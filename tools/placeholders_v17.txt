@@ -1,0 +1,3 @@
+# v0.17 PLACEHOLDERS (tools/art_woud_placeholders.py). Echte art: zelfde naam + maat erover,
+# daarna de regel hier weghalen en in tools/handwerk.txt zetten. Zie /workspace/v17_ART_SLOTS.md.
+# (v0.17: alle 5 vervangen door RPG ART art_mapsprites_v17; geen open placeholders meer)

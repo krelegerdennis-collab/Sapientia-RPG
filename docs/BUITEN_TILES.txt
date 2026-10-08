@@ -1,0 +1,17 @@
+# buiten_tiles.png (192x80) - SAPIENTIA Act 1 buiten: Wachtershuis / ruines Vergeten Archieven
+# name x y w h frames   (w,h = maat van 1 frame; frames liggen naast elkaar naar rechts vanaf x,y)
+archief_ingang                        0    0  48  32  2   # frame 0 = dicht, 1 = open
+zegelsteen                           96    0  16  32  2   # frame 0 = rune gedimd, 1 = rune fel
+put                                 128    0  32  32  1   # stenen waterput 2x2
+kist                                160    0  16  16  2   # frame 0 = dicht, 1 = open
+ruine_hoek_lb                         0   32  16  16  1   # ruine.png index 0
+ruine_rand_h                         16   32  16  16  1   # ruine.png index 1
+ruine_hoek_rb                        32   32  16  16  1   # ruine.png index 2
+ruine_rand_v                         48   32  16  16  1   # ruine.png index 3
+ruine_hoek_lo                        64   32  16  16  1   # ruine.png index 4
+ruine_hoek_ro                        80   32  16  16  1   # ruine.png index 5
+ruine_eind                           96   32  16  16  1   # ruine.png index 6
+ruine_eind_l                        112   32  16  16  1   # ruine.png index 7
+ruine_pilaar                        128   32  16  16  1   # ruine.png index 8
+ruine_midden                        144   32  16  16  1   # ruine.png index 9
+archief_ingang_open_flikker           0   48  48  32  2   # extra: open-gloed A/B voor flikkeren

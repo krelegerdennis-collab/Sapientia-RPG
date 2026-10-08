@@ -1,0 +1,29 @@
+# Godot 4 editor/import cache (regenerated on open)
+.godot/
+# NOTE: keep *.import files next to assets - Godot 4 needs them.
+
+# Mono / build output
+.mono/
+data_*/
+mono_crash.*.json
+
+# Android build output and template
+android/
+*.apk
+*.apk.idsig
+*.aab
+
+# Signing material and credentials (never commit)
+*.keystore
+*.jks
+*credentials*
+export_credentials.cfg
+.env
+*.env
+
+# Temp / OS junk
+*.tmp
+*.log
+*~
+.DS_Store
+Thumbs.db

@@ -1,0 +1,218 @@
+extends Node
+## Autoload "Settings" (v0.11 veldmenu): spelerinstellingen, LOS van de save.
+## Staat in user://settings.cfg (ConfigFile), wordt bij de start geladen en na elke
+## wijziging meteen weggeschreven. De autotests gebruiken een eigen bestand.
+##
+## Wat er met een instelling gebeurt (apply_all / _apply):
+##   music_volume / sfx_volume  -> volume van de audiobussen "Music" en "SFX" (worden hier
+##                                 aangemaakt als ze nog niet bestaan; zet later bij een
+##                                 AudioStreamPlayer gewoon bus = "Music" of "SFX")
+##   text_speed                 -> Dialog.chars_per_second (typemachine van het tekstvak)
+##   battle_speed               -> tempo van de berichten/wachttijden in gevechten (battle.gd _wait)
+##   touch_opacity / touch_size -> doorzichtigheid en grootte van de D-pad en A/B (touch_controls.gd)
+##   crt                        -> scanline-filter aan/uit (autoload Crt)
+##   screen_shake               -> schudden bij treffers in gevechten (battle.gd _shake)
+##   autosave                   -> automatisch opslaan (GameState.autosave)
+## Andere scripts kunnen luisteren naar het signaal 'changed(key)'.
+
+signal changed(key: String)
+
+const GameData := preload("res://scripts/data/game_data.gd")
+const DEFAULT_PATH := "user://settings.cfg"
+const TEST_PATH := "user://autotest_settings.cfg"
+const SECTION := "instellingen"
+const BUS_MUSIC := "Music"
+const BUS_SFX := "SFX"
+## Volume: 0 (uit) .. VOLUME_STEPS (vol).
+const VOLUME_STEPS := 10
+## Tekstsnelheid: index -> letters per seconde. 3 = 'Direct' (hele regel in één keer).
+const TEXT_SPEED_CPS := [20.0, 40.0, 80.0, 100000.0]
+const TEXT_SPEED_NAMES := ["Langzaam", "Normaal", "Snel", "Direct"]
+## Gevechtstempo: index -> vermenigvuldiger voor wachttijden in het gevecht.
+const BATTLE_SPEED_FACTOR := [0.7, 1.0, 1.6]
+const BATTLE_SPEED_NAMES := ["Langzaam", "Normaal", "Snel"]
+## Touch-knoppen: zichtbaarheid in procenten (stappen van OPACITY_STEP).
+const OPACITY_MIN := 30
+const OPACITY_MAX := 100
+const OPACITY_STEP := 10
+## Touch-knoppen: grootte (index -> schaal van de D-pad/A/B-straal).
+const TOUCH_SIZE_SCALE := [0.85, 1.0, 1.15]
+const TOUCH_SIZE_NAMES := ["Klein", "Normaal", "Groot"]
+
+## Standaardwaarden (ook = 'nieuw bestand'). Volgorde = volgorde in het optiemenu.
+const DEFAULTS := {
+	"music_volume": 8,
+	"sfx_volume": 8,
+	"text_speed": 1,
+	"battle_speed": 1,
+	"touch_opacity": 100,
+	"touch_size": 1,
+	"crt": true,
+	"screen_shake": true,
+	"autosave": true,
+}
+
+var path := DEFAULT_PATH
+var values := {}
+
+
+func _ready() -> void:
+	var args := OS.get_cmdline_user_args()
+	if "--autotest" in args or "--menutest" in args:
+		path = TEST_PATH
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	_ensure_buses()
+	load_settings()
+	# Dialog en Crt zijn eerder geladen autoloads; voor de zekerheid pas na _ready toepassen.
+	apply_all.call_deferred()
+
+
+## Bussen "Music" en "SFX" aanmaken (onder Master) als ze nog niet bestaan. Onschuldig als
+## er (nog) geen geluid is.
+func _ensure_buses() -> void:
+	for bus in [BUS_MUSIC, BUS_SFX]:
+		if AudioServer.get_bus_index(bus) == -1:
+			AudioServer.add_bus()
+			var i := AudioServer.bus_count - 1
+			AudioServer.set_bus_name(i, bus)
+			AudioServer.set_bus_send(i, "Master")
+
+
+# ---------------------------------------------------------------- lezen / schrijven
+func load_settings() -> void:
+	values = DEFAULTS.duplicate()
+	var cfg := ConfigFile.new()
+	if cfg.load(path) != OK:
+		return
+	for key in DEFAULTS:
+		if cfg.has_section_key(SECTION, key):
+			values[key] = _sanitize(key, cfg.get_value(SECTION, key))
+
+
+func save_settings() -> bool:
+	var cfg := ConfigFile.new()
+	for key in values:
+		cfg.set_value(SECTION, key, values[key])
+	var err := cfg.save(path)
+	if err != OK:
+		push_warning("Instellingen opslaan mislukt: %s" % error_string(err))
+	return err == OK
+
+
+## Waarde in het geldige bereik (ook voor een met de hand aangepast/kapot bestand).
+func _sanitize(key: String, v):
+	var def = DEFAULTS[key]
+	if def is bool:
+		return bool(v)
+	var n := int(v) if (v is int or v is float or v is bool) else int(def)
+	match key:
+		"music_volume", "sfx_volume":
+			return clampi(n, 0, VOLUME_STEPS)
+		"text_speed":
+			return clampi(n, 0, TEXT_SPEED_CPS.size() - 1)
+		"battle_speed":
+			return clampi(n, 0, BATTLE_SPEED_FACTOR.size() - 1)
+		"touch_opacity":
+			return clampi(snappedi(n, OPACITY_STEP), OPACITY_MIN, OPACITY_MAX)
+		"touch_size":
+			return clampi(n, 0, TOUCH_SIZE_SCALE.size() - 1)
+	return n
+
+
+func get_value(key: String):
+	return values.get(key, DEFAULTS.get(key))
+
+
+## Zet een waarde, past hem toe, schrijft het bestand en meldt 'changed'.
+func set_value(key: String, v) -> void:
+	if not DEFAULTS.has(key):
+		push_warning("Onbekende instelling: %s" % key)
+		return
+	var clean = _sanitize(key, v)
+	if values.get(key) == clean:
+		return
+	values[key] = clean
+	_apply(key)
+	save_settings()
+	changed.emit(key)
+
+
+## Eén stap naar links (-1) of rechts (+1); aan/uit-instellingen wisselen gewoon.
+func step(key: String, dir: int) -> void:
+	var v = get_value(key)
+	if v is bool:
+		set_value(key, not v)
+	elif key == "touch_opacity":
+		set_value(key, int(v) + dir * OPACITY_STEP)
+	else:
+		set_value(key, int(v) + dir)
+
+
+## Alles terug naar de standaardwaarden.
+func reset_to_defaults() -> void:
+	for key in DEFAULTS:
+		set_value(key, DEFAULTS[key])
+
+
+# ---------------------------------------------------------------- afgeleide waarden
+func text_cps() -> float:
+	return TEXT_SPEED_CPS[int(get_value("text_speed"))]
+
+
+func battle_speed() -> float:
+	return BATTLE_SPEED_FACTOR[int(get_value("battle_speed"))]
+
+
+func touch_scale() -> float:
+	return TOUCH_SIZE_SCALE[int(get_value("touch_size"))]
+
+
+func touch_alpha() -> float:
+	return int(get_value("touch_opacity")) / 100.0
+
+
+func shake_enabled() -> bool:
+	return bool(get_value("screen_shake"))
+
+
+func autosave_enabled() -> bool:
+	return bool(get_value("autosave"))
+
+
+## Volume 0..VOLUME_STEPS -> decibel voor de bus (0 = gedempt).
+static func volume_db(steps: int) -> float:
+	return linear_to_db(maxf(float(steps) / VOLUME_STEPS, 0.0001))
+
+
+# ---------------------------------------------------------------- toepassen
+func apply_all() -> void:
+	for key in DEFAULTS:
+		_apply(key)
+
+
+func _apply(key: String) -> void:
+	match key:
+		"music_volume":
+			_apply_bus(BUS_MUSIC, int(get_value(key)))
+		"sfx_volume":
+			_apply_bus(BUS_SFX, int(get_value(key)))
+		"text_speed":
+			var dialog := get_node_or_null("/root/Dialog")
+			if dialog and "chars_per_second" in dialog:
+				dialog.chars_per_second = text_cps()
+		"crt":
+			var crt := get_node_or_null("/root/Crt")
+			# het filter kan in game_data.gd (CRT "enabled") helemaal uit staan: dan blijft het uit
+			if crt and crt.has_method("set_enabled"):
+				crt.set_enabled(bool(get_value(key)) and bool(GameData.CRT.get("enabled", true)))
+		# touch_opacity / touch_size: touch_controls.gd luistert zelf naar 'changed'
+		# battle_speed / screen_shake / autosave: worden opgevraagd wanneer ze nodig zijn
+
+
+func _apply_bus(bus: String, steps: int) -> void:
+	var i := AudioServer.get_bus_index(bus)
+	if i == -1:
+		return
+	AudioServer.set_bus_volume_db(i, volume_db(steps))
+	AudioServer.set_bus_mute(i, steps <= 0)

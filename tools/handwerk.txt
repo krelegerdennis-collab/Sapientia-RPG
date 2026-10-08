@@ -1,0 +1,218 @@
+# Handgemaakte art (art director). tools/generate_art.py OVERSCHRIJFT DEZE NIET.
+# Eén pad per regel, vanaf de projectmap. Nieuwe handgemaakte bestanden hier toevoegen.
+# Toch opnieuw genereren (placeholder-art terug): python3 tools/generate_art.py --ook-handwerk
+assets/sprites/battle/dennis.png
+# v0.11: Dennis/hoofdpersoon van achteren (art_heroes_v8/out_back/dennis_rug.png, 2100x210, 10 frames)
+assets/sprites/battle/dennis_rug.png
+assets/sprites/battle/noor.png
+assets/sprites/battle/lotte.png
+assets/sprites/enemies/kennis_beest.png
+assets/sprites/enemies/papiergeest.png
+assets/sprites/enemies/glitchmot.png
+assets/tiles/dorp.png
+assets/tiles/huis.png
+assets/tiles/wereld.png
+assets/sprites/player.png
+assets/sprites/npc.png
+assets/sprites/sign.png
+# v0.10: gevechtsachtergronden van RPG ART (art_battle_v9/out)
+art/battle_bg/gras.png
+art/battle_bg/zand.png
+art/battle_bg/boss.png
+# v0.10: binnen-tiles en opslagboek van RPG ART (art_interior_v10/out: binnen.png, savepunt.png)
+assets/tiles/binnen.png
+assets/sprites/save_book.png
+# v0.11: boekpunten van RPG ART (art_interior_v10/out: savepunt_groen.png = MP, savepunt_rood.png = HP; 64x16, 4 frames)
+assets/sprites/mp_book.png
+assets/sprites/hp_book.png
+# v0.11: vooraanzichten Mosslijm en Moskonijn van RPG ART (art_bestiary/out/mosslijm.png, moskonijn.png)
+art/enemies/mosslijm.png
+art/enemies/moskonijn.png
+# v0.11: proloog-objecten. NU NOG PLACEHOLDERS (tools/art_v11.py); ze staan hier al zodat
+# de echte art van RPG ART er zo overheen kan en nooit meer overschreven wordt.
+# (placeholder opnieuw maken: bestand weggooien en python3 tools/art_v11.py draaien)
+assets/sprites/story/put.png
+assets/sprites/story/zegel.png
+assets/sprites/story/kist.png
+assets/sprites/story/schilderij.png
+assets/sprites/story/archief.png
+# v0.12: puzzel-art van RPG ART (art_puzzle_v11/out; tools/art_puzzle_placeholders.py maakt alleen ontbrekende bestanden)
+assets/puzzle/hendel.png
+assets/puzzle/drukplaat.png
+assets/puzzle/poort.png
+assets/puzzle/herstelsteen.png
+assets/puzzle/kast_duwbaar.png
+# v0.13: de Oude Man / Wachter in de proloog van RPG ART (art_tiles_v8/out/wachter.png, 48x96, 3x4 frames zoals player.png)
+assets/sprites/wachter.png
+# v0.13: commando-kruis + doel-pijltje van RPG ART (art_ui_v13/out; spec: art_specs_v13/BATTLE_UI_SPEC.md)
+assets/ui/knop_aanval.png
+assets/ui/knop_magie.png
+assets/ui/knop_item.png
+assets/ui/knop_verdedig.png
+assets/ui/knop_vluchten.png
+assets/ui/richtpijl.png
+# v0.13: nieuwe dorpssprites van RPG ART (art_tiles_v14/out): dennis_dorp.png -> assets/sprites/player.png,
+#        wachter_dorp.png -> assets/sprites/wachter.png (beide 48x96, 3x4 frames van 16x24, zelfde volgorde)
+# v0.13: titelscherm van RPG ART (art_ui_v13/titel/out): achtergrond 384x216, logo 208x36, ondertitel,
+#        logo-glitch (6 frames van 208x36) en de kloppende kern (4 frames van 24x28)
+assets/ui/title_bg.png
+assets/ui/title_logo.png
+assets/ui/title_ondertitel.png
+assets/ui/title_logo_glitch.png
+assets/ui/title_kern.png
+# v0.13: eerste dungeon (Vergeten Archieven, ingangskamer) van RPG ART (art_tiles_v14/dungeon/out):
+#        dungeon_tiles.png (256x64, 16x4 tegels van 16x16; indexlijst in docs/DUNGEON_TILES.txt)
+assets/tiles/dungeon/dungeon_tiles.png
+# v0.13: zichtbare map-monsters van RPG ART, hernoemd naar assets/map_monsters/<enemy_id>.png:
+#        mosslijm_map.png -> mosslijm.png, moskonijn_map.png -> moskonijn.png
+#        (32x64: 2 kolommen stap A/B x 4 rijen onder/links/rechts/boven, frames 16x16)
+#        golem_map.png -> golem.png (64x32: 2 frames 32x32, idle + kern-puls, kijkt omlaag)
+#        Andere vijanden: placeholders van tools/art_map_monsters.py (NIET hier, zodat echte art erover kan).
+assets/map_monsters/mosslijm.png
+assets/map_monsters/moskonijn.png
+assets/map_monsters/golem.png
+# v0.13: Mechanische Wachter van RPG ART (art_act1_v14/out): vooraanzicht 88x112, idle-strook 2 frames
+#        (176x112) en map-sprite mech_wachter_map.png -> assets/map_monsters/mech_wachter.png (32x64, zoals mosslijm)
+assets/sprites/enemies/mech_wachter.png
+assets/sprites/enemies/mech_wachter_idle.png
+assets/map_monsters/mech_wachter.png
+# v0.13: de verslagen Oude Man voor de centrale hal (art_act1_v14/out; nog niet in een scène):
+#        wachter_liggend.png (2 frames 32x16), wachter_knielend.png (2 frames 16x24, hframes=2),
+#        wachter_verslagen.png (64x40, overzicht/combinatie van RPG ART)
+assets/characters/wachter_liggend.png
+assets/characters/wachter_knielend.png
+assets/characters/wachter_verslagen.png
+# v0.13: Golem (baas, enemy-id kennis_beest) van RPG ART (art_golem_v14/out): still 156x182,
+#        idle-strook 4 frames (624x182, kern pulseert) en raak-plaatje 156x182 (zelfde anker)
+assets/sprites/enemies/golem_boss.png
+assets/sprites/enemies/golem_boss_idle.png
+assets/sprites/enemies/golem_boss_hit.png
+# v0.13: buiten-art van RPG ART (art_buiten_v14/out, lijst in docs/BUITEN_TILES.txt); vervangt in
+#        build_maps.gd de oude assets/sprites/story/{archief,zegel,kist,put}.png (die blijven bestaan):
+#        archief_ingang.png (2 frames 48x32: dicht/open, 3x2 tiles), archief_ingang_open_flikker.png
+#        (2 frames 48x32, open-gloed A/B), zegelsteen.png (2 frames 16x32: rune gedimd/fel, voet = 1 tile),
+#        kist.png (2 frames 16x16 dicht/open), put.png (32x32, 2x2 tiles), ruine.png (10 stukken 16x16)
+assets/sprites/buiten/archief_ingang.png
+assets/sprites/buiten/archief_ingang_open_flikker.png
+assets/sprites/buiten/zegelsteen.png
+assets/sprites/buiten/kist.png
+assets/sprites/buiten/put.png
+assets/sprites/buiten/ruine.png
+# v0.13: wereldkaart-atlas met de nieuwe iconen van RPG ART (art_wereld_v14/out): wereld.png +
+#        wereld_nieuwe_iconen.png op (64,128) = tegels #132/#133 Wachtershuis, #134-#137 Wilgendal
+#        (identiek aan RPG ART's wereld_met_nieuwe_iconen_256x144.png). build_maps.gd gebruikt deze;
+#        het oude wereld.png blijft ongewijzigd staan.
+assets/tiles/wereld_v14.png
+# v0.13: Golem v2 (met hamer) van RPG ART (art_golem_v14/out), vervangt v1 in game_data.gd:
+#        still 196x182, idle-strook 4 frames (784x182), raak-plaatje 196x182 (zelfde anker) en de
+#        APARTE runecirkel (2 frames 196x36, linksboven op (0,158) van het baas-canvas, achter de voeten)
+assets/sprites/enemies/golem_boss_v2.png
+assets/sprites/enemies/golem_boss_v2_idle.png
+assets/sprites/enemies/golem_boss_v2_hit.png
+assets/sprites/enemies/golem_runecirkel.png
+assets/map_monsters/papiergeest.png
+assets/map_monsters/glitchmot.png
+assets/map_monsters/kennis_beest.png
+# v0.14: Eerste Archief (4 verdiepingen) van RPG ART (art_archief1_v14/out, zie LEESMIJ.txt daar), hernoemd:
+#        dungeon_tiles_256x80.png -> assets/tiles/dungeon/dungeon_tiles_v14.png (tegels 0-63 = dungeon_tiles.png,
+#        64 = donkere onderrand-doorgang A1; het oude dungeon_tiles.png blijft ongewijzigd staan)
+assets/tiles/dungeon/dungeon_tiles_v14.png
+#        bibliotheek_tiles.png (256x64, index in docs/BIBLIOTHEEK_TILES.txt) en savepunt_bibliotheek.png (4 frames 16x16)
+assets/tiles/dungeon/bibliotheek_tiles.png
+assets/sprites/savepunt_bibliotheek.png
+#        geheime_deur.png -> geheime_deur_archief.png (4 frames 16x32; open = beide tegels beloopbaar, gang naar het noorden)
+assets/puzzle/geheime_deur_archief.png
+#        drukplaat_rune.png (2 frames: 0 = tegel 11, 1 = aan), kast_vast.png (vaste kast 16x32)
+assets/puzzle/drukplaat_rune.png
+assets/puzzle/kast_vast.png
+#        schatkist_3frames.png -> assets/sprites/dungeon/schatkist.png; schatkist.png -> schatkist_2frames.png
+assets/sprites/dungeon/schatkist.png
+assets/sprites/dungeon/schatkist_2frames.png
+#        losse stukken: onderrand_doorgang (16x16), staande_kast (2x 16x32), kandelaar (2 frames 16x32),
+#        leestafel (32x16), golemdeur (2 frames 32x32: dicht/open)
+assets/sprites/dungeon/onderrand_doorgang.png
+assets/sprites/dungeon/staande_kast.png
+assets/sprites/dungeon/kandelaar.png
+assets/sprites/dungeon/leestafel.png
+assets/sprites/dungeon/golemdeur.png
+#        iconen 16x16: vonkzwaard.png, zwaard_icoon.png -> zwaard_cyaan.png, kort_zwaard_icoon.png -> kort_zwaard.png
+assets/ui/icons/vonkzwaard.png
+assets/ui/icons/zwaard_cyaan.png
+assets/ui/icons/kort_zwaard.png
+#        v0.14 item-iconen 16x16 van RPG ART (art_iconen_v14/out/icons/<id>.png); vonkzwaard/zwaard_cyaan/kort_zwaard hierboven (identiek)
+assets/ui/icons/bladwijzer.png
+assets/ui/icons/cat_accessoire.png
+assets/ui/icons/cat_goud.png
+assets/ui/icons/cat_harnas.png
+assets/ui/icons/cat_sleutel.png
+assets/ui/icons/cat_verbruik.png
+assets/ui/icons/cat_wapen.png
+assets/ui/icons/dolk.png
+assets/ui/icons/drankje.png
+assets/ui/icons/eiken_staf.png
+assets/ui/icons/emmer_water.png
+assets/ui/icons/groenring.png
+assets/ui/icons/houten_schild.png
+assets/ui/icons/ijzeren_helm.png
+assets/ui/icons/kaftschild.png
+assets/ui/icons/kruid.png
+assets/ui/icons/leren_harnas.png
+assets/ui/icons/leren_kap.png
+assets/ui/icons/malienkolder.png
+assets/ui/icons/reisgewaad.png
+assets/ui/icons/toverwater.png
+# v0.15: Golemkern (Kernfragment stap 1) van RPG ART (art_kern_v15/out, zie LEESMIJ.txt daar), hernoemd; nog niet gekoppeld:
+#        golemkern_icoon.png -> assets/ui/icons/golemkern.png (16x16),
+#        kern_absorptie.png -> assets/fx/kern_absorptie.png (192x48 = 4 frames 48x48, hframes=4, 0,12 s/frame, niet loopen)
+assets/ui/icons/golemkern.png
+assets/fx/kern_absorptie.png
+#        kast_zwaar.png -> assets/puzzle/kast_zwaar.png (16x32, zware kast; zelfde vorm als kast_duwbaar.png)
+assets/puzzle/kast_zwaar.png
+# v0.16: Lufia 2-tekstvakken van RPG ART (art_tekstvak_v15/out, LEESMIJ.txt): spraakballon (9-slice marge 6),
+# staart (2 frames 16x12: 0 = omlaag, 1 = omhoog) en het blauwe verteller-/systeemvak (9-slice marge 6)
+assets/ui/ballon_blauw.png
+assets/ui/ballon_staart.png
+assets/ui/tekstvak_blauw.png
+# v0.16 (merge Kernkracht, RPG CODE): paarse Kernkracht-vuurbal van RPG ART (art_kernkracht_v15/out, LEESMIJ.txt):
+# vuurbal.png (4x16x16, wijst naar rechts), vuurbal_trail.png (3x16x16), vuurbal_inslag.png (4x24x24) -> kern_*.png
+assets/fx/kern_vuurbal.png
+assets/fx/kern_vuurbal_trail.png
+assets/fx/kern_vuurbal_inslag.png
+# v0.17: dorp-/overworld-loopsprite van Noor van RPG ART (art_helden_dorp_v14/out/noor_dorp.png, 48x96,
+#        3x4 frames van 16x24, zelfde indeling als player.png), nieuwe naam; gebruikt in Esdoorn en het Donker Woud
+assets/sprites/noor_dorp.png
+# v0.17 Donker Woud vijanden van RPG ART (art_woudmonsters_v17/out), voor+rug, baas idle/hit
+assets/sprites/enemies/wortelkruiper.png
+assets/sprites/enemies/wortelkruiper_rug.png
+assets/sprites/enemies/mistuil.png
+assets/sprites/enemies/mistuil_rug.png
+assets/sprites/enemies/sporenzwam.png
+assets/sprites/enemies/sporenzwam_rug.png
+assets/sprites/enemies/wortelkoning.png
+assets/sprites/enemies/wortelkoning_rug.png
+assets/sprites/enemies/wortelkoning_idle.png
+assets/sprites/enemies/wortelkoning_hit.png
+# v0.17 Donker Woud van RPG ART (art_woud_v17/out): tegelset 256x112 (0-64 = dungeon_tiles_v14-nummering,
+#        65-111 bostegels, zie docs/WOUD_TILES.txt), 256x80-versie op het oude slot, gevechtsachtergrond
+#        (woud_achtergrond.png, 1280x432), Noor in de wortelcocon (dicht / puls 2 frames / open), anker (16,47)
+assets/tiles/dungeon/woud_tiles.png
+assets/tiles/dungeon/donker_woud_tiles.png
+assets/battle/donker_woud.png
+assets/sprites/woud/noor_cocon.png
+assets/sprites/woud/noor_cocon_open.png
+assets/sprites/woud/noor_cocon_puls.png
+# v0.17 Codex-art van RPG ART (art_codex_v16/out) voor de Codex-patch van RPG CODE: icoon Leeg Boek,
+#        inschrijf-effect (4 frames 48x48, 0,1 s, niet loopen, midden (24,24)), rugaanzichten van de
+#        bestaande vijanden (zelfde canvas/voet (b/2, h-6)/schaduw als de voorkant)
+assets/ui/icons/leeg_boek.png
+assets/fx/inschrijf.png
+art/enemies/mosslijm_rug.png
+assets/sprites/enemies/papiergeest_rug.png
+assets/sprites/enemies/glitchmot_rug.png
+assets/sprites/enemies/kennis_beest_rug.png
+# v0.17: map-sprites Donker Woud + wereldkaart-iconen van RPG ART (art_mapsprites_v17/out, zie LEESMIJ daar)
+assets/map_monsters/wortelkruiper.png
+assets/map_monsters/mistuil.png
+assets/map_monsters/sporenzwam.png
+assets/map_monsters/wortelkoning.png
+assets/tiles/wereld_v17_iconen.png

@@ -1,0 +1,86 @@
+dungeon_tiles.png = 256x64, 16 kolommen x 4 rijen, tegels 16x16, alles dekkend.
+tile n: x = (n % 16) * 16, y = (n // 16) * 16  (zelfde nummering als wereld.png)
+
+#   x    y   solid  naam
+0   0    0   nee    vloer A
+1   16   0   nee    vloer B
+2   32   0   nee    vloer C
+3   48   0   nee    vloer met onkruid
+4   64   0   nee    vloer met botten
+5   80   0   nee    vloer met losse bladzijden
+6   96   0   nee    vloer met klein puin
+7   112  0   nee    schedel + botten (decor)
+8   128  0   nee    vloer schaduw boven (onder muurvoorkant)
+9   144  0   nee    vloer schaduw links (naast linkermuur)
+10  160  0   nee    vloer schaduw linksboven (hoek)
+11  176  0   nee    runentegel (vloer)
+12  192  0   ja     sokkel savepunt (savepunt.png erop)
+13  208  0   ja     leegte (void)
+14  224  0   ja     afgrondrand (vloer boven, leegte onder)
+15  240  0   nee    vloer met magenta glitch-scheur
+16  0    16  ja     muurtop NW (buitenhoek, open N+W)
+17  16   16  ja     muurtop N (open N: vloer erboven)
+18  32   16  ja     muurtop NO (buitenhoek, open N+O)
+19  48   16  ja     muurtop W (open W)
+20  64   16  ja     muurtop midden (dicht)
+21  80   16  ja     muurtop O (open O)
+22  96   16  ja     muurtop ZW (buitenhoek, open Z+W)
+23  112  16  ja     muurtop Z (open Z: muurvoorkant eronder)
+24  128  16  ja     muurtop ZO (buitenhoek, open Z+O)
+25  144  16  ja     muurtop binnenhoek: alleen NW-hoekje open
+26  160  16  ja     muurtop binnenhoek: alleen NO-hoekje open
+27  176  16  ja     muurtop binnenhoek: alleen ZW-hoekje open
+28  192  16  ja     muurtop binnenhoek: alleen ZO-hoekje open
+29  208  16  ja     uitgang: pilaar links (in onderste muurrij)
+30  224  16  nee    uitgang: opening (naar wereldkaart, herhaalbaar)
+31  240  16  ja     uitgang: pilaar rechts
+32  0    32  ja     muurvoorkant boven
+33  16   32  ja     muurvoorkant onder
+34  32   32  ja     muurvoorkant boven, linkereinde
+35  48   32  ja     muurvoorkant onder, linkereinde
+36  64   32  ja     muurvoorkant boven, rechtereinde
+37  80   32  ja     muurvoorkant onder, rechtereinde
+38  96   32  ja     muurvoorkant boven, magenta glitch-scheur
+39  112  32  ja     muurvoorkant onder, magenta glitch-scheur
+40  128  32  ja     kapotte boekenkast boven (in muur)
+41  144  32  ja     kapotte boekenkast onder (in muur)
+42  160  32  ja     boogdoorgang boven
+43  176  32  nee    boogdoorgang onder (doorgang)
+44  192  32  nee    houten ladder boven (tegen muur)
+45  208  32  nee    houten ladder onder
+46  224  32  ja     muurvoorkant boven, mos
+47  240  32  ja     muurvoorkant onder, mos
+48  0    48  nee    platform NW
+49  16   48  nee    platform N
+50  32   48  nee    platform NO
+51  48   48  nee    platform W (rand links)
+52  64   48  nee    platform midden
+53  80   48  nee    platform O (rand rechts)
+54  96   48  ja     platformrichel ZW
+55  112  48  ja     platformrichel Z
+56  128  48  ja     platformrichel ZO
+57  144  48  nee    trap omhoog (in platformrichel)
+58  160  48  nee    trap omlaag (gat in vloer)
+59  176  48  ja     grote steenhoop
+60  192  48  ja     omgevallen boekenkast (vloer)
+61  208  48  ja     stapel gevallen boeken
+62  224  48  nee    platform-rune links (2 breed, voor de golem)
+63  240  48  nee    platform-rune rechts
+
+Gebruik / autotile:
+- Muur-bovenkant 16-28: 'open' = die kant grenst aan vloer of aan een muurvoorkant.
+  Een kamer omringen: bovenrand = 23 (Z open, daaronder 2 rijen voorkant), linkermuur = 21 (O open),
+  rechtermuur = 19 (W open), onderrand = 17 (N open). Kamerhoeken = binnenhoeken:
+  linksboven 28 (ZO-hoekje open), rechtsboven 27 (ZW), linksonder 26 (NO), rechtsonder 25 (NW).
+  Losse muurblokken/pilaren in een kamer = buitenhoeken 16/18/22/24 + 17/19/21/23, binnen 20.
+- Muurvoorkant = 2 tegels hoog: boven-tegel (even nummer) direct onder de muurtop, onder-tegel eronder.
+  Varianten zijn per paar uitwisselbaar: 32/33 gewoon, 34/35 linkereinde, 36/37 rechtereinde, 38/39 glitch-scheur,
+  40/41 kapotte boekenkast, 42/43 boogdoorgang (43 beloopbaar), 44/45 ladder (beloopbaar), 46/47 mos.
+- Rij direct onder een voorkant: 8 (schaduw), naast de linkermuur 9, hoek 10.
+- Uitgang naar de wereldkaart: in de onderste muurrij 29 + 30 (1 of meer keer) + 31. Op 30 stappen = naar buiten.
+- Platform: 48-53 bovenkant (N/W/O randen), 54-56 richel aan de zuidkant (solid), 57 trap omhoog in de richel
+  (naadloos naast 55, mag 2x naast elkaar), 62+63 = 2 tegels brede rune voor de golem (golem 32x32 erop/erachter).
+- 12 sokkel: zet savepunt.png (frame 0-3) op dezelfde tegel, 4 px hoger (y-4) zodat de lessenaar op de sokkel staat.
+- 58 trap omlaag = naar volgende verdieping. 13 leegte, 14 rand van een afgrond (vloer boven, leegte onder).
+- Decor op de vloer: 3 onkruid, 4 botten, 5 bladzijden, 6 klein puin, 7 schedel, 15 glitch-scheur (allemaal beloopbaar),
+  59 steenhoop, 60 omgevallen kast, 61 boekenstapel (solid).

@@ -1,0 +1,144 @@
+woud_tiles.png = 256x112, 16 kolommen x 7 rijen, tegels 16x16 (RGBA, alpha alleen 0/255).
+tegel n: kolom = n % 16, rij = n // 16, x = kolom*16, y = rij*16 (zelfde nummering als dungeon_tiles_v14.png).
+0-64 hebben DEZELFDE betekenis en botsing als dungeon_tiles_v14.png (alleen het beeld is bos),
+dus dungeon_rooms.gd LEGEND/SOLID/NO_MONSTER werken ongewijzigd. 65+ = nieuwe bostegels.
+laag: grond = dekkend, op de gewone Ground-laag; overlay = doorzichtig, op een laag BOVEN de speler.
+Lege plekken (geen tegel): geen, alle 112 plekken gebruikt
+
+#    kol,rij  x    y    solid  laag     naam
+0    0,0      0    0    nee    grond    bosvloer A
+1    1,0      16   0    nee    grond    bosvloer B
+2    2,0      32   0    nee    grond    bosvloer C
+3    3,0      48   0    nee    grond    bosvloer met ziek mos + varen
+4    4,0      64   0    nee    grond    bosvloer donker, dode bladeren (A)
+5    5,0      80   0    nee    grond    bosvloer met twijgen + verloren bladzijde
+6    6,0      96   0    nee    grond    bosvloer met kiezels (decor)
+7    7,0      112  0    nee    grond    kleine paddenstoelen (decor)
+8    8,0      128  0    nee    grond    bosvloer schaduw boven (onder boomwand)
+9    9,0      144  0    nee    grond    bosvloer schaduw links (naast linkerwand)
+10   10,0     160  0    nee    grond    bosvloer schaduw linksboven (hoek)
+11   11,0     176  0    nee    grond    glitch-vloer A (verschoven rijen, cyaan/magenta pixels)
+12   12,0     192  0    ja     grond    boomstronk (ook sokkel savepunt)
+13   13,0     208  0    ja     grond    leegte (donkere kuil)
+14   14,0     224  0    ja     grond    kuilrand (vloer boven, leegte onder, hangende wortels)
+15   15,0     240  0    nee    grond    vloer met magenta glitch-scheur
+16   0,1      0    16   ja     grond    boomwand-top NW (buitenhoek, open N+W)
+17   1,1      16   16   ja     grond    boomwand-top N (open N: vloer erboven)
+18   2,1      32   16   ja     grond    boomwand-top NO (buitenhoek, open N+O)
+19   3,1      48   16   ja     grond    boomwand-top W (open W)
+20   4,1      64   16   ja     grond    boomwand-top midden (dicht bladerdak)
+21   5,1      80   16   ja     grond    boomwand-top O (open O)
+22   6,1      96   16   ja     grond    boomwand-top ZW (buitenhoek, open Z+W)
+23   7,1      112  16   ja     grond    boomwand-top Z (open Z: stammen eronder)
+24   8,1      128  16   ja     grond    boomwand-top ZO (buitenhoek, open Z+O)
+25   9,1      144  16   ja     grond    boomwand-top binnenhoek: alleen NW-hoekje open
+26   10,1     160  16   ja     grond    boomwand-top binnenhoek: alleen NO-hoekje open
+27   11,1     176  16   ja     grond    boomwand-top binnenhoek: alleen ZW-hoekje open
+28   12,1     192  16   ja     grond    boomwand-top binnenhoek: alleen ZO-hoekje open
+29   13,1     208  16   ja     grond    uitgang: wand links van de opening (wortel buigt over)
+30   14,1     224  16   nee    grond    uitgang: bospad naar buiten (mist, herhaalbaar)
+31   15,1     240  16   ja     grond    uitgang: wand rechts van de opening
+32   0,2      0    32   ja     grond    boomwand-voorkant boven (stammen)
+33   1,2      16   32   ja     grond    boomwand-voorkant onder (stamvoeten)
+34   2,2      32   32   ja     grond    boomwand-voorkant boven, linkereinde
+35   3,2      48   32   ja     grond    boomwand-voorkant onder, linkereinde
+36   4,2      64   32   ja     grond    boomwand-voorkant boven, rechtereinde
+37   5,2      80   32   ja     grond    boomwand-voorkant onder, rechtereinde
+38   6,2      96   32   ja     grond    boomwand-voorkant boven, magenta glitch-litteken
+39   7,2      112  32   ja     grond    boomwand-voorkant onder, glitch-litteken
+40   8,2      128  32   ja     grond    holle boom boven (in wand)
+41   9,2      144  32   ja     grond    holle boom onder: oude boeken in de holte
+42   10,2     160  32   ja     grond    wortelpoort OPEN boven
+43   11,2     176  32   nee    grond    wortelpoort OPEN onder (doorgang)
+44   12,2     192  32   nee    grond    wortelladder boven (tegen wand)
+45   13,2     208  32   nee    grond    wortelladder onder
+46   14,2     224  32   ja     grond    boomwand-voorkant boven, hangend mos
+47   15,2     240  32   ja     grond    boomwand-voorkant onder, mos
+48   0,3      0    48   nee    grond    mosheuvel NW
+49   1,3      16   48   nee    grond    mosheuvel N
+50   2,3      32   48   nee    grond    mosheuvel NO
+51   3,3      48   48   nee    grond    mosheuvel W (rand links)
+52   4,3      64   48   nee    grond    mosheuvel midden
+53   5,3      80   48   nee    grond    mosheuvel O (rand rechts)
+54   6,3      96   48   ja     grond    heuvelrichel ZW (aarde + wortels)
+55   7,3      112  48   ja     grond    heuvelrichel Z
+56   8,3      128  48   ja     grond    heuvelrichel ZO
+57   9,3      144  48   nee    grond    aarden treden omhoog (in heuvelrichel)
+58   10,3     160  48   nee    grond    wortelgat omlaag (uitgang)
+59   11,3     176  48   ja     grond    rotsblokken
+60   12,3     192  48   ja     grond    korte liggende stam
+61   13,3     208  48   ja     grond    wortelknoop
+62   14,3     224  48   nee    grond    magenta wortelcirkel links (2 breed, op heuvel)
+63   15,3     240  48   nee    grond    magenta wortelcirkel rechts
+64   0,4      0    64   nee    grond    donkere onderrand-doorgang (pad het duister in)
+65   1,4      16   64   nee    grond    pad NW
+66   2,4      32   64   nee    grond    pad N
+67   3,4      48   64   nee    grond    pad NO
+68   4,4      64   64   nee    grond    pad W
+69   5,4      80   64   nee    grond    pad midden
+70   6,4      96   64   nee    grond    pad O
+71   7,4      112  64   nee    grond    pad ZW
+72   8,4      128  64   nee    grond    pad Z
+73   9,4      144  64   nee    grond    pad ZO
+74   10,4     160  64   nee    grond    pad binnenhoek: vloer alleen in NW-hoekje
+75   11,4     176  64   nee    grond    pad binnenhoek: vloer alleen in NO-hoekje
+76   12,4     192  64   nee    overlay  dode boom A (glitch-litteken), kruin boven links
+77   13,4     208  64   nee    overlay  dode boom A (glitch-litteken), kruin boven rechts
+78   14,4     224  64   nee    overlay  treurboom B (mosgordijn), kruin boven links
+79   15,4     240  64   nee    overlay  treurboom B (mosgordijn), kruin boven rechts
+80   0,5      0    80   nee    grond    pad binnenhoek: vloer alleen in ZW-hoekje
+81   1,5      16   80   nee    grond    pad binnenhoek: vloer alleen in ZO-hoekje
+82   2,5      32   80   nee    overlay  mist A (overlay, golvende band, horizontaal herhaalbaar)
+83   3,5      48   80   nee    overlay  mist B (overlay, twee slierten, horizontaal herhaalbaar)
+84   4,5      64   80   nee    overlay  mist C (overlay, losse wolk, dooft aan alle kanten uit)
+85   5,5      80   80   nee    grond    gloeiende magenta paddenstoelen + cyaan glitchpixel
+86   6,5      96   80   nee    grond    wortels over de vloer, horizontaal (beloopbaar, herhaalbaar)
+87   7,5      112  80   ja     grond    wortelwand horizontaal (blokkeert, herhaalbaar)
+88   8,5      128  80   ja     grond    wortelpoort DICHT boven
+89   9,5      144  80   ja     grond    wortelpoort DICHT onder (blokkeert)
+90   10,5     160  80   ja     grond    wortelversperring DICHT (op pad, blokkeert)
+91   11,5     176  80   nee    grond    wortelversperring OPEN (verdorde stompjes, beloopbaar)
+92   12,5     192  80   nee    overlay  dode boom A (glitch-litteken), kruin onder + stam links
+93   13,5     208  80   nee    overlay  dode boom A (glitch-litteken), kruin onder + stam rechts
+94   14,5     224  80   nee    overlay  treurboom B (mosgordijn), kruin onder + stam links
+95   15,5     240  80   nee    overlay  treurboom B (mosgordijn), kruin onder + stam rechts
+96   0,6      0    96   ja     grond    dode boom A (glitch-litteken), stamvoet links
+97   1,6      16   96   ja     grond    dode boom A (glitch-litteken), stamvoet rechts
+98   2,6      32   96   ja     grond    treurboom B (mosgordijn), stamvoet links
+99   3,6      48   96   ja     grond    treurboom B (mosgordijn), stamvoet rechts
+100  4,6      64   96   ja     grond    liggende stam links (2 breed)
+101  5,6      80   96   ja     grond    liggende stam rechts
+102  6,6      96   96   nee    grond    glitch-vloer B (gecorrumpeerd blok)
+103  7,6      112  96   nee    grond    wortels over de vloer, verticaal (beloopbaar, herhaalbaar)
+104  8,6      128  96   ja     grond    wortelwand verticaal (blokkeert, herhaalbaar)
+105  9,6      144  96   nee    grond    wortels over de vloer, kruising (beloopbaar)
+106  10,6     160  96   nee    grond    pad midden B
+107  11,6     176  96   nee    grond    bosvloer donker, dode bladeren (B)
+108  12,6     192  96   nee    overlay  glitch-overlay (losse zwevende pixels)
+109  13,6     208  96   nee    overlay  mist A begin (linkerkant dooft uit, overlay)
+110  14,6     224  96   nee    overlay  mist A eind (rechterkant dooft uit, overlay)
+111  15,6     240  96   nee    grond    losse gloeiende paddenstoel (decor)
+
+Gebruik / opmerkingen
+- 0-64: zelfde betekenis/botsing als dungeon_tiles_v14.png. Kamerrand zoals de archieven: muurtop-rij
+  (16-28) rondom, daaronder 2 rijen voorkant (32/33, 34-47), daaronder schaduwvloer 8 (10 in de hoek),
+  langs de linkerwand 9. Binnenhoeken: kamer-linksboven 28, rechtsboven 27, linksonder 26,
+  rechtsonder 25 (= LEGEND a b c d).
+- Uitgang onderrand: 29 (30 30 ...) 31; donkere doorgang 64; wortelgat omlaag 58.
+- Wortelpoort in de voorkant: OPEN = 42 (boven) + 43 (onder, doorgang 'n');
+  DICHT = 88 (boven) + 89 (onder, massief). Wisselen: 42 -> 88 en 43 -> 89 op dezelfde plek.
+- Wortelversperring op de vloer (pad/zij-uitgang): DICHT 90 (massief) -> OPEN 91 (beloopbaar).
+- Pad = autotegel: 65 66 67 / 68 69 70 / 71 72 73 (NW N NO / W midden O / ZW Z ZO),
+  binnenhoeken 74 (NW) 75 (NO) 80 (ZW) 81 (ZO); extra midden-variant 106.
+- Bomen 2 breed x 3 hoog:
+      boom A (glitch-litteken)      boom B (treurboom)
+        76 77   kruin boven            78 79      <- overlay (boven de speler), niet massief
+        92 93   kruin onder + stam     94 95      <- overlay, niet massief
+        96 97   stamvoet               98 99      <- grondlaag, massief
+  (de voet staat op rij 6 kolom 0-3 i.p.v. onder de kruin, zodat ALLES wat nodig is < 100 blijft)
+- Mist 82 83 84 (+ 109 begin / 110 eind van band 82) en glitch-overlay 108: doorzichtig, overlay-laag.
+  82/83 herhalen horizontaal; 84 is een losse wolk.
+- 100-111 zijn extra varianten (liggende stam 2 breed 100+101, glitch-vloer B 102, wortels verticaal 103,
+  wortelwand verticaal 104, wortelkruising 105, pad B 106, donkere bladeren B 107, 108-111 overlays/decor).
+  LET OP: dungeon_rooms.gd leest tegelnummer >= 100 (LIB_BASE) als bibliotheek-atlas; voor 100-111
+  moet de woud-kamer dus een eigen LIB_BASE hebben (bv. 200) of deze tegels als 2e atlas laden.

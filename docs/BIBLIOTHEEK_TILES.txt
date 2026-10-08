@@ -1,0 +1,59 @@
+bibliotheek_tiles.png = 256x64, 16 kolommen x 4 rijen, tegels 16x16, RGBA alles dekkend (alpha 255).
+tile n: x = (n % 16) * 16, y = (n // 16) * 16  (zelfde nummering als dungeon_tiles.png)
+Niet genoemde nummers zijn leeg (zwart) - niet gebruiken.
+
+#   x    y   solid  naam
+0   0    0   ja     boekenkast linkereinde - BOVEN
+1   16   0   ja     boekenkast midden A - BOVEN
+2   32   0   ja     boekenkast midden B - BOVEN
+3   48   0   ja     boekenkast rechtereinde - BOVEN
+4   64   0   ja     boekenkast enkel (1 breed) - BOVEN
+5   80   0   ja     boekenkast midden, gloeiend glitch-boek (frame A) - BOVEN
+6   96   0   ja     boekenkast midden, glitch-boek frame B (wisselen met 5 = flikkeren) - BOVEN
+7   112  0   ja     steenmuur met messing muurkandelaar (warm licht) - BOVEN
+8   128  0   ja     houten lambrisering (muur zonder kast) - BOVEN
+16  0    16  ja     boekenkast linkereinde - ONDER
+17  16   16  ja     boekenkast midden A - ONDER
+18  32   16  ja     boekenkast midden B - ONDER
+19  48   16  ja     boekenkast rechtereinde - ONDER
+20  64   16  ja     boekenkast enkel (1 breed) - ONDER
+21  80   16  ja     boekenkast midden, gloeiend glitch-boek (frame A) - ONDER
+22  96   16  ja     boekenkast midden, glitch-boek frame B (wisselen met 5 = flikkeren) - ONDER
+23  112  16  ja     steenmuur met messing muurkandelaar (warm licht) - ONDER
+24  128  16  ja     houten lambrisering (muur zonder kast) - ONDER
+32  0    32  nee    houten vloer A
+33  16   32  nee    houten vloer B
+34  32   32  nee    houten vloer schaduw boven (onder muurvoorkant)
+35  48   32  nee    houten vloer schaduw links (naast linkermuur)
+36  64   32  nee    houten vloer schaduw linksboven (hoek)
+37  80   32  nee    houten vloer met glitch-naad (beloopbaar)
+38  96   32  ja     leestafel links (open boek, inktpot)
+39  112  32  ja     leestafel rechts (kaars, boekjes)
+40  128  32  ja     staande kandelaar (3 kaarsen)
+41  144  32  ja     leesstoel (fluweel, kijkt naar beneden)
+42  160  32  ja     nette boekenstapel met kaarsstompje
+48  0    48  nee    kleed NW
+49  16   48  nee    kleed N
+50  32   48  nee    kleed NO
+51  48   48  nee    kleed W
+52  64   48  nee    kleed midden
+53  80   48  nee    kleed O
+54  96   48  nee    kleed ZW
+55  112  48  nee    kleed Z
+56  128  48  nee    kleed ZO
+57  144  48  nee    kleed midden met runenring (plek boekpunt)
+
+Gebruik:
+- Muurvoorkant = 2 tegels hoog (zoals dungeon 32/33): BOVEN-tegel (rij 0, kolom c) direct onder de muurtop,
+  ONDER-tegel (rij 1, zelfde kolom = c+16) eronder. Kroonlijst y0-3 = exact dungeon face_pair(), dus
+  dungeon-muurtop 23 erboven en dungeon-muurvoorkant 32/33 ernaast passen naadloos.
+- Kast-rij: 0 (links) + 1/2/5 (midden, vrij te herhalen/mengen) + 3 (rechts); 4 = losse kast van 1 breed.
+  5 en 6 = hetzelfde glitch-boek, 2 frames: als TileSet-animatie wisselen (bv. 0,4 s) = flikkeren, of alleen 5.
+- 7 muurkandelaar en 8 lambrisering zijn gewone muurvlakken voor tussen de kasten.
+- Vloer: 32/33 hout (willekeurig mengen), 34/35/36 = schaduw onder de voorkant / naast linkermuur / hoek
+  (zelfde rol als dungeon 8/9/10). 37 = beloopbare glitch-naad (decor).
+- Meubels (solid) liggen op houten vloer A/B: 38+39 leestafel (2 breed, links+rechts), 40 kandelaar,
+  41 leesstoel, 42 boekenstapel.
+- Kleed 48-56 = 3x3 (NW N NO / W midden O / ZW Z ZO), midden herhaalbaar; buitenrand = 2 px houten vloer.
+  57 = kleed-midden met runenring: zet savepunt_bibliotheek.png (64x16, 4 frames) op deze tegel.
+- Muurtoppen, zijmuren, boogdoorgang (42/43 naar de baaskamer) en trap komen uit dungeon_tiles.png.
