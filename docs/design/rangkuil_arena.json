@@ -1,0 +1,190 @@
+{
+  "id": "pvp_colosseum",
+  "name": "PvP Colosseum",
+  "location": "De Rangkuil",
+  "locale": "nl",
+  "actContext": "Na Act 1. Dennis heeft het Wachtershuis verlaten en zoekt Noor en Lotte. De Rangkuil ligt aan die weg, niet in de Vergeten Archieven.",
+  "statLegend": {
+    "hp": "HP",
+    "attack": "aanval",
+    "defense": "verdediging"
+  },
+  "rules": {
+    "winsAreCumulative": true,
+    "winSource": "Herhaalbare oefengevechten in de Rangkuil tellen mee voor minWins. Elke rang heeft daarnaast één unieke NPC. Die partij is de promotie: win haar om de volgende rang te bereiken.",
+    "damageModel": "schade = max(1, aanval - verdediging). De cijfers zijn gezet op een gevecht van ongeveer vijf beurten tegen expectedChallenger."
+  },
+  "ranks": [
+    {
+      "id": "brons",
+      "order": 1,
+      "name": "Brons",
+      "minWins": 3,
+      "title": "Vonkleerling",
+      "fromRankId": null,
+      "reward": {
+        "id": "vonkkling",
+        "name": "Vonkkling",
+        "kind": "weapon",
+        "description": "Kort zwaard uit de bosrand, met een vonk in de snede. Arena-exclusief. Sterker dan het Kort Zwaard uit het beginnersset.",
+        "bonuses": {
+          "attack": 10
+        }
+      },
+      "expectedChallenger": {
+        "hp": 52,
+        "attack": 16,
+        "defense": 6
+      },
+      "opponent": {
+        "id": "bram_holt",
+        "name": "Bram Holt",
+        "epithet": "De Bosbijl",
+        "grantsRankId": "brons",
+        "role": "Versla Bram om de rang Brons te bereiken.",
+        "hp": 48,
+        "attack": 17,
+        "defense": 3,
+        "introLine": "Bram plant zijn bijl in de aarde. \"Drie gevechten. Dan ik. Het bos telt geen excuses.\"",
+        "defeatLine": "De bijl zakt. \"Vonkleerling, dus. Ga de kuil in voor ik me bedenk.\""
+      }
+    },
+    {
+      "id": "zilver",
+      "order": 2,
+      "name": "Zilver",
+      "minWins": 8,
+      "title": "Roestbreker",
+      "fromRankId": "brons",
+      "reward": {
+        "id": "zilveren_scheenplaat",
+        "name": "Zilveren Scheenplaat",
+        "kind": "stat_boost",
+        "description": "Een scheenplaat die Sera zelf heeft gesmeed. Blijvende verhoging van de verdediging. Geen wapen.",
+        "bonuses": {
+          "defense": 5
+        }
+      },
+      "expectedChallenger": {
+        "hp": 80,
+        "attack": 26,
+        "defense": 10
+      },
+      "opponent": {
+        "id": "sera_roest",
+        "name": "Sera Roest",
+        "epithet": "De Reissmid",
+        "grantsRankId": "zilver",
+        "role": "Versla Sera om de rang Zilver te bereiken.",
+        "hp": 60,
+        "attack": 24,
+        "defense": 14,
+        "introLine": "Sera laat een vonk van de slijpsteen springen. \"Roest liegt niet. Jouw zwaard wel, als het bot is.\"",
+        "defeatLine": "Ze tikt de scheenplaat tegen je laars. \"Roestbreker. Die plaat houdt, ook als jij dat niet doet.\""
+      }
+    },
+    {
+      "id": "goud",
+      "order": 3,
+      "name": "Goud",
+      "minWins": 15,
+      "title": "Gouden Bladwijzer",
+      "fromRankId": "zilver",
+      "reward": {
+        "id": "gouden_folio",
+        "name": "Gouden Folio",
+        "kind": "weapon",
+        "description": "Een zwaard zo plat als een dichtgeslagen foliant. De snede draagt een gouden bladwijzerrand.",
+        "bonuses": {
+          "attack": 18
+        }
+      },
+      "expectedChallenger": {
+        "hp": 78,
+        "attack": 30,
+        "defense": 12
+      },
+      "opponent": {
+        "id": "ivo_quill",
+        "name": "Ivo Quill",
+        "epithet": "De Halve Magister",
+        "grantsRankId": "goud",
+        "role": "Versla Ivo om de rang Goud te bereiken.",
+        "hp": 88,
+        "attack": 32,
+        "defense": 6,
+        "introLine": "Ivo bladert in een leeg boek. \"De Oude Man leerde dit hoofdstuk. Ik heb het nooit uitgelezen.\"",
+        "defeatLine": "Het lege boek valt dicht. \"Gouden Bladwijzer. Jij bent verder gekomen dan ik.\""
+      }
+    },
+    {
+      "id": "platina",
+      "order": 4,
+      "name": "Platina",
+      "minWins": 25,
+      "title": "Sterwachter",
+      "fromRankId": "goud",
+      "reward": {
+        "id": "platina_zegel",
+        "name": "Platina Zegel",
+        "kind": "stat_boost",
+        "description": "Een zegelring uit een gebarsten observatoriumplaat. Blijvende aanval en verdediging. Niet de Groene Ring uit de winkel.",
+        "bonuses": {
+          "attack": 4,
+          "defense": 4
+        }
+      },
+      "expectedChallenger": {
+        "hp": 120,
+        "attack": 36,
+        "defense": 16
+      },
+      "opponent": {
+        "id": "index_vii",
+        "name": "Index-VII",
+        "epithet": "De Losgeslagen Wachter",
+        "grantsRankId": "platina",
+        "role": "Versla Index-VII om de rang Platina te bereiken.",
+        "hp": 96,
+        "attack": 36,
+        "defense": 20,
+        "introLine": "Index-VII klikt een rangnummer vast. \"Volgorde hersteld. Uitdager: ongecatalogiseerd.\"",
+        "defeatLine": "De platen zakken een vingerbreed. \"Sterwachter. Catalogus bijgewerkt.\""
+      }
+    },
+    {
+      "id": "meester",
+      "order": 5,
+      "name": "Meester",
+      "minWins": 40,
+      "title": "Hartkampioen",
+      "fromRankId": "platina",
+      "reward": {
+        "id": "hartkling",
+        "name": "Hartkling",
+        "kind": "weapon",
+        "description": "Het meesterzwaard van de Rangkuil. Een kling die trilt als een hartslag. Geen herstelitem: het Boek der Wederkeer blijft de revive.",
+        "bonuses": {
+          "attack": 26
+        }
+      },
+      "expectedChallenger": {
+        "hp": 130,
+        "attack": 42,
+        "defense": 18
+      },
+      "opponent": {
+        "id": "vale_de_stilte",
+        "name": "Vale de Stilte",
+        "epithet": "De Logische Kling",
+        "grantsRankId": "meester",
+        "role": "Versla Vale om de rang Meester te bereiken.",
+        "hp": 140,
+        "attack": 42,
+        "defense": 16,
+        "introLine": "Vale heft het zwaard en zegt niets. De stilte is de hele uitdaging.",
+        "defeatLine": "Vale buigt, nog steeds zonder woord. Iemand in de kuil fluistert de titel: Hartkampioen."
+      }
+    }
+  ]
+}

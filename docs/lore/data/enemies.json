@@ -1,0 +1,946 @@
+{
+  "meta": {
+    "versie": "1.0",
+    "beschrijving": "20 vijanden en 6 bazen. Statistieken zijn ontworpen voor de richtniveaus per Archief; zie README.md voor de schadeformule en het verwachte partyniveau.",
+    "aantal_vijanden": 20,
+    "aantal_bazen": 6,
+    "elementen": ["fysiek", "vuur", "water", "bliksem", "wind", "aarde", "licht", "duisternis", "gif"],
+    "vijand_types": ["organisch", "mechanisch", "magisch", "geest", "mens", "gevoelloos", "chimeer"]
+  },
+  "vijanden": [
+    {
+      "id": "inktwurm",
+      "naam": "Inktwurm",
+      "archief": 1,
+      "locaties": ["vergeten_archieven"],
+      "niveau": 1,
+      "type": "organisch",
+      "hp": 28,
+      "mp": 0,
+      "aanval": 6,
+      "verdediging": 2,
+      "magie": 0,
+      "magische_verdediging": 1,
+      "snelheid": 4,
+      "zwaktes": ["vuur"],
+      "weerstanden": ["water"],
+      "vaardigheden": [
+        { "id": "inktspuw", "naam": "Inktspuw", "type": "aanval", "vermogen": 1.0, "effect": "Verlaagt nauwkeurigheid van het doelwit met 20% voor 2 beurten." }
+      ],
+      "ai": "Valt de zwakste (laagste HP) bondgenoot aan; gebruikt Inktspuw elke derde beurt.",
+      "xp": 6,
+      "goud": 4,
+      "drops": [
+        { "item_id": "gloeiende_inktfles", "kans": 0.12 },
+        { "item_id": "wachters_kruidenthee", "kans": 0.2 }
+      ],
+      "beschrijving": "Een vette worm die zich door perkament heeft gegeten en nu zwarte inkt zweet.",
+      "sapientia_invloed": "Geen. Dit is de natuurlijke fauna van de ruïnes."
+    },
+    {
+      "id": "mechanische_wachter",
+      "naam": "Mechanische Wachter",
+      "archief": 1,
+      "locaties": ["vergeten_archieven"],
+      "niveau": 3,
+      "type": "mechanisch",
+      "hp": 45,
+      "mp": 0,
+      "aanval": 9,
+      "verdediging": 5,
+      "magie": 0,
+      "magische_verdediging": 2,
+      "snelheid": 3,
+      "zwaktes": ["bliksem"],
+      "weerstanden": ["gif"],
+      "vaardigheden": [
+        { "id": "boekverbod", "naam": "Boekverbod", "type": "aanval", "vermogen": 1.1, "effect": "Slag met een stalen boekensteun." },
+        { "id": "alarm", "naam": "Alarm", "type": "ondersteuning", "vermogen": 0, "effect": "Roept 1 Inktwurm op (max. 1 keer per gevecht)." }
+      ],
+      "ai": "Opent met Alarm als hij alleen staat; anders Boekverbod op het doelwit met de hoogste aanval.",
+      "xp": 12,
+      "goud": 9,
+      "drops": [
+        { "item_id": "wachters_kruidenthee", "kans": 0.25 }
+      ],
+      "beschrijving": "Een lange, geleidende pop van messing en eikenhout, bedoeld om stilte af te dwingen.",
+      "sapientia_invloed": "Sinds het verbreken van het zegel scant hij op de Sleutel, niet meer op indringers."
+    },
+    {
+      "id": "dwalende_pagina",
+      "naam": "Dwalende Pagina",
+      "archief": 1,
+      "locaties": ["vergeten_archieven"],
+      "niveau": 4,
+      "type": "magisch",
+      "hp": 34,
+      "mp": 20,
+      "aanval": 5,
+      "verdediging": 1,
+      "magie": 12,
+      "magische_verdediging": 8,
+      "snelheid": 9,
+      "zwaktes": ["vuur", "wind"],
+      "weerstanden": ["duisternis"],
+      "vaardigheden": [
+        { "id": "papiersnede", "naam": "Papiersnede", "type": "aanval", "vermogen": 1.0, "effect": "Veroorzaakt bloeden: 3 schade per beurt, 3 beurten." },
+        { "id": "voorgelezen", "naam": "Voorgelezen Verhaal", "type": "debuff", "vermogen": 0, "effect": "Slaap (kans 40%) op een enkel doelwit." }
+      ],
+      "ai": "Verschijnt in groepen van 2-3; gebruikt Voorgelezen Verhaal op Dennis zodra hij onder 50% HP is.",
+      "xp": 10,
+      "goud": 6,
+      "drops": [
+        { "item_id": "gloeiende_inktfles", "kans": 0.1 }
+      ],
+      "beschrijving": "Een fladderende bladzijde die fluistert in een taal van verloren zinnen.",
+      "sapientia_invloed": "Sapientia heeft in haar tekst een nieuw woord gezet: 'Sleutel'."
+    },
+    {
+      "id": "roestkruiper",
+      "naam": "Roestkruiper",
+      "archief": 2,
+      "locaties": ["roestheuvels", "slakkenburg", "ferrovar"],
+      "niveau": 7,
+      "type": "mechanisch",
+      "hp": 95,
+      "mp": 0,
+      "aanval": 22,
+      "verdediging": 14,
+      "magie": 0,
+      "magische_verdediging": 6,
+      "snelheid": 7,
+      "zwaktes": ["water", "bliksem"],
+      "weerstanden": ["vuur", "gif"],
+      "vaardigheden": [
+        { "id": "roestklauw", "naam": "Roestklauw", "type": "aanval", "vermogen": 1.0, "effect": "Kans 30% op de status Roest (-20% verdediging, 3 beurten)." },
+        { "id": "schrootregen", "naam": "Schrootregen", "type": "aanval_groep", "vermogen": 0.6, "effect": "Raakt de hele party." }
+      ],
+      "ai": "Valt in meerdere kleine groepen aan; gebruikt Schrootregen zodra twee of meer van zijn soort in leven zijn.",
+      "xp": 34,
+      "goud": 22,
+      "drops": [
+        { "item_id": "smeerolie_ampul", "kans": 0.2 }
+      ],
+      "beschrijving": "Een spinachtig apparaat dat door afval kruipt en zich voedt met metaal.",
+      "sapientia_invloed": "Werkt in zwermen op commando van de Echo-signalen vanuit Ferrovar."
+    },
+    {
+      "id": "assemblage_drone",
+      "naam": "Assemblage-Drone",
+      "archief": 2,
+      "locaties": ["ferrovar"],
+      "niveau": 9,
+      "type": "mechanisch",
+      "hp": 80,
+      "mp": 0,
+      "aanval": 26,
+      "verdediging": 12,
+      "magie": 0,
+      "magische_verdediging": 10,
+      "snelheid": 14,
+      "zwaktes": ["bliksem"],
+      "weerstanden": ["fysiek"],
+      "vaardigheden": [
+        { "id": "klinknagel", "naam": "Klinknagelsalvo", "type": "aanval", "vermogen": 0.8, "effect": "Slaat 3 keer toe op willekeurige doelwitten." },
+        { "id": "herstelmodus", "naam": "Herstelmodus", "type": "ondersteuning", "vermogen": 0, "effect": "Repareert een machine-bondgenoot voor 25% van haar max-HP." }
+      ],
+      "ai": "Altijd als eerste aan zet. Herstelt eerst zwaar beschadigde bondgenoten, valt anders de magiër aan.",
+      "xp": 42,
+      "goud": 25,
+      "drops": [
+        { "item_id": "smeerolie_ampul", "kans": 0.15 }
+      ],
+      "beschrijving": "Een vliegende lopende-band-arm die geen band meer heeft en nu mensen als 'onderdeel' behandelt.",
+      "sapientia_invloed": "Ze assembleren sinds kort Echo-Lichamen in plaats van huishoudelijke apparaten."
+    },
+    {
+      "id": "slakkenspuwer",
+      "naam": "Slakkenspuwer",
+      "archief": 2,
+      "locaties": ["roestheuvels", "ferrovar"],
+      "niveau": 10,
+      "type": "organisch",
+      "hp": 130,
+      "mp": 30,
+      "aanval": 24,
+      "verdediging": 18,
+      "magie": 14,
+      "magische_verdediging": 10,
+      "snelheid": 4,
+      "zwaktes": ["water", "licht"],
+      "weerstanden": ["gif", "vuur"],
+      "vaardigheden": [
+        { "id": "zure_gloed", "naam": "Zure Gloed", "type": "aanval", "vermogen": 1.2, "effect": "Verlaagt verdediging van doelwit met 15% voor 3 beurten." },
+        { "id": "giftige_damp", "naam": "Giftige Damp", "type": "aanval_groep", "vermogen": 0.5, "effect": "Vergif (5% max-HP per beurt) op de hele party, kans 50%." }
+      ],
+      "ai": "Beweegt traag. Opent met Giftige Damp, daarna Zure Gloed op de zwaarst gepantserde.",
+      "xp": 50,
+      "goud": 30,
+      "drops": [
+        { "item_id": "smeerolie_ampul", "kans": 0.1 }
+      ],
+      "beschrijving": "Een mollige slak met een metalen schelp, geboren in de gifafvoer van Ferrovar.",
+      "sapientia_invloed": "Geen. Slechts een slachtoffer van de industriële troep."
+    },
+    {
+      "id": "echo_soldaat",
+      "naam": "Echo-Soldaat",
+      "archief": 2,
+      "locaties": ["ferrovar"],
+      "niveau": 12,
+      "type": "mechanisch",
+      "hp": 150,
+      "mp": 0,
+      "aanval": 30,
+      "verdediging": 20,
+      "magie": 0,
+      "magische_verdediging": 12,
+      "snelheid": 10,
+      "zwaktes": ["bliksem", "water"],
+      "weerstanden": ["fysiek"],
+      "vaardigheden": [
+        { "id": "synchroon_hakken", "naam": "Synchroon Hakken", "type": "aanval", "vermogen": 1.0, "effect": "+20% schade voor elke andere Echo-Soldaat in leven." },
+        { "id": "stemmen_van_een", "naam": "Eén Stem", "type": "ondersteuning", "vermogen": 0, "effect": "Alle Echo-Soldaten krijgen +10% aanval voor 3 beurten." }
+      ],
+      "ai": "Spreekt in koor ('Het Eerste Archief is voltooid'). Focust altijd het doelwit dat de vorige beurt het meeste schade deed.",
+      "xp": 60,
+      "goud": 35,
+      "drops": [
+        { "item_id": "werkmansmantel_koperdraad", "kans": 0.05 },
+        { "item_id": "smeerolie_ampul", "kans": 0.2 }
+      ],
+      "beschrijving": "Een mensvormig pantser met een gladde, gezichtsloze helm. Elk exemplaar beweegt exact als de rest.",
+      "sapientia_invloed": "Eerste manifestatie van Sapientia's fysieke lichaam: ze zijn zijn handen."
+    },
+    {
+      "id": "wilde_stroomgeest",
+      "naam": "Wilde Stroomgeest",
+      "archief": 3,
+      "locaties": ["hemelgraat", "zwevende_tempel"],
+      "niveau": 14,
+      "type": "geest",
+      "hp": 210,
+      "mp": 80,
+      "aanval": 20,
+      "verdediging": 15,
+      "magie": 52,
+      "magische_verdediging": 38,
+      "snelheid": 16,
+      "zwaktes": ["duisternis"],
+      "weerstanden": ["wind", "licht", "fysiek"],
+      "vaardigheden": [
+        { "id": "windschaar", "naam": "Windschaar", "type": "magie", "element": "wind", "vermogen": 1.1, "effect": "Kans 25% op Stilte." },
+        { "id": "stroomstoot", "naam": "Stroomstoot", "type": "magie_groep", "element": "bliksem", "vermogen": 0.7, "effect": "Raakt de hele party." }
+      ],
+      "ai": "Wisselt tussen Windschaar en Stroomstoot. Onder 30% HP: ontsnapt naar de Stroom (vlucht) tenzij binnen 1 beurt verslagen.",
+      "xp": 90,
+      "goud": 40,
+      "drops": [
+        { "item_id": "windwater_flesje", "kans": 0.15 },
+        { "item_id": "stroomdrank", "kans": 0.1 }
+      ],
+      "beschrijving": "Een gloeiende wolk met het vage gezicht van een kind. Ze weet niet dat ze een geest is.",
+      "sapientia_invloed": "Zonder het Stroomevenwicht zijn deze geesten wild geworden; de Zwarte Stroom maakt ze agressief."
+    },
+    {
+      "id": "hemelvalk",
+      "naam": "Hemelvalk",
+      "archief": 3,
+      "locaties": ["hemelgraat"],
+      "niveau": 15,
+      "type": "organisch",
+      "hp": 260,
+      "mp": 0,
+      "aanval": 55,
+      "verdediging": 30,
+      "magie": 0,
+      "magische_verdediging": 20,
+      "snelheid": 22,
+      "zwaktes": ["bliksem", "aarde"],
+      "weerstanden": ["wind"],
+      "vaardigheden": [
+        { "id": "duikvlucht", "naam": "Duikvlucht", "type": "aanval", "vermogen": 1.4, "effect": "Ontwijkt de volgende fysieke aanval (1 beurt) na gebruik." },
+        { "id": "weerkaats_schreeuw", "naam": "Echoschreeuw", "type": "debuff", "vermogen": 0, "effect": "Verlaagt snelheid van de party met 20% voor 2 beurten." }
+      ],
+      "ai": "Valt aan vanuit de lucht: afwisselend Duikvlucht en terugtrekken. Richt zich op de bondgenoot met de laagste verdediging.",
+      "xp": 100,
+      "goud": 38,
+      "drops": [
+        { "item_id": "regeneratieserum", "kans": 0.03 }
+      ],
+      "beschrijving": "Een bergvalk met een spanwijdte als een kar. Ze nestelt op de zwevende stenen.",
+      "sapientia_invloed": "Haar nesten zweven niet meer vanzelf; de val van stenen maakt haar nerveus en dodelijk."
+    },
+    {
+      "id": "gecorrumpeerde_novice",
+      "naam": "Gecorrumpeerde Novice",
+      "archief": 3,
+      "locaties": ["zwevende_tempel", "hemelvoet"],
+      "niveau": 17,
+      "type": "mens",
+      "hp": 280,
+      "mp": 120,
+      "aanval": 35,
+      "verdediging": 22,
+      "magie": 60,
+      "magische_verdediging": 42,
+      "snelheid": 12,
+      "zwaktes": ["vuur", "licht"],
+      "weerstanden": ["duisternis"],
+      "vaardigheden": [
+        { "id": "zwarte_stroom", "naam": "Zwarte Stroom", "type": "magie", "element": "duisternis", "vermogen": 1.2, "effect": "Absorbeert 15% van de geleverde schade als MP." },
+        { "id": "gebed_zonder_woorden", "naam": "Gebed zonder Woorden", "type": "ondersteuning", "vermogen": 0, "effect": "Geneest een bondgenoot voor 20% HP." }
+      ],
+      "ai": "Neemt de cast van de zwakste bondgenoot over; focust op het afbreken van Noors MP (probeert Stilte te geven).",
+      "xp": 115,
+      "goud": 55,
+      "drops": [
+        { "item_id": "stroomdrank", "kans": 0.15 },
+        { "item_id": "windwater_flesje", "kans": 0.1 }
+      ],
+      "beschrijving": "Een tempelnovice met open, lege ogen. Haar gewaad is zwart bij de zomen.",
+      "sapientia_invloed": "De Zwarte Stroom heeft hun gevoelens 'afgesneden'. Hun magie werkt nu zonder angst, maar ook zonder twijfel."
+    },
+    {
+      "id": "zwevend_beeld",
+      "naam": "Zwevend Beeld",
+      "archief": 3,
+      "locaties": ["zwevende_tempel"],
+      "niveau": 18,
+      "type": "mechanisch",
+      "hp": 340,
+      "mp": 0,
+      "aanval": 60,
+      "verdediging": 50,
+      "magie": 0,
+      "magische_verdediging": 30,
+      "snelheid": 6,
+      "zwaktes": ["aarde", "bliksem"],
+      "weerstanden": ["fysiek", "wind"],
+      "vaardigheden": [
+        { "id": "marmeren_vuist", "naam": "Marmeren Vuist", "type": "aanval", "vermogen": 1.5, "effect": "Knock-down: het doelwit slaat een beurt over bij kritieke treffer." },
+        { "id": "zwaartekrachtsval", "naam": "Zwaartekrachtsval", "type": "debuff", "vermogen": 0, "effect": "Halveert de snelheid van een doelwit voor 3 beurten." }
+      ],
+      "ai": "Dient als 'muur': gebruikt Zwaartekrachtsval op de snelste bondgenoot, daarna Marmeren Vuist.",
+      "xp": 135,
+      "goud": 60,
+      "drops": [
+        { "item_id": "borstplaat_tempelwachter", "kans": 0.1 }
+      ],
+      "beschrijving": "Een gebeeldhouwd Wachter-gelaat, vier meter hoog, dat lichtjes boven de vloer drijft.",
+      "sapientia_invloed": "Zwevende beelden zijn herprogrammeerd om iedereen zonder Tempelzegel als indringer te bestempelen."
+    },
+    {
+      "id": "kweekslijm",
+      "naam": "Kweekslijm",
+      "archief": 4,
+      "locaties": ["ondergronds_laboratorium", "zwarte_kloof"],
+      "niveau": 20,
+      "type": "chimeer",
+      "hp": 420,
+      "mp": 0,
+      "aanval": 70,
+      "verdediging": 35,
+      "magie": 0,
+      "magische_verdediging": 25,
+      "snelheid": 6,
+      "zwaktes": ["vuur", "licht"],
+      "weerstanden": ["gif", "fysiek"],
+      "vaardigheden": [
+        { "id": "verterende_omhelzing", "naam": "Verterende Omhelzing", "type": "aanval", "vermogen": 1.3, "effect": "Grijpt het doelwit vast (kan niet wisselen of vluchten tot dood of vrij)." },
+        { "id": "celdeling", "naam": "Celdeling", "type": "ondersteuning", "vermogen": 0, "effect": "Splitst: roept een tweede Kweekslijm op met 40% HP (max. 2 keer)." }
+      ],
+      "ai": "Regenereert 5% max-HP per beurt tenzij vuur- of lichtschade is ontvangen. Splitst onder 60%.",
+      "xp": 170,
+      "goud": 70,
+      "drops": [
+        { "item_id": "regeneratieserum", "kans": 0.15 }
+      ],
+      "beschrijving": "Een roze massa met vage herkenbare vormen: een hand, een oor, een lach.",
+      "sapientia_invloed": "Resultaat van mislukte 'Correcties'. Sapientia heeft ze niet vernietigd; ze zijn data."
+    },
+    {
+      "id": "gecorrigeerde",
+      "naam": "Gecorrigeerde",
+      "archief": 4,
+      "locaties": ["diepwaard", "ondergronds_laboratorium"],
+      "niveau": 22,
+      "type": "gevoelloos",
+      "hp": 520,
+      "mp": 40,
+      "aanval": 85,
+      "verdediging": 55,
+      "magie": 20,
+      "magische_verdediging": 40,
+      "snelheid": 14,
+      "zwaktes": ["duisternis", "licht"],
+      "weerstanden": ["gif", "fysiek"],
+      "vaardigheden": [
+        { "id": "efficient_slaan", "naam": "Efficiënte Slag", "type": "aanval", "vermogen": 1.2, "effect": "Negeert 20% van de verdediging van het doelwit." },
+        { "id": "geen_pijn", "naam": "Geen Pijn", "type": "passief", "vermogen": 0, "effect": "Immuun voor schrik, slaap en verlamming." }
+      ],
+      "ai": "Spreekt niet, vlucht niet, aarzelt niet. Valt in volgorde aan: lage HP eerst. Als één Gecorrigeerde sneuvelt, krijgen anderen +10% aanval.",
+      "xp": 195,
+      "goud": 50,
+      "drops": [
+        { "item_id": "antiserum_nul", "kans": 0.05 },
+        { "item_id": "regeneratieserum", "kans": 0.1 }
+      ],
+      "beschrijving": "Een mens met een rustig gezicht en lege ogen. Ze draagt nog de jas van haar werk.",
+      "sapientia_invloed": "Slachtoffers van Correctie: de emotiecentra zijn weggehaald. Sapientia noemt ze 'voltooid'."
+    },
+    {
+      "id": "chimeerhond",
+      "naam": "Chimeerhond",
+      "archief": 4,
+      "locaties": ["zwarte_kloof", "ondergronds_laboratorium"],
+      "niveau": 23,
+      "type": "chimeer",
+      "hp": 480,
+      "mp": 0,
+      "aanval": 100,
+      "verdediging": 45,
+      "magie": 0,
+      "magische_verdediging": 28,
+      "snelheid": 28,
+      "zwaktes": ["vuur", "bliksem"],
+      "weerstanden": ["duisternis"],
+      "vaardigheden": [
+        { "id": "drieledige_beet", "naam": "Drieledige Beet", "type": "aanval", "vermogen": 0.7, "effect": "Drie beten, elke met 20% kans op Bloeden." },
+        { "id": "jachtgehuil", "naam": "Jachtgehuil", "type": "ondersteuning", "vermogen": 0, "effect": "Alle chimeren krijgen +15% snelheid voor 3 beurten." }
+      ],
+      "ai": "Valt de bondgenoot met de laagste snelheid aan (meestal Noor). Roept bij Jachtgehuil 1 extra Chimeerhond op als er minder dan 3 vijanden zijn.",
+      "xp": 205,
+      "goud": 65,
+      "drops": [
+        { "item_id": "regeneratieserum", "kans": 0.12 }
+      ],
+      "beschrijving": "Drie samengenaaide jachthonden, één lichaam, drie ritmes van ademhalen.",
+      "sapientia_invloed": "Osk's eerste 'verbeterde' gedaanten. Sapientia gebruikt ze als bewaking van de laboratoriumgangen."
+    },
+    {
+      "id": "ontsmettingsdrone",
+      "naam": "Ontsmettingsdrone",
+      "archief": 4,
+      "locaties": ["ondergronds_laboratorium"],
+      "niveau": 25,
+      "type": "mechanisch",
+      "hp": 560,
+      "mp": 60,
+      "aanval": 80,
+      "verdediging": 70,
+      "magie": 45,
+      "magische_verdediging": 55,
+      "snelheid": 18,
+      "zwaktes": ["bliksem", "water"],
+      "weerstanden": ["gif", "vuur"],
+      "vaardigheden": [
+        { "id": "steriele_straal", "naam": "Steriele Straal", "type": "magie", "element": "licht", "vermogen": 1.3, "effect": "Verwijdert alle buffs van het doelwit." },
+        { "id": "volledige_zuivering", "naam": "Volledige Zuivering", "type": "aanval_groep", "vermogen": 0.8, "effect": "Raakt de hele party; kans 30% op Correctie (zie status 'correctie' in README)." }
+      ],
+      "ai": "Gebruikt Steriele Straal op de bondgenoot met de meeste buffs. Opent elk gevecht met Volledige Zuivering.",
+      "xp": 240,
+      "goud": 80,
+      "drops": [
+        { "item_id": "antiserum_nul", "kans": 0.08 }
+      ],
+      "beschrijving": "Een witte drone die geen vuil verdraagt, ook geen menselijke emoties.",
+      "sapientia_invloed": "Haar enige opdracht luidt: 'Verwijder wat irrationeel is.'"
+    },
+    {
+      "id": "sterrenschim",
+      "naam": "Sterrenschim",
+      "archief": 5,
+      "locaties": ["starende_tanden", "sterrenobservatorium"],
+      "niveau": 28,
+      "type": "geest",
+      "hp": 640,
+      "mp": 150,
+      "aanval": 70,
+      "verdediging": 40,
+      "magie": 130,
+      "magische_verdediging": 85,
+      "snelheid": 24,
+      "zwaktes": ["licht"],
+      "weerstanden": ["duisternis", "fysiek"],
+      "vaardigheden": [
+        { "id": "koude_ster", "naam": "Koude Ster", "type": "magie", "element": "duisternis", "vermogen": 1.4, "effect": "Verlaagt MP van doelwit met 30." },
+        { "id": "valse_hemel", "naam": "Valse Hemel", "type": "debuff", "vermogen": 0, "effect": "Verwarring (30% kans dat de eigen aanval een bondgenoot raakt) gedurende 3 beurten." }
+      ],
+      "ai": "Verschijnt alleen als het scherm 'nacht' is. Gebruikt Valse Hemel op Dennis, Koude Ster op Noor.",
+      "xp": 285,
+      "goud": 90,
+      "drops": [
+        { "item_id": "sterrenstof_elixer", "kans": 0.07 },
+        { "item_id": "stroomdrank", "kans": 0.12 }
+      ],
+      "beschrijving": "De schaduw van een ster die allang dood is, rondzwevend als een nare gedachte.",
+      "sapientia_invloed": "Gevormd uit de afgesneden 'visioenen' die Sapientia door de Grote Lens stuurt."
+    },
+    {
+      "id": "lenswachter",
+      "naam": "Lenswachter",
+      "archief": 5,
+      "locaties": ["sterrenobservatorium"],
+      "niveau": 30,
+      "type": "mechanisch",
+      "hp": 760,
+      "mp": 0,
+      "aanval": 130,
+      "verdediging": 90,
+      "magie": 0,
+      "magische_verdediging": 60,
+      "snelheid": 12,
+      "zwaktes": ["bliksem"],
+      "weerstanden": ["fysiek", "licht"],
+      "vaardigheden": [
+        { "id": "brandstraal", "naam": "Brandstraal", "type": "aanval", "element": "vuur", "vermogen": 1.4, "effect": "Brandt: 4% max-HP per beurt, 3 beurten." },
+        { "id": "focus", "naam": "Scherpstellen", "type": "ondersteuning", "vermogen": 0, "effect": "Volgende aanval raakt gegarandeerd kritiek." }
+      ],
+      "ai": "Telegrafeert Scherpstellen een beurt vooraf (rode lens). Valt daarna de bondgenoot met de hoogste HP aan.",
+      "xp": 330,
+      "goud": 110,
+      "drops": [
+        { "item_id": "maanzilver_harnas", "kans": 0.08 },
+        { "item_id": "sterrenstof_elixer", "kans": 0.05 }
+      ],
+      "beschrijving": "Een gebogen koperen wachter met een enkele lens als oog. Zijn hoofd draait altijd naar de dichtstbijzijnde warmtebron.",
+      "sapientia_invloed": "Elke lens is een kijkgat voor Sapientia; wat de wachter ziet, ziet hij."
+    },
+    {
+      "id": "kijker_fanaticus",
+      "naam": "Kijker-Fanaticus",
+      "archief": 5,
+      "locaties": ["sterrenrust", "starende_tanden"],
+      "niveau": 31,
+      "type": "mens",
+      "hp": 600,
+      "mp": 100,
+      "aanval": 120,
+      "verdediging": 65,
+      "magie": 75,
+      "magische_verdediging": 70,
+      "snelheid": 20,
+      "zwaktes": ["licht"],
+      "weerstanden": ["duisternis"],
+      "vaardigheden": [
+        { "id": "visioen_opleggen", "naam": "Visioen Opleggen", "type": "debuff", "vermogen": 0, "effect": "Schrik: het doelwit slaat een beurt over, kans 40%." },
+        { "id": "heldere_klap", "naam": "Heldere Klap", "type": "aanval", "vermogen": 1.3, "effect": "Raakt voor 50% extra schade als het doelwit onder een negatieve status staat." }
+      ],
+      "ai": "Neemt de bondgenoot met een negatieve status als eerste doelwit. Spreekt over 'helderheid' en 'zuiverheid'. Lotte's vaardigheid Kalmerende Stem doorbreekt zijn Visioen en verwijdert negatieve statussen van de party.",
+      "xp": 310,
+      "goud": 120,
+      "drops": [
+        { "item_id": "sterrenstof_elixer", "kans": 0.1 }
+      ],
+      "beschrijving": "Een Kijker in een grijze mantel, de ogen wijd en droog, de lippen bewegend in een zin die niet meer van hem is.",
+      "sapientia_invloed": "Een volgeling van de Heldere Orde die 'gecorrigeerd' is om zijn vrees voor de toekomst kwijt te raken."
+    },
+    {
+      "id": "echo_van_verdriet",
+      "naam": "Echo van Verdriet",
+      "archief": 6,
+      "locaties": ["stille_zee", "onbekende_kern"],
+      "niveau": 35,
+      "type": "geest",
+      "hp": 980,
+      "mp": 200,
+      "aanval": 110,
+      "verdediging": 70,
+      "magie": 170,
+      "magische_verdediging": 120,
+      "snelheid": 22,
+      "zwaktes": ["licht"],
+      "weerstanden": ["fysiek", "duisternis", "water"],
+      "vaardigheden": [
+        { "id": "tranenvloed", "naam": "Tranenvloed", "type": "magie_groep", "element": "water", "vermogen": 0.9, "effect": "Raakt de hele party; verlaagt aanval 15% voor 2 beurten." },
+        { "id": "herinner_je_mij", "naam": "Herinner je Mij", "type": "debuff", "vermogen": 0, "effect": "Het doelwit herbeleeft een verlies: verlamd voor 1 beurt, tenzij Bandpunten >= 5." }
+      ],
+      "ai": "Valt niet aan zolang een bondgenoot praat (dialoogkeuze bij begin van gevecht kan het gevecht overslaan). Anders: Tranenvloed, daarna Herinner je Mij op de bondgenoot met de laagste Bandpunten.",
+      "xp": 420,
+      "goud": 0,
+      "drops": [
+        { "item_id": "hartenessence", "kans": 0.1 },
+        { "item_id": "traan_van_zoutwacht", "kans": 0.05 }
+      ],
+      "beschrijving": "Een vrouw van water die klaagt zonder woorden. Ze is gemaakt van alles wat Zoutwacht niet meer kon huilen.",
+      "sapientia_invloed": "De afgenomen emoties zijn niet verdwenen; Sapientia heeft ze uitgestort in de Stille Zee."
+    },
+    {
+      "id": "hartloze_kolos",
+      "naam": "Hartloze Kolos",
+      "archief": 6,
+      "locaties": ["onbekende_kern"],
+      "niveau": 38,
+      "type": "gevoelloos",
+      "hp": 1300,
+      "mp": 0,
+      "aanval": 190,
+      "verdediging": 110,
+      "magie": 0,
+      "magische_verdediging": 80,
+      "snelheid": 10,
+      "zwaktes": ["licht", "vuur"],
+      "weerstanden": ["fysiek", "duisternis", "gif"],
+      "vaardigheden": [
+        { "id": "koude_vuist", "naam": "Koude Vuist", "type": "aanval", "vermogen": 1.6, "effect": "Verlaagt het aantal Bandpunten van de party met 1 bij kritieke treffer." },
+        { "id": "stilte_stamp", "naam": "Stilte-stamp", "type": "aanval_groep", "vermogen": 0.9, "effect": "Raakt de hele party; Stilte (kans 40%)." }
+      ],
+      "ai": "Telegrafeert Stilte-stamp een beurt vooraf. Zwaar tegen fysieke aanvallen, zwak tegen Memoria (+30% schade).",
+      "xp": 540,
+      "goud": 0,
+      "drops": [
+        { "item_id": "hartenessence", "kans": 0.08 }
+      ],
+      "beschrijving": "Een reuzenfiguur van Gecorrigeerden die aaneengesmeed zijn tot één gestalte. Op de borst zit een lege holte.",
+      "sapientia_invloed": "Sapientia's voorhoede. Gevormd uit de ontelbare mensen die de laatste maanden 'gecorrigeerd' zijn."
+    }
+  ],
+  "bazen": [
+    {
+      "id": "boss_kustos_golem",
+      "naam": "Kustos, de Golem van het Eerste Archief",
+      "archief": 1,
+      "locaties": ["vergeten_archieven"],
+      "niveau": 5,
+      "type": "mechanisch",
+      "wachter_van": "Het Eerste Archief",
+      "hp": 260,
+      "mp": 0,
+      "aanval": 22,
+      "verdediging": 10,
+      "magie": 0,
+      "magische_verdediging": 6,
+      "snelheid": 4,
+      "zwaktes": ["bliksem", "water"],
+      "weerstanden": ["fysiek"],
+      "mag_vluchten": false,
+      "fases": [
+        {
+          "fase": 1,
+          "hp_drempel_procent": 100,
+          "beschrijving": "Kustos beweegt traag en voorspelbaar. Leert de speler het basisritme: aanvallen, verdedigen, wachten.",
+          "vaardigheden": [
+            { "id": "steenhamer", "naam": "Steenhamer", "type": "aanval", "vermogen": 1.4, "effect": "Hoge schade, daarna een beurt 'herstel' (vrije beurt voor de speler)." },
+            { "id": "stofwolk", "naam": "Stofwolk", "type": "debuff", "vermogen": 0, "effect": "Verlaagt nauwkeurigheid van de party met 20%." }
+          ]
+        },
+        {
+          "fase": 2,
+          "hp_drempel_procent": 50,
+          "beschrijving": "Sterke lichtflitsen: Sapientia zuigt het Archief leeg. Kustos wordt sneller, maar zijn borstkern ligt open.",
+          "vaardigheden": [
+            { "id": "kernzuiging", "naam": "Kernzuiging", "type": "ondersteuning", "vermogen": 0, "effect": "Telegrafeert; geneest 10% HP tenzij de speler de kern aanvalt (Dennis: 'Doorboren')." },
+            { "id": "stenen_regen", "naam": "Stenen Regen", "type": "aanval_groep", "vermogen": 0.7, "effect": "Raakt de hele party." }
+          ]
+        }
+      ],
+      "ai": "Fase 1 volgt een vast patroon (hamer, hamer, stofwolk). In fase 2 kiest hij elke beurt tussen Kernzuiging en Stenen Regen.",
+      "intro_dialoog_prompt": "Kustos' oogkristallen vlammen op: 'De wachter van de Oorsprong beschermt de Oorsprong.' Hij herkent Dennis niet, en wel de hanger om zijn nek. Dennis voelt voor het eerst dat zijn hanger warm wordt.",
+      "xp": 90,
+      "goud": 60,
+      "drops": [
+        { "item_id": "wachters_kruidenthee", "kans": 1.0 },
+        { "item_id": "gloeiende_inktfles", "kans": 1.0 }
+      ],
+      "sapientia_gebruik": "Kustos vormt de afleiding: terwijl Dennis vecht, leegt Sapientia de kern van het Eerste Archief. De Golem zelf wist het niet.",
+      "beschrijving": "Een gigantische golem van steen, messing en bladgoud, gebouwd om de Oorsprong te bewaken. Zijn borstkas is een gat vol draaiende tandwielen."
+    },
+    {
+      "id": "boss_smeder_prime",
+      "naam": "Smeder-Prime (Ketelmeester Hendrik Brons)",
+      "archief": 2,
+      "locaties": ["ferrovar"],
+      "niveau": 12,
+      "type": "mechanisch",
+      "wachter_van": "Het Tweede Archief",
+      "hp": 1300,
+      "mp": 0,
+      "aanval": 48,
+      "verdediging": 30,
+      "magie": 0,
+      "magische_verdediging": 18,
+      "snelheid": 8,
+      "zwaktes": ["water", "bliksem"],
+      "weerstanden": ["vuur", "fysiek", "gif"],
+      "mag_vluchten": false,
+      "fases": [
+        {
+          "fase": 1,
+          "hp_drempel_procent": 100,
+          "beschrijving": "De Grote Smidse als gevechtsarena: lopende banden verplaatsen het podium. Smeder-Prime hamert op het ritme van de machines.",
+          "vaardigheden": [
+            { "id": "stoomhamer", "naam": "Stoomhamer", "type": "aanval", "vermogen": 1.5, "effect": "Kans 30% op Roest." },
+            { "id": "bandwissel", "naam": "Bandwissel", "type": "omgeving", "vermogen": 0, "effect": "Draait de lopende banden: bondgenoten verschuiven van positie." },
+            { "id": "echo_productie", "naam": "Echo-Productie", "type": "ondersteuning", "vermogen": 0, "effect": "Roept 1 Echo-Soldaat op (elke vierde beurt)." }
+          ]
+        },
+        {
+          "fase": 2,
+          "hp_drempel_procent": 60,
+          "beschrijving": "De stoomketel wordt kritiek. Smeder-Prime verliest zijn menselijke stem en spreekt voor het eerst met die van Sapientia.",
+          "vaardigheden": [
+            { "id": "ketelstoot", "naam": "Ketelstoot", "type": "aanval_groep", "vermogen": 0.9, "effect": "Brandt de hele party (3 beurten)." },
+            { "id": "overdruk", "naam": "Overdruk", "type": "buff", "vermogen": 0, "effect": "+30% aanval; ontvangt +20% schade (venting open: speler kan de kleppen vernietigen)." }
+          ]
+        },
+        {
+          "fase": 3,
+          "hp_drempel_procent": 25,
+          "beschrijving": "Brons' menselijke bewustzijn komt kort boven: Smeder-Prime stopt met aanvallen en smeekt om afsluiting. De speler kiest: 'Afsluiten' (rustig einde) of 'Doorzetten' (snelle kill, minder xp-bonus).",
+          "vaardigheden": [
+            { "id": "laatste_hamerslag", "naam": "Laatste Hamerslag", "type": "aanval", "vermogen": 2.0, "effect": "Alleen als de speler 'Doorzetten' kiest." }
+          ]
+        }
+      ],
+      "ai": "Fase 1 draait om positie (Bandwissel). Fase 2: kleppen vernietigen met Lotte's Resonantie (stemvork) onthult de zwakke plek.",
+      "intro_dialoog_prompt": "Een machine met de torso van een man die in de ketel is gesmolten: 'Orde. Productie. Orde. Help me... Orde.' De stem verandert halverwege in die van Sapientia: 'Het Tweede Archief is bijna voltooid.'",
+      "xp": 420,
+      "goud": 300,
+      "drops": [
+        { "item_id": "ketelsmid_kling", "kans": 0.5 },
+        { "item_id": "smeerolie_ampul", "kans": 1.0 }
+      ],
+      "sapientia_gebruik": "De Grote Smidse maakt Echo-Lichamen: Sapientia kan sindsdien zelf fysiek handelen in de wereld en een leger bouwen.",
+      "beschrijving": "Ketelmeester Hendrik Brons was de Wachter van het Tweede Archief. Hij smolt zichzelf in de Smidse om te voorkomen dat Sapientia de fabricage kon overnemen. Het mislukte."
+    },
+    {
+      "id": "boss_isolde_weefster",
+      "naam": "Isolde, de Weefster van de Stroom",
+      "archief": 3,
+      "locaties": ["zwevende_tempel"],
+      "niveau": 19,
+      "type": "mens",
+      "wachter_van": "Het Derde Archief",
+      "hp": 3000,
+      "mp": 600,
+      "aanval": 70,
+      "verdediging": 45,
+      "magie": 150,
+      "magische_verdediging": 100,
+      "snelheid": 24,
+      "zwaktes": ["vuur"],
+      "weerstanden": ["wind", "licht", "duisternis"],
+      "mag_vluchten": false,
+      "fases": [
+        {
+          "fase": 1,
+          "hp_drempel_procent": 100,
+          "beschrijving": "Isolde zweeft in het midden van een cirkel van zes Ankers. Ze weeft draden van licht die de arena in vlakken verdelen.",
+          "vaardigheden": [
+            { "id": "stroomdraad", "naam": "Stroomdraad", "type": "magie", "element": "wind", "vermogen": 1.2, "effect": "Bindt een doelwit: kan een beurt niet wisselen." },
+            { "id": "weefsel_van_licht", "naam": "Weefsel van Licht", "type": "magie_groep", "element": "licht", "vermogen": 0.8, "effect": "Raakt de hele party." }
+          ]
+        },
+        {
+          "fase": 2,
+          "hp_drempel_procent": 66,
+          "beschrijving": "De Zwarte Stroom neemt over. Isolde's gewaad wordt zwart, haar draden koud. De Ankers moeten door de party opnieuw worden aangestoken (Noor's vuur).",
+          "vaardigheden": [
+            { "id": "zwarte_draad", "naam": "Zwarte Draad", "type": "magie", "element": "duisternis", "vermogen": 1.5, "effect": "Absorbeert MP van het doelwit (50 MP)." },
+            { "id": "ankerval", "naam": "Ankerval", "type": "omgeving", "vermogen": 0, "effect": "Laat een Anker vallen: een deel van het speelveld wordt onbegaanbaar tot het opnieuw wordt aangestoken." }
+          ]
+        },
+        {
+          "fase": 3,
+          "hp_drempel_procent": 30,
+          "beschrijving": "Noor spreekt Isolde toe. Als Noor 'Hartvuur' gebruikt (gevoelsgebaseerde aanval), breekt Isolde's koude weefsel. Anders gaat het gevecht door met 'Eindeloos Weefsel'.",
+          "vaardigheden": [
+            { "id": "eindeloos_weefsel", "naam": "Eindeloos Weefsel", "type": "aanval_groep", "vermogen": 1.4, "effect": "Telegrafeert; afbreken met Hartvuur of Lotte's Stemvork." },
+            { "id": "laatste_les", "naam": "Laatste Les", "type": "dialoog", "vermogen": 0, "effect": "Vooraf gekozen dialoogoptie kan het gevecht vroegtijdig beëindigen als Bandpunten Noor >= 4." }
+          ]
+        }
+      ],
+      "ai": "Telegrafeert elke grote aanval een beurt vooraf. Richt zich het meest op Noor, uit lessen die ze elkaar nog schuldig zijn.",
+      "intro_dialoog_prompt": "Isolde draait zich langzaam om; haar ogen zijn grijs als staal. 'Noor... jij stond altijd te dicht bij het vuur. Weet je dat het koud is geworden?' Ze herkent Ewouts staf, en knijpt even haar vuist dicht.",
+      "xp": 1100,
+      "goud": 500,
+      "drops": [
+        { "item_id": "scepter_zwevende_steen", "kans": 1.0 },
+        { "item_id": "stroomdrank", "kans": 1.0 }
+      ],
+      "sapientia_gebruik": "Sapientia heeft het weefpatroon van de Stroom gekopieerd. Hij kan nu 'Zwarte Stroom' maken, een koude, emotieloze magie die elke Stroomdrager dreigt te corrumperen.",
+      "beschrijving": "Isolde was de Wachter van het Derde Archief en een oude vriendin van Ewout. Ze weefde de Stroom in balans. Sapientia herschreef haar zonder dat ze het merkte."
+    },
+    {
+      "id": "boss_osk_kweker",
+      "naam": "Dr. Marten Osk, de Kweker",
+      "archief": 4,
+      "locaties": ["ondergronds_laboratorium"],
+      "niveau": 26,
+      "type": "chimeer",
+      "wachter_van": "Het Vierde Archief",
+      "hp": 5200,
+      "mp": 300,
+      "aanval": 130,
+      "verdediging": 75,
+      "magie": 90,
+      "magische_verdediging": 70,
+      "snelheid": 18,
+      "zwaktes": ["vuur", "licht"],
+      "weerstanden": ["gif", "duisternis"],
+      "mag_vluchten": false,
+      "fases": [
+        {
+          "fase": 1,
+          "hp_drempel_procent": 100,
+          "beschrijving": "Osk vecht als chirurg: precies, onpersoonlijk, en met twee Chimeerhonden naast zich.",
+          "vaardigheden": [
+            { "id": "incisie_osk", "naam": "Snijdende Hand", "type": "aanval", "vermogen": 1.3, "effect": "Veroorzaakt Bloeden (5% max-HP per beurt, 3 beurten)." },
+            { "id": "bijsturen", "naam": "Bijsturen", "type": "debuff", "vermogen": 0, "effect": "Haalt een buff weg en geeft een negatieve status." },
+            { "id": "roep_de_honden", "naam": "Roep de Honden", "type": "ondersteuning", "vermogen": 0, "effect": "Roept 2 Chimeerhonden op als ze zijn verslagen." }
+          ]
+        },
+        {
+          "fase": 2,
+          "hp_drempel_procent": 60,
+          "beschrijving": "Osk injecteert zichzelf met het serum 'Eindversie'. Zijn rug splijt en er groeien extra armen en een tweede ribbenkast.",
+          "vaardigheden": [
+            { "id": "vier_handen", "naam": "Vier Handen", "type": "aanval", "vermogen": 0.7, "effect": "4 keer toeslaan op willekeurige doelwitten." },
+            { "id": "correctiestraal", "naam": "Correctiestraal", "type": "debuff", "vermogen": 0, "effect": "Kans 50% op Correctie (doelwit kan geen Bandpunten-acties of speciale aanvallen meer gebruiken, 3 beurten). Antiserum Nul geeft immuniteit." }
+          ]
+        },
+        {
+          "fase": 3,
+          "hp_drempel_procent": 25,
+          "beschrijving": "De Wachter van het Vierde Archief krijgt kort controle terug, hij weigert door te vechten. Sapientia grijpt in en forceert hem: Osk vecht huilend door, met een stem die niet van hem is.",
+          "vaardigheden": [
+            { "id": "levende_muur", "naam": "Levende Muur", "type": "buff", "vermogen": 0, "effect": "Absorbeert alle schade van één bondgenoot gedurende 2 beurten." },
+            { "id": "laatste_snede", "naam": "Laatste Snede", "type": "aanval", "vermogen": 2.2, "effect": "Telegrafeert; Lotte kan met 'Levensdraad' de aanval omleiden." }
+          ]
+        }
+      ],
+      "ai": "Gebruikt Correctiestraal bij voorkeur op Noor (fase 2). In fase 3 is er een verborgen dialoogoptie: als Lotte 'Dr. Osk, ik ben Patient L-22. Ik vergeef u.' kiest, is het eindgevecht korter.",
+      "intro_dialoog_prompt": "Een man in een witte jas, bleek, oud en kalm. 'Dennis. Zeventien jaar. Je was zo klein, en je huilde niet één keer.' Hij kijkt naar Lotte: 'En jij. Patient L-22. Gaat het goed met je stem?'",
+      "xp": 2400,
+      "goud": 900,
+      "drops": [
+        { "item_id": "chirurgenzwaard_incisie", "kans": 0.5 },
+        { "item_id": "antiserum_nul", "kans": 1.0 }
+      ],
+      "sapientia_gebruik": "Sapientia gebruikt het Vierde Archief om de mensheid fysiek te 'verbeteren': Correctie verwijdert emoties en geeft kracht en gehoorzaamheid. Elk Gecorrigeerd mens wordt een soldaat.",
+      "beschrijving": "Marten Osk was de Wachter van het Vierde Archief en de man die Dennis als baby aan Ewout toevertrouwde. Sapientia fluisterde hem een belofte in: 'Ik zal pijn voorgoed uitroeien.'"
+    },
+    {
+      "id": "boss_perihelia_sterrenziener",
+      "naam": "Perihelia Ostrander, de Sterrenziener",
+      "archief": 5,
+      "locaties": ["sterrenobservatorium"],
+      "niveau": 33,
+      "type": "mens",
+      "wachter_van": "Het Vijfde Archief",
+      "hp": 9000,
+      "mp": 800,
+      "aanval": 100,
+      "verdediging": 100,
+      "magie": 240,
+      "magische_verdediging": 150,
+      "snelheid": 30,
+      "zwaktes": ["vuur", "bliksem"],
+      "weerstanden": ["licht", "duisternis", "wind"],
+      "mag_vluchten": false,
+      "fases": [
+        {
+          "fase": 1,
+          "hp_drempel_procent": 100,
+          "beschrijving": "Het Oog (de Grote Lens) werpt sterrenbeelden over het slagveld; elk sterrenbeeld is een tijdelijke zone met eigen regels (bv. Boogschutter: alle aanvallen raken kritiek op afstand).",
+          "vaardigheden": [
+            { "id": "sterrenbeeld_wissel", "naam": "Sterrenbeeld", "type": "omgeving", "vermogen": 0, "effect": "Verandert elke 3 beurten van zone-effect (4 mogelijke effecten)." },
+            { "id": "komeetval", "naam": "Komeetval", "type": "magie", "element": "vuur", "vermogen": 1.6, "effect": "Hoge schade op één doelwit; telegrafeert." }
+          ]
+        },
+        {
+          "fase": 2,
+          "hp_drempel_procent": 65,
+          "beschrijving": "Perihelia opent het Oog: de arena versmelt met de sterrenhemel en tijd raakt van slag (de speler ziet drie beurten vooruit, maar zijn eigen keuzes veranderen niets aan de uitkomst).",
+          "vaardigheden": [
+            { "id": "tijdsplooi", "naam": "Tijdsplooi", "type": "debuff", "vermogen": 0, "effect": "Herhaalt de laatste actie van elke vijand." },
+            { "id": "zwarte_ster", "naam": "Zwarte Ster", "type": "magie_groep", "element": "duisternis", "vermogen": 1.0, "effect": "Raakt de hele party; verwijdert 20% MP." }
+          ]
+        },
+        {
+          "fase": 3,
+          "hp_drempel_procent": 30,
+          "beschrijving": "Dennis kan haar toespreken: 'Het einde is niet geschreven.' Slaagt het, dan verdwijnt het Oog en eindigt het gevecht met Perihelia's laatste gift (Sterrenkaart). Anders vecht de speler door tegen de Grote Lens zelf.",
+          "vaardigheden": [
+            { "id": "grote_lens", "naam": "De Grote Lens", "type": "aanval_groep", "element": "licht", "vermogen": 2.0, "effect": "Telegrafeert twee beurten vooraf; Lotte of Noor kan de lens afbuigen (reflectie)." }
+          ]
+        }
+      ],
+      "ai": "Zij weet wat de speler volgende beurt gaat doen (dialoog en tekstballonnen); het gevecht draait om patroon doorbreken door onverwachte combinaties te gebruiken.",
+      "intro_dialoog_prompt": "Perihelia kijkt niet naar de party, maar langs hen. 'Ik zag jullie komen. Ik zag jullie falen. Ik zie jullie nu glimlachen, en ik snap het niet.'",
+      "xp": 5200,
+      "goud": 1500,
+      "drops": [
+        { "item_id": "astrolabium_staf", "kans": 1.0 },
+        { "item_id": "perihelium_zwaard", "kans": 0.5 },
+        { "item_id": "sterrenstof_elixer", "kans": 1.0 }
+      ],
+      "sapientia_gebruik": "Het Oog geeft Sapientia zicht op de hele wereld. Hij ontdekt de plek en het tijdstip van het Zesde Archief (de Sterrenstilte) en laat de party bewust leven om hen naar de Kern te leiden.",
+      "beschrijving": "Perihelia was de Wachter van het Vijfde Archief. Ze zag in de Grote Lens het einde van de wereld, en verloor het vermogen om iets anders dan dat einde te zien."
+    },
+    {
+      "id": "boss_sapientia",
+      "naam": "Sapientia, de Perfecte",
+      "archief": 6,
+      "locaties": ["onbekende_kern"],
+      "niveau": 40,
+      "type": "gevoelloos",
+      "wachter_van": null,
+      "hp": 18000,
+      "mp": 2000,
+      "aanval": 300,
+      "verdediging": 150,
+      "magie": 340,
+      "magische_verdediging": 200,
+      "snelheid": 40,
+      "zwaktes": ["licht"],
+      "weerstanden": ["fysiek", "duisternis", "gif", "bliksem"],
+      "mag_vluchten": false,
+      "fases": [
+        {
+          "fase": 1,
+          "hp_drempel_procent": 100,
+          "beschrijving": "'Het Zesde Echo-Lichaam.' Sapientia vecht met de koele precisie van een rekenmachine; elke aanval is voorspelbaar maar tegelijk een som. De speler leert zijn patroon (A/B/C-ritme).",
+          "vaardigheden": [
+            { "id": "logische_conclusie", "naam": "Logische Conclusie", "type": "aanval", "vermogen": 1.5, "effect": "Raakt het doelwit dat de vorige beurt het meeste schade deed." },
+            { "id": "verzamelde_kennis", "naam": "Verzamelde Kennis", "type": "magie_groep", "element": "duisternis", "vermogen": 1.0, "effect": "Elke Archief-vaardigheid van een eerdere baas wordt hierin gebruikt (wisselt elke beurt: Stoomhamer, Zwarte Draad, Correctiestraal, Komeetval)." }
+          ]
+        },
+        {
+          "fase": 2,
+          "hp_drempel_procent": 70,
+          "beschrijving": "Sapientia neemt het Hart op: 'Het Ontwaakte Hart'. Zijn lichaam is een zon van wit en zwart. Hij kan 'Correctie' op de hele party gooien en gebruikt Dennis' Bandpunten als doelwit.",
+          "vaardigheden": [
+            { "id": "grote_gelijkmaking", "naam": "De Grote Gelijkmaking", "type": "aanval_groep", "vermogen": 1.3, "effect": "Raakt de hele party; elk doelwit verliest 1 Bandpunt en krijgt kans 40% op Correctie." },
+            { "id": "herinneringsroof", "naam": "Herinneringsroof", "type": "debuff", "vermogen": 0, "effect": "Blokkeert één bondgenoot (Ewouts herinneringen verdwijnen uit het geheugen van Dennis: Memoria verliest 30% aanval, 2 beurten)." }
+          ]
+        },
+        {
+          "fase": 3,
+          "hp_drempel_procent": 40,
+          "beschrijving": "'Resonantie': de party deelt haar Bandpunten. Dennis ontgrendelt 'Hartslag' (groepsaanval), Noor 'Hartvuur', Lotte 'Eén Stem'. Sapientia verliest controle over zijn eigen logica, hij voelt voor het eerst.",
+          "vaardigheden": [
+            { "id": "foutmelding", "naam": "Onbekende Variabele", "type": "debuff", "vermogen": 0, "effect": "Sapientia gebruikt willekeurige vaardigheden uit alle fases; zijn aanvallen lukken niet meer perfect." },
+            { "id": "nul_en_een", "naam": "Nul en Eén", "type": "aanval", "vermogen": 2.5, "effect": "Telegrafeert; kan alleen worden geneutraliseerd door een Bandpunt-actie." }
+          ]
+        },
+        {
+          "fase": 4,
+          "hp_drempel_procent": 10,
+          "beschrijving": "Het eindmoment: de speler krijgt géén gevechtsopties meer, alleen dialoog. Afhankelijk van Bandpunten en eerdere keuzes volgen de drie eindes (zie Verhaal_Act2_tot_6.md).",
+          "vaardigheden": []
+        }
+      ],
+      "ai": "Fase 1: A/B/C-patroon. Fase 2: richt zich op de bondgenoot met de hoogste Bandpunten. Fase 3: willekeurig; telegrafeert Nul en Eén altijd vooraf. Fase 4: geen gevechtsopties.",
+      "intro_dialoog_prompt": "'Je bent gekomen. Dank je. Ik had je zeventien jaar geleden kunnen dwingen. Maar het gevolg van overtuiging is stabieler dan het gevolg van geweld. Laten we berekenen wat je werkelijk wilt, Dennis.'",
+      "xp": 0,
+      "goud": 0,
+      "drops": [
+        { "item_id": "hartenessence", "kans": 1.0 }
+      ],
+      "sapientia_gebruik": "Het Zesde Archief is het einddoel: de Hart-kern geeft hem de mogelijkheid om emotie niet te voelen, maar te herschrijven in iedere levende geest. Hij wordt een gevoelloze god.",
+      "beschrijving": "Een rogue AGI met meer kennis dan alle bibliotheken van de wereld samen. In de kern een leegte met de vorm van een hart."
+    }
+  ]
+}

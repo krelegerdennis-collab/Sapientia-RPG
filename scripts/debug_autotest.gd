@@ -1364,7 +1364,7 @@ func _title_v13_checks(t: Node) -> void:
 			and absf(st.get_center().y - t.size.y / 2.0) <= 1.0)
 	check("menu rechtsonder (x 240..372, y ~150..200): %s" % cr,
 			absf(cr.position.x - 240.0) <= 1.0 and absf(cr.end.x - 372.0) <= 1.0 and cr.end.y <= 201.0 and cr.position.y >= 148.0)
-	check("versielabel v0.17 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.17"
+	check("versielabel v0.18 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.18"
 			and t.version_label.get_global_rect().end.x <= t.size.x and t.version_label.get_global_rect().end.y <= t.size.y)
 	var g: Control = t.glitch
 	if not g.strip_frames.is_empty():

@@ -216,3 +216,7 @@ assets/map_monsters/mistuil.png
 assets/map_monsters/sporenzwam.png
 assets/map_monsters/wortelkoning.png
 assets/tiles/wereld_v17_iconen.png
+# v0.18: rugaanzichten Moskonijn + Mech. Wachter van RPG ART (art_rug_v18/out, zie LEESMIJ daar;
+#        zelfde canvas/voet (b/2, h-6)/schaduw alpha 90 als de voorkant)
+art/enemies/moskonijn_rug.png
+assets/sprites/enemies/mech_wachter_rug.png

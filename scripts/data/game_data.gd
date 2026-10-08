@@ -86,6 +86,7 @@ const ENEMIES := {
 	},
 	"moskonijn": {
 		"name": "Moskonijn", "sprite": "res://art/enemies/moskonijn.png",
+		"sprite_back": "res://art/enemies/moskonijn_rug.png",   # v0.18 rugaanzicht (Codex-bondgenoot; RPG ART art_rug_v18)
 		"max_hp": 14, "atk": 9, "def": 3, "agi": 12,
 		"exp": 4, "gold": 3, "y_offset": 0,
 		"skills": [],
@@ -121,6 +122,7 @@ const ENEMIES := {
 	# STATS VOORLOPIG (nog niet gebalanceerd): tussen de kleine Archief-vijanden en de Golem in.
 	"mech_wachter": {
 		"name": "Mech. Wachter", "sprite": "res://assets/sprites/enemies/mech_wachter.png",
+		"sprite_back": "res://assets/sprites/enemies/mech_wachter_rug.png",   # v0.18 rugaanzicht (Codex-bondgenoot; RPG ART art_rug_v18)
 		"idle": "res://assets/sprites/enemies/mech_wachter_idle.png", "idle_frames": 2, "idle_time": 0.55,
 		# v0.14 DEFINITIEF (RPG CODE, zie HANDOFF_GOLEM.md): sterkste gewone vijand van de Archieven.
 		# Dennis Lv 1 (ATK 17): 3 klappen; Lv 2-3 (ATK 20-23): 2 klappen. Hij doet 4-9 schade.

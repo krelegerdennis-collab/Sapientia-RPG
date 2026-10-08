@@ -1,0 +1,1199 @@
+{
+	"versie": 1,
+	"beschrijving": "Audio-manifest van SAPIENTIA. Wordt ingelezen door scripts/audio_manager.gd (autoload AudioManager). Voeg hier nieuwe geluiden toe; de AudioManager hoeft niet aangepast te worden. Bestanden horen in res://assets/audio/bgm/ en res://assets/audio/sfx/.",
+	"paden": {
+		"bgm": "res://assets/audio/bgm/",
+		"sfx": "res://assets/audio/sfx/"
+	},
+	"bgm": {
+		"main_menu": {
+			"bestand": "bgm_main_menu.ogg",
+			"titel": "Het Ontwaken van Sapientia",
+			"locatie": "Titelscherm",
+			"beschrijving": "Eenzame, melancholische piano boven een langzaam tikkend uurwerk. Voelt als een stoffige machine die langzaam wakker wordt.",
+			"loop": true,
+			"volume_db": -4.0,
+			"bpm": 62
+		},
+		"wachtershuis": {
+			"bestand": "bgm_wachtershuis.ogg",
+			"titel": "Haard van de Wachter",
+			"locatie": "Het Wachtershuis",
+			"beschrijving": "Veilige maar sombere uitvalsbasis. Warme akoestische gitaar en cello, zacht tikkende tandwielen en een knetterend haardvuur. Een gevoel van rust met een onderliggende dreiging.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 70
+		},
+		"vergeten_archieven": {
+			"bestand": "bgm_vergeten_archieven.ogg",
+			"titel": "Stof en Vergeten Woorden",
+			"locatie": "De Vergeten Archieven",
+			"beschrijving": "Stille bibliotheek vol stof. Ijle strijkers, fluisterende koorklanken, het ritselen van papier en af en toe een enkele pianotoon die in de ruimte nagalmt.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 58
+		},
+		"industriestad": {
+			"bestand": "bgm_industriestad.ogg",
+			"titel": "Stoom en Staal",
+			"locatie": "De Industriestad",
+			"beschrijving": "Zware, ritmische industriele sfeer. Stampende ritmes van machines, metalen percussie, stoomfluiten en een grimmig baslijntje met een kleine melodie op een distorted synth.",
+			"loop": true,
+			"volume_db": -5.0,
+			"bpm": 96
+		},
+		"zwevende_tempel": {
+			"bestand": "bgm_zwevende_tempel.ogg",
+			"titel": "Hemelse Radertjes",
+			"locatie": "De Zwevende Tempel",
+			"beschrijving": "Etherisch en verheven, maar met een onheilspellende ondertoon. Harp, hoge koorstemmen, helder bellengeluid en zachte windruis, alsof de tempel zelf aan het ademen is.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 64
+		},
+		"ondergronds_lab": {
+			"bestand": "bgm_ondergronds_lab.ogg",
+			"titel": "Experiment 0-13",
+			"locatie": "Het Ondergrondse Lab",
+			"beschrijving": "Klinische, onrustige elektronische sfeer. Gonzende apparaten, druppelend water, pulserende synth-bas en vervormde, onnatuurlijke geluiden die op mislukte experimenten wijzen.",
+			"loop": true,
+			"volume_db": -5.0,
+			"bpm": 84
+		},
+		"sterrenobservatorium": {
+			"bestand": "bgm_sterrenobservatorium.ogg",
+			"titel": "Het Laatste Sterrenlicht",
+			"locatie": "Het Sterrenobservatorium",
+			"beschrijving": "Groots, kosmisch en eenzaam. Zachte synth-pads, glinsterende celesta, een zacht pulserende bas en langzaam bewegende strijkers. Het gevoel van kijken naar iets dat veel groter is dan jij.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 72
+		},
+		"gevecht_normaal": {
+			"bestand": "bgm_gevecht_normaal.ogg",
+			"titel": "Raderwerk in Beweging",
+			"locatie": "Standaard gevechten",
+			"beschrijving": "Snelle, energieke turn-based battle muziek. Opgejaagde strijkers, strakke drums, een duidelijk melodisch motief en mechanische percussie.",
+			"loop": true,
+			"volume_db": -4.0,
+			"bpm": 148
+		},
+		"gevecht_miniboss": {
+			"bestand": "bgm_gevecht_miniboss.ogg",
+			"titel": "Het Zware Staal",
+			"locatie": "Golem en andere tussenbazen",
+			"beschrijving": "Zwaar en dreigend. Langzamere, stampende drums, laag koper, een koor in de verte en metalen slagen. Moet groot en onverbiddelijk klinken, passend bij de Golem.",
+			"loop": true,
+			"volume_db": -3.0,
+			"bpm": 132
+		},
+		"eindbaas_fase1": {
+			"bestand": "bgm_eindbaas_fase1.ogg",
+			"titel": "De Laatste Beslissing",
+			"locatie": "Eindbaas, eerste fase",
+			"beschrijving": "Epische, dramatische boss-muziek. Orgel, snelle strijkers, koor, onheilspellende klokken en een mechanisch tikkende percussielaag die steeds sneller lijkt te worden.",
+			"loop": true,
+			"volume_db": -3.0,
+			"bpm": 140
+		},
+		"eindbaas_fase2": {
+			"bestand": "bgm_eindbaas_fase2.ogg",
+			"titel": "Het Einde van de Tijd",
+			"locatie": "Eindbaas, tweede fase",
+			"beschrijving": "Een nog intensere, wanhopige variant van fase 1. Sneller tempo, vervormd orgel, schreeuwend koor, versnelde tandwielen en een tragische melodie die door de chaos heen breekt.",
+			"loop": true,
+			"volume_db": -3.0,
+			"bpm": 168
+		},
+		"sapientia_thema": {
+			"bestand": "bgm_sapientia_thema.ogg",
+			"titel": "De Stem van Wijsheid",
+			"locatie": "Verhaalscenes en Sapientia",
+			"beschrijving": "Het persoonlijke thema van Sapientia. Een zacht, tragisch pianomotief met subtiele elektronische glitches, een ijle vrouwelijke zang zonder tekst en tikkende mechaniek.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 66
+		},
+		"rustplek": {
+			"bestand": "bgm_rustplek.ogg",
+			"titel": "Even Ademhalen",
+			"locatie": "Rustplekken en opslaan",
+			"beschrijving": "Zeer zacht en geruststellend. Een zachte harp met een korte strijkerpad; een moment van rust tussen de gevechten.",
+			"loop": true,
+			"volume_db": -7.0,
+			"bpm": 60
+		},
+		"overwinning": {
+			"bestand": "bgm_overwinning.ogg",
+			"titel": "Het Raderwerk Rust",
+			"locatie": "Na een gewonnen gevecht",
+			"beschrijving": "Korte (5-8 seconden) overwinningsjingle. Triomfantelijk maar ingehouden; past bij de donkere toon.",
+			"loop": false,
+			"volume_db": -3.0,
+			"bpm": 120
+		},
+		"game_over": {
+			"bestand": "bgm_game_over.ogg",
+			"titel": "Het Raderwerk Stopt",
+			"locatie": "Na een verloren gevecht",
+			"beschrijving": "Korte, trieste jingle (6-10 seconden). Een neerwaartse pianolijn die wegsterft terwijl het tikken van een klok vertraagt en stopt.",
+			"loop": false,
+			"volume_db": -3.0,
+			"bpm": 50
+		},
+		"aftiteling": {
+			"bestand": "bgm_aftiteling.ogg",
+			"titel": "Wat de Sterren Onthouden",
+			"locatie": "Aftiteling",
+			"beschrijving": "Hoopvolle maar weemoedige afsluiting. Begint met het Sapientia-motief op piano, bouwt op met strijkers en koor, en eindigt in een stille uitloop.",
+			"loop": true,
+			"volume_db": -5.0,
+			"bpm": 76
+		}
+	},
+	"sfx": {
+		"menu_click": {
+			"bestanden": [
+				"sfx_menu_click_01.wav",
+				"sfx_menu_click_02.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Korte, droge mechanische klik, als een tandwiel dat vastklikt.",
+			"volume_db": -6,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 40
+		},
+		"menu_hover": {
+			"bestanden": [
+				"sfx_menu_hover_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Zeer zacht tikje bij het selecteren van een menu-item.",
+			"volume_db": -14,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 60
+		},
+		"menu_confirm": {
+			"bestanden": [
+				"sfx_menu_confirm_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Positieve bevestiging, twee oplopende metalen tonen.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 80
+		},
+		"menu_cancel": {
+			"bestanden": [
+				"sfx_menu_cancel_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Neerwaartse korte toon bij annuleren of teruggaan.",
+			"volume_db": -8,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 80
+		},
+		"menu_error": {
+			"bestanden": [
+				"sfx_menu_error_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Dof, zoemend afwijzingsgeluid (niet mogelijk).",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 150
+		},
+		"menu_open": {
+			"bestanden": [
+				"sfx_menu_open_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Mechanisch openschuivend paneel met korte zucht van stoom.",
+			"volume_db": -8,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 100
+		},
+		"menu_close": {
+			"bestanden": [
+				"sfx_menu_close_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Mechanisch sluitend paneel.",
+			"volume_db": -8,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 100
+		},
+		"tab_switch": {
+			"bestanden": [
+				"sfx_tab_switch_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Kort schuivend geluid bij het wisselen van tabblad.",
+			"volume_db": -10,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 60
+		},
+		"dialogue_blip": {
+			"bestanden": [
+				"sfx_dialogue_blip_01.wav",
+				"sfx_dialogue_blip_02.wav",
+				"sfx_dialogue_blip_03.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Kort tekstgeluidje per letter bij gewone gesprekken.",
+			"volume_db": -14,
+			"pitch_variatie": 0.08,
+			"min_interval_ms": 30
+		},
+		"dialogue_advance": {
+			"bestanden": [
+				"sfx_dialogue_advance_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Klein klikje als een tekstvak wordt doorgezet.",
+			"volume_db": -10,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 80
+		},
+		"save_game": {
+			"bestanden": [
+				"sfx_save_game_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Rustgevend, helder klokkenspel met een mechanische klik; het spel is opgeslagen.",
+			"volume_db": -4,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 500
+		},
+		"load_game": {
+			"bestanden": [
+				"sfx_load_game_01.wav"
+			],
+			"categorie": "ui",
+			"beschrijving": "Klok die opwindt, gevolgd door een zachte klik.",
+			"volume_db": -4,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 500
+		},
+		"item_pickup": {
+			"bestanden": [
+				"sfx_item_pickup_01.wav",
+				"sfx_item_pickup_02.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Kort, helder pingend geluid wanneer je iets oppakt.",
+			"volume_db": -6,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 80
+		},
+		"item_equip": {
+			"bestanden": [
+				"sfx_item_equip_01.wav",
+				"sfx_item_equip_02.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Metaal dat vastklikt, als pantser dat wordt aangedaan.",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 80
+		},
+		"item_unequip": {
+			"bestanden": [
+				"sfx_item_unequip_01.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Metaal dat losklikt en over leer schuift.",
+			"volume_db": -8,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 80
+		},
+		"item_use_potion": {
+			"bestanden": [
+				"sfx_item_use_potion_01.wav",
+				"sfx_item_use_potion_02.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Prop wordt eruit getrokken en vloeistof wordt gedronken.",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 100
+		},
+		"gold_coins": {
+			"bestanden": [
+				"sfx_gold_coins_01.wav",
+				"sfx_gold_coins_02.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Rinkelende metalen munten.",
+			"volume_db": -8,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 80
+		},
+		"chest_open": {
+			"bestanden": [
+				"sfx_chest_open_01.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Krakend houten deksel en een korte magische glinster.",
+			"volume_db": -4,
+			"pitch_variatie": 0.02,
+			"min_interval_ms": 200
+		},
+		"chest_locked": {
+			"bestanden": [
+				"sfx_chest_locked_01.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Rammelend slot dat niet opengaat.",
+			"volume_db": -6,
+			"pitch_variatie": 0.02,
+			"min_interval_ms": 200
+		},
+		"book_page_turn": {
+			"bestanden": [
+				"sfx_book_page_turn_01.wav",
+				"sfx_book_page_turn_02.wav",
+				"sfx_book_page_turn_03.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Papier dat omgeslagen wordt in een stille bibliotheek.",
+			"volume_db": -8,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 100
+		},
+		"level_up": {
+			"bestanden": [
+				"sfx_level_up_01.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Triomfantelijke opstijgende klokken en een mechanische zoem.",
+			"volume_db": -3,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 1000
+		},
+		"quest_accept": {
+			"bestanden": [
+				"sfx_quest_accept_01.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Zware, plechtige gong met een pennenkrabbel.",
+			"volume_db": -5,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 500
+		},
+		"quest_complete": {
+			"bestanden": [
+				"sfx_quest_complete_01.wav"
+			],
+			"categorie": "items",
+			"beschrijving": "Opgewekte, heldere fanfare van klokjes.",
+			"volume_db": -4,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 500
+		},
+		"footstep_stone": {
+			"bestanden": [
+				"sfx_footstep_stone_01.wav",
+				"sfx_footstep_stone_02.wav",
+				"sfx_footstep_stone_03.wav",
+				"sfx_footstep_stone_04.wav"
+			],
+			"categorie": "beweging",
+			"beschrijving": "Laarzen op stenen vloer, licht galmend.",
+			"volume_db": -10,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 0
+		},
+		"footstep_wood": {
+			"bestanden": [
+				"sfx_footstep_wood_01.wav",
+				"sfx_footstep_wood_02.wav",
+				"sfx_footstep_wood_03.wav",
+				"sfx_footstep_wood_04.wav"
+			],
+			"categorie": "beweging",
+			"beschrijving": "Laarzen op houten planken, een zacht kraakje.",
+			"volume_db": -10,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 0
+		},
+		"footstep_metal": {
+			"bestanden": [
+				"sfx_footstep_metal_01.wav",
+				"sfx_footstep_metal_02.wav",
+				"sfx_footstep_metal_03.wav",
+				"sfx_footstep_metal_04.wav"
+			],
+			"categorie": "beweging",
+			"beschrijving": "Laarzen op metalen roosters van de fabrieken.",
+			"volume_db": -9,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 0
+		},
+		"footstep_marble": {
+			"bestanden": [
+				"sfx_footstep_marble_01.wav",
+				"sfx_footstep_marble_02.wav",
+				"sfx_footstep_marble_03.wav",
+				"sfx_footstep_marble_04.wav"
+			],
+			"categorie": "beweging",
+			"beschrijving": "Heldere, galmende stappen in de tempel.",
+			"volume_db": -10,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 0
+		},
+		"footstep_water": {
+			"bestanden": [
+				"sfx_footstep_water_01.wav",
+				"sfx_footstep_water_02.wav",
+				"sfx_footstep_water_03.wav",
+				"sfx_footstep_water_04.wav"
+			],
+			"categorie": "beweging",
+			"beschrijving": "Plonsen in ondiep water in het lab.",
+			"volume_db": -10,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 0
+		},
+		"jump_land": {
+			"bestanden": [
+				"sfx_jump_land_01.wav",
+				"sfx_jump_land_02.wav"
+			],
+			"categorie": "beweging",
+			"beschrijving": "Zachte dreun van een landing.",
+			"volume_db": -8,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 100
+		},
+		"door_open_wood": {
+			"bestanden": [
+				"sfx_door_open_wood_01.wav",
+				"sfx_door_open_wood_02.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Krakende houten deur.",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 200
+		},
+		"door_close_wood": {
+			"bestanden": [
+				"sfx_door_close_wood_01.wav",
+				"sfx_door_close_wood_02.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Houten deur die dichtvalt met een doffe klap.",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 200
+		},
+		"door_open_iron": {
+			"bestanden": [
+				"sfx_door_open_iron_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Zware ijzeren poort die schuift met schurend metaal.",
+			"volume_db": -5,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 200
+		},
+		"door_open_mechanical": {
+			"bestanden": [
+				"sfx_door_open_mechanical_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Tandwielen, stoom en een hydraulische sis; een mechanische deur schuift open.",
+			"volume_db": -5,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 200
+		},
+		"door_locked": {
+			"bestanden": [
+				"sfx_door_locked_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Kort rammelen en een dof klikje; de deur zit op slot.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 300
+		},
+		"lever_pull": {
+			"bestanden": [
+				"sfx_lever_pull_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Zware hendel die omgaat, gevolgd door een mechanische klik.",
+			"volume_db": -5,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 200
+		},
+		"switch_press": {
+			"bestanden": [
+				"sfx_switch_press_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Drukknop of drukplaat die wordt ingedrukt.",
+			"volume_db": -6,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 150
+		},
+		"steam_vent": {
+			"bestanden": [
+				"sfx_steam_vent_01.wav",
+				"sfx_steam_vent_02.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Sissende stoomstoot uit een pijp.",
+			"volume_db": -8,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 300
+		},
+		"elevator_mechanical": {
+			"bestanden": [
+				"sfx_elevator_mechanical_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Kettingen en motoren van een liftplatform.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 500
+		},
+		"secret_discovered": {
+			"bestanden": [
+				"sfx_secret_discovered_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Mysterieuze, oplopende toon met een stenen klik.",
+			"volume_db": -4,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 800
+		},
+		"rune_activate": {
+			"bestanden": [
+				"sfx_rune_activate_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Gloeiende rune die ontbrandt met een zacht elektrisch gezoem.",
+			"volume_db": -6,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 200
+		},
+		"clock_chime": {
+			"bestanden": [
+				"sfx_clock_chime_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "Diepe klokslag van een oud uurwerk.",
+			"volume_db": -8,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 1000
+		},
+		"battle_start": {
+			"bestanden": [
+				"sfx_battle_start_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Dreigend stinger-geluid bij het begin van een gevecht, metaal dat dichtklapt.",
+			"volume_db": -2,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 1000
+		},
+		"turn_start": {
+			"bestanden": [
+				"sfx_turn_start_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Korte tikkende bel; jouw beurt.",
+			"volume_db": -10,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 200
+		},
+		"command_select": {
+			"bestanden": [
+				"sfx_command_select_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Klik in het gevechtsmenu.",
+			"volume_db": -8,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 40
+		},
+		"target_select": {
+			"bestanden": [
+				"sfx_target_select_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Zacht piepje bij het kiezen van een doelwit.",
+			"volume_db": -10,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 40
+		},
+		"sword_swing": {
+			"bestanden": [
+				"sfx_sword_swing_01.wav",
+				"sfx_sword_swing_02.wav",
+				"sfx_sword_swing_03.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Scherp, snijdend geluid van een zwaard door de lucht.",
+			"volume_db": -6,
+			"pitch_variatie": 0.08,
+			"min_interval_ms": 0
+		},
+		"sword_hit_flesh": {
+			"bestanden": [
+				"sfx_sword_hit_flesh_01.wav",
+				"sfx_sword_hit_flesh_02.wav",
+				"sfx_sword_hit_flesh_03.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Zwaard dat vlees raakt: nat en doffer.",
+			"volume_db": -4,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 0
+		},
+		"sword_hit_armor": {
+			"bestanden": [
+				"sfx_sword_hit_armor_01.wav",
+				"sfx_sword_hit_armor_02.wav",
+				"sfx_sword_hit_armor_03.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Zwaard op harnas: scherpe metalen klank en vonken.",
+			"volume_db": -4,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 0
+		},
+		"critical_hit": {
+			"bestanden": [
+				"sfx_critical_hit_01.wav",
+				"sfx_critical_hit_02.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Zware klap met een extra nagalm.",
+			"volume_db": -2,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 100
+		},
+		"block": {
+			"bestanden": [
+				"sfx_block_01.wav",
+				"sfx_block_02.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Schild of wapen vangt een aanval op.",
+			"volume_db": -5,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 100
+		},
+		"dodge": {
+			"bestanden": [
+				"sfx_dodge_01.wav",
+				"sfx_dodge_02.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Snelle whoosh van een ontwijking.",
+			"volume_db": -8,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 100
+		},
+		"miss": {
+			"bestanden": [
+				"sfx_miss_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Zwakke whoosh zonder impact.",
+			"volume_db": -10,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 100
+		},
+		"player_hurt": {
+			"bestanden": [
+				"sfx_player_hurt_01.wav",
+				"sfx_player_hurt_02.wav",
+				"sfx_player_hurt_03.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Pijnlijke kreun van de held, kort en ingehouden.",
+			"volume_db": -5,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 100
+		},
+		"player_death": {
+			"bestanden": [
+				"sfx_player_death_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Laatste ademtocht en dof neerstorten.",
+			"volume_db": -3,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 500
+		},
+		"enemy_hurt": {
+			"bestanden": [
+				"sfx_enemy_hurt_01.wav",
+				"sfx_enemy_hurt_02.wav",
+				"sfx_enemy_hurt_03.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Algemene schreeuw van een gewonde vijand.",
+			"volume_db": -6,
+			"pitch_variatie": 0.08,
+			"min_interval_ms": 80
+		},
+		"enemy_death_organic": {
+			"bestanden": [
+				"sfx_enemy_death_organic_01.wav",
+				"sfx_enemy_death_organic_02.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Rochelende kreet en een zware klap neer.",
+			"volume_db": -4,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 200
+		},
+		"enemy_death_mechanical": {
+			"bestanden": [
+				"sfx_enemy_death_mechanical_01.wav",
+				"sfx_enemy_death_mechanical_02.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Metaal dat uit elkaar valt, tandwielen die over de vloer rollen en elektrische knetters.",
+			"volume_db": -4,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 200
+		},
+		"heal": {
+			"bestanden": [
+				"sfx_heal_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Zachte, stijgende klokjes; herstel.",
+			"volume_db": -5,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 150
+		},
+		"buff_apply": {
+			"bestanden": [
+				"sfx_buff_apply_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Opwaartse toon met metalen glinster.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 150
+		},
+		"debuff_apply": {
+			"bestanden": [
+				"sfx_debuff_apply_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Neerwaartse, dissonante toon.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 150
+		},
+		"status_poison": {
+			"bestanden": [
+				"sfx_status_poison_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Borrelende, giftige vloeistof.",
+			"volume_db": -8,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 200
+		},
+		"status_burn": {
+			"bestanden": [
+				"sfx_status_burn_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Knetterend vuur en een korte sissende vlam.",
+			"volume_db": -8,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 200
+		},
+		"status_stun": {
+			"bestanden": [
+				"sfx_status_stun_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Tollende sterren-achtige tinkels en een doffe dreun.",
+			"volume_db": -8,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 200
+		},
+		"flee_success": {
+			"bestanden": [
+				"sfx_flee_success_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Snelle voetstappen die wegsterven.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 300
+		},
+		"flee_fail": {
+			"bestanden": [
+				"sfx_flee_fail_01.wav"
+			],
+			"categorie": "gevecht",
+			"beschrijving": "Gestruikel, gevolgd door een afkeurende klank.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 300
+		},
+		"spell_charge": {
+			"bestanden": [
+				"sfx_spell_charge_01.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Tandwielen die snel opdraaien met een stijgend elektrisch gezoem.",
+			"volume_db": -8,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 100
+		},
+		"spell_cog_burst": {
+			"bestanden": [
+				"sfx_spell_cog_burst_01.wav",
+				"sfx_spell_cog_burst_02.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Explosie van tandwielen en metaalschroot met een magische knal.",
+			"volume_db": -5,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 80
+		},
+		"spell_fire": {
+			"bestanden": [
+				"sfx_spell_fire_01.wav",
+				"sfx_spell_fire_02.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Vuurbal met een metalen ondertoon.",
+			"volume_db": -5,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 80
+		},
+		"spell_lightning": {
+			"bestanden": [
+				"sfx_spell_lightning_01.wav",
+				"sfx_spell_lightning_02.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Elektrische ontlading tussen metalen spoelen.",
+			"volume_db": -5,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 80
+		},
+		"spell_ice": {
+			"bestanden": [
+				"sfx_spell_ice_01.wav",
+				"sfx_spell_ice_02.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Kristal dat vormt en versplintert.",
+			"volume_db": -5,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 80
+		},
+		"spell_arcane_beam": {
+			"bestanden": [
+				"sfx_spell_arcane_beam_01.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Strakke energiestraal die snijdt door de lucht.",
+			"volume_db": -5,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 100
+		},
+		"spell_steam": {
+			"bestanden": [
+				"sfx_spell_steam_01.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Stoomexplosie, sissend en hees.",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 100
+		},
+		"spell_shield": {
+			"bestanden": [
+				"sfx_spell_shield_01.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Gonzende energiekoepel die opent.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 100
+		},
+		"spell_summon": {
+			"bestanden": [
+				"sfx_spell_summon_01.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Machtig zoemen en tandwielen die in elkaar vallen.",
+			"volume_db": -4,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 300
+		},
+		"spell_overload": {
+			"bestanden": [
+				"sfx_spell_overload_01.wav"
+			],
+			"categorie": "magie",
+			"beschrijving": "Mislukking: knetterende kortsluiting, krakende metalen en een zwaar zoemen dat afbreekt.",
+			"volume_db": -3,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 300
+		},
+		"enemy_attack_claw": {
+			"bestanden": [
+				"sfx_enemy_attack_claw_01.wav",
+				"sfx_enemy_attack_claw_02.wav",
+				"sfx_enemy_attack_claw_03.wav"
+			],
+			"categorie": "vijanden",
+			"beschrijving": "Scherpe klauwen die door de lucht klieven.",
+			"volume_db": -5,
+			"pitch_variatie": 0.08,
+			"min_interval_ms": 0
+		},
+		"enemy_attack_bite": {
+			"bestanden": [
+				"sfx_enemy_attack_bite_01.wav",
+				"sfx_enemy_attack_bite_02.wav"
+			],
+			"categorie": "vijanden",
+			"beschrijving": "Snelle hap met een snauw.",
+			"volume_db": -5,
+			"pitch_variatie": 0.08,
+			"min_interval_ms": 0
+		},
+		"enemy_attack_mech_punch": {
+			"bestanden": [
+				"sfx_enemy_attack_mech_punch_01.wav",
+				"sfx_enemy_attack_mech_punch_02.wav"
+			],
+			"categorie": "vijanden",
+			"beschrijving": "Hydraulische stoot: sis en zware metalen klap.",
+			"volume_db": -4,
+			"pitch_variatie": 0.06,
+			"min_interval_ms": 0
+		},
+		"enemy_attack_steam_blast": {
+			"bestanden": [
+				"sfx_enemy_attack_steam_blast_01.wav"
+			],
+			"categorie": "vijanden",
+			"beschrijving": "Stoomwolk die uit een mechanisch lichaam ontsnapt.",
+			"volume_db": -4,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 0
+		},
+		"enemy_attack_laser": {
+			"bestanden": [
+				"sfx_enemy_attack_laser_01.wav"
+			],
+			"categorie": "vijanden",
+			"beschrijving": "Opladend gezoem en een scherpe laserflits.",
+			"volume_db": -5,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 0
+		},
+		"enemy_growl": {
+			"bestanden": [
+				"sfx_enemy_growl_01.wav",
+				"sfx_enemy_growl_02.wav",
+				"sfx_enemy_growl_03.wav"
+			],
+			"categorie": "vijanden",
+			"beschrijving": "Laag grommen van een vijand die je opmerkt.",
+			"volume_db": -6,
+			"pitch_variatie": 0.1,
+			"min_interval_ms": 150
+		},
+		"enemy_alert": {
+			"bestanden": [
+				"sfx_enemy_alert_01.wav"
+			],
+			"categorie": "vijanden",
+			"beschrijving": "Metalen alarmgeluid; een bewaker heeft je gezien.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 300
+		},
+		"golem_roar": {
+			"bestanden": [
+				"sfx_golem_roar_01.wav",
+				"sfx_golem_roar_02.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Diepe, galmende brul vermengd met knarsend steen en een mechanisch gesis.",
+			"volume_db": -1,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 500
+		},
+		"golem_step": {
+			"bestanden": [
+				"sfx_golem_step_01.wav",
+				"sfx_golem_step_02.wav",
+				"sfx_golem_step_03.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Zware stap die de grond laat schudden.",
+			"volume_db": -3,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 0
+		},
+		"golem_slam": {
+			"bestanden": [
+				"sfx_golem_slam_01.wav",
+				"sfx_golem_slam_02.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Verpletterende klap van stenen vuisten.",
+			"volume_db": -2,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 200
+		},
+		"golem_hurt": {
+			"bestanden": [
+				"sfx_golem_hurt_01.wav",
+				"sfx_golem_hurt_02.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Barstend gesteente en metaalgekreun.",
+			"volume_db": -3,
+			"pitch_variatie": 0.05,
+			"min_interval_ms": 150
+		},
+		"golem_death": {
+			"bestanden": [
+				"sfx_golem_death_01.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Instortend gebouw van steen, een laatste zucht van stoom en een gestorven motor.",
+			"volume_db": -2,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 500
+		},
+		"boss_intro_stinger": {
+			"bestanden": [
+				"sfx_boss_intro_stinger_01.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Dreigende, lage stinger bij het verschijnen van een tussenbaas.",
+			"volume_db": -2,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 1000
+		},
+		"boss_phase_change": {
+			"bestanden": [
+				"sfx_boss_phase_change_01.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Tandwielen die vastlopen, een schreeuw en een zware dreun; de baas verandert van vorm.",
+			"volume_db": -2,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 1000
+		},
+		"finalboss_roar": {
+			"bestanden": [
+				"sfx_finalboss_roar_01.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Onaards, vervormd gebrul met koorstemmen en klokken.",
+			"volume_db": -1,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 1000
+		},
+		"finalboss_defeat": {
+			"bestanden": [
+				"sfx_finalboss_defeat_01.wav"
+			],
+			"categorie": "bazen",
+			"beschrijving": "Epische ineenstorting: klokken, tandwielen en een langzaam stoppend uurwerk.",
+			"volume_db": -2,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 1000
+		},
+		"sapientia_awaken": {
+			"bestanden": [
+				"sfx_sapientia_awaken_01.wav"
+			],
+			"categorie": "sapientia",
+			"beschrijving": "Het ontwaken: zware motor die op gang komt, dan een gelaagde, etherische stem.",
+			"volume_db": -3,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 1000
+		},
+		"sapientia_whisper": {
+			"bestanden": [
+				"sfx_sapientia_whisper_01.wav",
+				"sfx_sapientia_whisper_02.wav",
+				"sfx_sapientia_whisper_03.wav"
+			],
+			"categorie": "sapientia",
+			"beschrijving": "Gefluisterde, galmende stem zonder woorden, met een mechanische resonantie.",
+			"volume_db": -8,
+			"pitch_variatie": 0.04,
+			"min_interval_ms": 300
+		},
+		"sapientia_speak_blip": {
+			"bestanden": [
+				"sfx_sapientia_speak_blip_01.wav",
+				"sfx_sapientia_speak_blip_02.wav",
+				"sfx_sapientia_speak_blip_03.wav"
+			],
+			"categorie": "sapientia",
+			"beschrijving": "Tekstgeluidje voor Sapientia's dialoog; zachter en melodieuzer dan normale tekstblips.",
+			"volume_db": -14,
+			"pitch_variatie": 0.1,
+			"min_interval_ms": 30
+		},
+		"sapientia_warning": {
+			"bestanden": [
+				"sfx_sapientia_warning_01.wav"
+			],
+			"categorie": "sapientia",
+			"beschrijving": "Onheilspellend, dubbel klinkende stem met een laag alarm.",
+			"volume_db": -3,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 800
+		},
+		"sapientia_glitch": {
+			"bestanden": [
+				"sfx_sapientia_glitch_01.wav",
+				"sfx_sapientia_glitch_02.wav"
+			],
+			"categorie": "sapientia",
+			"beschrijving": "Stem die haperend en digitaal vervormd klinkt, alsof de machine hapert.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 300
+		},
+		"sapientia_power_surge": {
+			"bestanden": [
+				"sfx_sapientia_power_surge_01.wav"
+			],
+			"categorie": "sapientia",
+			"beschrijving": "Golf van energie, tandwielen en koorstemmen; Sapientia grijpt in.",
+			"volume_db": -3,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 800
+		},
+		"sapientia_approve": {
+			"bestanden": [
+				"sfx_sapientia_approve_01.wav"
+			],
+			"categorie": "sapientia",
+			"beschrijving": "Zachte, warme klank, een goedkeurend 'ding' van de machine.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 400
+		}
+	}
+}

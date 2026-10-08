@@ -8,6 +8,29 @@ touch-knoppen voor je telefoon én **turn-based gevechten** met random encounter
 
 Getest met **Godot 4.3** en **Godot 4.7.2** (standaardversie, *niet* de .NET/C#-versie).
 
+**Nieuw in v0.18 (versie 0.18, code 20): rugaanzichten Moskonijn + Mech. Wachter, Codex-namen, audio-basis, design/lore + CANON.**
+- Rug-sprites van RPG ART (`/workspace/art_rug_v18/out`): `res://art/enemies/moskonijn_rug.png` (106x110, voeten
+  53,104) en `res://assets/sprites/enemies/mech_wachter_rug.png` (88x112, voeten 44,106); zelfde canvas, voetanker
+  (b/2, h-6) en grondschaduw (alpha 90) als de voorkant. `sprite_back` staat nu in `GameData.ENEMIES` voor beide, dus
+  een Codex-bondgenoot Moskonijn/Mech. Wachter gebruikt de echte rug i.p.v. de gespiegelde, donkere plaatsvervanger.
+  Alle Codex-soorten hebben nu een eigen rug (de plaatsvervanger in `codex_ally.gd` blijft als terugval). Beide in
+  `tools/handwerk.txt`.
+- Codex-scherm (patch RPG CODE, `code_codexnaam`): lijst 12 px breder (`LIST_W` 132), namen tot 13 tekens volledig
+  ('Wortelkruiper'), langer = 12 tekens + '.'.
+- `--codextest`: checks voor beide ruggen (pad, 106x110 / 88x112, anker, niet gespiegeld) + screenshots
+  `codex_bondgenoot_moskonijn` / `codex_bondgenoot_mech_wachter`. Versielabel v0.18.
+- **Audio (basis, nog zonder geluid):** autoload `AudioManager` (`scripts/audio_manager.gd`, uit Sapientia-Audio,
+  direct NA `Settings`; volume blijft van Settings: `music_volume`/`sfx_volume`). Manifest
+  `assets/audio/audio_manifest.json`, bestanden straks in `assets/audio/bgm/` en `assets/audio/sfx/` (nu leeg, alleen
+  een README). Zonder manifest of bestanden: stil, geen errors (`play_music`/`play_sfx` geven `false`). Nog niet
+  ingehaakt in kaart/gevecht. Beide export-presets hebben nu `include_filter="*.json"` zodat het manifest in de APK
+  zit (`docs/*` blijft uitgesloten). Arm64-preset: `export_path` = `../rpg_prototype_v0.18_arm64.apk`.
+- **Design + lore (alleen referentie, niet in de APK; `docs/.gdignore`):** `docs/design/` (Rangkuil-arena, andere
+  statschaal) en `docs/lore/` (worldbuilder: wereld, personages, Act 2-6, `data/*.json`) + `docs/lore/BOTSINGEN.md`.
+  **`docs/lore/CANON.md`** = de beslissingen van Dennis (gaan boven de worldbuilder): o.a. Noor alleen uit Esdoorn,
+  Opa blijft naamloos, Dennis = Hanger/Sleutel + Proefpersoon H-6 (twist), Golem = Het Kennis-Beest ('Kustos'),
+  roze = de Stroom / glitch = Zwarte Stroom, onze stats/namen blijven (lore-data alleen via converter).
+
 **Nieuw in v0.17 (versie 0.17, code 19): Esdoorn, Noor en het Donker Woud.**
 - **Esdoorn** (`scenes/maps/esdoorn.tscn` + `esdoorn_huis_noor.tscn`, `esdoorn_herberg.tscn`), Noors dorp op de
   wereldkaart; pas open na de Golem (`bewaker:archief_golemhal/golem`). Gebouwd door

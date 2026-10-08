@@ -12,7 +12,7 @@ config_version=5
 
 config/name="SAPIENTIA"
 config/description="Top-down JRPG prototype voor mobiel"
-config/version="0.17"
+config/version="0.18"
 run/main_scene="res://scenes/ui/title.tscn"
 config/features=PackedStringArray("4.3", "Mobile")
 config/icon="res://icon.png"
@@ -25,6 +25,7 @@ Dialog="*res://scenes/ui/dialog_box.tscn"
 Story="*res://scripts/story.gd"
 Crt="*res://scripts/ui/crt_overlay.gd"
 Settings="*res://scripts/settings.gd"
+AudioManager="*res://scripts/audio_manager.gd"
 
 [display]
 

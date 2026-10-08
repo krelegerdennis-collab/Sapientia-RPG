@@ -1,0 +1,560 @@
+{
+  "meta": {
+    "versie": "1.0",
+    "beschrijving": "30 unieke items (10 wapens, 10 armour, 10 potions), 5 per Archief. Zie README.md voor het schema en de lijst met effect-types.",
+    "aantal_items": 30,
+    "richtniveau_per_archief": {
+      "1": "L1-5",
+      "2": "L6-12",
+      "3": "L13-19",
+      "4": "L20-26",
+      "5": "L27-33",
+      "6": "L34-40"
+    }
+  },
+  "items": [
+    {
+      "id": "oefenzwaard_wachter",
+      "naam": "Oefenzwaard van de Wachter",
+      "type": "wapen",
+      "subtype": "zwaard",
+      "archief": 1,
+      "locatie_id": "wachtershuis",
+      "zeldzaamheid": "gewoon",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 6, "magie": 0, "verdediging": 0, "magische_verdediging": 0, "snelheid": 0, "hp": 0 },
+      "effecten": [],
+      "prijs_koop": 40,
+      "prijs_verkoop": 10,
+      "herkomst": { "soort": "startuitrusting", "bron": "ewout" },
+      "beschrijving": "Een stomp, afgesleten zwaard met een gekerfde 'E' in het gevest. Ewout liet Dennis er duizend keer mee op een strobaal slaan."
+    },
+    {
+      "id": "leerlingenstaf_noor",
+      "naam": "Leerlingenstaf van Noor",
+      "type": "wapen",
+      "subtype": "staf",
+      "archief": 1,
+      "locatie_id": "vergeten_archieven",
+      "zeldzaamheid": "uniek",
+      "equippable_by": ["noor"],
+      "stats": { "aanval": 2, "magie": 9, "verdediging": 0, "magische_verdediging": 2, "snelheid": 0, "hp": 0 },
+      "effecten": [
+        { "type": "element_bonus", "element": "vuur", "waarde_procent": 10 }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 0,
+      "herkomst": { "soort": "questitem", "bron": "ewout", "notitie": "Ewout geeft de staf aan Dennis aan het einde van Act 1, zodat Noor hem herkent. Wordt pas equipbaar zodra Noor zich bij de party voegt." },
+      "beschrijving": "Zwartgeblakerd hout met een roetvlek op het uiteinde. Noor liet hem achter toen ze vertrok. Ewout bewaarde hem acht jaar lang naast zijn bed."
+    },
+    {
+      "id": "wambuis_wachtershuis",
+      "naam": "Wambuis van het Wachtershuis",
+      "type": "armour",
+      "subtype": "licht",
+      "archief": 1,
+      "locatie_id": "wachtershuis",
+      "zeldzaamheid": "gewoon",
+      "equippable_by": ["dennis", "noor", "lotte"],
+      "stats": { "aanval": 0, "magie": 0, "verdediging": 4, "magische_verdediging": 1, "snelheid": 0, "hp": 10 },
+      "effecten": [],
+      "prijs_koop": 35,
+      "prijs_verkoop": 9,
+      "herkomst": { "soort": "startuitrusting", "bron": "ewout" },
+      "beschrijving": "Een gevoerd leren wambuis dat naar rook en appelhout ruikt. Warm genoeg voor het Stilwoud, te dun voor al het andere."
+    },
+    {
+      "id": "wachters_kruidenthee",
+      "naam": "Wachters Kruidenthee",
+      "type": "potion",
+      "subtype": "genezing",
+      "archief": 1,
+      "locatie_id": "hazelbrug",
+      "zeldzaamheid": "gewoon",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "heal_hp", "waarde": 40, "doel": "een_bondgenoot" }
+      ],
+      "prijs_koop": 15,
+      "prijs_verkoop": 4,
+      "herkomst": { "soort": "winkel", "bron": "tante_mien" },
+      "beschrijving": "Munt, tijm en een snuf eikenschors, in een stenen flesje dat nog warm aanvoelt. Ewouts huisrecept."
+    },
+    {
+      "id": "gloeiende_inktfles",
+      "naam": "Gloeiende Inktfles",
+      "type": "potion",
+      "subtype": "buff",
+      "archief": 1,
+      "locatie_id": "vergeten_archieven",
+      "zeldzaamheid": "ongewoon",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "buff", "stat": "aanval", "waarde_procent": 25, "beurten": 3, "doel": "een_bondgenoot" }
+      ],
+      "prijs_koop": 45,
+      "prijs_verkoop": 12,
+      "herkomst": { "soort": "drop", "bron": "inktwurm", "kans": 0.12 },
+      "beschrijving": "Inkt uit de archieven die zachtjes licht geeft. Wie ervan drinkt, ziet even elk gevecht als een zin die al geschreven is."
+    },
+    {
+      "id": "ketelsmid_kling",
+      "naam": "Ketelsmid-Kling",
+      "type": "wapen",
+      "subtype": "zwaard",
+      "archief": 2,
+      "locatie_id": "slakkenburg",
+      "zeldzaamheid": "ongewoon",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 26, "magie": 0, "verdediging": 0, "magische_verdediging": 0, "snelheid": 0, "hp": 0 },
+      "effecten": [
+        { "type": "bonus_vs_type", "vijand_type": "mechanisch", "waarde_procent": 25 }
+      ],
+      "prijs_koop": 420,
+      "prijs_verkoop": 105,
+      "herkomst": { "soort": "winkel", "bron": "bas_ratelaar" },
+      "beschrijving": "Gesmeed uit een ketelwand van Ferrovar. De rand is zo scherp gevijld dat roest er bijna van terugdeinst."
+    },
+    {
+      "id": "resonantie_stemvork",
+      "naam": "Resonantiestemvork",
+      "type": "wapen",
+      "subtype": "focus",
+      "archief": 2,
+      "locatie_id": "slakkenburg",
+      "zeldzaamheid": "ongewoon",
+      "equippable_by": ["lotte"],
+      "stats": { "aanval": 3, "magie": 24, "verdediging": 0, "magische_verdediging": 4, "snelheid": 1, "hp": 0 },
+      "effecten": [
+        { "type": "heal_bonus", "waarde_procent": 15 }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 90,
+      "herkomst": { "soort": "quest_beloning", "bron": "q_slakkenburg_stoomhart", "notitie": "Odile Kramp schenkt de stemvork aan Lotte." },
+      "beschrijving": "Een stemvork die Lotte laat zingen in plaats van spreken. Machines luisteren ernaar. Soms gehoorzamen ze zelfs."
+    },
+    {
+      "id": "schrootplaten_harnas",
+      "naam": "Schrootplaten Harnas",
+      "type": "armour",
+      "subtype": "zwaar",
+      "archief": 2,
+      "locatie_id": "slakkenburg",
+      "zeldzaamheid": "gewoon",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 0, "magie": 0, "verdediging": 18, "magische_verdediging": 4, "snelheid": -2, "hp": 25 },
+      "effecten": [],
+      "prijs_koop": 380,
+      "prijs_verkoop": 95,
+      "herkomst": { "soort": "winkel", "bron": "bas_ratelaar" },
+      "beschrijving": "Platen van oude machinebehuizingen, vastgeklonken met koperdraad. Elke deuk heeft een naam, volgens Bas Ratelaar."
+    },
+    {
+      "id": "werkmansmantel_koperdraad",
+      "naam": "Werkmansmantel met Koperdraad",
+      "type": "armour",
+      "subtype": "licht",
+      "archief": 2,
+      "locatie_id": "ferrovar",
+      "zeldzaamheid": "ongewoon",
+      "equippable_by": ["noor", "lotte"],
+      "stats": { "aanval": 0, "magie": 4, "verdediging": 8, "magische_verdediging": 16, "snelheid": 0, "hp": 15 },
+      "effecten": [
+        { "type": "weerstand", "element": "bliksem", "waarde_procent": 25 }
+      ],
+      "prijs_koop": 360,
+      "prijs_verkoop": 90,
+      "herkomst": { "soort": "kist", "bron": "ferrovar_ketelkamp" },
+      "beschrijving": "Een vettige overall waarin kopergaren is genaaid. De Ketelkamp-monteurs zweren dat het blikseminslagen afleidt."
+    },
+    {
+      "id": "smeerolie_ampul",
+      "naam": "Smeerolie-ampul",
+      "type": "potion",
+      "subtype": "status",
+      "archief": 2,
+      "locatie_id": "ferrovar",
+      "zeldzaamheid": "gewoon",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "cure", "status": "roest", "doel": "een_bondgenoot" },
+        { "type": "buff", "stat": "snelheid", "waarde_procent": 15, "beurten": 3, "doel": "een_bondgenoot" }
+      ],
+      "prijs_koop": 60,
+      "prijs_verkoop": 15,
+      "herkomst": { "soort": "drop", "bron": "roestkruiper", "kans": 0.2 },
+      "beschrijving": "Dikke gele olie met een glinstering van metaalsnippers. Haalt roest uit gewrichten, ook uit menselijke."
+    },
+    {
+      "id": "scepter_zwevende_steen",
+      "naam": "Scepter van de Zwevende Steen",
+      "type": "wapen",
+      "subtype": "staf",
+      "archief": 3,
+      "locatie_id": "zwevende_tempel",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["noor"],
+      "stats": { "aanval": 4, "magie": 58, "verdediging": 0, "magische_verdediging": 10, "snelheid": 0, "hp": 0 },
+      "effecten": [
+        { "type": "mp_regen", "waarde": 3, "per": "beurt" }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 600,
+      "herkomst": { "soort": "drop", "bron": "boss_isolde_weefster", "kans": 1.0, "notitie": "Isolde draagt de Scepter met haar laatste woorden over aan Noor." },
+      "beschrijving": "Een kristal dat zonder steun boven de staf zweeft en zachtjes meebeweegt met Noors ademhaling."
+    },
+    {
+      "id": "wolkenzijde_gewaad",
+      "naam": "Wolkenzijde Gewaad",
+      "type": "armour",
+      "subtype": "licht",
+      "archief": 3,
+      "locatie_id": "hemelvoet",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["noor", "lotte"],
+      "stats": { "aanval": 0, "magie": 8, "verdediging": 12, "magische_verdediging": 38, "snelheid": 3, "hp": 30 },
+      "effecten": [
+        { "type": "weerstand", "element": "wind", "waarde_procent": 30 }
+      ],
+      "prijs_koop": 980,
+      "prijs_verkoop": 245,
+      "herkomst": { "soort": "winkel", "bron": "zuster_amara" },
+      "beschrijving": "Geweven van de wol van wolkenschapen. Het gewicht van een gedachte, de warmte van een omhelzing."
+    },
+    {
+      "id": "borstplaat_tempelwachter",
+      "naam": "Borstplaat van de Tempelwachter",
+      "type": "armour",
+      "subtype": "zwaar",
+      "archief": 3,
+      "locatie_id": "zwevende_tempel",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 0, "magie": 0, "verdediging": 40, "magische_verdediging": 22, "snelheid": -1, "hp": 50 },
+      "effecten": [],
+      "prijs_koop": 0,
+      "prijs_verkoop": 520,
+      "herkomst": { "soort": "drop", "bron": "zwevend_beeld", "kans": 0.1 },
+      "beschrijving": "Van een zwevend beeld getrokken. Het metaal is licht als kurk en hard als een eed."
+    },
+    {
+      "id": "stroomdrank",
+      "naam": "Stroomdrank",
+      "type": "potion",
+      "subtype": "mana",
+      "archief": 3,
+      "locatie_id": "hemelvoet",
+      "zeldzaamheid": "ongewoon",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "restore_mp", "waarde": 80, "doel": "een_bondgenoot" }
+      ],
+      "prijs_koop": 140,
+      "prijs_verkoop": 35,
+      "herkomst": { "soort": "winkel", "bron": "zuster_amara" },
+      "beschrijving": "Vloeibaar licht, gebotteld bij de bron onder het Windklooster. Het tintelt in je tanden."
+    },
+    {
+      "id": "windwater_flesje",
+      "naam": "Windwater",
+      "type": "potion",
+      "subtype": "status",
+      "archief": 3,
+      "locatie_id": "hemelvoet",
+      "zeldzaamheid": "ongewoon",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "cure", "status": "stilte", "doel": "een_bondgenoot" },
+        { "type": "buff", "stat": "ontwijking", "waarde_procent": 30, "beurten": 3, "doel": "een_bondgenoot" }
+      ],
+      "prijs_koop": 110,
+      "prijs_verkoop": 28,
+      "herkomst": { "soort": "drop", "bron": "wilde_stroomgeest", "kans": 0.15 },
+      "beschrijving": "Een flesje met een mini-storm erin. Wie het opent, ademt even als een vogel."
+    },
+    {
+      "id": "chirurgenzwaard_incisie",
+      "naam": "Incisie",
+      "type": "wapen",
+      "subtype": "zwaard",
+      "archief": 4,
+      "locatie_id": "ondergronds_laboratorium",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 62, "magie": 0, "verdediging": 0, "magische_verdediging": 0, "snelheid": 2, "hp": 0 },
+      "effecten": [
+        { "type": "lifesteal", "waarde_procent": 8 }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 1100,
+      "herkomst": { "soort": "kist", "bron": "lab_operatiezaal" },
+      "beschrijving": "Een zwaard dat is uitgedacht als scalpel. Het snijdt zo schoon dat de wond pas na een seconde beseft dat hij er is."
+    },
+    {
+      "id": "levensdraad_staf",
+      "naam": "Staf van de Levensdraad",
+      "type": "wapen",
+      "subtype": "staf",
+      "archief": 4,
+      "locatie_id": "ondergronds_laboratorium",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["lotte"],
+      "stats": { "aanval": 2, "magie": 70, "verdediging": 0, "magische_verdediging": 14, "snelheid": 2, "hp": 0 },
+      "effecten": [
+        { "type": "heal_bonus", "waarde_procent": 25 }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 1050,
+      "herkomst": { "soort": "kist", "bron": "lab_wiegekamer", "notitie": "Ligt naast de capsule met label L-22." },
+      "beschrijving": "Een staf als een ruggengraat, met glazen wervels waarin een warme gloed pulseert. Lotte wil hem eerst niet aanraken."
+    },
+    {
+      "id": "biochitine_harnas",
+      "naam": "Biochitine Harnas",
+      "type": "armour",
+      "subtype": "zwaar",
+      "archief": 4,
+      "locatie_id": "ondergronds_laboratorium",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 0, "magie": 0, "verdediging": 66, "magische_verdediging": 40, "snelheid": 0, "hp": 80 },
+      "effecten": [
+        { "type": "hp_regen", "waarde": 6, "per": "beurt" }
+      ],
+      "prijs_koop": 2400,
+      "prijs_verkoop": 600,
+      "herkomst": { "soort": "winkel", "bron": "freule_lamp" },
+      "beschrijving": "Platen van gekweekt chitine die langzaam meegroeien met de drager. Het jeukt. Het beschermt wel."
+    },
+    {
+      "id": "regeneratieserum",
+      "naam": "Regeneratieserum",
+      "type": "potion",
+      "subtype": "genezing",
+      "archief": 4,
+      "locatie_id": "diepwaard",
+      "zeldzaamheid": "ongewoon",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "heal_hp", "waarde": 300, "doel": "een_bondgenoot" },
+        { "type": "hp_regen_buff", "waarde_procent": 5, "beurten": 3, "doel": "een_bondgenoot" }
+      ],
+      "prijs_koop": 320,
+      "prijs_verkoop": 80,
+      "herkomst": { "soort": "winkel", "bron": "freule_lamp" },
+      "beschrijving": "Roze en dik als siroop, naar de belofte van Dr. Nulle 'volkomen veilig'. Het werkt ook echt. Dat is het enge."
+    },
+    {
+      "id": "antiserum_nul",
+      "naam": "Antiserum Nul",
+      "type": "potion",
+      "subtype": "status",
+      "archief": 4,
+      "locatie_id": "ondergronds_laboratorium",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "cure_alle", "doel": "een_bondgenoot" },
+        { "type": "immuniteit", "status": "correctie", "beurten": 5, "doel": "een_bondgenoot" }
+      ],
+      "prijs_koop": 500,
+      "prijs_verkoop": 125,
+      "herkomst": { "soort": "quest_beloning", "bron": "q_diepwaard_verdwijningen", "notitie": "Maximaal 3 stuks; vervolgvoorraad ligt in het laboratorium." },
+      "beschrijving": "Een kleurloze vloeistof in een verzegelde ampul. Op het etiket staat met de hand geschreven: 'Voor als je jezelf kwijtraakt.'"
+    },
+    {
+      "id": "perihelium_zwaard",
+      "naam": "Perihelium",
+      "type": "wapen",
+      "subtype": "zwaard",
+      "archief": 5,
+      "locatie_id": "sterrenobservatorium",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 98, "magie": 12, "verdediging": 0, "magische_verdediging": 0, "snelheid": 3, "hp": 0 },
+      "effecten": [
+        { "type": "crit_kans", "waarde_procent": 12 }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 2000,
+      "herkomst": { "soort": "kist", "bron": "observatorium_kaartenzaal" },
+      "beschrijving": "Een klinge van sterrenstaal die in het donker de contouren van sterrenbeelden toont."
+    },
+    {
+      "id": "astrolabium_staf",
+      "naam": "Astrolabiumstaf",
+      "type": "wapen",
+      "subtype": "staf",
+      "archief": 5,
+      "locatie_id": "sterrenobservatorium",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["noor"],
+      "stats": { "aanval": 5, "magie": 112, "verdediging": 0, "magische_verdediging": 20, "snelheid": 0, "hp": 0 },
+      "effecten": [
+        { "type": "element_bonus", "element": "licht", "waarde_procent": 20 },
+        { "type": "element_bonus", "element": "vuur", "waarde_procent": 20 }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 2100,
+      "herkomst": { "soort": "drop", "bron": "boss_perihelia_sterrenziener", "kans": 1.0 },
+      "beschrijving": "Draaiende ringen van messing rond een glazen kern. Als Noor erin kijkt, ziet ze Brandwijk, en dan de sterren erachter."
+    },
+    {
+      "id": "kosmische_mantel",
+      "naam": "Mantel van de Koude Sterren",
+      "type": "armour",
+      "subtype": "licht",
+      "archief": 5,
+      "locatie_id": "sterrenrust",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["noor", "lotte"],
+      "stats": { "aanval": 0, "magie": 15, "verdediging": 20, "magische_verdediging": 74, "snelheid": 4, "hp": 60 },
+      "effecten": [
+        { "type": "weerstand", "element": "duisternis", "waarde_procent": 30 }
+      ],
+      "prijs_koop": 3200,
+      "prijs_verkoop": 800,
+      "herkomst": { "soort": "winkel", "bron": "madame_celeste" },
+      "beschrijving": "Donkerblauwe stof waarop de sterren van de eerste nacht zijn geborduurd. Ze verschuiven als je niet kijkt."
+    },
+    {
+      "id": "maanzilver_harnas",
+      "naam": "Maanzilver Harnas",
+      "type": "armour",
+      "subtype": "zwaar",
+      "archief": 5,
+      "locatie_id": "sterrenobservatorium",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 0, "magie": 0, "verdediging": 92, "magische_verdediging": 60, "snelheid": 1, "hp": 110 },
+      "effecten": [
+        { "type": "weerstand", "element": "duisternis", "waarde_procent": 20 }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 1900,
+      "herkomst": { "soort": "drop", "bron": "lenswachter", "kans": 0.08 },
+      "beschrijving": "Zilver dat in het maanlicht bijna doorzichtig wordt. Het harnas lijkt je te kennen."
+    },
+    {
+      "id": "sterrenstof_elixer",
+      "naam": "Sterrenstof-elixer",
+      "type": "potion",
+      "subtype": "herleving",
+      "archief": 5,
+      "locatie_id": "sterrenrust",
+      "zeldzaamheid": "zeldzaam",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "revive", "hp_procent": 50, "doel": "een_gevallen_bondgenoot" },
+        { "type": "restore_mp", "waarde": 50, "doel": "een_gevallen_bondgenoot" }
+      ],
+      "prijs_koop": 900,
+      "prijs_verkoop": 225,
+      "herkomst": { "soort": "winkel", "bron": "madame_celeste" },
+      "beschrijving": "Glinsterend poeder opgelost in regenwater. 'Niemand sterft helemaal, zolang iemand naar boven kijkt', zegt Madame Celeste."
+    },
+    {
+      "id": "memoria_zwaard",
+      "naam": "Memoria",
+      "type": "wapen",
+      "subtype": "zwaard",
+      "archief": 6,
+      "locatie_id": "onbekende_kern",
+      "zeldzaamheid": "legendarisch",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 150, "magie": 40, "verdediging": 0, "magische_verdediging": 10, "snelheid": 4, "hp": 0 },
+      "effecten": [
+        { "type": "bond_schaal", "stat": "aanval", "waarde_procent_per_bandpunt": 2, "max_bandpunten": 10 },
+        { "type": "bonus_vs_type", "vijand_type": "gevoelloos", "waarde_procent": 30 }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 0,
+      "herkomst": { "soort": "verhaal", "bron": "onbekende_kern_herinneringskamer_vreugde", "notitie": "Gevormd uit Ewouts Echo en Dennis' hanger. Niet verkoopbaar." },
+      "beschrijving": "Het zwaard van de Eerste Wachter. Het is gemaakt van herinneringen en slaat harder naarmate je meer van de mensen om je heen houdt."
+    },
+    {
+      "id": "mantel_gedeelde_herinneringen",
+      "naam": "Mantel van Gedeelde Herinneringen",
+      "type": "armour",
+      "subtype": "licht",
+      "archief": 6,
+      "locatie_id": "onbekende_kern",
+      "zeldzaamheid": "legendarisch",
+      "equippable_by": ["noor", "lotte"],
+      "stats": { "aanval": 0, "magie": 25, "verdediging": 34, "magische_verdediging": 110, "snelheid": 5, "hp": 90 },
+      "effecten": [
+        { "type": "weerstand", "element": "alle", "waarde_procent": 15 },
+        { "type": "status_immuniteit", "status": "correctie" }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 3000,
+      "herkomst": { "soort": "kist", "bron": "onbekende_kern_herinneringskamer_liefde" },
+      "beschrijving": "Een mantel die uit elke draad een andere herinnering lijkt te fluisteren. Alle herinneringen zijn warm."
+    },
+    {
+      "id": "tranenpantser_zoutwacht",
+      "naam": "Tranenpantser van Zoutwacht",
+      "type": "armour",
+      "subtype": "zwaar",
+      "archief": 6,
+      "locatie_id": "zoutwacht",
+      "zeldzaamheid": "legendarisch",
+      "equippable_by": ["dennis"],
+      "stats": { "aanval": 0, "magie": 0, "verdediging": 118, "magische_verdediging": 96, "snelheid": 0, "hp": 140 },
+      "effecten": [
+        { "type": "status_immuniteit", "status": "correctie" },
+        { "type": "hp_regen", "waarde": 10, "per": "beurt" }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 3500,
+      "herkomst": { "soort": "quest_beloning", "bron": "q_zoutwacht_traan", "notitie": "Gesmeed door de dorpssmid uit zeezout en de eerste tranen sinds jaren." },
+      "beschrijving": "Wit als zoutkorst, sterk als een belofte. Wie het draagt, mag weer huilen zonder zich te schamen."
+    },
+    {
+      "id": "traan_van_zoutwacht",
+      "naam": "Traan van Zoutwacht",
+      "type": "potion",
+      "subtype": "herleving",
+      "archief": 6,
+      "locatie_id": "zoutwacht",
+      "zeldzaamheid": "legendarisch",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "revive", "hp_procent": 100, "doel": "een_gevallen_bondgenoot" },
+        { "type": "restore_mp", "waarde": 100, "doel": "een_gevallen_bondgenoot" }
+      ],
+      "prijs_koop": 2500,
+      "prijs_verkoop": 600,
+      "herkomst": { "soort": "winkel", "bron": "dirkje_zeewind", "notitie": "Beperkte voorraad: 5 stuks na q_zoutwacht_traan." },
+      "beschrijving": "Een druppel zout water in een kristallen flesje. Het gewicht van een heel leven zit erin."
+    },
+    {
+      "id": "hartenessence",
+      "naam": "Essentie van de Herinnering",
+      "type": "potion",
+      "subtype": "groepsgenezing",
+      "archief": 6,
+      "locatie_id": "onbekende_kern",
+      "zeldzaamheid": "legendarisch",
+      "equippable_by": [],
+      "stats": {},
+      "effecten": [
+        { "type": "heal_hp_procent", "waarde": 50, "doel": "hele_party" },
+        { "type": "cure_alle", "doel": "hele_party" }
+      ],
+      "prijs_koop": 0,
+      "prijs_verkoop": 800,
+      "herkomst": { "soort": "drop", "bron": "echo_van_verdriet", "kans": 0.1 },
+      "beschrijving": "Een heldere vloeistof waarin soms een lachend gezicht voorbijdrijft. Niemand herkent het, iedereen mist het."
+    }
+  ]
+}

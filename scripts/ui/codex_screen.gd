@@ -9,7 +9,8 @@ const CodexData := preload("res://scripts/data/codex_data.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const TargetList := preload("res://scripts/ui/target_list.gd")
 
-const LIST_W := 120
+const LIST_W := 132
+const NAME_W := 13         # tekens voor de naam in de lijst; langste soort is "Wortelkruiper"
 const NONE_ID := ""
 const HINT := "A: bondgenoot kiezen   B: terug"
 
@@ -112,9 +113,9 @@ func entry_label(uid: String) -> String:
 	var p := GameState.codex_page(uid)
 	var mark := "* " if GameState.codex_active == uid else "  "
 	var n := str(p["name"])
-	if n.length() > 12:
-		n = n.substr(0, 12)
-	return "%s%s Lv%d" % [mark, n.rpad(12), int(p["level"])]
+	if n.length() > NAME_W:
+		n = n.substr(0, NAME_W - 1) + "."
+	return "%s%s Lv%d" % [mark, n.rpad(NAME_W), int(p["level"])]
 
 
 func entry_text(i: int) -> String:

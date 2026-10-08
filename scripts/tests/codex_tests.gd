@@ -353,7 +353,7 @@ func flee(b: Node) -> void:
 func _data_tests() -> void:
 	var errs := CD.validate()
 	check("CodexData.validate zonder fouten %s" % [errs], errs.is_empty())
-	for id in ["mosslijm", "papiergeest", "glitchmot", "kennis_beest"]:
+	for id in ["mosslijm", "moskonijn", "papiergeest", "glitchmot", "mech_wachter", "kennis_beest"]:   # v0.18: + moskonijn/mech_wachter
 		var s := CD.species(id)
 		check("soort %s: basis = ENEMIES (HP %d), groei, leert, AI, voor+rug, element, fusie-labels" % [id, CD.base_stats(id)["max_hp"]],
 				not s.is_empty() and CD.base_stats(id)["max_hp"] == int(GD.ENEMIES[s["enemy"]]["max_hp"])
@@ -377,9 +377,25 @@ func _data_tests() -> void:
 	check("De Wortelkoning: geen Codex-soort, kans 0 (ook buiten een baasgevecht)", CD.species_for_enemy("wortelkoning") == ""
 			and CD.capture_chance("wortelkoning", 1, 440) == 0.0 and CD.capture_chance("wortelkoning", 1, 440, true) == 0.0)
 	var mini := CD.species_from("nieuw", {"enemy": "moskonijn"})
-	check("nieuwe soort met alleen {'enemy'}: standaard groei/leert/AI, rug uit ENEMIES (moskonijn: geen -> plaatsvervanger)", mini["growth"] == CD.DEFAULT_GROWTH
+	# v0.18: de Moskonijn heeft nu een echte rug (RPG ART art_rug_v18), geen plaatsvervanger meer
+	check("nieuwe soort met alleen {'enemy'}: standaard groei/leert/AI, rug uit ENEMIES (moskonijn: moskonijn_rug.png)", mini["growth"] == CD.DEFAULT_GROWTH
 			and mini["learn"] == CD.DEFAULT_LEARN and mini["ai"]["target"] == CD.DEFAULT_AI["target"]
-			and mini["back"] == "" and mini["name"] == "Moskonijn" and mini["capturable"] == true)
+			and mini["back"] == "res://art/enemies/moskonijn_rug.png" and mini["name"] == "Moskonijn" and mini["capturable"] == true)
+	var mini_mw := CD.species_from("nieuw2", {"enemy": "mech_wachter"})
+	check("nieuwe soort {'enemy': 'mech_wachter'}: rug uit ENEMIES (mech_wachter_rug.png)", mini_mw["back"] == "res://assets/sprites/enemies/mech_wachter_rug.png"
+			and mini_mw["name"] == "Mech. Wachter")
+	var rug_sizes := {}
+	for rid in ["moskonijn", "mech_wachter"]:
+		var rp := str(CD.species(rid)["back"])
+		rug_sizes[rid] = (load(rp) as Texture2D).get_size() if ResourceLoader.exists(rp) else Vector2.ZERO
+	check("v0.18 rug-sprites geladen: Moskonijn 106x110, Mech. Wachter 88x112 %s" % [rug_sizes], rug_sizes["moskonijn"] == Vector2(106, 110)
+			and rug_sizes["mech_wachter"] == Vector2(88, 112))
+	var zonder_rug: Array = []
+	for k in CD.SPECIES:
+		var kb := str(CD.species(k)["back"])
+		if kb == "" or not ResourceLoader.exists(kb):
+			zonder_rug.append(k)
+	check("v0.18 alle Codex-soorten hebben een eigen rug (geen plaatsvervanger meer; zonder: %s)" % [zonder_rug], zonder_rug.is_empty())
 	check("onbekende vijand -> geen soort", CD.species_from("x", {"enemy": "bestaat_niet"}).is_empty() and CD.species_for_enemy("bestaat_niet") == "")
 	# vangkans-curve
 	var curve: Array = []
@@ -607,6 +623,32 @@ func _ally_tests() -> void:
 	check("Kennis-Beest als bondgenoot: %.1f eenheden hoog (= 182 x 0,375), echte art" % kh, not kn.placeholder and absf(kh - 182.0 * 0.375) < 0.6)
 	await screenshot("codex_bondgenoot_kennisbeest")
 	await flee(b)
+	# v0.18: Moskonijn en Mech. Wachter met hun echte rugaanzicht (art_rug_v18), niet meer gespiegeld/donker
+	for rid in ["moskonijn", "mech_wachter"]:
+		var rpage := GameState.codex_add(rid, 3)
+		GameState.codex_set_active(rpage["uid"])
+		b = await start_battle(["papiergeest"])
+		if b == null:
+			check("gevecht met %s als bondgenoot" % rid, false)
+			return
+		await wait_battle_state(["command"])
+		await pframes(10)
+		var ra := ally_c(b)
+		if ra.is_empty():
+			check("%s als bondgenoot in het gevecht" % rid, false)
+			await flee(b)
+			continue
+		var rn: Control = ra["node"]
+		var rspr: Sprite2D = rn._sprite
+		var rtex_size: Vector2 = rspr.texture.get_size() if rspr.texture != null else Vector2.ZERO
+		var rfeet: float = rn.art_rect(rn.home).end.y - rn.home.y
+		var rcx: float = rn.art_rect(rn.home).get_center().x - rn.home.x
+		check("v0.18 %s als bondgenoot: echte rug-sprite (%s, %s), niet gespiegeld/donker, voeten op H-6 (%.1f), midden (%.1f)" % [rid, rn.texture_path, rtex_size, rfeet, rcx],
+				not rn.placeholder and rn.texture_path == str(GD.ENEMIES[rid]["sprite_back"]) and not rspr.flip_h
+				and rspr.modulate == Color.WHITE and rtex_size == (load(str(GD.ENEMIES[rid]["sprite"])) as Texture2D).get_size()
+				and absf(rfeet - CD.FEET_FROM_BOTTOM * CD.ALLY_ART_SCALE) < 1.01 and absf(rcx) <= 1.0)
+		await screenshot("codex_bondgenoot_" + rid)
+		await flee(b)
 
 
 # ================================================================ deel D: Codex-scherm
@@ -631,6 +673,7 @@ func _screen_tests() -> void:
 	var p1 := GameState.codex_add("mosslijm", 3)
 	var p2 := GameState.codex_add("glitchmot", 2)
 	GameState.codex_add("kennis_beest", 5)
+	GameState.codex_add("wortelkruiper", 12)   # langste naam (13 tekens) + level met 2 cijfers
 	p2["hp"] = 7
 	await tap("menu")
 	await frames(3)
@@ -650,8 +693,21 @@ func _screen_tests() -> void:
 	var texts: Array = []
 	for i in s.entries.size():
 		texts.append(s.entry_text(i))
-	check("lijst: 3 pagina's + 'Geen', '*' = bondgenoot %s" % [texts], s.entries.size() == 4 and texts[0].begins_with("* Mosslijm")
-			and "Lv3" in texts[0] and "Kennis-Beest" in texts[2] and texts[3].ends_with("Geen bondgenoot") and s.entries[0].has_focus())
+	check("lijst: 4 pagina's + 'Geen', '*' = bondgenoot %s" % [texts], s.entries.size() == 5 and texts[0].begins_with("* Mosslijm")
+			and "Lv3" in texts[0] and "Kennis-Beest" in texts[2] and texts[4].ends_with("Geen bondgenoot") and s.entries[0].has_focus())
+	check("lange naam niet afgekapt: '%s'" % texts[3], "Wortelkruiper Lv12" in texts[3])
+	var past := true
+	for e in s.entries:
+		var f: Font = e.get_theme_font("font")
+		var w: float = f.get_string_size(e.text, HORIZONTAL_ALIGNMENT_LEFT, -1, e.get_theme_font_size("font_size")).x
+		if w > e.size.x or e.get_global_rect().end.x > s.name_label.get_global_rect().position.x:
+			past = false
+	check("alle regels passen in de lijst, niet over de details heen", past)
+	var oud: String = p1["name"]
+	p1["name"] = "Bibliotheekwachter"
+	var kort: String = s.entry_label(p1["uid"])
+	p1["name"] = oud
+	check("naam langer dan 13 tekens: afgekort met '.' ('%s')" % kort, "Bibliotheekw. Lv3" in kort)
 	check("details: level, stats, vaardigheden", "Lv 3" in s.name_label.text and "ATK %d" % int(p1["atk"]) in s.stats_label.text
 			and "Mosheling" in s.skills_label.text and "Vecht mee" in s.state_label.text)
 	check("tikvlakken >= 16 hoog (mobiel)", s.entries.all(func(x): return x.size.y >= 16))
@@ -661,8 +717,8 @@ func _screen_tests() -> void:
 	check("A op Glitchmot: nu de bondgenoot", GameState.codex_active == p2["uid"] and s.entry_text(1).begins_with("* Glitchmot")
 			and s.entry_text(0).begins_with("  Mosslijm") and "HP 7/" in s.stats_label.text)
 	await screenshot("codex_scherm")
-	await click(s.entries[3])
-	check("tik op 'Geen bondgenoot': niemand vecht mee", GameState.codex_active == "" and s.entry_text(3).begins_with("* Geen"))
+	await click(s.entries[4])
+	check("tik op 'Geen bondgenoot': niemand vecht mee", GameState.codex_active == "" and s.entry_text(4).begins_with("* Geen"))
 	await click(s.entries[0])
 	check("tik op Mosslijm: weer bondgenoot", GameState.codex_active == p1["uid"])
 	await tap("cancel")
