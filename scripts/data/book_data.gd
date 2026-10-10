@@ -27,6 +27,16 @@ const TYPES := {
 		"save": true,
 		"question": "Het boek gloeit zacht. Voortgang opslaan?",
 	},
+	# 100-verdiepingen-kerker: het rustpunt (scripts/dungeon/dungeon100_rustpunt.gd) is een boekpunt
+	# met een gouden gloed. Voorlopig het plaatje van het opslagboek (warm getint in code).
+	"rustpunt": {
+		"texture": "res://assets/sprites/save_book.png",
+		"aura": Color("f0c674"),
+		"hp": true, "mp": true,
+		"line": "Een warme gloed herstelt je krachten en je geest.",
+		"save": true,
+		"question": "Het rustpunt gloeit zacht. Voortgang opslaan?",
+	},
 	"mp": {
 		"texture": "res://assets/sprites/mp_book.png",
 		"aura": Color("3fff7a"),
