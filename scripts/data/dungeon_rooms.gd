@@ -612,9 +612,12 @@ static func woud() -> Script:
 
 
 ## v0.17 Kamerdata van ELKE dungeon: eerst de Archieven (ROOMS), dan het Donker Woud ({} = onbekend).
+## Dungeon100 (de Diepe Grot): id "dungeon100_<seed>_<verdieping>" wordt gegenereerd (dungeon100_generator.gd).
 static func room(room_id: String) -> Dictionary:
 	if ROOMS.has(room_id):
 		return ROOMS[room_id]
+	if room_id.begins_with("dungeon100_"):
+		return load("res://scripts/dungeon/dungeon100_generator.gd").room_for_id(room_id)
 	return woud().ROOMS.get(room_id, {})
 
 
