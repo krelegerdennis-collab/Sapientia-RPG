@@ -98,6 +98,8 @@ var pending_boss := false
 ## v0.14: monsterniveau (tier) voor het volgende gevecht: 0 = gewoon (wereldkaart), 1-4 = de
 ## verdieping van het Eerste Archief (game_data.gd TIERS). Alleen gezet door een dungeonkamer.
 var pending_tier := 0
+## Huidige verdieping van de dungeon van 100 verdiepingen: 1..100, 0 = niet in de dungeon.
+var dungeon100_floor: int = 0
 
 ## De vijandgroep voor het volgende gevecht (Array van vijand-id's).
 var pending_enemies: Array = []
@@ -150,6 +152,7 @@ func _ready() -> void:
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
 			["--puzzletest", "res://scripts/tests/puzzle_tests.gd", "PuzzleTest", "puzzletest"],
+			["--dungeon100test", "res://scripts/tests/dungeon100_schaal_tests.gd", "Dungeon100Test", "dungeon100test"],
 			["--dungeontest", "res://scripts/tests/dungeon_tests.gd", "DungeonTest", "dungeontest"],
 			["--golemtest", "res://scripts/tests/golem_tests.gd", "GolemTest", "golemtest"],
 			["--archieftest", "res://scripts/tests/archief_tests.gd", "GeheimTest", "archieftest"],
