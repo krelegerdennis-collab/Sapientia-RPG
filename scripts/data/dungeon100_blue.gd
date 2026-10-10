@@ -5,9 +5,9 @@ extends RefCounted
 ##
 ## LORE (voorstel, wacht op Dennis; botst niet met docs/lore/CANON.md): de Diepe Grot is geen echte grot
 ## maar een trainingsomgeving van de Oude Mensheid, een simulatie binnen een Archief die de Zwarte Stroom
-## van Sapientia heeft aangetast. Wie valt wordt 'teruggezet': levels en spullen van de run verdwijnen,
-## want ze bestonden alleen in de simulatie. Een BLAUWE KIST is een databank die de simulatie
-## overleeft: wat erin zit is permanent.
+## van Sapientia heeft aangetast. Wie valt is de simulatie uit: je staat weer voor de ingang, levels en
+## spullen van de run verdwijnen (ze bestonden alleen in de simulatie). Een BLAUWE KIST is een databank
+## die dat overleeft: wat erin zit is permanent.
 ##
 ## Regels:
 ##   - elke kist op een verdieping is deterministisch (run-seed + verdieping + kist-id) gewoon,
@@ -24,7 +24,7 @@ const KIND_BLUE := "blauw"
 const KIND_MIMIC := "mimic"
 
 const BLUE_CHANCE := 0.05
-const MIMIC_CHANCE := 0.08
+const MIMIC_CHANCE := 0.10
 const MIMIC_GOLD_MULT := 2.0
 const MIMIC_ENEMY := "mimic"
 ## Warp-kristal: buit van de eindbaas (verdieping 100), sleutel-voorwerp in GameData.KEY_ITEMS.

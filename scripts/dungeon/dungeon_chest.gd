@@ -144,7 +144,7 @@ func _give_loot(intro: Array) -> void:
 			_secure_blue()
 			last_result = "blauw"
 			lines.append("Een Blauwe Kist! Een databank van de Oude Mensheid.")
-			lines.append("{naam} vindt: %s! Dit blijft bewaard, ook als de simulatie wordt teruggezet." % Dungeon100Scaling.loot_text(loot))
+			lines.append("{naam} vindt: %s! Dit blijft bewaard, ook als je het Archief uit wordt gezet." % Dungeon100Scaling.loot_text(loot))
 		else:
 			lines.append("{naam} vindt: %s!" % Dungeon100Scaling.loot_text(loot))
 		Dialog.show_lines(lines)

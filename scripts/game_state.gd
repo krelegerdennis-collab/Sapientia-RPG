@@ -155,8 +155,8 @@ var last_respawn := {}
 const RESPAWN_LINES_BOSS := ["Je ontwaakt voor de deur...", "Je bent weer helemaal uitgerust."]
 const RESPAWN_LINES := ["Je ontwaakt waar je binnenkwam...", "Je bent weer helemaal uitgerust."]
 ## Het Gesimuleerde Archief: nederlaag in de kerker (gevechtsscherm) en het bericht na het opnieuw laden.
-const DUNGEON100_DEFEAT_TEXT := "GAME OVER\nHet Archief laadt de simulatie opnieuw."
-const DUNGEON100_RESET_LINES := ["De simulatie wordt teruggezet...", "Alleen de Blauwe databanken zijn bewaard gebleven."]
+const DUNGEON100_DEFEAT_TEXT := "GAME OVER\nDood is het Archief uit. Je staat weer voor de ingang."
+const DUNGEON100_RESET_LINES := ["De simulatie laat je los.", "Je staat weer voor de ingang van het Archief. Blauwe databanken blijven."]
 
 ## v7 (prestaties): alles wat een gevecht of mapwissel nodig heeft wordt bij de start
 ## alvast op de achtergrond geladen (ResourceLoader.load_threaded_request) en daarna
@@ -193,6 +193,7 @@ func _ready() -> void:
 	# Dungeon100: of  godot -- --dungeon100schaaltest [--shots=/pad/map]  (scripts/tests/dungeon100_schaal_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100regelstest [--shots=/pad/map]  (scripts/tests/dungeon100_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100integratietest [--shots=/pad/map]  (scripts/tests/dungeon100_integratie_tests.gd).
+	# Dungeon100: of  godot -- --dungeon100blauwtest [--shots=/pad/map]  (scripts/tests/dungeon100_blauw_tests.gd).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
 	# v0.19: of  godot -- --checkpointtest [--shots=/pad/map] [--v19=/workspace]  (kamer-checkpoint / respawn).
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -211,7 +212,8 @@ func _ready() -> void:
 			["--dungeon100gentest", "res://scripts/tests/dungeon100_generator_tests.gd", "Dungeon100GenTest", "dungeon100gentest"],
 			["--dungeon100schaaltest", "res://scripts/tests/dungeon100_schaal_tests.gd", "Dungeon100SchaalTest", "dungeon100schaaltest"],
 			["--dungeon100regelstest", "res://scripts/tests/dungeon100_tests.gd", "Dungeon100RegelsTest", "dungeon100regelstest"],
-			["--dungeon100integratietest", "res://scripts/tests/dungeon100_integratie_tests.gd", "Dungeon100IntegratieTest", "dungeon100integratietest"]]:
+			["--dungeon100integratietest", "res://scripts/tests/dungeon100_integratie_tests.gd", "Dungeon100IntegratieTest", "dungeon100integratietest"],
+			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -836,6 +838,8 @@ func start_new_game(hero_name: String) -> void:
 func go_to_title() -> void:
 	if changing_map or in_battle:
 		return
+	if dungeon100_run_active():
+		dungeon100_end_run(true)
 	changing_map = true
 	dungeon100_floor = 0
 	await Transition.fade_out()
@@ -849,7 +853,10 @@ func go_to_title() -> void:
 func enter_map(path: String) -> void:
 	current_map = path
 	if path != Dungeon100RulesC.dungeon_scene:
-		dungeon100_end_run(false)     # veiligheidsnet: wie de Diepe Grot anders verlaat, krijgt zijn echte party terug
+		# Veiligheidsnet, niet tijdens een gevecht: wie de grot verlaat krijgt de echte party terug
+		# en de Blauwe Kist-items. Een gevecht laadt geen map en mag de run niet afbreken.
+		if not in_battle and dungeon100_run_active():
+			dungeon100_end_run(true)
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
 
@@ -948,9 +955,8 @@ func end_battle(result: String) -> void:
 	var target := return_map if return_map != "" else START_MAP
 	if result == "lose":
 		map_monster_battle = {}
-		if dungeon100_floor > 0:
-			# 100-kerker (Het Gesimuleerde Archief): de run is voorbij, een nieuwe run begint op verdieping 1
-			# (dungeon100_defeat); het kamer-checkpoint van v0.19 telt hier niet.
+		if dungeon100_floor > 0 or dungeon100_run_active():
+			# 100-kerker: dood is dungeon uit. Terug naar de wereldkaart bij de ingang, niet verdieping 1.
 			target = dungeon100_defeat()
 		elif has_checkpoint():
 			# v0.19: terug naar waar je deze kamer/map binnenkwam (baas: de kamer ervoor)
@@ -1029,10 +1035,8 @@ func respawn_at_checkpoint(boss := false) -> String:
 
 ## v0.19: tekst in het gevecht bij GAME OVER (waar je wakker wordt).
 func defeat_text(boss := false) -> String:
-	if dungeon100_floor > 0:
-		if bool(Dungeon100RulesC.defeat_plan(dungeon100_floor, dungeon100_checkpoint, Dungeon100RulesC.scene_available())["to_dungeon"]):
-			return DUNGEON100_DEFEAT_TEXT
-		return "GAME OVER\nJe wordt wakker bij het begin."
+	if dungeon100_floor > 0 or dungeon100_run_active():
+		return DUNGEON100_DEFEAT_TEXT
 	if not has_checkpoint():
 		return "GAME OVER\nJe wordt wakker bij het begin."
 	return "GAME OVER\n" + str((RESPAWN_LINES_BOSS if boss else RESPAWN_LINES)[0])
@@ -1114,10 +1118,10 @@ func _dungeon100_clear_run_flags() -> void:
 			story_flags.erase(f)
 
 
-## De run is voorbij zonder dat je valt (verlaten of Warp): de echte party/tas/goud/Codex terug uit de
-## momentopname, run-vlaggen weg, verdieping 0 en een nieuwe seed bij de volgende run. 'deliver' (Warp):
-## de permanente items die nog niet in je echte tas lagen komen er nu in. Geen run bezig = niets (false).
-func dungeon100_end_run(deliver := false) -> bool:
+## De run is voorbij (verlaten, dood of Warp): de echte party/tas/goud/Codex terug uit de momentopname,
+## run-vlaggen weg, verdieping 0 en een nieuwe seed bij de volgende binnenkomst. 'deliver' (standaard):
+## permanente Blauwe-Kist-items die nog niet in de echte tas lagen komen er nu in. Geen run = false.
+func dungeon100_end_run(deliver := true) -> bool:
 	if not dungeon100_run_active():
 		return false
 	var snap := dungeon100_snapshot
@@ -1156,9 +1160,10 @@ func dungeon100_deliver() -> int:
 	return n
 
 
-## Je verlaat de kerker via de ladder op verdieping 1: run opgegeven, niets wordt meegenomen.
+## Je verlaat de kerker via de ladder op verdieping 1: run opgegeven. De momentopname komt terug en
+## Blauwe Kist-items die nog niet in de echte tas zaten komen er nu in.
 func dungeon100_leave() -> bool:
-	return dungeon100_end_run(false)
+	return dungeon100_end_run(true)
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
@@ -1177,27 +1182,26 @@ func dungeon100_warp() -> bool:
 	return true
 
 
-## Nederlaag in de kerker: de run is voorbij. Levels, tas, goud, Codex en rustpunt van de run zijn weg; de
-## permanente items en de momentopname blijven. Nieuwe run op verdieping 1 met een nieuwe seed. Geeft de
-## scène terug waar de groep ontwaakt (de kerker; zonder kerker-scène: het dorp, met de echte party terug).
+## Nederlaag in de kerker: de run is voorbij ("dood is dungeon uit"). Tijdelijke levels, tas en goud van
+## de run zijn weg. De echte party/tas/goud/Codex komen terug uit de momentopname, daarna de permanente
+## Blauwe-Kist-items. Terug naar de wereldkaart bij de ingang, niet naar verdieping 1. Een nieuwe run
+## begint pas als je opnieuw naar binnen gaat. Geeft de wereldkaart terug.
 func dungeon100_defeat() -> String:
 	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, dungeon100_floor)
 	has_return_point = false
-	var plan := Dungeon100RulesC.defeat_plan(dungeon100_floor, dungeon100_checkpoint, Dungeon100RulesC.scene_available())
-	if not bool(plan["to_dungeon"]):
-		dungeon100_end_run(false)
-		_full_heal()
-		pending_spawn = RESPAWN_SPAWN
-		return RESPAWN_MAP
-	_dungeon100_fresh_run()
-	dungeon100_checkpoint = 0
-	dungeon100_floor = 1
-	dungeon100_seed = 0
-	pending_spawn = Dungeon100RulesC.START_SPAWN
+	if dungeon100_run_active():
+		dungeon100_end_run(true)
+	else:
+		_dungeon100_clear_run_flags()
+		dungeon100_checkpoint = 0
+		dungeon100_floor = 0
+		dungeon100_seed = 0
+	_full_heal()
+	pending_spawn = Dungeon100RulesC.WORLD_SPAWN
 	pending_respawn_msg = DUNGEON100_RESET_LINES.duplicate()
 	entry_kind = "respawn"
 	_autosave_request = "respawn"
-	return Dungeon100RulesC.dungeon_scene
+	return Dungeon100RulesC.WORLD_SCENE
 
 
 ## Zet verdieping/checkpoint/best/seed + permanente items/momentopname uit save-data

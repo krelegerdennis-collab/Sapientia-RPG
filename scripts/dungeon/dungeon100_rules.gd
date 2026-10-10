@@ -13,16 +13,17 @@ extends RefCounted
 ## simulatie. Een RUN begint bij het binnenkomen vanaf de wereldkaart: de party wordt level 1 zonder
 ## uitrusting (de echte party + tas + goud + Codex liggen in een momentopname) en je tas bevat alleen de
 ## PERMANENTE items van eerdere runs (GameState.dungeon100_permanent, uit Blauwe Kisten).
-##   - VERLIES (party KO) BINNEN de kerker = de run is voorbij: levels, tas, goud, Codex en het
-##     rustpunt van deze run zijn weg, de groep begint opnieuw op verdieping 1 (nieuwe seed). Permanente
-##     items en de momentopname blijven. Dit vervangt het 'ontwaken bij het rustpunt' van de eerste
-##     regels-versie.
+##   - VERLIES (party KO) BINNEN de kerker = de run is voorbij ("dood is dungeon uit"): terug naar de
+##     wereldkaart bij de ingang (van_dungeon100), NIET naar verdieping 1 en NIET naar een rustpunt.
+##     Tijdelijke levels, tas, goud en uitrusting van de run zijn weg. De momentopname van de echte
+##     party/tas/goud/Codex komt terug, en daarna de permanente Blauwe-Kist-items. Een nieuwe run
+##     begint pas als je opnieuw naar binnen gaat (verdieping 1, level 1, nieuwe seed).
 ##   - RUSTPUNTEN (elke 10e verdieping: 10, 20, ... 100): aanraken (A) = HP/MP van de hele party (en de
 ##     Codex-bondgenoot) vol + opslaan ('Voortgang opslaan?'). Het rustpunt wordt ook onthouden als
 ##     'laatste rustpunt van deze run' (GameState.dungeon100_checkpoint, gaat alleen omhoog; alleen voor
-##     de HUD/tekst, het is geen terugkeerpunt meer).
-##   - de kerker verlaten: de ladder op verdieping 1 (run opgegeven) of het Warp-kristal van de eindbaas op
-##     verdieping 100 (run voltooid; permanente items worden dan ook in je echte tas gelegd).
+##     de tekst, het is GEEN terugkeerpunt).
+##   - de kerker verlaten: de ladder op verdieping 1, de dood, of het Warp-kristal op verdieping 100.
+##     Alle drie zetten de momentopname terug en leveren de permanente items af in de echte tas.
 ##   - game over BUITEN de kerker (verdieping 0) werkt zoals altijd.
 
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
@@ -44,9 +45,9 @@ const WORLD_SPAWN := "van_dungeon100"
 ## einde van de run weggaan. Kist- en kamer-id's bevatten de seed, dus een nieuwe run begint altijd schoon.
 const RUN_FLAG_PREFIXES := ["kist:d100_", "bewaker:dungeon100_", "dungeon100_boss:"]
 
-## Hoeveel goud je houdt na een nederlaag: in de kerker niets (het goud van de run was van de simulatie),
-## erbuiten de helft (bestaande regel).
-const GOLD_KEEP_RUN_LOST := 0.0
+## Goud na een nederlaag. In de kerker telt het goud van de run niet: de momentopname (het echte goud)
+## komt volledig terug (gold_keep 1.0 = niets van de echte tas/het echte goud af). Erbuiten: de helft.
+const GOLD_KEEP_RUN_LOST := 1.0
 const GOLD_KEEP_GAME_OVER := 0.5
 
 const HUD_FORMAT := "Verdieping %d/%d"
@@ -102,17 +103,14 @@ static func checkpoint_after_rest(current_checkpoint: int, floor_nr: int) -> int
 
 
 ## Plan bij een nederlaag (party KO) op verdieping 'floor_nr':
-##   {"respawn_floor": int (0 = naar het dorp), "to_dungeon": bool, "gold_keep": float, "new_run": bool}
-## In de kerker (1..100) en met kerker-scène ('scene_ok'): "new_run" = de run is voorbij, nieuwe run op
-## verdieping 1, goud weg. Zonder scène terug naar het dorp (de run wordt dan ook beëindigd).
-## Buiten de kerker: de gewone game over (helft van het goud). 'checkpoint' (rustpunt van de run) doet
-## niets meer voor het plan; de parameter blijft voor de bestaande aanroepers.
-static func defeat_plan(floor_nr: int, _checkpoint: int, scene_ok := true) -> Dictionary:
+##   {"respawn_floor": 0, "to_dungeon": false, "leave": bool, "gold_keep": float, "new_run": false}
+## In de kerker (1..100): "leave" = de run is voorbij, terug naar de wereldkaart bij de ingang.
+## Het rustpunt ('checkpoint') en 'scene_ok' doen niets meer: dood is nooit een respawn op verdieping 1.
+## De parameters blijven voor bestaande aanroepers. Buiten de kerker: gewone game over (helft van het goud).
+static func defeat_plan(floor_nr: int, _checkpoint: int, _scene_ok := true) -> Dictionary:
 	if is_valid_floor(floor_nr):
-		if scene_ok:
-			return {"respawn_floor": 1, "to_dungeon": true, "gold_keep": GOLD_KEEP_RUN_LOST, "new_run": true}
-		return {"respawn_floor": 0, "to_dungeon": false, "gold_keep": GOLD_KEEP_RUN_LOST, "new_run": true}
-	return {"respawn_floor": 0, "to_dungeon": false, "gold_keep": GOLD_KEEP_GAME_OVER, "new_run": false}
+		return {"respawn_floor": 0, "to_dungeon": false, "leave": true, "gold_keep": GOLD_KEEP_RUN_LOST, "new_run": false}
+	return {"respawn_floor": 0, "to_dungeon": false, "leave": false, "gold_keep": GOLD_KEEP_GAME_OVER, "new_run": false}
 
 
 static func scene_available() -> bool:

@@ -71,8 +71,9 @@ Suites (v0.18, aantallen PASS ter referentie):
 | `--dungeon100schaaltest` | `scripts/tests/dungeon100_schaal_tests.gd` | 78 |
 | `--dungeon100regelstest` | `scripts/tests/dungeon100_tests.gd` | 74 |
 | `--dungeon100integratietest` | `scripts/tests/dungeon100_integratie_tests.gd` | 41 |
+| `--dungeon100blauwtest` | `scripts/tests/dungeon100_blauw_tests.gd` | (na deze taak) |
 
-Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest archieftest kerntest kernkrachttest woudtest codextest checkpointtest dungeon100gentest dungeon100schaaltest dungeon100regelstest dungeon100integratietest; do .github/scripts/run_suite.sh $s; done`
+Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest archieftest kerntest kernkrachttest woudtest codextest checkpointtest dungeon100gentest dungeon100schaaltest dungeon100regelstest dungeon100integratietest dungeon100blauwtest; do .github/scripts/run_suite.sh $s; done`
 (samen ~12 min; CI draait ze parallel). Een eigen `XDG_DATA_HOME` per suite houdt `user://` (saves/instellingen) gescheiden.
 
 **Nieuwe suite toevoegen:** script in `scripts/tests/<naam>_tests.gd` (zelfde PASS/FAIL/RESULT-format,
@@ -82,7 +83,7 @@ en de suite in de matrix van `.github/workflows/tests.yml` (tijdelijk `.github/c
 ## Kaart van de code
 - `project.godot` — autoloads: `GameState`, `Transition`, `Dialog`, `Story`, `Crt`, `Settings`, `AudioManager`. Hoofdscène `scenes/ui/title.tscn`.
 - `scripts/game_state.gd` — party, inventaris, saves, test-dispatch. `scripts/story.gd` + `scripts/data/story_data.gd` — verhaalvlaggen/dialoog.
-- `scripts/data/` — **alle content-data**: `game_data.gd` (helden, monsters, items, skills), `codex_data.gd` (Codex: verzamelbare/vangbare wezens),
+- `scripts/data/` — **alle content-data**: `game_data.gd` (helden, monsters, items, skills), `dungeon100_scaling.gd`, `dungeon100_blue.gd` (Blauwe Kisten / Mimic / Warp), `codex_data.gd` (Codex: verzamelbare/vangbare wezens),
   `book_data.gd`, `kern_data.gd`, `dungeon_rooms.gd`, `puzzle_rooms.gd`, `woud_rooms.gd`, `story_data.gd`.
 - `scripts/battle/` — gevechten (`battle.gd`, menu, helden, baas-kern, `codex_battle.gd`/`codex_ally.gd` voor de Codex).
 - `scripts/ui/` — menu's, titelscherm, Codex-scherm (`codex_screen.gd`), bestiarium, stijl (`ui_style.gd`, `menu_colors.gd`).
