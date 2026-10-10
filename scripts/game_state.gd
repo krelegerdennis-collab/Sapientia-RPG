@@ -98,6 +98,11 @@ var pending_boss := false
 ## v0.14: monsterniveau (tier) voor het volgende gevecht: 0 = gewoon (wereldkaart), 1-4 = de
 ## verdieping van het Eerste Archief (game_data.gd TIERS). Alleen gezet door een dungeonkamer.
 var pending_tier := 0
+## Dungeon100 (de Diepe Grot, 100 verdiepingen): huidige verdieping 1..100, 0 = niet in de dungeon.
+## Seed = de run-seed van de generator (0 = nog niet gekozen; de eerste keer binnenkomen kiest hem).
+## Beide gaan mee in de save. Zie HANDOFF_DUNGEON100.md.
+var dungeon100_floor: int = 0
+var dungeon100_seed: int = 0
 
 ## De vijandgroep voor het volgende gevecht (Array van vijand-id's).
 var pending_enemies: Array = []
@@ -165,6 +170,7 @@ func _ready() -> void:
 	# v0.15: of  godot -- --kerntest [--shots=/pad/map]  (scripts/tests/kern_tests.gd, kernfragmenten).
 	# v0.16: of  godot -- --kernkrachttest [--shots=/pad/map]  (scripts/tests/kernkracht_tests.gd, vuurbal).
 	# v0.17: of  godot -- --woudtest [--shots=/pad/map]  (scripts/tests/woud_tests.gd, Esdoorn + Donker Woud + Noor).
+	# Dungeon100: of  godot -- --dungeon100gentest [--shots=/pad/map]  (scripts/tests/dungeon100_generator_tests.gd).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
 	# v0.19: of  godot -- --checkpointtest [--shots=/pad/map] [--v19=/workspace]  (kamer-checkpoint / respawn).
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -179,7 +185,8 @@ func _ready() -> void:
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
 			["--woudtest", "res://scripts/tests/woud_tests.gd", "WoudTest", "woudtest"],
 			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
-			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"]]:
+			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"],
+			["--dungeon100gentest", "res://scripts/tests/dungeon100_generator_tests.gd", "Dungeon100GenTest", "dungeon100gentest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -291,6 +298,8 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	inventory = GameData.START_INVENTORY.duplicate(true)
 	map_monster_battle = {}
 	defeated_map_monsters = {}
+	dungeon100_floor = 0
+	dungeon100_seed = 0
 	gold = GameData.START_GOLD
 	steps_until_encounter_possible = GameData.SAFE_STEPS
 	bestiary.clear()
@@ -595,6 +604,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"kernen": kernfragmenten.duplicate(true),
 		"codex": codex_save_data(),
 		"story": {"step": story_step, "flags": story_flags.keys()},
+		"dungeon100": {"floor": dungeon100_floor, "seed": dungeon100_seed},
 	}
 	for h in party:
 		var e := {}
@@ -718,6 +728,14 @@ func apply_state(d: Dictionary) -> bool:
 				kernfragmenten[str(k)] = e.duplicate(true)
 	# Codex: oude saves zonder "codex" = lege Codex; kapotte pagina's vallen weg.
 	codex_load_data(d.get("codex", {}))
+	dungeon100_floor = 0
+	dungeon100_seed = 0
+	var d100 = d.get("dungeon100", {})
+	if d100 is Dictionary:
+		var fl = d100.get("floor", 0)
+		var sd = d100.get("seed", 0)
+		dungeon100_floor = clampi(int(fl), 0, 100) if (fl is float or fl is int) else 0
+		dungeon100_seed = int(sd) if (sd is float or sd is int) else 0
 	puzzle_latched = {}
 	var pl = d.get("puzzle_latched", {})
 	if pl is Dictionary:
@@ -791,6 +809,8 @@ func go_to_title() -> void:
 ## Wordt aangeroepen door map.gd zodra een map geladen is.
 func enter_map(path: String) -> void:
 	current_map = path
+	if path != "res://scenes/maps/dungeon100.tscn":
+		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
 
 

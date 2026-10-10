@@ -22,7 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         suite: [autotest, menutest, puzzletest, dungeontest, golemtest,
-                archieftest, kerntest, kernkrachttest, woudtest, codextest]
+                archieftest, kerntest, kernkrachttest, woudtest, codextest,
+                dungeon100gentest]
     steps:
       - uses: actions/checkout@v4
 
