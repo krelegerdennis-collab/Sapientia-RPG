@@ -76,6 +76,8 @@ func _ready() -> void:
 		var sp := get_spawn(default_spawn())
 		if sp:
 			player.place_at(sp.get_tile(), sp.facing)
+	if music_track == "" and room_id.begins_with("archief"):
+		music_track = "vergeten_archieven"
 	super._ready()
 
 

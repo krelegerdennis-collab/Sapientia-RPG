@@ -92,6 +92,12 @@ debug_battle={
 
 pointing/emulate_touch_from_mouse=true
 
+[audio]
+
+; Web-standaard is Sample (1). Sample + extra bussen (Music/SFX) is stil in de
+; browser (Godot 4.7, godot#119026). 0 = Stream.
+general/default_playback_type.web=0
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
