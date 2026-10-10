@@ -30,6 +30,8 @@ const ROOM_PREFIX := "dungeon100_"
 ## Spawnpuntnamen in de kamer: aankomst van boven (via de ladder) en van onder (via de trap).
 const SPAWN_FROM_ABOVE := "omhoog"
 const SPAWN_FROM_BELOW := "omlaag"
+## Ontwaken bij het rustpunt na een nederlaag (alleen op rustverdiepingen; zelfde naam als Dungeon100Rules.REST_SPAWN).
+const SPAWN_REST := "rustpunt"
 const NO_TILE := Vector2i(-1, -1)
 
 const MIN_ROOMS := 4
@@ -265,7 +267,32 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		"dungeon100": true, "dungeon100_floor": f,
 	}
 	Content.fill_room(room, d)
+	if room.has("rustpunt"):
+		var rp: Array = room["rustpunt"]
+		var sp := _rest_spawn(room, d, Vector2i(int(rp[0]), int(rp[1])))
+		if sp.has("tile"):
+			spawns[SPAWN_REST] = _spawn_arr(sp["tile"], sp["facing"])
 	return room
+
+
+## Plek waar je ontwaakt na een nederlaag bij het rustpunt (spawn 'rustpunt'): een vrije,
+## bereikbare buurtegel van het rustpunt, kijkend ernaartoe. {} als die er niet is (valt terug op de ladder).
+static func _rest_spawn(room: Dictionary, d: Dictionary, rest: Vector2i) -> Dictionary:
+	var reach := reachable_tiles(room, d["spawn_up"])
+	var taken := {rest: true}
+	for m in room.get("monsters", []):
+		var sz: Array = m.get("size", [1, 1])
+		for dx in int(sz[0]):
+			for dy in int(sz[1]):
+				taken[Vector2i(int(m["tile"][0]) + dx, int(m["tile"][1]) + dy)] = true
+	for c in room.get("chests", []):
+		taken[Vector2i(int(c["tile"][0]), int(c["tile"][1]))] = true
+	for dir in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP]:
+		var t: Vector2i = rest + dir
+		if reach.has(t) and not taken.has(t):
+			var facing := "up" if dir == Vector2i.DOWN else "down" if dir == Vector2i.UP else "right" if dir == Vector2i.LEFT else "left"
+			return {"tile": t, "facing": facing}
+	return {}
 
 
 static func _spawn_arr(t: Vector2i, facing: String) -> Array:

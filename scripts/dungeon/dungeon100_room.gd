@@ -17,6 +17,8 @@ signal floor_ready(floor_no: int, data: Dictionary)
 
 var floor_no := 1
 var floor_data: Dictionary = {}
+## Het rustpunt van deze verdieping (alleen op 10, 20, ... 100), anders null.
+var rustpunt: Node2D = null
 
 
 func _ready() -> void:
@@ -28,10 +30,29 @@ func _ready() -> void:
 	room_id = Gen.room_id(GameState.dungeon100_seed, floor_no)
 	floor_data = Gen.generate(GameState.dungeon100_seed, floor_no)
 	var returning: bool = GameState.has_return_point and GameState.return_map == scene_file_path
-	if not returning and GameState.pending_spawn not in [Gen.SPAWN_FROM_ABOVE, Gen.SPAWN_FROM_BELOW]:
+	var spawns: Dictionary = floor_data["room"]["spawns"]
+	if not returning and (GameState.pending_spawn not in [Gen.SPAWN_FROM_ABOVE, Gen.SPAWN_FROM_BELOW, Gen.SPAWN_REST]
+			or not spawns.has(GameState.pending_spawn)):
 		GameState.pending_spawn = Gen.SPAWN_FROM_ABOVE
 	super._ready()
+	_place_rustpunt()
 	floor_ready.emit(floor_no, floor_data)
+
+
+## Rustpunt (Dungeon100Rustpunt) op elke 10e verdieping, op de rest_slot van de generator.
+func _place_rustpunt() -> void:
+	if not room.has("rustpunt"):
+		return
+	var t: Array = room["rustpunt"]
+	rustpunt = Dungeon100Rustpunt.create(Vector2i(int(t[0]), int(t[1])))
+	rustpunt.name = "Rustpunt"
+	$Objects.add_child(rustpunt)
+
+
+## De Diepe Grot heeft eigen terugkeerregels (rustpunt, zie Dungeon100Rules.defeat_plan): het
+## kamer-checkpoint van v0.19 wordt hier niet gezet.
+func allows_checkpoint() -> bool:
+	return false
 
 
 ## Trap/ladder: eerst de nieuwe verdieping in GameState zetten, dan pas de gewone uitgang

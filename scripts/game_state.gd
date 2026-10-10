@@ -8,6 +8,7 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")   # Kernfragment stap 2: de Codex
+const Dungeon100RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")   # 100-verdiepingen-kerker
 ## Hier begint een nieuw spel (v0.11: wakker worden in bed, in het huis).
 const START_MAP := "res://scenes/maps/huis_wilgendal.tscn"
 const START_SPAWN := "bed"
@@ -65,6 +66,16 @@ var pending_kern_absorb := ""
 var codex_pages: Array = []
 var codex_active := ""
 var codex_next_id := 1
+
+## 100-verdiepingen-kerker (de Diepe Grot): alles gaat mee in de save, blok "dungeon100"
+## (Dungeon100Rules.save_data/load_data). Zie HANDOFF_DUNGEON100*.md.
+## huidige verdieping 1..100, 0 = niet in de kerker
+var dungeon100_floor: int = 0
+## run-seed van de generator (0 = nog niet gekozen; de eerste keer binnenkomen kiest hem)
+var dungeon100_seed: int = 0
+## laatst geactiveerd rustpunt (0, 10, ... 100) en hoogste bereikte verdieping
+var dungeon100_checkpoint := 0
+var dungeon100_best := 0
 ## v0.11 verhaal: stap (zie scripts/data/story_data.gd) en flags (naam -> true)
 var story_step := 0
 var story_flags := {}
@@ -98,11 +109,6 @@ var pending_boss := false
 ## v0.14: monsterniveau (tier) voor het volgende gevecht: 0 = gewoon (wereldkaart), 1-4 = de
 ## verdieping van het Eerste Archief (game_data.gd TIERS). Alleen gezet door een dungeonkamer.
 var pending_tier := 0
-## Dungeon100 (de Diepe Grot, 100 verdiepingen): huidige verdieping 1..100, 0 = niet in de dungeon.
-## Seed = de run-seed van de generator (0 = nog niet gekozen; de eerste keer binnenkomen kiest hem).
-## Beide gaan mee in de save. Zie HANDOFF_DUNGEON100.md.
-var dungeon100_floor: int = 0
-var dungeon100_seed: int = 0
 
 ## De vijandgroep voor het volgende gevecht (Array van vijand-id's).
 var pending_enemies: Array = []
@@ -112,6 +118,7 @@ var debug_force_group: Array = []
 var last_battle_result := ""
 
 var in_battle := false
+
 ## v0.13 map-monsters (dungeons, scripts/dungeon/): het gevecht dat een map-monster startte
 ## ({} = geen; {"map", "room", "id", "positions"}) en per kamer de verslagen monsters
 ## ({room_id: {monster_id: true}}). Alleen deze sessie, niet in de save: kom je de kamer
@@ -159,6 +166,7 @@ func _ready() -> void:
 	_ensure_input_actions()
 	new_game()
 	_start_preload()
+	add_child.call_deferred(preload("res://scripts/ui/dungeon100_hud.gd").new())   # 'Verdieping X/100' (alleen in de kerker)
 	# Alleen voor testen: start met  godot -- --autotest  (zie scripts/debug_autotest.gd).
 	# De tester hangt aan de root, zodat hij blijft bestaan als de scène wisselt.
 	# (In de Android-export zit de tester niet: daarom eerst kijken of hij bestaat.)
@@ -172,6 +180,7 @@ func _ready() -> void:
 	# v0.17: of  godot -- --woudtest [--shots=/pad/map]  (scripts/tests/woud_tests.gd, Esdoorn + Donker Woud + Noor).
 	# Dungeon100: of  godot -- --dungeon100gentest [--shots=/pad/map]  (scripts/tests/dungeon100_generator_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100schaaltest [--shots=/pad/map]  (scripts/tests/dungeon100_schaal_tests.gd).
+	# Dungeon100: of  godot -- --dungeon100regelstest [--shots=/pad/map]  (scripts/tests/dungeon100_tests.gd).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
 	# v0.19: of  godot -- --checkpointtest [--shots=/pad/map] [--v19=/workspace]  (kamer-checkpoint / respawn).
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -188,7 +197,8 @@ func _ready() -> void:
 			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
 			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"],
 			["--dungeon100gentest", "res://scripts/tests/dungeon100_generator_tests.gd", "Dungeon100GenTest", "dungeon100gentest"],
-			["--dungeon100schaaltest", "res://scripts/tests/dungeon100_schaal_tests.gd", "Dungeon100SchaalTest", "dungeon100schaaltest"]]:
+			["--dungeon100schaaltest", "res://scripts/tests/dungeon100_schaal_tests.gd", "Dungeon100SchaalTest", "dungeon100schaaltest"],
+			["--dungeon100regelstest", "res://scripts/tests/dungeon100_tests.gd", "Dungeon100RegelsTest", "dungeon100regelstest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -300,8 +310,6 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	inventory = GameData.START_INVENTORY.duplicate(true)
 	map_monster_battle = {}
 	defeated_map_monsters = {}
-	dungeon100_floor = 0
-	dungeon100_seed = 0
 	gold = GameData.START_GOLD
 	steps_until_encounter_possible = GameData.SAFE_STEPS
 	bestiary.clear()
@@ -316,6 +324,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	story_step = StoryData.START
 	story_flags = {}
 	pending_tutorial = {}
+	dungeon100_load({})
 	if has_node("/root/Story"):
 		get_node("/root/Story").reset()
 	has_return_point = false
@@ -605,8 +614,8 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"puzzle_latched": puzzle_latched.duplicate(true),
 		"kernen": kernfragmenten.duplicate(true),
 		"codex": codex_save_data(),
+		"dungeon100": Dungeon100RulesC.save_data(dungeon100_floor, dungeon100_checkpoint, dungeon100_best, dungeon100_seed),
 		"story": {"step": story_step, "flags": story_flags.keys()},
-		"dungeon100": {"floor": dungeon100_floor, "seed": dungeon100_seed},
 	}
 	for h in party:
 		var e := {}
@@ -730,14 +739,7 @@ func apply_state(d: Dictionary) -> bool:
 				kernfragmenten[str(k)] = e.duplicate(true)
 	# Codex: oude saves zonder "codex" = lege Codex; kapotte pagina's vallen weg.
 	codex_load_data(d.get("codex", {}))
-	dungeon100_floor = 0
-	dungeon100_seed = 0
-	var d100 = d.get("dungeon100", {})
-	if d100 is Dictionary:
-		var fl = d100.get("floor", 0)
-		var sd = d100.get("seed", 0)
-		dungeon100_floor = clampi(int(fl), 0, 100) if (fl is float or fl is int) else 0
-		dungeon100_seed = int(sd) if (sd is float or sd is int) else 0
+	dungeon100_load(d.get("dungeon100", {}))
 	puzzle_latched = {}
 	var pl = d.get("puzzle_latched", {})
 	if pl is Dictionary:
@@ -801,6 +803,7 @@ func go_to_title() -> void:
 	if changing_map or in_battle:
 		return
 	changing_map = true
+	dungeon100_floor = 0
 	await Transition.fade_out()
 	changing_map = false
 	_go_to_scene(TITLE_SCENE)
@@ -811,7 +814,7 @@ func go_to_title() -> void:
 ## Wordt aangeroepen door map.gd zodra een map geladen is.
 func enter_map(path: String) -> void:
 	current_map = path
-	if path != "res://scenes/maps/dungeon100.tscn":
+	if path != Dungeon100RulesC.dungeon_scene:
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
 
@@ -910,7 +913,12 @@ func end_battle(result: String) -> void:
 	var target := return_map if return_map != "" else START_MAP
 	if result == "lose":
 		map_monster_battle = {}
-		if has_checkpoint():
+		if dungeon100_floor > 0:
+			# 100-kerker: eigen regels (Dungeon100Rules.defeat_plan); het kamer-checkpoint van v0.19 telt hier niet.
+			# Met een rustpunt ontwaakt de groep daar (respawn() zette de verdieping al), anders in Wilgendal.
+			respawn()
+			target = RESPAWN_MAP if dungeon100_floor == 0 else Dungeon100RulesC.dungeon_scene
+		elif has_checkpoint():
 			# v0.19: terug naar waar je deze kamer/map binnenkwam (baas: de kamer ervoor)
 			target = respawn_at_checkpoint(pending_boss)
 		else:
@@ -983,6 +991,11 @@ func respawn_at_checkpoint(boss := false) -> String:
 
 ## v0.19: tekst in het gevecht bij GAME OVER (waar je wakker wordt).
 func defeat_text(boss := false) -> String:
+	if dungeon100_floor > 0:
+		var plan := Dungeon100RulesC.defeat_plan(dungeon100_floor, dungeon100_checkpoint, Dungeon100RulesC.scene_available())
+		if bool(plan["to_dungeon"]):
+			return "GAME OVER\nJe ontwaakt bij het rustpunt."
+		return "GAME OVER\nJe wordt wakker bij het begin."
 	if not has_checkpoint():
 		return "GAME OVER\nJe wordt wakker bij het begin."
 	return "GAME OVER\n" + str((RESPAWN_LINES_BOSS if boss else RESPAWN_LINES)[0])
@@ -1006,9 +1019,21 @@ func respawn() -> void:
 	for p in codex_pages:          # Codex: de monsters ook
 		p["hp"] = p["max_hp"]
 		p["mp"] = p["max_mp"]
-	gold = int(gold / 2.0)
+	var d100 := Dungeon100RulesC.defeat_plan(dungeon100_floor, dungeon100_checkpoint, Dungeon100RulesC.scene_available())
+	gold = int(gold * float(d100["gold_keep"]))      # 50% (was int(gold / 2.0)); 25% weg bij een rustpunt
+	dungeon100_floor = int(d100["respawn_floor"])
 	has_return_point = false
-	pending_spawn = RESPAWN_SPAWN
+	pending_spawn = Dungeon100RulesC.REST_SPAWN if dungeon100_floor > 0 else RESPAWN_SPAWN
+
+
+# ---------------------------------------------------------------- 100-verdiepingen-kerker
+## Zet verdieping/checkpoint/best/seed uit save-data (Dungeon100Rules.load_data); {} = alles 0.
+func dungeon100_load(raw) -> void:
+	var v := Dungeon100RulesC.load_data(raw)
+	dungeon100_floor = int(v["floor"])
+	dungeon100_checkpoint = int(v["checkpoint"])
+	dungeon100_best = int(v["best"])
+	dungeon100_seed = int(v["seed"])
 
 
 # ---------------------------------------------------------------- kernfragmenten (v0.15)

@@ -23,7 +23,8 @@ jobs:
       matrix:
         suite: [autotest, menutest, puzzletest, dungeontest, golemtest,
                 archieftest, kerntest, kernkrachttest, woudtest, codextest,
-                checkpointtest, dungeon100gentest, dungeon100schaaltest]
+                checkpointtest, dungeon100gentest, dungeon100schaaltest,
+                dungeon100regelstest]
     steps:
       - uses: actions/checkout@v4
 
