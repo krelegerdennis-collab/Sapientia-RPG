@@ -417,7 +417,8 @@ func _data_tests() -> void:
 	check("De Wortelkoning: baas-blok, idle 4x 0,4 s + raak-plaatje, geen kern", wk.has("boss") and int(wk["idle_frames"]) == 4
 			and is_equal_approx(float(wk["idle_time"]), 0.4) and ResourceLoader.exists(wk["idle"]) and ResourceLoader.exists(wk["hit"])
 			and not wk["boss"].has("core"))
-	check("bestiarium 007-010 = de Woud-vijanden", GD.bestiary_ids().slice(6) == ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning"])
+	check("bestiarium 007-010 = de Woud-vijanden", GD.bestiary_ids().slice(6, 10) == ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning"])
+	check("bestiarium 011 = de Mimic (Het Gesimuleerde Archief)", GD.bestiary_ids().slice(10) == ["mimic"])
 	var bg: Texture2D = load(GD.backdrop_path("forest_dark"))
 	check("bos-achtergrond 1280x432, ook voor de baas in het woud (archief-baas blijft 'boss')",
 			bg != null and bg.get_size() == Vector2(1280, 432) and GD.backdrop_id_for("woud", false) == "forest_dark"
