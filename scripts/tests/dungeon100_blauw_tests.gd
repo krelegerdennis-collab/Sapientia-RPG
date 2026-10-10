@@ -197,6 +197,7 @@ func _scene_tests() -> void:
 			b != null and str(b.enemies[0]["id"]) == Blue.MIMIC_ENEMY and int(b.enemies[0]["s"]["max_hp"]) == scaled
 			and (scaled > base_hp or int(mimic_floor["floor"]) == 1))
 	await screenshot("d100_mimic_gevecht")
+	_drop_battle()
 	GameState.end_battle("flee")
 	check("vluchten uit de Mimic: de kist blijft dicht, de run loopt door", await wait_floor(int(mimic_floor["floor"]))
 			and GameState.dungeon100_run_active() and not GameState.story_flags.has("kist:" + str(mimic_floor["id"])))
@@ -272,6 +273,16 @@ func battle():
 	if s != null and s.scene_file_path == GameState.BATTLE_SCENE:
 		return s
 	return null
+
+
+## Stopt een lopend gevecht zonder dat de wachtlus nog een frame pakt (die is dan al weg).
+func _drop_battle() -> void:
+	var b = battle()
+	if b == null:
+		return
+	if get_tree().current_scene == b:
+		get_tree().current_scene = null
+	b.free()
 
 
 func pframes(n: int) -> void:

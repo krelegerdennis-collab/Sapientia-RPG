@@ -1506,7 +1506,12 @@ func _wait(seconds: float) -> void:
 	var settings := get_node_or_null("/root/Settings")
 	var tempo: float = settings.battle_speed() if settings else 1.0
 	while t < seconds:
+		# Een test (of game over) kan het gevecht weghalen terwijl deze lus nog loopt.
+		if not is_inside_tree():
+			return
 		await get_tree().process_frame
+		if not is_inside_tree():
+			return
 		var speed := 3.0 if Input.is_action_pressed("interact") else 1.0
 		t += get_process_delta_time() * speed * tempo
 

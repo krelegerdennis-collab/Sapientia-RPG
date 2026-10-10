@@ -147,6 +147,16 @@ func battle() -> Node:
 	return s if s != null and s.name == "Battle" else null
 
 
+## Stopt een lopend gevecht zonder dat de wachtlus nog een frame pakt (die is dan al weg).
+func _drop_battle() -> void:
+	var b := battle()
+	if b == null:
+		return
+	if get_tree().current_scene == b:
+		get_tree().current_scene = null
+	b.free()
+
+
 func wait_battle_state(states: Array, timeout := 30.0) -> String:
 	var t0 := Time.get_ticks_msec()
 	while Time.get_ticks_msec() - t0 < timeout * 1000.0:
@@ -384,7 +394,9 @@ func _floor10_tests() -> void:
 	var es: Dictionary = b.enemies[0]["s"]
 	check("baasgevecht gebruikt de schaal van verdieping 10: %s, HP %s" % [es["name"], es["max_hp"]],
 			es["name"] == bw["name"] and int(es["max_hp"]) == int(bs["max_hp"]))
-	# vluchten: de run en het rustpunt blijven (het rustpunt is geen respawn)
+	# De baas laat niet vluchten (hierboven). Het gevecht afbreken als 'flee' houdt de run
+	# en het rustpunt. Eerst de scène vrijgeven, anders blijft de gevechtslus op een lege tree hangen.
+	_drop_battle()
 	GameState.end_battle("flee")
 	check("vluchten uit het baasgevecht: nog verdieping 10, checkpoint 10, baas staat er nog", await wait_floor(10)
 			and GameState.dungeon100_checkpoint == 10 and GameState.dungeon100_run_active()
