@@ -15,6 +15,15 @@
 			"volume_db": -4.0,
 			"bpm": 62
 		},
+		"wereld": {
+			"bestand": "bgm_wereld.ogg",
+			"titel": "Onder de Open Hemel",
+			"locatie": "Wereldkaart",
+			"beschrijving": "De wegen tussen het Wachtershuis, Esdoorn, het Donker Woud en Wilgendal. Een lopende melodie in de open lucht, met zachte strijkers en ergens ver weg het tikken van een uurwerk.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 96
+		},
 		"wachtershuis": {
 			"bestand": "bgm_wachtershuis.ogg",
 			"titel": "Haard van de Wachter",

@@ -18,6 +18,9 @@ const AUTOSAVE_DELAY := 0.35
 
 ## Naam van de map (alleen informatief).
 @export var map_name := ""
+## BGM-sleutel uit res://assets/audio/audio_manifest.json, bijvoorbeeld "wereld".
+## Leeg: deze map heeft geen eigen muziek en een nog spelende track stopt.
+@export var music_track := ""
 ## Kunnen hier monsters verschijnen? In dorpen staat dit UIT.
 @export var encounters := true
 ## v0.19: zet binnenkomen hier het kamer-checkpoint (respawn na game over)? Baaskamers: nee.
@@ -77,7 +80,18 @@ func _ready() -> void:
 		var ka: Node2D = load("res://scripts/kern/kern_absorption.gd").new()
 		add_child(ka)
 		ka.start(self, GameState.pending_kern_absorb)
+	_play_map_music()
 	# (de autotest wordt sinds v0.10 door GameState gestart, zie game_state.gd)
+
+
+## Start de BGM van deze map. Zonder sleutel stopt een track die nog speelde
+## (dorp en kerker blijven stil tot ze een eigen track krijgen). Ontbreekt het
+## ogg-bestand, dan blijft het stil: play_music geeft false en crasht niet.
+func _play_map_music() -> void:
+	if music_track == "":
+		AudioManager.stop_music()
+		return
+	AudioManager.play_music(music_track)
 
 
 ## v0.19 Kamer-checkpoint bijwerken bij binnenkomst: via een uitgang/mapwissel, na laden (tenzij
