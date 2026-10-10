@@ -628,8 +628,9 @@ func _end_prologue() -> void:
 	check("v0.12: F4-puzzelsprong alleen in debug-builds (actie bestaat: %s)" % InputMap.has_action("debug_puzzle"),
 			InputMap.has_action("debug_puzzle") == OS.is_debug_build())
 	var presets := FileAccess.get_file_as_string("res://export_presets.cfg")
-	check("v0.12: scripts/tests/* niet in de export (beide presets)",
-			presets.count("exclude_filter=") == 2 and presets.count("scripts/tests/*") == 2)
+	var n_filters := presets.count("exclude_filter=")
+	check("scripts/tests/* niet in de export (elke preset, nu %d)" % n_filters,
+			n_filters >= 2 and presets.count("scripts/tests/*") == n_filters)
 	GameState.has_return_point = false
 	GameState.party = keep_party
 	GameState.inventory = keep_inv
@@ -1375,11 +1376,17 @@ func _title_v13_checks(t: Node) -> void:
 		var cfg := ConfigFile.new()
 		cfg.load("res://export_presets.cfg")
 		var ok := true
+		var android := 0
 		for sec in cfg.get_sections():
-			if sec.ends_with(".options"):
-				ok = ok and cfg.get_value(sec, "package/name", "") == "SAPIENTIA" \
-						and cfg.get_value(sec, "package/unique_name", "") == "com.dennis.rpgprototype"
-		check("Android-label SAPIENTIA, pakket blijft com.dennis.rpgprototype (update over de oude APK)", ok)
+			if str(sec).ends_with(".options"):
+				continue
+			if str(cfg.get_value(sec, "platform", "")) != "Android":
+				continue
+			android += 1
+			var opt := str(sec) + ".options"
+			ok = ok and cfg.get_value(opt, "package/name", "") == "SAPIENTIA" \
+					and cfg.get_value(opt, "package/unique_name", "") == "com.dennis.rpgprototype"
+		check("Android-label SAPIENTIA, pakket blijft com.dennis.rpgprototype (update over de oude APK)", ok and android >= 1)
 	# v0.13: alle titel-art staat in een vaste stage van 384x216 midden in beeld (ook op een
 	# breder/hoger scherm, zoals headless); het menu staat rechtsonder IN die stage.
 	var st: Rect2 = t.stage.get_global_rect()
