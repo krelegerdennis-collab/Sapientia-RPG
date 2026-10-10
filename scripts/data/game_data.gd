@@ -247,6 +247,19 @@ const ENEMIES := {
 		"desc": "De oude koning van het Donker Woud: een dode boom met een glitchend hart, die alles wat leeft in zijn wortels wil vangen.",
 		"habitat": ["woud", "baas"],
 	},
+	# Het Gesimuleerde Archief (Dungeon100): de Mimic, een kist die terugbijt. Komt alleen uit een
+	# Mimic-kist (scripts/data/dungeon100_blue.gd); stats = basis, de verdieping schaalt ze op.
+	# Plaatje is een PLACEHOLDER (tools/art_mimic_placeholder.py).
+	"mimic": {
+		"name": "Mimic", "sprite": "res://assets/sprites/enemies/mimic.png",
+		"max_hp": 26, "atk": 12, "def": 4, "agi": 6, "mag": 0, "mdef": 3,
+		"exp": 14, "gold": 14, "y_offset": 0,
+		"skills": [{"name": "Kistbeet", "chance": 0.3, "power": 1.5}],
+		"no": 11, "mp": 0, "weak": ["vuur"], "resist": [],
+		"drops": [],
+		"desc": "Een kist die niet van de Oude Mensheid is, maar van de Zwarte Stroom. Hij wacht tot iemand de deksel optilt.",
+		"habitat": ["archief"],
+	},
 }
 
 ## Vijand-id's in bestiarium-volgorde.
@@ -294,6 +307,11 @@ const ITEMS := {
 ## v0.11: sleutel-voorwerpen (niet te gebruiken in een gevecht; tellen wel in de inventaris)
 const KEY_ITEMS := {
 	"emmer_water": {"name": "Emmer water"},
+	# Het Gesimuleerde Archief (Dungeon100): de uitgang uit de simulatie. Alleen buit van de baas op
+	# verdieping 100 (Dungeon100Blue.WARP_ITEM). Een sleutel-voorwerp dus niet in het gevechtsmenu; in Items
+	# werkt het alleen op verdieping 100 ("warp": true: party_actions.gd + GameState.dungeon100_warp).
+	"warp": {"name": "Warp-kristal", "short": "Warp", "warp": true,
+		"desc": "Een kristal uit de kern van het Archief. Op de laatste verdieping brengt het je terug naar de wereld."},
 }
 # ---------------------------------------------------------------- uitrusting (v0.14)
 ## !! VOORSTEL / VOORLOPIG !!  Uit story/ITEMS_ELEMENTEN.md (par. 4, 'Beginnersset'), wacht nog

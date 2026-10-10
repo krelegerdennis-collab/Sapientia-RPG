@@ -24,13 +24,10 @@ kapotte saves laden met 0. `new_game()` en `go_to_title()` zetten de verdieping 
 - **Rustpunt elke 10 verdiepingen**: 10, 20, ... 100 (`Dungeon100Rules.is_rest_floor(f)`).
 - **Aanraken (A)**: HP en MP van de hele party (en de Codex-bondgenoot) vol, ook KO; het verdiepingsnummer
   wordt het **checkpoint** (gaat alleen omhoog); daarna de vraag *Voortgang opslaan?* (Ja/Nee, zoals een boekpunt).
-- **Verlies (hele party KO) in de kerker**:
-  - met checkpoint: de groep ontwaakt op **de verdieping van het checkpoint** (bij het rustpunt), HP/MP vol,
-    **25% van het goud kwijt**; checkpoint/best blijven;
-  - zonder checkpoint (verdieping 1-9, nog geen rustpunt aangeraakt): gewone game over = Wilgendal, helft van het
-    goud kwijt, `dungeon100_floor = 0` (de kerker begint weer bij 1);
-  - de kerker-scène bestaat niet (`Dungeon100Rules.dungeon_scene`): terugval op Wilgendal;
-  - buiten de kerker (verdieping 0) werkt game over zoals altijd.
+- **Verlies (hele party KO) in de kerker** is sinds de Blauwe Kisten niet meer een respawn op het rustpunt.
+  **Dood is dungeon uit**: wereldkaart bij de ingang (`van_dungeon100`), tijdelijke run weg, echte party terug,
+  Blauwe Kist-items blijven. Het rustpunt geneest alleen. Zie `HANDOFF_DUNGEON100_BLUECHEST.md`.
+  Buiten de kerker (verdieping 0) werkt game over zoals altijd.
 - Winnen of vluchten verandert de verdieping niet.
 - Een rustpunt wordt pas een checkpoint als je het **aanraakt**, niet als je de verdieping alleen binnenloopt.
   Staat het rustpunt achter de baas van de 10e verdieping (aanrader), dan verlies je de baas niet "gratis".
@@ -38,9 +35,9 @@ kapotte saves laden met 0. `new_game()` en `go_to_title()` zetten de verdieping 
 ### API `Dungeon100Rules` (allemaal `static`)
 `is_valid_floor(f)`, `is_rest_floor(f)`, `checkpoint_for(f)` (hoogste rustpunt <= f, 0 onder 10),
 `next_rest_floor(f)`, `floors_until_rest(f)`, `shows_hud(f)`, `hud_text(f)` ("Verdieping 12/100"),
-`checkpoint_after_rest(cp, f)`, `defeat_plan(f, cp, scene_ok := true)` -> `{respawn_floor, to_dungeon, gold_keep}`,
+`checkpoint_after_rest(cp, f)`, `defeat_plan(f, cp, scene_ok := true)` -> `{respawn_floor: 0, to_dungeon: false, leave, gold_keep}` (in de kerker: leave, niet verdieping 1),
 `best_after(best, f)`, `heal_party(party, codex_pages)`, `save_data(...)`, `load_data(raw)`, `scene_available()`.
-Constanten: `FLOORS`, `REST_INTERVAL`, `REST_SPAWN = "rustpunt"`, `GOLD_KEEP_AT_REST_POINT`, `GOLD_KEEP_GAME_OVER`.
+Constanten: `FLOORS`, `REST_INTERVAL`, `REST_SPAWN = "rustpunt"`, `WORLD_SPAWN = "van_dungeon100"`, `GOLD_KEEP_RUN_LOST` (1.0, echte goud terug), `GOLD_KEEP_GAME_OVER`.
 
 ## 3. Wat de generator moet doen
 
@@ -48,11 +45,9 @@ Constanten: `FLOORS`, `REST_INTERVAL`, `REST_SPAWN = "rustpunt"`, `GOLD_KEEP_AT_
 2. Op `Dungeon100Rules.is_rest_floor(n)` een rustpunt neerzetten:
    `objects.add_child(Dungeon100Rustpunt.create(Vector2i(x, y)))` (of de scène `scenes/dungeon100_rustpunt.tscn`).
    Het is een gewoon blokkerend object met `interact(player)`, 1 tile.
-3. **Pad van de kerker-scène**: `Dungeon100Rules.dungeon_scene` (standaard `res://scenes/maps/dungeon100.tscn`,
-   pas de standaardwaarde aan als de generator een ander pad gebruikt). Bij verlies met checkpoint doet
-   `GameState.end_battle("lose")` een gewone scènewissel hierheen, met `pending_spawn = "rustpunt"`
-   en `dungeon100_floor = <checkpoint>`. De generator bouwt dan verdieping `dungeon100_floor` en zet de speler bij
-   het rustpunt (spawnpunt-naam `Dungeon100Rules.REST_SPAWN`, of negeer `pending_spawn` en kies zelf).
+3. **Pad van de kerker-scène**: `Dungeon100Rules.dungeon_scene` (standaard `res://scenes/maps/dungeon100.tscn`).
+   Bij verlies doet `GameState.end_battle("lose")` een scènewissel naar de **wereldkaart** (`WORLD_SCENE`),
+   spawn `van_dungeon100`, verdieping 0. Niet naar het rustpunt.
 4. Opslaan in de kerker bewaart de verdieping. Na laden is `dungeon100_floor` weer die waarde en `return_map` /
    `tile` de plek in de scène: de generator moet een verdieping dus deterministisch kunnen herbouwen
    (bv. seed uit het verdiepingsnummer) of bij `has_return_point` een veilige tile kiezen.

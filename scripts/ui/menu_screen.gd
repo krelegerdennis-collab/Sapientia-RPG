@@ -175,7 +175,19 @@ static func _grey(b: Button) -> void:
 
 static func _recolor_grey(b: Button) -> void:
 	var c := MenuColors.ACCENT_GREY if b.has_focus() else MenuColors.TEXT_OFF
+	if bool(b.get_meta("permanent", false)):
+		c = MenuColors.PERMANENT if b.has_focus() else MenuColors.PERMANENT_DIM
 	_set_button_color(b, c)
+
+
+## Permanent item (Blauwe Kist, Het Gesimuleerde Archief): blauwe tekst. Een grijs item blijft grijs
+## (donkerder blauw), een gewoon item houdt zijn focuskleur.
+static func tint_permanent(b: Button) -> void:
+	b.set_meta("permanent", true)
+	if is_button_greyed(b):
+		_recolor_grey(b)
+	else:
+		b.add_theme_color_override("font_color", MenuColors.PERMANENT)
 
 
 static func is_button_greyed(b: Button) -> bool:

@@ -400,7 +400,7 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 	if room["monsters"].size() != d["monster_slots"].size() + boss_n or room["chests"].size() != d["chest_slots"].size():
 		return "aantal monsters/kisten komt niet overeen met de slots"
 	for c in room["chests"]:
-		if ids.has(c["id"]) or not GD.ITEMS.has(c["item"]) or int(c["n"]) < 1:
+		if ids.has(c["id"]) or not (GD.ITEMS.has(c["item"]) or GD.EQUIPMENT.has(c["item"])) or int(c["n"]) < 1:
 			return "kist %s ongeldig" % [c]
 		ids[c["id"]] = true
 	if int(room["tier"]) != Content.tier_for_floor(f) or not str(room["name"]).contains(str(f)) or int(room["dungeon100_floor"]) != f:
@@ -579,24 +579,30 @@ func _scene_tests() -> void:
 	var up_route := _route(r3, tile(), d["spawn_up"])
 	await _walk_route(up_route)
 	await walk("move_up", 1)
+	check("ladder op verdieping 1 vraagt eerst om bevestiging (Het Gesimuleerde Archief)",
+			await wait_until(func(): return Dialog.has_choices(), 5.0))
+	Dialog.choose(0)       # Verlaten
 	check("ladder op verdieping 1 -> wereldkaart", await wait_scene("Wereldkaart"))
 	await wait_fade()
 	var wsp: Node2D = scene().get_node("Spawns/van_dungeon100")
 	check("buiten de grot: verdieping 0, speler bij de ingang op de wereldkaart %s" % tile(),
-			GameState.dungeon100_floor == 0 and tile() == Vector2i((wsp.position / 16.0).floor()) and GameState.dungeon100_seed == run_seed)
-	# opnieuw naar binnen: zelfde seed, dus dezelfde verdieping 1
+			GameState.dungeon100_floor == 0 and tile() == Vector2i((wsp.position / 16.0).floor()) and GameState.dungeon100_seed == 0
+			and not GameState.dungeon100_run_active())
+	# opnieuw naar binnen: een nieuwe run kiest een nieuwe seed
 	player().place_at(et + D, U)
 	await pframes(2)
 	await walk("move_up", 1)
 	await wait_floor(1)
-	check("opnieuw binnen: verdieping 1 met dezelfde seed = dezelfde kaart",
-			GameState.dungeon100_floor == 1 and scene().room["layout"] == d["layout"])
+	var seed2: int = GameState.dungeon100_seed
+	check("opnieuw binnen: nieuwe run, verdieping 1 met een nieuwe seed (%d)" % seed2,
+			GameState.dungeon100_floor == 1 and seed2 != 0 and seed2 != run_seed and GameState.dungeon100_run_active()
+			and scene().room["layout"] == Gen.generate(seed2, 1)["layout"])
 	# laden uit de save: verdieping 3 op een bossen-verdieping (10) opent ook gewoon
 	GameState.dungeon100_floor = 10
 	GameState.change_map(DUNGEON, "omhoog")
 	await wait_floor(10)
 	var rb := scene()
-	var db: Dictionary = Gen.generate(run_seed, 10)
+	var db: Dictionary = Gen.generate(seed2, 10)
 	check("verdieping 10 (baasverdieping) laadt: baas-slot %s vrij en bereikbaar" % [db["boss_slot"]],
 			rb.floor_no == 10 and db["boss_slot"] != Gen.NO_TILE and not rb.is_wall(db["boss_slot"]) and not rb.is_wall(db["boss_slot"] + Vector2i(1, 1)))
 	check("floor_ready-signaal en floor_data aanwezig", rb.floor_data == db)

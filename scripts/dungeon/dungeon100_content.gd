@@ -18,6 +18,7 @@ extends RefCounted
 
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
+const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 
 ## Vijanden die op een verdieping kunnen voorkomen (game_data.gd ENEMIES, geen bazen).
 const POOLS := [
@@ -63,6 +64,8 @@ static func monsters(data: Dictionary) -> Array:
 
 
 ## Kisten op de kist-slots; buit en goud schalen met de verdieping (Dungeon100Scaling.chest_entry).
+## Per kist is deterministisch bepaald of hij gewoon, BLAUW (permanente buit) of een MIMIC is ("kind", zie
+## dungeon100_blue.gd).
 static func chests(data: Dictionary) -> Array:
 	var f: int = data["floor"]
 	var rng := RandomNumberGenerator.new()
@@ -71,7 +74,7 @@ static func chests(data: Dictionary) -> Array:
 	var i := 0
 	for t in data["chest_slots"]:
 		i += 1
-		out.append(Scaling.chest_entry(f, "d100_%d_%d_%d" % [int(data["run_seed"]), f, i], t, rng))
+		out.append(Blue.chest_entry(int(data["run_seed"]), f, "d100_%d_%d_%d" % [int(data["run_seed"]), f, i], t, rng))
 	return out
 
 

@@ -33,6 +33,7 @@ signal damage_shown(target_name: String, amount: int)
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const COMMANDS := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten"]
 ## Hoe lang een gevechtsbericht in beeld blijft (A drukken = sneller).
 const MESSAGE_TIME := 0.8
@@ -1378,7 +1379,7 @@ func _dungeon100_boss_loot() -> String:
 		return ""
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	var loot := Dungeon100Scaling.boss_loot(floor_nr, rng)
+	var loot := Dungeon100Blue.with_warp(Dungeon100Scaling.boss_loot(floor_nr, rng), floor_nr)    # eindbaas: + Warp-kristal
 	GameState.gold += Dungeon100Scaling.grant_loot(loot, GameState.inventory)
 	GameState.story_flags[Dungeon100Scaling.boss_flag(floor_nr)] = true
 	return "Buit van de baas!\n" + "\n".join(Dungeon100Scaling.loot_lines(loot))
@@ -1505,7 +1506,12 @@ func _wait(seconds: float) -> void:
 	var settings := get_node_or_null("/root/Settings")
 	var tempo: float = settings.battle_speed() if settings else 1.0
 	while t < seconds:
+		# Een test (of game over) kan het gevecht weghalen terwijl deze lus nog loopt.
+		if not is_inside_tree():
+			return
 		await get_tree().process_frame
+		if not is_inside_tree():
+			return
 		var speed := 3.0 if Input.is_action_pressed("interact") else 1.0
 		t += get_process_delta_time() * speed * tempo
 

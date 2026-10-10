@@ -5,7 +5,7 @@ extends Node
 ##           10e verdieping) en Dungeon100Rules (rustpunt op rest_slot van elke 10e verdieping, spawn 'rustpunt').
 ##   Deel B: save/load: één blok "dungeon100" met verdieping, seed, checkpoint en best.
 ##   Deel C: echte scène op verdieping 10: baas + rustpunt + HUD-tekst + geschaalde monsters; echt baasgevecht.
-##   Deel D: nederlaag in de grot: terug bij het rustpunt (checkpoint), zonder checkpoint naar Wilgendal.
+##   Deel D: nederlaag in de grot: dood is dungeon uit (wereldkaart bij de ingang), daarna een nieuwe run op verdieping 1.
 ## Zit niet in de export (scripts/tests/*).
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
@@ -147,6 +147,16 @@ func battle() -> Node:
 	return s if s != null and s.name == "Battle" else null
 
 
+## Stopt een lopend gevecht zonder dat de wachtlus nog een frame pakt (die is dan al weg).
+func _drop_battle() -> void:
+	var b := battle()
+	if b == null:
+		return
+	if get_tree().current_scene == b:
+		get_tree().current_scene = null
+	b.free()
+
+
 func wait_battle_state(states: Array, timeout := 30.0) -> String:
 	var t0 := Time.get_ticks_msec()
 	while Time.get_ticks_msec() - t0 < timeout * 1000.0:
@@ -250,9 +260,14 @@ func _data_tests() -> void:
 					scale_ok = false
 			for c in room["chests"]:
 				var tier: int = int(c["loot"]["tier"])
-				if int(c["floor"]) != f or tier != S.tier_for_floor(f) and tier != S.tier_for_floor(f) - 1:
+				var expect := S.tier_for_floor(f)
+				var kind := str(c.get("kind", "normaal"))
+				var tier_ok := tier == expect or tier == expect - 1
+				if kind == "blauw":
+					tier_ok = tier == mini(S.MAX_TIER, expect + 1)
+				if int(c["floor"]) != f or not tier_ok:
 					chest_ok = false
-					details.append("kist sd%d vd%d tier%d" % [sd, f, tier])
+					details.append("kist sd%d vd%d %s tier%d" % [sd, f, kind, tier])
 	check("baas op boss_slot (2x2, bewaker, juiste vijand) op elke 10e verdieping en nergens anders %s" % [details.slice(0, 3)],
 			boss_ok and no_boss_other)
 	check("rustpunt op rest_slot op elke 10e verdieping en nergens anders", rest_ok)
@@ -379,16 +394,13 @@ func _floor10_tests() -> void:
 	var es: Dictionary = b.enemies[0]["s"]
 	check("baasgevecht gebruikt de schaal van verdieping 10: %s, HP %s" % [es["name"], es["max_hp"]],
 			es["name"] == bw["name"] and int(es["max_hp"]) == int(bs["max_hp"]))
-	# de baas wint van een party op 1 HP: echte nederlaag -> ontwaken bij het rustpunt (checkpoint 10)
-	GameState.gold = 400
-	var over := await lose_battle()
-	check("GAME OVER-tekst bij de baas: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nJe ontwaakt bij het rustpunt.")
-	check("nederlaag bij de baas: Diepe Grot op verdieping 10 naast het rustpunt", await wait_floor(10)
-			and (tile() - d["rest_slot"]).length() == 1 and scene().get_node_or_null("Objects/Rustpunt") != null)
-	check("HP vol, 25% goud kwijt (300), checkpoint 10 blijft, baas nog niet verslagen", GameState.party[0]["hp"] == GameState.party[0]["max_hp"]
-			and GameState.gold == 300 and GameState.dungeon100_checkpoint == 10 and not S.boss_defeated(10, GameState.story_flags)
-			and scene().monsters.any(func(m): return m.boss))
-	await screenshot("d100_integratie_respawn_baas")
+	# De baas laat niet vluchten (hierboven). Het gevecht afbreken als 'flee' houdt de run
+	# en het rustpunt. Eerst de scène vrijgeven, anders blijft de gevechtslus op een lege tree hangen.
+	_drop_battle()
+	GameState.end_battle("flee")
+	check("vluchten uit het baasgevecht: nog verdieping 10, checkpoint 10, baas staat er nog", await wait_floor(10)
+			and GameState.dungeon100_checkpoint == 10 and GameState.dungeon100_run_active()
+			and scene().monsters.any(func(m): return m.boss) and scene().get_node_or_null("Objects/Rustpunt") != null)
 
 	# winst op de baas (kamerlogica): baas weg voor altijd (bewaker-vlag), rustpunt en verdieping blijven
 	var r2 := scene()
@@ -412,17 +424,22 @@ func _floor10_tests() -> void:
 
 # ================================================================ deel D
 func _defeat_tests() -> void:
-	# nederlaag op verdieping 15 met checkpoint 10: ontwaken bij het rustpunt van verdieping 10
+	# nederlaag op verdieping 15, ook mét rustpunt 10: terug naar de wereldkaart bij de ingang
 	GameState.new_game("Dennis")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
+	GameState.gold = 200
+	GameState.inventory["kruid"] = 2
+	GameState.party[0]["level"] = 5
 	GameState.dungeon100_seed = 4242
 	GameState.dungeon100_floor = 15
 	GameState.dungeon100_checkpoint = 10
 	GameState.dungeon100_best = 15
-	GameState.gold = 200
 	GameState.change_map(DUNGEON, "omhoog")
 	await wait_floor(15)
+	check("binnenkomst start een run: level 1, geen goud, momentopname bewaart level 5 en 200 goud",
+			GameState.dungeon100_run_active() and GameState.party[0]["level"] == 1 and GameState.gold == 0
+			and int(GameState.dungeon100_snapshot["gold"]) == 200 and int(GameState.dungeon100_snapshot["party"][0]["level"]) == 5)
 	var r := scene()
 	var victim: MapMonster = r.monsters[0] if not r.monsters.is_empty() else null
 	check("verdieping 15 met monsters", victim != null)
@@ -430,26 +447,27 @@ func _defeat_tests() -> void:
 	r.start_monster_battle(victim)
 	check("gevecht gestart", await wait_until(func(): return battle() != null and battle().is_node_ready(), 20.0))
 	check("het monster is geschaald naar verdieping 15", int(battle().enemies[0]["s"]["max_hp"]) > int(GD.ENEMIES[victim_enemy]["max_hp"]))
-	check("game-over-tekst in de grot met checkpoint: 'Je ontwaakt bij het rustpunt.'", GameState.defeat_text(false).contains("rustpunt"))
+	check("game-over-tekst: dood is het Archief uit (niet het rustpunt)", GameState.defeat_text(false).contains("Archief uit")
+			and not GameState.defeat_text(false).contains("rustpunt"))
 	await lose_battle()
-	check("na de nederlaag: Diepe Grot op verdieping 10 (checkpoint)", await wait_floor(10))
-	var d: Dictionary = Gen.generate(4242, 10)
-	var rp: Node = scene().get_node_or_null("Objects/Rustpunt")
-	var sp: Array = d["room"]["spawns"][Gen.SPAWN_REST]
-	check("speler staat naast het rustpunt (spawn 'rustpunt' %s), kijkt ernaartoe" % [sp], rp != null and tile() == tile_of(sp)
-			and (tile() - d["rest_slot"]).length() == 1 and (d["rest_slot"] - tile()) == player().facing)
-	check("HP vol, 25% goud kwijt (150), best/checkpoint blijven", GameState.party[0]["hp"] == GameState.party[0]["max_hp"]
-			and GameState.gold == 150 and GameState.dungeon100_checkpoint == 10 and GameState.dungeon100_best == 15)
-	check("de baas van verdieping 10 is nog gewoon aanwezig (niet verslagen)", scene().monsters.any(func(m): return m.boss))
-	await screenshot("d100_integratie_respawn")
+	check("na de nederlaag: wereldkaart, niet de grot", await wait_scene_path(Rules.WORLD_SCENE))
+	var wsp: Node2D = scene().get_node_or_null("Spawns/van_dungeon100")
+	check("speler staat bij de ingang (spawn van_dungeon100)", wsp != null and tile() == Vector2i((wsp.position / 16.0).floor()))
+	check("echte party terug: level 5, 200 goud, kruid 2, verdieping 0, run voorbij, best 15",
+			GameState.party[0]["level"] == 5 and GameState.party[0]["hp"] == GameState.party[0]["max_hp"]
+			and GameState.gold == 200 and GameState.item_count("kruid") == 2 and GameState.dungeon100_floor == 0
+			and not GameState.dungeon100_run_active() and GameState.dungeon100_checkpoint == 0 and GameState.dungeon100_best == 15)
+	var hud := GameState.get_node_or_null("Dungeon100Hud")
+	check("HUD verborgen buiten de grot", hud != null and not hud.visible)
+	await screenshot("d100_integratie_dood_uit")
 
-	# nederlaag zonder checkpoint: Wilgendal, kerker weer vanaf 1
-	GameState.dungeon100_floor = 7
-	GameState.dungeon100_checkpoint = 0
-	GameState.gold = 200
-	GameState.return_map = DUNGEON
-	GameState.in_battle = true
-	GameState.end_battle("lose")
-	check("zonder rustpunt: terug in Wilgendal", await wait_scene_path(TOWN))
-	check("verdieping 0, half goud", GameState.dungeon100_floor == 0 and GameState.gold == 100)
+	# opnieuw naar binnen: nieuwe run op verdieping 1, level 1; de echte voortgang blijft in de momentopname
+	GameState.change_map(DUNGEON, "omhoog")
+	check("nieuwe run na herintrede: verdieping 1, level 1", await wait_floor(1) and GameState.party[0]["level"] == 1
+			and GameState.dungeon100_run_active() and GameState.dungeon100_seed != 0 and GameState.dungeon100_seed != 4242)
+	check("de momentopname van de nieuwe run bewaart nog steeds level 5 en 200 goud",
+			int(GameState.dungeon100_snapshot["party"][0]["level"]) == 5 and int(GameState.dungeon100_snapshot["gold"]) == 200)
+	GameState.dungeon100_leave()
+	check("verlaten zet de echte party terug", GameState.party[0]["level"] == 5 and GameState.gold == 200
+			and not GameState.dungeon100_run_active())
 	GameState.encounter_multiplier = 1.0

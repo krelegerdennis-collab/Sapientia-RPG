@@ -8,6 +8,9 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 ##   - Binnenkomen vanaf de wereldkaart (verdieping 0): verdieping 1; de seed wordt eenmalig
 ##     gekozen (en zit in de save), dus elke verdieping ziet er bij een volgend bezoek hetzelfde uit.
 ##   - Laden uit een save: verdieping en seed komen uit de save.
+##   - HET GESIMULEERDE ARCHIEF: het eerste binnenkomen van een run (GameState.dungeon100_begin_run) zet de
+##     party op level 1 zonder uitrusting en bewaart de echte party/tas in een momentopname; de ladder op
+##     verdieping 1 (na een bevestiging) geeft de run op en brengt je naar de wereldkaart.
 ##   - Hooks voor andere systemen: signal floor_ready(floor_no, data) zodra de kamer er staat.
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
@@ -21,7 +24,14 @@ var floor_data: Dictionary = {}
 var rustpunt: Node2D = null
 
 
+const LEAVE_QUESTION := "Het Archief verlaten? Deze run gaat verloren. Blauwe databanken blijven."
+
+## Voor de tests: de laatste keer dat de ladder-vraag gesteld is en wat er gekozen werd (0 = verlaten).
+var last_leave_choice := -1
+
+
 func _ready() -> void:
+	GameState.dungeon100_begin_run()
 	if GameState.dungeon100_seed == 0:
 		GameState.dungeon100_seed = randi_range(1, 0x7FFFFFFF)
 	if GameState.dungeon100_floor < 1 or GameState.dungeon100_floor > Gen.MAX_FLOOR:
@@ -56,9 +66,24 @@ func allows_checkpoint() -> bool:
 
 
 ## Trap/ladder: eerst de nieuwe verdieping in GameState zetten, dan pas de gewone uitgang
-## (fade + dezelfde scène laden). De ladder op verdieping 1 gaat naar de wereldkaart.
+## (fade + dezelfde scène laden). De ladder op verdieping 1 gaat naar de wereldkaart: na een bevestiging
+## is de run opgegeven (de echte party/tas komen terug, GameState.dungeon100_leave).
 func _use_exit(exit: Node) -> void:
 	if exit.target_map == Gen.SCENE:
 		var next := floor_no + (1 if exit.name == "Uitgang_v" else -1)
 		GameState.dungeon100_floor = clampi(next, 1, Gen.MAX_FLOOR)
-	super._use_exit(exit)
+		super._use_exit(exit)
+		return
+	_confirm_leave(exit)
+
+
+func _confirm_leave(exit: Node) -> void:
+	if Dialog.is_open or GameState.changing_map:
+		return
+	player.input_locked = true
+	last_leave_choice = await Dialog.ask(LEAVE_QUESTION, ["Verlaten", "Blijven"])
+	if last_leave_choice == 0:
+		GameState.dungeon100_leave()
+		super._use_exit(exit)
+	else:
+		player.input_locked = false

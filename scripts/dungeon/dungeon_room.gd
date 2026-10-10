@@ -22,6 +22,7 @@ const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
 const BOOK_SCENE := "res://scenes/book_point.tscn"
 const ChestScript := preload("res://scripts/dungeon/dungeon_chest.gd")
+const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const PropScript := preload("res://scripts/dungeon/dungeon_prop.gd")
 const SignScript := preload("res://scripts/dungeon/dungeon_sign.gd")
 const STORY_OBJECT_SCENE := "res://scenes/story_object.tscn"
@@ -156,6 +157,8 @@ func _build() -> void:
 	for c in room.get("chests", []):
 		var ch: DungeonChest = ChestScript.new()
 		ch.setup(c)
+		ch.mimic_woke.connect(start_mimic_battle)
+		ch.blue_secured.connect(_on_blue_secured)
 		objects.add_child(ch)
 		chests.append(ch)
 		_blocked[ch.tile()] = true
@@ -489,20 +492,40 @@ func monster_touch(m: Node) -> void:
 func start_monster_battle(m: Node) -> void:
 	_touch_lock = true
 	last_touch_id = m.monster_id
+	var t := _prepare_battle(m.monster_id)
+	# v0.14: monsterniveau van de kamer (een baas krijgt geen niveau: zijn stats staan in game_data.gd)
+	GameState.start_battle(m.group.duplicate(), t, player.facing, terrain_at(t), m.boss, 0 if m.boss else tier())
+
+
+## Het Gesimuleerde Archief: een Mimic-kist is wakker; gevecht met een Mimic (geschaald met de verdieping
+## via GameState.dungeon100_floor, zoals elk monster in de kerker). Wint de groep, dan gaat de kist open
+## (_restore_after_battle); vlucht ze, dan blijft hij dicht.
+func start_mimic_battle(ch: DungeonChest) -> void:
+	_touch_lock = true
+	var t := _prepare_battle("mimic:" + ch.chest_id, ch.chest_id)
+	GameState.start_battle([Dungeon100Blue.MIMIC_ENEMY], t, player.facing, terrain_at(t), false, 0)
+
+
+## Gevechtscontext vastleggen (waar staan de monsters, wie vocht) en de speler stilzetten. Geeft de
+## laatste hele tile van de speler terug (niet halverwege een stap). 'mimic' = kist-id bij een Mimic.
+func _prepare_battle(id: String, mimic := "") -> Vector2i:
 	var positions := {}
 	for o in monsters:
 		if is_instance_valid(o):
 			positions[o.monster_id] = o.get_state()     # tijdens een stap: de tile waar hij vandaan kwam
-	GameState.map_monster_battle = {"map": scene_file_path, "room": room_id, "id": m.monster_id,
-			"positions": positions}
+	GameState.map_monster_battle = {"map": scene_file_path, "room": room_id, "id": id,
+			"positions": positions, "mimic": mimic}
 	player.input_locked = true
-	# terug op de laatste hele tile van de speler (niet halverwege een stap)
 	var t: Vector2i = player.get_tile()
 	if player.is_moving:
 		var tp: Vector2 = player.get("_target")
 		t = Vector2i((tp / 16.0).floor()) - player.facing
-	# v0.14: monsterniveau van de kamer (een baas krijgt geen niveau: zijn stats staan in game_data.gd)
-	GameState.start_battle(m.group.duplicate(), t, player.facing, terrain_at(t), m.boss, 0 if m.boss else tier())
+	return t
+
+
+## Een Blauwe Kist is geopend: meteen automatisch opslaan, zodat de databank niet verloren gaat.
+func _on_blue_secured(_chest: DungeonChest) -> void:
+	try_autosave("blauw")
 
 
 func _restore_after_battle(ctx: Dictionary) -> void:
@@ -514,6 +537,11 @@ func _restore_after_battle(ctx: Dictionary) -> void:
 			if int(st.get("stun", 0)) > 0:
 				m.stun(int(st["stun"]))     # v0.16: verlamd gebleven tijdens een ander gevecht
 	var id := str(ctx.get("id", ""))
+	var mimic := str(ctx.get("mimic", ""))
+	if mimic != "" and GameState.last_battle_result == "win":
+		for ch in chests:
+			if is_instance_valid(ch) and ch.chest_id == mimic:
+				ch.open_after_mimic()
 	match GameState.last_battle_result:
 		"win":
 			if not GameState.defeated_map_monsters.has(room_id):
