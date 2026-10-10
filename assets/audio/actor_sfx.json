@@ -1,0 +1,194 @@
+{
+	"versie": 1,
+	"beschrijving": "SFX per held en per monster. Bestanden: res://assets/audio/sfx/helden/<id>/<slot>.wav en res://assets/audio/sfx/monsters/<id>/<slot>.wav. De AudioManager maakt hier sleutels van (held_<id>_<slot> en monster_<id>_<slot>). De wavs zijn synthetische placeholders (tools/gen_actor_sfx.py) tot er echte opnames zijn. Ontbreekt een bestand, dan blijft dat geluid stil.",
+	"slots": ["aanval", "raak", "dood", "vaardigheid"],
+	"helden": {
+		"dennis": {
+			"naam": "Dennis",
+			"klas": "Krijger",
+			"stem": "Lage mannenstem en een zwaard.",
+			"klank": "zwaard",
+			"volume_db": -5,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Zwaard dat door de lucht snijdt.",
+				"raak": "Korte, ingehouden kreun.",
+				"dood": "Zware val en een laatste adem.",
+				"vaardigheid": "Zwaardere houw, metaal op metaal."
+			}
+		},
+		"noor": {
+			"naam": "Noor",
+			"klas": "Magiër",
+			"stem": "Hoge, magische stem. Vuur en bliksem.",
+			"klank": "magie",
+			"volume_db": -6,
+			"pitch_variatie": 0.05,
+			"slots": {
+				"aanval": "Korte magische zwaai, stijgend.",
+				"raak": "Hoge, zachte kreet.",
+				"dood": "Wegstervende glinstering.",
+				"vaardigheid": "Vuur- of blikseminslag."
+			}
+		},
+		"lotte": {
+			"naam": "Lotte",
+			"klas": "Priester",
+			"stem": "Warme middenstem en een staf. Genezen klinkt als klokjes.",
+			"klank": "klok",
+			"volume_db": -6,
+			"pitch_variatie": 0.03,
+			"slots": {
+				"aanval": "Staf die zacht tikt, met een toon.",
+				"raak": "Warme, korte kreet.",
+				"dood": "Dalende klok die uitdooft.",
+				"vaardigheid": "Stijgende klokjes, genezing."
+			}
+		}
+	},
+	"monsters": {
+		"mosslijm": {
+			"naam": "Mosslijm",
+			"stem": "Nat, plakkerig geklots. Klein en zacht.",
+			"klank": "slijm",
+			"volume_db": -8,
+			"pitch_variatie": 0.06,
+			"slots": {
+				"aanval": "Natte klodder die loslaat.",
+				"raak": "Kort gespetter.",
+				"dood": "Slijm dat uitloopt.",
+				"vaardigheid": "Bubbels die opstijgen."
+			}
+		},
+		"moskonijn": {
+			"naam": "Moskonijn",
+			"stem": "Snel, hoog gepiep. Een beet en een sprong.",
+			"klank": "piep",
+			"volume_db": -7,
+			"pitch_variatie": 0.07,
+			"slots": {
+				"aanval": "Korte sprong en een piep.",
+				"raak": "Scherp gepiep.",
+				"dood": "Piep die naar beneden valt.",
+				"vaardigheid": "Twee snelle bijten."
+			}
+		},
+		"papiergeest": {
+			"naam": "Papiergeest",
+			"stem": "Ritselend papier, droog en licht.",
+			"klank": "papier",
+			"volume_db": -7,
+			"pitch_variatie": 0.05,
+			"slots": {
+				"aanval": "Bladzijden die langs elkaar schuren.",
+				"raak": "Kort gefladder.",
+				"dood": "Papier dat op de grond valt.",
+				"vaardigheid": "Een wolk van bladzijden."
+			}
+		},
+		"glitchmot": {
+			"naam": "Glitchmot",
+			"stem": "Kapotte vleugels van ruis. Digitaal en snel.",
+			"klank": "glitch",
+			"volume_db": -7,
+			"pitch_variatie": 0.08,
+			"slots": {
+				"aanval": "Fladderende ruis.",
+				"raak": "Korte digitale hik.",
+				"dood": "Signaal dat uitvalt.",
+				"vaardigheid": "Stoorsignaal, scherp en gebroken."
+			}
+		},
+		"mech_wachter": {
+			"naam": "Mech. Wachter",
+			"stem": "IJzer, messing en servo's. Half kapot.",
+			"klank": "metaal",
+			"volume_db": -5,
+			"pitch_variatie": 0.03,
+			"slots": {
+				"aanval": "Hydraulische stoot en een metalen klap.",
+				"raak": "Kletterend pantser.",
+				"dood": "Tandwielen die over de vloer rollen.",
+				"vaardigheid": "Zegelslag: zware metalen klap."
+			}
+		},
+		"kennis_beest": {
+			"naam": "Het Kennis-Beest",
+			"stem": "Zware golem van boeken en steen.",
+			"klank": "golem",
+			"volume_db": -3,
+			"pitch_variatie": 0.03,
+			"slots": {
+				"aanval": "Lage dreun en verschuivend papier.",
+				"raak": "Barstend gesteente.",
+				"dood": "Instortende stapel boeken.",
+				"vaardigheid": "Boekenhamer, een verpletterende klap."
+			}
+		},
+		"wortelkruiper": {
+			"naam": "Wortelkruiper",
+			"stem": "Droog hout en knijpende wortels.",
+			"klank": "hout",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Krakend hout dat toeslaat.",
+				"raak": "Korte tak die breekt.",
+				"dood": "Wortels die slap vallen.",
+				"vaardigheid": "Wortelgreep, een langzame knijp."
+			}
+		},
+		"mistuil": {
+			"naam": "Mistuil",
+			"stem": "Luchtige roep, bijna zonder vleugelslag.",
+			"klank": "uil",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Zachte whoosh en een korte roep.",
+				"raak": "Hoge, korte kreet.",
+				"dood": "Roep die in de mist wegzakt.",
+				"vaardigheid": "Mistkreet, een stijgende schreeuw."
+			}
+		},
+		"sporenzwam": {
+			"naam": "Sporenzwam",
+			"stem": "Doffe paddenstoel. Poeft sporen uit.",
+			"klank": "zwam",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Doffe plof.",
+				"raak": "Natte plop.",
+				"dood": "Lucht die wegloopt.",
+				"vaardigheid": "Sporenwolk, meerdere ploffen."
+			}
+		},
+		"wortelkoning": {
+			"naam": "De Wortelkoning",
+			"stem": "Diepe, oude boom. Het hart kraakt.",
+			"klank": "boom",
+			"volume_db": -2,
+			"pitch_variatie": 0.02,
+			"slots": {
+				"aanval": "Lage houten dreun.",
+				"raak": "Diepe barst in de stam.",
+				"dood": "De boom die instort.",
+				"vaardigheid": "Wortelgreep van de koning, zwaar en lang."
+			}
+		},
+		"mimic": {
+			"naam": "Mimic",
+			"stem": "Een kist die kraakt en dan bijt.",
+			"klank": "kist",
+			"volume_db": -5,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Deksel dat openklapt en dichtbijt.",
+				"raak": "Houten klop op het deksel.",
+				"dood": "Kist die dichtslaat en stilvalt.",
+				"vaardigheid": "Kistbeet, een harde hap."
+			}
+		}
+	}
+}

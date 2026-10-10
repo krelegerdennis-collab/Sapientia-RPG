@@ -10,6 +10,7 @@ extends RefCounted
 ## Regels staan in HANDOFF_CODEX.md.
 
 const CodexData := preload("res://scripts/data/codex_data.gd")
+const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const AllyScript := preload("res://scripts/battle/codex_ally.gd")
 const StatusBoxScript := preload("res://scripts/battle/hero_status_box.gd")
 
@@ -117,6 +118,7 @@ func ally_turn(a: Dictionary) -> void:
 	if choice == "attack" or not CodexData.SKILLS.has(choice):
 		last_ally_action = {"kind": "attack", "skill": "", "target": target["name"]}
 		battle.show_message("%s valt aan!" % c["name"])
+		ActorSfx.play(c, "aanval")
 		await battle._hero_wind_up(c, true)
 		await battle._damage(target, battle._physical_damage(c, target, 1.0))
 		battle._hero_rest(c)
@@ -128,6 +130,8 @@ func ally_turn(a: Dictionary) -> void:
 		ally_t = heal_target if heal_target != null else battle._valid_ally(null)
 	last_ally_action = {"kind": "skill", "skill": choice, "target": (ally_t if ally_t != null else target)["name"]}
 	battle.show_message("%s: %s!" % [c["name"], sk["name"]])
+	if str(sk["type"]) != "guard":
+		ActorSfx.play(c, "vaardigheid")
 	match str(sk["type"]):
 		"damage":
 			await battle._hero_wind_up(c, true)

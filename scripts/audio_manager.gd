@@ -11,6 +11,7 @@ extends Node
 ##     de busvolumes niet; set_music_volume() e.d. sturen door naar Settings.
 ##   - De bussen "Music" en "SFX" maakt Settings aan; hier alleen een stille terugval.
 ##   - Manifest: res://assets/audio/audio_manifest.json, bestanden in res://assets/audio/{bgm,sfx}/.
+##   - Per held en monster: res://assets/audio/actor_sfx.json (mappen helden/ en monsters/).
 ##   - auto_ui_sounds staat standaard UIT (focus-hover in gevechts-/veldmenu's gaf spam).
 ##   - Robuust zonder audio: geen manifest of geen bestanden = stil, zonder errors/warnings
 ##     (alleen print_verbose, zichtbaar met --verbose). Echte fouten (kapotte JSON, onbekende
@@ -33,6 +34,7 @@ signal music_finished(track_name: String)
 signal volume_changed(bus_name: String, linear_volume: float)
 
 const MANIFEST_PATH := "res://assets/audio/audio_manifest.json"
+const ACTOR_SFX_PATH := "res://assets/audio/actor_sfx.json"
 
 const BUS_MASTER := "Master"
 const BUS_MUSIC := "Music"
@@ -377,8 +379,55 @@ func load_manifest() -> bool:
 	else:
 		_report("manifest_sfx", "Sectie 'sfx' in het manifest moet een object zijn.", true)
 
+	_merge_actor_sfx()
 	_manifest_loaded = true
 	return true
+
+
+## Held- en monstergeluiden staan niet in het grote manifest maar in actor_sfx.json,
+## naast de mappen res://assets/audio/sfx/helden/ en monsters/. Sleutel:
+## held_<id>_<slot> of monster_<id>_<slot>, slot is aanval/raak/dood/vaardigheid.
+func _merge_actor_sfx() -> void:
+	if not FileAccess.file_exists(ACTOR_SFX_PATH):
+		print_verbose("[AudioManager] Geen acteur-sfx (%s)." % ACTOR_SFX_PATH)
+		return
+	var text := FileAccess.get_file_as_string(ACTOR_SFX_PATH)
+	var json := JSON.new()
+	var error := json.parse(text)
+	if error != OK:
+		_report("actor_sfx_parse", "Acteur-sfx bevat een JSON-fout op regel %d: %s" % [json.get_error_line(), json.get_error_message()], true)
+		return
+	if typeof(json.data) != TYPE_DICTIONARY:
+		_report("actor_sfx_format", "Acteur-sfx moet een JSON-object zijn.", true)
+		return
+	var data: Dictionary = json.data
+	var slots: Array = data.get("slots", ["aanval", "raak", "dood", "vaardigheid"])
+	for soort in ["helden", "monsters"]:
+		var groep = data.get(soort, {})
+		if typeof(groep) != TYPE_DICTIONARY:
+			_report("actor_sfx_" + soort, "Sectie '%s' in de acteur-sfx moet een object zijn." % soort, true)
+			continue
+		var prefix := "held" if soort == "helden" else "monster"
+		for id in groep:
+			var entry = groep[id]
+			if typeof(entry) != TYPE_DICTIONARY:
+				_report("actor_sfx_entry:" + str(id), "Acteur '%s' moet een object zijn." % str(id), true)
+				continue
+			var slot_map: Dictionary = entry.get("slots", {})
+			for slot in slots:
+				var sleutel := "%s_%s_%s" % [prefix, str(id), str(slot)]
+				if _sfx.has(sleutel):
+					_report("actor_sfx_dup:" + sleutel, "Acteur-sfx '%s' botst met een bestaand geluid." % sleutel, true)
+					continue
+				var beschrijving := str(slot_map.get(slot, entry.get("stem", "")))
+				_sfx[sleutel] = {
+					"bestanden": ["%s/%s/%s.wav" % [soort, str(id), str(slot)]],
+					"categorie": "acteur",
+					"beschrijving": beschrijving,
+					"volume_db": float(entry.get("volume_db", -6.0)),
+					"pitch_variatie": float(entry.get("pitch_variatie", 0.04)),
+					"min_interval_ms": 0,
+				}
 
 
 ## Controleert of alle bestanden uit het manifest bestaan.
