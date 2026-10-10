@@ -875,7 +875,7 @@ func _equipment_logic_tests() -> void:
 		for k in it:
 			if k in ["atk", "def", "agi"] or k in ["mag", "mdef"]:
 				data_ok = data_ok and (it[k] is int)
-	check("uitrustingsdata: %d stukken, elk een geldig vak" % GameData.EQUIPMENT.size(), data_ok and GameData.EQUIPMENT.size() == 14)   # v0.15: + Vonkzwaard, v0.16: + Leerling-mantel
+	check("uitrustingsdata: %d stukken, elk een geldig vak" % GameData.EQUIPMENT.size(), data_ok and GameData.EQUIPMENT.size() == 38)   # v0.15: + Vonkzwaard, v0.16: + Leerling-mantel, Task #4: + 24 d100_*-stukken (14 + 24)
 	check("vakken Wapen/Schild/Helm/Harnas/Accessoire", GameData.EQUIP_SLOTS.map(func(x): return Equipment.slot_name(x))
 			== ["Wapen", "Schild", "Helm", "Harnas", "Accessoire"])
 	check("stats ATK/DEF/MAG/MDEF/SPD (SPD = agi)", GameData.EQUIP_STATS.map(func(x): return Equipment.stat_label(x))

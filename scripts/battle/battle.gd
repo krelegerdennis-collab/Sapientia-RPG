@@ -32,6 +32,7 @@ signal state_changed(new_state: String)
 signal damage_shown(target_name: String, amount: int)
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const COMMANDS := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten"]
 ## Hoe lang een gevechtsbericht in beeld blijft (A drukken = sneller).
 const MESSAGE_TIME := 0.8
@@ -293,10 +294,15 @@ func _spawn_enemies(ids: Array) -> void:
 		if GameState.pending_boss:
 			data = BossCore.apply_boss(data)   # v0.14: baas-stats + kern (alleen in een baasgevecht)
 			can_flee = false                   # v0.15: niet vluchten voor een baas
+			# Task #4: baas van de dungeon van 100 verdiepingen (verdieping 0 = ongewijzigd)
+			data = Dungeon100Scaling.battle_enemy(data, GameState.dungeon100_floor, true)
 		else:
 			data.erase("boss")
-			# v0.14: monsterniveau van de dungeonverdieping (0 = gewoon; game_data.gd TIERS)
-			if GameState.pending_tier > 0:
+			if GameState.dungeon100_floor > 0:
+				# Task #4: monsterschaal per verdieping (vervangt hier het kamerniveau "tier")
+				data = Dungeon100Scaling.battle_enemy(data, GameState.dungeon100_floor, false)
+			elif GameState.pending_tier > 0:
+				# v0.14: monsterniveau van de dungeonverdieping (0 = gewoon; game_data.gd TIERS)
 				data = GameData.apply_tier(data, GameState.pending_tier)
 		if tutorial.has("enemy_hp"):
 			data["max_hp"] = int(tutorial["enemy_hp"])   # oefengevecht: iets taaier
@@ -1332,6 +1338,7 @@ func _victory() -> void:
 		exp_total += int(e["s"]["exp"])
 		gold_total += int(e["s"]["gold"])
 	GameState.gold += gold_total
+	var loot_page := _dungeon100_boss_loot()
 	await _wait(0.3)
 	# EXP uitdelen (alleen helden die nog staan), level-ups onthouden
 	var level_pages: Array[String] = []
@@ -1349,6 +1356,8 @@ func _victory() -> void:
 		gains += " ATK+%d DEF+%d AGI+%d" % [s["atk"] - before["atk"], s["def"] - before["def"], s["agi"] - before["agi"]]
 		level_pages.append("%s\n%s" % [msgs[msgs.size() - 1], gains])
 	level_pages.append_array(codex.victory_exp(exp_total))
+	if loot_page != "":
+		level_pages.append(loot_page)
 	_refresh_party()
 	caption.hide()
 	victory_label.text = victory_text(exp_total, gold_total)
@@ -1359,6 +1368,20 @@ func _victory() -> void:
 	for page in level_pages:
 		await _victory_page(page)
 	await GameState.end_battle("win")
+
+
+## Task #4: na een baas in de dungeon van 100 verdiepingen: de gegarandeerde buit in de tas (en het
+## goud erbij), de baasvlag zetten. Geeft de tekst van de buitpagina ("" = geen baasbuit).
+func _dungeon100_boss_loot() -> String:
+	var floor_nr: int = GameState.dungeon100_floor
+	if floor_nr <= 0 or not GameState.pending_boss:
+		return ""
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var loot := Dungeon100Scaling.boss_loot(floor_nr, rng)
+	GameState.gold += Dungeon100Scaling.grant_loot(loot, GameState.inventory)
+	GameState.story_flags[Dungeon100Scaling.boss_flag(floor_nr)] = true
+	return "Buit van de baas!\n" + "\n".join(Dungeon100Scaling.loot_lines(loot))
 
 
 ## Tekst van de eerste overwinningspagina (ook gebruikt door de autotest).

@@ -276,6 +276,13 @@ const ITEMS := {
 		"desc": "Water dat zacht cyaan oplicht. Geeft magie terug."},
 	# v0.11: van de Oude Man (de kist naast het huis). "short" = naam in het gevechtsmenu.
 	"kruid":      {"name": "Geneeskrachtig kruid", "short": "Kruid", "target": "ally", "heal_hp": 25, "heal_mp": 0},
+	# Task #4: sterkere genees-items, alleen als buit in de dungeon van 100 verdiepingen (dungeon100_scaling.gd).
+	"sterk_drankje": {"name": "Sterk Drankje", "target": "ally", "heal_hp": 120, "heal_mp": 0,
+		"desc": "Dik, donker drankje. Geneest veel levenspunten."},
+	"toverbrouwsel": {"name": "Toverbrouwsel", "target": "ally", "heal_hp": 0, "heal_mp": 40,
+		"desc": "Gloeiend brouwsel. Geeft veel magie terug."},
+	"elixer": {"name": "Elixer", "target": "ally", "heal_hp": 400, "heal_mp": 60,
+		"desc": "Een zeldzaam elixer uit de diepte. Geneest bijna alles."},
 	# Codex (Kernfragment stap 2): alleen in een gevecht, op een VIJAND. Schrijft een verzwakt
 	# monster in de Codex (kans: scripts/data/codex_data.gd). Altijd op, ook als het mislukt.
 	# Te krijgen (v0.17): 3 van Marit in Esdoorn (na de ontmoeting) + 2 in kisten van het Donker Woud;
@@ -346,6 +353,57 @@ const EQUIPMENT := {
 	# VOORLOPIG: 'gif-immuun' uit het ontwerp is nog niet gebouwd (er is nog geen gif).
 	"groenring": {"name": "Groene Ring", "slot": "accessoire", "mdef": 2, "price": 150,
 		"desc": "Een ring van groen glas. (Gif-immuun: komt later.)"},
+	# Task #4 (Monsterschaal en buit, HANDOFF_DUNGEON100_SCHAAL.md): buit van de dungeon van 100 verdiepingen.
+	# Id = "d100_<soort>_<niveau>", niveau 2-5 (niveau 1 = de uitrusting hierboven). Niet te koop.
+	# Welke stukken waar vallen: scripts/data/dungeon100_scaling.gd (GEAR). VOORLOPIGE waarden.
+	"d100_zwaard_2": {"name": "Archiefzwaard", "slot": "wapen", "atk": 20, "wie": ["krijger"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_zwaard_3": {"name": "Runenzwaard", "slot": "wapen", "atk": 32, "wie": ["krijger"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_zwaard_4": {"name": "Glitchzwaard", "slot": "wapen", "atk": 48, "wie": ["krijger"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_zwaard_5": {"name": "Zegelzwaard", "slot": "wapen", "atk": 70, "wie": ["krijger"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_staf_2": {"name": "Archiefstaf", "slot": "wapen", "atk": 5, "mag": 10, "wie": ["magier", "priester"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_staf_3": {"name": "Runenstaf", "slot": "wapen", "atk": 8, "mag": 18, "wie": ["magier", "priester"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_staf_4": {"name": "Glitchstaf", "slot": "wapen", "atk": 12, "mag": 30, "wie": ["magier", "priester"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_staf_5": {"name": "Zegelstaf", "slot": "wapen", "atk": 18, "mag": 46, "wie": ["magier", "priester"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_schild_2": {"name": "Archiefschild", "slot": "schild", "def": 6, "mdef": 2, "wie": ["krijger", "priester"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_schild_3": {"name": "Runenschild", "slot": "schild", "def": 10, "mdef": 4, "wie": ["krijger", "priester"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_schild_4": {"name": "Glitchschild", "slot": "schild", "def": 16, "mdef": 7, "wie": ["krijger", "priester"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_schild_5": {"name": "Zegelschild", "slot": "schild", "def": 24, "mdef": 10, "wie": ["krijger", "priester"], "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_helm_2": {"name": "Archiefhelm", "slot": "helm", "def": 4, "mdef": 2, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_helm_3": {"name": "Runenhelm", "slot": "helm", "def": 7, "mdef": 4, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_helm_4": {"name": "Glitchhelm", "slot": "helm", "def": 11, "mdef": 6, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_helm_5": {"name": "Zegelhelm", "slot": "helm", "def": 16, "mdef": 9, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_harnas_2": {"name": "Archiefharnas", "slot": "harnas", "def": 9, "mdef": 3, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_harnas_3": {"name": "Runenharnas", "slot": "harnas", "def": 15, "mdef": 6, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_harnas_4": {"name": "Glitchharnas", "slot": "harnas", "def": 24, "mdef": 10, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_harnas_5": {"name": "Zegelharnas", "slot": "harnas", "def": 36, "mdef": 15, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_ring_2": {"name": "Archiefring", "slot": "accessoire", "mdef": 5, "agi": 3, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_ring_3": {"name": "Runenring", "slot": "accessoire", "mdef": 9, "agi": 5, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_ring_4": {"name": "Glitchring", "slot": "accessoire", "mdef": 14, "agi": 8, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_ring_5": {"name": "Zegelring", "slot": "accessoire", "mdef": 20, "agi": 12, "price": 0,
+		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
 }
 ## Sterkste: hoe zwaar elke stat telt per soort held (VOORLOPIG, eigen voorstel van RPG CODE;
 ## niet in het ontwerp). Score van een stuk = som van bonus x gewicht.

@@ -20,6 +20,8 @@ const PAUSE := Vector2(0.35, 1.3)
 ## Stap-animatie (frames per seconde) voor rondlopende monsters.
 const WALK_FPS := 4.0
 const PLACEHOLDER_COLOR := Color("ff1ee6")
+const GameData := preload("res://scripts/data/game_data.gd")
+const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 
 var room: Node = null
 var data := {}
@@ -27,6 +29,10 @@ var monster_id := ""
 var enemy_id := ""
 var moves := true
 var boss := false
+## Task #4: verdieping van de dungeon van 100 verdiepingen (eigen "floor" in de data, anders
+## GameState.dungeon100_floor; 0 = gewoon monster). Het gevecht zelf schaalt via GameState.dungeon100_floor
+## (battle.gd); dit is alleen voor wie de sterkte van dit monster wil zien (bv. kleurtint of kamer-UI).
+var floor_nr := 0
 var group: Array = []
 var size := Vector2i.ONE
 ## Linkerboven-tile waar hij staat (tijdens een stap: waar hij vandaan komt).
@@ -63,6 +69,7 @@ func setup(p_room: Node, d: Dictionary, rng_seed: int) -> void:
 	enemy_id = str(d.get("enemy", ""))
 	moves = bool(d.get("moves", true))
 	boss = bool(d.get("boss", false))
+	floor_nr = int(d.get("floor", GameState.dungeon100_floor))
 	group = (d.get("group", [enemy_id]) as Array).duplicate()
 	var sz: Array = d.get("size", [1, 1])
 	size = Vector2i(int(sz[0]), int(sz[1]))
@@ -222,6 +229,14 @@ func bump(_by: Node) -> void:
 func interact(_by: Node) -> void:
 	if room:
 		room.monster_touch(self)
+
+
+## Task #4: de vijand-stats van dit monster op zijn verdieping (zonder verdieping: de gewone data).
+func scaled_stats() -> Dictionary:
+	var base: Dictionary = GameData.ENEMIES.get(enemy_id, {})
+	if base.is_empty():
+		return {}
+	return Dungeon100Scaling.battle_enemy(base, floor_nr, boss)
 
 
 ## Voor de save/terugkeer na een gevecht. v0.16: + "stun" (blijft staan na een ander gevecht).
