@@ -465,6 +465,11 @@ func _world_tests() -> void:
 	var w := await enter(WORLD, "van_esdoorn")
 	check("wereldkaart met Esdoorn en het Donker Woud", w != null and w.get_node_or_null("Exits/NaarEsdoorn") != null
 			and w.get_node_or_null("Exits/NaarWoud") != null)
+	var wereld_ogg := "res://assets/audio/bgm/bgm_wereld.ogg"
+	var wereld_stil := not ResourceLoader.exists(wereld_ogg)
+	check("wereldkaart speelt track 'wereld' (bgm_wereld.ogg)", w != null and w.music_track == "wereld"
+			and AudioManager.has_music("wereld")
+			and (wereld_stil == (AudioManager.get_current_music() == "")))
 	if w == null:
 		return
 	var ex_e: Node = w.get_node("Exits/NaarEsdoorn")

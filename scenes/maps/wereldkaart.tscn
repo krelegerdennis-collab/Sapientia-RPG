@@ -10,6 +10,7 @@
 [node name="Wereldkaart" type="Node2D"]
 script = ExtResource("1_i0cqu")
 map_name = "Wereldkaart"
+music_track = "wereld"
 encounters = true
 
 [node name="Ground" type="TileMapLayer" parent="."]
