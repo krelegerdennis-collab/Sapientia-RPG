@@ -1330,12 +1330,21 @@ func _stairs_and_town_return_tests() -> void:
 
 
 ## v0.13: SAPIENTIA - De Vergeten Archieven, glitch, eigen art als die er is, app-naam.
+## Met title_main.png is die plaat de hoofdpagina (titel zit erin); logo/kern/glitch blijven weg.
 func _title_v13_checks(t: Node) -> void:
+	var has_main := ResourceLoader.exists("res://assets/ui/title_main.png")
 	var has_logo := ResourceLoader.exists("res://assets/ui/title_logo.png")
 	var has_bg := ResourceLoader.exists("res://assets/ui/title_bg.png")
 	check("titel 'SAPIENTIA', ondertitel 'De Vergeten Archieven'",
 			t.title_label.text == "SAPIENTIA" and t.subtitle_label.text == "De Vergeten Archieven")
-	if has_logo:
+	if has_main:
+		var main_path: String = t.background.texture.resource_path
+		check("hoofdpagina title_main.png, geen logo/kern/glitch erover (%s)" % main_path.get_file(),
+				main_path.ends_with("title_main.png") and t.backfill.texture.resource_path.ends_with("title_main.png")
+				and t.logo == null and t.kern == null and t.subtitle_art == null and t.glitch == null
+				and not t.title_label.visible and not t.subtitle_label.visible
+				and t.background.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
+	elif has_logo:
 		check("logo van RPG ART (title_logo.png 208x36) op (88,10) i.p.v. de tekst (%s %s)" % [t.glitch.position, t.glitch.size],
 				t.logo != null and t.glitch.content == t.logo and not t.title_label.visible
 				and t.glitch.position == Vector2(88, 10) and t.glitch.size == Vector2(208, 36))
@@ -1354,9 +1363,10 @@ func _title_v13_checks(t: Node) -> void:
 	else:
 		check("nog geen title_logo.png: titel als tekst met het pixelfont", t.logo == null
 				and t.glitch.content == t.title_label and t.title_label.is_visible_in_tree() and t.subtitle_label.is_visible_in_tree())
-	var bg_path: String = t.background.texture.resource_path
-	check("achtergrond: %s (%s)" % [bg_path.get_file(), "title_bg.png van RPG ART" if has_bg else "nog de bibliotheek"],
-			bg_path.ends_with("title_bg.png") if has_bg else bg_path.ends_with("bibliotheek.png"))
+	if not has_main:
+		var bg_path: String = t.background.texture.resource_path
+		check("achtergrond: %s (%s)" % [bg_path.get_file(), "title_bg.png van RPG ART" if has_bg else "nog de bibliotheek"],
+				bg_path.ends_with("title_bg.png") if has_bg else bg_path.ends_with("bibliotheek.png"))
 	check("app-/projectnaam SAPIENTIA", ProjectSettings.get_setting("application/config/name") == "SAPIENTIA")
 	if FileAccess.file_exists("res://export_presets.cfg"):
 		var cfg := ConfigFile.new()
@@ -1379,6 +1389,8 @@ func _title_v13_checks(t: Node) -> void:
 			absf(cr.position.x - 240.0) <= 1.0 and absf(cr.end.x - 372.0) <= 1.0 and cr.end.y <= 201.0 and cr.position.y >= 148.0)
 	check("versielabel v0.19 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.19"
 			and t.version_label.get_global_rect().end.x <= t.size.x and t.version_label.get_global_rect().end.y <= t.size.y)
+	if has_main:
+		return
 	var g: Control = t.glitch
 	if not g.strip_frames.is_empty():
 		var frames_seen := {}
@@ -1606,17 +1618,21 @@ func _load_restore_test() -> void:
 			t.save_info.visible and ":" in t.save_info.text and card_style is StyleBoxFlat
 			and (card_style as StyleBoxFlat).bg_color.is_equal_approx(Color(UiStyle.INK, UiStyle.PANEL_ALPHA))
 			and (card_style as StyleBoxFlat).border_color == UiStyle.BORDER)
-	t.glitch._wait = 99.0          # rustig beeld voor de screenshot
-	t.glitch._burst_left = 0.0
-	t.glitch._hide_all()
-	await frames(2)
-	await overworld_shot("_title")
-	t.glitch.force_glitch()
-	for i in 30:
-		await get_tree().process_frame
-		if t.glitch.is_glitching() and (t.glitch._split[0].visible or t.glitch.strip_frame >= 2):
-			break
-	await overworld_shot("_title_glitch")
+	if t.glitch:
+		t.glitch._wait = 99.0          # rustig beeld voor de screenshot
+		t.glitch._burst_left = 0.0
+		t.glitch._hide_all()
+		await frames(2)
+		await overworld_shot("_title")
+		t.glitch.force_glitch()
+		for i in 30:
+			await get_tree().process_frame
+			if t.glitch.is_glitching() and (t.glitch._split[0].visible or t.glitch.strip_frame >= 2):
+				break
+		await overworld_shot("_title_glitch")
+	else:
+		await frames(2)
+		await overworld_shot("_title")
 	await click_at(t.continue_button.get_global_rect().get_center())
 	check("'Doorgaan' -> het huis (opgeslagen map)", await wait_scene("Huis"))
 	await frames(5)
