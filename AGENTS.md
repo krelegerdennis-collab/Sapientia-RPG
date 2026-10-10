@@ -72,7 +72,7 @@ Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest
 
 **Nieuwe suite toevoegen:** script in `scripts/tests/<naam>_tests.gd` (zelfde PASS/FAIL/RESULT-format,
 `get_tree().quit(1 if failures else 0)`), een regel in de lijst in `scripts/game_state.gd` `_ready()`,
-en de suite in de matrix van `.github/workflows/tests.yml`.
+en de suite in de matrix van `.github/workflows/tests.yml` (tijdelijk `.github/ci/tests.yml`, zie `.github/ci/README.md`).
 
 ## Kaart van de code
 - `project.godot` — autoloads: `GameState`, `Transition`, `Dialog`, `Story`, `Crt`, `Settings`, `AudioManager`. Hoofdscène `scenes/ui/title.tscn`.
