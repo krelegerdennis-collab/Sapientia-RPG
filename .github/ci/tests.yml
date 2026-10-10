@@ -24,7 +24,8 @@ jobs:
         suite: [autotest, menutest, puzzletest, dungeontest, golemtest,
                 archieftest, kerntest, kernkrachttest, woudtest, codextest,
                 checkpointtest, dungeon100gentest, dungeon100schaaltest,
-                dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest]
+                dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
+                actorsfxtest]
     steps:
       - uses: actions/checkout@v4
 
