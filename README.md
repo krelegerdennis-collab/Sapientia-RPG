@@ -783,8 +783,11 @@ in de kamer gaat terug naar een spawnpunt vóór de deur.
      Dit staat in het overwinningsvenster, samen met per held "VOLG. LEVEL" (de EXP die nog nodig is).
      Genoeg EXP = **level-up** (stats stijgen volgens `growth`), daarna een pagina per held. KO-helden staan op met 1 HP.
    - **Vluchten gelukt**: terug naar dezelfde plek.
-   - **Alle helden KO**: GAME OVER → je begint weer in Wilgendal voor het huis, volledig genezen,
-     maar met de helft van je goud.
+   - **Alle helden KO**: GAME OVER → je ontwaakt waar je deze kamer of map binnenkwam, met de
+     voortgang van dat moment en iedereen volledig genezen (HP/MP). In een baaskamer telt die
+     binnenkomst niet: bij de Golem ontwaak je in de Bibliotheek, bij de Wortelkoning in de
+     Sporenkring. Alleen zonder kamer-checkpoint (direct na een nieuw spel) geldt de oude regel:
+     Wilgendal voor het huis, volledig genezen, de helft van je goud kwijt.
 
 ### Schadeformules (in `scripts/battle/battle.gd`)
 - Aanval: `ATK - DEF/2`, ±15% geluk, minimaal 1. Verdedigen = halve schade.
@@ -917,7 +920,7 @@ Laat de speler zelf spelen:
   - tikken op menuknoppen en vijanden, vluchten (F2)
   - de trap-tekst, de bos-achtergrond in het bos
   - het stad-icoon terug het dorp in en weer uit
-  - game over + respawn in het dorp
+  - game over + respawn waar je de wereldkaart binnenkwam (14,31), zonder goudverlies
 Daarnaast test hij het gevechtsscherm:
 - of de balken gelijk zijn aan de echte HP/MP
 - tikken op een heldensprite en op een statusvak
@@ -929,6 +932,12 @@ Daarnaast test hij het gevechtsscherm:
   venster) en de overworld staat na het gevecht weer op 384x216
 
 Hij print `PASS`/`FAIL` per check.
+
+**Kamer-checkpoint** (v0.19, respawn na game over):
+```
+godot --headless --path . -- --checkpointtest
+```
+Gewone dungeonkamer, wereldkaart, Golem (met opslaan/laden), Wortelkoning, oude en kapotte save, verslagen baas.
 
 **Veldmenu-test** (los, sneller):
 ```
