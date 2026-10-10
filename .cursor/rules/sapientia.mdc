@@ -1,0 +1,13 @@
+---
+description: SAPIENTIA harde regels (Godot 4.3 mobiele JRPG). Volledig: AGENTS.md
+alwaysApply: true
+---
+Lees eerst `AGENTS.md` (volledig) en `docs/WORKFLOW.md`.
+
+Harde regels:
+- Raak niets aan uit `tools/handwerk.txt` (handgetekende art). Teken geen definitieve art: alleen gemarkeerde placeholders, geregistreerd in `tools/placeholders_*.txt`.
+- Alle speler-tekst Nederlands. Verhaal volgt `docs/lore/CANON.md`.
+- Nooit secrets/keystores/APK/AAB committen; nooit signing-velden in `export_presets.cfg`; geen versienummers bumpen.
+- Eén taak per branch `cursor/<korte-taak>`, kleine PR naar `main` met ingevuld PR-template; niet zelf mergen.
+- Elk nieuw systeem krijgt een headless testsuite; alle suites moeten slagen (`.github/scripts/run_suite.sh <suite>`).
+- Godot 4.3, GDScript met type hints, signals i.p.v. harde koppeling, data in `scripts/data/`, mobile-first (384x216, gl_compatibility), geen zware shaders, `preload`.
