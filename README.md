@@ -8,6 +8,27 @@ touch-knoppen voor je telefoon én **turn-based gevechten** met random encounter
 
 Getest met **Godot 4.3** en **Godot 4.7.2** (standaardversie, *niet* de .NET/C#-versie).
 
+**Nieuw in v0.19 (versie 0.19, code 21): kamer-checkpoint - na GAME OVER ontwaak je waar je de kamer/map binnenkwam.**
+- Wens Dennis: 'Ik ging dood bij de baas, spawnpoint moet altijd voor de laatste room zijn.' Tot v0.18 ging je na
+  ELKE game over terug naar Wilgendal (spawn `start`, (16,8)), volledig genezen maar met de **helft van je goud kwijt**,
+  wat je ook in de dungeon had gedaan.
+- Nu: bij elke binnenkomst van een map/kamer (uitgang/mapwissel, laden; niet terug uit een gevecht) legt `map.gd`
+  het **kamer-checkpoint** vast (`GameState.checkpoint`): map + tile + kijkrichting waar je binnenkwam + een kopie
+  van de voortgang (zelfde velden als een save, `GameState.state_data`). GAME OVER (overal: dungeonkamer, dorp,
+  **wereldkaart**, baas) = terug op dat punt met die voortgang (party/EXP/spullen/goud/verhaal/kernen/Codex),
+  iedereen vol HP/MP; bestiarium en speeltijd lopen door. Monsters in de kamer staan er weer. Daarna autosave
+  (reden `respawn`) en een vertellerregel.
+- **Baaskamers zetten geen checkpoint** (data: `"checkpoint": false` in `archief_golemhal` en `woud_open_plek`;
+  zonder die sleutel automatisch voor elke kamer met een `"boss"`-monster), dus wie bij de Golem of De Wortelkoning
+  sneuvelt, ontwaakt in de **Bibliotheek** / **Sporenkring** bij de ingang, kijkend naar de baasdeur:
+  'Je ontwaakt voor de deur...' (anders 'Je ontwaakt waar je binnenkwam...'; `TODO(verhaal)`). Baas blijft staan.
+- Gaat mee in de save (`"checkpoint"`). Laden in dezelfde kamer houdt het checkpoint van binnenkomst; een oude
+  save zonder checkpoint zet het op de plek waar je laadt. Zonder checkpoint (alleen direct na een nieuw spel):
+  de oude regel (Wilgendal, helft goud).
+- Nieuwe test `--checkpointtest` (`scripts/tests/checkpoint_tests.gd`): gewone kamer, wereldkaart, Golem met
+  opslaan/laden ertussen, Wortelkoning, oude/kapotte save, verslagen baas. `--autotest`: game over nu terug op de
+  wereldkaart (14,31) zonder goudverlies; versielabel v0.19. Arm64-preset: `../rpg_prototype_v0.19_arm64.apk`.
+
 **Nieuw in v0.18 (versie 0.18, code 20): rugaanzichten Moskonijn + Mech. Wachter, Codex-namen, audio-basis, design/lore + CANON.**
 - Rug-sprites van RPG ART (`/workspace/art_rug_v18/out`): `res://art/enemies/moskonijn_rug.png` (106x110, voeten
   53,104) en `res://assets/sprites/enemies/mech_wachter_rug.png` (88x112, voeten 44,106); zelfde canvas, voetanker
@@ -762,8 +783,11 @@ in de kamer gaat terug naar een spawnpunt vóór de deur.
      Dit staat in het overwinningsvenster, samen met per held "VOLG. LEVEL" (de EXP die nog nodig is).
      Genoeg EXP = **level-up** (stats stijgen volgens `growth`), daarna een pagina per held. KO-helden staan op met 1 HP.
    - **Vluchten gelukt**: terug naar dezelfde plek.
-   - **Alle helden KO**: GAME OVER → je begint weer in Wilgendal voor het huis, volledig genezen,
-     maar met de helft van je goud.
+   - **Alle helden KO**: GAME OVER → je ontwaakt waar je deze kamer of map binnenkwam, met de
+     voortgang van dat moment en iedereen volledig genezen (HP/MP). In een baaskamer telt die
+     binnenkomst niet: bij de Golem ontwaak je in de Bibliotheek, bij de Wortelkoning in de
+     Sporenkring. Alleen zonder kamer-checkpoint (direct na een nieuw spel) geldt de oude regel:
+     Wilgendal voor het huis, volledig genezen, de helft van je goud kwijt.
 
 ### Schadeformules (in `scripts/battle/battle.gd`)
 - Aanval: `ATK - DEF/2`, ±15% geluk, minimaal 1. Verdedigen = halve schade.
@@ -896,7 +920,7 @@ Laat de speler zelf spelen:
   - tikken op menuknoppen en vijanden, vluchten (F2)
   - de trap-tekst, de bos-achtergrond in het bos
   - het stad-icoon terug het dorp in en weer uit
-  - game over + respawn in het dorp
+  - game over + respawn waar je de wereldkaart binnenkwam (14,31), zonder goudverlies
 Daarnaast test hij het gevechtsscherm:
 - of de balken gelijk zijn aan de echte HP/MP
 - tikken op een heldensprite en op een statusvak
@@ -908,6 +932,12 @@ Daarnaast test hij het gevechtsscherm:
   venster) en de overworld staat na het gevecht weer op 384x216
 
 Hij print `PASS`/`FAIL` per check.
+
+**Kamer-checkpoint** (v0.19, respawn na game over):
+```
+godot --headless --path . -- --checkpointtest
+```
+Gewone dungeonkamer, wereldkaart, Golem (met opslaan/laden), Wortelkoning, oude en kapotte save, verslagen baas.
 
 **Veldmenu-test** (los, sneller):
 ```

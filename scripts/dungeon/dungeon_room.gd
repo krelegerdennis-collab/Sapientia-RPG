@@ -78,6 +78,21 @@ func _ready() -> void:
 	super._ready()
 
 
+## v0.19: een BAASKAMER zet het kamer-checkpoint niet (wie bij de baas sneuvelt, ontwaakt in de
+## kamer ervoor). Data: "checkpoint": true/false per kamer; zonder die sleutel = geen checkpoint als
+## er een monster met "boss": true in de kamer staat (ook als hij al verslagen is).
+func allows_checkpoint() -> bool:
+	if not sets_checkpoint:
+		return false
+	if room.has("checkpoint"):
+		return bool(room["checkpoint"])
+	return not is_boss_room(room)
+
+
+static func is_boss_room(r: Dictionary) -> bool:
+	return r.get("monsters", []).any(func(m): return m.get("boss", false))
+
+
 # ---------------------------------------------------------------- bouwen
 func _build() -> void:
 	# v0.17: ook de kamers van het Donker Woud (scripts/data/woud_rooms.gd)

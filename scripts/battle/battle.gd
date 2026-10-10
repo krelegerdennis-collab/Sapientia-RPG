@@ -1397,7 +1397,8 @@ func _victory_page(text: String) -> void:
 
 func _defeat() -> void:
 	await say("De party is verslagen...", true)
-	await say("GAME OVER\nJe wordt wakker bij het begin.", true)
+	# v0.19: wakker worden waar je deze kamer/map binnenkwam (baas: in de kamer ervoor)
+	await say(GameState.defeat_text(GameState.pending_boss), true)
 	await GameState.end_battle("lose")
 
 

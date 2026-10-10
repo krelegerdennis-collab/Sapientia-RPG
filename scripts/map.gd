@@ -20,6 +20,10 @@ const AUTOSAVE_DELAY := 0.35
 @export var map_name := ""
 ## Kunnen hier monsters verschijnen? In dorpen staat dit UIT.
 @export var encounters := true
+## v0.19: zet binnenkomen hier het kamer-checkpoint (respawn na game over)? Baaskamers: nee.
+@export var sets_checkpoint := true
+## v0.19: na een respawn het bericht 'Je ontwaakt...' pas na de autosave (die wacht niet op tekstvakken).
+const RESPAWN_MSG_DELAY := 0.5
 ## TIJDELIJK (puzzels): F4 in debug-builds gaat hierheen.
 const DEBUG_PUZZLE_ROOM := "res://scenes/maps/archief_test.tscn"
 
@@ -45,6 +49,8 @@ func _ready() -> void:
 			push_warning("Spawnpunt '%s' bestaat niet in %s" % [GameState.pending_spawn, scene_file_path])
 		GameState.pending_spawn = ""
 
+	# v0.19 kamer-checkpoint: waar je deze map binnenkwam (zie GameState.checkpoint)
+	_update_checkpoint()
 	player.stepped.connect(_on_player_stepped)
 	# v0.10: MENU-knop op het touchscherm (veldmenu met o.a. het bestiarium)
 	var touch := get_node_or_null("TouchControls/Control")
@@ -57,6 +63,11 @@ func _ready() -> void:
 	Transition.fade_in()
 	if autosave_reason != "":
 		get_tree().create_timer(AUTOSAVE_DELAY).timeout.connect(try_autosave.bind(autosave_reason))
+	# v0.19 net ontwaakt na een game over: kort bericht (verteller), NA de autosave
+	if not GameState.pending_respawn_msg.is_empty():
+		var lines: Array = GameState.pending_respawn_msg
+		GameState.pending_respawn_msg = []
+		get_tree().create_timer(RESPAWN_MSG_DELAY).timeout.connect(_show_respawn_msg.bind(lines))
 	# v0.16 KERNKRACHT: vuurbal in het veld (knop KERN / toets K), zie scripts/kern/kern_kracht_veld.gd
 	add_child(load("res://scripts/kern/kern_kracht_veld.gd").new())
 	# v0.11: verhaal (tint, wie er staat, cutscenes bij binnenkomst / na een gevecht)
@@ -67,6 +78,32 @@ func _ready() -> void:
 		add_child(ka)
 		ka.start(self, GameState.pending_kern_absorb)
 	# (de autotest wordt sinds v0.10 door GameState gestart, zie game_state.gd)
+
+
+## v0.19 Kamer-checkpoint bijwerken bij binnenkomst: via een uitgang/mapwissel, na laden (tenzij
+## de save al een checkpoint op DEZE map had: dan blijft dat, met de voortgang van toen) of als de
+## scène zomaar geladen werd. NIET na een gevecht of een respawn, en niet in een baaskamer.
+func _update_checkpoint() -> void:
+	var kind := GameState.entry_kind
+	GameState.entry_kind = ""
+	if kind == "battle" or kind == "respawn":
+		return
+	if kind == "load" and str(GameState.checkpoint.get("map", "")) == scene_file_path:
+		return
+	if not allows_checkpoint():
+		return
+	GameState.set_checkpoint(scene_file_path, player.get_tile(), player.facing)
+
+
+## v0.19: mag deze map het checkpoint zetten? (DungeonRoom: niet in een baaskamer)
+func allows_checkpoint() -> bool:
+	return sets_checkpoint
+
+
+func _show_respawn_msg(lines: Array) -> void:
+	if not is_inside_tree() or GameState.in_battle or GameState.changing_map:
+		return
+	Dialog.show_lines(lines, "")
 
 
 ## Camera-grenzen = de map. Is de map kleiner dan het scherm (een kamer), dan staat

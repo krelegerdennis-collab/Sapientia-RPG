@@ -11,7 +11,7 @@ const CodexData := preload("res://scripts/data/codex_data.gd")   # Kernfragment 
 ## Hier begint een nieuw spel (v0.11: wakker worden in bed, in het huis).
 const START_MAP := "res://scenes/maps/huis_wilgendal.tscn"
 const START_SPAWN := "bed"
-## Hier kom je terug na GAME OVER (voor het huis).
+## Terugval bij GAME OVER als er (nog) geen kamer-checkpoint is (v0.19: zie 'checkpoint'): voor het huis.
 const RESPAWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const RESPAWN_SPAWN := "start"
 const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
@@ -114,6 +114,27 @@ var in_battle := false
 var map_monster_battle := {}
 var defeated_map_monsters := {}
 
+## v0.19 KAMER-CHECKPOINT (wens Dennis: 'spawnpoint moet altijd voor de laatste room zijn').
+## Bij ELKE binnenkomst van een map/kamer (deur, uitgang, laden; niet terug uit een gevecht) legt
+## map.gd hier vast WAAR je binnenkwam (tile + kijkrichting) plus een kopie van de voortgang op dat
+## moment ("state" = zelfde velden als een save). GAME OVER (overal: kamer, dorp, wereldkaart, baas)
+## = terug naar dat punt met die voortgang, iedereen vol HP/MP. Een BAASKAMER zet hem niet (map.gd
+## allows_checkpoint; dungeon_room.gd: kamers met een "boss"-monster of "checkpoint": false), dus wie
+## bij de baas sneuvelt, ontwaakt in de kamer ervoor. Gaat mee in de save ("checkpoint").
+## {} = nog geen (dan de oude regel: Wilgendal, helft van het goud kwijt).
+var checkpoint := {}
+## Hoe de volgende map binnenkomt: "door" (uitgang/mapwissel), "battle" (terug na winst/vlucht),
+## "respawn" (na game over), "load" (save geladen) of "" (onbekend, bv. direct een scène geladen).
+## map.gd leest en wist dit in _ready.
+var entry_kind := ""
+## Na een respawn: dit bericht (verteller) toont de map zodra hij in beeld is ("" = niets).
+var pending_respawn_msg: Array = []
+## Voor de tests/info: de laatste respawn ({"map", "tile", "facing", "boss"}).
+var last_respawn := {}
+# TODO(verhaal): definitieve tekst van het ontwaken (nu placeholder).
+const RESPAWN_LINES_BOSS := ["Je ontwaakt voor de deur...", "Je bent weer helemaal uitgerust."]
+const RESPAWN_LINES := ["Je ontwaakt waar je binnenkwam...", "Je bent weer helemaal uitgerust."]
+
 ## v7 (prestaties): alles wat een gevecht of mapwissel nodig heeft wordt bij de start
 ## alvast op de achtergrond geladen (ResourceLoader.load_threaded_request) en daarna
 ## vastgehouden. Zo hoeft er bij een encounter niets meer van 'schijf' te komen: dat
@@ -145,6 +166,7 @@ func _ready() -> void:
 	# v0.16: of  godot -- --kernkrachttest [--shots=/pad/map]  (scripts/tests/kernkracht_tests.gd, vuurbal).
 	# v0.17: of  godot -- --woudtest [--shots=/pad/map]  (scripts/tests/woud_tests.gd, Esdoorn + Donker Woud + Noor).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
+	# v0.19: of  godot -- --checkpointtest [--shots=/pad/map] [--v19=/workspace]  (kamer-checkpoint / respawn).
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
@@ -156,7 +178,8 @@ func _ready() -> void:
 			["--kerntest", "res://scripts/tests/kern_tests.gd", "KernTest", "kerntest"],
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
 			["--woudtest", "res://scripts/tests/woud_tests.gd", "WoudTest", "woudtest"],
-			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"]]:
+			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
+			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -275,6 +298,10 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	kernfragmenten = {}
 	pending_kern_absorb = ""
 	codex_reset()
+	checkpoint = {}
+	entry_kind = ""
+	pending_respawn_msg = []
+	last_respawn = {}
 	story_step = StoryData.START
 	story_flags = {}
 	pending_tutorial = {}
@@ -533,13 +560,29 @@ func autosave_on_background() -> bool:
 func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	if path == "":
 		path = save_path
+	var data := state_data(tile, facing)
+	data["game_version"] = str(ProjectSettings.get_setting("application/config/version", ""))
+	data["saved_at"] = Time.get_datetime_string_from_system()
+	data["saved_unix"] = Time.get_unix_time_from_system()
+	data["autosave"] = path == autosave_path
+	# v0.19 kamer-checkpoint (met zijn eigen voortgangs-kopie) gaat mee; altijd de sleutel
+	# ({} = nog geen), zodat handmatige save en autosave hetzelfde formaat houden
+	data["checkpoint"] = checkpoint.duplicate(true)
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		push_warning("Opslaan mislukt: %s" % error_string(FileAccess.get_open_error()))
+		return false
+	f.store_string(JSON.stringify(data, "  "))
+	f.close()
+	return true
+
+
+## v0.19: de voortgang als Dictionary (zelfde velden als een save, zonder checkpoint/tijdstempels).
+## Gebruikt door save_game en door het kamer-checkpoint (set_checkpoint).
+func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	var data := {
 		"version": SAVE_VERSION,
-		"game_version": str(ProjectSettings.get_setting("application/config/version", "")),
-		"saved_at": Time.get_datetime_string_from_system(),
-		"saved_unix": Time.get_unix_time_from_system(),
-		"autosave": path == autosave_path,
-		"map": current_map,
+		"map": map if map != "" else current_map,
 		"tile": [tile.x, tile.y],
 		"facing": [facing.x, facing.y],
 		"player_name": player_name,
@@ -562,13 +605,7 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 		e["mdef"] = h.get("mdef")
 		e.merge(Equipment.save_fields(h), true)
 		data["party"].append(e)
-	var f := FileAccess.open(path, FileAccess.WRITE)
-	if f == null:
-		push_warning("Opslaan mislukt: %s" % error_string(FileAccess.get_open_error()))
-		return false
-	f.store_string(JSON.stringify(data, "  "))
-	f.close()
-	return true
+	return data
 
 
 ## Leest een save (standaard de handmatige; v0.11: of 'path', bv. autosave_path).
@@ -586,6 +623,32 @@ func read_save(path := "") -> Dictionary:
 ## v0.11: 'path' = welke save ("" = de handmatige).
 func load_game(path := "") -> bool:
 	var d := read_save(path)
+	if not apply_state(d):
+		return false
+	# v0.19 kamer-checkpoint uit de save (oude saves: geen; dan zet de map hem bij binnenkomst)
+	checkpoint = _checkpoint_from(d.get("checkpoint", {}))
+	entry_kind = "load"
+	pending_respawn_msg = []
+	return true
+
+
+## v0.19: geldig checkpoint uit een save ({} = ontbreekt of kapot).
+static func _checkpoint_from(c) -> Dictionary:
+	if not (c is Dictionary) or not (c.get("map") is String) or str(c["map"]) == "":
+		return {}
+	var st = c.get("state")
+	if not (st is Dictionary) or not st.has("map") or not (st.get("party") is Array):
+		return {}
+	var t := _vec2i_from(c.get("tile"), Vector2i(-9999, -9999))
+	if t == Vector2i(-9999, -9999):
+		return {}
+	var fc := _vec2i_from(c.get("facing"), Vector2i.DOWN)
+	return {"map": str(c["map"]), "tile": [t.x, t.y], "facing": [fc.x, fc.y], "state": (st as Dictionary).duplicate(true)}
+
+
+## Zet alle voortgang uit een save-Dictionary terug (load_game, en v0.19 de respawn op het
+## checkpoint). false = geen geldige data.
+func apply_state(d: Dictionary) -> bool:
 	# v0.11: elke sleutel met een standaardwaarde; ontbrekende of verkeerde velden (oudere
 	# of nieuwere saves) laten het spel nooit vastlopen.
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
@@ -739,6 +802,7 @@ func change_map(path: String, spawn_name: String) -> void:
 	changing_map = true
 	pending_spawn = spawn_name
 	has_return_point = false
+	entry_kind = "door"
 	_autosave_request = "map"
 	await Transition.fade_out()
 	_go_to_scene(path)
@@ -824,9 +888,14 @@ func end_battle(result: String) -> void:
 	var target := return_map if return_map != "" else START_MAP
 	if result == "lose":
 		map_monster_battle = {}
-		respawn()
-		target = RESPAWN_MAP
+		if has_checkpoint():
+			# v0.19: terug naar waar je deze kamer/map binnenkwam (baas: de kamer ervoor)
+			target = respawn_at_checkpoint(pending_boss)
+		else:
+			respawn()
+			target = RESPAWN_MAP
 	else:
+		entry_kind = "battle"
 		# KO-helden staan na het gevecht weer op met 1 HP (houdt het simpel).
 		for h in party:
 			if h["hp"] <= 0:
@@ -850,8 +919,64 @@ func end_battle(result: String) -> void:
 	_go_to_scene(target)
 
 
-## GAME OVER: iedereen volledig genezen, helft van het goud kwijt,
-## terug naar het startpunt in het eerste dorp.
+## v0.19: is er een bruikbaar kamer-checkpoint?
+func has_checkpoint() -> bool:
+	return not checkpoint.is_empty() and ResourceLoader.exists(str(checkpoint.get("map", ""))) \
+			and checkpoint.get("state") is Dictionary
+
+
+## v0.19: leg het kamer-checkpoint vast (map.gd, bij binnenkomst): plek + kopie van de voortgang.
+func set_checkpoint(map: String, tile: Vector2i, facing: Vector2i) -> void:
+	checkpoint = {"map": map, "tile": [tile.x, tile.y], "facing": [facing.x, facing.y],
+			"state": state_data(tile, facing, map)}
+
+
+## v0.19 GAME OVER met checkpoint: voortgang terug zoals bij binnenkomst (party/EXP/spullen/goud/
+## verhaal/kernen/Codex), iedereen vol HP/MP, en terug op die plek. Bestiarium en speeltijd lopen
+## gewoon door. Geeft de map terug waar je naartoe gaat.
+func respawn_at_checkpoint(boss := false) -> String:
+	var keep_best := bestiary.duplicate(true)
+	var keep_time := play_time()
+	var cp := checkpoint.duplicate(true)
+	apply_state(cp["state"])
+	bestiary = keep_best
+	_play_time_base = keep_time
+	_clock_start_ms = Time.get_ticks_msec()
+	checkpoint = cp
+	_full_heal()
+	var t := _vec2i_from(cp.get("tile"), Vector2i.ZERO)
+	var fc := _vec2i_from(cp.get("facing"), Vector2i.DOWN)
+	return_map = str(cp["map"])
+	return_tile = t
+	return_facing = fc
+	has_return_point = true
+	pending_spawn = ""
+	entry_kind = "respawn"
+	pending_respawn_msg = (RESPAWN_LINES_BOSS if boss else RESPAWN_LINES).duplicate()
+	last_respawn = {"map": return_map, "tile": t, "facing": fc, "boss": boss}
+	# na het ontwaken automatisch opslaan (Doorgaan begint dan ook hier)
+	_autosave_request = "respawn"
+	return return_map
+
+
+## v0.19: tekst in het gevecht bij GAME OVER (waar je wakker wordt).
+func defeat_text(boss := false) -> String:
+	if not has_checkpoint():
+		return "GAME OVER\nJe wordt wakker bij het begin."
+	return "GAME OVER\n" + str((RESPAWN_LINES_BOSS if boss else RESPAWN_LINES)[0])
+
+
+func _full_heal() -> void:
+	for h in party:
+		h["hp"] = h["max_hp"]
+		h["mp"] = h["max_mp"]
+	for p in codex_pages:          # Codex: de monsters ook
+		p["hp"] = p["max_hp"]
+		p["mp"] = p["max_mp"]
+
+
+## GAME OVER ZONDER checkpoint (terugval, v0.19; zo werkte het tot v0.18 altijd): iedereen
+## volledig genezen, helft van het goud kwijt, terug naar het startpunt in het eerste dorp.
 func respawn() -> void:
 	for h in party:
 		h["hp"] = h["max_hp"]

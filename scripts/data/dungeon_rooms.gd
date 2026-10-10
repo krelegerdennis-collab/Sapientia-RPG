@@ -30,6 +30,9 @@ extends RefCounted
 ##            "kist:<id>" in GameState.story_flags (gaat mee in de save)
 ##   "props"  [{"type", "tile", ...}]        losse meubels (zie PROPS): staande kast, kandelaar, golemdeur
 ##   "monsters" (zie hieronder)
+##   "checkpoint" (v0.19) false = binnenkomen zet GEEN kamer-checkpoint (respawn na game over, zie
+##            GameState.checkpoint). Zonder deze sleutel: false in een kamer met een "boss"-monster,
+##            anders true. Zo ontwaak je na een verloren baasgevecht in de kamer VOOR de baas.
 ##
 ## MAP-MONSTERS (Lufia 2-stijl, GEEN random encounters in dungeons): lijst "monsters", per monster
 ##   "id"     uniek binnen de kamer (onthoudt of hij verslagen is)
@@ -529,6 +532,7 @@ const ROOMS := {
 			"<S.................>",
 			"c_______(UU)_______d",
 		],
+		"checkpoint": false,      # v0.19 baaskamer: game over = terug in de Bibliotheek
 		"spawns": {"zuid": [9, 10, "up"]},
 		"exits": {
 			"U": {"map": "res://scenes/maps/archief_bibliotheek.tscn", "spawn": "deur"},

@@ -6,7 +6,7 @@ extends Node
 ## spawnpunt, zee/bergen blokkeren, bos is begaanbaar, encounter + volledig gevecht
 ## (aanval/spreuk/item, winst + level-up), terug op dezelfde tile, vluchten,
 ## 4 helden, de trap (bericht), terug het dorp in en weer uit, en game over
-## (respawn in het dorp).
+## (v0.19: respawn waar je de wereldkaart binnenkwam).
 ## Gevechtsscherm: heldensprites, statusvakken (balken = echte HP/MP), aantikken van
 ## sprite/statusvak, overwinningsvenster, niets onder de D-pad/A/B, en 4 helden.
 ## v0.11: eerst de proloog (scène 1 en 2) helemaal doorgespeeld, met opslaan/laden
@@ -1217,6 +1217,10 @@ func _game_over_test() -> void:
 	for h in GameState.party:
 		h["hp"] = 1
 	var gold_before := GameState.gold
+	var cp_gold := int(GameState.checkpoint.get("state", {}).get("gold", -1))
+	check("v0.19: kamer-checkpoint op de wereldkaart (14,31), goud %d (nu %d)" % [cp_gold, gold_before],
+			str(GameState.checkpoint.get("map", "")).ends_with("wereldkaart.tscn")
+			and GameState.checkpoint.get("tile") == [14, 31] and cp_gold >= 0)
 	await tap("debug_battle")
 	check("game-over-gevecht geladen", await wait_scene("Battle"))
 	var game_over_seen := false
@@ -1237,13 +1241,22 @@ func _game_over_test() -> void:
 			await tap("interact")
 	Engine.time_scale = 1.0
 	check("GAME OVER-bericht", game_over_seen)
-	check("na game over terug in het dorp Wilgendal", await wait_scene("Wilgendal"))
+	# v0.19: niet meer naar Wilgendal (helft goud kwijt), maar terug waar je de wereldkaart
+	# binnenkwam (net buiten Wilgendal, (14,31)) met de voortgang van toen
+	check("v0.19: na game over terug op de wereldkaart", await wait_scene("Wereldkaart"))
 	await frames(5)
 	check("uitslag = lose", GameState.last_battle_result == "lose")
-	check("respawn op starttile (16,8): %s" % tile(), tile() == Vector2i(16, 8))
+	check("v0.19: respawn waar je de wereldkaart binnenkwam (14,31): %s" % tile(), tile() == Vector2i(14, 31)
+			and GameState.last_respawn.get("map", "") == GameState.current_map)
 	var all_full := GameState.party.all(func(h): return h["hp"] == h["max_hp"] and h["mp"] == h["max_mp"])
 	check("party volledig genezen", all_full)
-	check("helft van het goud kwijt: %d -> %d" % [gold_before, GameState.gold], GameState.gold == int(gold_before / 2.0))
+	check("v0.19: goud zoals bij binnenkomst (geen helft kwijt): %d -> %d" % [cp_gold, GameState.gold], GameState.gold == cp_gold)
+	for i in 120:
+		if Dialog.is_open:
+			break
+		await frames(1)
+	check("v0.19: 'Je ontwaakt...' (verteller)", Dialog.is_open and "ontwaakt" in str(Dialog._lines[0]))
+	await close_dialog()
 
 
 func _stairs_and_town_return_tests() -> void:
@@ -1364,7 +1377,7 @@ func _title_v13_checks(t: Node) -> void:
 			and absf(st.get_center().y - t.size.y / 2.0) <= 1.0)
 	check("menu rechtsonder (x 240..372, y ~150..200): %s" % cr,
 			absf(cr.position.x - 240.0) <= 1.0 and absf(cr.end.x - 372.0) <= 1.0 and cr.end.y <= 201.0 and cr.position.y >= 148.0)
-	check("versielabel v0.18 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.18"
+	check("versielabel v0.19 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.19"
 			and t.version_label.get_global_rect().end.x <= t.size.x and t.version_label.get_global_rect().end.y <= t.size.y)
 	var g: Control = t.glitch
 	if not g.strip_frames.is_empty():
