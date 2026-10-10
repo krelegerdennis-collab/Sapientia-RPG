@@ -1074,7 +1074,10 @@ func _v7_style_checks(b: Node) -> void:
 	var names: Array = b.enemies.map(func(e): return e["name"])
 	check("v7-vijanden: %s" % [names], names.has("Het Kennis-Beest") and names.has("Papiergeest"))
 	for id in GameData.ENEMIES:
-		check("vijand '%s' bestaat als plaatje" % id, ResourceLoader.exists(GameData.ENEMIES[id]["sprite"]))
+		# v0.19: een vijand met "art_pending" (Inktwurm) mag tijdelijk een plaatsvervanger hebben
+		var spr_ok := ResourceLoader.exists(GameData.ENEMIES[id]["sprite"]) or (bool(GameData.ENEMIES[id].get("art_pending", false))
+				and ResourceLoader.exists(GameData.enemy_sprite(GameData.ENEMIES[id])))
+		check("vijand '%s' bestaat als plaatje" % id, spr_ok)
 	for g in GameData.ENCOUNTER_GROUPS:
 		for id in g["enemies"]:
 			if not GameData.ENEMIES.has(id):
