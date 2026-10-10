@@ -1,6 +1,7 @@
 # v0.17 PLACEHOLDERS (tools/art_woud_placeholders.py). Echte art: zelfde naam + maat erover,
 # daarna de regel hier weghalen en in tools/handwerk.txt zetten. Zie /workspace/v17_ART_SLOTS.md.
 # (v0.17: alle 5 vervangen door RPG ART art_mapsprites_v17; geen open placeholders meer)
-# Het Gesimuleerde Archief (Blauwe Kisten, tools/art_mimic_placeholder.py):
+# Het Gesimuleerde Archief (Blauwe Kisten, tools/art_mimic_placeholder.py + tools/art_map_monsters.py):
 assets/sprites/enemies/mimic.png   80x64   Mimic (gevechtsplaatje; kist met tanden, magenta hoekjes)
+assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x16, magenta hoekjes)
 # (Blauwe kist = de gewone kist (assets/sprites/buiten/kist.png) met een blauwe tint in code: geen eigen bestand.)
