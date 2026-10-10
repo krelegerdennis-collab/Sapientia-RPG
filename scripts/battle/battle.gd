@@ -1358,6 +1358,7 @@ func _victory() -> void:
 		exp_total += int(e["s"]["exp"])
 		gold_total += int(e["s"]["gold"])
 	GameState.gold += gold_total
+	var book_lines: Array = grant_fixed_boss_drops()
 	var loot_page := _dungeon100_boss_loot()
 	await _wait(0.3)
 	# EXP uitdelen (alleen helden die nog staan), level-ups onthouden
@@ -1380,7 +1381,7 @@ func _victory() -> void:
 		level_pages.append(loot_page)
 	_refresh_party()
 	caption.hide()
-	victory_label.text = victory_text(exp_total, gold_total)
+	victory_label.text = victory_text(exp_total, gold_total, book_lines)
 	# Venster precies zo hoog als de tekst, zodat de helden eronder zichtbaar blijven.
 	victory_panel.offset_bottom = victory_panel.offset_top + victory_panel.get_combined_minimum_size().y
 	victory_panel.show()
@@ -1388,6 +1389,28 @@ func _victory() -> void:
 	for page in level_pages:
 		await _victory_page(page)
 	await GameState.end_battle("win")
+
+
+## Vaste baasbuit ("n" in drops) van het Eerste Archief. Niet in de 100-verdiepingen-kerker
+## (die heeft een eigen buit) en niet voor een gevangen of nog levend monster.
+## Geeft de regels voor het overwinningsvenster (leeg = niets).
+func grant_fixed_boss_drops() -> Array:
+	if not GameState.pending_boss or GameState.dungeon100_floor > 0:
+		return []
+	var totals := {}
+	var names := {}
+	for e in enemies:
+		if e.get("captured", false) or int(e["s"].get("hp", 0)) > 0:
+			continue
+		for d in GameData.fixed_drops(e["s"].get("drops", [])):
+			var id := str(d["item"])
+			totals[id] = int(totals.get(id, 0)) + int(d["n"])
+			names[id] = str(d["name"])
+	var lines: Array = []
+	for id in totals:
+		GameState.inventory[id] = GameState.item_count(id) + int(totals[id])
+		lines.append("Krijgt %dx %s." % [int(totals[id]), names[id]])
+	return lines
 
 
 ## Task #4: na een baas in de dungeon van 100 verdiepingen: de gegarandeerde buit in de tas (en het
@@ -1405,8 +1428,11 @@ func _dungeon100_boss_loot() -> String:
 
 
 ## Tekst van de eerste overwinningspagina (ook gebruikt door de autotest).
-func victory_text(exp_total: int, gold_total: int) -> String:
-	var lines := ["Krijgt %d EXP." % exp_total, "Krijgt %d GOUD." % gold_total, ""]
+func victory_text(exp_total: int, gold_total: int, loot_lines: Array = []) -> String:
+	var lines: Array[String] = ["Krijgt %d EXP." % exp_total, "Krijgt %d GOUD." % gold_total]
+	for line in loot_lines:
+		lines.append(str(line))
+	lines.append("")
 	# Kolommen over de hele vensterbreedte (zoals Lufia 2): naam links,
 	# 'VOLG. LEVEL' in het midden, getal rechts uitgelijnd. Letters zijn 6 px breed.
 	var width := victory_panel.size.x if victory_panel.size.x > 0 else size.x - 20.0

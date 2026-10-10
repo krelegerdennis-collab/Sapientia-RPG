@@ -68,7 +68,8 @@ static func exp_for_level(level: int) -> int:
 ## v0.10 Bestiarium (zelfde data, extra velden):
 ##   "no" = nummer in het bestiarium, "mp", "weak"/"resist" = lijst van elementen
 ##   ("vuur", "bliksem", ...; nu alleen informatie, nog niet in de schadeformule),
-##   "drops" = [{"item": id, "chance": 0..1}] (nu alleen informatie),
+##   "drops" = [{"item": id, "chance": 0..1}] (chance = alleen het bestiarium) of, op een baas,
+##             {"item": id, "n": aantal} = vaste buit bij winst (niet in de 100-verdiepingen-kerker).
 ##   "desc" = korte beschrijving, "habitat" = waar hij leeft (terreinen).
 const ENEMIES := {
 	# v0.10: eerste monsters op het gras (keuze van Dennis). Vooraanzicht-art komt van
@@ -169,7 +170,9 @@ const ENEMIES := {
 			"max_hp": 400, "atk": 33, "def": 22, "agi": 6, "mag": 16, "mdef": 18, "mp": 0,
 			"exp": 300, "gold": 120,
 			"skills": [{"name": "Boekenhamer", "chance": 0.2, "power": 1.5}],
-			"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 0.5}],
+			# Vaste buit van de Golem in het Eerste Archief: 3 Lege Boeken. "chance" blijft alleen info.
+			"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 0.5},
+					{"item": "leeg_boek", "n": 3}],
 			"core": {
 				"cycle": 3,            # elke 3e ronde gaat de kern open (ronde 3, 6, 9, ...)
 				"closed_mult": 0.4,    # schade op het pantser x0,4
@@ -262,6 +265,22 @@ const ENEMIES := {
 	},
 }
 
+## Vaste buit uit een drops-lijst: alleen regels met "n" (aantal). "chance" telt niet mee.
+static func fixed_drops(drops) -> Array:
+	var out: Array = []
+	if not (drops is Array):
+		return out
+	for d in drops:
+		if typeof(d) != TYPE_DICTIONARY:
+			continue
+		var n := int(d.get("n", 0))
+		var id := str(d.get("item", ""))
+		if n <= 0 or not ITEMS.has(id):
+			continue
+		out.append({"item": id, "n": n, "name": str(ITEMS[id].get("name", id))})
+	return out
+
+
 ## Vijand-id's in bestiarium-volgorde.
 static func bestiary_ids() -> Array:
 	var ids := ENEMIES.keys()
@@ -298,8 +317,9 @@ const ITEMS := {
 		"desc": "Een zeldzaam elixer uit de diepte. Geneest bijna alles."},
 	# Codex (Kernfragment stap 2): alleen in een gevecht, op een VIJAND. Schrijft een verzwakt
 	# monster in de Codex (kans: scripts/data/codex_data.gd). Altijd op, ook als het mislukt.
-	# Te krijgen (v0.17): 3 van Marit in Esdoorn (na de ontmoeting) + 2 in kisten van het Donker Woud;
-	# later ook in de winkel ("price"). NIET in START_INVENTORY (oude saves krijgen dat toch nooit).
+	# Te krijgen: 3 van Marit in Esdoorn (na de ontmoeting) + 2 in kisten van het Donker Woud
+	# + 3 van de Golem in het Eerste Archief (baas-buit, "n" hierboven). Later ook in de winkel
+	# ("price"). NIET in START_INVENTORY (oude saves krijgen dat toch nooit).
 	"leeg_boek":  {"name": "Leeg Boek", "target": "enemy", "capture": true, "field": false,
 		"heal_hp": 0, "heal_mp": 0, "price": 60, "icon": "res://assets/ui/icons/leeg_boek.png",
 		"desc": "Een boek zonder woorden. Schrijf er een verzwakt monster in."},
