@@ -69,7 +69,7 @@ Suites (v0.18, aantallen PASS ter referentie):
 | `--checkpointtest` | `scripts/tests/checkpoint_tests.gd` | 65 |
 | `--dungeon100gentest` | `scripts/tests/dungeon100_generator_tests.gd` | 57 |
 | `--dungeon100schaaltest` | `scripts/tests/dungeon100_schaal_tests.gd` | 78 |
-| `--dungeon100regelstest` | `scripts/tests/dungeon100_tests.gd` | 74 |
+| `--dungeon100regelstest` | `scripts/tests/dungeon100_tests.gd` | 72 |
 | `--dungeon100integratietest` | `scripts/tests/dungeon100_integratie_tests.gd` | 41 |
 | `--dungeon100blauwtest` | `scripts/tests/dungeon100_blauw_tests.gd` | (na deze taak) |
 

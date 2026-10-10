@@ -185,14 +185,14 @@ func _scene_tests() -> void:
 	GameState.dungeon100_floor = int(mimic_floor["floor"])
 	GameState.change_map(DUNGEON, "omhoog")
 	check("Mimic-verdieping geladen", await wait_floor(int(mimic_floor["floor"])))
-	var ch := _chest(str(mimic_floor["id"]))
+	var ch = _chest(str(mimic_floor["id"]))
 	check("Mimic-kist ziet eruit als een gewone kist (geen blauwe tint)", ch != null and ch.kind == Blue.KIND_MIMIC
 			and ch.sprite.modulate != Blue.BLUE_TINT)
 	var base_hp := int(GD.ENEMIES[Blue.MIMIC_ENEMY]["max_hp"])
 	var scaled := int(S.monster_stats(GD.ENEMIES[Blue.MIMIC_ENEMY], int(mimic_floor["floor"]))["max_hp"])
 	ch.wake_mimic()
 	check("Mimic start een gevecht", await wait_until(func(): return battle() != null and battle().is_node_ready(), 20.0))
-	var b := battle()
+	var b = battle()
 	check("Mimic-gevecht gebruikt de schaal van de verdieping (HP %d > basis %d)" % [scaled, base_hp],
 			b != null and str(b.enemies[0]["id"]) == Blue.MIMIC_ENEMY and int(b.enemies[0]["s"]["max_hp"]) == scaled
 			and (scaled > base_hp or int(mimic_floor["floor"]) == 1))
@@ -206,7 +206,7 @@ func _scene_tests() -> void:
 	GameState.dungeon100_floor = int(blue_floor["floor"])
 	GameState.change_map(DUNGEON, "omhoog")
 	check("Blauwe verdieping geladen", await wait_floor(int(blue_floor["floor"])))
-	var bl := _chest(str(blue_floor["id"]))
+	var bl = _chest(str(blue_floor["id"]))
 	check("Blauwe Kist is blauw getint", bl != null and bl.kind == Blue.KIND_BLUE and bl.sprite.modulate == Blue.BLUE_TINT)
 	await screenshot("d100_blauwe_kist")
 	var bid := str(bl.loot["items"][0]["item"])
