@@ -19,6 +19,8 @@ extends Node
 ##     play() pas daarna, en de spelers gebruiken playback Stream. Godot 4.3+ speelt op web
 ##     standaard via Samples; AudioServer.add_bus() (Music/SFX) koppelt dan Master los van
 ##     de speakers (godotengine/godot#119026) en alles blijft stil terwijl playing true is.
+##     GodotAudio zit in de engine-closure (niet op window). De Web-export zet daarom in
+##     head_include een wrapper om AudioContext en hervat die context bij de eerste tik.
 ##
 ## Hoofdfuncties:
 ##   play_music(track_name, fade_in)  - speelt BGM met crossfade
@@ -497,7 +499,7 @@ func _unlock_web_audio() -> void:
 func _resume_web_context() -> void:
 	if OS.get_name() != "Web" or not ClassDB.class_exists("JavaScriptBridge"):
 		return
-	JavaScriptBridge.eval("(function(){var c=window.GodotAudio&&window.GodotAudio.ctx;if(c&&c.state!=='running'&&c.resume){var p=c.resume();if(p&&p.catch){p.catch(function(){});}}})();", true)
+	JavaScriptBridge.eval("if(window.sapientiaResumeAudio){window.sapientiaResumeAudio();}", true)
 
 
 func _show_web_prompt() -> void:
