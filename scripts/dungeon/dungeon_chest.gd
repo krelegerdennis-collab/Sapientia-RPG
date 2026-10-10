@@ -11,11 +11,16 @@ const TEX := "res://assets/sprites/buiten/kist.png"
 ## v0.15: plaatje in het thema van de kamer (DungeonRooms.THEMES), zie dungeon_rooms.gd.
 const DungeonRoomsTheme := preload("res://scripts/data/dungeon_rooms.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
+const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EMPTY_LINES := ["De kist is leeg."]
 
 var chest_id := ""
 var item := ""
 var count := 1
+## Task #4 (dungeon van 100 verdiepingen): verdieping van deze kist (0 = gewone kist) en de buit
+## ({"items": [{"item", "n"}], "gold", "tier"}, zie dungeon100_scaling.gd; leeg = gewone kist).
+var floor_nr := 0
+var loot := {}
 var sprite: Sprite2D
 ## Voor de tests: "", "gekregen" of "leeg".
 var last_result := ""
@@ -38,6 +43,7 @@ func setup(d: Dictionary) -> void:
 	name = "Kist_" + chest_id
 	item = str(d.get("item", "drankje"))
 	count = maxi(1, int(d.get("n", 1)))
+	_setup_loot(d)
 	var t: Array = d.get("tile", [0, 0])
 	position = Vector2(int(t[0]), int(t[1])) * 16 + Vector2(8, 8)
 	var cs := CollisionShape2D.new()
@@ -52,6 +58,22 @@ func setup(d: Dictionary) -> void:
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(sprite)
 	sprite.frame = 1 if is_open() else 0
+
+
+## Task #4: op een verdieping > 0 (eigen "floor" of GameState.dungeon100_floor) heeft de kist schaalbuit:
+## "loot" uit de data (vooraf gerold door de generator) of, zonder, deterministisch gerold uit het
+## kist-id + de verdieping ("boss": true = baaskist). Verdieping 0 en "item"/"n" in de data: ongewijzigd.
+func _setup_loot(d: Dictionary) -> void:
+	floor_nr = int(d.get("floor", GameState.dungeon100_floor))
+	loot = {}
+	if floor_nr <= 0:
+		return
+	if d.get("loot") is Dictionary:
+		loot = d["loot"]
+	elif not d.has("item"):
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash("%s@%d" % [chest_id, floor_nr])
+		loot = Dungeon100Scaling.chest_loot(floor_nr, rng, bool(d.get("boss", false)))
 
 
 func tile() -> Vector2i:
@@ -71,6 +93,13 @@ func interact(_player: Node2D) -> void:
 		return
 	# eerst de vlag, dan het voorwerp: nooit dubbel
 	GameState.story_flags[flag_of(chest_id)] = true
+	if not loot.is_empty():
+		var gold := Dungeon100Scaling.grant_loot(loot, GameState.inventory)
+		GameState.gold += gold
+		sprite.frame = 1
+		last_result = "gekregen"
+		Dialog.show_lines(["{naam} opent de kist...", "{naam} vindt: %s!" % Dungeon100Scaling.loot_text(loot)])
+		return
 	GameState.inventory[item] = GameState.item_count(item) + count
 	sprite.frame = 1
 	last_result = "gekregen"
