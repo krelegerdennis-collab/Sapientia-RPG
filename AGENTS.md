@@ -67,11 +67,11 @@ Suites (v0.18, aantallen PASS ter referentie):
 | `--woudtest` | `scripts/tests/woud_tests.gd` | 90 |
 | `--codextest` | `scripts/tests/codex_tests.gd` | 90 |
 | `--checkpointtest` | `scripts/tests/checkpoint_tests.gd` | 65 |
-| `--dungeon100gentest` | `scripts/tests/dungeon100_generator_tests.gd` | 57 |
+| `--dungeon100gentest` | `scripts/tests/dungeon100_generator_tests.gd` | 58 |
 | `--dungeon100schaaltest` | `scripts/tests/dungeon100_schaal_tests.gd` | 78 |
 | `--dungeon100regelstest` | `scripts/tests/dungeon100_tests.gd` | 72 |
 | `--dungeon100integratietest` | `scripts/tests/dungeon100_integratie_tests.gd` | 41 |
-| `--dungeon100blauwtest` | `scripts/tests/dungeon100_blauw_tests.gd` | (na deze taak) |
+| `--dungeon100blauwtest` | `scripts/tests/dungeon100_blauw_tests.gd` | 38 |
 
 Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest archieftest kerntest kernkrachttest woudtest codextest checkpointtest dungeon100gentest dungeon100schaaltest dungeon100regelstest dungeon100integratietest dungeon100blauwtest; do .github/scripts/run_suite.sh $s; done`
 (samen ~12 min; CI draait ze parallel). Een eigen `XDG_DATA_HOME` per suite houdt `user://` (saves/instellingen) gescheiden.
