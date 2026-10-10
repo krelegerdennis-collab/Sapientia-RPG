@@ -185,6 +185,7 @@ const ROOMS := {
 			"<S.................>",
 			"c_______(UU)_______d",
 		],
+		"checkpoint": false,      # v0.19 baaskamer: game over = terug in de Sporenkring
 		"spawns": {"zuid": [9, 10, "up"]},
 		"exits": {
 			"U": {"map": M + "woud_sporenkring.tscn", "spawn": "boog"},
