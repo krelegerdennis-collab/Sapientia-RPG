@@ -1,0 +1,68 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.3-stable
+  GODOT: ${{ github.workspace }}/.godot-bin/Godot_v4.3-stable_linux.x86_64
+
+jobs:
+  suite:
+    name: ${{ matrix.suite }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [autotest, menutest, puzzletest, dungeontest, golemtest,
+                archieftest, kerntest, kernkrachttest, woudtest, codextest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: .godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      - name: Download Godot 4.3-stable
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .godot-bin
+          curl -fsSL -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d .godot-bin
+          chmod +x "$GODOT"
+
+      - name: Install xvfb + Mesa (gl_compatibility / opengl3)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 libegl1 > /dev/null
+
+      - name: Import pass
+        run: |
+          "$GODOT" --version
+          timeout 600 "$GODOT" --headless --path . --import > import.log 2>&1 || { tail -50 import.log; exit 1; }
+          if grep -q 'SCRIPT ERROR' import.log; then grep -n 'SCRIPT ERROR' -A3 import.log; exit 1; fi
+
+      - name: Run ${{ matrix.suite }}
+        run: |
+          echo "| suite | PASS | FAIL | ERR | tijd | resultaat |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          .github/scripts/run_suite.sh ${{ matrix.suite }}
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-${{ matrix.suite }}
+          path: testlogs/${{ matrix.suite }}.log
+          retention-days: 7
