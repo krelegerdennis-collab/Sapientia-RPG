@@ -1,0 +1,166 @@
+# PLACEHOLDER-SFX algemeen (tools/gen_algemene_sfx.py). Synthetisch, geen definitief geluid.
+# Patroon als tools/placeholders_v17.txt: pad, soort, omschrijving.
+# Bron: assets/audio/audio_manifest.json sectie sfx. Plat in assets/audio/sfx/.
+# Vervang het wav-bestand (zelfde naam) en haal de regel hier weg.
+# Acteur-sfx (helden/ en monsters/) staan niet in deze lijst.
+assets/audio/sfx/sfx_menu_click_01.wav   wav   ui/menu_click: Korte, droge mechanische klik, als een tandwiel dat vastklikt.
+assets/audio/sfx/sfx_menu_click_02.wav   wav   ui/menu_click: Korte, droge mechanische klik, als een tandwiel dat vastklikt.
+assets/audio/sfx/sfx_menu_hover_01.wav   wav   ui/menu_hover: Zeer zacht tikje bij het selecteren van een menu-item.
+assets/audio/sfx/sfx_menu_confirm_01.wav   wav   ui/menu_confirm: Positieve bevestiging, twee oplopende metalen tonen.
+assets/audio/sfx/sfx_menu_cancel_01.wav   wav   ui/menu_cancel: Neerwaartse korte toon bij annuleren of teruggaan.
+assets/audio/sfx/sfx_menu_error_01.wav   wav   ui/menu_error: Dof, zoemend afwijzingsgeluid (niet mogelijk).
+assets/audio/sfx/sfx_menu_open_01.wav   wav   ui/menu_open: Mechanisch openschuivend paneel met korte zucht van stoom.
+assets/audio/sfx/sfx_menu_close_01.wav   wav   ui/menu_close: Mechanisch sluitend paneel.
+assets/audio/sfx/sfx_tab_switch_01.wav   wav   ui/tab_switch: Kort schuivend geluid bij het wisselen van tabblad.
+assets/audio/sfx/sfx_dialogue_blip_01.wav   wav   ui/dialogue_blip: Kort tekstgeluidje per letter bij gewone gesprekken.
+assets/audio/sfx/sfx_dialogue_blip_02.wav   wav   ui/dialogue_blip: Kort tekstgeluidje per letter bij gewone gesprekken.
+assets/audio/sfx/sfx_dialogue_blip_03.wav   wav   ui/dialogue_blip: Kort tekstgeluidje per letter bij gewone gesprekken.
+assets/audio/sfx/sfx_dialogue_advance_01.wav   wav   ui/dialogue_advance: Klein klikje als een tekstvak wordt doorgezet.
+assets/audio/sfx/sfx_save_game_01.wav   wav   ui/save_game: Rustgevend, helder klokkenspel met een mechanische klik; het spel is opgeslagen.
+assets/audio/sfx/sfx_load_game_01.wav   wav   ui/load_game: Klok die opwindt, gevolgd door een zachte klik.
+assets/audio/sfx/sfx_item_pickup_01.wav   wav   items/item_pickup: Kort, helder pingend geluid wanneer je iets oppakt.
+assets/audio/sfx/sfx_item_pickup_02.wav   wav   items/item_pickup: Kort, helder pingend geluid wanneer je iets oppakt.
+assets/audio/sfx/sfx_item_equip_01.wav   wav   items/item_equip: Metaal dat vastklikt, als pantser dat wordt aangedaan.
+assets/audio/sfx/sfx_item_equip_02.wav   wav   items/item_equip: Metaal dat vastklikt, als pantser dat wordt aangedaan.
+assets/audio/sfx/sfx_item_unequip_01.wav   wav   items/item_unequip: Metaal dat losklikt en over leer schuift.
+assets/audio/sfx/sfx_item_use_potion_01.wav   wav   items/item_use_potion: Prop wordt eruit getrokken en vloeistof wordt gedronken.
+assets/audio/sfx/sfx_item_use_potion_02.wav   wav   items/item_use_potion: Prop wordt eruit getrokken en vloeistof wordt gedronken.
+assets/audio/sfx/sfx_gold_coins_01.wav   wav   items/gold_coins: Rinkelende metalen munten.
+assets/audio/sfx/sfx_gold_coins_02.wav   wav   items/gold_coins: Rinkelende metalen munten.
+assets/audio/sfx/sfx_chest_open_01.wav   wav   items/chest_open: Krakend houten deksel en een korte magische glinster.
+assets/audio/sfx/sfx_chest_locked_01.wav   wav   items/chest_locked: Rammelend slot dat niet opengaat.
+assets/audio/sfx/sfx_book_page_turn_01.wav   wav   items/book_page_turn: Papier dat omgeslagen wordt in een stille bibliotheek.
+assets/audio/sfx/sfx_book_page_turn_02.wav   wav   items/book_page_turn: Papier dat omgeslagen wordt in een stille bibliotheek.
+assets/audio/sfx/sfx_book_page_turn_03.wav   wav   items/book_page_turn: Papier dat omgeslagen wordt in een stille bibliotheek.
+assets/audio/sfx/sfx_level_up_01.wav   wav   items/level_up: Triomfantelijke opstijgende klokken en een mechanische zoem.
+assets/audio/sfx/sfx_quest_accept_01.wav   wav   items/quest_accept: Zware, plechtige gong met een pennenkrabbel.
+assets/audio/sfx/sfx_quest_complete_01.wav   wav   items/quest_complete: Opgewekte, heldere fanfare van klokjes.
+assets/audio/sfx/sfx_footstep_stone_01.wav   wav   beweging/footstep_stone: Laarzen op stenen vloer, licht galmend.
+assets/audio/sfx/sfx_footstep_stone_02.wav   wav   beweging/footstep_stone: Laarzen op stenen vloer, licht galmend.
+assets/audio/sfx/sfx_footstep_stone_03.wav   wav   beweging/footstep_stone: Laarzen op stenen vloer, licht galmend.
+assets/audio/sfx/sfx_footstep_stone_04.wav   wav   beweging/footstep_stone: Laarzen op stenen vloer, licht galmend.
+assets/audio/sfx/sfx_footstep_wood_01.wav   wav   beweging/footstep_wood: Laarzen op houten planken, een zacht kraakje.
+assets/audio/sfx/sfx_footstep_wood_02.wav   wav   beweging/footstep_wood: Laarzen op houten planken, een zacht kraakje.
+assets/audio/sfx/sfx_footstep_wood_03.wav   wav   beweging/footstep_wood: Laarzen op houten planken, een zacht kraakje.
+assets/audio/sfx/sfx_footstep_wood_04.wav   wav   beweging/footstep_wood: Laarzen op houten planken, een zacht kraakje.
+assets/audio/sfx/sfx_footstep_metal_01.wav   wav   beweging/footstep_metal: Laarzen op metalen roosters van de fabrieken.
+assets/audio/sfx/sfx_footstep_metal_02.wav   wav   beweging/footstep_metal: Laarzen op metalen roosters van de fabrieken.
+assets/audio/sfx/sfx_footstep_metal_03.wav   wav   beweging/footstep_metal: Laarzen op metalen roosters van de fabrieken.
+assets/audio/sfx/sfx_footstep_metal_04.wav   wav   beweging/footstep_metal: Laarzen op metalen roosters van de fabrieken.
+assets/audio/sfx/sfx_footstep_marble_01.wav   wav   beweging/footstep_marble: Heldere, galmende stappen in de tempel.
+assets/audio/sfx/sfx_footstep_marble_02.wav   wav   beweging/footstep_marble: Heldere, galmende stappen in de tempel.
+assets/audio/sfx/sfx_footstep_marble_03.wav   wav   beweging/footstep_marble: Heldere, galmende stappen in de tempel.
+assets/audio/sfx/sfx_footstep_marble_04.wav   wav   beweging/footstep_marble: Heldere, galmende stappen in de tempel.
+assets/audio/sfx/sfx_footstep_water_01.wav   wav   beweging/footstep_water: Plonsen in ondiep water in het lab.
+assets/audio/sfx/sfx_footstep_water_02.wav   wav   beweging/footstep_water: Plonsen in ondiep water in het lab.
+assets/audio/sfx/sfx_footstep_water_03.wav   wav   beweging/footstep_water: Plonsen in ondiep water in het lab.
+assets/audio/sfx/sfx_footstep_water_04.wav   wav   beweging/footstep_water: Plonsen in ondiep water in het lab.
+assets/audio/sfx/sfx_jump_land_01.wav   wav   beweging/jump_land: Zachte dreun van een landing.
+assets/audio/sfx/sfx_jump_land_02.wav   wav   beweging/jump_land: Zachte dreun van een landing.
+assets/audio/sfx/sfx_door_open_wood_01.wav   wav   wereld/door_open_wood: Krakende houten deur.
+assets/audio/sfx/sfx_door_open_wood_02.wav   wav   wereld/door_open_wood: Krakende houten deur.
+assets/audio/sfx/sfx_door_close_wood_01.wav   wav   wereld/door_close_wood: Houten deur die dichtvalt met een doffe klap.
+assets/audio/sfx/sfx_door_close_wood_02.wav   wav   wereld/door_close_wood: Houten deur die dichtvalt met een doffe klap.
+assets/audio/sfx/sfx_door_open_iron_01.wav   wav   wereld/door_open_iron: Zware ijzeren poort die schuift met schurend metaal.
+assets/audio/sfx/sfx_door_open_mechanical_01.wav   wav   wereld/door_open_mechanical: Tandwielen, stoom en een hydraulische sis; een mechanische deur schuift open.
+assets/audio/sfx/sfx_door_locked_01.wav   wav   wereld/door_locked: Kort rammelen en een dof klikje; de deur zit op slot.
+assets/audio/sfx/sfx_lever_pull_01.wav   wav   wereld/lever_pull: Zware hendel die omgaat, gevolgd door een mechanische klik.
+assets/audio/sfx/sfx_switch_press_01.wav   wav   wereld/switch_press: Drukknop of drukplaat die wordt ingedrukt.
+assets/audio/sfx/sfx_steam_vent_01.wav   wav   wereld/steam_vent: Sissende stoomstoot uit een pijp.
+assets/audio/sfx/sfx_steam_vent_02.wav   wav   wereld/steam_vent: Sissende stoomstoot uit een pijp.
+assets/audio/sfx/sfx_elevator_mechanical_01.wav   wav   wereld/elevator_mechanical: Kettingen en motoren van een liftplatform.
+assets/audio/sfx/sfx_secret_discovered_01.wav   wav   wereld/secret_discovered: Mysterieuze, oplopende toon met een stenen klik.
+assets/audio/sfx/sfx_rune_activate_01.wav   wav   wereld/rune_activate: Gloeiende rune die ontbrandt met een zacht elektrisch gezoem.
+assets/audio/sfx/sfx_clock_chime_01.wav   wav   wereld/clock_chime: Diepe klokslag van een oud uurwerk.
+assets/audio/sfx/sfx_battle_start_01.wav   wav   gevecht/battle_start: Dreigend stinger-geluid bij het begin van een gevecht, metaal dat dichtklapt.
+assets/audio/sfx/sfx_turn_start_01.wav   wav   gevecht/turn_start: Korte tikkende bel; jouw beurt.
+assets/audio/sfx/sfx_command_select_01.wav   wav   gevecht/command_select: Klik in het gevechtsmenu.
+assets/audio/sfx/sfx_target_select_01.wav   wav   gevecht/target_select: Zacht piepje bij het kiezen van een doelwit.
+assets/audio/sfx/sfx_sword_swing_01.wav   wav   gevecht/sword_swing: Scherp, snijdend geluid van een zwaard door de lucht.
+assets/audio/sfx/sfx_sword_swing_02.wav   wav   gevecht/sword_swing: Scherp, snijdend geluid van een zwaard door de lucht.
+assets/audio/sfx/sfx_sword_swing_03.wav   wav   gevecht/sword_swing: Scherp, snijdend geluid van een zwaard door de lucht.
+assets/audio/sfx/sfx_sword_hit_flesh_01.wav   wav   gevecht/sword_hit_flesh: Zwaard dat vlees raakt: nat en doffer.
+assets/audio/sfx/sfx_sword_hit_flesh_02.wav   wav   gevecht/sword_hit_flesh: Zwaard dat vlees raakt: nat en doffer.
+assets/audio/sfx/sfx_sword_hit_flesh_03.wav   wav   gevecht/sword_hit_flesh: Zwaard dat vlees raakt: nat en doffer.
+assets/audio/sfx/sfx_sword_hit_armor_01.wav   wav   gevecht/sword_hit_armor: Zwaard op harnas: scherpe metalen klank en vonken.
+assets/audio/sfx/sfx_sword_hit_armor_02.wav   wav   gevecht/sword_hit_armor: Zwaard op harnas: scherpe metalen klank en vonken.
+assets/audio/sfx/sfx_sword_hit_armor_03.wav   wav   gevecht/sword_hit_armor: Zwaard op harnas: scherpe metalen klank en vonken.
+assets/audio/sfx/sfx_critical_hit_01.wav   wav   gevecht/critical_hit: Zware klap met een extra nagalm.
+assets/audio/sfx/sfx_critical_hit_02.wav   wav   gevecht/critical_hit: Zware klap met een extra nagalm.
+assets/audio/sfx/sfx_block_01.wav   wav   gevecht/block: Schild of wapen vangt een aanval op.
+assets/audio/sfx/sfx_block_02.wav   wav   gevecht/block: Schild of wapen vangt een aanval op.
+assets/audio/sfx/sfx_dodge_01.wav   wav   gevecht/dodge: Snelle whoosh van een ontwijking.
+assets/audio/sfx/sfx_dodge_02.wav   wav   gevecht/dodge: Snelle whoosh van een ontwijking.
+assets/audio/sfx/sfx_miss_01.wav   wav   gevecht/miss: Zwakke whoosh zonder impact.
+assets/audio/sfx/sfx_player_hurt_01.wav   wav   gevecht/player_hurt: Pijnlijke kreun van de held, kort en ingehouden.
+assets/audio/sfx/sfx_player_hurt_02.wav   wav   gevecht/player_hurt: Pijnlijke kreun van de held, kort en ingehouden.
+assets/audio/sfx/sfx_player_hurt_03.wav   wav   gevecht/player_hurt: Pijnlijke kreun van de held, kort en ingehouden.
+assets/audio/sfx/sfx_player_death_01.wav   wav   gevecht/player_death: Laatste ademtocht en dof neerstorten.
+assets/audio/sfx/sfx_enemy_hurt_01.wav   wav   gevecht/enemy_hurt: Algemene schreeuw van een gewonde vijand.
+assets/audio/sfx/sfx_enemy_hurt_02.wav   wav   gevecht/enemy_hurt: Algemene schreeuw van een gewonde vijand.
+assets/audio/sfx/sfx_enemy_hurt_03.wav   wav   gevecht/enemy_hurt: Algemene schreeuw van een gewonde vijand.
+assets/audio/sfx/sfx_enemy_death_organic_01.wav   wav   gevecht/enemy_death_organic: Rochelende kreet en een zware klap neer.
+assets/audio/sfx/sfx_enemy_death_organic_02.wav   wav   gevecht/enemy_death_organic: Rochelende kreet en een zware klap neer.
+assets/audio/sfx/sfx_enemy_death_mechanical_01.wav   wav   gevecht/enemy_death_mechanical: Metaal dat uit elkaar valt, tandwielen die over de vloer rollen en elektrische knetters.
+assets/audio/sfx/sfx_enemy_death_mechanical_02.wav   wav   gevecht/enemy_death_mechanical: Metaal dat uit elkaar valt, tandwielen die over de vloer rollen en elektrische knetters.
+assets/audio/sfx/sfx_heal_01.wav   wav   gevecht/heal: Zachte, stijgende klokjes; herstel.
+assets/audio/sfx/sfx_buff_apply_01.wav   wav   gevecht/buff_apply: Opwaartse toon met metalen glinster.
+assets/audio/sfx/sfx_debuff_apply_01.wav   wav   gevecht/debuff_apply: Neerwaartse, dissonante toon.
+assets/audio/sfx/sfx_status_poison_01.wav   wav   gevecht/status_poison: Borrelende, giftige vloeistof.
+assets/audio/sfx/sfx_status_burn_01.wav   wav   gevecht/status_burn: Knetterend vuur en een korte sissende vlam.
+assets/audio/sfx/sfx_status_stun_01.wav   wav   gevecht/status_stun: Tollende sterren-achtige tinkels en een doffe dreun.
+assets/audio/sfx/sfx_flee_success_01.wav   wav   gevecht/flee_success: Snelle voetstappen die wegsterven.
+assets/audio/sfx/sfx_flee_fail_01.wav   wav   gevecht/flee_fail: Gestruikel, gevolgd door een afkeurende klank.
+assets/audio/sfx/sfx_spell_charge_01.wav   wav   magie/spell_charge: Tandwielen die snel opdraaien met een stijgend elektrisch gezoem.
+assets/audio/sfx/sfx_spell_cog_burst_01.wav   wav   magie/spell_cog_burst: Explosie van tandwielen en metaalschroot met een magische knal.
+assets/audio/sfx/sfx_spell_cog_burst_02.wav   wav   magie/spell_cog_burst: Explosie van tandwielen en metaalschroot met een magische knal.
+assets/audio/sfx/sfx_spell_fire_01.wav   wav   magie/spell_fire: Vuurbal met een metalen ondertoon.
+assets/audio/sfx/sfx_spell_fire_02.wav   wav   magie/spell_fire: Vuurbal met een metalen ondertoon.
+assets/audio/sfx/sfx_spell_lightning_01.wav   wav   magie/spell_lightning: Elektrische ontlading tussen metalen spoelen.
+assets/audio/sfx/sfx_spell_lightning_02.wav   wav   magie/spell_lightning: Elektrische ontlading tussen metalen spoelen.
+assets/audio/sfx/sfx_spell_ice_01.wav   wav   magie/spell_ice: Kristal dat vormt en versplintert.
+assets/audio/sfx/sfx_spell_ice_02.wav   wav   magie/spell_ice: Kristal dat vormt en versplintert.
+assets/audio/sfx/sfx_spell_arcane_beam_01.wav   wav   magie/spell_arcane_beam: Strakke energiestraal die snijdt door de lucht.
+assets/audio/sfx/sfx_spell_steam_01.wav   wav   magie/spell_steam: Stoomexplosie, sissend en hees.
+assets/audio/sfx/sfx_spell_shield_01.wav   wav   magie/spell_shield: Gonzende energiekoepel die opent.
+assets/audio/sfx/sfx_spell_summon_01.wav   wav   magie/spell_summon: Machtig zoemen en tandwielen die in elkaar vallen.
+assets/audio/sfx/sfx_spell_overload_01.wav   wav   magie/spell_overload: Mislukking: knetterende kortsluiting, krakende metalen en een zwaar zoemen dat afbreekt.
+assets/audio/sfx/sfx_enemy_attack_claw_01.wav   wav   vijanden/enemy_attack_claw: Scherpe klauwen die door de lucht klieven.
+assets/audio/sfx/sfx_enemy_attack_claw_02.wav   wav   vijanden/enemy_attack_claw: Scherpe klauwen die door de lucht klieven.
+assets/audio/sfx/sfx_enemy_attack_claw_03.wav   wav   vijanden/enemy_attack_claw: Scherpe klauwen die door de lucht klieven.
+assets/audio/sfx/sfx_enemy_attack_bite_01.wav   wav   vijanden/enemy_attack_bite: Snelle hap met een snauw.
+assets/audio/sfx/sfx_enemy_attack_bite_02.wav   wav   vijanden/enemy_attack_bite: Snelle hap met een snauw.
+assets/audio/sfx/sfx_enemy_attack_mech_punch_01.wav   wav   vijanden/enemy_attack_mech_punch: Hydraulische stoot: sis en zware metalen klap.
+assets/audio/sfx/sfx_enemy_attack_mech_punch_02.wav   wav   vijanden/enemy_attack_mech_punch: Hydraulische stoot: sis en zware metalen klap.
+assets/audio/sfx/sfx_enemy_attack_steam_blast_01.wav   wav   vijanden/enemy_attack_steam_blast: Stoomwolk die uit een mechanisch lichaam ontsnapt.
+assets/audio/sfx/sfx_enemy_attack_laser_01.wav   wav   vijanden/enemy_attack_laser: Opladend gezoem en een scherpe laserflits.
+assets/audio/sfx/sfx_enemy_growl_01.wav   wav   vijanden/enemy_growl: Laag grommen van een vijand die je opmerkt.
+assets/audio/sfx/sfx_enemy_growl_02.wav   wav   vijanden/enemy_growl: Laag grommen van een vijand die je opmerkt.
+assets/audio/sfx/sfx_enemy_growl_03.wav   wav   vijanden/enemy_growl: Laag grommen van een vijand die je opmerkt.
+assets/audio/sfx/sfx_enemy_alert_01.wav   wav   vijanden/enemy_alert: Metalen alarmgeluid; een bewaker heeft je gezien.
+assets/audio/sfx/sfx_golem_roar_01.wav   wav   bazen/golem_roar: Diepe, galmende brul vermengd met knarsend steen en een mechanisch gesis.
+assets/audio/sfx/sfx_golem_roar_02.wav   wav   bazen/golem_roar: Diepe, galmende brul vermengd met knarsend steen en een mechanisch gesis.
+assets/audio/sfx/sfx_golem_step_01.wav   wav   bazen/golem_step: Zware stap die de grond laat schudden.
+assets/audio/sfx/sfx_golem_step_02.wav   wav   bazen/golem_step: Zware stap die de grond laat schudden.
+assets/audio/sfx/sfx_golem_step_03.wav   wav   bazen/golem_step: Zware stap die de grond laat schudden.
+assets/audio/sfx/sfx_golem_slam_01.wav   wav   bazen/golem_slam: Verpletterende klap van stenen vuisten.
+assets/audio/sfx/sfx_golem_slam_02.wav   wav   bazen/golem_slam: Verpletterende klap van stenen vuisten.
+assets/audio/sfx/sfx_golem_hurt_01.wav   wav   bazen/golem_hurt: Barstend gesteente en metaalgekreun.
+assets/audio/sfx/sfx_golem_hurt_02.wav   wav   bazen/golem_hurt: Barstend gesteente en metaalgekreun.
+assets/audio/sfx/sfx_golem_death_01.wav   wav   bazen/golem_death: Instortend gebouw van steen, een laatste zucht van stoom en een gestorven motor.
+assets/audio/sfx/sfx_boss_intro_stinger_01.wav   wav   bazen/boss_intro_stinger: Dreigende, lage stinger bij het verschijnen van een tussenbaas.
+assets/audio/sfx/sfx_boss_phase_change_01.wav   wav   bazen/boss_phase_change: Tandwielen die vastlopen, een schreeuw en een zware dreun; de baas verandert van vorm.
+assets/audio/sfx/sfx_finalboss_roar_01.wav   wav   bazen/finalboss_roar: Onaards, vervormd gebrul met koorstemmen en klokken.
+assets/audio/sfx/sfx_finalboss_defeat_01.wav   wav   bazen/finalboss_defeat: Epische ineenstorting: klokken, tandwielen en een langzaam stoppend uurwerk.
+assets/audio/sfx/sfx_sapientia_awaken_01.wav   wav   sapientia/sapientia_awaken: Het ontwaken: zware motor die op gang komt, dan een gelaagde, etherische stem.
+assets/audio/sfx/sfx_sapientia_whisper_01.wav   wav   sapientia/sapientia_whisper: Gefluisterde, galmende stem zonder woorden, met een mechanische resonantie.
+assets/audio/sfx/sfx_sapientia_whisper_02.wav   wav   sapientia/sapientia_whisper: Gefluisterde, galmende stem zonder woorden, met een mechanische resonantie.
+assets/audio/sfx/sfx_sapientia_whisper_03.wav   wav   sapientia/sapientia_whisper: Gefluisterde, galmende stem zonder woorden, met een mechanische resonantie.
+assets/audio/sfx/sfx_sapientia_speak_blip_01.wav   wav   sapientia/sapientia_speak_blip: Tekstgeluidje voor Sapientia's dialoog; zachter en melodieuzer dan normale tekstblips.
+assets/audio/sfx/sfx_sapientia_speak_blip_02.wav   wav   sapientia/sapientia_speak_blip: Tekstgeluidje voor Sapientia's dialoog; zachter en melodieuzer dan normale tekstblips.
+assets/audio/sfx/sfx_sapientia_speak_blip_03.wav   wav   sapientia/sapientia_speak_blip: Tekstgeluidje voor Sapientia's dialoog; zachter en melodieuzer dan normale tekstblips.
+assets/audio/sfx/sfx_sapientia_warning_01.wav   wav   sapientia/sapientia_warning: Onheilspellend, dubbel klinkende stem met een laag alarm.
+assets/audio/sfx/sfx_sapientia_glitch_01.wav   wav   sapientia/sapientia_glitch: Stem die haperend en digitaal vervormd klinkt, alsof de machine hapert.
+assets/audio/sfx/sfx_sapientia_glitch_02.wav   wav   sapientia/sapientia_glitch: Stem die haperend en digitaal vervormd klinkt, alsof de machine hapert.
+assets/audio/sfx/sfx_sapientia_power_surge_01.wav   wav   sapientia/sapientia_power_surge: Golf van energie, tandwielen en koorstemmen; Sapientia grijpt in.
+assets/audio/sfx/sfx_sapientia_approve_01.wav   wav   sapientia/sapientia_approve: Zachte, warme klank, een goedkeurend 'ding' van de machine.
