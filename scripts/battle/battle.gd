@@ -33,6 +33,7 @@ signal damage_shown(target_name: String, amount: int)
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const COMMANDS := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten"]
 ## Hoe lang een gevechtsbericht in beeld blijft (A drukken = sneller).
 const MESSAGE_TIME := 0.8
@@ -1378,7 +1379,7 @@ func _dungeon100_boss_loot() -> String:
 		return ""
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	var loot := Dungeon100Scaling.boss_loot(floor_nr, rng)
+	var loot := Dungeon100Blue.with_warp(Dungeon100Scaling.boss_loot(floor_nr, rng), floor_nr)    # eindbaas: + Warp-kristal
 	GameState.gold += Dungeon100Scaling.grant_loot(loot, GameState.inventory)
 	GameState.story_flags[Dungeon100Scaling.boss_flag(floor_nr)] = true
 	return "Buit van de baas!\n" + "\n".join(Dungeon100Scaling.loot_lines(loot))

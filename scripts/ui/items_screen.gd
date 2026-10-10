@@ -13,6 +13,7 @@ const LIST_W := 132            # breedte van de itemlijst
 const NAME_COLS := PartyActions.LIST_NAME_COLS   # tekens voor de naam, daarna 'x3'
 const HINT_LIST := "A: gebruiken   B: terug"
 const HINT_TARGET := "Op wie?   A: gebruiken   B: andere keuze"
+const PERMANENT_NOTE := "Blauwe databank: blijft bewaard."
 
 var scroll: ScrollContainer
 var list: VBoxContainer
@@ -91,6 +92,8 @@ func rebuild(keep_id := "") -> void:
 		b.pressed.connect(choose_item.bind(id))
 		if not PartyActions.item_usable_in_field(id):
 			_grey(b)
+		if GameState.is_permanent_item(id):
+			tint_permanent(b)
 		list.add_child(b)
 		entries.append(b)
 	TargetList.link_ring(entries)
@@ -135,6 +138,9 @@ func show_item(id: String) -> void:
 	else:
 		effect_label.text = reason
 		effect_label.add_theme_color_override("font_color", MenuColors.TEXT_DIM)
+	if GameState.is_permanent_item(id):
+		effect_label.text = (effect_label.text + "\n" if effect_label.text != "" else "") + PERMANENT_NOTE
+		effect_label.add_theme_color_override("font_color", MenuColors.PERMANENT)
 
 
 ## A / tik op een item: bruikbaar = doel kiezen, anders een melding.
@@ -145,6 +151,10 @@ func choose_item(id: String) -> void:
 	var reason := PartyActions.item_block_reason(id)
 	if reason != "":
 		show_message(reason, MenuColors.TEXT_DIM)
+		return
+	if bool(PartyActions.item_data(id).get("warp", false)):
+		show_message(PartyActions.MSG_WARP_USED, MenuColors.INFO)
+		GameState.dungeon100_warp()
 		return
 	_start_targeting()
 

@@ -5,11 +5,12 @@ extends Node
 ##   Deel B: GameState: nieuw spel, opslaan/laden (ook oude of kapotte saves), game over (respawn).
 ##   Deel C: HUD 'Verdieping X/100': verborgen buiten de kerker en in een gevecht, goede tekst/plek.
 ##   Deel D: het rustpunt (scène): HP/MP vol, checkpoint gaat alleen omhoog, opslaan, Ja/Nee.
-##   Deel E: nederlaag op een kerkerverdieping: met checkpoint terug naar de kerker (op de rustverdieping),
-##           zonder checkpoint naar Wilgendal; echte scènewissel via GameState.end_battle("lose").
+##   Deel E: nederlaag op een kerkerverdieping (Het Gesimuleerde Archief): de run is voorbij, nieuwe run op verdieping 1,
+##           zonder kerker-scène naar Wilgendal; echte scènewissel via GameState.end_battle("lose").
 ## Met --shots=map: d100_hud_*.png (384x216 + _3x). Zit niet in de export (scripts/tests/*).
 
 const R := preload("res://scripts/dungeon/dungeon100_rules.gd")
+const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const RustpuntC := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
 const HUD_PATH := "res://scripts/ui/dungeon100_hud.gd"
 const TOWN := "res://scenes/maps/wilgendal.tscn"
@@ -102,31 +103,34 @@ func _rules_tests() -> void:
 			and R.checkpoint_after_rest(50, 20) == 50 and R.checkpoint_after_rest(20, 27) == 20
 			and R.checkpoint_after_rest(0, 0) == 0)
 	var p := R.defeat_plan(27, 20)
-	check("nederlaag met checkpoint 20: terug naar verdieping 20, 75% goud", p["to_dungeon"] and p["respawn_floor"] == 20
-			and is_equal_approx(p["gold_keep"], 0.75))
+	check("nederlaag in de kerker (ook met rustpunt 20): nieuwe run op verdieping 1, geen goud", p["to_dungeon"] and p["respawn_floor"] == 1
+			and p["new_run"] and is_equal_approx(p["gold_keep"], 0.0))
 	p = R.defeat_plan(5, 0)
-	check("nederlaag zonder checkpoint: naar het dorp, 50% goud", not p["to_dungeon"] and p["respawn_floor"] == 0
-			and is_equal_approx(p["gold_keep"], 0.5))
+	check("nederlaag zonder rustpunt: precies hetzelfde (het rustpunt telt niet meer mee)", p["to_dungeon"] and p["respawn_floor"] == 1
+			and p["new_run"] and is_equal_approx(p["gold_keep"], 0.0))
 	p = R.defeat_plan(0, 30)
-	check("game over buiten de kerker: gewoon het dorp (checkpoint telt niet)", not p["to_dungeon"] and p["respawn_floor"] == 0)
+	check("game over buiten de kerker: gewoon het dorp, half goud, geen run", not p["to_dungeon"] and p["respawn_floor"] == 0
+			and not p["new_run"] and is_equal_approx(p["gold_keep"], 0.5))
 	p = R.defeat_plan(27, 20, false)
-	check("kerker-scène ontbreekt: terugval naar het dorp", not p["to_dungeon"] and p["respawn_floor"] == 0)
-	p = R.defeat_plan(40, 35)
-	check("kapot checkpoint (geen rustverdieping) wordt genegeerd", not p["to_dungeon"])
+	check("kerker-scène ontbreekt: terugval naar het dorp (de run is wel voorbij)", not p["to_dungeon"] and p["respawn_floor"] == 0 and p["new_run"])
+	check("defeat_plan hangt niet van het (kapotte) rustpunt af", R.defeat_plan(40, 35) == R.defeat_plan(40, 0) and R.defeat_plan(40, 30) == R.defeat_plan(40, 0))
+	check("START_SPAWN/WORLD_* komen overeen met de generator", R.START_SPAWN == Gen.SPAWN_FROM_ABOVE and R.WORLD_SCENE == Gen.WORLD_SCENE
+			and R.WORLD_SPAWN == Gen.WORLD_SPAWN)
 	var party := [{"hp": 0, "max_hp": 30, "mp": 1, "max_mp": 8}, {"hp": 5, "max_hp": 20, "mp": 0, "max_mp": 4}]
 	var pages := [{"hp": 0, "max_hp": 12, "mp": 0, "max_mp": 3}]
 	R.heal_party(party, pages)
 	check("heal_party: party en Codex-bondgenoot HP/MP vol (ook KO)", party[0]["hp"] == 30 and party[0]["mp"] == 8
 			and party[1]["hp"] == 20 and party[1]["mp"] == 4 and pages[0]["hp"] == 12 and pages[0]["mp"] == 3)
 	var d := R.load_data({"floor": 37.0, "checkpoint": 30.0, "best": 41.0})
-	check("load_data: gewone waarden blijven (floats uit JSON worden ints)", d == {"floor": 37, "checkpoint": 30, "best": 41, "seed": 0})
+	check("load_data: gewone waarden blijven (floats uit JSON worden ints)", _core(d) == {"floor": 37, "checkpoint": 30, "best": 41, "seed": 0})
 	d = R.load_data({"floor": 999, "checkpoint": "x", "best": -4})
-	check("load_data: rommel -> 0", d == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0})
+	check("load_data: rommel -> 0", _core(d) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0})
 	d = R.load_data({"floor": 5, "checkpoint": 37, "best": 2})
 	check("load_data: checkpoint 37 wordt 30, best is minstens de verdieping/het checkpoint", d["checkpoint"] == 30
 			and d["best"] == 30 and d["floor"] == 5)
-	check("load_data: geen dictionary -> alles 0", R.load_data(null) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0}
-			and R.load_data([1, 2]) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0})
+	check("load_data: geen dictionary -> alles 0 en leeg", _core(R.load_data(null)) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0}
+			and _core(R.load_data([1, 2])) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0}
+			and R.load_data(null)["permanent"] == {} and R.load_data(null)["snapshot"] == {})
 	check("best_after gaat alleen omhoog", R.best_after(10, 4) == 10 and R.best_after(10, 12) == 12 and R.best_after(0, 300) == 100)
 
 
@@ -179,34 +183,42 @@ func _state_tests() -> void:
 	check("game over buiten de kerker: half goud, spawn 'start', party vol",
 			GameState.gold == 50 and GameState.pending_spawn == GameState.RESPAWN_SPAWN
 			and GameState.party[0]["hp"] == GameState.party[0]["max_hp"] and GameState.dungeon100_floor == 0)
-	# in de kerker zonder checkpoint
-	GameState.gold = 101
-	GameState.dungeon100_floor = 6
-	GameState.dungeon100_checkpoint = 0
-	GameState.respawn()
-	check("game over op verdieping 6 zonder rustpunt: naar het dorp (verdieping 0, half goud)",
-			GameState.dungeon100_floor == 0 and GameState.gold == 50 and GameState.pending_spawn == GameState.RESPAWN_SPAWN)
-	# met checkpoint, maar kerker-scène bestaat niet
-	R.dungeon_scene = "res://scenes/maps/bestaat_niet.tscn"
-	GameState.gold = 100
-	GameState.dungeon100_floor = 26
-	GameState.dungeon100_checkpoint = 20
-	GameState.respawn()
-	check("scène ontbreekt: game over valt terug op het dorp, checkpoint blijft bewaard",
-			GameState.dungeon100_floor == 0 and GameState.dungeon100_checkpoint == 20 and GameState.gold == 50)
-	# met checkpoint en een bestaande scène
+	# in de kerker: respawn() = de run is voorbij (Het Gesimuleerde Archief), ook zonder rustpunt
 	R.dungeon_scene = STAND_IN
-	GameState.gold = 100
-	GameState.dungeon100_floor = 26
-	GameState.dungeon100_checkpoint = 20
+	GameState.new_game("Dennis")
+	GameState.gold = 101
+	GameState.dungeon100_begin_run()
+	GameState.dungeon100_floor = 6
+	GameState.gold = 40
 	GameState.party[0]["hp"] = 0
 	GameState.respawn()
-	check("game over op verdieping 26 met rustpunt 20: terug naar verdieping 20, 75 goud, spawn 'rustpunt', party vol",
-			GameState.dungeon100_floor == 20 and GameState.gold == 75 and GameState.pending_spawn == R.REST_SPAWN
-			and GameState.party[0]["hp"] == GameState.party[0]["max_hp"])
-	check("checkpoint en best blijven na het verlies", GameState.dungeon100_checkpoint == 20)
+	check("game over op verdieping 6 zonder rustpunt: nieuwe run op verdieping 1, geen goud, party vol, spawn bovenaan",
+			GameState.dungeon100_floor == 1 and GameState.gold == 0 and GameState.pending_spawn == R.START_SPAWN
+			and GameState.party[0]["hp"] == GameState.party[0]["max_hp"] and GameState.dungeon100_run_active()
+			and int(GameState.dungeon100_snapshot["gold"]) == 101)
+	# met rustpunt: dat telt niet meer als terugkeerpunt
+	GameState.dungeon100_floor = 26
+	GameState.dungeon100_checkpoint = 20
+	GameState.gold = 75
+	GameState.party[0]["hp"] = 0
+	GameState.respawn()
+	check("game over op verdieping 26 met rustpunt 20: toch verdieping 1, rustpunt vergeten, best = 26",
+			GameState.dungeon100_floor == 1 and GameState.dungeon100_checkpoint == 0 and GameState.gold == 0
+			and GameState.dungeon100_best == 26 and GameState.pending_spawn == R.START_SPAWN)
+	# kerker-scène bestaat niet: terug naar het dorp met de echte party en het echte goud
+	R.dungeon_scene = "res://scenes/maps/bestaat_niet.tscn"
+	GameState.dungeon100_floor = 26
+	GameState.gold = 33
+	GameState.respawn()
+	check("scène ontbreekt: game over valt terug op het dorp; de run is voorbij en het echte goud (101) is terug",
+			GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active() and GameState.gold == 101
+			and GameState.pending_spawn == GameState.RESPAWN_SPAWN)
 	R.dungeon_scene = _saved_scene
 	GameState.new_game("Dennis")
+
+
+func _core(d: Dictionary) -> Dictionary:
+	return {"floor": d["floor"], "checkpoint": d["checkpoint"], "best": d["best"], "seed": d["seed"]}
 
 
 # ================================================================ deel C
@@ -363,42 +375,50 @@ func answer_no(rp: Node) -> void:
 
 # ================================================================ deel E
 func _defeat_tests() -> void:
-	# 1. met checkpoint: de echte scènewissel naar de (stand-in) kerker
+	# 1. nederlaag in de kerker: de echte scènewissel naar de (stand-in) kerker, nieuwe run
 	GameState.new_game("Dennis")
 	GameState.story_step = load("res://scripts/data/story_data.gd").KLAAR
 	R.dungeon_scene = STAND_IN
+	GameState.gold = 200
+	GameState.dungeon100_begin_run()
 	GameState.dungeon100_floor = 26
 	GameState.dungeon100_checkpoint = 20
 	GameState.dungeon100_best = 26
-	GameState.gold = 200
+	GameState.gold = 150
+	GameState.party[0]["level"] = 7
 	GameState.party[0]["hp"] = 0
 	GameState.return_map = TOWN
 	GameState.in_battle = true
 	GameState.end_battle("lose")
 	var ok := await wait_scene("Esdoorn", 20.0)
 	await wait_fade()
-	check("verlies met checkpoint: nieuwe scène is de kerker-scène", ok and scene().scene_file_path == STAND_IN)
-	check("verlies met checkpoint: verdieping 20, 150 goud, HP vol, best blijft 26",
-			GameState.dungeon100_floor == 20 and GameState.gold == 150 and GameState.dungeon100_best == 26
+	check("verlies in de kerker: nieuwe scène is de kerker-scène", ok and scene().scene_file_path == STAND_IN)
+	check("verlies in de kerker: verdieping 1, goud 0, level 1, rustpunt vergeten, HP vol, best blijft 26",
+			GameState.dungeon100_floor == 1 and GameState.gold == 0 and GameState.dungeon100_best == 26
+			and GameState.party[0]["level"] == 1 and GameState.dungeon100_checkpoint == 0
 			and GameState.party[0]["hp"] == GameState.party[0]["max_hp"] and not GameState.in_battle)
+	check("... de echte party/goud liggen nog in de momentopname (goud 200)", GameState.dungeon100_run_active()
+			and int(GameState.dungeon100_snapshot["gold"]) == 200)
 	var hud := _hud()
 	await pframes(3)
-	check("na het verlies toont de HUD verdieping 20", hud != null and hud.visible and hud.shown_floor == 20)
+	check("na het verlies toont de HUD verdieping 1", hud != null and hud.visible and hud.shown_floor == 1)
 
-	# 2. zonder checkpoint: naar Wilgendal, geen kerker
+	# 2. zonder kerker-scène: naar Wilgendal, de run is voorbij, echte goud terug
+	R.dungeon_scene = "res://scenes/maps/bestaat_niet.tscn"
 	GameState.dungeon100_floor = 7
-	GameState.dungeon100_checkpoint = 0
-	GameState.gold = 200
+	GameState.gold = 55
 	GameState.party[0]["hp"] = 0
 	GameState.return_map = STAND_IN
 	GameState.in_battle = true
 	GameState.end_battle("lose")
 	ok = await wait_scene("Wilgendal", 20.0)
 	await wait_fade()
-	check("verlies zonder rustpunt: terug in Wilgendal, verdieping 0, half goud", ok and GameState.dungeon100_floor == 0
-			and GameState.gold == 100 and scene().scene_file_path == TOWN)
+	check("verlies zonder kerker-scène: terug in Wilgendal, verdieping 0, run voorbij, echt goud (200) terug",
+			ok and GameState.dungeon100_floor == 0 and GameState.gold == 200 and not GameState.dungeon100_run_active()
+			and scene().scene_file_path == TOWN)
 	await pframes(3)
 	check("... en de HUD is weer verborgen", hud != null and not hud.visible)
+	R.dungeon_scene = STAND_IN
 
 	# 3. winst of vluchten in de kerker verandert de verdieping niet
 	GameState.dungeon100_floor = 33

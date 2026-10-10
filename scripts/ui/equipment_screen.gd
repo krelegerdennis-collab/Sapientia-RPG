@@ -390,6 +390,8 @@ func open_list(slot: String) -> void:
 		var b := UiMenu.button("%s x%d" % [Equipment.item_name(id).rpad(NAME_COLS), GameState.item_count(id)])
 		b.custom_minimum_size = Vector2(0, ROW_H)
 		b.clip_text = true
+		if GameState.is_permanent_item(str(id)):
+			tint_permanent(b)
 		b.focus_entered.connect(preview_item.bind(str(id)))
 		b.pressed.connect(choose_item.bind(str(id)))
 		lock_horizontal_focus(b)

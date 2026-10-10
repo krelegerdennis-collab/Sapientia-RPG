@@ -76,6 +76,14 @@ var dungeon100_seed: int = 0
 ## laatst geactiveerd rustpunt (0, 10, ... 100) en hoogste bereikte verdieping
 var dungeon100_checkpoint := 0
 var dungeon100_best := 0
+## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md):
+## PERMANENTE items uit Blauwe Kisten (id -> aantal): overleven de dood en elke nieuwe run.
+var dungeon100_permanent := {}
+## hoeveel van elk permanent item al in de echte tas is gelegd (door een geslaagde Warp)
+var dungeon100_delivered := {}
+## Momentopname van de echte party/tas/goud/Codex tijdens een run ({} = geen run bezig). Tijdens een run
+## zijn party/inventory/gold/codex_pages die van de SIMULATIE (level 1, geen uitrusting).
+var dungeon100_snapshot := {}
 ## v0.11 verhaal: stap (zie scripts/data/story_data.gd) en flags (naam -> true)
 var story_step := 0
 var story_flags := {}
@@ -146,6 +154,9 @@ var last_respawn := {}
 # TODO(verhaal): definitieve tekst van het ontwaken (nu placeholder).
 const RESPAWN_LINES_BOSS := ["Je ontwaakt voor de deur...", "Je bent weer helemaal uitgerust."]
 const RESPAWN_LINES := ["Je ontwaakt waar je binnenkwam...", "Je bent weer helemaal uitgerust."]
+## Het Gesimuleerde Archief: nederlaag in de kerker (gevechtsscherm) en het bericht na het opnieuw laden.
+const DUNGEON100_DEFEAT_TEXT := "GAME OVER\nHet Archief laadt de simulatie opnieuw."
+const DUNGEON100_RESET_LINES := ["De simulatie wordt teruggezet...", "Alleen de Blauwe databanken zijn bewaard gebleven."]
 
 ## v7 (prestaties): alles wat een gevecht of mapwissel nodig heeft wordt bij de start
 ## alvast op de achtergrond geladen (ResourceLoader.load_threaded_request) en daarna
@@ -599,6 +610,57 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	return true
 
 
+## De party als lijst van Dictionaries voor een save (en de Archief-momentopname).
+func _party_save() -> Array:
+	var out := []
+	for h in party:
+		var e := {}
+		for k in ["id", "name", "level", "exp", "hp", "mp", "max_hp", "max_mp", "atk", "def", "agi", "spells", "weapon"]:
+			e[k] = h.get(k)
+		# v0.14: magie-stats (effectief), basis-stats en uitrusting (zie Equipment.save_fields)
+		e["mag"] = h.get("mag")
+		e["mdef"] = h.get("mdef")
+		e.merge(Equipment.save_fields(h), true)
+		out.append(e)
+	return out
+
+
+## Party uit save-data terug (kapotte velden krijgen de standaardwaarde); uitrusting die niet meer past
+## komt in 'stray_equipment'.
+func _party_from(raw: Array, stray_equipment: Array) -> Array:
+	var out := []
+	for e in raw:
+		if not (e is Dictionary):
+			continue
+		var h := hero_template(resolve_hero_id(hero_id_compat(str(e.get("id", "")))))
+		if h.is_empty():
+			continue
+		for k in e:
+			if k in ["id", "spells", "base", "equip", "weapon"] or e[k] == null:
+				continue
+			var v = e[k]
+			if h.has(k) and h[k] is int and not (v is float or v is int):
+				continue      # kapot getal: standaardwaarde van de held houden
+			h[k] = int(v) if v is float else v
+		if e.has("spells") and e["spells"] is Array:
+			h["spells"] = e["spells"].duplicate()
+		# v0.14 uitrusting + basis-stats; oude saves zonder die sleutels krijgen
+		# standaardwaarden (zie Equipment.load_hero). Ongeldige stukken -> terug in de tas.
+		Equipment.load_hero(h, e, _hero_data(str(h["id"])), stray_equipment)
+		out.append(h)
+	return out
+
+
+## Tas uit save-data: id -> aantal (kapotte waarden vallen weg).
+static func _inventory_from(raw) -> Dictionary:
+	var out := {}
+	if raw is Dictionary:
+		for k in raw:
+			if raw[k] is float or raw[k] is int:
+				out[k] = int(raw[k])
+	return out
+
+
 ## v0.19: de voortgang als Dictionary (zelfde velden als een save, zonder checkpoint/tijdstempels).
 ## Gebruikt door save_game en door het kamer-checkpoint (set_checkpoint).
 func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
@@ -616,18 +678,11 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"puzzle_latched": puzzle_latched.duplicate(true),
 		"kernen": kernfragmenten.duplicate(true),
 		"codex": codex_save_data(),
-		"dungeon100": Dungeon100RulesC.save_data(dungeon100_floor, dungeon100_checkpoint, dungeon100_best, dungeon100_seed),
+		"dungeon100": Dungeon100RulesC.save_data(dungeon100_floor, dungeon100_checkpoint, dungeon100_best, dungeon100_seed,
+				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
 	}
-	for h in party:
-		var e := {}
-		for k in ["id", "name", "level", "exp", "hp", "mp", "max_hp", "max_mp", "atk", "def", "agi", "spells", "weapon"]:
-			e[k] = h.get(k)
-		# v0.14: magie-stats (effectief), basis-stats en uitrusting (zie Equipment.save_fields)
-		e["mag"] = h.get("mag")
-		e["mdef"] = h.get("mdef")
-		e.merge(Equipment.save_fields(h), true)
-		data["party"].append(e)
+	data["party"] = _party_save()
 	return data
 
 
@@ -679,33 +734,10 @@ func apply_state(d: Dictionary) -> bool:
 	player_name = clean_name(str(d.get("player_name", DEFAULT_NAME)))
 	party.clear()
 	var stray_equipment: Array = []
-	for e in d["party"]:
-		if not (e is Dictionary):
-			continue
-		var h := hero_template(resolve_hero_id(hero_id_compat(str(e.get("id", "")))))
-		if h.is_empty():
-			continue
-		for k in e:
-			if k in ["id", "spells", "base", "equip", "weapon"] or e[k] == null:
-				continue
-			var v = e[k]
-			if h.has(k) and h[k] is int and not (v is float or v is int):
-				continue      # kapot getal: standaardwaarde van de held houden
-			h[k] = int(v) if v is float else v
-		if e.has("spells") and e["spells"] is Array:
-			h["spells"] = e["spells"].duplicate()
-		# v0.14 uitrusting + basis-stats; oude saves zonder die sleutels krijgen
-		# standaardwaarden (zie Equipment.load_hero). Ongeldige stukken -> terug in de tas.
-		Equipment.load_hero(h, e, _hero_data(str(h["id"])), stray_equipment)
-		party.append(h)
+	party = _party_from(d["party"], stray_equipment)
 	if party.is_empty():
 		add_member(MAIN_HERO)
-	inventory = {}
-	var inv = d.get("inventory", {})
-	if inv is Dictionary:
-		for k in inv:
-			if inv[k] is float or inv[k] is int:
-				inventory[k] = int(inv[k])
+	inventory = _inventory_from(d.get("inventory", {}))
 	for id in stray_equipment:
 		inventory[id] = int(inventory.get(id, 0)) + 1
 	gold = int(d.get("gold", 0)) if (d.get("gold", 0) is float or d.get("gold", 0) is int) else 0
@@ -817,6 +849,7 @@ func go_to_title() -> void:
 func enter_map(path: String) -> void:
 	current_map = path
 	if path != Dungeon100RulesC.dungeon_scene:
+		dungeon100_end_run(false)     # veiligheidsnet: wie de Diepe Grot anders verlaat, krijgt zijn echte party terug
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
 
@@ -916,10 +949,9 @@ func end_battle(result: String) -> void:
 	if result == "lose":
 		map_monster_battle = {}
 		if dungeon100_floor > 0:
-			# 100-kerker: eigen regels (Dungeon100Rules.defeat_plan); het kamer-checkpoint van v0.19 telt hier niet.
-			# Met een rustpunt ontwaakt de groep daar (respawn() zette de verdieping al), anders in Wilgendal.
-			respawn()
-			target = RESPAWN_MAP if dungeon100_floor == 0 else Dungeon100RulesC.dungeon_scene
+			# 100-kerker (Het Gesimuleerde Archief): de run is voorbij, een nieuwe run begint op verdieping 1
+			# (dungeon100_defeat); het kamer-checkpoint van v0.19 telt hier niet.
+			target = dungeon100_defeat()
 		elif has_checkpoint():
 			# v0.19: terug naar waar je deze kamer/map binnenkwam (baas: de kamer ervoor)
 			target = respawn_at_checkpoint(pending_boss)
@@ -941,7 +973,7 @@ func end_battle(result: String) -> void:
 			_autosave_request = "battle"
 			# v0.15: baas verslagen -> de hoofdheld absorbeert zijn kern (eenmalig). Meteen
 			# vastleggen, dus de autosave hierna heeft hem al; het moment zelf speelt de map af.
-			if pending_boss:
+			if pending_boss and dungeon100_floor == 0:      # de simulatie geeft geen echte kernen
 				for e in pending_enemies:
 					var kid := KernData.fragment_for_boss(str(e))
 					if kid != "" and grant_kern(kid, str(e)):
@@ -969,8 +1001,12 @@ func set_checkpoint(map: String, tile: Vector2i, facing: Vector2i) -> void:
 func respawn_at_checkpoint(boss := false) -> String:
 	var keep_best := bestiary.duplicate(true)
 	var keep_time := play_time()
+	var keep_permanent := dungeon100_permanent.duplicate(true)      # de databank rolt niet mee terug
+	var keep_floor_best := dungeon100_best
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
+	dungeon100_permanent = keep_permanent
+	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
 	_play_time_base = keep_time
 	_clock_start_ms = Time.get_ticks_msec()
@@ -994,9 +1030,8 @@ func respawn_at_checkpoint(boss := false) -> String:
 ## v0.19: tekst in het gevecht bij GAME OVER (waar je wakker wordt).
 func defeat_text(boss := false) -> String:
 	if dungeon100_floor > 0:
-		var plan := Dungeon100RulesC.defeat_plan(dungeon100_floor, dungeon100_checkpoint, Dungeon100RulesC.scene_available())
-		if bool(plan["to_dungeon"]):
-			return "GAME OVER\nJe ontwaakt bij het rustpunt."
+		if bool(Dungeon100RulesC.defeat_plan(dungeon100_floor, dungeon100_checkpoint, Dungeon100RulesC.scene_available())["to_dungeon"]):
+			return DUNGEON100_DEFEAT_TEXT
 		return "GAME OVER\nJe wordt wakker bij het begin."
 	if not has_checkpoint():
 		return "GAME OVER\nJe wordt wakker bij het begin."
@@ -1015,27 +1050,167 @@ func _full_heal() -> void:
 ## GAME OVER ZONDER checkpoint (terugval, v0.19; zo werkte het tot v0.18 altijd): iedereen
 ## volledig genezen, helft van het goud kwijt, terug naar het startpunt in het eerste dorp.
 func respawn() -> void:
+	if dungeon100_floor > 0:
+		dungeon100_defeat()
+		return
 	for h in party:
 		h["hp"] = h["max_hp"]
 		h["mp"] = h["max_mp"]
 	for p in codex_pages:          # Codex: de monsters ook
 		p["hp"] = p["max_hp"]
 		p["mp"] = p["max_mp"]
-	var d100 := Dungeon100RulesC.defeat_plan(dungeon100_floor, dungeon100_checkpoint, Dungeon100RulesC.scene_available())
-	gold = int(gold * float(d100["gold_keep"]))      # 50% (was int(gold / 2.0)); 25% weg bij een rustpunt
-	dungeon100_floor = int(d100["respawn_floor"])
+	gold = int(gold * Dungeon100RulesC.GOLD_KEEP_GAME_OVER)      # helft van het goud (was int(gold / 2.0))
 	has_return_point = false
-	pending_spawn = Dungeon100RulesC.REST_SPAWN if dungeon100_floor > 0 else RESPAWN_SPAWN
+	pending_spawn = RESPAWN_SPAWN
 
 
-# ---------------------------------------------------------------- 100-verdiepingen-kerker
-## Zet verdieping/checkpoint/best/seed uit save-data (Dungeon100Rules.load_data); {} = alles 0.
+# ---------------------------------------------------------------- 100-verdiepingen-kerker: Het Gesimuleerde Archief (runs)
+## Is er een run bezig? (de echte party/tas liggen dan in de momentopname)
+func dungeon100_run_active() -> bool:
+	return not dungeon100_snapshot.is_empty()
+
+
+## Is dit item permanent (zit het in de Blauwe-Kist-databank)? Alleen tijdens een run, daarbuiten is
+## het gewoon een item van je tas.
+func is_permanent_item(id: String) -> bool:
+	return dungeon100_run_active() and dungeon100_permanent.has(id)
+
+
+## Een run begint (Dungeon100Room, bij het binnenkomen vanaf de wereldkaart): de echte party/tas/goud/
+## Codex gaan in de momentopname; de simulatie start met een party van level 1 zonder uitrusting, een
+## tas met alleen de permanente items, geen goud en een lege Codex. Dubbel aanroepen doet niets (false).
+func dungeon100_begin_run() -> bool:
+	if dungeon100_run_active():
+		return false
+	dungeon100_snapshot = {"party": _party_save(), "inventory": inventory.duplicate(true), "gold": gold,
+			"codex": codex_save_data()}
+	_dungeon100_fresh_run()
+	dungeon100_floor = maxi(1, dungeon100_floor)      # vanaf de wereldkaart 1; een geladen oude save houdt zijn verdieping
+	return true
+
+
+## Zet de simulatie op 'nieuw': party level 1 (zelfde leden, geen uitrusting), tas = permanente items, goud 0,
+## lege Codex, schone run-vlaggen. Verdieping, seed en rustpunt laat dit aan de aanroeper.
+func _dungeon100_fresh_run() -> void:
+	var ids: Array = party.map(func(h): return str(h.get("id", "")))
+	party = []
+	for id in ids:
+		var h := hero_template(str(id))
+		if not h.is_empty():
+			party.append(h)
+	if party.is_empty():
+		add_member(MAIN_HERO)
+	inventory = dungeon100_permanent.duplicate(true)
+	gold = 0
+	codex_reset()
+	_dungeon100_clear_run_flags()
+	defeated_map_monsters = {}
+	map_monster_battle = {}
+
+
+func _dungeon100_clear_run_flags() -> void:
+	for f in story_flags.keys():
+		if Dungeon100RulesC.is_run_flag(str(f)):
+			story_flags.erase(f)
+
+
+## De run is voorbij zonder dat je valt (verlaten of Warp): de echte party/tas/goud/Codex terug uit de
+## momentopname, run-vlaggen weg, verdieping 0 en een nieuwe seed bij de volgende run. 'deliver' (Warp):
+## de permanente items die nog niet in je echte tas lagen komen er nu in. Geen run bezig = niets (false).
+func dungeon100_end_run(deliver := false) -> bool:
+	if not dungeon100_run_active():
+		return false
+	var snap := dungeon100_snapshot
+	var stray: Array = []
+	party = _party_from(snap["party"], stray)
+	if party.is_empty():
+		add_member(MAIN_HERO)
+	inventory = _inventory_from(snap.get("inventory", {}))
+	for id in stray:
+		inventory[id] = int(inventory.get(id, 0)) + 1
+	var g = snap.get("gold", 0)
+	gold = int(g) if (g is int or g is float) else 0
+	codex_load_data(snap.get("codex", {}))
+	dungeon100_snapshot = {}
+	_dungeon100_clear_run_flags()
+	defeated_map_monsters = {}
+	map_monster_battle = {}
+	dungeon100_checkpoint = 0
+	dungeon100_floor = 0
+	dungeon100_seed = 0
+	if deliver:
+		dungeon100_deliver()
+	return true
+
+
+## Permanente items die nog niet in de echte tas zijn gelegd erin leggen (na een geslaagde Warp).
+## Geeft het aantal stukken terug. Alleen buiten een run (de echte tas is dan 'inventory').
+func dungeon100_deliver() -> int:
+	var n := 0
+	for id in dungeon100_permanent:
+		var delta := int(dungeon100_permanent[id]) - int(dungeon100_delivered.get(id, 0))
+		if delta > 0:
+			inventory[id] = item_count(str(id)) + delta
+			dungeon100_delivered[id] = int(dungeon100_permanent[id])
+			n += delta
+	return n
+
+
+## Je verlaat de kerker via de ladder op verdieping 1: run opgegeven, niets wordt meegenomen.
+func dungeon100_leave() -> bool:
+	return dungeon100_end_run(false)
+
+
+## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
+func dungeon100_can_warp() -> bool:
+	return dungeon100_run_active() and dungeon100_floor == Dungeon100RulesC.FLOORS and item_count(Dungeon100RulesC.Blue.WARP_ITEM) > 0
+
+
+## Warp: run voltooid, permanente items mee naar je echte tas, terug naar de wereldkaart (het kristal is
+## op). false = kan niet (verkeerde verdieping, geen kristal of geen run).
+func dungeon100_warp() -> bool:
+	if not dungeon100_can_warp():
+		return false
+	dungeon100_best = Dungeon100RulesC.FLOORS
+	dungeon100_end_run(true)
+	change_map(Dungeon100RulesC.WORLD_SCENE, Dungeon100RulesC.WORLD_SPAWN)
+	return true
+
+
+## Nederlaag in de kerker: de run is voorbij. Levels, tas, goud, Codex en rustpunt van de run zijn weg; de
+## permanente items en de momentopname blijven. Nieuwe run op verdieping 1 met een nieuwe seed. Geeft de
+## scène terug waar de groep ontwaakt (de kerker; zonder kerker-scène: het dorp, met de echte party terug).
+func dungeon100_defeat() -> String:
+	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, dungeon100_floor)
+	has_return_point = false
+	var plan := Dungeon100RulesC.defeat_plan(dungeon100_floor, dungeon100_checkpoint, Dungeon100RulesC.scene_available())
+	if not bool(plan["to_dungeon"]):
+		dungeon100_end_run(false)
+		_full_heal()
+		pending_spawn = RESPAWN_SPAWN
+		return RESPAWN_MAP
+	_dungeon100_fresh_run()
+	dungeon100_checkpoint = 0
+	dungeon100_floor = 1
+	dungeon100_seed = 0
+	pending_spawn = Dungeon100RulesC.START_SPAWN
+	pending_respawn_msg = DUNGEON100_RESET_LINES.duplicate()
+	entry_kind = "respawn"
+	_autosave_request = "respawn"
+	return Dungeon100RulesC.dungeon_scene
+
+
+## Zet verdieping/checkpoint/best/seed + permanente items/momentopname uit save-data
+## (Dungeon100Rules.load_data); {} = alles 0 en leeg.
 func dungeon100_load(raw) -> void:
 	var v := Dungeon100RulesC.load_data(raw)
 	dungeon100_floor = int(v["floor"])
 	dungeon100_checkpoint = int(v["checkpoint"])
 	dungeon100_best = int(v["best"])
 	dungeon100_seed = int(v["seed"])
+	dungeon100_permanent = v["permanent"]
+	dungeon100_delivered = v["delivered"]
+	dungeon100_snapshot = v["snapshot"]
 
 
 # ---------------------------------------------------------------- kernfragmenten (v0.15)

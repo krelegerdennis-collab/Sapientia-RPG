@@ -24,6 +24,8 @@ const MSG_KO := "%s is buiten westen."
 const MSG_NO_MP := "Niet genoeg MP."
 const MSG_KEY_ITEM := "Belangrijk voorwerp. Bewaar het goed."
 const MSG_EQUIP_ITEM := "Uitrusting: kies 'Uitrusting' in het menu."
+const MSG_WARP_ONLY := "De Warp werkt alleen op verdieping 100."
+const MSG_WARP_USED := "Het kristal vlamt op... de simulatie loslaten."
 
 
 ## Een Dictionary-constante uit game_data.gd die niet in elke versie bestaat (v0.11:
@@ -89,6 +91,8 @@ static func item_list_name(id: String, cols: int) -> String:
 ## Een item kan dit uitzetten met "field": false in game_data.gd.
 static func item_usable_in_field(id: String) -> bool:
 	var it := item_data(id)
+	if bool(it.get("warp", false)):
+		return GameState.dungeon100_can_warp()
 	if it.is_empty() or not bool(it.get("field", true)):
 		return false
 	return str(it.get("target", "")) == "ally" and (int(it.get("heal_hp", 0)) > 0 or int(it.get("heal_mp", 0)) > 0)
@@ -97,6 +101,8 @@ static func item_usable_in_field(id: String) -> bool:
 ## Korte uitleg van het effect ("Herstelt 30 HP.").
 static func item_effect_text(id: String) -> String:
 	var it := item_data(id)
+	if bool(it.get("warp", false)):
+		return "Brengt je terug naar de wereld."
 	var parts: Array[String] = []
 	if int(it.get("heal_hp", 0)) > 0:
 		parts.append("%d HP" % int(it["heal_hp"]))
@@ -112,6 +118,8 @@ static func item_block_reason(id: String) -> String:
 	var it := item_data(id)
 	if it.is_empty():
 		return MSG_UNKNOWN
+	if bool(it.get("warp", false)):
+		return "" if GameState.dungeon100_can_warp() else MSG_WARP_ONLY
 	if bool(it.get("key", false)):
 		return MSG_KEY_ITEM
 	if bool(it.get("equip", false)):

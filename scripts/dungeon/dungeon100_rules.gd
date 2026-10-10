@@ -9,15 +9,23 @@ extends RefCounted
 ##   GameState.dungeon100_checkpoint laatst geactiveerde rustpunt-verdieping (0, 10, 20, ... 100).
 ##   GameState.dungeon100_best       hoogste verdieping die ooit bereikt is (0..100).
 ##
-## RUSTPUNTEN: elke 10e verdieping (10, 20, ... 100) heeft een rustpunt (scenes/dungeon100_rustpunt.tscn).
-##   - aanraken (A) = HP en MP van de hele party (en de Codex-bondgenoot) vol + het rustpunt wordt
-##     het CHECKPOINT + de vraag 'Voortgang opslaan?' (zoals een boekpunt);
-##   - het checkpoint gaat alleen omhoog (een lager rustpunt opnieuw aanraken verlaagt het niet);
-##   - VERLIES (party KO) BINNEN de kerker: heb je een checkpoint, dan ontwaakt de groep op die
-##     verdieping bij het rustpunt (HP/MP vol, 25% van het goud kwijt, voortgang blijft). Zonder
-##     checkpoint (verdieping 1-9, nog geen rustpunt gehaald) is het de gewone game over: terug naar
-##     Wilgendal, helft van het goud kwijt, en de kerker begint weer bij verdieping 1.
+## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md): de kerker is een
+## simulatie. Een RUN begint bij het binnenkomen vanaf de wereldkaart: de party wordt level 1 zonder
+## uitrusting (de echte party + tas + goud + Codex liggen in een momentopname) en je tas bevat alleen de
+## PERMANENTE items van eerdere runs (GameState.dungeon100_permanent, uit Blauwe Kisten).
+##   - VERLIES (party KO) BINNEN de kerker = de run is voorbij: levels, tas, goud, Codex en het
+##     rustpunt van deze run zijn weg, de groep begint opnieuw op verdieping 1 (nieuwe seed). Permanente
+##     items en de momentopname blijven. Dit vervangt het 'ontwaken bij het rustpunt' van de eerste
+##     regels-versie.
+##   - RUSTPUNTEN (elke 10e verdieping: 10, 20, ... 100): aanraken (A) = HP/MP van de hele party (en de
+##     Codex-bondgenoot) vol + opslaan ('Voortgang opslaan?'). Het rustpunt wordt ook onthouden als
+##     'laatste rustpunt van deze run' (GameState.dungeon100_checkpoint, gaat alleen omhoog; alleen voor
+##     de HUD/tekst, het is geen terugkeerpunt meer).
+##   - de kerker verlaten: de ladder op verdieping 1 (run opgegeven) of het Warp-kristal van de eindbaas op
+##     verdieping 100 (run voltooid; permanente items worden dan ook in je echte tas gelegd).
 ##   - game over BUITEN de kerker (verdieping 0) werkt zoals altijd.
+
+const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 
 const FLOORS := 100
 const REST_INTERVAL := 10
@@ -27,9 +35,18 @@ const REST_INTERVAL := 10
 ## (static var i.p.v. const: de generator past de standaardwaarde aan, en de tests wijzen naar een testscène.)
 static var dungeon_scene := "res://scenes/maps/dungeon100.tscn"
 const REST_SPAWN := "rustpunt"
+## Spawnpunt boven aan de trap van een verdieping (= Dungeon100Generator.SPAWN_FROM_ABOVE): daar begint elke run.
+const START_SPAWN := "omhoog"
+## Waar je uitkomt als je de kerker verlaat (= Dungeon100Generator.WORLD_SCENE / WORLD_SPAWN).
+const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
+const WORLD_SPAWN := "van_dungeon100"
+## Vlaggen in GameState.story_flags die bij één run horen (kist geopend, bewaker/baas verslagen) en bij het
+## einde van de run weggaan. Kist- en kamer-id's bevatten de seed, dus een nieuwe run begint altijd schoon.
+const RUN_FLAG_PREFIXES := ["kist:d100_", "bewaker:dungeon100_", "dungeon100_boss:"]
 
-## Hoeveel goud je houdt na een nederlaag: bij een rustpunt in de kerker 75%, anders 50% (bestaande regel).
-const GOLD_KEEP_AT_REST_POINT := 0.75
+## Hoeveel goud je houdt na een nederlaag: in de kerker niets (het goud van de run was van de simulatie),
+## erbuiten de helft (bestaande regel).
+const GOLD_KEEP_RUN_LOST := 0.0
 const GOLD_KEEP_GAME_OVER := 0.5
 
 const HUD_FORMAT := "Verdieping %d/%d"
@@ -84,14 +101,18 @@ static func checkpoint_after_rest(current_checkpoint: int, floor_nr: int) -> int
 	return maxi(current_checkpoint, floor_nr)
 
 
-## Plan bij een nederlaag (party KO) op verdieping 'floor_nr' met 'checkpoint':
-##   {"respawn_floor": int (0 = naar het dorp), "to_dungeon": bool, "gold_keep": float}
-## 'scene_ok' = bestaat de kerker-scène (zie scene_available()).
-static func defeat_plan(floor_nr: int, checkpoint: int, scene_ok := true) -> Dictionary:
-	var cp := checkpoint if is_rest_floor(checkpoint) else 0
-	if is_valid_floor(floor_nr) and cp > 0 and scene_ok:
-		return {"respawn_floor": cp, "to_dungeon": true, "gold_keep": GOLD_KEEP_AT_REST_POINT}
-	return {"respawn_floor": 0, "to_dungeon": false, "gold_keep": GOLD_KEEP_GAME_OVER}
+## Plan bij een nederlaag (party KO) op verdieping 'floor_nr':
+##   {"respawn_floor": int (0 = naar het dorp), "to_dungeon": bool, "gold_keep": float, "new_run": bool}
+## In de kerker (1..100) en met kerker-scène ('scene_ok'): "new_run" = de run is voorbij, nieuwe run op
+## verdieping 1, goud weg. Zonder scène terug naar het dorp (de run wordt dan ook beëindigd).
+## Buiten de kerker: de gewone game over (helft van het goud). 'checkpoint' (rustpunt van de run) doet
+## niets meer voor het plan; de parameter blijft voor de bestaande aanroepers.
+static func defeat_plan(floor_nr: int, _checkpoint: int, scene_ok := true) -> Dictionary:
+	if is_valid_floor(floor_nr):
+		if scene_ok:
+			return {"respawn_floor": 1, "to_dungeon": true, "gold_keep": GOLD_KEEP_RUN_LOST, "new_run": true}
+		return {"respawn_floor": 0, "to_dungeon": false, "gold_keep": GOLD_KEEP_RUN_LOST, "new_run": true}
+	return {"respawn_floor": 0, "to_dungeon": false, "gold_keep": GOLD_KEEP_GAME_OVER, "new_run": false}
 
 
 static func scene_available() -> bool:
@@ -99,9 +120,15 @@ static func scene_available() -> bool:
 
 
 ## Opslaan/laden: veilige waarden (kapotte of oude saves geven overal 0).
-## 'run_seed' = de seed van de generator (0 = nog niet gekozen).
-static func save_data(floor_nr: int, checkpoint: int, best: int, run_seed := 0) -> Dictionary:
-	return {"floor": floor_nr, "checkpoint": checkpoint, "best": best, "seed": run_seed}
+## 'run_seed' = de seed van de generator (0 = nog niet gekozen). 'extra' (optioneel): "permanent"
+## (id -> aantal, de Blauwe-Kist-items), "delivered" (id -> aantal al in de echte tas gelegd) en "snapshot"
+## (de momentopname van de echte party/tas/goud/Codex tijdens een run, {} = geen run).
+static func save_data(floor_nr: int, checkpoint: int, best: int, run_seed := 0, extra := {}) -> Dictionary:
+	var d := {"floor": floor_nr, "checkpoint": checkpoint, "best": best, "seed": run_seed}
+	d["permanent"] = (extra.get("permanent", {}) as Dictionary).duplicate(true)
+	d["delivered"] = (extra.get("delivered", {}) as Dictionary).duplicate(true)
+	d["snapshot"] = (extra.get("snapshot", {}) as Dictionary).duplicate(true)
+	return d
 
 
 static func load_data(raw) -> Dictionary:
@@ -114,7 +141,32 @@ static func load_data(raw) -> Dictionary:
 		cp = checkpoint_for(cp) if cp > 0 else 0
 	var best := clampi(_int_of(d.get("best", 0)), 0, FLOORS)
 	best = maxi(best, maxi(floor_nr, cp))
-	return {"floor": floor_nr, "checkpoint": cp, "best": best, "seed": _int_of(d.get("seed", 0))}
+	var snap = d.get("snapshot", {})
+	if not (snap is Dictionary) or not (snap.get("party") is Array):
+		snap = {}
+	return {"floor": floor_nr, "checkpoint": cp, "best": best, "seed": _int_of(d.get("seed", 0)),
+			"permanent": clean_counts(d.get("permanent", {})), "delivered": clean_counts(d.get("delivered", {})),
+			"snapshot": (snap as Dictionary).duplicate(true)}
+
+
+## id -> aantal (alleen echte uitrustingsstukken die een Blauwe Kist kan geven, aantal 1..99).
+static func clean_counts(raw) -> Dictionary:
+	var out := {}
+	if not (raw is Dictionary):
+		return out
+	for k in raw:
+		var n := _int_of(raw[k])
+		if n >= 1 and Blue.is_blue_item(str(k)):
+			out[str(k)] = mini(n, 99)
+	return out
+
+
+## Hoort deze story-vlag bij één kerker-run? (zie RUN_FLAG_PREFIXES)
+static func is_run_flag(flag: String) -> bool:
+	for p in RUN_FLAG_PREFIXES:
+		if flag.begins_with(p):
+			return true
+	return false
 
 
 static func _int_of(v) -> int:

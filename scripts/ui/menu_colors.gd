@@ -31,6 +31,8 @@ const DIM := Color(0.03, 0.02, 0.04, 0.5)   # eigen: waas over de map achter het
 const ACCENT := UiStyle.HILITE          # gekozen regel + '>' (warm goud)
 const ACCENT_SOFT := UiStyle.HILITE_DIM # 'gekozen' terwijl je iets anders kiest
 const ACCENT_GREY := Color("8c8270")    # eigen: grijs item met focus
+const PERMANENT := Color("8cc4ff")      # eigen: permanent item uit een Blauwe Kist (Het Gesimuleerde Archief)
+const PERMANENT_DIM := Color("5f8fc4")  # eigen: idem, grijs (niet te gebruiken) en zonder focus
 const INFO := UiStyle.TEAL              # meldingen en effecten
 const KO := UiStyle.KO                  # KO-held
 
