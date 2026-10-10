@@ -114,3 +114,33 @@ lopend naar de trap -> 2 -> ladder -> 1 -> wereldkaart -> opnieuw binnen (zelfde
   Eigen icoon voor de Diepe Grot (16x16) gewenst.
 - Dungeon-tegels: bestaande `archief_grijs`-set; een eigen thema per 25 verdiepingen is mogelijk via `room["theme"]`
   (nu niet gedaan, tegelnummers 0-64 zijn in alle thema's gelijk).
+
+## Samengevoegd: generator + schaal/buit + regels (PR #7, #8, #9)
+
+De drie takken zijn in `main` samengevoegd en op elkaar aangesloten. Overzicht:
+
+| onderdeel | waar |
+|---|---|
+| generator (vloeren, trappen, ingang) | `HANDOFF_DUNGEON100.md` (dit bestand) |
+| monsterschaal, buit, 10 bazen | `HANDOFF_DUNGEON100_SCHAAL.md` |
+| rustpunten, checkpoint, HUD, nederlaag-regels | `HANDOFF_DUNGEON100_REGELS.md` |
+
+- **GameState**: één blok variabelen `dungeon100_floor`, `dungeon100_seed`, `dungeon100_checkpoint`, `dungeon100_best`;
+  één save-blok `"dungeon100": {"floor", "seed", "checkpoint", "best"}` (`Dungeon100Rules.save_data/load_data`).
+  Een ongeldige verdieping (bv. 999) in een save wordt 0 (de kerker begint dan weer bij 1).
+- **Inhoud** (`scripts/dungeon/dungeon100_content.gd`): monsters via `Dungeon100Scaling.monster_entry` (dragen hun
+  verdieping; het gevecht schaalt via `GameState.dungeon100_floor`), kisten via `Dungeon100Scaling.chest_entry`
+  (schaalbuit vooraf gerold), de **baas** (`Content.boss`) op `boss_slot` op verdieping 10, 20, ... 100 (2x2, Golem-sprite
+  als placeholder, `"guard": true`: een verslagen baas blijft weg), en het **rustpunt** (`room["rustpunt"]`) op
+  `rest_slot` op elke rustverdieping (`Dungeon100Rules.is_rest_floor`). Het kamerniveau `room["tier"]` (1-4) blijft
+  voor het Codex-vangniveau; de vijandstats komen uit `Dungeon100Scaling` (niveaus 1-5).
+- **Rustpunt**: `Dungeon100Room._place_rustpunt()` zet een `Dungeon100Rustpunt` op `room["rustpunt"]`. Op die
+  verdiepingen bestaat ook de spawn `rustpunt` (`Gen.SPAWN_REST`, een vrije bereikbare buurtegel, kijkend naar het rustpunt).
+- **Nederlaag** (`GameState.end_battle("lose")`): in de kerker (`dungeon100_floor > 0`) gelden de regels van
+  `Dungeon100Rules.defeat_plan` (checkpoint -> terug bij het rustpunt van die verdieping, 25% goud kwijt; geen
+  checkpoint -> Wilgendal, half goud, kerker weer vanaf 1). Het kamer-checkpoint van v0.19 wordt in de kerker niet
+  gezet (`Dungeon100Room.allows_checkpoint() == false`) en niet gebruikt. `Dungeon100Rules.dungeon_scene` is
+  `res://scenes/maps/dungeon100.tscn`.
+- **Tests**: `--dungeon100gentest`, `--dungeon100schaaltest` (was `--dungeon100test`), `--dungeon100regelstest`
+  (was `--dungeon100test`) en `--dungeon100integratietest` (verdieping 10: baas + rustpunt + HUD + geschaalde monsters,
+  echt baasgevecht, nederlaag bij het rustpunt).

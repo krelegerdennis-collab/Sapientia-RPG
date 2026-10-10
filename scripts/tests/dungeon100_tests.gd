@@ -119,14 +119,14 @@ func _rules_tests() -> void:
 	check("heal_party: party en Codex-bondgenoot HP/MP vol (ook KO)", party[0]["hp"] == 30 and party[0]["mp"] == 8
 			and party[1]["hp"] == 20 and party[1]["mp"] == 4 and pages[0]["hp"] == 12 and pages[0]["mp"] == 3)
 	var d := R.load_data({"floor": 37.0, "checkpoint": 30.0, "best": 41.0})
-	check("load_data: gewone waarden blijven (floats uit JSON worden ints)", d == {"floor": 37, "checkpoint": 30, "best": 41})
+	check("load_data: gewone waarden blijven (floats uit JSON worden ints)", d == {"floor": 37, "checkpoint": 30, "best": 41, "seed": 0})
 	d = R.load_data({"floor": 999, "checkpoint": "x", "best": -4})
-	check("load_data: rommel -> 0", d == {"floor": 0, "checkpoint": 0, "best": 0})
+	check("load_data: rommel -> 0", d == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0})
 	d = R.load_data({"floor": 5, "checkpoint": 37, "best": 2})
 	check("load_data: checkpoint 37 wordt 30, best is minstens de verdieping/het checkpoint", d["checkpoint"] == 30
 			and d["best"] == 30 and d["floor"] == 5)
-	check("load_data: geen dictionary -> alles 0", R.load_data(null) == {"floor": 0, "checkpoint": 0, "best": 0}
-			and R.load_data([1, 2]) == {"floor": 0, "checkpoint": 0, "best": 0})
+	check("load_data: geen dictionary -> alles 0", R.load_data(null) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0}
+			and R.load_data([1, 2]) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0})
 	check("best_after gaat alleen omhoog", R.best_after(10, 4) == 10 and R.best_after(10, 12) == 12 and R.best_after(0, 300) == 100)
 
 
@@ -403,7 +403,7 @@ func _defeat_tests() -> void:
 	# 3. winst of vluchten in de kerker verandert de verdieping niet
 	GameState.dungeon100_floor = 33
 	GameState.dungeon100_checkpoint = 30
-	GameState.return_map = TOWN
+	GameState.return_map = STAND_IN
 	GameState.in_battle = true
 	GameState.end_battle("flee")
 	await wait_until(func(): return not GameState.in_battle and not GameState.changing_map, 20.0)

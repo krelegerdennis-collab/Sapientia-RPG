@@ -278,7 +278,8 @@ func _generator_tests() -> void:
 			and Content.enemy_pool(30).size() < Content.enemy_pool(100).size())
 	check("alle vijanden en voorwerpen in de inhoud bestaan in game_data.gd",
 			range(1, 101).all(func(i): return Content.enemy_pool(i).all(func(e): return GD.ENEMIES.has(e)))
-			and Content.CHEST_ITEMS.all(func(it): return GD.ITEMS.has(it)))
+			and range(1, 101).all(func(i): return fresh(1, i)["room"]["chests"].all(func(c): return c["loot"]["items"].all(
+					func(e): return GD.ITEMS.has(e["item"]) or GD.EQUIPMENT.has(e["item"])))))
 
 
 ## Een dictionary zonder Vector2i/Rect2i (zodat JSON.stringify ze vergelijkbaar maakt).
@@ -395,7 +396,8 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 		ids[m["id"]] = true
 		if not reach.has(tile_of(m["tile"])):
 			return "monster %s staat op een onbereikbare tegel" % [m["id"]]
-	if room["monsters"].size() != d["monster_slots"].size() or room["chests"].size() != d["chest_slots"].size():
+	var boss_n := 1 if d["is_boss_floor"] else 0     # de baas (Dungeon100Content.boss) staat op boss_slot, niet op een monster-slot
+	if room["monsters"].size() != d["monster_slots"].size() + boss_n or room["chests"].size() != d["chest_slots"].size():
 		return "aantal monsters/kisten komt niet overeen met de slots"
 	for c in room["chests"]:
 		if ids.has(c["id"]) or not GD.ITEMS.has(c["item"]) or int(c["n"]) < 1:
@@ -427,7 +429,7 @@ func _state_tests() -> void:
 	f = FileAccess.open(GameState.save_path, FileAccess.WRITE)
 	f.store_string(JSON.stringify(raw))
 	f.close()
-	check("kapotte/te grote waarden worden begrensd (floor <= 100, seed 0)", GameState.load_game() and GameState.dungeon100_floor == 100 and GameState.dungeon100_seed == 0)
+	check("kapotte/te grote waarden worden begrensd (floor 999 = ongeldig = 0, seed 0)", GameState.load_game() and GameState.dungeon100_floor == 0 and GameState.dungeon100_seed == 0)
 	GameState.dungeon100_floor = 12
 	GameState.enter_map("res://scenes/maps/wilgendal.tscn")
 	check("enter_map buiten de grot zet de verdieping op 0 (ook na game over)", GameState.dungeon100_floor == 0)

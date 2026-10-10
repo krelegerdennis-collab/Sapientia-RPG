@@ -70,8 +70,9 @@ Suites (v0.18, aantallen PASS ter referentie):
 | `--dungeon100gentest` | `scripts/tests/dungeon100_generator_tests.gd` | ? |
 | `--dungeon100schaaltest` | `scripts/tests/dungeon100_schaal_tests.gd` | ? |
 | `--dungeon100regelstest` | `scripts/tests/dungeon100_tests.gd` | ? |
+| `--dungeon100integratietest` | `scripts/tests/dungeon100_integratie_tests.gd` | ? |
 
-Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest archieftest kerntest kernkrachttest woudtest codextest checkpointtest dungeon100gentest dungeon100schaaltest dungeon100regelstest; do .github/scripts/run_suite.sh $s; done`
+Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest archieftest kerntest kernkrachttest woudtest codextest checkpointtest dungeon100gentest dungeon100schaaltest dungeon100regelstest dungeon100integratietest; do .github/scripts/run_suite.sh $s; done`
 (samen ~12 min; CI draait ze parallel). Een eigen `XDG_DATA_HOME` per suite houdt `user://` (saves/instellingen) gescheiden.
 
 **Nieuwe suite toevoegen:** script in `scripts/tests/<naam>_tests.gd` (zelfde PASS/FAIL/RESULT-format,
