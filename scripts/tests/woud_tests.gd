@@ -438,6 +438,22 @@ func _data_tests() -> void:
 		"assets/sprites/enemies/kennis_beest_rug.png"]
 	var miss := need.filter(func(f): return not (f in hw))
 	check("alle nieuwe RPG ART-bestanden in tools/handwerk.txt (mist %s)" % [miss], miss.is_empty())
+	var suno := {
+		"main_menu": "bgm_main_menu.ogg",
+		"wachtershuis": "bgm_wachtershuis.ogg",
+		"vergeten_archieven": "bgm_vergeten_archieven.ogg",
+		"gevecht_normaal": "bgm_gevecht_normaal.ogg",
+		"gevecht_miniboss": "bgm_gevecht_miniboss.ogg",
+		"wereld": "bgm_wereld.ogg",
+	}
+	var suno_bad: Array[String] = []
+	for key in suno:
+		var bestand := str(suno[key])
+		var path := "res://assets/audio/bgm/" + bestand
+		var stream: Resource = load(path)
+		if not AudioManager.has_music(key) or not (stream is AudioStreamOggVorbis):
+			suno_bad.append("%s -> %s" % [key, bestand])
+	check("Suno-BGM is ogg-vorbis en staat in het manifest (%s)" % [suno_bad], suno_bad.is_empty())
 
 
 # ================================================================ B: wereldkaart
@@ -466,11 +482,8 @@ func _world_tests() -> void:
 	var w := await enter(WORLD, "van_esdoorn")
 	check("wereldkaart met Esdoorn en het Donker Woud", w != null and w.get_node_or_null("Exits/NaarEsdoorn") != null
 			and w.get_node_or_null("Exits/NaarWoud") != null)
-	var wereld_ogg := "res://assets/audio/bgm/bgm_wereld.ogg"
-	var wereld_stil := not ResourceLoader.exists(wereld_ogg)
 	check("wereldkaart speelt track 'wereld' (bgm_wereld.ogg)", w != null and w.music_track == "wereld"
-			and AudioManager.has_music("wereld")
-			and (wereld_stil == (AudioManager.get_current_music() == "")))
+			and AudioManager.get_current_music() == "wereld")
 	if w == null:
 		return
 	var ex_e: Node = w.get_node("Exits/NaarEsdoorn")
