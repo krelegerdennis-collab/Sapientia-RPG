@@ -1,16 +1,17 @@
 extends Control
 ## v0.10 Titelscherm met 'Doorgaan' en 'Nieuw spel'.
-## v0.13: titel 'SAPIENTIA', ondertitel 'De Vergeten Archieven', met een lichte roze glitch
-## (title_glitch.gd: RGB-split + verschoven plakjes, elke paar seconden; ook een smal plakje
-## van de achtergrond). Art van RPG ART wordt gebruikt zodra die er is:
+## Hoofdpagina: assets/ui/title_main.png (384x216). Titel en ondertitel zitten in die plaat,
+## dus logo, kern en glitch worden er niet overheen getekend. Het menu (Doorgaan / Nieuw spel)
+## blijft rechtsonder.
+## Zonder die plaat: v0.13-titel 'SAPIENTIA', ondertitel 'De Vergeten Archieven', met een lichte
+## roze glitch (title_glitch.gd). Art van RPG ART wordt gebruikt zodra die er is:
 ##   assets/ui/title_bg.png          -> achtergrond 384x216 i.p.v. de bibliotheek;
 ##   assets/ui/title_logo.png        -> logo 208x36 op (88,10) i.p.v. de tekst;
 ##   assets/ui/title_ondertitel.png  -> ondertitel op (134,43) i.p.v. de tekst;
 ##   assets/ui/title_logo_glitch.png -> 6 frames over het logo, 1x per 3-5 s op 14 fps;
 ##   assets/ui/title_kern.png        -> kern van de Golem, 4 frames 24x28 op (188,50), 7 fps.
 ## Ontbreekt een bestand, dan valt alleen dat stuk terug (tekst / bibliotheek / code-glitch).
-## Menu (Doorgaan/Nieuw spel + save-info) rechtsonder, x 240..372, onderkant y 200 (de held
-## links en de Golem in het midden blijven vrij).
+## Menu (Doorgaan/Nieuw spel + save-info) rechtsonder, x 240..372, onderkant y 200.
 ## v0.13 (afgemaakt): alle titel-art staat in een vaste 'stage' van 384x216 die in het midden
 ## van het scherm staat (pixel-precies, Nearest). Op bredere/hogere schermen (telefoons zijn vaak
 ## breder dan 16:9) vult een donkere, vergrote kopie van de achtergrond de randen; zo blijven
@@ -25,6 +26,7 @@ const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const TitleGlitch := preload("res://scripts/ui/title_glitch.gd")
 const BACKDROP := "res://assets/battle/bibliotheek.png"
+const TITLE_MAIN := "res://assets/ui/title_main.png"   # hoofdpagina 384x216 (titel zit in de plaat)
 const TITLE_BG := "res://assets/ui/title_bg.png"
 const TITLE_LOGO := "res://assets/ui/title_logo.png"
 const TITLE_SUB := "res://assets/ui/title_ondertitel.png"
@@ -65,11 +67,13 @@ const STAGE_SIZE := Vector2(384, 216)
 func _ready() -> void:
 	theme = load(UiMenu.THEME_PATH)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	var own_bg := ResourceLoader.exists(TITLE_BG)
+	var use_main := ResourceLoader.exists(TITLE_MAIN)
+	var own_bg := use_main or ResourceLoader.exists(TITLE_BG)
+	var bg_path := TITLE_MAIN if use_main else (TITLE_BG if ResourceLoader.exists(TITLE_BG) else BACKDROP)
 	# randen (alleen zichtbaar als het scherm niet precies 16:9 is): donkere vergrote achtergrond
 	backfill = TextureRect.new()
 	backfill.name = "Backfill"
-	backfill.texture = load(TITLE_BG if own_bg else BACKDROP)
+	backfill.texture = load(bg_path)
 	backfill.set_anchors_preset(Control.PRESET_FULL_RECT)
 	backfill.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	backfill.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
@@ -84,7 +88,7 @@ func _ready() -> void:
 	add_child(stage)
 	var bg := TextureRect.new()
 	bg.name = "Background"
-	bg.texture = load(TITLE_BG if own_bg else BACKDROP)
+	bg.texture = load(bg_path)
 	bg.position = Vector2.ZERO
 	bg.size = STAGE_SIZE
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -101,7 +105,58 @@ func _ready() -> void:
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(dim)
 
-	# --- titel: logo van RPG ART (vaste plekken op 384x216) of tekst met het pixelfont
+	# --- titel: de hoofdpagina heeft SAPIENTIA al in de plaat. Anders logo van RPG ART
+	# (vaste plekken op 384x216) of tekst met het pixelfont.
+	title_label = UiMenu.label(TITLE, UiStyleC.TEXT, 30)
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_label.add_theme_color_override("font_shadow_color", UiStyleC.GLITCH_DIM)
+	title_label.add_theme_constant_override("shadow_offset_x", 1)
+	title_label.add_theme_constant_override("shadow_offset_y", 1)
+	subtitle_label = UiMenu.label(SUBTITLE, UiStyleC.HILITE)
+	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if use_main:
+		title_label.visible = false
+		subtitle_label.visible = false
+		stage.add_child(title_label)
+		stage.add_child(subtitle_label)
+	else:
+		_build_legacy_title(bg)
+
+	# --- menu rechtsonder (de held in het midden blijft vrij)
+	var box := PanelContainer.new()
+	box.name = "Card"
+	box.add_theme_stylebox_override("panel", UiStyleC.panel("window"))   # v0.13: palet
+	card = box
+	add_child(box)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 0)
+	box.add_child(list)
+	continue_button = UiMenu.button("Doorgaan")
+	continue_button.custom_minimum_size = Vector2(0, 16)
+	list.add_child(continue_button)
+	save_info = UiMenu.label("", UiStyleC.TEXT_DIM)
+	# v0.13: een lange naam + '(auto)' mag het menu niet breder maken (dan liep het rechts uit
+	# beeld): afkappen met '...' binnen de vaste breedte van het menu
+	save_info.clip_text = true
+	save_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	list.add_child(save_info)
+	new_button = UiMenu.button("Nieuw spel")
+	list.add_child(new_button)
+	continue_button.pressed.connect(_on_continue)
+	new_button.pressed.connect(_on_new)
+
+	version_label = UiMenu.label("v" + str(ProjectSettings.get_setting("application/config/version", "")), UiStyleC.TEXT_OFF)
+	version_label.name = "Version"
+	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	add_child(version_label)
+	refresh()
+	resized.connect(_place_card)
+	_place_card.call_deferred()
+	Transition.fade_in()
+
+
+## Oude titel (logo, ondertitel, kern, glitch) als title_main.png er niet is.
+func _build_legacy_title(bg: TextureRect) -> void:
 	if ResourceLoader.exists(TITLE_KERN):
 		kern = TextureRect.new()
 		kern.name = "Kern"
@@ -117,13 +172,6 @@ func _ready() -> void:
 		kern.size = KERN_SIZE
 		kern.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stage.add_child(kern)
-	title_label = UiMenu.label(TITLE, UiStyleC.TEXT, 30)
-	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_label.add_theme_color_override("font_shadow_color", UiStyleC.GLITCH_DIM)
-	title_label.add_theme_constant_override("shadow_offset_x", 1)
-	title_label.add_theme_constant_override("shadow_offset_y", 1)
-	subtitle_label = UiMenu.label(SUBTITLE, UiStyleC.HILITE)
-	subtitle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	glitch = TitleGlitch.new()
 	glitch.name = "TitleGlitch"
 	stage.add_child(glitch)
@@ -162,38 +210,6 @@ func _ready() -> void:
 		stage.add_child(subtitle_label)
 		_place_text_title.call_deferred()
 	glitch.set_background(bg)
-
-	# --- menu rechtsonder (Dennis' hoofd blijft vrij)
-	var box := PanelContainer.new()
-	box.name = "Card"
-	box.add_theme_stylebox_override("panel", UiStyleC.panel("window"))   # v0.13: palet
-	card = box
-	add_child(box)
-	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", 0)
-	box.add_child(list)
-	continue_button = UiMenu.button("Doorgaan")
-	continue_button.custom_minimum_size = Vector2(0, 16)
-	list.add_child(continue_button)
-	save_info = UiMenu.label("", UiStyleC.TEXT_DIM)
-	# v0.13: een lange naam + '(auto)' mag het menu niet breder maken (dan liep het rechts uit
-	# beeld): afkappen met '...' binnen de vaste breedte van het menu
-	save_info.clip_text = true
-	save_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	list.add_child(save_info)
-	new_button = UiMenu.button("Nieuw spel")
-	list.add_child(new_button)
-	continue_button.pressed.connect(_on_continue)
-	new_button.pressed.connect(_on_new)
-
-	version_label = UiMenu.label("v" + str(ProjectSettings.get_setting("application/config/version", "")), UiStyleC.TEXT_OFF)
-	version_label.name = "Version"
-	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	add_child(version_label)
-	refresh()
-	resized.connect(_place_card)
-	_place_card.call_deferred()
-	Transition.fade_in()
 
 
 ## Stage (384x216) in het midden; menu rechtsonder IN de stage: x CARD_LEFT..CARD_RIGHT,
