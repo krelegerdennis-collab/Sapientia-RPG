@@ -1,21 +1,24 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`7a5c7ee`), Godot 4.7.2, threads uit.
+Web-build van `cursor/web-audio-29ec` (`0c157f5`, inclusief `main` `9b72cf9`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
-De zes muziekbestanden (`assets/audio/bgm/*.ogg`) zitten in `index.pck`.
+De zes muziekbestanden (`assets/audio/bgm/*.ogg`) en de acteur-wavs zitten in `index.pck`.
 
 ## Spelen op je telefoon
 
-Pages staat al op branch `cursor/web-build-29ec`, map `/ (root)`.
-Je hoeft geen knop meer aan te zetten.
+Pages staat op branch `cursor/web-build-29ec`, map `/ (root)`.
 
-1. Wacht ongeveer een minuut na deze update.
-2. Open https://krelegerdennis-collab.github.io/Sapientia-RPG/
-3. Ververs hard als je nog de vorige build ziet (pagina verversen, of de site even uit de recente apps vegen).
+https://krelegerdennis-collab.github.io/Sapientia-RPG/
 
-De eerste tik op het scherm zet het geluid aan. Dat eist de telefoonbrowser.
-Houd de telefoon liggend. Eerste keer ongeveer 65 MB download (`index.pck` 27 MB + `index.wasm` 38 MB).
+Na deze publicatie moet je hard verversen. De browser bewaart de oude `index.pck`.
+
+- Chrome: menu, dan verversen.
+- Safari: het tabblad sluiten en opnieuw openen.
+
+De eerste tik ergens op het scherm (ook Doorgaan of Nieuw spel) zet het geluid aan.
+Tot die tik staat er **Tik voor geluid**. Houd de telefoon liggend.
+Eerste keer ongeveer 68 MB (`index.pck` 28 MB + `index.wasm` 38 MB).
 
 ## Kortere link
 

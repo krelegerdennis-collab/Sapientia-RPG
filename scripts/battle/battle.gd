@@ -32,6 +32,7 @@ signal state_changed(new_state: String)
 signal damage_shown(target_name: String, amount: int)
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const COMMANDS := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten"]
@@ -145,6 +146,8 @@ var hero_nodes: Array = []    # battle_hero.gd per held
 var status_boxes: Array = []  # hero_status_box.gd per held
 var codex: CodexBattle            # Codex (scripts/battle/codex_battle.gd)
 var _previous_scale_size := Vector2i.ZERO
+## push_music in _ready, pop in _exit_tree. Alleen poppen als we zelf gepusht hebben.
+var _battle_music_pushed := false
 
 
 func _ready() -> void:
@@ -197,6 +200,7 @@ func _ready() -> void:
 	_refresh_party()
 	_layout()
 	resized.connect(_layout)
+	_start_battle_music()
 	_run.call_deferred()
 
 
@@ -265,12 +269,21 @@ func _fit_to_screen() -> void:
 
 
 func _exit_tree() -> void:
+	if _battle_music_pushed:
+		_battle_music_pushed = false
+		AudioManager.pop_music(0.35)
 	if get_viewport().size_changed.is_connected(_fit_to_screen):
 		get_viewport().size_changed.disconnect(_fit_to_screen)
 	if touch and get_viewport().size_changed.is_connected(touch.refit):
 		get_viewport().size_changed.disconnect(touch.refit)
 	if _previous_scale_size != Vector2i.ZERO:
 		get_window().content_scale_size = _previous_scale_size
+
+
+func _start_battle_music() -> void:
+	var track := "gevecht_miniboss" if GameState.pending_boss else "gevecht_normaal"
+	_battle_music_pushed = true
+	AudioManager.push_music(track, 0.4)
 
 
 # ================================================================ opbouw
@@ -1020,6 +1033,7 @@ func _execute(a: Dictionary) -> void:
 					text = "%s: %s!" % [actor["name"], skill["name"]]
 					break
 			show_message(text)
+			ActorSfx.play(actor, "vaardigheid" if mult != 1.0 else "aanval")
 			if actor["is_hero"]:
 				await _hero_wind_up(actor, true)
 			else:
@@ -1035,6 +1049,7 @@ func _execute(a: Dictionary) -> void:
 			actor["s"]["mp"] -= sp["mp"]
 			_refresh_party()
 			show_message("%s spreekt %s!" % [actor["name"], sp["name"]])
+			ActorSfx.play(actor, "vaardigheid")
 			await _hero_wind_up(actor, false)
 			match sp["target"]:
 				"enemy":
@@ -1160,6 +1175,7 @@ func _hit(t: Dictionary, amount: int) -> void:
 		amount = t["core"].scale_damage(amount)
 	t["s"]["hp"] = maxi(0, int(t["s"]["hp"]) - amount)
 	_popup_number(t, str(amount), number_color)
+	ActorSfx.play(t, "raak")
 	if t["is_hero"]:
 		show_message("%s krijgt %d schade." % [t["name"], amount])
 		var node: Control = t["node"]
@@ -1181,6 +1197,7 @@ func _report_kos(targets: Array) -> void:
 		if t["s"]["hp"] > 0 or t.get("reported_ko", false):
 			continue
 		t["reported_ko"] = true
+		ActorSfx.play(t, "dood")
 		if t["is_hero"]:
 			show_message("%s is KO!" % t["name"])
 		else:
@@ -1260,6 +1277,7 @@ const GUARD_TINT := Color(0.7, 0.88, 1.3)
 
 
 func _guard_up(actor: Dictionary, skill: Dictionary) -> void:
+	ActorSfx.play(actor, "vaardigheid")
 	actor["guard"] = 2
 	actor["guard_mult"] = float(skill.get("def_mult", 2.0))
 	if actor["node"]:
@@ -1311,6 +1329,7 @@ func _core_resolve(a: Dictionary) -> void:
 		if t == null:
 			return
 		show_message(BossCore.MSG_SLAM % [actor["name"], core.slam_name])
+		ActorSfx.play(actor, "vaardigheid")
 		await _enemy_lunge(actor, t)
 		await _damage(t, _physical_damage(actor, t, core.slam_power))
 	if _alive(heroes).size() > 0:
@@ -1694,6 +1713,7 @@ func _kern_strike(a: Dictionary) -> void:
 		actor["kern_cd"] = {}
 	actor["kern_cd"][id] = int(skill.get("cooldown", 3))
 	show_message(KERN_HIT_TEXT % [actor["name"], skill["name"]])
+	ActorSfx.play(actor, "vaardigheid")
 	if actor["node"]:
 		var tw := create_tween()
 		tw.tween_property(actor["node"], "modulate", KERN_TINT, 0.15)
