@@ -74,5 +74,7 @@ rustpunt, HUD en geschaalde monsters.
 
 - `assets/sprites/enemies/mimic.png` — nu een placeholder (80×64, kist met tanden, magenta hoekjes).
   Echt gevechtsplaatje, zelfde maat. Generator: `tools/art_mimic_placeholder.py`.
+- `assets/map_monsters/mimic.png` — placeholder 32×64 (2×4 frames van 16×16, magenta hoekjes),
+  zodat elke vijand een kaartplaatje heeft. Generator: `tools/art_map_monsters.py`.
 - Blauwe kist: geen eigen bestand. De gewone kist (`assets/sprites/buiten/kist.png`, 2×16×16) krijgt
   een blauwe tint in code. Een eigen blauwe variant mag later, zelfde maat als de gewone kist.

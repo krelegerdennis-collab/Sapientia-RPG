@@ -380,19 +380,28 @@ func _title_shot() -> void:
 	cr.position -= st.position
 	check("menu rechtsonder in de stage (x 240..372, y 150..200): %s" % cr,
 			absf(cr.position.x - 240.0) <= 1.0 and absf(cr.end.x - 372.0) <= 1.0 and cr.end.y <= 201.0 and cr.position.y >= 148.0)
-	# menu niet over de held (links onder, x < 200) en niet over de Golem/kern (midden boven)
-	var kern: Rect2 = Rect2(t.kern.position, t.kern.size)
-	check("menu raakt logo, ondertitel en kern niet", not cr.intersects(Rect2(88, 10, 208, 36))
-			and not cr.intersects(Rect2(t.subtitle_art.position, t.subtitle_art.size)) and not cr.intersects(kern))
-	check("logo/ondertitel/kern/achtergrond: Nearest", t.background.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
-			and t.logo.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST and t.kern.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
-	check("kern-fps 6..8, glitch 12..15 fps elke 3..5 s", t.KERN_FPS >= 6.0 and t.KERN_FPS <= 8.0
-			and t.glitch.STRIP_FPS >= 12.0 and t.glitch.STRIP_FPS <= 15.0 and t.glitch.STRIP_GAP_MIN >= 3.0 and t.glitch.STRIP_GAP_MAX <= 5.0)
-	check("eerste logo-glitch ook pas na 3..5 s (%.2f)" % t.glitch._wait, t.glitch._wait >= 2.5 and t.glitch._wait <= 5.0)
-	await pframes(30)
-	# schoon logo (frame 0) op de foto
-	await wait_until(func(): return not t.glitch.is_glitching() and t.glitch.strip_frame == 0, 3.0)
-	await screenshot("v13_title")
+	if t.glitch == null:
+		check("hoofdpagina title_main.png, menu onder de titel, Nearest",
+				t.background.texture.resource_path.ends_with("title_main.png")
+				and t.logo == null and t.kern == null and t.subtitle_art == null
+				and t.background.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
+				and cr.position.y >= 140.0)
+		await pframes(30)
+		await screenshot("v13_title")
+	else:
+		# menu niet over de held (links onder, x < 200) en niet over de Golem/kern (midden boven)
+		var kern: Rect2 = Rect2(t.kern.position, t.kern.size)
+		check("menu raakt logo, ondertitel en kern niet", not cr.intersects(Rect2(88, 10, 208, 36))
+				and not cr.intersects(Rect2(t.subtitle_art.position, t.subtitle_art.size)) and not cr.intersects(kern))
+		check("logo/ondertitel/kern/achtergrond: Nearest", t.background.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
+				and t.logo.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST and t.kern.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
+		check("kern-fps 6..8, glitch 12..15 fps elke 3..5 s", t.KERN_FPS >= 6.0 and t.KERN_FPS <= 8.0
+				and t.glitch.STRIP_FPS >= 12.0 and t.glitch.STRIP_FPS <= 15.0 and t.glitch.STRIP_GAP_MIN >= 3.0 and t.glitch.STRIP_GAP_MAX <= 5.0)
+		check("eerste logo-glitch ook pas na 3..5 s (%.2f)" % t.glitch._wait, t.glitch._wait >= 2.5 and t.glitch._wait <= 5.0)
+		await pframes(30)
+		# schoon logo (frame 0) op de foto
+		await wait_until(func(): return not t.glitch.is_glitching() and t.glitch.strip_frame == 0, 3.0)
+		await screenshot("v13_title")
 	# lange naam + autosave: het menu blijft even breed en in beeld (tekst wordt afgekapt)
 	var w0: float = t.card.size.x
 	t.save_info.text = "  Maximiliaan  12:34:56 (auto)"
