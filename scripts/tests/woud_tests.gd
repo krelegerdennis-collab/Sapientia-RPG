@@ -454,6 +454,12 @@ func _data_tests() -> void:
 		if not AudioManager.has_music(key) or not (stream is AudioStreamOggVorbis):
 			suno_bad.append("%s -> %s" % [key, bestand])
 	check("Suno-BGM is ogg-vorbis en staat in het manifest (%s)" % [suno_bad], suno_bad.is_empty())
+	var menu_stream: Resource = load("res://assets/audio/bgm/bgm_main_menu.ogg")
+	var menu_len := (menu_stream as AudioStream).get_length() if menu_stream is AudioStream else 0.0
+	check("titel-ogg is echte muziek (langer dan een minuut)", menu_len > 60.0)
+	var music_player := AudioManager.get_node_or_null("MusicPlayer0") as AudioStreamPlayer
+	check("muziekspeler gebruikt stream-playback (web Sample-bus blijft anders stil)",
+			music_player != null and music_player.playback_type == AudioServer.PLAYBACK_TYPE_STREAM)
 
 
 # ================================================================ B: wereldkaart

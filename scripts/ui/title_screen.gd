@@ -152,6 +152,8 @@ func _ready() -> void:
 	refresh()
 	resized.connect(_place_card)
 	_place_card.call_deferred()
+	# Eigen track. Op web start play() pas na de eerste tik (AudioManager).
+	AudioManager.play_music("main_menu", 0.6)
 	Transition.fade_in()
 
 

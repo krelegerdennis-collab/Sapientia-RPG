@@ -146,6 +146,8 @@ var hero_nodes: Array = []    # battle_hero.gd per held
 var status_boxes: Array = []  # hero_status_box.gd per held
 var codex: CodexBattle            # Codex (scripts/battle/codex_battle.gd)
 var _previous_scale_size := Vector2i.ZERO
+## push_music in _ready, pop in _exit_tree. Alleen poppen als we zelf gepusht hebben.
+var _battle_music_pushed := false
 
 
 func _ready() -> void:
@@ -198,6 +200,7 @@ func _ready() -> void:
 	_refresh_party()
 	_layout()
 	resized.connect(_layout)
+	_start_battle_music()
 	_run.call_deferred()
 
 
@@ -266,12 +269,21 @@ func _fit_to_screen() -> void:
 
 
 func _exit_tree() -> void:
+	if _battle_music_pushed:
+		_battle_music_pushed = false
+		AudioManager.pop_music(0.35)
 	if get_viewport().size_changed.is_connected(_fit_to_screen):
 		get_viewport().size_changed.disconnect(_fit_to_screen)
 	if touch and get_viewport().size_changed.is_connected(touch.refit):
 		get_viewport().size_changed.disconnect(touch.refit)
 	if _previous_scale_size != Vector2i.ZERO:
 		get_window().content_scale_size = _previous_scale_size
+
+
+func _start_battle_music() -> void:
+	var track := "gevecht_miniboss" if GameState.pending_boss else "gevecht_normaal"
+	_battle_music_pushed = true
+	AudioManager.push_music(track, 0.4)
 
 
 # ================================================================ opbouw

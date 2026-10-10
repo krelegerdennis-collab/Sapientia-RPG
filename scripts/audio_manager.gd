@@ -16,6 +16,12 @@ extends Node
 ##   - Robuust zonder audio: geen manifest of geen bestanden = stil, zonder errors/warnings
 ##     (alleen print_verbose, zichtbaar met --verbose). Echte fouten (kapotte JSON, onbekende
 ##     naam terwijl het manifest WEL geladen is) melden we één keer per sleutel.
+##   - Web (HTML5): browsers blokkeren geluid tot de eerste tik/toets. Op Web starten we
+##     play() pas daarna, en de spelers gebruiken playback Stream. Godot 4.3+ speelt op web
+##     standaard via Samples; AudioServer.add_bus() (Music/SFX) koppelt dan Master los van
+##     de speakers (godotengine/godot#119026) en alles blijft stil terwijl playing true is.
+##     GodotAudio zit in de engine-closure (niet op window). De Web-export zet daarom in
+##     head_include een wrapper om AudioContext en hervat die context bij de eerste tik.
 ##
 ## Hoofdfuncties:
 ##   play_music(track_name, fade_in)  - speelt BGM met crossfade
@@ -75,13 +81,22 @@ var _stream_cache: Dictionary = {}
 var _reported: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 
+## Web: true tot de eerste tik/toets. play() vóór die tik blijft in de browser stil.
+var _web_locked := false
+## Volume van de track die klaarstaat tot de browser het geluid vrijgeeft.
+var _armed_base_db := 0.0
+var _web_prompt: CanvasLayer
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_web_locked = OS.get_name() == "Web"
 	_rng.randomize()
 	_ensure_buses()
 	_create_players()
 	load_manifest()
+	if _web_locked:
+		_show_web_prompt()
 	# Volume: Settings is de enige eigenaar. Wij geven alleen het signaal door.
 	var settings := _settings()
 	if settings != null and settings.has_signal("changed"):
@@ -126,19 +141,15 @@ func play_music(track_name: String, fade_in: float = DEFAULT_FADE, restart: bool
 	incoming.stop()
 	incoming.stream = stream
 	incoming.volume_db = base_db if fade_in <= 0.0 else SILENT_DB
-	incoming.play(maxf(from_position, 0.0))
 
 	_active_player = incoming
 	_current_track = track_name
+	_armed_base_db = base_db
 
-	if fade_in <= 0.0:
-		if outgoing != null:
-			outgoing.stop()
-	else:
-		var out_db := outgoing.volume_db if outgoing != null else SILENT_DB
-		_music_tween = create_tween()
-		_music_tween.tween_method(_apply_crossfade.bind(incoming, base_db, outgoing, out_db), 0.0, 1.0, fade_in)
-		_music_tween.tween_callback(_on_fade_finished.bind(outgoing))
+	# Op web nog geen play(): de AudioContext is suspended en een te vroege play()
+	# blijft daarna stil. _unlock_web_audio() start de track bij de eerste tik.
+	if not _web_locked:
+		_start_music_playback(incoming, outgoing, base_db, fade_in, from_position)
 
 	music_started.emit(track_name)
 	return true
@@ -246,6 +257,8 @@ func play_sfx(sound_name: String, volume_offset_db: float = 0.0, pitch_scale: fl
 	player.stream = stream
 	player.volume_db = float(entry.get("volume_db", 0.0)) + volume_offset_db
 	player.pitch_scale = maxf(pitch_scale * _rng.randf_range(1.0 - variation, 1.0 + variation), 0.01)
+	if _web_locked:
+		return false
 	player.play()
 	return true
 
@@ -481,6 +494,8 @@ func _create_players() -> void:
 		var player := AudioStreamPlayer.new()
 		player.name = "MusicPlayer%d" % i
 		player.bus = BUS_MUSIC
+		# Stream, niet Sample: op web maakt add_bus() de Sample-busgrafiek stil.
+		player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 		player.finished.connect(_on_music_player_finished.bind(player))
 		add_child(player)
 		_music_players.append(player)
@@ -490,8 +505,82 @@ func _create_players() -> void:
 		var player := AudioStreamPlayer.new()
 		player.name = "SfxPlayer%d" % i
 		player.bus = BUS_SFX
+		player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 		add_child(player)
 		_sfx_pool.append(player)
+
+
+func _start_music_playback(incoming: AudioStreamPlayer, outgoing: AudioStreamPlayer, base_db: float, fade_in: float, from_position: float) -> void:
+	incoming.play(maxf(from_position, 0.0))
+	if fade_in <= 0.0:
+		if outgoing != null:
+			outgoing.stop()
+		return
+	var out_db := outgoing.volume_db if outgoing != null else SILENT_DB
+	_music_tween = create_tween()
+	_music_tween.tween_method(_apply_crossfade.bind(incoming, base_db, outgoing, out_db), 0.0, 1.0, fade_in)
+	_music_tween.tween_callback(_on_fade_finished.bind(outgoing))
+
+
+## Eerste tik, muisklik, toets of gamepad. De knoppen op het titelscherm krijgen
+## dezelfde tik daarna nog gewoon (we markeren het event niet als afgehandeld).
+func _input(event: InputEvent) -> void:
+	if not _web_locked or not event.is_pressed() or event.is_echo():
+		return
+	if event is InputEventMouseButton or event is InputEventScreenTouch or event is InputEventKey or event is InputEventJoypadButton:
+		_unlock_web_audio()
+
+
+func _unlock_web_audio() -> void:
+	if not _web_locked:
+		return
+	_web_locked = false
+	_hide_web_prompt()
+	_resume_web_context()
+	var playing := false
+	if _active_player != null and _current_track != "" and _active_player.stream != null:
+		_active_player.volume_db = _armed_base_db
+		_active_player.play(0.0)
+		playing = _active_player.playing
+	print("[AudioManager] geluid aan (track=%s playing=%s)" % [_current_track, str(playing)])
+
+
+func _resume_web_context() -> void:
+	if OS.get_name() != "Web" or not ClassDB.class_exists("JavaScriptBridge"):
+		return
+	JavaScriptBridge.eval("if(window.sapientiaResumeAudio){window.sapientiaResumeAudio();}", true)
+
+
+func _show_web_prompt() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "WebAudioPrompt"
+	layer.layer = 128
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	var label := Label.new()
+	label.name = "Prompt"
+	label.text = "Tik voor geluid"
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	label.offset_top = -22.0
+	label.offset_bottom = -4.0
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null and "ui_theme" in gs and gs.ui_theme != null:
+		label.theme = gs.ui_theme
+	label.add_theme_color_override("font_color", Color("f2e9d8"))
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	layer.add_child(label)
+	add_child(layer)
+	_web_prompt = layer
+
+
+func _hide_web_prompt() -> void:
+	if _web_prompt != null and is_instance_valid(_web_prompt):
+		_web_prompt.queue_free()
+	_web_prompt = null
 
 
 func _get_inactive_music_player() -> AudioStreamPlayer:

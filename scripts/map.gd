@@ -85,13 +85,24 @@ func _ready() -> void:
 
 
 ## Start de BGM van deze map. Zonder sleutel stopt een track die nog speelde
-## (dorp en kerker blijven stil tot ze een eigen track krijgen). Ontbreekt het
+## (dorp en kerker blijven stil tot ze een eigen track krijgen), behalve het
+## huis van de wachter en Wilgendal: die spelen "wachtershuis". Ontbreekt het
 ## ogg-bestand, dan blijft het stil: play_music geeft false en crasht niet.
 func _play_map_music() -> void:
-	if music_track == "":
+	var track := _resolved_music_track()
+	if track == "":
 		AudioManager.stop_music()
 		return
-	AudioManager.play_music(music_track)
+	AudioManager.play_music(track)
+
+
+func _resolved_music_track() -> String:
+	if music_track != "":
+		return music_track
+	var path := scene_file_path
+	if path.ends_with("/huis_wilgendal.tscn") or path.ends_with("/wilgendal.tscn"):
+		return "wachtershuis"
+	return ""
 
 
 ## v0.19 Kamer-checkpoint bijwerken bij binnenkomst: via een uitgang/mapwissel, na laden (tenzij
