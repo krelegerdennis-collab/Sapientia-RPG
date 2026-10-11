@@ -8,7 +8,7 @@ extends Node
 ##   Deel E: opslaan/laden houdt alles vast.
 ##   Deel F: Codex (patch RPG CODE) in v0.17: Lege Boeken van Marit/woudkisten, woudmonster vangen,
 ##           bondgenoot vecht mee (ook in het woud), Codex-scherm, wereldkaart-iconen (RPG ART).
-##   Deel G: Het Zingende Graan (dicht vóór Noor, zaad op de mistrand, molen slaat op en geeft meel).
+##   Deel G: Het Zingende Graan (dicht vóór Noor, zaad op de mistrand, molen draait en zingt zacht, slaat op en geeft meel).
 ## --v17=map: screenshots 1024x576 als v17_dorp.png, v17_noor_ballon.png, v17_woud_kamer.png,
 ## v17_noor_cocon.png, v17_woud_baas.png, v17_noor_erbij.png (+ v17_woud_achtergrond.png, v17_veldmenu_opdracht.png),
 ## v17_wereld_esdoorn.png, v17_codex_vangen.png, v17_codex_bondgenoot.png, v17_codex_scherm.png.
@@ -22,6 +22,7 @@ const WR := preload("res://scripts/data/woud_rooms.gd")
 const KernVeld := preload("res://scripts/kern/kern_kracht_veld.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const Molen := preload("res://scripts/village/molen.gd")
+const Wieken := preload("res://scripts/village/molen_wieken.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
@@ -929,6 +930,10 @@ func _gerrit_citaten() -> Array:
 	return out
 
 
+func _magenta(c: Color) -> bool:
+	return c.a > 0.9 and c.r > 0.9 and c.b > 0.8 and c.g < 0.2
+
+
 func _mist_naast(room: Dictionary, t: Vector2i) -> bool:
 	var mist := {}
 	for m in room.get("mist", []):
@@ -1000,6 +1005,7 @@ func _graan_data() -> void:
 			if cmd is Array and cmd.size() >= 3 and str(cmd[0]) == "say" and str(cmd[1]) == "{naam}":
 				speler_vraagt = cmd[2].has(SD.QUOTE_GRAAN_VRAAG)
 	check("Gerrit zegt de canon-zinnen, zonder TODO(verhaal) en zonder de oude twee", mist.is_empty()
+			and quotes.size() == canon.size()
 			and not quotes.has("Het zaad zingt aan de rand van de mist.")
 			and not quotes.has("De molen kan weer malen.")
 			and not todo_op_zin and not SD.TODO_STORY.has("gerrit")
@@ -1007,6 +1013,31 @@ func _graan_data() -> void:
 			and keuze == [SD.KEUZE_GRAAN_JA, SD.KEUZE_GRAAN_NEE]
 			and SD.EVENTS["gerrit_ja"][0]["do"][0][0] == "flag"
 			and SD.EVENTS["gerrit_weigert"][0]["do"][0][0] == "say")
+	var namen: Array = []
+	for v in SD.EVENTS["gerrit"]:
+		var cond: Dictionary = v.get("if", {})
+		if cond.get("flags", []).has(SD.FLAG_ZAAD) and cond.get("not_flags", []).has(SD.FLAG_GRAAN_KLAAR):
+			for cmd in v.get("do", []):
+				if cmd is Array and not cmd.is_empty():
+					namen.append(str(cmd[0]))
+	check("zangscène tussen herkenning en de molen, zonder nieuwe zin", namen == ["take", "flag", "say", "molen_zang", "molen"])
+	var sheet := Wieken.placeholder_sheet().get_image()
+	var tip: Vector2i = Wieken.zeil_punt(0)
+	var tip2 := Vector2i(tip.x + Wieken.FRAME_W, tip.y)
+	var merk: Color = sheet.get_pixelv(Wieken.merk_pixel())
+	var hoek: Color = sheet.get_pixel(0, 0)
+	var zeil: Color = sheet.get_pixelv(tip)
+	check("placeholder-molen: 4 frames, magenta PH, wiek verschilt per frame", sheet.get_width() == Wieken.FRAME_W * Wieken.FRAMES
+			and sheet.get_height() == Wieken.FRAME_H
+			and _magenta(hoek) and _magenta(merk)
+			and zeil.a > 0.8 and not _magenta(zeil)
+			and sheet.get_pixelv(tip2).a < 0.1)
+	var toon := Wieken.maak_zang()
+	var top := Wieken.piek(toon)
+	check("zacht gezang uit de noten in de data", SD.MOLEN_ZANG.size() == 5 and SD.MOLEN_NODE == "MolenWieken"
+			and Wieken.piek(Wieken.maak_toon([], 0.2)) == 0.0
+			and top > 0.04 and top < 0.2
+			and absf(toon.get_length() - SD.MOLEN_ZANG_SEC) < 0.02)
 	var geesten: Dictionary = {}
 	for n in WR.ROOMS["woud_open_plek"].get("npcs", []):
 		if str(n.get("name", "")) == "Woudgeesten":
@@ -1037,6 +1068,10 @@ func _graan_tests() -> void:
 	var g: Node = d.get_node("Objects/Gerrit")
 	check("één Gerrit de Molenaar, zonder Goedendag", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
 			and g.event == "gerrit" and d.get_node("Objects").get_children().filter(func(n): return n.name == "Gerrit").size() == 1)
+	var wieken: Node = d.get_node_or_null("Objects/MolenWieken")
+	check("molen staat stil tot het zaad binnen is", wieken != null and not wieken.draait() and wieken.frame_nu() == 0
+			and not wieken.glow_aan() and not wieken.gezongen
+			and wieken.sprite.texture == Wieken.placeholder_sheet())
 	Story.trigger("gerrit", g)
 	var dicht: Array = await run_story(6.0)
 	check("quest dicht vóór Noor", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)
@@ -1100,6 +1135,9 @@ func _graan_tests() -> void:
 			and not scene().get_node("Objects/Woudgeesten").visible)
 	d = await enter(dorp, "zuid_ingang")
 	g = d.get_node("Objects/Gerrit")
+	wieken = d.get_node("Objects/MolenWieken")
+	var zong: Array = [false]
+	wieken.begon_te_zingen.connect(func() -> void: zong[0] = true)
 	GameState.party[0]["hp"] = 1
 	Story.trigger("gerrit", g)
 	var af: Array = await lines_until_choice()
@@ -1110,6 +1148,13 @@ func _graan_tests() -> void:
 			and GameState.item_count(SD.ITEM_ZAAD) == 0 and GameState.item_count(SD.ITEM_MEEL) == 1
 			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"])
 			and Dialog.choices == Molen.KEUZES)
+	var wiek0: int = wieken.frame_nu()
+	await get_tree().create_timer(0.55).timeout
+	check("zangscène: de molen draait en zingt zacht", zong[0] and wieken.gezongen and wieken.draait()
+			and wieken.glow_aan() and wieken.noten >= 3 and wieken.frame_nu() != wiek0
+			and wieken.get_node_or_null("Zang") != null
+			and Wieken.piek(wieken.laatste_zang) > 0.04 and Wieken.piek(wieken.laatste_zang) < 0.2)
+	await v17_shot("molen_zingt")
 	Dialog.choose(1)
 	await lines_until_choice()
 	check("party wisselen noemt de groep", Dialog.choices.size() == 2 and str(Dialog.choices[1]) == "Noor")
@@ -1135,6 +1180,8 @@ func _graan_tests() -> void:
 	check("na het opslaan nog steeds één meel", GameState.item_count(SD.ITEM_MEEL) == 1)
 	await enter(WORLD, "van_wilgendal")
 	d = await enter(dorp, "zuid_ingang")
+	wieken = d.get_node("Objects/MolenWieken")
+	check("nieuw bezoek: de molen draait al, de zangscène niet opnieuw", wieken.draait() and wieken.glow_aan() and not wieken.gezongen)
 	Story.trigger("gerrit", d.get_node("Objects/Gerrit"))
 	await lines_until_choice()
 	check("nieuw bezoek: nog één Zingend Meel", GameState.item_count(SD.ITEM_MEEL) == 2)
