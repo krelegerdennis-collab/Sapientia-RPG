@@ -236,13 +236,6 @@ Verdieping 100: geen baas. Op verdieping 100 staat het Warp-kristal. De speler k
 
 Optie A, een Codex-monster. Uniek, alleen uit de grot. Komt in de Codex en het bestiarium en kan als bondgenoot meevechten. Het beloningstype (Codex-monster) is canon. Naam: ECHO. De AI-gids van de World Warper heet ook ECHO.
 
-**CANON – niet wijzigen zonder overleg.**
-
-- [ ] TODO(verhaal): wanneer ontdekt ECHO wat hij echt deed?
-- [ ] TODO(verhaal): hoe reageert ECHO?
-- [ ] TODO(verhaal): confrontatie met Sapientia of Dennis?
-- [ ] TODO(verhaal): wat is er met H-1 t/m H-5 gebeurd?
-
 Optie B, equipment. Grade 4. Vaste affixes, endgame. Het beloningstype (Grade 4-uitrusting) is canon. Voor nu de bestaande Grade 4-wapens: Superzwaard (Dennis), Staf van Noor, Staf van Lotte. Class-restrictie blijft zoals die wapens al zijn.
 
 Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Het beloningstype (accessoire) is canon.
@@ -291,7 +284,8 @@ Dialoog letterlijk:
 Open laten:
 
 - [ ] ECHO ontdekt wat hij echt deed (mogelijke twist act 5/6)
-- [ ] Confrontatie ECHO en Sapientia over de kandidaten
+- [ ] Hoe reageert ECHO?
+- [ ] Confrontatie ECHO en Sapientia (of Dennis) over de kandidaten
 - [ ] Wat er met H-1 t/m H-5 is gebeurd
 
 ## Dorpen & Shops
@@ -470,12 +464,6 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 - [ ] Kamers bouwen volgens de lijst hieronder
   codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand. De kamers uit de lijst staan in world_warper/kamers. Ze gaan open met vlag warper_hub_open, die standaard uit staat en nog niet aan een kern hangt.
 
-**CANON – niet wijzigen zonder overleg.**
-
-- [ ] TODO(design): aantal blauwe kisten in ECHO's Kamer
-- [ ] TODO(design): kisten leeg of gevuld bij eerste bezoek
-- [ ] TODO(design): verandert de kamer visueel bij voortgang?
-
 Per act:
 
 - [ ] Act 4: De Werkplaats, crafting
@@ -533,8 +521,6 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
   Kijklijst Gezelschap: naam en niveau. Wisselen ontbreekt; er is geen API.
 - [ ] Questvoortgang via de AI-gids
   IVA heeft vier vaste stappen (world_warper_guide_0 tot en met 3). Geen questvoortgang.
-- [x] Latere kamers unlocken per act: De Beeldkamer, De Trainingshal, De Werkplaats, De Handelskamer, De Kern
-  `world_warper/kamers/kamers.gd`: min-act 2 tot en met 6. De deuren naar codex_nis en sapientia_schot blijven dicht.
 
 ### Audio
 
@@ -575,17 +561,8 @@ Het huidige ingame-menu vervangen door losse knoppen. Elke knop opent meteen een
 
 De vier functies zijn besloten. Welke functie op welke plek staat, blijft open.
 
-- [x] Huidige ingame-menu vervangen door losse knoppen die direct een scherm openen
-  `scripts/ui/field_menu.gd`. Geen tussenmenu. Het bord "MENU" is alleen een label.
-- [x] Knop Uitrusting (equip)
-- [x] Knop Codex
-- [x] Knop Items
-- [x] Knop Warp naar de warp-hub (World Warper)
-  De knop Warpen opent de hub als `world_warper_unlocked` gezet is.
 - [ ] Indeling volgens de schets
   Goudgerand bord "MENU" rechtsboven. Links drie gestapelde liggende knoppen. Rechts daarvan een groter vlak. Welke functie waar staat is nog open. De code zet voorlopig Uitrusting, Codex en Items links en Warpen rechts.
-- [x] Spelertekst later Nederlands: Uitrusting, Codex, Items, Warpen
-  Die vier labels staan op de knoppen.
 
 ## RPG ART
 
