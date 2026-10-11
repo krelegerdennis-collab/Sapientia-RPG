@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
 [ext_resource type="TileSet" path="res://world_warper/art/tiles_placeholder.tres" id="2_tiles"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="5_touch"]
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="6_exit"]
 [ext_resource type="Texture2D" path="res://world_warper/art/bord_hal.png" id="8_hal"]
+[ext_resource type="Script" path="res://world_warper/flow/hub_boot.gd" id="10_boot"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bord"]
 size = Vector2(14, 14)
@@ -66,5 +67,9 @@ target_map = "res://world_warper/maps/hal.tscn"
 target_spawn = "van_buiten"
 lines = Array[String]([])
 event = ""
+
+[node name="HubBoot" type="Node2D" parent="."]
+script = ExtResource("10_boot")
+licht = true
 
 [node name="TouchControls" parent="." instance=ExtResource("5_touch")]
