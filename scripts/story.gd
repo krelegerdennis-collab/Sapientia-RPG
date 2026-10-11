@@ -315,6 +315,11 @@ func _exec(cmds: Array, arg: String) -> String:
 				for h in GameState.party:
 					h["hp"] = h["max_hp"]
 					h["mp"] = h["max_mp"]
+			"molen_zang":
+				# Na de herkenning: wieken draaien, zacht gezang. Geen tekst.
+				var wieken := actor(SD.MOLEN_NODE)
+				if wieken != null and wieken.has_method("zing"):
+					await wieken.zing()
 			"molen":
 				await Molen.bezoek()
 			"glitch":
