@@ -605,3 +605,107 @@ Echte pixel-art ter vervanging van placeholders. Geen definitieve art tekenen in
 - [ ] `world_warper/art/tiles_placeholder.png` — 128×32 — interieur-tegels. Staat niet in `tools/placeholders_v17.txt`
 - [ ] `assets/bg/spiegel_kamer.png` — 384×216 — kamer vol spiegelende oppervlakken
 - [ ] `assets/bg/spiegel_kamer_gebroken.png` — 384×216 — dezelfde kamer, spiegels gebroken
+
+## PvP – Vriendenmodus
+
+**CANON – niet wijzigen zonder overleg.**
+
+### PVP 1V1 – VRIENDENMODUS (GEEN RANKED)
+
+#### Concept
+
+- [ ] Simpel 1v1 PvP-gevecht tussen vrienden
+- [ ] Geen ranked, geen MMR, geen matchmaking, geen seizoenen
+- [ ] Spelers nodigen elkaar uit via een connect-code
+- [ ] APARTE modus, los van singleplayer
+- [ ] Lore/kernen/Hanger/Codex gelden NIET in PvP
+- [ ] Geen impact op save files
+
+### MATCH SETUP FLOW (CANON)
+
+1. [ ] Host start PvP → krijgt unieke connect-code
+2. [ ] Vriend voert code in → verbinding tot stand
+3. [ ] HOST kiest game mode (early / mid / high)
+   - [ ] Alleen de host kiest
+   - [ ] Keuze wordt naar beide spelers gestuurd
+4. [ ] BEIDE spelers kiezen een team
+   - [ ] Speler A kiest team
+   - [ ] Speler B kiest team
+   - [ ] Mirror match TOEGESTAAN (beide mogen hetzelfde team)
+5. [ ] Gevecht begint
+
+### 3 GAME MODES (host kiest)
+
+- [ ] Early Game Mode
+  - Level 5-10
+  - Startuitrusting
+  - Kort (5-10 min)
+- [ ] Mid Game Mode
+  - Level 15-20
+  - Grade 1-2 gear
+  - Middel (10-15 min)
+- [ ] High Game Mode
+  - Level 20+
+  - Grade 3-4 gear
+  - Lang (15-25 min)
+
+### 3 PRE-MADE TEAMS (voor nu)
+
+Teams zijn NOG NIET definitief — er komen meer main characters om teams te vullen in latere updates.
+
+- [ ] Team 1: De Klassieke Drie
+  - Dennis + Noor + Lotte
+  - Gebalanceerd, beginner-vriendelijk
+- [ ] Team 2: De Aanvalsdriehoek
+  - 2x Dennis + 1x Lotte
+  - Hoog risico, hoge damage + support
+- [ ] Team 3: De Verdedigingslinie
+  - 2x Lotte + 1x Dennis
+  - Langzaam, moeilijk te verslaan, dubbele heal
+- [ ] TODO(design): teams herzien zodra nieuwe main characters beschikbaar zijn
+
+### LOBBY FLOW (technisch)
+
+- [ ] Host genereert unieke connect-code
+- [ ] Join-scherm: code invoeren
+- [ ] Verbinding opzetten (relay of direct)
+- [ ] Host-mode-select scherm (early/mid/high)
+- [ ] Team-select scherm (beide spelers tegelijk)
+- [ ] Load gevecht
+- [ ] Result-scherm (winnaar + rematch optie)
+
+### TECHNISCHE VEREISTEN (BLOKKEREND)
+
+- [ ] Netwerk-laag (Godot 4.3 Multiplayer API)
+- [ ] Relay service kiezen
+  - [ ] TODO(design): GD-Sync / NodeTunnel / eigen VPS / TBD
+- [ ] Aparte PvP-scene (los van singleplayer)
+- [ ] Turn-based combat synchroniseren
+- [ ] Verbindingsverlies afhandelen
+  - [ ] Disconnect → terug naar menu
+  - [ ] Reconnect-optie (indien mogelijk)
+- [ ] Connect-code generator (uniek, kort, makkelijk te delen)
+
+### SCHEIDING VAN SINGLEPLAYER
+
+- [ ] Eigen UI/menu los van singleplayer
+- [ ] Eigen regels en balans
+- [ ] Eigen stat-berekening per game mode
+- [ ] Geen lore-items, geen kernkrachten, geen Hanger
+- [ ] Geen save file impact
+
+### ROADMAP (gefaseerd)
+
+- [ ] Fase 1: Local PvP POC (LAN, 1v1, 1 team, 1 mode)
+- [ ] Fase 2: Online lobby + connect-code
+- [ ] Fase 3: Host-mode-select + team-select schermen
+- [ ] Fase 4: 3 teams + 3 modes volledig
+- [ ] Fase 5: Polish (UI, disconnect, reconnect)
+
+### NIET IN SCOPE (voor nu)
+
+- [ ] Geen ranked, geen MMR, geen matchmaking
+- [ ] Geen seizoenen, geen ranks
+- [ ] Geen 2v2 (later eventueel)
+- [ ] Geen anti-cheat (vrienden onder elkaar)
+- [ ] Geen leaderboards
