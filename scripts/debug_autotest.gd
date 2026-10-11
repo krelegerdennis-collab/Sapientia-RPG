@@ -15,6 +15,7 @@ extends Node
 ## Deze node hangt aan de root, zodat hij blijft bestaan als de scène wisselt.
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 
 var failures := 0
 var shot_path := ""
@@ -1604,6 +1605,17 @@ func _wait_typed() -> void:
 	await frames(3)
 
 
+## Doorgaan opent de slotlijst; slot 1 is de bestaande save (of de autosave van dat slot).
+func _click_continue_slot() -> void:
+	var t := scene()
+	await click_at(t.continue_button.get_global_rect().get_center())
+	await frames(5)
+	var slots := scene().get_node_or_null("SaveSlotList")
+	var slot1: Node = slots.find_child("Slot1", true, false) if slots != null else null
+	if slot1 != null:
+		await click_at(slot1.get_global_rect().get_center())
+
+
 ## Laden: eerst alles veranderen, dan via het titelscherm 'Doorgaan'.
 func _load_restore_test() -> void:
 	var d := GameState.read_save()
@@ -1649,7 +1661,7 @@ func _load_restore_test() -> void:
 	else:
 		await frames(2)
 		await overworld_shot("_title")
-	await click_at(t.continue_button.get_global_rect().get_center())
+	await _click_continue_slot()
 	check("'Doorgaan' -> het huis (opgeslagen map)", await wait_scene("Huis"))
 	await frames(5)
 	check("plek (8,4) en kijkrichting omhoog hersteld: %s" % tile(), tile() == Vector2i(8, 4) and player().facing == Vector2i.UP)
@@ -1758,8 +1770,9 @@ func _bestiary_tests() -> void:
 		var texts := []
 		for i in bs.entries.size():
 			texts.append(bs.entry_text(i))
-		# v0.17: de lijst groeit mee met GameData.ENEMIES (Donker Woud: 007-010); de eerste 6 blijven gelijk
-		var n_all := GameData.ENEMIES.size()
+		# v0.17: de lijst groeit mee met GameData.ENEMIES (Donker Woud: 007-010); de eerste 6 blijven gelijk.
+		# Eindbazen van de Diepe Grot staan erachter (endgame_bestiary.gd), ongezien als ???.
+		var n_all := GameData.ENEMIES.size() + EndgameBestiary.ids().size()
 		check("lijst op nummer, ongezien = ??? %s" % [texts], texts.slice(0, 6) == ["001 Moss Slime", "002 ???", "003 Paper Wraith", "004 ???", "005 The Knowledge Beast", "006 ???"]
 				and texts.size() == n_all and texts.slice(6).all(func(t): return str(t).ends_with("???")))
 		check("kop telt gezien/verslagen (%s)" % bs.header.text, ("seen 3/%d" % n_all) in bs.header.text and ("defeated 3/%d" % n_all) in bs.header.text)
@@ -2135,7 +2148,7 @@ func _prologue_tests() -> void:
 	GameState.go_to_title()
 	check("titel (halverwege)", await wait_scene("Title"))
 	await frames(10)
-	await click_at(scene().continue_button.get_global_rect().get_center())
+	await _click_continue_slot()
 	check("Doorgaan -> het huis", await wait_scene("Huis"))
 	await frames(30)
 	check("verhaal hersteld: stap TAKEN, kist, emmer, mantel aan, plek (8,4)",

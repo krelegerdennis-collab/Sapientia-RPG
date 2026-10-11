@@ -605,7 +605,7 @@ func _menu_save_tests() -> void:
 			not d.is_empty() and hurt["hp"] == maxi(1, int(hurt["max_hp"]) - 5) and int(d["party"][0]["hp"]) == hurt["hp"])
 	hurt["hp"] = keep_hp
 	check("Ja: handmatig opgeslagen (%s)" % m.message_label.text, m.last_save_result == "saved" and GameState.has_save()
-			and m.message_label.text == "Saved." and m.message_label.visible)
+			and m.message_label.text == "Opgeslagen." and m.message_label.visible)
 	check("save: map, plek en kijkrichting van de speler, geen autosave-vlag",
 			not d.is_empty() and str(d.get("map", "")).ends_with("wilgendal.tscn") and Vector2i(int(d["tile"][0]), int(d["tile"][1])) == p.get_tile()
 			and d.get("autosave", true) == false and d["party"].size() == 3 and int(d["gold"]) == 123)
@@ -617,12 +617,12 @@ func _menu_save_tests() -> void:
 	await frames(2)
 	sc = m.get_node_or_null("SaveScreen")
 	check("slot met data: 'Overschrijven?' + wat er nu in het slot staat (%s)" % (sc.slot_label.text if sc else "-"),
-			sc != null and sc.overwrite and sc.question_label.text == "Overwrite?" and sc.slot_label.visible
-			and sc.slot_label.text.begins_with("In this slot: Kees Lv"))
+			sc != null and sc.overwrite and sc.question_label.text == sc.Q_OVERWRITE and sc.slot_label.visible
+			and sc.slot_label.text.begins_with("In het slot: Kees Lv"))
 	if sc == null:
 		return
-	check("overschrijven: knoppen 'Ja' en 'Nee', tikvlak >= %d px" % m.ROW_H, sc.yes_button.get_meta("label") == "Yes"
-			and sc.no_button.get_meta("label") == "No" and sc.yes_button.size.y >= m.ROW_H and sc.no_button.size.y >= m.ROW_H)
+	check("overschrijven: knoppen 'Ja' en 'Nee', tikvlak >= %d px" % m.ROW_H, sc.yes_button.get_meta("label") == "Ja"
+			and sc.no_button.get_meta("label") == "Nee" and sc.yes_button.size.y >= m.ROW_H and sc.no_button.size.y >= m.ROW_H)
 	check("overschrijven: alles binnen het scherm", _inside_screen(sc.root, sc.content))
 	await shot("menu_save_overwrite")
 	await click(sc.no_button)
@@ -749,8 +749,19 @@ func _autosave_tests() -> void:
 	await frames(10)
 	var t := scene()
 	check("'Doorgaan' aan, toont '(auto)' (%s)" % t.save_info.text, not t.continue_button.disabled and "(auto)" in t.save_info.text)
+	check("Laden staat naast Doorgaan", t.load_button != null and not t.load_button.disabled
+			and t.load_button.get_parent() == t.continue_button.get_parent()
+			and str(t.load_button.get_meta("label", "")) == "Laden"
+			and str(t.continue_button.get_meta("label", "")) == "Doorgaan")
 	await shot("title_autosave")
 	await click(t.continue_button)
+	await frames(3)
+	var slots: Node = t.get_node_or_null("SaveSlotList")
+	var slot1: Node = slots.find_child("Slot1", true, false) if slots != null else null
+	var slot4: Node = slots.find_child("Slot4", true, false) if slots != null else null
+	check("Doorgaan toont vier slots", slot1 is Button and slot4 is Button and not (slot1 as Button).disabled)
+	if slot1 is Button:
+		await click(slot1)
 	check("'Doorgaan' -> wereldkaart (autosave is de nieuwste)", await wait_scene("Wereldkaart"))
 	await frames(5)
 	check("plek en HP uit de autosave (%s, HP %d)" % [player().get_tile(), GameState.party[0]["hp"]],
@@ -876,8 +887,8 @@ func _equipment_logic_tests() -> void:
 			if k in ["atk", "def", "agi"] or k in ["mag", "mdef"]:
 				data_ok = data_ok and (it[k] is int)
 	check("uitrustingsdata: %d stukken, elk een geldig vak" % GameData.EQUIPMENT.size(), data_ok and GameData.EQUIPMENT.size() == 84)   # 38 bestaande + 46 verhaalstukken t/m Act 6
-	check("vakken Wapen/Schild/Helm/Harnas/Accessoire", GameData.EQUIP_SLOTS.map(func(x): return Equipment.slot_name(x))
-			== ["Weapon", "Shield", "Helm", "Armor", "Accessory"])
+	check("vakken Wapen/Schild/Helm/Harnas/Benen/Laarzen/Accessoire", GameData.EQUIP_SLOTS.map(func(x): return Equipment.slot_name(x))
+			== ["Weapon", "Shield", "Helm", "Armor", "Benen", "Laarzen", "Accessory"])
 	check("stats ATK/DEF/MAG/MDEF/SPD (SPD = agi)", GameData.EQUIP_STATS.map(func(x): return Equipment.stat_label(x))
 			== ["ATK", "DEF", "MAG", "MDEF", "SPD"] and GameData.EQUIP_STATS[4] == "agi")
 	var mag_ok := true
@@ -1014,7 +1025,9 @@ func _equipment_screen_tests() -> void:
 		return
 	var slot_texts: Array = Equipment.slots().map(func(x): return str(s.slot_buttons[x].get_meta("label")))
 	check("vakken %s" % [slot_texts], slot_texts[0].begins_with("Weapon") and slot_texts[1].begins_with("Shield")
-			and slot_texts[2].begins_with("Helm") and slot_texts[3].begins_with("Armor") and slot_texts[4].begins_with("Accessory")
+			and slot_texts[2].begins_with("Helm") and slot_texts[3].begins_with("Armor")
+			and slot_texts[4].begins_with("Benen") and slot_texts[5].begins_with("Laarzen")
+			and slot_texts[6].begins_with("Accessory")
 			and slot_texts.all(func(t): return t.ends_with("-")))
 	var cmds: Array = s.COMMANDS.map(func(c): return str(s.cmd_buttons[c[0]].get_meta("label")))
 	check("submenu %s" % [cmds], cmds == ["Equip", "Best", "Remove", "Remove All", "Drop"])
@@ -1073,7 +1086,7 @@ func _equipment_screen_tests() -> void:
 	await tap("interact")
 	await frames(2)
 	check("Sterkste: %s" % [kees["equip"]], kees["equip"] == {"wapen": "dolk", "schild": "kaftschild", "helm": "ijzeren_helm",
-			"harnas": "malienkolder", "accessoire": "bladwijzer"})
+			"harnas": "malienkolder", "benen": "", "laarzen": "", "accessoire": "bladwijzer"})
 	check("Sterkste: pijlen tonen het verschil (DEF omhoog, melding '%s')" % s.message_text(), s.arrow_dir("def") == 1
 			and s.new_value_text("def") == str(kees["def"]) and s.message_text() == Equipment.MSG_STRONGEST)
 	check("Sterkste: effectief = basis + uitrusting (DEF %d = %d + 3 + 3 + 6)" % [kees["def"], kees["base"]["def"]],
