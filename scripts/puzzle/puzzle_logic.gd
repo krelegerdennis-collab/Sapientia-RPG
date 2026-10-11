@@ -41,6 +41,7 @@ const TYPES := ["block", "plate", "lever", "gate", "reset", "hook", "book", "sec
 ## Typen die een signaal geven (mogen in "needs" staan). grow pas als het pad open is.
 const SIGNAL_TYPES := ["plate", "lever", "gate", "book", "secret", "grow"]
 const GameData := preload("res://scripts/data/game_data.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const NOWHERE := Vector2i(-9999, -9999)
 
 ## Tegels van assets/tiles/binnen.png (tile n staat op x = n*16).
@@ -709,7 +710,7 @@ static func validate(room: Dictionary) -> Array[String]:
 				err.append("geheime deur '%s' op (%d,%d) is 2 tegels hoog: erboven ',' of '.', eronder een doorgang" % [d.get("id", c), t.x, t.y])
 		if dtype == "chest":
 			var item := str(d.get("item", ""))
-			if not GameData.ITEMS.has(item) and not GameData.EQUIPMENT.has(item):
+			if not GameData.ITEMS.has(item) and not GameData.EQUIPMENT.has(item) and not BerggrotData.has_gear(item):
 				err.append("kist '%s': item '%s' bestaat niet (ITEMS/EQUIPMENT)" % [d.get("id", c), item])
 			var flag := chest_flag(d)
 			if flags.has(flag):

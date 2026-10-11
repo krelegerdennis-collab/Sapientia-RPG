@@ -46,3 +46,15 @@ world_warper/art/bord_kamers.png              32x16   bordje naar de kamers en o
 # De Spiegel (Archief 4), onthullingsscène (tools/art_spiegel_placeholder.py). Magenta hoekjes, geen definitieve art.
 assets/bg/spiegel_kamer.png                   384x216  kamer vol spiegelende oppervlakken
 assets/bg/spiegel_kamer_gebroken.png          384x216  dezelfde kamer, spiegels gebroken door de weigering
+# Berggrot naar de kas (tools/art_berggrot_placeholder.py). Magenta hoekjes, het woord PLACEHOLDER. Geen definitieve art.
+assets/tiles/dungeon/berggrot_tiles.png         256x80   tileset berggrot (zelfde nummering als archief_grijs)
+assets/tiles/dungeon/berggrot_bibliotheek.png   256x64   bibliotheek-atlas van de berggrot (loader)
+assets/sprites/enemies/steenluis.png            90x90    Steenluis, vooraanzicht
+assets/sprites/enemies/steenluis_rug.png        90x90    Steenluis, rugaanzicht
+assets/sprites/enemies/druipslak.png            90x90    Druipslak, vooraanzicht
+assets/sprites/enemies/druipslak_rug.png        90x90    Druipslak, rugaanzicht
+assets/sprites/enemies/adermot.png              90x90    Adermot, vooraanzicht
+assets/sprites/enemies/adermot_rug.png          90x90    Adermot, rugaanzicht
+assets/map_monsters/steenluis.png               32x64    Steenluis op de kaart (2x4 frames van 16x16)
+assets/map_monsters/druipslak.png               32x64    Druipslak op de kaart (2x4 frames van 16x16)
+assets/map_monsters/adermot.png                 32x64    Adermot op de kaart (2x4 frames van 16x16)
