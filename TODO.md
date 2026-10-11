@@ -252,7 +252,7 @@ Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Het beloningsty
 Voorbeelden, geen gekozen accessoire: "Hanger-echo" (kleine teleport in gevecht), "Groene Hart" (regeneratie), "Simulatie-ring" (extra XP en goud).
 
 - [ ] Diepe Grot-bazen bouwen
-  De code kan nog de oude eindbaas-namen hebben.
+  Verdieping 25, 50, 75 en 99 heten De Schaduw van H-6, De Cyclus, De Rechter en De Stem, met de canon-citaten in het bestiarium. De andere baasverdiepingen (10, 20, 30, 40, 60, 70, 80, 90) houden de oude Engelse namen.
 
 
 ### Diepe Grot – Toegang via World Warper
@@ -415,7 +415,7 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 - [ ] Dorpen eerst bezocht vóór een warp. Dat filter ontbreekt.
 - [ ] Party wisselen. Er is geen API.
 - [ ] Save-tegel op de echte spelerpositie. Nu is de tegel (0, 0) en de kijkrichting (0, 1).
-- [ ] Act-kamers bouwen en de deuren openen. De kamers staan vast bij Interieur. world_warper_act2 en world_warper_act3 zet niemand.
+- [ ] Act-kamers bouwen en de deuren openen. De kamers uit de lijst staan in `world_warper/kamers` en gaan open met `warper_hub_open` plus de act. Werkplaats en Handelskamer zijn leeg. `world_warper_act2` en `world_warper_act3` zet niemand; `codex_nis` en `sapientia_schot` blijven dicht.
 - [ ] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
 - [ ] Kleur van de Hanger-gloed. Deze lijst zei paars; de code is roze (canon: roze = de Stroom).
 - [ ] Webversie. Hoort niet bij deze branch.
@@ -533,8 +533,8 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
   Kijklijst Gezelschap: naam en niveau. Wisselen ontbreekt; er is geen API.
 - [ ] Questvoortgang via de AI-gids
   IVA heeft vier vaste stappen (world_warper_guide_0 tot en met 3). Geen questvoortgang.
-- [ ] Latere kamers unlocken per act: De Beeldkamer, De Trainingshal, De Werkplaats, De Handelskamer, De Kern
-  De deuren naar codex_nis en sapientia_schot blijven dicht.
+- [x] Latere kamers unlocken per act: De Beeldkamer, De Trainingshal, De Werkplaats, De Handelskamer, De Kern
+  `world_warper/kamers/kamers.gd`: min-act 2 tot en met 6. De deuren naar codex_nis en sapientia_schot blijven dicht.
 
 ### Audio
 
@@ -575,17 +575,17 @@ Het huidige ingame-menu vervangen door losse knoppen. Elke knop opent meteen een
 
 De vier functies zijn besloten. Welke functie op welke plek staat, blijft open.
 
-- [ ] Huidige ingame-menu vervangen door losse knoppen die direct een scherm openen
-  Niet eerst een tussenmenu. Het goudgerande bord "MENU" mag als label blijven staan.
-- [ ] Knop Uitrusting (equip)
-- [ ] Knop Codex
-- [ ] Knop Items
-- [ ] Knop Warp naar de warp-hub (World Warper)
-  De hub zelf is nog ontwerp. De knop is wel een requirement. Bestaat de hub nog niet, dan blijft de knop een open punt. Niet bouwen.
+- [x] Huidige ingame-menu vervangen door losse knoppen die direct een scherm openen
+  `scripts/ui/field_menu.gd`. Geen tussenmenu. Het bord "MENU" is alleen een label.
+- [x] Knop Uitrusting (equip)
+- [x] Knop Codex
+- [x] Knop Items
+- [x] Knop Warp naar de warp-hub (World Warper)
+  De knop Warpen opent de hub als `world_warper_unlocked` gezet is.
 - [ ] Indeling volgens de schets
-  Goudgerand bord "MENU" rechtsboven. Links drie gestapelde liggende knoppen. Rechts daarvan een groter vlak. Welke functie waar staat is nog open.
-- [ ] Spelertekst later Nederlands: Uitrusting, Codex, Items, Warpen
-  Nu alleen deze TODO. Nog geen schermtekst.
+  Goudgerand bord "MENU" rechtsboven. Links drie gestapelde liggende knoppen. Rechts daarvan een groter vlak. Welke functie waar staat is nog open. De code zet voorlopig Uitrusting, Codex en Items links en Warpen rechts.
+- [x] Spelertekst later Nederlands: Uitrusting, Codex, Items, Warpen
+  Die vier labels staan op de knoppen.
 
 ## RPG ART
 
