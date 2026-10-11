@@ -19,6 +19,7 @@ const RESPAWN_SPAWN := "start"
 const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
+const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
@@ -97,6 +98,14 @@ var puzzle_latched := {}
 var kernfragmenten := {}
 ## v0.15: net geabsorbeerde kern; map.gd speelt dan het absorptie-moment af (niet in de save).
 var pending_kern_absorb := ""
+## Archief 2: plaat-stadia ("platen") gaan mee in de save. De rest is alleen dit gevecht.
+var archief2 := {"platen": {}}
+var archief2_temp_ally := {}
+var archief2_party_filter := ""
+var pending_story_loss := false
+var archief2_lotte_join := false
+var archief2_last_open := {}
+var archief2_last_leech := {}
 ## Codex (Kernfragment stap 2): ingeschreven monsters (pagina's, zie codex_data.gd), de uid van
 ## de actieve bondgenoot ("" = geen) en de teller voor unieke ids (nooit hergebruikt).
 ## codex_changed: de actieve bondgenoot (of de lijst) is veranderd. De volger op de kaart luistert.
@@ -117,7 +126,7 @@ var dungeon100_seed: int = 0
 ## laatst geactiveerd rustpunt (0, 10, ... 100) en hoogste bereikte verdieping
 var dungeon100_checkpoint := 0
 var dungeon100_best := 0
-## Open warpers van deze run (verdiepingen 1, 50, 99). Mee in het dungeon100-blok van de save.
+## Open warpers van deze run (verdiepingen 1, 25, 50, 75, 99). Mee in het dungeon100-blok van de save.
 var dungeon100_warpers: Array[int] = []
 ## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md):
 ## PERMANENTE items uit Blauwe Kisten (id -> aantal): overleven de dood en elke nieuwe run.
@@ -162,6 +171,8 @@ var pending_boss := false
 var pending_tier := 0
 ## True als het gevecht uit een kamer van het Eerste Archief komt (niet het woud, niet de Diepe Grot).
 var pending_archief := false
+## Trainingshal: oefengevecht zonder buit. Verlies is geen game-over.
+var practice_battle := false
 
 ## De vijandgroep voor het volgende gevecht (Array van vijand-id's).
 var pending_enemies: Array = []
@@ -245,6 +256,9 @@ func _ready() -> void:
 	# Sfx per held/monster: of  godot -- --actorsfxtest  (scripts/tests/actor_sfx_tests.gd).
 	# Catalogus t/m Act 6: of  godot -- --catalogustest  (scripts/tests/catalogus_tests.gd).
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
+	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
+	# De Spiegel (Archief 4): of  godot -- --spiegeltest [--shots=/pad/map]
+	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
@@ -266,7 +280,10 @@ func _ready() -> void:
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
 			["--actorsfxtest", "res://scripts/tests/actor_sfx_tests.gd", "ActorSfxTest", "actorsfxtest"],
 			["--catalogustest", "res://scripts/tests/catalogus_tests.gd", "CatalogusTest", "catalogustest"],
-			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"]]:
+			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
+			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
+			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"],
+			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -282,6 +299,10 @@ func _ready() -> void:
 		tester.name = t[2]
 		get_tree().root.add_child.call_deferred(tester)
 		break
+	# De Spiegel (Archief 4): debug-ingang. Start alleen de kamer.
+	# Geen story_step en geen story_flags: het echte verhaal wordt niet overgeslagen.
+	if SpiegelData.DEBUG_ARG in args and not ("--spiegeltest" in args):
+		call_deferred("_go_to_scene", SpiegelData.SCENE)
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
 
@@ -397,6 +418,13 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	last_respawn = {}
 	story_step = StoryData.START
 	story_flags = {}
+	archief2 = {"platen": {}}
+	archief2_temp_ally = {}
+	archief2_party_filter = ""
+	pending_story_loss = false
+	archief2_lotte_join = false
+	archief2_last_open = {}
+	archief2_last_leech = {}
 	pending_tutorial = {}
 	dungeon100_load({})
 	if has_node("/root/Story"):
@@ -481,6 +509,35 @@ func join_member(id: String, level := 1, gear: Array = []) -> bool:
 	return true
 
 
+## Archief 2: winst of verlies tegen Lotte wordt een verhaaleinde, geen game over.
+## Vluchten telt niet. Geeft het resultaat terug dat end_battle verder gebruikt.
+func archief2_verwerk_einde(result: String) -> String:
+	if not pending_story_loss:
+		return result
+	if result == "win" or result == "lose":
+		archief2_lotte_join = true
+		if result == "lose":
+			result = "story"
+	pending_story_loss = false
+	archief2_temp_ally = {}
+	archief2_party_filter = ""
+	return result
+
+
+func archief2_plaat(room_id: String, plaat_id: String, fallback: int) -> int:
+	var sleutel := "%s:%s" % [room_id, plaat_id]
+	var platen: Dictionary = archief2.get("platen", {})
+	if platen.has(sleutel):
+		return int(platen[sleutel])
+	return fallback
+
+
+func archief2_zet_plaat(room_id: String, plaat_id: String, staat: int) -> void:
+	if not (archief2.get("platen") is Dictionary):
+		archief2["platen"] = {}
+	archief2["platen"]["%s:%s" % [room_id, plaat_id]] = staat
+
+
 ## v0.17 Niveau van een held in de party (0 = zit er niet in).
 func member_level(id: String) -> int:
 	for h in party:
@@ -491,6 +548,18 @@ func member_level(id: String) -> int:
 
 func has_member(id: String) -> bool:
 	return party.any(func(h): return h.get("id", "") == id)
+
+
+## Zet een groepslid vooraan (molen: party wisselen). index 0 blijft staan.
+func move_member_to_front(index: int) -> bool:
+	if index < 0 or index >= party.size():
+		return false
+	if index == 0:
+		return true
+	var h: Dictionary = party[index]
+	party.remove_at(index)
+	party.insert(0, h)
+	return true
 
 
 ## v0.11: wapen geven en meteen dragen (v0.14: via de uitrusting, game_data.gd EQUIPMENT);
@@ -879,6 +948,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot,
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
+		"archief2": archief2.duplicate(true),
 	}
 	data["party"] = _party_save()
 	return data
@@ -980,6 +1050,17 @@ func apply_state(d: Dictionary) -> bool:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	puzzle_latched = {}
+	archief2 = {"platen": {}}
+	var a2 = d.get("archief2", {})
+	if a2 is Dictionary and a2.get("platen") is Dictionary:
+		var platen := {}
+		for k in a2["platen"]:
+			platen[str(k)] = int(a2["platen"][k])
+		archief2 = {"platen": platen}
+	archief2_temp_ally = {}
+	archief2_party_filter = ""
+	pending_story_loss = false
+	archief2_lotte_join = false
 	var pl = d.get("puzzle_latched", {})
 	if pl is Dictionary:
 		for k in pl:
@@ -1331,9 +1412,10 @@ func boss_group() -> Dictionary:
 
 ## Start een gevecht: onthoud map + positie, flits, en wissel naar de gevechtsscène.
 ## v0.14: tier = monsterniveau (0 = gewoon; dungeonkamers geven hun "tier" mee, nooit voor een baas).
-func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false) -> void:
+func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
 	if in_battle or changing_map:
 		return
+	practice_battle = practice
 	in_battle = true
 	pending_enemies = enemies
 	pending_boss = boss
@@ -1352,6 +1434,9 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),
 ## of naar het begin van het spel (game over).
 func end_battle(result: String) -> void:
+	result = archief2_verwerk_einde(result)
+	var oefening := practice_battle
+	practice_battle = false
 	last_battle_result = result
 	pending_tier = 0
 	pending_archief = false
@@ -1360,7 +1445,13 @@ func end_battle(result: String) -> void:
 	var target := return_map if return_map != "" else START_MAP
 	if result == "lose":
 		map_monster_battle = {}
-		if dungeon100_floor > 0 or dungeon100_run_active():
+		if oefening:
+			# Terug in de kamer, genezen. Geen checkpoint-rollback en geen game-over.
+			_full_heal()
+			entry_kind = "battle"
+			has_return_point = true
+			pending_respawn_msg = []
+		elif dungeon100_floor > 0 or dungeon100_run_active():
 			# 100-kerker: dood is dungeon uit. Terug naar de wereldkaart bij de ingang, niet verdieping 1.
 			target = dungeon100_defeat()
 		elif has_checkpoint():
@@ -1371,16 +1462,19 @@ func end_battle(result: String) -> void:
 			target = RESPAWN_MAP
 	else:
 		entry_kind = "battle"
-		# KO-helden staan na het gevecht weer op met 1 HP (houdt het simpel).
-		for h in party:
-			if h["hp"] <= 0:
-				h["hp"] = 1
-		# Codex: de bondgenoot ook (zelfde regel als de helden)
-		for p in codex_pages:
-			if int(p["hp"]) <= 0:
-				p["hp"] = 1
+		if oefening:
+			_full_heal()
+		else:
+			# KO-helden staan na het gevecht weer op met 1 HP (houdt het simpel).
+			for h in party:
+				if h["hp"] <= 0:
+					h["hp"] = 1
+			# Codex: de bondgenoot ook (zelfde regel als de helden)
+			for p in codex_pages:
+				if int(p["hp"]) <= 0:
+					p["hp"] = 1
 		# v0.11: na winst automatisch opslaan (zodra de map weer in beeld is)
-		if result == "win":
+		if result == "win" and not oefening:
 			_autosave_request = "battle"
 			# v0.15: baas verslagen -> de hoofdheld absorbeert zijn kern (eenmalig). Meteen
 			# vastleggen, dus de autosave hierna heeft hem al; het moment zelf speelt de map af.
@@ -1615,44 +1709,38 @@ func dungeon100_leave() -> bool:
 
 
 ## Deze verdieping is bereikt: best gaat omhoog, en een warper-verdieping gaat open.
+## Op 100 ligt het Warp-kristal klaar. Er is geen baas die het dropt.
+## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
 func dungeon100_reach_floor(floor_nr: int) -> void:
 	if not Dungeon100RulesC.is_valid_floor(floor_nr):
 		return
 	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, floor_nr)
 	dungeon100_warpers = Dungeon100RulesC.unlock_warper(dungeon100_warpers, floor_nr)
+	if floor_nr == Dungeon100RulesC.FLOORS and dungeon100_run_active() \
+			and item_count(Dungeon100RulesC.Blue.WARP_ITEM) < 1:
+		inventory[Dungeon100RulesC.Blue.WARP_ITEM] = 1
 
 
-## Mag je naar deze warper? Alleen tijdens een run, naar een andere verdieping die al open is.
-func dungeon100_warper_can(dest: int) -> bool:
+## Warper (niet op verdieping 1): de run stopt en je staat op de wereldkaart bij de ingang.
+## false = geen run, of de kaart wisselt al. Annuleren roept dit niet aan.
+func dungeon100_warper_exit() -> bool:
 	if not dungeon100_run_active() or changing_map or in_battle:
 		return false
-	if not Dungeon100RulesC.is_valid_floor(dungeon100_floor) or dest == dungeon100_floor:
-		return false
-	return Dungeon100RulesC.warper_open(dungeon100_warpers, dest)
-
-
-## Sprong naar een open warper. false = dicht, zelfde verdieping, of geen run. De run blijft lopen
-## (dit is niet het Warp-kristal van verdieping 100).
-signal dungeon100_warper_traveled(from_floor: int, to_floor: int)
-func dungeon100_warper_go(dest: int) -> bool:
-	if not dungeon100_warper_can(dest):
-		return false
-	var from := dungeon100_floor
-	dungeon100_floor = dest
-	dungeon100_reach_floor(dest)
-	pending_spawn = Dungeon100RulesC.WARPER_SPAWN
-	dungeon100_warper_traveled.emit(from, dest)
-	change_map(Dungeon100RulesC.dungeon_scene, Dungeon100RulesC.WARPER_SPAWN)
+	dungeon100_leave()
+	change_map(Dungeon100RulesC.WORLD_SCENE, Dungeon100RulesC.WORLD_SPAWN)
 	return true
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
+## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties. Het kristal werkt
+## zoals het was: gebruiken beëindigt de run en zet je op de wereldkaart. Geen keuzemenu.
 func dungeon100_can_warp() -> bool:
 	return dungeon100_run_active() and dungeon100_floor == Dungeon100RulesC.FLOORS and item_count(Dungeon100RulesC.Blue.WARP_ITEM) > 0
 
 
 ## Warp: run voltooid, permanente items mee naar je echte tas, terug naar de wereldkaart (het kristal is
 ## op). false = kan niet (verkeerde verdieping, geen kristal of geen run).
+## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
 func dungeon100_warp() -> bool:
 	if not dungeon100_can_warp():
 		return false

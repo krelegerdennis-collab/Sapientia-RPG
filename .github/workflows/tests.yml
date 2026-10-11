@@ -25,7 +25,8 @@ jobs:
                 archieftest, kerntest, kernkrachttest, woudtest, codextest,
                 checkpointtest, dungeon100gentest, dungeon100schaaltest,
                 dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
-                actorsfxtest, fusietest, catalogustest, updatetest]
+                actorsfxtest, fusietest, catalogustest, updatetest, archief2test,
+                warperkamertest, spiegeltest]
     steps:
       - uses: actions/checkout@v4
 

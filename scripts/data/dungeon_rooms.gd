@@ -93,14 +93,21 @@ const THEMES := {
 		},
 	},
 	"archief_v14": {"tiles": TILES, "lib_tiles": LIB_TILES, "sprites": {}},
-	# Het Levende Archief, verdieping 1. Zelfde tegelnummers als archief_grijs, groen beeld.
-	# PLACEHOLDER: tools/art_kas_placeholder.py (magenta hoekjes). terrain "kas" -> bibliotheek_overwoekerd.
+	# Het Levende Archief. Zelfde tegelnummers als archief_grijs, groen beeld.
+	# PLACEHOLDER: tools/art_kas_placeholder.py (magenta hoekjes). terrain "kas".
 	"kas": {
 		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",
 		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek.png",
 		"terrain": "kas",
 		"tint": Color(0.78, 1.0, 0.84),
 		"sprites": {},
+	},
+	# Hub na De Genezer. Zelfde atlas, paarse tint.
+	"warper_paars": {
+		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",
+		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek.png",
+		"tint": Color(0.78, 0.68, 1.0),
+		"terrain": "kas",
 	},
 	# v0.17 HET DONKER WOUD (scripts/data/woud_rooms.gd), tegels van RPG ART (art_woud_v17,
 	# docs/WOUD_TILES.txt): woud_tiles.png 256x112. 0-64 = zelfde nummering/botsing als
@@ -642,6 +649,9 @@ static func room(room_id: String) -> Dictionary:
 		return load("res://scripts/dungeon/dungeon100_generator.gd").room_for_id(room_id)
 	if archief2().ROOMS.has(room_id):
 		return archief2().ROOMS[room_id]
+	var later: Dictionary = archief2().rooms()
+	if later.has(room_id):
+		return later[room_id]
 	return woud().ROOMS.get(room_id, {})
 
 
@@ -742,7 +752,11 @@ static func _rooms_for_set(dungeon_set: String) -> Dictionary:
 	if dungeon_set == "woud":
 		return woud().ROOMS
 	if dungeon_set == "leven":
-		return archief2().ROOMS
+		var leven: Dictionary = archief2().ROOMS.duplicate(true)
+		var later: Dictionary = archief2().rooms()
+		for id in later:
+			leven[id] = later[id]
+		return leven
 	return ROOMS
 
 

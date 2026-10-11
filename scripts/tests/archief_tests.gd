@@ -584,7 +584,8 @@ func _leven_tests() -> void:
 	check("open na de golem-vlag", str(opened.get("do", "")) == "default")
 	if not had:
 		GameState.story_flags.erase(SD.GOLEM_FLAG)
-	var lore := closed_txt + " " + " ".join(PuzzleRooms.ROOMS[PLAAT_ID]["exit"]["lines"])
+	var exit_lines: Array = PuzzleRooms.ROOMS[PLAAT_ID]["exit"].get("lines", [])
+	var lore := closed_txt + " " + " ".join(exit_lines)
 	check("geen verzonnen lore in de nieuwe zinnen", not lore.contains("H-6") and not lore.contains("Genezer")
 			and not lore.contains("Wurger") and not lore.contains("Stille Vlam") and not lore.contains("ECHO"))
 	var wereld: Node = (load("res://scenes/maps/wereldkaart.tscn") as PackedScene).instantiate()
@@ -598,8 +599,8 @@ func _leven_tests() -> void:
 	wereld.free()
 	var pr: Dictionary = PuzzleRooms.ROOMS[PLAAT_ID]
 	check("groeiplaat-kamer geldig: %s" % [PuzzleLogic.validate(pr)], PuzzleLogic.validate(pr).is_empty())
-	check("noorduitgang is alleen een zin (geen verdieping 2)", str(pr["exit"].get("map", "")) == ""
-			and str(pr["exit"]["lines"][0]) == "Verder in de kas is het nog dicht.")
+	check("noorduitgang gaat naar verdieping 2", str(pr["exit"].get("map", "")).ends_with("archief_2_v2_gang.tscn")
+			and str(pr["exit"].get("spawn", "")) == "zuid")
 	check("puzzel hoort bij set leven, niet bij de archief-glitch", str(pr.get("dungeon_set", "")) == "leven"
 			and DR.glitch_intensity(PLAAT_SCENE) == 0.0 and DR.glitch_intensity(LEVEN_SCENE) == 0.0
 			and DR.glitch_intensity(DR.scene_of("archief_golemhal")) == 1.0)
@@ -701,7 +702,7 @@ func _warper_tests() -> void:
 			and begin == AW.BEGIN_TILE and absi(begin.x - int(spawn[0])) + absi(begin.y - int(spawn[1])) == 1
 			and AW.walkable(DR.ROOMS["archief_ingang"], begin))
 	check("midden-tegel beloopbaar in de Zuilenhal", AW.walkable(DR.ROOMS["archief_v3_zuilenhal"], roles["midden"]["tile"]))
-	check("Diepe Grot-warpers blijven 1, 50 en 99", D100Rules.WARPER_FLOORS == [1, 50, 99])
+	check("Diepe Grot-warpers zijn 1, 25, 50, 75 en 99", D100Rules.WARPER_FLOORS == [1, 25, 50, 75, 99])
 	var only_a1 := true
 	for p in spots:
 		if not DR.ROOMS.has(str(p["room"])):

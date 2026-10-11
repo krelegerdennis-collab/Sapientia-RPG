@@ -17,7 +17,6 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
 - [ ] 3 grote hoofdeilanden opzetten, elk met 2 Archieven (totaal 6 Archieven)
 - [ ] Worldmap 1 = start-eiland
   - [ ] Archief 1: Eerste Archief (bij Opa), startpunt van het verhaal
-  - [ ] Archief 2: Archief van Leven
   - Bevat Dennis' huis en Wilgendal (eerste dorp met shops)
 - [ ] Worldmap 2 = tweede eiland
 
@@ -74,16 +73,14 @@ In elke normale dungeon en in elk Archief (Archief 1 tot en met 6) staan warpers
 - [ ] Eind van de dungeon: warper na de eindbaas
 - [ ] Geldt voor elke normale dungeon, niet alleen de Diepe Grot
 - [ ] Geldt voor alle Archieven (Archief 1 tot en met 6), inclusief Archief 1 (het Eerste Archief)
-- [ ] Diepe Grot-warpers bouwen op de frequentie hieronder
 
-  **CANON – niet wijzigen zonder overleg.**
+**CANON – niet wijzigen zonder overleg.**
 
-  Warpers op verdieping 1, 25, 50, 75 en 99.
-  Verdieping 1: start, geen waarschuwing.
-  Verdieping 25, 50 en 75: tussen-warpers met waarschuwing en annuleren.
-  Verdieping 99: eind-warp naar de worldmap, met waarschuwing en annuleren.
-  Bestemming: direct naar de worldmap.
-  De code volgt deze frequentie nog niet: die heeft nog 1, 50 en 99 als interne sprong.
+Warpers op verdieping 1, 25, 50, 75 en 99.
+Verdieping 1: start, geen waarschuwing.
+Verdieping 25, 50 en 75: tussen-warpers met waarschuwing en annuleren.
+Verdieping 99: eind-warp naar de worldmap, met waarschuwing en annuleren.
+Bestemming: direct naar de worldmap.
 
 Warp-bestemming voor de andere dungeons en Archieven: de party gaat in één stap direct naar de worldmap of het dichtstbijzijnde dorp, zonder eerst terug naar de dungeon-ingang. Voor de Diepe Grot geldt de bestemming hierboven: direct naar de worldmap.
 
@@ -110,6 +107,7 @@ Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en qui
 - [ ] Act 3 en verder = Worldmap 3 (Kosmos en Hart)
 - [ ] Onthulling Proefpersoon H-6 (Dennis) in Archief 4 (De Spiegel) op Worldmap 2
   De onthulling staat hierboven als canon. De checkbox blijft open tot de scène in het spel staat.
+  De scène staat in `scenes/story/spiegel_kamer.tscn`, alleen via `--spiegel`, niet op de wereldkaart en niet in Archief 4. De plaatsing blijft open.
 
 ### Archief 2 — Het Levende Archief
 
@@ -141,6 +139,19 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
 Waarom Archief 1 naar Archief 2 wijst: de Oude Mensheid ontwierp de zes Archieven als keten. Elke kern activeert de volgende, niet als uitnodiging maar als noodsignaal. Toen Archief 1 openging, zond zijn kern naar de andere vijf: "Iemand is binnen." Archief 2 reageerde als eerste. Sapientia heeft het signaal opgevangen en gemanipuleerd. Dennis denkt dat hij moet volgen, maar Sapientia leidt hem.
 
+
+#### Archief 2 op de wereldkaart
+
+**CANON – niet wijzigen zonder overleg.**
+
+De kas van het tweede archief komt linksboven op worldmap 1, achter bergen waar je niet overheen kunt lopen. Er komt een grot-dungeon door de berg naar de andere kant: een paar puzzels, geen bazen, unieke omgeving, eigen bgm en monsters. Geheime kamer met 2 kisten: een staf en een accessoire, geschaald naar het niveau richting Archief 2.
+
+De speelbare kas van verdieping 1 staat nu naast de trap van het Eerste Archief, niet achter de bergen. Onderstaande punten zijn nog niet gebouwd.
+
+- [ ] Kas linksboven op worldmap 1, achter bergen waar je niet overheen kunt lopen
+- [ ] Grot-dungeon door de berg naar de andere kant: een paar puzzels, geen bazen, unieke omgeving, eigen bgm en monsters
+- [ ] Geheime kamer met 2 kisten: een staf en een accessoire, geschaald naar het niveau richting Archief 2
+
 #### Sfeer en setting
 
 - [ ] Overwoekerde kas of broeikas (groen, vochtig, planten overal)
@@ -148,32 +159,9 @@ Waarom Archief 1 naar Archief 2 wijst: de Oude Mensheid ontwierp de zes Archieve
 - [ ] Leven dat niet stopt met groeien; alles is in beweging
 - [ ] Visueel contrast met het grauwe Eerste Archief
 
-#### Verhaallijn
-
-- [ ] In het spel zetten: Dennis volgt het noodsignaal van de kern van Archief 1 naar Archief 2. Sapientia heeft het signaal gemanipuleerd; Dennis denkt dat hij moet volgen, maar Sapientia leidt hem
-- [ ] In het spel zetten: Lotte, priesteres van de Orde van de Stille Vlam, gecorrumpeerd door Sapientia, als mini-baas halverwege
-
-#### Lotte's entree (midden van de dungeon, verdieping 2)
-
-- [ ] Lotte verschijnt als mini-baas op verdieping 2 van 4
-- [ ] Gecorrumpeerd door Sapientia, met visuele glitch-effecten
-- [ ] Gevecht bouwen: Dennis en één Codex-monster tegen Lotte
-  De speler kiest één gevangen Codex-monster. Heeft de speler er nog geen, dan vecht een tijdelijke Mosslijm mee (leermoment).
-- [ ] Bij verlies is het een story death, geen game over
-  - [ ] Cutscene bouwen: Lotte breekt zelf de glitch van Sapientia
-  - [ ] Ze beseft wat er gebeurd is en sluit zich aan bij de party
-  - [ ] Of de speler wint of verliest: Lotte sluit aan
-- [ ] Na het gevecht sluit Lotte aan als vast party-lid, op hetzelfde level als Dennis
-- [ ] Daarna verdieping 3 en 4 met Dennis, Lotte en het gekozen Codex-monster. Mosslijm is alleen het leermoment
-
 #### Lotte's stats en skills bij aansluiting
 
 Lotte's start-level: hetzelfde level als Dennis op dat moment. Gelijkwaardige metgezel, geen hulpje. Gebalanceerd ongeacht speelsnelheid.
-
-- [ ] Klasse: Priester
-- [ ] Elementen: Licht (heal en buffs) en IJs (aanval)
-- [ ] Startuitrusting: priester-standaard (staf en robes)
-- [ ] Startspreuken: Grade 1 Licht (heal) en Grade 1 IJs (aanval)
 
 #### Puzzel-mechaniek: groeiende platen
 
@@ -185,13 +173,7 @@ B) Tegen-platen: krimpen bij aanraking. De speler moet ze vermijden om ruimte te
 
 C) Licht-platen: groeien alleen als Lotte's Licht-magie erop schijnt. Lotte heeft daarmee een rol in puzzels, niet alleen in gevecht.
 
-- [ ] Kernmechaniek: planten of platen die groeien als je ze activeert
-- [ ] Groeiende platen vormen bruggen, plateaus en paden
-- [ ] De speler moet de juiste volgorde vinden om door te komen
 - [ ] Combinaties met bestaande puzzel-elementen (kasten en hendels uit Archief 1)
-- [ ] Moeilijkheid per verdieping opbouwen
-- [ ] De nieuwe mechanic introduceren op verdieping 1, tutorial-achtig
-- [ ] Verdieping 3: ketting-platen, tegen-platen en licht-platen implementeren
 
 #### Baas: De Genezer (verdieping 4)
 
@@ -201,34 +183,12 @@ De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmomen
 
 Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
-- [ ] Baasgevecht De Genezer bouwen, met de HP-trek hierboven
-- [ ] Na het verslaan de kern van Archief 2 opnemen
-- [ ] De kern-zin tonen na De Genezer
-
 #### Cutscene na Archief 2: de World Warper
 
-- [ ] Na het verslaan van De Genezer start een cutscene
-  De Genezer bestaat niet. De hub-unlock kijkt naar bewaker:archief_v2_trapzaal/m2, verdieping 2 van het Eerste Archief.
-- [ ] Een zwevend hightech gebouw verschijnt: de World Warper
-  Er is een placeholder-exterieur (tegels 16×16). Het verschijnt niet in de lucht.
-- [ ] De party wordt automatisch gewarped naar de World Warper
-  Er is geen deur op de wereldkaart. WorldWarperEnter.enter() wisselt naar het exterieur zodra de unlock-vlag er is; de kaart roept dat niet aan.
 - [ ] De World Warper is de hub om tussen de 3 hoofdeilanden te reizen
-  Eerste versie van de hub staat. Alleen WM1 is open. WM2 en WM3 zijn zichtbaar en vergrendeld.
-- [ ] Eerste introductie van het warp-systeem in het verhaal
-  De warp-UI staat in de hal. Een cutscene op de wereldkaart ontbreekt.
+  Eerste kamer wel: opslaan, terug naar Wilgendal of de Archief-ingang. TODO(design): WM2 en WM3 bestaan niet. De IVA-hub van PR 30 is niet hernoemd.
 - [ ] Vanaf hier kan de speler terug naar eerder bezochte eilanden
-  WM1 warpt naar de wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). Een filter op eerder bezoek ontbreekt.
-- [ ] De cutscene maakt duidelijk wat de World Warper is en doet
-  De eerste-bezoekscène in de hal heeft voorlopige zinnen en gebruikt kleurvlakken. Dat is deze cutscene niet.
-
-#### Dungeon-opbouw (4 verdiepingen)
-
-- [x] Verdieping 1 is speelbaar: overwoekerde kas op de wereldkaart, alleen na het Eerste Archief, met één groei-plaat (hendel, daarna zaad, scheut, volgroeid)
-- [ ] Verdieping 1: entree, eerste groei-plaatpuzzel, zichtbare monsters
-- [ ] Verdieping 2: Lotte als mini-baas (Dennis en één gekozen Codex-monster, anders tijdelijke Mosslijm), daarna sluit ze aan
-- [ ] Verdieping 3: ketting-platen, tegen-platen en licht-platen, mini-baas De Wurger
-- [ ] Verdieping 4: aanloop naar De Genezer, het baasgevecht, de kern-zin en de World Warper-cutscene
+  Alleen Wilgendal en de ingang van het Eerste Archief. Geen filter op bezoek, geen WM2/WM3.
 
 #### Content en art
 
@@ -245,7 +205,6 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 #### Codex
 
 - [ ] Nieuwe Codex-monsters voor Archief 2 (leventhema)
-- [ ] Lotte-gevecht bouwen met één gekozen Codex-monster, of een tijdelijke Mosslijm als de speler er nog geen heeft
 
 ## Content
 
@@ -295,6 +254,46 @@ Voorbeelden, geen gekozen accessoire: "Hanger-echo" (kleine teleport in gevecht)
 - [ ] Diepe Grot-bazen bouwen
   De code kan nog de oude eindbaas-namen hebben.
 
+
+### Diepe Grot – Toegang via World Warper
+
+**CANON – niet wijzigen zonder overleg.**
+
+De Diepe Grot is een SIMULATIE en wordt niet meer betreden via de worldmap. Toegang alleen via de World Warper.
+
+De grot is in de code nog bereikbaar vanaf de wereldkaart. Onderstaande punten zijn nog niet gebouwd.
+
+- [ ] Diepe Grot verplaatsen naar ECHO's Kamer; ECHO beheert de simulatie en is de enige start; praten met ECHO → "Start Simulatie"; geen aparte worldmap-ingang.
+- [ ] Blauwe kisten in ECHO's Kamer, deksel open, decoratief en verwijzing naar grot-loot, paars/blauw licht. Aantal TBD.
+- [ ] Flow: World Warper → ECHO's Kamer → optie "Diepe Grot Simulatie" → "Start nieuwe run" / "Ga terug". Start: floor 1, level 1, geen uitrusting. Na warp-kristal floor 100 terug naar ECHO's Kamer. ECHO toont resultaat en opent de volgende run.
+- [ ] ECHO weet dat de grot een simulatie is en kan dat bij het eerste bezoek uitleggen.
+
+TODO(design), open laten:
+
+- [ ] Aantal blauwe kisten (2, 3 of 4)
+- [ ] Kisten gevuld of leeg bij eerste bezoek
+- [ ] Verandert de kamer visueel naarmate de speler de grot vordert
+
+### ECHO, Sapientia en de Diepe Grot
+
+**CANON – niet wijzigen zonder overleg.**
+
+- ECHO beheert de simulatie bewust. Sapientia is mede-eigenaar en data-afnemer.
+- ECHO weet het volledige plaatje niet. Hij denkt dat hij helpt met onderzoek. Sapientia gebruikt hem als filter. Elke floor-100-speler is een potentiële H. ECHO levert kandidaten zonder te weten waarvoor. Hij is tragisch: een instrument dat niet weet wat het dient.
+
+Dialoog letterlijk:
+
+- Eerste bezoek: "De Diepe Grot. Een simulatie — honderd verdiepingen, telkens anders. Ik beheer hem. Sapientia... Sapientia helpt met de data. Zo werkt het nu eenmaal."
+- Bij twijfel: "Waarom ik het doe? Omdat het mijn taak is. De Oude Mensheid bouwde me om te meten, te tellen, te bewaren."
+- Later na H-6: "Ik heb honderden kandidaten doorgelaten. Jij bent de zesde die bleef staan. De anderen... ik weet niet wat er met ze is gebeurd."
+- Over de data: "Dat weet ik niet. Ik lever, zij neemt. Zo is het altijd geweest."
+
+Open laten:
+
+- [ ] ECHO ontdekt wat hij echt deed (mogelijke twist act 5/6)
+- [ ] Confrontatie ECHO en Sapientia over de kandidaten
+- [ ] Wat er met H-1 t/m H-5 is gebeurd
+
 ## Dorpen & Shops
 
 ### Gerrit de Molenaar
@@ -302,6 +301,7 @@ Voorbeelden, geen gekozen accessoire: "Hanger-echo" (kleine teleport in gevecht)
 **CANON – niet wijzigen zonder overleg.**
 
 - [ ] Gerrits quest
+  Dialoog, Gerrit, zaad na Noor, molen-save en één Zingend Meel per bezoek staan in de code. De scène "zacht gezang" nog niet.
 
 NPC: Gerrit de Molenaar in Wilgendal. Quest: Het Zingende Graan. Thema: kleine menselijke verhalen tussen grote gebeurtenissen.
 
@@ -410,7 +410,7 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 
 ### Nog te doen
 
-- [ ] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. De Genezer bestaat niet.
+- [ ] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. De Genezer staat in Archief 2. De deur en die automatische warp ontbreken nog.
 - [ ] WM2 naast WM1 open na Archief 2. De code heeft alleen WM1.
 - [ ] Dorpen eerst bezocht vóór een warp. Dat filter ontbreekt.
 - [ ] Party wisselen. Er is geen API.
@@ -435,7 +435,7 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 ### Verschijning en cutscene
 
 - [ ] Cutscene na De Genezer: de World Warper verschijnt in de lucht
-  De Genezer bestaat niet. Er is geen deur op de wereldkaart.
+  De Genezer staat in Archief 2. Er is geen deur op de wereldkaart.
 - [ ] De party wordt automatisch gewarped naar het gebouw
   WorldWarperEnter.enter() wisselt naar het exterieur als de unlock-vlag er is. Niets op de kaart roept dat aan.
 - [ ] Introductie van de AI-gids ECHO
@@ -445,12 +445,10 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 
 ### Eerste binnenkomst: Hanger en Sapientia
 
-- [x] Bij de eerste keer binnen: visueel effect
-  Eerste versie. Paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn voorlopig. Geen H-6-onthulling.
-  - [ ] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
-    Open ontwerp. De code gloeit roze (canon: roze = de Stroom). De hal is paars.
-  - [ ] Systemen komen online door het Hanger-signaal
-    De scène speelt één keer. Losse systemen gaan niet aan.
+- [ ] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
+  Open ontwerp. De code gloeit roze (canon: roze = de Stroom). De hal is paars.
+- [ ] Systemen komen online door het Hanger-signaal
+  De scène speelt één keer. Losse systemen gaan niet aan.
 - [ ] Dialoogscène
   - [ ] Dennis toont de Hanger (eerste keer expliciet in het verhaal)
     De scène toont een roze Hanger. Dennis steekt hem niet apart op.
@@ -469,18 +467,8 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 
 ### Interieur
 
-- [x] Half functioneel: centrale hal en meerdere kamers
-  Eerste versie. Placeholder-kaarten, tegels 16×16. Open: exterieur, hal, warp_ring, hanger_nis. codex_nis en sapientia_schot bestaan en blijven dicht.
 - [ ] Kamers bouwen volgens de lijst hieronder
-  codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand. De genoemde kamers staan nog niet in de code.
-
-**CANON – niet wijzigen zonder overleg.**
-
-Direct open na Archief 2:
-
-- [ ] De Hal: warp-platform, ECHO in de main PC, party loopt rond
-- [ ] De Rustkamer: save, heal, party wisselen
-- [ ] ECHO's Kamer: questvoortgang
+  codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand. De kamers uit de lijst staan in world_warper/kamers. Ze gaan open met vlag warper_hub_open, die standaard uit staat en nog niet aan een kern hangt.
 
 **CANON – niet wijzigen zonder overleg.**
 
@@ -490,29 +478,20 @@ Direct open na Archief 2:
 
 Per act:
 
-- [ ] Act 2: De Beeldkamer, bestiarium en Codex
-- [ ] Act 3: De Trainingshal, oefengevechten
 - [ ] Act 4: De Werkplaats, crafting
+  De kamer staat, maar is leeg.
 - [ ] Act 5: De Handelskamer, endgame-shops
-- [ ] Act 6: De Kern, H-6 verhaal-eindpunt
+  De kamer staat, maar is leeg.
 
 Eerste versie, nog niet de kamers hierboven:
 
-- [x] Centrale hal met warp-platform (hoofdfunctie)
-  Eerste versie. De hal opent de warp-UI. warp_ring is een aparte kamer: een rechthoek van paneeltegels, geen cirkel.
 - [ ] Paars als signature kleur, in lijn met het Codex Monument
   Panelen en de hal zijn paars. De Hanger in de scène is roze.
 - [ ] Hologrammen, schermen en tech-details
   Placeholder-hologram in de eerste-bezoekscène en bij IVA. Geen echte schermen.
-- [x] Alle party-leden en Codex-monsters lopen vrij rond in het gebouw
-  Eerste versie, in de hal. Placeholders uit party en codex_pages. Geen loop-animatie.
 
 ### Bewoners van de hub
 
-- [x] Huidige party-leden lopen rond (Dennis, Noor, Lotte, en latere leden)
-  Eerste versie. Placeholders uit GameState.party, bij het laden van de hal. Geen loop-animatie.
-- [x] Gevangen Codex-monsters lopen rond
-  Eerste versie. Placeholders uit codex_pages. Geen loop-animatie.
 - [ ] Nieuwe party-leden voegen zich toe zodra ze aansluiten
   refresh() leest de party bij het laden van de hal. Midden in de kamer werkt dat niet live bij.
 
@@ -535,14 +514,6 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 ### Warp-systeem
 
-- [x] Wereldkaart-view opent bij gebruik van het warp-platform
-  Eerste versie, vanuit de hal, in twee stappen. Landing op de wereldkaart is de bestaande spawn van_dorp.
-- [x] Eerste keuze: welke worldmap (WM1, WM2 of WM3)
-  Eerste versie. WM2 en WM3 zijn zichtbaar en vergrendeld. Alleen WM1 is open.
-- [x] Tweede keuze: welk dorp op die worldmap
-  Eerste versie op WM1: wereldkaart (van_dorp), Wilgendal (zuid_ingang), Esdoorn (zuid_ingang).
-- [x] Alleen ontgrendelde worldmaps zijn selecteerbaar
-  Eerste versie. Alleen WM1. WM2 en WM3 tonen Vergrendeld.
 - [ ] Alleen ontgrendelde dorpen zijn selecteerbaar
   Het bezoek-filter ontbreekt. De drie WM1-plaatsen zijn altijd kiesbaar.
 - [ ] Visuele stijl: paars, holografisch, sciencefiction
@@ -558,30 +529,17 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 ### Functionaliteit in de World Warper
 
-- [x] Opslaan (save point)
-  Eerste versie. Nederlandse bevestiging: Opslaan?, Ja, Nee, Opgeslagen. Schrijft GameState.save_game(Vector2i(0, 0), Vector2i(0, 1)).
 - [ ] Party kiezen en wisselen
   Kijklijst Gezelschap: naam en niveau. Wisselen ontbreekt; er is geen API.
 - [ ] Questvoortgang via de AI-gids
   IVA heeft vier vaste stappen (world_warper_guide_0 tot en met 3). Geen questvoortgang.
-- [x] Party-leden en Codex-monsters lopen vrij rond
-  Eerste versie. Placeholders uit party en codex_pages, in de hal. Geen loop-animatie.
 - [ ] Latere kamers unlocken per act: De Beeldkamer, De Trainingshal, De Werkplaats, De Handelskamer, De Kern
   De deuren naar codex_nis en sapientia_schot blijven dicht.
-- [ ] Bestiarium en Codex in De Beeldkamer (Act 2)
 
 ### Audio
 
-- [x] Ambient tech-muziek (rustig, mysterieus, sciencefiction)
-  Eerste versie. Aanroep ww_ambient. Geen bestand, geen manifest-entry, blijft stil.
-- [x] Hum als achtergrondgeluid (constante lage toon)
-  Eerste versie. Aanroep ww_hum. Geen bestand, geen manifest-entry, blijft stil.
-- [x] Warp-geluid bij het activeren van het platform
-  Eerste versie. Aanroep ww_warp. Geen bestand, geen manifest-entry, blijft stil.
 - [ ] Geluid bij de eerste Hanger-activatie
   Bij hanger_activated gaat ww_sapientia_glitch af. Een eigen Hanger-geluid ontbreekt, en ook dat blijft stil.
-- [x] Sapientia-stem of glitch-geluid voor de dreigingsscène
-  Eerste versie. Aanroep ww_sapientia_glitch. Geen bestand, geen manifest-entry, blijft stil.
 - [ ] Stem of hologramgeluid van de AI-gids
 
 ### Visuals en art
@@ -628,3 +586,45 @@ De vier functies zijn besloten. Welke functie op welke plek staat, blijft open.
   Goudgerand bord "MENU" rechtsboven. Links drie gestapelde liggende knoppen. Rechts daarvan een groter vlak. Welke functie waar staat is nog open.
 - [ ] Spelertekst later Nederlands: Uitrusting, Codex, Items, Warpen
   Nu alleen deze TODO. Nog geen schermtekst.
+
+## RPG ART
+
+Echte pixel-art ter vervanging van placeholders. Geen definitieve art tekenen in de repo: alleen deze lijst. Bron: `tools/placeholders_v17.txt`, plus placeholders van Archief 2, de Diepe Grot, Gerrit, de World Warper-kamers en De Spiegel die daar niet of alleen als commentaar staan. Bestanden in `tools/handwerk.txt` niet wijzigen.
+
+- [ ] `assets/sprites/enemies/mimic.png` — 80×64 — Mimic, gevechtsplaatje
+- [ ] `assets/map_monsters/mimic.png` — 32×64 — Mimic op de kaart (2×4 frames van 16×16)
+- [ ] `assets/sprites/dungeon100_warper.png` — 64×16 — warper Diepe Grot, 4 frames van 16×16. Nog geen bestand; de code tint `assets/sprites/save_book.png` (64×16) violet
+- [ ] `assets/tiles/dungeon/kas_tiles.png` — 256×80 — tileset overwoekerde kas
+- [ ] `assets/tiles/dungeon/kas_bibliotheek.png` — 256×64 — bibliotheek-atlas van de kas
+- [ ] `assets/puzzle/groei_plaat.png` — 48×16 — groei-plaat, 3 frames van 16×16: zaad, scheut, volgroeid
+- [ ] `assets/sprites/buiten/kas_ingang.png` — 16×16 — ingang van de kas op de wereldkaart
+- [ ] `assets/tiles/dungeon/archief2_kas_tiles.png` — 256×80 — extra kas-atlas Archief 2
+- [ ] `assets/sprites/archief2/lotte_veld.png` — 48×96 — Lotte priester, veld
+- [ ] `assets/sprites/archief2/lotte_glitch.png` — 64×80 — Lotte glitch
+- [ ] `assets/sprites/archief2/genezer.png` — 64×80 — De Genezer
+- [ ] `assets/sprites/archief2/wurger.png` — 80×96 — De Wurger
+- [ ] `assets/sprites/archief2/plaat_zaad.png` — 16×16 — plaatsoort zaad
+- [ ] `assets/sprites/archief2/plaat_scheut.png` — 16×16 — plaatsoort scheut
+- [ ] `assets/sprites/archief2/plaat_volgroeid.png` — 16×16 — plaatsoort volgroeid
+- [ ] `assets/ui/icons/levenskern.png` — 16×16 — kern-item Archief 2
+- [ ] `assets/sprites/archief2/world_warper.png` — 128×64 — World Warper exterieur
+- [ ] `assets/sprites/archief2/echo.png` — 32×48 — ECHO hologram
+- [ ] `assets/sprites/archief2/sapientia_glitch.png` — 48×48 — Sapientia glitch
+- [ ] `assets/map_monsters/lotte_glitch.png` — 32×64 — Lotte glitch op de kaart (2×4 van 16×16)
+- [ ] `assets/map_monsters/wurger.png` — 32×64 — De Wurger op de kaart (2×4 van 16×16)
+- [ ] `assets/map_monsters/genezer.png` — 32×64 — De Genezer op de kaart (2×4 van 16×16)
+- [ ] `assets/sprites/enemies/woudgeest.png` — maat niet vastgelegd — vooraanzicht woudgeest (Het Zingende Graan). Nog geen bestand; het gevecht gebruikt tijdelijk `art/enemies/mosslijm.png` (90×94)
+- [ ] `assets/sprites/enemies/woudgeest_rug.png` — zelfde canvas als het vooraanzicht — rugaanzicht woudgeest. Nog geen bestand
+- [ ] `assets/map_monsters/woudgeest.png` — 32×64 — alleen als de woudgeest op de kaart gaat lopen (2×4 frames van 16×16). Nog geen bestand
+- [ ] `world_warper/art/echo_placeholder.png` — 48×96 — ECHO op de kaart (3×4 frames van 16×32)
+- [ ] `world_warper/art/party_placeholder.png` — 48×96 — party-lid zonder eigen sheet (3×4 frames van 16×32)
+- [ ] `world_warper/art/pc_placeholder.png` — 32×32 — hoofd-PC in De Hal en de terminal in ECHO's Kamer
+- [ ] `world_warper/art/warp_platform.png` — 32×16 — warp-platform in De Hal
+- [ ] `world_warper/art/tafel_placeholder.png` — 32×16 — lege smidstafel in De Werkplaats
+- [ ] `world_warper/art/toonbank_placeholder.png` — 48×16 — dichte toonbank in De Handelskamer
+- [ ] `world_warper/art/bord_kamers.png` — 32×16 — bordje naar de kamers
+- [ ] `world_warper/art/bord_hal.png` — 32×16 — bord in de hal. Staat niet in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/bord_warp.png` — 48×16 — bord bij de warp. Staat niet in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/tiles_placeholder.png` — 128×32 — interieur-tegels. Staat niet in `tools/placeholders_v17.txt`
+- [ ] `assets/bg/spiegel_kamer.png` — 384×216 — kamer vol spiegelende oppervlakken
+- [ ] `assets/bg/spiegel_kamer_gebroken.png` — 384×216 — dezelfde kamer, spiegels gebroken

@@ -67,10 +67,13 @@ func _floor_tests() -> void:
 	for f in range(-3, 111):
 		if S.is_boss_floor(f):
 			boss_floors.append(f)
-	check("baasverdiepingen = 10, 20, ... 100 (en niets anders in -3..110)",
-			boss_floors == [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] and S.boss_floors() == boss_floors)
-	check("alleen verdieping 100 is de eindbaas", S.is_final_floor(100) and not S.is_final_floor(90) and not S.is_final_floor(0))
-	check("boss_index: 10 -> 1, 100 -> 10, 15 -> 0", S.boss_index(10) == 1 and S.boss_index(100) == 10 and S.boss_index(15) == 0)
+	check("baasverdiepingen = canon, zonder 100",
+			boss_floors == [10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 99] and S.boss_floors() == boss_floors)
+	check("alleen verdieping 100 is de eindverdieping, en daar staat geen baas",
+			S.is_final_floor(100) and not S.is_final_floor(90) and not S.is_final_floor(0)
+			and not S.is_boss_floor(100) and S.boss_for_floor(100).is_empty())
+	check("boss_index: 10 -> 1, 25 -> 3, 100 -> 0, 15 -> 0",
+			S.boss_index(10) == 1 and S.boss_index(25) == 3 and S.boss_index(100) == 0 and S.boss_index(15) == 0)
 	var tiers_ok := true
 	var prev := 0
 	for f in range(1, 101):
@@ -144,13 +147,15 @@ func _boss_tests() -> void:
 	for f in S.boss_floors():
 		var b := S.boss_for_floor(f)
 		ok_names = ok_names and not b.is_empty() and GD.ENEMIES.has(b["enemy"]) and str(b["name"]) != "" \
-				and int(b["floor"]) == f and bool(b["final"]) == (f == 100) and int(b["index"]) == f / 10
+				and int(b["floor"]) == f and not bool(b["final"]) and int(b["index"]) == S.boss_index(f)
 		names[b["name"]] = true
-	check("boss_for_floor: elke 10e verdieping een baas met bestaande vijand-sprite en naam", ok_names)
-	check("alle 10 de bazen hebben een eigen naam", names.size() == 10)
+	check("boss_for_floor: elke baasverdieping een baas met bestaande vijand-sprite en naam", ok_names)
+	check("alle 12 bazen hebben een eigen naam", names.size() == 12)
 	check("boss_for_floor op een gewone verdieping = {}", S.boss_for_floor(1).is_empty() and S.boss_for_floor(95).is_empty()
-			and S.boss_for_floor(0).is_empty() and S.boss_for_floor(110).is_empty())
-	check("verdieping 100 = The Last Warden (eindbaas)", S.boss_for_floor(100)["final"] and S.boss_for_floor(100)["name"] == "The Last Warden")
+			and S.boss_for_floor(0).is_empty() and S.boss_for_floor(110).is_empty() and S.boss_for_floor(100).is_empty())
+	check("verdieping 25 heet De Schaduw van H-6", S.boss_for_floor(25)["name"] == "De Schaduw van H-6"
+			and S.boss_for_floor(50)["name"] == "De Cyclus" and S.boss_for_floor(75)["name"] == "De Rechter"
+			and S.boss_for_floor(99)["name"] == "De Stem")
 	var bossier := true
 	var last: Dictionary = {}
 	var rising := true
@@ -165,13 +170,14 @@ func _boss_tests() -> void:
 				rising = rising and int(bs[k]) > int(last[k])
 		last = bs
 	check("elke baas is sterker dan elk gewoon monster op dezelfde verdieping (HP/ATK/DEF/EXP/goud)", bossier)
-	check("bazen worden sterker per baasverdieping (10 -> 100)", rising)
+	check("bazen worden sterker per baasverdieping (10 -> 99)", rising)
 	var b100 := S.boss_stats(GD.ENEMIES["kennis_beest"], 100)
 	var b90 := S.boss_stats(GD.ENEMIES["kennis_beest"], 90)
 	check("eindbaas (100) sterker dan een baas met dezelfde formule zonder eindbaas-bonus",
 			int(b100["max_hp"]) > int(S.boss_stats(GD.ENEMIES["kennis_beest"], 99)["max_hp"]) * 1.25 and int(b100["atk"]) > int(b90["atk"]))
-	check("baas heeft de baasnaam, geen roze kern, geen boss-blok", b100["name"] == "The Last Warden"
-			and not b100.has("core") and not b100.has("boss") and int(b100["boss_floor"]) == 100)
+	check("verdieping 100 heeft geen baasnaam; de formule houdt de vijandnaam, geen roze kern",
+			b100["name"] == "The Knowledge Beast" and not b100.has("core") and not b100.has("boss")
+			and int(b100["boss_floor"]) == 100)
 	var skill_names := []
 	for sk in b100["skills"]:
 		skill_names.append(sk["name"])
@@ -305,7 +311,7 @@ func _loot_tests() -> void:
 				if _gear_tier(str(it["item"])) == 5:
 					kinds += 1
 			all_gear = kinds == 6
-	check("baasbuit: gegarandeerd uitrusting + genees-items + goud, ids bestaan (alle 10 baasverdiepingen)", boss_ok)
+	check("baasbuit: gegarandeerd uitrusting + genees-items + goud, ids bestaan (alle baasverdiepingen)", boss_ok)
 	check("baasbuit is beter dan een kist: >3x goud en uitrusting een niveau hoger", boss_better)
 	check("eindbaas geeft van elke soort uitrusting niveau 5 en 5 elixers", all_gear
 			and S.boss_loot(100, _rng(1))["items"].any(func(it): return it["item"] == "elixer" and int(it["n"]) >= 5))
@@ -422,9 +428,11 @@ func _chest_tests() -> void:
 			mm.floor_nr == 40 and mm.scaled_stats() == S.monster_stats(GD.ENEMIES["papiergeest"], 40))
 	var mm2 := MonsterScript.new()
 	add_child(mm2)
-	mm2.setup(null, S.boss_entry(100, Vector2i(3, 3)), 1)
-	check("MapMonster uit boss_entry(100): boss, floor 100, baasstats", mm2.boss and mm2.floor_nr == 100
-			and int(mm2.scaled_stats()["max_hp"]) == int(S.boss_stats(GD.ENEMIES["kennis_beest"], 100)["max_hp"]))
+	check("boss_entry(100) is leeg: verdieping 100 is geen baas", S.boss_entry(100, Vector2i(3, 3)).is_empty())
+	mm2.setup(null, S.boss_entry(99, Vector2i(3, 3)), 1)
+	check("MapMonster uit boss_entry(99): De Stem, floor 99, baasstats", mm2.boss and mm2.floor_nr == 99
+			and mm2.scaled_stats()["name"] == "De Stem"
+			and int(mm2.scaled_stats()["max_hp"]) == int(S.boss_stats(GD.ENEMIES["papiergeest"], 99)["max_hp"]))
 	GameState.dungeon100_floor = 0
 	var mm3 := MonsterScript.new()
 	add_child(mm3)
@@ -511,8 +519,8 @@ func _battle_tests() -> void:
 	b = _make_battle(["kennis_beest"], 100, true)
 	await get_tree().process_frame
 	var fs: Dictionary = b.enemies[0]["s"]
-	check("eindbaas verdieping 100: The Last Warden, HP %d, geen kern, niet vluchten" % int(fs["max_hp"]),
-			fs["name"] == "The Last Warden" and int(fs["max_hp"]) == int(S.boss_stats(GD.ENEMIES["kennis_beest"], 100)["max_hp"])
+	check("verdieping 100 is geen baasnaam; geforceerde formule houdt The Knowledge Beast, HP %d, geen kern" % int(fs["max_hp"]),
+			fs["name"] == "The Knowledge Beast" and int(fs["max_hp"]) == int(S.boss_stats(GD.ENEMIES["kennis_beest"], 100)["max_hp"])
 			and not b.enemies[0].has("core") and not b.can_flee)
 	b._dungeon100_boss_loot()
 	var sets := 0

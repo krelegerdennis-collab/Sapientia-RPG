@@ -202,6 +202,58 @@
 				"dood": "Inkt die wegzakt.",
 				"vaardigheid": "Inktspuw, een lange natte straal."
 			}
+		},
+		"lotte_glitch": {
+			"naam": "Lotte",
+			"stem": "Een priesteresstem die hapert, alsof er stilte overheen ligt.",
+			"klank": "glitch",
+			"volume_db": -6,
+			"pitch_variatie": 0.06,
+			"slots": {
+				"aanval": "Korte glitch en een stafzwaai.",
+				"raak": "Haperende adem.",
+				"dood": "De glitch die scheurt.",
+				"vaardigheid": "Stilte, een doffe toon."
+			}
+		},
+		"wurger": {
+			"naam": "De Wurger",
+			"stem": "Natte ranken die aanspannen.",
+			"klank": "rank",
+			"volume_db": -4,
+			"pitch_variatie": 0.03,
+			"slots": {
+				"aanval": "Een rank die toeslaat.",
+				"raak": "Hout dat kraakt.",
+				"dood": "Ranken die slap vallen.",
+				"vaardigheid": "Een wurggreep, lang en laag."
+			}
+		},
+		"genezer": {
+			"naam": "De Genezer",
+			"stem": "Plant en staal. Een zachte zuig.",
+			"klank": "staal",
+			"volume_db": -5,
+			"pitch_variatie": 0.03,
+			"slots": {
+				"aanval": "Een zuig van levenskracht.",
+				"raak": "Metaal op blad.",
+				"dood": "Het staal valt, het blad verdort.",
+				"vaardigheid": "Hij geneest zichzelf, een natte toon."
+			}
+		},
+		"woudgeest": {
+			"naam": "Woudgeest",
+			"stem": "Ijl en kort, als een zucht tussen bladeren.",
+			"klank": "wind",
+			"volume_db": -8,
+			"pitch_variatie": 0.06,
+			"slots": {
+				"aanval": "Korte windvlaag.",
+				"raak": "Hoge, dunne tik.",
+				"dood": "Zucht die wegvalt.",
+				"vaardigheid": "Een iets langere windvlaag."
+			}
 		}
 	}
 }

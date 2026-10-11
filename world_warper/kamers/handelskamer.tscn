@@ -1,0 +1,60 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/map_spawn.gd" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="4_touch"]
+[ext_resource type="Script" path="res://world_warper/kamers/layout.gd" id="5_layout"]
+[ext_resource type="Script" path="res://world_warper/kamers/deur.gd" id="6_deur"]
+[ext_resource type="Script" path="res://world_warper/kamers/prop.gd" id="7_prop"]
+
+[node name="Handelskamer" type="Node2D"]
+script = ExtResource("1_map")
+map_name = "De Handelskamer"
+encounters = false
+
+[node name="Void" type="ColorRect" parent="."]
+offset_left = -640.0
+offset_top = -480.0
+offset_right = 832.0
+offset_bottom = 624.0
+mouse_filter = 2
+color = Color(0.02, 0, 0.04, 1)
+
+[node name="Ground" type="TileMapLayer" parent="."]
+
+[node name="Layout" type="Node" parent="."]
+script = ExtResource("5_layout")
+room_id = "handelskamer"
+
+[node name="Objects" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Toonbank" type="StaticBody2D" parent="Objects"]
+position = Vector2(88, 72)
+script = ExtResource("7_prop")
+bron = "handel"
+
+[node name="Player" parent="Objects" instance=ExtResource("2_player")]
+position = Vector2(72, 24)
+
+[node name="Spawns" type="Node2D" parent="."]
+
+[node name="ingang" type="Marker2D" parent="Spawns"]
+position = Vector2(72, 24)
+script = ExtResource("3_spawn")
+facing = Vector2i(0, 1)
+
+[node name="Exits" type="Node2D" parent="."]
+
+[node name="NaarHal" type="Node2D" parent="Exits"]
+position = Vector2(64, 0)
+script = ExtResource("6_deur")
+size_tiles = Vector2i(1, 1)
+room_id = "hal"
+destination = "res://world_warper/kamers/hal.tscn"
+destination_spawn = "van_handelskamer"
+blokkeer = Vector2i(0, -1)
+
+
+[node name="TouchControls" parent="." instance=ExtResource("4_touch")]

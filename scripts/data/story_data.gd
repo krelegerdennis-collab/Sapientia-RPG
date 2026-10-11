@@ -47,6 +47,7 @@ extends RefCounted
 ##                                       held sluit zich aan (GameState.join_member), bv. Noor
 ##   ["glitch", sec]                     één glitch-flits van de CRT-laag (ook buiten de dungeons)
 ##   ["heal"]                            HP en MP van de hele groep vol (herberg)
+##   ["molen"]                           molen van Gerrit: rusten, meel (1x per bezoek), opslaan, party wisselen
 ##   Spreker "{naam}" = de held zelf (ballon wijst naar de speler).
 ##   MAP_ENTER "map" mag ook een volledig scènepad zijn (Esdoorn, Donker Woud).
 
@@ -65,6 +66,27 @@ const WOUD_BAAS := "res://scenes/maps/woud_open_plek.tscn"
 const GOLEM_FLAG := "bewaker:archief_golemhal/golem"
 ## Vlag van de verslagen Wortelkoning.
 const WORTELKONING_FLAG := "bewaker:woud_open_plek/baas"
+## Het Zingende Graan (na noor_lid). Dialoog is de canon, letterlijk.
+const GERRIT := "Gerrit de Molenaar"
+const FLAG_GRAAN := "quest_zingend_graan"
+const FLAG_ZAAD := "zingend_zaad"
+const FLAG_GRAAN_KLAAR := "zingend_graan_klaar"
+const ITEM_ZAAD := "zingend_zaad"
+const ITEM_MEEL := "zingend_meel"
+const QUOTE_GRAAN_BEZOEK := "O, bezoek. Ga zitten, jongen. Of blijf staan — maakt niet uit. De molen draait toch niet meer."
+const QUOTE_GRAAN_WIND := "Vroeger zong hij. Als ik graan maalde, zong hij. Nu hoor ik alleen de wind. En de wind zingt niet, hij fluistert."
+const QUOTE_GRAAN_VRAAG := "Wat is er gebeurd?"
+const QUOTE_GRAAN_OP := "Het graan is op. Niet het gewone graan — dat heb ik nog wel. Het ZINGENDE graan. Dat groeit alleen waar licht en schaduw elkaar raken. In het Donker Woud, aan de rand van de mist."
+const QUOTE_GRAAN_OUD := "Ik ben te oud om te gaan. Mijn benen willen niet meer. Maar jij... jij ziet eruit als iemand die nog wel eens ergens heen gaat."
+const QUOTE_GRAAN_ZOEK := "Zoek het Zingend Zaad. Het groeit waar de mist optrekt en de eerste zon doorbreekt. Neem het mee, en mijn molen zingt weer."
+const QUOTE_GRAAN_VOORZICHTIG := "En jongen — wees voorzichtig. Het woud houdt niet van haast."
+const QUOTE_GRAAN_WACHT := "Geen haast. De molen wacht toch wel. Ik ook."
+const QUOTE_GRAAN_ZONDER := "Nog niet gevonden? Geen zorgen. Het woud laat zich niet dwingen."
+const QUOTE_GRAAN_ZAAD := "Laat me het zien. ...Ja. Ja, dit is het. Hij zingt al, hoor je? Zachtjes. Hij wacht op de molen."
+const QUOTE_GRAAN_DANK := "Dank je, jongen. De molen zingt weer. Neem wat meel mee voor onderweg — en als je ooit terugkomt, de deur staat altijd open."
+## Ja neemt de opdracht aan. Nee (ook de B-knop) is weglopen: de opdracht blijft uit.
+const KEUZE_GRAAN_JA := "Ja"
+const KEUZE_GRAAN_NEE := "Nee"
 
 ## Stappen van de proloog
 const START := 0          # nieuw spel: wakker worden in bed
@@ -90,6 +112,7 @@ const STEP_NAMES := {0: "start", 10: "wakker", 15: "uitrusting", 20: "taken", 30
 ## gezet is). Story.active_quest() geeft de titel.
 const QUESTS := [
 	{"id": "noor", "title": "Save Noor from the Dark Wood", "start_flag": "quest_noor", "done_flag": "noor_gered"},
+	{"id": "zingend_graan", "title": "Het Zingende Graan", "start_flag": FLAG_GRAAN, "done_flag": FLAG_GRAAN_KLAAR},
 ]
 ## v0.17 TODO(verhaal): deze events hebben PLACEHOLDER-tekst (kort, Nederlands). Dennis schrijft het
 ## echte verhaal; de opbouw (wie loopt waar, vlaggen, ballonnen) kan blijven.
@@ -115,6 +138,7 @@ const MAP_ENTER := [
 	{"map": "huis", "if": {"step": OPGESLOTEN}, "event": "opgesloten_timer"},
 	# v0.17 eerste keer in Esdoorn (na de Golem): Noor ontmoeten, ze wordt het woud in gesleurd
 	{"map": ESDOORN, "if": {"flags": [GOLEM_FLAG], "not_flags": ["noor_ontmoet"]}, "event": "noor_ontmoeting"},
+	{"map": "res://scenes/maps/leven_ingang.tscn", "if": {"not_flags": ["archief2_keten"]}, "event": "archief2_keten"},
 	# v0.17 terug op de open plek na de winst op de Wortelkoning: Noor is vrij en sluit zich aan
 	{"map": WOUD_BAAS, "if": {"flags": [WORTELKONING_FLAG], "not_flags": ["noor_gered"]}, "event": "noor_bevrijd"},
 ]
@@ -352,7 +376,7 @@ const EVENTS := {
 	]}],
 
 	# ============================================================ v0.17 ESDOORN + DONKER WOUD
-	# TODO(verhaal): ALLE tekst hieronder is placeholder (zie TODO_STORY). Kort gehouden.
+	# TODO(verhaal): tekst hieronder is placeholder (zie TODO_STORY), behalve Het Zingende Graan.
 	# --- poorten op de wereldkaart
 	"naar_esdoorn": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
@@ -375,6 +399,17 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+	# Waarom Archief 1 naar Archief 2 wijst. Eenmalig, bij de kas-ingang.
+	"archief2_keten": [{"do": [
+		["say", "", [
+			"De Oude Mensheid maakte de zes Archieven als keten.",
+			"Elke kern activeert de volgende. Geen uitnodiging: een noodsignaal.",
+			"Archief 1 zond: Iemand is binnen. Archief 2 reageerde als eerste.",
+			"Sapientia heeft dat signaal gemanipuleerd.",
+			"Je denkt dat je volgt. Sapientia leidt je.",
+		]],
+		["flag", "archief2_keten"],
+	]}],
 
 	# --- de ontmoeting (eenmalig, MAP_ENTER; vlag noor_ontmoet)
 	"noor_ontmoeting": [{"do": [
@@ -493,6 +528,51 @@ const EVENTS := {
 		["say", "", ["Noor joins the party!", "She gives you a Padded Jerkin from Mapleton.", "Quest complete: Save Noor from the Dark Wood"]],
 	]}],
 	"noor_woud": [{"do": [["say", "Noor", ["Let's go, {naam}."]]]}],
+
+	# Het Zingende Graan. Canon-dialoog. Dicht zonder noor_lid.
+	# Eerste keer: bezoek, de vraag, dan Ja (opdracht aan) of Nee (weglopen, later nog mogelijk).
+	# Zonder zaad: één zin. Met zaad: herkenning, daarna de molen. Daarna de afsluitende zin en opnieuw de molen.
+	"gerrit": [
+		{"if": {"not_flags": ["noor_lid"]}, "do": []},
+		{"if": {"flags": [FLAG_GRAAN_KLAAR]}, "do": [
+			["say", GERRIT, [QUOTE_GRAAN_DANK]],
+			["molen"],
+		]},
+		{"if": {"flags": ["noor_lid", FLAG_ZAAD], "not_flags": [FLAG_GRAAN_KLAAR]}, "do": [
+			["take", ITEM_ZAAD, 1],
+			["flag", FLAG_GRAAN_KLAAR],
+			["say", GERRIT, [QUOTE_GRAAN_ZAAD]],
+			["molen"],
+		]},
+		{"if": {"flags": ["noor_lid", FLAG_GRAAN], "not_flags": [FLAG_ZAAD]}, "do": [
+			["say", GERRIT, [QUOTE_GRAAN_ZONDER]],
+		]},
+		{"if": {"flags": ["noor_lid"], "not_flags": [FLAG_GRAAN]}, "do": [
+			["say", GERRIT, [QUOTE_GRAAN_BEZOEK, QUOTE_GRAAN_WIND]],
+			["say", "{naam}", [QUOTE_GRAAN_VRAAG]],
+			["say", GERRIT, [QUOTE_GRAAN_OP]],
+			["choice", QUOTE_GRAAN_OUD, [KEUZE_GRAAN_JA, KEUZE_GRAAN_NEE], ["gerrit_ja", "gerrit_weigert"], GERRIT],
+		]},
+	],
+	"gerrit_ja": [{"do": [
+		["flag", FLAG_GRAAN],
+		["say", GERRIT, [QUOTE_GRAAN_ZOEK, QUOTE_GRAAN_VOORZICHTIG]],
+	]}],
+	"gerrit_weigert": [{"do": [
+		["say", GERRIT, [QUOTE_GRAAN_WACHT]],
+	]}],
+	"zingend_zaad": [
+		{"if": {"flags": [FLAG_GRAAN], "not_flags": [FLAG_ZAAD]}, "do": [
+			["battle", ["woudgeest", "woudgeest"], {"after": "zingend_zaad_na"}],
+		]},
+		{"do": []},
+	],
+	"zingend_zaad_na": [{"do": [
+		["give", ITEM_ZAAD, 1],
+		["flag", FLAG_ZAAD],
+		["refresh"],
+		["say", "", ["Je vindt Zingend Zaad."]],
+	]}],
 }
 
 
