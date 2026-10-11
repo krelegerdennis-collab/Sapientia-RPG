@@ -1,18 +1,24 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`bb69c9b`), Godot 4.7.2, threads uit.
+Web-build van `main` (`794e9ba`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`1b92f3e`, export van `7a18856`):
-- Het Levende Archief heeft vier verdiepingen, na de Golem. De kas staat nog naast de trap van het Eerste Archief, niet achter de bergen. Groei-platen, Lotte, De Wurger en De Genezer. Na De Genezer een korte hub-scène: ECHO, de Hanger, en de andere eilanden die nog dicht blijven.
-- In de Diepe Grot heten de bazen op verdieping 25, 50, 75 en 99 De Schaduw van H-6, De Cyclus, De Rechter en De Stem. Uitgang-warpers staan op verdieping 1, 25, 50, 75 en 99. Verdieping 1 legt het uit. De andere vier vragen of je de grot uit wilt; Ja zet je op de wereldkaart bij de ingang. De grot zelf start nog vanaf de wereldkaart.
-- In Wilgendal, na Noor: Gerrit en Het Zingende Graan. Het zaad, de molen-save en één Zingend Meel per bezoek zitten erin. De scène waarin de molen zacht zingt nog niet.
+Nieuw in deze build, bovenop de vorige web-build (`aa5018d`, export van `bb69c9b`):
+- De kas van Archief 2 staat linksboven op de wereldkaart, achter de bergen. De berggrot is de enige weg erheen. De ingang naast de trap van het Eerste Archief is weg.
+- De Diepe Grot start niet meer vanaf de wereldkaart. Je begint in ECHO's Kamer. Ladder, tussen-warper en nederlaag zetten je terug in die kamer.
+- In Wilgendal zingt de molen zacht na het zaad.
+- Op de wereldkaart staat een platform voor de World Warper. Dat gaat open na De Genezer. Worldmap 2 en 3 blijven dicht.
 - Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
+Nog van de build van `bb69c9b`:
+- Het Levende Archief heeft vier verdiepingen, na de Golem. De kas stond toen nog naast de trap van het Eerste Archief. Groei-platen, Lotte, De Wurger en De Genezer. Na De Genezer een korte hub-scène: ECHO, de Hanger, en de andere eilanden die nog dicht blijven.
+- In de Diepe Grot heten de bazen op verdieping 25, 50, 75 en 99 De Schaduw van H-6, De Cyclus, De Rechter en De Stem. Uitgang-warpers staan op verdieping 1, 25, 50, 75 en 99. Verdieping 1 legt het uit.
+- In Wilgendal, na Noor: Gerrit en Het Zingende Graan. Het zaad, de molen-save en één Zingend Meel per bezoek zitten erin.
+
 Nog van de build van `7a18856`:
-- Het veldmenu is vier knoppen. Links, onder elkaar: Uitrusting, Codex en Items. Die openen meteen het bestaande scherm. Rechts een groter vlak Warpen, met het label MENU erboven. Warpen zegt "De warp-hub is nog niet bereikbaar." zolang de hub-vlag niet gezet is. Die vlag komt nog van de bewaker op verdieping 2 van het Eerste Archief, niet van De Genezer. De kaart en de save-slots blijven met rust.
+- Het veldmenu is vier knoppen. Links, onder elkaar: Uitrusting, Codex en Items. Die openen meteen het bestaande scherm. Rechts een groter vlak Warpen, met het label MENU erboven. Warpen zegt "De warp-hub is nog niet bereikbaar." zolang de hub-vlag niet gezet is. Die vlag gaat open na De Genezer. De kaart en de save-slots blijven met rust.
 
 Nog van de build van `4a145c6`:
 - In het Eerste Archief staan drie uitgang-warpers: bij de ingang, in de Zuilenhal (verdieping 3) en in de Golemhal, naast de tegel na de overwinning. Met A vraagt het spel: "Weet je zeker dat je de dungeon wilt verlaten?" Ja zet je op de wereldkaart bij het Eerste Archief. Nee laat je staan. De warpers van de Diepe Grot (verdieping 1, 50 en 99) blijven zoals ze waren.
