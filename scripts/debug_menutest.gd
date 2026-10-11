@@ -267,7 +267,7 @@ func _main_menu_tests() -> void:
 	check("'Uitrusting' heeft de focus", m.buttons["equip"].has_focus())
 	var vp := Rect2(Vector2.ZERO, m.root.size)
 	var inside := true
-	var left := m.buttons["equip"].get_global_rect()
+	var left: Rect2 = m.buttons["equip"].get_global_rect()
 	left = left.merge(m.buttons["codex"].get_global_rect())
 	left = left.merge(m.buttons["items"].get_global_rect())
 	for id in m.buttons:
