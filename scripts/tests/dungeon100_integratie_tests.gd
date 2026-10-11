@@ -11,6 +11,7 @@ extends Node
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const S := preload("res://scripts/data/dungeon100_scaling.gd")
+const Gear := preload("res://scripts/data/grade_gear.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
@@ -264,7 +265,9 @@ func _data_tests() -> void:
 				var kind := str(c.get("kind", "normaal"))
 				var tier_ok := tier == expect or tier == expect - 1
 				if kind == "blauw":
-					tier_ok = tier == mini(S.MAX_TIER, expect + 1)
+					# Bevestigde grade-buit: tier is de grade-band, niet de oude schaal + 1.
+					var gate := 99 if f >= 100 else f
+					tier_ok = tier == Gear.grade_for_floor(gate)
 				if int(c["floor"]) != f or not tier_ok:
 					chest_ok = false
 					details.append("kist sd%d vd%d %s tier%d" % [sd, f, kind, tier])
@@ -273,7 +276,7 @@ func _data_tests() -> void:
 	check("rustpunt op rest_slot op elke 10e verdieping en nergens anders", rest_ok)
 	check("spawn 'rustpunt': vrije bereikbare buurtegel naast het rustpunt (10, 20 ... 100)", spawn_ok)
 	check("elk monster draagt zijn verdieping (schaal via Dungeon100Scaling)", scale_ok)
-	check("elke kist heeft vooraf gerolde schaalbuit van de juiste verdieping (niveau)", chest_ok)
+	check("elke kist heeft vooraf gerolde buit van de juiste verdieping (schaal, blauw = grade)", chest_ok)
 	var d10 := fresh(7, 10)
 	var d1 := fresh(7, 1)
 	var m10: Dictionary = d10["room"]["monsters"][0]
