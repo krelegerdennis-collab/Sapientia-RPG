@@ -1,0 +1,108 @@
+extends "res://scripts/ui/menu_screen.gd"
+## Winkel in Wilgendal. Kopen en verkopen. Magie kiest eerst een held.
+## Teksten die de speler ziet zijn Nederlands.
+
+const ShopData := preload("res://scripts/data/shop_data.gd")
+
+var shop_id := ""
+var mode := "koop"
+var _pending_spell := ""
+
+
+func _build() -> void:
+	header.text = ShopData.shop_name(shop_id)
+	set_hint("A: kies   B: terug")
+	_show_koop()
+
+
+func _clear() -> void:
+	for c in content.get_children():
+		content.remove_child(c)
+		c.free()
+
+
+func _show_koop() -> void:
+	mode = "koop"
+	_pending_spell = ""
+	_clear()
+	var switch := UiMenu.button("Verkopen")
+	switch.pressed.connect(_show_verkoop)
+	content.add_child(switch)
+	var rows: Array = ShopData.stock(shop_id)
+	if rows.is_empty():
+		content.add_child(UiMenu.label("De schappen zijn leeg.", MenuColors.TEXT_DIM))
+		return
+	for row in rows:
+		var id := str(row["id"])
+		var b := UiMenu.button("%s  %dg" % [str(row["name"]), int(row["price"])])
+		b.pressed.connect(_on_buy.bind(id, str(row.get("kind", "item"))))
+		content.add_child(b)
+	if content.get_child_count() > 1:
+		(content.get_child(1) as Control).grab_focus()
+
+
+func _show_verkoop() -> void:
+	mode = "verkoop"
+	_clear()
+	var back := UiMenu.button("Kopen")
+	back.pressed.connect(_show_koop)
+	content.add_child(back)
+	var rows: Array = ShopData.sellable()
+	if rows.is_empty():
+		content.add_child(UiMenu.label("Niets om te verkopen.", MenuColors.TEXT_DIM))
+		back.grab_focus()
+		return
+	for row in rows:
+		var id := str(row["id"])
+		var b := UiMenu.button("%s x%d  %dg" % [str(row["name"]), int(row["n"]), int(row["price"])])
+		b.pressed.connect(_on_sell.bind(id))
+		content.add_child(b)
+
+
+func _show_held(spell_id: String) -> void:
+	mode = "held"
+	_pending_spell = spell_id
+	_clear()
+	content.add_child(UiMenu.label("Wie leert dit?", MenuColors.TEXT))
+	var any := false
+	for h in GameState.party:
+		if int(h.get("hp", 1)) <= 0:
+			continue
+		var hero: Dictionary = h
+		var b := UiMenu.button(str(hero.get("name", "?")))
+		b.pressed.connect(_on_hero.bind(hero))
+		content.add_child(b)
+		if not any:
+			b.grab_focus()
+			any = true
+	if not any:
+		show_message("Niemand kan dit leren.")
+
+
+func _on_buy(id: String, kind: String) -> void:
+	if kind == "spell":
+		_show_held(id)
+		return
+	var r := ShopData.buy_item(shop_id, id)
+	show_message(str(r["text"]))
+	if r["ok"]:
+		_show_koop()
+
+
+func _on_hero(hero: Dictionary) -> void:
+	var r := ShopData.buy_spell(shop_id, _pending_spell, hero)
+	show_message(str(r["text"]))
+	_show_koop()
+
+
+func _on_sell(id: String) -> void:
+	var r := ShopData.sell(id)
+	show_message(str(r["text"]))
+	_show_verkoop()
+
+
+func back() -> void:
+	if mode == "held" or mode == "verkoop":
+		_show_koop()
+		return
+	close()

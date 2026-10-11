@@ -9,6 +9,7 @@ extends CanvasLayer
 signal closed
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
@@ -107,10 +108,13 @@ func _ready() -> void:
 	detail.add_child(stats_label)
 
 	ids = GameData.bestiary_ids()
+	ids.append_array(EndgameBestiary.ids())
 	var seen := 0
 	var beaten := 0
 	for id in ids:
-		var e: Dictionary = GameData.ENEMIES[id]
+		var e: Dictionary = _entry(str(id))
+		if e.is_empty():
+			continue
 		var known := GameState.is_seen(id)
 		seen += 1 if known else 0
 		beaten += 1 if GameState.defeated_count(id) > 0 else 0
@@ -130,9 +134,17 @@ func entry_text(i: int) -> String:
 	return str(entries[i].get_meta("label", ""))
 
 
+func _entry(id: String) -> Dictionary:
+	if GameData.ENEMIES.has(id):
+		return GameData.ENEMIES[id]
+	return EndgameBestiary.entry(id)
+
+
 func show_entry(id: String) -> void:
 	shown_id = id
-	var e: Dictionary = GameData.ENEMIES[id]
+	var e: Dictionary = _entry(id)
+	if e.is_empty():
+		return
 	var known := GameState.is_seen(id)
 	var kills := GameState.defeated_count(id)
 	var sp := GameData.enemy_sprite(e)   # v0.19: plaatsvervanger als de art er nog niet is

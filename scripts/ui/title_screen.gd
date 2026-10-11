@@ -24,6 +24,7 @@ extends Control
 ## (GameState.has_any_save / read_newest_save / continue_game).
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
+const SaveSlotList := preload("res://scripts/ui/save_slot_list.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const TitleGlitch := preload("res://scripts/ui/title_glitch.gd")
 const BACKDROP := "res://assets/battle/bibliotheek.png"
@@ -45,6 +46,7 @@ const TITLE := "SAPIENTIA"
 const SUBTITLE := "The Forgotten Archives"
 
 var continue_button: Button
+var load_button: Button
 var new_button: Button
 var beta_button: Button
 var beta_card: PanelContainer
@@ -135,18 +137,29 @@ func _ready() -> void:
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 0)
 	box.add_child(list)
-	continue_button = UiMenu.button("Continue")
+	var row := HBoxContainer.new()
+	row.name = "ContinueRow"
+	row.add_theme_constant_override("separation", 2)
+	list.add_child(row)
+	continue_button = UiMenu.button("Doorgaan")
 	continue_button.custom_minimum_size = Vector2(0, 16)
-	list.add_child(continue_button)
+	continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(continue_button)
+	load_button = UiMenu.button("Laden")
+	load_button.name = "LoadButton"
+	load_button.custom_minimum_size = Vector2(0, 16)
+	load_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(load_button)
 	save_info = UiMenu.label("", UiStyleC.TEXT_DIM)
 	# v0.13: een lange naam + '(auto)' mag het menu niet breder maken (dan liep het rechts uit
 	# beeld): afkappen met '...' binnen de vaste breedte van het menu
 	save_info.clip_text = true
 	save_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	list.add_child(save_info)
-	new_button = UiMenu.button("New Game")
+	new_button = UiMenu.button("Nieuw spel")
 	list.add_child(new_button)
 	continue_button.pressed.connect(_on_continue)
+	load_button.pressed.connect(_on_load)
 	new_button.pressed.connect(_on_new)
 	# Links onder, buiten het kaartje rechts: anders past het menu niet meer in y 148..200.
 	var beta_box := PanelContainer.new()
@@ -157,7 +170,7 @@ func _ready() -> void:
 	var beta_list := VBoxContainer.new()
 	beta_list.add_theme_constant_override("separation", 0)
 	beta_box.add_child(beta_list)
-	beta_button = UiMenu.button("Beta Test")
+	beta_button = UiMenu.button("Betatest")
 	beta_button.custom_minimum_size = Vector2(116, 16)
 	beta_list.add_child(beta_button)
 	beta_info = UiMenu.label("", UiStyleC.TEXT_DIM)
@@ -169,6 +182,9 @@ func _ready() -> void:
 	beta_button.focus_neighbor_right = new_button.get_path()
 	new_button.focus_neighbor_left = beta_button.get_path()
 	continue_button.focus_neighbor_left = beta_button.get_path()
+	continue_button.focus_neighbor_right = load_button.get_path()
+	load_button.focus_neighbor_left = continue_button.get_path()
+	load_button.focus_neighbor_right = load_button.get_path()
 
 	version_label = UiMenu.label("v" + str(ProjectSettings.get_setting("application/config/version", "")), UiStyleC.TEXT_OFF)
 	version_label.name = "Version"
@@ -264,6 +280,8 @@ func refresh() -> void:
 	var has := GameState.has_any_save()
 	continue_button.disabled = not has
 	continue_button.focus_mode = Control.FOCUS_ALL if has else Control.FOCUS_NONE
+	load_button.disabled = not has
+	load_button.focus_mode = Control.FOCUS_ALL if has else Control.FOCUS_NONE
 	if has:
 		var d := GameState.read_newest_save()
 		save_info.text = "  %s  %s%s" % [str(d.get("player_name", "")), UiMenu.format_time(float(d.get("play_time", 0.0))),
@@ -294,8 +312,33 @@ func _process(delta: float) -> void:
 func _on_continue() -> void:
 	if continue_button.disabled:
 		return
+	_open_slot_list()
+
+
+func _on_load() -> void:
+	if load_button.disabled:
+		return
+	_open_slot_list()
+
+
+func _open_slot_list() -> void:
+	if get_node_or_null("SaveSlotList") != null:
+		return
+	var list := SaveSlotList.new()
+	list.picked.connect(_on_slot_picked)
+	list.cancelled.connect(_on_slot_cancelled)
+	add_child(list)
+
+
+func _on_slot_picked(slot: int) -> void:
 	set_process(false)
-	await GameState.continue_game()
+	await GameState.continue_slot(slot)
+
+
+func _on_slot_cancelled() -> void:
+	var list := get_node_or_null("SaveSlotList")
+	if list != null:
+		list.queue_free()
 
 
 func _on_new() -> void:

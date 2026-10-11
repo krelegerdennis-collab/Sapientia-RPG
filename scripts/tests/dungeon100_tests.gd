@@ -274,28 +274,34 @@ func _strip_and_scroll_tests() -> void:
 			and (run_fuse.get("skills", []) as Array) == CD.skills_at(str(run_fuse.get("species", "")), 1))
 	var dennis: Dictionary = GameState.party[0]
 	var inv := {"spreuk_vuur": 1}
-	var taught := PA.use_item(inv, "spreuk_vuur", dennis)
-	check("Fire Scroll leert Dennis Fire, vult zijn MP en is op", taught["ok"] and (dennis["spells"] as Array).has("vuur")
-			and not inv.has("spreuk_vuur") and int(dennis["max_mp"]) >= 4 and int(dennis["mp"]) >= 4
-			and str(taught["text"]) == "Dennis learns Fire!")
+	var refused := PA.use_item(inv, "spreuk_vuur", dennis)
+	check("Dennis leert geen magie van een rol", not refused["ok"] and inv.has("spreuk_vuur")
+			and (dennis["spells"] as Array).is_empty() and str(refused["text"]) == "Dennis leert geen magie.")
+	var noor: Dictionary = GameState.party[1]
+	noor["max_mp"] = 0
+	noor["mp"] = 0
+	var taught := PA.use_item(inv, "spreuk_vuur", noor)
+	check("Fire Scroll leert Noor Fire, vult haar MP en is op", taught["ok"] and (noor["spells"] as Array).has("vuur")
+			and not inv.has("spreuk_vuur") and int(noor["max_mp"]) >= 4 and int(noor["mp"]) >= 4
+			and str(taught["text"]) == "Noor learns Fire!")
 	var again := {"spreuk_vuur": 1}
-	var second := PA.use_item(again, "spreuk_vuur", dennis)
+	var second := PA.use_item(again, "spreuk_vuur", noor)
 	check("een rol voor een spreuk die je al kent doet niets", not second["ok"] and int(again["spreuk_vuur"]) == 1
-			and (dennis["spells"] as Array).size() == 1 and int(dennis["max_mp"]) == 4)
-	var mp_before := int(dennis["max_mp"])
+			and (noor["spells"] as Array).size() == 1 and int(noor["max_mp"]) == 4)
+	var mp_before := int(noor["max_mp"])
 	var genees := {"spreuk_genees": 1}
-	var healed := PA.use_item(genees, "spreuk_genees", dennis)
-	check("Heal Scroll leert Heal zonder de MP-voorraad te verlagen", healed["ok"] and (dennis["spells"] as Array).has("genees")
-			and not genees.has("spreuk_genees") and int(dennis["max_mp"]) == mp_before)
+	var healed := PA.use_item(genees, "spreuk_genees", noor)
+	check("Heal Scroll leert Noor Heal (Grade 1 licht) zonder de MP-voorraad te verlagen", healed["ok"]
+			and (noor["spells"] as Array).has("genees") and not genees.has("spreuk_genees")
+			and int(noor["max_mp"]) == mp_before)
 	dennis["hp"] = 0
 	var bliksem := {"spreuk_bliksem": 1}
 	var ko := PA.use_item(bliksem, "spreuk_bliksem", dennis)
 	check("een bewusteloze held leert niets", not ko["ok"] and int(bliksem["spreuk_bliksem"]) == 1)
 	dennis["hp"] = int(dennis["max_hp"])
-	var noor: Dictionary = GameState.party[1]
 	var noor_rol := {"spreuk_bliksem": 1}
 	var noor_learn := PA.use_item(noor_rol, "spreuk_bliksem", noor)
-	check("Noor kan tijdens de run Lightning opnieuw leren", noor_learn["ok"] and (noor["spells"] as Array) == ["bliksem"]
+	check("Noor kan tijdens de run Lightning leren", noor_learn["ok"] and (noor["spells"] as Array).has("bliksem")
 			and int(noor["max_mp"]) >= 7)
 	check("een rol is in het veld te gebruiken", PA.item_usable_in_field("spreuk_vuur") and PA.item_block_reason("spreuk_vuur") == ""
 			and PA.item_effect_text("spreuk_vuur") == "Teaches the spell Fire.")

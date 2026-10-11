@@ -15,6 +15,7 @@ extends StaticBody2D
 ## 4 richtingen: omlaag, links, rechts, omhoog). Leeg = npc.png uit de scène.
 @export var sheet: Texture2D
 
+const ShopScreen := preload("res://scripts/ui/shop_screen.gd")
 const DIR_ROW := {
 	Vector2i.DOWN: 0,
 	Vector2i.LEFT: 1,
@@ -40,9 +41,27 @@ func interact(player: Node2D) -> void:
 	if "facing" in player:
 		facing = -player.facing
 		_update_sprite()
+	if event == "shop" and event_arg != "":
+		_open_shop(player)
+		return
 	if event != "" and Story.trigger(event, self, event_arg):
 		return
 	Dialog.show_lines(lines, npc_name, self)
+
+
+func _open_shop(player: Node2D) -> void:
+	if get_tree().current_scene.get_node_or_null("ShopScreen") != null:
+		return
+	if "input_locked" in player:
+		player.input_locked = true
+	var shop := ShopScreen.new()
+	shop.name = "ShopScreen"
+	shop.shop_id = event_arg
+	shop.closed.connect(func() -> void:
+		if is_instance_valid(player) and "input_locked" in player:
+			player.input_locked = false
+	)
+	get_tree().current_scene.add_child(shop)
 
 
 func story_refresh() -> void:

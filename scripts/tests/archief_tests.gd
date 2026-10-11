@@ -98,6 +98,7 @@ func _flood(l: PuzzleLogic, start: Vector2i) -> Dictionary:
 
 
 func _logic_tests() -> void:
+	check("Eerste Archief doel-level is 7", GD.EERSTE_ARCHIEF_DOEL == 7)
 	var room: Dictionary = PuzzleRooms.ROOMS[ROOM_ID]
 	check("puzzelkamer '%s' is geldig: %s" % [ROOM_ID, PuzzleLogic.validate(room)], PuzzleLogic.validate(room).is_empty())
 	var l := PuzzleLogic.from_room(room, ROOM_ID)

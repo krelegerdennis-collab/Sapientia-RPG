@@ -53,6 +53,8 @@ func check(label: String, ok: bool) -> void:
 
 
 func _run() -> void:
+	print("=== Deel S: vier save-slots ===")
+	_slot_tests()
 	print("=== Deel A: data ===")
 	_data_tests()
 	print("=== Deel B: gewone dungeonkamer ===")
@@ -299,6 +301,38 @@ func v19_shot(path: String) -> void:
 
 
 # ================================================================ A: data
+func _slot_tests() -> void:
+	GameState.new_game("Kees")
+	GameState.current_map = "res://scenes/maps/huis_wilgendal.tscn"
+	GameState.active_slot = 1
+	check("vier save-slots", GameState.SLOT_COUNT == 4)
+	check("slot 1 is het oude save-bestand", GameState.slot_path(1) == GameState.save_path)
+	check("slot 4 ligt naast slot 1", GameState.slot_path(4).ends_with("save_4.json") and GameState.slot_path(2) != "")
+	GameState.gold = 11
+	check("opslaan in slot 1", GameState.save_game(Vector2i(1, 2), Vector2i.DOWN))
+	GameState.active_slot = 2
+	GameState.gold = 22
+	check("opslaan in slot 2", GameState.save_game(Vector2i(3, 4), Vector2i.UP))
+	var raw := GameState.read_save(GameState.slot_path(2))
+	raw["saved_unix"] = float(raw.get("saved_unix", 0)) + 30.0
+	var f := FileAccess.open(GameState.slot_path(2), FileAccess.WRITE)
+	f.store_string(JSON.stringify(raw))
+	f.close()
+	var s1 := GameState.read_save(GameState.slot_path(1))
+	var s2 := GameState.read_save(GameState.slot_path(2))
+	check("slots blijven apart (goud 11 en 22)", int(s1.get("gold", 0)) == 11 and int(s2.get("gold", 0)) == 22
+			and int(s1.get("slot", 0)) == 1 and int(s2.get("slot", 0)) == 2)
+	check("nieuwste save is slot 2", GameState.newest_save_path() == GameState.slot_path(2))
+	var rec1 := GameState.slot_record(1)
+	check("lijst van slot 1 toont Kees", str(rec1.get("data", {}).get("player_name", "")) == "Kees" and not rec1.is_empty())
+	for s in [1, 2, 3, 4]:
+		var p := GameState.slot_path(s)
+		if p != "" and FileAccess.file_exists(p):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+	GameState.active_slot = 1
+	GameState.new_game("Dennis")
+
+
 func _data_tests() -> void:
 	var gh := DR.room("archief_golemhal")
 	var op := DR.room(WR.BOSS_ROOM)

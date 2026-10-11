@@ -117,11 +117,12 @@ func _core_rule_tests() -> void:
 # ================================================================ deel B
 func _data_tests() -> void:
 	var g := _boss_data()
-	var want_g := {"max_hp": 400, "atk": 33, "def": 22, "agi": 6, "mag": 16, "mdef": 18, "exp": 300, "gold": 120}
+	var want_g := {"max_hp": 360, "atk": 27, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "exp": 210, "gold": 84}
 	var ok := true
 	for k in want_g:
 		ok = ok and int(g.get(k, -1)) == int(want_g[k])
-	check("v0.15 Golem-baas (Lv 10 + Spark Sword +12; Forge par. 8, HP 340 -> 400): HP 400, ATK 33, DEF 22, SPD 6, MAG 16, MDEF 18, EXP 300, Goud 120", ok)
+	check("Golem-baas voor Dennis Lv 7 + Spark Sword: HP 360, ATK 27, DEF 15, SPD 6, MAG 11, MDEF 13, EXP 210, Goud 84", ok)
+	check("Eerste Archief mikt op level 7", GD.EERSTE_ARCHIEF_DOEL == 7)
 	check("kern blijft: elke 3e ronde, x0,4 / x2, Hamerslag x2,2; drempel nu 45",
 			int(g["core"]["cycle"]) == 3 and is_equal_approx(float(g["core"]["closed_mult"]), 0.4)
 			and is_equal_approx(float(g["core"]["open_mult"]), 2.0) and is_equal_approx(float(g["core"]["slam_power"]), 2.2)
@@ -161,13 +162,13 @@ func _data_tests() -> void:
 			if not m.get("boss", false):
 				fights += 1
 				for e in m.get("group", [m["enemy"]]):
-					exp_total += int(GD.apply_tier(GD.ENEMIES[e], int(DR.ROOMS[rid].get("tier", 0)))["exp"])
+					exp_total += int(GD.apply_archief_tier(GD.ENEMIES[e], int(DR.ROOMS[rid].get("tier", 0)))["exp"])
 	var lv := 1
 	while GD.exp_for_level(lv + 1) <= exp_total:
 		lv += 1
 	print("INFO  EXP voor de Golem (oefengevecht + 34 gevechten met tiers): %d -> Lv %d" % [exp_total, lv])
-	check("34 gevechten; Dennis is bij de Golem Lv 9-11 (%d EXP, Lv %d) = de doelgroep van de balans" % [exp_total, lv],
-			fights == 34 and lv >= 9 and lv <= 11)
+	check("34 gevechten; Dennis is bij de Golem Lv 7 (%d EXP, Lv %d)" % [exp_total, lv],
+			fights == 34 and lv == GD.EERSTE_ARCHIEF_DOEL)
 
 
 # ================================================================ deel C
@@ -257,38 +258,38 @@ const BOSS_BAG := [30, 30, 30, 25, 25, 25]
 
 func _balance_tests() -> void:
 	seed(2026)
-	# Dennis Lv 10 zoals het spel hem maakt
-	var d10 := _dennis(10)
-	print("INFO  Dennis Lv 10 (+Spark Sword): HP %d, ATK %d, DEF %d, SPD %d (EXP %d)"
-			% [d10["max_hp"], d10["atk"], d10["def"], d10["agi"], GD.exp_for_level(10)])
-	check("Dennis Lv 10 met Spark Sword: HP 123, ATK 53 (41+12), DEF 26, SPD 18",
-			int(d10["max_hp"]) == 123 and int(d10["atk"]) == 53 and int(d10["def"]) == 26 and int(d10["agi"]) == 18
-			and int(d10["level"]) == 10)
+	# Dennis Lv 7 zoals het spel hem maakt
+	var d7 := _dennis(7)
+	print("INFO  Dennis Lv 7 (+Spark Sword): HP %d, ATK %d, DEF %d, SPD %d (EXP %d)"
+			% [d7["max_hp"], d7["atk"], d7["def"], d7["agi"], GD.exp_for_level(7)])
+	check("Dennis Lv 7 met Spark Sword: HP 96, ATK 44 (32+12), DEF 20, SPD 15",
+			int(d7["max_hp"]) == 96 and int(d7["atk"]) == 44 and int(d7["def"]) == 20 and int(d7["agi"]) == 15
+			and int(d7["level"]) == 7)
 	var boss := _boss_data()
-	var min_open := roundi(roundi((float(d10["atk"]) - float(boss["def"]) / 2.0) * 0.85) * 2.0)
-	check("drempel 45: elke klap van Dennis Lv 10 op de open kern haalt hem (min. %d)" % min_open, min_open >= 45)
+	var min_open := roundi(roundi((float(d7["atk"]) - float(boss["def"]) / 2.0) * 0.85) * 2.0)
+	check("drempel 45: elke klap van Dennis Lv 7 op de open kern haalt hem (min. %d)" % min_open, min_open >= 45)
 	var weak_open := roundi((25.0 - float(boss["def"]) / 2.0) * 1.15 * 2.0)
 	check("drempel 45: een zwakke klap (ATK 25, bv. later Noor) haalt hem NIET (max. %d)" % weak_open, weak_open < 45)
 	var n := 1500
 	var res := {}
-	for L in [8, 10, 12]:
+	for L in [5, 7, 9]:
 		for pol in ["slim", "domweg", "nooit_kern"]:
 			var r := _rate(L, pol, n, BOSS_BAG)
 			res["%d_%s" % [L, pol]] = r
 			print("INFO  Lv %d %-10s winst %5.1f%%  rondes %4.1f  items %3.1f" % [L, pol, r["win"] * 100.0, r["rounds"], r["items"]])
-	check("Lv 10 (doel), slim spelen: wint >= 97%% (%.1f%%)" % (res["10_slim"]["win"] * 100.0), res["10_slim"]["win"] >= 0.97)
-	check("Lv 10: kost meerdere items (gem. %.1f, >= 3)" % res["10_slim"]["items"], res["10_slim"]["items"] >= 3.0)
-	check("Lv 10: gevecht <= 20 rondes (%.1f)" % res["10_slim"]["rounds"], res["10_slim"]["rounds"] <= 20.0)
-	check("Lv 8: zwaar maar te doen, slim 40-90%% (%.1f%%)" % (res["8_slim"]["win"] * 100.0),
-			res["8_slim"]["win"] >= 0.4 and res["8_slim"]["win"] <= 0.9)
-	check("Lv 12: wint >= 99%% (%.1f%%)" % (res["12_slim"]["win"] * 100.0), res["12_slim"]["win"] >= 0.99)
-	check("Lv 10: domweg aanvallen zonder genezen verliest meestal (%.1f%% < 10%%)" % (res["10_domweg"]["win"] * 100.0),
-			res["10_domweg"]["win"] < 0.1)
-	check("de kern negeren verliest altijd (Lv 8/10/12: %.1f / %.1f / %.1f%%)" % [res["8_nooit_kern"]["win"] * 100.0,
-			res["10_nooit_kern"]["win"] * 100.0, res["12_nooit_kern"]["win"] * 100.0],
-			res["8_nooit_kern"]["win"] == 0.0 and res["10_nooit_kern"]["win"] == 0.0 and res["12_nooit_kern"]["win"] == 0.0)
+	check("Lv 7 (doel), slim spelen: wint >= 97%% (%.1f%%)" % (res["7_slim"]["win"] * 100.0), res["7_slim"]["win"] >= 0.97)
+	check("Lv 7: kost meerdere items (gem. %.1f, >= 3)" % res["7_slim"]["items"], res["7_slim"]["items"] >= 3.0)
+	check("Lv 7: gevecht <= 20 rondes (%.1f)" % res["7_slim"]["rounds"], res["7_slim"]["rounds"] <= 20.0)
+	check("Lv 5: zwaar maar te doen, slim 40-90%% (%.1f%%)" % (res["5_slim"]["win"] * 100.0),
+			res["5_slim"]["win"] >= 0.4 and res["5_slim"]["win"] <= 0.9)
+	check("Lv 9: wint >= 99%% (%.1f%%)" % (res["9_slim"]["win"] * 100.0), res["9_slim"]["win"] >= 0.99)
+	check("Lv 7: domweg aanvallen zonder genezen verliest meestal (%.1f%% < 10%%)" % (res["7_domweg"]["win"] * 100.0),
+			res["7_domweg"]["win"] < 0.1)
+	check("de kern negeren verliest altijd (Lv 5/7/9: %.1f / %.1f / %.1f%%)" % [res["5_nooit_kern"]["win"] * 100.0,
+			res["7_nooit_kern"]["win"] * 100.0, res["9_nooit_kern"]["win"] * 100.0],
+			res["5_nooit_kern"]["win"] == 0.0 and res["7_nooit_kern"]["win"] == 0.0 and res["9_nooit_kern"]["win"] == 0.0)
 	# Info: met de kisten van Forge's plattegrond (Kaftschild DEF+3, Leren Kap DEF+1)
-	for L in [8, 10]:
+	for L in [5, 7]:
 		var hg := _dennis(L)
 		for arm in ["kaftschild", "leren_kap"]:
 			GameState.inventory[arm] = 1
@@ -307,8 +308,8 @@ func _balance_tests() -> void:
 			if _sim(hg, _boss_data(), "domweg", BOSS_BAG)[0]:
 				dwins += 1
 		print("INFO  Lv %d + Cover Shield + Leather Hood: domweg winst %.1f%%" % [L, dwins * 100.0 / n])
-		if L == 10:
-			check("Lv 10 met alle uitrusting: domweg aanvallen verliest nog steeds meestal (%.1f%% < 10%%)" % (dwins * 100.0 / n),
+		if L == 7:
+			check("Lv 7 met schild en kap: domweg aanvallen verliest nog steeds meestal (%.1f%% < 10%%)" % (dwins * 100.0 / n),
 					dwins < n / 10)
 	# Mech. Wachter (met Schild omhoog) per monsterniveau, Dennis op het level van die verdieping
 	var w: Dictionary = GD.ENEMIES["mech_wachter"]
@@ -340,9 +341,9 @@ func _balance_tests() -> void:
 	GameState.new_game("Dennis")
 
 
-## Vijand op monsterniveau t: de echte functie van het spel (v0.14 GameData.apply_tier).
+## Vijand op monsterniveau t in het Eerste Archief (doel-level 7).
 static func _tier(e: Dictionary, t: int) -> Dictionary:
-	return GD.apply_tier(e, t)
+	return GD.apply_archief_tier(e, t)
 
 
 ## Dennis tegen één Mech. Wachter (zelfde regels als battle.gd, met Schild omhoog).
