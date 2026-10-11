@@ -35,6 +35,11 @@ position = Vector2(88, 56)
 script = ExtResource("7_prop")
 bron = "voortgang"
 
+[node name="Echo" type="StaticBody2D" parent="Objects"]
+position = Vector2(72, 40)
+script = ExtResource("7_prop")
+bron = "echo_grot"
+
 [node name="Player" parent="Objects" instance=ExtResource("2_player")]
 position = Vector2(24, 56)
 

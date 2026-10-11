@@ -4,8 +4,9 @@ extends Node
 ##   Deel A: generator als data (determinisme, alle 100 verdiepingen geldig, ingang -> trap omlaag
 ##           loopbaar op de ECHTE botsing, slots voor monsters/kisten/rustpunt/baas, kamerdata).
 ##   Deel B: GameState (velden, save/load, reset buiten de grot) en de ingang op de wereldkaart.
-##   Deel C: echte scènes: wereldkaart -> verdieping 1 -> (lopend) trap omlaag -> 2 -> ladder omhoog
-##           -> 1 -> wereldkaart; zelfde seed = zelfde verdieping; opslaan/laden in de grot.
+##   Deel C: echte scènes: de wereldkaart start de grot niet (dat doet ECHO); daarna verdieping 1
+##           -> (lopend) trap omlaag -> 2 -> ladder omhoog -> 1 -> wereldkaart; zelfde seed =
+##           zelfde verdieping; opslaan/laden in de grot.
 ## Zit niet in de export (scripts/tests/*).
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
@@ -16,6 +17,7 @@ const GD := preload("res://scripts/data/game_data.gd")
 const Gear := preload("res://scripts/data/grade_gear.gd")
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const SD := preload("res://scripts/data/story_data.gd")
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const SEEDS := [1, 42, 20240607, 987654321, 2147483647]
@@ -563,7 +565,18 @@ func _scene_tests() -> void:
 	player().place_at(et + D, U)
 	await pframes(2)
 	await walk("move_up", 1)
-	check("op de ingang stappen -> Deep Cave", await wait_scene("Dungeon100"))
+	var geweigerd := await wait_until(func():
+		return scene().name == "Wereldkaart" and Dialog.is_open and str(Dialog.text_label.text) == EchoGrot.ZIN_WERELD \
+				and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active()
+	, 3.0)
+	check("op de ingang stappen start de grot niet en wijst naar ECHO", geweigerd)
+	for _sluit in 8:
+		if not Dialog.is_open:
+			break
+		Dialog.advance()
+		await pframes(2)
+	GameState.change_map(DUNGEON, "omhoog")
+	check("de grot-scène opent daarna wel", await wait_scene("Dungeon100"))
 	await wait_fade()
 	var r := scene()
 	check("verdieping 1 en een gekozen seed: %d / %d" % [GameState.dungeon100_floor, GameState.dungeon100_seed],
@@ -619,10 +632,8 @@ func _scene_tests() -> void:
 	check("buiten de grot: verdieping 0, speler bij de ingang op de wereldkaart %s" % tile(),
 			GameState.dungeon100_floor == 0 and tile() == Vector2i((wsp.position / 16.0).floor()) and GameState.dungeon100_seed == 0
 			and not GameState.dungeon100_run_active())
-	# opnieuw naar binnen: een nieuwe run kiest een nieuwe seed
-	player().place_at(et + D, U)
-	await pframes(2)
-	await walk("move_up", 1)
+	# de tegel start geen tweede run; de scène zelf wel (zoals ECHO dat doet)
+	GameState.change_map(DUNGEON, "omhoog")
 	await wait_floor(1)
 	var seed2: int = GameState.dungeon100_seed
 	check("opnieuw binnen: nieuwe run, verdieping 1 met een nieuwe seed (%d)" % seed2,
