@@ -71,6 +71,34 @@ Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af 
 - [ ] Worldmap 3 ontgrendelt na afronden van Worldmap 2
 - [ ] Visuele feedback (poort, portaal of magisch effect)
 
+### Dungeon Warpers (begin, midden en eind)
+
+In elke dungeon (Archief 1 tot en met 6) staan warpers op vaste plekken.
+
+- [ ] Midden van de dungeon: warper na de mini-baas
+- [ ] Eind van de dungeon: warper na de eindbaas
+- [ ] Geldt voor alle Archieven, inclusief Archief 1 (het Eerste Archief)
+- [ ] Geldt ook voor de Diepe Grot (na de mini-baas en na verdieping 100)
+  - [ ] Frequentie in de Diepe Grot nog open (elke 20 verdiepingen een warper?)
+
+Warp-bestemming: de party gaat in één stap direct naar de worldmap of het dichtstbijzijnde dorp, zonder eerst terug naar de dungeon-ingang.
+
+- [ ] Warper brengt de party direct naar de worldmap of het dichtstbijzijnde dorp
+- [ ] De speler hoeft niet eerst terug naar de ingang
+- [ ] Eén stap: warper naar worldmap
+
+Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en quit-prompts. Die geldt voor de midden- en de eindwarper.
+
+- [ ] Waarschuwingsscherm: "Weet je zeker dat je de dungeon wilt verlaten?"
+  - [ ] Optie: "Ja, warpen naar worldmap"
+  - [ ] Optie: "Nee, blijf in de dungeon" (annuleren, de party blijft staan)
+- [ ] Voorkomt dat een speler per ongeluk de dungeon uitwarpt
+- [ ] Waarschuwingsstijl passend bij de game-UI (vergelijkbaar met save- en quit-prompts)
+- [ ] Werkt op zowel de midden- als de eindwarper
+
+- [ ] Universele warper-stijl, of een variant per Archief-thema
+  - [ ] Die keuze is nog open
+
 ### Act-koppeling
 
 - [ ] Act 1 = Worldmap 1 (start-eiland, Eerste Archief en Leven)
