@@ -1,13 +1,16 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`538e906`), Godot 4.7.2, threads uit.
+Web-build van `main` (`71c7bdc`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`a4f5f3f`, export van `4ae7a4a`):
-- In de Diepe Grot staan warpers op verdieping 1, 50 en 99. Een warper gaat open zodra je die verdieping in deze run bereikt. Met A kies je een andere open warper. Vóór de sprong vraagt het spel of je door wilt. Annuleren laat je staan. Een warper die je nog niet bereikt hebt, staat niet in de lijst. De open warpers gaan mee in de save van de run.
+Nieuw in deze build, bovenop de vorige web-build (`6226cef`, export van `538e906`):
+- Kortere intro. Geen wakker-cutscene: je staat meteen naast het bed. Opa vraagt eerst wat je zegt: "Goedemorgen, Opa." of "Waarom blijven de Archieven dicht?". Daarna hetzelfde vervolg: de mantel, MENU > Uitrusting > Harnas, en daarna water en kruiden.
 - Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `538e906`:
+- In de Diepe Grot staan warpers op verdieping 1, 50 en 99. Een warper gaat open zodra je die verdieping in deze run bereikt. Met A kies je een andere open warper. Vóór de sprong vraagt het spel of je door wilt. Annuleren laat je staan. Een warper die je nog niet bereikt hebt, staat niet in de lijst. De open warpers gaan mee in de save van de run.
 
 Nog van de build van `4ae7a4a`:
 - Titelscherm links, onder Betatest: **Eindstaat**. Eigen bestand (`save_eindstaat.json`), niet slot 1–4.
