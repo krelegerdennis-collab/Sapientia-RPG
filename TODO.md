@@ -17,7 +17,6 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
 - [ ] 3 grote hoofdeilanden opzetten, elk met 2 Archieven (totaal 6 Archieven)
 - [ ] Worldmap 1 = start-eiland
   - [ ] Archief 1: Eerste Archief (bij Opa), startpunt van het verhaal
-  - [x] Archief 2: Archief van Leven
   - Bevat Dennis' huis en Wilgendal (eerste dorp met shops)
 - [ ] Worldmap 2 = tweede eiland
 
@@ -74,16 +73,14 @@ In elke normale dungeon en in elk Archief (Archief 1 tot en met 6) staan warpers
 - [ ] Eind van de dungeon: warper na de eindbaas
 - [ ] Geldt voor elke normale dungeon, niet alleen de Diepe Grot
 - [ ] Geldt voor alle Archieven (Archief 1 tot en met 6), inclusief Archief 1 (het Eerste Archief)
-- [x] Diepe Grot-warpers bouwen op de frequentie hieronder
-  Staat in de grot-branch: warpers op 1, 25, 50, 75 en 99. Verdieping 1 zonder waarschuwing. Verdieping 25, 50 en 75 met waarschuwing en annuleren, naar de worldmap. Verdieping 99 naar de worldmap met waarschuwing.
 
-  **CANON – niet wijzigen zonder overleg.**
+**CANON – niet wijzigen zonder overleg.**
 
-  Warpers op verdieping 1, 25, 50, 75 en 99.
-  Verdieping 1: start, geen waarschuwing.
-  Verdieping 25, 50 en 75: tussen-warpers met waarschuwing en annuleren.
-  Verdieping 99: eind-warp naar de worldmap, met waarschuwing en annuleren.
-  Bestemming: direct naar de worldmap.
+Warpers op verdieping 1, 25, 50, 75 en 99.
+Verdieping 1: start, geen waarschuwing.
+Verdieping 25, 50 en 75: tussen-warpers met waarschuwing en annuleren.
+Verdieping 99: eind-warp naar de worldmap, met waarschuwing en annuleren.
+Bestemming: direct naar de worldmap.
 
 Warp-bestemming voor de andere dungeons en Archieven: de party gaat in één stap direct naar de worldmap of het dichtstbijzijnde dorp, zonder eerst terug naar de dungeon-ingang. Voor de Diepe Grot geldt de bestemming hierboven: direct naar de worldmap.
 
@@ -149,38 +146,9 @@ Waarom Archief 1 naar Archief 2 wijst: de Oude Mensheid ontwierp de zes Archieve
 - [ ] Leven dat niet stopt met groeien; alles is in beweging
 - [ ] Visueel contrast met het grauwe Eerste Archief
 
-#### Verhaallijn
-
-- [x] In het spel zetten: Dennis volgt het noodsignaal van de kern van Archief 1 naar Archief 2. Sapientia heeft het signaal gemanipuleerd; Dennis denkt dat hij moet volgen, maar Sapientia leidt hem
-  Bord in de kas-ingang. De kas gaat open op de bestaande golem-vlag.
-- [x] In het spel zetten: Lotte, priesteres van de Orde van de Stille Vlam, gecorrumpeerd door Sapientia, als mini-baas halverwege
-
-#### Lotte's entree (midden van de dungeon, verdieping 2)
-
-- [x] Lotte verschijnt als mini-baas op verdieping 2 van 4
-- [x] Gecorrumpeerd door Sapientia, met visuele glitch-effecten
-  Placeholder-tint paars in het gevecht. Geen shader.
-- [x] Gevecht bouwen: Dennis en één Codex-monster tegen Lotte
-  De speler kiest één gevangen Codex-monster. Heeft de speler er nog geen, dan vecht een tijdelijke Mosslijm mee (leermoment).
-- [x] Bij verlies is het een story death, geen game over
-  - [x] Cutscene bouwen: Lotte breekt zelf de glitch van Sapientia
-  - [x] Ze beseft wat er gebeurd is en sluit zich aan bij de party
-  - [x] Of de speler wint of verliest: Lotte sluit aan
-- [x] Na het gevecht sluit Lotte aan als vast party-lid, op hetzelfde level als Dennis
-- [x] Daarna verdieping 3 en 4 met Dennis, Lotte en het gekozen Codex-monster. Mosslijm is alleen het leermoment
-  Het gekozen monster loopt mee als Codex-volger. Een tijdelijke Mosslijm blijft niet. TODO(design): de veldparty kent geen vierde held.
-
 #### Lotte's stats en skills bij aansluiting
 
 Lotte's start-level: hetzelfde level als Dennis op dat moment. Gelijkwaardige metgezel, geen hulpje. Gebalanceerd ongeacht speelsnelheid.
-
-- [x] Klasse: Priester
-  Class-id blijft Priest, zoals Warrior en Mage. De dialoog zegt priester.
-- [x] Elementen: Licht (heal en buffs) en IJs (aanval)
-- [x] Startuitrusting: priester-standaard (staf en robes)
-  Bestaande items: eiken_staf en reisgewaad.
-- [x] Startspreuken: Grade 1 Licht (heal) en Grade 1 IJs (aanval)
-  genees en rijp.
 
 #### Puzzel-mechaniek: groeiende platen
 
@@ -192,13 +160,7 @@ B) Tegen-platen: krimpen bij aanraking. De speler moet ze vermijden om ruimte te
 
 C) Licht-platen: groeien alleen als Lotte's Licht-magie erop schijnt. Lotte heeft daarmee een rol in puzzels, niet alleen in gevecht.
 
-- [x] Kernmechaniek: planten of platen die groeien als je ze activeert
-- [x] Groeiende platen vormen bruggen, plateaus en paden
-- [x] De speler moet de juiste volgorde vinden om door te komen
 - [ ] Combinaties met bestaande puzzel-elementen (kasten en hendels uit Archief 1)
-- [x] Moeilijkheid per verdieping opbouwen
-- [x] De nieuwe mechanic introduceren op verdieping 1, tutorial-achtig
-- [x] Verdieping 3: ketting-platen, tegen-platen en licht-platen implementeren
 
 #### Baas: De Genezer (verdieping 4)
 
@@ -208,38 +170,12 @@ De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmomen
 
 Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
-- [x] Baasgevecht De Genezer bouwen, met de HP-trek hierboven
-  TODO(design): HP 220. Opening 30%. Daarna 8–12% en evenveel heal.
-- [x] Na het verslaan de kern van Archief 2 opnemen
-  Item levenskern, zelfde kern-patroon.
-- [x] De kern-zin tonen na De Genezer
-  Letterlijk: In stilte ligt vrede. Ik corrigeer wat groeit.
-
 #### Cutscene na Archief 2: de World Warper
 
-- [x] Na het verslaan van De Genezer start een cutscene
-  Dialoog in de kas, daarna de hub archief_2_warper. De oude IVA-hub (PR 30) blijft op bewaker:archief_v2_trapzaal/m2.
-- [x] Een zwevend hightech gebouw verschijnt: de World Warper
-  In de tekst, en als placeholder in de hub. Niet als gebouw op de wereldkaart.
-- [x] De party wordt automatisch gewarped naar de World Warper
-  change_map naar archief_2_warper, spawn ingang.
 - [ ] De World Warper is de hub om tussen de 3 hoofdeilanden te reizen
   Eerste kamer wel: opslaan, terug naar Wilgendal of de Archief-ingang. TODO(design): WM2 en WM3 bestaan niet. De IVA-hub van PR 30 is niet hernoemd.
-- [x] Eerste introductie van het warp-systeem in het verhaal
-  Warp-pad in de ECHO-hub. Geen extra kamers.
 - [ ] Vanaf hier kan de speler terug naar eerder bezochte eilanden
   Alleen Wilgendal en de ingang van het Eerste Archief. Geen filter op bezoek, geen WM2/WM3.
-- [x] De cutscene maakt duidelijk wat de World Warper is en doet
-  ECHO legt de warprelay, de Hanger en Sapientia uit. Niet dat ECHO een onderzoeker is.
-
-#### Dungeon-opbouw (4 verdiepingen)
-
-- [x] Verdieping 1 is speelbaar: overwoekerde kas op de wereldkaart, alleen na het Eerste Archief, met één groei-plaat (hendel, daarna zaad, scheut, volgroeid)
-- [x] Verdieping 1: entree, eerste groei-plaatpuzzel, zichtbare monsters
-- [x] Verdieping 2: Lotte als mini-baas (Dennis en één gekozen Codex-monster, anders tijdelijke Mosslijm), daarna sluit ze aan
-- [x] Verdieping 3: ketting-platen, tegen-platen en licht-platen, mini-baas De Wurger
-  TODO(design): Wurger HP 160, ATK 16, DEF 6.
-- [x] Verdieping 4: aanloop naar De Genezer, het baasgevecht, de kern-zin en de World Warper-cutscene
 
 #### Content en art
 
@@ -256,8 +192,6 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 #### Codex
 
 - [ ] Nieuwe Codex-monsters voor Archief 2 (leventhema)
-- [x] Lotte-gevecht bouwen met één gekozen Codex-monster, of een tijdelijke Mosslijm als de speler er nog geen heeft
-  Mosslijm staat in de Codex. Het bestiarium noemt hem Moss Slime. De tekst zegt Mosslijm.
 
 ## Content
 
@@ -275,17 +209,6 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 **CANON – niet wijzigen zonder overleg.**
 
 De Diepe Grot is een simulatie van Sapientia. Doel: menselijke doorzettingskracht meten. Wie 100 verdiepingen haalt is een "kandidaat". Dennis en de party zijn niet de eersten en niet de laatsten. Dat verklaart de start op level 1, zonder uitrusting en zonder echt verhaal.
-
-**CANON – niet wijzigen zonder overleg.**
-
-- [x] Verdieping 25, De Schaduw van H-6: "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6."
-  Staat in de grot-branch.
-- [x] Verdieping 50, De Cyclus: "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door."
-  Staat in de grot-branch.
-- [x] Verdieping 75, De Rechter: "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte."
-  Staat in de grot-branch.
-- [x] Verdieping 99, De Stem: "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht."
-  Staat in de grot-branch.
 
 **CANON – niet wijzigen zonder overleg.**
 
@@ -312,12 +235,6 @@ Voorbeelden, geen gekozen accessoire: "Hanger-echo" (kleine teleport in gevecht)
 
 - [ ] Gerrits quest
   Dialoog, Gerrit, zaad na Noor, molen-save en één Zingend Meel per bezoek staan in de code. De scène "zacht gezang" nog niet.
-
-- [x] Gerrit de Molenaar in Wilgendal
-- [x] Zaad in het Donker Woud na Noor's aansluiting
-- [x] Molen als save point (opslaan, rusten, party wisselen)
-- [x] Zingend Meel, één per bezoek
-- [x] Dialoog ingevuld
 
 NPC: Gerrit de Molenaar in Wilgendal. Quest: Het Zingende Graan. Thema: kleine menselijke verhalen tussen grote gebeurtenissen.
 
@@ -461,12 +378,10 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 
 ### Eerste binnenkomst: Hanger en Sapientia
 
-- [x] Bij de eerste keer binnen: visueel effect
-  Eerste versie. Paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn voorlopig. Geen H-6-onthulling.
-  - [ ] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
-    Open ontwerp. De code gloeit roze (canon: roze = de Stroom). De hal is paars.
-  - [ ] Systemen komen online door het Hanger-signaal
-    De scène speelt één keer. Losse systemen gaan niet aan.
+- [ ] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
+  Open ontwerp. De code gloeit roze (canon: roze = de Stroom). De hal is paars.
+- [ ] Systemen komen online door het Hanger-signaal
+  De scène speelt één keer. Losse systemen gaan niet aan.
 - [ ] Dialoogscène
   - [ ] Dennis toont de Hanger (eerste keer expliciet in het verhaal)
     De scène toont een roze Hanger. Dennis steekt hem niet apart op.
@@ -485,52 +400,27 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 
 ### Interieur
 
-- [x] Half functioneel: centrale hal en meerdere kamers
-  Eerste versie. Placeholder-kaarten, tegels 16×16. Open: exterieur, hal, warp_ring, hanger_nis. codex_nis en sapientia_schot bestaan en blijven dicht.
 - [ ] Kamers bouwen volgens de lijst hieronder
   codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand. De kamers uit de lijst staan in world_warper/kamers. Ze gaan open met vlag warper_hub_open, die standaard uit staat en nog niet aan een kern hangt.
 
 **CANON – niet wijzigen zonder overleg.**
 
-Direct open na Archief 2:
-
-- [x] De Hal: warp-platform, ECHO in de main PC, party loopt rond
-  De Hal staat en gaat open met vlag warper_hub_open. Die staat standaard uit.
-- [x] De Rustkamer: save, heal, party wisselen
-  De Rustkamer staat en gaat open met vlag warper_hub_open. Die staat standaard uit.
-- [x] ECHO's Kamer: questvoortgang
-  ECHO's Kamer staat en gaat open met vlag warper_hub_open. Die staat standaard uit.
-
 Per act:
 
-- [x] Act 2: De Beeldkamer, bestiarium en Codex
-  De Beeldkamer opent bestiarium en Codex vanaf act 2.
-- [x] Act 3: De Trainingshal, oefengevechten
-  De Trainingshal doet een oefengevecht zonder buit vanaf act 3.
 - [ ] Act 4: De Werkplaats, crafting
   De kamer staat, maar is leeg.
 - [ ] Act 5: De Handelskamer, endgame-shops
   De kamer staat, maar is leeg.
-- [x] Act 6: De Kern, H-6 verhaal-eindpunt
-  De Kern toont één zin dat het H-6-verhaal hier eindigt, vanaf act 6, zonder nieuwe onthulling.
 
 Eerste versie, nog niet de kamers hierboven:
 
-- [x] Centrale hal met warp-platform (hoofdfunctie)
-  Eerste versie. De hal opent de warp-UI. warp_ring is een aparte kamer: een rechthoek van paneeltegels, geen cirkel.
 - [ ] Paars als signature kleur, in lijn met het Codex Monument
   Panelen en de hal zijn paars. De Hanger in de scène is roze.
 - [ ] Hologrammen, schermen en tech-details
   Placeholder-hologram in de eerste-bezoekscène en bij IVA. Geen echte schermen.
-- [x] Alle party-leden en Codex-monsters lopen vrij rond in het gebouw
-  Eerste versie, in de hal. Placeholders uit party en codex_pages. Geen loop-animatie.
 
 ### Bewoners van de hub
 
-- [x] Huidige party-leden lopen rond (Dennis, Noor, Lotte, en latere leden)
-  Eerste versie. Placeholders uit GameState.party, bij het laden van de hal. Geen loop-animatie.
-- [x] Gevangen Codex-monsters lopen rond
-  Eerste versie. Placeholders uit codex_pages. Geen loop-animatie.
 - [ ] Nieuwe party-leden voegen zich toe zodra ze aansluiten
   refresh() leest de party bij het laden van de hal. Midden in de kamer werkt dat niet live bij.
 
@@ -553,14 +443,6 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 ### Warp-systeem
 
-- [x] Wereldkaart-view opent bij gebruik van het warp-platform
-  Eerste versie, vanuit de hal, in twee stappen. Landing op de wereldkaart is de bestaande spawn van_dorp.
-- [x] Eerste keuze: welke worldmap (WM1, WM2 of WM3)
-  Eerste versie. WM2 en WM3 zijn zichtbaar en vergrendeld. Alleen WM1 is open.
-- [x] Tweede keuze: welk dorp op die worldmap
-  Eerste versie op WM1: wereldkaart (van_dorp), Wilgendal (zuid_ingang), Esdoorn (zuid_ingang).
-- [x] Alleen ontgrendelde worldmaps zijn selecteerbaar
-  Eerste versie. Alleen WM1. WM2 en WM3 tonen Vergrendeld.
 - [ ] Alleen ontgrendelde dorpen zijn selecteerbaar
   Het bezoek-filter ontbreekt. De drie WM1-plaatsen zijn altijd kiesbaar.
 - [ ] Visuele stijl: paars, holografisch, sciencefiction
@@ -576,31 +458,17 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 ### Functionaliteit in de World Warper
 
-- [x] Opslaan (save point)
-  Eerste versie. Nederlandse bevestiging: Opslaan?, Ja, Nee, Opgeslagen. Schrijft GameState.save_game(Vector2i(0, 0), Vector2i(0, 1)).
 - [ ] Party kiezen en wisselen
   Kijklijst Gezelschap: naam en niveau. Wisselen ontbreekt; er is geen API.
 - [ ] Questvoortgang via de AI-gids
   IVA heeft vier vaste stappen (world_warper_guide_0 tot en met 3). Geen questvoortgang.
-- [x] Party-leden en Codex-monsters lopen vrij rond
-  Eerste versie. Placeholders uit party en codex_pages, in de hal. Geen loop-animatie.
 - [ ] Latere kamers unlocken per act: De Beeldkamer, De Trainingshal, De Werkplaats, De Handelskamer, De Kern
   De deuren naar codex_nis en sapientia_schot blijven dicht.
-- [x] Bestiarium en Codex in De Beeldkamer (Act 2)
-  De Beeldkamer opent bestiarium en Codex vanaf act 2.
 
 ### Audio
 
-- [x] Ambient tech-muziek (rustig, mysterieus, sciencefiction)
-  Eerste versie. Aanroep ww_ambient. Geen bestand, geen manifest-entry, blijft stil.
-- [x] Hum als achtergrondgeluid (constante lage toon)
-  Eerste versie. Aanroep ww_hum. Geen bestand, geen manifest-entry, blijft stil.
-- [x] Warp-geluid bij het activeren van het platform
-  Eerste versie. Aanroep ww_warp. Geen bestand, geen manifest-entry, blijft stil.
 - [ ] Geluid bij de eerste Hanger-activatie
   Bij hanger_activated gaat ww_sapientia_glitch af. Een eigen Hanger-geluid ontbreekt, en ook dat blijft stil.
-- [x] Sapientia-stem of glitch-geluid voor de dreigingsscène
-  Eerste versie. Aanroep ww_sapientia_glitch. Geen bestand, geen manifest-entry, blijft stil.
 - [ ] Stem of hologramgeluid van de AI-gids
 
 ### Visuals en art
