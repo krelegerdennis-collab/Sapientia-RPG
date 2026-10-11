@@ -1,0 +1,7 @@
+# PvP-placeholders voor RPG ART
+# De UI tekent gekleurde blokken met het woord PLACEHOLDER.
+# Dit bestand hoort bij pvp/ en vervangt geen lijst buiten deze map.
+
+pvp_portret_dennis.png    32x32    Portret Dennis in het PvP-gevecht
+pvp_portret_noor.png      32x32    Portret Noor in het PvP-gevecht
+pvp_portret_lotte.png     32x32    Portret Lotte in het PvP-gevecht

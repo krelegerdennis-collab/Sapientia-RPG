@@ -261,6 +261,7 @@ func _ready() -> void:
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
 	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
 	# De Spiegel (Archief 4): of  godot -- --spiegeltest [--shots=/pad/map]
+	# Vriendenmodus: of  godot -- --pvptest  (pvp/tests/pvp_tests.gd).
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -289,7 +290,8 @@ func _ready() -> void:
 			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
 			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
-			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"]]:
+			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
+			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
