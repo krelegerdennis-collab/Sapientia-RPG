@@ -61,7 +61,7 @@ func _run() -> void:
 	await _world_tests()
 	print("=== Deel D: Golem (opslaan/laden ertussen) ===")
 	await _golem_tests()
-	print("=== Deel E: De Wortelkoning ===")
+	print("=== Deel E: The Root King ===")
 	await _woud_tests()
 	print("=== Deel F: oude save, laden, verslagen baas ===")
 	await _misc_tests()
@@ -302,10 +302,10 @@ func v19_shot(path: String) -> void:
 func _data_tests() -> void:
 	var gh := DR.room("archief_golemhal")
 	var op := DR.room(WR.BOSS_ROOM)
-	check("baaskamers (Golemhal, Open plek) zetten geen checkpoint (\"checkpoint\": false + baas-monster)",
+	check("baaskamers (Golem Hall, Clearing) zetten geen checkpoint (\"checkpoint\": false + baas-monster)",
 			gh.get("checkpoint", true) == false and op.get("checkpoint", true) == false
 			and DungeonRoomScript.is_boss_room(gh) and DungeonRoomScript.is_boss_room(op))
-	check("kamers voor de baas (Bibliotheek, Sporenkring) wel: geen baas, geen \"checkpoint\": false",
+	check("kamers voor de baas (Library, Spore Ring) wel: geen baas, geen \"checkpoint\": false",
 			not DungeonRoomScript.is_boss_room(DR.room("archief_bibliotheek")) and DR.room("archief_bibliotheek").get("checkpoint", true)
 			and not DungeonRoomScript.is_boss_room(DR.room("woud_sporenkring")) and DR.room("woud_sporenkring").get("checkpoint", true))
 	var bosses := []
@@ -314,11 +314,11 @@ func _data_tests() -> void:
 			bosses.append(e[0])
 	check("alle baaskamers in de data: %s (alleen deze twee)" % [bosses], bosses == ["archief_golemhal", WR.BOSS_ROOM])
 	check("tekst Nederlands: 'Je ontwaakt voor de deur...' / 'Je ontwaakt waar je binnenkwam...'",
-			GameState.RESPAWN_LINES_BOSS[0] == "Je ontwaakt voor de deur..." and GameState.RESPAWN_LINES[0] == "Je ontwaakt waar je binnenkwam...")
+			GameState.RESPAWN_LINES_BOSS[0] == "You wake before the door..." and GameState.RESPAWN_LINES[0] == "You wake where you came in...")
 	GameState.new_game("Dennis")
 	check("nieuw spel: geen checkpoint; game over-tekst = de oude ('wakker bij het begin')",
 			GameState.checkpoint.is_empty() and not GameState.has_checkpoint()
-			and GameState.defeat_text(false) == "GAME OVER\nJe wordt wakker bij het begin.")
+			and GameState.defeat_text(false) == "GAME OVER\nYou wake up back at the start.")
 
 
 # ================================================================ B: gewone kamer
@@ -346,8 +346,8 @@ func _room_tests() -> void:
 	r.start_monster_battle(r.monsters[0])
 	check("gevecht in de Gang gestart (geen baas)", await wait_scene("Battle") and not GameState.pending_boss)
 	var over := await lose_battle()
-	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nJe ontwaakt waar je binnenkwam...")
-	check("na game over terug in de Gang (niet Wilgendal)", await wait_scene("ArchiefV1Gang"))
+	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nYou wake where you came in...")
+	check("na game over terug in de Gang (niet Willowdale)", await wait_scene("ArchiefV1Gang"))
 	await pframes(3)
 	check("uitslag = lose", GameState.last_battle_result == "lose")
 	check("op de ingang van de kamer %s (nu %s), kijkt omhoog" % [sp[0], tile()], tile() == sp[0]
@@ -359,7 +359,7 @@ func _room_tests() -> void:
 			and int(GameState.party[0]["exp"]) == exp0 and not GameState.story_flags.has("test_na_checkpoint"))
 	check("alle monsters van de kamer staan er weer (%d)" % scene().monsters.size(), scene().monsters.size() == n_mon)
 	var line := await respawn_line()
-	check("bericht: '%s'" % line, line == "Je ontwaakt waar je binnenkwam...")
+	check("bericht: '%s'" % line, line == "You wake where you came in...")
 	check("automatisch opgeslagen na het ontwaken (reden respawn)", GameState.last_autosave_reason == "respawn"
 			and GameState.read_save(GameState.autosave_path).get("map") == GANG)
 	check("checkpoint blijft dezelfde (Gang, ingang)", GameState.checkpoint.get("map") == GANG and cp_tile() == sp[0])
@@ -401,7 +401,7 @@ func _world_tests() -> void:
 	setup_game(3)
 	GameState.story_step = SD.KLAAR
 	var r := await enter(WORLD, "van_dorp")
-	check("op de wereldkaart (net buiten Wilgendal)", r != null)
+	check("op de wereldkaart (net buiten Willowdale)", r != null)
 	if r == null:
 		return
 	var start := tile()
@@ -417,12 +417,12 @@ func _world_tests() -> void:
 	var over := await lose_battle()
 	GameState.debug_force_group = []
 	check("GAME OVER gezien", over.begins_with("GAME OVER"))
-	check("terug op de wereldkaart (niet in Wilgendal)", await wait_scene("Wereldkaart"))
+	check("terug op de wereldkaart (niet in Willowdale)", await wait_scene("Wereldkaart"))
 	await pframes(3)
 	check("op de plek waar je de kaart binnenkwam %s (nu %s)" % [start, tile()], tile() == start)
 	check("vol HP/MP, goud van toen (%d, geen helft kwijt)" % GameState.gold, full_hp_mp() and GameState.gold == gold0)
 	var line := await respawn_line()
-	check("bericht: '%s'" % line, line.begins_with("Je ontwaakt"))
+	check("bericht: '%s'" % line, line.begins_with("You wake"))
 	await close_dialog()
 
 
@@ -433,9 +433,9 @@ func _golem_tests() -> void:
 	await freeze_monsters(r)
 	# naar de Bibliotheek (ingang zuid, zoals vanuit de Voorhal)
 	r = await enter(BIEB, "zuid")
-	check("in de Bibliotheek (kamer voor de Golem)", r != null)
+	check("in de Library (kamer voor de Golem)", r != null)
 	var sp := spawn_of("archief_bibliotheek", "zuid")
-	check("checkpoint = ingang van de Bibliotheek %s, kijkt naar de golemdeur (omhoog)" % [sp[0]],
+	check("checkpoint = ingang van de Library %s, kijkt naar de golemdeur (omhoog)" % [sp[0]],
 			GameState.checkpoint.get("map") == BIEB and cp_tile() == sp[0] and GameState.checkpoint.get("facing") == [0, -1])
 	var gold0 := GameState.gold
 	var lv0 := int(GameState.party[0]["level"])
@@ -443,23 +443,23 @@ func _golem_tests() -> void:
 	player().place_at(Vector2i(5, 3), Vector2i.UP)
 	await frames(2)
 	await walk("move_up", 1)
-	check("door de golemdeur -> Golemhal", await wait_scene("ArchiefGolemhal"))
+	check("door de golemdeur -> Golem Hall", await wait_scene("ArchiefGolemhal"))
 	await wait_fade()
-	check("de Golemhal (baaskamer) zet GEEN checkpoint: nog steeds de Bibliotheek", GameState.checkpoint.get("map") == BIEB
+	check("de Golem Hall (baaskamer) zet GEEN checkpoint: nog steeds de Library", GameState.checkpoint.get("map") == BIEB
 			and cp_tile() == sp[0])
 	# opslaan in de Golemhal, iets veranderen, en weer laden (Doorgaan)
 	GameState.gold += 300
 	var saved_gold := GameState.gold
-	check("opgeslagen in de Golemhal (met checkpoint in de save)", GameState.save_game(tile(), player().facing)
+	check("opgeslagen in de Golem Hall (met checkpoint in de save)", GameState.save_game(tile(), player().facing)
 			and GameState.read_save().get("checkpoint", {}).get("map") == BIEB)
 	if FileAccess.file_exists(GameState.autosave_path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(GameState.autosave_path))
 	GameState.checkpoint = {}
 	GameState.gold = 1
 	GameState.continue_game()
-	check("geladen: weer in de Golemhal", await wait_scene("ArchiefGolemhal"))
+	check("geladen: weer in de Golem Hall", await wait_scene("ArchiefGolemhal"))
 	await wait_fade()
-	check("na laden: checkpoint uit de save (Bibliotheek %s), goud van de save (%d)" % [cp_tile(), GameState.gold],
+	check("na laden: checkpoint uit de save (Library %s), goud van de save (%d)" % [cp_tile(), GameState.gold],
 			GameState.checkpoint.get("map") == BIEB and cp_tile() == sp[0] and GameState.gold == saved_gold
 			and int(GameState.checkpoint["state"]["gold"]) == gold0)
 	var golem: Node = scene().get_monster("golem")
@@ -469,17 +469,17 @@ func _golem_tests() -> void:
 	scene().start_monster_battle(golem)
 	check("baasgevecht tegen de Golem", await wait_scene("Battle") and GameState.pending_boss)
 	var over := await lose_battle()
-	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nJe ontwaakt voor de deur...")
-	check("na game over: in de Bibliotheek (kamer voor de baas)", await wait_scene("ArchiefBibliotheek"))
+	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nYou wake before the door...")
+	check("na game over: in de Library (kamer voor de baas)", await wait_scene("ArchiefBibliotheek"))
 	await pframes(3)
-	check("op de ingang van de Bibliotheek %s (nu %s), kijkt naar de deur" % [sp[0], tile()], tile() == sp[0]
+	check("op de ingang van de Library %s (nu %s), kijkt naar de deur" % [sp[0], tile()], tile() == sp[0]
 			and player().facing == Vector2i.UP)
 	check("vol HP/MP, voortgang van bij binnenkomst (goud %d = %d, Lv %d)" % [GameState.gold, gold0, lv0],
 			full_hp_mp() and GameState.gold == gold0 and int(GameState.party[0]["level"]) == lv0)
 	check("Golem niet als verslagen gemarkeerd", not GameState.story_flags.has(SD.GOLEM_FLAG) and not GameState.has_kern("golemkern"))
-	check("last_respawn: baas = true, Bibliotheek", GameState.last_respawn.get("boss") == true and GameState.last_respawn.get("map") == BIEB)
+	check("last_respawn: baas = true, Library", GameState.last_respawn.get("boss") == true and GameState.last_respawn.get("map") == BIEB)
 	var line := await respawn_line()
-	check("bericht: '%s'" % line, line == "Je ontwaakt voor de deur...")
+	check("bericht: '%s'" % line, line == "You wake before the door...")
 	await wait_until(func(): return not Dialog._is_typing(), 4.0)
 	await pframes(4)
 	var shot_path := v19_dir.path_join("v19_respawn.png") if v19_dir != "" else (shots.path_join("v19_respawn.png") if shots != "" else "")
@@ -488,8 +488,8 @@ func _golem_tests() -> void:
 	await close_dialog()
 	# opnieuw naar binnen: de Golem staat er nog
 	r = await enter(GOLEMHAL, "zuid")
-	check("Golemhal opnieuw: de Golem staat er nog", r != null and r.get_monster("golem") != null)
-	check("checkpoint nog steeds de Bibliotheek", GameState.checkpoint.get("map") == BIEB)
+	check("Golem Hall opnieuw: de Golem staat er nog", r != null and r.get_monster("golem") != null)
+	check("checkpoint nog steeds de Library", GameState.checkpoint.get("map") == BIEB)
 
 
 # ================================================================ E: Wortelkoning
@@ -497,31 +497,31 @@ func _woud_tests() -> void:
 	setup_game(8)
 	GameState.story_flags["quest_noor"] = true
 	var r := await enter(SPORENKRING, "zuid")
-	check("in de Sporenkring (kamer voor de Wortelkoning)", r != null)
+	check("in de Spore Ring (kamer voor de Root King)", r != null)
 	if r == null:
 		return
 	await freeze_monsters(r)
 	var sp := spawn_of("woud_sporenkring", "zuid")
-	check("checkpoint = ingang Sporenkring %s" % [sp[0]], GameState.checkpoint.get("map") == SPORENKRING and cp_tile() == sp[0])
+	check("checkpoint = ingang Spore Ring %s" % [sp[0]], GameState.checkpoint.get("map") == SPORENKRING and cp_tile() == sp[0])
 	r = await enter("res://scenes/maps/woud_open_plek.tscn", "zuid")
-	check("Open plek: geen nieuw checkpoint (baaskamer)", r != null and GameState.checkpoint.get("map") == SPORENKRING)
+	check("Clearing: geen nieuw checkpoint (baaskamer)", r != null and GameState.checkpoint.get("map") == SPORENKRING)
 	var boss: Node = r.get_monster("baas") if r else null
-	check("De Wortelkoning staat er", boss != null and boss.boss)
+	check("The Root King staat er", boss != null and boss.boss)
 	if boss == null:
 		return
 	r.start_monster_battle(boss)
-	check("baasgevecht tegen De Wortelkoning", await wait_scene("Battle") and GameState.pending_boss)
+	check("baasgevecht tegen The Root King", await wait_scene("Battle") and GameState.pending_boss)
 	var over := await lose_battle()
-	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nJe ontwaakt voor de deur...")
-	check("na game over: in de Sporenkring", await wait_scene("WoudSporenkring"))
+	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nYou wake before the door...")
+	check("na game over: in de Spore Ring", await wait_scene("WoudSporenkring"))
 	await pframes(3)
 	check("op de ingang %s (nu %s), vol HP/MP" % [sp[0], tile()], tile() == sp[0] and full_hp_mp())
-	check("Wortelkoning niet verslagen, Noor niet gered", not GameState.story_flags.has(SD.WORTELKONING_FLAG)
+	check("Root King niet verslagen, Noor niet gered", not GameState.story_flags.has(SD.WORTELKONING_FLAG)
 			and not GameState.story_flags.has("noor_gered") and not GameState.has_member("noor"))
 	await respawn_line()
 	await close_dialog()
 	r = await enter("res://scenes/maps/woud_open_plek.tscn", "zuid")
-	check("Open plek opnieuw: baas + Noor in de cocon", r != null and r.get_monster("baas") != null
+	check("Clearing opnieuw: baas + Noor in de cocon", r != null and r.get_monster("baas") != null
 			and r.get_node("Objects/Cocon").visible and not Story.running)
 
 
@@ -539,7 +539,7 @@ func _misc_tests() -> void:
 	if FileAccess.file_exists(GameState.autosave_path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(GameState.autosave_path))
 	GameState.continue_game()
-	check("geladen in de Bibliotheek op (8,6)", await wait_scene("ArchiefBibliotheek") and tile() == Vector2i(8, 6))
+	check("geladen in de Library op (8,6)", await wait_scene("ArchiefBibliotheek") and tile() == Vector2i(8, 6))
 	check("checkpoint na laden in dezelfde kamer: nog de ingang %s met het goud van toen" % [cp_tile()],
 			cp_tile() == Vector2i(5, 7) and int(GameState.checkpoint["state"]["gold"]) == gold0)
 	# oude save (v0.18, zonder checkpoint) -> de kamer waar je laadt wordt het checkpoint
@@ -552,7 +552,7 @@ func _misc_tests() -> void:
 	check("oude save zonder checkpoint laadt", GameState.load_game() and GameState.checkpoint.is_empty())
 	GameState.continue_game()
 	check("geladen (oude save)", await wait_scene("ArchiefBibliotheek"))
-	check("oude save: checkpoint = waar je laadt (8,6) in de Bibliotheek", GameState.checkpoint.get("map") == BIEB and cp_tile() == Vector2i(8, 6))
+	check("oude save: checkpoint = waar je laadt (8,6) in de Library", GameState.checkpoint.get("map") == BIEB and cp_tile() == Vector2i(8, 6))
 	# kapot checkpoint in de save: genegeerd
 	d["checkpoint"] = {"map": BIEB, "tile": "x", "state": 5}
 	f = FileAccess.open(GameState.save_path, FileAccess.WRITE)
@@ -564,8 +564,8 @@ func _misc_tests() -> void:
 	GameState.story_flags[SD.GOLEM_FLAG] = true
 	r = await enter(BIEB, "zuid")
 	r = await enter(GOLEMHAL, "zuid")
-	check("verslagen Golem: Golemhal zonder baas, checkpoint blijft de Bibliotheek", r != null and r.get_monster("golem") == null
+	check("verslagen Golem: Golem Hall zonder baas, checkpoint blijft de Library", r != null and r.get_monster("golem") == null
 			and GameState.checkpoint.get("map") == BIEB)
 	r = await enter(BIEB, "deur")
-	check("terug in de Bibliotheek (via de deur): checkpoint = daar (5,3)", r != null and GameState.checkpoint.get("map") == BIEB
+	check("terug in de Library (via de deur): checkpoint = daar (5,3)", r != null and GameState.checkpoint.get("map") == BIEB
 			and cp_tile() == Vector2i(5, 3))

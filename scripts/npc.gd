@@ -5,8 +5,8 @@ extends StaticBody2D
 ## in plaats van 'lines'; 'show_if' bepaalt wanneer hij er is. Cutscenes laten hem
 ## lopen (script_walk) en draaien (face).
 
-@export var npc_name := "Oude man"
-@export_multiline var lines: Array[String] = ["Hallo!"]
+@export var npc_name := "Old Man"
+@export_multiline var lines: Array[String] = ["Hello!"]
 @export var facing := Vector2i.DOWN
 @export var event := ""
 @export var event_arg := ""

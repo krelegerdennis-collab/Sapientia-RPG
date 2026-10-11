@@ -30,7 +30,7 @@ offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/line_spacing = 4
-text = "Tekst"
+text = "Text"
 autowrap_mode = 3
 
 [node name="Arrow" type="Control" parent="Panel"]
@@ -60,7 +60,7 @@ text_color = Color(0.941, 0.776, 0.455, 1)
 
 [node name="NameLabel" type="Label" parent="Panel/NameTab"]
 layout_mode = 2
-text = "Naam"
+text = "Name"
 
 [node name="Tail" type="TextureRect" parent="Panel"]
 visible = false

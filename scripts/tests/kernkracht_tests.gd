@@ -94,7 +94,7 @@ func _run() -> void:
 		print("=== Deel I: haak on_kernkracht_hit (v0.19) ===")
 		await _hook_tests()
 	if part("J"):
-		print("=== Deel J: Inktwurm-kast in de Golemhal ===")
+		print("=== Deel J: Ink Worm-kast in de Golem Hall ===")
 		await _kast_tests()
 	print("KERNKRACHTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -359,7 +359,7 @@ func screenshot(name: String) -> void:
 # ================================================================ deel A
 func _data_tests() -> void:
 	var s: Dictionary = KernData.KERN_SKILLS["kernslag"]
-	check("vaardigheid heet 'Kernkracht' (id blijft 'kernslag'), fx vuurbal", s["name"] == "Kernkracht" and s.get("fx") == "vuurbal")
+	check("vaardigheid heet 'Kernkracht' (id blijft 'kernslag'), fx vuurbal", s["name"] == "Core Power" and s.get("fx") == "vuurbal")
 	check("formule ongewijzigd: 1,5x ATK, DEF x0,25, 3 rondes opladen", is_equal_approx(s["atk_mult"], 1.5)
 			and is_equal_approx(s["def_factor"], 0.25) and int(s["cooldown"]) == 3)
 	var f := KernData.fragment("golemkern")
@@ -503,7 +503,7 @@ func win(b: Node) -> bool:
 func _battle_tests() -> void:
 	setup(SD.NACHT, true)
 	var room := await enter(GOLEM_SCENE, "zuid")
-	check("Golemhal geladen (met Golemkern)", room != null)
+	check("Golem Hall geladen (met Golemkern)", room != null)
 	if room == null:
 		return
 	var b := await start_battle(["papiergeest"])
@@ -519,8 +519,8 @@ func _battle_tests() -> void:
 	await tap("interact")
 	await wait_until(func(): return b.menu.visible, 3.0)
 	var entries: Array = b.menu._entries
-	check("menu: 'Kernkracht KERN' %s" % [entries], entries.size() == 1 and str(entries[0]["text"]).begins_with("Kernkracht")
-			and str(entries[0]["text"]).ends_with("KERN") and entries[0]["enabled"])
+	check("menu: 'Kernkracht KERN' %s" % [entries], entries.size() == 1 and str(entries[0]["text"]).begins_with("Core Power")
+			and str(entries[0]["text"]).ends_with("CORE") and entries[0]["enabled"])
 	var hero: Dictionary = GameState.party[0]
 	var sk: Dictionary = KernData.KERN_SKILLS["kernslag"]
 	var dfn: float = b._defense_of(e) if b.has_method("_defense_of") else float(e["s"]["def"])
@@ -899,7 +899,7 @@ func _boss_tests() -> void:
 	setup(SD.NACHT, true)
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("Golemhal geladen", false)
+		check("Golem Hall geladen", false)
 		return
 	var golem: Node = room.get_monster("golem")
 	check("de Golem staat er (baas)", golem != null and golem.boss)
@@ -1071,7 +1071,7 @@ func _kast_tests() -> void:
 	GameState.story_flags.erase("inktwurm_kast_open")
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("J: Golemhal geladen", false)
+		check("J: Golem Hall geladen", false)
 		return
 	await freeze_monsters()
 	var kast: Node = room.get_node_or_null("Objects/InktwurmKast")
@@ -1097,7 +1097,7 @@ func _kast_tests() -> void:
 			worm = m
 	check("J: kast open, vlag gezet, botsing weg, tekst gezien", opened and said and GameState.story_flags.has("inktwurm_kast_open")
 			and kast.shape.disabled and kast.sprite.frame == 5)
-	check("J: Inktwurm staat in de kast en is nog te vangen", worm != null and worm.moves == false
+	check("J: Ink Worm staat in de kast en is nog te vangen", worm != null and worm.moves == false
 			and worm.tile == Vector2i(16, 5) and GameState.unique_available("inktwurm"))
 	player().place_at(Vector2i(13, 6), Vector2i.RIGHT)
 	await pframes(4)
@@ -1124,5 +1124,5 @@ func _kast_tests() -> void:
 		for m in room.monsters:
 			if is_instance_valid(m) and str(m.enemy_id) == "inktwurm":
 				worm2 = true
-	check("J: na opnieuw binnenkomen staat de kast open en de Inktwurm er nog", kast != null and kast.is_open
+	check("J: na opnieuw binnenkomen staat de kast open en de Ink Worm er nog", kast != null and kast.is_open
 			and kast.sprite.frame == 5 and kast.shape.disabled and worm2)

@@ -24,7 +24,7 @@ const HEROES := [
 	{
 		"id": "dennis", "battle_sprite": "res://assets/sprites/battle/dennis_rug.png",   # v0.11: rugaanzicht (RPG ART)
 		"field_sprite": "res://assets/sprites/player.png",   # v0.14: loop-sheet (vooraanzicht in het menu)
-		"name": "Dennis", "class": "Krijger", "accent": "", "equip_type": "krijger",
+		"name": "Dennis", "class": "Warrior", "accent": "", "equip_type": "krijger",
 		"level": 1, "exp": 0,
 		"max_hp": 42, "max_mp": 0, "atk": 14, "def": 8, "agi": 9, "mag": 2, "mdef": 4,
 		"spells": [],
@@ -34,7 +34,7 @@ const HEROES := [
 		"id": "noor", "battle_sprite": "res://assets/sprites/battle/noor.png",
 		# v0.17: dorp-/overworld-loopsheet van RPG ART (art_helden_dorp_v14, 48x96, zelfde indeling als player.png)
 		"field_sprite": "res://assets/sprites/noor_dorp.png",
-		"name": "Noor", "class": "Magiër", "accent": "magenta", "equip_type": "magier",
+		"name": "Noor", "class": "Mage", "accent": "magenta", "equip_type": "magier",
 		"level": 1, "exp": 0,
 		"max_hp": 28, "max_mp": 18, "atk": 7, "def": 5, "agi": 11, "mag": 10, "mdef": 8,
 		"spells": ["vuur", "bliksem"],
@@ -42,7 +42,7 @@ const HEROES := [
 	},
 	{
 		"id": "lotte", "battle_sprite": "res://assets/sprites/battle/lotte.png",
-		"name": "Lotte", "class": "Priester", "accent": "cyaan", "equip_type": "priester",
+		"name": "Lotte", "class": "Priest", "accent": "cyaan", "equip_type": "priester",
 		"level": 1, "exp": 0,
 		"max_hp": 32, "max_mp": 14, "atk": 9, "def": 6, "agi": 7, "mag": 7, "mdef": 9,
 		"spells": ["genees"],
@@ -75,54 +75,54 @@ const ENEMIES := {
 	# v0.10: eerste monsters op het gras (keuze van Dennis). Vooraanzicht-art komt van
 	# RPG ART op res://art/enemies/<id>.png; nu staan er placeholders (tools/art_v10.py).
 	"mosslijm": {
-		"name": "Mosslijm", "sprite": "res://art/enemies/mosslijm.png",
+		"name": "Moss Slime", "sprite": "res://art/enemies/mosslijm.png",
 		"sprite_back": "res://art/enemies/mosslijm_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
 		"max_hp": 10, "atk": 7, "def": 2, "agi": 3,
 		"exp": 3, "gold": 2, "y_offset": 0,
 		"skills": [],
 		"no": 1, "mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "drankje", "chance": 0.10}],
-		"desc": "Een klodder levend mos die over oude boekbanden kruipt. Kleverig, maar niet gemeen.",
+		"desc": "A clot of living moss that crawls over old book covers. Sticky, but not mean.",
 		"habitat": ["gras", "hoog_gras"],
 	},
 	"moskonijn": {
-		"name": "Moskonijn", "sprite": "res://art/enemies/moskonijn.png",
+		"name": "Moss Rabbit", "sprite": "res://art/enemies/moskonijn.png",
 		"sprite_back": "res://art/enemies/moskonijn_rug.png",   # v0.18 rugaanzicht (Codex-bondgenoot; RPG ART art_rug_v18)
 		"max_hp": 14, "atk": 9, "def": 3, "agi": 12,
 		"exp": 4, "gold": 3, "y_offset": 0,
 		"skills": [],
 		"no": 2, "mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "drankje", "chance": 0.12}],
-		"desc": "Een konijn met een vacht van mos en varens. Snel, schichtig en bijt als je te dichtbij komt.",
+		"desc": "A rabbit with a coat of moss and ferns. Fast, skittish, and it bites if you get too close.",
 		"habitat": ["gras", "hoog_gras", "bos"],
 	},
 	"papiergeest": {
-		"name": "Papiergeest", "sprite": "res://assets/sprites/enemies/papiergeest.png",
+		"name": "Paper Wraith", "sprite": "res://assets/sprites/enemies/papiergeest.png",
 		"sprite_back": "res://assets/sprites/enemies/papiergeest_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
 		"max_hp": 16, "atk": 9, "def": 3, "agi": 4,
 		"exp": 5, "gold": 4, "y_offset": 0,
 		"skills": [],
 		"no": 3, "mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "drankje", "chance": 0.15}],
-		"desc": "Losgescheurde bladzijden die nooit gelezen zijn. Ze fluisteren nullen en enen.",
+		"desc": "Torn-out pages that were never read. They whisper zeros and ones.",
 		"habitat": ["gras", "bos"],
 	},
 	"glitchmot": {
-		"name": "Glitchmot", "sprite": "res://assets/sprites/enemies/glitchmot.png",
+		"name": "Glitch Moth", "sprite": "res://assets/sprites/enemies/glitchmot.png",
 		"sprite_back": "res://assets/sprites/enemies/glitchmot_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
 		"max_hp": 12, "atk": 10, "def": 2, "agi": 14,
 		"exp": 6, "gold": 3, "y_offset": 0,
 		"skills": [],
 		"no": 4, "mp": 0, "weak": ["bliksem"], "resist": [],
 		"drops": [{"item": "toverwater", "chance": 0.10}],
-		"desc": "Een mot met kapotte vleugels van ruis. Vliegt op het licht van schermen en kaarsen.",
+		"desc": "A moth with broken wings of noise. It flies at the light of screens and candles.",
 		"habitat": ["gras", "zand", "bos"],
 	},
 	# v0.13: eerste echte vijand van De Vergeten Archieven (scène 3: 'half kapotte Wachters').
 	# Art van RPG ART (art_act1_v14/out): vooraanzicht 88x112 + idle-strook (2 frames).
 	# STATS VOORLOPIG (nog niet gebalanceerd): tussen de kleine Archief-vijanden en de Golem in.
 	"mech_wachter": {
-		"name": "Mech. Wachter", "sprite": "res://assets/sprites/enemies/mech_wachter.png",
+		"name": "Mech. Warden", "sprite": "res://assets/sprites/enemies/mech_wachter.png",
 		"sprite_back": "res://assets/sprites/enemies/mech_wachter_rug.png",   # v0.18 rugaanzicht (Codex-bondgenoot; RPG ART art_rug_v18)
 		"idle": "res://assets/sprites/enemies/mech_wachter_idle.png", "idle_frames": 2, "idle_time": 0.55,
 		# v0.14 DEFINITIEF (RPG CODE, zie HANDOFF_GOLEM.md): sterkste gewone vijand van de Archieven.
@@ -134,11 +134,11 @@ const ENEMIES := {
 		# tint en een strook tijdens het kiezen).
 		"max_hp": 30, "atk": 12, "def": 8, "agi": 5, "mag": 0, "mdef": 4,
 		"exp": 10, "gold": 8, "y_offset": 0,
-		"skills": [{"name": "Schild omhoog", "chance": 0.2, "type": "guard", "def_mult": 2.0},
-				{"name": "Zegelslag", "chance": 0.15, "power": 1.4}],
+		"skills": [{"name": "Shield Up", "chance": 0.2, "type": "guard", "def_mult": 2.0},
+				{"name": "Seal Strike", "chance": 0.15, "power": 1.4}],
 		"no": 6, "mp": 0, "weak": ["bliksem"], "resist": [],
 		"drops": [{"item": "drankje", "chance": 0.25}],
-		"desc": "Een half kapotte bewaker van ijzer, messing en oude boekbanden. Zijn oog zoekt nog steeds naar indringers.",
+		"desc": "A half-broken guard of iron, brass, and old book covers. Its eye still searches for intruders.",
 		"habitat": ["archief"],
 	},
 	"kennis_beest": {
@@ -146,7 +146,7 @@ const ENEMIES := {
 		# 4 frames (kern pulseert, langzaam), raak-plaatje (zelfde ankerpunt) en een aparte
 		# runecirkel achter de voeten (2 frames 196x36 op (0,158), loopt langzaam). De oude
 		# kennis_beest.png en golem_boss.png (v1) blijven bestaan (handwerk), maar worden niet gebruikt.
-		"name": "Het Kennis-Beest", "sprite": "res://assets/sprites/enemies/golem_boss_v2.png",
+		"name": "The Knowledge Beast", "sprite": "res://assets/sprites/enemies/golem_boss_v2.png",
 		# v0.17 rugaanzicht (Codex-bondgenoot; als bondgenoot liefst kleiner tonen, zie v17_ART_SLOTS.md)
 		"sprite_back": "res://assets/sprites/enemies/kennis_beest_rug.png",
 		"idle": "res://assets/sprites/enemies/golem_boss_v2_idle.png", "idle_frames": 4, "idle_time": 0.4,
@@ -155,7 +155,7 @@ const ENEMIES := {
 		"under_pos": [0, 158], "under_time": 0.9,
 		"max_hp": 46, "atk": 14, "def": 7, "agi": 6,
 		"exp": 24, "gold": 18, "y_offset": 0,
-		"skills": [{"name": "Boekenhamer", "chance": 0.25, "power": 1.5}],
+		"skills": [{"name": "Book Hammer", "chance": 0.25, "power": 1.5}],
 		"no": 5, "mp": 6, "weak": ["vuur"], "resist": ["bliksem"],
 		"drops": [{"item": "drankje", "chance": 0.5}, {"item": "toverwater", "chance": 0.25}],
 		# v0.14 (RPG CODE) DE GOLEM-BAAS: in een baasgevecht (GameState.pending_boss, bv. de Golem
@@ -169,7 +169,7 @@ const ENEMIES := {
 			# Niet vluchten (battle.gd).
 			"max_hp": 400, "atk": 33, "def": 22, "agi": 6, "mag": 16, "mdef": 18, "mp": 0,
 			"exp": 300, "gold": 120,
-			"skills": [{"name": "Boekenhamer", "chance": 0.2, "power": 1.5}],
+			"skills": [{"name": "Book Hammer", "chance": 0.2, "power": 1.5}],
 			# Vaste buit van de Golem in het Eerste Archief: 3 Lege Boeken. "chance" blijft alleen info.
 			"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 0.5},
 					{"item": "leeg_boek", "n": 3}],
@@ -179,11 +179,11 @@ const ENEMIES := {
 				"open_mult": 2.0,      # schade op de open roze kern x2
 				"break_damage": 45,    # >= 45 schade in die ronde = geen Hamerslag (1 echte klap op Lv 10)
 				"slam_power": 2.2,     # Hamerslag = ATK x 2,2 (verdedigen = helft)
-				"slam_name": "Hamerslag",
+				"slam_name": "Hammer Blow",
 				"rect": [82, 52, 30, 30],   # kern in golem_boss_v2.png (196x182)
 			},
 		},
-		"desc": "Golem van boeken, perkament en code. Bewaakt kennis die niemand meer mag lezen.",
+		"desc": "A golem of books, parchment, and code. It guards knowledge no one is allowed to read anymore.",
 		"habitat": ["gras", "bos", "baas"],
 	},
 	# ------------------------------------------------------------ v0.17 HET DONKER WOUD
@@ -195,43 +195,43 @@ const ENEMIES := {
 	# STATS VOORLOPIG: basis = niveau 1; de Woud-kamers zetten niveau ("tier") 3-4 (game_data TIERS),
 	# bedoeld voor Dennis ~Lv 10-13 met het Vonkzwaard (zie docs/HANDOFF_WOUD.md).
 	"wortelkruiper": {
-		"name": "Wortelkruiper", "sprite": "res://assets/sprites/enemies/wortelkruiper.png",
+		"name": "Root Crawler", "sprite": "res://assets/sprites/enemies/wortelkruiper.png",
 		"sprite_back": "res://assets/sprites/enemies/wortelkruiper_rug.png",
 		"max_hp": 34, "atk": 22, "def": 10, "agi": 7, "mag": 0, "mdef": 6,
 		"exp": 16, "gold": 10, "y_offset": 0,
-		"skills": [{"name": "Wortelgreep", "chance": 0.2, "power": 1.3}],
+		"skills": [{"name": "Root Grip", "chance": 0.2, "power": 1.3}],
 		"no": 7, "mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "kruid", "chance": 0.2}],
-		"desc": "Een kluwen dode wortels met een mosrug dat onder het bladerdek loert; je ziet alleen zijn roze ogen voor hij in je enkels knijpt.",
+		"desc": "A tangle of dead roots with a moss back that lurks under the leaf cover; you only see its pink eyes before it clamps your ankles.",
 		"habitat": ["woud"],
 	},
 	"mistuil": {
-		"name": "Mistuil", "sprite": "res://assets/sprites/enemies/mistuil.png",
+		"name": "Mist Owl", "sprite": "res://assets/sprites/enemies/mistuil.png",
 		"sprite_back": "res://assets/sprites/enemies/mistuil_rug.png",
 		"max_hp": 26, "atk": 20, "def": 6, "agi": 16, "mag": 8, "mdef": 10,
 		"exp": 15, "gold": 9, "y_offset": 0,
-		"skills": [{"name": "Mistkreet", "chance": 0.2, "power": 1.25}],
+		"skills": [{"name": "Mist Cry", "chance": 0.2, "power": 1.25}],
 		"no": 8, "mp": 4, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "toverwater", "chance": 0.15}],
-		"desc": "Een uil van mist en gescheurde bladzijden die zonder geluid boven het pad zweeft; in zijn ogen flikkert nog de code van vergeten boeken.",
+		"desc": "An owl of mist and torn pages that hangs silent above the path; the code of forgotten books still flickers in its eyes.",
 		"habitat": ["woud"],
 	},
 	"sporenzwam": {
-		"name": "Sporenzwam", "sprite": "res://assets/sprites/enemies/sporenzwam.png",
+		"name": "Spore Cap", "sprite": "res://assets/sprites/enemies/sporenzwam.png",
 		"sprite_back": "res://assets/sprites/enemies/sporenzwam_rug.png",
 		"max_hp": 40, "atk": 18, "def": 12, "agi": 4, "mag": 6, "mdef": 8,
 		"exp": 18, "gold": 12, "y_offset": 0,
-		"skills": [{"name": "Sporenwolk", "chance": 0.25, "power": 1.4}],
+		"skills": [{"name": "Spore Cloud", "chance": 0.25, "power": 1.4}],
 		"no": 9, "mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "drankje", "chance": 0.25}],
-		"desc": "Een chagrijnige paddenstoel die nooit is uitgeslapen en bij elke stap gloeiende sporen uitniest.",
+		"desc": "A grumpy mushroom that never finished sleeping, and sneezes glowing spores with every step.",
 		"habitat": ["woud"],
 	},
 	# BAAS van het Donker Woud: houdt Noor gevangen in een wortelcocon (story_data.gd "noor_bevrijd").
 	# Basis = baas-stats (hij komt alleen als baas voor). VOORLOPIG gebalanceerd voor Dennis SOLO
 	# ~Lv 11-12 met Vonkzwaard + Kernkracht (zie docs/HANDOFF_WOUD.md). Geen kern-mechaniek.
 	"wortelkoning": {
-		"name": "De Wortelkoning", "sprite": "res://assets/sprites/enemies/wortelkoning.png",
+		"name": "The Root King", "sprite": "res://assets/sprites/enemies/wortelkoning.png",
 		"sprite_back": "res://assets/sprites/enemies/wortelkoning_rug.png",
 		"max_hp": 440, "atk": 34, "def": 20, "agi": 8, "mag": 14, "mdef": 16,
 		"exp": 400, "gold": 150, "y_offset": 0,
@@ -239,15 +239,15 @@ const ENEMIES := {
 		# (voor een eventuele kern-mechaniek later) = rect [88, 98, 24, 40] in wortelkoning.png
 		"idle": "res://assets/sprites/enemies/wortelkoning_idle.png", "idle_frames": 4, "idle_time": 0.4,
 		"hit": "res://assets/sprites/enemies/wortelkoning_hit.png",
-		"skills": [{"name": "Wortelgreep", "chance": 0.25, "power": 1.6}],
+		"skills": [{"name": "Root Grip", "chance": 0.25, "power": 1.6}],
 		"no": 10, "mp": 0, "weak": ["vuur"], "resist": ["bliksem"],
 		"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 1.0}],
 		"boss": {
 			"max_hp": 440, "atk": 34, "def": 20, "agi": 8, "mag": 14, "mdef": 16, "mp": 0,
 			"exp": 400, "gold": 150,
-			"skills": [{"name": "Wortelgreep", "chance": 0.25, "power": 1.6}],
+			"skills": [{"name": "Root Grip", "chance": 0.25, "power": 1.6}],
 		},
-		"desc": "De oude koning van het Donker Woud: een dode boom met een glitchend hart, die alles wat leeft in zijn wortels wil vangen.",
+		"desc": "The old king of the Dark Wood: a dead tree with a glitching heart, that wants to catch everything alive in its roots.",
 		"habitat": ["woud", "baas"],
 	},
 	# Het Gesimuleerde Archief (Dungeon100): de Mimic, een kist die terugbijt. Komt alleen uit een
@@ -257,10 +257,10 @@ const ENEMIES := {
 		"name": "Mimic", "sprite": "res://assets/sprites/enemies/mimic.png",
 		"max_hp": 26, "atk": 12, "def": 4, "agi": 6, "mag": 0, "mdef": 3,
 		"exp": 14, "gold": 14, "y_offset": 0,
-		"skills": [{"name": "Kistbeet", "chance": 0.3, "power": 1.5}],
+		"skills": [{"name": "Chest Bite", "chance": 0.3, "power": 1.5}],
 		"no": 11, "mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [],
-		"desc": "Een kist die niet van de Oude Mensheid is, maar van de Zwarte Stroom. Hij wacht tot iemand de deksel optilt.",
+		"desc": "A chest that is not of the Old Humanity, but of the Black Current. It waits until someone lifts the lid.",
 		"habitat": ["archief"],
 	},
 	# ------------------------------------------------------------ v0.19 ARCHIEF 1: DE INKTWURM
@@ -278,7 +278,7 @@ const ENEMIES := {
 	# Kaart: assets/map_monsters/inktwurm.png (32x64, 2x4 frames van 16x16).
 	# Bestiarium 012: 011 is al de Mimic op main.
 	"inktwurm": {
-		"name": "Inktwurm", "sprite": "res://assets/sprites/enemies/inktwurm.png",
+		"name": "Ink Worm", "sprite": "res://assets/sprites/enemies/inktwurm.png",
 		"sprite_back": "res://assets/sprites/enemies/inktwurm_rug.png",
 		"idle": "res://assets/sprites/enemies/inktwurm_idle.png", "idle_frames": 2, "idle_time": 0.55,
 		"unique": true, "encounter_level": 5,
@@ -290,7 +290,7 @@ const ENEMIES := {
 		"no": 12, "mp": 0, "weak": ["vuur"], "resist": [],
 		# lore: Gloeiende Inktfles; dat item bestaat nog niet -> Toverwater (= Bladzijde van Inkt) als plaatshouder
 		"drops": [{"item": "toverwater", "chance": 1.0}],
-		"desc": "Een vette worm die zich door perkament heeft gegeten en nu zwarte inkt zweet.",
+		"desc": "A fat worm that ate its way through parchment and now sweats black ink.",
 		"habitat": ["archief"],
 	},
 }
@@ -341,9 +341,9 @@ static func bestiary_ids() -> Array:
 ## type:   "damage" (schade) of "heal" (genezen)
 ## Effect = power + 2 x level van de gebruiker (+/- 10% geluk).
 const SPELLS := {
-	"vuur":    {"name": "Vuur",    "mp": 4, "target": "enemy",       "type": "damage", "power": 14},
-	"bliksem": {"name": "Bliksem", "mp": 7, "target": "all_enemies", "type": "damage", "power": 9},
-	"genees":  {"name": "Genees",  "mp": 3, "target": "ally",        "type": "heal",   "power": 22},
+	"vuur":    {"name": "Fire",    "mp": 4, "target": "enemy",       "type": "damage", "power": 14},
+	"bliksem": {"name": "Lightning", "mp": 7, "target": "all_enemies", "type": "damage", "power": 9},
+	"genees":  {"name": "Heal",  "mp": 3, "target": "ally",        "type": "heal",   "power": 22},
 }
 
 # ---------------------------------------------------------------- items
@@ -351,44 +351,44 @@ const SPELLS := {
 ## heal_mp) werken ook buiten gevechten; "field": false = alleen in een gevecht (grijs in
 ## het veldmenu). Zie scripts/party_actions.gd.
 const ITEMS := {
-	"drankje":    {"name": "Drankje",    "target": "ally", "heal_hp": 30, "heal_mp": 0,
-		"desc": "Bitter kruidendrankje uit de bibliotheektuin."},
-	"toverwater": {"name": "Toverwater", "target": "ally", "heal_hp": 0,  "heal_mp": 10,
-		"desc": "Water dat zacht cyaan oplicht. Geeft magie terug."},
+	"drankje":    {"name": "Potion",    "target": "ally", "heal_hp": 30, "heal_mp": 0,
+		"desc": "A bitter herb drink from the library garden."},
+	"toverwater": {"name": "Magic Water", "target": "ally", "heal_hp": 0,  "heal_mp": 10,
+		"desc": "Water that glows a soft cyan. Gives magic back."},
 	# v0.11: van de Oude Man (de kist naast het huis). "short" = naam in het gevechtsmenu.
-	"kruid":      {"name": "Geneeskrachtig kruid", "short": "Kruid", "target": "ally", "heal_hp": 25, "heal_mp": 0},
+	"kruid":      {"name": "Healing Herb", "short": "Herb", "target": "ally", "heal_hp": 25, "heal_mp": 0},
 	# Task #4: sterkere genees-items, alleen als buit in de dungeon van 100 verdiepingen (dungeon100_scaling.gd).
-	"sterk_drankje": {"name": "Sterk Drankje", "target": "ally", "heal_hp": 120, "heal_mp": 0,
-		"desc": "Dik, donker drankje. Geneest veel levenspunten."},
-	"toverbrouwsel": {"name": "Toverbrouwsel", "target": "ally", "heal_hp": 0, "heal_mp": 40,
-		"desc": "Gloeiend brouwsel. Geeft veel magie terug."},
-	"elixer": {"name": "Elixer", "target": "ally", "heal_hp": 400, "heal_mp": 60,
-		"desc": "Een zeldzaam elixer uit de diepte. Geneest bijna alles."},
+	"sterk_drankje": {"name": "Strong Potion", "target": "ally", "heal_hp": 120, "heal_mp": 0,
+		"desc": "A thick, dark drink. Heals a lot of hit points."},
+	"toverbrouwsel": {"name": "Magic Brew", "target": "ally", "heal_hp": 0, "heal_mp": 40,
+		"desc": "A glowing brew. Gives a lot of magic back."},
+	"elixer": {"name": "Elixir", "target": "ally", "heal_hp": 400, "heal_mp": 60,
+		"desc": "A rare elixir from the deep. Heals almost everything."},
 	# Codex (Kernfragment stap 2): alleen in een gevecht, op een VIJAND. Schrijft een verzwakt
 	# monster in de Codex (kans: scripts/data/codex_data.gd). Altijd op, ook als het mislukt.
 	# Te krijgen: 3 van Marit in Esdoorn (na de ontmoeting) + 2 in kisten van het Donker Woud
 	# + 3 van de Golem in het Eerste Archief (baas-buit, "n" hierboven). Later ook in de winkel
 	# ("price"). NIET in START_INVENTORY (oude saves krijgen dat toch nooit).
-	"leeg_boek":  {"name": "Leeg Boek", "target": "enemy", "capture": true, "field": false,
+	"leeg_boek":  {"name": "Blank Book", "target": "enemy", "capture": true, "field": false,
 		"heal_hp": 0, "heal_mp": 0, "price": 60, "icon": "res://assets/ui/icons/leeg_boek.png",
-		"desc": "Een boek zonder woorden. Schrijf er een verzwakt monster in."},
+		"desc": "A book without words. Write a weakened monster into it."},
 	# Spreukrollen: alleen als buit in gewone kisten van de 100-verdiepingen-grot (dungeon100_scaling.gd).
 	# De party gaat die grot in zonder spreuken; een rol leert één held de spreuk (party_actions.gd).
-	"spreuk_vuur": {"name": "Vuurrol", "target": "ally", "teach": "vuur", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met de spreuk Vuur. Iemand in de party kan hem leren."},
-	"spreuk_bliksem": {"name": "Bliksemrol", "target": "ally", "teach": "bliksem", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met de spreuk Bliksem. Iemand in de party kan hem leren."},
-	"spreuk_genees": {"name": "Geneesrol", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met de spreuk Genees. Iemand in de party kan hem leren."},
+	"spreuk_vuur": {"name": "Fire Scroll", "target": "ally", "teach": "vuur", "heal_hp": 0, "heal_mp": 0,
+		"desc": "A scroll with the spell Fire. Someone in the party can learn it."},
+	"spreuk_bliksem": {"name": "Lightning Scroll", "short": "Bolt Scroll", "target": "ally", "teach": "bliksem", "heal_hp": 0, "heal_mp": 0,
+		"desc": "A scroll with the spell Lightning. Someone in the party can learn it."},
+	"spreuk_genees": {"name": "Heal Scroll", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
+		"desc": "A scroll with the spell Heal. Someone in the party can learn it."},
 }
 ## v0.11: sleutel-voorwerpen (niet te gebruiken in een gevecht; tellen wel in de inventaris)
 const KEY_ITEMS := {
-	"emmer_water": {"name": "Emmer water"},
+	"emmer_water": {"name": "Bucket of Water", "short": "Water Bucket"},
 	# Het Gesimuleerde Archief (Dungeon100): de uitgang uit de simulatie. Alleen buit van de baas op
 	# verdieping 100 (Dungeon100Blue.WARP_ITEM). Een sleutel-voorwerp dus niet in het gevechtsmenu; in Items
 	# werkt het alleen op verdieping 100 ("warp": true: party_actions.gd + GameState.dungeon100_warp).
-	"warp": {"name": "Warp-kristal", "short": "Warp", "warp": true,
-		"desc": "Een kristal uit de kern van het Archief. Op de laatste verdieping brengt het je terug naar de wereld."},
+	"warp": {"name": "Warp Crystal", "short": "Warp", "warp": true,
+		"desc": "A crystal from the core of the Archive. On the last floor it takes you back to the world."},
 }
 # ---------------------------------------------------------------- uitrusting (v0.14)
 ## !! VOORSTEL / VOORLOPIG !!  Uit story/ITEMS_ELEMENTEN.md (par. 4, 'Beginnersset'), wacht nog
@@ -398,7 +398,7 @@ const KEY_ITEMS := {
 ##
 ## Vakken (volgorde = volgorde op het scherm) en hun naam op het scherm.
 const EQUIP_SLOTS := ["wapen", "schild", "helm", "harnas", "accessoire"]
-const EQUIP_SLOT_NAMES := {"wapen": "Wapen", "schild": "Schild", "helm": "Helm", "harnas": "Harnas", "accessoire": "Accessoire"}
+const EQUIP_SLOT_NAMES := {"wapen": "Weapon", "schild": "Shield", "helm": "Helm", "harnas": "Armor", "accessoire": "Accessory"}
 ## Stats die uitrusting kan veranderen (volgorde op het scherm) en hun korte naam.
 ## SPD = de bestaande sleutel "agi".
 const EQUIP_STATS := ["atk", "def", "mag", "mdef", "agi"]
@@ -411,94 +411,94 @@ const EQUIPMENT := {
 	# VOORLOPIG: in het spel (v0.11 zwaardles) is het Kort zwaard ATK +3. Het ontwerp zegt
 	# Kort Zwaard ATK +7 (winkel, 120) en een apart Roestig Zwaard ATK +3 als startwapen.
 	# Zolang Dennis dat niet besloten heeft blijft het zoals in het spel: ATK +3.
-	"kort_zwaard": {"name": "Kort zwaard", "slot": "wapen", "atk": 3, "wie": ["krijger"], "price": 120,
-		"desc": "Het zwaard van de Oude Man. Licht en eerlijk."},
+	"kort_zwaard": {"name": "Short Sword", "slot": "wapen", "atk": 3, "wie": ["krijger"], "price": 120,
+		"desc": "The Old Man's sword. Light and honest."},
 	# v0.15 (RPG CODE): uit de schatkist achter de geheime deur in de puzzelkamer van het Eerste
 	# Archief. ATK +12 (keuze Dennis; = 4x het Kort zwaard). Alleen krijgers (Dennis). Niet te koop.
 	# "element" is alleen info (doet nog niets in de schade); "icon" = 16x16 van RPG ART.
-	"vonkzwaard": {"name": "Vonkzwaard", "slot": "wapen", "atk": 12, "wie": ["krijger"], "price": 0,
-		"element": "vuur", "desc": "Een kling die zacht roze-oranje gloeit. Warm in je hand.",
+	"vonkzwaard": {"name": "Spark Sword", "slot": "wapen", "atk": 12, "wie": ["krijger"], "price": 0,
+		"element": "vuur", "desc": "A blade that glows a soft pink-orange. Warm in your hand.",
 		"icon": "res://assets/ui/icons/vonkzwaard.png"},
-	"eiken_staf": {"name": "Eiken Staf", "slot": "wapen", "atk": 2, "mag": 4, "wie": ["magier", "priester"], "price": 90,
-		"desc": "Een staf van oud eikenhout. Versterkt spreuken."},
-	"dolk": {"name": "Dolk", "slot": "wapen", "atk": 4, "agi": 1, "wie": ["krijger", "magier", "priester"], "price": 60,
-		"desc": "Kort en snel. Iedereen kan hem gebruiken."},
-	"houten_schild": {"name": "Houten Schild", "slot": "schild", "def": 2, "wie": ["krijger", "priester"], "price": 40,
-		"desc": "Een eenvoudig rond schild van planken."},
-	"kaftschild": {"name": "Kaftschild", "slot": "schild", "def": 3, "mdef": 1, "wie": ["krijger", "priester"], "price": 90,
-		"desc": "Gemaakt van de harde kaft van een oud boek."},
-	"leren_kap": {"name": "Leren Kap", "slot": "helm", "def": 1, "mdef": 1, "wie": ["krijger", "magier", "priester"], "price": 30,
-		"desc": "Een zachte kap van leer."},
-	"ijzeren_helm": {"name": "IJzeren Helm", "slot": "helm", "def": 3, "wie": ["krijger"], "price": 80,
-		"desc": "Zwaar, maar houdt een klap tegen."},
-	"reisgewaad": {"name": "Reisgewaad", "slot": "harnas", "def": 1, "mdef": 2, "wie": ["magier", "priester"], "price": 30,
-		"desc": "Een licht gewaad voor lange tochten."},
-	"leren_harnas": {"name": "Leren Harnas", "slot": "harnas", "def": 4, "wie": ["krijger", "priester"], "price": 70,
-		"desc": "Stevig leer over de borst en schouders."},
+	"eiken_staf": {"name": "Oak Staff", "slot": "wapen", "atk": 2, "mag": 4, "wie": ["magier", "priester"], "price": 90,
+		"desc": "A staff of old oak. It strengthens spells."},
+	"dolk": {"name": "Dagger", "slot": "wapen", "atk": 4, "agi": 1, "wie": ["krijger", "magier", "priester"], "price": 60,
+		"desc": "Short and quick. Anyone can use it."},
+	"houten_schild": {"name": "Wooden Shield", "slot": "schild", "def": 2, "wie": ["krijger", "priester"], "price": 40,
+		"desc": "A simple round shield of planks."},
+	"kaftschild": {"name": "Cover Shield", "slot": "schild", "def": 3, "mdef": 1, "wie": ["krijger", "priester"], "price": 90,
+		"desc": "Made from the hard cover of an old book."},
+	"leren_kap": {"name": "Leather Hood", "slot": "helm", "def": 1, "mdef": 1, "wie": ["krijger", "magier", "priester"], "price": 30,
+		"desc": "A soft hood of leather."},
+	"ijzeren_helm": {"name": "Iron Helm", "slot": "helm", "def": 3, "wie": ["krijger"], "price": 80,
+		"desc": "Heavy, but it stops a blow."},
+	"reisgewaad": {"name": "Travel Robe", "slot": "harnas", "def": 1, "mdef": 2, "wie": ["magier", "priester"], "price": 30,
+		"desc": "A light robe for long journeys."},
+	"leren_harnas": {"name": "Leather Armor", "slot": "harnas", "def": 4, "wie": ["krijger", "priester"], "price": 70,
+		"desc": "Sturdy leather over the chest and shoulders."},
 	# v0.16 (tutorial, wens Dennis): Opa geeft Dennis deze mantel in de proloog en leert hem
 	# MENU > Uitrusting. Klein beetje DEF; iedereen mag hem dragen. Niet te koop.
 	# Icoon: het bestaande reisgewaad-icoon van RPG ART (een mantel/gewaad).
-	"leerling_mantel": {"name": "Leerling-mantel", "slot": "harnas", "def": 2, "price": 0,
-		"desc": "Een warme mantel van Opa. Beter dan niets.",
+	"leerling_mantel": {"name": "Apprentice Cloak", "slot": "harnas", "def": 2, "price": 0,
+		"desc": "A warm cloak from Grandpa. Better than nothing.",
 		"icon": "res://assets/ui/icons/reisgewaad.png"},
-	"malienkolder": {"name": "Maliënkolder", "slot": "harnas", "def": 6, "agi": -1, "wie": ["krijger"], "price": 160,
-		"desc": "Ringen van ijzer. Sterk, maar zwaar."},
-	"bladwijzer": {"name": "Zilveren Bladwijzer", "short": "Bladwijzer", "slot": "accessoire", "agi": 2, "price": 100,
-		"desc": "Een zilveren bladwijzer die licht en snel maakt."},
+	"malienkolder": {"name": "Chain Mail", "slot": "harnas", "def": 6, "agi": -1, "wie": ["krijger"], "price": 160,
+		"desc": "Rings of iron. Strong, but heavy."},
+	"bladwijzer": {"name": "Silver Bookmark", "short": "Bookmark", "slot": "accessoire", "agi": 2, "price": 100,
+		"desc": "A silver bookmark that makes you light and quick."},
 	# VOORLOPIG: 'gif-immuun' uit het ontwerp is nog niet gebouwd (er is nog geen gif).
-	"groenring": {"name": "Groene Ring", "slot": "accessoire", "mdef": 2, "price": 150,
-		"desc": "Een ring van groen glas. (Gif-immuun: komt later.)"},
+	"groenring": {"name": "Green Ring", "slot": "accessoire", "mdef": 2, "price": 150,
+		"desc": "A ring of green glass. (Poison immunity: later.)"},
 	# Task #4 (Monsterschaal en buit, HANDOFF_DUNGEON100_SCHAAL.md): buit van de dungeon van 100 verdiepingen.
 	# Id = "d100_<soort>_<niveau>", niveau 2-5 (niveau 1 = de uitrusting hierboven). Niet te koop.
 	# Welke stukken waar vallen: scripts/data/dungeon100_scaling.gd (GEAR). VOORLOPIGE waarden.
-	"d100_zwaard_2": {"name": "Archiefzwaard", "slot": "wapen", "atk": 20, "wie": ["krijger"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_zwaard_3": {"name": "Runenzwaard", "slot": "wapen", "atk": 32, "wie": ["krijger"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_zwaard_4": {"name": "Glitchzwaard", "slot": "wapen", "atk": 48, "wie": ["krijger"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_zwaard_5": {"name": "Zegelzwaard", "slot": "wapen", "atk": 70, "wie": ["krijger"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_staf_2": {"name": "Archiefstaf", "slot": "wapen", "atk": 5, "mag": 10, "wie": ["magier", "priester"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_staf_3": {"name": "Runenstaf", "slot": "wapen", "atk": 8, "mag": 18, "wie": ["magier", "priester"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_staf_4": {"name": "Glitchstaf", "slot": "wapen", "atk": 12, "mag": 30, "wie": ["magier", "priester"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_staf_5": {"name": "Zegelstaf", "slot": "wapen", "atk": 18, "mag": 46, "wie": ["magier", "priester"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_schild_2": {"name": "Archiefschild", "slot": "schild", "def": 6, "mdef": 2, "wie": ["krijger", "priester"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_schild_3": {"name": "Runenschild", "slot": "schild", "def": 10, "mdef": 4, "wie": ["krijger", "priester"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_schild_4": {"name": "Glitchschild", "slot": "schild", "def": 16, "mdef": 7, "wie": ["krijger", "priester"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_schild_5": {"name": "Zegelschild", "slot": "schild", "def": 24, "mdef": 10, "wie": ["krijger", "priester"], "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_helm_2": {"name": "Archiefhelm", "slot": "helm", "def": 4, "mdef": 2, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_helm_3": {"name": "Runenhelm", "slot": "helm", "def": 7, "mdef": 4, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_helm_4": {"name": "Glitchhelm", "slot": "helm", "def": 11, "mdef": 6, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_helm_5": {"name": "Zegelhelm", "slot": "helm", "def": 16, "mdef": 9, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_harnas_2": {"name": "Archiefharnas", "slot": "harnas", "def": 9, "mdef": 3, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_harnas_3": {"name": "Runenharnas", "slot": "harnas", "def": 15, "mdef": 6, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_harnas_4": {"name": "Glitchharnas", "slot": "harnas", "def": 24, "mdef": 10, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_harnas_5": {"name": "Zegelharnas", "slot": "harnas", "def": 36, "mdef": 15, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_ring_2": {"name": "Archiefring", "slot": "accessoire", "mdef": 5, "agi": 3, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_ring_3": {"name": "Runenring", "slot": "accessoire", "mdef": 9, "agi": 5, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_ring_4": {"name": "Glitchring", "slot": "accessoire", "mdef": 14, "agi": 8, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
-	"d100_ring_5": {"name": "Zegelring", "slot": "accessoire", "mdef": 20, "agi": 12, "price": 0,
-		"desc": "Buit uit de diepte van de Honderd Verdiepingen."},
+	"d100_zwaard_2": {"name": "Archive Sword", "slot": "wapen", "atk": 20, "wie": ["krijger"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_zwaard_3": {"name": "Rune Sword", "slot": "wapen", "atk": 32, "wie": ["krijger"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_zwaard_4": {"name": "Glitch Sword", "slot": "wapen", "atk": 48, "wie": ["krijger"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_zwaard_5": {"name": "Seal Sword", "slot": "wapen", "atk": 70, "wie": ["krijger"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_staf_2": {"name": "Archive Staff", "slot": "wapen", "atk": 5, "mag": 10, "wie": ["magier", "priester"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_staf_3": {"name": "Rune Staff", "slot": "wapen", "atk": 8, "mag": 18, "wie": ["magier", "priester"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_staf_4": {"name": "Glitch Staff", "slot": "wapen", "atk": 12, "mag": 30, "wie": ["magier", "priester"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_staf_5": {"name": "Seal Staff", "slot": "wapen", "atk": 18, "mag": 46, "wie": ["magier", "priester"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_schild_2": {"name": "Archive Shield", "slot": "schild", "def": 6, "mdef": 2, "wie": ["krijger", "priester"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_schild_3": {"name": "Rune Shield", "slot": "schild", "def": 10, "mdef": 4, "wie": ["krijger", "priester"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_schild_4": {"name": "Glitch Shield", "slot": "schild", "def": 16, "mdef": 7, "wie": ["krijger", "priester"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_schild_5": {"name": "Seal Shield", "slot": "schild", "def": 24, "mdef": 10, "wie": ["krijger", "priester"], "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_helm_2": {"name": "Archive Helm", "slot": "helm", "def": 4, "mdef": 2, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_helm_3": {"name": "Rune Helm", "slot": "helm", "def": 7, "mdef": 4, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_helm_4": {"name": "Glitch Helm", "slot": "helm", "def": 11, "mdef": 6, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_helm_5": {"name": "Seal Helm", "slot": "helm", "def": 16, "mdef": 9, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_harnas_2": {"name": "Archive Armor", "slot": "harnas", "def": 9, "mdef": 3, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_harnas_3": {"name": "Rune Armor", "slot": "harnas", "def": 15, "mdef": 6, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_harnas_4": {"name": "Glitch Armor", "slot": "harnas", "def": 24, "mdef": 10, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_harnas_5": {"name": "Seal Armor", "slot": "harnas", "def": 36, "mdef": 15, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_ring_2": {"name": "Archive Ring", "slot": "accessoire", "mdef": 5, "agi": 3, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_ring_3": {"name": "Rune Ring", "slot": "accessoire", "mdef": 9, "agi": 5, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_ring_4": {"name": "Glitch Ring", "slot": "accessoire", "mdef": 14, "agi": 8, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
+	"d100_ring_5": {"name": "Seal Ring", "slot": "accessoire", "mdef": 20, "agi": 12, "price": 0,
+		"desc": "Loot from the depths of the Hundred Floors."},
 }
 ## Sterkste: hoe zwaar elke stat telt per soort held (VOORLOPIG, eigen voorstel van RPG CODE;
 ## niet in het ontwerp). Score van een stuk = som van bonus x gewicht.
@@ -548,6 +548,25 @@ static func apply_tier(data: Dictionary, tier: int) -> Dictionary:
 	d["gold"] = round_half_even(float(d.get("gold", 0)) * float(t["gold"]))
 	d["tier"] = tier
 	return d
+
+## Player-facing element names. The ids (vuur, bliksem, ...) stay as data.
+const ELEMENT_NAMES := {
+	"vuur": "fire",
+	"bliksem": "lightning",
+	"natuur": "nature",
+	"inkt": "ink",
+	"ruis": "noise",
+	"metaal": "metal",
+	"kennis": "knowledge",
+	"mist": "mist",
+	"neutraal": "neutral",
+	"water": "water",
+}
+
+
+static func element_name(id: String) -> String:
+	return str(ELEMENT_NAMES.get(id, id))
+
 
 # ---------------------------------------------------------------- encounters
 ## ---------------- RANDOM ENCOUNTERS ----------------

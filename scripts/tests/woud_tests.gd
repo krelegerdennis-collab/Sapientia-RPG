@@ -59,9 +59,9 @@ func _run() -> void:
 	_data_tests()
 	print("=== Deel B: wereldkaart ===")
 	await _world_tests()
-	print("=== Deel C: Esdoorn ===")
+	print("=== Deel C: Mapleton ===")
 	await _village_tests()
-	print("=== Deel D: Donker Woud ===")
+	print("=== Deel D: Dark Wood ===")
 	await _forest_tests()
 	print("=== Deel E: opslaan/laden ===")
 	await _save_tests()
@@ -333,14 +333,14 @@ func freeze_monsters(r: Node) -> void:
 # ================================================================ A: data
 func _data_tests() -> void:
 	var q: Array = SD.QUESTS.filter(func(x): return x["id"] == "noor")
-	check("opdracht 'Red Noor uit het Donker Woud' (start quest_noor, klaar noor_gered)", q.size() == 1
-			and q[0]["title"] == "Red Noor uit het Donker Woud" and q[0]["start_flag"] == "quest_noor" and q[0]["done_flag"] == "noor_gered")
+	check("opdracht 'Red Noor uit het Dark Wood' (start quest_noor, klaar noor_gered)", q.size() == 1
+			and q[0]["title"] == "Save Noor from the Dark Wood" and q[0]["start_flag"] == "quest_noor" and q[0]["done_flag"] == "noor_gered")
 	var missing := SD.TODO_STORY.filter(func(e): return not SD.EVENTS.has(e))
 	check("TODO(verhaal): placeholder-events gemarkeerd en aanwezig (%d, mist %s)" % [SD.TODO_STORY.size(), missing],
 			missing.is_empty() and SD.TODO_STORY.has("noor_ontmoeting") and SD.TODO_STORY.has("noor_bevrijd")
 			and FileAccess.get_file_as_string("res://scripts/data/story_data.gd").contains("TODO(verhaal)"))
 	# --- kamers
-	check("Donker Woud: 4 kamers + open plek (baas), volgorde ingang -> baas", WR.ORDER.size() == 5
+	check("Dark Wood: 4 kamers + open plek (baas), volgorde ingang -> baas", WR.ORDER.size() == 5
 			and WR.ORDER[0][0] == "woud_rand" and WR.ORDER[4][0] == WR.BOSS_ROOM)
 	var bad := []
 	var chests := 0
@@ -378,9 +378,9 @@ func _data_tests() -> void:
 	var tiers := WR.ORDER.map(func(e): return int(WR.ROOMS[e[0]].get("tier", 0)))
 	check("monsterniveau 3-4 (Lv ~10-13): %s" % [tiers], tiers.all(func(t): return t >= 3 and t <= 4))
 	var boss: Array = WR.ROOMS[WR.BOSS_ROOM]["monsters"].filter(func(m): return m.get("boss", false))
-	check("baas op de open plek: De Wortelkoning (2x2, bewaker)", boss.size() == 1 and boss[0]["enemy"] == "wortelkoning"
+	check("baas op de open plek: The Root King (2x2, bewaker)", boss.size() == 1 and boss[0]["enemy"] == "wortelkoning"
 			and boss[0].get("guard", false) and boss[0]["size"] == [2, 2])
-	check("de Archieven ongemoeid (DR.ROOMS zonder woudkamers)", not DR.ROOMS.has("woud_rand") and DR.room("archief_ingang") == DR.ROOMS["archief_ingang"])
+	check("de Archives ongemoeid (DR.ROOMS zonder woudkamers)", not DR.ROOMS.has("woud_rand") and DR.room("archief_ingang") == DR.ROOMS["archief_ingang"])
 	# --- thema / tegels
 	var th: Dictionary = DR.THEMES["donker_woud"]
 	var tex: Texture2D = load(th["tiles"])
@@ -398,9 +398,9 @@ func _data_tests() -> void:
 		rising = rising and gi[i] > gi[i - 1]
 	check("glitch stijgt naar de baas: %s (ingang = min, open plek = 1)" % [gi], rising and is_equal_approx(gi[0], DR.GLITCH_MIN)
 			and gi[4] == 1.0 and gi[3] == 1.0)
-	check("glitch in de Archieven zoals v0.16 (ingang min, Golemhal 1)", is_equal_approx(DR.glitch_intensity(DR.scene_of("archief_ingang")), DR.GLITCH_MIN)
+	check("glitch in de Archives zoals v0.16 (ingang min, Golem Hall 1)", is_equal_approx(DR.glitch_intensity(DR.scene_of("archief_ingang")), DR.GLITCH_MIN)
 			and DR.glitch_intensity(DR.scene_of("archief_golemhal")) == 1.0)
-	check("geen glitch in Esdoorn en de huizen", DR.glitch_intensity(SD.ESDOORN) == 0.0 and DR.glitch_intensity(SD.ESDOORN_HERBERG) == 0.0)
+	check("geen glitch in Mapleton en de huizen", DR.glitch_intensity(SD.ESDOORN) == 0.0 and DR.glitch_intensity(SD.ESDOORN_HERBERG) == 0.0)
 	# --- vijanden + art
 	var art_bad := []
 	for id in ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning"]:
@@ -414,12 +414,12 @@ func _data_tests() -> void:
 			art_bad.append("%s map" % id)
 	var wk: Dictionary = GD.ENEMIES["wortelkoning"]
 	check("Woud-vijanden: voor + rug, zwak voor vuur, map-plaatje (%s)" % [art_bad], art_bad.is_empty())
-	check("De Wortelkoning: baas-blok, idle 4x 0,4 s + raak-plaatje, geen kern", wk.has("boss") and int(wk["idle_frames"]) == 4
+	check("The Root King: baas-blok, idle 4x 0,4 s + raak-plaatje, geen kern", wk.has("boss") and int(wk["idle_frames"]) == 4
 			and is_equal_approx(float(wk["idle_time"]), 0.4) and ResourceLoader.exists(wk["idle"]) and ResourceLoader.exists(wk["hit"])
 			and not wk["boss"].has("core"))
 	check("bestiarium 007-010 = de Woud-vijanden", GD.bestiary_ids().slice(6, 10) == ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning"])
 	check("bestiarium 011 = de Mimic (Het Gesimuleerde Archief)", GD.bestiary_ids()[10] == "mimic")
-	check("bestiarium 012 = de Inktwurm", GD.bestiary_ids()[11] == "inktwurm")
+	check("bestiarium 012 = de Ink Worm", GD.bestiary_ids()[11] == "inktwurm")
 	var bg: Texture2D = load(GD.backdrop_path("forest_dark"))
 	check("bos-achtergrond 1280x432, ook voor de baas in het woud (archief-baas blijft 'boss')",
 			bg != null and bg.get_size() == Vector2(1280, 432) and GD.backdrop_id_for("woud", false) == "forest_dark"
@@ -487,7 +487,7 @@ func _reachable(g: TileMapLayer, from: Vector2i, to: Vector2i) -> bool:
 func _world_tests() -> void:
 	setup_game()
 	var w := await enter(WORLD, "van_esdoorn")
-	check("wereldkaart met Esdoorn en het Donker Woud", w != null and w.get_node_or_null("Exits/NaarEsdoorn") != null
+	check("wereldkaart met Mapleton en het Dark Wood", w != null and w.get_node_or_null("Exits/NaarEsdoorn") != null
 			and w.get_node_or_null("Exits/NaarWoud") != null)
 	check("wereldkaart speelt track 'wereld' (bgm_wereld.ogg)", w != null and w.music_track == "wereld"
 			and AudioManager.get_current_music() == "wereld")
@@ -499,14 +499,14 @@ func _world_tests() -> void:
 	var e_tile := Vector2i((ex_e.position / 16.0).floor())
 	var w_tile := Vector2i((ex_w.position / 16.0).floor())
 	var stairs := Vector2i((w.get_node("Spawns/van_archief").position / 16.0).floor())
-	check("Esdoorn en het woud lopend bereikbaar vanaf de Archieven", _reachable(g, stairs, e_tile) and _reachable(g, stairs, w_tile))
+	check("Mapleton en het woud lopend bereikbaar vanaf de Archives", _reachable(g, stairs, e_tile) and _reachable(g, stairs, w_tile))
 	check("iconen uit de 2e atlas (geen monsters: 'stad')", g.get_cell_source_id(e_tile) == 1 and g.get_cell_source_id(w_tile) == 1
 			and w.terrain_at(e_tile) == "stad" and w.terrain_at(w_tile) == "stad")
 	# zonder Golem: dicht
 	await walk("move_up", 1)
 	var blocked := await wait_until(func(): return Dialog.is_open, 2.0)
-	check("VOOR de Golem: Esdoorn dicht ('%s')" % Dialog.text_label.text, blocked and scene().name == "Wereldkaart"
-			and Dialog.text_label.text.contains("Esdoorn"))
+	check("VOOR de Golem: Mapleton dicht ('%s')" % Dialog.text_label.text, blocked and scene().name == "Wereldkaart"
+			and Dialog.text_label.text.contains("Mapleton"))
 	await close_dialog()
 	await pframes(10)
 	check("... en je blijft op de wereldkaart", scene().name == "Wereldkaart" and not GameState.changing_map)
@@ -515,7 +515,7 @@ func _world_tests() -> void:
 	await frames(3)
 	await walk("move_left", 1)
 	blocked = await wait_until(func(): return Dialog.is_open, 2.0)
-	check("zonder opdracht: het Donker Woud dicht", blocked and scene().name == "Wereldkaart")
+	check("zonder opdracht: het Dark Wood dicht", blocked and scene().name == "Wereldkaart")
 	await close_dialog()
 	await pframes(10)
 	# na de Golem: open (echt erheen lopen)
@@ -523,7 +523,7 @@ func _world_tests() -> void:
 	player().place_at(e_tile + Vector2i(0, 2), Vector2i.UP)
 	await frames(3)
 	await walk("move_up", 1)
-	check("NA de Golem: Esdoorn open (dorp geladen)", await wait_scene("Esdoorn"))
+	check("NA de Golem: Mapleton open (dorp geladen)", await wait_scene("Esdoorn"))
 
 
 # ================================================================ C: Esdoorn
@@ -542,21 +542,21 @@ func _village_tests() -> void:
 	check("blauwe ballonnen met namen (Noor, %s, Marit): %d regels" % [GameState.player_name, lines.size()],
 			lines.any(func(l): return str(l).begins_with("Noor: ")) and lines.any(func(l): return str(l).begins_with("Marit: "))
 			and lines.any(func(l): return str(l).begins_with(GameState.player_name + ": ")))
-	check("eindigt met de opdracht (dorpeling vraagt Noor te redden)", lines.any(func(l): return "red haar" in str(l))
-			and lines.any(func(l): return "Nieuwe opdracht: Red Noor uit het Donker Woud" in str(l)))
+	check("eindigt met de opdracht (dorpeling vraagt Noor te redden)", lines.any(func(l): return "save her" in str(l))
+			and lines.any(func(l): return "New quest: Save Noor from the Dark Wood" in str(l)))
 	check("vlaggen: noor_ontmoet + quest_noor, stap NOOR_KWIJT", Story.has_flag("noor_ontmoet") and Story.has_flag("quest_noor")
 			and GameState.story_step == SD.NOOR_KWIJT)
 	check("Noor is weg (meegesleurd), de wortelgreep ook", not noor.visible and not v.get_node("Objects/WortelGreep").visible)
-	check("opdracht loopt: '%s'" % Story.active_quest(), Story.active_quest() == "Red Noor uit het Donker Woud")
-	check("Codex: Marit geeft 3 Lege Boeken na de ontmoeting (geen startvoorraad) (%d)" % GameState.item_count("leeg_boek"),
+	check("opdracht loopt: '%s'" % Story.active_quest(), Story.active_quest() == "Save Noor from the Dark Wood")
+	check("Codex: Marit geeft 3 Blank Books na de ontmoeting (geen startvoorraad) (%d)" % GameState.item_count("leeg_boek"),
 			GameState.item_count("leeg_boek") == 3 and Story.has_flag("marit_boeken") and not GD.START_INVENTORY.has("leeg_boek")
-			and lines.any(func(l): return "3x Leeg Boek" in str(l)))
+			and lines.any(func(l): return "3x Blank Book" in str(l)))
 	# veldmenu: regel met de opdracht
 	v.open_field_menu()
 	await pframes(4)
 	var fm: Node = v.get_node_or_null("FieldMenu")
-	check("veldmenu: 'Opdracht' + 'Red Noor uit het Donker Woud'", fm != null and fm.quest_label != null
-			and fm.quest_label.text == "Red Noor uit het Donker Woud" and fm.quest_label.is_visible_in_tree())
+	check("veldmenu: 'Opdracht' + 'Red Noor uit het Dark Wood'", fm != null and fm.quest_label != null
+			and fm.quest_label.text == "Save Noor from the Dark Wood" and fm.quest_label.is_visible_in_tree())
 	await v17_shot("veldmenu_opdracht")
 	if fm:
 		fm.close()
@@ -592,7 +592,7 @@ func _village_tests() -> void:
 	check("binnen: Ilse (moeder van Noor)", ilse != null and ilse.event == "ilse")
 	await wait_fade()
 	await walk("move_down", 2)
-	check("deur uit = terug in Esdoorn voor het huis", await wait_scene("Esdoorn") and tile() == Vector2i(7, 9))
+	check("deur uit = terug in Mapleton voor het huis", await wait_scene("Esdoorn") and tile() == Vector2i(7, 9))
 	await get_tree().create_timer(0.5).timeout
 	# herberg: rusten + opslagboek
 	var h := await enter(SD.ESDOORN_HERBERG, "binnen")
@@ -621,7 +621,7 @@ func _forest_tests() -> void:
 	player().place_at(wt + Vector2i.RIGHT, Vector2i.LEFT)
 	await frames(3)
 	await walk("move_left", 1)
-	check("met de opdracht: het Donker Woud in (Woudrand)", await wait_scene("WoudRand"))
+	check("met de opdracht: het Dark Wood in (Wood's Edge)", await wait_scene("WoudRand"))
 	await wait_fade()
 	var r := scene()
 	check("thema: woud-tegels, terrein 'woud', tint + mist", r.ground.tile_set.get_source(0).texture.resource_path.ends_with("woud_tiles.png")
@@ -642,7 +642,7 @@ func _forest_tests() -> void:
 	player().place_at(Vector2i(10, 3), Vector2i.UP)
 	await frames(3)
 	await walk("move_up", 1)
-	check("Woudrand -> (boog) -> Wortelpad", await wait_scene("WoudPad"))
+	check("Wood's Edge -> (boog) -> Root Path", await wait_scene("WoudPad"))
 	await wait_fade()
 	# alle kamers verbonden: per uitgang de scène in en op het juiste spawnpunt
 	var conn_bad := []
@@ -686,7 +686,7 @@ func _forest_tests() -> void:
 	r = await enter("res://scenes/maps/woud_mistpoel.tscn", "zuid")
 	await freeze_monsters(r)
 	await pframes(3)
-	check("glitch sterker dieper in het woud (Mistpoel %.2f > ingang)" % Crt.glitch_intensity, Crt.glitch_intensity > DR.GLITCH_MIN + 0.1)
+	check("glitch sterker dieper in het woud (Mist Pool %.2f > ingang)" % Crt.glitch_intensity, Crt.glitch_intensity > DR.GLITCH_MIN + 0.1)
 	player().place_at(Vector2i(9, 11), Vector2i.UP)
 	await get_tree().create_timer(0.5).timeout
 	await v17_shot("woud_kamer")
@@ -695,7 +695,7 @@ func _forest_tests() -> void:
 	await pframes(3)
 	var cocon: Node = r.get_node_or_null("Objects/Cocon")
 	var boss: Node = r.get_monster("baas")
-	check("open plek: Noor in de cocon (puls) achter de Wortelkoning", cocon != null and cocon.visible and cocon.looping
+	check("open plek: Noor in de cocon (puls) achter de Root King", cocon != null and cocon.visible and cocon.looping
 			and str(cocon.sprite.texture.resource_path).ends_with("noor_cocon_puls.png") and boss != null and boss.boss
 			and not r.get_node("Objects/Noor").visible and not r.get_node("Objects/CoconOpen").visible)
 	check("glitch maximaal bij de baas (%.2f)" % Crt.glitch_intensity, Crt.glitch_intensity == 1.0)
@@ -711,7 +711,7 @@ func _forest_tests() -> void:
 	check("bos-achtergrond (forest_dark) in het baasgevecht, niet vluchten", GameState.pending_backdrop_id == "forest_dark"
 			and GameState.pending_boss and b != null and not b.can_flee)
 	var g: Dictionary = b.enemies[0] if b and not b.enemies.is_empty() else {}
-	check("De Wortelkoning: baas-stats en idle-animatie", not g.is_empty() and int(g["s"]["max_hp"]) == int(GD.ENEMIES["wortelkoning"]["boss"]["max_hp"])
+	check("The Root King: baas-stats en idle-animatie", not g.is_empty() and int(g["s"]["max_hp"]) == int(GD.ENEMIES["wortelkoning"]["boss"]["max_hp"])
 			and g["node"].has_meta("idle_frames"))
 	await wait_battle_state(["command"], 20)
 	await get_tree().create_timer(0.6).timeout
@@ -722,8 +722,8 @@ func _forest_tests() -> void:
 	check("terug op de open plek", await wait_scene("WoudOpenPlek"))
 	check("Noor-bevrijding start vanzelf", await wait_until(func(): return Story.running, 3.0) and Story.current_event == "noor_bevrijd")
 	var ls := await run_story(60.0, "Ik ga met je mee", "noor_erbij")
-	check("tekst: Noor sluit zich aan + opdracht voltooid", ls.any(func(l): return "Noor sluit zich aan" in str(l))
-			and ls.any(func(l): return "Opdracht voltooid" in str(l)))
+	check("tekst: Noor joins the party + quest complete", ls.any(func(l): return "Noor joins the party" in str(l))
+			and ls.any(func(l): return "Quest complete" in str(l)))
 	var noor := {}
 	for h in GameState.party:
 		if h["id"] == "noor":
@@ -731,7 +731,7 @@ func _forest_tests() -> void:
 	var lv_now := int(GameState.party[0]["level"])     # (de baas gaf EXP: Dennis kan gestegen zijn)
 	check("Noor in de groep (niveau Dennis-1 = %d, Dennis was Lv %d voor de baas, gevechtsplaatje noor.png)" % [lv_now - 1, lv], not noor.is_empty()
 			and int(noor["level"]) == lv_now - 1 and str(noor["battle_sprite"]).ends_with("battle/noor.png"))
-	check("Noor draagt Eiken Staf + Reisgewaad, HP/MP vol", not noor.is_empty() and noor["equip"]["wapen"] == "eiken_staf"
+	check("Noor draagt Oak Staff + Travel Robe, HP/MP vol", not noor.is_empty() and noor["equip"]["wapen"] == "eiken_staf"
 			and noor["equip"]["harnas"] == "reisgewaad" and int(noor["hp"]) == int(noor["max_hp"]) and int(noor["mp"]) == int(noor["max_mp"]))
 	check("opdracht klaar: noor_gered + noor_lid, stap NOOR_GERED, geen lopende opdracht", Story.has_flag("noor_gered")
 			and Story.has_flag("noor_lid") and Story.has_flag(SD.WORTELKONING_FLAG) and GameState.story_step == SD.NOOR_GERED and Story.active_quest() == "")
@@ -759,7 +759,7 @@ func _save_tests() -> void:
 	for h in GameState.party:
 		if h["id"] == "noor":
 			noor = h
-	check("Noor terug in de groep (Lv %d, Eiken Staf)" % lv_noor, not noor.is_empty() and int(noor["level"]) == lv_noor
+	check("Noor terug in de groep (Lv %d, Oak Staff)" % lv_noor, not noor.is_empty() and int(noor["level"]) == lv_noor
 			and noor["equip"]["wapen"] == "eiken_staf")
 	GameState.continue_game()
 	check("verder spelen: op de open plek, geen cutscene", await wait_scene("WoudOpenPlek") and not Story.running)
@@ -774,7 +774,7 @@ func _save_tests() -> void:
 	GameState.new_game("Iemand")
 	GameState.load_game()
 	check("halverwege geladen: opdracht loopt nog ('%s'), ontmoeting niet opnieuw" % Story.active_quest(),
-			Story.active_quest() == "Red Noor uit het Donker Woud" and Story.has_flag("noor_ontmoet"))
+			Story.active_quest() == "Save Noor from the Dark Wood" and Story.has_flag("noor_ontmoet"))
 
 
 # ================================================================ F: Codex + wereldkaart-iconen
@@ -785,8 +785,8 @@ func _codex_forest_tests() -> void:
 		for c in DR.room(e[0]).get("chests", []):
 			if c["item"] == CD.BOOK_ITEM:
 				books += int(c.get("n", 1))
-	check("Lege Boeken in kisten van het Donker Woud (%d)" % books, books >= 1 and books <= 2)
-	check("Wortelkruiper, Mistuil, Sporenzwam vangbaar; De Wortelkoning niet",
+	check("Blank Books in kisten van het Dark Wood (%d)" % books, books >= 1 and books <= 2)
+	check("Root Crawler, Mist Owl, Spore Cap vangbaar; The Root King niet",
 			["wortelkruiper", "mistuil", "sporenzwam"].all(func(x): return CD.capture_chance(x, 1, 100) > 0.5)
 			and not CD.has_species("wortelkoning") and CD.capture_chance("wortelkoning", 1, 100) == 0.0)
 	# --- oude save: ontmoeting al gezien, nog geen boeken -> Marit geeft ze bij een gesprek (eenmalig)
@@ -801,12 +801,12 @@ func _codex_forest_tests() -> void:
 		if marit and Story.trigger(marit.event, marit):
 			await run_story(15.0)
 		got = GameState.item_count(CD.BOOK_ITEM) if i == 0 else got
-	check("oude save: Marit geeft 3 Lege Boeken bij een gesprek, maar één keer (%d, daarna %d)" % [got, GameState.item_count(CD.BOOK_ITEM)],
+	check("oude save: Marit geeft 3 Blank Books bij een gesprek, maar één keer (%d, daarna %d)" % [got, GameState.item_count(CD.BOOK_ITEM)],
 			got == 3 and GameState.item_count(CD.BOOK_ITEM) == 3)
 	# --- wereldkaart met de iconen van RPG ART
 	var w := await enter(WORLD, "van_esdoorn")
 	var g: TileMapLayer = w.get_node("Ground") if w else null
-	check("wereldkaart: Esdoorn (47-48, 24-25) en woudingang (42, 26) uit wereld_v17_iconen.png (RPG ART, handwerk)",
+	check("wereldkaart: Mapleton (47-48, 24-25) en woudingang (42, 26) uit wereld_v17_iconen.png (RPG ART, handwerk)",
 			g != null and g.get_cell_source_id(Vector2i(47, 24)) == 1 and g.get_cell_atlas_coords(Vector2i(48, 25)) == Vector2i(3, 0)
 			and g.get_cell_source_id(Vector2i(42, 26)) == 1 and g.get_cell_atlas_coords(Vector2i(42, 26)) == Vector2i(4, 0)
 			and "assets/tiles/wereld_v17_iconen.png" in hw_lines())
@@ -846,16 +846,16 @@ func _codex_forest_tests() -> void:
 					break
 				await tap("move_right")
 			await tap("interact")
-	check("inschrijf-effect op de Wortelkruiper", await wait_until(func(): return b.codex.fx_node != null and is_instance_valid(b.codex.fx_node), 6.0))
+	check("inschrijf-effect op de Root Crawler", await wait_until(func(): return b.codex.fx_node != null and is_instance_valid(b.codex.fx_node), 6.0))
 	await wait_until(func(): return b.codex.fx_node == null or int(b.codex.fx_node.get("frame")) >= 2, 2.0)
 	await v17_shot("codex_vangen")
 	await wait_until(func(): return not (str(b.codex.last_capture.get("result", "")) in ["", "bezig"]), 8.0)
-	check("Wortelkruiper ingeschreven (%s), boek op (2 over)" % [b.codex.last_capture.get("result")],
+	check("Root Crawler ingeschreven (%s), boek op (2 over)" % [b.codex.last_capture.get("result")],
 			b.codex.last_capture.get("result") == "gelukt" and GameState.item_count(CD.BOOK_ITEM) == 2)
 	await win_battle()
 	await wait_scene("WoudPad")
 	await wait_fade()
-	check("pagina Wortelkruiper = bondgenoot", GameState.codex_pages.size() == 1 and GameState.codex_pages[0]["species"] == "wortelkruiper"
+	check("pagina Root Crawler = bondgenoot", GameState.codex_pages.size() == 1 and GameState.codex_pages[0]["species"] == "wortelkruiper"
 			and GameState.codex_active == GameState.codex_pages[0]["uid"])
 	# --- bondgenoot vecht mee in het woud (rugaanzicht van RPG ART)
 	r = scene()
@@ -870,7 +870,7 @@ func _codex_forest_tests() -> void:
 	for c in b.heroes:
 		if c.get("ally", false):
 			ally = c
-	check("Wortelkruiper vecht mee naast Dennis (bos-achtergrond %s)" % GameState.pending_backdrop_id, not ally.is_empty()
+	check("Root Crawler vecht mee naast Dennis (bos-achtergrond %s)" % GameState.pending_backdrop_id, not ally.is_empty()
 			and GameState.pending_backdrop_id == "forest_dark")
 	b.codex.force_skill = "wortelgreep"
 	b.codex.last_ally_action = {}
@@ -884,7 +884,7 @@ func _codex_forest_tests() -> void:
 	var acted := await wait_until(func(): return not b.codex.last_ally_action.is_empty(), 15.0)
 	await pframes(9)
 	await v17_shot("codex_bondgenoot")
-	check("bondgenoot gebruikt zelf Wortelgreep %s" % [b.codex.last_ally_action], acted and b.codex.last_ally_action.get("skill") == "wortelgreep")
+	check("bondgenoot gebruikt zelf Root Grip %s" % [b.codex.last_ally_action], acted and b.codex.last_ally_action.get("skill") == "wortelgreep")
 	await win_battle()
 	await wait_scene("WoudPad")
 	await wait_fade()

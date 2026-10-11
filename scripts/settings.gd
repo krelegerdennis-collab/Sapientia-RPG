@@ -27,17 +27,17 @@ const BUS_SFX := "SFX"
 const VOLUME_STEPS := 10
 ## Tekstsnelheid: index -> letters per seconde. 3 = 'Direct' (hele regel in één keer).
 const TEXT_SPEED_CPS := [20.0, 40.0, 80.0, 100000.0]
-const TEXT_SPEED_NAMES := ["Langzaam", "Normaal", "Snel", "Direct"]
+const TEXT_SPEED_NAMES := ["Slow", "Normal", "Fast", "Instant"]
 ## Gevechtstempo: index -> vermenigvuldiger voor wachttijden in het gevecht.
 const BATTLE_SPEED_FACTOR := [0.7, 1.0, 1.6]
-const BATTLE_SPEED_NAMES := ["Langzaam", "Normaal", "Snel"]
+const BATTLE_SPEED_NAMES := ["Slow", "Normal", "Fast"]
 ## Touch-knoppen: zichtbaarheid in procenten (stappen van OPACITY_STEP).
 const OPACITY_MIN := 30
 const OPACITY_MAX := 100
 const OPACITY_STEP := 10
 ## Touch-knoppen: grootte (index -> schaal van de D-pad/A/B-straal).
 const TOUCH_SIZE_SCALE := [0.85, 1.0, 1.15]
-const TOUCH_SIZE_NAMES := ["Klein", "Normaal", "Groot"]
+const TOUCH_SIZE_NAMES := ["Small", "Normal", "Large"]
 
 ## Standaardwaarden (ook = 'nieuw bestand'). Volgorde = volgorde in het optiemenu.
 const DEFAULTS := {

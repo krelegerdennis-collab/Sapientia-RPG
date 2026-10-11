@@ -7,7 +7,7 @@
 [node name="ArchiefGolemhal" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "archief_golemhal"
-map_name = "Vergeten Archieven - Golemhal"
+map_name = "Forgotten Archives - Golem Hall"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

@@ -11,9 +11,9 @@ const GameData := preload("res://scripts/data/game_data.gd")
 
 const LIST_W := 132            # breedte van de itemlijst
 const NAME_COLS := PartyActions.LIST_NAME_COLS   # tekens voor de naam, daarna 'x3'
-const HINT_LIST := "A: gebruiken   B: terug"
-const HINT_TARGET := "Op wie?   A: gebruiken   B: andere keuze"
-const PERMANENT_NOTE := "Blauwe databank: blijft bewaard."
+const HINT_LIST := "A: use   B: back"
+const HINT_TARGET := "On whom?   A: use   B: other choice"
+const PERMANENT_NOTE := "Blue databank: this stays."
 
 var scroll: ScrollContainer
 var list: VBoxContainer
@@ -43,7 +43,7 @@ func _build() -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override("separation", 0)
 	scroll.add_child(list)
-	empty_label = UiMenu.label("Je tas is leeg.", MenuColors.TEXT_DIM)
+	empty_label = UiMenu.label("Your bag is empty.", MenuColors.TEXT_DIM)
 	list.add_child(empty_label)
 	var detail := VBoxContainer.new()
 	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -164,7 +164,7 @@ func _start_targeting() -> void:
 	quiet()
 	desc_label.visible = false
 	effect_label.visible = false
-	name_label.text = "%s x%d - op wie?" % [PartyActions.item_name(selected_id), GameState.item_count(selected_id)]
+	name_label.text = "%s x%d - on whom?" % [PartyActions.item_name(selected_id), GameState.item_count(selected_id)]
 	targets.build(GameState.party)
 	targets.visible = true
 	for b in entries:
@@ -196,7 +196,7 @@ func _on_target_chosen(index: int) -> void:
 		_stop_targeting()
 		show_message(str(r["text"]), MenuColors.INFO if r["ok"] else MenuColors.TEXT_DIM)
 	else:
-		name_label.text = "%s x%d - op wie?" % [PartyActions.item_name(selected_id), GameState.item_count(selected_id)]
+		name_label.text = "%s x%d - on whom?" % [PartyActions.item_name(selected_id), GameState.item_count(selected_id)]
 
 
 func back() -> void:

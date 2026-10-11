@@ -35,15 +35,15 @@ void fragment() {
 const LIST_W := 132
 const NAME_W := 13         # tekens voor de naam in de lijst; langste soort is "Wortelkruiper"
 const NONE_ID := ""
-const HINT := "A: bondgenoot   >: fusie   B: terug"
+const HINT := "A: ally   >: fusion   B: back"
 ## v0.19 fusie: stappen ("" = gewoon Codex-scherm)
 const MODE_A := "kies_a"
 const MODE_B := "kies_b"
 const MODE_PREVIEW := "voorbeeld"
 const FUSE_W := 44
-const HINT_A := "Fusie: kies pagina 1   B: terug"
-const HINT_B := "Fusie: kies pagina 2   B: terug"
-const HINT_PREVIEW := "A: fuseren (beide pagina's gaan op)   B: terug"
+const HINT_A := "Fusion: pick page 1   B: back"
+const HINT_B := "Fusion: pick page 2   B: back"
+const HINT_PREVIEW := "A: fuse (both pages are used up)   B: back"
 
 var scroll: ScrollContainer
 var list: VBoxContainer
@@ -80,7 +80,7 @@ func _build() -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override("separation", 0)
 	scroll.add_child(list)
-	empty_label = UiMenu.label("Nog geen pagina's.", MenuColors.TEXT_DIM)
+	empty_label = UiMenu.label("No pages yet.", MenuColors.TEXT_DIM)
 	empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	list.add_child(empty_label)
 	var detail := VBoxContainer.new()
@@ -109,7 +109,7 @@ func _build() -> void:
 	state_label.custom_minimum_size = Vector2(100, 0)
 	detail.add_child(state_label)
 	# v0.19 fusie: knop vóór 'Terug' (tikken; met de D-pad: rechts)
-	fuse_button = UiMenu.button("Fusie")
+	fuse_button = UiMenu.button("Fusion")
 	fuse_button.custom_minimum_size = Vector2(FUSE_W, ROW_H)
 	fuse_button.focus_mode = Control.FOCUS_NONE
 	fuse_button.pressed.connect(start_fusion)
@@ -139,11 +139,11 @@ func rebuild(keep_uid := "-") -> void:
 		return
 	match mode:
 		MODE_A:
-			header.text = "Fusie: kies pagina 1"
+			header.text = "Fusion: pick page 1"
 		MODE_B:
-			header.text = "Fusie: kies pagina 2"
+			header.text = "Fusion: pick page 2"
 		_:
-			header.text = "Codex   %d/%d pagina's" % [GameState.codex_pages.size(), CodexData.MAX_PAGES]
+			header.text = "Codex   %d/%d pages" % [GameState.codex_pages.size(), CodexData.MAX_PAGES]
 	_update_fuse_button()
 	for p in GameState.codex_pages:
 		uids.append(str(p["uid"]))
@@ -167,7 +167,7 @@ func rebuild(keep_uid := "-") -> void:
 	if entries.is_empty():
 		name_label.text = ""
 		stats_label.text = ""
-		skills_label.text = "Gebruik een Leeg Boek in een gevecht op een verzwakt monster."
+		skills_label.text = "Use a Blank Book in battle on a weakened monster."
 		state_label.text = ""
 		back_button.grab_focus()
 		return
@@ -183,7 +183,7 @@ func rebuild(keep_uid := "-") -> void:
 ## Tekst van een regel ('* Mosslijm  Lv 3'); '*' = actieve bondgenoot.
 func entry_label(uid: String) -> String:
 	if uid == NONE_ID:
-		return ("* " if GameState.codex_active == "" else "  ") + "Geen bondgenoot"
+		return ("* " if GameState.codex_active == "" else "  ") + "No ally"
 	var p := GameState.codex_page(uid)
 	var mark := "* " if GameState.codex_active == uid else "  "
 	var n := str(p["name"])
@@ -201,13 +201,13 @@ func show_page(uid: String) -> void:
 		return
 	shown_uid = uid
 	if uid == NONE_ID:
-		name_label.text = "Geen bondgenoot"
+		name_label.text = "No ally"
 		name_label.add_theme_color_override("font_color", MenuColors.TITLE)
 		picture.texture = null
 		picture.material = null
 		stats_label.text = ""
-		skills_label.text = "%s vecht zonder Codex-monster." % _hero_name()
-		state_label.text = "Gekozen." if GameState.codex_active == "" else "A: niemand laten meevechten."
+		skills_label.text = "%s fights without a Codex monster." % _hero_name()
+		state_label.text = "Chosen." if GameState.codex_active == "" else "A: fight with nobody."
 		return
 	var p := GameState.codex_page(uid)
 	if p.is_empty():
@@ -215,14 +215,14 @@ func show_page(uid: String) -> void:
 	_show_page_data(p)
 	match mode:
 		MODE_A:
-			state_label.text = "A: kies dit als pagina 1."
+			state_label.text = "A: pick this as page 1."
 		MODE_B:
-			state_label.text = "Al gekozen als pagina 1." if uid == pick_a else "A: kies dit als pagina 2."
+			state_label.text = "Already picked as page 1." if uid == pick_a else "A: pick this as page 2."
 		_:
 			if GameState.codex_active == uid:
-				state_label.text = "Vecht mee naast %s." % _hero_name()
+				state_label.text = "Fights beside %s." % _hero_name()
 			else:
-				state_label.text = "A: laat dit monster meevechten."
+				state_label.text = "A: let this monster fight with you."
 
 
 ## Naam van de hoofdheld (GameState.MAIN_HERO; nooit een vaste naam).
@@ -245,11 +245,12 @@ func _show_page_data(p: Dictionary) -> void:
 	picture.modulate = col
 	picture.material = _glitch_mat if fused else null
 	var need: int = maxi(0, GameData.exp_for_level(int(p["level"]) + 1) - int(p["exp"]))
-	stats_label.text = "HP %d/%d  MP %d/%d\nATK %d  DEF %d  SPD %d\nEXP %d  volg. %d\nElement: %s" % [
+	stats_label.text = "HP %d/%d  MP %d/%d\nATK %d  DEF %d  SPD %d\nEXP %d  next %d\nElement: %s" % [
 			int(p["hp"]), int(p["max_hp"]), int(p["mp"]), int(p["max_mp"]),
-			int(p["atk"]), int(p["def"]), int(p["agi"]), int(p["exp"]), need, str(p.get("element", "-"))]
+			int(p["atk"]), int(p["def"]), int(p["agi"]), int(p["exp"]), need,
+			GameData.element_name(str(p.get("element", "-")))]
 	var names: Array = (p["skills"] as Array).map(func(x): return str(CodexData.skill(str(x)).get("name", x)))
-	skills_label.text = "Vaardigheden: " + (", ".join(names) if not names.is_empty() else "-")
+	skills_label.text = "Skills: " + (", ".join(names) if not names.is_empty() else "-")
 
 
 ## A / tik: deze pagina wordt de bondgenoot ('Geen' = niemand). In de fusie-stappen: pagina kiezen.
@@ -260,7 +261,7 @@ func choose(uid: String) -> void:
 		return
 	if mode == MODE_B:
 		if uid == pick_a:
-			show_message("Kies een andere pagina.", MenuColors.TEXT_DIM)
+			show_message("Pick a different page.", MenuColors.TEXT_DIM)
 			return
 		pick_b = uid
 		preview = GameState.codex_fusion_preview(pick_a, pick_b)
@@ -274,9 +275,9 @@ func choose(uid: String) -> void:
 		UiMenu.set_label(entries[i], entry_label(uids[i]))
 	show_page(uid)
 	if uid == NONE_ID:
-		show_message("Geen bondgenoot.")
+		show_message("No ally.")
 	else:
-		show_message("%s vecht mee!" % GameState.codex_page(uid)["name"])
+		show_message("%s fights with you!" % GameState.codex_page(uid)["name"])
 
 
 # ---------------------------------------------------------------- glitch-fusie (v0.19)
@@ -290,7 +291,7 @@ func start_fusion() -> void:
 	if mode != "":
 		return
 	if GameState.codex_pages.size() < 2:
-		show_message("Voor een fusie heb je twee pagina's nodig.", MenuColors.TEXT_DIM)
+		show_message("A fusion needs two pages.", MenuColors.TEXT_DIM)
 		return
 	pick_a = ""
 	pick_b = ""
@@ -324,7 +325,7 @@ func _update_fuse_button() -> void:
 	if GameState.codex_pages.size() < 2:
 		_set_button_color(fuse_button, MenuColors.TEXT_OFF)
 	else:
-		UiMenu.set_label(fuse_button, "Fusie")
+		UiMenu.set_label(fuse_button, "Fusion")
 
 
 ## Pagina 1 in stap 2: '1' vooraan (zelfde breedte als '> '), gedimd goud.
@@ -344,12 +345,12 @@ func _tint_glitch_row(b: Button) -> void:
 
 ## Stap 3: de twee ouders, 'Fuseren!' en 'Annuleren'; rechts het resultaat.
 func _build_preview_rows() -> void:
-	header.text = "Fusie: voorbeeld"
+	header.text = "Fusion: preview"
 	_update_fuse_button()
 	var a := GameState.codex_page(pick_a)
 	var b := GameState.codex_page(pick_b)
 	parents_label.text = "%s Lv%d\n+ %s Lv%d" % [_short(str(a["name"])), int(a["level"]), _short(str(b["name"])), int(b["level"])]
-	for t in [["Fuseren!", confirm_fusion], ["Annuleren", back]]:
+	for t in [["Fuse!", confirm_fusion], ["Cancel", back]]:
 		var btn := UiMenu.button(t[0])
 		btn.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
 		btn.pressed.connect(t[1])
@@ -358,7 +359,7 @@ func _build_preview_rows() -> void:
 	TargetList.link_ring(entries)
 	_show_page_data(preview)
 	var rule: Array = preview["fusion"].get("rule", [])
-	var how := "Glitch-variant van %s." % _short(str(a["name"])) if rule.is_empty() else "Fusietabel: %s + %s." % rule
+	var how := "Glitch variant of %s." % _short(str(a["name"])) if rule.is_empty() else "Fusion table: %s + %s." % rule
 	var inh: Array = (preview["fusion"].get("inherited", []) as Array).map(func(x): return str(CodexData.skill(str(x)).get("name", x)))
 	state_label.text = how + ("" if inh.is_empty() else " Erft: " + ", ".join(inh) + ".")
 	state_label.add_theme_color_override("font_color", UiStyle.GLITCH)
@@ -386,4 +387,4 @@ func confirm_fusion() -> void:
 	_set_mode("", str(page["uid"]))
 	if Engine.has_singleton("Crt") or get_node_or_null("/root/Crt") != null:
 		get_node("/root/Crt").start_glitch(0.18)
-	show_message("Fusie gelukt: %s, Lv %d!" % [page["name"], int(page["level"])], UiStyle.GLITCH)
+	show_message("Fusion succeeded: %s, Lv %d!" % [page["name"], int(page["level"])], UiStyle.GLITCH)

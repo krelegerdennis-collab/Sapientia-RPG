@@ -64,7 +64,7 @@ func on_kernkracht_hit() -> void:
 func interact(_player: Node2D) -> void:
 	if is_open or _anim:
 		return
-	Dialog.show_lines(["Het perkament in deze kast is gescheurd. Er beweegt iets achter."])
+	Dialog.show_lines(["The parchment in this cabinet is torn. Something moves behind it."])
 
 
 func _set_open_now() -> void:
@@ -94,9 +94,9 @@ func _process(delta: float) -> void:
 		return
 	_say = false
 	if _worm != null:
-		Dialog.show_lines(["De kernkracht scheurt het perkament. Een Inktwurm kronkelt de kast uit."])
+		Dialog.show_lines(["Core Power tears the parchment. An Ink Worm writhes out of the cabinet."])
 	else:
-		Dialog.show_lines(["De kernkracht scheurt het perkament. De kast is leeg."])
+		Dialog.show_lines(["Core Power tears the parchment. The cabinet is empty."])
 
 
 func _finish() -> void:

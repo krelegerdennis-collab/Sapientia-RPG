@@ -58,7 +58,7 @@ func _run() -> void:
 		print("=== Deel A: data ===")
 		_data_tests()
 	if part("B"):
-		print("=== Deel B: Leeg Boek in het gevecht ===")
+		print("=== Deel B: Blank Book in het gevecht ===")
 		await _capture_tests()
 	if part("C"):
 		print("=== Deel C: bondgenoot ===")
@@ -376,7 +376,7 @@ func _data_tests() -> void:
 	check("art van RPG ART aanwezig: icoon 16x16, effect 192x48 (4x 48x48)", ResourceLoader.exists(CD.BOOK_ICON)
 			and (load(CD.BOOK_ICON) as Texture2D).get_size() == Vector2(16, 16) and ResourceLoader.exists(CD.INSCRIBE_EFFECT)
 			and (load(CD.INSCRIBE_EFFECT) as Texture2D).get_size() == Vector2(192, 48))
-	check("Kennis-Beest als bondgenoot kleiner (ally_scale 0,75), effect 2x", is_equal_approx(float(CD.species("kennis_beest")["ally_scale"]), 0.75)
+	check("Lore Beast als bondgenoot kleiner (ally_scale 0,75), effect 2x", is_equal_approx(float(CD.species("kennis_beest")["ally_scale"]), 0.75)
 			and is_equal_approx(float(CD.species("kennis_beest")["fx_scale"]), 2.0) and is_equal_approx(float(CD.species("mosslijm")["ally_scale"]), 1.0))
 	# v0.17 Donker Woud: 3 nieuwe soorten via data, De Wortelkoning (baas) niet te vangen
 	for id in ["wortelkruiper", "mistuil", "sporenzwam"]:
@@ -384,21 +384,21 @@ func _data_tests() -> void:
 		check("v17 soort %s: basis = ENEMIES, rug = sprite_back (bestaat), leert op Lv 1" % id, not ws.is_empty()
 				and CD.base_stats(id)["max_hp"] == int(GD.ENEMIES[id]["max_hp"]) and str(ws["back"]) == str(GD.ENEMIES[id]["sprite_back"])
 				and ResourceLoader.exists(str(ws["back"])) and not CD.skills_at(id, 1).is_empty())
-	check("De Wortelkoning: geen Codex-soort, kans 0 (ook buiten een baasgevecht)", CD.species_for_enemy("wortelkoning") == ""
+	check("The Root King: geen Codex-soort, kans 0 (ook buiten een baasgevecht)", CD.species_for_enemy("wortelkoning") == ""
 			and CD.capture_chance("wortelkoning", 1, 440) == 0.0 and CD.capture_chance("wortelkoning", 1, 440, true) == 0.0)
 	var mini := CD.species_from("nieuw", {"enemy": "moskonijn"})
 	# v0.18: de Moskonijn heeft nu een echte rug (RPG ART art_rug_v18), geen plaatsvervanger meer
 	check("nieuwe soort met alleen {'enemy'}: standaard groei/leert/AI, rug uit ENEMIES (moskonijn: moskonijn_rug.png)", mini["growth"] == CD.DEFAULT_GROWTH
 			and mini["learn"] == CD.DEFAULT_LEARN and mini["ai"]["target"] == CD.DEFAULT_AI["target"]
-			and mini["back"] == "res://art/enemies/moskonijn_rug.png" and mini["name"] == "Moskonijn" and mini["capturable"] == true)
+			and mini["back"] == "res://art/enemies/moskonijn_rug.png" and mini["name"] == "Moss Rabbit" and mini["capturable"] == true)
 	var mini_mw := CD.species_from("nieuw2", {"enemy": "mech_wachter"})
 	check("nieuwe soort {'enemy': 'mech_wachter'}: rug uit ENEMIES (mech_wachter_rug.png)", mini_mw["back"] == "res://assets/sprites/enemies/mech_wachter_rug.png"
-			and mini_mw["name"] == "Mech. Wachter")
+			and mini_mw["name"] == "Mech. Warden")
 	var rug_sizes := {}
 	for rid in ["moskonijn", "mech_wachter"]:
 		var rp := str(CD.species(rid)["back"])
 		rug_sizes[rid] = (load(rp) as Texture2D).get_size() if ResourceLoader.exists(rp) else Vector2.ZERO
-	check("v0.18 rug-sprites geladen: Moskonijn 106x110, Mech. Wachter 88x112 %s" % [rug_sizes], rug_sizes["moskonijn"] == Vector2(106, 110)
+	check("v0.18 rug-sprites geladen: Moss Rabbit 106x110, Mech. Warden 88x112 %s" % [rug_sizes], rug_sizes["moskonijn"] == Vector2(106, 110)
 			and rug_sizes["mech_wachter"] == Vector2(88, 112))
 	var zonder_rug: Array = []
 	for k in CD.SPECIES:
@@ -420,11 +420,11 @@ func _data_tests() -> void:
 	check("volle HP ~2%%, halve ~35%%, 1 HP > 80%%, nooit > 95%%", is_equal_approx(curve[0], CD.CAPTURE_MIN)
 			and absf(curve[2] - 0.349) < 0.01 and curve[4] > 0.8 and CD.capture_chance("papiergeest", 0, 16) <= CD.CAPTURE_MAX)
 	check("baas: kans 0", CD.capture_chance("kennis_beest", 1, 400, true) == 0.0)
-	check("capture_rate: Kennis-Beest lager (x0,6)", is_equal_approx(CD.capture_chance("kennis_beest", 1, 46), CD.capture_chance("mosslijm", 1, 46) * 0.6))
+	check("capture_rate: Lore Beast lager (x0,6)", is_equal_approx(CD.capture_chance("kennis_beest", 1, 46), CD.capture_chance("mosslijm", 1, 46) * 0.6))
 	# pagina's
 	var p3 := CD.make_page("mosslijm", 3, "codex_x")
 	var st3 := CD.stats_at("mosslijm", 3)
-	check("pagina Lv 3: stats = basis + 2x groei, Mosheling geleerd, fusievelden", p3["max_hp"] == 10 + 2 * 5 and p3["max_hp"] == st3["max_hp"]
+	check("pagina Lv 3: stats = basis + 2x groei, Moss Mend geleerd, fusievelden", p3["max_hp"] == 10 + 2 * 5 and p3["max_hp"] == st3["max_hp"]
 			and p3["skills"] == ["slijmklodder", "mosheling"] and p3["exp"] == GD.exp_for_level(3)
 			and p3["fusion"] == {"generation": 0, "parents": []} and p3["element"] == "natuur")
 	GameState.new_game("Dennis")
@@ -439,15 +439,15 @@ func _data_tests() -> void:
 	GameState.new_game("Dennis")
 	check("nieuw spel: lege Codex, geen bondgenoot", GameState.codex_pages.is_empty() and GameState.codex_active == "")
 	var it: Dictionary = GD.ITEMS.get(CD.BOOK_ITEM, {})
-	check("item Leeg Boek: op een vijand, alleen in gevecht, NIET in de startvoorraad (v0.17: van Marit + woudkisten)", it.get("target") == "enemy"
+	check("item Blank Book: op een vijand, alleen in gevecht, NIET in de startvoorraad (v0.17: van Marit + woudkisten)", it.get("target") == "enemy"
 			and it.get("field") == false and it.get("capture") == true and GameState.item_count(CD.BOOK_ITEM) == 0
 			and not GD.START_INVENTORY.has(CD.BOOK_ITEM))
 	var golem_drops: Array = GD.fixed_drops(GD.ENEMIES["kennis_beest"]["boss"].get("drops", []))
 	var plain_drops: Array = GD.fixed_drops(GD.ENEMIES["kennis_beest"].get("drops", []))
 	var woud_drops: Array = GD.fixed_drops(GD.ENEMIES["wortelkoning"].get("drops", []))
-	check("Golem-baas (Eerste Archief): vaste buit 3x Leeg Boek", golem_drops.size() == 1
+	check("Golem-baas (Eerste Archief): vaste buit 3x Blank Book", golem_drops.size() == 1
 			and golem_drops[0]["item"] == CD.BOOK_ITEM and int(golem_drops[0]["n"]) == 3)
-	check("gewone Kennis-Beest en De Wortelkoning: geen vaste boekbuit", plain_drops.is_empty() and woud_drops.is_empty())
+	check("gewone Lore Beast en The Root King: geen vaste boekbuit", plain_drops.is_empty() and woud_drops.is_empty())
 	check("volger wel in kerkers en op de wereldkaart", Follower.allowed("res://scenes/maps/archief_golemhal.tscn")
 			and Follower.allowed("res://scenes/maps/archief_puzzel.tscn") and Follower.allowed("res://scenes/maps/woud_pad.tscn")
 			and Follower.allowed("res://scenes/maps/wereldkaart.tscn") and Follower.allowed("res://scenes/maps/dungeon100.tscn"))
@@ -459,7 +459,7 @@ func _data_tests() -> void:
 	# EXP-groei
 	var p := CD.make_page("papiergeest", 1, "codex_y")
 	var msgs := CD.give_exp(p, GD.exp_for_level(4))
-	check("EXP -> Lv 4 + Papierstorm geleerd %s" % [msgs], p["level"] == 4 and p["skills"].has("papierstorm")
+	check("EXP -> Lv 4 + Paper Storm geleerd %s" % [msgs], p["level"] == 4 and p["skills"].has("papierstorm")
 			and p["atk"] == CD.stats_at("papiergeest", 4)["atk"] and msgs.size() == 4)
 
 
@@ -467,7 +467,7 @@ func _data_tests() -> void:
 func _capture_tests() -> void:
 	setup()
 	var room := await enter(GOLEM_SCENE, "zuid")
-	check("Golemhal geladen", room != null)
+	check("Golem Hall geladen", room != null)
 	if room == null:
 		return
 	var exp0: int = GameState.party[0]["exp"]
@@ -480,13 +480,13 @@ func _capture_tests() -> void:
 	await wait_battle_state(["command"])
 	e["s"]["hp"] = 1
 	b.codex.force_roll = 0.0
-	check("Item-menu bevat 'Leeg Boek x3'", b._available_items().has(CD.BOOK_ITEM))
-	check("Leeg Boek gekozen op Mosslijm", await use_book(b, e))
+	check("Item-menu bevat 'Blank Book x3'", b._available_items().has(CD.BOOK_ITEM))
+	check("Blank Book gekozen op Moss Slime", await use_book(b, e))
 	check("inschrijf-effect speelt (art van RPG ART)", await wait_until(func(): return b.codex.fx_node != null and is_instance_valid(b.codex.fx_node), 6.0)
 			and b.codex.fx_node.get_script() != null and b.codex.fx_node.has_method("setup"))
 	await wait_until(func(): return b.codex.fx_node == null or int(b.codex.fx_node.get("frame")) >= 2, 2.0)
 	await screenshot("codex_boek_inschrijven")
-	check("bericht: ingeschreven in de Codex", await wait_until(func(): return seen_message("ingeschreven in de Codex"), 6.0))
+	check("bericht: written into the Codex", await wait_until(func(): return seen_message("written into the Codex"), 6.0))
 	await pframes(6)
 	await screenshot("codex_gevangen")
 	check("vangkans bij 1/10 HP %.2f (> 0,8), resultaat 'gelukt'" % float(b.codex.last_capture.get("chance", 0.0)),
@@ -495,7 +495,7 @@ func _capture_tests() -> void:
 			and GameState.defeated_count("mosslijm") == 0)
 	await finish()
 	check("gevecht klaar als 'win' (laatste vijand), terug op de kaart", GameState.last_battle_result == "win" and scene().scene_file_path == GOLEM_SCENE)
-	check("1 pagina: Mosslijm Lv 1, HP %d, Slijmklodder; meteen bondgenoot" % (GameState.codex_pages[0]["max_hp"] if not GameState.codex_pages.is_empty() else -1),
+	check("1 pagina: Moss Slime Lv 1, HP %d, Slime Glob; meteen bondgenoot" % (GameState.codex_pages[0]["max_hp"] if not GameState.codex_pages.is_empty() else -1),
 			GameState.codex_pages.size() == 1 and GameState.codex_pages[0]["species"] == "mosslijm" and GameState.codex_pages[0]["level"] == 1
 			and GameState.codex_pages[0]["skills"] == ["slijmklodder"] and GameState.codex_active == GameState.codex_pages[0]["uid"])
 	check("boek op (2 over), geen EXP voor een ingeschreven monster", GameState.item_count(CD.BOOK_ITEM) == 2 and GameState.party[0]["exp"] == exp0)
@@ -508,7 +508,7 @@ func _capture_tests() -> void:
 	await wait_battle_state(["command"])
 	b.codex.force_roll = 0.999
 	await use_book(b, e)
-	check("mislukt: 'Het boek blijft leeg'", await wait_until(func(): return seen_message("Het boek blijft leeg"), 8.0))
+	check("mislukt: 'The book stays blank'", await wait_until(func(): return seen_message("The book stays blank"), 8.0))
 	check("mislukt: boek toch op (1 over), monster blijft, geen pagina", GameState.item_count(CD.BOOK_ITEM) == 1
 			and not e.get("captured", false) and int(e["s"]["hp"]) > 0 and GameState.codex_pages.size() == 1
 			and is_equal_approx(float(b.codex.last_capture["chance"]), CD.CAPTURE_MIN))
@@ -524,7 +524,7 @@ func _capture_tests() -> void:
 	e["s"]["hp"] = 1
 	b.codex.force_roll = 0.0
 	await use_book(b, e)
-	check("baas: 'te machtig' (duidelijke melding)", await wait_until(func(): return seen_message("te machtig"), 8.0))
+	check("baas: 'te machtig' (duidelijke melding)", await wait_until(func(): return seen_message("too strong"), 8.0))
 	check("baas: boek blijft (1), geen pagina, baas staat nog", GameState.item_count(CD.BOOK_ITEM) == 1
 			and GameState.codex_pages.size() == 1 and int(e["s"]["hp"]) > 0 and b.codex.last_capture.get("result") == "baas")
 	e["s"]["hp"] = 400
@@ -537,7 +537,7 @@ func _ally_tests() -> void:
 	setup()
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("Golemhal geladen", false)
+		check("Golem Hall geladen", false)
 		return
 	var page := GameState.codex_add("mosslijm", 2)
 	page["exp"] = GD.exp_for_level(2)
@@ -573,19 +573,19 @@ func _ally_tests() -> void:
 	hp_before = 400
 	await defend(b)
 	var acted := await wait_until(func(): return not b.codex.last_ally_action.is_empty(), 15.0)
-	check("bondgenoot handelt zelf (Slijmklodder) %s" % [b.codex.last_ally_action], acted and b.codex.last_ally_action.get("skill") == "slijmklodder")
+	check("bondgenoot handelt zelf (Slime Glob) %s" % [b.codex.last_ally_action], acted and b.codex.last_ally_action.get("skill") == "slijmklodder")
 	await pframes(9)
 	await screenshot("codex_bondgenoot_aanval")
 	await wait_battle_state(["command"], 30)
 	var hp_after: int = b.enemies.map(func(x): return int(x["s"]["hp"])).reduce(func(s, v): return s + v, 0)
 	check("vijanden nemen schade van de bondgenoot (%d -> %d)" % [hp_before, hp_after], hp_after < hp_before
-			and seen_message("%s: Slijmklodder!" % page["name"]))
+			and seen_message("%s: Slime Glob!" % page["name"]))
 	# kan geraakt worden
 	var ahp := int(page["hp"])
 	b._hit(a, 3)
 	check("bondgenoot geraakt: HP %d -> %d (zelfde HP als de pagina)" % [ahp, int(page["hp"])], int(page["hp"]) == ahp - 3)
 	# AI genezen: HP laag -> Mosheling (Lv 3) ... deze is Lv 2: kent het nog niet
-	check("Lv 2 kent nog geen Mosheling", not (page["skills"] as Array).has("mosheling"))
+	check("Lv 2 kent nog geen Moss Mend", not (page["skills"] as Array).has("mosheling"))
 	# KO
 	b._hit(a, 999)
 	await b._report_kos([a])
@@ -615,7 +615,7 @@ func _ally_tests() -> void:
 			await screenshot("codex_levelup"))
 	check("bondgenoot krijgt EXP en gaat naar Lv 3 (ATK %d -> %d)" % [atk0, int(page["atk"])], int(page["level"]) == lv0 + 1
 			and int(page["atk"]) == CD.stats_at("mosslijm", 3)["atk"])
-	check("level-up-pagina na de winst + nieuwe vaardigheid Mosheling", got_page[0] and (page["skills"] as Array).has("mosheling"))
+	check("level-up-pagina na de winst + nieuwe vaardigheid Moss Mend", got_page[0] and (page["skills"] as Array).has("mosheling"))
 	# AI geneest bij lage HP (Mosheling, Lv 3)
 	b = await start_battle(["papiergeest"])
 	if b == null:
@@ -629,7 +629,7 @@ func _ally_tests() -> void:
 	b.codex.last_ally_action = {}
 	await defend(b)
 	var healed := await wait_until(func(): return not b.codex.last_ally_action.is_empty(), 15.0)
-	check("AI: Dennis bijna KO -> bondgenoot geneest met Mosheling %s" % [b.codex.last_ally_action], healed
+	check("AI: Dennis bijna KO -> bondgenoot geneest met Moss Mend %s" % [b.codex.last_ally_action], healed
 			and b.codex.last_ally_action.get("skill") == "mosheling" and b.codex.last_ally_action.get("target") == GameState.party[0]["name"])
 	await wait_battle_state(["command"], 30)
 	check("Dennis is genezen (HP %d > 3)" % int(GameState.party[0]["hp"]), int(GameState.party[0]["hp"]) > 3)
@@ -646,7 +646,7 @@ func _ally_tests() -> void:
 	await pframes(10)
 	var kn: Control = ally_c(b)["node"]
 	var kh: float = kn.art_rect(kn.home).size.y
-	check("Kennis-Beest als bondgenoot: %.1f eenheden hoog (= 182 x 0,375), echte art" % kh, not kn.placeholder and absf(kh - 182.0 * 0.375) < 0.6)
+	check("Lore Beast als bondgenoot: %.1f eenheden hoog (= 182 x 0,375), echte art" % kh, not kn.placeholder and absf(kh - 182.0 * 0.375) < 0.6)
 	await screenshot("codex_bondgenoot_kennisbeest")
 	await flee(b)
 	# v0.18: Moskonijn en Mech. Wachter met hun echte rugaanzicht (art_rug_v18), niet meer gespiegeld/donker
@@ -687,7 +687,7 @@ func _screen_tests() -> void:
 	setup()
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("Golemhal geladen", false)
+		check("Golem Hall geladen", false)
 		return
 	await tap("menu")
 	await frames(3)
@@ -708,7 +708,7 @@ func _screen_tests() -> void:
 		check("veldmenu open", false)
 		return
 	var labels: Array = m.commands().map(func(c): return str(m.buttons[c[0]].get_meta("label")))
-	check("menu: 'Codex' na 'Status' %s" % [labels], labels == ["Items", "Magie", "Uitrusting", "Status", "Codex", "Bestiarium", "Opties", "Opslaan", "Sluiten"])
+	check("menu: 'Codex' na 'Status' %s" % [labels], labels == ["Items", "Magic", "Equipment", "Status", "Codex", "Bestiary", "Options", "Save", "Close"])
 	check("menuvensters overlappen niet (9 regels)", not m.command_box.get_global_rect().intersects(m.info_box.get_global_rect()))
 	m.choose("codex")
 	await frames(3)
@@ -719,9 +719,9 @@ func _screen_tests() -> void:
 	var texts: Array = []
 	for i in s.entries.size():
 		texts.append(s.entry_text(i))
-	check("lijst: 4 pagina's + 'Geen', '*' = bondgenoot %s" % [texts], s.entries.size() == 5 and texts[0].begins_with("* Mosslijm")
-			and "Lv3" in texts[0] and "Kennis-Beest" in texts[2] and texts[4].ends_with("Geen bondgenoot") and s.entries[0].has_focus())
-	check("lange naam niet afgekapt: '%s'" % texts[3], "Wortelkruiper Lv12" in texts[3])
+	check("lijst: 4 pagina's + 'Geen', '*' = bondgenoot %s" % [texts], s.entries.size() == 5 and texts[0].begins_with("* Moss Slime")
+			and "Lv3" in texts[0] and "Lore Beast" in texts[2] and texts[4].ends_with("No ally") and s.entries[0].has_focus())
+	check("lange naam niet afgekapt: '%s'" % texts[3], "Root Crawler Lv12" in texts[3])
 	var past := true
 	for e in s.entries:
 		var f: Font = e.get_theme_font("font")
@@ -735,18 +735,18 @@ func _screen_tests() -> void:
 	p1["name"] = oud
 	check("naam langer dan 13 tekens: afgekort met '.' ('%s')" % kort, "Bibliotheekw. Lv3" in kort)
 	check("details: level, stats, vaardigheden", "Lv 3" in s.name_label.text and "ATK %d" % int(p1["atk"]) in s.stats_label.text
-			and "Mosheling" in s.skills_label.text and "Vecht mee" in s.state_label.text)
+			and "Moss Mend" in s.skills_label.text and "Vecht mee" in s.state_label.text)
 	check("tikvlakken >= 16 hoog (mobiel)", s.entries.all(func(x): return x.size.y >= 16))
 	await tap("move_down")
 	await tap("interact")
 	await frames(2)
-	check("A op Glitchmot: nu de bondgenoot", GameState.codex_active == p2["uid"] and s.entry_text(1).begins_with("* Glitchmot")
-			and s.entry_text(0).begins_with("  Mosslijm") and "HP 7/" in s.stats_label.text)
+	check("A op Glitch Moth: nu de bondgenoot", GameState.codex_active == p2["uid"] and s.entry_text(1).begins_with("* Glitch Moth")
+			and s.entry_text(0).begins_with("  Moss Slime") and "HP 7/" in s.stats_label.text)
 	await screenshot("codex_scherm")
 	await click(s.entries[4])
-	check("tik op 'Geen bondgenoot': niemand vecht mee", GameState.codex_active == "" and s.entry_text(4).begins_with("* Geen"))
+	check("tik op 'No ally': niemand vecht mee", GameState.codex_active == "" and s.entry_text(4).begins_with("* No"))
 	await click(s.entries[0])
-	check("tik op Mosslijm: weer bondgenoot", GameState.codex_active == p1["uid"])
+	check("tik op Moss Slime: weer bondgenoot", GameState.codex_active == p1["uid"])
 	await tap("cancel")
 	await frames(3)
 	check("B: terug naar het menu, focus op 'Codex'", m.get_node_or_null("Codex") == null and m.buttons["codex"].has_focus())
@@ -774,7 +774,7 @@ func _save_tests() -> void:
 	setup()
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("Golemhal geladen", false)
+		check("Golem Hall geladen", false)
 		return
 	GameState.codex_add("mosslijm", 3)
 	var p2 := GameState.codex_add("papiergeest", 4)
@@ -789,7 +789,7 @@ func _save_tests() -> void:
 	check("nieuw spel: Codex leeg", GameState.codex_pages.is_empty())
 	check("laden", GameState.load_game())
 	var q := GameState.codex_page(p2["uid"])
-	check("na laden: 2 pagina's, Papiergeest Lv 4 HP 5, Papierstorm, actief", GameState.codex_pages.size() == 2 and not q.is_empty()
+	check("na laden: 2 pagina's, Paper Wraith Lv 4 HP 5, Paper Storm, actief", GameState.codex_pages.size() == 2 and not q.is_empty()
 			and q["level"] == 4 and q["hp"] == 5 and (q["skills"] as Array).has("papierstorm") and GameState.codex_active == p2["uid"])
 	check("na laden: nieuwe pagina krijgt een nieuwe uid", GameState.codex_add("glitchmot")["uid"] == "codex_0003")
 	# oude save (v16) zonder codex
@@ -833,15 +833,15 @@ func _follower_tests() -> void:
 		golem.enemies[0]["s"]["hp"] = 0
 		var lines: Array = golem.grant_fixed_boss_drops()
 		golem.enemies[0]["s"]["hp"] = int(golem.enemies[0]["s"]["max_hp"])
-		check("verslagen Golem: +3 Leeg Boek (%s)" % [lines], lines == ["Krijgt 3x Leeg Boek."]
+		check("verslagen Golem: +3 Blank Book (%s)" % [lines], lines == ["Got 3x Blank Book."]
 				and GameState.item_count(CD.BOOK_ITEM) == before + 3)
-		check("overwinningsvenster noemt de boeken", "Krijgt 3x Leeg Boek." in golem.victory_text(300, 120, lines))
+		check("overwinningsvenster noemt de boeken", "Got 3x Blank Book." in golem.victory_text(300, 120, lines))
 		_close_battle(golem)
 	var king := await _open_battle(["wortelkoning"], true, 0)
 	if king != null:
 		king.enemies[0]["s"]["hp"] = 0
 		var none: Array = king.grant_fixed_boss_drops()
-		check("De Wortelkoning dropt geen Lege Boeken", none.is_empty() and GameState.item_count(CD.BOOK_ITEM) == before + 3)
+		check("The Root King dropt geen Blank Books", none.is_empty() and GameState.item_count(CD.BOOK_ITEM) == before + 3)
 		_close_battle(king)
 	var deep := await _open_battle(["kennis_beest"], true, 100)
 	if deep != null:
@@ -854,7 +854,7 @@ func _follower_tests() -> void:
 	GameState.pending_boss = false
 	# volger op de kaart
 	var page: Dictionary = GameState.codex_add("mosslijm")
-	check("Mosslijm is de actieve bondgenoot", page.get("uid", "") != "" and GameState.codex_active == page["uid"])
+	check("Moss Slime is de actieve bondgenoot", page.get("uid", "") != "" and GameState.codex_active == page["uid"])
 	var arch := await enter("res://scenes/maps/archief_ingang.tscn", "ingang")
 	var follower = scene().get_node_or_null("Objects/CodexFollower") if arch != null else null
 	check("in het archief staat de volger klaar (nog op Dennis, dus verborgen)", follower != null and not follower.visible
@@ -863,7 +863,7 @@ func _follower_tests() -> void:
 		var start: Vector2i = player().get_tile()
 		await _walk("move_up", 3)
 		var dist: float = follower.position.distance_to(player().position)
-		check("na 3 stappen omhoog loopt Mosslijm één tegel achter Dennis (afstand %.1f, tile %s -> %s)"
+		check("na 3 stappen omhoog loopt Moss Slime één tegel achter Dennis (afstand %.1f, tile %s -> %s)"
 				% [dist, start, player().get_tile()], player().get_tile() == start + Vector2i(0, -3)
 				and follower.visible and follower.position.y > player().position.y + 8.0
 				and dist > 10.0 and dist < 22.0 and follower.facing == Vector2i.UP
@@ -962,11 +962,11 @@ func _beta_account_tests() -> void:
 			and GameState.playing_beta and GameState.save_path.ends_with("save_beta.json"))
 	var hero: Dictionary = GameState.party[0]
 	var equip: Dictionary = hero.get("equip", {})
-	check("betatest: Dennis niveau 10 met Vonkzwaard, schild, kap en mantel",
+	check("betatest: Dennis niveau 10 met Spark Sword, schild, kap en mantel",
 			hero["name"] == "Dennis" and int(hero["level"]) == 10 and str(equip.get("wapen", "")) == "vonkzwaard"
 			and str(equip.get("schild", "")) == "houten_schild" and str(equip.get("helm", "")) == "leren_kap"
 			and str(equip.get("harnas", "")) == "leerling_mantel")
-	check("betatest: 6 Lege Boeken, Inktwurm als buddy, Mosslijm en Moskonijn erbij",
+	check("betatest: 6 Blank Books, Ink Worm als buddy, Moss Slime en Moss Rabbit erbij",
 			GameState.item_count("leeg_boek") == 6 and GameState.codex_pages.size() == 3
 			and str(GameState.codex_active_page().get("species", "")) == "inktwurm"
 			and GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "mosslijm")
@@ -977,12 +977,12 @@ func _beta_account_tests() -> void:
 			kept.append(page)
 	GameState.codex_pages = kept
 	GameState.codex_active = str(kept[0].get("uid", ""))
-	check("oude betatest-save zonder Inktwurm wegschrijven", GameState.save_game(GameState.BETA_TILE, GameState.BETA_FACING))
+	check("oude betatest-save zonder Ink Worm wegschrijven", GameState.save_game(GameState.BETA_TILE, GameState.BETA_FACING))
 	GameState.new_game("Leeg")
 	GameState.use_beta_saves()
-	check("oude betatest laden heeft nog geen Inktwurm", GameState.load_game(GameState.newest_beta_path())
+	check("oude betatest laden heeft nog geen Ink Worm", GameState.load_game(GameState.newest_beta_path())
 			and not GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "inktwurm"))
-	check("oude betatest krijgt alsnog een Inktwurm als buddy", GameState._grant_beta_inktwurm()
+	check("oude betatest krijgt alsnog een Ink Worm als buddy", GameState._grant_beta_inktwurm()
 			and GameState.codex_pages.size() == 3
 			and str(GameState.codex_active_page().get("species", "")) == "inktwurm")
 	check("betatest: proloog klaar, woud open, Golem nog niet verslagen, Noor nog niet in de groep",

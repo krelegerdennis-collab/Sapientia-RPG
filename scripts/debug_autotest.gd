@@ -28,7 +28,7 @@ var _bar_animating_seen := false
 
 
 ## v0.12: eerste regel van het opslagboek (vult HP en MP).
-const NEW_SAVE_LINE := "Een warme gloed herstelt je krachten en je geest."
+const NEW_SAVE_LINE := "A warm glow restores your strength and your mind."
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -587,7 +587,7 @@ func _run() -> void:
 	await _title_and_name_tests()
 	await _prologue_tests()
 	await _end_prologue()
-	check("na de proloog: voor het huis (Wilgendal)", await wait_scene("Wilgendal"))
+	check("na de proloog: voor het huis (Willowdale)", await wait_scene("Wilgendal"))
 	await frames(20)
 	await _town_tests()
 	await _world_tests()
@@ -876,8 +876,8 @@ func _encounter_and_battle_tests() -> void:
 	await battle_shot("_1b_noor_menu")
 	await choose_command(1)
 	await pframes(3)
-	check("spreukenmenu open", b.menu.title_label.text == "Magie")
-	_check_submenu(b, "Magie")
+	check("spreukenmenu open", b.menu.title_label.text == "Magic")
+	_check_submenu(b, "Magic")
 	check("kruis blijft zichtbaar maar bedient niet tijdens het lijstje", b.cross.visible and not b.cross.active)
 	await tap("cancel")
 	check("B gaat terug naar het kruis van Noor, Magie nog gekozen",
@@ -927,8 +927,8 @@ func _encounter_and_battle_tests() -> void:
 
 	var st := await wait_battle_state(["command", "message_wait"], 60)
 	check("ronde 1 afgehandeld (%s)" % st, st != "")
-	check("Vuur kostte 4 MP: %d -> %d" % [mp_before, noor["mp"]], noor["mp"] == mp_before - 4)
-	check("Drankje verbruikt: %d -> %d" % [potions_before, GameState.item_count("drankje")],
+	check("Fire kostte 4 MP: %d -> %d" % [mp_before, noor["mp"]], noor["mp"] == mp_before - 4)
+	check("Potion verbruikt: %d -> %d" % [potions_before, GameState.item_count("drankje")],
 			GameState.item_count("drankje") == potions_before - 1)
 	var damaged: Array = b.enemies.filter(func(e): return e["s"]["hp"] < e["s"]["max_hp"])
 	check("vijanden hebben schade", damaged.size() >= 1)
@@ -1022,7 +1022,7 @@ func _cross_nav_tests(b: Node) -> void:
 		path.append(b.cross.selected)
 	check("D-pad door het kruis: op/neer/links/rechts/rechts/neer/op -> %s" % [path],
 			path == [1, 0, 2, 0, 3, 4, 0])
-	check("naam-tabje volgt de keuze ('%s')" % b.cross.name_label.text, b.cross.name_label.text.ends_with("Aanval"))
+	check("naam-tabje volgt de keuze ('%s')" % b.cross.name_label.text, b.cross.name_label.text.ends_with("Attack"))
 	# Magie is uit voor Dennis: grijs; A doet niets
 	check("Magie grijs voor Dennis (geen spreuken)", not b.cross.is_enabled(1) and cross_frame(b, 1) == 2)
 	await tap("move_up")
@@ -1073,7 +1073,7 @@ func _target_cycle_tests(b: Node) -> void:
 ## v7 'De Vergeten Bibliotheek': namen, tabjes, scanline-filter, grote sprites.
 func _v7_style_checks(b: Node) -> void:
 	var names: Array = b.enemies.map(func(e): return e["name"])
-	check("v7-vijanden: %s" % [names], names.has("Het Kennis-Beest") and names.has("Papiergeest"))
+	check("v7-vijanden: %s" % [names], names.has("The Knowledge Beast") and names.has("Paper Wraith"))
 	for id in GameData.ENEMIES:
 		# v0.19: een vijand met "art_pending" (Inktwurm) mag tijdelijk een plaatsvervanger hebben
 		var spr_ok := ResourceLoader.exists(GameData.ENEMIES[id]["sprite"]) or (bool(GameData.ENEMIES[id].get("art_pending", false))
@@ -1085,8 +1085,8 @@ func _v7_style_checks(b: Node) -> void:
 				check("encountergroep met onbekende vijand '%s'" % id, false)
 	var boss: Control = b.enemies[0]["node"]
 	var hero_h: float = b.hero_nodes[0].SIZE.y
-	check("Kennis-Beest groter dan een held (%.0f > %.0f)" % [boss.size.y, hero_h], boss.size.y > hero_h)
-	check("v9: berichtvenster en tabje 'De Vergeten Bibliotheek' zijn weg",
+	check("Lore Beast groter dan een held (%.0f > %.0f)" % [boss.size.y, hero_h], boss.size.y > hero_h)
+	check("v9: berichtvenster en tabje 'De Vergeten Library' zijn weg",
 			b.get_node_or_null("MessageWindow") == null and b.get_node_or_null("MessageTab") == null)
 	var cap: Rect2 = lrect(b, b.caption)
 	var cap_style: StyleBox = b.caption.get_theme_stylebox("panel")
@@ -1094,8 +1094,8 @@ func _v7_style_checks(b: Node) -> void:
 			cap.position.y <= 4.0 and cap.size.y <= 16.0 and cap_style is StyleBoxFlat
 			and (cap_style as StyleBoxFlat).bg_color.a < 0.9)
 	check("v0.13: geen 'Wat doet X?'-strook tijdens het kiezen; naam-tabje boven het kruis ('%s')" % b.cross.name_label.text,
-			not b.caption.visible and b.message_label.text == "Wat doet %s?" % GameState.party[0]["name"]
-			and b.cross.name_label.text == "%s: Aanval" % GameState.party[0]["name"])
+			not b.caption.visible and b.message_label.text == "What will %s do?" % GameState.party[0]["name"]
+			and b.cross.name_label.text == "%s: Attack" % GameState.party[0]["name"])
 	_check_cross(b, GameState.party[0]["name"])
 	check("actieve held: naam in goud (palet HILITE)", b.status_boxes[0].name_color() == UiStyle.HILITE)
 	check("HP-balken in het palet: Noor '%s', Lotte '%s'" % [b.status_boxes[1].hp_bar_kind(), b.status_boxes[2].hp_bar_kind()],
@@ -1125,17 +1125,17 @@ func _check_victory_window(b: Node) -> void:
 	var lines: PackedStringArray = b.victory_label.text.split("\n")
 	print("INFO  overwinningsvenster:\n      " + "\n      ".join(lines))
 	check("bericht-strook weg, overwinningsvenster in beeld", not b.caption.visible and b.victory_panel.visible)
-	check("regel 'Krijgt %d EXP.'" % exp_total, lines.size() > 0 and lines[0] == "Krijgt %d EXP." % exp_total)
-	check("regel 'Krijgt %d GOUD.'" % gold_total, lines.size() > 1 and lines[1] == "Krijgt %d GOUD." % gold_total)
+	check("regel 'Krijgt %d EXP.'" % exp_total, lines.size() > 0 and lines[0] == "Gained %d EXP." % exp_total)
+	check("regel 'Krijgt %d GOUD.'" % gold_total, lines.size() > 1 and lines[1] == "Gained %d GOLD." % gold_total)
 	var ok := lines.size() == 3 + GameState.party.size()
 	for i in GameState.party.size():
 		var h: Dictionary = GameState.party[i]
 		var need: int = GameData.exp_for_level(h["level"] + 1) - h["exp"]
 		var line: String = lines[3 + i] if 3 + i < lines.size() else ""
 		var parts := line.split(" ", false)
-		if not (line.begins_with(h["name"]) and "VOLG. LEVEL" in line and parts.size() > 0 and parts[parts.size() - 1] == str(need)):
+		if not (line.begins_with(h["name"]) and "NEXT LEVEL" in line and parts.size() > 0 and parts[parts.size() - 1] == str(need)):
 			ok = false
-	check("per held 'Naam VOLG. LEVEL <nodig>' klopt", ok)
+	check("per held 'Naam NEXT LEVEL <nodig>' klopt", ok)
 	var r: Rect2 = lrect(b, b.victory_panel)
 	check("overwinningsvenster groot en bovenin (%s)" % r, r.size.x >= 280 and r.position.y < 20 and r.end.y < 140)
 	# v0.16: buit/beloning in hetzelfde blauwe Lufia 2-vak als de tekstvakken (tekstvak_blauw.png)
@@ -1203,7 +1203,7 @@ func _flee_test() -> void:
 	await click_at(b.cross.buttons[4].get_global_rect().get_center())
 	await pframes(2)
 	check("tik op 'Vluchten' start de vluchtpoging",
-			battle() != null and battle().message_label.text.begins_with("De party probeert"))
+			battle() != null and battle().message_label.text.begins_with("The party tries"))
 	for guard in 20:
 		var st := await wait_battle_state(["command"], 30)
 		if st == "":
@@ -1259,7 +1259,7 @@ func _game_over_test() -> void:
 		if Dialog.is_open:
 			break
 		await frames(1)
-	check("v0.19: 'Je ontwaakt...' (verteller)", Dialog.is_open and "ontwaakt" in str(Dialog._lines[0]))
+	check("v0.19: 'You wake...' (verteller)", Dialog.is_open and "wake" in str(Dialog._lines[0]))
 	await close_dialog()
 
 
@@ -1274,7 +1274,7 @@ func _stairs_and_town_return_tests() -> void:
 	await walk("move_down", 1)
 	check("op de trap (20,34) = %s" % terrain(tile()), tile() == Vector2i(20, 34) and terrain(tile()) == "trap")
 	# v0.13: de trap is de ingang van De Vergeten Archieven (eerste dungeonkamer)
-	check("v0.13: trap -> De Vergeten Archieven (ArchiefIngang)", await wait_scene("ArchiefIngang"))
+	check("v0.13: trap -> The Forgotten Archives (ArchiefIngang)", await wait_scene("ArchiefIngang"))
 	await frames(5)
 	check("v0.13: binnen bij de ingang (9,10): %s" % tile(), tile() == Vector2i(9, 10))
 	check("v0.13: dungeon zonder random encounters", scene().encounters == false)
@@ -1318,7 +1318,7 @@ func _stairs_and_town_return_tests() -> void:
 	await walk("move_up", 2)
 	check("terug op de spawn (14,31): %s" % tile(), tile() == Vector2i(14, 31))
 	await walk("move_up", 1)
-	check("stad-icoon -> dorp Wilgendal geladen", await wait_scene("Wilgendal"))
+	check("stad-icoon -> dorp Willowdale geladen", await wait_scene("Wilgendal"))
 	await frames(5)
 	check("in het dorp bij de zuid-ingang (15,19): %s" % tile(), tile() == Vector2i(15, 19))
 	check("kijkt omhoog (het dorp in)", player() != null and player().facing == Vector2i.UP)
@@ -1339,8 +1339,8 @@ func _title_v13_checks(t: Node) -> void:
 	var has_main := ResourceLoader.exists("res://assets/ui/title_main.png")
 	var has_logo := ResourceLoader.exists("res://assets/ui/title_logo.png")
 	var has_bg := ResourceLoader.exists("res://assets/ui/title_bg.png")
-	check("titel 'SAPIENTIA', ondertitel 'De Vergeten Archieven'",
-			t.title_label.text == "SAPIENTIA" and t.subtitle_label.text == "De Vergeten Archieven")
+	check("titel 'SAPIENTIA', ondertitel 'The Forgotten Archives'",
+			t.title_label.text == "SAPIENTIA" and t.subtitle_label.text == "The Forgotten Archives")
 	if has_main:
 		var main_path: String = t.background.texture.resource_path
 		check("hoofdpagina title_main.png, geen logo/kern/glitch erover (%s)" % main_path.get_file(),
@@ -1556,7 +1556,7 @@ func _house_tests() -> void:
 	await _wait_typed()
 	await press_interact()
 	check("vraag: 'Het boek gloeit zacht. Voortgang opslaan?' met Ja/Nee",
-			Dialog.has_choices() and Dialog._lines == ["Het boek gloeit zacht. Voortgang opslaan?"] and Dialog.choices == ["Ja", "Nee"])
+			Dialog.has_choices() and Dialog._lines == ["The book glows softly. Save progress?"] and Dialog.choices == ["Yes", "No"])
 	await _wait_typed()
 	check("MENU-knop verborgen zolang het tekstvak open is", not scene().get_node("TouchControls/Control").show_menu)
 	await tap("move_down")
@@ -1573,7 +1573,7 @@ func _house_tests() -> void:
 	await frames(30)
 	await overworld_shot("_save_dialog")
 	await press_interact()
-	check("'Ja': 'Opgeslagen.'", Dialog.is_open and Dialog._lines == ["Opgeslagen."] and book.last_result == "saved")
+	check("'Ja': 'Opgeslagen.'", Dialog.is_open and Dialog._lines == ["Saved."] and book.last_result == "saved")
 	check("save geschreven (%s)" % GameState.save_path, GameState.has_save())
 	var d := GameState.read_save()
 	check("save: map, plek (8,4) en kijkrichting omhoog",
@@ -1587,7 +1587,7 @@ func _house_tests() -> void:
 	# Naar buiten: deur onderin op (4,8)
 	await walk("move_left", 4)
 	await walk("move_down", 4)
-	check("deur onderin -> terug in Wilgendal", await wait_scene("Wilgendal"))
+	check("deur onderin -> terug in Willowdale", await wait_scene("Wilgendal"))
 	await frames(5)
 	check("net onder de huisdeur (16,7), kijkt omlaag: %s" % tile(), tile() == Vector2i(16, 7) and player().facing == Vector2i.DOWN)
 
@@ -1661,7 +1661,7 @@ func _load_restore_test() -> void:
 	check("speeltijd loopt door vanaf de save", GameState.play_time() >= float(d["play_time"]))
 	await walk("move_left", 4)
 	await walk("move_down", 4)
-	check("weer naar buiten -> Wilgendal", await wait_scene("Wilgendal"))
+	check("weer naar buiten -> Willowdale", await wait_scene("Wilgendal"))
 	await frames(5)
 	check("weer op (16,7): %s" % tile(), tile() == Vector2i(16, 7))
 
@@ -1691,7 +1691,7 @@ func _solo_battle_test() -> void:
 	if b != null and await wait_hero(0):
 		check("solo: 1 heldensprite en 1 statusvak", b.hero_nodes.size() == 1 and b.status_boxes.size() == 1)
 		check("solo: naam 'Kees' in het statusvak", b.status_boxes[0].hero["name"] == "Kees" and b.status_boxes[0].fitted_name() == "Kees")
-		check("solo: 'Wat doet Kees?' (%s)" % b.message_label.text, b.message_label.text == "Wat doet Kees?")
+		check("solo: 'What will Kees do?' (%s)" % b.message_label.text, b.message_label.text == "What will Kees do?")
 		var box: Rect2 = lrect(b, b.status_boxes[0])
 		check("solo: statusvak in het midden (%.1f vs %.1f)" % [box.get_center().x, (b._menu_left + b._menu_right) / 2.0],
 				absf(box.get_center().x - (b._menu_left + b._menu_right) / 2.0) <= 1.5)
@@ -1703,7 +1703,7 @@ func _solo_battle_test() -> void:
 				and b.cross.is_enabled(2) and b.cross.is_enabled(3) and b.cross.is_enabled(4))
 		check("solo: gras-achtergrond", GameState.pending_backdrop_id == "grass"
 				and b.get_node("Backdrop").texture.resource_path.ends_with("battle_bg/gras.png"))
-		check("bestiarium: Papiergeest gezien, nog niet verslagen",
+		check("bestiarium: Paper Wraith gezien, nog niet verslagen",
 				GameState.is_seen("papiergeest") and GameState.defeated_count("papiergeest") == 0)
 		# screenshot tijdens een actie (het menu dekt de enige held anders af)
 		Engine.time_scale = 1.0
@@ -1727,9 +1727,9 @@ func _solo_battle_test() -> void:
 
 ## Bestiarium: gezien/verslagen bijhouden, het scherm (MENU-knop) en opslaan/laden.
 func _bestiary_tests() -> void:
-	check("bestiarium: Kennis-Beest en Papiergeest verslagen (%s)" % [GameState.bestiary],
+	check("bestiarium: Lore Beast en Paper Wraith verslagen (%s)" % [GameState.bestiary],
 			GameState.defeated_count("kennis_beest") >= 1 and GameState.defeated_count("papiergeest") >= 1)
-	check("bestiarium: Glitchmot nog niet gezien", not GameState.is_seen("glitchmot") and GameState.defeated_count("glitchmot") == 0)
+	check("bestiarium: Glitch Moth nog niet gezien", not GameState.is_seen("glitchmot") and GameState.defeated_count("glitchmot") == 0)
 	for id in GameData.ENEMIES:
 		var e: Dictionary = GameData.ENEMIES[id]
 		check("bestiarium-data '%s' compleet" % id, e.has("no") and e.has("mp") and e.has("desc") and e.has("habitat")
@@ -1753,14 +1753,14 @@ func _bestiary_tests() -> void:
 	await click_at(fm.bestiary_button.get_global_rect().get_center())
 	await frames(3)
 	var bs: Node = fm.get_node_or_null("Bestiary")
-	check("'Bestiarium' opent het bestiarium", bs != null)
+	check("'Bestiary' opent het bestiarium", bs != null)
 	if bs != null:
 		var texts := []
 		for i in bs.entries.size():
 			texts.append(bs.entry_text(i))
 		# v0.17: de lijst groeit mee met GameData.ENEMIES (Donker Woud: 007-010); de eerste 6 blijven gelijk
 		var n_all := GameData.ENEMIES.size()
-		check("lijst op nummer, ongezien = ??? %s" % [texts], texts.slice(0, 6) == ["001 Mosslijm", "002 ???", "003 Papiergeest", "004 ???", "005 Het Kennis-Beest", "006 ???"]
+		check("lijst op nummer, ongezien = ??? %s" % [texts], texts.slice(0, 6) == ["001 Moss Slime", "002 ???", "003 Paper Wraith", "004 ???", "005 The Knowledge Beast", "006 ???"]
 				and texts.size() == n_all and texts.slice(6).all(func(t): return str(t).ends_with("???")))
 		check("kop telt gezien/verslagen (%s)" % bs.header.text, ("gezien 3/%d" % n_all) in bs.header.text and ("verslagen 3/%d" % n_all) in bs.header.text)
 		bs.show_entry("glitchmot")
@@ -1794,7 +1794,7 @@ func _bestiary_tests() -> void:
 
 ## Achtergrond per terrein (Lufia-stijl): gras, zand, baas.
 func _backdrop_tests() -> void:
-	check("terrein -> achtergrond (gras/hoog gras/bos = grass, zand = sand, baas = boss)",
+	check("terrein -> achtergrond (gras/tall grass/bos = grass, zand = sand, baas = boss)",
 			GameData.backdrop_id_for("gras") == "grass" and GameData.backdrop_id_for("hoog_gras") == "grass"
 			and GameData.backdrop_id_for("bos") == "grass" and GameData.backdrop_id_for("zand") == "sand"
 			and GameData.backdrop_id_for("gras", true) == "boss")
@@ -1812,7 +1812,7 @@ func _backdrop_tests() -> void:
 		for id in GameState.pick_encounter_group("zand"):
 			on_sand[id] = true
 	GameState.debug_force_group = saved_force
-	check("Mosslijm/Moskonijn op het gras, niet op het zand (gras %s, zand %s)" % [on_grass.keys(), on_sand.keys()],
+	check("Moss Slime/Moss Rabbit op het gras, niet op het zand (gras %s, zand %s)" % [on_grass.keys(), on_sand.keys()],
 			on_grass.has("mosslijm") and on_grass.has("moskonijn") and not on_sand.has("mosslijm")
 			and not on_sand.has("moskonijn"))
 	check("baas-encounter in de data (boss-vlag, nooit willekeurig)", not GameState.boss_group().is_empty()
@@ -1841,7 +1841,7 @@ func _backdrop_tests() -> void:
 	if await wait_scene("Battle"):
 		var b := battle()
 		await wait_hero(0)
-		check("baas: Kennis-Beest + boss.png", b.enemies.size() >= 1 and b.enemies[0]["id"] == "kennis_beest"
+		check("baas: Lore Beast + boss.png", b.enemies.size() >= 1 and b.enemies[0]["id"] == "kennis_beest"
 				and b.get_node("Backdrop").texture.resource_path.ends_with("battle_bg/boss.png"))
 		var br: Rect2 = lrect(b, b.enemies[0]["node"])
 		var sx: float = b.stage_x(b.size.x, b.size.y)
@@ -1860,7 +1860,7 @@ func _backdrop_tests() -> void:
 		await _flee_battle()
 	check("terug na baas-test", await wait_scene("Wereldkaart"))
 	await frames(5)
-	check("Glitchmot nu gezien in het bestiarium", GameState.is_seen("glitchmot"))
+	check("Glitch Moth nu gezien in het bestiarium", GameState.is_seen("glitchmot"))
 	for h in GameState.party:
 		h["hp"] = h["max_hp"]
 		h["mp"] = h["max_mp"]
@@ -1872,15 +1872,15 @@ func _backdrop_tests() -> void:
 # ================================================================ v0.11 proloog
 const SD := preload("res://scripts/data/story_data.gd")
 ## v0.16: na de mantel (de zegels zijn weg): water + kist
-const OPA_LINE := "{naam}... haal wat water uit de put. En pak de kruiden uit de kist naast het huis. Vandaag voelt... anders."
+const OPA_LINE := "{naam}... fetch some water from the well. And take the herbs from the chest beside the house. Today feels... different."
 ## v0.16 uitrusting-tutorial
-const GREET_LINE := "Goedemorgen, {naam}. Het is koud vandaag. Hier, trek deze mantel aan."
-const MENU_LINE := "Open het MENU rechtsboven en kies Uitrusting. Daar zet je de mantel bij Harnas."
-const REMIND_LINE := "Eerst die mantel aan, {naam}. MENU > Uitrusting > Harnas."
+const GREET_LINE := "Good morning, {naam}. It's cold today. Here, put this cloak on."
+const MENU_LINE := "Open the MENU at the top right and choose Equipment. Put the cloak in Armor."
+const REMIND_LINE := "Put that cloak on first, {naam}. MENU > Equipment > Armor."
 const ARMOR := "leerling_mantel"
-const LESSON_LINE := "Soms moet je je verdedigen, jongen, ook al hoop ik dat je het nooit nodig zult hebben."
-const PANIC_LINE := "Nee... het zegel! Het is te vroeg! {naam}, blijf hier! Sluit de deuren achter me en kom me niet achterna, wat je ook hoort!"
-const LOCKED_LINE := "De deur zit op slot. Opa zei dat ik hier moest blijven."
+const LESSON_LINE := "Sometimes you have to defend yourself, boy, even if I hope you never need to."
+const PANIC_LINE := "No... the seal! It's too soon! {naam}, stay here! Lock the doors behind me and don't follow, no matter what you hear!"
+const LOCKED_LINE := "The door is locked. Grandpa said I had to stay here."
 
 var _drain_shot_done := {}
 
@@ -1976,25 +1976,25 @@ func _prologue_tests() -> void:
 			break
 		await frames(1)
 	check("cutscene: speler ligt in bed (1,3)", tile() == Vector2i(1, 3))
-	check("wakker-tekst: %s" % _lines_text(), "wordt wakker" in _lines_text() and Story.current_event == "wakker_worden")
+	check("wakker-tekst: %s" % _lines_text(), "wakes up" in _lines_text() and Story.current_event == "wakker_worden")
 	check("Oude Man 's ochtends niet binnen", _obj("OudeMan") != null and not _obj("OudeMan").visible)
 	check("speler zit vast tijdens de cutscene", player().input_locked)
-	await _story_drain(false, "wordt wakker", "_v11_morning")
+	await _story_drain(false, "wakes up", "_v11_morning")
 	check("na het opstaan: (2,3), stap WAKKER, speler vrij: %s" % tile(),
 			tile() == Vector2i(2, 3) and GameState.story_step == SD.WAKKER and not player().input_locked)
 	# naar buiten
 	await walk("move_right", 2)
 	await walk("move_down", 5)
-	check("deur -> naar buiten (Wilgendal = huis aan de bosrand)", await wait_scene("Wilgendal"))
+	check("deur -> naar buiten (Willowdale = huis aan de bosrand)", await wait_scene("Wilgendal"))
 	await frames(10)
 	var opa := _obj("OudeMan")
 	check("buiten: voor de deur (16,7): %s" % tile(), tile() == Vector2i(16, 7))
 	check("geen dorp meer: geen bordje en geen dorpsbewoners", _obj("Sign") == null and _obj("OldMan") == null)
 	check("Oude Man buiten op (21,8), staart naar de ruïnes (omhoog)",
 			opa != null and opa.visible and opa.get_tile() == Vector2i(21, 8) and opa.facing == Vector2i.UP)
-	check("v0.13: Oude Man buiten = Wachter-sprite (wachter.png, 3x4 frames, kijkt omhoog = rij 3)",
+	check("v0.13: Oude Man buiten = Warden-sprite (wachter.png, 3x4 frames, kijkt omhoog = rij 3)",
 			_wachter_ok(opa) and opa.sprite.frame / 3 == 3)
-	check("put, kist en de ingang van de Archieven staan er",
+	check("put, kist en de ingang van de Archives staan er",
 			_obj("Put") != null and _obj("Kist") != null and _obj("Archief") != null)
 	# v0.16 (wens Dennis): de '3 runen aanraken' (zegelstenen) zijn helemaal weg
 	var seal_nodes: Array = scene().get_node("Objects").get_children().filter(func(n):
@@ -2012,7 +2012,7 @@ func _prologue_tests() -> void:
 	await walk("move_left", 1)
 	await walk("move_down", 13)
 	await frames(5)
-	check("pad naar de wereldkaart: 'Niet vandaag' (%s)" % _lines_text(), Dialog.is_open and "Niet vandaag" in _lines_text())
+	check("pad naar de wereldkaart: 'Not today' (%s)" % _lines_text(), Dialog.is_open and "Not today" in _lines_text())
 	await _story_drain()
 	check("teruggestuurd, nog op de proloog-map (15,20): %s" % tile(), map_name() == "Wilgendal" and tile() == Vector2i(15, 20))
 	# praten met de Oude Man (van links)
@@ -2025,9 +2025,9 @@ func _prologue_tests() -> void:
 	await press_interact()
 	await _wait_typed()
 	check("v0.16: Oude Man begroet je en geeft een mantel ('%s')" % Dialog._lines[0],
-			Dialog._lines == [_named(GREET_LINE)] and Dialog.name_label.text == "Oude Man")
+			Dialog._lines == [_named(GREET_LINE)] and Dialog.name_label.text == "Old Man")
 	check("Oude Man draait naar je toe", opa.facing == Vector2i.LEFT)
-	_check_bubble("Oude Man", opa)
+	_check_bubble("Old Man", opa)
 	await frames(30)
 	await overworld_shot("_v11_oude_man")
 	# mantel, uitleg (ballon) en de tutorialregel (blauw verteller-vak)
@@ -2038,15 +2038,15 @@ func _prologue_tests() -> void:
 			break
 		if Dialog.is_open and not Dialog._is_typing():
 			var cur := str(Dialog._lines[Dialog._index])
-			if cur == "%s krijgt een Leerling-mantel!" % GameState.player_name:
-				check("v0.16: 'krijgt een Leerling-mantel!' in het blauwe vertellervak (geen staart)",
+			if cur == "%s receives an Apprentice Cloak!" % GameState.player_name:
+				check("v0.16: 'krijgt een Apprentice Cloak!' in het blauwe vertellervak (geen staart)",
 						Dialog.style_kind == "vak" and UiStyle.is_blue_box(Dialog.box_style(), "vak") and not Dialog.tail.visible)
 			if cur == MENU_LINE and not menu_seen:
 				menu_seen = true
 				_check_bubble("Oude Man (uitleg)", opa)
 				await frames(20)
 				await v16_shot("spraakballon")
-			if cur.begins_with("(Tutorial: MENU > Uitrusting") and not narr_seen:
+			if cur.begins_with("(Tutorial: MENU > Equipment") and not narr_seen:
 				narr_seen = true
 				check("v0.16: tutorialtekst in het blauwe vertellervak, niet bovenin (%s, plek %s)" % [Dialog.box_rect(), Dialog.placement],
 						Dialog.style_kind == "vak" and UiStyle.is_blue_box(Dialog.box_style(), "vak") and Dialog.at_bottom
@@ -2056,11 +2056,11 @@ func _prologue_tests() -> void:
 				await v16_shot("verteller")
 			await press_interact()
 		await frames(1)
-	check("v0.16: Opa legt uit: MENU > Uitrusting (ballon)", menu_seen)
-	check("v0.16: tutorialregel 'MENU > Uitrusting > Uitrusten > Harnas'", narr_seen)
-	check("v0.16: Leerling-mantel gekregen (in de tas, nog niet aan), stap UITRUSTING",
+	check("v0.16: Grandpa legt uit: MENU > Equipment (ballon)", menu_seen)
+	check("v0.16: tutorialregel 'MENU > Equipment > Uitrusten > Harnas'", narr_seen)
+	check("v0.16: Apprentice Cloak gekregen (in de tas, nog niet aan), stap UITRUSTING",
 			GameState.item_count(ARMOR) == 1 and not Story.wears(ARMOR) and GameState.story_step == SD.UITRUSTING)
-	check("v0.16: Leerling-mantel = harnas, klein beetje DEF, bestaand icoon (reisgewaad.png)",
+	check("v0.16: Apprentice Cloak = harnas, klein beetje DEF, bestaand icoon (reisgewaad.png)",
 			GameData.EQUIPMENT[ARMOR]["slot"] == "harnas" and int(GameData.EQUIPMENT[ARMOR]["def"]) in [1, 2, 3]
 			and str(GameData.EQUIPMENT[ARMOR].get("icon", "")).ends_with("icons/reisgewaad.png")
 			and ResourceLoader.exists(str(GameData.EQUIPMENT[ARMOR]["icon"])))
@@ -2072,7 +2072,7 @@ func _prologue_tests() -> void:
 	await walk("move_up", 5)
 	await walk("move_up", 1)
 	await frames(5)
-	check("ingang Archieven (25,4) is dicht ('%s')" % _lines_text(), tile() == Vector2i(25, 4) and "ranken" in _lines_text())
+	check("ingang Archives (25,4) is dicht ('%s')" % _lines_text(), tile() == Vector2i(25, 4) and "vines" in _lines_text())
 	await _story_drain()
 	# kist (19,6) (v0.16: geen zegel 2 meer onderweg)
 	await walk("move_down", 5)
@@ -2084,22 +2084,22 @@ func _prologue_tests() -> void:
 	var kg := 0
 	while kg < 6:
 		await _wait_typed()
-		if not Dialog.is_open or str(Dialog._lines[Dialog._index]).contains("krijgt 3x"):
+		if not Dialog.is_open or str(Dialog._lines[Dialog._index]).contains("receives 3x"):
 			break
 		await press_interact()
 		kg += 1
 	var kline := str(Dialog._lines[Dialog._index]) if Dialog.is_open else ""
 	check("v0.16: schat ('%s') in het blauwe vak, laag en niet bovenin (%s, plek %s)" % [kline, Dialog.box_rect(), Dialog.placement],
-			kline.contains("krijgt 3x") and Dialog.style_kind == "vak" and UiStyle.is_blue_box(Dialog.box_style(), "vak")
+			kline.contains("receives 3x") and Dialog.style_kind == "vak" and UiStyle.is_blue_box(Dialog.box_style(), "vak")
 			and not Dialog.tail.visible and Dialog.at_bottom and Dialog.box_rect().position.y > 216.0 * 0.4)
 	_check_box_clear("schat")
 	await frames(20)
 	await v16_shot("schat_dorp")
 	await _story_drain()
-	check("kist: 3x Geneeskrachtig kruid, kist open", GameState.item_count("kruid") == 3 and Story.has_flag("kist_open") and _obj("Kist").sprite.frame == 1)
+	check("kist: 3x Healing Herb, kist open", GameState.item_count("kruid") == 3 and Story.has_flag("kist_open") and _obj("Kist").sprite.frame == 1)
 	await press_interact()
 	await _wait_typed()
-	check("tweede keer: 'De kist is leeg.'", Dialog._lines == ["De kist is leeg."])
+	check("tweede keer: 'De kist is leeg.'", Dialog._lines == ["The chest is empty."])
 	await _story_drain()
 	# put (9,5); v0.13: RPG ART's put is 2x2 (9..10, 5..6), dus je staat op (9,7)
 	await walk("move_left", 10)
@@ -2107,7 +2107,7 @@ func _prologue_tests() -> void:
 	check("voor de put (9,7), kijkt omhoog: %s" % tile(), tile() == Vector2i(9, 7) and player().facing == Vector2i.UP)
 	await press_interact()
 	await _story_drain()
-	check("put: emmer water gekregen", GameState.item_count("emmer_water") == 1)
+	check("put: bucket of water gekregen", GameState.item_count("emmer_water") == 1)
 	# ---------------- opslaan halverwege (het boek in het huis) en laden
 	await walk("move_right", 7)
 	await walk("move_up", 1)
@@ -2122,7 +2122,7 @@ func _prologue_tests() -> void:
 	await _wait_typed()
 	await press_interact()   # Ja
 	await _wait_typed()
-	check("halverwege opgeslagen", Dialog._lines == ["Opgeslagen."] and GameState.has_save())
+	check("halverwege opgeslagen", Dialog._lines == ["Saved."] and GameState.has_save())
 	await close_dialog()
 	var d := GameState.read_save()
 	var st: Dictionary = d.get("story", {})
@@ -2166,7 +2166,7 @@ func _prologue_tests() -> void:
 		await frames(1)
 	check("zwaardles: '%s'" % LESSON_LINE, lesson_seen)
 	check("emmer afgegeven, stap LES", GameState.item_count("emmer_water") == 0 and Story.has_flag("water_klaar") and GameState.story_step == SD.LES)
-	check("Kort zwaard gekregen (ATK %d -> %d)" % [atk_before, GameState.party[0]["atk"]],
+	check("Short Sword gekregen (ATK %d -> %d)" % [atk_before, GameState.party[0]["atk"]],
 			GameState.party[0].get("weapon", "") == "kort_zwaard" and int(GameState.party[0]["atk"]) == atk_before + 3)
 	await _tutorial_battle_test()
 	# ---------------- scène 2: de avond
@@ -2176,7 +2176,7 @@ func _prologue_tests() -> void:
 		if map_name() == "Huis" and scene().is_node_ready():
 			break
 		if Dialog.is_open and not Dialog._is_typing():
-			if "zon gaat al onder" in _lines_text():
+			if "already setting" in _lines_text():
 				after_ok = true
 			await press_interact()
 		await frames(1)
@@ -2187,7 +2187,7 @@ func _prologue_tests() -> void:
 			and scene().get_node("StoryTint").color.is_equal_approx(SD.TINTS["evening"]))
 	check("lezen op de stoel (9,5), Oude Man binnen op (9,3)",
 			tile() == Vector2i(9, 5) and _obj("OudeMan").visible and _obj("OudeMan").get_tile() == Vector2i(9, 3))
-	check("v0.13: Oude Man binnen = Wachter-sprite (wachter.png, 3x4 frames)", _wachter_ok(_obj("OudeMan")))
+	check("v0.13: Oude Man binnen = Warden-sprite (wachter.png, 3x4 frames)", _wachter_ok(_obj("OudeMan")))
 	for i in 60:
 		if Transition._rect.color.a < 0.01:
 			break
@@ -2207,10 +2207,10 @@ func _prologue_tests() -> void:
 		if scene().get_node_or_null("WindowGlow") != null:
 			glow_seen = true
 		if Dialog.is_open and not Dialog._is_typing():
-			if "flits" in _lines_text() and not _drain_shot_done.has("_v11_flash"):
+			if "flash" in _lines_text() and not _drain_shot_done.has("_v11_flash"):
 				_drain_shot_done["_v11_flash"] = true
 				await overworld_shot("_v11_flash")
-			if _named(PANIC_LINE) in Dialog._lines and Dialog.name_label.text == "Oude Man":
+			if _named(PANIC_LINE) in Dialog._lines and Dialog.name_label.text == "Old Man":
 				panic_ok = true
 			await press_interact()
 		if not Story.running and not Dialog.is_open:
@@ -2219,7 +2219,7 @@ func _prologue_tests() -> void:
 	check("aardbeving (scherm schudt)", shake_seen)
 	check("flits + magisch licht door de ramen", glow_seen)
 	check("Oude Man in paniek: tekst precies uit het verhaal", panic_ok)
-	check("Opa weg, schilderij scheef, deur op slot, stap OPGESLOTEN",
+	check("Grandpa weg, schilderij scheef, deur op slot, stap OPGESLOTEN",
 			not _obj("OudeMan").visible and _obj("Schilderij").sprite.frame == 1
 			and Story.has_flag("locked:HuisDeur") and GameState.story_step == SD.OPGESLOTEN)
 	check("schreeuw-timer loopt", Story.scheduled.get("event", "") == "schreeuw")
@@ -2238,17 +2238,17 @@ func _prologue_tests() -> void:
 		await frames(1)
 	check("na een paar seconden: schok + schreeuw", Story.current_event == "schreeuw")
 	await _story_drain(true)
-	check("keuze 'Blijven' / 'Opa achterna'", Dialog.has_choices() and Dialog.choices == ["Blijven", "Opa achterna"])
+	check("keuze 'Blijven' / 'Grandpa achterna'", Dialog.has_choices() and Dialog.choices == ["Stay", "Follow Grandpa"])
 	await frames(20)
 	await overworld_shot("_v11_choice")
 	await press_interact()   # Blijven
 	await _story_drain(true)
 	check("'Blijven' -> wachten, nieuwe schok, weer de keuze",
-			Story.history.has("blijven") and Dialog.has_choices() and Dialog.choices == ["Blijven", "Opa achterna"])
+			Story.history.has("blijven") and Dialog.has_choices() and Dialog.choices == ["Stay", "Follow Grandpa"])
 	await tap("move_down")
 	await press_interact()   # Opa achterna
 	await _story_drain()
-	check("'Opa achterna': deur open, nacht (stap NACHT)",
+	check("'Grandpa achterna': deur open, nacht (stap NACHT)",
 			not Story.has_flag("locked:HuisDeur") and GameState.story_step == SD.NACHT)
 	await frames(80)
 	check("nacht-tint binnen", scene().get_node("StoryTint").color.is_equal_approx(SD.TINTS["night"]))
@@ -2269,7 +2269,7 @@ func _prologue_tests() -> void:
 	check("v0.13: open ingang -> eerste dungeonkamer (ArchiefIngang)", await wait_scene("ArchiefIngang")
 			and Story.has_flag("archief_gezien") and GameState.current_map == SD.ARCHIEF)
 	await frames(10)
-	check("v0.13: in de Archieven bij de ingang (9,10), kijkt omhoog: %s" % tile(), tile() == Vector2i(9, 10)
+	check("v0.13: in de Archives bij de ingang (9,10), kijkt omhoog: %s" % tile(), tile() == Vector2i(9, 10)
 			and player().facing == Vector2i.UP)
 	check("event-geschiedenis compleet (%s)" % [Story.history],
 			["wakker_worden", "opa", "mantel_aan", "kist", "put", "les", "na_les", "catastrofe", "schreeuw", "keuze", "blijven", "achterna", "archief_binnen"].all(func(e): return Story.history.has(e)))
@@ -2334,18 +2334,18 @@ func _equip_tutorial_tests(_opa: Node, def_before: int) -> void:
 	# 1) nog niet aan: Opa herinnert je, put/kist zijn dicht, menu zonder uitrusten = niets
 	await press_interact()
 	await _wait_typed()
-	check("v0.16: mantel nog niet aan -> Opa: '%s'" % (Dialog._lines[0] if Dialog.is_open else ""),
+	check("v0.16: mantel nog niet aan -> Grandpa: '%s'" % (Dialog._lines[0] if Dialog.is_open else ""),
 			Dialog.is_open and Dialog._lines == [_named(REMIND_LINE)])
 	await _story_drain()
 	check("v0.16: kan niet verder zonder mantel: nog stap UITRUSTING", GameState.story_step == SD.UITRUSTING
 			and not Story.history.has("mantel_aan"))
 	Story.trigger("put")
 	await _wait_typed()
-	check("v0.16: put geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "Eerst de mantel" in _lines_text())
+	check("v0.16: put geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "cloak first" in _lines_text())
 	await _story_drain()
 	Story.trigger("kist", _obj("Kist"))
 	await _wait_typed()
-	check("v0.16: kist geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "Eerst de mantel" in _lines_text())
+	check("v0.16: kist geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "cloak first" in _lines_text())
 	await _story_drain()
 	check("v0.16: geen emmer, kist dicht", GameState.item_count("emmer_water") == 0 and not Story.has_flag("kist_open"))
 	scene().open_field_menu()
@@ -2365,14 +2365,14 @@ func _equip_tutorial_tests(_opa: Node, def_before: int) -> void:
 	m.choose("equip")
 	await pframes(4)
 	var es: Node = m.sub
-	check("v0.16: MENU > Uitrusting open", es != null and es.name == "Equipment")
+	check("v0.16: MENU > Equipment open", es != null and es.name == "Equipment")
 	if es == null:
 		return
 	es.do_command("equip")
 	await pframes(2)
 	es.choose_slot("harnas")
 	await pframes(4)
-	check("v0.16: vak Harnas: lijst met de Leerling-mantel (%s)" % [es.list_ids], es.mode == "item" and es.list_ids.has(ARMOR))
+	check("v0.16: vak Harnas: lijst met de Apprentice Cloak (%s)" % [es.list_ids], es.mode == "item" and es.list_ids.has(ARMOR))
 	es.preview_item(ARMOR)
 	await pframes(6)
 	await v16_shot("tutorial_uitrusting")
@@ -2384,19 +2384,19 @@ func _equip_tutorial_tests(_opa: Node, def_before: int) -> void:
 	es.back()
 	es.back()
 	await pframes(4)
-	check("Uitrusting dicht, terug in het veldmenu", m.sub == null)
+	check("Equipment dicht, terug in het veldmenu", m.sub == null)
 	m.close()
 	# 3) menu dicht -> Opa gaat verder (gedwongen check geslaagd)
 	var opa_line := false
 	for i in 1800:
 		if Dialog.is_open and not Dialog._is_typing():
-			if _named(OPA_LINE) in Dialog._lines and Dialog.name_label.text == "Oude Man":
+			if _named(OPA_LINE) in Dialog._lines and Dialog.name_label.text == "Old Man":
 				opa_line = true
 			await press_interact()
 		elif not Story.running and not Dialog.is_open and Story.history.has("mantel_aan"):
 			break
 		await frames(1)
-	check("v0.16: na uitrusten + menu dicht gaat de tutorial verder: Opa '%s'" % _named(OPA_LINE),
+	check("v0.16: na uitrusten + menu dicht gaat de tutorial verder: Grandpa '%s'" % _named(OPA_LINE),
 			opa_line and Story.history.has("mantel_aan"))
 
 
@@ -2408,7 +2408,7 @@ func _book_tests() -> void:
 	var start_facing: Vector2i = p.facing
 	var red: Node = _obj("BoekHP")
 	var green: Node = _obj("BoekMP")
-	check("rood + groen boek naast de Archieven (24,4) en (27,4)", red != null and green != null
+	check("rood + groen boek naast de Archives (24,4) en (27,4)", red != null and green != null
 			and red.position == Vector2(24 * 16 + 8, 4 * 16 + 8) and green.position == Vector2(27 * 16 + 8, 4 * 16 + 8))
 	if red == null or green == null:
 		return
@@ -2436,7 +2436,7 @@ func _book_tests() -> void:
 	await frames(10)
 	await overworld_shot("_v11_books")
 	await press_interact()
-	check("rood boek: 'Je wonden sluiten zich. HP hersteld.'", Dialog.is_open and Dialog._lines == ["Je wonden sluiten zich. HP hersteld."])
+	check("rood boek: 'Je wonden sluiten zich. HP hersteld.'", Dialog.is_open and Dialog._lines == ["Your wounds close. HP restored."])
 	check("rood boek: HP van de hele party vol, MP niet",
 			GameState.party.all(func(h): return h["hp"] == h["max_hp"] and h["mp"] == 0))
 	await _wait_typed()
@@ -2450,7 +2450,7 @@ func _book_tests() -> void:
 	p.place_at(Vector2i(27, 5), Vector2i.UP)
 	await frames(5)
 	await press_interact()
-	check("groen boek: 'Je geest raakt helder. MP hersteld.'", Dialog.is_open and Dialog._lines == ["Je geest raakt helder. MP hersteld."])
+	check("groen boek: 'Je geest raakt helder. MP hersteld.'", Dialog.is_open and Dialog._lines == ["Your mind clears. MP restored."])
 	check("groen boek: MP van de hele party vol, HP niet (Noor %d/%d MP)" % [GameState.party[1]["mp"], GameState.party[1]["max_mp"]],
 			GameState.party.all(func(h): return h["mp"] == h["max_mp"] and h["hp"] == 1) and GameState.party[1]["mp"] > 0)
 	await _wait_typed()
@@ -2469,9 +2469,9 @@ func _tutorial_battle_test() -> void:
 	var b := battle()
 	if b == null or not await wait_hero(0):
 		return
-	check("oefengevecht: 1 Mosslijm (HP 30), gras-achtergrond", b.enemies.size() == 1 and b.enemies[0]["id"] == "mosslijm"
+	check("oefengevecht: 1 Moss Slime (HP 30), gras-achtergrond", b.enemies.size() == 1 and b.enemies[0]["id"] == "mosslijm"
 			and int(b.enemies[0]["s"]["max_hp"]) == 30 and GameState.pending_backdrop_id == "grass")
-	check("tip 'Aanval' in beeld", b.tip_panel != null and b.tip_panel.visible and "Aanval" in b.tip_label.text)
+	check("tip 'Aanval' in beeld", b.tip_panel != null and b.tip_panel.visible and "Attack" in b.tip_label.text)
 	check("vluchten kan niet in het oefengevecht (knop grijs)", not b.cross.is_enabled(4) and cross_frame(b, 4) == 2)
 	var tip_r: Rect2 = lrect(b, b.tip_panel)
 	var ok_tip := true
@@ -2518,7 +2518,7 @@ func _tutorial_battle_test() -> void:
 					if GameState.item_count("kruid") < before:
 						break
 					await frames(1)
-				check("Item > Kruid gebruikt (%d -> %d)" % [before, GameState.item_count("kruid")], GameState.item_count("kruid") == before - 1)
+				check("Item > Herb gebruikt (%d -> %d)" % [before, GameState.item_count("kruid")], GameState.item_count("kruid") == before - 1)
 			else:
 				await choose_command(0)
 				await wait_battle_state(["target_enemy"])
@@ -2527,4 +2527,4 @@ func _tutorial_battle_test() -> void:
 			await tap("interact")
 	check("tip 'Item' verscheen na schade", item_tip)
 	check("held nooit KO in het oefengevecht", int(GameState.party[0]["hp"]) >= 1)
-	check("Mosslijm verslagen (bestiarium)", GameState.defeated_count("mosslijm") >= 1)
+	check("Moss Slime verslagen (bestiarium)", GameState.defeated_count("mosslijm") >= 1)
