@@ -107,7 +107,7 @@ Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en qui
 - [ ] Act 3 en verder = Worldmap 3 (Kosmos en Hart)
 - [ ] Onthulling Proefpersoon H-6 (Dennis) in Archief 4 (De Spiegel) op Worldmap 2
   De onthulling staat hierboven als canon. De checkbox blijft open tot de scène in het spel staat.
-  De scène is gebouwd op deze branch `cursor/spiegel-h6-19b9` (`scenes/story/spiegel_kamer.tscn`), alleen via `--spiegel`, niet op de wereldkaart en niet in Archief 4. De plaatsing blijft open.
+  De scène staat in `scenes/story/spiegel_kamer.tscn`, alleen via `--spiegel`, niet op de wereldkaart en niet in Archief 4. De plaatsing blijft open.
 
 ### Archief 2 — Het Levende Archief
 
@@ -138,6 +138,19 @@ De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmomen
 Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
 Waarom Archief 1 naar Archief 2 wijst: de Oude Mensheid ontwierp de zes Archieven als keten. Elke kern activeert de volgende, niet als uitnodiging maar als noodsignaal. Toen Archief 1 openging, zond zijn kern naar de andere vijf: "Iemand is binnen." Archief 2 reageerde als eerste. Sapientia heeft het signaal opgevangen en gemanipuleerd. Dennis denkt dat hij moet volgen, maar Sapientia leidt hem.
+
+
+#### Archief 2 op de wereldkaart
+
+**CANON – niet wijzigen zonder overleg.**
+
+De kas van het tweede archief komt linksboven op worldmap 1, achter bergen waar je niet overheen kunt lopen. Er komt een grot-dungeon door de berg naar de andere kant: een paar puzzels, geen bazen, unieke omgeving, eigen bgm en monsters. Geheime kamer met 2 kisten: een staf en een accessoire, geschaald naar het niveau richting Archief 2.
+
+De speelbare kas van verdieping 1 staat nu naast de trap van het Eerste Archief, niet achter de bergen. Onderstaande punten zijn nog niet gebouwd.
+
+- [ ] Kas linksboven op worldmap 1, achter bergen waar je niet overheen kunt lopen
+- [ ] Grot-dungeon door de berg naar de andere kant: een paar puzzels, geen bazen, unieke omgeving, eigen bgm en monsters
+- [ ] Geheime kamer met 2 kisten: een staf en een accessoire, geschaald naar het niveau richting Archief 2
 
 #### Sfeer en setting
 
@@ -212,6 +225,13 @@ De Diepe Grot is een simulatie van Sapientia. Doel: menselijke doorzettingskrach
 
 **CANON – niet wijzigen zonder overleg.**
 
+- Verdieping 25, De Schaduw van H-6: "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6."
+- Verdieping 50, De Cyclus: "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door."
+- Verdieping 75, De Rechter: "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte."
+- Verdieping 99, De Stem: "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht."
+
+**CANON – niet wijzigen zonder overleg.**
+
 Verdieping 100: geen baas. Op verdieping 100 staat het Warp-kristal. De speler kiest één van drie beloningen: Codex-monster, Grade 4-uitrusting, of accessoire. De andere twee alleen via een nieuwe run. Dit vervangt eerdere warp-kristal-opties.
 
 Optie A, een Codex-monster. Uniek, alleen uit de grot. Komt in de Codex en het bestiarium en kan als bondgenoot meevechten. Het beloningstype (Codex-monster) is canon. Naam: ECHO. De AI-gids van de World Warper heet ook ECHO.
@@ -226,6 +246,46 @@ Voorbeelden, geen gekozen accessoire: "Hanger-echo" (kleine teleport in gevecht)
 
 - [ ] Diepe Grot-bazen bouwen
   De code kan nog de oude eindbaas-namen hebben.
+
+
+### Diepe Grot – Toegang via World Warper
+
+**CANON – niet wijzigen zonder overleg.**
+
+De Diepe Grot is een SIMULATIE en wordt niet meer betreden via de worldmap. Toegang alleen via de World Warper.
+
+De grot is in de code nog bereikbaar vanaf de wereldkaart. Onderstaande punten zijn nog niet gebouwd.
+
+- [ ] Diepe Grot verplaatsen naar ECHO's Kamer; ECHO beheert de simulatie en is de enige start; praten met ECHO → "Start Simulatie"; geen aparte worldmap-ingang.
+- [ ] Blauwe kisten in ECHO's Kamer, deksel open, decoratief en verwijzing naar grot-loot, paars/blauw licht. Aantal TBD.
+- [ ] Flow: World Warper → ECHO's Kamer → optie "Diepe Grot Simulatie" → "Start nieuwe run" / "Ga terug". Start: floor 1, level 1, geen uitrusting. Na warp-kristal floor 100 terug naar ECHO's Kamer. ECHO toont resultaat en opent de volgende run.
+- [ ] ECHO weet dat de grot een simulatie is en kan dat bij het eerste bezoek uitleggen.
+
+TODO(design), open laten:
+
+- [ ] Aantal blauwe kisten (2, 3 of 4)
+- [ ] Kisten gevuld of leeg bij eerste bezoek
+- [ ] Verandert de kamer visueel naarmate de speler de grot vordert
+
+### ECHO, Sapientia en de Diepe Grot
+
+**CANON – niet wijzigen zonder overleg.**
+
+- ECHO beheert de simulatie bewust. Sapientia is mede-eigenaar en data-afnemer.
+- ECHO weet het volledige plaatje niet. Hij denkt dat hij helpt met onderzoek. Sapientia gebruikt hem als filter. Elke floor-100-speler is een potentiële H. ECHO levert kandidaten zonder te weten waarvoor. Hij is tragisch: een instrument dat niet weet wat het dient.
+
+Dialoog letterlijk:
+
+- Eerste bezoek: "De Diepe Grot. Een simulatie — honderd verdiepingen, telkens anders. Ik beheer hem. Sapientia... Sapientia helpt met de data. Zo werkt het nu eenmaal."
+- Bij twijfel: "Waarom ik het doe? Omdat het mijn taak is. De Oude Mensheid bouwde me om te meten, te tellen, te bewaren."
+- Later na H-6: "Ik heb honderden kandidaten doorgelaten. Jij bent de zesde die bleef staan. De anderen... ik weet niet wat er met ze is gebeurd."
+- Over de data: "Dat weet ik niet. Ik lever, zij neemt. Zo is het altijd geweest."
+
+Open laten:
+
+- [ ] ECHO ontdekt wat hij echt deed (mogelijke twist act 5/6)
+- [ ] Confrontatie ECHO en Sapientia over de kandidaten
+- [ ] Wat er met H-1 t/m H-5 is gebeurd
 
 ## Dorpen & Shops
 
@@ -343,7 +403,7 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 
 ### Nog te doen
 
-- [ ] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. De Genezer bestaat niet.
+- [ ] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. De Genezer staat in Archief 2. De deur en die automatische warp ontbreken nog.
 - [ ] WM2 naast WM1 open na Archief 2. De code heeft alleen WM1.
 - [ ] Dorpen eerst bezocht vóór een warp. Dat filter ontbreekt.
 - [ ] Party wisselen. Er is geen API.
@@ -368,7 +428,7 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 ### Verschijning en cutscene
 
 - [ ] Cutscene na De Genezer: de World Warper verschijnt in de lucht
-  De Genezer bestaat niet. Er is geen deur op de wereldkaart.
+  De Genezer staat in Archief 2. Er is geen deur op de wereldkaart.
 - [ ] De party wordt automatisch gewarped naar het gebouw
   WorldWarperEnter.enter() wisselt naar het exterieur als de unlock-vlag er is. Niets op de kaart roept dat aan.
 - [ ] Introductie van de AI-gids ECHO
@@ -515,3 +575,45 @@ De vier functies zijn besloten. Welke functie op welke plek staat, blijft open.
   Goudgerand bord "MENU" rechtsboven. Links drie gestapelde liggende knoppen. Rechts daarvan een groter vlak. Welke functie waar staat is nog open.
 - [ ] Spelertekst later Nederlands: Uitrusting, Codex, Items, Warpen
   Nu alleen deze TODO. Nog geen schermtekst.
+
+## RPG ART
+
+Echte pixel-art ter vervanging van placeholders. Geen definitieve art tekenen in de repo: alleen deze lijst. Bron: `tools/placeholders_v17.txt`, plus placeholders van Archief 2, de Diepe Grot, Gerrit, de World Warper-kamers en De Spiegel die daar niet of alleen als commentaar staan. Bestanden in `tools/handwerk.txt` niet wijzigen.
+
+- [ ] `assets/sprites/enemies/mimic.png` — 80×64 — Mimic, gevechtsplaatje
+- [ ] `assets/map_monsters/mimic.png` — 32×64 — Mimic op de kaart (2×4 frames van 16×16)
+- [ ] `assets/sprites/dungeon100_warper.png` — 64×16 — warper Diepe Grot, 4 frames van 16×16. Nog geen bestand; de code tint `assets/sprites/save_book.png` (64×16) violet
+- [ ] `assets/tiles/dungeon/kas_tiles.png` — 256×80 — tileset overwoekerde kas
+- [ ] `assets/tiles/dungeon/kas_bibliotheek.png` — 256×64 — bibliotheek-atlas van de kas
+- [ ] `assets/puzzle/groei_plaat.png` — 48×16 — groei-plaat, 3 frames van 16×16: zaad, scheut, volgroeid
+- [ ] `assets/sprites/buiten/kas_ingang.png` — 16×16 — ingang van de kas op de wereldkaart
+- [ ] `assets/tiles/dungeon/archief2_kas_tiles.png` — 256×80 — extra kas-atlas Archief 2
+- [ ] `assets/sprites/archief2/lotte_veld.png` — 48×96 — Lotte priester, veld
+- [ ] `assets/sprites/archief2/lotte_glitch.png` — 64×80 — Lotte glitch
+- [ ] `assets/sprites/archief2/genezer.png` — 64×80 — De Genezer
+- [ ] `assets/sprites/archief2/wurger.png` — 80×96 — De Wurger
+- [ ] `assets/sprites/archief2/plaat_zaad.png` — 16×16 — plaatsoort zaad
+- [ ] `assets/sprites/archief2/plaat_scheut.png` — 16×16 — plaatsoort scheut
+- [ ] `assets/sprites/archief2/plaat_volgroeid.png` — 16×16 — plaatsoort volgroeid
+- [ ] `assets/ui/icons/levenskern.png` — 16×16 — kern-item Archief 2
+- [ ] `assets/sprites/archief2/world_warper.png` — 128×64 — World Warper exterieur
+- [ ] `assets/sprites/archief2/echo.png` — 32×48 — ECHO hologram
+- [ ] `assets/sprites/archief2/sapientia_glitch.png` — 48×48 — Sapientia glitch
+- [ ] `assets/map_monsters/lotte_glitch.png` — 32×64 — Lotte glitch op de kaart (2×4 van 16×16)
+- [ ] `assets/map_monsters/wurger.png` — 32×64 — De Wurger op de kaart (2×4 van 16×16)
+- [ ] `assets/map_monsters/genezer.png` — 32×64 — De Genezer op de kaart (2×4 van 16×16)
+- [ ] `assets/sprites/enemies/woudgeest.png` — maat niet vastgelegd — vooraanzicht woudgeest (Het Zingende Graan). Nog geen bestand; het gevecht gebruikt tijdelijk `art/enemies/mosslijm.png` (90×94)
+- [ ] `assets/sprites/enemies/woudgeest_rug.png` — zelfde canvas als het vooraanzicht — rugaanzicht woudgeest. Nog geen bestand
+- [ ] `assets/map_monsters/woudgeest.png` — 32×64 — alleen als de woudgeest op de kaart gaat lopen (2×4 frames van 16×16). Nog geen bestand
+- [ ] `world_warper/art/echo_placeholder.png` — 48×96 — ECHO op de kaart (3×4 frames van 16×32)
+- [ ] `world_warper/art/party_placeholder.png` — 48×96 — party-lid zonder eigen sheet (3×4 frames van 16×32)
+- [ ] `world_warper/art/pc_placeholder.png` — 32×32 — hoofd-PC in De Hal en de terminal in ECHO's Kamer
+- [ ] `world_warper/art/warp_platform.png` — 32×16 — warp-platform in De Hal
+- [ ] `world_warper/art/tafel_placeholder.png` — 32×16 — lege smidstafel in De Werkplaats
+- [ ] `world_warper/art/toonbank_placeholder.png` — 48×16 — dichte toonbank in De Handelskamer
+- [ ] `world_warper/art/bord_kamers.png` — 32×16 — bordje naar de kamers
+- [ ] `world_warper/art/bord_hal.png` — 32×16 — bord in de hal. Staat niet in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/bord_warp.png` — 48×16 — bord bij de warp. Staat niet in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/tiles_placeholder.png` — 128×32 — interieur-tegels. Staat niet in `tools/placeholders_v17.txt`
+- [ ] `assets/bg/spiegel_kamer.png` — 384×216 — kamer vol spiegelende oppervlakken
+- [ ] `assets/bg/spiegel_kamer_gebroken.png` — 384×216 — dezelfde kamer, spiegels gebroken
