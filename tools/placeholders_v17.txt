@@ -9,3 +9,17 @@ assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x
 # Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint
 # in scripts/dungeon/dungeon100_warper.gd.
 # Echte art later: assets/sprites/dungeon100_warper.png  64x16  (4 frames van 16x16).
+
+# Archief 2, Het Levende Archief (tools/art_archief2_placeholders.py). PLACEHOLDER, geen definitieve art.
+assets/tiles/dungeon/archief2_kas_tiles.png   256x80   tileset kas 256x80
+assets/sprites/archief2/lotte_veld.png   48x96   Lotte priester, veld 48x96
+assets/sprites/archief2/lotte_glitch.png   64x80   Lotte glitch 64x80
+assets/sprites/archief2/genezer.png   64x80   De Genezer 64x80
+assets/sprites/archief2/wurger.png   80x96   De Wurger 80x96
+assets/sprites/archief2/plaat_zaad.png   16x16   groei-plaat zaad 16x16
+assets/sprites/archief2/plaat_scheut.png   16x16   groei-plaat scheut 16x16
+assets/sprites/archief2/plaat_volgroeid.png   16x16   groei-plaat volgroeid 16x16
+assets/ui/icons/levenskern.png   16x16   kern-item Archief 2 16x16
+assets/sprites/archief2/world_warper.png   128x64   World Warper exterieur 128x64
+assets/sprites/archief2/echo.png   32x48   ECHO hologram 32x48
+assets/sprites/archief2/sapientia_glitch.png   48x48   Sapientia glitch 48x48

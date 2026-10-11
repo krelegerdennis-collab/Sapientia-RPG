@@ -42,6 +42,8 @@ const HEROES := [
 	},
 	{
 		"id": "lotte", "battle_sprite": "res://assets/sprites/battle/lotte.png",
+		# Veld-sheet is een PLACEHOLDER (48x96). De gevechts-art blijft handwerk.
+		"field_sprite": "res://assets/sprites/archief2/lotte_veld.png",
 		"name": "Lotte", "class": "Priest", "accent": "cyaan", "equip_type": "priester",
 		"level": 1, "exp": 0,
 		"max_hp": 32, "max_mp": 14, "atk": 9, "def": 6, "agi": 7, "mag": 7, "mdef": 9,
@@ -307,6 +309,64 @@ const ENEMIES := {
 		"drops": [{"item": "gloeiende_inktfles", "chance": 1.0}],
 		"desc": "A fat worm that ate its way through parchment and now sweats black ink.",
 		"habitat": ["archief"],
+	},
+	# ------------------------------------------------------------ ARCHIEF 2, HET LEVENDE ARCHIEF
+	# Plaatjes zijn PLACEHOLDERS (tools/art_archief2_placeholders.py).
+	# TODO(design): Lotte-glitch HP 90, ATK 14, DEF 5. Niet in de canon; onder de Golem (HP 360).
+	"lotte_glitch": {
+		"name": "Lotte", "sprite": "res://assets/sprites/archief2/lotte_glitch.png",
+		"max_hp": 90, "atk": 14, "def": 5, "agi": 8, "mag": 8, "mdef": 6,
+		"exp": 20, "gold": 0, "y_offset": 0,
+		"skills": [{"name": "Stilte", "chance": 0.25, "power": 1.2}],
+		"no": 30, "mp": 12, "weak": [], "resist": [],
+		"drops": [],
+		"boss": {
+			"max_hp": 90, "atk": 14, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
+			"exp": 20, "gold": 0,
+			"skills": [{"name": "Stilte", "chance": 0.25, "power": 1.2}],
+			"tint": [0.72, 0.40, 1.15],
+		},
+		"desc": "Lotte, priesteres van de Orde van de Stille Vlam, stilgezet door Sapientia.",
+		"habitat": ["archief"],
+	},
+	# TODO(design): De Wurger HP 160, ATK 16, DEF 6. Conservatief na Archief 1 (Golem HP 360 / doel-level 7).
+	"wurger": {
+		"name": "De Wurger", "sprite": "res://assets/sprites/archief2/wurger.png",
+		"max_hp": 160, "atk": 16, "def": 6, "agi": 5, "mag": 0, "mdef": 4,
+		"exp": 48, "gold": 20, "y_offset": 0,
+		"skills": [],
+		"no": 31, "mp": 0, "weak": ["ijs", "fysiek"], "resist": [],
+		"drops": [],
+		"boss": {
+			"max_hp": 160, "atk": 16, "def": 6, "agi": 5, "mag": 0, "mdef": 4, "mp": 0,
+			"exp": 48, "gold": 20,
+			"skills": [],
+			"weak": ["ijs", "fysiek"],
+			"weak_matters": true,
+		},
+		"desc": "Een kolossale slingerplant. Sapientia's stilte: leven dat geen kant op kan.",
+		"habitat": ["archief", "baas"],
+	},
+	# TODO(design): De Genezer HP 220. Eerste treffer 30% en leech 8-12% staan in de canon; het totaal-HP niet.
+	"genezer": {
+		"name": "De Genezer", "sprite": "res://assets/sprites/archief2/genezer.png",
+		"max_hp": 220, "atk": 10, "def": 8, "agi": 6, "mag": 8, "mdef": 10,
+		"exp": 90, "gold": 40, "y_offset": 0,
+		"skills": [],
+		"no": 32, "mp": 0, "weak": ["ijs", "zwaard"], "resist": [],
+		"drops": [],
+		"boss": {
+			"max_hp": 220, "atk": 10, "def": 8, "agi": 6, "mag": 8, "mdef": 10, "mp": 0,
+			"exp": 90, "gold": 40,
+			"skills": [],
+			"weak": ["ijs", "zwaard"],
+			"weak_matters": true,
+			"archief2_open": true,
+			"archief2_leech": true,
+			"archief2_zin": "In stilte ligt vrede. Ik corrigeer wat groeit.",
+		},
+		"desc": "Half plant, half staal. Hij geneest door te nemen.",
+		"habitat": ["archief", "baas"],
 	},
 }
 

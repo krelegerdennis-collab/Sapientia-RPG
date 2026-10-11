@@ -93,6 +93,19 @@ const THEMES := {
 		},
 	},
 	"archief_v14": {"tiles": TILES, "lib_tiles": LIB_TILES, "sprites": {}},
+	# Archief 2: placeholder-kas (zelfde nummering/botsing als de grijze atlas, groen getint).
+	"levend_kas": {
+		"tiles": "res://assets/tiles/dungeon/archief2_kas_tiles.png",
+		"lib_tiles": "res://assets/tiles/dungeon/archief_grijs_bibliotheek.png",
+		"tint": Color(0.78, 1.0, 0.84),
+		"terrain": "archief",
+	},
+	"warper_paars": {
+		"tiles": "res://assets/tiles/dungeon/archief2_kas_tiles.png",
+		"lib_tiles": "res://assets/tiles/dungeon/archief_grijs_bibliotheek.png",
+		"tint": Color(0.78, 0.68, 1.0),
+		"terrain": "archief",
+	},
 	# v0.17 HET DONKER WOUD (scripts/data/woud_rooms.gd), tegels van RPG ART (art_woud_v17,
 	# docs/WOUD_TILES.txt): woud_tiles.png 256x112. 0-64 = zelfde nummering/botsing als
 	# dungeon_tiles_v14 (bladerdak = muurtop, stammen = voorkant, wortels/paddenstoelen = decor),
@@ -626,6 +639,9 @@ static func room(room_id: String) -> Dictionary:
 		return ROOMS[room_id]
 	if room_id.begins_with("dungeon100_"):
 		return load("res://scripts/dungeon/dungeon100_generator.gd").room_for_id(room_id)
+	# Archief 2 staat apart, niet in ROOMS (de glitch-grafiek van Archief 1 blijft gelijk).
+	if room_id.begins_with("archief_2_"):
+		return load("res://scripts/data/archief2_rooms.gd").rooms().get(room_id, {})
 	return woud().ROOMS.get(room_id, {})
 
 

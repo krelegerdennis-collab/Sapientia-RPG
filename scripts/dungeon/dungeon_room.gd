@@ -261,6 +261,7 @@ func _build() -> void:
 		for l in data.get("lines", []):
 			lines.append(str(l))
 		ex.lines = lines
+		ex.event = str(data.get("event", ""))
 		$Exits.add_child(ex)
 		for t in tiles:
 			if t.y != layout.size() - 1:
@@ -504,7 +505,8 @@ func start_monster_battle(m: Node) -> void:
 	last_touch_id = m.monster_id
 	var t := _prepare_battle(m.monster_id)
 	# v0.14: monsterniveau van de kamer (een baas krijgt geen niveau: zijn stats staan in game_data.gd)
-	var in_archief := DungeonRooms.ROOMS.has(room_id)
+	# archief "2" = Het Levende Archief (niet in ROOMS, wel dezelfde schaal als Archief 1).
+	var in_archief := DungeonRooms.ROOMS.has(room_id) or str(room.get("archief", "")) == "2"
 	GameState.start_battle(m.group.duplicate(), t, player.facing, terrain_at(t), m.boss, 0 if m.boss else tier(), in_archief)
 
 
@@ -554,7 +556,7 @@ func _restore_after_battle(ctx: Dictionary) -> void:
 			if is_instance_valid(ch) and ch.chest_id == mimic:
 				ch.open_after_mimic()
 	match GameState.last_battle_result:
-		"win":
+		"win", "story":
 			if not GameState.defeated_map_monsters.has(room_id):
 				GameState.defeated_map_monsters[room_id] = {}
 			GameState.defeated_map_monsters[room_id][id] = true

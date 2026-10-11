@@ -366,6 +366,13 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+	# Archief 2 gaat open op dezelfde golem-vlag. Geen nieuwe beat.
+	"naar_archief2": [
+		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
+			["say", "", ["Achter het Archief dampt een kas. De deur blijft dicht.", "Eerst moet de kern van het Eerste Archief antwoorden."]],
+		]},
+		{"do": "default"},
+	],
 
 	# --- de ontmoeting (eenmalig, MAP_ENTER; vlag noor_ontmoet)
 	"noor_ontmoeting": [{"do": [

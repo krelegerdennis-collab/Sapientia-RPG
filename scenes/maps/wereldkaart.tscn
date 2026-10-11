@@ -31,6 +31,11 @@ position = Vector2(328, 536)
 script = ExtResource("4_de1fy")
 facing = Vector2i(0, -1)
 
+[node name="van_archief2" type="Marker2D" parent="Spawns"]
+position = Vector2(344, 536)
+script = ExtResource("4_de1fy")
+facing = Vector2i(0, -1)
+
 [node name="van_dorp" type="Marker2D" parent="Spawns"]
 position = Vector2(232, 504)
 script = ExtResource("4_de1fy")
@@ -66,6 +71,15 @@ target_map = "res://scenes/maps/archief_ingang.tscn"
 target_spawn = "ingang"
 lines = Array[String]([])
 event = ""
+
+[node name="NaarArchief2" type="Node2D" parent="Exits"]
+position = Vector2(336, 544)
+script = ExtResource("5_ws0vq")
+size_tiles = Vector2i(1, 1)
+target_map = "res://scenes/maps/archief_2_v1_entree.tscn"
+target_spawn = "ingang"
+lines = Array[String]([])
+event = "naar_archief2"
 
 [node name="NaarWachtershuis" type="Node2D" parent="Exits"]
 position = Vector2(224, 480)
