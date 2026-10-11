@@ -177,8 +177,12 @@ const ENEMIES := {
 			# par. 8: HP 340, ATK 33, DEF 22, kern kapot bij 45+), maar HP 340 -> 400: met +12 won
 			# 'alleen aanvallen' op Lv 10 anders 18-39% (simulatie golem_tests.gd, HANDOFF_ARCHIEF1.md).
 			# Niet vluchten (battle.gd).
-			"max_hp": 400, "atk": 33, "def": 22, "agi": 6, "mag": 16, "mdef": 18, "mp": 0,
-			"exp": 300, "gold": 120,
+			# Doel-level van het Eerste Archief is 7 (EERSTE_ARCHIEF_DOEL).
+			# TODO(design): HP 360 en ATK 27 zijn bijgesteld na golem_tests.gd, zodat Lv 7
+			# slim wint met meerdere items en domweg aanvallen meestal verliest.
+			# DEF blijft 15 (de kern-drempel 45 hoort bij Dennis Lv 7, niet bij een zwakke klap).
+			"max_hp": 360, "atk": 27, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "mp": 0,
+			"exp": 210, "gold": 84,
 			"skills": [{"name": "Book Hammer", "chance": 0.2, "power": 1.5}],
 			# Vaste buit van de Golem in het Eerste Archief: 3 Lege Boeken. "chance" blijft alleen info.
 			"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 0.5},
@@ -351,10 +355,51 @@ static func bestiary_ids() -> Array:
 ## target: "enemy" (één vijand), "all_enemies" (alle vijanden) of "ally" (één held)
 ## type:   "damage" (schade) of "heal" (genezen)
 ## Effect = power + 2 x level van de gebruiker (+/- 10% geluk).
+## Kleine werklijst: één spreuk per grade per element dat nu meedoet.
+## TODO(design): namen en cijfers van de nieuwe spreuken. De volledige 4×16-lijst is nog ontwerp.
+## Bestaande vuur/bliksem/genees houden hun oude mp en power (tests en startspreuken).
+## type "buff": buff_stat + buff_n voor de rest van het gevecht (battle.gd).
 const SPELLS := {
-	"vuur":    {"name": "Fire",    "mp": 4, "target": "enemy",       "type": "damage", "power": 14},
-	"bliksem": {"name": "Lightning", "mp": 7, "target": "all_enemies", "type": "damage", "power": 9},
-	"genees":  {"name": "Heal",  "mp": 3, "target": "ally",        "type": "heal",   "power": 22},
+	"vuur":    {"name": "Fire", "mp": 4, "target": "enemy", "type": "damage", "power": 14,
+		"element": "vuur", "grade": 1, "role": "damage"},
+	"vlam":    {"name": "Vlam", "mp": 6, "target": "enemy", "type": "damage", "power": 26,
+		"element": "vuur", "grade": 2, "role": "damage"},
+	"vuurzee": {"name": "Vuurzee", "mp": 8, "target": "all_enemies", "type": "damage", "power": 34,
+		"element": "vuur", "grade": 3, "role": "damage"},
+	"inferno": {"name": "Inferno", "mp": 10, "target": "all_enemies", "type": "damage", "power": 42,
+		"element": "vuur", "grade": 4, "role": "damage"},
+	"doorn":   {"name": "Doorn", "mp": 4, "target": "enemy", "type": "damage", "power": 18,
+		"element": "natuur", "grade": 1, "role": "damage"},
+	"rank":    {"name": "Rank", "mp": 6, "target": "enemy", "type": "damage", "power": 26,
+		"element": "natuur", "grade": 2, "role": "damage"},
+	"wildgroei": {"name": "Wildgroei", "mp": 8, "target": "all_enemies", "type": "damage", "power": 34,
+		"element": "natuur", "grade": 3, "role": "damage"},
+	"oerwoud": {"name": "Oerwoud", "mp": 10, "target": "all_enemies", "type": "damage", "power": 42,
+		"element": "natuur", "grade": 4, "role": "damage"},
+	"vonk":    {"name": "Vonk", "mp": 4, "target": "enemy", "type": "damage", "power": 18,
+		"element": "bliksem", "grade": 1, "role": "damage"},
+	"bliksem": {"name": "Lightning", "mp": 7, "target": "all_enemies", "type": "damage", "power": 9,
+		"element": "bliksem", "grade": 2, "role": "damage"},
+	"storm":   {"name": "Storm", "mp": 8, "target": "all_enemies", "type": "damage", "power": 34,
+		"element": "bliksem", "grade": 3, "role": "damage"},
+	"donderslag": {"name": "Donderslag", "mp": 10, "target": "all_enemies", "type": "damage", "power": 42,
+		"element": "bliksem", "grade": 4, "role": "damage"},
+	"genees":  {"name": "Heal", "mp": 3, "target": "ally", "type": "heal", "power": 22,
+		"element": "licht", "grade": 1, "role": "heal"},
+	"zegen":   {"name": "Zegen", "mp": 6, "target": "ally", "type": "buff", "power": 0, "buff_stat": "def", "buff_n": 2,
+		"element": "licht", "grade": 2, "role": "buff"},
+	"glans":   {"name": "Glans", "mp": 8, "target": "ally", "type": "heal", "power": 46,
+		"element": "licht", "grade": 3, "role": "heal"},
+	"aureool": {"name": "Aureool", "mp": 10, "target": "ally", "type": "heal", "power": 56,
+		"element": "licht", "grade": 4, "role": "heal"},
+	"rijp":    {"name": "Rijp", "mp": 4, "target": "enemy", "type": "damage", "power": 18,
+		"element": "ijs", "grade": 1, "role": "damage"},
+	"vorst":   {"name": "Vorst", "mp": 6, "target": "enemy", "type": "damage", "power": 26,
+		"element": "ijs", "grade": 2, "role": "damage"},
+	"ijsstorm": {"name": "IJsstorm", "mp": 8, "target": "all_enemies", "type": "damage", "power": 34,
+		"element": "ijs", "grade": 3, "role": "damage"},
+	"ijskern": {"name": "IJskern", "mp": 10, "target": "enemy", "type": "damage", "power": 42,
+		"element": "ijs", "grade": 4, "role": "damage"},
 }
 
 # ---------------------------------------------------------------- items
@@ -393,6 +438,17 @@ const ITEMS := {
 		"desc": "A scroll with the spell Lightning. Someone in the party can learn it."},
 	"spreuk_genees": {"name": "Heal Scroll", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
 		"desc": "A scroll with the spell Heal. Someone in the party can learn it."},
+	# Grade 4 alleen uit blauwe kisten, verdieping 80-99. Niet in de winkel.
+	"spreuk_inferno": {"name": "Rol: Inferno", "target": "ally", "teach": "inferno", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Inferno. Alleen uit een diepe blauwe kist."},
+	"spreuk_oerwoud": {"name": "Rol: Oerwoud", "target": "ally", "teach": "oerwoud", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Oerwoud. Alleen uit een diepe blauwe kist."},
+	"spreuk_donderslag": {"name": "Donderrol", "target": "ally", "teach": "donderslag", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Donderslag. Alleen uit een diepe blauwe kist."},
+	"spreuk_aureool": {"name": "Rol: Aureool", "target": "ally", "teach": "aureool", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Aureool. Alleen uit een diepe blauwe kist."},
+	"spreuk_ijskern": {"name": "Rol: IJskern", "target": "ally", "teach": "ijskern", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met IJskern. Alleen uit een diepe blauwe kist."},
 	# Verhaaldrankjes t/m Act 6 (lijn "drank" in level_scale.gd). Alleen HP/MP: boosts, status
 	# (roest, stilte, correctie) en herleving zitten nog niet in het gevecht.
 	# Act 1, te vinden: Ilse in Esdoorn, eenmalig nadat Noor gered is. Later ook Tante Mien
@@ -454,8 +510,9 @@ const KEY_ITEMS := {
 ## (v0.11 had hier WEAPONS met alleen het Kort zwaard; dat zit nu in EQUIPMENT.)
 ##
 ## Vakken (volgorde = volgorde op het scherm) en hun naam op het scherm.
-const EQUIP_SLOTS := ["wapen", "schild", "helm", "harnas", "accessoire"]
-const EQUIP_SLOT_NAMES := {"wapen": "Weapon", "schild": "Shield", "helm": "Helm", "harnas": "Armor", "accessoire": "Accessory"}
+const EQUIP_SLOTS := ["wapen", "schild", "helm", "harnas", "benen", "laarzen", "accessoire"]
+const EQUIP_SLOT_NAMES := {"wapen": "Weapon", "schild": "Shield", "helm": "Helm", "harnas": "Armor",
+	"benen": "Benen", "laarzen": "Laarzen", "accessoire": "Accessory"}
 ## Stats die uitrusting kan veranderen (volgorde op het scherm) en hun korte naam.
 ## SPD = de bestaande sleutel "agi".
 const EQUIP_STATS := ["atk", "def", "mag", "mdef", "agi"]
@@ -780,6 +837,12 @@ const START_GOLD := 0
 ## Alleen in de dungeon: dezelfde vijand op de wereldkaart blijft gewoon (tier 0), een BAAS krijgt
 ## nooit een niveau (zijn stats staan in het "boss"-blok), en het bestiarium toont de gewone waarden.
 ## Afronden: half naar even (zoals de simulatie in /workspace/archief1_ontwerp/plan.py).
+## Speler-level waar het Eerste Archief op mikt. De gedeelde TIERS-tabel (ook woud en
+## formule-tests) blijft staan. Alleen archiefgevechten gaan door apply_archief_tier.
+const EERSTE_ARCHIEF_DOEL := 7
+## TODO(design): 0,7 op gevechtsstats en 0,50 op EXP, zodat 34 kamergevechten + het oefengevecht op level 7 landen.
+const ARCHIEF_STAT_SCHAAL := 0.7
+const ARCHIEF_EXP_SCHAAL := 0.50
 const TIERS := {
 	1: {"hp": 1.0, "atk": 0, "def": 0, "exp": 2.0, "gold": 1.0},
 	2: {"hp": 1.5, "atk": 4, "def": 3, "exp": 2.5, "gold": 1.5},
@@ -809,6 +872,24 @@ static func apply_tier(data: Dictionary, tier: int) -> Dictionary:
 	d["exp"] = round_half_even(float(d.get("exp", 0)) * float(t["exp"]))
 	d["gold"] = round_half_even(float(d.get("gold", 0)) * float(t["gold"]))
 	d["tier"] = tier
+	return d
+
+
+## Zelfde tier-tabel, daarna omlaag naar doel-level 7. Tier 0 blijft ongewijzigd.
+static func apply_archief_tier(data: Dictionary, tier: int) -> Dictionary:
+	var d := apply_tier(data, tier)
+	if not TIERS.has(tier):
+		return d
+	d["max_hp"] = maxi(1, round_half_even(float(d["max_hp"]) * ARCHIEF_STAT_SCHAAL))
+	d["atk"] = maxi(1, round_half_even(float(d["atk"]) * ARCHIEF_STAT_SCHAAL))
+	d["def"] = maxi(0, round_half_even(float(d["def"]) * ARCHIEF_STAT_SCHAAL))
+	if d.has("mag"):
+		d["mag"] = maxi(0, round_half_even(float(d["mag"]) * ARCHIEF_STAT_SCHAAL))
+	if d.has("mdef"):
+		d["mdef"] = maxi(0, round_half_even(float(d["mdef"]) * ARCHIEF_STAT_SCHAAL))
+	d["exp"] = maxi(1, round_half_even(float(d.get("exp", 0)) * ARCHIEF_EXP_SCHAAL))
+	d["gold"] = maxi(0, round_half_even(float(d.get("gold", 0)) * ARCHIEF_STAT_SCHAAL))
+	d["archief_doel"] = EERSTE_ARCHIEF_DOEL
 	return d
 
 ## Player-facing element names. The ids (vuur, bliksem, ...) stay as data.
