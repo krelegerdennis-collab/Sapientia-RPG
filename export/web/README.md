@@ -1,6 +1,6 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`5fa7ff0`, spelcode `b93bcad`), Godot 4.7.2, threads uit.
+Web-build van `main` (`f0a3a7a`, spelcode `44a22af`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
@@ -8,7 +8,7 @@ De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 Nieuw in deze build, bovenop de vorige web-build (`6e51c61`):
 - De Inktwurm heeft zijn eigen sprites (gevecht, rug, idle en op de kaart).
 - In de Golemhal staat rechts een boekenkast. Kernkracht (de veld-vuurbal, pas na de Golem) scheurt hem open. Dan kronkelt de Inktwurm eruit.
-- Betatest begint met een Inktwurm als buddy (Mosslijm en Moskonijn staan er ook in).
+- Betatest begint met een Inktwurm als buddy (Mosslijm en Moskonijn staan er ook in). Had je Betatest al gestart, dan komt de Inktwurm er de volgende keer bij.
 - Bij **Nieuw spel** typ je je eigen naam. Dennis staat er al in; de eerste letter vervangt die naam. Tik het vak aan, dan opent het toetsenbord op de telefoon. Leeg laten blijft Dennis. Maximaal 10 tekens.
 - Titelscherm links: **Betatest**. Eigen voortgang, los van Nieuw spel en Doorgaan.
   De eerste keer sta je op de wereldkaart (niveau 10, Vonkzwaard, 6 Lege Boeken).
