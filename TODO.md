@@ -264,11 +264,22 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
 De Diepe Grot is een simulatie van Sapientia. Doel: menselijke doorzettingskracht meten. Wie 100 verdiepingen haalt is een "kandidaat". Dennis en de party zijn niet de eersten en niet de laatsten. Dat verklaart de start op level 1, zonder uitrusting en zonder echt verhaal.
 
-- Verdieping 25: De Schaduw van H-6, duistere echo van Dennis.
-- Verdieping 50: De Cyclus, draaiende machine, organisch en staal.
-- Verdieping 75: De Rechter, een oog met armen.
-- Verdieping 99: De Stem, geen lichaam, Sapientia zelf.
-- Verdieping 100: geen baas. Het Warp-kristal. Een keuze-moment. De keuze-opties zijn niet gegeven.
+**CANON – niet wijzigen zonder overleg.**
+
+- Verdieping 25, De Schaduw van H-6: "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6."
+- Verdieping 50, De Cyclus: "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door."
+- Verdieping 75, De Rechter: "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte."
+- Verdieping 99, De Stem: "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht."
+
+**CANON – niet wijzigen zonder overleg.**
+
+Verdieping 100: geen baas. Op verdieping 100 staat het Warp-kristal. De speler kiest één van drie beloningen. De andere twee alleen via een nieuwe run. Dit vervangt eerdere warp-kristal-opties.
+
+Optie A, een Codex-monster. Uniek, alleen uit de grot. Voorbeelden: "De Echo" (maakt een zwakke kopie van de party) of "De Simulacrum". Komt in de Codex en het bestiarium en kan als bondgenoot meevechten. Het concrete monster is nog een voorbeeld. De beloningstype (Codex-monster) is canon.
+
+Optie B, equipment. Grade 4, alleen via deze keuze. Voorbeelden: Kernstaf (Lotte), Schaduwzwaard (Dennis), Natuurstaf (Noor), of een uniek pantserstuk buiten de gewone Grade 4-pool. Vaste affixes, endgame. Class-restrictie hangt af van het stuk.
+
+Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Voorbeelden: "Hanger-echo" (kleine teleport in gevecht), "Groene Hart" (regeneratie), "Simulatie-ring" (extra XP en goud).
 
 - [ ] Diepe Grot-bazen bouwen
   De code kan nog de oude eindbaas-namen hebben.
@@ -287,7 +298,30 @@ Zaad: in het Donker Woud, op de grens van mist en open plek. Bereikbaar na Noor'
 
 Beloning: de molen wordt een save point in Wilgendal (opslaan, rusten, party wisselen). Item-bron: "Zingend Meel", één healing-item per bezoek.
 
-De gesproken regels zijn nog niet aangeleverd, dus er staat nog geen citaat. De opzet hierboven is wel canon.
+Eerste keer:
+"O, bezoek. Ga zitten, jongen. Of blijf staan — maakt niet uit. De molen draait toch niet meer."
+"Vroeger zong hij. Als ik graan maalde, zong hij. Nu hoor ik alleen de wind. En de wind zingt niet, hij fluistert."
+
+Vraag "Wat is er gebeurd?":
+"Het graan is op. Niet het gewone graan — dat heb ik nog wel. Het ZINGENDE graan. Dat groeit alleen waar licht en schaduw elkaar raken. In het Donker Woud, aan de rand van de mist."
+"Ik ben te oud om te gaan. Mijn benen willen niet meer. Maar jij... jij ziet eruit als iemand die nog wel eens ergens heen gaat."
+
+Accepteren:
+"Zoek het Zingend Zaad. Het groeit waar de mist optrekt en de eerste zon doorbreekt. Neem het mee, en mijn molen zingt weer."
+"En jongen — wees voorzichtig. Het woud houdt niet van haast."
+
+Weigeren (speler loopt weg):
+"Geen haast. De molen wacht toch wel. Ik ook."
+
+Terug zonder zaad:
+"Nog niet gevonden? Geen zorgen. Het woud laat zich niet dwingen."
+
+Terug met zaad:
+"Laat me het zien. ...Ja. Ja, dit is het. Hij zingt al, hoor je? Zachtjes. Hij wacht op de molen."
+Scène: de molen draait weer, zacht gezang.
+
+Afsluitend, definitief:
+"Dank je, jongen. De molen zingt weer. Neem wat meel mee voor onderweg — en als je ooit terugkomt, de deur staat altijd open."
 
 ### Magic tier list
 
