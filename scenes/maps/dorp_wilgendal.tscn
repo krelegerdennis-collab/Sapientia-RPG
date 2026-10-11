@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
 [ext_resource type="TileSet" path="res://assets/tiles/dorp.tres" id="2_tiles"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/map_spawn.gd" id="6_spawn"]
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="7_exit"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="8_touch"]
+[ext_resource type="Script" path="res://scripts/village/molen_wieken.gd" id="9_molen"]
 
 [node name="DorpWilgendal" type="Node2D"]
 script = ExtResource("1_map")
@@ -60,6 +61,25 @@ lines = Array[String]([])
 facing = Vector2i(0, 1)
 event = "gerrit"
 event_arg = ""
+
+[node name="MolenWieken" type="StaticBody2D" parent="Objects"]
+position = Vector2(24, 24)
+script = ExtResource("9_molen")
+event = ""
+event_arg = ""
+show_if = {}
+frame_rules = []
+glow_if = {
+"flags": ["zingend_graan_klaar"]
+}
+glow_color = Color(0.93, 0.78, 0.42, 1)
+glow_radius = 22.0
+tiles = Vector2i(3, 4)
+bump_event = false
+loop_if = {
+"flags": ["zingend_graan_klaar"]
+}
+loop_time = 0.4
 
 [node name="Accessoire" parent="Objects" instance=ExtResource("4_npc")]
 position = Vector2(232, 72)
