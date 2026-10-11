@@ -446,7 +446,7 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 - [ ] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
 - [ ] Kleur van de Hanger-gloed. Deze lijst zei paars; de code is roze (canon: roze = de Stroom).
 - [ ] Webversie. Hoort niet bij deze branch.
-- [ ] Runner in de CI-matrix op Godot 4.3. De 65 PASS draaiden op Godot 4.7.2, buiten .github/workflows/tests.yml.
+- [x] Runner in de CI-matrix op Godot 4.3. De job warper-runner in .github/workflows/tests.yml draait world_warper/tests/run.gd. warperkamertest stond al in de matrix.
 
 Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven). De hub gaat open na die vlag. Het zwevende gebouw en de automatische warp zijn er nog niet.
 
