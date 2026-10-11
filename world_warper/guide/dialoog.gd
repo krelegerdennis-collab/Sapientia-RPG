@@ -72,4 +72,7 @@ static func step_index(flags: Dictionary) -> int:
 static func _vlag_aan(flags: Dictionary, sleutel: String) -> bool:
 	if sleutel == "":
 		return false
-	return flags.get(sleutel, false) == true
+	# Alleen de bool true telt. Een int (1) mag niet met true vergeleken worden:
+	# Godot weigert die operand en de stap zou dan niet betrouwbaar zijn.
+	var waarde: Variant = flags.get(sleutel, false)
+	return waarde is bool and (waarde as bool)
