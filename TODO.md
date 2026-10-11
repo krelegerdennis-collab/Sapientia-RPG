@@ -337,3 +337,21 @@ Zwevend hightech hub. Verschijnt na het verslaan van De Genezer (Archief 2).
 - [ ] Wat Sapientia precies met de World Warper wil
 - [ ] Latere kamers: welke, wanneer, en wat ze doen
 - [ ] Reageren party-leden op locatie en verhaalprogressie?
+
+## Ingame-menu
+
+Het huidige ingame-menu vervangen door losse knoppen. Elke knop opent meteen een scherm. Geen tussenmenu, tenzij het bord "MENU" op de schets alleen een label blijft.
+
+De vier functies zijn besloten. Welke functie op welke plek staat, blijft open.
+
+- [ ] Huidige ingame-menu vervangen door losse knoppen die direct een scherm openen
+  Niet eerst een tussenmenu. Het goudgerande bord "MENU" mag als label blijven staan.
+- [ ] Knop Uitrusting (equip)
+- [ ] Knop Codex
+- [ ] Knop Items
+- [ ] Knop Warp naar de warp-hub (World Warper)
+  De hub zelf is nog ontwerp. De knop is wel een requirement. Bestaat de hub nog niet, dan blijft de knop een open punt. Niet bouwen.
+- [ ] Indeling volgens de schets
+  Goudgerand bord "MENU" rechtsboven. Links drie gestapelde liggende knoppen. Rechts daarvan een groter vlak. Welke functie waar staat is nog open.
+- [ ] Spelertekst later Nederlands: Uitrusting, Codex, Items, Warpen
+  Nu alleen deze TODO. Nog geen schermtekst.
