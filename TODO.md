@@ -277,6 +277,13 @@ Verdieping 100: geen baas. Op verdieping 100 staat het Warp-kristal. De speler k
 
 Optie A, een Codex-monster. Uniek, alleen uit de grot. Komt in de Codex en het bestiarium en kan als bondgenoot meevechten. Het beloningstype (Codex-monster) is canon. Naam: ECHO. De AI-gids van de World Warper heet ook ECHO.
 
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] TODO(verhaal): wanneer ontdekt ECHO wat hij echt deed?
+- [ ] TODO(verhaal): hoe reageert ECHO?
+- [ ] TODO(verhaal): confrontatie met Sapientia of Dennis?
+- [ ] TODO(verhaal): wat is er met H-1 t/m H-5 gebeurd?
+
 Optie B, equipment. Grade 4. Vaste affixes, endgame. Het beloningstype (Grade 4-uitrusting) is canon. Voor nu de bestaande Grade 4-wapens: Superzwaard (Dennis), Staf van Noor, Staf van Lotte. Class-restrictie blijft zoals die wapens al zijn.
 
 Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Het beloningstype (accessoire) is canon.
@@ -474,6 +481,12 @@ Direct open na Archief 2:
 - [ ] De Hal: warp-platform, ECHO in de main PC, party loopt rond
 - [ ] De Rustkamer: save, heal, party wisselen
 - [ ] ECHO's Kamer: questvoortgang
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] TODO(design): aantal blauwe kisten in ECHO's Kamer
+- [ ] TODO(design): kisten leeg of gevuld bij eerste bezoek
+- [ ] TODO(design): verandert de kamer visueel bij voortgang?
 
 Per act:
 
