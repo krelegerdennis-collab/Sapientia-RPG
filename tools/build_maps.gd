@@ -54,13 +54,14 @@ const INSIDE_LEGEND := {
 	"O": [0, false],   # v0.11: de Oude Man ('s avonds; object, blokkeert zelf)
 	"G": [3, true],    # v0.11: muur met schilderij (object 'Schilderij' op de muur-tile)
 	"Z": [9, false],   # v0.11: stoel waar je 's avonds leest (spawnpunt 'lezen')
-	"B": [10, true],   # v0.11: bed boven = spawnpunt 'bed' (wakker worden)
+	"B": [10, true],   # v0.11: bed boven. Update 5: spawn 'bed' staat één tile rechts (beloopbaar).
 }
 ## Tile 22 is het 2e frame van de kaars (geen eigen tile in de TileSet).
 const INSIDE_ANIM := {21: 2}
 const INSIDE_ANIM_FRAME_TIME := 0.45
 ## 12 x 9 tiles. Deur onderin op (4,8), spawn op het kleed (4,7), opslagboek op (8,3).
-## v0.11: bed (1,3) = spawn 'bed', stoel (9,5) = spawn 'lezen', Oude Man (9,3) 's avonds,
+## v0.11: bedmeubel (1,3), stoel (9,5) = spawn 'lezen', Oude Man (9,3) 's avonds,
+## Update 5: spawn 'bed' staat op (2,3), naast het bed. De bed-tile zelf blokkeert lopen.
 ## schilderij op de muur (6,1) met Opa's zwaard erachter.
 const INSIDE_MAP := [
 	"CCCCCCCCCCCC",
@@ -848,7 +849,8 @@ func build_inside(tileset: TileSet) -> Node2D:
 				"Z":
 					add_spawn(root, "lezen", Vector2i(x, y), Vector2i.LEFT)
 				"B":
-					add_spawn(root, "bed", Vector2i(x, y), Vector2i.DOWN)
+					# Update 5: niet óp het bedmeubel (blokkeert), maar één tile rechts.
+					add_spawn(root, "bed", Vector2i(x + 1, y), Vector2i.DOWN)
 				"D":
 					add_exit(root, "NaarDorp", Rect2i(x, y, 1, 1), TOWN_PATH, "voor_huis")
 					root.get_node("Exits/NaarDorp").event = "huis_uit"   # v0.11: kan op slot zitten

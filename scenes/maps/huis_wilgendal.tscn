@@ -76,7 +76,7 @@ walk_speed = 64.0
 [node name="Spawns" type="Node2D" parent="."]
 
 [node name="bed" type="Marker2D" parent="Spawns"]
-position = Vector2(24, 56)
+position = Vector2(40, 56)
 script = ExtResource("5_u7uxe")
 facing = Vector2i(0, 1)
 
