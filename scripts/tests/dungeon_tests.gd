@@ -18,6 +18,9 @@ extends Node
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
+const Winkels := preload("res://scripts/data/wilgendal_winkels.gd")
+const Shop := preload("res://scripts/data/shop_data.gd")
+const Follower := preload("res://scripts/field_follower.gd")
 const ROOM_SCENE := "res://scenes/maps/archief_ingang.tscn"
 const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
 const U := Vector2i.UP
@@ -491,11 +494,7 @@ func _world_and_outdoor_tests() -> void:
 	await walk("move_up", 1)
 	check("W: op Willowdale: dorp geladen (node DorpWilgendal)", await wait_scene("DorpWilgendal"))
 	await wait_fade()
-	check("W: winkels van Jelle, Mien en de magiebalie staan er", scene().get_node_or_null("Objects/JelleWapen") != null
-			and scene().get_node_or_null("Objects/JellePantser") != null
-			and scene().get_node_or_null("Objects/TanteMien") != null
-			and scene().get_node_or_null("Objects/Magie") != null
-			and scene().get_node_or_null("Objects/Gerrit") != null)
+	await _wilgendal_winkel_tests()
 	GameState.change_map(WORLD_SCENE, "van_wilgendal")
 	check("W: terug op de wereldkaart na Wilgendal", await wait_scene("Wereldkaart"))
 	await wait_fade()
@@ -510,6 +509,160 @@ func _world_and_outdoor_tests() -> void:
 	check("W: Wachtershuis-icoon -> 'Huis aan de bosrand' (Willowdale-scène)", await wait_scene("Wilgendal"))
 	await wait_fade()
 	await _outdoor_tests()
+
+
+func _wilgendal_winkel_tests() -> void:
+	var dorp := scene()
+	check("W: vier shopkeepers niet meer los op het plein", dorp.get_node_or_null("Objects/JelleWapen") == null
+			and dorp.get_node_or_null("Objects/JellePantser") == null
+			and dorp.get_node_or_null("Objects/Magie") == null
+			and dorp.get_node_or_null("Objects/Accessoire") == null)
+	var mien: Node = dorp.get_node_or_null("Objects/TanteMien")
+	var gerrit: Node = dorp.get_node_or_null("Objects/Gerrit")
+	check("W: Tante Mien blijft kruiden verkopen, Gerrit en de molen blijven", mien != null
+			and mien.event == "shop" and mien.event_arg == "wilgendal_kruiden"
+			and gerrit != null and gerrit.event == "gerrit"
+			and dorp.get_node_or_null("Objects/MolenWieken") != null)
+	var grond: TileMapLayer = dorp.get_node("Ground")
+	var gebouwen: TileMapLayer = dorp.get_node("Gebouwen")
+	var huisjes := 0
+	for cel in gebouwen.get_used_cells():
+		if gebouwen.get_cell_source_id(cel) == 1:
+			huisjes += 1
+	check("W: plein is dorpsschaal, vier panden van 5x5", grond.get_used_rect().size == Vector2i(Winkels.W, Winkels.H)
+			and huisjes == Winkels.HUIS * Winkels.HUIS * Winkels.WINKELS.size())
+	var wereld: Node = dorp.get_node("Exits/NaarWereld")
+	check("W: zuid uit Wilgendal terug naar de wereldkaart", wereld.target_map == WORLD_SCENE
+			and wereld.target_spawn == "van_wilgendal" and wereld.tile_rect() == Rect2i(9, 15, 3, 1))
+	var borden: Array = []
+	for kind in dorp.get_node("Objects").get_children():
+		var naam := str(kind.name).to_lower()
+		if naam.contains("bord") or naam.contains("sign") or naam.contains("uithang"):
+			borden.append(kind.name)
+	check("W: geen uithangborden", borden.is_empty())
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	var ph := FileAccess.get_file_as_string("res://tools/placeholders_v17.txt")
+	check("W: winkel-art is placeholder, niet in handwerk", not hw.contains("assets/sprites/wilgendal/")
+			and ph.contains("assets/sprites/wilgendal/wapen_toonbank.png"))
+	var kleuren: Dictionary = {}
+	for id in Winkels.WINKELS:
+		var info: Dictionary = Winkels.WINKELS[id]
+		var deur: Node = dorp.get_node_or_null("Objects/" + str(info["deur_node"]))
+		var voor: Vector2i = Winkels.voor_deur(id)
+		var deur_ok: bool = deur != null and deur.lines.is_empty() and str(deur.event) == "" \
+				and deur.target_map == str(info["scene"]) and deur.target_spawn == "binnen"
+		check("W: deur %s altijd open naar het pand" % id, deur_ok)
+		if deur != null:
+			check("W: deur %s staat in de gevel" % id, Vector2i((deur.position / 16.0).floor()) == Winkels.deur_tegel(id))
+		check("W: pad van de zuidingang naar %s" % id, _plein_bereik(dorp, Winkels.ZUID, voor)
+				and _plein_vrij(dorp, voor) and not _plein_vrij(dorp, Winkels.deur_tegel(id)))
+		var spawn: Node = dorp.get_node_or_null("Spawns/" + str(info["spawn_buiten"]))
+		check("W: spawn voor %s" % id, spawn != null and spawn.get_tile() == voor and spawn.facing == U)
+		for sleutel in ["keeper_art", "toonbank_art", "display_art"]:
+			var pad := str(info[sleutel])
+			var tex := load(pad) as Texture2D
+			var plaat: Image = null
+			if tex != null:
+				plaat = tex.get_image()
+			var hoek := Color.BLACK
+			if plaat != null:
+				hoek = plaat.get_pixel(0, 0)
+			var maat := Vector2i(48, 96) if sleutel == "keeper_art" else (Vector2i(48, 16) if sleutel == "toonbank_art" else Vector2i(32, 32))
+			check("W: placeholder %s" % pad.get_file(), tex != null and tex.get_width() == maat.x and tex.get_height() == maat.y
+					and hoek.r > 0.95 and hoek.g < 0.05 and hoek.b > 0.95 and ph.contains(pad.trim_prefix("res://")))
+		var toon: Image = (load(str(info["toonbank_art"])) as Texture2D).get_image()
+		kleuren[id] = toon.get_pixel(24, 8)
+		check("W: volger loopt de winkel %s niet in" % id, not Follower.allowed(str(info["scene"])))
+	check("W: vier toonbanken zien er anders uit", kleuren["wapen"] != kleuren["pantser"]
+			and kleuren["wapen"] != kleuren["accessoire"] and kleuren["wapen"] != kleuren["magie"]
+			and kleuren["pantser"] != kleuren["accessoire"] and kleuren["pantser"] != kleuren["magie"]
+			and kleuren["accessoire"] != kleuren["magie"])
+	check("W: plein en Gerrit zijn te belopen", _plein_bereik(dorp, Winkels.ZUID, Winkels.GERRIT + Vector2i.DOWN)
+			and _plein_bereik(dorp, Winkels.ZUID, Winkels.MIEN) and _plein_bereik(dorp, Winkels.ZUID, Winkels.ZUID + Vector2i.DOWN))
+	player().place_at(Vector2i(10, 9), D)
+	await pframes(8)
+	await screenshot("wilgendal_plein")
+	for id in Winkels.WINKELS:
+		var info: Dictionary = Winkels.WINKELS[id]
+		var winkel := await enter(str(info["scene"]), "binnen")
+		if winkel == null:
+			check("W: winkel %s laadt" % id, false)
+			continue
+		check("W: winkel %s heet Nederlands" % id, winkel.map_name == str(info["map_name"]) and winkel.encounters == false)
+		var keeper: Node = winkel.get_node_or_null("Objects/" + str(info["keeper"]))
+		var bar: Node = winkel.get_node_or_null("Objects/Toonbank")
+		var vitrine: Node = winkel.get_node_or_null("Objects/Display")
+		var kt := Vector2i((keeper.position / 16.0).floor()) if keeper != null else Vector2i(-1, -1)
+		var bt := Vector2i((bar.position / 16.0).floor()) if bar != null else Vector2i(-1, -1)
+		check("W: %s staat achter de toonbank" % str(info["keeper_name"]), keeper != null and bar != null and vitrine != null
+				and keeper.npc_name == str(info["keeper_name"]) and keeper.event == "shop"
+				and keeper.event_arg == str(info["shop_id"]) and keeper.lines.size() == 1 and keeper.lines[0] == str(info["line"])
+				and keeper.facing == D and kt == Winkels.KEEPER_TEGEL and bt == Winkels.TOONBANK_TEGEL
+				and kt == bt + Vector2i(1, -1)
+				and Vector2i((vitrine.position / 16.0).floor()) == Winkels.DISPLAY_TEGEL
+				and str(keeper.sheet.resource_path) == str(info["keeper_art"])
+				and str(bar.texture.resource_path) == str(info["toonbank_art"])
+				and str(vitrine.texture.resource_path) == str(info["display_art"]))
+		check("W: binnenkomst %s voor de toonbank" % id, tile() == Winkels.SPAWN_BINNEN and player().facing == U)
+		var uit: Node = winkel.get_node("Exits/NaarDorp")
+		check("W: deur naar buiten vanuit %s" % id, uit.target_map == Winkels.DORP and uit.target_spawn == str(info["spawn_buiten"])
+				and uit.lines.is_empty() and uit.tile_rect() == Rect2i(Winkels.UITGANG_TEGEL, Vector2i.ONE))
+		await screenshot("wilgendal_" + id)
+		if keeper != null:
+			keeper.interact(player())
+		await pframes(3)
+		var scherm: Node = winkel.get_node_or_null("ShopScreen")
+		var rows: Array = Shop.stock(str(info["shop_id"]))
+		var knoppen: Dictionary = {}
+		if scherm != null:
+			for knop in scherm.content.get_children():
+				if knop is Button:
+					knoppen[str(knop.text)] = true
+		var mist: Array = []
+		for row in rows:
+			var regel := "%s  %dg" % [str(row["name"]), int(row["price"])]
+			if not knoppen.has(regel):
+				mist.append(regel)
+		check("W: %s verkoopt de bestaande voorraad (%s)" % [id, str(mist)], scherm != null
+				and scherm.shop_id == str(info["shop_id"]) and scherm.header.text == Shop.shop_name(str(info["shop_id"]))
+				and not rows.is_empty() and mist.is_empty())
+		if scherm != null:
+			scherm.close()
+			await pframes(2)
+		await walk("move_down", 1)
+		check("W: %s terug op het plein voor de deur" % id, await wait_scene("DorpWilgendal") and tile() == Winkels.voor_deur(id))
+		await wait_fade()
+	player().place_at(Winkels.voor_deur("wapen"), U)
+	await pframes(3)
+	await walk("move_up", 1)
+	check("W: tegen de deur lopen opent de wapenwinkel", await wait_scene("WinkelWapen"))
+	await wait_fade()
+
+
+func _plein_vrij(map: Node, t: Vector2i) -> bool:
+	var grond: TileMapLayer = map.get_node("Ground")
+	var td := grond.get_cell_tile_data(t)
+	if td == null or td.get_collision_polygons_count(0) > 0:
+		return false
+	var gebouwen: TileMapLayer = map.get_node("Gebouwen")
+	var bd := gebouwen.get_cell_tile_data(t)
+	return bd == null or bd.get_collision_polygons_count(0) == 0
+
+
+func _plein_bereik(map: Node, van: Vector2i, naar: Vector2i) -> bool:
+	var gezien := {van: true}
+	var todo: Array[Vector2i] = [van]
+	while not todo.is_empty():
+		var t: Vector2i = todo.pop_front()
+		if t == naar:
+			return true
+		for d in [U, D, L, R]:
+			var n: Vector2i = t + d
+			if gezien.has(n) or not _plein_vrij(map, n):
+				continue
+			gezien[n] = true
+			todo.append(n)
+	return false
 
 
 func _outdoor_tests() -> void:

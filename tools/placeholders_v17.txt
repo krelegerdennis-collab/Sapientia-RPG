@@ -61,3 +61,17 @@ assets/sprites/enemies/adermot_rug.png          90x90    Adermot, rugaanzicht
 assets/map_monsters/steenluis.png               32x64    Steenluis op de kaart (2x4 frames van 16x16)
 assets/map_monsters/druipslak.png               32x64    Druipslak op de kaart (2x4 frames van 16x16)
 assets/map_monsters/adermot.png                 32x64    Adermot op de kaart (2x4 frames van 16x16)
+
+# Wilgendal, vier winkelpanden (tools/art_wilgendal_winkels.py). PLACEHOLDER, magenta hoekjes, letters PH. Geen definitieve art.
+assets/sprites/wilgendal/wapen_shopkeeper.png     48x96   winkelier wapen, ambachtelijk (3x4 frames van 16x24)
+assets/sprites/wilgendal/wapen_toonbank.png       48x16   toonbank wapen, ambachtelijk
+assets/sprites/wilgendal/wapen_display.png        32x32   uitstalling wapen, ambachtelijk
+assets/sprites/wilgendal/pantser_shopkeeper.png   48x96   winkelier pantser, stoer (3x4 frames van 16x24)
+assets/sprites/wilgendal/pantser_toonbank.png     48x16   toonbank pantser, stoer
+assets/sprites/wilgendal/pantser_display.png      32x32   uitstalling pantser, stoer
+assets/sprites/wilgendal/accessoire_shopkeeper.png 48x96   winkelier accessoire, sierlijk (3x4 frames van 16x24)
+assets/sprites/wilgendal/accessoire_toonbank.png  48x16   toonbank accessoire, sierlijk
+assets/sprites/wilgendal/accessoire_display.png   32x32   uitstalling accessoire, sierlijk
+assets/sprites/wilgendal/magie_shopkeeper.png     48x96   winkelier magie, mystiek (3x4 frames van 16x24)
+assets/sprites/wilgendal/magie_toonbank.png       48x16   toonbank magie, mystiek
+assets/sprites/wilgendal/magie_display.png        32x32   uitstalling magie, mystiek

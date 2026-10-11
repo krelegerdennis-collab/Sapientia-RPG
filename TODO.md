@@ -298,20 +298,20 @@ Huidige situatie:
 - [ ] Ze hebben nog geen vaste winkel-locatie
 
 Doel: winkels met vaste locaties:
-- [ ] Eigen winkelpand per shopkeeper: armour, wapen, accessoire, magic
-- [ ] Shopkeepers verplaatsen van het dorp naar hun eigen winkel
-- [ ] NPC staat achter de toonbank in de winkel
-- [ ] Niet meer rondlopend in het dorp
-- [ ] Speler moet de winkel binnengaan om te handelen
-- [ ] Winkelinterieurs, per winkel eigen uitstraling (armour stoer, magic mystiek, wapen ambachtelijk, accessoire sierlijk)
-- [ ] Toonbank, shopkeeper en item-display
-- [ ] Deur naar buiten, terug naar het dorp
-- [ ] Klein maar sfeervol (dorpsschaal, niet stadsschaal)
-- [ ] Wilgendal: klein knus dorpsplein
-- [ ] Paden tussen de winkelpanden
+- [x] Eigen winkelpand per shopkeeper: armour, wapen, accessoire, magic
+- [x] Shopkeepers verplaatsen van het dorp naar hun eigen winkel
+- [x] NPC staat achter de toonbank in de winkel
+- [x] Niet meer rondlopend in het dorp
+- [x] Speler moet de winkel binnengaan om te handelen
+- [x] Winkelinterieurs, per winkel eigen uitstraling (armour stoer, magic mystiek, wapen ambachtelijk, accessoire sierlijk)
+- [x] Toonbank, shopkeeper en item-display
+- [x] Deur naar buiten, terug naar het dorp
+- [x] Klein maar sfeervol (dorpsschaal, niet stadsschaal)
+- [x] Wilgendal: klein knus dorpsplein
+- [x] Paden tussen de winkelpanden
 - [ ] Een paar woonhuizen als decor
 - [ ] Sfeer-NPC's die rondlopen (geen shopkeepers)
-- [ ] Dorpsgevoel behouden (geen stadse drukte)
+- [x] Dorpsgevoel behouden (geen stadse drukte)
 
 TODO(design), open laten:
 - [ ] TODO(design): hoeveel sfeer-NPC's lopen rond in Wilgendal?
@@ -320,7 +320,7 @@ TODO(design), open laten:
 - [ ] TODO(design): aantal woonhuizen als decor?
 
 Scheiding:
-- [ ] Wilgendal blijft op Worldmap 1 (start-eiland)
+- [x] Wilgendal blijft op Worldmap 1 (start-eiland)
 - [ ] Codex Bibliotheek ligt ten zuiden van Wilgendal
 
 ### Gerrit de Molenaar

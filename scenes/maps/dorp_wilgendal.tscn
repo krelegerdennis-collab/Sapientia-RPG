@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
 [ext_resource type="TileSet" path="res://assets/tiles/dorp.tres" id="2_tiles"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="7_exit"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="8_touch"]
 [ext_resource type="Script" path="res://scripts/village/molen_wieken.gd" id="9_molen"]
+[ext_resource type="PackedScene" path="res://scenes/door.tscn" id="10_door"]
 
 [node name="DorpWilgendal" type="Node2D"]
 script = ExtResource("1_map")
@@ -17,45 +18,54 @@ encounters = false
 
 [node name="Ground" type="TileMapLayer" parent="."]
 tile_set = ExtResource("2_tiles")
+
+[node name="Gebouwen" type="TileMapLayer" parent="."]
+tile_set = ExtResource("2_tiles")
+
+[node name="Opbouw" type="Node" parent="."]
 script = ExtResource("3_ground")
 
 [node name="Objects" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="JelleWapen" parent="Objects" instance=ExtResource("4_npc")]
-position = Vector2(136, 88)
-npc_name = "Jelle Hamer"
-lines = Array[String](["Staal. Wat heb je nodig?"])
-facing = Vector2i(0, 1)
-event = "shop"
-event_arg = "wilgendal_wapen"
+[node name="DeurWapen" parent="Objects" instance=ExtResource("10_door")]
+position = Vector2(88, 88)
+lines = Array[String]([])
+target_map = "res://scenes/maps/winkel_wapen.tscn"
+target_spawn = "binnen"
+event = ""
 
-[node name="JellePantser" parent="Objects" instance=ExtResource("4_npc")]
-position = Vector2(200, 88)
-npc_name = "Jelle Hamer"
-lines = Array[String](["Harnas en helmen."])
-facing = Vector2i(0, 1)
-event = "shop"
-event_arg = "wilgendal_pantser"
+[node name="DeurPantser" parent="Objects" instance=ExtResource("10_door")]
+position = Vector2(248, 88)
+lines = Array[String]([])
+target_map = "res://scenes/maps/winkel_pantser.tscn"
+target_spawn = "binnen"
+event = ""
+
+[node name="DeurAccessoire" parent="Objects" instance=ExtResource("10_door")]
+position = Vector2(88, 200)
+lines = Array[String]([])
+target_map = "res://scenes/maps/winkel_accessoire.tscn"
+target_spawn = "binnen"
+event = ""
+
+[node name="DeurMagie" parent="Objects" instance=ExtResource("10_door")]
+position = Vector2(248, 200)
+lines = Array[String]([])
+target_map = "res://scenes/maps/winkel_magie.tscn"
+target_spawn = "binnen"
+event = ""
 
 [node name="TanteMien" parent="Objects" instance=ExtResource("4_npc")]
-position = Vector2(104, 120)
+position = Vector2(152, 168)
 npc_name = "Tante Mien"
 lines = Array[String](["Kruiden. Wat heb je nodig?"])
 facing = Vector2i(0, 1)
 event = "shop"
 event_arg = "wilgendal_kruiden"
 
-[node name="Magie" parent="Objects" instance=ExtResource("4_npc")]
-position = Vector2(232, 120)
-npc_name = "Magiewinkel"
-lines = Array[String](["Spreuken. Wat zoek je?"])
-facing = Vector2i(0, 1)
-event = "shop"
-event_arg = "wilgendal_magie"
-
 [node name="Gerrit" parent="Objects" instance=ExtResource("4_npc")]
-position = Vector2(168, 72)
+position = Vector2(168, 104)
 npc_name = "Gerrit de Molenaar"
 lines = Array[String]([])
 facing = Vector2i(0, 1)
@@ -63,7 +73,7 @@ event = "gerrit"
 event_arg = ""
 
 [node name="MolenWieken" type="StaticBody2D" parent="Objects"]
-position = Vector2(24, 24)
+position = Vector2(152, 40)
 script = ExtResource("9_molen")
 event = ""
 event_arg = ""
@@ -81,28 +91,40 @@ loop_if = {
 }
 loop_time = 0.4
 
-[node name="Accessoire" parent="Objects" instance=ExtResource("4_npc")]
-position = Vector2(232, 72)
-npc_name = "Accessoire"
-lines = Array[String](["Ringen en bladwijzers."])
-facing = Vector2i(0, 1)
-event = "shop"
-event_arg = "wilgendal_accessoire"
-
 [node name="Player" parent="Objects" instance=ExtResource("5_player")]
-position = Vector2(168, 200)
+position = Vector2(168, 232)
 
 [node name="Spawns" type="Node2D" parent="."]
 
 [node name="zuid_ingang" type="Marker2D" parent="Spawns"]
-position = Vector2(168, 200)
+position = Vector2(168, 232)
+script = ExtResource("6_spawn")
+facing = Vector2i(0, -1)
+
+[node name="voor_wapen" type="Marker2D" parent="Spawns"]
+position = Vector2(88, 104)
+script = ExtResource("6_spawn")
+facing = Vector2i(0, -1)
+
+[node name="voor_pantser" type="Marker2D" parent="Spawns"]
+position = Vector2(248, 104)
+script = ExtResource("6_spawn")
+facing = Vector2i(0, -1)
+
+[node name="voor_accessoire" type="Marker2D" parent="Spawns"]
+position = Vector2(88, 216)
+script = ExtResource("6_spawn")
+facing = Vector2i(0, -1)
+
+[node name="voor_magie" type="Marker2D" parent="Spawns"]
+position = Vector2(248, 216)
 script = ExtResource("6_spawn")
 facing = Vector2i(0, -1)
 
 [node name="Exits" type="Node2D" parent="."]
 
 [node name="NaarWereld" type="Node2D" parent="Exits"]
-position = Vector2(144, 208)
+position = Vector2(144, 240)
 script = ExtResource("7_exit")
 size_tiles = Vector2i(3, 1)
 target_map = "res://scenes/maps/wereldkaart.tscn"
