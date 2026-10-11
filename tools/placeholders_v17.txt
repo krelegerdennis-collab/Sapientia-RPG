@@ -27,3 +27,6 @@ assets/ui/icons/levenskern.png   16x16   kern-item Archief 2 16x16
 assets/sprites/archief2/world_warper.png   128x64   World Warper exterieur 128x64
 assets/sprites/archief2/echo.png   32x48   ECHO hologram 32x48
 assets/sprites/archief2/sapientia_glitch.png   48x48   Sapientia glitch 48x48
+assets/map_monsters/lotte_glitch.png   32x64   Lotte glitch op de kaart (2x4 van 16x16)
+assets/map_monsters/wurger.png   32x64   De Wurger op de kaart (2x4 van 16x16)
+assets/map_monsters/genezer.png   32x64   De Genezer op de kaart (2x4 van 16x16)
