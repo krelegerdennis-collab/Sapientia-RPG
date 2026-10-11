@@ -15,12 +15,13 @@ extends RefCounted
 ##   3. Ladder omhoog in de bovenmuur van de ingangskamer, trap omlaag (tegel 58) in de hoek van
 ##      de kamer die het verst (loopafstand) van de ingang ligt. Verdieping 100 heeft geen trap omlaag.
 ##   4. Steenhopen/kasten als obstakel (nooit in ingangs- of trapkamer, nooit op de rand van een kamer).
-##   5. Slots voor monsters, kisten, rustpunt en baas; kisten worden alleen gezet als de trap
-##      daarna nog bereikbaar is.
+##   5. Slots voor monsters, kisten, rustpunt, baas en (op verdieping 1, 50 en 99) een warper;
+##      kisten en de warper worden alleen gezet als de trap daarna nog bereikbaar is.
 ##   6. Tegels: muurtop-autotile, voorkant (2 hoog), schaduw onder de voorkant, vloerdecor.
 ##   7. Controle (BFS op de uiteindelijke botsing): ingang -> trap omlaag moet loopbaar zijn.
 
 const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
+const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 
 const MAX_FLOOR := 100
 const SCENE := "res://scenes/maps/dungeon100.tscn"
@@ -32,6 +33,8 @@ const SPAWN_FROM_ABOVE := "omhoog"
 const SPAWN_FROM_BELOW := "omlaag"
 ## Ontwaken bij het rustpunt na een nederlaag (alleen op rustverdiepingen; zelfde naam als Dungeon100Rules.REST_SPAWN).
 const SPAWN_REST := "rustpunt"
+## Aankomst via een warper, naast het kristal (zelfde naam als Dungeon100Rules.WARPER_SPAWN).
+const SPAWN_WARPER := "warper"
 const NO_TILE := Vector2i(-1, -1)
 
 const MIN_ROOMS := 4
@@ -199,6 +202,19 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 			for dy in 2:
 				reserved[boss_slot + Vector2i(dx, dy)] = true
 
+	# warper bij de ingang (verdieping 1, 50, 99). De tegel blokkeert straks als object;
+	# de buren en de trap moeten bereikbaar blijven.
+	var warper_slot := NO_TILE
+	var warper_spawn := NO_TILE
+	if Rules.is_warper_floor(f):
+		var picked := _pick_warper(cells, w, h, er, reserved, spawn_up, has_down, stairs)
+		if not picked.is_empty():
+			warper_slot = picked["tile"]
+			warper_spawn = picked["spawn"]
+			reserved[warper_slot] = true
+			if warper_spawn != spawn_up:
+				reserved[warper_spawn] = true
+
 	# obstakels
 	for i in rooms.size():
 		if i == entry_room or i == stairs_room:
@@ -238,6 +254,7 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 		"has_stairs_down": has_down, "stairs_down": stairs, "spawn_down": spawn_down,
 		"monster_slots": monster_slots, "chest_slots": chest_slots,
 		"boss_slot": boss_slot, "rest_slot": rest_slot,
+		"warper_slot": warper_slot, "warper_spawn": warper_spawn,
 		"is_boss_floor": is_boss_floor(f), "is_milestone": f % 10 == 0,
 		"tier": Content.tier_for_floor(f),
 	}
@@ -272,6 +289,11 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		var sp := _rest_spawn(room, d, Vector2i(int(rp[0]), int(rp[1])))
 		if sp.has("tile"):
 			spawns[SPAWN_REST] = _spawn_arr(sp["tile"], sp["facing"])
+	var ws: Vector2i = d.get("warper_slot", NO_TILE)
+	var wspawn: Vector2i = d.get("warper_spawn", NO_TILE)
+	if ws != NO_TILE and wspawn != NO_TILE:
+		room["warper"] = [ws.x, ws.y]
+		spawns[SPAWN_WARPER] = _spawn_arr(wspawn, _facing_toward(wspawn, ws))
 	return room
 
 
@@ -297,6 +319,81 @@ static func _rest_spawn(room: Dictionary, d: Dictionary, rest: Vector2i) -> Dict
 
 static func _spawn_arr(t: Vector2i, facing: String) -> Array:
 	return [t.x, t.y, facing]
+
+
+static func _facing_toward(from: Vector2i, to: Vector2i) -> String:
+	var dir := to - from
+	if dir == Vector2i.UP:
+		return "up"
+	if dir == Vector2i.DOWN:
+		return "down"
+	if dir == Vector2i.LEFT:
+		return "left"
+	return "right"
+
+
+## Warper in de ingangskamer, dicht bij de ladder. Geeft {tile, spawn} of {}.
+## De warper-tegel mag de trap niet afsluiten; de spawn is een vrije buur (ook de ladder-tegel).
+static func _pick_warper(cells: PackedByteArray, w: int, h: int, room_rect: Rect2i, reserved: Dictionary,
+		spawn_up: Vector2i, has_down: bool, stairs: Vector2i) -> Dictionary:
+	var near: Array[Vector2i] = []
+	var far: Array[Vector2i] = []
+	for y in range(room_rect.position.y, room_rect.end.y):
+		for x in range(room_rect.position.x, room_rect.end.x):
+			var t := Vector2i(x, y)
+			if cells[y * w + x] != FLOOR or reserved.has(t):
+				continue
+			var dist := absi(t.x - spawn_up.x) + absi(t.y - spawn_up.y)
+			if dist < 1:
+				continue
+			if dist <= 4:
+				near.append(t)
+			else:
+				far.append(t)
+	var picked := _first_safe_warper(cells, w, h, near, reserved, spawn_up, has_down, stairs)
+	if not picked.is_empty():
+		return picked
+	return _first_safe_warper(cells, w, h, far, reserved, spawn_up, has_down, stairs)
+
+
+static func _first_safe_warper(cells: PackedByteArray, w: int, h: int, tiles: Array[Vector2i],
+		reserved: Dictionary, spawn_up: Vector2i, has_down: bool, stairs: Vector2i) -> Dictionary:
+	var ordered: Array[Vector2i] = tiles.duplicate()
+	ordered.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		var da := absi(a.x - spawn_up.x) + absi(a.y - spawn_up.y)
+		var db := absi(b.x - spawn_up.x) + absi(b.y - spawn_up.y)
+		if da != db:
+			return da < db
+		if a.x != b.x:
+			return a.x < b.x
+		return a.y < b.y)
+	for t in ordered:
+		var spawn := _warper_neighbor(cells, w, t, reserved, spawn_up)
+		if spawn == NO_TILE:
+			continue
+		var before := _distances(cells, w, h, spawn_up).size()
+		cells[t.y * w + t.x] = BLOCK
+		var after := _distances(cells, w, h, spawn_up)
+		cells[t.y * w + t.x] = FLOOR
+		if after.size() != before - 1:
+			continue
+		if has_down and not after.has(stairs):
+			continue
+		if not after.has(spawn):
+			continue
+		return {"tile": t, "spawn": spawn}
+	return {}
+
+
+static func _warper_neighbor(cells: PackedByteArray, w: int, tile: Vector2i, reserved: Dictionary, spawn_up: Vector2i) -> Vector2i:
+	for dir in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP]:
+		var n: Vector2i = tile + dir
+		if reserved.has(n) and n != spawn_up:
+			continue
+		if _at(cells, w, n.x, n.y) != FLOOR:
+			continue
+		return n
+	return NO_TILE
 
 
 # ---------------------------------------------------------------- kamers en gangen

@@ -12,6 +12,7 @@ extends Node
 const R := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const RustpuntC := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
+const WarperC := preload("res://scripts/dungeon/dungeon100_warper.gd")
 const PA := preload("res://scripts/party_actions.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
 const HUD_PATH := "res://scripts/ui/dungeon100_hud.gd"
@@ -59,6 +60,8 @@ func _run() -> void:
 	await _rustpunt_tests()
 	print("=== Deel E: nederlaag in de kerker ===")
 	await _defeat_tests()
+	print("=== Deel F: warpers ===")
+	await _warper_tests()
 	R.dungeon_scene = _saved_scene
 	print("DUNGEON100TEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -136,6 +139,46 @@ func _rules_tests() -> void:
 			and _core(R.load_data([1, 2])) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0}
 			and R.load_data(null)["permanent"] == {} and R.load_data(null)["snapshot"] == {})
 	check("best_after gaat alleen omhoog", R.best_after(10, 4) == 10 and R.best_after(10, 12) == 12 and R.best_after(0, 300) == 100)
+	check("warpers: precies verdieping 1, 50 en 99 (100 is de eindbaas, geen warper)",
+			R.WARPER_FLOORS == [1, 50, 99] and R.is_warper_floor(1) and R.is_warper_floor(50) and R.is_warper_floor(99)
+			and not R.is_warper_floor(100) and not R.is_warper_floor(2) and not R.is_warper_floor(0) and not R.is_warper_floor(49))
+	check("bereiken ontgrendelt alleen die warper-verdieping", R.unlock_warper([], 1) == [1]
+			and R.unlock_warper([1], 50) == [1, 50] and R.unlock_warper([1, 50], 40) == [1, 50]
+			and R.unlock_warper([1], 99) == [1, 99] and R.unlock_warper([1, 50, 99], 50) == [1, 50, 99]
+			and R.unlock_warper([1, 100, 2], 0) == [1])
+	check("niet-bereikte warper is dicht", not R.warper_open([1], 50) and not R.warper_open([1], 99)
+			and not R.warper_open([], 1) and R.warper_open([1, 50], 50)
+			and R.warper_destinations([1], 1).is_empty()
+			and R.warper_destinations([1, 50], 50) == [1]
+			and R.warper_destinations([1, 50, 99], 99) == [1, 50])
+	check("waarschuwing is kort en Nederlands", R.WARPER_WARNING == "Je verlaat deze verdieping. Doorgaan?"
+			and R.WARPER_YES == "Doorgaan" and R.WARPER_NO == "Annuleren"
+			and R.WARPER_SPAWN == Gen.SPAWN_WARPER)
+	var migrated := R.load_data({"floor": 60, "checkpoint": 50, "best": 60})
+	check("oude save zonder 'warpers': open tot de huidige verdieping (60 = 1 en 50, niet 99)",
+			migrated["warpers"] == [1, 50])
+	check("oude save op 99 ontgrendelt alle drie, op 0 (ook met best 100) geen",
+			R.load_data({"floor": 99})["warpers"] == [1, 50, 99]
+			and R.load_data({"floor": 0, "best": 100})["warpers"] == []
+			and R.load_data({"floor": 100})["warpers"] == [1, 50, 99])
+	check("aanwezige sleutel 'warpers' wordt niet aangevuld", R.load_data({"floor": 99, "warpers": [1]})["warpers"] == [1]
+			and R.load_data({"floor": 50, "warpers": []})["warpers"] == []
+			and R.load_data(null)["warpers"] == [])
+	var placed := true
+	for seed_i in [1, 42, 20240607]:
+		for wf in [1, 50, 99]:
+			var gd: Dictionary = Gen.generate(seed_i, wf)
+			var slot: Vector2i = gd.get("warper_slot", Gen.NO_TILE)
+			var spawn: Vector2i = gd.get("warper_spawn", Gen.NO_TILE)
+			var room: Dictionary = gd.get("room", {})
+			placed = placed and slot != Gen.NO_TILE and spawn != Gen.NO_TILE
+			placed = placed and room.has("warper") and room.get("spawns", {}).has(R.WARPER_SPAWN)
+			placed = placed and absi(slot.x - spawn.x) + absi(slot.y - spawn.y) == 1
+			placed = placed and slot != gd["spawn_up"] and slot != gd["rest_slot"]
+		placed = placed and Gen.generate(seed_i, 2).get("warper_slot", Gen.NO_TILE) == Gen.NO_TILE
+		placed = placed and not Gen.generate(seed_i, 100).get("room", {}).has("warper")
+		placed = placed and Gen.generate(seed_i, 100).get("warper_slot", Gen.NO_TILE) == Gen.NO_TILE
+	check("generator zet een warper op 1, 50 en 99 (niet op 2 of 100), spawn ernaast", placed)
 
 
 # ================================================================ deel B
@@ -145,9 +188,11 @@ func _state_tests() -> void:
 	GameState.dungeon100_floor = 42
 	GameState.dungeon100_checkpoint = 40
 	GameState.dungeon100_best = 44
+	GameState.dungeon100_warpers = [1, 50, 99]
 	GameState.new_game("Dennis")
-	check("nieuw spel zet verdieping, checkpoint en best terug op 0", GameState.dungeon100_floor == 0
-			and GameState.dungeon100_checkpoint == 0 and GameState.dungeon100_best == 0)
+	check("nieuw spel zet verdieping, checkpoint, best en warpers terug op 0", GameState.dungeon100_floor == 0
+			and GameState.dungeon100_checkpoint == 0 and GameState.dungeon100_best == 0
+			and GameState.dungeon100_warpers.is_empty())
 
 	GameState.current_map = TOWN
 	GameState.dungeon100_floor = 37
@@ -178,6 +223,31 @@ func _state_tests() -> void:
 	check("kapot 'dungeon100'-blok laadt zonder fout (alles 0)", GameState.load_game(path) and GameState.dungeon100_floor == 0
 			and GameState.dungeon100_checkpoint == 0)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+	# warpers in het bestaande dungeon100-blok; de vier menuslots blijven vier
+	GameState.new_game("Dennis")
+	check("vier menuslots", GameState.SLOT_COUNT == 4 and GameState.slot_path(1).ends_with("save_1.json")
+			and GameState.slot_path(2).ends_with("save_2.json") and GameState.slot_path(3).ends_with("save_3.json")
+			and GameState.slot_path(4).ends_with("save_4.json") and GameState.slot_path(5) == "")
+	GameState.active_slot = 2
+	GameState.dungeon100_begin_run()
+	GameState.dungeon100_floor = 50
+	GameState.dungeon100_warpers = [1, 50]
+	var slot2 := GameState.slot_path(2)
+	check("opslaan in slot 2", slot2 != "" and GameState.save_game(Vector2i(8, 8), Vector2i.DOWN))
+	var slot_raw := GameState.read_save(slot2)
+	check("slot 2: warpers zitten in het blok dungeon100, niet in een vijfde slot",
+			slot_raw.get("slot", 0) == 2 and slot_raw["dungeon100"] is Dictionary
+			and R.clean_warpers(slot_raw["dungeon100"]["warpers"]) == [1, 50]
+			and int(slot_raw["dungeon100"]["floor"]) == 50 and not slot_raw.has("warpers"))
+	GameState.new_game("Dennis")
+	check("laden van slot 2 zet de warpers terug", GameState.load_game(slot2) and GameState.dungeon100_warpers == [1, 50]
+			and GameState.dungeon100_floor == 50)
+	GameState.dungeon100_end_run(true)
+	check("einde van de run leegt de warpers (verdieping 0)", GameState.dungeon100_warpers.is_empty()
+			and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active())
+	GameState.active_slot = 1
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(slot2))
 
 	# game over (respawn) zonder kerker: precies zoals altijd
 	GameState.new_game("Dennis")
@@ -526,7 +596,76 @@ func _defeat_tests() -> void:
 	R.dungeon_scene = _saved_scene
 
 
+# ================================================================ deel F
+func _warper_tests() -> void:
+	GameState.new_game("Dennis")
+	GameState.story_step = load("res://scripts/data/story_data.gd").KLAAR
+	GameState.has_return_point = false
+	GameState.change_map(TOWN, "start")
+	var town_ok := await wait_scene("Wilgendal")
+	await wait_fade()
+	check("wilgendal geladen voor de warper", town_ok and player() != null)
+	if player() == null:
+		return
+	GameState.dungeon100_begin_run()
+	GameState.dungeon100_floor = 1
+	GameState.dungeon100_warpers = [1]
+	var pl := player()
+	var start := tile()
+	var wp: Node2D = WarperC.create(start + Vector2i(1, 0))
+	scene().get_node("Objects").add_child(wp)
+	await pframes(2)
+	check("warper: scène laadt (boek, type 'warper'), 1 tile", wp is Dungeon100Warper and wp.type == "warper"
+			and wp is StaticBody2D and wp.position == Vector2(start + Vector2i(1, 0)) * 16.0 + Vector2(8, 8))
+	check("sprong naar een dichte warper (50 en 99) doet niets", not GameState.dungeon100_warper_can(50)
+			and not GameState.dungeon100_warper_go(50) and not GameState.dungeon100_warper_go(99)
+			and GameState.dungeon100_floor == 1 and tile() == start)
+	wp.interact(pl)
+	await pframes(2)
+	check("geen andere open warper: tekst dat ze dicht zijn", await wait_until(func():
+		return Dialog.is_open and not Dialog._lines.is_empty() and "dicht" in str(Dialog._lines[0]), 3.0))
+	await close_dialog()
+	await wait_until(func(): return not wp.busy, 2.0)
+	check("na 'dicht' staan verdieping en tegel nog steeds", GameState.dungeon100_floor == 1 and tile() == start
+			and wp.last_result == "closed" and GameState.dungeon100_warpers == [1])
+
+	# verdieping 50 bereikt: 1 en 50 open, 99 dicht. Annuleren houdt de plek.
+	GameState.dungeon100_floor = 50
+	GameState.dungeon100_warpers = [1]
+	wp.interact(pl)
+	var warned: bool = await wait_until(_warning_open, 3.0)
+	check("waarschuwing vóór de sprong: '%s'" % R.WARPER_WARNING, warned)
+	await screenshot("d100_warper_waarschuwing")
+	Dialog.choose(1)
+	await wait_until(func(): return wp.last_result == "cancelled" and not wp.busy, 2.0)
+	check("annuleren: verdieping 50 en tegel ongewijzigd, 99 blijft dicht",
+			wp.last_result == "cancelled" and GameState.dungeon100_floor == 50 and tile() == start
+			and GameState.dungeon100_warpers == [1, 50] and not GameState.dungeon100_warper_can(99)
+			and not GameState.dungeon100_warper_go(99) and tile() == start)
+
+	wp.interact(pl)
+	warned = await wait_until(_warning_open, 3.0)
+	check("waarschuwing opnieuw", warned)
+	Dialog.choose(0)
+	var moved := await wait_scene("Dungeon100", 20.0)
+	await wait_fade()
+	var data := Gen.generate(GameState.dungeon100_seed, 1)
+	var sp: Array = data.get("room", {}).get("spawns", {}).get(R.WARPER_SPAWN, [])
+	var arrived := tile()
+	var expect := Vector2i(int(sp[0]), int(sp[1])) if sp.size() >= 2 else Vector2i(-1, -1)
+	check("bevestigen verplaatst naar verdieping 1, op de warper-spawn %s (was %s)" % [arrived, start],
+			moved and scene().scene_file_path == R.dungeon_scene and GameState.dungeon100_floor == 1
+			and arrived == expect and arrived != start and GameState.dungeon100_run_active()
+			and scene().get_node_or_null("Objects/Warper") != null)
+
+
 # ================================================================ hulp
+func _warning_open() -> bool:
+	return Dialog.is_open and Dialog.choices.size() == 2 and not Dialog._lines.is_empty() \
+			and str(Dialog._lines[0]) == R.WARPER_WARNING and Dialog.choices[0] == R.WARPER_YES \
+			and Dialog.choices[1] == R.WARPER_NO
+
+
 func scene() -> Node:
 	return get_tree().current_scene
 

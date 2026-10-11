@@ -14,6 +14,7 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 ##   - Hooks voor andere systemen: signal floor_ready(floor_no, data) zodra de kamer er staat.
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
+const WarperC := preload("res://scripts/dungeon/dungeon100_warper.gd")
 
 ## Verdieping is gebouwd; data = Dungeon100Generator.generate() van deze verdieping.
 signal floor_ready(floor_no: int, data: Dictionary)
@@ -37,15 +38,17 @@ func _ready() -> void:
 	if GameState.dungeon100_floor < 1 or GameState.dungeon100_floor > Gen.MAX_FLOOR:
 		GameState.dungeon100_floor = 1
 	floor_no = GameState.dungeon100_floor
+	GameState.dungeon100_reach_floor(floor_no)
 	room_id = Gen.room_id(GameState.dungeon100_seed, floor_no)
 	floor_data = Gen.generate(GameState.dungeon100_seed, floor_no)
 	var returning: bool = GameState.has_return_point and GameState.return_map == scene_file_path
 	var spawns: Dictionary = floor_data["room"]["spawns"]
-	if not returning and (GameState.pending_spawn not in [Gen.SPAWN_FROM_ABOVE, Gen.SPAWN_FROM_BELOW, Gen.SPAWN_REST]
+	if not returning and (GameState.pending_spawn not in [Gen.SPAWN_FROM_ABOVE, Gen.SPAWN_FROM_BELOW, Gen.SPAWN_REST, Gen.SPAWN_WARPER]
 			or not spawns.has(GameState.pending_spawn)):
 		GameState.pending_spawn = Gen.SPAWN_FROM_ABOVE
 	super._ready()
 	_place_rustpunt()
+	_place_warper()
 	floor_ready.emit(floor_no, floor_data)
 
 
@@ -57,6 +60,16 @@ func _place_rustpunt() -> void:
 	rustpunt = Dungeon100Rustpunt.create(Vector2i(int(t[0]), int(t[1])))
 	rustpunt.name = "Rustpunt"
 	$Objects.add_child(rustpunt)
+
+
+## Warper (verdieping 1, 50, 99) op room["warper"], naast de ingang.
+func _place_warper() -> void:
+	if not room.has("warper"):
+		return
+	var t: Array = room["warper"]
+	var warper := WarperC.create(Vector2i(int(t[0]), int(t[1])))
+	warper.name = "Warper"
+	$Objects.add_child(warper)
 
 
 ## De Diepe Grot heeft eigen terugkeerregels (rustpunt, zie Dungeon100Rules.defeat_plan): het
