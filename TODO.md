@@ -136,12 +136,19 @@ Locatie: Worldmap 1 (start-eiland), tweede Archief. Thema: Leven. Grootte: verge
 #### Cutscene na Archief 2: de World Warper
 
 - [ ] Na het verslaan van De Genezer start een cutscene
+  De Genezer bestaat niet. De hub-unlock kijkt naar bewaker:archief_v2_trapzaal/m2, verdieping 2 van het Eerste Archief.
 - [ ] Een zwevend hightech gebouw verschijnt: de World Warper
+  Er is een placeholder-exterieur (tegels 16×16). Het verschijnt niet in de lucht.
 - [ ] De party wordt automatisch gewarped naar de World Warper
+  Er is geen deur op de wereldkaart. WorldWarperEnter.enter() wisselt naar het exterieur zodra de unlock-vlag er is; de kaart roept dat niet aan.
 - [ ] De World Warper is de hub om tussen de 3 hoofdeilanden te reizen
+  Eerste versie van de hub staat. Alleen WM1 is open. WM2 en WM3 zijn zichtbaar en vergrendeld.
 - [ ] Eerste introductie van het warp-systeem in het verhaal
+  De warp-UI staat in de hal. Een cutscene op de wereldkaart ontbreekt.
 - [ ] Vanaf hier kan de speler terug naar eerder bezochte eilanden
+  WM1 warpt naar de wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). Een filter op eerder bezoek ontbreekt.
 - [ ] De cutscene maakt duidelijk wat de World Warper is en doet
+  De eerste-bezoekscène in de hal heeft voorlopige zinnen (TODO(design)). Dat is deze cutscene niet.
 
 #### Dungeon-opbouw (4 verdiepingen)
 
@@ -161,7 +168,9 @@ Locatie: Worldmap 1 (start-eiland), tweede Archief. Thema: Leven. Grootte: verge
 - [ ] Achtergrondmuziek die bij de overwoekerde kas past
 - [ ] Gecorrumpeerde Lotte-variant (glitch-effecten) voor het mini-baasgevecht
 - [ ] World Warper-gebouw (zwevend, hightech)
+  Placeholder-kaarten staan in world_warper/maps. Ze zweven niet en staan niet in tools/placeholders_v17.txt.
 - [ ] Art voor de World Warper-cutscene
+  De eerste-bezoekscène gebruikt kleurvlakken. Cutscene-art ontbreekt.
 
 #### Codex
 
@@ -216,118 +225,195 @@ Techniek: de headless testsuites draaien via `.github/workflows/tests.yml` (Godo
 
 ## World Warper
 
-Zwevend hightech hub. Verschijnt na het verslaan van De Genezer (Archief 2).
+Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_warper/. Placeholder-kaarten met tegels van 16×16: exterieur, hal, warp_ring en hanger_nis zijn open. codex_nis en sapientia_schot bestaan en blijven dicht (vlaggen world_warper_act2 en world_warper_act3 zet niemand). Warp-UI in twee stappen; alleen WM1 is open: wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). WM2 en WM3 zijn zichtbaar en vergrendeld. AI-gids IVA in de hal, vier Nederlandse stappen via Dialog.show_lines, vlaggen world_warper_guide_0 tot en met 3. De naam is TODO(design), geen canon. Rondlopers uit party en codex_pages, placeholders, geen loop-animatie. Savepunt met Nederlandse bevestiging; schrijft GameState.save_game(Vector2i(0, 0), Vector2i(0, 1)). Gezelschap is een kijklijst. Eerste-bezoekscène: paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn TODO(design). Geen H-6-onthulling. Audio-aanroepen ww_ambient, ww_hum, ww_warp en ww_sapientia_glitch, zonder bestanden en zonder manifest-entry, blijven stil. Unlock-haakje in scripts/game_state.gd: world_warper_is_unlocked en try_unlock_world_warper, elk één keer. Vlag world_warper_unlocked na bewaker:archief_v2_trapzaal/m2. Dat is verdieping 2 van het Eerste Archief, niet De Genezer en niet het Archief van Leven. Eigen tests: 65 PASS op Godot 4.7.2. De runner staat niet in .github/workflows/tests.yml.
+
+### Nog te doen
+
+- [ ] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. De Genezer bestaat niet.
+- [ ] WM2 naast WM1 open na Archief 2. De code heeft alleen WM1.
+- [ ] Dorpen eerst bezocht vóór een warp. Dat filter ontbreekt.
+- [ ] Party wisselen. Er is geen API.
+- [ ] Save-tegel op de echte spelerpositie. Nu is de tegel (0, 0) en de kijkrichting (0, 1).
+- [ ] Act-kamers invullen en de deuren openen. world_warper_act2 en world_warper_act3 zet niemand.
+- [ ] Art. Wat er staat is placeholder en staat niet in tools/placeholders_v17.txt.
+- [ ] Kleur van de Hanger-gloed. Deze lijst zei paars; de code is roze (canon: roze = de Stroom).
+- [ ] Of de AI-gids meer weet over H-6. De tekst doet dat bewust niet.
+- [ ] Webversie. Hoort niet bij deze branch.
+- [ ] Runner in de CI-matrix op Godot 4.3. De 65 PASS draaiden op Godot 4.7.2, buiten .github/workflows/tests.yml.
+
+Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven). Dat pad is nog niet gebouwd.
 
 ### Concept en lore
 
 - [ ] Zwevend hightech gebouw, mix van technologie van de Oude Mensheid en Sapientia
+  Placeholder-exterieur staat. Het gebouw zweeft niet op de wereldkaart.
 - [ ] Oorspronkelijk gebouwd door de Oude Mensheid als verbinding tussen de Archieven
 - [ ] Sapientia heeft het offline gehouden en wil het zelf in handen krijgen
 - [ ] Het werkt alleen op Dennis' Hanger; de Hanger is de enige sleutel
+  De scène noemt de Hanger de Sleutel. Een slot dat alleen op Dennis reageert ontbreekt.
 - [ ] Dat maakt Dennis (Proefpersoon H-6) onmisbaar voor Sapientia's plannen
+  De spelertekst onthult H-6 niet.
 - [ ] Komt online zodra twee Archieven (1 en 2) geactiveerd zijn
+  De code zet world_warper_unlocked na bewaker:archief_v2_trapzaal/m2, verdieping 2 van het Eerste Archief.
 
 ### Verschijning en cutscene
 
 - [ ] Cutscene na De Genezer: de World Warper verschijnt in de lucht
+  De Genezer bestaat niet. Er is geen deur op de wereldkaart.
 - [ ] De party wordt automatisch gewarped naar het gebouw
+  WorldWarperEnter.enter() wisselt naar het exterieur als de unlock-vlag er is. Niets op de kaart roept dat aan.
 - [ ] Introductie van de AI-gids
+  Placeholder IVA staat in de hal, vier stappen via Dialog.show_lines. De naam is TODO(design), geen canon.
 - [ ] Duidelijk maken wat dit is, wat het kan, en waarom het belangrijk is
+  Eerste-bezoekscène en IVA doen een eerste versie. De zinnen zijn TODO(design).
 
 ### Eerste binnenkomst: Hanger en Sapientia
 
-- [ ] Bij de eerste keer binnen: visueel effect
+- [x] Bij de eerste keer binnen: visueel effect
+  Eerste versie. Paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn TODO(design). Geen H-6-onthulling.
   - [ ] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
+    Open ontwerp. De code gloeit roze (canon: roze = de Stroom). De hal is paars.
   - [ ] Systemen komen online door het Hanger-signaal
+    De scène speelt één keer. Losse systemen gaan niet aan.
 - [ ] Dialoogscène
   - [ ] Dennis toont de Hanger (eerste keer expliciet in het verhaal)
+    De scène toont een roze Hanger. Dennis steekt hem niet apart op.
   - [ ] De AI-gids reageert herkennend op de Hanger
+    IVA-stap hanger zegt dat de Hanger de Sleutel is.
   - [ ] Uitleg: alleen de Hanger kan de World Warper activeren
+    De tekst noemt de Hanger de Sleutel. Ze zegt niet dat alleen die de hub start.
 - [ ] Sapientia-dreiging
   - [ ] Na de activering verschijnt Sapientia (glitch, stem of hologram)
+    Korte zwarte flikkering en een haperend hologram. Geen stem en geen hologram van Sapientia.
   - [ ] Sapientia uit de dreiging: zij wil de World Warper
+    De zin is: Sapientia weet dat de Sleutel hier is.
   - [ ] Duidelijk maken dat Dennis en de Hanger het enige obstakel zijn
   - [ ] Dreiging opbouwen voor latere acts
   - [ ] De party reageert geschokt; de AI-gids waarschuwt
 
 ### Interieur
 
-- [ ] Half functioneel: centrale hal en meerdere kamers
+- [x] Half functioneel: centrale hal en meerdere kamers
+  Eerste versie. Placeholder-kaarten, tegels 16×16. Open: exterieur, hal, warp_ring, hanger_nis. codex_nis en sapientia_schot bestaan en blijven dicht.
 - [ ] Sommige kamers zijn leeg bij de introductie en unlocken later per act
-- [ ] Centrale hal met warp-platform (hoofdfunctie)
+  codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand.
+- [x] Centrale hal met warp-platform (hoofdfunctie)
+  Eerste versie. De hal opent de warp-UI. warp_ring is een aparte kamer: een rechthoek van paneeltegels, geen cirkel.
 - [ ] Paars als signature kleur, in lijn met het Codex Monument
+  Panelen en de hal zijn paars. De Hanger in de scène is roze.
 - [ ] Hologrammen, schermen en tech-details
-- [ ] Alle party-leden en Codex-monsters lopen vrij rond in het gebouw
+  Placeholder-hologram in de eerste-bezoekscène en bij IVA. Geen echte schermen.
+- [x] Alle party-leden en Codex-monsters lopen vrij rond in het gebouw
+  Eerste versie, in de hal. Placeholders uit party en codex_pages. Geen loop-animatie.
 
 ### Bewoners van de hub
 
-- [ ] Huidige party-leden lopen rond (Dennis, Noor, Lotte, en latere leden)
-- [ ] Gevangen Codex-monsters lopen rond
+- [x] Huidige party-leden lopen rond (Dennis, Noor, Lotte, en latere leden)
+  Eerste versie. Placeholders uit GameState.party, bij het laden van de hal. Geen loop-animatie.
+- [x] Gevangen Codex-monsters lopen rond
+  Eerste versie. Placeholders uit codex_pages. Geen loop-animatie.
 - [ ] Nieuwe party-leden voegen zich toe zodra ze aansluiten
+  refresh() leest de party bij het laden van de hal. Midden in de kamer werkt dat niet live bij.
 - [ ] Reageren party-leden op locatie en verhaalprogressie? (design nog open)
 
 ### AI-gids (in de main PC)
 
 - [ ] De AI-gids zit in de main PC van het warp-platform
+  Placeholder IVA staat in de hal (ww_anchor_gids), niet in de warp-ring.
 - [ ] Functie: questvoortgang, missie-uitleg en begeleiding
+  Vier vaste stappen via Dialog.show_lines. Geen questvoortgang.
 - [ ] Naam nog te bepalen
+  Placeholder IVA, TODO(design), geen canon.
 - [ ] Uiterlijk: hologram met paarse gloed
+  Paars vlak met het woord PLACEHOLDER.
 - [ ] Reageert op verhaalprogressie (nieuwe dialoog per act)
+  Vlaggen world_warper_guide_0 tot en met 3, in volgorde. Niet per act.
 - [ ] Geeft hints bij vastlopen en de volgende bestemming
+  Vier vaste zinnen. Geen hint als de speler vastloopt.
 - [ ] Herkent de Hanger en weet mogelijk meer over Dennis en H-6 dan hijzelf
+  De hanger-stap noemt de Hanger de Sleutel. Over H-6 zegt de tekst niets.
 
 ### Warp-systeem
 
-- [ ] Wereldkaart-view opent bij gebruik van het warp-platform
-- [ ] Eerste keuze: welke worldmap (WM1, WM2 of WM3)
-- [ ] Tweede keuze: welk dorp op die worldmap
-- [ ] Alleen ontgrendelde worldmaps zijn selecteerbaar
+- [x] Wereldkaart-view opent bij gebruik van het warp-platform
+  Eerste versie, vanuit de hal, in twee stappen. Landing op de wereldkaart is de bestaande spawn van_dorp.
+- [x] Eerste keuze: welke worldmap (WM1, WM2 of WM3)
+  Eerste versie. WM2 en WM3 zijn zichtbaar en vergrendeld. Alleen WM1 is open.
+- [x] Tweede keuze: welk dorp op die worldmap
+  Eerste versie op WM1: wereldkaart (van_dorp), Wilgendal (zuid_ingang), Esdoorn (zuid_ingang).
+- [x] Alleen ontgrendelde worldmaps zijn selecteerbaar
+  Eerste versie. Alleen WM1. WM2 en WM3 tonen Vergrendeld.
 - [ ] Alleen ontgrendelde dorpen zijn selecteerbaar
+  Het bezoek-filter ontbreekt. De drie WM1-plaatsen zijn altijd kiesbaar.
 - [ ] Visuele stijl: paars, holografisch, sciencefiction
+  Paarse vlakke panelen met PLACEHOLDER. Geen hologram.
 
 ### Ontgrendeling per worldmap
 
 - [ ] Na Archief 2: World Warper actief, WM1 en WM2 beschikbaar
+  De hub gaat open na bewaker:archief_v2_trapzaal/m2 (verdieping 2 van het Eerste Archief). Alleen WM1 is open.
 - [ ] Na afronden van WM2 (Archief 3 en 4): WM3 ontgrendelt
 - [ ] Elk dorp moet eerst bezocht zijn voordat je ernaartoe kunt warpen
+  Dat filter ontbreekt.
 
 ### Functionaliteit in de World Warper
 
-- [ ] Opslaan (save point)
+- [x] Opslaan (save point)
+  Eerste versie. Nederlandse bevestiging: Opslaan?, Ja, Nee, Opgeslagen. Schrijft GameState.save_game(Vector2i(0, 0), Vector2i(0, 1)).
 - [ ] Party kiezen en wisselen
+  Kijklijst Gezelschap: naam en niveau. Wisselen ontbreekt; er is geen API.
 - [ ] Questvoortgang via de AI-gids
-- [ ] Party-leden en Codex-monsters lopen vrij rond
+  IVA heeft vier vaste stappen (world_warper_guide_0 tot en met 3). Geen questvoortgang.
+- [x] Party-leden en Codex-monsters lopen vrij rond
+  Eerste versie. Placeholders uit party en codex_pages, in de hal. Geen loop-animatie.
 - [ ] Latere kamers unlocken per act (invulling nog te bepalen)
+  De deuren naar codex_nis en sapientia_schot blijven dicht.
   - [ ] Welke kamers? (crafting, training, shops, Codex — design nog open)
 - [ ] Bestiarium of Codex beheren, indien van toepassing
 
 ### Audio
 
-- [ ] Ambient tech-muziek (rustig, mysterieus, sciencefiction)
-- [ ] Hum als achtergrondgeluid (constante lage toon)
-- [ ] Warp-geluid bij het activeren van het platform
+- [x] Ambient tech-muziek (rustig, mysterieus, sciencefiction)
+  Eerste versie. Aanroep ww_ambient. Geen bestand, geen manifest-entry, blijft stil.
+- [x] Hum als achtergrondgeluid (constante lage toon)
+  Eerste versie. Aanroep ww_hum. Geen bestand, geen manifest-entry, blijft stil.
+- [x] Warp-geluid bij het activeren van het platform
+  Eerste versie. Aanroep ww_warp. Geen bestand, geen manifest-entry, blijft stil.
 - [ ] Geluid bij de eerste Hanger-activatie
-- [ ] Sapientia-stem of glitch-geluid voor de dreigingsscène
+  Bij hanger_activated gaat ww_sapientia_glitch af. Een eigen Hanger-geluid ontbreekt, en ook dat blijft stil.
+- [x] Sapientia-stem of glitch-geluid voor de dreigingsscène
+  Eerste versie. Aanroep ww_sapientia_glitch. Geen bestand, geen manifest-entry, blijft stil.
 - [ ] Stem of hologramgeluid van de AI-gids
 
 ### Visuals en art
 
 - [ ] Exterieur van de World Warper (zwevend, paars, hightech)
+  Placeholder-kaart, tegels 16×16. Zweeft niet. Staat niet in tools/placeholders_v17.txt.
 - [ ] Interieur-tileset (paars, holografisch, sciencefiction)
+  tiles_placeholder.png, tegels 16×16, met het woord PLACEHOLDER. Niet geregistreerd.
 - [ ] Sprite van het warp-platform
+  warp_ring is een rechthoek van paneeltegels. Geen sprite.
 - [ ] Sprite van de main PC
 - [ ] Hologram-sprite of animatie van de AI-gids
+  Paars vlak met PLACEHOLDER. Geen sprite.
 - [ ] Oplicht-effect van de Hanger (paarse gloed)
+  Open ontwerp. De code gloeit roze (de Stroom).
 - [ ] Verschijning van Sapientia (glitch of hologram)
+  Korte zwarte flikkering van het hologram. Geen glitch-sprite.
 - [ ] UI van de wereldkaart-view (WM1, WM2, WM3, daarna dorp)
+  Paarse vlakke knoppen met PLACEHOLDER. WM2 en WM3 zijn vergrendeld.
 - [ ] Loop-animaties van party-leden en Codex-monsters in de hub
+  Rondlopers zijn gekleurde vlakken. Geen loop-animatie.
 
 ### Verhaal-integratie
 
 - [ ] Dennis' Hanger is de sleutel; dat meermaals benadrukken in dialoog
+  Eerste-bezoekscène en de IVA-stap hanger noemen de Hanger de Sleutel. Zinnen zijn TODO(design). Geen H-6.
 - [ ] Sapientia's interesse in de World Warper opbouwen als dreiging
+  Eén zin: Sapientia weet dat de Sleutel hier is.
 - [ ] De AI-gids kent de Oude Mensheid, of doet alsof
 - [ ] De AI-gids weet mogelijk meer over Dennis en H-6 dan hijzelf
+  De tekst doet dat bewust niet.
 
 ### Verhaal nog open
 

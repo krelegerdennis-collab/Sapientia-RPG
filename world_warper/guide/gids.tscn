@@ -1,0 +1,52 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://world_warper/guide/gids.gd" id="1_gids"]
+[ext_resource type="Theme" path="res://assets/theme.tres" id="2_theme"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(14, 14)
+
+[node name="Gids" type="StaticBody2D"]
+collision_layer = 1
+collision_mask = 1
+input_pickable = true
+script = ExtResource("1_gids")
+
+[node name="Hologram" type="Polygon2D" parent="."]
+color = Color(0.62, 0.28, 0.95, 0.42)
+polygon = PackedVector2Array(-7, -22, 7, -22, 7, 2, -7, 2)
+
+[node name="Placeholder" type="Label" parent="."]
+layout_mode = 0
+offset_left = -44.0
+offset_top = -48.0
+offset_right = 44.0
+offset_bottom = -36.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+theme_override_colors/font_color = Color(1, 0.62, 0.9, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0, 0.08, 0.9)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "PLACEHOLDER"
+horizontal_alignment = 1
+
+[node name="Naam" type="Label" parent="."]
+layout_mode = 0
+offset_left = -24.0
+offset_top = -36.0
+offset_right = 24.0
+offset_bottom = -24.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+theme_override_colors/font_color = Color(0.93, 0.82, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0, 0.08, 0.9)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 10
+text = "IVA"
+horizontal_alignment = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_body")

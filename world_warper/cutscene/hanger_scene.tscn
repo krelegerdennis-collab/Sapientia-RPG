@@ -1,0 +1,144 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://world_warper/cutscene/hanger_scene.gd" id="1_script"]
+[ext_resource type="FontFile" path="res://assets/fonts/Dauwpixel-Regular.ttf" id="2_font"]
+
+[node name="WorldWarperHangerScene" type="Node2D"]
+texture_filter = 1
+script = ExtResource("1_script")
+
+[node name="Layer" type="CanvasLayer" parent="."]
+layer = 30
+
+[node name="Hall" type="ColorRect" parent="Layer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.141176, 0.078431, 0.2, 1)
+
+[node name="Hologram" type="Control" parent="Layer"]
+custom_minimum_size = Vector2(96, 68)
+layout_mode = 0
+offset_left = 144.0
+offset_top = 86.0
+offset_right = 240.0
+offset_bottom = 154.0
+mouse_filter = 2
+
+[node name="Frame" type="ColorRect" parent="Layer/Hologram"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.28, 0.45, 0.52, 1)
+
+[node name="Plane" type="ColorRect" parent="Layer/Hologram"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.72, 0.86, 0.9, 1)
+
+[node name="Placeholder" type="Label" parent="Layer/Hologram"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.1, 0.06, 0.14, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 10
+text = "PLACEHOLDER"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Hanger" type="ColorRect" parent="Layer"]
+custom_minimum_size = Vector2(14, 22)
+layout_mode = 0
+offset_left = 185.0
+offset_top = 148.0
+offset_right = 199.0
+offset_bottom = 170.0
+mouse_filter = 2
+color = Color(0.62, 0.55, 0.72, 1)
+
+[node name="Flicker" type="ColorRect" parent="Layer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
+[node name="Panel" type="Panel" parent="Layer"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = -8.0
+offset_bottom = 58.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Text" type="Label" parent="Layer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = -8.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.949, 0.914, 0.847, 1)
+theme_override_colors/font_shadow_color = Color(0.027, 0.024, 0.039, 1)
+theme_override_constants/line_spacing = 2
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 10
+autowrap_mode = 3
+
+[node name="Hint" type="Label" parent="Layer/Panel"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -78.0
+offset_top = -14.0
+offset_right = -6.0
+offset_bottom = -2.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.71, 0.655, 0.553, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 8
+text = "tik verder"
+horizontal_alignment = 2
