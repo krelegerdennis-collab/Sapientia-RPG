@@ -158,6 +158,15 @@
 			"loop": true,
 			"volume_db": -5.0,
 			"bpm": 76
+		},
+		"berggrot": {
+			"bestand": "bgm_berggrot.ogg",
+			"titel": "Door de Bergader",
+			"locatie": "De berggrot naar het Levende Archief",
+			"beschrijving": "Koude druppels in een stenen nerf. Lage strijkers, een holle fluit en af en toe een tik van vallend gruis. Geen baasdreiging: een pad door de berg.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 72
 		}
 	},
 	"sfx": {

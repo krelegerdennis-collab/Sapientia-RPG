@@ -81,6 +81,8 @@ func _ready() -> void:
 			player.place_at(sp.get_tile(), sp.facing)
 	if music_track == "" and room_id.begins_with("archief"):
 		music_track = "vergeten_archieven"
+	if music_track == "" and str(room.get("music", "")) != "":
+		music_track = str(room["music"])
 	super._ready()
 
 
@@ -104,7 +106,7 @@ func _build() -> void:
 	# v0.17: ook de kamers van het Donker Woud (scripts/data/woud_rooms.gd)
 	room = DungeonRooms.room(room_id)
 	if room.is_empty():
-		push_error("Dungeonkamer '%s' bestaat niet in dungeon_rooms.gd / woud_rooms.gd / archief2_rooms.gd" % room_id)
+		push_error("Dungeonkamer '%s' bestaat niet in dungeon_rooms.gd / woud_rooms.gd / archief2_rooms.gd / berggrot_data.gd" % room_id)
 		return
 	if map_name == "":
 		map_name = str(room.get("name", room_id))

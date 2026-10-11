@@ -21,6 +21,7 @@ const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
@@ -260,6 +261,8 @@ func _ready() -> void:
 	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
 	# De Spiegel (Archief 4): of  godot -- --spiegeltest [--shots=/pad/map]
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
+	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
+	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
@@ -284,7 +287,8 @@ func _ready() -> void:
 			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
 			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
 			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"],
-			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"]]:
+			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
+			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -304,8 +308,16 @@ func _ready() -> void:
 	# Geen story_step en geen story_flags: het echte verhaal wordt niet overgeslagen.
 	if SpiegelData.DEBUG_ARG in args and not ("--spiegeltest" in args):
 		call_deferred("_go_to_scene", SpiegelData.SCENE)
+	# Berggrot, zonder wereldkaart. Golf 2 roept BerggrotData.start() aan.
+	if BerggrotData.DEBUG_ARG in args and not ("--berggrottest" in args):
+		call_deferred("_start_berggrot")
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
+
+
+## Debug-ingang van de berggrot. Golf 2 gebruikt BerggrotData.start() zelf.
+func _start_berggrot() -> void:
+	BerggrotData.start()
 
 
 ## Extra input-acties uit code (zodat project.godot niet hoeft te veranderen):

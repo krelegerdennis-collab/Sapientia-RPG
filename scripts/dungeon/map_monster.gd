@@ -21,6 +21,7 @@ const PAUSE := Vector2(0.35, 1.3)
 const WALK_FPS := 4.0
 const PLACEHOLDER_COLOR := Color("ff1ee6")
 const GameData := preload("res://scripts/data/game_data.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 
 var room: Node = null
@@ -110,7 +111,7 @@ func _make_sprite(d: Dictionary) -> void:
 		placeholder = true
 		directional = false
 		var GD := preload("res://scripts/data/game_data.gd")
-		var bp := GD.enemy_sprite(GD.ENEMIES.get(enemy_id, {}))   # v0.19: ook als de gevechts-art nog ontbreekt
+		var bp := GD.enemy_sprite(_enemy_base())   # v0.19: ook als de gevechts-art nog ontbreekt
 		if bp != "" and ResourceLoader.exists(bp):
 			var tex: Texture2D = load(bp)
 			sprite.texture = tex
@@ -232,8 +233,15 @@ func interact(_by: Node) -> void:
 
 
 ## Task #4: de vijand-stats van dit monster op zijn verdieping (zonder verdieping: de gewone data).
-func scaled_stats() -> Dictionary:
+func _enemy_base() -> Dictionary:
 	var base: Dictionary = GameData.ENEMIES.get(enemy_id, {})
+	if not base.is_empty():
+		return base
+	return BerggrotData.enemy(enemy_id)
+
+
+func scaled_stats() -> Dictionary:
+	var base := _enemy_base()
 	if base.is_empty():
 		return {}
 	return Dungeon100Scaling.battle_enemy(base, floor_nr, boss)
