@@ -25,16 +25,21 @@ extends RefCounted
 ##           als {"type": "gate", "style": "geheim"} (zo staat het in Forge's ontwerp).
 ##   plate   v0.15: "hidden": true = verborgen runeplaat (ziet eruit als een runetegel).
 ##   chest   schatkist (massief). Eenmalig via een story-vlag: zie PuzzleRoom.request_chest.
+##   '~'     spleet (Het Levende Archief): massief tot een groei-plaat volgroeid is.
+##   grow    groei-plaat. A ervoor = één stadium (zaad, scheut, volgroeid). "needs" moet
+##           eerst waar zijn (bv. een hendel). "stages" 2 of 3. "gap": true claimt alle '~'.
+##           Alleen het laatste stadium opent de spleet en vergrendelt (latch). Eerder
+##           groeien blijft dicht en gaat terug bij herstellen of verlaten.
 
 ## Ids van objecten waarvan de toestand veranderde (kasten, platen, hendels, poorten).
 signal changed(ids: Array)
 
 const DIRS: Array[Vector2i] = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 ## Vaste tekens in de plattegrond.
-const FIXED_CHARS := "#.EXB,"
-const TYPES := ["block", "plate", "lever", "gate", "reset", "hook", "book", "secret", "chest"]
-## Typen die een signaal geven (mogen in "needs" staan).
-const SIGNAL_TYPES := ["plate", "lever", "gate", "book", "secret"]
+const FIXED_CHARS := "#.EXB,~"
+const TYPES := ["block", "plate", "lever", "gate", "reset", "hook", "book", "secret", "chest", "grow"]
+## Typen die een signaal geven (mogen in "needs" staan). grow pas als het pad open is.
+const SIGNAL_TYPES := ["plate", "lever", "gate", "book", "secret", "grow"]
 const GameData := preload("res://scripts/data/game_data.gd")
 const NOWHERE := Vector2i(-9999, -9999)
 
@@ -75,6 +80,9 @@ var hidden := {}         # Vector2i -> true  (',' verborgen vloer)      (v0.15)
 var door_tops := {}      # Vector2i -> id van de geheime deur eronder     (v0.15)
 ## v0.14 haakjes/placeholders voor componenten van RPG CODE: id -> {"tile", "hook", "solid"}
 var hooks := {}
+## Groei-platen: id -> {tile, needs, stage, max, latched, gap, bridge}.
+var grows := {}
+var gap_owner := {}      # Vector2i -> id van de plaat die deze spleet claimt
 var signals := {}        # id -> bool
 var types := {}          # id -> "block"/"plate"/...
 var player_tile := NOWHERE
@@ -108,6 +116,8 @@ func build(room: Dictionary, id := "", latched_ids: Array = []) -> void:
 					pass
 				",":
 					hidden[t] = true
+				"~":
+					pass
 				"B":
 					statics[t] = true
 				"E", "X":
@@ -117,6 +127,7 @@ func build(room: Dictionary, id := "", latched_ids: Array = []) -> void:
 				_:
 					if objs.has(c):
 						_add_object(objs[c], t)
+	_claim_gaps(rows)
 	if entrance_tile != NOWHERE:
 		spawn_facing = inward_dir(entrance_tile)
 		spawn_tile = entrance_tile + spawn_facing
@@ -125,6 +136,9 @@ func build(room: Dictionary, id := "", latched_ids: Array = []) -> void:
 			gates[g]["latched"] = true
 		elif books.has(g):
 			books[g]["pressed"] = true
+		elif grows.has(g):
+			grows[g]["latched"] = true
+			grows[g]["stage"] = grows[g]["max"]
 	_evaluate()
 
 
@@ -184,6 +198,32 @@ func _add_object(d: Dictionary, t: Vector2i) -> void:
 			# v0.14 placeholder: geen signaal, alleen massief of niet (zie puzzle_rooms.gd)
 			hooks[id] = {"tile": t, "hook": str(d.get("hook", "")), "solid": bool(d.get("solid", true))}
 			_static_obj_at[t] = id
+		"grow":
+			var gneeds: Array = []
+			for n in d.get("needs", []):
+				gneeds.append(str(n))
+			var stages := clampi(int(d.get("stages", 3)), 2, 3)
+			grows[id] = {"tile": t, "needs": gneeds, "stage": 0, "max": stages - 1,
+					"latched": false, "gap": bool(d.get("gap", true)), "bridge": []}
+			_static_obj_at[t] = id
+			signals[id] = false
+
+
+func _claim_gaps(rows: Array) -> void:
+	var owner := ""
+	for id in grows:
+		if bool(grows[id]["gap"]):
+			owner = str(id)
+			break
+	if owner == "":
+		return
+	for y in rows.size():
+		var row := str(rows[y])
+		for x in row.length():
+			if row[x] == "~":
+				var gt := Vector2i(x, y)
+				gap_owner[gt] = owner
+				(grows[owner]["bridge"] as Array).append(gt)
 
 
 ## Story-vlag van een kist (eenmalig openen). Standaard "kist:<id>", net als DungeonChest in v14;
@@ -268,11 +308,13 @@ func is_solid(t: Vector2i) -> bool:
 		return true
 	if door_tops.has(t) and not gates[door_tops[t]]["open"]:
 		return true      # bovenste tegel van een dichte geheime deur
+	if gap_owner.has(t) and not grow_open(str(gap_owner[t])):
+		return true      # spleet, tot de groei-plaat volgroeid is
 	var o := object_at(t)
 	if o == "":
 		return false
 	match types.get(o, ""):
-		"lever", "reset", "book", "chest":
+		"lever", "reset", "book", "chest", "grow":
 			return true
 		"gate", "secret":
 			return not gates[o]["open"]
@@ -304,9 +346,13 @@ func push_block_reason(id: String, dir: Vector2i) -> String:
 		return "deur"
 	if door_tops.has(t):
 		return "poort"
+	if gap_owner.has(t) and not grow_open(str(gap_owner[t])):
+		return "groeiplaat"
 	match types.get(object_at(t), ""):
 		"lever":
 			return "hendel"
+		"grow":
+			return "groeiplaat"
 		"reset":
 			return "herstelsteen"
 		"gate", "secret":
@@ -340,6 +386,43 @@ func try_push(id: String, dir: Vector2i) -> bool:
 	ids.push_front(id)
 	changed.emit(ids)
 	return true
+
+
+func grow_stage(id: String) -> int:
+	return int(grows[id]["stage"]) if grows.has(id) else 0
+
+
+## Pad open: laatste stadium (en dus vergrendeld).
+func grow_open(id: String) -> bool:
+	return grows.has(id) and int(grows[id]["stage"]) >= int(grows[id]["max"])
+
+
+func _needs_met(needs: Array) -> bool:
+	for n in needs:
+		if not signals.get(n, false):
+			return false
+	return true
+
+
+## Eén stadium verder. "wacht" = needs niet waar (stadium blijft). "groei" = verder, pad nog
+## dicht. "open" = laatste stadium, spleet is een pad en blijft zo. "klaar" = was al open.
+## "" = onbekend. Verkeerde volgorde blokkeert de doorgang, maar zet niets vast.
+func try_grow(id: String) -> String:
+	if not grows.has(id):
+		return ""
+	var g: Dictionary = grows[id]
+	if int(g["stage"]) >= int(g["max"]):
+		return "klaar"
+	if not _needs_met(g["needs"]):
+		return "wacht"
+	g["stage"] = int(g["stage"]) + 1
+	if int(g["stage"]) >= int(g["max"]):
+		g["latched"] = true
+	var ids := _evaluate()
+	if not id in ids:
+		ids.push_front(id)
+	changed.emit(ids)
+	return "open" if grow_open(id) else "groei"
 
 
 ## Hendel omzetten. Geeft de nieuwe stand terug.
@@ -393,6 +476,9 @@ func reset() -> Array:
 		_block_at[block_start[id]] = id
 	for id in levers:
 		levers[id]["on"] = levers[id]["start"]
+	for id in grows:
+		if not grows[id]["latched"]:
+			grows[id]["stage"] = 0
 	_evaluate()
 	var ids: Array = []
 	ids.append_array(blocks.keys())
@@ -400,6 +486,7 @@ func reset() -> Array:
 	ids.append_array(levers.keys())
 	ids.append_array(gates.keys())
 	ids.append_array(books.keys())
+	ids.append_array(grows.keys())
 	changed.emit(ids)
 	return ids
 
@@ -411,6 +498,9 @@ func latched_ids() -> Array:
 			out.append(id)
 	for id in books:      # v0.15: ingedrukte losse boeken worden net zo onthouden
 		if books[id]["pressed"]:
+			out.append(id)
+	for id in grows:
+		if grows[id]["latched"]:
 			out.append(id)
 	return out
 
@@ -424,7 +514,10 @@ func get_state() -> Dictionary:
 	var lv := {}
 	for id in levers:
 		lv[id] = levers[id]["on"]
-	return {"blocks": b, "levers": lv, "latched": latched_ids()}
+	var gr := {}
+	for id in grows:
+		gr[id] = int(grows[id]["stage"])
+	return {"blocks": b, "levers": lv, "latched": latched_ids(), "grows": gr}
 
 
 func set_state(st: Dictionary) -> Array:
@@ -442,6 +535,16 @@ func set_state(st: Dictionary) -> Array:
 		gates[id]["latched"] = gates[id]["latch"] and (id in st.get("latched", []))
 	for id in books:
 		books[id]["pressed"] = id in st.get("latched", [])
+	var gr: Dictionary = st.get("grows", {})
+	var latched: Array = st.get("latched", [])
+	for id in grows:
+		grows[id]["latched"] = id in latched
+		if grows[id]["latched"]:
+			grows[id]["stage"] = grows[id]["max"]
+		elif gr.has(id):
+			grows[id]["stage"] = clampi(int(gr[id]), 0, int(grows[id]["max"]))
+		else:
+			grows[id]["stage"] = 0
 	_evaluate()
 	var ids: Array = []
 	ids.append_array(blocks.keys())
@@ -449,6 +552,7 @@ func set_state(st: Dictionary) -> Array:
 	ids.append_array(levers.keys())
 	ids.append_array(gates.keys())
 	ids.append_array(books.keys())
+	ids.append_array(grows.keys())
 	changed.emit(ids)
 	return ids
 
@@ -468,6 +572,11 @@ func _evaluate() -> Array:
 		signals[id] = levers[id]["on"]
 	for id in books:
 		signals[id] = books[id]["pressed"]
+	for id in grows:
+		var grown := grow_open(id)
+		if bool(signals.get(id, false)) != grown:
+			ids.append(id)
+		signals[id] = grown
 	# Poorten mogen van elkaar afhangen: herhaal tot er niets meer verandert.
 	for i in gates.size() + 1:
 		var any := false
@@ -554,6 +663,9 @@ static func validate(room: Dictionary) -> Array[String]:
 					err.append("vaste kast 'B' op (%d,%d) heeft geen muur erboven" % [x, y])
 				if border:
 					err.append("vaste kast 'B' op (%d,%d) staat in de rand" % [x, y])
+			elif c == "~":
+				if border:
+					err.append("spleet '~' op (%d,%d) moet binnen de kamer" % [x, y])
 			elif c == "#" or c == "." or c == ",":
 				if c != "#" and border:
 					err.append("vloer in de rand op (%d,%d): de kamer is niet dicht" % [x, y])
@@ -619,6 +731,35 @@ static func validate(room: Dictionary) -> Array[String]:
 				err.append("poort '%s': '%s' geeft geen signaal (alleen %s)" % [d.get("id", c), n, "/".join(SIGNAL_TYPES)])
 		if not str(d.get("mode", "all")) in ["all", "any"]:
 			err.append("poort '%s': mode moet 'all' of 'any' zijn" % d.get("id", c))
+	var tilde_n := 0
+	var gap_plates := 0
+	for y2 in h:
+		var rowt := str(rows[y2])
+		for i in rowt.length():
+			if rowt[i] == "~":
+				tilde_n += 1
+	for c2 in objs:
+		var d2: Dictionary = objs[c2]
+		if _type_of(d2) != "grow":
+			continue
+		if bool(d2.get("gap", true)):
+			gap_plates += 1
+		var stages := int(d2.get("stages", 3))
+		if stages < 2 or stages > 3:
+			err.append("groeiplaat '%s': stages moet 2 of 3 zijn" % d2.get("id", c2))
+		for n2 in d2.get("needs", []):
+			if not ids.has(str(n2)):
+				err.append("groeiplaat '%s' wacht op '%s', maar dat bestaat niet" % [d2.get("id", c2), n2])
+			elif str(n2) == str(d2.get("id", "")):
+				err.append("groeiplaat '%s' wacht op zichzelf" % n2)
+			elif not ids[str(n2)] in SIGNAL_TYPES:
+				err.append("groeiplaat '%s': '%s' geeft geen signaal (alleen %s)" % [d2.get("id", c2), n2, "/".join(SIGNAL_TYPES)])
+	if gap_plates > 1:
+		err.append("meer dan één groeiplaat met een spleet (gap)")
+	if tilde_n > 0 and gap_plates != 1:
+		err.append("spleet '~' hoort bij precies één groeiplaat met gap")
+	if gap_plates == 1 and tilde_n == 0:
+		err.append("groeiplaat met gap heeft geen spleet '~'")
 	if e_tile != NOWHERE:
 		var l := PuzzleLogic.new()
 		l.size = Vector2i(w, h)

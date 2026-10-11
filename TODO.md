@@ -187,6 +187,7 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
 #### Dungeon-opbouw (4 verdiepingen)
 
+- [x] Verdieping 1 is speelbaar: overwoekerde kas op de wereldkaart, alleen na het Eerste Archief, met één groei-plaat (hendel, daarna zaad, scheut, volgroeid)
 - [ ] Verdieping 1: entree, eerste groei-plaatpuzzel, zichtbare monsters
 - [ ] Verdieping 2: Lotte als mini-baas (Dennis en één gekozen Codex-monster, anders tijdelijke Mosslijm), daarna sluit ze aan
 - [ ] Verdieping 3: ketting-platen, tegen-platen en licht-platen, mini-baas De Wurger

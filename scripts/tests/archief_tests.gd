@@ -71,6 +71,8 @@ func _run() -> void:
 	await _equip_screen_tests()
 	print("=== Deel D: Mech. Warden - Shield Up ===")
 	await _guard_tests()
+	print("=== Deel E: Levende Archief, verdieping 1 ===")
+	await _leven_tests()
 	print("ARCHIEFTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -527,6 +529,140 @@ func _guard_tests() -> void:
 			await tap("interact")
 	check("gewonnen, terug in de kamer", await wait_scene(SCENE_NAME, 20.0) and GameState.last_battle_result == "win")
 	Engine.time_scale = 1.0
+
+
+# ================================================================ deel E: kas, verdieping 1
+const A2 := preload("res://scripts/data/archief2_rooms.gd")
+const DR := preload("res://scripts/data/dungeon_rooms.gd")
+const Follower := preload("res://scripts/field_follower.gd")
+const LEVEN_ID := "leven_ingang"
+const PLAAT_ID := "leven_v1_plaat"
+const LEVEN_SCENE := "res://scenes/maps/leven_ingang.tscn"
+const PLAAT_SCENE := "res://scenes/maps/leven_v1_plaat.tscn"
+const GAP := Vector2i(7, 2)
+const NOORD := Vector2i(7, 1)
+const BRUG := "groei_brug"
+const HENDEL := "hendel_kas"
+
+
+func _leven_tests() -> void:
+	var room: Dictionary = A2.ROOMS[LEVEN_ID]
+	check("verdieping 1 bestaat, verdieping 1, thema kas", not room.is_empty() and int(room["floor"]) == 1
+			and str(room["theme"]) == "kas" and A2.ORDER[0][0] == LEVEN_ID)
+	check("niet in de lijst van het Eerste Archief", not DR.ROOMS.has(LEVEN_ID) and DR.ORDER.size() == 12
+			and DR.room(LEVEN_ID)["floor"] == 1)
+	check("scènes bestaan", ResourceLoader.exists(LEVEN_SCENE) and ResourceLoader.exists(PLAAT_SCENE)
+			and DR.scene_of(LEVEN_ID) == LEVEN_SCENE)
+	var known := true
+	var ids: Array = []
+	for m in room["monsters"]:
+		var eid := str(m["enemy"])
+		ids.append(eid)
+		known = known and GD.ENEMIES.has(eid)
+	check("vijanden zijn bestaande soorten (mosslijm, moskonijn): %s" % [ids], known
+			and ids == ["mosslijm", "moskonijn"])
+	var had: bool = GameState.story_flags.has(SD.GOLEM_FLAG)
+	GameState.story_flags.erase(SD.GOLEM_FLAG)
+	var closed: Dictionary = Story.pick("naar_leven")
+	var closed_do: Array = closed.get("do", [])
+	var closed_txt := ""
+	if closed_do.size() > 0 and closed_do[0] is Array and closed_do[0].size() > 2:
+		closed_txt = " ".join(closed_do[0][2])
+	check("dicht zonder Eerste Archief", closed_do is Array and closed_txt.contains("potdicht")
+			and closed_txt.contains("Eerste Archief") and closed_do.size() > 1
+			and closed_do[1][0] == "walk")
+	GameState.story_flags[SD.GOLEM_FLAG] = true
+	var opened: Dictionary = Story.pick("naar_leven")
+	check("open na de golem-vlag", str(opened.get("do", "")) == "default")
+	if not had:
+		GameState.story_flags.erase(SD.GOLEM_FLAG)
+	var lore := closed_txt + " " + " ".join(PuzzleRooms.ROOMS[PLAAT_ID]["exit"]["lines"])
+	check("geen verzonnen lore in de nieuwe zinnen", not lore.contains("H-6") and not lore.contains("Genezer")
+			and not lore.contains("Wurger") and not lore.contains("Stille Vlam") and not lore.contains("ECHO"))
+	var wereld: Node = (load("res://scenes/maps/wereldkaart.tscn") as PackedScene).instantiate()
+	var ex: Node = wereld.get_node("Exits/NaarKas")
+	var sp: Node = wereld.get_node("Spawns/van_kas")
+	check("wereldkaart: kas op tegel (19,34), event naar_leven", ex.event == "naar_leven"
+			and ex.target_map == LEVEN_SCENE and ex.target_spawn == "ingang"
+			and Vector2i((ex.position / 16.0).floor()) == Vector2i(19, 34))
+	check("terugspawn (19,33) kijkt omhoog, naast de uitgang", Vector2i((sp.position / 16.0).floor()) == Vector2i(19, 33)
+			and sp.facing == Vector2i(0, -1) and wereld.get_node_or_null("Objects/KasIngang") != null)
+	wereld.free()
+	var pr: Dictionary = PuzzleRooms.ROOMS[PLAAT_ID]
+	check("groeiplaat-kamer geldig: %s" % [PuzzleLogic.validate(pr)], PuzzleLogic.validate(pr).is_empty())
+	check("noorduitgang is alleen een zin (geen verdieping 2)", str(pr["exit"].get("map", "")) == ""
+			and str(pr["exit"]["lines"][0]) == "Verder in de kas is het nog dicht.")
+	check("puzzel hoort bij set leven, niet bij de archief-glitch", str(pr.get("dungeon_set", "")) == "leven"
+			and DR.glitch_intensity(PLAAT_SCENE) == 0.0 and DR.glitch_intensity(LEVEN_SCENE) == 0.0
+			and DR.glitch_intensity(DR.scene_of("archief_golemhal")) == 1.0)
+	check("volger mag de kas in", Follower.allowed(LEVEN_SCENE) and Follower.allowed(PLAAT_SCENE))
+	var l := PuzzleLogic.from_room(pr, PLAAT_ID)
+	check("start: stadium 0, spleet dicht, noorden onbereikbaar", l.grow_stage(BRUG) == 0 and l.is_solid(GAP)
+			and not _bereikbaar(l, l.spawn_tile, NOORD))
+	check("groeien vóór de hendel doet niets", l.try_grow(BRUG) == "wacht" and l.grow_stage(BRUG) == 0
+			and l.is_solid(GAP) and not (BRUG in l.latched_ids()))
+	check("hendel aan, eerste groei is scheut en blijft dicht", l.toggle_lever(HENDEL) and l.try_grow(BRUG) == "groei"
+			and l.grow_stage(BRUG) == 1 and l.is_solid(GAP) and not _bereikbaar(l, l.spawn_tile, NOORD)
+			and not (BRUG in l.latched_ids()))
+	var half := l.get_state()
+	l.reset()
+	check("herstellen voor het eind: plaat terug naar zaad", l.grow_stage(BRUG) == 0 and l.is_solid(GAP))
+	l.set_state(half)
+	check("set_state bewaart scheut, pad nog dicht", l.grow_stage(BRUG) == 1 and l.is_solid(GAP) and l.lever_on(HENDEL))
+	check("tweede groei opent het pad", l.try_grow(BRUG) == "open" and l.grow_stage(BRUG) == 2
+			and not l.is_solid(GAP) and _bereikbaar(l, l.spawn_tile, NOORD) and BRUG in l.latched_ids())
+	check("nog een keer is klaar, slaat geen stadium over", l.try_grow(BRUG) == "klaar" and l.grow_stage(BRUG) == 2)
+	l.reset()
+	check("volgroeid blijft open na herstellen", l.grow_open(BRUG) and _bereikbaar(l, l.spawn_tile, NOORD))
+	var l2 := PuzzleLogic.from_room(pr, PLAAT_ID, [BRUG])
+	check("opnieuw binnen met latch: pad open, ook als de hendel uit staat", l2.grow_open(BRUG)
+			and not l2.lever_on(HENDEL) and _bereikbaar(l2, l2.spawn_tile, NOORD))
+	var l3 := PuzzleLogic.from_room(pr, PLAAT_ID)
+	l3.try_grow(BRUG)
+	l3.toggle_lever(HENDEL)
+	check("eerst plaat dan hendel blijft op stadium 0 tot je daarna groeit", l3.grow_stage(BRUG) == 0 and l3.is_solid(GAP))
+	check("daarna alsnog scheut: verkeerde volgorde zet niets vast", l3.try_grow(BRUG) == "groei" and l3.grow_stage(BRUG) == 1)
+	GameState.encounter_multiplier = 0.0
+	GameState.change_map(LEVEN_SCENE, "ingang")
+	check("kas laadt", await wait_scene("LevenIngang"))
+	var kas := scene()
+	var m1: Node = kas.get_node_or_null("Objects/Monster_m1") if kas else null
+	var m2: Node = kas.get_node_or_null("Objects/Monster_m2") if kas else null
+	var bord: Node = kas.get_node_or_null("Objects/Lees_12_5") if kas else null
+	check("kas: tint, monsters, bord, opslag", kas != null and kas.get_node_or_null("ThemaTint") != null
+			and m1 != null and m1.enemy_id == "mosslijm" and m2 != null and m2.enemy_id == "moskonijn"
+			and bord != null and str(bord.lines[0]).contains("kas") and kas.get_node_or_null("Objects/SaveBook") != null)
+	GameState.change_map(PLAAT_SCENE, "ingang")
+	check("groeiplaat-scène laadt", await wait_scene("LevenV1Plaat"))
+	var plaat := scene()
+	var pl: Node = plaat.get_node_or_null("Objects/groei_brug") if plaat else null
+	var pad: Node = plaat.get_node_or_null("PuzzleFloor/groei_brug_pad") if plaat else null
+	var dicht := false
+	if pad:
+		for c in pad.get_children():
+			if c is CollisionShape2D and not (c as CollisionShape2D).disabled:
+				dicht = true
+	check("plaat staat en de spleet blokkeert", pl != null and plaat.logic.grow_stage(BRUG) == 0
+			and plaat.logic.is_solid(GAP) and pad != null and dicht
+			and plaat.get_node_or_null("Objects/hendel_kas") != null
+			and plaat.get_node_or_null("ThemaTint") != null)
+
+
+func _bereikbaar(l: PuzzleLogic, start: Vector2i, goal: Vector2i) -> bool:
+	var seen := {}
+	var q: Array[Vector2i] = [start]
+	seen[start] = true
+	while not q.is_empty():
+		var t: Vector2i = q.pop_front()
+		if t == goal:
+			return true
+		for d in PuzzleLogic.DIRS:
+			var n: Vector2i = t + d
+			if seen.has(n) or not l.inside(n) or l.is_solid(n):
+				continue
+			seen[n] = true
+			q.append(n)
+	return false
 
 
 # ================================================================ hulp

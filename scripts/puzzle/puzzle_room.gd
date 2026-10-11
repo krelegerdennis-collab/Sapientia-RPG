@@ -27,6 +27,7 @@ const ResetStone := preload("res://scripts/puzzle/reset_stone.gd")
 const SecretDoor := preload("res://scripts/puzzle/secret_door.gd")
 const BookSwitch := preload("res://scripts/puzzle/book_switch.gd")
 const TreasureChest := preload("res://scripts/puzzle/treasure_chest.gd")
+const GrowPlate := preload("res://scripts/puzzle/grow_plate.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 ## Standaardteksten (Nederlands); per object te vervangen in de data.
 const SECRET_HINT := ["There's a little draft behind this cabinet...",
@@ -37,6 +38,10 @@ const SECRET_OPEN_LINES := ["A cabinet slides aside!"]
 const CHEST_EMPTY_LINES := ["The chest is empty."]
 ## v0.15 zware kast zonder de wereldvaardigheid 'Zware blokken duwen' (per kast te vervangen: "hint").
 const HEAVY_HINT := ["This cabinet is full of runes and lead-heavy.", "It doesn't move a millimeter... That takes more strength."]
+const GROW_WAIT := ["De plaat doet niets.", "Eerst de hendel."]
+const GROW_STEP := ["De plaat groeit."]
+const GROW_OPEN := ["De ranken sluiten zich tot een pad."]
+const GROW_DONE := ["Het pad ligt er al."]
 ## v0.14 dungeon-stijl (Eerste Archief): tegels + legenda van de dungeonkamers.
 const DungeonRoomScript := preload("res://scripts/dungeon/dungeon_room.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
@@ -178,6 +183,13 @@ func _build() -> void:
 		l.setup(self, id, logic.levers[id]["tile"], logic.lever_on(id))
 		objects.add_child(l)
 		nodes[id] = l
+	for id in logic.grows:
+		var ginfo: Dictionary = logic.grows[id]
+		var gp := GrowPlate.new()
+		gp.setup(self, id, ginfo["tile"], logic.grow_stage(id), logic.grow_open(id))
+		objects.add_child(gp)
+		gp.attach_pad(floor_layer, ginfo["bridge"])
+		nodes[id] = gp
 	for id in logic.resets:
 		var r := ResetStone.new()
 		r.setup(self, id, logic.resets[id])
@@ -216,6 +228,15 @@ func _build() -> void:
 		_build_cover(room["dek"])
 		if logic.any_secret_open():
 			reveal_hidden_area(false)   # v0.15: geheime deur staat al open (save/terugkomen)
+	# Kas (en andere thema's met "tint"): dezelfde kleurtint als een dungeonkamer.
+	# archief_grijs heeft geen tint, dus het Eerste Archief blijft zoals het was.
+	if is_dungeon_style():
+		var td: Dictionary = DungeonRooms.theme_data(DungeonRooms.current_theme)
+		if td.has("tint"):
+			var cm := CanvasModulate.new()
+			cm.name = "ThemaTint"
+			cm.color = td["tint"]
+			add_child(cm)
 
 	# 3) Spawnpunt 'ingang' (naast E, kijkt de kamer in) + v0.14 extra spawns uit de data
 	var spawn := MapSpawn.new()
@@ -408,6 +429,25 @@ func request_lever(lever: Node, p: Node2D) -> void:
 	puzzle_sound.emit("hendel")
 
 
+func request_grow(plate: Node, p: Node2D) -> void:
+	if not _can_act(p):
+		return
+	var res := logic.try_grow(plate.grow_id)
+	var lines: Array = []
+	match res:
+		"wacht":
+			lines = _lines(plate.grow_id, "wait_lines", GROW_WAIT)
+		"groei":
+			lines = _lines(plate.grow_id, "lines", GROW_STEP)
+		"open":
+			lines = _lines(plate.grow_id, "open_lines", GROW_OPEN)
+		"klaar":
+			lines = _lines(plate.grow_id, "done_lines", GROW_DONE)
+		_:
+			return
+	Dialog.show_lines(lines)
+
+
 func request_reset(p: Node2D) -> void:
 	if p != player or _resetting or Dialog.is_open or GameState.changing_map:
 		return
@@ -560,6 +600,8 @@ func _sync(id: String, animate: bool) -> void:
 			n.set_pressed(logic.plate_pressed(id))
 		"lever":
 			n.set_on(logic.lever_on(id))
+		"grow":
+			n.set_stage(logic.grow_stage(id), logic.grow_open(id))
 		"book":
 			n.set_pressed(logic.book_pressed(id))
 		"secret":

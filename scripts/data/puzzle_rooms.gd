@@ -9,6 +9,7 @@ extends RefCounted
 ##   'X' uitgang (deur in de rand): naar "exit" (map + spawn) of alleen een bericht ("lines").
 ##   'B' vaste boekenkast (decor, massief, niet te duwen). De muur erboven wordt de bovenkant
 ##       van de kast, dus er moet een '#' boven staan.
+##   '~' spleet: massief tot een groei-plaat (type grow, gap) volgroeid is. Binnen de kamer.
 ## Alle andere tekens staan in "objects": {teken: {type, id, ...}}, elk teken precies 1x:
 ##   block  duwbare boekenkast                       {"type": "block", "id": "kast_a"}
 ##   plate  drukplaat; "heavy": true = alleen een kast drukt hem in (de speler niet)
@@ -25,6 +26,11 @@ extends RefCounted
 ##           "needs", "mode", "invert"; vergrendelt ALTIJD (blijft open). Boven en onder moet een
 ##           doorgang zijn (bv. ',' erboven, '.' eronder). "hint" (A op de dichte deur) en
 ##           "open_lines" (als hij opengaat) optioneel.
+##   grow    groei-plaat {"needs": [ids], "stages": 2 of 3, "gap": true}. A = één stadium
+##           (zaad, scheut, volgroeid). Needs eerst (bv. een hendel). Alleen het laatste
+##           stadium opent de '~'-spleet en blijft open. "wait_lines" / "lines" /
+##           "open_lines" / "done_lines" optioneel. "dungeon_set" op de kamer haalt hem
+##           uit de glitch-graaf van een ander archief (standaard "archief").
 ##   chest   schatkist {"item": id uit ITEMS/EQUIPMENT, "n": aantal (standaard 1), "flag": story-vlag
 ##           (optioneel, standaard "kist:<id>" zoals de gewone dungeonkisten)}. Eenmalig per spel (de vlag gaat
 ##           mee in de save). "lines" / "empty_lines" optioneel.
@@ -194,5 +200,51 @@ const ROOMS := {
 				[14, 6, 23], [15, 6, 23], [16, 6, 23], [17, 6, 27]]},
 		"entrance": {"map": "res://scenes/maps/archief_v3_zuilenhal.tscn", "spawn": "boog"},
 		"exit": {"map": "res://scenes/maps/archief_v3_gang.tscn", "spawn": "zuid"},
+	},
+	# Verdieping 1, Het Levende Archief. Tutorial: hendel, daarna de plaat drie stadia.
+	# De spleet is de volle breedte, dus er is geen omweg. TODO(design): verdieping 2-4 niet hier.
+	"leven_v1_plaat": {
+		"name": "Het Levende Archief - Groeiplaat",
+		"style": "dungeon",
+		"theme": "kas",
+		"dungeon_set": "leven",
+		"legend": {"V": 13},
+		"layout": [
+			"#######X#######",
+			"#.............#",
+			"#~~~~~~~~~~~~~#",
+			"#......g......#",
+			"#..h..........#",
+			"#.............#",
+			"#.............#",
+			"#.............#",
+			"#.............#",
+			"#.............#",
+			"#######E#######",
+		],
+		"look": [
+			"a------n------b",
+			"<S............>",
+			"<VVVVVVVVVVVVV>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"c_____(E)_____d",
+		],
+		"objects": {
+			"h": {"type": "lever", "id": "hendel_kas", "on": false},
+			"g": {"type": "grow", "id": "groei_brug", "needs": ["hendel_kas"], "stages": 3, "gap": true,
+					"wait_lines": ["De plaat doet niets.", "Eerst de hendel."],
+					"lines": ["De plaat groeit."],
+					"open_lines": ["De ranken sluiten zich tot een pad."],
+					"done_lines": ["Het pad ligt er al."]},
+		},
+		"entrance": {"map": "res://scenes/maps/leven_ingang.tscn", "spawn": "boog"},
+		# TODO(design): verdieping 2-4, Lotte, De Genezer en de World Warper horen hier niet.
+		"exit": {"lines": ["Verder in de kas is het nog dicht."]},
 	},
 }
