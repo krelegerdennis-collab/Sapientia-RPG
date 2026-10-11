@@ -19,6 +19,7 @@ const RESPAWN_SPAWN := "start"
 const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
+const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
@@ -256,6 +257,8 @@ func _ready() -> void:
 	# Catalogus t/m Act 6: of  godot -- --catalogustest  (scripts/tests/catalogus_tests.gd).
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
 	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
+	# De Spiegel (Archief 4): of  godot -- --spiegeltest [--shots=/pad/map]
+	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
@@ -279,7 +282,8 @@ func _ready() -> void:
 			["--catalogustest", "res://scripts/tests/catalogus_tests.gd", "CatalogusTest", "catalogustest"],
 			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
 			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
-			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"]]:
+			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"],
+			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -295,6 +299,10 @@ func _ready() -> void:
 		tester.name = t[2]
 		get_tree().root.add_child.call_deferred(tester)
 		break
+	# De Spiegel (Archief 4): debug-ingang. Start alleen de kamer.
+	# Geen story_step en geen story_flags: het echte verhaal wordt niet overgeslagen.
+	if SpiegelData.DEBUG_ARG in args and not ("--spiegeltest" in args):
+		call_deferred("_go_to_scene", SpiegelData.SCENE)
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
 

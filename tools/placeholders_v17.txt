@@ -43,3 +43,6 @@ world_warper/art/warp_platform.png            32x16   warp-platform in De Hal
 world_warper/art/tafel_placeholder.png        32x16   lege smidstafel in De Werkplaats
 world_warper/art/toonbank_placeholder.png     48x16   dichte toonbank in De Handelskamer
 world_warper/art/bord_kamers.png              32x16   bordje naar de kamers en overige interactievlakken
+# De Spiegel (Archief 4), onthullingsscène (tools/art_spiegel_placeholder.py). Magenta hoekjes, geen definitieve art.
+assets/bg/spiegel_kamer.png                   384x216  kamer vol spiegelende oppervlakken
+assets/bg/spiegel_kamer_gebroken.png          384x216  dezelfde kamer, spiegels gebroken door de weigering
