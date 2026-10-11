@@ -1762,7 +1762,7 @@ func _bestiary_tests() -> void:
 		var n_all := GameData.ENEMIES.size()
 		check("lijst op nummer, ongezien = ??? %s" % [texts], texts.slice(0, 6) == ["001 Moss Slime", "002 ???", "003 Paper Wraith", "004 ???", "005 The Knowledge Beast", "006 ???"]
 				and texts.size() == n_all and texts.slice(6).all(func(t): return str(t).ends_with("???")))
-		check("kop telt gezien/verslagen (%s)" % bs.header.text, ("gezien 3/%d" % n_all) in bs.header.text and ("verslagen 3/%d" % n_all) in bs.header.text)
+		check("kop telt gezien/verslagen (%s)" % bs.header.text, ("seen 3/%d" % n_all) in bs.header.text and ("defeated 3/%d" % n_all) in bs.header.text)
 		bs.show_entry("glitchmot")
 		check("ongezien: ??? en silhouet", bs.name_label.text == "004 ???" and bs.picture.modulate.v < 0.1 and not bs.stats_visible())
 		bs.entries[4].grab_focus()

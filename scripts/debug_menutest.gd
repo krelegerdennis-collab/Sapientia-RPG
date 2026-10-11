@@ -305,7 +305,7 @@ func _items_tests() -> void:
 	var texts := []
 	for i in s.entries.size():
 		texts.append(s.entry_text(i))
-	check("lijst met aantallen %s" % [texts], texts == ["Potion        x3", "Magic Water  x1"])
+	check("lijst met aantallen %s" % [texts], texts == ["Potion        x3", "Magic Water   x1"])
 	check("beschrijving van het gekozen item (%s)" % s.desc_label.text,
 			s.name_label.text == "Potion" and s.desc_label.text == GameData.ITEMS["drankje"]["desc"]
 			and s.effect_label.text == "Restores 30 HP.")
@@ -440,7 +440,7 @@ func _status_tests() -> void:
 	s.show_member(0)
 	var need2: int = GameData.exp_for_level(int(hero["level"]) + 1) - int(hero["exp"])
 	check("na level-up: Lv %d, EXP %d, %s (verwacht nog %d)" % [hero["level"], hero["exp"], s.next_label.text, need2],
-			hero["level"] == 2 and hero["exp"] == 19 and need2 == 41 and s.next_label.text == "nog 41 EXP")
+			hero["level"] == 2 and hero["exp"] == 19 and need2 == 41 and s.next_label.text == "41 EXP to go")
 	await tap("cancel")
 	await frames(2)
 	check("B sluit Status", m.get_node_or_null("Status") == null)

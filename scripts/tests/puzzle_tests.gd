@@ -792,7 +792,7 @@ func _integration() -> void:
 	await screenshot("04_opgelost")
 	await moves("UU")
 	check("op de uitgang X (7,0): %s" % tile(), tile() == Vector2i(7, 0))
-	check("bericht bij X ('donkere gang')", Dialog.is_open and "donkere gang" in Dialog.text_label.text)
+	check("bericht bij X ('donkere gang')", Dialog.is_open and "dark corridor" in Dialog.text_label.text)
 	await wait_until(func(): return not Dialog._is_typing(), 3.0)
 	await pframes(2)
 	await screenshot("05_uitgang_bericht")

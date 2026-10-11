@@ -532,7 +532,7 @@ func _battle_tests() -> void:
 	b.last_kern_fireball = null
 	b.last_kern_impact = null
 	await tap("interact")
-	check("bericht '%s: Kernkracht!'" % hero["name"], await wait_until(func(): return seen_message("%s: Kernkracht!" % hero["name"]), 5.0))
+	check("bericht '%s: Core Power!'" % hero["name"], await wait_until(func(): return seen_message("%s: Core Power!" % hero["name"]), 5.0))
 	# de hand: held in spreuk-pose, de bal vertrekt bij de hand
 	var hn: Control = hero_c(b)["node"]
 	check("vuurbal verschijnt in het gevecht", await wait_until(func(): return is_instance_valid(b.last_kern_fireball) and b.last_kern_fireball.flying, 3.0))

@@ -513,7 +513,7 @@ func _kernslag_tests() -> void:
 	check("doel kiezen", await wait_battle_state(["target_enemy"], 5) == "target_enemy")
 	await tap("interact")
 	await wait_until(func(): return seen_message("Core Power"), 5.0)
-	check("bericht '%s: Kernkracht!'" % hero["name"], seen_message("%s: Kernkracht!" % hero["name"]))
+	check("bericht '%s: Core Power!'" % hero["name"], seen_message("%s: Core Power!" % hero["name"]))
 	await wait_until(func(): return not enemy_hits.is_empty(), 5.0)
 	if shots != "":   # schadegetal in beeld, vijand niet net weg door het knipperen
 		await wait_until(func(): return e["node"].visible, 1.0)

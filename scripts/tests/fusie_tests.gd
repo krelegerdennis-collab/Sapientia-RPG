@@ -312,7 +312,7 @@ func _screen_tests() -> void:
 	await tap("move_right")
 	await frames(3)
 	check("D-pad rechts: fusie stap 1 ('kies pagina 1'), geen 'Geen'-regel", s.mode == s.MODE_A and s.entries.size() == 3
-			and "pagina 1" in s.header.text and not s.fuse_button.visible)
+			and "page 1" in s.header.text and not s.fuse_button.visible)
 	await tap("cancel")
 	await frames(3)
 	check("B in stap 1: terug naar de Codex (scherm blijft open)", s.mode == "" and m.get_node_or_null("Codex") == s and s.entries.size() == 4)
@@ -320,9 +320,9 @@ func _screen_tests() -> void:
 	await frames(2)
 	check("tik op 'Fusie': stap 1", s.mode == s.MODE_A)
 	await click(s.entries[0])
-	check("pagina 1 = Mech. Warden -> stap 2", s.mode == s.MODE_B and s.pick_a == p1["uid"] and "pagina 2" in s.header.text)
+	check("pagina 1 = Mech. Warden -> stap 2", s.mode == s.MODE_B and s.pick_a == p1["uid"] and "page 2" in s.header.text)
 	await click(s.entries[0])
-	check("zelfde pagina nog eens: melding, blijft stap 2", s.mode == s.MODE_B and "andere" in s.message_text())
+	check("zelfde pagina nog eens: melding, blijft stap 2", s.mode == s.MODE_B and "different" in s.message_text())
 	s.entries[1].grab_focus()
 	await frames(2)
 	await screenshot("fusie_kies2")
@@ -347,7 +347,7 @@ func _screen_tests() -> void:
 	var newp: Dictionary = GameState.codex_pages[0]
 	check("Fuseren!: 2 pagina's, Lore Beast op plek 1, ouders weg, melding", s.mode == "" and GameState.codex_pages.size() == 2
 			and newp["species"] == "kennis_beest" and GameState.codex_page(p1["uid"]).is_empty() and GameState.codex_page(p2["uid"]).is_empty()
-			and "Fusie gelukt" in s.message_text())
+			and "Fusion succeeded" in s.message_text())
 	check("Ink Worm was bondgenoot -> Lore Beast is het; lijst '*' + focus op de nieuwe", GameState.codex_active == newp["uid"]
 			and s.entry_text(0).begins_with("* Lore Beast") and s.entries[0].has_focus() and s.picture.material != null)
 	s.confirm_fusion()      # nog eens bevestigen (dubbel tikken) mag niets doen
@@ -376,7 +376,7 @@ func _screen_tests() -> void:
 	s.rebuild()
 	await frames(2)
 	await click(s.fuse_button)
-	check("maar 1 pagina: 'Fusie' geeft een melding, geen stap 1", s.mode == "" and "twee pagina" in s.message_text())
+	check("maar 1 pagina: 'Fusie' geeft een melding, geen stap 1", s.mode == "" and "two pages" in s.message_text())
 	await tap("cancel")
 	await frames(3)
 	m.close()

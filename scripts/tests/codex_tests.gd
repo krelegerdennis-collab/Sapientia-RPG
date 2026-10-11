@@ -735,7 +735,7 @@ func _screen_tests() -> void:
 	p1["name"] = oud
 	check("naam langer dan 13 tekens: afgekort met '.' ('%s')" % kort, "Bibliotheekw. Lv3" in kort)
 	check("details: level, stats, vaardigheden", "Lv 3" in s.name_label.text and "ATK %d" % int(p1["atk"]) in s.stats_label.text
-			and "Moss Mend" in s.skills_label.text and "Vecht mee" in s.state_label.text)
+			and "Moss Mend" in s.skills_label.text and "Fights beside" in s.state_label.text)
 	check("tikvlakken >= 16 hoog (mobiel)", s.entries.all(func(x): return x.size.y >= 16))
 	await tap("move_down")
 	await tap("interact")

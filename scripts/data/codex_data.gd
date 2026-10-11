@@ -474,9 +474,9 @@ static func fusion_block_reason(a: Dictionary, b: Dictionary) -> String:
 	if a.is_empty() or b.is_empty():
 		return "Pick two pages."
 	if str(a.get("uid", "")) == str(b.get("uid", "")):
-		return "Kies twee verschillende pagina's."
+		return "Pick two different pages."
 	if not has_species(str(a.get("species", ""))) or not has_species(str(b.get("species", ""))):
-		return "Deze pagina is onleesbaar."
+		return "This page can't be read."
 	return ""
 
 
