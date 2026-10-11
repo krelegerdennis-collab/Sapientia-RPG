@@ -24,7 +24,7 @@ var floor_data: Dictionary = {}
 var rustpunt: Node2D = null
 
 
-const LEAVE_QUESTION := "Het Archief verlaten? Deze run gaat verloren. Blauwe databanken blijven."
+const LEAVE_QUESTION := "Leave the Archive? This run is lost. Blue databanks remain."
 
 ## Voor de tests: de laatste keer dat de ladder-vraag gesteld is en wat er gekozen werd (0 = verlaten).
 var last_leave_choice := -1
@@ -81,7 +81,7 @@ func _confirm_leave(exit: Node) -> void:
 	if Dialog.is_open or GameState.changing_map:
 		return
 	player.input_locked = true
-	last_leave_choice = await Dialog.ask(LEAVE_QUESTION, ["Verlaten", "Blijven"])
+	last_leave_choice = await Dialog.ask(LEAVE_QUESTION, ["Leave", "Stay"])
 	if last_leave_choice == 0:
 		GameState.dungeon100_leave()
 		super._use_exit(exit)

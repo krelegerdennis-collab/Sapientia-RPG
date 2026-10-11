@@ -19,7 +19,7 @@
 
 [node name="Wilgendal" type="Node2D"]
 script = ExtResource("1_pq0w8")
-map_name = "Huis aan de bosrand"
+map_name = "House at the Wood's Edge"
 encounters = false
 
 [node name="Ground" type="TileMapLayer" parent="."]
@@ -213,8 +213,8 @@ loop_frames = 2
 
 [node name="OudeMan" parent="Objects" instance=ExtResource("3_hcxc2")]
 position = Vector2(344, 136)
-npc_name = "Oude Man"
-lines = Array[String](["Hallo!"])
+npc_name = "Old Man"
+lines = Array[String](["Hello!"])
 facing = Vector2i(0, -1)
 event = "opa"
 event_arg = ""
@@ -225,7 +225,7 @@ sheet = ExtResource("10_1m7ox")
 
 [node name="Door" parent="Objects" instance=ExtResource("5_5ra5u")]
 position = Vector2(264, 104)
-lines = Array[String](["De deur is op slot."])
+lines = Array[String](["The door is locked."])
 target_map = "res://scenes/maps/huis_wilgendal.tscn"
 target_spawn = "binnen"
 event = ""

@@ -85,7 +85,7 @@ func _kind_tests() -> void:
 	check("blauwe buit is deterministisch", str(loot["items"][0]["item"]) == str(again["items"][0]["item"]))
 	var boss := S.boss_loot(100, _rng(1))
 	var with := Blue.with_warp(boss, 100)
-	check("Warp-kristal zit in de baasbuit van verdieping 100 en nergens anders",
+	check("Warp Crystal zit in de baasbuit van verdieping 100 en nergens anders",
 			(with["items"] as Array).any(func(it): return str(it["item"]) == Blue.WARP_ITEM)
 			and not (Blue.with_warp(boss, 90)["items"] as Array).any(func(it): return str(it["item"]) == Blue.WARP_ITEM))
 	check("Mimic bestaat in de vijanddata", GD.ENEMIES.has(Blue.MIMIC_ENEMY))

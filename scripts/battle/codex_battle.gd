@@ -118,7 +118,7 @@ func ally_turn(a: Dictionary) -> void:
 	var target: Dictionary = _pick_foe(foes, str(ai["target"]))
 	if choice == "attack" or not CodexData.SKILLS.has(choice):
 		last_ally_action = {"kind": "attack", "skill": "", "target": target["name"]}
-		battle.show_message("%s valt aan!" % c["name"])
+		battle.show_message("%s attacks!" % c["name"])
 		ActorSfx.play(c, "aanval")
 		await battle._hero_wind_up(c, true)
 		await battle._damage(target, battle._physical_damage(c, target, 1.0))
@@ -179,11 +179,11 @@ func _is_boss(t: Dictionary) -> bool:
 func capture_hint(t: Dictionary) -> String:
 	var sid := CodexData.species_for_enemy(str(t.get("id", "")))
 	if _is_boss(t):
-		return "te machtig"
+		return "too strong"
 	if sid == "" or not bool(CodexData.species(sid)["capturable"]):
-		return "past niet"
+		return "won't fit"
 	if GameState.codex_full():
-		return "Codex vol"
+		return "Codex full"
 	return "%d%%" % roundi(chance_for(t) * 100.0)
 
 
@@ -227,7 +227,7 @@ func swap_ally(a: Dictionary) -> void:
 		var page := GameState.codex_page(uid)
 		if page.is_empty() or int(page["hp"]) <= 0:
 			last_swap["result"] = "ko"
-			await battle.say("%s kan niet meer meedoen." % str(page.get("name", "Die pagina")))
+			await battle.say("%s can't fight anymore." % str(page.get("name", "That page")))
 			return
 	var old_name := ""
 	for c in allies():
@@ -241,9 +241,9 @@ func swap_ally(a: Dictionary) -> void:
 	last_swap["result"] = "gewisseld"
 	var text := ""
 	if old_name != "":
-		text = "%s keert terug in de Codex." % old_name
+		text = "%s returns to the Codex." % old_name
 	if uid != "":
-		text = (text + "\n" if text != "" else "") + "%s springt uit de Codex!" % str(GameState.codex_page(uid)["name"])
+		text = (text + "\n" if text != "" else "") + "%s leaps out of the Codex!" % str(GameState.codex_page(uid)["name"])
 	await battle.say(text)
 
 
@@ -280,17 +280,17 @@ func capture(actor: Dictionary, target) -> void:
 	if _is_boss(t):
 		_refund(item)
 		last_capture = {"result": "baas", "chance": 0.0, "species": sid}
-		await battle.say("%s is te machtig! Een baas laat zich niet inschrijven. (Het boek blijft heel.)" % t["name"])
+		await battle.say("%s is too strong! A boss won't be written in. (The book stays whole.)" % t["name"])
 		return
 	if sid == "" or not bool(CodexData.species(sid)["capturable"]):
 		_refund(item)
 		last_capture = {"result": "geen_soort", "chance": 0.0, "species": sid}
-		await battle.say("%s past niet in de Codex. (Het boek blijft heel.)" % t["name"])
+		await battle.say("%s doesn't fit in the Codex. (The book stays whole.)" % t["name"])
 		return
 	if GameState.codex_full():
 		_refund(item)
 		last_capture = {"result": "vol", "chance": 0.0, "species": sid}
-		await battle.say("De Codex is vol (%d pagina's). (Het boek blijft heel.)" % CodexData.MAX_PAGES)
+		await battle.say("The Codex is full (%d pages). (The book stays whole.)" % CodexData.MAX_PAGES)
 		return
 	var chance := chance_for(t)
 	var roll := force_roll if force_roll >= 0.0 else randf()
@@ -300,7 +300,7 @@ func capture(actor: Dictionary, target) -> void:
 	if not ok:
 		last_capture["result"] = "mislukt"
 		battle._blink(t["node"])
-		await battle.say("Het boek blijft leeg... %s glipt eruit! (kans %d%%)" % [t["name"], roundi(chance * 100.0)])
+		await battle.say("The book stays blank... %s slips out! (chance %d%%)" % [t["name"], roundi(chance * 100.0)])
 		return
 	# gelukt: weg uit het gevecht (telt niet als verslagen: geen EXP/goud/buit voor dit monster)
 	t["s"]["hp"] = 0
@@ -312,7 +312,7 @@ func capture(actor: Dictionary, target) -> void:
 	last_capture["result"] = "gelukt"
 	last_capture["page"] = str(page.get("uid", ""))
 	var skills: Array = (page["skills"] as Array).map(func(x): return str(CodexData.skill(x)["name"]))
-	await battle.say("%s is ingeschreven in de Codex!\nPagina %d: Lv %d, %s." % [t["name"], GameState.codex_pages.size(),
+	await battle.say("%s is written into the Codex!\nPage %d: Lv %d, %s." % [t["name"], GameState.codex_pages.size(),
 			int(page["level"]), ", ".join(skills)], false)
 	await battle._wait(0.6)
 

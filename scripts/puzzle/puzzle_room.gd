@@ -29,14 +29,14 @@ const BookSwitch := preload("res://scripts/puzzle/book_switch.gd")
 const TreasureChest := preload("res://scripts/puzzle/treasure_chest.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 ## Standaardteksten (Nederlands); per object te vervangen in de data.
-const SECRET_HINT := ["Achter deze kast tocht het een beetje...",
-		"Ergens in deze kamer steekt vast iets uit."]
-const BOOK_LINES := ["Eén boek steekt uit. Je duwt het terug...", "*klik*"]
-const BOOK_PRESSED_LINES := ["Het boek zit stevig vast."]
-const SECRET_OPEN_LINES := ["Er schuift een kast opzij!"]
-const CHEST_EMPTY_LINES := ["De kist is leeg."]
+const SECRET_HINT := ["There's a little draft behind this cabinet...",
+		"Something in this room is surely sticking out."]
+const BOOK_LINES := ["One book sticks out. You push it back...", "*click*"]
+const BOOK_PRESSED_LINES := ["The book is stuck fast."]
+const SECRET_OPEN_LINES := ["A cabinet slides aside!"]
+const CHEST_EMPTY_LINES := ["The chest is empty."]
 ## v0.15 zware kast zonder de wereldvaardigheid 'Zware blokken duwen' (per kast te vervangen: "hint").
-const HEAVY_HINT := ["Deze kast zit vol runen en is loodzwaar.", "Hij beweegt geen millimeter... Daar is meer kracht voor nodig."]
+const HEAVY_HINT := ["This cabinet is full of runes and lead-heavy.", "It doesn't move a millimeter... That takes more strength."]
 ## v0.14 dungeon-stijl (Eerste Archief): tegels + legenda van de dungeonkamers.
 const DungeonRoomScript := preload("res://scripts/dungeon/dungeon_room.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
@@ -113,10 +113,10 @@ func _exit_tree() -> void:
 func _build() -> void:
 	room = PuzzleRooms.ROOMS.get(room_id, {})
 	if room.is_empty():
-		push_error("Puzzelkamer '%s' bestaat niet in puzzle_rooms.gd" % room_id)
+		push_error("Puzzle Room '%s' bestaat niet in puzzle_rooms.gd" % room_id)
 		return
 	for e in PuzzleLogic.validate(room):
-		push_error("Puzzelkamer '%s': %s" % [room_id, e])
+		push_error("Puzzle Room '%s': %s" % [room_id, e])
 	if map_name == "":
 		map_name = str(room.get("name", room_id))
 	logic = PuzzleLogic.from_room(room, room_id, _latched_store().get(room_id, []))
@@ -201,7 +201,7 @@ func _build() -> void:
 	for id in logic.hooks:
 		var kind: String = logic.hooks[id]["hook"]
 		if not HOOK_SCRIPTS.has(kind):
-			push_error("Puzzelkamer '%s': onbekend haakje '%s'" % [room_id, kind])
+			push_error("Puzzle Room '%s': onbekend haakje '%s'" % [room_id, kind])
 			continue
 		var hk: Node2D = HOOK_SCRIPTS[kind].new()
 		hk.setup(self, id, logic.hooks[id]["tile"], objdata.get(id, {}))
@@ -277,7 +277,7 @@ func _build_dungeon_ground() -> void:
 			if ch == " ":
 				continue
 			if not legend.has(ch):
-				push_error("Puzzelkamer '%s': onbekend look-teken '%s' op (%d,%d)" % [room_id, ch, x, y])
+				push_error("Puzzle Room '%s': onbekend look-teken '%s' op (%d,%d)" % [room_id, ch, x, y])
 				continue
 			var n: int = legend[ch]
 			if ch == ".":
@@ -412,7 +412,7 @@ func request_reset(p: Node2D) -> void:
 	if p != player or _resetting or Dialog.is_open or GameState.changing_map:
 		return
 	_resetting = true
-	var choice: int = await Dialog.ask("De kamer herstellen?", ["Ja", "Nee"])
+	var choice: int = await Dialog.ask("Restore the room?", ["Yes", "No"])
 	if choice == 0:
 		player.input_locked = true
 		await Transition.fade_out()
@@ -494,7 +494,7 @@ func request_chest(chest: Node, p: Node2D) -> void:
 	puzzle_sound.emit("kist")
 	last_chest_result = "gekregen"
 	var nm := str(item_data(item).get("name", item))
-	var fallback := ["{naam} vindt: %s!" % (nm if int(c["n"]) == 1 else "%dx %s" % [c["n"], nm])]
+	var fallback := ["{naam} finds: %s!" % (nm if int(c["n"]) == 1 else "%dx %s" % [c["n"], nm])]
 	Dialog.show_lines(_lines(chest.chest_id, "lines", fallback))
 	await Dialog.finished
 	chest.show_icon(false)

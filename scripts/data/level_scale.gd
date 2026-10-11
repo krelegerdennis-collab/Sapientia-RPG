@@ -17,33 +17,33 @@ const VERHAAL_MAX := 40
 const ACTS := [
 	{
 		"act": 1, "min": 1, "max": 13,
-		"naam": "Wachtershuis, het Eerste Archief, Esdoorn en het Donker Woud",
-		"verwacht": "Beginnersset en Leerling-mantel. Vonkzwaard uit de archiefkist. Noor sluit aan na de Wortelkoning (niveau van Dennis min 1) met Eiken Staf en Reisgewaad. Wambuis, Kruidenthee en de Gloeiende Inktfles zijn dan te vinden.",
+		"naam": "Warden's House, the First Archive, Mapleton and the Dark Wood",
+		"verwacht": "Starter set and Apprentice Cloak. Spark Sword from the archive chest. Noor joins after the Root King (Dennis's level minus 1) with Oak Staff and Travel Robe. Padded Jerkin, Herbal Tea and Glowing Ink can be found then.",
 	},
 	{
 		"act": 2, "min": 14, "max": 19,
-		"naam": "Het Tweede Archief, de Vooruitgang",
-		"verwacht": "Smidse-uitrusting: Ketelkling, Schrootplaat, Werkmantel, Stemvork. Lotte hoort in deze band aan te sluiten; haar plek is nog niet gebouwd.",
+		"naam": "The Second Archive, Progress",
+		"verwacht": "Forge gear: Kettle Blade, Scrap Plate, Work Cloak, Tuning Fork. Lotte is meant to join in this band; her place is not built yet.",
 	},
 	{
 		"act": 3, "min": 20, "max": 25,
-		"naam": "Het Derde Archief, de Magie",
-		"verwacht": "Tempel-uitrusting: Ankerkling, Zweefstaf, Gebedsstaf, Wolkgewaad. Bron is de Zwevende Tempel en Isolde.",
+		"naam": "The Third Archive, Magic",
+		"verwacht": "Temple gear: Anchor Blade, Hover Staff, Prayer Staff, Cloud Robe. The source is the Floating Temple and Isolde.",
 	},
 	{
 		"act": 4, "min": 26, "max": 31,
-		"naam": "Het Vierde Archief, het Leven",
-		"verwacht": "Laboratorium: Incisie, Levensstaf, Chitineharnas, Antiserum Nul. Hier hoort de onthulling dat Dennis proefpersoon H-6 is.",
+		"naam": "The Fourth Archive, Life",
+		"verwacht": "Laboratory: Incision, Life Staff, Chitin Armor, Antiserum Zero. This is where Dennis is revealed as test subject H-6.",
 	},
 	{
 		"act": 5, "min": 32, "max": 36,
-		"naam": "Het Vijfde Archief, de Kosmos",
-		"verwacht": "Sterrenuitrusting: Perihelium, Astrostaf, Lichtstaf, Maanharnas. Bron is het observatorium en Perihelia.",
+		"naam": "The Fifth Archive, Cosmos",
+		"verwacht": "Star gear: Perihelion, Astrolabe Staff, Light Staff, Moon Armor. The source is the observatory and Perihelia.",
 	},
 	{
 		"act": 6, "min": 37, "max": 40,
-		"naam": "Het Zesde Archief, het Hart",
-		"verwacht": "Eindspullen: Memoria, Hartvuurstaf, Hartpsalm, Tranenpantser, Hartmantel, Harttraan. Sterker dan de zegel-set uit de 100 verdiepingen.",
+		"naam": "The Sixth Archive, the Heart",
+		"verwacht": "Endgame gear: Memoria, Heartfire Staff, Heart Psalm, Tearplate, Heart Cloak, Heart Tear. Stronger than the seal set from the Hundred Floors.",
 	},
 ]
 
@@ -92,9 +92,9 @@ const VOORBIJ_ARCHIEF := {
 
 ## Al in het spel te vinden (niet alleen data). De rest van de nieuwe catalogus wacht op Act 2-6.
 const NU_TE_VINDEN := {
-	"wambuis": "Noor geeft hem bij het aansluiten, in de tas.",
-	"kruidenthee": "Ilse in Esdoorn, eenmalig nadat Noor gered is.",
-	"gloeiende_inktfles": "Kast van de Inktwurm in de Golemhal, eenmalig bij het openen.",
+	"wambuis": "Noor gives it when she joins, into the bag.",
+	"kruidenthee": "Ilse in Mapleton, once, after Noor is saved.",
+	"gloeiende_inktfles": "The Ink Worm's cabinet in Golem Hall, once, when it opens.",
 }
 
 

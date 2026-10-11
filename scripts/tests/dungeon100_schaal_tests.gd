@@ -121,7 +121,7 @@ func _scaling_tests() -> void:
 				windows = windows and int(S.monster_stats(GD.ENEMIES[id], f + 10)[k]) > int(S.monster_stats(GD.ENEMIES[id], f)[k])
 	check("... HP/ATK stijgen elke verdieping echt, DEF/EXP/goud elke 10 verdiepingen", strict and windows)
 	var m100 := S.monster_stats(base, 100)
-	check("Mosslijm op 100: veel sterker dan op 1 (HP %d, ATK %d, DEF %d, EXP %d, goud %d)"
+	check("Moss Slime op 100: veel sterker dan op 1 (HP %d, ATK %d, DEF %d, EXP %d, goud %d)"
 			% [m100["max_hp"], m100["atk"], m100["def"], m100["exp"], m100["gold"]],
 			int(m100["max_hp"]) >= 20 * int(base["max_hp"]) and int(m100["atk"]) >= 10 * int(base["atk"])
 			and int(m100["def"]) >= 10 * int(base["def"]) and int(m100["exp"]) >= 30 * int(base["exp"])
@@ -135,7 +135,7 @@ func _scaling_tests() -> void:
 	check("mag/mdef schalen mee als de vijand ze heeft", int(wk50["mag"]) >= int(wk["mag"]) and int(wk50["mdef"]) > int(wk["mdef"])
 			and not S.monster_stats(base, 50).has("mag"))
 	# een held van niveau 1 kan hem op verdieping 1 nog neerleggen, op 100 niet in 1 slag
-	check("verdieping 1 voelt als de wereldkaart: Mosslijm-HP 10 blijft 10", int(f1["max_hp"]) == 10)
+	check("verdieping 1 voelt als de wereldkaart: Moss Slime-HP 10 blijft 10", int(f1["max_hp"]) == 10)
 
 
 func _boss_tests() -> void:
@@ -150,7 +150,7 @@ func _boss_tests() -> void:
 	check("alle 10 de bazen hebben een eigen naam", names.size() == 10)
 	check("boss_for_floor op een gewone verdieping = {}", S.boss_for_floor(1).is_empty() and S.boss_for_floor(95).is_empty()
 			and S.boss_for_floor(0).is_empty() and S.boss_for_floor(110).is_empty())
-	check("verdieping 100 = De Laatste Wachter (eindbaas)", S.boss_for_floor(100)["final"] and S.boss_for_floor(100)["name"] == "De Laatste Wachter")
+	check("verdieping 100 = The Last Warden (eindbaas)", S.boss_for_floor(100)["final"] and S.boss_for_floor(100)["name"] == "The Last Warden")
 	var bossier := true
 	var last: Dictionary = {}
 	var rising := true
@@ -170,13 +170,13 @@ func _boss_tests() -> void:
 	var b90 := S.boss_stats(GD.ENEMIES["kennis_beest"], 90)
 	check("eindbaas (100) sterker dan een baas met dezelfde formule zonder eindbaas-bonus",
 			int(b100["max_hp"]) > int(S.boss_stats(GD.ENEMIES["kennis_beest"], 99)["max_hp"]) * 1.25 and int(b100["atk"]) > int(b90["atk"]))
-	check("baas heeft de baasnaam, geen roze kern, geen boss-blok", b100["name"] == "De Laatste Wachter"
+	check("baas heeft de baasnaam, geen roze kern, geen boss-blok", b100["name"] == "The Last Warden"
 			and not b100.has("core") and not b100.has("boss") and int(b100["boss_floor"]) == 100)
 	var skill_names := []
 	for sk in b100["skills"]:
 		skill_names.append(sk["name"])
-	check("eindbaas heeft Laatste Oordeel; baas zonder skills krijgt Zware Slag",
-			"Laatste Oordeel" in skill_names and S.boss_stats(GD.ENEMIES["mosslijm"], 10)["skills"][0]["name"] == "Zware Slag")
+	check("eindbaas heeft Last Judgment; baas zonder skills krijgt Heavy Blow",
+			"Last Judgment" in skill_names and S.boss_stats(GD.ENEMIES["mosslijm"], 10)["skills"][0]["name"] == "Heavy Blow")
 	check("boss_stats gebruikt de bron-data niet als uitvoer (kennis_beest boss-blok blijft in game_data)",
 			GD.ENEMIES["kennis_beest"].has("boss") and GD.ENEMIES["kennis_beest"]["boss"].has("core"))
 	check("baas op verdieping 0: data ongewijzigd", S.boss_stats(GD.ENEMIES["kennis_beest"], 0) == GD.ENEMIES["kennis_beest"])
@@ -314,7 +314,7 @@ func _loot_tests() -> void:
 	var gold_back := S.grant_loot({"items": [{"item": "drankje", "n": 3}, {"item": "elixer", "n": 1}], "gold": 77}, inv)
 	check("grant_loot legt voorwerpen in de tas en geeft het goud terug", inv["drankje"] == 5 and inv["elixer"] == 1 and gold_back == 77)
 	var txt := S.loot_text({"items": [{"item": "drankje", "n": 2}, {"item": "d100_zwaard_2", "n": 1}], "gold": 120})
-	check("loot_text in het Nederlands: '%s'" % txt, txt == "2x Drankje, Archiefzwaard, 120 goud")
+	check("loot_text in het Nederlands: '%s'" % txt, txt == "2x Potion, Archive Sword, 120 gold")
 	var names_fit := true
 	for id in GD.ITEMS:
 		var pn: String = GD.ITEMS[id].get("short", GD.ITEMS[id]["name"])
@@ -328,7 +328,7 @@ func _loot_tests() -> void:
 			if (S.SPELL_SCROLLS as Array).has(sid):
 				scrolls[sid] = true
 				scroll_n += 1
-	check("gewone kisten kunnen Vuur-, Bliksem- en Geneesrol geven (%d rollen)" % scroll_n,
+	check("gewone kisten kunnen Fire-, Lightning- en Heal Scroll geven (%d rollen)" % scroll_n,
 			scrolls.has("spreuk_vuur") and scrolls.has("spreuk_bliksem") and scrolls.has("spreuk_genees") and scroll_n > 0)
 	var boss_clean := true
 	for f in S.boss_floors():
@@ -391,7 +391,7 @@ func _chest_tests() -> void:
 		var had := int(inv_before.get(it["item"], 0))
 		got_all = got_all and GameState.item_count(it["item"]) == had + int(it["n"])
 	check("kist openen: alle buit in de tas en goud erbij (+%d)" % int(fx.loot["gold"]), got_all and GameState.gold == expected_gold and fx.is_open())
-	check("melding noemt de buit (Nederlands)", Dialog.is_open and "vindt" in str(Dialog._lines[-1]) and "goud" in str(Dialog._lines[-1]))
+	check("melding noemt de buit (Nederlands)", Dialog.is_open and "finds" in str(Dialog._lines[-1]) and "gold" in str(Dialog._lines[-1]))
 	Dialog.close()
 	await get_tree().process_frame
 	var g_after := GameState.gold
@@ -459,7 +459,7 @@ func _battle_tests() -> void:
 	var b := _make_battle(["papiergeest", "mosslijm"], 0, false)
 	await get_tree().process_frame
 	var e0: Dictionary = b.enemies[0]["s"]
-	check("gevecht verdieping 0: Papiergeest HP/ATK/DEF/EXP/goud = game_data.gd", int(e0["max_hp"]) == 16 and int(e0["atk"]) == 9
+	check("gevecht verdieping 0: Paper Wraith HP/ATK/DEF/EXP/goud = game_data.gd", int(e0["max_hp"]) == 16 and int(e0["atk"]) == 9
 			and int(e0["def"]) == 3 and int(e0["exp"]) == 5 and int(e0["gold"]) == 4 and int(e0["hp"]) == 16)
 	_free_battle(b)
 	await get_tree().process_frame
@@ -491,8 +491,8 @@ func _battle_tests() -> void:
 	await get_tree().process_frame
 	var bs: Dictionary = b.enemies[0]["s"]
 	var bwant := S.boss_stats(GD.ENEMIES["sporenzwam"], 30)
-	check("baasgevecht verdieping 30: Sporenvorst met baasstats (HP %d, ATK %d), niet vluchten" % [bs["max_hp"], bs["atk"]],
-			bs["name"] == "Sporenvorst" and int(bs["max_hp"]) == int(bwant["max_hp"]) and int(bs["atk"]) == int(bwant["atk"])
+	check("baasgevecht verdieping 30: Spore Lord met baasstats (HP %d, ATK %d), niet vluchten" % [bs["max_hp"], bs["atk"]],
+			bs["name"] == "Spore Lord" and int(bs["max_hp"]) == int(bwant["max_hp"]) and int(bs["atk"]) == int(bwant["atk"])
 			and not b.can_flee and int(bs["max_hp"]) > 5 * int(S.monster_stats(GD.ENEMIES["sporenzwam"], 30)["max_hp"]))
 	var inv_before := GameState.inventory.duplicate()
 	var gold_before := GameState.gold
@@ -502,7 +502,7 @@ func _battle_tests() -> void:
 		if int(GameState.inventory[id]) > int(inv_before.get(id, 0)):
 			gained = true
 	check("baasbuit na de overwinning: voorwerpen + goud erbij, pagina 'Buit van de baas!' met gear", gained and GameState.gold > gold_before
-			and page.begins_with("Buit van de baas!") and page.contains("\n") and page.contains("goud"))
+			and page.begins_with("Boss loot!") and page.contains("\n") and page.contains("gold"))
 	check("baasvlag 'dungeon100_boss:30' gezet", S.boss_defeated(30, GameState.story_flags))
 	_free_battle(b)
 	await get_tree().process_frame
@@ -511,8 +511,8 @@ func _battle_tests() -> void:
 	b = _make_battle(["kennis_beest"], 100, true)
 	await get_tree().process_frame
 	var fs: Dictionary = b.enemies[0]["s"]
-	check("eindbaas verdieping 100: De Laatste Wachter, HP %d, geen kern, niet vluchten" % int(fs["max_hp"]),
-			fs["name"] == "De Laatste Wachter" and int(fs["max_hp"]) == int(S.boss_stats(GD.ENEMIES["kennis_beest"], 100)["max_hp"])
+	check("eindbaas verdieping 100: The Last Warden, HP %d, geen kern, niet vluchten" % int(fs["max_hp"]),
+			fs["name"] == "The Last Warden" and int(fs["max_hp"]) == int(S.boss_stats(GD.ENEMIES["kennis_beest"], 100)["max_hp"])
 			and not b.enemies[0].has("core") and not b.can_flee)
 	b._dungeon100_boss_loot()
 	var sets := 0

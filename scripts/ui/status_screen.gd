@@ -92,7 +92,7 @@ func _build() -> void:
 	grid.add_theme_constant_override("v_separation", 0)
 	pad.add_child(grid)
 	exp_label = _row(grid, "EXP")
-	next_label = _row(grid, "Volgend Lv")
+	next_label = _row(grid, "Next Lv")
 	# v0.14: stats in twee kolommen (ATK/DEF/SPD links, MAG/MDEF rechts)
 	var pad2 := MarginContainer.new()
 	pad2.add_theme_constant_override("margin_left", TEXT_INDENT)
@@ -115,12 +115,12 @@ func _build() -> void:
 	grid2.add_theme_constant_override("h_separation", 0)
 	grid2.add_theme_constant_override("v_separation", 0)
 	pad3.add_child(grid2)
-	weapon_label = _row(grid2, "Wapen")
-	spells_label = _row(grid2, "Spreuken")
+	weapon_label = _row(grid2, "Weapon")
+	spells_label = _row(grid2, "Spells")
 	spells_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	spells_label.custom_minimum_size = Vector2(CARD_W - KEY_W, 0)
 	# v0.15: kernfragmenten (alleen zichtbaar bij de hoofdheld als hij er een heeft)
-	kern_label = _row(grid2, "Kernen")
+	kern_label = _row(grid2, "Cores")
 	kern_key = grid2.get_child(grid2.get_child_count() - 2)
 	kern_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	kern_label.custom_minimum_size = Vector2(CARD_W - KEY_W, 0)
@@ -128,7 +128,7 @@ func _build() -> void:
 	prev_button.visible = multi
 	next_button.visible = multi
 	page_label.visible = multi
-	set_hint("<  >: andere held   B: terug" if multi else DEFAULT_HINT.replace("A: kiezen   ", ""))
+	set_hint("<  >: other hero   B: back" if multi else DEFAULT_HINT.replace("A: kiezen   ", ""))
 	back_button.grab_focus()
 	show_member(index)
 
@@ -181,7 +181,7 @@ func show_member(i: int) -> void:
 	class_label.text = str(h.get("class", ""))
 	HeroPortrait.show_portrait(portrait_view, h)
 	exp_label.text = str(int(h["exp"]))
-	next_label.text = "nog %d EXP" % PartyActions.exp_to_next(h)
+	next_label.text = "%d EXP to go" % PartyActions.exp_to_next(h)
 	atk_label.text = stat_text(h, "atk")
 	def_label.text = stat_text(h, "def")
 	agi_label.text = stat_text(h, "agi")
@@ -192,7 +192,7 @@ func show_member(i: int) -> void:
 	for sid in h.get("spells", []):
 		var sp := PartyActions.spell_data(str(sid))
 		names.append("%s (%d MP)" % [str(sp.get("name", sid)), int(sp.get("mp", 0))])
-	spells_label.text = "\n".join(names) if not names.is_empty() else "geen"
+	spells_label.text = "\n".join(names) if not names.is_empty() else "none"
 	kern_label.text = kern_text(h)
 	kern_label.visible = kern_label.text != ""
 	kern_key.visible = kern_label.visible

@@ -10,9 +10,9 @@ const TargetList := preload("res://scripts/ui/target_list.gd")
 
 const LIST_W := 132
 const NAME_COLS := 9
-const HINT_LIST := "A: gebruiken   <  >: andere held   B: terug"
-const HINT_LIST_SOLO := "A: gebruiken   B: terug"
-const HINT_TARGET := "Op wie?   A: gebruiken   B: andere keuze"
+const HINT_LIST := "A: use   <  >: other hero   B: back"
+const HINT_LIST_SOLO := "A: use   B: back"
+const HINT_TARGET := "On whom?   A: use   B: other choice"
 
 var caster_index := 0
 var prev_button: Button
@@ -29,7 +29,7 @@ var targeting := false
 
 
 func _build() -> void:
-	header.text = "Magie"
+	header.text = "Magic"
 	prev_button = arrow_button("<")
 	prev_button.pressed.connect(switch.bind(-1))
 	caster_label = UiMenu.label("", MenuColors.TEXT)
@@ -100,8 +100,8 @@ func show_caster(i: int, keep_id := "") -> void:
 	if entries.is_empty():
 		selected_id = ""
 		var anyone := GameState.party.any(func(h): return not h.get("spells", []).is_empty())
-		name_label.text = "%s kent geen magie." % c["name"]
-		desc_label.text = "" if anyone else "Niemand in de groep kent nog magie."
+		name_label.text = "%s knows no magic." % c["name"]
+		desc_label.text = "" if anyone else "Nobody in the party knows magic yet."
 		back_button.grab_focus()
 		return
 	var k := maxi(0, spell_ids.find(keep_id))
@@ -141,7 +141,7 @@ func choose_spell(id: String) -> void:
 	targeting = true
 	quiet()
 	desc_label.visible = false
-	name_label.text = "%s - op wie?" % str(PartyActions.spell_data(id).get("name", id))
+	name_label.text = "%s - on whom?" % str(PartyActions.spell_data(id).get("name", id))
 	targets.build(GameState.party)
 	targets.visible = true
 	for b in entries:

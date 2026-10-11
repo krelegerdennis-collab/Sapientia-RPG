@@ -13,8 +13,8 @@ const DungeonRoomsTheme := preload("res://scripts/data/dungeon_rooms.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
-const EMPTY_LINES := ["De kist is leeg."]
-const MIMIC_LINES := ["{naam} tilt de deksel op...", "De kist bijt terug! Het is een Mimic!"]
+const EMPTY_LINES := ["The chest is empty."]
+const MIMIC_LINES := ["{naam} lifts the lid...", "The chest bites back! It's a Mimic!"]
 ## Het Gesimuleerde Archief: een Mimic-kist is wakker geworden (de kamer start het gevecht).
 signal mimic_woke(chest: DungeonChest)
 ## Een Blauwe Kist is geopend en de databank is veiliggesteld (de kamer slaat dan automatisch op).
@@ -122,13 +122,13 @@ func wake_mimic() -> void:
 func open_after_mimic() -> void:
 	if is_open():
 		return
-	_give_loot(["De Mimic is verslagen!"])
+	_give_loot(["The Mimic is defeated!"])
 
 
 func open_chest() -> void:
 	if is_open():
 		return
-	_give_loot(["{naam} opent de kist..."])
+	_give_loot(["{naam} opens the chest..."])
 
 
 func _give_loot(intro: Array) -> void:
@@ -143,10 +143,10 @@ func _give_loot(intro: Array) -> void:
 		if kind == Blue.KIND_BLUE:
 			_secure_blue()
 			last_result = "blauw"
-			lines.append("Een Blauwe Kist! Een databank van de Oude Mensheid.")
-			lines.append("{naam} vindt: %s! Dit blijft bewaard, ook als je het Archief uit wordt gezet." % Dungeon100Scaling.loot_text(loot))
+			lines.append("A Blue Chest! A databank of the Old Humanity.")
+			lines.append("{naam} finds: %s! This stays, even if you are thrown out of the Archive." % Dungeon100Scaling.loot_text(loot))
 		else:
-			lines.append("{naam} vindt: %s!" % Dungeon100Scaling.loot_text(loot))
+			lines.append("{naam} finds: %s!" % Dungeon100Scaling.loot_text(loot))
 		Dialog.show_lines(lines)
 		if kind == Blue.KIND_BLUE:
 			await Dialog.finished
@@ -157,7 +157,7 @@ func _give_loot(intro: Array) -> void:
 	last_result = "gekregen"
 	var nm := item_name(item)
 	var lines2 := intro.duplicate()
-	lines2.append("{naam} vindt: %s!" % (nm if count == 1 else "%dx %s" % [count, nm]))
+	lines2.append("{naam} finds: %s!" % (nm if count == 1 else "%dx %s" % [count, nm]))
 	Dialog.show_lines(lines2)
 
 

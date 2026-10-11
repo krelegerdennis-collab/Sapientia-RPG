@@ -52,7 +52,7 @@ const RUN_FLAG_PREFIXES := ["kist:d100_", "bewaker:dungeon100_", "dungeon100_bos
 const GOLD_KEEP_RUN_LOST := 1.0
 const GOLD_KEEP_GAME_OVER := 0.5
 
-const HUD_FORMAT := "Verdieping %d/%d"
+const HUD_FORMAT := "Floor %d/%d"
 
 
 ## Geldige verdieping van de kerker (1..100)?

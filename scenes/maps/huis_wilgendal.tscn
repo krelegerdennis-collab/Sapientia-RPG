@@ -14,7 +14,7 @@
 
 [node name="Huis" type="Node2D"]
 script = ExtResource("1_n5ctt")
-map_name = "Het huis"
+map_name = "The House"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]
@@ -58,7 +58,7 @@ type = "save"
 
 [node name="OudeMan" parent="Objects" instance=ExtResource("4_743jt")]
 position = Vector2(152, 56)
-npc_name = "Oude Man"
+npc_name = "Old Man"
 lines = Array[String](["..."])
 facing = Vector2i(0, 1)
 event = ""

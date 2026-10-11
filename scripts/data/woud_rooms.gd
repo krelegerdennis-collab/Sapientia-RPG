@@ -30,7 +30,7 @@ const WOUD_LEGEND := {"P": 85, "j": 86, "J": 103, "D": 107, "C": 102, "i": 111, 
 const ROOMS := {
 	# 1 WOUDRAND (20x12): ingang vanaf de wereldkaart
 	"woud_rand": {
-		"name": "Donker Woud - Woudrand", "floor": 1, "tier": 3, "theme": THEME, "legend": WOUD_LEGEND,
+		"name": "Dark Wood - Wood's Edge", "floor": 1, "tier": 3, "theme": THEME, "legend": WOUD_LEGEND,
 		"layout": [
 			"a------------------b",
 			"<LFFMFFFFFAFFFGFFFR>",
@@ -63,7 +63,7 @@ const ROOMS := {
 	},
 	# 2 WORTELPAD (32x12, scrolt horizontaal)
 	"woud_pad": {
-		"name": "Donker Woud - Wortelpad", "floor": 1, "tier": 3, "theme": THEME, "legend": WOUD_LEGEND,
+		"name": "Dark Wood - Root Path", "floor": 1, "tier": 3, "theme": THEME, "legend": WOUD_LEGEND,
 		"layout": [
 			"a------------------------------b",
 			"<LFFFFFFMFFFFFKFFFFFFFGFFFFFFAR>",
@@ -98,7 +98,7 @@ const ROOMS := {
 	},
 	# 3 MISTPOEL (20x16, scrolt verticaal): donkere poel in het midden
 	"woud_mistpoel": {
-		"name": "Donker Woud - Mistpoel", "floor": 2, "tier": 4, "theme": THEME, "legend": WOUD_LEGEND,
+		"name": "Dark Wood - Mist Pool", "floor": 2, "tier": 4, "theme": THEME, "legend": WOUD_LEGEND,
 				"layout": [
 			"a------------------b",
 			"<LFFFFFFFFAMFFFKFFR>",
@@ -123,7 +123,7 @@ const ROOMS := {
 			"n": {"map": M + "woud_sporenkring.tscn", "spawn": "zuid"},
 		},
 		"chests": [{"id": "kist_w3", "tile": [17, 13], "item": "ijzeren_helm", "n": 1}],
-		"signs": [{"tile": [7, 6], "lines": ["Het water is zwart en stil. In de mist hangt een zacht gezoem,", "alsof het bos zelf ademhaalt... in nullen en enen."]}],
+		"signs": [{"tile": [7, 6], "lines": ["The water is black and still. A soft hum hangs in the mist,", "as if the woods themselves are breathing... in zeros and ones."]}],
 		"trees": [[2, 8, "A"], [15, 11, "B"]],
 		"mist": [[4, 7, 8], [2, 11, 7], [10, 13, 6], [11, 4, 5]],
 		"overlay": [[16, 6, 84], [6, 9, 108], [12, 12, 108], [3, 5, 108]],
@@ -136,7 +136,7 @@ const ROOMS := {
 	},
 	# 4 SPORENKRING (20x12): opslagstronk vlak voor de baas, een bewaker voor de doorgang
 	"woud_sporenkring": {
-		"name": "Donker Woud - Sporenkring", "floor": 2, "tier": 4, "theme": THEME, "legend": WOUD_LEGEND,
+		"name": "Dark Wood - Spore Ring", "floor": 2, "tier": 4, "theme": THEME, "legend": WOUD_LEGEND,
 		"layout": [
 			"a------------------b",
 			"<LFFGFFMFFAFFFFFFFR>",
@@ -158,7 +158,7 @@ const ROOMS := {
 			"n": {"map": M + "woud_open_plek.tscn", "spawn": "zuid"},
 		},
 		"chests": [{"id": "kist_w5", "tile": [17, 4], "item": "leeg_boek", "n": 1}],   # v0.17 Codex
-		"signs": [{"tile": [15, 4], "lines": ["Tussen de stammen fluistert iets. 'Noor...' Het klinkt als haar eigen stem."]}],
+		"signs": [{"tile": [15, 4], "lines": ["Something whispers between the trunks. 'Noor...' It sounds like her own voice."]}],
 		"trees": [[13, 8, "A"], [5, 7, "B"]],
 		"mist": [[7, 9, 6]],
 		"overlay": [[8, 4, 108], [16, 6, 108], [3, 9, 108], [11, 6, 108], [15, 3, 84]],
@@ -170,7 +170,7 @@ const ROOMS := {
 	},
 	# 5 OPEN PLEK (20x12): de Wortelkoning op de wortelheuvel; Noor hangt in een cocon tussen de stammen
 	"woud_open_plek": {
-		"name": "Donker Woud - Open plek", "floor": 3, "tier": 4, "theme": THEME, "legend": WOUD_LEGEND,
+		"name": "Dark Wood - Clearing", "floor": 3, "tier": 4, "theme": THEME, "legend": WOUD_LEGEND,
 		"layout": [
 			"a------------------b",
 			"<LFKMFFFFFFFFFGFFFR>",

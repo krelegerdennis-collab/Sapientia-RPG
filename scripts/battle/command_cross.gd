@@ -25,7 +25,7 @@ signal denied(index: int)          # A/tik op een uitgeschakeld commando
 
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const IDS := ["aanval", "magie", "item", "verdedig", "vluchten", "codex"]
-const NAMES := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten", "Codex"]
+const NAMES := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 const CODEX := 5
 ## Plek van elke knop in het kruis (in knoppen; midden = 0,0)
 const CELLS := [Vector2i(0, 0), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]

@@ -20,8 +20,8 @@ const MINI_BOX := Vector2(44, 44)      # vak voor het kleine plaatje (loopframe 
 const HERO_W := 110                    # breedte van één held in de groepsrij
 const ASK_W := 120                     # breedte van het vraagvak
 const BUTTON_W := 64
-const Q_OVERWRITE := "Overschrijven?"
-const Q_NEW := "Hier opslaan?"
+const Q_OVERWRITE := "Overwrite?"
+const Q_NEW := "Save here?"
 
 ## Naam van de plek (field_menu.gd zet dit: map_name van de huidige map).
 var place := ""
@@ -38,7 +38,7 @@ var _answered := false
 
 
 func _build() -> void:
-	header.text = "Opslaan"
+	header.text = "Save"
 	overwrite = GameState.has_save()
 	var party_panel := PanelContainer.new()
 	party_panel.add_theme_stylebox_override("panel", UiMenu.inner_style())
@@ -76,10 +76,10 @@ func _build() -> void:
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 12)
 	tg.add_child(grid)
-	grid.add_child(UiMenu.label("Tijd", MenuColors.TEXT_DIM))
+	grid.add_child(UiMenu.label("Time", MenuColors.TEXT_DIM))
 	time_label = UiMenu.label(UiMenu.format_time(GameState.play_time()))
 	grid.add_child(time_label)
-	grid.add_child(UiMenu.label("Goud", MenuColors.TEXT_DIM))
+	grid.add_child(UiMenu.label("Gold", MenuColors.TEXT_DIM))
 	gold_label = UiMenu.label(str(GameState.gold))
 	grid.add_child(gold_label)
 	var ask := PanelContainer.new()
@@ -91,16 +91,16 @@ func _build() -> void:
 	ask.add_child(acol)
 	question_label = UiMenu.label(Q_OVERWRITE if overwrite else Q_NEW)
 	acol.add_child(question_label)
-	yes_button = UiMenu.button("Ja")
+	yes_button = UiMenu.button("Yes")
 	yes_button.custom_minimum_size = Vector2(BUTTON_W, ROW_H)
 	yes_button.pressed.connect(answer.bind(true))
 	acol.add_child(yes_button)
-	no_button = UiMenu.button("Nee")
+	no_button = UiMenu.button("No")
 	no_button.custom_minimum_size = Vector2(BUTTON_W, ROW_H)
 	no_button.pressed.connect(answer.bind(false))
 	acol.add_child(no_button)
 	TargetList.link_ring([yes_button, no_button])
-	set_hint("A: kiezen   B: terug")
+	set_hint("A: choose   B: back")
 	yes_button.grab_focus()
 
 
@@ -139,7 +139,7 @@ func _slot_summary() -> String:
 		var lv = p[0].get("level", 1)
 		who = "%s Lv %d, " % [str(p[0].get("name", "")), int(lv) if (lv is int or lv is float) else 1]
 	var t = d.get("play_time", 0.0)
-	return "In het slot: %sTijd %s" % [who, UiMenu.format_time(float(t) if (t is int or t is float) else 0.0)]
+	return "In this slot: %sTime %s" % [who, UiMenu.format_time(float(t) if (t is int or t is float) else 0.0)]
 
 
 func answer(yes: bool) -> void:

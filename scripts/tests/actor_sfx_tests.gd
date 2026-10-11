@@ -125,7 +125,7 @@ func _sleutels() -> void:
 	var vijand := {"is_hero": false, "id": "glitchmot", "s": {}}
 	var bondgenoot := {"is_hero": true, "ally": true, "s": {"species": "papiergeest"}}
 	check("held-combatant is Noor", ActorSfx.soort_en_id(held) == PackedStringArray(["held", "noor"]))
-	check("vijand-combatant is Glitchmot", ActorSfx.soort_en_id(vijand) == PackedStringArray(["monster", "glitchmot"]))
+	check("vijand-combatant is Glitch Moth", ActorSfx.soort_en_id(vijand) == PackedStringArray(["monster", "glitchmot"]))
 	check("bondgenoot gebruikt de monsterstem", ActorSfx.soort_en_id(bondgenoot) == PackedStringArray(["monster", "papiergeest"]))
 	check("afspelen van Noor lukt", ActorSfx.play(held, "aanval"))
 	check("onbekende vijand blijft stil", not ActorSfx.play({"is_hero": false, "id": "geen_monster", "s": {}}, "aanval"))
