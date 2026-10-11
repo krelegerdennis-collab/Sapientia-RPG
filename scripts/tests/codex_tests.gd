@@ -966,9 +966,11 @@ func _beta_account_tests() -> void:
 			hero["name"] == "Dennis" and int(hero["level"]) == 10 and str(equip.get("wapen", "")) == "vonkzwaard"
 			and str(equip.get("schild", "")) == "houten_schild" and str(equip.get("helm", "")) == "leren_kap"
 			and str(equip.get("harnas", "")) == "leerling_mantel")
-	check("betatest: 6 Lege Boeken, buddy Mosslijm en een tweede pagina",
-			GameState.item_count("leeg_boek") == 6 and GameState.codex_pages.size() == 2
-			and str(GameState.codex_active_page().get("species", "")) == "mosslijm")
+	check("betatest: 6 Lege Boeken, Inktwurm als buddy, Mosslijm en Moskonijn erbij",
+			GameState.item_count("leeg_boek") == 6 and GameState.codex_pages.size() == 3
+			and str(GameState.codex_active_page().get("species", "")) == "inktwurm"
+			and GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "mosslijm")
+			and GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "moskonijn"))
 	check("betatest: proloog klaar, woud open, Golem nog niet verslagen, Noor nog niet in de groep",
 			GameState.story_step == SD.KLAAR and GameState.story_flags.has("quest_noor")
 			and GameState.story_flags.has("marit_boeken") and not GameState.story_flags.has(SD.GOLEM_FLAG)
