@@ -420,7 +420,7 @@ func _data_tests() -> void:
 	var wk: Dictionary = GD.ENEMIES["wortelkoning"]
 	check("Woud-vijanden: voor + rug, zwak voor vuur, map-plaatje (%s)" % [art_bad], art_bad.is_empty())
 	check("Wortelkoning: canon-zin in het bestiarium", str(wk["desc"]) == "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat.")
-	check("The Root King: baas-blok, idle 4x 0,4 s + raak-plaatje, geen kern", wk.has("boss") and int(wk["idle_frames"]) == 4)
+	check("The Root King: baas-blok, idle 4x 0,4 s + raak-plaatje, geen kern", wk.has("boss") and int(wk["idle_frames"]) == 4
 			and is_equal_approx(float(wk["idle_time"]), 0.4) and ResourceLoader.exists(wk["idle"]) and ResourceLoader.exists(wk["hit"])
 			and not wk["boss"].has("core"))
 	check("bestiarium 007-010 = de Woud-vijanden", GD.bestiary_ids().slice(6, 10) == ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning"])
