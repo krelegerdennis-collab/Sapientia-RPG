@@ -87,7 +87,7 @@ static func item_list_name(id: String, cols: int) -> String:
 	return n.left(cols)
 
 
-## Kan dit item hier (buiten een gevecht) gebruikt worden? Alleen genees-items op een held.
+## Kan dit item hier (buiten een gevecht) gebruikt worden? Genees-items en spreukrollen, op een held.
 ## Een item kan dit uitzetten met "field": false in game_data.gd.
 static func item_usable_in_field(id: String) -> bool:
 	var it := item_data(id)
@@ -95,6 +95,8 @@ static func item_usable_in_field(id: String) -> bool:
 		return GameState.dungeon100_can_warp()
 	if it.is_empty() or not bool(it.get("field", true)):
 		return false
+	if _teach_id(it) != "":
+		return str(it.get("target", "")) == "ally"
 	return str(it.get("target", "")) == "ally" and (int(it.get("heal_hp", 0)) > 0 or int(it.get("heal_mp", 0)) > 0)
 
 
@@ -110,6 +112,9 @@ static func item_effect_text(id: String) -> String:
 		parts.append("%d MP" % int(it["heal_mp"]))
 	if bool(it.get("equip", false)):
 		return "%s: %s." % [Equipment.slot_name(str(it.get("slot", ""))), Equipment.bonus_text(id)]
+	var spell_id := _teach_id(it)
+	if spell_id != "":
+		return "Leert de spreuk %s." % str(spell_data(spell_id).get("name", spell_id))
 	return ("Herstelt %s." % " en ".join(parts)) if not parts.is_empty() else ""
 
 
@@ -160,6 +165,14 @@ static func use_item(inventory: Dictionary, id: String, hero: Dictionary) -> Dic
 	if int(hero["hp"]) <= 0:
 		return {"ok": false, "hp": 0, "mp": 0, "text": MSG_KO % hero["name"]}
 	var it := item_data(id)
+	var spell_id := _teach_id(it)
+	if spell_id != "":
+		if not teach_spell(hero, spell_id):
+			return {"ok": false, "hp": 0, "mp": 0, "text": MSG_NO_EFFECT}
+		inventory[id] = int(inventory[id]) - 1
+		if int(inventory[id]) <= 0:
+			inventory.erase(id)
+		return {"ok": true, "hp": 0, "mp": 0, "text": "%s leert %s!" % [hero["name"], spell_data(spell_id)["name"]]}
 	var hp := int(it.get("heal_hp", 0))
 	var mp := int(it.get("heal_mp", 0))
 	if not _would_help(hero, hp, mp):
@@ -169,6 +182,31 @@ static func use_item(inventory: Dictionary, id: String, hero: Dictionary) -> Dic
 	if int(inventory[id]) <= 0:
 		inventory.erase(id)
 	return {"ok": true, "hp": gained.x, "mp": gained.y, "text": _heal_text(hero, gained)}
+
+
+# ---------------------------------------------------------------- spreukrollen
+## Spreuk-id van een rol ("teach" in game_data.gd), of "" als dit geen rol is of de spreuk niet bestaat.
+static func _teach_id(it: Dictionary) -> String:
+	var spell_id := str(it.get("teach", ""))
+	return spell_id if spell_id != "" and GameData.SPELLS.has(spell_id) else ""
+
+
+## Leert 'spell_id' aan een levende held die hem nog niet kent. Kent hij hem al, dan verandert er niets
+## (false). Heeft hij te weinig max MP voor de spreuk, dan gaat zijn MP-voorraad omhoog tot de kosten
+## (nooit omlaag) en vult zijn huidige MP tot dat nieuwe maximum.
+static func teach_spell(hero: Dictionary, spell_id: String) -> bool:
+	if spell_data(spell_id).is_empty():
+		return false
+	if not (hero.get("spells") is Array):
+		hero["spells"] = []
+	if (hero["spells"] as Array).has(spell_id):
+		return false
+	(hero["spells"] as Array).append(spell_id)
+	var cost := int(spell_data(spell_id)["mp"])
+	if int(hero.get("max_mp", 0)) < cost:
+		hero["max_mp"] = cost
+		hero["mp"] = maxi(int(hero.get("mp", 0)), cost)
+	return true
 
 
 # ---------------------------------------------------------------- spreuken

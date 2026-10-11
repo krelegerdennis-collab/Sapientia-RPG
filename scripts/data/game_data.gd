@@ -372,6 +372,14 @@ const ITEMS := {
 	"leeg_boek":  {"name": "Leeg Boek", "target": "enemy", "capture": true, "field": false,
 		"heal_hp": 0, "heal_mp": 0, "price": 60, "icon": "res://assets/ui/icons/leeg_boek.png",
 		"desc": "Een boek zonder woorden. Schrijf er een verzwakt monster in."},
+	# Spreukrollen: alleen als buit in gewone kisten van de 100-verdiepingen-grot (dungeon100_scaling.gd).
+	# De party gaat die grot in zonder spreuken; een rol leert één held de spreuk (party_actions.gd).
+	"spreuk_vuur": {"name": "Vuurrol", "target": "ally", "teach": "vuur", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met de spreuk Vuur. Iemand in de party kan hem leren."},
+	"spreuk_bliksem": {"name": "Bliksemrol", "target": "ally", "teach": "bliksem", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met de spreuk Bliksem. Iemand in de party kan hem leren."},
+	"spreuk_genees": {"name": "Geneesrol", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met de spreuk Genees. Iemand in de party kan hem leren."},
 }
 ## v0.11: sleutel-voorwerpen (niet te gebruiken in een gevecht; tellen wel in de inventaris)
 const KEY_ITEMS := {

@@ -32,6 +32,7 @@ signal state_changed(new_state: String)
 signal damage_shown(target_name: String, amount: int)
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const PartyActions := preload("res://scripts/party_actions.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
@@ -1152,8 +1153,23 @@ func _execute(a: Dictionary) -> void:
 				show_message("Geen %s meer!" % GameData.ITEMS[id]["name"])
 				await _wait(MESSAGE_TIME)
 				return
-			GameState.inventory[id] -= 1
 			var it: Dictionary = GameData.ITEMS[id]
+			if str(it.get("teach", "")) != "":
+				var ally := _valid_ally(a["target"])
+				var spell_id := str(it["teach"])
+				if ally.is_empty() or not PartyActions.teach_spell(ally["s"], spell_id):
+					show_message(PartyActions.MSG_NO_EFFECT)
+					await _wait(MESSAGE_TIME)
+					return
+				GameState.inventory[id] -= 1
+				show_message("%s gebruikt %s!" % [actor["name"], it["name"]])
+				await _hero_wind_up(actor, false)
+				show_message("%s leert %s!" % [ally["name"], GameData.SPELLS[spell_id]["name"]])
+				_refresh_party()
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
+			GameState.inventory[id] -= 1
 			show_message("%s gebruikt %s!" % [actor["name"], it["name"]])
 			await _hero_wind_up(actor, false)
 			if it.get("capture", false):
