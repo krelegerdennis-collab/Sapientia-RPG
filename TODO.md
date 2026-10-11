@@ -290,6 +290,39 @@ Open laten:
 
 ## Dorpen & Shops
 
+### Wilgendal – dorp met winkelpanden
+Wilgendal blijft een dorp (geen stad), maar krijgt nette winkelpanden.
+
+Huidige situatie:
+- [ ] Shopkeepers lopen nu los in het dorp (placeholder)
+- [ ] Ze hebben nog geen vaste winkel-locatie
+
+Doel: winkels met vaste locaties:
+- [ ] Eigen winkelpand per shopkeeper: armour, wapen, accessoire, magic
+- [ ] Shopkeepers verplaatsen van het dorp naar hun eigen winkel
+- [ ] NPC staat achter de toonbank in de winkel
+- [ ] Niet meer rondlopend in het dorp
+- [ ] Speler moet de winkel binnengaan om te handelen
+- [ ] Winkelinterieurs, per winkel eigen uitstraling (armour stoer, magic mystiek, wapen ambachtelijk, accessoire sierlijk)
+- [ ] Toonbank, shopkeeper en item-display
+- [ ] Deur naar buiten, terug naar het dorp
+- [ ] Klein maar sfeervol (dorpsschaal, niet stadsschaal)
+- [ ] Wilgendal: klein knus dorpsplein
+- [ ] Paden tussen de winkelpanden
+- [ ] Een paar woonhuizen als decor
+- [ ] Sfeer-NPC's die rondlopen (geen shopkeepers)
+- [ ] Dorpsgevoel behouden (geen stadse drukte)
+
+TODO(design), open laten:
+- [ ] TODO(design): hoeveel sfeer-NPC's lopen rond in Wilgendal?
+- [ ] TODO(design): openingstijden winkels of altijd open?
+- [ ] TODO(design): uithangborden, icoon of tekst?
+- [ ] TODO(design): aantal woonhuizen als decor?
+
+Scheiding:
+- [ ] Wilgendal blijft op Worldmap 1 (start-eiland)
+- [ ] Codex Bibliotheek ligt ten zuiden van Wilgendal
+
 ### Gerrit de Molenaar
 
 **CANON – niet wijzigen zonder overleg.**
