@@ -272,7 +272,7 @@ func _strip_and_scroll_tests() -> void:
 			and str(run_fuse.get("element", "")) == fuse_element
 			and int(run_fuse.get("fusion", {}).get("generation", 0)) == fuse_gen
 			and (run_fuse.get("skills", []) as Array) == CD.skills_at(str(run_fuse.get("species", "")), 1))
-	var dennis := GameState.party[0]
+	var dennis: Dictionary = GameState.party[0]
 	var inv := {"spreuk_vuur": 1}
 	var taught := PA.use_item(inv, "spreuk_vuur", dennis)
 	check("Vuurrol leert Dennis Vuur, vult zijn MP en is op", taught["ok"] and (dennis["spells"] as Array).has("vuur")
@@ -292,7 +292,7 @@ func _strip_and_scroll_tests() -> void:
 	var ko := PA.use_item(bliksem, "spreuk_bliksem", dennis)
 	check("een bewusteloze held leert niets", not ko["ok"] and int(bliksem["spreuk_bliksem"]) == 1)
 	dennis["hp"] = int(dennis["max_hp"])
-	var noor := GameState.party[1]
+	var noor: Dictionary = GameState.party[1]
 	var noor_rol := {"spreuk_bliksem": 1}
 	var noor_learn := PA.use_item(noor_rol, "spreuk_bliksem", noor)
 	check("Noor kan tijdens de run Bliksem opnieuw leren", noor_learn["ok"] and (noor["spells"] as Array) == ["bliksem"]
