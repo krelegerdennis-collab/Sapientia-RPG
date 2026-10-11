@@ -1387,6 +1387,11 @@ func _title_v13_checks(t: Node) -> void:
 			ok = ok and cfg.get_value(opt, "package/name", "") == "SAPIENTIA" \
 					and cfg.get_value(opt, "package/unique_name", "") == "com.dennis.rpgprototype"
 		check("Android-label SAPIENTIA, pakket blijft com.dennis.rpgprototype (update over de oude APK)", ok and android >= 1)
+		var web_vk := false
+		for sec in cfg.get_sections():
+			if str(cfg.get_value(sec, "platform", "")) == "Web":
+				web_vk = bool(cfg.get_value(str(sec) + ".options", "html/experimental_virtual_keyboard", false))
+		check("web: schermtoetsenbord aan, zodat de naam op de telefoon te wijzigen is", web_vk)
 	# v0.13: alle titel-art staat in een vaste stage van 384x216 midden in beeld (ook op een
 	# breder/hoger scherm, zoals headless); het menu staat rechtsonder IN die stage.
 	var st: Rect2 = t.stage.get_global_rect()
@@ -1461,8 +1466,9 @@ func _title_and_name_tests() -> void:
 	await frames(10)
 	var n := scene()
 	check("'Hoe heet je?' voorgevuld met 'Dennis'", n.edit.text == "Dennis" and n.chosen_name() == "Dennis")
-	check("LineEdit: schermtoetsenbord aan, max. 10 tekens, focus",
-			n.edit.virtual_keyboard_enabled and n.edit.max_length == 10 and n.edit.has_focus())
+	check("LineEdit: te wijzigen, schermtoetsenbord aan, max. 10 tekens, focus",
+			n.edit.editable and n.edit.virtual_keyboard_enabled and n.edit.select_all_on_focus
+			and n.edit.max_length == 10 and n.edit.has_focus())
 	check("lege naam -> 'Dennis', te lang -> 10 tekens",
 			GameState.clean_name("   ") == "Dennis" and GameState.clean_name("Abcdefghijklmn") == "Abcdefghij")
 	n.edit.text = ""
