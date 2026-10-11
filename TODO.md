@@ -26,7 +26,24 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
   Eilandthema: industrieel, rokend, metaal, machines (contrast met het groene eiland 1).
 
   - [ ] Archief 3 Industrie: fabriek, tandwielen, stoom, glitches in machines. Baas: De Architect (bouwt en sloopt).
-  - [ ] Archief 4 Magie: zwevende torens, arcane cirkels, paars licht. Baas: De Spiegel (confronteert Dennis met zijn verleden). De H-6-onthulling vindt hier plaats.
+  - [ ] Archief 4 Magie: zwevende torens, arcane cirkels, paars licht. Baas: De Spiegel.
+
+    **CANON – niet wijzigen zonder overleg.**
+
+    Setting: De Spiegel, een kamer vol spiegelende oppervlakken. De baas vecht niet met geweld maar met waarheid.
+
+    - Dennis is Proefpersoon H-6.
+    - Hij is niet geboren maar gemaakt.
+    - De Hanger is van hem, en hij is ook van de Hanger.
+    - Sapientia wil hem terug, niet verslaan.
+
+    Dennis' reactie: eerst stilte, dan vragen, dan de weigering, letterlijk: "Ik ben Dennis. En dat is genoeg." De Spiegel breekt door die weigering, niet door kracht.
+
+    Laatste woorden van De Spiegel, letterlijk: "Je bent sterker dan de vorige vijf. Misschien... ben jij de eerste die het haalt."
+
+    Dat verwijst naar H-1 tot en met H-5 en laat ruimte voor latere onthullingen.
+
+    Na-scène: de kern van Archief 4 is opgenomen. Dennis zwijgt. Noor en Lotte zeggen niets. Pas in de World Warper praat hij er weer over.
   - [ ] Dorp Stoomwijk (mijnwerkersdorp)
   - [ ] Dorp Hoge Toren (magisch, oud, geheimzinnig)
 - [ ] Worldmap 3 = derde eiland
@@ -91,7 +108,8 @@ Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en qui
 - [ ] Act 1 = Worldmap 1 (start-eiland, Eerste Archief en Leven)
 - [ ] Act 2 en verder = Worldmap 2 (Industrie en Magie)
 - [ ] Act 3 en verder = Worldmap 3 (Kosmos en Hart)
-- [ ] Onthulling Proefpersoon H-6 (Dennis) koppelen aan Archief 4 (Magie) op Worldmap 2
+- [ ] Onthulling Proefpersoon H-6 (Dennis) in Archief 4 (De Spiegel) op Worldmap 2
+  De onthulling staat hierboven als canon. De checkbox blijft open tot de scène in het spel staat.
 
 ### Archief 2 — Het Levende Archief
 
@@ -242,7 +260,18 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 - [ ] De Wurger (Archief 2, verdieping 3): "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden."
 - [ ] De Genezer (Archief 2, eindbaas): "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg."
 
-Diepe Grot-bazen: `TODO(verhaal)` — wachten op Grot-lore canon. Geen lore verzinnen voor die tien bazen.
+**CANON – niet wijzigen zonder overleg.**
+
+De Diepe Grot is een simulatie van Sapientia. Doel: menselijke doorzettingskracht meten. Wie 100 verdiepingen haalt is een "kandidaat". Dennis en de party zijn niet de eersten en niet de laatsten. Dat verklaart de start op level 1, zonder uitrusting en zonder echt verhaal.
+
+- Verdieping 25: De Schaduw van H-6, duistere echo van Dennis.
+- Verdieping 50: De Cyclus, draaiende machine, organisch en staal.
+- Verdieping 75: De Rechter, een oog met armen.
+- Verdieping 99: De Stem, geen lichaam, Sapientia zelf.
+- Verdieping 100: geen baas. Het Warp-kristal. Een keuze-moment. De keuze-opties zijn niet gegeven.
+
+- [ ] Diepe Grot-bazen bouwen
+  De code kan nog de oude eindbaas-namen hebben.
 
 ## Dorpen & Shops
 
@@ -251,9 +280,14 @@ Diepe Grot-bazen: `TODO(verhaal)` — wachten op Grot-lore canon. Geen lore verz
 **CANON – niet wijzigen zonder overleg.**
 
 - [ ] Gerrits quest
-  `TODO(verhaal)` — dialoog en details nog uitwerken. De quest-opzet hieronder is canon.
 
-NPC: Gerrit de Molenaar (Wilgendal). Quest: Het Zingende Graan. Zaad vinden in het Donker Woud. Beschikbaar na Noor's aansluiting. Beloning: de molen wordt een rustpunt / item. Thema: kleine menselijke verhalen tussen grote gebeurtenissen.
+NPC: Gerrit de Molenaar in Wilgendal. Quest: Het Zingende Graan. Thema: kleine menselijke verhalen tussen grote gebeurtenissen.
+
+Zaad: in het Donker Woud, op de grens van mist en open plek. Bereikbaar na Noor's aansluiting. Beschermd door kleine woudgeesten (mini-gevecht). Item: "Zingend Zaad".
+
+Beloning: de molen wordt een save point in Wilgendal (opslaan, rusten, party wisselen). Item-bron: "Zingend Meel", één healing-item per bezoek.
+
+De gesproken regels zijn nog niet aangeleverd, dus er staat nog geen citaat. De opzet hierboven is wel canon.
 
 ### Magic tier list
 
