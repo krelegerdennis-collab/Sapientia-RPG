@@ -919,9 +919,13 @@ func _gerrit_citaten() -> Array:
 			if not (cmds is Array):
 				continue
 			for cmd in cmds:
-				if cmd is Array and cmd.size() >= 3 and str(cmd[0]) == "say" and str(cmd[1]) == SD.GERRIT:
+				if not (cmd is Array) or cmd.is_empty():
+					continue
+				if str(cmd[0]) == "say" and cmd.size() >= 3 and str(cmd[1]) == SD.GERRIT:
 					for line in cmd[2]:
 						out.append(str(line))
+				elif str(cmd[0]) == "choice" and cmd.size() >= 5 and str(cmd[4]) == SD.GERRIT:
+					out.append(str(cmd[1]))
 	return out
 
 
@@ -968,16 +972,41 @@ func _graan_data() -> void:
 			and q[0]["title"] == "Het Zingende Graan" and q[0]["start_flag"] == SD.FLAG_GRAAN
 			and q[0]["done_flag"] == SD.FLAG_GRAAN_KLAAR)
 	var quotes := _gerrit_citaten()
-	var uniq := {}
-	for l in quotes:
-		uniq[str(l)] = true
+	var canon := [SD.QUOTE_GRAAN_BEZOEK, SD.QUOTE_GRAAN_WIND, SD.QUOTE_GRAAN_OP, SD.QUOTE_GRAAN_OUD,
+			SD.QUOTE_GRAAN_ZOEK, SD.QUOTE_GRAAN_VOORZICHTIG, SD.QUOTE_GRAAN_WACHT, SD.QUOTE_GRAAN_ZONDER,
+			SD.QUOTE_GRAAN_ZAAD, SD.QUOTE_GRAAN_DANK]
+	var mist: Array = []
+	for l in canon:
+		if not quotes.has(l):
+			mist.append(l)
 	var src := FileAccess.get_file_as_string("res://scripts/data/story_data.gd")
-	check("Gerrit zegt alleen de twee zinnen, met TODO(verhaal)", quotes.size() >= 2 and uniq.size() == 2
-			and uniq.has(SD.QUOTE_GRAAN_OPEN) and uniq.has(SD.QUOTE_GRAAN_KLAAR)
-			and SD.QUOTE_GRAAN_OPEN == "Het zaad zingt aan de rand van de mist."
-			and SD.QUOTE_GRAAN_KLAAR == "De molen kan weer malen."
-			and src.contains(SD.QUOTE_GRAAN_OPEN + "\" # TODO(verhaal)")
-			and src.contains(SD.QUOTE_GRAAN_KLAAR + "\" # TODO(verhaal)"))
+	var todo_op_zin := false
+	for l in canon:
+		var at := src.find(l)
+		if at < 0:
+			todo_op_zin = true
+			break
+		var einde := src.find("\n", at)
+		if src.substr(at, einde - at).contains("TODO(verhaal)"):
+			todo_op_zin = true
+	var keuze: Array = []
+	for v in SD.EVENTS["gerrit"]:
+		for cmd in v.get("do", []):
+			if cmd is Array and cmd.size() >= 3 and str(cmd[0]) == "choice":
+				keuze = cmd[2]
+	var speler_vraagt := false
+	for v in SD.EVENTS["gerrit"]:
+		for cmd in v.get("do", []):
+			if cmd is Array and cmd.size() >= 3 and str(cmd[0]) == "say" and str(cmd[1]) == "{naam}":
+				speler_vraagt = cmd[2].has(SD.QUOTE_GRAAN_VRAAG)
+	check("Gerrit zegt de canon-zinnen, zonder TODO(verhaal) en zonder de oude twee", mist.is_empty()
+			and not quotes.has("Het zaad zingt aan de rand van de mist.")
+			and not quotes.has("De molen kan weer malen.")
+			and not todo_op_zin and not SD.TODO_STORY.has("gerrit")
+			and SD.QUOTE_GRAAN_VRAAG == "Wat is er gebeurd?" and speler_vraagt
+			and keuze == [SD.KEUZE_GRAAN_JA, SD.KEUZE_GRAAN_NEE]
+			and SD.EVENTS["gerrit_ja"][0]["do"][0][0] == "flag"
+			and SD.EVENTS["gerrit_weigert"][0]["do"][0][0] == "say")
 	var geesten: Dictionary = {}
 	for n in WR.ROOMS["woud_open_plek"].get("npcs", []):
 		if str(n.get("name", "")) == "Woudgeesten":
@@ -1012,14 +1041,37 @@ func _graan_tests() -> void:
 	var dicht: Array = await run_story(6.0)
 	check("quest dicht vóór Noor", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)
 			and Story.active_quest() == "" and GameState.item_count(SD.ITEM_ZAAD) == 0
-			and not dicht.any(func(l): return SD.QUOTE_GRAAN_OPEN in str(l) or SD.QUOTE_GRAAN_KLAAR in str(l)))
+			and not dicht.any(func(l): return SD.QUOTE_GRAAN_BEZOEK in str(l) or SD.QUOTE_GRAAN_DANK in str(l) or SD.QUOTE_GRAAN_WACHT in str(l)))
 	GameState.story_flags["noor_lid"] = true
 	GameState.add_member("noor")
 	Story.trigger("gerrit", g)
-	var open_lines: Array = await run_story(8.0)
-	check("daarna wijst Gerrit naar het woud", open_lines.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_OPEN))
+	var eerste: Array = await lines_until_choice(40.0)
+	check("eerste keer: bezoek, wind, vraag en het zingende graan", eerste.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_BEZOEK))
+			and eerste.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_WIND))
+			and eerste.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_VRAAG))
+			and eerste.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_OP))
+			and Dialog.text_label.text == SD.QUOTE_GRAAN_OUD
+			and Dialog.choices == [SD.KEUZE_GRAAN_JA, SD.KEUZE_GRAAN_NEE]
+			and not Story.has_flag(SD.FLAG_GRAAN) and Story.active_quest() == "")
+	Dialog.choose(1)
+	var weg: Array = await run_story(8.0)
+	check("weigeren: de molen wacht, quest nog uit", weg.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_WACHT))
+			and not Story.has_flag(SD.FLAG_GRAAN) and Story.active_quest() == "" and GameState.item_count(SD.ITEM_ZAAD) == 0)
+	Story.trigger("gerrit", g)
+	await lines_until_choice(40.0)
+	check("later nog dezelfde keuze", Dialog.choices == [SD.KEUZE_GRAAN_JA, SD.KEUZE_GRAAN_NEE] and not Story.has_flag(SD.FLAG_GRAAN))
+	Dialog.choose(0)
+	var ja: Array = await run_story(15.0)
+	check("aannemen: zoek het Zingend Zaad", ja.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZOEK))
+			and ja.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_VOORZICHTIG))
 			and Story.has_flag(SD.FLAG_GRAAN) and Story.active_quest() == "Het Zingende Graan"
-			and not Story.has_flag(SD.FLAG_ZAAD) and not open_lines.any(func(l): return SD.QUOTE_GRAAN_KLAAR in str(l)))
+			and not Story.has_flag(SD.FLAG_ZAAD))
+	Story.trigger("gerrit", g)
+	var zonder: Array = await run_story(8.0)
+	check("terug zonder zaad", zonder.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZONDER))
+			and Story.has_flag(SD.FLAG_GRAAN) and not Story.has_flag(SD.FLAG_ZAAD)
+			and Story.active_quest() == "Het Zingende Graan"
+			and not zonder.any(func(l): return Molen.REGEL_RUST in str(l) or SD.QUOTE_GRAAN_ZAAD in str(l)))
 	GameState.story_flags["noor_gered"] = true
 	GameState.story_flags[SD.WORTELKONING_FLAG] = true
 	GameState.story_flags.erase(SD.FLAG_GRAAN)
@@ -1051,7 +1103,8 @@ func _graan_tests() -> void:
 	GameState.party[0]["hp"] = 1
 	Story.trigger("gerrit", g)
 	var af: Array = await lines_until_choice()
-	check("bij Gerrit: molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_KLAAR))
+	check("bij Gerrit: zaad herkend, molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZAAD))
+			and not af.any(func(l): return SD.QUOTE_GRAAN_DANK in str(l))
 			and af.any(func(l): return Molen.REGEL_RUST in str(l)) and af.any(func(l): return Molen.REGEL_MEEL in str(l))
 			and Story.has_flag(SD.FLAG_GRAAN_KLAAR) and Story.active_quest() == ""
 			and GameState.item_count(SD.ITEM_ZAAD) == 0 and GameState.item_count(SD.ITEM_MEEL) == 1
@@ -1066,8 +1119,9 @@ func _graan_tests() -> void:
 	var meel := GameState.item_count(SD.ITEM_MEEL)
 	GameState.party[0]["hp"] = 1
 	Story.trigger("gerrit", scene().get_node("Objects/Gerrit"))
-	await lines_until_choice()
-	check("zelfde bezoek: geen tweede meel, wel weer uitgerust", GameState.item_count(SD.ITEM_MEEL) == meel
+	var dank: Array = await lines_until_choice()
+	check("zelfde bezoek: dank, geen tweede meel, wel weer uitgerust", dank.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_DANK))
+			and GameState.item_count(SD.ITEM_MEEL) == meel
 			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"]))
 	Dialog.choose(0)
 	await lines_until_choice()
