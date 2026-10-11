@@ -1212,6 +1212,16 @@
 			"volume_db": -6,
 			"pitch_variatie": 0.0,
 			"min_interval_ms": 400
+		},
+		"molen_zang": {
+			"bestanden": [
+				"sfx_molen_zang_01.wav"
+			],
+			"categorie": "dorp",
+			"beschrijving": "PLACEHOLDER. Soft singing as Gerrit's mill turns again. Two soft tones, no real voice.",
+			"volume_db": -8,
+			"pitch_variatie": 0.02,
+			"min_interval_ms": 0
 		}
 	}
 }

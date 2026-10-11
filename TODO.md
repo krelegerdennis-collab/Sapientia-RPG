@@ -657,7 +657,7 @@ Wilgendal blijft een dorp (geen stad), maar krijgt nette winkelpanden.
 **CANON – niet wijzigen zonder overleg.**
 
 - [x] Gerrits quest
-  Dialoog, Gerrit, zaad na Noor, molen-save, één Zingend Meel per bezoek en de scène "zacht gezang" staan in de code.
+  Dialoog, Gerrit, zaad na Noor, molen-save, één Zingend Meel per bezoek en de scène "zacht gezang" staan in de code. Na het zaad: korte zangscène met placeholder-geluid (`molen_zang`).
 
 NPC: Gerrit de Molenaar in Wilgendal. Quest: Het Zingende Graan. Thema: kleine menselijke verhalen tussen grote gebeurtenissen.
 

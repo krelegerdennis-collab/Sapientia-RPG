@@ -49,6 +49,7 @@ extends RefCounted
 ##   ["heal"]                            HP en MP van de hele groep vol (herberg)
 ##   ["molen_zang"]                      scène: de molen draait en zingt zacht (geen extra dialoog)
 ##   ["molen"]                           molen van Gerrit: rusten, meel (1x per bezoek), opslaan, party wisselen
+##   ["zang"]                            scène: de molen draait, zacht gezang (eenmalig, bij het zaad)
 ##   Spreker "{naam}" = de held zelf (ballon wijst naar de speler).
 ##   MAP_ENTER "map" mag ook een volledig scènepad zijn (Esdoorn, Donker Woud).
 
@@ -563,6 +564,7 @@ const EVENTS := {
 			["flag", FLAG_GRAAN_KLAAR],
 			["say", GERRIT, [QUOTE_GRAAN_ZAAD]],
 			["molen_zang"],
+			["zang"],
 			["molen"],
 		]},
 		{"if": {"flags": ["noor_lid", FLAG_GRAAN], "not_flags": [FLAG_ZAAD]}, "do": [
