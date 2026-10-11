@@ -13,6 +13,7 @@ extends Node2D
 ## (na een gevecht of na een overgang), uitgangen en random encounters.
 
 const TILE := 16
+const FieldFollowerScript := preload("res://scripts/field_follower.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
 const AUTOSAVE_DELAY := 0.35
 
@@ -52,6 +53,7 @@ func _ready() -> void:
 			push_warning("Spawnpunt '%s' bestaat niet in %s" % [GameState.pending_spawn, scene_file_path])
 		GameState.pending_spawn = ""
 
+	_spawn_follower()
 	# v0.19 kamer-checkpoint: waar je deze map binnenkwam (zie GameState.checkpoint)
 	_update_checkpoint()
 	player.stepped.connect(_on_player_stepped)
@@ -185,6 +187,19 @@ func try_autosave(reason: String) -> bool:
 	if not is_inside_tree() or player == null or player.is_moving:
 		return false
 	return GameState.autosave(player.get_tile(), player.facing, reason)
+
+
+## Actieve Codex-bondgenoot achter de speler (kerkers + wereldkaart, niet in dorpen).
+func _spawn_follower() -> void:
+	if player == null or not FieldFollowerScript.allowed(scene_file_path):
+		return
+	var objects := get_node_or_null("Objects")
+	if objects == null:
+		return
+	var follower := FieldFollowerScript.new()
+	follower.name = "CodexFollower"
+	objects.add_child(follower)
+	follower.setup(player)
 
 
 func _process(_delta: float) -> void:

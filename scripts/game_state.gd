@@ -63,6 +63,8 @@ var kernfragmenten := {}
 var pending_kern_absorb := ""
 ## Codex (Kernfragment stap 2): ingeschreven monsters (pagina's, zie codex_data.gd), de uid van
 ## de actieve bondgenoot ("" = geen) en de teller voor unieke ids (nooit hergebruikt).
+## codex_changed: de actieve bondgenoot (of de lijst) is veranderd. De volger op de kaart luistert.
+signal codex_changed
 var codex_pages: Array = []
 var codex_active := ""
 var codex_next_id := 1
@@ -1307,10 +1309,12 @@ func item_count(item_id: String) -> int:
 
 
 # ---------------------------------------------------------------- Codex (Kernfragment stap 2)
-func codex_reset() -> void:
+func codex_reset(notify := true) -> void:
 	codex_pages = []
 	codex_active = ""
 	codex_next_id = 1
+	if notify:
+		codex_changed.emit()
 
 
 func codex_full() -> bool:
@@ -1330,6 +1334,7 @@ func codex_add(species_id: String, level := 1, caught := {}) -> Dictionary:
 	codex_pages.append(page)
 	if codex_active == "":
 		codex_active = uid
+	codex_changed.emit()
 	return page
 
 
@@ -1344,7 +1349,10 @@ func codex_page(uid: String) -> Dictionary:
 func codex_set_active(uid: String) -> bool:
 	if uid != "" and codex_page(uid).is_empty():
 		return false
+	if uid == codex_active:
+		return true
 	codex_active = uid
+	codex_changed.emit()
 	return true
 
 
@@ -1358,8 +1366,9 @@ func codex_save_data() -> Dictionary:
 
 
 func codex_load_data(raw) -> void:
-	codex_reset()
+	codex_reset(false)
 	if not (raw is Dictionary):
+		codex_changed.emit()
 		return
 	var seen := {}
 	if raw.get("pages") is Array:
@@ -1379,6 +1388,7 @@ func codex_load_data(raw) -> void:
 	codex_active = str(raw.get("active", ""))
 	if codex_page(codex_active).is_empty():
 		codex_active = ""
+	codex_changed.emit()
 
 
 # ---------------------------------------------------------------- glitch-fusie (Kernfragment stap 3, v0.19)
@@ -1423,6 +1433,7 @@ func codex_fuse(uid_a: String, uid_b: String) -> Dictionary:
 	codex_pages.insert(clampi(at, 0, codex_pages.size()), page)
 	if was_active:
 		codex_active = uid
+	codex_changed.emit()
 	return page
 
 
