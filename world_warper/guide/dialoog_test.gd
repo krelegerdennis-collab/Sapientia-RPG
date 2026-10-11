@@ -81,8 +81,8 @@ static func _check_volgorde(fouten: Array) -> void:
 static func _check_tekst(fouten: Array) -> void:
 	if str(Dialoog.ID) != "gids":
 		fouten.append("interne id is niet gids")
-	if str(Dialoog.NAAM) != "IVA":
-		fouten.append("zichtbare naam is niet IVA")
+	if str(Dialoog.NAAM) != "ECHO":
+		fouten.append("zichtbare naam is niet ECHO")
 	_verboden(fouten, "naam", str(Dialoog.NAAM))
 	for stap in Dialoog.steps():
 		var regels = stap.get("lines", [])
@@ -106,7 +106,7 @@ static func _check_inhoud(fouten: Array) -> void:
 	var stappen: Array = Dialoog.steps()
 	if stappen.size() < 4:
 		return
-	_eist(fouten, stappen[0], ["gids"])
+	_eist(fouten, stappen[0], ["gids", "echo"])
 	_eist(fouten, stappen[1], ["ring", "wereldkaart", "plaats"])
 	_eist(fouten, stappen[2], ["kamer", "verhaal"])
 	_eist(fouten, stappen[3], ["sleutel", "hanger"])
