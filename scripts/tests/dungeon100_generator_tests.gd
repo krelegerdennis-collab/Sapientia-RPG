@@ -9,6 +9,7 @@ extends Node
 ## Zit niet in de export (scripts/tests/*).
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
+const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const GD := preload("res://scripts/data/game_data.gd")
@@ -386,6 +387,18 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 			return "kist-slot %s niet op vloer" % [t]
 	if not reach.has(d["rest_slot"]) or seen.has(d["rest_slot"]):
 		return "rustpunt-slot onbereikbaar of bezet"
+	if Rules.is_warper_floor(f):
+		var ws: Vector2i = d["warper_slot"]
+		var wsp: Vector2i = d["warper_spawn"]
+		if ws == Gen.NO_TILE or not reach.has(ws) or seen.has(ws) or ws == d["rest_slot"] or ws == d["spawn_up"]:
+			return "warper-slot %s ongeldig" % [ws]
+		if not room.has("warper") or tile_of(room["warper"]) != ws or not room["spawns"].has(Rules.WARPER_SPAWN):
+			return "kamer mist de warper"
+		var at: Vector2i = tile_of(room["spawns"][Rules.WARPER_SPAWN])
+		if at != wsp or not reach.has(at) or at == ws or absi(at.x - ws.x) + absi(at.y - ws.y) != 1:
+			return "spawn warper staat niet naast de warper"
+	elif d.get("warper_slot", Gen.NO_TILE) != Gen.NO_TILE or room.has("warper"):
+		return "warper op verdieping %d hoort niet" % f
 	if bool(d["is_boss_floor"]) != (f % 10 == 0) or (d["boss_slot"] != Gen.NO_TILE) != bool(d["is_boss_floor"]):
 		return "baas-slot klopt niet met de verdieping"
 	if d["boss_slot"] != Gen.NO_TILE:
