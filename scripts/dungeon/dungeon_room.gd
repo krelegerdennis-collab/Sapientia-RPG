@@ -102,7 +102,7 @@ func _build() -> void:
 	# v0.17: ook de kamers van het Donker Woud (scripts/data/woud_rooms.gd)
 	room = DungeonRooms.room(room_id)
 	if room.is_empty():
-		push_error("Dungeonkamer '%s' bestaat niet in dungeon_rooms.gd / woud_rooms.gd" % room_id)
+		push_error("Dungeonkamer '%s' bestaat niet in dungeon_rooms.gd / woud_rooms.gd / archief2_rooms.gd" % room_id)
 		return
 	if map_name == "":
 		map_name = str(room.get("name", room_id))

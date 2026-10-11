@@ -1,0 +1,58 @@
+[gd_resource type="TileSet" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://world_warper/art/tiles_placeholder.png" id="1_tiles"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ww"]
+texture = ExtResource("1_tiles")
+texture_region_size = Vector2i(16, 16)
+0:0/0 = 0
+0:0/0/custom_data_0 = "ww_vloer"
+1:0/0 = 0
+1:0/0/custom_data_0 = "ww_vloer"
+2:0/0 = 0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:0/0/custom_data_0 = "ww_muur"
+3:0/0 = 0
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:0/0/custom_data_0 = "ww_rand"
+4:0/0 = 0
+4:0/0/custom_data_0 = "ww_deur"
+5:0/0 = 0
+5:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+5:0/0/custom_data_0 = "ww_frame"
+6:0/0 = 0
+6:0/0/custom_data_0 = "ww_deur"
+7:0/0 = 0
+7:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+7:0/0/custom_data_0 = "ww_schot"
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:1/0/custom_data_0 = "ww_muur"
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:1/0/custom_data_0 = "ww_muur"
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:1/0/custom_data_0 = "ww_muur"
+3:1/0 = 0
+3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:1/0/custom_data_0 = "ww_muur"
+4:1/0 = 0
+4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:1/0/custom_data_0 = "ww_muur"
+5:1/0 = 0
+5:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+5:1/0/custom_data_0 = "ww_muur"
+6:1/0 = 0
+6:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+6:1/0/custom_data_0 = "ww_muur"
+7:1/0 = 0
+7:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+7:1/0/custom_data_0 = "ww_muur"
+
+[resource]
+tile_size = Vector2i(16, 16)
+physics_layer_0/collision_layer = 1
+custom_data_layer_0/name = "terrain"
+custom_data_layer_0/type = 4
+sources/0 = SubResource("TileSetAtlasSource_ww")

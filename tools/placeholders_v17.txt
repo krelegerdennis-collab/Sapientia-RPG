@@ -9,3 +9,8 @@ assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x
 # Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint
 # in scripts/dungeon/dungeon100_warper.gd.
 # Echte art later: assets/sprites/dungeon100_warper.png  64x16  (4 frames van 16x16).
+# Het Levende Archief, verdieping 1 (tools/art_kas_placeholder.py). Magenta hoekjes, geen definitieve art.
+assets/tiles/dungeon/kas_tiles.png            256x80  tileset overwoekerde kas (zelfde nummering als archief_grijs)
+assets/tiles/dungeon/kas_bibliotheek.png      256x64  bibliotheek-atlas van de kas (loader; verdieping 1 tekent er nog niet mee)
+assets/puzzle/groei_plaat.png                  48x16  groei-plaat, 3 frames van 16x16: zaad, scheut, volgroeid
+assets/sprites/buiten/kas_ingang.png           16x16  ingang van de kas op de wereldkaart

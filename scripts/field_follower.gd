@@ -1,6 +1,6 @@
 extends Node2D
 ## Actieve Codex-bondgenoot die achter de speler aanloopt.
-## Wel: kerkers (Archieven, Donker Woud, Diepe Grot) en de wereldkaart.
+## Wel: kerkers (Archieven, Levende Archief, Donker Woud, Diepe Grot) en de wereldkaart.
 ## Niet: dorpen en huizen (Esdoorn, herberg, Wilgendal, het huis).
 ## Plaatje: assets/map_monsters/<vijand>.png (16x16, 2 stapframes x 4 richtingen),
 ## dezelfde indeling als de map-monsters. Geen botsing: hij loopt het pad van de speler na.
@@ -33,7 +33,7 @@ static func allowed(scene_path: String) -> bool:
 	var base := scene_path.get_file().get_basename()
 	if base == "wereldkaart":
 		return true
-	if base in DUNGEON_NAMES or base.begins_with("archief_") or base.begins_with("woud_"):
+	if base in DUNGEON_NAMES or base.begins_with("archief_") or base.begins_with("woud_") or base.begins_with("leven_"):
 		return true
 	return DungeonRooms.boss_distance(scene_path) >= 0
 
