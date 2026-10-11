@@ -1,15 +1,21 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`d81e339`), Godot 4.7.2, threads uit.
+Web-build van `main` (`1f8f6b3`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`b7754dd`):
+Nieuw in deze build, bovenop de vorige web-build (`30918e3`, export van `d81e339`):
+- Vier save-slots. Continue en Load openen dezelfde lijst. Slot 1 blijft het oude bestand.
+- Het Eerste Archief mikt op level 7. De Golem blijft een eigen gevecht.
+- Wilgendal is het eerste dorp, met wapen, pantser, accessoire en magie. In Act 1 verkoopt de magiebalie alleen Grade 1.
+- Blauwe kisten in de Diepe Grot hebben grades. Affixen staan vast per item. Grade 4 (vanaf verdieping 80) is niet te koop.
+- Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `d81e339`:
 - Alle tekst die je in het spel ziet is Engels. Menu's, verhaal, items en de titel (The Forgotten Archives). Namen blijven Dennis, Noor en Lotte.
 - De levelschaal loopt door tot Act 6 (level 40). De 100-vloeren-grot mag daar voorbij.
 - Nieuwe spullen: Ilse geeft Herbal Tea nadat Noor gered is. Noor geeft een Padded Jerkin. In de kast van de Ink Worm ligt Glowing Ink. De rest van de verhaalset staat in de data, nog niet in de wereld.
-- Hard verversen op je telefoon. Anders blijft de oude Nederlandse build in het geheugen.
 
 Nog van de vorige build:
 - De 100-vloeren-grot neemt de hele party mee, ook elk Codex-monster. Iedereen start op level 1, zonder spullen en zonder spreuken.
@@ -35,7 +41,7 @@ Na deze publicatie moet je hard verversen. De browser bewaart de oude `index.pck
 
 De eerste tik ergens op het scherm (ook Continue of New Game) zet het geluid aan.
 Tot die tik staat er **Tap for sound**. Houd de telefoon liggend.
-Eerste keer ongeveer 68 MB (`index.pck` 30 MB + `index.wasm` 38 MB).
+Eerste keer ongeveer 75 MB (`index.pck` 37 MB + `index.wasm` 38 MB).
 
 ## Kortere link
 
