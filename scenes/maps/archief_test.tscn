@@ -8,7 +8,7 @@
 [node name="ArchiefTest" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "archief_test"
-map_name = "Vergeten Archieven - testkamer"
+map_name = "Forgotten Archives - Test Room"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

@@ -7,6 +7,7 @@ extends RefCounted
 ## (preload i.p.v. class_name, zoals de andere UI-hulpjes)
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 ## Spreuk-effect buiten gevechten: zelfde formule als in battle.gd (_spell_amount):
 ## power + SPELL_LEVEL_BONUS x level, +/- SPELL_SPREAD.
@@ -17,15 +18,15 @@ const SPELL_SPREAD := 0.1
 ## v0.14: 13 (uitrusting heeft langere namen, bv. 'Maliënkolder').
 const LIST_NAME_COLS := 13
 
-const MSG_FIELD_ONLY := "Dit kan alleen in een gevecht."
-const MSG_UNKNOWN := "Hier weet je niets mee te doen."
-const MSG_NO_EFFECT := "Dat heeft nu geen effect."
-const MSG_KO := "%s is buiten westen."
-const MSG_NO_MP := "Niet genoeg MP."
-const MSG_KEY_ITEM := "Belangrijk voorwerp. Bewaar het goed."
-const MSG_EQUIP_ITEM := "Uitrusting: kies 'Uitrusting' in het menu."
-const MSG_WARP_ONLY := "De Warp werkt alleen op verdieping 100."
-const MSG_WARP_USED := "Het kristal vlamt op... de simulatie loslaten."
+const MSG_FIELD_ONLY := "This only works in battle."
+const MSG_UNKNOWN := "You don't know what to do with this."
+const MSG_NO_EFFECT := "That has no effect right now."
+const MSG_KO := "%s is unconscious."
+const MSG_NO_MP := "Not enough MP."
+const MSG_KEY_ITEM := "Important item. Keep it safe."
+const MSG_EQUIP_ITEM := "Equipment: choose Equipment in the menu."
+const MSG_WARP_ONLY := "The Warp only works on floor 100."
+const MSG_WARP_USED := "The crystal flares... the simulation lets go."
 
 
 ## Een Dictionary-constante uit game_data.gd die niet in elke versie bestaat (v0.11:
@@ -104,7 +105,7 @@ static func item_usable_in_field(id: String) -> bool:
 static func item_effect_text(id: String) -> String:
 	var it := item_data(id)
 	if bool(it.get("warp", false)):
-		return "Brengt je terug naar de wereld."
+		return "Takes you back to the world."
 	var parts: Array[String] = []
 	if int(it.get("heal_hp", 0)) > 0:
 		parts.append("%d HP" % int(it["heal_hp"]))
@@ -114,8 +115,8 @@ static func item_effect_text(id: String) -> String:
 		return "%s: %s." % [Equipment.slot_name(str(it.get("slot", ""))), Equipment.bonus_text(id)]
 	var spell_id := _teach_id(it)
 	if spell_id != "":
-		return "Leert de spreuk %s." % str(spell_data(spell_id).get("name", spell_id))
-	return ("Herstelt %s." % " en ".join(parts)) if not parts.is_empty() else ""
+		return "Teaches the spell %s." % str(spell_data(spell_id).get("name", spell_id))
+	return ("Restores %s." % " and ".join(parts)) if not parts.is_empty() else ""
 
 
 ## Waarom kan dit item hier niet? ("" = het kan wel).
@@ -143,10 +144,10 @@ static func restore(hero: Dictionary, hp: int, mp: int) -> Vector2i:
 
 static func _heal_text(hero: Dictionary, gained: Vector2i) -> String:
 	if gained.x > 0 and gained.y > 0:
-		return "%s krijgt %d HP en %d MP terug." % [hero["name"], gained.x, gained.y]
+		return "%s recovers %d HP and %d MP." % [hero["name"], gained.x, gained.y]
 	if gained.x > 0:
-		return "%s krijgt %d HP terug." % [hero["name"], gained.x]
-	return "%s krijgt %d MP terug." % [hero["name"], gained.y]
+		return "%s recovers %d HP." % [hero["name"], gained.x]
+	return "%s recovers %d MP." % [hero["name"], gained.y]
 
 
 ## Zou dit herstel iets doen? (volle HP bij een Drankje = nee; KO-helden niet, zoals in het
@@ -161,18 +162,25 @@ static func use_item(inventory: Dictionary, id: String, hero: Dictionary) -> Dic
 	if reason != "":
 		return {"ok": false, "hp": 0, "mp": 0, "text": reason}
 	if int(inventory.get(id, 0)) <= 0:
-		return {"ok": false, "hp": 0, "mp": 0, "text": "Je hebt geen %s meer." % item_name(id)}
+		return {"ok": false, "hp": 0, "mp": 0, "text": "You have no %s left." % item_name(id)}
 	if int(hero["hp"]) <= 0:
 		return {"ok": false, "hp": 0, "mp": 0, "text": MSG_KO % hero["name"]}
 	var it := item_data(id)
 	var spell_id := _teach_id(it)
 	if spell_id != "":
+		if not (hero.get("spells") is Array):
+			hero["spells"] = []
+		if (hero["spells"] as Array).has(spell_id):
+			return {"ok": false, "hp": 0, "mp": 0, "text": MSG_NO_EFFECT}
+		var why := SpellRules.block_reason(hero, spell_id)
+		if why != "":
+			return {"ok": false, "hp": 0, "mp": 0, "text": why}
 		if not teach_spell(hero, spell_id):
 			return {"ok": false, "hp": 0, "mp": 0, "text": MSG_NO_EFFECT}
 		inventory[id] = int(inventory[id]) - 1
 		if int(inventory[id]) <= 0:
 			inventory.erase(id)
-		return {"ok": true, "hp": 0, "mp": 0, "text": "%s leert %s!" % [hero["name"], spell_data(spell_id)["name"]]}
+		return {"ok": true, "hp": 0, "mp": 0, "text": "%s learns %s!" % [hero["name"], spell_data(spell_id)["name"]]}
 	var hp := int(it.get("heal_hp", 0))
 	var mp := int(it.get("heal_mp", 0))
 	if not _would_help(hero, hp, mp):
@@ -196,6 +204,8 @@ static func _teach_id(it: Dictionary) -> String:
 ## (nooit omlaag) en vult zijn huidige MP tot dat nieuwe maximum.
 static func teach_spell(hero: Dictionary, spell_id: String) -> bool:
 	if spell_data(spell_id).is_empty():
+		return false
+	if not SpellRules.can_learn(str(hero.get("id", "")), spell_id):
 		return false
 	if not (hero.get("spells") is Array):
 		hero["spells"] = []
@@ -240,12 +250,12 @@ static func spell_base(caster: Dictionary, id: String) -> float:
 
 static func spell_effect_text(caster: Dictionary, id: String) -> String:
 	var sp := spell_data(id)
-	var what := "Geneest één held" if str(sp.get("type", "")) == "heal" else "Schade"
+	var what := "Heals one ally" if str(sp.get("type", "")) == "heal" else "Damage"
 	match str(sp.get("target", "")):
 		"enemy":
-			what = "Schade aan één vijand"
+			what = "Damage to one enemy"
 		"all_enemies":
-			what = "Schade aan alle vijanden"
+			what = "Damage to all enemies"
 	return "%s (±%d)." % [what, roundi(spell_base(caster, id))]
 
 

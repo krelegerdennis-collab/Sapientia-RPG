@@ -102,7 +102,7 @@ offset_top = 1.0
 offset_right = 136.0
 offset_bottom = 13.0
 theme_override_constants/line_spacing = 2
-text = "Bericht"
+text = "Message"
 
 [node name="Arrow" type="Control" parent="Caption"]
 layout_mode = 1
@@ -186,7 +186,7 @@ theme_override_styles/panel = SubResource("StyleBoxTexture_glass")
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_constants/line_spacing = 1
-text = "Krijgt 0 EXP."
+text = "Gained 0 EXP."
 
 [node name="VictoryArrow" type="Control" parent="VictoryWindow"]
 custom_minimum_size = Vector2(7, 5)

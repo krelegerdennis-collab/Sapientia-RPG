@@ -43,13 +43,13 @@ const MESSAGE_TIME := 2.5
 ## [id, tekst] - volgorde in het menu.
 const COMMANDS := [
 	["items", "Items"],
-	["magic", "Magie"],
-	["equip", "Uitrusting"],
+	["magic", "Magic"],
+	["equip", "Equipment"],
 	["status", "Status"],
-	["bestiary", "Bestiarium"],
-	["options", "Opties"],
-	["save", "Opslaan"],
-	["close", "Sluiten"],
+	["bestiary", "Bestiary"],
+	["options", "Options"],
+	["save", "Save"],
+	["close", "Close"],
 ]
 ## Codex: staat na 'Status' in het menu zodra de Codex minstens één pagina heeft (zoals het
 ## capsule-menu in Lufia 2 pas verschijnt als je een capsule-monster hebt).
@@ -157,7 +157,7 @@ func _build_party() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 0)
 	party_box.add_child(col)
-	col.add_child(UiMenu.label("Groep", MenuColors.TEXT_DIM))
+	col.add_child(UiMenu.label("Party", MenuColors.TEXT_DIM))
 	for i in GameState.party.size():
 		# tikbaar kaartje (geen focus: de D-pad blijft in de commandolijst)
 		var b := Button.new()
@@ -178,7 +178,7 @@ func _build_party() -> void:
 	# v0.17 lopende opdracht (story_data.gd QUESTS), bv. 'Red Noor uit het Donker Woud'
 	var q: String = Story.active_quest()
 	if q != "":
-		col.add_child(UiMenu.label("Opdracht", MenuColors.TEXT_DIM))
+		col.add_child(UiMenu.label("Quest", MenuColors.TEXT_DIM))
 		quest_label = UiMenu.label(q, MenuColors.INFO)
 		quest_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		col.add_child(quest_label)
@@ -201,8 +201,8 @@ func _layout() -> void:
 
 
 func _update_info() -> void:
-	gold_label.text = "Goud %d" % GameState.gold
-	time_label.text = "Tijd %s" % UiMenu.format_time(GameState.play_time())
+	gold_label.text = "Gold %d" % GameState.gold
+	time_label.text = "Time %s" % UiMenu.format_time(GameState.play_time())
 	place_label.text = _place_name()
 
 
@@ -357,14 +357,14 @@ func _on_save_answer(yes: bool) -> void:
 func save_now() -> bool:
 	if player == null or not is_instance_valid(player):
 		last_save_result = "failed"
-		show_message("Hier kun je niet opslaan.")
+		show_message("You can't save here.")
 		return false
 	if GameState.save_game(player.get_tile(), player.facing):
 		last_save_result = "saved"
 		show_message("Opgeslagen.")
 		return true
 	last_save_result = "failed"
-	show_message("Opslaan mislukt.")
+	show_message("Save failed.")
 	return false
 
 

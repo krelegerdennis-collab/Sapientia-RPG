@@ -11,6 +11,7 @@ extends Node
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const S := preload("res://scripts/data/dungeon100_scaling.gd")
+const Gear := preload("res://scripts/data/grade_gear.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
@@ -264,7 +265,9 @@ func _data_tests() -> void:
 				var kind := str(c.get("kind", "normaal"))
 				var tier_ok := tier == expect or tier == expect - 1
 				if kind == "blauw":
-					tier_ok = tier == mini(S.MAX_TIER, expect + 1)
+					# Bevestigde grade-buit: tier is de grade-band, niet de oude schaal + 1.
+					var gate := 99 if f >= 100 else f
+					tier_ok = tier == Gear.grade_for_floor(gate)
 				if int(c["floor"]) != f or not tier_ok:
 					chest_ok = false
 					details.append("kist sd%d vd%d %s tier%d" % [sd, f, kind, tier])
@@ -273,7 +276,7 @@ func _data_tests() -> void:
 	check("rustpunt op rest_slot op elke 10e verdieping en nergens anders", rest_ok)
 	check("spawn 'rustpunt': vrije bereikbare buurtegel naast het rustpunt (10, 20 ... 100)", spawn_ok)
 	check("elk monster draagt zijn verdieping (schaal via Dungeon100Scaling)", scale_ok)
-	check("elke kist heeft vooraf gerolde schaalbuit van de juiste verdieping (niveau)", chest_ok)
+	check("elke kist heeft vooraf gerolde buit van de juiste verdieping (schaal, blauw = grade)", chest_ok)
 	var d10 := fresh(7, 10)
 	var d1 := fresh(7, 1)
 	var m10: Dictionary = d10["room"]["monsters"][0]
@@ -345,8 +348,8 @@ func _floor10_tests() -> void:
 	var d: Dictionary = Gen.generate(4242, 10)
 	var hud := GameState.get_node_or_null("Dungeon100Hud")
 	await pframes(3)
-	check("HUD-tekst: 'Verdieping 10/100' (rustverdieping)", hud != null and hud.visible and hud.shown_floor == 10
-			and Rules.hud_text(GameState.dungeon100_floor) == "Verdieping 10/100")
+	check("HUD-tekst: 'Floor 10/100' (rustverdieping)", hud != null and hud.visible and hud.shown_floor == 10
+			and Rules.hud_text(GameState.dungeon100_floor) == "Floor 10/100")
 	var rp: Node = r.get_node_or_null("Objects/Rustpunt")
 	check("rustpunt staat op rest_slot %s" % [d["rest_slot"]], rp != null and rp is Dungeon100Rustpunt
 			and Vector2i((rp.position / 16.0).floor()) == d["rest_slot"])
@@ -418,7 +421,7 @@ func _floor10_tests() -> void:
 	GameState.dungeon100_floor = 9
 	GameState.change_map(DUNGEON, "omhoog")
 	await wait_floor(9)
-	check("verdieping 9: geen baas, geen rustpunt, HUD 'Verdieping 9/100'", scene().get_node_or_null("Objects/Rustpunt") == null
+	check("verdieping 9: geen baas, geen rustpunt, HUD 'Floor 9/100'", scene().get_node_or_null("Objects/Rustpunt") == null
 			and not scene().monsters.any(func(m): return m.boss) and hud.shown_floor == 9)
 
 
@@ -447,7 +450,7 @@ func _defeat_tests() -> void:
 	r.start_monster_battle(victim)
 	check("gevecht gestart", await wait_until(func(): return battle() != null and battle().is_node_ready(), 20.0))
 	check("het monster is geschaald naar verdieping 15", int(battle().enemies[0]["s"]["max_hp"]) > int(GD.ENEMIES[victim_enemy]["max_hp"]))
-	check("game-over-tekst: dood is het Archief uit (niet het rustpunt)", GameState.defeat_text(false).contains("Archief uit")
+	check("game-over-tekst: death means out of the Archive (niet het rustpunt)", GameState.defeat_text(false).contains("out of the Archive")
 			and not GameState.defeat_text(false).contains("rustpunt"))
 	await lose_battle()
 	check("na de nederlaag: wereldkaart, niet de grot", await wait_scene_path(Rules.WORLD_SCENE))

@@ -75,7 +75,7 @@ func _run() -> void:
 		print("=== Deel E: gevecht ===")
 		await _battle_tests()
 	if part("F"):
-		print("=== Deel F: Inktwurm (beslissing Dennis) ===")
+		print("=== Deel F: Ink Worm (beslissing Dennis) ===")
 		await _unique_tests()
 	if part("G"):
 		print("=== Deel G: Codex-knop in het gevecht ===")
@@ -100,9 +100,9 @@ func _data_tests() -> void:
 	# --- Inktwurm
 	var iw: Dictionary = GD.ENEMIES.get("inktwurm", {})
 	var mw: Dictionary = GD.ENEMIES["mech_wachter"]
-	check("Inktwurm staat in ENEMIES (naam, Archief, bestiarium 12)", not iw.is_empty() and iw["name"] == "Inktwurm"
+	check("Ink Worm staat in ENEMIES (naam, Archief, bestiarium 12)", not iw.is_empty() and iw["name"] == "Ink Worm"
 			and "archief" in iw["habitat"] and int(iw["no"]) == 12 and iw.has("desc") and iw.has("drops"))
-	check("Inktwurm: art-paden volgens ART v19 (voor, _rug, _idle 2 frames)", iw.get("sprite") == "res://assets/sprites/enemies/inktwurm.png"
+	check("Ink Worm: art-paden volgens ART v19 (voor, _rug, _idle 2 frames)", iw.get("sprite") == "res://assets/sprites/enemies/inktwurm.png"
 			and iw.get("sprite_back") == "res://assets/sprites/enemies/inktwurm_rug.png"
 			and iw.get("idle") == "res://assets/sprites/enemies/inktwurm_idle.png" and int(iw.get("idle_frames", 0)) == 2)
 	var normal := CD.normal_stats_at(5)
@@ -110,34 +110,34 @@ func _data_tests() -> void:
 	for k in ["max_hp", "atk", "def", "agi"]:
 		if int(iw[k]) != GD.round_half_even(2.0 * float(normal[k])):
 			twice = false
-	check("Inktwurm = 2x normaal Lv 5 (normaal HP %.1f ATK %.1f DEF %.1f SPD %.1f -> %d/%d/%d/%d)" % [normal["max_hp"], normal["atk"],
+	check("Ink Worm = 2x normaal Lv 5 (normaal HP %.1f ATK %.1f DEF %.1f SPD %.1f -> %d/%d/%d/%d)" % [normal["max_hp"], normal["atk"],
 			normal["def"], normal["agi"], iw["max_hp"], iw["atk"], iw["def"], iw["agi"]], twice and int(iw["max_hp"]) == 68)
-	check("Inktwurm: uniek, gevechtsniveau 5, als vijand nog geen vaardigheid", bool(iw.get("unique", false))
+	check("Ink Worm: uniek, gevechtsniveau 5, als vijand nog geen vaardigheid", bool(iw.get("unique", false))
 			and int(iw.get("encounter_level", 0)) == 5 and (iw["skills"] as Array).is_empty() and iw["weak"] == ["vuur"])
 	var sp_path := GD.enemy_sprite(iw)
-	check("Inktwurm-plaatje: echte art of plaatsvervanger (%s), bestaat altijd" % sp_path, ResourceLoader.exists(sp_path)
+	check("Ink Worm-plaatje: echte art of plaatsvervanger (%s), bestaat altijd" % sp_path, ResourceLoader.exists(sp_path)
 			and (sp_path == iw["sprite"]) == ResourceLoader.exists(str(iw["sprite"])))
 	check("enemy_sprite: bestaande art = gewoon 'sprite'", GD.enemy_sprite(GD.ENEMIES["papiergeest"]) == GD.ENEMIES["papiergeest"]["sprite"]
 			and not GD.enemy_sprite_is_placeholder(GD.ENEMIES["papiergeest"]))
 	check("enemy_sprite: ontbrekend bestand -> plaatsvervanger", GD.enemy_sprite({"sprite": "res://bestaat/niet.png"}) == GD.PLACEHOLDER_ENEMY_SPRITE
 			and ResourceLoader.exists(GD.PLACEHOLDER_ENEMY_SPRITE))
 	var s := CD.species("inktwurm")
-	check("Codex-soort Inktwurm: inkt/worm, labels [inkt, worm], base_level 5, zwakste, vaardigheid 40-50%%",
+	check("Codex-soort Ink Worm: inkt/worm, labels [inkt, worm], base_level 5, zwakste, vaardigheid 40-50%%",
 			not s.is_empty() and s["element"] == "inkt" and s["type"] == "worm" and s["fusion_tags"] == ["inkt", "worm"]
 			and int(s["base_level"]) == 5 and s["ai"]["target"] == "zwakste"
 			and float(s["ai"]["skill_chance"]) >= 0.4 and float(s["ai"]["skill_chance"]) <= 0.5)
-	check("Inktspuw: element inkt, schade", CD.skill("inktspuw").get("element") == "inkt" and CD.skill("inktspuw")["type"] == "damage")
+	check("Ink Spit: element inkt, schade", CD.skill("inktspuw").get("element") == "inkt" and CD.skill("inktspuw")["type"] == "damage")
 	check("Codex Lv 5 = de stats van het gevecht; vangen = Lv 5; kans 100%% ook bij volle HP",
 			CD.stats_at("inktwurm", 5) == {"max_hp": iw["max_hp"], "max_mp": 0, "atk": iw["atk"], "def": iw["def"], "agi": iw["agi"]}
 			and CD.capture_level(0, "inktwurm") == 5 and CD.capture_level(3, "inktwurm") == 5
 			and CD.capture_chance("inktwurm", 68, 68) == 1.0 and CD.species_for_enemy("inktwurm") == "inktwurm")
 	check("andere soorten: vangniveau = tier zoals altijd", CD.capture_level(3, "mosslijm") == 3 and CD.capture_level(0) == 1)
-	check("Inktwurm zit in de fusietabel", CD.FUSION_TABLE.any(func(r): return (r["tags"] as Array).has("inkt")))
+	check("Ink Worm zit in de fusietabel", CD.FUSION_TABLE.any(func(r): return (r["tags"] as Array).has("inkt")))
 	# --- regels
 	var mwp := pg("mech_wachter", 4, "t1")
 	var iwp := pg("inktwurm", 8, "t2")
 	var r := CD.make_fusion_page(mwp, iwp, "t3")
-	check("tabel: Mech. Wachter + Inktwurm = Kennis-Beest (archief + inkt)", r["species"] == "kennis_beest" and not r["fusion"]["glitch"]
+	check("tabel: Mech. Warden + Ink Worm = Lore Beast (archief + inkt)", r["species"] == "kennis_beest" and not r["fusion"]["glitch"]
 			and r["fusion"]["rule"] == ["archief", "inkt"] and r["name"] == CD.species("kennis_beest")["name"])
 	var r2 := CD.make_fusion_page(iwp, mwp, "t3")
 	check("volgorde A/B maakt voor de soort niet uit", r2["species"] == r["species"] and r2["level"] == r["level"])
@@ -150,26 +150,26 @@ func _data_tests() -> void:
 		if int(r[k]) != want:
 			ok_bonus = false
 	check("stats = soort op Lv 7 + 10%% (min +1) (HP %d -> %d)" % [base["max_hp"], r["max_hp"]], ok_bonus and r["hp"] == r["max_hp"])
-	check("vaardigheden: Boekenhamer, Kennisgolf + erft de laatst geleerde van A (Schild omhoog) en B (Inktspuw) %s" % [r["skills"]],
+	check("vaardigheden: Book Hammer, Lore Wave + erft de laatst geleerde van A (Shield Up) en B (Ink Spit) %s" % [r["skills"]],
 			r["skills"] == ["boekenhamer", "kennisgolf", "schild_omhoog", "inktspuw"] and r["fusion"]["inherited"] == ["schild_omhoog", "inktspuw"])
 	check("fusie-velden: generatie 1, ouders, soorten", r["fusion"]["generation"] == 1 and r["fusion"]["parents"] == ["t1", "t2"]
 			and r["fusion"]["parent_species"] == ["mech_wachter", "inktwurm"] and CD.is_fused(r) and not CD.is_fused(mwp))
 	var a := pg("inktwurm", 8, "g1")
 	var b := pg("inktwurm", 10, "g2")
 	var g := CD.make_fusion_page(a, b, "g3")
-	check("geen tabelregel (2x Inktwurm): glitch-variant van A 'Glitchwurm', label glitch %s" % [g["fusion_tags"]],
-			g["species"] == "inktwurm" and g["name"] == "Glitchwurm" and g["fusion"]["glitch"] and g["fusion_tags"].has("glitch")
+	check("geen tabelregel (2x Ink Worm): glitch-variant van A 'Glitch Worm', label glitch %s" % [g["fusion_tags"]],
+			g["species"] == "inktwurm" and g["name"] == "Glitch Worm" and g["fusion"]["glitch"] and g["fusion_tags"].has("glitch")
 			and g["element"] == "inkt" and g["level"] == 10)
 	check("glitch-variant sterker dan een gewone van hetzelfde level (ATK %d > %d)" % [g["atk"], CD.stats_at("inktwurm", 10)["atk"]],
 			int(g["atk"]) > int(CD.stats_at("inktwurm", 10)["atk"]) and int(g["max_hp"]) > int(CD.stats_at("inktwurm", 10)["max_hp"]))
 	check("ouders met dezelfde vaardigheden: niets dubbel %s" % [g["skills"]], g["skills"] == ["inktspuw"])
 	var g2 := CD.make_fusion_page(g, pg("glitchmot", 5, "g4"), "g5")
-	check("inkt + ruis = Glitchmot; generatie 2 (bonus 20%%)", g2["species"] == "glitchmot" and g2["fusion"]["generation"] == 2
+	check("inkt + ruis = Glitch Moth; generatie 2 (bonus 20%%)", g2["species"] == "glitchmot" and g2["fusion"]["generation"] == 2
 			and int(g2["atk"]) == int(CD.stats_at("glitchmot", g2["level"])["atk"]) + maxi(1, ceili(CD.stats_at("glitchmot", g2["level"])["atk"] * 0.2)))
 	var lv := CD.make_fusion_page(pg("mosslijm", 99, "x1"), pg("mosslijm", 99, "x2"), "x3")
 	check("level nooit boven 99", lv["level"] == 99)
 	check("zelfde pagina 2x: geen resultaat", CD.make_fusion_page(a, a, "z").is_empty() and CD.fusion_block_reason(a, a) != "")
-	check("mos + wortel = Wortelkruiper (Mosslijm + Wortelkruiper)", CD.make_fusion_page(pg("mosslijm", 2, "m1"), pg("wortelkruiper", 2, "m2"), "m3")["species"] == "wortelkruiper")
+	check("mos + wortel = Root Crawler (Moss Slime + Root Crawler)", CD.make_fusion_page(pg("mosslijm", 2, "m1"), pg("wortelkruiper", 2, "m2"), "m3")["species"] == "wortelkruiper")
 	check("alle glitch-namen <= 13 tekens", CD.SPECIES.keys().all(func(id): return CD.glitch_name(id).length() <= CD.FUSION_NAME_MAX))
 
 
@@ -186,7 +186,7 @@ func _state_tests() -> void:
 			and GameState.codex_pages.size() == 2)
 	var before := GameState.codex_save_data()
 	var pv := GameState.codex_fusion_preview(p1["uid"], p2["uid"])
-	check("voorbeeld: Kennis-Beest, geen uid, Codex onveranderd", pv["species"] == "kennis_beest" and pv["uid"] == ""
+	check("voorbeeld: Lore Beast, geen uid, Codex onveranderd", pv["species"] == "kennis_beest" and pv["uid"] == ""
 			and GameState.codex_save_data() == before)
 	GameState.in_battle = true
 	check("tijdens een gevecht: kan niet", GameState.codex_fuse(p1["uid"], p2["uid"]).is_empty() and GameState.codex_pages.size() == 2)
@@ -237,7 +237,7 @@ func _save_tests() -> void:
 	setup()
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("Golemhal geladen", false)
+		check("Golem Hall geladen", false)
 		return
 	var a := GameState.codex_add("inktwurm", 8)
 	var b := GameState.codex_add("inktwurm", 9)
@@ -249,7 +249,7 @@ func _save_tests() -> void:
 	GameState.new_game("Dennis")
 	check("laden", GameState.load_game())
 	var q := GameState.codex_page(g["uid"])
-	check("na laden: Glitchwurm, generatie 1, label glitch, stats, HP 7, actief", not q.is_empty() and q["name"] == "Glitchwurm"
+	check("na laden: Glitch Worm, generatie 1, label glitch, stats, HP 7, actief", not q.is_empty() and q["name"] == "Glitch Worm"
 			and q["fusion"]["generation"] == 1 and q["fusion"]["glitch"] and (q["fusion_tags"] as Array).has("glitch")
 			and q["atk"] == g["atk"] and q["max_hp"] == g["max_hp"] and q["hp"] == 7 and q["skills"] == g["skills"]
 			and GameState.codex_active == g["uid"] and GameState.codex_pages.size() == 2)
@@ -264,7 +264,7 @@ func _save_tests() -> void:
 	GameState.new_game("Dennis")
 	GameState.load_game()
 	var k2 := GameState.codex_page(kb["uid"])
-	check("na laden: Kennis-Beest houdt geërfde Schild omhoog + Inktspuw %s" % [k2.get("skills")], not k2.is_empty()
+	check("na laden: Lore Beast houdt geërfde Shield Up + Ink Spit %s" % [k2.get("skills")], not k2.is_empty()
 			and (k2["skills"] as Array).has("schild_omhoog") and (k2["skills"] as Array).has("inktspuw") and k2["element"] == "kennis")
 	# kapotte fusie-data
 	var raw := GameState.read_save(GameState.save_path)
@@ -284,7 +284,7 @@ func _screen_tests() -> void:
 	setup()
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("Golemhal geladen", false)
+		check("Golem Hall geladen", false)
 		return
 	var p1 := GameState.codex_add("mech_wachter", 4)
 	var p2 := GameState.codex_add("inktwurm", 8)
@@ -304,15 +304,15 @@ func _screen_tests() -> void:
 		return
 	check("'Fusie'-knop past naast 'Terug' en de titel (geen overlap)", not s.fuse_button.get_global_rect().intersects(s.back_button.get_global_rect())
 			and s.fuse_button.get_global_rect().end.x <= s.root.size.x and not s.header.get_global_rect().intersects(s.fuse_button.get_global_rect()))
-	check("gewone lijst ongewijzigd: 3 pagina's + 'Geen'", s.entries.size() == 4 and s.entry_text(3).ends_with("Geen bondgenoot"))
+	check("gewone lijst ongewijzigd: 3 pagina's + 'Geen'", s.entries.size() == 4 and s.entry_text(3).ends_with("No ally"))
 	s.entries[1].grab_focus()
 	await frames(2)
 	await screenshot("inktwurm_codex")
-	check("Inktwurm-pagina: plaatje (art of plaatsvervanger), Inktspuw", s.picture.texture != null and "Inktspuw" in s.skills_label.text)
+	check("Ink Worm-pagina: plaatje (art of plaatsvervanger), Ink Spit", s.picture.texture != null and "Ink Spit" in s.skills_label.text)
 	await tap("move_right")
 	await frames(3)
 	check("D-pad rechts: fusie stap 1 ('kies pagina 1'), geen 'Geen'-regel", s.mode == s.MODE_A and s.entries.size() == 3
-			and "pagina 1" in s.header.text and not s.fuse_button.visible)
+			and "page 1" in s.header.text and not s.fuse_button.visible)
 	await tap("cancel")
 	await frames(3)
 	check("B in stap 1: terug naar de Codex (scherm blijft open)", s.mode == "" and m.get_node_or_null("Codex") == s and s.entries.size() == 4)
@@ -320,18 +320,18 @@ func _screen_tests() -> void:
 	await frames(2)
 	check("tik op 'Fusie': stap 1", s.mode == s.MODE_A)
 	await click(s.entries[0])
-	check("pagina 1 = Mech. Wachter -> stap 2", s.mode == s.MODE_B and s.pick_a == p1["uid"] and "pagina 2" in s.header.text)
+	check("pagina 1 = Mech. Warden -> stap 2", s.mode == s.MODE_B and s.pick_a == p1["uid"] and "page 2" in s.header.text)
 	await click(s.entries[0])
-	check("zelfde pagina nog eens: melding, blijft stap 2", s.mode == s.MODE_B and "andere" in s.message_text())
+	check("zelfde pagina nog eens: melding, blijft stap 2", s.mode == s.MODE_B and "different" in s.message_text())
 	s.entries[1].grab_focus()
 	await frames(2)
 	await screenshot("fusie_kies2")
 	await tap("interact")
 	await frames(3)
-	check("pagina 2 = Inktwurm -> voorbeeld", s.mode == s.MODE_PREVIEW and s.pick_b == p2["uid"])
-	check("voorbeeld: Kennis-Beest Lv 7, paars, erft Schild omhoog + Inktspuw, Codex nog onveranderd",
-			"Kennis-Beest" in s.name_label.text and "Lv 7" in s.name_label.text and s.picture.material != null
-			and "Schild omhoog" in s.skills_label.text and "Inktspuw" in s.skills_label.text and GameState.codex_pages.size() == 3)
+	check("pagina 2 = Ink Worm -> voorbeeld", s.mode == s.MODE_PREVIEW and s.pick_b == p2["uid"])
+	check("voorbeeld: Lore Beast Lv 7, paars, erft Shield Up + Ink Spit, Codex nog onveranderd",
+			"Lore Beast" in s.name_label.text and "Lv 7" in s.name_label.text and s.picture.material != null
+			and "Shield Up" in s.skills_label.text and "Ink Spit" in s.skills_label.text and GameState.codex_pages.size() == 3)
 	check("voorbeeld: 'Fuseren!' + 'Annuleren', >= 16 hoog, focus op Fuseren", s.entries.size() == 2 and s.entries.all(func(e): return e.size.y >= 16)
 			and s.entries[0].has_focus() and s.parents_label.visible)
 	_layout_checks(s, "voorbeeld")
@@ -345,11 +345,11 @@ func _screen_tests() -> void:
 	await tap("interact")
 	await frames(4)
 	var newp: Dictionary = GameState.codex_pages[0]
-	check("Fuseren!: 2 pagina's, Kennis-Beest op plek 1, ouders weg, melding", s.mode == "" and GameState.codex_pages.size() == 2
+	check("Fuseren!: 2 pagina's, Lore Beast op plek 1, ouders weg, melding", s.mode == "" and GameState.codex_pages.size() == 2
 			and newp["species"] == "kennis_beest" and GameState.codex_page(p1["uid"]).is_empty() and GameState.codex_page(p2["uid"]).is_empty()
-			and "Fusie gelukt" in s.message_text())
-	check("Inktwurm was bondgenoot -> Kennis-Beest is het; lijst '*' + focus op de nieuwe", GameState.codex_active == newp["uid"]
-			and s.entry_text(0).begins_with("* Kennis-Beest") and s.entries[0].has_focus() and s.picture.material != null)
+			and "Fusion succeeded" in s.message_text())
+	check("Ink Worm was bondgenoot -> Lore Beast is het; lijst '*' + focus op de nieuwe", GameState.codex_active == newp["uid"]
+			and s.entry_text(0).begins_with("* Lore Beast") and s.entries[0].has_focus() and s.picture.material != null)
 	s.confirm_fusion()      # nog eens bevestigen (dubbel tikken) mag niets doen
 	await frames(2)
 	check("nog eens 'Fuseren!' na de fusie: niets (Codex nog 2 pagina's, geen duplicaat)", GameState.codex_pages.size() == 2)
@@ -361,7 +361,7 @@ func _screen_tests() -> void:
 	var gz := GameState.codex_fuse(p3["uid"], w2["uid"])
 	s.rebuild(gz["uid"])
 	await frames(2)
-	check("glitch-variant 'Glitchkruiper' (13 tekens) past in de lijst: '%s'" % s.entry_text(1), "Glitchkruiper Lv13" in s.entry_text(1))
+	check("glitch-variant 'Root Glitch' (13 tekens) past in de lijst: '%s'" % s.entry_text(1), "Root Glitch" in s.entry_text(1) and "Lv13" in s.entry_text(1))
 	var past := true
 	for e in s.entries:
 		var f: Font = e.get_theme_font("font")
@@ -376,7 +376,7 @@ func _screen_tests() -> void:
 	s.rebuild()
 	await frames(2)
 	await click(s.fuse_button)
-	check("maar 1 pagina: 'Fusie' geeft een melding, geen stap 1", s.mode == "" and "twee pagina" in s.message_text())
+	check("maar 1 pagina: 'Fusie' geeft een melding, geen stap 1", s.mode == "" and "two pages" in s.message_text())
 	await tap("cancel")
 	await frames(3)
 	m.close()
@@ -423,12 +423,12 @@ func _battle_tests() -> void:
 	setup()
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("Golemhal geladen", false)
+		check("Golem Hall geladen", false)
 		return
 	var a := GameState.codex_add("inktwurm", 3)
 	var b := GameState.codex_add("mosslijm", 3)
 	var g := GameState.codex_fuse(a["uid"], b["uid"])
-	check("Inktwurm + Mosslijm (geen regel) = Glitchwurm, bondgenoot", g["name"] == "Glitchwurm" and GameState.codex_active == g["uid"])
+	check("Ink Worm + Moss Slime (geen regel) = Glitch Worm, bondgenoot", g["name"] == "Glitch Worm" and GameState.codex_active == g["uid"])
 	var bt := await start_battle(["inktwurm", "papiergeest"])
 	if bt == null:
 		check("gevecht gestart", false)
@@ -441,14 +441,14 @@ func _battle_tests() -> void:
 			and node._sprite.modulate != Color.WHITE)
 	var e0: Dictionary = bt.enemies[0]
 	var en: TextureButton = e0["node"]
-	check("Inktwurm als vijand: naam, plaatje (%s), HP %d" % [GD.enemy_sprite(GD.ENEMIES["inktwurm"]), e0["s"]["max_hp"]],
-			str(e0["name"]).begins_with("Inktwurm") and en.texture_normal != null and int(e0["s"]["max_hp"]) == int(GD.ENEMIES["inktwurm"]["max_hp"]))
-	check("Inktwurm gezien in het bestiarium", GameState.is_seen("inktwurm"))
+	check("Ink Worm als vijand: naam, plaatje (%s), HP %d" % [GD.enemy_sprite(GD.ENEMIES["inktwurm"]), e0["s"]["max_hp"]],
+			str(e0["name"]).begins_with("Ink Worm") and en.texture_normal != null and int(e0["s"]["max_hp"]) == int(GD.ENEMIES["inktwurm"]["max_hp"]))
+	check("Ink Worm gezien in het bestiarium", GameState.is_seen("inktwurm"))
 	await screenshot("inktwurm_gevecht")
 	await screenshot("fusie_bondgenoot")
 	await flee(bt)
 	check("na het gevecht: pagina bestaat nog, nog steeds gefuseerd", CD.is_fused(GameState.codex_page(g["uid"])))
-	check("gevlucht voor de Inktwurm: hij is er nog (uniek, niet verslagen)", GameState.unique_available("inktwurm"))
+	check("gevlucht voor de Ink Worm: hij is er nog (uniek, niet verslagen)", GameState.unique_available("inktwurm"))
 
 
 # ================================================================ deel F: Inktwurm (beslissing Dennis)
@@ -485,19 +485,19 @@ func _unique_tests() -> void:
 		if int(hi[k]) - int(lo[k]) != roundi(1.5 * float(avg[k]) * 10.0):
 			ok_10 = false
 	check("10 levels: groei 1,5x het gemiddelde (HP +%d i.p.v. +%d)" % [hi["max_hp"] - lo["max_hp"], roundi(avg["max_hp"] * 10.0)], ok_10)
-	check("Lv 5-7: geen vaardigheid (alleen aanvallen); Lv 8: Inktspuw", CD.skills_at("inktwurm", 5).is_empty()
+	check("Lv 5-7: geen vaardigheid (alleen aanvallen); Lv 8: Ink Spit", CD.skills_at("inktwurm", 5).is_empty()
 			and CD.skills_at("inktwurm", 7).is_empty() and CD.skills_at("inktwurm", 8) == ["inktspuw"])
 	var page := CD.make_page("inktwurm", 5, "u1")
 	var m7 := CD.give_exp(page, GD.exp_for_level(7) - int(page["exp"]))
 	check("EXP tot Lv 7: nog geen vaardigheid %s" % [page["skills"]], page["level"] == 7 and (page["skills"] as Array).is_empty()
-			and not m7.any(func(x): return "Inktspuw" in x))
+			and not m7.any(func(x): return "Ink Spit" in x))
 	var m8 := CD.give_exp(page, GD.exp_for_level(8) - int(page["exp"]))
-	check("Lv 8: 'leert Inktspuw!' en stats = stats_at(8) %s" % [m8], page["level"] == 8 and page["skills"] == ["inktspuw"]
-			and m8.any(func(x): return "leert Inktspuw" in x) and page["atk"] == CD.stats_at("inktwurm", 8)["atk"]
+	check("Lv 8: 'leert Ink Spit!' en stats = stats_at(8) %s" % [m8], page["level"] == 8 and page["skills"] == ["inktspuw"]
+			and m8.any(func(x): return "learns Ink Spit" in x) and page["atk"] == CD.stats_at("inktwurm", 8)["atk"]
 			and page["max_hp"] == CD.stats_at("inktwurm", 8)["max_hp"])
 	# --- uniek: API
 	GameState.new_game("Dennis")
-	check("nieuw spel: Inktwurm beschikbaar, gewone monsters altijd", GameState.unique_available("inktwurm") and GameState.is_unique("inktwurm")
+	check("nieuw spel: Ink Worm beschikbaar, gewone monsters altijd", GameState.unique_available("inktwurm") and GameState.is_unique("inktwurm")
 			and GameState.unique_available("mosslijm") and not GameState.is_unique("mosslijm"))
 	# --- vangen in het gevecht (in een kamer met tier: telt niet)
 	setup()
@@ -505,7 +505,7 @@ func _unique_tests() -> void:
 	if room == null:
 		check("Archief-ingang geladen", false)
 		return
-	check("kamer met de Inktwurm (zoals Forge hem neerzet): hij verschijnt", await respawn_with_unique(room) == 1)
+	check("kamer met de Ink Worm (zoals Forge hem neerzet): hij verschijnt", await respawn_with_unique(room) == 1)
 	var books := GameState.item_count(CD.BOOK_ITEM)
 	var b := await start_battle(["inktwurm"], false, 3)
 	if b == null:
@@ -514,23 +514,23 @@ func _unique_tests() -> void:
 	var e: Dictionary = b.enemies[0]
 	await wait_battle_state(["command"])
 	var iw: Dictionary = GD.ENEMIES["inktwurm"]
-	check("in een kamer met niveau 3: geen tier op de Inktwurm (HP %d, ATK %d), level 5" % [e["s"]["max_hp"], e["s"]["atk"]],
+	check("in een kamer met niveau 3: geen tier op de Ink Worm (HP %d, ATK %d), level 5" % [e["s"]["max_hp"], e["s"]["atk"]],
 			int(e["s"]["max_hp"]) == int(iw["max_hp"]) and int(e["s"]["atk"]) == int(iw["atk"]) and int(e["s"]["level"]) == 5)
 	b.codex.force_roll = 0.999        # 'slechtste' worp: met 100% toch raak
-	check("Leeg Boek op de Inktwurm (volle HP)", int(e["s"]["hp"]) == int(e["s"]["max_hp"]) and await use_book(b, e))
+	check("Blank Book op de Ink Worm (volle HP)", int(e["s"]["hp"]) == int(e["s"]["max_hp"]) and await use_book(b, e))
 	await wait_until(func(): return b.codex.last_capture.get("result", "") in ["gelukt", "mislukt"], 8.0)
 	check("vangkans 100%% bij volle HP: gelukt (kans %.2f)" % float(b.codex.last_capture.get("chance", 0.0)),
 			b.codex.last_capture.get("result") == "gelukt" and float(b.codex.last_capture["chance"]) == 1.0)
 	check("boek wel gebruikt (%d -> %d)" % [books, GameState.item_count(CD.BOOK_ITEM)], GameState.item_count(CD.BOOK_ITEM) == books - 1)
 	var pg5 := GameState.codex_page(str(b.codex.last_capture.get("page", "")))
-	check("pagina: Inktwurm Lv 5, 2x-stats (HP %d ATK %d), nog geen vaardigheid" % [pg5.get("max_hp", 0), pg5.get("atk", 0)],
+	check("pagina: Ink Worm Lv 5, 2x-stats (HP %d ATK %d), nog geen vaardigheid" % [pg5.get("max_hp", 0), pg5.get("atk", 0)],
 			not pg5.is_empty() and pg5["level"] == 5 and pg5["max_hp"] == iw["max_hp"] and pg5["atk"] == iw["atk"]
 			and pg5["def"] == iw["def"] and pg5["agi"] == iw["agi"] and (pg5["skills"] as Array).is_empty())
 	check("gevangen -> uniek weg ('gevangen')", GameState.unique_state("inktwurm") == "gevangen" and not GameState.unique_available("inktwurm"))
 	await finish()
 	await wait_scene_path(INGANG)
 	room = scene()
-	check("terug in de kamer: de Inktwurm verschijnt niet meer", room != null and await respawn_with_unique(room) == 0)
+	check("terug in de kamer: de Ink Worm verschijnt niet meer", room != null and await respawn_with_unique(room) == 0)
 	var p := player()
 	check("opslaan", GameState.save_game(p.get_tile(), p.facing))
 	check("save bevat 'uniek': {inktwurm: gevangen}", GameState.read_save(GameState.save_path).get("uniek", {}) == {"inktwurm": "gevangen"})
@@ -539,7 +539,7 @@ func _unique_tests() -> void:
 	check("laden: nooit meer (gevangen)", GameState.load_game() and not GameState.unique_available("inktwurm")
 			and GameState.unique_state("inktwurm") == "gevangen")
 	room = await enter(INGANG, "ingang")
-	check("na laden: kamer zonder Inktwurm", room != null and await respawn_with_unique(room) == 0)
+	check("na laden: kamer zonder Ink Worm", room != null and await respawn_with_unique(room) == 0)
 	# --- verslaan
 	setup()
 	room = await enter(INGANG, "ingang")
@@ -556,7 +556,7 @@ func _unique_tests() -> void:
 	# oude save zonder 'uniek' / kapot
 	raw.erase("uniek")
 	_write(GameState.save_path, raw)
-	check("oude save zonder 'uniek': Inktwurm beschikbaar", GameState.load_game() and GameState.unique_available("inktwurm"))
+	check("oude save zonder 'uniek': Ink Worm beschikbaar", GameState.load_game() and GameState.unique_available("inktwurm"))
 	raw["uniek"] = {"inktwurm": "gevangen", "mosslijm": "verslagen", "bestaat_niet": 1}
 	_write(GameState.save_path, raw)
 	check("save met onzin in 'uniek': alleen echte unieke monsters", GameState.load_game() and GameState.unique_done == {"inktwurm": "gevangen"}
@@ -568,7 +568,7 @@ func _unique_tests() -> void:
 	GameState.set_checkpoint(INGANG, Vector2i(2, 2), Vector2i.DOWN)
 	GameState.unique_mark("inktwurm", "verslagen")
 	GameState.respawn_at_checkpoint(false)
-	check("game over: verslagen Inktwurm blijft weg", GameState.unique_state("inktwurm") == "verslagen"
+	check("game over: verslagen Ink Worm blijft weg", GameState.unique_state("inktwurm") == "verslagen"
 			and not GameState.unique_available("inktwurm"))
 	GameState.new_game("Dennis")
 	GameState.set_checkpoint(INGANG, Vector2i(2, 2), Vector2i.DOWN)
@@ -953,7 +953,7 @@ func _codex_button_tests() -> void:
 	setup()
 	var room := await enter(GOLEM_SCENE, "zuid")
 	if room == null:
-		check("Golemhal geladen", false)
+		check("Golem Hall geladen", false)
 		return
 	# --- 1. geen pagina's en geen boeken: knop weg
 	GameState.inventory[CD.BOOK_ITEM] = 0
@@ -972,7 +972,7 @@ func _codex_button_tests() -> void:
 	GameState.inventory[CD.BOOK_ITEM] = 2
 	check("oefengevecht: geen Codex-knop en niet wisselen (ook met boeken)", not bt.codex_command_shown() and not bt.codex.can_swap())
 	bt.tutorial = {}
-	check("met 1 Leeg Boek (0 pagina's) zou de knop er wel zijn", bt.codex_command_shown())
+	check("met 1 Blank Book (0 pagina's) zou de knop er wel zijn", bt.codex_command_shown())
 	GameState.inventory[CD.BOOK_ITEM] = 0
 	await flee(bt)
 	# --- 2. Codex met pagina's: knop, menu, vangen, wisselen
@@ -1020,7 +1020,7 @@ func _codex_button_tests() -> void:
 	check("tik op Codex opent het submenu 'Codex'", opened)
 	var t0: String = bt.menu._entries[0]["text"]
 	check("submenu: Vangen (Boek x2) + Wissel bondgenoot, beide aan ('%s')" % t0, bt.menu._entries.size() == 2
-			and "Boek x2" in t0 and bt.menu._is_enabled(0) and bt.menu._is_enabled(1))
+			and "Book x2" in t0 and bt.menu._is_enabled(0) and bt.menu._is_enabled(1))
 	await pframes(4)
 	check("submenu: regels >= 16 hoog (%.0f)" % bt.menu.row_button(0).size.y, rows_ok(bt))
 	var cr: Rect2 = bt.cross.cross_rect()
@@ -1033,14 +1033,14 @@ func _codex_button_tests() -> void:
 	await pframes(3)
 	var first: Dictionary = bt.target_list[bt.target_index]
 	var hint: String = bt.codex.capture_hint(first)
-	check("doel-label toont de vangkans ('%s')" % bt.target_name_label.text, bt.target_name_label.text == "%s %s (2 boeken)" % [first["name"], hint]
+	check("doel-label toont de vangkans ('%s')" % bt.target_name_label.text, bt.target_name_label.text == "%s %s (2 books)" % [first["name"], hint]
 			and hint.ends_with("%"))
-	check("doel-label toont ook het aantal Lege Boeken", "(2 boeken)" in bt.target_name_label.text)
+	check("doel-label toont ook het aantal Blank Books", "(2 books)" in bt.target_name_label.text)
 	await screenshot("codex_knop_vangen")
 	await tap("move_right")
 	await pframes(2)
 	var second: Dictionary = bt.target_list[bt.target_index]
-	check("ander doel, eigen kans ('%s')" % bt.target_name_label.text, bt.target_name_label.text == "%s %s (2 boeken)" % [second["name"], bt.codex.capture_hint(second)]
+	check("ander doel, eigen kans ('%s')" % bt.target_name_label.text, bt.target_name_label.text == "%s %s (2 books)" % [second["name"], bt.codex.capture_hint(second)]
 			and bt.codex.capture_hint(second) != hint)
 	await tap("cancel")
 	check("B bij het doel: terug naar het Codex-submenu", await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Codex", 3.0))
@@ -1071,15 +1071,15 @@ func _codex_button_tests() -> void:
 		return
 	await tap("move_down")
 	await tap("interact")
-	var wopen: bool = await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Wissel", 3.0)
+	var wopen: bool = await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Swap", 3.0)
 	var texts: Array = bt.menu._entries.map(func(e): return str(e["text"]))
 	check("Wissel-lijst open: %s" % [texts], wopen)
-	var names_ok: bool = texts.size() == 4 and texts[3] == "Geen" and not texts.any(func(t): return "Moskonijn" in t)
-	check("alleen niet-KO pagina's + 'Geen' (Moskonijn KO ontbreekt)", names_ok)
-	check("huidige bondgenoot staat grijs ('nu'), 'Geen' aan", "nu" in texts[0] and not bt.menu._is_enabled(0) and bt.menu._is_enabled(3))
+	var names_ok: bool = texts.size() == 4 and texts[3] == "None" and not texts.any(func(t): return "Moss Rabbit" in t)
+	check("alleen niet-KO pagina's + 'Geen' (Moss Rabbit KO ontbreekt)", names_ok)
+	check("huidige bondgenoot staat grijs ('now'), 'None' aan", "now" in texts[0] and not bt.menu._is_enabled(0) and bt.menu._is_enabled(3))
 	await pframes(3)
 	check("wissel-lijst: regels >= 16, binnen beeld", rows_ok(bt) and in_screen(bt, bt.menu))
-	check("wissel-lijst start op de eerste keuzemogelijkheid (Papiergeest)", bt.menu.selected == 1)
+	check("wissel-lijst start op de eerste keuzemogelijkheid (Paper Wraith)", bt.menu.selected == 1)
 	await screenshot("codex_knop_wissel")
 	var enemy_hp: Array = bt.enemies.map(func(e): return int(e["s"]["hp"]))
 	var old_ally := ally_c(bt)
@@ -1089,21 +1089,21 @@ func _codex_button_tests() -> void:
 	await tap("interact")
 	await next_turn(bt)
 	var al := ally_c(bt)
-	check("gewisseld: Papiergeest vecht mee (%s), actief in de Codex" % str(al.get("name", "")), str(al.get("page", "")) == p2["uid"]
+	check("gewisseld: Paper Wraith vecht mee (%s), actief in de Codex" % str(al.get("name", "")), str(al.get("page", "")) == p2["uid"]
 			and GameState.codex_active == p2["uid"] and bt.codex.last_swap.get("result", "") == "gewisseld")
 	check("oude bondgenoot weg (node vrij), 1 bondgenoot, vakken = helden", not is_instance_valid(old_node)
 			and bt.heroes.filter(func(c): return c.get("ally", false)).size() == 1 and bt.status_boxes.size() == bt.heroes.size()
 			and bt.hero_nodes.size() == bt.heroes.size())
 	check("wissel kost de beurt: %s viel niet aan (vijand-HP %s -> %s)" % [h["name"], enemy_hp, bt.enemies.map(func(e): return int(e["s"]["hp"]))],
-			not seen_message("%s valt aan" % h["name"]) and seen_message("springt uit de Codex"))
-	check("oude bondgenoot keert terug (bericht), pagina bewaard", seen_message("keert terug in de Codex") and not GameState.codex_page(p1["uid"]).is_empty())
+			not seen_message("%s attacks" % h["name"]) and seen_message("leaps out of the Codex"))
+	check("oude bondgenoot keert terug (bericht), pagina bewaard", seen_message("returns to the Codex") and not GameState.codex_page(p1["uid"]).is_empty())
 	# 'Geen'
 	if not await open_codex(bt):
 		check("Codex-submenu (beurt 3)", false)
 		return
 	await tap("move_down")
 	await tap("interact")
-	await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Wissel", 3.0)
+	await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Swap", 3.0)
 	bt.menu.select(bt.menu._entries.size() - 1)
 	await pframes(2)
 	await tap("interact")
@@ -1118,7 +1118,7 @@ func _codex_button_tests() -> void:
 		return
 	await tap("move_down")
 	await tap("interact")
-	await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Wissel", 3.0)
+	await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Swap", 3.0)
 	await pframes(3)
 	var n: int = bt.menu._entries.size()
 	var shown := 0
@@ -1139,7 +1139,7 @@ func _codex_button_tests() -> void:
 	await tap("interact")
 	await wait_battle_state(["target_enemy"], 5)
 	await pframes(2)
-	check("Codex vol: doel-label zegt het ('%s')" % bt.target_name_label.text, "Codex vol (1 boek)" in bt.target_name_label.text)
+	check("Codex vol: doel-label zegt het ('%s')" % bt.target_name_label.text, "Codex full (1 book)" in bt.target_name_label.text)
 	await tap("interact")
 	await next_turn(bt)
 	check("Codex vol: geweigerd, boek blijft (%d)" % GameState.item_count(CD.BOOK_ITEM), bt.codex.last_capture.get("result", "") == "vol"
@@ -1147,7 +1147,7 @@ func _codex_button_tests() -> void:
 	# Item > Leeg Boek werkt nog (zelfde weigering, Codex vol)
 	var ok := await use_book(bt, bt._alive(bt.enemies)[0])
 	await next_turn(bt)
-	check("Item > Leeg Boek werkt nog (zelfde regels: vol -> boek blijft)", ok and bt.codex.last_capture.get("result", "") == "vol"
+	check("Item > Blank Book werkt nog (zelfde regels: vol -> boek blijft)", ok and bt.codex.last_capture.get("result", "") == "vol"
 			and GameState.item_count(CD.BOOK_ITEM) == 1)
 	# 0 boeken: Vangen grijs met reden
 	GameState.inventory[CD.BOOK_ITEM] = 0
@@ -1155,7 +1155,7 @@ func _codex_button_tests() -> void:
 		check("Codex-submenu (0 boeken)", false)
 		return
 	var tv: String = bt.menu._entries[0]["text"]
-	check("0 boeken: 'Vangen' grijs met reden ('%s'), keuze staat op Wissel" % tv, not bt.menu._is_enabled(0) and "geen Leeg Boek" in tv
+	check("0 boeken: 'Capture' grijs met reden ('%s'), keuze staat op Swap" % tv, not bt.menu._is_enabled(0) and "no Blank Book" in tv
 			and bt.menu.selected == 1)
 	bt.menu.selected = 0
 	await tap("interact")
@@ -1165,12 +1165,12 @@ func _codex_button_tests() -> void:
 	await pframes(3)
 	# weigeringen: baas / geen soort / Inktwurm 100%
 	var fake := {"id": "mosslijm", "s": {"hp": 5, "max_hp": 10}, "core": true}
-	check("label bij een baas: 'te machtig'", bt.codex.capture_hint(fake) == "te machtig")
+	check("label bij een baas: 'te machtig'", bt.codex.capture_hint(fake) == "too strong")
 	GameState.codex_pages.pop_back()
 	fake = {"id": "bestaat_niet", "s": {"hp": 5, "max_hp": 10}}
-	check("label bij een niet-soort: 'past niet'", bt.codex.capture_hint(fake) == "past niet")
+	check("label bij een niet-soort: 'past niet'", bt.codex.capture_hint(fake) == "won't fit")
 	fake = {"id": "inktwurm", "s": {"hp": 136, "max_hp": 136}}
-	check("label bij de Inktwurm (volle HP): 100%", bt.codex.capture_hint(fake) == "100%")
+	check("label bij de Ink Worm (volle HP): 100%", bt.codex.capture_hint(fake) == "100%")
 	var act_before := GameState.codex_active
 	await flee(bt)
 	check("na het gevecht: Codex-keuze blijft zoals in het gevecht ('%s')" % act_before, GameState.codex_active == act_before

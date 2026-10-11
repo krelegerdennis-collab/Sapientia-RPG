@@ -12,6 +12,7 @@ const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const GD := preload("res://scripts/data/game_data.gd")
+const Gear := preload("res://scripts/data/grade_gear.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
@@ -276,10 +277,15 @@ func _generator_tests() -> void:
 			and range(1, 100).all(func(i): return Content.tier_for_floor(i) <= Content.tier_for_floor(i + 1)))
 	check("vijanden-pool groeit mee met de verdieping", Content.enemy_pool(1).size() < Content.enemy_pool(30).size()
 			and Content.enemy_pool(30).size() < Content.enemy_pool(100).size())
-	check("alle vijanden en voorwerpen in de inhoud bestaan in game_data.gd",
+	check("alle vijanden en voorwerpen in de inhoud bestaan in game_data of de grade-buit",
 			range(1, 101).all(func(i): return Content.enemy_pool(i).all(func(e): return GD.ENEMIES.has(e)))
 			and range(1, 101).all(func(i): return fresh(1, i)["room"]["chests"].all(func(c): return c["loot"]["items"].all(
-					func(e): return GD.ITEMS.has(e["item"]) or GD.EQUIPMENT.has(e["item"])))))
+					func(e): return _known_item(str(e["item"]))))))
+
+
+## Gewone buit staat in game_data. Grade-stukken en G4-rollen staan in grade_gear (bewust niet in EQUIPMENT).
+func _known_item(id: String) -> bool:
+	return GD.ITEMS.has(id) or GD.EQUIPMENT.has(id) or Gear.has_item(id) or Gear.is_scroll(id)
 
 
 ## Een dictionary zonder Vector2i/Rect2i (zodat JSON.stringify ze vergelijkbaar maakt).
@@ -400,7 +406,7 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 	if room["monsters"].size() != d["monster_slots"].size() + boss_n or room["chests"].size() != d["chest_slots"].size():
 		return "aantal monsters/kisten komt niet overeen met de slots"
 	for c in room["chests"]:
-		if ids.has(c["id"]) or not (GD.ITEMS.has(c["item"]) or GD.EQUIPMENT.has(c["item"])) or int(c["n"]) < 1:
+		if ids.has(c["id"]) or not _known_item(str(c["item"])) or int(c["n"]) < 1:
 			return "kist %s ongeldig" % [c]
 		ids[c["id"]] = true
 	if int(room["tier"]) != Content.tier_for_floor(f) or not str(room["name"]).contains(str(f)) or int(room["dungeon100_floor"]) != f:
@@ -454,7 +460,7 @@ func _state_tests() -> void:
 	var st: Vector2i = Vector2i((sp.position / 16.0).floor()) if sp else Vector2i.ZERO
 	var dist_arch := _world_dist(ground, st, Vector2i(20, 34))
 	var dist_town := _world_dist(ground, st, Vector2i(30, 24))
-	check("de spawn bij de ingang is loopbaar en verbonden met het Wachtershuis en Wilgendal (%d / %d stappen)" % [dist_arch, dist_town],
+	check("de spawn bij de ingang is loopbaar en verbonden met het Wachtershuis en Willowdale (%d / %d stappen)" % [dist_arch, dist_town],
 			_world_walkable(ground, st) and dist_arch > 0 and dist_town > 0 and st == et + D)
 	var overlap := false
 	for e in w.get_node("Exits").get_children():
@@ -532,7 +538,7 @@ func _scene_tests() -> void:
 	player().place_at(et + D, U)
 	await pframes(2)
 	await walk("move_up", 1)
-	check("op de ingang stappen -> Diepe Grot", await wait_scene("Dungeon100"))
+	check("op de ingang stappen -> Deep Cave", await wait_scene("Dungeon100"))
 	await wait_fade()
 	var r := scene()
 	check("verdieping 1 en een gekozen seed: %d / %d" % [GameState.dungeon100_floor, GameState.dungeon100_seed],
@@ -542,7 +548,7 @@ func _scene_tests() -> void:
 	clear_monsters(r)
 	check("speler staat op de ingang (spawn_up %s), kijkt omlaag" % [d["spawn_up"]], tile() == d["spawn_up"] and player().facing == D)
 	check("kamer is dezelfde als de generator: id, naam, layout, monsters en kisten",
-			r.room_id == Gen.room_id(run_seed, 1) and r.map_name == "Diepe Grot - Verdieping 1" and r.room["layout"] == d["layout"]
+			r.room_id == Gen.room_id(run_seed, 1) and r.map_name == "Deep Cave - Floor 1" and r.room["layout"] == d["layout"]
 			and r.chests.size() == d["chest_slots"].size() and r.cell(d["stairs_down"]) == 58 and r.cell(d["stairs_up"]) == 45
 			and not r.is_wall(d["spawn_up"]) and r.is_wall(d["spawn_up"] + Vector2i(-3, -3)))
 	check("geen random encounters in de grot, terrein = archief", not r.encounters and r.terrain_at(d["spawn_up"]) == "archief")
@@ -558,7 +564,7 @@ func _scene_tests() -> void:
 	var r2 := scene()
 	var d2: Dictionary = Gen.generate(run_seed, 2)
 	check("verdieping 2: nieuwe kamer, speler op de ingang (ladder) van 2: %s" % tile(),
-			r2 != r and r2.floor_no == 2 and r2.map_name == "Diepe Grot - Verdieping 2" and tile() == d2["spawn_up"]
+			r2 != r and r2.floor_no == 2 and r2.map_name == "Deep Cave - Floor 2" and tile() == d2["spawn_up"]
 			and r2.room["layout"] == d2["layout"] and d2["layout"] != d["layout"])
 	clear_monsters(r2)
 	await screenshot("d100_verdieping2")
@@ -619,6 +625,6 @@ func _scene_tests() -> void:
 	check("na laden: verdieping 1, seed %d" % run_seed, GameState.dungeon100_floor == 1 and GameState.dungeon100_seed == run_seed)
 	GameState._go_to_scene(GameState.return_map)
 	await wait_floor(1)
-	check("na laden: Diepe Grot verdieping 1, speler op de opgeslagen tegel %s" % tile(),
+	check("na laden: Deep Cave verdieping 1, speler op de opgeslagen tegel %s" % tile(),
 			scene().floor_no == 1 and scene().room["layout"] == d["layout"] and tile() == d["spawn_down"])
 	GameState.encounter_multiplier = 1.0

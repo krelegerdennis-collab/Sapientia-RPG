@@ -95,9 +95,9 @@ func _rules_tests() -> void:
 		ok = ok and cp <= f and f - cp < 10 and (cp == 0 or R.is_rest_floor(cp))
 		ok = ok and (R.is_rest_floor(f) == (cp == f))
 	check("checkpoint_for klopt voor alle 100 verdiepingen", ok)
-	check("HUD-tekst: 'Verdieping 12/100'", R.hud_text(12) == "Verdieping 12/100" and R.hud_text(1) == "Verdieping 1/100"
-			and R.hud_text(100) == "Verdieping 100/100")
-	check("HUD-tekst klemt op 0..100", R.hud_text(500) == "Verdieping 100/100" and R.hud_text(-2) == "Verdieping 0/100")
+	check("HUD-tekst: 'Floor 12/100'", R.hud_text(12) == "Floor 12/100" and R.hud_text(1) == "Floor 1/100"
+			and R.hud_text(100) == "Floor 100/100")
+	check("HUD-tekst klemt op 0..100", R.hud_text(500) == "Floor 100/100" and R.hud_text(-2) == "Floor 0/100")
 	check("HUD alleen op verdieping 1..100", R.shows_hud(1) and R.shows_hud(100) and not R.shows_hud(0)
 			and not R.shows_hud(101) and not R.shows_hud(-1))
 	check("checkpoint_after_rest: nieuw rustpunt telt, lager verlaagt niet, geen rustverdieping = niets",
@@ -243,7 +243,7 @@ func _strip_and_scroll_tests() -> void:
 	var fuse_element := str(fused["element"])
 	GameState.codex_set_active(worm_uid)
 	var next_before := GameState.codex_next_id
-	check("voor de grot: Noor level 8 met spreuken en staf, Inktwurm kent Inktspuw",
+	check("voor de grot: Noor level 8 met spreuken en staf, Ink Worm kent Ink Spit",
 			int(GameState.party[1]["level"]) == 8 and (GameState.party[1]["spells"] as Array).has("vuur")
 			and (GameState.party[1]["spells"] as Array).has("bliksem") and (GameState.party[1]["spells"] as Array).has("genees")
 			and noor_weapon == "eiken_staf" and (worm["skills"] as Array).has("inktspuw")
@@ -274,31 +274,37 @@ func _strip_and_scroll_tests() -> void:
 			and (run_fuse.get("skills", []) as Array) == CD.skills_at(str(run_fuse.get("species", "")), 1))
 	var dennis: Dictionary = GameState.party[0]
 	var inv := {"spreuk_vuur": 1}
-	var taught := PA.use_item(inv, "spreuk_vuur", dennis)
-	check("Vuurrol leert Dennis Vuur, vult zijn MP en is op", taught["ok"] and (dennis["spells"] as Array).has("vuur")
-			and not inv.has("spreuk_vuur") and int(dennis["max_mp"]) >= 4 and int(dennis["mp"]) >= 4
-			and str(taught["text"]) == "Dennis leert Vuur!")
+	var refused := PA.use_item(inv, "spreuk_vuur", dennis)
+	check("Dennis leert geen magie van een rol", not refused["ok"] and inv.has("spreuk_vuur")
+			and (dennis["spells"] as Array).is_empty() and str(refused["text"]) == "Dennis leert geen magie.")
+	var noor: Dictionary = GameState.party[1]
+	noor["max_mp"] = 0
+	noor["mp"] = 0
+	var taught := PA.use_item(inv, "spreuk_vuur", noor)
+	check("Fire Scroll leert Noor Fire, vult haar MP en is op", taught["ok"] and (noor["spells"] as Array).has("vuur")
+			and not inv.has("spreuk_vuur") and int(noor["max_mp"]) >= 4 and int(noor["mp"]) >= 4
+			and str(taught["text"]) == "Noor learns Fire!")
 	var again := {"spreuk_vuur": 1}
-	var second := PA.use_item(again, "spreuk_vuur", dennis)
+	var second := PA.use_item(again, "spreuk_vuur", noor)
 	check("een rol voor een spreuk die je al kent doet niets", not second["ok"] and int(again["spreuk_vuur"]) == 1
-			and (dennis["spells"] as Array).size() == 1 and int(dennis["max_mp"]) == 4)
-	var mp_before := int(dennis["max_mp"])
+			and (noor["spells"] as Array).size() == 1 and int(noor["max_mp"]) == 4)
+	var mp_before := int(noor["max_mp"])
 	var genees := {"spreuk_genees": 1}
-	var healed := PA.use_item(genees, "spreuk_genees", dennis)
-	check("Geneesrol leert Genees zonder de MP-voorraad te verlagen", healed["ok"] and (dennis["spells"] as Array).has("genees")
-			and not genees.has("spreuk_genees") and int(dennis["max_mp"]) == mp_before)
+	var healed := PA.use_item(genees, "spreuk_genees", noor)
+	check("Heal Scroll leert Noor Heal (Grade 1 licht) zonder de MP-voorraad te verlagen", healed["ok"]
+			and (noor["spells"] as Array).has("genees") and not genees.has("spreuk_genees")
+			and int(noor["max_mp"]) == mp_before)
 	dennis["hp"] = 0
 	var bliksem := {"spreuk_bliksem": 1}
 	var ko := PA.use_item(bliksem, "spreuk_bliksem", dennis)
 	check("een bewusteloze held leert niets", not ko["ok"] and int(bliksem["spreuk_bliksem"]) == 1)
 	dennis["hp"] = int(dennis["max_hp"])
-	var noor: Dictionary = GameState.party[1]
 	var noor_rol := {"spreuk_bliksem": 1}
 	var noor_learn := PA.use_item(noor_rol, "spreuk_bliksem", noor)
-	check("Noor kan tijdens de run Bliksem opnieuw leren", noor_learn["ok"] and (noor["spells"] as Array) == ["bliksem"]
+	check("Noor kan tijdens de run Lightning leren", noor_learn["ok"] and (noor["spells"] as Array).has("bliksem")
 			and int(noor["max_mp"]) >= 7)
 	check("een rol is in het veld te gebruiken", PA.item_usable_in_field("spreuk_vuur") and PA.item_block_reason("spreuk_vuur") == ""
-			and PA.item_effect_text("spreuk_vuur") == "Leert de spreuk Vuur.")
+			and PA.item_effect_text("spreuk_vuur") == "Teaches the spell Fire.")
 	check("de run eindigt", GameState.dungeon100_end_run(false))
 	check("na de grot: levels, spreuken, staf en Codex zijn weer van voor de run",
 			int(GameState.party[0]["level"]) == 9 and (GameState.party[0]["spells"] as Array).is_empty()
@@ -340,7 +346,7 @@ func _hud_tests() -> void:
 	GameState.dungeon100_floor = 12
 	await pframes(3)
 	check("verdieping 12: HUD zichtbaar met 12", hud.visible and hud.shown_floor == 12)
-	check("HUD geeft de tekst 'Verdieping 12/100'", R.hud_text(hud.shown_floor) == "Verdieping 12/100")
+	check("HUD geeft de tekst 'Floor 12/100'", R.hud_text(hud.shown_floor) == "Floor 12/100")
 	check("HUD houdt het hoogste bereikte verdieping bij (best = 12)", GameState.dungeon100_best == 12)
 	var r: Rect2 = hud.pill_rect()
 	check("HUD staat linksboven in beeld (niet over de MENU-knop rechtsboven)", r.position.x >= 4 and r.position.y >= 2
@@ -404,7 +410,7 @@ func _rustpunt_tests() -> void:
 	await pframes(2)
 	check("aanraken opent een tekstvak", Dialog.is_open)
 	await close_dialog_until_choice()
-	check("na de tekst komt de vraag 'opslaan?' met Ja/Nee", Dialog.choices.size() == 2 and "opslaan" in str(Dialog._lines[0]).to_lower())
+	check("na de tekst komt de vraag 'opslaan?' met Ja/Nee", Dialog.choices.size() == 2 and "save" in str(Dialog._lines[0]).to_lower())
 	for i in 6:
 		await press_interact()       # keuze 0 = Ja (eerste druk maakt de tekst af)
 		if await wait_until(func(): return rp.last_result in ["saved", "failed"], 0.5):
@@ -455,7 +461,7 @@ func _rustpunt_tests() -> void:
 func close_dialog_until_choice() -> void:
 	for i in 20:
 		if Dialog.choices.size() == 2 and Dialog.is_open and not Dialog._lines.is_empty() \
-				and "opslaan" in str(Dialog._lines[0]).to_lower():
+				and "save" in str(Dialog._lines[0]).to_lower():
 			break
 		await press_interact()
 		await pframes(2)
@@ -487,7 +493,7 @@ func _defeat_tests() -> void:
 	GameState.party[0]["hp"] = 0
 	GameState.return_map = TOWN
 	GameState.in_battle = true
-	check("game-over-tekst: dood is het Archief uit", GameState.defeat_text(false).contains("Archief uit"))
+	check("game-over-tekst: death means out of the Archive", GameState.defeat_text(false).contains("out of the Archive"))
 	GameState.end_battle("lose")
 	var ok := await wait_scene("Wereldkaart", 20.0)
 	await wait_fade()

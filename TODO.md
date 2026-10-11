@@ -1,50 +1,16 @@
 # TODO — toekomstige updates
 
-Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af is.
-
-## Save System
-
-- [ ] Meerdere laadstanden op het hoofdmenu
-  Bij "Continue" zijn meerdere save slots zichtbaar, niet alleen de laatste save.
-
-- [ ] Vier aparte save slots
-  Het save-systeem ondersteunt 4 losse slots.
-
-- [ ] Load-knop op het hoofdmenu
-  Een eigen Load-knop, los van "Continue".
+Afvinken alleen als het echt af is. Open punten zijn nog ontwerp of nog niet gebouwd.
 
 ## Wereld & Levels
 
-- [ ] Eerste Archief herschalen
-  Moeilijkheidsgraad en level van het eerste Archief van 10 naar 7.
+Uniek superwapen per karakter (alleen Grade 4, drop vanaf verdieping 80):
 
-- [ ] Blauwe kist-items in de Diepe Grot schalen, plus een rarity-systeem
-  De beloningen uit blauwe kisten in de grot van 100 verdiepingen schalen mee met de diepte. Sommige items droppen alleen uit een blauwe kist vanaf een vaste verdieping (floor-gated loot, niet puur willekeurig).
+- [ ] Aan te vullen zodra nieuwe karakters of classes in het verhaal komen
 
-  Affixes zijn vast per item: geen random rolls. Elk Grade 3- en Grade 4-item heeft vooraf bepaalde affixes die bij dat item horen. Grade 1 en 2 krijgen geen affixes.
+Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laarzen; alleen de eigen set, geen mix):
 
-  - Grade 1 (early game): verdieping 1–20
-  - Grade 2 (midgame): verdieping 20–50
-  - Grade 3 (endgame): verdieping 50–80
-  - Grade 4 (endgame++): verdieping 80–99
-
-  - [ ] Grade 3 items: vast affix-systeem (basis affixes, per item voorgedefinieerd)
-  - [ ] Grade 4 items: uitgebreid vast affix-systeem (sterkere en meerdere affixes per item)
-  - [ ] Grade 1 en 2 items: geen affixes, blijven puur stat-gebaseerd
-  - [ ] Eén uniek super wapen per karakter (alleen Grade 4, drop vanaf verdieping 80)
-    - [ ] Dennis: super zwaard (fysiek)
-    - [ ] Noor: super staf (natuur/magisch; zij is een mage)
-    - [ ] Lotte: super staf (licht/magisch; priester)
-    - [ ] Aan te vullen zodra nieuwe karakters of classes in het verhaal komen
-  - [ ] Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laarzen; alleen de eigen set, geen mix)
-    - [ ] Plated Armour set — Dennis (zwaar/defensief, vaste affixes per stuk)
-    - [ ] Robes set — Lotte (licht/magisch, vaste affixes per stuk)
-    - [ ] Natuur/Robes set — Noor (natuur/magisch, vaste affixes per stuk)
-    - [ ] Aan te vullen voor toekomstige karakters
-  - [ ] Grade 4 accessoires (niet class-gebonden)
-    - [ ] Accessoires toevoegen aan de Grade 4 loot table
-    - [ ] Voor elk karakter bruikbaar, zonder class-restrictie
-    - [ ] Vaste affixes per accessoire
+- [ ] Aan te vullen voor toekomstige karakters
 
 ### Wereldkaart opbouw
 
@@ -212,54 +178,39 @@ Locatie: Worldmap 1 (start-eiland), tweede Archief. Thema: Leven. Grootte: verge
 ## Content
 
 - [ ] Bestiarium uitwerken tot endgame
-  Alle monsters tot en met de eindgame opnemen, met een entry, stats en lore-tekst per monster.
+  De bestaande eindbazen van de Diepe Grot (verdieping 10 tot en met 100) hebben een entry en stats uit de bestaande monsterdata.
+  Lore-tekst nog van Dennis: de regels zijn nu kort en feitelijk, geen canon-lore.
 
 ## Dorpen & Shops
-
-### Eerste dorp: Wilgendal
-
-- [ ] Wilgendal activeren als eerste dorp
-  Huidige status: nog niet actief, alleen een placeholder.
-
-### Shops in Wilgendal
-
-- [ ] Armour shop
-- [ ] Wapen shop
-- [ ] Accessoire shop
-- [ ] Magic shop
 
 ### Magic tier list
 
 Magie heeft 4 grades. Grade 1 tot en met 3 zijn te koop in de magic shop en worden per act vrijgespeeld. Grade 4 is niet te koop: die dropt alleen uit blauwe kisten in de Diepe Grot (verdieping 80+). Per tier 4 spreuken. Niet alles is in Act 1 beschikbaar.
 
 - [ ] Magic tier list opzetten (4 grades × 4 spreuken = 16 spreuken per element)
-- [ ] Grade 1 tot en met 3 in de magic shop (prijs loopt op per grade)
-- [ ] Grade 4 alleen als drop uit blauwe kisten (Diepe Grot, verdieping 80–99)
-- [ ] Tiers vrijspelen per act (Act 1 = alleen Grade 1)
+  De volledige 4×16-lijst is nog ontwerp. De kleine lijst van 20 spreuken (één per grade per element: vuur, natuur, bliksem, licht, ijs) is bevestigd en geldt tot nader order. Fire, Lightning en Heal blijven zo heten.
 - [ ] Per spreuk eigen data: damage, healing en effect schalen per grade
+  Geldt voor de volledige 16 per element, die er nog niet is. De kleine lijst van 20 heeft bevestigde mp en power per grade.
 
 ### Elements en karakters
 
-- [ ] Dennis: geen magie
-  Dennis krijgt alleen kernkrachten. Dat zijn geen shop-items.
-- [ ] Noor (mage): Vuur, Natuur en Bliksem
-  - [ ] Extra elementen per latere act bepalen
-  - [ ] Ook Grade 1 Licht (healen), beperkt tot niveau 1
-  - [ ] Grade 2 en hoger Licht niet voor Noor
-- [ ] Lotte (priester): Licht als healing en buffs (hoofdrol)
-  - [ ] IJs als aanvalsmagie (voorlopig het enige aanvals-element)
-  - [ ] Geen Vuur, Natuur of Bliksem
+Noor (mage): Vuur, Natuur en Bliksem.
 
-### Beschikbaarheid shops
+- [ ] Extra elementen per latere act bepalen
 
-- [ ] Niet alle items direct beschikbaar in Wilgendal; selectie per act
-- [ ] Shop-voorraad laten meeschalen met verhaalprogressie
-- [ ] Magic grades per act vrijspelen (Act 1 = Grade 1, enzovoort)
+### Nog te bevestigen
 
-### Algemeen
+- Volledige 4×16-spreukenlijst. De kleine lijst van 20 is bevestigd en geldt tot nader order.
+- Toekomstige helden (eigen G4-wapen en set).
+- Gerrits quest.
+  Gerrits quest is niet gebouwd.
+- Echte lore van de eindbazen in het bestiarium.
+- Extra elementen voor Noor in latere acts.
+- Wereldkaart, warps en de act-koppeling aan de eilanden.
 
-- [ ] Verkoop-systeem in shops
-  Sluit aan op de eerdere TODO: items verkoopbaar.
+Bevestigd en dus geen open ontwerp meer: winkelprijzen en voorraad, magieprijs 160×grade², verkoop op de helft, grade-statcijfers en grenzen, winkel-act via party-level, archiefschaal 0,7 / EXP 0,50, Golem HP 360 / ATK 27 / DEF 15, Jelle als één smid met twee balies, kort zwaard ATK +3.
+
+Techniek: de headless testsuites draaien via `.github/workflows/tests.yml` (Godot 4.3-stable). De web-export naar Pages (`cursor/web-build-29ec`) blijft handmatig: Godot 4.7.2, threads uit. Er is geen script en geen bot-token die die branch vanuit Actions pusht.
 
 ## World Warper
 

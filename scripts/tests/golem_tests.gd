@@ -107,21 +107,22 @@ func _core_rule_tests() -> void:
 	# berichten: Nederlands en kort genoeg voor de strook (max. ~60 tekens)
 	var name: String = GD.ENEMIES["kennis_beest"]["name"]
 	var texts := [BossCore.MSG_HINT, BossCore.MSG_OPEN % name, BossCore.MSG_WINDOW, BossCore.MSG_BREAK % name,
-			BossCore.MSG_SLAM % [name, "Hamerslag"], BossCore.MSG_CLOSE]
+			BossCore.MSG_SLAM % [name, "Hammer Blow"], BossCore.MSG_CLOSE]
 	check("berichten passen in de strook (%s)" % [texts.map(func(t): return t.length())],
 			texts.all(func(t): return t.length() <= 60))
-	check("telegraaf-bericht: 'De kern gloeit roze! Het Kennis-Beest laadt op...'",
-			BossCore.MSG_OPEN % name == "De kern gloeit roze! Het Kennis-Beest laadt op...")
+	check("telegraaf-bericht: 'De kern gloeit roze! The Knowledge Beast laadt op...'",
+			BossCore.MSG_OPEN % name == "The core glows pink! The Knowledge Beast charges...")
 
 
 # ================================================================ deel B
 func _data_tests() -> void:
 	var g := _boss_data()
-	var want_g := {"max_hp": 400, "atk": 33, "def": 22, "agi": 6, "mag": 16, "mdef": 18, "exp": 300, "gold": 120}
+	var want_g := {"max_hp": 360, "atk": 27, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "exp": 210, "gold": 84}
 	var ok := true
 	for k in want_g:
 		ok = ok and int(g.get(k, -1)) == int(want_g[k])
-	check("v0.15 Golem-baas (Lv 10 + Vonkzwaard +12; Forge par. 8, HP 340 -> 400): HP 400, ATK 33, DEF 22, SPD 6, MAG 16, MDEF 18, EXP 300, Goud 120", ok)
+	check("Golem-baas voor Dennis Lv 7 + Spark Sword: HP 360, ATK 27, DEF 15, SPD 6, MAG 11, MDEF 13, EXP 210, Goud 84", ok)
+	check("Eerste Archief mikt op level 7", GD.EERSTE_ARCHIEF_DOEL == 7)
 	check("kern blijft: elke 3e ronde, x0,4 / x2, Hamerslag x2,2; drempel nu 45",
 			int(g["core"]["cycle"]) == 3 and is_equal_approx(float(g["core"]["closed_mult"]), 0.4)
 			and is_equal_approx(float(g["core"]["open_mult"]), 2.0) and is_equal_approx(float(g["core"]["slam_power"]), 2.2)
@@ -130,27 +131,27 @@ func _data_tests() -> void:
 			g["weak"] == ["vuur"] and g["resist"] == ["bliksem"] and str(g["sprite"]).ends_with("golem_boss_v2.png")
 			and str(g["under"]).ends_with("golem_runecirkel.png") and not g.has("boss") and g.has("core"))
 	var kb: Dictionary = GD.ENEMIES["kennis_beest"]
-	check("gewoon Kennis-Beest (zwakke Golem-variant) blijft 46/14/7/6, 24 EXP",
+	check("gewoon Lore Beast (zwakke Golem-variant) blijft 46/14/7/6, 24 EXP",
 			int(kb["max_hp"]) == 46 and int(kb["atk"]) == 14 and int(kb["def"]) == 7 and int(kb["agi"]) == 6 and int(kb["exp"]) == 24)
 	var mw: Dictionary = GD.ENEMIES["mech_wachter"]
 	var want_w := {"max_hp": 30, "atk": 12, "def": 8, "agi": 5, "mag": 0, "mdef": 4, "exp": 10, "gold": 8}
 	ok = true
 	for k in want_w:
 		ok = ok and int(mw.get(k, -1)) == int(want_w[k])
-	check("Mech. Wachter basis (niveau 1) blijft: HP 30, ATK 12, DEF 8, SPD 5, MAG 0, MDEF 4, EXP 10, Goud 8, zwak bliksem",
+	check("Mech. Warden basis (niveau 1) blijft: HP 30, ATK 12, DEF 8, SPD 5, MAG 0, MDEF 4, EXP 10, Goud 8, zwak bliksem",
 			ok and mw["weak"] == ["bliksem"])
 	var guard: Array = mw["skills"].filter(func(sk): return str(sk.get("type", "")) == "guard")
-	check("Mech. Wachter: trucje 'Schild omhoog' (20%, DEF x2) + Zegelslag", guard.size() == 1
-			and str(guard[0]["name"]) == "Schild omhoog" and is_equal_approx(float(guard[0]["chance"]), 0.2)
+	check("Mech. Warden: trucje 'Shield Up' (20%, DEF x2) + Seal Strike", guard.size() == 1
+			and str(guard[0]["name"]) == "Shield Up" and is_equal_approx(float(guard[0]["chance"]), 0.2)
 			and is_equal_approx(float(guard[0]["def_mult"]), 2.0)
-			and mw["skills"].any(func(sk): return str(sk["name"]) == "Zegelslag"))
-	check("Mech. Wachter blijft tussen de kleine vijanden en het Kennis-Beest (dungeontest)",
+			and mw["skills"].any(func(sk): return str(sk["name"]) == "Seal Strike"))
+	check("Mech. Warden blijft tussen de kleine vijanden en het Lore Beast (dungeontest)",
 			["mosslijm", "moskonijn", "papiergeest", "glitchmot"].all(func(e): return int(GD.ENEMIES[e]["max_hp"]) < int(mw["max_hp"]))
 			and int(mw["max_hp"]) < int(kb["max_hp"]) and int(mw["atk"]) < int(kb["atk"]))
 	var az: Dictionary = GD.EQUIPMENT["vonkzwaard"]
-	check("Vonkzwaard: wapen voor krijgers, ATK +12 (keuze Dennis; Kort zwaard +%d)" % int(GD.EQUIPMENT["kort_zwaard"]["atk"]),
+	check("Spark Sword: wapen voor krijgers, ATK +12 (keuze Dennis; Short Sword +%d)" % int(GD.EQUIPMENT["kort_zwaard"]["atk"]),
 			az["slot"] == "wapen" and az["wie"] == ["krijger"] and int(az["atk"]) == 12)
-	check("Golem in de Golemhal (4D) = baasgevecht met kennis_beest, geen andere monsters daar",
+	check("Golem in de Golem Hall (4D) = baasgevecht met kennis_beest, geen andere monsters daar",
 			DR.ROOMS["archief_golemhal"]["monsters"].size() == 1 and DR.ROOMS["archief_golemhal"]["monsters"].any(func(m): return m["id"] == "golem" and m["enemy"] == "kennis_beest" and m.get("boss", false)))
 	# v0.14 (Forge): EXP bij de Golem = oefengevecht (Mosslijm) + elk map-monster in de 4 verdiepingen
 	# (34 gevechten, hele groep, met het monsterniveau van de kamer) één keer.
@@ -161,13 +162,13 @@ func _data_tests() -> void:
 			if not m.get("boss", false):
 				fights += 1
 				for e in m.get("group", [m["enemy"]]):
-					exp_total += int(GD.apply_tier(GD.ENEMIES[e], int(DR.ROOMS[rid].get("tier", 0)))["exp"])
+					exp_total += int(GD.apply_archief_tier(GD.ENEMIES[e], int(DR.ROOMS[rid].get("tier", 0)))["exp"])
 	var lv := 1
 	while GD.exp_for_level(lv + 1) <= exp_total:
 		lv += 1
 	print("INFO  EXP voor de Golem (oefengevecht + 34 gevechten met tiers): %d -> Lv %d" % [exp_total, lv])
-	check("34 gevechten; Dennis is bij de Golem Lv 9-11 (%d EXP, Lv %d) = de doelgroep van de balans" % [exp_total, lv],
-			fights == 34 and lv >= 9 and lv <= 11)
+	check("34 gevechten; Dennis is bij de Golem Lv 7 (%d EXP, Lv %d)" % [exp_total, lv],
+			fights == 34 and lv == GD.EERSTE_ARCHIEF_DOEL)
 
 
 # ================================================================ deel C
@@ -257,38 +258,38 @@ const BOSS_BAG := [30, 30, 30, 25, 25, 25]
 
 func _balance_tests() -> void:
 	seed(2026)
-	# Dennis Lv 10 zoals het spel hem maakt
-	var d10 := _dennis(10)
-	print("INFO  Dennis Lv 10 (+Vonkzwaard): HP %d, ATK %d, DEF %d, SPD %d (EXP %d)"
-			% [d10["max_hp"], d10["atk"], d10["def"], d10["agi"], GD.exp_for_level(10)])
-	check("Dennis Lv 10 met Vonkzwaard: HP 123, ATK 53 (41+12), DEF 26, SPD 18",
-			int(d10["max_hp"]) == 123 and int(d10["atk"]) == 53 and int(d10["def"]) == 26 and int(d10["agi"]) == 18
-			and int(d10["level"]) == 10)
+	# Dennis Lv 7 zoals het spel hem maakt
+	var d7 := _dennis(7)
+	print("INFO  Dennis Lv 7 (+Spark Sword): HP %d, ATK %d, DEF %d, SPD %d (EXP %d)"
+			% [d7["max_hp"], d7["atk"], d7["def"], d7["agi"], GD.exp_for_level(7)])
+	check("Dennis Lv 7 met Spark Sword: HP 96, ATK 44 (32+12), DEF 20, SPD 15",
+			int(d7["max_hp"]) == 96 and int(d7["atk"]) == 44 and int(d7["def"]) == 20 and int(d7["agi"]) == 15
+			and int(d7["level"]) == 7)
 	var boss := _boss_data()
-	var min_open := roundi(roundi((float(d10["atk"]) - float(boss["def"]) / 2.0) * 0.85) * 2.0)
-	check("drempel 45: elke klap van Dennis Lv 10 op de open kern haalt hem (min. %d)" % min_open, min_open >= 45)
+	var min_open := roundi(roundi((float(d7["atk"]) - float(boss["def"]) / 2.0) * 0.85) * 2.0)
+	check("drempel 45: elke klap van Dennis Lv 7 op de open kern haalt hem (min. %d)" % min_open, min_open >= 45)
 	var weak_open := roundi((25.0 - float(boss["def"]) / 2.0) * 1.15 * 2.0)
 	check("drempel 45: een zwakke klap (ATK 25, bv. later Noor) haalt hem NIET (max. %d)" % weak_open, weak_open < 45)
 	var n := 1500
 	var res := {}
-	for L in [8, 10, 12]:
+	for L in [5, 7, 9]:
 		for pol in ["slim", "domweg", "nooit_kern"]:
 			var r := _rate(L, pol, n, BOSS_BAG)
 			res["%d_%s" % [L, pol]] = r
 			print("INFO  Lv %d %-10s winst %5.1f%%  rondes %4.1f  items %3.1f" % [L, pol, r["win"] * 100.0, r["rounds"], r["items"]])
-	check("Lv 10 (doel), slim spelen: wint >= 97%% (%.1f%%)" % (res["10_slim"]["win"] * 100.0), res["10_slim"]["win"] >= 0.97)
-	check("Lv 10: kost meerdere items (gem. %.1f, >= 3)" % res["10_slim"]["items"], res["10_slim"]["items"] >= 3.0)
-	check("Lv 10: gevecht <= 20 rondes (%.1f)" % res["10_slim"]["rounds"], res["10_slim"]["rounds"] <= 20.0)
-	check("Lv 8: zwaar maar te doen, slim 40-90%% (%.1f%%)" % (res["8_slim"]["win"] * 100.0),
-			res["8_slim"]["win"] >= 0.4 and res["8_slim"]["win"] <= 0.9)
-	check("Lv 12: wint >= 99%% (%.1f%%)" % (res["12_slim"]["win"] * 100.0), res["12_slim"]["win"] >= 0.99)
-	check("Lv 10: domweg aanvallen zonder genezen verliest meestal (%.1f%% < 10%%)" % (res["10_domweg"]["win"] * 100.0),
-			res["10_domweg"]["win"] < 0.1)
-	check("de kern negeren verliest altijd (Lv 8/10/12: %.1f / %.1f / %.1f%%)" % [res["8_nooit_kern"]["win"] * 100.0,
-			res["10_nooit_kern"]["win"] * 100.0, res["12_nooit_kern"]["win"] * 100.0],
-			res["8_nooit_kern"]["win"] == 0.0 and res["10_nooit_kern"]["win"] == 0.0 and res["12_nooit_kern"]["win"] == 0.0)
+	check("Lv 7 (doel), slim spelen: wint >= 97%% (%.1f%%)" % (res["7_slim"]["win"] * 100.0), res["7_slim"]["win"] >= 0.97)
+	check("Lv 7: kost meerdere items (gem. %.1f, >= 3)" % res["7_slim"]["items"], res["7_slim"]["items"] >= 3.0)
+	check("Lv 7: gevecht <= 20 rondes (%.1f)" % res["7_slim"]["rounds"], res["7_slim"]["rounds"] <= 20.0)
+	check("Lv 5: zwaar maar te doen, slim 40-90%% (%.1f%%)" % (res["5_slim"]["win"] * 100.0),
+			res["5_slim"]["win"] >= 0.4 and res["5_slim"]["win"] <= 0.9)
+	check("Lv 9: wint >= 99%% (%.1f%%)" % (res["9_slim"]["win"] * 100.0), res["9_slim"]["win"] >= 0.99)
+	check("Lv 7: domweg aanvallen zonder genezen verliest meestal (%.1f%% < 10%%)" % (res["7_domweg"]["win"] * 100.0),
+			res["7_domweg"]["win"] < 0.1)
+	check("de kern negeren verliest altijd (Lv 5/7/9: %.1f / %.1f / %.1f%%)" % [res["5_nooit_kern"]["win"] * 100.0,
+			res["7_nooit_kern"]["win"] * 100.0, res["9_nooit_kern"]["win"] * 100.0],
+			res["5_nooit_kern"]["win"] == 0.0 and res["7_nooit_kern"]["win"] == 0.0 and res["9_nooit_kern"]["win"] == 0.0)
 	# Info: met de kisten van Forge's plattegrond (Kaftschild DEF+3, Leren Kap DEF+1)
-	for L in [8, 10]:
+	for L in [5, 7]:
 		var hg := _dennis(L)
 		for arm in ["kaftschild", "leren_kap"]:
 			GameState.inventory[arm] = 1
@@ -301,14 +302,14 @@ func _balance_tests() -> void:
 			if r[0]:
 				wins += 1
 				used += int(r[2])
-		print("INFO  Lv %d + Kaftschild + Leren Kap (DEF %d): slim winst %.1f%%, items %.1f" % [L, hg["def"], wins * 100.0 / n, float(used) / maxi(1, wins)])
+		print("INFO  Lv %d + Cover Shield + Leather Hood (DEF %d): slim winst %.1f%%, items %.1f" % [L, hg["def"], wins * 100.0 / n, float(used) / maxi(1, wins)])
 		var dwins := 0
 		for i in n:
 			if _sim(hg, _boss_data(), "domweg", BOSS_BAG)[0]:
 				dwins += 1
-		print("INFO  Lv %d + Kaftschild + Leren Kap: domweg winst %.1f%%" % [L, dwins * 100.0 / n])
-		if L == 10:
-			check("Lv 10 met alle uitrusting: domweg aanvallen verliest nog steeds meestal (%.1f%% < 10%%)" % (dwins * 100.0 / n),
+		print("INFO  Lv %d + Cover Shield + Leather Hood: domweg winst %.1f%%" % [L, dwins * 100.0 / n])
+		if L == 7:
+			check("Lv 7 met schild en kap: domweg aanvallen verliest nog steeds meestal (%.1f%% < 10%%)" % (dwins * 100.0 / n),
 					dwins < n / 10)
 	# Mech. Wachter (met Schild omhoog) per monsterniveau, Dennis op het level van die verdieping
 	var w: Dictionary = GD.ENEMIES["mech_wachter"]
@@ -327,10 +328,10 @@ func _balance_tests() -> void:
 			rounds += int(r[2])
 		var pct := float(lost) / 1000.0 / float(h["max_hp"]) * 100.0
 		wres["%d_%d" % [row[0], row[1]]] = {"wins": wins, "pct": pct}
-		print("INFO  Wachter niveau %d (HP %d ATK %d DEF %d EXP %d) vs Dennis Lv %d (%s): winst %.1f%%, %.1f rondes, %.0f%% HP kwijt"
+		print("INFO  Warden niveau %d (HP %d ATK %d DEF %d EXP %d) vs Dennis Lv %d (%s): winst %.1f%%, %.1f rondes, %.0f%% HP kwijt"
 				% [row[0], tw["max_hp"], tw["atk"], tw["def"], tw["exp"], row[1], row[2], wins / 10.0, rounds / 1000.0, pct])
-	check("Mech. Wachter niveau 2 vs Dennis Lv 4: wint altijd zonder items (%.0f%% HP kwijt)" % wres["2_4"]["pct"], wres["2_4"]["wins"] == 1000)
-	check("Mech. Wachter niveau 4 vs Dennis Lv 8 (+Vonkzwaard): wint altijd, maar kost HP (3-50%%: %.0f%%)" % wres["4_8"]["pct"],
+	check("Mech. Warden niveau 2 vs Dennis Lv 4: wint altijd zonder items (%.0f%% HP kwijt)" % wres["2_4"]["pct"], wres["2_4"]["wins"] == 1000)
+	check("Mech. Warden niveau 4 vs Dennis Lv 8 (+Spark Sword): wint altijd, maar kost HP (3-50%%: %.0f%%)" % wres["4_8"]["pct"],
 			wres["4_8"]["wins"] == 1000 and wres["4_8"]["pct"] >= 3.0 and wres["4_8"]["pct"] <= 50.0)
 	# EXP-curve (advies voor Forge)
 	var line := []
@@ -340,9 +341,9 @@ func _balance_tests() -> void:
 	GameState.new_game("Dennis")
 
 
-## Vijand op monsterniveau t: de echte functie van het spel (v0.14 GameData.apply_tier).
+## Vijand op monsterniveau t in het Eerste Archief (doel-level 7).
 static func _tier(e: Dictionary, t: int) -> Dictionary:
-	return GD.apply_tier(e, t)
+	return GD.apply_archief_tier(e, t)
 
 
 ## Dennis tegen één Mech. Wachter (zelfde regels als battle.gd, met Schild omhoog).
@@ -526,7 +527,7 @@ func _start_boss(level: int) -> Node:
 func _battle_tests() -> void:
 	Engine.time_scale = 2.0
 	var b := await _start_boss(10)
-	check("baasgevecht gestart (Archieven, baas)", b != null and GameState.pending_boss)
+	check("baasgevecht gestart (Archives, baas)", b != null and GameState.pending_boss)
 	if b == null:
 		return
 	var g: Dictionary = b.enemies[0]
@@ -543,7 +544,7 @@ func _battle_tests() -> void:
 	check("pantser ligt precies op de kern (82,52 30x30 in het plaatje)", view.position.is_equal_approx(Vector2(82, 52) * k)
 			and view.size.is_equal_approx(Vector2(30, 30) * k) and view.mouse_filter == Control.MOUSE_FILTER_IGNORE)
 	check("ronde 1: wacht op het commando", await wait_battle_state(["command"]) == "command")
-	check("uitleg bij de start: '%s'" % BossCore.MSG_HINT, seen_message("Wacht op het roze licht"))
+	check("uitleg bij de start: '%s'" % BossCore.MSG_HINT, seen_message("pink light"))
 	var hero: Dictionary = GameState.party[0]
 	var atk := float(hero["atk"])
 	await pframes(20)
@@ -563,7 +564,7 @@ func _battle_tests() -> void:
 	await do_round(b, VERDEDIG)
 	# --- ronde 3: kern open -> aanvallen = lading kapot
 	check("ronde 3: 'De kern gloeit roze!' (telegraaf)", await wait_battle_state(["command"]) == "command" and b.round_no == 3
-			and seen_message("De kern gloeit roze!") and core.open)
+			and seen_message("The core glows pink!") and core.open)
 	await get_tree().create_timer(0.5).timeout
 	var idle: Timer = g["node"].get_node_or_null("Idle")
 	check("ronde 3: tijdens het kiezen roze strook '%s'" % b.message_label.text, b.caption.visible
@@ -590,13 +591,13 @@ func _battle_tests() -> void:
 	var min_open := roundi(roundi(base * 0.85) * 2.0) - 2
 	check("ronde 3: open kern, schade x2 (%s, min ~%d) >= drempel %d" % [enemy_hits.slice(hits_before), min_open, core.break_damage],
 			enemy_hits.size() == hits_before + 1 and enemy_hits[hits_before] >= min_open and enemy_hits[hits_before] >= core.break_damage)
-	check("ronde 3: 'Raak! De lading barst.' en geen schade voor Dennis", seen_message("De lading barst")
+	check("ronde 3: 'Hit! The charge bursts.' en geen schade voor Dennis", seen_message("The charge bursts")
 			and hero_hits.size() == hero_before and int(hero["hp"]) == hp_before)
-	check("daarna: 'De kern sluit zich weer.', platen terug", seen_message("De kern sluit zich weer") and not core.open
+	check("daarna: 'The core seals shut.', platen terug", seen_message("The core seals shut") and not core.open
 			and core.broken_count == 1)
 	await get_tree().create_timer(0.5).timeout
 	check("kern dicht: tijdens het kiezen weer geen strook (zoals v0.13)", await wait_battle_state(["command"]) == "command"
-			and not b.caption.visible and b.message_label.text.begins_with("Wat doet"))
+			and not b.caption.visible and b.message_label.text.begins_with("What will"))
 	check("platen weer dicht in beeld, idle weer normaal", view.plates_shown() and is_equal_approx(idle.wait_time, 0.4))
 	# --- ronde 4, 5: verdedigen; ronde 6: verdedigen in het open venster -> Hamerslag (gehalveerd)
 	await do_round(b, VERDEDIG)
@@ -609,7 +610,7 @@ func _battle_tests() -> void:
 	await tap("interact")
 	# screenshot zodra de Hamerslag-tekst er staat
 	var t0 := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < 8000 and not seen_message("Hamerslag"):
+	while Time.get_ticks_msec() - t0 < 8000 and not seen_message("Hammer Blow"):
 		await get_tree().process_frame
 	if shots != "":
 		Engine.time_scale = 1.0
@@ -618,7 +619,7 @@ func _battle_tests() -> void:
 		Engine.time_scale = 2.0
 	await wait_battle_state(["command", "message_wait"], 40)
 	var max_slam := ceili(maxf(1.0, (float(bd["atk"]) * float(bd["core"]["slam_power"]) - float(hero["def"]) / 2.0) * 1.15) / 2.0) + 1
-	check("ronde 6: niet geraakt -> 'Het Kennis-Beest: Hamerslag!'", seen_message("Hamerslag!") and core.slam_count == 1)
+	check("ronde 6: niet geraakt -> 'The Knowledge Beast: Hammer Blow!'", seen_message("Hammer Blow!") and core.slam_count == 1)
 	check("Hamerslag verdedigd = halve schade (%s, max %d)" % [hero_hits.slice(hero_before), max_slam],
 			hero_hits.size() == hero_before + 1 and hero_hits[hero_before] <= max_slam and hero_hits[hero_before] >= 5)
 	# --- uitspelen als een speler: kern open = aanvallen, weinig HP = Drankje, anders aanvallen
@@ -641,7 +642,7 @@ func _battle_tests() -> void:
 			await do_round(b, AANVAL)
 	check("gewonnen (overwinningsvenster gezien, %d drankjes gebruikt, %d keer kapot, %d Hamerslagen)"
 			% [drank_before - GameState.item_count("drankje"), core.broken_count, core.slam_count], won)
-	check("terug in de Golemhal, EXP +%d" % int(bd["exp"]), await wait_scene("ArchiefGolemhal") and GameState.last_battle_result == "win"
+	check("terug in de Golem Hall, EXP +%d" % int(bd["exp"]), await wait_scene("ArchiefGolemhal") and GameState.last_battle_result == "win"
 			and int(GameState.party[0]["exp"]) == exp_before + int(bd["exp"]))
 	check("Golem in het bestiarium als verslagen", GameState.defeated_count("kennis_beest") >= 1)
 	Engine.time_scale = 1.0

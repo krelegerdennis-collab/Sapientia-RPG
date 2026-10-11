@@ -38,4 +38,4 @@ func setup(p_room: Node, id: String, t: Vector2i, d: Dictionary) -> void:
 
 func interact(_by: Node) -> void:
 	if not Dialog.is_open:
-		Dialog.show_lines(["De kist zit muurvast. (komt later)"])
+		Dialog.show_lines(["The chest is stuck fast. (later)"])

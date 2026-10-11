@@ -9,10 +9,14 @@ extends CanvasLayer
 signal closed
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
-const TERRAIN_NAMES := {"gras": "vlakte", "hoog_gras": "hoog gras", "bos": "bos", "zand": "zand", "baas": "baas"}
+const TERRAIN_NAMES := {
+	"gras": "plains", "hoog_gras": "tall grass", "bos": "woods", "zand": "sand",
+	"baas": "boss", "archief": "archive", "woud": "wood",
+}
 
 var root: Control
 var header: Label
@@ -61,7 +65,7 @@ func _ready() -> void:
 	header = UiMenu.label("", MenuColors.TEXT)
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(header)
-	back_button = UiMenu.button("Terug")
+	back_button = UiMenu.button("Back")
 	back_button.pressed.connect(close)
 	top.add_child(back_button)
 	var body := HBoxContainer.new()
@@ -104,10 +108,13 @@ func _ready() -> void:
 	detail.add_child(stats_label)
 
 	ids = GameData.bestiary_ids()
+	ids.append_array(EndgameBestiary.ids())
 	var seen := 0
 	var beaten := 0
 	for id in ids:
-		var e: Dictionary = GameData.ENEMIES[id]
+		var e: Dictionary = _entry(str(id))
+		if e.is_empty():
+			continue
 		var known := GameState.is_seen(id)
 		seen += 1 if known else 0
 		beaten += 1 if GameState.defeated_count(id) > 0 else 0
@@ -117,7 +124,7 @@ func _ready() -> void:
 		b.pressed.connect(show_entry.bind(id))
 		list.add_child(b)
 		entries.append(b)
-	header.text = "Bestiarium   gezien %d/%d   verslagen %d/%d" % [seen, ids.size(), beaten, ids.size()]
+	header.text = "Bestiary   seen %d/%d   defeated %d/%d" % [seen, ids.size(), beaten, ids.size()]
 	if not entries.is_empty():
 		entries[0].grab_focus()
 		show_entry(ids[0])
@@ -127,9 +134,17 @@ func entry_text(i: int) -> String:
 	return str(entries[i].get_meta("label", ""))
 
 
+func _entry(id: String) -> Dictionary:
+	if GameData.ENEMIES.has(id):
+		return GameData.ENEMIES[id]
+	return EndgameBestiary.entry(id)
+
+
 func show_entry(id: String) -> void:
 	shown_id = id
-	var e: Dictionary = GameData.ENEMIES[id]
+	var e: Dictionary = _entry(id)
+	if e.is_empty():
+		return
 	var known := GameState.is_seen(id)
 	var kills := GameState.defeated_count(id)
 	var sp := GameData.enemy_sprite(e)   # v0.19: plaatsvervanger als de art er nog niet is
@@ -137,23 +152,23 @@ func show_entry(id: String) -> void:
 	picture.modulate = Color.WHITE if known else Color(0.02, 0.02, 0.03, 0.95)   # silhouet
 	if not known:
 		name_label.text = "%03d ???" % int(e.get("no", 0))
-		desc_label.text = "Nog niet gezien."
+		desc_label.text = "Not seen yet."
 		stats_label.text = ""
 		return
 	name_label.text = "%03d %s" % [int(e.get("no", 0)), str(e["name"])]
 	desc_label.text = str(e.get("desc", ""))
 	if kills <= 0:
-		stats_label.text = "Versla hem om meer te weten."
+		stats_label.text = "Defeat it to learn more."
 		return
 	var lines := [
 		"HP %d  MP %d  ATK %d  DEF %d" % [int(e["max_hp"]), int(e.get("mp", 0)), int(e["atk"]), int(e["def"])],
-		"EXP %d  Goud %d  Verslagen: %dx" % [int(e["exp"]), int(e["gold"]), kills],
+		"EXP %d  Gold %d  Defeated: %dx" % [int(e["exp"]), int(e["gold"]), kills],
 	]
 	var ws := []
 	if not e.get("weak", []).is_empty():
-		ws.append("Zwak: " + ", ".join(e["weak"]))
+		ws.append("Weak: " + _element_list(e["weak"]))
 	if not e.get("resist", []).is_empty():
-		ws.append("Sterk: " + ", ".join(e["resist"]))
+		ws.append("Resists: " + _element_list(e["resist"]))
 	if not ws.is_empty():
 		lines.append("   ".join(ws))
 	var drops: Array = []
@@ -161,13 +176,20 @@ func show_entry(id: String) -> void:
 		var item: Dictionary = GameData.ITEMS.get(str(d["item"]), {})
 		drops.append("%s %d%%" % [str(item.get("name", d["item"])), roundi(float(d["chance"]) * 100.0)])
 	if not drops.is_empty():
-		lines.append("Buit: " + ", ".join(drops))
+		lines.append("Drops: " + ", ".join(drops))
 	var hab: Array = []
 	for t in e.get("habitat", []):
 		hab.append(str(TERRAIN_NAMES.get(t, t)))
 	if not hab.is_empty():
-		lines.append("Leeft: " + ", ".join(hab))
+		lines.append("Lives: " + ", ".join(hab))
 	stats_label.text = "\n".join(lines)
+
+
+func _element_list(ids: Array) -> String:
+	var names: Array = []
+	for id in ids:
+		names.append(GameData.element_name(str(id)))
+	return ", ".join(names)
 
 
 func stats_visible() -> bool:

@@ -81,27 +81,27 @@ const DEFAULT_AI := {"skill_chance": 0.35, "heal_below": 0.35, "target": "willek
 ##           "guard"  = schild omhoog (DEF x def_mult, deze en de volgende ronde)
 ##   "mp" = kosten (0 = gratis); "element" = alleen informatie (fusie later)
 const SKILLS := {
-	"klauw":        {"name": "Klauw",        "type": "damage", "power": 1.2, "mp": 0},
-	"slijmklodder": {"name": "Slijmklodder", "type": "damage", "power": 1.35, "mp": 0, "element": "natuur"},
-	"mosheling":    {"name": "Mosheling",    "type": "heal",   "power": 10,  "mp": 0, "element": "natuur"},
-	"bijtsprong":   {"name": "Bijtsprong",   "type": "damage", "power": 1.5, "mp": 0},
-	"fluisterblad": {"name": "Fluisterblad", "type": "damage", "power": 1.3, "mp": 0, "element": "inkt"},
-	"papierstorm":  {"name": "Papierstorm",  "type": "all",    "power": 0.8, "mp": 0, "element": "inkt"},
-	"ruisvleugel":  {"name": "Ruisvleugel",  "type": "damage", "power": 1.5, "mp": 0, "element": "ruis"},
-	"stoorsignaal": {"name": "Stoorsignaal", "type": "all",    "power": 0.7, "mp": 0, "element": "ruis"},
-	"schild_omhoog": {"name": "Schild omhoog", "type": "guard", "def_mult": 2.0, "mp": 0},
-	"zegelslag":    {"name": "Zegelslag",    "type": "damage", "power": 1.4, "mp": 0, "element": "metaal"},
-	"boekenhamer":  {"name": "Boekenhamer",  "type": "damage", "power": 1.5, "mp": 0, "element": "kennis"},
-	"kennisgolf":   {"name": "Kennisgolf",   "type": "all",    "power": 0.9, "mp": 0, "element": "kennis"},
+	"klauw":        {"name": "Claw",        "type": "damage", "power": 1.2, "mp": 0},
+	"slijmklodder": {"name": "Slime Glob", "type": "damage", "power": 1.35, "mp": 0, "element": "natuur"},
+	"mosheling":    {"name": "Moss Mend",    "type": "heal",   "power": 10,  "mp": 0, "element": "natuur"},
+	"bijtsprong":   {"name": "Bite Leap",   "type": "damage", "power": 1.5, "mp": 0},
+	"fluisterblad": {"name": "Whisper Page", "type": "damage", "power": 1.3, "mp": 0, "element": "inkt"},
+	"papierstorm":  {"name": "Paper Storm",  "type": "all",    "power": 0.8, "mp": 0, "element": "inkt"},
+	"ruisvleugel":  {"name": "Noise Wing",  "type": "damage", "power": 1.5, "mp": 0, "element": "ruis"},
+	"stoorsignaal": {"name": "Static Burst", "type": "all",    "power": 0.7, "mp": 0, "element": "ruis"},
+	"schild_omhoog": {"name": "Shield Up", "type": "guard", "def_mult": 2.0, "mp": 0},
+	"zegelslag":    {"name": "Seal Strike",    "type": "damage", "power": 1.4, "mp": 0, "element": "metaal"},
+	"boekenhamer":  {"name": "Book Hammer",  "type": "damage", "power": 1.5, "mp": 0, "element": "kennis"},
+	"kennisgolf":   {"name": "Lore Wave",   "type": "all",    "power": 0.9, "mp": 0, "element": "kennis"},
 	# v0.17 Donker Woud
-	"wortelgreep":  {"name": "Wortelgreep",  "type": "damage", "power": 1.3, "mp": 0, "element": "natuur"},
-	"doornhaag":    {"name": "Doornhaag",    "type": "all",    "power": 0.8, "mp": 0, "element": "natuur"},
-	"mistkreet":    {"name": "Mistkreet",    "type": "damage", "power": 1.25, "mp": 0, "element": "mist"},
-	"mistsluier":   {"name": "Mistsluier",   "type": "all",    "power": 0.75, "mp": 0, "element": "mist"},
-	"sporenwolk":   {"name": "Sporenwolk",   "type": "all",    "power": 0.8, "mp": 0, "element": "natuur"},
-	"zwamkuur":     {"name": "Zwamkuur",     "type": "heal",   "power": 14,  "mp": 0, "element": "natuur"},
+	"wortelgreep":  {"name": "Root Grip",  "type": "damage", "power": 1.3, "mp": 0, "element": "natuur"},
+	"doornhaag":    {"name": "Thorn Hedge",    "type": "all",    "power": 0.8, "mp": 0, "element": "natuur"},
+	"mistkreet":    {"name": "Mist Cry",    "type": "damage", "power": 1.25, "mp": 0, "element": "mist"},
+	"mistsluier":   {"name": "Mist Veil",   "type": "all",    "power": 0.75, "mp": 0, "element": "mist"},
+	"sporenwolk":   {"name": "Spore Cloud",   "type": "all",    "power": 0.8, "mp": 0, "element": "natuur"},
+	"zwamkuur":     {"name": "Cap Cure",     "type": "heal",   "power": 14,  "mp": 0, "element": "natuur"},
 	# v0.19 Archief 1: de Inktwurm (lore: Inktspuw; BESLISSING DENNIS: eerste vaardigheid op Lv 8, element inkt)
-	"inktspuw":     {"name": "Inktspuw",     "type": "damage", "power": 1.4, "mp": 0, "element": "inkt"},
+	"inktspuw":     {"name": "Ink Spit",     "type": "damage", "power": 1.4, "mp": 0, "element": "inkt"},
 }
 
 ## De soorten. Volgorde = volgorde in het Codex-scherm (daarna op level).
@@ -111,28 +111,28 @@ const SPECIES := {
 		"growth": {"max_hp": 5, "max_mp": 0, "atk": 2, "def": 1, "agi": 1},
 		"learn": {1: ["slijmklodder"], 3: ["mosheling"]},
 		"ai": {"skill_chance": 0.35, "heal_below": 0.4, "target": "willekeurig"},
-		"glitch_name": "Glitchslijm",
+		"glitch_name": "Glitch Slime",
 	},
 	"moskonijn": {
 		"enemy": "moskonijn", "element": "natuur", "type": "dier", "fusion_tags": ["mos", "dier"],
 		"growth": {"max_hp": 4, "max_mp": 0, "atk": 2, "def": 1, "agi": 2},
 		"learn": {1: ["bijtsprong"]},
 		"ai": {"skill_chance": 0.3, "heal_below": 0.0, "target": "zwakste"},
-		"glitch_name": "Glitchkonijn",
+		"glitch_name": "Glitch Rabbit",
 	},
 	"papiergeest": {
 		"enemy": "papiergeest", "element": "inkt", "type": "geest", "fusion_tags": ["papier", "geest"],
 		"growth": {"max_hp": 4, "max_mp": 0, "atk": 2, "def": 1, "agi": 1},
 		"learn": {1: ["fluisterblad"], 4: ["papierstorm"]},
 		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "willekeurig"},
-		"glitch_name": "Glitchgeest",
+		"glitch_name": "Glitch Wraith",
 	},
 	"glitchmot": {
 		"enemy": "glitchmot", "element": "ruis", "type": "insect", "fusion_tags": ["ruis", "vleugel"],
 		"growth": {"max_hp": 3, "max_mp": 0, "atk": 3, "def": 1, "agi": 2},
 		"learn": {1: ["ruisvleugel"], 5: ["stoorsignaal"]},
 		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "zwakste"},
-		"glitch_name": "Zwartmot",
+		"glitch_name": "Black Moth",
 	},
 	"mech_wachter": {
 		"enemy": "mech_wachter", "element": "metaal", "type": "construct", "fusion_tags": ["metaal", "archief"],
@@ -140,17 +140,17 @@ const SPECIES := {
 		"learn": {1: ["zegelslag"], 3: ["schild_omhoog"]},
 		"ai": {"skill_chance": 0.3, "heal_below": 0.0, "target": "sterkste"},
 		"capture_rate": 0.8,
-		"glitch_name": "Glitchwachter",
+		"glitch_name": "Glitch Warden",
 	},
 	"kennis_beest": {
-		"enemy": "kennis_beest", "name": "Kennis-Beest", "element": "kennis", "type": "golem",
+		"enemy": "kennis_beest", "name": "Lore Beast", "element": "kennis", "type": "golem",
 		"fusion_tags": ["boek", "golem", "kern"],
 		"growth": {"max_hp": 7, "max_mp": 1, "atk": 3, "def": 2, "agi": 1},
 		"learn": {1: ["boekenhamer"], 6: ["kennisgolf"]},
 		"ai": {"skill_chance": 0.3, "heal_below": 0.0, "target": "sterkste"},
 		# 182 art-px hoog (Dennis ~156): als bondgenoot 0,75x (LEESMIJ RPG ART); effect 2x
 		"ally_scale": 0.75, "fx_scale": 2.0, "capture_rate": 0.6,
-		"glitch_name": "Glitchbeest",
+		"glitch_name": "Glitch Beast",
 	},
 	# v0.17 Donker Woud (alleen data; vijand + "sprite_back" staan in GameData.ENEMIES).
 	# De Wortelkoning staat hier bewust NIET: hij is alleen baas (bazen zijn nooit te vangen).
@@ -160,7 +160,7 @@ const SPECIES := {
 		"learn": {1: ["wortelgreep"], 5: ["doornhaag"]},
 		"ai": {"skill_chance": 0.35, "heal_below": 0.0, "target": "zwakste"},
 		"capture_rate": 0.8,
-		"glitch_name": "Glitchkruiper",
+		"glitch_name": "Root Glitch",
 	},
 	"mistuil": {
 		"enemy": "mistuil", "element": "mist", "type": "vogel", "fusion_tags": ["mist", "vleugel", "papier"],
@@ -168,7 +168,7 @@ const SPECIES := {
 		"learn": {1: ["mistkreet"], 5: ["mistsluier"]},
 		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "willekeurig"},
 		"capture_rate": 0.8,
-		"glitch_name": "Glitchuil",
+		"glitch_name": "Glitch Owl",
 	},
 	"sporenzwam": {
 		"enemy": "sporenzwam", "element": "natuur", "type": "zwam", "fusion_tags": ["zwam", "woud"],
@@ -176,7 +176,7 @@ const SPECIES := {
 		"learn": {1: ["sporenwolk"], 4: ["zwamkuur"]},
 		"ai": {"skill_chance": 0.35, "heal_below": 0.4, "target": "willekeurig"},
 		"capture_rate": 0.8,
-		"glitch_name": "Glitchzwam",
+		"glitch_name": "Glitch Cap",
 	},
 	# v0.19 Archief 1 (CANON besluit 8). BESLISSING DENNIS (9 okt 2026): UNIEK monster (zie GameData.ENEMIES),
 	# gevangen op Lv 5 ("base_level") met de stats van het gevecht (2x een normaal Lv 5-monster), vangkans 100%,
@@ -191,7 +191,7 @@ const SPECIES := {
 		"learn": {8: ["inktspuw"]},
 		"ai": {"skill_chance": 0.45, "heal_below": 0.0, "target": "zwakste"},
 		"capture_always": true,
-		"glitch_name": "Glitchwurm",
+		"glitch_name": "Glitch Worm",
 	},
 }
 
@@ -435,11 +435,11 @@ static func give_exp(page: Dictionary, amount: int) -> Array[String]:
 			page[k] = int(page[k]) + int(after[k]) - int(before[k])
 		page["hp"] = int(page["hp"]) + int(after["max_hp"]) - int(before["max_hp"])
 		page["mp"] = int(page["mp"]) + int(after["max_mp"]) - int(before["max_mp"])
-		msgs.append("%s is nu level %d!" % [page["name"], page["level"]])
+		msgs.append("%s is now level %d!" % [page["name"], page["level"]])
 		for sk in skills_at(str(page["species"]), int(page["level"])):
 			if not (page["skills"] as Array).has(sk):
 				page["skills"].append(sk)
-				msgs.append("%s leert %s!" % [page["name"], SKILLS[sk]["name"]])
+				msgs.append("%s learns %s!" % [page["name"], SKILLS[sk]["name"]])
 	return msgs
 
 
@@ -472,11 +472,11 @@ static func fusion_rule(a: Dictionary, b: Dictionary) -> Dictionary:
 ## Waarom kan A + B niet? "" = het kan. (GameState controleert daarnaast of ze in de Codex staan.)
 static func fusion_block_reason(a: Dictionary, b: Dictionary) -> String:
 	if a.is_empty() or b.is_empty():
-		return "Kies twee pagina's."
+		return "Pick two pages."
 	if str(a.get("uid", "")) == str(b.get("uid", "")):
-		return "Kies twee verschillende pagina's."
+		return "Pick two different pages."
 	if not has_species(str(a.get("species", ""))) or not has_species(str(b.get("species", ""))):
-		return "Deze pagina is onleesbaar."
+		return "This page can't be read."
 	return ""
 
 

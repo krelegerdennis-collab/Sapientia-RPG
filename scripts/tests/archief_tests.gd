@@ -64,12 +64,12 @@ func _run() -> void:
 	print("=== Deel A: logica geheime deur / kist ===")
 	_logic_tests()
 	_validation_tests()
-	print("=== Deel B: echte testkamer ===")
+	print("=== Deel B: echte Test Room ===")
 	await _room_tests()
-	print("=== Deel C: Vonkzwaard uitrusten ===")
+	print("=== Deel C: Spark Sword uitrusten ===")
 	_strongest_tests()
 	await _equip_screen_tests()
-	print("=== Deel D: Mech. Wachter - Schild omhoog ===")
+	print("=== Deel D: Mech. Warden - Shield Up ===")
 	await _guard_tests()
 	print("ARCHIEFTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -98,6 +98,7 @@ func _flood(l: PuzzleLogic, start: Vector2i) -> Dictionary:
 
 
 func _logic_tests() -> void:
+	check("Eerste Archief doel-level is 7", GD.EERSTE_ARCHIEF_DOEL == 7)
 	var room: Dictionary = PuzzleRooms.ROOMS[ROOM_ID]
 	check("puzzelkamer '%s' is geldig: %s" % [ROOM_ID, PuzzleLogic.validate(room)], PuzzleLogic.validate(room).is_empty())
 	var l := PuzzleLogic.from_room(room, ROOM_ID)
@@ -109,7 +110,7 @@ func _logic_tests() -> void:
 	check("deur op (16,8) + bovenste tegel (16,7), plaat s (15,9), kist (13,3)", l.gates["geheime_deur"]["tile"] == DOOR
 			and l.door_tops.get(DOOR_TOP, "") == "geheime_deur" and l.plates["plaat_s"]["tile"] == PLATE_S
 			and l.chests["kist_vonkzwaard"]["tile"] == CHEST)
-	check("kist-data: Vonkzwaard x1, vlag '%s'" % FLAG, l.chests["kist_vonkzwaard"]["item"] == SWORD
+	check("kist-data: Spark Sword x1, vlag '%s'" % FLAG, l.chests["kist_vonkzwaard"]["item"] == SWORD
 			and l.chests["kist_vonkzwaard"]["n"] == 1 and l.chests["kist_vonkzwaard"]["flag"] == FLAG)
 	check("dungeon-stijl: schatkamer afgedekt met Forge's \"dek\" (geen ','-tegels)", l.hidden.is_empty() and room.has("dek"))
 	check("dicht: BEIDE deurtegels massief, kist massief", l.is_solid(DOOR) and l.is_solid(DOOR_TOP) and l.is_solid(CHEST)
@@ -267,7 +268,7 @@ func _room_tests() -> void:
 		if await wait_until(func(): return Dialog.is_open, 0.5):
 			break
 	check("A op de dichte deur: hint '%s'" % (Dialog._lines[0] if Dialog.is_open else ""),
-			Dialog.is_open and "roze scheur" in str(Dialog._lines[0]) and Dialog._lines.size() == 2)
+			Dialog.is_open and "pink crack" in str(Dialog._lines[0]) and Dialog._lines.size() == 2)
 	await close_dialog()
 	check("hint opent de deur NIET", not room.logic.gate_open("geheime_deur") and not door.is_open)
 	# --- kast c op de runeplaat
@@ -288,7 +289,7 @@ func _room_tests() -> void:
 			and GameState.puzzle_latched.get(ROOM_ID, []).has("geheime_deur"))
 	await wait_until(func(): return Dialog.is_open, 2.0)
 	check("bericht: '%s' / '%s'" % [Dialog._lines[0] if Dialog.is_open else "", Dialog._lines[-1] if Dialog.is_open else ""],
-			Dialog.is_open and "schrapen" in str(Dialog._lines[0]))
+			Dialog.is_open and "scrape" in str(Dialog._lines[0]))
 	await close_dialog()
 	await wait_until(func(): return not door.is_animating() and not room.hidden_cover.visible, 3.0)
 	check("deur-animatie klaar (frame 3), botsing uit op beide tegels, schatkamer zichtbaar", door.sprite.frame == 3
@@ -313,14 +314,14 @@ func _room_tests() -> void:
 	check("nog geen zwaard, vlag niet gezet", GameState.item_count(SWORD) == 0 and not GameState.story_flags.has(FLAG))
 	await interact_dialog()
 	check("A op de kist: '%s'" % (Dialog._lines[0] if Dialog.is_open else ""), Dialog.is_open
-			and str(Dialog._lines[1]) == "Dennis vindt het Vonkzwaard!" and room.last_chest_result == "gekregen")
+			and str(Dialog._lines[1]) == "Dennis finds the Spark Sword!" and room.last_chest_result == "gekregen")
 	# v0.14 (handoff par. 9): de kist staat bovenin beeld -> tekstvak onderin, niet over kist + icoon
 	var chest_pos: Vector2 = chest.get_global_transform_with_canvas().origin
 	var chest_rect := Rect2(chest_pos + Vector2(-8, -26), Vector2(16, 34))   # kist + icoon erboven
 	var box_rect: Rect2 = Dialog.panel.get_global_rect().grow_side(SIDE_TOP, 12)   # + naamtabje
 	check("tekstvak onderin en NIET over de kist (kist %s, vak %s)" % [chest_rect, box_rect],
 			Dialog.at_bottom and not box_rect.intersects(chest_rect))
-	check("zwaard 1x in de tas, vlag gezet, kist open met gloed (frame 2), Vonkzwaard-icoon boven de kist",
+	check("zwaard 1x in de tas, vlag gezet, kist open met gloed (frame 2), Spark Sword-icoon boven de kist",
 			GameState.item_count(SWORD) == 1 and GameState.story_flags.has(FLAG) and chest.sprite.frame == 2 and chest.icon.visible
 			and chest.icon.texture != null and chest.icon.texture.resource_path.ends_with("icons/vonkzwaard.png"))
 	for i in 4:                  # naar regel 2 (het zwaard); een druk tijdens het typen maakt eerst de regel af
@@ -341,7 +342,7 @@ func _room_tests() -> void:
 	check("autosave bevat de vlag en het zwaard", FLAG in auto.get("story", {}).get("flags", [])
 			and int(auto.get("inventory", {}).get(SWORD, 0)) == 1)
 	await interact_dialog()
-	check("A nog eens: 'De kist is leeg.', niets erbij", Dialog.is_open and str(Dialog._lines[0]) == "De kist is leeg."
+	check("A nog eens: 'De kist is leeg.', niets erbij", Dialog.is_open and str(Dialog._lines[0]) == "The chest is empty."
 			and GameState.item_count(SWORD) == 1 and room.last_chest_result == "leeg")
 	await close_dialog()
 	# --- opnieuw binnenkomen: geen tweede zwaard
@@ -399,13 +400,13 @@ func _strongest_tests() -> void:
 	var h := GameState.hero_template(GameState.MAIN_HERO)
 	var inv := {"kort_zwaard": 1, "dolk": 1, SWORD: 1}
 	var base_atk: int = h["base"]["atk"]
-	check("Vonkzwaard: naam '%s', vak Wapen, ATK +12" % Equipment.item_name(SWORD),
-			Equipment.item_name(SWORD) == "Vonkzwaard" and Equipment.slot_of(SWORD) == "wapen" and int(GD.EQUIPMENT[SWORD]["atk"]) == 12)
+	check("Spark Sword: naam '%s', vak Wapen, ATK +12" % Equipment.item_name(SWORD),
+			Equipment.item_name(SWORD) == "Spark Sword" and Equipment.slot_of(SWORD) == "wapen" and int(GD.EQUIPMENT[SWORD]["atk"]) == 12)
 	var n := Equipment.strongest(h, inv)
-	check("Sterkste kiest het Vonkzwaard (boven Dolk en Kort zwaard): %s" % h["equip"]["wapen"],
+	check("Sterkste kiest het Spark Sword (boven Dagger en Short Sword): %s" % h["equip"]["wapen"],
 			n >= 1 and h["equip"]["wapen"] == SWORD and h["atk"] == base_atk + 12 and inv.get("dolk", 0) == 1 and inv.get("kort_zwaard", 0) == 1)
 	var noor := GameState.hero_template("noor")
-	check("Noor (magier) kan het Vonkzwaard niet dragen", not Equipment.equip(noor, {SWORD: 1}, "wapen", SWORD)["ok"])
+	check("Noor (magier) kan het Spark Sword niet dragen", not Equipment.equip(noor, {SWORD: 1}, "wapen", SWORD)["ok"])
 
 
 func menu() -> Node:
@@ -438,20 +439,20 @@ func _equip_screen_tests() -> void:
 		return
 	await tap("interact")          # Uitrusten
 	await tap("interact")          # Wapen
-	check("Wapen-lijst bevat het Vonkzwaard (%s)" % [s.list_ids], s.mode == "item" and SWORD in s.list_ids)
+	check("Wapen-lijst bevat het Spark Sword (%s)" % [s.list_ids], s.mode == "item" and SWORD in s.list_ids)
 	for i in 6:
 		if s.list_ids[s.list_buttons.find(focused())] == SWORD if s.list_buttons.find(focused()) >= 0 else false:
 			break
 		await tap("move_down")
-	check("pijl bij het Vonkzwaard: ATK %s -> %s omhoog (+9 t.o.v. Kort zwaard)" % [s.old_value_text("atk"), s.new_value_text("atk")],
+	check("pijl bij het Spark Sword: ATK %s -> %s omhoog (+9 t.o.v. Short Sword)" % [s.old_value_text("atk"), s.new_value_text("atk")],
 			s.arrow_dir("atk") == 1 and s.old_value_text("atk") == str(atk0) and s.new_value_text("atk") == str(atk0 + 9)
 			and s.arrow_dir("def") == 0)
 	await pframes(4)
 	await screenshot("archief_uitrusting_zwaard")
 	await tap("interact")
-	check("uitgerust: ATK = basis + 12 (%d), Kort zwaard terug in de tas" % h["atk"], h["equip"]["wapen"] == SWORD
+	check("uitgerust: ATK = basis + 12 (%d), Short Sword terug in de tas" % h["atk"], h["equip"]["wapen"] == SWORD
 			and h["atk"] == int(h["base"]["atk"]) + 12 and GameState.item_count("kort_zwaard") == 1 and GameState.item_count(SWORD) == 0
-			and GameState.weapon_name(h) == "Vonkzwaard")
+			and GameState.weapon_name(h) == "Spark Sword")
 	for i in 4:
 		await tap("cancel")
 		await pframes(3)
@@ -467,7 +468,7 @@ func _guard_tests() -> void:
 		check("speler in de kamer voor het gevecht", false)
 		return
 	GameState.start_battle(["mech_wachter"], p.get_tile(), p.facing, "archief")
-	check("gevecht tegen de Mech. Wachter", await wait_scene("Battle", 20.0))
+	check("gevecht tegen de Mech. Warden", await wait_scene("Battle", 20.0))
 	var b := battle()
 	if b == null:
 		return
@@ -479,18 +480,18 @@ func _guard_tests() -> void:
 			enemy_hits.append(amount))
 	await wait_battle_state(["command"])
 	var w: Dictionary = b.enemies[0]
-	check("Wachter in het gevecht: HP 30, DEF 8, skill 'Schild omhoog'", int(w["s"]["max_hp"]) == 30 and int(w["s"]["def"]) == 8
+	check("Warden in het gevecht: HP 30, DEF 8, skill 'Shield Up'", int(w["s"]["max_hp"]) == 30 and int(w["s"]["def"]) == 8
 			and w["s"]["skills"].any(func(sk): return sk.get("type", "") == "guard"))
 	# zoals op monsterniveau 4 (Forge): DEF 15, HP 69 -> verschil met/zonder schild goed meetbaar
 	w["s"]["def"] = 15
 	w["s"]["max_hp"] = 69
 	w["s"]["hp"] = 69
 	# het trucje afdwingen (anders 20%): alleen 'Schild omhoog', kans 1
-	w["s"]["skills"] = [{"name": "Schild omhoog", "chance": 1.0, "type": "guard", "def_mult": 2.0}]
+	w["s"]["skills"] = [{"name": "Shield Up", "chance": 1.0, "type": "guard", "def_mult": 2.0}]
 	Engine.time_scale = 2.0
 	await do_round(b, VERDEDIG)
-	check("ronde 1: '%s'" % b.GUARD_TEXT % w["name"], seen_message("heft zijn schild! (DEF x2)") and int(w.get("guard", 0)) == 1)
-	check("Wachter blauw getint", w["node"].modulate == b.GUARD_TINT)
+	check("ronde 1: '%s'" % b.GUARD_TEXT % w["name"], seen_message("raises a shield! (DEF x2)") and int(w.get("guard", 0)) == 1)
+	check("Warden blauw getint", w["node"].modulate == b.GUARD_TINT)
 	await get_tree().create_timer(0.4).timeout
 	check("ronde 2 (kiezen): strook '%s'" % b.message_label.text, b.state == "command" and b.caption.visible
 			and b.message_label.text == b.GUARD_BANNER % w["name"])
@@ -504,8 +505,8 @@ func _guard_tests() -> void:
 	await do_round(b, AANVAL)
 	check("ronde 2: aanval op het schild = DEF x2 (%s, max %d; zonder schild min %d)" % [enemy_hits, max_guarded, min_normal],
 			enemy_hits.size() == 1 and enemy_hits[0] <= max_guarded and max_guarded < min_normal)
-	check("ronde 2: de Wachter zet het schild niet nog eens op (valt aan)", not messages.slice(1).any(func(x): return "heft zijn schild" in x)
-			or messages.filter(func(x): return "heft zijn schild" in x).size() == 1)
+	check("ronde 2: de Warden zet het schild niet nog eens op (valt aan)", not messages.slice(1).any(func(x): return "raises a shield" in x)
+			or messages.filter(func(x): return "raises a shield" in x).size() == 1)
 	check("na ronde 2: schild weg, tint weg", int(w.get("guard", 0)) == 0 and w["node"].modulate == Color.WHITE)
 	await get_tree().create_timer(0.4).timeout
 	check("ronde 3 (kiezen): geen strook meer", b.state == "command" and not b.caption.visible)

@@ -4,6 +4,7 @@ extends Node
 ## en waar hij stond voordat een gevecht begon. Data komt uit scripts/data/game_data.gd.
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 ## v0.14 (menu L2): uitrusting en effectieve stats (basis + uitrusting).
 const Equipment := preload("res://scripts/equipment.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
@@ -32,9 +33,14 @@ const MAIN_HERO := "dennis"
 const HERO_ID := MAIN_HERO
 const HERO_ID_LEGACY := "ruben"
 const HERO_ID_ALIASES := {HERO_ID_LEGACY: HERO_ID, HERO_ID: HERO_ID_LEGACY}
-## Opslag: één slot. De autotest gebruikt een eigen bestand (raakt je echte save niet).
+## Opslag: vier slots. Slot 1 is het oude bestand user://save_1.json (oude saves blijven werken).
+## Slots 2-4 bestaan alleen als save_path op save_1.json eindigt (tests en het echte spel).
+## Een betatest-pad eindigt daar niet op: dan is er één bestand, zoals eerst.
 const SAVE_VERSION := 1
+const SLOT_COUNT := 4
 var save_path := "user://save_1.json"
+## Welk slot de volgende handmatige save schrijft. Laden van een slot zet dit.
+var active_slot := 1
 ## v0.11 Automatisch opslaan: een EIGEN bestand (overschrijft de handmatige save nooit).
 ## Wordt geschreven na een mapwissel, na een gewonnen gevecht en als de app naar de
 ## achtergrond gaat (Android). Nooit tijdens een gevecht, een mapwissel of een tekstvak.
@@ -136,6 +142,8 @@ var pending_boss := false
 ## v0.14: monsterniveau (tier) voor het volgende gevecht: 0 = gewoon (wereldkaart), 1-4 = de
 ## verdieping van het Eerste Archief (game_data.gd TIERS). Alleen gezet door een dungeonkamer.
 var pending_tier := 0
+## True als het gevecht uit een kamer van het Eerste Archief komt (niet het woud, niet de Diepe Grot).
+var pending_archief := false
 
 ## De vijandgroep voor het volgende gevecht (Array van vijand-id's).
 var pending_enemies: Array = []
@@ -171,11 +179,11 @@ var pending_respawn_msg: Array = []
 ## Voor de tests/info: de laatste respawn ({"map", "tile", "facing", "boss"}).
 var last_respawn := {}
 # TODO(verhaal): definitieve tekst van het ontwaken (nu placeholder).
-const RESPAWN_LINES_BOSS := ["Je ontwaakt voor de deur...", "Je bent weer helemaal uitgerust."]
-const RESPAWN_LINES := ["Je ontwaakt waar je binnenkwam...", "Je bent weer helemaal uitgerust."]
+const RESPAWN_LINES_BOSS := ["You wake before the door...", "You are fully rested again."]
+const RESPAWN_LINES := ["You wake where you came in...", "You are fully rested again."]
 ## Het Gesimuleerde Archief: nederlaag in de kerker (gevechtsscherm) en het bericht na het opnieuw laden.
-const DUNGEON100_DEFEAT_TEXT := "GAME OVER\nDood is het Archief uit. Je staat weer voor de ingang."
-const DUNGEON100_RESET_LINES := ["De simulatie laat je los.", "Je staat weer voor de ingang van het Archief. Blauwe databanken blijven."]
+const DUNGEON100_DEFEAT_TEXT := "GAME OVER\nDeath means out of the Archive. You stand before the entrance again."
+const DUNGEON100_RESET_LINES := ["The simulation lets you go.", "You stand before the Archive entrance again. Blue databanks remain."]
 
 ## v7 (prestaties): alles wat een gevecht of mapwissel nodig heeft wordt bij de start
 ## alvast op de achtergrond geladen (ResourceLoader.load_threaded_request) en daarna
@@ -217,6 +225,8 @@ func _ready() -> void:
 	# v0.19: of  godot -- --fusietest [--shots=/pad/map]  (scripts/tests/fusie_tests.gd, glitch-fusie + Inktwurm).
 	# v0.19: of  godot -- --checkpointtest [--shots=/pad/map] [--v19=/workspace]  (kamer-checkpoint / respawn).
 	# Sfx per held/monster: of  godot -- --actorsfxtest  (scripts/tests/actor_sfx_tests.gd).
+	# Catalogus t/m Act 6: of  godot -- --catalogustest  (scripts/tests/catalogus_tests.gd).
+	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
@@ -236,15 +246,20 @@ func _ready() -> void:
 			["--dungeon100regelstest", "res://scripts/tests/dungeon100_tests.gd", "Dungeon100RegelsTest", "dungeon100regelstest"],
 			["--dungeon100integratietest", "res://scripts/tests/dungeon100_integratie_tests.gd", "Dungeon100IntegratieTest", "dungeon100integratietest"],
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
-			["--actorsfxtest", "res://scripts/tests/actor_sfx_tests.gd", "ActorSfxTest", "actorsfxtest"]]:
+			["--actorsfxtest", "res://scripts/tests/actor_sfx_tests.gd", "ActorSfxTest", "actorsfxtest"],
+			["--catalogustest", "res://scripts/tests/catalogus_tests.gd", "CatalogusTest", "catalogustest"],
+			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
 		save_path = "user://%s_save_1.json" % t[3]
 		autosave_path = "user://%s_autosave.json" % t[3]
-		for p in [save_path, autosave_path]:
-			if FileAccess.file_exists(p):
-				DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+		for s in range(1, SLOT_COUNT + 1):
+			var sp := slot_path(s)
+			if sp != "" and FileAccess.file_exists(sp):
+				DirAccess.remove_absolute(ProjectSettings.globalize_path(sp))
+		if FileAccess.file_exists(autosave_path):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(autosave_path))
 		var tester: Node = load(t[1]).new()
 		tester.name = t[2]
 		get_tree().root.add_child.call_deferred(tester)
@@ -372,6 +387,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	pending_spawn = ""
 	_play_time_base = 0.0
 	_clock_start_ms = Time.get_ticks_msec()
+	active_slot = 1
 
 
 ## Naam opschonen: spaties eraf, max. NAME_MAX tekens, leeg = DEFAULT_NAME.
@@ -509,13 +525,13 @@ func _beast(id: String) -> Dictionary:
 
 
 func mark_seen(id: String) -> void:
-	if GameData.ENEMIES.has(id):
+	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id):
 		_beast(id)["seen"] = true
 
 
 func mark_defeated(id: String) -> void:
 	unique_mark(id, "verslagen")      # v0.19: uniek monster verslagen = nooit meer
-	if GameData.ENEMIES.has(id):
+	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id):
 		var b := _beast(id)
 		b["seen"] = true
 		b["defeated"] = int(b["defeated"]) + 1
@@ -541,15 +557,77 @@ func has_autosave() -> bool:
 
 
 ## v0.11: handmatige save óf autosave aanwezig (titelscherm: 'Doorgaan' aan).
+## Elk van de vier slots telt, niet alleen slot 1.
 func has_any_save() -> bool:
-	return has_save() or has_autosave()
+	return newest_save_path() != ""
 
 
-## v0.11: pad van de NIEUWSTE save (handmatig of automatisch), "" = geen.
+## Pad van slot n. Slot 1 = save_path (migratie). Leeg = dit pad kent geen extra slots.
+func slot_path(slot: int) -> String:
+	if slot < 1 or slot > SLOT_COUNT:
+		return ""
+	if slot == 1:
+		return save_path
+	if not save_path.ends_with("save_1.json"):
+		return ""
+	return save_path.trim_suffix("save_1.json") + "save_%d.json" % slot
+
+
+## Oude saves zonder sleutel "slot" horen bij slot 1.
+func _slot_of_data(d: Dictionary) -> int:
+	if not d.has("slot"):
+		return 1
+	var s = d["slot"]
+	if not (s is int or s is float):
+		return 1
+	return clampi(int(s), 1, SLOT_COUNT)
+
+
+## Nieuwste bestand van één slot: handmatig, of de autosave als die bij dit slot hoort en nieuwer is.
+## {} = leeg. Even oud = de handmatige save.
+func slot_record(slot: int) -> Dictionary:
+	var manual := slot_path(slot)
+	var best_path := ""
+	var best_stamp := -1.0
+	var best := {}
+	if manual != "" and FileAccess.file_exists(manual):
+		var d := read_save(manual)
+		if not d.is_empty():
+			best_path = manual
+			best = d
+			best_stamp = _save_stamp(manual)
+	if FileAccess.file_exists(autosave_path):
+		var ad := read_save(autosave_path)
+		if not ad.is_empty() and _slot_of_data(ad) == slot:
+			var st := _save_stamp(autosave_path)
+			if best_path == "" or st > best_stamp:
+				best_path = autosave_path
+				best = ad
+				best_stamp = st
+	if best_path == "":
+		return {}
+	return {"path": best_path, "data": best, "stamp": best_stamp, "slot": slot}
+
+
+func newest_slot_record() -> Dictionary:
+	var best := {}
+	var stamp := -1.0
+	for i in range(1, SLOT_COUNT + 1):
+		var rec := slot_record(i)
+		if rec.is_empty():
+			continue
+		if float(rec["stamp"]) > stamp:
+			stamp = float(rec["stamp"])
+			best = rec
+	return best
+
+
+## v0.11: pad van de NIEUWSTE save (handmatig of automatisch), over alle slots. "" = geen.
 ## Vergelijkt "saved_unix" in het bestand (oudere saves zonder dat veld: de
-## wijzigingstijd van het bestand). Even oud = de handmatige save.
+## wijzigingstijd van het bestand). Even oud = de handmatige save van dat slot,
+## en bij een gelijke stempel tussen slots wint het lagere slotnummer.
 func newest_save_path() -> String:
-	return _newest_of(save_path, autosave_path)
+	return str(newest_slot_record().get("path", ""))
 
 
 func _newest_of(manual: String, auto: String) -> String:
@@ -660,12 +738,14 @@ func autosave_on_background() -> bool:
 ## Geeft true als het gelukt is.
 func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	if path == "":
-		path = save_path
+		var slot_file := slot_path(active_slot)
+		path = slot_file if slot_file != "" else save_path
 	var data := state_data(tile, facing)
 	data["game_version"] = str(ProjectSettings.get_setting("application/config/version", ""))
 	data["saved_at"] = Time.get_datetime_string_from_system()
 	data["saved_unix"] = Time.get_unix_time_from_system()
 	data["autosave"] = path == autosave_path
+	data["slot"] = active_slot if path == autosave_path else _slot_for_path(path)
 	# v0.19 kamer-checkpoint (met zijn eigen voortgangs-kopie) gaat mee; altijd de sleutel
 	# ({} = nog geen), zodat handmatige save en autosave hetzelfde formaat houden
 	data["checkpoint"] = checkpoint.duplicate(true)
@@ -867,6 +947,8 @@ func apply_state(d: Dictionary) -> bool:
 	steps_until_encounter_possible = GameData.SAFE_STEPS
 	map_monster_battle = {}
 	defeated_map_monsters = {}
+	if d.has("slot") and (d["slot"] is int or d["slot"] is float):
+		active_slot = clampi(int(d["slot"]), 1, SLOT_COUNT)
 	return true
 
 
@@ -886,11 +968,35 @@ func hero_id_compat(id: String) -> String:
 	return LEGACY_HERO_IDS.get(id, id)
 
 
-## Titelscherm 'Doorgaan': laden en naar de opgeslagen map + plek.
-## v0.11: de NIEUWSTE van handmatige save en autosave.
+func _slot_for_path(path: String) -> int:
+	for i in range(1, SLOT_COUNT + 1):
+		if slot_path(i) == path:
+			return i
+	return active_slot
+
+
+## Titelscherm 'Doorgaan' laadt nog steeds de nieuwste save (tests en oude knop).
+## Het titelscherm zelf opent eerst de slotlijst en roept continue_slot aan.
 func continue_game() -> bool:
 	use_story_saves()
-	if changing_map or not load_game(newest_save_path()):
+	var rec := newest_slot_record()
+	if rec.is_empty():
+		return false
+	return await _continue_record(rec)
+
+
+## Laad één van de vier slots (de nieuwste van dat slot: handmatig of bijbehorende autosave).
+func continue_slot(slot: int) -> bool:
+	use_story_saves()
+	var rec := slot_record(slot)
+	if rec.is_empty():
+		return false
+	return await _continue_record(rec)
+
+
+func _continue_record(rec: Dictionary) -> bool:
+	active_slot = int(rec.get("slot", 1))
+	if changing_map or not load_game(str(rec.get("path", ""))):
 		return false
 	changing_map = true
 	in_battle = false
@@ -1067,13 +1173,14 @@ func boss_group() -> Dictionary:
 
 ## Start een gevecht: onthoud map + positie, flits, en wissel naar de gevechtsscène.
 ## v0.14: tier = monsterniveau (0 = gewoon; dungeonkamers geven hun "tier" mee, nooit voor een baas).
-func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0) -> void:
+func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false) -> void:
 	if in_battle or changing_map:
 		return
 	in_battle = true
 	pending_enemies = enemies
 	pending_boss = boss
 	pending_tier = 0 if boss else tier
+	pending_archief = archief and not boss
 	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss)
 	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
 	has_return_point = true
@@ -1089,6 +1196,7 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 func end_battle(result: String) -> void:
 	last_battle_result = result
 	pending_tier = 0
+	pending_archief = false
 	steps_until_encounter_possible = GameData.SAFE_STEPS
 	pending_tutorial = {}
 	var target := return_map if return_map != "" else START_MAP
@@ -1183,7 +1291,7 @@ func defeat_text(boss := false) -> String:
 	if dungeon100_floor > 0 or dungeon100_run_active():
 		return DUNGEON100_DEFEAT_TEXT
 	if not has_checkpoint():
-		return "GAME OVER\nJe wordt wakker bij het begin."
+		return "GAME OVER\nYou wake up back at the start."
 	return "GAME OVER\n" + str((RESPAWN_LINES_BOSS if boss else RESPAWN_LINES)[0])
 
 
@@ -1456,7 +1564,7 @@ func give_exp(hero: Dictionary, amount: int) -> Array[String]:
 		# v0.14: atk/def/agi/mag/mdef groeien op de BASIS; de effectieve waarde (met
 		# uitrusting) wordt opnieuw uitgerekend (Equipment.grow -> refresh).
 		Equipment.grow(hero, g)
-		messages.append("%s is nu level %d!" % [hero["name"], hero["level"]])
+		messages.append("%s is now level %d!" % [hero["name"], hero["level"]])
 	return messages
 
 
@@ -1551,13 +1659,13 @@ func codex_load_data(raw) -> void:
 ## Waarom kunnen pagina's 'uid_a' en 'uid_b' niet fuseren? "" = het kan. Regels: CodexData.FUSION_TABLE.
 func codex_fusion_reason(uid_a: String, uid_b: String) -> String:
 	if in_battle:
-		return "Fuseren kan niet tijdens een gevecht."
+		return "You can't fuse during a battle."
 	if codex_pages.size() < 2:
-		return "Voor een fusie heb je twee pagina's nodig."
+		return "A fusion needs two pages."
 	var a := codex_page(uid_a)
 	var b := codex_page(uid_b)
 	if a.is_empty() or b.is_empty():
-		return "Kies twee pagina's."
+		return "Pick two pages."
 	return CodexData.fusion_block_reason(a, b)
 
 

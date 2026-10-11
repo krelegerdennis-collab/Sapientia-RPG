@@ -91,7 +91,7 @@ func _draw_pill() -> void:
 		view.draw_circle(c, 2.0, UiStyleC.TEAL_DIM)
 		view.draw_circle(c, 1.0, UiStyleC.TEAL_HOT)
 		x += 9.0
-	var parts := [["Verdieping ", UiStyleC.TEXT_DIM], [str(shown_floor), UiStyleC.HILITE],
+	var parts := [["Floor ", UiStyleC.TEXT_DIM], [str(shown_floor), UiStyleC.HILITE],
 			["/%d" % RulesC.FLOORS, UiStyleC.TEXT_DIM]]
 	for p in parts:
 		var pos := Vector2(x, y).round()

@@ -21,18 +21,19 @@ extends RefCounted
 ## (preload i.p.v. class_name, zoals party_actions.gd)
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const GradeGear := preload("res://scripts/data/grade_gear.gd")
 
-const MSG_NOT_OWNED := "Dat heb je niet."
-const MSG_WRONG_SLOT := "Dat past niet in dit vak."
-const MSG_CANT_WEAR := "%s kan dit niet dragen."
-const MSG_EMPTY_SLOT := "Dit vak is al leeg."
-const MSG_EQUIPPED := "%s draagt nu %s."
-const MSG_REMOVED := "%s gaat terug in de tas."
-const MSG_ALL_REMOVED := "Alles gaat terug in de tas."
-const MSG_NOTHING_ON := "%s draagt niets."
-const MSG_DROPPED := "%s weggegooid."
-const MSG_STRONGEST := "Sterkste uitrusting gekozen."
-const MSG_STRONGEST_SAME := "Dit is al de sterkste uitrusting."
+const MSG_NOT_OWNED := "You don't have that."
+const MSG_WRONG_SLOT := "That doesn't fit this slot."
+const MSG_CANT_WEAR := "%s can't wear this."
+const MSG_EMPTY_SLOT := "This slot is already empty."
+const MSG_EQUIPPED := "%s now wears %s."
+const MSG_REMOVED := "%s goes back in the bag."
+const MSG_ALL_REMOVED := "Everything goes back in the bag."
+const MSG_NOTHING_ON := "%s isn't wearing anything."
+const MSG_DROPPED := "%s dropped."
+const MSG_STRONGEST := "Best equipment chosen."
+const MSG_STRONGEST_SAME := "This is already the best equipment."
 
 
 static func slots() -> Array:
@@ -52,12 +53,14 @@ static func stat_label(stat: String) -> String:
 
 
 static func item(id: String) -> Dictionary:
-	var it = GameData.EQUIPMENT.get(id, {})
-	return it if it is Dictionary else {}
+	if GameData.EQUIPMENT.has(id):
+		var it = GameData.EQUIPMENT[id]
+		return it if it is Dictionary else {}
+	return GradeGear.item(id)
 
 
 static func is_equipment(id: String) -> bool:
-	return GameData.EQUIPMENT.has(id)
+	return GameData.EQUIPMENT.has(id) or GradeGear.has_item(id)
 
 
 static func item_name(id: String) -> String:
@@ -70,8 +73,17 @@ static func slot_of(id: String) -> String:
 
 ## Bonus van één stuk op één stat (0 als het stuk of de stat er niet is).
 static func item_bonus(id: String, stat: String) -> int:
-	var v = item(id).get(stat, 0)
-	return int(v) if (v is int or v is float) else 0
+	var it := item(id)
+	var v = it.get(stat, 0)
+	var total := int(v) if (v is int or v is float) else 0
+	var ax = it.get("affixen", [])
+	if ax is Array:
+		for a in ax:
+			if a is Dictionary and str(a.get("stat", "")) == stat:
+				var n = a.get("n", 0)
+				if n is int or n is float:
+					total += int(n)
+	return total
 
 
 ## "ATK +3, SPD -1" (voor de hulpregel en het Items-scherm).
@@ -81,7 +93,7 @@ static func bonus_text(id: String) -> String:
 		var b := item_bonus(id, s)
 		if b != 0:
 			parts.append("%s %s%d" % [stat_label(s), "+" if b > 0 else "", b])
-	return ", ".join(parts) if not parts.is_empty() else "geen bonus"
+	return ", ".join(parts) if not parts.is_empty() else "no bonus"
 
 
 ## Mag deze held dit stuk dragen? ("wie" = lijst van equip_type's; geen "wie" = iedereen)
@@ -89,9 +101,20 @@ static func can_wear(hero: Dictionary, id: String) -> bool:
 	var it := item(id)
 	if it.is_empty():
 		return false
-	if not it.has("wie"):
+	if it.has("wie") and not (str(hero.get("equip_type", "")) in it["wie"]):
+		return false
+	var set_id := str(it.get("set_id", ""))
+	if set_id == "":
 		return true
-	return str(hero.get("equip_type", "")) in it["wie"]
+	var worn := equip_of(hero)
+	for s in slots():
+		var other := str(worn.get(s, ""))
+		if other == "" or other == id:
+			continue
+		var other_set := str(item(other).get("set_id", ""))
+		if other_set != "" and other_set != set_id:
+			return false
+	return true
 
 
 static func empty_equip() -> Dictionary:
@@ -204,9 +227,17 @@ static func compare(before: Dictionary, after: Dictionary) -> Dictionary:
 ## Stukken uit de tas die in dit vak passen en die deze held mag dragen (volgorde = data).
 static func candidates(hero: Dictionary, inventory: Dictionary, slot: String) -> Array:
 	var out: Array = []
+	var seen := {}
 	for id in GameData.EQUIPMENT:
 		if int(inventory.get(id, 0)) > 0 and slot_of(id) == slot and can_wear(hero, id):
 			out.append(id)
+			seen[id] = true
+	for id in inventory:
+		var sid := str(id)
+		if seen.has(sid):
+			continue
+		if int(inventory.get(sid, 0)) > 0 and slot_of(sid) == slot and can_wear(hero, sid):
+			out.append(sid)
 	return out
 
 

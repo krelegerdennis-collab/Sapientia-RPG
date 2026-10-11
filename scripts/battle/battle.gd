@@ -35,8 +35,9 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
-const COMMANDS := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten", "Codex"]
+const COMMANDS := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 ## v0.19 Codex-knop (index 5): submenu 'Vangen' (Leeg Boek op een vijand, met vangkans per doel)
 ## en 'Wissel bondgenoot' (niet-KO pagina's + 'Geen'; kost de beurt van de held). Verborgen in
 ## het oefengevecht en zolang de Codex 0 pagina's EN 0 Lege Boeken heeft. Regels: HANDOFF_FUSIE.md.
@@ -325,7 +326,11 @@ func _spawn_enemies(ids: Array) -> void:
 			elif GameState.pending_tier > 0 and not bool(data.get("unique", false)):
 				# v0.14: monsterniveau van de dungeonverdieping (0 = gewoon; game_data.gd TIERS)
 				# v0.19: een uniek monster (Inktwurm) heeft zijn eigen vaste niveau ("encounter_level")
-				data = GameData.apply_tier(data, GameState.pending_tier)
+				# Eerste Archief: dezelfde tabel, daarna omlaag naar doel-level 7.
+				if GameState.pending_archief:
+					data = GameData.apply_archief_tier(data, GameState.pending_tier)
+				else:
+					data = GameData.apply_tier(data, GameState.pending_tier)
 		if tutorial.has("enemy_hp"):
 			data["max_hp"] = int(tutorial["enemy_hp"])   # oefengevecht: iets taaier
 		data["hp"] = data["max_hp"]
@@ -337,6 +342,10 @@ func _spawn_enemies(ids: Array) -> void:
 		var c := _make_combatant(display_name, data, false, -1)
 		c["id"] = id
 		GameState.mark_seen(id)   # bestiarium: gezien
+		if GameState.pending_boss and GameState.dungeon100_floor > 0:
+			var end_id := EndgameBestiary.id_for_floor(GameState.dungeon100_floor)
+			if end_id != "":
+				GameState.mark_seen(end_id)
 		var node := TextureButton.new()
 		# v0.19: nog geen art (bv. de Inktwurm)? dan de plaatsvervanger (GameData.enemy_sprite)
 		var sprite_path := GameData.enemy_sprite(data)
@@ -696,9 +705,9 @@ func _sort_by_feet(layer: Control) -> void:
 func _run() -> void:
 	await Transition.fade_in()
 	var names: Array = enemies.map(func(e): return e["name"])
-	var intro := "Er verschijnen monsters!"
+	var intro := "Monsters appear!"
 	if names.size() == 1:
-		intro = "%s verschijnt!" % names[0]
+		intro = "%s appears!" % names[0]
 	await say(intro)
 	await _core_hint()
 	while true:
@@ -789,7 +798,7 @@ func _choose_for_hero(hero: Dictionary, can_go_back: bool):
 	var last := 0          # na 'terug' uit een submenu/doelkeuze staat het kruis weer daar
 	while true:
 		_set_state("command")
-		show_message("Wat doet %s?" % hero["name"])
+		show_message("What will %s do?" % hero["name"])
 		_show_tip(hero)
 		var allowed := [
 			true,
@@ -844,11 +853,11 @@ func _choose_codex(hero: Dictionary):
 	while true:
 		_set_state("command")
 		var books := _items_left(book)
-		var vangen := "Vangen  Boek x%d" % books if books > 0 else "Vangen: geen Leeg Boek"
-		var wissel := "Wissel bondgenoot"
+		var vangen := "Capture  Book x%d" % books if books > 0 else "Capture: no Blank Book"
+		var wissel := "Swap ally"
 		if not codex.can_swap():
-			wissel = "Wissel: Codex leeg" if GameState.codex_pages.is_empty() else "Wissel: alles KO"
-		show_message("Codex: vangen of wisselen?")
+			wissel = "Swap: Codex empty" if GameState.codex_pages.is_empty() else "Swap: all down"
+		show_message("Codex: capture or swap?")
 		menu.open("Codex", [{"text": vangen, "enabled": books > 0},
 				{"text": wissel, "enabled": codex.can_swap()}], last, true, CODEX_ROW_H)
 		var k: int = await menu.finished
@@ -857,8 +866,8 @@ func _choose_codex(hero: Dictionary):
 			return null
 		last = k
 		if k == 0:
-			var bk := "1 boek" if books == 1 else "%d boeken" % books
-			var t = await _select_enemy(func(c): return "%s %s (%s)" % [c["name"], codex.capture_hint(c), bk], "Vangen: ")
+			var bk := "1 book" if books == 1 else "%d books" % books
+			var t = await _select_enemy(func(c): return "%s %s (%s)" % [c["name"], codex.capture_hint(c), bk], "Capture: ")
 			if t != null:
 				_reserved[book] = _reserved.get(book, 0) + 1
 				return {"type": "item", "actor": hero, "item": book, "target": t}   # zelfde weg als Item
@@ -879,10 +888,10 @@ func _choose_swap(hero: Dictionary):
 	for i in pages.size():
 		var p: Dictionary = pages[i]
 		var here := str(p["uid"]) == cur
-		entries.append({"text": "%s Lv%d%s" % [p["name"], int(p["level"]), " nu" if here else ""], "enabled": not here})
-	entries.append({"text": "Geen", "enabled": cur != ""})
-	show_message("Wie vecht er mee?")
-	menu.open("Wissel", entries, start, true, CODEX_ROW_H, CODEX_ROWS_MAX)
+		entries.append({"text": "%s Lv%d%s" % [p["name"], int(p["level"]), " now" if here else ""], "enabled": not here})
+	entries.append({"text": "None", "enabled": cur != ""})
+	show_message("Who fights with you?")
+	menu.open("Swap", entries, start, true, CODEX_ROW_H, CODEX_ROWS_MAX)
 	var k: int = await menu.finished
 	menu.close()
 	if k == -1:
@@ -903,8 +912,8 @@ func _choose_spell(hero: Dictionary):
 		var kern := _kern_skills(hero)
 		for id in kern:
 			entries.append({"text": kern_entry_text(hero, id), "enabled": kern_ready(hero, id)})
-		show_message("Welke spreuk?" if kern.is_empty() else ("Welke vaardigheid?" if ids.is_empty() else "Welke spreuk of vaardigheid?"))
-		menu.open("Magie" if kern.is_empty() else ("Kern" if ids.is_empty() else "Magie/Kern"), entries)
+		show_message("Which spell?" if kern.is_empty() else ("Which skill?" if ids.is_empty() else "Which spell or skill?"))
+		menu.open("Magic" if kern.is_empty() else ("Core" if ids.is_empty() else "Magic/Core"), entries)
 		var k: int = await menu.finished
 		menu.close()        # v0.13: lijstje weg, dan is het doel goed te zien
 		if k == -1:
@@ -940,7 +949,7 @@ func _choose_item(hero: Dictionary):
 		var entries := []
 		for id in ids:
 			entries.append({"text": "%s x%d" % [GameData.ITEMS[id].get("short", GameData.ITEMS[id]["name"]), _items_left(id)], "enabled": true})
-		show_message("Welk item?")
+		show_message("Which item?")
 		menu.open("Item", entries)
 		var k: int = await menu.finished
 		menu.close()
@@ -1006,7 +1015,7 @@ func _select_enemy(label := Callable(), prefix := ""):
 func _select_ally():
 	_set_state("target_ally")
 	var living := _alive(heroes)
-	var result = await _pick_target(living, "Op wie?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
+	var result = await _pick_target(living, "On whom?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
 	if result != null:
 		last_ally_target_row = result["row"]
 	return result
@@ -1034,7 +1043,7 @@ func _pick_target(living: Array, _title: String, point: Callable, heroes_side: b
 				_target_row = living[idx]["row"]
 				_refresh_party()
 			var lab := str(label.call(living[idx])) if label.is_valid() else str(living[idx]["name"])
-			show_message(("Op wie? " if heroes_side else prefix) + lab)
+			show_message(("On whom? " if heroes_side else prefix) + lab)
 			target_name_label.text = lab
 		var tip: Vector2 = point.call(living[idx])
 		target_cursor.point_at(tip)
@@ -1102,7 +1111,7 @@ func _execute(a: Dictionary) -> void:
 			if t == null:
 				return
 			var mult := 1.0
-			var text := "%s valt aan!" % actor["name"]
+			var text := "%s attacks!" % actor["name"]
 			for skill in actor["s"].get("skills", []):
 				if randf() < float(skill["chance"]):
 					if str(skill.get("type", "")) == "guard":   # v0.15: schild omhoog i.p.v. aanvallen
@@ -1124,12 +1133,12 @@ func _execute(a: Dictionary) -> void:
 		"spell":
 			var sp: Dictionary = GameData.SPELLS[a["spell"]]
 			if actor["s"]["mp"] < sp["mp"]:
-				show_message("%s heeft te weinig MP!" % actor["name"])
+				show_message("%s doesn't have enough MP!" % actor["name"])
 				await _wait(MESSAGE_TIME)
 				return
 			actor["s"]["mp"] -= sp["mp"]
 			_refresh_party()
-			show_message("%s spreekt %s!" % [actor["name"], sp["name"]])
+			show_message("%s casts %s!" % [actor["name"], sp["name"]])
 			ActorSfx.play(actor, "vaardigheid")
 			await _hero_wind_up(actor, false)
 			match sp["target"]:
@@ -1144,13 +1153,22 @@ func _execute(a: Dictionary) -> void:
 					await _wait(0.7)
 					await _report_kos(targets)
 				"ally":
-					await _heal(_valid_ally(a["target"]), _spell_amount(actor, sp), 0)
+					var ally := _valid_ally(a["target"])
+					if str(sp.get("type", "")) == "buff":
+						if not ally.is_empty():
+							var stat := str(sp.get("buff_stat", "def"))
+							var key := "buff_" + stat
+							ally[key] = int(ally.get(key, 0)) + int(sp.get("buff_n", 1))
+							show_message("%s is versterkt." % ally["name"])
+							await _wait(MESSAGE_TIME)
+					else:
+						await _heal(ally, _spell_amount(actor, sp), 0)
 			_hero_rest(actor)
 		"item":
 			var id: String = a["item"]
 			_reserved[id] = maxi(0, _reserved.get(id, 0) - 1)
 			if GameState.item_count(id) <= 0:
-				show_message("Geen %s meer!" % GameData.ITEMS[id]["name"])
+				show_message("No %s left!" % GameData.ITEMS[id]["name"])
 				await _wait(MESSAGE_TIME)
 				return
 			var it: Dictionary = GameData.ITEMS[id]
@@ -1162,15 +1180,15 @@ func _execute(a: Dictionary) -> void:
 					await _wait(MESSAGE_TIME)
 					return
 				GameState.inventory[id] -= 1
-				show_message("%s gebruikt %s!" % [actor["name"], it["name"]])
+				show_message("%s uses %s!" % [actor["name"], it["name"]])
 				await _hero_wind_up(actor, false)
-				show_message("%s leert %s!" % [ally["name"], GameData.SPELLS[spell_id]["name"]])
+				show_message("%s learns %s!" % [ally["name"], GameData.SPELLS[spell_id]["name"]])
 				_refresh_party()
 				await _wait(MESSAGE_TIME)
 				_hero_rest(actor)
 				return
 			GameState.inventory[id] -= 1
-			show_message("%s gebruikt %s!" % [actor["name"], it["name"]])
+			show_message("%s uses %s!" % [actor["name"], it["name"]])
 			await _hero_wind_up(actor, false)
 			if it.get("capture", false):
 				await codex.capture(actor, a["target"])   # Codex: Leeg Boek
@@ -1179,7 +1197,7 @@ func _execute(a: Dictionary) -> void:
 			await _heal(_valid_ally(a["target"]), int(it["heal_hp"]), int(it["heal_mp"]))
 			_hero_rest(actor)
 		"defend":
-			show_message("%s verdedigt zich." % actor["name"])
+			show_message("%s defends." % actor["name"])
 			await _wait(MESSAGE_TIME)
 		"core_charge":
 			await _core_resolve(a)
@@ -1189,7 +1207,7 @@ func _execute(a: Dictionary) -> void:
 			if in_battle(actor):           # v0.19: weggewisseld in deze ronde = geen actie meer
 				await codex.ally_turn(a)
 		"codex_swap":
-			show_message("%s opent de Codex..." % actor["name"])
+			show_message("%s opens the Codex..." % actor["name"])
 			await _hero_wind_up(actor, false)
 			await codex.swap_ally(a)
 			_hero_rest(actor)
@@ -1290,7 +1308,7 @@ func _hit(t: Dictionary, amount: int) -> void:
 	_popup_number(t, str(amount), number_color)
 	ActorSfx.play(t, "raak")
 	if t["is_hero"]:
-		show_message("%s krijgt %d schade." % [t["name"], amount])
+		show_message("%s takes %d damage." % [t["name"], amount])
 		var node: Control = t["node"]
 		node.hurt()
 		if t["s"]["hp"] <= 0:
@@ -1312,13 +1330,17 @@ func _report_kos(targets: Array) -> void:
 		t["reported_ko"] = true
 		ActorSfx.play(t, "dood")
 		if t["is_hero"]:
-			show_message("%s is KO!" % t["name"])
+			show_message("%s is down!" % t["name"])
 		else:
 			GameState.mark_defeated(str(t.get("id", "")))   # bestiarium: verslagen
+			if GameState.pending_boss and GameState.dungeon100_floor > 0:
+				var end_id := EndgameBestiary.id_for_floor(GameState.dungeon100_floor)
+				if end_id != "":
+					GameState.mark_defeated(end_id)
 			var tw := create_tween()
 			tw.tween_property(t["node"], "modulate:a", 0.0, 0.3)
 			tw.tween_callback(t["node"].hide)
-			show_message("%s is verslagen!" % t["name"])
+			show_message("%s is defeated!" % t["name"])
 		await _wait(MESSAGE_TIME)
 
 
@@ -1333,22 +1355,22 @@ func _heal(t: Dictionary, hp: int, mp: int) -> void:
 	status_boxes[t["row"]].flash(UiStyle.TEAL)
 	if hp > 0:
 		_popup_number(t, "+%d" % real_hp, UiStyle.TEAL_HOT)
-		show_message("%s krijgt %d HP terug." % [t["name"], real_hp])
+		show_message("%s recovers %d HP." % [t["name"], real_hp])
 	else:
 		_popup_number(t, "+%d" % real_mp, UiStyle.TEAL)
-		show_message("%s krijgt %d MP terug." % [t["name"], real_mp])
+		show_message("%s recovers %d MP." % [t["name"], real_mp])
 	await _wait(MESSAGE_TIME)
 
 
 func _try_flee() -> bool:
-	show_message("De party probeert te vluchten...")
+	show_message("The party tries to flee...")
 	await _wait(MESSAGE_TIME)
 	var chance := clampf(0.5 + (_avg_agi(heroes) - _avg_agi(enemies)) * 0.04, 0.1, 0.95)
 	if randf() < chance:
-		show_message("Gelukt! Je bent ontsnapt.")
+		show_message("Made it! You got away.")
 		await _wait(MESSAGE_TIME)
 		return true
-	show_message("Vluchten mislukt!")
+	show_message("Couldn't flee!")
 	await _wait(MESSAGE_TIME)
 	return false
 
@@ -1384,8 +1406,8 @@ func _core_banner() -> String:
 ## Vijand-skill {"type": "guard", "def_mult": 2.0}: i.p.v. aanvallen DEF x def_mult, de rest van
 ## deze ronde en de hele volgende ronde. Getoond met een bericht, een blauwe tint en (tijdens
 ## het kiezen) de strook bovenin.
-const GUARD_TEXT := "%s heft zijn schild! (DEF x2)"
-const GUARD_BANNER := "%s: schild omhoog! (DEF x2)"
+const GUARD_TEXT := "%s raises a shield! (DEF x2)"
+const GUARD_BANNER := "%s: shield up! (DEF x2)"
 const GUARD_TINT := Color(0.7, 0.88, 1.3)
 
 
@@ -1409,7 +1431,7 @@ func _guard_tick(c: Dictionary) -> void:
 
 ## DEF van een doelwit, met schild omhoog (x guard_mult).
 func _defense_of(t: Dictionary) -> float:
-	var d := float(t["s"]["def"])
+	var d := float(t["s"]["def"]) + float(t.get("buff_def", 0))
 	if int(t.get("guard", 0)) > 0:
 		d *= float(t.get("guard_mult", 2.0))
 	return d
@@ -1522,7 +1544,7 @@ func grant_fixed_boss_drops() -> Array:
 	var lines: Array = []
 	for id in totals:
 		GameState.inventory[id] = GameState.item_count(id) + int(totals[id])
-		lines.append("Krijgt %dx %s." % [int(totals[id]), names[id]])
+		lines.append("Got %dx %s." % [int(totals[id]), names[id]])
 	return lines
 
 
@@ -1537,12 +1559,12 @@ func _dungeon100_boss_loot() -> String:
 	var loot := Dungeon100Blue.with_warp(Dungeon100Scaling.boss_loot(floor_nr, rng), floor_nr)    # eindbaas: + Warp-kristal
 	GameState.gold += Dungeon100Scaling.grant_loot(loot, GameState.inventory)
 	GameState.story_flags[Dungeon100Scaling.boss_flag(floor_nr)] = true
-	return "Buit van de baas!\n" + "\n".join(Dungeon100Scaling.loot_lines(loot))
+	return "Boss loot!\n" + "\n".join(Dungeon100Scaling.loot_lines(loot))
 
 
 ## Tekst van de eerste overwinningspagina (ook gebruikt door de autotest).
 func victory_text(exp_total: int, gold_total: int, loot_lines: Array = []) -> String:
-	var lines: Array[String] = ["Krijgt %d EXP." % exp_total, "Krijgt %d GOUD." % gold_total]
+	var lines: Array[String] = ["Gained %d EXP." % exp_total, "Gained %d GOLD." % gold_total]
 	for line in loot_lines:
 		lines.append(str(line))
 	lines.append("")
@@ -1554,7 +1576,7 @@ func victory_text(exp_total: int, gold_total: int, loot_lines: Array = []) -> St
 	for h in heroes:
 		var s: Dictionary = h["s"]
 		var need: int = maxi(0, GameData.exp_for_level(int(s["level"]) + 1) - int(s["exp"]))
-		var left := str(s["name"]).rpad(col_label - 1) + " VOLG. LEVEL"
+		var left := str(s["name"]).rpad(col_label - 1) + " NEXT LEVEL"
 		lines.append(left + " " + str(need).lpad(cols - left.length() - 1))
 	return "\n".join(lines)
 
@@ -1578,7 +1600,7 @@ func _victory_page(text: String) -> void:
 
 
 func _defeat() -> void:
-	await say("De party is verslagen...", true)
+	await say("The party is defeated...", true)
 	# v0.19: wakker worden waar je deze kamer/map binnenkwam (baas: in de kamer ervoor)
 	await say(GameState.defeat_text(GameState.pending_boss), true)
 	await GameState.end_battle("lose")
@@ -1758,9 +1780,9 @@ func tip_text(hero: Dictionary) -> String:
 	var hurt := int(hero["s"]["hp"]) < int(hero["s"]["max_hp"])
 	if round_no <= 1 or not hurt or _available_items().is_empty():
 		tips_shown["aanval"] = true
-		return "TIP: kies Aanval en dan de Mosslijm."
+		return "TIP: Attack, then the Moss Slime."
 	tips_shown["item"] = true
-	return "TIP: gewond? Item > Kruid geeft HP terug."
+	return "TIP: hurt? Item > Herb gives HP back."
 
 
 func _show_tip(hero: Dictionary) -> void:
@@ -1825,7 +1847,7 @@ func kern_ready(hero: Dictionary, id: String) -> bool:
 func kern_entry_text(hero: Dictionary, id: String) -> String:
 	var n := str(KernData.KERN_SKILLS[id]["name"])
 	var cd := kern_charge(hero, id)
-	return ("%-10s KERN" % n) if cd <= 0 else ("%-10s (%d)" % [n, cd])
+	return ("%-10s CORE" % n) if cd <= 0 else ("%-10s (%d)" % [n, cd])
 
 
 ## Schade van een fysieke kernvaardigheid: ATK x atk_mult - DEF x def_factor, +/- 15%,

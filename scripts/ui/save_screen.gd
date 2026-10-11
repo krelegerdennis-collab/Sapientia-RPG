@@ -33,13 +33,25 @@ var time_label: Label
 var gold_label: Label
 var yes_button: Button
 var no_button: Button
+var chosen_slot := 1
 var hero_views: Array = []
 var _answered := false
 
 
 func _build() -> void:
 	header.text = "Opslaan"
-	overwrite = GameState.has_save()
+	var slots := HBoxContainer.new()
+	slots.name = "Slots"
+	slots.add_theme_constant_override("separation", 2)
+	content.add_child(slots)
+	for i in range(1, GameState.SLOT_COUNT + 1):
+		var b := UiMenu.button("S%d" % i)
+		b.name = "Slot%d" % i
+		b.custom_minimum_size = Vector2(36, ROW_H)
+		var slot := i
+		b.pressed.connect(_select_slot.bind(slot))
+		slots.add_child(b)
+	_select_slot(GameState.active_slot)
 	var party_panel := PanelContainer.new()
 	party_panel.add_theme_stylebox_override("panel", UiMenu.inner_style())
 	content.add_child(party_panel)
@@ -61,9 +73,8 @@ func _build() -> void:
 	# wat er nu in het slot staat (alleen als er al een save is)
 	slot_label = UiMenu.label("", MenuColors.TEXT_DIM)
 	slot_label.clip_text = true
-	slot_label.visible = overwrite
-	slot_label.text = _slot_summary() if overwrite else ""
 	pcol.add_child(slot_label)
+	_refresh_question()
 	# tijd/goud + vraag
 	var bottom := HBoxContainer.new()
 	bottom.add_theme_constant_override("separation", 4)
@@ -89,7 +100,7 @@ func _build() -> void:
 	var acol := VBoxContainer.new()
 	acol.add_theme_constant_override("separation", 0)
 	ask.add_child(acol)
-	question_label = UiMenu.label(Q_OVERWRITE if overwrite else Q_NEW)
+	question_label = UiMenu.label("")
 	acol.add_child(question_label)
 	yes_button = UiMenu.button("Ja")
 	yes_button.custom_minimum_size = Vector2(BUTTON_W, ROW_H)
@@ -100,8 +111,25 @@ func _build() -> void:
 	no_button.pressed.connect(answer.bind(false))
 	acol.add_child(no_button)
 	TargetList.link_ring([yes_button, no_button])
-	set_hint("A: kiezen   B: terug")
+	set_hint("A: kies   B: terug")
+	_refresh_question()
 	yes_button.grab_focus()
+
+
+func _select_slot(slot: int) -> void:
+	chosen_slot = slot
+	if question_label != null:
+		_refresh_question()
+
+
+func _refresh_question() -> void:
+	var rec := GameState.slot_record(chosen_slot)
+	overwrite = not rec.is_empty()
+	if question_label != null:
+		question_label.text = Q_OVERWRITE if overwrite else Q_NEW
+	if slot_label != null:
+		slot_label.visible = overwrite
+		slot_label.text = _summary_of(rec.get("data", {})) if overwrite else ""
 
 
 func _hero_block(h: Dictionary) -> Control:
@@ -128,9 +156,7 @@ func _hero_block(h: Dictionary) -> Control:
 	return box
 
 
-## 'In het slot: Kees Lv 3, Tijd 0:12:05' (uit de bestaande handmatige save).
-func _slot_summary() -> String:
-	var d := GameState.read_save()
+func _summary_of(d: Dictionary) -> String:
 	if d.is_empty():
 		return ""
 	var who := ""
@@ -146,6 +172,8 @@ func answer(yes: bool) -> void:
 	if _answered:
 		return
 	_answered = true
+	if yes:
+		GameState.active_slot = chosen_slot
 	answered.emit(yes)
 	close()
 

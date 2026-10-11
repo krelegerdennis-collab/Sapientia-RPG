@@ -14,16 +14,16 @@ const RESET_KEY := "_reset"
 
 ## [sleutel in Settings, naam in het menu, uitleg onderin]
 const ROWS := [
-	["music_volume", "Muziek", "Volume van de muziek."],
-	["sfx_volume", "Effecten", "Volume van de geluidseffecten."],
-	["text_speed", "Tekstsnelheid", "Hoe snel tekst in het tekstvak verschijnt."],
-	["battle_speed", "Gevechtstempo", "Hoe lang berichten in een gevecht blijven staan."],
-	["touch_opacity", "Knoppen zicht", "Hoe goed je de D-pad en A/B op het scherm ziet."],
-	["touch_size", "Knopgrootte", "Grootte van de D-pad en A/B op het scherm."],
-	["crt", "Scanlines", "Beeldfilter met lijnen, vignet en glitches."],
-	["screen_shake", "Schudden", "Schudden bij treffers in een gevecht."],
-	["autosave", "Autom. opslaan", "Opslaan bij een nieuwe map, na winst en bij afsluiten."],
-	[RESET_KEY, "Standaard", "Alle opties terug naar de standaard (A)."],
+	["music_volume", "Music", "Music volume."],
+	["sfx_volume", "Effects", "Sound effect volume."],
+	["text_speed", "Text Speed", "How fast text appears in the text box."],
+	["battle_speed", "Battle Speed", "How long battle messages stay up."],
+	["touch_opacity", "Button Fade", "How clearly you see the D-pad and A/B."],
+	["touch_size", "Button Size", "Size of the D-pad and A/B on screen."],
+	["crt", "Scanlines", "Picture filter with lines, vignette, and glitches."],
+	["screen_shake", "Screen Shake", "Shake the screen when a hit lands."],
+	["autosave", "Autosave", "Save on a new map, after a win, and when you quit."],
+	[RESET_KEY, "Default", "Set every option back to the default (A)."],
 ]
 
 var settings: Node
@@ -33,13 +33,13 @@ var value_labels := {}         # sleutel -> Label
 
 
 func _build() -> void:
-	header.text = "Opties"
+	header.text = "Options"
 	settings = get_node_or_null("/root/Settings")
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 0)
 	content.add_child(box)
 	if settings == null:
-		box.add_child(UiMenu.label("Opties zijn niet beschikbaar (autoload Settings ontbreekt).", MenuColors.TEXT_DIM))
+		box.add_child(UiMenu.label("Options are unavailable (Settings autoload is missing).", MenuColors.TEXT_DIM))
 		back_button.grab_focus()
 		return
 	for r in ROWS:
@@ -84,7 +84,7 @@ func value_text(key: String) -> String:
 	var v = settings.get_value(key)
 	match key:
 		"music_volume", "sfx_volume":
-			return "Uit" if int(v) <= 0 else "%d%%" % (int(v) * 100 / settings.VOLUME_STEPS)
+			return "Off" if int(v) <= 0 else "%d%%" % (int(v) * 100 / settings.VOLUME_STEPS)
 		"text_speed":
 			return settings.TEXT_SPEED_NAMES[int(v)]
 		"battle_speed":
@@ -94,7 +94,7 @@ func value_text(key: String) -> String:
 		"touch_size":
 			return settings.TOUCH_SIZE_NAMES[int(v)]
 	if v is bool:
-		return "Aan" if v else "Uit"
+		return "On" if v else "Off"
 	return str(v)
 
 
@@ -133,7 +133,7 @@ func activate(key: String) -> void:
 	if key == RESET_KEY:
 		settings.reset_to_defaults()
 		refresh_values()
-		show_message("Alle opties staan weer op standaard.")
+		show_message("All options are back to the default.")
 		return
 	var before = settings.get_value(key)
 	settings.step(key, 1)

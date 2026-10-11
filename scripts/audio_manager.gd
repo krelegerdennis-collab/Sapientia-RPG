@@ -558,7 +558,7 @@ func _show_web_prompt() -> void:
 	layer.process_mode = Node.PROCESS_MODE_ALWAYS
 	var label := Label.new()
 	label.name = "Prompt"
-	label.text = "Tik voor geluid"
+	label.text = "Tap for sound"
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	label.offset_top = -22.0
