@@ -11,7 +11,8 @@ extends Node
 ##   Deel E: save/load (pagina's + actieve bondgenoot), oude save zonder codex, kapotte data.
 ##   Deel F: Golem (Eerste Archief) dropt 3 Lege Boeken; de actieve bondgenoot loopt mee
 ##           in kerkers en op de wereldkaart, niet in dorpen.
-##   Deel G: betatest-account (aparte save, niveau 10, buddy, echte save blijft heel).
+##   Deel G: betatest-account (aparte save, niveau 10, buddy, echte save blijft heel)
+##           en eindstaat (niveau 40, eigen bestand, slot 1-4 blijft heel).
 ## Met --shots=map: codex_boek_inschrijven, codex_gevangen, codex_bondgenoot, codex_bondgenoot_aanval,
 ## codex_levelup, codex_scherm (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
@@ -19,6 +20,7 @@ extends Node
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
+const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const AllyScript := preload("res://scripts/battle/codex_ally.gd")
 const Follower := preload("res://scripts/field_follower.gd")
 const GOLEM_SCENE := "res://scenes/maps/archief_golemhal.tscn"
@@ -1000,9 +1002,111 @@ func _beta_account_tests() -> void:
 			and GameState.player_name == "Dennis" and GameState.member_level("dennis") == 10
 			and GameState.return_map == GameState.WORLD_MAP and GameState.return_tile == GameState.BETA_TILE)
 	check("echte save nog te laden", GameState.load_game(story_path) and GameState.player_name == "Echt")
-	for p in [GameState.beta_save_path(), GameState.beta_autosave_path()]:
+	_eind_account_tests(story_path)
+	for p in [GameState.beta_save_path(), GameState.beta_autosave_path(),
+			GameState.eind_save_path(), GameState.eind_autosave_path()]:
 		if FileAccess.file_exists(p):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+
+
+func _eind_account_tests(story_path: String) -> void:
+	for p in [GameState.eind_save_path(), GameState.eind_autosave_path()]:
+		if FileAccess.file_exists(p):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+	GameState.use_story_saves()
+	var slots_ok := true
+	for s in range(1, GameState.SLOT_COUNT + 1):
+		GameState.active_slot = s
+		GameState.set_player_name("Slot%d" % s)
+		slots_ok = slots_ok and GameState.save_game(Vector2i(s, 2), Vector2i.DOWN)
+	check("vier slots gevuld voor de eindstaat", slots_ok)
+	var before := _story_slot_snapshot()
+	GameState.use_eind_saves()
+	GameState._build_eind_state()
+	GameState.current_map = GameState.WORLD_MAP
+	check("eindstaat schrijft zijn eigen bestand", GameState.save_game(GameState.BETA_TILE, GameState.BETA_FACING)
+			and GameState.playing_eind and not GameState.playing_beta
+			and GameState.save_path.ends_with("save_eindstaat.json"))
+	GameState.active_slot = 3
+	check("eindstaat schrijft niet naar de vier slots", GameState.save_game(GameState.BETA_TILE, GameState.BETA_FACING)
+			and GameState.save_path.ends_with("save_eindstaat.json")
+			and _story_slot_snapshot() == before)
+	check("eindstaat: party op level 40", GameState.eind_level() == 40
+			and GameState.member_level("dennis") == 40 and GameState.member_level("noor") == 40
+			and GameState.member_level("lotte") == 40)
+	var dennis: Dictionary = GameState.party[0]
+	check("eindstaat: Dennis heeft geen spreuk", str(dennis.get("id", "")) == "dennis"
+			and (dennis.get("spells") as Array).is_empty())
+	var noor := _member("noor")
+	var noor_ok := not noor.is_empty()
+	for sid in noor.get("spells", []):
+		var spell_id := str(sid)
+		var sp: Dictionary = GD.SPELLS.get(spell_id, {})
+		noor_ok = noor_ok and SpellRules.can_learn("noor", spell_id) and int(sp.get("grade", 99)) <= 3
+	var noor_spells: Array = noor.get("spells", [])
+	check("eindstaat: Noor heeft geen verboden element", noor_ok
+			and noor_spells.has("vuurzee") and not noor_spells.has("zegen") and not noor_spells.has("inferno"))
+	var lotte := _member("lotte")
+	var lotte_spells: Array = lotte.get("spells", [])
+	check("eindstaat: Lotte tot grade 3, geen grade 4", not lotte.is_empty()
+			and lotte_spells.has("ijsstorm") and lotte_spells.has("glans") and not lotte_spells.has("ijskern")
+			and not lotte_spells.has("aureool"))
+	check("eindstaat: G4-wapens, goud, geen hanger", str(dennis.get("equip", {}).get("wapen", "")) == "bg_g4_superzwaard"
+			and str(noor.get("equip", {}).get("wapen", "")) == "bg_g4_staf_noor"
+			and str(lotte.get("equip", {}).get("wapen", "")) == "bg_g4_staf_lotte"
+			and GameState.gold == GameState.EIND_GOLD and GameState.item_count("hanger") == 0)
+	check("eindstaat: verhaal tot Noor gered, grot niet gestart", GameState.story_step == SD.NOOR_GERED
+			and GameState.story_flags.has(SD.GOLEM_FLAG) and GameState.story_flags.has(SD.WORTELKONING_FLAG)
+			and GameState.story_flags.has("noor_gered") and GameState.dungeon100_floor == 0)
+	var codex_n := 0
+	for raw_id in CD.SPECIES:
+		var sid := str(raw_id)
+		if CD.has_species(sid) and bool(CD.species(sid).get("capturable", false)):
+			codex_n += 1
+	check("eindstaat: vangbare Codex-soorten, Inktwurm als buddy", GameState.codex_pages.size() == codex_n
+			and str(GameState.codex_active_page().get("species", "")) == "inktwurm"
+			and GameState.is_seen("mosslijm"))
+	var eind_path := GameState.newest_eind_path()
+	GameState.new_game("Weg")
+	GameState.use_eind_saves()
+	check("eindstaat laden houdt level 40", GameState.load_game(eind_path)
+			and GameState.member_level("dennis") == 40 and GameState.playing_eind
+			and GameState.return_map == GameState.WORLD_MAP)
+	GameState.use_beta_saves()
+	GameState._build_beta_state()
+	check("gewone betatest blijft niveau 10", GameState.member_level("dennis") == GameState.BETA_LEVEL
+			and GameState.playing_beta and not GameState.playing_eind and not GameState.has_member("noor")
+			and not GameState.has_member("lotte"))
+	GameState.use_story_saves()
+	check("na eindstaat wijst opslaan weer naar de echte save", not GameState.playing_eind
+			and not GameState.playing_beta and GameState.save_path == story_path
+			and _story_slot_snapshot() == before)
+
+
+func _member(id: String) -> Dictionary:
+	for h in GameState.party:
+		if str(h.get("id", "")) == id:
+			return h
+	return {}
+
+
+func _story_slot_snapshot() -> Dictionary:
+	var out := {}
+	var base := GameState._story_save_path
+	out[base] = _file_text(base)
+	if base.ends_with("save_1.json"):
+		var prefix := base.trim_suffix("save_1.json")
+		for i in range(2, GameState.SLOT_COUNT + 1):
+			var p := prefix + "save_%d.json" % i
+			out[p] = _file_text(p)
+	out[GameState._story_autosave_path] = _file_text(GameState._story_autosave_path)
+	return out
+
+
+func _file_text(path: String) -> String:
+	if not FileAccess.file_exists(path):
+		return ""
+	return FileAccess.get_file_as_string(path)
 
 
 func _write(path: String, d: Dictionary) -> void:
