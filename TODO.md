@@ -410,7 +410,8 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 - [ ] Party wisselen. Er is geen API.
 - [ ] Save-tegel op de echte spelerpositie. Nu is de tegel (0, 0) en de kijkrichting (0, 1).
 - [ ] Act-kamers bouwen en de deuren openen. De kamers uit de lijst staan in `world_warper/kamers` en gaan open met `warper_hub_open` plus de act. Werkplaats en Handelskamer zijn leeg. `world_warper_act2` en `world_warper_act3` zet niemand; `codex_nis` en `sapientia_schot` blijven dicht.
-- [ ] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
+- [x] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
+  bord_hal, bord_warp en tiles_placeholder staan in tools/placeholders_v17.txt. De kaarten in world_warper/maps tekenen met die atlas.
 - [ ] Kleur van de Hanger-gloed. Deze lijst zei paars; de code is roze (canon: roze = de Stroom).
 - [ ] Webversie. Hoort niet bij deze branch.
 - [ ] Runner in de CI-matrix op Godot 4.3. De 65 PASS draaiden op Godot 4.7.2, buiten .github/workflows/tests.yml.
@@ -531,9 +532,9 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 ### Visuals en art
 
 - [ ] World Warper exterieur (zwevend, paars, high-tech)
-  Placeholder-kaart, tegels 16×16, in world_warper/maps. Zweeft niet. Staat niet in tools/placeholders_v17.txt.
+  Placeholder-kaart, tegels 16×16, in world_warper/maps. Zweeft niet. De atlas staat in tools/placeholders_v17.txt.
 - [ ] Interieur-tileset (paars, holografisch, sciencefiction)
-  tiles_placeholder.png, tegels 16×16, met het woord PLACEHOLDER. Niet geregistreerd.
+  tiles_placeholder.png, tegels 16×16, met het woord PLACEHOLDER. Geregistreerd in tools/placeholders_v17.txt. Echte tileset ontbreekt nog.
 - [ ] Sprite van het warp-platform
   warp_ring is een rechthoek van paneeltegels. Geen sprite.
 - [ ] Sprite van de main PC
@@ -600,9 +601,9 @@ Echte pixel-art ter vervanging van placeholders. Geen definitieve art tekenen in
 - [ ] `world_warper/art/tafel_placeholder.png` — 32×16 — lege smidstafel in De Werkplaats
 - [ ] `world_warper/art/toonbank_placeholder.png` — 48×16 — dichte toonbank in De Handelskamer
 - [ ] `world_warper/art/bord_kamers.png` — 32×16 — bordje naar de kamers
-- [ ] `world_warper/art/bord_hal.png` — 32×16 — bord in de hal. Staat niet in `tools/placeholders_v17.txt`
-- [ ] `world_warper/art/bord_warp.png` — 48×16 — bord bij de warp. Staat niet in `tools/placeholders_v17.txt`
-- [ ] `world_warper/art/tiles_placeholder.png` — 128×32 — interieur-tegels. Staat niet in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/bord_hal.png` — 32×16 — bord in de hal. Placeholder staat in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/bord_warp.png` — 48×16 — bord bij de warp. Placeholder staat in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/tiles_placeholder.png` — 128×32 — interieur-tegels. Placeholder staat in `tools/placeholders_v17.txt`
 - [ ] `assets/bg/spiegel_kamer.png` — 384×216 — kamer vol spiegelende oppervlakken
 - [ ] `assets/bg/spiegel_kamer_gebroken.png` — 384×216 — dezelfde kamer, spiegels gebroken
 
