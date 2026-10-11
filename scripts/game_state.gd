@@ -1723,3 +1723,21 @@ func unique_state(id: String) -> String:
 func unique_mark(id: String, how: String) -> void:
 	if is_unique(id) and not unique_done.has(id):
 		unique_done[id] = how
+
+
+# ---------------------------------------------------------------- world warper
+## TODO(design): trigger is de bewaker van verdieping 2 van het Eerste Archief
+## (bewaker:archief_v2_trapzaal/m2, kamer archief_v2_trapzaal, monster m2).
+## Dit is NIET het Archief van Leven uit TODO.md; dat archief bestaat niet.
+## Geen afhankelijkheid van code die nog gebouwd moet worden.
+func world_warper_is_unlocked() -> bool:
+	return story_flags.has("world_warper_unlocked")
+
+
+func try_unlock_world_warper() -> bool:
+	if world_warper_is_unlocked():
+		return true
+	if story_flags.has("bewaker:archief_v2_trapzaal/m2"):
+		story_flags["world_warper_unlocked"] = true
+		return true
+	return false
