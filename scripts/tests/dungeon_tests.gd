@@ -873,11 +873,14 @@ func _dungeon_tests() -> void:
 	check("speler op de tile = aanraken", r.monster_can_enter(ms, tile()) == "player")
 	check("vrije vloer", r.monster_can_enter(ms, Vector2i(15, 9)) == "free")
 	GameState.encounter_multiplier = 100.0
-	await walk("move_left", 3)
+	# De begin-warper staat op (8, 10), direct links van de spawn. Rechts is de gang vrij.
 	await walk("move_right", 3)
+	await walk("move_left", 3)
 	check("geen random encounters in de dungeon (6 stappen, 100x kans)", not GameState.in_battle and tile() == Vector2i(9, 10))
 	GameState.encounter_multiplier = 0.0
-	# savepunt
+	# savepunt: eerst omhoog, dan links langs de warper. De laatste stap omhoog
+	# botst op de sokkel en draait de speler ernaartoe.
+	await walk("move_up", 1)
 	await walk("move_left", 6)
 	await walk("move_up", 1)
 	check("voor het savepunt (3,9), kijkt omhoog: %s" % tile(), tile() == Vector2i(3, 9) and player().facing == U)
