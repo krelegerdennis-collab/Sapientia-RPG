@@ -7,7 +7,6 @@ extends SceneTree
 ## --script eist een SceneTree. De eerste _process draait ná de autoloads.
 
 const UnlockTest := preload("res://world_warper/flow/unlock_test.gd")
-const DestinationsTest := preload("res://world_warper/warp/destinations_test.gd")
 const DialoogTest := preload("res://world_warper/guide/dialoog_test.gd")
 const DreigingTest := preload("res://world_warper/cutscene/dreiging_test.gd")
 const SpawnTest := preload("res://world_warper/wander/spawn_test.gd")
@@ -36,9 +35,12 @@ func _draai() -> void:
 	_rapport("unlock alleen bewaker", UnlockTest.alleen_bewaker())
 	_rapport("unlock al open", UnlockTest.al_open())
 	_rapport("unlock andere bewaker", UnlockTest.andere_bewaker())
-	_rapport("warp WM2 dicht", DestinationsTest.wm2_dicht())
-	_rapport("warp WM1 echte bestemming", DestinationsTest.wm1_echte_bestemming())
-	_rapport("warp onbekend id", DestinationsTest.onbekend_id_faalt())
+	# Pas hier laden: destinations.gd noemt GameState, en dat script noemt Transition.
+	# Een preload bovenaan parseert dat vóór de autoloads bestaan.
+	var DestinationsTest: Script = load("res://world_warper/warp/destinations_test.gd")
+	_rapport("warp WM2 dicht", DestinationsTest.call("wm2_dicht"))
+	_rapport("warp WM1 echte bestemming", DestinationsTest.call("wm1_echte_bestemming"))
+	_rapport("warp onbekend id", DestinationsTest.call("onbekend_id_faalt"))
 	_rapport("dialoog", DialoogTest.fouten())
 	_dreiging()
 	_spawn()
@@ -97,26 +99,65 @@ func _smoke() -> void:
 		_fail("smoke geen scènes")
 		return
 	for pad in paden:
-		if not ResourceLoader.exists(pad):
-			_fail("smoke ontbreekt %s" % pad)
+		_smoke_scene(pad)
+	var scripts := _bestanden("res://world_warper", ".gd")
+	if scripts.is_empty():
+		_fail("smoke geen scripts")
+		return
+	for pad in scripts:
+		_smoke_script(pad)
+
+
+func _smoke_scene(pad: String) -> void:
+	if not ResourceLoader.exists(pad):
+		_fail("smoke ontbreekt %s" % pad)
+		return
+	var res: Resource = ResourceLoader.load(pad, "", ResourceLoader.CACHE_MODE_IGNORE)
+	if res == null or not (res is PackedScene):
+		_fail("smoke null %s" % pad)
+		return
+	for dep in ResourceLoader.get_dependencies(pad):
+		var bron := _dep_pad(str(dep))
+		if bron == "" or bron.ends_with(".gd"):
 			continue
-		var res: Resource = ResourceLoader.load(pad, "", ResourceLoader.CACHE_MODE_IGNORE)
-		if res == null:
-			_fail("smoke null %s" % pad)
-		elif not (res is PackedScene):
-			_fail("smoke geen scène %s" % pad)
-		else:
-			_pass("smoke %s" % pad)
+		var sub: Resource = ResourceLoader.load(bron, "", ResourceLoader.CACHE_MODE_REUSE)
+		if sub == null:
+			_fail("smoke kapotte afhankelijkheid %s van %s" % [bron, pad])
+			return
+	_pass("smoke %s" % pad)
+
+
+func _smoke_script(pad: String) -> void:
+	var scr: Script = load(pad) as Script
+	if scr == null or not scr.can_instantiate():
+		_fail("smoke script %s" % pad)
+		return
+	_pass("smoke script %s" % pad)
+
+
+func _dep_pad(dep: String) -> String:
+	var delen := dep.split("::", false)
+	for deel in delen:
+		var tekst := str(deel)
+		if tekst.begins_with("res://") or tekst.begins_with("user://"):
+			return tekst
+	if dep.begins_with("res://") or dep.begins_with("user://"):
+		return dep
+	return ""
 
 
 func _scenes(root: String) -> PackedStringArray:
+	return _bestanden(root, ".tscn")
+
+
+func _bestanden(root: String, ext: String) -> PackedStringArray:
 	var uit := PackedStringArray()
-	_loop(root, uit)
+	_loop(root, ext, uit)
 	uit.sort()
 	return uit
 
 
-func _loop(pad: String, uit: PackedStringArray) -> void:
+func _loop(pad: String, ext: String, uit: PackedStringArray) -> void:
 	var dir := DirAccess.open(pad)
 	if dir == null:
 		return
@@ -126,8 +167,8 @@ func _loop(pad: String, uit: PackedStringArray) -> void:
 		if not naam.begins_with("."):
 			var volledig := pad.path_join(naam)
 			if dir.current_is_dir():
-				_loop(volledig, uit)
-			elif naam.ends_with(".tscn"):
+				_loop(volledig, ext, uit)
+			elif naam.ends_with(ext):
 				uit.append(volledig)
 		naam = dir.get_next()
 	dir.list_dir_end()

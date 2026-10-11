@@ -24,13 +24,15 @@ const SCHERM_LAAG := 20
 ## Buiten: alleen play_hub. Geen cutscene en geen andere onderdelen.
 @export var licht := false
 
-var _ambience: WorldWarperAmbience
-var _gids: WorldWarperGids
-var _wanderers: WorldWarperWanderers
-var _save: WorldWarperSavePoint
-var _party: WorldWarperPartySelect
-var _warp: WorldWarperWarpView
-var _hanger: WorldWarperHangerScene
+## Basistypes, geen class_name. Die namen staan pas in de globale cache na een
+## editor-import; zonder cache weigert Godot dit script te parsen en start de hal niet.
+var _ambience: RefCounted
+var _gids: StaticBody2D
+var _wanderers: Node2D
+var _save: Control
+var _party: Control
+var _warp: Control
+var _hanger: Node2D
 
 
 func _ready() -> void:
@@ -60,19 +62,19 @@ func _bouw_hal() -> void:
 	_ontkoppel_wereldankers("ww_anchor_warp")
 	_ontkoppel_wereldankers("ww_anchor_party")
 
-	_gids = GIDS_SCENE.instantiate() as WorldWarperGids
+	_gids = GIDS_SCENE.instantiate() as StaticBody2D
 	_gids.name = "Gids"
 	add_child(_gids)
 
-	_wanderers = WANDER_SCENE.instantiate() as WorldWarperWanderers
+	_wanderers = WANDER_SCENE.instantiate() as Node2D
 	_wanderers.name = "Wanderers"
 	add_child(_wanderers)
 
-	_save = SAVE_SCENE.instantiate() as WorldWarperSavePoint
+	_save = SAVE_SCENE.instantiate() as Control
 	_save.name = "Savepunt"
 	add_child(_save)
 
-	_hanger = HANGER_SCENE.instantiate() as WorldWarperHangerScene
+	_hanger = HANGER_SCENE.instantiate() as Node2D
 	_hanger.name = "HangerScene"
 	add_child(_hanger)
 
@@ -81,24 +83,24 @@ func _bouw_hal() -> void:
 	scherm.layer = SCHERM_LAAG
 	add_child(scherm)
 
-	_warp = WARP_SCENE.instantiate() as WorldWarperWarpView
+	_warp = WARP_SCENE.instantiate() as Control
 	_warp.name = "WarpView"
 	scherm.add_child(_warp)
 
-	_party = PARTY_SCENE.instantiate() as WorldWarperPartySelect
+	_party = PARTY_SCENE.instantiate() as Control
 	_party.name = "PartySelect"
 	scherm.add_child(_party)
 
 	_maak_vlak(warp_pos, "Warp", _open_warp)
 	_maak_vlak(party_pos, "Gezelschap", _open_party)
 
-	if not _warp.warp_requested.is_connected(_on_warp_requested):
-		_warp.warp_requested.connect(_on_warp_requested)
-	if not _hanger.hanger_activated.is_connected(_on_hanger_activated):
-		_hanger.hanger_activated.connect(_on_hanger_activated)
+	if not _warp.is_connected("warp_requested", _on_warp_requested):
+		_warp.connect("warp_requested", _on_warp_requested)
+	if not _hanger.is_connected("hanger_activated", _on_hanger_activated):
+		_hanger.connect("hanger_activated", _on_hanger_activated)
 
-	_wanderers.refresh()
-	_hanger.maybe_play()
+	_wanderers.call("refresh")
+	_hanger.call("maybe_play")
 
 
 func _on_warp_requested(_wm_id: String, _place_id: String) -> void:
@@ -113,17 +115,17 @@ func _on_hanger_activated() -> void:
 func _open_warp() -> void:
 	if _geblokkeerd() or _warp == null:
 		return
-	if _party != null and _party.is_open():
-		_party.close()
-	_warp.open()
+	if _party != null and bool(_party.call("is_open")):
+		_party.call("close")
+	_warp.call("open")
 
 
 func _open_party() -> void:
 	if _geblokkeerd() or _party == null:
 		return
 	if _warp != null and _warp.visible:
-		_warp.close()
-	_party.open()
+		_warp.call("close")
+	_party.call("open")
 
 
 func _geblokkeerd() -> bool:
