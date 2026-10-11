@@ -10,7 +10,6 @@ const Equipment := preload("res://scripts/equipment.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")   # Kernfragment stap 2: de Codex
 const Dungeon100RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")   # 100-verdiepingen-kerker
-const WarperBestemmingen := preload("res://world_warper/warp/destinations.gd")
 ## Hier begint een nieuw spel (v0.11: wakker worden in bed, in het huis).
 const START_MAP := "res://scenes/maps/huis_wilgendal.tscn"
 const START_SPAWN := "bed"
@@ -1339,7 +1338,10 @@ func go_to_title() -> void:
 ## Wordt aangeroepen door map.gd zodra een map geladen is.
 func enter_map(path: String) -> void:
 	current_map = path
-	var bezoek := WarperBestemmingen.visit_flag_for_path(path)
+	# Niet preloaden: destinations.gd noemt GameState, en een const hierboven
+	# loopt vast zodra een test dat script opnieuw laadt.
+	var bestem: Script = load("res://world_warper/warp/destinations.gd")
+	var bezoek := str(bestem.call("visit_flag_for_path", path))
 	if bezoek != "":
 		story_flags[bezoek] = true
 	if path != Dungeon100RulesC.dungeon_scene:
