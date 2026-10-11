@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
 [ext_resource type="TileSet" path="res://world_warper/art/tiles_placeholder.tres" id="2_tiles"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://world_warper/art/bord_hal.png" id="8_hal"]
 [ext_resource type="Texture2D" path="res://world_warper/art/bord_warp.png" id="9_warp"]
 [ext_resource type="Script" path="res://world_warper/flow/hub_boot.gd" id="10_boot"]
+[ext_resource type="PackedScene" path="res://world_warper/kamers/naar_kamers.tscn" id="11_kamers"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bord"]
 size = Vector2(14, 14)
@@ -134,6 +135,9 @@ position = Vector2(72, 88)
 
 [node name="AnkerWander" type="Marker2D" parent="Ankers" groups=["ww_anchor_wander"]]
 position = Vector2(264, 152)
+
+[node name="NaarKamers" parent="Objects" instance=ExtResource("11_kamers")]
+position = Vector2(40, 40)
 
 [node name="HubBoot" type="Node2D" parent="."]
 script = ExtResource("10_boot")

@@ -170,6 +170,8 @@ var pending_boss := false
 var pending_tier := 0
 ## True als het gevecht uit een kamer van het Eerste Archief komt (niet het woud, niet de Diepe Grot).
 var pending_archief := false
+## Trainingshal: oefengevecht zonder buit. Verlies is geen game-over.
+var practice_battle := false
 
 ## De vijandgroep voor het volgende gevecht (Array van vijand-id's).
 var pending_enemies: Array = []
@@ -253,6 +255,7 @@ func _ready() -> void:
 	# Sfx per held/monster: of  godot -- --actorsfxtest  (scripts/tests/actor_sfx_tests.gd).
 	# Catalogus t/m Act 6: of  godot -- --catalogustest  (scripts/tests/catalogus_tests.gd).
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
+	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
@@ -275,7 +278,8 @@ func _ready() -> void:
 			["--actorsfxtest", "res://scripts/tests/actor_sfx_tests.gd", "ActorSfxTest", "actorsfxtest"],
 			["--catalogustest", "res://scripts/tests/catalogus_tests.gd", "CatalogusTest", "catalogustest"],
 			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
-			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"]]:
+			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
+			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -1400,9 +1404,10 @@ func boss_group() -> Dictionary:
 
 ## Start een gevecht: onthoud map + positie, flits, en wissel naar de gevechtsscène.
 ## v0.14: tier = monsterniveau (0 = gewoon; dungeonkamers geven hun "tier" mee, nooit voor een baas).
-func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false) -> void:
+func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
 	if in_battle or changing_map:
 		return
+	practice_battle = practice
 	in_battle = true
 	pending_enemies = enemies
 	pending_boss = boss
@@ -1422,6 +1427,8 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 ## of naar het begin van het spel (game over).
 func end_battle(result: String) -> void:
 	result = archief2_verwerk_einde(result)
+	var oefening := practice_battle
+	practice_battle = false
 	last_battle_result = result
 	pending_tier = 0
 	pending_archief = false
@@ -1430,7 +1437,13 @@ func end_battle(result: String) -> void:
 	var target := return_map if return_map != "" else START_MAP
 	if result == "lose":
 		map_monster_battle = {}
-		if dungeon100_floor > 0 or dungeon100_run_active():
+		if oefening:
+			# Terug in de kamer, genezen. Geen checkpoint-rollback en geen game-over.
+			_full_heal()
+			entry_kind = "battle"
+			has_return_point = true
+			pending_respawn_msg = []
+		elif dungeon100_floor > 0 or dungeon100_run_active():
 			# 100-kerker: dood is dungeon uit. Terug naar de wereldkaart bij de ingang, niet verdieping 1.
 			target = dungeon100_defeat()
 		elif has_checkpoint():
@@ -1441,16 +1454,19 @@ func end_battle(result: String) -> void:
 			target = RESPAWN_MAP
 	else:
 		entry_kind = "battle"
-		# KO-helden staan na het gevecht weer op met 1 HP (houdt het simpel).
-		for h in party:
-			if h["hp"] <= 0:
-				h["hp"] = 1
-		# Codex: de bondgenoot ook (zelfde regel als de helden)
-		for p in codex_pages:
-			if int(p["hp"]) <= 0:
-				p["hp"] = 1
+		if oefening:
+			_full_heal()
+		else:
+			# KO-helden staan na het gevecht weer op met 1 HP (houdt het simpel).
+			for h in party:
+				if h["hp"] <= 0:
+					h["hp"] = 1
+			# Codex: de bondgenoot ook (zelfde regel als de helden)
+			for p in codex_pages:
+				if int(p["hp"]) <= 0:
+					p["hp"] = 1
 		# v0.11: na winst automatisch opslaan (zodra de map weer in beeld is)
-		if result == "win":
+		if result == "win" and not oefening:
 			_autosave_request = "battle"
 			# v0.15: baas verslagen -> de hoofdheld absorbeert zijn kern (eenmalig). Meteen
 			# vastleggen, dus de autosave hierna heeft hem al; het moment zelf speelt de map af.

@@ -35,3 +35,11 @@ assets/map_monsters/genezer.png   32x64   De Genezer op de kaart (2x4 van 16x16)
 # assets/sprites/enemies/woudgeest.png       vooraanzicht, zelfde anker als de andere vijanden
 # assets/sprites/enemies/woudgeest_rug.png   rugaanzicht, zelfde canvas als het vooraanzicht
 # assets/map_monsters/woudgeest.png          32x64  (2x4 frames van 16x16), alleen als hij op de kaart gaat lopen
+# Extra kamers van de World Warper (tools/art_warper_kamers.py). Magenta hoekjes, het woord PLACEHOLDER of een kort label. Geen definitieve art.
+world_warper/art/echo_placeholder.png         48x96   ECHO op de kaart (3x4 frames van 16x32, PLACEHOLDER)
+world_warper/art/party_placeholder.png        48x96   party-lid zonder eigen sheet (3x4 frames van 16x32, PLACEHOLDER)
+world_warper/art/pc_placeholder.png           32x32   hoofd-PC in De Hal en de terminal in ECHO's Kamer
+world_warper/art/warp_platform.png            32x16   warp-platform in De Hal
+world_warper/art/tafel_placeholder.png        32x16   lege smidstafel in De Werkplaats
+world_warper/art/toonbank_placeholder.png     48x16   dichte toonbank in De Handelskamer
+world_warper/art/bord_kamers.png              32x16   bordje naar de kamers en overige interactievlakken

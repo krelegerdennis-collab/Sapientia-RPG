@@ -487,23 +487,31 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 - [x] Half functioneel: centrale hal en meerdere kamers
   Eerste versie. Placeholder-kaarten, tegels 16×16. Open: exterieur, hal, warp_ring, hanger_nis. codex_nis en sapientia_schot bestaan en blijven dicht.
 - [ ] Kamers bouwen volgens de lijst hieronder
-  codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand. De genoemde kamers staan nog niet in de code.
+  codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand. De kamers uit de lijst staan in world_warper/kamers. Ze gaan open met vlag warper_hub_open, die standaard uit staat en nog niet aan een kern hangt.
 
 **CANON – niet wijzigen zonder overleg.**
 
 Direct open na Archief 2:
 
-- [ ] De Hal: warp-platform, ECHO in de main PC, party loopt rond
-- [ ] De Rustkamer: save, heal, party wisselen
-- [ ] ECHO's Kamer: questvoortgang
+- [x] De Hal: warp-platform, ECHO in de main PC, party loopt rond
+  De Hal staat en gaat open met vlag warper_hub_open. Die staat standaard uit.
+- [x] De Rustkamer: save, heal, party wisselen
+  De Rustkamer staat en gaat open met vlag warper_hub_open. Die staat standaard uit.
+- [x] ECHO's Kamer: questvoortgang
+  ECHO's Kamer staat en gaat open met vlag warper_hub_open. Die staat standaard uit.
 
 Per act:
 
-- [ ] Act 2: De Beeldkamer, bestiarium en Codex
-- [ ] Act 3: De Trainingshal, oefengevechten
+- [x] Act 2: De Beeldkamer, bestiarium en Codex
+  De Beeldkamer opent bestiarium en Codex vanaf act 2.
+- [x] Act 3: De Trainingshal, oefengevechten
+  De Trainingshal doet een oefengevecht zonder buit vanaf act 3.
 - [ ] Act 4: De Werkplaats, crafting
+  De kamer staat, maar is leeg.
 - [ ] Act 5: De Handelskamer, endgame-shops
-- [ ] Act 6: De Kern, H-6 verhaal-eindpunt
+  De kamer staat, maar is leeg.
+- [x] Act 6: De Kern, H-6 verhaal-eindpunt
+  De Kern toont één zin dat het H-6-verhaal hier eindigt, vanaf act 6, zonder nieuwe onthulling.
 
 Eerste versie, nog niet de kamers hierboven:
 
@@ -577,7 +585,8 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
   Eerste versie. Placeholders uit party en codex_pages, in de hal. Geen loop-animatie.
 - [ ] Latere kamers unlocken per act: De Beeldkamer, De Trainingshal, De Werkplaats, De Handelskamer, De Kern
   De deuren naar codex_nis en sapientia_schot blijven dicht.
-- [ ] Bestiarium en Codex in De Beeldkamer (Act 2)
+- [x] Bestiarium en Codex in De Beeldkamer (Act 2)
+  De Beeldkamer opent bestiarium en Codex vanaf act 2.
 
 ### Audio
 
