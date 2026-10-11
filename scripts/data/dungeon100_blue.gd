@@ -18,6 +18,7 @@ extends RefCounted
 ##   - Mimic: kistbuit zoals gewoon, maar met MIMIC_GOLD_MULT x het goud, ná een gevecht.
 
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+const GradeGear := preload("res://scripts/data/grade_gear.gd")
 
 const KIND_NORMAL := "normaal"
 const KIND_BLUE := "blauw"
@@ -61,14 +62,17 @@ static func kind_for(run_seed: int, floor_nr: int, chest_id: String, boss := fal
 ## Permanente buit van een Blauwe Kist: {"tier", "items": [{"item", "n": 1}], "gold": 0, "blue": true}.
 static func blue_loot(run_seed: int, floor_nr: int, chest_id: String) -> Dictionary:
 	var f := Scaling.clamp_floor(floor_nr)
-	var tier := mini(Scaling.MAX_TIER, Scaling.tier_for_floor(f) + 1)
-	var rng := _rng(run_seed, f, chest_id, "buit")
-	var kind: String = Scaling.GEAR_KINDS[rng.randi_range(0, Scaling.GEAR_KINDS.size() - 1)]
-	return {"tier": tier, "items": [{"item": Scaling.gear_id(kind, tier), "n": 1}], "gold": 0, "blue": true}
+	var id := GradeGear.pick(run_seed, f, chest_id)
+	var gate := 99 if f >= 100 else f
+	var grade := GradeGear.grade_for_floor(gate)
+	return {"tier": grade, "grade": grade, "items": [{"item": id, "n": 1}], "gold": 0, "blue": true}
 
 
 ## Is dit een uitrustingsstuk dat een Blauwe Kist kan geven? (voor de tests en de opslag-opschoning)
+## Oude d100_*-stukken blijven blauw (saves van voor de grades). Nieuwe grade-stukken en G4-rollen ook.
 static func is_blue_item(id: String) -> bool:
+	if GradeGear.has_item(id) or GradeGear.is_scroll(id):
+		return true
 	for kind in Scaling.GEAR_KINDS:
 		for t in range(1, Scaling.MAX_TIER + 1):
 			if Scaling.gear_id(kind, t) == id:
