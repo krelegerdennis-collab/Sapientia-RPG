@@ -32,6 +32,7 @@ signal state_changed(new_state: String)
 signal damage_shown(target_name: String, amount: int)
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
@@ -308,9 +309,19 @@ func _make_combatant(display_name: String, stats: Dictionary, is_hero: bool, row
 			"defending": false, "row": row, "node": null}
 
 
+func _enemy_known(id: String) -> bool:
+	return GameData.ENEMIES.has(id) or BerggrotData.has_enemy(id)
+
+
+func _enemy_base(id: String) -> Dictionary:
+	if GameData.ENEMIES.has(id):
+		return GameData.ENEMIES[id]
+	return BerggrotData.enemy(id)
+
+
 func _spawn_enemies(ids: Array) -> void:
 	# onbekende id's (bv. een oude naam) overslaan; nooit een gevecht zonder vijanden
-	ids = ids.filter(func(i): return GameData.ENEMIES.has(i))
+	ids = ids.filter(func(i): return _enemy_known(str(i)))
 	if ids.is_empty():
 		push_warning("Gevecht zonder bekende vijanden; gebruik de eerste encountergroep")
 		ids = GameData.ENCOUNTER_GROUPS[0]["enemies"].duplicate()
@@ -319,7 +330,7 @@ func _spawn_enemies(ids: Array) -> void:
 		counts[id] = counts.get(id, 0) + 1
 	var seen := {}
 	for id in ids:
-		var data: Dictionary = GameData.ENEMIES[id].duplicate(true)
+		var data: Dictionary = _enemy_base(str(id)).duplicate(true)
 		if GameState.pending_boss:
 			data = BossCore.apply_boss(data)   # v0.14: baas-stats + kern (alleen in een baasgevecht)
 			can_flee = false                   # v0.15: niet vluchten voor een baas

@@ -42,8 +42,9 @@ static func flag_of(id: String) -> String:
 static func item_name(id: String) -> String:
 	if GameData.ITEMS.has(id):
 		return str(GameData.ITEMS[id]["name"])
-	if GameData.EQUIPMENT.has(id):
-		return str(GameData.EQUIPMENT[id]["name"])
+	var Equipment := preload("res://scripts/equipment.gd")
+	if Equipment.is_equipment(id):
+		return Equipment.item_name(id)
 	return id
 
 

@@ -22,6 +22,7 @@ extends RefCounted
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const GradeGear := preload("res://scripts/data/grade_gear.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 
 const MSG_NOT_OWNED := "You don't have that."
 const MSG_WRONG_SLOT := "That doesn't fit this slot."
@@ -56,11 +57,13 @@ static func item(id: String) -> Dictionary:
 	if GameData.EQUIPMENT.has(id):
 		var it = GameData.EQUIPMENT[id]
 		return it if it is Dictionary else {}
+	if BerggrotData.has_gear(id):
+		return BerggrotData.gear(id)
 	return GradeGear.item(id)
 
 
 static func is_equipment(id: String) -> bool:
-	return GameData.EQUIPMENT.has(id) or GradeGear.has_item(id)
+	return GameData.EQUIPMENT.has(id) or BerggrotData.has_gear(id) or GradeGear.has_item(id)
 
 
 static func item_name(id: String) -> String:

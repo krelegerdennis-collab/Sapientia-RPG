@@ -105,7 +105,7 @@ static func rooms() -> Dictionary:
 	var entree := _met(_basis("Het Levende Archief", 1, 2), {
 		"save": [3, 8],
 		"exits": {
-			"E": {"map": "res://scenes/maps/wereldkaart.tscn", "spawn": "van_kas"},
+			"E": {"map": "res://scenes/maps/berggrot_uitmond.tscn", "spawn": "boog"},
 			"n": {"map": SCENES["archief_2_v1_plaat"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [4, 5], "lines": [

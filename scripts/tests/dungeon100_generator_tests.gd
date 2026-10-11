@@ -4,8 +4,9 @@ extends Node
 ##   Deel A: generator als data (determinisme, alle 100 verdiepingen geldig, ingang -> trap omlaag
 ##           loopbaar op de ECHTE botsing, slots voor monsters/kisten/rustpunt/baas, kamerdata).
 ##   Deel B: GameState (velden, save/load, reset buiten de grot) en de ingang op de wereldkaart.
-##   Deel C: echte scènes: wereldkaart -> verdieping 1 -> (lopend) trap omlaag -> 2 -> ladder omhoog
-##           -> 1 -> wereldkaart; zelfde seed = zelfde verdieping; opslaan/laden in de grot.
+##   Deel C: echte scènes: de wereldkaart start de grot niet (dat doet ECHO); daarna verdieping 1
+##           -> (lopend) trap omlaag -> 2 -> ladder omhoog -> 1 -> wereldkaart; zelfde seed =
+##           zelfde verdieping; opslaan/laden in de grot.
 ## Zit niet in de export (scripts/tests/*).
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
@@ -16,6 +17,7 @@ const GD := preload("res://scripts/data/game_data.gd")
 const Gear := preload("res://scripts/data/grade_gear.gd")
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const SD := preload("res://scripts/data/story_data.gd")
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const SEEDS := [1, 42, 20240607, 987654321, 2147483647]
@@ -265,7 +267,7 @@ func _generator_tests() -> void:
 
 	# --- verdieping 1 en 100
 	var f1 := fresh(1, 1)
-	check("verdieping 1: ladder omhoog -> wereldkaart 'van_dungeon100', trap omlaag -> dezelfde scène 'omhoog'",
+	check("verdieping 1: ladder omhoog -> ECHO's Kamer, trap omlaag -> dezelfde scène 'omhoog'",
 			f1["room"]["exits"]["h"] == {"map": Gen.WORLD_SCENE, "spawn": Gen.WORLD_SPAWN}
 			and f1["room"]["exits"]["v"] == {"map": Gen.SCENE, "spawn": "omhoog"})
 	var f2 := fresh(1, 2)
@@ -469,29 +471,22 @@ func _state_tests() -> void:
 	check("enter_map in de grot laat de verdieping staan", GameState.dungeon100_floor == 12)
 	GameState.dungeon100_floor = 0
 
-	# wereldkaart: ingang
+	# wereldkaart: de oude ingang start de grot niet meer
 	var ws: PackedScene = GameState.get_resource(WORLD)
 	var w: Node = ws.instantiate()
-	var ex: Node = w.get_node_or_null("Exits/NaarDiepeGrot")
-	check("wereldkaart: uitgang 'NaarDiepeGrot' -> dungeon100.tscn, spawn 'omhoog'",
-			ex != null and ex.target_map == DUNGEON and ex.target_spawn == "omhoog" and ResourceLoader.exists(DUNGEON))
-	var sp: Node2D = w.get_node_or_null("Spawns/van_dungeon100")
-	check("wereldkaart: spawn 'van_dungeon100' bestaat", sp != null)
+	check("wereldkaart: geen uitgang NaarDiepeGrot", w.get_node_or_null("Exits/NaarDiepeGrot") == null
+			and ResourceLoader.exists(DUNGEON))
 	var ground: TileMapLayer = w.get_node("Ground")
-	var et: Vector2i = ex.tile_rect().position if ex else Vector2i.ZERO
-	check("ingang ligt op een loopbare wereldtegel met het grot-icoon (iconen-atlas, geen nieuwe art): %s" % et,
-			ground.get_cell_source_id(et) == 1 and ground.get_cell_atlas_coords(et) == Vector2i(4, 0)
-			and _world_walkable(ground, et))
-	var st: Vector2i = Vector2i((sp.position / 16.0).floor()) if sp else Vector2i.ZERO
-	var dist_arch := _world_dist(ground, st, Vector2i(20, 34))
-	var dist_town := _world_dist(ground, st, Vector2i(30, 24))
-	check("de spawn bij de ingang is loopbaar en verbonden met het Wachtershuis en Willowdale (%d / %d stappen)" % [dist_arch, dist_town],
-			_world_walkable(ground, st) and dist_arch > 0 and dist_town > 0 and st == et + D)
-	var overlap := false
+	var et := Vector2i(9, 26)
+	var bezet := false
 	for e in w.get_node("Exits").get_children():
-		if e != ex and e.tile_rect().intersects(ex.tile_rect()):
-			overlap = true
-	check("geen andere uitgang op de ingang-tegel", not overlap)
+		if e.tile_rect().has_point(et):
+			bezet = true
+	check("oude grottegel is gras zonder uitgang: %s" % et,
+			ground.get_cell_source_id(et) == 0 and ground.get_cell_atlas_coords(et) == Vector2i(0, 0)
+			and _world_walkable(ground, et) and not bezet)
+	var sp: Node2D = w.get_node_or_null("Spawns/van_dungeon100")
+	check("oude spawn van_dungeon100 blijft voor oude saves", sp != null)
 	w.free()
 
 
@@ -557,13 +552,16 @@ func _scene_tests() -> void:
 	GameState.change_map(WORLD, "van_dorp")
 	check("wereldkaart geladen", await wait_scene("Wereldkaart"))
 	await wait_fade()
-	# de echte ingang: naast de tegel staan en erop stappen
-	var ex: Node = scene().get_node("Exits/NaarDiepeGrot")
-	var et: Vector2i = ex.tile_rect().position
-	player().place_at(et + D, U)
+	check("wereldkaart heeft geen grot-uitgang", scene().get_node_or_null("Exits/NaarDiepeGrot") == null)
+	var oud := Vector2i(9, 26)
+	player().place_at(oud + D, U)
 	await pframes(2)
 	await walk("move_up", 1)
-	check("op de ingang stappen -> Deep Cave", await wait_scene("Dungeon100"))
+	check("op de oude grottegel stappen start de grot niet",
+			scene().name == "Wereldkaart" and tile() == oud and not Dialog.is_open
+			and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active())
+	GameState.change_map(DUNGEON, "omhoog")
+	check("de grot-scène opent daarna wel", await wait_scene("Dungeon100"))
 	await wait_fade()
 	var r := scene()
 	check("verdieping 1 en een gekozen seed: %d / %d" % [GameState.dungeon100_floor, GameState.dungeon100_seed],
@@ -613,16 +611,15 @@ func _scene_tests() -> void:
 	check("ladder op verdieping 1 vraagt eerst om bevestiging (Het Gesimuleerde Archief)",
 			await wait_until(func(): return Dialog.has_choices(), 5.0))
 	Dialog.choose(0)       # Verlaten
-	check("ladder op verdieping 1 -> wereldkaart", await wait_scene("Wereldkaart"))
+	check("ladder op verdieping 1 -> ECHO's Kamer", await wait_scene("EchoKamer"))
 	await wait_fade()
-	var wsp: Node2D = scene().get_node("Spawns/van_dungeon100")
-	check("buiten de grot: verdieping 0, speler bij de ingang op de wereldkaart %s" % tile(),
-			GameState.dungeon100_floor == 0 and tile() == Vector2i((wsp.position / 16.0).floor()) and GameState.dungeon100_seed == 0
-			and not GameState.dungeon100_run_active())
-	# opnieuw naar binnen: een nieuwe run kiest een nieuwe seed
-	player().place_at(et + D, U)
-	await pframes(2)
-	await walk("move_up", 1)
+	var wsp: Node2D = scene().get_node("Spawns/ingang")
+	check("buiten de grot: verdieping 0, speler in ECHO's Kamer %s" % tile(),
+			GameState.dungeon100_floor == 0 and tile() == Vector2i((wsp.position / 16.0).floor())
+			and GameState.dungeon100_seed == 0 and not GameState.dungeon100_run_active()
+			and not GameState.story_flags.has(EchoGrot.FLAG_RESULTAAT))
+	# de tegel start geen tweede run; de scène zelf wel (zoals ECHO dat doet)
+	GameState.change_map(DUNGEON, "omhoog")
 	await wait_floor(1)
 	var seed2: int = GameState.dungeon100_seed
 	check("opnieuw binnen: nieuwe run, verdieping 1 met een nieuwe seed (%d)" % seed2,

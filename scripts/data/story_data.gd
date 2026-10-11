@@ -47,6 +47,7 @@ extends RefCounted
 ##                                       held sluit zich aan (GameState.join_member), bv. Noor
 ##   ["glitch", sec]                     één glitch-flits van de CRT-laag (ook buiten de dungeons)
 ##   ["heal"]                            HP en MP van de hele groep vol (herberg)
+##   ["molen_zang"]                      scène: de molen draait en zingt zacht (geen extra dialoog)
 ##   ["molen"]                           molen van Gerrit: rusten, meel (1x per bezoek), opslaan, party wisselen
 ##   Spreker "{naam}" = de held zelf (ballon wijst naar de speler).
 ##   MAP_ENTER "map" mag ook een volledig scènepad zijn (Esdoorn, Donker Woud).
@@ -87,6 +88,16 @@ const QUOTE_GRAAN_DANK := "Dank je, jongen. De molen zingt weer. Neem wat meel m
 ## Ja neemt de opdracht aan. Nee (ook de B-knop) is weglopen: de opdracht blijft uit.
 const KEUZE_GRAAN_JA := "Ja"
 const KEUZE_GRAAN_NEE := "Nee"
+## Zangscène, meteen na QUOTE_GRAAN_ZAAD. Geen nieuwe zin: de wieken gaan draaien en er klinkt zacht gezang.
+const MOLEN_NODE := "MolenWieken"
+const MOLEN_ZANG_SEC := 2.4
+const MOLEN_ZANG := [
+	{"hz": 262.0, "t": 0.0, "d": 0.42},
+	{"hz": 330.0, "t": 0.48, "d": 0.42},
+	{"hz": 392.0, "t": 0.96, "d": 0.5},
+	{"hz": 330.0, "t": 1.52, "d": 0.4},
+	{"hz": 262.0, "t": 1.98, "d": 0.42},
+]
 
 ## Stappen van de proloog
 const START := 0          # nieuw spel: wakker worden in bed
@@ -393,6 +404,14 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+	# Platform op de wereldkaart. try_unlock zet de vlag vóór deze check.
+	"naar_world_warper": [
+		{"if": {"not_flags": ["world_warper_unlocked"]}, "do": [
+			["say", "", ["Een leeg platform. De World Warper is hier nog niet."]],
+			["walk", "player", "down", 1],
+		]},
+		{"do": "default"},
+	],
 	"woud_ingang": [
 		{"if": {"not_flags": ["quest_noor"]}, "do": [
 			["say", "", ["The Dark Wood. Between the black trunks hangs mist that flickers like a broken screen.", "You don't go in there without a reason."]],
@@ -531,7 +550,8 @@ const EVENTS := {
 
 	# Het Zingende Graan. Canon-dialoog. Dicht zonder noor_lid.
 	# Eerste keer: bezoek, de vraag, dan Ja (opdracht aan) of Nee (weglopen, later nog mogelijk).
-	# Zonder zaad: één zin. Met zaad: herkenning, daarna de molen. Daarna de afsluitende zin en opnieuw de molen.
+	# Zonder zaad: één zin. Met zaad: herkenning, de molen draait en zingt zacht, daarna de molen.
+	# Daarna de afsluitende zin en opnieuw de molen.
 	"gerrit": [
 		{"if": {"not_flags": ["noor_lid"]}, "do": []},
 		{"if": {"flags": [FLAG_GRAAN_KLAAR]}, "do": [
@@ -542,6 +562,7 @@ const EVENTS := {
 			["take", ITEM_ZAAD, 1],
 			["flag", FLAG_GRAAN_KLAAR],
 			["say", GERRIT, [QUOTE_GRAAN_ZAAD]],
+			["molen_zang"],
 			["molen"],
 		]},
 		{"if": {"flags": ["noor_lid", FLAG_GRAAN], "not_flags": [FLAG_ZAAD]}, "do": [
