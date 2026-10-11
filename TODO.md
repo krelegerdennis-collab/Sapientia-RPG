@@ -67,20 +67,31 @@ Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af 
 
 ### Magic tier list
 
-- [ ] Magic tier list opzetten (meerdere levels van dezelfde spreuk)
-  - [ ] Per tier eigen niveau en sterkte
-  - [ ] Per tier eigen prijs (oplopend)
-  - [ ] Per tier eigen spell-data (damage, healing en effect schalen mee)
-- [ ] Magic tiers worden per game-act vrijgespeeld
-  - [ ] Act 1: alleen tier 1 beschikbaar
-  - [ ] Act 2 en verder: volgende tiers ontgrendelen
-  - [ ] Aan te vullen zodra acts 2–6 uitgewerkt zijn
+Magie heeft 4 grades. Grade 1 tot en met 3 zijn te koop in de magic shop en worden per act vrijgespeeld. Grade 4 is niet te koop: die dropt alleen uit blauwe kisten in de Diepe Grot (verdieping 80+). Per tier 4 spreuken. Niet alles is in Act 1 beschikbaar.
+
+- [ ] Magic tier list opzetten (4 grades × 4 spreuken = 16 spreuken per element)
+- [ ] Grade 1 tot en met 3 in de magic shop (prijs loopt op per grade)
+- [ ] Grade 4 alleen als drop uit blauwe kisten (Diepe Grot, verdieping 80–99)
+- [ ] Tiers vrijspelen per act (Act 1 = alleen Grade 1)
+- [ ] Per spreuk eigen data: damage, healing en effect schalen per grade
+
+### Elements en karakters
+
+- [ ] Dennis: geen magie
+  Dennis krijgt alleen kernkrachten. Dat zijn geen shop-items.
+- [ ] Noor (mage): Vuur, Natuur en Bliksem
+  - [ ] Extra elementen per latere act bepalen
+  - [ ] Ook Grade 1 Licht (healen), beperkt tot niveau 1
+  - [ ] Grade 2 en hoger Licht niet voor Noor
+- [ ] Lotte (priester): Licht als healing en buffs (hoofdrol)
+  - [ ] IJs als aanvalsmagie (voorlopig het enige aanvals-element)
+  - [ ] Geen Vuur, Natuur of Bliksem
 
 ### Beschikbaarheid shops
 
 - [ ] Niet alle items direct beschikbaar in Wilgendal; selectie per act
 - [ ] Shop-voorraad laten meeschalen met verhaalprogressie
-- [ ] Items die later pas in de shop komen markeren, per act
+- [ ] Magic grades per act vrijspelen (Act 1 = Grade 1, enzovoort)
 
 ### Algemeen
 
