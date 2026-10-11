@@ -1,13 +1,18 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`7a18856`), Godot 4.7.2, threads uit.
+Web-build van `main` (`bb69c9b`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`69b64b5`, export van `4a145c6`):
-- Het veldmenu is vier knoppen. Links, onder elkaar: Uitrusting, Codex en Items. Die openen meteen het bestaande scherm. Rechts een groter vlak Warpen, met het label MENU erboven. Warpen zegt "De warp-hub is nog niet bereikbaar." zolang die hub er niet is. De kaart en de save-slots blijven met rust.
+Nieuw in deze build, bovenop de vorige web-build (`1b92f3e`, export van `7a18856`):
+- Het Levende Archief heeft vier verdiepingen, na de Golem. De kas staat nog naast de trap van het Eerste Archief, niet achter de bergen. Groei-platen, Lotte, De Wurger en De Genezer. Na De Genezer een korte hub-scène: ECHO, de Hanger, en de andere eilanden die nog dicht blijven.
+- In de Diepe Grot heten de bazen op verdieping 25, 50, 75 en 99 De Schaduw van H-6, De Cyclus, De Rechter en De Stem. Uitgang-warpers staan op verdieping 1, 25, 50, 75 en 99. Verdieping 1 legt het uit. De andere vier vragen of je de grot uit wilt; Ja zet je op de wereldkaart bij de ingang. De grot zelf start nog vanaf de wereldkaart.
+- In Wilgendal, na Noor: Gerrit en Het Zingende Graan. Het zaad, de molen-save en één Zingend Meel per bezoek zitten erin. De scène waarin de molen zacht zingt nog niet.
 - Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `7a18856`:
+- Het veldmenu is vier knoppen. Links, onder elkaar: Uitrusting, Codex en Items. Die openen meteen het bestaande scherm. Rechts een groter vlak Warpen, met het label MENU erboven. Warpen zegt "De warp-hub is nog niet bereikbaar." zolang de hub-vlag niet gezet is. Die vlag komt nog van de bewaker op verdieping 2 van het Eerste Archief, niet van De Genezer. De kaart en de save-slots blijven met rust.
 
 Nog van de build van `4a145c6`:
 - In het Eerste Archief staan drie uitgang-warpers: bij de ingang, in de Zuilenhal (verdieping 3) en in de Golemhal, naast de tegel na de overwinning. Met A vraagt het spel: "Weet je zeker dat je de dungeon wilt verlaten?" Ja zet je op de wereldkaart bij het Eerste Archief. Nee laat je staan. De warpers van de Diepe Grot (verdieping 1, 50 en 99) blijven zoals ze waren.
@@ -68,7 +73,7 @@ Na deze publicatie moet je hard verversen. De browser bewaart de oude `index.pck
 
 De eerste tik ergens op het scherm (ook Continue of New Game) zet het geluid aan.
 Tot die tik staat er **Tap for sound**. Houd de telefoon liggend.
-Eerste keer ongeveer 71 MB (`index.pck` 33 MB + `index.wasm` 38 MB).
+Eerste keer ongeveer 71 MB (`index.pck` 31 MB + `index.wasm` 38 MB).
 
 ## Kortere link
 
