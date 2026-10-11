@@ -396,6 +396,14 @@ def render(actor_id: str, slot: str) -> list[float]:
 		if slot == "dood":
 			return _mix(_clang(90, 0.35), _delay(_puff(0.4, seed, 100), 0.08))
 		return _mix(_shimmer(300, 520, 0.3), _scale(_clang(140, 0.2), 0.4))
+	if actor_id == "woudgeest":
+		if slot == "aanval":
+			return _whoosh(0.14, seed, 1600)
+		if slot == "raak":
+			return _mix(_scale(_whoosh(0.06, seed, 2400), 0.45), _cry(1800, 1400, 0.06, seed, 0.02))
+		if slot == "dood":
+			return _whoosh(0.42, seed, 700)
+		return _whoosh(0.28, seed, 1100)
 	raise SystemExit("Geen recept voor %s/%s" % (actor_id, slot))
 
 
