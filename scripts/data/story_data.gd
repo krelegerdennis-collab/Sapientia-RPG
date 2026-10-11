@@ -172,7 +172,7 @@ const EVENTS := {
 	# Het event "keuze" (Blijven / Opa achterna) blijft de nacht-beat; dat hergebruiken
 	# we hier niet, want dat is een lus tot je Opa achterna gaat.
 	"intro_keuze": [{"do": [
-		["choice", "Wat zeg je, {naam}?", ["Goedemorgen, Opa.", "Waarom blijven de Archieven dicht?", "Ik help je vandaag."], ["intro_toon_groet", "intro_toon_archief", "intro_toon_help"], SPEAKER],
+		["choice", "Wat zeg je, {naam}?", ["Goedemorgen, Opa.", "Waarom blijven de Archieven dicht?"], ["intro_toon_groet", "intro_toon_archief"], SPEAKER],
 	]}],
 	"intro_toon_groet": [{"do": [
 		["flag", "toon_groet"],
@@ -182,14 +182,12 @@ const EVENTS := {
 		["flag", "toon_archief"],
 		["jump", "opa_mantel"],
 	]}],
-	"intro_toon_help": [{"do": [
-		["flag", "toon_help"],
-		["jump", "opa_mantel"],
-	]}],
 
-	# TODO(verhaal): groet, mantel en menu in twee vakken. De herhaalde tutorialregel is weg.
+	# TODO(verhaal): groet en menu in twee korte vakken (passen in de lage ballon).
+	# De herhaalde tutorialregel is weg.
 	"opa_mantel": [{"do": [
-		["say", SPEAKER, ["Goedemorgen, {naam}. Het is koud in het Wachtershuis. Doe deze mantel aan: MENU > Uitrusting > Harnas."]],
+		["say", SPEAKER, ["Goedemorgen, {naam}. Het is koud in het Wachtershuis."]],
+		["say", SPEAKER, ["Doe deze mantel aan: MENU > Uitrusting > Harnas."]],
 		["give", TUTORIAL_ARMOR, 1],
 		["say", "", ["{naam} krijgt een Leerling-mantel! Sluit daarna het menu."]],
 		["step", UITRUSTING],

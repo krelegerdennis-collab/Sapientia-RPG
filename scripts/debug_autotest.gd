@@ -1890,10 +1890,11 @@ const OPA_LINE := "Die staat je, {naam}. Haal water bij de put en kruiden uit de
 ## (wakker_worden) en 7 tekstvakken (wakker 1 + opa 4 + mantel_aan 2) vóór de klusjes.
 const INTRO_FORCED_WAS := 1
 const INTRO_SAYS_WAS := 7
-const GREET_LINE := "Goedemorgen, {naam}. Het is koud in het Wachtershuis. Doe deze mantel aan: MENU > Uitrusting > Harnas."
+const GREET_LINE := "Goedemorgen, {naam}. Het is koud in het Wachtershuis."
+const MENU_LINE := "Doe deze mantel aan: MENU > Uitrusting > Harnas."
 const ITEM_LINE := "{naam} krijgt een Leerling-mantel! Sluit daarna het menu."
 const REMIND_LINE := "Doe eerst die mantel aan, {naam}. MENU > Uitrusting > Harnas."
-const INTRO_CHOICES := ["Goedemorgen, Opa.", "Waarom blijven de Archieven dicht?", "Ik help je vandaag."]
+const INTRO_CHOICES := ["Goedemorgen, Opa.", "Waarom blijven de Archieven dicht?"]
 const ARMOR := "leerling_mantel"
 const LESSON_LINE := "Sometimes you have to defend yourself, boy, even if I hope you never need to."
 const PANIC_LINE := "No... the seal! It's too soon! {naam}, stay here! Lock the doors behind me and don't follow, no matter what you hear!"
@@ -1994,7 +1995,7 @@ func _prologue_tests() -> void:
 			forced.is_empty() and forced.size() < INTRO_FORCED_WAS)
 	var says := SD.intro_says_before_tasks()
 	check("intro korter: %d verplichte tekstvakken vóór de klusjes < %d" % [says, INTRO_SAYS_WAS],
-			says < INTRO_SAYS_WAS and says == 3)
+			says < INTRO_SAYS_WAS and says == 4)
 	var spec: Dictionary = SD.early_choice_spec()
 	var opts: Array = spec.get("options", [])
 	check("vroeg keuzemenu bestaat: %d opties, zelfde vervolg" % opts.size(),
@@ -2081,7 +2082,7 @@ func _prologue_tests() -> void:
 				_check_box_clear("manteltekst")
 				await frames(20)
 				await v16_shot("verteller")
-			if cur == _named(GREET_LINE) and not menu_seen:
+			if cur == _named(MENU_LINE) and not menu_seen:
 				menu_seen = true
 				_check_bubble("Oude Man (uitleg)", opa)
 				await frames(20)
