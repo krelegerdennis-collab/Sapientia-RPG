@@ -273,13 +273,19 @@ De Diepe Grot is een simulatie van Sapientia. Doel: menselijke doorzettingskrach
 
 **CANON – niet wijzigen zonder overleg.**
 
-Verdieping 100: geen baas. Op verdieping 100 staat het Warp-kristal. De speler kiest één van drie beloningen. De andere twee alleen via een nieuwe run. Dit vervangt eerdere warp-kristal-opties.
+Verdieping 100: geen baas. Op verdieping 100 staat het Warp-kristal. De speler kiest één van drie beloningen: Codex-monster, Grade 4-uitrusting, of accessoire. De andere twee alleen via een nieuwe run. Dit vervangt eerdere warp-kristal-opties.
 
-Optie A, een Codex-monster. Uniek, alleen uit de grot. Voorbeelden: "De Echo" (maakt een zwakke kopie van de party) of "De Simulacrum". Komt in de Codex en het bestiarium en kan als bondgenoot meevechten. Het concrete monster is nog een voorbeeld. De beloningstype (Codex-monster) is canon.
+Optie A, een Codex-monster. Uniek, alleen uit de grot. Komt in de Codex en het bestiarium en kan als bondgenoot meevechten. Het beloningstype (Codex-monster) is canon.
 
-Optie B, equipment. Grade 4, alleen via deze keuze. Voorbeelden: Kernstaf (Lotte), Schaduwzwaard (Dennis), Natuurstaf (Noor), of een uniek pantserstuk buiten de gewone Grade 4-pool. Vaste affixes, endgame. Class-restrictie hangt af van het stuk.
+Optie B, equipment. Grade 4, alleen via deze keuze. Vaste affixes, endgame. Class-restrictie hangt af van het stuk. Het beloningstype (Grade 4-uitrusting) is canon.
 
-Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Voorbeelden: "Hanger-echo" (kleine teleport in gevecht), "Groene Hart" (regeneratie), "Simulatie-ring" (extra XP en goud).
+Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Het beloningstype (accessoire) is canon.
+
+**OPEN – nog niet vastgelegd.**
+
+Voorbeelden, geen gekozen naam: "De Echo" (maakt een zwakke kopie van de party) of "De Simulacrum".
+
+Voorbeelden, geen gekozen drops: Kernstaf (Lotte), Schaduwzwaard (Dennis), Natuurstaf (Noor), of een uniek pantserstuk buiten de gewone Grade 4-pool. "Hanger-echo" (kleine teleport in gevecht), "Groene Hart" (regeneratie), "Simulatie-ring" (extra XP en goud).
 
 - [ ] Diepe Grot-bazen bouwen
   De code kan nog de oude eindbaas-namen hebben.
