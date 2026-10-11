@@ -18,6 +18,14 @@ Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af 
 - [ ] Eerste Archief herschalen
   Moeilijkheidsgraad en level van het eerste Archief van 10 naar 7.
 
+- [ ] Blauwe kist-items in de Diepe Grot schalen, plus een rarity-systeem
+  De beloningen uit blauwe kisten in de grot van 100 verdiepingen schalen mee met de diepte. Sommige items droppen alleen uit een blauwe kist vanaf een vaste verdieping (floor-gated loot, niet puur willekeurig).
+
+  - Grade 1 (early game): verdieping 1–20
+  - Grade 2 (midgame): verdieping 20–50
+  - Grade 3 (endgame): verdieping 50–80
+  - Grade 4 (endgame++): verdieping 80–99
+
 ## Content
 
 - [ ] Bestiarium uitwerken tot endgame
