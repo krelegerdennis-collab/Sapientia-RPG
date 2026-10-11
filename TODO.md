@@ -50,3 +50,39 @@ Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af 
 
 - [ ] Bestiarium uitwerken tot endgame
   Alle monsters tot en met de eindgame opnemen, met een entry, stats en lore-tekst per monster.
+
+## Dorpen & Shops
+
+### Eerste dorp: Wilgendal
+
+- [ ] Wilgendal activeren als eerste dorp
+  Huidige status: nog niet actief, alleen een placeholder.
+
+### Shops in Wilgendal
+
+- [ ] Armour shop
+- [ ] Wapen shop
+- [ ] Accessoire shop
+- [ ] Magic shop
+
+### Magic tier list
+
+- [ ] Magic tier list opzetten (meerdere levels van dezelfde spreuk)
+  - [ ] Per tier eigen niveau en sterkte
+  - [ ] Per tier eigen prijs (oplopend)
+  - [ ] Per tier eigen spell-data (damage, healing en effect schalen mee)
+- [ ] Magic tiers worden per game-act vrijgespeeld
+  - [ ] Act 1: alleen tier 1 beschikbaar
+  - [ ] Act 2 en verder: volgende tiers ontgrendelen
+  - [ ] Aan te vullen zodra acts 2–6 uitgewerkt zijn
+
+### Beschikbaarheid shops
+
+- [ ] Niet alle items direct beschikbaar in Wilgendal; selectie per act
+- [ ] Shop-voorraad laten meeschalen met verhaalprogressie
+- [ ] Items die later pas in de shop komen markeren, per act
+
+### Algemeen
+
+- [ ] Verkoop-systeem in shops
+  Sluit aan op de eerdere TODO: items verkoopbaar.
