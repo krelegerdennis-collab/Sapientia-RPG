@@ -609,7 +609,7 @@ func _ally_tests() -> void:
 	var atk0 := int(page["atk"])
 	var got_page := [false]
 	await finish(func(bb: Node):
-		if (str(page["name"]) + " is nu level") in str(bb.victory_label.text) and not got_page[0]:
+		if (str(page["name"]) + " is now level") in str(bb.victory_label.text) and not got_page[0]:
 			got_page[0] = true
 			await pframes(4)
 			await screenshot("codex_levelup"))

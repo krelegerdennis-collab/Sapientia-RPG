@@ -608,7 +608,7 @@ func _village_tests() -> void:
 
 func _is_hint(l) -> bool:
 	var t := str(l).to_lower()
-	for w in ["woud", "bos", "wortel", "mist", "paddenstoel"]:
+	for w in ["wood", "forest", "root", "mist", "mushroom"]:
 		if w in t:
 			return true
 	return false

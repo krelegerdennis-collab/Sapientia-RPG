@@ -1758,7 +1758,7 @@ func tip_text(hero: Dictionary) -> String:
 	var hurt := int(hero["s"]["hp"]) < int(hero["s"]["max_hp"])
 	if round_no <= 1 or not hurt or _available_items().is_empty():
 		tips_shown["aanval"] = true
-		return "TIP: choose Attack, then the Moss Slime."
+		return "TIP: Attack, then the Moss Slime."
 	tips_shown["item"] = true
 	return "TIP: hurt? Item > Herb gives HP back."
 

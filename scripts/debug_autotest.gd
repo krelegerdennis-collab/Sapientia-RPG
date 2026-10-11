@@ -972,7 +972,7 @@ func _encounter_and_battle_tests() -> void:
 				await battle_shot("_4_victory")
 				await v16_shot("buit")
 				Engine.time_scale = 3.0
-			elif vic and "is nu level" in text and not levelup_seen:
+			elif vic and "is now level" in text and not levelup_seen:
 				levelup_seen = true
 				check("level-up in het overwinningsvenster: %s" % text.replace("\n", " | "), "HP+" in text)
 				Engine.time_scale = 1.0
@@ -2341,7 +2341,7 @@ func _equip_tutorial_tests(_opa: Node, def_before: int) -> void:
 			and not Story.history.has("mantel_aan"))
 	Story.trigger("put")
 	await _wait_typed()
-	check("v0.16: put geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "cloak first" in _lines_text())
+	check("v0.16: put geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "cloak on first" in _lines_text())
 	await _story_drain()
 	Story.trigger("kist", _obj("Kist"))
 	await _wait_typed()
