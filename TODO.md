@@ -20,13 +20,24 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
   - [ ] Archief 2: Archief van Leven
   - Bevat Dennis' huis en Wilgendal (eerste dorp met shops)
 - [ ] Worldmap 2 = tweede eiland
-  - [ ] Archief 3: Archief van Industrie
-  - [ ] Archief 4: Archief van Magie
-  - Dorpen en locaties nog te bepalen
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Eilandthema: industrieel, rokend, metaal, machines (contrast met het groene eiland 1).
+
+  - [ ] Archief 3 Industrie: fabriek, tandwielen, stoom, glitches in machines. Baas: De Architect (bouwt en sloopt).
+  - [ ] Archief 4 Magie: zwevende torens, arcane cirkels, paars licht. Baas: De Spiegel (confronteert Dennis met zijn verleden). De H-6-onthulling vindt hier plaats.
+  - [ ] Dorp Stoomwijk (mijnwerkersdorp)
+  - [ ] Dorp Hoge Toren (magisch, oud, geheimzinnig)
 - [ ] Worldmap 3 = derde eiland
-  - [ ] Archief 5: Archief van Kosmos
-  - [ ] Archief 6: Archief van Hart
-  - Dorpen en locaties nog te bepalen
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Eilandthema: kosmisch, zwevend, sterren, oneindigheid.
+
+  - [ ] Archief 5 Kosmos: sterrenkaart, ruimte, tijd. Baas: De Wachter (bewaakt de grens).
+  - [ ] Archief 6 Hart: emotie, herinnering, warmte. Eindbaas: Sapientia zelf.
+  - [ ] Dorp Sterrenhaven, laatste rustpunt voor het einde. Geen dorp bij Archief 6.
 
 ### Warp-systeem
 
@@ -46,10 +57,18 @@ In elke normale dungeon en in elk Archief (Archief 1 tot en met 6) staan warpers
 - [ ] Eind van de dungeon: warper na de eindbaas
 - [ ] Geldt voor elke normale dungeon, niet alleen de Diepe Grot
 - [ ] Geldt voor alle Archieven (Archief 1 tot en met 6), inclusief Archief 1 (het Eerste Archief)
-- [ ] Geldt ook voor de Diepe Grot: begin, midden en eind
-  - [ ] Frequentie in de Diepe Grot nog open (elke 20 verdiepingen een warper?)
+- [ ] Diepe Grot-warpers bouwen op de frequentie hieronder
 
-Warp-bestemming: de party gaat in één stap direct naar de worldmap of het dichtstbijzijnde dorp, zonder eerst terug naar de dungeon-ingang.
+  **CANON – niet wijzigen zonder overleg.**
+
+  Warpers op verdieping 1, 25, 50, 75 en 99.
+  Verdieping 1: start, geen waarschuwing.
+  Verdieping 25, 50 en 75: tussen-warpers met waarschuwing en annuleren.
+  Verdieping 99: eind-warp naar de worldmap, met waarschuwing en annuleren.
+  Bestemming: direct naar de worldmap.
+  De code volgt deze frequentie nog niet: die heeft nog 1, 50 en 99 als interne sprong.
+
+Warp-bestemming voor de andere dungeons en Archieven: de party gaat in één stap direct naar de worldmap of het dichtstbijzijnde dorp, zonder eerst terug naar de dungeon-ingang. Voor de Diepe Grot geldt de bestemming hierboven: direct naar de worldmap.
 
 - [ ] Warper brengt de party direct naar de worldmap of het dichtstbijzijnde dorp
 - [ ] De speler hoeft niet eerst terug naar de ingang
@@ -214,34 +233,83 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
 - [ ] Bestiarium uitwerken tot endgame
   De bestaande eindbazen van de Diepe Grot (verdieping 10 tot en met 100) hebben een entry en stats uit de bestaande monsterdata.
-  Lore-tekst nog van Dennis: de regels zijn nu kort en feitelijk, geen canon-lore.
+  De vier lore-zinnen hieronder zijn canon. De checkboxes blijven open tot die tekst in het bestiarium staat.
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] Kustos (Archief 1): "Een wachter zonder ogen, maar met duizend oren. Hij hoort elke gedachte die het Archief binnenkomt. De Oude Mensheid bouwde hem niet om te doden, maar om te bewaren. Sapientia gaf hem een nieuw doel: alles wat niet past, wordt verwijderd."
+- [ ] De Wortelkoning (Donker Woud): "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat."
+- [ ] De Wurger (Archief 2, verdieping 3): "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden."
+- [ ] De Genezer (Archief 2, eindbaas): "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg."
+
+Diepe Grot-bazen: `TODO(verhaal)` — wachten op Grot-lore canon. Geen lore verzinnen voor die tien bazen.
 
 ## Dorpen & Shops
+
+### Gerrit de Molenaar
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] Gerrits quest
+  `TODO(verhaal)` — dialoog en details nog uitwerken. De quest-opzet hieronder is canon.
+
+NPC: Gerrit de Molenaar (Wilgendal). Quest: Het Zingende Graan. Zaad vinden in het Donker Woud. Beschikbaar na Noor's aansluiting. Beloning: de molen wordt een rustpunt / item. Thema: kleine menselijke verhalen tussen grote gebeurtenissen.
 
 ### Magic tier list
 
 Magie heeft 4 grades. Grade 1 tot en met 3 zijn te koop in de magic shop en worden per act vrijgespeeld. Grade 4 is niet te koop: die dropt alleen uit blauwe kisten in de Diepe Grot (verdieping 80+). Per tier 4 spreuken. Niet alles is in Act 1 beschikbaar.
 
-- [ ] Magic tier list opzetten (4 grades × 4 spreuken = 16 spreuken per element)
-  De volledige 4×16-lijst is nog ontwerp. De kleine lijst van 20 spreuken (één per grade per element: vuur, natuur, bliksem, licht, ijs) is bevestigd en geldt tot nader order. Fire, Lightning en Heal blijven zo heten.
+- [ ] Magic tier list opzetten en in het spel zetten (4 grades × 4 spreuken = 16 spreuken per element)
+  De lijst hieronder is canon. De checkbox blijft open tot de spreuken in de code staan. De oude werklijst van 20 is als ontwerp vervangen, niet als al gebouwd.
+
+**CANON – niet wijzigen zonder overleg.**
+
+VUUR (Noor)
+G1: Vonk, Vlam, Gloed, Sprank
+G2: Vuurbal, Brandende Grond, Vuurpijl, Asregen
+G3: Vlammenzee, Inferno, Zonnevlam, Foenix
+G4: Zonneslag (superwapen), Apocalyps, Dageraad, Zuiverende Vlam
+
+NATUUR (Noor)
+G1: Ranken, Doornen, Bladstorm, Wortel
+G2: Wortelval, Giftige Wolk, Natuurpuls, Kreupelhout
+G3: Natuurkolos, Wurgende Wingerd, Oerwoud, Levensdief
+G4: Zielenbloei, Oerbos, Moeder Aarde, Wrake van de Wildernis
+
+BLIKSEM (Noor)
+G1: Schok, Prikkel, Statisch Veld, Vonk
+G2: Bliksemflits, Kettingbliksem, Donderklap, Elektroveld
+G3: Donderstorm, Stormslag, Bliksemregen, Schokgolf
+G4: Hemelval, Godenslag, Stormheer, Zuiverende Donder
+
+LICHT (Noor, alleen Grade 1): Kleine Genezing, Ziellicht, Bescherming, Gloed
+
+LICHT (Lotte)
+G1: Kleine Genezing, Zegen, Ziellicht, Bescherming
+G2: Grote Genezing, Schild van Licht, Zuiverend Licht, Hemelse Zegen
+G3: Groepsgenezing, Zuivering, Lichtkolom, Goddelijke Bescherming
+G4: Wederopstanding, Heilige Straal, Aurora, Zegen der Goden
+
+IJS (Lotte)
+G1: IJspegel, Koude Aanraking, Sneeuwval, Vorstvlaag
+G2: IJsstorm, Bevriezen, IJspilaar, Hagelstorm
+G3: Bevriezing, Glaciaal, IJsgevangenis, Poolstorm
+G4: Eeuwige Winter, Absolute Nul, Glaciaal Hart, Sneeuwkoningin
+
 - [ ] Per spreuk eigen data: damage, healing en effect schalen per grade
-  Geldt voor de volledige 16 per element, die er nog niet is. De kleine lijst van 20 heeft bevestigde mp en power per grade.
+  De namen hierboven zijn canon. Schade, healing en effect per spreuk staan in deze lijst nog niet. De checkbox blijft open.
 
 ### Elements en karakters
 
-Noor (mage): Vuur, Natuur en Bliksem.
+**CANON – niet wijzigen zonder overleg.**
 
-- [ ] Extra elementen per latere act bepalen
+Noor (mage), totaal: Vuur, Natuur, Bliksem, Water, Wind, Aarde, Aether, plus Grade 1 Licht.
+Act 2: Water. Act 3: Wind. Act 4: Aarde. Act 5: Aether / Leegte.
+Lotte blijft bij Licht + IJs.
 
 ### Nog te bevestigen
 
-- Volledige 4×16-spreukenlijst. De kleine lijst van 20 is bevestigd en geldt tot nader order.
 - Toekomstige helden (eigen G4-wapen en set).
-- Gerrits quest.
-  Gerrits quest is niet gebouwd.
-- Echte lore van de eindbazen in het bestiarium.
-- Extra elementen voor Noor in latere acts.
-- Wereldkaart, warps en de act-koppeling aan de eilanden.
 
 Bevestigd en dus geen open ontwerp meer: winkelprijzen en voorraad, magieprijs 160×grade², verkoop op de helft, grade-statcijfers en grenzen, winkel-act via party-level, archiefschaal 0,7 / EXP 0,50, Golem HP 360 / ATK 27 / DEF 15, Jelle als één smid met twee balies, kort zwaard ATK +3.
 
@@ -268,7 +336,7 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 - [ ] Dorpen eerst bezocht vóór een warp. Dat filter ontbreekt.
 - [ ] Party wisselen. Er is geen API.
 - [ ] Save-tegel op de echte spelerpositie. Nu is de tegel (0, 0) en de kijkrichting (0, 1).
-- [ ] Act-kamers invullen en de deuren openen. world_warper_act2 en world_warper_act3 zet niemand.
+- [ ] Act-kamers bouwen en de deuren openen. De kamers staan vast bij Interieur. world_warper_act2 en world_warper_act3 zet niemand.
 - [ ] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
 - [ ] Kleur van de Hanger-gloed. Deze lijst zei paars; de code is roze (canon: roze = de Stroom).
 - [ ] Webversie. Hoort niet bij deze branch.
@@ -324,8 +392,27 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 
 - [x] Half functioneel: centrale hal en meerdere kamers
   Eerste versie. Placeholder-kaarten, tegels 16×16. Open: exterieur, hal, warp_ring, hanger_nis. codex_nis en sapientia_schot bestaan en blijven dicht.
-- [ ] Sommige kamers zijn leeg bij de introductie en unlocken later per act
-  codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand.
+- [ ] Kamers bouwen volgens de lijst hieronder
+  codex_nis en sapientia_schot zijn leeg en dicht. world_warper_act2 en world_warper_act3 zet niemand. De genoemde kamers staan nog niet in de code.
+
+**CANON – niet wijzigen zonder overleg.**
+
+Direct open na Archief 2:
+
+- [ ] De Hal: warp-platform, ECHO in de main PC, party loopt rond
+- [ ] De Rustkamer: save, heal, party wisselen
+- [ ] ECHO's Kamer: questvoortgang
+
+Per act:
+
+- [ ] Act 2: De Beeldkamer, bestiarium en Codex
+- [ ] Act 3: De Trainingshal, oefengevechten
+- [ ] Act 4: De Werkplaats, crafting
+- [ ] Act 5: De Handelskamer, endgame-shops
+- [ ] Act 6: De Kern, H-6 verhaal-eindpunt
+
+Eerste versie, nog niet de kamers hierboven:
+
 - [x] Centrale hal met warp-platform (hoofdfunctie)
   Eerste versie. De hal opent de warp-UI. warp_ring is een aparte kamer: een rechthoek van paneeltegels, geen cirkel.
 - [ ] Paars als signature kleur, in lijn met het Codex Monument
@@ -394,9 +481,9 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
   IVA heeft vier vaste stappen (world_warper_guide_0 tot en met 3). Geen questvoortgang.
 - [x] Party-leden en Codex-monsters lopen vrij rond
   Eerste versie. Placeholders uit party en codex_pages, in de hal. Geen loop-animatie.
-- [ ] Latere kamers unlocken per act
+- [ ] Latere kamers unlocken per act: De Beeldkamer, De Trainingshal, De Werkplaats, De Handelskamer, De Kern
   De deuren naar codex_nis en sapientia_schot blijven dicht.
-- [ ] Bestiarium of Codex beheren, indien van toepassing
+- [ ] Bestiarium en Codex in De Beeldkamer (Act 2)
 
 ### Audio
 
