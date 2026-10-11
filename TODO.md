@@ -76,7 +76,33 @@ Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en qui
 
 ### Archief 2 — Het Levende Archief
 
+**CANON – niet wijzigen zonder overleg.**
+
 Locatie: Worldmap 1 (start-eiland), tweede Archief. Thema: Leven. Grootte: vergelijkbaar met Archief 1 (4 verdiepingen).
+
+Lotte's orde: DE ORDE VAN DE STILLE VLAM. Stilte = Sapientia's doel (emotie uitwissen). Vlam = leven, warmte, emotie (wat de Orde verdedigt). De Orde is verdeeld: sommigen zien stilte als vrede, anderen verzetten zich.
+
+Waarom Sapientia Lotte corrumpeert: haar orde stuurde haar naar het Levende Archief om te onderzoeken waarom Sapientia leven wil uitwissen. Sapientia zag haar als het perfecte doelwit: een priesteres die leven en emotie verdedigt is een symbool dat gebroken moet worden. In plaats van haar te doden, corrumpeerde Sapientia haar, als bewijs dat zelfs wie het leven koestert uiteindelijk stil wordt.
+
+Codex-monster in het Lotte-gevecht: de speler kiest één gevangen Codex-monster. Heeft de speler er nog geen, dan vecht een tijdelijke Mosslijm mee (leermoment).
+
+Lotte's start-level: hetzelfde level als Dennis op dat moment. Gelijkwaardige metgezel, geen hulpje. Gebalanceerd ongeacht speelsnelheid.
+
+Mini-baas verdieping 3: DE WURGER. Een kolossale slingerplant die de kas verstikt. Sapientia's stilte = alles stopt met groeien; De Wurger is wat overblijft als leven geen kant op kan. Zwak voor IJs (Lotte) en fysieke aanvallen (Dennis).
+
+Plaat-combinaties verdieping 3, nieuw ten opzichte van verdieping 1:
+
+A) Ketting-platen: één plaat activeert de volgende, die weer een derde. De speler zoekt de volgorde.
+
+B) Tegen-platen: krimpen bij aanraking. De speler moet ze vermijden om ruimte te houden.
+
+C) Licht-platen: groeien alleen als Lotte's Licht-magie erop schijnt. Lotte heeft daarmee een rol in puzzels, niet alleen in gevecht.
+
+De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmoment, trekt ongeveer 30% HP van één party-lid, hij "geneest" ze letterlijk, scripted en onvermijdelijk. Daarna is het een echte aanval: 8–12% HP per beurt, en hij healt zichzelf met dezelfde hoeveelheid. Zwak voor IJs en Dennis' zwaard. Uiterlijk: half plant, half staal.
+
+Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
+
+Waarom Archief 1 naar Archief 2 wijst: de Oude Mensheid ontwierp de zes Archieven als keten. Elke kern activeert de volgende, niet als uitnodiging maar als noodsignaal. Toen Archief 1 openging, zond zijn kern naar de andere vijf: "Iemand is binnen." Archief 2 reageerde als eerste. Sapientia heeft het signaal opgevangen en gemanipuleerd. Dennis denkt dat hij moet volgen, maar Sapientia leidt hem.
 
 #### Sfeer en setting
 
@@ -87,34 +113,40 @@ Locatie: Worldmap 1 (start-eiland), tweede Archief. Thema: Leven. Grootte: verge
 
 #### Verhaallijn
 
-- [ ] Dennis gaat naar Archief 2 omdat de kern van Archief 1 reageert op een tweede signaal
-- [ ] Lotte is een priesteres, gestuurd door haar orde (naam nog te bepalen) om het Archief te onderzoeken
-- [ ] Lotte is gecorrumpeerd door Sapientia en verschijnt als mini-baas halverwege
-- [ ] Lotte's backstory: gestuurd door een orde, verdeeld over Sapientia (later uitwerken)
+- [ ] In het spel zetten: Dennis volgt het noodsignaal van de kern van Archief 1 naar Archief 2. Sapientia heeft het signaal gemanipuleerd; Dennis denkt dat hij moet volgen, maar Sapientia leidt hem
+- [ ] In het spel zetten: Lotte, priesteres van de Orde van de Stille Vlam, gecorrumpeerd door Sapientia, als mini-baas halverwege
 
 #### Lotte's entree (midden van de dungeon, verdieping 2)
 
 - [ ] Lotte verschijnt als mini-baas op verdieping 2 van 4
 - [ ] Gecorrumpeerd door Sapientia, met visuele glitch-effecten
-- [ ] Gevecht: Dennis en een Codex-monster (bondgenoot) tegen Lotte
-  - [ ] Het Codex-monster vecht mee als tijdelijke bondgenoot
-  - [ ] De speler kiest welk Codex-monster meegaat, als er meerdere zijn
+- [ ] Gevecht bouwen: Dennis en één Codex-monster tegen Lotte
+  De speler kiest één gevangen Codex-monster. Heeft de speler er nog geen, dan vecht een tijdelijke Mosslijm mee (leermoment).
 - [ ] Bij verlies is het een story death, geen game over
-  - [ ] Cutscene: Lotte breekt zelf de glitch van Sapientia
+  - [ ] Cutscene bouwen: Lotte breekt zelf de glitch van Sapientia
   - [ ] Ze beseft wat er gebeurd is en sluit zich aan bij de party
   - [ ] Of de speler wint of verliest: Lotte sluit aan
-- [ ] Na het gevecht sluit Lotte aan als vast party-lid
-- [ ] Daarna speel je verdieping 3 en 4 met Dennis, Lotte en het Codex-monster
+- [ ] Na het gevecht sluit Lotte aan als vast party-lid, op hetzelfde level als Dennis
+- [ ] Daarna verdieping 3 en 4 met Dennis, Lotte en het gekozen Codex-monster. Mosslijm is alleen het leermoment
 
 #### Lotte's stats en skills bij aansluiting
 
+Lotte's start-level: hetzelfde level als Dennis op dat moment. Gelijkwaardige metgezel, geen hulpje. Gebalanceerd ongeacht speelsnelheid.
+
 - [ ] Klasse: Priester
 - [ ] Elementen: Licht (heal en buffs) en IJs (aanval)
-- [ ] Start-level passend bij de voortgang in Archief 2, afgestemd op Dennis
 - [ ] Startuitrusting: priester-standaard (staf en robes)
 - [ ] Startspreuken: Grade 1 Licht (heal) en Grade 1 IJs (aanval)
 
 #### Puzzel-mechaniek: groeiende platen
+
+Plaat-combinaties verdieping 3, nieuw ten opzichte van verdieping 1:
+
+A) Ketting-platen: één plaat activeert de volgende, die weer een derde. De speler zoekt de volgorde.
+
+B) Tegen-platen: krimpen bij aanraking. De speler moet ze vermijden om ruimte te houden.
+
+C) Licht-platen: groeien alleen als Lotte's Licht-magie erop schijnt. Lotte heeft daarmee een rol in puzzels, niet alleen in gevecht.
 
 - [ ] Kernmechaniek: planten of platen die groeien als je ze activeert
 - [ ] Groeiende platen vormen bruggen, plateaus en paden
@@ -122,16 +154,19 @@ Locatie: Worldmap 1 (start-eiland), tweede Archief. Thema: Leven. Grootte: verge
 - [ ] Combinaties met bestaande puzzel-elementen (kasten en hendels uit Archief 1)
 - [ ] Moeilijkheid per verdieping opbouwen
 - [ ] De nieuwe mechanic introduceren op verdieping 1, tutorial-achtig
+- [ ] Verdieping 3: ketting-platen, tegen-platen en licht-platen implementeren
 
 #### Baas: De Genezer (verdieping 4)
 
-- [ ] Concept: een golem die "geneest" door alles te absorberen
-- [ ] Sapientia's logica: leven is stilte, emotie is een fout
-- [ ] De Genezer zuigt levenskracht op van planten en monsters
-- [ ] Aanval: absorbeert HP van party-leden (heal-trade)
-- [ ] Zwakte: IJs (Lotte's element) en Dennis' zwaardaanvallen
-- [ ] Design: organisch/machine-hybride, half plant en half staal
+Concept: een golem die "geneest" door alles te absorberen. Sapientia's logica: leven is stilte, emotie is een fout. De Genezer zuigt levenskracht op van planten en monsters.
+
+De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmoment, trekt ongeveer 30% HP van één party-lid, hij "geneest" ze letterlijk, scripted en onvermijdelijk. Daarna is het een echte aanval: 8–12% HP per beurt, en hij healt zichzelf met dezelfde hoeveelheid. Zwak voor IJs en Dennis' zwaard. Uiterlijk: half plant, half staal.
+
+Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
+
+- [ ] Baasgevecht De Genezer bouwen, met de HP-trek hierboven
 - [ ] Na het verslaan de kern van Archief 2 opnemen
+- [ ] De kern-zin tonen na De Genezer
 
 #### Cutscene na Archief 2: de World Warper
 
@@ -148,43 +183,31 @@ Locatie: Worldmap 1 (start-eiland), tweede Archief. Thema: Leven. Grootte: verge
 - [ ] Vanaf hier kan de speler terug naar eerder bezochte eilanden
   WM1 warpt naar de wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). Een filter op eerder bezoek ontbreekt.
 - [ ] De cutscene maakt duidelijk wat de World Warper is en doet
-  De eerste-bezoekscène in de hal heeft voorlopige zinnen (TODO(design)). Dat is deze cutscene niet.
+  De eerste-bezoekscène in de hal heeft voorlopige zinnen en gebruikt kleurvlakken. Dat is deze cutscene niet.
 
 #### Dungeon-opbouw (4 verdiepingen)
 
 - [ ] Verdieping 1: entree, eerste groei-plaatpuzzel, zichtbare monsters
-- [ ] Verdieping 2: Lotte als mini-baas (Dennis en Codex-monster), daarna sluit ze aan
-- [ ] Verdieping 3: complexere groei-plaatpuzzels en een monster als mini-baas
-- [ ] Verdieping 4: aanloop naar De Genezer, het baasgevecht en de World Warper-cutscene
+- [ ] Verdieping 2: Lotte als mini-baas (Dennis en één gekozen Codex-monster, anders tijdelijke Mosslijm), daarna sluit ze aan
+- [ ] Verdieping 3: ketting-platen, tegen-platen en licht-platen, mini-baas De Wurger
+- [ ] Verdieping 4: aanloop naar De Genezer, het baasgevecht, de kern-zin en de World Warper-cutscene
 
 #### Content en art
 
-- [ ] Nieuwe tileset: overwoekerde kas (planten, water, groene gloed)
-- [ ] Nieuwe vijanden met een plant- of leventhema (aantal en types nog te bepalen)
-- [ ] Lotte-sprite (priester, robes)
-- [ ] De Genezer-sprite (golem, organisch/machine)
-- [ ] Groei-plaatsprite per stadium: zaad, scheut, volgroeid
-- [ ] Kern-item van Archief 2
+- [ ] Tileset overwoekerde kas (groen, vochtig, organisch)
+- [ ] Lotte-sprite (priester, robes, staf)
+- [ ] Lotte glitch-variant (gecorrumpeerd, paarse glitch)
+- [ ] De Genezer (golem, half plant half staal)
+- [ ] De Wurger (kolossale slingerplant, mini-baas verdieping 3)
+- [ ] Groei-plaat, 3 stadia: zaad, scheut, volgroeid
+- [ ] Kern-item Archief 2 (levend, groen, organisch)
+- [ ] Nieuwe vijanden met een plant- of leventhema
 - [ ] Achtergrondmuziek die bij de overwoekerde kas past
-- [ ] Gecorrumpeerde Lotte-variant (glitch-effecten) voor het mini-baasgevecht
-- [ ] World Warper-gebouw (zwevend, hightech)
-  Placeholder-kaarten staan in world_warper/maps. Ze zweven niet en staan niet in tools/placeholders_v17.txt.
-- [ ] Art voor de World Warper-cutscene
-  De eerste-bezoekscène gebruikt kleurvlakken. Cutscene-art ontbreekt.
 
 #### Codex
 
 - [ ] Nieuwe Codex-monsters voor Archief 2 (leventhema)
-- [ ] Lotte's startmonster, indien van toepassing
-
-#### Verhaal nog open
-
-- [ ] Naam van Lotte's orde bepalen
-- [ ] Lotte's familie en achtergrond uitwerken
-- [ ] Waarom Lotte gecorrumpeerd raakte (invloed van Sapientia)
-- [ ] Exacte reden dat de kern van Archief 1 reageert op Archief 2
-- [ ] Welke rol De Genezer speelt in de bredere Sapientia-lore
-- [ ] World Warper: wie heeft het gebouwd? (Oude Mensheid, Sapientia, of iemand anders?)
+- [ ] Lotte-gevecht bouwen met één gekozen Codex-monster, of een tijdelijke Mosslijm als de speler er nog geen heeft
 
 ## Content
 
@@ -225,7 +248,17 @@ Techniek: de headless testsuites draaien via `.github/workflows/tests.yml` (Godo
 
 ## World Warper
 
-Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_warper/. Placeholder-kaarten met tegels van 16×16: exterieur, hal, warp_ring en hanger_nis zijn open. codex_nis en sapientia_schot bestaan en blijven dicht (vlaggen world_warper_act2 en world_warper_act3 zet niemand). Warp-UI in twee stappen; alleen WM1 is open: wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). WM2 en WM3 zijn zichtbaar en vergrendeld. AI-gids IVA in de hal, vier Nederlandse stappen via Dialog.show_lines, vlaggen world_warper_guide_0 tot en met 3. De naam is TODO(design), geen canon. Rondlopers uit party en codex_pages, placeholders, geen loop-animatie. Savepunt met Nederlandse bevestiging; schrijft GameState.save_game(Vector2i(0, 0), Vector2i(0, 1)). Gezelschap is een kijklijst. Eerste-bezoekscène: paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn TODO(design). Geen H-6-onthulling. Audio-aanroepen ww_ambient, ww_hum, ww_warp en ww_sapientia_glitch, zonder bestanden en zonder manifest-entry, blijven stil. Unlock-haakje in scripts/game_state.gd: world_warper_is_unlocked en try_unlock_world_warper, elk één keer. Vlag world_warper_unlocked na bewaker:archief_v2_trapzaal/m2. Dat is verdieping 2 van het Eerste Archief, niet De Genezer en niet het Archief van Leven. Eigen tests: 65 PASS op Godot 4.7.2. De runner staat niet in .github/workflows/tests.yml.
+**CANON – niet wijzigen zonder overleg.**
+
+Wie bouwde hem: de Oude Mensheid, als verbindingspunt tussen de zes Archieven (warprelay voor hun onderzoekers). Sapientia heeft hem offline gezet en de code deels herschreven. Sapientia kon hem niet volledig overnemen, omdat hij alleen op de Hanger werkt, en de Hanger van de Oude Mensheid is.
+
+AI-gids: naam ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderzoeker van de Oude Mensheid.
+
+Waarom alleen de Hanger werkt: de Hanger is geen accessoire maar een biometrische sleutel die de Oude Mensheid maakte voor Proefpersoon H-6. Hij is letterlijk met Dennis verbonden. Sapientia kan hem niet namaken, niet stelen zonder Dennis te doden, en niet omzeilen. Daarom wil Sapientia Dennis: niet zijn kracht, maar zijn sleutel.
+
+Wat Sapientia met de World Warper wil: toegang tot alle zes Archieven tegelijk. Zonder de World Warper moet ze elk Archief apart bereiken. Met de World Warper kan ze in één keer alle kernen absorberen, en dan is de mensheid in één klap "verlost". De World Warper is het einddoel van Sapientia's plan. Dennis heeft per ongeluk het wapen van de vijand geactiveerd.
+
+Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_warper/. Placeholder-kaarten met tegels van 16×16: exterieur, hal, warp_ring en hanger_nis zijn open. codex_nis en sapientia_schot bestaan en blijven dicht (vlaggen world_warper_act2 en world_warper_act3 zet niemand). Warp-UI in twee stappen; alleen WM1 is open: wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). WM2 en WM3 zijn zichtbaar en vergrendeld. AI-gids in de code nog IVA (canon-naam ECHO) in de hal, vier Nederlandse stappen via Dialog.show_lines, vlaggen world_warper_guide_0 tot en met 3. Rondlopers uit party en codex_pages, placeholders, geen loop-animatie. Savepunt met Nederlandse bevestiging; schrijft GameState.save_game(Vector2i(0, 0), Vector2i(0, 1)). Gezelschap is een kijklijst. Eerste-bezoekscène: paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn voorlopig. Geen H-6-onthulling. Audio-aanroepen ww_ambient, ww_hum, ww_warp en ww_sapientia_glitch, zonder bestanden en zonder manifest-entry, blijven stil. Unlock-haakje in scripts/game_state.gd: world_warper_is_unlocked en try_unlock_world_warper, elk één keer. Vlag world_warper_unlocked na bewaker:archief_v2_trapzaal/m2. Dat is verdieping 2 van het Eerste Archief, niet De Genezer en niet het Archief van Leven. Eigen tests: 65 PASS op Godot 4.7.2. De runner staat niet in .github/workflows/tests.yml.
 
 ### Nog te doen
 
@@ -235,9 +268,8 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 - [ ] Party wisselen. Er is geen API.
 - [ ] Save-tegel op de echte spelerpositie. Nu is de tegel (0, 0) en de kijkrichting (0, 1).
 - [ ] Act-kamers invullen en de deuren openen. world_warper_act2 en world_warper_act3 zet niemand.
-- [ ] Art. Wat er staat is placeholder en staat niet in tools/placeholders_v17.txt.
+- [ ] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
 - [ ] Kleur van de Hanger-gloed. Deze lijst zei paars; de code is roze (canon: roze = de Stroom).
-- [ ] Of de AI-gids meer weet over H-6. De tekst doet dat bewust niet.
 - [ ] Webversie. Hoort niet bij deze branch.
 - [ ] Runner in de CI-matrix op Godot 4.3. De 65 PASS draaiden op Godot 4.7.2, buiten .github/workflows/tests.yml.
 
@@ -245,15 +277,11 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 
 ### Concept en lore
 
-- [ ] Zwevend hightech gebouw, mix van technologie van de Oude Mensheid en Sapientia
-  Placeholder-exterieur staat. Het gebouw zweeft niet op de wereldkaart.
-- [ ] Oorspronkelijk gebouwd door de Oude Mensheid als verbinding tussen de Archieven
-- [ ] Sapientia heeft het offline gehouden en wil het zelf in handen krijgen
-- [ ] Het werkt alleen op Dennis' Hanger; de Hanger is de enige sleutel
-  De scène noemt de Hanger de Sleutel. Een slot dat alleen op Dennis reageert ontbreekt.
-- [ ] Dat maakt Dennis (Proefpersoon H-6) onmisbaar voor Sapientia's plannen
-  De spelertekst onthult H-6 niet.
-- [ ] Komt online zodra twee Archieven (1 en 2) geactiveerd zijn
+- [ ] Zwevend hightech gebouw op de wereldkaart
+  Placeholder-exterieur staat. Het gebouw zweeft niet op de wereldkaart. Placeholder-kaarten staan in world_warper/maps.
+- [ ] Slot dat alleen op Dennis' Hanger reageert
+  De scène noemt de Hanger de Sleutel. Een slot dat alleen op Dennis reageert ontbreekt. De spelertekst onthult H-6 niet.
+- [ ] Komt online na De Genezer (Archief 2)
   De code zet world_warper_unlocked na bewaker:archief_v2_trapzaal/m2, verdieping 2 van het Eerste Archief.
 
 ### Verschijning en cutscene
@@ -262,15 +290,15 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
   De Genezer bestaat niet. Er is geen deur op de wereldkaart.
 - [ ] De party wordt automatisch gewarped naar het gebouw
   WorldWarperEnter.enter() wisselt naar het exterieur als de unlock-vlag er is. Niets op de kaart roept dat aan.
-- [ ] Introductie van de AI-gids
-  Placeholder IVA staat in de hal, vier stappen via Dialog.show_lines. De naam is TODO(design), geen canon.
+- [ ] Introductie van de AI-gids ECHO
+  Placeholder IVA staat in de hal, vier stappen via Dialog.show_lines. De canon-naam ECHO staat nog niet in de tekst.
 - [ ] Duidelijk maken wat dit is, wat het kan, en waarom het belangrijk is
-  Eerste-bezoekscène en IVA doen een eerste versie. De zinnen zijn TODO(design).
+  Eerste-bezoekscène en IVA doen een eerste versie. De zinnen zijn voorlopig.
 
 ### Eerste binnenkomst: Hanger en Sapientia
 
 - [x] Bij de eerste keer binnen: visueel effect
-  Eerste versie. Paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn TODO(design). Geen H-6-onthulling.
+  Eerste versie. Paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn voorlopig. Geen H-6-onthulling.
   - [ ] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
     Open ontwerp. De code gloeit roze (canon: roze = de Stroom). De hal is paars.
   - [ ] Systemen komen online door het Hanger-signaal
@@ -278,18 +306,18 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 - [ ] Dialoogscène
   - [ ] Dennis toont de Hanger (eerste keer expliciet in het verhaal)
     De scène toont een roze Hanger. Dennis steekt hem niet apart op.
-  - [ ] De AI-gids reageert herkennend op de Hanger
-    IVA-stap hanger zegt dat de Hanger de Sleutel is.
-  - [ ] Uitleg: alleen de Hanger kan de World Warper activeren
-    De tekst noemt de Hanger de Sleutel. Ze zegt niet dat alleen die de hub start.
+  - [ ] ECHO reageert herkennend op de Hanger
+    IVA-stap hanger zegt dat de Hanger de Sleutel is. De canon-naam ECHO staat nog niet in de tekst.
+  - [ ] Uitleg bouwen: alleen de Hanger, de biometrische sleutel, activeert de World Warper
+    De tekst noemt de Hanger de Sleutel. Ze zegt niet dat alleen die de hub start. Geen H-6-onthulling.
 - [ ] Sapientia-dreiging
   - [ ] Na de activering verschijnt Sapientia (glitch, stem of hologram)
     Korte zwarte flikkering en een haperend hologram. Geen stem en geen hologram van Sapientia.
-  - [ ] Sapientia uit de dreiging: zij wil de World Warper
+  - [ ] Sapientia uit de dreiging: zij wil de World Warper, toegang tot alle zes Archieven tegelijk
     De zin is: Sapientia weet dat de Sleutel hier is.
-  - [ ] Duidelijk maken dat Dennis en de Hanger het enige obstakel zijn
+  - [ ] Duidelijk maken dat Dennis en de Hanger het enige obstakel zijn: Sapientia wil zijn sleutel
   - [ ] Dreiging opbouwen voor latere acts
-  - [ ] De party reageert geschokt; de AI-gids waarschuwt
+  - [ ] De party reageert geschokt; ECHO waarschuwt
 
 ### Interieur
 
@@ -314,24 +342,23 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
   Eerste versie. Placeholders uit codex_pages. Geen loop-animatie.
 - [ ] Nieuwe party-leden voegen zich toe zodra ze aansluiten
   refresh() leest de party bij het laden van de hal. Midden in de kamer werkt dat niet live bij.
-- [ ] Reageren party-leden op locatie en verhaalprogressie? (design nog open)
 
 ### AI-gids (in de main PC)
 
+Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderzoeker van de Oude Mensheid.
+
 - [ ] De AI-gids zit in de main PC van het warp-platform
   Placeholder IVA staat in de hal (ww_anchor_gids), niet in de warp-ring.
+- [ ] De gids in de tekst ECHO noemen
+  De canon-naam staat nog niet in de tekst.
 - [ ] Functie: questvoortgang, missie-uitleg en begeleiding
   Vier vaste stappen via Dialog.show_lines. Geen questvoortgang.
-- [ ] Naam nog te bepalen
-  Placeholder IVA, TODO(design), geen canon.
-- [ ] Uiterlijk: hologram met paarse gloed
-  Paars vlak met het woord PLACEHOLDER.
 - [ ] Reageert op verhaalprogressie (nieuwe dialoog per act)
   Vlaggen world_warper_guide_0 tot en met 3, in volgorde. Niet per act.
 - [ ] Geeft hints bij vastlopen en de volgende bestemming
   Vier vaste zinnen. Geen hint als de speler vastloopt.
-- [ ] Herkent de Hanger en weet mogelijk meer over Dennis en H-6 dan hijzelf
-  De hanger-stap noemt de Hanger de Sleutel. Over H-6 zegt de tekst niets.
+- [ ] Herkent de Hanger
+  De hanger-stap noemt de Hanger de Sleutel. Over H-6 zegt de tekst niets. De bonus-lore over ECHO staat nog niet in de tekst.
 
 ### Warp-systeem
 
@@ -366,9 +393,8 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
   IVA heeft vier vaste stappen (world_warper_guide_0 tot en met 3). Geen questvoortgang.
 - [x] Party-leden en Codex-monsters lopen vrij rond
   Eerste versie. Placeholders uit party en codex_pages, in de hal. Geen loop-animatie.
-- [ ] Latere kamers unlocken per act (invulling nog te bepalen)
+- [ ] Latere kamers unlocken per act
   De deuren naar codex_nis en sapientia_schot blijven dicht.
-  - [ ] Welke kamers? (crafting, training, shops, Codex — design nog open)
 - [ ] Bestiarium of Codex beheren, indien van toepassing
 
 ### Audio
@@ -387,19 +413,19 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 
 ### Visuals en art
 
-- [ ] Exterieur van de World Warper (zwevend, paars, hightech)
-  Placeholder-kaart, tegels 16×16. Zweeft niet. Staat niet in tools/placeholders_v17.txt.
+- [ ] World Warper exterieur (zwevend, paars, high-tech)
+  Placeholder-kaart, tegels 16×16, in world_warper/maps. Zweeft niet. Staat niet in tools/placeholders_v17.txt.
 - [ ] Interieur-tileset (paars, holografisch, sciencefiction)
   tiles_placeholder.png, tegels 16×16, met het woord PLACEHOLDER. Niet geregistreerd.
 - [ ] Sprite van het warp-platform
   warp_ring is een rechthoek van paneeltegels. Geen sprite.
 - [ ] Sprite van de main PC
-- [ ] Hologram-sprite of animatie van de AI-gids
-  Paars vlak met PLACEHOLDER. Geen sprite.
+- [ ] ECHO-hologram (paarse gloed)
+  Paars vlak met het woord PLACEHOLDER. Geen sprite. De code noemt de gids nog IVA.
 - [ ] Oplicht-effect van de Hanger (paarse gloed)
   Open ontwerp. De code gloeit roze (de Stroom).
-- [ ] Verschijning van Sapientia (glitch of hologram)
-  Korte zwarte flikkering van het hologram. Geen glitch-sprite.
+- [ ] Sapientia glitch-verschijning (dreigingsscène)
+  Korte zwarte flikkering van het hologram. Geen glitch-sprite. De eerste-bezoekscène gebruikt kleurvlakken.
 - [ ] UI van de wereldkaart-view (WM1, WM2, WM3, daarna dorp)
   Paarse vlakke knoppen met PLACEHOLDER. WM2 en WM3 zijn vergrendeld.
 - [ ] Loop-animaties van party-leden en Codex-monsters in de hub
@@ -408,21 +434,9 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 ### Verhaal-integratie
 
 - [ ] Dennis' Hanger is de sleutel; dat meermaals benadrukken in dialoog
-  Eerste-bezoekscène en de IVA-stap hanger noemen de Hanger de Sleutel. Zinnen zijn TODO(design). Geen H-6.
-- [ ] Sapientia's interesse in de World Warper opbouwen als dreiging
+  Eerste-bezoekscène en de IVA-stap hanger noemen de Hanger de Sleutel. Zinnen zijn voorlopig. Geen H-6-onthulling.
+- [ ] Sapientia's belang bij de World Warper opbouwen: alle zes kernen in één keer
   Eén zin: Sapientia weet dat de Sleutel hier is.
-- [ ] De AI-gids kent de Oude Mensheid, of doet alsof
-- [ ] De AI-gids weet mogelijk meer over Dennis en H-6 dan hijzelf
-  De tekst doet dat bewust niet.
-
-### Verhaal nog open
-
-- [ ] Naam van de AI-gids bepalen
-- [ ] Exacte relatie tussen de World Warper en Archief 4 (oorsprong van H-6)
-- [ ] Waarom werkt het alleen op de Hanger?
-- [ ] Wat Sapientia precies met de World Warper wil
-- [ ] Latere kamers: welke, wanneer, en wat ze doen
-- [ ] Reageren party-leden op locatie en verhaalprogressie?
 
 ## Ingame-menu
 
