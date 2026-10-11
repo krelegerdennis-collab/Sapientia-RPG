@@ -29,6 +29,7 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	_vlag_en_act()
 	_buit_en_tekst()
+	_dorp_bezoek()
 	_scènes()
 	await _hal_in_beeld()
 	print("WARPERKAMERTEST %d PASS, %d FAIL" % [passes, failures])
@@ -63,6 +64,12 @@ func _vlag_en_act() -> void:
 	check("Kern dicht vóór act 6", not Kamers.is_open("kern", open, _party(36)))
 	check("Kern open in act 6", Kamers.is_open("kern", open, _party(37)) and Kamers.naam("kern") == "De Kern")
 	check("onbekende kamer blijft dicht", not Kamers.is_open("hanger_nis", open, _party(40)))
+
+
+func _dorp_bezoek() -> void:
+	var DestTest: Script = load("res://world_warper/warp/destinations_test.gd")
+	var fouten: PackedStringArray = DestTest.call("dorp_eerst_bezocht")
+	check("dorp pas na bezoek (%s)" % [", ".join(fouten)], fouten.is_empty())
 
 
 func _buit_en_tekst() -> void:

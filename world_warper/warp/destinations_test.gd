@@ -65,6 +65,35 @@ static func wm1_echte_bestemming() -> PackedStringArray:
 	return fouten
 
 
+static func dorp_eerst_bezocht() -> PackedStringArray:
+	var fouten := PackedStringArray()
+	var leeg := {}
+	if Destinations.resolve(Destinations.WM1, Destinations.PLACE_WERELDKAART, leeg).is_empty():
+		fouten.append("wereldkaart hoort open zonder bezoek")
+	if not Destinations.resolve(Destinations.WM1, Destinations.PLACE_WILGENDAL, leeg).is_empty():
+		fouten.append("Wilgendal hoort dicht zonder bezoek")
+	if not Destinations.resolve(Destinations.WM1, Destinations.PLACE_ESDOORN, leeg).is_empty():
+		fouten.append("Esdoorn hoort dicht zonder bezoek")
+	var wilg := {Destinations.FLAG_WILGENDAL: true}
+	if Destinations.resolve(Destinations.WM1, Destinations.PLACE_WILGENDAL, wilg).is_empty():
+		fouten.append("Wilgendal hoort open na bezoek")
+	if not Destinations.resolve(Destinations.WM1, Destinations.PLACE_ESDOORN, wilg).is_empty():
+		fouten.append("Esdoorn blijft dicht als alleen Wilgendal bezocht is")
+	var beide := {Destinations.FLAG_WILGENDAL: true, Destinations.FLAG_ESDOORN: true}
+	if Destinations.resolve(Destinations.WM1, Destinations.PLACE_ESDOORN, beide).is_empty():
+		fouten.append("Esdoorn hoort open na bezoek")
+	if Destinations.visit_flag_for_path(Destinations.WILGENDAL_PATH) != Destinations.FLAG_WILGENDAL:
+		fouten.append("Wilgendal-pad zet niet de bezoekvlag")
+	if Destinations.visit_flag_for_path(Destinations.ESDOORN_PATH) != Destinations.FLAG_ESDOORN:
+		fouten.append("Esdoorn-pad zet niet de bezoekvlag")
+	if Destinations.visit_flag_for_path(GameState.WORLD_MAP) != "":
+		fouten.append("de wereldkaart hoort geen bezoekvlag")
+	var onecht := {Destinations.FLAG_WILGENDAL: 1}
+	if not Destinations.resolve(Destinations.WM1, Destinations.PLACE_WILGENDAL, onecht).is_empty():
+		fouten.append("een getal telt niet als bezoek")
+	return fouten
+
+
 static func onbekend_id_faalt() -> PackedStringArray:
 	var fouten := PackedStringArray()
 	if Destinations.is_world_open("onbekend", {}):

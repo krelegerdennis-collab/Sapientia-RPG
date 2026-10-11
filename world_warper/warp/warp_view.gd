@@ -173,7 +173,8 @@ func _show_step() -> void:
 	else:
 		for place in Destinations.places(_wm_id):
 			var place_id := str(place.get("id", ""))
-			_add_row(place_id, str(place.get("label", "")), false, place_id == _place_id, _on_place_pressed.bind(place_id))
+			var dicht := not Destinations.is_place_open(place, flags)
+			_add_row(place_id, str(place.get("label", "")), dicht, place_id == _place_id, _on_place_pressed.bind(place_id))
 	var gekozen := Destinations.resolve(_wm_id, _place_id, flags)
 	_travel.disabled = _step != STEP_PLACES or gekozen.is_empty()
 
@@ -254,6 +255,11 @@ func _on_world_pressed(wm_id: String) -> void:
 
 
 func _on_place_pressed(place_id: String) -> void:
+	for place in Destinations.places(_wm_id):
+		if str(place.get("id", "")) != place_id:
+			continue
+		if not Destinations.is_place_open(place, _story_flags()):
+			return
 	_place_id = place_id
 	call_deferred("_show_step")
 

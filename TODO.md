@@ -406,7 +406,7 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 
 - [ ] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. De Genezer staat in Archief 2. De deur en die automatische warp ontbreken nog.
 - [ ] WM2 naast WM1 open na Archief 2. De code heeft alleen WM1.
-- [ ] Dorpen eerst bezocht vóór een warp. Dat filter ontbreekt.
+- [x] Dorpen eerst bezocht vóór een warp. Wilgendal en Esdoorn zijn pas kiesbaar na een bezoek. De wereldkaart blijft open.
 - [ ] Party wisselen. Er is geen API.
 - [ ] Save-tegel op de echte spelerpositie. Nu is de tegel (0, 0) en de kijkrichting (0, 1).
 - [ ] Act-kamers bouwen en de deuren openen. De kamers uit de lijst staan in `world_warper/kamers` en gaan open met `warper_hub_open` plus de act. Werkplaats en Handelskamer zijn leeg. `world_warper_act2` en `world_warper_act3` zet niemand; `codex_nis` en `sapientia_schot` blijven dicht.
@@ -502,8 +502,8 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 ### Warp-systeem
 
-- [ ] Alleen ontgrendelde dorpen zijn selecteerbaar
-  Het bezoek-filter ontbreekt. De drie WM1-plaatsen zijn altijd kiesbaar.
+- [x] Alleen ontgrendelde dorpen zijn selecteerbaar
+  Wilgendal en Esdoorn vragen de vlag bezocht_wilgendal of bezocht_esdoorn. De wereldkaart blijft kiesbaar. WM2 en WM3 blijven dicht.
 - [ ] Visuele stijl: paars, holografisch, sciencefiction
   Paarse vlakke panelen met PLACEHOLDER. Geen hologram.
 
@@ -512,8 +512,8 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 - [ ] Na Archief 2: World Warper actief, WM1 en WM2 beschikbaar
   De hub gaat open na bewaker:archief_v2_trapzaal/m2 (verdieping 2 van het Eerste Archief). Alleen WM1 is open.
 - [ ] Na afronden van WM2 (Archief 3 en 4): WM3 ontgrendelt
-- [ ] Elk dorp moet eerst bezocht zijn voordat je ernaartoe kunt warpen
-  Dat filter ontbreekt.
+- [x] Elk dorp moet eerst bezocht zijn voordat je ernaartoe kunt warpen
+  Binnenkomen op dorp_wilgendal of esdoorn zet de vlag. Zonder vlag blijft de rij vergrendeld.
 
 ### Functionaliteit in de World Warper
 

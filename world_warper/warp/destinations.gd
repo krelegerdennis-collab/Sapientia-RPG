@@ -28,6 +28,9 @@ const ESDOORN_SPAWN := "zuid_ingang"
 const PLACE_WERELDKAART := "wereldkaart"
 const PLACE_WILGENDAL := "wilgendal"
 const PLACE_ESDOORN := "esdoorn"
+## Alleen dorpen. De wereldkaart zelf heeft geen bezoekvlag.
+const FLAG_WILGENDAL := "bezocht_wilgendal"
+const FLAG_ESDOORN := "bezocht_esdoorn"
 
 
 ## WM1, WM2 en WM3. WM2 en WM3 hebben nog geen eilandscènes.
@@ -56,12 +59,14 @@ static func places(wm_id: String) -> Array[Dictionary]:
 		"label": "Wilgendal",
 		"path": WILGENDAL_PATH,
 		"spawn": WILGENDAL_SPAWN,
+		"visit_flag": FLAG_WILGENDAL,
 	})
 	out.append({
 		"id": PLACE_ESDOORN,
 		"label": "Esdoorn",
 		"path": ESDOORN_PATH,
 		"spawn": ESDOORN_SPAWN,
+		"visit_flag": FLAG_ESDOORN,
 	})
 	return out
 
@@ -74,7 +79,25 @@ static func is_world_open(wm_id: String, flags: Dictionary) -> bool:
 	return wm_id == WM1
 
 
-## Lege dictionary als de wereld dicht is of het plaats-id niet bestaat.
+## Lege string als dit pad geen dorp is dat eerst bezocht moet zijn.
+static func visit_flag_for_path(path: String) -> String:
+	for place in places(WM1):
+		if str(place.get("path", "")) != path:
+			continue
+		return str(place.get("visit_flag", ""))
+	return ""
+
+
+## De wereldkaart is altijd open. Een dorp pas nadat de speler er is geweest.
+static func is_place_open(place: Dictionary, flags: Dictionary) -> bool:
+	var vlag := str(place.get("visit_flag", ""))
+	if vlag == "":
+		return true
+	var waarde: Variant = flags.get(vlag, false)
+	return waarde is bool and waarde
+
+
+## Lege dictionary als de wereld dicht is, het dorp onbezocht is, of het plaats-id niet bestaat.
 static func resolve(wm_id: String, place_id: String, flags: Dictionary) -> Dictionary:
 	if not is_world_open(wm_id, flags):
 		return {}
@@ -82,6 +105,8 @@ static func resolve(wm_id: String, place_id: String, flags: Dictionary) -> Dicti
 		if str(place.get("id", "")) != place_id:
 			continue
 		if str(place.get("path", "")).is_empty() or str(place.get("spawn", "")).is_empty():
+			return {}
+		if not is_place_open(place, flags):
 			return {}
 		return place
 	return {}
