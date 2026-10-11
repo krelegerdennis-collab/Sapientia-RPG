@@ -11,6 +11,7 @@ const Archief2 := preload("res://scripts/data/archief2.gd")
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const PuzzleRooms := preload("res://scripts/data/puzzle_rooms.gd")
 const PuzzleLogic := preload("res://scripts/puzzle/puzzle_logic.gd")
+const Equipment := preload("res://scripts/equipment.gd")
 const AANVAL := 0
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}

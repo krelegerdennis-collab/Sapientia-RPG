@@ -584,7 +584,8 @@ func _leven_tests() -> void:
 	check("open na de golem-vlag", str(opened.get("do", "")) == "default")
 	if not had:
 		GameState.story_flags.erase(SD.GOLEM_FLAG)
-	var lore := closed_txt + " " + " ".join(PuzzleRooms.ROOMS[PLAAT_ID]["exit"]["lines"])
+	var exit_lines: Array = PuzzleRooms.ROOMS[PLAAT_ID]["exit"].get("lines", [])
+	var lore := closed_txt + " " + " ".join(exit_lines)
 	check("geen verzonnen lore in de nieuwe zinnen", not lore.contains("H-6") and not lore.contains("Genezer")
 			and not lore.contains("Wurger") and not lore.contains("Stille Vlam") and not lore.contains("ECHO"))
 	var wereld: Node = (load("res://scenes/maps/wereldkaart.tscn") as PackedScene).instantiate()

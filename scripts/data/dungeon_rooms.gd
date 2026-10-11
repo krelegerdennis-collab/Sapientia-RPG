@@ -752,7 +752,7 @@ static func _rooms_for_set(dungeon_set: String) -> Dictionary:
 	if dungeon_set == "woud":
 		return woud().ROOMS
 	if dungeon_set == "leven":
-		var leven := archief2().ROOMS.duplicate(true)
+		var leven: Dictionary = archief2().ROOMS.duplicate(true)
 		var later: Dictionary = archief2().rooms()
 		for id in later:
 			leven[id] = later[id]
