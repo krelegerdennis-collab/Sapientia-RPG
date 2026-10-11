@@ -1,16 +1,19 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`4ae7a4a`), Godot 4.7.2, threads uit.
+Web-build van `main` (`538e906`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`50829ec`, export van `5cd0522`):
+Nieuw in deze build, bovenop de vorige web-build (`a4f5f3f`, export van `4ae7a4a`):
+- In de Diepe Grot staan warpers op verdieping 1, 50 en 99. Een warper gaat open zodra je die verdieping in deze run bereikt. Met A kies je een andere open warper. Vóór de sprong vraagt het spel of je door wilt. Annuleren laat je staan. Een warper die je nog niet bereikt hebt, staat niet in de lijst. De open warpers gaan mee in de save van de run.
+- Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `4ae7a4a`:
 - Titelscherm links, onder Betatest: **Eindstaat**. Eigen bestand (`save_eindstaat.json`), niet slot 1–4.
   De party staat op level 40. Noor en Lotte doen mee, met spreuken t/m grade 3, G4-wapens en 8000 goud.
   Je start op de wereldkaart bij Wilgendal. De winkels en de Diepe Grot zijn bereikbaar.
   Opslaan daarna blijft in dat eindstaat-bestand.
-- Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
 Nog van de build van `5cd0522`:
 - Geen nieuwe gameplay t.o.v. `404bce0`. `index.pck` zonder lokale testscreenshots.
@@ -53,7 +56,7 @@ Na deze publicatie moet je hard verversen. De browser bewaart de oude `index.pck
 
 De eerste tik ergens op het scherm (ook Continue of New Game) zet het geluid aan.
 Tot die tik staat er **Tap for sound**. Houd de telefoon liggend.
-Eerste keer ongeveer 67 MB (`index.pck` 29 MB + `index.wasm` 38 MB).
+Eerste keer ongeveer 71 MB (`index.pck` 33 MB + `index.wasm` 38 MB).
 
 ## Kortere link
 
