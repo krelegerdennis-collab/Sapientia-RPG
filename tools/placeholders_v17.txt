@@ -14,3 +14,8 @@ assets/tiles/dungeon/kas_tiles.png            256x80  tileset overwoekerde kas (
 assets/tiles/dungeon/kas_bibliotheek.png      256x64  bibliotheek-atlas van de kas (loader; verdieping 1 tekent er nog niet mee)
 assets/puzzle/groei_plaat.png                  48x16  groei-plaat, 3 frames van 16x16: zaad, scheut, volgroeid
 assets/sprites/buiten/kas_ingang.png           16x16  ingang van de kas op de wereldkaart
+# Het Zingende Graan: woudgeest. Geen bestand. art_pending in game_data.gd.
+# Gevecht gebruikt GameData.PLACEHOLDER_ENEMY_SPRITE (art/enemies/mosslijm.png) tot RPG ART levert:
+# assets/sprites/enemies/woudgeest.png       vooraanzicht, zelfde anker als de andere vijanden
+# assets/sprites/enemies/woudgeest_rug.png   rugaanzicht, zelfde canvas als het vooraanzicht
+# assets/map_monsters/woudgeest.png          32x64  (2x4 frames van 16x16), alleen als hij op de kaart gaat lopen

@@ -11,6 +11,7 @@ extends Node
 signal event_finished(event_id: String)
 
 const SD := preload("res://scripts/data/story_data.gd")
+const Molen := preload("res://scripts/village/molen.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const WINDOW_TILE := Vector2i(4, 0)      # raam-tile in binnen.png
 const WALK_SPEED := 56.0
@@ -314,6 +315,8 @@ func _exec(cmds: Array, arg: String) -> String:
 				for h in GameState.party:
 					h["hp"] = h["max_hp"]
 					h["mp"] = h["max_mp"]
+			"molen":
+				await Molen.bezoek()
 			"glitch":
 				# v0.17 ["glitch", sec]: één glitch-flits van de CRT-laag (ook buiten de dungeons)
 				if Crt.has_method("start_glitch"):

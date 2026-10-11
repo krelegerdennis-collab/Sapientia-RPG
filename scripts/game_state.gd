@@ -493,6 +493,18 @@ func has_member(id: String) -> bool:
 	return party.any(func(h): return h.get("id", "") == id)
 
 
+## Zet een groepslid vooraan (molen: party wisselen). index 0 blijft staan.
+func move_member_to_front(index: int) -> bool:
+	if index < 0 or index >= party.size():
+		return false
+	if index == 0:
+		return true
+	var h: Dictionary = party[index]
+	party.remove_at(index)
+	party.insert(0, h)
+	return true
+
+
 ## v0.11: wapen geven en meteen dragen (v0.14: via de uitrusting, game_data.gd EQUIPMENT);
 ## de bonus telt meteen mee. Een wapen dat hij al droeg gaat terug in de tas.
 func equip_weapon(hero_id: String, weapon_id: String) -> bool:

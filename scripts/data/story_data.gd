@@ -47,6 +47,7 @@ extends RefCounted
 ##                                       held sluit zich aan (GameState.join_member), bv. Noor
 ##   ["glitch", sec]                     één glitch-flits van de CRT-laag (ook buiten de dungeons)
 ##   ["heal"]                            HP en MP van de hele groep vol (herberg)
+##   ["molen"]                           molen van Gerrit: rusten, meel (1x per bezoek), opslaan, party wisselen
 ##   Spreker "{naam}" = de held zelf (ballon wijst naar de speler).
 ##   MAP_ENTER "map" mag ook een volledig scènepad zijn (Esdoorn, Donker Woud).
 
@@ -65,6 +66,15 @@ const WOUD_BAAS := "res://scenes/maps/woud_open_plek.tscn"
 const GOLEM_FLAG := "bewaker:archief_golemhal/golem"
 ## Vlag van de verslagen Wortelkoning.
 const WORTELKONING_FLAG := "bewaker:woud_open_plek/baas"
+## Het Zingende Graan (na noor_lid). Dialoog is voorlopig: alleen de twee zinnen hieronder.
+const GERRIT := "Gerrit de Molenaar"
+const FLAG_GRAAN := "quest_zingend_graan"
+const FLAG_ZAAD := "zingend_zaad"
+const FLAG_GRAAN_KLAAR := "zingend_graan_klaar"
+const ITEM_ZAAD := "zingend_zaad"
+const ITEM_MEEL := "zingend_meel"
+const QUOTE_GRAAN_OPEN := "Het zaad zingt aan de rand van de mist." # TODO(verhaal)
+const QUOTE_GRAAN_KLAAR := "De molen kan weer malen." # TODO(verhaal)
 
 ## Stappen van de proloog
 const START := 0          # nieuw spel: wakker worden in bed
@@ -90,11 +100,12 @@ const STEP_NAMES := {0: "start", 10: "wakker", 15: "uitrusting", 20: "taken", 30
 ## gezet is). Story.active_quest() geeft de titel.
 const QUESTS := [
 	{"id": "noor", "title": "Save Noor from the Dark Wood", "start_flag": "quest_noor", "done_flag": "noor_gered"},
+	{"id": "zingend_graan", "title": "Het Zingende Graan", "start_flag": FLAG_GRAAN, "done_flag": FLAG_GRAAN_KLAAR},
 ]
 ## v0.17 TODO(verhaal): deze events hebben PLACEHOLDER-tekst (kort, Nederlands). Dennis schrijft het
 ## echte verhaal; de opbouw (wie loopt waar, vlaggen, ballonnen) kan blijven.
 const TODO_STORY := ["noor_ontmoeting", "noor_bevrijd", "noor_woud", "marit", "bram", "jens", "tobias",
-	"ilse", "herbergier", "naar_esdoorn", "woud_ingang", "marit_boeken", "naar_leven"]
+	"ilse", "herbergier", "naar_esdoorn", "woud_ingang", "marit_boeken", "naar_leven", "gerrit"]
 
 const SPEAKER := "Old Man"
 
@@ -493,6 +504,38 @@ const EVENTS := {
 		["say", "", ["Noor joins the party!", "She gives you a Padded Jerkin from Mapleton.", "Quest complete: Save Noor from the Dark Wood"]],
 	]}],
 	"noor_woud": [{"do": [["say", "Noor", ["Let's go, {naam}."]]]}],
+
+	# Het Zingende Graan. TODO(verhaal): alleen deze twee zinnen tot de echte citaten er zijn.
+	# Dicht zolang noor_lid ontbreekt. Open: wijst naar de mistrand. Af: de molen is een rustpunt.
+	"gerrit": [
+		{"if": {"not_flags": ["noor_lid"]}, "do": []},
+		{"if": {"flags": [FLAG_GRAAN_KLAAR]}, "do": [
+			["say", GERRIT, [QUOTE_GRAAN_KLAAR]], # TODO(verhaal)
+			["molen"],
+		]},
+		{"if": {"flags": ["noor_lid", FLAG_ZAAD], "not_flags": [FLAG_GRAAN_KLAAR]}, "do": [
+			["take", ITEM_ZAAD, 1],
+			["flag", FLAG_GRAAN_KLAAR],
+			["say", GERRIT, [QUOTE_GRAAN_KLAAR]], # TODO(verhaal)
+			["molen"],
+		]},
+		{"if": {"flags": ["noor_lid"], "not_flags": [FLAG_ZAAD]}, "do": [
+			["flag", FLAG_GRAAN],
+			["say", GERRIT, [QUOTE_GRAAN_OPEN]], # TODO(verhaal)
+		]},
+	],
+	"zingend_zaad": [
+		{"if": {"flags": [FLAG_GRAAN], "not_flags": [FLAG_ZAAD]}, "do": [
+			["battle", ["woudgeest", "woudgeest"], {"after": "zingend_zaad_na"}],
+		]},
+		{"do": []},
+	],
+	"zingend_zaad_na": [{"do": [
+		["give", ITEM_ZAAD, 1],
+		["flag", FLAG_ZAAD],
+		["refresh"],
+		["say", "", ["Je vindt Zingend Zaad."]],
+	]}],
 }
 
 

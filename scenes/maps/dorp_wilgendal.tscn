@@ -55,10 +55,10 @@ event_arg = "wilgendal_magie"
 
 [node name="Gerrit" parent="Objects" instance=ExtResource("4_npc")]
 position = Vector2(168, 72)
-npc_name = "Gerrit Molenaar"
-lines = Array[String](["Goedendag."])
+npc_name = "Gerrit de Molenaar"
+lines = Array[String]([])
 facing = Vector2i(0, 1)
-event = ""
+event = "gerrit"
 event_arg = ""
 
 [node name="Accessoire" parent="Objects" instance=ExtResource("4_npc")]

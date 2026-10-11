@@ -8,6 +8,7 @@ extends Node
 ##   Deel E: opslaan/laden houdt alles vast.
 ##   Deel F: Codex (patch RPG CODE) in v0.17: Lege Boeken van Marit/woudkisten, woudmonster vangen,
 ##           bondgenoot vecht mee (ook in het woud), Codex-scherm, wereldkaart-iconen (RPG ART).
+##   Deel G: Het Zingende Graan (dicht vóór Noor, zaad op de mistrand, molen slaat op en geeft meel).
 ## --v17=map: screenshots 1024x576 als v17_dorp.png, v17_noor_ballon.png, v17_woud_kamer.png,
 ## v17_noor_cocon.png, v17_woud_baas.png, v17_noor_erbij.png (+ v17_woud_achtergrond.png, v17_veldmenu_opdracht.png),
 ## v17_wereld_esdoorn.png, v17_codex_vangen.png, v17_codex_bondgenoot.png, v17_codex_scherm.png.
@@ -19,6 +20,8 @@ const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
 const WR := preload("res://scripts/data/woud_rooms.gd")
 const KernVeld := preload("res://scripts/kern/kern_kracht_veld.gd")
+const PartyActions := preload("res://scripts/party_actions.gd")
+const Molen := preload("res://scripts/village/molen.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
@@ -67,6 +70,8 @@ func _run() -> void:
 	await _save_tests()
 	print("=== Deel F: Codex in het woud + wereldkaart-iconen ===")
 	await _codex_forest_tests()
+	print("=== Deel G: Het Zingende Graan ===")
+	await _graan_tests()
 	print("WOUDTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -903,3 +908,187 @@ func _codex_forest_tests() -> void:
 	await v17_shot("codex_scherm")
 	fm.close()
 	await pframes(6)
+
+
+# ================================================================ G: Het Zingende Graan
+func _gerrit_citaten() -> Array:
+	var out: Array = []
+	for ev in SD.EVENTS:
+		for v in SD.EVENTS[ev]:
+			var cmds = v.get("do", [])
+			if not (cmds is Array):
+				continue
+			for cmd in cmds:
+				if cmd is Array and cmd.size() >= 3 and str(cmd[0]) == "say" and str(cmd[1]) == SD.GERRIT:
+					for line in cmd[2]:
+						out.append(str(line))
+	return out
+
+
+func _mist_naast(room: Dictionary, t: Vector2i) -> bool:
+	var mist := {}
+	for m in room.get("mist", []):
+		for i in int(m[2]):
+			mist[Vector2i(int(m[0]) + i, int(m[1]))] = true
+	if mist.has(t):
+		return false
+	for d in DIRS:
+		if mist.has(t + d):
+			return true
+	return false
+
+
+## Tekst doorklikken tot er een keuze staat. Geeft de geziene regels terug.
+func lines_until_choice(timeout := 20.0) -> Array:
+	var seen: Array = []
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < timeout * 1000.0:
+		if Dialog.is_open:
+			var line := "%s: %s" % [Dialog.name_label.text, Dialog.text_label.text]
+			if seen.is_empty() or seen[seen.size() - 1] != line:
+				seen.append(line)
+			if Dialog._is_typing():
+				await frames(2)
+				continue
+			if Dialog.has_choices():
+				return seen
+			await press_interact()
+			continue
+		if not Story.running and not Dialog.is_open:
+			await pframes(4)
+			if not Story.running and not Dialog.is_open:
+				return seen
+		await get_tree().process_frame
+	return seen
+
+
+func _graan_data() -> void:
+	var q: Array = SD.QUESTS.filter(func(x): return x["id"] == "zingend_graan")
+	check("opdracht Het Zingende Graan (start na het gesprek, klaar als de molen maalt)", q.size() == 1
+			and q[0]["title"] == "Het Zingende Graan" and q[0]["start_flag"] == SD.FLAG_GRAAN
+			and q[0]["done_flag"] == SD.FLAG_GRAAN_KLAAR)
+	var quotes := _gerrit_citaten()
+	var uniq := {}
+	for l in quotes:
+		uniq[str(l)] = true
+	var src := FileAccess.get_file_as_string("res://scripts/data/story_data.gd")
+	check("Gerrit zegt alleen de twee zinnen, met TODO(verhaal)", quotes.size() >= 2 and uniq.size() == 2
+			and uniq.has(SD.QUOTE_GRAAN_OPEN) and uniq.has(SD.QUOTE_GRAAN_KLAAR)
+			and SD.QUOTE_GRAAN_OPEN == "Het zaad zingt aan de rand van de mist."
+			and SD.QUOTE_GRAAN_KLAAR == "De molen kan weer malen."
+			and src.contains(SD.QUOTE_GRAAN_OPEN + "\" # TODO(verhaal)")
+			and src.contains(SD.QUOTE_GRAAN_KLAAR + "\" # TODO(verhaal)"))
+	var geesten: Dictionary = {}
+	for n in WR.ROOMS["woud_open_plek"].get("npcs", []):
+		if str(n.get("name", "")) == "Woudgeesten":
+			geesten = n
+	var t := Vector2i(int(geesten.get("tile", [0, 0])[0]), int(geesten.get("tile", [0, 0])[1]))
+	check("zaad op de grens van mist en open plek", not geesten.is_empty() and geesten["event"] == "zingend_zaad"
+			and _mist_naast(WR.ROOMS["woud_open_plek"], t)
+			and geesten["show_if"]["flags"] == ["quest_zingend_graan"]
+			and geesten["show_if"]["not_flags"] == ["zingend_zaad"])
+	var gevecht: Array = SD.EVENTS["zingend_zaad"][0]["do"][0]
+	check("mini-gevecht: twee woudgeesten, daarna het zaad", gevecht[0] == "battle" and gevecht[1] == ["woudgeest", "woudgeest"]
+			and str(gevecht[2]["after"]) == "zingend_zaad_na")
+	var wg: Dictionary = GD.ENEMIES["woudgeest"]
+	check("Woudgeest is klein, hoort in het woud, art nog placeholder", wg["name"] == "Woudgeest" and int(wg["max_hp"]) <= 16
+			and "woud" in wg["habitat"] and bool(wg.get("art_pending", false)) and GD.enemy_sprite_is_placeholder(wg)
+			and ResourceLoader.exists(GD.enemy_sprite(wg)))
+	check("bestiarium 007-012 blijft gelijk", GD.bestiary_ids().slice(6, 12) == ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning", "mimic", "inktwurm"])
+	check("Zingend Zaad is een sleutel, Zingend Meel geneest", GD.KEY_ITEMS[SD.ITEM_ZAAD]["name"] == "Zingend Zaad"
+			and GD.ITEMS[SD.ITEM_MEEL]["name"] == "Zingend Meel" and int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"]) > 0
+			and PartyActions.item_usable_in_field(SD.ITEM_MEEL) and not PartyActions.item_usable_in_field(SD.ITEM_ZAAD))
+
+
+func _graan_tests() -> void:
+	_graan_data()
+	setup_game()
+	var dorp := "res://scenes/maps/dorp_wilgendal.tscn"
+	var d := await enter(dorp, "zuid_ingang")
+	var g: Node = d.get_node("Objects/Gerrit")
+	check("één Gerrit de Molenaar, zonder Goedendag", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
+			and g.event == "gerrit" and d.get_node("Objects").get_children().filter(func(n): return n.name == "Gerrit").size() == 1)
+	Story.trigger("gerrit", g)
+	var dicht: Array = await run_story(6.0)
+	check("quest dicht vóór Noor", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)
+			and Story.active_quest() == "" and GameState.item_count(SD.ITEM_ZAAD) == 0
+			and not dicht.any(func(l): return SD.QUOTE_GRAAN_OPEN in str(l) or SD.QUOTE_GRAAN_KLAAR in str(l)))
+	GameState.story_flags["noor_lid"] = true
+	GameState.add_member("noor")
+	Story.trigger("gerrit", g)
+	var open_lines: Array = await run_story(8.0)
+	check("daarna wijst Gerrit naar het woud", open_lines.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_OPEN))
+			and Story.has_flag(SD.FLAG_GRAAN) and Story.active_quest() == "Het Zingende Graan"
+			and not Story.has_flag(SD.FLAG_ZAAD) and not open_lines.any(func(l): return SD.QUOTE_GRAAN_KLAAR in str(l)))
+	GameState.story_flags["noor_gered"] = true
+	GameState.story_flags[SD.WORTELKONING_FLAG] = true
+	GameState.story_flags.erase(SD.FLAG_GRAAN)
+	var plek := await enter(SD.WOUD_BAAS, "zuid")
+	await get_tree().create_timer(0.6).timeout
+	var geest: Node = plek.get_node_or_null("Objects/Woudgeesten")
+	check("zonder opdracht geen woudgeesten", geest != null and not geest.visible and not Story.running)
+	GameState.story_flags[SD.FLAG_GRAAN] = true
+	plek = await enter(SD.WOUD_BAAS, "zuid")
+	await get_tree().create_timer(0.5).timeout
+	geest = plek.get_node_or_null("Objects/Woudgeesten")
+	check("woudgeesten staan op de afgesproken tegel", geest != null and geest.visible and geest.get_tile() == Vector2i(4, 9)
+			and geest.event == "zingend_zaad")
+	Story.trigger("zingend_zaad", geest)
+	check("mini-gevecht begint", await wait_scene("Battle"))
+	var b := battle()
+	var ids: Array = b.enemies.map(func(e): return str(e.get("id", ""))) if b != null else []
+	check("twee Woudgeesten op basis-HP", ids == ["woudgeest", "woudgeest"]
+			and b.enemies.all(func(e): return int(e["s"]["max_hp"]) == int(GD.ENEMIES["woudgeest"]["max_hp"])))
+	check("mini-gevecht gewonnen", await win_battle())
+	check("terug op de open plek", await wait_scene("WoudOpenPlek"))
+	check("na het zaad bestaat het item", await wait_until(func(): return GameState.item_count(SD.ITEM_ZAAD) >= 1, 8.0)
+			and Story.has_flag(SD.FLAG_ZAAD))
+	var vondst: Array = await run_story(8.0)
+	check("vondst is alleen de itemregel, geesten weg", vondst.any(func(l): return "Je vindt Zingend Zaad." in str(l))
+			and not scene().get_node("Objects/Woudgeesten").visible)
+	d = await enter(dorp, "zuid_ingang")
+	g = d.get_node("Objects/Gerrit")
+	GameState.party[0]["hp"] = 1
+	Story.trigger("gerrit", g)
+	var af: Array = await lines_until_choice()
+	check("bij Gerrit: molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_KLAAR))
+			and af.any(func(l): return Molen.REGEL_RUST in str(l)) and af.any(func(l): return Molen.REGEL_MEEL in str(l))
+			and Story.has_flag(SD.FLAG_GRAAN_KLAAR) and Story.active_quest() == ""
+			and GameState.item_count(SD.ITEM_ZAAD) == 0 and GameState.item_count(SD.ITEM_MEEL) == 1
+			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"])
+			and Dialog.choices == Molen.KEUZES)
+	Dialog.choose(1)
+	await lines_until_choice()
+	check("party wisselen noemt de groep", Dialog.choices.size() == 2 and str(Dialog.choices[1]) == "Noor")
+	Dialog.choose(1)
+	await run_story(8.0)
+	check("Noor gaat voorop", str(GameState.party[0].get("id", "")) == "noor" and str(GameState.party[1].get("id", "")) == "dennis")
+	var meel := GameState.item_count(SD.ITEM_MEEL)
+	GameState.party[0]["hp"] = 1
+	Story.trigger("gerrit", scene().get_node("Objects/Gerrit"))
+	await lines_until_choice()
+	check("zelfde bezoek: geen tweede meel, wel weer uitgerust", GameState.item_count(SD.ITEM_MEEL) == meel
+			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"]))
+	Dialog.choose(0)
+	await lines_until_choice()
+	check("opslaan vraagt Ja/Nee", Dialog.choices == ["Ja", "Nee"])
+	Dialog.choose(0)
+	await run_story(8.0)
+	var sav := GameState.read_save()
+	var sav_party: Array = sav.get("party", [])
+	check("de molen slaat op in Wilgendal", str(sav.get("map", "")).ends_with("dorp_wilgendal.tscn")
+			and not sav_party.is_empty() and str(sav_party[0].get("id", "")) == "noor")
+	check("na het opslaan nog steeds één meel", GameState.item_count(SD.ITEM_MEEL) == 1)
+	await enter(WORLD, "van_wilgendal")
+	d = await enter(dorp, "zuid_ingang")
+	Story.trigger("gerrit", d.get_node("Objects/Gerrit"))
+	await lines_until_choice()
+	check("nieuw bezoek: nog één Zingend Meel", GameState.item_count(SD.ITEM_MEEL) == 2)
+	Dialog.choose(2)
+	await run_story(6.0)
+	var held: Dictionary = GameState.party[0]
+	held["hp"] = maxi(1, int(held["max_hp"]) - int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"]))
+	var voor := int(held["hp"])
+	var gebruikt: Dictionary = PartyActions.use_item(GameState.inventory, SD.ITEM_MEEL, held)
+	check("Zingend Meel herstelt HP", gebruikt["ok"] and int(gebruikt["hp"]) == int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"])
+			and int(held["hp"]) == voor + int(gebruikt["hp"]))
