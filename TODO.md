@@ -110,6 +110,7 @@ Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en qui
 - [ ] Act 3 en verder = Worldmap 3 (Kosmos en Hart)
 - [ ] Onthulling Proefpersoon H-6 (Dennis) in Archief 4 (De Spiegel) op Worldmap 2
   De onthulling staat hierboven als canon. De checkbox blijft open tot de scène in het spel staat.
+  De scène is gebouwd op deze branch `cursor/spiegel-h6-19b9` (`scenes/story/spiegel_kamer.tscn`), alleen via `--spiegel`, niet op de wereldkaart en niet in Archief 4. De plaatsing blijft open.
 
 ### Archief 2 — Het Levende Archief
 
