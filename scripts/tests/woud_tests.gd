@@ -1148,7 +1148,7 @@ func _graan_tests() -> void:
 			and GameState.item_count(SD.ITEM_ZAAD) == 0 and GameState.item_count(SD.ITEM_MEEL) == 1
 			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"])
 			and Dialog.choices == Molen.KEUZES)
-	var wiek0 := wieken.frame_nu()
+	var wiek0: int = wieken.frame_nu()
 	await get_tree().create_timer(0.55).timeout
 	check("zangscène: de molen draait en zingt zacht", zong[0] and wieken.gezongen and wieken.draait()
 			and wieken.glow_aan() and wieken.noten >= 3 and wieken.frame_nu() != wiek0
