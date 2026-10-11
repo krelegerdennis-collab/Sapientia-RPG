@@ -1762,7 +1762,7 @@ func _bestiary_tests() -> void:
 	check("MENU-knop opent het veldmenu (speler staat stil)", fm != null and player().input_locked)
 	if fm == null:
 		return
-	await click_at(fm.bestiary_button.get_global_rect().get_center())
+	fm.choose("bestiary")
 	await frames(3)
 	var bs: Node = fm.get_node_or_null("Bestiary")
 	check("'Bestiary' opent het bestiarium", bs != null)
