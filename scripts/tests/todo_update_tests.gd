@@ -185,17 +185,23 @@ func _gear_tests() -> void:
 
 func _bestiary_tests() -> void:
 	var ids: Array = Bestiary.ids()
-	check("tien eindbazen", ids.size() == 10 and ids[0] == "d100_baas_10" and ids[9] == "d100_baas_100")
+	check("twaalf grotbazen, geen baas op 100", ids.size() == 12 and ids[0] == "d100_baas_10"
+			and ids[ids.size() - 1] == "d100_baas_99" and not ids.has("d100_baas_100"))
 	var order: Array = GD.bestiary_ids()
 	check("bestaande bestiarium-volgorde blijft", order.size() >= 12 and str(order[11]) == "inktwurm")
 	for id in ids:
 		var e := Bestiary.entry(str(id))
-		check("entry %s heeft stats en een feitelijke regel" % id, int(e.get("no", 0)) >= 13
-				and int(e.get("max_hp", 0)) > 0 and str(e.get("desc", "")).begins_with("Baas op verdieping")
+		var desc := str(e.get("desc", ""))
+		var canon_line := desc in ["duistere echo van Dennis.", "draaiende machine, organisch en staal.",
+				"een oog met armen.", "geen lichaam, Sapientia zelf."]
+		check("entry %s heeft stats en een regel" % id, int(e.get("no", 0)) >= 13
+				and int(e.get("max_hp", 0)) > 0 and (desc.begins_with("Baas op verdieping") or canon_line)
 				and str(e.get("name", "")) != "")
-	GameState.mark_seen("d100_baas_100")
-	GameState.mark_defeated("d100_baas_100")
-	check("eindbaas telt in het bestiarium", GameState.is_seen("d100_baas_100") and GameState.defeated_count("d100_baas_100") == 1)
+	check("verdieping 25 heet De Schaduw van H-6", Bestiary.entry("d100_baas_25")["name"] == "De Schaduw van H-6"
+			and Bestiary.entry("d100_baas_25")["desc"] == "duistere echo van Dennis.")
+	GameState.mark_seen("d100_baas_99")
+	GameState.mark_defeated("d100_baas_99")
+	check("De Stem telt in het bestiarium", GameState.is_seen("d100_baas_99") and GameState.defeated_count("d100_baas_99") == 1)
 
 
 func _slot_migration() -> void:

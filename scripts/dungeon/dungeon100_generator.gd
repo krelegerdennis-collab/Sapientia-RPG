@@ -15,13 +15,14 @@ extends RefCounted
 ##   3. Ladder omhoog in de bovenmuur van de ingangskamer, trap omlaag (tegel 58) in de hoek van
 ##      de kamer die het verst (loopafstand) van de ingang ligt. Verdieping 100 heeft geen trap omlaag.
 ##   4. Steenhopen/kasten als obstakel (nooit in ingangs- of trapkamer, nooit op de rand van een kamer).
-##   5. Slots voor monsters, kisten, rustpunt, baas en (op verdieping 1, 50 en 99) een warper;
+##   5. Slots voor monsters, kisten, rustpunt, baas en (op verdieping 1, 25, 50, 75 en 99) een warper;
 ##      kisten en de warper worden alleen gezet als de trap daarna nog bereikbaar is.
 ##   6. Tegels: muurtop-autotile, voorkant (2 hoog), schaduw onder de voorkant, vloerdecor.
 ##   7. Controle (BFS op de uiteindelijke botsing): ingang -> trap omlaag moet loopbaar zijn.
 
 const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
+const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 
 const MAX_FLOOR := 100
 const SCENE := "res://scenes/maps/dungeon100.tscn"
@@ -93,7 +94,7 @@ static func room_for_id(id: String) -> Dictionary:
 
 
 static func is_boss_floor(floor_no: int) -> bool:
-	return floor_no >= 10 and floor_no <= MAX_FLOOR and floor_no % 10 == 0
+	return Scaling.is_boss_floor(floor_no)
 
 
 ## Eén verdieping. Zie HANDOFF_DUNGEON100.md voor alle sleutels. {} alleen bij een programmeerfout.
@@ -202,7 +203,7 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 			for dy in 2:
 				reserved[boss_slot + Vector2i(dx, dy)] = true
 
-	# warper bij de ingang (verdieping 1, 50, 99). De tegel blokkeert straks als object;
+	# warper bij de ingang (verdieping 1, 25, 50, 75, 99). De tegel blokkeert straks als object;
 	# de buren en de trap moeten bereikbaar blijven.
 	var warper_slot := NO_TILE
 	var warper_spawn := NO_TILE

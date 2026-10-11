@@ -10,7 +10,7 @@ extends RefCounted
 ##                          de stats van de vijanden komen in de dungeon uit Dungeon100Scaling)
 ##   monsters(data)         Array met "monsters"-regels (formaat: scripts/data/dungeon_rooms.gd)
 ##   chests(data)           Array met "chests"-regels (geschaalde buit, vooraf gerold)
-##   boss(data)             baas op data["boss_slot"] (alleen verdieping 10, 20, ... 100), anders {}
+##   boss(data)             baas op data["boss_slot"] (BOSSES; niet op verdieping 100), anders {}
 ##   fill_room(room, data)  zet alles in de kamerdata: "monsters" (incl. baas), "chests", "rustpunt"
 ## 'data' = het resultaat van Dungeon100Generator.generate() (zonder "room"): "floor", "floor_seed",
 ## "monster_slots", "chest_slots", "boss_slot", "rest_slot", "is_boss_floor", ...
@@ -78,7 +78,7 @@ static func chests(data: Dictionary) -> Array:
 	return out
 
 
-## De baas van een baasverdieping (10, 20, ... 100) op boss_slot (2x2 tegels, past de Golem-sprite).
+## De baas van een baasverdieping op boss_slot (2x2 tegels, past de Golem-sprite). Verdieping 100 niet.
 ## "guard": een verslagen baas blijft weg (vlag in de save, kamer-id bevat de run-seed).
 static func boss(data: Dictionary) -> Dictionary:
 	var f: int = data["floor"]

@@ -11,6 +11,8 @@ extends Node
 
 const R := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
+const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+const Bestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const RustpuntC := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
 const WarperC := preload("res://scripts/dungeon/dungeon100_warper.gd")
 const PA := preload("res://scripts/party_actions.gd")
@@ -139,34 +141,45 @@ func _rules_tests() -> void:
 			and _core(R.load_data([1, 2])) == {"floor": 0, "checkpoint": 0, "best": 0, "seed": 0}
 			and R.load_data(null)["permanent"] == {} and R.load_data(null)["snapshot"] == {})
 	check("best_after gaat alleen omhoog", R.best_after(10, 4) == 10 and R.best_after(10, 12) == 12 and R.best_after(0, 300) == 100)
-	check("warpers: precies verdieping 1, 50 en 99 (100 is de eindbaas, geen warper)",
-			R.WARPER_FLOORS == [1, 50, 99] and R.is_warper_floor(1) and R.is_warper_floor(50) and R.is_warper_floor(99)
+	check("warpers: verdieping 1, 25, 50, 75 en 99 (100 is geen warper)",
+			R.WARPER_FLOORS == [1, 25, 50, 75, 99] and R.is_warper_floor(1) and R.is_warper_floor(25)
+			and R.is_warper_floor(50) and R.is_warper_floor(75) and R.is_warper_floor(99)
 			and not R.is_warper_floor(100) and not R.is_warper_floor(2) and not R.is_warper_floor(0) and not R.is_warper_floor(49))
+	check("alleen de start-warper waarschuwt niet", not R.warper_warns(1) and R.warper_warns(25)
+			and R.warper_warns(50) and R.warper_warns(75) and R.warper_warns(99) and not R.warper_warns(100))
 	check("bereiken ontgrendelt alleen die warper-verdieping", R.unlock_warper([], 1) == [1]
-			and R.unlock_warper([1], 50) == [1, 50] and R.unlock_warper([1, 50], 40) == [1, 50]
-			and R.unlock_warper([1], 99) == [1, 99] and R.unlock_warper([1, 50, 99], 50) == [1, 50, 99]
+			and R.unlock_warper([1], 25) == [1, 25] and R.unlock_warper([1, 25], 40) == [1, 25]
+			and R.unlock_warper([1], 99) == [1, 99] and R.unlock_warper([1, 25, 50, 75, 99], 50) == [1, 25, 50, 75, 99]
 			and R.unlock_warper([1, 100, 2], 0) == [1])
-	check("niet-bereikte warper is dicht", not R.warper_open([1], 50) and not R.warper_open([1], 99)
-			and not R.warper_open([], 1) and R.warper_open([1, 50], 50)
-			and R.warper_destinations([1], 1).is_empty()
-			and R.warper_destinations([1, 50], 50) == [1]
-			and R.warper_destinations([1, 50, 99], 99) == [1, 50])
-	check("waarschuwing is kort en Nederlands", R.WARPER_WARNING == "Je verlaat deze verdieping. Doorgaan?"
-			and R.WARPER_YES == "Doorgaan" and R.WARPER_NO == "Annuleren"
-			and R.WARPER_SPAWN == Gen.SPAWN_WARPER)
+	check("niet-bereikte warper is dicht", not R.warper_open([1], 25) and not R.warper_open([1], 99)
+			and not R.warper_open([], 1) and R.warper_open([1, 25], 25))
+	check("waarschuwing is de vertrekvraag, Ja en Nee", R.WARPER_WARNING == "Weet je zeker dat je de dungeon wilt verlaten?"
+			and R.WARPER_YES == "Ja" and R.WARPER_NO == "Nee"
+			and R.WARPER_SPAWN == Gen.SPAWN_WARPER and R.WORLD_SPAWN == "van_dungeon100")
+	check("verdieping 25 heet De Schaduw van H-6", Scaling.boss_for_floor(25)["name"] == "De Schaduw van H-6"
+			and Scaling.boss_for_floor(50)["name"] == "De Cyclus"
+			and Scaling.boss_for_floor(75)["name"] == "De Rechter"
+			and Scaling.boss_for_floor(99)["name"] == "De Stem")
+	check("verdieping 100 is geen baas", Scaling.boss_for_floor(100).is_empty() and not Scaling.is_boss_floor(100)
+			and not Gen.is_boss_floor(100))
+	check("bestiariumzin van de canon-bazen, zonder extra zin",
+			Bestiary.entry("d100_baas_25")["desc"] == "duistere echo van Dennis."
+			and Bestiary.entry("d100_baas_50")["desc"] == "draaiende machine, organisch en staal."
+			and Bestiary.entry("d100_baas_75")["desc"] == "een oog met armen."
+			and Bestiary.entry("d100_baas_99")["desc"] == "geen lichaam, Sapientia zelf.")
 	var migrated := R.load_data({"floor": 60, "checkpoint": 50, "best": 60})
-	check("oude save zonder 'warpers': open tot de huidige verdieping (60 = 1 en 50, niet 99)",
-			migrated["warpers"] == [1, 50])
-	check("oude save op 99 ontgrendelt alle drie, op 0 (ook met best 100) geen",
-			R.load_data({"floor": 99})["warpers"] == [1, 50, 99]
+	check("oude save zonder 'warpers': open tot de huidige verdieping (60 = 1, 25 en 50)",
+			migrated["warpers"] == [1, 25, 50])
+	check("oude save op 99 ontgrendelt alle warpers, op 0 (ook met best 100) geen",
+			R.load_data({"floor": 99})["warpers"] == [1, 25, 50, 75, 99]
 			and R.load_data({"floor": 0, "best": 100})["warpers"] == []
-			and R.load_data({"floor": 100})["warpers"] == [1, 50, 99])
+			and R.load_data({"floor": 100})["warpers"] == [1, 25, 50, 75, 99])
 	check("aanwezige sleutel 'warpers' wordt niet aangevuld", R.load_data({"floor": 99, "warpers": [1]})["warpers"] == [1]
 			and R.load_data({"floor": 50, "warpers": []})["warpers"] == []
 			and R.load_data(null)["warpers"] == [])
 	var placed := true
 	for seed_i in [1, 42, 20240607]:
-		for wf in [1, 50, 99]:
+		for wf in [1, 25, 50, 75, 99]:
 			var gd: Dictionary = Gen.generate(seed_i, wf)
 			var slot: Vector2i = gd.get("warper_slot", Gen.NO_TILE)
 			var spawn: Vector2i = gd.get("warper_spawn", Gen.NO_TILE)
@@ -178,7 +191,7 @@ func _rules_tests() -> void:
 		placed = placed and Gen.generate(seed_i, 2).get("warper_slot", Gen.NO_TILE) == Gen.NO_TILE
 		placed = placed and not Gen.generate(seed_i, 100).get("room", {}).has("warper")
 		placed = placed and Gen.generate(seed_i, 100).get("warper_slot", Gen.NO_TILE) == Gen.NO_TILE
-	check("generator zet een warper op 1, 50 en 99 (niet op 2 of 100), spawn ernaast", placed)
+	check("generator zet een warper op 1, 25, 50, 75 en 99 (niet op 2 of 100), spawn ernaast", placed)
 
 
 # ================================================================ deel B
@@ -617,46 +630,46 @@ func _warper_tests() -> void:
 	await pframes(2)
 	check("warper: scène laadt (boek, type 'warper'), 1 tile", wp is Dungeon100Warper and wp.type == "warper"
 			and wp is StaticBody2D and wp.position == Vector2(start + Vector2i(1, 0)) * 16.0 + Vector2(8, 8))
-	check("sprong naar een dichte warper (50 en 99) doet niets", not GameState.dungeon100_warper_can(50)
-			and not GameState.dungeon100_warper_go(50) and not GameState.dungeon100_warper_go(99)
-			and GameState.dungeon100_floor == 1 and tile() == start)
 	wp.interact(pl)
 	await pframes(2)
-	check("geen andere open warper: tekst dat ze dicht zijn", await wait_until(func():
-		return Dialog.is_open and not Dialog._lines.is_empty() and "dicht" in str(Dialog._lines[0]), 3.0))
+	var quiet: bool = await wait_until(func():
+		return Dialog.is_open and Dialog.choices.is_empty() and not Dialog._lines.is_empty() \
+				and str(Dialog._lines[0]) == R.GROT_INTRO
+	, 3.0)
+	check("verdieping 1 waarschuwt niet", quiet and R.WARPER_WARNING not in str(Dialog._lines[0]))
 	await close_dialog()
 	await wait_until(func(): return not wp.busy, 2.0)
-	check("na 'dicht' staan verdieping en tegel nog steeds", GameState.dungeon100_floor == 1 and tile() == start
-			and wp.last_result == "closed" and GameState.dungeon100_warpers == [1])
+	check("na de start-tekst staan verdieping en tegel nog steeds", GameState.dungeon100_floor == 1 and tile() == start
+			and wp.last_result == "start")
 
-	# verdieping 50 bereikt: 1 en 50 open, 99 dicht. Annuleren houdt de plek.
-	GameState.dungeon100_floor = 50
-	GameState.dungeon100_warpers = [1]
+	# verdieping 25: waarschuwing. Annuleren verplaatst niet.
+	GameState.dungeon100_floor = 25
 	wp.interact(pl)
 	var warned: bool = await wait_until(_warning_open, 3.0)
-	check("waarschuwing vóór de sprong: '%s'" % R.WARPER_WARNING, warned)
+	check("verdieping 25 waarschuwt: '%s'" % R.WARPER_WARNING, warned)
 	await screenshot("d100_warper_waarschuwing")
-	Dialog.choose(1)
+	Dialog.cancel()
+	await pframes(2)
+	if wp.last_result != "cancelled":
+		Dialog.cancel()
 	await wait_until(func(): return wp.last_result == "cancelled" and not wp.busy, 2.0)
-	check("annuleren: verdieping 50 en tegel ongewijzigd, 99 blijft dicht",
-			wp.last_result == "cancelled" and GameState.dungeon100_floor == 50 and tile() == start
-			and GameState.dungeon100_warpers == [1, 50] and not GameState.dungeon100_warper_can(99)
-			and not GameState.dungeon100_warper_go(99) and tile() == start)
+	check("annuleren op 25 blijft: verdieping en tegel ongewijzigd",
+			wp.last_result == "cancelled" and GameState.dungeon100_floor == 25 and tile() == start
+			and GameState.dungeon100_run_active())
 
+	# verdieping 99: Ja gaat naar de wereldkaart bij de ingang.
+	GameState.dungeon100_floor = 99
 	wp.interact(pl)
 	warned = await wait_until(_warning_open, 3.0)
-	check("waarschuwing opnieuw", warned)
+	check("verdieping 99 waarschuwt hetzelfde", warned)
 	Dialog.choose(0)
-	var moved := await wait_scene("Dungeon100", 20.0)
+	var moved := await wait_scene("Wereldkaart", 20.0)
 	await wait_fade()
-	var data := Gen.generate(GameState.dungeon100_seed, 1)
-	var sp: Array = data.get("room", {}).get("spawns", {}).get(R.WARPER_SPAWN, [])
-	var arrived := tile()
-	var expect := Vector2i(int(sp[0]), int(sp[1])) if sp.size() >= 2 else Vector2i(-1, -1)
-	check("bevestigen verplaatst naar verdieping 1, op de warper-spawn %s (was %s)" % [arrived, start],
-			moved and scene().scene_file_path == R.dungeon_scene and GameState.dungeon100_floor == 1
-			and arrived == expect and arrived != start and GameState.dungeon100_run_active()
-			and scene().get_node_or_null("Objects/Warper") != null)
+	var wsp: Node2D = scene().get_node_or_null("Spawns/van_dungeon100")
+	check("verdieping 99 gaat naar de kaart, bij de ingang van de Diepe Grot",
+			moved and scene().scene_file_path == R.WORLD_SCENE and wsp != null
+			and tile() == Vector2i((wsp.position / 16.0).floor())
+			and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active())
 
 
 # ================================================================ hulp

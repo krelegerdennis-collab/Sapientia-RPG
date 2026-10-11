@@ -3,11 +3,10 @@ extends RefCounted
 ## HANDOFF_DUNGEON100_BLUECHEST.md. Alleen PURE, statische functies + constanten (geen scène,
 ## geen autoload): los te testen met scripts/tests/dungeon100_blauw_tests.gd.
 ##
-## LORE (voorstel, wacht op Dennis; botst niet met docs/lore/CANON.md): de Diepe Grot is geen echte grot
-## maar een trainingsomgeving van de Oude Mensheid, een simulatie binnen een Archief die de Zwarte Stroom
-## van Sapientia heeft aangetast. Wie valt is de simulatie uit: je staat weer voor de ingang, levels en
-## spullen van de run verdwijnen (ze bestonden alleen in de simulatie). Een BLAUWE KIST is een databank
-## die dat overleeft: wat erin zit is permanent.
+## De Diepe Grot is een simulatie van Sapientia. Ze meet menselijke doorzettingskracht. Wie verdieping
+## 100 haalt is een kandidaat. Dennis en de party zijn niet de eersten en niet de laatsten. Daarom
+## level 1, geen uitrusting en geen echt verhaal. Wie valt is de simulatie uit: je staat weer voor de
+## ingang. Een BLAUWE KIST is een databank die de run overleeft: wat erin zit is permanent.
 ##
 ## Regels:
 ##   - elke kist op een verdieping is deterministisch (run-seed + verdieping + kist-id) gewoon,
@@ -28,7 +27,8 @@ const BLUE_CHANCE := 0.05
 const MIMIC_CHANCE := 0.10
 const MIMIC_GOLD_MULT := 2.0
 const MIMIC_ENEMY := "mimic"
-## Warp-kristal: buit van de eindbaas (verdieping 100), sleutel-voorwerp in GameData.KEY_ITEMS.
+## Warp-kristal: sleutel-voorwerp in GameData.KEY_ITEMS. Verdieping 100 heeft geen baas.
+## TODO(design): het keuze-moment heeft nog geen opties. Het kristal werkt zoals het was.
 const WARP_ITEM := "warp"
 const WARP_FLOOR := 100
 ## Blauwe tint voor kist, items en inventaris (placeholder: geen eigen sprite, zie tools/placeholders_v17.txt).
@@ -105,7 +105,8 @@ static func chest_entry(run_seed: int, floor_nr: int, id: String, tile: Vector2i
 	return e
 
 
-## Buit van de eindbaas (verdieping 100) + het Warp-kristal; andere bazen: ongewijzigd.
+## Verdieping 100: het Warp-kristal erbij. Er is geen baas die het dropt; aankomst legt het in de tas.
+## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
 static func with_warp(loot: Dictionary, floor_nr: int) -> Dictionary:
 	if floor_nr != WARP_FLOOR:
 		return loot

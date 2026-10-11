@@ -10,8 +10,6 @@ extends RefCounted
 const GameData := preload("res://scripts/data/game_data.gd")
 
 const MAX_FLOOR := 100
-## Elke 10e verdieping (10, 20, ... 100) is een baasverdieping; 100 is de eindbaas.
-const BOSS_INTERVAL := 10
 ## Buitniveau (1..5): elke 20 verdiepingen een niveau hoger.
 const TIER_INTERVAL := 20
 const MAX_TIER := 5
@@ -43,21 +41,23 @@ const GOLD_QUAD := 0.002
 ## naam en de skills komen van de gekozen vijand (BOSSES). Daarna de bazen-vermenigvuldigers.
 const BOSS_BASE := {"max_hp": 120, "atk": 24, "def": 14, "agi": 8, "mag": 12, "mdef": 10, "exp": 60, "gold": 40}
 const BOSS_MULT := {"max_hp": 2.5, "atk": 1.25, "def": 1.2, "mag": 1.2, "mdef": 1.2, "exp": 5.0, "gold": 5.0}
-## De eindbaas (verdieping 100) krijgt hier nog bovenop.
+## Formulebonus die boss_stats nog op verdieping 100 toepast. Er staat daar geen baas meer.
 const FINAL_MULT := {"max_hp": 1.3, "atk": 1.15, "def": 1.1, "mag": 1.15, "mdef": 1.1, "exp": 3.0, "gold": 3.0}
-## Baas per 10e verdieping. "enemy" = bestaande vijand uit game_data.gd (sprite + skills, nog
-## PLACEHOLDER-art: geen eigen art per baas), "name" = naam in het gevecht (max. ~20 tekens).
+## "enemy" = bestaande vijand uit game_data.gd (sprite + skills, geen eigen art per baas).
+## "name" = naam in het gevecht. "desc" = bestiariumzin, alleen bij de canon-bazen.
 const BOSSES := {
 	10: {"enemy": "papiergeest", "name": "Page Warden"},
 	20: {"enemy": "glitchmot", "name": "Glitch Queen"},
+	25: {"enemy": "glitchmot", "name": "De Schaduw van H-6", "desc": "duistere echo van Dennis."},
 	30: {"enemy": "sporenzwam", "name": "Spore Lord"},
 	40: {"enemy": "wortelkruiper", "name": "Root Mother"},
-	50: {"enemy": "mech_wachter", "name": "Warden Colossus"},
+	50: {"enemy": "mech_wachter", "name": "De Cyclus", "desc": "draaiende machine, organisch en staal."},
 	60: {"enemy": "mistuil", "name": "Mist Lord"},
 	70: {"enemy": "mech_wachter", "name": "Seal Warden"},
+	75: {"enemy": "mistuil", "name": "De Rechter", "desc": "een oog met armen."},
 	80: {"enemy": "kennis_beest", "name": "Great Book Golem"},
 	90: {"enemy": "wortelkoning", "name": "Root Emperor"},
-	100: {"enemy": "kennis_beest", "name": "The Last Warden"},
+	99: {"enemy": "papiergeest", "name": "De Stem", "desc": "geen lichaam, Sapientia zelf."},
 }
 ## Extra skill van de eindbaas (bovenop de skills van zijn vijand-sprite).
 const FINAL_SKILL := {"name": "Last Judgment", "chance": 0.15, "power": 2.0}
@@ -110,28 +110,26 @@ static func clamp_floor(floor_nr: int) -> int:
 	return clampi(floor_nr, 0, MAX_FLOOR)
 
 
-## Baasverdieping = 10, 20, ... 100.
+## Staat deze verdieping in BOSSES? Verdieping 100 niet.
 static func is_boss_floor(floor_nr: int) -> bool:
-	return floor_nr >= BOSS_INTERVAL and floor_nr <= MAX_FLOOR and floor_nr % BOSS_INTERVAL == 0
+	return BOSSES.has(floor_nr)
 
 
 static func is_final_floor(floor_nr: int) -> bool:
 	return floor_nr == MAX_FLOOR
 
 
-## Volgnummer van de baas: 1 (verdieping 10) .. 10 (verdieping 100); 0 = geen baasverdieping.
-@warning_ignore("integer_division")
+## Volgnummer van de baas: 1 = de eerste in BOSSES, oplopend. 0 = geen baasverdieping.
 static func boss_index(floor_nr: int) -> int:
-	return floor_nr / BOSS_INTERVAL if is_boss_floor(floor_nr) else 0
+	if not is_boss_floor(floor_nr):
+		return 0
+	return boss_floors().find(floor_nr) + 1
 
 
-## Alle baasverdiepingen: [10, 20, ..., 100].
+## Alle baasverdiepingen, oplopend. Verdieping 100 zit er niet in.
 static func boss_floors() -> Array:
-	var out := []
-	var f := BOSS_INTERVAL
-	while f <= MAX_FLOOR:
-		out.append(f)
-		f += BOSS_INTERVAL
+	var out: Array = BOSSES.keys()
+	out.sort()
 	return out
 
 

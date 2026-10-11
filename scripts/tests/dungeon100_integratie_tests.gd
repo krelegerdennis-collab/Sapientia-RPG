@@ -235,12 +235,15 @@ func _data_tests() -> void:
 			var d := fresh(sd, f)
 			var room: Dictionary = d["room"]
 			var bosses: Array = room["monsters"].filter(func(m): return m.get("boss", false))
-			if f % 10 == 0:
+			if S.is_boss_floor(f):
 				var want := S.boss_for_floor(f)
 				if bosses.size() != 1 or tile_of(bosses[0]["tile"]) != d["boss_slot"] or bosses[0]["enemy"] != want["enemy"] \
 						or int(bosses[0]["floor"]) != f or not bosses[0].get("guard", false) or bosses[0].get("size", []) != [2, 2]:
 					boss_ok = false
 					details.append("baas sd%d vd%d" % [sd, f])
+			elif not bosses.is_empty():
+				no_boss_other = false
+			if f % 10 == 0:
 				if not room.has("rustpunt") or tile_of(room["rustpunt"]) != d["rest_slot"]:
 					rest_ok = false
 					details.append("rust sd%d vd%d" % [sd, f])
@@ -250,12 +253,9 @@ func _data_tests() -> void:
 					if sp.size() < 3 or (tile_of(sp) - rt).length() != 1 or not Gen.reachable_tiles(room, d["spawn_up"]).has(tile_of(sp)):
 						spawn_ok = false
 						details.append("spawn sd%d vd%d" % [sd, f])
-			else:
-				if not bosses.is_empty():
-					no_boss_other = false
-				if room.has("rustpunt") or room["spawns"].has(Gen.SPAWN_REST):
-					rest_ok = false
-					details.append("rust-te-veel sd%d vd%d" % [sd, f])
+			elif room.has("rustpunt") or room["spawns"].has(Gen.SPAWN_REST):
+				rest_ok = false
+				details.append("rust-te-veel sd%d vd%d" % [sd, f])
 			for m in room["monsters"]:
 				if int(m["floor"]) != f:
 					scale_ok = false
@@ -271,7 +271,7 @@ func _data_tests() -> void:
 				if int(c["floor"]) != f or not tier_ok:
 					chest_ok = false
 					details.append("kist sd%d vd%d %s tier%d" % [sd, f, kind, tier])
-	check("baas op boss_slot (2x2, bewaker, juiste vijand) op elke 10e verdieping en nergens anders %s" % [details.slice(0, 3)],
+	check("baas op boss_slot (2x2, bewaker, juiste vijand) op de canon-verdiepingen en nergens anders %s" % [details.slice(0, 3)],
 			boss_ok and no_boss_other)
 	check("rustpunt op rest_slot op elke 10e verdieping en nergens anders", rest_ok)
 	check("spawn 'rustpunt': vrije bereikbare buurtegel naast het rustpunt (10, 20 ... 100)", spawn_ok)
@@ -288,9 +288,10 @@ func _data_tests() -> void:
 			and s10.has("max_hp") and s1.has("max_hp"))
 	check("determinisme: dezelfde seed + verdieping geeft dezelfde baas/kisten/rustpunt",
 			JSON.stringify(_plain(fresh(7, 30)["room"])) == JSON.stringify(_plain(fresh(7, 30)["room"])))
-	check("alle uitzonderingen: verdieping 100 heeft de eindbaas en een rustpunt, geen trap omlaag",
-			fresh(7, 100)["room"]["monsters"].any(func(m): return m.get("boss", false) and m["enemy"] == "kennis_beest")
-			and fresh(7, 100)["room"].has("rustpunt") and not fresh(7, 100)["has_stairs_down"])
+	check("verdieping 100 is geen baas, wel een rustpunt, geen trap omlaag",
+			not fresh(7, 100)["room"]["monsters"].any(func(m): return m.get("boss", false))
+			and fresh(7, 100)["room"].has("rustpunt") and not fresh(7, 100)["has_stairs_down"]
+			and S.boss_for_floor(25)["name"] == "De Schaduw van H-6")
 
 
 func _is_scaled_to_10(m: MapMonster) -> bool:
