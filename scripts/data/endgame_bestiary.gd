@@ -1,6 +1,6 @@
 extends RefCounted
-## Eindbazen van de Diepe Grot. Ze hergebruiken een bestaand monster (sprite, elementen).
-## Bevestigd: de regel blijft feitelijk (verdieping en gedaante). Echte bazenlore is nog open.
+## Bazen van de Diepe Grot. Ze hergebruiken een bestaand monster (sprite, elementen).
+## Canon-bazen (25, 50, 75, 99) hebben het canon-citaat in BOSSES["desc"]. De rest blijft feitelijk.
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
@@ -24,10 +24,8 @@ static func has(id: String) -> bool:
 
 
 static func ids() -> Array:
-	var floors: Array = Scaling.BOSSES.keys()
-	floors.sort()
 	var out: Array = []
-	for f in floors:
+	for f in Scaling.boss_floors():
 		out.append(id_for_floor(int(f)))
 	return out
 
@@ -39,10 +37,13 @@ static func entry(id: String) -> Dictionary:
 	var b: Dictionary = Scaling.BOSSES[floor]
 	var base: Dictionary = GameData.ENEMIES[str(b["enemy"])]
 	var stats := Scaling.boss_stats(base, floor)
+	var canon := str(b.get("desc", ""))
+	var factual := "Baas op verdieping %d van de Diepe Grot. Zelfde gedaante als %s." % [floor, str(base.get("name", ""))]
+	var desc := canon if canon != "" else factual
 	return {
 		"name": str(b["name"]),
-		"no": 12 + int(floor / 10),
-		"desc": "Baas op verdieping %d van de Diepe Grot. Zelfde gedaante als %s." % [floor, str(base.get("name", ""))],
+		"no": 12 + Scaling.boss_index(floor),
+		"desc": desc,
 		"max_hp": int(stats.get("max_hp", 1)),
 		"atk": int(stats.get("atk", 1)),
 		"def": int(stats.get("def", 0)),

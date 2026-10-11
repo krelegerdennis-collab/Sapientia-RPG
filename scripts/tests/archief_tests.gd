@@ -702,7 +702,7 @@ func _warper_tests() -> void:
 			and begin == AW.BEGIN_TILE and absi(begin.x - int(spawn[0])) + absi(begin.y - int(spawn[1])) == 1
 			and AW.walkable(DR.ROOMS["archief_ingang"], begin))
 	check("midden-tegel beloopbaar in de Zuilenhal", AW.walkable(DR.ROOMS["archief_v3_zuilenhal"], roles["midden"]["tile"]))
-	check("Diepe Grot-warpers blijven 1, 50 en 99", D100Rules.WARPER_FLOORS == [1, 50, 99])
+	check("Diepe Grot-warpers zijn 1, 25, 50, 75 en 99", D100Rules.WARPER_FLOORS == [1, 25, 50, 75, 99])
 	var only_a1 := true
 	for p in spots:
 		if not DR.ROOMS.has(str(p["room"])):

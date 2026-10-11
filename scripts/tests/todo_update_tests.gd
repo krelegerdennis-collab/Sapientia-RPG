@@ -185,17 +185,27 @@ func _gear_tests() -> void:
 
 func _bestiary_tests() -> void:
 	var ids: Array = Bestiary.ids()
-	check("tien eindbazen", ids.size() == 10 and ids[0] == "d100_baas_10" and ids[9] == "d100_baas_100")
+	check("twaalf grotbazen, geen baas op 100", ids.size() == 12 and ids[0] == "d100_baas_10"
+			and ids[ids.size() - 1] == "d100_baas_99" and not ids.has("d100_baas_100"))
 	var order: Array = GD.bestiary_ids()
 	check("bestaande bestiarium-volgorde blijft", order.size() >= 12 and str(order[11]) == "inktwurm")
 	for id in ids:
 		var e := Bestiary.entry(str(id))
-		check("entry %s heeft stats en een feitelijke regel" % id, int(e.get("no", 0)) >= 13
-				and int(e.get("max_hp", 0)) > 0 and str(e.get("desc", "")).begins_with("Baas op verdieping")
+		var desc := str(e.get("desc", ""))
+		var canon_line := desc in [
+				"Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6.",
+				"Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door.",
+				"Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte.",
+				"Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht.",
+		]
+		check("entry %s heeft stats en een regel" % id, int(e.get("no", 0)) >= 13
+				and int(e.get("max_hp", 0)) > 0 and (desc.begins_with("Baas op verdieping") or canon_line)
 				and str(e.get("name", "")) != "")
-	GameState.mark_seen("d100_baas_100")
-	GameState.mark_defeated("d100_baas_100")
-	check("eindbaas telt in het bestiarium", GameState.is_seen("d100_baas_100") and GameState.defeated_count("d100_baas_100") == 1)
+	check("verdieping 25 heet De Schaduw van H-6", Bestiary.entry("d100_baas_25")["name"] == "De Schaduw van H-6"
+			and Bestiary.entry("d100_baas_25")["desc"] == "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6.")
+	GameState.mark_seen("d100_baas_99")
+	GameState.mark_defeated("d100_baas_99")
+	check("De Stem telt in het bestiarium", GameState.is_seen("d100_baas_99") and GameState.defeated_count("d100_baas_99") == 1)
 
 
 func _slot_migration() -> void:

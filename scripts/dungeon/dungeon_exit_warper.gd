@@ -3,8 +3,8 @@ class_name DungeonExitWarper
 ## Warper die een dungeon in één stap verlaat, naar een vast punt op de wereldkaart.
 ## Het Eerste Archief zet er drie (begin, midden, eind). Archief 2 gebruikt dit nog niet.
 ##
-## De Diepe Grot heeft een eigen warper (dungeon100_warper.gd): interne sprong op
-## verdieping 1, 50 en 99. Die flow blijft zoals hij is; dit script roept hem niet aan.
+## De Diepe Grot heeft een eigen warper (dungeon100_warper.gd) op verdieping 1, 25, 50, 75 en 99.
+## Die verlaat de grot. Dit script roept hem niet aan. De uitgangen van het Eerste Archief blijven hier.
 ##
 ## PLAATJE PLACEHOLDER: het opslagboek, violet getint, hetzelfde als de grot-warper.
 ## Geen nieuw bestand. Echte art is nog open (universeel of per archief, TODO in de takenlijst).

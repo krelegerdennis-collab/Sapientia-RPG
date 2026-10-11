@@ -125,7 +125,7 @@ var dungeon100_seed: int = 0
 ## laatst geactiveerd rustpunt (0, 10, ... 100) en hoogste bereikte verdieping
 var dungeon100_checkpoint := 0
 var dungeon100_best := 0
-## Open warpers van deze run (verdiepingen 1, 50, 99). Mee in het dungeon100-blok van de save.
+## Open warpers van deze run (verdiepingen 1, 25, 50, 75, 99). Mee in het dungeon100-blok van de save.
 var dungeon100_warpers: Array[int] = []
 ## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md):
 ## PERMANENTE items uit Blauwe Kisten (id -> aantal): overleven de dood en elke nieuwe run.
@@ -1673,44 +1673,38 @@ func dungeon100_leave() -> bool:
 
 
 ## Deze verdieping is bereikt: best gaat omhoog, en een warper-verdieping gaat open.
+## Op 100 ligt het Warp-kristal klaar. Er is geen baas die het dropt.
+## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
 func dungeon100_reach_floor(floor_nr: int) -> void:
 	if not Dungeon100RulesC.is_valid_floor(floor_nr):
 		return
 	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, floor_nr)
 	dungeon100_warpers = Dungeon100RulesC.unlock_warper(dungeon100_warpers, floor_nr)
+	if floor_nr == Dungeon100RulesC.FLOORS and dungeon100_run_active() \
+			and item_count(Dungeon100RulesC.Blue.WARP_ITEM) < 1:
+		inventory[Dungeon100RulesC.Blue.WARP_ITEM] = 1
 
 
-## Mag je naar deze warper? Alleen tijdens een run, naar een andere verdieping die al open is.
-func dungeon100_warper_can(dest: int) -> bool:
+## Warper (niet op verdieping 1): de run stopt en je staat op de wereldkaart bij de ingang.
+## false = geen run, of de kaart wisselt al. Annuleren roept dit niet aan.
+func dungeon100_warper_exit() -> bool:
 	if not dungeon100_run_active() or changing_map or in_battle:
 		return false
-	if not Dungeon100RulesC.is_valid_floor(dungeon100_floor) or dest == dungeon100_floor:
-		return false
-	return Dungeon100RulesC.warper_open(dungeon100_warpers, dest)
-
-
-## Sprong naar een open warper. false = dicht, zelfde verdieping, of geen run. De run blijft lopen
-## (dit is niet het Warp-kristal van verdieping 100).
-signal dungeon100_warper_traveled(from_floor: int, to_floor: int)
-func dungeon100_warper_go(dest: int) -> bool:
-	if not dungeon100_warper_can(dest):
-		return false
-	var from := dungeon100_floor
-	dungeon100_floor = dest
-	dungeon100_reach_floor(dest)
-	pending_spawn = Dungeon100RulesC.WARPER_SPAWN
-	dungeon100_warper_traveled.emit(from, dest)
-	change_map(Dungeon100RulesC.dungeon_scene, Dungeon100RulesC.WARPER_SPAWN)
+	dungeon100_leave()
+	change_map(Dungeon100RulesC.WORLD_SCENE, Dungeon100RulesC.WORLD_SPAWN)
 	return true
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
+## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties. Het kristal werkt
+## zoals het was: gebruiken beëindigt de run en zet je op de wereldkaart. Geen keuzemenu.
 func dungeon100_can_warp() -> bool:
 	return dungeon100_run_active() and dungeon100_floor == Dungeon100RulesC.FLOORS and item_count(Dungeon100RulesC.Blue.WARP_ITEM) > 0
 
 
 ## Warp: run voltooid, permanente items mee naar je echte tas, terug naar de wereldkaart (het kristal is
 ## op). false = kan niet (verkeerde verdieping, geen kristal of geen run).
+## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
 func dungeon100_warp() -> bool:
 	if not dungeon100_can_warp():
 		return false

@@ -14,6 +14,7 @@ const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const Gear := preload("res://scripts/data/grade_gear.gd")
+const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
@@ -197,8 +198,11 @@ func _generator_tests() -> void:
 			and Gen.parse_room_id("dungeon100_5_101").is_empty() and Gen.parse_room_id("dungeon100_x_3").is_empty())
 	check("DungeonRooms.room() kent dungeon100-id's (en laat de rest met rust)",
 			not DR.room(Gen.room_id(5, 3)).is_empty() and DR.room("archief_ingang").has("layout") and DR.room("dungeon100_5_0").is_empty())
-	check("is_boss_floor: 10, 20 ... 100 (niet 0, niet 5)", Gen.is_boss_floor(10) and Gen.is_boss_floor(100)
-			and not Gen.is_boss_floor(0) and not Gen.is_boss_floor(5) and not Gen.is_boss_floor(95))
+	check("is_boss_floor: 10, 25, 50, 75 en 99 wel; 100, 0 en 5 niet",
+			Gen.is_boss_floor(10) and Gen.is_boss_floor(25) and Gen.is_boss_floor(50)
+			and Gen.is_boss_floor(75) and Gen.is_boss_floor(99)
+			and not Gen.is_boss_floor(100) and not Gen.is_boss_floor(0) and not Gen.is_boss_floor(5)
+			and not Gen.is_boss_floor(95))
 
 	# --- determinisme
 	var det_ok := true
@@ -246,7 +250,7 @@ func _generator_tests() -> void:
 			bad.is_empty())
 	check("elke verdieping heeft minstens %d kamers (min = %d)" % [Gen.MIN_ROOMS, rooms_min], rooms_min >= Gen.MIN_ROOMS)
 	check("monster- en kistslots komen voor (%d monsters, %d kisten)" % [monsters_total, chests_total], monsters_total > checked * 2 and chests_total > checked / 2)
-	check("bazen-slots alleen op verdieping 10, 20 ... 100 (%d keer)" % boss_floors, boss_floors == SEEDS.size() * 10)
+	check("bazen-slots op de canon-verdiepingen, niet op 100 (%d keer)" % boss_floors, boss_floors == SEEDS.size() * 12)
 	print("INFO  %d verdiepingen gegenereerd+gecontroleerd in %d ms" % [checked, Time.get_ticks_msec() - t0])
 
 	# --- noodindeling
@@ -267,10 +271,18 @@ func _generator_tests() -> void:
 	var f2 := fresh(1, 2)
 	check("verdieping 2: ladder omhoog -> dezelfde scène, spawn 'omlaag'", f2["room"]["exits"]["h"] == {"map": Gen.SCENE, "spawn": "omlaag"})
 	var f100 := fresh(1, 100)
-	check("verdieping 100: geen trap omlaag (tegel 'v', exit 'v', spawn 'omlaag') maar wel een baas-slot",
+	check("verdieping 100: geen trap omlaag (tegel 'v', exit 'v', spawn 'omlaag') en geen baas-slot",
 			not f100["has_stairs_down"] and f100["stairs_down"] == Gen.NO_TILE and not f100["room"]["exits"].has("v")
-			and not f100["room"]["spawns"].has("omlaag") and f100["boss_slot"] != Gen.NO_TILE
-			and not "\n".join(f100["layout"]).contains("v"))
+			and not f100["room"]["spawns"].has("omlaag") and f100["boss_slot"] == Gen.NO_TILE
+			and not f100["is_boss_floor"] and not "\n".join(f100["layout"]).contains("v"))
+	var f25 := fresh(1, 25)
+	var schaduw := false
+	for m in f25["room"]["monsters"]:
+		if m.get("boss", false) and str(m.get("id", "")) == "d100_baas_25":
+			schaduw = true
+	check("verdieping 25 heeft een warper en de baas De Schaduw van H-6",
+			f25["room"].has("warper") and schaduw and Scaling.boss_for_floor(25)["name"] == "De Schaduw van H-6"
+			and not f100["room"].has("warper") and not Scaling.is_boss_floor(100))
 
 	# --- inhoud
 	check("tier_for_floor: 1 t/m 4, nooit omlaag", Content.tier_for_floor(1) == 1 and Content.tier_for_floor(25) == 1
@@ -399,7 +411,7 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 			return "spawn warper staat niet naast de warper"
 	elif d.get("warper_slot", Gen.NO_TILE) != Gen.NO_TILE or room.has("warper"):
 		return "warper op verdieping %d hoort niet" % f
-	if bool(d["is_boss_floor"]) != (f % 10 == 0) or (d["boss_slot"] != Gen.NO_TILE) != bool(d["is_boss_floor"]):
+	if bool(d["is_boss_floor"]) != Gen.is_boss_floor(f) or (d["boss_slot"] != Gen.NO_TILE) != bool(d["is_boss_floor"]):
 		return "baas-slot klopt niet met de verdieping"
 	if d["boss_slot"] != Gen.NO_TILE:
 		for dx in 2:
@@ -630,8 +642,10 @@ func _scene_tests() -> void:
 	GameState.dungeon100_floor = 100
 	GameState.change_map(DUNGEON, "omhoog")
 	await wait_floor(100)
-	check("verdieping 100 laadt zonder trap omlaag", scene().floor_no == 100 and not scene().floor_data["has_stairs_down"]
-			and scene().get_node("Exits").get_children().size() == 1)
+	check("verdieping 100 laadt zonder trap omlaag en zonder baas", scene().floor_no == 100
+			and not scene().floor_data["has_stairs_down"] and not scene().floor_data["is_boss_floor"]
+			and scene().get_node("Exits").get_children().size() == 1
+			and GameState.item_count("warp") >= 1)
 	# laden uit de save
 	GameState.new_game("Dennis")
 	check("load_game (uit de save op verdieping 1)", GameState.load_game())

@@ -74,7 +74,8 @@ In elke normale dungeon en in elk Archief (Archief 1 tot en met 6) staan warpers
 - [ ] Eind van de dungeon: warper na de eindbaas
 - [ ] Geldt voor elke normale dungeon, niet alleen de Diepe Grot
 - [ ] Geldt voor alle Archieven (Archief 1 tot en met 6), inclusief Archief 1 (het Eerste Archief)
-- [ ] Diepe Grot-warpers bouwen op de frequentie hieronder
+- [x] Diepe Grot-warpers bouwen op de frequentie hieronder
+  Staat in de grot-branch: warpers op 1, 25, 50, 75 en 99. Verdieping 1 zonder waarschuwing. Verdieping 25, 50 en 75 met waarschuwing en annuleren, naar de worldmap. Verdieping 99 naar de worldmap met waarschuwing.
 
   **CANON – niet wijzigen zonder overleg.**
 
@@ -83,7 +84,6 @@ In elke normale dungeon en in elk Archief (Archief 1 tot en met 6) staan warpers
   Verdieping 25, 50 en 75: tussen-warpers met waarschuwing en annuleren.
   Verdieping 99: eind-warp naar de worldmap, met waarschuwing en annuleren.
   Bestemming: direct naar de worldmap.
-  De code volgt deze frequentie nog niet: die heeft nog 1, 50 en 99 als interne sprong.
 
 Warp-bestemming voor de andere dungeons en Archieven: de party gaat in één stap direct naar de worldmap of het dichtstbijzijnde dorp, zonder eerst terug naar de dungeon-ingang. Voor de Diepe Grot geldt de bestemming hierboven: direct naar de worldmap.
 
@@ -277,10 +277,14 @@ De Diepe Grot is een simulatie van Sapientia. Doel: menselijke doorzettingskrach
 
 **CANON – niet wijzigen zonder overleg.**
 
-- Verdieping 25, De Schaduw van H-6: "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6."
-- Verdieping 50, De Cyclus: "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door."
-- Verdieping 75, De Rechter: "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte."
-- Verdieping 99, De Stem: "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht."
+- [x] Verdieping 25, De Schaduw van H-6: "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6."
+  Staat in de grot-branch.
+- [x] Verdieping 50, De Cyclus: "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door."
+  Staat in de grot-branch.
+- [x] Verdieping 75, De Rechter: "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte."
+  Staat in de grot-branch.
+- [x] Verdieping 99, De Stem: "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht."
+  Staat in de grot-branch.
 
 **CANON – niet wijzigen zonder overleg.**
 

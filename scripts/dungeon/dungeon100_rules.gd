@@ -24,27 +24,28 @@ extends RefCounted
 ##     Codex-bondgenoot) vol + opslaan ('Voortgang opslaan?'). Het rustpunt wordt ook onthouden als
 ##     'laatste rustpunt van deze run' (GameState.dungeon100_checkpoint, gaat alleen omhoog; alleen voor
 ##     de tekst, het is GEEN terugkeerpunt).
-##   - de kerker verlaten: de ladder op verdieping 1, de dood, of het Warp-kristal op verdieping 100.
-##     Alle drie zetten de momentopname terug en leveren de permanente items af in de echte tas.
+##   - de kerker verlaten: de ladder op verdieping 1, een warper (niet op 1), de dood, of het
+##     Warp-kristal op verdieping 100. Allemaal zetten de momentopname terug en leveren de
+##     permanente items af in de echte tas.
 ##   - game over BUITEN de kerker (verdieping 0) werkt zoals altijd.
 
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 
 const FLOORS := 100
 const REST_INTERVAL := 10
-## TODO(design): warper-verdiepingen. De grot loopt van 1 tot 100 en verdieping 100 is de eindbaas
-## (geen trap omlaag, Dungeon100Generator.MAX_FLOOR). De eind-warper staat daarom op 99, de laatste
-## veilige verdieping vóór die baas. Begin = 1, midden = 50.
-const WARPER_FLOORS: Array[int] = [1, 50, 99]
+## Warpers: 1 is de start (geen waarschuwing). 25, 50 en 75 zijn tussen-warpers. 99 is de
+## eind-warper. Allemaal behalve 1 verlaten de grot naar de wereldkaart, na een waarschuwing.
+const WARPER_FLOORS: Array[int] = [1, 25, 50, 75, 99]
+const WARPER_START := 1
 ## Spawnpunt naast de warper (zelfde naam in de generator).
 const WARPER_SPAWN := "warper"
-## TODO(design): exacte waarschuwing. Kort: de huidige verdieping wordt verlaten.
-const WARPER_WARNING := "Je verlaat deze verdieping. Doorgaan?"
-const WARPER_YES := "Doorgaan"
-const WARPER_NO := "Annuleren"
-## TODO(design): een warper gaat open zodra je die verdieping in deze run bereikt. De lijst zit in het
-## dungeon100-blok van de save. Verlaten, dood of het Warp-kristal maakt de lijst leeg (geen skip
-## die een nieuwe run overslaat).
+const WARPER_WARNING := "Weet je zeker dat je de dungeon wilt verlaten?"
+const WARPER_YES := "Ja"
+const WARPER_NO := "Nee"
+## Korte uitleg op de start-warper. De grot is een simulatie: level 1, geen uitrusting, geen verhaal.
+const GROT_INTRO := "De Diepe Grot is een simulatie van Sapientia. Ze meet menselijke doorzettingskracht. Wie verdieping 100 haalt is een kandidaat. Jullie zijn niet de eersten en niet de laatsten."
+## Een bereikte warper-verdieping komt in het dungeon100-blok van de save. Verlaten, dood of het
+## Warp-kristal maakt de lijst leeg.
 
 ## De scène van de kerker (door de generator-branch geleverd) en het spawnpunt voor 'ontwaken bij
 ## het rustpunt'. Bestaat de scène niet (nog niet gemerged), dan valt een nederlaag terug op Wilgendal.
@@ -193,9 +194,14 @@ static func best_after(best: int, floor_nr: int) -> int:
 	return maxi(best, clampi(floor_nr, 0, FLOORS))
 
 
-## Staat er op deze verdieping een warper? (1, 50, 99 — niet de eindbaas op 100.)
+## Staat er op deze verdieping een warper? (1, 25, 50, 75, 99 — niet op 100.)
 static func is_warper_floor(floor_nr: int) -> bool:
 	return floor_nr in WARPER_FLOORS
+
+
+## Verdieping 1 is de start en vraagt niets. De andere warpers waarschuwen vóór het verlaten.
+static func warper_warns(floor_nr: int) -> bool:
+	return is_warper_floor(floor_nr) and floor_nr != WARPER_START
 
 
 ## Alleen echte warper-verdiepingen, uniek en oplopend. Rommel valt weg.
@@ -222,15 +228,6 @@ static func unlock_warper(unlocked: Array, floor_nr: int) -> Array[int]:
 ## Is de warper op deze verdieping al bereikt (open)?
 static func warper_open(unlocked: Array, floor_nr: int) -> bool:
 	return is_warper_floor(floor_nr) and clean_warpers(unlocked).has(floor_nr)
-
-
-## Andere open warpers, vanaf 'current_floor'. Een niet-bereikte verdieping zit er niet in.
-static func warper_destinations(unlocked: Array, current_floor: int) -> Array[int]:
-	var out: Array[int] = []
-	for f in clean_warpers(unlocked):
-		if f != current_floor:
-			out.append(f)
-	return out
 
 
 ## Sleutel "warpers" aanwezig: die lijst (ook leeg). Oude save zonder sleutel, midden in een run:

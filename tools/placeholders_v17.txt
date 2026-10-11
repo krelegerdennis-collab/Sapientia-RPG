@@ -5,7 +5,7 @@
 assets/sprites/enemies/mimic.png   80x64   Mimic (gevechtsplaatje; kist met tanden, magenta hoekjes)
 assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x16, magenta hoekjes)
 # (Blauwe kist = de gewone kist (assets/sprites/buiten/kist.png) met een blauwe tint in code: geen eigen bestand.)
-# Diepe Grot, warpers (verdieping 1, 50, 99): PLACEHOLDER, geen eigen bestand.
+# Diepe Grot, warpers (verdieping 1, 25, 50, 75, 99): PLACEHOLDER, geen eigen bestand.
 # Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint
 # in scripts/dungeon/dungeon100_warper.gd.
 # Echte art later: assets/sprites/dungeon100_warper.png  64x16  (4 frames van 16x16).
