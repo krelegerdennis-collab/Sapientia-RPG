@@ -423,7 +423,13 @@ const EVENTS := {
 	],
 	"esdoorn_put": [{"do": [["say", "", ["Een oude put. Diep beneden flikkert iets roze in het water."]]]}],
 	"ilse": [
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Ilse", ["Je hebt mijn Noor gered. Ze wil met je mee, dat zie ik aan haar.", "Pas goed op haar, {naam}."]]]},
+		{"if": {"flags": ["noor_gered"], "not_flags": ["ilse_thee"]}, "do": [
+			["say", "Ilse", ["Je hebt mijn Noor gered. Ze wil met je mee, dat zie ik aan haar.", "Pas goed op haar. En neem deze thee mee, voor onderweg."]],
+			["give", "kruidenthee", 3],
+			["flag", "ilse_thee"],
+			["say", "", ["Je krijgt 3x Kruidenthee!"]],
+		]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Ilse", ["Pas goed op haar, {naam}."]]]},
 		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Ilse", ["Mijn Noor... Ze had al weken van die vonken. Ik had het moeten zien.", "Breng haar terug. Alsjeblieft."]]]},
 		{"do": [["say", "Ilse", ["Noor is buiten, op het plein. Zoals altijd."]]]},
 	],
@@ -459,10 +465,11 @@ const EVENTS := {
 		["say", "{naam}", ["Je bent vrij. Het is voorbij."]],
 		["say", "Noor", ["Nee. Die wortels fluisterden over de Archieven. Over een Wachter.", "Ik ga met je mee. Ik wil weten wat er met mijn vonken gebeurt."]],
 		["join", "noor", {"level_from": "dennis", "level_delta": -1, "gear": ["eiken_staf", "reisgewaad"]}],
+		["give", "wambuis", 1],
 		["flag", "noor_lid"],
 		["step", NOOR_GERED],
 		["refresh"],
-		["say", "", ["Noor sluit zich aan bij de groep!", "Opdracht voltooid: Red Noor uit het Donker Woud"]],
+		["say", "", ["Noor sluit zich aan bij de groep!", "Ze geeft je een wambuis uit Esdoorn.", "Opdracht voltooid: Red Noor uit het Donker Woud"]],
 	]}],
 	"noor_woud": [{"do": [["say", "Noor", ["Laten we gaan, {naam}."]]]}],
 }

@@ -52,8 +52,18 @@ const HEROES := [
 
 ## Totale EXP die nodig is om een level te bereiken.
 ## Level 2 = 15, level 3 = 60, level 4 = 135, ...
+## Formule blijft 15 * (level - 1)^2 (CANON: onze levelschaal). Geen harde cap:
+## de 100-verdiepingen-kerker mag hier voorbij. Act-banden t/m het einde: LevelScale.
+const LevelScale := preload("res://scripts/data/level_scale.gd")
+
+
 static func exp_for_level(level: int) -> int:
 	return 15 * (level - 1) * (level - 1)
+
+
+## Act (1-6) waar dit level in het verhaal bij hoort. 0 = geen. Boven 40 blijft Act 6.
+static func act_for_level(level: int) -> int:
+	return LevelScale.act_for_level(level)
 
 # ---------------------------------------------------------------- vijanden
 ## "sprite" = plaatje op 2x-resolutie (1 art-pixel = 1 pixel van het 768x432-raster; op het
@@ -288,8 +298,9 @@ const ENEMIES := {
 		"skills": [],
 		# lore: bestand tegen water; 'water' is (nog) geen element in de game, dus leeg (open vraag)
 		"no": 12, "mp": 0, "weak": ["vuur"], "resist": [],
-		# lore: Gloeiende Inktfles; dat item bestaat nog niet -> Toverwater (= Bladzijde van Inkt) als plaatshouder
-		"drops": [{"item": "toverwater", "chance": 1.0}],
+		# Bestiarium noemt de Gloeiende Inktfles (kans-drops worden nog niet uitgedeeld).
+		# De fles zelf ligt in de kast: scripts/dungeon/inktwurm_kast.gd, eenmalig.
+		"drops": [{"item": "gloeiende_inktfles", "chance": 1.0}],
 		"desc": "Een vette worm die zich door perkament heeft gegeten en nu zwarte inkt zweet.",
 		"habitat": ["archief"],
 	},
@@ -352,11 +363,13 @@ const SPELLS := {
 ## het veldmenu). Zie scripts/party_actions.gd.
 const ITEMS := {
 	"drankje":    {"name": "Drankje",    "target": "ally", "heal_hp": 30, "heal_mp": 0,
+		"act": 1, "lijn": "drank", "orde": 2,
 		"desc": "Bitter kruidendrankje uit de bibliotheektuin."},
 	"toverwater": {"name": "Toverwater", "target": "ally", "heal_hp": 0,  "heal_mp": 10,
 		"desc": "Water dat zacht cyaan oplicht. Geeft magie terug."},
 	# v0.11: van de Oude Man (de kist naast het huis). "short" = naam in het gevechtsmenu.
-	"kruid":      {"name": "Geneeskrachtig kruid", "short": "Kruid", "target": "ally", "heal_hp": 25, "heal_mp": 0},
+	"kruid":      {"name": "Geneeskrachtig kruid", "short": "Kruid", "target": "ally", "heal_hp": 25, "heal_mp": 0,
+		"act": 1, "lijn": "drank", "orde": 1},
 	# Task #4: sterkere genees-items, alleen als buit in de dungeon van 100 verdiepingen (dungeon100_scaling.gd).
 	"sterk_drankje": {"name": "Sterk Drankje", "target": "ally", "heal_hp": 120, "heal_mp": 0,
 		"desc": "Dik, donker drankje. Geneest veel levenspunten."},
@@ -380,6 +393,46 @@ const ITEMS := {
 		"desc": "Een rol met de spreuk Bliksem. Iemand in de party kan hem leren."},
 	"spreuk_genees": {"name": "Geneesrol", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
 		"desc": "Een rol met de spreuk Genees. Iemand in de party kan hem leren."},
+	# Verhaaldrankjes t/m Act 6 (lijn "drank" in level_scale.gd). Alleen HP/MP: boosts, status
+	# (roest, stilte, correctie) en herleving zitten nog niet in het gevecht.
+	# Act 1, te vinden: Ilse in Esdoorn, eenmalig nadat Noor gered is. Later ook Tante Mien
+	# in Wilgendal; die winkel is er nog niet.
+	"kruidenthee": {"name": "Kruidenthee", "target": "ally", "heal_hp": 40, "heal_mp": 0,
+		"act": 1, "lijn": "drank", "orde": 4, "price": 0,
+		"desc": "Munt en tijm in een warm flesje. Ilse's recept uit Esdoorn."},
+	# Act 1, te vinden: de kast van de Inktwurm in de Golemhal.
+	"gloeiende_inktfles": {"name": "Gloeiende inktfles", "short": "Inktfles", "target": "ally",
+		"heal_hp": 15, "heal_mp": 20, "act": 1, "lijn": "drank", "orde": 3, "price": 0,
+		"desc": "Inkt uit de Archieven die zacht licht geeft. Een slok maakt je scherp en wakker."},
+	# Act 2, Grote Smidse / Smeder-Prime. Nog niet geplaatst: de industriestad is er nog niet.
+	"smeerolie": {"name": "Smeerolie", "target": "ally", "heal_hp": 70, "heal_mp": 0,
+		"act": 2, "lijn": "drank", "orde": 5, "price": 0,
+		"desc": "Dikke olie uit de smidse. Maakt stijve gewrichten weer soepel."},
+	# Act 3, Hemelvoet / Zwevende Tempel. Nog niet geplaatst.
+	"windwater": {"name": "Windwater", "target": "ally", "heal_hp": 40, "heal_mp": 40,
+		"act": 3, "lijn": "drank", "orde": 6, "price": 0,
+		"desc": "Een flesje met een mini-storm erin. De eerste slok maakt je mond weer vrij."},
+	"stroomdrank": {"name": "Stroomdrank", "target": "ally", "heal_hp": 0, "heal_mp": 100,
+		"act": 3, "lijn": "drank", "orde": 7, "price": 0,
+		"desc": "Vloeibaar licht, gebotteld bij de bron onder de Zwevende Tempel."},
+	# Act 4, het laboratorium onder de Zwarte Kloof. Nog niet geplaatst.
+	"antiserum_nul": {"name": "Antiserum Nul", "target": "ally", "heal_hp": 80, "heal_mp": 40,
+		"act": 4, "lijn": "drank", "orde": 8, "price": 0,
+		"desc": "Een kleurloze ampul. Op het etiket staat: Voor als je jezelf kwijtraakt."},
+	"regeneratie": {"name": "Regeneratie", "target": "ally", "heal_hp": 220, "heal_mp": 0,
+		"act": 4, "lijn": "drank", "orde": 9, "price": 0,
+		"desc": "Roze en dik als siroop, uit de kweekzalen. Het werkt. Dat is het enge."},
+	# Act 5, Sterrenrust / het observatorium. Nog niet geplaatst. Herleving is nog niet gebouwd.
+	"sterrenelixer": {"name": "Sterrenelixer", "target": "ally", "heal_hp": 260, "heal_mp": 90,
+		"act": 5, "lijn": "drank", "orde": 10, "price": 0,
+		"desc": "Glinsterend poeder in regenwater. Het trekt je terug van de rand."},
+	# Act 6, de Onbekende Kern en Zoutwacht. Nog niet geplaatst. Groepsgenezing is nog niet gebouwd.
+	"herinnering": {"name": "Herinnering", "target": "ally", "heal_hp": 300, "heal_mp": 100,
+		"act": 6, "lijn": "drank", "orde": 11, "price": 0,
+		"desc": "Een heldere druppel waarin soms een lachend gezicht voorbijdrijft."},
+	"harttraan": {"name": "Harttraan", "target": "ally", "heal_hp": 480, "heal_mp": 160,
+		"act": 6, "lijn": "drank", "orde": 12, "price": 0,
+		"desc": "Zout water uit Zoutwacht, in een kristallen flesje. Het weegt als een heel leven."},
 }
 ## v0.11: sleutel-voorwerpen (niet te gebruiken in een gevecht; tellen wel in de inventaris)
 const KEY_ITEMS := {
@@ -389,10 +442,14 @@ const KEY_ITEMS := {
 	# werkt het alleen op verdieping 100 ("warp": true: party_actions.gd + GameState.dungeon100_warp).
 	"warp": {"name": "Warp-kristal", "short": "Warp", "warp": true,
 		"desc": "Een kristal uit de kern van het Archief. Op de laatste verdieping brengt het je terug naar de wereld."},
+	# De Hanger is de Sleutel (CANON). Nog niet uitgedeeld: de onthulling (H-6) hoort bij Act 4-5.
+	# Niet in START_INVENTORY en niet op het betatest-account.
+	"hanger": {"name": "Hanger", "desc": "Een hartvormige hanger van Opa. Hij wordt soms warm."},
 }
 # ---------------------------------------------------------------- uitrusting (v0.14)
-## !! VOORSTEL / VOORLOPIG !!  Uit story/ITEMS_ELEMENTEN.md (par. 4, 'Beginnersset'), wacht nog
-## op Dennis. Alle getallen zijn startwaarden. Alleen de beginnersset staat erin.
+## Beginnersset (Act 1) plus de verhaalset t/m Act 6 (lijnen in level_scale.gd).
+## De d100_*-stukken blijven de buit van de 100 verdiepingen. Getallen van de beginnersset
+## zijn niet veranderd. Nieuwe stukken vullen de gaten tot voorbij de zegel-set.
 ## Logica (uitrusten, afdoen, sterkste, effectieve stats, opslaan): scripts/equipment.gd.
 ## (v0.11 had hier WEAPONS met alleen het Kort zwaard; dat zit nu in EQUIPMENT.)
 ##
@@ -412,28 +469,37 @@ const EQUIPMENT := {
 	# Kort Zwaard ATK +7 (winkel, 120) en een apart Roestig Zwaard ATK +3 als startwapen.
 	# Zolang Dennis dat niet besloten heeft blijft het zoals in het spel: ATK +3.
 	"kort_zwaard": {"name": "Kort zwaard", "slot": "wapen", "atk": 3, "wie": ["krijger"], "price": 120,
+		"act": 1, "lijn": "zwaard", "orde": 1,
 		"desc": "Het zwaard van de Oude Man. Licht en eerlijk."},
 	# v0.15 (RPG CODE): uit de schatkist achter de geheime deur in de puzzelkamer van het Eerste
 	# Archief. ATK +12 (keuze Dennis; = 4x het Kort zwaard). Alleen krijgers (Dennis). Niet te koop.
 	# "element" is alleen info (doet nog niets in de schade); "icon" = 16x16 van RPG ART.
 	"vonkzwaard": {"name": "Vonkzwaard", "slot": "wapen", "atk": 12, "wie": ["krijger"], "price": 0,
+		"act": 1, "lijn": "zwaard", "orde": 2,
 		"element": "vuur", "desc": "Een kling die zacht roze-oranje gloeit. Warm in je hand.",
 		"icon": "res://assets/ui/icons/vonkzwaard.png"},
 	"eiken_staf": {"name": "Eiken Staf", "slot": "wapen", "atk": 2, "mag": 4, "wie": ["magier", "priester"], "price": 90,
+		"act": 1, "lijn": "staf_noor", "orde": 1,
 		"desc": "Een staf van oud eikenhout. Versterkt spreuken."},
 	"dolk": {"name": "Dolk", "slot": "wapen", "atk": 4, "agi": 1, "wie": ["krijger", "magier", "priester"], "price": 60,
 		"desc": "Kort en snel. Iedereen kan hem gebruiken."},
 	"houten_schild": {"name": "Houten Schild", "slot": "schild", "def": 2, "wie": ["krijger", "priester"], "price": 40,
+		"act": 1, "lijn": "schild", "orde": 1,
 		"desc": "Een eenvoudig rond schild van planken."},
 	"kaftschild": {"name": "Kaftschild", "slot": "schild", "def": 3, "mdef": 1, "wie": ["krijger", "priester"], "price": 90,
+		"act": 1, "lijn": "schild", "orde": 2,
 		"desc": "Gemaakt van de harde kaft van een oud boek."},
 	"leren_kap": {"name": "Leren Kap", "slot": "helm", "def": 1, "mdef": 1, "wie": ["krijger", "magier", "priester"], "price": 30,
+		"act": 1, "lijn": "helm_krijger", "orde": 1,
 		"desc": "Een zachte kap van leer."},
 	"ijzeren_helm": {"name": "IJzeren Helm", "slot": "helm", "def": 3, "wie": ["krijger"], "price": 80,
+		"act": 1, "lijn": "helm_krijger", "orde": 2,
 		"desc": "Zwaar, maar houdt een klap tegen."},
 	"reisgewaad": {"name": "Reisgewaad", "slot": "harnas", "def": 1, "mdef": 2, "wie": ["magier", "priester"], "price": 30,
+		"act": 1, "lijn": "harnas_stroom", "orde": 1,
 		"desc": "Een licht gewaad voor lange tochten."},
 	"leren_harnas": {"name": "Leren Harnas", "slot": "harnas", "def": 4, "wie": ["krijger", "priester"], "price": 70,
+		"act": 1, "lijn": "harnas_krijger", "orde": 1,
 		"desc": "Stevig leer over de borst en schouders."},
 	# v0.16 (tutorial, wens Dennis): Opa geeft Dennis deze mantel in de proloog en leert hem
 	# MENU > Uitrusting. Klein beetje DEF; iedereen mag hem dragen. Niet te koop.
@@ -442,12 +508,208 @@ const EQUIPMENT := {
 		"desc": "Een warme mantel van Opa. Beter dan niets.",
 		"icon": "res://assets/ui/icons/reisgewaad.png"},
 	"malienkolder": {"name": "Maliënkolder", "slot": "harnas", "def": 6, "agi": -1, "wie": ["krijger"], "price": 160,
+		"act": 1, "lijn": "harnas_krijger", "orde": 2,
 		"desc": "Ringen van ijzer. Sterk, maar zwaar."},
 	"bladwijzer": {"name": "Zilveren Bladwijzer", "short": "Bladwijzer", "slot": "accessoire", "agi": 2, "price": 100,
+		"act": 1, "lijn": "ring", "orde": 1,
 		"desc": "Een zilveren bladwijzer die licht en snel maakt."},
 	# VOORLOPIG: 'gif-immuun' uit het ontwerp is nog niet gebouwd (er is nog geen gif).
 	"groenring": {"name": "Groene Ring", "slot": "accessoire", "mdef": 2, "price": 150,
 		"desc": "Een ring van groen glas. (Gif-immuun: komt later.)"},
+	# ---------------------------------------------------------------- verhaalset Act 1-6
+	# Lijnen en volgorde: scripts/data/level_scale.gd. Niet in de 100-verdiepingen-kisten.
+	# Act 1 is te vinden. Act 2-6 staan klaar; die gebieden zijn nog niet gebouwd.
+	# "bron" = waar het stuk hoort. Prijs 0: er is nog geen winkel.
+	"wambuis": {"name": "Wambuis", "slot": "harnas", "def": 3, "mdef": 3,
+		"wie": ["krijger", "magier", "priester"], "price": 0,
+		"act": 1, "lijn": "harnas_stroom", "orde": 2,
+		"bron": "Act 1. Noor geeft hem bij het aansluiten (Esdoorn), in de tas.",
+		"desc": "Gevoerd leer dat naar rook en appelhout ruikt. Warm genoeg voor het woud."},
+	"ketelkling": {"name": "Ketelkling", "slot": "wapen", "atk": 18, "wie": ["krijger"], "price": 0,
+		"act": 2, "lijn": "zwaard", "orde": 3,
+		"bron": "Act 2. Beloning van Smeder-Prime in de Grote Smidse. Nog niet geplaatst.",
+		"desc": "Gesmeed uit een ketelwand. De rand is zo scherp dat roest ervan terugdeinst."},
+	"rookstaf": {"name": "Rookstaf", "slot": "wapen", "atk": 4, "mag": 12, "mdef": 3, "wie": ["magier"], "price": 0,
+		"act": 2, "lijn": "staf_noor", "orde": 2,
+		"bron": "Act 2. Kist in de Ketelkamp van de industriestad. Nog niet geplaatst.",
+		"desc": "Een staf vol roet en koper. Spreuken komen er warmer uit."},
+	"stemvork": {"name": "Stemvork", "slot": "wapen", "atk": 3, "mag": 14, "mdef": 6, "agi": 1, "wie": ["priester"], "price": 0,
+		"act": 2, "lijn": "staf_lotte", "orde": 2,
+		"bron": "Act 2. Voor Lotte als ze aansluit. Haar plek is nog vrij (CANON). Nog niet geplaatst.",
+		"desc": "Een stemvork die zingt in plaats van spreekt. Machines luisteren ernaar."},
+	"ketelschild": {"name": "Ketelschild", "slot": "schild", "def": 8, "mdef": 3, "wie": ["krijger", "priester"], "price": 0,
+		"act": 2, "lijn": "schild", "orde": 3,
+		"bron": "Act 2. Kist in de Grote Smidse. Nog niet geplaatst.",
+		"desc": "Een deksel van een stoomketel, rond geslagen tot een schild."},
+	"ketelhelm": {"name": "Ketelhelm", "slot": "helm", "def": 7, "mdef": 2, "wie": ["krijger"], "price": 0,
+		"act": 2, "lijn": "helm_krijger", "orde": 3,
+		"bron": "Act 2. Kist in de Rooktorens. Nog niet geplaatst.",
+		"desc": "Een helm van ketelplaat. Hij ruikt naar rook en houdt een klap tegen."},
+	"rookkap": {"name": "Rookkap", "slot": "helm", "def": 2, "mdef": 5, "mag": 1, "wie": ["magier", "priester"], "price": 0,
+		"act": 2, "lijn": "helm_stroom", "orde": 2,
+		"bron": "Act 2. Kist in de Ketelkamp. Nog niet geplaatst.",
+		"desc": "Een kap doortrokken van roet. De zoom is met koperdraad genaaid."},
+	"schrootplaat": {"name": "Schrootplaat", "slot": "harnas", "def": 12, "mdef": 3, "agi": -1, "wie": ["krijger"], "price": 0,
+		"act": 2, "lijn": "harnas_krijger", "orde": 3,
+		"bron": "Act 2. Kist in de Grote Smidse. Nog niet geplaatst.",
+		"desc": "Platen van oude machinebehuizingen, vastgeklonken met koperdraad."},
+	"werkmantel": {"name": "Werkmansmantel", "short": "Werkmantel", "slot": "harnas", "def": 6, "mdef": 10, "mag": 4,
+		"wie": ["magier", "priester"], "price": 0,
+		"act": 2, "lijn": "harnas_stroom", "orde": 3,
+		"bron": "Act 2. Kist in de Ketelkamp. Nog niet geplaatst.",
+		"desc": "Een vettige mantel met kopergaren. De monteurs zweren dat bliksem hem mijdt."},
+	"koperring": {"name": "Koperring", "slot": "accessoire", "mdef": 5, "agi": 2, "price": 0,
+		"act": 2, "lijn": "ring", "orde": 2,
+		"bron": "Act 2. Kist in de Commandokamer. Nog niet geplaatst.",
+		"desc": "Een ring van getrokken koperdraad. Warm, en een tikje sneller."},
+	"ankerkling": {"name": "Ankerkling", "slot": "wapen", "atk": 28, "wie": ["krijger"], "price": 0,
+		"act": 3, "lijn": "zwaard", "orde": 4,
+		"bron": "Act 3. Kist in de Zwevende Tempel. Nog niet geplaatst.",
+		"desc": "Een kling licht als kurk. In de wind van de Hemelgraat zingt hij zacht."},
+	"zweefstaf": {"name": "Zweefstaf", "slot": "wapen", "atk": 4, "mag": 24, "mdef": 8, "wie": ["magier"], "price": 0,
+		"act": 3, "lijn": "staf_noor", "orde": 3,
+		"bron": "Act 3. Isolde draagt hem over in de Weefzaal. Nog niet geplaatst.",
+		"desc": "Een kristal zweeft boven de staf en beweegt mee met je adem."},
+	"gebedsstaf": {"name": "Gebedsstaf", "slot": "wapen", "atk": 4, "mag": 26, "mdef": 12, "wie": ["priester"], "price": 0,
+		"act": 3, "lijn": "staf_lotte", "orde": 3,
+		"bron": "Act 3. Kist in de Stroomvijver. Nog niet geplaatst.",
+		"desc": "Een staf met een gebedsvlag uit Hemelvoet. De Stroom wordt er stiller van."},
+	"ankerschild": {"name": "Ankerschild", "slot": "schild", "def": 14, "mdef": 6, "wie": ["krijger", "priester"], "price": 0,
+		"act": 3, "lijn": "schild", "orde": 4,
+		"bron": "Act 3. Kist bij de Poort van Stilte. Nog niet geplaatst.",
+		"desc": "Een schild van tempelsteen. Het trekt spreuken naar zich toe en breekt ze."},
+	"tempelhelm": {"name": "Tempelhelm", "slot": "helm", "def": 12, "mdef": 4, "wie": ["krijger"], "price": 0,
+		"act": 3, "lijn": "helm_krijger", "orde": 4,
+		"bron": "Act 3. Kist in de Binnenhof. Nog niet geplaatst.",
+		"desc": "Een helm van de tempelwacht. Licht, en hard als een eed."},
+	"windkap": {"name": "Windkap", "slot": "helm", "def": 3, "mdef": 10, "mag": 3, "wie": ["magier", "priester"], "price": 0,
+		"act": 3, "lijn": "helm_stroom", "orde": 3,
+		"bron": "Act 3. Kist op de Windbruggen. Nog niet geplaatst.",
+		"desc": "Een kap die in de wind nauwelijks beweegt. Spreuken blijven erin hangen."},
+	"tempelplaat": {"name": "Tempelplaat", "slot": "harnas", "def": 18, "mdef": 6, "wie": ["krijger"], "price": 0,
+		"act": 3, "lijn": "harnas_krijger", "orde": 4,
+		"bron": "Act 3. Kist in Isolde's Cirkel. Nog niet geplaatst.",
+		"desc": "Een borstplaat van een zwevend beeld. Het metaal is licht en hard."},
+	"wolkgewaad": {"name": "Wolkgewaad", "slot": "harnas", "def": 8, "mdef": 18, "mag": 8, "agi": 2,
+		"wie": ["magier", "priester"], "price": 0,
+		"act": 3, "lijn": "harnas_stroom", "orde": 4,
+		"bron": "Act 3. Kist in Hemelvoet. Nog niet geplaatst.",
+		"desc": "Geweven zo licht als een gedachte, en warm als een omhelzing."},
+	"stroomring": {"name": "Stroomring", "slot": "accessoire", "mdef": 9, "mag": 5, "agi": 2, "price": 0,
+		"act": 3, "lijn": "ring", "orde": 3,
+		"bron": "Act 3. Spoor van Magie, na Isolde. Nog niet geplaatst.",
+		"desc": "Een ring van blauw draad. De Stroom loopt er een klein stukje mee."},
+	"incisie": {"name": "Incisie", "slot": "wapen", "atk": 40, "agi": 2, "wie": ["krijger"], "price": 0,
+		"act": 4, "lijn": "zwaard", "orde": 5,
+		"bron": "Act 4. Kist in de Operatiezaal. Nog niet geplaatst.",
+		"desc": "Een zwaard uitgedacht als scalpel. De wond beseft het pas een tel later."},
+	"glazenstaf": {"name": "Glazenstaf", "slot": "wapen", "atk": 5, "mag": 36, "mdef": 12, "wie": ["magier"], "price": 0,
+		"act": 4, "lijn": "staf_noor", "orde": 4,
+		"bron": "Act 4. Kist in de Kweekzalen. Nog niet geplaatst.",
+		"desc": "Een staf van laboratoriumglas. Er pulseert een koude gloed in."},
+	"levensstaf": {"name": "Levensstaf", "slot": "wapen", "atk": 4, "mag": 40, "mdef": 16, "agi": 2, "wie": ["priester"], "price": 0,
+		"act": 4, "lijn": "staf_lotte", "orde": 4,
+		"bron": "Act 4. Naast Lottes capsule in de Wiegekamer. Nog niet geplaatst.",
+		"desc": "Een staf als een ruggengraat, met glazen wervels en een warme gloed."},
+	"kweekschild": {"name": "Kweekschild", "slot": "schild", "def": 22, "mdef": 8, "wie": ["krijger", "priester"], "price": 0,
+		"act": 4, "lijn": "schild", "orde": 5,
+		"bron": "Act 4. Kist in de Kweekzalen. Nog niet geplaatst.",
+		"desc": "Een schild van gekweekte plaat. Het voelt warm, en een beetje levend."},
+	"kweekhelm": {"name": "Kweekhelm", "slot": "helm", "def": 16, "mdef": 6, "wie": ["krijger"], "price": 0,
+		"act": 4, "lijn": "helm_krijger", "orde": 5,
+		"bron": "Act 4. Kist in de Receptie. Nog niet geplaatst.",
+		"desc": "Een helm die langzaam meegroeit. Het jeukt. Het beschermt wel."},
+	"glashelm": {"name": "Glashelm", "slot": "helm", "def": 4, "mdef": 14, "mag": 4, "wie": ["magier", "priester"], "price": 0,
+		"act": 4, "lijn": "helm_stroom", "orde": 4,
+		"bron": "Act 4. Kist in de Correctiekamer. Nog niet geplaatst.",
+		"desc": "Een helm van dik glas. Je hoort je eigen adem, en verder weinig."},
+	"chitineharnas": {"name": "Chitineharnas", "slot": "harnas", "def": 28, "mdef": 8, "wie": ["krijger"], "price": 0,
+		"act": 4, "lijn": "harnas_krijger", "orde": 5,
+		"bron": "Act 4. Kist in Osk's studio. Nog niet geplaatst.",
+		"desc": "Platen van gekweekt chitine. Ze groeien een beetje mee met de drager."},
+	"labmantel": {"name": "Labmantel", "slot": "harnas", "def": 10, "mdef": 24, "mag": 10, "wie": ["magier", "priester"], "price": 0,
+		"act": 4, "lijn": "harnas_stroom", "orde": 5,
+		"bron": "Act 4. Kist in de Wiegekamer. Nog niet geplaatst.",
+		"desc": "Een witte mantel uit het laboratorium. De zoom is nog steriel."},
+	"levensring": {"name": "Levensring", "slot": "accessoire", "mdef": 14, "mag": 6, "agi": 3, "price": 0,
+		"act": 4, "lijn": "ring", "orde": 4,
+		"bron": "Act 4. Spoor van Leven, na Osk. Nog niet geplaatst.",
+		"desc": "Een ring met een groen blaadje erin. Genezing valt er lichter mee."},
+	"perihelium": {"name": "Perihelium", "slot": "wapen", "atk": 56, "mag": 4, "agi": 2, "wie": ["krijger"], "price": 0,
+		"act": 5, "lijn": "zwaard", "orde": 6,
+		"bron": "Act 5. Kist in de Kaartenzaal. Nog niet geplaatst.",
+		"desc": "Een kling van sterrenstaal. In het donker toont hij sterrenbeelden."},
+	"astrostaf": {"name": "Astrolabiumstaf", "short": "Astrostaf", "slot": "wapen", "atk": 6, "mag": 50, "mdef": 16,
+		"wie": ["magier"], "price": 0,
+		"act": 5, "lijn": "staf_noor", "orde": 5,
+		"bron": "Act 5. Perihelia geeft hem na het Oog. Nog niet geplaatst.",
+		"desc": "Draaiende ringen van messing rond een glazen kern vol sterren."},
+	"lichtstaf": {"name": "Lichtstaf", "slot": "wapen", "atk": 5, "mag": 52, "mdef": 20, "wie": ["priester"], "price": 0,
+		"act": 5, "lijn": "staf_lotte", "orde": 5,
+		"bron": "Act 5. Kist in de Koepelhallen. Nog niet geplaatst.",
+		"desc": "Een staf die het licht van de echte sterren vasthoudt, niet de valse."},
+	"maanschild": {"name": "Maanschild", "slot": "schild", "def": 30, "mdef": 12, "wie": ["krijger", "priester"], "price": 0,
+		"act": 5, "lijn": "schild", "orde": 6,
+		"bron": "Act 5. Kist in de Uurwerkgangen. Nog niet geplaatst.",
+		"desc": "Een schild van maanzilver. In het maanlicht wordt het bijna doorzichtig."},
+	"sterrenhelm": {"name": "Sterrenhelm", "slot": "helm", "def": 22, "mdef": 8, "wie": ["krijger"], "price": 0,
+		"act": 5, "lijn": "helm_krijger", "orde": 6,
+		"bron": "Act 5. Kist op de Hemeltrap. Nog niet geplaatst.",
+		"desc": "Een helm met een smalle vizierlijn. Daarachter staan de sterren stil."},
+	"sterrenkap": {"name": "Sterrenkap", "slot": "helm", "def": 6, "mdef": 20, "mag": 6, "wie": ["magier", "priester"], "price": 0,
+		"act": 5, "lijn": "helm_stroom", "orde": 5,
+		"bron": "Act 5. Kist in Sterrenrust. Nog niet geplaatst.",
+		"desc": "Een donkerblauwe kap. De geborduurde sterren verschuiven als je niet kijkt."},
+	"maanharnas": {"name": "Maanharnas", "slot": "harnas", "def": 40, "mdef": 14, "agi": 1, "wie": ["krijger"], "price": 0,
+		"act": 5, "lijn": "harnas_krijger", "orde": 6,
+		"bron": "Act 5. Kist bij de Grote Lens. Nog niet geplaatst.",
+		"desc": "Zilver dat in het maanlicht bijna verdwijnt. Het harnas lijkt je te kennen."},
+	"sterrenmantel": {"name": "Sterrenmantel", "slot": "harnas", "def": 14, "mdef": 34, "mag": 14, "agi": 2,
+		"wie": ["magier", "priester"], "price": 0,
+		"act": 5, "lijn": "harnas_stroom", "orde": 6,
+		"bron": "Act 5. Kist in Sterrenrust. Nog niet geplaatst.",
+		"desc": "Donkerblauwe stof met de sterren van de eerste nacht erop geborduurd."},
+	"sterrenring": {"name": "Sterrenring", "slot": "accessoire", "mdef": 18, "mag": 8, "agi": 4, "price": 0,
+		"act": 5, "lijn": "ring", "orde": 5,
+		"bron": "Act 5. Spoor van Kosmos, na Perihelia. Nog niet geplaatst.",
+		"desc": "Een ring met een zilveren ster. Hij wijst, heel zacht, naar het oosten."},
+	"memoria": {"name": "Memoria", "slot": "wapen", "atk": 84, "mag": 8, "mdef": 4, "agi": 2, "wie": ["krijger"], "price": 0,
+		"act": 6, "lijn": "zwaard", "orde": 7,
+		"bron": "Act 6. Kamer van Vreugde in de Onbekende Kern. Nog niet geplaatst.",
+		"desc": "Een zwaard uit de herinnering aan de eerste lach met Opa. Het slaat eerlijk."},
+	"hartvuurstaf": {"name": "Hartvuurstaf", "slot": "wapen", "atk": 6, "mag": 66, "mdef": 20, "agi": 2, "wie": ["magier"], "price": 0,
+		"act": 6, "lijn": "staf_noor", "orde": 6,
+		"bron": "Act 6. Kamer van Verdriet. Nog niet geplaatst.",
+		"desc": "Een staf die warm wordt als je een naam hardop zegt die je niet wilt vergeten."},
+	"hartpsalm": {"name": "Hartpsalm", "slot": "wapen", "atk": 5, "mag": 68, "mdef": 24, "agi": 2, "wie": ["priester"], "price": 0,
+		"act": 6, "lijn": "staf_lotte", "orde": 6,
+		"bron": "Act 6. Kamer van Angst. Nog niet geplaatst.",
+		"desc": "Een staf die één stem overhoudt, ook als er honderd tegelijk praten."},
+	"hartschild": {"name": "Hartschild", "slot": "schild", "def": 40, "mdef": 16, "wie": ["krijger", "priester"], "price": 0,
+		"act": 6, "lijn": "schild", "orde": 7,
+		"bron": "Act 6. Poort van Hart. Nog niet geplaatst.",
+		"desc": "Een schild dat meebuigt met wie erachter staat. Het voelt als een belofte."},
+	"zouthelm": {"name": "Zouthelm", "slot": "helm", "def": 28, "mdef": 12, "wie": ["krijger"], "price": 0,
+		"act": 6, "lijn": "helm_krijger", "orde": 7,
+		"bron": "Act 6. Beloning in Zoutwacht. Nog niet geplaatst.",
+		"desc": "Wit als zoutkorst. Wie hem draagt, mag weer huilen zonder zich te schamen."},
+	"traankap": {"name": "Traankap", "slot": "helm", "def": 8, "mdef": 26, "mag": 8, "wie": ["magier", "priester"], "price": 0,
+		"act": 6, "lijn": "helm_stroom", "orde": 6,
+		"bron": "Act 6. Kist in Zoutwacht. Nog niet geplaatst.",
+		"desc": "Een kap die naar zee ruikt. De rand is nat, ook als het niet regent."},
+	"tranenpantser": {"name": "Tranenpantser", "slot": "harnas", "def": 52, "mdef": 18, "wie": ["krijger"], "price": 0,
+		"act": 6, "lijn": "harnas_krijger", "orde": 7,
+		"bron": "Act 6. Beloning van de vuurtoren in Zoutwacht. Nog niet geplaatst.",
+		"desc": "Wit als zout, sterk als een belofte. Gesmeed toen het dorp weer kon huilen."},
+	"hartmantel": {"name": "Hartmantel", "slot": "harnas", "def": 18, "mdef": 44, "mag": 18, "agi": 3,
+		"wie": ["magier", "priester"], "price": 0,
+		"act": 6, "lijn": "harnas_stroom", "orde": 7,
+		"bron": "Act 6. Kamer van Liefde. Nog niet geplaatst.",
+		"desc": "Een mantel die uit elke draad een andere herinnering fluistert. Allemaal warm."},
+	"hartring": {"name": "Hartring", "slot": "accessoire", "mdef": 24, "mag": 10, "agi": 5, "price": 0,
+		"act": 6, "lijn": "ring", "orde": 6,
+		"bron": "Act 6. De Hanger sluit zich tot een hart. Nog niet geplaatst.",
+		"desc": "Een ring in de vorm van een klein hart. Hij is warm als iemand je naam zegt."},
 	# Task #4 (Monsterschaal en buit, HANDOFF_DUNGEON100_SCHAAL.md): buit van de dungeon van 100 verdiepingen.
 	# Id = "d100_<soort>_<niveau>", niveau 2-5 (niveau 1 = de uitrusting hierboven). Niet te koop.
 	# Welke stukken waar vallen: scripts/data/dungeon100_scaling.gd (GEAR). VOORLOPIGE waarden.
