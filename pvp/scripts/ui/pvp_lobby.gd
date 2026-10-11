@@ -116,6 +116,10 @@ func _on_menu_join() -> void:
 
 func _on_menu_back() -> void:
 	leave_requested.emit()
+	# Alleen als dit scherm zelf de scène is (vanaf de titel). In een test
+	# hangt de lobby aan een andere node en blijft Terug een signaal.
+	if get_parent() == get_tree().root:
+		get_tree().change_scene_to_file("res://scenes/ui/title.tscn")
 
 
 func _on_host_local() -> void:
