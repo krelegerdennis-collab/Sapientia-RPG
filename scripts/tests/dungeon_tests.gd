@@ -617,7 +617,8 @@ func _wilgendal_winkel_tests() -> void:
 		if scherm != null:
 			for knop in scherm.content.get_children():
 				if knop is Button:
-					knoppen[str(knop.text)] = true
+					# UiMenu zet er '  ' of '> ' voor; de echte regel staat in de meta.
+					knoppen[str(knop.get_meta("label", knop.text))] = true
 		var mist: Array = []
 		for row in rows:
 			var regel := "%s  %dg" % [str(row["name"]), int(row["price"])]
