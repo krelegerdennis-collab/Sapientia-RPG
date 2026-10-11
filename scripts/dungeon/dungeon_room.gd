@@ -504,7 +504,8 @@ func start_monster_battle(m: Node) -> void:
 	last_touch_id = m.monster_id
 	var t := _prepare_battle(m.monster_id)
 	# v0.14: monsterniveau van de kamer (een baas krijgt geen niveau: zijn stats staan in game_data.gd)
-	GameState.start_battle(m.group.duplicate(), t, player.facing, terrain_at(t), m.boss, 0 if m.boss else tier())
+	var in_archief := DungeonRooms.ROOMS.has(room_id)
+	GameState.start_battle(m.group.duplicate(), t, player.facing, terrain_at(t), m.boss, 0 if m.boss else tier(), in_archief)
 
 
 ## Het Gesimuleerde Archief: een Mimic-kist is wakker; gevecht met een Mimic (geschaald met de verdieping

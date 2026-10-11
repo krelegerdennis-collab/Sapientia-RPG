@@ -19,7 +19,8 @@ extends RefCounted
 ##
 ## Per kamer (v0.14):
 ##   "name", "floor" (verdieping 1-4), "tier" (monsterniveau 1-4, zie game_data.gd TIERS; alleen
-##           voor map-monsters in deze kamer, NIET voor een baas en niet op de wereldkaart)
+##           voor map-monsters in deze kamer, NIET voor een baas en niet op de wereldkaart).
+##           In het gevecht gaat dit door apply_archief_tier: de curve mikt op level 7.
 ##   "spawns" {naam: [x, y, richting]}       waar je binnenkomt (richting "up"/"down"/"left"/"right")
 ##   "exits"  {teken: {"map", "spawn"}}      alle tiles met dat teken = één uitgang (zie EXIT_CHARS):
 ##            'E' naar buiten (30), 'U' onderrand-doorgang (64), 'n' boog/deur (43, onderste rij),

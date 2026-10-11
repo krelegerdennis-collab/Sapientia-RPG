@@ -361,7 +361,7 @@ func save_now() -> bool:
 		return false
 	if GameState.save_game(player.get_tile(), player.facing):
 		last_save_result = "saved"
-		show_message("Saved.")
+		show_message("Opgeslagen.")
 		return true
 	last_save_result = "failed"
 	show_message("Save failed.")

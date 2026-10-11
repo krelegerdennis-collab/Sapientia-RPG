@@ -708,7 +708,7 @@ func build_world(tileset: TileSet) -> Node2D:
 	# bosrand'); het nieuwe dorp Wilgendal heeft een eigen uitgang + spawn.
 	add_exit(root, "NaarWachtershuis", town_rect, TOWN_PATH, "zuid_ingang")
 	add_spawn(root, "van_dorp", spawn, Vector2i.DOWN)
-	var lines_later: Array[String] = ["Willowdale (later)"]
+	var lines_later: Array[String] = []
 	add_exit(root, "NaarWilgendal", village_rect, VILLAGE_PATH, "zuid_ingang", lines_later)
 	add_spawn(root, "van_wilgendal", village_rect.position + Vector2i(0, village_rect.size.y), Vector2i.DOWN)
 	# v0.17 Esdoorn (pas open na de Golem: event naar_esdoorn) en het Donker Woud (pas met de opdracht)

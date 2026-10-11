@@ -35,6 +35,7 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const COMMANDS := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 ## v0.19 Codex-knop (index 5): submenu 'Vangen' (Leeg Boek op een vijand, met vangkans per doel)
@@ -325,7 +326,11 @@ func _spawn_enemies(ids: Array) -> void:
 			elif GameState.pending_tier > 0 and not bool(data.get("unique", false)):
 				# v0.14: monsterniveau van de dungeonverdieping (0 = gewoon; game_data.gd TIERS)
 				# v0.19: een uniek monster (Inktwurm) heeft zijn eigen vaste niveau ("encounter_level")
-				data = GameData.apply_tier(data, GameState.pending_tier)
+				# Eerste Archief: dezelfde tabel, daarna omlaag naar doel-level 7.
+				if GameState.pending_archief:
+					data = GameData.apply_archief_tier(data, GameState.pending_tier)
+				else:
+					data = GameData.apply_tier(data, GameState.pending_tier)
 		if tutorial.has("enemy_hp"):
 			data["max_hp"] = int(tutorial["enemy_hp"])   # oefengevecht: iets taaier
 		data["hp"] = data["max_hp"]
@@ -337,6 +342,10 @@ func _spawn_enemies(ids: Array) -> void:
 		var c := _make_combatant(display_name, data, false, -1)
 		c["id"] = id
 		GameState.mark_seen(id)   # bestiarium: gezien
+		if GameState.pending_boss and GameState.dungeon100_floor > 0:
+			var end_id := EndgameBestiary.id_for_floor(GameState.dungeon100_floor)
+			if end_id != "":
+				GameState.mark_seen(end_id)
 		var node := TextureButton.new()
 		# v0.19: nog geen art (bv. de Inktwurm)? dan de plaatsvervanger (GameData.enemy_sprite)
 		var sprite_path := GameData.enemy_sprite(data)
@@ -1144,7 +1153,16 @@ func _execute(a: Dictionary) -> void:
 					await _wait(0.7)
 					await _report_kos(targets)
 				"ally":
-					await _heal(_valid_ally(a["target"]), _spell_amount(actor, sp), 0)
+					var ally := _valid_ally(a["target"])
+					if str(sp.get("type", "")) == "buff":
+						if not ally.is_empty():
+							var stat := str(sp.get("buff_stat", "def"))
+							var key := "buff_" + stat
+							ally[key] = int(ally.get(key, 0)) + int(sp.get("buff_n", 1))
+							show_message("%s is versterkt." % ally["name"])
+							await _wait(MESSAGE_TIME)
+					else:
+						await _heal(ally, _spell_amount(actor, sp), 0)
 			_hero_rest(actor)
 		"item":
 			var id: String = a["item"]
@@ -1315,6 +1333,10 @@ func _report_kos(targets: Array) -> void:
 			show_message("%s is down!" % t["name"])
 		else:
 			GameState.mark_defeated(str(t.get("id", "")))   # bestiarium: verslagen
+			if GameState.pending_boss and GameState.dungeon100_floor > 0:
+				var end_id := EndgameBestiary.id_for_floor(GameState.dungeon100_floor)
+				if end_id != "":
+					GameState.mark_defeated(end_id)
 			var tw := create_tween()
 			tw.tween_property(t["node"], "modulate:a", 0.0, 0.3)
 			tw.tween_callback(t["node"].hide)
@@ -1409,7 +1431,7 @@ func _guard_tick(c: Dictionary) -> void:
 
 ## DEF van een doelwit, met schild omhoog (x guard_mult).
 func _defense_of(t: Dictionary) -> float:
-	var d := float(t["s"]["def"])
+	var d := float(t["s"]["def"]) + float(t.get("buff_def", 0))
 	if int(t.get("guard", 0)) > 0:
 		d *= float(t.get("guard_mult", 2.0))
 	return d
