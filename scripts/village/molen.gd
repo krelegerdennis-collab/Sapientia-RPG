@@ -6,6 +6,9 @@ extends RefCounted
 const META := "zingend_meel_gegeven"
 const REGEL_RUST := "HP en MP zijn hersteld."
 const REGEL_MEEL := "Je krijgt Zingend Meel."
+const REGEL_ZANG := "De molen draait weer."
+const REGEL_GEZANG := "Zacht gezang."
+const SFX_ZANG := "molen_zang"
 const VRAAG := "Wat wil je?"
 const KEUZES := ["Opslaan", "Party wisselen", "Klaar"]
 const VRAAG_SAVE := "Voortgang opslaan?"
@@ -13,6 +16,14 @@ const REGEL_OPGESLAGEN := "Opgeslagen."
 const REGEL_MISLUKT := "Opslaan mislukt."
 const VRAAG_PARTY := "Wie gaat voorop?"
 const REGEL_ALLEEN := "Je reist alleen."
+
+
+## Eenmalig, als het zaad de molen weer laat draaien. Placeholder-geluid.
+static func zang() -> void:
+	if AudioManager.has_sfx(SFX_ZANG):
+		AudioManager.play_sfx(SFX_ZANG)
+	Dialog.show_lines([REGEL_ZANG, REGEL_GEZANG])
+	await Dialog.finished
 
 
 static func bezoek() -> void:

@@ -1203,6 +1203,16 @@
 			"volume_db": -6,
 			"pitch_variatie": 0.0,
 			"min_interval_ms": 400
+		},
+		"molen_zang": {
+			"bestanden": [
+				"sfx_molen_zang_01.wav"
+			],
+			"categorie": "dorp",
+			"beschrijving": "PLACEHOLDER. Zacht gezang als de molen van Gerrit weer draait. Twee zachte tonen, geen echte stem.",
+			"volume_db": -8,
+			"pitch_variatie": 0.02,
+			"min_interval_ms": 0
 		}
 	}
 }

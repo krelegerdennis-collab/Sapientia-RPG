@@ -294,8 +294,8 @@ Open laten:
 
 **CANON – niet wijzigen zonder overleg.**
 
-- [ ] Gerrits quest
-  Dialoog, Gerrit, zaad na Noor, molen-save en één Zingend Meel per bezoek staan in de code. De scène "zacht gezang" nog niet.
+- [x] Gerrits quest
+  Dialoog, Gerrit, zaad na Noor, molen-save en één Zingend Meel per bezoek staan in de code. Bij het zaad draait de molen en klinkt zacht gezang (placeholder).
 
 NPC: Gerrit de Molenaar in Wilgendal. Quest: Het Zingende Graan. Thema: kleine menselijke verhalen tussen grote gebeurtenissen.
 

@@ -1104,6 +1104,8 @@ func _graan_tests() -> void:
 	Story.trigger("gerrit", g)
 	var af: Array = await lines_until_choice()
 	check("bij Gerrit: zaad herkend, molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZAAD))
+			and af.any(func(l): return Molen.REGEL_ZANG in str(l))
+			and af.any(func(l): return Molen.REGEL_GEZANG in str(l))
 			and not af.any(func(l): return SD.QUOTE_GRAAN_DANK in str(l))
 			and af.any(func(l): return Molen.REGEL_RUST in str(l)) and af.any(func(l): return Molen.REGEL_MEEL in str(l))
 			and Story.has_flag(SD.FLAG_GRAAN_KLAAR) and Story.active_quest() == ""

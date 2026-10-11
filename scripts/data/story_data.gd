@@ -48,6 +48,7 @@ extends RefCounted
 ##   ["glitch", sec]                     één glitch-flits van de CRT-laag (ook buiten de dungeons)
 ##   ["heal"]                            HP en MP van de hele groep vol (herberg)
 ##   ["molen"]                           molen van Gerrit: rusten, meel (1x per bezoek), opslaan, party wisselen
+##   ["zang"]                            scène: de molen draait, zacht gezang (eenmalig, bij het zaad)
 ##   Spreker "{naam}" = de held zelf (ballon wijst naar de speler).
 ##   MAP_ENTER "map" mag ook een volledig scènepad zijn (Esdoorn, Donker Woud).
 
@@ -542,6 +543,7 @@ const EVENTS := {
 			["take", ITEM_ZAAD, 1],
 			["flag", FLAG_GRAAN_KLAAR],
 			["say", GERRIT, [QUOTE_GRAAN_ZAAD]],
+			["zang"],
 			["molen"],
 		]},
 		{"if": {"flags": ["noor_lid", FLAG_GRAAN], "not_flags": [FLAG_ZAAD]}, "do": [

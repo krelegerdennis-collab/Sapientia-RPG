@@ -317,6 +317,8 @@ func _exec(cmds: Array, arg: String) -> String:
 					h["mp"] = h["max_mp"]
 			"molen":
 				await Molen.bezoek()
+			"zang":
+				await Molen.zang()
 			"glitch":
 				# v0.17 ["glitch", sec]: één glitch-flits van de CRT-laag (ook buiten de dungeons)
 				if Crt.has_method("start_glitch"):
