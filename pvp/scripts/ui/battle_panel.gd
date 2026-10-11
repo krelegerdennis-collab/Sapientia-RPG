@@ -25,6 +25,7 @@ func _ready() -> void:
 	root.add_theme_constant_override("separation", 2)
 	add_child(root)
 	_banner = PvpStyle.label("", 8)
+	_banner.custom_minimum_size = Vector2(360, 24)
 	root.add_child(_banner)
 	_sides = HBoxContainer.new()
 	_sides.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -69,13 +70,17 @@ func _rebuild() -> void:
 		_actions.add_child(PvpStyle.label("Wachten op de andere speler…", 8))
 		return
 	if _pending == "":
-		_add_action("Aanval", "attack")
 		var actor := _current()
+		var row_a := _action_row()
+		var row_b := _action_row()
+		_actions.add_child(row_a)
+		_actions.add_child(row_b)
+		_add_battle_action(row_a, "Aanval", "attack")
 		if not actor.is_empty() and not (actor["spells"] as Array).is_empty():
-			_add_action("Magie", "spell")
-		_add_action("Verdedigen", "defend")
+			_add_battle_action(row_a, "Magie", "spell")
+		_add_battle_action(row_b, "Verdedigen", "defend")
 		if _has_item(actor):
-			_add_action("Item", "item")
+			_add_battle_action(row_b, "Item", "item")
 		return
 	if _pending == "attack":
 		_add_targets(false)
@@ -133,6 +138,19 @@ func _has_item(actor: Dictionary) -> bool:
 		if int(bag[key]) > 0:
 			return true
 	return false
+
+
+func _action_row() -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 4)
+	return row
+
+
+func _add_battle_action(row: HBoxContainer, text: String, action: String) -> void:
+	var btn := PvpStyle.battle_button(text)
+	btn.pressed.connect(_begin.bind(action))
+	row.add_child(btn)
 
 
 func _add_action(text: String, action: String) -> void:

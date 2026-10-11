@@ -9,6 +9,11 @@ class_name PvpLanTransport
 ##   7779  UDP-uitstuur van de host (broadcast naar 7778).
 ## Het baken is JSON: {"game":"sapientia-pvp","code":"...","port":7777}.
 ## Aanmaken van deze node bindt nog niets. host() en join() doen dat pas.
+##
+## Zelfde machine: broadcast naar 255.255.255.255 komt vaak niet terug op
+## 127.0.0.1. De suite test daarom parse_beacon plus join_ip("127.0.0.1")
+## met twee ENet-peers in één proces. Dat is geen tweede fysiek apparaat.
+## Productie-join blijft via het baken. Poorten blijven 7777 en 7778.
 
 
 const PORT := 7777
@@ -57,6 +62,34 @@ func join(code_text: String) -> bool:
 		_give_up("Geen verbinding op dit netwerk. Blijf in het menu.")
 		return false
 	return true
+
+
+## Direct ENet naar een IP, zonder het UDP-baken.
+## Alleen bedoeld als het adres al bekend is (localhost-test). De code zelf
+## wordt niet via het baken gecontroleerd; parse_beacon doet die controle.
+func join_ip(code_text: String, ip: String) -> bool:
+	if _closed:
+		return false
+	_code = code_text
+	_joining = true
+	_connect_enet(ip, PORT)
+	return _peer != null and not _closed
+
+
+## Puur: pakket plus verwachte code geeft de poort, of -1. Geen socket.
+static func parse_beacon(packet: PackedByteArray, expected_code: String) -> int:
+	var parsed: Variant = JSON.parse_string(packet.get_string_from_utf8())
+	if not (parsed is Dictionary):
+		return -1
+	var data: Dictionary = parsed
+	if str(data.get("game", "")) != "sapientia-pvp":
+		return -1
+	if str(data.get("code", "")) != expected_code:
+		return -1
+	var port := int(data.get("port", -1))
+	if port <= 0:
+		return -1
+	return port
 
 
 func send(payload: Dictionary) -> void:
@@ -111,15 +144,10 @@ func _read_beacon() -> void:
 	while _udp.get_available_packet_count() > 0:
 		var pkt := _udp.get_packet()
 		var ip := _udp.get_packet_ip()
-		var parsed = JSON.parse_string(pkt.get_string_from_utf8())
-		if not (parsed is Dictionary):
+		var port := parse_beacon(pkt, _code)
+		if port < 0:
 			continue
-		var data: Dictionary = parsed
-		if str(data.get("game", "")) != "sapientia-pvp":
-			continue
-		if str(data.get("code", "")) != _code:
-			continue
-		_connect_enet(ip, int(data.get("port", PORT)))
+		_connect_enet(ip, port)
 		return
 
 
@@ -157,7 +185,12 @@ func _on_peer_connected(_id: int) -> void:
 func _on_peer_disconnected(_id: int) -> void:
 	if _closed:
 		return
-	var reason := PvpDisconnect.drop_message()
+	if _hosting:
+		# De vriend is weg. De server blijft op 7777 zodat dezelfde code werkt.
+		_did_connect = false
+		peer_left.emit()
+		return
+	var reason := PvpDisconnect.match_gone_message()
 	close()
 	disconnected.emit(reason)
 

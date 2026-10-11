@@ -16,6 +16,8 @@ signal disconnected(message: String)
 signal phase_changed(phase: String)
 signal error_message(text: String)
 signal stopped
+signal resumed(phase: String)
+signal guest_dropped(message: String)
 
 var role: String = ""
 var code: String = ""
@@ -26,6 +28,10 @@ var phase: String = "menu"
 var transport: PvpTransport = null
 var battle: PvpBattleState = null
 var last_result: Dictionary = {}
+var reconnect_code: String = ""
+var reconnect_kind: String = ""
+var guest_online: bool = false
+var _kind: String = ""
 var _closing: bool = false
 var _reject_reason: String = ""
 
@@ -33,7 +39,11 @@ var _reject_reason: String = ""
 func begin_host(kind: String) -> bool:
 	_shutdown_transport()
 	_clear_match()
+	reconnect_code = ""
+	reconnect_kind = ""
 	role = "host"
+	_kind = kind
+	guest_online = false
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	code = PvpConnectCode.generate(rng)
@@ -48,27 +58,34 @@ func begin_host(kind: String) -> bool:
 	return true
 
 
-func begin_join(kind: String, raw_code: String) -> bool:
+func begin_join(kind: String, raw_code: String, direct_ip: String = "") -> bool:
 	var parsed := PvpConnectCode.parse(raw_code)
 	if parsed == "":
 		error_message.emit("Die code klopt niet. Zes tekens, bijvoorbeeld K7NP2Q.")
 		return false
 	_shutdown_transport()
 	_clear_match()
+	reconnect_code = ""
+	reconnect_kind = ""
 	role = "guest"
+	_kind = kind
 	code = parsed
 	if not _open_transport(kind):
 		return false
 	phase = "wait_peer"
-	transport.join(parsed)
-	if phase == "menu":
+	var started := false
+	if kind == "lan" and direct_ip != "":
+		var lan := transport as PvpLanTransport
+		started = lan != null and lan.join_ip(parsed, direct_ip)
+	else:
+		started = transport.join(parsed)
+	if not started or phase == "menu":
 		return false
-	if kind == "local" and phase != "mode_select":
-		var why := "Geen sessie met die code."
+	if kind == "local" and not _phase_is_live():
 		_shutdown_transport()
 		_clear_match()
 		phase = "menu"
-		error_message.emit(why)
+		error_message.emit(PvpDisconnect.match_gone_message())
 		return false
 	phase_changed.emit(phase)
 	return true
@@ -163,9 +180,18 @@ func stop_match() -> void:
 
 func force_disconnect() -> void:
 	var msg := PvpDisconnect.drop_message()
+	var remember := role == "guest" and code != "" and _kind != ""
+	var saved_code := code
+	var saved_kind := _kind
 	_closing = true
 	_shutdown_transport()
 	_clear_match()
+	if remember:
+		reconnect_code = saved_code
+		reconnect_kind = saved_kind
+	else:
+		reconnect_code = ""
+		reconnect_kind = ""
 	phase = "menu"
 	_closing = false
 	phase_changed.emit(phase)
@@ -178,20 +204,34 @@ func abandon() -> void:
 		transport.close_silent()
 	_shutdown_transport()
 	_clear_match()
+	reconnect_code = ""
+	reconnect_kind = ""
 	phase = "menu"
 	_closing = false
 	phase_changed.emit(phase)
 
 
-func request_reconnect() -> void:
-	# TODO(design): reconnect is nog niet beschikbaar.
-	_closing = true
-	_shutdown_transport()
-	_clear_match()
-	phase = "menu"
-	_closing = false
-	phase_changed.emit(phase)
-	disconnected.emit(PvpDisconnect.reconnect_message())
+func request_reconnect() -> bool:
+	# TODO(design): geen relay. Alleen dezelfde nog levende hostsessie.
+	if reconnect_code == "" or reconnect_kind == "":
+		phase = "menu"
+		phase_changed.emit(phase)
+		disconnected.emit(PvpDisconnect.match_gone_message())
+		return false
+	var saved_code := reconnect_code
+	var saved_kind := reconnect_kind
+	var ok := begin_join(saved_kind, saved_code)
+	if ok:
+		reconnect_code = ""
+		reconnect_kind = ""
+		return true
+	reconnect_code = ""
+	reconnect_kind = ""
+	if phase != "menu":
+		phase = "menu"
+		phase_changed.emit(phase)
+	disconnected.emit(PvpDisconnect.match_gone_message())
+	return false
 
 
 func _open_transport(kind: String) -> bool:
@@ -204,6 +244,7 @@ func _open_transport(kind: String) -> bool:
 	add_child(transport)
 	transport.connected.connect(_on_connected)
 	transport.disconnected.connect(_on_disconnected)
+	transport.peer_left.connect(_on_peer_left)
 	transport.message.connect(_on_message)
 	transport.failed.connect(_on_failed)
 	return true
@@ -224,11 +265,28 @@ func _send(payload: Dictionary) -> void:
 
 
 func _on_connected() -> void:
+	guest_online = true
+	if role == "host" and phase != "wait_peer" and phase != "menu":
+		# Lokaal is het bericht meteen binnen. Op LAN pas na deze frame,
+		# zodat de vriend de ENet-handshake al af heeft.
+		if _kind == "local":
+			_push_resume()
+		else:
+			_push_resume.call_deferred()
+		peer_joined.emit()
+		return
 	if phase != "wait_peer":
 		return
 	phase = "mode_select"
 	peer_joined.emit()
 	phase_changed.emit(phase)
+
+
+func _on_peer_left() -> void:
+	if role != "host" or _closing:
+		return
+	guest_online = false
+	guest_dropped.emit(PvpDisconnect.guest_left_message())
 
 
 func _on_disconnected(reason: String) -> void:
@@ -237,10 +295,12 @@ func _on_disconnected(reason: String) -> void:
 	_closing = true
 	_shutdown_transport()
 	_clear_match()
+	reconnect_code = ""
+	reconnect_kind = ""
 	phase = "menu"
 	_closing = false
 	phase_changed.emit(phase)
-	var text := reason if reason != "" else PvpDisconnect.drop_message()
+	var text := reason if reason != "" else PvpDisconnect.match_gone_message()
 	disconnected.emit(text)
 
 
@@ -331,6 +391,10 @@ func _on_message(payload: Dictionary) -> void:
 		"reject":
 			_reject_reason = str(payload.get("reason", "Dat kan niet."))
 			error_message.emit(_reject_reason)
+		"resume":
+			if from != "host" or role != "guest":
+				return
+			_apply_resume(payload)
 
 
 func _try_start() -> void:
@@ -362,6 +426,47 @@ func _start_battle(rematch_flag: bool) -> void:
 	_send(payload)
 	phase_changed.emit(phase)
 	battle_started.emit()
+
+
+func _push_resume() -> void:
+	var payload := {
+		"t": "resume",
+		"from": "host",
+		"phase": phase,
+		"mode": mode_id,
+		"host_team": host_team,
+		"guest_team": guest_team,
+	}
+	if battle != null and (phase == "battle" or phase == "result"):
+		payload["state"] = battle.serialize()
+		payload["result"] = last_result.duplicate(true)
+	_send(payload)
+
+
+func _apply_resume(payload: Dictionary) -> void:
+	var next := str(payload.get("phase", ""))
+	if next != "mode_select" and next != "team_select" and next != "battle" and next != "result":
+		return
+	mode_id = str(payload.get("mode", ""))
+	host_team = str(payload.get("host_team", ""))
+	guest_team = str(payload.get("guest_team", ""))
+	if payload.get("state", null) is Dictionary:
+		if battle == null:
+			battle = PvpBattleState.new()
+		battle.load_snapshot(payload["state"])
+	if payload.get("result", null) is Dictionary:
+		last_result = (payload["result"] as Dictionary).duplicate(true)
+	phase = next
+	phase_changed.emit(phase)
+	resumed.emit(phase)
+	if phase == "battle":
+		battle_started.emit()
+	elif phase == "result":
+		battle_finished.emit(last_result)
+
+
+func _phase_is_live() -> bool:
+	return phase == "mode_select" or phase == "team_select" or phase == "battle" or phase == "result"
 
 
 func _accept_battle(state: Variant) -> void:
@@ -447,6 +552,8 @@ func _finish_stop() -> void:
 		transport.close_silent()
 	_shutdown_transport()
 	_clear_match()
+	reconnect_code = ""
+	reconnect_kind = ""
 	phase = "menu"
 	_closing = false
 	phase_changed.emit(phase)
@@ -462,6 +569,8 @@ func _shutdown_transport() -> void:
 		old.connected.disconnect(_on_connected)
 	if old.disconnected.is_connected(_on_disconnected):
 		old.disconnected.disconnect(_on_disconnected)
+	if old.peer_left.is_connected(_on_peer_left):
+		old.peer_left.disconnect(_on_peer_left)
 	if old.message.is_connected(_on_message):
 		old.message.disconnect(_on_message)
 	if old.failed.is_connected(_on_failed):

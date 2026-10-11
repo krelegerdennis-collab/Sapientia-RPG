@@ -84,6 +84,8 @@ func _ready() -> void:
 		session.disconnected.connect(_on_disconnected)
 		session.error_message.connect(_on_error)
 		session.stopped.connect(_on_stopped)
+		session.resumed.connect(_on_resumed)
+		session.guest_dropped.connect(_on_guest_dropped)
 	_show_menu()
 
 
@@ -270,7 +272,6 @@ func _refresh_battle() -> void:
 			banner = "Geef het apparaat door. " + banner
 		elif net_kind == "lan" and str(actor["seat"]) != role_on_device:
 			can = false
-			banner = "Wachten op de andere speler…"
 	_battle.present(state, can, banner)
 	_show_only(_battle)
 
@@ -350,9 +351,78 @@ func _on_error(text: String) -> void:
 	_show_only(_drop)
 
 
+func _on_guest_dropped(message: String) -> void:
+	if _screen == "battle":
+		_battle.set_log(message)
+
+
+func _on_resumed(phase_name: String) -> void:
+	if phase_name == "battle" or phase_name == "result":
+		return
+	if phase_name == "mode_select":
+		_show_mode(role_on_device != "guest")
+		return
+	if phase_name == "team_select":
+		_resume_teams()
+
+
+func _resume_teams() -> void:
+	if role_on_device == "guest":
+		if guest_session.guest_team != "":
+			_team.set_waiting(true)
+			_team.prompt("Wachten op de andere speler…")
+			_screen = "team"
+			_show_only(_team)
+			return
+		_ask_team("guest")
+		return
+	if host_session.host_team == "":
+		_ask_team("host")
+		return
+	if net_kind == "local" and role_on_device == "both" and host_session.guest_team == "":
+		_ask_team("guest")
+		return
+	_team.set_waiting(true)
+	_team.prompt("Wachten op de andere speler…")
+	_screen = "team"
+	_show_only(_team)
+
+
 func _on_reconnect() -> void:
-	var session := _authority()
-	session.request_reconnect()
+	var session: PvpSession = null
+	if guest_session.reconnect_code != "":
+		session = guest_session
+		net_kind = guest_session.reconnect_kind
+		if role_on_device == "":
+			role_on_device = "guest"
+	elif host_session.reconnect_code != "":
+		session = host_session
+		net_kind = host_session.reconnect_kind
+		if role_on_device == "":
+			role_on_device = "host"
+	if session == null:
+		_drop.set_text(PvpDisconnect.match_gone_message())
+		_screen = "error"
+		_show_only(_drop)
+		return
+	if not session.request_reconnect():
+		return
+	_follow(session)
+
+
+func _follow(session: PvpSession) -> void:
+	match session.phase:
+		"mode_select":
+			_show_mode(role_on_device != "guest")
+		"team_select":
+			_resume_teams()
+		"battle":
+			_screen = "battle"
+			_refresh_battle()
+		"result":
+			_on_battle_finished(session.last_result)
+		_:
+			_show_menu()
 
 
 func _on_error_menu() -> void:

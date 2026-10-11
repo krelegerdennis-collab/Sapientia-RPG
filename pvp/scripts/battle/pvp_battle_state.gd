@@ -11,6 +11,7 @@ var round_no: int = 1
 var over: bool = false
 var winner: String = ""
 var log: Array = []
+var last_variance: float = 1.0
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
@@ -129,6 +130,7 @@ func serialize() -> Dictionary:
 		"round_no": round_no,
 		"over": over,
 		"winner": winner,
+		"variance": last_variance,
 	}
 
 
@@ -139,6 +141,7 @@ func load_snapshot(data: Dictionary) -> void:
 	round_no = int(data.get("round_no", 1))
 	over = bool(data.get("over", false))
 	winner = str(data.get("winner", ""))
+	last_variance = float(data.get("variance", 1.0))
 
 
 func reset_for_rematch() -> void:
@@ -164,6 +167,7 @@ func _attack(actor: Dictionary, target_uid: String) -> Dictionary:
 	if target.is_empty() or str(target["seat"]) == str(actor["seat"]) or int(target["hp"]) <= 0:
 		return _fail("Kies een tegenstander.")
 	var variance := PvpRules.roll_variance(rng)
+	last_variance = variance
 	var dmg := PvpRules.physical_damage(int(actor["atk"]), int(target["def"]), 1.0, variance, bool(target["defending"]))
 	target["hp"] = maxi(0, int(target["hp"]) - dmg)
 	var line := "%s valt %s aan (%d)." % [str(actor["display"]), str(target["display"]), dmg]

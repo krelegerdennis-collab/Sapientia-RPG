@@ -24,8 +24,11 @@ func host(code_text: String) -> void:
 
 func join(code_text: String) -> bool:
 	var host_node: PvpLocalTransport = live_host as PvpLocalTransport
-	if host_node == null or host_node.code != code_text or host_node.peer != null or host_node == self:
-		mark_failed("Geen sessie met die code.")
+	if host_node == null or host_node == self or host_node.code != code_text:
+		mark_failed(PvpDisconnect.match_gone_message())
+		return false
+	if host_node.peer != null:
+		mark_failed(PvpDisconnect.occupied_message())
 		return false
 	peer = host_node
 	host_node.peer = self
@@ -46,11 +49,20 @@ func close() -> void:
 	if _closed:
 		return
 	_closed = true
-	if live_host == self:
-		live_host = null
 	var other := peer
 	peer = null
 	if other != null and other.peer == self:
 		other.peer = null
-	if other != null and not other._closed and not _silent_close:
-		other.disconnected.emit(PvpDisconnect.drop_message())
+	if _silent_close:
+		if is_host and live_host == self:
+			live_host = null
+		return
+	if is_host:
+		if live_host == self:
+			live_host = null
+		if other != null and not other._closed:
+			other.disconnected.emit(PvpDisconnect.match_gone_message())
+		return
+	# Gast weg: de host blijft staan. Dezelfde code kan opnieuw.
+	if other != null and not other._closed:
+		other.peer_left.emit()

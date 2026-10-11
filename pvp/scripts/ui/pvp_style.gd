@@ -41,9 +41,18 @@ static func label(text: String, size: int = 8) -> Label:
 
 
 static func button(text: String) -> Button:
+	return _button(text, Vector2(200, 22))
+
+
+static func battle_button(text: String) -> Button:
+	return _button(text, Vector2(148, 22))
+
+
+static func _button(text: String, size: Vector2) -> Button:
 	var btn := Button.new()
 	btn.text = text
-	btn.custom_minimum_size = Vector2(200, 18)
+	btn.custom_minimum_size = size
+	btn.clip_text = false
 	btn.add_theme_font_size_override("font_size", 8)
 	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	return btn

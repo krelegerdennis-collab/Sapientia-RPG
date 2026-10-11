@@ -5,6 +5,7 @@ class_name PvpTransport
 
 signal connected
 signal disconnected(reason: String)
+signal peer_left
 signal message(payload: Dictionary)
 signal failed(reason: String)
 
