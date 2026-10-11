@@ -28,7 +28,7 @@ Afvinken alleen als het echt af is. Open punten zijn nog ontwerp of nog niet geb
   - Grade 2 (midgame): verdieping 20–50
   - Grade 3 (endgame): verdieping 50–80
   - Grade 4 (endgame++): verdieping 80–99
-  - Grensverdieping hoort bij de hogere grade (TODO(design)): 20 = Grade 2, 50 = Grade 3, 80 = Grade 4.
+  - Grensverdieping hoort bij de hogere grade (bevestigd): 20 = Grade 2, 50 = Grade 3, 80 = Grade 4.
 
   - [x] Grade 3 items: vast affix-systeem (basis affixes, per item voorgedefinieerd)
   - [x] Grade 4 items: uitgebreid vast affix-systeem (sterkere en meerdere affixes per item)
@@ -48,7 +48,7 @@ Afvinken alleen als het echt af is. Open punten zijn nog ontwerp of nog niet geb
     - [x] Voor elk karakter bruikbaar, zonder class-restrictie
     - [x] Vaste affixes per accessoire
 
-  Nog te bevestigen: de concrete statcijfers van grade-wapens, sets, accessoires en affixen (TODO(design) in `scripts/data/grade_gear.gd`).
+  Bevestigd: de statcijfers van grade-wapens, sets, accessoires en affixen in `scripts/data/grade_gear.gd`. Toekomstige helden hebben nog geen eigen G4-wapen of set.
 
 ### Wereldkaart opbouw
 
@@ -104,19 +104,20 @@ Afvinken alleen als het echt af is. Open punten zijn nog ontwerp of nog niet geb
 - [x] Accessoire shop
 - [x] Magic shop
 
-Jelle Hamer heeft zowel de wapen- als de pantserstal (TODO(design)). Accessoire en magie zijn balies zonder nieuwe persoon.
+Jelle Hamer heeft zowel de wapen- als de pantserstal (bevestigd, één smid). Accessoire en magie zijn balies zonder nieuwe persoon.
 
 ### Magic tier list
 
 Magie heeft 4 grades. Grade 1 tot en met 3 zijn te koop in de magic shop en worden per act vrijgespeeld. Grade 4 is niet te koop: die dropt alleen uit blauwe kisten in de Diepe Grot (verdieping 80+). Per tier 4 spreuken. Niet alles is in Act 1 beschikbaar.
 
 - [ ] Magic tier list opzetten (4 grades × 4 spreuken = 16 spreuken per element)
-  De volledige 4×16-lijst is nog ontwerp. Er staat een kleine werklijst: één spreuk per grade per element (vuur, natuur, bliksem, licht, ijs), met TODO(design) bij namen en cijfers.
-- [x] Grade 1 tot en met 3 in de magic shop (prijs loopt op per grade)
+  De volledige 4×16-lijst is nog ontwerp. De kleine lijst van 20 spreuken (één per grade per element: vuur, natuur, bliksem, licht, ijs) is bevestigd en geldt tot nader order. Fire, Lightning en Heal blijven zo heten.
+- [x] Grade 1 tot en met 3 in de magic shop (prijs 160×grade²)
+  Grade 1 = 160, grade 2 = 640, grade 3 = 1440. Bevestigd. Grade 4 blijft uit de winkel.
 - [x] Grade 4 alleen als drop uit blauwe kisten (Diepe Grot, verdieping 80–99)
 - [x] Tiers vrijspelen per act (Act 1 = alleen Grade 1)
 - [ ] Per spreuk eigen data: damage, healing en effect schalen per grade
-  Geldt voor de volledige 16 per element, die er nog niet is. De kleine werklijst heeft wel eigen mp/power per grade (TODO(design)).
+  Geldt voor de volledige 16 per element, die er nog niet is. De kleine lijst van 20 heeft bevestigde mp en power per grade.
 
 ### Elements en karakters
 
@@ -133,22 +134,24 @@ Magie heeft 4 grades. Grade 1 tot en met 3 zijn te koop in de magic shop en word
 ### Beschikbaarheid shops
 
 - [x] Niet alle items direct beschikbaar in Wilgendal; selectie per act
-  Act 1 toont alleen de laagste schappen. Welke stukken dat precies zijn, is nog een placeholder.
-- [ ] Shop-voorraad laten meeschalen met verhaalprogressie
-  Nu volgt de act het party-level (Act 1 = level 1–13), niet een verhaalteller. Nog te bevestigen.
+  Act 1 toont alleen de laagste schappen. IJzeren helm, maliënkolder en groenring pas vanaf act 2. Bevestigd.
+- [x] Winkel-act volgt het hoogste party-level
+  Act 1 = level 1–13. Geen aparte verhaalvlag. Bevestigd.
 - [x] Magic grades per act vrijspelen (Act 1 = Grade 1, enzovoort)
   Nooit hoger dan Grade 3 in de winkel.
 
 ### Algemeen
 
 - [x] Verkoop-systeem in shops
-  Verkoop is de helft van de genoteerde prijs (TODO(design)).
+  Verkoop is de helft van de genoteerde prijs. Een grade-1-spreuk verkoopt dus voor 80. Bevestigd.
 
-### Nog te bevestigen: prijzen/voorraad
+### Nog te bevestigen
 
-- Prijzen en voorraad van wapen, pantser, accessoire, magie en de kruidenbalie van Tante Mien.
-- Verkooppercentage (nu de helft).
-- Statcijfers van grade-uitrusting en affixen.
-- Namen en cijfers van de kleine spreukenlijst, en de volledige 4×16-lijst.
-- Of de winkel-act aan het verhaal hangt in plaats van aan het level.
-- Lore-tekst van de eindbazen in het bestiarium (nog van Dennis).
+- Volledige 4×16-spreukenlijst. De kleine lijst van 20 is bevestigd en geldt tot nader order.
+- Toekomstige helden (eigen G4-wapen en set).
+- Gerrits quest.
+- Echte lore van de eindbazen in het bestiarium.
+- Extra elementen voor Noor in latere acts.
+- Wereldkaart, warps en de act-koppeling aan de eilanden.
+
+Bevestigd en dus geen open ontwerp meer: winkelprijzen en voorraad, magieprijs 160×grade², verkoop op de helft, grade-statcijfers en grenzen, winkel-act via party-level, archiefschaal 0,7 / EXP 0,50, Golem HP 360 / ATK 27 / DEF 15, Jelle als één smid met twee balies, kort zwaard ATK +3.

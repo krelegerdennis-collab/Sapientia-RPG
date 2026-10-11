@@ -1,7 +1,6 @@
 extends RefCounted
 ## Eindbazen van de Diepe Grot. Ze hergebruiken een bestaand monster (sprite, elementen).
-## Geen nieuwe canon: de regel is feitelijk uit dungeon100_scaling.gd. Lore-tekst blijft
-## open tot Dennis die schrijft.
+## Bevestigd: de regel blijft feitelijk (verdieping en gedaante). Echte bazenlore is nog open.
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")

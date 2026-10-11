@@ -1,9 +1,8 @@
 extends RefCounted
 ## Blauwe-kistuitrusting van de Diepe Grot, per grade.
 ## Staat NIET in GameData.EQUIPMENT (die lijst blijft 84 stukken voor het verhaal).
-## TODO(design): alle statcijfers, affix-waarden en de grensverdiepingen (hogere grade
-## bezit de grens: 20 = grade 2, 50 = grade 3, 80 = grade 4) zijn een conservatieve
-## invulling. Dennis heeft de echte cijfers nog niet vastgelegd.
+## Bevestigd: statcijfers, affix-waarden en de grensverdiepingen (hogere grade
+## bezit de grens: 20 = grade 2, 50 = grade 3, 80 = grade 4).
 ## TODO(design): toekomstige helden krijgen nog geen eigen G4-wapen of set.
 
 const SCROLLS: Array[String] = ["spreuk_inferno", "spreuk_oerwoud", "spreuk_donderslag", "spreuk_aureool", "spreuk_ijskern"]
@@ -106,7 +105,7 @@ static func is_scroll(id: String) -> bool:
 	return id in SCROLLS
 
 
-## TODO(design): grens hoort bij de hogere grade (20/50/80).
+## Bevestigd: grens hoort bij de hogere grade (20/50/80).
 static func grade_for_floor(floor_nr: int) -> int:
 	if floor_nr < 1:
 		return 0

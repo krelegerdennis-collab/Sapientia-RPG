@@ -76,6 +76,9 @@ func _shop_tests() -> void:
 	var magic: Array = _ids(Shop.stock("wilgendal_magie"))
 	check("magiewinkel act 1 is alleen grade 1", magic.has("vuur") and magic.has("genees") and magic.has("rijp")
 			and not magic.has("inferno") and not magic.has("zegen") and not magic.has("bliksem"))
+	check("magieprijs is 160 maal grade kwadraat", Shop.list_price("vuur") == 160 and Shop.list_price("vlam") == 640
+			and Shop.list_price("vuurzee") == 1440)
+	check("een grade-1-spreuk verkoopt voor 80", Shop.sell_price("vuur") == 80 and Shop.sell_price("doorn") == 80)
 	var broke := Shop.buy_item("wilgendal_wapen", "kort_zwaard")
 	check("te weinig goud koopt niets", not broke["ok"] and str(broke["text"]) == "Te weinig goud."
 			and int(GameState.inventory.get("kort_zwaard", 0)) == 0)
@@ -93,7 +96,7 @@ func _shop_tests() -> void:
 	var noor: Dictionary = GameState.party[1]
 	(noor["spells"] as Array).clear()
 	var yes := Shop.buy_spell("wilgendal_magie", "doorn", noor)
-	check("Noor koopt Doorn", yes["ok"] and (noor["spells"] as Array).has("doorn") and GameState.gold == 400)
+	check("Noor koopt Doorn", yes["ok"] and (noor["spells"] as Array).has("doorn") and GameState.gold == 280)
 	var g4 := Shop.buy_spell("wilgendal_magie", "inferno", noor)
 	check("grade 4 ligt niet in de winkel", not g4["ok"] and not (noor["spells"] as Array).has("inferno"))
 	var scroll := {"spreuk_inferno": 1}
