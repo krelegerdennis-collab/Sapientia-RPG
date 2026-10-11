@@ -52,8 +52,18 @@ const HEROES := [
 
 ## Totale EXP die nodig is om een level te bereiken.
 ## Level 2 = 15, level 3 = 60, level 4 = 135, ...
+## Formule blijft 15 * (level - 1)^2 (CANON: onze levelschaal). Geen harde cap:
+## de 100-verdiepingen-kerker mag hier voorbij. Act-banden t/m het einde: LevelScale.
+const LevelScale := preload("res://scripts/data/level_scale.gd")
+
+
 static func exp_for_level(level: int) -> int:
 	return 15 * (level - 1) * (level - 1)
+
+
+## Act (1-6) waar dit level in het verhaal bij hoort. 0 = geen. Boven 40 blijft Act 6.
+static func act_for_level(level: int) -> int:
+	return LevelScale.act_for_level(level)
 
 # ---------------------------------------------------------------- vijanden
 ## "sprite" = plaatje op 2x-resolutie (1 art-pixel = 1 pixel van het 768x432-raster; op het
@@ -288,8 +298,9 @@ const ENEMIES := {
 		"skills": [],
 		# lore: bestand tegen water; 'water' is (nog) geen element in de game, dus leeg (open vraag)
 		"no": 12, "mp": 0, "weak": ["vuur"], "resist": [],
-		# lore: Gloeiende Inktfles; dat item bestaat nog niet -> Toverwater (= Bladzijde van Inkt) als plaatshouder
-		"drops": [{"item": "toverwater", "chance": 1.0}],
+		# Bestiarium noemt de Gloeiende Inktfles (kans-drops worden nog niet uitgedeeld).
+		# De fles zelf ligt in de kast: scripts/dungeon/inktwurm_kast.gd, eenmalig.
+		"drops": [{"item": "gloeiende_inktfles", "chance": 1.0}],
 		"desc": "A fat worm that ate its way through parchment and now sweats black ink.",
 		"habitat": ["archief"],
 	},
@@ -352,11 +363,13 @@ const SPELLS := {
 ## het veldmenu). Zie scripts/party_actions.gd.
 const ITEMS := {
 	"drankje":    {"name": "Potion",    "target": "ally", "heal_hp": 30, "heal_mp": 0,
+		"act": 1, "lijn": "drank", "orde": 2,
 		"desc": "A bitter herb drink from the library garden."},
 	"toverwater": {"name": "Magic Water", "target": "ally", "heal_hp": 0,  "heal_mp": 10,
 		"desc": "Water that glows a soft cyan. Gives magic back."},
 	# v0.11: van de Oude Man (de kist naast het huis). "short" = naam in het gevechtsmenu.
-	"kruid":      {"name": "Healing Herb", "short": "Herb", "target": "ally", "heal_hp": 25, "heal_mp": 0},
+	"kruid":      {"name": "Healing Herb", "short": "Herb", "target": "ally", "heal_hp": 25, "heal_mp": 0,
+		"act": 1, "lijn": "drank", "orde": 1},
 	# Task #4: sterkere genees-items, alleen als buit in de dungeon van 100 verdiepingen (dungeon100_scaling.gd).
 	"sterk_drankje": {"name": "Strong Potion", "target": "ally", "heal_hp": 120, "heal_mp": 0,
 		"desc": "A thick, dark drink. Heals a lot of hit points."},
@@ -380,6 +393,46 @@ const ITEMS := {
 		"desc": "A scroll with the spell Lightning. Someone in the party can learn it."},
 	"spreuk_genees": {"name": "Heal Scroll", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
 		"desc": "A scroll with the spell Heal. Someone in the party can learn it."},
+	# Verhaaldrankjes t/m Act 6 (lijn "drank" in level_scale.gd). Alleen HP/MP: boosts, status
+	# (roest, stilte, correctie) en herleving zitten nog niet in het gevecht.
+	# Act 1, te vinden: Ilse in Esdoorn, eenmalig nadat Noor gered is. Later ook Tante Mien
+	# in Wilgendal; die winkel is er nog niet.
+	"kruidenthee": {"name": "Herbal Tea", "target": "ally", "heal_hp": 40, "heal_mp": 0,
+		"act": 1, "lijn": "drank", "orde": 4, "price": 0,
+		"desc": "Mint and thyme in a warm bottle. Ilse's recipe from Mapleton."},
+	# Act 1, te vinden: de kast van de Inktwurm in de Golemhal.
+	"gloeiende_inktfles": {"name": "Glowing Ink", "target": "ally",
+		"heal_hp": 15, "heal_mp": 20, "act": 1, "lijn": "drank", "orde": 3, "price": 0,
+		"desc": "Ink from the Archives that gives off a soft light. A sip leaves you sharp and awake."},
+	# Act 2, Grote Smidse / Smeder-Prime. Nog niet geplaatst: de industriestad is er nog niet.
+	"smeerolie": {"name": "Forge Oil", "target": "ally", "heal_hp": 70, "heal_mp": 0,
+		"act": 2, "lijn": "drank", "orde": 5, "price": 0,
+		"desc": "Thick oil from the forge. It loosens joints that have gone stiff."},
+	# Act 3, Hemelvoet / Zwevende Tempel. Nog niet geplaatst.
+	"windwater": {"name": "Wind Water", "target": "ally", "heal_hp": 40, "heal_mp": 40,
+		"act": 3, "lijn": "drank", "orde": 6, "price": 0,
+		"desc": "A bottle with a tiny storm inside. The first sip frees your mouth."},
+	"stroomdrank": {"name": "Current Tonic", "target": "ally", "heal_hp": 0, "heal_mp": 100,
+		"act": 3, "lijn": "drank", "orde": 7, "price": 0,
+		"desc": "Liquid light, bottled at the spring under the Floating Temple."},
+	# Act 4, het laboratorium onder de Zwarte Kloof. Nog niet geplaatst.
+	"antiserum_nul": {"name": "Antiserum Zero", "short": "Antiserum", "target": "ally", "heal_hp": 80, "heal_mp": 40,
+		"act": 4, "lijn": "drank", "orde": 8, "price": 0,
+		"desc": "A colorless ampoule. The label reads: For when you lose yourself."},
+	"regeneratie": {"name": "Regeneration", "target": "ally", "heal_hp": 220, "heal_mp": 0,
+		"act": 4, "lijn": "drank", "orde": 9, "price": 0,
+		"desc": "Pink and thick as syrup, from the growth halls. It works. That is the frightening part."},
+	# Act 5, Sterrenrust / het observatorium. Nog niet geplaatst. Herleving is nog niet gebouwd.
+	"sterrenelixer": {"name": "Star Elixir", "target": "ally", "heal_hp": 260, "heal_mp": 90,
+		"act": 5, "lijn": "drank", "orde": 10, "price": 0,
+		"desc": "Glittering powder in rainwater. It pulls you back from the edge."},
+	# Act 6, de Onbekende Kern en Zoutwacht. Nog niet geplaatst. Groepsgenezing is nog niet gebouwd.
+	"herinnering": {"name": "Remembrance", "target": "ally", "heal_hp": 300, "heal_mp": 100,
+		"act": 6, "lijn": "drank", "orde": 11, "price": 0,
+		"desc": "A clear drop in which a smiling face sometimes drifts past."},
+	"harttraan": {"name": "Heart Tear", "target": "ally", "heal_hp": 480, "heal_mp": 160,
+		"act": 6, "lijn": "drank", "orde": 12, "price": 0,
+		"desc": "Salt water from Saltwatch, in a crystal bottle. It weighs as much as a whole life."},
 }
 ## v0.11: sleutel-voorwerpen (niet te gebruiken in een gevecht; tellen wel in de inventaris)
 const KEY_ITEMS := {
@@ -389,10 +442,14 @@ const KEY_ITEMS := {
 	# werkt het alleen op verdieping 100 ("warp": true: party_actions.gd + GameState.dungeon100_warp).
 	"warp": {"name": "Warp Crystal", "short": "Warp", "warp": true,
 		"desc": "A crystal from the core of the Archive. On the last floor it takes you back to the world."},
+	# De Hanger is de Sleutel (CANON). Nog niet uitgedeeld: de onthulling (H-6) hoort bij Act 4-5.
+	# Niet in START_INVENTORY en niet op het betatest-account.
+	"hanger": {"name": "Pendant", "desc": "A heart-shaped pendant from Grandpa. It sometimes grows warm."},
 }
 # ---------------------------------------------------------------- uitrusting (v0.14)
-## !! VOORSTEL / VOORLOPIG !!  Uit story/ITEMS_ELEMENTEN.md (par. 4, 'Beginnersset'), wacht nog
-## op Dennis. Alle getallen zijn startwaarden. Alleen de beginnersset staat erin.
+## Beginnersset (Act 1) plus de verhaalset t/m Act 6 (lijnen in level_scale.gd).
+## De d100_*-stukken blijven de buit van de 100 verdiepingen. Getallen van de beginnersset
+## zijn niet veranderd. Nieuwe stukken vullen de gaten tot voorbij de zegel-set.
 ## Logica (uitrusten, afdoen, sterkste, effectieve stats, opslaan): scripts/equipment.gd.
 ## (v0.11 had hier WEAPONS met alleen het Kort zwaard; dat zit nu in EQUIPMENT.)
 ##
@@ -412,28 +469,37 @@ const EQUIPMENT := {
 	# Kort Zwaard ATK +7 (winkel, 120) en een apart Roestig Zwaard ATK +3 als startwapen.
 	# Zolang Dennis dat niet besloten heeft blijft het zoals in het spel: ATK +3.
 	"kort_zwaard": {"name": "Short Sword", "slot": "wapen", "atk": 3, "wie": ["krijger"], "price": 120,
+		"act": 1, "lijn": "zwaard", "orde": 1,
 		"desc": "The Old Man's sword. Light and honest."},
 	# v0.15 (RPG CODE): uit de schatkist achter de geheime deur in de puzzelkamer van het Eerste
 	# Archief. ATK +12 (keuze Dennis; = 4x het Kort zwaard). Alleen krijgers (Dennis). Niet te koop.
 	# "element" is alleen info (doet nog niets in de schade); "icon" = 16x16 van RPG ART.
 	"vonkzwaard": {"name": "Spark Sword", "slot": "wapen", "atk": 12, "wie": ["krijger"], "price": 0,
+		"act": 1, "lijn": "zwaard", "orde": 2,
 		"element": "vuur", "desc": "A blade that glows a soft pink-orange. Warm in your hand.",
 		"icon": "res://assets/ui/icons/vonkzwaard.png"},
 	"eiken_staf": {"name": "Oak Staff", "slot": "wapen", "atk": 2, "mag": 4, "wie": ["magier", "priester"], "price": 90,
+		"act": 1, "lijn": "staf_noor", "orde": 1,
 		"desc": "A staff of old oak. It strengthens spells."},
 	"dolk": {"name": "Dagger", "slot": "wapen", "atk": 4, "agi": 1, "wie": ["krijger", "magier", "priester"], "price": 60,
 		"desc": "Short and quick. Anyone can use it."},
 	"houten_schild": {"name": "Wooden Shield", "slot": "schild", "def": 2, "wie": ["krijger", "priester"], "price": 40,
+		"act": 1, "lijn": "schild", "orde": 1,
 		"desc": "A simple round shield of planks."},
 	"kaftschild": {"name": "Cover Shield", "slot": "schild", "def": 3, "mdef": 1, "wie": ["krijger", "priester"], "price": 90,
+		"act": 1, "lijn": "schild", "orde": 2,
 		"desc": "Made from the hard cover of an old book."},
 	"leren_kap": {"name": "Leather Hood", "slot": "helm", "def": 1, "mdef": 1, "wie": ["krijger", "magier", "priester"], "price": 30,
+		"act": 1, "lijn": "helm_krijger", "orde": 1,
 		"desc": "A soft hood of leather."},
 	"ijzeren_helm": {"name": "Iron Helm", "slot": "helm", "def": 3, "wie": ["krijger"], "price": 80,
+		"act": 1, "lijn": "helm_krijger", "orde": 2,
 		"desc": "Heavy, but it stops a blow."},
 	"reisgewaad": {"name": "Travel Robe", "slot": "harnas", "def": 1, "mdef": 2, "wie": ["magier", "priester"], "price": 30,
+		"act": 1, "lijn": "harnas_stroom", "orde": 1,
 		"desc": "A light robe for long journeys."},
 	"leren_harnas": {"name": "Leather Armor", "slot": "harnas", "def": 4, "wie": ["krijger", "priester"], "price": 70,
+		"act": 1, "lijn": "harnas_krijger", "orde": 1,
 		"desc": "Sturdy leather over the chest and shoulders."},
 	# v0.16 (tutorial, wens Dennis): Opa geeft Dennis deze mantel in de proloog en leert hem
 	# MENU > Uitrusting. Klein beetje DEF; iedereen mag hem dragen. Niet te koop.
@@ -442,12 +508,208 @@ const EQUIPMENT := {
 		"desc": "A warm cloak from Grandpa. Better than nothing.",
 		"icon": "res://assets/ui/icons/reisgewaad.png"},
 	"malienkolder": {"name": "Chain Mail", "slot": "harnas", "def": 6, "agi": -1, "wie": ["krijger"], "price": 160,
+		"act": 1, "lijn": "harnas_krijger", "orde": 2,
 		"desc": "Rings of iron. Strong, but heavy."},
 	"bladwijzer": {"name": "Silver Bookmark", "short": "Bookmark", "slot": "accessoire", "agi": 2, "price": 100,
+		"act": 1, "lijn": "ring", "orde": 1,
 		"desc": "A silver bookmark that makes you light and quick."},
 	# VOORLOPIG: 'gif-immuun' uit het ontwerp is nog niet gebouwd (er is nog geen gif).
 	"groenring": {"name": "Green Ring", "slot": "accessoire", "mdef": 2, "price": 150,
 		"desc": "A ring of green glass. (Poison immunity: later.)"},
+	# ---------------------------------------------------------------- verhaalset Act 1-6
+	# Lijnen en volgorde: scripts/data/level_scale.gd. Niet in de 100-verdiepingen-kisten.
+	# Act 1 is te vinden. Act 2-6 staan klaar; die gebieden zijn nog niet gebouwd.
+	# "bron" = waar het stuk hoort. Prijs 0: er is nog geen winkel.
+	"wambuis": {"name": "Padded Jerkin", "slot": "harnas", "def": 3, "mdef": 3,
+		"wie": ["krijger", "magier", "priester"], "price": 0,
+		"act": 1, "lijn": "harnas_stroom", "orde": 2,
+		"bron": "Act 1. Noor gives it when she joins (Mapleton), into the bag.",
+		"desc": "Lined leather that smells of smoke and applewood. Warm enough for the wood."},
+	"ketelkling": {"name": "Kettle Blade", "slot": "wapen", "atk": 18, "wie": ["krijger"], "price": 0,
+		"act": 2, "lijn": "zwaard", "orde": 3,
+		"bron": "Act 2. Reward from Smeder-Prime in the Great Forge. Not placed yet.",
+		"desc": "Forged from a kettle wall. The edge is so sharp that rust backs away."},
+	"rookstaf": {"name": "Smoke Staff", "slot": "wapen", "atk": 4, "mag": 12, "mdef": 3, "wie": ["magier"], "price": 0,
+		"act": 2, "lijn": "staf_noor", "orde": 2,
+		"bron": "Act 2. Chest in the Kettle Works of the industrial town. Not placed yet.",
+		"desc": "A staff full of soot and copper. Spells come out of it warmer."},
+	"stemvork": {"name": "Tuning Fork", "slot": "wapen", "atk": 3, "mag": 14, "mdef": 6, "agi": 1, "wie": ["priester"], "price": 0,
+		"act": 2, "lijn": "staf_lotte", "orde": 2,
+		"bron": "Act 2. For Lotte when she joins. Her place is still open (CANON). Not placed yet.",
+		"desc": "A tuning fork that sings instead of speaking. Machines listen to it."},
+	"ketelschild": {"name": "Kettle Shield", "slot": "schild", "def": 8, "mdef": 3, "wie": ["krijger", "priester"], "price": 0,
+		"act": 2, "lijn": "schild", "orde": 3,
+		"bron": "Act 2. Chest in the Great Forge. Not placed yet.",
+		"desc": "A steam-kettle lid, beaten round into a shield."},
+	"ketelhelm": {"name": "Kettle Helm", "slot": "helm", "def": 7, "mdef": 2, "wie": ["krijger"], "price": 0,
+		"act": 2, "lijn": "helm_krijger", "orde": 3,
+		"bron": "Act 2. Chest in the Smoke Towers. Not placed yet.",
+		"desc": "A helm of kettle plate. It smells of smoke and stops a blow."},
+	"rookkap": {"name": "Smoke Hood", "slot": "helm", "def": 2, "mdef": 5, "mag": 1, "wie": ["magier", "priester"], "price": 0,
+		"act": 2, "lijn": "helm_stroom", "orde": 2,
+		"bron": "Act 2. Chest in the Kettle Works. Not placed yet.",
+		"desc": "A hood soaked through with soot. The hem is stitched with copper wire."},
+	"schrootplaat": {"name": "Scrap Plate", "slot": "harnas", "def": 12, "mdef": 3, "agi": -1, "wie": ["krijger"], "price": 0,
+		"act": 2, "lijn": "harnas_krijger", "orde": 3,
+		"bron": "Act 2. Chest in the Great Forge. Not placed yet.",
+		"desc": "Plates from old machine housings, riveted together with copper wire."},
+	"werkmantel": {"name": "Work Cloak", "slot": "harnas", "def": 6, "mdef": 10, "mag": 4,
+		"wie": ["magier", "priester"], "price": 0,
+		"act": 2, "lijn": "harnas_stroom", "orde": 3,
+		"bron": "Act 2. Chest in the Kettle Works. Not placed yet.",
+		"desc": "A greasy cloak stitched with copper thread. The fitters swear lightning avoids it."},
+	"koperring": {"name": "Copper Ring", "slot": "accessoire", "mdef": 5, "agi": 2, "price": 0,
+		"act": 2, "lijn": "ring", "orde": 2,
+		"bron": "Act 2. Chest in the Command Room. Not placed yet.",
+		"desc": "A ring of drawn copper wire. Warm, and a little quicker."},
+	"ankerkling": {"name": "Anchor Blade", "slot": "wapen", "atk": 28, "wie": ["krijger"], "price": 0,
+		"act": 3, "lijn": "zwaard", "orde": 4,
+		"bron": "Act 3. Chest in the Floating Temple. Not placed yet.",
+		"desc": "A blade light as cork. In the wind of the Sky Ridge it sings softly."},
+	"zweefstaf": {"name": "Hover Staff", "slot": "wapen", "atk": 4, "mag": 24, "mdef": 8, "wie": ["magier"], "price": 0,
+		"act": 3, "lijn": "staf_noor", "orde": 3,
+		"bron": "Act 3. Isolde hands it over in the Weaving Hall. Not placed yet.",
+		"desc": "A crystal hovers above the staff and moves with your breath."},
+	"gebedsstaf": {"name": "Prayer Staff", "slot": "wapen", "atk": 4, "mag": 26, "mdef": 12, "wie": ["priester"], "price": 0,
+		"act": 3, "lijn": "staf_lotte", "orde": 3,
+		"bron": "Act 3. Chest at the Current Pool. Not placed yet.",
+		"desc": "A staff with a prayer flag from Skyfoot. The Current grows quieter around it."},
+	"ankerschild": {"name": "Anchor Shield", "slot": "schild", "def": 14, "mdef": 6, "wie": ["krijger", "priester"], "price": 0,
+		"act": 3, "lijn": "schild", "orde": 4,
+		"bron": "Act 3. Chest by the Gate of Silence. Not placed yet.",
+		"desc": "A shield of temple stone. It draws spells in and breaks them."},
+	"tempelhelm": {"name": "Temple Helm", "slot": "helm", "def": 12, "mdef": 4, "wie": ["krijger"], "price": 0,
+		"act": 3, "lijn": "helm_krijger", "orde": 4,
+		"bron": "Act 3. Chest in the Inner Court. Not placed yet.",
+		"desc": "A helm of the temple guard. Light, and hard as an oath."},
+	"windkap": {"name": "Wind Hood", "slot": "helm", "def": 3, "mdef": 10, "mag": 3, "wie": ["magier", "priester"], "price": 0,
+		"act": 3, "lijn": "helm_stroom", "orde": 3,
+		"bron": "Act 3. Chest on the Wind Bridges. Not placed yet.",
+		"desc": "A hood that barely moves in the wind. Spells linger inside it."},
+	"tempelplaat": {"name": "Temple Plate", "slot": "harnas", "def": 18, "mdef": 6, "wie": ["krijger"], "price": 0,
+		"act": 3, "lijn": "harnas_krijger", "orde": 4,
+		"bron": "Act 3. Chest in Isolde's Circle. Not placed yet.",
+		"desc": "A breastplate from a floating statue. The metal is light and hard."},
+	"wolkgewaad": {"name": "Cloud Robe", "slot": "harnas", "def": 8, "mdef": 18, "mag": 8, "agi": 2,
+		"wie": ["magier", "priester"], "price": 0,
+		"act": 3, "lijn": "harnas_stroom", "orde": 4,
+		"bron": "Act 3. Chest in Skyfoot. Not placed yet.",
+		"desc": "Woven as light as a thought, and warm as an embrace."},
+	"stroomring": {"name": "Current Ring", "slot": "accessoire", "mdef": 9, "mag": 5, "agi": 2, "price": 0,
+		"act": 3, "lijn": "ring", "orde": 3,
+		"bron": "Act 3. Trail of Magic, after Isolde. Not placed yet.",
+		"desc": "A ring of blue thread. The Current runs with you a little way."},
+	"incisie": {"name": "Incision", "slot": "wapen", "atk": 40, "agi": 2, "wie": ["krijger"], "price": 0,
+		"act": 4, "lijn": "zwaard", "orde": 5,
+		"bron": "Act 4. Chest in the Operating Hall. Not placed yet.",
+		"desc": "A sword conceived as a scalpel. The wound only notices a moment later."},
+	"glazenstaf": {"name": "Glass Staff", "slot": "wapen", "atk": 5, "mag": 36, "mdef": 12, "wie": ["magier"], "price": 0,
+		"act": 4, "lijn": "staf_noor", "orde": 4,
+		"bron": "Act 4. Chest in the Growth Halls. Not placed yet.",
+		"desc": "A staff of laboratory glass. A cold glow pulses inside."},
+	"levensstaf": {"name": "Life Staff", "slot": "wapen", "atk": 4, "mag": 40, "mdef": 16, "agi": 2, "wie": ["priester"], "price": 0,
+		"act": 4, "lijn": "staf_lotte", "orde": 4,
+		"bron": "Act 4. Beside Lotte's capsule in the Cradle Room. Not placed yet.",
+		"desc": "A staff like a spine, with glass vertebrae and a warm glow."},
+	"kweekschild": {"name": "Growth Shield", "slot": "schild", "def": 22, "mdef": 8, "wie": ["krijger", "priester"], "price": 0,
+		"act": 4, "lijn": "schild", "orde": 5,
+		"bron": "Act 4. Chest in the Growth Halls. Not placed yet.",
+		"desc": "A shield of cultured plate. It feels warm, and a little alive."},
+	"kweekhelm": {"name": "Growth Helm", "slot": "helm", "def": 16, "mdef": 6, "wie": ["krijger"], "price": 0,
+		"act": 4, "lijn": "helm_krijger", "orde": 5,
+		"bron": "Act 4. Chest in Reception. Not placed yet.",
+		"desc": "A helm that slowly grows along with you. It itches. It does protect."},
+	"glashelm": {"name": "Glass Helm", "slot": "helm", "def": 4, "mdef": 14, "mag": 4, "wie": ["magier", "priester"], "price": 0,
+		"act": 4, "lijn": "helm_stroom", "orde": 4,
+		"bron": "Act 4. Chest in the Correction Room. Not placed yet.",
+		"desc": "A helm of thick glass. You hear your own breath, and little else."},
+	"chitineharnas": {"name": "Chitin Armor", "slot": "harnas", "def": 28, "mdef": 8, "wie": ["krijger"], "price": 0,
+		"act": 4, "lijn": "harnas_krijger", "orde": 5,
+		"bron": "Act 4. Chest in Osk's studio. Not placed yet.",
+		"desc": "Plates of cultured chitin. They grow a little with the wearer."},
+	"labmantel": {"name": "Lab Coat", "slot": "harnas", "def": 10, "mdef": 24, "mag": 10, "wie": ["magier", "priester"], "price": 0,
+		"act": 4, "lijn": "harnas_stroom", "orde": 5,
+		"bron": "Act 4. Chest in the Cradle Room. Not placed yet.",
+		"desc": "A white coat from the laboratory. The hem is still sterile."},
+	"levensring": {"name": "Life Ring", "slot": "accessoire", "mdef": 14, "mag": 6, "agi": 3, "price": 0,
+		"act": 4, "lijn": "ring", "orde": 4,
+		"bron": "Act 4. Trail of Life, after Osk. Not placed yet.",
+		"desc": "A ring with a green leaf inside. Healing sits lighter with it."},
+	"perihelium": {"name": "Perihelion", "slot": "wapen", "atk": 56, "mag": 4, "agi": 2, "wie": ["krijger"], "price": 0,
+		"act": 5, "lijn": "zwaard", "orde": 6,
+		"bron": "Act 5. Chest in the Chart Hall. Not placed yet.",
+		"desc": "A blade of star steel. In the dark it shows constellations."},
+	"astrostaf": {"name": "Astrolabe Staff", "short": "Astro Staff", "slot": "wapen", "atk": 6, "mag": 50, "mdef": 16,
+		"wie": ["magier"], "price": 0,
+		"act": 5, "lijn": "staf_noor", "orde": 5,
+		"bron": "Act 5. Perihelia gives it after the Eye. Not placed yet.",
+		"desc": "Turning brass rings around a glass core full of stars."},
+	"lichtstaf": {"name": "Light Staff", "slot": "wapen", "atk": 5, "mag": 52, "mdef": 20, "wie": ["priester"], "price": 0,
+		"act": 5, "lijn": "staf_lotte", "orde": 5,
+		"bron": "Act 5. Chest in the Dome Halls. Not placed yet.",
+		"desc": "A staff that holds the light of the real stars, not the false ones."},
+	"maanschild": {"name": "Moon Shield", "slot": "schild", "def": 30, "mdef": 12, "wie": ["krijger", "priester"], "price": 0,
+		"act": 5, "lijn": "schild", "orde": 6,
+		"bron": "Act 5. Chest in the Clockwork Halls. Not placed yet.",
+		"desc": "A shield of moon-silver. In moonlight it turns almost clear."},
+	"sterrenhelm": {"name": "Star Helm", "slot": "helm", "def": 22, "mdef": 8, "wie": ["krijger"], "price": 0,
+		"act": 5, "lijn": "helm_krijger", "orde": 6,
+		"bron": "Act 5. Chest on the Sky Stair. Not placed yet.",
+		"desc": "A helm with a narrow visor line. Behind it the stars stand still."},
+	"sterrenkap": {"name": "Star Hood", "slot": "helm", "def": 6, "mdef": 20, "mag": 6, "wie": ["magier", "priester"], "price": 0,
+		"act": 5, "lijn": "helm_stroom", "orde": 5,
+		"bron": "Act 5. Chest in Starrest. Not placed yet.",
+		"desc": "A dark-blue hood. The embroidered stars shift when you are not looking."},
+	"maanharnas": {"name": "Moon Armor", "slot": "harnas", "def": 40, "mdef": 14, "agi": 1, "wie": ["krijger"], "price": 0,
+		"act": 5, "lijn": "harnas_krijger", "orde": 6,
+		"bron": "Act 5. Chest by the Great Lens. Not placed yet.",
+		"desc": "Silver that almost vanishes in moonlight. The armor seems to know you."},
+	"sterrenmantel": {"name": "Star Cloak", "slot": "harnas", "def": 14, "mdef": 34, "mag": 14, "agi": 2,
+		"wie": ["magier", "priester"], "price": 0,
+		"act": 5, "lijn": "harnas_stroom", "orde": 6,
+		"bron": "Act 5. Chest in Starrest. Not placed yet.",
+		"desc": "Dark-blue cloth with the stars of the first night embroidered on it."},
+	"sterrenring": {"name": "Star Ring", "slot": "accessoire", "mdef": 18, "mag": 8, "agi": 4, "price": 0,
+		"act": 5, "lijn": "ring", "orde": 5,
+		"bron": "Act 5. Trail of Cosmos, after Perihelia. Not placed yet.",
+		"desc": "A ring with a silver star. It points, very softly, toward the east."},
+	"memoria": {"name": "Memoria", "slot": "wapen", "atk": 84, "mag": 8, "mdef": 4, "agi": 2, "wie": ["krijger"], "price": 0,
+		"act": 6, "lijn": "zwaard", "orde": 7,
+		"bron": "Act 6. Chamber of Joy in the Unknown Core. Not placed yet.",
+		"desc": "A sword from the memory of the first laugh with Grandpa. It strikes true."},
+	"hartvuurstaf": {"name": "Heartfire Staff", "short": "Heartfire", "slot": "wapen", "atk": 6, "mag": 66, "mdef": 20, "agi": 2, "wie": ["magier"], "price": 0,
+		"act": 6, "lijn": "staf_noor", "orde": 6,
+		"bron": "Act 6. Chamber of Grief. Not placed yet.",
+		"desc": "A staff that grows warm when you say aloud a name you refuse to forget."},
+	"hartpsalm": {"name": "Heart Psalm", "slot": "wapen", "atk": 5, "mag": 68, "mdef": 24, "agi": 2, "wie": ["priester"], "price": 0,
+		"act": 6, "lijn": "staf_lotte", "orde": 6,
+		"bron": "Act 6. Chamber of Fear. Not placed yet.",
+		"desc": "A staff that keeps one voice, even when a hundred speak at once."},
+	"hartschild": {"name": "Heart Shield", "slot": "schild", "def": 40, "mdef": 16, "wie": ["krijger", "priester"], "price": 0,
+		"act": 6, "lijn": "schild", "orde": 7,
+		"bron": "Act 6. Gate of the Heart. Not placed yet.",
+		"desc": "A shield that bends with whoever stands behind it. It feels like a promise."},
+	"zouthelm": {"name": "Salt Helm", "slot": "helm", "def": 28, "mdef": 12, "wie": ["krijger"], "price": 0,
+		"act": 6, "lijn": "helm_krijger", "orde": 7,
+		"bron": "Act 6. Reward in Saltwatch. Not placed yet.",
+		"desc": "White as a crust of salt. Whoever wears it may cry again without shame."},
+	"traankap": {"name": "Tear Hood", "slot": "helm", "def": 8, "mdef": 26, "mag": 8, "wie": ["magier", "priester"], "price": 0,
+		"act": 6, "lijn": "helm_stroom", "orde": 6,
+		"bron": "Act 6. Chest in Saltwatch. Not placed yet.",
+		"desc": "A hood that smells of the sea. The brim stays wet, even when it is not raining."},
+	"tranenpantser": {"name": "Tearplate", "slot": "harnas", "def": 52, "mdef": 18, "wie": ["krijger"], "price": 0,
+		"act": 6, "lijn": "harnas_krijger", "orde": 7,
+		"bron": "Act 6. Reward from the lighthouse in Saltwatch. Not placed yet.",
+		"desc": "White as salt, strong as a promise. Forged when the village could cry again."},
+	"hartmantel": {"name": "Heart Cloak", "slot": "harnas", "def": 18, "mdef": 44, "mag": 18, "agi": 3,
+		"wie": ["magier", "priester"], "price": 0,
+		"act": 6, "lijn": "harnas_stroom", "orde": 7,
+		"bron": "Act 6. Chamber of Love. Not placed yet.",
+		"desc": "A cloak that whispers a different memory from every thread. All of them warm."},
+	"hartring": {"name": "Heart Ring", "slot": "accessoire", "mdef": 24, "mag": 10, "agi": 5, "price": 0,
+		"act": 6, "lijn": "ring", "orde": 6,
+		"bron": "Act 6. The Pendant closes into a heart. Not placed yet.",
+		"desc": "A ring shaped like a small heart. It is warm when someone says your name."},
 	# Task #4 (Monsterschaal en buit, HANDOFF_DUNGEON100_SCHAAL.md): buit van de dungeon van 100 verdiepingen.
 	# Id = "d100_<soort>_<niveau>", niveau 2-5 (niveau 1 = de uitrusting hierboven). Niet te koop.
 	# Welke stukken waar vallen: scripts/data/dungeon100_scaling.gd (GEAR). VOORLOPIGE waarden.

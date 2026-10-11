@@ -9,6 +9,7 @@ const TEX := "res://assets/puzzle/inktwurm_kast.png"
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
 const FRAME_TIME := 0.12
 const FLAG := "inktwurm_kast_open"
+const INKT_FLAG := "gloeiende_inktfles"
 const LAST := 5
 
 var room: Node = null
@@ -19,6 +20,7 @@ var shape: CollisionShape2D
 var _anim := false
 var _t := 0.0
 var _say := false
+var _flask := false
 var _worm: Node = null
 
 
@@ -93,14 +95,23 @@ func _process(delta: float) -> void:
 	if veld != null and is_instance_valid(veld) and bool(veld.get("busy")):
 		return
 	_say = false
+	var lines: Array = []
 	if _worm != null:
-		Dialog.show_lines(["Core Power tears the parchment. An Ink Worm writhes out of the cabinet."])
+		lines.append("Core Power tears the parchment. An Ink Worm writhes out of the cabinet.")
 	else:
-		Dialog.show_lines(["Core Power tears the parchment. The cabinet is empty."])
+		lines.append("Core Power tears the parchment. The cabinet is empty.")
+	if _flask:
+		lines.append("A glowing ink bottle lies among the scraps.")
+		_flask = false
+	Dialog.show_lines(lines)
 
 
 func _finish() -> void:
 	GameState.story_flags[FLAG] = true
+	if not GameState.story_flags.has(INKT_FLAG):
+		GameState.story_flags[INKT_FLAG] = true
+		GameState.inventory["gloeiende_inktfles"] = GameState.item_count("gloeiende_inktfles") + 1
+		_flask = true
 	_set_open_now()
 	_say = true
 

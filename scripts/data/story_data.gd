@@ -423,7 +423,13 @@ const EVENTS := {
 	],
 	"esdoorn_put": [{"do": [["say", "", ["An old well. Deep down, something pink flickers in the water."]]]}],
 	"ilse": [
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Ilse", ["You saved my Noor. She wants to go with you. I can see it on her.", "Take good care of her, {naam}."]]]},
+		{"if": {"flags": ["noor_gered"], "not_flags": ["ilse_thee"]}, "do": [
+			["say", "Ilse", ["You saved my Noor. She wants to go with you. I can see it on her.", "Take good care of her. And take this tea, for the road."]],
+			["give", "kruidenthee", 3],
+			["flag", "ilse_thee"],
+			["say", "", ["You receive 3x Herbal Tea!"]],
+		]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Ilse", ["Take good care of her, {naam}."]]]},
 		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Ilse", ["My Noor... She had those sparks for weeks. I should have seen it.", "Bring her back. Please."]]]},
 		{"do": [["say", "Ilse", ["Noor is outside, on the square. As always."]]]},
 	],
@@ -459,10 +465,11 @@ const EVENTS := {
 		["say", "{naam}", ["You're free. It's over."]],
 		["say", "Noor", ["No. Those roots whispered about the Archives. About a Warden.", "I'm coming with you. I want to know what's happening to my sparks."]],
 		["join", "noor", {"level_from": "dennis", "level_delta": -1, "gear": ["eiken_staf", "reisgewaad"]}],
+		["give", "wambuis", 1],
 		["flag", "noor_lid"],
 		["step", NOOR_GERED],
 		["refresh"],
-		["say", "", ["Noor joins the party!", "Quest complete: Save Noor from the Dark Wood"]],
+		["say", "", ["Noor joins the party!", "She gives you a Padded Jerkin from Mapleton.", "Quest complete: Save Noor from the Dark Wood"]],
 	]}],
 	"noor_woud": [{"do": [["say", "Noor", ["Let's go, {naam}."]]]}],
 }
