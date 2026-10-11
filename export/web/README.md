@@ -1,11 +1,14 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`f0a3a7a`, spelcode `44a22af`), Godot 4.7.2, threads uit.
+Web-build van `main` (`261a180`, spelcode `4aa0ec0`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`6e51c61`):
+Nieuw in deze build, bovenop de vorige web-build (`88a39bc`):
+- De 100-vloeren-grot neemt de hele party mee, ook elk Codex-monster. Iedereen start op level 1, zonder spullen en zonder spreuken.
+- In gewone kisten vind je soms een Vuurrol, Bliksemrol of Geneesrol. Die leert één held de spreuk, alleen tijdens de run.
+- Als de run stopt (dood, de grot uit, of de Warp), komen je echte levels, spullen, spreuken en monsters terug.
 - De Inktwurm heeft zijn eigen sprites (gevecht, rug, idle en op de kaart).
 - In de Golemhal staat rechts een boekenkast. Kernkracht (de veld-vuurbal, pas na de Golem) scheurt hem open. Dan kronkelt de Inktwurm eruit.
 - Betatest begint met een Inktwurm als buddy (Mosslijm en Moskonijn staan er ook in). Had je Betatest al gestart, dan komt de Inktwurm er de volgende keer bij.
