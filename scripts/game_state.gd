@@ -117,6 +117,8 @@ var dungeon100_seed: int = 0
 ## laatst geactiveerd rustpunt (0, 10, ... 100) en hoogste bereikte verdieping
 var dungeon100_checkpoint := 0
 var dungeon100_best := 0
+## Open warpers van deze run (verdiepingen 1, 50, 99). Mee in het dungeon100-blok van de save.
+var dungeon100_warpers: Array[int] = []
 ## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md):
 ## PERMANENTE items uit Blauwe Kisten (id -> aantal): overleven de dood en elke nieuwe run.
 var dungeon100_permanent := {}
@@ -874,7 +876,8 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"codex": codex_save_data(),
 		"uniek": unique_done.duplicate(true),
 		"dungeon100": Dungeon100RulesC.save_data(dungeon100_floor, dungeon100_checkpoint, dungeon100_best, dungeon100_seed,
-				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot}),
+				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot,
+				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
 	}
 	data["party"] = _party_save()
@@ -1586,6 +1589,7 @@ func dungeon100_end_run(deliver := true) -> bool:
 	dungeon100_checkpoint = 0
 	dungeon100_floor = 0
 	dungeon100_seed = 0
+	dungeon100_warpers = []
 	if deliver:
 		dungeon100_deliver()
 	return true
@@ -1608,6 +1612,38 @@ func dungeon100_deliver() -> int:
 ## Blauwe Kist-items die nog niet in de echte tas zaten komen er nu in.
 func dungeon100_leave() -> bool:
 	return dungeon100_end_run(true)
+
+
+## Deze verdieping is bereikt: best gaat omhoog, en een warper-verdieping gaat open.
+func dungeon100_reach_floor(floor_nr: int) -> void:
+	if not Dungeon100RulesC.is_valid_floor(floor_nr):
+		return
+	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, floor_nr)
+	dungeon100_warpers = Dungeon100RulesC.unlock_warper(dungeon100_warpers, floor_nr)
+
+
+## Mag je naar deze warper? Alleen tijdens een run, naar een andere verdieping die al open is.
+func dungeon100_warper_can(dest: int) -> bool:
+	if not dungeon100_run_active() or changing_map or in_battle:
+		return false
+	if not Dungeon100RulesC.is_valid_floor(dungeon100_floor) or dest == dungeon100_floor:
+		return false
+	return Dungeon100RulesC.warper_open(dungeon100_warpers, dest)
+
+
+## Sprong naar een open warper. false = dicht, zelfde verdieping, of geen run. De run blijft lopen
+## (dit is niet het Warp-kristal van verdieping 100).
+signal dungeon100_warper_traveled(from_floor: int, to_floor: int)
+func dungeon100_warper_go(dest: int) -> bool:
+	if not dungeon100_warper_can(dest):
+		return false
+	var from := dungeon100_floor
+	dungeon100_floor = dest
+	dungeon100_reach_floor(dest)
+	pending_spawn = Dungeon100RulesC.WARPER_SPAWN
+	dungeon100_warper_traveled.emit(from, dest)
+	change_map(Dungeon100RulesC.dungeon_scene, Dungeon100RulesC.WARPER_SPAWN)
+	return true
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
@@ -1640,6 +1676,7 @@ func dungeon100_defeat() -> String:
 		dungeon100_checkpoint = 0
 		dungeon100_floor = 0
 		dungeon100_seed = 0
+		dungeon100_warpers = []
 	_full_heal()
 	pending_spawn = Dungeon100RulesC.WORLD_SPAWN
 	pending_respawn_msg = DUNGEON100_RESET_LINES.duplicate()
@@ -1659,6 +1696,7 @@ func dungeon100_load(raw) -> void:
 	dungeon100_permanent = v["permanent"]
 	dungeon100_delivered = v["delivered"]
 	dungeon100_snapshot = v["snapshot"]
+	dungeon100_warpers = v["warpers"]
 
 
 # ---------------------------------------------------------------- kernfragmenten (v0.15)
