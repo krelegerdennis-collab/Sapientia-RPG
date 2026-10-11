@@ -3,10 +3,14 @@ extends Control
 ##
 ##                [Magie]
 ##        [Item] [Aanval] [Verdedig]
-##               [Vluchten]
+##               [Vluchten] [Codex]
 ##
 ## Index = battle.gd COMMANDS: 0 Aanval (midden), 1 Magie (boven), 2 Item (links),
-## 3 Verdedig (rechts), 4 Vluchten (onder).
+## 3 Verdedig (rechts), 4 Vluchten (onder), 5 Codex (v0.19, rechtsonder: vangen / bondgenoot
+## wisselen). De Codex-knop is VERBORGEN als open() hem in 'hidden_list' krijgt (oefengevecht, of
+## nog geen pagina's en geen Lege Boeken); verborgen = niet te zien, niet te kiezen, niet te tikken.
+## Codex bereik je met rechts vanaf Vluchten (of door erop te tikken); vanaf Codex gaat omhoog naar
+## Verdedig en links naar Vluchten. De oude paden (0-4) zijn ongewijzigd.
 ## Besturing: D-pad/pijltjes kiezen een arm (vanaf een arm terug naar het midden met de
 ## tegenovergestelde richting), A = kiezen, B = terug, of direct op een knop tikken.
 ## Uitgeschakelde commando's zijn grijs (frame 2); A of tikken doet dan niets.
@@ -20,10 +24,11 @@ signal finished(index: int)
 signal denied(index: int)          # A/tik op een uitgeschakeld commando
 
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
-const IDS := ["aanval", "magie", "item", "verdedig", "vluchten"]
-const NAMES := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten"]
+const IDS := ["aanval", "magie", "item", "verdedig", "vluchten", "codex"]
+const NAMES := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten", "Codex"]
+const CODEX := 5
 ## Plek van elke knop in het kruis (in knoppen; midden = 0,0)
-const CELLS := [Vector2i(0, 0), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1)]
+const CELLS := [Vector2i(0, 0), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
 const BUTTON := 24.0
 const GAP := 1.0
 const ART_DIR := "res://assets/ui/"
@@ -31,10 +36,11 @@ const ART_DIR := "res://assets/ui/"
 var active := false
 var selected := 0
 var allow_cancel := true
-var enabled: Array = [true, true, true, true, true]
+var enabled: Array = [true, true, true, true, true, true]
+var hidden_cmds: Array = []            # v0.19: indexen die niet getoond worden (bv. [CODEX])
 var last_result := -2
 var hero_name := ""
-var buttons: Array[Control] = []    # 5 knoppen (TextureRect), index = commando
+var buttons: Array[Control] = []    # 6 knoppen (TextureRect), index = commando
 var name_tab: PanelContainer
 var name_label: Label
 var _frames := {}                   # id -> [normaal, gekozen, uit] (AtlasTexture) of leeg
@@ -107,8 +113,9 @@ func place(center: Vector2) -> void:
 ## Rechthoek om het hele kruis (in battle-eenheden).
 func cross_rect() -> Rect2:
 	var r := Rect2(buttons[0].position, buttons[0].size)
-	for b in buttons:
-		r = r.merge(Rect2(b.position, b.size))
+	for i in buttons.size():
+		if is_shown(i):
+			r = r.merge(Rect2(buttons[i].position, buttons[i].size))
 	return r
 
 
@@ -116,10 +123,17 @@ func button_rect(i: int) -> Rect2:
 	return Rect2(buttons[i].position, buttons[i].size)
 
 
-func open(who: String, enabled_list: Array, start_index := 0, can_cancel := true) -> void:
+func open(who: String, enabled_list: Array, start_index := 0, can_cancel := true, hidden_list := []) -> void:
 	hero_name = who
 	enabled = enabled_list.duplicate()
+	while enabled.size() < IDS.size():
+		enabled.append(true)
+	hidden_cmds = hidden_list.duplicate()
+	for i in buttons.size():
+		buttons[i].visible = is_shown(i)
 	selected = clampi(start_index, 0, IDS.size() - 1)
+	if not is_shown(selected):
+		selected = 0
 	allow_cancel = can_cancel
 	last_result = -2
 	active = true
@@ -140,11 +154,25 @@ func deactivate() -> void:
 
 
 func is_enabled(i: int) -> bool:
-	return i >= 0 and i < enabled.size() and bool(enabled[i])
+	return i >= 0 and i < enabled.size() and bool(enabled[i]) and is_shown(i)
+
+
+## v0.19: staat de knop in beeld? (de Codex-knop kan verborgen zijn)
+func is_shown(i: int) -> bool:
+	return i >= 0 and i < IDS.size() and not hidden_cmds.has(i)
 
 
 ## Welke knop krijg je als je vanaf 'from' in richting 'dir' drukt?
-static func neighbour(from: int, dir: Vector2i) -> int:
+## v0.19: codex_shown = is de Codex-knop (rechtsonder) zichtbaar?
+static func neighbour(from: int, dir: Vector2i, codex_shown := false) -> int:
+	if from == CODEX:
+		if dir == Vector2i.UP:
+			return 3                   # Verdedig
+		if dir == Vector2i.LEFT:
+			return 4                   # Vluchten
+		return CODEX
+	if codex_shown and from == 4 and dir == Vector2i.RIGHT:
+		return CODEX
 	var cell: Vector2i = CELLS[from]
 	if from != 0 and cell == -dir:
 		return 0                       # tegenovergestelde richting: terug naar het midden
@@ -152,6 +180,8 @@ static func neighbour(from: int, dir: Vector2i) -> int:
 
 
 func select(i: int) -> void:
+	if not is_shown(i):
+		return
 	selected = clampi(i, 0, IDS.size() - 1)
 	_refresh()
 
@@ -168,7 +198,7 @@ func _process(delta: float) -> void:
 	for pair in [["move_up", Vector2i.UP], ["move_down", Vector2i.DOWN],
 			["move_left", Vector2i.LEFT], ["move_right", Vector2i.RIGHT]]:
 		if Input.is_action_just_pressed(pair[0]):
-			select(neighbour(selected, pair[1]))
+			select(neighbour(selected, pair[1], is_shown(CODEX)))
 			return
 	if Input.is_action_just_pressed("interact"):
 		_choose(selected)
@@ -193,7 +223,7 @@ func _choose(i: int) -> void:
 func _on_button_input(event: InputEvent, i: int) -> void:
 	var pressed: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) \
 			or (event is InputEventScreenTouch and event.pressed)
-	if not pressed or not active:
+	if not pressed or not active or not is_shown(i):
 		return
 	buttons[i].accept_event()
 	select(i)
@@ -239,6 +269,18 @@ func _draw_placeholder(b: Control, i: int) -> void:
 	var r := Rect2(Vector2.ZERO, b.size)
 	b.draw_rect(r, Color(UiStyleC.INK, 0.9))
 	b.draw_rect(r.grow(-0.5), UiStyleC.HILITE if sel else UiStyleC.BORDER_DIM, false, 1.0)
+	if i == CODEX:
+		# v0.19 reserve-icoon (tot ART knop_codex.png levert): open boekje met paarse rug
+		var col: Color = UiStyleC.TEXT if on else UiStyleC.TEXT_OFF
+		var glow: Color = Color(0.72, 0.45, 1.0) if on else UiStyleC.TEXT_OFF
+		b.draw_rect(Rect2(5, 7, 6, 10), Color(col, 0.9))
+		b.draw_rect(Rect2(13, 7, 6, 10), Color(col, 0.9))
+		b.draw_rect(Rect2(11, 6, 2, 12), glow)
+		b.draw_rect(Rect2(6, 9, 4, 1), Color(UiStyleC.INK, 0.8))
+		b.draw_rect(Rect2(14, 9, 4, 1), Color(UiStyleC.INK, 0.8))
+		b.draw_rect(Rect2(6, 12, 4, 1), Color(UiStyleC.INK, 0.8))
+		b.draw_rect(Rect2(14, 12, 4, 1), Color(UiStyleC.INK, 0.8))
+		return
 	var font := b.get_theme_default_font()
 	if font:
 		b.draw_string(font, Vector2(8, 16), NAMES[i].left(1), HORIZONTAL_ALIGNMENT_LEFT, -1, 10,

@@ -10,6 +10,8 @@ extends Node
 ##   Deel F: monster 10 stappen verlamd (ook na een ander gevecht), daarna loopt hij weer en
 ##           start aanraken weer een gevecht. Deel G: baas (Golem) krijgt niets.
 ##   Deel H: save/load: vaardigheid blijft, geen verlamming blijft hangen.
+##   Deel I: v0.19 haak on_kernkracht_hit() (geheime Inktwurm-kast van Forge): 1x bij een treffer, vóór de
+##           inslag; ook via de parent; niet buiten bereik (> 3 tegels) en niet door een ander object heen.
 ## Met --shots=map: kk_gevecht_vlucht, kk_gevecht_inslag, kk_veld_vlucht, kk_veld_geblokkeerd,
 ## kk_veld_monster_verlamd, kk_veld_knop (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
@@ -86,6 +88,9 @@ func _run() -> void:
 	if part("H"):
 		print("=== Deel H: save/load ===")
 		await _save_tests()
+	if part("I"):
+		print("=== Deel I: haak on_kernkracht_hit (v0.19) ===")
+		await _hook_tests()
 	print("KERNKRACHTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -952,3 +957,104 @@ func _save_tests() -> void:
 			and not veld().busy and not player().input_locked)
 	await pframes(3)
 	check("na laden: KERN-knop zichtbaar", touch().show_kern)
+
+
+# ================================================================ deel I: haak on_kernkracht_hit (v0.19)
+const HOOK_SRC := "extends Node2D\nvar hits := 0\nvar veld: Node = null\nvar impact_before := false\n" \
+		+ "func on_kernkracht_hit() -> void:\n\thits += 1\n\timpact_before = veld != null and veld.last_impact == null\n"
+
+
+## Massief blokje (16x16) op tile t; met 'hook' = het blokje zelf heeft on_kernkracht_hit(),
+## 'parent_hook' = alleen de parent heeft hem (het blokje zelf niet).
+func dummy(t: Vector2i, hook: bool, parent_hook := false) -> Node2D:
+	var body := StaticBody2D.new()
+	body.name = "HaakTest"
+	var cs := CollisionShape2D.new()
+	var sh := RectangleShape2D.new()
+	sh.size = Vector2(14, 14)
+	cs.shape = sh
+	body.add_child(cs)
+	var holder: Node2D = body
+	if hook or parent_hook:
+		var sc := GDScript.new()
+		sc.source_code = HOOK_SRC.replace("extends Node2D", "extends StaticBody2D") if hook else HOOK_SRC
+		sc.reload()
+		if hook:
+			body.set_script(sc)
+			body.set("veld", veld())
+		else:
+			holder = Node2D.new()
+			holder.set_script(sc)
+			holder.set("veld", veld())
+			holder.name = "HaakOuder"
+			holder.add_child(body)
+	var at := Vector2(t) * 16 + Vector2(8, 8)
+	if holder == body:
+		body.position = at
+	else:
+		body.position = at
+	scene().get_node("Objects").add_child(holder)
+	return holder
+
+
+func _hook_tests() -> void:
+	setup(SD.KLAAR, true)
+	var room := await enter(INGANG, "ingang")
+	if room == null:
+		check("archief_ingang geladen", false)
+		return
+	await freeze_monsters()
+	var v := veld()
+	# plek met 4 vrije tegels op een rij (dan kan er een blokje op tegel 2 en op tegel 4)
+	var s := find_shot(func(r):
+		if r["hit"] != null:
+			return false
+		var t4: Vector2i = r["tiles"][2] + (r["tiles"][2] - r["tiles"][1])
+		return v.blocker_at(t4).is_empty() and room.ground.get_cell_source_id(t4) != -1)
+	check("I: plek met 4 vrije tegels gevonden", not s.is_empty())
+	if s.is_empty():
+		return
+	var st: Vector2i = s["start"]
+	var d: Vector2i = s["dir"]
+	# 1) treffer op tegel 2: precies 1x, vóór de inslag
+	var a := dummy(st + d * 2, true)
+	await frames(3)
+	v.last_impact = null
+	var res := await shoot(st, d)
+	var r: Dictionary = res.get("result", {})
+	check("I: blokje op tegel 2 met on_kernkracht_hit: 1x aangeroepen (%d), r.hook = blokje" % int(a.get("hits")),
+			int(a.get("hits")) == 1 and r.get("hook") == a and r.get("hit") == st + d * 2)
+	check("I: aangeroepen vóór de inslag", bool(a.get("impact_before")))
+	a.queue_free()
+	await frames(3)
+	await wait_until(func(): return v.can_fire() == "", 2.0)
+	# 2) buiten bereik (tegel 4): niets
+	var far := dummy(st + d * 4, true)
+	await frames(3)
+	res = await shoot(st, d)
+	r = res.get("result", {})
+	check("I: blokje op tegel 4 (buiten bereik): niet aangeroepen, geen hook", int(far.get("hits")) == 0 and r.get("hook") == null and r.get("hit") == null)
+	far.queue_free()
+	await frames(3)
+	await wait_until(func(): return v.can_fire() == "", 2.0)
+	# 3) niet door een ander object heen
+	var wall := dummy(st + d * 1, false)
+	var behind := dummy(st + d * 2, true)
+	await frames(3)
+	res = await shoot(st, d)
+	r = res.get("result", {})
+	check("I: ander object ervoor (tegel 1): het blokje erachter krijgt niets", int(behind.get("hits")) == 0
+			and r.get("hook") == null and r.get("hit") == st + d)
+	wall.queue_free()
+	behind.queue_free()
+	await frames(3)
+	await wait_until(func(): return v.can_fire() == "", 2.0)
+	# 4) alleen de parent heeft de methode
+	var par := dummy(st + d * 3, false, true)
+	await frames(3)
+	res = await shoot(st, d)
+	r = res.get("result", {})
+	check("I: methode op de parent: parent 1x aangeroepen", int(par.get("hits")) == 1 and r.get("hook") == par)
+	par.queue_free()
+	await frames(3)
+	check("I: hook_target(null) / zonder methode = null", KernVeld.hook_target(null) == null and KernVeld.hook_target(room.ground) == null)

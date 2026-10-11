@@ -400,6 +400,8 @@ func _data_tests() -> void:
 	for k in CD.SPECIES:
 		var kb := str(CD.species(k)["back"])
 		if kb == "" or not ResourceLoader.exists(kb):
+			if bool(GD.ENEMIES.get(k, {}).get("art_pending", false)):
+				continue        # v0.19: art onderweg (Inktwurm, Forge plaatst hem); plaatsvervanger mag
 			zonder_rug.append(k)
 	check("v0.18 alle Codex-soorten hebben een eigen rug (geen plaatsvervanger meer; zonder: %s)" % [zonder_rug], zonder_rug.is_empty())
 	check("onbekende vijand -> geen soort", CD.species_from("x", {"enemy": "bestaat_niet"}).is_empty() and CD.species_for_enemy("bestaat_niet") == "")

@@ -110,7 +110,7 @@ func _make_sprite(d: Dictionary) -> void:
 		placeholder = true
 		directional = false
 		var GD := preload("res://scripts/data/game_data.gd")
-		var bp := str(GD.ENEMIES.get(enemy_id, {}).get("sprite", ""))
+		var bp := GD.enemy_sprite(GD.ENEMIES.get(enemy_id, {}))   # v0.19: ook als de gevechts-art nog ontbreekt
 		if bp != "" and ResourceLoader.exists(bp):
 			var tex: Texture2D = load(bp)
 			sprite.texture = tex
