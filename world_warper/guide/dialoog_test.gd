@@ -83,6 +83,8 @@ static func _check_tekst(fouten: Array) -> void:
 		fouten.append("interne id is niet gids")
 	if str(Dialoog.NAAM) != "ECHO":
 		fouten.append("zichtbare naam is niet ECHO")
+	if str(Dialoog.NAAM) == "IVA":
+		fouten.append("zichtbare naam is nog IVA")
 	_verboden(fouten, "naam", str(Dialoog.NAAM))
 	for stap in Dialoog.steps():
 		var regels = stap.get("lines", [])

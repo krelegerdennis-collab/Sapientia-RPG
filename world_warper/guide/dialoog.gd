@@ -9,7 +9,7 @@ extends RefCounted
 
 const ID := "gids"
 
-## Canon-naam ECHO. De zinnen zelf blijven voorlopig.
+## Canon-naam. De bonus-lore (digitale echo van een onderzoeker) blijft een latere onthulling.
 const NAAM := "ECHO"
 
 const FLAG_VOORVOEGSEL := "world_warper_guide_"

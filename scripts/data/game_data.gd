@@ -199,7 +199,7 @@ const ENEMIES := {
 				"rect": [82, 52, 30, 30],   # kern in golem_boss_v2.png (196x182)
 			},
 		},
-		"desc": "A golem of books, parchment, and code. It guards knowledge no one is allowed to read anymore.",
+		"desc": "Een wachter zonder ogen, maar met duizend oren. Hij hoort elke gedachte die het Archief binnenkomt. De Oude Mensheid bouwde hem niet om te doden, maar om te bewaren. Sapientia gaf hem een nieuw doel: alles wat niet past, wordt verwijderd.",
 		"habitat": ["gras", "bos", "baas"],
 	},
 	# ------------------------------------------------------------ v0.17 HET DONKER WOUD
@@ -263,7 +263,7 @@ const ENEMIES := {
 			"exp": 400, "gold": 150,
 			"skills": [{"name": "Root Grip", "chance": 0.25, "power": 1.6}],
 		},
-		"desc": "The old king of the Dark Wood: a dead tree with a glitching heart, that wants to catch everything alive in its roots.",
+		"desc": "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat.",
 		"habitat": ["woud", "baas"],
 	},
 	# Het Gesimuleerde Archief (Dungeon100): de Mimic, een kist die terugbijt. Komt alleen uit een
@@ -344,7 +344,7 @@ const ENEMIES := {
 			"weak": ["ijs", "fysiek"],
 			"weak_matters": true,
 		},
-		"desc": "Een kolossale slingerplant. Sapientia's stilte: leven dat geen kant op kan.",
+		"desc": "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden.",
 		"habitat": ["archief", "baas"],
 	},
 	# TODO(design): De Genezer HP 220. Eerste treffer 30% en leech 8-12% staan in de canon; het totaal-HP niet.
@@ -365,7 +365,7 @@ const ENEMIES := {
 			"archief2_leech": true,
 			"archief2_zin": "In stilte ligt vrede. Ik corrigeer wat groeit.",
 		},
-		"desc": "Half plant, half staal. Hij geneest door te nemen.",
+		"desc": "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg.",
 		"habitat": ["archief", "baas"],
 	},
 	# Het Zingende Graan: klein mini-gevecht op de mistrand. Geen eigen art (art_pending).
