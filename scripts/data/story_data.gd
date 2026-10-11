@@ -115,6 +115,7 @@ const MAP_ENTER := [
 	{"map": "huis", "if": {"step": OPGESLOTEN}, "event": "opgesloten_timer"},
 	# v0.17 eerste keer in Esdoorn (na de Golem): Noor ontmoeten, ze wordt het woud in gesleurd
 	{"map": ESDOORN, "if": {"flags": [GOLEM_FLAG], "not_flags": ["noor_ontmoet"]}, "event": "noor_ontmoeting"},
+	{"map": "res://scenes/maps/leven_ingang.tscn", "if": {"not_flags": ["archief2_keten"]}, "event": "archief2_keten"},
 	# v0.17 terug op de open plek na de winst op de Wortelkoning: Noor is vrij en sluit zich aan
 	{"map": WOUD_BAAS, "if": {"flags": [WORTELKONING_FLAG], "not_flags": ["noor_gered"]}, "event": "noor_bevrijd"},
 ]
@@ -375,6 +376,17 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+	# Waarom Archief 1 naar Archief 2 wijst. Eenmalig, bij de kas-ingang.
+	"archief2_keten": [{"do": [
+		["say", "", [
+			"De Oude Mensheid maakte de zes Archieven als keten.",
+			"Elke kern activeert de volgende. Geen uitnodiging: een noodsignaal.",
+			"Archief 1 zond: Iemand is binnen. Archief 2 reageerde als eerste.",
+			"Sapientia heeft dat signaal gemanipuleerd.",
+			"Je denkt dat je volgt. Sapientia leidt je.",
+		]],
+		["flag", "archief2_keten"],
+	]}],
 
 	# --- de ontmoeting (eenmalig, MAP_ENTER; vlag noor_ontmoet)
 	"noor_ontmoeting": [{"do": [

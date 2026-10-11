@@ -244,7 +244,7 @@ const ROOMS := {
 					"done_lines": ["Het pad ligt er al."]},
 		},
 		"entrance": {"map": "res://scenes/maps/leven_ingang.tscn", "spawn": "boog"},
-		# TODO(design): verdieping 2-4, Lotte, De Genezer en de World Warper horen hier niet.
-		"exit": {"lines": ["Verder in de kas is het nog dicht."]},
+		"spawns": {"noord": [7, 1, "down"]},
+		"exit": {"map": "res://scenes/maps/archief_2_v2_gang.tscn", "spawn": "zuid"},
 	},
 }

@@ -362,9 +362,17 @@ func map_ready(map: Node) -> void:
 
 
 func _run_later(ev: String) -> void:
-	# eerst de map laten infaden
+	# eerst de map laten infaden. Alleen op díe map: een test of een uitgang
+	# kan binnen 0,35 s al verder zijn, en dan hoort het event niet mee te reizen.
 	_lock(true)
+	var path := ""
+	var hier := _map()
+	if hier != null:
+		path = str(hier.scene_file_path)
 	await get_tree().create_timer(0.35).timeout
+	var nu := _map()
+	if nu == null or str(nu.scene_file_path) != path:
+		return
 	if not running:
 		run(ev)
 

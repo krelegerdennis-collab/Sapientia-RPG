@@ -97,6 +97,14 @@ var puzzle_latched := {}
 var kernfragmenten := {}
 ## v0.15: net geabsorbeerde kern; map.gd speelt dan het absorptie-moment af (niet in de save).
 var pending_kern_absorb := ""
+## Archief 2: plaat-stadia ("platen") gaan mee in de save. De rest is alleen dit gevecht.
+var archief2 := {"platen": {}}
+var archief2_temp_ally := {}
+var archief2_party_filter := ""
+var pending_story_loss := false
+var archief2_lotte_join := false
+var archief2_last_open := {}
+var archief2_last_leech := {}
 ## Codex (Kernfragment stap 2): ingeschreven monsters (pagina's, zie codex_data.gd), de uid van
 ## de actieve bondgenoot ("" = geen) en de teller voor unieke ids (nooit hergebruikt).
 ## codex_changed: de actieve bondgenoot (of de lijst) is veranderd. De volger op de kaart luistert.
@@ -266,7 +274,8 @@ func _ready() -> void:
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
 			["--actorsfxtest", "res://scripts/tests/actor_sfx_tests.gd", "ActorSfxTest", "actorsfxtest"],
 			["--catalogustest", "res://scripts/tests/catalogus_tests.gd", "CatalogusTest", "catalogustest"],
-			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"]]:
+			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
+			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -397,6 +406,13 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	last_respawn = {}
 	story_step = StoryData.START
 	story_flags = {}
+	archief2 = {"platen": {}}
+	archief2_temp_ally = {}
+	archief2_party_filter = ""
+	pending_story_loss = false
+	archief2_lotte_join = false
+	archief2_last_open = {}
+	archief2_last_leech = {}
 	pending_tutorial = {}
 	dungeon100_load({})
 	if has_node("/root/Story"):
@@ -479,6 +495,35 @@ func join_member(id: String, level := 1, gear: Array = []) -> bool:
 	h["hp"] = h["max_hp"]
 	h["mp"] = h["max_mp"]
 	return true
+
+
+## Archief 2: winst of verlies tegen Lotte wordt een verhaaleinde, geen game over.
+## Vluchten telt niet. Geeft het resultaat terug dat end_battle verder gebruikt.
+func archief2_verwerk_einde(result: String) -> String:
+	if not pending_story_loss:
+		return result
+	if result == "win" or result == "lose":
+		archief2_lotte_join = true
+		if result == "lose":
+			result = "story"
+	pending_story_loss = false
+	archief2_temp_ally = {}
+	archief2_party_filter = ""
+	return result
+
+
+func archief2_plaat(room_id: String, plaat_id: String, fallback: int) -> int:
+	var sleutel := "%s:%s" % [room_id, plaat_id]
+	var platen: Dictionary = archief2.get("platen", {})
+	if platen.has(sleutel):
+		return int(platen[sleutel])
+	return fallback
+
+
+func archief2_zet_plaat(room_id: String, plaat_id: String, staat: int) -> void:
+	if not (archief2.get("platen") is Dictionary):
+		archief2["platen"] = {}
+	archief2["platen"]["%s:%s" % [room_id, plaat_id]] = staat
 
 
 ## v0.17 Niveau van een held in de party (0 = zit er niet in).
@@ -879,6 +924,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot,
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
+		"archief2": archief2.duplicate(true),
 	}
 	data["party"] = _party_save()
 	return data
@@ -980,6 +1026,17 @@ func apply_state(d: Dictionary) -> bool:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	puzzle_latched = {}
+	archief2 = {"platen": {}}
+	var a2 = d.get("archief2", {})
+	if a2 is Dictionary and a2.get("platen") is Dictionary:
+		var platen := {}
+		for k in a2["platen"]:
+			platen[str(k)] = int(a2["platen"][k])
+		archief2 = {"platen": platen}
+	archief2_temp_ally = {}
+	archief2_party_filter = ""
+	pending_story_loss = false
+	archief2_lotte_join = false
 	var pl = d.get("puzzle_latched", {})
 	if pl is Dictionary:
 		for k in pl:
@@ -1352,6 +1409,7 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),
 ## of naar het begin van het spel (game over).
 func end_battle(result: String) -> void:
+	result = archief2_verwerk_einde(result)
 	last_battle_result = result
 	pending_tier = 0
 	pending_archief = false

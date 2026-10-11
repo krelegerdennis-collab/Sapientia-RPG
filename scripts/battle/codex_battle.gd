@@ -34,8 +34,9 @@ func _init(b: Control) -> void:
 func add_allies() -> void:
 	if not battle.tutorial.is_empty():
 		return                                  # oefengevecht: alleen de helden
-	var page: Dictionary = GameState.codex_active_page()
-	if page.is_empty() or int(page["hp"]) <= 0:
+	# Archief 2: tijdelijke Mosslijm (niet in de Codex) gaat voor op de actieve pagina.
+	var page: Dictionary = GameState.archief2_temp_ally if not GameState.archief2_temp_ally.is_empty() else GameState.codex_active_page()
+	if page.is_empty() or int(page.get("hp", 0)) <= 0:
 		return
 	var row: int = battle.heroes.size()
 	var c: Dictionary = battle._make_combatant(str(page["name"]), page, true, row)

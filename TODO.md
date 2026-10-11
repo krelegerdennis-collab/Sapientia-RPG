@@ -17,7 +17,7 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
 - [ ] 3 grote hoofdeilanden opzetten, elk met 2 Archieven (totaal 6 Archieven)
 - [ ] Worldmap 1 = start-eiland
   - [ ] Archief 1: Eerste Archief (bij Opa), startpunt van het verhaal
-  - [ ] Archief 2: Archief van Leven
+  - [x] Archief 2: Archief van Leven
   - Bevat Dennis' huis en Wilgendal (eerste dorp met shops)
 - [ ] Worldmap 2 = tweede eiland
 
@@ -150,30 +150,36 @@ Waarom Archief 1 naar Archief 2 wijst: de Oude Mensheid ontwierp de zes Archieve
 
 #### Verhaallijn
 
-- [ ] In het spel zetten: Dennis volgt het noodsignaal van de kern van Archief 1 naar Archief 2. Sapientia heeft het signaal gemanipuleerd; Dennis denkt dat hij moet volgen, maar Sapientia leidt hem
-- [ ] In het spel zetten: Lotte, priesteres van de Orde van de Stille Vlam, gecorrumpeerd door Sapientia, als mini-baas halverwege
+- [x] In het spel zetten: Dennis volgt het noodsignaal van de kern van Archief 1 naar Archief 2. Sapientia heeft het signaal gemanipuleerd; Dennis denkt dat hij moet volgen, maar Sapientia leidt hem
+  Bord in de kas-ingang. De kas gaat open op de bestaande golem-vlag.
+- [x] In het spel zetten: Lotte, priesteres van de Orde van de Stille Vlam, gecorrumpeerd door Sapientia, als mini-baas halverwege
 
 #### Lotte's entree (midden van de dungeon, verdieping 2)
 
-- [ ] Lotte verschijnt als mini-baas op verdieping 2 van 4
-- [ ] Gecorrumpeerd door Sapientia, met visuele glitch-effecten
-- [ ] Gevecht bouwen: Dennis en één Codex-monster tegen Lotte
+- [x] Lotte verschijnt als mini-baas op verdieping 2 van 4
+- [x] Gecorrumpeerd door Sapientia, met visuele glitch-effecten
+  Placeholder-tint paars in het gevecht. Geen shader.
+- [x] Gevecht bouwen: Dennis en één Codex-monster tegen Lotte
   De speler kiest één gevangen Codex-monster. Heeft de speler er nog geen, dan vecht een tijdelijke Mosslijm mee (leermoment).
-- [ ] Bij verlies is het een story death, geen game over
-  - [ ] Cutscene bouwen: Lotte breekt zelf de glitch van Sapientia
-  - [ ] Ze beseft wat er gebeurd is en sluit zich aan bij de party
-  - [ ] Of de speler wint of verliest: Lotte sluit aan
-- [ ] Na het gevecht sluit Lotte aan als vast party-lid, op hetzelfde level als Dennis
-- [ ] Daarna verdieping 3 en 4 met Dennis, Lotte en het gekozen Codex-monster. Mosslijm is alleen het leermoment
+- [x] Bij verlies is het een story death, geen game over
+  - [x] Cutscene bouwen: Lotte breekt zelf de glitch van Sapientia
+  - [x] Ze beseft wat er gebeurd is en sluit zich aan bij de party
+  - [x] Of de speler wint of verliest: Lotte sluit aan
+- [x] Na het gevecht sluit Lotte aan als vast party-lid, op hetzelfde level als Dennis
+- [x] Daarna verdieping 3 en 4 met Dennis, Lotte en het gekozen Codex-monster. Mosslijm is alleen het leermoment
+  Het gekozen monster loopt mee als Codex-volger. Een tijdelijke Mosslijm blijft niet. TODO(design): de veldparty kent geen vierde held.
 
 #### Lotte's stats en skills bij aansluiting
 
 Lotte's start-level: hetzelfde level als Dennis op dat moment. Gelijkwaardige metgezel, geen hulpje. Gebalanceerd ongeacht speelsnelheid.
 
-- [ ] Klasse: Priester
-- [ ] Elementen: Licht (heal en buffs) en IJs (aanval)
-- [ ] Startuitrusting: priester-standaard (staf en robes)
-- [ ] Startspreuken: Grade 1 Licht (heal) en Grade 1 IJs (aanval)
+- [x] Klasse: Priester
+  Class-id blijft Priest, zoals Warrior en Mage. De dialoog zegt priester.
+- [x] Elementen: Licht (heal en buffs) en IJs (aanval)
+- [x] Startuitrusting: priester-standaard (staf en robes)
+  Bestaande items: eiken_staf en reisgewaad.
+- [x] Startspreuken: Grade 1 Licht (heal) en Grade 1 IJs (aanval)
+  genees en rijp.
 
 #### Puzzel-mechaniek: groeiende platen
 
@@ -185,13 +191,13 @@ B) Tegen-platen: krimpen bij aanraking. De speler moet ze vermijden om ruimte te
 
 C) Licht-platen: groeien alleen als Lotte's Licht-magie erop schijnt. Lotte heeft daarmee een rol in puzzels, niet alleen in gevecht.
 
-- [ ] Kernmechaniek: planten of platen die groeien als je ze activeert
-- [ ] Groeiende platen vormen bruggen, plateaus en paden
-- [ ] De speler moet de juiste volgorde vinden om door te komen
+- [x] Kernmechaniek: planten of platen die groeien als je ze activeert
+- [x] Groeiende platen vormen bruggen, plateaus en paden
+- [x] De speler moet de juiste volgorde vinden om door te komen
 - [ ] Combinaties met bestaande puzzel-elementen (kasten en hendels uit Archief 1)
-- [ ] Moeilijkheid per verdieping opbouwen
-- [ ] De nieuwe mechanic introduceren op verdieping 1, tutorial-achtig
-- [ ] Verdieping 3: ketting-platen, tegen-platen en licht-platen implementeren
+- [x] Moeilijkheid per verdieping opbouwen
+- [x] De nieuwe mechanic introduceren op verdieping 1, tutorial-achtig
+- [x] Verdieping 3: ketting-platen, tegen-platen en licht-platen implementeren
 
 #### Baas: De Genezer (verdieping 4)
 
@@ -201,34 +207,38 @@ De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmomen
 
 Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
-- [ ] Baasgevecht De Genezer bouwen, met de HP-trek hierboven
-- [ ] Na het verslaan de kern van Archief 2 opnemen
-- [ ] De kern-zin tonen na De Genezer
+- [x] Baasgevecht De Genezer bouwen, met de HP-trek hierboven
+  TODO(design): HP 220. Opening 30%. Daarna 8–12% en evenveel heal.
+- [x] Na het verslaan de kern van Archief 2 opnemen
+  Item levenskern, zelfde kern-patroon.
+- [x] De kern-zin tonen na De Genezer
+  Letterlijk: In stilte ligt vrede. Ik corrigeer wat groeit.
 
 #### Cutscene na Archief 2: de World Warper
 
-- [ ] Na het verslaan van De Genezer start een cutscene
-  De Genezer bestaat niet. De hub-unlock kijkt naar bewaker:archief_v2_trapzaal/m2, verdieping 2 van het Eerste Archief.
-- [ ] Een zwevend hightech gebouw verschijnt: de World Warper
-  Er is een placeholder-exterieur (tegels 16×16). Het verschijnt niet in de lucht.
-- [ ] De party wordt automatisch gewarped naar de World Warper
-  Er is geen deur op de wereldkaart. WorldWarperEnter.enter() wisselt naar het exterieur zodra de unlock-vlag er is; de kaart roept dat niet aan.
+- [x] Na het verslaan van De Genezer start een cutscene
+  Dialoog in de kas, daarna de hub archief_2_warper. De oude IVA-hub (PR 30) blijft op bewaker:archief_v2_trapzaal/m2.
+- [x] Een zwevend hightech gebouw verschijnt: de World Warper
+  In de tekst, en als placeholder in de hub. Niet als gebouw op de wereldkaart.
+- [x] De party wordt automatisch gewarped naar de World Warper
+  change_map naar archief_2_warper, spawn ingang.
 - [ ] De World Warper is de hub om tussen de 3 hoofdeilanden te reizen
-  Eerste versie van de hub staat. Alleen WM1 is open. WM2 en WM3 zijn zichtbaar en vergrendeld.
-- [ ] Eerste introductie van het warp-systeem in het verhaal
-  De warp-UI staat in de hal. Een cutscene op de wereldkaart ontbreekt.
+  Eerste kamer wel: opslaan, terug naar Wilgendal of de Archief-ingang. TODO(design): WM2 en WM3 bestaan niet. De IVA-hub van PR 30 is niet hernoemd.
+- [x] Eerste introductie van het warp-systeem in het verhaal
+  Warp-pad in de ECHO-hub. Geen extra kamers.
 - [ ] Vanaf hier kan de speler terug naar eerder bezochte eilanden
-  WM1 warpt naar de wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). Een filter op eerder bezoek ontbreekt.
-- [ ] De cutscene maakt duidelijk wat de World Warper is en doet
-  De eerste-bezoekscène in de hal heeft voorlopige zinnen en gebruikt kleurvlakken. Dat is deze cutscene niet.
+  Alleen Wilgendal en de ingang van het Eerste Archief. Geen filter op bezoek, geen WM2/WM3.
+- [x] De cutscene maakt duidelijk wat de World Warper is en doet
+  ECHO legt de warprelay, de Hanger en Sapientia uit. Niet dat ECHO een onderzoeker is.
 
 #### Dungeon-opbouw (4 verdiepingen)
 
 - [x] Verdieping 1 is speelbaar: overwoekerde kas op de wereldkaart, alleen na het Eerste Archief, met één groei-plaat (hendel, daarna zaad, scheut, volgroeid)
-- [ ] Verdieping 1: entree, eerste groei-plaatpuzzel, zichtbare monsters
-- [ ] Verdieping 2: Lotte als mini-baas (Dennis en één gekozen Codex-monster, anders tijdelijke Mosslijm), daarna sluit ze aan
-- [ ] Verdieping 3: ketting-platen, tegen-platen en licht-platen, mini-baas De Wurger
-- [ ] Verdieping 4: aanloop naar De Genezer, het baasgevecht, de kern-zin en de World Warper-cutscene
+- [x] Verdieping 1: entree, eerste groei-plaatpuzzel, zichtbare monsters
+- [x] Verdieping 2: Lotte als mini-baas (Dennis en één gekozen Codex-monster, anders tijdelijke Mosslijm), daarna sluit ze aan
+- [x] Verdieping 3: ketting-platen, tegen-platen en licht-platen, mini-baas De Wurger
+  TODO(design): Wurger HP 160, ATK 16, DEF 6.
+- [x] Verdieping 4: aanloop naar De Genezer, het baasgevecht, de kern-zin en de World Warper-cutscene
 
 #### Content en art
 
@@ -245,7 +255,8 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 #### Codex
 
 - [ ] Nieuwe Codex-monsters voor Archief 2 (leventhema)
-- [ ] Lotte-gevecht bouwen met één gekozen Codex-monster, of een tijdelijke Mosslijm als de speler er nog geen heeft
+- [x] Lotte-gevecht bouwen met één gekozen Codex-monster, of een tijdelijke Mosslijm als de speler er nog geen heeft
+  Mosslijm staat in de Codex. Het bestiarium noemt hem Moss Slime. De tekst zegt Mosslijm.
 
 ## Content
 

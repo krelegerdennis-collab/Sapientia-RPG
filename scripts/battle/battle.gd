@@ -95,6 +95,7 @@ const CodexDataScript := preload("res://scripts/data/codex_data.gd")   # v0.19 C
 ## v0.14 (RPG CODE) roze kern van de Golem-baas: regels + beeld (zie boss_core.gd)
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")   # v0.15 kernvaardigheden
+const Archief2 := preload("res://scripts/data/archief2.gd")
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
@@ -170,9 +171,13 @@ func _ready() -> void:
 	caption.gui_input.connect(_on_message_gui_input)
 	victory_panel.gui_input.connect(_on_message_gui_input)
 	# Helden: verwijzen direct naar GameState.party, dus schade blijft bewaard.
+	# Archief 2, Lotte: alleen Dennis (plus één Codex-bondgenoot). Verdieping 3-4: de hele party.
+	var row := 0
 	for i in GameState.party.size():
 		var h: Dictionary = GameState.party[i]
-		var c := _make_combatant(h["name"], h, true, i)
+		if GameState.archief2_party_filter != "" and str(h.get("id", "")) != GameState.archief2_party_filter:
+			continue
+		var c := _make_combatant(h["name"], h, true, row)
 		heroes.append(c)
 		var path: String = h.get("battle_sprite", "")
 		if path == "" or not ResourceLoader.exists(path):
@@ -181,7 +186,7 @@ func _ready() -> void:
 		node.name = "Held_" + str(h["name"])
 		party_layer.add_child(node)
 		node.setup(GameState.get_resource(path), Vector2.ZERO)
-		node.tapped.connect(_on_hero_tapped.bind(i))
+		node.tapped.connect(_on_hero_tapped.bind(row))
 		if int(h["hp"]) <= 0:
 			node.set_ko(true)
 		c["node"] = node
@@ -190,8 +195,9 @@ func _ready() -> void:
 		box.name = "Status_" + str(h["name"])
 		status_bar.add_child(box)
 		box.setup(h)
-		box.tapped.connect(_on_hero_tapped.bind(i))
+		box.tapped.connect(_on_hero_tapped.bind(row))
 		status_boxes.append(box)
+		row += 1
 	# Codex: de actieve bondgenoot naast de helden (combatant met "ally": true)
 	codex = CodexBattle.new(self)
 	codex.add_allies()
@@ -368,6 +374,9 @@ func _spawn_enemies(ids: Array) -> void:
 		c["top"] = sprite_top(sprite_path, tex) * art_scale
 		node.focus_mode = Control.FOCUS_NONE
 		node.pressed.connect(_on_enemy_pressed.bind(c))
+		if data.get("tint") is Array and (data["tint"] as Array).size() >= 3:
+			var tn: Array = data["tint"]
+			node.modulate = Color(float(tn[0]), float(tn[1]), float(tn[2]))
 		_add_enemy_idle(node, data)
 		enemy_layer.add_child(node)
 		c["node"] = node
@@ -710,6 +719,8 @@ func _run() -> void:
 		intro = "%s appears!" % names[0]
 	await say(intro)
 	await _core_hint()
+	if await _archief2_opening():
+		return
 	while true:
 		round_no += 1
 		await _core_round_start()
@@ -728,6 +739,8 @@ func _run() -> void:
 		for e in _alive(enemies):
 			if e.has("core") and e["core"].open:
 				plan.append({"type": "core_charge", "actor": e, "target": null})   # v0.14: laadt op
+			elif bool(e["s"].get("archief2_leech", false)):
+				plan.append({"type": "archief2_leech", "actor": e, "target": null})
 			else:
 				plan.append({"type": "attack", "actor": e, "target": null})
 		for a in plan:
@@ -1145,11 +1158,11 @@ func _execute(a: Dictionary) -> void:
 				"enemy":
 					var t = _valid_target(a["target"], false)
 					if t != null:
-						await _damage(t, _spell_amount(actor, sp))
+						await _damage(t, Archief2.schaal_element(_spell_amount(actor, sp), t, str(sp.get("element", ""))))
 				"all_enemies":
 					var targets := _alive(enemies)
 					for t in targets:
-						_hit(t, _spell_amount(actor, sp))
+						_hit(t, Archief2.schaal_element(_spell_amount(actor, sp), t, str(sp.get("element", ""))))
 					await _wait(0.7)
 					await _report_kos(targets)
 				"ally":
@@ -1203,6 +1216,8 @@ func _execute(a: Dictionary) -> void:
 			await _core_resolve(a)
 		"kern_skill":
 			await _kern_strike(a)
+		"archief2_leech":
+			await _archief2_leech(actor)
 		"codex_ally":
 			if in_battle(actor):           # v0.19: weggewisseld in deze ronde = geen actie meer
 				await codex.ally_turn(a)
@@ -1248,11 +1263,13 @@ func _enemy_lunge(actor: Dictionary, target: Dictionary) -> void:
 
 
 ## Schadeformule: ATK - DEF/2, +/- 15% geluk, verdedigen = halve schade.
+## Zwakte telt alleen als het doel weak_matters heeft (Archief 2). Andere vijanden blijven gelijk.
 func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> int:
 	var base := float(attacker["s"]["atk"]) * mult - _defense_of(target) / 2.0
 	var dmg := maxi(1, roundi(base * randf_range(0.85, 1.15)))
 	if target["defending"]:
 		dmg = maxi(1, int(dmg / 2.0))
+	dmg = maxi(1, roundi(float(dmg) * Archief2.zwakte_fysiek(attacker, target)))
 	return dmg
 
 
@@ -1373,6 +1390,50 @@ func _try_flee() -> bool:
 	show_message("Couldn't flee!")
 	await _wait(MESSAGE_TIME)
 	return false
+
+
+## De Genezer: eerste klap is scripted (ongeveer 30%). true = het gevecht is daar gestopt.
+func _archief2_opening() -> bool:
+	for e in enemies:
+		if not bool(e["s"].get("archief2_open", false)):
+			continue
+		var pool: Array = []
+		for c in heroes:
+			if not bool(c.get("ally", false)) and int(c["s"]["hp"]) > 0:
+				pool.append(c)
+		if pool.is_empty():
+			return false
+		var t: Dictionary = pool[0]
+		var dmg := Archief2.openingslag(int(t["s"]["max_hp"]))
+		var zin := str(e["s"].get("archief2_zin", Archief2.KERN_ZIN))
+		await say(zin)
+		await _damage(t, dmg)
+		GameState.archief2_last_open = {"schade": dmg, "max": int(t["s"]["max_hp"]), "id": str(t["s"].get("id", ""))}
+		if codex.party_down():
+			await _defeat()
+			return true
+	return false
+
+
+## Daarna 8-12% van het doel, en hij herstelt hetzelfde aantal.
+func _archief2_leech(actor: Dictionary) -> void:
+	var pool: Array = []
+	for c in _alive(heroes):
+		if not bool(c.get("ally", false)):
+			pool.append(c)
+	if pool.is_empty():
+		pool = _alive(heroes)
+	if pool.is_empty():
+		return
+	var t: Dictionary = pool[0]
+	var n := Archief2.leech_hoeveelheid(randf(), int(t["s"]["max_hp"]))
+	show_message("%s corrigeert %s." % [actor["name"], t["name"]])
+	await _damage(t, n)
+	var voor := int(actor["s"]["hp"])
+	actor["s"]["hp"] = mini(int(actor["s"]["max_hp"]), voor + n)
+	GameState.archief2_last_leech = {"schade": n, "heal": n, "bij": int(actor["s"]["hp"]) - voor}
+	show_message("%s herstelt %d." % [actor["name"], n])
+	await _wait(MESSAGE_TIME)
 
 
 func _avg_agi(list: Array) -> float:
@@ -1600,6 +1661,10 @@ func _victory_page(text: String) -> void:
 
 
 func _defeat() -> void:
+	if GameState.pending_story_loss:
+		await say("De glitch breekt. Dit gevecht is geen einde.", true)
+		await GameState.end_battle("lose")
+		return
 	await say("The party is defeated...", true)
 	# v0.19: wakker worden waar je deze kamer/map binnenkwam (baas: in de kamer ervoor)
 	await say(GameState.defeat_text(GameState.pending_boss), true)
