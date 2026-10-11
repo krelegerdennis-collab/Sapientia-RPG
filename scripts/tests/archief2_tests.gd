@@ -581,9 +581,9 @@ func _uitgang_warpers() -> void:
 			world_ok and GameState.current_map == ExitWarper.WORLD_SCENE and spawn_node != null
 			and _tegel() == expect and _tegel() != stay)
 
-	var hub := await _enter_kamer(Archief2.WARPER_SCENE, "ingang", "Archief2Warper")
-	var hub_wp: Node = hub.get_node_or_null("Objects/ExitWarper") if hub != null else null
-	check("kaartkamer heeft geen uitgang-warper", hub != null and hub_wp == null)
+	var hal := await _enter_kamer(str(Rooms.SCENES["archief_2_v4_hal"]), "zuid", "Archief2V4Hal")
+	var hal_wp: Node = hal.get_node_or_null("Objects/ExitWarper") if hal != null else null
+	check("hal tussen Wurger en Genezer heeft geen uitgang-warper", hal != null and hal_wp == null)
 	if Dialog.is_open:
 		Dialog.close()
 
