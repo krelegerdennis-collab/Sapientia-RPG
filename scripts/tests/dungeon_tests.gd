@@ -381,6 +381,11 @@ func _title_shot() -> void:
 	cr.position -= st.position
 	check("menu rechtsonder in de stage (x 240..372, y 150..200): %s" % cr,
 			absf(cr.position.x - 240.0) <= 1.0 and absf(cr.end.x - 372.0) <= 1.0 and cr.end.y <= 201.0 and cr.position.y >= 148.0)
+	var br: Rect2 = t.beta_card.get_global_rect()
+	br.position -= st.position
+	check("Betatest links onder, los van het menu (%s)" % br, t.beta_button != null and not t.beta_button.disabled
+			and "Betatest" in str(t.beta_button.get_meta("label", "")) and br.end.x <= cr.position.x
+			and br.position.x >= 0.0 and br.end.y <= 201.0 and br.position.y >= 140.0)
 	if t.glitch == null:
 		check("hoofdpagina title_main.png, menu onder de titel, Nearest",
 				t.background.texture.resource_path.ends_with("title_main.png")

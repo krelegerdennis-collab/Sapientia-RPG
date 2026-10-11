@@ -12,6 +12,7 @@ extends Control
 ##   assets/ui/title_kern.png        -> kern van de Golem, 4 frames 24x28 op (188,50), 7 fps.
 ## Ontbreekt een bestand, dan valt alleen dat stuk terug (tekst / bibliotheek / code-glitch).
 ## Menu (Doorgaan/Nieuw spel + save-info) rechtsonder, x 240..372, onderkant y 200.
+## Betatest staat links onder: een aparte voortgang, niet in dit kaartje (anders wordt het te hoog).
 ## v0.13 (afgemaakt): alle titel-art staat in een vaste 'stage' van 384x216 die in het midden
 ## van het scherm staat (pixel-precies, Nearest). Op bredere/hogere schermen (telefoons zijn vaak
 ## breder dan 16:9) vult een donkere, vergrote kopie van de achtergrond de randen; zo blijven
@@ -45,6 +46,9 @@ const SUBTITLE := "De Vergeten Archieven"
 
 var continue_button: Button
 var new_button: Button
+var beta_button: Button
+var beta_card: PanelContainer
+var beta_info: Label
 var title_label: Label
 var subtitle_label: Label
 var save_info: Label
@@ -144,6 +148,27 @@ func _ready() -> void:
 	list.add_child(new_button)
 	continue_button.pressed.connect(_on_continue)
 	new_button.pressed.connect(_on_new)
+	# Links onder, buiten het kaartje rechts: anders past het menu niet meer in y 148..200.
+	var beta_box := PanelContainer.new()
+	beta_box.name = "BetaCard"
+	beta_box.add_theme_stylebox_override("panel", UiStyleC.panel("window"))
+	beta_card = beta_box
+	add_child(beta_box)
+	var beta_list := VBoxContainer.new()
+	beta_list.add_theme_constant_override("separation", 0)
+	beta_box.add_child(beta_list)
+	beta_button = UiMenu.button("Betatest")
+	beta_button.custom_minimum_size = Vector2(116, 16)
+	beta_list.add_child(beta_button)
+	beta_info = UiMenu.label("", UiStyleC.TEXT_DIM)
+	beta_info.clip_text = true
+	beta_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	beta_info.custom_minimum_size = Vector2(116, 0)
+	beta_list.add_child(beta_info)
+	beta_button.pressed.connect(_on_beta)
+	beta_button.focus_neighbor_right = new_button.get_path()
+	new_button.focus_neighbor_left = beta_button.get_path()
+	continue_button.focus_neighbor_left = beta_button.get_path()
 
 	version_label = UiMenu.label("v" + str(ProjectSettings.get_setting("application/config/version", "")), UiStyleC.TEXT_OFF)
 	version_label.name = "Version"
@@ -221,6 +246,8 @@ func _place_card() -> void:
 	card.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 0)
 	card.reset_size()
 	card.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - card.size.y)).round()
+	beta_card.reset_size()
+	beta_card.position = (stage.position + Vector2(8, CARD_BOTTOM - beta_card.size.y)).round()
 	version_label.reset_size()
 	version_label.position = (size - version_label.size - Vector2(4, 1)).round()
 
@@ -246,6 +273,12 @@ func refresh() -> void:
 	else:
 		save_info.visible = false
 		new_button.grab_focus()
+	var beta := GameState.read_beta_save()
+	if beta.is_empty():
+		beta_info.text = "  aparte voortgang"
+	else:
+		beta_info.text = "  %s  %s" % [str(beta.get("player_name", "")), UiMenu.format_time(float(beta.get("play_time", 0.0)))]
+	beta_info.visible = true
 
 
 func _process(delta: float) -> void:
@@ -268,3 +301,8 @@ func _on_continue() -> void:
 func _on_new() -> void:
 	set_process(false)
 	get_tree().change_scene_to_file(GameState.NAME_SCENE)
+
+
+func _on_beta() -> void:
+	set_process(false)
+	await GameState.start_beta_game()
