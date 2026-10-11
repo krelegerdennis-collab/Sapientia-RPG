@@ -94,7 +94,7 @@ const QUESTS := [
 ## v0.17 TODO(verhaal): deze events hebben PLACEHOLDER-tekst (kort, Nederlands). Dennis schrijft het
 ## echte verhaal; de opbouw (wie loopt waar, vlaggen, ballonnen) kan blijven.
 const TODO_STORY := ["noor_ontmoeting", "noor_bevrijd", "noor_woud", "marit", "bram", "jens", "tobias",
-	"ilse", "herbergier", "naar_esdoorn", "woud_ingang", "marit_boeken"]
+	"ilse", "herbergier", "naar_esdoorn", "woud_ingang", "marit_boeken", "naar_leven"]
 
 const SPEAKER := "Old Man"
 
@@ -115,6 +115,7 @@ const MAP_ENTER := [
 	{"map": "huis", "if": {"step": OPGESLOTEN}, "event": "opgesloten_timer"},
 	# v0.17 eerste keer in Esdoorn (na de Golem): Noor ontmoeten, ze wordt het woud in gesleurd
 	{"map": ESDOORN, "if": {"flags": [GOLEM_FLAG], "not_flags": ["noor_ontmoet"]}, "event": "noor_ontmoeting"},
+	{"map": "res://scenes/maps/leven_ingang.tscn", "if": {"not_flags": ["archief2_keten"]}, "event": "archief2_keten"},
 	# v0.17 terug op de open plek na de winst op de Wortelkoning: Noor is vrij en sluit zich aan
 	{"map": WOUD_BAAS, "if": {"flags": [WORTELKONING_FLAG], "not_flags": ["noor_gered"]}, "event": "noor_bevrijd"},
 ]
@@ -360,19 +361,32 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+	# TODO(verhaal): de kas gaat open op de bestaande golem-vlag van het Eerste Archief.
+	# Waarom die kern op een tweede signaal reageert, staat nog open. Geen nieuwe beat.
+	"naar_leven": [
+		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
+			["say", "", ["Een overwoekerde kas. De ranken zitten potdicht.", "Eerst het Eerste Archief uit."]],
+			["walk", "player", "up", 1],
+		]},
+		{"do": "default"},
+	],
 	"woud_ingang": [
 		{"if": {"not_flags": ["quest_noor"]}, "do": [
 			["say", "", ["The Dark Wood. Between the black trunks hangs mist that flickers like a broken screen.", "You don't go in there without a reason."]],
 		]},
 		{"do": "default"},
 	],
-	# Archief 2 gaat open op dezelfde golem-vlag. Geen nieuwe beat.
-	"naar_archief2": [
-		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
-			["say", "", ["Achter het Archief dampt een kas. De deur blijft dicht.", "Eerst moet de kern van het Eerste Archief antwoorden."]],
-		]},
-		{"do": "default"},
-	],
+	# Waarom Archief 1 naar Archief 2 wijst. Eenmalig, bij de kas-ingang.
+	"archief2_keten": [{"do": [
+		["say", "", [
+			"De Oude Mensheid maakte de zes Archieven als keten.",
+			"Elke kern activeert de volgende. Geen uitnodiging: een noodsignaal.",
+			"Archief 1 zond: Iemand is binnen. Archief 2 reageerde als eerste.",
+			"Sapientia heeft dat signaal gemanipuleerd.",
+			"Je denkt dat je volgt. Sapientia leidt je.",
+		]],
+		["flag", "archief2_keten"],
+	]}],
 
 	# --- de ontmoeting (eenmalig, MAP_ENTER; vlag noor_ontmoet)
 	"noor_ontmoeting": [{"do": [

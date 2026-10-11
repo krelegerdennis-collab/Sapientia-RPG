@@ -9,6 +9,8 @@ const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const Rooms := preload("res://scripts/data/archief2_rooms.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const BossCore := preload("res://scripts/battle/boss_core.gd")
+const PuzzleRooms := preload("res://scripts/data/puzzle_rooms.gd")
+const PuzzleLogic := preload("res://scripts/puzzle/puzzle_logic.gd")
 const AANVAL := 0
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
@@ -75,7 +77,7 @@ func _data() -> void:
 	var wurg := BossCore.apply_boss(GD.ENEMIES["wurger"])
 	check("Wurger zwak voor ijs en fysiek", bool(wurg.get("weak_matters", false))
 			and "ijs" in wurg.get("weak", []) and "fysiek" in wurg.get("weak", []))
-	check("thema kas en warper", DungeonRooms.THEMES.has("levend_kas") and DungeonRooms.THEMES.has("warper_paars"))
+	check("thema kas en warper", DungeonRooms.THEMES.has("kas") and DungeonRooms.THEMES.has("warper_paars"))
 	var kamers: Dictionary = Rooms.rooms()
 	var breed := true
 	for id in kamers:
@@ -106,7 +108,8 @@ func _data() -> void:
 	check("actor-sfx voor de drie bazen", monsters.has("lotte_glitch") and monsters.has("wurger")
 			and monsters.has("genezer"))
 	var maten := {
-		"res://assets/tiles/dungeon/archief2_kas_tiles.png": Vector2(256, 80),
+		"res://assets/tiles/dungeon/kas_tiles.png": Vector2(256, 80),
+		"res://assets/puzzle/groei_plaat.png": Vector2(48, 16),
 		"res://assets/sprites/archief2/lotte_veld.png": Vector2(48, 96),
 		"res://assets/sprites/archief2/lotte_glitch.png": Vector2(64, 80),
 		"res://assets/sprites/archief2/genezer.png": Vector2(64, 80),
@@ -131,11 +134,19 @@ func _poort_en_platen() -> void:
 	check("dicht zonder vlag", not Archief2.open_na({}))
 	check("open na de golem", Archief2.open_na({Archief2.GOLEM_VLAG: true}))
 	GameState.new_game("Dennis")
-	var dicht: Dictionary = Story.pick("naar_archief2")
+	var dicht: Dictionary = Story.pick("naar_leven")
 	check("verhaal houdt de kas dicht", dicht.get("do") is Array)
 	GameState.story_flags[SD.GOLEM_FLAG] = true
-	var open: Dictionary = Story.pick("naar_archief2")
+	var open: Dictionary = Story.pick("naar_leven")
 	check("verhaal geeft de uitgang vrij", str(open.get("do", "")) == "default")
+	var pr: Dictionary = PuzzleRooms.ROOMS["leven_v1_plaat"]
+	var pl := PuzzleLogic.from_room(pr, "leven_v1_plaat")
+	check("groei-plaat vóór de hendel blijft zaad", pl.try_grow("groei_brug") == "wacht" and pl.grow_stage("groei_brug") == 0
+			and pl.is_solid(Vector2i(7, 2)))
+	check("na de hendel groeit de plaat één stadium", pl.toggle_lever("hendel_kas") and pl.try_grow("groei_brug") == "groei"
+			and pl.grow_stage("groei_brug") == 1 and pl.is_solid(Vector2i(7, 2)))
+	check("tweede groei opent het pad", pl.try_grow("groei_brug") == "open" and pl.grow_open("groei_brug")
+			and not pl.is_solid(Vector2i(7, 2)))
 	check("groei + stap 0-1-2 en blijft", _groei_reeks())
 	check("groei negeert licht", Archief2.volgende_staat("groei", 0, "licht", true) == 0)
 	check("tegen krimpt en groeit niet", Archief2.volgende_staat("tegen", 2, "stap", false) == 1
@@ -244,19 +255,19 @@ func _wereldkaart() -> void:
 	var kaart := packed.instantiate()
 	var grond: TileMapLayer = kaart.get_node("Ground")
 	var trap: Node = kaart.get_node("Exits/Trap")
-	var uit: Node = kaart.get_node("Exits/NaarArchief2")
-	var spawn: Node2D = kaart.get_node("Spawns/van_archief2")
+	var uit: Node = kaart.get_node("Exits/NaarKas")
+	var spawn: Node2D = kaart.get_node("Spawns/van_kas")
 	check("oude val blijft Archief 1", trap.position == Vector2(320, 544)
 			and str(trap.target_map).ends_with("archief_ingang.tscn") and str(trap.event) == ""
 			and trap.contains(Vector2i(20, 34)))
 	var tegel := Vector2i((uit.position / 16.0).floor())
-	var spawn_tegel := Vector2i(((spawn.position - Vector2(8, 8)) / 16.0).floor())
-	check("uitgang Archief 2 naast de val", str(uit.event) == "naar_archief2"
-			and str(uit.target_map) == Archief2.ENTREE_SCENE and str(uit.target_spawn) == "ingang"
-			and not uit.contains(Vector2i(20, 34)) and tegel == Vector2i(21, 34))
+	var spawn_tegel := Vector2i((spawn.position / 16.0).floor())
+	check("kas-uitgang op de bestaande vlag", str(uit.event) == "naar_leven"
+			and str(uit.target_map).ends_with("leven_ingang.tscn") and str(uit.target_spawn) == "ingang"
+			and not uit.contains(Vector2i(20, 34)) and tegel == Vector2i(19, 34))
 	check("tegel uitgang loopbaar (%s)" % _terrein(grond, tegel), _loopbaar(grond, tegel))
 	check("spawn loopbaar (%s)" % _terrein(grond, spawn_tegel), _loopbaar(grond, spawn_tegel)
-			and spawn_tegel != Vector2i(20, 34) and spawn_tegel != Vector2i(20, 33))
+			and spawn_tegel == Vector2i(19, 33))
 	kaart.free()
 
 

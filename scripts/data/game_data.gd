@@ -996,6 +996,8 @@ const TERRAIN_BACKDROP := {
 	"zand": "sand",
 	# v0.13: De Vergeten Archieven (dungeon-tegels, scripts/data/dungeon_rooms.gd)
 	"archief": "library",
+	# Het Levende Archief (thema kas): bestaande overwoekerde bibliotheek, geen nieuw bestand.
+	"kas": "library_overgrown",
 	# v0.17: het Donker Woud (thema donker_woud in dungeon_rooms.gd)
 	"woud": "forest_dark",
 }

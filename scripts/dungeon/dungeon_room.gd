@@ -26,6 +26,8 @@ const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const PropScript := preload("res://scripts/dungeon/dungeon_prop.gd")
 const InktwurmKastScript := preload("res://scripts/dungeon/inktwurm_kast.gd")
 const SignScript := preload("res://scripts/dungeon/dungeon_sign.gd")
+const ExitWarperScript := preload("res://scripts/dungeon/dungeon_exit_warper.gd")
+const ArchiefWarpers := preload("res://scripts/dungeon/archief_warpers.gd")
 const STORY_OBJECT_SCENE := "res://scenes/story_object.tscn"
 const NPC_SCENE := "res://scenes/npc.tscn"
 ## Onkwetsbaar (knipperen) na vluchten, in seconden.
@@ -102,7 +104,7 @@ func _build() -> void:
 	# v0.17: ook de kamers van het Donker Woud (scripts/data/woud_rooms.gd)
 	room = DungeonRooms.room(room_id)
 	if room.is_empty():
-		push_error("Dungeonkamer '%s' bestaat niet in dungeon_rooms.gd / woud_rooms.gd" % room_id)
+		push_error("Dungeonkamer '%s' bestaat niet in dungeon_rooms.gd / woud_rooms.gd / archief2_rooms.gd" % room_id)
 		return
 	if map_name == "":
 		map_name = str(room.get("name", room_id))
@@ -187,6 +189,8 @@ func _build() -> void:
 		var sg: Area2D = SignScript.new()
 		sg.setup(d)
 		objects.add_child(sg)
+	# Eerste Archief: uitgang-warper (begin / midden / eind). Andere dungeons: leeg.
+	_place_exit_warper(objects)
 	# v0.17 verhaal-objecten en NPC's uit de data (bv. Noor in de wortelcocon, woud_rooms.gd)
 	for d in room.get("objects", []):
 		var so: Node2D = load(STORY_OBJECT_SCENE).instantiate()
@@ -275,6 +279,19 @@ func _build() -> void:
 			cs.shape = rect
 			wall.add_child(cs)
 			add_child(wall)
+
+
+## Uitgang-warper van het Eerste Archief (ArchiefWarpers). Geen plek = niets, ook niet in de Diepe Grot.
+func _place_exit_warper(objects: Node2D) -> void:
+	var spot: Dictionary = ArchiefWarpers.for_room(room_id)
+	if spot.is_empty():
+		return
+	var t: Vector2i = spot["tile"]
+	var warper := ExitWarperScript.create(t) as DungeonExitWarper
+	warper.name = "ExitWarper"
+	warper.role = str(spot["role"])
+	objects.add_child(warper)
+	_blocked[t] = true
 
 
 ## v0.17 OVERLAY-laag (boomkruinen, mist, glitch-pixels) BOVEN de speler en de objecten, zonder

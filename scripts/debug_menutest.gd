@@ -4,7 +4,7 @@ extends Node
 ##         godot --path . -- --menutest --shots=/pad/naar/map   (met venster: screenshots)
 ## Wat hij doet (alles met gesimuleerde knoppen, zoals een speler):
 ##   - nieuw spel, Noor en Lotte erbij, menu openen (MENU-actie), speler op slot,
-##     touch-knoppen weg, commando's, goud/tijd, vensters overlappen niet
+##     touch-knoppen weg, vier knoppen (Uitrusting, Codex, Items, Warpen) + label MENU
 ##   - Items: Drankje op een gewonde held (HP + clamping + aantal), vol = geen effect,
 ##     Toverwater (MP), item op 0 verdwijnt, onbruikbaar item = grijs + melding
 ##   - Status: EXP/volgend level volgens GameData.exp_for_level, links/rechts = andere held
@@ -205,6 +205,7 @@ func _run() -> void:
 	GameState.add_member("lotte")
 	GameState.gold = 123
 	await _main_menu_tests()
+	await _direct_button_tests()
 	await _items_tests()
 	_data_compat_tests()
 	_equipment_logic_tests()
@@ -256,42 +257,92 @@ func _main_menu_tests() -> void:
 		return
 	check("speler op slot zolang het menu open is", p.input_locked)
 	check("touch-D-pad/A/B verborgen in het menu", not touch().is_visible_in_tree())
-	var labels := []
-	for c in m.COMMANDS:
-		labels.append(str(m.buttons[c[0]].get_meta("label")))
-	check("commando's %s" % [labels], labels == ["Items", "Magic", "Equipment", "Status", "Bestiary", "Options", "Save", "Close"])
-	check("v0.14: 'Equipment' na Magie (Lufia 2-volgorde), geen 'Terug naar titel'", labels.find("Equipment") == 2 and not ("Terug naar titel" in labels))
-	check("'Items' heeft de focus", m.buttons["items"].has_focus())
-	check("goud en speeltijd (%s / %s)" % [m.gold_label.text, m.time_label.text],
-			m.gold_label.text == "Gold 123" and m.time_label.text.begins_with("Time 0:00:"))
-	# verwachte naam uit de map zelf (v9: 'Wilgendal'; v0.11: 'Huis aan de bosrand')
-	var want_place := str(scene().map_name) if "map_name" in scene() else ""
-	check("plek: %s (map_name van de map: %s)" % [m.place_label.text, want_place], m.place_label.text == want_place)
-	check("3 heldenkaartjes", m.party_cards.size() == 3)
 	await frames(3)
+	var labels := []
+	for c in m.commands():
+		labels.append(str(m.buttons[c[0]].get_meta("label")))
+	check("vier knoppen %s" % [labels], labels == ["Uitrusting", "Codex", "Items", "Warpen"] and m.buttons.size() == 4)
+	check("label MENU boven Warpen", m.menu_label.text == "MENU"
+			and m.menu_label.get_global_rect().end.y <= m.buttons["warp"].get_global_rect().position.y + 1.0)
+	check("'Uitrusting' heeft de focus", m.buttons["equip"].has_focus())
 	var vp := Rect2(Vector2.ZERO, m.root.size)
-	var boxes := [m.command_box, m.info_box, m.party_box]
 	var inside := true
-	for b in boxes:
-		inside = inside and vp.encloses(b.get_global_rect())
-	check("vensters binnen het scherm (%s)" % [boxes.map(func(b): return b.get_global_rect())], inside)
-	check("vensters overlappen niet", not m.command_box.get_global_rect().intersects(m.info_box.get_global_rect())
-			and not m.command_box.get_global_rect().intersects(m.party_box.get_global_rect())
-			and not m.info_box.get_global_rect().intersects(m.party_box.get_global_rect()))
-	check("info-vak (plaatsnaam ook lang) past op het scherm (%s)" % m.info_box.get_global_rect(),
-			m.info_box.get_global_rect().end.y <= m.root.size.y and m.place_label.get_line_count() <= 2)
+	var left: Rect2 = m.buttons["equip"].get_global_rect()
+	left = left.merge(m.buttons["codex"].get_global_rect())
+	left = left.merge(m.buttons["items"].get_global_rect())
+	for id in m.buttons:
+		var r: Rect2 = m.buttons[id].get_global_rect()
+		inside = inside and vp.encloses(r)
+	inside = inside and vp.encloses(m.menu_label.get_global_rect())
+	check("knoppen en MENU binnen het scherm", inside)
+	check("links gestapeld, Warpen rechts en groter",
+			m.buttons["codex"].position.y > m.buttons["equip"].position.y
+			and m.buttons["items"].position.y > m.buttons["codex"].position.y
+			and is_equal_approx(m.buttons["equip"].position.x, m.buttons["codex"].position.x)
+			and is_equal_approx(m.buttons["codex"].position.x, m.buttons["items"].position.x)
+			and m.buttons["warp"].position.x > m.buttons["equip"].position.x + 8.0
+			and m.buttons["warp"].size.y > m.buttons["equip"].size.y
+			and not left.intersects(m.buttons["warp"].get_global_rect()))
 	var small := false
 	for id in m.buttons:
 		small = small or m.buttons[id].size.y < m.ROW_H
-	check("tikvlak van elk commando >= %d px hoog" % m.ROW_H, not small)
-	# D-pad loopt rond en de speler beweegt niet
+	check("tikvlak van elke knop >= %d px hoog" % m.ROW_H, not small)
 	await tap("move_up")
-	check("omhoog vanaf 'Items' = 'Sluiten' (rondlopen)", m.buttons["close"].has_focus())
+	check("omhoog vanaf Uitrusting = Items", m.buttons["items"].has_focus())
 	await tap("move_down")
+	check("omlaag vanaf Items = Uitrusting", m.buttons["equip"].has_focus())
 	await tap("move_right")
+	check("rechts = Warpen", m.buttons["warp"].has_focus())
+	await tap("move_left")
+	check("links vanaf Warpen = Uitrusting", m.buttons["equip"].has_focus())
 	await frames(10)
 	check("speler loopt niet tijdens het menu", p.get_tile() == start_tile and not p.is_moving)
 	await shot("menu_main")
+
+
+## Vier knoppen openen meteen het juiste scherm. Warpen zonder hub blijft op de kaart.
+func _direct_button_tests() -> void:
+	var m := menu()
+	if m == null:
+		m = await open_menu()
+	if m == null:
+		check("veldmenu open voor de knoppen", false)
+		return
+	var map_path := str(scene().scene_file_path)
+	var map_name := str(scene().name)
+	var tile: Vector2i = player().get_tile()
+	var save_before := file_text(GameState.save_path)
+	var auto_before := file_text(GameState.autosave_path)
+	m.choose("equip")
+	await frames(3)
+	check("Uitrusting opent het equip-scherm", m.get_node_or_null("Equipment") != null and m.get_node_or_null("Items") == null)
+	await tap("cancel")
+	await frames(3)
+	check("B sluit Uitrusting, menu blijft", m.get_node_or_null("Equipment") == null and menu() == m)
+	m.choose("codex")
+	await frames(3)
+	check("Codex opent het Codex-scherm", m.get_node_or_null("Codex") != null)
+	await tap("cancel")
+	await frames(3)
+	check("B sluit Codex, focus op Codex", m.get_node_or_null("Codex") == null and m.buttons["codex"].has_focus())
+	m.choose("items")
+	await frames(3)
+	check("Items opent het itemscherm", m.get_node_or_null("Items") != null and m.get_node_or_null("Equipment") == null)
+	await tap("cancel")
+	await frames(3)
+	check("B sluit Items, focus op Items", m.get_node_or_null("Items") == null and m.buttons["items"].has_focus())
+	m.choose("warp")
+	await frames(3)
+	check("Warpen zonder hub: '%s'" % m.message_label.text,
+			m.message_label.visible and m.message_label.text == "De warp-hub is nog niet bereikbaar.")
+	check("Warpen zonder hub verandert de kaart niet", str(scene().scene_file_path) == map_path
+			and str(scene().name) == map_name and player().get_tile() == tile and not GameState.changing_map
+			and menu() == m)
+	check("Warpen sluit geen save-slots", m.get_node_or_null("SaveScreen") == null
+			and scene().get_node_or_null("SaveSlotList") == null
+			and file_text(GameState.save_path) == save_before
+			and file_text(GameState.autosave_path) == auto_before)
+	await shot("menu_warp")
 
 
 func _items_tests() -> void:
@@ -398,7 +449,8 @@ func _status_tests() -> void:
 	var m := menu()
 	var hero: Dictionary = GameState.party[0]
 	hero["exp"] = 9       # level 1: volgend level bij exp_for_level(2) = 15 -> nog 6
-	await pick_command(m, "status")
+	m.choose("status")
+	await frames(2)
 	var s: Node = m.get_node_or_null("Status")
 	check("'Status' opent het statusscherm", s != null)
 	if s == null:
@@ -448,9 +500,7 @@ func _status_tests() -> void:
 
 func _magic_tests() -> void:
 	var m := menu()
-	await tap("move_up")
-	check("omhoog vanaf 'Equipment': 'Magie'", m.buttons["magic"].has_focus())
-	await tap("interact")
+	m.choose("magic")
 	await frames(2)
 	var s: Node = m.get_node_or_null("Magic")
 	check("'Magie' opent het magiescherm", s != null)
@@ -483,12 +533,14 @@ func _magic_tests() -> void:
 
 func _bestiary_and_options_tests() -> void:
 	var m := menu()
-	await pick_command(m, "bestiary")
+	m.choose("bestiary")
+	await frames(2)
 	check("'Bestiary' opent het bestiarium", m.get_node_or_null("Bestiary") != null)
 	await tap("cancel")
 	await frames(2)
 	check("B sluit het bestiarium", m.get_node_or_null("Bestiary") == null)
-	await pick_command(m, "options")
+	m.choose("options")
+	await frames(2)
 	var s: Node = m.get_node_or_null("Options")
 	check("'Opties' opent het optiescherm", s != null)
 	if s == null:
@@ -567,7 +619,8 @@ func _menu_save_tests() -> void:
 	var m := menu()
 	var p := player()
 	check("nog geen handmatige save", not GameState.has_save())
-	await pick_command(m, "save")
+	m.open_save()
+	await frames(2)
 	var sc: Node = m.get_node_or_null("SaveScreen")
 	check("'Opslaan' opent het opslagscherm (leeg slot: 'Hier opslaan?')", sc != null and sc.question_label.text == sc.Q_NEW
 			and not sc.overwrite and not sc.slot_label.visible)
@@ -590,7 +643,7 @@ func _menu_save_tests() -> void:
 	await tap("cancel")
 	await frames(2)
 	check("B = Nee: niets opgeslagen", m.last_save_result == "declined" and not GameState.has_save() and m.get_node_or_null("SaveScreen") == null)
-	await tap("interact")
+	m.open_save()
 	await frames(2)
 	sc = m.get_node_or_null("SaveScreen")
 	check("opnieuw: scherm open, 'Ja' gekozen", sc != null and sc.yes_button.has_focus())
@@ -613,7 +666,7 @@ func _menu_save_tests() -> void:
 	# v0.14: slot heeft nu data -> 'Overschrijven? Ja/Nee'
 	var before := file_text(GameState.save_path)
 	GameState.gold = 124
-	await tap("interact")
+	m.open_save()
 	await frames(2)
 	sc = m.get_node_or_null("SaveScreen")
 	check("slot met data: 'Overschrijven?' + wat er nu in het slot staat (%s)" % (sc.slot_label.text if sc else "-"),
@@ -629,7 +682,7 @@ func _menu_save_tests() -> void:
 	await frames(2)
 	check("tik op 'Nee': niet overschreven (bestand gelijk)", m.last_save_result == "declined"
 			and file_text(GameState.save_path) == before and m.get_node_or_null("SaveScreen") == null)
-	await tap("interact")
+	m.open_save()
 	await frames(2)
 	sc = m.get_node_or_null("SaveScreen")
 	if sc != null:
@@ -645,9 +698,9 @@ func _menu_save_tests() -> void:
 func _close_tests() -> void:
 	var m := menu()
 	var p := player()
-	await click(m.back_button)
+	await click_at(Vector2(3, 3))
 	await frames(3)
-	check("tik op 'Sluiten': menu dicht", menu() == null)
+	check("tik naast de knoppen: menu dicht", menu() == null)
 	check("speler weer los en touch-knoppen terug", not p.input_locked and touch().is_visible_in_tree())
 	var t0: Vector2i = p.get_tile()
 	await tap("move_up")

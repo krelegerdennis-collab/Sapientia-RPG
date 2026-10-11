@@ -1,9 +1,66 @@
 extends RefCounted
-## Kamers van Het Levende Archief. Niet in DungeonRooms.ROOMS: DungeonRooms.room zoekt
-## ze hier, zodat de glitch-grafiek en de tests van Archief 1 gelijk blijven.
-## Thema levend_kas = placeholder-tegels (groen, vochtig). BGM blijft vergeten_archieven
-## tot er kas-muziek is.
+## Verdieping 1 van Het Levende Archief (kas). Zelfde velden als dungeon_rooms.gd ROOMS.
+## Aparte lijst, zodat de tellingen van het Eerste Archief (ORDER, gevechten, thema
+## archief_grijs) blijven staan. DungeonRooms.room() zoekt hier ná de Archieven.
+##
+## De ingang gebruikt de bestaande golem-vlag (naar_leven). Verdieping 2-4 staan in rooms().
 
+const THEME := "kas"
+const WORLD := "res://scenes/maps/wereldkaart.tscn"
+const M := "res://scenes/maps/"
+
+const ROOMS := {
+	# 1 KAS (16x11): entree vanaf de wereldkaart, zichtbare monsters, bord, opslag.
+	"leven_ingang": {
+		"name": "Het Levende Archief",
+		"floor": 1,
+		"tier": 2,
+		"archief": "2",
+		"theme": THEME,
+		"layout": [
+			"a--------------b",
+			"<LFFMFFFFGFFFFR>",
+			"<lffmffffnffffr>",
+			"<Zsssssssssssss>",
+			"<S.............>",
+			"<S.............>",
+			"<S....x........>",
+			"<S.............>",
+			"<S.@...........>",
+			"<S.............>",
+			"c_____(EE)_____d",
+		],
+		"save": [3, 8],
+		"spawns": {"ingang": [7, 9, "up"], "boog": [9, 3, "down"]},
+		"exits": {
+			"E": {"map": WORLD, "spawn": "van_kas"},
+			"n": {"map": M + "leven_v1_plaat.tscn", "spawn": "ingang"},
+		},
+		"signs": [{
+			"tile": [12, 5],
+			"lines": [
+				"Een kas. De ranken groeien over de vloer.",
+				"Zet de hendel om. Daarna groeit de plaat tot een pad.",
+				"De Oude Mensheid maakte de zes Archieven als keten.",
+				"Elke kern activeert de volgende. Geen uitnodiging: een noodsignaal.",
+				"Archief 1 zond: Iemand is binnen. Archief 2 reageerde als eerste.",
+				"Sapientia heeft dat signaal gemanipuleerd. Je denkt dat je volgt. Sapientia leidt je.",
+			],
+		}],
+		# Bestaande soorten. Geen nieuwe species.
+		"monsters": [
+			{"id": "m1", "enemy": "mosslijm", "group": ["mosslijm"], "tile": [4, 6], "moves": true},
+			{"id": "m2", "enemy": "moskonijn", "group": ["moskonijn"], "tile": [12, 7], "moves": true},
+		],
+	},
+}
+
+const ORDER := [
+	["leven_ingang", M + "leven_ingang.tscn"],
+]
+
+## Verdieping 2-4: kamers via rooms(). De wereldkaart en de groei-plaat van
+## verdieping 1 blijven leven_ingang / leven_v1_plaat.
 const SCENES := {
 	"archief_2_v1_entree": "res://scenes/maps/archief_2_v1_entree.tscn",
 	"archief_2_v1_plaat": "res://scenes/maps/archief_2_v1_plaat.tscn",
@@ -31,7 +88,7 @@ const _SH := "<Zsssssssssssssssss>"
 
 static func _basis(naam: String, verdieping: int, tier: int) -> Dictionary:
 	return {
-		"name": naam, "floor": verdieping, "tier": tier, "archief": "2", "theme": "levend_kas",
+		"name": naam, "floor": verdieping, "tier": tier, "archief": "2", "theme": "kas",
 		"layout": [_TOP, _WU, _WL, _SH, _F, _F, _F, _F, _F, _F, _F, _BOT],
 		"spawns": {"zuid": [9, 10, "up"], "noord": [9, 3, "down"], "ingang": [9, 10, "up"]},
 	}
@@ -48,7 +105,7 @@ static func rooms() -> Dictionary:
 	var entree := _met(_basis("Het Levende Archief", 1, 2), {
 		"save": [3, 8],
 		"exits": {
-			"E": {"map": "res://scenes/maps/wereldkaart.tscn", "spawn": "van_archief2"},
+			"E": {"map": "res://scenes/maps/wereldkaart.tscn", "spawn": "van_kas"},
 			"n": {"map": SCENES["archief_2_v1_plaat"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [4, 5], "lines": [
@@ -74,7 +131,7 @@ static func rooms() -> Dictionary:
 	})
 	var gang := _met(_basis("Kasgang", 2, 2), {
 		"exits": {
-			"E": {"map": SCENES["archief_2_v1_plaat"], "spawn": "noord"},
+			"E": {"map": "res://scenes/maps/leven_v1_plaat.tscn", "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v2_lotte"], "spawn": "zuid"},
 		},
 		"monsters": [

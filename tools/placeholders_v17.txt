@@ -9,16 +9,20 @@ assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x
 # Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint
 # in scripts/dungeon/dungeon100_warper.gd.
 # Echte art later: assets/sprites/dungeon100_warper.png  64x16  (4 frames van 16x16).
-
-# Archief 2, Het Levende Archief (tools/art_archief2_placeholders.py). PLACEHOLDER, geen definitieve art.
-assets/tiles/dungeon/archief2_kas_tiles.png   256x80   tileset kas 256x80
+# Het Levende Archief, verdieping 1 (tools/art_kas_placeholder.py). Magenta hoekjes, geen definitieve art.
+assets/tiles/dungeon/kas_tiles.png            256x80  tileset overwoekerde kas (zelfde nummering als archief_grijs)
+assets/tiles/dungeon/kas_bibliotheek.png      256x64  bibliotheek-atlas van de kas (loader; verdieping 1 tekent er nog niet mee)
+assets/puzzle/groei_plaat.png                  48x16  groei-plaat, 3 frames van 16x16: zaad, scheut, volgroeid
+assets/sprites/buiten/kas_ingang.png           16x16  ingang van de kas op de wereldkaart
+# Archief 2, verdieping 2-4 en de hub (tools/art_archief2_placeholders.py). PLACEHOLDER.
+assets/tiles/dungeon/archief2_kas_tiles.png   256x80   extra kas-atlas, niet de tegelset van verdieping 1
 assets/sprites/archief2/lotte_veld.png   48x96   Lotte priester, veld 48x96
 assets/sprites/archief2/lotte_glitch.png   64x80   Lotte glitch 64x80
 assets/sprites/archief2/genezer.png   64x80   De Genezer 64x80
 assets/sprites/archief2/wurger.png   80x96   De Wurger 80x96
-assets/sprites/archief2/plaat_zaad.png   16x16   groei-plaat zaad 16x16
-assets/sprites/archief2/plaat_scheut.png   16x16   groei-plaat scheut 16x16
-assets/sprites/archief2/plaat_volgroeid.png   16x16   groei-plaat volgroeid 16x16
+assets/sprites/archief2/plaat_zaad.png   16x16   plaatsoort zaad 16x16 (ketting, tegen, licht)
+assets/sprites/archief2/plaat_scheut.png   16x16   plaatsoort scheut 16x16
+assets/sprites/archief2/plaat_volgroeid.png   16x16   plaatsoort volgroeid 16x16
 assets/ui/icons/levenskern.png   16x16   kern-item Archief 2 16x16
 assets/sprites/archief2/world_warper.png   128x64   World Warper exterieur 128x64
 assets/sprites/archief2/echo.png   32x48   ECHO hologram 32x48

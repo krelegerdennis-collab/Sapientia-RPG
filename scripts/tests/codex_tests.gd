@@ -694,7 +694,7 @@ func _screen_tests() -> void:
 	await tap("menu")
 	await frames(3)
 	var m := field_menu()
-	check("veldmenu open, zonder pagina's geen 'Codex'", m != null and not m.buttons.has("codex"))
+	check("veldmenu open, Codex-knop ook zonder pagina's", m != null and m.buttons.has("codex") and m.buttons["codex"].visible)
 	if m:
 		m.close()
 	await pframes(6)
@@ -710,8 +710,9 @@ func _screen_tests() -> void:
 		check("veldmenu open", false)
 		return
 	var labels: Array = m.commands().map(func(c): return str(m.buttons[c[0]].get_meta("label")))
-	check("menu: 'Codex' na 'Status' %s" % [labels], labels == ["Items", "Magic", "Equipment", "Status", "Codex", "Bestiary", "Options", "Save", "Close"])
-	check("menuvensters overlappen niet (9 regels)", not m.command_box.get_global_rect().intersects(m.info_box.get_global_rect()))
+	check("menu: vier knoppen %s" % [labels], labels == ["Uitrusting", "Codex", "Items", "Warpen"])
+	var stack: Rect2 = m.buttons["equip"].get_global_rect().merge(m.buttons["codex"].get_global_rect()).merge(m.buttons["items"].get_global_rect())
+	check("links en Warpen overlappen niet", not stack.intersects(m.buttons["warp"].get_global_rect()))
 	m.choose("codex")
 	await frames(3)
 	var s: Node = m.get_node_or_null("Codex")

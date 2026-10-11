@@ -643,12 +643,7 @@ func _status_tests() -> void:
 	check("veldmenu open", m != null)
 	if m == null:
 		return
-	var target: Button = m.buttons["status"]
-	for i in 10:
-		if target.has_focus():
-			break
-		await tap("move_down")
-	await tap("interact")
+	m.choose("status")
 	await frames(4)
 	var st: Node = m.get_node_or_null("Status")
 	check("statusscherm open, regel 'Kernen: %s' zichtbaar" % (st.kern_label.text if st else "?"), st != null
