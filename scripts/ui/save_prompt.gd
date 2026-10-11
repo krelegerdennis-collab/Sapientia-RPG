@@ -16,7 +16,7 @@ const LAYER := 22
 const BUTTON_SIZE := Vector2(72, 16)
 const DIM_ALPHA := 0.4
 
-var question := "Voortgang opslaan?"
+var question := "Save progress?"
 var detail := ""
 ## v0.14: 'Nee' heeft eerst de focus (bv. bij Weggooien in Uitrusting).
 var default_no := false
@@ -47,11 +47,11 @@ func _ready() -> void:
 	col.add_child(UiMenu.label(question, MenuColors.TEXT))
 	if detail != "":
 		col.add_child(UiMenu.label(detail, MenuColors.TEXT_DIM))
-	yes_button = UiMenu.button("Ja")
+	yes_button = UiMenu.button("Yes")
 	yes_button.custom_minimum_size = BUTTON_SIZE
 	yes_button.pressed.connect(answer.bind(true))
 	col.add_child(yes_button)
-	no_button = UiMenu.button("Nee")
+	no_button = UiMenu.button("No")
 	no_button.custom_minimum_size = BUTTON_SIZE
 	no_button.pressed.connect(answer.bind(false))
 	col.add_child(no_button)

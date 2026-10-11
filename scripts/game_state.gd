@@ -171,11 +171,11 @@ var pending_respawn_msg: Array = []
 ## Voor de tests/info: de laatste respawn ({"map", "tile", "facing", "boss"}).
 var last_respawn := {}
 # TODO(verhaal): definitieve tekst van het ontwaken (nu placeholder).
-const RESPAWN_LINES_BOSS := ["Je ontwaakt voor de deur...", "Je bent weer helemaal uitgerust."]
-const RESPAWN_LINES := ["Je ontwaakt waar je binnenkwam...", "Je bent weer helemaal uitgerust."]
+const RESPAWN_LINES_BOSS := ["You wake before the door...", "You are fully rested again."]
+const RESPAWN_LINES := ["You wake where you came in...", "You are fully rested again."]
 ## Het Gesimuleerde Archief: nederlaag in de kerker (gevechtsscherm) en het bericht na het opnieuw laden.
-const DUNGEON100_DEFEAT_TEXT := "GAME OVER\nDood is het Archief uit. Je staat weer voor de ingang."
-const DUNGEON100_RESET_LINES := ["De simulatie laat je los.", "Je staat weer voor de ingang van het Archief. Blauwe databanken blijven."]
+const DUNGEON100_DEFEAT_TEXT := "GAME OVER\nDeath means out of the Archive. You stand before the entrance again."
+const DUNGEON100_RESET_LINES := ["The simulation lets you go.", "You stand before the Archive entrance again. Blue databanks remain."]
 
 ## v7 (prestaties): alles wat een gevecht of mapwissel nodig heeft wordt bij de start
 ## alvast op de achtergrond geladen (ResourceLoader.load_threaded_request) en daarna
@@ -1183,7 +1183,7 @@ func defeat_text(boss := false) -> String:
 	if dungeon100_floor > 0 or dungeon100_run_active():
 		return DUNGEON100_DEFEAT_TEXT
 	if not has_checkpoint():
-		return "GAME OVER\nJe wordt wakker bij het begin."
+		return "GAME OVER\nYou wake up back at the start."
 	return "GAME OVER\n" + str((RESPAWN_LINES_BOSS if boss else RESPAWN_LINES)[0])
 
 
@@ -1456,7 +1456,7 @@ func give_exp(hero: Dictionary, amount: int) -> Array[String]:
 		# v0.14: atk/def/agi/mag/mdef groeien op de BASIS; de effectieve waarde (met
 		# uitrusting) wordt opnieuw uitgerekend (Equipment.grow -> refresh).
 		Equipment.grow(hero, g)
-		messages.append("%s is nu level %d!" % [hero["name"], hero["level"]])
+		messages.append("%s is now level %d!" % [hero["name"], hero["level"]])
 	return messages
 
 
@@ -1551,13 +1551,13 @@ func codex_load_data(raw) -> void:
 ## Waarom kunnen pagina's 'uid_a' en 'uid_b' niet fuseren? "" = het kan. Regels: CodexData.FUSION_TABLE.
 func codex_fusion_reason(uid_a: String, uid_b: String) -> String:
 	if in_battle:
-		return "Fuseren kan niet tijdens een gevecht."
+		return "You can't fuse during a battle."
 	if codex_pages.size() < 2:
-		return "Voor een fusie heb je twee pagina's nodig."
+		return "A fusion needs two pages."
 	var a := codex_page(uid_a)
 	var b := codex_page(uid_b)
 	if a.is_empty() or b.is_empty():
-		return "Kies twee pagina's."
+		return "Pick two pages."
 	return CodexData.fusion_block_reason(a, b)
 
 

@@ -22,7 +22,7 @@ const PAD_Y := 9               # inhoud - schermrand (boven/onder)
 const ROW_H := 16              # hoogte van een menuregel (ook = minimale tikhoogte)
 const BACK_W := 56             # breedte van de 'Terug'-knop (groot genoeg voor een duim)
 const MESSAGE_TIME := 2.5      # zo lang blijft een melding staan (seconden)
-const DEFAULT_HINT := "A: kiezen   B: terug"
+const DEFAULT_HINT := "A: choose   B: back"
 
 var root: Control
 var header_row: HBoxContainer
@@ -66,7 +66,7 @@ func _ready() -> void:
 	header = UiMenu.label("", MenuColors.TITLE)
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_row.add_child(header)
-	back_button = UiMenu.button("Terug")
+	back_button = UiMenu.button("Back")
 	back_button.custom_minimum_size = Vector2(BACK_W, ROW_H)
 	back_button.pressed.connect(back)
 	header_row.add_child(back_button)

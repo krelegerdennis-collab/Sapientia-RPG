@@ -129,14 +129,14 @@ func interact(player: Node2D) -> void:
 		Dialog.show_lines([line])
 		await Dialog.finished
 	if info.get("save", false):
-		var choice: int = await Dialog.ask(info.get("question", "Voortgang opslaan?"), ["Ja", "Nee"])
+		var choice: int = await Dialog.ask(info.get("question", "Save progress?"), ["Yes", "No"])
 		if choice == 0:
 			if GameState.save_game(player.get_tile(), player.facing):
 				last_result = "saved"
-				Dialog.show_lines(["Opgeslagen."])
+				Dialog.show_lines(["Saved."])
 			else:
 				last_result = "failed"
-				Dialog.show_lines(["Opslaan is mislukt."])
+				Dialog.show_lines(["Save failed."])
 		else:
 			last_result = "declined"
 	busy = false

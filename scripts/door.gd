@@ -3,7 +3,7 @@ extends StaticBody2D
 ##   - target_map ingevuld (v0.10) -> korte fade naar die map, speler op target_spawn
 ##   - anders -> de tekst uit 'lines' (bv. "De deur is op slot.")
 
-@export_multiline var lines: Array[String] = ["De deur is op slot."]
+@export_multiline var lines: Array[String] = ["The door is locked."]
 @export_file("*.tscn") var target_map := ""
 ## Naam van een MapSpawn-node in de doel-map (onder "Spawns").
 @export var target_spawn := ""

@@ -80,7 +80,7 @@ func _data_tests() -> void:
 			KernData.fragment_for_boss("kennis_beest") == "golemkern" and KernData.fragment_for_boss("papiergeest") == ""
 			and KernData.fragment_for_boss("") == "")
 	var f := KernData.fragment("golemkern")
-	check("golemkern: naam/beschrijving/icoon/baas/vaardigheden ingevuld", f.get("naam") == "Golemkern"
+	check("golemkern: naam/beschrijving/icoon/baas/vaardigheden ingevuld", f.get("naam") == "Golem Core"
 			and str(f.get("beschrijving", "")).length() > 10 and f.get("source_boss") == "kennis_beest"
 			and f.get("battle_skill") == "kernslag" and KernData.abilities_of(f) == [KernData.HEAVY_BLOCK_ABILITY, KernData.FIELD_FIREBALL_ABILITY])   # v0.16: + kernvuur
 	var icon: Texture2D = load(str(f["icon"]))
@@ -89,7 +89,7 @@ func _data_tests() -> void:
 	check("effect assets/fx/kern_absorptie.png 192x48 (4 frames van 48x48)", fx != null and fx.get_size() == Vector2(192, 48)
 			and KernAbsorption.FRAMES == 4 and is_equal_approx(KernAbsorption.FRAME_TIME, 0.12))
 	var s: Dictionary = KernData.KERN_SKILLS["kernslag"]
-	check("Kernkracht (id kernslag): 1,5x ATK, DEF x0,25, 3 rondes opladen, fysiek op 1 vijand", s["name"] == "Kernkracht"
+	check("Kernkracht (id kernslag): 1,5x ATK, DEF x0,25, 3 rondes opladen, fysiek op 1 vijand", s["name"] == "Core Power"
 			and is_equal_approx(s["atk_mult"], 1.5) and is_equal_approx(s["def_factor"], 0.25) and int(s["cooldown"]) == 3
 			and s["type"] == "physical" and s["target"] == "enemy")
 	# validate vangt fouten echt op
@@ -390,7 +390,7 @@ func _golem_setup() -> bool:
 # ================================================================ deel C
 func _golem_tests() -> void:
 	Engine.time_scale = 1.0
-	check("Golemhal geladen", await _golem_setup())
+	check("Golem Hall geladen", await _golem_setup())
 	if player() == null:
 		return
 	check("voor de Golem: geen kern", GameState.kernfragmenten.is_empty())
@@ -406,7 +406,7 @@ func _golem_tests() -> void:
 			GameState.has_kern("golemkern") and GameState.kernfragmenten["golemkern"].get("bron") == "kennis_beest"
 			and GameState.kernfragmenten.size() == 1)
 	Engine.time_scale = 1.0
-	check("terug in de Golemhal", await wait_scene("ArchiefGolemhal"))
+	check("terug in de Golem Hall", await wait_scene("ArchiefGolemhal"))
 	var ka: Node = null
 	await wait_until(func(): return scene() != null and scene().get_node_or_null("KernAbsorptie") != null, 3.0)
 	ka = scene().get_node_or_null("KernAbsorptie")
@@ -432,8 +432,8 @@ func _golem_tests() -> void:
 	check("daarna het bericht", await wait_until(func(): return Dialog.is_open, 3.0) and ka.phase == "bericht")
 	var lines: Array = Dialog._lines
 	check("'Dennis absorbeert de Golemkern!' + Kernkracht + Zware blokken duwen + vuurbal in het veld %s" % [lines], lines.size() == 4
-			and lines[0] == "Dennis absorbeert de Golemkern!" and "Kernkracht" in str(lines[1]) and "Zware blokken duwen" in str(lines[2])
-			and "Kernkracht" in str(lines[3]))
+			and lines[0] == "Dennis absorbs the Golem Core!" and "Core Power" in str(lines[1]) and "Push Heavy Blocks" in str(lines[2])
+			and "Core Power" in str(lines[3]))
 	await get_tree().create_timer(1.6).timeout       # tekst helemaal uitgetypt
 	await screenshot("kern_absorptie_bericht")
 	var count_before := GameState.autosave_count
@@ -448,7 +448,7 @@ func _golem_tests() -> void:
 	check("autosave laden: golemkern terug", GameState.load_game(GameState.autosave_path) and GameState.has_kern("golemkern")
 			and GameState.pending_kern_absorb == "")
 	# tweede overwinning op een baas met dezelfde kern: niets dubbel, geen nieuw moment
-	check("weer in de Golemhal", await _golem_setup())
+	check("weer in de Golem Hall", await _golem_setup())
 	GameState.grant_kern("golemkern")
 	var b2 := await _start_battle(["kennis_beest"], true)
 	if b2 == null:
@@ -467,7 +467,7 @@ func _golem_tests() -> void:
 # ================================================================ deel D
 func _kernslag_tests() -> void:
 	GameState.new_game("Dennis")
-	check("Golemhal (zonder kern) geladen", await _golem_setup())
+	check("Golem Hall (zonder kern) geladen", await _golem_setup())
 	# zonder kern: Magie uit voor Dennis (hij heeft geen spreuken)
 	var b := await _start_battle(["papiergeest"], false)
 	if b == null:
@@ -497,10 +497,10 @@ func _kernslag_tests() -> void:
 	check("met kern: 'Magie' aan voor Dennis", b.cross.enabled[MAGIE])
 	await cross_to(b, MAGIE)
 	await tap("interact")
-	check("menu open met titel 'Kern'", await wait_until(func(): return b.menu.visible, 3.0) and b.menu.title_label.text == "Kern")
+	check("menu open met titel 'Kern'", await wait_until(func(): return b.menu.visible, 3.0) and b.menu.title_label.text == "Core")
 	var entries: Array = b.menu._entries
 	check("menu: 'Kernkracht KERN' staat erin en is te kiezen %s" % [entries], entries.size() == 1
-			and str(entries[0]["text"]).begins_with("Kernkracht") and "KERN" in str(entries[0]["text"]) and entries[0]["enabled"])
+			and str(entries[0]["text"]).begins_with("Core Power") and "CORE" in str(entries[0]["text"]) and entries[0]["enabled"])
 	await get_tree().create_timer(0.3).timeout
 	await screenshot("kernslag_menu")
 	var hero: Dictionary = GameState.party[0]
@@ -512,8 +512,8 @@ func _kernslag_tests() -> void:
 	await tap("interact")
 	check("doel kiezen", await wait_battle_state(["target_enemy"], 5) == "target_enemy")
 	await tap("interact")
-	await wait_until(func(): return seen_message("Kernkracht"), 5.0)
-	check("bericht '%s: Kernkracht!'" % hero["name"], seen_message("%s: Kernkracht!" % hero["name"]))
+	await wait_until(func(): return seen_message("Core Power"), 5.0)
+	check("bericht '%s: Core Power!'" % hero["name"], seen_message("%s: Core Power!" % hero["name"]))
 	await wait_until(func(): return not enemy_hits.is_empty(), 5.0)
 	if shots != "":   # schadegetal in beeld, vijand niet net weg door het knipperen
 		await wait_until(func(): return e["node"].visible, 1.0)
@@ -545,7 +545,7 @@ func _kernslag_tests() -> void:
 	await wait_battle_state(["command"], 40)
 	await pframes(4)
 	check("ronde %d: Kernkracht weer klaar" % b.round_no, b.kern_ready(_hero_c(b), "kernslag")
-			and b.kern_entry_text(_hero_c(b), "kernslag").ends_with("KERN"))
+			and b.kern_entry_text(_hero_c(b), "kernslag").ends_with("CORE"))
 	b.can_flee = true
 	b.cross.enabled[4] = true
 	await cross_to(b, 4)
@@ -609,7 +609,7 @@ func _heavy_tests() -> void:
 	check("naast de kast (2,3): %s" % tile(), tile() == Vector2i(2, 3))
 	await push("move_right", room, "kast_zwaar")
 	check("zonder kern: hint '%s'" % [Dialog._lines], await wait_until(func(): return Dialog.is_open, 2.0)
-			and room.last_heavy_hint == "kast_zwaar" and str(Dialog._lines[0]).begins_with("Deze kast zit vol runen"))
+			and room.last_heavy_hint == "kast_zwaar" and str(Dialog._lines[0]).begins_with("This cabinet is full of runes"))
 	check("kast bleef staan (3,3), speler ook", room.logic.blocks["kast_zwaar"] == Vector2i(3, 3) and tile() == Vector2i(2, 3))
 	await get_tree().create_timer(1.6).timeout       # tekst helemaal uitgetypt
 	await screenshot("zware_kast_hint")
@@ -633,7 +633,7 @@ func _heavy_tests() -> void:
 # ================================================================ deel F
 func _status_tests() -> void:
 	var dennis: Dictionary = GameState.party[0]
-	check("kern_text: Dennis met Golemkern = 'Golemkern (Kernkracht)'", StatusScreenS.kern_text(dennis) == "Golemkern (Kernkracht)")
+	check("kern_text: Dennis met Golemkern = 'Golemkern (Kernkracht)'", StatusScreenS.kern_text(dennis) == "Golem Core (Core Power)")
 	check("kern_text: Noor = '' (alleen de hoofdheld)", StatusScreenS.kern_text({"id": "noor"}) == "")
 	if player() == null or Dialog.is_open:
 		await close_dialog()
@@ -652,7 +652,7 @@ func _status_tests() -> void:
 	await frames(4)
 	var st: Node = m.get_node_or_null("Status")
 	check("statusscherm open, regel 'Kernen: %s' zichtbaar" % (st.kern_label.text if st else "?"), st != null
-			and st.kern_label.visible and st.kern_key.visible and st.kern_label.text == "Golemkern (Kernkracht)")
+			and st.kern_label.visible and st.kern_key.visible and st.kern_label.text == "Golem Core (Core Power)")
 	if st != null:
 		await get_tree().create_timer(0.3).timeout
 		var r: Rect2 = st.kern_label.get_global_rect()

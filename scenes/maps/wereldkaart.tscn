@@ -9,7 +9,7 @@
 
 [node name="Wereldkaart" type="Node2D"]
 script = ExtResource("1_i0cqu")
-map_name = "Wereldkaart"
+map_name = "World Map"
 music_track = "wereld"
 encounters = true
 
@@ -82,7 +82,7 @@ script = ExtResource("5_ws0vq")
 size_tiles = Vector2i(2, 2)
 target_map = "res://scenes/maps/dorp_wilgendal.tscn"
 target_spawn = "zuid_ingang"
-lines = Array[String](["Wilgendal (komt later)"])
+lines = Array[String](["Willowdale (later)"])
 event = ""
 
 [node name="NaarEsdoorn" type="Node2D" parent="Exits"]

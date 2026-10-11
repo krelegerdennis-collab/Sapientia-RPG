@@ -48,21 +48,21 @@ const FINAL_MULT := {"max_hp": 1.3, "atk": 1.15, "def": 1.1, "mag": 1.15, "mdef"
 ## Baas per 10e verdieping. "enemy" = bestaande vijand uit game_data.gd (sprite + skills, nog
 ## PLACEHOLDER-art: geen eigen art per baas), "name" = naam in het gevecht (max. ~20 tekens).
 const BOSSES := {
-	10: {"enemy": "papiergeest", "name": "Bladzijdenwachter"},
-	20: {"enemy": "glitchmot", "name": "Glitchkoningin"},
-	30: {"enemy": "sporenzwam", "name": "Sporenvorst"},
-	40: {"enemy": "wortelkruiper", "name": "Wortelmoeder"},
-	50: {"enemy": "mech_wachter", "name": "Wachter-Kolos"},
-	60: {"enemy": "mistuil", "name": "Mistheer"},
-	70: {"enemy": "mech_wachter", "name": "Zegelwachter"},
-	80: {"enemy": "kennis_beest", "name": "Grote Boekengolem"},
-	90: {"enemy": "wortelkoning", "name": "Wortelkeizer"},
-	100: {"enemy": "kennis_beest", "name": "De Laatste Wachter"},
+	10: {"enemy": "papiergeest", "name": "Page Warden"},
+	20: {"enemy": "glitchmot", "name": "Glitch Queen"},
+	30: {"enemy": "sporenzwam", "name": "Spore Lord"},
+	40: {"enemy": "wortelkruiper", "name": "Root Mother"},
+	50: {"enemy": "mech_wachter", "name": "Warden Colossus"},
+	60: {"enemy": "mistuil", "name": "Mist Lord"},
+	70: {"enemy": "mech_wachter", "name": "Seal Warden"},
+	80: {"enemy": "kennis_beest", "name": "Great Book Golem"},
+	90: {"enemy": "wortelkoning", "name": "Root Emperor"},
+	100: {"enemy": "kennis_beest", "name": "The Last Warden"},
 }
 ## Extra skill van de eindbaas (bovenop de skills van zijn vijand-sprite).
-const FINAL_SKILL := {"name": "Laatste Oordeel", "chance": 0.15, "power": 2.0}
+const FINAL_SKILL := {"name": "Last Judgment", "chance": 0.15, "power": 2.0}
 ## Skill voor een baas als zijn vijand er geen heeft.
-const DEFAULT_BOSS_SKILL := {"name": "Zware Slag", "chance": 0.2, "power": 1.5}
+const DEFAULT_BOSS_SKILL := {"name": "Heavy Blow", "chance": 0.2, "power": 1.5}
 const FLAG_BOSS := "dungeon100_boss:"
 
 # ---------------------------------------------------------------- buit
@@ -353,7 +353,7 @@ static func loot_lines(loot: Dictionary) -> Array[String]:
 		parts.append(nm if n == 1 else "%dx %s" % [n, nm])
 	var gold := int(loot.get("gold", 0))
 	if gold > 0:
-		parts.append("%d goud" % gold)
+		parts.append("%d gold" % gold)
 	return parts
 
 

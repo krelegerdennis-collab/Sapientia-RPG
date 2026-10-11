@@ -24,8 +24,8 @@ extends RefCounted
 const KERNFRAGMENTEN := {
 	"golemkern": {
 		"id": "golemkern",
-		"naam": "Golemkern",
-		"beschrijving": "Het roze hart van de Golem. Zwaar en warm; het geeft je de kracht van steen.",
+		"naam": "Golem Core",
+		"beschrijving": "The pink heart of the Golem. Heavy and warm; it gives you the strength of stone.",
 		"icon": "res://assets/ui/icons/golemkern.png",
 		"source_boss": "kennis_beest",
 		"battle_skill": "kernslag",
@@ -43,14 +43,14 @@ const KERNFRAGMENTEN := {
 ## Forge's teksten en eventuele toekomstige saves verwijzen ernaar); alleen naam/beeld zijn nieuw.
 const KERN_SKILLS := {
 	"kernslag": {
-		"name": "Kernkracht",
+		"name": "Core Power",
 		"fx": "vuurbal",
 		"type": "physical",
 		"target": "enemy",
 		"atk_mult": 1.5,       # 1,5x ATK
 		"def_factor": 0.25,    # de kern gaat door het pantser: maar 1/4 DEF telt (gewoon 1/2)
 		"cooldown": 3,         # 1x per 3 rondes (na gebruik 2 rondes opladen)
-		"desc": "Paarse vuurbal uit de hand, met de kracht van de Golemkern: 1,5x ATK, door het pantser heen. Laadt 3 rondes op.",
+		"desc": "A purple fireball from the hand, with the Golem Core's strength: 1.5x ATK, through armor. Charges for 3 rounds.",
 	},
 }
 
@@ -58,14 +58,14 @@ const KERN_SKILLS := {
 ##   zware_blokken: zware kasten in puzzelkamers duwen ({"type": "block", "heavy": true}).
 const WORLD_ABILITIES := {
 	"zware_blokken": {
-		"name": "Zware blokken duwen",
-		"desc": "Je kunt nu zware, met runen beladen kasten duwen.",
+		"name": "Push Heavy Blocks",
+		"desc": "You can now push heavy cabinets loaded with runes.",
 	},
 	# v0.16: KERNKRACHT in het veld (scripts/kern/kern_kracht_veld.gd): knop KERN (of toets K) =
 	# paarse vuurbal 3 tegels ver in de kijkrichting; een (niet-baas) map-monster staat 10 stappen stil.
 	"kernvuur": {
-		"name": "Kernkracht",
-		"desc": "Druk op KERN: een vuurbal vliegt 3 tegels en verlamt een monster 10 stappen.",
+		"name": "Core Power",
+		"desc": "Press CORE: a fireball flies 3 tiles and stuns a monster for 10 steps.",
 	},
 }
 

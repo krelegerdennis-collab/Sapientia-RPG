@@ -345,8 +345,8 @@ func _floor10_tests() -> void:
 	var d: Dictionary = Gen.generate(4242, 10)
 	var hud := GameState.get_node_or_null("Dungeon100Hud")
 	await pframes(3)
-	check("HUD-tekst: 'Verdieping 10/100' (rustverdieping)", hud != null and hud.visible and hud.shown_floor == 10
-			and Rules.hud_text(GameState.dungeon100_floor) == "Verdieping 10/100")
+	check("HUD-tekst: 'Floor 10/100' (rustverdieping)", hud != null and hud.visible and hud.shown_floor == 10
+			and Rules.hud_text(GameState.dungeon100_floor) == "Floor 10/100")
 	var rp: Node = r.get_node_or_null("Objects/Rustpunt")
 	check("rustpunt staat op rest_slot %s" % [d["rest_slot"]], rp != null and rp is Dungeon100Rustpunt
 			and Vector2i((rp.position / 16.0).floor()) == d["rest_slot"])
@@ -418,7 +418,7 @@ func _floor10_tests() -> void:
 	GameState.dungeon100_floor = 9
 	GameState.change_map(DUNGEON, "omhoog")
 	await wait_floor(9)
-	check("verdieping 9: geen baas, geen rustpunt, HUD 'Verdieping 9/100'", scene().get_node_or_null("Objects/Rustpunt") == null
+	check("verdieping 9: geen baas, geen rustpunt, HUD 'Floor 9/100'", scene().get_node_or_null("Objects/Rustpunt") == null
 			and not scene().monsters.any(func(m): return m.boss) and hud.shown_floor == 9)
 
 
@@ -447,7 +447,7 @@ func _defeat_tests() -> void:
 	r.start_monster_battle(victim)
 	check("gevecht gestart", await wait_until(func(): return battle() != null and battle().is_node_ready(), 20.0))
 	check("het monster is geschaald naar verdieping 15", int(battle().enemies[0]["s"]["max_hp"]) > int(GD.ENEMIES[victim_enemy]["max_hp"]))
-	check("game-over-tekst: dood is het Archief uit (niet het rustpunt)", GameState.defeat_text(false).contains("Archief uit")
+	check("game-over-tekst: death means out of the Archive (niet het rustpunt)", GameState.defeat_text(false).contains("out of the Archive")
 			and not GameState.defeat_text(false).contains("rustpunt"))
 	await lose_battle()
 	check("na de nederlaag: wereldkaart, niet de grot", await wait_scene_path(Rules.WORLD_SCENE))

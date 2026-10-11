@@ -20,26 +20,26 @@ const DEFAULTS := {
 	"open_mult": 2.0,        # schade op de open roze kern
 	"break_damage": 20,      # zoveel schade in het open venster = lading kapot, geen Hamerslag
 	"slam_power": 2.2,       # Hamerslag = ATK x 2,2 (normale formule, verdedigen = helft)
-	"slam_name": "Hamerslag",
+	"slam_name": "Hammer Blow",
 	# kern in de pixels van het baas-plaatje (golem_boss_v2.png, 196x182): x, y, b, h
 	"rect": [82, 52, 30, 30],
 }
 
 ## Berichten (de naam van de baas wordt ingevuld).
-const MSG_HINT := "Pantser op de kern! Wacht op het roze licht."
-const MSG_OPEN := "De kern gloeit roze! %s laadt op..."
+const MSG_HINT := "Armor on the core! Wait for the pink light."
+const MSG_OPEN := "The core glows pink! %s charges..."
 ## blijft in beeld zolang je kiest en de kern open is
-const MSG_WINDOW := "Roze kern open! Val nu aan!"
-const MSG_BREAK := "Raak! De lading barst. %s wankelt."
+const MSG_WINDOW := "Pink core open! Strike now!"
+const MSG_BREAK := "Hit! The charge bursts. %s staggers."
 const MSG_SLAM := "%s: %s!"
-const MSG_CLOSE := "De kern sluit zich weer."
+const MSG_CLOSE := "The core seals shut."
 
 var cycle := 3
 var closed_mult := 0.4
 var open_mult := 2.0
 var break_damage := 20
 var slam_power := 2.2
-var slam_name := "Hamerslag"
+var slam_name := "Hammer Blow"
 var rect := Rect2(82, 52, 30, 30)
 
 ## true = kern open (roze, kwetsbaar)

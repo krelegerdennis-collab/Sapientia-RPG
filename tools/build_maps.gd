@@ -259,7 +259,7 @@ const ESDOORN_HOUSES := [
 ## Dorpelingen: [node, naam, tile, richting, event, kleur (modulate van npc.png)].
 const ESDOORN_NPCS := [
 	["Marit", "Marit", Vector2i(19, 14), Vector2i.DOWN, "marit", Color(1.0, 0.82, 0.78)],
-	["Bram", "Oude Bram", Vector2i(6, 12), Vector2i.LEFT, "bram", Color(0.78, 0.78, 0.9)],
+	["Bram", "Old Bram", Vector2i(6, 12), Vector2i.LEFT, "bram", Color(0.78, 0.78, 0.9)],
 	["Jens", "Jens", Vector2i(24, 18), Vector2i.DOWN, "jens", Color(0.85, 1.0, 0.8)],
 	["Tobias", "Tobias", Vector2i(26, 14), Vector2i.RIGHT, "tobias", Color(0.8, 0.92, 1.0)],
 ]
@@ -295,8 +295,8 @@ const ESDOORN_MAP := [
 	"TTTTTTTTTTTTTTT===TTTTTTTTTTTTTTTT",
 ]
 const ESDOORN_SIGN := Vector2i(5, 11)
-const ESDOORN_SIGN_LINES: Array[String] = ["<- Het Donker Woud. Niet na zonsondergang!", "(Iemand heeft eronder gekrast: 'Ook niet overdag.')"]
-const ESDOORN_LOCKED_LINES: Array[String] = ["De deur zit op slot.", "Er hangt een briefje: 'Naar de markt. Terug als de mist optrekt.'"]
+const ESDOORN_SIGN_LINES: Array[String] = ["<- The Dark Wood. Not after sunset!", "(Someone scratched under it: 'Not in the daytime either.')"]
+const ESDOORN_LOCKED_LINES: Array[String] = ["The door is locked.", "A note hangs there: 'Gone to market. Back when the mist lifts.'"]
 
 ## Interieurs (binnen.png, INSIDE_LEGEND; D = deur naar buiten, P = spawn 'binnen', X = opslagboek).
 const NOOR_HUIS_MAP := [
@@ -321,7 +321,7 @@ const HERBERG_MAP := [
 	"Ld.,.zPc.,.R",
 	"CCCCCCDCCCCC",
 ]
-const HERBERG_NPCS := [["Waard", "Waard Wout", Vector2i(6, 3), Vector2i.DOWN, "herbergier", Color(0.95, 0.85, 0.7)]]
+const HERBERG_NPCS := [["Waard", "Innkeeper Wout", Vector2i(6, 3), Vector2i.DOWN, "herbergier", Color(0.95, 0.85, 0.7)]]
 
 
 
@@ -355,9 +355,9 @@ func build_v17() -> void:
 func build_esdoorn_all() -> void:
 	save_scene(build_esdoorn(load("res://assets/tiles/dorp.tres")), ESDOORN_PATH)
 	var inside: TileSet = load("res://assets/tiles/binnen.tres")
-	save_scene(build_interior("EsdoornHuisNoor", "Esdoorn - Huis van Noor", NOOR_HUIS_MAP, NOOR_HUIS_NPCS,
+	save_scene(build_interior("EsdoornHuisNoor", "Mapleton - Noor's House", NOOR_HUIS_MAP, NOOR_HUIS_NPCS,
 			"voor_noor"), NOOR_HUIS_PATH)
-	save_scene(build_interior("EsdoornHerberg", "Esdoorn - Herberg 'De Esdoorn'", HERBERG_MAP, HERBERG_NPCS,
+	save_scene(build_interior("EsdoornHerberg", "Mapleton - The Maple Inn", HERBERG_MAP, HERBERG_NPCS,
 			"voor_herberg"), HERBERG_PATH)
 
 
@@ -535,7 +535,7 @@ func add_touch_controls(root: Node) -> void:
 
 # ---------------------------------------------------------------- dorp Wilgendal
 func build_town(tileset: TileSet) -> Node2D:
-	var root := new_map_root("Wilgendal", "Huis aan de bosrand", false)   # GEEN monsters hier
+	var root := new_map_root("Wilgendal", "House at the Wood's Edge", false)   # GEEN monsters hier
 	add_layers(root, tileset, true)
 	var ground: TileMapLayer = root.get_node("Ground")
 	var gebouwen: TileMapLayer = root.get_node("Gebouwen")
@@ -552,7 +552,7 @@ func build_town(tileset: TileSet) -> Node2D:
 			match ch:
 				"O":
 					var npc := add_instance(objects, root, "res://scenes/npc.tscn", "OudeMan", tile_center(Vector2i(x, y)))
-					npc.npc_name = "Oude Man"
+					npc.npc_name = "Old Man"
 					npc.sheet = load(WACHTER_SHEET)   # v0.13: RPG ART's Wachter
 					npc.facing = Vector2i.UP     # staart naar de ruïnes
 					npc.event = "opa"
@@ -664,7 +664,7 @@ func town_is_green(ch: String) -> bool:
 
 # ---------------------------------------------------------------- wereldkaart
 func build_world(tileset: TileSet) -> Node2D:
-	var root := new_map_root("Wereldkaart", "Wereldkaart", true)   # overal monsters
+	var root := new_map_root("Wereldkaart", "World Map", true)   # overal monsters
 	add_layers(root, tileset, false)
 	var ground: TileMapLayer = root.get_node("Ground")
 	var sea := sea_masks()
@@ -708,7 +708,7 @@ func build_world(tileset: TileSet) -> Node2D:
 	# bosrand'); het nieuwe dorp Wilgendal heeft een eigen uitgang + spawn.
 	add_exit(root, "NaarWachtershuis", town_rect, TOWN_PATH, "zuid_ingang")
 	add_spawn(root, "van_dorp", spawn, Vector2i.DOWN)
-	var lines_later: Array[String] = ["Wilgendal (komt later)"]
+	var lines_later: Array[String] = ["Willowdale (later)"]
 	add_exit(root, "NaarWilgendal", village_rect, VILLAGE_PATH, "zuid_ingang", lines_later)
 	add_spawn(root, "van_wilgendal", village_rect.position + Vector2i(0, village_rect.size.y), Vector2i.DOWN)
 	# v0.17 Esdoorn (pas open na de Golem: event naar_esdoorn) en het Donker Woud (pas met de opdracht)
@@ -812,7 +812,7 @@ func build_inside_tileset() -> TileSet:
 
 
 func build_inside(tileset: TileSet) -> Node2D:
-	var root := new_map_root("Huis", "Het huis", false)   # binnen: geen monsters
+	var root := new_map_root("Huis", "The House", false)   # binnen: geen monsters
 	# zwart rondom de kamer (de kamer is kleiner dan het scherm)
 	var void_rect := ColorRect.new()
 	void_rect.color = Color(0.02, 0.02, 0.025)
@@ -836,7 +836,7 @@ func build_inside(tileset: TileSet) -> Node2D:
 					spawn = Vector2i(x, y)
 				"O":
 					var npc := add_instance(objects, root, "res://scenes/npc.tscn", "OudeMan", tile_center(Vector2i(x, y)))
-					npc.npc_name = "Oude Man"
+					npc.npc_name = "Old Man"
 					npc.sheet = load(WACHTER_SHEET)   # v0.13: RPG ART's Wachter
 					npc.facing = Vector2i.DOWN
 					npc.show_if = {"step_ge": StoryData.AVOND, "step_lt": StoryData.OPGESLOTEN}
@@ -866,7 +866,7 @@ func esdoorn_cell(x: int, y: int) -> String:
 
 
 func build_esdoorn(tileset: TileSet) -> Node2D:
-	var root := new_map_root("Esdoorn", "Esdoorn", false)   # dorp: geen monsters
+	var root := new_map_root("Esdoorn", "Mapleton", false)   # dorp: geen monsters
 	add_layers(root, tileset, true)
 	var ground: TileMapLayer = root.get_node("Ground")
 	var gebouwen: TileMapLayer = root.get_node("Gebouwen")

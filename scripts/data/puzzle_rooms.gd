@@ -59,7 +59,7 @@ const ROOMS := {
 	# de verhaalroute, alleen voor --kerntest (en F4-achtige debug). Oplossing: zware kast z 2x naar
 	# rechts op de zware plaat p -> poort 1 open (blijft open) -> X. Zonder de Golemkern: hint.
 	"kern_demo": {
-		"name": "Kernkamer (demo zware kast)",
+		"name": "Core Room (demo heavy cabinet)",
 		"layout": [
 			"####X####",
 			"####1####",
@@ -76,10 +76,10 @@ const ROOMS := {
 			"r": {"type": "reset", "id": "herstelsteen"},
 		},
 		"entrance": {"map": "res://scenes/maps/huis_wilgendal.tscn", "spawn": "binnen"},
-		"exit": {"lines": ["Achter de poort is het stil.", "(Demo: hier kan Forge een echte kamer maken.)"]},
+		"exit": {"lines": ["It's quiet behind the gate.", "(Demo: a real room can go here later.)"]},
 	},
 	"archief_test": {
-		"name": "Vergeten Archieven - testkamer",
+		"name": "Forgotten Archives - Test Room",
 		"layout": [
 			"#######X######",
 			"#######1######",
@@ -105,8 +105,8 @@ const ROOMS := {
 			"r": {"type": "reset", "id": "herstelsteen"},
 		},
 		"entrance": {"map": "res://scenes/maps/huis_wilgendal.tscn", "spawn": "binnen"},
-		"exit": {"lines": ["Achter de poort ligt een donkere gang vol stof en losse bladzijden.",
-				"(De rest van De Vergeten Archieven komt later.)"]},
+		"exit": {"lines": ["Behind the gate lies a dark corridor full of dust and loose pages.",
+				"(The rest of the Forgotten Archives comes later.)"]},
 	},
 	# v0.14 PUZZELKAMER 3B van het Eerste Archief (plan: story/ARCHIEF1_PLATTEGROND.md par. 4.1),
 	# dungeontegels. De onderste 13 rijen = de puzzelkamer (de testkamer, 4 breder en 1 hoger);
@@ -119,7 +119,7 @@ const ROOMS := {
 	# v0.15: G, s en T zijn de echte componenten van RPG CODE (geheime deur, runeplaat, schatkist
 	# met het Vonkzwaard); de schatkamer wordt zichtbaar via reveal_hidden_area() ("dek").
 	"archief_puzzel": {
-		"name": "Vergeten Archieven - Puzzelkamer",
+		"name": "Forgotten Archives - Puzzle Room",
 		"style": "dungeon",
 		"layout": [
 			"##################",
@@ -179,15 +179,15 @@ const ROOMS := {
 			# geheime deur in de achterwand (16x32: deze tile + de tile erboven); placeholder = dicht
 			"G": {"type": "secret", "hook": "geheime_deur", "id": "geheime_deur", "solid": true,
 					"needs": ["plaat_s", "poort_1"], "mode": "all", "latch": true, "style": "geheim",
-					"hint": ["In de muur zit een dunne roze scheur...", "Er tocht iets achter de stenen."],
-					"open_lines": ["Er klinkt een zwaar schrapen achter de muur..."]},
+					"hint": ["A thin pink crack sits in the wall...", "Something drafts behind the stones."],
+					"open_lines": ["A heavy scrape sounds behind the wall..."]},
 			# verborgen zware drukplaat (ziet eruit als runentegel 11); placeholder = alleen het plaatje
 			"s": {"type": "plate", "hook": "runeplaat", "id": "plaat_s", "solid": false, "heavy": true, "hidden": true},
 			# schatkist met het Vonkzwaard (eenmalig); placeholder = dichte kist, massief
 			"T": {"type": "chest", "hook": "schatkist", "id": "kist_vonkzwaard", "solid": true,
 					"item": "vonkzwaard", "n": 1, "flag": "kist_vonkzwaard",
-					"lines": ["{naam} opent de kist...", "{naam} vindt het Vonkzwaard!",
-							"ATK +12. Uitrusten: Menu > Uitrusting > Wapen."]},
+					"lines": ["{naam} opens the chest...", "{naam} finds the Spark Sword!",
+							"ATK +12. Equip: Menu > Equipment > Weapon."]},
 		},
 		"spawns": {"uit_x": [8, 9, "down"]},
 		"dek": {"rect": [9, 0, 9, 6], "tiles": [[9, 6, 23], [10, 6, 23], [11, 6, 23], [12, 6, 23], [13, 6, 23],

@@ -17,7 +17,7 @@ extends "res://scripts/book_point.gd"
 const SCENE := "res://scenes/dungeon100_rustpunt.tscn"
 const RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const TINT := Color(1.0, 0.86, 0.62)
-const ACTIVATED_LINE := "De groep is hersteld. Dit is geen terugkeerpunt: vallen betekent het Archief uit."
+const ACTIVATED_LINE := "The party is restored. This is not a return point: falling means out of the Archive."
 
 ## Voor de tests: de laatste keer dat het rustpunt een NIEUW checkpoint werd.
 var last_activated := false
@@ -54,14 +54,14 @@ func interact(player: Node2D) -> void:
 		lines.append(ACTIVATED_LINE)
 	Dialog.show_lines(lines)
 	await Dialog.finished
-	var choice: int = await Dialog.ask(str(info.get("question", "Voortgang opslaan?")), ["Ja", "Nee"])
+	var choice: int = await Dialog.ask(str(info.get("question", "Save progress?")), ["Yes", "No"])
 	if choice == 0:
 		if GameState.save_game(player.get_tile(), player.facing):
 			last_result = "saved"
-			Dialog.show_lines(["Opgeslagen."])
+			Dialog.show_lines(["Saved."])
 		else:
 			last_result = "failed"
-			Dialog.show_lines(["Opslaan is mislukt."])
+			Dialog.show_lines(["Save failed."])
 	else:
 		last_result = "declined"
 	busy = false

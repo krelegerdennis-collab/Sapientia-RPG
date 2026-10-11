@@ -330,7 +330,7 @@ func _draw_kern_button(line: float) -> void:
 	else:
 		draw_circle(icon_c, 4.0, KERN_NEON)
 	var font := get_theme_default_font()
-	var ts := font.get_string_size("KERN", HORIZONTAL_ALIGNMENT_LEFT, -1, 10)
+	var ts := font.get_string_size("CORE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10)
 	var tp := Vector2(kr.end.x - 4.0 - ts.x, kr.position.y + 12.0).round()
-	draw_string(font, tp + Vector2(1, 1), "KERN", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyleC.SHADOW)
-	draw_string(font, tp, "KERN", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, KERN_NEON.lerp(Color.WHITE, 0.7) if not pressed else Color.WHITE)
+	draw_string(font, tp + Vector2(1, 1), "CORE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyleC.SHADOW)
+	draw_string(font, tp, "CORE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, KERN_NEON.lerp(Color.WHITE, 0.7) if not pressed else Color.WHITE)
