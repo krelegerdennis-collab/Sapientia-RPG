@@ -14,3 +14,6 @@ assets/tiles/dungeon/kas_tiles.png            256x80  tileset overwoekerde kas (
 assets/tiles/dungeon/kas_bibliotheek.png      256x64  bibliotheek-atlas van de kas (loader; verdieping 1 tekent er nog niet mee)
 assets/puzzle/groei_plaat.png                  48x16  groei-plaat, 3 frames van 16x16: zaad, scheut, volgroeid
 assets/sprites/buiten/kas_ingang.png           16x16  ingang van de kas op de wereldkaart
+# De Spiegel (Archief 4), onthullingsscène (tools/art_spiegel_placeholder.py). Magenta hoekjes, geen definitieve art.
+assets/bg/spiegel_kamer.png                   384x216  kamer vol spiegelende oppervlakken
+assets/bg/spiegel_kamer_gebroken.png          384x216  dezelfde kamer, spiegels gebroken door de weigering
