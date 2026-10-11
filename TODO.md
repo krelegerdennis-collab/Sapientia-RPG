@@ -210,14 +210,14 @@ Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
 - [ ] Bestiarium uitwerken tot endgame
   De bestaande eindbazen van de Diepe Grot (verdieping 10 tot en met 100) hebben een entry en stats uit de bestaande monsterdata.
-  De vier lore-zinnen hieronder zijn canon. De checkboxes blijven open tot die tekst in het bestiarium staat.
+  De vier lore-zinnen hieronder staan in het bestiarium (`desc` van kennis_beest, wortelkoning, wurger en genezer). De weergavenaam van Kustos blijft The Knowledge Beast; die naam zit in de tests vast.
 
 **CANON – niet wijzigen zonder overleg.**
 
-- [ ] Kustos (Archief 1): "Een wachter zonder ogen, maar met duizend oren. Hij hoort elke gedachte die het Archief binnenkomt. De Oude Mensheid bouwde hem niet om te doden, maar om te bewaren. Sapientia gaf hem een nieuw doel: alles wat niet past, wordt verwijderd."
-- [ ] De Wortelkoning (Donker Woud): "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat."
-- [ ] De Wurger (Archief 2, verdieping 3): "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden."
-- [ ] De Genezer (Archief 2, eindbaas): "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg."
+- [x] Kustos (Archief 1): "Een wachter zonder ogen, maar met duizend oren. Hij hoort elke gedachte die het Archief binnenkomt. De Oude Mensheid bouwde hem niet om te doden, maar om te bewaren. Sapientia gaf hem een nieuw doel: alles wat niet past, wordt verwijderd."
+- [x] De Wortelkoning (Donker Woud): "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat."
+- [x] De Wurger (Archief 2, verdieping 3): "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden."
+- [x] De Genezer (Archief 2, eindbaas): "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg."
 
 **CANON – niet wijzigen zonder overleg.**
 
