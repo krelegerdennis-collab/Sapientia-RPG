@@ -2000,12 +2000,12 @@ func _prologue_tests() -> void:
 	check("vroeg keuzemenu bestaat: %d opties, zelfde vervolg" % opts.size(),
 			opts == INTRO_CHOICES and SD.early_choice_same_followup()
 			and str(spec.get("question", "")) == "Wat zeg je, {naam}?")
-	check("speler staat vrij op het bed (1,3), geen wakker-cutscene: %s" % tile(),
-			tile() == Vector2i(1, 3) and not player().input_locked and not Story.running and not Dialog.is_open
+	check("speler staat vrij naast het bed (2,3), geen wakker-cutscene: %s" % tile(),
+			tile() == Vector2i(2, 3) and not player().input_locked and not Story.running and not Dialog.is_open
 			and not Story.history.has("wakker_worden") and GameState.story_step == SD.START)
 	check("Oude Man 's ochtends niet binnen", _obj("OudeMan") != null and not _obj("OudeMan").visible)
-	# naar buiten (bed is (1,3); vroeger zette de cutscene je op (2,3))
-	await walk("move_right", 3)
+	# naar buiten (spawn staat al op (2,3); de bed-tile zelf is niet beloopbaar)
+	await walk("move_right", 2)
 	await walk("move_down", 5)
 	check("deur -> naar buiten (Willowdale = huis aan de bosrand)", await wait_scene("Wilgendal"))
 	await frames(10)

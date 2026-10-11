@@ -132,7 +132,8 @@ const MENU_CLOSED := [
 
 const EVENTS := {
 	# ------------------------------------------------------------ scène 1: ochtend
-	# Update 5: geen wakker-cutscene. De speler staat meteen vrij op het bed (spawn "bed").
+	# Update 5: geen wakker-cutscene. Spawn "bed" staat op (2,3), naast het bedmeubel
+	# (de bed-tile zelf blokkeert lopen). De speler is daar meteen vrij.
 	# TODO(verhaal): ochtendtekst ingekort. Canon-beats blijven: naam, Wachtershuis, Opa,
 	# en dat de Archieven dicht blijven tot het zegel breekt (dat laatste staat nog in scène 2).
 	"opa": [
