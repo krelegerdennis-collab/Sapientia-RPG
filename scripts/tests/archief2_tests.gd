@@ -323,7 +323,7 @@ func _spel() -> void:
 	var open: Dictionary = GameState.archief2_last_open
 	var max_hp := int(open.get("max", 0))
 	var dmg := int(open.get("schade", -1))
-	check("eerste treffer ongeveer 30%% (%d/%d)" % [dmg, max_hp], max_hp > 0)
+	check("eerste treffer ongeveer 30%% (%d/%d)" % [dmg, max_hp], max_hp > 0
 			and dmg == Archief2.openingslag(max_hp)
 			and absf(float(dmg) / float(max_hp) - 0.30) < 0.02)
 	var bondgenoot := false
