@@ -5,6 +5,7 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const PlaatScript := preload("res://scripts/dungeon/groei_plaat.gd")
 const WarpScript := preload("res://scripts/dungeon/archief2_warp.gd")
+const WarperEnter := preload("res://world_warper/flow/enter.gd")
 
 var platen: Array = []
 
@@ -129,7 +130,11 @@ func _na_kern() -> void:
 		return
 	await _zeg(Archief2.NA_GENEZER, "")
 	GameState.story_flags["archief2_naar_warper"] = true
-	GameState.change_map(Archief2.WARPER_SCENE, "ingang")
+	# De noorduitgang blijft de kaartkamer archief_2_warper. Na de kern is de hub het doel.
+	var binnenkomst: RefCounted = WarperEnter.new()
+	var gelukt := bool(binnenkomst.call("enter"))
+	if not gelukt:
+		push_warning("World Warper na De Genezer: unlock of hub ontbreekt")
 
 
 func _verhaal() -> void:
