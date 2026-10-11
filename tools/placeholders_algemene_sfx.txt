@@ -164,3 +164,4 @@ assets/audio/sfx/sfx_sapientia_glitch_01.wav   wav   sapientia/sapientia_glitch:
 assets/audio/sfx/sfx_sapientia_glitch_02.wav   wav   sapientia/sapientia_glitch: Stem die haperend en digitaal vervormd klinkt, alsof de machine hapert.
 assets/audio/sfx/sfx_sapientia_power_surge_01.wav   wav   sapientia/sapientia_power_surge: Golf van energie, tandwielen en koorstemmen; Sapientia grijpt in.
 assets/audio/sfx/sfx_sapientia_approve_01.wav   wav   sapientia/sapientia_approve: Zachte, warme klank, een goedkeurend 'ding' van de machine.
+assets/audio/sfx/sfx_molen_zang_01.wav   wav   dorp/molen_zang: PLACEHOLDER. Zacht gezang als de molen van Gerrit weer draait. Twee zachte tonen, geen echte stem.

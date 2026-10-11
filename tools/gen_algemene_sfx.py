@@ -976,6 +976,7 @@ SPEC: dict[str, tuple[str, float, float, float]] = {
     "sapientia_glitch": ("glitch", 0.32, 280, 0),
     "sapientia_power_surge": ("surge", 0.50, 220, 880),
     "sapientia_approve": ("approve", 0.28, 523, 659),
+    "molen_zang": ("two_tone", 0.50, 392, 494),
 }
 
 KINDS = {
