@@ -4,8 +4,8 @@ class_name PvpRules
 ##
 ## Fysieke schade: ATK * mult - DEF/2, daarna spreiding ±15% (variance 0.85..1.15).
 ## Verdedigen halveert daarna, naar beneden afgerond, met een minimum van 1.
-## Spreukbedrag: power + level. Geen spreiding.
-## TODO(design): power + level is bewust korter dan power + 2 * level.
+## Spreukbedrag: power + 2 * level. Geen spreiding.
+## Zelfde formule als het gewone gevecht, hier lokaal gekopieerd.
 ## Beurtvolgorde: AGI aflopend. Bij gelijke AGI eerst de host, dan de gast,
 ## en binnen een kant de partij-index. Geen toevals-tiebreak, zodat tests vast liggen.
 ## Spiegelgevecht (hetzelfde team) is toegestaan.
@@ -36,7 +36,7 @@ static func roll_variance(rng: RandomNumberGenerator) -> float:
 
 
 static func spell_amount(power: int, level: int) -> int:
-	return maxi(1, power + level)
+	return maxi(1, power + 2 * level)
 
 
 static func spell_damage(power: int, level: int) -> int:
