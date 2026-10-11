@@ -9,12 +9,19 @@ extends Node
 ##           save/laden, opnieuw binnenkomen, oude save (save-scum) = nooit dubbel.
 ##   Deel C: Vonkzwaard in het uitrustingsscherm (Wapen-vak, pijlen ATK +12) en bij Sterkste.
 ##   Deel D: echt gevecht tegen de Mech. Wachter: 'Schild omhoog' (bericht, strook, DEF x2, duur).
+##   Deel E: Levende Archief, verdieping 1 (kas en groei-plaat).
+##   Deel F: uitgang-warpers begin/midden/eind. Waarschuwing kan annuleren; Ja zet je
+##           op de wereldkaart bij het Eerste Archief.
 ## Kamer: archief_puzzel (Forge's puzzelkamer 3B + de schatkamer ten noorden, zelfde kaart).
 ## Met --shots=map: archief_geheim_dicht, archief_geheim_open, archief_kist_zwaard,
 ## archief_uitrusting_zwaard, archief_wachter_schild (native + _3x).
 ## Zit niet in de export (scripts/tests/*).
 
 const GD := preload("res://scripts/data/game_data.gd")
+const DR := preload("res://scripts/data/dungeon_rooms.gd")
+const AW := preload("res://scripts/dungeon/archief_warpers.gd")
+const ExitWarper := preload("res://scripts/dungeon/dungeon_exit_warper.gd")
+const D100Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const PuzzleRooms := preload("res://scripts/data/puzzle_rooms.gd")
 const Equipment := preload("res://scripts/equipment.gd")
@@ -73,6 +80,8 @@ func _run() -> void:
 	await _guard_tests()
 	print("=== Deel E: Levende Archief, verdieping 1 ===")
 	await _leven_tests()
+	print("=== Deel F: uitgang-warpers Eerste Archief ===")
+	await _warper_tests()
 	print("ARCHIEFTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -533,7 +542,6 @@ func _guard_tests() -> void:
 
 # ================================================================ deel E: kas, verdieping 1
 const A2 := preload("res://scripts/data/archief2_rooms.gd")
-const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const Follower := preload("res://scripts/field_follower.gd")
 const LEVEN_ID := "leven_ingang"
 const PLAAT_ID := "leven_v1_plaat"
@@ -663,6 +671,112 @@ func _bereikbaar(l: PuzzleLogic, start: Vector2i, goal: Vector2i) -> bool:
 			seen[n] = true
 			q.append(n)
 	return false
+
+
+# ================================================================ deel F: uitgang-warpers
+func _warper_tests() -> void:
+	var spots: Array = AW.placements()
+	var roles := {}
+	for p in spots:
+		roles[str(p["role"])] = p
+	check("begin, midden en eind bestaan", spots.size() == 3 and roles.has("begin") and roles.has("midden") and roles.has("eind"))
+	check("geen mini-baas: midden op verdieping %d (%s)" % [AW.middle_floor(), AW.midden_room()],
+			AW.mini_boss().is_empty() and AW.middle_floor() == 3 and AW.midden_room() == "archief_v3_zuilenhal"
+			and str(roles["midden"]["room"]) == "archief_v3_zuilenhal"
+			and int(DR.ROOMS["archief_v3_zuilenhal"]["floor"]) == AW.middle_floor())
+	var src := FileAccess.get_file_as_string("res://scripts/dungeon/archief_warpers.gd")
+	check("TODO(design) omdat er geen mini-baas is", "TODO(design)" in src and "geen mini-baas" in src)
+	var boss_room: Dictionary = DR.ROOMS["archief_golemhal"]
+	var past: Vector2i = AW.tile_past_boss(boss_room)
+	var stand: Vector2i = AW.victory_tile(boss_room)
+	var eind: Vector2i = roles["eind"]["tile"]
+	check("eindbaas is de Golem; geen tegel ten noorden van hem", str(roles["eind"]["room"]) == "archief_golemhal"
+			and AW.boss_monster(boss_room).get("id", "") == "golem" and past == Vector2i(-1, -1))
+	check("eind-warper naast de tegel direct na de overwinning %s (warper %s)" % [stand, eind],
+			eind != stand and AW.walkable(boss_room, eind) and not AW.boss_rect(boss_room).has_point(eind)
+			and absi(eind.x - stand.x) + absi(eind.y - stand.y) == 1)
+	var begin: Vector2i = roles["begin"]["tile"]
+	var spawn: Array = DR.ROOMS["archief_ingang"]["spawns"]["ingang"]
+	check("begin bij de ingang, niet op de wereld-uitgang", str(roles["begin"]["room"]) == "archief_ingang"
+			and begin == AW.BEGIN_TILE and absi(begin.x - int(spawn[0])) + absi(begin.y - int(spawn[1])) == 1
+			and AW.walkable(DR.ROOMS["archief_ingang"], begin))
+	check("midden-tegel beloopbaar in de Zuilenhal", AW.walkable(DR.ROOMS["archief_v3_zuilenhal"], roles["midden"]["tile"]))
+	check("Diepe Grot-warpers blijven 1, 50 en 99", D100Rules.WARPER_FLOORS == [1, 50, 99])
+	var only_a1 := true
+	for p in spots:
+		if not DR.ROOMS.has(str(p["room"])):
+			only_a1 = false
+	check("alleen kamers van het Eerste Archief", only_a1)
+
+	GameState.new_game("Dennis")
+	GameState.story_step = SD.KLAAR
+	GameState.encounter_multiplier = 0.0
+	if Dialog.is_open:
+		Dialog.close()
+	var ingang := await _enter_map("res://scenes/maps/archief_ingang.tscn", "ingang", "ArchiefIngang")
+	var wp: DungeonExitWarper = null
+	if ingang != null:
+		wp = ingang.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
+	check("begin-warper in de ingang op %s" % [AW.BEGIN_TILE], wp != null and wp.role == "begin"
+			and _warper_tile(wp) == AW.BEGIN_TILE and wp.sprite.texture.resource_path.ends_with("save_book.png")
+			and wp.sprite.modulate == ExitWarper.TINT)
+	if wp == null or player() == null:
+		return
+	var stay := tile()
+	wp.interact(player())
+	var warned: bool = await wait_until(_exit_warning_open, 3.0)
+	check("waarschuwing: '%s'" % ExitWarper.WARNING, warned)
+	Dialog.choose(1)
+	await wait_until(func(): return wp.last_result == "cancelled" and not wp.busy, 2.0)
+	check("annuleren laat je staan", wp.last_result == "cancelled" and scene() == ingang and tile() == stay
+			and player() != null and not player().input_locked and GameState.current_map.ends_with("archief_ingang.tscn"))
+
+	wp.interact(player())
+	warned = await wait_until(_exit_warning_open, 3.0)
+	check("waarschuwing opnieuw voor de bevestiging", warned)
+	Dialog.choose(0)
+	var world_ok := await wait_scene("Wereldkaart", 20.0)
+	await wait_fade()
+	var spawn_node: Node2D = null
+	if world_ok:
+		spawn_node = scene().get_node_or_null("Spawns/van_archief") as Node2D
+	var expect := Vector2i((spawn_node.position / 16.0).floor()) if spawn_node != null else Vector2i(-99, -99)
+	check("bevestigen zet je op de wereldkaart bij het Eerste Archief %s" % [tile()],
+			world_ok and GameState.current_map == ExitWarper.WORLD_SCENE and spawn_node != null
+			and tile() == expect and tile() != stay)
+
+	var mid := await _enter_map("res://scenes/maps/archief_v3_zuilenhal.tscn", "ladder", "ArchiefV3Zuilenhal")
+	var mid_wp: DungeonExitWarper = null
+	if mid != null:
+		mid_wp = mid.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
+	check("midden-warper in de Zuilenhal op %s" % [roles["midden"]["tile"]], mid_wp != null
+			and mid_wp.role == "midden" and _warper_tile(mid_wp) == roles["midden"]["tile"])
+	var eind_room := await _enter_map("res://scenes/maps/archief_golemhal.tscn", "zuid", "ArchiefGolemhal")
+	var eind_wp: DungeonExitWarper = null
+	if eind_room != null:
+		eind_wp = eind_room.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
+	check("eind-warper in de Golemhal op %s" % [eind], eind_wp != null and eind_wp.role == "eind"
+			and _warper_tile(eind_wp) == eind)
+
+
+func _enter_map(path: String, spawn_name: String, scene_name: String) -> Node:
+	GameState.has_return_point = false
+	GameState.change_map(path, spawn_name)
+	if not await wait_scene(scene_name, 20.0):
+		check("kamer geladen: %s" % scene_name, false)
+		return null
+	await wait_fade()
+	return scene()
+
+
+func _warper_tile(node: Node2D) -> Vector2i:
+	return Vector2i((node.position / 16.0).floor())
+
+
+func _exit_warning_open() -> bool:
+	return Dialog.is_open and Dialog.choices.size() == 2 and not Dialog._lines.is_empty() \
+			and str(Dialog._lines[0]) == ExitWarper.WARNING and str(Dialog.choices[0]) == ExitWarper.YES \
+			and str(Dialog.choices[1]) == ExitWarper.NO
 
 
 # ================================================================ hulp
