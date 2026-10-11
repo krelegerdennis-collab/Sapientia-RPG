@@ -1,16 +1,19 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`1f8f6b3`), Godot 4.7.2, threads uit.
+Web-build van `main` (`404bce0`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`30918e3`, export van `d81e339`):
+Nieuw in deze build, bovenop de vorige web-build (`2d393da`, export van `1f8f6b3`):
+- Magie in Wilgendal kost 160×grade²: grade 1 = 160, grade 2 = 640, grade 3 = 1440. Grade 4 blijft uit de winkel. Verkoop is de helft, dus een grade-1-spreuk levert 80.
+- Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `1f8f6b3`:
 - Vier save-slots. Continue en Load openen dezelfde lijst. Slot 1 blijft het oude bestand.
 - Het Eerste Archief mikt op level 7. De Golem blijft een eigen gevecht.
 - Wilgendal is het eerste dorp, met wapen, pantser, accessoire en magie. In Act 1 verkoopt de magiebalie alleen Grade 1.
 - Blauwe kisten in de Diepe Grot hebben grades. Affixen staan vast per item. Grade 4 (vanaf verdieping 80) is niet te koop.
-- Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
 Nog van de build van `d81e339`:
 - Alle tekst die je in het spel ziet is Engels. Menu's, verhaal, items en de titel (The Forgotten Archives). Namen blijven Dennis, Noor en Lotte.
