@@ -275,17 +275,15 @@ De Diepe Grot is een simulatie van Sapientia. Doel: menselijke doorzettingskrach
 
 Verdieping 100: geen baas. Op verdieping 100 staat het Warp-kristal. De speler kiest één van drie beloningen: Codex-monster, Grade 4-uitrusting, of accessoire. De andere twee alleen via een nieuwe run. Dit vervangt eerdere warp-kristal-opties.
 
-Optie A, een Codex-monster. Uniek, alleen uit de grot. Komt in de Codex en het bestiarium en kan als bondgenoot meevechten. Het beloningstype (Codex-monster) is canon.
+Optie A, een Codex-monster. Uniek, alleen uit de grot. Komt in de Codex en het bestiarium en kan als bondgenoot meevechten. Het beloningstype (Codex-monster) is canon. Naam: ECHO. De AI-gids van de World Warper heet ook ECHO.
 
-Optie B, equipment. Grade 4, alleen via deze keuze. Vaste affixes, endgame. Class-restrictie hangt af van het stuk. Het beloningstype (Grade 4-uitrusting) is canon.
+Optie B, equipment. Grade 4. Vaste affixes, endgame. Het beloningstype (Grade 4-uitrusting) is canon. Voor nu de bestaande Grade 4-wapens: Superzwaard (Dennis), Staf van Noor, Staf van Lotte. Class-restrictie blijft zoals die wapens al zijn.
 
 Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Het beloningstype (accessoire) is canon.
 
 **OPEN – nog niet vastgelegd.**
 
-Voorbeelden, geen gekozen naam: "De Echo" (maakt een zwakke kopie van de party) of "De Simulacrum".
-
-Voorbeelden, geen gekozen drops: Kernstaf (Lotte), Schaduwzwaard (Dennis), Natuurstaf (Noor), of een uniek pantserstuk buiten de gewone Grade 4-pool. "Hanger-echo" (kleine teleport in gevecht), "Groene Hart" (regeneratie), "Simulatie-ring" (extra XP en goud).
+Voorbeelden, geen gekozen accessoire: "Hanger-echo" (kleine teleport in gevecht), "Groene Hart" (regeneratie), "Simulatie-ring" (extra XP en goud).
 
 - [ ] Diepe Grot-bazen bouwen
   De code kan nog de oude eindbaas-namen hebben.
