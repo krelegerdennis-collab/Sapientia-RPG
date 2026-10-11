@@ -127,7 +127,8 @@ func _data_tests() -> void:
 			and "assets/map_monsters/golem.png" in hw)
 	var ph := []
 	for e in GD.ENEMIES:
-		if not ResourceLoader.exists("res://assets/map_monsters/%s.png" % e):
+		# v0.19: "art_pending" (Inktwurm) = map_monster.gd tekent tijdelijk zijn eigen plaatsvervanger
+		if not ResourceLoader.exists("res://assets/map_monsters/%s.png" % e) and not bool(GD.ENEMIES[e].get("art_pending", false)):
 			ph.append(e)
 	check("elke vijand heeft een map-plaatje (echt of placeholder-PNG); zonder: %s" % [ph], ph.is_empty())
 

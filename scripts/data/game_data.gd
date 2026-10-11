@@ -260,7 +260,59 @@ const ENEMIES := {
 		"desc": "Een kist die niet van de Oude Mensheid is, maar van de Zwarte Stroom. Hij wacht tot iemand de deksel optilt.",
 		"habitat": ["archief"],
 	},
+	# ------------------------------------------------------------ v0.19 ARCHIEF 1: DE INKTWURM
+	# CANON.md besluit 8: de Inktwurm komt erbij als monster van Archief 1 (lore: docs/lore/data/enemies.json).
+	# BESLISSING DENNIS (9 okt 2026): UNIEK monster, maar 1x in het hele spel (geheime kamer in Archief 1;
+	# kamer + plaatsing bouwt Forge). "unique": true = na verslaan of vangen komt hij nooit meer terug
+	# (GameState.unique_available("inktwurm"), in de save als "uniek"). Gevechtsniveau 5 ("encounter_level";
+	# het monsterniveau "tier" van de kamer telt NIET voor hem). Stats = 2x een 'normaal monster op Lv 5':
+	#   normaal Lv 5 = gemiddelde van CodexData.stats_at(soort, 5) over de gewone Archief 1-soorten
+	#   (CodexData.ARCHIEF1_SPECIES: mosslijm, moskonijn, papiergeest, glitchmot, mech_wachter)
+	#   = HP 34, ATK 18,2, DEF 8,4, SPD 13,2  ->  x2 (half naar even afgerond) = HP 68, ATK 36, DEF 17, SPD 26.
+	#   (CodexData.normal_stats_at(5); de fusietest rekent het na.) Tot Lv 7 alleen een gewone aanval, dus
+	#   als vijand (Lv 5) geen "skills". Vangkans 100% (CodexData "capture_always"; wel een Leeg Boek nodig).
+	# Art van RPG ART (art_inktwurm_v19/out, LEESMIJ.txt): voor/rug/idle 108x86, voeten (54, 80) = (w/2, h-6);
+	# kaart: out/inktwurm_map.png -> assets/map_monsters/inktwurm.png (2x4 frames van 16x16). Forge zet de
+	# bestanden in het project. Zolang ze ontbreken: "sprite_placeholder" (enemy_sprite() hieronder); de kaart
+	# en de Codex-bondgenoot hebben hun eigen plaatsvervanger. "art_pending" weghalen zodra de art er is.
+	# Bestiarium 012: 011 is al de Mimic op main.
+	"inktwurm": {
+		"name": "Inktwurm", "sprite": "res://assets/sprites/enemies/inktwurm.png",
+		"sprite_back": "res://assets/sprites/enemies/inktwurm_rug.png",
+		"idle": "res://assets/sprites/enemies/inktwurm_idle.png", "idle_frames": 2, "idle_time": 0.55,
+		"art_pending": true, "sprite_placeholder": "res://art/enemies/mosslijm.png",
+		"unique": true, "encounter_level": 5,
+		"max_hp": 68, "atk": 36, "def": 17, "agi": 26, "mag": 0, "mdef": 2,
+		# TIJDELIJKE AANNAME: EXP/goud ongeveer 2x een Mech. Wachter op niveau 4 (unieke beloning)
+		"exp": 60, "gold": 40, "y_offset": 0,
+		"skills": [],
+		# lore: bestand tegen water; 'water' is (nog) geen element in de game, dus leeg (open vraag)
+		"no": 12, "mp": 0, "weak": ["vuur"], "resist": [],
+		# lore: Gloeiende Inktfles; dat item bestaat nog niet -> Toverwater (= Bladzijde van Inkt) als plaatshouder
+		"drops": [{"item": "toverwater", "chance": 1.0}],
+		"desc": "Een vette worm die zich door perkament heeft gegeten en nu zwarte inkt zweet.",
+		"habitat": ["archief"],
+	},
 }
+
+## v0.19: plaatsvervanger voor een vijand waarvan de gevechts-art er nog niet is ("art_pending").
+const PLACEHOLDER_ENEMY_SPRITE := "res://art/enemies/mosslijm.png"
+
+
+## Pad van het vooraanzicht van vijand-data 'e': "sprite" als dat bestand bestaat, anders
+## "sprite_placeholder" (of PLACEHOLDER_ENEMY_SPRITE). Zo werkt een nieuwe vijand al voordat RPG ART
+## de art levert; zodra het bestand er is, wordt het vanzelf gebruikt.
+static func enemy_sprite(e: Dictionary) -> String:
+	var p := str(e.get("sprite", ""))
+	if p != "" and ResourceLoader.exists(p):
+		return p
+	return str(e.get("sprite_placeholder", PLACEHOLDER_ENEMY_SPRITE))
+
+
+## true = het vooraanzicht is (nog) een plaatsvervanger.
+static func enemy_sprite_is_placeholder(e: Dictionary) -> bool:
+	return enemy_sprite(e) != str(e.get("sprite", ""))
+
 
 ## Vijand-id's in bestiarium-volgorde.
 static func bestiary_ids() -> Array:

@@ -22,6 +22,8 @@ var stepped_forward := false
 var pose := "stil"
 var is_ko := false
 var placeholder := false
+## v0.19: gefuseerd monster (glitch-fusie): paarse glitch-tint (CodexData.FUSION_TINT)
+var glitched := false
 var texture_path := ""
 var _sprite: Sprite2D
 var _move_tween: Tween
@@ -164,7 +166,15 @@ func set_ko(ko: bool) -> void:
 func _base_modulate() -> Color:
 	if is_ko:
 		return KO_TINT
-	return PLACEHOLDER_TINT if placeholder else Color.WHITE
+	var c := PLACEHOLDER_TINT if placeholder else Color.WHITE
+	return c * CodexData.FUSION_TINT if glitched else c
+
+
+## v0.19: gefuseerd monster paars kleuren (na setup_species).
+func set_glitched(on: bool) -> void:
+	glitched = on
+	if _sprite:
+		_sprite.modulate = _base_modulate()
 
 
 func _gui_input(event: InputEvent) -> void:

@@ -132,7 +132,8 @@ func show_entry(id: String) -> void:
 	var e: Dictionary = GameData.ENEMIES[id]
 	var known := GameState.is_seen(id)
 	var kills := GameState.defeated_count(id)
-	picture.texture = GameState.get_resource(str(e["sprite"])) if ResourceLoader.exists(str(e["sprite"])) else null
+	var sp := GameData.enemy_sprite(e)   # v0.19: plaatsvervanger als de art er nog niet is
+	picture.texture = GameState.get_resource(sp) if ResourceLoader.exists(sp) else null
 	picture.modulate = Color.WHITE if known else Color(0.02, 0.02, 0.03, 0.95)   # silhouet
 	if not known:
 		name_label.text = "%03d ???" % int(e.get("no", 0))
