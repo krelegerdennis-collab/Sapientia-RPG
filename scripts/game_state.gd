@@ -10,6 +10,7 @@ const Equipment := preload("res://scripts/equipment.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")   # Kernfragment stap 2: de Codex
 const Dungeon100RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")   # 100-verdiepingen-kerker
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 ## Hier begint een nieuw spel (v0.11: wakker worden in bed, in het huis).
 const START_MAP := "res://scenes/maps/huis_wilgendal.tscn"
 const START_SPAWN := "bed"
@@ -20,6 +21,8 @@ const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
+const WorldWarperUnlock := preload("res://world_warper/flow/unlock.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
@@ -258,7 +261,10 @@ func _ready() -> void:
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
 	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
 	# De Spiegel (Archief 4): of  godot -- --spiegeltest [--shots=/pad/map]
+	# Vriendenmodus: of  godot -- --pvptest  (pvp/tests/pvp_tests.gd).
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
+	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
+	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
@@ -283,7 +289,9 @@ func _ready() -> void:
 			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
 			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
 			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"],
-			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"]]:
+			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
+			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
+			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -303,8 +311,16 @@ func _ready() -> void:
 	# Geen story_step en geen story_flags: het echte verhaal wordt niet overgeslagen.
 	if SpiegelData.DEBUG_ARG in args and not ("--spiegeltest" in args):
 		call_deferred("_go_to_scene", SpiegelData.SCENE)
+	# Berggrot, zonder wereldkaart. Zelfde haakje als de mond op de kaart.
+	if BerggrotData.DEBUG_ARG in args and not ("--berggrottest" in args):
+		call_deferred("_start_berggrot")
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
+
+
+## Debug-ingang van de berggrot. Zelfde haakje als de mond op de kaart.
+func _start_berggrot() -> void:
+	BerggrotData.start()
 
 
 ## Extra input-acties uit code (zodat project.godot niet hoeft te veranderen):
@@ -1452,7 +1468,7 @@ func end_battle(result: String) -> void:
 			has_return_point = true
 			pending_respawn_msg = []
 		elif dungeon100_floor > 0 or dungeon100_run_active():
-			# 100-kerker: dood is dungeon uit. Terug naar de wereldkaart bij de ingang, niet verdieping 1.
+			# 100-kerker: dood is dungeon uit. Terug naar ECHO's Kamer, niet verdieping 1.
 			target = dungeon100_defeat()
 		elif has_checkpoint():
 			# v0.19: terug naar waar je deze kamer/map binnenkwam (baas: de kamer ervoor)
@@ -1585,10 +1601,11 @@ func is_permanent_item(id: String) -> bool:
 	return dungeon100_run_active() and dungeon100_permanent.has(id)
 
 
-## Een run begint (Dungeon100Room, bij het binnenkomen vanaf de wereldkaart): de echte party/tas/goud/
+## Een run begint (ECHO, of Dungeon100Room bij een directe binnenkomst): de echte party/tas/goud/
 ## Codex gaan in de momentopname. De simulatie neemt iedereen mee die dan in de party zit (ook wie zich
 ## later aansloot) plus elke Codex-pagina, allemaal op level 1, zonder uitrusting en zonder spreuken.
 ## De tas heeft alleen de permanente items, en er is geen goud. Dubbel aanroepen doet niets (false).
+## De wereldkaart start de grot niet meer; dat doet dungeon100_echo_start.
 func dungeon100_begin_run() -> bool:
 	if dungeon100_run_active():
 		return false
@@ -1721,8 +1738,9 @@ func dungeon100_reach_floor(floor_nr: int) -> void:
 		inventory[Dungeon100RulesC.Blue.WARP_ITEM] = 1
 
 
-## Warper (niet op verdieping 1): de run stopt en je staat op de wereldkaart bij de ingang.
+## Warper (niet op verdieping 1): de run stopt en je staat in ECHO's Kamer.
 ## false = geen run, of de kaart wisselt al. Annuleren roept dit niet aan.
+## Zet echo_grot_resultaat niet: dat doet alleen het Warp-kristal op verdieping 100.
 func dungeon100_warper_exit() -> bool:
 	if not dungeon100_run_active() or changing_map or in_battle:
 		return false
@@ -1732,28 +1750,41 @@ func dungeon100_warper_exit() -> bool:
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
-## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties. Het kristal werkt
-## zoals het was: gebruiken beëindigt de run en zet je op de wereldkaart. Geen keuzemenu.
+## TODO(design): het keuze-moment op verdieping 100 (Codex, Grade 4, accessoire) heeft nog geen opties.
 func dungeon100_can_warp() -> bool:
 	return dungeon100_run_active() and dungeon100_floor == Dungeon100RulesC.FLOORS and item_count(Dungeon100RulesC.Blue.WARP_ITEM) > 0
 
 
-## Warp: run voltooid, permanente items mee naar je echte tas, terug naar de wereldkaart (het kristal is
-## op). false = kan niet (verkeerde verdieping, geen kristal of geen run).
-## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
+## Warp: run voltooid, permanente items mee naar de echte tas, terug naar ECHO's Kamer.
+## false = kan niet (verkeerde verdieping, geen kristal of geen run).
+## TODO(design): het keuze-moment op verdieping 100 (Codex, Grade 4, accessoire) heeft nog geen opties.
 func dungeon100_warp() -> bool:
 	if not dungeon100_can_warp():
 		return false
 	dungeon100_best = Dungeon100RulesC.FLOORS
-	dungeon100_end_run(true)
-	change_map(Dungeon100RulesC.WORLD_SCENE, Dungeon100RulesC.WORLD_SPAWN)
+	if not dungeon100_end_run(true):
+		return false
+	story_flags[EchoGrot.FLAG_RESULTAAT] = true
+	change_map(EchoGrot.KAMER, EchoGrot.KAMER_SPAWN)
+	return true
+
+
+## ECHO start een nieuwe run: verdieping 1, level 1, zonder uitrusting. De kamer kiest de seed.
+func dungeon100_echo_start() -> bool:
+	if changing_map or in_battle or dungeon100_run_active():
+		return false
+	if not dungeon100_begin_run():
+		return false
+	dungeon100_floor = 1
+	dungeon100_seed = 0
+	change_map(EchoGrot.DUNGEON, EchoGrot.DUNGEON_SPAWN)
 	return true
 
 
 ## Nederlaag in de kerker: de run is voorbij ("dood is dungeon uit"). Tijdelijke levels, tas en goud van
 ## de run zijn weg. De echte party/tas/goud/Codex komen terug uit de momentopname, daarna de permanente
-## Blauwe-Kist-items. Terug naar de wereldkaart bij de ingang, niet naar verdieping 1. Een nieuwe run
-## begint pas als je opnieuw naar binnen gaat. Geeft de wereldkaart terug.
+## Blauwe-Kist-items. Terug naar ECHO's Kamer, niet naar verdieping 1 en niet naar de wereldkaart.
+## Zet echo_grot_resultaat niet. Een nieuwe run begint pas als ECHO hem start. Geeft de kamer terug.
 func dungeon100_defeat() -> String:
 	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, dungeon100_floor)
 	has_return_point = false
@@ -2007,18 +2038,16 @@ func unique_mark(id: String, how: String) -> void:
 
 
 # ---------------------------------------------------------------- world warper
-## TODO(design): trigger is de bewaker van verdieping 2 van het Eerste Archief
-## (bewaker:archief_v2_trapzaal/m2, kamer archief_v2_trapzaal, monster m2).
-## Dit is NIET het Archief van Leven uit TODO.md; dat archief bestaat niet.
-## Geen afhankelijkheid van code die nog gebouwd moet worden.
+## De hub gaat open na De Genezer (einde Archief 2). Zelfde vlag als
+## WorldWarperUnlock.BEWAKER_VLAG. De bewaker van verdieping 2 van het Eerste
+## Archief opent de hub niet. Geen Worldmap 2 of 3.
 func world_warper_is_unlocked() -> bool:
-	return story_flags.has("world_warper_unlocked")
+	return story_flags.has(WorldWarperUnlock.UNLOCK_VLAG)
 
 
 func try_unlock_world_warper() -> bool:
-	if world_warper_is_unlocked():
-		return true
-	if story_flags.has("bewaker:archief_v2_trapzaal/m2"):
-		story_flags["world_warper_unlocked"] = true
-		return true
-	return false
+	if not WorldWarperUnlock.should_unlock(story_flags):
+		return false
+	if not story_flags.has(WorldWarperUnlock.UNLOCK_VLAG):
+		story_flags[WorldWarperUnlock.UNLOCK_VLAG] = true
+	return true

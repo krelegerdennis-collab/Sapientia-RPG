@@ -23,11 +23,12 @@ extends RefCounted
 const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 
 const MAX_FLOOR := 100
 const SCENE := "res://scenes/maps/dungeon100.tscn"
-const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
-const WORLD_SPAWN := "van_dungeon100"
+const WORLD_SCENE := EchoGrot.KAMER
+const WORLD_SPAWN := EchoGrot.KAMER_SPAWN
 const ROOM_PREFIX := "dungeon100_"
 ## Spawnpuntnamen in de kamer: aankomst van boven (via de ladder) en van onder (via de trap).
 const SPAWN_FROM_ABOVE := "omhoog"

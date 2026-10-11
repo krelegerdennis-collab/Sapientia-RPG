@@ -48,6 +48,7 @@ const SUBTITLE := "The Forgotten Archives"
 var continue_button: Button
 var load_button: Button
 var new_button: Button
+var pvp_button: Button
 var beta_button: Button
 var eind_button: Button
 var beta_card: PanelContainer
@@ -159,9 +160,17 @@ func _ready() -> void:
 	list.add_child(save_info)
 	new_button = UiMenu.button("Nieuw spel")
 	list.add_child(new_button)
+	# Buiten het kaartje: het menu moet in y 148..200 blijven (titeltests).
+	pvp_button = UiMenu.button("PvP")
+	pvp_button.name = "PvpButton"
+	pvp_button.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 16)
+	add_child(pvp_button)
 	continue_button.pressed.connect(_on_continue)
 	load_button.pressed.connect(_on_load)
 	new_button.pressed.connect(_on_new)
+	pvp_button.pressed.connect(_on_pvp)
+	pvp_button.focus_neighbor_bottom = new_button.get_path()
+	new_button.focus_neighbor_top = pvp_button.get_path()
 	# Links onder, buiten het kaartje rechts: anders past het menu niet meer in y 148..200.
 	var beta_box := PanelContainer.new()
 	beta_box.name = "BetaCard"
@@ -271,6 +280,8 @@ func _place_card() -> void:
 	card.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 0)
 	card.reset_size()
 	card.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - card.size.y)).round()
+	pvp_button.reset_size()
+	pvp_button.position = (card.position + Vector2(0, -pvp_button.size.y - 1.0)).round()
 	beta_card.reset_size()
 	beta_card.position = (stage.position + Vector2(8, CARD_BOTTOM - beta_card.size.y)).round()
 	version_label.reset_size()
@@ -353,6 +364,11 @@ func _on_slot_cancelled() -> void:
 func _on_new() -> void:
 	set_process(false)
 	get_tree().change_scene_to_file(GameState.NAME_SCENE)
+
+
+func _on_pvp() -> void:
+	set_process(false)
+	get_tree().change_scene_to_file("res://pvp/scenes/pvp_lobby.tscn")
 
 
 func _on_beta() -> void:

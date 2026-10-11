@@ -3,17 +3,16 @@ extends RefCounted
 ## Unlock van de World Warper, puur op een vlaggen-dictionary.
 ## Geen autoload en geen scènes, zodat een test GameState niet nodig heeft.
 ##
-## TODO(design): trigger is de bewaker van verdieping 2 van het Eerste Archief
-## (bewaker:archief_v2_trapzaal/m2). Dit is NIET het Archief van Leven uit TODO.md;
-## dat archief bestaat niet. Geen afhankelijkheid van code die nog gebouwd moet worden.
+## Trigger is De Genezer, einde Archief 2 (kamer archief_2_v4_genezer, monster genezer).
+## De bewaker van verdieping 2 van het Eerste Archief opent de hub niet.
 
 ## Zelfde string als GameState.try_unlock_world_warper.
-const BEWAKER_VLAG := "bewaker:archief_v2_trapzaal/m2"
+const BEWAKER_VLAG := "bewaker:archief_2_v4_genezer/genezer"
 const UNLOCK_VLAG := "world_warper_unlocked"
 
 
 ## Zelfde regel als GameState.try_unlock_world_warper, zonder te schrijven:
-## al open, of de bewaker-vlag staat aan. Anders dicht.
+## al open, of De Genezer is verslagen. Anders dicht.
 static func should_unlock(flags: Dictionary) -> bool:
 	if flags.has(UNLOCK_VLAG):
 		return true
