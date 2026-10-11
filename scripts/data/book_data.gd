@@ -37,7 +37,7 @@ const TYPES := {
 		"save": true,
 		"question": "The rest point glows softly. Save progress?",
 	},
-	# Diepe Grot: warper op verdieping 1, 50 en 99. PLACEHOLDER = opslagboek, violet getint
+	# Diepe Grot: warper op verdieping 1, 25, 50, 75 en 99. PLACEHOLDER = opslagboek, violet getint
 	# in dungeon100_warper.gd (geen eigen bestand, zie tools/placeholders_v17.txt).
 	"warper": {
 		"texture": "res://assets/sprites/save_book.png",

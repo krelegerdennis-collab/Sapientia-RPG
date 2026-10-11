@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/spiegel/spiegel_kamer.gd" id="1_spiegel"]
+[ext_resource type="Texture2D" path="res://assets/bg/spiegel_kamer.png" id="2_kamer"]
+[ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="3_touch"]
+
+[node name="SpiegelKamer" type="Node2D"]
+script = ExtResource("1_spiegel")
+
+[node name="Achtergrond" type="Sprite2D" parent="."]
+centered = false
+texture_filter = 1
+texture = ExtResource("2_kamer")
+
+[node name="TouchControls" parent="." instance=ExtResource("3_touch")]

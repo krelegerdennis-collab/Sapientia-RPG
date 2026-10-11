@@ -372,6 +372,39 @@ def render(actor_id: str, slot: str) -> list[float]:
 		if slot == "dood":
 			return _mix(_puff(0.5, seed, 80), _delay(_bubbles(seed, 4, 70), 0.12))
 		return _mix(_bubbles(seed, 5, 110), _scale(_puff(0.22, seed, 200), 0.4))
+	if actor_id == "lotte_glitch":
+		if slot == "aanval":
+			return _mix(_glitch(0.16, seed, 420), _scale(_shimmer(520, 780, 0.12), 0.35))
+		if slot == "raak":
+			return _glitch(0.1, seed, 300)
+		if slot == "dood":
+			return _mix(_glitch(0.4, seed, 180), _delay(_tone(220, 0.3, "sine", 0.4), 0.05))
+		return _mix(_shimmer(400, 900, 0.28), _scale(_glitch(0.2, seed, 600), 0.4))
+	if actor_id == "wurger":
+		if slot == "aanval":
+			return _mix(_creak(70, 0.28, 0.2), _whoosh(0.16, seed, 500))
+		if slot == "raak":
+			return _creak(90, 0.16, 0.08)
+		if slot == "dood":
+			return _mix(_creak(40, 0.6, 0.15), _puff(0.4, seed, 120))
+		return _mix(_creak(55, 0.4, 0.25), _delay(_creak(80, 0.2, 0.1), 0.12))
+	if actor_id == "genezer":
+		if slot == "aanval":
+			return _mix(_clang(180, 0.16), _scale(_puff(0.18, seed, 240), 0.45))
+		if slot == "raak":
+			return _clang(240, 0.1)
+		if slot == "dood":
+			return _mix(_clang(90, 0.35), _delay(_puff(0.4, seed, 100), 0.08))
+		return _mix(_shimmer(300, 520, 0.3), _scale(_clang(140, 0.2), 0.4))
+	if actor_id == "woudgeest":
+		# Wind: korte vlaag, dunne tik, wegvallende zucht, langere vlaag.
+		if slot == "aanval":
+			return _whoosh(0.16, seed, 900)
+		if slot == "raak":
+			return _mix(_scale(_whoosh(0.05, seed, 2800), 0.45), _clang(1600, 0.05))
+		if slot == "dood":
+			return _whoosh(0.48, seed, 280)
+		return _whoosh(0.34, seed, 640)
 	raise SystemExit("Geen recept voor %s/%s" % (actor_id, slot))
 
 
@@ -453,5 +486,49 @@ def main() -> None:
 	print("geschreven: %d wavs" % len(written))
 
 
+def write_only(ids: list[str]) -> None:
+	"""Schrijf alleen deze monster-wavs. main() herschrijft alles; die niet aanroepen."""
+	with open(CATALOG, encoding="utf-8") as handle:
+		catalog = json.load(handle)
+	hashes: dict[bytes, str] = {}
+	for dirpath, _dirs, files in os.walk(SFX_ROOT):
+		for name in files:
+			if not name.endswith(".wav"):
+				continue
+			path = os.path.join(dirpath, name)
+			blob = open(path, "rb").read()
+			hashes[blob] = path
+	written = []
+	for actor_id in ids:
+		entry = catalog["monsters"][actor_id]
+		folder = os.path.join(SFX_ROOT, "monsters", actor_id)
+		_leesmij(folder, entry["naam"], entry["stem"], entry["slots"])
+		for slot in SLOTS:
+			samples = render(actor_id, slot)
+			rel = "assets/audio/sfx/monsters/%s/%s.wav" % (actor_id, slot)
+			path = os.path.join(ROOT, rel)
+			_write_wav(path, samples)
+			blob = open(path, "rb").read()
+			if blob in hashes and hashes[blob] != path:
+				raise SystemExit("%s is identiek aan %s" % (rel, hashes[blob]))
+			hashes[blob] = path
+			written.append(rel)
+	have = set()
+	if os.path.isfile(PLACEHOLDER_LIST):
+		for line in open(PLACEHOLDER_LIST, encoding="utf-8"):
+			part = line.split()
+			if part:
+				have.add(part[0])
+	with open(PLACEHOLDER_LIST, "a", encoding="utf-8") as handle:
+		for rel in written:
+			if rel not in have:
+				handle.write(rel + "\n")
+	print("alleen geschreven: %d" % len(written))
+
+
 if __name__ == "__main__":
-	main()
+	import sys
+	if len(sys.argv) > 1 and sys.argv[1] == "--alleen":
+		write_only(sys.argv[2:])
+	else:
+		main()

@@ -32,6 +32,17 @@ const KERNFRAGMENTEN := {
 		"world_ability": ["zware_blokken", "kernvuur"],   # v0.16: + de vuurbal in het veld
 		"kleur": Color(1.0, 0.36, 0.78),
 	},
+	# Archief 2. Geen gevechts- of wereldvaardigheid: de zin is het fragment.
+	"levenskern": {
+		"id": "levenskern",
+		"naam": "Levenskern",
+		"beschrijving": "In stilte ligt vrede. Ik corrigeer wat groeit.",
+		"icon": "res://assets/ui/icons/levenskern.png",
+		"source_boss": "genezer",
+		"battle_skill": "",
+		"world_ability": "",
+		"kleur": Color(0.35, 0.85, 0.45),
+	},
 }
 
 ## Gevechtsvaardigheden uit kernen. Dennis heeft geen MP: een kernvaardigheid kost geen MP

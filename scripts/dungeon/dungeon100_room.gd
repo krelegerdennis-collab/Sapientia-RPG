@@ -62,7 +62,7 @@ func _place_rustpunt() -> void:
 	$Objects.add_child(rustpunt)
 
 
-## Warper (verdieping 1, 50, 99) op room["warper"], naast de ingang.
+## Warper (verdieping 1, 25, 50, 75, 99) op room["warper"], naast de ingang.
 func _place_warper() -> void:
 	if not room.has("warper"):
 		return

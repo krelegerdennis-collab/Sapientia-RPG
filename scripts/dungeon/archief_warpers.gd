@@ -2,7 +2,7 @@ extends RefCounted
 class_name ArchiefWarpers
 ## Waar de drie uitgang-warpers van het Eerste Archief staan.
 ## Alleen kamers uit DungeonRooms.ROOMS (Archief 1). Archief 2 heeft hier geen kamers.
-## De Diepe Grot (verdieping 1, 50 en 99) staat hier niet in.
+## De Diepe Grot (verdieping 1, 25, 50, 75 en 99) staat hier niet in.
 
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 

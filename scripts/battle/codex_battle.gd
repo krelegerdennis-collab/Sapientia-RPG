@@ -10,6 +10,7 @@ extends RefCounted
 ## Regels staan in HANDOFF_CODEX.md.
 
 const CodexData := preload("res://scripts/data/codex_data.gd")
+const KamerData := preload("res://world_warper/kamers/kamers.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const AllyScript := preload("res://scripts/battle/codex_ally.gd")
 const StatusBoxScript := preload("res://scripts/battle/hero_status_box.gd")
@@ -34,8 +35,9 @@ func _init(b: Control) -> void:
 func add_allies() -> void:
 	if not battle.tutorial.is_empty():
 		return                                  # oefengevecht: alleen de helden
-	var page: Dictionary = GameState.codex_active_page()
-	if page.is_empty() or int(page["hp"]) <= 0:
+	# Archief 2: tijdelijke Mosslijm (niet in de Codex) gaat voor op de actieve pagina.
+	var page: Dictionary = GameState.archief2_temp_ally if not GameState.archief2_temp_ally.is_empty() else GameState.codex_active_page()
+	if page.is_empty() or int(page.get("hp", 0)) <= 0:
 		return
 	var row: int = battle.heroes.size()
 	var c: Dictionary = battle._make_combatant(str(page["name"]), page, true, row)
@@ -272,6 +274,10 @@ func _remove_ally(c: Dictionary) -> void:
 ## Het Leeg Boek is al van de stapel gehaald (battle.gd); bij een weigering komt het terug.
 func capture(actor: Dictionary, target) -> void:
 	var item := CodexData.BOOK_ITEM
+	if GameState.practice_battle:
+		_refund(item)
+		await battle.say(KamerData.OEFEN_VANGEN)
+		return
 	var t = battle._valid_target(target, false)
 	if t == null:
 		_refund(item)
