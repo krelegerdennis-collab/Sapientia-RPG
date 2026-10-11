@@ -12,7 +12,7 @@ extends Control
 ##   assets/ui/title_kern.png        -> kern van de Golem, 4 frames 24x28 op (188,50), 7 fps.
 ## Ontbreekt een bestand, dan valt alleen dat stuk terug (tekst / bibliotheek / code-glitch).
 ## Menu (Doorgaan/Nieuw spel + save-info) rechtsonder, x 240..372, onderkant y 200.
-## Betatest staat links onder: een aparte voortgang, niet in dit kaartje (anders wordt het te hoog).
+## Betatest en Eindstaat staan links onder: aparte voortgang, niet in dit kaartje.
 ## v0.13 (afgemaakt): alle titel-art staat in een vaste 'stage' van 384x216 die in het midden
 ## van het scherm staat (pixel-precies, Nearest). Op bredere/hogere schermen (telefoons zijn vaak
 ## breder dan 16:9) vult een donkere, vergrote kopie van de achtergrond de randen; zo blijven
@@ -49,6 +49,7 @@ var continue_button: Button
 var load_button: Button
 var new_button: Button
 var beta_button: Button
+var eind_button: Button
 var beta_card: PanelContainer
 var beta_info: Label
 var title_label: Label
@@ -173,13 +174,21 @@ func _ready() -> void:
 	beta_button = UiMenu.button("Betatest")
 	beta_button.custom_minimum_size = Vector2(116, 16)
 	beta_list.add_child(beta_button)
+	eind_button = UiMenu.button("Eindstaat")
+	eind_button.name = "EindButton"
+	eind_button.custom_minimum_size = Vector2(116, 16)
+	beta_list.add_child(eind_button)
 	beta_info = UiMenu.label("", UiStyleC.TEXT_DIM)
 	beta_info.clip_text = true
 	beta_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	beta_info.custom_minimum_size = Vector2(116, 0)
 	beta_list.add_child(beta_info)
 	beta_button.pressed.connect(_on_beta)
+	eind_button.pressed.connect(_on_eind)
 	beta_button.focus_neighbor_right = new_button.get_path()
+	beta_button.focus_neighbor_bottom = eind_button.get_path()
+	eind_button.focus_neighbor_top = beta_button.get_path()
+	eind_button.focus_neighbor_right = new_button.get_path()
 	new_button.focus_neighbor_left = beta_button.get_path()
 	continue_button.focus_neighbor_left = beta_button.get_path()
 	continue_button.focus_neighbor_right = load_button.get_path()
@@ -293,7 +302,7 @@ func refresh() -> void:
 		new_button.grab_focus()
 	var beta := GameState.read_beta_save()
 	if beta.is_empty():
-		beta_info.text = "  separate progress"
+		beta_info.text = "  aparte voortgang"
 	else:
 		beta_info.text = "  %s  %s" % [str(beta.get("player_name", "")), UiMenu.format_time(float(beta.get("play_time", 0.0)))]
 	beta_info.visible = true
@@ -349,3 +358,8 @@ func _on_new() -> void:
 func _on_beta() -> void:
 	set_process(false)
 	await GameState.start_beta_game()
+
+
+func _on_eind() -> void:
+	set_process(false)
+	await GameState.start_eind_game()
