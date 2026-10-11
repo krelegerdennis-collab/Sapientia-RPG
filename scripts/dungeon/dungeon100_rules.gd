@@ -10,9 +10,11 @@ extends RefCounted
 ##   GameState.dungeon100_best       hoogste verdieping die ooit bereikt is (0..100).
 ##
 ## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md): de kerker is een
-## simulatie. Een RUN begint bij het binnenkomen vanaf de wereldkaart: de party wordt level 1 zonder
-## uitrusting (de echte party + tas + goud + Codex liggen in een momentopname) en je tas bevat alleen de
-## PERMANENTE items van eerdere runs (GameState.dungeon100_permanent, uit Blauwe Kisten).
+## simulatie. Een RUN begint bij het binnenkomen vanaf de wereldkaart: iedereen die dan in de party zit
+## (ook wie zich later aansluit) gaat mee op level 1, zonder uitrusting en zonder spreuken. Elke
+## Codex-pagina gaat ook mee, op level 1. De echte party + tas + goud + Codex liggen in een momentopname
+## en je tas bevat alleen de PERMANENTE items van eerdere runs (GameState.dungeon100_permanent, uit
+## Blauwe Kisten). Spreuken vind je terug als rol in een willekeurige gewone kist.
 ##   - VERLIES (party KO) BINNEN de kerker = de run is voorbij ("dood is dungeon uit"): terug naar de
 ##     wereldkaart bij de ingang (van_dungeon100), NIET naar verdieping 1 en NIET naar een rustpunt.
 ##     Tijdelijke levels, tas, goud en uitrusting van de run zijn weg. De momentopname van de echte
