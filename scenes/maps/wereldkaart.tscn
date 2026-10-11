@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=4]
+[gd_scene load_steps=8 format=4]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_i0cqu"]
 [ext_resource type="TileSet" path="res://assets/tiles/wereld.tres" id="2_gwldh"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/map_spawn.gd" id="4_de1fy"]
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="5_ws0vq"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="6_vhjf7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/kas_ingang.png" id="7_kas"]
 
 [node name="Wereldkaart" type="Node2D"]
 script = ExtResource("1_i0cqu")
@@ -24,10 +25,20 @@ y_sort_enabled = true
 position = Vector2(232, 504)
 walk_speed = 64.0
 
+[node name="KasIngang" type="Sprite2D" parent="Objects"]
+position = Vector2(312, 552)
+texture = ExtResource("7_kas")
+texture_filter = 1
+
 [node name="Spawns" type="Node2D" parent="."]
 
 [node name="van_archief" type="Marker2D" parent="Spawns"]
 position = Vector2(328, 536)
+script = ExtResource("4_de1fy")
+facing = Vector2i(0, -1)
+
+[node name="van_kas" type="Marker2D" parent="Spawns"]
+position = Vector2(312, 536)
 script = ExtResource("4_de1fy")
 facing = Vector2i(0, -1)
 
@@ -102,6 +113,15 @@ target_map = "res://scenes/maps/woud_rand.tscn"
 target_spawn = "ingang"
 lines = Array[String]([])
 event = "woud_ingang"
+
+[node name="NaarKas" type="Node2D" parent="Exits"]
+position = Vector2(304, 544)
+script = ExtResource("5_ws0vq")
+size_tiles = Vector2i(1, 1)
+target_map = "res://scenes/maps/leven_ingang.tscn"
+target_spawn = "ingang"
+lines = Array[String]([])
+event = "naar_leven"
 
 [node name="NaarDiepeGrot" type="Node2D" parent="Exits"]
 position = Vector2(144, 416)

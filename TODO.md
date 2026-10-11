@@ -152,6 +152,7 @@ Locatie: Worldmap 1 (start-eiland), tweede Archief. Thema: Leven. Grootte: verge
 
 #### Dungeon-opbouw (4 verdiepingen)
 
+- [x] Verdieping 1 is speelbaar: overwoekerde kas op de wereldkaart, alleen na het Eerste Archief, met één groei-plaat (hendel, daarna zaad, scheut, volgroeid)
 - [ ] Verdieping 1: entree, eerste groei-plaatpuzzel, zichtbare monsters
 - [ ] Verdieping 2: Lotte als mini-baas (Dennis en Codex-monster), daarna sluit ze aan
 - [ ] Verdieping 3: complexere groei-plaatpuzzels en een monster als mini-baas

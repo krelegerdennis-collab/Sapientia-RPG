@@ -94,7 +94,7 @@ const QUESTS := [
 ## v0.17 TODO(verhaal): deze events hebben PLACEHOLDER-tekst (kort, Nederlands). Dennis schrijft het
 ## echte verhaal; de opbouw (wie loopt waar, vlaggen, ballonnen) kan blijven.
 const TODO_STORY := ["noor_ontmoeting", "noor_bevrijd", "noor_woud", "marit", "bram", "jens", "tobias",
-	"ilse", "herbergier", "naar_esdoorn", "woud_ingang", "marit_boeken"]
+	"ilse", "herbergier", "naar_esdoorn", "woud_ingang", "marit_boeken", "naar_leven"]
 
 const SPEAKER := "Old Man"
 
@@ -357,6 +357,15 @@ const EVENTS := {
 	"naar_esdoorn": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
 			["say", "", ["Beyond the hills lies a village: Mapleton.", "But first you have to find out what is happening in the Forgotten Archives."]],
+		]},
+		{"do": "default"},
+	],
+	# TODO(verhaal): de kas gaat open op de bestaande golem-vlag van het Eerste Archief.
+	# Waarom die kern op een tweede signaal reageert, staat nog open. Geen nieuwe beat.
+	"naar_leven": [
+		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
+			["say", "", ["Een overwoekerde kas. De ranken zitten potdicht.", "Eerst het Eerste Archief uit."]],
+			["walk", "player", "up", 1],
 		]},
 		{"do": "default"},
 	],

@@ -93,6 +93,15 @@ const THEMES := {
 		},
 	},
 	"archief_v14": {"tiles": TILES, "lib_tiles": LIB_TILES, "sprites": {}},
+	# Het Levende Archief, verdieping 1. Zelfde tegelnummers als archief_grijs, groen beeld.
+	# PLACEHOLDER: tools/art_kas_placeholder.py (magenta hoekjes). terrain "kas" -> bibliotheek_overwoekerd.
+	"kas": {
+		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",
+		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek.png",
+		"terrain": "kas",
+		"tint": Color(0.78, 1.0, 0.84),
+		"sprites": {},
+	},
 	# v0.17 HET DONKER WOUD (scripts/data/woud_rooms.gd), tegels van RPG ART (art_woud_v17,
 	# docs/WOUD_TILES.txt): woud_tiles.png 256x112. 0-64 = zelfde nummering/botsing als
 	# dungeon_tiles_v14 (bladerdak = muurtop, stammen = voorkant, wortels/paddenstoelen = decor),
@@ -608,7 +617,7 @@ static func legend_of(room: Dictionary) -> Dictionary:
 
 ## Scènepad van een kamer-id ("" = onbekend). v0.17: ook de kamers van het Donker Woud.
 static func scene_of(room_id: String) -> String:
-	for e in ORDER + woud().ORDER:
+	for e in ORDER + woud().ORDER + archief2().ORDER:
 		if e[0] == room_id:
 			return e[1]
 	return ""
@@ -619,6 +628,11 @@ static func woud() -> Script:
 	return load("res://scripts/data/woud_rooms.gd")
 
 
+## Het Levende Archief (scripts/data/archief2_rooms.gd; via load(), geen cyclus).
+static func archief2() -> Script:
+	return load("res://scripts/data/archief2_rooms.gd")
+
+
 ## v0.17 Kamerdata van ELKE dungeon: eerst de Archieven (ROOMS), dan het Donker Woud ({} = onbekend).
 ## Dungeon100 (de Diepe Grot): id "dungeon100_<seed>_<verdieping>" wordt gegenereerd (dungeon100_generator.gd).
 static func room(room_id: String) -> Dictionary:
@@ -626,6 +640,8 @@ static func room(room_id: String) -> Dictionary:
 		return ROOMS[room_id]
 	if room_id.begins_with("dungeon100_"):
 		return load("res://scripts/dungeon/dungeon100_generator.gd").room_for_id(room_id)
+	if archief2().ROOMS.has(room_id):
+		return archief2().ROOMS[room_id]
 	return woud().ROOMS.get(room_id, {})
 
 
@@ -691,12 +707,12 @@ static func room_scene(room_id: String) -> String:
 static func room_graph(dungeon_set := "archief") -> Dictionary:
 	var g := {}
 	var archive := {}
-	var rooms: Dictionary = ROOMS if dungeon_set == "archief" else woud().ROOMS
+	var rooms: Dictionary = _rooms_for_set(dungeon_set)
 	for id in rooms:
 		archive[room_scene(id)] = true
 	var PR = load("res://scripts/data/puzzle_rooms.gd")
 	for id in PR.ROOMS:
-		if dungeon_set == "archief" and str(PR.ROOMS[id].get("style", "")) == "dungeon":
+		if _puzzle_in_set(PR.ROOMS[id], dungeon_set):
 			archive[room_scene(id)] = true
 	var link := func(a: String, b: String):
 		if not archive.has(a) or not archive.has(b) or a == b:
@@ -714,12 +730,26 @@ static func room_graph(dungeon_set := "archief") -> Dictionary:
 			link.call(room_scene(id), str(rooms[id]["exits"][k].get("map", "")))
 	for id in PR.ROOMS:
 		var r: Dictionary = PR.ROOMS[id]
-		if dungeon_set != "archief" or str(r.get("style", "")) != "dungeon":
+		if not _puzzle_in_set(r, dungeon_set):
 			continue
 		for k in ["entrance", "exit"]:
 			if r.get(k) is Dictionary:
 				link.call(room_scene(id), str(r[k].get("map", "")))
 	return g
+
+
+static func _rooms_for_set(dungeon_set: String) -> Dictionary:
+	if dungeon_set == "woud":
+		return woud().ROOMS
+	if dungeon_set == "leven":
+		return archief2().ROOMS
+	return ROOMS
+
+
+## Puzzelkamer hoort bij deze dungeon-graaf. Zonder "dungeon_set" blijft dat "archief",
+## zodat archief_puzzel in de graaf van het Eerste Archief blijft. "leven" blijft erbuiten.
+static func _puzzle_in_set(room: Dictionary, dungeon_set: String) -> bool:
+	return str(room.get("style", "")) == "dungeon" and str(room.get("dungeon_set", "archief")) == dungeon_set
 
 
 ## Afstand (kamerstappen) van elke dungeonkamer tot de baaskamer van zijn dungeon: scènepad -> int.
