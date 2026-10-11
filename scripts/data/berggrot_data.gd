@@ -2,8 +2,8 @@ extends RefCounted
 class_name Berggrot
 ## Berggrot door de bergen naar de kas van het Levende Archief.
 ## Een paar puzzels, geen bazen, eigen monsters en een eigen track.
-## De kas blijft op haar huidige plek op de wereldkaart. Golf 2 legt de ingang
-## en verplaatst de kas. Deze data wijst de andere kant al naar de kas-scène.
+## De wereldkaart start de grot via Berggrot.start(). De zuiduitgang komt terug
+## op spawn van_berggrot. De noordkant wijst al naar de kas-scène.
 
 const GradeGear := preload("res://scripts/data/grade_gear.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
@@ -14,10 +14,10 @@ const SPAWN_INGANG := "ingang"
 const DEBUG_ARG := "--berggrot"
 const BGM := "berggrot"
 const BGM_BESTAND := "bgm_berggrot.ogg"
-## Golf 2 zet deze spawn op de wereldkaart. De tscn zelf wordt hier niet aangepast.
+## Spawn op de wereldkaart, aan de voet van de bergen, ten zuiden van de mond.
 const WERELD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const WERELD_SPAWN := "van_berggrot"
-## Bestaande kas-scène. Golf 2 verplaatst haar op de wereldkaart, niet deze uitgang.
+## Bestaande kas-scène. De kaart legt haar achter de bergen. Deze uitgang blijft.
 const KAS_SCENE := "res://scenes/maps/archief_2_v1_entree.tscn"
 const KAS_SPAWN := "ingang"
 const THEME := "berggrot"
@@ -280,11 +280,10 @@ const PUZZLES := {
 }
 
 
-## Haakje voor golf 2. De wereldkaart roept Berggrot.start() aan op de grotmond
-## (linksboven op worldmap 1, achter de bergen). Deze functie wisselt naar SCENE
-## met spawn SPAWN_INGANG. Golf 2 zet ook spawn WERELD_SPAWN op de wereldkaart
-## en verplaatst de kas. De andere kant van de grot wijst al naar KAS_SCENE
-## (spawn KAS_SPAWN). De kas-scène en de wereldkaart worden hier niet verplaatst.
+## De wereldkaart roept Berggrot.start() aan op de grotmond, linksboven op
+## worldmap 1 aan de voet van de bergen. Deze functie wisselt naar SCENE met
+## spawn SPAWN_INGANG. Spawn WERELD_SPAWN ligt ten zuiden van die mond. De
+## andere kant van de grot wijst naar KAS_SCENE (spawn KAS_SPAWN).
 static func start() -> void:
 	GameState.change_map(SCENE, SPAWN_INGANG)
 

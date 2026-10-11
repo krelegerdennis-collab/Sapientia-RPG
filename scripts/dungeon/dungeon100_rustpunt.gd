@@ -9,7 +9,7 @@ extends "res://scripts/book_point.gd"
 ##
 ## A = HP/MP van de party vol (BookPoint.restore) + dit verdiepingsnummer wordt het laatste rustpunt van
 ## DEZE RUN (GameState.dungeon100_checkpoint, gaat alleen omhoog). Het is GEEN terugkeerpunt: valt de
-## groep, dan is de run voorbij en sta je weer voor de ingang op de wereldkaart. Daarna de vraag
+## groep, dan is de run voorbij en sta je in ECHO's Kamer. Daarna de vraag
 ## 'Voortgang opslaan?'. Staat het rustpunt op een verdieping zonder rustpunt-regel (niet 10, 20, ...)
 ## of buiten de kerker, dan herstelt en bewaart het wel, maar het checkpoint verandert niet.
 ## Plaatje: voorlopig het opslagboek, warm getint (PLACEHOLDER, zie HANDOFF_DUNGEON100_REGELS.md).

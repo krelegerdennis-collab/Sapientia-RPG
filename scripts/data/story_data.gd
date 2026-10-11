@@ -404,6 +404,14 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+	# Platform op de wereldkaart. try_unlock zet de vlag vóór deze check.
+	"naar_world_warper": [
+		{"if": {"not_flags": ["world_warper_unlocked"]}, "do": [
+			["say", "", ["Een leeg platform. De World Warper is hier nog niet."]],
+			["walk", "player", "down", 1],
+		]},
+		{"do": "default"},
+	],
 	"woud_ingang": [
 		{"if": {"not_flags": ["quest_noor"]}, "do": [
 			["say", "", ["The Dark Wood. Between the black trunks hangs mist that flickers like a broken screen.", "You don't go in there without a reason."]],

@@ -15,6 +15,7 @@ extends Node2D
 const TILE := 16
 const FieldFollowerScript := preload("res://scripts/field_follower.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
 const AUTOSAVE_DELAY := 0.35
 
@@ -256,6 +257,12 @@ func _on_player_stepped(tile: Vector2i) -> void:
 
 
 func _use_exit(exit: Node) -> void:
+	if str(exit.name) == "NaarBerggrot":
+		player.input_locked = true
+		BerggrotData.start()
+		return
+	if str(exit.name) == "NaarWorldWarper":
+		GameState.try_unlock_world_warper()
 	if "event" in exit and exit.event != "" and Story.trigger(exit.event, exit):
 		return
 	# v0.13: doel-scène bestaat (nog) niet maar er is tekst -> alleen het bericht

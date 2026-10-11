@@ -591,10 +591,11 @@ func _leven_tests() -> void:
 	var wereld: Node = (load("res://scenes/maps/wereldkaart.tscn") as PackedScene).instantiate()
 	var ex: Node = wereld.get_node("Exits/NaarKas")
 	var sp: Node = wereld.get_node("Spawns/van_kas")
-	check("wereldkaart: kas op tegel (19,34), event naar_leven", ex.event == "naar_leven"
+	check("wereldkaart: kas achter de bergen, event naar_leven", ex.event == "naar_leven"
 			and ex.target_map == LEVEN_SCENE and ex.target_spawn == "ingang"
-			and Vector2i((ex.position / 16.0).floor()) == Vector2i(19, 34))
-	check("terugspawn (19,33) kijkt omhoog, naast de uitgang", Vector2i((sp.position / 16.0).floor()) == Vector2i(19, 33)
+			and Vector2i((ex.position / 16.0).floor()) == Vector2i(14, 8)
+			and not ex.contains(Vector2i(19, 34)))
+	check("terugspawn (14,9) kijkt omhoog, naast de uitgang", Vector2i((sp.position / 16.0).floor()) == Vector2i(14, 9)
 			and sp.facing == Vector2i(0, -1) and wereld.get_node_or_null("Objects/KasIngang") != null)
 	wereld.free()
 	var pr: Dictionary = PuzzleRooms.ROOMS[PLAAT_ID]

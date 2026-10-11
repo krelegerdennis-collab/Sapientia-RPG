@@ -22,6 +22,7 @@ const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
+const WorldWarperUnlock := preload("res://world_warper/flow/unlock.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
@@ -308,14 +309,14 @@ func _ready() -> void:
 	# Geen story_step en geen story_flags: het echte verhaal wordt niet overgeslagen.
 	if SpiegelData.DEBUG_ARG in args and not ("--spiegeltest" in args):
 		call_deferred("_go_to_scene", SpiegelData.SCENE)
-	# Berggrot, zonder wereldkaart. Golf 2 roept BerggrotData.start() aan.
+	# Berggrot, zonder wereldkaart. Zelfde haakje als de mond op de kaart.
 	if BerggrotData.DEBUG_ARG in args and not ("--berggrottest" in args):
 		call_deferred("_start_berggrot")
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
 
 
-## Debug-ingang van de berggrot. Golf 2 gebruikt BerggrotData.start() zelf.
+## Debug-ingang van de berggrot. Zelfde haakje als de mond op de kaart.
 func _start_berggrot() -> void:
 	BerggrotData.start()
 
@@ -1465,7 +1466,7 @@ func end_battle(result: String) -> void:
 			has_return_point = true
 			pending_respawn_msg = []
 		elif dungeon100_floor > 0 or dungeon100_run_active():
-			# 100-kerker: dood is dungeon uit. Terug naar de wereldkaart bij de ingang, niet verdieping 1.
+			# 100-kerker: dood is dungeon uit. Terug naar ECHO's Kamer, niet verdieping 1.
 			target = dungeon100_defeat()
 		elif has_checkpoint():
 			# v0.19: terug naar waar je deze kamer/map binnenkwam (baas: de kamer ervoor)
@@ -1735,8 +1736,9 @@ func dungeon100_reach_floor(floor_nr: int) -> void:
 		inventory[Dungeon100RulesC.Blue.WARP_ITEM] = 1
 
 
-## Warper (niet op verdieping 1): de run stopt en je staat op de wereldkaart bij de ingang.
+## Warper (niet op verdieping 1): de run stopt en je staat in ECHO's Kamer.
 ## false = geen run, of de kaart wisselt al. Annuleren roept dit niet aan.
+## Zet echo_grot_resultaat niet: dat doet alleen het Warp-kristal op verdieping 100.
 func dungeon100_warper_exit() -> bool:
 	if not dungeon100_run_active() or changing_map or in_battle:
 		return false
@@ -1779,8 +1781,8 @@ func dungeon100_echo_start() -> bool:
 
 ## Nederlaag in de kerker: de run is voorbij ("dood is dungeon uit"). Tijdelijke levels, tas en goud van
 ## de run zijn weg. De echte party/tas/goud/Codex komen terug uit de momentopname, daarna de permanente
-## Blauwe-Kist-items. Terug naar de wereldkaart bij de ingang, niet naar verdieping 1. Een nieuwe run
-## begint pas als je opnieuw naar binnen gaat. Geeft de wereldkaart terug.
+## Blauwe-Kist-items. Terug naar ECHO's Kamer, niet naar verdieping 1 en niet naar de wereldkaart.
+## Zet echo_grot_resultaat niet. Een nieuwe run begint pas als ECHO hem start. Geeft de kamer terug.
 func dungeon100_defeat() -> String:
 	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, dungeon100_floor)
 	has_return_point = false
@@ -2034,18 +2036,16 @@ func unique_mark(id: String, how: String) -> void:
 
 
 # ---------------------------------------------------------------- world warper
-## TODO(design): trigger is de bewaker van verdieping 2 van het Eerste Archief
-## (bewaker:archief_v2_trapzaal/m2, kamer archief_v2_trapzaal, monster m2).
-## Dit is NIET het Archief van Leven uit TODO.md; dat archief bestaat niet.
-## Geen afhankelijkheid van code die nog gebouwd moet worden.
+## De hub gaat open na De Genezer (einde Archief 2). Zelfde vlag als
+## WorldWarperUnlock.BEWAKER_VLAG. De bewaker van verdieping 2 van het Eerste
+## Archief opent de hub niet. Geen Worldmap 2 of 3.
 func world_warper_is_unlocked() -> bool:
-	return story_flags.has("world_warper_unlocked")
+	return story_flags.has(WorldWarperUnlock.UNLOCK_VLAG)
 
 
 func try_unlock_world_warper() -> bool:
-	if world_warper_is_unlocked():
-		return true
-	if story_flags.has("bewaker:archief_v2_trapzaal/m2"):
-		story_flags["world_warper_unlocked"] = true
-		return true
-	return false
+	if not WorldWarperUnlock.should_unlock(story_flags):
+		return false
+	if not story_flags.has(WorldWarperUnlock.UNLOCK_VLAG):
+		story_flags[WorldWarperUnlock.UNLOCK_VLAG] = true
+	return true

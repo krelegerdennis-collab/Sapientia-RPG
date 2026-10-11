@@ -263,12 +263,14 @@ func _wereldkaart() -> void:
 			and trap.contains(Vector2i(20, 34)))
 	var tegel := Vector2i((uit.position / 16.0).floor())
 	var spawn_tegel := Vector2i((spawn.position / 16.0).floor())
-	check("kas-uitgang op de bestaande vlag", str(uit.event) == "naar_leven"
+	check("kas-uitgang op de bestaande vlag, achter de bergen", str(uit.event) == "naar_leven"
 			and str(uit.target_map).ends_with("leven_ingang.tscn") and str(uit.target_spawn) == "ingang"
-			and not uit.contains(Vector2i(20, 34)) and tegel == Vector2i(19, 34))
-	check("tegel uitgang loopbaar (%s)" % _terrein(grond, tegel), _loopbaar(grond, tegel))
-	check("spawn loopbaar (%s)" % _terrein(grond, spawn_tegel), _loopbaar(grond, spawn_tegel)
-			and spawn_tegel == Vector2i(19, 33))
+			and not uit.contains(Vector2i(20, 34)) and not uit.contains(Vector2i(19, 34))
+			and tegel == Vector2i(14, 8))
+	check("kas-terrein loopbaar maar niet vanaf het dorp (%s)" % _terrein(grond, tegel),
+			_loopbaar(grond, tegel) and _afstand(grond, Vector2i(14, 31), tegel) < 0)
+	check("spawn achter de bergen (%s)" % _terrein(grond, spawn_tegel), _loopbaar(grond, spawn_tegel)
+			and spawn_tegel == Vector2i(14, 9) and spawn.facing == Vector2i(0, -1))
 	kaart.free()
 
 
@@ -282,6 +284,21 @@ func _terrein(grond: TileMapLayer, t: Vector2i) -> String:
 func _loopbaar(grond: TileMapLayer, t: Vector2i) -> bool:
 	var td := grond.get_cell_tile_data(t)
 	return td != null and not (str(td.get_custom_data("terrain")) in ["berg", "zee"])
+
+
+func _afstand(grond: TileMapLayer, van: Vector2i, naar: Vector2i) -> int:
+	var dist := {van: 0}
+	var todo: Array[Vector2i] = [van]
+	while not todo.is_empty():
+		var t: Vector2i = todo.pop_front()
+		if t == naar:
+			return dist[t]
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var n: Vector2i = t + d
+			if not dist.has(n) and _loopbaar(grond, n):
+				dist[n] = dist[t] + 1
+				todo.append(n)
+	return -1
 
 
 func _spel() -> void:

@@ -128,7 +128,8 @@ func _rules_tests() -> void:
 			and R.WORLD_SPAWN == Gen.WORLD_SPAWN)
 	check("start alleen via ECHO, niet via de wereldkaart", EchoGrot.blokkeert_wereldkaart(EchoGrot.WERELD, EchoGrot.DUNGEON)
 			and not EchoGrot.blokkeert_wereldkaart(EchoGrot.DUNGEON, EchoGrot.DUNGEON)
-			and EchoGrot.KAMER != R.WORLD_SCENE and EchoGrot.ZIN_EERSTE.begins_with("De Diepe Grot."))
+			and EchoGrot.KAMER == R.WORLD_SCENE and EchoGrot.KAMER_SPAWN == R.WORLD_SPAWN
+			and EchoGrot.ZIN_EERSTE.begins_with("De Diepe Grot."))
 	var party := [{"hp": 0, "max_hp": 30, "mp": 1, "max_mp": 8}, {"hp": 5, "max_hp": 20, "mp": 0, "max_mp": 4}]
 	var pages := [{"hp": 0, "max_hp": 12, "mp": 0, "max_mp": 3}]
 	R.heal_party(party, pages)
@@ -159,7 +160,7 @@ func _rules_tests() -> void:
 			and not R.warper_open([], 1) and R.warper_open([1, 25], 25))
 	check("waarschuwing is de vertrekvraag, Ja en Nee", R.WARPER_WARNING == "Weet je zeker dat je de dungeon wilt verlaten?"
 			and R.WARPER_YES == "Ja" and R.WARPER_NO == "Nee"
-			and R.WARPER_SPAWN == Gen.SPAWN_WARPER and R.WORLD_SPAWN == "van_dungeon100")
+			and R.WARPER_SPAWN == Gen.SPAWN_WARPER and R.WORLD_SPAWN == EchoGrot.KAMER_SPAWN)
 	check("verdieping 25 heet De Schaduw van H-6", Scaling.boss_for_floor(25)["name"] == "De Schaduw van H-6"
 			and Scaling.boss_for_floor(50)["name"] == "De Cyclus"
 			and Scaling.boss_for_floor(75)["name"] == "De Rechter"
@@ -582,12 +583,13 @@ func _defeat_tests() -> void:
 	GameState.in_battle = true
 	check("game-over-tekst: death means out of the Archive", GameState.defeat_text(false).contains("out of the Archive"))
 	GameState.end_battle("lose")
-	var ok := await wait_scene("Wereldkaart", 20.0)
+	var ok := await wait_scene("EchoKamer", 20.0)
 	await wait_fade()
-	var wsp: Node2D = scene().get_node_or_null("Spawns/van_dungeon100")
-	check("verlies in de kerker: wereldkaart bij de ingang, niet de kerker en niet verdieping 1",
+	var wsp: Node2D = scene().get_node_or_null("Spawns/ingang")
+	check("verlies in de kerker: ECHO's Kamer, niet de kerker en niet verdieping 1",
 			ok and scene().scene_file_path == R.WORLD_SCENE and wsp != null
-			and tile() == Vector2i((wsp.position / 16.0).floor()))
+			and tile() == Vector2i((wsp.position / 16.0).floor())
+			and not GameState.story_flags.has(EchoGrot.FLAG_RESULTAAT))
 	check("verlies: verdieping 0, echt goud 200, level 4 terug, rustpunt weg, HP vol, best 26, run voorbij",
 			GameState.dungeon100_floor == 0 and GameState.gold == 200 and GameState.dungeon100_best == 26
 			and GameState.party[0]["level"] == 4 and GameState.dungeon100_checkpoint == 0
@@ -661,19 +663,20 @@ func _warper_tests() -> void:
 			wp.last_result == "cancelled" and GameState.dungeon100_floor == 25 and tile() == start
 			and GameState.dungeon100_run_active())
 
-	# verdieping 99: Ja gaat naar de wereldkaart bij de ingang.
+	# verdieping 99: Ja gaat naar ECHO's Kamer.
 	GameState.dungeon100_floor = 99
 	wp.interact(pl)
 	warned = await wait_until(_warning_open, 3.0)
 	check("verdieping 99 waarschuwt hetzelfde", warned)
 	Dialog.choose(0)
-	var moved := await wait_scene("Wereldkaart", 20.0)
+	var moved := await wait_scene("EchoKamer", 20.0)
 	await wait_fade()
-	var wsp: Node2D = scene().get_node_or_null("Spawns/van_dungeon100")
-	check("verdieping 99 gaat naar de kaart, bij de ingang van de Diepe Grot",
+	var wsp: Node2D = scene().get_node_or_null("Spawns/ingang")
+	check("verdieping 99 gaat naar ECHO's Kamer",
 			moved and scene().scene_file_path == R.WORLD_SCENE and wsp != null
 			and tile() == Vector2i((wsp.position / 16.0).floor())
-			and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active())
+			and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active()
+			and not GameState.story_flags.has(EchoGrot.FLAG_RESULTAAT))
 
 
 # ================================================================ hulp

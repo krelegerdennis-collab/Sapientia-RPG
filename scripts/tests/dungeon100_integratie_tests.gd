@@ -454,9 +454,9 @@ func _defeat_tests() -> void:
 	check("game-over-tekst: death means out of the Archive (niet het rustpunt)", GameState.defeat_text(false).contains("out of the Archive")
 			and not GameState.defeat_text(false).contains("rustpunt"))
 	await lose_battle()
-	check("na de nederlaag: wereldkaart, niet de grot", await wait_scene_path(Rules.WORLD_SCENE))
-	var wsp: Node2D = scene().get_node_or_null("Spawns/van_dungeon100")
-	check("speler staat bij de ingang (spawn van_dungeon100)", wsp != null and tile() == Vector2i((wsp.position / 16.0).floor()))
+	check("na de nederlaag: ECHO's Kamer, niet de grot", await wait_scene_path(Rules.WORLD_SCENE))
+	var wsp: Node2D = scene().get_node_or_null("Spawns/ingang")
+	check("speler staat in ECHO's Kamer (spawn ingang)", wsp != null and tile() == Vector2i((wsp.position / 16.0).floor()))
 	check("echte party terug: level 5, 200 goud, kruid 2, verdieping 0, run voorbij, best 15",
 			GameState.party[0]["level"] == 5 and GameState.party[0]["hp"] == GameState.party[0]["max_hp"]
 			and GameState.gold == 200 and GameState.item_count("kruid") == 2 and GameState.dungeon100_floor == 0

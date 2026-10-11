@@ -293,23 +293,14 @@ func _wereld_weigert() -> bool:
 		return false
 	await _wacht_fade()
 	var ex: Node = scene().get_node_or_null("Exits/NaarDiepeGrot")
-	if ex == null:
-		check("wereldkaart voor de grot", false)
-		return false
-	var et: Vector2i = ex.tile_rect().position
-	_player().place_at(et + Vector2i.DOWN, Vector2i.UP)
+	var oud := Vector2i(9, 26)
+	_player().place_at(oud + Vector2i.DOWN, Vector2i.UP)
 	await _pframes(2)
 	await _loop("move_up")
-	var dicht := await _wacht(func() -> bool:
-		return scene().name == "Wereldkaart" and Dialog.is_open and str(Dialog.text_label.text) == EchoGrot.ZIN_WERELD \
-				and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active()
-	, 3.0)
+	var tegel: Vector2i = _player().get_tile()
+	var dicht := scene().name == "Wereldkaart" and tegel == oud and ex == null and not Dialog.is_open \
+			and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active()
 	check("wereldkaart start de grot niet", dicht)
-	for _i in 8:
-		if not Dialog.is_open:
-			break
-		Dialog.advance()
-		await _pframes(2)
 	return dicht
 
 

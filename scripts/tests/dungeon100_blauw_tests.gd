@@ -128,7 +128,7 @@ func _run_tests() -> void:
 	GameState.party[0]["hp"] = 0
 	GameState.respawn()
 	check("dood: verdieping 0, spawn bij de ingang, run voorbij", GameState.dungeon100_floor == 0
-			and GameState.pending_spawn == "van_dungeon100" and not GameState.dungeon100_run_active())
+			and GameState.pending_spawn == EchoGrot.KAMER_SPAWN and not GameState.dungeon100_run_active())
 	check("dood zet level 8, 80 goud en kruid terug en levert het blauwe item af",
 			GameState.party[0]["level"] == 8 and GameState.gold == 80 and GameState.item_count("kruid") == 2
 			and GameState.item_count("sterk_drankje") == 0 and GameState.item_count(item_id) == 1

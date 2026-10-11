@@ -11,6 +11,10 @@ const Gear := preload("res://scripts/data/grade_gear.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const Scale := preload("res://scripts/data/level_scale.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
+const SD := preload("res://scripts/data/story_data.gd")
+const Unlock := preload("res://world_warper/flow/unlock.gd")
+const GENEZER_VLAG := "bewaker:archief_2_v4_genezer/genezer"
+const TRAPZAAL_VLAG := "bewaker:archief_v2_trapzaal/m2"
 
 var failures := 0
 var passes := 0
@@ -39,7 +43,9 @@ func _run() -> void:
 	_data()
 	print("=== Deel B: puzzels ===")
 	_puzzels()
-	print("=== Deel C: grot start zonder wereldkaart ===")
+	print("=== Deel C: wereldkaart ===")
+	await _kaart()
+	print("=== Deel D: grot start zonder wereldkaart ===")
 	await _start()
 	print("BERGGROTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -97,10 +103,8 @@ func _data() -> void:
 			and ph.contains("256x80") and ph.contains("assets/sprites/enemies/steenluis.png")
 			and ph.contains("90x90") and ph.contains("assets/map_monsters/adermot.png")
 			and ph.contains("32x64"))
-	var wereld := FileAccess.get_file_as_string("res://scenes/maps/wereldkaart.tscn")
-	check("wereldkaart noemt de grot niet", not wereld.contains("berggrot") and not wereld.contains("van_berggrot"))
 	var bron := FileAccess.get_file_as_string("res://scripts/data/berggrot_data.gd")
-	check("start-haakje noemt golf 2", bron.contains("func start") and bron.contains("Golf 2")
+	check("start() wisselt naar de grotmond", bron.contains("func start")
 			and bron.contains("change_map(SCENE, SPAWN_INGANG)"))
 	check("kamers hangen aan het dungeon-thema", not DR.room("berggrot_mond").is_empty()
 			and DR.theme_of(DR.room("berggrot_mond")) == "berggrot")
@@ -138,6 +142,76 @@ func _puzzels() -> void:
 			and items.get(BG.ACCESSOIRE_ID, "") == "kist_adersteen" and items.size() == 2)
 	check("buit-vakken kloppen", Equipment.slot_of(BG.STAF_ID) == "wapen"
 			and Equipment.slot_of(BG.ACCESSOIRE_ID) == "accessoire")
+
+
+func _kaart() -> void:
+	var packed: PackedScene = load(BG.WERELD_MAP)
+	var kaart := packed.instantiate()
+	var grond: TileMapLayer = kaart.get_node("Ground")
+	var grot: Node = kaart.get_node("Exits/NaarBerggrot")
+	var spawn: Node2D = kaart.get_node("Spawns/van_berggrot")
+	var grot_tegel := Vector2i((grot.position / 16.0).floor())
+	var spawn_tegel := Vector2i((spawn.position / 16.0).floor())
+	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(14, 19)
+			and spawn_tegel == Vector2i(14, 20) and spawn.facing == Vector2i(0, 1)
+			and _terrein(grond, Vector2i(14, 18)) == "berg"
+			and _loopbaar(grond, grot_tegel) and _loopbaar(grond, spawn_tegel)
+			and _afstand(grond, Vector2i(14, 31), grot_tegel) > 0)
+	var kas: Node = kaart.get_node("Exits/NaarKas")
+	var van_kas: Node2D = kaart.get_node("Spawns/van_kas")
+	var kas_tegel := Vector2i((kas.position / 16.0).floor())
+	check("kas achter de bergen", kas_tegel == Vector2i(14, 8)
+			and Vector2i((van_kas.position / 16.0).floor()) == Vector2i(14, 9)
+			and van_kas.facing == Vector2i(0, -1)
+			and str(kas.event) == "naar_leven"
+			and not kas.contains(Vector2i(19, 34)) and not kas.contains(Vector2i(20, 34))
+			and _loopbaar(grond, kas_tegel) and _afstand(grond, Vector2i(14, 31), kas_tegel) < 0
+			and kaart.get_node("Exits/Trap").contains(Vector2i(20, 34)))
+	var oud := Vector2i(9, 26)
+	var bezet := false
+	for uit in kaart.get_node("Exits").get_children():
+		if uit.tile_rect().has_point(oud) or str(uit.target_map).ends_with("dungeon100.tscn"):
+			bezet = true
+	check("de grot start niet meer van de kaart", kaart.get_node_or_null("Exits/NaarDiepeGrot") == null
+			and not bezet and grond.get_cell_source_id(oud) == 0
+			and grond.get_cell_atlas_coords(oud) == Vector2i(0, 0))
+	var platform: Node = kaart.get_node("Exits/NaarWorldWarper")
+	check("warper-platform op de kaart", str(platform.event) == "naar_world_warper"
+			and Vector2i((platform.position / 16.0).floor()) == Vector2i(26, 22)
+			and str(platform.target_map).ends_with("exterieur.tscn")
+			and str(platform.target_spawn) == "ingang"
+			and _loopbaar(grond, Vector2i(26, 22)) and _afstand(grond, Vector2i(14, 31), Vector2i(26, 22)) > 0)
+	kaart.free()
+	GameState.new_game("Dennis")
+	GameState.story_step = SD.NACHT
+	GameState.encounter_multiplier = 0.0
+	check("Genezer-vlag is de unlock", Unlock.BEWAKER_VLAG == GENEZER_VLAG)
+	GameState.story_flags[TRAPZAAL_VLAG] = true
+	check("bewaker van verdieping 2 opent de warper niet", not GameState.try_unlock_world_warper()
+			and not GameState.world_warper_is_unlocked())
+	var dicht: Dictionary = Story.pick("naar_world_warper")
+	check("dicht platform wijst terug", dicht.get("do") is Array and str(dicht["do"]).contains("nog niet"))
+	GameState.story_flags.erase(TRAPZAAL_VLAG)
+	GameState.story_flags[GENEZER_VLAG] = true
+	check("warper-vlag na De Genezer", GameState.try_unlock_world_warper()
+			and GameState.world_warper_is_unlocked()
+			and str(Story.pick("naar_world_warper").get("do", "")) == "default")
+	GameState.change_map(BG.WERELD_MAP, "van_dorp")
+	var wereld_ok := await wait_scene("Wereldkaart", 20.0)
+	check("wereldkaart geladen", wereld_ok)
+	if not wereld_ok:
+		return
+	await wait_fade()
+	player().place_at(oud + Vector2i.DOWN, Vector2i.UP)
+	await pframes(2)
+	await walk("move_up", 1)
+	check("op de oude grottegel blijft de wereldkaart", scene().name == "Wereldkaart" and tile() == oud
+			and not Dialog.is_open and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active())
+	player().place_at(Vector2i(14, 20), Vector2i.UP)
+	await pframes(2)
+	await walk("move_up", 1)
+	var mond_ok := await wait_scene("BerggrotMond", 20.0)
+	check("de berggrot start vanaf de voet", mond_ok and str(GameState.current_map).ends_with("berggrot_mond.tscn"))
 
 
 func _start() -> void:
@@ -195,8 +269,62 @@ func _start() -> void:
 		await screenshot("berggrot_grendel")
 
 
+func _terrein(grond: TileMapLayer, t: Vector2i) -> String:
+	var td := grond.get_cell_tile_data(t)
+	if td == null:
+		return "leeg"
+	return str(td.get_custom_data("terrain"))
+
+
+func _loopbaar(grond: TileMapLayer, t: Vector2i) -> bool:
+	return not (_terrein(grond, t) in ["berg", "zee", "leeg"])
+
+
+func _afstand(grond: TileMapLayer, van: Vector2i, naar: Vector2i) -> int:
+	var dist := {van: 0}
+	var todo: Array[Vector2i] = [van]
+	while not todo.is_empty():
+		var t: Vector2i = todo.pop_front()
+		if t == naar:
+			return dist[t]
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var n: Vector2i = t + d
+			if not dist.has(n) and _loopbaar(grond, n):
+				dist[n] = dist[t] + 1
+				todo.append(n)
+	return -1
+
+
 func scene() -> Node:
 	return get_tree().current_scene
+
+
+func player() -> CharacterBody2D:
+	var s := scene()
+	return s.get_node_or_null("Objects/Player") if s else null
+
+
+func tile() -> Vector2i:
+	var p := player()
+	return p.get_tile() if p else Vector2i(-99, -99)
+
+
+func walk(action: String, n: int) -> void:
+	var start_scene := scene()
+	for _i in n:
+		var p := player()
+		if p == null or scene() != start_scene or GameState.changing_map or GameState.in_battle:
+			return
+		Input.action_press(action)
+		var gewacht := 0
+		while is_instance_valid(p) and not p.is_moving and gewacht < 8:
+			await get_tree().physics_frame
+			gewacht += 1
+		Input.action_release(action)
+		while is_instance_valid(p) and p.is_moving:
+			await get_tree().physics_frame
+		if GameState.changing_map or Dialog.is_open or GameState.in_battle:
+			return
 
 
 func wait_scene(scene_name: String, timeout := 15.0) -> bool:
