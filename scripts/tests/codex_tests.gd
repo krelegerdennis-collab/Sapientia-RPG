@@ -11,6 +11,7 @@ extends Node
 ##   Deel E: save/load (pagina's + actieve bondgenoot), oude save zonder codex, kapotte data.
 ##   Deel F: Golem (Eerste Archief) dropt 3 Lege Boeken; de actieve bondgenoot loopt mee
 ##           in kerkers en op de wereldkaart, niet in dorpen.
+##   Deel G: betatest-account (aparte save, niveau 10, buddy, echte save blijft heel).
 ## Met --shots=map: codex_boek_inschrijven, codex_gevangen, codex_bondgenoot, codex_bondgenoot_aanval,
 ## codex_levelup, codex_scherm (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
@@ -71,6 +72,9 @@ func _run() -> void:
 	if part("F"):
 		print("=== Deel F: Golem-buit + volger ===")
 		await _follower_tests()
+	if part("G"):
+		print("=== Deel G: betatest-account ===")
+		_beta_account_tests()
 	print("CODEXTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -939,6 +943,52 @@ func _walk(action: String, n: int) -> void:
 		Input.action_release(action)
 		while is_instance_valid(p) and p.is_moving:
 			await get_tree().process_frame
+
+
+# ================================================================ G: betatest-account
+func _beta_account_tests() -> void:
+	for p in [GameState.beta_save_path(), GameState.beta_autosave_path()]:
+		if FileAccess.file_exists(p):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+	GameState.use_story_saves()
+	GameState.new_game("Echt")
+	GameState.current_map = "res://scenes/maps/huis_wilgendal.tscn"
+	check("echte save schrijven", GameState.save_game(Vector2i(2, 3), Vector2i.DOWN))
+	var story_path := GameState.save_path
+	GameState.use_beta_saves()
+	GameState._build_beta_state()
+	GameState.current_map = GameState.WORLD_MAP
+	check("betatest schrijft zijn eigen bestand", GameState.save_game(GameState.BETA_TILE, GameState.BETA_FACING)
+			and GameState.playing_beta and GameState.save_path.ends_with("save_beta.json"))
+	var hero: Dictionary = GameState.party[0]
+	var equip: Dictionary = hero.get("equip", {})
+	check("betatest: Dennis niveau 10 met Vonkzwaard, schild, kap en mantel",
+			hero["name"] == "Dennis" and int(hero["level"]) == 10 and str(equip.get("wapen", "")) == "vonkzwaard"
+			and str(equip.get("schild", "")) == "houten_schild" and str(equip.get("helm", "")) == "leren_kap"
+			and str(equip.get("harnas", "")) == "leerling_mantel")
+	check("betatest: 6 Lege Boeken, Inktwurm als buddy, Mosslijm en Moskonijn erbij",
+			GameState.item_count("leeg_boek") == 6 and GameState.codex_pages.size() == 3
+			and str(GameState.codex_active_page().get("species", "")) == "inktwurm"
+			and GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "mosslijm")
+			and GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "moskonijn"))
+	check("betatest: proloog klaar, woud open, Golem nog niet verslagen, Noor nog niet in de groep",
+			GameState.story_step == SD.KLAAR and GameState.story_flags.has("quest_noor")
+			and GameState.story_flags.has("marit_boeken") and not GameState.story_flags.has(SD.GOLEM_FLAG)
+			and not GameState.has_member("noor"))
+	var story := GameState.read_save(story_path)
+	check("echte save blijft Echt in bed", str(story.get("player_name", "")) == "Echt"
+			and story.get("map", "") == "res://scenes/maps/huis_wilgendal.tscn")
+	GameState.new_game("Weg")
+	GameState.use_story_saves()
+	check("na Nieuw spel wijst opslaan weer naar de echte save", not GameState.playing_beta
+			and GameState.save_path == story_path)
+	check("betatest laden zet Dennis terug op de wereldkaart", GameState.load_game(GameState.newest_beta_path())
+			and GameState.player_name == "Dennis" and GameState.member_level("dennis") == 10
+			and GameState.return_map == GameState.WORLD_MAP and GameState.return_tile == GameState.BETA_TILE)
+	check("echte save nog te laden", GameState.load_game(story_path) and GameState.player_name == "Echt")
+	for p in [GameState.beta_save_path(), GameState.beta_autosave_path()]:
+		if FileAccess.file_exists(p):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
 
 
 func _write(path: String, d: Dictionary) -> void:

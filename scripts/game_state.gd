@@ -16,6 +16,7 @@ const START_SPAWN := "bed"
 const RESPAWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const RESPAWN_SPAWN := "start"
 const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
+const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const TITLE_SCENE := "res://scenes/ui/title.tscn"
@@ -40,6 +41,19 @@ var save_path := "user://save_1.json"
 ## Uit te zetten in Opties ('Autom. opslaan', autoload Settings).
 const AUTOSAVE_PATH := "user://autosave.json"
 var autosave_path := AUTOSAVE_PATH
+## Betatest: een eigen voortgang, los van Nieuw spel en Doorgaan. Zo kun je nieuwe
+## content proberen zonder telkens in bed te beginnen, en zonder je echte spel te wissen.
+## De paden worden gezet in _ready (tests krijgen een eigen voorvoegsel).
+var _story_save_path := ""
+var _story_autosave_path := ""
+var playing_beta := false
+## Start van een nieuw betatest-account: wereldkaart bij Wilgendal (spawn van_dorp).
+const BETA_SPAWN := "van_dorp"
+const BETA_TILE := Vector2i(14, 31)
+const BETA_FACING := Vector2i(0, 1)
+const BETA_LEVEL := 10
+const BETA_FLAGS: Array[String] = ["water_klaar", "kist_open", "schilderij_weg", "archief_gezien",
+		"noor_ontmoet", "quest_noor", "marit_boeken"]
 ## Waarom de volgende map moet autosaven ("map", "battle" of "" = niet). map.gd vraagt
 ## dit op (take_autosave_request) en slaat op zodra de map in beeld is.
 var _autosave_request := ""
@@ -235,6 +249,8 @@ func _ready() -> void:
 		tester.name = t[2]
 		get_tree().root.add_child.call_deferred(tester)
 		break
+	_story_save_path = save_path
+	_story_autosave_path = autosave_path
 
 
 ## Extra input-acties uit code (zodat project.godot niet hoeft te veranderen):
@@ -533,11 +549,50 @@ func has_any_save() -> bool:
 ## Vergelijkt "saved_unix" in het bestand (oudere saves zonder dat veld: de
 ## wijzigingstijd van het bestand). Even oud = de handmatige save.
 func newest_save_path() -> String:
-	if not has_autosave():
-		return save_path if has_save() else ""
-	if not has_save():
-		return autosave_path
-	return autosave_path if _save_stamp(autosave_path) > _save_stamp(save_path) else save_path
+	return _newest_of(save_path, autosave_path)
+
+
+func _newest_of(manual: String, auto: String) -> String:
+	var has_manual := FileAccess.file_exists(manual)
+	var has_auto := FileAccess.file_exists(auto)
+	if not has_auto:
+		return manual if has_manual else ""
+	if not has_manual:
+		return auto
+	return auto if _save_stamp(auto) > _save_stamp(manual) else manual
+
+
+func beta_save_path() -> String:
+	return _story_save_path.replace("save_1.json", "save_beta.json")
+
+
+func beta_autosave_path() -> String:
+	return _story_autosave_path.replace("autosave.json", "autosave_beta.json")
+
+
+func use_story_saves() -> void:
+	save_path = _story_save_path
+	autosave_path = _story_autosave_path
+	playing_beta = false
+
+
+func use_beta_saves() -> void:
+	save_path = beta_save_path()
+	autosave_path = beta_autosave_path()
+	playing_beta = true
+
+
+func has_beta_save() -> bool:
+	return FileAccess.file_exists(beta_save_path()) or FileAccess.file_exists(beta_autosave_path())
+
+
+func newest_beta_path() -> String:
+	return _newest_of(beta_save_path(), beta_autosave_path())
+
+
+func read_beta_save() -> Dictionary:
+	var p := newest_beta_path()
+	return read_save(p) if p != "" else {}
 
 
 func _save_stamp(path: String) -> float:
@@ -834,6 +889,7 @@ func hero_id_compat(id: String) -> String:
 ## Titelscherm 'Doorgaan': laden en naar de opgeslagen map + plek.
 ## v0.11: de NIEUWSTE van handmatige save en autosave.
 func continue_game() -> bool:
+	use_story_saves()
 	if changing_map or not load_game(newest_save_path()):
 		return false
 	changing_map = true
@@ -843,8 +899,57 @@ func continue_game() -> bool:
 	return true
 
 
+## Betatest-account: verdergaan in de aparte voortgang, of die de eerste keer aanmaken.
+## Proloog is klaar, Dennis is niveau 10 met het Vonkzwaard, de Codex heeft al een buddy.
+## De Golem staat er nog (3 Lege Boeken), het woud is open, Esdoorn pas na de Golem.
+func start_beta_game() -> void:
+	if changing_map or in_battle:
+		return
+	use_beta_saves()
+	var p := newest_beta_path()
+	if p != "" and load_game(p):
+		changing_map = true
+		in_battle = false
+		await Transition.fade_out()
+		_go_to_scene(return_map if ResourceLoader.exists(return_map) else WORLD_MAP)
+		return
+	_build_beta_state()
+	current_map = WORLD_MAP
+	save_game(BETA_TILE, BETA_FACING)
+	changing_map = false
+	change_map(WORLD_MAP, BETA_SPAWN)
+
+
+## Eerste betatest-voortgang. Raakt de gewone save niet aan (die paden staan even opzij).
+func _build_beta_state() -> void:
+	new_game(DEFAULT_NAME)
+	story_step = StoryData.KLAAR
+	story_flags = {}
+	for f in BETA_FLAGS:
+		story_flags[f] = true
+	var hero: Dictionary = party[0]
+	give_exp(hero, GameData.exp_for_level(BETA_LEVEL) - int(hero["exp"]))
+	for id in ["vonkzwaard", "houten_schild", "leren_kap", "leerling_mantel"]:
+		inventory[id] = item_count(id) + 1
+		Equipment.equip(hero, inventory, Equipment.slot_of(id), id)
+	hero["hp"] = hero["max_hp"]
+	hero["mp"] = hero["max_mp"]
+	inventory["drankje"] = 5
+	inventory["toverwater"] = 3
+	inventory["leeg_boek"] = 6
+	gold = 200
+	codex_add("mosslijm", 5)
+	codex_add("moskonijn", 5)
+	var iw := codex_add("inktwurm", 5)
+	codex_set_active(str(iw.get("uid", "")))
+	mark_seen("mosslijm")
+	mark_seen("moskonijn")
+	mark_seen("inktwurm")
+
+
 ## Na de naamkeuze: nieuw spel en naar het startpunt in het dorp.
 func start_new_game(hero_name: String) -> void:
+	use_story_saves()
 	new_game(hero_name)
 	changing_map = false
 	change_map(START_MAP, START_SPAWN)
@@ -857,6 +962,7 @@ func start_new_game(hero_name: String) -> void:
 func go_to_title() -> void:
 	if changing_map or in_battle:
 		return
+	use_story_saves()
 	if dungeon100_run_active():
 		dungeon100_end_run(true)
 	changing_map = true
