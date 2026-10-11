@@ -10,6 +10,8 @@ const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 var edit: LineEdit
 var ok_button: Button
 var _done := false
+## Zolang de speler nog niets getypt heeft, vervangt de eerste letter 'Dennis'.
+var _pristine := true
 
 
 func _ready() -> void:
@@ -62,6 +64,7 @@ func _ready() -> void:
 	resized.connect(_center.bind(box))
 	_center.call_deferred(box)
 	edit.grab_focus.call_deferred()
+	_select_default.call_deferred()
 	_set_web_name_mode(true)
 	Transition.fade_in()
 
@@ -72,6 +75,11 @@ func _exit_tree() -> void:
 
 ## Een tik (ook als het vak al focus heeft) opent het toetsenbord. Zonder dit blijft
 ## 'Dennis' staan op een telefoon: de browser weigert een toetsenbord zonder tik.
+func _select_default() -> void:
+	if edit != null and _pristine:
+		edit.select_all()
+
+
 func _on_edit_input(event: InputEvent) -> void:
 	var press := false
 	if event is InputEventMouseButton:
@@ -79,8 +87,16 @@ func _on_edit_input(event: InputEvent) -> void:
 		press = mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT
 	elif event is InputEventScreenTouch:
 		press = (event as InputEventScreenTouch).pressed
+	elif _pristine and event is InputEventKey and event.pressed and not event.echo:
+		var key := event as InputEventKey
+		if key.unicode >= 32:
+			edit.text = ""
+			edit.caret_column = 0
+			_pristine = false
 	if press:
 		_show_keyboard()
+		if _pristine:
+			edit.select_all.call_deferred()
 
 
 func _show_keyboard() -> void:
