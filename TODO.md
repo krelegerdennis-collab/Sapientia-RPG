@@ -2,15 +2,18 @@
 
 Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af is.
 
-## UI/UX
+## Save System
 
-- [ ] Donkere modus
-  Schakelaar om tussen een lichte en een donkere weergave te wisselen.
+- [ ] Meerdere laadstanden op het hoofdmenu
+  Bij "Continue" zijn meerdere save slots zichtbaar, niet alleen de laatste save.
 
-- [ ] Slepen om te herordenen
-  Items in een lijst verslepen, zodat de volgorde zelf te kiezen is.
+- [ ] Vier aparte save slots
+  Het save-systeem ondersteunt 4 losse slots.
 
-## Features
+- [ ] Load-knop op het hoofdmenu
+  Een eigen Load-knop, los van "Continue".
 
-- [ ] Filteropties voor de lijst
-  De lijst kunnen beperken op gekozen criteria, zodat niet alles tegelijk zichtbaar is.
+## Wereld & Levels
+
+- [ ] Eerste Archief herschalen
+  Moeilijkheidsgraad en level van het eerste Archief van 10 naar 7.
