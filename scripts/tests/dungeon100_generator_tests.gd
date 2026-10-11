@@ -9,9 +9,11 @@ extends Node
 ## Zit niet in de export (scripts/tests/*).
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
+const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const GD := preload("res://scripts/data/game_data.gd")
+const Gear := preload("res://scripts/data/grade_gear.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
@@ -276,10 +278,15 @@ func _generator_tests() -> void:
 			and range(1, 100).all(func(i): return Content.tier_for_floor(i) <= Content.tier_for_floor(i + 1)))
 	check("vijanden-pool groeit mee met de verdieping", Content.enemy_pool(1).size() < Content.enemy_pool(30).size()
 			and Content.enemy_pool(30).size() < Content.enemy_pool(100).size())
-	check("alle vijanden en voorwerpen in de inhoud bestaan in game_data.gd",
+	check("alle vijanden en voorwerpen in de inhoud bestaan in game_data of de grade-buit",
 			range(1, 101).all(func(i): return Content.enemy_pool(i).all(func(e): return GD.ENEMIES.has(e)))
 			and range(1, 101).all(func(i): return fresh(1, i)["room"]["chests"].all(func(c): return c["loot"]["items"].all(
-					func(e): return GD.ITEMS.has(e["item"]) or GD.EQUIPMENT.has(e["item"])))))
+					func(e): return _known_item(str(e["item"]))))))
+
+
+## Gewone buit staat in game_data. Grade-stukken en G4-rollen staan in grade_gear (bewust niet in EQUIPMENT).
+func _known_item(id: String) -> bool:
+	return GD.ITEMS.has(id) or GD.EQUIPMENT.has(id) or Gear.has_item(id) or Gear.is_scroll(id)
 
 
 ## Een dictionary zonder Vector2i/Rect2i (zodat JSON.stringify ze vergelijkbaar maakt).
@@ -380,6 +387,18 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 			return "kist-slot %s niet op vloer" % [t]
 	if not reach.has(d["rest_slot"]) or seen.has(d["rest_slot"]):
 		return "rustpunt-slot onbereikbaar of bezet"
+	if Rules.is_warper_floor(f):
+		var ws: Vector2i = d["warper_slot"]
+		var wsp: Vector2i = d["warper_spawn"]
+		if ws == Gen.NO_TILE or not reach.has(ws) or seen.has(ws) or ws == d["rest_slot"] or ws == d["spawn_up"]:
+			return "warper-slot %s ongeldig" % [ws]
+		if not room.has("warper") or tile_of(room["warper"]) != ws or not room["spawns"].has(Rules.WARPER_SPAWN):
+			return "kamer mist de warper"
+		var at: Vector2i = tile_of(room["spawns"][Rules.WARPER_SPAWN])
+		if at != wsp or not reach.has(at) or at == ws or absi(at.x - ws.x) + absi(at.y - ws.y) != 1:
+			return "spawn warper staat niet naast de warper"
+	elif d.get("warper_slot", Gen.NO_TILE) != Gen.NO_TILE or room.has("warper"):
+		return "warper op verdieping %d hoort niet" % f
 	if bool(d["is_boss_floor"]) != (f % 10 == 0) or (d["boss_slot"] != Gen.NO_TILE) != bool(d["is_boss_floor"]):
 		return "baas-slot klopt niet met de verdieping"
 	if d["boss_slot"] != Gen.NO_TILE:
@@ -400,7 +419,7 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 	if room["monsters"].size() != d["monster_slots"].size() + boss_n or room["chests"].size() != d["chest_slots"].size():
 		return "aantal monsters/kisten komt niet overeen met de slots"
 	for c in room["chests"]:
-		if ids.has(c["id"]) or not (GD.ITEMS.has(c["item"]) or GD.EQUIPMENT.has(c["item"])) or int(c["n"]) < 1:
+		if ids.has(c["id"]) or not _known_item(str(c["item"])) or int(c["n"]) < 1:
 			return "kist %s ongeldig" % [c]
 		ids[c["id"]] = true
 	if int(room["tier"]) != Content.tier_for_floor(f) or not str(room["name"]).contains(str(f)) or int(room["dungeon100_floor"]) != f:

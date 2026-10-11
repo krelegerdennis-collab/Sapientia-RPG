@@ -1,10 +1,7 @@
-# CI-workflow (nog te activeren)
+# CI-workflow
 
-`tests.yml` hoort in `.github/workflows/tests.yml`. Hij kon niet automatisch gepusht worden:
-de gh-token van de bot heeft geen `workflow`-scope (GitHub weigert dan bestanden onder `.github/workflows/`).
+De testworkflow staat in `.github/workflows/tests.yml` (hierheen verplaatst vanuit deze map).
 
-Activeren (één van beide):
-- In de GitHub-app/web: maak `.github/workflows/tests.yml` aan met de inhoud van dit bestand; of
-- lokaal: `gh auth refresh -s workflow`, dan `git mv .github/ci/tests.yml .github/workflows/tests.yml` en pushen.
+Hij draait bij een pull request en bij een push naar `main`. Godot is **4.3-stable**, met xvfb en `.github/scripts/run_suite.sh`. De matrix en de job `algemene-sfx` zijn de inhoud die hier stond; er is geen tweede CI-systeem.
 
-Daarna kan deze map weg.
+Een web-export vanuit Actions naar `cursor/web-build-29ec` staat hier niet: die push vraagt een token met schrijfrecht dat deze repo niet heeft. De export blijft handmatig (Godot 4.7.2, threads uit).

@@ -32,6 +32,19 @@ const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 
 const FLOORS := 100
 const REST_INTERVAL := 10
+## TODO(design): warper-verdiepingen. De grot loopt van 1 tot 100 en verdieping 100 is de eindbaas
+## (geen trap omlaag, Dungeon100Generator.MAX_FLOOR). De eind-warper staat daarom op 99, de laatste
+## veilige verdieping vóór die baas. Begin = 1, midden = 50.
+const WARPER_FLOORS: Array[int] = [1, 50, 99]
+## Spawnpunt naast de warper (zelfde naam in de generator).
+const WARPER_SPAWN := "warper"
+## TODO(design): exacte waarschuwing. Kort: de huidige verdieping wordt verlaten.
+const WARPER_WARNING := "Je verlaat deze verdieping. Doorgaan?"
+const WARPER_YES := "Doorgaan"
+const WARPER_NO := "Annuleren"
+## TODO(design): een warper gaat open zodra je die verdieping in deze run bereikt. De lijst zit in het
+## dungeon100-blok van de save. Verlaten, dood of het Warp-kristal maakt de lijst leeg (geen skip
+## die een nieuwe run overslaat).
 
 ## De scène van de kerker (door de generator-branch geleverd) en het spawnpunt voor 'ontwaken bij
 ## het rustpunt'. Bestaat de scène niet (nog niet gemerged), dan valt een nederlaag terug op Wilgendal.
@@ -128,6 +141,7 @@ static func save_data(floor_nr: int, checkpoint: int, best: int, run_seed := 0, 
 	d["permanent"] = (extra.get("permanent", {}) as Dictionary).duplicate(true)
 	d["delivered"] = (extra.get("delivered", {}) as Dictionary).duplicate(true)
 	d["snapshot"] = (extra.get("snapshot", {}) as Dictionary).duplicate(true)
+	d["warpers"] = clean_warpers(extra.get("warpers", []))
 	return d
 
 
@@ -146,7 +160,8 @@ static func load_data(raw) -> Dictionary:
 		snap = {}
 	return {"floor": floor_nr, "checkpoint": cp, "best": best, "seed": _int_of(d.get("seed", 0)),
 			"permanent": clean_counts(d.get("permanent", {})), "delivered": clean_counts(d.get("delivered", {})),
-			"snapshot": (snap as Dictionary).duplicate(true)}
+			"snapshot": (snap as Dictionary).duplicate(true),
+			"warpers": _warpers_from(d, floor_nr)}
 
 
 ## id -> aantal (alleen echte uitrustingsstukken die een Blauwe Kist kan geven, aantal 1..99).
@@ -176,6 +191,60 @@ static func _int_of(v) -> int:
 ## Hoogste bereikte verdieping bijhouden (HUD en rustpunt roepen dit aan).
 static func best_after(best: int, floor_nr: int) -> int:
 	return maxi(best, clampi(floor_nr, 0, FLOORS))
+
+
+## Staat er op deze verdieping een warper? (1, 50, 99 — niet de eindbaas op 100.)
+static func is_warper_floor(floor_nr: int) -> bool:
+	return floor_nr in WARPER_FLOORS
+
+
+## Alleen echte warper-verdiepingen, uniek en oplopend. Rommel valt weg.
+static func clean_warpers(raw) -> Array[int]:
+	var out: Array[int] = []
+	if raw is Array:
+		for v in raw:
+			var n := _int_of(v)
+			if is_warper_floor(n) and not out.has(n):
+				out.append(n)
+	out.sort()
+	return out
+
+
+## 'unlocked' plus deze verdieping, als dat een warper-verdieping is. Andere verdiepingen doen niets.
+static func unlock_warper(unlocked: Array, floor_nr: int) -> Array[int]:
+	var out := clean_warpers(unlocked)
+	if is_warper_floor(floor_nr) and not out.has(floor_nr):
+		out.append(floor_nr)
+		out.sort()
+	return out
+
+
+## Is de warper op deze verdieping al bereikt (open)?
+static func warper_open(unlocked: Array, floor_nr: int) -> bool:
+	return is_warper_floor(floor_nr) and clean_warpers(unlocked).has(floor_nr)
+
+
+## Andere open warpers, vanaf 'current_floor'. Een niet-bereikte verdieping zit er niet in.
+static func warper_destinations(unlocked: Array, current_floor: int) -> Array[int]:
+	var out: Array[int] = []
+	for f in clean_warpers(unlocked):
+		if f != current_floor:
+			out.append(f)
+	return out
+
+
+## Sleutel "warpers" aanwezig: die lijst (ook leeg). Oude save zonder sleutel, midden in een run:
+## je bent tot de huidige verdieping gelopen, dus die warpers zijn open. Buiten de grot: leeg.
+static func _warpers_from(d: Dictionary, floor_nr: int) -> Array[int]:
+	if d.has("warpers"):
+		return clean_warpers(d.get("warpers", []))
+	var out: Array[int] = []
+	if not is_valid_floor(floor_nr):
+		return out
+	for f in WARPER_FLOORS:
+		if floor_nr >= f:
+			out.append(f)
+	return out
 
 
 ## HP en MP van de hele party en de Codex-bondgenoten vol (ook KO = 0 HP komt terug).

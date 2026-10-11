@@ -1885,11 +1885,16 @@ func _backdrop_tests() -> void:
 # ================================================================ v0.11 proloog
 const SD := preload("res://scripts/data/story_data.gd")
 ## v0.16: na de mantel (de zegels zijn weg): water + kist
-const OPA_LINE := "{naam}... fetch some water from the well. And take the herbs from the chest beside the house. Today feels... different."
-## v0.16 uitrusting-tutorial
-const GREET_LINE := "Good morning, {naam}. It's cold today. Here, put this cloak on."
-const MENU_LINE := "Open the MENU at the top right and choose Equipment. Put the cloak in Armor."
-const REMIND_LINE := "Put that cloak on first, {naam}. MENU > Equipment > Armor."
+const OPA_LINE := "Die staat je, {naam}. Haal water bij de put en kruiden uit de kist naast het huis. Vandaag voelt anders."
+## Update 5: ochtendtekst ingekort (Nederlands). Vóór deze update: 1 verplicht event
+## (wakker_worden) en 7 tekstvakken (wakker 1 + opa 4 + mantel_aan 2) vóór de klusjes.
+const INTRO_FORCED_WAS := 1
+const INTRO_SAYS_WAS := 7
+const GREET_LINE := "Goedemorgen, {naam}. Het is koud in het Wachtershuis."
+const MENU_LINE := "Doe deze mantel aan: MENU > Uitrusting > Harnas."
+const ITEM_LINE := "{naam} krijgt een Leerling-mantel! Sluit daarna het menu."
+const REMIND_LINE := "Doe eerst die mantel aan, {naam}. MENU > Uitrusting > Harnas."
+const INTRO_CHOICES := ["Goedemorgen, Opa.", "Waarom blijven de Archieven dicht?"]
 const ARMOR := "leerling_mantel"
 const LESSON_LINE := "Sometimes you have to defend yourself, boy, even if I hope you never need to."
 const PANIC_LINE := "No... the seal! It's too soon! {naam}, stay here! Lock the doors behind me and don't follow, no matter what you hear!"
@@ -1981,21 +1986,26 @@ func _obj(n: String) -> Node:
 
 ## Scène 1 en 2 van de proloog, helemaal doorgespeeld (met opslaan/laden halverwege).
 func _prologue_tests() -> void:
-	# ---------------- scène 1: wakker worden
-	check("nieuw spel: start in het huis (wakker worden)", map_name() == "Huis")
+	# ---------------- scène 1: meteen vrij, daarna een vroege keuze
+	check("nieuw spel: start in het huis", map_name() == "Huis")
 	check("proloog begint op stap START", GameState.story_step == SD.START)
-	for i in 240:
-		if Dialog.is_open:
-			break
-		await frames(1)
-	check("cutscene: speler ligt in bed (1,3)", tile() == Vector2i(1, 3))
-	check("wakker-tekst: %s" % _lines_text(), "wakes up" in _lines_text() and Story.current_event == "wakker_worden")
+	await frames(15)
+	var forced: Array = SD.forced_before_free()
+	check("intro korter: verplichte events vóór het eerste vrije moment %d < %d" % [forced.size(), INTRO_FORCED_WAS],
+			forced.is_empty() and forced.size() < INTRO_FORCED_WAS)
+	var says := SD.intro_says_before_tasks()
+	check("intro korter: %d verplichte tekstvakken vóór de klusjes < %d" % [says, INTRO_SAYS_WAS],
+			says < INTRO_SAYS_WAS and says == 4)
+	var spec: Dictionary = SD.early_choice_spec()
+	var opts: Array = spec.get("options", [])
+	check("vroeg keuzemenu bestaat: %d opties, zelfde vervolg" % opts.size(),
+			opts == INTRO_CHOICES and SD.early_choice_same_followup()
+			and str(spec.get("question", "")) == "Wat zeg je, {naam}?")
+	check("speler staat vrij naast het bed (2,3), geen wakker-cutscene: %s" % tile(),
+			tile() == Vector2i(2, 3) and not player().input_locked and not Story.running and not Dialog.is_open
+			and not Story.history.has("wakker_worden") and GameState.story_step == SD.START)
 	check("Oude Man 's ochtends niet binnen", _obj("OudeMan") != null and not _obj("OudeMan").visible)
-	check("speler zit vast tijdens de cutscene", player().input_locked)
-	await _story_drain(false, "wakes up", "_v11_morning")
-	check("na het opstaan: (2,3), stap WAKKER, speler vrij: %s" % tile(),
-			tile() == Vector2i(2, 3) and GameState.story_step == SD.WAKKER and not player().input_locked)
-	# naar buiten
+	# naar buiten (spawn staat al op (2,3); de bed-tile zelf is niet beloopbaar)
 	await walk("move_right", 2)
 	await walk("move_down", 5)
 	check("deur -> naar buiten (Willowdale = huis aan de bosrand)", await wait_scene("Wilgendal"))
@@ -2025,7 +2035,7 @@ func _prologue_tests() -> void:
 	await walk("move_left", 1)
 	await walk("move_down", 13)
 	await frames(5)
-	check("pad naar de wereldkaart: 'Not today' (%s)" % _lines_text(), Dialog.is_open and "Not today" in _lines_text())
+	check("pad naar de wereldkaart: 'Vandaag niet' (%s)" % _lines_text(), Dialog.is_open and "Vandaag niet" in _lines_text())
 	await _story_drain()
 	check("teruggestuurd, nog op de proloog-map (15,20): %s" % tile(), map_name() == "Wilgendal" and tile() == Vector2i(15, 20))
 	# praten met de Oude Man (van links)
@@ -2037,40 +2047,52 @@ func _prologue_tests() -> void:
 	var def_before := int(GameState.party[0]["def"])
 	await press_interact()
 	await _wait_typed()
-	check("v0.16: Oude Man begroet je en geeft een mantel ('%s')" % Dialog._lines[0],
-			Dialog._lines == [_named(GREET_LINE)] and Dialog.name_label.text == "Old Man")
+	check("vroeg keuzemenu bij Opa (%s)" % [Dialog.choices],
+			Dialog.has_choices() and Dialog.choices == INTRO_CHOICES
+			and _named("Wat zeg je, {naam}?") in _lines_text() and Dialog.name_label.text == "Old Man")
 	check("Oude Man draait naar je toe", opa.facing == Vector2i.LEFT)
+	_check_bubble("keuze Opa", opa)
+	await frames(20)
+	await overworld_shot("_v11_intro_keuze")
+	await press_interact()
+	var greet_wait := 0
+	while greet_wait < 300 and (not Dialog.is_open or Dialog.has_choices() or Dialog._is_typing()):
+		await frames(1)
+		greet_wait += 1
+	check("v0.16: Oude Man begroet je en geeft een mantel ('%s')" % (Dialog._lines[0] if Dialog.is_open else ""),
+			Dialog.is_open and not Dialog.has_choices() and Dialog._lines == [_named(GREET_LINE)]
+			and Dialog.name_label.text == "Old Man" and Story.has_flag("toon_groet")
+			and "Wachtershuis" in _lines_text())
 	_check_bubble("Old Man", opa)
 	await frames(30)
 	await overworld_shot("_v11_oude_man")
-	# mantel, uitleg (ballon) en de tutorialregel (blauw verteller-vak)
+	# één ballon (groet + menu) en één verteller-vak (mantel). Geen tweede tutorialregel.
 	var menu_seen := false
 	var narr_seen := false
+	var tutorial_repeat := false
 	for i in 1200:
 		if not Story.running and not Dialog.is_open:
 			break
 		if Dialog.is_open and not Dialog._is_typing():
 			var cur := str(Dialog._lines[Dialog._index])
-			if cur == "%s receives an Apprentice Cloak!" % GameState.player_name:
-				check("v0.16: 'krijgt een Apprentice Cloak!' in het blauwe vertellervak (geen staart)",
+			if cur == _named(ITEM_LINE):
+				narr_seen = true
+				check("Update 5: 'krijgt een Leerling-mantel!' in het blauwe vertellervak (geen staart)",
 						Dialog.style_kind == "vak" and UiStyle.is_blue_box(Dialog.box_style(), "vak") and not Dialog.tail.visible)
-			if cur == MENU_LINE and not menu_seen:
+				_check_box_clear("manteltekst")
+				await frames(20)
+				await v16_shot("verteller")
+			if cur == _named(MENU_LINE) and not menu_seen:
 				menu_seen = true
 				_check_bubble("Oude Man (uitleg)", opa)
 				await frames(20)
 				await v16_shot("spraakballon")
-			if cur.begins_with("(Tutorial: MENU > Equipment") and not narr_seen:
-				narr_seen = true
-				check("v0.16: tutorialtekst in het blauwe vertellervak, niet bovenin (%s, plek %s)" % [Dialog.box_rect(), Dialog.placement],
-						Dialog.style_kind == "vak" and UiStyle.is_blue_box(Dialog.box_style(), "vak") and Dialog.at_bottom
-						and Dialog.box_rect().position.y > 216.0 * 0.4 and not Dialog.tail.visible and not Dialog.name_tab.visible)
-				_check_box_clear("tutorialtekst")
-				await frames(20)
-				await v16_shot("verteller")
+			if cur.begins_with("(Tutorial:"):
+				tutorial_repeat = true
 			await press_interact()
 		await frames(1)
-	check("v0.16: Grandpa legt uit: MENU > Equipment (ballon)", menu_seen)
-	check("v0.16: tutorialregel 'MENU > Equipment > Uitrusten > Harnas'", narr_seen)
+	check("Update 5: Opa legt het menu uit in één ballon", menu_seen)
+	check("Update 5: manteltekst één keer, geen herhaalde tutorialregel", narr_seen and not tutorial_repeat)
 	check("v0.16: Apprentice Cloak gekregen (in de tas, nog niet aan), stap UITRUSTING",
 			GameState.item_count(ARMOR) == 1 and not Story.wears(ARMOR) and GameState.story_step == SD.UITRUSTING)
 	check("v0.16: Apprentice Cloak = harnas, klein beetje DEF, bestaand icoon (reisgewaad.png)",
@@ -2285,7 +2307,8 @@ func _prologue_tests() -> void:
 	check("v0.13: in de Archives bij de ingang (9,10), kijkt omhoog: %s" % tile(), tile() == Vector2i(9, 10)
 			and player().facing == Vector2i.UP)
 	check("event-geschiedenis compleet (%s)" % [Story.history],
-			["wakker_worden", "opa", "mantel_aan", "kist", "put", "les", "na_les", "catastrofe", "schreeuw", "keuze", "blijven", "achterna", "archief_binnen"].all(func(e): return Story.history.has(e)))
+			["opa", "intro_keuze", "intro_toon_groet", "opa_mantel", "mantel_aan", "kist", "put", "les", "na_les", "catastrofe", "schreeuw", "keuze", "blijven", "achterna", "archief_binnen"].all(func(e): return Story.history.has(e))
+			and not Story.history.has("wakker_worden"))
 	# terug naar buiten (uitgang -> wereldkaart, net boven de trap) en via het pad weer naar het huis
 	GameState.change_map(SD.OUTSIDE, "voor_huis")
 	await wait_scene("Wilgendal")
@@ -2354,11 +2377,11 @@ func _equip_tutorial_tests(_opa: Node, def_before: int) -> void:
 			and not Story.history.has("mantel_aan"))
 	Story.trigger("put")
 	await _wait_typed()
-	check("v0.16: put geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "cloak on first" in _lines_text())
+	check("v0.16: put geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "eerst de mantel" in _lines_text())
 	await _story_drain()
 	Story.trigger("kist", _obj("Kist"))
 	await _wait_typed()
-	check("v0.16: kist geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "cloak first" in _lines_text())
+	check("v0.16: kist geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "eerst Opa" in _lines_text())
 	await _story_drain()
 	check("v0.16: geen emmer, kist dicht", GameState.item_count("emmer_water") == 0 and not Story.has_flag("kist_open"))
 	scene().open_field_menu()

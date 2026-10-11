@@ -19,6 +19,9 @@ const RESPAWN_SPAWN := "start"
 const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
+const LevelScale := preload("res://scripts/data/level_scale.gd")
+const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const PartyActions := preload("res://scripts/party_actions.gd")
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const TITLE_SCENE := "res://scenes/ui/title.tscn"
 const NAME_SCENE := "res://scenes/ui/name_entry.tscn"
@@ -53,6 +56,8 @@ var autosave_path := AUTOSAVE_PATH
 var _story_save_path := ""
 var _story_autosave_path := ""
 var playing_beta := false
+## Eindstaat: eigen voortgang, los van de gewone slots én los van de betatest.
+var playing_eind := false
 ## Start van een nieuw betatest-account: wereldkaart bij Wilgendal (spawn van_dorp).
 const BETA_SPAWN := "van_dorp"
 const BETA_TILE := Vector2i(14, 31)
@@ -60,6 +65,17 @@ const BETA_FACING := Vector2i(0, 1)
 const BETA_LEVEL := 10
 const BETA_FLAGS: Array[String] = ["water_klaar", "kist_open", "schilderij_weg", "archief_gezien",
 		"noor_ontmoet", "quest_noor", "marit_boeken"]
+## Eindstaat: genoeg goud om in de winkels van Wilgendal te kopen (grade-3-spreuk = 1440).
+const EIND_GOLD := 8000
+## Gebouwde verhaalvlaggen t/m Noor gered. Geen kistvlaggen (die blijven open) en geen H-6.
+const EIND_FLAGS: Array[String] = ["water_klaar", "kist_open", "schilderij_weg", "archief_gezien",
+		"noor_ontmoet", "quest_noor", "marit_boeken", "noor_gered", "noor_lid", "ilse_thee"]
+## Bestaande G4-wapens uit grade_gear.gd, één per held die al in de data staat.
+const EIND_WEAPONS := {
+	"dennis": "bg_g4_superzwaard",
+	"noor": "bg_g4_staf_noor",
+	"lotte": "bg_g4_staf_lotte",
+}
 ## Waarom de volgende map moet autosaven ("map", "battle" of "" = niet). map.gd vraagt
 ## dit op (take_autosave_request) en slaat op zodra de map in beeld is.
 var _autosave_request := ""
@@ -101,6 +117,8 @@ var dungeon100_seed: int = 0
 ## laatst geactiveerd rustpunt (0, 10, ... 100) en hoogste bereikte verdieping
 var dungeon100_checkpoint := 0
 var dungeon100_best := 0
+## Open warpers van deze run (verdiepingen 1, 50, 99). Mee in het dungeon100-blok van de save.
+var dungeon100_warpers: Array[int] = []
 ## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md):
 ## PERMANENTE items uit Blauwe Kisten (id -> aantal): overleven de dood en elke nieuwe run.
 var dungeon100_permanent := {}
@@ -652,12 +670,42 @@ func use_story_saves() -> void:
 	save_path = _story_save_path
 	autosave_path = _story_autosave_path
 	playing_beta = false
+	playing_eind = false
 
 
 func use_beta_saves() -> void:
 	save_path = beta_save_path()
 	autosave_path = beta_autosave_path()
 	playing_beta = true
+	playing_eind = false
+
+
+func eind_save_path() -> String:
+	return _story_save_path.replace("save_1.json", "save_eindstaat.json")
+
+
+func eind_autosave_path() -> String:
+	return _story_autosave_path.replace("autosave.json", "autosave_eindstaat.json")
+
+
+func use_eind_saves() -> void:
+	save_path = eind_save_path()
+	autosave_path = eind_autosave_path()
+	playing_beta = false
+	playing_eind = true
+
+
+func has_eind_save() -> bool:
+	return FileAccess.file_exists(eind_save_path()) or FileAccess.file_exists(eind_autosave_path())
+
+
+func newest_eind_path() -> String:
+	return _newest_of(eind_save_path(), eind_autosave_path())
+
+
+func read_eind_save() -> Dictionary:
+	var p := newest_eind_path()
+	return read_save(p) if p != "" else {}
 
 
 func has_beta_save() -> bool:
@@ -828,7 +876,8 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"codex": codex_save_data(),
 		"uniek": unique_done.duplicate(true),
 		"dungeon100": Dungeon100RulesC.save_data(dungeon100_floor, dungeon100_checkpoint, dungeon100_best, dungeon100_seed,
-				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot}),
+				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot,
+				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
 	}
 	data["party"] = _party_save()
@@ -1065,6 +1114,115 @@ func _grant_beta_inktwurm() -> bool:
 	codex_set_active(str(iw.get("uid", "")))
 	mark_seen("inktwurm")
 	return true
+
+
+## Eindstaat-account: verdergaan in de aparte voortgang, of die de eerste keer aanmaken.
+## Het bestand is save_eindstaat.json. Slot 1-4 en de betatest blijven onaangeroerd,
+## ook als de speler daarna zelf opslaat (die save gaat naar het eindstaat-bestand).
+func start_eind_game() -> void:
+	if changing_map or in_battle:
+		return
+	use_eind_saves()
+	var p := newest_eind_path()
+	if p != "" and load_game(p):
+		changing_map = true
+		in_battle = false
+		await Transition.fade_out()
+		_go_to_scene(return_map if ResourceLoader.exists(return_map) else WORLD_MAP)
+		return
+	_build_eind_state()
+	current_map = WORLD_MAP
+	save_game(BETA_TILE, BETA_FACING)
+	changing_map = false
+	change_map(WORLD_MAP, BETA_SPAWN)
+
+
+## TODO(design): level 40 (VERHAAL_MAX, act 6), stap noor_gered met vlaggen water_klaar t/m ilse_thee plus golem en wortelkoning, party Dennis/Noor/Lotte zonder nieuwe dialoog, G4-wapens superzwaard en de staven van Noor en Lotte, 8000 goud, drankje, toverwater, leeg boek en kruidenthee, spreuken t/m grade 3 die SpellRules toestaat, en de vangbare Codex-soorten; geen hanger en geen H-6.
+func _build_eind_state() -> void:
+	new_game(DEFAULT_NAME)
+	story_step = StoryData.NOOR_GERED
+	story_flags = {}
+	for f in EIND_FLAGS:
+		story_flags[f] = true
+	story_flags[StoryData.GOLEM_FLAG] = true
+	story_flags[StoryData.WORTELKONING_FLAG] = true
+	var lv := eind_level()
+	var hero: Dictionary = party[0]
+	_raise_to_level(hero, lv)
+	_equip_eind_weapon(hero)
+	join_member("noor", lv, [str(EIND_WEAPONS["noor"])])
+	join_member("lotte", lv, [str(EIND_WEAPONS["lotte"])])
+	for h in party:
+		_grant_eind_spells(h)
+		h["hp"] = h["max_hp"]
+		h["mp"] = h["max_mp"]
+	inventory["drankje"] = 5
+	inventory["toverwater"] = 3
+	inventory["leeg_boek"] = 3
+	inventory["kruidenthee"] = 3
+	gold = EIND_GOLD
+	_fill_eind_codex()
+
+
+## Hoogste verhaallevel dat act 6 is. Nu VERHAAL_MAX (40); anders de hoogste band van act 6.
+func eind_level() -> int:
+	var cap := LevelScale.VERHAAL_MAX
+	if LevelScale.act_for_level(cap) == 6:
+		return cap
+	var best := 0
+	for lv in range(1, cap + 1):
+		if LevelScale.act_for_level(lv) == 6:
+			best = lv
+	return best if best > 0 else cap
+
+
+func _raise_to_level(hero: Dictionary, level: int) -> void:
+	var need := GameData.exp_for_level(level) - int(hero["exp"])
+	if need > 0:
+		give_exp(hero, need)
+
+
+func _equip_eind_weapon(hero: Dictionary) -> void:
+	var id := str(EIND_WEAPONS.get(str(hero.get("id", "")), ""))
+	if id != "":
+		Equipment.give_and_equip(hero, inventory, id)
+
+
+## Alleen spreuken die deze held mag, tot de grade die de winkel op dit level verkoopt (max 3).
+func _grant_eind_spells(hero: Dictionary) -> void:
+	var id := str(hero.get("id", ""))
+	var cap := SpellRules.shop_max_grade(GameData.act_for_level(eind_level()))
+	for sid in GameData.SPELLS:
+		var sp: Dictionary = GameData.SPELLS[sid]
+		if int(sp.get("grade", 1)) > cap:
+			continue
+		if SpellRules.can_learn(id, str(sid)):
+			PartyActions.teach_spell(hero, str(sid))
+
+
+## Codex en bestiarium: alleen soorten en vijanden die de data al kent.
+func _fill_eind_codex() -> void:
+	var ids: Array = CodexData.SPECIES.keys()
+	ids.sort()
+	for raw_id in ids:
+		var sid := str(raw_id)
+		if not CodexData.has_species(sid):
+			continue
+		var spec := CodexData.species(sid)
+		if not bool(spec.get("capturable", false)):
+			continue
+		var lv := int(spec.get("base_level", 1))
+		if lv < 1:
+			lv = 1
+		codex_add(sid, lv)
+	for enemy_id in GameData.ENEMIES:
+		mark_seen(str(enemy_id))
+	for boss_id in EndgameBestiary.ids():
+		mark_seen(str(boss_id))
+	for page in codex_pages:
+		if str(page.get("species", "")) == "inktwurm":
+			codex_set_active(str(page.get("uid", "")))
+			break
 
 
 ## Na de naamkeuze: nieuw spel en naar het startpunt in het dorp.
@@ -1431,6 +1589,7 @@ func dungeon100_end_run(deliver := true) -> bool:
 	dungeon100_checkpoint = 0
 	dungeon100_floor = 0
 	dungeon100_seed = 0
+	dungeon100_warpers = []
 	if deliver:
 		dungeon100_deliver()
 	return true
@@ -1453,6 +1612,38 @@ func dungeon100_deliver() -> int:
 ## Blauwe Kist-items die nog niet in de echte tas zaten komen er nu in.
 func dungeon100_leave() -> bool:
 	return dungeon100_end_run(true)
+
+
+## Deze verdieping is bereikt: best gaat omhoog, en een warper-verdieping gaat open.
+func dungeon100_reach_floor(floor_nr: int) -> void:
+	if not Dungeon100RulesC.is_valid_floor(floor_nr):
+		return
+	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, floor_nr)
+	dungeon100_warpers = Dungeon100RulesC.unlock_warper(dungeon100_warpers, floor_nr)
+
+
+## Mag je naar deze warper? Alleen tijdens een run, naar een andere verdieping die al open is.
+func dungeon100_warper_can(dest: int) -> bool:
+	if not dungeon100_run_active() or changing_map or in_battle:
+		return false
+	if not Dungeon100RulesC.is_valid_floor(dungeon100_floor) or dest == dungeon100_floor:
+		return false
+	return Dungeon100RulesC.warper_open(dungeon100_warpers, dest)
+
+
+## Sprong naar een open warper. false = dicht, zelfde verdieping, of geen run. De run blijft lopen
+## (dit is niet het Warp-kristal van verdieping 100).
+signal dungeon100_warper_traveled(from_floor: int, to_floor: int)
+func dungeon100_warper_go(dest: int) -> bool:
+	if not dungeon100_warper_can(dest):
+		return false
+	var from := dungeon100_floor
+	dungeon100_floor = dest
+	dungeon100_reach_floor(dest)
+	pending_spawn = Dungeon100RulesC.WARPER_SPAWN
+	dungeon100_warper_traveled.emit(from, dest)
+	change_map(Dungeon100RulesC.dungeon_scene, Dungeon100RulesC.WARPER_SPAWN)
+	return true
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
@@ -1485,6 +1676,7 @@ func dungeon100_defeat() -> String:
 		dungeon100_checkpoint = 0
 		dungeon100_floor = 0
 		dungeon100_seed = 0
+		dungeon100_warpers = []
 	_full_heal()
 	pending_spawn = Dungeon100RulesC.WORLD_SPAWN
 	pending_respawn_msg = DUNGEON100_RESET_LINES.duplicate()
@@ -1504,6 +1696,7 @@ func dungeon100_load(raw) -> void:
 	dungeon100_permanent = v["permanent"]
 	dungeon100_delivered = v["delivered"]
 	dungeon100_snapshot = v["snapshot"]
+	dungeon100_warpers = v["warpers"]
 
 
 # ---------------------------------------------------------------- kernfragmenten (v0.15)
