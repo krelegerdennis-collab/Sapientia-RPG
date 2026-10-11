@@ -46,6 +46,7 @@ func add_allies() -> void:
 	node.name = "Codex_" + str(page["uid"])
 	battle.party_layer.add_child(node)
 	node.setup_species(str(page["species"]), Vector2.ZERO)
+	node.set_glitched(CodexData.is_fused(page))     # v0.19 glitch-fusie: paarse tint
 	node.tapped.connect(battle._on_hero_tapped.bind(row))
 	c["node"] = node
 	battle.hero_nodes.append(node)
@@ -173,6 +174,101 @@ func _is_boss(t: Dictionary) -> bool:
 	return GameState.pending_boss or t.has("core")
 
 
+## v0.19 Codex-knop: wat het doel-label bij 'Vangen' laat zien. Dezelfde volgorde als capture():
+## baas -> "te machtig", geen Codex-soort -> "past niet", Codex vol -> "Codex vol", anders "35%".
+func capture_hint(t: Dictionary) -> String:
+	var sid := CodexData.species_for_enemy(str(t.get("id", "")))
+	if _is_boss(t):
+		return "te machtig"
+	if sid == "" or not bool(CodexData.species(sid)["capturable"]):
+		return "past niet"
+	if GameState.codex_full():
+		return "Codex vol"
+	return "%d%%" % roundi(chance_for(t) * 100.0)
+
+
+# ---------------------------------------------------------------- v0.19 bondgenoot wisselen
+## Laatste wissel (voor de test): {"from": uid of "", "to": uid of "", "result": ...}
+var last_swap := {}
+
+
+## uid van de bondgenoot die nu meevecht ("" = geen).
+func current_ally_uid() -> String:
+	var al := allies()
+	return str(al[0].get("page", "")) if not al.is_empty() else ""
+
+
+## Pagina's waarmee je kunt wisselen: alleen niet-KO pagina's (volgorde van de Codex).
+func swap_choices() -> Array:
+	return GameState.codex_pages.filter(func(p): return int(p["hp"]) > 0)
+
+
+## Kan er überhaupt gewisseld worden? (iets anders dan de huidige keuze)
+func can_swap() -> bool:
+	if not battle.tutorial.is_empty():
+		return false
+	var cur := current_ally_uid()
+	if cur != "":
+		return true                              # 'Geen' kan altijd
+	return not swap_choices().is_empty()
+
+
+## De wissel zelf (actie van de held, kost zijn beurt). a["page"] = uid of "" (= 'Geen').
+## De oude bondgenoot gaat terug in de Codex (zijn HP/MP blijven op zijn pagina staan), de
+## nieuwe komt op dezelfde plek (rij) naast de helden en handelt vanaf de VOLGENDE ronde.
+func swap_ally(a: Dictionary) -> void:
+	var uid := str(a.get("page", ""))
+	var cur := current_ally_uid()
+	last_swap = {"from": cur, "to": uid, "result": "bezig"}
+	if uid == cur:
+		last_swap["result"] = "zelfde"
+		return
+	if uid != "":
+		var page := GameState.codex_page(uid)
+		if page.is_empty() or int(page["hp"]) <= 0:
+			last_swap["result"] = "ko"
+			await battle.say("%s kan niet meer meedoen." % str(page.get("name", "Die pagina")))
+			return
+	var old_name := ""
+	for c in allies():
+		old_name = str(c["name"])
+		_remove_ally(c)
+	GameState.codex_set_active(uid)
+	if uid != "":
+		add_allies()
+	battle._layout()
+	battle._refresh_party()
+	last_swap["result"] = "gewisseld"
+	var text := ""
+	if old_name != "":
+		text = "%s keert terug in de Codex." % old_name
+	if uid != "":
+		text = (text + "\n" if text != "" else "") + "%s springt uit de Codex!" % str(GameState.codex_page(uid)["name"])
+	await battle.say(text)
+
+
+func _remove_ally(c: Dictionary) -> void:
+	var idx := -1
+	for i in battle.heroes.size():
+		if battle.heroes[i]["uid"] == c["uid"]:      # op uid (niet op inhoud vergelijken)
+			idx = i
+	if idx < 0:
+		return
+	battle.heroes.remove_at(idx)
+	var node = c.get("node")
+	var ni: int = battle.hero_nodes.find(node)
+	if ni >= 0:
+		battle.hero_nodes.remove_at(ni)
+	if node != null and is_instance_valid(node):
+		node.get_parent().remove_child(node)
+		node.queue_free()
+	if idx < battle.status_boxes.size():
+		var box: Control = battle.status_boxes[idx]
+		battle.status_boxes.remove_at(idx)
+		box.get_parent().remove_child(box)
+		box.queue_free()
+
+
 ## Het Leeg Boek is al van de stapel gehaald (battle.gd); bij een weigering komt het terug.
 func capture(actor: Dictionary, target) -> void:
 	var item := CodexData.BOOK_ITEM
@@ -211,7 +307,8 @@ func capture(actor: Dictionary, target) -> void:
 	t["captured"] = true
 	t["reported_ko"] = true
 	var caught := {"tier": GameState.pending_tier, "play_time": int(GameState.play_time())}
-	var page: Dictionary = GameState.codex_add(sid, CodexData.capture_level(GameState.pending_tier), caught)
+	var page: Dictionary = GameState.codex_add(sid, CodexData.capture_level(GameState.pending_tier, sid), caught)
+	GameState.unique_mark(str(t.get("id", "")), "gevangen")     # v0.19: uniek monster komt nooit terug
 	last_capture["result"] = "gelukt"
 	last_capture["page"] = str(page.get("uid", ""))
 	var skills: Array = (page["skills"] as Array).map(func(x): return str(CodexData.skill(x)["name"]))

@@ -414,6 +414,8 @@ func _spawn_monsters() -> void:
 			continue
 		if d.get("guard", false) and GameState.story_flags.has(guard_flag(room_id, mid)):
 			continue      # bewaker: voor altijd verslagen
+		if not GameState.unique_available(str(d.get("enemy", ""))):
+			continue      # v0.19: uniek monster (Inktwurm) al verslagen of gevangen: nooit meer
 		var m: MapMonster = MapMonsterScript.new()
 		m.setup(self, d, hash(room_id) + i * 7919 + randi() % 1000)
 		$Objects.add_child(m)

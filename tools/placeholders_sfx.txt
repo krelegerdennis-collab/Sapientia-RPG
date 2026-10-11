@@ -58,3 +58,7 @@ assets/audio/sfx/monsters/mimic/aanval.wav
 assets/audio/sfx/monsters/mimic/raak.wav
 assets/audio/sfx/monsters/mimic/dood.wav
 assets/audio/sfx/monsters/mimic/vaardigheid.wav
+assets/audio/sfx/monsters/inktwurm/aanval.wav
+assets/audio/sfx/monsters/inktwurm/raak.wav
+assets/audio/sfx/monsters/inktwurm/dood.wav
+assets/audio/sfx/monsters/inktwurm/vaardigheid.wav

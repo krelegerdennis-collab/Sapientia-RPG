@@ -68,7 +68,8 @@ static func exp_for_level(level: int) -> int:
 ## v0.10 Bestiarium (zelfde data, extra velden):
 ##   "no" = nummer in het bestiarium, "mp", "weak"/"resist" = lijst van elementen
 ##   ("vuur", "bliksem", ...; nu alleen informatie, nog niet in de schadeformule),
-##   "drops" = [{"item": id, "chance": 0..1}] (nu alleen informatie),
+##   "drops" = [{"item": id, "chance": 0..1}] (chance = alleen het bestiarium) of, op een baas,
+##             {"item": id, "n": aantal} = vaste buit bij winst (niet in de 100-verdiepingen-kerker).
 ##   "desc" = korte beschrijving, "habitat" = waar hij leeft (terreinen).
 const ENEMIES := {
 	# v0.10: eerste monsters op het gras (keuze van Dennis). Vooraanzicht-art komt van
@@ -169,7 +170,9 @@ const ENEMIES := {
 			"max_hp": 400, "atk": 33, "def": 22, "agi": 6, "mag": 16, "mdef": 18, "mp": 0,
 			"exp": 300, "gold": 120,
 			"skills": [{"name": "Boekenhamer", "chance": 0.2, "power": 1.5}],
-			"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 0.5}],
+			# Vaste buit van de Golem in het Eerste Archief: 3 Lege Boeken. "chance" blijft alleen info.
+			"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 0.5},
+					{"item": "leeg_boek", "n": 3}],
 			"core": {
 				"cycle": 3,            # elke 3e ronde gaat de kern open (ronde 3, 6, 9, ...)
 				"closed_mult": 0.4,    # schade op het pantser x0,4
@@ -260,7 +263,75 @@ const ENEMIES := {
 		"desc": "Een kist die niet van de Oude Mensheid is, maar van de Zwarte Stroom. Hij wacht tot iemand de deksel optilt.",
 		"habitat": ["archief"],
 	},
+	# ------------------------------------------------------------ v0.19 ARCHIEF 1: DE INKTWURM
+	# CANON.md besluit 8: de Inktwurm komt erbij als monster van Archief 1 (lore: docs/lore/data/enemies.json).
+	# BESLISSING DENNIS (9 okt 2026): UNIEK monster, maar 1x in het hele spel (geheime kamer in Archief 1;
+	# kamer + plaatsing bouwt Forge). "unique": true = na verslaan of vangen komt hij nooit meer terug
+	# (GameState.unique_available("inktwurm"), in de save als "uniek"). Gevechtsniveau 5 ("encounter_level";
+	# het monsterniveau "tier" van de kamer telt NIET voor hem). Stats = 2x een 'normaal monster op Lv 5':
+	#   normaal Lv 5 = gemiddelde van CodexData.stats_at(soort, 5) over de gewone Archief 1-soorten
+	#   (CodexData.ARCHIEF1_SPECIES: mosslijm, moskonijn, papiergeest, glitchmot, mech_wachter)
+	#   = HP 34, ATK 18,2, DEF 8,4, SPD 13,2  ->  x2 (half naar even afgerond) = HP 68, ATK 36, DEF 17, SPD 26.
+	#   (CodexData.normal_stats_at(5); de fusietest rekent het na.) Tot Lv 7 alleen een gewone aanval, dus
+	#   als vijand (Lv 5) geen "skills". Vangkans 100% (CodexData "capture_always"; wel een Leeg Boek nodig).
+	# Art van RPG ART (art_inktwurm_v19/out, LEESMIJ.txt): voor/rug/idle 108x86, voeten (54, 80) = (w/2, h-6);
+	# kaart: out/inktwurm_map.png -> assets/map_monsters/inktwurm.png (2x4 frames van 16x16). Forge zet de
+	# bestanden in het project. Zolang ze ontbreken: "sprite_placeholder" (enemy_sprite() hieronder); de kaart
+	# en de Codex-bondgenoot hebben hun eigen plaatsvervanger. "art_pending" weghalen zodra de art er is.
+	# Bestiarium 012: 011 is al de Mimic op main.
+	"inktwurm": {
+		"name": "Inktwurm", "sprite": "res://assets/sprites/enemies/inktwurm.png",
+		"sprite_back": "res://assets/sprites/enemies/inktwurm_rug.png",
+		"idle": "res://assets/sprites/enemies/inktwurm_idle.png", "idle_frames": 2, "idle_time": 0.55,
+		"art_pending": true, "sprite_placeholder": "res://art/enemies/mosslijm.png",
+		"unique": true, "encounter_level": 5,
+		"max_hp": 68, "atk": 36, "def": 17, "agi": 26, "mag": 0, "mdef": 2,
+		# TIJDELIJKE AANNAME: EXP/goud ongeveer 2x een Mech. Wachter op niveau 4 (unieke beloning)
+		"exp": 60, "gold": 40, "y_offset": 0,
+		"skills": [],
+		# lore: bestand tegen water; 'water' is (nog) geen element in de game, dus leeg (open vraag)
+		"no": 12, "mp": 0, "weak": ["vuur"], "resist": [],
+		# lore: Gloeiende Inktfles; dat item bestaat nog niet -> Toverwater (= Bladzijde van Inkt) als plaatshouder
+		"drops": [{"item": "toverwater", "chance": 1.0}],
+		"desc": "Een vette worm die zich door perkament heeft gegeten en nu zwarte inkt zweet.",
+		"habitat": ["archief"],
+	},
 }
+
+## Vaste buit uit een drops-lijst: alleen regels met "n" (aantal). "chance" telt niet mee.
+static func fixed_drops(drops) -> Array:
+	var out: Array = []
+	if not (drops is Array):
+		return out
+	for d in drops:
+		if typeof(d) != TYPE_DICTIONARY:
+			continue
+		var n := int(d.get("n", 0))
+		var id := str(d.get("item", ""))
+		if n <= 0 or not ITEMS.has(id):
+			continue
+		out.append({"item": id, "n": n, "name": str(ITEMS[id].get("name", id))})
+	return out
+
+
+## v0.19: plaatsvervanger voor een vijand waarvan de gevechts-art er nog niet is ("art_pending").
+const PLACEHOLDER_ENEMY_SPRITE := "res://art/enemies/mosslijm.png"
+
+
+## Pad van het vooraanzicht van vijand-data 'e': "sprite" als dat bestand bestaat, anders
+## "sprite_placeholder" (of PLACEHOLDER_ENEMY_SPRITE). Zo werkt een nieuwe vijand al voordat RPG ART
+## de art levert; zodra het bestand er is, wordt het vanzelf gebruikt.
+static func enemy_sprite(e: Dictionary) -> String:
+	var p := str(e.get("sprite", ""))
+	if p != "" and ResourceLoader.exists(p):
+		return p
+	return str(e.get("sprite_placeholder", PLACEHOLDER_ENEMY_SPRITE))
+
+
+## true = het vooraanzicht is (nog) een plaatsvervanger.
+static func enemy_sprite_is_placeholder(e: Dictionary) -> bool:
+	return enemy_sprite(e) != str(e.get("sprite", ""))
+
 
 ## Vijand-id's in bestiarium-volgorde.
 static func bestiary_ids() -> Array:
@@ -298,8 +369,9 @@ const ITEMS := {
 		"desc": "Een zeldzaam elixer uit de diepte. Geneest bijna alles."},
 	# Codex (Kernfragment stap 2): alleen in een gevecht, op een VIJAND. Schrijft een verzwakt
 	# monster in de Codex (kans: scripts/data/codex_data.gd). Altijd op, ook als het mislukt.
-	# Te krijgen (v0.17): 3 van Marit in Esdoorn (na de ontmoeting) + 2 in kisten van het Donker Woud;
-	# later ook in de winkel ("price"). NIET in START_INVENTORY (oude saves krijgen dat toch nooit).
+	# Te krijgen: 3 van Marit in Esdoorn (na de ontmoeting) + 2 in kisten van het Donker Woud
+	# + 3 van de Golem in het Eerste Archief (baas-buit, "n" hierboven). Later ook in de winkel
+	# ("price"). NIET in START_INVENTORY (oude saves krijgen dat toch nooit).
 	"leeg_boek":  {"name": "Leeg Boek", "target": "enemy", "capture": true, "field": false,
 		"heal_hp": 0, "heal_mp": 0, "price": 60, "icon": "res://assets/ui/icons/leeg_boek.png",
 		"desc": "Een boek zonder woorden. Schrijf er een verzwakt monster in."},

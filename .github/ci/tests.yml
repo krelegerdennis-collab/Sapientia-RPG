@@ -25,7 +25,7 @@ jobs:
                 archieftest, kerntest, kernkrachttest, woudtest, codextest,
                 checkpointtest, dungeon100gentest, dungeon100schaaltest,
                 dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
-                actorsfxtest]
+                actorsfxtest, fusietest]
     steps:
       - uses: actions/checkout@v4
 
@@ -69,3 +69,12 @@ jobs:
           name: log-${{ matrix.suite }}
           path: testlogs/${{ matrix.suite }}.log
           retention-days: 7
+
+  algemene-sfx:
+    name: algemene-sfx
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check algemene placeholder-sfx
+        run: python3 tools/check_algemene_sfx.py

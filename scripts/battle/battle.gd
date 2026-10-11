@@ -35,7 +35,12 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
-const COMMANDS := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten"]
+const COMMANDS := ["Aanval", "Magie", "Item", "Verdedig", "Vluchten", "Codex"]
+## v0.19 Codex-knop (index 5): submenu 'Vangen' (Leeg Boek op een vijand, met vangkans per doel)
+## en 'Wissel bondgenoot' (niet-KO pagina's + 'Geen'; kost de beurt van de held). Verborgen in
+## het oefengevecht en zolang de Codex 0 pagina's EN 0 Lege Boeken heeft. Regels: HANDOFF_FUSIE.md.
+const CODEX_ROW_H := 16           # regelhoogte van de Codex-menu's (tikken met een vinger)
+const CODEX_ROWS_MAX := 5         # wissel-lijst: zoveel regels tegelijk, daarna ▲/▼
 ## Hoe lang een gevechtsbericht in beeld blijft (A drukken = sneller).
 const MESSAGE_TIME := 0.8
 const HeroScript := preload("res://scripts/battle/battle_hero.gd")
@@ -84,6 +89,7 @@ const MENU_WIDTH := 94.0         # normale breedte (submenu's mogen breder worde
 ## v0.13: commando-KRUIS (command_cross.gd) i.p.v. de lijst (v0.15: LINKS naast de helden, zie _place_cross);
 ## spreuken/items in een lijstje rechtsboven (SUBMENU_TOP); doelkeuze met pijltje + naamlabel.
 const CommandCrossScript := preload("res://scripts/battle/command_cross.gd")
+const CodexDataScript := preload("res://scripts/data/codex_data.gd")   # v0.19 Codex-knop
 ## v0.14 (RPG CODE) roze kern van de Golem-baas: regels + beeld (zie boss_core.gd)
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")   # v0.15 kernvaardigheden
@@ -315,13 +321,14 @@ func _spawn_enemies(ids: Array) -> void:
 			if GameState.dungeon100_floor > 0:
 				# Task #4: monsterschaal per verdieping (vervangt hier het kamerniveau "tier")
 				data = Dungeon100Scaling.battle_enemy(data, GameState.dungeon100_floor, false)
-			elif GameState.pending_tier > 0:
+			elif GameState.pending_tier > 0 and not bool(data.get("unique", false)):
 				# v0.14: monsterniveau van de dungeonverdieping (0 = gewoon; game_data.gd TIERS)
+				# v0.19: een uniek monster (Inktwurm) heeft zijn eigen vaste niveau ("encounter_level")
 				data = GameData.apply_tier(data, GameState.pending_tier)
 		if tutorial.has("enemy_hp"):
 			data["max_hp"] = int(tutorial["enemy_hp"])   # oefengevecht: iets taaier
 		data["hp"] = data["max_hp"]
-		data["level"] = 1
+		data["level"] = int(data.get("encounter_level", 1))
 		var display_name: String = data["name"]
 		if counts[id] > 1:   # "Papiergeest A", "Papiergeest B", ...
 			seen[id] = seen.get(id, 0) + 1
@@ -330,7 +337,9 @@ func _spawn_enemies(ids: Array) -> void:
 		c["id"] = id
 		GameState.mark_seen(id)   # bestiarium: gezien
 		var node := TextureButton.new()
-		var tex: Texture2D = GameState.get_resource(data["sprite"])
+		# v0.19: nog geen art (bv. de Inktwurm)? dan de plaatsvervanger (GameData.enemy_sprite)
+		var sprite_path := GameData.enemy_sprite(data)
+		var tex: Texture2D = GameState.get_resource(sprite_path)
 		node.texture_normal = tex
 		# Alle gevechts-art is 2x zo fijn getekend: op halve grootte tonen, zodat
 		# 1 art-pixel = 1 pixel van het 768-raster. NIET afronden: een oneven breedte
@@ -346,7 +355,7 @@ func _spawn_enemies(ids: Array) -> void:
 		node.custom_minimum_size = node.size
 		# bovenkant van het echte plaatje (voor het doel-pijltje); één keer per plaatje
 		# uitgerekend en bewaard (get_image() is een trage GPU-terugleesactie op telefoons)
-		c["top"] = sprite_top(data["sprite"], tex) * art_scale
+		c["top"] = sprite_top(sprite_path, tex) * art_scale
 		node.focus_mode = Control.FOCUS_NONE
 		node.pressed.connect(_on_enemy_pressed.bind(c))
 		_add_enemy_idle(node, data)
@@ -787,8 +796,9 @@ func _choose_for_hero(hero: Dictionary, can_go_back: bool):
 			not _available_items().is_empty(),
 			true,
 			tutorial.is_empty() and can_flee,   # oefengevecht / baas (v0.15): niet vluchten
+			_items_left(CodexDataScript.BOOK_ITEM) > 0 or codex.can_swap(),   # v0.19 Codex
 		]
-		cross.open(hero["name"], allowed, last, can_go_back)
+		cross.open(hero["name"], allowed, last, can_go_back, [] if codex_command_shown() else [COMMANDS.size() - 1])
 		var cmd: int = await cross.finished
 		cross.deactivate()
 		last = maxi(cmd, 0)
@@ -811,7 +821,73 @@ func _choose_for_hero(hero: Dictionary, can_go_back: bool):
 				return {"type": "defend", "actor": hero}
 			4:
 				return {"type": "flee", "actor": hero}
+			5:
+				var c = await _choose_codex(hero)
+				if c != null:
+					return c
 	return null
+
+
+## v0.19: staat de Codex-knop in het kruis? Niet in het oefengevecht, en niet zolang er nog
+## niets te doen is (0 pagina's en 0 Lege Boeken).
+func codex_command_shown() -> bool:
+	if not tutorial.is_empty():
+		return false
+	return not GameState.codex_pages.is_empty() or GameState.item_count(CodexDataScript.BOOK_ITEM) > 0
+
+
+## v0.19 Codex-submenu: 0 = Vangen, 1 = Wissel bondgenoot. Uitgeschakeld = grijs met de reden.
+func _choose_codex(hero: Dictionary):
+	var book: String = CodexDataScript.BOOK_ITEM
+	var last := 0
+	while true:
+		_set_state("command")
+		var books := _items_left(book)
+		var vangen := "Vangen  Boek x%d" % books if books > 0 else "Vangen: geen Leeg Boek"
+		var wissel := "Wissel bondgenoot"
+		if not codex.can_swap():
+			wissel = "Wissel: Codex leeg" if GameState.codex_pages.is_empty() else "Wissel: alles KO"
+		show_message("Codex: vangen of wisselen?")
+		menu.open("Codex", [{"text": vangen, "enabled": books > 0},
+				{"text": wissel, "enabled": codex.can_swap()}], last, true, CODEX_ROW_H)
+		var k: int = await menu.finished
+		menu.close()
+		if k == -1:
+			return null
+		last = k
+		if k == 0:
+			var bk := "1 boek" if books == 1 else "%d boeken" % books
+			var t = await _select_enemy(func(c): return "%s %s (%s)" % [c["name"], codex.capture_hint(c), bk], "Vangen: ")
+			if t != null:
+				_reserved[book] = _reserved.get(book, 0) + 1
+				return {"type": "item", "actor": hero, "item": book, "target": t}   # zelfde weg als Item
+		else:
+			var sw = await _choose_swap(hero)
+			if sw != null:
+				return sw
+	return null
+
+
+## v0.19 Wissel-lijst: niet-KO pagina's ('Lv' + naam) en onderaan 'Geen'. De bondgenoot die nu
+## meevecht staat erin maar is grijs ('nu'); 'Geen' is grijs als er geen bondgenoot is.
+func _choose_swap(hero: Dictionary):
+	var cur := codex.current_ally_uid()
+	var pages: Array = codex.swap_choices()
+	var entries := []
+	var start := 0
+	for i in pages.size():
+		var p: Dictionary = pages[i]
+		var here := str(p["uid"]) == cur
+		entries.append({"text": "%s Lv%d%s" % [p["name"], int(p["level"]), " nu" if here else ""], "enabled": not here})
+	entries.append({"text": "Geen", "enabled": cur != ""})
+	show_message("Wie vecht er mee?")
+	menu.open("Wissel", entries, start, true, CODEX_ROW_H, CODEX_ROWS_MAX)
+	var k: int = await menu.finished
+	menu.close()
+	if k == -1:
+		return null
+	var uid := "" if k >= pages.size() else str(pages[k]["uid"])
+	return {"type": "codex_swap", "actor": hero, "page": uid}
 
 
 func _choose_spell(hero: Dictionary):
@@ -915,13 +991,15 @@ func _prev_alive_hero(from: int) -> int:
 ## Doel kiezen: de namen staan in het menu (op dezelfde plek als het commandomenu) en een
 ## pijltje wijst het doel aan. Kiezen met omhoog/omlaag/links/rechts + A, op een naam tikken
 ## of op de vijand zelf tikken. B = terug.
-func _select_enemy():
+## v0.19: label (optioneel) = tekst bij het pijltje (bv. 'Mosslijm 35%' bij Vangen); prefix komt
+## ervoor in de berichtstrook.
+func _select_enemy(label := Callable(), prefix := ""):
 	_set_state("target_enemy")
 	var living := _alive(enemies)
 	# v9.1: vijanden staan bovenin; het pijltje blijft onder de bericht-strook (dan wijst het
 	# iets in het plaatje, op het hoofd)
 	var above := func(c): return Vector2(c["node"].position.x + roundf(c["node"].size.x / 2.0), maxf(c["node"].position.y + float(c.get("top", 0)) - 2.0, CURSOR_MIN_Y))
-	return await _pick_target(living, "Doel", above, false)
+	return await _pick_target(living, "Doel", above, false, label, prefix)
 
 
 func _select_ally():
@@ -936,7 +1014,8 @@ func _select_ally():
 ## v0.13: geen namenlijst meer. Een pijltje (richtpijl.png) wijst het doel aan, met de naam
 ## in een klein label. Links/rechts (en omhoog/omlaag) = volgende/vorige, A = kiezen,
 ## B = terug naar het kruis, of tik direct op de vijand / held / zijn statusvak.
-func _pick_target(living: Array, _title: String, point: Callable, heroes_side: bool):
+func _pick_target(living: Array, _title: String, point: Callable, heroes_side: bool, label := Callable(),
+		prefix := ""):
 	# van links naar rechts op het scherm
 	living = living.duplicate()
 	living.sort_custom(func(a, b): return a["node"].position.x < b["node"].position.x)
@@ -953,8 +1032,9 @@ func _pick_target(living: Array, _title: String, point: Callable, heroes_side: b
 			if heroes_side:
 				_target_row = living[idx]["row"]
 				_refresh_party()
-			show_message(("Op wie? " if heroes_side else "") + str(living[idx]["name"]))
-			target_name_label.text = str(living[idx]["name"])
+			var lab := str(label.call(living[idx])) if label.is_valid() else str(living[idx]["name"])
+			show_message(("Op wie? " if heroes_side else prefix) + lab)
+			target_name_label.text = lab
 		var tip: Vector2 = point.call(living[idx])
 		target_cursor.point_at(tip)
 		target_cursor.show()
@@ -1090,7 +1170,13 @@ func _execute(a: Dictionary) -> void:
 		"kern_skill":
 			await _kern_strike(a)
 		"codex_ally":
-			await codex.ally_turn(a)
+			if in_battle(actor):           # v0.19: weggewisseld in deze ronde = geen actie meer
+				await codex.ally_turn(a)
+		"codex_swap":
+			show_message("%s opent de Codex..." % actor["name"])
+			await _hero_wind_up(actor, false)
+			await codex.swap_ally(a)
+			_hero_rest(actor)
 
 
 ## Held stapt naar voren en haalt uit (aanval) of heft de staf (spreuk/item).
@@ -1142,17 +1228,28 @@ func _spell_amount(caster: Dictionary, spell: Dictionary) -> int:
 	return maxi(1, roundi(base * randf_range(0.9, 1.1)))
 
 
+## v0.19: doet deze combatant nog mee? (een weggewisselde bondgenoot niet meer)
+func in_battle(c) -> bool:
+	if c == null:
+		return false
+	for list in [heroes, enemies]:
+		for x in list:
+			if x["uid"] == c["uid"]:
+				return true
+	return false
+
+
 func _valid_target(t, target_heroes: bool):
 	var pool := _alive(heroes if target_heroes else enemies)
 	if pool.is_empty():
 		return null
-	if t != null and t["s"]["hp"] > 0:
+	if t != null and t["s"]["hp"] > 0 and in_battle(t):
 		return t
 	return pool.pick_random()   # vijanden kiezen een willekeurige held
 
 
 func _valid_ally(t) -> Dictionary:
-	if t != null and t["s"]["hp"] > 0:
+	if t != null and t["s"]["hp"] > 0 and in_battle(t):
 		return t
 	var pool := _alive(heroes)
 	pool.sort_custom(func(a, b): return a["s"]["hp"] < b["s"]["hp"])
@@ -1358,6 +1455,7 @@ func _victory() -> void:
 		exp_total += int(e["s"]["exp"])
 		gold_total += int(e["s"]["gold"])
 	GameState.gold += gold_total
+	var book_lines: Array = grant_fixed_boss_drops()
 	var loot_page := _dungeon100_boss_loot()
 	await _wait(0.3)
 	# EXP uitdelen (alleen helden die nog staan), level-ups onthouden
@@ -1380,7 +1478,7 @@ func _victory() -> void:
 		level_pages.append(loot_page)
 	_refresh_party()
 	caption.hide()
-	victory_label.text = victory_text(exp_total, gold_total)
+	victory_label.text = victory_text(exp_total, gold_total, book_lines)
 	# Venster precies zo hoog als de tekst, zodat de helden eronder zichtbaar blijven.
 	victory_panel.offset_bottom = victory_panel.offset_top + victory_panel.get_combined_minimum_size().y
 	victory_panel.show()
@@ -1388,6 +1486,28 @@ func _victory() -> void:
 	for page in level_pages:
 		await _victory_page(page)
 	await GameState.end_battle("win")
+
+
+## Vaste baasbuit ("n" in drops) van het Eerste Archief. Niet in de 100-verdiepingen-kerker
+## (die heeft een eigen buit) en niet voor een gevangen of nog levend monster.
+## Geeft de regels voor het overwinningsvenster (leeg = niets).
+func grant_fixed_boss_drops() -> Array:
+	if not GameState.pending_boss or GameState.dungeon100_floor > 0:
+		return []
+	var totals := {}
+	var names := {}
+	for e in enemies:
+		if e.get("captured", false) or int(e["s"].get("hp", 0)) > 0:
+			continue
+		for d in GameData.fixed_drops(e["s"].get("drops", [])):
+			var id := str(d["item"])
+			totals[id] = int(totals.get(id, 0)) + int(d["n"])
+			names[id] = str(d["name"])
+	var lines: Array = []
+	for id in totals:
+		GameState.inventory[id] = GameState.item_count(id) + int(totals[id])
+		lines.append("Krijgt %dx %s." % [int(totals[id]), names[id]])
+	return lines
 
 
 ## Task #4: na een baas in de dungeon van 100 verdiepingen: de gegarandeerde buit in de tas (en het
@@ -1405,8 +1525,11 @@ func _dungeon100_boss_loot() -> String:
 
 
 ## Tekst van de eerste overwinningspagina (ook gebruikt door de autotest).
-func victory_text(exp_total: int, gold_total: int) -> String:
-	var lines := ["Krijgt %d EXP." % exp_total, "Krijgt %d GOUD." % gold_total, ""]
+func victory_text(exp_total: int, gold_total: int, loot_lines: Array = []) -> String:
+	var lines: Array[String] = ["Krijgt %d EXP." % exp_total, "Krijgt %d GOUD." % gold_total]
+	for line in loot_lines:
+		lines.append(str(line))
+	lines.append("")
 	# Kolommen over de hele vensterbreedte (zoals Lufia 2): naam links,
 	# 'VOLG. LEVEL' in het midden, getal rechts uitgelijnd. Letters zijn 6 px breed.
 	var width := victory_panel.size.x if victory_panel.size.x > 0 else size.x - 20.0

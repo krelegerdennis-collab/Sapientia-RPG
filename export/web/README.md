@@ -1,9 +1,14 @@
 # SAPIENTIA in de browser
 
-Web-build van `cursor/web-audio-29ec` (`0c157f5`, inclusief `main` `9b72cf9`), Godot 4.7.2, threads uit.
+Web-build van `cursor/golem-boeken-volger-4396` (`07d3c51`, inclusief `main` `860ba75`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
-De zes muziekbestanden (`assets/audio/bgm/*.ogg`) en de acteur-wavs zitten in `index.pck`.
+De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
+
+Nieuw in deze build, bovenop de vorige web-build (`0c157f5`):
+- De Golem in het Eerste Archief geeft 3 Lege Boeken.
+- De actieve Codex-buddy loopt mee in kerkers en op de wereldkaart, niet in dorpen.
+- Glitch-fusie, de Inktwurm en de Codex-knop in het gevecht.
 
 ## Spelen op je telefoon
 
@@ -18,7 +23,7 @@ Na deze publicatie moet je hard verversen. De browser bewaart de oude `index.pck
 
 De eerste tik ergens op het scherm (ook Doorgaan of Nieuw spel) zet het geluid aan.
 Tot die tik staat er **Tik voor geluid**. Houd de telefoon liggend.
-Eerste keer ongeveer 68 MB (`index.pck` 28 MB + `index.wasm` 38 MB).
+Eerste keer ongeveer 87 MB (`index.pck` 48 MB + `index.wasm` 38 MB).
 
 ## Kortere link
 

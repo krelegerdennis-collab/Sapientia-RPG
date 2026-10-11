@@ -189,6 +189,19 @@
 				"dood": "Kist die dichtslaat en stilvalt.",
 				"vaardigheid": "Kistbeet, een harde hap."
 			}
+		},
+		"inktwurm": {
+			"naam": "Inktwurm",
+			"stem": "Natte inkt die zuigt en spettert.",
+			"klank": "inkt",
+			"volume_db": -6,
+			"pitch_variatie": 0.05,
+			"slots": {
+				"aanval": "Natte zuig en een korte spetter.",
+				"raak": "Zachte plof in de inkt.",
+				"dood": "Inkt die wegzakt.",
+				"vaardigheid": "Inktspuw, een lange natte straal."
+			}
 		}
 	}
 }

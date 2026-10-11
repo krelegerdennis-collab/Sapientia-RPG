@@ -63,9 +63,14 @@ var kernfragmenten := {}
 var pending_kern_absorb := ""
 ## Codex (Kernfragment stap 2): ingeschreven monsters (pagina's, zie codex_data.gd), de uid van
 ## de actieve bondgenoot ("" = geen) en de teller voor unieke ids (nooit hergebruikt).
+## codex_changed: de actieve bondgenoot (of de lijst) is veranderd. De volger op de kaart luistert.
+signal codex_changed
 var codex_pages: Array = []
 var codex_active := ""
 var codex_next_id := 1
+## v0.19 UNIEKE monsters (GameData.ENEMIES "unique": true, bv. de Inktwurm; beslissing Dennis): id ->
+## "verslagen" / "gevangen". Staat erin = komt nooit meer terug. In de save als "uniek".
+var unique_done := {}
 
 ## 100-verdiepingen-kerker (de Diepe Grot): alles gaat mee in de save, blok "dungeon100"
 ## (Dungeon100Rules.save_data/load_data). Zie HANDOFF_DUNGEON100*.md.
@@ -195,6 +200,7 @@ func _ready() -> void:
 	# Dungeon100: of  godot -- --dungeon100integratietest [--shots=/pad/map]  (scripts/tests/dungeon100_integratie_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100blauwtest [--shots=/pad/map]  (scripts/tests/dungeon100_blauw_tests.gd).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
+	# v0.19: of  godot -- --fusietest [--shots=/pad/map]  (scripts/tests/fusie_tests.gd, glitch-fusie + Inktwurm).
 	# v0.19: of  godot -- --checkpointtest [--shots=/pad/map] [--v19=/workspace]  (kamer-checkpoint / respawn).
 	# Sfx per held/monster: of  godot -- --actorsfxtest  (scripts/tests/actor_sfx_tests.gd).
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -209,6 +215,7 @@ func _ready() -> void:
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
 			["--woudtest", "res://scripts/tests/woud_tests.gd", "WoudTest", "woudtest"],
 			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
+			["--fusietest", "res://scripts/tests/fusie_tests.gd", "FusieTest", "fusietest"],
 			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"],
 			["--dungeon100gentest", "res://scripts/tests/dungeon100_generator_tests.gd", "Dungeon100GenTest", "dungeon100gentest"],
 			["--dungeon100schaaltest", "res://scripts/tests/dungeon100_schaal_tests.gd", "Dungeon100SchaalTest", "dungeon100schaaltest"],
@@ -255,7 +262,7 @@ func _preload_paths() -> Array[String]:
 	for h in GameData.HEROES:
 		out.append(str(h["battle_sprite"]))
 	for e in GameData.ENEMIES.values():
-		out.append(str(e["sprite"]))
+		out.append(GameData.enemy_sprite(e))
 	return out
 
 
@@ -334,6 +341,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	kernfragmenten = {}
 	pending_kern_absorb = ""
 	codex_reset()
+	unique_done = {}
 	checkpoint = {}
 	entry_kind = ""
 	pending_respawn_msg = []
@@ -490,6 +498,7 @@ func mark_seen(id: String) -> void:
 
 
 func mark_defeated(id: String) -> void:
+	unique_mark(id, "verslagen")      # v0.19: uniek monster verslagen = nooit meer
 	if GameData.ENEMIES.has(id):
 		var b := _beast(id)
 		b["seen"] = true
@@ -682,6 +691,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"puzzle_latched": puzzle_latched.duplicate(true),
 		"kernen": kernfragmenten.duplicate(true),
 		"codex": codex_save_data(),
+		"uniek": unique_done.duplicate(true),
 		"dungeon100": Dungeon100RulesC.save_data(dungeon100_floor, dungeon100_checkpoint, dungeon100_best, dungeon100_seed,
 				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
@@ -778,6 +788,13 @@ func apply_state(d: Dictionary) -> bool:
 	# Codex: oude saves zonder "codex" = lege Codex; kapotte pagina's vallen weg.
 	codex_load_data(d.get("codex", {}))
 	dungeon100_load(d.get("dungeon100", {}))
+	# v0.19 unieke monsters; oude saves zonder dit veld = nog niets verslagen. Onbekende ids vallen weg.
+	unique_done = {}
+	var un = d.get("uniek", {})
+	if un is Dictionary:
+		for k in un:
+			if is_unique(str(k)):
+				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	puzzle_latched = {}
 	var pl = d.get("puzzle_latched", {})
 	if pl is Dictionary:
@@ -1011,8 +1028,14 @@ func respawn_at_checkpoint(boss := false) -> String:
 	var keep_time := play_time()
 	var keep_permanent := dungeon100_permanent.duplicate(true)      # de databank rolt niet mee terug
 	var keep_floor_best := dungeon100_best
+	# Uniek 'verslagen' blijft, ook als je daarna het gevecht verliest (HANDOFF_FUSIE aanname 6).
+	# 'gevangen' rolt mee met de Codex, die bij het checkpoint hoort.
+	var keep_unique := unique_done.duplicate(true)
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
+	for id in keep_unique:
+		if str(keep_unique[id]) == "verslagen" and not unique_done.has(str(id)):
+			unique_done[str(id)] = "verslagen"
 	dungeon100_permanent = keep_permanent
 	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
@@ -1286,10 +1309,12 @@ func item_count(item_id: String) -> int:
 
 
 # ---------------------------------------------------------------- Codex (Kernfragment stap 2)
-func codex_reset() -> void:
+func codex_reset(notify := true) -> void:
 	codex_pages = []
 	codex_active = ""
 	codex_next_id = 1
+	if notify:
+		codex_changed.emit()
 
 
 func codex_full() -> bool:
@@ -1309,6 +1334,7 @@ func codex_add(species_id: String, level := 1, caught := {}) -> Dictionary:
 	codex_pages.append(page)
 	if codex_active == "":
 		codex_active = uid
+	codex_changed.emit()
 	return page
 
 
@@ -1323,7 +1349,10 @@ func codex_page(uid: String) -> Dictionary:
 func codex_set_active(uid: String) -> bool:
 	if uid != "" and codex_page(uid).is_empty():
 		return false
+	if uid == codex_active:
+		return true
 	codex_active = uid
+	codex_changed.emit()
 	return true
 
 
@@ -1337,8 +1366,9 @@ func codex_save_data() -> Dictionary:
 
 
 func codex_load_data(raw) -> void:
-	codex_reset()
+	codex_reset(false)
 	if not (raw is Dictionary):
+		codex_changed.emit()
 		return
 	var seen := {}
 	if raw.get("pages") is Array:
@@ -1358,3 +1388,74 @@ func codex_load_data(raw) -> void:
 	codex_active = str(raw.get("active", ""))
 	if codex_page(codex_active).is_empty():
 		codex_active = ""
+	codex_changed.emit()
+
+
+# ---------------------------------------------------------------- glitch-fusie (Kernfragment stap 3, v0.19)
+## Waarom kunnen pagina's 'uid_a' en 'uid_b' niet fuseren? "" = het kan. Regels: CodexData.FUSION_TABLE.
+func codex_fusion_reason(uid_a: String, uid_b: String) -> String:
+	if in_battle:
+		return "Fuseren kan niet tijdens een gevecht."
+	if codex_pages.size() < 2:
+		return "Voor een fusie heb je twee pagina's nodig."
+	var a := codex_page(uid_a)
+	var b := codex_page(uid_b)
+	if a.is_empty() or b.is_empty():
+		return "Kies twee pagina's."
+	return CodexData.fusion_block_reason(a, b)
+
+
+## Voorbeeld van de fusie (zelfde regels, maar er verandert niets; uid = ""). {} = kan niet.
+func codex_fusion_preview(uid_a: String, uid_b: String) -> Dictionary:
+	if codex_fusion_reason(uid_a, uid_b) != "":
+		return {}
+	return CodexData.make_fusion_page(codex_page(uid_a), codex_page(uid_b), "")
+
+
+## Fuseer A + B: beide pagina's verdwijnen, de nieuwe komt op de plek van A en krijgt een nieuwe uid
+## (nooit hergebruikt). Was A of B de bondgenoot, dan wordt de nieuwe het. {} = kan niet (er verandert
+## dan niets). Alles in één keer: geen await, dus nooit half gefuseerd of dubbel.
+func codex_fuse(uid_a: String, uid_b: String) -> Dictionary:
+	if codex_fusion_reason(uid_a, uid_b) != "":
+		return {}
+	var uid := "codex_%04d" % codex_next_id
+	var page := CodexData.make_fusion_page(codex_page(uid_a), codex_page(uid_b), uid)
+	if page.is_empty():
+		return {}
+	codex_next_id += 1
+	page["caught"] = {"fusie": true, "play_time": int(play_time())}
+	var was_active := codex_active == uid_a or codex_active == uid_b
+	var at := -1
+	for i in codex_pages.size():
+		if str(codex_pages[i]["uid"]) == uid_a:
+			at = i
+	codex_pages = codex_pages.filter(func(p): return str(p["uid"]) != uid_a and str(p["uid"]) != uid_b)
+	codex_pages.insert(clampi(at, 0, codex_pages.size()), page)
+	if was_active:
+		codex_active = uid
+	codex_changed.emit()
+	return page
+
+
+# ---------------------------------------------------------------- unieke monsters (v0.19)
+## Is vijand 'id' uniek (maar 1x in het spel)? (GameData.ENEMIES "unique": true)
+func is_unique(id: String) -> bool:
+	return bool(GameData.ENEMIES.get(id, {}).get("unique", false))
+
+
+## Mag dit monster (nog) verschijnen? Gewone monsters: altijd true. Unieke: false zodra hij verslagen of
+## gevangen is. Voor Forge in de kaart: dungeon_room.gd slaat zo'n monster al vanzelf over; een eigen
+## plaatsing (story/object) kan dit zelf vragen:  if GameState.unique_available("inktwurm"): ...
+func unique_available(id: String) -> bool:
+	return not (is_unique(id) and unique_done.has(id))
+
+
+## "verslagen" of "gevangen" ("" = nog niet). Alleen voor unieke monsters.
+func unique_state(id: String) -> String:
+	return str(unique_done.get(id, ""))
+
+
+## Uniek monster weg: 'how' = "verslagen" of "gevangen". De eerste keer telt (nooit overschrijven).
+func unique_mark(id: String, how: String) -> void:
+	if is_unique(id) and not unique_done.has(id):
+		unique_done[id] = how

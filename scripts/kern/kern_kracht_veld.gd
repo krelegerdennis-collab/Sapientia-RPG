@@ -10,6 +10,10 @@ extends Node
 ##            bij het EERSTE obstakel met een inslag en gaat nooit ergens doorheen.
 ##   Monster: een zichtbaar map-monster (dungeonkamer) staat STUN_STEPS (10) stappen van de speler
 ##            stil en start geen gevecht; een BAAS krijgt niets (alleen de inslag).
+##   v0.19 HAAK voor objecten: houdt een node de bal tegen en heeft die node (of anders zijn parent, of
+##            anders zijn owner) een methode  func on_kernkracht_hit() -> void,  dan wordt die precies 1x
+##            aangeroepen, vlak vóór de inslag. Niet als de bal uitdooft (niets binnen RANGE) en nooit
+##            door een ander object heen (alleen het EERSTE obstakel). Bv. Forge's geheime Inktwurm-kast.
 ##   Spammen kan niet: tijdens het schot staat de speler op slot (~0,5 s) en daarna COOLDOWN s.
 
 const KernVuurbal := preload("res://scripts/kern/kern_vuurbal.gd")
@@ -28,7 +32,8 @@ var map: Node = null
 var cooldown_left := 0.0
 var busy := false
 ## voor de tests: uitkomst van het laatste schot
-## {"tiles": [pad], "end": Vector2i, "hit": Vector2i of null, "kind": "", "node": Node, "effect": "stun"/"baas"/"geen"}
+## {"tiles": [pad], "end": Vector2i, "hit": Vector2i of null, "kind": "", "node": Node, "effect": "stun"/"baas"/"geen",
+##  "hook": Node die on_kernkracht_hit() kreeg (of null)}
 var last_result := {}
 var shots_fired := 0
 var last_fireball: Node2D
@@ -217,6 +222,13 @@ func fire() -> void:
 	if not _alive(p):
 		return
 	vb.queue_free()
+	# v0.19 haak: het geraakte object (of zijn parent/owner) mag zelf reageren, vóór de inslag
+	r["hook"] = null
+	if r["hit"] != null:
+		var h := hook_target(r.get("node"))
+		if h != null:
+			r["hook"] = h
+			h.call("on_kernkracht_hit")
 	last_impact = KernVuurbal.impact(map.get_node("Objects"), end, FX_SCALE * (0.7 if r["hit"] == null else 1.0))
 	last_impact.z_index = 31
 	if r["kind"] == "monster" and is_instance_valid(r["node"]):
@@ -234,6 +246,19 @@ func fire() -> void:
 		p.input_locked = false
 	busy = false
 	cooldown_left = COOLDOWN
+
+
+## v0.19: wie krijgt on_kernkracht_hit()? De node zelf, anders zijn parent, anders zijn owner (null = niemand).
+static func hook_target(n) -> Object:
+	if n == null or not is_instance_valid(n) or not (n is Object):
+		return null
+	if n.has_method("on_kernkracht_hit"):
+		return n
+	if n is Node:
+		for c in [(n as Node).get_parent(), (n as Node).owner]:
+			if c != null and is_instance_valid(c) and c.has_method("on_kernkracht_hit"):
+				return c
+	return null
 
 
 func _alive(p: Node) -> bool:
