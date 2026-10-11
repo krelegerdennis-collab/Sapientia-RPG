@@ -1,20 +1,25 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`261a180`, spelcode `4aa0ec0`), Godot 4.7.2, threads uit.
+Web-build van `main` (`d81e339`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`88a39bc`):
+Nieuw in deze build, bovenop de vorige web-build (`b7754dd`):
+- Alle tekst die je in het spel ziet is Engels. Menu's, verhaal, items en de titel (The Forgotten Archives). Namen blijven Dennis, Noor en Lotte.
+- De levelschaal loopt door tot Act 6 (level 40). De 100-vloeren-grot mag daar voorbij.
+- Nieuwe spullen: Ilse geeft Herbal Tea nadat Noor gered is. Noor geeft een Padded Jerkin. In de kast van de Ink Worm ligt Glowing Ink. De rest van de verhaalset staat in de data, nog niet in de wereld.
+- Hard verversen op je telefoon. Anders blijft de oude Nederlandse build in het geheugen.
+
+Nog van de vorige build:
 - De 100-vloeren-grot neemt de hele party mee, ook elk Codex-monster. Iedereen start op level 1, zonder spullen en zonder spreuken.
-- In gewone kisten vind je soms een Vuurrol, Bliksemrol of Geneesrol. Die leert één held de spreuk, alleen tijdens de run.
+- In gewone kisten vind je soms een Fire Scroll, Lightning Scroll of Heal Scroll. Die leert één held de spreuk, alleen tijdens de run.
 - Als de run stopt (dood, de grot uit, of de Warp), komen je echte levels, spullen, spreuken en monsters terug.
-- De Inktwurm heeft zijn eigen sprites (gevecht, rug, idle en op de kaart).
-- In de Golemhal staat rechts een boekenkast. Kernkracht (de veld-vuurbal, pas na de Golem) scheurt hem open. Dan kronkelt de Inktwurm eruit.
-- Betatest begint met een Inktwurm als buddy (Mosslijm en Moskonijn staan er ook in). Had je Betatest al gestart, dan komt de Inktwurm er de volgende keer bij.
-- Bij **Nieuw spel** typ je je eigen naam. Dennis staat er al in; de eerste letter vervangt die naam. Tik het vak aan, dan opent het toetsenbord op de telefoon. Leeg laten blijft Dennis. Maximaal 10 tekens.
-- Titelscherm links: **Betatest**. Eigen voortgang, los van Nieuw spel en Doorgaan.
-  De eerste keer sta je op de wereldkaart (niveau 10, Vonkzwaard, 6 Lege Boeken).
+- In de Golemhal staat rechts een boekenkast. Core Power (de veld-vuurbal, pas na de Golem) scheurt hem open. Dan kronkelt de Ink Worm eruit.
+- **Beta Test** begint met een Ink Worm als buddy. Had je die al gestart, dan komt de Ink Worm er de volgende keer bij.
+- Bij **New Game** typ je je eigen naam. Dennis staat er al in; de eerste letter vervangt die naam. Tik het vak aan, dan opent het toetsenbord op de telefoon. Leeg laten blijft Dennis. Maximaal 10 tekens.
+- Titelscherm links: **Beta Test**. Eigen voortgang, los van New Game en Continue.
+  De eerste keer sta je op de wereldkaart (niveau 10, Spark Sword, 6 Blank Books).
   De volgende keer ga je daar verder.
 
 ## Spelen op je telefoon
@@ -28,9 +33,9 @@ Na deze publicatie moet je hard verversen. De browser bewaart de oude `index.pck
 - Chrome: menu, dan verversen.
 - Safari: het tabblad sluiten en opnieuw openen.
 
-De eerste tik ergens op het scherm (ook Doorgaan of Nieuw spel) zet het geluid aan.
-Tot die tik staat er **Tik voor geluid**. Houd de telefoon liggend.
-Eerste keer ongeveer 87 MB (`index.pck` 48 MB + `index.wasm` 38 MB).
+De eerste tik ergens op het scherm (ook Continue of New Game) zet het geluid aan.
+Tot die tik staat er **Tap for sound**. Houd de telefoon liggend.
+Eerste keer ongeveer 68 MB (`index.pck` 30 MB + `index.wasm` 38 MB).
 
 ## Kortere link
 

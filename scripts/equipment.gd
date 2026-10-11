@@ -22,17 +22,17 @@ extends RefCounted
 
 const GameData := preload("res://scripts/data/game_data.gd")
 
-const MSG_NOT_OWNED := "Dat heb je niet."
-const MSG_WRONG_SLOT := "Dat past niet in dit vak."
-const MSG_CANT_WEAR := "%s kan dit niet dragen."
-const MSG_EMPTY_SLOT := "Dit vak is al leeg."
-const MSG_EQUIPPED := "%s draagt nu %s."
-const MSG_REMOVED := "%s gaat terug in de tas."
-const MSG_ALL_REMOVED := "Alles gaat terug in de tas."
-const MSG_NOTHING_ON := "%s draagt niets."
-const MSG_DROPPED := "%s weggegooid."
-const MSG_STRONGEST := "Sterkste uitrusting gekozen."
-const MSG_STRONGEST_SAME := "Dit is al de sterkste uitrusting."
+const MSG_NOT_OWNED := "You don't have that."
+const MSG_WRONG_SLOT := "That doesn't fit this slot."
+const MSG_CANT_WEAR := "%s can't wear this."
+const MSG_EMPTY_SLOT := "This slot is already empty."
+const MSG_EQUIPPED := "%s now wears %s."
+const MSG_REMOVED := "%s goes back in the bag."
+const MSG_ALL_REMOVED := "Everything goes back in the bag."
+const MSG_NOTHING_ON := "%s isn't wearing anything."
+const MSG_DROPPED := "%s dropped."
+const MSG_STRONGEST := "Best equipment chosen."
+const MSG_STRONGEST_SAME := "This is already the best equipment."
 
 
 static func slots() -> Array:
@@ -81,7 +81,7 @@ static func bonus_text(id: String) -> String:
 		var b := item_bonus(id, s)
 		if b != 0:
 			parts.append("%s %s%d" % [stat_label(s), "+" if b > 0 else "", b])
-	return ", ".join(parts) if not parts.is_empty() else "geen bonus"
+	return ", ".join(parts) if not parts.is_empty() else "no bonus"
 
 
 ## Mag deze held dit stuk dragen? ("wie" = lijst van equip_type's; geen "wie" = iedereen)

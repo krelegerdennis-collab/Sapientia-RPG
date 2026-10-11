@@ -144,11 +144,11 @@ func _process(delta: float) -> void:
 ## De tekst van het moment (uit de data, dus ook goed voor latere kernen).
 static func lines_for(id: String) -> Array:
 	var f := KernData.fragment(id)
-	var lines: Array = ["{naam} absorbeert de %s!" % f.get("naam", id)]
+	var lines: Array = ["{naam} absorbs the %s!" % f.get("naam", id)]
 	var sk := str(f.get("battle_skill", ""))
 	if KernData.KERN_SKILLS.has(sk):
-		lines.append("Nieuwe vaardigheid: %s. (In het gevecht: Magie > %s)" % [KernData.KERN_SKILLS[sk]["name"], KernData.KERN_SKILLS[sk]["name"]])
+		lines.append("New skill: %s. (In battle: Magic > %s)" % [KernData.KERN_SKILLS[sk]["name"], KernData.KERN_SKILLS[sk]["name"]])
 	for ab in KernData.abilities_of(f):     # v0.16: een fragment kan meer wereldvaardigheden geven
 		if KernData.WORLD_ABILITIES.has(ab):
-			lines.append("Nieuw: %s. %s" % [KernData.WORLD_ABILITIES[ab]["name"], KernData.WORLD_ABILITIES[ab]["desc"]])
+			lines.append("New: %s. %s" % [KernData.WORLD_ABILITIES[ab]["name"], KernData.WORLD_ABILITIES[ab]["desc"]])
 	return lines

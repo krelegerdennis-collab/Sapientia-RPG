@@ -195,7 +195,7 @@ func _run() -> void:
 		await seconds(0.6)
 		check("geen autosave bij de start van een nieuw spel", not GameState.has_autosave())
 		GameState.change_map(TOWN, "start")
-	check("nieuw spel in Wilgendal", await wait_scene("Wilgendal"))
+	check("nieuw spel in Willowdale", await wait_scene("Wilgendal"))
 	await seconds(0.6)
 	if story:
 		_remove(GameState.autosave_path)     # de autosave van de mapwissel hierboven
@@ -259,11 +259,11 @@ func _main_menu_tests() -> void:
 	var labels := []
 	for c in m.COMMANDS:
 		labels.append(str(m.buttons[c[0]].get_meta("label")))
-	check("commando's %s" % [labels], labels == ["Items", "Magie", "Uitrusting", "Status", "Bestiarium", "Opties", "Opslaan", "Sluiten"])
-	check("v0.14: 'Uitrusting' na Magie (Lufia 2-volgorde), geen 'Terug naar titel'", labels.find("Uitrusting") == 2 and not ("Terug naar titel" in labels))
+	check("commando's %s" % [labels], labels == ["Items", "Magic", "Equipment", "Status", "Bestiary", "Options", "Save", "Close"])
+	check("v0.14: 'Equipment' na Magie (Lufia 2-volgorde), geen 'Terug naar titel'", labels.find("Equipment") == 2 and not ("Terug naar titel" in labels))
 	check("'Items' heeft de focus", m.buttons["items"].has_focus())
 	check("goud en speeltijd (%s / %s)" % [m.gold_label.text, m.time_label.text],
-			m.gold_label.text == "Goud 123" and m.time_label.text.begins_with("Tijd 0:00:"))
+			m.gold_label.text == "Gold 123" and m.time_label.text.begins_with("Time 0:00:"))
 	# verwachte naam uit de map zelf (v9: 'Wilgendal'; v0.11: 'Huis aan de bosrand')
 	var want_place := str(scene().map_name) if "map_name" in scene() else ""
 	check("plek: %s (map_name van de map: %s)" % [m.place_label.text, want_place], m.place_label.text == want_place)
@@ -305,10 +305,10 @@ func _items_tests() -> void:
 	var texts := []
 	for i in s.entries.size():
 		texts.append(s.entry_text(i))
-	check("lijst met aantallen %s" % [texts], texts == ["Drankje       x3", "Toverwater    x1"])
+	check("lijst met aantallen %s" % [texts], texts == ["Potion        x3", "Magic Water   x1"])
 	check("beschrijving van het gekozen item (%s)" % s.desc_label.text,
-			s.name_label.text == "Drankje" and s.desc_label.text == GameData.ITEMS["drankje"]["desc"]
-			and s.effect_label.text == "Herstelt 30 HP.")
+			s.name_label.text == "Potion" and s.desc_label.text == GameData.ITEMS["drankje"]["desc"]
+			and s.effect_label.text == "Restores 30 HP.")
 	await shot("menu_items")
 	# v0.14: uitrusting in de tas staat grijs in Items, met vak + bonus en een eigen melding
 	GameState.inventory["kort_zwaard"] = 1
@@ -319,7 +319,7 @@ func _items_tests() -> void:
 	if ki >= 0:
 		s.entries[ki].grab_focus()
 		await frames(2)
-		check("uitrusting in Items: 'Wapen: ATK +3.' (%s)" % s.effect_label.text, s.effect_label.text == "Wapen: ATK +3.")
+		check("uitrusting in Items: 'Wapen: ATK +3.' (%s)" % s.effect_label.text, s.effect_label.text == "Weapon: ATK +3.")
 		await shot("menu_items_uitrusting")
 		await tap("interact")
 		check("A op uitrusting in Items: melding '%s'" % s.message_text(), not s.targeting and s.message_text() == PartyActions.MSG_EQUIP_ITEM)
@@ -328,16 +328,16 @@ func _items_tests() -> void:
 	await frames(2)
 	# Drankje op Kees (10/42 HP): +30
 	await tap("interact")
-	check("A op Drankje -> doelkeuze met 3 helden", s.targeting and s.targets.buttons.size() == 3 and s.targets.buttons[0].has_focus())
+	check("A op Potion -> doelkeuze met 3 helden", s.targeting and s.targets.buttons.size() == 3 and s.targets.buttons[0].has_focus())
 	await shot("menu_items_target")
 	await tap("interact")
 	var hero: Dictionary = GameState.party[0]
-	check("Drankje: Kees 10 -> %d HP, nog %d" % [hero["hp"], GameState.item_count("drankje")],
+	check("Potion: Kees 10 -> %d HP, nog %d" % [hero["hp"], GameState.item_count("drankje")],
 			hero["hp"] == 40 and GameState.item_count("drankje") == 2)
-	check("melding '%s'" % s.message_text(), s.message_text() == "Kees krijgt 30 HP terug.")
+	check("melding '%s'" % s.message_text(), s.message_text() == "Kees recovers 30 HP.")
 	await tap("interact")
-	check("tweede Drankje: geclampt op max (%d/%d), nog %d" % [hero["hp"], hero["max_hp"], GameState.item_count("drankje")],
-			hero["hp"] == hero["max_hp"] and GameState.item_count("drankje") == 1 and s.message_text() == "Kees krijgt 2 HP terug.")
+	check("tweede Potion: geclampt op max (%d/%d), nog %d" % [hero["hp"], hero["max_hp"], GameState.item_count("drankje")],
+			hero["hp"] == hero["max_hp"] and GameState.item_count("drankje") == 1 and s.message_text() == "Kees recovers 2 HP.")
 	await tap("interact")
 	check("volle HP: geen effect, niets verbruikt (%s)" % s.message_text(),
 			GameState.item_count("drankje") == 1 and s.message_text() == PartyActions.MSG_NO_EFFECT)
@@ -347,13 +347,13 @@ func _items_tests() -> void:
 	var noor: Dictionary = GameState.party[1]
 	noor["mp"] = 2
 	await tap("move_down")
-	check("omlaag: Toverwater gekozen", s.selected_id == "toverwater")
+	check("omlaag: Magic Water gekozen", s.selected_id == "toverwater")
 	await tap("interact")
 	await tap("move_down")
 	check("omlaag in de doelkeuze: Noor", s.targets.focused_index() == 1)
 	await tap("interact")
 	await frames(2)
-	check("Toverwater: Noor 2 -> %d MP, op = weg uit de lijst" % noor["mp"],
+	check("Magic Water: Noor 2 -> %d MP, op = weg uit de lijst" % noor["mp"],
 			noor["mp"] == 12 and not GameState.inventory.has("toverwater") and s.entries.size() == 1 and not s.targeting)
 	# onbruikbaar item (onbekend / alleen in gevecht): grijs + melding, niets verbruikt
 	GameState.inventory["oude_sleutel"] = 1
@@ -366,7 +366,7 @@ func _items_tests() -> void:
 		check("tik op een grijs item: melding, geen doelkeuze (%s)" % s.message_text(),
 				not s.targeting and s.message_text() == PartyActions.MSG_UNKNOWN and GameState.item_count("oude_sleutel") == 1)
 	GameState.inventory.erase("oude_sleutel")
-	check("Drankje 'field': false zou grijs zijn (regel in party_actions)", PartyActions.item_usable_in_field("drankje")
+	check("Potion 'field': false zou grijs zijn (regel in party_actions)", PartyActions.item_usable_in_field("drankje")
 			and not PartyActions.item_usable_in_field("bestaat_niet"))
 	await tap("cancel")
 	await frames(2)
@@ -406,11 +406,11 @@ func _status_tests() -> void:
 	var need: int = GameData.exp_for_level(int(hero["level"]) + 1) - int(hero["exp"])
 	check("Kees: Lv, EXP %d, nog %d tot volgend level (%s)" % [hero["exp"], need, s.next_label.text],
 			s.index == 0 and s.card.hero == hero and s.exp_label.text == str(hero["exp"])
-			and s.next_label.text == "nog %d EXP" % need)
+			and s.next_label.text == "%d EXP to go" % need)
 	check("ATK/DEF/SPD/MAG/MDEF = effectief (%s/%s/%s/%s/%s)" % [s.atk_label.text, s.def_label.text, s.agi_label.text, s.mag_label.text, s.mdef_label.text],
 			s.atk_label.text == str(hero["atk"]) and s.def_label.text == str(hero["def"]) and s.agi_label.text == str(hero["agi"])
 			and s.mag_label.text == str(hero["mag"]) and s.mdef_label.text == str(hero["mdef"]))
-	check("geen spreuken: Spreuken 'geen'", s.spells_label.text == "geen")
+	check("geen spreuken: Spreuken 'geen'", s.spells_label.text == "none")
 	if not PartyActions.weapons().is_empty():
 		check("rij 'Wapen' (%s)" % s.weapon_label.text, s.weapon_label != null and s.weapon_label.text == PartyActions.weapon_name(hero))
 	else:
@@ -420,10 +420,10 @@ func _status_tests() -> void:
 			and s.portrait.texture.resource_path.ends_with("assets/ui/portrait_%s.png" % GameState.MAIN_HERO)
 			and s.portrait.texture.get_size() == Vector2(64, 80) and s.portrait.custom_minimum_size == Vector2(64, 80)
 			and s.portrait.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST and is_equal_approx(float(s.portrait.get_meta("scale", 0)), 1.0))
-	check("klasse: %s" % s.class_label.text, s.class_label.text == "Krijger")
+	check("klasse: %s" % s.class_label.text, s.class_label.text == "Warrior")
 	await shot("menu_status")
 	await tap("move_right")
-	check("rechts: Noor (%s)" % s.spells_label.text, s.index == 1 and "Vuur (4 MP)" in s.spells_label.text and "Bliksem (7 MP)" in s.spells_label.text)
+	check("rechts: Noor (%s)" % s.spells_label.text, s.index == 1 and "Fire (4 MP)" in s.spells_label.text and "Lightning (7 MP)" in s.spells_label.text)
 	check("Noor: eigen portret (portrait_noor.png, 64x80, NEAREST)", s.portrait.get_meta("source", "") == "portrait"
 			and s.portrait.texture.resource_path.ends_with("portrait_noor.png") and s.portrait.custom_minimum_size == Vector2(64, 80)
 			and s.portrait.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
@@ -440,7 +440,7 @@ func _status_tests() -> void:
 	s.show_member(0)
 	var need2: int = GameData.exp_for_level(int(hero["level"]) + 1) - int(hero["exp"])
 	check("na level-up: Lv %d, EXP %d, %s (verwacht nog %d)" % [hero["level"], hero["exp"], s.next_label.text, need2],
-			hero["level"] == 2 and hero["exp"] == 19 and need2 == 41 and s.next_label.text == "nog 41 EXP")
+			hero["level"] == 2 and hero["exp"] == 19 and need2 == 41 and s.next_label.text == "41 EXP to go")
 	await tap("cancel")
 	await frames(2)
 	check("B sluit Status", m.get_node_or_null("Status") == null)
@@ -449,7 +449,7 @@ func _status_tests() -> void:
 func _magic_tests() -> void:
 	var m := menu()
 	await tap("move_up")
-	check("omhoog vanaf 'Uitrusting': 'Magie'", m.buttons["magic"].has_focus())
+	check("omhoog vanaf 'Equipment': 'Magie'", m.buttons["magic"].has_focus())
 	await tap("interact")
 	await frames(2)
 	var s: Node = m.get_node_or_null("Magic")
@@ -457,23 +457,23 @@ func _magic_tests() -> void:
 	if s == null:
 		return
 	check("begint bij de eerste held met magie (Noor)", s.caster_index == 1 and s.entries.size() == 2)
-	check("Vuur/Bliksem grijs (alleen in een gevecht)", s.is_greyed(0) and s.is_greyed(1))
+	check("Fire/Lightning grijs (alleen in een gevecht)", s.is_greyed(0) and s.is_greyed(1))
 	await tap("interact")
-	check("A op Vuur: melding '%s'" % s.message_text(), not s.targeting and s.message_text() == PartyActions.MSG_FIELD_ONLY)
+	check("A op Fire: melding '%s'" % s.message_text(), not s.targeting and s.message_text() == PartyActions.MSG_FIELD_ONLY)
 	await tap("move_right")
-	check("rechts: Lotte met Genees", s.caster_index == 2 and s.entry_text(0).begins_with("Genees") and not s.is_greyed(0))
+	check("rechts: Lotte met Heal", s.caster_index == 2 and s.entry_text(0).begins_with("Heal") and not s.is_greyed(0))
 	var kees: Dictionary = GameState.party[0]
 	var lotte: Dictionary = GameState.party[2]
 	kees["hp"] = 5
 	var mp0 := int(lotte["mp"])
 	await shot("menu_magic")
 	await tap("interact")
-	check("A op Genees -> doelkeuze", s.targeting)
+	check("A op Heal -> doelkeuze", s.targeting)
 	await tap("interact")
 	var base := PartyActions.spell_base(lotte, "genees")
 	var lo := 5 + roundi(base * 0.9)
 	var hi := mini(int(kees["max_hp"]), 5 + roundi(base * 1.1))
-	check("Genees op Kees: 5 -> %d HP (verwacht %d..%d), Lotte MP %d -> %d" % [kees["hp"], lo, hi, mp0, lotte["mp"]],
+	check("Heal op Kees: 5 -> %d HP (verwacht %d..%d), Lotte MP %d -> %d" % [kees["hp"], lo, hi, mp0, lotte["mp"]],
 			kees["hp"] >= lo and kees["hp"] <= hi and lotte["mp"] == mp0 - 3)
 	await tap("cancel")
 	await tap("cancel")
@@ -484,7 +484,7 @@ func _magic_tests() -> void:
 func _bestiary_and_options_tests() -> void:
 	var m := menu()
 	await pick_command(m, "bestiary")
-	check("'Bestiarium' opent het bestiarium", m.get_node_or_null("Bestiary") != null)
+	check("'Bestiary' opent het bestiarium", m.get_node_or_null("Bestiary") != null)
 	await tap("cancel")
 	await frames(2)
 	check("B sluit het bestiarium", m.get_node_or_null("Bestiary") == null)
@@ -508,7 +508,7 @@ func _bestiary_and_options_tests() -> void:
 	await tap("move_right")
 	check("Tekstsnelheid -> Snel: Dialog %.0f letters/sec" % Dialog.chars_per_second,
 			Settings.get_value("text_speed") == 2 and is_equal_approx(Dialog.chars_per_second, 80.0)
-			and s.value_labels["text_speed"].text == "Snel")
+			and s.value_labels["text_speed"].text == "Fast")
 	# Knoppen zicht: links = 90%
 	await tap("move_down")
 	await tap("move_down")
@@ -534,7 +534,7 @@ func _bestiary_and_options_tests() -> void:
 	await tap("move_down")
 	check("focus op Autom. opslaan", s.focused_key() == "autosave")
 	await tap("interact")
-	check("Autom. opslaan uit", Settings.autosave_enabled() == false and s.value_labels["autosave"].text == "Uit")
+	check("Autom. opslaan uit", Settings.autosave_enabled() == false and s.value_labels["autosave"].text == "Off")
 	# Bestand geschreven en opnieuw in te lezen
 	var cfg := ConfigFile.new()
 	check("settings.cfg geschreven (%s)" % Settings.path, cfg.load(Settings.path) == OK
@@ -605,7 +605,7 @@ func _menu_save_tests() -> void:
 			not d.is_empty() and hurt["hp"] == maxi(1, int(hurt["max_hp"]) - 5) and int(d["party"][0]["hp"]) == hurt["hp"])
 	hurt["hp"] = keep_hp
 	check("Ja: handmatig opgeslagen (%s)" % m.message_label.text, m.last_save_result == "saved" and GameState.has_save()
-			and m.message_label.text == "Opgeslagen." and m.message_label.visible)
+			and m.message_label.text == "Saved." and m.message_label.visible)
 	check("save: map, plek en kijkrichting van de speler, geen autosave-vlag",
 			not d.is_empty() and str(d.get("map", "")).ends_with("wilgendal.tscn") and Vector2i(int(d["tile"][0]), int(d["tile"][1])) == p.get_tile()
 			and d.get("autosave", true) == false and d["party"].size() == 3 and int(d["gold"]) == 123)
@@ -617,12 +617,12 @@ func _menu_save_tests() -> void:
 	await frames(2)
 	sc = m.get_node_or_null("SaveScreen")
 	check("slot met data: 'Overschrijven?' + wat er nu in het slot staat (%s)" % (sc.slot_label.text if sc else "-"),
-			sc != null and sc.overwrite and sc.question_label.text == "Overschrijven?" and sc.slot_label.visible
-			and sc.slot_label.text.begins_with("In het slot: Kees Lv"))
+			sc != null and sc.overwrite and sc.question_label.text == "Overwrite?" and sc.slot_label.visible
+			and sc.slot_label.text.begins_with("In this slot: Kees Lv"))
 	if sc == null:
 		return
-	check("overschrijven: knoppen 'Ja' en 'Nee', tikvlak >= %d px" % m.ROW_H, sc.yes_button.get_meta("label") == "Ja"
-			and sc.no_button.get_meta("label") == "Nee" and sc.yes_button.size.y >= m.ROW_H and sc.no_button.size.y >= m.ROW_H)
+	check("overschrijven: knoppen 'Ja' en 'Nee', tikvlak >= %d px" % m.ROW_H, sc.yes_button.get_meta("label") == "Yes"
+			and sc.no_button.get_meta("label") == "No" and sc.yes_button.size.y >= m.ROW_H and sc.no_button.size.y >= m.ROW_H)
 	check("overschrijven: alles binnen het scherm", _inside_screen(sc.root, sc.content))
 	await shot("menu_save_overwrite")
 	await click(sc.no_button)
@@ -705,7 +705,7 @@ func _autosave_tests() -> void:
 	var count := GameState.autosave_count
 	var stamp := file_text(GameState.autosave_path)
 	GameState.change_map(TOWN, "zuid_ingang")
-	check("terug in Wilgendal", await wait_scene("Wilgendal"))
+	check("terug in Willowdale", await wait_scene("Wilgendal"))
 	await seconds(AUTOSAVE_WAIT)
 	check("autosave uit in Opties: niets geschreven", GameState.autosave_count == count and file_text(GameState.autosave_path) == stamp)
 	Settings.set_value("autosave", true)
@@ -875,9 +875,9 @@ func _equipment_logic_tests() -> void:
 		for k in it:
 			if k in ["atk", "def", "agi"] or k in ["mag", "mdef"]:
 				data_ok = data_ok and (it[k] is int)
-	check("uitrustingsdata: %d stukken, elk een geldig vak" % GameData.EQUIPMENT.size(), data_ok and GameData.EQUIPMENT.size() == 38)   # v0.15: + Vonkzwaard, v0.16: + Leerling-mantel, Task #4: + 24 d100_*-stukken (14 + 24)
+	check("uitrustingsdata: %d stukken, elk een geldig vak" % GameData.EQUIPMENT.size(), data_ok and GameData.EQUIPMENT.size() == 84)   # 38 bestaande + 46 verhaalstukken t/m Act 6
 	check("vakken Wapen/Schild/Helm/Harnas/Accessoire", GameData.EQUIP_SLOTS.map(func(x): return Equipment.slot_name(x))
-			== ["Wapen", "Schild", "Helm", "Harnas", "Accessoire"])
+			== ["Weapon", "Shield", "Helm", "Armor", "Accessory"])
 	check("stats ATK/DEF/MAG/MDEF/SPD (SPD = agi)", GameData.EQUIP_STATS.map(func(x): return Equipment.stat_label(x))
 			== ["ATK", "DEF", "MAG", "MDEF", "SPD"] and GameData.EQUIP_STATS[4] == "agi")
 	var mag_ok := true
@@ -892,21 +892,21 @@ func _equipment_logic_tests() -> void:
 	var party := [h]
 	var total := func(id): return Equipment.total_count(party, inv, id)
 	var r := Equipment.equip(h, inv, "wapen", "eiken_staf")
-	check("Krijger kan geen Eiken Staf dragen (%s)" % r["text"], not r["ok"] and h["equip"]["wapen"] == "" and inv["eiken_staf"] == 1)
+	check("Krijger kan geen Oak Staff dragen (%s)" % r["text"], not r["ok"] and h["equip"]["wapen"] == "" and inv["eiken_staf"] == 1)
 	r = Equipment.equip(h, inv, "schild", "dolk")
-	check("Dolk past niet in het vak Schild", not r["ok"] and inv["dolk"] == 1)
+	check("Dagger past niet in het vak Schild", not r["ok"] and inv["dolk"] == 1)
 	r = Equipment.equip(h, inv, "wapen", "kort_zwaard")
-	check("Kort zwaard uitrusten: ATK 14 -> %d, weg uit de tas, weapon-veld mee" % h["atk"], r["ok"] and h["atk"] == 17
+	check("Short Sword uitrusten: ATK 14 -> %d, weg uit de tas, weapon-veld mee" % h["atk"], r["ok"] and h["atk"] == 17
 			and not inv.has("kort_zwaard") and h["weapon"] == "kort_zwaard" and h["base"]["atk"] == 14)
 	r = Equipment.equip(h, inv, "wapen", "dolk")
-	check("Dolk over het Kort zwaard: ATK %d, SPD %d, zwaard terug in de tas" % [h["atk"], h["agi"]], r["ok"] and h["atk"] == 18
+	check("Dagger over het Short Sword: ATK %d, SPD %d, zwaard terug in de tas" % [h["atk"], h["agi"]], r["ok"] and h["atk"] == 18
 			and h["agi"] == 10 and inv.get("kort_zwaard", 0) == 1 and not inv.has("dolk")
 			and total.call("dolk") == 1 and total.call("kort_zwaard") == 1)
 	r = Equipment.equip(h, inv, "wapen", "dolk")
-	check("Dolk nog eens: niet in de tas -> niets gebeurt", not r["ok"] and total.call("dolk") == 1)
+	check("Dagger nog eens: niet in de tas -> niets gebeurt", not r["ok"] and total.call("dolk") == 1)
 	var pv := Equipment.preview(h, "harnas", "malienkolder")
 	var cmp := Equipment.compare(Equipment.effective_stats(h), pv)
-	check("voorbeeld Maliënkolder: DEF +6 (pijl omhoog), SPD -1 (pijl omlaag), ATK gelijk; held onveranderd",
+	check("voorbeeld Chain Mail: DEF +6 (pijl omhoog), SPD -1 (pijl omlaag), ATK gelijk; held onveranderd",
 			pv["def"] == h["def"] + 6 and cmp["def"] == 1 and cmp["agi"] == -1 and cmp["atk"] == 0 and h["equip"]["harnas"] == "")
 	var n := Equipment.strongest(h, inv)
 	check("Sterkste (Krijger): %d vakken -> %s" % [n, h["equip"]], h["equip"]["wapen"] == "dolk" and h["equip"]["harnas"] == "malienkolder"
@@ -930,7 +930,7 @@ func _equipment_logic_tests() -> void:
 	var n2 := GameState.hero_template("noor")
 	var inv2 := {"eiken_staf": 1, "dolk": 1, "reisgewaad": 1, "houten_schild": 1}
 	Equipment.strongest(n2, inv2)
-	check("Sterkste (Magiër Noor): Eiken Staf (MAG %d), Reisgewaad, geen schild" % n2["mag"], n2["equip"]["wapen"] == "eiken_staf"
+	check("Sterkste (Magiër Noor): Oak Staff (MAG %d), Travel Robe, geen schild" % n2["mag"], n2["equip"]["wapen"] == "eiken_staf"
 			and n2["equip"]["harnas"] == "reisgewaad" and n2["equip"]["schild"] == "" and n2["mag"] == 14 and inv2.get("dolk", 0) == 1)
 	# stat-pijlen (los getekend)
 	var a := StatArrow.new()
@@ -1009,15 +1009,15 @@ func _equipment_screen_tests() -> void:
 	var start := _equip_totals()
 	await pick_command(m, "equip")
 	var s: Node = m.get_node_or_null("Equipment")
-	check("'Uitrusting' opent het uitrustingsscherm", s != null)
+	check("'Equipment' opent het uitrustingsscherm", s != null)
 	if s == null:
 		return
 	var slot_texts: Array = Equipment.slots().map(func(x): return str(s.slot_buttons[x].get_meta("label")))
-	check("vakken %s" % [slot_texts], slot_texts[0].begins_with("Wapen") and slot_texts[1].begins_with("Schild")
-			and slot_texts[2].begins_with("Helm") and slot_texts[3].begins_with("Harnas") and slot_texts[4].begins_with("Accessoire")
+	check("vakken %s" % [slot_texts], slot_texts[0].begins_with("Weapon") and slot_texts[1].begins_with("Shield")
+			and slot_texts[2].begins_with("Helm") and slot_texts[3].begins_with("Armor") and slot_texts[4].begins_with("Accessory")
 			and slot_texts.all(func(t): return t.ends_with("-")))
 	var cmds: Array = s.COMMANDS.map(func(c): return str(s.cmd_buttons[c[0]].get_meta("label")))
-	check("submenu %s" % [cmds], cmds == ["Uitrusten", "Sterkste", "Afdoen", "Alles afdoen", "Weggooien"])
+	check("submenu %s" % [cmds], cmds == ["Equip", "Best", "Remove", "Remove All", "Drop"])
 	check("links: naam, Lv, HP, MP (%s / %s / %s / %s)" % [s.name_label.text, s.level_label.text, s.hp_label.text, s.mp_label.text],
 			s.name_label.text == "Kees" and s.level_label.text.ends_with("Lv %d" % kees["level"])
 			and s.hp_label.text == "HP %d/%d" % [kees["hp"], kees["max_hp"]] and s.mp_label.text == "MP --")
@@ -1043,24 +1043,24 @@ func _equipment_screen_tests() -> void:
 	await tap("interact")
 	check("A op Wapen: lijst met passende wapens %s (geen staf)" % [s.list_ids], s.mode == "item" and s.list_ids == ["kort_zwaard", "dolk"]
 			and s.list_panel.visible and not s.cmd_panel.visible and s.list_buttons[0].has_focus())
-	check("pijl bij Kort zwaard: ATK %s -> %s omhoog (groen), SPD gelijk" % [s.old_value_text("atk"), s.new_value_text("atk")],
+	check("pijl bij Short Sword: ATK %s -> %s omhoog (groen), SPD gelijk" % [s.old_value_text("atk"), s.new_value_text("atk")],
 			s.arrow_dir("atk") == 1 and s.new_value_text("atk") == str(kees["atk"] + 3) and s.arrow_dir("agi") == 0
 			and s.new_value_color("atk") == MenuColors.BETTER)
 	await tap("move_down")
-	check("omlaag: Dolk - ATK +4 en SPD +1 omhoog", s.arrow_dir("atk") == 1 and s.arrow_dir("agi") == 1
+	check("omlaag: Dagger - ATK +4 en SPD +1 omhoog", s.arrow_dir("atk") == 1 and s.arrow_dir("agi") == 1
 			and s.new_value_text("atk") == str(kees["atk"] + 4) and s.new_value_text("agi") == str(kees["agi"] + 1))
 	check("lijst: alles binnen het scherm", _inside_screen(s.root, s.content))
 	await shot("menu_equip_list")
 	var atk0: int = kees["atk"]
 	await tap("interact")
-	check("A op Dolk: gedragen, weg uit de tas, terug naar de vakken (%s)" % s.message_text(), kees["equip"]["wapen"] == "dolk"
+	check("A op Dagger: gedragen, weg uit de tas, terug naar de vakken (%s)" % s.message_text(), kees["equip"]["wapen"] == "dolk"
 			and kees["atk"] == atk0 + 4 and GameState.item_count("dolk") == 0 and s.mode == "slot" and s.slot_buttons["wapen"].has_focus()
-			and str(s.slot_buttons["wapen"].get_meta("label")).ends_with("Dolk"))
+			and str(s.slot_buttons["wapen"].get_meta("label")).ends_with("Dagger"))
 	check("na uitrusten: niets dubbel of kwijt", _equip_totals() == start)
 	# nu het Kort zwaard bekijken: slechter dan de Dolk -> rood omlaag
 	await tap("interact")
-	check("lijst opnieuw: alleen het Kort zwaard (Dolk wordt gedragen)", s.list_ids == ["kort_zwaard"])
-	check("pijl bij Kort zwaard nu: ATK %s -> %s omlaag (rood), SPD omlaag" % [s.old_value_text("atk"), s.new_value_text("atk")],
+	check("lijst opnieuw: alleen het Short Sword (Dagger wordt gedragen)", s.list_ids == ["kort_zwaard"])
+	check("pijl bij Short Sword nu: ATK %s -> %s omlaag (rood), SPD omlaag" % [s.old_value_text("atk"), s.new_value_text("atk")],
 			s.arrow_dir("atk") == -1 and s.arrow_dir("agi") == -1 and s.new_value_color("atk") == MenuColors.WORSE)
 	await shot("menu_equip_list_worse")
 	await tap("cancel")
@@ -1087,7 +1087,7 @@ func _equipment_screen_tests() -> void:
 	await click(s.cmd_buttons["unequip"])
 	check("tik op 'Afdoen': vak kiezen", s.mode == "slot" and s.action == "unequip")
 	await tap("interact")
-	check("Afdoen Wapen: Dolk terug in de tas (%s)" % s.message_text(), kees["equip"]["wapen"] == "" and GameState.item_count("dolk") == 1
+	check("Afdoen Wapen: Dagger terug in de tas (%s)" % s.message_text(), kees["equip"]["wapen"] == "" and GameState.item_count("dolk") == 1
 			and kees["atk"] == kees["base"]["atk"] and kees["weapon"] == "")
 	await tap("interact")
 	check("Afdoen op een leeg vak: melding '%s'" % s.message_text(), s.message_text() == Equipment.MSG_EMPTY_SLOT)
@@ -1102,7 +1102,7 @@ func _equipment_screen_tests() -> void:
 	check("Weggooien vraagt eerst (Nee heeft focus)", s.mode == "confirm" and s.confirm != null and s.confirm.no_button.has_focus())
 	await tap("interact")
 	await frames(2)
-	check("Nee: Kaftschild blijft", s.mode == "slot" and kees["equip"]["schild"] == "kaftschild" and _equip_totals() == start)
+	check("Nee: Cover Shield blijft", s.mode == "slot" and kees["equip"]["schild"] == "kaftschild" and _equip_totals() == start)
 	await tap("interact")
 	await frames(2)
 	await tap("move_up")
@@ -1110,7 +1110,7 @@ func _equipment_screen_tests() -> void:
 	await frames(2)
 	var after_drop := start.duplicate()
 	after_drop["kaftschild"] = 0
-	check("Ja: Kaftschild weg (niet in de tas), de rest onveranderd", kees["equip"]["schild"] == "" and GameState.item_count("kaftschild") == 0
+	check("Ja: Cover Shield weg (niet in de tas), de rest onveranderd", kees["equip"]["schild"] == "" and GameState.item_count("kaftschild") == 0
 			and _equip_totals() == after_drop)
 	await tap("cancel")
 	# Alles afdoen
@@ -1124,16 +1124,16 @@ func _equipment_screen_tests() -> void:
 	await click(s.slot_buttons["schild"])
 	check("tik op Schild bij Noor: niets dat past (Magiër, geen schild)", s.mode == "slot" and s.message_text() == s.MSG_NOTHING_FITS)
 	await click(s.slot_buttons["wapen"])
-	check("tik op Wapen bij Noor: Eiken Staf en Dolk %s" % [s.list_ids], s.mode == "item" and s.list_ids == ["eiken_staf", "dolk"])
-	check("Eiken Staf: MAG %s -> %s omhoog" % [s.old_value_text("mag"), s.new_value_text("mag")], s.arrow_dir("mag") == 1
+	check("tik op Wapen bij Noor: Oak Staff en Dagger %s" % [s.list_ids], s.mode == "item" and s.list_ids == ["eiken_staf", "dolk"])
+	check("Oak Staff: MAG %s -> %s omhoog" % [s.old_value_text("mag"), s.new_value_text("mag")], s.arrow_dir("mag") == 1
 			and s.new_value_text("mag") == str(int(GameState.party[1]["mag"]) + 4))
 	await click(s.list_buttons[0])
-	check("tik op Eiken Staf: Noor draagt hem (MAG %d)" % GameState.party[1]["mag"], GameState.party[1]["equip"]["wapen"] == "eiken_staf"
+	check("tik op Oak Staff: Noor draagt hem (MAG %d)" % GameState.party[1]["mag"], GameState.party[1]["equip"]["wapen"] == "eiken_staf"
 			and GameState.item_count("eiken_staf") == 0 and _equip_totals() == after_drop)
 	await tap("cancel")
 	await tap("cancel")
 	await frames(2)
-	check("B, B: Uitrusting dicht, terug op 'Uitrusting' in het hoofdmenu", m.get_node_or_null("Equipment") == null
+	check("B, B: Equipment dicht, terug op 'Equipment' in het hoofdmenu", m.get_node_or_null("Equipment") == null
 			and m.buttons["equip"].has_focus())
 	# Kees krijgt de Dolk terug om (voor de save-test hieronder)
 	Equipment.equip(kees, GameState.inventory, "wapen", "dolk")
@@ -1171,7 +1171,7 @@ func _equipment_save_tests() -> void:
 	_write_json(path, old)
 	var ok := GameState.load_game(path)
 	var k: Dictionary = GameState.party[0] if ok else {}
-	check("oude save zonder uitrusting laadt: Kort zwaard in het wapenvak, ATK 23 = 20 + 3", ok and k["equip"]["wapen"] == "kort_zwaard"
+	check("oude save zonder uitrusting laadt: Short Sword in het wapenvak, ATK 23 = 20 + 3", ok and k["equip"]["wapen"] == "kort_zwaard"
 			and k["atk"] == 23 and k["base"]["atk"] == 20 and k["equip"]["schild"] == "")
 	check("oude save: MAG/MDEF standaard (Lv 3: MAG 2, MDEF 4 + 2x1 = 6; Noor 10/8)", ok and k["mag"] == 2 and k["mdef"] == 6
 			and GameState.party[1]["mag"] == 10 and GameState.party[1]["mdef"] == 8 and GameState.party[1]["equip"] == Equipment.empty_equip())

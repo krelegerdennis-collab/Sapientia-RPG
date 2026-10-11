@@ -57,11 +57,11 @@ func _run() -> void:
 	_data_tests()
 	print("=== Deel B: titel ===")
 	await _title_shot()
-	print("=== Deel W: wereldkaart (Wachtershuis + Wilgendal) en buiten bij het Wachtershuis ===")
+	print("=== Deel W: wereldkaart (Wachtershuis + Willowdale) en buiten bij het Wachtershuis ===")
 	await _world_and_outdoor_tests()
 	print("=== Deel C: wereldkaart + dungeon ===")
 	await _dungeon_tests()
-	print("=== Deel G: v0.16 glitch alleen in de Archieven, sterker bij de baas ===")
+	print("=== Deel G: v0.16 glitch alleen in de Archives, sterker bij de baas ===")
 	await _glitch_tests()
 	print("DUNGEONTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -90,15 +90,15 @@ func _data_tests() -> void:
 			var code := line.get_slice("#", 0) if path.ends_with(".gd") else line
 			if ("\"say\"" in code or "lines = " in code) and (code.contains("Noor") or code.contains("Lotte")):
 				named.append("%s:%d" % [path.get_file(), n])
-	check("Wachter/Oude Man noemt Noor en Lotte nergens bij naam (%s)" % [named], named.is_empty())
+	check("Warden/Oude Man noemt Noor en Lotte nergens bij naam (%s)" % [named], named.is_empty())
 	var mw: Dictionary = GD.ENEMIES.get("mech_wachter", {})
 	var kb: Dictionary = GD.ENEMIES["kennis_beest"]
 	var small := ["mosslijm", "moskonijn", "papiergeest", "glitchmot"]
-	check("Mechanische Wachter: nieuwe vijand, stats tussen de kleine Archief-vijanden en de Golem",
+	check("Mechanische Warden: nieuwe vijand, stats tussen de kleine Archief-vijanden en de Golem",
 			not mw.is_empty() and small.all(func(e): return int(GD.ENEMIES[e]["max_hp"]) < int(mw["max_hp"]))
 			and int(mw["max_hp"]) < int(kb["max_hp"]) and int(mw["atk"]) < int(kb["atk"])
 			and ResourceLoader.exists(mw["sprite"]) and ResourceLoader.exists(mw["idle"]))
-	check("Mechanische Wachter in de Archief-groepen (terrein 'archief', niet op de wereldkaart)",
+	check("Mechanische Warden in de Archief-groepen (terrein 'archief', niet op de wereldkaart)",
 			GD.ENCOUNTER_GROUPS.any(func(g): return g["enemies"] == ["mech_wachter"] and g.get("terrains", []) == ["archief"]))
 	for f in ["wachter_liggend.png", "wachter_knielend.png"]:
 		check("verslagen Oude Man klaar voor later: assets/characters/" + f, ResourceLoader.exists("res://assets/characters/" + f))
@@ -384,7 +384,7 @@ func _title_shot() -> void:
 	var br: Rect2 = t.beta_card.get_global_rect()
 	br.position -= st.position
 	check("Betatest links onder, los van het menu (%s)" % br, t.beta_button != null and not t.beta_button.disabled
-			and "Betatest" in str(t.beta_button.get_meta("label", "")) and br.end.x <= cr.position.x
+			and "Beta Test" in str(t.beta_button.get_meta("label", "")) and br.end.x <= cr.position.x
 			and br.position.x >= 0.0 and br.end.y <= 201.0 and br.position.y >= 140.0)
 	if t.glitch == null:
 		check("hoofdpagina title_main.png, menu onder de titel, Nearest",
@@ -468,18 +468,18 @@ func _world_and_outdoor_tests() -> void:
 		var td := g.get_cell_tile_data(t)
 		vil_ok = vil_ok and g.get_cell_atlas_coords(t) == want[t] and td != null and str(td.get_custom_data("terrain")) == "stad" \
 				and td.get_collision_polygons_count(0) == 0
-	check("W: Wilgendal-icoon 2x2 op (30,23)-(31,24) = #134-#137, stad, loopbaar", vil_ok)
+	check("W: Willowdale-icoon 2x2 op (30,23)-(31,24) = #134-#137, stad, loopbaar", vil_ok)
 	var ex_house: Node = scene().get_node_or_null("Exits/NaarWachtershuis")
 	var ex_vil: Node = scene().get_node_or_null("Exits/NaarWilgendal")
 	check("W: uitgang NaarWachtershuis (oude stad) -> wilgendal.tscn 'zuid_ingang'", ex_house != null
 			and ex_house.tile_rect() == Rect2i(14, 30, 2, 1) and ex_house.target_map == TOWN_SCENE and ex_house.target_spawn == "zuid_ingang")
 	check("W: uitgang NaarWilgendal (30,23) 2x2 -> dorp_wilgendal.tscn, met 'komt later'-tekst", ex_vil != null
-			and ex_vil.tile_rect() == Rect2i(30, 23, 2, 2) and ex_vil.target_map == VILLAGE_SCENE and ex_vil.lines == ["Wilgendal (komt later)"])
+			and ex_vil.tile_rect() == Rect2i(30, 23, 2, 2) and ex_vil.target_map == VILLAGE_SCENE and ex_vil.lines == ["Willowdale (later)"])
 	var sp: Node = scene().get_node_or_null("Spawns/van_wilgendal")
 	check("W: spawn van_wilgendal op (30,25), kijkt omlaag", sp != null and Vector2i((sp.position / 16.0).floor()) == Vector2i(30, 25))
 	var to_vil := _world_reachable(g, Vector2i(14, 31), Vector2i(30, 25))
 	var to_trap := _world_reachable(g, Vector2i(14, 31), Vector2i(20, 34))
-	check("W: lopend bereikbaar: Wachtershuis -> Wilgendal (%d stappen) en -> de trap/Archieven (%d)" % [to_vil, to_trap],
+	check("W: lopend bereikbaar: Wachtershuis -> Willowdale (%d stappen) en -> de trap/Archives (%d)" % [to_vil, to_trap],
 			to_vil > 0 and to_trap > 0)
 	# bij Wilgendal: 'komt later' (zolang de dorpsscène er niet is), blijft op de wereldkaart
 	GameState.change_map(WORLD_SCENE, "van_wilgendal")
@@ -489,8 +489,8 @@ func _world_and_outdoor_tests() -> void:
 	check("W: terug-spawn van_wilgendal (30,25): %s" % tile(), tile() == Vector2i(30, 25))
 	await walk("move_up", 1)
 	await wait_until(func(): return Dialog.is_open, 2.0)
-	check("W: op Wilgendal: 'Wilgendal (komt later)', geen mapwissel (dorp_wilgendal.tscn bestaat nog niet)",
-			not ResourceLoader.exists(VILLAGE_SCENE) and Dialog.is_open and Dialog._lines == ["Wilgendal (komt later)"]
+	check("W: op Willowdale: 'Willowdale (komt later)', geen mapwissel (dorp_wilgendal.tscn bestaat nog niet)",
+			not ResourceLoader.exists(VILLAGE_SCENE) and Dialog.is_open and Dialog._lines == ["Willowdale (later)"]
 			and not GameState.changing_map and scene().name == "Wereldkaart" and tile() == Vector2i(30, 24))
 	await close_dialog()
 	# overzicht met beide iconen in beeld
@@ -501,7 +501,7 @@ func _world_and_outdoor_tests() -> void:
 	player().place_at(Vector2i(14, 31), U)
 	await pframes(3)
 	await walk("move_up", 1)
-	check("W: Wachtershuis-icoon -> 'Huis aan de bosrand' (Wilgendal-scène)", await wait_scene("Wilgendal"))
+	check("W: Wachtershuis-icoon -> 'Huis aan de bosrand' (Willowdale-scène)", await wait_scene("Wilgendal"))
 	await wait_fade()
 	await _outdoor_tests()
 
@@ -702,7 +702,7 @@ func _archief_data_tests() -> void:
 	var ms: Dictionary = GD.ENEMIES["mech_wachter"]
 	var t4 := GD.apply_tier(ms, 4)
 	var t2 := GD.apply_tier(ms, 2)
-	check("niveau 4: HP x2,3, ATK +10, DEF +7, EXP x3 (Mech. Wachter %d/%d/%d/%d)" % [t4["max_hp"], t4["atk"], t4["def"], t4["exp"]],
+	check("niveau 4: HP x2,3, ATK +10, DEF +7, EXP x3 (Mech. Warden %d/%d/%d/%d)" % [t4["max_hp"], t4["atk"], t4["def"], t4["exp"]],
 			t4["max_hp"] == GD.round_half_even(ms["max_hp"] * 2.3) and t4["atk"] == ms["atk"] + 10 and t4["def"] == ms["def"] + 7
 			and t4["exp"] == ms["exp"] * 3)
 	check("niveau 2: HP x1,5, ATK +4, DEF +3, EXP x2,5", t2["max_hp"] == GD.round_half_even(ms["max_hp"] * 1.5)
@@ -730,7 +730,7 @@ func _archief_data_tests() -> void:
 		for ex in exits_of(path):
 			if ex["map"] == GOLEMHAL_SCENE:
 				to_golem.append(path.get_file())
-	check("Golemhal alleen bereikbaar via de bibliotheek (%s)" % [to_golem], to_golem == ["archief_bibliotheek.tscn"])
+	check("Golem Hall alleen bereikbaar via de bibliotheek (%s)" % [to_golem], to_golem == ["archief_bibliotheek.tscn"])
 	# kisten + boeken (plan par. 7)
 	var chest_items := {}
 	var books := 0
@@ -756,11 +756,11 @@ func _archief_data_tests() -> void:
 	var lg := DR.legend_of(lib)
 	check("bibliotheek: geen monsters, opslagboek 'save_bibliotheek' op de runenring (157)", lib["monsters"].is_empty()
 			and lib["save_type"] == "save_bibliotheek" and lg[lib["layout"][5][3]] == 157)
-	check("golemdeur: boven muur (massief), alleen de onderste rij (5,2)/(6,2) is beloopbaar = uitgang naar de Golemhal",
+	check("golemdeur: boven muur (massief), alleen de onderste rij (5,2)/(6,2) is beloopbaar = uitgang naar de Golem Hall",
 			lg[lib["layout"][1][5]] in DR.SOLID and lg[lib["layout"][1][6]] in DR.SOLID and lib["layout"][2].substr(5, 2) == "nn"
 			and not (43 in DR.SOLID) and lib["exits"]["n"]["map"] == GOLEMHAL_SCENE
 			and lib["props"].any(func(p): return p["type"] == "golemdeur" and p["tile"] == [5, 1] and p["frame"] == 1))
-	check("Golemhal: platform zoals v0.13, alleen de Golem, uitgang onderaan naar de bibliotheek",
+	check("Golem Hall: platform zoals v0.13, alleen de Golem, uitgang onderaan naar de bibliotheek",
 			DR.ROOMS["archief_golemhal"]["layout"][5] == "<S.....[=oO=]......>" and DR.ROOMS["archief_golemhal"]["exits"]["U"]["map"] == LIB_SCENE)
 	check("ingang (1A): savepunt op sokkel, geen Golem/testmonsters meer (3 monsters), E naar de wereldkaart",
 			DR.ROOMS["archief_ingang"]["monsters"].size() == 3 and DR.ROOMS["archief_ingang"]["exits"]["E"]["map"] == WORLD_SCENE
@@ -804,10 +804,10 @@ func _dungeon_tests() -> void:
 	check("wereldkaart geladen", await wait_scene("Wereldkaart"))
 	await wait_fade()
 	var trap: Node = scene().get_node("Exits/Trap")
-	check("trap (20,34) = ingang van de Archieven -> archief_ingang.tscn 'ingang'",
+	check("trap (20,34) = ingang van de Archives -> archief_ingang.tscn 'ingang'",
 			trap.contains(Vector2i(20, 34)) and trap.target_map == ROOM_SCENE and trap.target_spawn == "ingang")
 	await walk("move_down", 1)
-	check("over de trap -> De Vergeten Archieven (1A)", await wait_scene("ArchiefIngang"))
+	check("over de trap -> The Forgotten Archives (1A)", await wait_scene("ArchiefIngang"))
 	var r := room()
 	if r == null:
 		return
@@ -1015,7 +1015,7 @@ func _guard_chest_book_tests() -> void:
 			and ch.sprite.frame == 1)
 	# v0.16: naar de regel "{naam} vindt: 2x Drankje!" en die in het blauwe vak
 	var guard := 0
-	while Dialog.is_open and not str(Dialog._lines[Dialog._index]).contains("vindt") and guard < 10:
+	while Dialog.is_open and not str(Dialog._lines[Dialog._index]).contains("finds") and guard < 10:
 		await wait_until(func(): return not Dialog._is_typing(), 3.0)
 		await press_interact()
 		guard += 1
@@ -1027,7 +1027,7 @@ func _guard_chest_book_tests() -> void:
 		for b in Dialog._rects_for(bx):
 			over = over or b.intersects(f)
 	var py: float = player().get_global_transform_with_canvas().origin.y
-	check("v0.16: schat-tekst '%s' in het blauwe vak (geen ballon/staart/naam)" % line, line == "Dennis vindt: 2x Drankje!"
+	check("v0.16: schat-tekst '%s' in het blauwe vak (geen ballon/staart/naam)" % line, line == "Dennis finds: 2x Potion!"
 			and Dialog.style_kind == "vak" and UiStyle.is_blue_box(Dialog.box_style(), "vak") and not Dialog.tail.visible
 			and not Dialog.name_tab.visible)
 	check("v0.16: schat-tekst bedekt speler/kist niet; laag tenzij de speler zelf onderin staat (%s, plek %s, speler y %.0f)"
@@ -1051,7 +1051,7 @@ func _guard_chest_book_tests() -> void:
 	await frames(2)
 	await press_interact()
 	await wait_until(func(): return Dialog.is_open)
-	check("2B: kist geeft de Leren Kap", GameState.item_count("leren_kap") >= 1)
+	check("2B: kist geeft de Leather Hood", GameState.item_count("leren_kap") >= 1)
 	await close_dialog()
 	await pframes(4)
 
@@ -1100,7 +1100,7 @@ func _theme_tests(hw: String) -> void:
 
 
 func _library_and_golem_tests() -> void:
-	print("=== Deel F: bibliotheek (save) en Golemhal ===")
+	print("=== Deel F: bibliotheek (save) en Golem Hall ===")
 	var r := await enter(LIB_SCENE, "zuid")
 	check("bibliotheek: twee atlassen, kastmuur (1,1)=100, loper (5,4)=151", r.cell(Vector2i(1, 1)) == 100 and r.cell(Vector2i(5, 4)) == 151
 			and str(r.get_node("Ground").tile_set.get_source(1).texture.resource_path).ends_with("archief_grijs_bibliotheek.png"))
@@ -1134,10 +1134,10 @@ func _library_and_golem_tests() -> void:
 	await frames(2)
 	check("golemdeur: bovenste rij (5,1) is muur", r.is_wall(Vector2i(5, 1)) and not r.is_wall(Vector2i(5, 2)))
 	await walk("move_up", 1)
-	check("op de onderste rij van de golemdeur -> Golemhal", await wait_scene("ArchiefGolemhal"))
+	check("op de onderste rij van de golemdeur -> Golem Hall", await wait_scene("ArchiefGolemhal"))
 	await wait_fade()
 	r = droom()
-	check("Golemhal: binnen bij (9,10)", tile() == Vector2i(9, 10))
+	check("Golem Hall: binnen bij (9,10)", tile() == Vector2i(9, 10))
 	var gm: MapMonster = r.get_monster("golem")
 	check("Golem: 2x2 op (9,3), baas, stil", gm != null and gm.size == Vector2i(2, 2) and gm.tile == Vector2i(9, 3) and gm.boss and not gm.moves)
 	await walk("move_up", 5)
@@ -1149,7 +1149,7 @@ func _library_and_golem_tests() -> void:
 	if await wait_scene("Battle"):
 		await wait_battle_state(["command"])
 		await win_battle()
-	check("terug in de Golemhal", await wait_scene("ArchiefGolemhal"))
+	check("terug in de Golem Hall", await wait_scene("ArchiefGolemhal"))
 	await wait_fade()
 	# v0.15 (KERN): na de Golem absorbeert Dennis de Golemkern (moment + tekst); wegklikken als een speler
 	var absorbed: bool = await wait_until(func(): return Dialog.is_open and GameState.has_kern("golemkern"), 5.0)
@@ -1170,12 +1170,12 @@ func _tier_battle_tests() -> void:
 		m.moves = false
 	await get_tree().create_timer(1.0).timeout
 	var mw: MapMonster = r.get_monster("m3")
-	check("2A: Mech. Wachter met eigen map-art", mw != null and not mw.placeholder and mw.enemy_id == "mech_wachter")
+	check("2A: Mech. Warden met eigen map-art", mw != null and not mw.placeholder and mw.enemy_id == "mech_wachter")
 	mw.place_at(Vector2i(3, 4), U)
 	await pframes(2)
 	await walk("move_down", 1)
 	await pframes(2)
-	check("tegen de Mech. Wachter -> gevecht niveau 2", GameState.in_battle and GameState.pending_tier == 2)
+	check("tegen de Mech. Warden -> gevecht niveau 2", GameState.in_battle and GameState.pending_tier == 2)
 	if await wait_scene("Battle"):
 		await wait_battle_state(["command"])
 		var s: Dictionary = battle().enemies[0]["s"]
@@ -1202,7 +1202,7 @@ func _tier_battle_tests() -> void:
 	if await wait_scene("Battle"):
 		await wait_battle_state(["command"])
 		var s: Dictionary = battle().enemies[0]["s"]
-		check("niveau 4: Mech. Wachter HP %d" % s["max_hp"], int(s["max_hp"]) == int(GD.apply_tier(GD.ENEMIES["mech_wachter"], 4)["max_hp"]))
+		check("niveau 4: Mech. Warden HP %d" % s["max_hp"], int(s["max_hp"]) == int(GD.apply_tier(GD.ENEMIES["mech_wachter"], 4)["max_hp"]))
 		await pframes(20)
 		await screenshot("v14_tier4_gevecht")
 		await win_battle()
@@ -1237,9 +1237,9 @@ func _glitch_tests() -> void:
 	var outside := ["res://scenes/maps/wilgendal.tscn", "res://scenes/maps/huis_wilgendal.tscn", WORLD_SCENE,
 			"res://scenes/battle/battle.tscn", "res://scenes/ui/title.tscn", ""]
 	var zeros := outside.filter(func(p2): return DR.glitch_intensity(p2) != 0.0)
-	check("G: sterkte 0 buiten de Archieven (dorp, huis, wereldkaart, gevecht, titel) %s" % [zeros], zeros.is_empty())
+	check("G: sterkte 0 buiten de Archives (dorp, huis, wereldkaart, gevecht, titel) %s" % [zeros], zeros.is_empty())
 	var dist := DR.boss_distances()
-	check("G: kamergraaf uit de uitgangen: alle %d archiefkamers bereikbaar vanaf de Golemhal (%s)" % [DR.ORDER.size(), dist.size()],
+	check("G: kamergraaf uit de uitgangen: alle %d archiefkamers bereikbaar vanaf de Golem Hall (%s)" % [DR.ORDER.size(), dist.size()],
 			DR.ORDER.all(func(e): return dist.has(e[1])) and DR.boss_distance(DR.scene_of("archief_golemhal")) == 0)
 	# de route van de ingang naar de baas: elke stap sterker (tot de max in de Voorhal)
 	var route := ["archief_ingang", "archief_v1_gang", "archief_v2_kastenzaal", "archief_v2_leeszaal", "archief_v2_trapzaal",
@@ -1252,7 +1252,7 @@ func _glitch_tests() -> void:
 	for i in range(1, vals.size()):
 		rising = rising and vals[i] > vals[i - 1]
 	check("G: sterkte stijgt richting de baas: ingang -> ... -> voorhal %s" % [vals], rising and vals[0] > 0.0)
-	check("G: max (1.0) in de Golemhal (baas), de Bibliotheek en de Voorhal", DR.glitch_intensity(DR.scene_of("archief_golemhal")) == 1.0
+	check("G: max (1.0) in de Golem Hall (baas), de Library en de Vestibule", DR.glitch_intensity(DR.scene_of("archief_golemhal")) == 1.0
 			and DR.glitch_intensity(DR.scene_of("archief_v4_voorhal")) == 1.0 and DR.glitch_intensity(DR.scene_of("archief_bibliotheek")) == 1.0)
 	check("G: verste kamer (ingang) zwakst maar > 0 (%.2f)" % vals[0], is_equal_approx(vals[0], DR.GLITCH_MIN))
 	GameState.encounter_multiplier = 0.0

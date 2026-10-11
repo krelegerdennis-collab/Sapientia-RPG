@@ -42,7 +42,7 @@ const CARD_LEFT := 240.0
 const CARD_RIGHT := 372.0
 const CARD_BOTTOM := 200.0
 const TITLE := "SAPIENTIA"
-const SUBTITLE := "De Vergeten Archieven"
+const SUBTITLE := "The Forgotten Archives"
 
 var continue_button: Button
 var new_button: Button
@@ -135,7 +135,7 @@ func _ready() -> void:
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 0)
 	box.add_child(list)
-	continue_button = UiMenu.button("Doorgaan")
+	continue_button = UiMenu.button("Continue")
 	continue_button.custom_minimum_size = Vector2(0, 16)
 	list.add_child(continue_button)
 	save_info = UiMenu.label("", UiStyleC.TEXT_DIM)
@@ -144,7 +144,7 @@ func _ready() -> void:
 	save_info.clip_text = true
 	save_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	list.add_child(save_info)
-	new_button = UiMenu.button("Nieuw spel")
+	new_button = UiMenu.button("New Game")
 	list.add_child(new_button)
 	continue_button.pressed.connect(_on_continue)
 	new_button.pressed.connect(_on_new)
@@ -157,7 +157,7 @@ func _ready() -> void:
 	var beta_list := VBoxContainer.new()
 	beta_list.add_theme_constant_override("separation", 0)
 	beta_box.add_child(beta_list)
-	beta_button = UiMenu.button("Betatest")
+	beta_button = UiMenu.button("Beta Test")
 	beta_button.custom_minimum_size = Vector2(116, 16)
 	beta_list.add_child(beta_button)
 	beta_info = UiMenu.label("", UiStyleC.TEXT_DIM)
@@ -186,7 +186,7 @@ func _ready() -> void:
 func _build_legacy_title(bg: TextureRect) -> void:
 	if ResourceLoader.exists(TITLE_KERN):
 		kern = TextureRect.new()
-		kern.name = "Kern"
+		kern.name = "Core"
 		kern.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		var kt: Texture2D = load(TITLE_KERN)
 		for f in int(kt.get_width() / KERN_SIZE.x):
@@ -275,7 +275,7 @@ func refresh() -> void:
 		new_button.grab_focus()
 	var beta := GameState.read_beta_save()
 	if beta.is_empty():
-		beta_info.text = "  aparte voortgang"
+		beta_info.text = "  separate progress"
 	else:
 		beta_info.text = "  %s  %s" % [str(beta.get("player_name", "")), UiMenu.format_time(float(beta.get("play_time", 0.0)))]
 	beta_info.visible = true

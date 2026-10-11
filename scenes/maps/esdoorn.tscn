@@ -16,7 +16,7 @@
 
 [node name="Esdoorn" type="Node2D"]
 script = ExtResource("1_scakf")
-map_name = "Esdoorn"
+map_name = "Mapleton"
 encounters = false
 
 [node name="Ground" type="TileMapLayer" parent="."]
@@ -50,21 +50,21 @@ loop_frames = 2
 
 [node name="Deur_voor_noor" parent="Objects" instance=ExtResource("5_p8hj2")]
 position = Vector2(120, 136)
-lines = Array[String](["De deur is op slot."])
+lines = Array[String](["The door is locked."])
 target_map = "res://scenes/maps/esdoorn_huis_noor.tscn"
 target_spawn = "binnen"
 event = ""
 
 [node name="Deur_voor_herberg" parent="Objects" instance=ExtResource("5_p8hj2")]
 position = Vector2(264, 120)
-lines = Array[String](["De deur is op slot."])
+lines = Array[String](["The door is locked."])
 target_map = "res://scenes/maps/esdoorn_herberg.tscn"
 target_spawn = "binnen"
 event = ""
 
 [node name="Deur_voor_dicht" parent="Objects" instance=ExtResource("5_p8hj2")]
 position = Vector2(424, 136)
-lines = Array[String](["De deur zit op slot.", "Er hangt een briefje: 'Naar de markt. Terug als de mist optrekt.'"])
+lines = Array[String](["The door is locked.", "A note hangs there: 'Gone to market. Back when the mist lifts.'"])
 target_map = ""
 target_spawn = ""
 event = ""
@@ -83,7 +83,7 @@ sheet = null
 [node name="Bram" parent="Objects" instance=ExtResource("6_0dd4x")]
 modulate = Color(0.78, 0.78, 0.9, 1)
 position = Vector2(104, 200)
-npc_name = "Oude Bram"
+npc_name = "Old Bram"
 lines = Array[String](["..."])
 facing = Vector2i(-1, 0)
 event = "bram"
@@ -152,7 +152,7 @@ loop_frames = 2
 
 [node name="BordWoud" parent="Objects" instance=ExtResource("9_elh45")]
 position = Vector2(88, 184)
-lines = Array[String](["<- Het Donker Woud. Niet na zonsondergang!", "(Iemand heeft eronder gekrast: 'Ook niet overdag.')"])
+lines = Array[String](["<- The Dark Wood. Not after sunset!", "(Someone scratched under it: 'Not in the daytime either.')"])
 
 [node name="Player" parent="Objects" instance=ExtResource("10_uc6ba")]
 position = Vector2(264, 344)

@@ -7,7 +7,7 @@
 [node name="ArchiefBibliotheek" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "archief_bibliotheek"
-map_name = "Vergeten Archieven - Bibliotheek"
+map_name = "Forgotten Archives - Library"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

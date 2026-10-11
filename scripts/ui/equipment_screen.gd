@@ -27,17 +27,17 @@ const NAME_COLS := 19          # 'Zilveren Bladwijzer'
 
 ## [id, tekst] van het submenu; kolom voor kolom (omlaag loopt door naar de 2e kolom).
 const COMMANDS := [
-	["equip", "Uitrusten"],
-	["strongest", "Sterkste"],
-	["unequip", "Afdoen"],
-	["unequip_all", "Alles afdoen"],
-	["drop", "Weggooien"],
+	["equip", "Equip"],
+	["strongest", "Best"],
+	["unequip", "Remove"],
+	["unequip_all", "Remove All"],
+	["drop", "Drop"],
 ]
-const HINT_CMD := "A: kiezen   <  >: held   B: terug"
-const HINT_SLOT := {"equip": "Welk vak?   A: kiezen   B: terug",
-	"unequip": "Wat afdoen?   A: afdoen   B: terug",
-	"drop": "Wat weggooien?   A: kiezen   B: terug"}
-const MSG_NOTHING_FITS := "Niets in de tas dat hier past."
+const HINT_CMD := "A: choose   <  >: hero   B: back"
+const HINT_SLOT := {"equip": "Which slot?   A: choose   B: back",
+	"unequip": "Remove what?   A: remove   B: back",
+	"drop": "Drop what?   A: choose   B: back"}
+const MSG_NOTHING_FITS := "Nothing in the bag fits here."
 
 var index := 0
 ## "command" (submenu), "slot" (vak kiezen), "item" (stuk kiezen), "confirm" (weggooien?)
@@ -72,7 +72,7 @@ func hero() -> Dictionary:
 
 
 func _build() -> void:
-	header.text = "Uitrusting"
+	header.text = "Equipment"
 	prev_button = arrow_button("<")
 	prev_button.pressed.connect(switch.bind(-1))
 	page_label = UiMenu.label("", MenuColors.TEXT_DIM)
@@ -440,8 +440,8 @@ func _close_list() -> void:
 func ask_drop(slot: String, id: String) -> void:
 	mode = "confirm"
 	var p := SavePrompt.new()
-	p.question = "%s weggooien?" % Equipment.item_name(id)
-	p.detail = "Het is daarna echt weg."
+	p.question = "Drop %s?" % Equipment.item_name(id)
+	p.detail = "It will really be gone."
 	p.default_no = true
 	p.answered.connect(_on_drop_answer.bind(slot))
 	confirm = p

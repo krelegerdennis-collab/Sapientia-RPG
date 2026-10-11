@@ -192,7 +192,7 @@ const LIBRARY_LEGEND := {
 const ROOMS := {
 	# 1A Ingang (bestaand, met savepunt) (20x12), verdieping 1
 	"archief_ingang": {
-		"name": "Vergeten Archieven", "floor": 1, "tier": 1,
+		"name": "Forgotten Archives", "floor": 1, "tier": 1,
 		"layout": [
 			"a------------------b",
 			"<LFFMFGFFAFFFFFFFFR>",
@@ -221,7 +221,7 @@ const ROOMS := {
 	},
 	# 1B Stoffige Gang (scrolt horizontaal) (32x12), verdieping 1
 	"archief_v1_gang": {
-		"name": "Vergeten Archieven - Stoffige Gang", "floor": 1, "tier": 1,
+		"name": "Forgotten Archives - Dusty Corridor", "floor": 1, "tier": 1,
 		"layout": [
 			"a------------------------------b",
 			"<LFFFFFFFFFFFFMFFFFFFFFFFFFMFMR>",
@@ -253,7 +253,7 @@ const ROOMS := {
 	},
 	# 2A Kastenzaal (1 scherm) (24x13), verdieping 2
 	"archief_v2_kastenzaal": {
-		"name": "Vergeten Archieven - Kastenzaal", "floor": 2, "tier": 2,
+		"name": "Forgotten Archives - Cabinet Hall", "floor": 2, "tier": 2,
 		"layout": [
 			"a----------------------b",
 			"<LFHFFFFFFFFFFMFFFFFAFR>",
@@ -282,7 +282,7 @@ const ROOMS := {
 	},
 	# 2B Leeszaal (scrolt verticaal) (20x24), verdieping 2
 	"archief_v2_leeszaal": {
-		"name": "Vergeten Archieven - Leeszaal", "floor": 2, "tier": 2,
+		"name": "Forgotten Archives - Reading Room", "floor": 2, "tier": 2,
 		"layout": [
 			"a------------------b",
 			"<LFFFFFFFFAMFFFGFFR>",
@@ -324,7 +324,7 @@ const ROOMS := {
 	},
 	# 2C Trapzaal + poortwachter (20x12), verdieping 2
 	"archief_v2_trapzaal": {
-		"name": "Vergeten Archieven - Trapzaal", "floor": 2, "tier": 2,
+		"name": "Forgotten Archives - Stair Hall", "floor": 2, "tier": 2,
 		"layout": [
 			"a------------------b",
 			"<LFFFFFFFKFFFFFFFFR>",
@@ -353,7 +353,7 @@ const ROOMS := {
 	},
 	# 3A Zuilenhal (scrolt horizontaal) (32x13), verdieping 3
 	"archief_v3_zuilenhal": {
-		"name": "Vergeten Archieven - Zuilenhal", "floor": 3, "tier": 3,
+		"name": "Forgotten Archives - Pillar Hall", "floor": 3, "tier": 3,
 		"layout": [
 			"a------------------------------b",
 			"<LHFFFFFFFFMFFFGFFMFFFFFFKKFAFR>",
@@ -386,7 +386,7 @@ const ROOMS := {
 	},
 	# 3C Gang na de puzzel (20x12), verdieping 3
 	"archief_v3_gang": {
-		"name": "Vergeten Archieven - Gang", "floor": 3, "tier": 3,
+		"name": "Forgotten Archives - Corridor", "floor": 3, "tier": 3,
 		"layout": [
 			"a------------------b",
 			"<LFFGFFMFFFFFFFFFFR>",
@@ -414,7 +414,7 @@ const ROOMS := {
 	},
 	# 4A Wachtersgang (scrolt horizontaal) (32x12), verdieping 4
 	"archief_v4_wachtersgang": {
-		"name": "Vergeten Archieven - Wachtersgang", "floor": 4, "tier": 4,
+		"name": "Forgotten Archives - Warden's Corridor", "floor": 4, "tier": 4,
 		"layout": [
 			"a------------------------------b",
 			"<LHFFFFFFKFFFFFFFFMFFFFMFFFFFAR>",
@@ -445,7 +445,7 @@ const ROOMS := {
 	},
 	# 4B Voorhal (20x12), verdieping 4
 	"archief_v4_voorhal": {
-		"name": "Vergeten Archieven - Voorhal", "floor": 4, "tier": 4,
+		"name": "Forgotten Archives - Vestibule", "floor": 4, "tier": 4,
 		"layout": [
 			"a------------------b",
 			"<LFFGFFMFFAFFFFFFFR>",
@@ -475,7 +475,7 @@ const ROOMS := {
 	# 4C BIBLIOTHEEK = savekamer vlak voor de baas (12x9). Kastmuur, staande kasten, kandelaars,
 	# loper naar de grote deur van de Golemhal, opslagboek op de runenring. Geen monsters.
 	"archief_bibliotheek": {
-		"name": "Vergeten Archieven - Bibliotheek", "floor": 4, "tier": 4,
+		"name": "Forgotten Archives - Library", "floor": 4, "tier": 4,
 		"legend": LIBRARY_LEGEND, "floor_tiles": [132, 133],
 		"layout": [
 			"a----------b",
@@ -506,18 +506,18 @@ const ROOMS := {
 			{"type": "kandelaar", "tile": [10, 7]},
 		],
 		# leesbaar boek op de leestafel (A ervoor)
-		"signs": [{"tile": [8, 5], "lines": ["Een open boek. Het handschrift is oud maar netjes:",
-				"'Sapientia bewaart wat de wereld vergat. Dit is het Eerste Archief.'",
-				"'Achter de grote deur slaapt de Wachter van steen. Lees, rust, en ga dan pas verder.'"]},
-				{"tile": [5, 2], "lines": ["Achter deze deur bromt iets zwaars. Ben je er klaar voor?"]},
-				{"tile": [6, 2], "lines": ["Achter deze deur bromt iets zwaars. Ben je er klaar voor?"]}],
+		"signs": [{"tile": [8, 5], "lines": ["An open book. The handwriting is old but neat:",
+				"'Sapientia keeps what the world forgot. This is the First Archive.'",
+				"'Behind the great door sleeps the Warden of stone. Read, rest, and only then go on.'"]},
+				{"tile": [5, 2], "lines": ["Something heavy hums behind this door. Are you ready?"]},
+				{"tile": [6, 2], "lines": ["Something heavy hums behind this door. Are you ready?"]}],
 		"monsters": [],
 	},
 	# 4D GOLEMHAL = de bestaande baaskamer (v0.13 testkamer-platform), zonder opslagboek en zonder
 	# andere monsters. De opening onderaan leidt naar de bibliotheek. Baas-stats: game_data.gd
 	# (kennis_beest.boss, RPG CODE). Een verslagen Golem blijft weg (bewaker).
 	"archief_golemhal": {
-		"name": "Vergeten Archieven - Golemhal", "floor": 4, "tier": 4,
+		"name": "Forgotten Archives - Golem Hall", "floor": 4, "tier": 4,
 		"layout": [
 			"a------------------b",
 			"<LFKMFFFFFFFFFGFFFR>",

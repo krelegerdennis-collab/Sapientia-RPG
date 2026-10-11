@@ -96,7 +96,7 @@ func _test_push() -> void:
 		"1": {"type": "gate", "id": "poort", "needs": ["hendel"]},
 		"r": {"type": "reset", "id": "steen"},
 	})
-	check("testkamer duwen is geldig: %s" % [PuzzleLogic.validate(room)], PuzzleLogic.validate(room).is_empty())
+	check("Test Room duwen is geldig: %s" % [PuzzleLogic.validate(room)], PuzzleLogic.validate(room).is_empty())
 	var l := PuzzleLogic.from_room(room)
 	var got := []
 	l.changed.connect(func(ids): got.append_array(ids))
@@ -144,7 +144,7 @@ func _test_plates_gates() -> void:
 		"3": {"type": "gate", "id": "omgekeerd", "needs": ["licht"], "invert": true},
 		"4": {"type": "gate", "id": "grendel", "needs": ["licht"], "latch": true},
 	})
-	check("testkamer platen is geldig: %s" % [PuzzleLogic.validate(room)], PuzzleLogic.validate(room).is_empty())
+	check("Test Room platen is geldig: %s" % [PuzzleLogic.validate(room)], PuzzleLogic.validate(room).is_empty())
 	var l := PuzzleLogic.from_room(room)
 	check("begin: alle/een/grendel dicht, omgekeerd open", not l.gate_open("alle") and not l.gate_open("een")
 			and l.gate_open("omgekeerd") and not l.gate_open("grendel"))
@@ -704,7 +704,7 @@ func _flee_battle() -> void:
 
 func _integration() -> void:
 	GameState.change_map(ROOM_SCENE, "ingang")
-	check("testkamer geladen (scène 'ArchiefTest')", await wait_scene("ArchiefTest"))
+	check("Test Room geladen (scène 'ArchiefTest')", await wait_scene("ArchiefTest"))
 	var room := scene()
 	if room == null or room.name != "ArchiefTest":
 		return
@@ -743,7 +743,7 @@ func _integration() -> void:
 	await moves("DDD L")
 	check("voor de herstelsteen (2,9), kijkt links: %s" % tile(), tile() == Vector2i(2, 9) and player().facing == L)
 	await press_interact()
-	check("vraag 'De kamer herstellen?'", await wait_choices() and Dialog.text_label.text == "De kamer herstellen?")
+	check("vraag 'De kamer herstellen?'", await wait_choices() and Dialog.text_label.text == "Restore the room?")
 	await screenshot("03_herstelvraag")
 	await tap("cancel")
 	await pframes(3)
@@ -792,7 +792,7 @@ func _integration() -> void:
 	await screenshot("04_opgelost")
 	await moves("UU")
 	check("op de uitgang X (7,0): %s" % tile(), tile() == Vector2i(7, 0))
-	check("bericht bij X ('donkere gang')", Dialog.is_open and "donkere gang" in Dialog.text_label.text)
+	check("bericht bij X ('donkere gang')", Dialog.is_open and "dark corridor" in Dialog.text_label.text)
 	await wait_until(func(): return not Dialog._is_typing(), 3.0)
 	await pframes(2)
 	await screenshot("05_uitgang_bericht")
@@ -809,7 +809,7 @@ func _integration() -> void:
 	check("in het huis op spawn 'binnen' (4,7): %s" % tile(), tile() == Vector2i(4, 7))
 	await wait_fade()
 	await tap("debug_puzzle")
-	check("F4 (tijdelijk): terug naar de testkamer", await wait_scene("ArchiefTest"))
+	check("F4 (tijdelijk): terug naar de Test Room", await wait_scene("ArchiefTest"))
 	room = scene()
 	await wait_fade()
 	check("terug: kasten op hun beginplek", block_ok(room, "kast_a", Vector2i(3, 6)) and block_ok(room, "kast_b", Vector2i(10, 6)))
@@ -825,7 +825,7 @@ func _integration() -> void:
 	check("gevecht gestart", await wait_scene("Battle", 20.0))
 	await _flee_battle()
 	check("gevlucht (uitslag flee)", GameState.last_battle_result == "flee")
-	check("terug in de testkamer na het gevecht", await wait_scene("ArchiefTest", 20.0))
+	check("terug in de Test Room na het gevecht", await wait_scene("ArchiefTest", 20.0))
 	room = scene()
 	await wait_fade()
 	check("na gevecht: kast_b nog op (10,7), speler op (10,6): %s" % tile(), block_ok(room, "kast_b", Vector2i(10, 7)) and tile() == Vector2i(10, 6))
