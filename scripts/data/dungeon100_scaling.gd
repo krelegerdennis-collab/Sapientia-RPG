@@ -100,6 +100,9 @@ const BOSS_GOLD_MULT := 6.0
 ## Een leeg boek (Codex) komt vanaf buitniveau 2 soms mee.
 const BOOK_CHANCE := 0.1
 const BOOK_ID := "leeg_boek"
+## Een spreukrol (Vuur, Bliksem of Genees) ligt soms in een gewone kist. De party gaat de grot in zonder magie.
+const SPELL_CHANCE := 0.12
+const SPELL_SCROLLS := ["spreuk_vuur", "spreuk_bliksem", "spreuk_genees"]
 
 
 # ---------------------------------------------------------------- verdiepingen
@@ -269,7 +272,8 @@ static func gear_chance(floor_nr: int) -> float:
 
 ## Buit van een gewone kist op deze verdieping. 'rng' = RandomNumberGenerator (of iets met
 ## randf() / randi_range()): zelfde seed = zelfde buit. Altijd minstens 1 genees-item + goud;
-## uitrusting met kans gear_chance(). floor_nr <= 0: lege buit. boss = true: baaskist (boss_loot()).
+## uitrusting met kans gear_chance(); soms een spreukrol (SPELL_CHANCE). floor_nr <= 0: lege buit.
+## boss = true: baaskist (boss_loot(), geen spreukrol).
 static func chest_loot(floor_nr: int, rng, boss := false) -> Dictionary:
 	if floor_nr <= 0:
 		return {"tier": 0, "items": [], "gold": 0, "boss": false}
@@ -285,6 +289,8 @@ static func chest_loot(floor_nr: int, rng, boss := false) -> Dictionary:
 		items.append({"item": gear_id(GEAR_KINDS[rng.randi_range(0, GEAR_KINDS.size() - 1)], gt), "n": 1})
 	if tier >= 2 and rng.randf() < BOOK_CHANCE:
 		items.append({"item": BOOK_ID, "n": 1})
+	if rng.randf() < SPELL_CHANCE:
+		items.append({"item": str(SPELL_SCROLLS[rng.randi_range(0, SPELL_SCROLLS.size() - 1)]), "n": 1})
 	var gold := GameData.round_half_even(chest_gold_base(f) * rng.randf_range(0.8, 1.2))
 	return {"tier": tier, "items": items, "gold": gold, "boss": false}
 

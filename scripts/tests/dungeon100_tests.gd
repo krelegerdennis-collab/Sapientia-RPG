@@ -12,6 +12,8 @@ extends Node
 const R := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const RustpuntC := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
+const PA := preload("res://scripts/party_actions.gd")
+const CD := preload("res://scripts/data/codex_data.gd")
 const HUD_PATH := "res://scripts/ui/dungeon100_hud.gd"
 const TOWN := "res://scenes/maps/wilgendal.tscn"
 ## Stand-in voor de kerker-scène (die komt van de generator-branch): een bestaande kleine map.
@@ -215,6 +217,101 @@ func _state_tests() -> void:
 			GameState.gold == 40 and GameState.pending_spawn == GameState.RESPAWN_SPAWN and GameState.dungeon100_floor == 0)
 	R.dungeon_scene = _saved_scene
 	GameState.new_game("Dennis")
+	_strip_and_scroll_tests()
+	GameState.new_game("Dennis")
+
+
+## De grot neemt de hele party mee (ook wie zich later aansloot) en elke Codex-pagina, allemaal
+## op level 1 zonder uitrusting en zonder spreuken. Een rol uit een kist leert één spreuk terug.
+func _strip_and_scroll_tests() -> void:
+	GameState.join_member("noor", 8, ["eiken_staf"])
+	GameState.join_member("lotte", 6, [])
+	GameState.party[0]["level"] = 9
+	GameState.party[1]["spells"].append("genees")
+	var noor_weapon := str(GameState.party[1].get("equip", {}).get("wapen", ""))
+	var moss := GameState.codex_add("mosslijm", 5)
+	var worm := GameState.codex_add("inktwurm", 8)
+	var konijn := GameState.codex_add("moskonijn", 4)
+	var geest := GameState.codex_add("papiergeest", 4)
+	var fused := CD.make_fusion_page(konijn, geest, "codex_fuse_test")
+	GameState.codex_pages.append(fused)
+	var moss_uid := str(moss["uid"])
+	var worm_uid := str(worm["uid"])
+	var fuse_uid := str(fused["uid"])
+	var fuse_name := str(fused["name"])
+	var fuse_gen := int(fused["fusion"]["generation"])
+	var fuse_element := str(fused["element"])
+	GameState.codex_set_active(worm_uid)
+	var next_before := GameState.codex_next_id
+	check("voor de grot: Noor level 8 met spreuken en staf, Inktwurm kent Inktspuw",
+			int(GameState.party[1]["level"]) == 8 and (GameState.party[1]["spells"] as Array).has("vuur")
+			and (GameState.party[1]["spells"] as Array).has("bliksem") and (GameState.party[1]["spells"] as Array).has("genees")
+			and noor_weapon == "eiken_staf" and (worm["skills"] as Array).has("inktspuw")
+			and (moss["skills"] as Array).has("mosheling") and not fused.is_empty())
+	check("de run begint", GameState.dungeon100_begin_run())
+	var ids: Array = []
+	var stripped := true
+	for h in GameState.party:
+		ids.append(str(h["id"]))
+		stripped = stripped and int(h["level"]) == 1 and (h["spells"] as Array).is_empty()
+		for slot in h.get("equip", {}):
+			stripped = stripped and str(h["equip"][slot]) == ""
+	check("hele party mee op level 1, zonder spreuken en zonder uitrusting",
+			stripped and ids == ["dennis", "noor", "lotte"] and GameState.party.size() == 3)
+	var run_moss := GameState.codex_page(moss_uid)
+	var run_worm := GameState.codex_page(worm_uid)
+	var run_fuse := GameState.codex_page(fuse_uid)
+	check("Codex gaat mee op level 1, zelfde uid, alleen vaardigheden van level 1",
+			int(run_moss.get("level", 0)) == 1 and int(run_worm.get("level", 0)) == 1
+			and (run_moss.get("skills", []) as Array) == CD.skills_at("mosslijm", 1)
+			and not (run_worm.get("skills", []) as Array).has("inktspuw")
+			and (run_worm.get("skills", []) as Array) == CD.skills_at("inktwurm", 1)
+			and GameState.codex_active == worm_uid and GameState.codex_next_id == next_before)
+	check("gefuseerde pagina houdt naam, element en generatie, maar is level 1",
+			int(run_fuse.get("level", 0)) == 1 and str(run_fuse.get("name", "")) == fuse_name
+			and str(run_fuse.get("element", "")) == fuse_element
+			and int(run_fuse.get("fusion", {}).get("generation", 0)) == fuse_gen
+			and (run_fuse.get("skills", []) as Array) == CD.skills_at(str(run_fuse.get("species", "")), 1))
+	var dennis: Dictionary = GameState.party[0]
+	var inv := {"spreuk_vuur": 1}
+	var taught := PA.use_item(inv, "spreuk_vuur", dennis)
+	check("Vuurrol leert Dennis Vuur, vult zijn MP en is op", taught["ok"] and (dennis["spells"] as Array).has("vuur")
+			and not inv.has("spreuk_vuur") and int(dennis["max_mp"]) >= 4 and int(dennis["mp"]) >= 4
+			and str(taught["text"]) == "Dennis leert Vuur!")
+	var again := {"spreuk_vuur": 1}
+	var second := PA.use_item(again, "spreuk_vuur", dennis)
+	check("een rol voor een spreuk die je al kent doet niets", not second["ok"] and int(again["spreuk_vuur"]) == 1
+			and (dennis["spells"] as Array).size() == 1 and int(dennis["max_mp"]) == 4)
+	var mp_before := int(dennis["max_mp"])
+	var genees := {"spreuk_genees": 1}
+	var healed := PA.use_item(genees, "spreuk_genees", dennis)
+	check("Geneesrol leert Genees zonder de MP-voorraad te verlagen", healed["ok"] and (dennis["spells"] as Array).has("genees")
+			and not genees.has("spreuk_genees") and int(dennis["max_mp"]) == mp_before)
+	dennis["hp"] = 0
+	var bliksem := {"spreuk_bliksem": 1}
+	var ko := PA.use_item(bliksem, "spreuk_bliksem", dennis)
+	check("een bewusteloze held leert niets", not ko["ok"] and int(bliksem["spreuk_bliksem"]) == 1)
+	dennis["hp"] = int(dennis["max_hp"])
+	var noor: Dictionary = GameState.party[1]
+	var noor_rol := {"spreuk_bliksem": 1}
+	var noor_learn := PA.use_item(noor_rol, "spreuk_bliksem", noor)
+	check("Noor kan tijdens de run Bliksem opnieuw leren", noor_learn["ok"] and (noor["spells"] as Array) == ["bliksem"]
+			and int(noor["max_mp"]) >= 7)
+	check("een rol is in het veld te gebruiken", PA.item_usable_in_field("spreuk_vuur") and PA.item_block_reason("spreuk_vuur") == ""
+			and PA.item_effect_text("spreuk_vuur") == "Leert de spreuk Vuur.")
+	check("de run eindigt", GameState.dungeon100_end_run(false))
+	check("na de grot: levels, spreuken, staf en Codex zijn weer van voor de run",
+			int(GameState.party[0]["level"]) == 9 and (GameState.party[0]["spells"] as Array).is_empty()
+			and int(GameState.party[0]["max_mp"]) == 0
+			and int(GameState.party[1]["level"]) == 8
+			and (GameState.party[1]["spells"] as Array).has("vuur") and (GameState.party[1]["spells"] as Array).has("bliksem")
+			and (GameState.party[1]["spells"] as Array).has("genees")
+			and str(GameState.party[1].get("equip", {}).get("wapen", "")) == "eiken_staf"
+			and int(GameState.party[2]["level"]) == 6 and (GameState.party[2]["spells"] as Array).has("genees")
+			and int(GameState.codex_page(moss_uid).get("level", 0)) == 5
+			and (GameState.codex_page(worm_uid).get("skills", []) as Array).has("inktspuw")
+			and int(GameState.codex_page(fuse_uid).get("level", 0)) > 1
+			and GameState.codex_active == worm_uid)
 
 
 func _core(d: Dictionary) -> Dictionary:

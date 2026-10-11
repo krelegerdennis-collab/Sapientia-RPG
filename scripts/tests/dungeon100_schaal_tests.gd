@@ -320,6 +320,22 @@ func _loot_tests() -> void:
 		var pn: String = GD.ITEMS[id].get("short", GD.ITEMS[id]["name"])
 		names_fit = names_fit and pn.length() <= 13
 	check("itemnamen passen in de lijst (max 13 tekens)", names_fit)
+	var scrolls := {}
+	var scroll_n := 0
+	for sd in 400:
+		for it in S.chest_loot(15, _rng(910000 + sd))["items"]:
+			var sid := str(it["item"])
+			if (S.SPELL_SCROLLS as Array).has(sid):
+				scrolls[sid] = true
+				scroll_n += 1
+	check("gewone kisten kunnen Vuur-, Bliksem- en Geneesrol geven (%d rollen)" % scroll_n,
+			scrolls.has("spreuk_vuur") and scrolls.has("spreuk_bliksem") and scrolls.has("spreuk_genees") and scroll_n > 0)
+	var boss_clean := true
+	for f in S.boss_floors():
+		for sd in 20:
+			for it in S.boss_loot(f, _rng(44000 + f * 20 + sd))["items"]:
+				boss_clean = boss_clean and not (S.SPELL_SCROLLS as Array).has(str(it["item"]))
+	check("baasbuit bevat geen spreukrol", boss_clean)
 
 
 func _entry_tests() -> void:

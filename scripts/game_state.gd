@@ -1226,8 +1226,9 @@ func is_permanent_item(id: String) -> bool:
 
 
 ## Een run begint (Dungeon100Room, bij het binnenkomen vanaf de wereldkaart): de echte party/tas/goud/
-## Codex gaan in de momentopname; de simulatie start met een party van level 1 zonder uitrusting, een
-## tas met alleen de permanente items, geen goud en een lege Codex. Dubbel aanroepen doet niets (false).
+## Codex gaan in de momentopname. De simulatie neemt iedereen mee die dan in de party zit (ook wie zich
+## later aansloot) plus elke Codex-pagina, allemaal op level 1, zonder uitrusting en zonder spreuken.
+## De tas heeft alleen de permanente items, en er is geen goud. Dubbel aanroepen doet niets (false).
 func dungeon100_begin_run() -> bool:
 	if dungeon100_run_active():
 		return false
@@ -1238,23 +1239,58 @@ func dungeon100_begin_run() -> bool:
 	return true
 
 
-## Zet de simulatie op 'nieuw': party level 1 (zelfde leden, geen uitrusting), tas = permanente items, goud 0,
-## lege Codex, schone run-vlaggen. Verdieping, seed en rustpunt laat dit aan de aanroeper.
+## Zet de simulatie op 'nieuw': dezelfde party-leden op level 1 (geen uitrusting, geen spreuken), elke
+## Codex-pagina op level 1 (zelfde uid, alleen vaardigheden van level 1), tas = permanente items, goud 0,
+## schone run-vlaggen. Verdieping, seed en rustpunt laat dit aan de aanroeper.
 func _dungeon100_fresh_run() -> void:
 	var ids: Array = party.map(func(h): return str(h.get("id", "")))
 	party = []
 	for id in ids:
 		var h := hero_template(str(id))
-		if not h.is_empty():
-			party.append(h)
+		if h.is_empty():
+			continue
+		h["spells"] = []
+		party.append(h)
 	if party.is_empty():
 		add_member(MAIN_HERO)
+		if not party.is_empty():
+			party[0]["spells"] = []
 	inventory = dungeon100_permanent.duplicate(true)
 	gold = 0
-	codex_reset()
+	_dungeon100_strip_codex()
 	_dungeon100_clear_run_flags()
 	defeated_map_monsters = {}
 	map_monster_battle = {}
+
+
+## Codex mee de grot in: elke pagina opnieuw op level 1. Uid, naam, vangst en (bij een fusie) element,
+## type en fusie-gegevens blijven. Vaardigheden zijn alleen wat de soort op level 1 kent. De teller voor
+## nieuwe pagina's blijft, zodat een vangst tijdens de run geen uid hergebruikt.
+func _dungeon100_strip_codex() -> void:
+	var kept: Array = []
+	for page in codex_pages:
+		var species := str(page.get("species", ""))
+		var uid := str(page.get("uid", ""))
+		if uid == "" or not CodexData.has_species(species):
+			continue
+		var fresh := CodexData.make_page(species, 1, uid)
+		if page.get("name") is String and str(page["name"]) != "":
+			fresh["name"] = str(page["name"])
+		if page.get("caught") is Dictionary:
+			fresh["caught"] = (page["caught"] as Dictionary).duplicate(true)
+		if CodexData.is_fused(page):
+			for k in ["element", "type"]:
+				if page.get(k) is String and str(page[k]) != "":
+					fresh[k] = str(page[k])
+			if page.get("fusion_tags") is Array:
+				fresh["fusion_tags"] = (page["fusion_tags"] as Array).duplicate()
+			if page.get("fusion") is Dictionary:
+				fresh["fusion"] = (page["fusion"] as Dictionary).duplicate(true)
+		kept.append(fresh)
+	codex_pages = kept
+	if codex_page(codex_active).is_empty():
+		codex_active = ""
+	codex_changed.emit()
 
 
 func _dungeon100_clear_run_flags() -> void:
