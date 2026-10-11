@@ -259,7 +259,7 @@ De grot start alleen via ECHO. Er is geen ingang meer op de wereldkaart. Ladder,
 - [x] Diepe Grot verplaatsen naar ECHO's Kamer; ECHO beheert de simulatie en is de enige start; praten met ECHO → "Start Simulatie"; geen aparte worldmap-ingang.
 - [ ] Blauwe kisten in ECHO's Kamer, deksel open, decoratief en verwijzing naar grot-loot, paars/blauw licht. Aantal TBD.
 - [x] Flow: World Warper → ECHO's Kamer → optie "Diepe Grot Simulatie" → "Start nieuwe run" / "Ga terug". Start: floor 1, level 1, geen uitrusting. Na warp-kristal floor 100 terug naar ECHO's Kamer. ECHO toont resultaat en opent de volgende run.
-- [ ] ECHO weet dat de grot een simulatie is en kan dat bij het eerste bezoek uitleggen.
+- [x] ECHO weet dat de grot een simulatie is en kan dat bij het eerste bezoek uitleggen.
 
 TODO(design), open laten:
 

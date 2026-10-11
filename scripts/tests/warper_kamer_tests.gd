@@ -188,6 +188,11 @@ func _echo_grot() -> void:
 			and EchoGrot.ZIN_H6 == h6_letterlijk and EchoGrot.ZIN_DATA == data_letterlijk)
 	check("ECHO legt de onderzoeker-twist niet uit", not " ".join(EchoGrot.speler_teksten()).to_lower().contains("onderzoeker"))
 	check("voor H-6 alleen de eerste zin", EchoGrot.regels_vooraf({}) == [EchoGrot.ZIN_EERSTE])
+	check("later bezoek herhaalt de zin niet", EchoGrot.regels_vooraf({EchoGrot.FLAG_EERSTE: true}).is_empty())
+	var gezien := {}
+	EchoGrot.markeer(gezien, [EchoGrot.ZIN_EERSTE])
+	check("vlag echo_grot_gezien na de eerste zin", gezien.get(EchoGrot.FLAG_EERSTE, false) == true
+			and EchoGrot.regels_vooraf(gezien).is_empty() and not gezien.has(EchoGrot.FLAG_H6))
 	check("na H-6 komt de kandidatenzin erbij", EchoGrot.regels_vooraf({EchoGrot.FLAG_EERSTE: true, EchoGrot.FLAG_H6: true}) == [EchoGrot.ZIN_H6])
 	check("trappen in de grot blijven een uitgang", not EchoGrot.blokkeert_wereldkaart(EchoGrot.DUNGEON, EchoGrot.DUNGEON))
 
@@ -209,6 +214,8 @@ func _echo_grot() -> void:
 	var eerste := await _naar_tekst(EchoGrot.ZIN_EERSTE)
 	var live_naam := Dialog.name_label.text == "ECHO" and Dialog.name_label.text != "IVA"
 	check("eerste-bezoekzin", eerste and EchoGrot.ZIN_EERSTE == eerste_letterlijk and live_naam)
+	if eerste:
+		await _screenshot("echo_eerste_bezoek")
 	check("naam ECHO en niet IVA", str(Dialoog.NAAM) == "ECHO" and str(Dialoog.NAAM) != "IVA"
 			and welkom.contains("ECHO") and not welkom.contains("IVA") and live_naam)
 	check("menu Diepe Grot Simulatie", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE))
@@ -230,6 +237,18 @@ func _echo_grot() -> void:
 	_kies(EchoGrot.KEUZE_TERUG)
 	var dicht := await _wacht_gesprek_weg()
 	check("gesprek sluit", dicht)
+	check("vlag na het eerste gesprek", GameState.story_flags.get(EchoGrot.FLAG_EERSTE, false) == true)
+	if not _praat():
+		check("tweede bezoek slaat de zin over", false)
+		return
+	var tweede_open := await _wacht(func() -> bool: return Dialog.is_open, 3.0)
+	var tweede_tekst := str(Dialog.text_label.text) if Dialog.is_open else ""
+	check("tweede bezoek slaat de zin over", tweede_open and Dialog.has_choices()
+			and tweede_tekst == EchoGrot.VRAAG_MENU
+			and tweede_tekst != EchoGrot.ZIN_EERSTE
+			and tweede_tekst != EchoGrot.ZIN_H6)
+	_kies(EchoGrot.KEUZE_TERUG)
+	check("tweede gesprek sluit", await _wacht_gesprek_weg())
 
 	GameState.story_flags[EchoGrot.FLAG_H6] = true
 	if not _praat():
