@@ -2,7 +2,7 @@ extends RefCounted
 ## Wie welke spreuk mag leren, en tot welke grade de winkel gaat.
 ## Dennis: geen shop-magie (alleen kernkrachten). Grade 4 nooit in de winkel.
 ## TODO(design): de volledige lijst van 4×16 spreuken per element is nog niet ontworpen.
-## Dit bestand dwingt alleen de grade- en personageregels af op de kleine werklijst.
+## Bevestigd: de grade- en personageregels gelden voor de kleine lijst van 20.
 
 const GameData := preload("res://scripts/data/game_data.gd")
 

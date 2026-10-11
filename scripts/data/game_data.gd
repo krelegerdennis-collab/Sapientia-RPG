@@ -178,8 +178,8 @@ const ENEMIES := {
 			# 'alleen aanvallen' op Lv 10 anders 18-39% (simulatie golem_tests.gd, HANDOFF_ARCHIEF1.md).
 			# Niet vluchten (battle.gd).
 			# Doel-level van het Eerste Archief is 7 (EERSTE_ARCHIEF_DOEL).
-			# TODO(design): HP 360 en ATK 27 zijn bijgesteld na golem_tests.gd, zodat Lv 7
-			# slim wint met meerdere items en domweg aanvallen meestal verliest.
+			# Bevestigd: HP 360 en ATK 27, zodat Lv 7 slim wint met meerdere items
+			# en domweg aanvallen meestal verliest.
 			# DEF blijft 15 (de kern-drempel 45 hoort bij Dennis Lv 7, niet bij een zwakke klap).
 			"max_hp": 360, "atk": 27, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "mp": 0,
 			"exp": 210, "gold": 84,
@@ -356,7 +356,8 @@ static func bestiary_ids() -> Array:
 ## type:   "damage" (schade) of "heal" (genezen)
 ## Effect = power + 2 x level van de gebruiker (+/- 10% geluk).
 ## Kleine werklijst: één spreuk per grade per element dat nu meedoet.
-## TODO(design): namen en cijfers van de nieuwe spreuken. De volledige 4×16-lijst is nog ontwerp.
+## Bevestigd: namen en cijfers van deze 20 spreuken gelden tot nader order.
+## TODO(design): de volledige 4×16-lijst per element is nog ontwerp.
 ## Bestaande vuur/bliksem/genees houden hun oude mp en power (tests en startspreuken).
 ## type "buff": buff_stat + buff_n voor de rest van het gevecht (battle.gd).
 const SPELLS := {
@@ -522,9 +523,7 @@ const STAT_LABELS := {"atk": "ATK", "def": "DEF", "mag": "MAG", "mdef": "MDEF", 
 ## "price" (winkel, nog niet gebouwd), "desc", "short" (naam in smalle lijsten, Items-scherm).
 ## Ids zonder trema (maliënkolder -> "malienkolder"), de naam op het scherm heeft hem wel.
 const EQUIPMENT := {
-	# VOORLOPIG: in het spel (v0.11 zwaardles) is het Kort zwaard ATK +3. Het ontwerp zegt
-	# Kort Zwaard ATK +7 (winkel, 120) en een apart Roestig Zwaard ATK +3 als startwapen.
-	# Zolang Dennis dat niet besloten heeft blijft het zoals in het spel: ATK +3.
+	# Bevestigd: het Kort zwaard blijft ATK +3 (niet het oude ontwerp ATK +7).
 	"kort_zwaard": {"name": "Short Sword", "slot": "wapen", "atk": 3, "wie": ["krijger"], "price": 120,
 		"act": 1, "lijn": "zwaard", "orde": 1,
 		"desc": "The Old Man's sword. Light and honest."},
@@ -840,7 +839,7 @@ const START_GOLD := 0
 ## Speler-level waar het Eerste Archief op mikt. De gedeelde TIERS-tabel (ook woud en
 ## formule-tests) blijft staan. Alleen archiefgevechten gaan door apply_archief_tier.
 const EERSTE_ARCHIEF_DOEL := 7
-## TODO(design): 0,7 op gevechtsstats en 0,50 op EXP, zodat 34 kamergevechten + het oefengevecht op level 7 landen.
+## Bevestigd: 0,7 op gevechtsstats en 0,50 op EXP, zodat 34 kamergevechten + het oefengevecht op level 7 landen.
 const ARCHIEF_STAT_SCHAAL := 0.7
 const ARCHIEF_EXP_SCHAAL := 0.50
 const TIERS := {

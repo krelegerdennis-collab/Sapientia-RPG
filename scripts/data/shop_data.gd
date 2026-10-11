@@ -1,16 +1,16 @@
 extends RefCounted
 ## Eén winkelraam voor Wilgendal: wapen, pantser, accessoire, magie, plus de kruiden van Tante Mien.
-## TODO(design): prijzen en welke stukken pas in een latere act liggen zijn een conservatieve
-## invulling. Act = hoogste level in de party (level_scale), niet een aparte verhaalvlag.
-## TODO(design): verkoop = de helft van de vraagprijs (naar beneden).
-## TODO(design): Jelle Hamer heeft twee balies (wapen en pantser), één smid.
+## Bevestigd: prijzen en welke stukken pas in een latere act liggen.
+## Act = hoogste level in de party (level_scale), niet een aparte verhaalvlag. Bevestigd.
+## Bevestigd: verkoop is de helft van de vraagprijs (naar beneden).
+## Bevestigd: Jelle Hamer heeft twee balies (wapen en pantser), één smid.
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const GradeGear := preload("res://scripts/data/grade_gear.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 
-## TODO(design): ijzeren helm, maliënkolder en groenring pas vanaf act 2, zodat act 1 niet alles toont.
+## Bevestigd: ijzeren helm, maliënkolder en groenring pas vanaf act 2, zodat act 1 niet alles toont.
 const SHOPS := {
 	"wilgendal_wapen": {
 		"name": "Wapens",
@@ -90,7 +90,8 @@ static func list_price(id: String) -> int:
 				return int(offer["price"])
 	if GameData.SPELLS.has(id):
 		var g := int(GameData.SPELLS[id].get("grade", 1))
-		return 40 * g * g
+		# Bevestigd: vraagprijs magie = 160 × grade². Grade 4 ligt niet in de winkel.
+		return 160 * g * g
 	return _data_price(id)
 
 
