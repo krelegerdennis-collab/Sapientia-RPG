@@ -191,7 +191,8 @@ func _build() -> void:
 		var sg: Area2D = SignScript.new()
 		sg.setup(d)
 		objects.add_child(sg)
-	# Eerste Archief: uitgang-warper (begin / midden / eind). Andere dungeons: leeg.
+	# Eerste Archief: uitgang-warper (ArchiefWarpers). Archief 2 overschrijft dit.
+	# Geen plek = niets, ook niet in de Diepe Grot.
 	_place_exit_warper(objects)
 	# v0.17 verhaal-objecten en NPC's uit de data (bv. Noor in de wortelcocon, woud_rooms.gd)
 	for d in room.get("objects", []):
@@ -283,7 +284,8 @@ func _build() -> void:
 			add_child(wall)
 
 
-## Uitgang-warper van het Eerste Archief (ArchiefWarpers). Geen plek = niets, ook niet in de Diepe Grot.
+## Uitgang-warper van het Eerste Archief (ArchiefWarpers). Archief 2 plaatst de zijne zelf.
+## Geen plek = niets, ook niet in de Diepe Grot.
 func _place_exit_warper(objects: Node2D) -> void:
 	var spot: Dictionary = ArchiefWarpers.for_room(room_id)
 	if spot.is_empty():

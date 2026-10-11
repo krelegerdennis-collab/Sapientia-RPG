@@ -69,10 +69,14 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
 In elke normale dungeon en in elk Archief (Archief 1 tot en met 6) staan warpers op vaste plekken: begin, midden en eind. Niet alleen in de Diepe Grot (de 100-verdiepingen-dungeon).
 
 - [ ] Begin: warper bij de ingang / start van de dungeon of het Archief
+  - [x] Archief 2: bij de ingang, naast de start, niet op een uitgangstegel. Geen waarschuwing.
 - [ ] Midden van de dungeon: warper na de mini-baas
+  - [x] Archief 2: na De Wurger (verdieping 3), met waarschuwing.
 - [ ] Eind van de dungeon: warper na de eindbaas
+  - [x] Archief 2: na De Genezer, met waarschuwing.
 - [ ] Geldt voor elke normale dungeon, niet alleen de Diepe Grot
 - [ ] Geldt voor alle Archieven (Archief 1 tot en met 6), inclusief Archief 1 (het Eerste Archief)
+  Archief 2 heeft begin, midden en eind. Archief 3 tot en met 6 bestaan niet. Deze checkbox blijft open.
 
 **CANON – niet wijzigen zonder overleg.**
 
@@ -87,15 +91,18 @@ Warp-bestemming voor de andere dungeons en Archieven: de party gaat in één sta
 - [ ] Warper brengt de party direct naar de worldmap of het dichtstbijzijnde dorp
 - [ ] De speler hoeft niet eerst terug naar de ingang
 - [ ] Eén stap: warper naar worldmap
+  - [x] Archief 2: begin, midden en eind gaan in één stap naar de wereldkaart.
 
 Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en quit-prompts. Die geldt voor de midden- en de eindwarper.
 
 - [ ] Waarschuwingsscherm: "Weet je zeker dat je de dungeon wilt verlaten?"
   - [ ] Optie: "Ja, warpen naar worldmap"
   - [ ] Optie: "Nee, blijf in de dungeon" (annuleren, de party blijft staan)
+  - [x] Archief 2: midden en eind gebruiken dit scherm en deze twee opties. De begin-warper waarschuwt niet.
 - [ ] Voorkomt dat een speler per ongeluk de dungeon uitwarpt
 - [ ] Waarschuwingsstijl passend bij de game-UI (vergelijkbaar met save- en quit-prompts)
 - [ ] Werkt op zowel de midden- als de eindwarper
+  - [x] Archief 2: de waarschuwing staat op midden (De Wurger) en eind (De Genezer).
 
 - [ ] Universele warper-stijl, of een variant per Archief-thema
   - [ ] Die keuze is nog open

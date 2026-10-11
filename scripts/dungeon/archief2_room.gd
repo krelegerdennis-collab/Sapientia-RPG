@@ -5,6 +5,7 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const PlaatScript := preload("res://scripts/dungeon/groei_plaat.gd")
 const WarpScript := preload("res://scripts/dungeon/archief2_warp.gd")
+const Archief2Warpers := preload("res://scripts/dungeon/archief2_warpers.gd")
 
 var platen: Array = []
 
@@ -112,6 +113,20 @@ func _tint_lotte() -> void:
 	var ml := get_node_or_null("Objects/Monster_lotte")
 	if ml and "sprite" in ml and ml.sprite:
 		ml.sprite.modulate = Color(0.75, 0.45, 1.15)
+
+
+## Uitgang-warpers van Het Levende Archief. Niet via ArchiefWarpers (dat is Archief 1).
+func _place_exit_warper(objects: Node2D) -> void:
+	var spot: Dictionary = Archief2Warpers.for_room(room_id)
+	if spot.is_empty():
+		return
+	var t: Vector2i = spot["tile"]
+	var warper := ExitWarperScript.create(t) as DungeonExitWarper
+	warper.name = "ExitWarper"
+	warper.role = str(spot["role"])
+	warper.warns = bool(spot.get("warn", true))
+	objects.add_child(warper)
+	_blocked[t] = true
 
 
 func _koppel_kern() -> void:

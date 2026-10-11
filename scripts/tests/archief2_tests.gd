@@ -8,6 +8,9 @@ const KernData := preload("res://scripts/data/kern_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const Rooms := preload("res://scripts/data/archief2_rooms.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
+const Archief2Warpers := preload("res://scripts/dungeon/archief2_warpers.gd")
+const ArchiefWarpers := preload("res://scripts/dungeon/archief_warpers.gd")
+const ExitWarper := preload("res://scripts/dungeon/dungeon_exit_warper.gd")
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const PuzzleRooms := preload("res://scripts/data/puzzle_rooms.gd")
 const PuzzleLogic := preload("res://scripts/puzzle/puzzle_logic.gd")
@@ -49,6 +52,8 @@ func _run() -> void:
 	_wereldkaart()
 	print("=== Archief 2: kamer, gevecht, warp ===")
 	await _spel()
+	print("=== Archief 2: uitgang-warpers ===")
+	await _uitgang_warpers()
 	print("ARCHIEF2TEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -434,6 +439,196 @@ func _spel() -> void:
 			slots_gelijk = false
 	check("vier save-slots onaangeroerd", slots_gelijk and GameState.SLOT_COUNT == 4)
 	Engine.time_scale = 1.0
+
+
+func _uitgang_warpers() -> void:
+	var spots: Array = Archief2Warpers.placements()
+	var roles := {}
+	for p in spots:
+		roles[str(p["role"])] = p
+	check("begin, midden en eind bestaan", spots.size() == 3 and roles.has("begin") and roles.has("midden") and roles.has("eind"))
+	var mid: Dictionary = Archief2Warpers.mini_boss()
+	var eind: Dictionary = Archief2Warpers.eind_boss()
+	var wurger_kamer: Dictionary = Rooms.rooms()["archief_2_v3_wurger"]
+	var genezer_kamer: Dictionary = Rooms.rooms()["archief_2_v4_genezer"]
+	var entree: Dictionary = Rooms.rooms()[Archief2.ENTREE]
+	check("mini-baas is De Wurger op verdieping 3", str(mid.get("room", "")) == "archief_2_v3_wurger"
+			and str(mid.get("enemy", "")) == "wurger" and int(wurger_kamer.get("floor", 0)) == 3
+			and bool(wurger_kamer["monsters"][0].get("mini", false)))
+	check("midden-warper staat na De Wurger, niet bij Lotte", str(roles["midden"]["room"]) == "archief_2_v3_wurger"
+			and str(roles["midden"]["room"]) != "archief_2_v2_lotte" and bool(roles["midden"]["warn"]))
+	check("eindbaas is De Genezer", str(eind.get("room", "")) == "archief_2_v4_genezer"
+			and str(eind.get("enemy", "")) == "genezer" and str(roles["eind"]["room"]) == "archief_2_v4_genezer"
+			and bool(roles["eind"]["warn"]) and not bool(genezer_kamer["monsters"][0].get("mini", false)))
+	var spawn: Array = entree["spawns"]["ingang"]
+	var begin: Vector2i = roles["begin"]["tile"]
+	check("begin bij de ingang, naast de start, niet op een uitgang", str(roles["begin"]["room"]) == Archief2.ENTREE
+			and begin == Archief2Warpers.BEGIN_TILE
+			and absi(begin.x - int(spawn[0])) + absi(begin.y - int(spawn[1])) == 1
+			and Archief2Warpers.walkable(entree, begin) and not Archief2Warpers.is_exit(entree, begin)
+			and not bool(roles["begin"]["warn"]))
+	var mid_tile: Vector2i = roles["midden"]["tile"]
+	var eind_tile: Vector2i = roles["eind"]["tile"]
+	var mid_baas: Vector2i = Archief2Warpers.boss_rect(wurger_kamer).position
+	var eind_baas: Vector2i = Archief2Warpers.boss_rect(genezer_kamer).position
+	check("midden-tegel direct ten noorden van De Wurger", mid_tile == Vector2i(mid_baas.x, mid_baas.y - 1)
+			and Archief2Warpers.walkable(wurger_kamer, mid_tile) and not Archief2Warpers.is_exit(wurger_kamer, mid_tile)
+			and not Archief2Warpers.boss_rect(wurger_kamer).has_point(mid_tile)
+			and mid_tile != Archief2Warpers.victory_tile(wurger_kamer))
+	check("eind-tegel direct ten noorden van De Genezer", eind_tile == Vector2i(eind_baas.x, eind_baas.y - 1)
+			and Archief2Warpers.walkable(genezer_kamer, eind_tile) and not Archief2Warpers.is_exit(genezer_kamer, eind_tile)
+			and not Archief2Warpers.boss_rect(genezer_kamer).has_point(eind_tile)
+			and eind_tile != Archief2Warpers.victory_tile(genezer_kamer))
+	var alleen_drie := true
+	var kamers: Dictionary = Rooms.rooms()
+	for id in kamers:
+		var plek: Dictionary = Archief2Warpers.for_room(str(id))
+		if plek.is_empty():
+			continue
+		if not ["archief_2_v1_entree", "archief_2_v3_wurger", "archief_2_v4_genezer"].has(str(id)):
+			alleen_drie = false
+	check("alleen ingang, Wurger en Genezer", alleen_drie and Archief2Warpers.for_room("archief_2_warper").is_empty()
+			and Archief2Warpers.for_room("leven_ingang").is_empty()
+			and Archief2Warpers.for_room("archief_2_v2_lotte").is_empty())
+	var a1_alleen := true
+	for p in ArchiefWarpers.placements():
+		var rid := str(p["room"])
+		if rid.begins_with("archief_2") or rid == "leven_ingang" or kamers.has(rid):
+			a1_alleen = false
+	check("ArchiefWarpers blijft het Eerste Archief", ArchiefWarpers.placements().size() == 3 and a1_alleen
+			and ArchiefWarpers.for_room("archief_2_v1_entree").is_empty()
+			and ArchiefWarpers.for_room("archief_2_v3_wurger").is_empty()
+			and ArchiefWarpers.for_room("archief_2_v4_genezer").is_empty())
+	var los := ExitWarper.new()
+	check("zonder vlag waarschuwt de warper", los.warns)
+	los.free()
+	var kern := FileAccess.get_file_as_string("res://scripts/dungeon/archief2_room.gd")
+	check("na De Genezer blijft de kaartkamer het doel", kern.contains('GameState.change_map(Archief2.WARPER_SCENE, "ingang")'))
+	check("geen automatische hub-warp na de kern", not kern.contains("WarperEnter"))
+
+	GameState.new_game("Dennis")
+	GameState.story_step = SD.KLAAR
+	GameState.encounter_multiplier = 0.0
+	GameState.story_flags["archief2_keten"] = true
+	GameState.story_flags["archief2_echo"] = true
+	if Dialog.is_open:
+		Dialog.close()
+	var ingang := await _enter_kamer(Archief2.ENTREE_SCENE, "ingang", "Archief2V1Entree")
+	var wp: DungeonExitWarper = null
+	if ingang != null:
+		wp = ingang.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
+	check("begin-warper in de ingang op %s" % [begin], wp != null and wp.role == "begin" and not wp.warns
+			and _warper_tegel(wp) == begin and wp.sprite.texture.resource_path.ends_with("save_book.png")
+			and wp.sprite.modulate == ExitWarper.TINT)
+	await _shot("archief2_warper_begin")
+	if wp == null or _speler() == null:
+		return
+	var stay := _tegel()
+	wp.interact(_speler())
+	await _pframes(3)
+	check("begin-warper waarschuwt niet", not _waarschuwing_open() and not Dialog.is_open)
+	var world_ok := await _wacht("Wereldkaart", 20.0)
+	await _wacht_fade()
+	var spawn_node: Node2D = null
+	if world_ok:
+		spawn_node = _scène().get_node_or_null("Spawns/van_archief") as Node2D
+	var expect := Vector2i((spawn_node.position / 16.0).floor()) if spawn_node != null else Vector2i(-99, -99)
+	check("begin warpt in één stap naar de wereldkaart %s" % [_tegel()],
+			world_ok and GameState.current_map == ExitWarper.WORLD_SCENE and spawn_node != null
+			and _tegel() == expect and _tegel() != stay)
+
+	var mid_scene := await _enter_kamer(str(Rooms.SCENES["archief_2_v3_wurger"]), "zuid", "Archief2V3Wurger")
+	var mid_wp: DungeonExitWarper = null
+	if mid_scene != null:
+		mid_wp = mid_scene.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
+	check("midden-warper in de Wurger-kamer op %s" % [mid_tile], mid_wp != null and mid_wp.role == "midden"
+			and mid_wp.warns and _warper_tegel(mid_wp) == mid_tile
+			and mid_wp.sprite.modulate == ExitWarper.TINT)
+	if mid_wp == null or _speler() == null:
+		return
+	stay = _tegel()
+	mid_wp.interact(_speler())
+	var warned: bool = await _wacht_tot(_waarschuwing_open, 3.0)
+	check("midden-waarschuwing: '%s'" % ExitWarper.WARNING, warned)
+	await _shot("archief2_warper_midden_waarschuwing")
+	Dialog.choose(1)
+	await _wacht_tot(func(): return mid_wp.last_result == "cancelled" and not mid_wp.busy, 2.0)
+	check("annuleren laat je in de Wurger-kamer", mid_wp.last_result == "cancelled" and _scène() == mid_scene
+			and _tegel() == stay and _speler() != null and not _speler().input_locked
+			and GameState.current_map.ends_with("archief_2_v3_wurger.tscn"))
+
+	var eind_scene := await _enter_kamer(str(Rooms.SCENES["archief_2_v4_genezer"]), "zuid", "Archief2V4Genezer")
+	var eind_wp: DungeonExitWarper = null
+	if eind_scene != null:
+		eind_wp = eind_scene.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
+	check("eind-warper in de Genezer-kamer op %s" % [eind_tile], eind_wp != null and eind_wp.role == "eind"
+			and eind_wp.warns and _warper_tegel(eind_wp) == eind_tile)
+	await _shot("archief2_warper_eind")
+	if eind_wp == null or _speler() == null:
+		return
+	stay = _tegel()
+	eind_wp.interact(_speler())
+	warned = await _wacht_tot(_waarschuwing_open, 3.0)
+	check("eind-waarschuwing opnieuw, dezelfde keuzes", warned)
+	Dialog.choose(0)
+	world_ok = await _wacht("Wereldkaart", 20.0)
+	await _wacht_fade()
+	spawn_node = null
+	if world_ok:
+		spawn_node = _scène().get_node_or_null("Spawns/van_archief") as Node2D
+	expect = Vector2i((spawn_node.position / 16.0).floor()) if spawn_node != null else Vector2i(-99, -99)
+	check("bevestigen zet je op de wereldkaart %s" % [_tegel()],
+			world_ok and GameState.current_map == ExitWarper.WORLD_SCENE and spawn_node != null
+			and _tegel() == expect and _tegel() != stay)
+
+	var hub := await _enter_kamer(Archief2.WARPER_SCENE, "ingang", "Archief2Warper")
+	var hub_wp: Node = hub.get_node_or_null("Objects/ExitWarper") if hub != null else null
+	check("kaartkamer heeft geen uitgang-warper", hub != null and hub_wp == null)
+	if Dialog.is_open:
+		Dialog.close()
+
+
+func _enter_kamer(path: String, spawn_name: String, scene_name: String) -> Node:
+	if Dialog.is_open:
+		Dialog.close()
+	GameState.has_return_point = false
+	GameState.in_battle = false
+	GameState.changing_map = false
+	GameState.change_map(path, spawn_name)
+	if not await _wacht(scene_name, 20.0):
+		check("kamer geladen: %s" % scene_name, false)
+		return null
+	await _wacht_fade()
+	return _scène()
+
+
+func _warper_tegel(node: Node2D) -> Vector2i:
+	if node == null:
+		return Vector2i(-99, -99)
+	return Vector2i((node.position / 16.0).floor())
+
+
+func _waarschuwing_open() -> bool:
+	return Dialog.is_open and Dialog.choices.size() == 2 and not Dialog._lines.is_empty() \
+			and str(Dialog._lines[0]) == ExitWarper.WARNING and str(Dialog.choices[0]) == ExitWarper.YES \
+			and str(Dialog.choices[1]) == ExitWarper.NO
+
+
+func _speler() -> CharacterBody2D:
+	var s := _scène()
+	if s == null or not s.is_node_ready():
+		return null
+	return s.get_node_or_null("Objects/Player") as CharacterBody2D
+
+
+func _tegel() -> Vector2i:
+	var p := _speler()
+	return p.get_tile() if p else Vector2i(-99, -99)
+
+
+func _wacht_fade() -> void:
+	await _wacht_tot(func(): return Transition._rect.color.a <= 0.01, 3.0)
+	await _pframes(2)
 
 
 func _zonder_lotte() -> void:

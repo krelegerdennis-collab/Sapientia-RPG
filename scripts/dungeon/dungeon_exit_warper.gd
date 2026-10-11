@@ -1,7 +1,9 @@
 extends "res://scripts/book_point.gd"
 class_name DungeonExitWarper
 ## Warper die een dungeon in één stap verlaat, naar een vast punt op de wereldkaart.
-## Het Eerste Archief zet er drie (begin, midden, eind). Archief 2 gebruikt dit nog niet.
+## Het Eerste Archief en Het Levende Archief zetten er drie (begin, midden, eind).
+## Met warns aan is de waarschuwing in beide archieven dezelfde. Archief 2 zet warns uit
+## op de begin-warper. Midden en eind vragen wel.
 ##
 ## De Diepe Grot heeft een eigen warper (dungeon100_warper.gd) op verdieping 1, 25, 50, 75 en 99.
 ## Die verlaat de grot. Dit script roept hem niet aan. De uitgangen van het Eerste Archief blijven hier.
@@ -17,8 +19,10 @@ const NO := "Nee, blijf in de dungeon"
 const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
 const WORLD_SPAWN := "van_archief"
 
-## "begin", "midden" of "eind". Alleen voor tests en de naam; het gedrag is hetzelfde.
+## "begin", "midden" of "eind". De rol is een naam. warns beslist of de waarschuwing komt.
 var role := ""
+## true: dezelfde Ja/Nee-waarschuwing als het Eerste Archief. Archief 2 zet dit uit op begin.
+var warns := true
 var world_scene := WORLD_SCENE
 var world_spawn := WORLD_SPAWN
 
@@ -46,11 +50,12 @@ func interact(player: Node2D) -> void:
 	busy = true
 	player.input_locked = true
 	last_result = ""
-	var warn: int = await Dialog.ask(WARNING, [YES, NO])
-	if warn != 0:
-		last_result = "cancelled"
-		_release(player)
-		return
+	if warns:
+		var keuze: int = await Dialog.ask(WARNING, [YES, NO])
+		if keuze != 0:
+			last_result = "cancelled"
+			_release(player)
+			return
 	last_result = "travel"
 	_release(player)
 	GameState.change_map(world_scene, world_spawn)

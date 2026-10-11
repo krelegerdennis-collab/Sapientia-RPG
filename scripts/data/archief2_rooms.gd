@@ -209,7 +209,7 @@ static func rooms() -> Dictionary:
 		]}],
 		"monsters": [{
 			"id": "wurger", "enemy": "wurger", "group": ["wurger"],
-			"tile": [9, 5], "moves": false, "boss": true, "guard": true,
+			"tile": [9, 5], "moves": false, "boss": true, "mini": true, "guard": true,
 		}],
 	})
 	var hal := _met(_basis("Hal van de Genezer", 4, 3), {
