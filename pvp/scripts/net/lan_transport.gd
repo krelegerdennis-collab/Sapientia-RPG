@@ -78,7 +78,10 @@ func join_ip(code_text: String, ip: String) -> bool:
 
 ## Puur: pakket plus verwachte code geeft de poort, of -1. Geen socket.
 static func parse_beacon(packet: PackedByteArray, expected_code: String) -> int:
-	var parsed: Variant = JSON.parse_string(packet.get_string_from_utf8())
+	var text := packet.get_string_from_utf8().strip_edges()
+	if not text.begins_with("{"):
+		return -1
+	var parsed: Variant = JSON.parse_string(text)
 	if not (parsed is Dictionary):
 		return -1
 	var data: Dictionary = parsed
