@@ -39,12 +39,14 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
 
 ### Dungeon Warpers (begin, midden en eind)
 
-In elke dungeon (Archief 1 tot en met 6) staan warpers op vaste plekken.
+In elke normale dungeon en in elk Archief (Archief 1 tot en met 6) staan warpers op vaste plekken: begin, midden en eind. Niet alleen in de Diepe Grot (de 100-verdiepingen-dungeon).
 
+- [ ] Begin: warper bij de ingang / start van de dungeon of het Archief
 - [ ] Midden van de dungeon: warper na de mini-baas
 - [ ] Eind van de dungeon: warper na de eindbaas
-- [ ] Geldt voor alle Archieven, inclusief Archief 1 (het Eerste Archief)
-- [ ] Geldt ook voor de Diepe Grot (na de mini-baas en na verdieping 100)
+- [ ] Geldt voor elke normale dungeon, niet alleen de Diepe Grot
+- [ ] Geldt voor alle Archieven (Archief 1 tot en met 6), inclusief Archief 1 (het Eerste Archief)
+- [ ] Geldt ook voor de Diepe Grot: begin, midden en eind
   - [ ] Frequentie in de Diepe Grot nog open (elke 20 verdiepingen een warper?)
 
 Warp-bestemming: de party gaat in één stap direct naar de worldmap of het dichtstbijzijnde dorp, zonder eerst terug naar de dungeon-ingang.
