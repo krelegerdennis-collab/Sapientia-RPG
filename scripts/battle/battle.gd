@@ -37,6 +37,7 @@ const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
+const KamerData := preload("res://world_warper/kamers/kamers.gd")
 const COMMANDS := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 ## v0.19 Codex-knop (index 5): submenu 'Vangen' (Leeg Boek op een vijand, met vangkans per doel)
 ## en 'Wissel bondgenoot' (niet-KO pagina's + 'Geen'; kost de beurt van de held). Verborgen in
@@ -841,7 +842,7 @@ func _choose_for_hero(hero: Dictionary, can_go_back: bool):
 ## v0.19: staat de Codex-knop in het kruis? Niet in het oefengevecht, en niet zolang er nog
 ## niets te doen is (0 pagina's en 0 Lege Boeken).
 func codex_command_shown() -> bool:
-	if not tutorial.is_empty():
+	if not tutorial.is_empty() or GameState.practice_battle:
 		return false
 	return not GameState.codex_pages.is_empty() or GameState.item_count(CodexDataScript.BOOK_ITEM) > 0
 
@@ -1485,38 +1486,50 @@ func _flash_enemy(e: Dictionary) -> void:
 ## Pagina 1: EXP, goud en per held hoeveel EXP er nog nodig is voor het
 ## volgende level. Daarna één pagina per held die een level omhoog gaat.
 func _victory() -> void:
+	var practice := GameState.practice_battle
 	var exp_total := 0
 	var gold_total := 0
-	for e in enemies:
-		if e.get("captured", false):
-			continue   # Codex: ingeschreven monsters geven geen EXP/goud
-		exp_total += int(e["s"]["exp"])
-		gold_total += int(e["s"]["gold"])
-	GameState.gold += gold_total
-	var book_lines: Array = grant_fixed_boss_drops()
-	var loot_page := _dungeon100_boss_loot()
+	var book_lines: Array = []
+	var loot_page := ""
+	if practice:
+		var buit := KamerData.toegepaste_buit(true, 0, 0)
+		exp_total = buit.x
+		gold_total = buit.y
+	else:
+		for e in enemies:
+			if e.get("captured", false):
+				continue   # Codex: ingeschreven monsters geven geen EXP/goud
+			exp_total += int(e["s"]["exp"])
+			gold_total += int(e["s"]["gold"])
+		GameState.gold += gold_total
+		book_lines = grant_fixed_boss_drops()
+		loot_page = _dungeon100_boss_loot()
 	await _wait(0.3)
 	# EXP uitdelen (alleen helden die nog staan), level-ups onthouden
 	var level_pages: Array[String] = []
-	for h in _alive(heroes):
-		if h.get("ally", false):
-			continue   # Codex: de bondgenoot krijgt zijn EXP hieronder (codex.victory_exp)
-		var s: Dictionary = h["s"]
-		var before: Dictionary = s.duplicate()
-		var msgs := GameState.give_exp(s, exp_total)
-		if msgs.is_empty():
-			continue
-		var gains := "HP+%d" % (s["max_hp"] - before["max_hp"])
-		if s["max_mp"] > before["max_mp"]:
-			gains += " MP+%d" % (s["max_mp"] - before["max_mp"])
-		gains += " ATK+%d DEF+%d AGI+%d" % [s["atk"] - before["atk"], s["def"] - before["def"], s["agi"] - before["agi"]]
-		level_pages.append("%s\n%s" % [msgs[msgs.size() - 1], gains])
-	level_pages.append_array(codex.victory_exp(exp_total))
-	if loot_page != "":
-		level_pages.append(loot_page)
+	if not practice:
+		for h in _alive(heroes):
+			if h.get("ally", false):
+				continue   # Codex: de bondgenoot krijgt zijn EXP hieronder (codex.victory_exp)
+			var s: Dictionary = h["s"]
+			var before: Dictionary = s.duplicate()
+			var msgs := GameState.give_exp(s, exp_total)
+			if msgs.is_empty():
+				continue
+			var gains := "HP+%d" % (s["max_hp"] - before["max_hp"])
+			if s["max_mp"] > before["max_mp"]:
+				gains += " MP+%d" % (s["max_mp"] - before["max_mp"])
+			gains += " ATK+%d DEF+%d AGI+%d" % [s["atk"] - before["atk"], s["def"] - before["def"], s["agi"] - before["agi"]]
+			level_pages.append("%s\n%s" % [msgs[msgs.size() - 1], gains])
+		level_pages.append_array(codex.victory_exp(exp_total))
+		if loot_page != "":
+			level_pages.append(loot_page)
 	_refresh_party()
 	caption.hide()
-	victory_label.text = victory_text(exp_total, gold_total, book_lines)
+	if practice:
+		victory_label.text = KamerData.OEFEN_KLAAR
+	else:
+		victory_label.text = victory_text(exp_total, gold_total, book_lines)
 	# Venster precies zo hoog als de tekst, zodat de helden eronder zichtbaar blijven.
 	victory_panel.offset_bottom = victory_panel.offset_top + victory_panel.get_combined_minimum_size().y
 	victory_panel.show()
@@ -1600,6 +1613,10 @@ func _victory_page(text: String) -> void:
 
 
 func _defeat() -> void:
+	if GameState.practice_battle:
+		await say(KamerData.OEFEN_VERLIES, true)
+		await GameState.end_battle("lose")
+		return
 	await say("The party is defeated...", true)
 	# v0.19: wakker worden waar je deze kamer/map binnenkwam (baas: in de kamer ervoor)
 	await say(GameState.defeat_text(GameState.pending_boss), true)

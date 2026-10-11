@@ -10,6 +10,7 @@ extends RefCounted
 ## Regels staan in HANDOFF_CODEX.md.
 
 const CodexData := preload("res://scripts/data/codex_data.gd")
+const KamerData := preload("res://world_warper/kamers/kamers.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const AllyScript := preload("res://scripts/battle/codex_ally.gd")
 const StatusBoxScript := preload("res://scripts/battle/hero_status_box.gd")
@@ -272,6 +273,10 @@ func _remove_ally(c: Dictionary) -> void:
 ## Het Leeg Boek is al van de stapel gehaald (battle.gd); bij een weigering komt het terug.
 func capture(actor: Dictionary, target) -> void:
 	var item := CodexData.BOOK_ITEM
+	if GameState.practice_battle:
+		_refund(item)
+		await battle.say(KamerData.OEFEN_VANGEN)
+		return
 	var t = battle._valid_target(target, false)
 	if t == null:
 		_refund(item)
