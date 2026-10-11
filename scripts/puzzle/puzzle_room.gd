@@ -29,6 +29,7 @@ const BookSwitch := preload("res://scripts/puzzle/book_switch.gd")
 const TreasureChest := preload("res://scripts/puzzle/treasure_chest.gd")
 const GrowPlate := preload("res://scripts/puzzle/grow_plate.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 ## Standaardteksten (Nederlands); per object te vervangen in de data.
 const SECRET_HINT := ["There's a little draft behind this cabinet...",
 		"Something in this room is surely sticking out."]
@@ -101,6 +102,8 @@ func _ready() -> void:
 		logic.set_state(_battle_snapshots[room_id])
 		_sync_all()
 	_battle_snapshots.erase(room_id)
+	if music_track == "" and room is Dictionary and str(room.get("music", "")) != "":
+		music_track = str(room["music"])
 	super._ready()
 	# Veiligheid (bv. een oude save midden in een kast): terug naar de ingang.
 	if logic.is_solid(player.get_tile()):
@@ -117,6 +120,8 @@ func _exit_tree() -> void:
 # ---------------------------------------------------------------- bouwen
 func _build() -> void:
 	room = PuzzleRooms.ROOMS.get(room_id, {})
+	if room.is_empty():
+		room = BerggrotData.puzzle(room_id)
 	if room.is_empty():
 		push_error("Puzzle Room '%s' bestaat niet in puzzle_rooms.gd" % room_id)
 		return
@@ -471,6 +476,8 @@ func request_reset(p: Node2D) -> void:
 static func item_data(item: String) -> Dictionary:
 	if GameData.ITEMS.has(item):
 		return GameData.ITEMS[item]
+	if BerggrotData.has_gear(item):
+		return BerggrotData.gear(item)
 	return GameData.EQUIPMENT.get(item, {})
 
 

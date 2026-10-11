@@ -2,8 +2,8 @@ extends "res://scripts/book_point.gd"
 class_name Dungeon100Warper
 ## WARPER van de Diepe Grot (Dungeon100Rules.WARPER_FLOORS).
 ## Verdieping 1 is de start: een korte uitleg, geen waarschuwing, geen verplaatsing.
-## 25, 50, 75 en 99 vragen of je de dungeon verlaat. Ja gaat naar de wereldkaart bij de
-## ingang. Nee of annuleren laat je staan.
+## 25, 50, 75 en 99 vragen of je de dungeon verlaat. Ja gaat naar ECHO's Kamer.
+## Nee of annuleren laat je staan.
 ##
 ## PLAATJE PLACEHOLDER: het opslagboek, violet getint. Geen eigen bestand.
 ## Zie tools/placeholders_v17.txt. Echte art: assets/sprites/dungeon100_warper.png (64x16).

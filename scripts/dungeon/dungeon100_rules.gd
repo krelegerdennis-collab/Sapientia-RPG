@@ -10,31 +10,32 @@ extends RefCounted
 ##   GameState.dungeon100_best       hoogste verdieping die ooit bereikt is (0..100).
 ##
 ## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md): de kerker is een
-## simulatie. Een RUN begint bij het binnenkomen vanaf de wereldkaart: iedereen die dan in de party zit
+## simulatie. Een RUN begint bij ECHO (niet vanaf de wereldkaart): iedereen die dan in de party zit
 ## (ook wie zich later aansluit) gaat mee op level 1, zonder uitrusting en zonder spreuken. Elke
 ## Codex-pagina gaat ook mee, op level 1. De echte party + tas + goud + Codex liggen in een momentopname
 ## en je tas bevat alleen de PERMANENTE items van eerdere runs (GameState.dungeon100_permanent, uit
 ## Blauwe Kisten). Spreuken vind je terug als rol in een willekeurige gewone kist.
-##   - VERLIES (party KO) BINNEN de kerker = de run is voorbij ("dood is dungeon uit"): terug naar de
-##     wereldkaart bij de ingang (van_dungeon100), NIET naar verdieping 1 en NIET naar een rustpunt.
-##     Tijdelijke levels, tas, goud en uitrusting van de run zijn weg. De momentopname van de echte
-##     party/tas/goud/Codex komt terug, en daarna de permanente Blauwe-Kist-items. Een nieuwe run
-##     begint pas als je opnieuw naar binnen gaat (verdieping 1, level 1, nieuwe seed).
+##   - VERLIES (party KO) BINNEN de kerker = de run is voorbij ("dood is dungeon uit"): terug naar
+##     ECHO's Kamer, NIET naar verdieping 1, NIET naar een rustpunt en NIET naar de wereldkaart.
+##     De oude tegel op de wereldkaart start de grot niet meer. Tijdelijke levels, tas, goud en uitrusting van de run zijn weg.
+##     De momentopname komt terug, en daarna de permanente Blauwe-Kist-items. Een nieuwe run begint
+##     pas als ECHO hem start (verdieping 1, level 1, nieuwe seed).
 ##   - RUSTPUNTEN (elke 10e verdieping: 10, 20, ... 100): aanraken (A) = HP/MP van de hele party (en de
 ##     Codex-bondgenoot) vol + opslaan ('Voortgang opslaan?'). Het rustpunt wordt ook onthouden als
 ##     'laatste rustpunt van deze run' (GameState.dungeon100_checkpoint, gaat alleen omhoog; alleen voor
 ##     de tekst, het is GEEN terugkeerpunt).
-##   - de kerker verlaten: de ladder op verdieping 1, een warper (niet op 1), de dood, of het
-##     Warp-kristal op verdieping 100. Allemaal zetten de momentopname terug en leveren de
-##     permanente items af in de echte tas.
+##   - de kerker verlaten: de ladder op verdieping 1, een warper (niet op 1) en de dood gaan naar
+##     ECHO's Kamer, net als het Warp-kristal op verdieping 100. Alleen het kristal zet
+##     echo_grot_resultaat. Allemaal zetten de momentopname terug en leveren de permanente items af.
 ##   - game over BUITEN de kerker (verdieping 0) werkt zoals altijd.
 
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 
 const FLOORS := 100
 const REST_INTERVAL := 10
 ## Warpers: 1 is de start (geen waarschuwing). 25, 50 en 75 zijn tussen-warpers. 99 is de
-## eind-warper. Allemaal behalve 1 verlaten de grot naar de wereldkaart, na een waarschuwing.
+## eind-warper. Allemaal behalve 1 verlaten de grot naar ECHO's Kamer, na een waarschuwing.
 const WARPER_FLOORS: Array[int] = [1, 25, 50, 75, 99]
 const WARPER_START := 1
 ## Spawnpunt naast de warper (zelfde naam in de generator).
@@ -55,8 +56,9 @@ const REST_SPAWN := "rustpunt"
 ## Spawnpunt boven aan de trap van een verdieping (= Dungeon100Generator.SPAWN_FROM_ABOVE): daar begint elke run.
 const START_SPAWN := "omhoog"
 ## Waar je uitkomt als je de kerker verlaat (= Dungeon100Generator.WORLD_SCENE / WORLD_SPAWN).
-const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
-const WORLD_SPAWN := "van_dungeon100"
+## Ladder, tussen-warper en nederlaag. Het kristal op 100 gebruikt dezelfde kamer.
+const WORLD_SCENE := EchoGrot.KAMER
+const WORLD_SPAWN := EchoGrot.KAMER_SPAWN
 ## Vlaggen in GameState.story_flags die bij één run horen (kist geopend, bewaker/baas verslagen) en bij het
 ## einde van de run weggaan. Kist- en kamer-id's bevatten de seed, dus een nieuwe run begint altijd schoon.
 const RUN_FLAG_PREFIXES := ["kist:d100_", "bewaker:dungeon100_", "dungeon100_boss:"]
@@ -120,7 +122,7 @@ static func checkpoint_after_rest(current_checkpoint: int, floor_nr: int) -> int
 
 ## Plan bij een nederlaag (party KO) op verdieping 'floor_nr':
 ##   {"respawn_floor": 0, "to_dungeon": false, "leave": bool, "gold_keep": float, "new_run": false}
-## In de kerker (1..100): "leave" = de run is voorbij, terug naar de wereldkaart bij de ingang.
+## In de kerker (1..100): "leave" = de run is voorbij, terug naar ECHO's Kamer.
 ## Het rustpunt ('checkpoint') en 'scene_ok' doen niets meer: dood is nooit een respawn op verdieping 1.
 ## De parameters blijven voor bestaande aanroepers. Buiten de kerker: gewone game over (helft van het goud).
 static func defeat_plan(floor_nr: int, _checkpoint: int, _scene_ok := true) -> Dictionary:

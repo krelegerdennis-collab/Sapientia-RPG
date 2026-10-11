@@ -102,6 +102,16 @@ const THEMES := {
 		"tint": Color(0.78, 1.0, 0.84),
 		"sprites": {},
 	},
+	# Berggrot naar de kas. Zelfde tegelnummers, koud steenblauw beeld.
+	# PLACEHOLDER: tools/art_berggrot_placeholder.py (magenta hoekjes).
+	# Terrein blijft "archief": de gevechtsachtergrond staat in game_data en wordt niet uitgebreid.
+	"berggrot": {
+		"tiles": "res://assets/tiles/dungeon/berggrot_tiles.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"terrain": "archief",
+		"tint": Color(0.70, 0.78, 0.95),
+		"sprites": {},
+	},
 	# Hub na De Genezer. Zelfde atlas, paarse tint.
 	"warper_paars": {
 		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",
@@ -640,6 +650,11 @@ static func archief2() -> Script:
 	return load("res://scripts/data/archief2_rooms.gd")
 
 
+## De berggrot naar de kas (scripts/data/berggrot_data.gd; via load(), geen cyclus).
+static func berggrot() -> Script:
+	return load("res://scripts/data/berggrot_data.gd")
+
+
 ## v0.17 Kamerdata van ELKE dungeon: eerst de Archieven (ROOMS), dan het Donker Woud ({} = onbekend).
 ## Dungeon100 (de Diepe Grot): id "dungeon100_<seed>_<verdieping>" wordt gegenereerd (dungeon100_generator.gd).
 static func room(room_id: String) -> Dictionary:
@@ -652,6 +667,8 @@ static func room(room_id: String) -> Dictionary:
 	var later: Dictionary = archief2().rooms()
 	if later.has(room_id):
 		return later[room_id]
+	if berggrot().ROOMS.has(room_id):
+		return berggrot().ROOMS[room_id]
 	return woud().ROOMS.get(room_id, {})
 
 

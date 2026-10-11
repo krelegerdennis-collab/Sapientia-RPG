@@ -2,6 +2,7 @@ extends StaticBody2D
 ## Interactie in een extra kamer: tekst, poort, diensten of een bestaand scherm.
 
 const Kamers := preload("res://world_warper/kamers/kamers.gd")
+const Gesprek := preload("res://world_warper/kamers/echo_gesprek.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 const ShopScreen := preload("res://scripts/ui/shop_screen.gd")
 
@@ -47,6 +48,8 @@ func interact(player: Node) -> void:
 	match bron:
 		"echo":
 			_zeg(Kamers.ECHO_REGELS, "ECHO")
+		"echo_grot":
+			_grot(player)
 		"werk":
 			_zeg(Kamers.WERK_REGELS, "")
 		"kern":
@@ -77,6 +80,23 @@ func _zeg(regels: Array, spreker: String) -> void:
 	for r in regels:
 		lines.append(str(r))
 	Dialog.show_lines(lines, spreker)
+
+
+func _grot(player: Node) -> void:
+	if get_node_or_null("Gesprek") != null:
+		return
+	if "input_locked" in player:
+		player.input_locked = true
+	var gesprek := Gesprek.new()
+	gesprek.name = "Gesprek"
+	gesprek.klaar.connect(func() -> void:
+		if is_instance_valid(player) and "input_locked" in player and not GameState.changing_map:
+			player.input_locked = false
+		if is_instance_valid(gesprek):
+			gesprek.queue_free()
+	)
+	add_child(gesprek)
+	gesprek.praat()
 
 
 func _warp(player: Node) -> void:

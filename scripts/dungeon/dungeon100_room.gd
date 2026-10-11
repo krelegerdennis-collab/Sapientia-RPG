@@ -5,12 +5,12 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 ## GameState.dungeon100_seed + GameState.dungeon100_floor; de kamer wordt dan door
 ## Dungeon100Generator gegenereerd (via DungeonRooms.room()) en door DungeonRoom getekend.
 ## Trap omlaag / ladder omhoog = dezelfde scène opnieuw, met een andere verdieping.
-##   - Binnenkomen vanaf de wereldkaart (verdieping 0): verdieping 1; de seed wordt eenmalig
-##     gekozen (en zit in de save), dus elke verdieping ziet er bij een volgend bezoek hetzelfde uit.
+##   - Binnenkomen (ECHO zet verdieping 1, of een save): verdieping 1 als die nog 0 is; de seed
+##     wordt eenmalig gekozen (en zit in de save). De wereldkaart start deze scène niet meer.
 ##   - Laden uit een save: verdieping en seed komen uit de save.
 ##   - HET GESIMULEERDE ARCHIEF: het eerste binnenkomen van een run (GameState.dungeon100_begin_run) zet de
 ##     party op level 1 zonder uitrusting en bewaart de echte party/tas in een momentopname; de ladder op
-##     verdieping 1 (na een bevestiging) geeft de run op en brengt je naar de wereldkaart.
+##     verdieping 1 (na een bevestiging) geeft de run op en brengt je naar ECHO's Kamer.
 ##   - Hooks voor andere systemen: signal floor_ready(floor_no, data) zodra de kamer er staat.
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
@@ -79,7 +79,7 @@ func allows_checkpoint() -> bool:
 
 
 ## Trap/ladder: eerst de nieuwe verdieping in GameState zetten, dan pas de gewone uitgang
-## (fade + dezelfde scène laden). De ladder op verdieping 1 gaat naar de wereldkaart: na een bevestiging
+## (fade + dezelfde scène laden). De ladder op verdieping 1 gaat naar ECHO's Kamer: na een bevestiging
 ## is de run opgegeven (de echte party/tas komen terug, GameState.dungeon100_leave).
 func _use_exit(exit: Node) -> void:
 	if exit.target_map == Gen.SCENE:
