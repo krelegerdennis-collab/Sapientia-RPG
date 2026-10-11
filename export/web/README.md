@@ -1,13 +1,16 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`ad7cbd4`), Godot 4.7.2, threads uit.
+Web-build van `main` (`4a145c6`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`5a4486a`, export van `71c7bdc`):
-- Verdieping 1 van Het Levende Archief. Op de wereldkaart, direct links van de trap naar het Eerste Archief, staat een kas. Die blijft dicht tot je de Golem van het Eerste Archief verslagen hebt. Daarna: een bord, een opslagpunt, een Mosslijm en een Moskonijn, en één groei-plaat. Zet eerst de hendel om. Daarna groeit de plaat: zaad, scheut, volgroeid. Alleen volgroeid is een pad. Verder de kas in is nog dicht.
+Nieuw in deze build, bovenop de vorige web-build (`2505d0a`, export van `ad7cbd4`):
+- In het Eerste Archief staan drie uitgang-warpers: bij de ingang, in de Zuilenhal (verdieping 3) en in de Golemhal, naast de tegel na de overwinning. Met A vraagt het spel: "Weet je zeker dat je de dungeon wilt verlaten?" Ja zet je op de wereldkaart bij het Eerste Archief. Nee laat je staan. De warpers van de Diepe Grot (verdieping 1, 50 en 99) blijven zoals ze waren.
 - Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `ad7cbd4`:
+- Verdieping 1 van Het Levende Archief. Op de wereldkaart, direct links van de trap naar het Eerste Archief, staat een kas. Die blijft dicht tot je de Golem van het Eerste Archief verslagen hebt. Daarna: een bord, een opslagpunt, een Mosslijm en een Moskonijn, en één groei-plaat. Zet eerst de hendel om. Daarna groeit de plaat: zaad, scheut, volgroeid. Alleen volgroeid is een pad. Verder de kas in is nog dicht.
 
 Nog van de build van `71c7bdc`:
 - Kortere intro. Geen wakker-cutscene: je staat meteen naast het bed. Opa vraagt eerst wat je zegt: "Goedemorgen, Opa." of "Waarom blijven de Archieven dicht?". Daarna hetzelfde vervolg: de mantel, MENU > Uitrusting > Harnas, en daarna water en kruiden.
