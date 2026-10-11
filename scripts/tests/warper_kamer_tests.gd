@@ -214,6 +214,8 @@ func _echo_grot() -> void:
 	var eerste := await _naar_tekst(EchoGrot.ZIN_EERSTE)
 	var live_naam := Dialog.name_label.text == "ECHO" and Dialog.name_label.text != "IVA"
 	check("eerste-bezoekzin", eerste and EchoGrot.ZIN_EERSTE == eerste_letterlijk and live_naam)
+	if eerste and Dialog._is_typing():
+		Dialog.advance()
 	if eerste:
 		await _screenshot("echo_eerste_bezoek")
 	check("naam ECHO en niet IVA", str(Dialoog.NAAM) == "ECHO" and str(Dialoog.NAAM) != "IVA"
