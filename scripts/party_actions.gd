@@ -7,6 +7,7 @@ extends RefCounted
 ## (preload i.p.v. class_name, zoals de andere UI-hulpjes)
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 ## Spreuk-effect buiten gevechten: zelfde formule als in battle.gd (_spell_amount):
 ## power + SPELL_LEVEL_BONUS x level, +/- SPELL_SPREAD.
@@ -167,6 +168,13 @@ static func use_item(inventory: Dictionary, id: String, hero: Dictionary) -> Dic
 	var it := item_data(id)
 	var spell_id := _teach_id(it)
 	if spell_id != "":
+		if not (hero.get("spells") is Array):
+			hero["spells"] = []
+		if (hero["spells"] as Array).has(spell_id):
+			return {"ok": false, "hp": 0, "mp": 0, "text": MSG_NO_EFFECT}
+		var why := SpellRules.block_reason(hero, spell_id)
+		if why != "":
+			return {"ok": false, "hp": 0, "mp": 0, "text": why}
 		if not teach_spell(hero, spell_id):
 			return {"ok": false, "hp": 0, "mp": 0, "text": MSG_NO_EFFECT}
 		inventory[id] = int(inventory[id]) - 1
@@ -196,6 +204,8 @@ static func _teach_id(it: Dictionary) -> String:
 ## (nooit omlaag) en vult zijn huidige MP tot dat nieuwe maximum.
 static func teach_spell(hero: Dictionary, spell_id: String) -> bool:
 	if spell_data(spell_id).is_empty():
+		return false
+	if not SpellRules.can_learn(str(hero.get("id", "")), spell_id):
 		return false
 	if not (hero.get("spells") is Array):
 		hero["spells"] = []

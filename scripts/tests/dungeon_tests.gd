@@ -384,7 +384,7 @@ func _title_shot() -> void:
 	var br: Rect2 = t.beta_card.get_global_rect()
 	br.position -= st.position
 	check("Betatest links onder, los van het menu (%s)" % br, t.beta_button != null and not t.beta_button.disabled
-			and "Beta Test" in str(t.beta_button.get_meta("label", "")) and br.end.x <= cr.position.x
+			and "Betatest" in str(t.beta_button.get_meta("label", "")) and br.end.x <= cr.position.x
 			and br.position.x >= 0.0 and br.end.y <= 201.0 and br.position.y >= 140.0)
 	if t.glitch == null:
 		check("hoofdpagina title_main.png, menu onder de titel, Nearest",
@@ -473,8 +473,9 @@ func _world_and_outdoor_tests() -> void:
 	var ex_vil: Node = scene().get_node_or_null("Exits/NaarWilgendal")
 	check("W: uitgang NaarWachtershuis (oude stad) -> wilgendal.tscn 'zuid_ingang'", ex_house != null
 			and ex_house.tile_rect() == Rect2i(14, 30, 2, 1) and ex_house.target_map == TOWN_SCENE and ex_house.target_spawn == "zuid_ingang")
-	check("W: uitgang NaarWilgendal (30,23) 2x2 -> dorp_wilgendal.tscn, met 'komt later'-tekst", ex_vil != null
-			and ex_vil.tile_rect() == Rect2i(30, 23, 2, 2) and ex_vil.target_map == VILLAGE_SCENE and ex_vil.lines == ["Willowdale (later)"])
+	check("W: uitgang NaarWilgendal (30,23) 2x2 -> dorp_wilgendal.tscn, zonder later-tekst", ex_vil != null
+			and ex_vil.tile_rect() == Rect2i(30, 23, 2, 2) and ex_vil.target_map == VILLAGE_SCENE and ex_vil.lines.is_empty()
+			and ResourceLoader.exists(VILLAGE_SCENE))
 	var sp: Node = scene().get_node_or_null("Spawns/van_wilgendal")
 	check("W: spawn van_wilgendal op (30,25), kijkt omlaag", sp != null and Vector2i((sp.position / 16.0).floor()) == Vector2i(30, 25))
 	var to_vil := _world_reachable(g, Vector2i(14, 31), Vector2i(30, 25))
@@ -488,11 +489,16 @@ func _world_and_outdoor_tests() -> void:
 	await pframes(5)
 	check("W: terug-spawn van_wilgendal (30,25): %s" % tile(), tile() == Vector2i(30, 25))
 	await walk("move_up", 1)
-	await wait_until(func(): return Dialog.is_open, 2.0)
-	check("W: op Willowdale: 'Willowdale (komt later)', geen mapwissel (dorp_wilgendal.tscn bestaat nog niet)",
-			not ResourceLoader.exists(VILLAGE_SCENE) and Dialog.is_open and Dialog._lines == ["Willowdale (later)"]
-			and not GameState.changing_map and scene().name == "Wereldkaart" and tile() == Vector2i(30, 24))
-	await close_dialog()
+	check("W: op Willowdale: dorp geladen (node DorpWilgendal)", await wait_scene("DorpWilgendal"))
+	await wait_fade()
+	check("W: winkels van Jelle, Mien en de magiebalie staan er", scene().get_node_or_null("Objects/JelleWapen") != null
+			and scene().get_node_or_null("Objects/JellePantser") != null
+			and scene().get_node_or_null("Objects/TanteMien") != null
+			and scene().get_node_or_null("Objects/Magie") != null
+			and scene().get_node_or_null("Objects/Gerrit") != null)
+	GameState.change_map(WORLD_SCENE, "van_wilgendal")
+	check("W: terug op de wereldkaart na Wilgendal", await wait_scene("Wereldkaart"))
+	await wait_fade()
 	# overzicht met beide iconen in beeld
 	player().place_at(Vector2i(23, 29), D)
 	await pframes(20)
@@ -897,7 +903,9 @@ func _dungeon_tests() -> void:
 	check("gevechtsscherm", await wait_scene("Battle"))
 	await wait_battle_state(["command"])
 	var e0: Dictionary = battle().enemies[0]["s"]
-	check("niveau 1 in het gevecht: HP gewoon (%d), EXP x2" % int(e0["max_hp"]), int(e0["max_hp"]) == int(GD.ENEMIES["mosslijm"]["max_hp"]))
+	var want1 := GD.apply_archief_tier(GD.ENEMIES["mosslijm"], 1)
+	check("niveau 1 in het gevecht: archiefschaal HP %d (=%d), EXP %d (=%d)" % [int(e0["max_hp"]), int(want1["max_hp"]), int(e0["exp"]), int(want1["exp"])],
+			int(e0["max_hp"]) == int(want1["max_hp"]) and int(e0["exp"]) == int(want1["exp"]))
 	await win_battle()
 	check("na winst terug in 1A", await wait_scene("ArchiefIngang"))
 	r = room()
@@ -1179,7 +1187,7 @@ func _tier_battle_tests() -> void:
 	if await wait_scene("Battle"):
 		await wait_battle_state(["command"])
 		var s: Dictionary = battle().enemies[0]["s"]
-		var want := GD.apply_tier(GD.ENEMIES["mech_wachter"], 2)
+		var want := GD.apply_archief_tier(GD.ENEMIES["mech_wachter"], 2)
 		check("niveau 2 in het gevecht: HP %d (=%d), ATK %d (=%d)" % [s["max_hp"], want["max_hp"], s["atk"], want["atk"]],
 				int(s["max_hp"]) == int(want["max_hp"]) and int(s["atk"]) == int(want["atk"]))
 		await win_battle()
@@ -1202,7 +1210,7 @@ func _tier_battle_tests() -> void:
 	if await wait_scene("Battle"):
 		await wait_battle_state(["command"])
 		var s: Dictionary = battle().enemies[0]["s"]
-		check("niveau 4: Mech. Warden HP %d" % s["max_hp"], int(s["max_hp"]) == int(GD.apply_tier(GD.ENEMIES["mech_wachter"], 4)["max_hp"]))
+		check("niveau 4: Mech. Warden HP %d" % s["max_hp"], int(s["max_hp"]) == int(GD.apply_archief_tier(GD.ENEMIES["mech_wachter"], 4)["max_hp"]))
 		await pframes(20)
 		await screenshot("v14_tier4_gevecht")
 		await win_battle()
