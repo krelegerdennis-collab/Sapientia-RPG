@@ -310,6 +310,13 @@ Voorbeelden, geen gekozen accessoire: "Hanger-echo" (kleine teleport in gevecht)
 **CANON – niet wijzigen zonder overleg.**
 
 - [ ] Gerrits quest
+  Dialoog, Gerrit, zaad na Noor, molen-save en één Zingend Meel per bezoek staan in de code. De scène "zacht gezang" nog niet.
+
+- [x] Gerrit de Molenaar in Wilgendal
+- [x] Zaad in het Donker Woud na Noor's aansluiting
+- [x] Molen als save point (opslaan, rusten, party wisselen)
+- [x] Zingend Meel, één per bezoek
+- [x] Dialoog ingevuld
 
 NPC: Gerrit de Molenaar in Wilgendal. Quest: Het Zingende Graan. Thema: kleine menselijke verhalen tussen grote gebeurtenissen.
 

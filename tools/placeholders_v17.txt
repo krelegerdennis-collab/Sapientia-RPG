@@ -30,3 +30,8 @@ assets/sprites/archief2/sapientia_glitch.png   48x48   Sapientia glitch 48x48
 assets/map_monsters/lotte_glitch.png   32x64   Lotte glitch op de kaart (2x4 van 16x16)
 assets/map_monsters/wurger.png   32x64   De Wurger op de kaart (2x4 van 16x16)
 assets/map_monsters/genezer.png   32x64   De Genezer op de kaart (2x4 van 16x16)
+# Het Zingende Graan: woudgeest. Geen bestand. art_pending in game_data.gd.
+# Gevecht gebruikt GameData.PLACEHOLDER_ENEMY_SPRITE (art/enemies/mosslijm.png) tot RPG ART levert:
+# assets/sprites/enemies/woudgeest.png       vooraanzicht, zelfde anker als de andere vijanden
+# assets/sprites/enemies/woudgeest_rug.png   rugaanzicht, zelfde canvas als het vooraanzicht
+# assets/map_monsters/woudgeest.png          32x64  (2x4 frames van 16x16), alleen als hij op de kaart gaat lopen

@@ -241,6 +241,19 @@
 				"dood": "Het staal valt, het blad verdort.",
 				"vaardigheid": "Hij geneest zichzelf, een natte toon."
 			}
+		},
+		"woudgeest": {
+			"naam": "Woudgeest",
+			"stem": "Ijl en kort, als een zucht tussen bladeren.",
+			"klank": "wind",
+			"volume_db": -8,
+			"pitch_variatie": 0.06,
+			"slots": {
+				"aanval": "Korte windvlaag.",
+				"raak": "Hoge, dunne tik.",
+				"dood": "Zucht die wegvalt.",
+				"vaardigheid": "Een iets langere windvlaag."
+			}
 		}
 	}
 }
