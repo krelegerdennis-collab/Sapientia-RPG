@@ -31,14 +31,20 @@ Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af 
   - [ ] Grade 3 items: vast affix-systeem (basis affixes, per item voorgedefinieerd)
   - [ ] Grade 4 items: uitgebreid vast affix-systeem (sterkere en meerdere affixes per item)
   - [ ] Grade 1 en 2 items: geen affixes, blijven puur stat-gebaseerd
-  - [ ] Eén super wapen per karakter (uniek, alleen Grade 4, verdieping 80–99)
-    - Dennis: super zwaard
-    - Noor: super wapen (type nog te bepalen)
-    - Lotte: super staf
-    - [ ] Aan te vullen zodra nieuwe karakters in het verhaal komen
-  - [ ] Twee Grade 4 armour sets, bruikbaar voor de hele party waar dat past, met vaste affixes per stuk
-    - [ ] Plated Armour set (zware/defensieve set)
-    - [ ] Robes set (lichte/magische set)
+  - [ ] Eén uniek super wapen per karakter (alleen Grade 4, drop vanaf verdieping 80)
+    - [ ] Dennis: super zwaard (fysiek)
+    - [ ] Noor: super staf (natuur/magisch; zij is een mage)
+    - [ ] Lotte: super staf (licht/magisch; priester)
+    - [ ] Aan te vullen zodra nieuwe karakters of classes in het verhaal komen
+  - [ ] Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laarzen; alleen de eigen set, geen mix)
+    - [ ] Plated Armour set — Dennis (zwaar/defensief, vaste affixes per stuk)
+    - [ ] Robes set — Lotte (licht/magisch, vaste affixes per stuk)
+    - [ ] Natuur/Robes set — Noor (natuur/magisch, vaste affixes per stuk)
+    - [ ] Aan te vullen voor toekomstige karakters
+  - [ ] Grade 4 accessoires (niet class-gebonden)
+    - [ ] Accessoires toevoegen aan de Grade 4 loot table
+    - [ ] Voor elk karakter bruikbaar, zonder class-restrictie
+    - [ ] Vaste affixes per accessoire
 
 ## Content
 
