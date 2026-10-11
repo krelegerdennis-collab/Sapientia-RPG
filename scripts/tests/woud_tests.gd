@@ -1086,9 +1086,13 @@ func _graan_tests() -> void:
 	check("nieuw bezoek: nog één Zingend Meel", GameState.item_count(SD.ITEM_MEEL) == 2)
 	Dialog.choose(2)
 	await run_story(6.0)
-	var held: Dictionary = GameState.party[0]
-	held["hp"] = maxi(1, int(held["max_hp"]) - int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"]))
+	var held: Dictionary = {}
+	for h in GameState.party:
+		if str(h.get("id", "")) == "dennis":
+			held = h
+	var gat := int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"])
+	held["hp"] = int(held["max_hp"]) - gat
 	var voor := int(held["hp"])
 	var gebruikt: Dictionary = PartyActions.use_item(GameState.inventory, SD.ITEM_MEEL, held)
-	check("Zingend Meel herstelt HP", gebruikt["ok"] and int(gebruikt["hp"]) == int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"])
-			and int(held["hp"]) == voor + int(gebruikt["hp"]))
+	check("Zingend Meel herstelt %d HP" % gat, gebruikt["ok"] and int(gebruikt["hp"]) == gat
+			and int(held["hp"]) == voor + gat)
