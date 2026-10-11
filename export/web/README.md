@@ -1,13 +1,17 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`404bce0`), Godot 4.7.2, threads uit.
+Web-build van `main` (`5cd0522`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`2d393da`, export van `1f8f6b3`):
-- Magie in Wilgendal kost 160×grade²: grade 1 = 160, grade 2 = 640, grade 3 = 1440. Grade 4 blijft uit de winkel. Verkoop is de helft, dus een grade-1-spreuk levert 80.
+Nieuw in deze build, bovenop de vorige web-build (`4d8731b`, export van `404bce0`):
+- Geen nieuwe gameplay. Zelfde scripts en assets als de build van `404bce0`.
+- `index.pck` is kleiner: lokale testscreenshots en testsaves zitten er niet meer in.
 - Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `404bce0`:
+- Magie in Wilgendal kost 160×grade²: grade 1 = 160, grade 2 = 640, grade 3 = 1440. Grade 4 blijft uit de winkel. Verkoop is de helft, dus een grade-1-spreuk levert 80.
 
 Nog van de build van `1f8f6b3`:
 - Vier save-slots. Continue en Load openen dezelfde lijst. Slot 1 blijft het oude bestand.
@@ -44,7 +48,7 @@ Na deze publicatie moet je hard verversen. De browser bewaart de oude `index.pck
 
 De eerste tik ergens op het scherm (ook Continue of New Game) zet het geluid aan.
 Tot die tik staat er **Tap for sound**. Houd de telefoon liggend.
-Eerste keer ongeveer 75 MB (`index.pck` 37 MB + `index.wasm` 38 MB).
+Eerste keer ongeveer 67 MB (`index.pck` 29 MB + `index.wasm` 38 MB).
 
 ## Kortere link
 
