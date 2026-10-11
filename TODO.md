@@ -46,7 +46,86 @@ Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af 
     - [ ] Voor elk karakter bruikbaar, zonder class-restrictie
     - [ ] Vaste affixes per accessoire
 
+### Wereldkaart opbouw
+
+- [ ] 3 grote hoofdeilanden opzetten, elk met 2 Archieven (totaal 6 Archieven)
+- [ ] Worldmap 1 = start-eiland
+  - [ ] Archief 1: Eerste Archief (bij Opa), startpunt van het verhaal
+  - [ ] Archief 2: Archief van Leven
+  - Bevat Dennis' huis en Wilgendal (eerste dorp met shops)
+- [ ] Worldmap 2 = tweede eiland
+  - [ ] Archief 3: Archief van Industrie
+  - [ ] Archief 4: Archief van Magie
+  - Dorpen en locaties nog te bepalen
+- [ ] Worldmap 3 = derde eiland
+  - [ ] Archief 5: Archief van Kosmos
+  - [ ] Archief 6: Archief van Hart
+  - Dorpen en locaties nog te bepalen
+
+### Warp-systeem
+
+- [ ] Warp-punten plaatsen op elk eiland
+- [ ] Vrij heen en weer reizen tussen ontgrendelde eilanden
+- [ ] Warp ontgrendelen na een bepaald verhaalpunt of act
+- [ ] Worldmap 2 ontgrendelt na afronden van Worldmap 1
+- [ ] Worldmap 3 ontgrendelt na afronden van Worldmap 2
+- [ ] Visuele feedback (poort, portaal of magisch effect)
+
+### Act-koppeling
+
+- [ ] Act 1 = Worldmap 1 (start-eiland, Eerste Archief en Leven)
+- [ ] Act 2 en verder = Worldmap 2 (Industrie en Magie)
+- [ ] Act 3 en verder = Worldmap 3 (Kosmos en Hart)
+- [ ] Onthulling Proefpersoon H-6 (Dennis) koppelen aan Archief 4 (Magie) op Worldmap 2
+
 ## Content
 
 - [ ] Bestiarium uitwerken tot endgame
   Alle monsters tot en met de eindgame opnemen, met een entry, stats en lore-tekst per monster.
+
+## Dorpen & Shops
+
+### Eerste dorp: Wilgendal
+
+- [ ] Wilgendal activeren als eerste dorp
+  Huidige status: nog niet actief, alleen een placeholder.
+
+### Shops in Wilgendal
+
+- [ ] Armour shop
+- [ ] Wapen shop
+- [ ] Accessoire shop
+- [ ] Magic shop
+
+### Magic tier list
+
+Magie heeft 4 grades. Grade 1 tot en met 3 zijn te koop in de magic shop en worden per act vrijgespeeld. Grade 4 is niet te koop: die dropt alleen uit blauwe kisten in de Diepe Grot (verdieping 80+). Per tier 4 spreuken. Niet alles is in Act 1 beschikbaar.
+
+- [ ] Magic tier list opzetten (4 grades × 4 spreuken = 16 spreuken per element)
+- [ ] Grade 1 tot en met 3 in de magic shop (prijs loopt op per grade)
+- [ ] Grade 4 alleen als drop uit blauwe kisten (Diepe Grot, verdieping 80–99)
+- [ ] Tiers vrijspelen per act (Act 1 = alleen Grade 1)
+- [ ] Per spreuk eigen data: damage, healing en effect schalen per grade
+
+### Elements en karakters
+
+- [ ] Dennis: geen magie
+  Dennis krijgt alleen kernkrachten. Dat zijn geen shop-items.
+- [ ] Noor (mage): Vuur, Natuur en Bliksem
+  - [ ] Extra elementen per latere act bepalen
+  - [ ] Ook Grade 1 Licht (healen), beperkt tot niveau 1
+  - [ ] Grade 2 en hoger Licht niet voor Noor
+- [ ] Lotte (priester): Licht als healing en buffs (hoofdrol)
+  - [ ] IJs als aanvalsmagie (voorlopig het enige aanvals-element)
+  - [ ] Geen Vuur, Natuur of Bliksem
+
+### Beschikbaarheid shops
+
+- [ ] Niet alle items direct beschikbaar in Wilgendal; selectie per act
+- [ ] Shop-voorraad laten meeschalen met verhaalprogressie
+- [ ] Magic grades per act vrijspelen (Act 1 = Grade 1, enzovoort)
+
+### Algemeen
+
+- [ ] Verkoop-systeem in shops
+  Sluit aan op de eerdere TODO: items verkoopbaar.
