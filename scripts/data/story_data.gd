@@ -3,6 +3,9 @@ extends RefCounted
 ## v0.16 (wens Dennis): tutorial korter: de 3 zegels/runen bij de bosrand zijn weg (objecten, events,
 ## tekst, tests); nieuw: Opa geeft een Leerling-mantel en je kunt pas verder als hij AAN is
 ## (MENU > Uitrusting; stap UITRUSTING, MENU_CLOSED hieronder).
+## Update 5: intro sneller. De wakker-cutscene (het enige verplichte event vóór het
+## eerste vrije moment) is weg. Ochtenddialoog korter. Vroege toon-keuze (intro_keuze)
+## met hetzelfde vervolg. TODO(verhaal) staat bij ingekorte tekst en bij die keuze.
 ## Alles wat er in het verhaal gebeurt staat HIER als data; scripts/story.gd voert het uit.
 ##
 ## Voortgang = GameState.story_step (getal) + GameState.story_flags (namen). Beide gaan mee
@@ -65,7 +68,7 @@ const WORTELKONING_FLAG := "bewaker:woud_open_plek/baas"
 
 ## Stappen van de proloog
 const START := 0          # nieuw spel: wakker worden in bed
-const WAKKER := 10        # wakker, Opa staat buiten
+const WAKKER := 10        # oude saves: wakker, Opa buiten. Update 5 zet deze stap niet meer.
 const UITRUSTING := 15    # v0.16: mantel van Opa gekregen; verder pas als hij AAN is (MENU > Uitrusting)
 const TAKEN := 20         # opdracht gekregen: water en kist (v0.16: de 3 zegels/runen zijn weg)
 const LES := 30           # alle taken klaar: zwaardles + oefengevecht
@@ -108,7 +111,6 @@ const TINT_RULES := [
 
 ## Wat er gebeurt als je een map binnenkomt (in volgorde; alle passende worden gedaan).
 const MAP_ENTER := [
-	{"map": "huis", "if": {"step": START}, "event": "wakker_worden"},
 	{"map": "huis", "if": {"step": AVOND}, "event": "catastrofe"},
 	{"map": "huis", "if": {"step": OPGESLOTEN}, "event": "opgesloten_timer"},
 	# v0.17 eerste keer in Esdoorn (na de Golem): Noor ontmoeten, ze wordt het woud in gesleurd
@@ -130,35 +132,24 @@ const MENU_CLOSED := [
 
 const EVENTS := {
 	# ------------------------------------------------------------ scène 1: ochtend
-	"wakker_worden": [{"do": [
-		["place", "player", [1, 3], "down"],
-		["wait", 0.8],
-		["say", "", ["{naam} wakes up. Grandpa is already up, and surely outside again..."]],
-		["walk", "player", "right", 1],
-		["face", "player", "down"],
-		["step", WAKKER],
-	]}],
-
+	# Update 5: geen wakker-cutscene. Spawn "bed" staat op (2,3), naast het bedmeubel
+	# (de bed-tile zelf blokkeert lopen). De speler is daar meteen vrij.
+	# TODO(verhaal): ochtendtekst ingekort. Canon-beats blijven: naam, Wachtershuis, Opa,
+	# en dat de Archieven dicht blijven tot het zegel breekt (dat laatste staat nog in scène 2).
 	"opa": [
-		# v0.16 uitrusting-tutorial: eerst de mantel, pas daarna de klusjes
+		# v0.16 uitrusting-tutorial, Update 5: eerst een toon-keuze, daarna de mantel
 		{"if": {"step_lt": UITRUSTING}, "do": [
-			["say", SPEAKER, ["Good morning, {naam}. It's cold today. Here, put this cloak on."]],
-			["give", TUTORIAL_ARMOR, 1],
-			["say", "", ["{naam} receives an Apprentice Cloak!"]],
-			["step", UITRUSTING],
-			["say", SPEAKER, ["Open the MENU at the top right and choose Equipment. Put the cloak in Armor."]],
-			["say", "", ["(Tutorial: MENU > Equipment > Equip > Armor > Apprentice Cloak.)", "(Close the menu after that, and it continues.)"]],
-			["face", "OudeMan", "up"],
+			["jump", "intro_keuze"],
 		]},
 		{"if": {"step": UITRUSTING, "equipped": TUTORIAL_ARMOR}, "do": [["jump", "mantel_aan"]]},
 		# mantel weggegooid? Dan krijg je een nieuwe (anders zit je vast)
 		{"if": {"step": UITRUSTING, "not_item": TUTORIAL_ARMOR}, "do": [
 			["give", TUTORIAL_ARMOR, 1],
-			["say", SPEAKER, ["Lost your cloak? Here, another one. MENU > Equipment > Armor."]],
+			["say", SPEAKER, ["Mantel kwijt? Hier, een nieuwe. MENU > Uitrusting > Harnas."]],
 			["face", "OudeMan", "up"],
 		]},
 		{"if": {"step": UITRUSTING}, "do": [
-			["say", SPEAKER, ["Put that cloak on first, {naam}. MENU > Equipment > Armor."]],
+			["say", SPEAKER, ["Doe eerst die mantel aan, {naam}. MENU > Uitrusting > Harnas."]],
 			["face", "OudeMan", "up"],
 		]},
 		{"if": {"item": "emmer_water"}, "do": [
@@ -176,10 +167,37 @@ const EVENTS := {
 		{"do": [["say", SPEAKER, ["..."]]]},
 	],
 
-	# v0.16: de mantel is aan (na het sluiten van het menu, of als je Opa weer aanspreekt)
+	# TODO(verhaal): vroege keuze. Elke optie zet alleen een toon-vlag en springt naar
+	# opa_mantel (zelfde vervolg). Een echte vertakking zou de canon wijzigen.
+	# Het event "keuze" (Blijven / Opa achterna) blijft de nacht-beat; dat hergebruiken
+	# we hier niet, want dat is een lus tot je Opa achterna gaat.
+	"intro_keuze": [{"do": [
+		["choice", "Wat zeg je, {naam}?", ["Goedemorgen, Opa.", "Waarom blijven de Archieven dicht?"], ["intro_toon_groet", "intro_toon_archief"], SPEAKER],
+	]}],
+	"intro_toon_groet": [{"do": [
+		["flag", "toon_groet"],
+		["jump", "opa_mantel"],
+	]}],
+	"intro_toon_archief": [{"do": [
+		["flag", "toon_archief"],
+		["jump", "opa_mantel"],
+	]}],
+
+	# TODO(verhaal): groet en menu in twee korte vakken (passen in de lage ballon).
+	# De herhaalde tutorialregel is weg.
+	"opa_mantel": [{"do": [
+		["say", SPEAKER, ["Goedemorgen, {naam}. Het is koud in het Wachtershuis."]],
+		["say", SPEAKER, ["Doe deze mantel aan: MENU > Uitrusting > Harnas."]],
+		["give", TUTORIAL_ARMOR, 1],
+		["say", "", ["{naam} krijgt een Leerling-mantel! Sluit daarna het menu."]],
+		["step", UITRUSTING],
+		["face", "OudeMan", "up"],
+	]}],
+
+	# v0.16: de mantel is aan (na het sluiten van het menu, of als je Opa weer aanspreekt).
+	# TODO(verhaal): de taken niet twee keer uitleggen.
 	"mantel_aan": [{"do": [
-		["say", SPEAKER, ["It suits you. That will keep you warm.", "{naam}... fetch some water from the well. And take the herbs from the chest beside the house. Today feels... different."]],
-		["say", "", ["(Tasks: draw water from the well and open the chest beside the house.)"]],
+		["say", SPEAKER, ["Die staat je, {naam}. Haal water bij de put en kruiden uit de kist naast het huis. Vandaag voelt anders."]],
 		["step", TAKEN],
 		["face", "OudeMan", "up"],
 	]}],
@@ -208,7 +226,7 @@ const EVENTS := {
 	]}],
 
 	"put": [
-		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Grandpa is waiting. Put the cloak on first: MENU > Equipment."]]]},
+		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Opa wacht. Doe eerst de mantel aan: MENU > Uitrusting."]]]},
 		{"if": {"item": "emmer_water"}, "do": [["say", "", ["The bucket is already full. Take it to Grandpa."]]]},
 		{"if": {"step": TAKEN, "not_flags": ["water_klaar"]}, "do": [
 			["say", "", ["{naam} lowers the bucket into the well...", "{naam} got a bucket of water!"]],
@@ -222,7 +240,7 @@ const EVENTS := {
 
 	"kist": [
 		{"if": {"flags": ["kist_open"]}, "do": [["say", "", ["The chest is empty."]]]},
-		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Put on Grandpa's cloak first: MENU > Equipment."]]]},
+		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Doe eerst Opa's mantel aan: MENU > Uitrusting."]]]},
 		{"do": [
 			["flag", "kist_open"],
 			["refresh"],
@@ -239,7 +257,7 @@ const EVENTS := {
 
 	"pad_wereld": [
 		{"if": {"step_lt": AVOND}, "do": [
-			["say", SPEAKER, ["Where are you going? Not today, {naam}. Stay near the house."]],
+			["say", SPEAKER, ["Waar ga je heen? Vandaag niet, {naam}. Blijf bij het huis."]],
 			["walk", "player", "up", 1],
 		]},
 		{"if": {"step_lt": NACHT}, "do": [
@@ -271,23 +289,18 @@ const EVENTS := {
 
 	# ------------------------------------------------------------ scène 2: de catastrofe
 	"catastrofe": [{"do": [
-		["wait", 0.8],
 		["say", "", ["It's evening. {naam} is reading one of Grandpa's old books.", "\"...and the Wardens sealed the Archives, so that no one would ever wake again...\""]],
-		["wait", 0.6],
 		["shake", 2.2, 4.0],
-		["wait", 0.5],
 		["flash", "#ffffff", 0.7],
 		["window_glow", 5.0],
 		["face", "player", "up"],
 		["say", "", ["The ground shakes! A deafening bang, and a blinding flash from the direction of the Archives.", "Pink and blue light pours through the windows."]],
 		["face", "OudeMan", "up"],
-		["wait", 0.4],
 		["face", "OudeMan", "down"],
 		["say", SPEAKER, ["No... the seal! It's too soon! {naam}, stay here! Lock the doors behind me and don't follow, no matter what you hear!"]],
 		["walk", "OudeMan", "up", 1],
 		["walk", "OudeMan", "left", 3],
 		["face", "OudeMan", "up"],
-		["wait", 0.3],
 		["flag", "schilderij_weg"],
 		["refresh"],
 		["say", "", ["Grandpa pulls an old, rusted sword out from behind the painting!"]],
@@ -299,10 +312,10 @@ const EVENTS := {
 		["say", "", ["The door slams shut. A key turns in the lock."]],
 		["step", OPGESLOTEN],
 		["refresh"],
-		["after", 6.0, "schreeuw"],
+		["after", 2.0, "schreeuw"],
 	]}],
 
-	"opgesloten_timer": [{"do": [["after", 5.0, "schreeuw"]]}],
+	"opgesloten_timer": [{"do": [["after", 2.0, "schreeuw"]]}],
 
 	"huis_uit": [
 		{"if": {"flags": ["locked:HuisDeur"]}, "do": [
@@ -314,7 +327,6 @@ const EVENTS := {
 
 	"schreeuw": [{"do": [
 		["shake", 1.6, 3.0],
-		["wait", 0.6],
 		["say", "", ["The earth shakes again...", "A shout in the distance. Grandpa!"]],
 		["jump", "keuze"],
 	]}],
@@ -325,7 +337,7 @@ const EVENTS := {
 
 	"blijven": [{"do": [
 		["say", "", ["{naam} stays inside, like Grandpa said..."]],
-		["wait", 2.5],
+		["wait", 0.3],
 		["shake", 1.2, 2.5],
 		["say", "", ["Another shock. The rumble comes from the Archives."]],
 		["jump", "keuze"],
@@ -473,3 +485,86 @@ const EVENTS := {
 	]}],
 	"noor_woud": [{"do": [["say", "Noor", ["Let's go, {naam}."]]]}],
 }
+
+
+## Update 5: events die vanzelf starten in het huis op stap START.
+## Dat is het stuk vóór het eerste vrije moment. Vóór deze update: ["wakker_worden"].
+static func forced_before_free() -> Array:
+	var out: Array = []
+	for row in MAP_ENTER:
+		if str(row.get("map", "")) != "huis":
+			continue
+		var cond: Dictionary = row.get("if", {})
+		if int(cond.get("step", -999)) != START:
+			continue
+		var flags: Array = cond.get("flags", [])
+		var not_flags: Array = cond.get("not_flags", [])
+		if not flags.is_empty() or not not_flags.is_empty():
+			continue
+		out.append(str(row.get("event", "")))
+	return out
+
+
+static func _say_commands(event_id: String) -> int:
+	var variants: Array = EVENTS.get(event_id, [])
+	if variants.is_empty():
+		return 0
+	var cmds: Array = variants[0].get("do", [])
+	var n := 0
+	for raw in cmds:
+		if raw is Array and not raw.is_empty() and str(raw[0]) == "say":
+			n += 1
+	return n
+
+
+## Verplichte tekstvakken op het standaardpad tot de klusjes (opa_mantel + mantel_aan).
+## Vóór Update 5: wakker_worden 1 + opa 4 + mantel_aan 2 = 7.
+static func intro_says_before_tasks() -> int:
+	return _say_commands("opa_mantel") + _say_commands("mantel_aan")
+
+
+static func early_choice_spec() -> Dictionary:
+	var variants: Array = EVENTS.get("intro_keuze", [])
+	if variants.is_empty():
+		return {}
+	var cmds: Array = variants[0].get("do", [])
+	for raw in cmds:
+		if raw is Array and raw.size() >= 4 and str(raw[0]) == "choice":
+			return {"question": str(raw[1]), "options": raw[2], "targets": raw[3]}
+	return {}
+
+
+## Leeg als het toon-event iets anders doet dan een vlag zetten en springen.
+static func _tone_jump(event_id: String) -> String:
+	var variants: Array = EVENTS.get(event_id, [])
+	if variants.is_empty():
+		return ""
+	var cmds: Array = variants[0].get("do", [])
+	var jump := ""
+	for raw in cmds:
+		if not (raw is Array) or raw.is_empty():
+			return ""
+		var op := str(raw[0])
+		if op == "jump" and raw.size() >= 2:
+			jump = str(raw[1])
+		elif op != "flag":
+			return ""
+	return jump
+
+
+## True als elke vroege optie (2 of 3) naar hetzelfde vervolg springt.
+static func early_choice_same_followup() -> bool:
+	var spec := early_choice_spec()
+	var targets: Array = spec.get("targets", [])
+	if targets.size() < 2 or targets.size() > 3:
+		return false
+	var dest := ""
+	for t in targets:
+		var jump := _tone_jump(str(t))
+		if jump == "":
+			return false
+		if dest == "":
+			dest = jump
+		elif dest != jump:
+			return false
+	return dest == "opa_mantel"
