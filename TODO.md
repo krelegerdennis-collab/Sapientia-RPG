@@ -17,3 +17,8 @@ Lijst met ideeën voor later. Nog niets hiervan is gebouwd; afvinken als het af 
 
 - [ ] Eerste Archief herschalen
   Moeilijkheidsgraad en level van het eerste Archief van 10 naar 7.
+
+## Content
+
+- [ ] Bestiarium uitwerken tot endgame
+  Alle monsters tot en met de eindgame opnemen, met een entry, stats en lore-tekst per monster.
