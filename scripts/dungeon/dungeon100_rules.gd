@@ -10,23 +10,23 @@ extends RefCounted
 ##   GameState.dungeon100_best       hoogste verdieping die ooit bereikt is (0..100).
 ##
 ## HET GESIMULEERDE ARCHIEF (Blauwe Kisten, zie HANDOFF_DUNGEON100_BLUECHEST.md): de kerker is een
-## simulatie. Een RUN begint bij het binnenkomen vanaf de wereldkaart: iedereen die dan in de party zit
+## simulatie. Een RUN begint bij ECHO (niet vanaf de wereldkaart): iedereen die dan in de party zit
 ## (ook wie zich later aansluit) gaat mee op level 1, zonder uitrusting en zonder spreuken. Elke
 ## Codex-pagina gaat ook mee, op level 1. De echte party + tas + goud + Codex liggen in een momentopname
 ## en je tas bevat alleen de PERMANENTE items van eerdere runs (GameState.dungeon100_permanent, uit
 ## Blauwe Kisten). Spreuken vind je terug als rol in een willekeurige gewone kist.
 ##   - VERLIES (party KO) BINNEN de kerker = de run is voorbij ("dood is dungeon uit"): terug naar de
-##     wereldkaart bij de ingang (van_dungeon100), NIET naar verdieping 1 en NIET naar een rustpunt.
-##     Tijdelijke levels, tas, goud en uitrusting van de run zijn weg. De momentopname van de echte
-##     party/tas/goud/Codex komt terug, en daarna de permanente Blauwe-Kist-items. Een nieuwe run
-##     begint pas als je opnieuw naar binnen gaat (verdieping 1, level 1, nieuwe seed).
+##     wereldkaart bij de oude ingang (van_dungeon100), NIET naar verdieping 1 en NIET naar een rustpunt.
+##     Die tegel start de grot niet meer. Tijdelijke levels, tas, goud en uitrusting van de run zijn weg.
+##     De momentopname komt terug, en daarna de permanente Blauwe-Kist-items. Een nieuwe run begint
+##     pas als ECHO hem start (verdieping 1, level 1, nieuwe seed).
 ##   - RUSTPUNTEN (elke 10e verdieping: 10, 20, ... 100): aanraken (A) = HP/MP van de hele party (en de
 ##     Codex-bondgenoot) vol + opslaan ('Voortgang opslaan?'). Het rustpunt wordt ook onthouden als
 ##     'laatste rustpunt van deze run' (GameState.dungeon100_checkpoint, gaat alleen omhoog; alleen voor
 ##     de tekst, het is GEEN terugkeerpunt).
-##   - de kerker verlaten: de ladder op verdieping 1, een warper (niet op 1), de dood, of het
-##     Warp-kristal op verdieping 100. Allemaal zetten de momentopname terug en leveren de
-##     permanente items af in de echte tas.
+##   - de kerker verlaten: de ladder op verdieping 1, een warper (niet op 1) en de dood gaan naar
+##     de wereldkaart. Het Warp-kristal op verdieping 100 gaat naar ECHO's Kamer. Allemaal zetten
+##     de momentopname terug en leveren de permanente items af in de echte tas.
 ##   - game over BUITEN de kerker (verdieping 0) werkt zoals altijd.
 
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")

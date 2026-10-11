@@ -17,6 +17,7 @@ const RustpuntC := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
 const WarperC := preload("res://scripts/dungeon/dungeon100_warper.gd")
 const PA := preload("res://scripts/party_actions.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const HUD_PATH := "res://scripts/ui/dungeon100_hud.gd"
 const TOWN := "res://scenes/maps/wilgendal.tscn"
 ## Stand-in voor de kerker-scène (die komt van de generator-branch): een bestaande kleine map.
@@ -125,6 +126,9 @@ func _rules_tests() -> void:
 	check("defeat_plan hangt niet van het (kapotte) rustpunt af", R.defeat_plan(40, 35) == R.defeat_plan(40, 0) and R.defeat_plan(40, 30) == R.defeat_plan(40, 0))
 	check("START_SPAWN/WORLD_* komen overeen met de generator", R.START_SPAWN == Gen.SPAWN_FROM_ABOVE and R.WORLD_SCENE == Gen.WORLD_SCENE
 			and R.WORLD_SPAWN == Gen.WORLD_SPAWN)
+	check("start alleen via ECHO, niet via de wereldkaart", EchoGrot.blokkeert_wereldkaart(EchoGrot.WERELD, EchoGrot.DUNGEON)
+			and not EchoGrot.blokkeert_wereldkaart(EchoGrot.DUNGEON, EchoGrot.DUNGEON)
+			and EchoGrot.KAMER != R.WORLD_SCENE and EchoGrot.ZIN_EERSTE.begins_with("De Diepe Grot."))
 	var party := [{"hp": 0, "max_hp": 30, "mp": 1, "max_mp": 8}, {"hp": 5, "max_hp": 20, "mp": 0, "max_mp": 4}]
 	var pages := [{"hp": 0, "max_hp": 12, "mp": 0, "max_mp": 3}]
 	R.heal_party(party, pages)

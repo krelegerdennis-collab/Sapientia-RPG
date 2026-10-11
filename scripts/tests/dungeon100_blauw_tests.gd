@@ -3,7 +3,7 @@ extends Node
 ## Start:  godot --path . -- --dungeon100blauwtest [--shots=/pad/map]
 ##   Deel A: deterministische soort (~5% blauw, ~10% Mimic), baaskist nooit, Warp alleen op 100.
 ##   Deel B: momentopname, permanente items in de save, dood = dungeon uit, Warp levert af.
-##   Deel C: echte scène: blauwe tint, Mimic-gevecht met schaal, Warp naar de wereldkaart.
+##   Deel C: echte scène: blauwe tint, Mimic-gevecht met schaal, Warp naar ECHO's Kamer.
 ## Zit niet in de export (scripts/tests/*).
 
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
@@ -12,6 +12,7 @@ const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 
 var failures := 0
 var passes := 0
@@ -221,12 +222,13 @@ func _scene_tests() -> void:
 	GameState.inventory[Blue.WARP_ITEM] = 1
 	GameState.dungeon100_floor = 100
 	check("Warp vanuit de run", GameState.dungeon100_warp())
-	check("Warp: wereldkaart", await wait_scene_path(Gen.WORLD_SCENE))
-	var wsp: Node2D = scene().get_node_or_null("Spawns/van_dungeon100")
-	check("Warp: bij de ingang, level 6, 55 goud, blauw item in de echte tas, geen kristal, run voorbij",
+	check("Warp: ECHO's Kamer", await wait_scene_path(EchoGrot.KAMER))
+	var wsp: Node2D = scene().get_node_or_null("Spawns/" + EchoGrot.KAMER_SPAWN)
+	check("Warp: bij ECHO, level 6, 55 goud, blauw item in de echte tas, geen kristal, run voorbij",
 			wsp != null and tile() == Vector2i((wsp.position / 16.0).floor()) and GameState.party[0]["level"] == 6
 			and GameState.gold == 55 and GameState.item_count(bid) >= 1 and GameState.item_count(Blue.WARP_ITEM) == 0
-			and not GameState.dungeon100_run_active() and GameState.dungeon100_floor == 0)
+			and not GameState.dungeon100_run_active() and GameState.dungeon100_floor == 0
+			and GameState.story_flags.get(EchoGrot.FLAG_RESULTAAT, false) == true)
 	await screenshot("d100_warp_ingang")
 	GameState.encounter_multiplier = 1.0
 

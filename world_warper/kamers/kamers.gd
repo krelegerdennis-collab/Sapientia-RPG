@@ -11,6 +11,7 @@ extends RefCounted
 ## die voorraad is geen endgame-winkel en wordt hier niet gebruikt.
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const StoryData := preload("res://scripts/data/story_data.gd")
 const ShopData := preload("res://scripts/data/shop_data.gd")
 
@@ -317,7 +318,7 @@ static func handel_open() -> bool:
 
 static func plaatje(bron: String) -> Dictionary:
 	match bron:
-		"echo":
+		"echo", "echo_grot":
 			return {"pad": ART_ECHO, "h": 3, "v": 4, "offset": Vector2(0, -10)}
 		"party":
 			return {"pad": ART_PARTY, "h": 3, "v": 4, "offset": Vector2(0, -10)}
@@ -335,7 +336,7 @@ static func plaatje(bron: String) -> Dictionary:
 
 static func label(bron: String) -> String:
 	match bron:
-		"echo":
+		"echo", "echo_grot":
 			return "ECHO"
 		"warp":
 			return "Poort"
@@ -368,6 +369,7 @@ static func label(bron: String) -> String:
 static func speler_teksten() -> Array[String]:
 	var out: Array[String] = []
 	out.append_array(ECHO_REGELS)
+	out.append_array(EchoGrot.speler_teksten())
 	out.append_array(WERK_REGELS)
 	out.append(HANDEL_DICHT)
 	out.append(KERN_ZIN)

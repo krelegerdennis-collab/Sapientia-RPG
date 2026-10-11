@@ -10,6 +10,7 @@ const Equipment := preload("res://scripts/equipment.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")   # Kernfragment stap 2: de Codex
 const Dungeon100RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")   # 100-verdiepingen-kerker
+const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 ## Hier begint een nieuw spel (v0.11: wakker worden in bed, in het huis).
 const START_MAP := "res://scenes/maps/huis_wilgendal.tscn"
 const START_SPAWN := "bed"
@@ -1585,10 +1586,11 @@ func is_permanent_item(id: String) -> bool:
 	return dungeon100_run_active() and dungeon100_permanent.has(id)
 
 
-## Een run begint (Dungeon100Room, bij het binnenkomen vanaf de wereldkaart): de echte party/tas/goud/
+## Een run begint (ECHO, of Dungeon100Room bij een directe binnenkomst): de echte party/tas/goud/
 ## Codex gaan in de momentopname. De simulatie neemt iedereen mee die dan in de party zit (ook wie zich
 ## later aansloot) plus elke Codex-pagina, allemaal op level 1, zonder uitrusting en zonder spreuken.
 ## De tas heeft alleen de permanente items, en er is geen goud. Dubbel aanroepen doet niets (false).
+## De wereldkaart start de grot niet meer; dat doet dungeon100_echo_start.
 func dungeon100_begin_run() -> bool:
 	if dungeon100_run_active():
 		return false
@@ -1732,21 +1734,34 @@ func dungeon100_warper_exit() -> bool:
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
-## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties. Het kristal werkt
-## zoals het was: gebruiken beëindigt de run en zet je op de wereldkaart. Geen keuzemenu.
+## TODO(design): het keuze-moment op verdieping 100 (Codex, Grade 4, accessoire) heeft nog geen opties.
 func dungeon100_can_warp() -> bool:
 	return dungeon100_run_active() and dungeon100_floor == Dungeon100RulesC.FLOORS and item_count(Dungeon100RulesC.Blue.WARP_ITEM) > 0
 
 
-## Warp: run voltooid, permanente items mee naar je echte tas, terug naar de wereldkaart (het kristal is
-## op). false = kan niet (verkeerde verdieping, geen kristal of geen run).
-## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
+## Warp: run voltooid, permanente items mee naar de echte tas, terug naar ECHO's Kamer.
+## false = kan niet (verkeerde verdieping, geen kristal of geen run).
+## TODO(design): het keuze-moment op verdieping 100 (Codex, Grade 4, accessoire) heeft nog geen opties.
 func dungeon100_warp() -> bool:
 	if not dungeon100_can_warp():
 		return false
 	dungeon100_best = Dungeon100RulesC.FLOORS
-	dungeon100_end_run(true)
-	change_map(Dungeon100RulesC.WORLD_SCENE, Dungeon100RulesC.WORLD_SPAWN)
+	if not dungeon100_end_run(true):
+		return false
+	story_flags[EchoGrot.FLAG_RESULTAAT] = true
+	change_map(EchoGrot.KAMER, EchoGrot.KAMER_SPAWN)
+	return true
+
+
+## ECHO start een nieuwe run: verdieping 1, level 1, zonder uitrusting. De kamer kiest de seed.
+func dungeon100_echo_start() -> bool:
+	if changing_map or in_battle or dungeon100_run_active():
+		return false
+	if not dungeon100_begin_run():
+		return false
+	dungeon100_floor = 1
+	dungeon100_seed = 0
+	change_map(EchoGrot.DUNGEON, EchoGrot.DUNGEON_SPAWN)
 	return true
 
 

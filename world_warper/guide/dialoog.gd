@@ -9,8 +9,8 @@ extends RefCounted
 
 const ID := "gids"
 
-# TODO(design): geen canon-naam; IVA is een placeholder tot Dennis een naam geeft.
-const NAAM := "IVA"
+## Canon-naam. De bonus-lore (digitale echo van een onderzoeker) blijft een latere onthulling.
+const NAAM := "ECHO"
 
 const FLAG_VOORVOEGSEL := "world_warper_guide_"
 
@@ -26,7 +26,7 @@ static func steps() -> Array:
 			"id": "welkom",
 			"flag": flag_for(0),
 			"lines": [
-				"Ik ben IVA. Ik ben de gids van deze hub.",
+				"Ik ben ECHO. Ik ben de gids van deze hub.",
 				"Vraag het me als je de weg niet weet.",
 			],
 		},
