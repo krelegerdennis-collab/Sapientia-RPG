@@ -44,20 +44,20 @@ const BOSS_MULT := {"max_hp": 2.5, "atk": 1.25, "def": 1.2, "mag": 1.2, "mdef": 
 ## Formulebonus die boss_stats nog op verdieping 100 toepast. Er staat daar geen baas meer.
 const FINAL_MULT := {"max_hp": 1.3, "atk": 1.15, "def": 1.1, "mag": 1.15, "mdef": 1.1, "exp": 3.0, "gold": 3.0}
 ## "enemy" = bestaande vijand uit game_data.gd (sprite + skills, geen eigen art per baas).
-## "name" = naam in het gevecht. "desc" = bestiariumzin, alleen bij de canon-bazen.
+## "name" = naam in het gevecht. "desc" = canon-citaat in het bestiarium, alleen bij de canon-bazen.
 const BOSSES := {
 	10: {"enemy": "papiergeest", "name": "Page Warden"},
 	20: {"enemy": "glitchmot", "name": "Glitch Queen"},
-	25: {"enemy": "glitchmot", "name": "De Schaduw van H-6", "desc": "duistere echo van Dennis."},
+	25: {"enemy": "glitchmot", "name": "De Schaduw van H-6", "desc": "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6."},
 	30: {"enemy": "sporenzwam", "name": "Spore Lord"},
 	40: {"enemy": "wortelkruiper", "name": "Root Mother"},
-	50: {"enemy": "mech_wachter", "name": "De Cyclus", "desc": "draaiende machine, organisch en staal."},
+	50: {"enemy": "mech_wachter", "name": "De Cyclus", "desc": "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door."},
 	60: {"enemy": "mistuil", "name": "Mist Lord"},
 	70: {"enemy": "mech_wachter", "name": "Seal Warden"},
-	75: {"enemy": "mistuil", "name": "De Rechter", "desc": "een oog met armen."},
+	75: {"enemy": "mistuil", "name": "De Rechter", "desc": "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte."},
 	80: {"enemy": "kennis_beest", "name": "Great Book Golem"},
 	90: {"enemy": "wortelkoning", "name": "Root Emperor"},
-	99: {"enemy": "papiergeest", "name": "De Stem", "desc": "geen lichaam, Sapientia zelf."},
+	99: {"enemy": "papiergeest", "name": "De Stem", "desc": "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht."},
 }
 ## Extra skill van de eindbaas (bovenop de skills van zijn vijand-sprite).
 const FINAL_SKILL := {"name": "Last Judgment", "chance": 0.15, "power": 2.0}

@@ -162,11 +162,11 @@ func _rules_tests() -> void:
 			and Scaling.boss_for_floor(99)["name"] == "De Stem")
 	check("verdieping 100 is geen baas", Scaling.boss_for_floor(100).is_empty() and not Scaling.is_boss_floor(100)
 			and not Gen.is_boss_floor(100))
-	check("bestiariumzin van de canon-bazen, zonder extra zin",
-			Bestiary.entry("d100_baas_25")["desc"] == "duistere echo van Dennis."
-			and Bestiary.entry("d100_baas_50")["desc"] == "draaiende machine, organisch en staal."
-			and Bestiary.entry("d100_baas_75")["desc"] == "een oog met armen."
-			and Bestiary.entry("d100_baas_99")["desc"] == "geen lichaam, Sapientia zelf.")
+	check("bestiariumcitaat van de canon-bazen, letterlijk",
+			Bestiary.entry("d100_baas_25")["desc"] == "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6."
+			and Bestiary.entry("d100_baas_50")["desc"] == "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door."
+			and Bestiary.entry("d100_baas_75")["desc"] == "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte."
+			and Bestiary.entry("d100_baas_99")["desc"] == "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht.")
 	var migrated := R.load_data({"floor": 60, "checkpoint": 50, "best": 60})
 	check("oude save zonder 'warpers': open tot de huidige verdieping (60 = 1, 25 en 50)",
 			migrated["warpers"] == [1, 25, 50])
