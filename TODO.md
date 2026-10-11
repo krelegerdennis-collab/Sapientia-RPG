@@ -232,3 +232,127 @@ Magie heeft 4 grades. Grade 1 tot en met 3 zijn te koop in de magic shop en word
 
 - [ ] Verkoop-systeem in shops
   Sluit aan op de eerdere TODO: items verkoopbaar.
+
+## World Warper
+
+Zwevend hightech hub. Verschijnt na het verslaan van De Genezer (Archief 2).
+
+### Concept en lore
+
+- [ ] Zwevend hightech gebouw, mix van technologie van de Oude Mensheid en Sapientia
+- [ ] Oorspronkelijk gebouwd door de Oude Mensheid als verbinding tussen de Archieven
+- [ ] Sapientia heeft het offline gehouden en wil het zelf in handen krijgen
+- [ ] Het werkt alleen op Dennis' Hanger; de Hanger is de enige sleutel
+- [ ] Dat maakt Dennis (Proefpersoon H-6) onmisbaar voor Sapientia's plannen
+- [ ] Komt online zodra twee Archieven (1 en 2) geactiveerd zijn
+
+### Verschijning en cutscene
+
+- [ ] Cutscene na De Genezer: de World Warper verschijnt in de lucht
+- [ ] De party wordt automatisch gewarped naar het gebouw
+- [ ] Introductie van de AI-gids
+- [ ] Duidelijk maken wat dit is, wat het kan, en waarom het belangrijk is
+
+### Eerste binnenkomst: Hanger en Sapientia
+
+- [ ] Bij de eerste keer binnen: visueel effect
+  - [ ] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
+  - [ ] Systemen komen online door het Hanger-signaal
+- [ ] Dialoogscène
+  - [ ] Dennis toont de Hanger (eerste keer expliciet in het verhaal)
+  - [ ] De AI-gids reageert herkennend op de Hanger
+  - [ ] Uitleg: alleen de Hanger kan de World Warper activeren
+- [ ] Sapientia-dreiging
+  - [ ] Na de activering verschijnt Sapientia (glitch, stem of hologram)
+  - [ ] Sapientia uit de dreiging: zij wil de World Warper
+  - [ ] Duidelijk maken dat Dennis en de Hanger het enige obstakel zijn
+  - [ ] Dreiging opbouwen voor latere acts
+  - [ ] De party reageert geschokt; de AI-gids waarschuwt
+
+### Interieur
+
+- [ ] Half functioneel: centrale hal en meerdere kamers
+- [ ] Sommige kamers zijn leeg bij de introductie en unlocken later per act
+- [ ] Centrale hal met warp-platform (hoofdfunctie)
+- [ ] Paars als signature kleur, in lijn met het Codex Monument
+- [ ] Hologrammen, schermen en tech-details
+- [ ] Alle party-leden en Codex-monsters lopen vrij rond in het gebouw
+
+### Bewoners van de hub
+
+- [ ] Huidige party-leden lopen rond (Dennis, Noor, Lotte, en latere leden)
+- [ ] Gevangen Codex-monsters lopen rond
+- [ ] Nieuwe party-leden voegen zich toe zodra ze aansluiten
+- [ ] Reageren party-leden op locatie en verhaalprogressie? (design nog open)
+
+### AI-gids (in de main PC)
+
+- [ ] De AI-gids zit in de main PC van het warp-platform
+- [ ] Functie: questvoortgang, missie-uitleg en begeleiding
+- [ ] Naam nog te bepalen
+- [ ] Uiterlijk: hologram met paarse gloed
+- [ ] Reageert op verhaalprogressie (nieuwe dialoog per act)
+- [ ] Geeft hints bij vastlopen en de volgende bestemming
+- [ ] Herkent de Hanger en weet mogelijk meer over Dennis en H-6 dan hijzelf
+
+### Warp-systeem
+
+- [ ] Wereldkaart-view opent bij gebruik van het warp-platform
+- [ ] Eerste keuze: welke worldmap (WM1, WM2 of WM3)
+- [ ] Tweede keuze: welk dorp op die worldmap
+- [ ] Alleen ontgrendelde worldmaps zijn selecteerbaar
+- [ ] Alleen ontgrendelde dorpen zijn selecteerbaar
+- [ ] Visuele stijl: paars, holografisch, sciencefiction
+
+### Ontgrendeling per worldmap
+
+- [ ] Na Archief 2: World Warper actief, WM1 en WM2 beschikbaar
+- [ ] Na afronden van WM2 (Archief 3 en 4): WM3 ontgrendelt
+- [ ] Elk dorp moet eerst bezocht zijn voordat je ernaartoe kunt warpen
+
+### Functionaliteit in de World Warper
+
+- [ ] Opslaan (save point)
+- [ ] Party kiezen en wisselen
+- [ ] Questvoortgang via de AI-gids
+- [ ] Party-leden en Codex-monsters lopen vrij rond
+- [ ] Latere kamers unlocken per act (invulling nog te bepalen)
+  - [ ] Welke kamers? (crafting, training, shops, Codex — design nog open)
+- [ ] Bestiarium of Codex beheren, indien van toepassing
+
+### Audio
+
+- [ ] Ambient tech-muziek (rustig, mysterieus, sciencefiction)
+- [ ] Hum als achtergrondgeluid (constante lage toon)
+- [ ] Warp-geluid bij het activeren van het platform
+- [ ] Geluid bij de eerste Hanger-activatie
+- [ ] Sapientia-stem of glitch-geluid voor de dreigingsscène
+- [ ] Stem of hologramgeluid van de AI-gids
+
+### Visuals en art
+
+- [ ] Exterieur van de World Warper (zwevend, paars, hightech)
+- [ ] Interieur-tileset (paars, holografisch, sciencefiction)
+- [ ] Sprite van het warp-platform
+- [ ] Sprite van de main PC
+- [ ] Hologram-sprite of animatie van de AI-gids
+- [ ] Oplicht-effect van de Hanger (paarse gloed)
+- [ ] Verschijning van Sapientia (glitch of hologram)
+- [ ] UI van de wereldkaart-view (WM1, WM2, WM3, daarna dorp)
+- [ ] Loop-animaties van party-leden en Codex-monsters in de hub
+
+### Verhaal-integratie
+
+- [ ] Dennis' Hanger is de sleutel; dat meermaals benadrukken in dialoog
+- [ ] Sapientia's interesse in de World Warper opbouwen als dreiging
+- [ ] De AI-gids kent de Oude Mensheid, of doet alsof
+- [ ] De AI-gids weet mogelijk meer over Dennis en H-6 dan hijzelf
+
+### Verhaal nog open
+
+- [ ] Naam van de AI-gids bepalen
+- [ ] Exacte relatie tussen de World Warper en Archief 4 (oorsprong van H-6)
+- [ ] Waarom werkt het alleen op de Hanger?
+- [ ] Wat Sapientia precies met de World Warper wil
+- [ ] Latere kamers: welke, wanneer, en wat ze doen
+- [ ] Reageren party-leden op locatie en verhaalprogressie?
