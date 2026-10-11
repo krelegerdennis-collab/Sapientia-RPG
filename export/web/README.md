@@ -1,14 +1,19 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`5cd0522`), Godot 4.7.2, threads uit.
+Web-build van `main` (`4ae7a4a`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`4d8731b`, export van `404bce0`):
-- Geen nieuwe gameplay. Zelfde scripts en assets als de build van `404bce0`.
-- `index.pck` is kleiner: lokale testscreenshots en testsaves zitten er niet meer in.
+Nieuw in deze build, bovenop de vorige web-build (`50829ec`, export van `5cd0522`):
+- Titelscherm links, onder Betatest: **Eindstaat**. Eigen bestand (`save_eindstaat.json`), niet slot 1–4.
+  De party staat op level 40. Noor en Lotte doen mee, met spreuken t/m grade 3, G4-wapens en 8000 goud.
+  Je start op de wereldkaart bij Wilgendal. De winkels en de Diepe Grot zijn bereikbaar.
+  Opslaan daarna blijft in dat eindstaat-bestand.
 - Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `5cd0522`:
+- Geen nieuwe gameplay t.o.v. `404bce0`. `index.pck` zonder lokale testscreenshots.
 
 Nog van de build van `404bce0`:
 - Magie in Wilgendal kost 160×grade²: grade 1 = 160, grade 2 = 640, grade 3 = 1440. Grade 4 blijft uit de winkel. Verkoop is de helft, dus een grade-1-spreuk levert 80.
@@ -31,9 +36,9 @@ Nog van de vorige build:
 - In de Golemhal staat rechts een boekenkast. Core Power (de veld-vuurbal, pas na de Golem) scheurt hem open. Dan kronkelt de Ink Worm eruit.
 - **Beta Test** begint met een Ink Worm als buddy. Had je die al gestart, dan komt de Ink Worm er de volgende keer bij.
 - Bij **New Game** typ je je eigen naam. Dennis staat er al in; de eerste letter vervangt die naam. Tik het vak aan, dan opent het toetsenbord op de telefoon. Leeg laten blijft Dennis. Maximaal 10 tekens.
-- Titelscherm links: **Beta Test**. Eigen voortgang, los van New Game en Continue.
-  De eerste keer sta je op de wereldkaart (niveau 10, Spark Sword, 6 Blank Books).
-  De volgende keer ga je daar verder.
+- Titelscherm links: **Betatest** en **Eindstaat**. Elk een eigen voortgang, los van Nieuw spel en Doorgaan.
+  Betatest: de eerste keer op de wereldkaart (niveau 10, Vonkzwaard, 6 Lege Boeken). Daarna ga je daar verder.
+  Eindstaat: level 40, Noor en Lotte, eigen bestand. Slot 1–4 blijft heel.
 
 ## Spelen op je telefoon
 
