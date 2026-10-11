@@ -908,6 +908,8 @@ func start_beta_game() -> void:
 	use_beta_saves()
 	var p := newest_beta_path()
 	if p != "" and load_game(p):
+		if _grant_beta_inktwurm():
+			save_game(return_tile, return_facing)
 		changing_map = true
 		in_battle = false
 		await Transition.fade_out()
@@ -940,11 +942,23 @@ func _build_beta_state() -> void:
 	gold = 200
 	codex_add("mosslijm", 5)
 	codex_add("moskonijn", 5)
-	var iw := codex_add("inktwurm", 5)
-	codex_set_active(str(iw.get("uid", "")))
+	_grant_beta_inktwurm()
 	mark_seen("mosslijm")
 	mark_seen("moskonijn")
+
+
+## Oude betatest-save (van vóór de Inktwurm): de pagina erbij en meteen de buddy.
+## true = er is een Inktwurm toegevoegd.
+func _grant_beta_inktwurm() -> bool:
+	for page in codex_pages:
+		if str(page.get("species", "")) == "inktwurm":
+			return false
+	var iw := codex_add("inktwurm", 5)
+	if iw.is_empty():
+		return false
+	codex_set_active(str(iw.get("uid", "")))
 	mark_seen("inktwurm")
+	return true
 
 
 ## Na de naamkeuze: nieuw spel en naar het startpunt in het dorp.

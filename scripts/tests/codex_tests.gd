@@ -971,6 +971,20 @@ func _beta_account_tests() -> void:
 			and str(GameState.codex_active_page().get("species", "")) == "inktwurm"
 			and GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "mosslijm")
 			and GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "moskonijn"))
+	var kept: Array = []
+	for page in GameState.codex_pages:
+		if str(page.get("species", "")) != "inktwurm":
+			kept.append(page)
+	GameState.codex_pages = kept
+	GameState.codex_active = str(kept[0].get("uid", ""))
+	check("oude betatest-save zonder Inktwurm wegschrijven", GameState.save_game(GameState.BETA_TILE, GameState.BETA_FACING))
+	GameState.new_game("Leeg")
+	GameState.use_beta_saves()
+	check("oude betatest laden heeft nog geen Inktwurm", GameState.load_game(GameState.newest_beta_path())
+			and not GameState.codex_pages.any(func(p): return str(p.get("species", "")) == "inktwurm"))
+	check("oude betatest krijgt alsnog een Inktwurm als buddy", GameState._grant_beta_inktwurm()
+			and GameState.codex_pages.size() == 3
+			and str(GameState.codex_active_page().get("species", "")) == "inktwurm")
 	check("betatest: proloog klaar, woud open, Golem nog niet verslagen, Noor nog niet in de groep",
 			GameState.story_step == SD.KLAAR and GameState.story_flags.has("quest_noor")
 			and GameState.story_flags.has("marit_boeken") and not GameState.story_flags.has(SD.GOLEM_FLAG)
