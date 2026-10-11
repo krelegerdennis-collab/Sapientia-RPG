@@ -721,7 +721,7 @@ func _screen_tests() -> void:
 		texts.append(s.entry_text(i))
 	check("lijst: 4 pagina's + 'Geen', '*' = bondgenoot %s" % [texts], s.entries.size() == 5 and texts[0].begins_with("* Moss Slime")
 			and "Lv3" in texts[0] and "Lore Beast" in texts[2] and texts[4].ends_with("No ally") and s.entries[0].has_focus())
-	check("lange naam niet afgekapt: '%s'" % texts[3], "Root Crawler Lv12" in texts[3])
+	check("lange naam niet afgekapt: '%s'" % texts[3], "Root Crawler" in texts[3] and "Lv12" in texts[3] and "." not in texts[3])
 	var past := true
 	for e in s.entries:
 		var f: Font = e.get_theme_font("font")

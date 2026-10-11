@@ -361,7 +361,7 @@ func _screen_tests() -> void:
 	var gz := GameState.codex_fuse(p3["uid"], w2["uid"])
 	s.rebuild(gz["uid"])
 	await frames(2)
-	check("glitch-variant 'Root Glitch' (13 tekens) past in de lijst: '%s'" % s.entry_text(1), "Root Glitch Lv13" in s.entry_text(1))
+	check("glitch-variant 'Root Glitch' (13 tekens) past in de lijst: '%s'" % s.entry_text(1), "Root Glitch" in s.entry_text(1) and "Lv13" in s.entry_text(1))
 	var past := true
 	for e in s.entries:
 		var f: Font = e.get_theme_font("font")
@@ -1020,7 +1020,7 @@ func _codex_button_tests() -> void:
 	check("tik op Codex opent het submenu 'Codex'", opened)
 	var t0: String = bt.menu._entries[0]["text"]
 	check("submenu: Vangen (Boek x2) + Wissel bondgenoot, beide aan ('%s')" % t0, bt.menu._entries.size() == 2
-			and "Boek x2" in t0 and bt.menu._is_enabled(0) and bt.menu._is_enabled(1))
+			and "Book x2" in t0 and bt.menu._is_enabled(0) and bt.menu._is_enabled(1))
 	await pframes(4)
 	check("submenu: regels >= 16 hoog (%.0f)" % bt.menu.row_button(0).size.y, rows_ok(bt))
 	var cr: Rect2 = bt.cross.cross_rect()
