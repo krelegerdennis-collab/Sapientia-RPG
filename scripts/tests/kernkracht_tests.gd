@@ -12,6 +12,8 @@ extends Node
 ##   Deel H: save/load: vaardigheid blijft, geen verlamming blijft hangen.
 ##   Deel I: v0.19 haak on_kernkracht_hit() (geheime Inktwurm-kast van Forge): 1x bij een treffer, vóór de
 ##           inslag; ook via de parent; niet buiten bereik (> 3 tegels) en niet door een ander object heen.
+##   Deel J: de echte kast in de Golemhal gaat open door Kernkracht, de Inktwurm komt eruit, en blijft
+##           open na opnieuw binnenkomen. Zonder Golemkern blijft hij dicht.
 ## Met --shots=map: kk_gevecht_vlucht, kk_gevecht_inslag, kk_veld_vlucht, kk_veld_geblokkeerd,
 ## kk_veld_monster_verlamd, kk_veld_knop (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
@@ -91,6 +93,9 @@ func _run() -> void:
 	if part("I"):
 		print("=== Deel I: haak on_kernkracht_hit (v0.19) ===")
 		await _hook_tests()
+	if part("J"):
+		print("=== Deel J: Inktwurm-kast in de Golemhal ===")
+		await _kast_tests()
 	print("KERNKRACHTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -1058,3 +1063,66 @@ func _hook_tests() -> void:
 	par.queue_free()
 	await frames(3)
 	check("I: hook_target(null) / zonder methode = null", KernVeld.hook_target(null) == null and KernVeld.hook_target(room.ground) == null)
+
+
+# ================================================================ deel J: Inktwurm-kast
+func _kast_tests() -> void:
+	setup(SD.KLAAR, true)
+	GameState.story_flags.erase("inktwurm_kast_open")
+	var room := await enter(GOLEM_SCENE, "zuid")
+	if room == null:
+		check("J: Golemhal geladen", false)
+		return
+	await freeze_monsters()
+	var kast: Node = room.get_node_or_null("Objects/InktwurmKast")
+	check("J: kast staat dicht rechts in de hal", kast != null and not kast.is_open and kast.tile == Vector2i(17, 5)
+			and kast.sprite.hframes == 6 and kast.sprite.frame == 0)
+	if kast == null:
+		return
+	var blocked: Dictionary = veld().blocker_at(Vector2i(17, 5))
+	check("J: de vuurbal ziet de kast (soort inktwurm_kast)", blocked.get("kind") == "inktwurm_kast" and blocked.get("node") == kast)
+	player().place_at(Vector2i(13, 6), Vector2i.RIGHT)
+	await pframes(4)
+	await screenshot("inktwurm_kast_dicht")
+	var res := await shoot(Vector2i(15, 5), Vector2i.RIGHT)
+	var r: Dictionary = res.get("result", {})
+	check("J: schot vanaf (15,5) naar rechts raakt de kast", r.get("hook") == kast and r.get("hit") == Vector2i(17, 5)
+			and r.get("kind") == "inktwurm_kast")
+	var opened: bool = await wait_until(func(): return kast.is_open, 3.0)
+	var said: bool = await wait_until(func(): return Dialog.is_open, 2.0)
+	await close_dialog()
+	var worm: Node = null
+	for m in room.monsters:
+		if is_instance_valid(m) and str(m.enemy_id) == "inktwurm":
+			worm = m
+	check("J: kast open, vlag gezet, botsing weg, tekst gezien", opened and said and GameState.story_flags.has("inktwurm_kast_open")
+			and kast.shape.disabled and kast.sprite.frame == 5)
+	check("J: Inktwurm staat in de kast en is nog te vangen", worm != null and worm.moves == false
+			and worm.tile == Vector2i(16, 5) and GameState.unique_available("inktwurm"))
+	player().place_at(Vector2i(13, 6), Vector2i.RIGHT)
+	await pframes(4)
+	await screenshot("inktwurm_kast_open")
+	# zonder kern: de haak zelf weigert
+	setup(SD.KLAAR, false)
+	GameState.story_flags.erase("inktwurm_kast_open")
+	room = await enter(GOLEM_SCENE, "zuid")
+	kast = room.get_node_or_null("Objects/InktwurmKast") if room != null else null
+	if kast == null:
+		check("J: kast zonder kern geladen", false)
+		return
+	kast.on_kernkracht_hit()
+	await pframes(8)
+	check("J: zonder Golemkern blijft de kast dicht", not kast.is_open and not GameState.story_flags.has("inktwurm_kast_open")
+			and kast.sprite.frame == 0)
+	# opnieuw binnenkomen: open, worm er nog
+	setup(SD.KLAAR, true)
+	GameState.story_flags["inktwurm_kast_open"] = true
+	room = await enter(GOLEM_SCENE, "zuid")
+	kast = room.get_node_or_null("Objects/InktwurmKast") if room != null else null
+	var worm2 := false
+	if room != null:
+		for m in room.monsters:
+			if is_instance_valid(m) and str(m.enemy_id) == "inktwurm":
+				worm2 = true
+	check("J: na opnieuw binnenkomen staat de kast open en de Inktwurm er nog", kast != null and kast.is_open
+			and kast.sprite.frame == 5 and kast.shape.disabled and worm2)

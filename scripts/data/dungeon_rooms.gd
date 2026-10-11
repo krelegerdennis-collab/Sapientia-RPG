@@ -542,6 +542,9 @@ const ROOMS := {
 			{"id": "golem", "enemy": "kennis_beest", "tile": [9, 3], "moves": false, "boss": true, "guard": true,
 				"sprite": "golem", "size": [2, 2], "frame": [32, 32], "fps": 1.2},
 		],
+		# Geheime kast rechts in de hal. Niet in "monsters": de Inktwurm verschijnt pas als
+		# Kernkracht de kast raakt (scripts/dungeon/inktwurm_kast.gd). De Golem blijft de enige baas.
+		"inktwurm_kast": {"tile": [17, 5]},
 	},
 }
 

@@ -940,8 +940,11 @@ func _build_beta_state() -> void:
 	gold = 200
 	codex_add("mosslijm", 5)
 	codex_add("moskonijn", 5)
+	var iw := codex_add("inktwurm", 5)
+	codex_set_active(str(iw.get("uid", "")))
 	mark_seen("mosslijm")
 	mark_seen("moskonijn")
+	mark_seen("inktwurm")
 
 
 ## Na de naamkeuze: nieuw spel en naar het startpunt in het dorp.

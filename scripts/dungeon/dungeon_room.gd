@@ -24,6 +24,7 @@ const BOOK_SCENE := "res://scenes/book_point.tscn"
 const ChestScript := preload("res://scripts/dungeon/dungeon_chest.gd")
 const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const PropScript := preload("res://scripts/dungeon/dungeon_prop.gd")
+const InktwurmKastScript := preload("res://scripts/dungeon/inktwurm_kast.gd")
 const SignScript := preload("res://scripts/dungeon/dungeon_sign.gd")
 const STORY_OBJECT_SCENE := "res://scenes/story_object.tscn"
 const NPC_SCENE := "res://scenes/npc.tscn"
@@ -176,6 +177,11 @@ func _build() -> void:
 		props.append(pr)
 		for t in pr.blocked_tiles(d):
 			_blocked[t] = true
+	# Geheime Inktwurm-kast (Golemhal): alleen open met Kernkracht.
+	if room.has("inktwurm_kast"):
+		var kast: StaticBody2D = InktwurmKastScript.new()
+		kast.setup(self, room["inktwurm_kast"])
+		objects.add_child(kast)
 	# v0.14 leesplekken (zonder botsing)
 	for d in room.get("signs", []):
 		var sg: Area2D = SignScript.new()

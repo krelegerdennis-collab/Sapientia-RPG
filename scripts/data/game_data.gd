@@ -274,16 +274,13 @@ const ENEMIES := {
 	#   = HP 34, ATK 18,2, DEF 8,4, SPD 13,2  ->  x2 (half naar even afgerond) = HP 68, ATK 36, DEF 17, SPD 26.
 	#   (CodexData.normal_stats_at(5); de fusietest rekent het na.) Tot Lv 7 alleen een gewone aanval, dus
 	#   als vijand (Lv 5) geen "skills". Vangkans 100% (CodexData "capture_always"; wel een Leeg Boek nodig).
-	# Art van RPG ART (art_inktwurm_v19/out, LEESMIJ.txt): voor/rug/idle 108x86, voeten (54, 80) = (w/2, h-6);
-	# kaart: out/inktwurm_map.png -> assets/map_monsters/inktwurm.png (2x4 frames van 16x16). Forge zet de
-	# bestanden in het project. Zolang ze ontbreken: "sprite_placeholder" (enemy_sprite() hieronder); de kaart
-	# en de Codex-bondgenoot hebben hun eigen plaatsvervanger. "art_pending" weghalen zodra de art er is.
+	# Art: voor/rug/idle 108x86, voeten (54, 80) = (w/2, h-6); idle 216x86, 2 frames, 0,55 s.
+	# Kaart: assets/map_monsters/inktwurm.png (32x64, 2x4 frames van 16x16).
 	# Bestiarium 012: 011 is al de Mimic op main.
 	"inktwurm": {
 		"name": "Inktwurm", "sprite": "res://assets/sprites/enemies/inktwurm.png",
 		"sprite_back": "res://assets/sprites/enemies/inktwurm_rug.png",
 		"idle": "res://assets/sprites/enemies/inktwurm_idle.png", "idle_frames": 2, "idle_time": 0.55,
-		"art_pending": true, "sprite_placeholder": "res://art/enemies/mosslijm.png",
 		"unique": true, "encounter_level": 5,
 		"max_hp": 68, "atk": 36, "def": 17, "agi": 26, "mag": 0, "mdef": 2,
 		# TIJDELIJKE AANNAME: EXP/goud ongeveer 2x een Mech. Wachter op niveau 4 (unieke beloning)
