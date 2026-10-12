@@ -70,8 +70,9 @@ static func blue_loot(run_seed: int, floor_nr: int, chest_id: String) -> Diction
 
 ## Is dit een uitrustingsstuk dat een Blauwe Kist kan geven? (voor de tests en de opslag-opschoning)
 ## Oude d100_*-stukken blijven blauw (saves van voor de grades). Nieuwe grade-stukken en G4-rollen ook.
+## Oude rol-ids blijven blauw zodat een save ze nog vindt; ze zitten niet meer in de grade-4-pool.
 static func is_blue_item(id: String) -> bool:
-	if GradeGear.has_item(id) or GradeGear.is_scroll(id):
+	if GradeGear.has_item(id) or GradeGear.is_scroll(id) or GradeGear.is_legacy_scroll(id):
 		return true
 	for kind in Scaling.GEAR_KINDS:
 		for t in range(1, Scaling.MAX_TIER + 1):

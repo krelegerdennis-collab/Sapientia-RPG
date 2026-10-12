@@ -8,6 +8,8 @@ extends Node
 
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const S := preload("res://scripts/data/dungeon100_scaling.gd")
+const Gear := preload("res://scripts/data/grade_gear.gd")
+const Shop := preload("res://scripts/data/shop_data.gd")
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
@@ -93,6 +95,92 @@ func _kind_tests() -> void:
 			(with["items"] as Array).any(func(it): return str(it["item"]) == Blue.WARP_ITEM)
 			and not (Blue.with_warp(boss, 90)["items"] as Array).any(func(it): return str(it["item"]) == Blue.WARP_ITEM))
 	check("Mimic bestaat in de vijanddata", GD.ENEMIES.has(Blue.MIMIC_ENEMY))
+	_g4_rol_tests()
+
+
+## Grade 4-spreuken: één rol per canon-spreuk, alleen in de blauwe pool vanaf verdieping 80.
+## De oude vijf rol-ids blijven opzoekbaar, maar zijn niet meer die pool.
+func _g4_rol_tests() -> void:
+	var spells: Array[String] = []
+	for sid in GD.SPELLS:
+		var sp: Dictionary = GD.SPELLS[sid]
+		if int(sp.get("grade", 0)) == 4:
+			spells.append(str(sid))
+	spells.sort()
+	var verwacht: Array[String] = []
+	for sid in spells:
+		verwacht.append("spreuk_g4_" + sid)
+	var pool: Array[String] = []
+	for id in Gear.SCROLLS:
+		pool.append(str(id))
+	pool.sort()
+	check("grade 4 is twintig canon-spreuken, elk met een eigen rol", spells.size() == 20 and pool == verwacht)
+	var rol_ok := true
+	var winkel := false
+	for sid in spells:
+		var rid := "spreuk_g4_" + sid
+		var it: Dictionary = GD.ITEMS.get(rid, {})
+		var sp: Dictionary = GD.SPELLS[sid]
+		var naam := str(it.get("name", ""))
+		var spreuknaam := str(sp.get("name", ""))
+		var kort := str(it.get("short", naam))
+		if str(it.get("teach", "")) != sid or str(it.get("target", "")) != "ally":
+			rol_ok = false
+		if not naam.begins_with("Rol: ") or not naam.contains(spreuknaam):
+			rol_ok = false
+		if kort.length() > 13 or (naam.length() > 13 and not it.has("short")):
+			rol_ok = false
+		if sp.get("shop", true) != false or int(it.get("price", 0)) != 0:
+			winkel = true
+		if Shop.list_price(rid) != 0 or Shop.sell_price(rid) != 0:
+			winkel = true
+		if not Blue.is_blue_item(rid):
+			rol_ok = false
+		if (S.SPELL_SCROLLS as Array).has(rid):
+			winkel = true
+	for shop_id in Shop.SHOPS:
+		var shop: Dictionary = Shop.SHOPS[shop_id]
+		for offer in shop.get("offers", []):
+			if str(offer.get("id", "")).begins_with("spreuk_g4_"):
+				winkel = true
+	check("elke G4-rol leert die spreuk, in het Nederlands, en blijft een blauw item", rol_ok)
+	check("G4-rollen liggen niet in de winkel en niet in gewone kisten", not winkel)
+	var oud_ok := true
+	var oud_in_pool := false
+	for id in Gear.LEGACY_SCROLLS:
+		var oud: Dictionary = GD.ITEMS.get(id, {})
+		if oud.is_empty() or str(oud.get("teach", "")) == "" or not Blue.is_blue_item(id):
+			oud_ok = false
+		if Gear.is_scroll(id):
+			oud_in_pool = true
+	check("oude vijf rollen blijven opzoekbaar en zijn geen grade-4-pool", oud_ok and not oud_in_pool
+			and Gear.LEGACY_SCROLLS.size() == 5)
+	var onder := true
+	for f in range(1, 80):
+		for seed in range(0, 4):
+			var id := Gear.pick(seed, f, "rol")
+			if Gear.is_scroll(id) or Gear.is_legacy_scroll(id):
+				onder = false
+			elif int(Gear.item(id).get("grade", 0)) != Gear.grade_for_floor(f):
+				onder = false
+	check("onder verdieping 80 valt geen G4-rol", onder)
+	var gezien := {}
+	var diep := true
+	for seed in range(0, 240):
+		for chest in ["a", "b"]:
+			var id := Gear.pick(seed, 80, chest)
+			if Gear.is_scroll(id):
+				gezien[id] = true
+			elif Gear.is_legacy_scroll(id) or int(Gear.item(id).get("grade", 0)) != 4:
+				diep = false
+			elif int(Gear.item(id).get("min_floor", 99)) > 80:
+				diep = false
+	var loot := Blue.blue_loot(4, 85, "diep")
+	var lid := str((loot["items"] as Array)[0]["item"])
+	check("vanaf verdieping 80 valt elke G4-rol, en geen oude rol", diep and gezien.size() == Gear.SCROLLS.size()
+			and int(loot["grade"]) == 4 and Blue.is_blue_item(lid)
+			and (Gear.is_scroll(lid) or int(Gear.item(lid).get("grade", 0)) == 4)
+			and not Gear.is_legacy_scroll(lid))
 
 
 func _rng(s: int) -> RandomNumberGenerator:
