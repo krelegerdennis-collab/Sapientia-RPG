@@ -64,3 +64,16 @@ assets/sprites/enemies/adermot_rug.png          90x90    Adermot, rugaanzicht
 assets/map_monsters/steenluis.png               32x64    Steenluis op de kaart (2x4 frames van 16x16)
 assets/map_monsters/druipslak.png               32x64    Druipslak op de kaart (2x4 frames van 16x16)
 assets/map_monsters/adermot.png                 32x64    Adermot op de kaart (2x4 frames van 16x16)
+# Wilgendal, winkelpanden (tools/art_wilgendal_placeholders.py). Gekleurd vlak, magenta hoekjes, het woord PLACEHOLDER. Geen definitieve art.
+assets/sprites/buiten/wilgendal_pantser.png     48x48    pantserwinkel, exterieur
+assets/sprites/buiten/wilgendal_wapen.png       48x48    wapenwinkel, exterieur
+assets/sprites/buiten/wilgendal_accessoire.png  48x48    accessoirewinkel, exterieur
+assets/sprites/buiten/wilgendal_magie.png       48x48    magiewinkel, exterieur
+assets/sprites/buiten/wilgendal_huis.png        48x48    bewoond woonhuis, exterieur
+assets/sprites/buiten/wilgendal_huis_dicht.png  48x48    dicht woonhuis, exterieur
+assets/sprites/buiten/wilgendal_schild.png      48x16    uithangbord schild (armour)
+assets/sprites/buiten/wilgendal_zwaard.png      48x16    uithangbord zwaard (wapen)
+assets/sprites/buiten/wilgendal_ring.png        48x16    uithangbord ring (accessoire)
+assets/sprites/buiten/wilgendal_ster.png        48x16    uithangbord ster (magic)
+assets/sprites/buiten/wilgendal_toonbank.png    48x16    toonbank in de winkel
+assets/sprites/buiten/wilgendal_vitrine.png     48x16    item-display in de winkel

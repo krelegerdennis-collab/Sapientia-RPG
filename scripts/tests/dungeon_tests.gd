@@ -491,11 +491,12 @@ func _world_and_outdoor_tests() -> void:
 	await walk("move_up", 1)
 	check("W: op Willowdale: dorp geladen (node DorpWilgendal)", await wait_scene("DorpWilgendal"))
 	await wait_fade()
-	check("W: winkels van Jelle, Mien en de magiebalie staan er", scene().get_node_or_null("Objects/JelleWapen") != null
-			and scene().get_node_or_null("Objects/JellePantser") != null
-			and scene().get_node_or_null("Objects/TanteMien") != null
-			and scene().get_node_or_null("Objects/Magie") != null
-			and scene().get_node_or_null("Objects/Gerrit") != null)
+	check("W: Gerrit staat in het dorp; de verkopers niet meer los op het plein", scene().get_node_or_null("Objects/Gerrit") != null
+			and scene().get_node_or_null("Objects/JelleWapen") == null
+			and scene().get_node_or_null("Objects/JellePantser") == null
+			and scene().get_node_or_null("Objects/TanteMien") == null
+			and scene().get_node_or_null("Objects/Magie") == null
+			and scene().get_node_or_null("Objects/Accessoire") == null)
 	GameState.change_map(WORLD_SCENE, "van_wilgendal")
 	check("W: terug op de wereldkaart na Wilgendal", await wait_scene("Wereldkaart"))
 	await wait_fade()
