@@ -897,19 +897,63 @@ Per verdieping: 1 layout rollen uit onderstaande tabel.
 
 Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
 
+### Afmetingen
+
+Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
+
+- Chest Room: 10×10 tegels (compact beloningskamertje)
+- Medium Map: 25×25 tegels
+- Large Room: 50×50 tegels
+- Verhouding: Medium = ½ van Large in elke dimensie
+
 ### Kamer-types + kansen
 
 - [ ] MEDIUM MAP (35%)
-  - ½ van Large Room
-  - Nieuwe NORM (meest voorkomend)
-  - TODO(design): kisten + monsters
+  Definitief. 25×25 tegels. Nieuwe NORM (meest voorkomend). Medium = ½ van Large in elke dimensie.
+
+  Kisten:
+
+  - 2-4 normale kisten
+  - 0-1 blue chest (volgt floor-bracket tabel)
+
+  Monsters (schaalt met floor):
+
+  - Floor 1-20: 8-10 monsters
+  - Floor 21-50: 10-12 monsters
+  - Floor 51-80: 12-14 monsters
+  - Floor 81-99: 14-16 monsters
+
+  Karakter: normale verdieping, snel te doorlopen.
 - [ ] LARGE ROOM (20%)
-  - Huidige grote layout
-  - Standaard kisten + monsters
+  Definitief. 50×50 tegels.
+
+  Kisten:
+
+  - 6-10 normale kisten
+  - 1-2 blue chests
+
+  Monsters (schaalt met floor):
+
+  - Floor 1-20: 15-18 monsters
+  - Floor 21-50: 18-22 monsters
+  - Floor 51-80: 22-26 monsters
+  - Floor 81-99: 26-30 monsters
+
+  Karakter: uitgebreide verkenning, langere sessie.
 - [ ] CHEST ROOM (10%)
-  - 10×10 tegels
-  - 2 blauwe kisten + 3 normale kisten
-  - VEEL monsters
+  Definitief. 10×10 tegels (compact beloningskamertje).
+
+  Kisten:
+
+  - 3 normale kisten (altijd)
+  - 2 blue chests (altijd)
+
+  Monsters:
+
+  - 8-10 monsters (VEEL, past bij kleine kamer)
+  - Dicht op elkaar (risico vs. reward)
+
+  Karakter: compact beloningskamertje, hoge risico/dichtheid.
 - [ ] TRAP ROOM (7%)
   - Vallen (pijlen, gaten, spike-platen)
   - Weinig kisten (0-1 normale)
@@ -939,6 +983,14 @@ Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
   - Kan ook items KOPEN van de speler
   - Max 1× per 10 verdiepingen
   - TODO(design): welke items verkoopt hij?
+
+### Totaal-overzicht
+
+| Kamer-type | Grootte | Kisten | Monsters (hoog floor) |
+|---|---|---|---|
+| Chest Room | 10×10 | 3+2 (altijd) | 8-10 |
+| Medium Map | 25×25 | 2-4 + 0-1 | 14-16 |
+| Large Room | 50×50 | 6-10 + 1-2 | 26-30 |
 
 ### Vaste kamers (geen random)
 
