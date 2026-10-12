@@ -1188,6 +1188,43 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Empty Room: af en toe vallen
   - Rest/Treasure/Merchant Room: NOOIT vallen
 - [ ] Puzzle Room: welke puzzels?
+  Definitief. De checkbox blijft open tot de puzzels in de code deze types gebruiken.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  3 puzzel-types (roterend):
+
+  1. Ketting-puzzel (vanaf floor 11). Schakelaars die elkaar beïnvloeden. "Lights out"-stijl. Elke schakelaar verandert 2-3 andere.
+  2. Rotatie-puzzel (vanaf floor 21). Draaiende tegels, verbind start met einde. Klik op tegel → roteert 90°.
+  3. Licht-puzzel (vanaf floor 31). Lotte's Licht op panelen. Verborgen paden onthullen. Alleen als Lotte in de party is.
+
+  Beschikbaarheid per floor-bracket:
+
+  - Floor 1-10: geen puzzel-kamers
+  - Floor 11-20: Ketting
+  - Floor 21-30: Ketting, Rotatie
+  - Floor 31-99: Ketting, Rotatie, Licht
+
+  Moeilijkheid schaalt:
+
+  - Floor 11-30: klein (3-5 stappen, ~30 sec)
+  - Floor 31-60: middel (6-10 stappen, ~1 min)
+  - Floor 61-99: groot (11-15 stappen, ~2 min)
+
+  Beloning en falen:
+
+  - Succes: 1 blue chest + poort opent
+  - Falen: geen straf, opnieuw proberen
+  - Puzzel reset na 3 mislukte pogingen (nieuwe layout)
+
+  Visueel:
+
+  - Paarse gloed (match Codex Monument + Hanger)
+  - Symbolen op tegels
+  - Licht-effect bij activeren
+  - Blue chest verschijnt met animatie
+
+  - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
 - [ ] Empty Room: lore-items of alleen leeg?
 - [ ] Merchant Room: welke items verkoopt hij?
 
