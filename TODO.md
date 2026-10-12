@@ -1278,6 +1278,51 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Graffiti: symbolen op muur (paarse gloed?)
   - Geheime doorgang: verborgen, zichtbaar met Lotte's Licht
 - [ ] Merchant Room: welke items verkoopt hij?
+  Definitief. De checkbox blijft open tot de merchant in de code deze voorraad gebruikt.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Wie is de merchant:
+
+  - Een vorige proefpersoon (H-reeks) die vast zit in de simulatie
+  - Verzamelt wat hij onderweg vindt
+  - Weet meer dan hij zegt
+  - Koppelt aan H-1 t/m H-5
+  - [ ] TODO(verhaal): welke H is hij? Wat is zijn verhaal?
+
+  Wat hij verkoopt:
+
+  1. Consumables (altijd op voorraad). Elixir, Phoenix-veer (revive), anti-status items. Prijs: 2x normale winkelprijs.
+  2. Grot-exclusieve items (altijd op voorraad). Simulatie-token (1x run herstarten), Kaart-fragment (onthult 1 verborgen kamer), Stun-bom (stunt alle monsters in kamer), Push-handschoen (push werkt ook op niet-gestunde). Prijs: vast hoog.
+  3. Grade 3-4 equipment (wisselt per bezoek). 1 willekeurig Grade 3 item. 1 Grade 4 item per 3 bezoeken (zeldzaam). Prijs: 2-3x normale winkelprijs.
+  4. Rotatie-item (1 per bezoek, uniek). Kan zijn: lore-item, zeldzame consumable, novelty. Prijs: variabel.
+
+  Wat hij koopt van de speler:
+
+  - Consumables: 50% winkelprijs
+  - Equipment: 30-50% winkelprijs
+  - Accessoires: 30-50% winkelprijs
+  - Grade 4 items: 60% winkelprijs (biedt meer)
+
+  Stock en rotatie:
+
+  - Consumables + Grot-exclusief: altijd op voorraad
+  - Grade 3-4 equipment: random 1-2 stuks per bezoek
+  - Rotatie-item: 1 uniek per bezoek
+  - Restock: elke nieuwe run
+
+  Dialoog:
+
+  - Bij binnenkomst: "Wel, wel. Een nieuwe kandidaat. Ik heb je gezien op de muren, wist je dat? De Grot laat alles zien... aan wie blijft kijken."
+  - Bij kopen: "Goede keuze. Ik heb dit zelf... laten liggen. Lang geleden."
+  - Bij verkopen: "Alles heeft waarde hier beneden. Zelfs dingen die je niet meer nodig hebt."
+  - Bij vertrekken: "Als je de Stem hoort, blijf dan niet staan. Ik deed dat wel."
+
+  Waarom uniek:
+
+  - Eén van de weinige verkopers in het spel
+  - Beste plek om overtollige loot te verkopen
+  - Lore-personage, niet alleen shop
 
 ## Canon-markering
 
