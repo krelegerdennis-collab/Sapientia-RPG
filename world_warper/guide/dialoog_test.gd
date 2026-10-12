@@ -4,8 +4,6 @@ extends RefCounted
 ## Roep fouten() aan: lege array = in orde.
 
 const Dialoog := preload("res://world_warper/guide/dialoog.gd")
-const StoryData := preload("res://scripts/data/story_data.gd")
-const Unlock := preload("res://world_warper/flow/unlock.gd")
 
 const VERWACHT_IDS: Array[String] = ["welkom", "warp", "gesloten", "hanger"]
 
@@ -128,17 +126,24 @@ static func _eist(fouten: Array, stap: Dictionary, woorden: Array) -> void:
 
 
 static func _check_hint(fouten: Array) -> void:
+	# load() en niet preload: story_data is groot, en de kamer-test laadt dit
+	# script terwijl GameState de wereldkaart al op de achtergrond inleest.
+	var story: GDScript = load("res://scripts/data/story_data.gd") as GDScript
+	var unlock: GDScript = load("res://world_warper/flow/unlock.gd") as GDScript
+	if story == null or unlock == null:
+		fouten.append("vlag-bronnen laden niet")
+		return
 	if str(Dialoog.FLAG_NOOR_LID) != "noor_lid":
 		fouten.append("Noor-vlag is niet noor_lid")
-	if str(StoryData.GOLEM_FLAG) != "bewaker:archief_golemhal/golem":
+	if str(Dialoog.FLAG_GOLEM) != str(story.GOLEM_FLAG):
 		fouten.append("Golem-vlag wijkt af van de bewaker")
-	if str(Unlock.BEWAKER_VLAG) != "bewaker:archief_2_v4_genezer/genezer":
+	if str(Dialoog.FLAG_GENEZER) != str(unlock.BEWAKER_VLAG):
 		fouten.append("Genezer-vlag wijkt af van de bewaker")
 	var leeg := {}
 	_hint_eis(fouten, "zonder vlag", Dialoog.hint_lines(leeg),
 			["donker woud"],
 			["eerste archief", "genezer", "warp-ring", "berggrot"])
-	var alleen_golem := {str(StoryData.GOLEM_FLAG): true}
+	var alleen_golem := {Dialoog.FLAG_GOLEM: true}
 	_hint_eis(fouten, "golem zonder noor", Dialoog.hint_lines(alleen_golem),
 			["donker woud"], ["eerste archief"])
 	var getal := {Dialoog.FLAG_NOOR_LID: 1}
@@ -148,14 +153,14 @@ static func _check_hint(fouten: Array) -> void:
 	_hint_eis(fouten, "na noor", Dialoog.hint_lines(noor),
 			["eerste archief", "golem"],
 			["donker woud", "genezer", "warp-ring", "berggrot"])
-	var golem := {Dialoog.FLAG_NOOR_LID: true, str(StoryData.GOLEM_FLAG): true}
+	var golem := {Dialoog.FLAG_NOOR_LID: true, Dialoog.FLAG_GOLEM: true}
 	_hint_eis(fouten, "na golem", Dialoog.hint_lines(golem),
 			["genezer", "kas", "archief 2", "berggrot"],
 			["donker woud", "eerste archief", "warp-ring"])
 	var klaar := {
 		Dialoog.FLAG_NOOR_LID: true,
-		str(StoryData.GOLEM_FLAG): true,
-		str(Unlock.BEWAKER_VLAG): true,
+		Dialoog.FLAG_GOLEM: true,
+		Dialoog.FLAG_GENEZER: true,
 	}
 	_hint_eis(fouten, "na genezer zonder bezoek", Dialoog.hint_lines(klaar, []),
 			["warp-ring", "wereld 1", "bezocht"],

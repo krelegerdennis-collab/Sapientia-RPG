@@ -6,7 +6,6 @@ const Kamers := preload("res://world_warper/kamers/kamers.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const Dialoog := preload("res://world_warper/guide/dialoog.gd")
-const DialoogTest := preload("res://world_warper/guide/dialoog_test.gd")
 const Destinations := preload("res://world_warper/warp/destinations.gd")
 const DestTest := preload("res://world_warper/warp/destinations_test.gd")
 const SavePunt := preload("res://world_warper/services/save_point.gd")
@@ -45,6 +44,10 @@ func check(label: String, ok: bool) -> void:
 
 
 func _run() -> void:
+	# De wereldkaart laadt op de achtergrond (GameState._start_preload). Een
+	# synchrone load() tussendoor wacht op die thread, en die thread wacht op
+	# de hoofdthread. Eerst laten eindigen.
+	await _wacht_voorgeladen()
 	_vlag_en_act()
 	_echo_hint()
 	_buit_en_tekst()
@@ -87,8 +90,19 @@ func _vlag_en_act() -> void:
 	check("onbekende kamer blijft dicht", not Kamers.is_open("hanger_nis", open, _party(40)))
 
 
+func _wacht_voorgeladen() -> void:
+	var t0 := Time.get_ticks_msec()
+	while GameState._preloading.size() > 0 and Time.get_ticks_msec() - t0 < 15000:
+		await get_tree().process_frame
+	check("voorgeladen kaarten zijn binnen", GameState._preloading.is_empty())
+
+
 func _echo_hint() -> void:
-	var fouten: Array = DialoogTest.fouten()
+	var test: GDScript = load("res://world_warper/guide/dialoog_test.gd") as GDScript
+	if test == null:
+		check("ECHO-hint en gidsdialoog", false)
+		return
+	var fouten: Array = test.fouten()
 	check("ECHO-hint en gidsdialoog", fouten.is_empty())
 	for regel in fouten:
 		print("INFO  ", regel)

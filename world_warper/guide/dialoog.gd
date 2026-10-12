@@ -14,11 +14,12 @@ const NAAM := "ECHO"
 
 const FLAG_VOORVOEGSEL := "world_warper_guide_"
 
-## Join-event noor_bevrijd in story_data.gd zet deze vlag als Noor aansluit.
+## Zelfde sleutel als het join-event noor_bevrijd in story_data.gd.
 const FLAG_NOOR_LID := "noor_lid"
-
-const StoryData := preload("res://scripts/data/story_data.gd")
-const Unlock := preload("res://world_warper/flow/unlock.gd")
+## Zelfde sleutel als StoryData.GOLEM_FLAG.
+const FLAG_GOLEM := "bewaker:archief_golemhal/golem"
+## Zelfde sleutel als WorldWarperUnlock.BEWAKER_VLAG.
+const FLAG_GENEZER := "bewaker:archief_2_v4_genezer/genezer"
 
 
 static func flag_for(index: int) -> String:
@@ -92,12 +93,12 @@ static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 			"Noor is nog niet aangesloten.",
 			"Zoek haar in het Donker Woud.",
 		]
-	if not _vlag_aan(flags, str(StoryData.GOLEM_FLAG)):
+	if not _vlag_aan(flags, FLAG_GOLEM):
 		return [
 			"De Golem van het Eerste Archief staat nog.",
 			"Ga naar het Eerste Archief.",
 		]
-	if not _vlag_aan(flags, str(Unlock.BEWAKER_VLAG)):
+	if not _vlag_aan(flags, FLAG_GENEZER):
 		return [
 			"De Genezer staat nog in de kas van Archief 2.",
 			"Ga via de berggrot.",
