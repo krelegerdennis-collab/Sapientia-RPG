@@ -1226,6 +1226,57 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
   - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
 - [ ] Empty Room: lore-items of alleen leeg?
+  Definitief. De checkbox blijft open tot de Empty Room in de code deze verdeling gebruikt.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Verdeling binnen Empty Room:
+
+  - Echt leeg: 50% (alleen doorgang)
+  - Lore-notitie: 20% (brief/boek op muur)
+  - Overblijfselen: 15% (zwak item, Grade 1-2)
+  - Graffiti: 10% (symbolen/hints)
+  - Geheime doorgang: 5% (verborgen pad, met Lotte's Licht)
+
+  Lore-notitie:
+
+  - Briefje / boek / kras op muur
+  - Verwijst naar H-1 t/m H-5 of Sapientia's experiment
+  - Voorbeeld: "H-4 probeerde hier te rusten. Hij kwam niet verder."
+
+  Overblijfselen:
+
+  - Oud wapen, schild, of accessoire op de grond
+  - Zwak item (Grade 1-2)
+  - Vertelt verhaal: iemand was hier, haalde het niet
+
+  Graffiti:
+
+  - Symbolen of tekst op muur
+  - Soms hint naar puzzel of geheim
+  - Soms waarschuwing
+  - Voorbeeld: "Loop niet verder. De Stem hoort je."
+
+  Geheime doorgang:
+
+  - Verborgen pad naar naastgelegen kamer
+  - Ontdekbaar met Lotte's Licht
+  - Leidt naar kleine bonus (1 normale kist)
+
+  Lore-koppeling:
+
+  - Verwijst naar H-1 t/m H-5
+  - Sapientia's experiment
+  - De Stem (Sapientia fluistert door de Grot)
+  - Andere kandidaten die het niet haalden
+
+  Visueel:
+
+  - Echt leeg: alleen muren, lege vloer, 1 uitgang
+  - Lore-notitie: boek/brief op grond of muur
+  - Overblijfselen: subtiele item-glow
+  - Graffiti: symbolen op muur (paarse gloed?)
+  - Geheime doorgang: verborgen, zichtbaar met Lotte's Licht
 - [ ] Merchant Room: welke items verkoopt hij?
 
 ## Canon-markering
