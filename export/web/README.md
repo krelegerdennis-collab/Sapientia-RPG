@@ -1,11 +1,20 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`794e9ba`), Godot 4.7.2, threads uit.
+Web-build van `main` (`66f0b80`), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
 
-Nieuw in deze build, bovenop de vorige web-build (`aa5018d`, export van `bb69c9b`):
+Nieuw in deze build, bovenop de vorige web-build (`e0b937d`, export van `794e9ba`):
+- De Wurger heeft HP 700, ATK 42, DEF 28. De Genezer heeft HP 900, ATK 54, DEF 36. Op verdieping 25, 50, 75 en 99 hebben De Schaduw van H-6, De Cyclus, De Rechter en De Stem vaste stats.
+- De magielijst gebruikt de canon-namen. Grade 1 tot en met 3 staan in de winkel. Grade 4 niet.
+- Op verdieping 100 kies je één beloning: het Codex-monster ECHO, een Grade 4-wapen, of de Simulatie-ring. De ring geeft +10% stats in de Diepe Grot en herstart één keer per run de huidige verdieping als je valt.
+- De Hanger gloeit paars. Na De Genezer ga je vanzelf naar de World Warper. In de Rustkamer wissel je de groep (maximaal 3, Dennis blijft). ECHO's Kamer heeft drie kisten.
+- Midden- en eindwarpers van Archief 1 en Archief 2 vragen of je de dungeon wilt verlaten.
+- Wilgendal heeft vier winkelpanden. De verkoper staat achter de toonbank. De borden zijn iconen: schild, zwaard, ring en ster. Op het plein staan zes dorpelingen. Gerrit en de molen blijven.
+- Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nog van de build van `794e9ba`:
 - De kas van Archief 2 staat linksboven op de wereldkaart, achter de bergen. De berggrot is de enige weg erheen. De ingang naast de trap van het Eerste Archief is weg.
 - De Diepe Grot start niet meer vanaf de wereldkaart. Je begint in ECHO's Kamer. Ladder, tussen-warper en nederlaag zetten je terug in die kamer.
 - In Wilgendal zingt de molen zacht na het zaad.
@@ -79,7 +88,7 @@ Na deze publicatie moet je hard verversen. De browser bewaart de oude `index.pck
 
 De eerste tik ergens op het scherm (ook Continue of New Game) zet het geluid aan.
 Tot die tik staat er **Tap for sound**. Houd de telefoon liggend.
-Eerste keer ongeveer 71 MB (`index.pck` 31 MB + `index.wasm` 38 MB).
+Eerste keer ongeveer 78 MB (`index.pck` 40 MB + `index.wasm` 38 MB).
 
 ## Kortere link
 
