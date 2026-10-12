@@ -516,7 +516,7 @@ const ITEMS := {
 		"desc": "Een rol met Zuiverende Donder. Alleen uit een diepe blauwe kist."},
 	"spreuk_g4_wederopstanding": {"name": "Rol: Wederopstanding", "short": "Opstanding", "target": "ally", "teach": "wederopstanding", "heal_hp": 0, "heal_mp": 0,
 		"desc": "Een rol met Wederopstanding. Alleen uit een diepe blauwe kist."},
-	"spreuk_g4_heilige_straal": {"name": "Rol: Heilige Straal", "short": "Heilige Straal", "target": "ally", "teach": "heilige_straal", "heal_hp": 0, "heal_mp": 0,
+	"spreuk_g4_heilige_straal": {"name": "Rol: Heilige Straal", "short": "Heil. Straal", "target": "ally", "teach": "heilige_straal", "heal_hp": 0, "heal_mp": 0,
 		"desc": "Een rol met Heilige Straal. Alleen uit een diepe blauwe kist."},
 	"spreuk_g4_aureool": {"name": "Rol: Aurora", "target": "ally", "teach": "aureool", "heal_hp": 0, "heal_mp": 0,
 		"desc": "Een rol met Aurora. Alleen uit een diepe blauwe kist."},
