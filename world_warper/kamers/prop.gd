@@ -28,14 +28,17 @@ func _ready() -> void:
 	spr.hframes = maxi(1, int(p.get("h", 1)))
 	spr.vframes = maxi(1, int(p.get("v", 1)))
 	spr.offset = p.get("offset", Vector2.ZERO)
+	if p.has("tint"):
+		spr.modulate = p["tint"]
 	add_child(spr)
 	var titel := Kamers.label(bron)
 	if titel == "":
 		return
+	var breed := 72.0 if bron == "grot_ingang" else 56.0
 	var lab := Label.new()
 	lab.text = titel
-	lab.position = Vector2(-28, -28)
-	lab.size = Vector2(56, 12)
+	lab.position = Vector2(-breed * 0.5, -28)
+	lab.size = Vector2(breed, 12)
 	lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	lab.add_theme_font_override("font", FONT)
@@ -48,7 +51,7 @@ func interact(player: Node) -> void:
 	match bron:
 		"echo":
 			_zeg(Kamers.ECHO_REGELS, "ECHO")
-		"echo_grot":
+		"echo_grot", "grot_ingang":
 			_grot(player)
 		"werk":
 			_zeg(Kamers.WERK_REGELS, "")

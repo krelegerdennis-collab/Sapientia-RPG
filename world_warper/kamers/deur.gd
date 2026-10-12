@@ -4,6 +4,7 @@ extends Node2D
 ## Dicht = Nederlandse melding. Open = GameState.change_map.
 
 const Kamers := preload("res://world_warper/kamers/kamers.gd")
+const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 const TILE := 16
 
 var target_map := ""
@@ -19,6 +20,7 @@ var event := ""
 
 
 func _ready() -> void:
+	_plaats_bord()
 	_plaats_blokkade()
 	var player := _player()
 	if player != null and player.has_signal("stepped"):
@@ -50,6 +52,24 @@ func _on_player_stepped(tile: Vector2i) -> void:
 	if player != null and "input_locked" in player:
 		player.input_locked = true
 	GameState.change_map(destination, destination_spawn)
+
+
+func _plaats_bord() -> void:
+	var titel := Kamers.naam(room_id)
+	if room_id == "echo_kamer":
+		titel = "ECHO"
+	if titel == "":
+		return
+	var lab := Label.new()
+	lab.text = titel
+	lab.position = Vector2(-28, -14) + Vector2(blokkeer) * -10.0
+	lab.size = Vector2(56, 12)
+	lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lab.add_theme_font_override("font", FONT)
+	lab.add_theme_font_size_override("font_size", 8)
+	lab.add_theme_color_override("font_color", Color("f2e9d8"))
+	add_child(lab)
 
 
 func _plaats_blokkade() -> void:

@@ -42,8 +42,8 @@ static func steps() -> Array:
 			"id": "gesloten",
 			"flag": flag_for(2),
 			"lines": [
-				"De verdere kamers blijven dicht.",
-				"Het verhaal geeft ze vrij.",
+				"ECHO's Kamer is open. Daar begint de Diepe Grot.",
+				"Het verhaal opent de andere kamers.",
 			],
 		},
 		{
