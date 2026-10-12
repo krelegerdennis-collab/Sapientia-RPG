@@ -1,7 +1,7 @@
 extends "res://scripts/book_point.gd"
 class_name DungeonExitWarper
 ## Warper die een dungeon in één stap verlaat, naar een vast punt op de wereldkaart.
-## Het Eerste Archief en Archief 2 zetten er drie (begin, midden, eind).
+## Het Eerste Archief, Archief 2, het Donker Woud en de berggrot zetten er drie (begin, midden, eind).
 ##
 ## De Diepe Grot heeft een eigen warper (dungeon100_warper.gd) op verdieping 1, 25, 50, 75 en 99.
 ## Die verlaat de grot. Dit script roept hem niet aan. De uitgangen van het Eerste Archief blijven hier.

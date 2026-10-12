@@ -28,6 +28,8 @@ const InktwurmKastScript := preload("res://scripts/dungeon/inktwurm_kast.gd")
 const SignScript := preload("res://scripts/dungeon/dungeon_sign.gd")
 const ExitWarperScript := preload("res://scripts/dungeon/dungeon_exit_warper.gd")
 const Archief2Warpers := preload("res://scripts/dungeon/archief2_warpers.gd")
+const WoudWarpers := preload("res://scripts/dungeon/woud_warpers.gd")
+const BerggrotWarpers := preload("res://scripts/dungeon/berggrot_warpers.gd")
 const NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
 const ArchiefWarpers := preload("res://scripts/dungeon/archief_warpers.gd")
 const STORY_OBJECT_SCENE := "res://scenes/story_object.tscn"
@@ -285,11 +287,15 @@ func _build() -> void:
 			add_child(wall)
 
 
-## Uitgang-warper van het Eerste Archief (ArchiefWarpers). Geen plek = niets, ook niet in de Diepe Grot.
+## Uitgang-warper (Archief 1 en 2, Donker Woud, berggrot). Geen plek = niets, ook niet in de Diepe Grot.
 func _place_exit_warper(objects: Node2D) -> void:
 	var spot: Dictionary = ArchiefWarpers.for_room(room_id)
 	if spot.is_empty():
 		spot = Archief2Warpers.for_room(room_id)
+	if spot.is_empty():
+		spot = WoudWarpers.for_room(room_id)
+	if spot.is_empty():
+		spot = BerggrotWarpers.for_room(room_id)
 	if spot.is_empty():
 		return
 	var t: Vector2i = spot["tile"]
