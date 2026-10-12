@@ -28,9 +28,6 @@ const ESDOORN_SPAWN := "zuid_ingang"
 const PLACE_WERELDKAART := "wereldkaart"
 const PLACE_WILGENDAL := "wilgendal"
 const PLACE_ESDOORN := "esdoorn"
-## Alleen dorpen. De wereldkaart zelf heeft geen bezoekvlag.
-const FLAG_WILGENDAL := "bezocht_wilgendal"
-const FLAG_ESDOORN := "bezocht_esdoorn"
 
 
 ## WM1, WM2 en WM3. WM2 en WM3 hebben nog geen eilandscènes.
@@ -59,14 +56,12 @@ static func places(wm_id: String) -> Array[Dictionary]:
 		"label": "Wilgendal",
 		"path": WILGENDAL_PATH,
 		"spawn": WILGENDAL_SPAWN,
-		"visit_flag": FLAG_WILGENDAL,
 	})
 	out.append({
 		"id": PLACE_ESDOORN,
 		"label": "Esdoorn",
 		"path": ESDOORN_PATH,
 		"spawn": ESDOORN_SPAWN,
-		"visit_flag": FLAG_ESDOORN,
 	})
 	return out
 
