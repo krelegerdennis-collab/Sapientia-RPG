@@ -1225,6 +1225,17 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Blue chest verschijnt met animatie
 
   - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
+    Definitief. Getrapt, geen directe hints. De checkbox blijft open tot de hints in de code deze fasen gebruiken.
+
+    **CANON – niet wijzigen zonder overleg.**
+
+    Fase 1 (0-5 min vast): geen hint. De speler puzzelt zelf. Pure ervaring.
+
+    Fase 2 (5-10 min vast): Lotte-hint. Alleen als Lotte in de party is. Subtiele hint, één keer per puzzel. Voorbeeld: "Wacht... die twee panelen lijken samen te horen."
+
+    Fase 3 (10+ min vast): ECHO-hint. Via communicator (World Warper bereikt simulatie). Duidelijkere hint dan Lotte. Altijd beschikbaar. Voorbeeld: "Kandidaat, de volgorde is niet links-rechts, maar binnenstebuiten."
+
+    Optioneel, na 3x falen: de puzzel licht op. Eén tegel licht kort op (startpunt). Geen volledige oplossing.
 - [ ] Empty Room: lore-items of alleen leeg?
   Definitief. De checkbox blijft open tot de Empty Room in de code deze verdeling gebruikt.
 
@@ -1289,6 +1300,37 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Weet meer dan hij zegt
   - Koppelt aan H-1 t/m H-5
   - [ ] TODO(verhaal): welke H is hij? Wat is zijn verhaal?
+    Definitief. Hij is H-5, de laatste proefpersoon vóór Dennis. De checkbox blijft open tot dit verhaal in de code staat.
+
+    **CANON – niet wijzigen zonder overleg.**
+
+    Achtergrond:
+
+    - Proefpersoon H-5, gemaakt in Archief 4
+    - Kwam 2-3 jaar voor Dennis
+    - Haalde floor 100 NIET
+    - Simulatie sloot hem op in plaats van hem te doden
+    - Zit nu vast in de Grot, kan er niet meer uit
+
+    Naam: hij is zijn naam vergeten (simulatie heeft het gewist). Noemt zichzelf "de Koopman".
+
+    Wat hij weet:
+
+    - Kent Dennis' oorsprong (Archief 4)
+    - Kent Opa (heeft hem ontmoet)
+    - Weet wat er met H-1 t/m H-4 is gebeurd
+    - Weet dat de Grot een filter is
+    - Weet dat Sapientia wacht op "de juiste"
+
+    Waarom hij niets zegt:
+
+    - Bang (Sapientia luistert)
+    - Schaamt zich (hij faalde)
+    - Heeft vrede gevonden in zijn rol
+    - Als speler vaak terugkomt: hij vertelt meer
+
+    - [ ] TODO(verhaal): hoe eindigt H-5?
+    - [ ] TODO(verhaal): kan hij bevrijd worden? Sterft hij? List van Sapientia?
 
   Wat hij verkoopt:
 
