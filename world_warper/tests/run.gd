@@ -1,6 +1,6 @@
 extends SceneTree
 ## Pure World Warper-tests plus een scène-smoke.
-## Geen game_state-dispatch en geen CI-matrix.
+## Geen game_state-dispatch. De job warper-runner in .github/workflows/tests.yml draait dit script.
 ##
 ##   godot --headless --path . --script res://world_warper/tests/run.gd
 ##
