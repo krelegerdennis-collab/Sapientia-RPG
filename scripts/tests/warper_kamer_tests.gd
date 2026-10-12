@@ -389,15 +389,17 @@ func _update2_regels() -> void:
 	GameState.party.append(GameState.hero_template("noor"))
 	PartyBench.normaliseer()
 	check("maximaal 3 actief", GameState.party.size() == PartyBench.MAX_ACTIEF and GameState.party_bench.size() == 1)
-	PartyBench.naar_bank(1, PartyBench.RUSTKAMER)
 	var pad := "user://warper_bank_test.json"
 	var weg := GameState.save_game(Vector2i(4, 5), Vector2i.LEFT, pad)
 	var ruw := GameState.read_save(pad)
 	GameState.party_bench = []
 	var geladen := GameState.load_game(pad)
 	var bank_id := str(GameState.party_bench[0]["id"]) if GameState.party_bench.size() == 1 else ""
-	check("bank en tegel in de save", weg and geladen and bank_id != "" and bank_id != "dennis"
-			and ruw.get("tile", []) == [4, 5] and ruw.get("facing", []) == [-1, 0])
+	var tegel := GameState._vec2i_from(ruw.get("tile"), Vector2i(-9, -9))
+	var kijk := GameState._vec2i_from(ruw.get("facing"), Vector2i(9, 9))
+	check("bank en tegel in de save", weg and geladen and bank_id == "noor"
+			and str(GameState.party[0].get("id", "")) == "dennis"
+			and tegel == Vector2i(4, 5) and kijk == Vector2i.LEFT)
 	var leeg := SavePunt.positie_van(null)
 	check("zonder speler valt de tegel terug", leeg["tile"] == Vector2i.ZERO and leeg["facing"] == Vector2i.DOWN)
 
