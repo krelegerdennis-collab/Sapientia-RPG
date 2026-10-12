@@ -2,6 +2,10 @@
 
 Afvinken alleen als het echt af is. Open punten zijn nog ontwerp of nog niet gebouwd.
 
+Beslissingen van 12 okt 2026 zijn **CANON – niet wijzigen zonder overleg.** De code is hier nog niet op aangepast. Vastgelegd: de Hanger gloeit paars; magie-cijfers per grade; vloer 100 optie C is de Simulatie-ring; baas-statistieken; party wisselen in de Rustkamer; menuknoppen; ECHO's Kamer; Wilgendal.
+
+Niet zelf bouwen. Wacht op scènes: ECHO's twist (wanneer, hoe, confrontatie, H-1 tot en met H-5); De Spiegel koppelen aan Archief 4; worldmap 2 en 3 (kamerlijsten, monsters, paden).
+
 ## Wereld & Levels
 
 Uniek superwapen per karakter (alleen Grade 4, drop vanaf verdieping 80):
@@ -19,6 +23,8 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
   - [ ] Archief 1: Eerste Archief (bij Opa), startpunt van het verhaal
   - Bevat Dennis' huis en Wilgendal (eerste dorp met shops)
 - [ ] Worldmap 2 = tweede eiland
+
+  Niet zelf bouwen: kamerlijsten, monsters en paden wachten op scènes.
 
   **CANON – niet wijzigen zonder overleg.**
 
@@ -46,6 +52,8 @@ Grade 4 armour sets, class-gebonden (4 stukken per set: helm, borst, benen, laar
   - [ ] Dorp Stoomwijk (mijnwerkersdorp)
   - [ ] Dorp Hoge Toren (magisch, oud, geheimzinnig)
 - [ ] Worldmap 3 = derde eiland
+
+  Niet zelf bouwen: kamerlijsten, monsters en paden wachten op scènes.
 
   **CANON – niet wijzigen zonder overleg.**
 
@@ -107,7 +115,7 @@ Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en qui
 - [ ] Act 3 en verder = Worldmap 3 (Kosmos en Hart)
 - [ ] Onthulling Proefpersoon H-6 (Dennis) in Archief 4 (De Spiegel) op Worldmap 2
   De onthulling staat hierboven als canon. De checkbox blijft open tot de scène in het spel staat.
-  De scène staat in `scenes/story/spiegel_kamer.tscn`, alleen via `--spiegel`, niet op de wereldkaart en niet in Archief 4. De plaatsing blijft open.
+  De scène staat in `scenes/story/spiegel_kamer.tscn`, alleen via `--spiegel`, niet op de wereldkaart en niet in Archief 4. Niet zelf bouwen: de scène nog niet koppelen aan Archief 4 of aan de wereldkaart. Wacht op de scène.
 
 ### Archief 2 — Het Levende Archief
 
@@ -123,7 +131,7 @@ Codex-monster in het Lotte-gevecht: de speler kiest één gevangen Codex-monster
 
 Lotte's start-level: hetzelfde level als Dennis op dat moment. Gelijkwaardige metgezel, geen hulpje. Gebalanceerd ongeacht speelsnelheid.
 
-Mini-baas verdieping 3: DE WURGER. Een kolossale slingerplant die de kas verstikt. Sapientia's stilte = alles stopt met groeien; De Wurger is wat overblijft als leven geen kant op kan. Zwak voor IJs (Lotte) en fysieke aanvallen (Dennis).
+Mini-baas verdieping 3: DE WURGER. Een kolossale slingerplant die de kas verstikt. Sapientia's stilte = alles stopt met groeien; De Wurger is wat overblijft als leven geen kant op kan. Zwak voor IJs (Lotte) en fysieke aanvallen (Dennis). Level 14: HP 700, ATK 42, DEF 28.
 
 Plaat-combinaties verdieping 3, nieuw ten opzichte van verdieping 1:
 
@@ -133,7 +141,7 @@ B) Tegen-platen: krimpen bij aanraking. De speler moet ze vermijden om ruimte te
 
 C) Licht-platen: groeien alleen als Lotte's Licht-magie erop schijnt. Lotte heeft daarmee een rol in puzzels, niet alleen in gevecht.
 
-De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmoment, trekt ongeveer 30% HP van één party-lid, hij "geneest" ze letterlijk, scripted en onvermijdelijk. Daarna is het een echte aanval: 8–12% HP per beurt, en hij healt zichzelf met dezelfde hoeveelheid. Zwak voor IJs en Dennis' zwaard. Uiterlijk: half plant, half staal.
+De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmoment, trekt ongeveer 30% HP van één party-lid, hij "geneest" ze letterlijk, scripted en onvermijdelijk. Daarna is het een echte aanval: 8–12% HP per beurt, en hij healt zichzelf met dezelfde hoeveelheid. Zwak voor IJs en Dennis' zwaard. Level 18: HP 900, ATK 54, DEF 36. Uiterlijk: half plant, half staal.
 
 Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
@@ -179,14 +187,14 @@ C) Licht-platen: groeien alleen als Lotte's Licht-magie erop schijnt. Lotte heef
 
 Concept: een golem die "geneest" door alles te absorberen. Sapientia's logica: leven is stilte, emotie is een fout. De Genezer zuigt levenskracht op van planten en monsters.
 
-De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmoment, trekt ongeveer 30% HP van één party-lid, hij "geneest" ze letterlijk, scripted en onvermijdelijk. Daarna is het een echte aanval: 8–12% HP per beurt, en hij healt zichzelf met dezelfde hoeveelheid. Zwak voor IJs en Dennis' zwaard. Uiterlijk: half plant, half staal.
+De Genezer, eindbaas verdieping 4. HP-trek: de eerste aanval is een verhaalmoment, trekt ongeveer 30% HP van één party-lid, hij "geneest" ze letterlijk, scripted en onvermijdelijk. Daarna is het een echte aanval: 8–12% HP per beurt, en hij healt zichzelf met dezelfde hoeveelheid. Zwak voor IJs en Dennis' zwaard. Level 18: HP 900, ATK 54, DEF 36. Uiterlijk: half plant, half staal.
 
 Kern-zin na De Genezer: "In stilte ligt vrede. Ik corrigeer wat groeit."
 
 #### Cutscene na Archief 2: de World Warper
 
 - [ ] De World Warper is de hub om tussen de 3 hoofdeilanden te reizen
-  Eerste kamer wel: opslaan, terug naar Wilgendal of de Archief-ingang. TODO(design): WM2 en WM3 bestaan niet. De IVA-hub van PR 30 is niet hernoemd.
+  Eerste kamer wel: opslaan, terug naar Wilgendal of de Archief-ingang. WM2 en WM3 bestaan niet. Kamerlijsten, monsters en paden: niet zelf bouwen, wacht op scènes. De IVA-hub van PR 30 is niet hernoemd.
 - [ ] Vanaf hier kan de speler terug naar eerder bezochte eilanden
   Alleen Wilgendal en de ingang van het Eerste Archief. Geen filter op bezoek, geen WM2/WM3.
 
@@ -238,11 +246,24 @@ Optie A, een Codex-monster. Uniek, alleen uit de grot. Komt in de Codex en het b
 
 Optie B, equipment. Grade 4. Vaste affixes, endgame. Het beloningstype (Grade 4-uitrusting) is canon. Voor nu de bestaande Grade 4-wapens: Superzwaard (Dennis), Staf van Noor, Staf van Lotte. Class-restrictie blijft zoals die wapens al zijn.
 
-Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Het beloningstype (accessoire) is canon.
+Optie C, een accessoire. Niet class-gebonden, voor elk karakter. Het beloningstype (accessoire) is canon. Gekozen accessoire: de Simulatie-ring.
 
-**OPEN – nog niet vastgelegd.**
+**CANON – niet wijzigen zonder overleg.**
 
-Voorbeelden, geen gekozen accessoire: "Hanger-echo" (kleine teleport in gevecht), "Groene Hart" (regeneratie), "Simulatie-ring" (extra XP en goud).
+Simulatie-ring, Grade 4 accessoire. Voor elk personage bruikbaar.
+- +10% alle stats in de Diepe Grot
+- 1× per run "reset" bij dood (herstart de huidige verdieping)
+
+**CANON – niet wijzigen zonder overleg.**
+
+Baas-statistieken. Formule: HP = level × 50, ATK = level × 3, DEF = level × 2.
+
+- De Wurger (lvl 14): HP 700, ATK 42, DEF 28 — zwak IJs/fysiek
+- De Genezer (lvl 18): HP 900, ATK 54, DEF 36 — zwak IJs/zwaard. Patroon: eerste klap 30%, daarna 8-12% + zelfheal
+- Schaduw van H-6 (lvl 15): HP 750, ATK 45, DEF 30 — zwak Licht
+- De Cyclus (lvl 25): HP 1250, ATK 75, DEF 50 — zwak Bliksem
+- De Rechter (lvl 35): HP 1750, ATK 105, DEF 70 — zwak Natuur
+- De Stem (lvl 45): HP 2250, ATK 135, DEF 90 — zwak IJs
 
 - [ ] Diepe Grot-bazen bouwen
   Verdieping 25, 50, 75 en 99 heten De Schaduw van H-6, De Cyclus, De Rechter en De Stem, met de canon-citaten in het bestiarium. De andere baasverdiepingen (10, 20, 30, 40, 60, 70, 80, 90) houden de oude Engelse namen.
@@ -257,15 +278,20 @@ De Diepe Grot is een SIMULATIE en wordt niet meer betreden via de worldmap. Toeg
 De grot start alleen via ECHO. Er is geen ingang meer op de wereldkaart. Ladder, tussen-warper en nederlaag keren terug naar ECHO's Kamer.
 
 - [x] Diepe Grot verplaatsen naar ECHO's Kamer; ECHO beheert de simulatie en is de enige start; praten met ECHO → "Start Simulatie"; geen aparte worldmap-ingang.
-- [ ] Blauwe kisten in ECHO's Kamer, deksel open, decoratief en verwijzing naar grot-loot, paars/blauw licht. Aantal TBD.
+- [ ] Drie kisten in ECHO's Kamer (Codex, Equipment, Accessoire). Leeg bij het eerste bezoek. Na elke Grot-run licht één kist op. Vulling per act staat hieronder.
 - [x] Flow: World Warper → ECHO's Kamer → optie "Diepe Grot Simulatie" → "Start nieuwe run" / "Ga terug". Start: floor 1, level 1, geen uitrusting. Na warp-kristal floor 100 terug naar ECHO's Kamer. ECHO toont resultaat en opent de volgende run.
 - [ ] ECHO weet dat de grot een simulatie is en kan dat bij het eerste bezoek uitleggen.
 
-TODO(design), open laten:
+**CANON – niet wijzigen zonder overleg.**
 
-- [ ] TODO(design): aantal blauwe kisten in ECHO's Kamer
-- [ ] TODO(design): kisten leeg of gevuld bij eerste bezoek
-- [ ] TODO(design): verandert de kamer visueel bij voortgang?
+- 3 blauwe kisten (Codex-, Equipment- en Accessoire-kleuren)
+- Leeg bij het eerste bezoek
+- Na elke Grot-run licht 1 kist op
+- Act 2: alle leeg
+- Act 3: 1 gevuld
+- Act 4: 2 gevuld
+- Act 5: alle 3 gevuld
+- Act 6: kisten pulseren, ECHO feller
 
 ### ECHO, Sapientia en de Diepe Grot
 
@@ -281,7 +307,7 @@ Dialoog letterlijk:
 - Later na H-6: "Ik heb honderden kandidaten doorgelaten. Jij bent de zesde die bleef staan. De anderen... ik weet niet wat er met ze is gebeurd."
 - Over de data: "Dat weet ik niet. Ik lever, zij neemt. Zo is het altijd geweest."
 
-Open laten:
+Niet zelf bouwen. Wacht op scènes. De antwoorden hieronder niet invullen.
 
 - [ ] TODO(verhaal): wanneer ontdekt ECHO wat hij echt deed?
 - [ ] TODO(verhaal): hoe reageert ECHO?
@@ -309,15 +335,18 @@ Doel: winkels met vaste locaties:
 - [ ] Klein maar sfeervol (dorpsschaal, niet stadsschaal)
 - [ ] Wilgendal: klein knus dorpsplein
 - [ ] Paden tussen de winkelpanden
-- [ ] Een paar woonhuizen als decor
-- [ ] Sfeer-NPC's die rondlopen (geen shopkeepers)
+- [ ] 4 woonhuizen (2 bewoond, 2 decoratief)
+- [ ] 6 sfeer-NPC's die rondlopen (geen shopkeepers): echtpaar (2), kind, Gerrit, veteraan, koerier
+- [ ] Uithangborden als icoon: schild (armour), zwaard (wapen), ring (accessoire), ster (magic)
+- [ ] Winkels altijd open; geen tijdsysteem
 - [ ] Dorpsgevoel behouden (geen stadse drukte)
 
-TODO(design), open laten:
-- [ ] TODO(design): hoeveel sfeer-NPC's lopen rond in Wilgendal?
-- [ ] TODO(design): openingstijden winkels of altijd open?
-- [ ] TODO(design): uithangborden, icoon of tekst?
-- [ ] TODO(design): aantal woonhuizen als decor?
+**CANON – niet wijzigen zonder overleg.**
+
+- 6 sfeer-NPC's (2 echtpaar, 1 kind, Gerrit, 1 veteraan, 1 koerier)
+- Winkels altijd open (geen tijdsysteem)
+- Uithangborden: icoon (schild, zwaard, ring, ster)
+- 4 woonhuizen (2 bewoond, 2 decoratief)
 
 Scheiding:
 - [ ] Wilgendal blijft op Worldmap 1 (start-eiland)
@@ -403,7 +432,28 @@ G3: Bevriezing, Glaciaal, IJsgevangenis, Poolstorm
 G4: Eeuwige Winter, Absolute Nul, Glaciaal Hart, Sneeuwkoningin
 
 - [ ] Per spreuk eigen data: damage, healing en effect schalen per grade
-  De namen hierboven zijn canon. Schade, healing en effect per spreuk staan in deze lijst nog niet. De checkbox blijft open.
+  De namen hierboven zijn canon. De cijfers hieronder zijn canon. De checkbox blijft open tot de spreuken in de code staan.
+
+**CANON – niet wijzigen zonder overleg.**
+
+Basis per grade:
+- G1: 15-25 schade/healing, 4 MP, +2 per level
+- G2: 40-60, 8 MP, +4 per level
+- G3: 80-120, 15 MP, +6 per level
+- G4: 150-220, 25 MP, +10 per level
+
+Varianten:
+- Schade enkel: 100%, groep: 60% per doel
+- Healing enkel: 100%, groep: 50%, over-time: 30% × 3
+- Buffs: 3 beurten, +20% ATK/DEF, +15% speed
+
+Per element:
+- Vuur: +10% schade, brand (5% HP/beurt, 3 beurten)
+- Natuur: +5%, vergiftiging (5% HP/beurt, 3 beurten)
+- Bliksem: +15% vs metaal, verlamming (1 beurt skip)
+- IJs: -10% schade, bevriezing (1 beurt skip)
+- Licht (Lotte): +30% healing, +20% buff
+- Licht (Noor): -20% healing (zwakker)
 
 ### Elements en karakters
 
@@ -417,7 +467,7 @@ Lotte blijft bij Licht + IJs.
 
 - Toekomstige helden (eigen G4-wapen en set).
 
-Bevestigd en dus geen open ontwerp meer: winkelprijzen en voorraad, magieprijs 160×grade², verkoop op de helft, grade-statcijfers en grenzen, winkel-act via party-level, archiefschaal 0,7 / EXP 0,50, Golem HP 360 / ATK 27 / DEF 15, Jelle als één smid met twee balies, kort zwaard ATK +3.
+Bevestigd en dus geen open ontwerp meer: winkelprijzen en voorraad, magieprijs 160×grade², verkoop op de helft, grade-statcijfers en grenzen, winkel-act via party-level, archiefschaal 0,7 / EXP 0,50, Golem HP 360 / ATK 27 / DEF 15, Jelle als één smid met twee balies, kort zwaard ATK +3. Op 12 okt 2026 daarbij: Hanger paars, magie-cijfers, Simulatie-ring, baas-statistieken, party wisselen in de Rustkamer, menuknoppen, ECHO's Kamer, Wilgendal.
 
 Techniek: de headless testsuites draaien via `.github/workflows/tests.yml` (Godot 4.3-stable). De web-export naar Pages (`cursor/web-build-29ec`) blijft handmatig: Godot 4.7.2, threads uit. Er is geen script en geen bot-token die die branch vanuit Actions pusht.
 
@@ -433,19 +483,23 @@ Waarom alleen de Hanger werkt: de Hanger is geen accessoire maar een biometrisch
 
 Wat Sapientia met de World Warper wil: toegang tot alle zes Archieven tegelijk. Zonder de World Warper moet ze elk Archief apart bereiken. Met de World Warper kan ze in één keer alle kernen absorberen, en dan is de mensheid in één klap "verlost". De World Warper is het einddoel van Sapientia's plan. Dennis heeft per ongeluk het wapen van de vijand geactiveerd.
 
-Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_warper/. Placeholder-kaarten met tegels van 16×16: exterieur, hal, warp_ring en hanger_nis zijn open. codex_nis en sapientia_schot bestaan en blijven dicht (vlaggen world_warper_act2 en world_warper_act3 zet niemand). Warp-UI in twee stappen; alleen WM1 is open: wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). WM2 en WM3 zijn zichtbaar en vergrendeld. AI-gids in de code nog IVA (canon-naam ECHO) in de hal, vier Nederlandse stappen via Dialog.show_lines, vlaggen world_warper_guide_0 tot en met 3. Rondlopers uit party en codex_pages, placeholders, geen loop-animatie. Savepunt met Nederlandse bevestiging; schrijft GameState.save_game(Vector2i(0, 0), Vector2i(0, 1)). Gezelschap is een kijklijst. Eerste-bezoekscène: paarse hal, roze Hanger (de Stroom), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn voorlopig. Geen H-6-onthulling. Audio-aanroepen ww_ambient, ww_hum, ww_warp en ww_sapientia_glitch, zonder bestanden en zonder manifest-entry, blijven stil. Unlock-haakje in scripts/game_state.gd: world_warper_is_unlocked en try_unlock_world_warper, elk één keer. Vlag world_warper_unlocked na bewaker:archief_2_v4_genezer/genezer (De Genezer, einde Archief 2). De bewaker van verdieping 2 van het Eerste Archief opent de hub niet. Eigen tests: 65 PASS op Godot 4.7.2. De runner staat niet in .github/workflows/tests.yml.
+Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_warper/. Placeholder-kaarten met tegels van 16×16: exterieur, hal, warp_ring en hanger_nis zijn open. codex_nis en sapientia_schot bestaan en blijven dicht (vlaggen world_warper_act2 en world_warper_act3 zet niemand). Warp-UI in twee stappen; alleen WM1 is open: wereldkaart (spawn van_dorp), Wilgendal en Esdoorn (zuid_ingang). WM2 en WM3 zijn zichtbaar en vergrendeld. AI-gids in de code nog IVA (canon-naam ECHO) in de hal, vier Nederlandse stappen via Dialog.show_lines, vlaggen world_warper_guide_0 tot en met 3. Rondlopers uit party en codex_pages, placeholders, geen loop-animatie. Savepunt met Nederlandse bevestiging; schrijft GameState.save_game(Vector2i(0, 0), Vector2i(0, 1)). Gezelschap is een kijklijst. Eerste-bezoekscène: paarse hal, Hanger nog roze in de code (canon: paars), korte Zwarte Stroom, vlag world_warper_intro_seen. Zinnen zijn voorlopig. Geen H-6-onthulling. Audio-aanroepen ww_ambient, ww_hum, ww_warp en ww_sapientia_glitch, zonder bestanden en zonder manifest-entry, blijven stil. Unlock-haakje in scripts/game_state.gd: world_warper_is_unlocked en try_unlock_world_warper, elk één keer. Vlag world_warper_unlocked na bewaker:archief_2_v4_genezer/genezer (De Genezer, einde Archief 2). De bewaker van verdieping 2 van het Eerste Archief opent de hub niet. Eigen tests: 65 PASS op Godot 4.7.2. De runner staat niet in .github/workflows/tests.yml.
 
 ### Nog te doen
 
 - [ ] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. Het platform staat op de wereldkaart en gaat open na De Genezer. De automatische warp ontbreekt nog.
 - [ ] WM2 naast WM1 open na Archief 2. De code heeft alleen WM1.
 - [ ] Dorpen eerst bezocht vóór een warp. Dat filter ontbreekt.
-- [ ] Party wisselen. Er is geen API.
+- [ ] Party wisselen in de Rustkamer. De regels staan bij Functionaliteit. De hub-bank is er nog niet.
 - [ ] Save-tegel op de echte spelerpositie. Nu is de tegel (0, 0) en de kijkrichting (0, 1).
 - [ ] Act-kamers bouwen en de deuren openen. De kamers uit de lijst staan in `world_warper/kamers` en gaan open met `warper_hub_open` plus de act. Werkplaats en Handelskamer zijn leeg. `world_warper_act2` en `world_warper_act3` zet niemand; `codex_nis` en `sapientia_schot` blijven dicht.
 - [x] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
   bord_hal, bord_warp en tiles_placeholder staan in tools/placeholders_v17.txt. De kaarten in world_warper/maps tekenen met die atlas.
-- [ ] Kleur van de Hanger-gloed. Deze lijst zei paars; de code is roze (canon: roze = de Stroom).
+- [ ] Kleur van de Hanger-gloed in de code van roze naar paars.
+
+**CANON – niet wijzigen zonder overleg.**
+
+De Hanger gloeit paars, niet roze. Roze = de Stroom = Sapientia's domein. Paars = Oude Mensheid, Codex Monument, World Warper, ECHO. De code gloeit nog roze en moet naar paars.
 - [ ] Webversie. Hoort niet bij deze branch.
 - [ ] Runner in de CI-matrix op Godot 4.3. De 65 PASS draaiden op Godot 4.7.2, buiten .github/workflows/tests.yml.
 
@@ -474,12 +528,12 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 ### Eerste binnenkomst: Hanger en Sapientia
 
 - [ ] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
-  Open ontwerp. De code gloeit roze (canon: roze = de Stroom). De hal is paars.
+  Canon is paars. De code gloeit nog roze. De hal is paars. Roze blijft de Stroom, het domein van Sapientia.
 - [ ] Systemen komen online door het Hanger-signaal
   De scène speelt één keer. Losse systemen gaan niet aan.
 - [ ] Dialoogscène
   - [ ] Dennis toont de Hanger (eerste keer expliciet in het verhaal)
-    De scène toont een roze Hanger. Dennis steekt hem niet apart op.
+    De scène toont de Hanger nog roze; canon is paars. Dennis steekt hem niet apart op.
   - [ ] ECHO reageert herkennend op de Hanger
     IVA-stap hanger zegt dat de Hanger de Sleutel is. De canon-naam ECHO staat nog niet in de tekst.
   - [ ] Uitleg bouwen: alleen de Hanger, de biometrische sleutel, activeert de World Warper
@@ -508,7 +562,7 @@ Per act:
 Eerste versie, nog niet de kamers hierboven:
 
 - [ ] Paars als signature kleur, in lijn met het Codex Monument
-  Panelen en de hal zijn paars. De Hanger in de scène is roze.
+  Panelen en de hal zijn paars. De Hanger in de scène is nog roze; canon is paars.
 - [ ] Hologrammen, schermen en tech-details
   Placeholder-hologram in de eerste-bezoekscène en bij IVA. Geen echte schermen.
 
@@ -552,7 +606,18 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 ### Functionaliteit in de World Warper
 
 - [ ] Party kiezen en wisselen
-  Kijklijst Gezelschap: naam en niveau. Wisselen ontbreekt; er is geen API.
+  Kijklijst Gezelschap: naam en niveau. Wisselen in de hub is nog niet gebouwd. De Rustkamer (`rustkamer`) staat al in `world_warper/kamers`.
+
+**CANON – niet wijzigen zonder overleg.** Party wisselen in de hub:
+
+- Max 3 actieve party-leden (Dennis + 2)
+- Rest op de bank in de Rustkamer
+- Wisselen alleen in de Rustkamer
+- Gratis, onbeperkt
+- Actieve party en de bank worden opgeslagen
+- Dennis kan niet op de bank
+- Tijdelijke gasten (Codex) niet op de bank
+
 - [ ] Questvoortgang via de AI-gids
   IVA heeft vier vaste stappen (world_warper_guide_0 tot en met 3). Geen questvoortgang.
 
@@ -574,7 +639,7 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 - [ ] ECHO-hologram (paarse gloed)
   Paars vlak met het woord PLACEHOLDER. Geen sprite. De code noemt de gids nog IVA.
 - [ ] Oplicht-effect van de Hanger (paarse gloed)
-  Open ontwerp. De code gloeit roze (de Stroom).
+  Canon is paars. De code gloeit nog roze. Roze is de Stroom, het domein van Sapientia.
 - [ ] Sapientia glitch-verschijning (dreigingsscène)
   Korte zwarte flikkering van het hologram. Geen glitch-sprite. De eerste-bezoekscène gebruikt kleurvlakken.
 - [ ] UI van de wereldkaart-view (WM1, WM2, WM3, daarna dorp)
@@ -591,12 +656,17 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 ## Ingame-menu
 
+**CANON – niet wijzigen zonder overleg.**
+
 Het huidige ingame-menu vervangen door losse knoppen. Elke knop opent meteen een scherm. Geen tussenmenu, tenzij het bord "MENU" op de schets alleen een label blijft.
 
-De vier functies zijn besloten. Welke functie op welke plek staat, blijft open.
+Indeling:
+- Links, drie stapels: Uitrusting, Codex, Items
+- Rechts, groot vlak: Warpen
+- Warpen blijft rechts (visueel zwaartepunt)
 
 - [ ] Indeling volgens de schets
-  Goudgerand bord "MENU" rechtsboven. Links drie gestapelde liggende knoppen. Rechts daarvan een groter vlak. Welke functie waar staat is nog open. De code zet voorlopig Uitrusting, Codex en Items links en Warpen rechts.
+  Goudgerand bord "MENU" rechtsboven. Links drie gestapelde liggende knoppen. Rechts daarvan een groter vlak. De plekken zijn canon. De code zet Uitrusting, Codex en Items links en Warpen rechts.
 
 ## RPG ART
 
