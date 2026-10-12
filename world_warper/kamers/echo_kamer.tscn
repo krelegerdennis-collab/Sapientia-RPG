@@ -41,6 +41,11 @@ position = Vector2(72, 40)
 script = ExtResource("7_prop")
 bron = "echo_grot"
 
+[node name="Grot" type="StaticBody2D" parent="Objects"]
+position = Vector2(72, 72)
+script = ExtResource("7_prop")
+bron = "grot_ingang"
+
 [node name="Kisten" type="Node2D" parent="Objects"]
 script = ExtResource("8_kist")
 
