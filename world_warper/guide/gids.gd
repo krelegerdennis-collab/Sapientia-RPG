@@ -51,22 +51,24 @@ func interact(_by: Node = null) -> void:
 	var frame := Engine.get_process_frames()
 	if frame == _laatste_frame:
 		return
-	var stappen: Array = Dialoog.steps()
-	var idx := int(Dialoog.step_index(_flags()))
-	if idx < 0 or idx >= stappen.size():
+	var flags := _flags()
+	var idx := int(Dialoog.step_index(flags))
+	var regels: Array = Dialoog.regels_voor(idx, flags, _bezocht())
+	if regels.is_empty():
 		return
-	var stap: Dictionary = stappen[idx]
 	_laatste_frame = frame
-	_toon(stap)
-	_zet_vlag(str(stap.get("flag", "")))
-	guide_advanced.emit(str(stap.get("id", "")))
+	_toon_regels(regels)
+	var stappen: Array = Dialoog.steps()
+	if idx >= 0 and idx < stappen.size():
+		var stap: Dictionary = stappen[idx]
+		_zet_vlag(str(stap.get("flag", "")))
+		guide_advanced.emit(str(stap.get("id", "")))
+	else:
+		guide_advanced.emit("hint")
 
 
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
 	if not _is_tik(event) or _dialog_open():
-		return
-	var idx := int(Dialoog.step_index(_flags()))
-	if idx < 0 or idx >= Dialoog.steps().size():
 		return
 	interact(null)
 	get_viewport().set_input_as_handled()
@@ -83,11 +85,22 @@ func _stijl_labels() -> void:
 		placeholder_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
-func _toon(stap: Dictionary) -> void:
+func _toon_regels(regels: Array) -> void:
 	if not is_inside_tree() or get_node_or_null("/root/Dialog") == null:
 		return
-	var regels: Array = stap.get("lines", [])
 	Dialog.show_lines(regels, str(Dialoog.NAAM), self)
+
+
+func _bezocht() -> Array:
+	if not is_inside_tree():
+		return []
+	var gs := get_node_or_null("/root/GameState")
+	if gs == null:
+		return []
+	var raw = gs.get("bezochte_kaarten")
+	if raw is Array:
+		return raw
+	return []
 
 
 func _zet_vlag(vlag: String) -> void:

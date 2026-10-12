@@ -3,6 +3,8 @@ extends Node
 ## Start:  godot --path . -- --berggrottest [--shots=/pad/map]
 ##   Geen baas, puzzels aanwezig en oplosbaar, geheime kamer heeft staf en
 ##   accessoire op Archief 2-schaal, de grot start zonder de wereldkaart.
+##   Deel E: uitgang-warpers begin/midden/eind. De ingang waarschuwt niet.
+##   Ja gaat naar de bestaande grotuitgang op de wereldkaart.
 
 const BG := preload("res://scripts/data/berggrot_data.gd")
 const Logic := preload("res://scripts/puzzle/puzzle_logic.gd")
@@ -13,6 +15,9 @@ const Scale := preload("res://scripts/data/level_scale.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const Unlock := preload("res://world_warper/flow/unlock.gd")
+const BW := preload("res://scripts/dungeon/berggrot_warpers.gd")
+const ExitWarper := preload("res://scripts/dungeon/dungeon_exit_warper.gd")
+const AW := preload("res://scripts/dungeon/archief_warpers.gd")
 const GENEZER_VLAG := "bewaker:archief_2_v4_genezer/genezer"
 const TRAPZAAL_VLAG := "bewaker:archief_v2_trapzaal/m2"
 
@@ -47,6 +52,8 @@ func _run() -> void:
 	await _kaart()
 	print("=== Deel D: grot start zonder wereldkaart ===")
 	await _start()
+	print("=== Deel E: uitgang-warpers berggrot ===")
+	await _warper_tests()
 	print("BERGGROTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await pframes(8)
@@ -267,6 +274,173 @@ func _start() -> void:
 		check("grendel heeft een poort", grendel != null and grendel.logic != null
 				and grendel.logic.gates.has("poort_uit") and not grendel.logic.gate_open("poort_uit"))
 		await screenshot("berggrot_grendel")
+
+
+func _warper_tests() -> void:
+	var spots: Array = BW.placements()
+	var roles := {}
+	for p in spots:
+		roles[str(p["role"])] = p
+	var uit: Dictionary = BG.ROOMS["berggrot_mond"]["exits"]["E"]
+	check("begin, midden en eind bestaan", spots.size() == 3 and roles.has("begin")
+			and roles.has("midden") and roles.has("eind"))
+	if not roles.has("begin") or not roles.has("midden") or not roles.has("eind"):
+		return
+	check("geen mini-baas: midden op de Nerf, eind in de Uitmond",
+			str(roles["begin"]["room"]) == "berggrot_mond"
+			and str(roles["midden"]["room"]) == "berggrot_nerf"
+			and str(roles["eind"]["room"]) == "berggrot_uitmond"
+			and BW.for_room("berggrot_grendel").is_empty()
+			and BW.for_room("berggrot_geheim").is_empty())
+	check("begin bij de ingang, niet op de wereld-uitgang", roles["begin"]["tile"] == BW.BEGIN_TILE
+			and _naast(roles["begin"]["tile"], _spawn_tile(BG.ROOMS["berggrot_mond"], "ingang"))
+			and AW.walkable(BG.ROOMS["berggrot_mond"], roles["begin"]["tile"])
+			and not BW.bezet(BG.ROOMS["berggrot_mond"], roles["begin"]["tile"]))
+	check("midden-tegel vrij in de Nerf", roles["midden"]["tile"] == BW.MIDDEN_TILE
+			and AW.walkable(BG.ROOMS["berggrot_nerf"], roles["midden"]["tile"])
+			and not BW.bezet(BG.ROOMS["berggrot_nerf"], roles["midden"]["tile"]))
+	check("eind-tegel vrij in de laatste kamer", roles["eind"]["tile"] == BW.EIND_TILE
+			and AW.walkable(BG.ROOMS["berggrot_uitmond"], roles["eind"]["tile"])
+			and not BW.bezet(BG.ROOMS["berggrot_uitmond"], roles["eind"]["tile"]))
+	var doel_ok := true
+	for p in spots:
+		var rid := str(p["room"])
+		if not BG.ROOMS.has(rid) or rid.begins_with("archief") or rid.begins_with("dungeon100"):
+			doel_ok = false
+		if str(p["world_scene"]) != str(uit["map"]) or str(p["world_spawn"]) != str(uit["spawn"]):
+			doel_ok = false
+		if str(p["world_scene"]) == BG.KAS_SCENE:
+			doel_ok = false
+	check("alleen grotkamers, terug naar de bestaande wereldkaart-uitgang", doel_ok
+			and str(uit["map"]) == BG.WERELD_MAP and str(uit["spawn"]) == BG.WERELD_SPAWN)
+	if spots.size() != 3:
+		return
+	GameState.new_game("Dennis")
+	GameState.story_step = SD.KLAAR
+	GameState.encounter_multiplier = 0.0
+	if Dialog.is_open:
+		Dialog.close()
+	var ingang := await _enter("res://scenes/maps/berggrot_mond.tscn", "ingang", "BerggrotMond")
+	await _weg_monsters(ingang)
+	var wp: DungeonExitWarper = _warper_van(ingang)
+	check("begin-warper in de grotmond op %s" % [BW.BEGIN_TILE], wp != null and wp.role == "begin"
+			and _warper_tile(wp) == BW.BEGIN_TILE and not wp.waarschuwt()
+			and wp.sprite.texture.resource_path.ends_with("save_book.png")
+			and wp.sprite.modulate == ExitWarper.TINT
+			and wp.world_scene == BG.WERELD_MAP and wp.world_spawn == BG.WERELD_SPAWN)
+	if wp == null or player() == null:
+		return
+	var stay := tile()
+	wp.interact(player())
+	var ingang_zin: bool = await wait_until(func() -> bool:
+		return wp.last_result == "start" and Dialog.is_open and Dialog.choices.is_empty() \
+				and not Dialog._lines.is_empty() and str(Dialog._lines[0]) == ExitWarper.INGANG
+	, 3.0)
+	check("begin-warper waarschuwt niet", ingang_zin and not wp.waarschuwt())
+	_klik_dicht()
+	await wait_until(func() -> bool: return not Dialog.is_open and not wp.busy, 2.0)
+	check("begin laat de party staan", wp.last_result == "start" and scene() == ingang and tile() == stay
+			and player() != null and not player().input_locked
+			and str(GameState.current_map).ends_with("berggrot_mond.tscn"))
+	await _warper_kamer("res://scenes/maps/berggrot_nerf.tscn", "zuid", "BerggrotNerf", "midden", roles["midden"]["tile"])
+	await _warper_kamer("res://scenes/maps/berggrot_uitmond.tscn", "zuid", "BerggrotUitmond", "eind", roles["eind"]["tile"])
+
+
+func _warper_kamer(pad: String, spawn: String, scene_name: String, role: String, tegel: Vector2i) -> void:
+	var kamer := await _enter(pad, spawn, scene_name)
+	await _weg_monsters(kamer)
+	var wp: DungeonExitWarper = _warper_van(kamer)
+	check("%s-warper op %s" % [role, tegel], wp != null and wp.role == role and wp.waarschuwt()
+			and _warper_tile(wp) == tegel and wp.sprite.texture.resource_path.ends_with("save_book.png")
+			and wp.sprite.modulate == ExitWarper.TINT)
+	if wp == null or player() == null:
+		return
+	var stay := tile()
+	wp.interact(player())
+	var warned: bool = await wait_until(_exit_warning_open, 3.0)
+	check("%s waarschuwt: '%s'" % [role, ExitWarper.WARNING], warned
+			and ExitWarper.YES == "Ja, warpen naar worldmap"
+			and ExitWarper.NO == "Nee, blijf in de dungeon")
+	Dialog.choose(1)
+	await wait_until(func() -> bool: return wp.last_result == "cancelled" and not wp.busy, 2.0)
+	check("%s annuleren laat de party staan" % role, wp.last_result == "cancelled" and scene() == kamer
+			and tile() == stay and player() != null and not player().input_locked)
+	wp.interact(player())
+	warned = await wait_until(_exit_warning_open, 3.0)
+	check("%s vraagt opnieuw om bevestiging" % role, warned)
+	Dialog.choose(0)
+	var wereld_ok := await wait_scene("Wereldkaart", 20.0)
+	await wait_fade()
+	var sp: Node2D = null
+	if wereld_ok:
+		sp = scene().get_node_or_null("Spawns/" + BG.WERELD_SPAWN) as Node2D
+	var verwacht := Vector2i((sp.position / 16.0).floor()) if sp != null else Vector2i(-99, -99)
+	check("%s ja gaat naar de wereldkaart bij %s %s" % [role, BG.WERELD_SPAWN, tile()],
+			wereld_ok and GameState.current_map == BG.WERELD_MAP and sp != null
+			and tile() == verwacht and tile() != stay)
+
+
+func _enter(pad: String, spawn_name: String, scene_name: String) -> Node:
+	GameState.has_return_point = false
+	GameState.change_map(pad, spawn_name)
+	if not await wait_scene(scene_name, 20.0):
+		check("kamer geladen: %s" % scene_name, false)
+		return null
+	await wait_fade()
+	return scene()
+
+
+func _warper_van(kamer: Node) -> DungeonExitWarper:
+	if kamer == null:
+		return null
+	return kamer.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
+
+
+func _warper_tile(node: Node2D) -> Vector2i:
+	if node == null:
+		return Vector2i(-99, -99)
+	return Vector2i((node.position / 16.0).floor())
+
+
+func _spawn_tile(room: Dictionary, spawn: String) -> Vector2i:
+	var v: Array = room["spawns"][spawn]
+	return Vector2i(int(v[0]), int(v[1]))
+
+
+func _naast(a: Vector2i, b: Vector2i) -> bool:
+	return absi(a.x - b.x) + absi(a.y - b.y) == 1
+
+
+func _exit_warning_open() -> bool:
+	return Dialog.is_open and Dialog.choices.size() == 2 and not Dialog._lines.is_empty() \
+			and str(Dialog._lines[0]) == ExitWarper.WARNING and str(Dialog.choices[0]) == ExitWarper.YES \
+			and str(Dialog.choices[1]) == ExitWarper.NO
+
+
+func _klik_dicht() -> void:
+	if Dialog.is_open:
+		Dialog.advance()
+	if Dialog.is_open:
+		Dialog.advance()
+
+
+func _weg_monsters(kamer: Node) -> void:
+	if kamer == null or not ("monsters" in kamer):
+		return
+	for m in kamer.monsters.duplicate():
+		if is_instance_valid(m):
+			m.queue_free()
+	kamer.monsters.clear()
+	await pframes(2)
+
+
+func wait_until(cond: Callable, timeout := 5.0) -> bool:
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < timeout * 1000.0:
+		if cond.call():
+			return true
+		await get_tree().process_frame
+	return cond.call()
 
 
 func _terrein(grond: TileMapLayer, t: Vector2i) -> String:

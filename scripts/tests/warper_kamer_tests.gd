@@ -44,7 +44,12 @@ func check(label: String, ok: bool) -> void:
 
 
 func _run() -> void:
+	# De wereldkaart laadt op de achtergrond (GameState._start_preload). Een
+	# synchrone load() tussendoor wacht op die thread, en die thread wacht op
+	# de hoofdthread. Eerst laten eindigen.
+	await _wacht_voorgeladen()
 	_vlag_en_act()
+	_echo_hint()
 	_buit_en_tekst()
 	_update2_regels()
 	_scènes()
@@ -88,6 +93,24 @@ func _vlag_en_act() -> void:
 	check("Kern dicht vóór act 6", not Kamers.is_open("kern", open, _party(36)))
 	check("Kern open in act 6", Kamers.is_open("kern", open, _party(37)) and Kamers.naam("kern") == "De Kern")
 	check("onbekende kamer blijft dicht", not Kamers.is_open("hanger_nis", open, _party(40)))
+
+
+func _wacht_voorgeladen() -> void:
+	var t0 := Time.get_ticks_msec()
+	while GameState._preloading.size() > 0 and Time.get_ticks_msec() - t0 < 15000:
+		await get_tree().process_frame
+	check("voorgeladen kaarten zijn binnen", GameState._preloading.is_empty())
+
+
+func _echo_hint() -> void:
+	var test: GDScript = load("res://world_warper/guide/dialoog_test.gd") as GDScript
+	if test == null:
+		check("ECHO-hint en gidsdialoog", false)
+		return
+	var fouten: Array = test.fouten()
+	check("ECHO-hint en gidsdialoog", fouten.is_empty())
+	for regel in fouten:
+		print("INFO  ", regel)
 
 
 func _buit_en_tekst() -> void:
@@ -210,6 +233,11 @@ func _echo_grot() -> void:
 			and EchoGrot.ZIN_H6 == h6_letterlijk and EchoGrot.ZIN_DATA == data_letterlijk)
 	check("ECHO legt de onderzoeker-twist niet uit", not " ".join(EchoGrot.speler_teksten()).to_lower().contains("onderzoeker"))
 	check("voor H-6 alleen de eerste zin", EchoGrot.regels_vooraf({}) == [EchoGrot.ZIN_EERSTE])
+	check("later bezoek herhaalt de zin niet", EchoGrot.regels_vooraf({EchoGrot.FLAG_EERSTE: true}).is_empty())
+	var gezien := {}
+	EchoGrot.markeer(gezien, [EchoGrot.ZIN_EERSTE])
+	check("vlag echo_grot_gezien na de eerste zin", gezien.get(EchoGrot.FLAG_EERSTE, false) == true
+			and EchoGrot.regels_vooraf(gezien).is_empty() and not gezien.has(EchoGrot.FLAG_H6))
 	check("na H-6 komt de kandidatenzin erbij", EchoGrot.regels_vooraf({EchoGrot.FLAG_EERSTE: true, EchoGrot.FLAG_H6: true}) == [EchoGrot.ZIN_H6])
 	check("trappen in de grot blijven een uitgang", not EchoGrot.blokkeert_wereldkaart(EchoGrot.DUNGEON, EchoGrot.DUNGEON))
 
@@ -236,6 +264,10 @@ func _echo_grot() -> void:
 	var eerste := await _naar_tekst(EchoGrot.ZIN_EERSTE)
 	var live_naam := Dialog.name_label.text == "ECHO" and Dialog.name_label.text != "IVA"
 	check("eerste-bezoekzin", eerste and EchoGrot.ZIN_EERSTE == eerste_letterlijk and live_naam)
+	if eerste and Dialog._is_typing():
+		Dialog.advance()
+	if eerste:
+		await _screenshot("echo_eerste_bezoek")
 	check("naam ECHO en niet IVA", str(Dialoog.NAAM) == "ECHO" and str(Dialoog.NAAM) != "IVA"
 			and welkom.contains("ECHO") and not welkom.contains("IVA") and live_naam)
 	check("menu Diepe Grot Simulatie", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE))
@@ -257,6 +289,18 @@ func _echo_grot() -> void:
 	_kies(EchoGrot.KEUZE_TERUG)
 	var dicht := await _wacht_gesprek_weg()
 	check("gesprek sluit", dicht)
+	check("vlag na het eerste gesprek", GameState.story_flags.get(EchoGrot.FLAG_EERSTE, false) == true)
+	if not _praat():
+		check("tweede bezoek slaat de zin over", false)
+		return
+	var tweede_open := await _wacht(func() -> bool: return Dialog.is_open, 3.0)
+	var tweede_tekst := str(Dialog.text_label.text) if Dialog.is_open else ""
+	check("tweede bezoek slaat de zin over", tweede_open and Dialog.has_choices()
+			and tweede_tekst == EchoGrot.VRAAG_MENU
+			and tweede_tekst != EchoGrot.ZIN_EERSTE
+			and tweede_tekst != EchoGrot.ZIN_H6)
+	_kies(EchoGrot.KEUZE_TERUG)
+	check("tweede gesprek sluit", await _wacht_gesprek_weg())
 
 	GameState.story_flags[EchoGrot.FLAG_H6] = true
 	if not _praat():

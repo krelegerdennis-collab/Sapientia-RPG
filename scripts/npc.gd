@@ -89,6 +89,16 @@ func place_at(tile: Vector2i, dir: Vector2i) -> void:
 	face(dir)
 
 
+## Pose op een korte plein-lus. afstand is het aantal pixels van deze ene stap.
+func loop_frame(dir: Vector2i, lopend: bool, afstand: float) -> void:
+	facing = dir
+	if lopend:
+		_col = WALK_CYCLE[int(afstand / 8.0) % WALK_CYCLE.size()]
+	else:
+		_col = 0
+	_update_sprite()
+
+
 ## Cutscene: n tiles lopen (botsing telt niet, het script kiest de route).
 func script_walk(dir: Vector2i, n: int, speed := 56.0) -> void:
 	facing = dir

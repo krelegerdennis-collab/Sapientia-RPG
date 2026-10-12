@@ -5,7 +5,17 @@ extends RefCounted
 ## bezit de grens: 20 = grade 2, 50 = grade 3, 80 = grade 4).
 ## TODO(design): toekomstige helden krijgen nog geen eigen G4-wapen of set.
 
-const SCROLLS: Array[String] = ["spreuk_inferno", "spreuk_oerwoud", "spreuk_donderslag", "spreuk_aureool", "spreuk_ijskern"]
+## Eén rol per canon-spreuk met grade 4 (scripts/data/spells.gd). Alleen in deze pool,
+## en pick stopt ze pas bij grade 4 (verdieping 80+). Niet de oude vijf rol-ids.
+const SCROLLS: Array[String] = [
+	"spreuk_g4_zonneslag", "spreuk_g4_apocalyps", "spreuk_g4_dageraad", "spreuk_g4_zuiverende_vlam",
+	"spreuk_g4_zielenbloei", "spreuk_g4_oerbos", "spreuk_g4_moeder_aarde", "spreuk_g4_wildgroei",
+	"spreuk_g4_hemelval", "spreuk_g4_donderslag", "spreuk_g4_stormheer", "spreuk_g4_zuiverende_donder",
+	"spreuk_g4_wederopstanding", "spreuk_g4_heilige_straal", "spreuk_g4_aureool", "spreuk_g4_zegen_der_goden",
+	"spreuk_g4_eeuwige_winter", "spreuk_g4_absolute_nul", "spreuk_g4_ijskern", "spreuk_g4_sneeuwkoningin",
+]
+## Oude rol-ids. Blijven opzoekbaar voor een save of test, maar niet meer in de grade-4-pool.
+const LEGACY_SCROLLS: Array[String] = ["spreuk_inferno", "spreuk_oerwoud", "spreuk_donderslag", "spreuk_aureool", "spreuk_ijskern"]
 
 const ITEMS := {
 	# Grade 1, verdieping 1-19. Geen affix.
@@ -103,6 +113,10 @@ static func item(id: String) -> Dictionary:
 
 static func is_scroll(id: String) -> bool:
 	return id in SCROLLS
+
+
+static func is_legacy_scroll(id: String) -> bool:
+	return id in LEGACY_SCROLLS
 
 
 ## Bevestigd: grens hoort bij de hogere grade (20/50/80).
