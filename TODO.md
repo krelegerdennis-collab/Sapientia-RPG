@@ -1128,6 +1128,65 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Endgame (90-99) voelt als beloning
 - [ ] Medium Map: exacte kisten + monsters
 - [ ] Trap Room: zichtbaar of verborgen vallen?
+  Definitief. De checkbox blijft open tot de vallen in de code deze verdeling gebruiken.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Verdeling:
+
+  - 60% ZICHTBARE vallen (speler kan ontwijken)
+  - 40% VERBORGEN vallen (speler kan niet ontwijken)
+  - Speciale combo-vallen op hoge floors (61+)
+
+  Val-types:
+
+  Zichtbaar:
+
+  - Spike-platen (op vloer)
+  - Pijlen uit muren
+  - Gaten in vloer
+
+  Verborgen:
+
+  - Drukplaten
+  - Verborgen spike-traps
+  - Plafond-val
+
+  Speciaal (floor 61+):
+
+  - Combo-vallen (zichtbaar triggert verborgen)
+  - Bewegende vallen
+  - Push-vallen (duwen speler)
+
+  Schade per val:
+
+  - Spike-plaat: 5-10% HP
+  - Pijlen: 8-12% HP
+  - Gat in vloer: 10-15% HP + terug naar ingang
+  - Drukplaat: 10% HP
+  - Plafond-val: 15-20% HP + korte stun
+  - Push-val: 0% HP + verplaatst speler
+
+  Schade schaalt met floor:
+
+  - Floor 1-30: basis
+  - Floor 31-60: +25%
+  - Floor 61-99: +50%
+
+  Detectie verborgen vallen:
+
+  - Lotte's Licht-magie (verlicht tijdelijk)
+  - Codex-monster met detectie-ability
+  - Item (Detectie-bril / Kaart)
+  - Zonder detectie: blind erin
+
+  Voorkomen per kamer-type:
+
+  - Trap Room: MEER vallen, mix 60/40
+  - Medium Map: af en toe vallen
+  - Large Room: af en toe vallen
+  - Empty Room: af en toe vallen
+  - Rest/Treasure/Merchant Room: NOOIT vallen
 - [ ] Puzzle Room: welke puzzels?
 - [ ] Empty Room: lore-items of alleen leeg?
 - [ ] Merchant Room: welke items verkoopt hij?
