@@ -12,6 +12,12 @@ const BossCore := preload("res://scripts/battle/boss_core.gd")
 const PuzzleRooms := preload("res://scripts/data/puzzle_rooms.gd")
 const PuzzleLogic := preload("res://scripts/puzzle/puzzle_logic.gd")
 const Equipment := preload("res://scripts/equipment.gd")
+const WarperEnter := preload("res://world_warper/flow/enter.gd")
+const WarperUnlock := preload("res://world_warper/flow/unlock.gd")
+const HangerScene := preload("res://world_warper/cutscene/hanger_scene.gd")
+const WarperDialoog := preload("res://world_warper/guide/dialoog.gd")
+const WarperDreiging := preload("res://world_warper/cutscene/dreiging.gd")
+const GENEZER_SCENE := "res://scenes/maps/archief_2_v4_genezer.tscn"
 const AANVAL := 0
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
@@ -49,6 +55,8 @@ func _run() -> void:
 	await _wereldkaart()
 	print("=== Archief 2: kamer, gevecht, warp ===")
 	await _spel()
+	print("=== Archief 2: na De Genezer naar de hub ===")
+	await _na_genezer_hub()
 	print("ARCHIEF2TEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -459,6 +467,68 @@ func _spel() -> void:
 			slots_gelijk = false
 	check("vier save-slots onaangeroerd", slots_gelijk and GameState.SLOT_COUNT == 4)
 	Engine.time_scale = 1.0
+
+
+func _na_genezer_hub() -> void:
+	var kamers: Dictionary = Rooms.rooms()
+	var noord: Dictionary = kamers["archief_2_v4_genezer"]["exits"]["n"]
+	check("noorduitgang blijft de kaartkamer", str(noord.get("map", "")) == Archief2.WARPER_SCENE
+			and str(noord.get("spawn", "")) == "ingang" and ResourceLoader.exists(Archief2.WARPER_SCENE))
+	check("hub is het exterieur", str(WarperEnter.HUB_SCENE).ends_with("exterieur.tscn") and str(WarperEnter.HUB_SPAWN) == "ingang")
+	check("Hanger gloeit paars", HangerScene.PURPLE == Color("b07ae8"))
+	var echo := " ".join(Archief2.ECHO_REGELS)
+	check("H-6 blijft bij de kaartkamer", echo.contains("H-6") and echo.contains("Proefpersoon"))
+	var hubtekst := " ".join(WarperDreiging.lines())
+	for stap in WarperDialoog.steps():
+		hubtekst += " " + " ".join(stap.get("lines", []))
+	check("hub krijgt de H-6-regels niet", not hubtekst.contains("H-6") and not hubtekst.contains("Proefpersoon")
+			and not hubtekst.contains("biometrische"))
+	GameState.new_game("Dennis")
+	GameState.encounter_multiplier = 0.0
+	Engine.time_scale = 1.0
+	GameState.story_flags[WarperUnlock.BEWAKER_VLAG] = true
+	check("levenskern voor de warp", GameState.grant_kern(Archief2.KERN_ID, "genezer"))
+	GameState.pending_kern_absorb = Archief2.KERN_ID
+	GameState.in_battle = false
+	GameState.changing_map = false
+	GameState.change_map(GENEZER_SCENE, "zuid")
+	var kamer_ok := await _wacht("Archief2V4Genezer", 20.0)
+	check("Genezer-kamer voor de warp", kamer_ok)
+	if not kamer_ok:
+		return
+	var gezien: Array[String] = []
+	var t0 := Time.get_ticks_msec()
+	var hub := false
+	while Time.get_ticks_msec() - t0 < 30000:
+		var s := _scène()
+		if s != null and s.name == "Exterieur" and s.is_node_ready() and not GameState.changing_map:
+			hub = true
+			break
+		if Dialog.is_open:
+			if Dialog._is_typing():
+				Dialog.advance()
+			else:
+				var regel := str(Dialog.text_label.text)
+				if regel != "" and (gezien.is_empty() or gezien[gezien.size() - 1] != regel):
+					gezien.append(regel)
+				Dialog.advance()
+		await get_tree().process_frame
+	var tekst := " ".join(gezien)
+	check("bestaande zinnen vóór de hub (%s)" % [tekst], tekst.contains(str(Archief2.NA_GENEZER[0]))
+			and tekst.contains(str(Archief2.NA_GENEZER[1])) and tekst.contains("Het trekt jullie omhoog."))
+	check("geen H-6 in de warptekst", not tekst.contains("H-6") and not tekst.contains("Proefpersoon"))
+	check("party in het exterieur", hub and str(GameState.current_map).ends_with("exterieur.tscn")
+			and str(GameState.current_map) != Archief2.WARPER_SCENE)
+	check("world_warper_unlocked na De Genezer", GameState.world_warper_is_unlocked()
+			and GameState.story_flags.has("archief2_naar_warper"))
+	var ex := _scène()
+	var spawn := ex.get_node_or_null("Spawns/ingang") if ex != null else null
+	var speler := ex.get_node_or_null("Objects/Player") if ex != null else null
+	check("spawn ingang van de hub", ex != null and ex.name == "Exterieur" and spawn != null and speler != null
+			and speler.position.distance_to(spawn.position) < 2.0)
+	check("niet de kaartkamer Archief2Warper", ex != null and ex.name != "Archief2Warper")
+	await _shot("archief2_naar_hub")
+	await _dialoog_dicht(8)
 
 
 func _zonder_lotte() -> void:

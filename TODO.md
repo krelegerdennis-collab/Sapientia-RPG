@@ -488,7 +488,7 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Eerste versie in world_w
 
 ### Nog te doen
 
-- [ ] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. Het platform staat op de wereldkaart en gaat open na De Genezer. De automatische warp ontbreekt nog.
+- [x] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. Het platform staat op de wereldkaart en gaat open na De Genezer. Na de bestaande zinnen van NA_GENEZER roept de Genezer-kamer WorldWarperEnter.enter() aan. De party komt in world_warper/maps/exterieur.tscn, spawn ingang, en world_warper_unlocked gaat aan.
 - [ ] WM2 naast WM1 open na Archief 2. De code heeft alleen WM1.
 - [ ] Dorpen eerst bezocht vóór een warp. Dat filter ontbreekt.
 - [ ] Party wisselen in de Rustkamer. De regels staan bij Functionaliteit. De hub-bank is er nog niet.
@@ -504,7 +504,7 @@ De Hanger gloeit paars, niet roze. Roze = de Stroom = Sapientia's domein. Paars 
 - [ ] Webversie. Hoort niet bij deze branch.
 - [x] Runner in de CI-matrix op Godot 4.3. De job warper-runner in .github/workflows/tests.yml draait world_warper/tests/run.gd. warperkamertest stond al in de matrix.
 
-Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven). De hub gaat open na die vlag. Het zwevende gebouw en de automatische warp zijn er nog niet.
+Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven). De hub gaat open na die vlag. De automatische warp zet de party in het exterieur. Het zwevende gebouw op de wereldkaart is er nog niet.
 
 ### Concept en lore
 
@@ -518,9 +518,9 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 ### Verschijning en cutscene
 
 - [ ] Cutscene na De Genezer: de World Warper verschijnt in de lucht
-  De Genezer staat in Archief 2. Het platform op de kaart is geen cutscene.
-- [ ] De party wordt automatisch gewarped naar het gebouw
-  WorldWarperEnter.enter() wisselt naar het exterieur als de unlock-vlag er is. Niets op de kaart roept dat aan.
+  De Genezer staat in Archief 2. Het platform op de kaart is geen cutscene. De bestaande zinnen plus de mapwissel zijn geen losse cutscene.
+- [x] De party wordt automatisch gewarped naar het gebouw
+  Na De Genezer speelt NA_GENEZER. WorldWarperEnter.enter() zet world_warper_unlocked en wisselt naar het exterieur, spawn ingang. De kaartkamer archief_2_warper blijft de noorduitgang.
 - [ ] Introductie van de AI-gids ECHO
   Placeholder IVA staat in de hal, vier stappen via Dialog.show_lines. De canon-naam ECHO staat nog niet in de tekst.
 - [ ] Duidelijk maken wat dit is, wat het kan, en waarom het belangrijk is
