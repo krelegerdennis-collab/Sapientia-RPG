@@ -33,6 +33,7 @@ static func fouten() -> Array:
 	_check_volgorde(uit)
 	_check_tekst(uit)
 	_check_inhoud(uit)
+	_check_hint(uit)
 	return uit
 
 
@@ -122,6 +123,98 @@ static func _eist(fouten: Array, stap: Dictionary, woorden: Array) -> void:
 	for woord in woorden:
 		if not laag.contains(str(woord)):
 			fouten.append("stap %s mist '%s'" % [str(stap.get("id", "")), str(woord)])
+
+
+static func _check_hint(fouten: Array) -> void:
+	# load() en niet preload: story_data is groot, en de kamer-test laadt dit
+	# script terwijl GameState de wereldkaart al op de achtergrond inleest.
+	var story: GDScript = load("res://scripts/data/story_data.gd") as GDScript
+	var unlock: GDScript = load("res://world_warper/flow/unlock.gd") as GDScript
+	if story == null or unlock == null:
+		fouten.append("vlag-bronnen laden niet")
+		return
+	if str(Dialoog.FLAG_NOOR_LID) != "noor_lid":
+		fouten.append("Noor-vlag is niet noor_lid")
+	if str(Dialoog.FLAG_GOLEM) != str(story.GOLEM_FLAG):
+		fouten.append("Golem-vlag wijkt af van de bewaker")
+	if str(Dialoog.FLAG_GENEZER) != str(unlock.BEWAKER_VLAG):
+		fouten.append("Genezer-vlag wijkt af van de bewaker")
+	var leeg := {}
+	_hint_eis(fouten, "zonder vlag", Dialoog.hint_lines(leeg),
+			["donker woud"],
+			["eerste archief", "genezer", "warp-ring", "berggrot"])
+	var alleen_golem := {Dialoog.FLAG_GOLEM: true}
+	_hint_eis(fouten, "golem zonder noor", Dialoog.hint_lines(alleen_golem),
+			["donker woud"], ["eerste archief"])
+	var getal := {Dialoog.FLAG_NOOR_LID: 1}
+	_hint_eis(fouten, "getal telt niet als noor", Dialoog.hint_lines(getal),
+			["donker woud"], ["eerste archief"])
+	var noor := {Dialoog.FLAG_NOOR_LID: true}
+	_hint_eis(fouten, "na noor", Dialoog.hint_lines(noor),
+			["eerste archief", "golem"],
+			["donker woud", "genezer", "warp-ring", "berggrot"])
+	var golem := {Dialoog.FLAG_NOOR_LID: true, Dialoog.FLAG_GOLEM: true}
+	_hint_eis(fouten, "na golem", Dialoog.hint_lines(golem),
+			["genezer", "kas", "archief 2", "berggrot"],
+			["donker woud", "eerste archief", "warp-ring"])
+	var klaar := {
+		Dialoog.FLAG_NOOR_LID: true,
+		Dialoog.FLAG_GOLEM: true,
+		Dialoog.FLAG_GENEZER: true,
+	}
+	_hint_eis(fouten, "na genezer zonder bezoek", Dialoog.hint_lines(klaar, []),
+			["warp-ring", "wereld 1", "bezocht"],
+			["donker woud", "genezer", "wilgendal", "esdoorn", "wereldkaart", "berggrot"])
+	var bestemmingen: GDScript = load("res://world_warper/warp/destinations.gd") as GDScript
+	if bestemmingen == null:
+		fouten.append("warp-bestemmingen laden niet")
+		return
+	var esdoorn_eerst: Array = [str(bestemmingen.ESDOORN_PATH), str(bestemmingen.WILGENDAL_PATH)]
+	_hint_eis(fouten, "laatst bezocht op wereld 1", Dialoog.hint_lines(klaar, esdoorn_eerst),
+			["warp-ring", "wilgendal", "wereld 1"],
+			["esdoorn", "wereldkaart", "genezer", "donker woud"])
+	var vreemd: Array = ["res://scenes/maps/archief_2_v1_entree.tscn"]
+	_hint_eis(fouten, "kas is geen wereld-1-plek", Dialoog.hint_lines(klaar, vreemd),
+			["warp-ring", "bezocht"],
+			["wilgendal", "esdoorn", "wereldkaart", "kas"])
+	var welkom: Array = Dialoog.regels_voor(0, leeg)
+	_hint_eis(fouten, "welkom met hint", welkom, ["echo", "gids", "donker woud"], ["iva"])
+	var warp: Array = Dialoog.regels_voor(1, leeg)
+	_hint_eis(fouten, "warp zonder hint", warp, ["ring", "wereldkaart"], ["donker woud"])
+	var hanger: Array = Dialoog.regels_voor(3, leeg)
+	_hint_eis(fouten, "hanger met hint", hanger, ["hanger", "sleutel", "donker woud"], ["iva"])
+	var na: Array = Dialoog.regels_voor(Dialoog.steps().size(), noor)
+	_hint_eis(fouten, "na de stappen alleen de hint", na, ["eerste archief"], ["echo", "hanger", "donker woud"])
+
+
+static func _hint_eis(fouten: Array, waar: String, regels: Array, moet: Array, niet: Array) -> void:
+	if regels.is_empty():
+		fouten.append("%s heeft geen zinnen" % waar)
+		return
+	var tekst := ""
+	for zin in regels:
+		var regel := str(zin)
+		tekst += " " + regel
+		if regel.strip_edges() == "":
+			fouten.append("lege hintzin in %s" % waar)
+			continue
+		_verboden(fouten, waar, regel)
+		if not _is_nederlands(regel):
+			fouten.append("geen Nederlandse hint: %s" % regel)
+		for woord in _woorden(regel):
+			if woord in ENGELS_UI:
+				fouten.append("Engels UI-woord '%s' in: %s" % [woord, regel])
+		var laag := regel.to_lower()
+		for naald in ["h-1", "h-2", "h-3", "h-4", "h-5", "spiegel", "onderzoeker", "worldmap", "iva"]:
+			if laag.contains(naald):
+				fouten.append("%s bevat '%s'" % [waar, naald])
+	var geheel := tekst.to_lower()
+	for woord in moet:
+		if not geheel.contains(str(woord)):
+			fouten.append("%s mist '%s'" % [waar, str(woord)])
+	for woord in niet:
+		if geheel.contains(str(woord)):
+			fouten.append("%s noemt '%s'" % [waar, str(woord)])
 
 
 static func _verboden(fouten: Array, waar: String, tekst: String) -> void:

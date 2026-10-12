@@ -44,7 +44,12 @@ func check(label: String, ok: bool) -> void:
 
 
 func _run() -> void:
+	# De wereldkaart laadt op de achtergrond (GameState._start_preload). Een
+	# synchrone load() tussendoor wacht op die thread, en die thread wacht op
+	# de hoofdthread. Eerst laten eindigen.
+	await _wacht_voorgeladen()
 	_vlag_en_act()
+	_echo_hint()
 	_buit_en_tekst()
 	_update2_regels()
 	_scènes()
@@ -83,6 +88,24 @@ func _vlag_en_act() -> void:
 	check("Kern dicht vóór act 6", not Kamers.is_open("kern", open, _party(36)))
 	check("Kern open in act 6", Kamers.is_open("kern", open, _party(37)) and Kamers.naam("kern") == "De Kern")
 	check("onbekende kamer blijft dicht", not Kamers.is_open("hanger_nis", open, _party(40)))
+
+
+func _wacht_voorgeladen() -> void:
+	var t0 := Time.get_ticks_msec()
+	while GameState._preloading.size() > 0 and Time.get_ticks_msec() - t0 < 15000:
+		await get_tree().process_frame
+	check("voorgeladen kaarten zijn binnen", GameState._preloading.is_empty())
+
+
+func _echo_hint() -> void:
+	var test: GDScript = load("res://world_warper/guide/dialoog_test.gd") as GDScript
+	if test == null:
+		check("ECHO-hint en gidsdialoog", false)
+		return
+	var fouten: Array = test.fouten()
+	check("ECHO-hint en gidsdialoog", fouten.is_empty())
+	for regel in fouten:
+		print("INFO  ", regel)
 
 
 func _buit_en_tekst() -> void:

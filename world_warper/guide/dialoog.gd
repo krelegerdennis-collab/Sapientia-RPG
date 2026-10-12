@@ -14,6 +14,13 @@ const NAAM := "ECHO"
 
 const FLAG_VOORVOEGSEL := "world_warper_guide_"
 
+## Zelfde sleutel als het join-event noor_bevrijd in story_data.gd.
+const FLAG_NOOR_LID := "noor_lid"
+## Zelfde sleutel als StoryData.GOLEM_FLAG.
+const FLAG_GOLEM := "bewaker:archief_golemhal/golem"
+## Zelfde sleutel als WorldWarperUnlock.BEWAKER_VLAG.
+const FLAG_GENEZER := "bewaker:archief_2_v4_genezer/genezer"
+
 
 static func flag_for(index: int) -> String:
 	return FLAG_VOORVOEGSEL + str(index)
@@ -76,3 +83,78 @@ static func _vlag_aan(flags: Dictionary, sleutel: String) -> bool:
 	# Godot weigert die operand en de stap zou dan niet betrouwbaar zijn.
 	var waarde: Variant = flags.get(sleutel, false)
 	return waarde is bool and (waarde as bool)
+
+
+## Volgende bestemming die al in het spel bestaat. Geen nieuw verhaal.
+## Volgorde: Noor, Golem van het Eerste Archief, De Genezer, anders de warp-ring.
+static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
+	if not _vlag_aan(flags, FLAG_NOOR_LID):
+		return [
+			"Noor is nog niet aangesloten.",
+			"Zoek haar in het Donker Woud.",
+		]
+	if not _vlag_aan(flags, FLAG_GOLEM):
+		return [
+			"De Golem van het Eerste Archief staat nog.",
+			"Ga naar het Eerste Archief.",
+		]
+	if not _vlag_aan(flags, FLAG_GENEZER):
+		return [
+			"De Genezer staat nog in de kas van Archief 2.",
+			"Ga via de berggrot.",
+		]
+	var plek := _wm1_plek(bezocht)
+	if plek == "":
+		return [
+			"De warp-ring brengt je naar wereld 1.",
+			"Kies een plek die je al bezocht hebt.",
+		]
+	return [
+		"De warp-ring brengt je naar %s." % plek,
+		"Die plek op wereld 1 heb je al bezocht.",
+	]
+
+
+## Staptekst. Welkom en hanger krijgen de hint erbij. Na de laatste stap alleen de hint.
+static func regels_voor(index: int, flags: Dictionary, bezocht: Array = []) -> Array:
+	var hint: Array = hint_lines(flags, bezocht)
+	var alle := steps()
+	if index < 0 or index >= alle.size():
+		return hint
+	var stap: Dictionary = alle[index]
+	var regels: Array = []
+	for zin in stap.get("lines", []):
+		regels.append(str(zin))
+	var id := str(stap.get("id", ""))
+	if id == "welkom" or id == "hanger":
+		regels.append_array(hint)
+	return regels
+
+
+## Laatst bezochte plek op wereld 1. Leeg als er geen open plek bij zit.
+## load() en niet preload: destinations.gd noemt GameState, en de dialoogtest
+## wordt geparsed vóór de autoloads.
+static func _wm1_plek(bezocht: Array) -> String:
+	var bestemmingen: GDScript = load("res://world_warper/warp/destinations.gd") as GDScript
+	if bestemmingen == null:
+		return ""
+	var gekozen := ""
+	var laatst := -1
+	var plaatsen: Array = bestemmingen.places(str(bestemmingen.WM1))
+	for place in plaatsen:
+		if not (place is Dictionary):
+			continue
+		var plek: Dictionary = place
+		if not bool(bestemmingen.is_place_open(plek, bezocht)):
+			continue
+		var path := str(plek.get("path", ""))
+		var gezien := -1
+		var i := 0
+		for pad in bezocht:
+			if str(pad) == path:
+				gezien = i
+			i += 1
+		if gezien > laatst:
+			laatst = gezien
+			gekozen = str(plek.get("label", ""))
+	return gekozen
