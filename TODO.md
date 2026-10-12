@@ -1047,6 +1047,33 @@ Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
   - Equipment/accessoires worden de hoofdbeloning.
   - Goud wordt nuttig (voor merchant in Grot + verkopen).
 - [ ] Blue chest kans per floor-bracket
+  Definitief. De checkbox blijft open tot de blue-chest-kans in de code deze tabel gebruikt.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Basis kans per verdieping (normale kamer):
+
+  - Floor 1-10: 5% → 0-1 blue chest
+  - Floor 11-20: 10% → 0-1 blue chest
+  - Floor 21-35: 15% → 0-1 blue chest
+  - Floor 36-50: 20% → 0-1 blue chest
+  - Floor 51-65: 25% → 0-1 blue chest
+  - Floor 66-80: 30% → 0-1 blue chest
+  - Floor 81-95: 40% → 0-1 blue chest
+  - Floor 96-99: 50% → 0-1 blue chest
+
+  Overrides per kamer-type:
+
+  - CHEST ROOM (10%): altijd 2 blue chests
+  - TREASURE ROOM (5%): 50% kans op 1 blue chest
+  - PUZZLE ROOM (5%): altijd 1 blue chest (bij succes)
+  - Andere kamers: volgt floor-bracket tabel
+
+  Balans-effect:
+
+  - Gemiddeld 25-30 blue chests per volledige run (was ~60-80)
+  - Early game (1-20) significant minder
+  - Endgame (90-99) voelt als beloning
 - [ ] Medium Map: exacte kisten + monsters
 - [ ] Trap Room: zichtbaar of verborgen vallen?
 - [ ] Puzzle Room: welke puzzels?
