@@ -1051,7 +1051,9 @@ func _eind_account_tests(story_path: String) -> void:
 		noor_ok = noor_ok and SpellRules.can_learn("noor", spell_id) and int(sp.get("grade", 99)) <= 3
 	var noor_spells: Array = noor.get("spells", [])
 	check("eindstaat: Noor heeft geen verboden element", noor_ok
-			and noor_spells.has("vuurzee") and not noor_spells.has("zegen") and not noor_spells.has("inferno"))
+			and noor_spells.has("vuurzee") and noor_spells.has("zegen") and noor_spells.has("inferno")
+			and not noor_spells.has("donderslag") and not noor_spells.has("zonneslag")
+			and not noor_spells.has("rijp"))
 	var lotte := _member("lotte")
 	var lotte_spells: Array = lotte.get("spells", [])
 	check("eindstaat: Lotte tot grade 3, geen grade 4", not lotte.is_empty()

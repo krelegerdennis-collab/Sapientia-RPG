@@ -28,7 +28,7 @@ const MIMIC_CHANCE := 0.10
 const MIMIC_GOLD_MULT := 2.0
 const MIMIC_ENEMY := "mimic"
 ## Warp-kristal: sleutel-voorwerp in GameData.KEY_ITEMS. Verdieping 100 heeft geen baas.
-## TODO(design): het keuze-moment heeft nog geen opties. Het kristal werkt zoals het was.
+## De beloning is een keuze (Codex, Grade 4-wapens of Simulatie-ring): dungeon100_reward.gd.
 const WARP_ITEM := "warp"
 const WARP_FLOOR := 100
 ## Blauwe tint voor kist, items en inventaris (placeholder: geen eigen sprite, zie tools/placeholders_v17.txt).
@@ -106,7 +106,7 @@ static func chest_entry(run_seed: int, floor_nr: int, id: String, tile: Vector2i
 
 
 ## Verdieping 100: het Warp-kristal erbij. Er is geen baas die het dropt; aankomst legt het in de tas.
-## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
+## De keuze van de beloning gebeurt pas als het kristal gebruikt wordt.
 static func with_warp(loot: Dictionary, floor_nr: int) -> Dictionary:
 	if floor_nr != WARP_FLOOR:
 		return loot

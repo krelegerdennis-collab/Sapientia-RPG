@@ -475,7 +475,7 @@ func _status_tests() -> void:
 	check("klasse: %s" % s.class_label.text, s.class_label.text == "Warrior")
 	await shot("menu_status")
 	await tap("move_right")
-	check("rechts: Noor (%s)" % s.spells_label.text, s.index == 1 and "Fire (4 MP)" in s.spells_label.text and "Lightning (7 MP)" in s.spells_label.text)
+	check("rechts: Noor (%s)" % s.spells_label.text, s.index == 1 and "Vonk (4 MP)" in s.spells_label.text and "Kettingbliksem (8 MP)" in s.spells_label.text)
 	check("Noor: eigen portret (portrait_noor.png, 64x80, NEAREST)", s.portrait.get_meta("source", "") == "portrait"
 			and s.portrait.texture.resource_path.ends_with("portrait_noor.png") and s.portrait.custom_minimum_size == Vector2(64, 80)
 			and s.portrait.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
@@ -511,7 +511,7 @@ func _magic_tests() -> void:
 	await tap("interact")
 	check("A op Fire: melding '%s'" % s.message_text(), not s.targeting and s.message_text() == PartyActions.MSG_FIELD_ONLY)
 	await tap("move_right")
-	check("rechts: Lotte met Heal", s.caster_index == 2 and s.entry_text(0).begins_with("Heal") and not s.is_greyed(0))
+	check("rechts: Lotte met Kleine Genezing", s.caster_index == 2 and s.entry_text(0).begins_with("Kleine Genezing") and not s.is_greyed(0))
 	var kees: Dictionary = GameState.party[0]
 	var lotte: Dictionary = GameState.party[2]
 	kees["hp"] = 5
@@ -524,7 +524,7 @@ func _magic_tests() -> void:
 	var lo := 5 + roundi(base * 0.9)
 	var hi := mini(int(kees["max_hp"]), 5 + roundi(base * 1.1))
 	check("Heal op Kees: 5 -> %d HP (verwacht %d..%d), Lotte MP %d -> %d" % [kees["hp"], lo, hi, mp0, lotte["mp"]],
-			kees["hp"] >= lo and kees["hp"] <= hi and lotte["mp"] == mp0 - 3)
+			kees["hp"] >= lo and kees["hp"] <= hi and lotte["mp"] == mp0 - 4)
 	await tap("cancel")
 	await tap("cancel")
 	await frames(2)
@@ -939,7 +939,7 @@ func _equipment_logic_tests() -> void:
 		for k in it:
 			if k in ["atk", "def", "agi"] or k in ["mag", "mdef"]:
 				data_ok = data_ok and (it[k] is int)
-	check("uitrustingsdata: %d stukken, elk een geldig vak" % GameData.EQUIPMENT.size(), data_ok and GameData.EQUIPMENT.size() == 84)   # 38 bestaande + 46 verhaalstukken t/m Act 6
+	check("uitrustingsdata: %d stukken, elk een geldig vak" % GameData.EQUIPMENT.size(), data_ok and GameData.EQUIPMENT.size() == 85)   # 38 bestaande + 46 verhaalstukken t/m Act 6 + Simulatie-ring
 	check("vakken Wapen/Schild/Helm/Harnas/Benen/Laarzen/Accessoire", GameData.EQUIP_SLOTS.map(func(x): return Equipment.slot_name(x))
 			== ["Weapon", "Shield", "Helm", "Armor", "Benen", "Laarzen", "Accessory"])
 	check("stats ATK/DEF/MAG/MDEF/SPD (SPD = agi)", GameData.EQUIP_STATS.map(func(x): return Equipment.stat_label(x))

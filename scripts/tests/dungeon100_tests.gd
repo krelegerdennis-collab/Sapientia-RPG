@@ -371,7 +371,7 @@ func _strip_and_scroll_tests() -> void:
 	var taught := PA.use_item(inv, "spreuk_vuur", noor)
 	check("Fire Scroll leert Noor Fire, vult haar MP en is op", taught["ok"] and (noor["spells"] as Array).has("vuur")
 			and not inv.has("spreuk_vuur") and int(noor["max_mp"]) >= 4 and int(noor["mp"]) >= 4
-			and str(taught["text"]) == "Noor learns Fire!")
+			and str(taught["text"]) == "Noor learns Vonk!")
 	var again := {"spreuk_vuur": 1}
 	var second := PA.use_item(again, "spreuk_vuur", noor)
 	check("een rol voor een spreuk die je al kent doet niets", not second["ok"] and int(again["spreuk_vuur"]) == 1
@@ -392,7 +392,7 @@ func _strip_and_scroll_tests() -> void:
 	check("Noor kan tijdens de run Lightning leren", noor_learn["ok"] and (noor["spells"] as Array).has("bliksem")
 			and int(noor["max_mp"]) >= 7)
 	check("een rol is in het veld te gebruiken", PA.item_usable_in_field("spreuk_vuur") and PA.item_block_reason("spreuk_vuur") == ""
-			and PA.item_effect_text("spreuk_vuur") == "Teaches the spell Fire.")
+			and PA.item_effect_text("spreuk_vuur") == "Teaches the spell Vonk.")
 	check("de run eindigt", GameState.dungeon100_end_run(false))
 	check("na de grot: levels, spreuken, staf en Codex zijn weer van voor de run",
 			int(GameState.party[0]["level"]) == 9 and (GameState.party[0]["spells"] as Array).is_empty()

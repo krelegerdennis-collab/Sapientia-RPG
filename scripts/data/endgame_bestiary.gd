@@ -51,7 +51,7 @@ static func entry(id: String) -> Dictionary:
 		"exp": int(stats.get("exp", 0)),
 		"gold": int(stats.get("gold", 0)),
 		"mp": int(stats.get("mp", base.get("mp", 0))),
-		"weak": base.get("weak", []),
+		"weak": stats.get("weak", base.get("weak", [])),
 		"resist": base.get("resist", []),
 		"sprite": str(base.get("sprite", "")),
 		"sprite_placeholder": str(base.get("sprite_placeholder", "")),

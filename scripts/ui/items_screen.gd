@@ -8,6 +8,7 @@ extends "res://scripts/ui/menu_screen.gd"
 const PartyActions := preload("res://scripts/party_actions.gd")
 const TargetList := preload("res://scripts/ui/target_list.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
+const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
 
 const LIST_W := 132            # breedte van de itemlijst
 const NAME_COLS := PartyActions.LIST_NAME_COLS   # tekens voor de naam, daarna 'x3'
@@ -154,7 +155,10 @@ func choose_item(id: String) -> void:
 		return
 	if bool(PartyActions.item_data(id).get("warp", false)):
 		show_message(PartyActions.MSG_WARP_USED, MenuColors.INFO)
-		GameState.dungeon100_warp()
+		var keuze: int = await Dialog.ask(Dungeon100Reward.VRAAG, Dungeon100Reward.KEUZES)
+		if keuze < 0 or keuze >= Dungeon100Reward.IDS.size():
+			return
+		GameState.dungeon100_warp(Dungeon100Reward.IDS[keuze])
 		return
 	_start_targeting()
 

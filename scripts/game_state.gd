@@ -25,6 +25,7 @@ const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const WorldWarperUnlock := preload("res://world_warper/flow/unlock.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const TITLE_SCENE := "res://scenes/ui/title.tscn"
@@ -1684,6 +1685,8 @@ func dungeon100_end_run(deliver := true) -> bool:
 		return false
 	var snap := dungeon100_snapshot
 	var stray: Array = []
+	# Vloer eerst op 0, anders schaalt de Simulatie-ring de echte party bij het terugzetten.
+	dungeon100_floor = 0
 	party = _party_from(snap["party"], stray)
 	if party.is_empty():
 		add_member(MAIN_HERO)
@@ -1698,7 +1701,6 @@ func dungeon100_end_run(deliver := true) -> bool:
 	defeated_map_monsters = {}
 	map_monster_battle = {}
 	dungeon100_checkpoint = 0
-	dungeon100_floor = 0
 	dungeon100_seed = 0
 	dungeon100_warpers = []
 	if deliver:
@@ -1727,7 +1729,7 @@ func dungeon100_leave() -> bool:
 
 ## Deze verdieping is bereikt: best gaat omhoog, en een warper-verdieping gaat open.
 ## Op 100 ligt het Warp-kristal klaar. Er is geen baas die het dropt.
-## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
+## De beloning kiest de speler pas als het kristal gebruikt wordt.
 func dungeon100_reach_floor(floor_nr: int) -> void:
 	if not Dungeon100RulesC.is_valid_floor(floor_nr):
 		return
@@ -1750,20 +1752,19 @@ func dungeon100_warper_exit() -> bool:
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
-## TODO(design): het keuze-moment op verdieping 100 (Codex, Grade 4, accessoire) heeft nog geen opties.
 func dungeon100_can_warp() -> bool:
 	return dungeon100_run_active() and dungeon100_floor == Dungeon100RulesC.FLOORS and item_count(Dungeon100RulesC.Blue.WARP_ITEM) > 0
 
 
-## Warp: run voltooid, permanente items mee naar de echte tas, terug naar ECHO's Kamer.
-## false = kan niet (verkeerde verdieping, geen kristal of geen run).
-## TODO(design): het keuze-moment op verdieping 100 (Codex, Grade 4, accessoire) heeft nog geen opties.
-func dungeon100_warp() -> bool:
-	if not dungeon100_can_warp():
+## Warp: één beloning (codex, wapens of ring), daarna de run voorbij en terug naar ECHO's Kamer.
+## false = kan niet, of de keuze ontbreekt of is ongeldig. Zonder keuze rondt de run niet af.
+func dungeon100_warp(keuze := "") -> bool:
+	if not dungeon100_can_warp() or not Dungeon100Reward.geldig(keuze):
 		return false
 	dungeon100_best = Dungeon100RulesC.FLOORS
 	if not dungeon100_end_run(true):
 		return false
+	Dungeon100Reward.geef(keuze)
 	story_flags[EchoGrot.FLAG_RESULTAAT] = true
 	change_map(EchoGrot.KAMER, EchoGrot.KAMER_SPAWN)
 	return true
@@ -1788,6 +1789,16 @@ func dungeon100_echo_start() -> bool:
 func dungeon100_defeat() -> String:
 	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, dungeon100_floor)
 	has_return_point = false
+	if dungeon100_run_active() and dungeon100_floor > 0 \
+			and not bool(story_flags.get(Dungeon100Reward.FLAG_RESET, false)) \
+			and Dungeon100Reward.draagt_ring(party):
+		story_flags[Dungeon100Reward.FLAG_RESET] = true
+		_full_heal()
+		pending_spawn = Dungeon100RulesC.START_SPAWN
+		pending_respawn_msg = [Dungeon100Reward.RESET_LINE]
+		entry_kind = "respawn"
+		_autosave_request = "respawn"
+		return Dungeon100RulesC.dungeon_scene
 	if dungeon100_run_active():
 		dungeon100_end_run(true)
 	else:
@@ -1816,6 +1827,8 @@ func dungeon100_load(raw) -> void:
 	dungeon100_delivered = v["delivered"]
 	dungeon100_snapshot = v["snapshot"]
 	dungeon100_warpers = v["warpers"]
+	for h in party:
+		Equipment.refresh(h)
 
 
 # ---------------------------------------------------------------- kernfragmenten (v0.15)

@@ -1,6 +1,6 @@
 extends RefCounted
 ## Blauwe-kistuitrusting van de Diepe Grot, per grade.
-## Staat NIET in GameData.EQUIPMENT (die lijst blijft 84 stukken voor het verhaal).
+## Staat NIET in GameData.EQUIPMENT (het verhaal blijft 84 stukken; de Simulatie-ring is het 85e, geen kistloot).
 ## Bevestigd: statcijfers, affix-waarden en de grensverdiepingen (hogere grade
 ## bezit de grens: 20 = grade 2, 50 = grade 3, 80 = grade 4).
 ## TODO(design): toekomstige helden krijgen nog geen eigen G4-wapen of set.

@@ -59,6 +59,13 @@ const BOSSES := {
 	90: {"enemy": "wortelkoning", "name": "Root Emperor"},
 	99: {"enemy": "papiergeest", "name": "De Stem", "desc": "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht."},
 }
+## Vaste canon-stats ná de curve, alleen voor deze baasverdiepingen. HP = level × 50.
+const CANON_BOSS := {
+	25: {"max_hp": 750, "atk": 45, "def": 30, "weak": ["licht"]},
+	50: {"max_hp": 1250, "atk": 75, "def": 50, "weak": ["bliksem"]},
+	75: {"max_hp": 1750, "atk": 105, "def": 70, "weak": ["natuur"]},
+	99: {"max_hp": 2250, "atk": 135, "def": 90, "weak": ["ijs"]},
+}
 ## Extra skill van de eindbaas (bovenop de skills van zijn vijand-sprite).
 const FINAL_SKILL := {"name": "Last Judgment", "chance": 0.15, "power": 2.0}
 ## Skill voor een baas als zijn vijand er geen heeft.
@@ -235,6 +242,14 @@ static func boss_stats(base: Dictionary, floor_nr: int) -> Dictionary:
 	out["skills"] = skills
 	out["boss_floor"] = f
 	out["dungeon100_floor"] = f
+	# Canon overschrijft alleen deze vier verdiepingen. De curve voor de rest blijft.
+	if CANON_BOSS.has(f):
+		var c: Dictionary = CANON_BOSS[f]
+		out["max_hp"] = int(c["max_hp"])
+		out["atk"] = int(c["atk"])
+		out["def"] = int(c["def"])
+		out["weak"] = (c["weak"] as Array).duplicate()
+		out["weak_matters"] = true
 	return out
 
 

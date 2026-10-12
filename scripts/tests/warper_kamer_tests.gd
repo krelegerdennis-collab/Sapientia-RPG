@@ -259,7 +259,7 @@ func _echo_grot() -> void:
 
 	GameState.inventory["warp"] = 1
 	GameState.dungeon100_floor = 100
-	var terug := GameState.dungeon100_warp()
+	var terug := GameState.dungeon100_warp("ring")
 	var kamer2 := await _wacht_pad(EchoGrot.KAMER)
 	await _wacht_fade()
 	check("terugkeer na floor 100", terug and kamer2 and scene().scene_file_path == EchoGrot.KAMER

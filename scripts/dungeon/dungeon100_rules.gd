@@ -61,7 +61,7 @@ const WORLD_SCENE := EchoGrot.KAMER
 const WORLD_SPAWN := EchoGrot.KAMER_SPAWN
 ## Vlaggen in GameState.story_flags die bij één run horen (kist geopend, bewaker/baas verslagen) en bij het
 ## einde van de run weggaan. Kist- en kamer-id's bevatten de seed, dus een nieuwe run begint altijd schoon.
-const RUN_FLAG_PREFIXES := ["kist:d100_", "bewaker:dungeon100_", "dungeon100_boss:"]
+const RUN_FLAG_PREFIXES := ["kist:d100_", "bewaker:dungeon100_", "dungeon100_boss:", "dungeon100_ring:"]
 
 ## Goud na een nederlaag. In de kerker telt het goud van de run niet: de momentopname (het echte goud)
 ## komt volledig terug (gold_keep 1.0 = niets van de echte tas/het echte goud af). Erbuiten: de helft.

@@ -159,8 +159,11 @@ func _boss_tests() -> void:
 	var bossier := true
 	var last: Dictionary = {}
 	var rising := true
+	var canon_floors: Array[int] = [25, 50, 75, 99]
 	for f in S.boss_floors():
 		var bs := S.boss_stats(GD.ENEMIES[S.boss_for_floor(f)["enemy"]], f)
+		if f in canon_floors:
+			continue
 		for id in NORMAL_ENEMIES:
 			var nm := S.monster_stats(GD.ENEMIES[id], f)
 			for k in ["max_hp", "atk", "def", "exp", "gold"]:
@@ -169,8 +172,17 @@ func _boss_tests() -> void:
 			for k in ["max_hp", "atk", "def", "exp", "gold"]:
 				rising = rising and int(bs[k]) > int(last[k])
 		last = bs
-	check("elke baas is sterker dan elk gewoon monster op dezelfde verdieping (HP/ATK/DEF/EXP/goud)", bossier)
-	check("bazen worden sterker per baasverdieping (10 -> 99)", rising)
+	check("elke curve-baas is sterker dan elk gewoon monster op dezelfde verdieping (HP/ATK/DEF/EXP/goud)", bossier)
+	check("curve-bazen worden sterker per baasverdieping (10 -> 90)", rising)
+	var canon_ok := true
+	var want := {25: [750, 45, 30, "licht"], 50: [1250, 75, 50, "bliksem"], 75: [1750, 105, 70, "natuur"], 99: [2250, 135, 90, "ijs"]}
+	for f in want:
+		var bs2 := S.boss_stats(GD.ENEMIES[S.boss_for_floor(f)["enemy"]], f)
+		var row: Array = want[f]
+		canon_ok = canon_ok and int(bs2["max_hp"]) == int(row[0]) and int(bs2["atk"]) == int(row[1]) \
+				and int(bs2["def"]) == int(row[2]) and bool(bs2.get("weak_matters", false)) \
+				and str(row[3]) in bs2.get("weak", [])
+	check("canon-bazen 25/50/75/99 hebben vaste HP/ATK/DEF en zwakte", canon_ok)
 	var b100 := S.boss_stats(GD.ENEMIES["kennis_beest"], 100)
 	var b90 := S.boss_stats(GD.ENEMIES["kennis_beest"], 90)
 	check("eindbaas (100) sterker dan een baas met dezelfde formule zonder eindbaas-bonus",

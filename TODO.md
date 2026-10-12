@@ -265,7 +265,7 @@ Baas-statistieken. Formule: HP = level × 50, ATK = level × 3, DEF = level × 2
 - De Rechter (lvl 35): HP 1750, ATK 105, DEF 70 — zwak Natuur
 - De Stem (lvl 45): HP 2250, ATK 135, DEF 90 — zwak IJs
 
-- [ ] Diepe Grot-bazen bouwen
+- [x] Diepe Grot-bazen bouwen
   Verdieping 25, 50, 75 en 99 heten De Schaduw van H-6, De Cyclus, De Rechter en De Stem, met de canon-citaten in het bestiarium. De andere baasverdiepingen (10, 20, 30, 40, 60, 70, 80, 90) houden de oude Engelse namen.
 
 
@@ -394,7 +394,7 @@ Afsluitend, definitief:
 
 Magie heeft 4 grades. Grade 1 tot en met 3 zijn te koop in de magic shop en worden per act vrijgespeeld. Grade 4 is niet te koop: die dropt alleen uit blauwe kisten in de Diepe Grot (verdieping 80+). Per tier 4 spreuken. Niet alles is in Act 1 beschikbaar.
 
-- [ ] Magic tier list opzetten en in het spel zetten (4 grades × 4 spreuken = 16 spreuken per element)
+- [x] Magic tier list opzetten en in het spel zetten (4 grades × 4 spreuken = 16 spreuken per element)
   De lijst hieronder is canon. De checkbox blijft open tot de spreuken in de code staan. De oude werklijst van 20 is als ontwerp vervangen, niet als al gebouwd.
 
 **CANON – niet wijzigen zonder overleg.**
@@ -431,7 +431,7 @@ G2: IJsstorm, Bevriezen, IJspilaar, Hagelstorm
 G3: Bevriezing, Glaciaal, IJsgevangenis, Poolstorm
 G4: Eeuwige Winter, Absolute Nul, Glaciaal Hart, Sneeuwkoningin
 
-- [ ] Per spreuk eigen data: damage, healing en effect schalen per grade
+- [x] Per spreuk eigen data: damage, healing en effect schalen per grade
   De namen hierboven zijn canon. De cijfers hieronder zijn canon. De checkbox blijft open tot de spreuken in de code staan.
 
 **CANON – niet wijzigen zonder overleg.**

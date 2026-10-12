@@ -329,16 +329,15 @@ const ENEMIES := {
 		"desc": "Lotte, priesteres van de Orde van de Stille Vlam, stilgezet door Sapientia.",
 		"habitat": ["archief"],
 	},
-	# TODO(design): De Wurger HP 160, ATK 16, DEF 6. Conservatief na Archief 1 (Golem HP 360 / doel-level 7).
 	"wurger": {
 		"name": "De Wurger", "sprite": "res://assets/sprites/archief2/wurger.png",
-		"max_hp": 160, "atk": 16, "def": 6, "agi": 5, "mag": 0, "mdef": 4,
+		"max_hp": 700, "atk": 42, "def": 28, "agi": 5, "mag": 0, "mdef": 4,
 		"exp": 48, "gold": 20, "y_offset": 0,
 		"skills": [],
 		"no": 31, "mp": 0, "weak": ["ijs", "fysiek"], "resist": [],
 		"drops": [],
 		"boss": {
-			"max_hp": 160, "atk": 16, "def": 6, "agi": 5, "mag": 0, "mdef": 4, "mp": 0,
+			"max_hp": 700, "atk": 42, "def": 28, "agi": 5, "mag": 0, "mdef": 4, "mp": 0,
 			"exp": 48, "gold": 20,
 			"skills": [],
 			"weak": ["ijs", "fysiek"],
@@ -347,16 +346,15 @@ const ENEMIES := {
 		"desc": "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden.",
 		"habitat": ["archief", "baas"],
 	},
-	# TODO(design): De Genezer HP 220. Eerste treffer 30% en leech 8-12% staan in de canon; het totaal-HP niet.
 	"genezer": {
 		"name": "De Genezer", "sprite": "res://assets/sprites/archief2/genezer.png",
-		"max_hp": 220, "atk": 10, "def": 8, "agi": 6, "mag": 8, "mdef": 10,
+		"max_hp": 900, "atk": 54, "def": 36, "agi": 6, "mag": 8, "mdef": 10,
 		"exp": 90, "gold": 40, "y_offset": 0,
 		"skills": [],
 		"no": 32, "mp": 0, "weak": ["ijs", "zwaard"], "resist": [],
 		"drops": [],
 		"boss": {
-			"max_hp": 220, "atk": 10, "def": 8, "agi": 6, "mag": 8, "mdef": 10, "mp": 0,
+			"max_hp": 900, "atk": 54, "def": 36, "agi": 6, "mag": 8, "mdef": 10, "mp": 0,
 			"exp": 90, "gold": 40,
 			"skills": [],
 			"weak": ["ijs", "zwaard"],
@@ -382,6 +380,18 @@ const ENEMIES := {
 		"drops": [],
 		"desc": "Een kleine geest uit het woud.",
 		"habitat": ["woud"],
+	},
+	# Beloning van verdieping 100 (optie A). Geen eigen art: art_pending, de Codex toont de placeholder.
+	"echo": {
+		"name": "ECHO", "sprite": "res://assets/sprites/enemies/echo.png",
+		"art_pending": true,
+		"max_hp": 40, "atk": 10, "def": 6, "agi": 8, "mag": 8, "mdef": 6,
+		"exp": 0, "gold": 0, "y_offset": 0,
+		"skills": [],
+		"no": 33, "mp": 0, "weak": [], "resist": [],
+		"drops": [],
+		"desc": "Een uniek wezen uit de Diepe Grot. Alleen als beloning op verdieping 100.",
+		"habitat": ["dungeon100"],
 	},
 }
 
@@ -427,56 +437,10 @@ static func bestiary_ids() -> Array:
 	return ids
 
 # ---------------------------------------------------------------- spreuken
-## target: "enemy" (één vijand), "all_enemies" (alle vijanden) of "ally" (één held)
-## type:   "damage" (schade) of "heal" (genezen)
-## Effect = power + 2 x level van de gebruiker (+/- 10% geluk).
-## Kleine werklijst: één spreuk per grade per element dat nu meedoet.
-## Bevestigd: namen en cijfers van deze 20 spreuken gelden tot nader order.
-## TODO(design): de volledige 4×16-lijst per element is nog ontwerp.
-## Bestaande vuur/bliksem/genees houden hun oude mp en power (tests en startspreuken).
-## type "buff": buff_stat + buff_n voor de rest van het gevecht (battle.gd).
-const SPELLS := {
-	"vuur":    {"name": "Fire", "mp": 4, "target": "enemy", "type": "damage", "power": 14,
-		"element": "vuur", "grade": 1, "role": "damage"},
-	"vlam":    {"name": "Vlam", "mp": 6, "target": "enemy", "type": "damage", "power": 26,
-		"element": "vuur", "grade": 2, "role": "damage"},
-	"vuurzee": {"name": "Vuurzee", "mp": 8, "target": "all_enemies", "type": "damage", "power": 34,
-		"element": "vuur", "grade": 3, "role": "damage"},
-	"inferno": {"name": "Inferno", "mp": 10, "target": "all_enemies", "type": "damage", "power": 42,
-		"element": "vuur", "grade": 4, "role": "damage"},
-	"doorn":   {"name": "Doorn", "mp": 4, "target": "enemy", "type": "damage", "power": 18,
-		"element": "natuur", "grade": 1, "role": "damage"},
-	"rank":    {"name": "Rank", "mp": 6, "target": "enemy", "type": "damage", "power": 26,
-		"element": "natuur", "grade": 2, "role": "damage"},
-	"wildgroei": {"name": "Wildgroei", "mp": 8, "target": "all_enemies", "type": "damage", "power": 34,
-		"element": "natuur", "grade": 3, "role": "damage"},
-	"oerwoud": {"name": "Oerwoud", "mp": 10, "target": "all_enemies", "type": "damage", "power": 42,
-		"element": "natuur", "grade": 4, "role": "damage"},
-	"vonk":    {"name": "Vonk", "mp": 4, "target": "enemy", "type": "damage", "power": 18,
-		"element": "bliksem", "grade": 1, "role": "damage"},
-	"bliksem": {"name": "Lightning", "mp": 7, "target": "all_enemies", "type": "damage", "power": 9,
-		"element": "bliksem", "grade": 2, "role": "damage"},
-	"storm":   {"name": "Storm", "mp": 8, "target": "all_enemies", "type": "damage", "power": 34,
-		"element": "bliksem", "grade": 3, "role": "damage"},
-	"donderslag": {"name": "Donderslag", "mp": 10, "target": "all_enemies", "type": "damage", "power": 42,
-		"element": "bliksem", "grade": 4, "role": "damage"},
-	"genees":  {"name": "Heal", "mp": 3, "target": "ally", "type": "heal", "power": 22,
-		"element": "licht", "grade": 1, "role": "heal"},
-	"zegen":   {"name": "Zegen", "mp": 6, "target": "ally", "type": "buff", "power": 0, "buff_stat": "def", "buff_n": 2,
-		"element": "licht", "grade": 2, "role": "buff"},
-	"glans":   {"name": "Glans", "mp": 8, "target": "ally", "type": "heal", "power": 46,
-		"element": "licht", "grade": 3, "role": "heal"},
-	"aureool": {"name": "Aureool", "mp": 10, "target": "ally", "type": "heal", "power": 56,
-		"element": "licht", "grade": 4, "role": "heal"},
-	"rijp":    {"name": "Rijp", "mp": 4, "target": "enemy", "type": "damage", "power": 18,
-		"element": "ijs", "grade": 1, "role": "damage"},
-	"vorst":   {"name": "Vorst", "mp": 6, "target": "enemy", "type": "damage", "power": 26,
-		"element": "ijs", "grade": 2, "role": "damage"},
-	"ijsstorm": {"name": "IJsstorm", "mp": 8, "target": "all_enemies", "type": "damage", "power": 34,
-		"element": "ijs", "grade": 3, "role": "damage"},
-	"ijskern": {"name": "IJskern", "mp": 10, "target": "enemy", "type": "damage", "power": 42,
-		"element": "ijs", "grade": 4, "role": "damage"},
-}
+## Canon-lijst: scripts/data/spells.gd. power is de onderkant op level 1;
+## power_per_level schaalt daarna. Grade 4 staat niet in de winkel.
+const SpellsData := preload("res://scripts/data/spells.gd")
+const SPELLS := SpellsData.SPELLS
 
 # ---------------------------------------------------------------- items
 ## v0.11 (veldmenu): "desc" = uitleg in Items. Genees-items ("target": "ally" met heal_hp/
@@ -508,23 +472,23 @@ const ITEMS := {
 		"desc": "A book without words. Write a weakened monster into it."},
 	# Spreukrollen: alleen als buit in gewone kisten van de 100-verdiepingen-grot (dungeon100_scaling.gd).
 	# De party gaat die grot in zonder spreuken; een rol leert één held de spreuk (party_actions.gd).
-	"spreuk_vuur": {"name": "Fire Scroll", "target": "ally", "teach": "vuur", "heal_hp": 0, "heal_mp": 0,
-		"desc": "A scroll with the spell Fire. Someone in the party can learn it."},
-	"spreuk_bliksem": {"name": "Lightning Scroll", "short": "Bolt Scroll", "target": "ally", "teach": "bliksem", "heal_hp": 0, "heal_mp": 0,
-		"desc": "A scroll with the spell Lightning. Someone in the party can learn it."},
-	"spreuk_genees": {"name": "Heal Scroll", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
-		"desc": "A scroll with the spell Heal. Someone in the party can learn it."},
+	"spreuk_vuur": {"name": "Rol: Vonk", "target": "ally", "teach": "vuur", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Vonk. Iemand in de party kan de spreuk leren."},
+	"spreuk_bliksem": {"name": "Rol: Bliksem", "target": "ally", "teach": "bliksem", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Kettingbliksem. Iemand in de party kan de spreuk leren."},
+	"spreuk_genees": {"name": "Rol: Genezing", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Kleine Genezing. Iemand in de party kan de spreuk leren."},
 	# Grade 4 alleen uit blauwe kisten, verdieping 80-99. Niet in de winkel.
 	"spreuk_inferno": {"name": "Rol: Inferno", "target": "ally", "teach": "inferno", "heal_hp": 0, "heal_mp": 0,
 		"desc": "Een rol met Inferno. Alleen uit een diepe blauwe kist."},
 	"spreuk_oerwoud": {"name": "Rol: Oerwoud", "target": "ally", "teach": "oerwoud", "heal_hp": 0, "heal_mp": 0,
 		"desc": "Een rol met Oerwoud. Alleen uit een diepe blauwe kist."},
 	"spreuk_donderslag": {"name": "Donderrol", "target": "ally", "teach": "donderslag", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Donderslag. Alleen uit een diepe blauwe kist."},
-	"spreuk_aureool": {"name": "Rol: Aureool", "target": "ally", "teach": "aureool", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Aureool. Alleen uit een diepe blauwe kist."},
-	"spreuk_ijskern": {"name": "Rol: IJskern", "target": "ally", "teach": "ijskern", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met IJskern. Alleen uit een diepe blauwe kist."},
+		"desc": "Een rol met Godenslag. Alleen uit een diepe blauwe kist."},
+	"spreuk_aureool": {"name": "Rol: Aurora", "target": "ally", "teach": "aureool", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Aurora. Alleen uit een diepe blauwe kist."},
+	"spreuk_ijskern": {"name": "Rol: Glaciaal", "target": "ally", "teach": "ijskern", "heal_hp": 0, "heal_mp": 0,
+		"desc": "Een rol met Glaciaal Hart. Alleen uit een diepe blauwe kist."},
 	# Verhaaldrankjes t/m Act 6 (lijn "drank" in level_scale.gd). Alleen HP/MP: boosts, status
 	# (roest, stilte, correctie) en herleving zitten nog niet in het gevecht.
 	# Act 1, te vinden: Ilse in Esdoorn, eenmalig nadat Noor gered is. Later ook Tante Mien
@@ -897,6 +861,9 @@ const EQUIPMENT := {
 		"desc": "Loot from the depths of the Hundred Floors."},
 	"d100_ring_5": {"name": "Seal Ring", "slot": "accessoire", "mdef": 20, "agi": 12, "price": 0,
 		"desc": "Loot from the depths of the Hundred Floors."},
+	# Verdieping 100, optie C. Geen class, niet in de blauwe-kistpool (die staat in grade_gear.gd).
+	"simulatie_ring": {"name": "Simulatie-ring", "short": "Sim.-ring", "slot": "accessoire", "grade": 4, "price": 0,
+		"desc": "+10% op alle stats in de Diepe Grot. Eenmaal per run herstart de ring de huidige verdieping als de party valt."},
 }
 ## Sterkste: hoe zwaar elke stat telt per soort held (VOORLOPIG, eigen voorstel van RPG CODE;
 ## niet in het ontwerp). Score van een stuk = som van bonus x gewicht.

@@ -98,6 +98,7 @@ const CodexDataScript := preload("res://scripts/data/codex_data.gd")   # v0.19 C
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")   # v0.15 kernvaardigheden
 const Archief2 := preload("res://scripts/data/archief2.gd")
+const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
@@ -756,7 +757,7 @@ func _run() -> void:
 			else:
 				plan.append({"type": "attack", "actor": e, "target": null})
 		for a in plan:
-			a["speed"] = float(a["actor"]["s"]["agi"]) + randf() * 3.0
+			a["speed"] = float(a["actor"]["s"]["agi"]) * _buff_mult(a["actor"], "agi") + randf() * 3.0
 			if a["type"] == "core_charge":
 				a["speed"] = -1000.0   # de oplaad-actie komt altijd als laatste
 			if a["type"] == "defend":
@@ -776,6 +777,14 @@ func _run() -> void:
 			c["defending"] = false
 			_guard_tick(c)   # v0.15: schild omhoog telt af
 			_kern_tick(c)    # v0.15: kernvaardigheden laden op
+			_tick_ailments(c)
+		_refresh_party()
+		if _alive(enemies).is_empty():
+			await _victory()
+			return
+		if codex.party_down():
+			await _defeat()
+			return
 		_reserved.clear()
 
 
@@ -958,7 +967,9 @@ func _choose_spell(hero: Dictionary):
 				t = await _select_enemy()
 			"ally":
 				t = await _select_ally()
-			"all_enemies":
+			"ko":
+				t = await _select_ko()
+			"all_enemies", "all_allies":
 				return {"type": "spell", "actor": hero, "spell": ids[k], "target": null}
 		if t != null:
 			return {"type": "spell", "actor": hero, "spell": ids[k], "target": t}
@@ -1046,6 +1057,19 @@ func _select_ally():
 	return result
 
 
+func _select_ko():
+	var dead: Array = []
+	for h in heroes:
+		if int(h["s"]["hp"]) <= 0:
+			dead.append(h)
+	if dead.is_empty():
+		show_message("Niemand is bewusteloos.")
+		await _wait(MESSAGE_TIME)
+		return null
+	_set_state("target_ally")
+	return await _pick_target(dead, "Wie?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
+
+
 ## v0.13: geen namenlijst meer. Een pijltje (richtpijl.png) wijst het doel aan, met de naam
 ## in een klein label. Links/rechts (en omhoog/omlaag) = volgende/vorige, A = kiezen,
 ## B = terug naar het kruis, of tik direct op de vijand / held / zijn statusvak.
@@ -1130,6 +1154,13 @@ func _on_message_gui_input(event: InputEvent) -> void:
 # ================================================================ acties uitvoeren
 func _execute(a: Dictionary) -> void:
 	var actor: Dictionary = a["actor"]
+	if int(actor.get("skip", 0)) > 0:
+		actor["skip"] = int(actor["skip"]) - 1
+		var reden := str(actor.get("skip_reden", "bevriezing"))
+		var zin := "%s is verlamd en slaat over." if reden == "verlamming" else "%s is bevroren en slaat over."
+		show_message(zin % actor["name"])
+		await _wait(MESSAGE_TIME)
+		return
 	match a["type"]:
 		"attack":
 			var t = _valid_target(a["target"], not actor["is_hero"])
@@ -1166,28 +1197,45 @@ func _execute(a: Dictionary) -> void:
 			show_message("%s casts %s!" % [actor["name"], sp["name"]])
 			ActorSfx.play(actor, "vaardigheid")
 			await _hero_wind_up(actor, false)
+			var stype := str(sp.get("type", "damage"))
 			match sp["target"]:
 				"enemy":
 					var t = _valid_target(a["target"], false)
 					if t != null:
-						await _damage(t, Archief2.schaal_element(_spell_amount(actor, sp), t, str(sp.get("element", ""))))
+						await _damage(t, Archief2.schaal_element(_spell_amount(actor, sp, t), t, str(sp.get("element", ""))))
+						_apply_spell_status(t, sp)
 				"all_enemies":
 					var targets := _alive(enemies)
 					for t in targets:
-						_hit(t, Archief2.schaal_element(_spell_amount(actor, sp), t, str(sp.get("element", ""))))
+						_hit(t, Archief2.schaal_element(_spell_amount(actor, sp, t), t, str(sp.get("element", ""))))
+						_apply_spell_status(t, sp)
 					await _wait(0.7)
 					await _report_kos(targets)
-				"ally":
-					var ally := _valid_ally(a["target"])
-					if str(sp.get("type", "")) == "buff":
+				"ally", "ko":
+					if stype == "revive":
+						await _revive(a["target"], _spell_amount(actor, sp, {}))
+					elif stype == "buff":
+						var ally := _valid_ally(a["target"])
 						if not ally.is_empty():
-							var stat := str(sp.get("buff_stat", "def"))
-							var key := "buff_" + stat
-							ally[key] = int(ally.get(key, 0)) + int(sp.get("buff_n", 1))
-							show_message("%s is versterkt." % ally["name"])
+							_apply_buffs(ally, sp, actor)
+							await _wait(MESSAGE_TIME)
+					elif stype == "hot":
+						var ally_hot := _valid_ally(a["target"])
+						if not ally_hot.is_empty():
+							_add_hot(ally_hot, sp, actor)
 							await _wait(MESSAGE_TIME)
 					else:
-						await _heal(ally, _spell_amount(actor, sp), 0)
+						await _heal(_valid_ally(a["target"]), _spell_amount(actor, sp, {}), 0)
+				"all_allies":
+					for ally_all in _alive(heroes):
+						if stype == "buff":
+							_apply_buffs(ally_all, sp, actor)
+						elif stype == "hot":
+							_add_hot(ally_all, sp, actor)
+						else:
+							await _heal(ally_all, _spell_amount(actor, sp, {}), 0)
+					if stype == "buff" or stype == "hot":
+						await _wait(MESSAGE_TIME)
 			_hero_rest(actor)
 		"item":
 			var id: String = a["item"]
@@ -1277,7 +1325,7 @@ func _enemy_lunge(actor: Dictionary, target: Dictionary) -> void:
 ## Schadeformule: ATK - DEF/2, +/- 15% geluk, verdedigen = halve schade.
 ## Zwakte telt alleen als het doel weak_matters heeft (Archief 2). Andere vijanden blijven gelijk.
 func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> int:
-	var base := float(attacker["s"]["atk"]) * mult - _defense_of(target) / 2.0
+	var base := float(attacker["s"]["atk"]) * _buff_mult(attacker, "atk") * mult - _defense_of(target) / 2.0
 	var dmg := maxi(1, roundi(base * randf_range(0.85, 1.15)))
 	if target["defending"]:
 		dmg = maxi(1, int(dmg / 2.0))
@@ -1285,10 +1333,121 @@ func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> 
 	return dmg
 
 
-## Spreuken: power + 2 x level, +/- 10%.
-func _spell_amount(caster: Dictionary, spell: Dictionary) -> int:
-	var base := float(spell["power"]) + 2.0 * float(caster["s"]["level"])
+## Spreuken: power op level 1 + power_per_level per level erboven, maal het element, +/- 10%.
+func _spell_amount(caster: Dictionary, spell: Dictionary, target: Dictionary) -> int:
+	var lvl := int(caster["s"].get("level", 1))
+	var base := SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target)
 	return maxi(1, roundi(base * randf_range(0.9, 1.1)))
+
+
+func _buff_mult(c: Dictionary, stat: String) -> float:
+	var m := 1.0
+	for b in c.get("buffs", []):
+		if typeof(b) != TYPE_DICTIONARY:
+			continue
+		if str(b.get("stat", "")) == stat and int(b.get("turns", 0)) > 0:
+			m *= 1.0 + float(b.get("pct", 0.0))
+	return m
+
+
+func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
+	var rows: Array = spell.get("buffs", [])
+	if rows.is_empty() and str(spell.get("buff_stat", "")) != "":
+		var key := "buff_" + str(spell.get("buff_stat", "def"))
+		ally[key] = int(ally.get(key, 0)) + int(spell.get("buff_n", 1))
+	if not ally.has("buffs"):
+		ally["buffs"] = []
+	var mult := SpellRules.buff_factor(spell, str(caster["s"].get("id", "")))
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		(ally["buffs"] as Array).append({
+			"stat": str(row.get("stat", "def")),
+			"pct": float(row.get("pct", 0.0)) * mult,
+			"turns": int(row.get("turns", 3)),
+		})
+	show_message("%s is versterkt." % ally["name"])
+
+
+func _add_hot(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
+	if not ally.has("hots"):
+		ally["hots"] = []
+	var turns := int(spell.get("hot_turns", 3))
+	(ally["hots"] as Array).append({"amount": _spell_amount(caster, spell, {}), "turns": turns})
+	show_message("%s herstelt langzaam." % ally["name"])
+
+
+func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
+	if int(target["s"]["hp"]) <= 0:
+		return
+	var fx := SpellRules.on_hit(spell)
+	if float(fx.get("dot_pct", 0.0)) > 0.0:
+		if not target.has("dots"):
+			target["dots"] = []
+		(target["dots"] as Array).append({"pct": float(fx["dot_pct"]), "turns": int(fx.get("dot_turns", 3))})
+	if int(fx.get("skip", 0)) > 0:
+		target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
+		target["skip_reden"] = str(fx.get("skip_reden", "bevriezing"))
+
+
+func _tick_ailments(c: Dictionary) -> void:
+	var dots: Array = c.get("dots", [])
+	var left_dots: Array = []
+	if int(c["s"]["hp"]) > 0:
+		for d in dots:
+			if typeof(d) != TYPE_DICTIONARY:
+				continue
+			var pct := float(d.get("pct", 0.0))
+			var dmg := maxi(1, roundi(float(c["s"]["max_hp"]) * pct))
+			c["s"]["hp"] = maxi(0, int(c["s"]["hp"]) - dmg)
+			d["turns"] = int(d.get("turns", 1)) - 1
+			if int(d["turns"]) > 0 and int(c["s"]["hp"]) > 0:
+				left_dots.append(d)
+	c["dots"] = left_dots
+	var hots: Array = c.get("hots", [])
+	var left_hots: Array = []
+	for h in hots:
+		if typeof(h) != TYPE_DICTIONARY:
+			continue
+		if int(c["s"]["hp"]) > 0:
+			var room := int(c["s"]["max_hp"]) - int(c["s"]["hp"])
+			c["s"]["hp"] += mini(int(h.get("amount", 0)), maxi(0, room))
+		h["turns"] = int(h.get("turns", 1)) - 1
+		if int(h["turns"]) > 0:
+			left_hots.append(h)
+	c["hots"] = left_hots
+	var buffs: Array = c.get("buffs", [])
+	var left_buffs: Array = []
+	for b in buffs:
+		if typeof(b) != TYPE_DICTIONARY:
+			continue
+		b["turns"] = int(b.get("turns", 1)) - 1
+		if int(b["turns"]) > 0:
+			left_buffs.append(b)
+	c["buffs"] = left_buffs
+	if int(c["s"]["hp"]) <= 0 and bool(c.get("is_hero", false)) and c.get("node") != null:
+		c["node"].set_ko(true)
+
+
+func _revive(t, amount: int) -> void:
+	var ally: Dictionary = {}
+	if t is Dictionary and int((t as Dictionary)["s"]["hp"]) <= 0 and in_battle(t):
+		ally = t
+	else:
+		for h in heroes:
+			if int(h["s"]["hp"]) <= 0:
+				ally = h
+				break
+	if ally.is_empty():
+		show_message("Dat heeft nu geen effect.")
+		await _wait(MESSAGE_TIME)
+		return
+	ally["s"]["hp"] = mini(maxi(1, amount), int(ally["s"]["max_hp"]))
+	if ally.get("node") != null:
+		ally["node"].set_ko(false)
+	_refresh_party()
+	show_message("%s staat op." % ally["name"])
+	await _wait(MESSAGE_TIME)
 
 
 ## v0.19: doet deze combatant nog mee? (een weggewisselde bondgenoot niet meer)
@@ -1504,7 +1663,7 @@ func _guard_tick(c: Dictionary) -> void:
 
 ## DEF van een doelwit, met schild omhoog (x guard_mult).
 func _defense_of(t: Dictionary) -> float:
-	var d := float(t["s"]["def"]) + float(t.get("buff_def", 0))
+	var d := float(t["s"]["def"]) * _buff_mult(t, "def") + float(t.get("buff_def", 0))
 	if int(t.get("guard", 0)) > 0:
 		d *= float(t.get("guard_mult", 2.0))
 	return d
