@@ -5,8 +5,10 @@ extends RefCounted
 ## wordt hier niet vervangen en niet nagebouwd.
 ##
 ## TODO(design): Archief 2 heeft nog geen kern-vlag (geen baas, geen kernfragment).
-## warper_hub_open staat daarom standaard uit. Zet die vlag pas als de kern er is;
-## hub_open() telt de kern-vlag mee zodra ARCHIEF2_KERN_VLAG een naam heeft.
+## hub_open() telt die vlag mee zodra ARCHIEF2_KERN_VLAG een naam heeft.
+## Tot die tijd gaan de kamers open met warper_hub_open, of zodra de World Warper
+## zelf open is (na De Genezer). Anders blijft ECHO's Kamer dicht en is de
+## ingang van de Diepe Grot onbereikbaar.
 ## TODO(design): koopwaar van de Handelskamer. shop_data.gd heeft alleen Wilgendal;
 ## die voorraad is geen endgame-winkel en wordt hier niet gebruikt.
 
@@ -14,6 +16,7 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const StoryData := preload("res://scripts/data/story_data.gd")
 const ShopData := preload("res://scripts/data/shop_data.gd")
+const Unlock := preload("res://world_warper/flow/unlock.gd")
 
 const FLAG_HUB := "warper_hub_open"
 ## Leeg tot Archief 2 een kern-vlag heeft. Geen verzonnen naam.
@@ -144,7 +147,7 @@ static func hub_open(flags: Dictionary) -> bool:
 		return true
 	if ARCHIEF2_KERN_VLAG != "" and flags.has(ARCHIEF2_KERN_VLAG):
 		return true
-	return false
+	return Unlock.should_unlock(flags)
 
 
 ## Act zoals de winkels: hoogste level in de party, banden uit level_scale (act 2 = level 14).
@@ -320,6 +323,8 @@ static func plaatje(bron: String) -> Dictionary:
 	match bron:
 		"echo", "echo_grot":
 			return {"pad": ART_ECHO, "h": 3, "v": 4, "offset": Vector2(0, -10)}
+		"grot_ingang":
+			return {"pad": ART_WARP, "h": 1, "v": 1, "offset": Vector2(0, 0), "tint": Color(0.55, 0.35, 0.95)}
 		"party":
 			return {"pad": ART_PARTY, "h": 3, "v": 4, "offset": Vector2(0, -10)}
 		"pc", "voortgang":
@@ -338,6 +343,8 @@ static func label(bron: String) -> String:
 	match bron:
 		"echo", "echo_grot":
 			return "ECHO"
+		"grot_ingang":
+			return "Diepe Grot"
 		"warp":
 			return "Poort"
 		"voortgang":

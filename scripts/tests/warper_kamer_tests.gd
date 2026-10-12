@@ -73,6 +73,11 @@ func _vlag_en_act() -> void:
 	var act1_laat := _party(13)
 	var act2 := _party(14)
 	check("hub dicht zonder vlag", not Kamers.hub_open(leeg))
+	var na_genezer := {Unlock.UNLOCK_VLAG: true}
+	check("na De Genezer is ECHO's Kamer open", Kamers.hub_open(na_genezer)
+			and Kamers.is_open("echo_kamer", na_genezer, act1))
+	var alleen_bewaker := {Unlock.BEWAKER_VLAG: true}
+	check("Genezer-vlag opent ECHO's Kamer", Kamers.is_open("echo_kamer", alleen_bewaker, act1))
 	for id in ["hal", "rustkamer", "echo_kamer", "beeldkamer", "trainingshal", "kern"]:
 		check("dicht zonder vlag: " + id, not Kamers.is_open(id, leeg, act2))
 	check("met vlag is De Hal open", Kamers.is_open("hal", open, act1) and Kamers.naam("hal") == "De Hal")
@@ -175,6 +180,10 @@ func _scènes() -> void:
 		if str(id) == "echo_kamer":
 			var echo := node.get_node_or_null("Objects/Echo")
 			check("ECHO staat in ECHO's Kamer", echo != null and str(echo.get("bron")) == "echo_grot")
+			var grot := node.get_node_or_null("Objects/Grot")
+			check("ingang Diepe Grot staat in ECHO's Kamer", grot != null
+					and str(grot.get("bron")) == "grot_ingang"
+					and Kamers.label("grot_ingang") == "Diepe Grot")
 		node.free()
 	var hal: Node = load(Kamers.scene_path("hal")).instantiate()
 	check("ECHO staat in de Hal", hal.get_node_or_null("Objects/Echo") != null and str(hal.get_node("Objects/Echo").get("bron")) == "echo")
