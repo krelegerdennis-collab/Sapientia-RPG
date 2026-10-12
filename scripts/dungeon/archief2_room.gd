@@ -129,7 +129,8 @@ func _na_kern() -> void:
 		return
 	await _zeg(Archief2.NA_GENEZER, "")
 	GameState.story_flags["archief2_naar_warper"] = true
-	GameState.change_map(Archief2.WARPER_SCENE, "ingang")
+	var NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
+	NaGenezer.probeer()
 
 
 func _verhaal() -> void:

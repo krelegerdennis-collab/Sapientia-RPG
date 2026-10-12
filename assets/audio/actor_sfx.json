@@ -254,6 +254,19 @@
 				"dood": "Zucht die wegvalt.",
 				"vaardigheid": "Een iets langere windvlaag."
 			}
+		},
+		"echo": {
+			"naam": "ECHO",
+			"stem": "Zacht en digitaal, als een stem achter glas.",
+			"klank": "wind",
+			"volume_db": -8,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Korte digitale tik.",
+				"raak": "Glas dat meetrilt.",
+				"dood": "De stem valt weg.",
+				"vaardigheid": "Een hogere digitale toon."
+			}
 		}
 	}
 }

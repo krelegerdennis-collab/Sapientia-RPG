@@ -46,7 +46,7 @@ func _run() -> void:
 	print("=== Archief 2: Lotte, Mosslijm, Genezer ===")
 	_lotte_en_genezer()
 	print("=== Archief 2: wereldkaart ===")
-	_wereldkaart()
+	await _wereldkaart()
 	print("=== Archief 2: kamer, gevecht, warp ===")
 	await _spel()
 	print("ARCHIEF2TEST %d PASS, %d FAIL" % [passes, failures])
@@ -66,10 +66,17 @@ func _data() -> void:
 	check("levenskern-icoon 16x16", icon != null and icon.get_size() == Vector2(16, 16))
 	for id in ["lotte_glitch", "wurger", "genezer"]:
 		check("vijand %s" % id, GD.ENEMIES.has(id))
-	check("Wurger HP/ATK/DEF TODO(design)", int(GD.ENEMIES["wurger"]["max_hp"]) == Archief2.WURGER_HP
+	check("Wurger HP/ATK/DEF canon", int(GD.ENEMIES["wurger"]["max_hp"]) == Archief2.WURGER_HP
 			and int(GD.ENEMIES["wurger"]["atk"]) == Archief2.WURGER_ATK
-			and int(GD.ENEMIES["wurger"]["def"]) == Archief2.WURGER_DEF)
-	check("Genezer HP TODO(design)", int(GD.ENEMIES["genezer"]["max_hp"]) == Archief2.GENEZER_HP)
+			and int(GD.ENEMIES["wurger"]["def"]) == Archief2.WURGER_DEF
+			and int(GD.ENEMIES["wurger"]["boss"]["max_hp"]) == Archief2.WURGER_HP
+			and int(GD.ENEMIES["wurger"]["boss"]["atk"]) == Archief2.WURGER_ATK
+			and int(GD.ENEMIES["wurger"]["boss"]["def"]) == Archief2.WURGER_DEF)
+	check("Genezer HP/ATK/DEF canon", int(GD.ENEMIES["genezer"]["max_hp"]) == Archief2.GENEZER_HP
+			and int(GD.ENEMIES["genezer"]["atk"]) == Archief2.GENEZER_ATK
+			and int(GD.ENEMIES["genezer"]["def"]) == Archief2.GENEZER_DEF
+			and int(GD.ENEMIES["genezer"]["boss"]["atk"]) == Archief2.GENEZER_ATK
+			and int(GD.ENEMIES["genezer"]["boss"]["def"]) == Archief2.GENEZER_DEF)
 	var toegepast := BossCore.apply_boss(GD.ENEMIES["genezer"])
 	check("Genezer-baas: opening, leech, zin", bool(toegepast.get("archief2_open", false))
 			and bool(toegepast.get("archief2_leech", false))
@@ -252,7 +259,12 @@ func _held(id: String) -> Dictionary:
 
 
 func _wereldkaart() -> void:
-	var packed: PackedScene = load(Archief2.WERELD)
+	# Godot 4.7: load() wacht de loader-thread af zonder de message queue te legen
+	# en loopt dan vast op deze scène. Eén frame tussendoor maakt de load af.
+	ResourceLoader.load_threaded_request(Archief2.WERELD)
+	while ResourceLoader.load_threaded_get_status(Archief2.WERELD) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		await get_tree().process_frame
+	var packed: PackedScene = ResourceLoader.load_threaded_get(Archief2.WERELD) as PackedScene
 	var kaart := packed.instantiate()
 	var grond: TileMapLayer = kaart.get_node("Ground")
 	var trap: Node = kaart.get_node("Exits/Trap")

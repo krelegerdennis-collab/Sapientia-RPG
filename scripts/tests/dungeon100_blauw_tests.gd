@@ -13,6 +13,8 @@ const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
+const Equipment := preload("res://scripts/equipment.gd")
+const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 
 var failures := 0
 var passes := 0
@@ -45,6 +47,7 @@ func _run() -> void:
 	_kind_tests()
 	print("=== Deel B: run, dood, save, Warp ===")
 	_run_tests()
+	_ring_tests()
 	print("=== Deel C: scène (blauw, Mimic, Warp) ===")
 	await _scene_tests()
 	print("DUNGEON100BLAUWTEST %d PASS, %d FAIL" % [passes, failures])
@@ -170,6 +173,41 @@ func _run_tests() -> void:
 	GameState.new_game("Dennis")
 
 
+func _ring_tests() -> void:
+	GameState.new_game("Dennis")
+	check("ring-run start", GameState.dungeon100_begin_run() and GameState.dungeon100_run_active())
+	GameState.dungeon100_floor = 100
+	GameState.inventory[Blue.WARP_ITEM] = 1
+	check("warp zonder keuze laat de run lopen", not GameState.dungeon100_warp()
+			and GameState.dungeon100_can_warp() and GameState.dungeon100_run_active()
+			and GameState.dungeon100_floor == 100)
+	GameState.inventory.erase(Blue.WARP_ITEM)
+	GameState.dungeon100_floor = 12
+	GameState.inventory["simulatie_ring"] = 1
+	var held: Dictionary = GameState.party[0]
+	var kaal := int(held["atk"])
+	var hp0 := int(held["max_hp"])
+	check("Simulatie-ring om", bool(Equipment.equip(held, GameState.inventory, "accessoire", "simulatie_ring")["ok"]))
+	check("ring geeft +10% in de grot", int(held["atk"]) == GD.round_half_even(float(kaal) * 1.1)
+			and int(held["max_hp"]) == GD.round_half_even(float(hp0) * 1.1) and int(held["atk"]) > kaal)
+	GameState.dungeon100_floor = 0
+	Equipment.refresh(held)
+	check("ring doet niets buiten de grot", int(held["atk"]) == kaal and int(held["max_hp"]) == hp0)
+	GameState.dungeon100_floor = 12
+	Equipment.refresh(held)
+	held["hp"] = 0
+	var terug := GameState.dungeon100_defeat()
+	check("eerste dood met ring herstart de verdieping", terug == Rules.dungeon_scene
+			and GameState.dungeon100_run_active() and GameState.dungeon100_floor == 12
+			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"])
+			and bool(GameState.story_flags.get("dungeon100_ring:reset", false)))
+	var weg := GameState.dungeon100_defeat()
+	check("tweede dood beëindigt de run naar ECHO", weg == Rules.WORLD_SCENE
+			and not GameState.dungeon100_run_active() and GameState.dungeon100_floor == 0)
+	GameState._autosave_request = ""
+	GameState.new_game("Dennis")
+
+
 # ================================================================ deel C
 func _scene_tests() -> void:
 	var mimic_floor := _find_kind(Blue.KIND_MIMIC)
@@ -221,12 +259,15 @@ func _scene_tests() -> void:
 	# Warp: verdieping 100, kristal gebruiken, echte party terug + blauw item afgeleverd
 	GameState.inventory[Blue.WARP_ITEM] = 1
 	GameState.dungeon100_floor = 100
-	check("Warp vanuit de run", GameState.dungeon100_warp())
+	check("Warp zonder keuze doet niets", not GameState.dungeon100_warp()
+			and GameState.dungeon100_can_warp() and GameState.dungeon100_run_active())
+	check("Warp vanuit de run", GameState.dungeon100_warp("ring"))
 	check("Warp: ECHO's Kamer", await wait_scene_path(EchoGrot.KAMER))
 	var wsp: Node2D = scene().get_node_or_null("Spawns/" + EchoGrot.KAMER_SPAWN)
 	check("Warp: bij ECHO, level 6, 55 goud, blauw item in de echte tas, geen kristal, run voorbij",
 			wsp != null and tile() == Vector2i((wsp.position / 16.0).floor()) and GameState.party[0]["level"] == 6
-			and GameState.gold == 55 and GameState.item_count(bid) >= 1 and GameState.item_count(Blue.WARP_ITEM) == 0
+			and GameState.gold == 55 and GameState.item_count(bid) >= 1 and GameState.item_count("simulatie_ring") >= 1
+			and GameState.item_count(Blue.WARP_ITEM) == 0
 			and not GameState.dungeon100_run_active() and GameState.dungeon100_floor == 0
 			and GameState.story_flags.get(EchoGrot.FLAG_RESULTAAT, false) == true)
 	await screenshot("d100_warp_ingang")

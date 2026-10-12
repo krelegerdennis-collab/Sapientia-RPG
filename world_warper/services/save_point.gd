@@ -17,11 +17,7 @@ const PANEL_SIZE := Vector2(176, 128)
 const RIJ_HOOG := 40
 const PLACEHOLDER_TEKST := "PLACEHOLDER"
 
-## TODO(design): de tegel en de kijkrichting van de speler zijn hier niet
-## betrouwbaar af te leiden. NPC's hebben ook get_tile(), en er is geen vaste
-## spelergroep. Tot die API er is: tegel (0, 0), kijkrichting (0, 1).
-const SAVE_TILE := Vector2i(0, 0)
-const SAVE_FACING := Vector2i(0, 1)
+## De speler is Objects/Player op de kaart (niet een NPC met get_tile()).
 
 const COLOR_PANEL := Color("3d2158")
 const COLOR_BUTTON := Color("5c3484")
@@ -197,7 +193,8 @@ func _on_yes() -> void:
 	_saving = true
 	_asking = false
 	save_requested.emit()
-	var ok := GameState.save_game(SAVE_TILE, SAVE_FACING)
+	var pos := positie_van(speler_in(get_tree().current_scene if is_inside_tree() else null))
+	var ok := GameState.save_game(pos["tile"], pos["facing"])
 	_status.text = "Opgeslagen." if ok else "Opslaan mislukt."
 	_ask.visible = false
 	_idle.visible = true
@@ -210,6 +207,25 @@ func _on_no() -> void:
 	_asking = false
 	_ask.visible = false
 	_idle.visible = true
+
+
+## Tegel en kijkrichting van Objects/Player. Zonder speler: (0, 0) en omlaag.
+static func speler_in(boom: Node) -> Node:
+	if boom == null:
+		return null
+	return boom.get_node_or_null("Objects/Player")
+
+
+static func positie_van(speler: Node) -> Dictionary:
+	var tile := Vector2i.ZERO
+	var facing := Vector2i.DOWN
+	if speler != null and speler.has_method("get_tile"):
+		var t: Variant = speler.call("get_tile")
+		if t is Vector2i:
+			tile = t
+	if speler != null and "facing" in speler and speler.facing is Vector2i:
+		facing = speler.facing
+	return {"tile": tile, "facing": facing}
 
 
 func _knop(tekst: String, node_naam: String) -> Button:

@@ -45,15 +45,35 @@ func _spell_tests() -> void:
 			and not Rules.can_learn("dennis", "inferno"))
 	check("Noor: vuur/natuur/bliksem t/m 4, licht alleen grade 1", Rules.can_learn("noor", "inferno")
 			and Rules.can_learn("noor", "oerwoud") and Rules.can_learn("noor", "donderslag")
-			and Rules.can_learn("noor", "genees") and not Rules.can_learn("noor", "zegen")
-			and not Rules.can_learn("noor", "rijp"))
+			and Rules.can_learn("noor", "genees") and Rules.can_learn("noor", "zegen")
+			and not Rules.can_learn("noor", "grote_genezing") and not Rules.can_learn("noor", "rijp"))
 	check("Lotte: licht en ijs, geen vuur/natuur/bliksem", Rules.can_learn("lotte", "aureool")
 			and Rules.can_learn("lotte", "ijskern") and Rules.can_learn("lotte", "zegen")
 			and not Rules.can_learn("lotte", "vuur") and not Rules.can_learn("lotte", "doorn")
 			and not Rules.can_learn("lotte", "vonk"))
 	check("winkel stopt bij grade 3", Rules.shop_max_grade(1) == 1 and Rules.shop_max_grade(4) == 3
-			and Rules.in_shop("vuur", 1) and not Rules.in_shop("vlam", 1)
-			and Rules.in_shop("vuurzee", 3) and not Rules.in_shop("inferno", 6))
+			and Rules.in_shop("vuur", 1) and Rules.in_shop("vlam", 1) and not Rules.in_shop("vuurbal", 1)
+			and Rules.in_shop("vuurzee", 3) and Rules.in_shop("inferno", 6) and not Rules.in_shop("zonneslag", 6)
+			and not Rules.in_shop("donderslag", 6))
+	var vuur: Dictionary = GD.SPELLS["vuur"]
+	check("Vonk is grade 1 vuur, power 15, +2 per level", str(vuur["name"]) == "Vonk" and int(vuur["power"]) == 15
+			and int(vuur["mp"]) == 4 and Rules.power_at(vuur, 1) == 15.0 and Rules.power_at(vuur, 2) == 17.0)
+	var shop_g := 0
+	var shop_g4 := 0
+	var oude := false
+	for sid in GD.SPELLS:
+		var sp: Dictionary = GD.SPELLS[sid]
+		if str(sp.get("name", "")) in ["Fire", "Heal", "Lightning"]:
+			oude = true
+		if int(sp.get("grade", 1)) >= 4:
+			shop_g4 += 1
+			if Rules.in_shop(str(sid), 6):
+				shop_g += 1
+		elif Rules.in_shop(str(sid), 6):
+			shop_g += 1
+	check("winkel toont de canon-lijst G1-G3, geen oude Engelse namen en geen grade 4", shop_g == 61
+			and shop_g4 == 20 and not oude and str(GD.SPELLS["genees"]["name"]) == "Kleine Genezing"
+			and str(GD.SPELLS["rijp"]["name"]) == "IJspegel" and str(GD.SPELLS["bliksem"]["name"]) == "Kettingbliksem")
 	for sid in GD.SPELLS:
 		var sp: Dictionary = GD.SPELLS[sid]
 		check("spreuk %s heeft element en grade" % sid, str(sp.get("element", "")) != "" and int(sp.get("grade", 0)) >= 1)
@@ -75,8 +95,9 @@ func _shop_tests() -> void:
 	GameState.party[0]["level"] = 1
 	var magic: Array = _ids(Shop.stock("wilgendal_magie"))
 	check("magiewinkel act 1 is alleen grade 1", magic.has("vuur") and magic.has("genees") and magic.has("rijp")
-			and not magic.has("inferno") and not magic.has("zegen") and not magic.has("bliksem"))
-	check("magieprijs is 160 maal grade kwadraat", Shop.list_price("vuur") == 160 and Shop.list_price("vlam") == 640
+			and magic.has("zegen") and not magic.has("inferno") and not magic.has("bliksem")
+			and not magic.has("zonneslag"))
+	check("magieprijs is 160 maal grade kwadraat", Shop.list_price("vuur") == 160 and Shop.list_price("vuurbal") == 640
 			and Shop.list_price("vuurzee") == 1440)
 	check("een grade-1-spreuk verkoopt voor 80", Shop.sell_price("vuur") == 80 and Shop.sell_price("doorn") == 80)
 	var broke := Shop.buy_item("wilgendal_wapen", "kort_zwaard")
@@ -97,12 +118,12 @@ func _shop_tests() -> void:
 	(noor["spells"] as Array).clear()
 	var yes := Shop.buy_spell("wilgendal_magie", "doorn", noor)
 	check("Noor koopt Doorn", yes["ok"] and (noor["spells"] as Array).has("doorn") and GameState.gold == 280)
-	var g4 := Shop.buy_spell("wilgendal_magie", "inferno", noor)
-	check("grade 4 ligt niet in de winkel", not g4["ok"] and not (noor["spells"] as Array).has("inferno"))
-	var scroll := {"spreuk_inferno": 1}
-	var learned := PA.use_item(scroll, "spreuk_inferno", noor)
-	check("grade 4 wel via een rol voor Noor", learned["ok"] and (noor["spells"] as Array).has("inferno")
-			and not scroll.has("spreuk_inferno"))
+	var g4 := Shop.buy_spell("wilgendal_magie", "donderslag", noor)
+	check("grade 4 ligt niet in de winkel", not g4["ok"] and not (noor["spells"] as Array).has("donderslag"))
+	var scroll := {"spreuk_donderslag": 1}
+	var learned := PA.use_item(scroll, "spreuk_donderslag", noor)
+	check("grade 4 wel via een rol voor Noor", learned["ok"] and (noor["spells"] as Array).has("donderslag")
+			and not scroll.has("spreuk_donderslag"))
 	var lotte: Dictionary = GameState.party[2]
 	var ice := {"spreuk_ijskern": 1}
 	check("Lotte leert IJskern van een rol", PA.use_item(ice, "spreuk_ijskern", lotte)["ok"]

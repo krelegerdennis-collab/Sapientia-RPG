@@ -214,6 +214,7 @@ static func teach_spell(hero: Dictionary, spell_id: String) -> bool:
 	(hero["spells"] as Array).append(spell_id)
 	var cost := int(spell_data(spell_id)["mp"])
 	if int(hero.get("max_mp", 0)) < cost:
+		hero["pool_mp"] = maxi(int(hero.get("pool_mp", 0)), cost)
 		hero["max_mp"] = cost
 		hero["mp"] = maxi(int(hero.get("mp", 0)), cost)
 	return true
@@ -245,17 +246,29 @@ static func spell_block_reason(caster: Dictionary, id: String) -> String:
 
 ## Basis-effect (zonder geluk) en de spreiding, voor de uitleg en de autotest.
 static func spell_base(caster: Dictionary, id: String) -> float:
-	return float(spell_data(id).get("power", 0)) + SPELL_LEVEL_BONUS * float(caster["level"])
+	var sp := spell_data(id)
+	var raw := SpellRules.power_at(sp, int(caster.get("level", 1)))
+	return raw * SpellRules.factor(sp, str(caster.get("id", "")), {})
 
 
 static func spell_effect_text(caster: Dictionary, id: String) -> String:
 	var sp := spell_data(id)
 	var what := "Heals one ally" if str(sp.get("type", "")) == "heal" else "Damage"
+	match str(sp.get("type", "")):
+		"hot":
+			what = "Geneest over tijd"
+		"buff":
+			what = "Versterkt"
+		"revive":
+			what = "Wekt een bewusteloze"
 	match str(sp.get("target", "")):
 		"enemy":
 			what = "Damage to one enemy"
 		"all_enemies":
 			what = "Damage to all enemies"
+		"all_allies":
+			if str(sp.get("type", "")) == "heal":
+				what = "Geneest de groep"
 	return "%s (±%d)." % [what, roundi(spell_base(caster, id))]
 
 

@@ -175,82 +175,17 @@ func _opslaan(player: Node) -> void:
 
 
 func _wissel(player: Node) -> void:
-	if GameState.party.size() < 2:
-		_zeg([Kamers.NIEMAND_WISSEL], "")
+	if not PartyBench.in_rustkamer(str(GameState.current_map)):
+		_zeg([PartyBench.ALLEEN_HIER], "")
 		return
 	if get_tree().current_scene.get_node_or_null("WisselScherm") != null:
 		return
 	if "input_locked" in player:
 		player.input_locked = true
-	var scherm := WisselScherm.new()
+	var scherm := PartyWissel.new()
 	scherm.name = "WisselScherm"
-	scherm.gekozen.connect(func(index: int) -> void:
-		if index < 0:
-			return
-		if not Kamers.naar_voren(GameState.party, index):
-			_zeg([Kamers.AL_VOORAAN], "")
-			return
-		var held: Dictionary = GameState.party[0]
-		_zeg([Kamers.VOORAAN % str(held.get("name", ""))], "")
-	)
 	scherm.dicht.connect(func() -> void:
 		if is_instance_valid(player) and "input_locked" in player:
 			player.input_locked = false
 	)
 	get_tree().current_scene.add_child(scherm)
-
-
-class WisselScherm extends CanvasLayer:
-	signal gekozen(index: int)
-	signal dicht
-
-	const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
-
-	func _ready() -> void:
-		layer = 22
-		var root := Control.new()
-		root.set_anchors_preset(Control.PRESET_FULL_RECT)
-		root.gui_input.connect(_op_gui)
-		add_child(root)
-		var kolom := VBoxContainer.new()
-		kolom.position = Vector2(48, 24)
-		kolom.size = Vector2(288, 168)
-		kolom.add_theme_constant_override("separation", 4)
-		root.add_child(kolom)
-		var kop := Label.new()
-		kop.text = "Zet iemand vooraan"
-		kop.add_theme_font_override("font", FONT)
-		kop.add_theme_font_size_override("font_size", 8)
-		kop.add_theme_color_override("font_color", Color("f2e9d8"))
-		kolom.add_child(kop)
-		var i := 0
-		for h in GameState.party:
-			if h is Dictionary:
-				var held := h as Dictionary
-				var knop := Button.new()
-				knop.text = str(held.get("name", ""))
-				knop.custom_minimum_size = Vector2(0, 22)
-				knop.add_theme_font_override("font", FONT)
-				knop.add_theme_font_size_override("font_size", 8)
-				knop.pressed.connect(_kies.bind(i))
-				kolom.add_child(knop)
-			i += 1
-		var terug := Button.new()
-		terug.text = "Terug"
-		terug.custom_minimum_size = Vector2(0, 22)
-		terug.add_theme_font_override("font", FONT)
-		terug.add_theme_font_size_override("font_size", 8)
-		terug.pressed.connect(_sluit)
-		kolom.add_child(terug)
-
-	func _kies(index: int) -> void:
-		gekozen.emit(index)
-		_sluit()
-
-	func _op_gui(event: InputEvent) -> void:
-		if event.is_action_pressed("cancel") or event.is_action_pressed("menu"):
-			_sluit()
-
-	func _sluit() -> void:
-		dicht.emit()
-		queue_free()

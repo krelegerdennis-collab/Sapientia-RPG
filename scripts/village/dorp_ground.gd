@@ -1,21 +1,13 @@
 extends TileMapLayer
 ## Grond van Dorp Wilgendal. Bestaande tegels uit dorp.tres (geen nieuwe art).
-## Kolommen: 0 gras, 2 pad, 3 boom (blokkeert). Zie tools/build_maps.gd TOWN_LEGEND.
+## Tekens en kolommen: scripts/data/wilgendal_dorp.gd.
 
-const W := 20
-const H := 14
+const Data := preload("res://scripts/data/wilgendal_dorp.gd")
 
 
 func _ready() -> void:
-	for y in H:
-		for x in W:
-			var col := 0
-			var edge := x == 0 or y == 0 or x == W - 1 or y == H - 1
-			var pad := x == 10 or y == 6
-			if edge and not (y == H - 1 and x >= 9 and x <= 11):
-				col = 3
-			elif pad and y < H - 1:
-				col = 2
-			elif y == H - 1 and x >= 9 and x <= 11:
-				col = 2
-			set_cell(Vector2i(x, y), 0, Vector2i(col, 0))
+	for y in Data.H:
+		var rij: String = Data.GROND[y]
+		for x in rij.length():
+			var kol: int = int(Data.TEGEL.get(rij[x], 0))
+			set_cell(Vector2i(x, y), 0, Vector2i(kol, 0))

@@ -1,10 +1,10 @@
 extends RefCounted
 ## Wie welke spreuk mag leren, en tot welke grade de winkel gaat.
 ## Dennis: geen shop-magie (alleen kernkrachten). Grade 4 nooit in de winkel.
-## TODO(design): de volledige lijst van 4×16 spreuken per element is nog niet ontworpen.
-## Bevestigd: de grade- en personageregels gelden voor de kleine lijst van 20.
+## De canon-lijst staat in scripts/data/spells.gd.
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const CodexData := preload("res://scripts/data/codex_data.gd")
 
 ## Hoogste grade per element. Ontbreekt het element, dan is de spreuk verboden.
 const CAP := {
@@ -37,8 +37,79 @@ static func shop_max_grade(act: int) -> int:
 static func in_shop(spell_id: String, act: int) -> bool:
 	if not GameData.SPELLS.has(spell_id):
 		return false
-	var grade := int(GameData.SPELLS[spell_id].get("grade", 1))
+	var sp: Dictionary = GameData.SPELLS[spell_id]
+	if sp.get("shop", true) == false:
+		return false
+	var grade := int(sp.get("grade", 1))
 	return grade >= 1 and grade <= shop_max_grade(act)
+
+
+## Onderkant op level 1 staat in power. Daarna power_per_level per level erboven.
+## Zonder power_per_level blijft de oude formule (power + 2 × level).
+static func power_at(spell: Dictionary, level: int) -> float:
+	var power := float(spell.get("power", 0))
+	if not spell.has("power_per_level"):
+		return power + 2.0 * float(level)
+	return power + float(spell["power_per_level"]) * float(maxi(0, level - 1))
+
+
+## Schade- of heal-factor van het element. Zonder doel telt bliksem-tegen-metaal niet mee.
+static func factor(spell: Dictionary, caster_id: String, target: Dictionary) -> float:
+	var kind := str(spell.get("type", ""))
+	var el := str(spell.get("element", ""))
+	if kind in ["heal", "hot", "revive"]:
+		if el == "licht" and caster_id == "lotte":
+			return 1.3
+		if el == "licht" and caster_id == "noor":
+			return 0.8
+		return 1.0
+	if kind != "damage":
+		return 1.0
+	match el:
+		"vuur":
+			return 1.1
+		"natuur":
+			return 1.05
+		"ijs":
+			return 0.9
+		"bliksem":
+			return 1.15 if is_metal(target) else 1.0
+		_:
+			return 1.0
+
+
+## Lotte's licht versterkt een buff met 20%.
+static func buff_factor(spell: Dictionary, caster_id: String) -> float:
+	if str(spell.get("element", "")) == "licht" and caster_id == "lotte":
+		return 1.2
+	return 1.0
+
+
+## Brand, vergif, verlamming of bevriezing na een schade-treffer. {} = geen.
+static func on_hit(spell: Dictionary) -> Dictionary:
+	if str(spell.get("type", "")) != "damage":
+		return {}
+	match str(spell.get("element", "")):
+		"vuur", "natuur":
+			return {"dot_pct": 0.05, "dot_turns": 3}
+		"bliksem":
+			return {"skip": 1, "skip_reden": "verlamming"}
+		"ijs":
+			return {"skip": 1, "skip_reden": "bevriezing"}
+		_:
+			return {}
+
+
+static func is_metal(target: Dictionary) -> bool:
+	if target.is_empty():
+		return false
+	var stats: Dictionary = target.get("s", {}) if target.get("s") is Dictionary else target
+	if str(stats.get("element", "")) == "metaal" or str(stats.get("materiaal", "")) == "metaal":
+		return true
+	var id := str(target.get("id", stats.get("id", "")))
+	if CodexData.SPECIES.has(id):
+		return str(CodexData.SPECIES[id].get("element", "")) == "metaal"
+	return false
 
 
 static func block_reason(hero: Dictionary, spell_id: String) -> String:

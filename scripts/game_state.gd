@@ -25,6 +25,8 @@ const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const WorldWarperUnlock := preload("res://world_warper/flow/unlock.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
+const PartyBenchLib := preload("res://scripts/party_bench.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const TITLE_SCENE := "res://scenes/ui/title.tscn"
@@ -146,6 +148,12 @@ var story_flags := {}
 var pending_tutorial := {}
 
 var party: Array = []          # Array van Dictionaries (kopie van GameData.HEROES)
+## Rustkamer: helden die niet meevechten. Gaat mee in de save als "party_bank".
+var party_bench: Array = []
+## Paden van kaarten waar de speler geweest is (warp-filter). "bezocht" in de save.
+var bezochte_kaarten: Array[String] = []
+## Voltooide Diepe-Grot-runs (ECHO's kisten lichten één voor één op).
+var echo_grot_voltooid := 0
 var inventory := {}            # item-id -> aantal
 var gold := 0
 
@@ -260,10 +268,12 @@ func _ready() -> void:
 	# Catalogus t/m Act 6: of  godot -- --catalogustest  (scripts/tests/catalogus_tests.gd).
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
 	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
+	# Hanger-scène: of  godot -- --hangertest  (scripts/tests/hanger_tests.gd).
 	# De Spiegel (Archief 4): of  godot -- --spiegeltest [--shots=/pad/map]
 	# Vriendenmodus: of  godot -- --pvptest  (pvp/tests/pvp_tests.gd).
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
+	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
@@ -289,8 +299,10 @@ func _ready() -> void:
 			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
 			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
 			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"],
+			["--hangertest", "res://scripts/tests/hanger_tests.gd", "HangerTest", "hangertest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
+			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
@@ -416,6 +428,9 @@ func _go_to_scene(path: String) -> void:
 func new_game(hero_name := DEFAULT_NAME) -> void:
 	player_name = clean_name(hero_name)
 	party.clear()
+	party_bench = []
+	bezochte_kaarten = []
+	echo_grot_voltooid = 0
 	add_member(MAIN_HERO)
 	inventory = GameData.START_INVENTORY.duplicate(true)
 	map_monster_battle = {}
@@ -559,11 +574,16 @@ func member_level(id: String) -> int:
 	for h in party:
 		if h.get("id", "") == id:
 			return int(h.get("level", 1))
+	for h in party_bench:
+		if h.get("id", "") == id:
+			return int(h.get("level", 1))
 	return 0
 
 
 func has_member(id: String) -> bool:
-	return party.any(func(h): return h.get("id", "") == id)
+	if party.any(func(h): return h.get("id", "") == id):
+		return true
+	return party_bench.any(func(h): return h.get("id", "") == id)
 
 
 ## Zet een groepslid vooraan (molen: party wisselen). index 0 blijft staan.
@@ -893,8 +913,12 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 
 ## De party als lijst van Dictionaries voor een save (en de Archief-momentopname).
 func _party_save() -> Array:
+	return _party_save_from(party)
+
+
+func _party_save_from(groep: Array) -> Array:
 	var out := []
-	for h in party:
+	for h in groep:
 		var e := {}
 		for k in ["id", "name", "level", "exp", "hp", "mp", "max_hp", "max_mp", "atk", "def", "agi", "spells", "weapon"]:
 			e[k] = h.get(k)
@@ -952,6 +976,9 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"facing": [facing.x, facing.y],
 		"player_name": player_name,
 		"party": [],
+		"party_bank": [],
+		"bezocht": bezochte_kaarten.duplicate(),
+		"echo_grot_voltooid": echo_grot_voltooid,
 		"inventory": inventory.duplicate(true),
 		"gold": gold,
 		"play_time": play_time(),
@@ -967,6 +994,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"archief2": archief2.duplicate(true),
 	}
 	data["party"] = _party_save()
+	data["party_bank"] = _party_save_from(party_bench)
 	return data
 
 
@@ -1019,6 +1047,9 @@ func apply_state(d: Dictionary) -> bool:
 	party.clear()
 	var stray_equipment: Array = []
 	party = _party_from(d["party"], stray_equipment)
+	party_bench = []
+	if d.get("party_bank") is Array:
+		party_bench = _party_from(d["party_bank"], stray_equipment)
 	if party.is_empty():
 		add_member(MAIN_HERO)
 	inventory = _inventory_from(d.get("inventory", {}))
@@ -1073,6 +1104,17 @@ func apply_state(d: Dictionary) -> bool:
 		for k in a2["platen"]:
 			platen[str(k)] = int(a2["platen"][k])
 		archief2 = {"platen": platen}
+	bezochte_kaarten = []
+	if d.has("bezocht") and d["bezocht"] is Array:
+		for pad in d["bezocht"]:
+			var sleutel := str(pad)
+			if sleutel != "" and not bezochte_kaarten.has(sleutel):
+				bezochte_kaarten.append(sleutel)
+	else:
+		for pad in WorldWarperDestinations.legacy_bezocht():
+			bezochte_kaarten.append(pad)
+	var voltooid = d.get("echo_grot_voltooid", 0)
+	echo_grot_voltooid = int(voltooid) if (voltooid is int or voltooid is float) else 0
 	archief2_temp_ally = {}
 	archief2_party_filter = ""
 	pending_story_loss = false
@@ -1352,6 +1394,8 @@ func go_to_title() -> void:
 ## Wordt aangeroepen door map.gd zodra een map geladen is.
 func enter_map(path: String) -> void:
 	current_map = path
+	if path != "" and not bezochte_kaarten.has(path):
+		bezochte_kaarten.append(path)
 	if path != Dungeon100RulesC.dungeon_scene:
 		# Veiligheidsnet, niet tijdens een gevecht: wie de grot verlaat krijgt de echte party terug
 		# en de Blauwe Kist-items. Een gevecht laadt geen map en mag de run niet afbreken.
@@ -1359,6 +1403,8 @@ func enter_map(path: String) -> void:
 			dungeon100_end_run(true)
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
+	if path.ends_with("/rustkamer.tscn"):
+		PartyBenchLib.normaliseer()
 
 
 ## Ga naar een andere map: fade uit, wissel van scène, en zet de speler
@@ -1684,6 +1730,8 @@ func dungeon100_end_run(deliver := true) -> bool:
 		return false
 	var snap := dungeon100_snapshot
 	var stray: Array = []
+	# Vloer eerst op 0, anders schaalt de Simulatie-ring de echte party bij het terugzetten.
+	dungeon100_floor = 0
 	party = _party_from(snap["party"], stray)
 	if party.is_empty():
 		add_member(MAIN_HERO)
@@ -1698,7 +1746,6 @@ func dungeon100_end_run(deliver := true) -> bool:
 	defeated_map_monsters = {}
 	map_monster_battle = {}
 	dungeon100_checkpoint = 0
-	dungeon100_floor = 0
 	dungeon100_seed = 0
 	dungeon100_warpers = []
 	if deliver:
@@ -1727,7 +1774,7 @@ func dungeon100_leave() -> bool:
 
 ## Deze verdieping is bereikt: best gaat omhoog, en een warper-verdieping gaat open.
 ## Op 100 ligt het Warp-kristal klaar. Er is geen baas die het dropt.
-## TODO(design): het keuze-moment op verdieping 100 heeft nog geen opties.
+## De beloning kiest de speler pas als het kristal gebruikt wordt.
 func dungeon100_reach_floor(floor_nr: int) -> void:
 	if not Dungeon100RulesC.is_valid_floor(floor_nr):
 		return
@@ -1750,20 +1797,19 @@ func dungeon100_warper_exit() -> bool:
 
 
 ## Het Warp-kristal werkt alleen op de laatste verdieping, tijdens een run, met het kristal in de tas.
-## TODO(design): het keuze-moment op verdieping 100 (Codex, Grade 4, accessoire) heeft nog geen opties.
 func dungeon100_can_warp() -> bool:
 	return dungeon100_run_active() and dungeon100_floor == Dungeon100RulesC.FLOORS and item_count(Dungeon100RulesC.Blue.WARP_ITEM) > 0
 
 
-## Warp: run voltooid, permanente items mee naar de echte tas, terug naar ECHO's Kamer.
-## false = kan niet (verkeerde verdieping, geen kristal of geen run).
-## TODO(design): het keuze-moment op verdieping 100 (Codex, Grade 4, accessoire) heeft nog geen opties.
-func dungeon100_warp() -> bool:
-	if not dungeon100_can_warp():
+## Warp: één beloning (codex, wapens of ring), daarna de run voorbij en terug naar ECHO's Kamer.
+## false = kan niet, of de keuze ontbreekt of is ongeldig. Zonder keuze rondt de run niet af.
+func dungeon100_warp(keuze := "") -> bool:
+	if not dungeon100_can_warp() or not Dungeon100Reward.geldig(keuze):
 		return false
 	dungeon100_best = Dungeon100RulesC.FLOORS
 	if not dungeon100_end_run(true):
 		return false
+	Dungeon100Reward.geef(keuze)
 	story_flags[EchoGrot.FLAG_RESULTAAT] = true
 	change_map(EchoGrot.KAMER, EchoGrot.KAMER_SPAWN)
 	return true
@@ -1788,6 +1834,16 @@ func dungeon100_echo_start() -> bool:
 func dungeon100_defeat() -> String:
 	dungeon100_best = Dungeon100RulesC.best_after(dungeon100_best, dungeon100_floor)
 	has_return_point = false
+	if dungeon100_run_active() and dungeon100_floor > 0 \
+			and not bool(story_flags.get(Dungeon100Reward.FLAG_RESET, false)) \
+			and Dungeon100Reward.draagt_ring(party):
+		story_flags[Dungeon100Reward.FLAG_RESET] = true
+		_full_heal()
+		pending_spawn = Dungeon100RulesC.START_SPAWN
+		pending_respawn_msg = [Dungeon100Reward.RESET_LINE]
+		entry_kind = "respawn"
+		_autosave_request = "respawn"
+		return Dungeon100RulesC.dungeon_scene
 	if dungeon100_run_active():
 		dungeon100_end_run(true)
 	else:
@@ -1816,6 +1872,8 @@ func dungeon100_load(raw) -> void:
 	dungeon100_delivered = v["delivered"]
 	dungeon100_snapshot = v["snapshot"]
 	dungeon100_warpers = v["warpers"]
+	for h in party:
+		Equipment.refresh(h)
 
 
 # ---------------------------------------------------------------- kernfragmenten (v0.15)

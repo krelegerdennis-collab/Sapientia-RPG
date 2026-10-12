@@ -22,12 +22,14 @@ const ZWAK := 1.5
 const OPEN_PCT := 0.30
 const LEECH_MIN := 0.08
 const LEECH_MAX := 0.12
-## TODO(design): HP/ATK/DEF van De Wurger en het HP van De Genezer staan niet in de canon.
-## Gekozen ná Archief 1 (Golem-baas HP 360, doel-level 7), duidelijk lager dan die baas.
-const WURGER_HP := 160
-const WURGER_ATK := 16
-const WURGER_DEF := 6
-const GENEZER_HP := 220
+## Canon: HP = level × 50, ATK = level × 3, DEF = level × 2.
+## De Wurger is level 14, De Genezer level 18.
+const WURGER_HP := 700
+const WURGER_ATK := 42
+const WURGER_DEF := 28
+const GENEZER_HP := 900
+const GENEZER_ATK := 54
+const GENEZER_DEF := 36
 const LOTTE_HP := 90
 const LOTTE_ATK := 14
 const LOTTE_DEF := 5

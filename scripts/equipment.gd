@@ -172,9 +172,48 @@ static func base_of(hero: Dictionary) -> Dictionary:
 static func effective_stats(hero: Dictionary) -> Dictionary:
 	var base := base_of(hero)
 	var out := {}
+	var factor := _ring_factor(hero)
 	for s in stats():
-		out[s] = maxi(0, int(base[s]) + equip_bonus(hero, s))
+		var raw := int(base[s]) + equip_bonus(hero, s)
+		out[s] = maxi(0, GameData.round_half_even(float(raw) * factor))
 	return out
+
+
+## +10% zolang de Simulatie-ring gedragen wordt én de party in de Diepe Grot staat.
+static func _ring_factor(hero: Dictionary) -> float:
+	if equipped(hero, "accessoire") != "simulatie_ring":
+		return 1.0
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return 1.0
+	var gs := tree.root.get_node_or_null("GameState")
+	if gs == null or int(gs.get("dungeon100_floor")) <= 0:
+		return 1.0
+	return 1.1
+
+
+static func _sync_pools(hero: Dictionary) -> void:
+	if not hero.has("pool_hp"):
+		hero["pool_hp"] = int(hero.get("max_hp", 1))
+	if not hero.has("pool_mp"):
+		hero["pool_mp"] = int(hero.get("max_mp", 0))
+
+
+## max_hp/max_mp volgen de ongeschaalde pool. Groei hoort in de pool (zie grow).
+static func _apply_pools(hero: Dictionary) -> void:
+	_sync_pools(hero)
+	var factor := _ring_factor(hero)
+	var new_hp := maxi(1, GameData.round_half_even(float(hero["pool_hp"]) * factor))
+	var new_mp := maxi(0, GameData.round_half_even(float(hero["pool_mp"]) * factor))
+	var dhp := new_hp - int(hero.get("max_hp", new_hp))
+	var dmp := new_mp - int(hero.get("max_mp", new_mp))
+	hero["max_hp"] = new_hp
+	hero["max_mp"] = new_mp
+	if int(hero.get("hp", 0)) <= 0:
+		hero["hp"] = 0
+	else:
+		hero["hp"] = clampi(int(hero["hp"]) + dhp, 1, new_hp)
+	hero["mp"] = clampi(int(hero.get("mp", new_mp)) + dmp, 0, new_mp)
 
 
 static func effective_stat(hero: Dictionary, stat: String) -> int:
@@ -191,6 +230,7 @@ static func refresh(hero: Dictionary) -> void:
 	for s in eff:
 		hero[s] = eff[s]
 	hero["weapon"] = equipped(hero, "wapen")
+	_apply_pools(hero)
 
 
 ## Nieuwe held (uit GameData.HEROES): basis = de waarden uit de data, lege vakken.
@@ -209,6 +249,15 @@ static func grow(hero: Dictionary, growth: Dictionary) -> void:
 	for s in stats():
 		var g = growth.get(s, 0)
 		base[s] = int(base[s]) + (int(g) if (g is int or g is float) else 0)
+	# give_exp telt de groei al bij max_hp/max_mp op. De pool is de ongeschaalde voorraad.
+	var ghp := int(growth.get("max_hp", 0)) if (growth.get("max_hp", 0) is int or growth.get("max_hp", 0) is float) else 0
+	var gmp := int(growth.get("max_mp", 0)) if (growth.get("max_mp", 0) is int or growth.get("max_mp", 0) is float) else 0
+	if not hero.has("pool_hp"):
+		hero["pool_hp"] = int(hero.get("max_hp", 0)) - ghp
+	if not hero.has("pool_mp"):
+		hero["pool_mp"] = int(hero.get("max_mp", 0)) - gmp
+	hero["pool_hp"] = int(hero["pool_hp"]) + ghp
+	hero["pool_mp"] = int(hero["pool_mp"]) + gmp
 	refresh(hero)
 
 
@@ -369,7 +418,12 @@ static func total_count(party: Array, inventory: Dictionary, id: String) -> int:
 # ---------------------------------------------------------------- opslaan / laden
 ## Wat er per held in de save komt (naast de oude velden atk/def/agi = effectief).
 static func save_fields(hero: Dictionary) -> Dictionary:
-	return {"base": base_of(hero).duplicate(), "equip": equip_of(hero).duplicate()}
+	var out := {"base": base_of(hero).duplicate(), "equip": equip_of(hero).duplicate()}
+	if hero.has("pool_hp"):
+		out["pool_hp"] = int(hero["pool_hp"])
+	if hero.has("pool_mp"):
+		out["pool_mp"] = int(hero["pool_mp"])
+	return out
 
 
 ## Held uit een save herstellen. 'h' = kopie van de held uit de data waar de gewone velden
@@ -417,5 +471,13 @@ static func load_hero(h: Dictionary, e: Dictionary, template: Dictionary, stray:
 		else:
 			b[s] = int(template.get(s, 0)) + int(growth.get(s, 0)) * (level - 1)
 	h["base"] = b
+	if e.get("pool_hp") is int or e.get("pool_hp") is float:
+		h["pool_hp"] = int(e["pool_hp"])
+	else:
+		h["pool_hp"] = int(h.get("max_hp", 1))
+	if e.get("pool_mp") is int or e.get("pool_mp") is float:
+		h["pool_mp"] = int(e["pool_mp"])
+	else:
+		h["pool_mp"] = int(h.get("max_mp", 0))
 	stray.append_array(bad)
 	refresh(h)

@@ -193,6 +193,11 @@ const SPECIES := {
 		"capture_always": true,
 		"glitch_name": "Glitch Worm",
 	},
+	# Verdieping 100, optie A. Geen nieuw verhaal: alleen een vangbare soort op de bestaande Codex-API.
+	"echo": {
+		"enemy": "echo", "name": "ECHO", "element": "licht", "type": "gids",
+		"fusion_tags": ["echo"], "glitch_name": "Glitch-ECHO", "capturable": true,
+	},
 }
 
 ## ---- v0.19 GLITCH-FUSIE (Kernfragment stap 3), zie HANDOFF_FUSIE.md ----

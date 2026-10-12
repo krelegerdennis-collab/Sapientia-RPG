@@ -208,7 +208,7 @@ func _process(_delta: float) -> void:
 	# MENU-knop verbergen zolang er een tekstvak of menu open is (anders valt hij erover)
 	var touch := get_node_or_null("TouchControls/Control")
 	if touch and "show_menu" in touch:
-		var want := not Dialog.is_open and not menu_open() and not Story.running
+		var want: bool = not Dialog.is_open and not menu_open() and not Story.running
 		if touch.show_menu != want:
 			touch.show_menu = want
 	# Veldmenu (Esc/M/Tab of de MENU-knop): alleen als de speler stil staat
