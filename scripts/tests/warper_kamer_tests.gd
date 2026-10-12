@@ -6,6 +6,7 @@ const Kamers := preload("res://world_warper/kamers/kamers.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const Dialoog := preload("res://world_warper/guide/dialoog.gd")
+const DialoogTest := preload("res://world_warper/guide/dialoog_test.gd")
 const Destinations := preload("res://world_warper/warp/destinations.gd")
 const DestTest := preload("res://world_warper/warp/destinations_test.gd")
 const SavePunt := preload("res://world_warper/services/save_point.gd")
@@ -45,6 +46,7 @@ func check(label: String, ok: bool) -> void:
 
 func _run() -> void:
 	_vlag_en_act()
+	_echo_hint()
 	_buit_en_tekst()
 	_update2_regels()
 	_scènes()
@@ -83,6 +85,13 @@ func _vlag_en_act() -> void:
 	check("Kern dicht vóór act 6", not Kamers.is_open("kern", open, _party(36)))
 	check("Kern open in act 6", Kamers.is_open("kern", open, _party(37)) and Kamers.naam("kern") == "De Kern")
 	check("onbekende kamer blijft dicht", not Kamers.is_open("hanger_nis", open, _party(40)))
+
+
+func _echo_hint() -> void:
+	var fouten: Array = DialoogTest.fouten()
+	check("ECHO-hint en gidsdialoog", fouten.is_empty())
+	for regel in fouten:
+		print("INFO  ", regel)
 
 
 func _buit_en_tekst() -> void:
