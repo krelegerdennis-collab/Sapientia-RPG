@@ -1020,6 +1020,32 @@ Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
 **CANON – niet wijzigen zonder overleg.**
 
 - [ ] Loot ratio consumables vs. equipment
+  Definitief. De checkbox blijft open tot de loot table in de code deze verdeling gebruikt.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Blue chest verdeling per grade:
+
+  - G1: Consumables 40% / Equipment 15% / Accessoires 5% / Goud 30% / Leeg 10%
+  - G2: Consumables 30% / Equipment 25% / Accessoires 10% / Goud 25% / Leeg 10%
+  - G3: Consumables 20% / Equipment 30% / Accessoires 20% / Goud 20% / Leeg 10%
+  - G4: Consumables 15% / Equipment 35% / Accessoires 25% / Goud 15% / Leeg 10%
+
+  Normale kisten:
+
+  - Consumables 60% (1-2 stuks) / Goud 20% / Equipment 15% / Leeg 5%
+
+  Extra regels:
+
+  - Consumables in Grot geven minder dan buiten
+  - Elixirs alleen in blue chests of merchant (niet in normale kisten)
+  - Blue chest loot schaalt met floor
+
+  Effect van deze wijziging:
+
+  - Speler krijgt significant minder consumables per run.
+  - Equipment/accessoires worden de hoofdbeloning.
+  - Goud wordt nuttig (voor merchant in Grot + verkopen).
 - [ ] Blue chest kans per floor-bracket
 - [ ] Medium Map: exacte kisten + monsters
 - [ ] Trap Room: zichtbaar of verborgen vallen?
