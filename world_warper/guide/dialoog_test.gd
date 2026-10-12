@@ -109,7 +109,7 @@ static func _check_inhoud(fouten: Array) -> void:
 	var stappen: Array = Dialoog.steps()
 	if stappen.size() < 4:
 		return
-	_eist(fouten, stappen[0], ["gids"])
+	_eist(fouten, stappen[0], ["gids", "echo"])
 	_eist(fouten, stappen[1], ["ring", "wereldkaart", "plaats"])
 	_eist(fouten, stappen[2], ["kamer", "verhaal"])
 	_eist(fouten, stappen[3], ["sleutel", "hanger"])

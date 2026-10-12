@@ -578,8 +578,8 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 - [ ] De AI-gids zit in de main PC van het warp-platform
   Placeholder IVA staat in de hal (ww_anchor_gids), niet in de warp-ring.
-- [ ] De gids in de tekst ECHO noemen
-  De canon-naam staat nog niet in de tekst.
+- [x] De gids in de tekst ECHO noemen
+  De spreker en de welkomstzin gebruiken de canon-naam ECHO. De overige zinnen blijven voorlopig.
 - [ ] Functie: questvoortgang, missie-uitleg en begeleiding
   Vier vaste stappen via Dialog.show_lines. Geen questvoortgang.
 - [ ] Reageert op verhaalprogressie (nieuwe dialoog per act)
