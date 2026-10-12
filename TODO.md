@@ -540,7 +540,7 @@ Status 11 okt 2026, branch feature/world-warper, PR 30. Dat was de eerste versie
 
 De Hanger gloeit paars, niet roze. Roze = de Stroom = Sapientia's domein. Paars = Oude Mensheid, Codex Monument, World Warper, ECHO. De code gebruikt `Color("b07ae8")`.
 - [ ] Webversie.
-  De Pages-branch `cursor/web-build-29ec` heeft de grot-ingang in ECHO's Kamer (c0df241). Deze merge staat daar nog niet in. De export blijft handmatig.
+  De Pages-branch `cursor/web-build-29ec` heeft de export van main `d3de708` (Godot 4.7.2, threads uit). De export blijft handmatig. Hard verversen na de publicatie.
 - [x] Runner in de CI-matrix op Godot 4.3. De job warper-runner in .github/workflows/tests.yml draait world_warper/tests/run.gd. warperkamertest stond al in de matrix.
 
 Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven). De hub gaat open na die vlag. De automatische warp zet de party in het exterieur. Het zwevende gebouw op de wereldkaart is er nog niet.
