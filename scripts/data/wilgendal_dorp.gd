@@ -254,6 +254,7 @@ const SFEER := [
 		"rol": "echtpaar",
 		"naam": "Bram",
 		"tegel": Vector2i(11, 8),
+		"lus": [Vector2i(11, 8), Vector2i(11, 9), Vector2i(10, 9), Vector2i(10, 8)],
 		"lines": ["Els wil zo naar de smid. Ik blijf hier op het plein."],
 	},
 	{
@@ -261,6 +262,7 @@ const SFEER := [
 		"rol": "echtpaar",
 		"naam": "Els",
 		"tegel": Vector2i(12, 8),
+		"lus": [Vector2i(12, 8), Vector2i(13, 8), Vector2i(13, 9), Vector2i(12, 9)],
 		"lines": ["De winkels gaan nooit dicht. Dat is wel zo rustig."],
 	},
 	{
@@ -268,6 +270,7 @@ const SFEER := [
 		"rol": "kind",
 		"naam": "Fien",
 		"tegel": Vector2i(14, 10),
+		"lus": [Vector2i(14, 10), Vector2i(15, 10), Vector2i(15, 11), Vector2i(14, 11)],
 		"lines": ["Die ster daar is de magiewinkel. Ik mag alleen kijken."],
 	},
 	{
@@ -275,6 +278,7 @@ const SFEER := [
 		"rol": "veteraan",
 		"naam": "Wout",
 		"tegel": Vector2i(16, 8),
+		"lus": [Vector2i(16, 8), Vector2i(16, 9), Vector2i(15, 9), Vector2i(15, 8)],
 		"lines": ["Ik heb genoeg gevochten. Nu drink ik thee op het plein."],
 	},
 	{
@@ -282,6 +286,7 @@ const SFEER := [
 		"rol": "koerier",
 		"naam": "Siem",
 		"tegel": Vector2i(9, 11),
+		"lus": [Vector2i(9, 11), Vector2i(10, 11), Vector2i(10, 10), Vector2i(9, 10)],
 		"lines": ["Post voor Wilgendal. Vandaag niets voor jou."],
 	},
 ]
@@ -391,3 +396,54 @@ static func bereikbaar(van: Vector2i, naar: Vector2i) -> bool:
 
 static func op_plein(t: Vector2i) -> bool:
 	return PLEIN.has_point(t)
+
+
+## Eén tegel verder op het plein. Geen zoektocht: de lus staat al vast.
+## Muren, panden (dus de winkel) en de molen vallen af via beloopbaar.
+static func stap_ok(van: Vector2i, naar: Vector2i) -> bool:
+	var d := naar - van
+	if absi(d.x) + absi(d.y) != 1:
+		return false
+	if naar == GERRIT_TEGEL:
+		return false
+	return op_plein(naar) and beloopbaar(naar)
+
+
+static func lus_tegels(rij: Dictionary) -> Array[Vector2i]:
+	var uit: Array[Vector2i] = []
+	for t in rij.get("lus", []):
+		uit.append(t)
+	return uit
+
+
+## Gesloten lus van minstens twee verschillende plein-tegels, start op "tegel".
+static func lus_geldig(rij: Dictionary) -> bool:
+	var tegels := lus_tegels(rij)
+	if tegels.size() < 2:
+		return false
+	if tegels[0] != rij.get("tegel", Vector2i(-999, -999)):
+		return false
+	var gezien := {}
+	for i in tegels.size():
+		var a: Vector2i = tegels[i]
+		var b: Vector2i = tegels[(i + 1) % tegels.size()]
+		if gezien.has(a) or not stap_ok(a, b):
+			return false
+		gezien[a] = true
+	return true
+
+
+## De vijf sfeer-NPC's (niet Gerrit) hebben elk een eigen lus.
+static func lussen_vrij() -> bool:
+	if SFEER.size() != 5:
+		return false
+	var bezet := {}
+	for ruw in SFEER:
+		var rij: Dictionary = ruw
+		if not lus_geldig(rij):
+			return false
+		for t in lus_tegels(rij):
+			if bezet.has(t) or t == GERRIT_TEGEL or MOLEN.has_point(t):
+				return false
+			bezet[t] = true
+	return true

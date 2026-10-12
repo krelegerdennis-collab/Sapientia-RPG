@@ -1,5 +1,6 @@
 extends Node
-## Wilgendal: vier winkelpanden, iconen, vier huizen, zes sfeer-NPC's, Gerrit blijft.
+## Wilgendal: vier winkelpanden, iconen, vier huizen, zes sfeer-NPC's.
+## Vijf lopen een korte lus op het plein. Gerrit blijft op zijn molentegel.
 ## Start: godot --path . -- --wilgendaltest
 
 const Data := preload("res://scripts/data/wilgendal_dorp.gd")
@@ -86,6 +87,14 @@ func _data() -> void:
 	rollen.sort()
 	var verwacht: Array = ["echtpaar", "echtpaar", "gerrit", "kind", "koerier", "veteraan"]
 	check("zes sfeerrollen", rollen == verwacht)
+	var lopers := 0
+	for ruw in Data.SFEER:
+		var rij: Dictionary = ruw
+		var geldig := Data.lus_geldig(rij)
+		if geldig:
+			lopers += 1
+		check("lus %s minstens 2 tegels" % str(rij["node"]), geldig and Data.lus_tegels(rij).size() >= 2)
+	check("vijf lopers hebben een lus", lopers == 5 and Data.lussen_vrij())
 	check("winkels zonder klok", Data.geen_klok() and Data.ALTIJD_OPEN)
 	check("korte zwaard houdt de databronprijs", Shop.list_price("kort_zwaard") == int(GD.EQUIPMENT["kort_zwaard"]["price"]))
 	check("kruiden blijven 20 goud", Shop.list_price("kruidenthee") == 20)
@@ -196,6 +205,43 @@ func _dorp() -> void:
 	check("kind veteraan en koerier hebben een praatje", dorp.get_node("Objects/Fien").lines[0] != ""
 			and dorp.get_node("Objects/Wout").lines[0] != ""
 			and dorp.get_node("Objects/Siem").lines[0] != "")
+	await _rondlopen(dorp)
+
+
+func _rondlopen(dorp: Node) -> void:
+	if Dialog.is_open:
+		Dialog.close()
+	var gerrit: Node = dorp.get_node_or_null("Objects/Gerrit")
+	check("quest-node Gerrit bestaat nog", gerrit != null and gerrit.event == "gerrit" and gerrit.name == "Gerrit")
+	if gerrit == null:
+		return
+	var vast: Vector2 = gerrit.position
+	var voor := {}
+	for naam in ["Bram", "Els", "Fien", "Wout", "Siem"]:
+		var npc: Node = dorp.get_node("Objects/%s" % naam)
+		var loper := npc.get_node_or_null("PleinLus")
+		var n := 0
+		if loper != null:
+			n = loper.lus.size()
+		check("%s loopt een lus van minstens 2 tegels" % naam, n >= 2)
+		voor[naam] = npc.position
+	check("Gerrit heeft geen lus", gerrit.get_node_or_null("PleinLus") == null)
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 1000:
+		await get_tree().process_frame
+	for naam in ["Bram", "Els", "Fien", "Wout", "Siem"]:
+		var npc: Node = dorp.get_node("Objects/%s" % naam)
+		var loper := npc.get_node_or_null("PleinLus")
+		var tegel: Vector2i = npc.get_tile()
+		var op_lus := false
+		if loper != null:
+			op_lus = tegel in loper.lus
+		check("%s stapt over het plein" % naam, loper != null and op_lus and Data.op_plein(tegel) and Data.beloopbaar(tegel)
+				and tegel != Data.GERRIT_TEGEL and not Data.MOLEN.has_point(tegel)
+				and npc.position.distance_to(voor[naam]) > 6.0)
+	check("Gerrit blijft op de molentegel", gerrit.get_tile() == Data.GERRIT_TEGEL
+			and gerrit.position.distance_to(vast) < 0.5
+			and dorp.get_node_or_null("Objects/Gerrit") == gerrit)
 
 
 func _panden() -> void:
