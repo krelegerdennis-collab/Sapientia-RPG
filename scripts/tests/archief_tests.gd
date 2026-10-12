@@ -732,6 +732,8 @@ func _warper_tests() -> void:
 	, 3.0)
 	check("begin-warper waarschuwt niet", ingang_zin and not wp.waarschuwt())
 	Dialog.advance()
+	if Dialog.is_open:
+		Dialog.advance()
 	await wait_until(func(): return not Dialog.is_open and not wp.busy, 2.0)
 	check("begin laat je staan", wp.last_result == "start" and scene() == ingang and tile() == stay
 			and player() != null and not player().input_locked and GameState.current_map.ends_with("archief_ingang.tscn"))

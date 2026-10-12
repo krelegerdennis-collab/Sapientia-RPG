@@ -50,7 +50,7 @@ static func echo_feller(act: int) -> bool:
 ## Telt een afgeronde run één keer, zolang echo_grot_resultaat aan staat.
 ## De vlag zelf blijft: ECHO leest hem nog voor.
 static func tel_resultaat(flags: Dictionary, teller: int) -> int:
-	var aan := flags.get(EchoGrot.FLAG_RESULTAAT, false) == true
+	var aan: bool = flags.get(EchoGrot.FLAG_RESULTAAT, false) == true
 	if aan and flags.get(FLAG_GETELD, false) != true:
 		flags[FLAG_GETELD] = true
 		return teller + 1
@@ -147,7 +147,9 @@ func _vlak(kleur: Color) -> ImageTexture:
 
 
 func _echo_tint(feller: bool) -> void:
-	var echo := get_parent().get_node_or_null("Echo") if get_parent() != null else null
+	var echo: Node = null
+	if get_parent() != null:
+		echo = get_parent().get_node_or_null("Echo")
 	if echo == null:
 		return
 	var spr := echo.get_node_or_null("Sprite2D") as CanvasItem
