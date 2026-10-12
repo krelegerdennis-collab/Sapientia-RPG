@@ -874,3 +874,161 @@ Teams zijn NOG NIET definitief — er komen meer main characters om teams te vul
 - [x] Geen 2v2 (later eventueel)
 - [x] Geen anti-cheat (vrienden onder elkaar)
 - [x] Geen leaderboards
+
+## Diepe Grot – balans aanpassen
+
+**CANON – niet wijzigen zonder overleg.**
+
+### Loot table
+
+- [ ] Consumables in loot table verminderen
+  - [ ] Te veel consumables maakt de Grot te makkelijk
+  - [ ] Meer equipment/accessoires, minder potions/MP-items
+  - [ ] TODO(design): exacte ratio bepalen
+- [ ] Blue chest frequentie early game verlagen
+  - [ ] Te veel blue chests op floor 1-20
+  - [ ] TODO(design): exacte kans per floor-bracket
+
+## Diepe Grot – map generatie (uitgebreid)
+
+**CANON – niet wijzigen zonder overleg.**
+
+Per verdieping: 1 layout rollen uit onderstaande tabel.
+
+Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
+
+### Kamer-types + kansen
+
+- [ ] MEDIUM MAP (35%)
+  - ½ van Large Room
+  - Nieuwe NORM (meest voorkomend)
+  - TODO(design): kisten + monsters
+- [ ] LARGE ROOM (20%)
+  - Huidige grote layout
+  - Standaard kisten + monsters
+- [ ] CHEST ROOM (10%)
+  - 10×10 tegels
+  - 2 blauwe kisten + 3 normale kisten
+  - VEEL monsters
+- [ ] TRAP ROOM (7%)
+  - Vallen (pijlen, gaten, spike-platen)
+  - Weinig kisten (0-1 normale)
+  - Lage monster-spawns
+  - TODO(design): zichtbaar of verborgen vallen?
+- [ ] PUZZLE ROOM (5%)
+  - Specifieke puzzel (push / groei-platen)
+  - Geen of weinig monsters
+  - Beloning: 1 blauwe kist bij succes
+  - TODO(design): welke puzzels precies?
+- [ ] TREASURE ROOM (5%)
+  - GEEN monsters
+  - Alleen kisten (2-3 normale, 1 blauwe kans)
+  - Puur beloningskamer
+- [ ] EMPTY ROOM (5%)
+  - Geen kisten, geen monsters
+  - Alleen doorgang
+  - Soms met lore-item of notitie
+  - TODO(design): lore-items of alleen leeg?
+- [ ] REST ROOM (3%)
+  - Heal + save point
+  - Geen monsters, geen kisten
+  - Veilig moment in de Grot
+- [ ] MERCHANT ROOM (1%)
+  - Een verdwaalde handelaar in de Grot
+  - Verkoopt speciale items (alleen hier te koop)
+  - Kan ook items KOPEN van de speler
+  - Max 1× per 10 verdiepingen
+  - TODO(design): welke items verkoopt hij?
+
+### Vaste kamers (geen random)
+
+- [ ] BOSS ROOM (floors 25/50/75/99)
+  - Vast, niet random
+  - Baas + eventueel wat monsters
+- [ ] FLOOR 100 ROOM (vast)
+  - Warp-kristal + keuzescherm (3 opties)
+  - Geen monsters
+
+### Generator logica
+
+- [ ] Per verdieping: 1 layout rollen uit bovenstaande tabel
+- [ ] Boss-floors (25/50/75/99) → altijd BOSS ROOM
+- [ ] Floor 100 → altijd FLOOR 100 ROOM
+- [ ] Layout-type onthouden voor save/load
+- [ ] Monsters spawnen passend bij layout-type
+- [ ] Kisten spawnen passend bij layout-type
+
+### Balans-regels
+
+- [ ] REST ROOM + TREASURE ROOM niet op opeenvolgende verdiepingen
+- [ ] MERCHANT ROOM max 1× per 10 verdiepingen
+- [ ] PUZZLE ROOM niet op floor 1-5
+- [ ] TRAP ROOM niet op floor 1-3
+
+## Systemen – push monster when stunned
+
+**CANON – niet wijzigen zonder overleg.**
+
+### Basis push
+
+- [ ] Als speler TEGEN een GESTUND monster aanloopt:
+  - [ ] Speler beweegt ÉN monster wordt geduwd (samen)
+  - [ ] Monster schuift 1 tegel in de richting van de speler
+  - [ ] Speler neemt de oorspronkelijke plek NIET in
+- [ ] Als monster tegen muur/obstakel wordt geduwd → blijft staan
+- [ ] Werkt ALLEEN bij stun-status (niet bij normale monsters)
+- [ ] Visuele feedback: monster schuift 1 tegel (geen teleport)
+
+### Chain-push
+
+- [ ] Als geduwd monster tegen ANDER monster aan komt:
+  - [ ] Beide monsters worden geduwd (chain-push)
+  - [ ] Tweede monster schuift ook 1 tegel in dezelfde richting
+  - [ ] Als tweede tegen muur/obstakel komt → stopt daar
+  - [ ] Als tweede tegen een DERDE monster komt → keten gaat door
+- [ ] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
+- [ ] Alle geduwde monsters schuiven tegelijk (animatie)
+
+## Systemen – run feature
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] RUN-knop toevoegen BOVEN de CORE-knop
+- [ ] Toggle: aan/uit (blijft aan tot speler uitzet)
+- [ ] Wanneer RUN aan:
+  - [ ] Speler beweegt 2 tegels per move
+  - [ ] Sprite beweegt SNEL (animatie, geen teleport)
+  - [ ] Loopsnelheid sprite 2x
+- [ ] Wanneer RUN uit:
+  - [ ] Normale 1-tegel beweging
+- [ ] Werkt OVERAL (dungeons + worldmap + dorpen)
+- [ ] Geen verschil in vijand-interactie (agro-radius blijft gelijk)
+- [ ] NIET tijdens gevecht
+- [ ] Visuele indicator op knop: aan/uit status duidelijk
+
+## Koppelingen tussen systemen
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] Push werkt samen met PUZZLE ROOM (gestund monster op drukplaat)
+- [ ] Push werkt samen met TRAP ROOM (monster in gat duwen)
+- [ ] RUN werkt in alle kamer-types behalve tijdens gevecht
+- [ ] RUN werkt in REST ROOM, MERCHANT ROOM, etc.
+
+## TODO(design) markers
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] Loot ratio consumables vs. equipment
+- [ ] Blue chest kans per floor-bracket
+- [ ] Medium Map: exacte kisten + monsters
+- [ ] Trap Room: zichtbaar of verborgen vallen?
+- [ ] Puzzle Room: welke puzzels?
+- [ ] Empty Room: lore-items of alleen leeg?
+- [ ] Merchant Room: welke items verkoopt hij?
+
+## Canon-markering
+
+**CANON – niet wijzigen zonder overleg.**
+
+Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
