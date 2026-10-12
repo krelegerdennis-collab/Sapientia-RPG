@@ -874,3 +874,503 @@ Teams zijn NOG NIET definitief — er komen meer main characters om teams te vul
 - [x] Geen 2v2 (later eventueel)
 - [x] Geen anti-cheat (vrienden onder elkaar)
 - [x] Geen leaderboards
+
+## Diepe Grot – balans aanpassen
+
+**CANON – niet wijzigen zonder overleg.**
+
+### Loot table
+
+- [ ] Consumables in loot table verminderen
+  - [ ] Te veel consumables maakt de Grot te makkelijk
+  - [ ] Meer equipment/accessoires, minder potions/MP-items
+  - [ ] TODO(design): exacte ratio bepalen
+- [ ] Blue chest frequentie early game verlagen
+  - [ ] Te veel blue chests op floor 1-20
+  - [ ] TODO(design): exacte kans per floor-bracket
+
+## Diepe Grot – map generatie (uitgebreid)
+
+**CANON – niet wijzigen zonder overleg.**
+
+Per verdieping: 1 layout rollen uit onderstaande tabel.
+
+Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
+
+### Afmetingen
+
+Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
+
+- Chest Room: 10×10 tegels (compact beloningskamertje)
+- Medium Map: 25×25 tegels
+- Large Room: 50×50 tegels
+- Verhouding: Medium = ½ van Large in elke dimensie
+
+### Kamer-types + kansen
+
+- [ ] MEDIUM MAP (35%)
+  Definitief. 25×25 tegels. Nieuwe NORM (meest voorkomend). Medium = ½ van Large in elke dimensie.
+
+  Kisten:
+
+  - 2-4 normale kisten
+  - 0-1 blue chest (volgt floor-bracket tabel)
+
+  Monsters (schaalt met floor):
+
+  - Floor 1-20: 8-10 monsters
+  - Floor 21-50: 10-12 monsters
+  - Floor 51-80: 12-14 monsters
+  - Floor 81-99: 14-16 monsters
+
+  Karakter: normale verdieping, snel te doorlopen.
+- [ ] LARGE ROOM (20%)
+  Definitief. 50×50 tegels.
+
+  Kisten:
+
+  - 6-10 normale kisten
+  - 1-2 blue chests
+
+  Monsters (schaalt met floor):
+
+  - Floor 1-20: 15-18 monsters
+  - Floor 21-50: 18-22 monsters
+  - Floor 51-80: 22-26 monsters
+  - Floor 81-99: 26-30 monsters
+
+  Karakter: uitgebreide verkenning, langere sessie.
+- [ ] CHEST ROOM (10%)
+  Definitief. 10×10 tegels (compact beloningskamertje).
+
+  Kisten:
+
+  - 3 normale kisten (altijd)
+  - 2 blue chests (altijd)
+
+  Monsters:
+
+  - 8-10 monsters (VEEL, past bij kleine kamer)
+  - Dicht op elkaar (risico vs. reward)
+
+  Karakter: compact beloningskamertje, hoge risico/dichtheid.
+- [ ] TRAP ROOM (7%)
+  - Vallen (pijlen, gaten, spike-platen)
+  - Weinig kisten (0-1 normale)
+  - Lage monster-spawns
+  - TODO(design): zichtbaar of verborgen vallen?
+- [ ] PUZZLE ROOM (5%)
+  - Specifieke puzzel (push / groei-platen)
+  - Geen of weinig monsters
+  - Beloning: 1 blauwe kist bij succes
+  - TODO(design): welke puzzels precies?
+- [ ] TREASURE ROOM (5%)
+  - GEEN monsters
+  - Alleen kisten (2-3 normale, 1 blauwe kans)
+  - Puur beloningskamer
+- [ ] EMPTY ROOM (5%)
+  - Geen kisten, geen monsters
+  - Alleen doorgang
+  - Soms met lore-item of notitie
+  - TODO(design): lore-items of alleen leeg?
+- [ ] REST ROOM (3%)
+  - Heal + save point
+  - Geen monsters, geen kisten
+  - Veilig moment in de Grot
+- [ ] MERCHANT ROOM (1%)
+  - Een verdwaalde handelaar in de Grot
+  - Verkoopt speciale items (alleen hier te koop)
+  - Kan ook items KOPEN van de speler
+  - Max 1× per 10 verdiepingen
+  - TODO(design): welke items verkoopt hij?
+
+### Totaal-overzicht
+
+| Kamer-type | Grootte | Kisten | Monsters (hoog floor) |
+|---|---|---|---|
+| Chest Room | 10×10 | 3+2 (altijd) | 8-10 |
+| Medium Map | 25×25 | 2-4 + 0-1 | 14-16 |
+| Large Room | 50×50 | 6-10 + 1-2 | 26-30 |
+
+### Vaste kamers (geen random)
+
+- [ ] BOSS ROOM (floors 25/50/75/99)
+  - Vast, niet random
+  - Baas + eventueel wat monsters
+- [ ] FLOOR 100 ROOM (vast)
+  - Warp-kristal + keuzescherm (3 opties)
+  - Geen monsters
+
+### Generator logica
+
+- [ ] Per verdieping: 1 layout rollen uit bovenstaande tabel
+- [ ] Boss-floors (25/50/75/99) → altijd BOSS ROOM
+- [ ] Floor 100 → altijd FLOOR 100 ROOM
+- [ ] Layout-type onthouden voor save/load
+- [ ] Monsters spawnen passend bij layout-type
+- [ ] Kisten spawnen passend bij layout-type
+
+### Balans-regels
+
+- [ ] REST ROOM + TREASURE ROOM niet op opeenvolgende verdiepingen
+- [ ] MERCHANT ROOM max 1× per 10 verdiepingen
+- [ ] PUZZLE ROOM niet op floor 1-5
+- [ ] TRAP ROOM niet op floor 1-3
+
+## Systemen – push monster when stunned
+
+**CANON – niet wijzigen zonder overleg.**
+
+### Basis push
+
+- [ ] Als speler TEGEN een GESTUND monster aanloopt:
+  - [ ] Speler beweegt ÉN monster wordt geduwd (samen)
+  - [ ] Monster schuift 1 tegel in de richting van de speler
+  - [ ] Speler neemt de oorspronkelijke plek NIET in
+- [ ] Als monster tegen muur/obstakel wordt geduwd → blijft staan
+- [ ] Werkt ALLEEN bij stun-status (niet bij normale monsters)
+- [ ] Visuele feedback: monster schuift 1 tegel (geen teleport)
+
+### Chain-push
+
+- [ ] Als geduwd monster tegen ANDER monster aan komt:
+  - [ ] Beide monsters worden geduwd (chain-push)
+  - [ ] Tweede monster schuift ook 1 tegel in dezelfde richting
+  - [ ] Als tweede tegen muur/obstakel komt → stopt daar
+  - [ ] Als tweede tegen een DERDE monster komt → keten gaat door
+- [ ] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
+- [ ] Alle geduwde monsters schuiven tegelijk (animatie)
+
+## Systemen – run feature
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] RUN-knop toevoegen BOVEN de CORE-knop
+- [ ] Toggle: aan/uit (blijft aan tot speler uitzet)
+- [ ] Wanneer RUN aan:
+  - [ ] Speler beweegt 2 tegels per move
+  - [ ] Sprite beweegt SNEL (animatie, geen teleport)
+  - [ ] Loopsnelheid sprite 2x
+- [ ] Wanneer RUN uit:
+  - [ ] Normale 1-tegel beweging
+- [ ] Werkt OVERAL (dungeons + worldmap + dorpen)
+- [ ] Geen verschil in vijand-interactie (agro-radius blijft gelijk)
+- [ ] NIET tijdens gevecht
+- [ ] Visuele indicator op knop: aan/uit status duidelijk
+
+## Koppelingen tussen systemen
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] Push werkt samen met PUZZLE ROOM (gestund monster op drukplaat)
+- [ ] Push werkt samen met TRAP ROOM (monster in gat duwen)
+- [ ] RUN werkt in alle kamer-types behalve tijdens gevecht
+- [ ] RUN werkt in REST ROOM, MERCHANT ROOM, etc.
+
+## TODO(design) markers
+
+**CANON – niet wijzigen zonder overleg.**
+
+- [ ] Loot ratio consumables vs. equipment
+  Definitief. De checkbox blijft open tot de loot table in de code deze verdeling gebruikt.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Blue chest verdeling per grade:
+
+  - G1: Consumables 40% / Equipment 15% / Accessoires 5% / Goud 30% / Leeg 10%
+  - G2: Consumables 30% / Equipment 25% / Accessoires 10% / Goud 25% / Leeg 10%
+  - G3: Consumables 20% / Equipment 30% / Accessoires 20% / Goud 20% / Leeg 10%
+  - G4: Consumables 15% / Equipment 35% / Accessoires 25% / Goud 15% / Leeg 10%
+
+  Normale kisten:
+
+  - Consumables 60% (1-2 stuks) / Goud 20% / Equipment 15% / Leeg 5%
+
+  Extra regels:
+
+  - Consumables in Grot geven minder dan buiten
+  - Elixirs alleen in blue chests of merchant (niet in normale kisten)
+  - Blue chest loot schaalt met floor
+
+  Effect van deze wijziging:
+
+  - Speler krijgt significant minder consumables per run.
+  - Equipment/accessoires worden de hoofdbeloning.
+  - Goud wordt nuttig (voor merchant in Grot + verkopen).
+- [ ] Blue chest kans per floor-bracket
+  Definitief. De checkbox blijft open tot de blue-chest-kans in de code deze tabel gebruikt.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Basis kans per verdieping (normale kamer):
+
+  - Floor 1-10: 5% → 0-1 blue chest
+  - Floor 11-20: 10% → 0-1 blue chest
+  - Floor 21-35: 15% → 0-1 blue chest
+  - Floor 36-50: 20% → 0-1 blue chest
+  - Floor 51-65: 25% → 0-1 blue chest
+  - Floor 66-80: 30% → 0-1 blue chest
+  - Floor 81-95: 40% → 0-1 blue chest
+  - Floor 96-99: 50% → 0-1 blue chest
+
+  Overrides per kamer-type:
+
+  - CHEST ROOM (10%): altijd 2 blue chests
+  - TREASURE ROOM (5%): 50% kans op 1 blue chest
+  - PUZZLE ROOM (5%): altijd 1 blue chest (bij succes)
+  - Andere kamers: volgt floor-bracket tabel
+
+  Balans-effect:
+
+  - Gemiddeld 25-30 blue chests per volledige run (was ~60-80)
+  - Early game (1-20) significant minder
+  - Endgame (90-99) voelt als beloning
+- [ ] Medium Map: exacte kisten + monsters
+- [ ] Trap Room: zichtbaar of verborgen vallen?
+  Definitief. De checkbox blijft open tot de vallen in de code deze verdeling gebruiken.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Verdeling:
+
+  - 60% ZICHTBARE vallen (speler kan ontwijken)
+  - 40% VERBORGEN vallen (speler kan niet ontwijken)
+  - Speciale combo-vallen op hoge floors (61+)
+
+  Val-types:
+
+  Zichtbaar:
+
+  - Spike-platen (op vloer)
+  - Pijlen uit muren
+  - Gaten in vloer
+
+  Verborgen:
+
+  - Drukplaten
+  - Verborgen spike-traps
+  - Plafond-val
+
+  Speciaal (floor 61+):
+
+  - Combo-vallen (zichtbaar triggert verborgen)
+  - Bewegende vallen
+  - Push-vallen (duwen speler)
+
+  Schade per val:
+
+  - Spike-plaat: 5-10% HP
+  - Pijlen: 8-12% HP
+  - Gat in vloer: 10-15% HP + terug naar ingang
+  - Drukplaat: 10% HP
+  - Plafond-val: 15-20% HP + korte stun
+  - Push-val: 0% HP + verplaatst speler
+
+  Schade schaalt met floor:
+
+  - Floor 1-30: basis
+  - Floor 31-60: +25%
+  - Floor 61-99: +50%
+
+  Detectie verborgen vallen:
+
+  - Lotte's Licht-magie (verlicht tijdelijk)
+  - Codex-monster met detectie-ability
+  - Item (Detectie-bril / Kaart)
+  - Zonder detectie: blind erin
+
+  Voorkomen per kamer-type:
+
+  - Trap Room: MEER vallen, mix 60/40
+  - Medium Map: af en toe vallen
+  - Large Room: af en toe vallen
+  - Empty Room: af en toe vallen
+  - Rest/Treasure/Merchant Room: NOOIT vallen
+- [ ] Puzzle Room: welke puzzels?
+  Definitief. De checkbox blijft open tot de puzzels in de code deze types gebruiken.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  3 puzzel-types (roterend):
+
+  1. Ketting-puzzel (vanaf floor 11). Schakelaars die elkaar beïnvloeden. "Lights out"-stijl. Elke schakelaar verandert 2-3 andere.
+  2. Rotatie-puzzel (vanaf floor 21). Draaiende tegels, verbind start met einde. Klik op tegel → roteert 90°.
+  3. Licht-puzzel (vanaf floor 31). Lotte's Licht op panelen. Verborgen paden onthullen. Alleen als Lotte in de party is.
+
+  Beschikbaarheid per floor-bracket:
+
+  - Floor 1-10: geen puzzel-kamers
+  - Floor 11-20: Ketting
+  - Floor 21-30: Ketting, Rotatie
+  - Floor 31-99: Ketting, Rotatie, Licht
+
+  Moeilijkheid schaalt:
+
+  - Floor 11-30: klein (3-5 stappen, ~30 sec)
+  - Floor 31-60: middel (6-10 stappen, ~1 min)
+  - Floor 61-99: groot (11-15 stappen, ~2 min)
+
+  Beloning en falen:
+
+  - Succes: 1 blue chest + poort opent
+  - Falen: geen straf, opnieuw proberen
+  - Puzzel reset na 3 mislukte pogingen (nieuwe layout)
+
+  Visueel:
+
+  - Paarse gloed (match Codex Monument + Hanger)
+  - Symbolen op tegels
+  - Licht-effect bij activeren
+  - Blue chest verschijnt met animatie
+
+  - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
+    Definitief. Getrapt, geen directe hints. De checkbox blijft open tot de hints in de code deze fasen gebruiken.
+
+    **CANON – niet wijzigen zonder overleg.**
+
+    Fase 1 (0-5 min vast): geen hint. De speler puzzelt zelf. Pure ervaring.
+
+    Fase 2 (5-10 min vast): Lotte-hint. Alleen als Lotte in de party is. Subtiele hint, één keer per puzzel. Voorbeeld: "Wacht... die twee panelen lijken samen te horen."
+
+    Fase 3 (10+ min vast): ECHO-hint. Via communicator (World Warper bereikt simulatie). Duidelijkere hint dan Lotte. Altijd beschikbaar. Voorbeeld: "Kandidaat, de volgorde is niet links-rechts, maar binnenstebuiten."
+
+    Optioneel, na 3x falen: de puzzel licht op. Eén tegel licht kort op (startpunt). Geen volledige oplossing.
+- [ ] Empty Room: lore-items of alleen leeg?
+  Definitief. De checkbox blijft open tot de Empty Room in de code deze verdeling gebruikt.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Verdeling binnen Empty Room:
+
+  - Echt leeg: 50% (alleen doorgang)
+  - Lore-notitie: 20% (brief/boek op muur)
+  - Overblijfselen: 15% (zwak item, Grade 1-2)
+  - Graffiti: 10% (symbolen/hints)
+  - Geheime doorgang: 5% (verborgen pad, met Lotte's Licht)
+
+  Lore-notitie:
+
+  - Briefje / boek / kras op muur
+  - Verwijst naar H-1 t/m H-5 of Sapientia's experiment
+  - Voorbeeld: "H-4 probeerde hier te rusten. Hij kwam niet verder."
+
+  Overblijfselen:
+
+  - Oud wapen, schild, of accessoire op de grond
+  - Zwak item (Grade 1-2)
+  - Vertelt verhaal: iemand was hier, haalde het niet
+
+  Graffiti:
+
+  - Symbolen of tekst op muur
+  - Soms hint naar puzzel of geheim
+  - Soms waarschuwing
+  - Voorbeeld: "Loop niet verder. De Stem hoort je."
+
+  Geheime doorgang:
+
+  - Verborgen pad naar naastgelegen kamer
+  - Ontdekbaar met Lotte's Licht
+  - Leidt naar kleine bonus (1 normale kist)
+
+  Lore-koppeling:
+
+  - Verwijst naar H-1 t/m H-5
+  - Sapientia's experiment
+  - De Stem (Sapientia fluistert door de Grot)
+  - Andere kandidaten die het niet haalden
+
+  Visueel:
+
+  - Echt leeg: alleen muren, lege vloer, 1 uitgang
+  - Lore-notitie: boek/brief op grond of muur
+  - Overblijfselen: subtiele item-glow
+  - Graffiti: symbolen op muur (paarse gloed?)
+  - Geheime doorgang: verborgen, zichtbaar met Lotte's Licht
+- [ ] Merchant Room: welke items verkoopt hij?
+  Definitief. De checkbox blijft open tot de merchant in de code deze voorraad gebruikt.
+
+  **CANON – niet wijzigen zonder overleg.**
+
+  Wie is de merchant:
+
+  - Een vorige proefpersoon (H-reeks) die vast zit in de simulatie
+  - Verzamelt wat hij onderweg vindt
+  - Weet meer dan hij zegt
+  - Koppelt aan H-1 t/m H-5
+  - [ ] TODO(verhaal): welke H is hij? Wat is zijn verhaal?
+    Definitief. Hij is H-5, de laatste proefpersoon vóór Dennis. De checkbox blijft open tot dit verhaal in de code staat.
+
+    **CANON – niet wijzigen zonder overleg.**
+
+    Achtergrond:
+
+    - Proefpersoon H-5, gemaakt in Archief 4
+    - Kwam 2-3 jaar voor Dennis
+    - Haalde floor 100 NIET
+    - Simulatie sloot hem op in plaats van hem te doden
+    - Zit nu vast in de Grot, kan er niet meer uit
+
+    Naam: hij is zijn naam vergeten (simulatie heeft het gewist). Noemt zichzelf "de Koopman".
+
+    Wat hij weet:
+
+    - Kent Dennis' oorsprong (Archief 4)
+    - Kent Opa (heeft hem ontmoet)
+    - Weet wat er met H-1 t/m H-4 is gebeurd
+    - Weet dat de Grot een filter is
+    - Weet dat Sapientia wacht op "de juiste"
+
+    Waarom hij niets zegt:
+
+    - Bang (Sapientia luistert)
+    - Schaamt zich (hij faalde)
+    - Heeft vrede gevonden in zijn rol
+    - Als speler vaak terugkomt: hij vertelt meer
+
+    - [ ] TODO(verhaal): hoe eindigt H-5?
+    - [ ] TODO(verhaal): kan hij bevrijd worden? Sterft hij? List van Sapientia?
+
+  Wat hij verkoopt:
+
+  1. Consumables (altijd op voorraad). Elixir, Phoenix-veer (revive), anti-status items. Prijs: 2x normale winkelprijs.
+  2. Grot-exclusieve items. Alleen deze twee, altijd op voorraad, prijs vast hoog.
+    - Simulatie-token: 1x een vastgelopen run herstarten.
+    - Stun-bom: stunt alle monsters in de kamer.
+    Kaart-fragment en Push-handschoen zijn niet meer in scope.
+  3. Grade 3-4 equipment (wisselt per bezoek). 1 willekeurig Grade 3 item. 1 Grade 4 item per 3 bezoeken (zeldzaam). Prijs: 2-3x normale winkelprijs.
+  4. Rotatie-item (1 per bezoek, uniek). Kan zijn: lore-item, zeldzame consumable, novelty. Prijs: variabel.
+
+  Wat hij koopt van de speler:
+
+  - Consumables: 50% winkelprijs
+  - Equipment: 30-50% winkelprijs
+  - Accessoires: 30-50% winkelprijs
+  - Grade 4 items: 60% winkelprijs (biedt meer)
+
+  Stock en rotatie:
+
+  - Consumables + Grot-exclusief: altijd op voorraad
+  - Grade 3-4 equipment: random 1-2 stuks per bezoek
+  - Rotatie-item: 1 uniek per bezoek
+  - Restock: elke nieuwe run
+
+  Dialoog:
+
+  - Bij binnenkomst: "Wel, wel. Een nieuwe kandidaat. Ik heb je gezien op de muren, wist je dat? De Grot laat alles zien... aan wie blijft kijken."
+  - Bij kopen: "Goede keuze. Ik heb dit zelf... laten liggen. Lang geleden."
+  - Bij verkopen: "Alles heeft waarde hier beneden. Zelfs dingen die je niet meer nodig hebt."
+  - Bij vertrekken: "Als je de Stem hoort, blijf dan niet staan. Ik deed dat wel."
+
+  Waarom uniek:
+
+  - Eén van de weinige verkopers in het spel
+  - Beste plek om overtollige loot te verkopen
+  - Lore-personage, niet alleen shop
+
+## Canon-markering
+
+**CANON – niet wijzigen zonder overleg.**
+
+Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
