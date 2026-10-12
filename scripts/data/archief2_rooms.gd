@@ -155,7 +155,7 @@ static func rooms() -> Dictionary:
 		"layout": [_TOP, _WU, _WL, _F, _G, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v2_lotte"], "spawn": "noord"},
-			"n": {"map": SCENES["archief_2_v3_tegen"], "spawn": "zuid"},
+			"n": {"map": "res://scenes/maps/leven_v3_combi.tscn", "spawn": "ingang"},
 		},
 		"signs": [{"tile": [3, 7], "lines": [
 			"Ketting-platen. Eén activeert de volgende.",

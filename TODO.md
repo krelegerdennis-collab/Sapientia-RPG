@@ -181,7 +181,8 @@ B) Tegen-platen: krimpen bij aanraking. De speler moet ze vermijden om ruimte te
 
 C) Licht-platen: groeien alleen als Lotte's Licht-magie erop schijnt. Lotte heeft daarmee een rol in puzzels, niet alleen in gevecht.
 
-- [ ] Combinaties met bestaande puzzel-elementen (kasten en hendels uit Archief 1)
+- [x] Combinaties met bestaande puzzel-elementen (kasten en hendels uit Archief 1)
+  Verdieping 3, kamer leven_v3_combi: duwbare kast op een zware plaat én een hendel, daarna de groei-plaat.
 
 #### Baas: De Genezer (verdieping 4)
 
