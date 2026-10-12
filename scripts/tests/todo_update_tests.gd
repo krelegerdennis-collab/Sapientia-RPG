@@ -162,7 +162,7 @@ func _gear_tests() -> void:
 	check("diepe kist is grade 4", int(Gear.item(deep).get("grade", 0)) == 4 or Gear.is_scroll(deep))
 	var seen_scroll := false
 	var seen_weapon := false
-	for seed in range(1, 40):
+	for seed in range(1, 200):
 		var id := Gear.pick(seed, 85, "vloer")
 		if Gear.is_scroll(id):
 			seen_scroll = true
