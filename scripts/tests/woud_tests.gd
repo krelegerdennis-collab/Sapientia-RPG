@@ -9,6 +9,7 @@ extends Node
 ##   Deel F: Codex (patch RPG CODE) in v0.17: Lege Boeken van Marit/woudkisten, woudmonster vangen,
 ##           bondgenoot vecht mee (ook in het woud), Codex-scherm, wereldkaart-iconen (RPG ART).
 ##   Deel G: Het Zingende Graan (dicht vóór Noor, zaad op de mistrand, molen draait en zingt zacht, slaat op en geeft meel).
+##   Deel H: uitgang-warpers begin/midden/eind. De ingang waarschuwt niet. Ja gaat naar de woud-ingang.
 ## --v17=map: screenshots 1024x576 als v17_dorp.png, v17_noor_ballon.png, v17_woud_kamer.png,
 ## v17_noor_cocon.png, v17_woud_baas.png, v17_noor_erbij.png (+ v17_woud_achtergrond.png, v17_veldmenu_opdracht.png),
 ## v17_wereld_esdoorn.png, v17_codex_vangen.png, v17_codex_bondgenoot.png, v17_codex_scherm.png.
@@ -24,6 +25,9 @@ const PartyActions := preload("res://scripts/party_actions.gd")
 const Molen := preload("res://scripts/village/molen.gd")
 const Wieken := preload("res://scripts/village/molen_wieken.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
+const WW := preload("res://scripts/dungeon/woud_warpers.gd")
+const ExitWarper := preload("res://scripts/dungeon/dungeon_exit_warper.gd")
+const AW := preload("res://scripts/dungeon/archief_warpers.gd")
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
 const DIRS := [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
@@ -73,6 +77,8 @@ func _run() -> void:
 	await _codex_forest_tests()
 	print("=== Deel G: Het Zingende Graan ===")
 	await _graan_tests()
+	print("=== Deel H: uitgang-warpers Donker Woud ===")
+	await _warper_tests()
 	print("WOUDTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -1197,3 +1203,151 @@ func _graan_tests() -> void:
 	var gebruikt: Dictionary = PartyActions.use_item(GameState.inventory, SD.ITEM_MEEL, held)
 	check("Zingend Meel herstelt %d HP" % gat, gebruikt["ok"] and int(gebruikt["hp"]) == gat
 			and int(held["hp"]) == voor + gat)
+
+
+# ================================================================ H: uitgang-warpers
+func _warper_tests() -> void:
+	var spots: Array = WW.placements()
+	var roles := {}
+	for p in spots:
+		roles[str(p["role"])] = p
+	var uit: Dictionary = WR.ROOMS["woud_rand"]["exits"]["E"]
+	var boss: Dictionary = WR.ROOMS[WR.BOSS_ROOM]
+	var stand: Vector2i = AW.victory_tile(boss)
+	var eind: Vector2i = roles["eind"]["tile"] if roles.has("eind") else Vector2i(-1, -1)
+	check("begin, midden en eind bestaan", spots.size() == 3 and roles.has("begin") and roles.has("midden") and roles.has("eind"))
+	if not roles.has("begin") or not roles.has("midden") or not roles.has("eind"):
+		return
+	check("geen mini-baas: midden in de Mistpoel (verdieping %d)" % WW.middle_floor(),
+			WW.mini_boss().is_empty() and WW.middle_floor() == 2 and WW.midden_room() == "woud_mistpoel"
+			and str(roles["midden"]["room"]) == "woud_mistpoel")
+	check("begin bij de ingang, niet op de wereld-uitgang", str(roles["begin"]["room"]) == "woud_rand"
+			and roles["begin"]["tile"] == WW.BEGIN_TILE
+			and _naast(roles["begin"]["tile"], _spawn_tile(WR.ROOMS["woud_rand"], "ingang"))
+			and AW.walkable(WR.ROOMS["woud_rand"], roles["begin"]["tile"])
+			and not WW.bezet(WR.ROOMS["woud_rand"], roles["begin"]["tile"]))
+	check("midden-tegel vrij in de Mistpoel", AW.walkable(WR.ROOMS["woud_mistpoel"], roles["midden"]["tile"])
+			and not WW.bezet(WR.ROOMS["woud_mistpoel"], roles["midden"]["tile"])
+			and roles["midden"]["tile"] == WW.MIDDEN_TILE)
+	check("eind naast de sta-tegel na de Wortelkoning %s (warper %s)" % [stand, eind],
+			str(roles["eind"]["room"]) == WR.BOSS_ROOM and eind != stand
+			and AW.walkable(boss, eind) and not WW.bezet(boss, eind)
+			and not AW.boss_rect(boss).has_point(eind)
+			and absi(eind.x - stand.x) + absi(eind.y - stand.y) == 1)
+	var alleen_woud := true
+	for p in spots:
+		var rid := str(p["room"])
+		if not WR.ROOMS.has(rid) or DR.ROOMS.has(rid) or rid.begins_with("archief") or rid.begins_with("dungeon100"):
+			alleen_woud = false
+		if str(p["world_scene"]) != str(uit["map"]) or str(p["world_spawn"]) != str(uit["spawn"]):
+			alleen_woud = false
+	check("alleen woudkamers, terug naar de woud-ingang op de wereldkaart", alleen_woud
+			and str(uit["spawn"]) == "van_woud" and str(uit["map"]) == WORLD)
+	if spots.size() != 3:
+		return
+	GameState.new_game("Dennis")
+	GameState.story_step = SD.KLAAR
+	GameState.encounter_multiplier = 0.0
+	if Dialog.is_open:
+		Dialog.close()
+	var ingang := await enter("res://scenes/maps/woud_rand.tscn", "ingang")
+	await _weg_monsters(ingang)
+	var wp: DungeonExitWarper = _warper_van(ingang)
+	check("begin-warper in de Woudrand op %s" % [WW.BEGIN_TILE], wp != null and wp.role == "begin"
+			and _warper_tile(wp) == WW.BEGIN_TILE and not wp.waarschuwt()
+			and wp.sprite.texture.resource_path.ends_with("save_book.png")
+			and wp.sprite.modulate == ExitWarper.TINT
+			and wp.world_scene == WORLD and wp.world_spawn == "van_woud")
+	if wp == null or player() == null:
+		return
+	var stay := tile()
+	wp.interact(player())
+	var ingang_zin: bool = await wait_until(func() -> bool:
+		return wp.last_result == "start" and Dialog.is_open and Dialog.choices.is_empty() \
+				and not Dialog._lines.is_empty() and str(Dialog._lines[0]) == ExitWarper.INGANG
+	, 3.0)
+	check("begin-warper waarschuwt niet", ingang_zin and not wp.waarschuwt())
+	_klik_dicht()
+	await wait_until(func() -> bool: return not Dialog.is_open and not wp.busy, 2.0)
+	check("begin laat de party staan", wp.last_result == "start" and scene() == ingang and tile() == stay
+			and player() != null and not player().input_locked
+			and str(GameState.current_map).ends_with("woud_rand.tscn"))
+	await _warper_kamer("res://scenes/maps/woud_mistpoel.tscn", "zuid", "midden", roles["midden"]["tile"], "van_woud")
+	await _warper_kamer("res://scenes/maps/woud_open_plek.tscn", "zuid", "eind", eind, "van_woud")
+
+
+func _warper_kamer(pad: String, spawn: String, role: String, tegel: Vector2i, wereld_spawn: String) -> void:
+	var kamer := await enter(pad, spawn)
+	await _weg_monsters(kamer)
+	var wp: DungeonExitWarper = _warper_van(kamer)
+	check("%s-warper op %s" % [role, tegel], wp != null and wp.role == role and wp.waarschuwt()
+			and _warper_tile(wp) == tegel and wp.sprite.texture.resource_path.ends_with("save_book.png")
+			and wp.sprite.modulate == ExitWarper.TINT)
+	if wp == null or player() == null:
+		return
+	var stay := tile()
+	wp.interact(player())
+	var warned: bool = await wait_until(_exit_warning_open, 3.0)
+	check("%s waarschuwt: '%s'" % [role, ExitWarper.WARNING], warned
+			and ExitWarper.YES == "Ja, warpen naar worldmap"
+			and ExitWarper.NO == "Nee, blijf in de dungeon")
+	Dialog.choose(1)
+	await wait_until(func() -> bool: return wp.last_result == "cancelled" and not wp.busy, 2.0)
+	check("%s annuleren laat de party staan" % role, wp.last_result == "cancelled" and scene() == kamer
+			and tile() == stay and player() != null and not player().input_locked)
+	wp.interact(player())
+	warned = await wait_until(_exit_warning_open, 3.0)
+	check("%s vraagt opnieuw om bevestiging" % role, warned)
+	Dialog.choose(0)
+	var wereld_ok := await wait_scene("Wereldkaart", 20.0)
+	await wait_fade()
+	var sp: Node2D = null
+	if wereld_ok:
+		sp = scene().get_node_or_null("Spawns/" + wereld_spawn) as Node2D
+	var verwacht := Vector2i((sp.position / 16.0).floor()) if sp != null else Vector2i(-99, -99)
+	check("%s ja gaat naar de wereldkaart bij %s %s" % [role, wereld_spawn, tile()],
+			wereld_ok and GameState.current_map == WORLD and sp != null and tile() == verwacht and tile() != stay)
+
+
+func _warper_van(kamer: Node) -> DungeonExitWarper:
+	if kamer == null:
+		return null
+	return kamer.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
+
+
+func _warper_tile(node: Node2D) -> Vector2i:
+	if node == null:
+		return Vector2i(-99, -99)
+	return Vector2i((node.position / 16.0).floor())
+
+
+func _spawn_tile(room: Dictionary, spawn: String) -> Vector2i:
+	var v: Array = room["spawns"][spawn]
+	return Vector2i(int(v[0]), int(v[1]))
+
+
+func _naast(a: Vector2i, b: Vector2i) -> bool:
+	return absi(a.x - b.x) + absi(a.y - b.y) == 1
+
+
+func _exit_warning_open() -> bool:
+	return Dialog.is_open and Dialog.choices.size() == 2 and not Dialog._lines.is_empty() \
+			and str(Dialog._lines[0]) == ExitWarper.WARNING and str(Dialog.choices[0]) == ExitWarper.YES \
+			and str(Dialog.choices[1]) == ExitWarper.NO
+
+
+func _klik_dicht() -> void:
+	if Dialog.is_open:
+		Dialog.advance()
+	if Dialog.is_open:
+		Dialog.advance()
+
+
+func _weg_monsters(kamer: Node) -> void:
+	if kamer == null or not ("monsters" in kamer):
+		return
+	for m in kamer.monsters.duplicate():
+		if is_instance_valid(m):
+			m.queue_free()
+	kamer.monsters.clear()
+	await pframes(2)
