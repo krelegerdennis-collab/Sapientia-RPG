@@ -41,6 +41,7 @@ func _draai() -> void:
 	_rapport("warp WM2 dicht", DestinationsTest.call("wm2_dicht"))
 	_rapport("warp WM1 echte bestemming", DestinationsTest.call("wm1_echte_bestemming"))
 	_rapport("warp onbekend id", DestinationsTest.call("onbekend_id_faalt"))
+	_rapport("warp bezoek", DestinationsTest.call("bezoek_filter"))
 	_rapport("dialoog", DialoogTest.fouten())
 	_dreiging()
 	_spawn()

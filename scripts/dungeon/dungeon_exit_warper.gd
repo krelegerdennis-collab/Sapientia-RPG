@@ -1,7 +1,7 @@
 extends "res://scripts/book_point.gd"
 class_name DungeonExitWarper
 ## Warper die een dungeon in één stap verlaat, naar een vast punt op de wereldkaart.
-## Het Eerste Archief zet er drie (begin, midden, eind). Archief 2 gebruikt dit nog niet.
+## Het Eerste Archief en Archief 2 zetten er drie (begin, midden, eind).
 ##
 ## De Diepe Grot heeft een eigen warper (dungeon100_warper.gd) op verdieping 1, 25, 50, 75 en 99.
 ## Die verlaat de grot. Dit script roept hem niet aan. De uitgangen van het Eerste Archief blijven hier.
@@ -14,10 +14,11 @@ const TINT := Color(0.78, 0.62, 1.0)
 const WARNING := "Weet je zeker dat je de dungeon wilt verlaten?"
 const YES := "Ja, warpen naar worldmap"
 const NO := "Nee, blijf in de dungeon"
+const INGANG := "Dit is de ingang. Je blijft in de dungeon."
 const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
 const WORLD_SPAWN := "van_archief"
 
-## "begin", "midden" of "eind". Alleen voor tests en de naam; het gedrag is hetzelfde.
+## "begin", "midden" of "eind". Begin waarschuwt niet en verlaat de dungeon niet.
 var role := ""
 var world_scene := WORLD_SCENE
 var world_spawn := WORLD_SPAWN
@@ -40,12 +41,22 @@ func _ready() -> void:
 	sprite.modulate = TINT
 
 
+func waarschuwt() -> bool:
+	return role != "begin"
+
+
 func interact(player: Node2D) -> void:
 	if busy or Dialog.is_open:
 		return
 	busy = true
 	player.input_locked = true
 	last_result = ""
+	if not waarschuwt():
+		last_result = "start"
+		Dialog.show_lines([INGANG])
+		await Dialog.finished
+		_release(player)
+		return
 	var warn: int = await Dialog.ask(WARNING, [YES, NO])
 	if warn != 0:
 		last_result = "cancelled"

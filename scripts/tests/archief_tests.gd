@@ -10,8 +10,8 @@ extends Node
 ##   Deel C: Vonkzwaard in het uitrustingsscherm (Wapen-vak, pijlen ATK +12) en bij Sterkste.
 ##   Deel D: echt gevecht tegen de Mech. Wachter: 'Schild omhoog' (bericht, strook, DEF x2, duur).
 ##   Deel E: Levende Archief, verdieping 1 (kas en groei-plaat).
-##   Deel F: uitgang-warpers begin/midden/eind. Waarschuwing kan annuleren; Ja zet je
-##           op de wereldkaart bij het Eerste Archief.
+##   Deel F: uitgang-warpers begin/midden/eind. De ingang waarschuwt niet.
+##           Midden: waarschuwing kan annuleren; Ja zet je op de wereldkaart.
 ## Kamer: archief_puzzel (Forge's puzzelkamer 3B + de schatkamer ten noorden, zelfde kaart).
 ## Met --shots=map: archief_geheim_dicht, archief_geheim_open, archief_kist_zwaard,
 ## archief_uitrusting_zwaard, archief_wachter_schild (native + _3x).
@@ -726,39 +726,53 @@ func _warper_tests() -> void:
 		return
 	var stay := tile()
 	wp.interact(player())
-	var warned: bool = await wait_until(_exit_warning_open, 3.0)
-	check("waarschuwing: '%s'" % ExitWarper.WARNING, warned)
-	Dialog.choose(1)
-	await wait_until(func(): return wp.last_result == "cancelled" and not wp.busy, 2.0)
-	check("annuleren laat je staan", wp.last_result == "cancelled" and scene() == ingang and tile() == stay
+	var ingang_zin: bool = await wait_until(func() -> bool:
+		return wp.last_result == "start" and Dialog.is_open and Dialog.choices.is_empty() \
+				and not Dialog._lines.is_empty() and str(Dialog._lines[0]) == ExitWarper.INGANG
+	, 3.0)
+	check("begin-warper waarschuwt niet", ingang_zin and not wp.waarschuwt())
+	Dialog.advance()
+	await wait_until(func(): return not Dialog.is_open and not wp.busy, 2.0)
+	check("begin laat je staan", wp.last_result == "start" and scene() == ingang and tile() == stay
 			and player() != null and not player().input_locked and GameState.current_map.ends_with("archief_ingang.tscn"))
-
-	wp.interact(player())
-	warned = await wait_until(_exit_warning_open, 3.0)
-	check("waarschuwing opnieuw voor de bevestiging", warned)
-	Dialog.choose(0)
-	var world_ok := await wait_scene("Wereldkaart", 20.0)
-	await wait_fade()
-	var spawn_node: Node2D = null
-	if world_ok:
-		spawn_node = scene().get_node_or_null("Spawns/van_archief") as Node2D
-	var expect := Vector2i((spawn_node.position / 16.0).floor()) if spawn_node != null else Vector2i(-99, -99)
-	check("bevestigen zet je op de wereldkaart bij het Eerste Archief %s" % [tile()],
-			world_ok and GameState.current_map == ExitWarper.WORLD_SCENE and spawn_node != null
-			and tile() == expect and tile() != stay)
 
 	var mid := await _enter_map("res://scenes/maps/archief_v3_zuilenhal.tscn", "ladder", "ArchiefV3Zuilenhal")
 	var mid_wp: DungeonExitWarper = null
 	if mid != null:
 		mid_wp = mid.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
 	check("midden-warper in de Zuilenhal op %s" % [roles["midden"]["tile"]], mid_wp != null
-			and mid_wp.role == "midden" and _warper_tile(mid_wp) == roles["midden"]["tile"])
+			and mid_wp.role == "midden" and _warper_tile(mid_wp) == roles["midden"]["tile"]
+			and mid_wp.waarschuwt())
+	if mid_wp != null and player() != null:
+		var mid_stay := tile()
+		mid_wp.interact(player())
+		var warned: bool = await wait_until(_exit_warning_open, 3.0)
+		check("midden waarschuwt: '%s'" % ExitWarper.WARNING, warned)
+		Dialog.choose(1)
+		await wait_until(func(): return mid_wp.last_result == "cancelled" and not mid_wp.busy, 2.0)
+		check("annuleren laat je in de dungeon", mid_wp.last_result == "cancelled" and scene() == mid and tile() == mid_stay
+				and player() != null and not player().input_locked)
+		mid_wp.interact(player())
+		warned = await wait_until(_exit_warning_open, 3.0)
+		check("waarschuwing opnieuw voor de bevestiging", warned
+				and ExitWarper.YES == "Ja, warpen naar worldmap"
+				and ExitWarper.NO == "Nee, blijf in de dungeon")
+		Dialog.choose(0)
+		var world_ok := await wait_scene("Wereldkaart", 20.0)
+		await wait_fade()
+		var spawn_node: Node2D = null
+		if world_ok:
+			spawn_node = scene().get_node_or_null("Spawns/van_archief") as Node2D
+		var expect := Vector2i((spawn_node.position / 16.0).floor()) if spawn_node != null else Vector2i(-99, -99)
+		check("bevestigen zet je op de wereldkaart bij het Eerste Archief %s" % [tile()],
+				world_ok and GameState.current_map == ExitWarper.WORLD_SCENE and spawn_node != null
+				and tile() == expect and tile() != mid_stay)
 	var eind_room := await _enter_map("res://scenes/maps/archief_golemhal.tscn", "zuid", "ArchiefGolemhal")
 	var eind_wp: DungeonExitWarper = null
 	if eind_room != null:
 		eind_wp = eind_room.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
 	check("eind-warper in de Golemhal op %s" % [eind], eind_wp != null and eind_wp.role == "eind"
-			and _warper_tile(eind_wp) == eind)
+			and eind_wp.waarschuwt() and _warper_tile(eind_wp) == eind)
 
 
 func _enter_map(path: String, spawn_name: String, scene_name: String) -> Node:

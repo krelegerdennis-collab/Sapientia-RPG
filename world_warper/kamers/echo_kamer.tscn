@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://world_warper/kamers/layout.gd" id="5_layout"]
 [ext_resource type="Script" path="res://world_warper/kamers/deur.gd" id="6_deur"]
 [ext_resource type="Script" path="res://world_warper/kamers/prop.gd" id="7_prop"]
+[ext_resource type="Script" path="res://world_warper/kamers/echo_kisten.gd" id="8_kist"]
 
 [node name="EchoKamer" type="Node2D"]
 script = ExtResource("1_map")
@@ -39,6 +40,9 @@ bron = "voortgang"
 position = Vector2(72, 40)
 script = ExtResource("7_prop")
 bron = "echo_grot"
+
+[node name="Kisten" type="Node2D" parent="Objects"]
+script = ExtResource("8_kist")
 
 [node name="Player" parent="Objects" instance=ExtResource("2_player")]
 position = Vector2(24, 56)

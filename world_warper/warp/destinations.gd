@@ -74,14 +74,50 @@ static func is_world_open(wm_id: String, flags: Dictionary) -> bool:
 	return wm_id == WM1
 
 
-## Lege dictionary als de wereld dicht is of het plaats-id niet bestaat.
+## Oude saves zonder bezoeklijst: de drie WM1-plekken tellen als bezocht.
+static func legacy_bezocht() -> Array[String]:
+	var out: Array[String] = []
+	out.append(str(GameState.WORLD_MAP))
+	out.append(WILGENDAL_PATH)
+	out.append(ESDOORN_PATH)
+	return out
+
+
+## Dorp of wereldkaart op WM1: alleen als dat pad al bezocht is.
+static func is_place_open(place: Dictionary, bezocht: Array) -> bool:
+	var id := str(place.get("id", ""))
+	if id != PLACE_WERELDKAART and id != PLACE_WILGENDAL and id != PLACE_ESDOORN:
+		return true
+	var path := str(place.get("path", ""))
+	if path.is_empty():
+		return false
+	for pad in bezocht:
+		if str(pad) == path:
+			return true
+	return false
+
+
+static func huidige_bezocht() -> Array:
+	if not is_instance_valid(GameState):
+		return []
+	var raw: Variant = GameState.get("bezochte_kaarten")
+	if raw is Array:
+		return raw
+	return []
+
+
+## Lege dictionary als de wereld dicht is, het dorp nog niet bezocht is,
+## of het plaats-id niet bestaat.
 static func resolve(wm_id: String, place_id: String, flags: Dictionary) -> Dictionary:
 	if not is_world_open(wm_id, flags):
 		return {}
+	var gezien := huidige_bezocht()
 	for place in places(wm_id):
 		if str(place.get("id", "")) != place_id:
 			continue
 		if str(place.get("path", "")).is_empty() or str(place.get("spawn", "")).is_empty():
+			return {}
+		if not is_place_open(place, gezien):
 			return {}
 		return place
 	return {}

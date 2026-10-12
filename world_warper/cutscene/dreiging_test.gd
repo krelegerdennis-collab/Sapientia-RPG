@@ -50,4 +50,4 @@ func _run() -> void:
 		for i in range(2, lines.size() - 1):
 			if Dreiging.beat_at(i) != 3:
 				mid = false
-		check("beat 3 tussen roze en herstel", mid)
+		check("beat 3 tussen gloed en herstel", mid)
