@@ -1,6 +1,7 @@
 # SAPIENTIA in de browser
 
 Web-build van `main` (`d3de708`), Godot 4.7.2, threads uit.
+Deze branch bevat ook `main` `83ac076`. Dat is alleen `TODO.md`. De gespeelde bestanden (`index.html`, `index.pck`, `index.wasm`) zijn de export van `d3de708`. Geen hard verversen nodig voor deze stap.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 De touch-knoppen zitten erin: stuurknop links, A en B rechts.
 De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
