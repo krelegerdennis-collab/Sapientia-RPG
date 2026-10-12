@@ -1293,7 +1293,10 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   Wat hij verkoopt:
 
   1. Consumables (altijd op voorraad). Elixir, Phoenix-veer (revive), anti-status items. Prijs: 2x normale winkelprijs.
-  2. Grot-exclusieve items (altijd op voorraad). Simulatie-token (1x run herstarten), Kaart-fragment (onthult 1 verborgen kamer), Stun-bom (stunt alle monsters in kamer), Push-handschoen (push werkt ook op niet-gestunde). Prijs: vast hoog.
+  2. Grot-exclusieve items. Alleen deze twee, altijd op voorraad, prijs vast hoog.
+    - Simulatie-token: 1x een vastgelopen run herstarten.
+    - Stun-bom: stunt alle monsters in de kamer.
+    Kaart-fragment en Push-handschoen zijn niet meer in scope.
   3. Grade 3-4 equipment (wisselt per bezoek). 1 willekeurig Grade 3 item. 1 Grade 4 item per 3 bezoeken (zeldzaam). Prijs: 2-3x normale winkelprijs.
   4. Rotatie-item (1 per bezoek, uniek). Kan zijn: lore-item, zeldzame consumable, novelty. Prijs: variabel.
 
