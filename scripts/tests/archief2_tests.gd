@@ -13,6 +13,7 @@ const PuzzleRooms := preload("res://scripts/data/puzzle_rooms.gd")
 const PuzzleLogic := preload("res://scripts/puzzle/puzzle_logic.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 const WarperEnter := preload("res://world_warper/flow/enter.gd")
+const NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
 const WarperUnlock := preload("res://world_warper/flow/unlock.gd")
 const HangerScene := preload("res://world_warper/cutscene/hanger_scene.gd")
 const WarperDialoog := preload("res://world_warper/guide/dialoog.gd")
@@ -487,6 +488,8 @@ func _na_genezer_hub() -> void:
 	GameState.encounter_multiplier = 0.0
 	Engine.time_scale = 1.0
 	GameState.story_flags[WarperUnlock.BEWAKER_VLAG] = true
+	# De suite slaat het gevecht over. In het spel zet de net gewonnen bewaker pending.
+	NaGenezer.pending = true
 	check("levenskern voor de warp", GameState.grant_kern(Archief2.KERN_ID, "genezer"))
 	GameState.pending_kern_absorb = Archief2.KERN_ID
 	GameState.in_battle = false
