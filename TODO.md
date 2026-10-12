@@ -445,16 +445,12 @@ Niet zelf bouwen. Wacht op scènes: ECHO's twist (wanneer, hoe, confrontatie, H-
 
 ### Act-koppeling
 
-### Act-koppeling
-
 - [ ] Act 1 = Worldmap 1 (start-eiland, Eerste Archief en Leven)
 - [ ] Act 2 en verder = Worldmap 2 (Industrie en Magie)
 - [ ] Act 3 en verder = Worldmap 3 (Kosmos en Hart)
 - [ ] Onthulling Proefpersoon H-6 (Dennis) in Archief 4 (De Spiegel) op Worldmap 2
   De onthulling staat hierboven als canon. De checkbox blijft open tot de scène in het spel staat.
   De scène staat in `scenes/story/spiegel_kamer.tscn`, alleen via `--spiegel`, niet op de wereldkaart en niet in Archief 4. Niet zelf bouwen: de scène nog niet koppelen aan Archief 4 of aan de wereldkaart. Wacht op de scène.
-
-### Dungeon-warpers
 
 ### Dungeon Warpers (begin, midden en eind)
 
@@ -472,8 +468,6 @@ Verdieping 99: eind-warper met waarschuwing en annuleren.
 Bestemming van die warpers: ECHO's Kamer. Het Warp-kristal op verdieping 100 doet hetzelfde. De knoppen daar zijn "Ja" en "Nee".
 
 Warp-bestemming voor de andere dungeons en Archieven: de party gaat in één stap direct naar de worldmap, zonder eerst terug naar de dungeon-ingang. De begin-warper doet dat niet.
-
-### Archief 2 — Het Levende Archief
 
 ### Archief 2 — Het Levende Archief
 
@@ -646,8 +640,6 @@ Niet zelf bouwen. Wacht op scènes. De antwoorden hieronder niet invullen.
 
 ## Dorpen & Shops
 
-### Wilgendal
-
 ### Wilgendal – dorp met winkelpanden
 Wilgendal blijft een dorp (geen stad), maar krijgt nette winkelpanden.
 
@@ -657,8 +649,6 @@ Wilgendal blijft een dorp (geen stad), maar krijgt nette winkelpanden.
 - Winkels altijd open (geen tijdsysteem)
 - Uithangborden: icoon (schild, zwaard, ring, ster)
 - 4 woonhuizen (2 bewoond, 2 decoratief)
-
-### Gerrit de Molenaar
 
 ### Gerrit de Molenaar
 
@@ -775,8 +765,6 @@ Bevestigd en dus geen open ontwerp meer: winkelprijzen en voorraad, magieprijs 1
 
 Techniek: de headless testsuites draaien via `.github/workflows/tests.yml` (Godot 4.3-stable). De web-export naar Pages (`cursor/web-build-29ec`) blijft handmatig: Godot 4.7.2, threads uit. Er is geen script en geen bot-token die die branch vanuit Actions pusht.
 
-### World Warper — lore, Hanger en party
-
 ## World Warper
 
 **CANON – niet wijzigen zonder overleg.**
@@ -807,8 +795,6 @@ Ontwerp: zwevend hightech hub na het verslaan van De Genezer (Archief van Leven)
 - Dennis kan niet op de bank
 - Tijdelijke gasten (Codex) niet op de bank
 
-### Ingame-menu
-
 ## Ingame-menu
 
 **CANON – niet wijzigen zonder overleg.**
@@ -819,8 +805,6 @@ Indeling:
 - Links, drie stapels: Uitrusting, Codex, Items
 - Rechts, groot vlak: Warpen
 - Warpen blijft rechts (visueel zwaartepunt)
-
-### PvP – Vriendenmodus
 
 ## PvP – Vriendenmodus
 
@@ -1575,9 +1559,7 @@ Scheiding:
 - [x] Per spreuk eigen data: damage, healing en effect schalen per grade
   De namen en cijfers hieronder zijn canon. Dezelfde spreuken staan in `scripts/data/spells.gd`, met MP, power en power per level. De grade-4-rollen zitten in `GradeGear.SCROLLS` en vallen vanaf verdieping 80. De vijf oude rol-ids blijven opzoekbaar voor saves en zitten niet meer in die pool.
 
-### World Warper
-
-### Nog te doen
+### World Warper — hub, ECHO en warp
 
 - [x] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. Het platform staat op de wereldkaart en gaat open na De Genezer. Na de bestaande zinnen van NA_GENEZER roept de Genezer-kamer `WorldWarperNaGenezer.probeer()` aan. Die wacht tot de kernabsorptie klaar is en roept dan `Enter.enter()` aan. De party komt in world_warper/maps/exterieur.tscn, spawn ingang, en world_warper_unlocked gaat aan.
 
