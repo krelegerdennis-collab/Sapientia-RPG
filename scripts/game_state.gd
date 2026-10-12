@@ -26,6 +26,7 @@ const WorldWarperUnlock := preload("res://world_warper/flow/unlock.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
+const PartyBenchLib := preload("res://scripts/party_bench.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const TITLE_SCENE := "res://scenes/ui/title.tscn"
@@ -1403,7 +1404,7 @@ func enter_map(path: String) -> void:
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
 	if path.ends_with("/rustkamer.tscn"):
-		PartyBench.normaliseer()
+		PartyBenchLib.normaliseer()
 
 
 ## Ga naar een andere map: fade uit, wissel van scène, en zet de speler
