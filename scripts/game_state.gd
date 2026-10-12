@@ -147,6 +147,12 @@ var story_flags := {}
 var pending_tutorial := {}
 
 var party: Array = []          # Array van Dictionaries (kopie van GameData.HEROES)
+## Rustkamer: helden die niet meevechten. Gaat mee in de save als "party_bank".
+var party_bench: Array = []
+## Paden van kaarten waar de speler geweest is (warp-filter). "bezocht" in de save.
+var bezochte_kaarten: Array[String] = []
+## Voltooide Diepe-Grot-runs (ECHO's kisten lichten één voor één op).
+var echo_grot_voltooid := 0
 var inventory := {}            # item-id -> aantal
 var gold := 0
 
@@ -261,6 +267,7 @@ func _ready() -> void:
 	# Catalogus t/m Act 6: of  godot -- --catalogustest  (scripts/tests/catalogus_tests.gd).
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
 	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
+	# Hanger-scène: of  godot -- --hangertest  (scripts/tests/hanger_tests.gd).
 	# De Spiegel (Archief 4): of  godot -- --spiegeltest [--shots=/pad/map]
 	# Vriendenmodus: of  godot -- --pvptest  (pvp/tests/pvp_tests.gd).
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
@@ -290,6 +297,7 @@ func _ready() -> void:
 			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
 			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
 			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"],
+			["--hangertest", "res://scripts/tests/hanger_tests.gd", "HangerTest", "hangertest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"]]:
@@ -417,6 +425,9 @@ func _go_to_scene(path: String) -> void:
 func new_game(hero_name := DEFAULT_NAME) -> void:
 	player_name = clean_name(hero_name)
 	party.clear()
+	party_bench = []
+	bezochte_kaarten = []
+	echo_grot_voltooid = 0
 	add_member(MAIN_HERO)
 	inventory = GameData.START_INVENTORY.duplicate(true)
 	map_monster_battle = {}
@@ -560,11 +571,16 @@ func member_level(id: String) -> int:
 	for h in party:
 		if h.get("id", "") == id:
 			return int(h.get("level", 1))
+	for h in party_bench:
+		if h.get("id", "") == id:
+			return int(h.get("level", 1))
 	return 0
 
 
 func has_member(id: String) -> bool:
-	return party.any(func(h): return h.get("id", "") == id)
+	if party.any(func(h): return h.get("id", "") == id):
+		return true
+	return party_bench.any(func(h): return h.get("id", "") == id)
 
 
 ## Zet een groepslid vooraan (molen: party wisselen). index 0 blijft staan.
@@ -894,8 +910,12 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 
 ## De party als lijst van Dictionaries voor een save (en de Archief-momentopname).
 func _party_save() -> Array:
+	return _party_save_from(party)
+
+
+func _party_save_from(groep: Array) -> Array:
 	var out := []
-	for h in party:
+	for h in groep:
 		var e := {}
 		for k in ["id", "name", "level", "exp", "hp", "mp", "max_hp", "max_mp", "atk", "def", "agi", "spells", "weapon"]:
 			e[k] = h.get(k)
@@ -953,6 +973,9 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"facing": [facing.x, facing.y],
 		"player_name": player_name,
 		"party": [],
+		"party_bank": [],
+		"bezocht": bezochte_kaarten.duplicate(),
+		"echo_grot_voltooid": echo_grot_voltooid,
 		"inventory": inventory.duplicate(true),
 		"gold": gold,
 		"play_time": play_time(),
@@ -968,6 +991,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"archief2": archief2.duplicate(true),
 	}
 	data["party"] = _party_save()
+	data["party_bank"] = _party_save_from(party_bench)
 	return data
 
 
@@ -1020,6 +1044,9 @@ func apply_state(d: Dictionary) -> bool:
 	party.clear()
 	var stray_equipment: Array = []
 	party = _party_from(d["party"], stray_equipment)
+	party_bench = []
+	if d.get("party_bank") is Array:
+		party_bench = _party_from(d["party_bank"], stray_equipment)
 	if party.is_empty():
 		add_member(MAIN_HERO)
 	inventory = _inventory_from(d.get("inventory", {}))
@@ -1074,6 +1101,17 @@ func apply_state(d: Dictionary) -> bool:
 		for k in a2["platen"]:
 			platen[str(k)] = int(a2["platen"][k])
 		archief2 = {"platen": platen}
+	bezochte_kaarten = []
+	if d.has("bezocht") and d["bezocht"] is Array:
+		for pad in d["bezocht"]:
+			var sleutel := str(pad)
+			if sleutel != "" and not bezochte_kaarten.has(sleutel):
+				bezochte_kaarten.append(sleutel)
+	else:
+		for pad in WorldWarperDestinations.legacy_bezocht():
+			bezochte_kaarten.append(pad)
+	var voltooid = d.get("echo_grot_voltooid", 0)
+	echo_grot_voltooid = int(voltooid) if (voltooid is int or voltooid is float) else 0
 	archief2_temp_ally = {}
 	archief2_party_filter = ""
 	pending_story_loss = false
@@ -1353,6 +1391,8 @@ func go_to_title() -> void:
 ## Wordt aangeroepen door map.gd zodra een map geladen is.
 func enter_map(path: String) -> void:
 	current_map = path
+	if path != "" and not bezochte_kaarten.has(path):
+		bezochte_kaarten.append(path)
 	if path != Dungeon100RulesC.dungeon_scene:
 		# Veiligheidsnet, niet tijdens een gevecht: wie de grot verlaat krijgt de echte party terug
 		# en de Blauwe Kist-items. Een gevecht laadt geen map en mag de run niet afbreken.
@@ -1360,6 +1400,8 @@ func enter_map(path: String) -> void:
 			dungeon100_end_run(true)
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
+	if path.ends_with("/rustkamer.tscn"):
+		PartyBench.normaliseer()
 
 
 ## Ga naar een andere map: fade uit, wissel van scène, en zet de speler

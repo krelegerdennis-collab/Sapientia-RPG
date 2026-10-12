@@ -171,9 +171,11 @@ func _show_step() -> void:
 			var dicht := not Destinations.is_world_open(wm_id, flags)
 			_add_row(wm_id, str(wereld.get("label", "")), dicht, false, _on_world_pressed.bind(wm_id))
 	else:
+		var gezien := Destinations.huidige_bezocht()
 		for place in Destinations.places(_wm_id):
 			var place_id := str(place.get("id", ""))
-			_add_row(place_id, str(place.get("label", "")), false, place_id == _place_id, _on_place_pressed.bind(place_id))
+			var dicht := not Destinations.is_place_open(place, gezien)
+			_add_row(place_id, str(place.get("label", "")), dicht, place_id == _place_id, _on_place_pressed.bind(place_id))
 	var gekozen := Destinations.resolve(_wm_id, _place_id, flags)
 	_travel.disabled = _step != STEP_PLACES or gekozen.is_empty()
 
@@ -254,8 +256,18 @@ func _on_world_pressed(wm_id: String) -> void:
 
 
 func _on_place_pressed(place_id: String) -> void:
+	if not _plaats_open(place_id):
+		return
 	_place_id = place_id
 	call_deferred("_show_step")
+
+
+func _plaats_open(place_id: String) -> bool:
+	var gezien := Destinations.huidige_bezocht()
+	for place in Destinations.places(_wm_id):
+		if str(place.get("id", "")) == place_id:
+			return Destinations.is_place_open(place, gezien)
+	return false
 
 
 ## TODO(design): Terug op stap 1 sluit de view. Op stap 2 keert hij terug naar de werelden.

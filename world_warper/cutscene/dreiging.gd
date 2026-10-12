@@ -7,7 +7,7 @@ extends RefCounted
 const FLAG := "world_warper_intro_seen"
 
 ## TODO(design): de zinnen zijn voorlopig. De beats zijn vast, de formulering niet.
-## Volgorde: 1 paarse stilte, 2 warme Hanger, 3 Zwarte Stroom (geen speech), 4 herstel.
+## Volgorde: 1 paarse stilte, 2 paarse Hanger, 3 Zwarte Stroom (geen speech), 4 herstel.
 ## beat_at() hoort bij die volgorde: regel 0 = beat 1, regel 1 = beat 2,
 ## de laatste regel = beat 4, alles daartussen = beat 3.
 
@@ -26,7 +26,7 @@ static func lines() -> Array[String]:
 	return out
 
 
-## 1 paars, 2 roze puls, 3 zwarte flikkering, 4 herstel.
+## 1 paars, 2 paarse Hanger-gloed, 3 zwarte flikkering, 4 herstel. De Stroom in de zin blijft roze.
 static func beat_at(line_index: int) -> int:
 	var n := lines().size()
 	if line_index <= 0:

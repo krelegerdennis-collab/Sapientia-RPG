@@ -65,6 +65,33 @@ static func wm1_echte_bestemming() -> PackedStringArray:
 	return fouten
 
 
+static func bezoek_filter() -> PackedStringArray:
+	var fouten := PackedStringArray()
+	var oud: Array[String] = []
+	for pad in Destinations.huidige_bezocht():
+		oud.append(str(pad))
+	GameState.bezochte_kaarten = []
+	var dicht := Destinations.resolve(Destinations.WM1, Destinations.PLACE_WILGENDAL, {})
+	if not dicht.is_empty():
+		fouten.append("Wilgendal hoort dicht zolang het dorp niet bezocht is")
+	var esdoorn := Destinations.resolve(Destinations.WM1, Destinations.PLACE_ESDOORN, {})
+	if not esdoorn.is_empty():
+		fouten.append("Esdoorn hoort dicht zolang het dorp niet bezocht is")
+	var kaart := Destinations.resolve(Destinations.WM1, Destinations.PLACE_WERELDKAART, {})
+	if not kaart.is_empty():
+		fouten.append("de wereldkaart hoort dicht zolang je er niet geweest bent")
+	GameState.bezochte_kaarten = [Destinations.WILGENDAL_PATH]
+	var open_wilg := Destinations.resolve(Destinations.WM1, Destinations.PLACE_WILGENDAL, {})
+	if str(open_wilg.get("spawn", "")) != Destinations.WILGENDAL_SPAWN:
+		fouten.append("bezocht Wilgendal hoort te warpen")
+	if not Destinations.resolve(Destinations.WM1, Destinations.PLACE_ESDOORN, {}).is_empty():
+		fouten.append("Esdoorn blijft dicht als alleen Wilgendal bezocht is")
+	if not Destinations.places(Destinations.WM2).is_empty():
+		fouten.append("het bezoek-filter mag WM2 niet vullen")
+	GameState.bezochte_kaarten = oud
+	return fouten
+
+
 static func onbekend_id_faalt() -> PackedStringArray:
 	var fouten := PackedStringArray()
 	if Destinations.is_world_open("onbekend", {}):

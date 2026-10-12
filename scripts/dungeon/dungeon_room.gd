@@ -27,6 +27,8 @@ const PropScript := preload("res://scripts/dungeon/dungeon_prop.gd")
 const InktwurmKastScript := preload("res://scripts/dungeon/inktwurm_kast.gd")
 const SignScript := preload("res://scripts/dungeon/dungeon_sign.gd")
 const ExitWarperScript := preload("res://scripts/dungeon/dungeon_exit_warper.gd")
+const Archief2Warpers := preload("res://scripts/dungeon/archief2_warpers.gd")
+const NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
 const ArchiefWarpers := preload("res://scripts/dungeon/archief_warpers.gd")
 const STORY_OBJECT_SCENE := "res://scenes/story_object.tscn"
 const NPC_SCENE := "res://scenes/npc.tscn"
@@ -287,11 +289,17 @@ func _build() -> void:
 func _place_exit_warper(objects: Node2D) -> void:
 	var spot: Dictionary = ArchiefWarpers.for_room(room_id)
 	if spot.is_empty():
+		spot = Archief2Warpers.for_room(room_id)
+	if spot.is_empty():
 		return
 	var t: Vector2i = spot["tile"]
 	var warper := ExitWarperScript.create(t) as DungeonExitWarper
 	warper.name = "ExitWarper"
 	warper.role = str(spot["role"])
+	if str(spot.get("world_scene", "")) != "":
+		warper.world_scene = str(spot["world_scene"])
+	if str(spot.get("world_spawn", "")) != "":
+		warper.world_spawn = str(spot["world_spawn"])
 	objects.add_child(warper)
 	_blocked[t] = true
 
@@ -581,12 +589,16 @@ func _restore_after_battle(ctx: Dictionary) -> void:
 			GameState.defeated_map_monsters[room_id][id] = true
 			var m := get_monster(id)
 			if m and m.data.get("guard", false):
-				GameState.story_flags[guard_flag(room_id, id)] = true
+				var vlag := guard_flag(room_id, id)
+				var net := not GameState.story_flags.has(vlag)
+				GameState.story_flags[vlag] = true
+				NaGenezer.on_guard_flag(vlag, net)
 			if m:
 				monsters.erase(m)
 				m.queue_free()
 		"flee":
 			start_invuln()
+	NaGenezer.probeer()
 
 
 ## v0.16: de speler zette een stap -> verlamde monsters tellen af.

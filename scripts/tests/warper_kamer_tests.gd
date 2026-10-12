@@ -6,6 +6,17 @@ const Kamers := preload("res://world_warper/kamers/kamers.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const Dialoog := preload("res://world_warper/guide/dialoog.gd")
+const Destinations := preload("res://world_warper/warp/destinations.gd")
+const DestTest := preload("res://world_warper/warp/destinations_test.gd")
+const SavePunt := preload("res://world_warper/services/save_point.gd")
+const NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
+const Unlock := preload("res://world_warper/flow/unlock.gd")
+const Enter := preload("res://world_warper/flow/enter.gd")
+const A2Warpers := preload("res://scripts/dungeon/archief2_warpers.gd")
+const A1Warpers := preload("res://scripts/dungeon/archief_warpers.gd")
+const ExitWarper := preload("res://scripts/dungeon/dungeon_exit_warper.gd")
+const Kisten := preload("res://world_warper/kamers/echo_kisten.gd")
+const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const Gear := preload("res://scripts/equipment.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
@@ -35,9 +46,11 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	_vlag_en_act()
 	_buit_en_tekst()
+	_update2_regels()
 	_scènes()
 	await _hal_in_beeld()
 	await _echo_grot()
+	await _genezer_warp()
 	print("WARPERKAMERTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await get_tree().process_frame
@@ -204,6 +217,11 @@ func _echo_grot() -> void:
 	if not kamer_ok:
 		return
 	check("ECHO in de geladen kamer", _echo_node() != null and _player() != null)
+	var kisten := _kisten()
+	var speler := _player()
+	var pos: Dictionary = SavePunt.positie_van(speler)
+	check("savepunt leest de spelertegel", speler != null and pos["tile"] == speler.get_tile() and pos["facing"] == speler.facing)
+	check("eerste bezoek: kisten leeg en donker", kisten != null and kisten.gevuld_aantal() == 0 and kisten.licht_aantal() == 0)
 	if not _praat():
 		return
 	var eerste := await _naar_tekst(EchoGrot.ZIN_EERSTE)
@@ -267,6 +285,21 @@ func _echo_grot() -> void:
 			and int(GameState.party[0]["level"]) == 8
 			and str(GameState.party[0].get("equip", {}).get("wapen", "")) == "kort_zwaard"
 			and GameState.story_flags.get(EchoGrot.FLAG_RESULTAAT, false) == true)
+	var na_run := _kisten()
+	check("na één run licht één kist, act 1 blijft leeg", na_run != null and GameState.echo_grot_voltooid == 1
+			and na_run.licht_aantal() == 1 and na_run.gevuld_aantal() == 0)
+	if na_run != null:
+		na_run.pas_toe(3, 1)
+		check("act 3 vult de eerste kist", na_run.gevuld_aantal() == 1 and na_run.licht_aantal() == 1)
+		na_run.pas_toe(4, 2)
+		check("act 4 vult twee kisten", na_run.gevuld_aantal() == 2)
+		na_run.pas_toe(5, 3)
+		check("act 5 vult alle drie", na_run.gevuld_aantal() == 3 and na_run.licht_aantal() == 3)
+		na_run.pas_toe(6, 3)
+		var echo := _echo_node()
+		var spr := echo.get_node_or_null("Sprite2D") as CanvasItem if echo != null else null
+		check("act 6 pulse en ECHO feller", na_run._pulse and spr != null and spr.modulate == Kisten.ECHO_FELLER)
+		na_run.pas_toe(1, 1)
 	if not _praat():
 		check("ECHO na terugkeer", false)
 		return
@@ -281,6 +314,123 @@ func _echo_grot() -> void:
 			and int(GameState.party[0]["level"]) == 1
 			and str(GameState.party[0].get("equip", {}).get("wapen", "")) == ""
 			and GameState.dungeon100_run_active())
+
+
+func _update2_regels() -> void:
+	var fouten := DestTest.bezoek_filter()
+	check("warp alleen bezochte plekken op WM1", fouten.is_empty())
+	for regel in fouten:
+		print("INFO  ", regel)
+	var begin := ExitWarper.new()
+	begin.role = "begin"
+	var midden := ExitWarper.new()
+	midden.role = "midden"
+	check("begin-warper zonder waarschuwing, midden met", not begin.waarschuwt() and midden.waarschuwt()
+			and ExitWarper.WARNING == "Weet je zeker dat je de dungeon wilt verlaten?"
+			and ExitWarper.YES == "Ja, warpen naar worldmap"
+			and ExitWarper.NO == "Nee, blijf in de dungeon")
+	begin.free()
+	midden.free()
+	var plekken: Array = A2Warpers.placements()
+	var rollen := {}
+	for plek in plekken:
+		rollen[str(plek["role"])] = plek
+	var kamers: Dictionary = DR.archief2().rooms()
+	var a1_alleen := true
+	for plek in A1Warpers.placements():
+		if not DR.ROOMS.has(str(plek["room"])):
+			a1_alleen = false
+	check("Archief 2 heeft begin, midden en eind", plekken.size() == 3 and rollen.has("begin")
+			and rollen.has("midden") and rollen.has("eind")
+			and str(rollen["midden"]["room"]) == "archief_2_v3_wurger"
+			and str(rollen["eind"]["room"]) == "archief_2_v4_genezer"
+			and str(rollen["begin"]["world_spawn"]) == "van_kas"
+			and A1Warpers.walkable(kamers["archief_2_v1_entree"], rollen["begin"]["tile"])
+			and A1Warpers.walkable(kamers["archief_2_v3_wurger"], rollen["midden"]["tile"])
+			and A1Warpers.walkable(kamers["archief_2_v4_genezer"], rollen["eind"]["tile"])
+			and a1_alleen and A1Warpers.placements().size() == 3)
+	check("kisten per act", Kisten.gevulde(1) == 0 and Kisten.gevulde(2) == 0 and Kisten.gevulde(3) == 1
+			and Kisten.gevulde(4) == 2 and Kisten.gevulde(5) == 3 and Kisten.gevulde(6) == 3
+			and not Kisten.pulseren(5) and Kisten.pulseren(6) and Kisten.echo_feller(6)
+			and not Kisten.echo_feller(5))
+	var vlaggen := {}
+	check("run telt één keer", Kisten.tel_resultaat(vlaggen, 0) == 0)
+	vlaggen[EchoGrot.FLAG_RESULTAAT] = true
+	var een := Kisten.tel_resultaat(vlaggen, 0)
+	var nog := Kisten.tel_resultaat(vlaggen, een)
+	check("resultaat licht één extra kist", een == 1 and nog == 1 and vlaggen.get(Kisten.FLAG_GETELD, false) == true
+			and vlaggen.get(EchoGrot.FLAG_RESULTAAT, false) == true)
+	vlaggen.erase(EchoGrot.FLAG_RESULTAAT)
+	check("geteld gaat weg als het resultaat weg is", Kisten.tel_resultaat(vlaggen, een) == een
+			and not vlaggen.has(Kisten.FLAG_GETELD))
+	var molen := FileAccess.get_file_as_string("res://scripts/village/molen.gd")
+	var prop := FileAccess.get_file_as_string("res://world_warper/kamers/prop.gd")
+	check("de molen zet nog iemand vooraan", molen.contains("move_member_to_front") and molen.contains("Wie gaat voorop?"))
+	check("de Rustkamer wisselt via de bank", prop.contains("PartyWissel") and prop.contains("ALLEEN_HIER"))
+	GameState.new_game("Dennis")
+	GameState.add_member("noor")
+	GameState.add_member("lotte")
+	var goud := GameState.gold
+	check("buiten de Rustkamer geen wissel", PartyBench.naar_bank(1, "res://scenes/maps/dorp_wilgendal.tscn") == PartyBench.ALLEEN_HIER
+			and GameState.party.size() == 3)
+	check("Dennis blijft in de groep", PartyBench.naar_bank(0, PartyBench.RUSTKAMER) == PartyBench.DENNIS_BLIJFT
+			and str(GameState.party[0]["id"]) == "dennis")
+	var naar := PartyBench.naar_bank(2, PartyBench.RUSTKAMER)
+	check("Lotte gratis op de bank", naar == PartyBench.OP_BANK % "Lotte" and GameState.gold == goud
+			and GameState.party.size() == 2 and GameState.party_bench.size() == 1
+			and str(GameState.party_bench[0]["id"]) == "lotte")
+	var terug := PartyBench.naar_groep(0, PartyBench.RUSTKAMER)
+	check("Lotte terug, nog steeds gratis", terug == PartyBench.IN_GROEP % "Lotte" and GameState.gold == goud
+			and GameState.party_bench.is_empty() and GameState.party.size() == 3)
+	var gast := {"id": "gast", "name": "Gast", "species": "mosslijm", "uid": "tijdelijk-1", "tijdelijk": true}
+	GameState.party.append(gast)
+	check("Codex-gast niet op de bank", PartyBench.naar_bank(GameState.party.size() - 1, PartyBench.RUSTKAMER) == PartyBench.GAST_BLIJFT)
+	GameState.party.pop_back()
+	GameState.party.append(GameState.hero_template("noor"))
+	PartyBench.normaliseer()
+	check("maximaal 3 actief", GameState.party.size() == PartyBench.MAX_ACTIEF and GameState.party_bench.size() == 1)
+	var pad := "user://warper_bank_test.json"
+	var weg := GameState.save_game(Vector2i(4, 5), Vector2i.LEFT, pad)
+	var ruw := GameState.read_save(pad)
+	GameState.party_bench = []
+	var geladen := GameState.load_game(pad)
+	var bank_id := str(GameState.party_bench[0]["id"]) if GameState.party_bench.size() == 1 else ""
+	var tegel := GameState._vec2i_from(ruw.get("tile"), Vector2i(-9, -9))
+	var kijk := GameState._vec2i_from(ruw.get("facing"), Vector2i(9, 9))
+	check("bank en tegel in de save", weg and geladen and bank_id == "noor"
+			and str(GameState.party[0].get("id", "")) == "dennis"
+			and tegel == Vector2i(4, 5) and kijk == Vector2i.LEFT)
+	var leeg := SavePunt.positie_van(null)
+	check("zonder speler valt de tegel terug", leeg["tile"] == Vector2i.ZERO and leeg["facing"] == Vector2i.DOWN)
+
+
+func _genezer_warp() -> void:
+	NaGenezer.pending = false
+	GameState.in_battle = false
+	GameState.changing_map = false
+	GameState.pending_kern_absorb = ""
+	NaGenezer.on_guard_flag("bewaker:archief_v2_trapzaal/m2", true)
+	check("andere bewaker start de warp niet", not NaGenezer.pending)
+	GameState.story_flags[Unlock.BEWAKER_VLAG] = true
+	NaGenezer.on_guard_flag(Unlock.BEWAKER_VLAG, false)
+	check("een oude Genezer-vlag warpt niet opnieuw", not NaGenezer.pending)
+	GameState.pending_kern_absorb = "levenskern"
+	NaGenezer.on_guard_flag(Unlock.BEWAKER_VLAG, true)
+	check("de warp wacht op de kern", NaGenezer.pending and not NaGenezer.probeer())
+	GameState.pending_kern_absorb = ""
+	var ging := NaGenezer.probeer()
+	var buiten := await _wacht_pad(Enter.HUB_SCENE, 20.0)
+	await _wacht_fade()
+	check("na De Genezer staat de party in het exterieur", ging and buiten
+			and GameState.world_warper_is_unlocked() and not NaGenezer.pending)
+	NaGenezer.pending = false
+
+
+func _kisten() -> EchoKisten:
+	var sc := scene()
+	if sc == null:
+		return null
+	return sc.get_node_or_null("Objects/Kisten") as EchoKisten
 
 
 func _wereld_weigert() -> bool:

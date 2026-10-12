@@ -26,7 +26,7 @@ jobs:
                 checkpointtest, dungeon100gentest, dungeon100schaaltest,
                 dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
                 actorsfxtest, fusietest, catalogustest, updatetest, archief2test,
-                warperkamertest, spiegeltest, berggrottest, pvptest]
+                warperkamertest, hangertest, spiegeltest, berggrottest, pvptest]
     steps:
       - uses: actions/checkout@v4
 

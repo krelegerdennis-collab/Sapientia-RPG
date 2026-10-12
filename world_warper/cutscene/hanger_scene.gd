@@ -1,6 +1,6 @@
 class_name WorldWarperHangerScene
 extends Node2D
-## Eerste-bezoekscène: paarse hal, roze Hanger, korte zwarte flikkering, herstel.
+## Eerste-bezoekscène: paarse hal, paarse Hanger, korte zwarte flikkering, herstel.
 ## Placeholder-hologram (geen definitieve art, geen shader). Tikken gaat verder.
 ## TODO(design): de zinnen staan in dreiging.gd.
 
@@ -16,7 +16,8 @@ const HALL_QUIET := Color("241433")
 const HALL_WARM := Color("4a2a58")
 const HALL_LIT := Color("3d2158")
 const HALL_THREAT := Color("0c0610")
-const PINK := Color("e2789e")
+## Paars = Oude Mensheid, Codex, World Warper, ECHO. Roze blijft de Stroom.
+const PURPLE := Color("b07ae8")
 const METAL := Color(0.62, 0.55, 0.72, 1)
 
 var _playing := false
@@ -176,7 +177,7 @@ func _apply_beat(beat: int) -> void:
 		1:
 			_beat_purple()
 		2:
-			_beat_pink()
+			_beat_gloed()
 		3:
 			_beat_threat()
 		4:
@@ -202,20 +203,20 @@ func _beat_purple() -> void:
 	hanger.scale = Vector2.ONE
 
 
-func _beat_pink() -> void:
+func _beat_gloed() -> void:
 	_kill_motion()
-	hologram.modulate = Color(1, 0.9, 0.95, 1)
+	hologram.modulate = Color(0.92, 0.86, 1, 1)
 	hologram.position = _hologram_home
 	hall.color = HALL_WARM
-	hanger.color = PINK
+	hanger.color = PURPLE
 	hanger.scale = Vector2.ONE
-	hanger.modulate = Color(0.85, 0.45, 0.6, 1)
+	hanger.modulate = Color(0.55, 0.35, 0.95, 1)
 	_motion = create_tween()
 	_motion.set_loops(3)
 	_motion.tween_property(hanger, "scale", Vector2(1.18, 1.18), 0.32).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_motion.parallel().tween_property(hanger, "modulate", Color(1, 0.82, 0.9, 1), 0.32)
+	_motion.parallel().tween_property(hanger, "modulate", Color(0.86, 0.72, 1, 1), 0.32)
 	_motion.tween_property(hanger, "scale", Vector2.ONE, 0.32).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_motion.parallel().tween_property(hanger, "modulate", Color(0.75, 0.38, 0.52, 1), 0.32)
+	_motion.parallel().tween_property(hanger, "modulate", Color(0.42, 0.22, 0.78, 1), 0.32)
 
 
 func _beat_threat() -> void:
@@ -245,7 +246,7 @@ func _beat_restore() -> void:
 	hall.color = HALL_LIT
 	hologram.modulate = Color.WHITE
 	hologram.position = _hologram_home
-	hanger.color = Color(0.95, 0.72, 0.8, 1)
+	hanger.color = Color(0.72, 0.55, 0.95, 1)
 	hanger.modulate = Color.WHITE
 	hanger.scale = Vector2.ONE
 
