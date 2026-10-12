@@ -1,10 +1,12 @@
 extends Node
 ## Zet panden, deuren, iconen en sfeer-NPC's op het plein van Wilgendal.
-## Gerrit en de molen staan al in de scène; die blijven.
+## Gerrit en de molen staan al in de scène; Gerrit blijft op zijn tegel.
+## De andere vijf lopen de korte lus uit de data, tegel voor tegel.
 
 const Data := preload("res://scripts/data/wilgendal_dorp.gd")
 const NPC := preload("res://scenes/npc.tscn")
 const DEUR := preload("res://scenes/door.tscn")
+const Lus := preload("res://scripts/village/plein_lus.gd")
 
 const TEX := {
 	"pantser": preload("res://assets/sprites/buiten/wilgendal_pantser.png"),
@@ -52,6 +54,10 @@ func _sfeer(objects: Node) -> void:
 		npc.set_meta("rol", str(rij["rol"]))
 		objects.add_child(npc)
 		npc.place_at(rij["tegel"], Vector2i.DOWN)
+		var loper := Lus.new()
+		loper.name = "PleinLus"
+		loper.lus = Data.lus_tegels(rij)
+		npc.add_child(loper)
 
 
 func _pand(objects: Node, ruw: Dictionary) -> void:
