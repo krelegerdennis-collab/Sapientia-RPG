@@ -254,3 +254,13 @@ assets/sprites/buiten/molen_wieken.png
 #        (De 5 Archief 2-monsters uit batch 2 zijn NIET geintegreerd; die bouwt RPG CODE.)
 assets/sprites/enemies/mimic.png
 assets/map_monsters/mimic.png
+# v0.21: RPG ART batch 3 (art_batch3_v21/out). Lotte veld 48x96 = 3x4 frames van 16x24 (native, zoals noor_dorp);
+#        Lotte glitch 64x80 voet (32,74), De Wurger 80x96 voet (40,90), De Genezer 64x80 voet (32,74);
+#        kaart 32x64 (2x4 frames 16x16). Vervangt de placeholders uit tools/art_archief2_placeholders.py.
+assets/sprites/archief2/lotte_veld.png
+assets/sprites/archief2/lotte_glitch.png
+assets/sprites/archief2/wurger.png
+assets/sprites/archief2/genezer.png
+assets/map_monsters/lotte_glitch.png
+assets/map_monsters/wurger.png
+assets/map_monsters/genezer.png
