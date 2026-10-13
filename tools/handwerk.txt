@@ -290,3 +290,6 @@ assets/map_monsters/woudgeest.png
 #        (De wereldkaart-knoppen uit batch 8 niet; die doet RPG CODE.)
 assets/bg/spiegel_kamer.png
 assets/bg/spiegel_kamer_gebroken.png
+# v0.21: De Genezer als baas (art_genezer_boss_v21/out), volle resolutie 240x194 voeten (120,188), met rug;
+#        kaart 32x64 (map_genezer.png). Vervangt batch 3's genezer. battle.gd: "is_boss" -> tot 256x200.
+assets/sprites/archief2/genezer_rug.png

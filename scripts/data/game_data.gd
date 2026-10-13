@@ -351,6 +351,9 @@ const ENEMIES := {
 	},
 	"genezer": {
 		"name": "De Genezer", "sprite": "res://assets/sprites/archief2/genezer.png",
+		# v0.21: baas-redraw van RPG ART, 240x194 op volle resolutie, voeten (120,188).
+		"sprite_back": "res://assets/sprites/archief2/genezer_rug.png",
+		"is_boss": true,
 		"max_hp": 900, "atk": 54, "def": 36, "agi": 6, "mag": 8, "mdef": 10,
 		"exp": 90, "gold": 40, "y_offset": 0,
 		"skills": [],

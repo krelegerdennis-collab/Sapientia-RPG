@@ -92,6 +92,19 @@ func _data() -> void:
 			and int(GD.ENEMIES["genezer"]["def"]) == Archief2.GENEZER_DEF
 			and int(GD.ENEMIES["genezer"]["boss"]["atk"]) == Archief2.GENEZER_ATK
 			and int(GD.ENEMIES["genezer"]["boss"]["def"]) == Archief2.GENEZER_DEF)
+	# v0.21: baas-uitzondering in battle.gd (max 256x200), gewone vijanden blijven op 194 hoog.
+	var BattleC = load("res://scripts/battle/battle.gd")
+	var gen_tex: Texture2D = load(str(GD.ENEMIES["genezer"]["sprite"]))
+	check("Genezer-baas: is_boss, rug, 240x194 op ware grootte; baasgrens 256x200, gewoon 194",
+			bool(GD.ENEMIES["genezer"].get("is_boss", false))
+			and ResourceLoader.exists(str(GD.ENEMIES["genezer"].get("sprite_back", "")))
+			and BattleC.BOSS_MAX_ART_W == 256 and BattleC.BOSS_MAX_ART_H == 200 and BattleC.MAX_ENEMY_ART_H == 194
+			and BattleC.art_fit(gen_tex.get_size(), true) == 1.0
+			and BattleC.art_fit(Vector2(256, 200), true) == 1.0
+			and is_equal_approx(BattleC.art_fit(Vector2(256, 400), true), 0.5)
+			and is_equal_approx(BattleC.art_fit(Vector2(512, 100), true), 0.5)
+			and BattleC.art_fit(Vector2(90, 194), false) == 1.0
+			and is_equal_approx(BattleC.art_fit(Vector2(90, 200), false), 194.0 / 200.0))
 	var toegepast := BossCore.apply_boss(GD.ENEMIES["genezer"])
 	check("Genezer-baas: opening, leech, zin", bool(toegepast.get("archief2_open", false))
 			and bool(toegepast.get("archief2_leech", false))
@@ -137,7 +150,8 @@ func _data() -> void:
 		"res://assets/puzzle/groei_plaat.png": Vector2(48, 16),
 		"res://assets/sprites/archief2/lotte_veld.png": Vector2(48, 96),
 		"res://assets/sprites/archief2/lotte_glitch.png": Vector2(64, 80),
-		"res://assets/sprites/archief2/genezer.png": Vector2(64, 80),
+		"res://assets/sprites/archief2/genezer.png": Vector2(240, 194),
+		"res://assets/sprites/archief2/genezer_rug.png": Vector2(240, 194),
 		"res://assets/sprites/archief2/wurger.png": Vector2(80, 96),
 		"res://assets/sprites/archief2/plaat_zaad.png": Vector2(16, 16),
 		"res://assets/sprites/archief2/plaat_scheut.png": Vector2(16, 16),
