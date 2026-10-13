@@ -268,9 +268,12 @@ const ENEMIES := {
 	},
 	# Het Gesimuleerde Archief (Dungeon100): de Mimic, een kist die terugbijt. Komt alleen uit een
 	# Mimic-kist (scripts/data/dungeon100_blue.gd); stats = basis, de verdieping schaalt ze op.
-	# Plaatje is een PLACEHOLDER (tools/art_mimic_placeholder.py).
+	# v0.21: echte art van RPG ART (art_batch2_v21): gevecht 80x64 voet (40,58), kaart 32x64. Geen rug (niet vangbaar).
 	"mimic": {
 		"name": "Mimic", "sprite": "res://assets/sprites/enemies/mimic.png",
+		# v0.21 (wens Dennis): op de kaart een pixel-gelijke dichte Blauwe Kist. Hij loopt niet en krijgt
+		# nooit een stun-tint/-flits (ook niet na vluchten), zodat hij zichzelf niet verraadt.
+		"moves": false, "disguised": true,
 		"max_hp": 26, "atk": 12, "def": 4, "agi": 6, "mag": 0, "mdef": 3,
 		"exp": 14, "gold": 14, "y_offset": 0,
 		"skills": [{"name": "Chest Bite", "chance": 0.3, "power": 1.5}],

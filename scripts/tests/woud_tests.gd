@@ -1028,17 +1028,26 @@ func _graan_data() -> void:
 				if cmd is Array and not cmd.is_empty():
 					namen.append(str(cmd[0]))
 	check("zangscène tussen herkenning en de molen, zonder nieuwe zin", namen == ["take", "flag", "say", "molen_zang", "molen"])
-	var sheet := Wieken.placeholder_sheet().get_image()
+	# v0.21: echte molen-art (4 frames, f*45 graden) -> 8 draaistappen van 22.5 graden.
+	var art: Texture2D = load(Wieken.ART)
+	var sheet := Wieken.wieken_sheet().get_image()
+	var art_img := Wieken.art_image()
 	var tip: Vector2i = Wieken.zeil_punt(0)
+	var tip_tussen: Vector2i = Wieken.zeil_punt(1)
 	var tip2 := Vector2i(tip.x + Wieken.FRAME_W, tip.y)
-	var merk: Color = sheet.get_pixelv(Wieken.merk_pixel())
-	var hoek: Color = sheet.get_pixel(0, 0)
-	var zeil: Color = sheet.get_pixelv(tip)
-	check("placeholder-molen: 4 frames, magenta PH, wiek verschilt per frame", sheet.get_width() == Wieken.FRAME_W * Wieken.FRAMES
-			and sheet.get_height() == Wieken.FRAME_H
-			and _magenta(hoek) and _magenta(merk)
-			and zeil.a > 0.8 and not _magenta(zeil)
-			and sheet.get_pixelv(tip2).a < 0.1)
+	var stap0_is_art := sheet.get_region(Rect2i(0, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data() \
+			== art_img.get_region(Rect2i(0, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data()
+	var stap2_is_art1 := sheet.get_region(Rect2i(2 * Wieken.FRAME_W, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data() \
+			== art_img.get_region(Rect2i(Wieken.FRAME_W, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data()
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	check("echte molen-art: 4 frames 48x64, 8 stappen van 22.5 graden, wiek draait per stap", art != null
+			and art.get_width() == Wieken.FRAME_W * Wieken.FRAMES and art.get_height() == Wieken.FRAME_H
+			and hw.contains("assets/sprites/buiten/molen_wieken.png")
+			and Wieken.STAPPEN == 8 and is_equal_approx(Wieken.STAP_GRADEN, 22.5)
+			and sheet.get_width() == Wieken.FRAME_W * Wieken.STAPPEN and sheet.get_height() == Wieken.FRAME_H
+			and stap0_is_art and stap2_is_art1
+			and sheet.get_pixelv(tip).a > 0.8 and sheet.get_pixelv(tip2).a < 0.1
+			and sheet.get_pixelv(tip_tussen).a > 0.8)
 	var toon := Wieken.maak_zang()
 	var top := Wieken.piek(toon)
 	check("zacht gezang uit de noten in de data", SD.MOLEN_ZANG.size() == 5 and SD.MOLEN_NODE == "MolenWieken"
@@ -1078,7 +1087,7 @@ func _graan_tests() -> void:
 	var wieken: Node = d.get_node_or_null("Objects/MolenWieken")
 	check("molen staat stil tot het zaad binnen is", wieken != null and not wieken.draait() and wieken.frame_nu() == 0
 			and not wieken.glow_aan() and not wieken.gezongen
-			and wieken.sprite.texture == Wieken.placeholder_sheet())
+			and wieken.sprite.texture == Wieken.wieken_sheet())
 	Story.trigger("gerrit", g)
 	var dicht: Array = await run_story(6.0)
 	check("quest dicht vóór Noor", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)

@@ -103,13 +103,13 @@ const THEMES := {
 		"sprites": {},
 	},
 	# Berggrot naar de kas. Zelfde tegelnummers, koud steenblauw beeld.
-	# PLACEHOLDER: tools/art_berggrot_placeholder.py (magenta hoekjes).
+	# v0.21: echte tegels van RPG ART (art_batch1_v21). Tint lichter gemaakt (was 0.70, 0.78, 0.95: te donker).
 	# Terrein blijft "archief": de gevechtsachtergrond staat in game_data en wordt niet uitgebreid.
 	"berggrot": {
 		"tiles": "res://assets/tiles/dungeon/berggrot_tiles.png",
 		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
 		"terrain": "archief",
-		"tint": Color(0.70, 0.78, 0.95),
+		"tint": Color(0.88, 0.92, 1.0),
 		"sprites": {},
 	},
 	# Hub na De Genezer. Zelfde atlas, paarse tint.
