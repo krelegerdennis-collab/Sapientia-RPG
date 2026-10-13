@@ -12,7 +12,6 @@ extends Node2D
 
 const GIDS_SCENE := preload("res://world_warper/guide/gids.tscn")
 const WANDER_SCENE := preload("res://world_warper/wander/wanderers.tscn")
-const SAVE_SCENE := preload("res://world_warper/services/save_point.tscn")
 const PARTY_SCENE := preload("res://world_warper/services/party_select.tscn")
 const WARP_SCENE := preload("res://world_warper/warp/warp_view.tscn")
 const HANGER_SCENE := preload("res://world_warper/cutscene/hanger_scene.tscn")
@@ -29,7 +28,6 @@ const SCHERM_LAAG := 20
 var _ambience: RefCounted
 var _gids: StaticBody2D
 var _wanderers: Node2D
-var _save: Control
 var _party: Control
 var _warp: Control
 var _hanger: Node2D
@@ -69,10 +67,6 @@ func _bouw_hal() -> void:
 	_wanderers = WANDER_SCENE.instantiate() as Node2D
 	_wanderers.name = "Wanderers"
 	add_child(_wanderers)
-
-	_save = SAVE_SCENE.instantiate() as Control
-	_save.name = "Savepunt"
-	add_child(_save)
 
 	_hanger = HANGER_SCENE.instantiate() as Node2D
 	_hanger.name = "HangerScene"

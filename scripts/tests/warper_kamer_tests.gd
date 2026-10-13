@@ -8,7 +8,6 @@ const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const Dialoog := preload("res://world_warper/guide/dialoog.gd")
 const Destinations := preload("res://world_warper/warp/destinations.gd")
 const DestTest := preload("res://world_warper/warp/destinations_test.gd")
-const SavePunt := preload("res://world_warper/services/save_point.gd")
 const NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
 const Unlock := preload("res://world_warper/flow/unlock.gd")
 const Enter := preload("res://world_warper/flow/enter.gd")
@@ -255,9 +254,6 @@ func _echo_grot() -> void:
 		return
 	check("ECHO in de geladen kamer", _echo_node() != null and _player() != null)
 	var kisten := _kisten()
-	var speler := _player()
-	var pos: Dictionary = SavePunt.positie_van(speler)
-	check("savepunt leest de spelertegel", speler != null and pos["tile"] == speler.get_tile() and pos["facing"] == speler.facing)
 	check("eerste bezoek: kisten leeg en donker", kisten != null and kisten.gevuld_aantal() == 0 and kisten.licht_aantal() == 0)
 	if not _praat():
 		return
@@ -454,8 +450,6 @@ func _update2_regels() -> void:
 	check("bank en tegel in de save", weg and geladen and bank_id == "noor"
 			and str(GameState.party[0].get("id", "")) == "dennis"
 			and tegel == Vector2i(4, 5) and kijk == Vector2i.LEFT)
-	var leeg := SavePunt.positie_van(null)
-	check("zonder speler valt de tegel terug", leeg["tile"] == Vector2i.ZERO and leeg["facing"] == Vector2i.DOWN)
 
 
 func _genezer_warp() -> void:
