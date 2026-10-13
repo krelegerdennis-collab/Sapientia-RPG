@@ -10,6 +10,10 @@ signal threat_finished
 const Dreiging := preload("res://world_warper/cutscene/dreiging.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
+const WarperAccent := preload("res://world_warper/art/accent.gd")
+## v0.21 RPG ART: hanger_gloed.png (4 frames 16x16) vervangt het paarse vlak tijdens de gloed.
+const GLOED_TEX := preload("res://world_warper/art/hanger_gloed.png")
+const GLOED_SCALE := 1.5
 
 const ANCHOR_GROUP := "ww_anchor_hanger"
 const HALL_QUIET := Color("241433")
@@ -33,6 +37,10 @@ var _lines: Array[String] = []
 var _hologram_home := Vector2.ZERO
 var _motion: Tween
 var _source: Node = null
+## v0.21: geanimeerde gloed (kind van de Hanger, volgt zijn schaal- en kleurpuls)
+var gloed: TextureRect
+var gloed_frame := 0
+var _gloed_t := 0.0
 
 @onready var layer: CanvasLayer = $Layer
 @onready var hall: ColorRect = $Layer/Hall
@@ -48,9 +56,55 @@ var _source: Node = null
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_style()
+	_maak_gloed()
 	layer.visible = false
 	_layout()
 	call_deferred("_layout_if_idle")
+
+
+func _maak_gloed() -> void:
+	var at := AtlasTexture.new()
+	at.atlas = GLOED_TEX
+	at.region = Rect2(Vector2.ZERO, Vector2(WarperAccent.HANGER_FRAME))
+	gloed = TextureRect.new()
+	gloed.name = "Gloed"
+	gloed.texture = at
+	gloed.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	gloed.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	gloed.stretch_mode = TextureRect.STRETCH_SCALE
+	gloed.size = Vector2(WarperAccent.HANGER_FRAME) * GLOED_SCALE
+	gloed.visible = false
+	hanger.add_child(gloed)
+	_zet_gloed(false)
+
+
+## Gloed aan = het plaatje, het vlak zelf onzichtbaar (kleur blijft de status). Uit = metalen Hanger.
+func _zet_gloed(aan: bool) -> void:
+	if gloed == null:
+		return
+	gloed.visible = aan
+	hanger.self_modulate.a = 0.0 if aan else 1.0
+	var hs := _control_size(hanger, Vector2(14, 22))
+	gloed.position = ((hs - gloed.size) * 0.5).round()
+	if aan:
+		gloed_frame = 0
+		_gloed_t = 0.0
+		_toon_frame()
+
+
+func _toon_frame() -> void:
+	(gloed.texture as AtlasTexture).region = Rect2(Vector2(gloed_frame * WarperAccent.HANGER_FRAME.x, 0),
+			Vector2(WarperAccent.HANGER_FRAME))
+
+
+func _process(delta: float) -> void:
+	if gloed == null or not gloed.visible:
+		return
+	_gloed_t += delta
+	while _gloed_t >= WarperAccent.HANGER_FRAME_TIME:
+		_gloed_t -= WarperAccent.HANGER_FRAME_TIME
+		gloed_frame = (gloed_frame + 1) % WarperAccent.HANGER_FRAMES
+		_toon_frame()
 
 
 func maybe_play(flags_source: Node = null) -> void:
@@ -160,6 +214,7 @@ func _finish() -> void:
 	_playing = false
 	_kill_motion()
 	_mark_intro_seen()
+	_zet_gloed(false)
 	layer.visible = false
 	_source = null
 	threat_finished.emit()
@@ -201,6 +256,7 @@ func _beat_purple() -> void:
 	hanger.color = METAL
 	hanger.modulate = Color.WHITE
 	hanger.scale = Vector2.ONE
+	_zet_gloed(false)
 
 
 func _beat_gloed() -> void:
@@ -209,6 +265,7 @@ func _beat_gloed() -> void:
 	hologram.position = _hologram_home
 	hall.color = HALL_WARM
 	hanger.color = PURPLE
+	_zet_gloed(true)
 	hanger.scale = Vector2.ONE
 	hanger.modulate = Color(0.55, 0.35, 0.95, 1)
 	_motion = create_tween()
@@ -221,6 +278,7 @@ func _beat_gloed() -> void:
 
 func _beat_threat() -> void:
 	_kill_motion()
+	_zet_gloed(false)
 	hanger.scale = Vector2.ONE
 	hanger.modulate = Color(0.55, 0.5, 0.6, 1)
 	hall.color = HALL_THREAT
@@ -247,6 +305,7 @@ func _beat_restore() -> void:
 	hologram.modulate = Color.WHITE
 	hologram.position = _hologram_home
 	hanger.color = Color(0.72, 0.55, 0.95, 1)
+	_zet_gloed(false)
 	hanger.modulate = Color.WHITE
 	hanger.scale = Vector2.ONE
 

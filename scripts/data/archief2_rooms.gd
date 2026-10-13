@@ -247,8 +247,8 @@ static func rooms() -> Dictionary:
 			"ECHO bedient de hub. Stap op het pad en kies.",
 		]}],
 		"sfeer": [
-			{"name": "Echo", "texture": "res://assets/sprites/archief2/echo.png", "tile": [4, 6], "scale": 1.0},
-			{"name": "Warper", "texture": "res://assets/sprites/archief2/world_warper.png", "tile": [14, 4], "scale": 0.25},
+			{"name": "Echo", "texture": "res://assets/sprites/archief2/echo_groen.png", "tile": [4, 6], "scale": 1.0},
+			{"name": "Warper", "texture": "res://assets/sprites/archief2/world_warper_groen.png", "tile": [14, 4], "scale": 0.25},
 			{"name": "Sapientia", "texture": "res://assets/sprites/archief2/sapientia_glitch.png", "tile": [15, 7], "scale": 0.5},
 		],
 	})
