@@ -26,6 +26,7 @@ const EquipmentScreen := preload("res://scripts/ui/equipment_screen.gd")
 const SaveScreen := preload("res://scripts/ui/save_screen.gd")
 const CodexScreen := preload("res://scripts/ui/codex_screen.gd")
 const PartyScreen := preload("res://scripts/ui/party_screen.gd")
+const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
 const LoadScreen := preload("res://scripts/ui/load_screen.gd")   # v0.22 Load vanuit het veldmenu   # v0.22 partylimiet
 
 const LAYER := 20
@@ -38,7 +39,9 @@ const MENU_H := 20
 const WARP_W := 96
 const WARP_H := 24
 ## v0.22 rechterkolom (compact, onder het MENU-bord), van boven naar beneden
-const RIGHT_COL := ["warp", "party", "options", "load"]
+const RIGHT_COL := ["warp", "party", "scenes", "options", "load"]
+## v0.22 linkerkolom (grote knoppen); 5 x 30 + tussenruimte eindigt op y=182, past op 216 hoog (telefoon)
+const LEFT_COL := ["equip", "codex", "items", "magic", "bestiary"]
 ## Minimale tikhoogte (de knoppen zelf zijn hoger). Tests leunen op deze naam.
 const ROW_H := 16
 const MESSAGE_TIME := 2.5
@@ -52,8 +55,10 @@ const COMMANDS := [
 	["codex", "Codex"],
 	["items", "Items"],
 	["magic", "Magic"],
+	["bestiary", "Bestiary"],
 	["warp", "Warp"],
 	["party", "Party"],
+	["scenes", "Scenes"],
 	["options", "Settings"],
 	["load", "Load"],
 ]
@@ -164,8 +169,8 @@ func _style_button(b: Button, gold: bool) -> void:
 
 
 func _link_focus() -> void:
-	# v0.22: linkerkolom Uitrusting > Codex > Items > Magic (ring), rechts Warpen > Party
-	var col: Array = [buttons["equip"], buttons["codex"], buttons["items"], buttons["magic"]]
+	# v0.22: linkerkolom LEFT_COL (ring), rechterkolom RIGHT_COL
+	var col: Array = LEFT_COL.map(func(id): return buttons[id])
 	var wp: Button = buttons["warp"]
 	var pt: Button = buttons["party"]
 	for i in col.size():
@@ -178,7 +183,7 @@ func _link_focus() -> void:
 		b.focus_neighbor_top = b.focus_previous
 		b.focus_neighbor_right = b.get_path_to(wp)
 	var eq: Button = col[0]
-	# rechterkolom: Warp > Party > Settings > Load, daarna weer de linkerkolom
+	# rechterkolom: Warp > Party > Scenes > Settings > Load, daarna weer de linkerkolom
 	var rc: Array = RIGHT_COL.map(func(id): return buttons[id])
 	for i in rc.size():
 		var b: Button = rc[i]
@@ -200,7 +205,7 @@ func _layout() -> void:
 	var right_x := left_x + LEFT_W + GAP
 	var right_w := maxf(80.0, w - right_x - MARGIN)
 	var y := top
-	for id in ["equip", "codex", "items", "magic"]:
+	for id in LEFT_COL:
 		var b: Button = buttons[id]
 		b.position = Vector2(left_x, y)
 		b.size = Vector2(LEFT_W, BUTTON_H)
@@ -304,6 +309,8 @@ func choose(id: String) -> void:
 			open_warp()
 		"load":
 			open_load()
+		"scenes":
+			open_scenes()
 		"party":
 			open_party()
 		"close":
@@ -370,6 +377,15 @@ func open_party() -> void:
 	if buttons.has("party"):
 		_last_focus = buttons["party"]
 	_open_sub(PartyScreen.new(), "Party")
+
+
+## v0.22 Scenes: bekeken cutscenes opnieuw afspelen (scripts/ui/scenes_screen.gd).
+func open_scenes() -> void:
+	if sub != null:
+		return
+	if buttons.has("scenes"):
+		_last_focus = buttons["scenes"]
+	_open_sub(ScenesScreen.new(), "Scenes")
 
 
 func open_bestiary() -> void:

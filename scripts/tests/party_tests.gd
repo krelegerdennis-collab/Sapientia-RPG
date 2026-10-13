@@ -61,6 +61,9 @@ func _run() -> void:
 	if part("D"):
 		print("=== Deel D: veldmenu > Party ===")
 		await _menu_tests()
+	if part("E"):
+		print("=== Deel E: veldmenu > Scenes ===")
+		await _scenes_tests()
 	print("PARTYTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -628,6 +631,118 @@ func _menu_tests() -> void:
 	await wait_fade()
 	check("'Yes': slot geladen, terug op de kaart, niet-opgeslagen wijziging weg (%s)" % str(GameState.party[1]["name"]),
 			terug and str(GameState.party[1]["name"]) != "Gewijzigd")
+
+
+# ================================================================ Deel E: Scenes
+const ScenesDataT := preload("res://scripts/data/scenes_data.gd")
+
+
+func _scenes_tests() -> void:
+	# save-roundtrip en migratie (zonder scherm)
+	GameState.story_flags.erase(ScenesDataT.WORLDMAP_FLAG)
+	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	GameState.scenes_seen = []
+	check("scenes: lijst = alle cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "hanger"]
+			and GameState.seen_scenes().is_empty())
+	GameState.mark_scene_seen("hanger")
+	GameState.mark_scene_seen("bestaat_niet")
+	var pad := "user://partytest_scenes.json"
+	var weg := GameState.save_game(Vector2i(3, 3), Vector2i.DOWN, pad)
+	var ruw := GameState.read_save(pad)
+	check("save: scenes_seen = ['hanger'] (%s)" % [ruw.get("scenes_seen")], weg and ruw.get("scenes_seen") == ["hanger"])
+	GameState.scenes_seen = []
+	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	var ok := GameState.load_game(pad)
+	check("load: scenes_seen terug", ok and GameState.scenes_seen == ["hanger"] and not GameState.scene_seen("wereldkaart"))
+	var oud := ruw.duplicate(true)
+	oud.erase("scenes_seen")
+	(oud["story"] as Dictionary)["flags"] = [ScenesDataT.WORLDMAP_FLAG]
+	_write("user://partytest_scenes_oud.json", oud)
+	ok = GameState.load_game("user://partytest_scenes_oud.json")
+	check("migratie: oude save zonder scenes_seen, vlag wereldkaart gezet -> gezien (%s)" % [GameState.scenes_seen],
+			ok and GameState.scenes_seen == ["wereldkaart"])
+	# scherm
+	GameState.scenes_seen = []
+	GameState.story_flags.erase(ScenesDataT.WORLDMAP_FLAG)
+	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	var m: Node = null
+	for poging in 10:
+		await tap("menu")
+		await frames(3)
+		m = field_menu()
+		if m != null:
+			break
+		await pframes(20)
+	if m == null:
+		check("veldmenu open (scenes)", false)
+		return
+	await pframes(4)
+	check("veldmenu: Bestiary en Scenes aanwezig, binnen beeld", m.buttons.has("bestiary") and m.buttons.has("scenes")
+			and Rect2(Vector2.ZERO, m.root.size).encloses(m.buttons["bestiary"].get_global_rect())
+			and Rect2(Vector2.ZERO, m.root.size).encloses(m.buttons["load"].get_global_rect()))
+	var overlap := false
+	var ids: Array = m.buttons.keys()
+	for i in ids.size():
+		for j in range(i + 1, ids.size()):
+			overlap = overlap or m.buttons[ids[i]].get_global_rect().intersects(m.buttons[ids[j]].get_global_rect())
+	check("veldmenu: geen knoppen over elkaar", not overlap)
+	await screenshot("veldmenu_scenes_knop")
+	await click(m.buttons["bestiary"])
+	await pframes(4)
+	check("Bestiary opent het bestiarium", m.sub != null and m.sub.name == "Bestiary")
+	if m.sub != null:
+		m.sub.close()
+		await pframes(4)
+	await click(m.buttons["scenes"])
+	await pframes(4)
+	var sc: Node = m.sub
+	check("Scenes opent het scenes-scherm", sc != null and sc.name == "Scenes" and sc.buttons.size() == 2)
+	if sc == null:
+		return
+	check("niet bekeken: '???' en op slot", sc.buttons[0].text.ends_with("???") and sc.is_locked(0) and sc.is_locked(1))
+	await screenshot("scenes_op_slot")
+	sc.choose("wereldkaart")
+	await pframes(2)
+	check("op slot: speelt niet af", sc.playing == null and sc.message_text() == sc.LOCKED_MSG)
+	# bekijken = ontgrendelen (de Hanger-scène zet zelf zijn vlag / mark_scene_seen)
+	var h: Node = load("res://world_warper/cutscene/hanger_scene.tscn").instantiate()
+	var bron := ScenesDataT.FlagBron.new()
+	h.add_child(bron)
+	get_tree().root.add_child(h)
+	h.maybe_play(bron)
+	await pframes(2)
+	h._finish()
+	h.queue_free()
+	await pframes(2)
+	check("Hanger bekeken -> ontgrendeld", GameState.scene_seen("hanger"))
+	WorldmapCutscene.start_on(scene())
+	await pframes(2)
+	for c in scene().get_children():
+		if c is WorldmapCutscene:
+			c._finish()
+	await pframes(3)
+	check("wereldkaart bekeken -> ontgrendeld", GameState.scene_seen("wereldkaart") and GameState.scenes_seen.has("wereldkaart"))
+	sc._fill()
+	await pframes(2)
+	check("lijst toont nu de titels", sc.buttons[0].text.ends_with(ScenesDataT.SCENES[0]["title"]) and not sc.is_locked(0)
+			and sc.buttons[1].text.ends_with(ScenesDataT.SCENES[1]["title"]) and not sc.is_locked(1))
+	await screenshot("scenes_scherm")
+	# herhaling: afspelen en terug naar het scherm
+	for id in ["hanger", "wereldkaart"]:
+		await click(sc.buttons[ScenesDataT.ids().find(id)])
+		await pframes(4)
+		check("%s: herhaling speelt" % id, sc.playing != null and is_instance_valid(sc.playing))
+		if id == "hanger":
+			await screenshot("scenes_herhaling_hanger")
+		sc.finish_replay()
+		await pframes(4)
+		check("%s: na afloop terug in Scenes (focus in de lijst)" % id, sc.playing == null and m.sub == sc and is_instance_valid(sc)
+				and get_tree().root.get_node_or_null("SceneReplay") == null and sc.buttons.any(func(b): return b.has_focus()))
+	sc.close()
+	await pframes(4)
+	check("Scenes dicht: terug in het veldmenu", m.sub == null and m.buttons["scenes"].has_focus())
+	m.close()
+	await pframes(3)
 
 
 func click(c: Control) -> void:
