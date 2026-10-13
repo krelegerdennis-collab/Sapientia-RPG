@@ -280,3 +280,13 @@ assets/map_monsters/bloeiende_schrik.png
 assets/sprites/enemies/wortelgeest.png
 assets/sprites/enemies/wortelgeest_rug.png
 assets/map_monsters/wortelgeest.png
+# v0.21: RPG ART batch 7 (art_batch7_v21/out): warper Diepe Grot 64x16 (4 frames 16x16, geen tint meer);
+#        Woudgeest gevecht/rug 90x90 (staartpunt 45,84) en kaart 32x64 (was map_woudgeest.png).
+assets/sprites/dungeon100_warper.png
+assets/sprites/enemies/woudgeest.png
+assets/sprites/enemies/woudgeest_rug.png
+assets/map_monsters/woudgeest.png
+# v0.21: RPG ART batch 8 (art_batch8_v21/out): De Spiegel (Archief 4), achtergrond 384x216, heel en gebroken.
+#        (De wereldkaart-knoppen uit batch 8 niet; die doet RPG CODE.)
+assets/bg/spiegel_kamer.png
+assets/bg/spiegel_kamer_gebroken.png

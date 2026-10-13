@@ -5,12 +5,11 @@ class_name Dungeon100Warper
 ## 25, 50, 75 en 99 vragen of je de dungeon verlaat. Ja gaat naar ECHO's Kamer.
 ## Nee of annuleren laat je staan.
 ##
-## PLAATJE PLACEHOLDER: het opslagboek, violet getint. Geen eigen bestand.
-## Zie tools/placeholders_v17.txt. Echte art: assets/sprites/dungeon100_warper.png (64x16).
+## v0.21: eigen art van RPG ART (batch 7): assets/sprites/dungeon100_warper.png (64x16, 4 frames).
+## De art is zelf violet, dus geen tint meer.
 
 const RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const SCENE := "res://scenes/dungeon100_warper.tscn"
-const TINT := Color(0.78, 0.62, 1.0)
 
 ## Voor de tests: "" | "start" | "cancelled" | "travel".
 var last_dest := -1
@@ -28,7 +27,6 @@ static func create(tile: Vector2i) -> Node2D:
 
 func _ready() -> void:
 	super._ready()
-	sprite.modulate = TINT
 
 
 func interact(player: Node2D) -> void:

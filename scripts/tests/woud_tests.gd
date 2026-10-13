@@ -1067,9 +1067,13 @@ func _graan_data() -> void:
 	check("mini-gevecht: twee woudgeesten, daarna het zaad", gevecht[0] == "battle" and gevecht[1] == ["woudgeest", "woudgeest"]
 			and str(gevecht[2]["after"]) == "zingend_zaad_na")
 	var wg: Dictionary = GD.ENEMIES["woudgeest"]
-	check("Woudgeest is klein, hoort in het woud, art nog placeholder", wg["name"] == "Woudgeest" and int(wg["max_hp"]) <= 16
-			and "woud" in wg["habitat"] and bool(wg.get("art_pending", false)) and GD.enemy_sprite_is_placeholder(wg)
-			and ResourceLoader.exists(GD.enemy_sprite(wg)))
+	# v0.21: eigen art van RPG ART (batch 7), niet meer de Mosslijm-plaatsvervanger.
+	var wg_kaart: Texture2D = load("res://assets/map_monsters/woudgeest.png")
+	check("Woudgeest is klein, hoort in het woud, eigen art (voor/rug 90x90, kaart 32x64)", wg["name"] == "Woudgeest" and int(wg["max_hp"]) <= 16
+			and "woud" in wg["habitat"] and not bool(wg.get("art_pending", false)) and not GD.enemy_sprite_is_placeholder(wg)
+			and GD.enemy_sprite(wg) == "res://assets/sprites/enemies/woudgeest.png"
+			and (load(GD.enemy_sprite(wg)) as Texture2D).get_size() == Vector2(90, 90)
+			and ResourceLoader.exists(str(wg["sprite_back"])) and wg_kaart != null and wg_kaart.get_size() == Vector2(32, 64))
 	check("bestiarium 007-012 blijft gelijk", GD.bestiary_ids().slice(6, 12) == ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning", "mimic", "inktwurm"])
 	check("Zingend Zaad is een sleutel, Zingend Meel geneest", GD.KEY_ITEMS[SD.ITEM_ZAAD]["name"] == "Zingend Zaad"
 			and GD.ITEMS[SD.ITEM_MEEL]["name"] == "Zingend Meel" and int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"]) > 0

@@ -436,13 +436,12 @@ const ENEMIES := {
 		"desc": "A pale ghost of roots. It pulls you toward it, so your next strike can only find the ghost.",
 		"habitat": ["archief"],
 	},
-	# Het Zingende Graan: klein mini-gevecht op de mistrand. Geen eigen art (art_pending).
+	# Het Zingende Graan: klein mini-gevecht op de mistrand. v0.21: eigen art van RPG ART (batch 7).
 	# Bestiariumnummer 025: 013-024 zijn de twaalf eindbazen van de Diepe Grot (endgame_bestiary.gd).
 	"woudgeest": {
 		"name": "Woudgeest",
 		"sprite": "res://assets/sprites/enemies/woudgeest.png",
 		"sprite_back": "res://assets/sprites/enemies/woudgeest_rug.png",
-		"art_pending": true,
 		"max_hp": 12, "atk": 6, "def": 1, "agi": 5, "mag": 0, "mdef": 1,
 		"exp": 4, "gold": 2, "y_offset": 0,
 		"skills": [],
