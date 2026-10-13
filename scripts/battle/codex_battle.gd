@@ -26,6 +26,9 @@ var last_capture := {}
 ## Laatste actie van de bondgenoot: {"kind": "attack"/"skill", "skill", "target"}
 var last_ally_action := {}
 var fx_node: Control = null
+## v0.22 partylimiet (spec RPG Forge): standaard UIT. Alleen de oude fusietest zet hem aan om
+## het (nog bestaande) wissel-pad in het gevecht te blijven dekken.
+var wissel_in_gevecht := false
 
 
 func _init(b: Control) -> void:
@@ -57,6 +60,7 @@ func add_allies() -> void:
 	box.name = "Status_Codex"
 	battle.status_bar.add_child(box)
 	box.setup(page)
+	box.monster = true                              # v0.22: monstervak ziet er anders uit
 	box.tapped.connect(battle._on_hero_tapped.bind(row))
 	battle.status_boxes.append(box)
 
@@ -216,8 +220,10 @@ func swap_choices() -> Array:
 
 
 ## Kan er überhaupt gewisseld worden? (iets anders dan de huidige keuze)
+## v0.22 partylimiet: monsters wissel je alleen BUITEN het gevecht (veldmenu > Party / Codex);
+## wissel_in_gevecht = false zet de knop in het gevecht uit.
 func can_swap() -> bool:
-	if not battle.tutorial.is_empty():
+	if not battle.tutorial.is_empty() or not wissel_in_gevecht:
 		return false
 	var cur := current_ally_uid()
 	if cur != "":

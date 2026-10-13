@@ -1019,8 +1019,10 @@ func _codex_button_tests() -> void:
 	var opened: bool = await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Codex", 3.0)
 	check("tik op Codex opent het submenu 'Codex'", opened)
 	var t0: String = bt.menu._entries[0]["text"]
-	check("submenu: Vangen (Boek x2) + Wissel bondgenoot, beide aan ('%s')" % t0, bt.menu._entries.size() == 2
-			and "Book x2" in t0 and bt.menu._is_enabled(0) and bt.menu._is_enabled(1))
+	# v0.22 partylimiet: wisselen in het gevecht staat uit ('Swap: outside battle', grijs)
+	check("submenu: Vangen (Boek x2) aan + Wissel grijs ('%s' / '%s')" % [t0, bt.menu._entries[1]["text"]], bt.menu._entries.size() == 2
+			and "Book x2" in t0 and bt.menu._is_enabled(0) and not bt.menu._is_enabled(1)
+			and str(bt.menu._entries[1]["text"]) == "Swap: outside battle")
 	await pframes(4)
 	check("submenu: regels >= 16 hoog (%.0f)" % bt.menu.row_button(0).size.y, rows_ok(bt))
 	var cr: Rect2 = bt.cross.cross_rect()
@@ -1065,6 +1067,9 @@ func _codex_button_tests() -> void:
 			bt.codex.last_capture.get("result", "") == "gelukt" and GameState.item_count(CD.BOOK_ITEM) == 1
 			and GameState.codex_pages.size() == pages_before + 1 and bool(victim.get("captured", false)))
 	bt.codex.force_roll = -1.0
+	# v0.22 partylimiet: wisselen in het gevecht staat standaard uit (alleen via het menu)
+	check("partylimiet: in het gevecht niet wisselen (standaard)", not bt.codex.can_swap())
+	bt.codex.wissel_in_gevecht = true    # oud wissel-pad blijft gedekt
 	# Wissel bondgenoot
 	if not await open_codex(bt):
 		check("Codex-submenu (beurt 2)", false)

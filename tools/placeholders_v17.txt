@@ -77,3 +77,4 @@ assets/sprites/buiten/wilgendal_ring.png        48x16    uithangbord ring (acces
 assets/sprites/buiten/wilgendal_ster.png        48x16    uithangbord ster (magic)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 assets/sprites/buiten/wilgendal_toonbank.png    48x16    toonbank in de winkel   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 assets/sprites/buiten/wilgendal_vitrine.png     48x16    item-display in de winkel   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+(code, geen bestand) hero_status_box.gd _draw_monster_icon   7x6    Codex-icoontje rechtsboven in het monstervak (gevecht, v0.22 partylimiet)   [PLACEHOLDER: getekend in code; echte art gewenst: assets/ui/icon_monstervak.png 7x6 (14x12 op 2x)]
