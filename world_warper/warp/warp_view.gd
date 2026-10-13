@@ -21,6 +21,13 @@ const LABEL_DICHT := "Vergrendeld"
 const LABEL_TERUG := "Terug"
 const LABEL_REIS := "Reis"
 const LABEL_PLAATSHOUDER := "PLACEHOLDER"
+## v0.21 RPG ART (art_batch8_v21): knop_<id>.png / knop_<id>_ingedrukt.png, 48x16, op 2x getoond.
+const KNOP_DIR := "res://world_warper/art/"
+const KNOP_SCHAAL := 2.0
+## Plaatsen zonder eigen knop. TIJDELIJKE AANNAME: dorpen = knop_village, de wereldkaart = de knop van die wereld.
+const KNOP_DORPEN := ["wilgendal", "esdoorn"]
+const TINT_DICHT := Color(0.45, 0.42, 0.52, 1)
+const TINT_GEKOZEN := Color(1.25, 1.15, 1.35, 1)
 
 const STEP_WORLDS := 0
 const STEP_PLACES := 1
@@ -180,7 +187,60 @@ func _show_step() -> void:
 	_travel.disabled = _step != STEP_PLACES or gekozen.is_empty()
 
 
+## v0.21: knop-id voor een rij ("" = geen art, dan de oude vlakke knop).
+func knop_id(row_id: String) -> String:
+	var id := row_id.to_lower()
+	if _step == STEP_PLACES:
+		id = "village" if row_id in KNOP_DORPEN else _wm_id.to_lower()
+	return id if ResourceLoader.exists(KNOP_DIR + "knop_%s.png" % id) else ""
+
+
 func _add_row(row_id: String, naam: String, dicht: bool, gekozen: bool, on_press: Callable) -> void:
+	var art := knop_id(row_id)
+	if art == "":
+		_add_flat_row(row_id, naam, dicht, gekozen, on_press)
+		return
+	var rij := HBoxContainer.new()
+	rij.name = "Regel_%s" % row_id
+	rij.custom_minimum_size = Vector2(0, RIJ_HOOG)
+	rij.add_theme_constant_override("separation", 6)
+	_rows.add_child(rij)
+
+	var knop := TextureButton.new()
+	knop.name = "Rij_%s" % row_id
+	knop.texture_normal = load(KNOP_DIR + "knop_%s.png" % art)
+	knop.texture_pressed = load(KNOP_DIR + "knop_%s_ingedrukt.png" % art)
+	knop.texture_hover = knop.texture_normal
+	knop.texture_disabled = knop.texture_normal
+	knop.ignore_texture_size = true
+	knop.stretch_mode = TextureButton.STRETCH_SCALE
+	knop.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	knop.custom_minimum_size = Vector2(knop.texture_normal.get_size()) * KNOP_SCHAAL
+	knop.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	knop.disabled = dicht
+	knop.focus_mode = Control.FOCUS_NONE if dicht else Control.FOCUS_ALL
+	knop.self_modulate = TINT_DICHT if dicht else (TINT_GEKOZEN if gekozen else Color.WHITE)
+	knop.pressed.connect(on_press)
+	rij.add_child(knop)
+
+	var label := Label.new()
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.text = naam
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_color_override("font_color", UiStyle.TEXT_DIM if dicht else (UiStyle.HILITE_HOT if gekozen else UiStyle.TEXT))
+	rij.add_child(label)
+
+	if dicht:
+		var slot := Label.new()
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.text = LABEL_DICHT
+		slot.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		slot.add_theme_color_override("font_color", UiStyle.TEXT_OFF)
+		rij.add_child(slot)
+
+
+func _add_flat_row(row_id: String, naam: String, dicht: bool, gekozen: bool, on_press: Callable) -> void:
 	var knop := Button.new()
 	knop.name = "Rij_%s" % row_id
 	knop.text = ""
