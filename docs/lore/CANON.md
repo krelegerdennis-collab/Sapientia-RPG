@@ -50,6 +50,10 @@ wat hier staat. Wat hier niet staat: dan geldt wat er in de game staat (`scripts
       Kael zelf Confused).
     - **Joint**: in **WM2** (exact moment nog open).
 
+13. **Party-regel**. Max **4 actieve helden** + **1 monster** (Codex-gevangen) in
+    gevecht; overige helden in reserve, wisselbaar buiten gevecht. (Besluit Dennis
+    2026-10-13.)
+
 ## Makkelijk over te nemen (botst niet)
 
 Uit `BOTSINGEN.md`; dit mag zonder verdere beslissing gebruikt worden:
