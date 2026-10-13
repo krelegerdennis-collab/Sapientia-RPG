@@ -13,6 +13,7 @@ extends Node2D
 ## (na een gevecht of na een overgang), uitgangen en random encounters.
 
 const TILE := 16
+const WarperAccent := preload("res://world_warper/art/accent.gd")
 const FieldFollowerScript := preload("res://scripts/field_follower.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const BerggrotHaak := preload("res://scripts/data/berggrot_data.gd")
@@ -56,6 +57,9 @@ func _ready() -> void:
 		GameState.pending_spawn = ""
 
 	_spawn_follower()
+	# v0.21 World Warper-art: accent per Archief (world_warper/art/accent.gd), na de opbouw van de kamer
+	if scene_file_path.begins_with("res://world_warper/"):
+		call_deferred("_warper_accent")
 	# v0.19 kamer-checkpoint: waar je deze map binnenkwam (zie GameState.checkpoint)
 	_update_checkpoint()
 	player.stepped.connect(_on_player_stepped)
@@ -290,3 +294,9 @@ func start_boss_battle() -> void:
 	var g := GameState.boss_group()
 	if not g.is_empty():
 		start_battle(g["enemies"].duplicate(), true)
+
+
+## v0.21: Warper-art op het accent van het huidige Archief (grijs = Archief 1).
+func _warper_accent() -> void:
+	if is_inside_tree():
+		WarperAccent.apply_to(self, WarperAccent.current())
