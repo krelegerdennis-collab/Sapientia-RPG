@@ -574,7 +574,7 @@ func _scene_tests() -> void:
 			r.room_id == Gen.room_id(run_seed, 1) and r.map_name == "Deep Cave - Floor 1" and r.room["layout"] == d["layout"]
 			and r.chests.size() == d["chest_slots"].size() and r.cell(d["stairs_down"]) == 58 and r.cell(d["stairs_up"]) == 45
 			and not r.is_wall(d["spawn_up"]) and r.is_wall(d["spawn_up"] + Vector2i(-3, -3)))
-	check("geen random encounters in de grot, terrein = archief", not r.encounters and r.terrain_at(d["spawn_up"]) == "archief")
+	check("geen random encounters in de grot, terrein = dungeon100 (v0.21: eigen gevechtsachtergrond)", not r.encounters and r.terrain_at(d["spawn_up"]) == "dungeon100")
 	await screenshot("d100_verdieping1")
 	# lopend van de ingang naar de trap omlaag (echte botsing, 1 tegel per stap)
 	var route := _route(r, d["spawn_up"], d["stairs_down"])

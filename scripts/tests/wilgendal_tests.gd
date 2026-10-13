@@ -119,8 +119,10 @@ func _art() -> void:
 			var img := tex.get_image()
 			var hoek := img.get_pixel(0, 0)
 			var inkt := img.get_pixel(2, 2)
-			ok = hoek.r > 0.9 and hoek.g < 0.15 and hoek.b > 0.9 and inkt.r > 0.9 and inkt.g > 0.8
-		check("placeholder %s %dx%d" % [pad.get_file(), maat.x, maat.y], ok)
+			# v0.21: echte art van RPG ART (batch 13): geen magenta placeholder-hoek meer, wel in handwerk.txt
+			ok = not (hoek.r > 0.9 and hoek.g < 0.15 and hoek.b > 0.9 and inkt.r > 0.9 and inkt.g > 0.8) \
+					and FileAccess.get_file_as_string("res://tools/handwerk.txt").contains(pad.trim_prefix("res://"))
+		check("echte art %s %dx%d" % [pad.get_file(), maat.x, maat.y], ok)
 
 
 func _wereld() -> void:
