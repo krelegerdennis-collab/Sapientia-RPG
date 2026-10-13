@@ -24,7 +24,7 @@ Status: **PH** = placeholder staat in repo (zelfde maat); **—** = nog geen bes
 | 6 | assets/puzzle/groei_plaat.png | 48×16, 3 van 16×16 | PH |
 | 7 | assets/sprites/buiten/kas_ingang.png | 16×16 | PH |
 | 8 | assets/tiles/dungeon/archief2_kas_tiles.png | 256×80 | PH |
-| 9 | assets/sprites/archief2/lotte_veld.png | 48×96 (3×4 van 16×32) | PH |
+| 9 | assets/sprites/archief2/lotte_veld.png | 48×96 (3×4 van 16×24) | ✅ RPG ART batch 3 (v0.21) |
 | 10 | assets/sprites/archief2/lotte_glitch.png | 64×80 | PH |
 | 11 | assets/sprites/archief2/genezer.png | 64×80 | PH |
 | 12 | assets/sprites/archief2/wurger.png | 80×96 | PH |
@@ -39,8 +39,8 @@ Status: **PH** = placeholder staat in repo (zelfde maat); **—** = nog geen bes
 | 23 | assets/sprites/enemies/woudgeest.png | maat open (vgl. 90×94) | — (gebruikt mosslijm.png) |
 | 24 | assets/sprites/enemies/woudgeest_rug.png | = vooraanzicht | — |
 | 25 | assets/map_monsters/woudgeest.png | 32×64, 2×4 (alleen als hij gaat lopen) | — |
-| 26 | world_warper/art/echo_placeholder.png | 48×96, 3×4 van 16×32 | PH |
-| 27 | world_warper/art/party_placeholder.png | 48×96, 3×4 van 16×32 | PH |
+| 26 | world_warper/art/echo_placeholder.png | 48×96, 3×4 van 16×24 | PH |
+| 27 | world_warper/art/party_placeholder.png | 48×96, 3×4 van 16×24 | PH |
 | 28 | world_warper/art/pc_placeholder.png | 32×32 (main PC + terminal) | PH |
 | 29 | world_warper/art/warp_platform.png | 32×16 | PH |
 | 30 | world_warper/art/tafel_placeholder.png | 32×16 | PH |
@@ -57,7 +57,7 @@ Status: **PH** = placeholder staat in repo (zelfde maat); **—** = nog geen bes
 | 41-49 | steenluis / druipslak / adermot: enemy + _rug + map | 90×90, 90×90, 32×64 (2×4) | PH (alle 9) |
 | 50 | Hanger-oplichteffect (paarse gloed `b07ae8`) | maat open (voorstel 16×16, 4 frames) | — (code kleurt) |
 | 51 | UI wereldkaart-view WM1/WM2/WM3/dorp (knoppen) | maat open | PH (vlakke knoppen) |
-| 52 | Loop-animaties party + Codex-monsters in hub | per figuur 48×96, 3×4 van 16×32 | PH (kleurvlakken) |
+| 52 | Loop-animaties party + Codex-monsters in hub | per figuur 48×96, 3×4 van 16×24 | PH (kleurvlakken) |
 | 53 | 5 vijanden Archief 2: rankje, sporekop, doornige_loper, bloeiende_schrik, wortelgeest (Codex-vangbaar: sporekop, rankje, wortelgeest) | per vijand 90×90 voor + 90×90 rug + map 32×64 (2×4 frames van 16×16) | — |
 | 54 | 6 kleurvarianten World Warper (grijs/groen/oranje/roze/blauw/rood + paars) | maat als warper-basis | — |
 
