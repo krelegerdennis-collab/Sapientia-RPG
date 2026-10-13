@@ -261,7 +261,7 @@ func _main_menu_tests() -> void:
 	var labels := []
 	for c in m.commands():
 		labels.append(str(m.buttons[c[0]].get_meta("label")))
-	check("vier knoppen %s" % [labels], labels == ["Uitrusting", "Codex", "Items", "Warpen"] and m.buttons.size() == 4)
+	check("vier knoppen %s" % [labels], labels == ["Equipment", "Codex", "Items", "Warp"] and m.buttons.size() == 4)
 	check("label MENU boven Warpen", m.menu_label.text == "MENU"
 			and m.menu_label.get_global_rect().end.y <= m.buttons["warp"].get_global_rect().position.y + 1.0)
 	check("'Uitrusting' heeft de focus", m.buttons["equip"].has_focus())

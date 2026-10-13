@@ -61,7 +61,7 @@ func begin_host(kind: String) -> bool:
 func begin_join(kind: String, raw_code: String, direct_ip: String = "") -> bool:
 	var parsed := PvpConnectCode.parse(raw_code)
 	if parsed == "":
-		error_message.emit("Die code klopt niet. Zes tekens, bijvoorbeeld K7NP2Q.")
+		error_message.emit("That code is wrong. Six characters, for example K7NP2Q.")
 		return false
 	_shutdown_transport()
 	_clear_match()
@@ -93,7 +93,7 @@ func begin_join(kind: String, raw_code: String, direct_ip: String = "") -> bool:
 
 func choose_mode(picked: String) -> bool:
 	if role != "host":
-		error_message.emit("Alleen de host kiest de modus.")
+		error_message.emit("Only the host chooses the mode.")
 		return false
 	if phase != "mode_select":
 		return false
@@ -237,7 +237,7 @@ func request_reconnect() -> bool:
 func _open_transport(kind: String) -> bool:
 	transport = _make_transport(kind)
 	if transport == null:
-		error_message.emit("Onbekende verbinding.")
+		error_message.emit("Unknown connection.")
 		_clear_match()
 		phase = "menu"
 		return false
@@ -389,7 +389,7 @@ func _on_message(payload: Dictionary) -> void:
 			elif role == "guest" and from == "host":
 				_finish_stop()
 		"reject":
-			_reject_reason = str(payload.get("reason", "Dat kan niet."))
+			_reject_reason = str(payload.get("reason", "You can't do that."))
 			error_message.emit(_reject_reason)
 		"resume":
 			if from != "host" or role != "guest":
@@ -485,7 +485,7 @@ func _resolve(actor_uid: String, action: String, target_uid: String, spell_id: S
 		return false
 	var actor := battle.fighter(actor_uid)
 	if actor.is_empty() or str(actor.get("seat", "")) != from_seat:
-		_send({"t": "reject", "from": "host", "reason": "Niet jouw beurt."})
+		_send({"t": "reject", "from": "host", "reason": "Not your turn."})
 		return false
 	var applied := battle.apply_action(actor_uid, action, target_uid, spell_id, item_id)
 	if not bool(applied["ok"]):

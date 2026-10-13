@@ -181,11 +181,11 @@ const EVENTS := {
 		# mantel weggegooid? Dan krijg je een nieuwe (anders zit je vast)
 		{"if": {"step": UITRUSTING, "not_item": TUTORIAL_ARMOR}, "do": [
 			["give", TUTORIAL_ARMOR, 1],
-			["say", SPEAKER, ["Mantel kwijt? Hier, een nieuwe. MENU > Uitrusting > Harnas."]],
+			["say", SPEAKER, ["Lost your cloak? Here, a new one. MENU > Equipment > Armor."]],
 			["face", "OudeMan", "up"],
 		]},
 		{"if": {"step": UITRUSTING}, "do": [
-			["say", SPEAKER, ["Doe eerst die mantel aan, {naam}. MENU > Uitrusting > Harnas."]],
+			["say", SPEAKER, ["Put that cloak on first, {naam}. MENU > Equipment > Armor."]],
 			["face", "OudeMan", "up"],
 		]},
 		{"if": {"item": "emmer_water"}, "do": [
@@ -208,7 +208,7 @@ const EVENTS := {
 	# Het event "keuze" (Blijven / Opa achterna) blijft de nacht-beat; dat hergebruiken
 	# we hier niet, want dat is een lus tot je Opa achterna gaat.
 	"intro_keuze": [{"do": [
-		["choice", "Wat zeg je, {naam}?", ["Goedemorgen, Opa.", "Waarom blijven de Archieven dicht?"], ["intro_toon_groet", "intro_toon_archief"], SPEAKER],
+		["choice", "What do you say, {naam}?", ["Good morning, Grandpa.", "Why do the Archives stay closed?"], ["intro_toon_groet", "intro_toon_archief"], SPEAKER],
 	]}],
 	"intro_toon_groet": [{"do": [
 		["flag", "toon_groet"],
@@ -222,10 +222,10 @@ const EVENTS := {
 	# TODO(verhaal): groet en menu in twee korte vakken (passen in de lage ballon).
 	# De herhaalde tutorialregel is weg.
 	"opa_mantel": [{"do": [
-		["say", SPEAKER, ["Goedemorgen, {naam}. Het is koud in het Wachtershuis."]],
-		["say", SPEAKER, ["Doe deze mantel aan: MENU > Uitrusting > Harnas."]],
+		["say", SPEAKER, ["Good morning, {naam}. It's cold in the Warden's House."]],
+		["say", SPEAKER, ["Put on this cloak: MENU > Equipment > Armor."]],
 		["give", TUTORIAL_ARMOR, 1],
-		["say", "", ["{naam} krijgt een Leerling-mantel! Sluit daarna het menu."]],
+		["say", "", ["{naam} receives an Apprentice Cloak! Then close the menu."]],
 		["step", UITRUSTING],
 		["face", "OudeMan", "up"],
 	]}],
@@ -233,7 +233,7 @@ const EVENTS := {
 	# v0.16: de mantel is aan (na het sluiten van het menu, of als je Opa weer aanspreekt).
 	# TODO(verhaal): de taken niet twee keer uitleggen.
 	"mantel_aan": [{"do": [
-		["say", SPEAKER, ["Die staat je, {naam}. Haal water bij de put en kruiden uit de kist naast het huis. Vandaag voelt anders."]],
+		["say", SPEAKER, ["That suits you, {naam}. Fetch water from the well and herbs from the chest beside the house. Today feels different."]],
 		["step", TAKEN],
 		["face", "OudeMan", "up"],
 	]}],
@@ -262,7 +262,7 @@ const EVENTS := {
 	]}],
 
 	"put": [
-		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Opa wacht. Doe eerst de mantel aan: MENU > Uitrusting."]]]},
+		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Grandpa is waiting. Put on the cloak first: MENU > Equipment."]]]},
 		{"if": {"item": "emmer_water"}, "do": [["say", "", ["The bucket is already full. Take it to Grandpa."]]]},
 		{"if": {"step": TAKEN, "not_flags": ["water_klaar"]}, "do": [
 			["say", "", ["{naam} lowers the bucket into the well...", "{naam} got a bucket of water!"]],
@@ -276,7 +276,7 @@ const EVENTS := {
 
 	"kist": [
 		{"if": {"flags": ["kist_open"]}, "do": [["say", "", ["The chest is empty."]]]},
-		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Doe eerst Opa's mantel aan: MENU > Uitrusting."]]]},
+		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Put on Grandpa's cloak first: MENU > Equipment."]]]},
 		{"do": [
 			["flag", "kist_open"],
 			["refresh"],
@@ -293,7 +293,7 @@ const EVENTS := {
 
 	"pad_wereld": [
 		{"if": {"step_lt": AVOND}, "do": [
-			["say", SPEAKER, ["Waar ga je heen? Vandaag niet, {naam}. Blijf bij het huis."]],
+			["say", SPEAKER, ["Where are you going? Not today, {naam}. Stay near the house."]],
 			["walk", "player", "up", 1],
 		]},
 		{"if": {"step_lt": NACHT}, "do": [
@@ -400,7 +400,7 @@ const EVENTS := {
 	# Waarom die kern op een tweede signaal reageert, staat nog open. Geen nieuwe beat.
 	"naar_leven": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
-			["say", "", ["Een overwoekerde kas. De ranken zitten potdicht.", "Eerst het Eerste Archief uit."]],
+			["say", "", ["An overgrown greenhouse. The vines are sealed shut.", "Clear the Eerste Archief first."]],
 			["walk", "player", "up", 1],
 		]},
 		{"do": "default"},
@@ -408,7 +408,7 @@ const EVENTS := {
 	# Platform op de wereldkaart. try_unlock zet de vlag vóór deze check.
 	"naar_world_warper": [
 		{"if": {"not_flags": ["world_warper_unlocked"]}, "do": [
-			["say", "", ["Een leeg platform. De World Warper is hier nog niet."]],
+			["say", "", ["An empty platform. The World Warper isn't here yet."]],
 			["walk", "player", "down", 1],
 		]},
 		{"do": "default"},
@@ -422,11 +422,11 @@ const EVENTS := {
 	# Waarom Archief 1 naar Archief 2 wijst. Eenmalig, bij de kas-ingang.
 	"archief2_keten": [{"do": [
 		["say", "", [
-			"De Oude Mensheid maakte de zes Archieven als keten.",
-			"Elke kern activeert de volgende. Geen uitnodiging: een noodsignaal.",
-			"Archief 1 zond: Iemand is binnen. Archief 2 reageerde als eerste.",
-			"Sapientia heeft dat signaal gemanipuleerd.",
-			"Je denkt dat je volgt. Sapientia leidt je.",
+			"The Old Humanity made the six Archives as a chain.",
+			"Each core activates the next. Not an invitation: a distress signal.",
+			"Archief 1 sent: Someone is inside. Archief 2 answered first.",
+			"Sapientia manipulated that signal.",
+			"You think you are following. Sapientia is leading you.",
 		]],
 		["flag", "archief2_keten"],
 	]}],
@@ -594,7 +594,7 @@ const EVENTS := {
 		["give", ITEM_ZAAD, 1],
 		["flag", FLAG_ZAAD],
 		["refresh"],
-		["say", "", ["Je vindt Zingend Zaad."]],
+		["say", "", ["You find Zingend Zaad."]],
 	]}],
 }
 

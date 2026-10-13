@@ -18,11 +18,11 @@ static func should_play(flags: Dictionary) -> bool:
 
 static func lines() -> Array[String]:
 	var out: Array[String] = []
-	out.append("De hal is paars. Het is stil.")
-	out.append("De Hanger wordt warm. De Stroom gloeit roze.")
-	out.append("Het hologram hapert. De Zwarte Stroom is even hier.")
-	out.append("Sapientia weet dat de Sleutel hier is.")
-	out.append("Het licht herstelt. De hub blijft open. De andere kamers blijven dicht.")
+	out.append("The hall is purple. It is quiet.")
+	out.append("The Hanger grows warm. The Stream glows pink.")
+	out.append("The hologram stutters. The Black Stream is here for a moment.")
+	out.append("Sapientia knows the Key is here.")
+	out.append("The light returns. The hub stays open. The other rooms stay closed.")
 	return out
 
 

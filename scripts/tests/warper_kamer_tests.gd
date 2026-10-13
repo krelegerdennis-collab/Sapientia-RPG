@@ -123,7 +123,7 @@ func _buit_en_tekst() -> void:
 	check("oefenvijand bestaat", GameData.ENEMIES.has(Kamers.OEFEN_VIJAND))
 	check("geen recepten", Kamers.RECEPTEN.is_empty())
 	check("geen endgame-winkel", Kamers.endgame_winkel() == "" and not Kamers.handel_open())
-	check("handelstekst", Kamers.HANDEL_DICHT == "De handel is nog gesloten.")
+	check("handelstekst", Kamers.HANDEL_DICHT == "The shop is still closed.")
 	var doelen := Kamers.warp_doelen()
 	var ids: Array[String] = []
 	for d in doelen:
@@ -134,9 +134,9 @@ func _buit_en_tekst() -> void:
 	var wereld: Node = load("res://scenes/maps/wereldkaart.tscn").instantiate()
 	check("spawn van_wilgendal bestaat", wereld.get_node_or_null("Spawns/van_wilgendal") != null)
 	wereld.free()
-	check("ECHO bedient alleen de hub", Kamers.ECHO_REGELS == ["Ik bedien deze hub."])
+	check("ECHO bedient alleen de hub", Kamers.ECHO_REGELS == ["I operate this hub."])
 	check("ECHO noemt geen onderzoeker", not " ".join(Kamers.ECHO_REGELS).to_lower().contains("onderzoeker"))
-	check("kernzin zonder onthulling", Kamers.KERN_ZIN == "Het verhaal van H-6 eindigt hier.")
+	check("kernzin zonder onthulling", Kamers.KERN_ZIN == "The story of H-6 ends here.")
 	var schoon := true
 	for regel in Kamers.speler_teksten():
 		if regel.to_lower().contains("proefpersoon"):
@@ -225,10 +225,10 @@ func _echo_grot() -> void:
 		var regels: Array = stappen[0].get("lines", [])
 		if not regels.is_empty():
 			welkom = str(regels[0])
-	var eerste_letterlijk := "De Diepe Grot. Een simulatie — honderd verdiepingen, telkens anders. Ik beheer hem. Sapientia... Sapientia helpt met de data. Zo werkt het nu eenmaal."
-	var twijfel_letterlijk := "Waarom ik het doe? Omdat het mijn taak is. De Oude Mensheid bouwde me om te meten, te tellen, te bewaren."
-	var h6_letterlijk := "Ik heb honderden kandidaten doorgelaten. Jij bent de zesde die bleef staan. De anderen... ik weet niet wat er met ze is gebeurd."
-	var data_letterlijk := "Dat weet ik niet. Ik lever, zij neemt. Zo is het altijd geweest."
+	var eerste_letterlijk := "The Diepe Grot. A simulation — a hundred floors, different every time. I run it. Sapientia... Sapientia helps with the data. That's just how it works."
+	var twijfel_letterlijk := "Why I do it? Because it is my task. The Old Humanity built me to measure, to count, to preserve."
+	var h6_letterlijk := "I have let hundreds of candidates through. You are the sixth who stayed standing. The others... I don't know what happened to them."
+	var data_letterlijk := "I don't know. I deliver, she takes. It has always been that way."
 	check("grotzinnen letterlijk", EchoGrot.ZIN_EERSTE == eerste_letterlijk and EchoGrot.ZIN_TWIJFEL == twijfel_letterlijk
 			and EchoGrot.ZIN_H6 == h6_letterlijk and EchoGrot.ZIN_DATA == data_letterlijk)
 	check("ECHO legt de onderzoeker-twist niet uit", not " ".join(EchoGrot.speler_teksten()).to_lower().contains("onderzoeker"))

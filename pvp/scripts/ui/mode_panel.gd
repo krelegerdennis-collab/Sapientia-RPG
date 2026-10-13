@@ -28,7 +28,7 @@ func _pick_mode(id: String) -> void:
 
 
 func _add_back() -> void:
-	var back := PvpStyle.button("Terug")
+	var back := PvpStyle.button("Back")
 	back.pressed.connect(func() -> void: back_pressed.emit())
 	_box.add_child(back)
 
@@ -37,10 +37,10 @@ func _rebuild() -> void:
 	for child in _box.get_children():
 		child.queue_free()
 	if not _host:
-		_box.add_child(PvpStyle.label("De host kiest…", 12))
+		_box.add_child(PvpStyle.label("The host is choosing…", 12))
 		_add_back()
 		return
-	_box.add_child(PvpStyle.label("Kies de modus", 12))
+	_box.add_child(PvpStyle.label("Choose the mode", 12))
 	for id in PvpModes.ORDER:
 		var label := "%s (level %d)" % [PvpModes.display_name(id), PvpModes.level_of(id)]
 		var btn := PvpStyle.button(label)

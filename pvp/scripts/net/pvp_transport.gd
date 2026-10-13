@@ -14,11 +14,11 @@ var _silent_close: bool = false
 
 
 func host(_code: String) -> void:
-	mark_failed("Dit transport kan niet hosten.")
+	mark_failed("This transport cannot host.")
 
 
 func join(_code: String) -> bool:
-	mark_failed("Dit transport kan niet deelnemen.")
+	mark_failed("This transport cannot join.")
 	return false
 
 

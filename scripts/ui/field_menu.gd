@@ -38,10 +38,10 @@ const HUB_ENTER := "res://world_warper/flow/enter.gd"
 
 ## [id, tekst] in de volgorde van de indeling (links van boven naar beneden, dan Warpen).
 const COMMANDS := [
-	["equip", "Uitrusting"],
+	["equip", "Equipment"],
 	["codex", "Codex"],
 	["items", "Items"],
-	["warp", "Warpen"],
+	["warp", "Warp"],
 ]
 
 ## De speler op de map (voor Opslaan: tile + kijkrichting). map.gd zet dit.

@@ -576,7 +576,7 @@ func _leven_tests() -> void:
 	var closed_txt := ""
 	if closed_do.size() > 0 and closed_do[0] is Array and closed_do[0].size() > 2:
 		closed_txt = " ".join(closed_do[0][2])
-	check("dicht zonder Eerste Archief", closed_do is Array and closed_txt.contains("potdicht")
+	check("dicht zonder Eerste Archief", closed_do is Array and closed_txt.contains("sealed shut")
 			and closed_txt.contains("Eerste Archief") and closed_do.size() > 1
 			and closed_do[1][0] == "walk")
 	GameState.story_flags[SD.GOLEM_FLAG] = true
@@ -641,7 +641,7 @@ func _leven_tests() -> void:
 	var bord: Node = kas.get_node_or_null("Objects/Lees_12_5") if kas else null
 	check("kas: tint, monsters, bord, opslag", kas != null and kas.get_node_or_null("ThemaTint") != null
 			and m1 != null and m1.enemy_id == "mosslijm" and m2 != null and m2.enemy_id == "moskonijn"
-			and bord != null and str(bord.lines[0]).contains("kas") and kas.get_node_or_null("Objects/SaveBook") != null)
+			and bord != null and str(bord.lines[0]).contains("greenhouse") and kas.get_node_or_null("Objects/SaveBook") != null)
 	GameState.change_map(PLAAT_SCENE, "ingang")
 	check("groeiplaat-scène laadt", await wait_scene("LevenV1Plaat"))
 	var plaat := scene()
