@@ -47,7 +47,7 @@ func _ready() -> void:
 		if not rec.is_empty() and float(rec.get("stamp", 0.0)) > best:
 			best = float(rec["stamp"])
 			focus_btn = b
-	var back := UiMenu.button("Terug")
+	var back := UiMenu.button("Back")
 	back.name = "Terug"
 	back.pressed.connect(func() -> void: cancelled.emit())
 	list.add_child(back)

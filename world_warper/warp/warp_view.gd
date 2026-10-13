@@ -15,11 +15,11 @@ const VIEW_SIZE := Vector2(384, 216)
 const RIJ_HOOG := 40
 
 ## TODO(design): stap 1 heeft geen afgesproken titel.
-const TITEL_WERELDEN := "Kies een wereld"
-const TITEL_BESTEMMING := "Kies een bestemming"
-const LABEL_DICHT := "Vergrendeld"
-const LABEL_TERUG := "Terug"
-const LABEL_REIS := "Reis"
+const TITEL_WERELDEN := "Choose a world"
+const TITEL_BESTEMMING := "Choose a destination"
+const LABEL_DICHT := "Locked"
+const LABEL_TERUG := "Back"
+const LABEL_REIS := "Travel"
 const LABEL_PLAATSHOUDER := "PLACEHOLDER"
 ## v0.21 RPG ART (art_batch8_v21): knop_<id>.png / knop_<id>_ingedrukt.png, 48x16, op 2x getoond.
 const KNOP_DIR := "res://world_warper/art/"
