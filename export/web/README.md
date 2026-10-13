@@ -1,10 +1,17 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`28d75ce`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`01f6ab8`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build, bovenop `ff4ecdd`:
+Nieuw in deze build, bovenop `28d75ce`:
+- Het monster vecht als zijspeler boven de B-knop. In het veldmenu staan nu Magic, Bestiary, Settings, Load en Scenes (cutscenes opnieuw bekijken, ook de drie World Warper-scènes), met gecentreerde knoppen.
+- Archief 2 in de nieuwe kas-stijl: nieuwe tegels en versierde kamers. De Genezer staat op een podium en je kunt pas langs hem na het gevecht.
+- Het baasgevecht in de kas heeft een eigen achtergrond.
+- Nieuw filmpje na De Genezer (de kern, de Hanger, de World Warper in de lucht), daarna de scène.
+- Let op: de download is groter (ongeveer 63 MB) door de twee filmpjes.
+
+Eerder, bovenop `ff4ecdd`:
 - Gevechts-HUD v2: perkamentkaarten met alleen balken (geen getallen), gouden kaart = aan de beurt, teal = doelwit, grijs = KO. Het monstervak blijft groen.
 - World Warper-canonscènes (PR #73).
 
