@@ -5,7 +5,7 @@ Donkere boog in de bergwand, ruwe rand in grotrots-kleuren (ARTSTYLE 'grotrots')
 Magenta hoekjes = placeholder. Geen definitieve art.
 Een pad in tools/handwerk.txt wordt nooit overschreven.
 
-  assets/sprites/buiten/berggrot_ingang.png   32x24
+  assets/sprites/buiten/berggrot_ingang.png   16x16
 
 Gebruik:  python3 tools/art_berggrot_ingang_placeholder.py
 """
@@ -32,14 +32,14 @@ def main() -> None:
     if DOEL in handwerk():
         print("overgeslagen (handwerk):", DOEL)
         return
-    w, h = 32, 24
+    w, h = 16, 16
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     px = img.load()
-    cx = 15.5
+    cx = 7.5
     for y in range(h):
         for x in range(w):
-            dx = (x - cx) / 15.5
-            dy = (h - 1 - y) / 23.0
+            dx = (x - cx) / 7.5
+            dy = (h - 1 - y) / 15.0
             r = dx * dx + dy * dy
             if r <= 1.0:
                 # buitenrand rots, binnen een donkere mond
@@ -48,7 +48,7 @@ def main() -> None:
                     px[x, y] = ZWART
                 else:
                     px[x, y] = ROTS[(x * 7 + y * 3) % 3]
-    for x, y in [(0, h - 1), (1, h - 1), (0, h - 2), (w - 1, h - 1), (w - 2, h - 1), (w - 1, h - 2)]:
+    for x, y in [(0, h - 1), (w - 1, h - 1)]:
         px[x, y] = MAGENTA
     pad = os.path.join(ROOT, DOEL)
     img.save(pad)

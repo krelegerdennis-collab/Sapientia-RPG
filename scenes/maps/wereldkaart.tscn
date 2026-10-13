@@ -33,7 +33,7 @@ texture = ExtResource("7_kas")
 texture_filter = 1
 
 [node name="BerggrotIngang" type="Sprite2D" parent="Objects"]
-position = Vector2(232, 292)
+position = Vector2(344, 296)
 texture = ExtResource("9_grot")
 texture_filter = 1
 
@@ -53,7 +53,7 @@ script = ExtResource("4_de1fy")
 facing = Vector2i(0, -1)
 
 [node name="van_berggrot" type="Marker2D" parent="Spawns"]
-position = Vector2(232, 328)
+position = Vector2(344, 312)
 script = ExtResource("4_de1fy")
 facing = Vector2i(0, 1)
 
@@ -139,7 +139,7 @@ lines = Array[String]([])
 event = "naar_leven"
 
 [node name="NaarBerggrot" type="Node2D" parent="Exits"]
-position = Vector2(224, 304)
+position = Vector2(336, 288)
 script = ExtResource("5_ws0vq")
 size_tiles = Vector2i(1, 1)
 target_map = ""

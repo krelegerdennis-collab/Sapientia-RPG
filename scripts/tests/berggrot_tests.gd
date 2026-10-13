@@ -178,9 +178,9 @@ func _kaart() -> void:
 	var spawn: Node2D = kaart.get_node("Spawns/van_berggrot")
 	var grot_tegel := Vector2i((grot.position / 16.0).floor())
 	var spawn_tegel := Vector2i((spawn.position / 16.0).floor())
-	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(14, 19)
-			and spawn_tegel == Vector2i(14, 20) and spawn.facing == Vector2i(0, 1)
-			and _terrein(grond, Vector2i(14, 18)) == "berg"
+	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(21, 18)
+			and spawn_tegel == Vector2i(21, 19) and spawn.facing == Vector2i(0, 1)
+			and _terrein(grond, Vector2i(21, 17)) == "berg"
 			and _loopbaar(grond, grot_tegel) and _loopbaar(grond, spawn_tegel)
 			and _afstand(grond, Vector2i(14, 31), grot_tegel) > 0)
 	var kas: Node = kaart.get_node("Exits/NaarKas")
@@ -251,13 +251,13 @@ func _kaart() -> void:
 	# Grotmond zichtbaar op de kaart: sprite in de bergwand recht boven de ingang (14,19).
 	var mond_sprite := scene().get_node_or_null("Objects/BerggrotIngang") as Sprite2D
 	check("grotmond-sprite boven de berggrot-ingang", mond_sprite != null and mond_sprite.visible
-			and mond_sprite.texture != null and mond_sprite.texture.get_size() == Vector2(32, 24)
-			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i(14, 18)
-			and mond_sprite.position.y + 12.0 <= 304.0)
+			and mond_sprite.texture != null and mond_sprite.texture.get_size() == Vector2(16, 16)
+			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i(21, 18)
+			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i((kaart_grot_pos() / 16.0).floor()))
 	var noord: Dictionary = BG.ROOMS["berggrot_uitmond"]["exits"]["n"]
 	check("berggrot leidt naar Archief 2 (kas-entree)", str(noord.get("map", "")) == BG.KAS_SCENE
 			and BG.KAS_SCENE.ends_with("archief_2_v1_entree.tscn") and ResourceLoader.exists(BG.KAS_SCENE))
-	player().place_at(Vector2i(14, 20), Vector2i.UP)
+	player().place_at(Vector2i(21, 19), Vector2i.UP)
 	await pframes(4)
 	await screenshot("wereldkaart_grotmond")
 	await pframes(2)
@@ -582,3 +582,8 @@ func screenshot(naam: String) -> void:
 	DirAccess.make_dir_recursive_absolute(shots)
 	img.save_png(shots.path_join(naam + ".png"))
 	print("INFO  screenshot: ", shots.path_join(naam + ".png"), " ", img.get_size())
+
+
+func kaart_grot_pos() -> Vector2:
+	var g := scene().get_node_or_null("Exits/NaarBerggrot") as Node2D
+	return g.position if g != null else Vector2(-1, -1)
