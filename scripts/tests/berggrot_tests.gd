@@ -105,11 +105,20 @@ func _data() -> void:
 		check("ogg speelt als het bestand er is", AudioManager.play_music(BG.BGM))
 	else:
 		check("zonder ogg blijft play_music stil", not AudioManager.play_music(BG.BGM))
-	var ph := FileAccess.get_file_as_string("res://tools/placeholders_v17.txt")
-	check("placeholders geregistreerd", ph.contains("assets/tiles/dungeon/berggrot_tiles.png")
-			and ph.contains("256x80") and ph.contains("assets/sprites/enemies/steenluis.png")
-			and ph.contains("90x90") and ph.contains("assets/map_monsters/adermot.png")
-			and ph.contains("32x64"))
+	# v0.21: echte art van RPG ART (batch 1). Staat in handwerk.txt, geen "art_pending" meer.
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	var echt := true
+	for bestand in ["assets/tiles/dungeon/berggrot_tiles.png", "assets/tiles/dungeon/berggrot_bibliotheek.png",
+			"assets/sprites/enemies/steenluis.png", "assets/sprites/enemies/druipslak_rug.png",
+			"assets/map_monsters/adermot.png"]:
+		echt = echt and hw.contains(bestand) and ResourceLoader.exists("res://" + bestand)
+	for id in BG.MONSTERS:
+		echt = echt and not bool(BG.MONSTERS[id].get("art_pending", false))
+	var tegels: Texture2D = load("res://assets/tiles/dungeon/berggrot_tiles.png")
+	var mon: Texture2D = load("res://assets/map_monsters/adermot.png")
+	check("echte grot-art geregistreerd (handwerk), geen art_pending", echt
+			and tegels.get_width() == 256 and tegels.get_height() == 80
+			and mon.get_width() == 32 and mon.get_height() == 64)
 	var bron := FileAccess.get_file_as_string("res://scripts/data/berggrot_data.gd")
 	check("start() wisselt naar de grotmond", bron.contains("func start")
 			and bron.contains("change_map(SCENE, SPAWN_INGANG)"))

@@ -29,6 +29,8 @@ var data := {}
 var monster_id := ""
 var enemy_id := ""
 var moves := true
+## v0.21: vermomd (Mimic als dichte kist): geen stun-tint, geen sterretjes, geen flits.
+var disguised := false
 var boss := false
 ## Task #4: verdieping van de dungeon van 100 verdiepingen (eigen "floor" in de data, anders
 ## GameState.dungeon100_floor; 0 = gewoon monster). Het gevecht zelf schaalt via GameState.dungeon100_floor
@@ -68,7 +70,10 @@ func setup(p_room: Node, d: Dictionary, rng_seed: int) -> void:
 	monster_id = str(d.get("id", d.get("enemy", "monster")))
 	name = "Monster_" + monster_id
 	enemy_id = str(d.get("enemy", ""))
-	moves = bool(d.get("moves", true))
+	# v0.21: standaard uit game_data (Mimic: "moves": false, "disguised": true); de kamerdata wint.
+	var ed: Dictionary = GameData.ENEMIES.get(enemy_id, {})
+	moves = bool(d.get("moves", ed.get("moves", true)))
+	disguised = bool(d.get("disguised", ed.get("disguised", false)))
 	boss = bool(d.get("boss", false))
 	floor_nr = int(d.get("floor", GameState.dungeon100_floor))
 	group = (d.get("group", [enemy_id]) as Array).duplicate()
@@ -259,7 +264,7 @@ func is_stunned() -> bool:
 
 ## Verlam voor n stappen van de speler (een baas nooit: daar komt de vuurbal niet eens aan toe).
 func stun(n: int) -> void:
-	if boss:
+	if boss or disguised:
 		return
 	stun_steps = maxi(stun_steps, n)
 	if _stun_fx == null:
@@ -294,7 +299,7 @@ func _unstun() -> void:
 ## Paars pulseren + drie paarse sterretjes die boven zijn kop rondjes draaien.
 func _stun_look(delta: float) -> void:
 	_stun_t += delta
-	if sprite:
+	if sprite and not disguised:
 		sprite.modulate = Color.WHITE.lerp(STUN_TINT, 0.55 + 0.25 * sin(_stun_t * 7.0))
 	if _stun_fx:
 		_stun_fx.queue_redraw()

@@ -235,3 +235,22 @@ assets/puzzle/geheimkast_2hoog.png
 assets/puzzle/kernscheur.png
 # v0.20: Engelse ondertitel van RPG ART (art_ondertitel_v20/out/title_ondertitel_en.png, 130x13) op (127,43).
 assets/ui/title_ondertitel.png
+# v0.21: RPG ART batch 1 (art_batch1_v21/out). Diepe Grot-monsters: gevecht/rug 90x90 voet (45,84), kaart 32x64
+#        (2x4 frames 16x16). Berggrot-tegels 256x80 en -bibliotheek 256x64 (nummering = de grijze Archief-atlas).
+#        Molen 192x64 = 4 frames 48x64 (wiek f*45 graden); molen_wieken.gd maakt er 8 stappen van 22.5 graden van.
+assets/sprites/enemies/steenluis.png
+assets/sprites/enemies/steenluis_rug.png
+assets/map_monsters/steenluis.png
+assets/sprites/enemies/druipslak.png
+assets/sprites/enemies/druipslak_rug.png
+assets/map_monsters/druipslak.png
+assets/sprites/enemies/adermot.png
+assets/sprites/enemies/adermot_rug.png
+assets/map_monsters/adermot.png
+assets/tiles/dungeon/berggrot_tiles.png
+assets/tiles/dungeon/berggrot_bibliotheek.png
+assets/sprites/buiten/molen_wieken.png
+# v0.21: RPG ART batch 2 (art_batch2_v21/out): Mimic, gevecht 80x64 voet (40,58), geen rug; kaart 32x64 (2x4 frames 16x16).
+#        (De 5 Archief 2-monsters uit batch 2 zijn NIET geintegreerd; die bouwt RPG CODE.)
+assets/sprites/enemies/mimic.png
+assets/map_monsters/mimic.png

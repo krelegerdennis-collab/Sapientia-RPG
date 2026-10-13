@@ -3,7 +3,11 @@ class_name MolenWieken
 ## Molen van Gerrit op het plein van Wilgendal.
 ## Stil tot Het Zingende Graan klaar is. De zangscène (zing) laat de wieken draaien
 ## en speelt zacht gezang uit de noten in story_data. Geen extra dialoog.
-## Het plaatje is een PLACEHOLDER (magenta hoekjes, letters PH). Geen definitieve art.
+## v0.21: echte art van RPG ART (assets/sprites/buiten/molen_wieken.png, 192x64 = 4 frames 48x64,
+## wiek van frame f op f*45 graden). Wieken hebben 4 bladen, dus frame 0 = frame 2: alleen de
+## 4 frames lopen zou als 2 beelden flikkeren. Daarom maakt wieken_sheet() er STAPPEN frames van
+## 22.5 graden per stap van: even stappen = het art-frame zelf, oneven stappen = dezelfde toren met
+## de wieklaag van het art-frame 22.5 graden gedraaid om de naaf (4x4 sub-samples, meeste kleur).
 
 const SD := preload("res://scripts/data/story_data.gd")
 
@@ -17,22 +21,13 @@ const CENTER_Y := 26
 const LENGTE := 16
 const RATE := 22050
 const ZANG_GAIN := 0.12
-const MAGENTA := Color(1.0, 30.0 / 255.0, 230.0 / 255.0, 1.0)
-
-const _TOREN := Color(0.42, 0.36, 0.28, 1.0)
-const _DAK := Color(0.33, 0.22, 0.16, 1.0)
-const _ZEIL := Color(0.62, 0.52, 0.32, 1.0)
-const _NAAF := Color(0.22, 0.16, 0.1, 1.0)
-const _DEUR := Color(0.16, 0.12, 0.1, 1.0)
+const ART := "res://assets/sprites/buiten/molen_wieken.png"
+## v0.21: draaistappen voor een vloeiende draai: 22.5 graden per stap, 8 stappen = halve slag.
+const STAP_GRADEN := 22.5
+const STAPPEN := 8
+const STAP_TIJD := 0.12
+const _SUB := 4
 const _NOOT := Color(0.95, 0.86, 0.62, 1.0)
-## Eerste pixel van de letters PH op frame 0. Blijft magenta na het stempelen.
-const _PH := [
-	"###.#.#.#",
-	"#.#.#.#.#",
-	"###.#####",
-	"#...#.#.#",
-	"#...#.#.#",
-]
 
 static var _sheet: ImageTexture
 static var _noot: ImageTexture
@@ -44,11 +39,12 @@ var _zang: AudioStreamPlayer
 
 
 func _ready() -> void:
-	var sheet := placeholder_sheet()
+	var sheet := wieken_sheet()
 	texture = sheet
 	loop_texture = sheet
-	hframes = FRAMES
-	loop_frames = FRAMES
+	hframes = STAPPEN
+	loop_frames = STAPPEN
+	loop_time = STAP_TIJD
 	add_to_group("molen_wieken")
 	super._ready()
 
@@ -80,22 +76,125 @@ func zing() -> void:
 		_zang.stop()
 
 
-static func placeholder_sheet() -> ImageTexture:
+## Draaisheet: STAPPEN frames van 48x64, stap k = wiek op k * STAP_GRADEN.
+static func wieken_sheet() -> ImageTexture:
 	if _sheet == null:
-		_sheet = ImageTexture.create_from_image(_teken())
+		_sheet = ImageTexture.create_from_image(maak_stappen(art_image()))
 	return _sheet
 
 
-static func merk_pixel() -> Vector2i:
-	return Vector2i(18, 50)
+## Het art-bestand (4 frames) als RGBA8-plaatje.
+static func art_image() -> Image:
+	var tex: Texture2D = load(ART)
+	var img := tex.get_image()
+	if img.is_compressed():
+		img.decompress()
+	img.convert(Image.FORMAT_RGBA8)
+	return img
 
 
-## Punt van de eerste wiek in dit frame. Frame 0 wijst naar rechts.
-static func zeil_punt(frame: int) -> Vector2i:
-	var ang := float(frame) * (PI / 4.0)
-	var x := int(round(float(CENTER_X) + cos(ang) * float(LENGTE)))
-	var y := int(round(float(CENTER_Y) + sin(ang) * float(LENGTE)))
-	return Vector2i(frame * FRAME_W + x, y)
+static func hoek_van_stap(stap: int) -> float:
+	return float(stap) * STAP_GRADEN
+
+
+static func maak_stappen(art: Image) -> Image:
+	var out := Image.create(FRAME_W * STAPPEN, FRAME_H, false, Image.FORMAT_RGBA8)
+	out.fill(Color(0, 0, 0, 0))
+	var f0 := art.get_region(Rect2i(0, 0, FRAME_W, FRAME_H))
+	var f1 := art.get_region(Rect2i(FRAME_W, 0, FRAME_W, FRAME_H))
+	var lagen := _splits(f0, f1)
+	var achter: Image = lagen[0]
+	var wiek: Image = lagen[1]
+	for k in STAPPEN:
+		var frame: Image
+		if k % 2 == 0:
+			var f := (k / 2) % FRAMES
+			frame = art.get_region(Rect2i(f * FRAME_W, 0, FRAME_W, FRAME_H))
+		else:
+			frame = _draai(achter, wiek, deg_to_rad(hoek_van_stap(k)))
+		out.blit_rect(frame, Rect2i(0, 0, FRAME_W, FRAME_H), Vector2i(k * FRAME_W, 0))
+	return out
+
+
+static func _wiek_kleur(c: Color) -> bool:
+	if c.a < 0.5:
+		return false
+	var h := c.to_html(false)
+	return h == "c8b88c" or h == "4a3424" or h == "6a4c32"
+
+
+static func _is_wiek(a: Color, b: Color, x: int, y: int) -> bool:
+	if Vector2(x - CENTER_X, y - CENTER_Y).length() > float(LENGTE) + 2.5:
+		return false
+	if a.is_equal_approx(b):
+		return _wiek_kleur(a) and not (x == CENTER_X and y == CENTER_Y)
+	if _wiek_kleur(a):
+		return true
+	if _wiek_kleur(b):
+		return false
+	return a.a > 0.5 and a.to_html(false) == "100e14"
+
+
+## [achtergrond zonder wieken, wieklaag van frame 0] uit art-frames 0 (0 graden) en 1 (45 graden).
+static func _splits(f0: Image, f1: Image) -> Array:
+	var achter := Image.create(FRAME_W, FRAME_H, false, Image.FORMAT_RGBA8)
+	var wiek := Image.create(FRAME_W, FRAME_H, false, Image.FORMAT_RGBA8)
+	achter.fill(Color(0, 0, 0, 0))
+	wiek.fill(Color(0, 0, 0, 0))
+	for y in FRAME_H:
+		for x in FRAME_W:
+			var a := f0.get_pixel(x, y)
+			var b := f1.get_pixel(x, y)
+			if _is_wiek(a, b, x, y):
+				wiek.set_pixel(x, y, a)
+				if not _is_wiek(b, a, x, y):
+					achter.set_pixel(x, y, b)
+			else:
+				achter.set_pixel(x, y, a)
+	return [achter, wiek]
+
+
+static func _draai(achter: Image, wiek: Image, ang: float) -> Image:
+	var img := achter.duplicate() as Image
+	var c := cos(-ang)
+	var s := sin(-ang)
+	var drempel := int(ceil(float(_SUB * _SUB) * 0.4))
+	for y in FRAME_H:
+		for x in FRAME_W:
+			var tel := {}
+			var n := 0
+			for j in _SUB:
+				for i in _SUB:
+					var dx := float(x) + (float(i) + 0.5) / float(_SUB) - 0.5 - float(CENTER_X)
+					var dy := float(y) + (float(j) + 0.5) / float(_SUB) - 0.5 - float(CENTER_Y)
+					var sx := int(round(float(CENTER_X) + dx * c - dy * s))
+					var sy := int(round(float(CENTER_Y) + dx * s + dy * c))
+					if sx < 0 or sy < 0 or sx >= FRAME_W or sy >= FRAME_H:
+						continue
+					var k := wiek.get_pixel(sx, sy)
+					if k.a < 0.5:
+						continue
+					n += 1
+					tel[k] = int(tel.get(k, 0)) + 1
+			if n >= drempel:
+				var beste := Color(0, 0, 0, 0)
+				var top := -1
+				for k in tel:
+					if int(tel[k]) > top:
+						top = int(tel[k])
+						beste = k
+				img.set_pixel(x, y, beste)
+	return img
+
+
+## Punt (op 3/4 van de wiek) van de eerste wiek in draaistap `stap` van wieken_sheet().
+## Stap 0 wijst naar rechts.
+static func zeil_punt(stap: int) -> Vector2i:
+	var ang := deg_to_rad(hoek_van_stap(stap))
+	var r := float(LENGTE) * 0.75
+	var x := int(round(float(CENTER_X) + cos(ang) * r))
+	var y := int(round(float(CENTER_Y) + sin(ang) * r))
+	return Vector2i(stap * FRAME_W + x, y)
 
 
 static func maak_zang() -> AudioStreamWAV:
@@ -182,61 +281,3 @@ static func _noot_tex() -> ImageTexture:
 					img.set_pixel(x, y + 2, _NOOT)
 		_noot = ImageTexture.create_from_image(img)
 	return _noot
-
-
-static func _teken() -> Image:
-	var img := Image.create(FRAME_W * FRAMES, FRAME_H, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0, 0, 0, 0))
-	for f in FRAMES:
-		var ox := f * FRAME_W
-		for y in range(40, 61):
-			for x in range(16, 33):
-				_pixel(img, ox + x, y, _TOREN)
-		for y in range(32, 41):
-			var k := float(y - 32) / 8.0
-			var half := int(round(lerpf(3.0, 9.0, k)))
-			for x in range(CENTER_X - half, CENTER_X + half + 1):
-				_pixel(img, ox + x, y, _DAK)
-		for y in range(50, 61):
-			for x in range(22, 27):
-				_pixel(img, ox + x, y, _DEUR)
-		var basis := float(f) * (PI / 4.0)
-		for blad in 4:
-			_zeil(img, ox, basis + float(blad) * (PI / 2.0))
-		_pixel(img, ox + CENTER_X, CENTER_Y, _NAAF)
-		_letters(img, ox)
-		_stempel(img, ox)
-	return img
-
-
-static func _zeil(img: Image, ox: int, ang: float) -> void:
-	for t in LENGTE + 1:
-		var x := int(round(float(CENTER_X) + cos(ang) * float(t)))
-		var y := int(round(float(CENTER_Y) + sin(ang) * float(t)))
-		for dy in range(-1, 2):
-			_pixel(img, ox + x, y + dy, _ZEIL)
-
-
-static func _letters(img: Image, ox: int) -> void:
-	var oorsprong := merk_pixel()
-	for y in _PH.size():
-		var rij: String = _PH[y]
-		for x in rij.length():
-			if rij[x] == "#":
-				_pixel(img, ox + oorsprong.x + x, oorsprong.y + y, MAGENTA)
-
-
-static func _stempel(img: Image, ox: int) -> void:
-	for ty in range(0, FRAME_H, 16):
-		for tx in range(0, FRAME_W, 16):
-			for c in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1),
-					Vector2i(14, 0), Vector2i(15, 0), Vector2i(14, 1), Vector2i(15, 1),
-					Vector2i(0, 14), Vector2i(1, 14), Vector2i(0, 15), Vector2i(1, 15),
-					Vector2i(14, 14), Vector2i(15, 14), Vector2i(14, 15), Vector2i(15, 15)]:
-				_pixel(img, ox + tx + c.x, ty + c.y, MAGENTA)
-
-
-static func _pixel(img: Image, x: int, y: int, kleur: Color) -> void:
-	if x < 0 or y < 0 or x >= img.get_width() or y >= img.get_height():
-		return
-	img.set_pixel(x, y, kleur)
