@@ -1065,6 +1065,9 @@ func _codex_button_tests() -> void:
 			bt.codex.last_capture.get("result", "") == "gelukt" and GameState.item_count(CD.BOOK_ITEM) == 1
 			and GameState.codex_pages.size() == pages_before + 1 and bool(victim.get("captured", false)))
 	bt.codex.force_roll = -1.0
+	# v0.22 partylimiet: wisselen in het gevecht staat standaard uit (alleen via het menu)
+	check("partylimiet: in het gevecht niet wisselen (standaard)", not bt.codex.can_swap())
+	bt.codex.wissel_in_gevecht = true    # oud wissel-pad blijft gedekt
 	# Wissel bondgenoot
 	if not await open_codex(bt):
 		check("Codex-submenu (beurt 2)", false)

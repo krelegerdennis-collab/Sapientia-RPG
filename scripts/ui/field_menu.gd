@@ -4,6 +4,7 @@ extends CanvasLayer
 ## TODO(design): voorlopige indeling. Dennis liet de plek per functie open.
 ##   links, gestapeld: Uitrusting, Codex, Items
 ##   rechts: een groter vlak Warpen, met het label MENU erboven
+##   v0.22: rechts onder Warpen de knop Party (wie vecht mee, wie zit in de reserve)
 ## Openen: MENU-knop, of Esc / M / Tab (map.gd). B of MENU of een tik ernaast sluit.
 ## Magie, Status, Bestiarium, Opties en Opslaan hebben geen knop meer; choose()
 ## opent die schermen nog wel (tests en bestaand gedrag van die schermen).
@@ -22,6 +23,7 @@ const OptionsScreen := preload("res://scripts/ui/options_screen.gd")
 const EquipmentScreen := preload("res://scripts/ui/equipment_screen.gd")
 const SaveScreen := preload("res://scripts/ui/save_screen.gd")
 const CodexScreen := preload("res://scripts/ui/codex_screen.gd")
+const PartyScreen := preload("res://scripts/ui/party_screen.gd")   # v0.22 partylimiet
 
 const LAYER := 20
 const MARGIN := 8
@@ -42,6 +44,7 @@ const COMMANDS := [
 	["codex", "Codex"],
 	["items", "Items"],
 	["warp", "Warpen"],
+	["party", "Party"],
 ]
 
 ## De speler op de map (voor Opslaan: tile + kijkrichting). map.gd zet dit.
@@ -173,6 +176,13 @@ func _link_focus() -> void:
 	wp.focus_neighbor_bottom = wp.focus_next
 	wp.focus_neighbor_top = wp.focus_previous
 	wp.focus_neighbor_left = wp.get_path_to(eq)
+	# v0.22 Party: alleen via rechts-omlaag bereikbaar met de D-pad (Warpen <-> Party), of tikken
+	var pt: Button = buttons["party"]
+	pt.focus_next = pt.get_path_to(eq)
+	pt.focus_previous = pt.get_path_to(wp)
+	pt.focus_neighbor_bottom = pt.focus_next
+	pt.focus_neighbor_top = pt.get_path_to(wp)
+	pt.focus_neighbor_left = pt.get_path_to(eq)
 
 
 ## TODO(design): zelfde voorlopige indeling als hierboven. Rechts groeit mee op bredere telefoons.
@@ -194,8 +204,12 @@ func _layout() -> void:
 	menu_board.size = Vector2(right_w, MENU_H)
 	var warp_y := top + MENU_H + GAP
 	var warp: Button = buttons["warp"]
+	var party_h := float(ROW_H + 6)
 	warp.position = Vector2(right_x, warp_y)
-	warp.size = Vector2(right_w, maxf(BUTTON_H, stack_bottom - warp_y))
+	warp.size = Vector2(right_w, maxf(BUTTON_H + 1.0, stack_bottom - warp_y - party_h - GAP))
+	var pt: Button = buttons["party"]
+	pt.position = Vector2(right_x, warp.position.y + warp.size.y + GAP)
+	pt.size = Vector2(right_w, party_h)
 	message_label.position = Vector2(MARGIN, stack_bottom + GAP)
 	message_label.size = Vector2(w - MARGIN * 2.0, 32)
 	if quest_label != null:
@@ -242,9 +256,9 @@ func _horizontal_nav() -> void:
 		return
 	var right := Input.is_action_just_pressed("move_right") and not Input.is_action_just_pressed("ui_right")
 	var left := Input.is_action_just_pressed("move_left") and not Input.is_action_just_pressed("ui_left")
-	if right and f != buttons["warp"]:
+	if right and f != buttons["warp"] and f != buttons["party"]:
 		buttons["warp"].grab_focus()
-	elif left and f == buttons["warp"]:
+	elif left and (f == buttons["warp"] or f == buttons["party"]):
 		var back: Button = _column_focus if _column_focus != null else buttons["equip"]
 		back.grab_focus()
 
@@ -279,6 +293,8 @@ func choose(id: String) -> void:
 			open_save()
 		"warp":
 			open_warp()
+		"party":
+			open_party()
 		"close":
 			close()
 
@@ -322,6 +338,18 @@ func open_codex() -> void:
 	if buttons.has("codex"):
 		_last_focus = buttons["codex"]
 	_open_sub(CodexScreen.new(), "Codex")
+
+
+## v0.22 partylimiet: actieve groep (4 helden + 1 monster) en reserve wisselen. Niet in een gevecht.
+func open_party() -> void:
+	if sub != null:
+		return
+	if GameState.in_battle:
+		show_message(PartyScreen.PartyLimiet.IN_GEVECHT)
+		return
+	if buttons.has("party"):
+		_last_focus = buttons["party"]
+	_open_sub(PartyScreen.new(), "Party")
 
 
 func open_bestiary() -> void:
@@ -388,7 +416,7 @@ func open_warp() -> void:
 
 func _remember_focus(b: Button) -> void:
 	_last_focus = b
-	if b != buttons.get("warp"):
+	if b != buttons.get("warp") and b != buttons.get("party"):
 		_column_focus = b
 
 

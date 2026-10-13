@@ -439,9 +439,10 @@ func _update2_regels() -> void:
 	GameState.party.append(gast)
 	check("Codex-gast niet op de bank", PartyBench.naar_bank(GameState.party.size() - 1, PartyBench.RUSTKAMER) == PartyBench.GAST_BLIJFT)
 	GameState.party.pop_back()
+	GameState.party.append(GameState.hero_template("lotte"))   # v0.22: max 4 actief, dus 5 nodig
 	GameState.party.append(GameState.hero_template("noor"))
 	PartyBench.normaliseer()
-	check("maximaal 3 actief", GameState.party.size() == PartyBench.MAX_ACTIEF and GameState.party_bench.size() == 1)
+	check("maximaal %d actief" % PartyBench.MAX_ACTIEF, GameState.party.size() == PartyBench.MAX_ACTIEF and GameState.party_bench.size() == 1)
 	var pad := "user://warper_bank_test.json"
 	var weg := GameState.save_game(Vector2i(4, 5), Vector2i.LEFT, pad)
 	var ruw := GameState.read_save(pad)
