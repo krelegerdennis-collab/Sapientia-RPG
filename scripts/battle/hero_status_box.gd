@@ -22,12 +22,15 @@ const PAD := 5
 const MONSTER_RAND := Color("8fc56a")
 const MONSTER_VAK := Color(0.30, 0.48, 0.22, 0.28)
 const ICON_W := 7.0
+## v0.22 maat van het zijspeler-label van het monster
+const SIDE_SIZE := Vector2(52, 11)
 
 var hero: Dictionary = {}      # verwijst naar GameState.party[i]
 var active := false            # kiest nu een commando
 var targeted := false          # wordt gekozen als doelwit
-## v0.22 partylimiet: dit vak hoort bij het monster (de Codex-bondgenoot, 5e plek). Eigen
-## groene rand, getinte achtergrond en een klein Codex-icoontje (boekje) rechtsboven.
+## v0.22 partylimiet: dit vak hoort bij het monster (de Codex-bondgenoot). Sinds het besluit van
+## Dennis geen statusvak in de rij meer maar een klein 'zijspeler'-label boven de B-knop:
+## groen kadertje met het Codex-icoontje (RPG ART) en de naam, GEEN HP/MP-balken (SIDE_SIZE).
 var monster := false
 var shown_hp := 0.0            # getoonde waarde (loopt naar de echte waarde)
 var shown_mp := 0.0
@@ -108,12 +111,12 @@ func fitted_name(font: Font = null) -> String:
 	if font == null:
 		font = get_theme_default_font()
 	var n := str(hero.get("name", ""))
-	var avail: float = size.x - PAD - (11.0 if hud_tex("kaart_normaal") != null else PAD) - (ICON_W + 1.0 if monster else 0.0)
+	var avail: float = size.x - ICON_W - 6.0 if monster else size.x - PAD - (11.0 if hud_tex("kaart_normaal") != null else PAD)
 	if font == null or avail <= 0.0 or font.get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x <= avail:
 		return n
 	while n.length() > 1 and font.get_string_size(n + ".", HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x > avail:
 		n = n.left(n.length() - 1)
-	return n + "."
+	return n.strip_edges() + "."
 
 
 # ---------------------------------------------------------------- tekenen
@@ -177,6 +180,10 @@ func _half(tex: Texture2D, pos: Vector2) -> void:
 func _draw() -> void:
 	if hero.is_empty():
 		return
+	if monster:
+		var pulse0 := 0.75 + 0.25 * sin(Time.get_ticks_msec() / 160.0)
+		_draw_side(size.x, int(hero["hp"]) <= 0, pulse0)   # zijspeler-label (#71), geen kaart
+		return
 	var card := hud_tex("kaart_" + card_kind())
 	if card == null:
 		_draw_v1()
@@ -188,10 +195,6 @@ func _draw() -> void:
 		var c := UiStyle.HILITE if active and not targeted else UiStyle.TEAL
 		draw_rect(Rect2(-1, -1, w + 2, HEIGHT + 2), Color(c.r, c.g, c.b, 0.22 * pulse), false, 1.0)
 	_nine(card, Rect2(0, 0, w, HEIGHT), 10.0)
-	if monster:
-		draw_rect(Rect2(2.5, 2.5, w - 5, HEIGHT - 5), MONSTER_VAK)
-		draw_rect(Rect2(0.75, 0.75, w - 1.5, HEIGHT - 1.5), MONSTER_RAND, false, 0.5)
-		_draw_monster_icon(Vector2(w - PAD - ICON_W + 0.5, 4.0))
 	var font := get_theme_default_font()
 	var rune := hud_tex("rune")
 	if rune != null:
@@ -239,6 +242,9 @@ func _draw_v1() -> void:
 	var w := size.x
 	var ko: bool = int(hero["hp"]) <= 0
 	var pulse := 0.75 + 0.25 * sin(Time.get_ticks_msec() / 160.0)
+	if monster:
+		_draw_side(w, ko, pulse)
+		return
 	# neon-gloed rond het vak (achter de rand)
 	if active or targeted:
 		var c := UiStyle.HILITE if active and not targeted else UiStyle.TEAL
@@ -303,7 +309,23 @@ func _stat_row(font: Font, top: float, label: String, value: float, max_value: f
 		draw_rect(Rect2(p + Vector2(0, inner.size.y - 0.5), Vector2(fw, 0.5)), bar_colors[2])
 
 
-## v0.22 Codex-icoontje (placeholder, getekend): een open boekje met een groen blad.
+## v0.22 Zijspeler-label: groen kadertje, icoon links, naam ernaast. Geen balken.
+func _draw_side(w: float, ko: bool, pulse: float) -> void:
+	var hgt := size.y
+	draw_rect(Rect2(0, 0, w, hgt), Color(UiStyle.INK.r, UiStyle.INK.g, UiStyle.INK.b, 0.85))
+	draw_rect(Rect2(0, 0, w, hgt), MONSTER_VAK)
+	var rand := UiStyle.TEAL if targeted else MONSTER_RAND
+	draw_rect(Rect2(0.25, 0.25, w - 0.5, hgt - 0.5), Color(rand.r, rand.g, rand.b, pulse if targeted else 1.0), false, 0.5)
+	_draw_monster_icon(Vector2(2, roundf((hgt - 6.0) / 2.0)))
+	var font := get_theme_default_font()
+	var n := fitted_name(font)
+	_text(font, Vector2(2 + ICON_W + 2, hgt - 2.5), n, UiStyle.KO if ko else MONSTER_RAND.lightened(0.3))
+	if _flash_t > 0.0:
+		var c := _flash_color
+		c.a = 0.45 * (_flash_t / 0.35)
+		draw_rect(Rect2(1, 1, w - 2, hgt - 2), c)
+
+
 ## Echte art van RPG ART (7x6); valt terug op het getekende icoontje als het bestand ontbreekt.
 const MONSTER_ICON_PATH := "res://assets/ui/icon_monstervak.png"
 static var _monster_icon: Texture2D = null

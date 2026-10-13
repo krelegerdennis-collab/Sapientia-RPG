@@ -561,9 +561,10 @@ func _ally_tests() -> void:
 	if a.is_empty():
 		return
 	var node: Control = a["node"]
-	check("naast Dennis (rechts ervan, zelfde hoogte), echte rug-sprite van ART (geen plaatsvervanger)", node.get_script() == AllyScript and not node.placeholder
+	# v0.22 (Dennis): het monster staat als zijspeler rechts, boven de B-knop (iets hoger dan de helden)
+	check("rechts van Dennis (zijspeler boven B), echte rug-sprite van ART (geen plaatsvervanger)", node.get_script() == AllyScript and not node.placeholder
 			and node.texture_path == str(GD.ENEMIES["mosslijm"]["sprite_back"])
-			and node.home.x > h["node"].home.x and absf(node.home.y - h["node"].home.y) < 1.0
+			and node.home.x > h["node"].home.x and node.home.y <= h["node"].home.y + 1.0
 			and (node.placeholder == not ResourceLoader.exists(str(GD.ENEMIES["mosslijm"].get("sprite_back", "")))))
 	var feet_row: float = node.art_rect(node.home).end.y - node.home.y
 	check("anker: voeten op rij H-6 van het plaatje (%.1f eenheden onder de voeten)" % feet_row, absf(feet_row - CD.FEET_FROM_BOTTOM * CD.ALLY_ART_SCALE) < 1.01)
@@ -715,7 +716,7 @@ func _screen_tests() -> void:
 		check("veldmenu open", false)
 		return
 	var labels: Array = m.commands().map(func(c): return str(m.buttons[c[0]].get_meta("label")))
-	check("menu: vijf knoppen (v0.22 +Party) %s" % [labels], labels == ["Equipment", "Codex", "Items", "Warp", "Party"])
+	check("menu: tien knoppen (v0.22 +Party +Magic +Bestiary +Scenes +Settings +Load) %s" % [labels], labels == ["Equipment", "Codex", "Items", "Magic", "Bestiary", "Warp", "Party", "Scenes", "Settings", "Load"])
 	var stack: Rect2 = m.buttons["equip"].get_global_rect().merge(m.buttons["codex"].get_global_rect()).merge(m.buttons["items"].get_global_rect())
 	check("links en Warpen overlappen niet", not stack.intersects(m.buttons["warp"].get_global_rect()))
 	m.choose("codex")
