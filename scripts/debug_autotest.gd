@@ -2062,7 +2062,7 @@ func _prologue_tests() -> void:
 	check("v0.16: Oude Man begroet je en geeft een mantel ('%s')" % (Dialog._lines[0] if Dialog.is_open else ""),
 			Dialog.is_open and not Dialog.has_choices() and Dialog._lines == [_named(GREET_LINE)]
 			and Dialog.name_label.text == "Old Man" and Story.has_flag("toon_groet")
-			and "Wachtershuis" in _lines_text())
+			and "Warden's House" in _lines_text())
 	_check_bubble("Old Man", opa)
 	await frames(30)
 	await overworld_shot("_v11_oude_man")
@@ -2381,7 +2381,7 @@ func _equip_tutorial_tests(_opa: Node, def_before: int) -> void:
 	await _story_drain()
 	Story.trigger("kist", _obj("Kist"))
 	await _wait_typed()
-	check("v0.16: kist geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "eerst Opa" in _lines_text())
+	check("v0.16: kist geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "Grandpa's cloak first" in _lines_text())
 	await _story_drain()
 	check("v0.16: geen emmer, kist dicht", GameState.item_count("emmer_water") == 0 and not Story.has_flag("kist_open"))
 	scene().open_field_menu()
