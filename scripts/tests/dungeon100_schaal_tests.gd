@@ -197,9 +197,16 @@ func _boss_tests() -> void:
 			art_ok = art_ok and idle != null and idle.get_size() == Vector2(1024, 200) and int(bs3.get("idle_frames", 0)) == 4
 		else:
 			art_ok = art_ok and not bs3.has("idle")
-	var gewoon := S.boss_stats(GD.ENEMIES[S.boss_for_floor(10)["enemy"]], 10)
-	check("canon-bazen: eigen art 256x200 + rug, is_boss; De Stem idle 4x256; andere bazen lenen nog",
-			art_ok and not gewoon.has("is_boss") and str(gewoon["sprite"]) == str(GD.ENEMIES[S.boss_for_floor(10)["enemy"]]["sprite"]))
+	check("canon-bazen: eigen art 256x200 + rug, is_boss; De Stem idle 4x256", art_ok)
+	# v0.21 batch 12: de acht andere bazen ook eigen art (geen geleende vijand-sprite meer)
+	var b12_ok := true
+	for f in [10, 20, 30, 40, 60, 70, 80, 90]:
+		var bs4 := S.boss_stats(GD.ENEMIES[S.boss_for_floor(f)["enemy"]], f)
+		var v4: Texture2D = load(str(bs4.get("sprite", "")))
+		var r4: Texture2D = load(str(bs4.get("sprite_back", "")))
+		b12_ok = b12_ok and bool(bs4.get("is_boss", false)) and v4 != null and r4 != null \
+				and v4.get_size() == Vector2(256, 200) and r4.get_size() == Vector2(256, 200) and not bs4.has("idle")
+	check("alle 12 bazen van de Diepe Grot hebben eigen art 256x200 + rug", b12_ok)
 	var b100 := S.boss_stats(GD.ENEMIES["kennis_beest"], 100)
 	var b90 := S.boss_stats(GD.ENEMIES["kennis_beest"], 90)
 	check("eindbaas (100) sterker dan een baas met dezelfde formule zonder eindbaas-bonus",

@@ -46,19 +46,20 @@ const FINAL_MULT := {"max_hp": 1.3, "atk": 1.15, "def": 1.1, "mag": 1.15, "mdef"
 ## "enemy" = bestaande vijand uit game_data.gd (skills; art als de baas geen eigen art heeft).
 ## v0.21: de vier canon-bazen hebben eigen art van RPG ART (batch 11, 256x200, voeten 128,194):
 ## "sprite"/"sprite_back" (+ "idle"/"idle_frames" bij De Stem). Die zijn dan "is_boss" (battle.gd 256x200).
+## v0.21: batch 12 geeft ook de acht andere bazen (10-90) eigen art 256x200 + rug.
 ## "name" = naam in het gevecht. "desc" = canon-citaat in het bestiarium, alleen bij de canon-bazen.
 const BOSSES := {
-	10: {"enemy": "papiergeest", "name": "Page Warden"},
-	20: {"enemy": "glitchmot", "name": "Glitch Queen"},
+	10: {"enemy": "papiergeest", "name": "Page Warden", "sprite": "res://assets/sprites/enemies/page_warden.png", "sprite_back": "res://assets/sprites/enemies/page_warden_rug.png"},
+	20: {"enemy": "glitchmot", "name": "Glitch Queen", "sprite": "res://assets/sprites/enemies/glitch_queen.png", "sprite_back": "res://assets/sprites/enemies/glitch_queen_rug.png"},
 	25: {"enemy": "glitchmot", "name": "De Schaduw van H-6", "desc": "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6.", "sprite": "res://assets/sprites/enemies/schaduw_h6.png", "sprite_back": "res://assets/sprites/enemies/schaduw_h6_rug.png"},
-	30: {"enemy": "sporenzwam", "name": "Spore Lord"},
-	40: {"enemy": "wortelkruiper", "name": "Root Mother"},
+	30: {"enemy": "sporenzwam", "name": "Spore Lord", "sprite": "res://assets/sprites/enemies/spore_lord.png", "sprite_back": "res://assets/sprites/enemies/spore_lord_rug.png"},
+	40: {"enemy": "wortelkruiper", "name": "Root Mother", "sprite": "res://assets/sprites/enemies/root_mother.png", "sprite_back": "res://assets/sprites/enemies/root_mother_rug.png"},
 	50: {"enemy": "mech_wachter", "name": "De Cyclus", "desc": "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door.", "sprite": "res://assets/sprites/enemies/de_cyclus.png", "sprite_back": "res://assets/sprites/enemies/de_cyclus_rug.png"},
-	60: {"enemy": "mistuil", "name": "Mist Lord"},
-	70: {"enemy": "mech_wachter", "name": "Seal Warden"},
+	60: {"enemy": "mistuil", "name": "Mist Lord", "sprite": "res://assets/sprites/enemies/mist_lord.png", "sprite_back": "res://assets/sprites/enemies/mist_lord_rug.png"},
+	70: {"enemy": "mech_wachter", "name": "Seal Warden", "sprite": "res://assets/sprites/enemies/seal_warden.png", "sprite_back": "res://assets/sprites/enemies/seal_warden_rug.png"},
 	75: {"enemy": "mistuil", "name": "De Rechter", "desc": "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte.", "sprite": "res://assets/sprites/enemies/de_rechter.png", "sprite_back": "res://assets/sprites/enemies/de_rechter_rug.png"},
-	80: {"enemy": "kennis_beest", "name": "Great Book Golem"},
-	90: {"enemy": "wortelkoning", "name": "Root Emperor"},
+	80: {"enemy": "kennis_beest", "name": "Great Book Golem", "sprite": "res://assets/sprites/enemies/great_book_golem.png", "sprite_back": "res://assets/sprites/enemies/great_book_golem_rug.png"},
+	90: {"enemy": "wortelkoning", "name": "Root Emperor", "sprite": "res://assets/sprites/enemies/root_emperor.png", "sprite_back": "res://assets/sprites/enemies/root_emperor_rug.png"},
 	99: {"enemy": "papiergeest", "name": "De Stem", "desc": "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht.", "sprite": "res://assets/sprites/enemies/de_stem.png", "sprite_back": "res://assets/sprites/enemies/de_stem_rug.png", "idle": "res://assets/sprites/enemies/de_stem_idle.png", "idle_frames": 4},
 }
 ## Vaste canon-stats ná de curve, alleen voor deze baasverdiepingen. HP = level × 50.

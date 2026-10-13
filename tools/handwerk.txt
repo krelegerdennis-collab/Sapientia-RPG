@@ -316,3 +316,20 @@ assets/sprites/enemies/schaduw_h6_rug.png
 assets/sprites/enemies/de_stem.png
 assets/sprites/enemies/de_stem_rug.png
 assets/sprites/enemies/de_stem_idle.png
+# v0.21: RPG ART batch 12 (art_batch12_v21/out): de acht andere bazen van de Diepe Grot (10-90), 256x200 + rug.
+assets/sprites/enemies/glitch_queen.png
+assets/sprites/enemies/glitch_queen_rug.png
+assets/sprites/enemies/great_book_golem.png
+assets/sprites/enemies/great_book_golem_rug.png
+assets/sprites/enemies/mist_lord.png
+assets/sprites/enemies/mist_lord_rug.png
+assets/sprites/enemies/page_warden.png
+assets/sprites/enemies/page_warden_rug.png
+assets/sprites/enemies/root_emperor.png
+assets/sprites/enemies/root_emperor_rug.png
+assets/sprites/enemies/root_mother.png
+assets/sprites/enemies/root_mother_rug.png
+assets/sprites/enemies/seal_warden.png
+assets/sprites/enemies/seal_warden_rug.png
+assets/sprites/enemies/spore_lord.png
+assets/sprites/enemies/spore_lord_rug.png
