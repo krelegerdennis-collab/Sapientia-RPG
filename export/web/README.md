@@ -1,8 +1,16 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`bb484ea`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`7237d2c`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
+
+Nieuw in deze build, bovenop `bb484ea`:
+- Eenmalige wereldkaart-cutscene (video `worldmap_intro.ogv` + glitch-paneel) en moswezens in de tuin van opa.
+- Alle spelerstekst is nu Engels (ECHO-gids, PvP, winkels, kamers, Archief 2). Eigennamen blijven Nederlands.
+- De Koopman in de Diepe Grot, met winkel en drie dialoogfases. Val-, rust- en koopmankamers.
+- Prijs van graad-uitrusting is nu graad x graad x 60 goud (G1 60, G2 240, G3 540, G4 960).
+- Party-limiet: 4 helden + 1 monster in gevecht, de rest in reserve. Nieuw Party-menu en monstervak-icoon.
+- World Warper-hub: het opslagmenu (PLACEHOLDER/Opslaan) is weg, de warp- en gezelschapsvlakken en warp-iconen hebben echte art, de rondlopers zijn echte sprites en er staat nergens meer PLACEHOLDER.
 
 Nieuw in deze build (v0.21), bovenop `577ccaa`:
 - Nieuwe vijand-art van RPG ART (batch 1), de Mimic ziet eruit als een dichte blauwe kist en loopt niet.
