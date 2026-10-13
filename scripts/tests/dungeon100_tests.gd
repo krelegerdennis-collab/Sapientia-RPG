@@ -636,6 +636,10 @@ func _warper_tests() -> void:
 	await pframes(2)
 	check("warper: scène laadt (boek, type 'warper'), 1 tile", wp is Dungeon100Warper and wp.type == "warper"
 			and wp is StaticBody2D and wp.position == Vector2(start + Vector2i(1, 0)) * 16.0 + Vector2(8, 8))
+	var wspr: Sprite2D = wp.get("sprite")
+	check("warper: eigen art (dungeon100_warper.png 64x16, 4 frames), geen violette tint", wspr != null
+			and wspr.texture.resource_path.ends_with("dungeon100_warper.png") and wspr.texture.get_size() == Vector2(64, 16)
+			and wspr.hframes == 4 and wspr.modulate == Color.WHITE)
 	wp.interact(pl)
 	await pframes(2)
 	var quiet: bool = await wait_until(func():

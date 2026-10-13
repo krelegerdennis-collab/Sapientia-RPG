@@ -80,6 +80,11 @@ const ENEMY_FEET_Y_MAX := 102.0
 ## verkleind (vangnet voor nieuwe art). 194 = Kennis-Beest; dan blijft er boven zijn kop
 ## ruimte voor de bericht-strook.
 const MAX_ENEMY_ART_H := 194
+## v0.21: BAAS-UITZONDERING. Een vijand met "is_boss": true in game_data mag tot BOSS_MAX_ART_W x
+## BOSS_MAX_ART_H fijne pixels op ware grootte staan (RPG ART tekent nieuwe bazen op die maat).
+## Groter wordt ook bij een baas passend verkleind. Gewone vijanden houden MAX_ENEMY_ART_H.
+const BOSS_MAX_ART_W := 256
+const BOSS_MAX_ART_H := 200
 ## v9: geen berichtvenster meer. Berichten staan kort in een smalle, half doorzichtige
 ## strook bovenin (Caption). Het commandomenu staat boven het statusvak van de held die
 ## aan de beurt is en schuift mee (zie battle_menu.gd anchor_to()).
@@ -380,8 +385,7 @@ func _spawn_enemies(ids: Array) -> void:
 		var art_scale := ENEMY_DEPTH_SCALE / DETAIL
 		# vangnet voor nieuwe/vervangen art: een te hoog plaatje (> MAX_ENEMY_ART_H fijne
 		# pixels) wordt iets kleiner getoond, zodat het nooit over de bericht-strook valt
-		if tex.get_height() > MAX_ENEMY_ART_H:
-			art_scale = ENEMY_DEPTH_SCALE * float(MAX_ENEMY_ART_H) / float(DETAIL * tex.get_height())
+		art_scale *= art_fit(tex.get_size(), bool(data.get("is_boss", false)))
 		node.ignore_texture_size = true
 		node.stretch_mode = TextureButton.STRETCH_SCALE
 		node.size = Vector2(tex.get_size()) * art_scale
@@ -2209,3 +2213,17 @@ func _kern_tick(c: Dictionary) -> void:
 		return
 	for id in c["kern_cd"]:
 		c["kern_cd"][id] = maxi(0, int(c["kern_cd"][id]) - 1)
+
+
+## v0.21: verkleinfactor (<= 1) zodat een plaatje binnen de maximummaat valt.
+## Baas ("is_boss"): BOSS_MAX_ART_W x BOSS_MAX_ART_H; anders alleen de hoogte MAX_ENEMY_ART_H.
+static func art_fit(size: Vector2, is_boss: bool) -> float:
+	var f := 1.0
+	if is_boss:
+		if size.y > BOSS_MAX_ART_H:
+			f = minf(f, float(BOSS_MAX_ART_H) / size.y)
+		if size.x > BOSS_MAX_ART_W:
+			f = minf(f, float(BOSS_MAX_ART_W) / size.x)
+	elif size.y > MAX_ENEMY_ART_H:
+		f = float(MAX_ENEMY_ART_H) / size.y
+	return f

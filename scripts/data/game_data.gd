@@ -351,6 +351,9 @@ const ENEMIES := {
 	},
 	"genezer": {
 		"name": "De Genezer", "sprite": "res://assets/sprites/archief2/genezer.png",
+		# v0.21: baas-redraw van RPG ART, 240x194 op volle resolutie, voeten (120,188).
+		"sprite_back": "res://assets/sprites/archief2/genezer_rug.png",
+		"is_boss": true,
 		"max_hp": 900, "atk": 54, "def": 36, "agi": 6, "mag": 8, "mdef": 10,
 		"exp": 90, "gold": 40, "y_offset": 0,
 		"skills": [],
@@ -436,13 +439,12 @@ const ENEMIES := {
 		"desc": "A pale ghost of roots. It pulls you toward it, so your next strike can only find the ghost.",
 		"habitat": ["archief"],
 	},
-	# Het Zingende Graan: klein mini-gevecht op de mistrand. Geen eigen art (art_pending).
+	# Het Zingende Graan: klein mini-gevecht op de mistrand. v0.21: eigen art van RPG ART (batch 7).
 	# Bestiariumnummer 025: 013-024 zijn de twaalf eindbazen van de Diepe Grot (endgame_bestiary.gd).
 	"woudgeest": {
 		"name": "Woudgeest",
 		"sprite": "res://assets/sprites/enemies/woudgeest.png",
 		"sprite_back": "res://assets/sprites/enemies/woudgeest_rug.png",
-		"art_pending": true,
 		"max_hp": 12, "atk": 6, "def": 1, "agi": 5, "mag": 0, "mdef": 1,
 		"exp": 4, "gold": 2, "y_offset": 0,
 		"skills": [],
@@ -451,10 +453,11 @@ const ENEMIES := {
 		"desc": "Een kleine geest uit het woud.",
 		"habitat": ["woud"],
 	},
-	# Beloning van verdieping 100 (optie A). Geen eigen art: art_pending, de Codex toont de placeholder.
+	# Beloning van verdieping 100 (optie A). v0.21: eigen art van RPG ART (batch 11), voor + rug 90x90.
 	"echo": {
 		"name": "ECHO", "sprite": "res://assets/sprites/enemies/echo.png",
-		"art_pending": true,
+		"sprite_back": "res://assets/sprites/enemies/echo_rug.png",
+		"no_map": true,     # alleen beloning (verdieping 100), loopt nooit op een kaart: geen kaart-sprite
 		"max_hp": 40, "atk": 10, "def": 6, "agi": 8, "mag": 8, "mdef": 6,
 		"exp": 0, "gold": 0, "y_offset": 0,
 		"skills": [],
@@ -1098,6 +1101,9 @@ const TERRAIN_BACKDROP := {
 	"kas": "library_overgrown",
 	# v0.17: het Donker Woud (thema donker_woud in dungeon_rooms.gd)
 	"woud": "forest_dark",
+	# v0.21: eigen gevechtsachtergronden van RPG ART (batch 13)
+	"berggrot": "cave_berg",
+	"dungeon100": "cave_deep",
 }
 ## v0.17: baasgevecht op dit terrein = deze achtergrond i.p.v. "boss" (de Wortelkoning in het Woud).
 const BOSS_TERRAIN_BACKDROP := {"woud": "forest_dark"}
@@ -1113,6 +1119,9 @@ const BACKDROPS := {
 	"library_overgrown": "res://assets/battle/bibliotheek_overwoekerd.png",
 	# v0.17: gevechtsachtergrond Donker Woud, 1280x432 (RPG ART art_woud_v17, handwerk)
 	"forest_dark": "res://assets/battle/donker_woud.png",
+	# v0.21: Berggrot en Diepe Grot, 1280x432 (RPG ART batch 13, handwerk)
+	"cave_berg": "res://assets/battle/berggrot.png",
+	"cave_deep": "res://assets/battle/diepe_grot.png",
 }
 
 
