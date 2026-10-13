@@ -1,10 +1,19 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`577ccaa`, v0.20), Godot 4.7.2, threads uit.
+Web-build van `main` (`bb484ea`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build (v0.20), bovenop `d3de708`:
+Nieuw in deze build (v0.21), bovenop `577ccaa`:
+- Nieuwe vijand-art van RPG ART (batch 1), de Mimic ziet eruit als een dichte blauwe kist en loopt niet.
+- De berggrot is lichter van kleur, heeft eigen tegels, een gevechtsachtergrond en een eigen terrein. De Diepe Grot ook.
+- De molen in Wilgendal draait met echte wieken. 12 nieuwe voorwerpen in Wilgendal, de borden staan een tegel lager.
+- Lotte, De Wurger, De Genezer (baas, 240x194), ECHO, Woudgeest en de bazen van verdieping 10 tot 99 van de Diepe Grot hebben echte art. De Stem heeft een idle-animatie.
+- Spiegelkamer (heel en gebroken), kas-tegels, platen, levenskern en kas-ingang.
+- World Warper-art: accent per Archief, gloeiende Hanger, knoppen op de wereldkaart.
+- De speltekst is Engels, ook het warp-scherm (Choose a world, Travel, Back).
+
+Nog van de build van `577ccaa`:
 - Engelse ondertitel op het titelscherm (art van RPG ART).
 - De Ink Worm heeft weer RPG ART's tekeningen (gevecht, rug, idle, kaart).
 - De geheime kast in de Golemhal is één kast breed. Core Power laat roze kernscheuren oplichten, daarna breekt hij open.
