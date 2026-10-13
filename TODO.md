@@ -1495,6 +1495,7 @@ Scheiding:
 - [x] Na De Genezer: canon-scène 1 (CANON 17, `world_warper/cutscene/genezer_scene.gd`), daarna warp naar de Hal (`world_warper/maps/hal.tscn`, spawn ingang); daar scène 2 en 3 (`hanger_scene.gd`), daarna opent de warp-view. Vlaggen: `ww_canon_genezer_gezien`, `ww_canon_hanger_gezien`, `ww_canon_dreiging_gezien`.
 - [x] **De World Warper is geen plek op de wereldkaart** (Dennis 2026-10-13). Geen platform, geen uitgang, geen botsing. Alleen een overvliegend plaatje (`world_warper/art/flyover.gd`) na ontgrendeling. De enige ingang is **Warp in het menu** (`field_menu.open_warp`).
 - [x] Grotmond van de berggrot (weg naar Archief 2) zichtbaar op worldmap 1: bergtegel (21,17): de tunnel zit in de rotswand; omhoog lopen vanaf (21,18) gaat de grot in, de rest van de berg blokkeert; terug op (21,18), placeholder `assets/sprites/buiten/berggrot_ingang.png` (16x16).
+- [x] Bouwplaats voor de tunnel (`scenes/maps/berggrot_bouwplaats.tscn`, gebouwd met `tools/build_bouwplaats.gd`): eerst deze kaart na de grotmond. Voorman Hendrik en werker Sanne, hek, karretje, gereedschap, balken. Tunnel dicht tot `noor_lid` (Noor/Vesper in de party), daarna open naar de berggrot. Zuid terug naar de wereldkaart (21,18). De grotmond in de berg komt uit op de bouwplaats (`van_tunnel`); de exit-warpers gaan naar de wereldkaart (21,18).
 
 - [x] Dorpen eerst bezocht vóór een warp.
   `GameState.bezochte_kaarten` bewaart het pad. Wilgendal, Esdoorn en de wereldkaart gaan alleen open als dat pad erin staat. Een oude save zonder lijst telt die drie WM1-plekken als bezocht.

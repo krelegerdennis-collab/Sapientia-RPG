@@ -138,12 +138,12 @@ target_spawn = "ingang"
 lines = Array[String]([])
 event = "naar_leven"
 
-[node name="NaarBerggrot" type="Node2D" parent="Exits"]
+[node name="NaarBouwplaats" type="Node2D" parent="Exits"]
 position = Vector2(336, 272)
 script = ExtResource("5_ws0vq")
 size_tiles = Vector2i(1, 1)
-target_map = ""
-target_spawn = ""
+target_map = "res://scenes/maps/berggrot_bouwplaats.tscn"
+target_spawn = "zuid"
 lines = Array[String]([])
 event = ""
 

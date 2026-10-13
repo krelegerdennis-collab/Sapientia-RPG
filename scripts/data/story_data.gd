@@ -406,6 +406,29 @@ const EVENTS := {
 		{"do": "default"},
 	],
 
+	# Bouwplaats voor de berggrot-tunnel. Dicht tot noor_lid (Noor in de party).
+	"bouwplaats_voorman": [
+		{"if": {"not_flags": ["noor_lid"]}, "do": [
+			["say", "Foreman Hendrik", ["Hold it right there. This tunnel isn't safe yet.", "The rock keeps shifting. Nobody goes in until we've shored it up.", "Come back later. Maybe with someone who can handle a few sparks."]],
+		]},
+		{"do": [
+			["say", "Foreman Hendrik", ["The supports are in. The tunnel's open.", "It runs right through the mountain. Watch your step in there."]],
+		]},
+	],
+	"bouwplaats_werker": [
+		{"if": {"not_flags": ["noor_lid"]}, "do": [
+			["say", "Worker Sanne", ["Mind the cart! We're hauling rubble out all day.", "Something keeps cracking deep inside. Like it's growing back."]],
+		]},
+		{"do": [
+			["say", "Worker Sanne", ["Finally done. My back is killing me.", "Funny thing: past the tunnel, there's a greenhouse. Nobody planted it."]],
+		]},
+	],
+	"bouwplaats_hek": [
+		{"if": {"not_flags": ["noor_lid"]}, "do": [
+			["say", "", ["A barrier blocks the tunnel. DANGER - FALLING ROCK."]],
+		]},
+		{"do": "default"},
+	],
 	"woud_ingang": [
 		{"if": {"not_flags": ["quest_noor"]}, "do": [
 			["say", "", ["The Dark Wood. Between the black trunks hangs mist that flickers like a broken screen.", "You don't go in there without a reason."]],

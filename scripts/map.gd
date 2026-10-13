@@ -285,13 +285,19 @@ func _on_player_stepped(tile: Vector2i) -> void:
 func _on_player_bumped(tile: Vector2i) -> void:
 	if GameState.changing_map or GameState.in_battle or Dialog.is_open:
 		return
-	var grot := get_node_or_null("Exits/NaarBerggrot")
-	if grot != null and grot.contains(tile) and player.facing == Vector2i.UP:
-		_use_exit(grot)
+	# Wereldkaart: NaarBouwplaats in de bergtegel. Bouwplaats: NaarBerggrot (de tunnel zelf).
+	for naam in ["NaarBouwplaats", "NaarBerggrot"]:
+		var grot := get_node_or_null("Exits/" + naam)
+		if grot != null and grot.contains(tile) and player.facing == Vector2i.UP:
+			_use_exit(grot)
+			return
 
 
 func _use_exit(exit: Node) -> void:
 	if str(exit.name) == "NaarBerggrot":
+		# Bouwplaats: de tunnel is dicht tot noor_lid (event bouwplaats_hek).
+		if "event" in exit and exit.event != "" and Story.trigger(exit.event, exit):
+			return
 		player.input_locked = true
 		BerggrotHaak.start()
 		return

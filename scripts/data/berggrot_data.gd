@@ -17,6 +17,11 @@ const BGM_BESTAND := "bgm_berggrot.ogg"
 ## Spawn op de wereldkaart, aan de voet van de bergen, ten zuiden van de mond.
 const WERELD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const WERELD_SPAWN := "van_berggrot"
+## Bouwplaats voor de tunnel (Dennis 2026-10-13). De grotmond komt daar uit, niet op de kaart.
+const BOUWPLAATS := "res://scenes/maps/berggrot_bouwplaats.tscn"
+const BOUWPLAATS_SPAWN := "van_tunnel"
+## Tunnel open zodra Noor in de party zit.
+const TUNNEL_VLAG := "noor_lid"
 ## Bestaande kas-scène. De kaart legt haar achter de bergen. Deze uitgang blijft.
 const KAS_SCENE := "res://scenes/maps/archief_2_v1_entree.tscn"
 const KAS_SPAWN := "ingang"
@@ -85,7 +90,7 @@ const ROOMS := {
 		"save": [3, 8],
 		"spawns": {"ingang": [9, 10, "up"], "boog": [9, 3, "down"]},
 		"exits": {
-			"E": {"map": WERELD_MAP, "spawn": WERELD_SPAWN},
+			"E": {"map": BOUWPLAATS, "spawn": BOUWPLAATS_SPAWN},
 			"n": {"map": M + "berggrot_grendel.tscn", "spawn": "ingang"},
 		},
 		"signs": [{
