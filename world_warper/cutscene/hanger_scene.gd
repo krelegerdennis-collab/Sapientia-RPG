@@ -428,6 +428,9 @@ func _mark_intro_seen() -> void:
 	for f in [Dreiging.FLAG, Canon.FLAG_HANGER, Canon.FLAG_DREIGING]:
 		_set_flag(_source, f)
 		_set_flag(_game_state(), f)
+	var gs := _game_state()
+	if gs != null and gs.has_method("mark_scene_seen"):
+		gs.mark_scene_seen("hanger")    # v0.22 veldmenu > Scenes
 
 
 func _set_flag(node: Node, flag: String = Dreiging.FLAG) -> void:

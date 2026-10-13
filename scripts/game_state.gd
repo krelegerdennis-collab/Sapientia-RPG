@@ -29,6 +29,7 @@ const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
 const PartyBenchLib := preload("res://scripts/party_bench.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const PartyLimiet := preload("res://scripts/party_limiet.gd")   # v0.22 max 4 helden + 1 monster
+const ScenesData := preload("res://scripts/data/scenes_data.gd")   # v0.22 veldmenu > Scenes
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const TITLE_SCENE := "res://scenes/ui/title.tscn"
 const NAME_SCENE := "res://scenes/ui/name_entry.tscn"
@@ -153,6 +154,9 @@ var koopman_gekocht: Array = []
 ## v0.11 verhaal: stap (zie scripts/data/story_data.gd) en flags (naam -> true)
 var story_step := 0
 var story_flags := {}
+## v0.22 Veldmenu > Scenes: ids van bekeken cutscenes (scripts/data/scenes_data.gd). Gaat mee in de save
+## als "scenes_seen"; oude saves worden gemigreerd via de vlaggen die de cutscenes zelf zetten.
+var scenes_seen: Array = []
 ## v0.11: opties voor het volgende gevecht als het een oefengevecht is ({} = gewoon)
 var pending_tutorial := {}
 
@@ -462,6 +466,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	last_respawn = {}
 	story_step = StoryData.START
 	story_flags = {}
+	scenes_seen = []
 	archief2 = {"platen": {}}
 	archief2_temp_ally = {}
 	archief2_party_filter = ""
@@ -535,6 +540,24 @@ func add_member(id: String) -> bool:
 		party.pop_back()
 		party_bench.append(h)
 	return true
+
+
+## v0.22 Is cutscene 'id' al bekeken? (eigen lijst, of de vlag die de cutscene zelf zet)
+func scene_seen(id: String) -> bool:
+	if scenes_seen.has(id):
+		return true
+	var sc: Dictionary = ScenesData.scene(id)
+	return not sc.is_empty() and story_flags.has(str(sc.get("flag", "")))
+
+
+func mark_scene_seen(id: String) -> void:
+	if not ScenesData.scene(id).is_empty() and not scenes_seen.has(id):
+		scenes_seen.append(id)
+
+
+## Alle bekeken cutscenes, in de volgorde van ScenesData.SCENES (ook gemigreerd via vlaggen).
+func seen_scenes() -> Array:
+	return ScenesData.ids().filter(func(i): return scene_seen(str(i)))
 
 
 ## v0.22 Held uit de groep of de reserve ({} = zit er niet in).
@@ -1017,6 +1040,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot,
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
+		"scenes_seen": seen_scenes(),
 		"archief2": archief2.duplicate(true),
 		"koopman": koopman_save_data(),
 	}
@@ -1102,6 +1126,14 @@ func apply_state(d: Dictionary) -> bool:
 	if flags is Array:
 		for f in flags:
 			story_flags[str(f)] = true
+	# v0.22 bekeken cutscenes (oude saves: geen veld -> afgeleid van de vlaggen)
+	scenes_seen = []
+	var seen_raw = d.get("scenes_seen", [])
+	if seen_raw is Array:
+		for sid in seen_raw:
+			if ScenesData.ids().has(str(sid)) and not scenes_seen.has(str(sid)):
+				scenes_seen.append(str(sid))
+	scenes_seen = seen_scenes()
 	pending_tutorial = {}
 	if has_node("/root/Story"):
 		get_node("/root/Story").reset(true)
