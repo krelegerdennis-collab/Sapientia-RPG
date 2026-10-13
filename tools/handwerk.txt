@@ -333,3 +333,19 @@ assets/sprites/enemies/seal_warden.png
 assets/sprites/enemies/seal_warden_rug.png
 assets/sprites/enemies/spore_lord.png
 assets/sprites/enemies/spore_lord_rug.png
+# v0.21: RPG ART batch 13 (art_batch13_v21/out): gevechtsachtergronden Berggrot en Diepe Grot 1280x432;
+#        Wilgendal-panden 48x48, borden/toonbank/vitrine 48x16 (zelfde naam en maat als de placeholders).
+assets/battle/berggrot.png
+assets/battle/diepe_grot.png
+assets/sprites/buiten/wilgendal_accessoire.png
+assets/sprites/buiten/wilgendal_huis.png
+assets/sprites/buiten/wilgendal_huis_dicht.png
+assets/sprites/buiten/wilgendal_magie.png
+assets/sprites/buiten/wilgendal_pantser.png
+assets/sprites/buiten/wilgendal_ring.png
+assets/sprites/buiten/wilgendal_schild.png
+assets/sprites/buiten/wilgendal_ster.png
+assets/sprites/buiten/wilgendal_toonbank.png
+assets/sprites/buiten/wilgendal_vitrine.png
+assets/sprites/buiten/wilgendal_wapen.png
+assets/sprites/buiten/wilgendal_zwaard.png

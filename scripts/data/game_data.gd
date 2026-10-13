@@ -457,6 +457,7 @@ const ENEMIES := {
 	"echo": {
 		"name": "ECHO", "sprite": "res://assets/sprites/enemies/echo.png",
 		"sprite_back": "res://assets/sprites/enemies/echo_rug.png",
+		"no_map": true,     # alleen beloning (verdieping 100), loopt nooit op een kaart: geen kaart-sprite
 		"max_hp": 40, "atk": 10, "def": 6, "agi": 8, "mag": 8, "mdef": 6,
 		"exp": 0, "gold": 0, "y_offset": 0,
 		"skills": [],
@@ -1100,6 +1101,9 @@ const TERRAIN_BACKDROP := {
 	"kas": "library_overgrown",
 	# v0.17: het Donker Woud (thema donker_woud in dungeon_rooms.gd)
 	"woud": "forest_dark",
+	# v0.21: eigen gevechtsachtergronden van RPG ART (batch 13)
+	"berggrot": "cave_berg",
+	"dungeon100": "cave_deep",
 }
 ## v0.17: baasgevecht op dit terrein = deze achtergrond i.p.v. "boss" (de Wortelkoning in het Woud).
 const BOSS_TERRAIN_BACKDROP := {"woud": "forest_dark"}
@@ -1115,6 +1119,9 @@ const BACKDROPS := {
 	"library_overgrown": "res://assets/battle/bibliotheek_overwoekerd.png",
 	# v0.17: gevechtsachtergrond Donker Woud, 1280x432 (RPG ART art_woud_v17, handwerk)
 	"forest_dark": "res://assets/battle/donker_woud.png",
+	# v0.21: Berggrot en Diepe Grot, 1280x432 (RPG ART batch 13, handwerk)
+	"cave_berg": "res://assets/battle/berggrot.png",
+	"cave_deep": "res://assets/battle/diepe_grot.png",
 }
 
 
