@@ -39,7 +39,7 @@ var _answered := false
 
 
 func _build() -> void:
-	header.text = "Opslaan"
+	header.text = "Save"
 	var slots := HBoxContainer.new()
 	slots.name = "Slots"
 	slots.add_theme_constant_override("separation", 2)
@@ -87,7 +87,7 @@ func _build() -> void:
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 12)
 	tg.add_child(grid)
-	grid.add_child(UiMenu.label("Tijd", MenuColors.TEXT_DIM))
+	grid.add_child(UiMenu.label("Time", MenuColors.TEXT_DIM))
 	time_label = UiMenu.label(UiMenu.format_time(GameState.play_time()))
 	grid.add_child(time_label)
 	grid.add_child(UiMenu.label("Goud", MenuColors.TEXT_DIM))
@@ -102,11 +102,11 @@ func _build() -> void:
 	ask.add_child(acol)
 	question_label = UiMenu.label("")
 	acol.add_child(question_label)
-	yes_button = UiMenu.button("Ja")
+	yes_button = UiMenu.button("Yes")
 	yes_button.custom_minimum_size = Vector2(BUTTON_W, ROW_H)
 	yes_button.pressed.connect(answer.bind(true))
 	acol.add_child(yes_button)
-	no_button = UiMenu.button("Nee")
+	no_button = UiMenu.button("No")
 	no_button.custom_minimum_size = Vector2(BUTTON_W, ROW_H)
 	no_button.pressed.connect(answer.bind(false))
 	acol.add_child(no_button)
@@ -165,7 +165,7 @@ func _summary_of(d: Dictionary) -> String:
 		var lv = p[0].get("level", 1)
 		who = "%s Lv %d, " % [str(p[0].get("name", "")), int(lv) if (lv is int or lv is float) else 1]
 	var t = d.get("play_time", 0.0)
-	return "In het slot: %sTijd %s" % [who, UiMenu.format_time(float(t) if (t is int or t is float) else 0.0)]
+	return "In the slot: %sTime %s" % [who, UiMenu.format_time(float(t) if (t is int or t is float) else 0.0)]
 
 
 func answer(yes: bool) -> void:

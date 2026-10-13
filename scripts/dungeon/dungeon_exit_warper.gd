@@ -11,10 +11,10 @@ class_name DungeonExitWarper
 
 const SCENE := "res://scenes/dungeon_exit_warper.tscn"
 const TINT := Color(0.78, 0.62, 1.0)
-const WARNING := "Weet je zeker dat je de dungeon wilt verlaten?"
-const YES := "Ja, warpen naar worldmap"
-const NO := "Nee, blijf in de dungeon"
-const INGANG := "Dit is de ingang. Je blijft in de dungeon."
+const WARNING := "Are you sure you want to leave the dungeon?"
+const YES := "Yes, warp to the world map"
+const NO := "No, stay in the dungeon"
+const INGANG := "This is the entrance. You stay in the dungeon."
 const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
 const WORLD_SPAWN := "van_archief"
 

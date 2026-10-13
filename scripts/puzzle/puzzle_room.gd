@@ -39,9 +39,9 @@ const SECRET_OPEN_LINES := ["A cabinet slides aside!"]
 const CHEST_EMPTY_LINES := ["The chest is empty."]
 ## v0.15 zware kast zonder de wereldvaardigheid 'Zware blokken duwen' (per kast te vervangen: "hint").
 const HEAVY_HINT := ["This cabinet is full of runes and lead-heavy.", "It doesn't move a millimeter... That takes more strength."]
-const GROW_WAIT := ["De plaat doet niets.", "Eerst de hendel."]
+const GROW_WAIT := ["The plate does nothing.", "The lever first."]
 const GROW_STEP := ["De plaat groeit."]
-const GROW_OPEN := ["De ranken sluiten zich tot een pad."]
+const GROW_OPEN := ["The vines close into a path."]
 const GROW_DONE := ["Het pad ligt er al."]
 ## v0.14 dungeon-stijl (Eerste Archief): tegels + legenda van de dungeonkamers.
 const DungeonRoomScript := preload("res://scripts/dungeon/dungeon_room.gd")

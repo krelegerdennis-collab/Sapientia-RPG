@@ -7,12 +7,12 @@ extends RefCounted
 const MAX_ACTIEF := 3
 const RUSTKAMER := "res://world_warper/kamers/rustkamer.tscn"
 
-const DENNIS_BLIJFT := "Dennis blijft in de groep."
-const GAST_BLIJFT := "Tijdelijke gasten gaan niet op de bank."
+const DENNIS_BLIJFT := "Dennis stays in the party."
+const GAST_BLIJFT := "Temporary guests can't go on the bench."
 const VOL := "De groep is vol."
-const ALLEEN_HIER := "Wisselen kan alleen in de Rustkamer."
-const OP_BANK := "%s staat op de bank."
-const IN_GROEP := "%s staat in de groep."
+const ALLEEN_HIER := "You can only switch in the Rest Room."
+const OP_BANK := "%s is on the bench."
+const IN_GROEP := "%s is in the party."
 
 
 static func in_rustkamer(pad: String) -> bool:

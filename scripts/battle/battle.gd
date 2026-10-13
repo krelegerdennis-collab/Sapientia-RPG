@@ -1439,7 +1439,7 @@ func _revive(t, amount: int) -> void:
 				ally = h
 				break
 	if ally.is_empty():
-		show_message("Dat heeft nu geen effect.")
+		show_message("That has no effect right now.")
 		await _wait(MESSAGE_TIME)
 		return
 	ally["s"]["hp"] = mini(maxi(1, amount), int(ally["s"]["max_hp"]))
@@ -1850,7 +1850,7 @@ func _victory_page(text: String) -> void:
 
 func _defeat() -> void:
 	if GameState.pending_story_loss:
-		await say("De glitch breekt. Dit gevecht is geen einde.", true)
+		await say("The glitch breaks. This battle is not an end.", true)
 		await GameState.end_battle("lose")
 		return
 	if GameState.practice_battle:
