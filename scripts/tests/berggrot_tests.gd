@@ -122,6 +122,15 @@ func _data() -> void:
 	var bron := FileAccess.get_file_as_string("res://scripts/data/berggrot_data.gd")
 	check("start() wisselt naar de grotmond", bron.contains("func start")
 			and bron.contains("change_map(SCENE, SPAWN_INGANG)"))
+	# v0.21 (RPG ART batch 13): eigen gevechtsachtergronden voor Berggrot en Diepe Grot
+	var bb: Texture2D = load(GameData.backdrop_path(GameData.backdrop_id_for(DR.terrain_of("berggrot"))))
+	var dg: Texture2D = load(GameData.backdrop_path(GameData.backdrop_id_for("dungeon100")))
+	check("gevechtsachtergrond: berggrot -> cave_berg, Diepe Grot -> cave_deep (1280x432)",
+			DR.terrain_of("berggrot") == "berggrot" and GameData.backdrop_id_for("berggrot") == "cave_berg"
+			and GameData.backdrop_id_for("dungeon100") == "cave_deep"
+			and bb != null and bb.get_size() == Vector2(1280, 432) and dg != null and dg.get_size() == Vector2(1280, 432)
+			and str(GameData.backdrop_path("cave_berg")).ends_with("berggrot.png")
+			and load("res://scripts/dungeon/dungeon100_room.gd").new().has_method("terrain_at"))
 	check("kamers hangen aan het dungeon-thema", not DR.room("berggrot_mond").is_empty()
 			and DR.theme_of(DR.room("berggrot_mond")) == "berggrot")
 
