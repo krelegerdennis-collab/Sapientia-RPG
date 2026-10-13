@@ -6,10 +6,10 @@ extends Node
 ##           Dennis en gasten blijven, een nieuwe held bij een volle groep gaat naar de reserve.
 ##   Deel B: save/load: reserve in de save, oude save zonder "party_bank", oude save met te veel
 ##           helden in "party" (migratie: de rest naar de reserve).
-##   Deel C: gevecht: 4 helden + 1 monster (5 plekken onderaan, monstervak anders), de reserve-held
+##   Deel C: gevecht: 4 helden + 1 monster (4 heldenvakken onderaan, monster als zijspeler boven B), de reserve-held
 ##           vecht niet mee, beurtvolgorde telt alleen de actieve combatanten, wisselen geblokkeerd.
 ##   Deel D: veldmenu > Party: scherm open, wisselen via het scherm, monster kiezen.
-## Met --shots=map: party_gevecht_5_plekken, party_menu, party_menu_gewisseld (+ _3x = 1152x648).
+## Met --shots=map: party_gevecht_5_plekken, party_veldmenu, veldmenu_magic, party_menu, party_menu_gewisseld (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
 
 const GD := preload("res://scripts/data/game_data.gd")
@@ -17,6 +17,7 @@ const SD := preload("res://scripts/data/story_data.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
 const PartyLimiet := preload("res://scripts/party_limiet.gd")
 const PartyScreen := preload("res://scripts/ui/party_screen.gd")
+const PartyActions := preload("res://scripts/party_actions.gd")
 const GOLEM_SCENE := "res://scenes/maps/archief_golemhal.tscn"
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
@@ -419,22 +420,30 @@ func _gevecht_tests() -> void:
 	check("monster = de actieve Codex-pagina", str(monsters[0].get("page", "")) == str(p1["uid"]) if monsters.size() == 1 else false)
 	check("5 statusvakken en 5 figuren", b.status_boxes.size() == 5 and b.hero_nodes.size() == 5)
 	var boxes: Array = b.status_boxes
+	var rij: Array = boxes.slice(0, 4)
+	var zij: Control = boxes[4]
 	var onder := true
 	var binnen := true
-	for bx in boxes:
+	for bx in rij:
 		onder = onder and bx.position.y > b.size.y * 0.7
 		binnen = binnen and bx.position.x >= 0.0 and bx.position.x + bx.size.x <= b.size.x
-	check("5 plekken onderaan, binnen beeld", onder and binnen)
+	check("statusrij: 4 heldenvakken onderaan, binnen beeld", onder and binnen and rij.all(func(x): return not bool(x.monster)))
 	var los := true
-	for i in range(1, boxes.size()):
-		los = los and boxes[i].position.x >= boxes[i - 1].position.x + boxes[i - 1].size.x
-	check("vakken overlappen niet, van links naar rechts", los)
-	var laatste: Control = boxes[boxes.size() - 1]
-	check("monstervak anders: alleen het laatste vak is 'monster'", bool(laatste.monster)
-			and boxes.slice(0, 4).all(func(x): return not bool(x.monster)))
-	var gat: float = laatste.position.x - (boxes[3].position.x + boxes[3].size.x)
-	var gat_held: float = boxes[1].position.x - (boxes[0].position.x + boxes[0].size.x)
-	check("monstervak staat apart (gat %.1f > %.1f)" % [gat, gat_held], gat > gat_held + 1.0)
+	for i in range(1, rij.size()):
+		los = los and rij[i].position.x >= rij[i - 1].position.x + rij[i - 1].size.x
+	check("heldenvakken overlappen niet, van links naar rechts", los)
+	check("monster heeft geen vak in de rij: zijspeler-label (klein, geen balken)", bool(zij.monster)
+			and zij.size == zij.SIDE_SIZE and zij.size.y < rij[0].size.y / 2.0
+			and zij.get_rect().end.y <= rij[0].position.y)
+	check("monster-icoon van RPG ART geladen (7x6)", zij._monster_icon != null and zij._monster_icon.get_size() == Vector2(7, 6))
+	var tc: Node = b.touch
+	if tc != null and tc.has_method("b_center"):
+		var bc: Vector2 = tc.b_center()
+		check("zijspeler boven de B-knop (label %s, B %s)" % [zij.get_rect(), bc], zij.get_rect().end.y <= bc.y - tc.button_radius
+				and absf(zij.get_rect().get_center().x - bc.x) < 30.0 and zij.position.x + zij.size.x <= b.size.x)
+	var mnode: Control = monsters[0]["node"]
+	check("monster-sprite staat boven zijn label", absf(mnode.home.x - zij.get_rect().get_center().x) < 1.5
+			and mnode.home.y <= zij.position.y + 0.5)
 	check("in het gevecht: monster wisselen uit (Codex-knop 'Swap' grijs)", not b.codex.can_swap())
 	check("in het gevecht: party wisselen geweigerd", GameState.in_battle and PartyLimiet.wissel(1, 0) == PartyLimiet.IN_GEVECHT
 			and PartyLimiet.kies_monster("") == PartyLimiet.IN_GEVECHT and GameState.codex_active == str(p1["uid"]))
@@ -487,6 +496,10 @@ func _menu_tests() -> void:
 	check("veldmenu open, knop 'Party' aanwezig", m != null and m.buttons.has("party"))
 	if m == null:
 		return
+	await pframes(3)
+	check("Warpen compact (%s), Party eronder, tikhoogte >= 16" % m.buttons["warp"].size, m.buttons["warp"].size.y >= 16.0
+			and m.buttons["warp"].size.y < m.buttons["equip"].size.y and m.buttons["party"].position.y > m.buttons["warp"].position.y)
+	await screenshot("party_veldmenu")
 	await click(m.buttons["party"])
 	await pframes(4)
 	var s: Node = m.sub
@@ -519,6 +532,30 @@ func _menu_tests() -> void:
 	s.back()
 	await pframes(3)
 	check("B sluit het scherm", m.sub == null)
+	# v0.22 (Dennis): Magic weer direct in het veldmenu (geen tussenstap); genezen werkt buiten gevechten
+	check("veldmenu: knop 'Magic' in de linkerkolom", m.buttons.has("magic")
+			and is_equal_approx(m.buttons["magic"].position.x, m.buttons["equip"].position.x)
+			and m.buttons["magic"].position.y > m.buttons["items"].position.y)
+	var dennis: Dictionary = GameState.party[0]
+	dennis["hp"] = maxi(1, int(dennis["max_hp"]) / 3)
+	await click(m.buttons["magic"])
+	await pframes(4)
+	var ms: Node = m.sub
+	check("tik op Magic opent meteen het Magie-scherm", ms != null and ms.name == "Magic")
+	if ms != null:
+		var li := -1
+		for i in GameState.party.size():
+			if str(GameState.party[i]["id"]) == "lotte":
+				li = i
+		ms.show_caster(li)
+		await pframes(3)
+		check("Lotte: genezing niet grijs in het veld", ms.entries.size() > 0 and not ms.is_greyed(0))
+		await screenshot("veldmenu_magic")
+		var hp0 := int(dennis["hp"])
+		var genees_r: Dictionary = PartyActions.cast_spell(GameState.party[li], "genees", dennis)
+		check("genezen buiten het gevecht: Dennis %d -> %d HP" % [hp0, int(dennis["hp"])], bool(genees_r["ok"]) and int(dennis["hp"]) > hp0)
+		ms.close()
+		await pframes(3)
 	# in een gevecht opent het scherm niet
 	GameState.in_battle = true
 	m.open_party()

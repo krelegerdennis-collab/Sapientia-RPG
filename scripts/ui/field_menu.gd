@@ -4,9 +4,10 @@ extends CanvasLayer
 ## TODO(design): voorlopige indeling. Dennis liet de plek per functie open.
 ##   links, gestapeld: Uitrusting, Codex, Items
 ##   rechts: een groter vlak Warpen, met het label MENU erboven
+##   v0.22: links onder Items de knop Magic (genezen buiten gevechten, meteen het Magie-scherm)
 ##   v0.22: rechts onder Warpen de knop Party (wie vecht mee, wie zit in de reserve)
 ## Openen: MENU-knop, of Esc / M / Tab (map.gd). B of MENU of een tik ernaast sluit.
-## Magie, Status, Bestiarium, Opties en Opslaan hebben geen knop meer; choose()
+## Status, Bestiarium, Opties en Opslaan hebben geen knop meer; choose()
 ## opent die schermen nog wel (tests en bestaand gedrag van die schermen).
 
 signal closed
@@ -29,8 +30,11 @@ const LAYER := 20
 const MARGIN := 8
 const GAP := 6
 const LEFT_W := 156
-const BUTTON_H := 34
+const BUTTON_H := 30
 const MENU_H := 20
+## v0.22 compacte Warpen-/Party-knop (rechterkolom)
+const WARP_W := 96
+const WARP_H := 24
 ## Minimale tikhoogte (de knoppen zelf zijn hoger). Tests leunen op deze naam.
 const ROW_H := 16
 const MESSAGE_TIME := 2.5
@@ -43,6 +47,7 @@ const COMMANDS := [
 	["equip", "Equipment"],
 	["codex", "Codex"],
 	["items", "Items"],
+	["magic", "Magic"],
 	["warp", "Warp"],
 	["party", "Party"],
 ]
@@ -110,6 +115,8 @@ func _build_buttons() -> void:
 		var b := UiMenu.button(str(c[1]))
 		b.custom_minimum_size = Vector2(LEFT_W, ROW_H)
 		_style_button(b, id == "warp")
+		if id == "warp" or id == "party":
+			b.custom_minimum_size = Vector2(WARP_W, ROW_H)   # v0.22 compact
 		if id == "warp":
 			b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.pressed.connect(choose.bind(id))
@@ -151,33 +158,26 @@ func _style_button(b: Button, gold: bool) -> void:
 
 
 func _link_focus() -> void:
-	var eq: Button = buttons["equip"]
-	var cx: Button = buttons["codex"]
-	var it: Button = buttons["items"]
+	# v0.22: linkerkolom Uitrusting > Codex > Items > Magic (ring), rechts Warpen > Party
+	var col: Array = [buttons["equip"], buttons["codex"], buttons["items"], buttons["magic"]]
 	var wp: Button = buttons["warp"]
-	eq.focus_next = eq.get_path_to(cx)
-	eq.focus_previous = eq.get_path_to(it)
-	eq.focus_neighbor_bottom = eq.focus_next
-	eq.focus_neighbor_top = eq.focus_previous
-	eq.focus_neighbor_right = eq.get_path_to(wp)
-	cx.focus_next = cx.get_path_to(it)
-	cx.focus_previous = cx.get_path_to(eq)
-	cx.focus_neighbor_bottom = cx.focus_next
-	cx.focus_neighbor_top = cx.focus_previous
-	cx.focus_neighbor_right = cx.get_path_to(wp)
-	it.focus_next = it.get_path_to(eq)
-	it.focus_previous = it.get_path_to(cx)
-	it.focus_neighbor_bottom = it.focus_next
-	it.focus_neighbor_top = it.focus_previous
-	it.focus_neighbor_right = it.get_path_to(wp)
-	# Omlaag vanaf Warpen komt bij de linkerkolom, zodat de D-pad de vier knoppen haalt.
-	wp.focus_next = wp.get_path_to(eq)
-	wp.focus_previous = wp.get_path_to(it)
+	var pt: Button = buttons["party"]
+	for i in col.size():
+		var b: Button = col[i]
+		var nxt: Button = col[(i + 1) % col.size()]
+		var prv: Button = col[(i - 1 + col.size()) % col.size()]
+		b.focus_next = b.get_path_to(nxt)
+		b.focus_previous = b.get_path_to(prv)
+		b.focus_neighbor_bottom = b.focus_next
+		b.focus_neighbor_top = b.focus_previous
+		b.focus_neighbor_right = b.get_path_to(wp)
+	var eq: Button = col[0]
+	# Omlaag vanaf Warpen komt bij Party, daarna weer de linkerkolom.
+	wp.focus_next = wp.get_path_to(pt)
+	wp.focus_previous = wp.get_path_to(col[col.size() - 1])
 	wp.focus_neighbor_bottom = wp.focus_next
 	wp.focus_neighbor_top = wp.focus_previous
 	wp.focus_neighbor_left = wp.get_path_to(eq)
-	# v0.22 Party: alleen via rechts-omlaag bereikbaar met de D-pad (Warpen <-> Party), of tikken
-	var pt: Button = buttons["party"]
 	pt.focus_next = pt.get_path_to(eq)
 	pt.focus_previous = pt.get_path_to(wp)
 	pt.focus_neighbor_bottom = pt.focus_next
@@ -194,22 +194,24 @@ func _layout() -> void:
 	var right_x := left_x + LEFT_W + GAP
 	var right_w := maxf(80.0, w - right_x - MARGIN)
 	var y := top
-	for id in ["equip", "codex", "items"]:
+	for id in ["equip", "codex", "items", "magic"]:
 		var b: Button = buttons[id]
 		b.position = Vector2(left_x, y)
 		b.size = Vector2(LEFT_W, BUTTON_H)
 		y += BUTTON_H + GAP
 	var stack_bottom := y - GAP
 	menu_board.position = Vector2(right_x, top)
-	menu_board.size = Vector2(right_w, MENU_H)
+	menu_board.size = Vector2(minf(right_w, float(WARP_W)), MENU_H)
 	var warp_y := top + MENU_H + GAP
+	# v0.22 (Dennis): Warpen compact (was een groot vlak): vaste maat WARP_W x WARP_H, nog steeds
+	# ruim boven de minimale tikhoogte; Party eronder met dezelfde breedte.
 	var warp: Button = buttons["warp"]
-	var party_h := float(ROW_H + 6)
+	var col_w := minf(right_w, float(WARP_W))
 	warp.position = Vector2(right_x, warp_y)
-	warp.size = Vector2(right_w, maxf(BUTTON_H + 1.0, stack_bottom - warp_y - party_h - GAP))
+	warp.size = Vector2(col_w, float(WARP_H))
 	var pt: Button = buttons["party"]
 	pt.position = Vector2(right_x, warp.position.y + warp.size.y + GAP)
-	pt.size = Vector2(right_w, party_h)
+	pt.size = Vector2(col_w, float(WARP_H))
 	message_label.position = Vector2(MARGIN, stack_bottom + GAP)
 	message_label.size = Vector2(w - MARGIN * 2.0, 32)
 	if quest_label != null:
