@@ -28,6 +28,7 @@ const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
 const PartyBenchLib := preload("res://scripts/party_bench.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
+const PartyLimiet := preload("res://scripts/party_limiet.gd")   # v0.22 max 4 helden + 1 monster
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const TITLE_SCENE := "res://scenes/ui/title.tscn"
 const NAME_SCENE := "res://scenes/ui/name_entry.tscn"
@@ -314,7 +315,8 @@ func _ready() -> void:
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
-			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"]]:
+			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
+			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -528,7 +530,19 @@ func add_member(id: String) -> bool:
 	if h.is_empty():
 		return false
 	party.append(h)
+	# v0.22 partylimiet: is de groep vol, dan gaat de nieuwe held naar de reserve
+	if party.size() > PartyLimiet.MAX_HELDEN and PartyLimiet.mag_naar_reserve(h):
+		party.pop_back()
+		party_bench.append(h)
 	return true
+
+
+## v0.22 Held uit de groep of de reserve ({} = zit er niet in).
+func member(id: String) -> Dictionary:
+	for h in party + party_bench:
+		if str(h.get("id", "")) == id:
+			return h
+	return {}
 
 
 ## v0.17 Held sluit zich aan (story-commando "join", bv. Noor na het Donker Woud): op niveau
@@ -537,7 +551,7 @@ func add_member(id: String) -> bool:
 func join_member(id: String, level := 1, gear: Array = []) -> bool:
 	if not add_member(id):
 		return false
-	var h: Dictionary = party[party.size() - 1]
+	var h: Dictionary = member(id)
 	if level > int(h["level"]):
 		give_exp(h, GameData.exp_for_level(level) - int(h["exp"]))
 	for g in gear:
@@ -1065,6 +1079,8 @@ func apply_state(d: Dictionary) -> bool:
 		party_bench = _party_from(d["party_bank"], stray_equipment)
 	if party.is_empty():
 		add_member(MAIN_HERO)
+	# v0.22 migratie: oude saves met meer dan 4 actieve helden -> de rest naar de reserve
+	PartyLimiet.normaliseer()
 	inventory = _inventory_from(d.get("inventory", {}))
 	for id in stray_equipment:
 		inventory[id] = int(inventory.get(id, 0)) + 1

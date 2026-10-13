@@ -454,3 +454,5 @@ art/map_creatures/mosslijm_speel.png
 art/map_creatures/moskonijn_speel.png
 # v0.21 RPG ART batch 15: glitch-zijpaneel van de wereldkaart-cutscene (131x216, rechts gespiegeld)
 art/cutscene/glitch_panel.png
+# v0.22 RPG ART UI-iconen: Codex-icoontje in het monstervak (7x6)
+assets/ui/icon_monstervak.png

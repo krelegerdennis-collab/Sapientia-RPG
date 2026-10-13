@@ -18,10 +18,17 @@ signal tapped
 
 const HEIGHT := 37
 const PAD := 5
+## v0.22 kleuren van het monstervak (mos-groen, los van goud = aan de beurt en teal = doelwit)
+const MONSTER_RAND := Color("8fc56a")
+const MONSTER_VAK := Color(0.30, 0.48, 0.22, 0.28)
+const ICON_W := 7.0
 
 var hero: Dictionary = {}      # verwijst naar GameState.party[i]
 var active := false            # kiest nu een commando
 var targeted := false          # wordt gekozen als doelwit
+## v0.22 partylimiet: dit vak hoort bij het monster (de Codex-bondgenoot, 5e plek). Eigen
+## groene rand, getinte achtergrond en een klein Codex-icoontje (boekje) rechtsboven.
+var monster := false
 var shown_hp := 0.0            # getoonde waarde (loopt naar de echte waarde)
 var shown_mp := 0.0
 var _flash_color := Color(0, 0, 0, 0)
@@ -99,7 +106,7 @@ func fitted_name(font: Font = null) -> String:
 	if font == null:
 		font = get_theme_default_font()
 	var n := str(hero.get("name", ""))
-	var avail := size.x - PAD * 2.0
+	var avail := size.x - PAD * 2.0 - (ICON_W + 1.0 if monster else 0.0)
 	if font == null or avail <= 0.0 or font.get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x <= avail:
 		return n
 	while n.length() > 1 and font.get_string_size(n + ".", HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x > avail:
@@ -119,6 +126,11 @@ func _draw() -> void:
 		var c := UiStyle.HILITE if active and not targeted else UiStyle.TEAL
 		draw_rect(Rect2(-1, -1, w + 2, HEIGHT + 2), Color(c.r, c.g, c.b, 0.22 * pulse), false, 1.0)
 	draw_style_box(_style, Rect2(Vector2.ZERO, size))
+	if monster:
+		draw_rect(Rect2(2, 2, w - 4, HEIGHT - 4), MONSTER_VAK)
+		draw_rect(Rect2(0.75, 0.75, w - 1.5, HEIGHT - 1.5), MONSTER_RAND, false, 0.5)
+		draw_rect(Rect2(2.25, 2.25, w - 4.5, HEIGHT - 4.5), Color(MONSTER_RAND.r, MONSTER_RAND.g, MONSTER_RAND.b, 0.5), false, 0.5)
+		_draw_monster_icon(Vector2(w - PAD - ICON_W + 1.0, 4.0))
 	if ko:
 		draw_rect(Rect2(3, 3, w - 6, HEIGHT - 6), Color(0, 0, 0, 0.3))
 	# rand: magenta = aan de beurt, cyaan (pulserend) = gekozen als doelwit.
@@ -179,6 +191,24 @@ func _stat_row(font: Font, top: float, label: String, value: float, max_value: f
 	draw_rect(Rect2(base.x - 1.5, r.position.y + 1.0, tw + 2.5, r.size.y - 2.0), Color(0, 0, 0, 0.45))
 	draw_string_outline(font, base, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, 1, UiStyle.SHADOW)
 	draw_string(font, base, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyle.TEXT if enabled else UiStyle.TEXT_OFF)
+
+
+## v0.22 Codex-icoontje (placeholder, getekend): een open boekje met een groen blad.
+## Echte art van RPG ART (7x6); valt terug op het getekende icoontje als het bestand ontbreekt.
+const MONSTER_ICON_PATH := "res://assets/ui/icon_monstervak.png"
+static var _monster_icon: Texture2D = null
+
+
+func _draw_monster_icon(p: Vector2) -> void:
+	if _monster_icon == null and ResourceLoader.exists(MONSTER_ICON_PATH):
+		_monster_icon = load(MONSTER_ICON_PATH) as Texture2D
+	if _monster_icon != null:
+		draw_texture(_monster_icon, p)
+		return
+	draw_rect(Rect2(p, Vector2(ICON_W, 6)), UiStyle.SHADOW)
+	draw_rect(Rect2(p + Vector2(0.5, 0.5), Vector2(ICON_W / 2.0 - 0.5, 5)), MONSTER_RAND)
+	draw_rect(Rect2(p + Vector2(ICON_W / 2.0, 0.5), Vector2(ICON_W / 2.0 - 0.5, 5)), MONSTER_RAND.darkened(0.25))
+	draw_rect(Rect2(p + Vector2(ICON_W / 2.0 - 0.25, 0.5), Vector2(0.5, 5)), UiStyle.SHADOW)
 
 
 ## Tekst met 1 px schaduw (zoals de labels in het thema).

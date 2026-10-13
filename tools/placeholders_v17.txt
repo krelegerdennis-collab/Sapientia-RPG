@@ -92,3 +92,4 @@ assets/sprites/buiten/wilgendal_vitrine.png     48x16    item-display in de wink
 # v0.21 Wereldkaart-cutscene (scripts/worldmap_cutscene.gd): PLACEHOLDER, geen eigen bestand.
 # Glitch-zijpanelen links/rechts van de portret-video worden in code getekend (donker, cyaan/magenta strepen).
 # Echte art later: art/cutscene/glitch_panel.png  96x216  (linkerpaneel; rechts = gespiegeld, uitgerekt tot de randbreedte)   [KLAAR v0.21: echte art van RPG ART batch 15 (131x216), zie tools/handwerk.txt]
+(code, geen bestand) hero_status_box.gd _draw_monster_icon   7x6    Codex-icoontje rechtsboven in het monstervak (gevecht, v0.22 partylimiet)   [PLACEHOLDER: getekend in code; echte art gewenst: assets/ui/icon_monstervak.png 7x6 (14x12 op 2x)]   [KLAAR v0.22: echte art assets/ui/icon_monstervak.png van RPG ART, zie tools/handwerk.txt]
