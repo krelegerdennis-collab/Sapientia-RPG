@@ -438,6 +438,8 @@ func _gevecht_tests() -> void:
 	check("in het gevecht: monster wisselen uit (Codex-knop 'Swap' grijs)", not b.codex.can_swap())
 	check("in het gevecht: party wisselen geweigerd", GameState.in_battle and PartyLimiet.wissel(1, 0) == PartyLimiet.IN_GEVECHT
 			and PartyLimiet.kies_monster("") == PartyLimiet.IN_GEVECHT and GameState.codex_active == str(p1["uid"]))
+	check("HUD v2: perkamentkaart-art geladen", boxes[0].hud_tex("kaart_normaal") != null and boxes[0].hud_tex("vul_hp") != null)
+	check("HUD v2: kaartsoort volgt de staat", boxes.all(func(x): return x.card_kind() in ["normaal", "actief", "doelwit", "ko"]))
 	await screenshot("party_gevecht_5_plekken")
 	# één ronde: iedereen verdedigt, vijanden doen weinig; daarna de beurtvolgorde bekijken
 	for e in b.enemies:
