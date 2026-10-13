@@ -183,6 +183,30 @@ func _boss_tests() -> void:
 				and int(bs2["def"]) == int(row[2]) and bool(bs2.get("weak_matters", false)) \
 				and str(row[3]) in bs2.get("weak", [])
 	check("canon-bazen 25/50/75/99 hebben vaste HP/ATK/DEF en zwakte", canon_ok)
+	# v0.21: eigen art van RPG ART (batch 11) voor de vier canon-bazen, 256x200, met rug; De Stem 4 idle-frames.
+	var art_ok := true
+	for f in [25, 50, 75, 99]:
+		var bs3 := S.boss_stats(GD.ENEMIES[S.boss_for_floor(f)["enemy"]], f)
+		var voor: Texture2D = load(str(bs3.get("sprite", "")))
+		var rug: Texture2D = load(str(bs3.get("sprite_back", "")))
+		art_ok = art_ok and bool(bs3.get("is_boss", false)) and voor != null and rug != null \
+				and voor.get_size() == Vector2(256, 200) and rug.get_size() == Vector2(256, 200) \
+				and str(bs3["sprite"]) == str(S.BOSSES[f]["sprite"])
+		if f == 99:
+			var idle: Texture2D = load(str(bs3.get("idle", "")))
+			art_ok = art_ok and idle != null and idle.get_size() == Vector2(1024, 200) and int(bs3.get("idle_frames", 0)) == 4
+		else:
+			art_ok = art_ok and not bs3.has("idle")
+	check("canon-bazen: eigen art 256x200 + rug, is_boss; De Stem idle 4x256", art_ok)
+	# v0.21 batch 12: de acht andere bazen ook eigen art (geen geleende vijand-sprite meer)
+	var b12_ok := true
+	for f in [10, 20, 30, 40, 60, 70, 80, 90]:
+		var bs4 := S.boss_stats(GD.ENEMIES[S.boss_for_floor(f)["enemy"]], f)
+		var v4: Texture2D = load(str(bs4.get("sprite", "")))
+		var r4: Texture2D = load(str(bs4.get("sprite_back", "")))
+		b12_ok = b12_ok and bool(bs4.get("is_boss", false)) and v4 != null and r4 != null \
+				and v4.get_size() == Vector2(256, 200) and r4.get_size() == Vector2(256, 200) and not bs4.has("idle")
+	check("alle 12 bazen van de Diepe Grot hebben eigen art 256x200 + rug", b12_ok)
 	var b100 := S.boss_stats(GD.ENEMIES["kennis_beest"], 100)
 	var b90 := S.boss_stats(GD.ENEMIES["kennis_beest"], 90)
 	check("eindbaas (100) sterker dan een baas met dezelfde formule zonder eindbaas-bonus",

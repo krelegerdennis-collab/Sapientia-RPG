@@ -1,6 +1,7 @@
 class_name WorldWarperGids
 extends StaticBody2D
-## Hologram van de gids bij de hoofd-PC. Placeholder: paars vlak, geen art.
+## Hologram van de gids bij de hoofd-PC. v0.21: ECHO-sheet van RPG ART (echo_placeholder.png, 3x4 frames
+## van 16x24); het paarse vlak en het woord PLACEHOLDER blijven alleen als die art ontbreekt.
 ## Tik op het vlak, of interact/accept vanaf de tegel ervoor (player.gd).
 ## Dialog.show_lines toont de stap. De vlag komt in GameState.story_flags.
 
@@ -9,6 +10,7 @@ signal guide_advanced(step_id: String)
 const Dialoog := preload("res://world_warper/guide/dialoog.gd")
 const ANKER_GROEP := "ww_anchor_gids"
 const PLACEHOLDER_TEKST := "PLACEHOLDER"
+const ART_ECHO := "res://world_warper/art/echo_placeholder.png"
 
 var _laatste_frame := -1
 
@@ -19,7 +21,27 @@ var _laatste_frame := -1
 func _ready() -> void:
 	input_pickable = true
 	_stijl_labels()
+	_maak_sprite()
 	_volg_anker()
+
+
+## Echte art als die er is: sprite (kijkt omlaag, stil), vlak en PLACEHOLDER weg.
+func _maak_sprite() -> void:
+	if not ResourceLoader.exists(ART_ECHO):
+		return
+	var spr := Sprite2D.new()
+	spr.name = "Sprite"
+	spr.texture = load(ART_ECHO)
+	spr.hframes = 3
+	spr.vframes = 4
+	spr.frame = 0
+	spr.offset = Vector2(0, -10)
+	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(spr)
+	var holo := get_node_or_null("Hologram") as CanvasItem
+	if holo != null:
+		holo.visible = false
+	placeholder_label.visible = false
 
 
 func _volg_anker() -> void:

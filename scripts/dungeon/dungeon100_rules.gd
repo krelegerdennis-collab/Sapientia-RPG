@@ -40,9 +40,9 @@ const WARPER_FLOORS: Array[int] = [1, 25, 50, 75, 99]
 const WARPER_START := 1
 ## Spawnpunt naast de warper (zelfde naam in de generator).
 const WARPER_SPAWN := "warper"
-const WARPER_WARNING := "Weet je zeker dat je de dungeon wilt verlaten?"
-const WARPER_YES := "Ja"
-const WARPER_NO := "Nee"
+const WARPER_WARNING := "Are you sure you want to leave the dungeon?"
+const WARPER_YES := "Yes"
+const WARPER_NO := "No"
 ## Korte uitleg op de start-warper. De grot is een simulatie: level 1, geen uitrusting, geen verhaal.
 const GROT_INTRO := "De Diepe Grot is een simulatie van Sapientia. Ze meet menselijke doorzettingskracht. Wie verdieping 100 haalt is een kandidaat. Jullie zijn niet de eersten en niet de laatsten."
 ## Een bereikte warper-verdieping komt in het dungeon100-blok van de save. Verlaten, dood of het

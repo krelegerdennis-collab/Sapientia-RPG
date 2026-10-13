@@ -268,9 +268,12 @@ const ENEMIES := {
 	},
 	# Het Gesimuleerde Archief (Dungeon100): de Mimic, een kist die terugbijt. Komt alleen uit een
 	# Mimic-kist (scripts/data/dungeon100_blue.gd); stats = basis, de verdieping schaalt ze op.
-	# Plaatje is een PLACEHOLDER (tools/art_mimic_placeholder.py).
+	# v0.21: echte art van RPG ART (art_batch2_v21): gevecht 80x64 voet (40,58), kaart 32x64. Geen rug (niet vangbaar).
 	"mimic": {
 		"name": "Mimic", "sprite": "res://assets/sprites/enemies/mimic.png",
+		# v0.21 (wens Dennis): op de kaart een pixel-gelijke dichte Blauwe Kist. Hij loopt niet en krijgt
+		# nooit een stun-tint/-flits (ook niet na vluchten), zodat hij zichzelf niet verraadt.
+		"moves": false, "disguised": true,
 		"max_hp": 26, "atk": 12, "def": 4, "agi": 6, "mag": 0, "mdef": 3,
 		"exp": 14, "gold": 14, "y_offset": 0,
 		"skills": [{"name": "Chest Bite", "chance": 0.3, "power": 1.5}],
@@ -348,6 +351,9 @@ const ENEMIES := {
 	},
 	"genezer": {
 		"name": "De Genezer", "sprite": "res://assets/sprites/archief2/genezer.png",
+		# v0.21: baas-redraw van RPG ART, 240x194 op volle resolutie, voeten (120,188).
+		"sprite_back": "res://assets/sprites/archief2/genezer_rug.png",
+		"is_boss": true,
 		"max_hp": 900, "atk": 54, "def": 36, "agi": 6, "mag": 8, "mdef": 10,
 		"exp": 90, "gold": 40, "y_offset": 0,
 		"skills": [],
@@ -366,13 +372,79 @@ const ENEMIES := {
 		"desc": "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg.",
 		"habitat": ["archief", "baas"],
 	},
-	# Het Zingende Graan: klein mini-gevecht op de mistrand. Geen eigen art (art_pending).
+	# ------------------------------------------------------------ v0.21 ARCHIEF 2: GEWONE VIJANDEN
+	# CANON.md besluit 13 (PR #51): vijf vijanden, allemaal Natuur. Gedrag: scripts/data/archief2_vijanden.gd.
+	# Art van RPG ART (art_batch2_v21/out, in tools/handwerk.txt): voor/rug 90x90, kaart 32x64.
+	# "weak_matters": zwakte telt (zoals de bazen van Archief 2, Archief2.ZWAK).
+	# TIJDELIJKE AANNAME: stats = basis op niveau 1, in de band van de Woud-soorten die ook in Archief 2
+	# lopen (kamers zetten tier 2-3, daarna GameData.apply_archief_tier). Bestiarium 034-038.
+	# TIJDELIJKE AANNAME: bestiariumtekst (canon geeft alleen gedrag en zwakte).
+	"rankje": {
+		"name": "Tendril", "sprite": "res://assets/sprites/enemies/rankje.png",
+		"sprite_back": "res://assets/sprites/enemies/rankje_rug.png",
+		"element": "natuur", "weak_matters": true,
+		"max_hp": 30, "atk": 18, "def": 8, "agi": 10, "mag": 0, "mdef": 6,
+		"exp": 16, "gold": 10, "y_offset": 0,
+		"skills": [{"name": "Bind", "type": "bind", "chance": 0.25, "power": 0.8}],
+		"no": 34, "mp": 0, "weak": ["vuur"], "resist": [],
+		"drops": [{"item": "kruid", "chance": 0.2}],
+		"desc": "A young shoot of the Living Archive. It wraps around your legs and holds you still for a moment.",
+		"habitat": ["archief"],
+	},
+	"sporekop": {
+		"name": "Sporehead", "sprite": "res://assets/sprites/enemies/sporekop.png",
+		"sprite_back": "res://assets/sprites/enemies/sporekop_rug.png",
+		"element": "natuur", "weak_matters": true,
+		"max_hp": 34, "atk": 17, "def": 10, "agi": 6, "mag": 6, "mdef": 8,
+		"exp": 17, "gold": 11, "y_offset": 0,
+		"skills": [{"name": "Poison Spit", "type": "poison", "chance": 0.3, "power": 0.9}],
+		"no": 35, "mp": 0, "weak": ["ijs"], "resist": [],
+		"drops": [{"item": "kruid", "chance": 0.2}],
+		"desc": "A swollen mushroom head that spits poisoned spores. The poison lingers for three turns.",
+		"habitat": ["archief"],
+	},
+	"doornige_loper": {
+		"name": "Thorn Runner", "sprite": "res://assets/sprites/enemies/doornige_loper.png",
+		"sprite_back": "res://assets/sprites/enemies/doornige_loper_rug.png",
+		"element": "natuur", "weak_matters": true,
+		"max_hp": 32, "atk": 22, "def": 9, "agi": 14, "mag": 0, "mdef": 6,
+		"exp": 19, "gold": 12, "y_offset": 0,
+		"skills": [{"name": "Thorn Charge", "type": "charge", "chance": 0.25, "power": 2.0}],
+		"no": 36, "mp": 0, "weak": ["vuur", "bliksem"], "resist": [],
+		"drops": [{"item": "drankje", "chance": 0.2}],
+		"desc": "A runner on thorny legs. It lowers its head and charges, and the charge hits twice as hard.",
+		"habitat": ["archief"],
+	},
+	"bloeiende_schrik": {
+		"name": "Blooming Dread", "sprite": "res://assets/sprites/enemies/bloeiende_schrik.png",
+		"sprite_back": "res://assets/sprites/enemies/bloeiende_schrik_rug.png",
+		"element": "natuur", "weak_matters": true,
+		"max_hp": 40, "atk": 20, "def": 11, "agi": 7, "mag": 0, "mdef": 9,
+		"exp": 20, "gold": 13, "y_offset": 0,
+		"skills": [{"name": "Bloom Bite", "type": "drain", "chance": 0.3, "power": 1.2}],
+		"no": 37, "mp": 0, "weak": ["ijs"], "resist": [],
+		"drops": [{"item": "drankje", "chance": 0.25}],
+		"desc": "A flower with teeth. Every bite makes it bloom a little more: it heals on what it takes.",
+		"habitat": ["archief"],
+	},
+	"wortelgeest": {
+		"name": "Rootghost", "sprite": "res://assets/sprites/enemies/wortelgeest.png",
+		"sprite_back": "res://assets/sprites/enemies/wortelgeest_rug.png",
+		"element": "natuur", "weak_matters": true,
+		"max_hp": 36, "atk": 19, "def": 8, "agi": 9, "mag": 8, "mdef": 12,
+		"exp": 21, "gold": 14, "y_offset": 0,
+		"skills": [{"name": "Root Pull", "type": "pull", "chance": 0.3, "power": 1.1}],
+		"no": 38, "mp": 0, "weak": ["vuur", "licht"], "resist": [],
+		"drops": [{"item": "toverwater", "chance": 0.2}],
+		"desc": "A pale ghost of roots. It pulls you toward it, so your next strike can only find the ghost.",
+		"habitat": ["archief"],
+	},
+	# Het Zingende Graan: klein mini-gevecht op de mistrand. v0.21: eigen art van RPG ART (batch 7).
 	# Bestiariumnummer 025: 013-024 zijn de twaalf eindbazen van de Diepe Grot (endgame_bestiary.gd).
 	"woudgeest": {
 		"name": "Woudgeest",
 		"sprite": "res://assets/sprites/enemies/woudgeest.png",
 		"sprite_back": "res://assets/sprites/enemies/woudgeest_rug.png",
-		"art_pending": true,
 		"max_hp": 12, "atk": 6, "def": 1, "agi": 5, "mag": 0, "mdef": 1,
 		"exp": 4, "gold": 2, "y_offset": 0,
 		"skills": [],
@@ -381,10 +453,11 @@ const ENEMIES := {
 		"desc": "Een kleine geest uit het woud.",
 		"habitat": ["woud"],
 	},
-	# Beloning van verdieping 100 (optie A). Geen eigen art: art_pending, de Codex toont de placeholder.
+	# Beloning van verdieping 100 (optie A). v0.21: eigen art van RPG ART (batch 11), voor + rug 90x90.
 	"echo": {
 		"name": "ECHO", "sprite": "res://assets/sprites/enemies/echo.png",
-		"art_pending": true,
+		"sprite_back": "res://assets/sprites/enemies/echo_rug.png",
+		"no_map": true,     # alleen beloning (verdieping 100), loopt nooit op een kaart: geen kaart-sprite
 		"max_hp": 40, "atk": 10, "def": 6, "agi": 8, "mag": 8, "mdef": 6,
 		"exp": 0, "gold": 0, "y_offset": 0,
 		"skills": [],
@@ -1028,6 +1101,9 @@ const TERRAIN_BACKDROP := {
 	"kas": "library_overgrown",
 	# v0.17: het Donker Woud (thema donker_woud in dungeon_rooms.gd)
 	"woud": "forest_dark",
+	# v0.21: eigen gevechtsachtergronden van RPG ART (batch 13)
+	"berggrot": "cave_berg",
+	"dungeon100": "cave_deep",
 }
 ## v0.17: baasgevecht op dit terrein = deze achtergrond i.p.v. "boss" (de Wortelkoning in het Woud).
 const BOSS_TERRAIN_BACKDROP := {"woud": "forest_dark"}
@@ -1043,6 +1119,9 @@ const BACKDROPS := {
 	"library_overgrown": "res://assets/battle/bibliotheek_overwoekerd.png",
 	# v0.17: gevechtsachtergrond Donker Woud, 1280x432 (RPG ART art_woud_v17, handwerk)
 	"forest_dark": "res://assets/battle/donker_woud.png",
+	# v0.21: Berggrot en Diepe Grot, 1280x432 (RPG ART batch 13, handwerk)
+	"cave_berg": "res://assets/battle/berggrot.png",
+	"cave_deep": "res://assets/battle/diepe_grot.png",
 }
 
 

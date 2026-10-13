@@ -13,6 +13,7 @@ const Gear := preload("res://scripts/data/grade_gear.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const Scale := preload("res://scripts/data/level_scale.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
+const GDb := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const Unlock := preload("res://world_warper/flow/unlock.gd")
 const BW := preload("res://scripts/dungeon/berggrot_warpers.gd")
@@ -105,14 +106,32 @@ func _data() -> void:
 		check("ogg speelt als het bestand er is", AudioManager.play_music(BG.BGM))
 	else:
 		check("zonder ogg blijft play_music stil", not AudioManager.play_music(BG.BGM))
-	var ph := FileAccess.get_file_as_string("res://tools/placeholders_v17.txt")
-	check("placeholders geregistreerd", ph.contains("assets/tiles/dungeon/berggrot_tiles.png")
-			and ph.contains("256x80") and ph.contains("assets/sprites/enemies/steenluis.png")
-			and ph.contains("90x90") and ph.contains("assets/map_monsters/adermot.png")
-			and ph.contains("32x64"))
+	# v0.21: echte art van RPG ART (batch 1). Staat in handwerk.txt, geen "art_pending" meer.
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	var echt := true
+	for bestand in ["assets/tiles/dungeon/berggrot_tiles.png", "assets/tiles/dungeon/berggrot_bibliotheek.png",
+			"assets/sprites/enemies/steenluis.png", "assets/sprites/enemies/druipslak_rug.png",
+			"assets/map_monsters/adermot.png"]:
+		echt = echt and hw.contains(bestand) and ResourceLoader.exists("res://" + bestand)
+	for id in BG.MONSTERS:
+		echt = echt and not bool(BG.MONSTERS[id].get("art_pending", false))
+	var tegels: Texture2D = load("res://assets/tiles/dungeon/berggrot_tiles.png")
+	var mon: Texture2D = load("res://assets/map_monsters/adermot.png")
+	check("echte grot-art geregistreerd (handwerk), geen art_pending", echt
+			and tegels.get_width() == 256 and tegels.get_height() == 80
+			and mon.get_width() == 32 and mon.get_height() == 64)
 	var bron := FileAccess.get_file_as_string("res://scripts/data/berggrot_data.gd")
 	check("start() wisselt naar de grotmond", bron.contains("func start")
 			and bron.contains("change_map(SCENE, SPAWN_INGANG)"))
+	# v0.21 (RPG ART batch 13): eigen gevechtsachtergronden voor Berggrot en Diepe Grot
+	var bb: Texture2D = load(GDb.backdrop_path(GDb.backdrop_id_for(DR.terrain_of("berggrot"))))
+	var dg: Texture2D = load(GDb.backdrop_path(GDb.backdrop_id_for("dungeon100")))
+	check("gevechtsachtergrond: berggrot -> cave_berg, Diepe Grot -> cave_deep (1280x432)",
+			DR.terrain_of("berggrot") == "berggrot" and GDb.backdrop_id_for("berggrot") == "cave_berg"
+			and GDb.backdrop_id_for("dungeon100") == "cave_deep"
+			and bb != null and bb.get_size() == Vector2(1280, 432) and dg != null and dg.get_size() == Vector2(1280, 432)
+			and str(GDb.backdrop_path("cave_berg")).ends_with("berggrot.png")
+			and FileAccess.get_file_as_string("res://scripts/dungeon/dungeon100_room.gd").contains("return \"dungeon100\""))
 	check("kamers hangen aan het dungeon-thema", not DR.room("berggrot_mond").is_empty()
 			and DR.theme_of(DR.room("berggrot_mond")) == "berggrot")
 
@@ -359,8 +378,8 @@ func _warper_kamer(pad: String, spawn: String, scene_name: String, role: String,
 	wp.interact(player())
 	var warned: bool = await wait_until(_exit_warning_open, 3.0)
 	check("%s waarschuwt: '%s'" % [role, ExitWarper.WARNING], warned
-			and ExitWarper.YES == "Ja, warpen naar worldmap"
-			and ExitWarper.NO == "Nee, blijf in de dungeon")
+			and ExitWarper.YES == "Yes, warp to the world map"
+			and ExitWarper.NO == "No, stay in the dungeon")
 	Dialog.choose(1)
 	await wait_until(func() -> bool: return wp.last_result == "cancelled" and not wp.busy, 2.0)
 	check("%s annuleren laat de party staan" % role, wp.last_result == "cancelled" and scene() == kamer

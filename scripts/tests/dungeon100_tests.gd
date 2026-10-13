@@ -158,8 +158,8 @@ func _rules_tests() -> void:
 			and R.unlock_warper([1, 100, 2], 0) == [1])
 	check("niet-bereikte warper is dicht", not R.warper_open([1], 25) and not R.warper_open([1], 99)
 			and not R.warper_open([], 1) and R.warper_open([1, 25], 25))
-	check("waarschuwing is de vertrekvraag, Ja en Nee", R.WARPER_WARNING == "Weet je zeker dat je de dungeon wilt verlaten?"
-			and R.WARPER_YES == "Ja" and R.WARPER_NO == "Nee"
+	check("waarschuwing is de vertrekvraag, Ja en Nee", R.WARPER_WARNING == "Are you sure you want to leave the dungeon?"
+			and R.WARPER_YES == "Yes" and R.WARPER_NO == "No"
 			and R.WARPER_SPAWN == Gen.SPAWN_WARPER and R.WORLD_SPAWN == EchoGrot.KAMER_SPAWN)
 	check("verdieping 25 heet De Schaduw van H-6", Scaling.boss_for_floor(25)["name"] == "De Schaduw van H-6"
 			and Scaling.boss_for_floor(50)["name"] == "De Cyclus"
@@ -636,6 +636,10 @@ func _warper_tests() -> void:
 	await pframes(2)
 	check("warper: scène laadt (boek, type 'warper'), 1 tile", wp is Dungeon100Warper and wp.type == "warper"
 			and wp is StaticBody2D and wp.position == Vector2(start + Vector2i(1, 0)) * 16.0 + Vector2(8, 8))
+	var wspr: Sprite2D = wp.get("sprite")
+	check("warper: eigen art (dungeon100_warper.png 64x16, 4 frames), geen violette tint", wspr != null
+			and wspr.texture.resource_path.ends_with("dungeon100_warper.png") and wspr.texture.get_size() == Vector2(64, 16)
+			and wspr.hframes == 4 and wspr.modulate == Color.WHITE)
 	wp.interact(pl)
 	await pframes(2)
 	var quiet: bool = await wait_until(func():

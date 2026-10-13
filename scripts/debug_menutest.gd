@@ -334,7 +334,7 @@ func _direct_button_tests() -> void:
 	m.choose("warp")
 	await frames(3)
 	check("Warpen zonder hub: '%s'" % m.message_label.text,
-			m.message_label.visible and m.message_label.text == "De warp-hub is nog niet bereikbaar.")
+			m.message_label.visible and m.message_label.text == "The warp hub cannot be reached yet.")
 	check("Warpen zonder hub verandert de kaart niet", str(scene().scene_file_path) == map_path
 			and str(scene().name) == map_name and player().get_tile() == tile and not GameState.changing_map
 			and menu() == m)
@@ -658,7 +658,7 @@ func _menu_save_tests() -> void:
 			not d.is_empty() and hurt["hp"] == maxi(1, int(hurt["max_hp"]) - 5) and int(d["party"][0]["hp"]) == hurt["hp"])
 	hurt["hp"] = keep_hp
 	check("Ja: handmatig opgeslagen (%s)" % m.message_label.text, m.last_save_result == "saved" and GameState.has_save()
-			and m.message_label.text == "Opgeslagen." and m.message_label.visible)
+			and m.message_label.text == "Saved." and m.message_label.visible)
 	check("save: map, plek en kijkrichting van de speler, geen autosave-vlag",
 			not d.is_empty() and str(d.get("map", "")).ends_with("wilgendal.tscn") and Vector2i(int(d["tile"][0]), int(d["tile"][1])) == p.get_tile()
 			and d.get("autosave", true) == false and d["party"].size() == 3 and int(d["gold"]) == 123)
@@ -671,11 +671,11 @@ func _menu_save_tests() -> void:
 	sc = m.get_node_or_null("SaveScreen")
 	check("slot met data: 'Overschrijven?' + wat er nu in het slot staat (%s)" % (sc.slot_label.text if sc else "-"),
 			sc != null and sc.overwrite and sc.question_label.text == sc.Q_OVERWRITE and sc.slot_label.visible
-			and sc.slot_label.text.begins_with("In het slot: Kees Lv"))
+			and sc.slot_label.text.begins_with("In the slot: Kees Lv"))
 	if sc == null:
 		return
-	check("overschrijven: knoppen 'Ja' en 'Nee', tikvlak >= %d px" % m.ROW_H, sc.yes_button.get_meta("label") == "Ja"
-			and sc.no_button.get_meta("label") == "Nee" and sc.yes_button.size.y >= m.ROW_H and sc.no_button.size.y >= m.ROW_H)
+	check("overschrijven: knoppen 'Ja' en 'Nee', tikvlak >= %d px" % m.ROW_H, sc.yes_button.get_meta("label") == "Yes"
+			and sc.no_button.get_meta("label") == "No" and sc.yes_button.size.y >= m.ROW_H and sc.no_button.size.y >= m.ROW_H)
 	check("overschrijven: alles binnen het scherm", _inside_screen(sc.root, sc.content))
 	await shot("menu_save_overwrite")
 	await click(sc.no_button)

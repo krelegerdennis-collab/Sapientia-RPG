@@ -30,9 +30,9 @@ func interact(speler: Node2D) -> void:
 				tile = speler.get_tile()
 				facing = speler.facing
 			if GameState.save_game(tile, facing):
-				Dialog.show_lines(["Opgeslagen."], "ECHO")
+				Dialog.show_lines(["Saved."], "ECHO")
 			else:
-				Dialog.show_lines(["Opslaan lukt niet."], "ECHO")
+				Dialog.show_lines(["Saving failed."], "ECHO")
 		1:
 			_warp("wilgendal")
 		2:

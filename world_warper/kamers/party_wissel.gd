@@ -37,7 +37,7 @@ func _ready() -> void:
 	_status.custom_minimum_size = Vector2(0, 20)
 	kolom.add_child(_status)
 	var terug := Button.new()
-	terug.text = "Terug"
+	terug.text = "Back"
 	terug.custom_minimum_size = Vector2(0, 22)
 	terug.add_theme_font_override("font", FONT)
 	terug.add_theme_font_size_override("font_size", 8)

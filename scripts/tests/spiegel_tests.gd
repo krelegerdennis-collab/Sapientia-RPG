@@ -114,9 +114,11 @@ func _kamer() -> void:
 	check("kamer is eerst heel", kamer.gebroken == false
 			and str(kamer.achtergrond.texture.resource_path).ends_with("spiegel_kamer.png"))
 	var tex: Texture2D = kamer.achtergrond.texture
-	check("placeholder 384x216", tex != null and tex.get_size() == Vector2(384, 216))
+	check("achtergrond 384x216", tex != null and tex.get_size() == Vector2(384, 216))
+	# v0.21: echte art van RPG ART (batch 8), geen magenta placeholder-hoek meer; staat in handwerk.txt
 	var hoek := tex.get_image().get_pixel(0, 0)
-	check("placeholder-hoek magenta", hoek.r > 0.9 and hoek.b > 0.8 and hoek.g < 0.25)
+	check("echte art: geen magenta hoek, in handwerk.txt", not (hoek.r > 0.9 and hoek.b > 0.8 and hoek.g < 0.25)
+			and FileAccess.get_file_as_string("res://tools/handwerk.txt").contains("assets/bg/spiegel_kamer_gebroken.png"))
 	await pframes(2)
 	await screenshot("spiegel_kamer")
 	var n := 0

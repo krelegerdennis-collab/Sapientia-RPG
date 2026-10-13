@@ -11,10 +11,11 @@ class_name DungeonExitWarper
 
 const SCENE := "res://scenes/dungeon_exit_warper.tscn"
 const TINT := Color(0.78, 0.62, 1.0)
-const WARNING := "Weet je zeker dat je de dungeon wilt verlaten?"
-const YES := "Ja, warpen naar worldmap"
-const NO := "Nee, blijf in de dungeon"
-const INGANG := "Dit is de ingang. Je blijft in de dungeon."
+const BOOK_TEX := "res://assets/sprites/save_book.png"
+const WARNING := "Are you sure you want to leave the dungeon?"
+const YES := "Yes, warp to the world map"
+const NO := "No, stay in the dungeon"
+const INGANG := "This is the entrance. You stay in the dungeon."
 const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
 const WORLD_SPAWN := "van_archief"
 
@@ -38,6 +39,9 @@ static func create(tile: Vector2i) -> Node2D:
 func _ready() -> void:
 	type = "warper"
 	super._ready()
+	# v0.21: BookData "warper" is nu de eigen art van de Diepe Grot-warper; deze uitgang-warper
+	# blijft (tot hij eigen art heeft) het violet getinte opslagboek.
+	sprite.texture = load(BOOK_TEX)
 	sprite.modulate = TINT
 
 

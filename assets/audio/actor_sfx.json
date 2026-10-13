@@ -1,7 +1,12 @@
 {
 	"versie": 1,
 	"beschrijving": "SFX per held en per monster. Bestanden: res://assets/audio/sfx/helden/<id>/<slot>.wav en res://assets/audio/sfx/monsters/<id>/<slot>.wav. De AudioManager maakt hier sleutels van (held_<id>_<slot> en monster_<id>_<slot>). De wavs zijn synthetische placeholders (tools/gen_actor_sfx.py) tot er echte opnames zijn. Ontbreekt een bestand, dan blijft dat geluid stil.",
-	"slots": ["aanval", "raak", "dood", "vaardigheid"],
+	"slots": [
+		"aanval",
+		"raak",
+		"dood",
+		"vaardigheid"
+	],
 	"helden": {
 		"dennis": {
 			"naam": "Dennis",
@@ -266,6 +271,71 @@
 				"raak": "Glas dat meetrilt.",
 				"dood": "De stem valt weg.",
 				"vaardigheid": "Een hogere digitale toon."
+			}
+		},
+		"rankje": {
+			"naam": "Tendril",
+			"stem": "PLACEHOLDER (kopie van wortelkruiper). Droog hout en knijpende wortels.",
+			"klank": "hout",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Krakend hout dat toeslaat.",
+				"raak": "Korte tak die breekt.",
+				"dood": "Wortels die slap vallen.",
+				"vaardigheid": "Wortelgreep, een langzame knijp."
+			}
+		},
+		"sporekop": {
+			"naam": "Sporehead",
+			"stem": "PLACEHOLDER (kopie van sporenzwam). Doffe paddenstoel. Poeft sporen uit.",
+			"klank": "zwam",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Doffe plof.",
+				"raak": "Natte plop.",
+				"dood": "Lucht die wegloopt.",
+				"vaardigheid": "Sporenwolk, meerdere ploffen."
+			}
+		},
+		"doornige_loper": {
+			"naam": "Thorn Runner",
+			"stem": "PLACEHOLDER (kopie van moskonijn). Snel, hoog gepiep. Een beet en een sprong.",
+			"klank": "piep",
+			"volume_db": -7,
+			"pitch_variatie": 0.07,
+			"slots": {
+				"aanval": "Korte sprong en een piep.",
+				"raak": "Scherp gepiep.",
+				"dood": "Piep die naar beneden valt.",
+				"vaardigheid": "Twee snelle bijten."
+			}
+		},
+		"bloeiende_schrik": {
+			"naam": "Blooming Dread",
+			"stem": "PLACEHOLDER (kopie van mosslijm). Nat, plakkerig geklots. Klein en zacht.",
+			"klank": "slijm",
+			"volume_db": -8,
+			"pitch_variatie": 0.06,
+			"slots": {
+				"aanval": "Natte klodder die loslaat.",
+				"raak": "Kort gespetter.",
+				"dood": "Slijm dat uitloopt.",
+				"vaardigheid": "Bubbels die opstijgen."
+			}
+		},
+		"wortelgeest": {
+			"naam": "Rootghost",
+			"stem": "PLACEHOLDER (kopie van woudgeest). Ijl en kort, als een zucht tussen bladeren.",
+			"klank": "wind",
+			"volume_db": -8,
+			"pitch_variatie": 0.06,
+			"slots": {
+				"aanval": "Korte windvlaag.",
+				"raak": "Hoge, dunne tik.",
+				"dood": "Zucht die wegvalt.",
+				"vaardigheid": "Een iets langere windvlaag."
 			}
 		}
 	}

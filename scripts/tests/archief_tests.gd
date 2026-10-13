@@ -757,8 +757,8 @@ func _warper_tests() -> void:
 		mid_wp.interact(player())
 		warned = await wait_until(_exit_warning_open, 3.0)
 		check("waarschuwing opnieuw voor de bevestiging", warned
-				and ExitWarper.YES == "Ja, warpen naar worldmap"
-				and ExitWarper.NO == "Nee, blijf in de dungeon")
+				and ExitWarper.YES == "Yes, warp to the world map"
+				and ExitWarper.NO == "No, stay in the dungeon")
 		Dialog.choose(0)
 		var world_ok := await wait_scene("Wereldkaart", 20.0)
 		await wait_fade()

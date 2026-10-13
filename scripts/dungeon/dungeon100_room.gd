@@ -100,3 +100,9 @@ func _confirm_leave(exit: Node) -> void:
 		super._use_exit(exit)
 	else:
 		player.input_locked = false
+
+
+## v0.21: de Diepe Grot heeft een eigen terrein (gevechtsachtergrond cave_deep, RPG ART batch 13).
+## De tegels zelf houden het terrein van hun thema; alleen het gevecht kijkt hiernaar.
+func terrain_at(tile: Vector2i) -> String:
+	return "dungeon100" if super.terrain_at(tile) != "" else ""

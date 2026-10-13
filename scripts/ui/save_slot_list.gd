@@ -31,7 +31,7 @@ func _ready() -> void:
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 0)
 	box.add_child(list)
-	list.add_child(UiMenu.label("Kies een slot", UiStyleC.TEXT))
+	list.add_child(UiMenu.label("Choose a slot", UiStyleC.TEXT))
 	var focus_btn: Button = null
 	var best := -1.0
 	for i in range(1, GameState.SLOT_COUNT + 1):
@@ -47,7 +47,7 @@ func _ready() -> void:
 		if not rec.is_empty() and float(rec.get("stamp", 0.0)) > best:
 			best = float(rec["stamp"])
 			focus_btn = b
-	var back := UiMenu.button("Terug")
+	var back := UiMenu.button("Back")
 	back.name = "Terug"
 	back.pressed.connect(func() -> void: cancelled.emit())
 	list.add_child(back)

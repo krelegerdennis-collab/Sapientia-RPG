@@ -79,6 +79,8 @@ const DEFAULT_AI := {"skill_chance": 0.35, "heal_below": 0.35, "target": "willek
 ##           "all"    = alle vijanden, ATK x power - DEF/2
 ##           "heal"   = één bondgenoot (held of hijzelf), power + 2 x level HP
 ##           "guard"  = schild omhoog (DEF x def_mult, deze en de volgende ronde)
+##           v0.21 "poison" / "bind" / "pull" = één vijand + effect (scripts/data/archief2_vijanden.gd);
+##           "counter": true bij "pull" = ook counter tot het einde van de ronde (alleen de Wortelgeest)
 ##   "mp" = kosten (0 = gratis); "element" = alleen informatie (fusie later)
 const SKILLS := {
 	"klauw":        {"name": "Claw",        "type": "damage", "power": 1.2, "mp": 0},
@@ -102,6 +104,10 @@ const SKILLS := {
 	"zwamkuur":     {"name": "Cap Cure",     "type": "heal",   "power": 14,  "mp": 0, "element": "natuur"},
 	# v0.19 Archief 1: de Inktwurm (lore: Inktspuw; BESLISSING DENNIS: eerste vaardigheid op Lv 8, element inkt)
 	"inktspuw":     {"name": "Ink Spit",     "type": "damage", "power": 1.4, "mp": 0, "element": "inkt"},
+	# v0.21 Archief 2 (CANON besluit 13): gedrag in scripts/data/archief2_vijanden.gd
+	"gifspuw":      {"name": "Poison Spit",  "type": "poison", "power": 0.9, "mp": 0, "element": "natuur"},
+	"rankgreep":    {"name": "Bind",         "type": "bind",   "power": 0.8, "mp": 0, "element": "natuur"},
+	"wortelzuiging": {"name": "Root Pull",   "type": "pull",   "power": 1.1, "mp": 0, "element": "natuur", "counter": true},
 }
 
 ## De soorten. Volgorde = volgorde in het Codex-scherm (daarna op level).
@@ -192,6 +198,33 @@ const SPECIES := {
 		"ai": {"skill_chance": 0.45, "heal_below": 0.0, "target": "zwakste"},
 		"capture_always": true,
 		"glitch_name": "Glitch Worm",
+	},
+	# v0.21 Archief 2 (CANON besluit 13): vangbaar zijn alleen Sporekop, Rankje en Wortelgeest.
+	# Doornige Loper en Bloeiende Schrik staan hier bewust NIET (niet vangbaar).
+	# TIJDELIJKE AANNAME: groei en AI in de band van de Woud-soorten; vaardigheid vanaf level 1.
+	"sporekop": {
+		"enemy": "sporekop", "name": "Sporehead", "element": "natuur", "type": "zwam", "fusion_tags": ["zwam", "gif"],
+		"growth": {"max_hp": 6, "max_mp": 0, "atk": 2, "def": 2, "agi": 1},
+		"learn": {1: ["gifspuw"]},
+		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "sterkste"},
+		"capture_rate": 0.8,
+		"glitch_name": "Glitch Spore",
+	},
+	"rankje": {
+		"enemy": "rankje", "name": "Tendril", "element": "natuur", "type": "plant", "fusion_tags": ["rank", "plant"],
+		"growth": {"max_hp": 5, "max_mp": 0, "atk": 2, "def": 1, "agi": 2},
+		"learn": {1: ["rankgreep"]},
+		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "sterkste"},
+		"capture_rate": 0.8,
+		"glitch_name": "Glitch Vine",
+	},
+	"wortelgeest": {
+		"enemy": "wortelgeest", "name": "Rootghost", "element": "natuur", "type": "geest", "fusion_tags": ["wortel", "geest"],
+		"growth": {"max_hp": 6, "max_mp": 1, "atk": 2, "def": 1, "agi": 1},
+		"learn": {1: ["wortelzuiging"]},
+		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "sterkste"},
+		"capture_rate": 0.7,
+		"glitch_name": "Glitch Ghost",
 	},
 	# Verdieping 100, optie A. Geen nieuw verhaal: alleen een vangbare soort op de bestaande Codex-API.
 	"echo": {
@@ -550,7 +583,7 @@ static func validate() -> Array[String]:
 		if not ResourceLoader.exists(str(s["front"])):
 			errs.append("%s: vooraanzicht %s bestaat niet" % [id, s["front"]])
 	for sk in SKILLS:
-		if not (str(SKILLS[sk].get("type", "")) in ["damage", "all", "heal", "guard"]):
+		if not (str(SKILLS[sk].get("type", "")) in ["damage", "all", "heal", "guard", "poison", "bind", "pull"]):
 			errs.append("vaardigheid %s: type ongeldig" % sk)
 	errs.append_array(validate_fusion())
 	return errs

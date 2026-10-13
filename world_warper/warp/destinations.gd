@@ -34,9 +34,9 @@ const PLACE_ESDOORN := "esdoorn"
 static func worlds() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	# TODO(design): er zijn nog geen spelersnamen voor de eilanden.
-	out.append({"id": WM1, "label": "Wereld 1"})
-	out.append({"id": WM2, "label": "Wereld 2"})
-	out.append({"id": WM3, "label": "Wereld 3"})
+	out.append({"id": WM1, "label": "World 1"})
+	out.append({"id": WM2, "label": "World 2"})
+	out.append({"id": WM3, "label": "World 3"})
 	return out
 
 
@@ -47,7 +47,7 @@ static func places(wm_id: String) -> Array[Dictionary]:
 		return out
 	out.append({
 		"id": PLACE_WERELDKAART,
-		"label": "Wereldkaart",
+		"label": "World Map",
 		"path": GameState.WORLD_MAP,
 		"spawn": WORLD_MAP_SPAWN,
 	})
