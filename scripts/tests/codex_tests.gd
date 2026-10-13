@@ -1071,7 +1071,7 @@ func _eind_account_tests(story_path: String) -> void:
 		var sid := str(raw_id)
 		if CD.has_species(sid) and bool(CD.species(sid).get("capturable", false)):
 			codex_n += 1
-	check("eindstaat: vangbare Codex-soorten, Inktwurm als buddy", GameState.codex_pages.size() == codex_n
+	check("eindstaat: vangbare Codex-soorten (max %d pagina's), Inktwurm als buddy" % CD.MAX_PAGES, GameState.codex_pages.size() == mini(codex_n, CD.MAX_PAGES)
 			and str(GameState.codex_active_page().get("species", "")) == "inktwurm"
 			and GameState.is_seen("mosslijm"))
 	var eind_path := GameState.newest_eind_path()

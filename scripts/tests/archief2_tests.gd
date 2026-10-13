@@ -22,6 +22,8 @@ const GENEZER_SCENE := "res://scenes/maps/archief_2_v4_genezer.tscn"
 const AANVAL := 0
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
+const AV := preload("res://scripts/data/archief2_vijanden.gd")
+const CD := preload("res://scripts/data/codex_data.gd")
 const LICHT_SCENE := "res://scenes/maps/archief_2_v3_licht.tscn"
 
 var failures := 0
@@ -58,6 +60,10 @@ func _run() -> void:
 	await _spel()
 	print("=== Archief 2: na De Genezer naar de hub ===")
 	await _na_genezer_hub()
+	print("=== Archief 2: vijanden (data en regels) ===")
+	_vijanden()
+	print("=== Archief 2: vijanden en Codex-bondgenoten in het gevecht ===")
+	await _vijanden_gevecht()
 	print("ARCHIEF2TEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -641,3 +647,199 @@ func _shot(naam: String) -> void:
 		return
 	DirAccess.make_dir_recursive_absolute(shots)
 	img.save_png(shots.path_join(naam + ".png"))
+
+
+# ---------------------------------------------------------------- v0.21 Archief 2-vijanden
+const VIJAND_VERWACHT := {
+	"rankje": ["Tendril", ["vuur"], "bind"],
+	"sporekop": ["Sporehead", ["ijs"], "poison"],
+	"doornige_loper": ["Thorn Runner", ["vuur", "bliksem"], "charge"],
+	"bloeiende_schrik": ["Blooming Dread", ["ijs"], "drain"],
+	"wortelgeest": ["Rootghost", ["vuur", "licht"], "pull"],
+}
+
+
+func _combatant(naam: String, hp: int, max_hp: int, held: bool) -> Dictionary:
+	return {"name": naam, "is_hero": held, "defending": false,
+			"s": {"hp": hp, "max_hp": max_hp, "atk": 20, "def": 5, "agi": 5}}
+
+
+func _vijanden() -> void:
+	var nummers := {}
+	for e in GD.ENEMIES.values():
+		nummers[int(e.get("no", 0))] = int(nummers.get(int(e.get("no", 0)), 0)) + 1
+	var in_kamers := {}
+	var kamers: Dictionary = Rooms.ROOMS.duplicate(true)
+	kamers.merge(Rooms.rooms())
+	for k in kamers:
+		for m in kamers[k].get("monsters", []):
+			for id in m.get("group", []):
+				in_kamers[str(id)] = true
+	for id in VIJAND_VERWACHT:
+		var want: Array = VIJAND_VERWACHT[id]
+		var e: Dictionary = GD.ENEMIES.get(id, {})
+		check("%s bestaat, naam %s, Natuur" % [id, want[0]], not e.is_empty() and str(e["name"]) == want[0]
+				and str(e.get("element", "")) == AV.ELEMENT and bool(e.get("weak_matters", false)))
+		if e.is_empty():
+			continue
+		check("%s zwak voor %s" % [id, want[1]], e["weak"] == want[1])
+		var sk: Dictionary = e["skills"][0] if not (e["skills"] as Array).is_empty() else {}
+		check("%s vaardigheid %s (%s)" % [id, want[2], sk.get("name", "")], str(sk.get("type", "")) == want[2]
+				and float(sk.get("chance", 0.0)) > 0.0)
+		var voor: Texture2D = load(str(e["sprite"]))
+		var rug: Texture2D = load(str(e["sprite_back"]))
+		var kaart: Texture2D = load("res://assets/map_monsters/%s.png" % id)
+		check("%s art: voor/rug 90x90, kaart 32x64" % id, voor != null and rug != null and kaart != null
+				and voor.get_size() == Vector2(90, 90) and rug.get_size() == Vector2(90, 90) and kaart.get_size() == Vector2(32, 64))
+		check("%s eigen bestiariumnummer %d" % [id, int(e["no"])], int(nummers.get(int(e["no"]), 0)) == 1
+				and str(e.get("desc", "")) != "")
+		check("%s loopt in Archief 2" % id, in_kamers.has(id))
+		var doel := {"s": e}
+		var zwak_ok := true
+		for el in ["vuur", "ijs", "bliksem", "licht", "natuur"]:
+			var x := Archief2.schaal_element(100, doel, el)
+			zwak_ok = zwak_ok and ((x > 100) == (el in want[1]))
+		check("%s: zwakte telt (x%.1f), de rest niet" % [id, Archief2.ZWAK], zwak_ok)
+	check("charge verdubbelt de schade", is_equal_approx(float(GD.ENEMIES["doornige_loper"]["skills"][0]["power"]), AV.CHARGE_POWER)
+			and is_equal_approx(AV.CHARGE_POWER, 2.0))
+	# regels op losse combatants
+	var a := _combatant("Rankje", 30, 30, false)
+	var h := _combatant("Dennis", 50, 50, true)
+	var zin := AV.apply(a, h, {"type": "bind"}, 5)
+	check("binden: 1 beurt overslaan", int(h["skip"]) == 1 and str(h["skip_reden"]) == AV.SKIP_REDEN_BIND and "bound" in zin)
+	h = _combatant("Dennis", 50, 50, true)
+	zin = AV.apply(a, h, {"type": "poison"}, 5)
+	var gif: Array = h.get("dots", [])
+	check("gif: 3 beurten, %d%% per ronde" % roundi(AV.POISON_PCT * 100.0), gif.size() == 1 and int(gif[0]["turns"]) == 3
+			and is_equal_approx(float(gif[0]["pct"]), AV.POISON_PCT) and "poisoned" in zin)
+	var schrik := _combatant("Blooming Dread", 10, 40, false)
+	zin = AV.apply(schrik, h, {"type": "drain"}, 10)
+	check("bijt + heelt zichzelf (helft van de schade)", int(schrik["s"]["hp"]) == 15 and "heals 5" in zin)
+	schrik["s"]["hp"] = 39
+	AV.apply(schrik, h, {"type": "drain"}, 10)
+	check("heelt niet boven max HP", int(schrik["s"]["hp"]) == 40)
+	var geest := _combatant("Rootghost", 30, 30, false)
+	h = _combatant("Dennis", 50, 50, true)
+	h["defending"] = true
+	AV.apply(geest, h, {"type": "pull"}, 5)
+	check("trekken: doel getrokken, verdedigen weg, geen counter voor een vijand", h.get("pulled_by") == geest
+			and not h["defending"] and int(geest.get("counter", 0)) == 0)
+	check("getrokken: volgende aanval op de trekker, daarna niet meer", AV.pulled_target(h) == geest and AV.pulled_target(h) == null)
+	AV.apply(geest, h, {"type": "pull"}, 5)
+	geest["s"]["hp"] = 0
+	check("dode trekker trekt niet", AV.pulled_target(h) == null)
+	var dood := _combatant("X", 0, 10, true)
+	check("geen effect op een KO-doel", AV.apply(a, dood, {"type": "bind"}, 1) == "" and not dood.has("skip"))
+	# Codex
+	check("Codex valideert %s" % [CD.validate()], CD.validate().is_empty())
+	for id in AV.CODEX_IDS:
+		var sid := CD.species_for_enemy(id)
+		check("%s vangbaar (kans bij 1 HP %.2f)" % [id, CD.capture_chance(sid, 1, 30)], sid == id
+				and bool(CD.species(sid)["capturable"]) and CD.capture_chance(sid, 1, 30) > 0.5)
+	for id in ["doornige_loper", "bloeiende_schrik"]:
+		check("%s niet vangbaar" % id, CD.species_for_enemy(id) == "")
+	var want_sk := {"sporekop": ["gifspuw", "poison"], "rankje": ["rankgreep", "bind"], "wortelgeest": ["wortelzuiging", "pull"]}
+	for id in want_sk:
+		var page := CD.make_page(id, 3, "codex_t_" + id)
+		check("%s-pagina kent %s (%s), Engelse naam" % [id, want_sk[id][0], want_sk[id][1]],
+				(page["skills"] as Array).has(want_sk[id][0]) and str(CD.skill(want_sk[id][0])["type"]) == want_sk[id][1]
+				and str(page["name"]) == VIJAND_VERWACHT[id][0])
+	var counters := 0
+	for k in CD.SKILLS:
+		if bool(CD.SKILLS[k].get("counter", false)):
+			counters += 1
+	check("alleen de Wortelgeest heeft counter", counters == 1 and bool(CD.skill("wortelzuiging").get("counter", false)))
+
+
+func _vijanden_gevecht() -> void:
+	Engine.time_scale = 4.0
+	GameState.new_game("Dennis")
+	GameState.encounter_multiplier = 0.0
+	GameState.change_map(Archief2.PLAAT_SCENE, "zuid")
+	if not await _wacht("Archief2V1Plaat", 20.0):
+		check("kamer voor het vijandgevecht", false)
+		return
+	await _dialoog_dicht(30)
+	GameState.codex_add("wortelgeest", 5, {})
+	check("Wortelgeest is de bondgenoot", GameState.codex_pages.size() == 1 and GameState.codex_active != "")
+	var speler: Node = _scène().get_node("Objects/Player")
+	GameState.start_battle(["wortelgeest", "rankje", "sporekop"], speler.get_tile(), speler.facing, "archief", false, 2, true)
+	if not await _wacht("Battle", 20.0):
+		check("gevecht met Archief 2-vijanden", false)
+		return
+	var b := _gevecht()
+	await _wacht_staat(["command"], 20.0)
+	var held: Dictionary = {}
+	var ally: Dictionary = {}
+	for c in b.heroes:
+		if bool(c.get("ally", false)):
+			ally = c
+		elif str(c["s"].get("id", "")) == "dennis":
+			held = c
+	var ew: Dictionary = b.enemies[0]
+	var er: Dictionary = b.enemies[1]
+	var es: Dictionary = b.enemies[2]
+	check("gevecht: Rootghost, Tendril, Sporehead + bondgenoot", str(ew["name"]) == "Rootghost" and str(er["name"]) == "Tendril"
+			and str(es["name"]) == "Sporehead" and not ally.is_empty() and not held.is_empty())
+	for c in [held, ally, ew, er, es]:
+		c["s"]["max_hp"] = 999
+		c["s"]["hp"] = 999
+	# Rankje bindt Dennis
+	er["s"]["skills"][0]["chance"] = 1.0
+	await b._execute({"type": "attack", "actor": er, "target": held})
+	check("Tendril bindt Dennis (1 beurt)", int(held.get("skip", 0)) == 1 and b.last_skill_effect.get("type") == "bind")
+	var hp_r := int(er["s"]["hp"])
+	await b._execute({"type": "attack", "actor": held, "target": er})
+	check("gebonden Dennis slaat over", int(held.get("skip", 0)) == 0 and int(er["s"]["hp"]) == hp_r)
+	# Sporekop vergiftigt
+	es["s"]["skills"][0]["chance"] = 1.0
+	await b._execute({"type": "attack", "actor": es, "target": held})
+	var hp_h := int(held["s"]["hp"])
+	b._tick_ailments(held)
+	check("Sporehead vergiftigt: gif tikt (%d -> %d), nog 2 beurten" % [hp_h, int(held["s"]["hp"])],
+			int(held["s"]["hp"]) == hp_h - roundi(999 * AV.POISON_PCT) and int((held["dots"] as Array)[0]["turns"]) == 2)
+	held["dots"] = []
+	# Wortelgeest trekt Dennis: zijn klap op Tendril gaat naar de Wortelgeest
+	ew["s"]["skills"][0]["chance"] = 1.0
+	await b._execute({"type": "attack", "actor": ew, "target": held})
+	check("Rootghost trekt Dennis aan", held.get("pulled_by") == ew)
+	var hp_w := int(ew["s"]["hp"])
+	hp_r = int(er["s"]["hp"])
+	await b._execute({"type": "attack", "actor": held, "target": er})
+	check("getrokken klap raakt de Rootghost, niet Tendril", int(ew["s"]["hp"]) < hp_w and int(er["s"]["hp"]) == hp_r
+			and not held.has("pulled_by"))
+	# Bondgenoot (Wortelgeest): trekt een vijand + counter
+	for e in [ew, er, es]:
+		e["s"]["skills"][0]["chance"] = 0.0
+	ew["s"]["hp"] = 500
+	es["s"]["hp"] = 400
+	b.codex.force_skill = "wortelzuiging"
+	await b.codex.ally_turn({"actor": ally})
+	check("bondgenoot trekt Tendril + counter klaar", er.get("pulled_by") == ally and int(ally.get("counter", 0)) == 1)
+	hp_r = int(er["s"]["hp"])
+	var c0: int = b.counters_done
+	var hp_a := int(ally["s"]["hp"])
+	await b._execute({"type": "attack", "actor": er, "target": held})
+	check("Tendril moet de bondgenoot slaan, die counter geeft", int(ally["s"]["hp"]) < hp_a and int(er["s"]["hp"]) < hp_r
+			and b.counters_done == c0 + 1 and int(ally.get("counter", 0)) == 0)
+	ally["counter"] = 1
+	AV.tick(ally)
+	check("counter duurt tot het einde van de ronde", int(ally["counter"]) == 0)
+	# Bondgenoot: gif (Sporekop) en binden (Rankje)
+	b.codex.force_skill = "gifspuw"
+	await b.codex.ally_turn({"actor": ally})
+	check("bondgenoot-gif op een vijand (3 beurten)", (er.get("dots", []) as Array).any(func(d): return int(d["turns"]) == 3))
+	b.codex.force_skill = "rankgreep"
+	await b.codex.ally_turn({"actor": ally})
+	check("bondgenoot bindt een vijand (1 beurt)", int(er.get("skip", 0)) == 1 and str(er["skip_reden"]) == AV.SKIP_REDEN_BIND)
+	b.codex.force_skill = ""
+	# Vangen: de Wortelgeest (Leeg Boek, vaste worp)
+	ew["s"]["hp"] = 1
+	b.codex.force_roll = 0.0
+	await b.codex.capture(held, ew)
+	check("Rootghost ingeschreven in de Codex", str(b.codex.last_capture.get("result", "")) == "gelukt"
+			and GameState.codex_pages.size() == 2 and str(GameState.codex_pages[1]["species"]) == "wortelgeest")
+	await _shot("archief2_vijanden")
+	GameState.end_battle("flee")
+	check("terug uit het vijandgevecht", await _wacht("Archief2V1Plaat", 20.0))
+	Engine.time_scale = 1.0

@@ -1343,7 +1343,14 @@ func _grant_eind_spells(hero: Dictionary) -> void:
 func _fill_eind_codex() -> void:
 	var ids: Array = CodexData.SPECIES.keys()
 	ids.sort()
+	# v0.21: de Archief 2-soorten achteraan; de Codex heeft maar MAX_PAGES pagina's.
+	for a2 in ["sporekop", "rankje", "wortelgeest"]:
+		if ids.has(a2):
+			ids.erase(a2)
+			ids.append(a2)
 	for raw_id in ids:
+		if codex_full():
+			break
 		var sid := str(raw_id)
 		if not CodexData.has_species(sid):
 			continue

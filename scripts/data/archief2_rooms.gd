@@ -47,10 +47,10 @@ const ROOMS := {
 				"Sapientia heeft dat signaal gemanipuleerd. Je denkt dat je volgt. Sapientia leidt je.",
 			],
 		}],
-		# Bestaande soorten. Geen nieuwe species.
+		# Kaart: bestaande soorten; v0.21: Archief 2-vijanden (CANON besluit 13) vechten mee in de groep.
 		"monsters": [
-			{"id": "m1", "enemy": "mosslijm", "group": ["mosslijm"], "tile": [4, 6], "moves": true},
-			{"id": "m2", "enemy": "moskonijn", "group": ["moskonijn"], "tile": [12, 7], "moves": true},
+			{"id": "m1", "enemy": "mosslijm", "group": ["mosslijm", "rankje"], "tile": [4, 6], "moves": true},
+			{"id": "m2", "enemy": "moskonijn", "group": ["moskonijn", "sporekop"], "tile": [12, 7], "moves": true},
 		],
 	},
 }
@@ -112,8 +112,8 @@ static func rooms() -> Dictionary:
 			"De kas ademt. Alles hier groeit door, ook als je stilstaat.",
 		]}],
 		"monsters": [
-			{"id": "m1", "enemy": "mosslijm", "group": ["mosslijm"], "tile": [5, 6], "moves": true},
-			{"id": "m2", "enemy": "wortelkruiper", "group": ["wortelkruiper"], "tile": [14, 7], "moves": true},
+			{"id": "m1", "enemy": "rankje", "group": ["rankje", "rankje"], "tile": [5, 6], "moves": true},
+			{"id": "m2", "enemy": "doornige_loper", "group": ["doornige_loper", "wortelkruiper"], "tile": [14, 7], "moves": true},
 		],
 	})
 	var plaat := _met(_basis("Groei-plaat", 1, 2), {
@@ -135,8 +135,8 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v2_lotte"], "spawn": "zuid"},
 		},
 		"monsters": [
-			{"id": "m1", "enemy": "wortelkruiper", "group": ["wortelkruiper"], "tile": [6, 6], "moves": true},
-			{"id": "m2", "enemy": "sporenzwam", "group": ["sporenzwam"], "tile": [13, 7], "moves": true},
+			{"id": "m1", "enemy": "doornige_loper", "group": ["doornige_loper", "rankje"], "tile": [6, 6], "moves": true},
+			{"id": "m2", "enemy": "sporekop", "group": ["sporekop", "sporenzwam"], "tile": [13, 7], "moves": true},
 		],
 	})
 	var lotte := _met(_basis("Lotte", 2, 2), {
@@ -168,7 +168,7 @@ static func rooms() -> Dictionary:
 		],
 		"bruggen": [{"plaat": "k2", "tiles": [[8, 4], [9, 4], [10, 4]]}],
 		"monsters": [
-			{"id": "m1", "enemy": "sporenzwam", "group": ["sporenzwam"], "tile": [15, 8], "moves": true},
+			{"id": "m1", "enemy": "bloeiende_schrik", "group": ["bloeiende_schrik", "sporekop"], "tile": [15, 8], "moves": true},
 		],
 	})
 	var tegen := _met(_basis("Tegen-platen", 3, 3), {
@@ -221,7 +221,7 @@ static func rooms() -> Dictionary:
 			"Verderop staat iets dat geneest door te nemen.",
 		]}],
 		"monsters": [
-			{"id": "m1", "enemy": "sporenzwam", "group": ["sporenzwam"], "tile": [13, 7], "moves": true},
+			{"id": "m1", "enemy": "wortelgeest", "group": ["wortelgeest", "bloeiende_schrik"], "tile": [13, 7], "moves": true},
 		],
 	})
 	var genezer := _met(_basis("De Genezer", 4, 3), {
