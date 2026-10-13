@@ -9,7 +9,7 @@ extends Node
 ##   Deel C: gevecht: 4 helden + 1 monster (4 heldenvakken onderaan, monster als zijspeler boven B), de reserve-held
 ##           vecht niet mee, beurtvolgorde telt alleen de actieve combatanten, wisselen geblokkeerd.
 ##   Deel D: veldmenu > Party: scherm open, wisselen via het scherm, monster kiezen.
-## Met --shots=map: party_gevecht_5_plekken, party_veldmenu, party_menu, party_menu_gewisseld (+ _3x = 1152x648).
+## Met --shots=map: party_gevecht_5_plekken, party_veldmenu, veldmenu_magic, party_menu, party_menu_gewisseld (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
 
 const GD := preload("res://scripts/data/game_data.gd")
@@ -17,6 +17,7 @@ const SD := preload("res://scripts/data/story_data.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
 const PartyLimiet := preload("res://scripts/party_limiet.gd")
 const PartyScreen := preload("res://scripts/ui/party_screen.gd")
+const PartyActions := preload("res://scripts/party_actions.gd")
 const GOLEM_SCENE := "res://scenes/maps/archief_golemhal.tscn"
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
@@ -531,6 +532,30 @@ func _menu_tests() -> void:
 	s.back()
 	await pframes(3)
 	check("B sluit het scherm", m.sub == null)
+	# v0.22 (Dennis): Magic weer direct in het veldmenu (geen tussenstap); genezen werkt buiten gevechten
+	check("veldmenu: knop 'Magic' in de linkerkolom", m.buttons.has("magic")
+			and is_equal_approx(m.buttons["magic"].position.x, m.buttons["equip"].position.x)
+			and m.buttons["magic"].position.y > m.buttons["items"].position.y)
+	var dennis: Dictionary = GameState.party[0]
+	dennis["hp"] = maxi(1, int(dennis["max_hp"]) / 3)
+	await click(m.buttons["magic"])
+	await pframes(4)
+	var ms: Node = m.sub
+	check("tik op Magic opent meteen het Magie-scherm", ms != null and ms.name == "Magic")
+	if ms != null:
+		var li := -1
+		for i in GameState.party.size():
+			if str(GameState.party[i]["id"]) == "lotte":
+				li = i
+		ms.show_caster(li)
+		await pframes(3)
+		check("Lotte: genezing niet grijs in het veld", ms.entries.size() > 0 and not ms.is_greyed(0))
+		await screenshot("veldmenu_magic")
+		var hp0 := int(dennis["hp"])
+		var genees_r: Dictionary = PartyActions.cast_spell(GameState.party[li], "genees", dennis)
+		check("genezen buiten het gevecht: Dennis %d -> %d HP" % [hp0, int(dennis["hp"])], bool(genees_r["ok"]) and int(dennis["hp"]) > hp0)
+		ms.close()
+		await pframes(3)
 	# in een gevecht opent het scherm niet
 	GameState.in_battle = true
 	m.open_party()

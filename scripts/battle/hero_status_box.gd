@@ -119,7 +119,7 @@ func fitted_name(font: Font = null) -> String:
 		return n
 	while n.length() > 1 and font.get_string_size(n + ".", HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x > avail:
 		n = n.left(n.length() - 1)
-	return n + "."
+	return n.strip_edges() + "."
 
 
 # ---------------------------------------------------------------- tekenen

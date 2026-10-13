@@ -262,7 +262,7 @@ func _main_menu_tests() -> void:
 	for c in m.commands():
 		labels.append(str(m.buttons[c[0]].get_meta("label")))
 	# v0.22 partylimiet: vijfde knop 'Party' (rechts onder Warpen)
-	check("vijf knoppen %s" % [labels], labels == ["Uitrusting", "Codex", "Items", "Warpen", "Party"] and m.buttons.size() == 5)
+	check("zes knoppen %s" % [labels], labels == ["Uitrusting", "Codex", "Items", "Magic", "Warpen", "Party"] and m.buttons.size() == 6)
 	check("label MENU boven Warpen", m.menu_label.text == "MENU"
 			and m.menu_label.get_global_rect().end.y <= m.buttons["warp"].get_global_rect().position.y + 1.0)
 	check("'Uitrusting' heeft de focus", m.buttons["equip"].has_focus())
@@ -290,9 +290,9 @@ func _main_menu_tests() -> void:
 		small = small or m.buttons[id].size.y < m.ROW_H
 	check("tikvlak van elke knop >= %d px hoog" % m.ROW_H, not small)
 	await tap("move_up")
-	check("omhoog vanaf Uitrusting = Items", m.buttons["items"].has_focus())
+	check("omhoog vanaf Uitrusting = Magic (v0.22)", m.buttons["magic"].has_focus())
 	await tap("move_down")
-	check("omlaag vanaf Items = Uitrusting", m.buttons["equip"].has_focus())
+	check("omlaag vanaf Magic = Uitrusting", m.buttons["equip"].has_focus())
 	await tap("move_right")
 	check("rechts = Warpen", m.buttons["warp"].has_focus())
 	await tap("move_left")
