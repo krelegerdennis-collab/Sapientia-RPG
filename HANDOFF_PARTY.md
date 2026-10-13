@@ -141,3 +141,10 @@ Extra aangepaste bestaande tests: `codex_tests.gd` (5 menuknoppen), `fusie_tests
   "compact" in plaats van "groter".
 - partytest: nieuwe checks voor de zijspeler (klein, boven B, geen balken, sprite erboven), het
   icoon (7x6) en de compacte Warpen. Er is ook een screenshot `party_veldmenu.png` bij.
+- **Magic weer direct in het veldmenu** (Dennis): knop **Magic** onderaan de linkerkolom
+  (Uitrusting > Codex > Items > Magic). Een tik opent meteen het bestaande Magie-scherm, zonder
+  tussenstap. Genezen buiten gevechten werkt zoals voorheen (`PartyActions.cast_spell`). Om ruimte te maken
+  zijn de knoppen links iets lager (30 i.p.v. 34). D-pad: Uitrusting ↑ = Magic, Magic ↓ = Uitrusting.
+  `menutest`/`codextest` verwachten nu 6 knoppen. partytest: Magic opent het scherm, Lotte geneest Dennis buiten het gevecht
+  (screenshot `veldmenu_magic.png`).
+- Ingekorte namen krijgen geen spatie meer voor het puntje ("Moss." i.p.v. "Moss .").
