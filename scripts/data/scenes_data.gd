@@ -11,11 +11,18 @@ extends RefCounted
 
 const WORLDMAP_FLAG := "cutscene_wereldkaart_gezien"     # = WorldmapCutscene.FLAG
 const HANGER_FLAG := "world_warper_intro_seen"           # = WorldWarperDreiging.FLAG
+## v0.23 World Warper-canonscènes (#73, CANON.md punt 17); vlaggen = WorldWarperCanon.FLAG_*
+const CANON_GENEZER_FLAG := "ww_canon_genezer_gezien"
+const CANON_HANGER_FLAG := "ww_canon_hanger_gezien"
+const CANON_DREIGING_FLAG := "ww_canon_dreiging_gezien"
 const LOCKED_TITLE := "???"
 
 const SCENES := [
 	{"id": "wereldkaart", "title": "Into the Wide World", "flag": WORLDMAP_FLAG, "kind": "worldmap"},
 	{"id": "hanger", "title": "The Hanger Awakens", "flag": HANGER_FLAG, "kind": "hanger"},
+	{"id": "ww_warper", "title": "The World Warper", "flag": CANON_GENEZER_FLAG, "kind": "genezer"},
+	{"id": "ww_hanger", "title": "The Hanger", "flag": CANON_HANGER_FLAG, "kind": "hanger"},
+	{"id": "ww_sapientia", "title": "Sapientia", "flag": CANON_DREIGING_FLAG, "kind": "sapientia"},
 ]
 
 

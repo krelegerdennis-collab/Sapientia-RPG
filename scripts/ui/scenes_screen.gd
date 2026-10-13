@@ -7,6 +7,7 @@ extends "res://scripts/ui/menu_screen.gd"
 const ScenesData := preload("res://scripts/data/scenes_data.gd")
 const WorldmapCutsceneScript := preload("res://scripts/worldmap_cutscene.gd")
 const HANGER_SCENE := preload("res://world_warper/cutscene/hanger_scene.tscn")
+const GenezerScene := preload("res://world_warper/cutscene/genezer_scene.gd")
 const HINT := "A: watch   B: back"
 const LOCKED_MSG := "You haven't seen this scene yet."
 const REPLAY_LAYER := 125
@@ -71,6 +72,10 @@ func choose(id: String) -> void:
 			_play_worldmap()
 		"hanger":
 			_play_hanger()
+		"sapientia":
+			_play_hanger({ScenesData.CANON_HANGER_FLAG: true})   # alleen scène 3 (de dreiging)
+		"genezer":
+			_play_genezer()
 
 
 func _play_worldmap() -> void:
@@ -84,10 +89,11 @@ func _play_worldmap() -> void:
 	c.begin(c)
 
 
-func _play_hanger() -> void:
+func _play_hanger(preset: Dictionary = {}) -> void:
 	var h: Node = HANGER_SCENE.instantiate()
 	h.name = "SceneReplay"
 	var bron := ScenesData.FlagBron.new()
+	bron.story_flags = preset.duplicate()
 	h.add_child(bron)
 	get_tree().root.add_child(h)
 	h.get_node("Layer").layer = REPLAY_LAYER
@@ -96,6 +102,33 @@ func _play_hanger() -> void:
 		h.queue_free()
 		_replay_done(), CONNECT_ONE_SHOT)
 	h.maybe_play(bron)
+
+
+## Canon-scène 1 als herhaling: geen vlaggen, geen mapwissel (WorldWarperGenezerScene.herhaal).
+func _play_genezer() -> void:
+	var holder := Node.new()
+	holder.name = "SceneReplay"
+	holder.process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().root.add_child(holder)
+	var achter_laag := CanvasLayer.new()
+	achter_laag.layer = REPLAY_LAYER - 1
+	holder.add_child(achter_laag)
+	var achter := ColorRect.new()
+	achter.color = Color(0.02, 0.01, 0.04)
+	achter.set_anchors_preset(Control.PRESET_FULL_RECT)
+	achter_laag.add_child(achter)
+	# de dialoog (laag 5) moet boven de herhaling en het menu staan; daarna terug
+	var dialog_layer: int = Dialog.layer
+	Dialog.layer = REPLAY_LAYER + 1
+	playing = holder
+	var s: Node = GenezerScene.herhaal(holder)
+	var laag := s.get_node_or_null("Laag") as CanvasLayer
+	if laag != null:
+		laag.layer = REPLAY_LAYER
+	s.klaar.connect(func() -> void:
+		Dialog.layer = dialog_layer
+		holder.queue_free()
+		_replay_done(), CONNECT_ONE_SHOT)
 
 
 func _replay_done() -> void:
@@ -113,6 +146,10 @@ func finish_replay() -> void:
 		return
 	if playing.has_method("_finish"):
 		playing._finish()
+		return
+	var g := playing.get_node_or_null("CanonGenezer")
+	if g != null and g.has_method("stop_herhaling"):
+		g.stop_herhaling()
 
 
 func _process(delta: float) -> void:

@@ -643,8 +643,10 @@ func _scenes_tests() -> void:
 	# save-roundtrip en migratie (zonder scherm)
 	GameState.story_flags.erase(ScenesDataT.WORLDMAP_FLAG)
 	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	for cf in [ScenesDataT.CANON_GENEZER_FLAG, ScenesDataT.CANON_HANGER_FLAG, ScenesDataT.CANON_DREIGING_FLAG]:
+		GameState.story_flags.erase(cf)
 	GameState.scenes_seen = []
-	check("scenes: lijst = alle cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "hanger"]
+	check("scenes: lijst = alle cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "hanger", "ww_warper", "ww_hanger", "ww_sapientia"]
 			and GameState.seen_scenes().is_empty())
 	GameState.mark_scene_seen("hanger")
 	GameState.mark_scene_seen("bestaat_niet")
@@ -667,6 +669,8 @@ func _scenes_tests() -> void:
 	GameState.scenes_seen = []
 	GameState.story_flags.erase(ScenesDataT.WORLDMAP_FLAG)
 	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	for cf in [ScenesDataT.CANON_GENEZER_FLAG, ScenesDataT.CANON_HANGER_FLAG, ScenesDataT.CANON_DREIGING_FLAG]:
+		GameState.story_flags.erase(cf)
 	var m: Node = null
 	for poging in 10:
 		await tap("menu")
@@ -698,7 +702,7 @@ func _scenes_tests() -> void:
 	await click(m.buttons["scenes"])
 	await pframes(4)
 	var sc: Node = m.sub
-	check("Scenes opent het scenes-scherm", sc != null and sc.name == "Scenes" and sc.buttons.size() == 2)
+	check("Scenes opent het scenes-scherm", sc != null and sc.name == "Scenes" and sc.buttons.size() == 5)
 	if sc == null:
 		return
 	check("niet bekeken: '???' en op slot", sc.buttons[0].text.ends_with("???") and sc.is_locked(0) and sc.is_locked(1))
@@ -717,6 +721,10 @@ func _scenes_tests() -> void:
 	h.queue_free()
 	await pframes(2)
 	check("Hanger bekeken -> ontgrendeld", GameState.scene_seen("hanger"))
+	check("canon: Hanger-intro ontgrendelt 'The Hanger' en 'Sapientia' (vlaggen ww_canon_*), 'The World Warper' nog op slot",
+			GameState.scene_seen("ww_hanger") and GameState.scene_seen("ww_sapientia") and not GameState.scene_seen("ww_warper"))
+	GameState.story_flags[ScenesDataT.CANON_GENEZER_FLAG] = true     # = WorldWarperGenezerScene na De Genezer
+	check("canon: vlag ww_canon_genezer_gezien -> 'The World Warper' ontgrendeld", GameState.scene_seen("ww_warper"))
 	WorldmapCutscene.start_on(scene())
 	await pframes(2)
 	for c in scene().get_children():
@@ -726,20 +734,37 @@ func _scenes_tests() -> void:
 	check("wereldkaart bekeken -> ontgrendeld", GameState.scene_seen("wereldkaart") and GameState.scenes_seen.has("wereldkaart"))
 	sc._fill()
 	await pframes(2)
-	check("lijst toont nu de titels", sc.buttons[0].text.ends_with(ScenesDataT.SCENES[0]["title"]) and not sc.is_locked(0)
-			and sc.buttons[1].text.ends_with(ScenesDataT.SCENES[1]["title"]) and not sc.is_locked(1))
+	var titels_ok := true
+	for i in ScenesDataT.SCENES.size():
+		titels_ok = titels_ok and sc.buttons[i].text.ends_with(ScenesDataT.SCENES[i]["title"]) and not sc.is_locked(i)
+	check("lijst toont nu de titels (ook The World Warper / The Hanger / Sapientia)", titels_ok
+			and ScenesDataT.scene("ww_warper")["title"] == "The World Warper" and ScenesDataT.scene("ww_hanger")["title"] == "The Hanger"
+			and ScenesDataT.scene("ww_sapientia")["title"] == "Sapientia")
+	var flags_voor: Dictionary = GameState.story_flags.duplicate()
+	var map_voor := scene().scene_file_path
 	await screenshot("scenes_scherm")
 	# herhaling: afspelen en terug naar het scherm
-	for id in ["hanger", "wereldkaart"]:
+	for id in ["hanger", "wereldkaart", "ww_warper", "ww_hanger", "ww_sapientia"]:
 		await click(sc.buttons[ScenesDataT.ids().find(id)])
 		await pframes(4)
 		check("%s: herhaling speelt" % id, sc.playing != null and is_instance_valid(sc.playing))
 		if id == "hanger":
 			await screenshot("scenes_herhaling_hanger")
+		if id == "ww_warper":
+			await pframes(30)
+			var gz: Node = get_tree().root.get_node_or_null("SceneReplay/CanonGenezer")
+			check("ww_warper: Genezer-scène speelt los (eerste zin getoond, dialoog boven het menu)", gz != null
+					and gz.regels_getoond.size() >= 1 and gz.herhaling and Dialog.layer > sc.layer)
+			await screenshot("scenes_herhaling_warper")
+		if id == "ww_sapientia":
+			var hs: Node = get_tree().root.get_node_or_null("SceneReplay")
+			check("ww_sapientia: alleen de dreiging (begint bij Sapientia)", hs != null and str(hs._lines[0]).begins_with("Sapientia"))
 		sc.finish_replay()
 		await pframes(4)
 		check("%s: na afloop terug in Scenes (focus in de lijst)" % id, sc.playing == null and m.sub == sc and is_instance_valid(sc)
 				and get_tree().root.get_node_or_null("SceneReplay") == null and sc.buttons.any(func(b): return b.has_focus()))
+	check("herhalingen raken het verhaal niet (vlaggen en map gelijk, dialooglaag terug)", GameState.story_flags == flags_voor
+			and scene().scene_file_path == map_voor and Dialog.layer == 5 and not Dialog.is_open)
 	sc.close()
 	await pframes(4)
 	check("Scenes dicht: terug in het veldmenu", m.sub == null and m.buttons["scenes"].has_focus())

@@ -30,6 +30,8 @@ var _cirkel: Control
 var _flits: ColorRect
 var _kamer: Node2D
 var _motion: Array[Tween] = []
+var herhaling := false
+var _klaar_gemeld := false
 
 
 static func mag_spelen(flags: Dictionary) -> bool:
@@ -46,6 +48,28 @@ static func speel(kamer: Node) -> bool:
 	kamer.add_child(s)
 	s.call_deferred("_speel")
 	return true
+
+
+## Veldmenu > Scenes: speelt de scène los af, zonder vlaggen of mapwissel. Eindigt met 'klaar'.
+static func herhaal(ouder: Node) -> Node:
+	var s: Node = load("res://world_warper/cutscene/genezer_scene.gd").new()
+	s.name = "CanonGenezer"
+	s.herhaling = true
+	ouder.add_child(s)
+	s.call_deferred("_speel")
+	return s
+
+
+## Herhaling meteen afronden (overslaan / testhaakje).
+func stop_herhaling() -> void:
+	if not herhaling or _klaar_gemeld:
+		return
+	if Dialog.is_open and Dialog.has_method("close"):
+		Dialog.close()
+	_stop()
+	_klaar_gemeld = true
+	klaar.emit()
+	queue_free()
 
 
 func _ready() -> void:
@@ -188,6 +212,12 @@ func _einde() -> void:
 	t.tween_property(_flits, "modulate:a", 1.0, 0.25)
 	await t.finished
 	_stop()
+	if herhaling:
+		if not _klaar_gemeld:
+			_klaar_gemeld = true
+			klaar.emit()
+			queue_free()
+		return
 	GameState.story_flags[Canon.FLAG_GENEZER] = true
 	GameState.story_flags["archief2_naar_warper"] = true
 	GameState.try_unlock_world_warper()
