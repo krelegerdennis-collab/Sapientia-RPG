@@ -235,3 +235,202 @@ assets/puzzle/geheimkast_2hoog.png
 assets/puzzle/kernscheur.png
 # v0.20: Engelse ondertitel van RPG ART (art_ondertitel_v20/out/title_ondertitel_en.png, 130x13) op (127,43).
 assets/ui/title_ondertitel.png
+# v0.21: RPG ART batch 1 (art_batch1_v21/out). Diepe Grot-monsters: gevecht/rug 90x90 voet (45,84), kaart 32x64
+#        (2x4 frames 16x16). Berggrot-tegels 256x80 en -bibliotheek 256x64 (nummering = de grijze Archief-atlas).
+#        Molen 192x64 = 4 frames 48x64 (wiek f*45 graden); molen_wieken.gd maakt er 8 stappen van 22.5 graden van.
+assets/sprites/enemies/steenluis.png
+assets/sprites/enemies/steenluis_rug.png
+assets/map_monsters/steenluis.png
+assets/sprites/enemies/druipslak.png
+assets/sprites/enemies/druipslak_rug.png
+assets/map_monsters/druipslak.png
+assets/sprites/enemies/adermot.png
+assets/sprites/enemies/adermot_rug.png
+assets/map_monsters/adermot.png
+assets/tiles/dungeon/berggrot_tiles.png
+assets/tiles/dungeon/berggrot_bibliotheek.png
+assets/sprites/buiten/molen_wieken.png
+# v0.21: RPG ART batch 2 (art_batch2_v21/out): Mimic, gevecht 80x64 voet (40,58), geen rug; kaart 32x64 (2x4 frames 16x16).
+#        (De 5 Archief 2-monsters uit batch 2 zijn NIET geintegreerd; die bouwt RPG CODE.)
+assets/sprites/enemies/mimic.png
+assets/map_monsters/mimic.png
+# v0.21: RPG ART batch 3 (art_batch3_v21/out). Lotte veld 48x96 = 3x4 frames van 16x24 (native, zoals noor_dorp);
+#        Lotte glitch 64x80 voet (32,74), De Wurger 80x96 voet (40,90), De Genezer 64x80 voet (32,74);
+#        kaart 32x64 (2x4 frames 16x16). Vervangt de placeholders uit tools/art_archief2_placeholders.py.
+assets/sprites/archief2/lotte_veld.png
+assets/sprites/archief2/lotte_glitch.png
+assets/sprites/archief2/wurger.png
+assets/sprites/archief2/genezer.png
+assets/map_monsters/lotte_glitch.png
+assets/map_monsters/wurger.png
+assets/map_monsters/genezer.png
+# v0.21: Archief 2-vijanden van RPG ART (art_batch2_v21/out): voor/rug 90x90, kaart 32x64.
+assets/sprites/enemies/rankje.png
+assets/sprites/enemies/rankje_rug.png
+assets/map_monsters/rankje.png
+assets/sprites/enemies/sporekop.png
+assets/sprites/enemies/sporekop_rug.png
+assets/map_monsters/sporekop.png
+assets/sprites/enemies/doornige_loper.png
+assets/sprites/enemies/doornige_loper_rug.png
+assets/map_monsters/doornige_loper.png
+assets/sprites/enemies/bloeiende_schrik.png
+assets/sprites/enemies/bloeiende_schrik_rug.png
+assets/map_monsters/bloeiende_schrik.png
+assets/sprites/enemies/wortelgeest.png
+assets/sprites/enemies/wortelgeest_rug.png
+assets/map_monsters/wortelgeest.png
+# v0.21: RPG ART batch 7 (art_batch7_v21/out): warper Diepe Grot 64x16 (4 frames 16x16, geen tint meer);
+#        Woudgeest gevecht/rug 90x90 (staartpunt 45,84) en kaart 32x64 (was map_woudgeest.png).
+assets/sprites/dungeon100_warper.png
+assets/sprites/enemies/woudgeest.png
+assets/sprites/enemies/woudgeest_rug.png
+assets/map_monsters/woudgeest.png
+# v0.21: RPG ART batch 8 (art_batch8_v21/out): De Spiegel (Archief 4), achtergrond 384x216, heel en gebroken.
+#        (De wereldkaart-knoppen uit batch 8 niet; die doet RPG CODE.)
+assets/bg/spiegel_kamer.png
+assets/bg/spiegel_kamer_gebroken.png
+# v0.21: De Genezer als baas (art_genezer_boss_v21/out), volle resolutie 240x194 voeten (120,188), met rug;
+#        kaart 32x64 (map_genezer.png). Vervangt batch 3's genezer. battle.gd: "is_boss" -> tot 256x200.
+assets/sprites/archief2/genezer_rug.png
+# v0.21: RPG ART batch 11 (art_batch11_v21/out). Deel A: ECHO (Codex-wezen) voor/rug 90x90, levenskern 16x16, groeiplaten,
+#        kas-tegels 256x80 / -bibliotheek 256x64 (nummering = grijze Archief-atlas), kas_ingang 16x16.
+#        Deel B: canon-bazen Diepe Grot 256x200 voeten (128,194) + rug; De Stem idle 1024x200 = 4 frames.
+assets/sprites/enemies/echo.png
+assets/sprites/enemies/echo_rug.png
+assets/ui/icons/levenskern.png
+assets/sprites/archief2/plaat_zaad.png
+assets/sprites/archief2/plaat_scheut.png
+assets/sprites/archief2/plaat_volgroeid.png
+assets/puzzle/groei_plaat.png
+assets/tiles/dungeon/kas_tiles.png
+assets/tiles/dungeon/kas_bibliotheek.png
+assets/tiles/dungeon/archief2_kas_tiles.png
+assets/sprites/buiten/kas_ingang.png
+assets/sprites/enemies/de_rechter.png
+assets/sprites/enemies/de_rechter_rug.png
+assets/sprites/enemies/de_cyclus.png
+assets/sprites/enemies/de_cyclus_rug.png
+assets/sprites/enemies/schaduw_h6.png
+assets/sprites/enemies/schaduw_h6_rug.png
+assets/sprites/enemies/de_stem.png
+assets/sprites/enemies/de_stem_rug.png
+assets/sprites/enemies/de_stem_idle.png
+# v0.21: RPG ART batch 12 (art_batch12_v21/out): de acht andere bazen van de Diepe Grot (10-90), 256x200 + rug.
+assets/sprites/enemies/glitch_queen.png
+assets/sprites/enemies/glitch_queen_rug.png
+assets/sprites/enemies/great_book_golem.png
+assets/sprites/enemies/great_book_golem_rug.png
+assets/sprites/enemies/mist_lord.png
+assets/sprites/enemies/mist_lord_rug.png
+assets/sprites/enemies/page_warden.png
+assets/sprites/enemies/page_warden_rug.png
+assets/sprites/enemies/root_emperor.png
+assets/sprites/enemies/root_emperor_rug.png
+assets/sprites/enemies/root_mother.png
+assets/sprites/enemies/root_mother_rug.png
+assets/sprites/enemies/seal_warden.png
+assets/sprites/enemies/seal_warden_rug.png
+assets/sprites/enemies/spore_lord.png
+assets/sprites/enemies/spore_lord_rug.png
+# v0.21: RPG ART batch 13 (art_batch13_v21/out): gevechtsachtergronden Berggrot en Diepe Grot 1280x432;
+#        Wilgendal-panden 48x48, borden/toonbank/vitrine 48x16 (zelfde naam en maat als de placeholders).
+assets/battle/berggrot.png
+assets/battle/diepe_grot.png
+assets/sprites/buiten/wilgendal_accessoire.png
+assets/sprites/buiten/wilgendal_huis.png
+assets/sprites/buiten/wilgendal_huis_dicht.png
+assets/sprites/buiten/wilgendal_magie.png
+assets/sprites/buiten/wilgendal_pantser.png
+assets/sprites/buiten/wilgendal_ring.png
+assets/sprites/buiten/wilgendal_schild.png
+assets/sprites/buiten/wilgendal_ster.png
+assets/sprites/buiten/wilgendal_toonbank.png
+assets/sprites/buiten/wilgendal_vitrine.png
+assets/sprites/buiten/wilgendal_wapen.png
+assets/sprites/buiten/wilgendal_zwaard.png
+# v0.21: World Warper van RPG ART (art_batch5_v21 + art_batch6_v21/out). Grijs = Archief 1 (zonder achtervoegsel),
+#        <naam>_<accent>.png = groen/oranje/roze/blauw/rood (Archief 2-6), gekozen in world_warper/art/accent.gd.
+assets/sprites/archief2/echo.png
+assets/sprites/archief2/echo_blauw.png
+assets/sprites/archief2/echo_groen.png
+assets/sprites/archief2/echo_oranje.png
+assets/sprites/archief2/echo_rood.png
+assets/sprites/archief2/echo_roze.png
+assets/sprites/archief2/sapientia_glitch.png
+assets/sprites/archief2/world_warper.png
+assets/sprites/archief2/world_warper_blauw.png
+assets/sprites/archief2/world_warper_groen.png
+assets/sprites/archief2/world_warper_oranje.png
+assets/sprites/archief2/world_warper_rood.png
+assets/sprites/archief2/world_warper_roze.png
+world_warper/art/bord_hal.png
+world_warper/art/bord_hal_blauw.png
+world_warper/art/bord_hal_groen.png
+world_warper/art/bord_hal_oranje.png
+world_warper/art/bord_hal_rood.png
+world_warper/art/bord_hal_roze.png
+world_warper/art/bord_kamers.png
+world_warper/art/bord_kamers_blauw.png
+world_warper/art/bord_kamers_groen.png
+world_warper/art/bord_kamers_oranje.png
+world_warper/art/bord_kamers_rood.png
+world_warper/art/bord_kamers_roze.png
+world_warper/art/bord_warp.png
+world_warper/art/bord_warp_blauw.png
+world_warper/art/bord_warp_groen.png
+world_warper/art/bord_warp_oranje.png
+world_warper/art/bord_warp_rood.png
+world_warper/art/bord_warp_roze.png
+world_warper/art/echo_placeholder.png
+world_warper/art/echo_placeholder_blauw.png
+world_warper/art/echo_placeholder_groen.png
+world_warper/art/echo_placeholder_oranje.png
+world_warper/art/echo_placeholder_rood.png
+world_warper/art/echo_placeholder_roze.png
+world_warper/art/hanger_gloed.png
+world_warper/art/party_placeholder.png
+world_warper/art/party_placeholder_blauw.png
+world_warper/art/party_placeholder_groen.png
+world_warper/art/party_placeholder_oranje.png
+world_warper/art/party_placeholder_rood.png
+world_warper/art/party_placeholder_roze.png
+world_warper/art/pc_placeholder.png
+world_warper/art/pc_placeholder_blauw.png
+world_warper/art/pc_placeholder_groen.png
+world_warper/art/pc_placeholder_oranje.png
+world_warper/art/pc_placeholder_rood.png
+world_warper/art/pc_placeholder_roze.png
+world_warper/art/tafel_placeholder.png
+world_warper/art/tafel_placeholder_blauw.png
+world_warper/art/tafel_placeholder_groen.png
+world_warper/art/tafel_placeholder_oranje.png
+world_warper/art/tafel_placeholder_rood.png
+world_warper/art/tafel_placeholder_roze.png
+world_warper/art/tiles_placeholder.png
+world_warper/art/tiles_placeholder_blauw.png
+world_warper/art/tiles_placeholder_groen.png
+world_warper/art/tiles_placeholder_oranje.png
+world_warper/art/tiles_placeholder_rood.png
+world_warper/art/tiles_placeholder_roze.png
+world_warper/art/toonbank_placeholder.png
+world_warper/art/toonbank_placeholder_blauw.png
+world_warper/art/toonbank_placeholder_groen.png
+world_warper/art/toonbank_placeholder_oranje.png
+world_warper/art/toonbank_placeholder_rood.png
+world_warper/art/toonbank_placeholder_roze.png
+world_warper/art/warp_platform.png
+world_warper/art/warp_platform_blauw.png
+world_warper/art/warp_platform_groen.png
+world_warper/art/warp_platform_oranje.png
+world_warper/art/warp_platform_rood.png
+world_warper/art/warp_platform_roze.png
+# v0.21: wereldkaart-knoppen van RPG ART (art_batch8_v21/out), 48x16, in warp_view.gd op 2x.
+world_warper/art/knop_village.png
+world_warper/art/knop_village_ingedrukt.png
+world_warper/art/knop_wm1.png
+world_warper/art/knop_wm1_ingedrukt.png
+world_warper/art/knop_wm2.png
+world_warper/art/knop_wm2_ingedrukt.png
+world_warper/art/knop_wm3.png
+world_warper/art/knop_wm3_ingedrukt.png

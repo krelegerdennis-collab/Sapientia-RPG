@@ -8,6 +8,8 @@ const NPC := preload("res://scenes/npc.tscn")
 const DEUR := preload("res://scenes/door.tscn")
 const Lus := preload("res://scripts/village/plein_lus.gd")
 
+## v0.21: bord een tegel onder de gevel (zie bord.position).
+const BORD_OMLAAG := 16.0
 const TEX := {
 	"pantser": preload("res://assets/sprites/buiten/wilgendal_pantser.png"),
 	"wapen": preload("res://assets/sprites/buiten/wilgendal_wapen.png"),
@@ -106,7 +108,9 @@ func _pand(objects: Node, ruw: Dictionary) -> void:
 		bord.icoon = icoon
 		bord.winkel_id = id
 		bord.z_index = 2
-		bord.position = Vector2(float(ruw["deur"].x) * 16.0 + 8.0, float(oorsprong.y) * 16.0 + 8.0)
+		# v0.21: met de echte panden (RPG ART batch 13) hangt het bord een tegel lager, boven de deur,
+		# zodat de gevelversiering (helm, zwaarden, sterraam) zichtbaar blijft.
+		bord.position = Vector2(float(ruw["deur"].x) * 16.0 + 8.0, float(oorsprong.y) * 16.0 + 8.0 + BORD_OMLAAG)
 		objects.add_child(bord)
 
 

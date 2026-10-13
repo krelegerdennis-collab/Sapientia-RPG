@@ -3,7 +3,7 @@
 ## Project
 SAPIENTIA is een mobiele JRPG in **Godot 4.3-stable** (GDScript), renderer **gl_compatibility**,
 export **Android arm64**, basisresolutie **384x216** (pixel-art, opgeschaald). Alle tekst in de
-game is **Nederlands**. Eigenaar: **Dennis** (werkt vanaf zijn telefoon).
+game is **Engels** (sinds v0.21, besluit Dennis); docs, commentaar en commits blijven Nederlands. Eigenaar: **Dennis** (werkt vanaf zijn telefoon).
 
 Rollen:
 - **RPG Forge** — hoofd-developer/integrator: beheert `main`, merget PR's, bouwt de APK's, doet releases en versienummers.
@@ -18,7 +18,7 @@ Zie ook `docs/WORKFLOW.md` (de flow, in het Nederlands) en `README.md`.
 2. **Nooit** definitieve art tekenen. Alleen placeholders, duidelijk als placeholder herkenbaar, en
    registreer ze in het placeholder-bestand (`tools/placeholders_v17.txt`, of het nieuwste `tools/placeholders_*.txt`).
    Zet in je PR onder "Nodig van RPG ART" welke echte art er moet komen (naam + maat).
-3. **Alle tekst die de speler ziet is Nederlands** (dialoog, menu's, items, foutmeldingen in UI).
+3. **Alle tekst die de speler ziet is Engels** (dialoog, menu's, items, foutmeldingen in UI). Docs (`docs/`, AGENTS.md, PR-teksten) en code-commentaar blijven Nederlands. Identifiers/keys niet hernoemen.
 4. Verhaal/lore volgt **`docs/lore/CANON.md`**; dat gaat boven de andere lore-bestanden. Twijfel → vraag in de PR.
 5. **Nooit secrets committen**: geen keystores (`*.keystore`, `*.jks`), wachtwoorden, tokens, `.env`, APK/AAB-bestanden.
 6. **Nooit** de signing-velden in `export_presets.cfg` aanraken (keystore/user/password). Liefst dat bestand helemaal niet.

@@ -33,7 +33,7 @@ const MENU_H := 20
 const ROW_H := 16
 const MESSAGE_TIME := 2.5
 ## Spelertekst. TODO(design): deze zin tot er een hub-scène én een vlag is.
-const WARP_UNAVAILABLE := "De warp-hub is nog niet bereikbaar."
+const WARP_UNAVAILABLE := "The warp hub cannot be reached yet."
 const HUB_ENTER := "res://world_warper/flow/enter.gd"
 
 ## [id, tekst] in de volgorde van de indeling (links van boven naar beneden, dan Warpen).
@@ -417,7 +417,7 @@ func save_now() -> bool:
 		return false
 	if GameState.save_game(player.get_tile(), player.facing):
 		last_save_result = "saved"
-		show_message("Opgeslagen.")
+		show_message("Saved.")
 		return true
 	last_save_result = "failed"
 	show_message("Save failed.")

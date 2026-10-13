@@ -260,7 +260,7 @@ static func spell_effect_text(caster: Dictionary, id: String) -> String:
 		"buff":
 			what = "Versterkt"
 		"revive":
-			what = "Wekt een bewusteloze"
+			what = "Revives a fallen ally"
 	match str(sp.get("target", "")):
 		"enemy":
 			what = "Damage to one enemy"
@@ -268,7 +268,7 @@ static func spell_effect_text(caster: Dictionary, id: String) -> String:
 			what = "Damage to all enemies"
 		"all_allies":
 			if str(sp.get("type", "")) == "heal":
-				what = "Geneest de groep"
+				what = "Heals the party"
 	return "%s (±%d)." % [what, roundi(spell_base(caster, id))]
 
 

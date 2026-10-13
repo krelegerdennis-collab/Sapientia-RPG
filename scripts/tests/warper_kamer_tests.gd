@@ -379,9 +379,9 @@ func _update2_regels() -> void:
 	var midden := ExitWarper.new()
 	midden.role = "midden"
 	check("begin-warper zonder waarschuwing, midden met", not begin.waarschuwt() and midden.waarschuwt()
-			and ExitWarper.WARNING == "Weet je zeker dat je de dungeon wilt verlaten?"
-			and ExitWarper.YES == "Ja, warpen naar worldmap"
-			and ExitWarper.NO == "Nee, blijf in de dungeon")
+			and ExitWarper.WARNING == "Are you sure you want to leave the dungeon?"
+			and ExitWarper.YES == "Yes, warp to the world map"
+			and ExitWarper.NO == "No, stay in the dungeon")
 	begin.free()
 	midden.free()
 	var plekken: Array = A2Warpers.placements()
@@ -418,7 +418,7 @@ func _update2_regels() -> void:
 			and not vlaggen.has(Kisten.FLAG_GETELD))
 	var molen := FileAccess.get_file_as_string("res://scripts/village/molen.gd")
 	var prop := FileAccess.get_file_as_string("res://world_warper/kamers/prop.gd")
-	check("de molen zet nog iemand vooraan", molen.contains("move_member_to_front") and molen.contains("Wie gaat voorop?"))
+	check("de molen zet nog iemand vooraan", molen.contains("move_member_to_front") and molen.contains("Who leads the way?"))
 	check("de Rustkamer wisselt via de bank", prop.contains("PartyWissel") and prop.contains("ALLEEN_HIER"))
 	GameState.new_game("Dennis")
 	GameState.add_member("noor")

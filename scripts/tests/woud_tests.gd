@@ -1016,7 +1016,7 @@ func _graan_data() -> void:
 			and not quotes.has("Het zaad zingt aan de rand van de mist.")
 			and not quotes.has("De molen kan weer malen.")
 			and not todo_op_zin and not SD.TODO_STORY.has("gerrit")
-			and SD.QUOTE_GRAAN_VRAAG == "Wat is er gebeurd?" and speler_vraagt
+			and SD.QUOTE_GRAAN_VRAAG == "What happened?" and speler_vraagt
 			and keuze == [SD.KEUZE_GRAAN_JA, SD.KEUZE_GRAAN_NEE]
 			and SD.EVENTS["gerrit_ja"][0]["do"][0][0] == "flag"
 			and SD.EVENTS["gerrit_weigert"][0]["do"][0][0] == "say")
@@ -1027,18 +1027,27 @@ func _graan_data() -> void:
 			for cmd in v.get("do", []):
 				if cmd is Array and not cmd.is_empty():
 					namen.append(str(cmd[0]))
-	check("zangscène tussen herkenning en de molen, zonder nieuwe zin", namen == ["take", "flag", "say", "molen_zang", "molen"])
-	var sheet := Wieken.placeholder_sheet().get_image()
+	check("zangscène en zang tussen herkenning en de molen", namen == ["take", "flag", "say", "molen_zang", "zang", "molen"])
+	# v0.21: echte molen-art (4 frames, f*45 graden) -> 8 draaistappen van 22.5 graden.
+	var art: Texture2D = load(Wieken.ART)
+	var sheet := Wieken.wieken_sheet().get_image()
+	var art_img := Wieken.art_image()
 	var tip: Vector2i = Wieken.zeil_punt(0)
+	var tip_tussen: Vector2i = Wieken.zeil_punt(1)
 	var tip2 := Vector2i(tip.x + Wieken.FRAME_W, tip.y)
-	var merk: Color = sheet.get_pixelv(Wieken.merk_pixel())
-	var hoek: Color = sheet.get_pixel(0, 0)
-	var zeil: Color = sheet.get_pixelv(tip)
-	check("placeholder-molen: 4 frames, magenta PH, wiek verschilt per frame", sheet.get_width() == Wieken.FRAME_W * Wieken.FRAMES
-			and sheet.get_height() == Wieken.FRAME_H
-			and _magenta(hoek) and _magenta(merk)
-			and zeil.a > 0.8 and not _magenta(zeil)
-			and sheet.get_pixelv(tip2).a < 0.1)
+	var stap0_is_art := sheet.get_region(Rect2i(0, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data() \
+			== art_img.get_region(Rect2i(0, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data()
+	var stap2_is_art1 := sheet.get_region(Rect2i(2 * Wieken.FRAME_W, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data() \
+			== art_img.get_region(Rect2i(Wieken.FRAME_W, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data()
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	check("echte molen-art: 4 frames 48x64, 8 stappen van 22.5 graden, wiek draait per stap", art != null
+			and art.get_width() == Wieken.FRAME_W * Wieken.FRAMES and art.get_height() == Wieken.FRAME_H
+			and hw.contains("assets/sprites/buiten/molen_wieken.png")
+			and Wieken.STAPPEN == 8 and is_equal_approx(Wieken.STAP_GRADEN, 22.5)
+			and sheet.get_width() == Wieken.FRAME_W * Wieken.STAPPEN and sheet.get_height() == Wieken.FRAME_H
+			and stap0_is_art and stap2_is_art1
+			and sheet.get_pixelv(tip).a > 0.8 and sheet.get_pixelv(tip2).a < 0.1
+			and sheet.get_pixelv(tip_tussen).a > 0.8)
 	var toon := Wieken.maak_zang()
 	var top := Wieken.piek(toon)
 	check("zacht gezang uit de noten in de data", SD.MOLEN_ZANG.size() == 5 and SD.MOLEN_NODE == "MolenWieken"
@@ -1058,9 +1067,13 @@ func _graan_data() -> void:
 	check("mini-gevecht: twee woudgeesten, daarna het zaad", gevecht[0] == "battle" and gevecht[1] == ["woudgeest", "woudgeest"]
 			and str(gevecht[2]["after"]) == "zingend_zaad_na")
 	var wg: Dictionary = GD.ENEMIES["woudgeest"]
-	check("Woudgeest is klein, hoort in het woud, art nog placeholder", wg["name"] == "Woudgeest" and int(wg["max_hp"]) <= 16
-			and "woud" in wg["habitat"] and bool(wg.get("art_pending", false)) and GD.enemy_sprite_is_placeholder(wg)
-			and ResourceLoader.exists(GD.enemy_sprite(wg)))
+	# v0.21: eigen art van RPG ART (batch 7), niet meer de Mosslijm-plaatsvervanger.
+	var wg_kaart: Texture2D = load("res://assets/map_monsters/woudgeest.png")
+	check("Woudgeest is klein, hoort in het woud, eigen art (voor/rug 90x90, kaart 32x64)", wg["name"] == "Woudgeest" and int(wg["max_hp"]) <= 16
+			and "woud" in wg["habitat"] and not bool(wg.get("art_pending", false)) and not GD.enemy_sprite_is_placeholder(wg)
+			and GD.enemy_sprite(wg) == "res://assets/sprites/enemies/woudgeest.png"
+			and (load(GD.enemy_sprite(wg)) as Texture2D).get_size() == Vector2(90, 90)
+			and ResourceLoader.exists(str(wg["sprite_back"])) and wg_kaart != null and wg_kaart.get_size() == Vector2(32, 64))
 	check("bestiarium 007-012 blijft gelijk", GD.bestiary_ids().slice(6, 12) == ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning", "mimic", "inktwurm"])
 	check("Zingend Zaad is een sleutel, Zingend Meel geneest", GD.KEY_ITEMS[SD.ITEM_ZAAD]["name"] == "Zingend Zaad"
 			and GD.ITEMS[SD.ITEM_MEEL]["name"] == "Zingend Meel" and int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"]) > 0
@@ -1078,7 +1091,7 @@ func _graan_tests() -> void:
 	var wieken: Node = d.get_node_or_null("Objects/MolenWieken")
 	check("molen staat stil tot het zaad binnen is", wieken != null and not wieken.draait() and wieken.frame_nu() == 0
 			and not wieken.glow_aan() and not wieken.gezongen
-			and wieken.sprite.texture == Wieken.placeholder_sheet())
+			and wieken.sprite.texture == Wieken.wieken_sheet())
 	Story.trigger("gerrit", g)
 	var dicht: Array = await run_story(6.0)
 	check("quest dicht vóór Noor", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)
@@ -1149,6 +1162,8 @@ func _graan_tests() -> void:
 	Story.trigger("gerrit", g)
 	var af: Array = await lines_until_choice()
 	check("bij Gerrit: zaad herkend, molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZAAD))
+			and af.any(func(l): return Molen.REGEL_ZANG in str(l))
+			and af.any(func(l): return Molen.REGEL_GEZANG in str(l))
 			and not af.any(func(l): return SD.QUOTE_GRAAN_DANK in str(l))
 			and af.any(func(l): return Molen.REGEL_RUST in str(l)) and af.any(func(l): return Molen.REGEL_MEEL in str(l))
 			and Story.has_flag(SD.FLAG_GRAAN_KLAAR) and Story.active_quest() == ""
@@ -1177,7 +1192,7 @@ func _graan_tests() -> void:
 			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"]))
 	Dialog.choose(0)
 	await lines_until_choice()
-	check("opslaan vraagt Ja/Nee", Dialog.choices == ["Ja", "Nee"])
+	check("opslaan vraagt Yes/No", Dialog.choices == ["Yes", "No"])
 	Dialog.choose(0)
 	await run_story(8.0)
 	var sav := GameState.read_save()
@@ -1290,8 +1305,8 @@ func _warper_kamer(pad: String, spawn: String, role: String, tegel: Vector2i, we
 	wp.interact(player())
 	var warned: bool = await wait_until(_exit_warning_open, 3.0)
 	check("%s waarschuwt: '%s'" % [role, ExitWarper.WARNING], warned
-			and ExitWarper.YES == "Ja, warpen naar worldmap"
-			and ExitWarper.NO == "Nee, blijf in de dungeon")
+			and ExitWarper.YES == "Yes, warp to the world map"
+			and ExitWarper.NO == "No, stay in the dungeon")
 	Dialog.choose(1)
 	await wait_until(func() -> bool: return wp.last_result == "cancelled" and not wp.busy, 2.0)
 	check("%s annuleren laat de party staan" % role, wp.last_result == "cancelled" and scene() == kamer

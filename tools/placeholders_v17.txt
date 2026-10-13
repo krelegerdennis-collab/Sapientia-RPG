@@ -2,78 +2,78 @@
 # daarna de regel hier weghalen en in tools/handwerk.txt zetten. Zie /workspace/v17_ART_SLOTS.md.
 # (v0.17: alle 5 vervangen door RPG ART art_mapsprites_v17; geen open placeholders meer)
 # Het Gesimuleerde Archief (Blauwe Kisten, tools/art_mimic_placeholder.py + tools/art_map_monsters.py):
-assets/sprites/enemies/mimic.png   80x64   Mimic (gevechtsplaatje; kist met tanden, magenta hoekjes)
-assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x16, magenta hoekjes)
+assets/sprites/enemies/mimic.png   80x64   Mimic (gevechtsplaatje; kist met tanden, magenta hoekjes)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x16, magenta hoekjes)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # (Blauwe kist = de gewone kist (assets/sprites/buiten/kist.png) met een blauwe tint in code: geen eigen bestand.)
 # Diepe Grot, warpers (verdieping 1, 25, 50, 75, 99): PLACEHOLDER, geen eigen bestand.
-# Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint
+# Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint   [KLAAR v0.21: Diepe Grot-warper heeft eigen art (dungeon100_warper.png); uitgang-warpers houden het getinte boek]
 # in scripts/dungeon/dungeon100_warper.gd.
-# Echte art later: assets/sprites/dungeon100_warper.png  64x16  (4 frames van 16x16).
+# Echte art later: assets/sprites/dungeon100_warper.png  64x16  (4 frames van 16x16).   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # Het Levende Archief, verdieping 1 (tools/art_kas_placeholder.py). Magenta hoekjes, geen definitieve art.
-assets/tiles/dungeon/kas_tiles.png            256x80  tileset overwoekerde kas (zelfde nummering als archief_grijs)
-assets/tiles/dungeon/kas_bibliotheek.png      256x64  bibliotheek-atlas van de kas (loader; verdieping 1 tekent er nog niet mee)
-assets/puzzle/groei_plaat.png                  48x16  groei-plaat, 3 frames van 16x16: zaad, scheut, volgroeid
-assets/sprites/buiten/kas_ingang.png           16x16  ingang van de kas op de wereldkaart
+assets/tiles/dungeon/kas_tiles.png            256x80  tileset overwoekerde kas (zelfde nummering als archief_grijs)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/tiles/dungeon/kas_bibliotheek.png      256x64  bibliotheek-atlas van de kas (loader; verdieping 1 tekent er nog niet mee)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/puzzle/groei_plaat.png                  48x16  groei-plaat, 3 frames van 16x16: zaad, scheut, volgroeid   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/kas_ingang.png           16x16  ingang van de kas op de wereldkaart   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # Archief 2, verdieping 2-4 en de hub (tools/art_archief2_placeholders.py). PLACEHOLDER.
-assets/tiles/dungeon/archief2_kas_tiles.png   256x80   extra kas-atlas, niet de tegelset van verdieping 1
-assets/sprites/archief2/lotte_veld.png   48x96   Lotte priester, veld 48x96
-assets/sprites/archief2/lotte_glitch.png   64x80   Lotte glitch 64x80
-assets/sprites/archief2/genezer.png   64x80   De Genezer 64x80
-assets/sprites/archief2/wurger.png   80x96   De Wurger 80x96
-assets/sprites/archief2/plaat_zaad.png   16x16   plaatsoort zaad 16x16 (ketting, tegen, licht)
-assets/sprites/archief2/plaat_scheut.png   16x16   plaatsoort scheut 16x16
-assets/sprites/archief2/plaat_volgroeid.png   16x16   plaatsoort volgroeid 16x16
-assets/ui/icons/levenskern.png   16x16   kern-item Archief 2 16x16
-assets/sprites/archief2/world_warper.png   128x64   World Warper exterieur 128x64
-assets/sprites/archief2/echo.png   32x48   ECHO hologram 32x48
-assets/sprites/archief2/sapientia_glitch.png   48x48   Sapientia glitch 48x48
-assets/map_monsters/lotte_glitch.png   32x64   Lotte glitch op de kaart (2x4 van 16x16)
-assets/map_monsters/wurger.png   32x64   De Wurger op de kaart (2x4 van 16x16)
-assets/map_monsters/genezer.png   32x64   De Genezer op de kaart (2x4 van 16x16)
+assets/tiles/dungeon/archief2_kas_tiles.png   256x80   extra kas-atlas, niet de tegelset van verdieping 1   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/lotte_veld.png   48x96   Lotte priester, veld 48x96   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/lotte_glitch.png   64x80   Lotte glitch 64x80   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/genezer.png   64x80   De Genezer 64x80   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/wurger.png   80x96   De Wurger 80x96   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/plaat_zaad.png   16x16   plaatsoort zaad 16x16 (ketting, tegen, licht)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/plaat_scheut.png   16x16   plaatsoort scheut 16x16   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/plaat_volgroeid.png   16x16   plaatsoort volgroeid 16x16   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/ui/icons/levenskern.png   16x16   kern-item Archief 2 16x16   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/world_warper.png   128x64   World Warper exterieur 128x64   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/echo.png   32x48   ECHO hologram 32x48   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+assets/sprites/archief2/sapientia_glitch.png   48x48   Sapientia glitch 48x48   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+assets/map_monsters/lotte_glitch.png   32x64   Lotte glitch op de kaart (2x4 van 16x16)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/map_monsters/wurger.png   32x64   De Wurger op de kaart (2x4 van 16x16)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/map_monsters/genezer.png   32x64   De Genezer op de kaart (2x4 van 16x16)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # Het Zingende Graan: woudgeest. Geen bestand. art_pending in game_data.gd.
 # Het Zingende Graan, zangscène: molenwieken. Geen bestand. PLACEHOLDER, magenta hoekjes en letters PH.
 # Getekend in scripts/village/molen_wieken.gd (192x64, 4 frames van 48x64). Geen definitieve art.
-# Echte art later: assets/sprites/buiten/molen_wieken.png  192x64  (4 frames, wieken stil tot de molen zingt)
-# Gevecht gebruikt GameData.PLACEHOLDER_ENEMY_SPRITE (art/enemies/mosslijm.png) tot RPG ART levert:
-# assets/sprites/enemies/woudgeest.png       vooraanzicht, zelfde anker als de andere vijanden
-# assets/sprites/enemies/woudgeest_rug.png   rugaanzicht, zelfde canvas als het vooraanzicht
-# assets/map_monsters/woudgeest.png          32x64  (2x4 frames van 16x16), alleen als hij op de kaart gaat lopen
+# Echte art later: assets/sprites/buiten/molen_wieken.png  192x64  (4 frames, wieken stil tot de molen zingt)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+# Gevecht gebruikt GameData.PLACEHOLDER_ENEMY_SPRITE (art/enemies/mosslijm.png) tot RPG ART levert:   [KLAAR v0.21: Woudgeest heeft eigen art (batch 7)]
+# assets/sprites/enemies/woudgeest.png       vooraanzicht, zelfde anker als de andere vijanden   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+# assets/sprites/enemies/woudgeest_rug.png   rugaanzicht, zelfde canvas als het vooraanzicht   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+# assets/map_monsters/woudgeest.png          32x64  (2x4 frames van 16x16), alleen als hij op de kaart gaat lopen   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # Extra kamers van de World Warper (tools/art_warper_kamers.py). Magenta hoekjes, het woord PLACEHOLDER of een kort label. Geen definitieve art.
-world_warper/art/echo_placeholder.png         48x96   ECHO op de kaart (3x4 frames van 16x32, PLACEHOLDER)
-world_warper/art/party_placeholder.png        48x96   party-lid zonder eigen sheet (3x4 frames van 16x32, PLACEHOLDER)
-world_warper/art/pc_placeholder.png           32x32   hoofd-PC in De Hal en de terminal in ECHO's Kamer
-world_warper/art/warp_platform.png            32x16   warp-platform in De Hal
-world_warper/art/tafel_placeholder.png        32x16   lege smidstafel in De Werkplaats
-world_warper/art/toonbank_placeholder.png     48x16   dichte toonbank in De Handelskamer
-world_warper/art/bord_kamers.png              32x16   bordje naar de kamers en overige interactievlakken
-world_warper/art/bord_hal.png                 32x16   bord in de hal (PLACEHOLDER, woord HAL)
-world_warper/art/bord_warp.png                48x16   bord bij de warp (PLACEHOLDER, woord WARP)
-world_warper/art/tiles_placeholder.png        128x32  interieur-atlas, 8x2 tegels van 16x16 (PLACEHOLDER). Kaarten in world_warper/maps gebruiken deze atlas.
+world_warper/art/echo_placeholder.png         48x96   ECHO op de kaart (3x4 frames van 16x32, PLACEHOLDER)   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/party_placeholder.png        48x96   party-lid zonder eigen sheet (3x4 frames van 16x32, PLACEHOLDER)   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/pc_placeholder.png           32x32   hoofd-PC in De Hal en de terminal in ECHO's Kamer   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/warp_platform.png            32x16   warp-platform in De Hal   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/tafel_placeholder.png        32x16   lege smidstafel in De Werkplaats   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/toonbank_placeholder.png     48x16   dichte toonbank in De Handelskamer   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/bord_kamers.png              32x16   bordje naar de kamers en overige interactievlakken   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/bord_hal.png                 32x16   bord in de hal (PLACEHOLDER, woord HAL)   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/bord_warp.png                48x16   bord bij de warp (PLACEHOLDER, woord WARP)   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
+world_warper/art/tiles_placeholder.png        128x32  interieur-atlas, 8x2 tegels van 16x16 (PLACEHOLDER). Kaarten in world_warper/maps gebruiken deze atlas.   [v0.21: VERVANGEN door RPG ART, zie tools/handwerk.txt]
 # De Spiegel (Archief 4), onthullingsscène (tools/art_spiegel_placeholder.py). Magenta hoekjes, geen definitieve art.
-assets/bg/spiegel_kamer.png                   384x216  kamer vol spiegelende oppervlakken
-assets/bg/spiegel_kamer_gebroken.png          384x216  dezelfde kamer, spiegels gebroken door de weigering
+assets/bg/spiegel_kamer.png                   384x216  kamer vol spiegelende oppervlakken   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/bg/spiegel_kamer_gebroken.png          384x216  dezelfde kamer, spiegels gebroken door de weigering   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # Berggrot naar de kas (tools/art_berggrot_placeholder.py). Magenta hoekjes, het woord PLACEHOLDER. Geen definitieve art.
-assets/tiles/dungeon/berggrot_tiles.png         256x80   tileset berggrot (zelfde nummering als archief_grijs)
-assets/tiles/dungeon/berggrot_bibliotheek.png   256x64   bibliotheek-atlas van de berggrot (loader)
-assets/sprites/enemies/steenluis.png            90x90    Steenluis, vooraanzicht
-assets/sprites/enemies/steenluis_rug.png        90x90    Steenluis, rugaanzicht
-assets/sprites/enemies/druipslak.png            90x90    Druipslak, vooraanzicht
-assets/sprites/enemies/druipslak_rug.png        90x90    Druipslak, rugaanzicht
-assets/sprites/enemies/adermot.png              90x90    Adermot, vooraanzicht
-assets/sprites/enemies/adermot_rug.png          90x90    Adermot, rugaanzicht
-assets/map_monsters/steenluis.png               32x64    Steenluis op de kaart (2x4 frames van 16x16)
-assets/map_monsters/druipslak.png               32x64    Druipslak op de kaart (2x4 frames van 16x16)
-assets/map_monsters/adermot.png                 32x64    Adermot op de kaart (2x4 frames van 16x16)
+assets/tiles/dungeon/berggrot_tiles.png         256x80   tileset berggrot (zelfde nummering als archief_grijs)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/tiles/dungeon/berggrot_bibliotheek.png   256x64   bibliotheek-atlas van de berggrot (loader)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/enemies/steenluis.png            90x90    Steenluis, vooraanzicht   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/enemies/steenluis_rug.png        90x90    Steenluis, rugaanzicht   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/enemies/druipslak.png            90x90    Druipslak, vooraanzicht   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/enemies/druipslak_rug.png        90x90    Druipslak, rugaanzicht   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/enemies/adermot.png              90x90    Adermot, vooraanzicht   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/enemies/adermot_rug.png          90x90    Adermot, rugaanzicht   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/map_monsters/steenluis.png               32x64    Steenluis op de kaart (2x4 frames van 16x16)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/map_monsters/druipslak.png               32x64    Druipslak op de kaart (2x4 frames van 16x16)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/map_monsters/adermot.png                 32x64    Adermot op de kaart (2x4 frames van 16x16)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # Wilgendal, winkelpanden (tools/art_wilgendal_placeholders.py). Gekleurd vlak, magenta hoekjes, het woord PLACEHOLDER. Geen definitieve art.
-assets/sprites/buiten/wilgendal_pantser.png     48x48    pantserwinkel, exterieur
-assets/sprites/buiten/wilgendal_wapen.png       48x48    wapenwinkel, exterieur
-assets/sprites/buiten/wilgendal_accessoire.png  48x48    accessoirewinkel, exterieur
-assets/sprites/buiten/wilgendal_magie.png       48x48    magiewinkel, exterieur
-assets/sprites/buiten/wilgendal_huis.png        48x48    bewoond woonhuis, exterieur
-assets/sprites/buiten/wilgendal_huis_dicht.png  48x48    dicht woonhuis, exterieur
-assets/sprites/buiten/wilgendal_schild.png      48x16    uithangbord schild (armour)
-assets/sprites/buiten/wilgendal_zwaard.png      48x16    uithangbord zwaard (wapen)
-assets/sprites/buiten/wilgendal_ring.png        48x16    uithangbord ring (accessoire)
-assets/sprites/buiten/wilgendal_ster.png        48x16    uithangbord ster (magic)
-assets/sprites/buiten/wilgendal_toonbank.png    48x16    toonbank in de winkel
-assets/sprites/buiten/wilgendal_vitrine.png     48x16    item-display in de winkel
+assets/sprites/buiten/wilgendal_pantser.png     48x48    pantserwinkel, exterieur   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_wapen.png       48x48    wapenwinkel, exterieur   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_accessoire.png  48x48    accessoirewinkel, exterieur   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_magie.png       48x48    magiewinkel, exterieur   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_huis.png        48x48    bewoond woonhuis, exterieur   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_huis_dicht.png  48x48    dicht woonhuis, exterieur   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_schild.png      48x16    uithangbord schild (armour)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_zwaard.png      48x16    uithangbord zwaard (wapen)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_ring.png        48x16    uithangbord ring (accessoire)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_ster.png        48x16    uithangbord ster (magic)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_toonbank.png    48x16    toonbank in de winkel   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/wilgendal_vitrine.png     48x16    item-display in de winkel   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]

@@ -329,6 +329,8 @@ func _scene_tests() -> void:
 	check("vluchten uit de Mimic: de kist blijft dicht, de run loopt door", await wait_floor(int(mimic_floor["floor"]))
 			and GameState.dungeon100_run_active() and not GameState.story_flags.has("kist:" + str(mimic_floor["id"])))
 
+	_mimic_vermomd_tests()
+
 	# Blauwe Kist op een (mogelijk andere) verdieping van dezelfde run
 	GameState.dungeon100_seed = int(blue_floor["seed"])
 	GameState.dungeon100_floor = int(blue_floor["floor"])
@@ -471,3 +473,24 @@ func screenshot(name: String) -> void:
 	var dir := shots
 	DirAccess.make_dir_recursive_absolute(dir)
 	img.save_png(dir.path_join(name + ".png"))
+
+
+## v0.21: Mimic op de kaart = dichte Blauwe Kist (pixel-gelijk), loopt niet, verraadt zich niet.
+func _mimic_vermomd_tests() -> void:
+	var ed: Dictionary = GD.ENEMIES[Blue.MIMIC_ENEMY]
+	var mm: MapMonster = preload("res://scripts/dungeon/map_monster.gd").new()
+	var room := scene()
+	mm.setup(room, {"id": "mimic_test", "enemy": Blue.MIMIC_ENEMY, "tile": [1, 1]}, 1)
+	check("Mimic op de kaart: moves false (game_data en MapMonster)", ed.get("moves", true) == false
+			and not mm.moves and mm.disguised)
+	mm.stun(5)
+	mm._stun_look(0.3)
+	mm.step_tick()
+	check("Mimic na vluchten/stun: geen stun, geen tint, geen sterretjes", not mm.is_stunned()
+			and mm.sprite.modulate == Color.WHITE and mm.get_node_or_null("Verlamd") == null)
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	var tex: Texture2D = load("res://assets/map_monsters/mimic.png")
+	check("Mimic-art (gevecht 80x64, kaart 32x64) in handwerk.txt", hw.contains("assets/sprites/enemies/mimic.png")
+			and hw.contains("assets/map_monsters/mimic.png") and tex.get_width() == 32 and tex.get_height() == 64
+			and (load(ed["sprite"]) as Texture2D).get_size() == Vector2(80, 64))
+	mm.free()
