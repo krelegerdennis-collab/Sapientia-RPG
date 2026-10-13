@@ -1287,6 +1287,38 @@ func _execute(a: Dictionary) -> void:
 				await codex.capture(actor, a["target"])   # Codex: Leeg Boek
 				_hero_rest(actor)
 				return
+			if float(it.get("revive", 0.0)) > 0.0:     # Feniksveer (Koopman)
+				var dood = a["target"] if a["target"] != null and int(a["target"]["s"]["hp"]) <= 0 else null
+				if dood == null:
+					for h in heroes:
+						if int(h["s"]["hp"]) <= 0:
+							dood = h
+							break
+				if dood == null:
+					show_message(PartyActions.MSG_NO_EFFECT)
+				else:
+					var back := PartyActions.revive(dood["s"], float(it["revive"]))
+					show_message("%s gets back up! (%d HP)" % [dood["name"], back])
+					_refresh_party()
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
+			if bool(it.get("cure", false)):          # Tegengif (Koopman): gif en binden weg
+				var t := _valid_ally(a["target"])
+				if t.has("dots"):
+					t["dots"] = (t["dots"] as Array).filter(func(d): return not bool(d.get("gif", false)))
+				if str(t.get("skip_reden", "")) == Archief2Vijanden.SKIP_REDEN_BIND:
+					t["skip"] = 0
+				show_message("%s is cured." % t["name"])
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
+			if bool(it.get("stun_room", false)):     # alleen in het veld: niet verbruiken
+				GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
+				show_message(PartyActions.MSG_NO_EFFECT)
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
 			await _heal(_valid_ally(a["target"]), int(it["heal_hp"]), int(it["heal_mp"]))
 			_hero_rest(actor)
 		"defend":

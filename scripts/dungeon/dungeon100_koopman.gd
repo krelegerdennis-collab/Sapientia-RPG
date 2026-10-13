@@ -6,6 +6,9 @@ extends StaticBody2D
 
 const Data := preload("res://scripts/data/koopman_data.gd")
 const Kamers := preload("res://scripts/data/grot_kamers.gd")
+const Winkel := preload("res://scripts/data/koopman_winkel.gd")
+const WinkelScherm := preload("res://scripts/ui/koopman_winkel_scherm.gd")
+var _bezig := false
 const DIR_ROW := {Vector2i.DOWN: 0, Vector2i.LEFT: 1, Vector2i.RIGHT: 2, Vector2i.UP: 3}
 
 var facing := Vector2i.DOWN
@@ -93,9 +96,33 @@ func praat() -> Array[String]:
 
 
 func interact(player: Node2D) -> void:
-	if Dialog.is_open:
+	if Dialog.is_open or _bezig:
 		return
+	_bezig = true
 	if "facing" in player:
 		facing = -player.facing
 		_update_sprite()
 	Dialog.show_lines(praat(), Data.NAAM, self)
+	await Dialog.finished
+	var keuze: int = await Dialog.ask(Winkel.VRAAG, Winkel.KEUZES, Data.NAAM)
+	if keuze == 0:
+		open_winkel(player)
+	_bezig = false
+
+
+## Winkelraam (scripts/ui/koopman_winkel_scherm.gd) openen; zelfde weg als npc.gd _open_shop.
+func open_winkel(player: Node2D) -> Node:
+	var scene := get_tree().current_scene
+	if scene.get_node_or_null("ShopScreen") != null:
+		return scene.get_node("ShopScreen")
+	if player != null and "input_locked" in player:
+		player.input_locked = true
+	var shop = WinkelScherm.new()
+	shop.name = "ShopScreen"
+	shop.run_seed = GameState.dungeon100_seed
+	shop.bezoek = maxi(1, GameState.koopman_bezoeken)
+	shop.closed.connect(func() -> void:
+		if is_instance_valid(player) and "input_locked" in player:
+			player.input_locked = false)
+	scene.add_child(shop)
+	return shop

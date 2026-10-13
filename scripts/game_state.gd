@@ -147,6 +147,8 @@ var dungeon100_snapshot := {}
 var koopman_bezoeken := 0
 var koopman_laatste := ""
 var koopman_token := false
+## Unieke stukken (uitrusting, rotatie-item) die dit bezoek al gekocht zijn; leeg bij een nieuw bezoek/nieuwe run.
+var koopman_gekocht: Array = []
 ## v0.11 verhaal: stap (zie scripts/data/story_data.gd) en flags (naam -> true)
 var story_step := 0
 var story_flags := {}
@@ -1659,7 +1661,8 @@ func respawn() -> void:
 ## Is er een run bezig? (de echte party/tas liggen dan in de momentopname)
 ## Koopman-blok voor de save.
 func koopman_save_data() -> Dictionary:
-	return {"bezoeken": koopman_bezoeken, "laatste": koopman_laatste, "token": koopman_token}
+	return {"bezoeken": koopman_bezoeken, "laatste": koopman_laatste, "token": koopman_token,
+			"gekocht": koopman_gekocht.duplicate()}
 
 
 ## Koopman-blok uit een save; oude saves zonder blok = nog nooit bezocht.
@@ -1668,6 +1671,11 @@ func koopman_load(d) -> void:
 	koopman_bezoeken = maxi(0, int(k.get("bezoeken", 0)))
 	koopman_laatste = str(k.get("laatste", ""))
 	koopman_token = bool(k.get("token", false))
+	koopman_gekocht = []
+	var g = k.get("gekocht", [])
+	if g is Array:
+		for id in g:
+			koopman_gekocht.append(str(id))
 
 
 ## Eén bezoek aan de Koopman tellen (zelfde run + verdieping telt één keer). Geeft de teller terug.
@@ -1675,6 +1683,7 @@ func koopman_bezoek(sleutel: String) -> int:
 	if sleutel != koopman_laatste:
 		koopman_laatste = sleutel
 		koopman_bezoeken += 1
+		koopman_gekocht = []     # restock: nieuw bezoek (en dus elke nieuwe run)
 	return koopman_bezoeken
 
 

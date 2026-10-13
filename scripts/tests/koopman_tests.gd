@@ -17,6 +17,9 @@ const Wanderers := preload("res://world_warper/wander/wanderers.gd")
 const HAL := "res://world_warper/maps/hal.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const SEED := 4242
+const W := preload("res://scripts/data/koopman_winkel.gd")
+const PA := preload("res://scripts/party_actions.gd")
+const GG := preload("res://scripts/data/grade_gear.gd")
 const BATCH9 := ["mosslijm", "moskonijn", "papiergeest", "glitchmot", "mech_wachter", "kennis_beest",
 		"wortelkruiper", "mistuil", "sporenzwam", "inktwurm"]
 
@@ -51,6 +54,8 @@ func _run() -> void:
 	_data_tests()
 	print("=== Deel B: save/load ===")
 	_save_tests()
+	print("=== Deel F1: winkel-data ===")
+	_winkel_data()
 	print("=== Deel C: Koopman in de Grot ===")
 	await _koopman_scene()
 	print("=== Deel D: val- en rustkamer ===")
@@ -112,7 +117,7 @@ func screenshot(name: String) -> void:
 func close_dialog() -> void:
 	var n := 0
 	while Dialog.is_open and n < 40:
-		Dialog.advance()
+		Dialog.cancel()
 		await pframes(3)
 		n += 1
 
@@ -266,6 +271,7 @@ func _koopman_scene() -> void:
 	await screenshot("koopman_grot_token")
 	await close_dialog()
 	await screenshot("koopman_kraam")
+	await _winkel_scene(k, pl)
 	check("lines niet leeg", not lines.is_empty())
 
 
@@ -362,3 +368,103 @@ func _hub_scene() -> void:
 			lopend = true
 	check("minstens één loper speelt een loopanimatie", lopend)
 	await screenshot("hub_rondlopers")
+
+
+# ================================================================ F winkel
+func _winkel_data() -> void:
+	var v1 := W.voorraad(SEED, 1)
+	var ids := v1.map(func(r): return r["id"])
+	check("consumables altijd: Elixir, Phoenix Feather, Antidote", ids.has("elixer") and ids.has("feniksveer") and ids.has("tegengif"))
+	var ok2x := true
+	for r in v1:
+		if r["soort"] == "consumable":
+			ok2x = ok2x and int(r["price"]) == 2 * W.basis_prijs(r["id"])
+	check("consumables kosten 2x de winkelprijs", ok2x)
+	var bom := v1.filter(func(r): return r["id"] == "stunbom")
+	check("Stun Bomb altijd, vaste hoge prijs", bom.size() == 1 and int(bom[0]["price"]) == W.STUNBOM_PRIJS
+			and W.voorraad(99, 7).any(func(r): return r["id"] == "stunbom"))
+	check("geen Simulatie-token (besluit Dennis)", not ids.has("simulatie_token") and not GameData_has("simulatie_token"))
+	var g3 := v1.filter(func(r): return r["soort"] == "g3")
+	check("1 Grade 3-stuk, 2x prijs", g3.size() == 1 and GG.item(g3[0]["id"])["grade"] == 3
+			and int(g3[0]["price"]) == 2 * W.basis_prijs(g3[0]["id"]))
+	var g4_ok := true
+	for b in range(1, 10):
+		var n := W.voorraad(SEED, b).filter(func(r): return r["soort"] == "g4").size()
+		g4_ok = g4_ok and n == (1 if b % 3 == 0 else 0)
+	check("Grade 4 alleen elk 3e bezoek (3, 6, 9)", g4_ok)
+	var g4 := W.voorraad(SEED, 3).filter(func(r): return r["soort"] == "g4")
+	check("Grade 4 kost 3x", int(g4[0]["price"]) == 3 * W.basis_prijs(g4[0]["id"]))
+	var rot1: String = v1.filter(func(r): return r["soort"] == "rotatie")[0]["id"]
+	var rot2: String = W.voorraad(SEED, 2).filter(func(r): return r["soort"] == "rotatie")[0]["id"]
+	check("rotatie-item wisselt per bezoek (%s -> %s)" % [rot1, rot2], rot1 != rot2)
+	check("voorraad is vast per run + bezoek", str(W.voorraad(SEED, 2)) == str(W.voorraad(SEED, 2)))
+	check("inkoop: consumable 50% (Elixir %d)" % W.inkoop_prijs("elixer"), W.inkoop_prijs("elixer") == 150)
+	check("inkoop: uitrusting 40% (Short Sword %d)" % W.inkoop_prijs("kort_zwaard"), W.inkoop_prijs("kort_zwaard") == 48)
+	var g4id: String = g4[0]["id"]
+	check("inkoop: Grade 4 60%", W.inkoop_prijs(g4id) == int(W.basis_prijs(g4id) * 0.6))
+	check("sleutel-items koopt hij niet", W.inkoop_prijs("hanger") == 0)
+	# kopen / restock
+	GameState.new_game("Dennis")
+	GameState.gold = 5000
+	GameState.koopman_bezoek("%d_5" % SEED)
+	var r := W.koop(SEED, 1, GameState.koopman_gekocht, rot1)
+	check("kopen: goud eraf, in de tas, canon-regel", r["ok"] and r["text"] == W.REGEL_KOOP and GameState.inventory.get(rot1, 0) == 1
+			and GameState.gold == 5000 - int(v1.filter(func(x): return x["id"] == rot1)[0]["price"]))
+	check("uniek stuk is dit bezoek weg", not W.voorraad(SEED, 1, GameState.koopman_gekocht).any(func(x): return x["id"] == rot1))
+	var e1 := int(GameState.inventory.get("elixer", 0))
+	W.koop(SEED, 1, GameState.koopman_gekocht, "elixer")
+	W.koop(SEED, 1, GameState.koopman_gekocht, "elixer")
+	check("consumables blijven op voorraad", int(GameState.inventory.get("elixer", 0)) == e1 + 2)
+	GameState.koopman_bezoek("777_5")
+	check("nieuwe run = restock (gekocht leeg)", GameState.koopman_gekocht.is_empty())
+	GameState.gold = 0
+	check("te weinig goud", not W.koop(SEED, 1, [], "elixer")["ok"])
+	var s1 := W.verkoop("elixer")
+	check("verkopen: canon-regel + 150g", s1["ok"] and s1["text"] == W.REGEL_VERKOOP and GameState.gold == 150)
+	var data := GameState.state_data(Vector2i.ZERO, Vector2i.DOWN)
+	check("gekocht-lijst in de save", data["koopman"].has("gekocht"))
+	# Feniksveer
+	var h: Dictionary = GameState.party[0]
+	h["hp"] = 0
+	GameState.inventory["feniksveer"] = 1
+	var rv := PA.use_item(GameState.inventory, "feniksveer", h)
+	check("Phoenix Feather: gevallen held staat op met 50%% HP (%d)" % int(h["hp"]), rv["ok"] and int(h["hp"]) == roundi(int(h["max_hp"]) * 0.5))
+	check("Phoenix Feather werkt niet op een levende held", not PA.use_item({"feniksveer": 1}, "feniksveer", h)["ok"])
+	check("Antidote alleen in een gevecht", PA.item_block_reason("tegengif") == PA.MSG_FIELD_ONLY)
+
+
+func GameData_has(id: String) -> bool:
+	return preload("res://scripts/data/game_data.gd").ITEMS.has(id)
+
+
+func _winkel_scene(k, pl) -> void:
+	GameState.gold = 3000
+	GameState.inventory["elixer"] = 2
+	GameState.inventory["kort_zwaard"] = 1
+	var shop = k.open_winkel(pl)
+	await pframes(20)
+	check("winkelraam open (zelfde shop_screen als Wilgendal)", shop != null and shop.is_inside_tree() and shop.mode == "koop")
+	var knoppen: Array = shop.content.get_children().filter(func(c): return c is Button)
+	check("kooplijst: Sell + %d regels" % (knoppen.size() - 1), knoppen.size() >= 6 and str(knoppen[0].text).contains("Sell"))
+	await get_tree().create_timer(0.5).timeout
+	await screenshot("koopman_winkel_kopen")
+	var g0 := GameState.gold
+	shop._on_buy("feniksveer", "item")
+	await pframes(5)
+	check("kopen via het raam: 'Good choice...'", shop.last_text == W.REGEL_KOOP and GameState.gold == g0 - 2 * W.basis_prijs("feniksveer"))
+	shop._show_verkoop()
+	await pframes(10)
+	await get_tree().create_timer(0.5).timeout
+	await screenshot("koopman_winkel_verkopen")
+	shop._on_sell("kort_zwaard")
+	await pframes(5)
+	check("verkopen via het raam: 'Everything has value...' (+48g)", shop.last_text == W.REGEL_VERKOOP and not GameState.inventory.has("kort_zwaard"))
+	shop.close()
+	await pframes(10)
+	check("raam dicht, speler kan weer lopen", not pl.input_locked)
+	# Stun Bomb in de kamer
+	var r := scene()
+	var levend := (r.get("monsters") as Array).filter(func(m): return is_instance_valid(m) and not m.boss and not m.disguised)
+	GameState.inventory["stunbom"] = 1
+	var su := PA.use_item(GameState.inventory, "stunbom", GameState.party[0])
+	check("Stun Bomb: %d monster(s) verlamd" % levend.size(), levend.is_empty() or (su["ok"] and levend.all(func(m): return m.is_stunned())))
