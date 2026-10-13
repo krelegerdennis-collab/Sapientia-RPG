@@ -16,6 +16,15 @@ const LUCHT := Color("1a0f26")
 const GRIJS := Color(0.55, 0.57, 0.55, 1)
 const LAAG := 4
 
+## v0.23 filmpje van Dennis (~21 s, 720x1280): de kern, de Hanger licht op, straal door de kas,
+## de lucht scheurt open en de World Warper verschijnt. Speelt vóór de dialoog, één keer (vlag),
+## en altijd in de herhaling (veldmenu > Scenes > The World Warper).
+const VIDEO := "res://assets/video/genezer_warper.ogv"
+const VIDEO_FLAG := "cutscene_genezer_video_gezien"
+const VIDEO_MAX := 26.0
+const CutsceneSpeler := preload("res://scripts/worldmap_cutscene.gd")
+var video_speler: CanvasLayer = null
+
 ## Eén scène tegelijk (kern-signaal en kamer-fallback mogen niet dubbel starten).
 static var bezig := false
 
@@ -64,6 +73,8 @@ static func herhaal(ouder: Node) -> Node:
 func stop_herhaling() -> void:
 	if not herhaling or _klaar_gemeld:
 		return
+	if video_speler != null and is_instance_valid(video_speler):
+		video_speler.skip_now()
 	if Dialog.is_open and Dialog.has_method("close"):
 		Dialog.close()
 	_stop()
@@ -132,6 +143,7 @@ func _tex(n: String, t: Texture2D, sz: Vector2) -> TextureRect:
 
 
 func _speel() -> void:
+	await _speel_video()
 	var speler: Node = _kamer.get("player") if _kamer != null and "player" in _kamer else null
 	if is_instance_valid(speler):
 		speler.set("input_locked", true)
@@ -148,6 +160,27 @@ func _speel() -> void:
 		Dialog.show_lines([str(r.get("text", ""))], wie)
 		await Dialog.finished
 	await _einde()
+
+
+## Filmpje vóór de dialoog. Echt verhaal: vlag meteen zetten (save-veilig: nooit twee keer).
+func _speel_video() -> void:
+	if not ResourceLoader.exists(VIDEO):
+		return
+	if not herhaling:
+		if GameState.story_flags.has(VIDEO_FLAG):
+			return
+		GameState.story_flags[VIDEO_FLAG] = true
+	var c: CanvasLayer = CutsceneSpeler.new()
+	c.name = "GenezerVideo"
+	c.video_path = VIDEO
+	c.max_seconds = VIDEO_MAX
+	c.layer = 127          # boven het veldmenu én de herhalingsachtergrond (125/124); CRT-filter = 128
+	add_child(c)
+	video_speler = c
+	c.begin(c)
+	if not c.is_done():
+		await c.finished
+	video_speler = null
 
 
 func _tween() -> Tween:

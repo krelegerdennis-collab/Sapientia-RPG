@@ -529,3 +529,4 @@ assets/ui/battlehud/vul_hp_laag.png
 assets/ui/battlehud/vul_mp.png
 assets/battle/kas_genezer.png
 assets/map_monsters/genezer_groot.png
+assets/video/genezer_warper.ogv

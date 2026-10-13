@@ -195,6 +195,22 @@ func _build() -> void:
 		var kast: StaticBody2D = InktwurmKastScript.new()
 		kast.setup(self, room["inktwurm_kast"])
 		objects.add_child(kast)
+	# v0.23 onzichtbare blokkades (bv. het podium van De Genezer): weg zodra de vlag "tot_vlag" staat
+	var blok: Dictionary = room.get("blokkades", {})
+	if not blok.is_empty() and not GameState.story_flags.has(str(blok.get("tot_vlag", ""))):
+		for bt in blok.get("tiles", []):
+			var sb := StaticBody2D.new()
+			sb.name = "Blokkade_%d_%d" % [int(bt[0]), int(bt[1])]
+			sb.collision_layer = 1
+			sb.add_to_group("dungeon_blokkade")
+			var cs := CollisionShape2D.new()
+			var rs := RectangleShape2D.new()
+			rs.size = Vector2(16, 16)
+			cs.shape = rs
+			sb.add_child(cs)
+			sb.position = Vector2(int(bt[0]), int(bt[1])) * 16 + Vector2(8, 8)
+			objects.add_child(sb)
+			_blocked[Vector2i(int(bt[0]), int(bt[1]))] = true
 	# v0.14 leesplekken (zonder botsing)
 	for d in room.get("signs", []):
 		var sg: Area2D = SignScript.new()

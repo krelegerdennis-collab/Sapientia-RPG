@@ -237,6 +237,10 @@ static func rooms() -> Dictionary:
 			# v0.23 originele Genezer, grote kaartversie (RPG ART, 2 frames van 32x32) op het zegel 62/63
 			"sprite": "genezer_groot", "size": [2, 1], "frame": [32, 32], "fps": 1.2,
 		}],
+		# v0.23 (Dennis): het podium heeft geen hekje meer; rij 5 blijft dicht tot De Genezer verslagen is
+		"blokkades": {"tot_vlag": "bewaker:archief_2_v4_genezer/genezer",
+			"tiles": [[1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5], [8, 5],
+				[11, 5], [12, 5], [13, 5], [14, 5], [15, 5], [16, 5], [17, 5], [18, 5]]},
 	})
 	var warper := _met(_basis("World Warper", 4, 0), {
 		"theme": "warper_paars",
