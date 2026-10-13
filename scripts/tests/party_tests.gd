@@ -9,7 +9,7 @@ extends Node
 ##   Deel C: gevecht: 4 helden + 1 monster (4 heldenvakken onderaan, monster als zijspeler boven B), de reserve-held
 ##           vecht niet mee, beurtvolgorde telt alleen de actieve combatanten, wisselen geblokkeerd.
 ##   Deel D: veldmenu > Party: scherm open, wisselen via het scherm, monster kiezen.
-## Met --shots=map: party_gevecht_5_plekken, party_veldmenu, veldmenu_magic, party_menu, party_menu_gewisseld (+ _3x = 1152x648).
+## Met --shots=map: party_gevecht_5_plekken, party_veldmenu, veldmenu_magic, veldmenu_knoppen, veldmenu_laden_bevestigen, party_menu, party_menu_gewisseld (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
 
 const GD := preload("res://scripts/data/game_data.gd")
@@ -556,6 +556,42 @@ func _menu_tests() -> void:
 		check("genezen buiten het gevecht: Dennis %d -> %d HP" % [hp0, int(dennis["hp"])], bool(genees_r["ok"]) and int(dennis["hp"]) > hp0)
 		ms.close()
 		await pframes(3)
+	# v0.22 (Dennis): Settings en Load in het veldmenu
+	check("veldmenu: Settings en Load rechts onder Party, binnen beeld", m.buttons.has("options") and m.buttons.has("load")
+			and m.buttons["options"].position.y > m.buttons["party"].position.y
+			and m.buttons["load"].position.y > m.buttons["options"].position.y
+			and Rect2(Vector2.ZERO, m.root.size).encloses(m.buttons["load"].get_global_rect())
+			and m.buttons["load"].size.y >= 16.0)
+	await screenshot("veldmenu_knoppen")
+	await click(m.buttons["options"])
+	await pframes(4)
+	check("Settings opent het Opties-scherm", m.sub != null and m.sub.name == "Options")
+	if m.sub != null:
+		m.sub.close()
+		await pframes(4)
+	var opgeslagen := GameState.save_game(player().get_tile(), player().facing)
+	var naam_voor := str(GameState.party[1]["name"])
+	GameState.party[1]["name"] = "Gewijzigd"
+	await click(m.buttons["load"])
+	await pframes(6)
+	var ls: Node = m.sub
+	check("Load opent de slotlijst", opgeslagen and ls != null and ls.name == "Load" and ls.list != null
+			and not ls.list.slot_buttons[0].disabled)
+	if ls != null:
+		await click(ls.list.slot_buttons[0])
+		await pframes(4)
+		check("slot kiezen vraagt eerst om bevestiging ('No' heeft de focus)", ls.prompt != null
+				and ls.prompt.no_button.has_focus() and ls.prompt.detail == ls.DETAIL)
+		await screenshot("veldmenu_laden_bevestigen")
+		if ls.prompt != null:
+			await click(ls.prompt.no_button)
+			await pframes(3)
+		check("'No': niets geladen, lijst blijft open", ls.result == "declined" and str(GameState.party[1]["name"]) == "Gewijzigd"
+				and is_instance_valid(ls) and m.sub == ls)
+		ls.close()
+		await pframes(4)
+	check("terug in het veldmenu", m.sub == null)
+	GameState.party[1]["name"] = naam_voor
 	# in een gevecht opent het scherm niet
 	GameState.in_battle = true
 	m.open_party()
@@ -564,6 +600,34 @@ func _menu_tests() -> void:
 	check("veldmenu > Party geweigerd tijdens een gevecht", m.sub == null and m.message_label.text == PartyLimiet.IN_GEVECHT)
 	m.close()
 	await pframes(3)
+	# Load > slot 1 > 'Yes': de save wordt geladen (voortgang erna is weg)
+	GameState.party[1]["name"] = "Gewijzigd"
+	m = null
+	for poging in 10:
+		await tap("menu")
+		await frames(3)
+		m = field_menu()
+		if m != null:
+			break
+		await pframes(20)
+	if m == null:
+		check("veldmenu opnieuw open", false)
+		return
+	m.open_load()
+	await pframes(6)
+	var ls2: Node = m.sub
+	if ls2 == null:
+		check("Load opnieuw open", false)
+		return
+	ls2._on_picked(1)
+	await pframes(3)
+	await click(ls2.prompt.yes_button)
+	var klaar := func() -> bool: return not GameState.changing_map and scene() != null and scene().scene_file_path == GOLEM_SCENE and field_menu() == null
+	await pframes(10)
+	var terug: bool = await wait_until(klaar, 15.0)
+	await wait_fade()
+	check("'Yes': slot geladen, terug op de kaart, niet-opgeslagen wijziging weg (%s)" % str(GameState.party[1]["name"]),
+			terug and str(GameState.party[1]["name"]) != "Gewijzigd")
 
 
 func click(c: Control) -> void:
