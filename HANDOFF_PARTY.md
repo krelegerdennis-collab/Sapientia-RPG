@@ -173,3 +173,6 @@ Port van de nieuwe stukken uit #66 bovenop #69 (al op main). Het icoon van RPG A
   er 29 groen. kernkrachttest faalde onder load 1 check (4.7.2: "door"; 4.3: "inslag") en is daarna los
   groen (116/0 op beide). partytest: 77/0 op beide versies, menutest 230/0, codextest 137/0.
   Logs: `/workspace/code_party/logs/full472_scenes`, `full43_scenes`, `rerun472_scenes`, `rerun43_scenes`.
+- **Knopteksten gecentreerd** (Dennis): alle veldmenu-knoppen centreren hun tekst. Een gecentreerde `UiMenu`-knop
+  krijgt rechts dezelfde opvulling als de focuspijl links, dus de tekst verspringt niet bij focus. Menutest controleert
+  dit. menutest/partytest/codextest zijn groen op 4.7.2 en 4.3 (231/77/137).

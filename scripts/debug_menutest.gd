@@ -288,6 +288,11 @@ func _main_menu_tests() -> void:
 	var small := false
 	for id in m.buttons:
 		small = small or m.buttons[id].size.y < m.ROW_H
+	var gecentreerd := true
+	for id in m.buttons:
+		var bb: Button = m.buttons[id]
+		gecentreerd = gecentreerd and bb.alignment == HORIZONTAL_ALIGNMENT_CENTER and bb.text.ends_with("  ")
+	check("alle veldmenu-knoppen gecentreerd (v0.22)", gecentreerd)
 	check("tikvlak van elke knop >= %d px hoog" % m.ROW_H, not small)
 	await tap("move_up")
 	check("omhoog vanaf Uitrusting = Bestiary (v0.22)", m.buttons["bestiary"].has_focus())
