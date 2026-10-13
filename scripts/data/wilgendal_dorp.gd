@@ -67,7 +67,7 @@ const PANDEN := [
 		"keeper_naam": "Jelle Hamer",
 		"keeper_lines": ["Harnas en helmen."],
 		"sfeer": "stoer",
-		"map_naam": "Pantserwinkel",
+		"map_naam": "Armor Shop",
 		"dicht": "",
 	},
 	{
@@ -83,7 +83,7 @@ const PANDEN := [
 		"keeper_naam": "Jelle Hamer",
 		"keeper_lines": ["Steel. What do you need?"],
 		"sfeer": "ambacht",
-		"map_naam": "Wapenwinkel",
+		"map_naam": "Weapon Shop",
 		"dicht": "",
 	},
 	{
@@ -96,10 +96,10 @@ const PANDEN := [
 		"icoon": "ring",
 		"tex": "accessoire",
 		"bewoond": false,
-		"keeper_naam": "Accessoire",
+		"keeper_naam": "Accessories",
 		"keeper_lines": ["Ringen en bladwijzers."],
 		"sfeer": "sier",
-		"map_naam": "Accessoirewinkel",
+		"map_naam": "Accessory Shop",
 		"dicht": "",
 	},
 	{
@@ -112,10 +112,10 @@ const PANDEN := [
 		"icoon": "ster",
 		"tex": "magie",
 		"bewoond": false,
-		"keeper_naam": "Magiewinkel",
+		"keeper_naam": "Magic Shop",
 		"keeper_lines": ["Spells. What are you looking for?"],
 		"sfeer": "mystiek",
-		"map_naam": "Magiewinkel",
+		"map_naam": "Magic Shop",
 		"dicht": "",
 	},
 	{
@@ -131,7 +131,7 @@ const PANDEN := [
 		"keeper_naam": "Tante Mien",
 		"keeper_lines": ["Herbs. What do you need?"],
 		"sfeer": "kruid",
-		"map_naam": "Huis van Tante Mien",
+		"map_naam": "Aunt Mien's House",
 		"dicht": "",
 	},
 	{

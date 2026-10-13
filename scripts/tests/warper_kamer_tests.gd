@@ -134,7 +134,7 @@ func _buit_en_tekst() -> void:
 	var wereld: Node = load("res://scenes/maps/wereldkaart.tscn").instantiate()
 	check("spawn van_wilgendal bestaat", wereld.get_node_or_null("Spawns/van_wilgendal") != null)
 	wereld.free()
-	check("ECHO bedient alleen de hub", Kamers.ECHO_REGELS == ["Ik bedien deze hub."])
+	check("ECHO bedient alleen de hub", Kamers.ECHO_REGELS == ["I operate this hub."])
 	check("ECHO noemt geen onderzoeker", not " ".join(Kamers.ECHO_REGELS).to_lower().contains("onderzoeker"))
 	check("kernzin zonder onthulling", Kamers.KERN_ZIN == "The story of H-6 ends here.")
 	var schoon := true

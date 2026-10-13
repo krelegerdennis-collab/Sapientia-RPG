@@ -1891,7 +1891,7 @@ const OPA_LINE := "That suits you, {naam}. Fetch water from the well and herbs f
 const INTRO_FORCED_WAS := 1
 const INTRO_SAYS_WAS := 7
 const GREET_LINE := "Good morning, {naam}. It's cold in the Warden's House."
-const MENU_LINE := "Doe deze mantel aan: MENU > Uitrusting > Harnas."
+const MENU_LINE := "Put on this cloak: MENU > Equipment > Armor."
 const ITEM_LINE := "{naam} receives an Apprentice Cloak! Then close the menu."
 const REMIND_LINE := "Put that cloak on first, {naam}. MENU > Equipment > Armor."
 const INTRO_CHOICES := ["Good morning, Grandpa.", "Why do the Archives stay closed?"]
@@ -2377,7 +2377,7 @@ func _equip_tutorial_tests(_opa: Node, def_before: int) -> void:
 			and not Story.history.has("mantel_aan"))
 	Story.trigger("put")
 	await _wait_typed()
-	check("v0.16: put geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "eerst de mantel" in _lines_text())
+	check("v0.16: put geblokkeerd ('%s')" % _lines_text(), Dialog.is_open and "cloak first" in _lines_text())
 	await _story_drain()
 	Story.trigger("kist", _obj("Kist"))
 	await _wait_typed()

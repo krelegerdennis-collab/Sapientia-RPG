@@ -23,7 +23,7 @@ const FLAG_HUB := "warper_hub_open"
 const ARCHIEF2_KERN_VLAG := ""
 
 const GESLOTEN := "This room is still closed."
-const ECHO_REGELS: Array[String] = ["Ik bedien deze hub."]
+const ECHO_REGELS: Array[String] = ["I operate this hub."]
 const WERK_REGELS: Array[String] = [
 	"Forging will be possible here later.",
 	"There are no recipes yet.",

@@ -13,7 +13,7 @@ const PartyActions := preload("res://scripts/party_actions.gd")
 ## Bevestigd: ijzeren helm, maliënkolder en groenring pas vanaf act 2, zodat act 1 niet alles toont.
 const SHOPS := {
 	"wilgendal_wapen": {
-		"name": "Wapens",
+		"name": "Weapons",
 		"offers": [
 			{"id": "kort_zwaard", "min_act": 1},
 			{"id": "dolk", "min_act": 1},
@@ -21,7 +21,7 @@ const SHOPS := {
 		],
 	},
 	"wilgendal_pantser": {
-		"name": "Pantser",
+		"name": "Armor",
 		"offers": [
 			{"id": "houten_schild", "min_act": 1},
 			{"id": "kaftschild", "min_act": 1},
@@ -33,19 +33,19 @@ const SHOPS := {
 		],
 	},
 	"wilgendal_accessoire": {
-		"name": "Accessoires",
+		"name": "Accessories",
 		"offers": [
 			{"id": "bladwijzer", "min_act": 1},
 			{"id": "groenring", "min_act": 2},
 		],
 	},
 	"wilgendal_kruiden": {
-		"name": "Kruiden",
+		"name": "Herbs",
 		"offers": [
 			{"id": "kruidenthee", "min_act": 1, "price": 20},
 		],
 	},
-	"wilgendal_magie": {"name": "Magie", "magic": true},
+	"wilgendal_magie": {"name": "Magic", "magic": true},
 }
 
 
@@ -161,7 +161,7 @@ static func buy_spell(shop_id: String, spell_id: String, hero: Dictionary) -> Di
 	if not (hero.get("spells") is Array):
 		hero["spells"] = []
 	if (hero["spells"] as Array).has(spell_id):
-		return {"ok": false, "text": "Kent deze spreuk al."}
+		return {"ok": false, "text": "Already knows this spell."}
 	var why := SpellRules.block_reason(hero, spell_id)
 	if why != "":
 		return {"ok": false, "text": why}

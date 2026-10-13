@@ -223,7 +223,7 @@ const EVENTS := {
 	# De herhaalde tutorialregel is weg.
 	"opa_mantel": [{"do": [
 		["say", SPEAKER, ["Good morning, {naam}. It's cold in the Warden's House."]],
-		["say", SPEAKER, ["Doe deze mantel aan: MENU > Uitrusting > Harnas."]],
+		["say", SPEAKER, ["Put on this cloak: MENU > Equipment > Armor."]],
 		["give", TUTORIAL_ARMOR, 1],
 		["say", "", ["{naam} receives an Apprentice Cloak! Then close the menu."]],
 		["step", UITRUSTING],
@@ -276,7 +276,7 @@ const EVENTS := {
 
 	"kist": [
 		{"if": {"flags": ["kist_open"]}, "do": [["say", "", ["The chest is empty."]]]},
-		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Doe eerst Opa's mantel aan: MENU > Uitrusting."]]]},
+		{"if": {"step": UITRUSTING}, "do": [["say", "", ["Put on Grandpa's cloak first: MENU > Equipment."]]]},
 		{"do": [
 			["flag", "kist_open"],
 			["refresh"],

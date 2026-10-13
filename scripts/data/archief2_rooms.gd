@@ -191,7 +191,7 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v3_wurger"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [4, 7], "lines": [
-			"Deze plaat groeit alleen in Lotte's licht.",
+			"This plate only grows in Lotte's light.",
 			"Stand in front of it and press A.",
 		]}],
 		"platen": [{"id": "l1", "soort": "licht", "tile": [9, 6], "start": 0}],
