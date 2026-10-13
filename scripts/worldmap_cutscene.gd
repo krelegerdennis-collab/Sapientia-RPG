@@ -31,6 +31,9 @@ var _player: Node
 var _map: Node
 var _elapsed := 0.0
 var _done := false
+## Scherp beeld: tijdens het filmpje rendert de root op schermresolutie (canvas_items)
+## i.p.v. de 384x216-viewport; na afloop terug, zodat de pixel-art ongewijzigd blijft.
+var _old_scale_mode := -1
 
 
 ## Moet de cutscene nu starten voor deze scène?
@@ -66,6 +69,7 @@ func begin(map: Node) -> void:
 	_player = map.get_node_or_null("Objects/Player")
 	if _player != null and "input_locked" in _player:
 		_player.input_locked = true
+	_sharp_on()
 	_build()
 	AudioManager.stop_music(0.3)
 	var stream: VideoStream = null
@@ -95,6 +99,7 @@ func _build() -> void:
 	right_panel = _panel(tex, true)
 	video = VideoStreamPlayer.new()
 	video.expand = true
+	video.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	video.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var bus := AudioServer.get_bus_index("Music")
 	if bus >= 0:
@@ -209,5 +214,23 @@ func _finish() -> void:
 			_player.input_locked = false
 	if _map != null and is_instance_valid(_map) and _map.has_method("_play_map_music"):
 		_map._play_map_music()
+	_sharp_off()
 	finished.emit()
 	queue_free()
+
+
+func _sharp_on() -> void:
+	var w := get_tree().root
+	if w.content_scale_mode == Window.CONTENT_SCALE_MODE_VIEWPORT:
+		_old_scale_mode = w.content_scale_mode
+		w.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+
+
+func _sharp_off() -> void:
+	if _old_scale_mode >= 0 and is_inside_tree():
+		get_tree().root.content_scale_mode = _old_scale_mode as Window.ContentScaleMode
+	_old_scale_mode = -1
+
+
+func _exit_tree() -> void:
+	_sharp_off()

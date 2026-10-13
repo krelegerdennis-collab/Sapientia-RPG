@@ -74,6 +74,8 @@ func _cutscene() -> void:
 		await get_tree().create_timer(1.5).timeout
 		check("panelen links/rechts naast de video", c.left_panel.size.x > 0 and c.right_panel.position.x >= c.video.position.x + c.video.size.x - 0.5)
 		check("video portret gecentreerd", absf(c.video.size.x / c.video.size.y - 9.0 / 16.0) < 0.01)
+		check("video lineair gefilterd", c.video.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR)
+		check("root op schermresolutie tijdens filmpje", get_tree().root.content_scale_mode == Window.CONTENT_SCALE_MODE_CANVAS_ITEMS)
 		await screenshot("cutscene_panels")
 		var ev := InputEventMouseButton.new()
 		ev.button_index = MOUSE_BUTTON_LEFT
@@ -83,6 +85,7 @@ func _cutscene() -> void:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		check("klik slaat over", not is_instance_valid(c) or c.is_done())
+		check("pixel-art-schaal terug na filmpje", get_tree().root.content_scale_mode == Window.CONTENT_SCALE_MODE_VIEWPORT)
 	check("speler weer vrij", p != null and not p.input_locked)
 	# opslaan, leegmaken, laden: vlag blijft, geen herhaling
 	check("opslaan", GameState.save_game(p.get_tile(), p.facing))
