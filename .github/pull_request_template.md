@@ -15,7 +15,7 @@
 
 ## Checklist
 - [ ] Niets uit `tools/handwerk.txt` aangeraakt
-- [ ] Alle speler-tekst in het Nederlands, verhaal volgens `docs/lore/CANON.md`
+- [ ] Alle speler-tekst in het Engels (docs blijven Nederlands), verhaal volgens `docs/lore/CANON.md`
 - [ ] Geen secrets/keystores/APK; `export_presets.cfg`-signing en versienummers niet aangeraakt
 - [ ] Nieuwe placeholders gemarkeerd en in `tools/placeholders_*.txt`
 - [ ] Alle suites groen (CI)

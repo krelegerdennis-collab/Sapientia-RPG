@@ -368,8 +368,8 @@ func _warper_kamer(pad: String, spawn: String, scene_name: String, role: String,
 	wp.interact(player())
 	var warned: bool = await wait_until(_exit_warning_open, 3.0)
 	check("%s waarschuwt: '%s'" % [role, ExitWarper.WARNING], warned
-			and ExitWarper.YES == "Ja, warpen naar worldmap"
-			and ExitWarper.NO == "Nee, blijf in de dungeon")
+			and ExitWarper.YES == "Yes, warp to the world map"
+			and ExitWarper.NO == "No, stay in the dungeon")
 	Dialog.choose(1)
 	await wait_until(func() -> bool: return wp.last_result == "cancelled" and not wp.busy, 2.0)
 	check("%s annuleren laat de party staan" % role, wp.last_result == "cancelled" and scene() == kamer

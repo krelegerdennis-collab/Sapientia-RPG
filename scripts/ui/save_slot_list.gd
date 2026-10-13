@@ -31,7 +31,7 @@ func _ready() -> void:
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 0)
 	box.add_child(list)
-	list.add_child(UiMenu.label("Kies een slot", UiStyleC.TEXT))
+	list.add_child(UiMenu.label("Choose a slot", UiStyleC.TEXT))
 	var focus_btn: Button = null
 	var best := -1.0
 	for i in range(1, GameState.SLOT_COUNT + 1):

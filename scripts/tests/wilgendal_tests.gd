@@ -98,8 +98,8 @@ func _data() -> void:
 	check("winkels zonder klok", Data.geen_klok() and Data.ALTIJD_OPEN)
 	check("korte zwaard houdt de databronprijs", Shop.list_price("kort_zwaard") == int(GD.EQUIPMENT["kort_zwaard"]["price"]))
 	check("kruiden blijven 20 goud", Shop.list_price("kruidenthee") == 20)
-	check("Gerrit-citaat blijft de canonzin", SD.QUOTE_GRAAN_BEZOEK == "O, bezoek. Ga zitten, jongen. Of blijf staan — maakt niet uit. De molen draait toch niet meer."
-			and SD.GERRIT == "Gerrit de Molenaar")
+	check("Gerrit-citaat blijft de canonzin", SD.QUOTE_GRAAN_BEZOEK == "Oh, a visitor. Sit down, lad. Or stay standing — doesn't matter. The mill doesn't turn anymore anyway."
+			and SD.GERRIT == "Gerrit the Miller")
 	for doel in [Data.voor_tegel(Data.pand("pantser")), Data.voor_tegel(Data.pand("wapen")),
 			Data.voor_tegel(Data.pand("accessoire")), Data.voor_tegel(Data.pand("magie")),
 			Data.voor_tegel(Data.pand("mien")), Data.voor_tegel(Data.pand("echtpaar")),

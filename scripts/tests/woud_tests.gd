@@ -1016,7 +1016,7 @@ func _graan_data() -> void:
 			and not quotes.has("Het zaad zingt aan de rand van de mist.")
 			and not quotes.has("De molen kan weer malen.")
 			and not todo_op_zin and not SD.TODO_STORY.has("gerrit")
-			and SD.QUOTE_GRAAN_VRAAG == "Wat is er gebeurd?" and speler_vraagt
+			and SD.QUOTE_GRAAN_VRAAG == "What happened?" and speler_vraagt
 			and keuze == [SD.KEUZE_GRAAN_JA, SD.KEUZE_GRAAN_NEE]
 			and SD.EVENTS["gerrit_ja"][0]["do"][0][0] == "flag"
 			and SD.EVENTS["gerrit_weigert"][0]["do"][0][0] == "say")
@@ -1301,8 +1301,8 @@ func _warper_kamer(pad: String, spawn: String, role: String, tegel: Vector2i, we
 	wp.interact(player())
 	var warned: bool = await wait_until(_exit_warning_open, 3.0)
 	check("%s waarschuwt: '%s'" % [role, ExitWarper.WARNING], warned
-			and ExitWarper.YES == "Ja, warpen naar worldmap"
-			and ExitWarper.NO == "Nee, blijf in de dungeon")
+			and ExitWarper.YES == "Yes, warp to the world map"
+			and ExitWarper.NO == "No, stay in the dungeon")
 	Dialog.choose(1)
 	await wait_until(func() -> bool: return wp.last_result == "cancelled" and not wp.busy, 2.0)
 	check("%s annuleren laat de party staan" % role, wp.last_result == "cancelled" and scene() == kamer

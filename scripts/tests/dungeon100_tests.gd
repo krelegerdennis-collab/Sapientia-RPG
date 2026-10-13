@@ -158,8 +158,8 @@ func _rules_tests() -> void:
 			and R.unlock_warper([1, 100, 2], 0) == [1])
 	check("niet-bereikte warper is dicht", not R.warper_open([1], 25) and not R.warper_open([1], 99)
 			and not R.warper_open([], 1) and R.warper_open([1, 25], 25))
-	check("waarschuwing is de vertrekvraag, Ja en Nee", R.WARPER_WARNING == "Weet je zeker dat je de dungeon wilt verlaten?"
-			and R.WARPER_YES == "Ja" and R.WARPER_NO == "Nee"
+	check("waarschuwing is de vertrekvraag, Ja en Nee", R.WARPER_WARNING == "Are you sure you want to leave the dungeon?"
+			and R.WARPER_YES == "Yes" and R.WARPER_NO == "No"
 			and R.WARPER_SPAWN == Gen.SPAWN_WARPER and R.WORLD_SPAWN == EchoGrot.KAMER_SPAWN)
 	check("verdieping 25 heet De Schaduw van H-6", Scaling.boss_for_floor(25)["name"] == "De Schaduw van H-6"
 			and Scaling.boss_for_floor(50)["name"] == "De Cyclus"

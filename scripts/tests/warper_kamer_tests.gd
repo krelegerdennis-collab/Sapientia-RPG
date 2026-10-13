@@ -379,9 +379,9 @@ func _update2_regels() -> void:
 	var midden := ExitWarper.new()
 	midden.role = "midden"
 	check("begin-warper zonder waarschuwing, midden met", not begin.waarschuwt() and midden.waarschuwt()
-			and ExitWarper.WARNING == "Weet je zeker dat je de dungeon wilt verlaten?"
-			and ExitWarper.YES == "Ja, warpen naar worldmap"
-			and ExitWarper.NO == "Nee, blijf in de dungeon")
+			and ExitWarper.WARNING == "Are you sure you want to leave the dungeon?"
+			and ExitWarper.YES == "Yes, warp to the world map"
+			and ExitWarper.NO == "No, stay in the dungeon")
 	begin.free()
 	midden.free()
 	var plekken: Array = A2Warpers.placements()
