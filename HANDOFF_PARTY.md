@@ -124,3 +124,55 @@ Extra aangepaste bestaande tests: `codex_tests.gd` (5 menuknoppen), `fusie_tests
 ## 6. Open punten
 - Met 5 vakken zijn de statusvakken ~41 eenheden breed; de getallen staan dan over het label "HP"/"MP" heen
   (nog leesbaar, zie screenshot). Mogelijke vervolgstap: labels weglaten bij smalle vakken.
+
+## 7. Vervolg (branch `rpgcode/party-zijspeler`, besluiten Dennis 13-10)
+Port van de nieuwe stukken uit #66 bovenop #69 (al op main). Het icoon van RPG ART
+(`assets/ui/icon_monstervak.png`, handwerk.txt, placeholder-regel KLAAR) stond al op main en is ongewijzigd.
+- **Monster als zijspeler boven B.** In de statusrij staan alleen nog de 4 heldenvakken (die worden daardoor
+  breder; het open punt in §6 vervalt). Het Codex-monster is een klein groen label (52x11,
+  `HeroStatusBox.SIDE_SIZE`) met het RPG ART-icoon en de naam, zonder HP/MP-balken. Het label staat boven de B-knop
+  (`SIDE_GAP` 3) en de rug-sprite staat er vlak boven. Het monster vecht, wordt geraakt en is tikbaar
+  als doelwit zoals voorheen. In `status_boxes` heeft het monster nog wel een element, zodat de indexen gelijk blijven aan
+  `heroes`; dat element tekent zich met `monster = true` als label. `MONSTER_GAP` is weg.
+  Het icoon blijft lazy geladen via main's `static var _monster_icon` (met een getekende terugval).
+- **Magic in het veldmenu.** De knop Magic staat onder Items (Equipment > Codex > Items > Magic, een D-pad-ring) en
+  opent meteen het Magie-scherm, zonder tussenstap. Genezen buiten gevechten werkt weer. De linkerknoppen zijn
+  30 hoog (was 34).
+- **Warp compact**: 96x24 (was ca. 210x60), Party eronder in dezelfde maat, tikhoogte >= 16. Er is geen
+  warp-knop in het gevecht zelf, dus ik ga ervan uit dat Dennis de Warp-knop van het veldmenu bedoelt.
+- **Ingekorte namen**: geen spatie meer voor het puntje.
+- **Settings en Load** (rechterkolom, 96x24). Settings opent het bestaande Opties-scherm. Load opent de slotlijst
+  (`scripts/ui/load_screen.gd`, dezelfde `SaveSlotList` als het titelscherm) en vraagt eerst "Load slot N?" met
+  "Unsaved progress will be lost." ('No' heeft de focus).
+- **Bestiary terug**: linkerkolom, onder Magic, opent het bestaande bestiarium.
+- **Scenes** (rechterkolom, onder Party): een lijst met alle cutscenes (`scripts/data/scenes_data.gd`,
+  `scripts/ui/scenes_screen.gd`). Bekeken scenes zijn speelbaar, niet bekeken scenes staan grijs als "???".
+  Na het afspelen ben je terug in de lijst. Aanname: alleen de echte, losse cutscenes staan erin
+  (wereldkaart-film `WorldmapCutscene`, Hanger-intro `hanger_scene.tscn`). De verhaal-events uit `story_data.gd`
+  zetten vlaggen, geven spullen, starten gevechten of wisselen van map en zijn dus niet veilig opnieuw af te
+  spelen. Een herhaling raakt het echte verhaal niet: de film krijgt geen map mee en de Hanger krijgt een eigen,
+  lege vlaggenbron (`ScenesData.FlagBron`). Een nieuwe cutscene vraagt om een regel in `SCENES` plus een `kind`
+  in het scherm. Titels zijn placeholder-spelertekst: "Into the Wide World" en "The Hanger Awakens".
+- **Save**: nieuw veld `scenes_seen` (ids). `GameState.mark_scene_seen()` wordt aangeroepen door
+  `WorldmapCutscene.start_on` en door de Hanger bij `_mark_intro_seen`. Migratie: oude saves hebben het veld
+  niet, en dan telt de vlag die de cutscene zelf zet (`cutscene_wereldkaart_gezien` /
+  `world_warper_intro_seen`) als gezien. Onbekende ids vallen weg.
+- **Indeling (telefoon, 384x216)**: links 5 knoppen van 30 hoog (Equipment, Codex, Items, Magic, Bestiary),
+  rechts onder het MENU-bord 5 knoppen van 24 hoog (Warp, Party, Scenes, Settings, Load). Beide kolommen eindigen
+  op y=182 en scrollen is niet nodig. De Scenes-lijst zelf staat in een ScrollContainer.
+- **Tests**: partytest deel E (Scenes-lijst, op slot/"???", ontgrendelen door bekijken (beide cutscenes),
+  herhaling speelt en keert terug naar de lijst, save-roundtrip, migratie van een oude save, Bestiary opent,
+  geen overlappende knoppen). Menutest en codextest verwachten nu 10 knoppen; omhoog vanaf Equipment = Bestiary.
+- **Tests (eerder)**: partytest (52, nieuw: zijspeler klein/boven B/geen balken/sprite erboven, icoon 7x6, Warp compact,
+  Magic opent het scherm en Lotte geneest Dennis in het veld), menutest (6 knoppen, Magic in de ring,
+  Warp "compact" i.p.v. "groter") en codextest (6 knoppen, monster rechts van Dennis en iets hoger).
+- **Screenshots** (`/workspace/code_party/shots/`): `party_gevecht_5_plekken.png`, `party_veldmenu.png`,
+  `veldmenu_magic.png`, `veldmenu_knoppen.png`, `veldmenu_laden_bevestigen.png`, `veldmenu_scenes_knop.png`,
+  `scenes_op_slot.png`, `scenes_scherm.png`, `scenes_herhaling_hanger.png` (alle ook `_3x`).
+- **Testresultaten (commit met Bestiary/Scenes)**: alle 30 suites serieel op 4.7.2 en 4.3. Op beide versies zijn
+  er 29 groen. kernkrachttest faalde onder load 1 check (4.7.2: "door"; 4.3: "inslag") en is daarna los
+  groen (116/0 op beide). partytest: 77/0 op beide versies, menutest 230/0, codextest 137/0.
+  Logs: `/workspace/code_party/logs/full472_scenes`, `full43_scenes`, `rerun472_scenes`, `rerun43_scenes`.
+- **Knopteksten gecentreerd** (Dennis): alle veldmenu-knoppen centreren hun tekst. Een gecentreerde `UiMenu`-knop
+  krijgt rechts dezelfde opvulling als de focuspijl links, dus de tekst verspringt niet bij focus. Menutest controleert
+  dit. menutest/partytest/codextest zijn groen op 4.7.2 en 4.3 (231/77/137).

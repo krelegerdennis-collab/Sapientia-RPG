@@ -1,0 +1,199 @@
+[gd_scene load_steps=17 format=4]
+
+[ext_resource type="Script" path="res://scripts/map.gd" id="1_2270x"]
+[ext_resource type="TileSet" path="res://assets/tiles/wereld.tres" id="2_uoeba"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_8p1i3"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="4_ikphp"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/berggrot_ingang.png" id="5_t8qsk"]
+[ext_resource type="PackedScene" path="res://scenes/story_object.tscn" id="6_y6tmd"]
+[ext_resource type="Script" path="res://scripts/story_object.gd" id="7_lh65j"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/bouw_hek.png" id="8_6kwl3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/bouw_karretje.png" id="9_s5fv2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/bouw_gereedschap.png" id="10_y25pr"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/bouw_balken.png" id="11_t83jj"]
+[ext_resource type="PackedScene" path="res://scenes/npc.tscn" id="12_qdr2b"]
+[ext_resource type="Script" path="res://scripts/npc.gd" id="13_028gj"]
+[ext_resource type="Script" path="res://scripts/map_spawn.gd" id="14_fjd16"]
+[ext_resource type="Script" path="res://scripts/map_exit.gd" id="15_8w33c"]
+[ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="16_kwuv0"]
+
+[node name="BerggrotBouwplaats" type="Node2D"]
+script = ExtResource("1_2270x")
+map_name = "Tunnel Worksite"
+music_track = "wereld"
+encounters = false
+sets_checkpoint = true
+
+[node name="Ground" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAAAAAAAAABAAQAAAABAAAAAAADAAgAAAACAAAAAAABAAQAAAADAAAAAAACAAgAAAAEAAAAAAAAAAQAAAAFAAAAAAACAAgAAAAGAAAAAAAAAAQAAAAHAAAAAAACAAgAAAAIAAAAAAAAAAQAAAAJAAAAAAADAAgAAAAKAAAAAAABAAQAAAALAAAAAAADAAgAAAAMAAAAAAABAAQAAAANAAAAAAADAAgAAAAOAAAAAAABAAQAAAAPAAAAAAADAAgAAAAQAAAAAAABAAQAAAARAAAAAAADAAgAAAASAAAAAAABAAQAAAATAAAAAAACAAgAAAAUAAAAAAAAAAQAAAAVAAAAAAACAAgAAAAWAAAAAAAAAAQAAAAXAAAAAAACAAgAAAAAAAEAAAADAAgAAAABAAEAAAABAAQAAAACAAEAAAAPAAcAAAADAAEAAAABAAQAAAAEAAEAAAADAAgAAAAFAAEAAAABAAQAAAAGAAEAAAADAAgAAAAHAAEAAAABAAQAAAAIAAEAAAADAAgAAAAJAAEAAAABAAQAAAAKAAEAAAADAAgAAAALAAEAAAABAAQAAAAMAAEAAAADAAgAAAANAAEAAAABAAQAAAAOAAEAAAADAAgAAAAPAAEAAAABAAQAAAAQAAEAAAADAAgAAAARAAEAAAABAAQAAAASAAEAAAAPAAcAAAATAAEAAAABAAQAAAAUAAEAAAADAAgAAAAVAAEAAAABAAQAAAAWAAEAAAADAAgAAAAXAAEAAAABAAQAAAAAAAIAAAABAAQAAAABAAIAAAADAAgAAAACAAIAAAABAAQAAAADAAIAAAACAAgAAAAEAAIAAAAAAAQAAAAFAAIAAAACAAgAAAAGAAIAAAAAAAQAAAAHAAIAAAACAAgAAAAIAAIAAAAAAAQAAAAJAAIAAAADAAgAAAAKAAIAAAABAAQAAAALAAIAAAADAAgAAAAMAAIAAAABAAQAAAANAAIAAAADAAgAAAAOAAIAAAABAAQAAAAPAAIAAAADAAgAAAAQAAIAAAABAAQAAAARAAIAAAADAAgAAAASAAIAAAABAAQAAAATAAIAAAACAAgAAAAUAAIAAAAAAAQAAAAVAAIAAAACAAgAAAAWAAIAAAAAAAQAAAAXAAIAAAACAAgAAAAAAAMAAAADAAgAAAABAAMAAAABAAQAAAACAAMAAAAPAAcAAAADAAMAAAABAAQAAAAEAAMAAAADAAgAAAAFAAMAAAABAAQAAAAGAAMAAAADAAgAAAAHAAMAAAABAAQAAAAIAAMAAAADAAgAAAAJAAMAAAABAAQAAAAKAAMAAAADAAgAAAALAAMAAAABAAQAAAAMAAMAAAADAAgAAAANAAMAAAABAAQAAAAOAAMAAAADAAgAAAAPAAMAAAABAAQAAAAQAAMAAAADAAgAAAARAAMAAAABAAQAAAASAAMAAAAPAAcAAAATAAMAAAABAAQAAAAUAAMAAAADAAgAAAAVAAMAAAABAAQAAAAWAAMAAAADAAgAAAAXAAMAAAABAAQAAAAAAAQAAAAAAAAAAAABAAQAAAAAAAAAAAACAAQAAAAAAAAAAAADAAQAAAAAAAAAAAAEAAQAAAABAAAAAAAFAAQAAAAAAAAAAAAGAAQAAAAAAAAAAAAHAAQAAAAAAAAAAAAIAAQAAAAAAAAAAAAJAAQAAAABAAAAAAAKAAQAAAAAAAAAAAALAAQAAAAAAAIAAAAMAAQAAAAEAAEAAAANAAQAAAAAAAAAAAAOAAQAAAABAAAAAAAPAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAARAAQAAAAAAAAAAAASAAQAAAAAAAAAAAATAAQAAAABAAAAAAAUAAQAAAAAAAAAAAAVAAQAAAAAAAAAAAAWAAQAAAAAAAAAAAAXAAQAAAAAAAAAAAAAAAUAAAABAAAAAAABAAUAAAAAAAAAAAACAAUAAAAAAAAAAAADAAUAAAAAAAAAAAAEAAUAAAAAAAAAAAAFAAUAAAABAAAAAAAGAAUAAAAAAAAAAAAHAAUAAAAAAAAAAAAIAAUAAAAAAAAAAAAJAAUAAAAAAAAAAAAKAAUAAAABAAAAAAALAAUAAAAAAAIAAAAMAAUAAAAEAAEAAAANAAUAAAAAAAAAAAAOAAUAAAAAAAAAAAAPAAUAAAABAAAAAAAQAAUAAAAAAAAAAAARAAUAAAAAAAAAAAASAAUAAAAAAAAAAAATAAUAAAAAAAAAAAAUAAUAAAABAAAAAAAVAAUAAAAAAAAAAAAWAAUAAAAAAAAAAAAXAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAABAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAYAAAABAAAAAAAEAAYAAAAAAAAAAAAFAAYAAAAAAAAAAAAGAAYAAAAAAAAAAAAHAAYAAAAAAAAAAAAIAAYAAAABAAAAAAAJAAYAAAAAAAAAAAAKAAYAAAAAAAAAAAALAAYAAAAAAAIAAAAMAAYAAAAEAAEAAAANAAYAAAABAAAAAAAOAAYAAAAAAAAAAAAPAAYAAAAAAAAAAAAQAAYAAAAAAAAAAAARAAYAAAAAAAAAAAASAAYAAAABAAAAAAATAAYAAAAAAAAAAAAUAAYAAAAAAAAAAAAVAAYAAAAAAAAAAAAWAAYAAAAAAAAAAAAXAAYAAAABAAAAAAAAAAcAAAAAAAAAAAABAAcAAAAAAAAAAAACAAcAAAAAAAAAAAADAAcAAAAAAAAAAAAEAAcAAAABAAAAAAAFAAcAAAAAAAAAAAAGAAcAAAAAAAAAAAAHAAcAAAAAAAAAAAAIAAcAAAAAAAAAAAAJAAcAAAABAAAAAAAKAAcAAAAAAAAAAAALAAcAAAAAAAIAAAAMAAcAAAAEAAEAAAANAAcAAAAAAAAAAAAOAAcAAAABAAAAAAAPAAcAAAAAAAAAAAAQAAcAAAAAAAAAAAARAAcAAAAAAAAAAAASAAcAAAAAAAAAAAATAAcAAAABAAAAAAAUAAcAAAAAAAAAAAAVAAcAAAAAAAAAAAAWAAcAAAAAAAAAAAAXAAcAAAAAAAAAAAAAAAgAAAABAAAAAAABAAgAAAAAAAAAAAACAAgAAAAAAAAAAAADAAgAAAAAAAAAAAAEAAgAAAAAAAAAAAAFAAgAAAABAAAAAAAGAAgAAAAAAAAAAAAHAAgAAAAAAAAAAAAIAAgAAAAAAAAAAAAJAAgAAAAAAAAAAAAKAAgAAAABAAAAAAALAAgAAAAAAAIAAAAMAAgAAAAEAAEAAAANAAgAAAAAAAAAAAAOAAgAAAAAAAAAAAAPAAgAAAABAAAAAAAQAAgAAAAAAAAAAAARAAgAAAAAAAAAAAASAAgAAAAAAAAAAAATAAgAAAAAAAAAAAAUAAgAAAABAAAAAAAVAAgAAAAAAAAAAAAWAAgAAAAAAAAAAAAXAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAABAAAAAAAEAAkAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAkAAAABAAAAAAAJAAkAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAkAAAAAAAIAAAAMAAkAAAAEAAEAAAANAAkAAAABAAAAAAAOAAkAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAkAAAAAAAAAAAASAAkAAAABAAAAAAATAAkAAAAAAAAAAAAUAAkAAAAAAAAAAAAVAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAAABAAAAAAAAAAoAAAAAAAAAAAABAAoAAAAAAAAAAAACAAoAAAAAAAAAAAADAAoAAAAAAAAAAAAEAAoAAAABAAAAAAAFAAoAAAAAAAAAAAAGAAoAAAAAAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAAAAAAAAAAJAAoAAAABAAAAAAAKAAoAAAAAAAAAAAALAAoAAAAAAAIAAAAMAAoAAAAEAAEAAAANAAoAAAAAAAAAAAAOAAoAAAABAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAAAAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAABAAAAAAAUAAoAAAAAAAAAAAAVAAoAAAAAAAAAAAAWAAoAAAAAAAAAAAAXAAoAAAAAAAAAAAAAAAsAAAABAAAAAAABAAsAAAAAAAAAAAACAAsAAAAAAAAAAAADAAsAAAAAAAAAAAAEAAsAAAAAAAAAAAAFAAsAAAABAAAAAAAGAAsAAAAAAAAAAAAHAAsAAAAAAAAAAAAIAAsAAAAAAAAAAAAJAAsAAAAAAAAAAAAKAAsAAAABAAAAAAALAAsAAAAAAAIAAAAMAAsAAAAEAAEAAAANAAsAAAAAAAAAAAAOAAsAAAAAAAAAAAAPAAsAAAABAAAAAAAQAAsAAAAAAAAAAAARAAsAAAAAAAAAAAASAAsAAAAAAAAAAAATAAsAAAAAAAAAAAAUAAsAAAABAAAAAAAVAAsAAAAAAAAAAAAWAAsAAAAAAAAAAAAXAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAABAAwAAAAAAAAAAAACAAwAAAAAAAAAAAADAAwAAAABAAAAAAAEAAwAAAAAAAAAAAAFAAwAAAAAAAAAAAAGAAwAAAAAAAAAAAAHAAwAAAAAAAAAAAAIAAwAAAABAAAAAAAJAAwAAAAAAAAAAAAKAAwAAAAAAAAAAAALAAwAAAAAAAIAAAAMAAwAAAAEAAEAAAANAAwAAAABAAAAAAAOAAwAAAAAAAAAAAAPAAwAAAAAAAAAAAAQAAwAAAAAAAAAAAARAAwAAAAAAAAAAAASAAwAAAABAAAAAAATAAwAAAAAAAAAAAAUAAwAAAAAAAAAAAAVAAwAAAAAAAAAAAAWAAwAAAAAAAAAAAAXAAwAAAABAAAAAAA=")
+tile_set = ExtResource("2_uoeba")
+
+[node name="Objects" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Player" type="CharacterBody2D" parent="Objects" instance=ExtResource("3_8p1i3")]
+position = Vector2(200, 184)
+motion_mode = 1
+script = ExtResource("4_ikphp")
+walk_speed = 64.0
+
+[node name="Tunnel" type="Sprite2D" parent="Objects"]
+texture_filter = 1
+position = Vector2(200, 56)
+texture = ExtResource("5_t8qsk")
+
+[node name="Hek" type="StaticBody2D" parent="Objects" instance=ExtResource("6_y6tmd")]
+position = Vector2(200, 72)
+script = ExtResource("7_lh65j")
+event = "bouwplaats_hek"
+event_arg = ""
+show_if = {
+"not_flags": ["noor_lid"]
+}
+frame_rules = []
+glow_if = {}
+glow_color = Color(0.247059, 0.941176, 1, 1)
+glow_radius = 14.0
+tiles = Vector2i(1, 1)
+bump_event = true
+texture = ExtResource("8_6kwl3")
+hframes = 1
+loop_if = {}
+loop_time = 0.5
+loop_texture = null
+loop_frames = 2
+
+[node name="Karretje" type="StaticBody2D" parent="Objects" instance=ExtResource("6_y6tmd")]
+position = Vector2(248, 72)
+script = ExtResource("7_lh65j")
+event = ""
+event_arg = ""
+show_if = {}
+frame_rules = []
+glow_if = {}
+glow_color = Color(0.247059, 0.941176, 1, 1)
+glow_radius = 14.0
+tiles = Vector2i(1, 1)
+bump_event = false
+texture = ExtResource("9_s5fv2")
+hframes = 1
+loop_if = {}
+loop_time = 0.5
+loop_texture = null
+loop_frames = 2
+
+[node name="Gereedschap" type="StaticBody2D" parent="Objects" instance=ExtResource("6_y6tmd")]
+position = Vector2(136, 72)
+script = ExtResource("7_lh65j")
+event = ""
+event_arg = ""
+show_if = {}
+frame_rules = []
+glow_if = {}
+glow_color = Color(0.247059, 0.941176, 1, 1)
+glow_radius = 14.0
+tiles = Vector2i(1, 1)
+bump_event = false
+texture = ExtResource("10_y25pr")
+hframes = 1
+loop_if = {}
+loop_time = 0.5
+loop_texture = null
+loop_frames = 2
+
+[node name="Balken" type="StaticBody2D" parent="Objects" instance=ExtResource("6_y6tmd")]
+position = Vector2(280, 104)
+script = ExtResource("7_lh65j")
+event = ""
+event_arg = ""
+show_if = {}
+frame_rules = []
+glow_if = {}
+glow_color = Color(0.247059, 0.941176, 1, 1)
+glow_radius = 14.0
+tiles = Vector2i(1, 1)
+bump_event = false
+texture = ExtResource("11_t83jj")
+hframes = 1
+loop_if = {}
+loop_time = 0.5
+loop_texture = null
+loop_frames = 2
+
+[node name="Balken2" type="StaticBody2D" parent="Objects" instance=ExtResource("6_y6tmd")]
+position = Vector2(104, 120)
+script = ExtResource("7_lh65j")
+event = ""
+event_arg = ""
+show_if = {}
+frame_rules = []
+glow_if = {}
+glow_color = Color(0.247059, 0.941176, 1, 1)
+glow_radius = 14.0
+tiles = Vector2i(1, 1)
+bump_event = false
+texture = ExtResource("11_t83jj")
+hframes = 1
+loop_if = {}
+loop_time = 0.5
+loop_texture = null
+loop_frames = 2
+
+[node name="Voorman" type="StaticBody2D" parent="Objects" instance=ExtResource("12_qdr2b")]
+modulate = Color(1, 0.85, 0.55, 1)
+position = Vector2(168, 88)
+script = ExtResource("13_028gj")
+npc_name = "Foreman Hendrik"
+lines = Array[String](["..."])
+facing = Vector2i(1, 0)
+event = "bouwplaats_voorman"
+event_arg = ""
+show_if = {}
+sheet = null
+
+[node name="Werker" type="StaticBody2D" parent="Objects" instance=ExtResource("12_qdr2b")]
+modulate = Color(0.75, 0.85, 1, 1)
+position = Vector2(248, 104)
+script = ExtResource("13_028gj")
+npc_name = "Worker Sanne"
+lines = Array[String](["..."])
+facing = Vector2i(-1, 0)
+event = "bouwplaats_werker"
+event_arg = ""
+show_if = {}
+sheet = null
+
+[node name="Spawns" type="Node2D" parent="."]
+
+[node name="zuid" type="Marker2D" parent="Spawns"]
+position = Vector2(200, 184)
+script = ExtResource("14_fjd16")
+facing = Vector2i(0, -1)
+
+[node name="van_tunnel" type="Marker2D" parent="Spawns"]
+position = Vector2(200, 72)
+script = ExtResource("14_fjd16")
+facing = Vector2i(0, 1)
+
+[node name="Exits" type="Node2D" parent="."]
+
+[node name="NaarWereld" type="Node2D" parent="Exits"]
+position = Vector2(176, 192)
+script = ExtResource("15_8w33c")
+size_tiles = Vector2i(2, 1)
+target_map = "res://scenes/maps/wereldkaart.tscn"
+target_spawn = "van_berggrot"
+lines = []
+event = ""
+
+[node name="NaarBerggrot" type="Node2D" parent="Exits"]
+position = Vector2(192, 48)
+script = ExtResource("15_8w33c")
+size_tiles = Vector2i(1, 1)
+target_map = ""
+target_spawn = ""
+lines = []
+event = "bouwplaats_hek"
+
+[node name="TouchControls" type="CanvasLayer" parent="." instance=ExtResource("16_kwuv0")]
+layer = 10
