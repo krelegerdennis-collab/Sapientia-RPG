@@ -453,10 +453,10 @@ const ENEMIES := {
 		"desc": "Een kleine geest uit het woud.",
 		"habitat": ["woud"],
 	},
-	# Beloning van verdieping 100 (optie A). Geen eigen art: art_pending, de Codex toont de placeholder.
+	# Beloning van verdieping 100 (optie A). v0.21: eigen art van RPG ART (batch 11), voor + rug 90x90.
 	"echo": {
 		"name": "ECHO", "sprite": "res://assets/sprites/enemies/echo.png",
-		"art_pending": true,
+		"sprite_back": "res://assets/sprites/enemies/echo_rug.png",
 		"max_hp": 40, "atk": 10, "def": 6, "agi": 8, "mag": 8, "mdef": 6,
 		"exp": 0, "gold": 0, "y_offset": 0,
 		"skills": [],
