@@ -178,11 +178,12 @@ func _kaart() -> void:
 	var spawn: Node2D = kaart.get_node("Spawns/van_berggrot")
 	var grot_tegel := Vector2i((grot.position / 16.0).floor())
 	var spawn_tegel := Vector2i((spawn.position / 16.0).floor())
-	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(21, 18)
-			and spawn_tegel == Vector2i(21, 19) and spawn.facing == Vector2i(0, 1)
-			and _terrein(grond, Vector2i(21, 17)) == "berg"
-			and _loopbaar(grond, grot_tegel) and _loopbaar(grond, spawn_tegel)
-			and _afstand(grond, Vector2i(14, 31), grot_tegel) > 0)
+	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(21, 17)
+			and spawn_tegel == Vector2i(21, 18) and spawn.facing == Vector2i(0, 1)
+			and _terrein(grond, grot_tegel) == "berg" and not _loopbaar(grond, grot_tegel)
+			and _terrein(grond, Vector2i(20, 17)) == "berg" and _terrein(grond, Vector2i(22, 17)) == "berg"
+			and _loopbaar(grond, spawn_tegel)
+			and _afstand(grond, Vector2i(14, 31), spawn_tegel) > 0)
 	var kas: Node = kaart.get_node("Exits/NaarKas")
 	var van_kas: Node2D = kaart.get_node("Spawns/van_kas")
 	var kas_tegel := Vector2i((kas.position / 16.0).floor())
@@ -252,12 +253,18 @@ func _kaart() -> void:
 	var mond_sprite := scene().get_node_or_null("Objects/BerggrotIngang") as Sprite2D
 	check("grotmond-sprite boven de berggrot-ingang", mond_sprite != null and mond_sprite.visible
 			and mond_sprite.texture != null and mond_sprite.texture.get_size() == Vector2(16, 16)
-			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i(21, 18)
+			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i(21, 17)
 			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i((kaart_grot_pos() / 16.0).floor()))
 	var noord: Dictionary = BG.ROOMS["berggrot_uitmond"]["exits"]["n"]
 	check("berggrot leidt naar Archief 2 (kas-entree)", str(noord.get("map", "")) == BG.KAS_SCENE
 			and BG.KAS_SCENE.ends_with("archief_2_v1_entree.tscn") and ResourceLoader.exists(BG.KAS_SCENE))
-	player().place_at(Vector2i(21, 19), Vector2i.UP)
+	player().place_at(Vector2i(20, 18), Vector2i.UP)
+	await pframes(2)
+	await walk("move_up", 1)
+	await pframes(10)
+	check("de rest van de bergwand blokkeert (20,17)", scene().name == "Wereldkaart" and tile() == Vector2i(20, 18)
+			and not GameState.changing_map)
+	player().place_at(Vector2i(21, 18), Vector2i.UP)
 	await pframes(4)
 	await screenshot("wereldkaart_grotmond")
 	await pframes(2)

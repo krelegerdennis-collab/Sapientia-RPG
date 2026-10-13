@@ -65,6 +65,7 @@ func _ready() -> void:
 	# v0.19 kamer-checkpoint: waar je deze map binnenkwam (zie GameState.checkpoint)
 	_update_checkpoint()
 	player.stepped.connect(_on_player_stepped)
+	player.bumped.connect(_on_player_bumped)
 	# v0.10: MENU-knop op het touchscherm (veldmenu met o.a. het bestiarium)
 	var touch := get_node_or_null("TouchControls/Control")
 	if touch and "show_menu" in touch:
@@ -277,6 +278,16 @@ func _on_player_stepped(tile: Vector2i) -> void:
 	# 2) Random encounter (alleen als deze map monsters heeft)
 	if encounters and GameState.on_player_step(terrain_at(tile)):
 		start_battle(GameState.pick_encounter_group(terrain_at(tile)))
+
+
+## Grotmond in de bergwand: de bergtegel blijft blokkeren, maar wie er van onderaf
+## tegenaan loopt, gaat de berggrot in (Dennis 2026-10-13, tegel 21,17).
+func _on_player_bumped(tile: Vector2i) -> void:
+	if GameState.changing_map or GameState.in_battle or Dialog.is_open:
+		return
+	var grot := get_node_or_null("Exits/NaarBerggrot")
+	if grot != null and grot.contains(tile) and player.facing == Vector2i.UP:
+		_use_exit(grot)
 
 
 func _use_exit(exit: Node) -> void:

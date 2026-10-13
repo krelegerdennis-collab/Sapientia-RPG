@@ -93,5 +93,5 @@ assets/sprites/buiten/wilgendal_vitrine.png     48x16    item-display in de wink
 # Glitch-zijpanelen links/rechts van de portret-video worden in code getekend (donker, cyaan/magenta strepen).
 # Echte art later: art/cutscene/glitch_panel.png  96x216  (linkerpaneel; rechts = gespiegeld, uitgerekt tot de randbreedte)   [KLAAR v0.21: echte art van RPG ART batch 15 (131x216), zie tools/handwerk.txt]
 (code, geen bestand) hero_status_box.gd _draw_monster_icon   7x6    Codex-icoontje rechtsboven in het monstervak (gevecht, v0.22 partylimiet)   [PLACEHOLDER: getekend in code; echte art gewenst: assets/ui/icon_monstervak.png 7x6 (14x12 op 2x)]   [KLAAR v0.22: echte art assets/ui/icon_monstervak.png van RPG ART, zie tools/handwerk.txt]
-# Grotmond van de berggrot op worldmap 1, tegel (21,18), zelfde tegel als de ingang (tools/art_berggrot_ingang_placeholder.py). Magenta hoekjes, geen definitieve art.
-assets/sprites/buiten/berggrot_ingang.png      16x16    grotmond aan de voet van de bergwand (weg naar Archief 2), Sprite2D Objects/BerggrotIngang op de wereldkaart
+# Grotmond van de berggrot op worldmap 1, tegel (21,17), in de bergwand; ingang = tegen de wand oplopen vanaf (21,18) (tools/art_berggrot_ingang_placeholder.py). Magenta hoekjes, geen definitieve art.
+assets/sprites/buiten/berggrot_ingang.png      16x16    tunnelopening in de bergwand (weg naar Archief 2), Sprite2D Objects/BerggrotIngang op de wereldkaart

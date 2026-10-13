@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """PLACEHOLDER voor de grotmond van de berggrot op worldmap 1 (weg naar Archief 2).
 
-Donkere boog in de bergwand, ruwe rand in grotrots-kleuren (ARTSTYLE 'grotrots').
+Rotswand-tegel met een donkere tunnelopening, ruwe rand in grotrots-kleuren (ARTSTYLE 'grotrots').
 Magenta hoekjes = placeholder. Geen definitieve art.
 Een pad in tools/handwerk.txt wordt nooit overschreven.
 
@@ -41,13 +41,12 @@ def main() -> None:
             dx = (x - cx) / 7.5
             dy = (h - 1 - y) / 15.0
             r = dx * dx + dy * dy
-            if r <= 1.0:
-                # buitenrand rots, binnen een donkere mond
-                binnen = (dx / 0.68) ** 2 + (dy / 0.8) ** 2
-                if binnen <= 1.0:
-                    px[x, y] = ZWART
-                else:
-                    px[x, y] = ROTS[(x * 7 + y * 3) % 3]
+            # hele tegel rotswand, met een tunnelboog onderin (opening in de wand)
+            binnen = (dx / 0.62) ** 2 + (dy / 0.78) ** 2
+            if binnen <= 1.0:
+                px[x, y] = ZWART if binnen < 0.75 else (0x15, 0x10, 0x12, 255)
+            else:
+                px[x, y] = ROTS[(x * 7 + y * 3) % 3]
     for x, y in [(0, h - 1), (w - 1, h - 1)]:
         px[x, y] = MAGENTA
     pad = os.path.join(ROOT, DOEL)
