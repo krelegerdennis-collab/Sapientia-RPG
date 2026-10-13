@@ -81,7 +81,7 @@ func _vul() -> void:
 			_bank.add_child(_knop(str(held.get("name", "")) + " → groep", _naar_groep.bind(i, pad)))
 		i += 1
 	if _bank.get_child_count() == 0:
-		_bank.add_child(_label("Niemand op de bank.", 8))
+		_bank.add_child(_label("Nobody on the bench.", 8))
 
 
 func _naar_bank(index: int, pad: String) -> void:

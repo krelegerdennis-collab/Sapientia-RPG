@@ -46,14 +46,14 @@ func _data() -> void:
 	for zin in [Data.KAMER, Data.WAARHEID, Data.FEIT_H6, Data.FEIT_GEMAAKT, Data.FEIT_HANGER,
 			Data.FEIT_TERUG, Data.WEIGERING, Data.LAATSTE, Data.KERN]:
 		check("zin exact: %s" % zin, Data.heeft_zin(zin))
-	check("weigering letterlijk", Data.heeft_zin("Ik ben Dennis. En dat is genoeg."))
+	check("weigering letterlijk", Data.heeft_zin("I am Dennis. And that is enough."))
 	check("laatste woorden letterlijk",
-			Data.heeft_zin("Je bent sterker dan de vorige vijf. Misschien... ben jij de eerste die het haalt."))
+			Data.heeft_zin("You are stronger than the last five. Maybe... you will be the first to make it."))
 	var alles := "\n".join(Data.zinnen())
 	for leeg in ["H-1", "H-2", "H-3", "H-4", "H-5"]:
 		check("%s niet ingevuld" % leeg, not alles.contains(leeg))
-	check("H-6 staat in de tekst", alles.contains("Proefpersoon H-6"))
-	check("vorige vijf blijft zonder namen", alles.contains("de vorige vijf"))
+	check("H-6 staat in de tekst", alles.contains("Test Subject H-6"))
+	check("vorige vijf blijft zonder namen", alles.contains("the last five"))
 	var stilte := Data.beat_index("stilte")
 	var vragen := Data.beat_index("vragen")
 	var weigering := Data.beat_index("weigering")
@@ -129,7 +129,7 @@ func _kamer() -> void:
 		await pframes(1)
 	check("scène speelt af", kamer.klaar)
 	check("de weigering is getoond en breekt de spiegel",
-			kamer.gebroken and kamer.breek_zin == "Ik ben Dennis. En dat is genoeg."
+			kamer.gebroken and kamer.breek_zin == "I am Dennis. And that is enough."
 			and kamer.getoond.has(Data.WEIGERING))
 	check("gebroken plaatje staat", str(kamer.achtergrond.texture.resource_path).ends_with("spiegel_kamer_gebroken.png"))
 	check("kern opgenomen, daarna niets meer van Dennis", kamer.kern_opgenomen

@@ -7,7 +7,7 @@ const HangerScene := preload("res://world_warper/cutscene/hanger_scene.tscn")
 
 const Accent := preload("res://world_warper/art/accent.gd")
 const ROZE := Color("e2789e")
-const STROOM := "De Stroom gloeit roze."
+const STROOM := "The Stream glows pink."
 
 var failures := 0
 var passes := 0
@@ -29,7 +29,7 @@ func _run() -> void:
 	var regels: Array[String] = Dreiging.lines()
 	var stroom := false
 	for regel in regels:
-		if regel == "De Hanger wordt warm. " + STROOM:
+		if regel == "The Hanger grows warm. " + STROOM:
 			stroom = true
 	check("de Stroom blijft roze in de zin", stroom and STROOM in " ".join(regels))
 	check("beat 2 blijft de tweede regel", Dreiging.beat_at(1) == 2)
@@ -82,10 +82,10 @@ func _accent_tests() -> void:
 			and Accent.archief_for({Accent.BEWAKERS[2]: true}) == 2 and Accent.archief_for({Accent.FLAG: 5}) == 5)
 	var root := Node2D.new()
 	var spr := Sprite2D.new()
-	spr.texture = load("res://world_warper/art/pc_placeholder.png")
+	spr.texture = load("res://world_warper/art/pc.png")
 	root.add_child(spr)
 	var tm := TileMapLayer.new()
-	tm.tile_set = load("res://world_warper/art/tiles_placeholder.tres")
+	tm.tile_set = load("res://world_warper/art/tiles.tres")
 	root.add_child(tm)
 	var andere := Sprite2D.new()
 	andere.texture = load("res://assets/sprites/archief2/sapientia_glitch.png")
@@ -93,14 +93,14 @@ func _accent_tests() -> void:
 	var n := Accent.apply_to(root, 4)
 	var src := tm.tile_set.get_source(tm.tile_set.get_source_id(0)) as TileSetAtlasSource
 	check("apply_to: sprite + tegels naar roze, de rest blijft (%d)" % n, n == 2
-			and spr.texture.resource_path.ends_with("pc_placeholder_roze.png")
-			and src.texture.resource_path.ends_with("tiles_placeholder_roze.png")
+			and spr.texture.resource_path.ends_with("pc_roze.png")
+			and src.texture.resource_path.ends_with("tiles_roze.png")
 			and andere.texture.resource_path.ends_with("sapientia_glitch.png"))
-	var gedeeld := load("res://world_warper/art/tiles_placeholder.tres") as TileSet
+	var gedeeld := load("res://world_warper/art/tiles.tres") as TileSet
 	var gsrc := gedeeld.get_source(gedeeld.get_source_id(0)) as TileSetAtlasSource
-	check("de gedeelde tileset blijft grijs", gsrc.texture.resource_path.ends_with("tiles_placeholder.png"))
+	check("de gedeelde tileset blijft grijs", gsrc.texture.resource_path.ends_with("tiles.png"))
 	Accent.apply_to(root, 1)
-	check("terug naar grijs", spr.texture.resource_path.ends_with("pc_placeholder.png"))
+	check("terug naar grijs", spr.texture.resource_path.ends_with("pc.png"))
 	root.free()
 
 

@@ -35,7 +35,7 @@ const LOTTE_ATK := 14
 const LOTTE_DEF := 5
 
 const KERN_ID := "levenskern"
-const KERN_ZIN := "In stilte ligt vrede. Ik corrigeer wat groeit."
+const KERN_ZIN := "In silence lies peace. I correct what grows."
 const START_GEAR := ["eiken_staf", "reisgewaad"]
 const START_SPELLS := ["genees", "rijp"]
 ## TODO(design): het bestiarium noemt dit beest "Moss Slime". De soort-id is mosslijm.
@@ -43,49 +43,49 @@ const START_SPELLS := ["genees", "rijp"]
 const MOSSLIJM_SOORT := "mosslijm"
 
 const KETEN := [
-	"De Oude Mensheid maakte de zes Archieven als keten.",
-	"Elke kern activeert de volgende. Geen uitnodiging: een noodsignaal.",
-	"Archief 1 zond: Iemand is binnen. Archief 2 reageerde als eerste.",
-	"Sapientia heeft dat signaal gemanipuleerd.",
-	"Je denkt dat je volgt. Sapientia leidt je.",
+	"The Old Humanity made the six Archives as a chain.",
+	"Each core activates the next. Not an invitation: a distress signal.",
+	"Archief 1 sent: Someone is inside. Archief 2 answered first.",
+	"Sapientia manipulated that signal.",
+	"You think you are following. Sapientia is leading you.",
 ]
 const GEEN_CODEX := [
-	"Je hebt nog geen Codex-monster.",
+	"You don't have a Codex monster yet.",
 	"Een Mosslijm vecht tijdelijk mee.",
 ]
 const LOTTE_AANSLUIT := [
-	"De glitch scheurt. Lotte breekt hem zelf.",
-	"Ik hoor de Orde van de Stille Vlam weer.",
-	"Stilte is wat Sapientia wil: emotie uitwissen.",
-	"De Vlam is leven, warmte, emotie. Daarvoor stuurden ze me.",
-	"De Orde is verdeeld. Sapientia corrumpeerde me als symbool, in plaats van me te doden.",
-	"Zelfs wie het leven koestert, wilden ze stil hebben.",
-	"Lotte sluit aan. Priester, met Licht en IJs, graad 1.",
+	"The glitch tears. Lotte breaks it herself.",
+	"I can hear the Order of the Silent Flame again.",
+	"Silence is what Sapientia wants: to erase emotion.",
+	"The Flame is life, warmth, emotion. That is why they sent me.",
+	"The Order is divided. Sapientia corrupted me as a symbol, instead of killing me.",
+	"Even those who cherish life, they wanted silenced.",
+	"Lotte joins. Priest, with Light and Ice, grade 1.",
 ]
 const NA_GENEZER := [
 	KERN_ZIN,
-	"De kas scheurt open. Een zwevend hightech gebouw verschijnt: de World Warper.",
-	"Het trekt jullie omhoog.",
+	"The greenhouse tears open. A floating high-tech building appears: the World Warper.",
+	"It pulls you upward.",
 ]
 ## TODO(verhaal): CANON.md punt 3 legt Proefpersoon H-6 later, vanuit Archief 4.
 ## Deze scène is de nieuwe canon. Het hanger-item wordt niet in de tas gelegd.
 const ECHO_REGELS := [
-	"Ik ben ECHO. Ik bedien deze hub.",
-	"Je Hanger licht paars op. Ik herken hem.",
-	"De Hanger is een biometrische sleutel van de Oude Mensheid, voor Proefpersoon H-6.",
-	"Hij is letterlijk met je verbonden.",
-	"Sapientia kan hem niet namaken of stelen zonder je te doden.",
-	"Sapientia wil je om de sleutel, niet om je kracht.",
-	"De Oude Mensheid bouwde de World Warper als warprelay tussen de zes Archieven.",
-	"Sapientia zette hem offline en herschreef de code deels.",
-	"Volledig overnemen lukte niet. Alleen de Hanger werkt.",
-	"Sapientia verschijnt, een glitch in de lucht.",
-	"Sapientia wil de World Warper: alle zes Archieven tegelijk, alle kernen in één keer.",
-	"De mensheid in één klap verlost, zegt de glitch.",
-	"Je hebt het wapen van de vijand geactiveerd.",
+	"I am ECHO. I operate this hub.",
+	"Your Hanger glows purple. I recognize it.",
+	"The Hanger is a biometric key of the Old Humanity, for Test Subject H-6.",
+	"It is literally bound to you.",
+	"Sapientia cannot copy or steal it without killing you.",
+	"Sapientia wants you for the key, not for your strength.",
+	"The Old Humanity built the World Warper as a warp relay between the six Archives.",
+	"Sapientia took it offline and partly rewrote the code.",
+	"A full takeover failed. Only the Hanger works.",
+	"Sapientia appears, a glitch in the sky.",
+	"Sapientia wants the World Warper: all six Archives at once, every core in one go.",
+	"Humanity set free in one stroke, says the glitch.",
+	"You have activated the enemy's weapon.",
 ]
 const EILANDEN_DICHT := [
-	"De andere eilanden zwijgen. ECHO kan ze nog niet openen.",
+	"The other islands are silent. ECHO cannot open them yet.",
 ]
 
 

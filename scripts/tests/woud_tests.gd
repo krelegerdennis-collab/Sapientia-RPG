@@ -426,7 +426,7 @@ func _data_tests() -> void:
 			art_bad.append("%s map" % id)
 	var wk: Dictionary = GD.ENEMIES["wortelkoning"]
 	check("Woud-vijanden: voor + rug, zwak voor vuur, map-plaatje (%s)" % [art_bad], art_bad.is_empty())
-	check("Wortelkoning: canon-zin in het bestiarium", str(wk["desc"]) == "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat.")
+	check("Wortelkoning: canon-zin in het bestiarium", str(wk["desc"]) == "What was once a shepherd of the wood became a king of roots. He drags what he loves into the depths — not out of cruelty, but out of fear of being alone. Sapientia whispered to him that everything that lets go, perishes.")
 	check("The Root King: baas-blok, idle 4x 0,4 s + raak-plaatje, geen kern", wk.has("boss") and int(wk["idle_frames"]) == 4
 			and is_equal_approx(float(wk["idle_time"]), 0.4) and ResourceLoader.exists(wk["idle"]) and ResourceLoader.exists(wk["hit"])
 			and not wk["boss"].has("core"))
@@ -1151,7 +1151,7 @@ func _graan_tests() -> void:
 	check("na het zaad bestaat het item", await wait_until(func(): return GameState.item_count(SD.ITEM_ZAAD) >= 1, 8.0)
 			and Story.has_flag(SD.FLAG_ZAAD))
 	var vondst: Array = await run_story(8.0)
-	check("vondst is alleen de itemregel, geesten weg", vondst.any(func(l): return "Je vindt Zingend Zaad." in str(l))
+	check("vondst is alleen de itemregel, geesten weg", vondst.any(func(l): return "You find Zingend Zaad." in str(l))
 			and not scene().get_node("Objects/Woudgeesten").visible)
 	d = await enter(dorp, "zuid_ingang")
 	g = d.get_node("Objects/Gerrit")

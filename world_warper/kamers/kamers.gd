@@ -22,34 +22,34 @@ const FLAG_HUB := "warper_hub_open"
 ## Leeg tot Archief 2 een kern-vlag heeft. Geen verzonnen naam.
 const ARCHIEF2_KERN_VLAG := ""
 
-const GESLOTEN := "Deze kamer is nog gesloten."
-const ECHO_REGELS: Array[String] = ["Ik bedien deze hub."]
+const GESLOTEN := "This room is still closed."
+const ECHO_REGELS: Array[String] = ["I operate this hub."]
 const WERK_REGELS: Array[String] = [
-	"Smeden kan hier later.",
-	"Er liggen nog geen recepten.",
+	"Forging will be possible here later.",
+	"There are no recipes yet.",
 ]
-const HANDEL_DICHT := "De handel is nog gesloten."
-const KERN_ZIN := "Het verhaal van H-6 eindigt hier."
+const HANDEL_DICHT := "The shop is still closed."
+const KERN_ZIN := "The story of H-6 ends here."
 const OEFEN_KLAAR := "Oefening klaar. Geen buit."
-const OEFEN_VERLIES := "De oefening is voorbij. Je staat weer in de kamer."
-const OEFEN_VANGEN := "In een oefening schrijf je niets in."
-const GEGENEZEN := "De groep is genezen."
+const OEFEN_VERLIES := "The practice is over. You are back in the room."
+const OEFEN_VANGEN := "Nothing is recorded in a practice."
+const GEGENEZEN := "The party is healed."
 const OPGESLAGEN := "Opgeslagen."
 const OPSLAAN_MISLUKT := "Opslaan mislukt."
-const NIEMAND_WISSEL := "Er is niemand om mee te wisselen."
-const AL_VOORAAN := "Die staat al vooraan."
+const NIEMAND_WISSEL := "There is nobody to swap with."
+const AL_VOORAAN := "They are already at the front."
 const VOORAAN := "Vooraan: %s."
-const GEEN_SCHERM := "Dat scherm is er nog niet."
-const GEEN_POORT := "De poort doet het niet."
+const GEEN_SCHERM := "That screen doesn't exist yet."
+const GEEN_POORT := "The gate doesn't work."
 
 const OEFEN_VIJAND := "mosslijm"
 
-const ART_ECHO := "res://world_warper/art/echo_placeholder.png"
-const ART_PC := "res://world_warper/art/pc_placeholder.png"
+const ART_ECHO := "res://world_warper/art/echo.png"
+const ART_PC := "res://world_warper/art/pc.png"
 const ART_WARP := "res://world_warper/art/warp_platform.png"
-const ART_TAFEL := "res://world_warper/art/tafel_placeholder.png"
-const ART_TOONBANK := "res://world_warper/art/toonbank_placeholder.png"
-const ART_PARTY := "res://world_warper/art/party_placeholder.png"
+const ART_TAFEL := "res://world_warper/art/tafel.png"
+const ART_TOONBANK := "res://world_warper/art/toonbank.png"
+const ART_PARTY := "res://world_warper/art/party.png"
 const ART_BORD := "res://world_warper/art/bord_kamers.png"
 
 const WARP_PAD := "res://scenes/maps/wereldkaart.tscn"
@@ -257,7 +257,7 @@ static func voortgang_regels(step: int, flags: Dictionary, opdracht: String) -> 
 	var regels: Array[String] = []
 	regels.append("Verhaalstap: %s." % stapnaam)
 	if opdracht == "":
-		regels.append("Er is nu geen lopende opdracht.")
+		regels.append("There is no active quest right now.")
 	else:
 		regels.append("Lopende opdracht: %s" % opdracht)
 	regels.append("Bekende vlaggen: %d." % flags.size())
@@ -346,29 +346,29 @@ static func label(bron: String) -> String:
 		"grot_ingang":
 			return "Diepe Grot"
 		"warp":
-			return "Poort"
+			return "Gate"
 		"voortgang":
-			return "Voortgang"
+			return "Progress"
 		"bestiarium":
-			return "Bestiarium"
+			return "Bestiary"
 		"codex":
 			return "Codex"
 		"oefening":
-			return "Oefening"
+			return "Practice"
 		"opslaan":
-			return "Opslaan"
+			return "Save"
 		"helen":
-			return "Helen"
+			return "Heal"
 		"wisselen":
-			return "Wisselen"
+			return "Swap"
 		"werk":
-			return "Tafel"
+			return "Table"
 		"handel":
-			return "Toonbank"
+			return "Counter"
 		"kern":
-			return "Kern"
+			return "Core"
 		"kamers":
-			return "Kamers"
+			return "Rooms"
 		_:
 			return ""
 

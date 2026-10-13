@@ -40,7 +40,7 @@ func host(code_text: String) -> void:
 	_peer = ENetMultiplayerPeer.new()
 	var err := _peer.create_server(PORT, 1)
 	if err != OK:
-		_give_up("Het netwerk kon niet starten (poort %d)." % PORT)
+		_give_up("The network could not start (port %d)." % PORT)
 		return
 	_peer.peer_connected.connect(_on_peer_connected)
 	_peer.peer_disconnected.connect(_on_peer_disconnected)
@@ -48,7 +48,7 @@ func host(code_text: String) -> void:
 	_udp.set_broadcast_enabled(true)
 	var bind_err := _udp.bind(BEACON_SEND_PORT)
 	if bind_err != OK:
-		_give_up("Het netwerk kon niet starten (baken).")
+		_give_up("The network could not start (beacon).")
 		return
 	_udp.set_dest_address("255.255.255.255", BEACON_PORT)
 
@@ -59,7 +59,7 @@ func join(code_text: String) -> bool:
 	_udp = PacketPeerUDP.new()
 	var err := _udp.bind(BEACON_PORT)
 	if err != OK:
-		_give_up("Geen verbinding op dit netwerk. Blijf in het menu.")
+		_give_up("No connection on this network. Stay in the menu.")
 		return false
 	return true
 
@@ -135,7 +135,7 @@ func _process(delta: float) -> void:
 		_read_beacon()
 		_join_wait += delta
 		if _join_wait >= JOIN_TIMEOUT:
-			_give_up("Geen vriend met die code op dit netwerk.")
+			_give_up("No friend with that code on this network.")
 
 
 func _send_beacon() -> void:
@@ -158,7 +158,7 @@ func _connect_enet(ip: String, port: int) -> void:
 	_peer = ENetMultiplayerPeer.new()
 	var err := _peer.create_client(ip, port)
 	if err != OK:
-		_give_up("Verbinden op dit netwerk lukte niet.")
+		_give_up("Connecting on this network failed.")
 		return
 	_peer.peer_connected.connect(_on_peer_connected)
 	_peer.peer_disconnected.connect(_on_peer_disconnected)

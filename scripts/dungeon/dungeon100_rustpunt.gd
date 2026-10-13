@@ -12,15 +12,19 @@ extends "res://scripts/book_point.gd"
 ## groep, dan is de run voorbij en sta je in ECHO's Kamer. Daarna de vraag
 ## 'Voortgang opslaan?'. Staat het rustpunt op een verdieping zonder rustpunt-regel (niet 10, 20, ...)
 ## of buiten de kerker, dan herstelt en bewaart het wel, maar het checkpoint verandert niet.
-## Plaatje: voorlopig het opslagboek, warm getint (PLACEHOLDER, zie HANDOFF_DUNGEON100_REGELS.md).
+## Plaatje: kampvuur van RPG ART (batch 10, grot_kamers.png rij 1, kol 0-3, ~0,15 s per frame) met een
+## boomstam ernaast; het opslagboek blijft als (onzichtbare) basis voor de botsing en BookPoint.
 
 const SCENE := "res://scenes/dungeon100_rustpunt.tscn"
 const RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const TINT := Color(1.0, 0.86, 0.62)
+const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
 const ACTIVATED_LINE := "The party is restored. This is not a return point: falling means out of the Archive."
 
 ## Voor de tests: de laatste keer dat het rustpunt een NIEUW checkpoint werd.
 var last_activated := false
+## Het kampvuur (AnimatedSprite2D, 4 frames).
+var vuur: AnimatedSprite2D
 
 
 func _init() -> void:
@@ -36,6 +40,18 @@ static func create(tile: Vector2i) -> Node2D:
 func _ready() -> void:
 	super._ready()
 	sprite.modulate = TINT
+	sprite.visible = false
+	var frames := SpriteFrames.new()
+	frames.set_animation_speed("default", GrotKamers.VUUR_FPS)
+	frames.set_animation_loop("default", true)
+	for c in GrotKamers.VUUR_FRAMES:
+		frames.add_frame("default", GrotKamers.tegel(c, 1))
+	vuur = AnimatedSprite2D.new()
+	vuur.name = "Kampvuur"
+	vuur.sprite_frames = frames
+	vuur.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(vuur)
+	vuur.play("default")
 
 
 func interact(player: Node2D) -> void:

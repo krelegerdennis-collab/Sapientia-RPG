@@ -349,6 +349,20 @@ assets/sprites/buiten/wilgendal_toonbank.png
 assets/sprites/buiten/wilgendal_vitrine.png
 assets/sprites/buiten/wilgendal_wapen.png
 assets/sprites/buiten/wilgendal_zwaard.png
+# v0.21: RPG ART batch 9 (art_batch9_v21/out): hub-rondlopers (48x96, 3x4 frames van 16x24) + de Koopman (H-5).
+assets/sprites/hub/glitchmot_hub.png
+assets/sprites/hub/inktwurm_hub.png
+assets/sprites/hub/kennis_beest_hub.png
+assets/sprites/hub/mech_wachter_hub.png
+assets/sprites/hub/mistuil_hub.png
+assets/sprites/hub/moskonijn_hub.png
+assets/sprites/hub/mosslijm_hub.png
+assets/sprites/hub/papiergeest_hub.png
+assets/sprites/hub/sporenzwam_hub.png
+assets/sprites/hub/wortelkruiper_hub.png
+assets/sprites/npc/koopman_veld.png
+# v0.21: RPG ART batch 10 (art_batch10_v21/out): Diepe Grot kamertegels (vallen, kampvuur, koopmankraam).
+assets/tiles/dungeon/grot_kamers.png
 # v0.21: World Warper van RPG ART (art_batch5_v21 + art_batch6_v21/out). Grijs = Archief 1 (zonder achtervoegsel),
 #        <naam>_<accent>.png = groen/oranje/roze/blauw/rood (Archief 2-6), gekozen in world_warper/art/accent.gd.
 assets/sprites/archief2/echo.png
@@ -434,3 +448,68 @@ world_warper/art/knop_wm2.png
 world_warper/art/knop_wm2_ingedrukt.png
 world_warper/art/knop_wm3.png
 world_warper/art/knop_wm3_ingedrukt.png
+art/map_creatures/mosslijm_volg.png
+art/map_creatures/moskonijn_volg.png
+art/map_creatures/mosslijm_speel.png
+art/map_creatures/moskonijn_speel.png
+# v0.21 RPG ART batch 15: glitch-zijpaneel van de wereldkaart-cutscene (131x216, rechts gespiegeld)
+art/cutscene/glitch_panel.png
+# v0.22 RPG ART UI-iconen: Codex-icoontje in het monstervak (7x6)
+assets/ui/icon_monstervak.png
+# v0.22 World Warper-art hernoemd (zonder _placeholder; zelfde RPG ART-bestanden), plus nieuwe hub-art van RPG ART
+world_warper/art/echo.png
+world_warper/art/echo_blauw.png
+world_warper/art/echo_groen.png
+world_warper/art/echo_oranje.png
+world_warper/art/echo_rood.png
+world_warper/art/echo_roze.png
+world_warper/art/party.png
+world_warper/art/party_blauw.png
+world_warper/art/party_groen.png
+world_warper/art/party_oranje.png
+world_warper/art/party_rood.png
+world_warper/art/party_roze.png
+world_warper/art/pc.png
+world_warper/art/pc_blauw.png
+world_warper/art/pc_groen.png
+world_warper/art/pc_oranje.png
+world_warper/art/pc_rood.png
+world_warper/art/pc_roze.png
+world_warper/art/tafel.png
+world_warper/art/tafel_blauw.png
+world_warper/art/tafel_groen.png
+world_warper/art/tafel_oranje.png
+world_warper/art/tafel_rood.png
+world_warper/art/tafel_roze.png
+world_warper/art/tiles.png
+world_warper/art/tiles_blauw.png
+world_warper/art/tiles_groen.png
+world_warper/art/tiles_oranje.png
+world_warper/art/tiles_rood.png
+world_warper/art/tiles_roze.png
+world_warper/art/toonbank.png
+world_warper/art/toonbank_blauw.png
+world_warper/art/toonbank_groen.png
+world_warper/art/toonbank_oranje.png
+world_warper/art/toonbank_rood.png
+world_warper/art/toonbank_roze.png
+world_warper/art/vlak_gezelschap.png
+world_warper/art/vlak_gezelschap_blauw.png
+world_warper/art/vlak_gezelschap_groen.png
+world_warper/art/vlak_gezelschap_oranje.png
+world_warper/art/vlak_gezelschap_rood.png
+world_warper/art/vlak_gezelschap_roze.png
+world_warper/art/vlak_warp.png
+world_warper/art/vlak_warp_blauw.png
+world_warper/art/vlak_warp_groen.png
+world_warper/art/vlak_warp_oranje.png
+world_warper/art/vlak_warp_rood.png
+world_warper/art/vlak_warp_roze.png
+world_warper/art/warp_icoon_village.png
+world_warper/art/warp_icoon_village_dicht.png
+world_warper/art/warp_icoon_wm1.png
+world_warper/art/warp_icoon_wm1_dicht.png
+world_warper/art/warp_icoon_wm2.png
+world_warper/art/warp_icoon_wm2_dicht.png
+world_warper/art/warp_icoon_wm3.png
+world_warper/art/warp_icoon_wm3_dicht.png

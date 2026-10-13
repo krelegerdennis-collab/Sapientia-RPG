@@ -34,6 +34,8 @@ signal damage_shown(target_name: String, amount: int)
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
+const KoopmanData := preload("res://scripts/data/koopman_data.gd")
+const PartyLimiet := preload("res://scripts/party_limiet.gd")   # v0.22 max 4 helden + 1 monster
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
@@ -113,6 +115,8 @@ const ARMOR_HIT_COLOR := Color("b5a78d")
 const SUBMENU_TOP := 24.0
 const CROSS_MARGIN := 4.0         # ruimte tot de rechterrand
 const BOX_GAP := 3.0
+## v0.22 extra ruimte voor het monstervak (5e plek), zodat het een los vak is
+const MONSTER_GAP := 4.0
 ## Hoeveel art-pixels per scherm-eenheid (2 = "16-bit plus", 768x432).
 const DETAIL := 2
 
@@ -166,6 +170,8 @@ var tips_shown := {}
 var hero_nodes: Array = []    # battle_hero.gd per held
 var status_boxes: Array = []  # hero_status_box.gd per held
 var codex: CodexBattle            # Codex (scripts/battle/codex_battle.gd)
+## v0.22 Beurtvolgorde van de laatste ronde (alleen de actieve combatanten: max 4 helden + 1 monster).
+var last_plan: Array = []
 var _previous_scale_size := Vector2i.ZERO
 ## push_music in _ready, pop in _exit_tree. Alleen poppen als we zelf gepusht hebben.
 var _battle_music_pushed := false
@@ -189,6 +195,8 @@ func _ready() -> void:
 		var h: Dictionary = GameState.party[i]
 		if GameState.archief2_party_filter != "" and str(h.get("id", "")) != GameState.archief2_party_filter:
 			continue
+		if row >= PartyLimiet.MAX_HELDEN:
+			break                                  # v0.22: de rest staat in de reserve
 		var c := _make_combatant(h["name"], h, true, row)
 		heroes.append(c)
 		var path: String = h.get("battle_sprite", "")
@@ -544,13 +552,16 @@ func _layout() -> void:
 	if count > 0:
 		# v0.15: links ruimte maken voor het commando-kruis naast de eerste held (als het past)
 		var box_left := _box_left_for_cross(left, right, count)
-		var bw := floorf((right - box_left - BOX_GAP * (count - 1)) / count)
+		# v0.22 partylimiet: het monstervak (laatste, Codex) staat iets apart (MONSTER_GAP)
+		var extra := MONSTER_GAP if bool(status_boxes[count - 1].get("monster")) and count > 1 else 0.0
+		var bw := floorf((right - box_left - extra - BOX_GAP * (count - 1)) / count)
 		bw = minf(bw, 88.0)
-		var total := bw * count + BOX_GAP * (count - 1)
+		var total := bw * count + BOX_GAP * (count - 1) + extra
 		var x0 := roundf(box_left + (right - box_left - total) / 2.0)
 		for i in count:
 			var box: Control = status_boxes[i]
-			box.position = Vector2(x0 + i * (bw + BOX_GAP), h - StatusBoxScript.HEIGHT - 3)
+			var bx := x0 + i * (bw + BOX_GAP) + (extra if i == count - 1 else 0.0)
+			box.position = Vector2(bx, h - StatusBoxScript.HEIGHT - 3)
 			box.size = Vector2(bw, StatusBoxScript.HEIGHT)
 			box.queue_redraw()
 	# Helden: midden boven hun eigen statusvak (reserve: de oude vaste plekken)
@@ -771,6 +782,7 @@ func _run() -> void:
 			if a["type"] == "defend":
 				a["actor"]["defending"] = true   # verdedigen telt vanaf het begin van de ronde
 		plan.sort_custom(func(a, b): return a["speed"] > b["speed"])
+		last_plan = plan.duplicate()   # v0.22: beurtvolgorde van deze ronde (partytest)
 		for a in plan:
 			if a["actor"]["s"]["hp"] <= 0:
 				continue
@@ -900,6 +912,8 @@ func _choose_codex(hero: Dictionary):
 		var wissel := "Swap ally"
 		if not codex.can_swap():
 			wissel = "Swap: Codex empty" if GameState.codex_pages.is_empty() else "Swap: all down"
+			if not codex.wissel_in_gevecht and not GameState.codex_pages.is_empty():
+				wissel = "Swap: outside battle"   # v0.22 partylimiet: wisselen via het menu
 		show_message("Codex: capture or swap?")
 		menu.open("Codex", [{"text": vangen, "enabled": books > 0},
 				{"text": wissel, "enabled": codex.can_swap()}], last, true, CODEX_ROW_H)
@@ -1166,7 +1180,7 @@ func _execute(a: Dictionary) -> void:
 	if int(actor.get("skip", 0)) > 0:
 		actor["skip"] = int(actor["skip"]) - 1
 		var reden := str(actor.get("skip_reden", "bevriezing"))
-		var zin := "%s is verlamd en slaat over." if reden == "verlamming" else "%s is bevroren en slaat over."
+		var zin := "%s is paralyzed and skips a turn." if reden == "verlamming" else "%s is frozen and skips a turn."
 		if reden == Archief2Vijanden.SKIP_REDEN_BIND:
 			zin = "%s is bound and skips a turn."
 		show_message(zin % actor["name"])
@@ -1286,6 +1300,38 @@ func _execute(a: Dictionary) -> void:
 				await codex.capture(actor, a["target"])   # Codex: Leeg Boek
 				_hero_rest(actor)
 				return
+			if float(it.get("revive", 0.0)) > 0.0:     # Feniksveer (Koopman)
+				var dood = a["target"] if a["target"] != null and int(a["target"]["s"]["hp"]) <= 0 else null
+				if dood == null:
+					for h in heroes:
+						if int(h["s"]["hp"]) <= 0:
+							dood = h
+							break
+				if dood == null:
+					show_message(PartyActions.MSG_NO_EFFECT)
+				else:
+					var back := PartyActions.revive(dood["s"], float(it["revive"]))
+					show_message("%s gets back up! (%d HP)" % [dood["name"], back])
+					_refresh_party()
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
+			if bool(it.get("cure", false)):          # Tegengif (Koopman): gif en binden weg
+				var t := _valid_ally(a["target"])
+				if t.has("dots"):
+					t["dots"] = (t["dots"] as Array).filter(func(d): return not bool(d.get("gif", false)))
+				if str(t.get("skip_reden", "")) == Archief2Vijanden.SKIP_REDEN_BIND:
+					t["skip"] = 0
+				show_message("%s is cured." % t["name"])
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
+			if bool(it.get("stun_room", false)):     # alleen in het veld: niet verbruiken
+				GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
+				show_message(PartyActions.MSG_NO_EFFECT)
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
 			await _heal(_valid_ally(a["target"]), int(it["heal_hp"]), int(it["heal_mp"]))
 			_hero_rest(actor)
 		"defend":
@@ -1377,18 +1423,25 @@ func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> 
 ## Spreuken: power op level 1 + power_per_level per level erboven, maal het element, +/- 10%.
 func _spell_amount(caster: Dictionary, spell: Dictionary, target: Dictionary) -> int:
 	var lvl := int(caster["s"].get("level", 1))
-	var base := SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target)
+	var base := SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target) * _token_mult(caster)
 	return maxi(1, roundi(base * randf_range(0.9, 1.1)))
 
 
 func _buff_mult(c: Dictionary, stat: String) -> float:
-	var m := 1.0
+	var m := _token_mult(c)
 	for b in c.get("buffs", []):
 		if typeof(b) != TYPE_DICTIONARY:
 			continue
 		if str(b.get("stat", "")) == stat and int(b.get("turns", 0)) > 0:
 			m *= 1.0 + float(b.get("pct", 0.0))
 	return m
+
+
+## "H-5's Token" van de Koopman (CANON §12): +10% stats voor de helden tegen dienaren van Sapientia.
+func _token_mult(c: Dictionary) -> float:
+	if not bool(c.get("is_hero", false)):
+		return 1.0
+	return KoopmanData.token_factor(GameState.koopman_token, not GameState.practice_battle)
 
 
 func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
@@ -1487,7 +1540,7 @@ func _revive(t, amount: int) -> void:
 	if ally.get("node") != null:
 		ally["node"].set_ko(false)
 	_refresh_party()
-	show_message("%s staat op." % ally["name"])
+	show_message("%s gets back up." % ally["name"])
 	await _wait(MESSAGE_TIME)
 
 

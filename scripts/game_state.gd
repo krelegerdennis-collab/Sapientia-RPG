@@ -28,6 +28,7 @@ const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
 const PartyBenchLib := preload("res://scripts/party_bench.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
+const PartyLimiet := preload("res://scripts/party_limiet.gd")   # v0.22 max 4 helden + 1 monster
 const BATTLE_SCENE := "res://scenes/battle/battle.tscn"
 const TITLE_SCENE := "res://scenes/ui/title.tscn"
 const NAME_SCENE := "res://scenes/ui/name_entry.tscn"
@@ -141,6 +142,14 @@ var dungeon100_delivered := {}
 ## Momentopname van de echte party/tas/goud/Codex tijdens een run ({} = geen run bezig). Tijdens een run
 ## zijn party/inventory/gold/codex_pages die van de SIMULATIE (level 1, geen uitrusting).
 var dungeon100_snapshot := {}
+## DE KOOPMAN (H-5, CANON §12, scripts/data/koopman_data.gd): aantal bezoeken (blijft over runs en
+## nederlagen heen), sleutel van het laatst getelde bezoek ("<seed>_<verdieping>") en of de speler
+## "H-5's Token" heeft. In de save als blok "koopman".
+var koopman_bezoeken := 0
+var koopman_laatste := ""
+var koopman_token := false
+## Unieke stukken (uitrusting, rotatie-item) die dit bezoek al gekocht zijn; leeg bij een nieuw bezoek/nieuwe run.
+var koopman_gekocht: Array = []
 ## v0.11 verhaal: stap (zie scripts/data/story_data.gd) en flags (naam -> true)
 var story_step := 0
 var story_flags := {}
@@ -269,6 +278,7 @@ func _ready() -> void:
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
 	# World Warper-kamers: of  godot -- --warperkamertest  (scripts/tests/warper_kamer_tests.gd).
 	# Hanger-scène: of  godot -- --hangertest  (scripts/tests/hanger_tests.gd).
+	# De Koopman (H-5) + grotkamers: of  godot -- --koopmantest [--shots=/pad/map]  (scripts/tests/koopman_tests.gd).
 	# De Spiegel (Archief 4): of  godot -- --spiegeltest [--shots=/pad/map]
 	# Vriendenmodus: of  godot -- --pvptest  (pvp/tests/pvp_tests.gd).
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
@@ -300,10 +310,13 @@ func _ready() -> void:
 			["--archief2test", "res://scripts/tests/archief2_tests.gd", "Archief2Test", "archief2test"],
 			["--warperkamertest", "res://scripts/tests/warper_kamer_tests.gd", "WarperKamerTest", "warperkamertest"],
 			["--hangertest", "res://scripts/tests/hanger_tests.gd", "HangerTest", "hangertest"],
+			["--koopmantest", "res://scripts/tests/koopman_tests.gd", "KoopmanTest", "koopmantest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
-			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"]]:
+			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
+			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
+			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -458,6 +471,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	archief2_last_leech = {}
 	pending_tutorial = {}
 	dungeon100_load({})
+	koopman_load({})
 	if has_node("/root/Story"):
 		get_node("/root/Story").reset()
 	has_return_point = false
@@ -516,7 +530,19 @@ func add_member(id: String) -> bool:
 	if h.is_empty():
 		return false
 	party.append(h)
+	# v0.22 partylimiet: is de groep vol, dan gaat de nieuwe held naar de reserve
+	if party.size() > PartyLimiet.MAX_HELDEN and PartyLimiet.mag_naar_reserve(h):
+		party.pop_back()
+		party_bench.append(h)
 	return true
+
+
+## v0.22 Held uit de groep of de reserve ({} = zit er niet in).
+func member(id: String) -> Dictionary:
+	for h in party + party_bench:
+		if str(h.get("id", "")) == id:
+			return h
+	return {}
 
 
 ## v0.17 Held sluit zich aan (story-commando "join", bv. Noor na het Donker Woud): op niveau
@@ -525,7 +551,7 @@ func add_member(id: String) -> bool:
 func join_member(id: String, level := 1, gear: Array = []) -> bool:
 	if not add_member(id):
 		return false
-	var h: Dictionary = party[party.size() - 1]
+	var h: Dictionary = member(id)
 	if level > int(h["level"]):
 		give_exp(h, GameData.exp_for_level(level) - int(h["exp"]))
 	for g in gear:
@@ -992,6 +1018,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
 		"archief2": archief2.duplicate(true),
+		"koopman": koopman_save_data(),
 	}
 	data["party"] = _party_save()
 	data["party_bank"] = _party_save_from(party_bench)
@@ -1052,6 +1079,8 @@ func apply_state(d: Dictionary) -> bool:
 		party_bench = _party_from(d["party_bank"], stray_equipment)
 	if party.is_empty():
 		add_member(MAIN_HERO)
+	# v0.22 migratie: oude saves met meer dan 4 actieve helden -> de rest naar de reserve
+	PartyLimiet.normaliseer()
 	inventory = _inventory_from(d.get("inventory", {}))
 	for id in stray_equipment:
 		inventory[id] = int(inventory.get(id, 0)) + 1
@@ -1089,6 +1118,7 @@ func apply_state(d: Dictionary) -> bool:
 	# Codex: oude saves zonder "codex" = lege Codex; kapotte pagina's vallen weg.
 	codex_load_data(d.get("codex", {}))
 	dungeon100_load(d.get("dungeon100", {}))
+	koopman_load(d.get("koopman", {}))
 	# v0.19 unieke monsters; oude saves zonder dit veld = nog niets verslagen. Onbekende ids vallen weg.
 	unique_done = {}
 	var un = d.get("uniek", {})
@@ -1580,8 +1610,10 @@ func respawn_at_checkpoint(boss := false) -> String:
 	# Uniek 'verslagen' blijft, ook als je daarna het gevecht verliest (HANDOFF_FUSIE aanname 6).
 	# 'gevangen' rolt mee met de Codex, die bij het checkpoint hoort.
 	var keep_unique := unique_done.duplicate(true)
+	var keep_koopman := koopman_save_data()      # bezoeken aan H-5 rollen niet terug
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
+	koopman_load(keep_koopman)
 	for id in keep_unique:
 		if str(keep_unique[id]) == "verslagen" and not unique_done.has(str(id)):
 			unique_done[str(id)] = "verslagen"
@@ -1644,6 +1676,34 @@ func respawn() -> void:
 
 # ---------------------------------------------------------------- 100-verdiepingen-kerker: Het Gesimuleerde Archief (runs)
 ## Is er een run bezig? (de echte party/tas liggen dan in de momentopname)
+## Koopman-blok voor de save.
+func koopman_save_data() -> Dictionary:
+	return {"bezoeken": koopman_bezoeken, "laatste": koopman_laatste, "token": koopman_token,
+			"gekocht": koopman_gekocht.duplicate()}
+
+
+## Koopman-blok uit een save; oude saves zonder blok = nog nooit bezocht.
+func koopman_load(d) -> void:
+	var k: Dictionary = d if d is Dictionary else {}
+	koopman_bezoeken = maxi(0, int(k.get("bezoeken", 0)))
+	koopman_laatste = str(k.get("laatste", ""))
+	koopman_token = bool(k.get("token", false))
+	koopman_gekocht = []
+	var g = k.get("gekocht", [])
+	if g is Array:
+		for id in g:
+			koopman_gekocht.append(str(id))
+
+
+## Eén bezoek aan de Koopman tellen (zelfde run + verdieping telt één keer). Geeft de teller terug.
+func koopman_bezoek(sleutel: String) -> int:
+	if sleutel != koopman_laatste:
+		koopman_laatste = sleutel
+		koopman_bezoeken += 1
+		koopman_gekocht = []     # restock: nieuw bezoek (en dus elke nieuwe run)
+	return koopman_bezoeken
+
+
 func dungeon100_run_active() -> bool:
 	return not dungeon100_snapshot.is_empty()
 

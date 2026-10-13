@@ -98,6 +98,10 @@ static func item_usable_in_field(id: String) -> bool:
 		return false
 	if _teach_id(it) != "":
 		return str(it.get("target", "")) == "ally"
+	if float(it.get("revive", 0.0)) > 0.0:
+		return true
+	if bool(it.get("stun_room", false)):
+		return _stun_targets().size() > 0
 	return str(it.get("target", "")) == "ally" and (int(it.get("heal_hp", 0)) > 0 or int(it.get("heal_mp", 0)) > 0)
 
 
@@ -163,9 +167,21 @@ static func use_item(inventory: Dictionary, id: String, hero: Dictionary) -> Dic
 		return {"ok": false, "hp": 0, "mp": 0, "text": reason}
 	if int(inventory.get(id, 0)) <= 0:
 		return {"ok": false, "hp": 0, "mp": 0, "text": "You have no %s left." % item_name(id)}
+	var it := item_data(id)
+	if float(it.get("revive", 0.0)) > 0.0:
+		if int(hero["hp"]) > 0:
+			return {"ok": false, "hp": 0, "mp": 0, "text": MSG_NO_EFFECT}
+		var hp_back := revive(hero, float(it["revive"]))
+		_take(inventory, id)
+		return {"ok": true, "hp": hp_back, "mp": 0, "text": "%s gets back up! (%d HP)" % [hero["name"], hp_back]}
+	if bool(it.get("stun_room", false)):
+		var n := stun_room()
+		if n <= 0:
+			return {"ok": false, "hp": 0, "mp": 0, "text": MSG_NO_EFFECT}
+		_take(inventory, id)
+		return {"ok": true, "hp": 0, "mp": 0, "text": "The bomb bursts! %d monster(s) are stunned." % n}
 	if int(hero["hp"]) <= 0:
 		return {"ok": false, "hp": 0, "mp": 0, "text": MSG_KO % hero["name"]}
-	var it := item_data(id)
 	var spell_id := _teach_id(it)
 	if spell_id != "":
 		if not (hero.get("spells") is Array):
@@ -190,6 +206,41 @@ static func use_item(inventory: Dictionary, id: String, hero: Dictionary) -> Dic
 	if int(inventory[id]) <= 0:
 		inventory.erase(id)
 	return {"ok": true, "hp": gained.x, "mp": gained.y, "text": _heal_text(hero, gained)}
+
+
+static func _take(inventory: Dictionary, id: String) -> void:
+	inventory[id] = int(inventory[id]) - 1
+	if int(inventory[id]) <= 0:
+		inventory.erase(id)
+
+
+## Feniksveer: een gevallen held staat op met een deel van zijn max HP. Geeft de HP terug.
+static func revive(hero: Dictionary, frac: float) -> int:
+	var hp := maxi(1, roundi(float(hero.get("max_hp", 1)) * frac))
+	hero["hp"] = hp
+	return hp
+
+
+## Stun Bomb: monsters (MapMonster) in de huidige kamer die verlamd kunnen worden.
+const STUNBOM_STAPPEN := 6
+static func _stun_targets() -> Array:
+	var tree := Engine.get_main_loop() as SceneTree
+	var s: Node = tree.current_scene if tree else null
+	if s == null or not ("monsters" in s):
+		return []
+	var uit: Array = []
+	for m in s.get("monsters"):
+		if is_instance_valid(m) and m.has_method("stun") and not bool(m.get("boss")) and not bool(m.get("disguised")):
+			uit.append(m)
+	return uit
+
+
+## Verlamt alle monsters in de kamer (STUNBOM_STAPPEN stappen). Geeft het aantal terug.
+static func stun_room() -> int:
+	var doelen := _stun_targets()
+	for m in doelen:
+		m.stun(STUNBOM_STAPPEN)
+	return doelen.size()
 
 
 # ---------------------------------------------------------------- spreukrollen

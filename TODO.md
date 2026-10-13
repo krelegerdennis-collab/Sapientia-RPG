@@ -10,7 +10,7 @@ Speelbaar: Worldmap 1 (start-eiland met Dennis' huis, Wilgendal en het Eerste Ar
 
 Niet zelf bouwen. Wacht op scènes: ECHO's twist (wanneer, hoe, confrontatie, H-1 tot en met H-5); De Spiegel koppelen aan Archief 4; worldmap 2 en 3 (kamerlijsten, monsters, paden).
 
-Open thema's: art-placeholders, World Warper (gebouw, dialoog, lege kamers, audio), sfeer, Codex en muziek van Archief 2, bestiarium tot endgame, PvP-relay en polish, Diepe Grot (loot, kaarten, push, rennen), warper-stijl.
+Open thema's: art-placeholders, World Warper (gebouw, dialoog, lege kamers, audio), sfeer, Codex en muziek van Archief 2, bestiarium tot endgame, PvP-relay en polish, Diepe Grot (loot, kaarten, push, rennen). Warper-stijl, Archief 2-roster en de Koopman (H-5) zijn beslist (CANON 12-14).
 
 Grade 4-wapens en -sets, en het herzien van PvP-teams, wachten tot er nieuwe karakters in het verhaal komen. Gerrit blijft staan.
 
@@ -24,8 +24,10 @@ Act 2, Act 3 en de Spiegel-scène wachten op worldmap 2/3 en op scènes. Die vak
 
 ### Dungeon-warpers
 
-- [ ] Universele warper-stijl, of een variant per Archief-thema
-  - [ ] Die keuze is nog open
+- [x] Warper-stijl beslist: universeel met kleuraccent per Archief (CANON 14)
+- [ ] Warper-basis bouwen: paars licht, zwevend platform, hologram, hetzelfde icoon
+- [ ] 6 kleurvarianten: Kennis grijs, Leven groen, Industrie oranje, Magie roze, Kosmos blauw, Hart rood (elk + paars)
+- [ ] Cutscene-teksten (na De Genezer, eerste binnenkomst Hal, Sapientia-dreiging): tekst volgt van Dennis
 
 Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Canon & Design Reference, samen met de canon-regel voor de Diepe Grot.
 
@@ -47,12 +49,15 @@ Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Cano
 - [ ] De Wurger (kolossale slingerplant, mini-baas verdieping 3)
 - [ ] Groei-plaat, 3 stadia: zaad, scheut, volgroeid
 - [ ] Kern-item Archief 2 (levend, groen, organisch)
-- [ ] Nieuwe vijanden met een plant- of leventhema
+- [x] Roster plant-vijanden beslist (CANON 13): Rankje, Sporekop, Doornige Loper, Bloeiende Schrik, Wortelgeest (Natuur)
+- [ ] Vijanden bouwen: data, zwaktes en gedrag (binden/beurt overslaan, gif 3 beurten, charge x2, bijten + heal, naar zich toe trekken)
+- [ ] EN-namen laten bevestigen door Dennis (voorstel: Tendril, Sporehead, Thorn Runner, Blooming Dread, Rootghost)
 - [ ] Achtergrondmuziek die bij de overwoekerde kas past
 
 #### Codex
 
-- [ ] Nieuwe Codex-monsters voor Archief 2 (leventhema)
+- [x] Codex-monsters Archief 2 beslist (CANON 13)
+- [ ] Codex-bondgenoten bouwen: Sporekop (vergiftigt), Rankje (bindt, 1 beurt), Wortelgeest (trekt + counter)
 
 ### Bestiarium
 
@@ -160,7 +165,7 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 - [ ] World Warper exterieur (zwevend, paars, high-tech)
   Placeholder-kaart, tegels 16×16, in world_warper/maps. Zweeft niet. De atlas staat in tools/placeholders_v17.txt.
 - [ ] Interieur-tileset (paars, holografisch, sciencefiction)
-  tiles_placeholder.png, tegels 16×16, met het woord PLACEHOLDER. Geregistreerd in tools/placeholders_v17.txt. Echte tileset ontbreekt nog.
+  tiles.png, tegels 16×16, met het woord PLACEHOLDER. Geregistreerd in tools/placeholders_v17.txt. Echte tileset ontbreekt nog.
 - [ ] Sprite van het warp-platform
   warp_ring is een rechthoek van paneeltegels. Geen sprite.
 - [ ] Sprite van de main PC
@@ -292,9 +297,10 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
   - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
 - [ ] Empty Room: lore-items of alleen leeg?
 - [ ] Merchant Room: welke items verkoopt hij?
-  - [ ] TODO(verhaal): welke H is hij? Wat is zijn verhaal?
-    - [ ] TODO(verhaal): hoe eindigt H-5?
-    - [ ] TODO(verhaal): kan hij bevrijd worden? Sterft hij? List van Sapientia?
+  - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
+  - [ ] 3 dialoogfases bouwen: bezoek 1-3 vaag; 4-7 (na H-6-onthulling) fragmenten; 8+ of na Archief 5 waarheid
+  - [ ] Item "H-5's Token" (+10% stats tegen dienaren van Sapientia)
+  - [ ] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest."
 
 ## RPG ART
 
@@ -325,16 +331,16 @@ Echte pixel-art ter vervanging van placeholders. Geen definitieve art tekenen in
 - [ ] `assets/sprites/enemies/woudgeest.png` — maat niet vastgelegd — vooraanzicht woudgeest (Het Zingende Graan). Nog geen bestand; het gevecht gebruikt tijdelijk `art/enemies/mosslijm.png` (90×94)
 - [ ] `assets/sprites/enemies/woudgeest_rug.png` — zelfde canvas als het vooraanzicht — rugaanzicht woudgeest. Nog geen bestand
 - [ ] `assets/map_monsters/woudgeest.png` — 32×64 — alleen als de woudgeest op de kaart gaat lopen (2×4 frames van 16×16). Nog geen bestand
-- [ ] `world_warper/art/echo_placeholder.png` — 48×96 — ECHO op de kaart (3×4 frames van 16×32)
-- [ ] `world_warper/art/party_placeholder.png` — 48×96 — party-lid zonder eigen sheet (3×4 frames van 16×32)
-- [ ] `world_warper/art/pc_placeholder.png` — 32×32 — hoofd-PC in De Hal en de terminal in ECHO's Kamer
+- [ ] `world_warper/art/echo.png` — 48×96 — ECHO op de kaart (3×4 frames van 16×32)
+- [ ] `world_warper/art/party.png` — 48×96 — party-lid zonder eigen sheet (3×4 frames van 16×32)
+- [ ] `world_warper/art/pc.png` — 32×32 — hoofd-PC in De Hal en de terminal in ECHO's Kamer
 - [ ] `world_warper/art/warp_platform.png` — 32×16 — warp-platform in De Hal
-- [ ] `world_warper/art/tafel_placeholder.png` — 32×16 — lege smidstafel in De Werkplaats
-- [ ] `world_warper/art/toonbank_placeholder.png` — 48×16 — dichte toonbank in De Handelskamer
+- [ ] `world_warper/art/tafel.png` — 32×16 — lege smidstafel in De Werkplaats
+- [ ] `world_warper/art/toonbank.png` — 48×16 — dichte toonbank in De Handelskamer
 - [ ] `world_warper/art/bord_kamers.png` — 32×16 — bordje naar de kamers
 - [ ] `world_warper/art/bord_hal.png` — 32×16 — bord in de hal. Placeholder staat in `tools/placeholders_v17.txt`
 - [ ] `world_warper/art/bord_warp.png` — 48×16 — bord bij de warp. Placeholder staat in `tools/placeholders_v17.txt`
-- [ ] `world_warper/art/tiles_placeholder.png` — 128×32 — interieur-tegels. Placeholder staat in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/tiles.png` — 128×32 — interieur-tegels. Placeholder staat in `tools/placeholders_v17.txt`
 - [ ] `assets/bg/spiegel_kamer.png` — 384×216 — kamer vol spiegelende oppervlakken
 - [ ] `assets/bg/spiegel_kamer_gebroken.png` — 384×216 — dezelfde kamer, spiegels gebroken
 - [ ] `assets/sprites/buiten/molen_wieken.png` — 192×64 — vier frames van 48×64
@@ -1574,7 +1580,7 @@ Scheiding:
 - [x] Act-kamers bouwen en de deuren openen.
   De kamers uit de lijst staan in `world_warper/kamers`. `hub_open` is waar bij `warper_hub_open` of zodra de World Warper na De Genezer open is. Werkplaats en Handelskamer zijn leeg: geen recepten, geen endgame-voorraad. `codex_nis` en `sapientia_schot` blijven dicht.
 - [x] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
-  bord_hal, bord_warp en tiles_placeholder staan in tools/placeholders_v17.txt. De kaarten in world_warper/maps tekenen met die atlas.
+  bord_hal, bord_warp en tiles staan in tools/placeholders_v17.txt. De kaarten in world_warper/maps tekenen met die atlas.
 - [x] Kleur van de Hanger-gloed in de code van roze naar paars.
   `HangerScene.PURPLE` is `Color("b07ae8")`. De scène zet de Hanger op die kleur.
 

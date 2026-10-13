@@ -33,32 +33,32 @@ static func steps() -> Array:
 			"id": "welkom",
 			"flag": flag_for(0),
 			"lines": [
-				"Ik ben ECHO. Ik ben de gids van deze hub.",
-				"Vraag het me als je de weg niet weet.",
+				"I am ECHO. I am the guide of this hub.",
+				"Ask me if you don't know the way.",
 			],
 		},
 		{
 			"id": "warp",
 			"flag": flag_for(1),
 			"lines": [
-				"De ring brengt je naar de open wereldkaart.",
-				"Daarna kom je bij een plaats.",
+				"The ring takes you to the open world map.",
+				"Then you arrive at a place.",
 			],
 		},
 		{
 			"id": "gesloten",
 			"flag": flag_for(2),
 			"lines": [
-				"ECHO's Kamer is open. Daar begint de Diepe Grot.",
-				"Het verhaal opent de andere kamers.",
+				"ECHO's Room is open. The Diepe Grot begins there.",
+				"The story opens the other rooms.",
 			],
 		},
 		{
 			"id": "hanger",
 			"flag": flag_for(3),
 			"lines": [
-				"De Sleutel reageerde bij je aankomst.",
-				"De Hanger is de Sleutel.",
+				"The Key reacted when you arrived.",
+				"The Hanger is the Key.",
 			],
 		},
 	]
@@ -90,28 +90,28 @@ static func _vlag_aan(flags: Dictionary, sleutel: String) -> bool:
 static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 	if not _vlag_aan(flags, FLAG_NOOR_LID):
 		return [
-			"Noor is nog niet aangesloten.",
-			"Zoek haar in het Donker Woud.",
+			"Noor hasn't joined yet.",
+			"Look for her in the Donker Woud.",
 		]
 	if not _vlag_aan(flags, FLAG_GOLEM):
 		return [
-			"De Golem van het Eerste Archief staat nog.",
-			"Ga naar het Eerste Archief.",
+			"The Golem of the Eerste Archief still stands.",
+			"Go to the Eerste Archief.",
 		]
 	if not _vlag_aan(flags, FLAG_GENEZER):
 		return [
-			"De Genezer staat nog in de kas van Archief 2.",
-			"Ga via de berggrot.",
+			"De Genezer still stands in the greenhouse of Archief 2.",
+			"Go through the berggrot.",
 		]
 	var plek := _wm1_plek(bezocht)
 	if plek == "":
 		return [
-			"De warp-ring brengt je naar wereld 1.",
-			"Kies een plek die je al bezocht hebt.",
+			"The warp ring takes you to world 1.",
+			"Choose a place you have already visited.",
 		]
 	return [
-		"De warp-ring brengt je naar %s." % plek,
-		"Die plek op wereld 1 heb je al bezocht.",
+		"The warp ring takes you to %s." % plek,
+		"You have already visited that place on world 1.",
 	]
 
 

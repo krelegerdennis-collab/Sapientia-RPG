@@ -15,6 +15,8 @@ extends Node2D
 const TILE := 16
 const WarperAccent := preload("res://world_warper/art/accent.gd")
 const FieldFollowerScript := preload("res://scripts/field_follower.gd")
+const WorldmapCutsceneScript := preload("res://scripts/worldmap_cutscene.gd")
+const GardenCreaturesScript := preload("res://scripts/village/garden_creatures.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const BerggrotHaak := preload("res://scripts/data/berggrot_data.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
@@ -89,6 +91,10 @@ func _ready() -> void:
 		add_child(ka)
 		ka.start(self, GameState.pending_kern_absorb)
 	_play_map_music()
+	# Eenmalig filmpje bij de eerste keer op de wereldkaart (vlag in de save), zie worldmap_cutscene.gd
+	if WorldmapCutsceneScript.should_play(scene_file_path):
+		WorldmapCutsceneScript.start_on(self)
+	_spawn_garden_creatures()
 	# (de autotest wordt sinds v0.10 door GameState gestart, zie game_state.gd)
 
 
@@ -206,6 +212,19 @@ func _spawn_follower() -> void:
 	follower.name = "CodexFollower"
 	objects.add_child(follower)
 	follower.setup(player)
+
+
+## Moswezens in de tuin van opa (alleen wilgendal.tscn), zie scripts/village/garden_creatures.gd
+func _spawn_garden_creatures() -> void:
+	if not GardenCreaturesScript.applies_to(scene_file_path):
+		return
+	var objects := get_node_or_null("Objects")
+	if objects == null or player == null:
+		return
+	var g := GardenCreaturesScript.new()
+	g.name = "GardenCreatures"
+	objects.add_child(g)
+	g.setup(player, get_node_or_null("Exits/NaarWereld"))
 
 
 func _process(_delta: float) -> void:

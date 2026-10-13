@@ -36,7 +36,7 @@ const KERNFRAGMENTEN := {
 	"levenskern": {
 		"id": "levenskern",
 		"naam": "Levenskern",
-		"beschrijving": "In stilte ligt vrede. Ik corrigeer wat groeit.",
+		"beschrijving": "In silence lies peace. I correct what grows.",
 		"icon": "res://assets/ui/icons/levenskern.png",
 		"source_boss": "genezer",
 		"battle_skill": "",

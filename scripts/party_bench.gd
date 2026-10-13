@@ -1,15 +1,15 @@
 class_name PartyBench
 extends RefCounted
-## Bank van de Rustkamer. Maximaal 3 actieve leden (Dennis + 2).
+## Bank van de Rustkamer. Maximaal 4 actieve helden (v0.22 partylimiet, scripts/party_limiet.gd).
 ## Wisselen is gratis en alleen hier. Dennis en tijdelijke Codex-gasten
 ## gaan niet op de bank. De molen houdt zijn eigen "zet vooraan".
 
-const MAX_ACTIEF := 3
+const MAX_ACTIEF := preload("res://scripts/party_limiet.gd").MAX_HELDEN
 const RUSTKAMER := "res://world_warper/kamers/rustkamer.tscn"
 
 const DENNIS_BLIJFT := "Dennis stays in the party."
 const GAST_BLIJFT := "Temporary guests can't go on the bench."
-const VOL := "De groep is vol."
+const VOL := "The party is full."
 const ALLEEN_HIER := "You can only switch in the Rest Room."
 const OP_BANK := "%s is on the bench."
 const IN_GROEP := "%s is in the party."

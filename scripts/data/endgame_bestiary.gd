@@ -38,7 +38,7 @@ static func entry(id: String) -> Dictionary:
 	var base: Dictionary = GameData.ENEMIES[str(b["enemy"])]
 	var stats := Scaling.boss_stats(base, floor)
 	var canon := str(b.get("desc", ""))
-	var factual := "Baas op verdieping %d van de Diepe Grot. Zelfde gedaante als %s." % [floor, str(base.get("name", ""))]
+	var factual := "Boss on floor %d of the Diepe Grot. Same shape as %s." % [floor, str(base.get("name", ""))]
 	var desc := canon if canon != "" else factual
 	return {
 		"name": str(b["name"]),

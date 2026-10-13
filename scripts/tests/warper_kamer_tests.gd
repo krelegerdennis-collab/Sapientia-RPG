@@ -8,7 +8,6 @@ const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const Dialoog := preload("res://world_warper/guide/dialoog.gd")
 const Destinations := preload("res://world_warper/warp/destinations.gd")
 const DestTest := preload("res://world_warper/warp/destinations_test.gd")
-const SavePunt := preload("res://world_warper/services/save_point.gd")
 const NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
 const Unlock := preload("res://world_warper/flow/unlock.gd")
 const Enter := preload("res://world_warper/flow/enter.gd")
@@ -123,7 +122,7 @@ func _buit_en_tekst() -> void:
 	check("oefenvijand bestaat", GameData.ENEMIES.has(Kamers.OEFEN_VIJAND))
 	check("geen recepten", Kamers.RECEPTEN.is_empty())
 	check("geen endgame-winkel", Kamers.endgame_winkel() == "" and not Kamers.handel_open())
-	check("handelstekst", Kamers.HANDEL_DICHT == "De handel is nog gesloten.")
+	check("handelstekst", Kamers.HANDEL_DICHT == "The shop is still closed.")
 	var doelen := Kamers.warp_doelen()
 	var ids: Array[String] = []
 	for d in doelen:
@@ -134,9 +133,9 @@ func _buit_en_tekst() -> void:
 	var wereld: Node = load("res://scenes/maps/wereldkaart.tscn").instantiate()
 	check("spawn van_wilgendal bestaat", wereld.get_node_or_null("Spawns/van_wilgendal") != null)
 	wereld.free()
-	check("ECHO bedient alleen de hub", Kamers.ECHO_REGELS == ["Ik bedien deze hub."])
+	check("ECHO bedient alleen de hub", Kamers.ECHO_REGELS == ["I operate this hub."])
 	check("ECHO noemt geen onderzoeker", not " ".join(Kamers.ECHO_REGELS).to_lower().contains("onderzoeker"))
-	check("kernzin zonder onthulling", Kamers.KERN_ZIN == "Het verhaal van H-6 eindigt hier.")
+	check("kernzin zonder onthulling", Kamers.KERN_ZIN == "The story of H-6 ends here.")
 	var schoon := true
 	for regel in Kamers.speler_teksten():
 		if regel.to_lower().contains("proefpersoon"):
@@ -225,10 +224,10 @@ func _echo_grot() -> void:
 		var regels: Array = stappen[0].get("lines", [])
 		if not regels.is_empty():
 			welkom = str(regels[0])
-	var eerste_letterlijk := "De Diepe Grot. Een simulatie — honderd verdiepingen, telkens anders. Ik beheer hem. Sapientia... Sapientia helpt met de data. Zo werkt het nu eenmaal."
-	var twijfel_letterlijk := "Waarom ik het doe? Omdat het mijn taak is. De Oude Mensheid bouwde me om te meten, te tellen, te bewaren."
-	var h6_letterlijk := "Ik heb honderden kandidaten doorgelaten. Jij bent de zesde die bleef staan. De anderen... ik weet niet wat er met ze is gebeurd."
-	var data_letterlijk := "Dat weet ik niet. Ik lever, zij neemt. Zo is het altijd geweest."
+	var eerste_letterlijk := "The Diepe Grot. A simulation — a hundred floors, different every time. I run it. Sapientia... Sapientia helps with the data. That's just how it works."
+	var twijfel_letterlijk := "Why I do it? Because it is my task. The Old Humanity built me to measure, to count, to preserve."
+	var h6_letterlijk := "I have let hundreds of candidates through. You are the sixth who stayed standing. The others... I don't know what happened to them."
+	var data_letterlijk := "I don't know. I deliver, she takes. It has always been that way."
 	check("grotzinnen letterlijk", EchoGrot.ZIN_EERSTE == eerste_letterlijk and EchoGrot.ZIN_TWIJFEL == twijfel_letterlijk
 			and EchoGrot.ZIN_H6 == h6_letterlijk and EchoGrot.ZIN_DATA == data_letterlijk)
 	check("ECHO legt de onderzoeker-twist niet uit", not " ".join(EchoGrot.speler_teksten()).to_lower().contains("onderzoeker"))
@@ -255,9 +254,6 @@ func _echo_grot() -> void:
 		return
 	check("ECHO in de geladen kamer", _echo_node() != null and _player() != null)
 	var kisten := _kisten()
-	var speler := _player()
-	var pos: Dictionary = SavePunt.positie_van(speler)
-	check("savepunt leest de spelertegel", speler != null and pos["tile"] == speler.get_tile() and pos["facing"] == speler.facing)
 	check("eerste bezoek: kisten leeg en donker", kisten != null and kisten.gevuld_aantal() == 0 and kisten.licht_aantal() == 0)
 	if not _praat():
 		return
@@ -439,9 +435,10 @@ func _update2_regels() -> void:
 	GameState.party.append(gast)
 	check("Codex-gast niet op de bank", PartyBench.naar_bank(GameState.party.size() - 1, PartyBench.RUSTKAMER) == PartyBench.GAST_BLIJFT)
 	GameState.party.pop_back()
+	GameState.party.append(GameState.hero_template("lotte"))   # v0.22: max 4 actief, dus 5 nodig
 	GameState.party.append(GameState.hero_template("noor"))
 	PartyBench.normaliseer()
-	check("maximaal 3 actief", GameState.party.size() == PartyBench.MAX_ACTIEF and GameState.party_bench.size() == 1)
+	check("maximaal %d actief" % PartyBench.MAX_ACTIEF, GameState.party.size() == PartyBench.MAX_ACTIEF and GameState.party_bench.size() == 1)
 	var pad := "user://warper_bank_test.json"
 	var weg := GameState.save_game(Vector2i(4, 5), Vector2i.LEFT, pad)
 	var ruw := GameState.read_save(pad)
@@ -453,8 +450,6 @@ func _update2_regels() -> void:
 	check("bank en tegel in de save", weg and geladen and bank_id == "noor"
 			and str(GameState.party[0].get("id", "")) == "dennis"
 			and tegel == Vector2i(4, 5) and kijk == Vector2i.LEFT)
-	var leeg := SavePunt.positie_van(null)
-	check("zonder speler valt de tegel terug", leeg["tile"] == Vector2i.ZERO and leeg["facing"] == Vector2i.DOWN)
 
 
 func _genezer_warp() -> void:

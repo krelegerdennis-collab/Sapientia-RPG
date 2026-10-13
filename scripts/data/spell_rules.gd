@@ -117,4 +117,4 @@ static func block_reason(hero: Dictionary, spell_id: String) -> String:
 		return ""
 	if str(hero.get("id", "")) == "dennis":
 		return "Dennis leert geen magie."
-	return "%s kan deze spreuk niet leren." % str(hero.get("name", "Deze held"))
+	return "%s cannot learn this spell." % str(hero.get("name", "Deze held"))

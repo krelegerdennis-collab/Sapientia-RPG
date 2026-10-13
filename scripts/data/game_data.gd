@@ -199,7 +199,7 @@ const ENEMIES := {
 				"rect": [82, 52, 30, 30],   # kern in golem_boss_v2.png (196x182)
 			},
 		},
-		"desc": "Een wachter zonder ogen, maar met duizend oren. Hij hoort elke gedachte die het Archief binnenkomt. De Oude Mensheid bouwde hem niet om te doden, maar om te bewaren. Sapientia gaf hem een nieuw doel: alles wat niet past, wordt verwijderd.",
+		"desc": "A guardian without eyes, but with a thousand ears. It hears every thought that enters the Archive. The Old Humanity built it not to kill, but to preserve. Sapientia gave it a new purpose: whatever doesn't fit is removed.",
 		"habitat": ["gras", "bos", "baas"],
 	},
 	# ------------------------------------------------------------ v0.17 HET DONKER WOUD
@@ -263,7 +263,7 @@ const ENEMIES := {
 			"exp": 400, "gold": 150,
 			"skills": [{"name": "Root Grip", "chance": 0.25, "power": 1.6}],
 		},
-		"desc": "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat.",
+		"desc": "What was once a shepherd of the wood became a king of roots. He drags what he loves into the depths — not out of cruelty, but out of fear of being alone. Sapientia whispered to him that everything that lets go, perishes.",
 		"habitat": ["woud", "baas"],
 	},
 	# Het Gesimuleerde Archief (Dungeon100): de Mimic, een kist die terugbijt. Komt alleen uit een
@@ -329,7 +329,7 @@ const ENEMIES := {
 			"skills": [{"name": "Stilte", "chance": 0.25, "power": 1.2}],
 			"tint": [0.72, 0.40, 1.15],
 		},
-		"desc": "Lotte, priesteres van de Orde van de Stille Vlam, stilgezet door Sapientia.",
+		"desc": "Lotte, priestess of the Order of the Silent Flame, stilled by Sapientia.",
 		"habitat": ["archief"],
 	},
 	"wurger": {
@@ -346,7 +346,7 @@ const ENEMIES := {
 			"weak": ["ijs", "fysiek"],
 			"weak_matters": true,
 		},
-		"desc": "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden.",
+		"desc": "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free.",
 		"habitat": ["archief", "baas"],
 	},
 	"genezer": {
@@ -367,9 +367,9 @@ const ENEMIES := {
 			"weak_matters": true,
 			"archief2_open": true,
 			"archief2_leech": true,
-			"archief2_zin": "In stilte ligt vrede. Ik corrigeer wat groeit.",
+			"archief2_zin": "In silence lies peace. I correct what grows.",
 		},
-		"desc": "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg.",
+		"desc": "He heals by taking. He gives nothing back. Sapientia's perfect servant: without doubt, without emotion, without end. Whoever sees him sees what humanity becomes if Sapientia wins — silent, whole, and empty.",
 		"habitat": ["archief", "baas"],
 	},
 	# ------------------------------------------------------------ v0.21 ARCHIEF 2: GEWONE VIJANDEN
@@ -450,7 +450,7 @@ const ENEMIES := {
 		"skills": [],
 		"no": 25, "mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [],
-		"desc": "Een kleine geest uit het woud.",
+		"desc": "A small spirit from the wood.",
 		"habitat": ["woud"],
 	},
 	# Beloning van verdieping 100 (optie A). v0.21: eigen art van RPG ART (batch 11), voor + rug 90x90.
@@ -463,7 +463,7 @@ const ENEMIES := {
 		"skills": [],
 		"no": 33, "mp": 0, "weak": [], "resist": [],
 		"drops": [],
-		"desc": "Een uniek wezen uit de Diepe Grot. Alleen als beloning op verdieping 100.",
+		"desc": "A unique creature from the Diepe Grot. Only as a reward on floor 100.",
 		"habitat": ["dungeon100"],
 	},
 }
@@ -535,6 +535,15 @@ const ITEMS := {
 		"desc": "A glowing brew. Gives a lot of magic back."},
 	"elixer": {"name": "Elixir", "target": "ally", "heal_hp": 400, "heal_mp": 60,
 		"desc": "A rare elixir from the deep. Heals almost everything."},
+	# De Koopman (H-5, Diepe Grot): alleen in zijn winkel (scripts/data/koopman_winkel.gd).
+	"feniksveer": {"name": "Phoenix Feather", "short": "Phoenix", "target": "ally", "heal_hp": 0, "heal_mp": 0,
+		"revive": 0.5, "desc": "A feather that is still warm. Wakes a fallen ally with half their HP."},
+	"tegengif": {"name": "Antidote", "target": "ally", "heal_hp": 0, "heal_mp": 0, "cure": true, "field": false,
+		"desc": "Bitter drops. Cures poison and binding in battle."},
+	"stunbom": {"name": "Stun Bomb", "target": "ally", "heal_hp": 0, "heal_mp": 0, "stun_room": true,
+		"desc": "A cracked glass orb full of static. Stuns every monster in the room."},
+	"h5_notitie": {"name": "Faded Note", "target": "ally", "heal_hp": 0, "heal_mp": 0, "field": false,
+		"desc": "Sleeve stitching: 'H-5'. On the back, in shaky handwriting: 'Don't stop for the Voice.'"},
 	# Codex (Kernfragment stap 2): alleen in een gevecht, op een VIJAND. Schrijft een verzwakt
 	# monster in de Codex (kans: scripts/data/codex_data.gd). Altijd op, ook als het mislukt.
 	# Te krijgen: 3 van Marit in Esdoorn (na de ontmoeting) + 2 in kisten van het Donker Woud
@@ -546,63 +555,63 @@ const ITEMS := {
 	# Spreukrollen: alleen als buit in gewone kisten van de 100-verdiepingen-grot (dungeon100_scaling.gd).
 	# De party gaat die grot in zonder spreuken; een rol leert één held de spreuk (party_actions.gd).
 	"spreuk_vuur": {"name": "Rol: Vonk", "target": "ally", "teach": "vuur", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Vonk. Iemand in de party kan de spreuk leren."},
+		"desc": "A scroll with Vonk. Someone in the party can learn the spell."},
 	"spreuk_bliksem": {"name": "Rol: Bliksem", "target": "ally", "teach": "bliksem", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Kettingbliksem. Iemand in de party kan de spreuk leren."},
+		"desc": "A scroll with Kettingbliksem. Someone in the party can learn the spell."},
 	"spreuk_genees": {"name": "Rol: Genezing", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Kleine Genezing. Iemand in de party kan de spreuk leren."},
+		"desc": "A scroll with Kleine Genezing. Someone in the party can learn the spell."},
 	# Oude rollen. Blijven staan zodat een save of test ze nog opzoekt. Niet de grade-4-pool.
 	"spreuk_inferno": {"name": "Rol: Inferno", "target": "ally", "teach": "inferno", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Inferno. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Inferno. Only from a deep blue chest."},
 	"spreuk_oerwoud": {"name": "Rol: Oerwoud", "target": "ally", "teach": "oerwoud", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Oerwoud. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Oerwoud. Only from a deep blue chest."},
 	"spreuk_donderslag": {"name": "Donderrol", "target": "ally", "teach": "donderslag", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Godenslag. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Godenslag. Only from a deep blue chest."},
 	"spreuk_aureool": {"name": "Rol: Aurora", "target": "ally", "teach": "aureool", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Aurora. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Aurora. Only from a deep blue chest."},
 	"spreuk_ijskern": {"name": "Rol: Glaciaal", "target": "ally", "teach": "ijskern", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Glaciaal Hart. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Glaciaal Hart. Only from a deep blue chest."},
 	# Grade 4: één rol per canon-spreuk (spells.gd, grade == 4). Alleen blauwe kisten vanaf verdieping 80. Niet in de winkel.
 	"spreuk_g4_zonneslag": {"name": "Rol: Zonneslag", "short": "Zonneslag", "target": "ally", "teach": "zonneslag", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Zonneslag. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Zonneslag. Only from a deep blue chest."},
 	"spreuk_g4_apocalyps": {"name": "Rol: Apocalyps", "short": "Apocalyps", "target": "ally", "teach": "apocalyps", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Apocalyps. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Apocalyps. Only from a deep blue chest."},
 	"spreuk_g4_dageraad": {"name": "Rol: Dageraad", "target": "ally", "teach": "dageraad", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Dageraad. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Dageraad. Only from a deep blue chest."},
 	"spreuk_g4_zuiverende_vlam": {"name": "Rol: Zuiverende Vlam", "short": "Zuiver. Vlam", "target": "ally", "teach": "zuiverende_vlam", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Zuiverende Vlam. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Zuiverende Vlam. Only from a deep blue chest."},
 	"spreuk_g4_zielenbloei": {"name": "Rol: Zielenbloei", "short": "Zielenbloei", "target": "ally", "teach": "zielenbloei", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Zielenbloei. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Zielenbloei. Only from a deep blue chest."},
 	"spreuk_g4_oerbos": {"name": "Rol: Oerbos", "target": "ally", "teach": "oerbos", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Oerbos. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Oerbos. Only from a deep blue chest."},
 	"spreuk_g4_moeder_aarde": {"name": "Rol: Moeder Aarde", "short": "Moeder Aarde", "target": "ally", "teach": "moeder_aarde", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Moeder Aarde. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Moeder Aarde. Only from a deep blue chest."},
 	"spreuk_g4_wildgroei": {"name": "Rol: Wrake van de Wildernis", "short": "Wrake Wildern", "target": "ally", "teach": "wildgroei", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Wrake van de Wildernis. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Wrake van de Wildernis. Only from a deep blue chest."},
 	"spreuk_g4_hemelval": {"name": "Rol: Hemelval", "target": "ally", "teach": "hemelval", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Hemelval. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Hemelval. Only from a deep blue chest."},
 	"spreuk_g4_donderslag": {"name": "Rol: Godenslag", "short": "Godenslag", "target": "ally", "teach": "donderslag", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Godenslag. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Godenslag. Only from a deep blue chest."},
 	"spreuk_g4_stormheer": {"name": "Rol: Stormheer", "short": "Stormheer", "target": "ally", "teach": "stormheer", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Stormheer. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Stormheer. Only from a deep blue chest."},
 	"spreuk_g4_zuiverende_donder": {"name": "Rol: Zuiverende Donder", "short": "Zuiverdonder", "target": "ally", "teach": "zuiverende_donder", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Zuiverende Donder. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Zuiverende Donder. Only from a deep blue chest."},
 	"spreuk_g4_wederopstanding": {"name": "Rol: Wederopstanding", "short": "Opstanding", "target": "ally", "teach": "wederopstanding", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Wederopstanding. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Wederopstanding. Only from a deep blue chest."},
 	"spreuk_g4_heilige_straal": {"name": "Rol: Heilige Straal", "short": "Heil. Straal", "target": "ally", "teach": "heilige_straal", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Heilige Straal. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Heilige Straal. Only from a deep blue chest."},
 	"spreuk_g4_aureool": {"name": "Rol: Aurora", "target": "ally", "teach": "aureool", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Aurora. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Aurora. Only from a deep blue chest."},
 	"spreuk_g4_zegen_der_goden": {"name": "Rol: Zegen der Goden", "short": "Godenzegen", "target": "ally", "teach": "zegen_der_goden", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Zegen der Goden. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Zegen der Goden. Only from a deep blue chest."},
 	"spreuk_g4_eeuwige_winter": {"name": "Rol: Eeuwige Winter", "short": "Eeuw. Winter", "target": "ally", "teach": "eeuwige_winter", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Eeuwige Winter. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Eeuwige Winter. Only from a deep blue chest."},
 	"spreuk_g4_absolute_nul": {"name": "Rol: Absolute Nul", "short": "Absolute Nul", "target": "ally", "teach": "absolute_nul", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Absolute Nul. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Absolute Nul. Only from a deep blue chest."},
 	"spreuk_g4_ijskern": {"name": "Rol: Glaciaal Hart", "short": "Glaciaal Hart", "target": "ally", "teach": "ijskern", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Glaciaal Hart. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Glaciaal Hart. Only from a deep blue chest."},
 	"spreuk_g4_sneeuwkoningin": {"name": "Rol: Sneeuwkoningin", "short": "Sneeuwkoning", "target": "ally", "teach": "sneeuwkoningin", "heal_hp": 0, "heal_mp": 0,
-		"desc": "Een rol met Sneeuwkoningin. Alleen uit een diepe blauwe kist."},
+		"desc": "A scroll with Sneeuwkoningin. Only from a deep blue chest."},
 	# Verhaaldrankjes t/m Act 6 (lijn "drank" in level_scale.gd). Alleen HP/MP: boosts, status
 	# (roest, stilte, correctie) en herleving zitten nog niet in het gevecht.
 	# Act 1, te vinden: Ilse in Esdoorn, eenmalig nadat Noor gered is. Later ook Tante Mien
@@ -645,7 +654,7 @@ const ITEMS := {
 		"desc": "Salt water from Saltwatch, in a crystal bottle. It weighs as much as a whole life."},
 	# Het Zingende Graan: één per bezoek aan de molen, nadat het zaad binnen is.
 	"zingend_meel": {"name": "Zingend Meel", "target": "ally", "heal_hp": 40, "heal_mp": 0, "price": 0,
-		"desc": "Meel uit de molen. Herstelt levenspunten."},
+		"desc": "Flour from the mill. Restores HP."},
 }
 ## v0.11: sleutel-voorwerpen (niet te gebruiken in een gevecht; tellen wel in de inventaris)
 const KEY_ITEMS := {
@@ -659,7 +668,7 @@ const KEY_ITEMS := {
 	# Niet in START_INVENTORY en niet op het betatest-account.
 	"hanger": {"name": "Pendant", "desc": "A heart-shaped pendant from Grandpa. It sometimes grows warm."},
 	# Het Zingende Graan: ligt aan de mistrand van de open plek, na een mini-gevecht.
-	"zingend_zaad": {"name": "Zingend Zaad", "desc": "Zaad van de rand van de mist."},
+	"zingend_zaad": {"name": "Zingend Zaad", "desc": "Seed from the edge of the mist."},
 }
 # ---------------------------------------------------------------- uitrusting (v0.14)
 ## Beginnersset (Act 1) plus de verhaalset t/m Act 6 (lijnen in level_scale.gd).
@@ -977,7 +986,7 @@ const EQUIPMENT := {
 		"desc": "Loot from the depths of the Hundred Floors."},
 	# Verdieping 100, optie C. Geen class, niet in de blauwe-kistpool (die staat in grade_gear.gd).
 	"simulatie_ring": {"name": "Simulatie-ring", "short": "Sim.-ring", "slot": "accessoire", "grade": 4, "price": 0,
-		"desc": "+10% op alle stats in de Diepe Grot. Eenmaal per run herstart de ring de huidige verdieping als de party valt."},
+		"desc": "+10% to all stats in the Diepe Grot. Once per run, the ring restarts the current floor if the party falls."},
 }
 ## Sterkste: hoe zwaar elke stat telt per soort held (VOORLOPIG, eigen voorstel van RPG CODE;
 ## niet in het ontwerp). Score van een stuk = som van bonus x gewicht.

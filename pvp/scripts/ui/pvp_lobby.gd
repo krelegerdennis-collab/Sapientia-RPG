@@ -226,10 +226,10 @@ func _on_mode_chosen(_id: String) -> void:
 
 func _ask_team(seat: String) -> void:
 	_team_seat = seat
-	var who := "Speler 1" if seat == "host" else "Speler 2"
-	var text := who + ", kies je team."
+	var who := "Player 1" if seat == "host" else "Player 2"
+	var text := who + ", choose your team."
 	if net_kind == "local" and seat == "guest":
-		text = "Geef het apparaat door. " + text
+		text = "Pass the device on. " + text
 	_team.set_waiting(false)
 	_team.prompt(text)
 	_screen = "team"
@@ -246,7 +246,7 @@ func _on_team_picked(id: String) -> void:
 		_ask_team("guest")
 		return
 	_team.set_waiting(true)
-	_team.prompt("Wachten op de andere speler…")
+	_team.prompt("Waiting for the other player…")
 
 
 func _on_battle_started() -> void:
@@ -267,13 +267,13 @@ func _refresh_battle() -> void:
 	if state == null or state.over:
 		return
 	var actor := state.fighter(state.current_uid())
-	var banner := "Wachten…"
+	var banner := "Waiting…"
 	var can := false
 	if not actor.is_empty():
-		banner = "%s is aan de beurt" % str(actor["display"])
+		banner = "It's %s's turn" % str(actor["display"])
 		can = true
 		if net_kind == "local":
-			banner = "Geef het apparaat door. " + banner
+			banner = "Pass the device on. " + banner
 		elif net_kind == "lan" and str(actor["seat"]) != role_on_device:
 			can = false
 	_battle.present(state, can, banner)
@@ -374,7 +374,7 @@ func _resume_teams() -> void:
 	if role_on_device == "guest":
 		if guest_session.guest_team != "":
 			_team.set_waiting(true)
-			_team.prompt("Wachten op de andere speler…")
+			_team.prompt("Waiting for the other player…")
 			_screen = "team"
 			_show_only(_team)
 			return
@@ -387,7 +387,7 @@ func _resume_teams() -> void:
 		_ask_team("guest")
 		return
 	_team.set_waiting(true)
-	_team.prompt("Wachten op de andere speler…")
+	_team.prompt("Waiting for the other player…")
 	_screen = "team"
 	_show_only(_team)
 

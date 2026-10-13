@@ -1,6 +1,6 @@
 class_name WorldWarperGids
 extends StaticBody2D
-## Hologram van de gids bij de hoofd-PC. v0.21: ECHO-sheet van RPG ART (echo_placeholder.png, 3x4 frames
+## Hologram van de gids bij de hoofd-PC. v0.21: ECHO-sheet van RPG ART (echo.png, 3x4 frames
 ## van 16x24); het paarse vlak en het woord PLACEHOLDER blijven alleen als die art ontbreekt.
 ## Tik op het vlak, of interact/accept vanaf de tegel ervoor (player.gd).
 ## Dialog.show_lines toont de stap. De vlag komt in GameState.story_flags.
@@ -10,7 +10,7 @@ signal guide_advanced(step_id: String)
 const Dialoog := preload("res://world_warper/guide/dialoog.gd")
 const ANKER_GROEP := "ww_anchor_gids"
 const PLACEHOLDER_TEKST := "PLACEHOLDER"
-const ART_ECHO := "res://world_warper/art/echo_placeholder.png"
+const ART_ECHO := "res://world_warper/art/echo.png"
 
 var _laatste_frame := -1
 
@@ -102,7 +102,7 @@ func _stijl_labels() -> void:
 		naam_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		naam_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if placeholder_label != null:
-		placeholder_label.text = PLACEHOLDER_TEKST
+		placeholder_label.text = ""
 		placeholder_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		placeholder_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 

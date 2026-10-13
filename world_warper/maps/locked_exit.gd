@@ -13,7 +13,7 @@ extends Node2D
 
 const Rooms := preload("res://world_warper/data/rooms.gd")
 const TILE := 16
-const GESLOTEN := "Deze kamer is nog gesloten."
+const GESLOTEN := "This room is still closed."
 
 ## Leeg laten: map.gd mag deze deur niet zelf afhandelen.
 var target_map := ""
