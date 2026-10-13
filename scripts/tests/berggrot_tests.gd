@@ -55,6 +55,7 @@ func _run() -> void:
 	await _start()
 	print("=== Deel D2: Archief 2-kant van de grot ===")
 	await _archief2_kant()
+	await _rust()
 	print("=== Deel E: uitgang-warpers berggrot ===")
 	await _warper_tests()
 	print("BERGGROTTEST %d PASS, %d FAIL" % [passes, failures])
@@ -376,6 +377,7 @@ func _warper_tests() -> void:
 	if Dialog.is_open:
 		Dialog.close()
 	var ingang := await _enter("res://scenes/maps/berggrot_mond.tscn", "ingang", "BerggrotMond")
+	await _rust()
 	await _weg_monsters(ingang)
 	var wp: DungeonExitWarper = _warper_van(ingang)
 	check("begin-warper in de grotmond op %s" % [BW.BEGIN_TILE], wp != null and wp.role == "begin"
@@ -403,6 +405,7 @@ func _warper_tests() -> void:
 
 func _warper_kamer(pad: String, spawn: String, scene_name: String, role: String, tegel: Vector2i) -> void:
 	var kamer := await _enter(pad, spawn, scene_name)
+	await _rust()
 	await _weg_monsters(kamer)
 	var wp: DungeonExitWarper = _warper_van(kamer)
 	check("%s-warper op %s" % [role, tegel], wp != null and wp.role == role and wp.waarschuwt()
@@ -611,6 +614,9 @@ func _archief2_kant() -> void:
 		await pframes(4)
 		await screenshot("berggrot_uitmond_boog")
 	check("Uitmond geladen bij de boog", ok and tile() == Vector2i(9, 3))
+	# Geen kas-intro (archief2_keten) tijdens deze check: die dialoog blokkeerde de warpers in Deel E.
+	var had_keten := GameState.story_flags.has("archief2_keten")
+	GameState.story_flags["archief2_keten"] = true
 	GameState.change_map("res://scenes/maps/archief_2_v1_entree.tscn", "ingang")
 	ok = await wait_scene("Archief2V1Entree", 20.0)
 	if ok:
@@ -633,6 +639,9 @@ func _archief2_kant() -> void:
 			break
 		await get_tree().process_frame
 	print("INFO  na D2: story.running=%s dialog=%s" % [Story.running, Dialog.is_open])
+	if not had_keten:
+		GameState.story_flags.erase("archief2_keten")
+	await _rust()
 
 
 func _praat(npc_naam: String) -> String:
@@ -715,3 +724,14 @@ func _bouwplaats() -> void:
 		if Dialog.is_open:
 			Dialog.advance()
 		await get_tree().process_frame
+
+
+## Wacht tot er geen dialoog, event of kaartwissel meer loopt (stabiel op trage CI).
+func _rust() -> void:
+	for _i in 600:
+		if Dialog.is_open:
+			Dialog.close()
+		if not Dialog.is_open and not Story.running and not GameState.changing_map:
+			break
+		await get_tree().process_frame
+	await pframes(5)
