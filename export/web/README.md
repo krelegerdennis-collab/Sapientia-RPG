@@ -1,10 +1,14 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`ff4ecdd`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`28d75ce`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build, bovenop `7237d2c`:
+Nieuw in deze build, bovenop `ff4ecdd`:
+- Gevechts-HUD v2: perkamentkaarten met alleen balken (geen getallen), gouden kaart = aan de beurt, teal = doelwit, grijs = KO. Het monstervak blijft groen.
+- World Warper-canonscènes (PR #73).
+
+Eerder, bovenop `7237d2c`:
 - De wereldkaart-cutscene is scherp: tijdens het filmpje rendert het spel op schermresolutie (daarna weer pixel-art), de video wordt lineair gefilterd en is opnieuw gecodeerd op 720x1280.
 
 Eerder, bovenop `bb484ea`:
