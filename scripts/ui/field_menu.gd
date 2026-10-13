@@ -128,8 +128,9 @@ func _build_buttons() -> void:
 		_style_button(b, id == "warp")
 		if id in RIGHT_COL:
 			b.custom_minimum_size = Vector2(WARP_W, ROW_H)   # v0.22 compact
-		if id == "warp":
-			b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# v0.22 (Dennis): alle teksten gecentreerd (horizontaal; Button centreert verticaal zelf), zodat ze gelijk staan
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		UiMenu.set_label(b, str(c[1]))
 		b.pressed.connect(choose.bind(id))
 		b.focus_entered.connect(_remember_focus.bind(b))
 		root.add_child(b)
