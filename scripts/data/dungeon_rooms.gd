@@ -101,6 +101,8 @@ const THEMES := {
 		"terrain": "kas",
 		"tint": Color(0.78, 1.0, 0.84),
 		"sprites": {},
+		# v0.23 kas v2 (RPG ART): ijzeren pilaar 70/71, bloembak 72, podiumrand met wortel 78
+		"solid_extra": [70, 71, 72, 78],
 	},
 	# Berggrot naar de kas. Zelfde tegelnummers, koud steenblauw beeld.
 	# v0.21: echte tegels van RPG ART (art_batch1_v21). Tint lichter gemaakt (was 0.70, 0.78, 0.95: te donker).
@@ -118,6 +120,7 @@ const THEMES := {
 		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek.png",
 		"tint": Color(0.78, 0.68, 1.0),
 		"terrain": "kas",
+		"solid_extra": [70, 71, 72, 78],
 	},
 	# v0.17 HET DONKER WOUD (scripts/data/woud_rooms.gd), tegels van RPG ART (art_woud_v17,
 	# docs/WOUD_TILES.txt): woud_tiles.png 256x112. 0-64 = zelfde nummering/botsing als

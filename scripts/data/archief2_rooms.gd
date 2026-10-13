@@ -234,6 +234,8 @@ static func rooms() -> Dictionary:
 		"monsters": [{
 			"id": "genezer", "enemy": "genezer", "group": ["genezer"],
 			"tile": [9, 5], "moves": false, "boss": true, "guard": true,
+			# v0.23 originele Genezer, grote kaartversie (RPG ART, 2 frames van 32x32) op het zegel 62/63
+			"sprite": "genezer_groot", "size": [2, 1], "frame": [32, 32], "fps": 1.2,
 		}],
 	})
 	var warper := _met(_basis("World Warper", 4, 0), {
