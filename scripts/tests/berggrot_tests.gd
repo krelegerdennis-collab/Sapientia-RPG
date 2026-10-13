@@ -53,6 +53,8 @@ func _run() -> void:
 	await _kaart()
 	print("=== Deel D: grot start zonder wereldkaart ===")
 	await _start()
+	print("=== Deel D2: Archief 2-kant van de grot ===")
+	await _archief2_kant()
 	print("=== Deel E: uitgang-warpers berggrot ===")
 	await _warper_tests()
 	print("BERGGROTTEST %d PASS, %d FAIL" % [passes, failures])
@@ -174,15 +176,16 @@ func _kaart() -> void:
 	var packed: PackedScene = load(BG.WERELD_MAP)
 	var kaart := packed.instantiate()
 	var grond: TileMapLayer = kaart.get_node("Ground")
-	var grot: Node = kaart.get_node("Exits/NaarBerggrot")
+	var grot: Node = kaart.get_node("Exits/NaarBouwplaats")
 	var spawn: Node2D = kaart.get_node("Spawns/van_berggrot")
 	var grot_tegel := Vector2i((grot.position / 16.0).floor())
 	var spawn_tegel := Vector2i((spawn.position / 16.0).floor())
-	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(21, 18)
-			and spawn_tegel == Vector2i(21, 19) and spawn.facing == Vector2i(0, 1)
-			and _terrein(grond, Vector2i(21, 17)) == "berg"
-			and _loopbaar(grond, grot_tegel) and _loopbaar(grond, spawn_tegel)
-			and _afstand(grond, Vector2i(14, 31), grot_tegel) > 0)
+	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(21, 17)
+			and spawn_tegel == Vector2i(21, 18) and spawn.facing == Vector2i(0, 1)
+			and _terrein(grond, grot_tegel) == "berg" and not _loopbaar(grond, grot_tegel)
+			and _terrein(grond, Vector2i(20, 17)) == "berg" and _terrein(grond, Vector2i(22, 17)) == "berg"
+			and _loopbaar(grond, spawn_tegel)
+			and _afstand(grond, Vector2i(14, 31), spawn_tegel) > 0)
 	var kas: Node = kaart.get_node("Exits/NaarKas")
 	var van_kas: Node2D = kaart.get_node("Spawns/van_kas")
 	var kas_tegel := Vector2i((kas.position / 16.0).floor())
@@ -252,18 +255,25 @@ func _kaart() -> void:
 	var mond_sprite := scene().get_node_or_null("Objects/BerggrotIngang") as Sprite2D
 	check("grotmond-sprite boven de berggrot-ingang", mond_sprite != null and mond_sprite.visible
 			and mond_sprite.texture != null and mond_sprite.texture.get_size() == Vector2(16, 16)
-			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i(21, 18)
+			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i(21, 17)
 			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i((kaart_grot_pos() / 16.0).floor()))
 	var noord: Dictionary = BG.ROOMS["berggrot_uitmond"]["exits"]["n"]
 	check("berggrot leidt naar Archief 2 (kas-entree)", str(noord.get("map", "")) == BG.KAS_SCENE
 			and BG.KAS_SCENE.ends_with("archief_2_v1_entree.tscn") and ResourceLoader.exists(BG.KAS_SCENE))
-	player().place_at(Vector2i(21, 19), Vector2i.UP)
+	player().place_at(Vector2i(20, 18), Vector2i.UP)
+	await pframes(2)
+	await walk("move_up", 1)
+	await pframes(10)
+	check("de rest van de bergwand blokkeert (20,17)", scene().name == "Wereldkaart" and tile() == Vector2i(20, 18)
+			and not GameState.changing_map)
+	player().place_at(Vector2i(21, 18), Vector2i.UP)
 	await pframes(4)
 	await screenshot("wereldkaart_grotmond")
 	await pframes(2)
 	await walk("move_up", 1)
-	var mond_ok := await wait_scene("BerggrotMond", 20.0)
-	check("de berggrot start vanaf de voet", mond_ok and str(GameState.current_map).ends_with("berggrot_mond.tscn"))
+	var bouw_ok := await wait_scene("BerggrotBouwplaats", 20.0)
+	check("tegen de grotmond lopen laadt eerst de bouwplaats", bouw_ok and str(GameState.current_map) == BG.BOUWPLAATS)
+	await _bouwplaats()
 
 
 func _start() -> void:
@@ -352,12 +362,12 @@ func _warper_tests() -> void:
 		var rid := str(p["room"])
 		if not BG.ROOMS.has(rid) or rid.begins_with("archief") or rid.begins_with("dungeon100"):
 			doel_ok = false
-		if str(p["world_scene"]) != str(uit["map"]) or str(p["world_spawn"]) != str(uit["spawn"]):
+		if str(p["world_scene"]) != BG.WERELD_MAP or str(p["world_spawn"]) != BG.WERELD_SPAWN:
 			doel_ok = false
 		if str(p["world_scene"]) == BG.KAS_SCENE:
 			doel_ok = false
-	check("alleen grotkamers, terug naar de bestaande wereldkaart-uitgang", doel_ok
-			and str(uit["map"]) == BG.WERELD_MAP and str(uit["spawn"]) == BG.WERELD_SPAWN)
+	check("warpers: alleen grotkamers, terug naar de wereldkaart (21,18); zuiduitgang naar de bouwplaats", doel_ok
+			and str(uit["map"]) == BG.BOUWPLAATS and str(uit["spawn"]) == BG.BOUWPLAATS_SPAWN)
 	if spots.size() != 3:
 		return
 	GameState.new_game("Dennis")
@@ -585,5 +595,123 @@ func screenshot(naam: String) -> void:
 
 
 func kaart_grot_pos() -> Vector2:
-	var g := scene().get_node_or_null("Exits/NaarBerggrot") as Node2D
+	var g := scene().get_node_or_null("Exits/NaarBouwplaats") as Node2D
 	return g.position if g != null else Vector2(-1, -1)
+
+
+## Uitmond: de boog in de noordwand (9,2) is de tunnel naar de kas (archief_2_v1_entree).
+## De kas-entree heeft onderin de dubbele deur (9-10,11) terug naar de Uitmond (spawn boog).
+func _archief2_kant() -> void:
+	var lay: Array = BG.ROOMS["berggrot_uitmond"]["layout"]
+	check("Uitmond: tunnelboog 'n' in de noordwand op (9,2)", str(lay[2]).find("n") == 9 and str(lay[1])[9] == "A")
+	GameState.change_map("res://scenes/maps/berggrot_uitmond.tscn", "boog")
+	var ok := await wait_scene("BerggrotUitmond", 20.0)
+	if ok:
+		await wait_fade()
+		await pframes(4)
+		await screenshot("berggrot_uitmond_boog")
+	check("Uitmond geladen bij de boog", ok and tile() == Vector2i(9, 3))
+	GameState.change_map("res://scenes/maps/archief_2_v1_entree.tscn", "ingang")
+	ok = await wait_scene("Archief2V1Entree", 20.0)
+	if ok:
+		await wait_fade()
+		await pframes(4)
+		await screenshot("archief2_entree_zuid")
+	var terug := false
+	if ok:
+		for uit in scene().get_node("Exits").get_children():
+			if str(uit.target_map).ends_with("berggrot_uitmond.tscn") and str(uit.target_spawn) == "boog":
+				terug = true
+	check("kas-entree heeft de weg terug naar de Uitmond", ok and terug)
+	for _i in 300:
+		if Dialog.is_open:
+			if Dialog._is_typing():
+				Dialog.advance()
+			else:
+				Dialog.advance()
+		elif not Story.running:
+			break
+		await get_tree().process_frame
+	print("INFO  na D2: story.running=%s dialog=%s" % [Story.running, Dialog.is_open])
+
+
+func _praat(npc_naam: String) -> String:
+	var n := scene().get_node_or_null("Objects/" + npc_naam)
+	if n == null:
+		return ""
+	var gezien := ""
+	Story.trigger(str(n.get("event")), n)
+	for _i in 200:
+		if Dialog.is_open:
+			if Dialog._is_typing():
+				Dialog.advance()
+			else:
+				gezien += str(Dialog.text_label.text) + " "
+				Dialog.advance()
+		elif not Story.running:
+			break
+		await get_tree().process_frame
+	return gezien
+
+
+## Bouwplaats voor de tunnel: dicht zonder noor_lid, open erna. Save-veilig (alleen de vlag telt).
+func _bouwplaats() -> void:
+	await wait_fade()
+	var hek := scene().get_node_or_null("Objects/Hek")
+	var voorman_tekst := await _praat("Voorman")
+	var werker_tekst := await _praat("Werker")
+	check("bouwplaats: werkers, karretje, gereedschap, balken", scene().get_node_or_null("Objects/Voorman") != null
+			and scene().get_node_or_null("Objects/Werker") != null and scene().get_node_or_null("Objects/Karretje") != null
+			and scene().get_node_or_null("Objects/Gereedschap") != null and scene().get_node_or_null("Objects/Balken") != null)
+	check("dicht: voorman zegt dat de tunnel niet veilig is (%s)" % voorman_tekst, voorman_tekst.contains("isn't safe yet"))
+	check("dicht: werker praat Engels", werker_tekst.contains("Mind the cart"))
+	check("dicht: hek staat en blokkeert", hek != null and hek.visible and int(hek.get("collision_layer")) != 0)
+	player().place_at(Vector2i(12, 5), Vector2i.UP)
+	await pframes(4)
+	await screenshot("bouwplaats_dicht")
+	await walk("move_up", 2)
+	await pframes(20)
+	for _i in 30:
+		if Dialog.is_open:
+			Dialog.advance()
+		await get_tree().process_frame
+	check("dicht: de tunnel laat je niet door", scene().name == "BerggrotBouwplaats" and tile() == Vector2i(12, 5))
+	# Zuid terug naar de wereldkaart (21,18)
+	var uit := scene().get_node("Exits/NaarWereld")
+	check("zuiduitgang naar de wereldkaart, spawn van_berggrot (21,18)", str(uit.target_map) == BG.WERELD_MAP
+			and str(uit.target_spawn) == "van_berggrot")
+	# Open na noor_lid. Via save/load: alleen de vlag telt.
+	GameState.story_flags[BG.TUNNEL_VLAG] = true
+	var data: Dictionary = GameState.state_data(Vector2i(12, 11), Vector2i.UP, BG.BOUWPLAATS)
+	GameState.story_flags.erase(BG.TUNNEL_VLAG)
+	print("INFO  na bouwplaats: story.running=%s dialog=%s locked=%s" % [Story.running, Dialog.is_open,
+			player().input_locked if player() != null else null])
+	for _i in 60:
+		if Dialog.is_open:
+			Dialog.advance()
+		await get_tree().process_frame
+	var geladen := GameState.apply_state(data)
+	GameState.change_map(BG.BOUWPLAATS, "zuid")
+	await wait_scene("BerggrotBouwplaats", 20.0)
+	await wait_fade()
+	await pframes(4)
+	hek = scene().get_node_or_null("Objects/Hek")
+	check("open: hek weg", hek != null and (not hek.visible or int(hek.get("collision_layer")) == 0))
+	voorman_tekst = await _praat("Voorman")
+	check("open: voorman zegt dat de tunnel open is", voorman_tekst.contains("tunnel's open"))
+	check("open na laden van een save met noor_lid", geladen and bool(GameState.story_flags.get(BG.TUNNEL_VLAG, false)))
+	player().place_at(Vector2i(12, 5), Vector2i.UP)
+	await pframes(4)
+	await screenshot("bouwplaats_open")
+	await walk("move_up", 1)
+	await pframes(2)
+	await walk("move_up", 1)
+	var mond_ok := await wait_scene("BerggrotMond", 20.0)
+	check("open: tunnel leidt de berggrot in", mond_ok and str(GameState.current_map).ends_with("berggrot_mond.tscn"))
+	GameState.story_flags.erase(BG.TUNNEL_VLAG)
+	print("INFO  na bouwplaats: story.running=%s dialog=%s locked=%s" % [Story.running, Dialog.is_open,
+			player().input_locked if player() != null else null])
+	for _i in 60:
+		if Dialog.is_open:
+			Dialog.advance()
+		await get_tree().process_frame
