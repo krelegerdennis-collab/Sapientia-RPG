@@ -2,6 +2,7 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 ## Kamer van Het Levende Archief. Zelfde opbouw als DungeonRoom, data uit archief2_rooms.gd
 ## (via DungeonRooms.room). Platen, de Lotte-ontmoeting en de hub horen hier.
 
+const CanonGenezer := preload("res://world_warper/cutscene/genezer_scene.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const PlaatScript := preload("res://scripts/dungeon/groei_plaat.gd")
 const WarpScript := preload("res://scripts/dungeon/archief2_warp.gd")
@@ -127,6 +128,9 @@ func _na_kern() -> void:
 		return
 	if not GameState.kernfragmenten.has(Archief2.KERN_ID):
 		return
+	# Canon-scène 1 (CANON.md punt 17): de World Warper verschijnt, daarna warp naar de Hal.
+	if CanonGenezer.speel(self):
+		return
 	await _zeg(Archief2.NA_GENEZER, "")
 	GameState.story_flags["archief2_naar_warper"] = true
 	var NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
@@ -141,8 +145,13 @@ func _verhaal() -> void:
 	if room_id == Archief2.ENTREE and not GameState.story_flags.has("archief2_keten"):
 		await _zeg(Archief2.KETEN, "")
 		GameState.story_flags["archief2_keten"] = true
+	# Save-veilig: kern al binnen maar scène 1 nooit afgemaakt (afgesloten tijdens de scène).
+	if room_id == "archief_2_v4_genezer" and GameState.kernfragmenten.has(Archief2.KERN_ID) \
+			and str(GameState.pending_kern_absorb) == "" and not GameState.world_warper_is_unlocked():
+		if CanonGenezer.speel(self):
+			return
 	if room_id == Archief2.WARPER and not GameState.story_flags.has("archief2_echo"):
-		await _zeg(Archief2.ECHO_REGELS, "ECHO")
+		await _zeg(Archief2.ECHO_REGELS, "")
 		GameState.story_flags["archief2_echo"] = true
 
 

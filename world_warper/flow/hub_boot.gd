@@ -92,9 +92,19 @@ func _bouw_hal() -> void:
 		_warp.connect("warp_requested", _on_warp_requested)
 	if not _hanger.is_connected("hanger_activated", _on_hanger_activated):
 		_hanger.connect("hanger_activated", _on_hanger_activated)
+	# Canon-scène 3 eindigt met: het warp-platform licht op, de wereldkaart verschijnt.
+	if not _hanger.is_connected("threat_finished", _on_canon_klaar):
+		_hanger.connect("threat_finished", _on_canon_klaar)
 
 	_wanderers.call("refresh")
 	_hanger.call("maybe_play")
+
+
+func _on_canon_klaar() -> void:
+	if _warp == null:
+		return
+	_ambience.play_warp()
+	call_deferred("_open_warp")
 
 
 func _on_warp_requested(_wm_id: String, _place_id: String) -> void:

@@ -67,22 +67,11 @@ const NA_GENEZER := [
 	"The greenhouse tears open. A floating high-tech building appears: the World Warper.",
 	"It pulls you upward.",
 ]
-## TODO(verhaal): CANON.md punt 3 legt Proefpersoon H-6 later, vanuit Archief 4.
-## Deze scène is de nieuwe canon. Het hanger-item wordt niet in de tas gelegd.
+## Kaartkamer. De Hanger-scène en de H-6-dreiging staan sinds CANON.md punt 17 in de Hal
+## (world_warper/cutscene/canon_scenes.gd). Hier alleen sfeer, geen ECHO-uitleg meer.
 const ECHO_REGELS := [
-	"I am ECHO. I operate this hub.",
-	"Your Hanger glows purple. I recognize it.",
-	"The Hanger is a biometric key of the Old Humanity, for Test Subject H-6.",
-	"It is literally bound to you.",
-	"Sapientia cannot copy or steal it without killing you.",
-	"Sapientia wants you for the key, not for your strength.",
-	"The Old Humanity built the World Warper as a warp relay between the six Archives.",
-	"Sapientia took it offline and partly rewrote the code.",
-	"A full takeover failed. Only the Hanger works.",
-	"Sapientia appears, a glitch in the sky.",
-	"Sapientia wants the World Warper: all six Archives at once, every core in one go.",
-	"Humanity set free in one stroke, says the glitch.",
-	"You have activated the enemy's weapon.",
+	"The map room is quiet. Purple light hums inside the walls.",
+	"Somewhere above you, the World Warper is waiting.",
 ]
 const EILANDEN_DICHT := [
 	"The other islands are silent. ECHO cannot open them yet.",

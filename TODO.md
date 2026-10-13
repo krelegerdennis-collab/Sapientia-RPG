@@ -73,7 +73,7 @@ De hub na De Genezer bestaat. Hieronder wat daar nog open is. Ontgrendeling van 
 ### Verschijning en cutscene
 
 - [ ] Cutscene na De Genezer: de World Warper verschijnt in de lucht
-  De Genezer staat in Archief 2. Het platform op de kaart is geen cutscene. De bestaande zinnen plus de mapwissel zijn geen losse cutscene.
+  De Genezer staat in Archief 2. De World Warper-scènes staan in CANON 17 en in de game. Er is geen platform op de kaart: alleen Warp in het menu.
 
 - [ ] Duidelijk maken wat dit is, wat het kan, en waarom het belangrijk is
   Eerste-bezoekscène en de vier ECHO-stappen doen een eerste versie. De zinnen zijn voorlopig.
@@ -1492,7 +1492,9 @@ Scheiding:
 
 ### World Warper — hub, ECHO en warp
 
-- [x] Deur op de wereldkaart, en een warp die vanzelf start na De Genezer. Het platform staat op de wereldkaart en gaat open na De Genezer. Na de bestaande zinnen van NA_GENEZER roept de Genezer-kamer `WorldWarperNaGenezer.probeer()` aan. Die wacht tot de kernabsorptie klaar is en roept dan `Enter.enter()` aan. De party komt in world_warper/maps/exterieur.tscn, spawn ingang, en world_warper_unlocked gaat aan.
+- [x] Na De Genezer: canon-scène 1 (CANON 17, `world_warper/cutscene/genezer_scene.gd`), daarna warp naar de Hal (`world_warper/maps/hal.tscn`, spawn ingang); daar scène 2 en 3 (`hanger_scene.gd`), daarna opent de warp-view. Vlaggen: `ww_canon_genezer_gezien`, `ww_canon_hanger_gezien`, `ww_canon_dreiging_gezien`.
+- [x] **De World Warper is geen plek op de wereldkaart** (Dennis 2026-10-13). Geen platform, geen uitgang, geen botsing. Alleen een overvliegend plaatje (`world_warper/art/flyover.gd`) na ontgrendeling. De enige ingang is **Warp in het menu** (`field_menu.open_warp`).
+- [x] Grotmond van de berggrot (weg naar Archief 2) zichtbaar op worldmap 1: tegel (14,18) boven de ingang (14,19), placeholder `assets/sprites/buiten/berggrot_ingang.png`.
 
 - [x] Dorpen eerst bezocht vóór een warp.
   `GameState.bezochte_kaarten` bewaart het pad. Wilgendal, Esdoorn en de wereldkaart gaan alleen open als dat pad erin staat. Een oude save zonder lijst telt die drie WM1-plekken als bezocht.

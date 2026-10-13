@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=4]
+[gd_scene load_steps=10 format=4]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_i0cqu"]
 [ext_resource type="TileSet" path="res://assets/tiles/wereld.tres" id="2_gwldh"]
@@ -7,7 +7,8 @@
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="5_ws0vq"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="6_vhjf7"]
 [ext_resource type="Texture2D" path="res://assets/sprites/buiten/kas_ingang.png" id="7_kas"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archief2/world_warper.png" id="8_ww"]
+[ext_resource type="Script" path="res://world_warper/art/flyover.gd" id="8_ww"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/berggrot_ingang.png" id="9_grot"]
 
 [node name="Wereldkaart" type="Node2D"]
 script = ExtResource("1_i0cqu")
@@ -31,11 +32,13 @@ position = Vector2(232, 136)
 texture = ExtResource("7_kas")
 texture_filter = 1
 
-[node name="WorldWarper" type="Sprite2D" parent="Objects"]
-position = Vector2(424, 360)
-scale = Vector2(0.25, 0.25)
-texture = ExtResource("8_ww")
+[node name="BerggrotIngang" type="Sprite2D" parent="Objects"]
+position = Vector2(232, 292)
+texture = ExtResource("9_grot")
 texture_filter = 1
+
+[node name="WorldWarperFlyover" type="Node2D" parent="."]
+script = ExtResource("8_ww")
 
 [node name="Spawns" type="Node2D" parent="."]
 
@@ -143,14 +146,5 @@ target_map = ""
 target_spawn = ""
 lines = Array[String]([])
 event = ""
-
-[node name="NaarWorldWarper" type="Node2D" parent="Exits"]
-position = Vector2(416, 352)
-script = ExtResource("5_ws0vq")
-size_tiles = Vector2i(1, 1)
-target_map = "res://world_warper/maps/exterieur.tscn"
-target_spawn = "ingang"
-lines = Array[String]([])
-event = "naar_world_warper"
 
 [node name="TouchControls" parent="." instance=ExtResource("6_vhjf7")]

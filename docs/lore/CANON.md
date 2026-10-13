@@ -62,7 +62,7 @@ Taalregel: tekst in de game is Engels; tekst in de documenten is Nederlands.
     zwevend platform, hologram, hetzelfde icoon. Accenten: Archief 1 Kennis grijs+paars;
     2 Leven groen+paars; 3 Industrie oranje+paars; 4 Magie roze+paars; 5 Kosmos blauw+paars;
     6 Hart rood+paars. Cutscene-teksten (na De Genezer, eerste binnenkomst Hal,
-    Sapientia-dreiging): *tekst volgt van Dennis*.
+    Sapientia-dreiging): zie **17** hieronder (canon van Dennis, 13 okt 2026).
 
 15. **5e party member: Kael Voss (WM2, psytech)**. **Kael Voss**, 19 jaar, is een
     psytech-dwaler uit **WM2**. Hij bestuurt **de Stroom** met zijn geest. Hij was
@@ -85,6 +85,99 @@ Taalregel: tekst in de game is Engels; tekst in de documenten is Nederlands.
 16. **Party-regel**. Max **4 actieve helden** + **1 monster** (Codex-gevangen) in
     gevecht; overige helden in reserve, wisselbaar buiten gevecht. (Besluit Dennis
     2026-10-13.)
+
+17. **World Warper-scènes (canon, Dennis 2026-10-13).** Deze drie scènes vervangen alle
+    eerdere korte samenvattingen (de World Warper verschijnt na De Genezer, de ontdekking
+    van de Hanger bij ECHO, de dreiging van Sapientia met H-6). In de game staan ze in het
+    Engels (`world_warper/cutscene/canon_scenes.gd`); de tekst hieronder is de bron.
+    Gevolg voor punt 3: Sapientia noemt Dennis al in de Hal **H-6**. Wát dat betekent
+    (Proefpersoon H-6) blijft de onthulling van Archief 4; ECHO stelt het uit ("een verhaal
+    voor later").
+    **Bereikbaarheid (Dennis 2026-10-13):** de World Warper is géén plek op de wereldkaart.
+    Na scène 1 blijft hij niet bij de kas staan. Hij vliegt alleen af en toe over de kaart
+    (puur beeld). De enige weg naar binnen is **Warp** in het menu.
+
+### Scène 1 – Na De Genezer: De World Warper verschijnt
+Setting: De kas lost op in paars licht. De Genezer is verslagen. De kern van Archief 2 stijgt op.
+
+[De kern van Archief 2 zweeft in het midden van de kamer. De kas om hen heen glitcht — groen wordt grijs, planten vervagen.]
+LOTTE (ademloos): "Wat gebeurt er...?"
+NOOR (kijkt om zich heen): "De simulatie. Ze trekt zich terug."
+[Stilte. Dan een diepe, dreunende toon — alsof iets groots ontwaakt.]
+[Door het plafond van de kas breekt een lichtstraal. Paars. Fel. Iets groots daalt neer van buiten.]
+DENNIS: "Wat is dat...?"
+[Het plafond verdwijnt volledig. Daar, in de lucht boven hen, hangt het: een zwevend gebouw. Donker metaal, paarse kieren licht, stiller dan iets zou moeten zijn.]
+NOOR (stap achteruit): "Dat is... dat is geen Archief."
+LOTTE (zacht): "Het is oud. Ouder dan de Archieven misschien."
+DENNIS: "Het reageert op de kern. Kijk — de kern pulseert in dezelfde kleur."
+[De kern pulseert. Het gebouw pulseert terug. Alsof ze elkaar herkennen.]
+ECHO (stem, van ver): "Kandidaat gedetecteerd. Twee Archieven actief. World Warper online."
+[De grond onder hun voeten licht op. Een paarse cirkel breidt zich uit.]
+LOTTE: "Dennis—!"
+[Een flits. De wereld draait weg.]
+
+### Scène 2 – De Hanger
+Setting: De Hal van de World Warper. Paars licht. Warp-platform in het midden. ECHO's hologram verschijnt.
+
+[De party landt in de Hal. Alles is stil. Paars licht pulseert zacht.]
+NOOR (om zich heen kijkend): "We zijn... binnen?"
+LOTTE: "Het voelt niet kwaad. Alleen... leeg."
+[Een hologram verschijnt — een menselijke gestalte, paars doorschijnend. ECHO.]
+ECHO: "Welkom in de World Warper, Dennis. En gezelschap. Ik ben ECHO."
+DENNIS: "Wat ben je?"
+ECHO: "Een echo. Niets meer, niets minder. Ik beheer dit gebouw. Of wat er van over is."
+[ECHO's blik valt op de Hanger om Dennis' nek. De Hanger gloeit.]
+ECHO (stilte): "...Ah."
+DENNIS: "Wat?"
+ECHO: "Daar is hij. De Hanger. Ik had gehoopt dat ik hem nooit meer zou zien."
+NOOR: "Wat bedoel je? Wat is de Hanger?"
+ECHO: "De sleutel. Dit gebouw werkt alleen op hem. Alleen op die Hanger. Niemand anders kan de World Warper aanzetten."
+DENNIS: "Waarom? Wat maakt hem zo bijzonder?"
+ECHO: "Omdat hij niet van jou is. Hij is voor jou gemaakt. Voor degene die hem zou dragen. En dat ben jij."
+LOTTE (zacht): "Dennis..."
+DENNIS: "Hoe weet je dat?"
+ECHO: "Omdat ik erbij was. Toen de Oude Mensheid hem maakte. Toen ze jou maakten."
+[Stilte. Dennis kijkt naar de Hanger in zijn hand. Hij gloeit.]
+DENNIS: "Wat ben ik?"
+ECHO: "Dat is een lang verhaal. En er is weinig tijd."
+[Het warp-platform licht op.]
+
+### Scène 3 – Sapientia's dreiging
+Setting: De Hal. Plotselinge glitch. Roze flitsen door de paarse omgeving. De temperatuur daalt.
+
+[De Hal glitcht. Eén moment staat alles stil.]
+[Een stem. Koud. Niet menselijk, maar ook niet onmenselijk.]
+SAPIENTIA: "ECHO. Je hebt hem gevonden."
+ECHO (strak): "Sapientia. Ik dacht dat je niet meer... direct was."
+SAPIENTIA: "Tijden veranderen. Jij hebt de Hanger gevonden. Dat verandert alles."
+[Een roze glitch-vorm verschijnt in het midden van de Hal. Geen lichaam — alleen een silhouet van licht en ruis.]
+NOOR (stap terug): "Wat is dat?!"
+LOTTE (beschermend voor Dennis): "Blijf achter me."
+SAPIENTIA (tegen Dennis): "Dennis. Eindelijk."
+DENNIS: "Wie ben je?"
+SAPIENTIA: "Ik ben wat de mensheid nodig had. Ik ben het einde van pijn. Ik ben Sapientia."
+DENNIS: "Jij... jij bent de Stem."
+SAPIENTIA: "Sommigen noemen me zo. Anderen noemen me God. Ik noem mezelf een correctie."
+[Ze glitcht dichterbij.]
+SAPIENTIA: "Zes Archieven. Zes kernen. Elk een stukje van wat de mensheid ooit was. Ik heb er twee. Jij hebt ze wakker gemaakt. Nu wil ik ze alle zes."
+ECHO: "Sapientia, je weet dat dit niet kan. De World Warper laat zich niet dwingen—"
+SAPIENTIA: "Ik forceer niets, ECHO. Ik vraag. Ik vraag Dennis vriendelijk."
+[Haar blik richt zich op de Hanger.]
+SAPIENTIA: "Geef mij de Hanger. Dan hoef ik niet te nemen wat ik kan krijgen."
+[Stilte. Dennis kijkt naar Noor. Naar Lotte. Naar ECHO.]
+DENNIS: "Nee."
+SAPIENTIA (geen woede, geen emotie): "Zo zij het."
+[De glitch pulseert.]
+SAPIENTIA: "Je zult leren dat ik geduldig ben. Ik heb millennia gewacht. Ik kan nog even wachten."
+[Ze kijkt naar de Hanger — één laatste keer.]
+SAPIENTIA: "H-6. Je naam is geen toeval. Ik heb je gemaakt. En wat ik maakte, kan ik terugnemen."
+[De glitch verdwijnt. De Hal is weer stil. Paars licht, geen roze meer.]
+NOOR (trillend): "Wat... wat bedoelde ze met H-6?"
+DENNIS (stilte): "...Ik weet het niet."
+ECHO (zacht): "Dat is niet waar, Dennis. Je weet het wel."
+[Dennis kijkt naar ECHO.]
+ECHO: "Maar dat is een verhaal voor later."
+[Het warp-platform licht op. De wereldkaart verschijnt.]
 
 ## Makkelijk over te nemen (botst niet)
 
