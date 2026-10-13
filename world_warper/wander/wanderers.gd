@@ -4,7 +4,12 @@ class_name WorldWarperWanderers
 ## Eigen spawner. Geen FieldFollower (niet extend, geen pad van de speler).
 ## Decoratie: geen gevecht, geen dialoog, geen botsing.
 ##
-## Placeholder: gekleurd vlak + displaynaam + de tekst PLACEHOLDER. Geen PNG.
+## Sprite: AnimatedSprite2D met 16x24-frames uit een 48x96-veldsheet (3 kol x 4 rijen: kol 0 stil,
+## 1 stap A, 2 stap B; rijen omlaag, links, rechts, omhoog; WALK_CYCLE [1,0,2,0]).
+##   party  -> GameData.HEROES[*].field_sprite (player.png, noor_dorp.png, lotte_veld.png),
+##             onbekend lid -> world_warper/art/party_placeholder.png
+##   Codex  -> assets/sprites/hub/<soort>_hub.png (RPG ART batch 9), echo -> echo_placeholder.png
+## Geen sheet te vinden: het oude gekleurde vlak + de tekst PLACEHOLDER.
 ## Hub: instantieer wanderers.tscn en roep refresh() aan na een wijziging
 ## in de party of de Codex. Optioneel anker: Node2D of Control in de groep
 ## "ww_anchor_wander" (deze node zelf telt niet). Zonder anker lopen ze
@@ -21,6 +26,13 @@ const AANKOMST := 1.0
 const WACHT_MIN := 0.2
 const WACHT_MAX := 0.7
 const PLAATS := "PLACEHOLDER"
+const HUB_MAP := "res://assets/sprites/hub/%s_hub.png"
+const PARTY_PLAATSHOUDER := "res://world_warper/art/party_placeholder.png"
+const ECHO_SHEET := "res://world_warper/art/echo_placeholder.png"
+const FRAME := Vector2i(16, 24)
+const RICHTINGEN: Array[String] = ["omlaag", "links", "rechts", "omhoog"]
+const WALK_CYCLE: Array[int] = [1, 0, 2, 0]
+const LOOP_FPS := 6.0
 
 const PARTY_KLEUREN: Array[Color] = [
 	Color(0.29, 0.48, 0.86),
@@ -68,13 +80,25 @@ func refresh() -> void:
 	# Displaynaam = het bestaande veld "name" (party-kopie, bij de hoofdpersoon
 	# al player_name). Leeg? dan GameData.HEROES / CodexData.species. Geen
 	# aparte vertaling: de hal toont dezelfde naam als de rest van het spel.
-	var helden: Array[Dictionary] = Spawn.descriptors(_lees_party(), [])
-	var wezens: Array[Dictionary] = Spawn.descriptors([], _lees_codex())
+	var party := _lees_party()
+	var codex := _lees_codex()
+	var helden: Array[Dictionary] = Spawn.descriptors(party, [])
+	var wezens: Array[Dictionary] = Spawn.descriptors([], codex)
+	var sheets := {}
+	for lid in party:
+		sheets[str(lid.get("id", ""))] = _sheet_held(str(lid.get("id", "")))
+	for pagina in codex:
+		var sleutel := ""
+		for k in ["uid", "id", "species"]:
+			if str(pagina.get(k, "")).strip_edges() != "":
+				sleutel = str(pagina.get(k, "")).strip_edges()
+				break
+		sheets[sleutel] = _sheet_wezen(str(pagina.get("species", "")))
 	var gebied := _gebied()
 	for spec in helden:
-		_maak(spec, true, gebied)
+		_maak(spec, true, gebied, str(sheets.get(str(spec.get("id", "")), "")))
 	for spec in wezens:
-		_maak(spec, false, gebied)
+		_maak(spec, false, gebied, str(sheets.get(str(spec.get("id", "")), "")))
 	set_process(not _lopers.is_empty())
 
 
@@ -134,16 +158,71 @@ func _naam_codex(pagina: Dictionary) -> String:
 	return str(sp.get("name", "")).strip_edges()
 
 
-func _maak(spec: Dictionary, party: bool, gebied: Rect2) -> void:
+## Veldsheet van een held (of de party-plaatshouder).
+static func _sheet_held(id: String) -> String:
+	for held in GameData.HEROES:
+		if str(held.get("id", "")) == id:
+			var p := str(held.get("field_sprite", ""))
+			if p != "" and ResourceLoader.exists(p):
+				return p
+	return PARTY_PLAATSHOUDER if ResourceLoader.exists(PARTY_PLAATSHOUDER) else ""
+
+
+## Hub-sheet van een Codex-soort ("" = geen art, dan het placeholdervlak).
+static func _sheet_wezen(soort: String) -> String:
+	soort = soort.strip_edges()
+	if soort == "echo":
+		return ECHO_SHEET if ResourceLoader.exists(ECHO_SHEET) else ""
+	var p := HUB_MAP % soort
+	return p if soort != "" and ResourceLoader.exists(p) else ""
+
+
+## SpriteFrames uit een 48x96-sheet: "stil_<richting>" (kol 0) en "loop_<richting>" (WALK_CYCLE).
+static func frames_uit(tex: Texture2D) -> SpriteFrames:
+	var sf := SpriteFrames.new()
+	if sf.has_animation("default"):
+		sf.remove_animation("default")
+	for r in RICHTINGEN.size():
+		var stil := "stil_" + RICHTINGEN[r]
+		var loop := "loop_" + RICHTINGEN[r]
+		sf.add_animation(stil)
+		sf.add_animation(loop)
+		sf.set_animation_speed(loop, LOOP_FPS)
+		sf.add_frame(stil, _frame(tex, 0, r))
+		for kol in WALK_CYCLE:
+			sf.add_frame(loop, _frame(tex, kol, r))
+	return sf
+
+
+static func _frame(tex: Texture2D, kol: int, rij: int) -> AtlasTexture:
+	var a := AtlasTexture.new()
+	a.atlas = tex
+	a.region = Rect2(kol * FRAME.x, rij * FRAME.y, FRAME.x, FRAME.y)
+	return a
+
+
+func _maak(spec: Dictionary, party: bool, gebied: Rect2, sheet := "") -> void:
 	var id := str(spec.get("id", ""))
 	var naam := str(spec.get("naam", ""))
 	var wortel := Node2D.new()
 	wortel.name = _node_naam(id, _lopers.size())
 	wortel.set_meta("ww_id", id)
 	wortel.set_meta("ww_naam", naam)
-	wortel.add_child(_vlak(id, party))
-	wortel.add_child(_label(naam, Vector2(-28, -26), Color(0.95, 0.94, 0.88)))
-	wortel.add_child(_label(PLAATS, Vector2(-36, 2), Color(1.0, 0.25, 0.72)))
+	var tex: Texture2D = load(sheet) as Texture2D if sheet != "" else null
+	if tex != null:
+		var anim := AnimatedSprite2D.new()
+		anim.name = "Sprite"
+		anim.sprite_frames = frames_uit(tex)
+		anim.offset = Vector2(0, -12)     # voeten (schaduw y 22-23) op de oorsprong
+		anim.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		anim.play("stil_omlaag")
+		wortel.add_child(anim)
+		wortel.set_meta("ww_sheet", sheet)
+		wortel.add_child(_label(naam, Vector2(-36, -34), Color(0.95, 0.94, 0.88)))
+	else:
+		wortel.add_child(_vlak(id, party))
+		wortel.add_child(_label(naam, Vector2(-28, -26), Color(0.95, 0.94, 0.88)))
+		wortel.add_child(_label(PLAATS, Vector2(-36, 2), Color(1.0, 0.25, 0.72)))
 	add_child(wortel)
 	var start := _punt_in(gebied, Vector2.ZERO)
 	wortel.position = start
@@ -197,6 +276,7 @@ func _beweeg(loper: Dictionary, delta: float, gebied: Rect2) -> void:
 	var wacht := float(loper["wacht"])
 	if wacht > 0.0:
 		loper["wacht"] = maxf(0.0, wacht - delta)
+		_anim(node, Vector2.ZERO)
 		return
 	var doel: Vector2 = loper["doel"]
 	if not gebied.has_point(doel):
@@ -213,6 +293,24 @@ func _beweeg(loper: Dictionary, delta: float, gebied: Rect2) -> void:
 	# Float-positie bewust niet afronden: 10 px/s zou anders blijven steken.
 	var stap := minf(float(loper["snelheid"]) * delta, afstand)
 	node.position = pos + naar * (stap / afstand)
+	_anim(node, naar)
+
+
+## Loop- of stilstaande animatie in de looprichting (stil = laatste richting houden).
+func _anim(node: Node2D, naar: Vector2) -> void:
+	var a := node.get_node_or_null("Sprite") as AnimatedSprite2D
+	if a == null:
+		return
+	var richting := str(node.get_meta("ww_richting", "omlaag"))
+	if naar != Vector2.ZERO:
+		if absf(naar.x) > absf(naar.y):
+			richting = "rechts" if naar.x > 0.0 else "links"
+		else:
+			richting = "omlaag" if naar.y > 0.0 else "omhoog"
+		node.set_meta("ww_richting", richting)
+	var naam := ("loop_" if naar != Vector2.ZERO else "stil_") + richting
+	if a.animation != naam:
+		a.play(naam)
 
 
 func _gebied() -> Rect2:

@@ -34,6 +34,7 @@ signal damage_shown(target_name: String, amount: int)
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
+const KoopmanData := preload("res://scripts/data/koopman_data.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
@@ -1286,6 +1287,38 @@ func _execute(a: Dictionary) -> void:
 				await codex.capture(actor, a["target"])   # Codex: Leeg Boek
 				_hero_rest(actor)
 				return
+			if float(it.get("revive", 0.0)) > 0.0:     # Feniksveer (Koopman)
+				var dood = a["target"] if a["target"] != null and int(a["target"]["s"]["hp"]) <= 0 else null
+				if dood == null:
+					for h in heroes:
+						if int(h["s"]["hp"]) <= 0:
+							dood = h
+							break
+				if dood == null:
+					show_message(PartyActions.MSG_NO_EFFECT)
+				else:
+					var back := PartyActions.revive(dood["s"], float(it["revive"]))
+					show_message("%s gets back up! (%d HP)" % [dood["name"], back])
+					_refresh_party()
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
+			if bool(it.get("cure", false)):          # Tegengif (Koopman): gif en binden weg
+				var t := _valid_ally(a["target"])
+				if t.has("dots"):
+					t["dots"] = (t["dots"] as Array).filter(func(d): return not bool(d.get("gif", false)))
+				if str(t.get("skip_reden", "")) == Archief2Vijanden.SKIP_REDEN_BIND:
+					t["skip"] = 0
+				show_message("%s is cured." % t["name"])
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
+			if bool(it.get("stun_room", false)):     # alleen in het veld: niet verbruiken
+				GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
+				show_message(PartyActions.MSG_NO_EFFECT)
+				await _wait(MESSAGE_TIME)
+				_hero_rest(actor)
+				return
 			await _heal(_valid_ally(a["target"]), int(it["heal_hp"]), int(it["heal_mp"]))
 			_hero_rest(actor)
 		"defend":
@@ -1377,18 +1410,25 @@ func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> 
 ## Spreuken: power op level 1 + power_per_level per level erboven, maal het element, +/- 10%.
 func _spell_amount(caster: Dictionary, spell: Dictionary, target: Dictionary) -> int:
 	var lvl := int(caster["s"].get("level", 1))
-	var base := SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target)
+	var base := SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target) * _token_mult(caster)
 	return maxi(1, roundi(base * randf_range(0.9, 1.1)))
 
 
 func _buff_mult(c: Dictionary, stat: String) -> float:
-	var m := 1.0
+	var m := _token_mult(c)
 	for b in c.get("buffs", []):
 		if typeof(b) != TYPE_DICTIONARY:
 			continue
 		if str(b.get("stat", "")) == stat and int(b.get("turns", 0)) > 0:
 			m *= 1.0 + float(b.get("pct", 0.0))
 	return m
+
+
+## "H-5's Token" van de Koopman (CANON §12): +10% stats voor de helden tegen dienaren van Sapientia.
+func _token_mult(c: Dictionary) -> float:
+	if not bool(c.get("is_hero", false)):
+		return 1.0
+	return KoopmanData.token_factor(GameState.koopman_token, not GameState.practice_battle)
 
 
 func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:

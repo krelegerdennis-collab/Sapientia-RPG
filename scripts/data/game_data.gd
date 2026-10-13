@@ -535,6 +535,15 @@ const ITEMS := {
 		"desc": "A glowing brew. Gives a lot of magic back."},
 	"elixer": {"name": "Elixir", "target": "ally", "heal_hp": 400, "heal_mp": 60,
 		"desc": "A rare elixir from the deep. Heals almost everything."},
+	# De Koopman (H-5, Diepe Grot): alleen in zijn winkel (scripts/data/koopman_winkel.gd).
+	"feniksveer": {"name": "Phoenix Feather", "short": "Phoenix", "target": "ally", "heal_hp": 0, "heal_mp": 0,
+		"revive": 0.5, "desc": "A feather that is still warm. Wakes a fallen ally with half their HP."},
+	"tegengif": {"name": "Antidote", "target": "ally", "heal_hp": 0, "heal_mp": 0, "cure": true, "field": false,
+		"desc": "Bitter drops. Cures poison and binding in battle."},
+	"stunbom": {"name": "Stun Bomb", "target": "ally", "heal_hp": 0, "heal_mp": 0, "stun_room": true,
+		"desc": "A cracked glass orb full of static. Stuns every monster in the room."},
+	"h5_notitie": {"name": "Faded Note", "target": "ally", "heal_hp": 0, "heal_mp": 0, "field": false,
+		"desc": "Sleeve stitching: 'H-5'. On the back, in shaky handwriting: 'Don't stop for the Voice.'"},
 	# Codex (Kernfragment stap 2): alleen in een gevecht, op een VIJAND. Schrijft een verzwakt
 	# monster in de Codex (kans: scripts/data/codex_data.gd). Altijd op, ook als het mislukt.
 	# Te krijgen: 3 van Marit in Esdoorn (na de ontmoeting) + 2 in kisten van het Donker Woud

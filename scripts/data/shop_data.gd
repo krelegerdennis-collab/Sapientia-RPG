@@ -76,7 +76,9 @@ static func _data_price(id: String) -> int:
 	if GameData.EQUIPMENT.has(id):
 		return int(GameData.EQUIPMENT[id].get("price", 0))
 	if GradeGear.has_item(id):
-		return int(GradeGear.item(id).get("grade", 1)) * 30
+		# Balans (Dennis, v0.21): grade x grade x 60 -> G1 60, G2 240, G3 540, G4 960 goud.
+		var g := int(GradeGear.item(id).get("grade", 1))
+		return g * g * 60
 	return 0
 
 
