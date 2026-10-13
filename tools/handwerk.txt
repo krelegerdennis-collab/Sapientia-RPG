@@ -513,3 +513,17 @@ world_warper/art/warp_icoon_wm2.png
 world_warper/art/warp_icoon_wm2_dicht.png
 world_warper/art/warp_icoon_wm3.png
 world_warper/art/warp_icoon_wm3_dicht.png
+assets/ui/battlehud/balk_rand.png
+assets/ui/battlehud/boekstrook.png
+assets/ui/battlehud/hp_druppels.png
+assets/ui/battlehud/icoon_druppel.png
+assets/ui/battlehud/icoon_hart.png
+assets/ui/battlehud/kaart_actief.png
+assets/ui/battlehud/kaart_doelwit.png
+assets/ui/battlehud/kaart_ko.png
+assets/ui/battlehud/kaart_normaal.png
+assets/ui/battlehud/rune.png
+assets/ui/battlehud/scheiding.png
+assets/ui/battlehud/vul_hp.png
+assets/ui/battlehud/vul_hp_laag.png
+assets/ui/battlehud/vul_mp.png

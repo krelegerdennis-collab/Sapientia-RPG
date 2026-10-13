@@ -1098,7 +1098,7 @@ func _v7_style_checks(b: Node) -> void:
 			not b.caption.visible and b.message_label.text == "What will %s do?" % GameState.party[0]["name"]
 			and b.cross.name_label.text == "%s: Attack" % GameState.party[0]["name"])
 	_check_cross(b, GameState.party[0]["name"])
-	check("actieve held: naam in goud (palet HILITE)", b.status_boxes[0].name_color() == UiStyle.HILITE)
+	check("actieve held: gouden kaart (HUD v2 kaart_actief), naam in inkt", b.status_boxes[0].card_kind() == "actief" and b.status_boxes[0].name_color() == b.status_boxes[0].INK)
 	check("HP-balken in het palet: Noor '%s', Lotte '%s'" % [b.status_boxes[1].hp_bar_kind(), b.status_boxes[2].hp_bar_kind()],
 			b.status_boxes[1].hp_bar_kind() == "hp" and b.status_boxes[2].hp_bar_kind() == "hp")
 	check("scanline-filter aan, over alles, vangt geen tikken",
