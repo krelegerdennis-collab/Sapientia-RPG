@@ -32,7 +32,39 @@ wat hier staat. Wat hier niet staat: dan geldt wat er in de game staat (`scripts
     Oude Bram, ...). **Vonkkling** en **Bram Holt** krijgen een andere naam zodra ze ingebouwd
     worden. Nieuwe lore-items (**Gloeiende Inktfles, Kruidenthee, Wambuis** e.d.) mogen erbij.
 
-12. **5e party member: Kael Voss (WM2, psytech)**. **Kael Voss**, 19 jaar, is een
+## Beslissingen 13 okt 2026
+
+Taalregel: tekst in de game is Engels; tekst in de documenten is Nederlands.
+
+12. **Grot-handelaar = H-5.** Vorige proefpersoon, 2-3 jaar vóór Dennis. Haalde verdieping 100
+    niet en zit vast in de simulatie. Is zijn naam vergeten en noemt zichzelf **"de Koopman"**
+    (in-game EN: **"the Merchant"**). Drie fases:
+    - bezoek 1-3: vaag en afstandelijk;
+    - bezoek 4-7 (na de H-6-onthulling): herkent Dennis en vertelt fragmenten;
+    - bezoek 8+ (of na Archief 5): vertelt de waarheid en geeft **"H-5's Token"**
+      (+10% stats tegen dienaren van Sapientia).
+    Einde (optie A): hij blijft voor altijd in de Grot. Bij de nederlaag van Sapientia
+    (Archief 6) lost de simulatie op en verdwijnt H-5 glimlachend: "Dank je. Eindelijk rust."
+    (EN: "Thank you. Finally, rest.")
+13. **Vijanden van Archief 2** (allemaal element Natuur):
+
+    | NL-naam | EN-naam (voorstel, Dennis beslist) | Zwak | Gedrag |
+    |---|---|---|---|
+    | Rankje | Tendril | Vuur | bindt speler, 1 beurt overslaan |
+    | Sporekop | Sporehead | IJs | spuugt gif, 3 beurten |
+    | Doornige Loper | Thorn Runner | Vuur/Bliksem | charge-aanval, verdubbelt schade |
+    | Bloeiende Schrik | Blooming Dread | IJs | bijt + heelt zichzelf |
+    | Wortelgeest | Rootghost | Vuur/Licht | trekt speler naar zich toe |
+
+    Codex-vangbaar: **Sporekop** (als bondgenoot: vergiftigt vijanden), **Rankje** (bindt
+    vijand, 1 beurt overslaan), **Wortelgeest** (trekt vijand + counter, als enige).
+14. **World Warper-stijl: universeel**, met kleuraccent per Archief. Basis: paars licht,
+    zwevend platform, hologram, hetzelfde icoon. Accenten: Archief 1 Kennis grijs+paars;
+    2 Leven groen+paars; 3 Industrie oranje+paars; 4 Magie roze+paars; 5 Kosmos blauw+paars;
+    6 Hart rood+paars. Cutscene-teksten (na De Genezer, eerste binnenkomst Hal,
+    Sapientia-dreiging): *tekst volgt van Dennis*.
+
+15. **5e party member: Kael Voss (WM2, psytech)**. **Kael Voss**, 19 jaar, is een
     psytech-dwaler uit **WM2**. Hij bestuurt **de Stroom** met zijn geest. Hij was
     **Proefpersoon K-7** in hetzelfde programma als **Dennis (H-6)**; **Sapientia**
     gebruikte hem als 'ontvanger' via een neurale kroon in zijn achterhoofd en keek
@@ -50,7 +82,7 @@ wat hier staat. Wat hier niet staat: dan geldt wat er in de game staat (`scripts
       Kael zelf Confused).
     - **Joint**: in **WM2** (exact moment nog open).
 
-13. **Party-regel**. Max **4 actieve helden** + **1 monster** (Codex-gevangen) in
+16. **Party-regel**. Max **4 actieve helden** + **1 monster** (Codex-gevangen) in
     gevecht; overige helden in reserve, wisselbaar buiten gevecht. (Besluit Dennis
     2026-10-13.)
 

@@ -10,7 +10,7 @@ Speelbaar: Worldmap 1 (start-eiland met Dennis' huis, Wilgendal en het Eerste Ar
 
 Niet zelf bouwen. Wacht op scènes: ECHO's twist (wanneer, hoe, confrontatie, H-1 tot en met H-5); De Spiegel koppelen aan Archief 4; worldmap 2 en 3 (kamerlijsten, monsters, paden).
 
-Open thema's: art-placeholders, World Warper (gebouw, dialoog, lege kamers, audio), sfeer, Codex en muziek van Archief 2, bestiarium tot endgame, PvP-relay en polish, Diepe Grot (loot, kaarten, push, rennen), warper-stijl.
+Open thema's: art-placeholders, World Warper (gebouw, dialoog, lege kamers, audio), sfeer, Codex en muziek van Archief 2, bestiarium tot endgame, PvP-relay en polish, Diepe Grot (loot, kaarten, push, rennen). Warper-stijl, Archief 2-roster en de Koopman (H-5) zijn beslist (CANON 12-14).
 
 Grade 4-wapens en -sets, en het herzien van PvP-teams, wachten tot er nieuwe karakters in het verhaal komen. Gerrit blijft staan.
 
@@ -24,8 +24,10 @@ Act 2, Act 3 en de Spiegel-scène wachten op worldmap 2/3 en op scènes. Die vak
 
 ### Dungeon-warpers
 
-- [ ] Universele warper-stijl, of een variant per Archief-thema
-  - [ ] Die keuze is nog open
+- [x] Warper-stijl beslist: universeel met kleuraccent per Archief (CANON 14)
+- [ ] Warper-basis bouwen: paars licht, zwevend platform, hologram, hetzelfde icoon
+- [ ] 6 kleurvarianten: Kennis grijs, Leven groen, Industrie oranje, Magie roze, Kosmos blauw, Hart rood (elk + paars)
+- [ ] Cutscene-teksten (na De Genezer, eerste binnenkomst Hal, Sapientia-dreiging): tekst volgt van Dennis
 
 Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Canon & Design Reference, samen met de canon-regel voor de Diepe Grot.
 
@@ -47,12 +49,15 @@ Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Cano
 - [ ] De Wurger (kolossale slingerplant, mini-baas verdieping 3)
 - [ ] Groei-plaat, 3 stadia: zaad, scheut, volgroeid
 - [ ] Kern-item Archief 2 (levend, groen, organisch)
-- [ ] Nieuwe vijanden met een plant- of leventhema
+- [x] Roster plant-vijanden beslist (CANON 13): Rankje, Sporekop, Doornige Loper, Bloeiende Schrik, Wortelgeest (Natuur)
+- [ ] Vijanden bouwen: data, zwaktes en gedrag (binden/beurt overslaan, gif 3 beurten, charge x2, bijten + heal, naar zich toe trekken)
+- [ ] EN-namen laten bevestigen door Dennis (voorstel: Tendril, Sporehead, Thorn Runner, Blooming Dread, Rootghost)
 - [ ] Achtergrondmuziek die bij de overwoekerde kas past
 
 #### Codex
 
-- [ ] Nieuwe Codex-monsters voor Archief 2 (leventhema)
+- [x] Codex-monsters Archief 2 beslist (CANON 13)
+- [ ] Codex-bondgenoten bouwen: Sporekop (vergiftigt), Rankje (bindt, 1 beurt), Wortelgeest (trekt + counter)
 
 ### Bestiarium
 
@@ -292,9 +297,10 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
   - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
 - [ ] Empty Room: lore-items of alleen leeg?
 - [ ] Merchant Room: welke items verkoopt hij?
-  - [ ] TODO(verhaal): welke H is hij? Wat is zijn verhaal?
-    - [ ] TODO(verhaal): hoe eindigt H-5?
-    - [ ] TODO(verhaal): kan hij bevrijd worden? Sterft hij? List van Sapientia?
+  - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
+  - [ ] 3 dialoogfases bouwen: bezoek 1-3 vaag; 4-7 (na H-6-onthulling) fragmenten; 8+ of na Archief 5 waarheid
+  - [ ] Item "H-5's Token" (+10% stats tegen dienaren van Sapientia)
+  - [ ] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest."
 
 ## RPG ART
 
