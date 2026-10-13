@@ -7,7 +7,7 @@ const HangerScene := preload("res://world_warper/cutscene/hanger_scene.tscn")
 
 const Accent := preload("res://world_warper/art/accent.gd")
 const ROZE := Color("e2789e")
-const STROOM := "De Stroom gloeit roze."
+const STROOM := "The Stream glows pink."
 
 var failures := 0
 var passes := 0
@@ -29,7 +29,7 @@ func _run() -> void:
 	var regels: Array[String] = Dreiging.lines()
 	var stroom := false
 	for regel in regels:
-		if regel == "De Hanger wordt warm. " + STROOM:
+		if regel == "The Hanger grows warm. " + STROOM:
 			stroom = true
 	check("de Stroom blijft roze in de zin", stroom and STROOM in " ".join(regels))
 	check("beat 2 blijft de tweede regel", Dreiging.beat_at(1) == 2)

@@ -30,7 +30,7 @@ func _show_koop() -> void:
 	content.add_child(switch)
 	var rows: Array = ShopData.stock(shop_id)
 	if rows.is_empty():
-		content.add_child(UiMenu.label("De schappen zijn leeg.", MenuColors.TEXT_DIM))
+		content.add_child(UiMenu.label("The shelves are empty.", MenuColors.TEXT_DIM))
 		return
 	for row in rows:
 		var id := str(row["id"])
@@ -49,7 +49,7 @@ func _show_verkoop() -> void:
 	content.add_child(back)
 	var rows: Array = ShopData.sellable()
 	if rows.is_empty():
-		content.add_child(UiMenu.label("Niets om te verkopen.", MenuColors.TEXT_DIM))
+		content.add_child(UiMenu.label("Nothing to sell.", MenuColors.TEXT_DIM))
 		back.grab_focus()
 		return
 	for row in rows:
@@ -63,7 +63,7 @@ func _show_held(spell_id: String) -> void:
 	mode = "held"
 	_pending_spell = spell_id
 	_clear()
-	content.add_child(UiMenu.label("Wie leert dit?", MenuColors.TEXT))
+	content.add_child(UiMenu.label("Who learns this?", MenuColors.TEXT))
 	var any := false
 	for h in GameState.party:
 		if int(h.get("hp", 1)) <= 0:
@@ -76,7 +76,7 @@ func _show_held(spell_id: String) -> void:
 			b.grab_focus()
 			any = true
 	if not any:
-		show_message("Niemand kan dit leren.")
+		show_message("Nobody can learn this.")
 
 
 func _on_buy(id: String, kind: String) -> void:

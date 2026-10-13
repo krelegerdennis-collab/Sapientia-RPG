@@ -35,7 +35,7 @@ const MONSTERS := {
 		"skills": [{"name": "Steenbeet", "chance": 0.2, "power": 1.3}],
 		"mp": 0, "weak": ["bliksem"], "resist": [],
 		"drops": [{"item": "drankje", "chance": 0.15}],
-		"desc": "Een luis van levende steen. Hij kruipt door de nerf van de berg.",
+		"desc": "A louse of living stone. It crawls through the grain of the mountain.",
 		"habitat": ["berggrot"],
 	},
 	"druipslak": {
@@ -47,7 +47,7 @@ const MONSTERS := {
 		"skills": [{"name": "Koude drup", "chance": 0.22, "power": 1.25}],
 		"mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "kruid", "chance": 0.18}],
-		"desc": "Een slak van koud druipsteen. Langzaam, en hij laat de rots nat achter.",
+		"desc": "A slug of cold dripstone. Slow, and it leaves the rock wet behind it.",
 		"habitat": ["berggrot"],
 	},
 	"adermot": {
@@ -59,7 +59,7 @@ const MONSTERS := {
 		"skills": [{"name": "Adervonk", "chance": 0.2, "power": 1.3}],
 		"mp": 4, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "toverwater", "chance": 0.12}],
-		"desc": "Een mot die de ertsader volgt. Snel, en hij flikkert als een vonk in het donker.",
+		"desc": "A moth that follows the ore vein. Fast, and it flickers like a spark in the dark.",
 		"habitat": ["berggrot"],
 	},
 }
@@ -91,8 +91,8 @@ const ROOMS := {
 		"signs": [{
 			"tile": [16, 7],
 			"lines": [
-				"De bergen laten je er niet overheen.",
-				"De nerf loopt door de steen, naar de kas van het Levende Archief.",
+				"The mountains won't let you cross.",
+				"The vein runs through the stone, to the greenhouse of the Living Archive.",
 			],
 		}],
 		"monsters": [
@@ -125,7 +125,7 @@ const ROOMS := {
 		},
 		"signs": [{
 			"tile": [16, 7],
-			"lines": ["Een tocht trekt langs de steen. Ergens zit een kier."],
+			"lines": ["A draft runs along the stone. There is a crack somewhere."],
 		}],
 		"monsters": [
 			{"id": "m1", "enemy": "druipslak", "group": ["druipslak"], "tile": [5, 5], "moves": true},
@@ -158,8 +158,8 @@ const ROOMS := {
 		"signs": [{
 			"tile": [4, 5],
 			"lines": [
-				"Aan de andere kant groeit de kas.",
-				"Je denkt dat je volgt. Sapientia leidt je.",
+				"On the other side, the greenhouse grows.",
+				"You think you are following. Sapientia is leading you.",
 			],
 		}],
 		"monsters": [
@@ -260,14 +260,14 @@ const PUZZLES := {
 			"1": {"type": "gate", "id": "poort_uit", "needs": ["hendel_uit"], "mode": "all", "latch": true},
 			"r": {"type": "reset", "id": "herstel_geheim"},
 			"G": {"type": "secret", "id": "geheime_deur", "needs": ["plaat_ader"], "mode": "all",
-					"hint": ["Een kier in de steen. Er trekt koude lucht doorheen."],
+					"hint": ["A crack in the stone. Cold air blows through it."],
 					"open_lines": ["De steen schuift opzij."]},
 			"T": {"type": "chest", "id": "kist_bergnerfstaf", "item": STAF_ID, "n": 1,
 					"flag": "kist_bergnerfstaf",
-					"lines": ["{naam} opent de kist...", "{naam} vindt de Bergnerfstaf!"]},
+					"lines": ["{naam} opens the chest...", "{naam} finds the Bergnerfstaf!"]},
 			"U": {"type": "chest", "id": "kist_adersteen", "item": ACCESSOIRE_ID, "n": 1,
 					"flag": "kist_adersteen",
-					"lines": ["{naam} opent de kist...", "{naam} vindt de Adersteen!"]},
+					"lines": ["{naam} opens the chest...", "{naam} finds the Adersteen!"]},
 		},
 		"spawns": {"noord": [14, 12, "left"]},
 		"dek": {"rect": [0, 0, 17, 5], "tiles": []},
@@ -337,7 +337,7 @@ static func _gear() -> Dictionary:
 			"grade": 2,
 			"wie": ["magier", "priester"],
 			"price": 0,
-			"desc": "Een staf uit de nerf van de berg. Hij zoemt zacht, alsof achter de steen iets groeit.",
+			"desc": "A staff from the mountain's vein. It hums softly, as if something grows behind the stone.",
 		},
 		ACCESSOIRE_ID: {
 			"name": "Adersteen",
@@ -346,6 +346,6 @@ static func _gear() -> Dictionary:
 			"mag": maxi(1, int(mag / 6.0)),
 			"grade": 2,
 			"price": 0,
-			"desc": "Een koude steen uit de bergader. Hij houdt spreuken tegen en maakt ze iets scherper.",
+			"desc": "A cold stone from the mountain vein. It blocks spells and makes them a little sharper.",
 		},
 	}

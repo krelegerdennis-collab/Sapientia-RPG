@@ -13,7 +13,7 @@ const PartyActions := preload("res://scripts/party_actions.gd")
 ## Bevestigd: ijzeren helm, maliënkolder en groenring pas vanaf act 2, zodat act 1 niet alles toont.
 const SHOPS := {
 	"wilgendal_wapen": {
-		"name": "Wapens",
+		"name": "Weapons",
 		"offers": [
 			{"id": "kort_zwaard", "min_act": 1},
 			{"id": "dolk", "min_act": 1},
@@ -21,7 +21,7 @@ const SHOPS := {
 		],
 	},
 	"wilgendal_pantser": {
-		"name": "Pantser",
+		"name": "Armor",
 		"offers": [
 			{"id": "houten_schild", "min_act": 1},
 			{"id": "kaftschild", "min_act": 1},
@@ -33,19 +33,19 @@ const SHOPS := {
 		],
 	},
 	"wilgendal_accessoire": {
-		"name": "Accessoires",
+		"name": "Accessories",
 		"offers": [
 			{"id": "bladwijzer", "min_act": 1},
 			{"id": "groenring", "min_act": 2},
 		],
 	},
 	"wilgendal_kruiden": {
-		"name": "Kruiden",
+		"name": "Herbs",
 		"offers": [
 			{"id": "kruidenthee", "min_act": 1, "price": 20},
 		],
 	},
-	"wilgendal_magie": {"name": "Magie", "magic": true},
+	"wilgendal_magie": {"name": "Magic", "magic": true},
 }
 
 
@@ -145,7 +145,7 @@ static func _in_stock(shop_id: String, id: String) -> Dictionary:
 static func buy_item(shop_id: String, id: String) -> Dictionary:
 	var row := _in_stock(shop_id, id)
 	if row.is_empty() or str(row.get("kind", "")) != "item":
-		return {"ok": false, "text": "Dat ligt hier niet."}
+		return {"ok": false, "text": "That isn't sold here."}
 	var price := int(row["price"])
 	if GameState.gold < price:
 		return {"ok": false, "text": "Te weinig goud."}
@@ -157,11 +157,11 @@ static func buy_item(shop_id: String, id: String) -> Dictionary:
 static func buy_spell(shop_id: String, spell_id: String, hero: Dictionary) -> Dictionary:
 	var row := _in_stock(shop_id, spell_id)
 	if row.is_empty() or str(row.get("kind", "")) != "spell":
-		return {"ok": false, "text": "Dat ligt hier niet."}
+		return {"ok": false, "text": "That isn't sold here."}
 	if not (hero.get("spells") is Array):
 		hero["spells"] = []
 	if (hero["spells"] as Array).has(spell_id):
-		return {"ok": false, "text": "Kent deze spreuk al."}
+		return {"ok": false, "text": "Already knows this spell."}
 	var why := SpellRules.block_reason(hero, spell_id)
 	if why != "":
 		return {"ok": false, "text": why}
@@ -169,17 +169,17 @@ static func buy_spell(shop_id: String, spell_id: String, hero: Dictionary) -> Di
 	if GameState.gold < price:
 		return {"ok": false, "text": "Te weinig goud."}
 	if not PartyActions.teach_spell(hero, spell_id):
-		return {"ok": false, "text": why if why != "" else "Niemand kan dit leren."}
+		return {"ok": false, "text": why if why != "" else "Nobody can learn this."}
 	GameState.gold -= price
 	return {"ok": true, "text": "Gekocht."}
 
 
 static func sell(id: String) -> Dictionary:
 	if int(GameState.inventory.get(id, 0)) <= 0:
-		return {"ok": false, "text": "Dat heb je niet."}
+		return {"ok": false, "text": "You don't have that."}
 	var price := sell_price(id)
 	if price <= 0:
-		return {"ok": false, "text": "Dat koop ik niet."}
+		return {"ok": false, "text": "I don't buy that."}
 	GameState.inventory[id] = int(GameState.inventory[id]) - 1
 	if int(GameState.inventory[id]) <= 0:
 		GameState.inventory.erase(id)

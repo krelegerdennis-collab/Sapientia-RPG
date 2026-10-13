@@ -5,10 +5,10 @@ class_name PvpDisconnect
 ## TODO(design): reconnect via een relay is niet gekozen (GD-Sync / NodeTunnel / VPS).
 
 
-const MSG_DROP := "De verbinding is verbroken. Je bent terug in het menu."
-const MSG_MATCH_GONE := "Dit gevecht is weg. De host is er niet meer."
-const MSG_GUEST_LEFT := "Je vriend is weg. Dezelfde code werkt nog."
-const MSG_OCCUPIED := "Er speelt al iemand mee met die code."
+const MSG_DROP := "The connection was lost. You are back in the menu."
+const MSG_MATCH_GONE := "This battle is gone. The host has left."
+const MSG_GUEST_LEFT := "Your friend left. The same code still works."
+const MSG_OCCUPIED := "Someone is already playing with that code."
 
 
 static func drop_message() -> String:

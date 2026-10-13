@@ -60,12 +60,12 @@ func first_living_enemy(actor_uid: String) -> String:
 
 func apply_action(actor_uid: String, action: String, target_uid: String, spell_id: String, item_id: String) -> Dictionary:
 	if over:
-		return _fail("Het gevecht is afgelopen.")
+		return _fail("The battle is over.")
 	if current_uid() != actor_uid:
-		return _fail("Niet deze beurt.")
+		return _fail("Not this turn.")
 	var actor := fighter(actor_uid)
 	if actor.is_empty() or int(actor["hp"]) <= 0:
-		return _fail("Deze vechter doet niet meer mee.")
+		return _fail("This fighter is out.")
 	var applied := false
 	var line := ""
 	match action:
@@ -83,7 +83,7 @@ func apply_action(actor_uid: String, action: String, target_uid: String, spell_i
 				return cast
 		"defend":
 			actor["defending"] = true
-			line = "%s verdedigt." % str(actor["display"])
+			line = "%s defends." % str(actor["display"])
 			applied = true
 		"item":
 			var used := _item(actor, target_uid, item_id)
@@ -92,7 +92,7 @@ func apply_action(actor_uid: String, action: String, target_uid: String, spell_i
 			if not applied:
 				return used
 		_:
-			return _fail("Onbekende actie.")
+			return _fail("Unknown action.")
 	_push_log(line)
 	var win := PvpRules.winner_seat(fighters)
 	if win != "":
@@ -165,24 +165,24 @@ func hp_list() -> Array:
 func _attack(actor: Dictionary, target_uid: String) -> Dictionary:
 	var target := fighter(target_uid)
 	if target.is_empty() or str(target["seat"]) == str(actor["seat"]) or int(target["hp"]) <= 0:
-		return _fail("Kies een tegenstander.")
+		return _fail("Choose an opponent.")
 	var variance := PvpRules.roll_variance(rng)
 	last_variance = variance
 	var dmg := PvpRules.physical_damage(int(actor["atk"]), int(target["def"]), 1.0, variance, bool(target["defending"]))
 	target["hp"] = maxi(0, int(target["hp"]) - dmg)
-	var line := "%s valt %s aan (%d)." % [str(actor["display"]), str(target["display"]), dmg]
+	var line := "%s attacks %s (%d)." % [str(actor["display"]), str(target["display"]), dmg]
 	return {"ok": true, "reason": "", "log": line, "finished": false}
 
 
 func _spell(actor: Dictionary, target_uid: String, spell_id: String) -> Dictionary:
 	if not (actor["spells"] as Array).has(spell_id):
-		return _fail("Die spreuk ken je niet.")
+		return _fail("You don't know that spell.")
 	var spell := PvpSpells.get_spell(spell_id)
 	if spell.is_empty():
-		return _fail("Die spreuk ken je niet.")
+		return _fail("You don't know that spell.")
 	var cost := int(spell["mp"])
 	if int(actor["mp"]) < cost:
-		return _fail("Te weinig MP.")
+		return _fail("Not enough MP.")
 	var amount := PvpRules.spell_amount(int(spell["power"]), int(actor["level"]))
 	var kind := str(spell["type"])
 	var target_kind := str(spell["target"])
@@ -190,12 +190,12 @@ func _spell(actor: Dictionary, target_uid: String, spell_id: String) -> Dictiona
 	if kind == "heal":
 		var ally := fighter(target_uid)
 		if ally.is_empty() or str(ally["seat"]) != str(actor["seat"]) or int(ally["hp"]) <= 0:
-			return _fail("Kies een bondgenoot.")
+			return _fail("Choose an ally.")
 		var before := int(ally["hp"])
 		ally["hp"] = mini(int(ally["max_hp"]), before + amount)
 		actor["mp"] = int(actor["mp"]) - cost
 		var gained := int(ally["hp"]) - before
-		line = "%s spreekt %s op %s (%d)." % [str(actor["display"]), str(spell["name"]), str(ally["display"]), gained]
+		line = "%s casts %s on %s (%d)." % [str(actor["display"]), str(spell["name"]), str(ally["display"]), gained]
 		return {"ok": true, "reason": "", "log": line, "finished": false}
 	if target_kind == "all_enemies":
 		var any := false
@@ -206,36 +206,36 @@ func _spell(actor: Dictionary, target_uid: String, spell_id: String) -> Dictiona
 			foe_all["hp"] = maxi(0, int(foe_all["hp"]) - amount)
 			any = true
 		if not any:
-			return _fail("Er is geen doelwit.")
+			return _fail("There is no target.")
 		actor["mp"] = int(actor["mp"]) - cost
-		line = "%s spreekt %s (%d)." % [str(actor["display"]), str(spell["name"]), amount]
+		line = "%s casts %s (%d)." % [str(actor["display"]), str(spell["name"]), amount]
 		return {"ok": true, "reason": "", "log": line, "finished": false}
 	var foe := fighter(target_uid)
 	if foe.is_empty() or str(foe["seat"]) == str(actor["seat"]) or int(foe["hp"]) <= 0:
-		return _fail("Kies een tegenstander.")
+		return _fail("Choose an opponent.")
 	foe["hp"] = maxi(0, int(foe["hp"]) - amount)
 	actor["mp"] = int(actor["mp"]) - cost
-	line = "%s spreekt %s op %s (%d)." % [str(actor["display"]), str(spell["name"]), str(foe["display"]), amount]
+	line = "%s casts %s on %s (%d)." % [str(actor["display"]), str(spell["name"]), str(foe["display"]), amount]
 	return {"ok": true, "reason": "", "log": line, "finished": false}
 
 
 func _item(actor: Dictionary, target_uid: String, item_id: String) -> Dictionary:
 	var bag: Dictionary = actor["items"]
 	if int(bag.get(item_id, 0)) <= 0:
-		return _fail("Dat drankje is op.")
+		return _fail("That potion is used up.")
 	var item := PvpItems.get_item(item_id)
 	if item.is_empty():
-		return _fail("Onbekend drankje.")
+		return _fail("Unknown potion.")
 	var ally := fighter(target_uid)
 	if ally.is_empty() or str(ally["seat"]) != str(actor["seat"]) or int(ally["hp"]) <= 0:
-		return _fail("Kies een bondgenoot.")
+		return _fail("Choose an ally.")
 	var before_hp := int(ally["hp"])
 	var before_mp := int(ally["mp"])
 	ally["hp"] = mini(int(ally["max_hp"]), before_hp + int(item["heal_hp"]))
 	ally["mp"] = mini(int(ally["max_mp"]), before_mp + int(item["heal_mp"]))
 	bag[item_id] = int(bag[item_id]) - 1
 	var gained := (int(ally["hp"]) - before_hp) + (int(ally["mp"]) - before_mp)
-	var line := "%s gebruikt %s op %s (%d)." % [str(actor["display"]), str(item["name"]), str(ally["display"]), gained]
+	var line := "%s uses %s on %s (%d)." % [str(actor["display"]), str(item["name"]), str(ally["display"]), gained]
 	return {"ok": true, "reason": "", "log": line, "finished": false}
 
 
