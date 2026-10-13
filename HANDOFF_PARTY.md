@@ -124,3 +124,25 @@ Extra aangepaste bestaande tests: `codex_tests.gd` (5 menuknoppen), `fusie_tests
 ## 6. Open punten
 - Met 5 vakken zijn de statusvakken ~41 eenheden breed; de getallen staan dan over het label "HP"/"MP" heen
   (nog leesbaar, zie screenshot). Mogelijke vervolgstap: labels weglaten bij smalle vakken.
+
+## 7. Vervolg (branch `rpgcode/party-zijspeler`, besluiten Dennis 13-10)
+Port van de nieuwe stukken uit #66 bovenop #69 (al op main). Het icoon van RPG ART
+(`assets/ui/icon_monstervak.png`, handwerk.txt, placeholder-regel KLAAR) stond al op main en is ongewijzigd.
+- **Monster als zijspeler boven B.** In de statusrij staan alleen nog de 4 heldenvakken (die worden daardoor
+  breder; het open punt in §6 vervalt). Het Codex-monster is een klein groen label (52x11,
+  `HeroStatusBox.SIDE_SIZE`) met het RPG ART-icoon en de naam, zonder HP/MP-balken. Het label staat boven de B-knop
+  (`SIDE_GAP` 3) en de rug-sprite staat er vlak boven. Het monster vecht, wordt geraakt en is tikbaar
+  als doelwit zoals voorheen. In `status_boxes` heeft het monster nog wel een element, zodat de indexen gelijk blijven aan
+  `heroes`; dat element tekent zich met `monster = true` als label. `MONSTER_GAP` is weg.
+  Het icoon blijft lazy geladen via main's `static var _monster_icon` (met een getekende terugval).
+- **Magic in het veldmenu.** De knop Magic staat onder Items (Equipment > Codex > Items > Magic, een D-pad-ring) en
+  opent meteen het Magie-scherm, zonder tussenstap. Genezen buiten gevechten werkt weer. De linkerknoppen zijn
+  30 hoog (was 34).
+- **Warp compact**: 96x24 (was ca. 210x60), Party eronder in dezelfde maat, tikhoogte >= 16. Er is geen
+  warp-knop in het gevecht zelf, dus ik ga ervan uit dat Dennis de Warp-knop van het veldmenu bedoelt.
+- **Ingekorte namen**: geen spatie meer voor het puntje.
+- **Tests**: partytest (52, nieuw: zijspeler klein/boven B/geen balken/sprite erboven, icoon 7x6, Warp compact,
+  Magic opent het scherm en Lotte geneest Dennis in het veld), menutest (6 knoppen, Magic in de ring,
+  Warp "compact" i.p.v. "groter") en codextest (6 knoppen, monster rechts van Dennis en iets hoger).
+- **Screenshots** (`/workspace/code_party/shots/`): `party_gevecht_5_plekken.png`, `party_veldmenu.png`,
+  `veldmenu_magic.png` (+ `_3x`).
