@@ -33,6 +33,8 @@ func _build() -> void:
 
 
 func _fill() -> void:
+	if list.get_child_count() > 0:
+		clear_message()
 	for b in buttons:
 		b.queue_free()
 	buttons.clear()
