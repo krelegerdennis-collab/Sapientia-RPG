@@ -74,6 +74,9 @@ static func set_label(b: Button, text: String) -> void:
 
 static func _mark(b: Button, on: bool) -> void:
 	b.text = ("> " if on else "  ") + str(b.get_meta("label", ""))
+	# gecentreerde knoppen (veldmenu): rechts even breed opvullen, zodat de tekst echt in het midden staat
+	if b.alignment == HORIZONTAL_ALIGNMENT_CENTER:
+		b.text += "  "
 	var c := MenuColors.ACCENT if on else MenuColors.TEXT
 	for k in ["font_color", "font_focus_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
 		b.add_theme_color_override(k, c)
