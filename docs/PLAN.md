@@ -58,8 +58,8 @@ Status: **PH** = placeholder staat in repo (zelfde maat); **—** = nog geen bes
 | 50 | Hanger-oplichteffect (paarse gloed `b07ae8`) | maat open (voorstel 16×16, 4 frames) | — (code kleurt) |
 | 51 | UI wereldkaart-view WM1/WM2/WM3/dorp (knoppen) | maat open | PH (vlakke knoppen) |
 | 52 | Loop-animaties party + Codex-monsters in hub | per figuur 48×96, 3×4 van 16×32 | PH (kleurvlakken) |
-| 53 | Nieuwe plant-/leven-vijanden Archief 2 | 90×90 + rug + map 32×64 | — (aantal open) |
-| 54 | Nieuwe Codex-monsters Archief 2 | idem | — (aantal open) |
+| 53 | 5 vijanden Archief 2: rankje, sporekop, doornige_loper, bloeiende_schrik, wortelgeest (Codex-vangbaar: sporekop, rankje, wortelgeest) | per vijand 90×90 voor + 90×90 rug + map 32×64 (2×4 frames van 16×16) | — |
+| 54 | 6 kleurvarianten World Warper (grijs/groen/oranje/roze/blauw/rood + paars) | maat als warper-basis | — |
 
 **Totaal: 54 open art-items** (49 met vaste bestandsnaam; 5 nog zonder bestand/maat). Niet aanraken: bestanden in `tools/handwerk.txt`.
 
@@ -73,13 +73,14 @@ Status: **PH** = placeholder staat in repo (zelfde maat); **—** = nog geen bes
 ## Fase 2 — Archief 2 (Levende Archief)
 - **RPG ART batch 2:** kas_tiles 256×80; archief2_kas_tiles 256×80; kas_bibliotheek 256×64; groei_plaat 48×16 (3 frames) + plaat_zaad/scheut/volgroeid 16×16; kas_ingang 16×16; levenskern 16×16.
 - **RPG ART batch 3:** lotte_veld 48×96; lotte_glitch 64×80 + map 32×64; wurger 80×96 + map; genezer 64×80 + map.
-- **RPG ART batch 4:** plant-vijanden + Codex-monsters A2 (na Dennis' lijst); woudgeest (+rug/map).
+- **RPG ART batch 4:** 5 vijanden A2 (rankje, sporekop, doornige_loper, bloeiende_schrik, wortelgeest; 90×90 + rug + map 32×64); woudgeest (+rug/map).
 - **Cursor-agent:** Codex-monsters A2 in `codex_data.gd` + placeholders; groene gloed/sfeerlicht kas (shader/CanvasModulate).
 - **RPG CODE:** nieuwe vijanden in encountertabellen; bgm-hook kas.
 - **Dennis:** lijst plant-vijanden + Codex-monsters (namen, element, lore); muziek-richting.
 
 ## Fase 3 — World Warper
 - **RPG ART batch 5:** world_warper exterieur 128×64; tiles_placeholder 128×32; echo.png 32×48 + echo_placeholder 48×96; pc_placeholder 32×32; warp_platform 32×16; sapientia_glitch 48×48; Hanger-gloed.
+- **RPG ART batch 5b:** 6 kleurvarianten warper per Archief.
 - **RPG ART batch 6:** borden (bord_kamers/bord_hal 32×16, bord_warp 48×16), tafel 32×16, toonbank 48×16, party_placeholder 48×96, WM-view UI-knoppen.
 - **Cursor-agents:** (a) cutscene na De Genezer: warper verschijnt in de lucht + zwevend gebouw; (b) Hanger-slot + systemen online per Hanger-signaal; (c) Sapientia-dreigingsscène (hologram/glitch, party-reactie); (d) ECHO-dialoog per act + questvoortgang.
 - **RPG CODE:** party live verversen in hal (refresh); Hanger-geluid + ECHO-stem (sfx-hooks).
@@ -109,6 +110,5 @@ Status: **PH** = placeholder staat in repo (zelfde maat); **—** = nog geen bes
 - Webbuild-script lokaal (Godot export) zodat Forge zonder Actions publiceert.
 
 ## Top-beslissingen Dennis
-1. Koopman Diepe Grot: welke H, verhaal, einde H-5 (blokkeert Merchant Room + ECHO-twist-lijn).
-2. Archief 2 roster: plant-vijanden + Codex-monsters (blokkeert art batch 4 en Codex).
-3. World Warper-scènes: definitieve tekst binnenkomst/Sapientia-dreiging + warper-stijl universeel of per Archief.
+Beslist 13 okt 2026 (CANON 12-14): Koopman = H-5; Archief 2-roster; warper-stijl universeel met kleuraccent.
+Nog open: cutscene-teksten World Warper (na De Genezer, eerste binnenkomst Hal, Sapientia-dreiging): tekst volgt van Dennis. EN-namen Archief 2-vijanden bevestigen.
