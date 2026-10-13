@@ -61,6 +61,7 @@ func _run() -> void:
 	print("=== Archief 2: kamer, gevecht, warp ===")
 	await _spel()
 	print("=== Archief 2: na De Genezer naar de hub ===")
+	await _genezer_podium()
 	await _na_genezer_hub()
 	print("=== Archief 2: vijanden (data en regels) ===")
 	_vijanden()
@@ -494,6 +495,54 @@ func _spel() -> void:
 	Engine.time_scale = 1.0
 
 
+## v0.23 podium (RPG ART): rij 5 is dicht tot De Genezer verslagen is (onzichtbare blokkades).
+func _genezer_podium() -> void:
+	GameState.new_game("Dennis")
+	GameState.encounter_multiplier = 0.0
+	GameState.story_flags.erase("bewaker:archief_2_v4_genezer/genezer")
+	GameState.in_battle = false
+	GameState.changing_map = false
+	GameState.change_map(GENEZER_SCENE, "zuid")
+	var ok := await _wacht("Archief2V4Genezer", 20.0)
+	check("podium: Genezer-kamer geladen", ok)
+	if not ok:
+		return
+	await _dialoog_dicht(10)
+	var k := _scène()
+	var blok := get_tree().get_nodes_in_group("dungeon_blokkade")
+	check("podium: 16 blokkades op rij 5 (alles behalve de Genezer op 9-10)", blok.size() == 16
+			and blok.all(func(b): return int(b.position.y) == 5 * 16 + 8))
+	# vrije tegels bereikbaar vanaf de ingang (9,10) zonder door rij 5 of de Genezer te gaan
+	var dicht := {}
+	for b in blok:
+		dicht[Vector2i(int(b.position.x) / 16, int(b.position.y) / 16)] = true
+	dicht[Vector2i(9, 5)] = true
+	dicht[Vector2i(10, 5)] = true
+	var gezien := {Vector2i(9, 10): true}
+	var rij := [Vector2i(9, 10)]
+	while not rij.is_empty():
+		var t: Vector2i = rij.pop_front()
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var n: Vector2i = t + d
+			if gezien.has(n) or dicht.has(n) or not k._cells.has(n) or k.is_wall(n):
+				continue
+			gezien[n] = true
+			rij.append(n)
+	check("podium: noorduitgang (9,2) niet bereikbaar zonder gevecht", not gezien.has(Vector2i(9, 2)) and not gezien.has(Vector2i(3, 4)))
+	check("podium: wel de Genezer zelf (trap 9,7 / 9,6)", gezien.has(Vector2i(9, 6)) and gezien.has(Vector2i(10, 6)))
+	var speler: Node = k.get_node("Objects/Player")
+	speler.position = Vector2(3, 6) * 16 + Vector2(8, 8)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	check("podium: speler kan op (3,6) niet omhoog door de blokkade", not speler._can_move(Vector2i.UP))
+	GameState.story_flags["bewaker:archief_2_v4_genezer/genezer"] = true
+	GameState.change_map(GENEZER_SCENE, "zuid")
+	ok = await _wacht("Archief2V4Genezer", 20.0)
+	await get_tree().create_timer(0.3).timeout
+	check("podium: na de overwinning geen blokkades meer", ok and get_tree().get_nodes_in_group("dungeon_blokkade").is_empty())
+	await _dialoog_dicht(10)
+
+
 func _na_genezer_hub() -> void:
 	var kamers: Dictionary = Rooms.rooms()
 	var noord: Dictionary = kamers["archief_2_v4_genezer"]["exits"]["n"]
@@ -524,8 +573,23 @@ func _na_genezer_hub() -> void:
 	var gezien: Array[String] = []
 	var t0 := Time.get_ticks_msec()
 	var hub := false
-	while Time.get_ticks_msec() - t0 < 30000:
+	var video_eerst := false
+	var video_gezien := false
+	while Time.get_ticks_msec() - t0 < 40000:
 		var s := _scène()
+		var vid: Node = s.find_child("GenezerVideo", true, false) if s != null else null
+		if vid != null and not video_gezien:
+			video_gezien = true
+			video_eerst = true
+			for r in WarperCanon.GENEZER:
+				if gezien.has(str(r["text"])) or str(Dialog.text_label.text).contains(str(r["text"])):
+					video_eerst = false
+			await get_tree().create_timer(2.5).timeout
+			check("filmpje: scherp (canvas_items, lineair), 720x1280", get_tree().root.content_scale_mode == Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+					and vid.video.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and vid.video_path.ends_with("genezer_warper.ogv"))
+			await _shot("genezer_video_frame")
+			vid.skip_now()
+			await get_tree().process_frame
 		if s != null and s.name == "Hal" and s.is_node_ready() and not GameState.changing_map:
 			hub = true
 			break
@@ -546,6 +610,8 @@ func _na_genezer_hub() -> void:
 	for r in WarperCanon.GENEZER:
 		if not tekst.contains(str(r["text"])):
 			canon = false
+	check("filmpje na de overwinning, vóór de dialoog van scène 1", video_gezien and video_eerst
+			and GameState.story_flags.has(GenezerScene.VIDEO_FLAG))
 	check("canon-scène 1 compleet vóór de Hal (%d regels)" % gezien.size(), canon)
 	check("scène 1: vlag gezet", bool(GameState.story_flags.get(WarperCanon.FLAG_GENEZER, false)))
 	check("geen H-6 in scène 1", not tekst.contains("H-6") and not tekst.contains("Proefpersoon"))

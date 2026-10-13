@@ -17,6 +17,9 @@ const PANEL_TEXTURE := "res://art/cutscene/glitch_panel.png"
 const VIDEO_ASPECT := 9.0 / 16.0
 ## Vangnet: video ~15 s; na deze tijd sowieso klaar (bv. als de browser niets afspeelt).
 const MAX_SECONDS := 20.0
+## v0.23: dezelfde speler voor andere filmpjes (bv. na De Genezer): pad + vangnet per exemplaar.
+var video_path := VIDEO_PATH
+var max_seconds := MAX_SECONDS
 ## Even geen skip direct na binnenkomst (de stap-toets die je nog vasthoudt).
 const SKIP_GRACE := 0.4
 
@@ -74,8 +77,8 @@ func begin(map: Node) -> void:
 	_build()
 	AudioManager.stop_music(0.3)
 	var stream: VideoStream = null
-	if ResourceLoader.exists(VIDEO_PATH):
-		stream = load(VIDEO_PATH) as VideoStream
+	if ResourceLoader.exists(video_path):
+		stream = load(video_path) as VideoStream
 	if stream == null:
 		push_warning("WorldmapCutscene: video ontbreekt, overslaan")
 		_finish.call_deferred()
@@ -175,7 +178,7 @@ func _process(delta: float) -> void:
 	# een verhaal-event mag de speler niet ontgrendelen zolang het filmpje loopt
 	if _player != null and is_instance_valid(_player) and "input_locked" in _player:
 		_player.input_locked = true
-	if _elapsed >= MAX_SECONDS:
+	if _elapsed >= max_seconds:
 		_finish()
 
 

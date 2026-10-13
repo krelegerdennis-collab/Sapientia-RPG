@@ -18,6 +18,7 @@ extends "res://scripts/map.gd"
 ##   vlucht -> monster blijft, de speler knippert INVULN seconden en kan niet geraakt worden.
 ## De monsters staan stil zolang er een tekstvak, het veldmenu, een cutscene of een overgang is.
 
+const Archief2Ground := preload("res://scripts/data/archief2_ground.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
 const BOOK_SCENE := "res://scenes/book_point.tscn"
@@ -123,6 +124,8 @@ func _build() -> void:
 	var legend := DungeonRooms.legend_of(room)
 	var floor_tiles: Array = room.get("floor_tiles", DungeonRooms.FLOOR)
 	var layout: Array = room["layout"]
+	# v0.23: vaste grondlaag (tegelnummers) als de kamer die heeft (Archief 2 v2-deco); anders willekeurige vloer
+	var vast: Array = room.get("ground", Archief2Ground.GROUND.get(room_id, []))
 	var exit_cells := {}           # sleutel in "exits" -> Array[Vector2i]
 	for y in layout.size():
 		var row: String = layout[y]
@@ -134,6 +137,8 @@ func _build() -> void:
 			var n: int = legend[ch]
 			if ch == ".":
 				n = floor_variant(x, y, floor_tiles)
+			if y < vast.size() and x < (vast[y] as Array).size():
+				n = int(vast[y][x])
 			_cells[Vector2i(x, y)] = n
 			set_tile(ground, Vector2i(x, y), n)
 			if DungeonRooms.EXIT_CHARS.has(ch):
@@ -190,6 +195,22 @@ func _build() -> void:
 		var kast: StaticBody2D = InktwurmKastScript.new()
 		kast.setup(self, room["inktwurm_kast"])
 		objects.add_child(kast)
+	# v0.23 onzichtbare blokkades (bv. het podium van De Genezer): weg zodra de vlag "tot_vlag" staat
+	var blok: Dictionary = room.get("blokkades", {})
+	if not blok.is_empty() and not GameState.story_flags.has(str(blok.get("tot_vlag", ""))):
+		for bt in blok.get("tiles", []):
+			var sb := StaticBody2D.new()
+			sb.name = "Blokkade_%d_%d" % [int(bt[0]), int(bt[1])]
+			sb.collision_layer = 1
+			sb.add_to_group("dungeon_blokkade")
+			var cs := CollisionShape2D.new()
+			var rs := RectangleShape2D.new()
+			rs.size = Vector2(16, 16)
+			cs.shape = rs
+			sb.add_child(cs)
+			sb.position = Vector2(int(bt[0]), int(bt[1])) * 16 + Vector2(8, 8)
+			objects.add_child(sb)
+			_blocked[Vector2i(int(bt[0]), int(bt[1]))] = true
 	# v0.14 leesplekken (zonder botsing)
 	for d in room.get("signs", []):
 		var sg: Area2D = SignScript.new()

@@ -1115,7 +1115,8 @@ const TERRAIN_BACKDROP := {
 	"dungeon100": "cave_deep",
 }
 ## v0.17: baasgevecht op dit terrein = deze achtergrond i.p.v. "boss" (de Wortelkoning in het Woud).
-const BOSS_TERRAIN_BACKDROP := {"woud": "forest_dark"}
+## v0.23: baasgevecht in de kas (De Genezer) = kas_boss (RPG ART art_kas_battle).
+const BOSS_TERRAIN_BACKDROP := {"woud": "forest_dark", "kas": "kas_boss"}
 const DEFAULT_BACKDROP_ID := "grass"
 ## Achtergrond-id -> plaatje (1280x432, zie docs/ARTSTYLE.md 10g). gras/zand/boss zijn van
 ## de art director (RPG ART, staan in tools/handwerk.txt).
@@ -1131,6 +1132,8 @@ const BACKDROPS := {
 	# v0.21: Berggrot en Diepe Grot, 1280x432 (RPG ART batch 13, handwerk)
 	"cave_berg": "res://assets/battle/berggrot.png",
 	"cave_deep": "res://assets/battle/diepe_grot.png",
+	# v0.23: baasgevecht in de kas (De Genezer), 1280x432 (RPG ART art_kas_battle, handwerk)
+	"kas_boss": "res://assets/battle/kas_genezer.png",
 }
 
 
