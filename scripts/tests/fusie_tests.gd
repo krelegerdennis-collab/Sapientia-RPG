@@ -1019,8 +1019,10 @@ func _codex_button_tests() -> void:
 	var opened: bool = await wait_until(func(): return bt.menu.visible and bt.menu.title_label.text == "Codex", 3.0)
 	check("tik op Codex opent het submenu 'Codex'", opened)
 	var t0: String = bt.menu._entries[0]["text"]
-	check("submenu: Vangen (Boek x2) + Wissel bondgenoot, beide aan ('%s')" % t0, bt.menu._entries.size() == 2
-			and "Book x2" in t0 and bt.menu._is_enabled(0) and bt.menu._is_enabled(1))
+	# v0.22 partylimiet: wisselen in het gevecht staat uit ('Swap: outside battle', grijs)
+	check("submenu: Vangen (Boek x2) aan + Wissel grijs ('%s' / '%s')" % [t0, bt.menu._entries[1]["text"]], bt.menu._entries.size() == 2
+			and "Book x2" in t0 and bt.menu._is_enabled(0) and not bt.menu._is_enabled(1)
+			and str(bt.menu._entries[1]["text"]) == "Swap: outside battle")
 	await pframes(4)
 	check("submenu: regels >= 16 hoog (%.0f)" % bt.menu.row_button(0).size.y, rows_ok(bt))
 	var cr: Rect2 = bt.cross.cross_rect()
