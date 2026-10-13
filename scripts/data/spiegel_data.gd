@@ -12,7 +12,7 @@ const ZWIJGEN: Array[String] = ["Noor", "Lotte"]
 
 const KAMER := "A room full of mirrored surfaces."
 const WAARHEID := "The Mirror does not fight with force but with truth."
-const FEIT_H6 := "Dennis is Proefpersoon H-6."
+const FEIT_H6 := "Dennis is Test Subject H-6."
 const FEIT_GEMAAKT := "He was not born but made."
 const FEIT_HANGER := "The Hanger belongs to him, and he belongs to the Hanger."
 const FEIT_TERUG := "Sapientia wants him back, not defeated."
@@ -37,7 +37,7 @@ const BEATS: Array = [
 	{"id": "stilte", "wie": WIE_DENNIS, "stilte": true},
 	# Dennis vraagt de zojuist genoemde feiten terug. Alleen een vraagteken erbij.
 	{"id": "vragen", "wie": WIE_DENNIS, "vragen": true, "tekst": [
-		"Dennis is Proefpersoon H-6?",
+		"Dennis is Test Subject H-6?",
 		"He was not born but made?",
 		"The Hanger belongs to him, and he belongs to the Hanger?",
 		"Sapientia wants him back, not defeated?",

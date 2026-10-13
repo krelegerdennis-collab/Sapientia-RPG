@@ -101,7 +101,7 @@ static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 	if not _vlag_aan(flags, FLAG_GENEZER):
 		return [
 			"De Genezer still stands in the greenhouse of Archief 2.",
-			"Ga via de berggrot.",
+			"Go through the berggrot.",
 		]
 	var plek := _wm1_plek(bezocht)
 	if plek == "":

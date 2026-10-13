@@ -52,8 +52,8 @@ func _data() -> void:
 	var alles := "\n".join(Data.zinnen())
 	for leeg in ["H-1", "H-2", "H-3", "H-4", "H-5"]:
 		check("%s niet ingevuld" % leeg, not alles.contains(leeg))
-	check("H-6 staat in de tekst", alles.contains("Proefpersoon H-6"))
-	check("vorige vijf blijft zonder namen", alles.contains("de vorige vijf"))
+	check("H-6 staat in de tekst", alles.contains("Test Subject H-6"))
+	check("vorige vijf blijft zonder namen", alles.contains("the last five"))
 	var stilte := Data.beat_index("stilte")
 	var vragen := Data.beat_index("vragen")
 	var weigering := Data.beat_index("weigering")

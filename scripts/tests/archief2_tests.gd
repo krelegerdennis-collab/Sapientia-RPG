@@ -500,7 +500,7 @@ func _na_genezer_hub() -> void:
 	check("hub is het exterieur", str(WarperEnter.HUB_SCENE).ends_with("exterieur.tscn") and str(WarperEnter.HUB_SPAWN) == "ingang")
 	check("Hanger gloeit paars", HangerScene.PURPLE == Color("b07ae8"))
 	var echo := " ".join(Archief2.ECHO_REGELS)
-	check("H-6 blijft bij de kaartkamer", echo.contains("H-6") and echo.contains("Proefpersoon"))
+	check("H-6 blijft bij de kaartkamer", echo.contains("H-6") and echo.contains("Test Subject"))
 	var hubtekst := " ".join(WarperDreiging.lines())
 	for stap in WarperDialoog.steps():
 		hubtekst += " " + " ".join(stap.get("lines", []))

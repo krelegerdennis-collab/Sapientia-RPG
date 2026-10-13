@@ -129,7 +129,7 @@ func _rules_tests() -> void:
 	check("start alleen via ECHO, niet via de wereldkaart", EchoGrot.blokkeert_wereldkaart(EchoGrot.WERELD, EchoGrot.DUNGEON)
 			and not EchoGrot.blokkeert_wereldkaart(EchoGrot.DUNGEON, EchoGrot.DUNGEON)
 			and EchoGrot.KAMER == R.WORLD_SCENE and EchoGrot.KAMER_SPAWN == R.WORLD_SPAWN
-			and EchoGrot.ZIN_EERSTE.begins_with("De Diepe Grot."))
+			and EchoGrot.ZIN_EERSTE.begins_with("The Diepe Grot."))
 	var party := [{"hp": 0, "max_hp": 30, "mp": 1, "max_mp": 8}, {"hp": 5, "max_hp": 20, "mp": 0, "max_mp": 4}]
 	var pages := [{"hp": 0, "max_hp": 12, "mp": 0, "max_mp": 3}]
 	R.heal_party(party, pages)

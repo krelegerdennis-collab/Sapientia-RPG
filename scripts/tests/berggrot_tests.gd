@@ -216,7 +216,7 @@ func _kaart() -> void:
 	check("bewaker van verdieping 2 opent de warper niet", not GameState.try_unlock_world_warper()
 			and not GameState.world_warper_is_unlocked())
 	var dicht: Dictionary = Story.pick("naar_world_warper")
-	check("dicht platform wijst terug", dicht.get("do") is Array and str(dicht["do"]).contains("nog niet"))
+	check("dicht platform wijst terug", dicht.get("do") is Array and str(dicht["do"]).contains("isn't here yet"))
 	GameState.story_flags.erase(TRAPZAAL_VLAG)
 	GameState.story_flags[GENEZER_VLAG] = true
 	check("warper-vlag na De Genezer", GameState.try_unlock_world_warper()
