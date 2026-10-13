@@ -148,3 +148,11 @@ Extra aangepaste bestaande tests: `codex_tests.gd` (5 menuknoppen), `fusie_tests
   `menutest`/`codextest` verwachten nu 6 knoppen. partytest: Magic opent het scherm, Lotte geneest Dennis buiten het gevecht
   (screenshot `veldmenu_magic.png`).
 - Ingekorte namen krijgen geen spatie meer voor het puntje ("Moss." i.p.v. "Moss .").
+
+### Testresultaten na deze update (commit met Magic + zijspeler + compacte Warpen)
+- **Godot 4.7.2**: alle 28 suites serieel groen (`logs/final3_472`). Alleen `archief2test` faalde eerst
+  (3 fouten, alleen onder zware belasting). Alleen opnieuw gedraaid: 180/0 (`logs/final3_472_rerun`).
+- **Godot 4.3**: alle 28 suites serieel groen (`logs/final3_43`). Ook hier faalde `archief2test` eerst
+  onder belasting. Alleen opnieuw gedraaid: 180/0 (`logs/a2_bisect`). Een bisect liet zien dat de
+  fout niet door deze PR komt: dezelfde code slaagt als hij alleen draait.
+- partytest 52/0, menutest 230/0, codextest 137/0, fusietest 155/0 op beide versies.
