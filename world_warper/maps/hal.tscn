@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
-[ext_resource type="TileSet" path="res://world_warper/art/tiles_placeholder.tres" id="2_tiles"]
+[ext_resource type="TileSet" path="res://world_warper/art/tiles.tres" id="2_tiles"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
 [ext_resource type="Script" path="res://scripts/map_spawn.gd" id="4_spawn"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="5_touch"]
@@ -123,9 +123,6 @@ position = Vector2(152, 72)
 
 [node name="AnkerWarp" type="Marker2D" parent="Ankers" groups=["ww_anchor_warp"]]
 position = Vector2(200, 88)
-
-[node name="AnkerSave" type="Marker2D" parent="Ankers" groups=["ww_anchor_save"]]
-position = Vector2(296, 56)
 
 [node name="AnkerParty" type="Marker2D" parent="Ankers" groups=["ww_anchor_party"]]
 position = Vector2(72, 136)

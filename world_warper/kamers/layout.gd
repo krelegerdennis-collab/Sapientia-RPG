@@ -2,7 +2,7 @@ extends Node
 ## Vult Ground vanuit WarperKamers.rijen. Kind van de map, dus dit loopt vóór map._ready.
 
 const Kamers := preload("res://world_warper/kamers/kamers.gd")
-const TILESET := preload("res://world_warper/art/tiles_placeholder.tres")
+const TILESET := preload("res://world_warper/art/tiles.tres")
 
 @export var room_id := ""
 

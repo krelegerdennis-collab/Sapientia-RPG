@@ -42,6 +42,8 @@ var gloed: TextureRect
 var gloed_frame := 0
 var _gloed_t := 0.0
 
+const WarperAccentArt := preload("res://world_warper/art/accent.gd")
+const ECHO_HOLO := "res://assets/sprites/archief2/echo.png"
 @onready var layer: CanvasLayer = $Layer
 @onready var hall: ColorRect = $Layer/Hall
 @onready var hologram: Control = $Layer/Hologram
@@ -418,6 +420,19 @@ func _style() -> void:
 	text_label.add_theme_constant_override("shadow_offset_y", 1)
 	_font_label(hint_label, 8, UiStyleC.TEXT_DIM)
 	_font_label(placeholder, 10, Color(0.1, 0.06, 0.14, 1))
+	# Hologram: ECHO-art van RPG ART in plaats van het woord PLACEHOLDER.
+	if hologram != null and hologram.get_node_or_null("EchoArt") == null:
+		var pad := WarperAccentArt.path(ECHO_HOLO, WarperAccentArt.current())
+		if ResourceLoader.exists(pad):
+			var art := TextureRect.new()
+			art.name = "EchoArt"
+			art.texture = load(pad) as Texture2D
+			art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			hologram.add_child(art)
 
 
 func _font_label(lbl: Label, size: int, color: Color) -> void:

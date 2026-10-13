@@ -12,7 +12,6 @@ extends Node2D
 
 const GIDS_SCENE := preload("res://world_warper/guide/gids.tscn")
 const WANDER_SCENE := preload("res://world_warper/wander/wanderers.tscn")
-const SAVE_SCENE := preload("res://world_warper/services/save_point.tscn")
 const PARTY_SCENE := preload("res://world_warper/services/party_select.tscn")
 const WARP_SCENE := preload("res://world_warper/warp/warp_view.tscn")
 const HANGER_SCENE := preload("res://world_warper/cutscene/hanger_scene.tscn")
@@ -29,7 +28,6 @@ const SCHERM_LAAG := 20
 var _ambience: RefCounted
 var _gids: StaticBody2D
 var _wanderers: Node2D
-var _save: Control
 var _party: Control
 var _warp: Control
 var _hanger: Node2D
@@ -69,10 +67,6 @@ func _bouw_hal() -> void:
 	_wanderers = WANDER_SCENE.instantiate() as Node2D
 	_wanderers.name = "Wanderers"
 	add_child(_wanderers)
-
-	_save = SAVE_SCENE.instantiate() as Control
-	_save.name = "Savepunt"
-	add_child(_save)
 
 	_hanger = HANGER_SCENE.instantiate() as Node2D
 	_hanger.name = "HangerScene"
@@ -174,8 +168,13 @@ func _maak_vlak(wereld: Vector2, tekst: String, bij_keuze: Callable) -> void:
 
 
 class Interactievlak extends Area2D:
-	## Placeholder-vlak. Tik of interact() opent het scherm. Geen definitieve art.
+	## Interactievlak (art van RPG ART). Tik of interact() opent het scherm.
 	signal gekozen
+	const WarperAccent := preload("res://world_warper/art/accent.gd")
+	const VLAK_ART := {
+		"Warp": "res://world_warper/art/vlak_warp.png",
+		"Gezelschap": "res://world_warper/art/vlak_gezelschap.png",
+	}
 	const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 	var titel := ""
 	var _frame := -1
@@ -191,20 +190,15 @@ class Interactievlak extends Area2D:
 		rect.size = Vector2(14, 14)
 		vorm.shape = rect
 		add_child(vorm)
-		var vlak := Polygon2D.new()
-		vlak.color = Color(0.45, 0.22, 0.72, 0.95)
-		vlak.polygon = PackedVector2Array([
-			Vector2(-8, -8), Vector2(8, -8), Vector2(8, 8), Vector2(-8, 8),
-		])
-		add_child(vlak)
-		var rand := Polygon2D.new()
-		rand.color = Color(1.0, 0.25, 0.72, 1.0)
-		rand.polygon = PackedVector2Array([
-			Vector2(-8, -8), Vector2(8, -8), Vector2(8, -6), Vector2(-8, -6),
-		])
-		add_child(rand)
+		# Art van RPG ART (16x16, kleuraccent per Archief): vlak_warp / vlak_gezelschap.
+		var sprite := Sprite2D.new()
+		sprite.name = "Art"
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var basis := VLAK_ART.get(titel, VLAK_ART["Warp"]) as String
+		sprite.texture = load(WarperAccent.path(basis, WarperAccent.current())) as Texture2D
+		add_child(sprite)
 		var label := Label.new()
-		label.text = titel
+		label.text = {"Gezelschap": "Party"}.get(titel, titel)
 		label.position = Vector2(-48, -22)
 		label.size = Vector2(96, 12)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

@@ -165,7 +165,7 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 - [ ] World Warper exterieur (zwevend, paars, high-tech)
   Placeholder-kaart, tegels 16×16, in world_warper/maps. Zweeft niet. De atlas staat in tools/placeholders_v17.txt.
 - [ ] Interieur-tileset (paars, holografisch, sciencefiction)
-  tiles_placeholder.png, tegels 16×16, met het woord PLACEHOLDER. Geregistreerd in tools/placeholders_v17.txt. Echte tileset ontbreekt nog.
+  tiles.png, tegels 16×16, met het woord PLACEHOLDER. Geregistreerd in tools/placeholders_v17.txt. Echte tileset ontbreekt nog.
 - [ ] Sprite van het warp-platform
   warp_ring is een rechthoek van paneeltegels. Geen sprite.
 - [ ] Sprite van de main PC
@@ -331,16 +331,16 @@ Echte pixel-art ter vervanging van placeholders. Geen definitieve art tekenen in
 - [ ] `assets/sprites/enemies/woudgeest.png` — maat niet vastgelegd — vooraanzicht woudgeest (Het Zingende Graan). Nog geen bestand; het gevecht gebruikt tijdelijk `art/enemies/mosslijm.png` (90×94)
 - [ ] `assets/sprites/enemies/woudgeest_rug.png` — zelfde canvas als het vooraanzicht — rugaanzicht woudgeest. Nog geen bestand
 - [ ] `assets/map_monsters/woudgeest.png` — 32×64 — alleen als de woudgeest op de kaart gaat lopen (2×4 frames van 16×16). Nog geen bestand
-- [ ] `world_warper/art/echo_placeholder.png` — 48×96 — ECHO op de kaart (3×4 frames van 16×32)
-- [ ] `world_warper/art/party_placeholder.png` — 48×96 — party-lid zonder eigen sheet (3×4 frames van 16×32)
-- [ ] `world_warper/art/pc_placeholder.png` — 32×32 — hoofd-PC in De Hal en de terminal in ECHO's Kamer
+- [ ] `world_warper/art/echo.png` — 48×96 — ECHO op de kaart (3×4 frames van 16×32)
+- [ ] `world_warper/art/party.png` — 48×96 — party-lid zonder eigen sheet (3×4 frames van 16×32)
+- [ ] `world_warper/art/pc.png` — 32×32 — hoofd-PC in De Hal en de terminal in ECHO's Kamer
 - [ ] `world_warper/art/warp_platform.png` — 32×16 — warp-platform in De Hal
-- [ ] `world_warper/art/tafel_placeholder.png` — 32×16 — lege smidstafel in De Werkplaats
-- [ ] `world_warper/art/toonbank_placeholder.png` — 48×16 — dichte toonbank in De Handelskamer
+- [ ] `world_warper/art/tafel.png` — 32×16 — lege smidstafel in De Werkplaats
+- [ ] `world_warper/art/toonbank.png` — 48×16 — dichte toonbank in De Handelskamer
 - [ ] `world_warper/art/bord_kamers.png` — 32×16 — bordje naar de kamers
 - [ ] `world_warper/art/bord_hal.png` — 32×16 — bord in de hal. Placeholder staat in `tools/placeholders_v17.txt`
 - [ ] `world_warper/art/bord_warp.png` — 48×16 — bord bij de warp. Placeholder staat in `tools/placeholders_v17.txt`
-- [ ] `world_warper/art/tiles_placeholder.png` — 128×32 — interieur-tegels. Placeholder staat in `tools/placeholders_v17.txt`
+- [ ] `world_warper/art/tiles.png` — 128×32 — interieur-tegels. Placeholder staat in `tools/placeholders_v17.txt`
 - [ ] `assets/bg/spiegel_kamer.png` — 384×216 — kamer vol spiegelende oppervlakken
 - [ ] `assets/bg/spiegel_kamer_gebroken.png` — 384×216 — dezelfde kamer, spiegels gebroken
 - [ ] `assets/sprites/buiten/molen_wieken.png` — 192×64 — vier frames van 48×64
@@ -1580,7 +1580,7 @@ Scheiding:
 - [x] Act-kamers bouwen en de deuren openen.
   De kamers uit de lijst staan in `world_warper/kamers`. `hub_open` is waar bij `warper_hub_open` of zodra de World Warper na De Genezer open is. Werkplaats en Handelskamer zijn leeg: geen recepten, geen endgame-voorraad. `codex_nis` en `sapientia_schot` blijven dicht.
 - [x] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
-  bord_hal, bord_warp en tiles_placeholder staan in tools/placeholders_v17.txt. De kaarten in world_warper/maps tekenen met die atlas.
+  bord_hal, bord_warp en tiles staan in tools/placeholders_v17.txt. De kaarten in world_warper/maps tekenen met die atlas.
 - [x] Kleur van de Hanger-gloed in de code van roze naar paars.
   `HangerScene.PURPLE` is `Color("b07ae8")`. De scène zet de Hanger op die kleur.
 
