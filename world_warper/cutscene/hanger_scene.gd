@@ -394,6 +394,9 @@ func _flags_of(node: Node) -> Dictionary:
 func _mark_intro_seen() -> void:
 	_set_flag(_source)
 	_set_flag(_game_state())
+	var gs := _game_state()
+	if gs != null and gs.has_method("mark_scene_seen"):
+		gs.mark_scene_seen("hanger")    # v0.22 veldmenu > Scenes
 
 
 func _set_flag(node: Node) -> void:

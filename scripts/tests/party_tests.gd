@@ -6,10 +6,10 @@ extends Node
 ##           Dennis en gasten blijven, een nieuwe held bij een volle groep gaat naar de reserve.
 ##   Deel B: save/load: reserve in de save, oude save zonder "party_bank", oude save met te veel
 ##           helden in "party" (migratie: de rest naar de reserve).
-##   Deel C: gevecht: 4 helden + 1 monster (5 plekken onderaan, monstervak anders), de reserve-held
+##   Deel C: gevecht: 4 helden + 1 monster (4 heldenvakken onderaan, monster als zijspeler boven B), de reserve-held
 ##           vecht niet mee, beurtvolgorde telt alleen de actieve combatanten, wisselen geblokkeerd.
 ##   Deel D: veldmenu > Party: scherm open, wisselen via het scherm, monster kiezen.
-## Met --shots=map: party_gevecht_5_plekken, party_menu, party_menu_gewisseld (+ _3x = 1152x648).
+## Met --shots=map: party_gevecht_5_plekken, party_veldmenu, veldmenu_magic, veldmenu_knoppen, veldmenu_laden_bevestigen, party_menu, party_menu_gewisseld (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
 
 const GD := preload("res://scripts/data/game_data.gd")
@@ -17,6 +17,7 @@ const SD := preload("res://scripts/data/story_data.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
 const PartyLimiet := preload("res://scripts/party_limiet.gd")
 const PartyScreen := preload("res://scripts/ui/party_screen.gd")
+const PartyActions := preload("res://scripts/party_actions.gd")
 const GOLEM_SCENE := "res://scenes/maps/archief_golemhal.tscn"
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
@@ -60,6 +61,9 @@ func _run() -> void:
 	if part("D"):
 		print("=== Deel D: veldmenu > Party ===")
 		await _menu_tests()
+	if part("E"):
+		print("=== Deel E: veldmenu > Scenes ===")
+		await _scenes_tests()
 	print("PARTYTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -419,22 +423,30 @@ func _gevecht_tests() -> void:
 	check("monster = de actieve Codex-pagina", str(monsters[0].get("page", "")) == str(p1["uid"]) if monsters.size() == 1 else false)
 	check("5 statusvakken en 5 figuren", b.status_boxes.size() == 5 and b.hero_nodes.size() == 5)
 	var boxes: Array = b.status_boxes
+	var rij: Array = boxes.slice(0, 4)
+	var zij: Control = boxes[4]
 	var onder := true
 	var binnen := true
-	for bx in boxes:
+	for bx in rij:
 		onder = onder and bx.position.y > b.size.y * 0.7
 		binnen = binnen and bx.position.x >= 0.0 and bx.position.x + bx.size.x <= b.size.x
-	check("5 plekken onderaan, binnen beeld", onder and binnen)
+	check("statusrij: 4 heldenvakken onderaan, binnen beeld", onder and binnen and rij.all(func(x): return not bool(x.monster)))
 	var los := true
-	for i in range(1, boxes.size()):
-		los = los and boxes[i].position.x >= boxes[i - 1].position.x + boxes[i - 1].size.x
-	check("vakken overlappen niet, van links naar rechts", los)
-	var laatste: Control = boxes[boxes.size() - 1]
-	check("monstervak anders: alleen het laatste vak is 'monster'", bool(laatste.monster)
-			and boxes.slice(0, 4).all(func(x): return not bool(x.monster)))
-	var gat: float = laatste.position.x - (boxes[3].position.x + boxes[3].size.x)
-	var gat_held: float = boxes[1].position.x - (boxes[0].position.x + boxes[0].size.x)
-	check("monstervak staat apart (gat %.1f > %.1f)" % [gat, gat_held], gat > gat_held + 1.0)
+	for i in range(1, rij.size()):
+		los = los and rij[i].position.x >= rij[i - 1].position.x + rij[i - 1].size.x
+	check("heldenvakken overlappen niet, van links naar rechts", los)
+	check("monster heeft geen vak in de rij: zijspeler-label (klein, geen balken)", bool(zij.monster)
+			and zij.size == zij.SIDE_SIZE and zij.size.y < rij[0].size.y / 2.0
+			and zij.get_rect().end.y <= rij[0].position.y)
+	check("monster-icoon van RPG ART geladen (7x6)", zij._monster_icon != null and zij._monster_icon.get_size() == Vector2(7, 6))
+	var tc: Node = b.touch
+	if tc != null and tc.has_method("b_center"):
+		var bc: Vector2 = tc.b_center()
+		check("zijspeler boven de B-knop (label %s, B %s)" % [zij.get_rect(), bc], zij.get_rect().end.y <= bc.y - tc.button_radius
+				and absf(zij.get_rect().get_center().x - bc.x) < 30.0 and zij.position.x + zij.size.x <= b.size.x)
+	var mnode: Control = monsters[0]["node"]
+	check("monster-sprite staat boven zijn label", absf(mnode.home.x - zij.get_rect().get_center().x) < 1.5
+			and mnode.home.y <= zij.position.y + 0.5)
 	check("in het gevecht: monster wisselen uit (Codex-knop 'Swap' grijs)", not b.codex.can_swap())
 	check("in het gevecht: party wisselen geweigerd", GameState.in_battle and PartyLimiet.wissel(1, 0) == PartyLimiet.IN_GEVECHT
 			and PartyLimiet.kies_monster("") == PartyLimiet.IN_GEVECHT and GameState.codex_active == str(p1["uid"]))
@@ -487,6 +499,10 @@ func _menu_tests() -> void:
 	check("veldmenu open, knop 'Party' aanwezig", m != null and m.buttons.has("party"))
 	if m == null:
 		return
+	await pframes(3)
+	check("Warpen compact (%s), Party eronder, tikhoogte >= 16" % m.buttons["warp"].size, m.buttons["warp"].size.y >= 16.0
+			and m.buttons["warp"].size.y < m.buttons["equip"].size.y and m.buttons["party"].position.y > m.buttons["warp"].position.y)
+	await screenshot("party_veldmenu")
 	await click(m.buttons["party"])
 	await pframes(4)
 	var s: Node = m.sub
@@ -519,12 +535,212 @@ func _menu_tests() -> void:
 	s.back()
 	await pframes(3)
 	check("B sluit het scherm", m.sub == null)
+	# v0.22 (Dennis): Magic weer direct in het veldmenu (geen tussenstap); genezen werkt buiten gevechten
+	check("veldmenu: knop 'Magic' in de linkerkolom", m.buttons.has("magic")
+			and is_equal_approx(m.buttons["magic"].position.x, m.buttons["equip"].position.x)
+			and m.buttons["magic"].position.y > m.buttons["items"].position.y)
+	var dennis: Dictionary = GameState.party[0]
+	dennis["hp"] = maxi(1, int(dennis["max_hp"]) / 3)
+	await click(m.buttons["magic"])
+	await pframes(4)
+	var ms: Node = m.sub
+	check("tik op Magic opent meteen het Magie-scherm", ms != null and ms.name == "Magic")
+	if ms != null:
+		var li := -1
+		for i in GameState.party.size():
+			if str(GameState.party[i]["id"]) == "lotte":
+				li = i
+		ms.show_caster(li)
+		await pframes(3)
+		check("Lotte: genezing niet grijs in het veld", ms.entries.size() > 0 and not ms.is_greyed(0))
+		await screenshot("veldmenu_magic")
+		var hp0 := int(dennis["hp"])
+		var genees_r: Dictionary = PartyActions.cast_spell(GameState.party[li], "genees", dennis)
+		check("genezen buiten het gevecht: Dennis %d -> %d HP" % [hp0, int(dennis["hp"])], bool(genees_r["ok"]) and int(dennis["hp"]) > hp0)
+		ms.close()
+		await pframes(3)
+	# v0.22 (Dennis): Settings en Load in het veldmenu
+	check("veldmenu: Settings en Load rechts onder Party, binnen beeld", m.buttons.has("options") and m.buttons.has("load")
+			and m.buttons["options"].position.y > m.buttons["party"].position.y
+			and m.buttons["load"].position.y > m.buttons["options"].position.y
+			and Rect2(Vector2.ZERO, m.root.size).encloses(m.buttons["load"].get_global_rect())
+			and m.buttons["load"].size.y >= 16.0)
+	await screenshot("veldmenu_knoppen")
+	await click(m.buttons["options"])
+	await pframes(4)
+	check("Settings opent het Opties-scherm", m.sub != null and m.sub.name == "Options")
+	if m.sub != null:
+		m.sub.close()
+		await pframes(4)
+	var opgeslagen := GameState.save_game(player().get_tile(), player().facing)
+	var naam_voor := str(GameState.party[1]["name"])
+	GameState.party[1]["name"] = "Gewijzigd"
+	await click(m.buttons["load"])
+	await pframes(6)
+	var ls: Node = m.sub
+	check("Load opent de slotlijst", opgeslagen and ls != null and ls.name == "Load" and ls.list != null
+			and not ls.list.slot_buttons[0].disabled)
+	if ls != null:
+		await click(ls.list.slot_buttons[0])
+		await pframes(4)
+		check("slot kiezen vraagt eerst om bevestiging ('No' heeft de focus)", ls.prompt != null
+				and ls.prompt.no_button.has_focus() and ls.prompt.detail == ls.DETAIL)
+		await screenshot("veldmenu_laden_bevestigen")
+		if ls.prompt != null:
+			await click(ls.prompt.no_button)
+			await pframes(3)
+		check("'No': niets geladen, lijst blijft open", ls.result == "declined" and str(GameState.party[1]["name"]) == "Gewijzigd"
+				and is_instance_valid(ls) and m.sub == ls)
+		ls.close()
+		await pframes(4)
+	check("terug in het veldmenu", m.sub == null)
+	GameState.party[1]["name"] = naam_voor
 	# in een gevecht opent het scherm niet
 	GameState.in_battle = true
 	m.open_party()
 	GameState.in_battle = false
 	await pframes(2)
 	check("veldmenu > Party geweigerd tijdens een gevecht", m.sub == null and m.message_label.text == PartyLimiet.IN_GEVECHT)
+	m.close()
+	await pframes(3)
+	# Load > slot 1 > 'Yes': de save wordt geladen (voortgang erna is weg)
+	GameState.party[1]["name"] = "Gewijzigd"
+	m = null
+	for poging in 10:
+		await tap("menu")
+		await frames(3)
+		m = field_menu()
+		if m != null:
+			break
+		await pframes(20)
+	if m == null:
+		check("veldmenu opnieuw open", false)
+		return
+	m.open_load()
+	await pframes(6)
+	var ls2: Node = m.sub
+	if ls2 == null:
+		check("Load opnieuw open", false)
+		return
+	ls2._on_picked(1)
+	await pframes(3)
+	await click(ls2.prompt.yes_button)
+	var klaar := func() -> bool: return not GameState.changing_map and scene() != null and scene().scene_file_path == GOLEM_SCENE and field_menu() == null
+	await pframes(10)
+	var terug: bool = await wait_until(klaar, 15.0)
+	await wait_fade()
+	check("'Yes': slot geladen, terug op de kaart, niet-opgeslagen wijziging weg (%s)" % str(GameState.party[1]["name"]),
+			terug and str(GameState.party[1]["name"]) != "Gewijzigd")
+
+
+# ================================================================ Deel E: Scenes
+const ScenesDataT := preload("res://scripts/data/scenes_data.gd")
+
+
+func _scenes_tests() -> void:
+	# save-roundtrip en migratie (zonder scherm)
+	GameState.story_flags.erase(ScenesDataT.WORLDMAP_FLAG)
+	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	GameState.scenes_seen = []
+	check("scenes: lijst = alle cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "hanger"]
+			and GameState.seen_scenes().is_empty())
+	GameState.mark_scene_seen("hanger")
+	GameState.mark_scene_seen("bestaat_niet")
+	var pad := "user://partytest_scenes.json"
+	var weg := GameState.save_game(Vector2i(3, 3), Vector2i.DOWN, pad)
+	var ruw := GameState.read_save(pad)
+	check("save: scenes_seen = ['hanger'] (%s)" % [ruw.get("scenes_seen")], weg and ruw.get("scenes_seen") == ["hanger"])
+	GameState.scenes_seen = []
+	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	var ok := GameState.load_game(pad)
+	check("load: scenes_seen terug", ok and GameState.scenes_seen == ["hanger"] and not GameState.scene_seen("wereldkaart"))
+	var oud := ruw.duplicate(true)
+	oud.erase("scenes_seen")
+	(oud["story"] as Dictionary)["flags"] = [ScenesDataT.WORLDMAP_FLAG]
+	_write("user://partytest_scenes_oud.json", oud)
+	ok = GameState.load_game("user://partytest_scenes_oud.json")
+	check("migratie: oude save zonder scenes_seen, vlag wereldkaart gezet -> gezien (%s)" % [GameState.scenes_seen],
+			ok and GameState.scenes_seen == ["wereldkaart"])
+	# scherm
+	GameState.scenes_seen = []
+	GameState.story_flags.erase(ScenesDataT.WORLDMAP_FLAG)
+	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	var m: Node = null
+	for poging in 10:
+		await tap("menu")
+		await frames(3)
+		m = field_menu()
+		if m != null:
+			break
+		await pframes(20)
+	if m == null:
+		check("veldmenu open (scenes)", false)
+		return
+	await pframes(4)
+	check("veldmenu: Bestiary en Scenes aanwezig, binnen beeld", m.buttons.has("bestiary") and m.buttons.has("scenes")
+			and Rect2(Vector2.ZERO, m.root.size).encloses(m.buttons["bestiary"].get_global_rect())
+			and Rect2(Vector2.ZERO, m.root.size).encloses(m.buttons["load"].get_global_rect()))
+	var overlap := false
+	var ids: Array = m.buttons.keys()
+	for i in ids.size():
+		for j in range(i + 1, ids.size()):
+			overlap = overlap or m.buttons[ids[i]].get_global_rect().intersects(m.buttons[ids[j]].get_global_rect())
+	check("veldmenu: geen knoppen over elkaar", not overlap)
+	await screenshot("veldmenu_scenes_knop")
+	await click(m.buttons["bestiary"])
+	await pframes(4)
+	check("Bestiary opent het bestiarium", m.sub != null and m.sub.name == "Bestiary")
+	if m.sub != null:
+		m.sub.close()
+		await pframes(4)
+	await click(m.buttons["scenes"])
+	await pframes(4)
+	var sc: Node = m.sub
+	check("Scenes opent het scenes-scherm", sc != null and sc.name == "Scenes" and sc.buttons.size() == 2)
+	if sc == null:
+		return
+	check("niet bekeken: '???' en op slot", sc.buttons[0].text.ends_with("???") and sc.is_locked(0) and sc.is_locked(1))
+	await screenshot("scenes_op_slot")
+	sc.choose("wereldkaart")
+	await pframes(2)
+	check("op slot: speelt niet af", sc.playing == null and sc.message_text() == sc.LOCKED_MSG)
+	# bekijken = ontgrendelen (de Hanger-scène zet zelf zijn vlag / mark_scene_seen)
+	var h: Node = load("res://world_warper/cutscene/hanger_scene.tscn").instantiate()
+	var bron := ScenesDataT.FlagBron.new()
+	h.add_child(bron)
+	get_tree().root.add_child(h)
+	h.maybe_play(bron)
+	await pframes(2)
+	h._finish()
+	h.queue_free()
+	await pframes(2)
+	check("Hanger bekeken -> ontgrendeld", GameState.scene_seen("hanger"))
+	WorldmapCutscene.start_on(scene())
+	await pframes(2)
+	for c in scene().get_children():
+		if c is WorldmapCutscene:
+			c._finish()
+	await pframes(3)
+	check("wereldkaart bekeken -> ontgrendeld", GameState.scene_seen("wereldkaart") and GameState.scenes_seen.has("wereldkaart"))
+	sc._fill()
+	await pframes(2)
+	check("lijst toont nu de titels", sc.buttons[0].text.ends_with(ScenesDataT.SCENES[0]["title"]) and not sc.is_locked(0)
+			and sc.buttons[1].text.ends_with(ScenesDataT.SCENES[1]["title"]) and not sc.is_locked(1))
+	await screenshot("scenes_scherm")
+	# herhaling: afspelen en terug naar het scherm
+	for id in ["hanger", "wereldkaart"]:
+		await click(sc.buttons[ScenesDataT.ids().find(id)])
+		await pframes(4)
+		check("%s: herhaling speelt" % id, sc.playing != null and is_instance_valid(sc.playing))
+		if id == "hanger":
+			await screenshot("scenes_herhaling_hanger")
+		sc.finish_replay()
+		await pframes(4)
+		check("%s: na afloop terug in Scenes (focus in de lijst)" % id, sc.playing == null and m.sub == sc and is_instance_valid(sc)
+				and get_tree().root.get_node_or_null("SceneReplay") == null and sc.buttons.any(func(b): return b.has_focus()))
+	sc.close()
+	await pframes(4)
+	check("Scenes dicht: terug in het veldmenu", m.sub == null and m.buttons["scenes"].has_focus())
 	m.close()
 	await pframes(3)
 

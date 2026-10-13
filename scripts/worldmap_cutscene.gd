@@ -52,6 +52,7 @@ static func should_play(scene_path: String) -> bool:
 ## Start op de map (zet de vlag meteen, zodat de autosave hem al meeneemt).
 static func start_on(map: Node) -> WorldmapCutscene:
 	GameState.story_flags[FLAG] = true
+	GameState.mark_scene_seen("wereldkaart")   # v0.22 veldmenu > Scenes
 	var c := WorldmapCutscene.new()
 	c.name = "WorldmapCutscene"
 	map.add_child(c)
