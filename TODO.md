@@ -25,8 +25,6 @@ Act 2, Act 3 en de Spiegel-scène wachten op worldmap 2/3 en op scènes. Die vak
 ### Dungeon-warpers
 
 - [x] Warper-stijl beslist: universeel met kleuraccent per Archief (CANON 14)
-- [ ] Warper-basis bouwen: paars licht, zwevend platform, hologram, hetzelfde icoon
-- [ ] 6 kleurvarianten: Kennis grijs, Leven groen, Industrie oranje, Magie roze, Kosmos blauw, Hart rood (elk + paars)
 - [ ] Cutscene-teksten (na De Genezer, eerste binnenkomst Hal, Sapientia-dreiging): tekst volgt van Dennis
 
 Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Canon & Design Reference, samen met de canon-regel voor de Diepe Grot.
@@ -42,22 +40,13 @@ Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Cano
 
 #### Content en art
 
-- [ ] Tileset overwoekerde kas (groen, vochtig, organisch)
-- [ ] Lotte-sprite (priester, robes, staf)
-- [ ] Lotte glitch-variant (gecorrumpeerd, paarse glitch)
-- [ ] De Genezer (golem, half plant half staal)
-- [ ] De Wurger (kolossale slingerplant, mini-baas verdieping 3)
-- [ ] Groei-plaat, 3 stadia: zaad, scheut, volgroeid
-- [ ] Kern-item Archief 2 (levend, groen, organisch)
 - [x] Roster plant-vijanden beslist (CANON 13): Rankje, Sporekop, Doornige Loper, Bloeiende Schrik, Wortelgeest (Natuur)
-- [ ] Vijanden bouwen: data, zwaktes en gedrag (binden/beurt overslaan, gif 3 beurten, charge x2, bijten + heal, naar zich toe trekken)
 - [ ] EN-namen laten bevestigen door Dennis (voorstel: Tendril, Sporehead, Thorn Runner, Blooming Dread, Rootghost)
 - [ ] Achtergrondmuziek die bij de overwoekerde kas past
 
 #### Codex
 
 - [x] Codex-monsters Archief 2 beslist (CANON 13)
-- [ ] Codex-bondgenoten bouwen: Sporekop (vergiftigt), Rankje (bindt, 1 beurt), Wortelgeest (trekt + counter)
 
 ### Bestiarium
 
@@ -72,7 +61,7 @@ De notitie bij dit vakje en de vier lore-zinnen staan direct boven die zinnen, o
 De hub na De Genezer bestaat. Hieronder wat daar nog open is. Ontgrendeling van worldmap 2 en 3 staat niet in deze lijst.
 
 - [ ] Webversie.
-  De Pages-branch `cursor/web-build-29ec` heeft de export van main `d3de708` (Godot 4.7.2, threads uit). De export blijft handmatig. Hard verversen na de publicatie.
+  De Pages-branch `cursor/web-build-29ec` heeft de export van main `7237d2c` (Godot 4.7.2, threads uit). De export blijft handmatig. Hard verversen na de publicatie.
 
 ### Concept en lore
 
@@ -148,8 +137,6 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 ### Warp-systeem
 
-- [ ] Visuele stijl: paars, holografisch, sciencefiction
-  Paarse vlakke panelen met PLACEHOLDER. Geen hologram.
 
 - [ ] Questvoortgang via de AI-gids
   ECHO heeft vier vaste stappen (world_warper_guide_0 tot en met 3) plus een hint naar de volgende bestaande bestemming. Geen questlog.
@@ -162,23 +149,7 @@ Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderz
 
 ### Visuals en art
 
-- [ ] World Warper exterieur (zwevend, paars, high-tech)
-  Placeholder-kaart, tegels 16×16, in world_warper/maps. Zweeft niet. De atlas staat in tools/placeholders_v17.txt.
-- [ ] Interieur-tileset (paars, holografisch, sciencefiction)
   tiles.png, tegels 16×16, met het woord PLACEHOLDER. Geregistreerd in tools/placeholders_v17.txt. Echte tileset ontbreekt nog.
-- [ ] Sprite van het warp-platform
-  warp_ring is een rechthoek van paneeltegels. Geen sprite.
-- [ ] Sprite van de main PC
-- [ ] ECHO-hologram (paarse gloed)
-  Paars vlak met het woord PLACEHOLDER. Geen sprite. De tekst noemt de gids ECHO.
-- [ ] Oplicht-effect van de Hanger (paarse gloed)
-  De scène kleurt de Hanger paars (`Color("b07ae8")`). Een eigen sprite ontbreekt. Roze blijft de Stroom, het domein van Sapientia.
-- [ ] Sapientia glitch-verschijning (dreigingsscène)
-  Korte zwarte flikkering van het hologram. Geen glitch-sprite. De eerste-bezoekscène gebruikt kleurvlakken.
-- [ ] UI van de wereldkaart-view (WM1, WM2, WM3, daarna dorp)
-  Paarse vlakke knoppen met PLACEHOLDER. WM2 en WM3 zijn vergrendeld.
-- [ ] Loop-animaties van party-leden en Codex-monsters in de hub
-  Rondlopers zijn gekleurde vlakken. Geen loop-animatie.
 
 ### Verhaal-integratie
 
@@ -199,8 +170,6 @@ De modus staat onder Canon & Design Reference. Open blijft:
 
 - [ ] Fase 5: Polish (UI, disconnect, reconnect)
   Disconnect en reconnect op dezelfde hostsessie staan. De rest van de polish niet.
-
-- [ ] De knop heet nog "Rematch". Dat is Engels en hoort nog Nederlands te worden.
 
 ### Diepe Grot — nog te bouwen
 
@@ -223,12 +192,9 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [ ] MEDIUM MAP (35%)
 - [ ] LARGE ROOM (20%)
 - [ ] CHEST ROOM (10%)
-- [ ] TRAP ROOM (7%)
 - [ ] PUZZLE ROOM (5%)
 - [ ] TREASURE ROOM (5%)
 - [ ] EMPTY ROOM (5%)
-- [ ] REST ROOM (3%)
-- [ ] MERCHANT ROOM (1%)
 
 ##### Vaste kamers (geen random)
 - [ ] BOSS ROOM (floors 25/50/75/99)
@@ -244,9 +210,7 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 
 ##### Balans-regels
 - [ ] REST ROOM + TREASURE ROOM niet op opeenvolgende verdiepingen
-- [ ] MERCHANT ROOM max 1× per 10 verdiepingen
 - [ ] PUZZLE ROOM niet op floor 1-5
-- [ ] TRAP ROOM niet op floor 1-3
 
 #### Systemen – push monster when stunned
 
@@ -298,55 +262,14 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [ ] Empty Room: lore-items of alleen leeg?
 - [ ] Merchant Room: welke items verkoopt hij?
   - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
-  - [ ] 3 dialoogfases bouwen: bezoek 1-3 vaag; 4-7 (na H-6-onthulling) fragmenten; 8+ of na Archief 5 waarheid
-  - [ ] Item "H-5's Token" (+10% stats tegen dienaren van Sapientia)
   - [ ] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest."
 
 ## RPG ART
 
+Alle items uit deze lijst zijn geleverd en staan in `tools/handwerk.txt` (v0.21).
+
 Echte pixel-art ter vervanging van placeholders. Geen definitieve art tekenen in de repo: alleen deze lijst. Bron: `tools/placeholders_v17.txt`, plus placeholders van Archief 2, de Diepe Grot, Gerrit, de World Warper-kamers en De Spiegel die daar niet of alleen als commentaar staan. Bestanden in `tools/handwerk.txt` niet wijzigen.
 
-- [ ] `assets/sprites/enemies/mimic.png` — 80×64 — Mimic, gevechtsplaatje
-- [ ] `assets/map_monsters/mimic.png` — 32×64 — Mimic op de kaart (2×4 frames van 16×16)
-- [ ] `assets/sprites/dungeon100_warper.png` — 64×16 — warper Diepe Grot, 4 frames van 16×16. Nog geen bestand; de code tint `assets/sprites/save_book.png` (64×16) violet
-- [ ] `assets/tiles/dungeon/kas_tiles.png` — 256×80 — tileset overwoekerde kas
-- [ ] `assets/tiles/dungeon/kas_bibliotheek.png` — 256×64 — bibliotheek-atlas van de kas
-- [ ] `assets/puzzle/groei_plaat.png` — 48×16 — groei-plaat, 3 frames van 16×16: zaad, scheut, volgroeid
-- [ ] `assets/sprites/buiten/kas_ingang.png` — 16×16 — ingang van de kas op de wereldkaart
-- [ ] `assets/tiles/dungeon/archief2_kas_tiles.png` — 256×80 — extra kas-atlas Archief 2
-- [ ] `assets/sprites/archief2/lotte_veld.png` — 48×96 — Lotte priester, veld
-- [ ] `assets/sprites/archief2/lotte_glitch.png` — 64×80 — Lotte glitch
-- [ ] `assets/sprites/archief2/genezer.png` — 64×80 — De Genezer
-- [ ] `assets/sprites/archief2/wurger.png` — 80×96 — De Wurger
-- [ ] `assets/sprites/archief2/plaat_zaad.png` — 16×16 — plaatsoort zaad
-- [ ] `assets/sprites/archief2/plaat_scheut.png` — 16×16 — plaatsoort scheut
-- [ ] `assets/sprites/archief2/plaat_volgroeid.png` — 16×16 — plaatsoort volgroeid
-- [ ] `assets/ui/icons/levenskern.png` — 16×16 — kern-item Archief 2
-- [ ] `assets/sprites/archief2/world_warper.png` — 128×64 — World Warper exterieur
-- [ ] `assets/sprites/archief2/echo.png` — 32×48 — ECHO hologram
-- [ ] `assets/sprites/archief2/sapientia_glitch.png` — 48×48 — Sapientia glitch
-- [ ] `assets/map_monsters/lotte_glitch.png` — 32×64 — Lotte glitch op de kaart (2×4 van 16×16)
-- [ ] `assets/map_monsters/wurger.png` — 32×64 — De Wurger op de kaart (2×4 van 16×16)
-- [ ] `assets/map_monsters/genezer.png` — 32×64 — De Genezer op de kaart (2×4 van 16×16)
-- [ ] `assets/sprites/enemies/woudgeest.png` — maat niet vastgelegd — vooraanzicht woudgeest (Het Zingende Graan). Nog geen bestand; het gevecht gebruikt tijdelijk `art/enemies/mosslijm.png` (90×94)
-- [ ] `assets/sprites/enemies/woudgeest_rug.png` — zelfde canvas als het vooraanzicht — rugaanzicht woudgeest. Nog geen bestand
-- [ ] `assets/map_monsters/woudgeest.png` — 32×64 — alleen als de woudgeest op de kaart gaat lopen (2×4 frames van 16×16). Nog geen bestand
-- [ ] `world_warper/art/echo.png` — 48×96 — ECHO op de kaart (3×4 frames van 16×32)
-- [ ] `world_warper/art/party.png` — 48×96 — party-lid zonder eigen sheet (3×4 frames van 16×32)
-- [ ] `world_warper/art/pc.png` — 32×32 — hoofd-PC in De Hal en de terminal in ECHO's Kamer
-- [ ] `world_warper/art/warp_platform.png` — 32×16 — warp-platform in De Hal
-- [ ] `world_warper/art/tafel.png` — 32×16 — lege smidstafel in De Werkplaats
-- [ ] `world_warper/art/toonbank.png` — 48×16 — dichte toonbank in De Handelskamer
-- [ ] `world_warper/art/bord_kamers.png` — 32×16 — bordje naar de kamers
-- [ ] `world_warper/art/bord_hal.png` — 32×16 — bord in de hal. Placeholder staat in `tools/placeholders_v17.txt`
-- [ ] `world_warper/art/bord_warp.png` — 48×16 — bord bij de warp. Placeholder staat in `tools/placeholders_v17.txt`
-- [ ] `world_warper/art/tiles.png` — 128×32 — interieur-tegels. Placeholder staat in `tools/placeholders_v17.txt`
-- [ ] `assets/bg/spiegel_kamer.png` — 384×216 — kamer vol spiegelende oppervlakken
-- [ ] `assets/bg/spiegel_kamer_gebroken.png` — 384×216 — dezelfde kamer, spiegels gebroken
-- [ ] `assets/sprites/buiten/molen_wieken.png` — 192×64 — vier frames van 48×64
-- [ ] `assets/tiles/dungeon/berggrot_tiles.png` — 256×80
-- [ ] `assets/tiles/dungeon/berggrot_bibliotheek.png` — 256×64
-- [ ] steenluis, druipslak en adermot: enemy en rug 90×90, map 32×64
 
 ## Canon & Design Reference
 
