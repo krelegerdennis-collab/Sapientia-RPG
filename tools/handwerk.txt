@@ -280,3 +280,7 @@ assets/map_monsters/bloeiende_schrik.png
 assets/sprites/enemies/wortelgeest.png
 assets/sprites/enemies/wortelgeest_rug.png
 assets/map_monsters/wortelgeest.png
+art/map_creatures/mosslijm_volg.png
+art/map_creatures/moskonijn_volg.png
+art/map_creatures/mosslijm_speel.png
+art/map_creatures/moskonijn_speel.png

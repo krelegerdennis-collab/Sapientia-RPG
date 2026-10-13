@@ -77,3 +77,6 @@ assets/sprites/buiten/wilgendal_ring.png        48x16    uithangbord ring (acces
 assets/sprites/buiten/wilgendal_ster.png        48x16    uithangbord ster (magic)
 assets/sprites/buiten/wilgendal_toonbank.png    48x16    toonbank in de winkel
 assets/sprites/buiten/wilgendal_vitrine.png     48x16    item-display in de winkel
+# v0.21 Wereldkaart-cutscene (scripts/worldmap_cutscene.gd): PLACEHOLDER, geen eigen bestand.
+# Glitch-zijpanelen links/rechts van de portret-video worden in code getekend (donker, cyaan/magenta strepen).
+# Echte art later: art/cutscene/glitch_panel.png  96x216  (linkerpaneel; rechts = gespiegeld, uitgerekt tot de randbreedte)
