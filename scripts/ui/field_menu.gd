@@ -31,6 +31,9 @@ const GAP := 6
 const LEFT_W := 156
 const BUTTON_H := 34
 const MENU_H := 20
+## v0.22 compacte Warpen-/Party-knop (rechterkolom)
+const WARP_W := 96
+const WARP_H := 24
 ## Minimale tikhoogte (de knoppen zelf zijn hoger). Tests leunen op deze naam.
 const ROW_H := 16
 const MESSAGE_TIME := 2.5
@@ -201,15 +204,17 @@ func _layout() -> void:
 		y += BUTTON_H + GAP
 	var stack_bottom := y - GAP
 	menu_board.position = Vector2(right_x, top)
-	menu_board.size = Vector2(right_w, MENU_H)
+	menu_board.size = Vector2(minf(right_w, float(WARP_W)), MENU_H)
 	var warp_y := top + MENU_H + GAP
+	# v0.22 (Dennis): Warpen compact (was een groot vlak): vaste maat WARP_W x WARP_H, nog steeds
+	# ruim boven de minimale tikhoogte; Party eronder met dezelfde breedte.
 	var warp: Button = buttons["warp"]
-	var party_h := float(ROW_H + 6)
+	var col_w := minf(right_w, float(WARP_W))
 	warp.position = Vector2(right_x, warp_y)
-	warp.size = Vector2(right_w, maxf(BUTTON_H + 1.0, stack_bottom - warp_y - party_h - GAP))
+	warp.size = Vector2(col_w, float(WARP_H))
 	var pt: Button = buttons["party"]
 	pt.position = Vector2(right_x, warp.position.y + warp.size.y + GAP)
-	pt.size = Vector2(right_w, party_h)
+	pt.size = Vector2(col_w, float(WARP_H))
 	message_label.position = Vector2(MARGIN, stack_bottom + GAP)
 	message_label.size = Vector2(w - MARGIN * 2.0, 32)
 	if quest_label != null:

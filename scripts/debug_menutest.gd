@@ -276,13 +276,14 @@ func _main_menu_tests() -> void:
 		inside = inside and vp.encloses(r)
 	inside = inside and vp.encloses(m.menu_label.get_global_rect())
 	check("knoppen en MENU binnen het scherm", inside)
-	check("links gestapeld, Warpen rechts en groter",
+	check("links gestapeld, Warpen rechts en compact",
 			m.buttons["codex"].position.y > m.buttons["equip"].position.y
 			and m.buttons["items"].position.y > m.buttons["codex"].position.y
 			and is_equal_approx(m.buttons["equip"].position.x, m.buttons["codex"].position.x)
 			and is_equal_approx(m.buttons["codex"].position.x, m.buttons["items"].position.x)
 			and m.buttons["warp"].position.x > m.buttons["equip"].position.x + 8.0
-			and m.buttons["warp"].size.y > m.buttons["equip"].size.y
+			and m.buttons["warp"].size.y >= m.ROW_H and m.buttons["warp"].size.y < m.buttons["equip"].size.y   # v0.22 compact
+			and m.buttons["warp"].size.x < m.buttons["equip"].size.x
 			and not left.intersects(m.buttons["warp"].get_global_rect()))
 	var small := false
 	for id in m.buttons:

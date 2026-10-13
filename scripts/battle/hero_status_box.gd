@@ -22,18 +22,24 @@ const PAD := 5
 const MONSTER_RAND := Color("8fc56a")
 const MONSTER_VAK := Color(0.30, 0.48, 0.22, 0.28)
 const ICON_W := 7.0
+## v0.22 maat van het zijspeler-label van het monster
+const SIDE_SIZE := Vector2(52, 11)
+## v0.22 echte art van RPG ART (7x6); ontbreekt hij, dan het getekende boekje als terugval
+const MONSTER_ICON := "res://assets/ui/icon_monstervak.png"
 
 var hero: Dictionary = {}      # verwijst naar GameState.party[i]
 var active := false            # kiest nu een commando
 var targeted := false          # wordt gekozen als doelwit
-## v0.22 partylimiet: dit vak hoort bij het monster (de Codex-bondgenoot, 5e plek). Eigen
-## groene rand, getinte achtergrond en een klein Codex-icoontje (boekje) rechtsboven.
+## v0.22 partylimiet: dit vak hoort bij het monster (de Codex-bondgenoot). Sinds het besluit van
+## Dennis geen statusvak in de rij meer maar een klein 'zijspeler'-label boven de B-knop:
+## groen kadertje met het Codex-icoontje (RPG ART) en de naam, GEEN HP/MP-balken (SIDE_SIZE).
 var monster := false
 var shown_hp := 0.0            # getoonde waarde (loopt naar de echte waarde)
 var shown_mp := 0.0
 var _flash_color := Color(0, 0, 0, 0)
 var _flash_t := 0.0
 var _style: StyleBox
+var _monster_icon: Texture2D = null
 
 
 func setup(hero_data: Dictionary) -> void:
@@ -42,6 +48,8 @@ func setup(hero_data: Dictionary) -> void:
 	shown_mp = float(hero["mp"])
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_style = UiStyle.panel("status")      # v0.13: palet i.p.v. de oude panel_status-textuur
+	if ResourceLoader.exists(MONSTER_ICON):
+		_monster_icon = load(MONSTER_ICON)   # 1x bij setup, niet per frame
 
 
 func has_mp() -> bool:
@@ -106,7 +114,7 @@ func fitted_name(font: Font = null) -> String:
 	if font == null:
 		font = get_theme_default_font()
 	var n := str(hero.get("name", ""))
-	var avail := size.x - PAD * 2.0 - (ICON_W + 1.0 if monster else 0.0)
+	var avail := size.x - PAD * 2.0 if not monster else size.x - ICON_W - 6.0
 	if font == null or avail <= 0.0 or font.get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x <= avail:
 		return n
 	while n.length() > 1 and font.get_string_size(n + ".", HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x > avail:
@@ -121,6 +129,9 @@ func _draw() -> void:
 	var w := size.x
 	var ko: bool = int(hero["hp"]) <= 0
 	var pulse := 0.75 + 0.25 * sin(Time.get_ticks_msec() / 160.0)
+	if monster:
+		_draw_side(w, ko, pulse)
+		return
 	# neon-gloed rond het vak (achter de rand)
 	if active or targeted:
 		var c := UiStyle.HILITE if active and not targeted else UiStyle.TEAL
@@ -193,8 +204,28 @@ func _stat_row(font: Font, top: float, label: String, value: float, max_value: f
 	draw_string(font, base, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyle.TEXT if enabled else UiStyle.TEXT_OFF)
 
 
-## v0.22 Codex-icoontje (placeholder, getekend): een open boekje met een groen blad.
+## v0.22 Zijspeler-label: groen kadertje, icoon links, naam ernaast. Geen balken.
+func _draw_side(w: float, ko: bool, pulse: float) -> void:
+	var hgt := size.y
+	draw_rect(Rect2(0, 0, w, hgt), Color(UiStyle.INK.r, UiStyle.INK.g, UiStyle.INK.b, 0.85))
+	draw_rect(Rect2(0, 0, w, hgt), MONSTER_VAK)
+	var rand := UiStyle.TEAL if targeted else MONSTER_RAND
+	draw_rect(Rect2(0.25, 0.25, w - 0.5, hgt - 0.5), Color(rand.r, rand.g, rand.b, pulse if targeted else 1.0), false, 0.5)
+	_draw_monster_icon(Vector2(2, roundf((hgt - 6.0) / 2.0)))
+	var font := get_theme_default_font()
+	var n := fitted_name(font)
+	_text(font, Vector2(2 + ICON_W + 2, hgt - 2.5), n, UiStyle.KO if ko else MONSTER_RAND.lightened(0.3))
+	if _flash_t > 0.0:
+		var c := _flash_color
+		c.a = 0.45 * (_flash_t / 0.35)
+		draw_rect(Rect2(1, 1, w - 2, hgt - 2), c)
+
+
+## v0.22 Codex-icoontje: art van RPG ART (MONSTER_ICON); terugval = getekend boekje met een groen blad.
 func _draw_monster_icon(p: Vector2) -> void:
+	if _monster_icon != null:
+		draw_texture(_monster_icon, p)
+		return
 	draw_rect(Rect2(p, Vector2(ICON_W, 6)), UiStyle.SHADOW)
 	draw_rect(Rect2(p + Vector2(0.5, 0.5), Vector2(ICON_W / 2.0 - 0.5, 5)), MONSTER_RAND)
 	draw_rect(Rect2(p + Vector2(ICON_W / 2.0, 0.5), Vector2(ICON_W / 2.0 - 0.5, 5)), MONSTER_RAND.darkened(0.25))

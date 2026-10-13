@@ -434,3 +434,4 @@ world_warper/art/knop_wm2.png
 world_warper/art/knop_wm2_ingedrukt.png
 world_warper/art/knop_wm3.png
 world_warper/art/knop_wm3_ingedrukt.png
+assets/ui/icon_monstervak.png

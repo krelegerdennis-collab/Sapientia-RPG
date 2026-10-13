@@ -114,8 +114,8 @@ const ARMOR_HIT_COLOR := Color("b5a78d")
 const SUBMENU_TOP := 24.0
 const CROSS_MARGIN := 4.0         # ruimte tot de rechterrand
 const BOX_GAP := 3.0
-## v0.22 extra ruimte voor het monstervak (5e plek), zodat het een los vak is
-const MONSTER_GAP := 4.0
+## v0.22 ruimte tussen het zijspeler-label van het monster en de B-knop
+const SIDE_GAP := 3.0
 ## Hoeveel art-pixels per scherm-eenheid (2 = "16-bit plus", 768x432).
 const DETAIL := 2
 
@@ -546,29 +546,43 @@ func _layout() -> void:
 	_menu_left = left
 	_menu_right = right
 	_fit_caption()
-	# Statusvakken: onderaan
-	var count := status_boxes.size()
+	# Statusvakken: onderaan. v0.22 (Dennis): het Codex-monster heeft GEEN vak in de rij meer;
+	# zijn vak is een klein 'zijspeler'-label (icoon + naam, geen balken) boven de B-knop en de
+	# sprite staat daar vlak boven. De lijst status_boxes blijft gelijk aan heroes (indexen).
+	var row_boxes: Array = status_boxes.filter(func(bx): return not bool(bx.get("monster")))
+	var count := row_boxes.size()
 	if count > 0:
 		# v0.15: links ruimte maken voor het commando-kruis naast de eerste held (als het past)
 		var box_left := _box_left_for_cross(left, right, count)
-		# v0.22 partylimiet: het monstervak (laatste, Codex) staat iets apart (MONSTER_GAP)
-		var extra := MONSTER_GAP if bool(status_boxes[count - 1].get("monster")) and count > 1 else 0.0
-		var bw := floorf((right - box_left - extra - BOX_GAP * (count - 1)) / count)
+		var bw := floorf((right - box_left - BOX_GAP * (count - 1)) / count)
 		bw = minf(bw, 88.0)
-		var total := bw * count + BOX_GAP * (count - 1) + extra
+		var total := bw * count + BOX_GAP * (count - 1)
 		var x0 := roundf(box_left + (right - box_left - total) / 2.0)
 		for i in count:
-			var box: Control = status_boxes[i]
-			var bx := x0 + i * (bw + BOX_GAP) + (extra if i == count - 1 else 0.0)
-			box.position = Vector2(bx, h - StatusBoxScript.HEIGHT - 3)
+			var box: Control = row_boxes[i]
+			box.position = Vector2(x0 + i * (bw + BOX_GAP), h - StatusBoxScript.HEIGHT - 3)
 			box.size = Vector2(bw, StatusBoxScript.HEIGHT)
 			box.queue_redraw()
-	# Helden: midden boven hun eigen statusvak (reserve: de oude vaste plekken)
+	var b_mid := Vector2(w - 54.0, h - 34.0)
+	var b_r := 15.0
+	if touch and touch.has_method("b_center"):
+		b_mid = touch.b_center()
+		b_r = touch.button_radius * 1.25
+	for bx in status_boxes:
+		if bool(bx.get("monster")):
+			var sz: Vector2 = StatusBoxScript.SIDE_SIZE
+			var px := clampf(roundf(b_mid.x - sz.x / 2.0), 2.0, w - sz.x - 2.0)
+			bx.position = Vector2(px, roundf(b_mid.y - b_r - SIDE_GAP - sz.y))
+			bx.size = sz
+			bx.queue_redraw()
+	# Helden: midden boven hun eigen statusvak (reserve: de oude vaste plekken); het monster
+	# boven zijn zijspeler-label
 	for i in hero_nodes.size():
 		var slot: Vector2
 		if i < status_boxes.size():
 			var box: Control = status_boxes[i]
-			slot = Vector2(roundf(box.position.x + box.size.x / 2.0), box.position.y - HERO_BOX_GAP)
+			var gap := 0.0 if bool(box.get("monster")) else HERO_BOX_GAP
+			slot = Vector2(roundf(box.position.x + box.size.x / 2.0), box.position.y - gap)
 		elif i < HERO_SLOTS.size():
 			slot = HERO_SLOTS[i] + Vector2(dx, 0)
 		else:
