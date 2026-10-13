@@ -264,3 +264,19 @@ assets/sprites/archief2/genezer.png
 assets/map_monsters/lotte_glitch.png
 assets/map_monsters/wurger.png
 assets/map_monsters/genezer.png
+# v0.21: Archief 2-vijanden van RPG ART (art_batch2_v21/out): voor/rug 90x90, kaart 32x64.
+assets/sprites/enemies/rankje.png
+assets/sprites/enemies/rankje_rug.png
+assets/map_monsters/rankje.png
+assets/sprites/enemies/sporekop.png
+assets/sprites/enemies/sporekop_rug.png
+assets/map_monsters/sporekop.png
+assets/sprites/enemies/doornige_loper.png
+assets/sprites/enemies/doornige_loper_rug.png
+assets/map_monsters/doornige_loper.png
+assets/sprites/enemies/bloeiende_schrik.png
+assets/sprites/enemies/bloeiende_schrik_rug.png
+assets/map_monsters/bloeiende_schrik.png
+assets/sprites/enemies/wortelgeest.png
+assets/sprites/enemies/wortelgeest_rug.png
+assets/map_monsters/wortelgeest.png

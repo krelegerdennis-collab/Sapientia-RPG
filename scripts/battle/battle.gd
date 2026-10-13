@@ -98,6 +98,7 @@ const CodexDataScript := preload("res://scripts/data/codex_data.gd")   # v0.19 C
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")   # v0.15 kernvaardigheden
 const Archief2 := preload("res://scripts/data/archief2.gd")
+const Archief2Vijanden := preload("res://scripts/data/archief2_vijanden.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
@@ -152,6 +153,9 @@ var can_flee := true
 var tip_panel: Panel
 var tip_label: Label
 var round_no := 0
+## v0.21 (tests): laatste effect van een vaardigheid en aantal counters in dit gevecht
+var last_skill_effect: Dictionary = {}
+var counters_done := 0
 ## Welke tips er getoond zijn (voor de autotest): "aanval", "item"
 var tips_shown := {}
 var hero_nodes: Array = []    # battle_hero.gd per held
@@ -776,6 +780,7 @@ func _run() -> void:
 		for c in heroes + enemies:
 			c["defending"] = false
 			_guard_tick(c)   # v0.15: schild omhoog telt af
+			Archief2Vijanden.tick(c)   # v0.21: counter telt af
 			_kern_tick(c)    # v0.15: kernvaardigheden laden op
 			_tick_ailments(c)
 		_refresh_party()
@@ -1158,16 +1163,22 @@ func _execute(a: Dictionary) -> void:
 		actor["skip"] = int(actor["skip"]) - 1
 		var reden := str(actor.get("skip_reden", "bevriezing"))
 		var zin := "%s is verlamd en slaat over." if reden == "verlamming" else "%s is bevroren en slaat over."
+		if reden == Archief2Vijanden.SKIP_REDEN_BIND:
+			zin = "%s is bound and skips a turn."
 		show_message(zin % actor["name"])
 		await _wait(MESSAGE_TIME)
 		return
 	match a["type"]:
 		"attack":
 			var t = _valid_target(a["target"], not actor["is_hero"])
+			var getrokken = Archief2Vijanden.pulled_target(actor)   # v0.21: Wortelgeest trok hem aan
+			if getrokken != null and in_battle(getrokken):
+				t = getrokken
 			if t == null:
 				return
 			var mult := 1.0
 			var text := "%s attacks!" % actor["name"]
+			var gekozen: Dictionary = {}
 			for skill in actor["s"].get("skills", []):
 				if randf() < float(skill["chance"]):
 					if str(skill.get("type", "")) == "guard":   # v0.15: schild omhoog i.p.v. aanvallen
@@ -1177,14 +1188,18 @@ func _execute(a: Dictionary) -> void:
 						return
 					mult = float(skill["power"])
 					text = "%s: %s!" % [actor["name"], skill["name"]]
+					gekozen = skill
 					break
 			show_message(text)
-			ActorSfx.play(actor, "vaardigheid" if mult != 1.0 else "aanval")
+			ActorSfx.play(actor, "vaardigheid" if not gekozen.is_empty() else "aanval")
 			if actor["is_hero"]:
 				await _hero_wind_up(actor, true)
 			else:
 				await _enemy_lunge(actor, t)
-			await _damage(t, _physical_damage(actor, t, mult))
+			var dmg := _physical_damage(actor, t, mult)
+			await _damage(t, dmg)
+			await _skill_effect(actor, t, gekozen, dmg)
+			await _counter(t, actor)
 			_hero_rest(actor)
 		"spell":
 			var sp: Dictionary = GameData.SPELLS[a["spell"]]
@@ -1301,6 +1316,28 @@ func _hero_wind_up(actor: Dictionary, is_attack: bool) -> void:
 	else:
 		await node.play_cast()
 		await _wait(0.12)
+
+
+## v0.21 Archief 2: effect van een vaardigheid na de schade (binden, gif, heelbeet, trekken).
+func _skill_effect(actor: Dictionary, t: Dictionary, skill: Dictionary, dmg: int) -> void:
+	if skill.is_empty():
+		return
+	var zin := Archief2Vijanden.apply(actor, t, skill, dmg)
+	if zin != "":
+		last_skill_effect = {"type": str(skill.get("type", "")), "actor": actor["name"], "target": t["name"]}
+		_refresh_party()
+		show_message(zin)
+		await _wait(MESSAGE_TIME)
+
+
+## v0.21: de Wortelgeest-bondgenoot slaat terug na een klap (counter, tot het einde van de ronde).
+func _counter(t: Dictionary, attacker: Dictionary) -> void:
+	if not Archief2Vijanden.counters(t, attacker) or not in_battle(t):
+		return
+	t["counter"] = 0
+	counters_done += 1
+	show_message("%s counters!" % t["name"])
+	await _damage(attacker, _physical_damage(t, attacker, Archief2Vijanden.COUNTER_POWER))
 
 
 func _hero_rest(actor: Dictionary) -> void:

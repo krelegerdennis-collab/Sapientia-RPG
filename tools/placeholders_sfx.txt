@@ -78,3 +78,24 @@ assets/audio/sfx/monsters/woudgeest/aanval.wav
 assets/audio/sfx/monsters/woudgeest/raak.wav
 assets/audio/sfx/monsters/woudgeest/dood.wav
 assets/audio/sfx/monsters/woudgeest/vaardigheid.wav
+# v0.21 Archief 2-vijanden: PLACEHOLDER, kopie van een verwant monster (rankje<-wortelkruiper, sporekop<-sporenzwam, doornige_loper<-moskonijn, bloeiende_schrik<-mosslijm, wortelgeest<-woudgeest)
+assets/audio/sfx/monsters/rankje/aanval.wav
+assets/audio/sfx/monsters/rankje/raak.wav
+assets/audio/sfx/monsters/rankje/dood.wav
+assets/audio/sfx/monsters/rankje/vaardigheid.wav
+assets/audio/sfx/monsters/sporekop/aanval.wav
+assets/audio/sfx/monsters/sporekop/raak.wav
+assets/audio/sfx/monsters/sporekop/dood.wav
+assets/audio/sfx/monsters/sporekop/vaardigheid.wav
+assets/audio/sfx/monsters/doornige_loper/aanval.wav
+assets/audio/sfx/monsters/doornige_loper/raak.wav
+assets/audio/sfx/monsters/doornige_loper/dood.wav
+assets/audio/sfx/monsters/doornige_loper/vaardigheid.wav
+assets/audio/sfx/monsters/bloeiende_schrik/aanval.wav
+assets/audio/sfx/monsters/bloeiende_schrik/raak.wav
+assets/audio/sfx/monsters/bloeiende_schrik/dood.wav
+assets/audio/sfx/monsters/bloeiende_schrik/vaardigheid.wav
+assets/audio/sfx/monsters/wortelgeest/aanval.wav
+assets/audio/sfx/monsters/wortelgeest/raak.wav
+assets/audio/sfx/monsters/wortelgeest/dood.wav
+assets/audio/sfx/monsters/wortelgeest/vaardigheid.wav
