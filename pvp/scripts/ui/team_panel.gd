@@ -5,7 +5,7 @@ signal team_picked(team_id: String)
 signal back_pressed
 
 var _box: VBoxContainer
-var _prompt: String = "Kies je team."
+var _prompt: String = "Choose your team."
 var _waiting: bool = false
 
 
@@ -36,7 +36,7 @@ func _rebuild() -> void:
 		child.queue_free()
 	_box.add_child(PvpStyle.label(_prompt, 10))
 	if _waiting:
-		var leave := PvpStyle.button("Terug")
+		var leave := PvpStyle.button("Back")
 		leave.pressed.connect(func() -> void: back_pressed.emit())
 		_box.add_child(leave)
 		return
@@ -47,6 +47,6 @@ func _rebuild() -> void:
 		var sub := PvpStyle.label(PvpTeams.member_line(id) + " — " + PvpTeams.blurb(id), 8)
 		sub.add_theme_color_override("font_color", PvpStyle.DIM)
 		_box.add_child(sub)
-	var back := PvpStyle.button("Terug")
+	var back := PvpStyle.button("Back")
 	back.pressed.connect(func() -> void: back_pressed.emit())
 	_box.add_child(back)

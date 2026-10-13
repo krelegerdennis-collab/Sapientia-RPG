@@ -1885,16 +1885,16 @@ func _backdrop_tests() -> void:
 # ================================================================ v0.11 proloog
 const SD := preload("res://scripts/data/story_data.gd")
 ## v0.16: na de mantel (de zegels zijn weg): water + kist
-const OPA_LINE := "Die staat je, {naam}. Haal water bij de put en kruiden uit de kist naast het huis. Vandaag voelt anders."
+const OPA_LINE := "That suits you, {naam}. Fetch water from the well and herbs from the chest beside the house. Today feels different."
 ## Update 5: ochtendtekst ingekort (Nederlands). Vóór deze update: 1 verplicht event
 ## (wakker_worden) en 7 tekstvakken (wakker 1 + opa 4 + mantel_aan 2) vóór de klusjes.
 const INTRO_FORCED_WAS := 1
 const INTRO_SAYS_WAS := 7
-const GREET_LINE := "Goedemorgen, {naam}. Het is koud in het Wachtershuis."
+const GREET_LINE := "Good morning, {naam}. It's cold in the Warden's House."
 const MENU_LINE := "Doe deze mantel aan: MENU > Uitrusting > Harnas."
-const ITEM_LINE := "{naam} krijgt een Leerling-mantel! Sluit daarna het menu."
-const REMIND_LINE := "Doe eerst die mantel aan, {naam}. MENU > Uitrusting > Harnas."
-const INTRO_CHOICES := ["Goedemorgen, Opa.", "Waarom blijven de Archieven dicht?"]
+const ITEM_LINE := "{naam} receives an Apprentice Cloak! Then close the menu."
+const REMIND_LINE := "Put that cloak on first, {naam}. MENU > Equipment > Armor."
+const INTRO_CHOICES := ["Good morning, Grandpa.", "Why do the Archives stay closed?"]
 const ARMOR := "leerling_mantel"
 const LESSON_LINE := "Sometimes you have to defend yourself, boy, even if I hope you never need to."
 const PANIC_LINE := "No... the seal! It's too soon! {naam}, stay here! Lock the doors behind me and don't follow, no matter what you hear!"
@@ -2000,7 +2000,7 @@ func _prologue_tests() -> void:
 	var opts: Array = spec.get("options", [])
 	check("vroeg keuzemenu bestaat: %d opties, zelfde vervolg" % opts.size(),
 			opts == INTRO_CHOICES and SD.early_choice_same_followup()
-			and str(spec.get("question", "")) == "Wat zeg je, {naam}?")
+			and str(spec.get("question", "")) == "What do you say, {naam}?")
 	check("speler staat vrij naast het bed (2,3), geen wakker-cutscene: %s" % tile(),
 			tile() == Vector2i(2, 3) and not player().input_locked and not Story.running and not Dialog.is_open
 			and not Story.history.has("wakker_worden") and GameState.story_step == SD.START)
@@ -2035,7 +2035,7 @@ func _prologue_tests() -> void:
 	await walk("move_left", 1)
 	await walk("move_down", 13)
 	await frames(5)
-	check("pad naar de wereldkaart: 'Vandaag niet' (%s)" % _lines_text(), Dialog.is_open and "Vandaag niet" in _lines_text())
+	check("pad naar de wereldkaart: 'Not today' (%s)" % _lines_text(), Dialog.is_open and "Not today" in _lines_text())
 	await _story_drain()
 	check("teruggestuurd, nog op de proloog-map (15,20): %s" % tile(), map_name() == "Wilgendal" and tile() == Vector2i(15, 20))
 	# praten met de Oude Man (van links)
@@ -2049,7 +2049,7 @@ func _prologue_tests() -> void:
 	await _wait_typed()
 	check("vroeg keuzemenu bij Opa (%s)" % [Dialog.choices],
 			Dialog.has_choices() and Dialog.choices == INTRO_CHOICES
-			and _named("Wat zeg je, {naam}?") in _lines_text() and Dialog.name_label.text == "Old Man")
+			and _named("What do you say, {naam}?") in _lines_text() and Dialog.name_label.text == "Old Man")
 	check("Oude Man draait naar je toe", opa.facing == Vector2i.LEFT)
 	_check_bubble("keuze Opa", opa)
 	await frames(20)

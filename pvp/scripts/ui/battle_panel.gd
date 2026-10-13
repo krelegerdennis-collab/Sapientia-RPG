@@ -64,10 +64,10 @@ func _rebuild() -> void:
 		child.queue_free()
 	if _state == null:
 		return
-	_sides.add_child(_side_column("host", "Speler 1"))
-	_sides.add_child(_side_column("guest", "Speler 2"))
+	_sides.add_child(_side_column("host", "Player 1"))
+	_sides.add_child(_side_column("guest", "Player 2"))
 	if not _can:
-		_actions.add_child(PvpStyle.label("Wachten op de andere speler…", 8))
+		_actions.add_child(PvpStyle.label("Waiting for the other player…", 8))
 		return
 	if _pending == "":
 		var actor := _current()
@@ -75,10 +75,10 @@ func _rebuild() -> void:
 		var row_b := _action_row()
 		_actions.add_child(row_a)
 		_actions.add_child(row_b)
-		_add_battle_action(row_a, "Aanval", "attack")
+		_add_battle_action(row_a, "Attack", "attack")
 		if not actor.is_empty() and not (actor["spells"] as Array).is_empty():
-			_add_battle_action(row_a, "Magie", "spell")
-		_add_battle_action(row_b, "Verdedigen", "defend")
+			_add_battle_action(row_a, "Magic", "spell")
+		_add_battle_action(row_b, "Defend", "defend")
 		if _has_item(actor):
 			_add_battle_action(row_b, "Item", "item")
 		return
@@ -92,7 +92,7 @@ func _rebuild() -> void:
 		_add_items()
 	elif _pending == "item":
 		_add_targets(true)
-	var back := PvpStyle.button("Terug")
+	var back := PvpStyle.button("Back")
 	back.pressed.connect(_clear_pending)
 	_actions.add_child(back)
 

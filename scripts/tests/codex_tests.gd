@@ -366,10 +366,10 @@ func _data_tests() -> void:
 	var errs := CD.validate()
 	check("CodexData.validate zonder fouten %s" % [errs], errs.is_empty())
 	check("bestiariumcitaten van Kustos, de Wortelkoning, De Wurger en De Genezer letterlijk",
-			GD.ENEMIES["kennis_beest"]["desc"] == "Een wachter zonder ogen, maar met duizend oren. Hij hoort elke gedachte die het Archief binnenkomt. De Oude Mensheid bouwde hem niet om te doden, maar om te bewaren. Sapientia gaf hem een nieuw doel: alles wat niet past, wordt verwijderd."
-			and GD.ENEMIES["wortelkoning"]["desc"] == "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat."
-			and GD.ENEMIES["wurger"]["desc"] == "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden."
-			and GD.ENEMIES["genezer"]["desc"] == "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg.")
+			GD.ENEMIES["kennis_beest"]["desc"] == "A guardian without eyes, but with a thousand ears. It hears every thought that enters the Archive. The Old Humanity built it not to kill, but to preserve. Sapientia gave it a new purpose: whatever doesn't fit is removed."
+			and GD.ENEMIES["wortelkoning"]["desc"] == "What was once a shepherd of the wood became a king of roots. He drags what he loves into the depths — not out of cruelty, but out of fear of being alone. Sapientia whispered to him that everything that lets go, perishes."
+			and GD.ENEMIES["wurger"]["desc"] == "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free."
+			and GD.ENEMIES["genezer"]["desc"] == "He heals by taking. He gives nothing back. Sapientia's perfect servant: without doubt, without emotion, without end. Whoever sees him sees what humanity becomes if Sapientia wins — silent, whole, and empty.")
 	for id in ["mosslijm", "moskonijn", "papiergeest", "glitchmot", "mech_wachter", "kennis_beest"]:   # v0.18: + moskonijn/mech_wachter
 		var s := CD.species(id)
 		check("soort %s: basis = ENEMIES (HP %d), groei, leert, AI, voor+rug, element, fusie-labels" % [id, CD.base_stats(id)["max_hp"]],

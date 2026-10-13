@@ -113,8 +113,8 @@ func _data() -> void:
 	var wurg := BossCore.apply_boss(GD.ENEMIES["wurger"])
 	check("Wurger zwak voor ijs en fysiek", bool(wurg.get("weak_matters", false))
 			and "ijs" in wurg.get("weak", []) and "fysiek" in wurg.get("weak", []))
-	check("Wurger: canon-zin in het bestiarium", str(GD.ENEMIES["wurger"]["desc"]) == "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden.")
-	check("Genezer: canon-zin in het bestiarium", str(GD.ENEMIES["genezer"]["desc"]) == "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg.")
+	check("Wurger: canon-zin in het bestiarium", str(GD.ENEMIES["wurger"]["desc"]) == "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free.")
+	check("Genezer: canon-zin in het bestiarium", str(GD.ENEMIES["genezer"]["desc"]) == "He heals by taking. He gives nothing back. Sapientia's perfect servant: without doubt, without emotion, without end. Whoever sees him sees what humanity becomes if Sapientia wins — silent, whole, and empty.")
 	check("thema kas en warper", DungeonRooms.THEMES.has("kas") and DungeonRooms.THEMES.has("warper_paars"))
 	var kamers: Dictionary = Rooms.rooms()
 	var breed := true
@@ -540,7 +540,7 @@ func _na_genezer_hub() -> void:
 		await get_tree().process_frame
 	var tekst := " ".join(gezien)
 	check("bestaande zinnen vóór de hub (%s)" % [tekst], tekst.contains(str(Archief2.NA_GENEZER[0]))
-			and tekst.contains(str(Archief2.NA_GENEZER[1])) and tekst.contains("Het trekt jullie omhoog."))
+			and tekst.contains(str(Archief2.NA_GENEZER[1])) and tekst.contains("It pulls you upward."))
 	check("geen H-6 in de warptekst", not tekst.contains("H-6") and not tekst.contains("Proefpersoon"))
 	check("party in het exterieur", hub and str(GameState.current_map).ends_with("exterieur.tscn")
 			and str(GameState.current_map) != Archief2.WARPER_SCENE)

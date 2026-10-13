@@ -1166,7 +1166,7 @@ func _execute(a: Dictionary) -> void:
 	if int(actor.get("skip", 0)) > 0:
 		actor["skip"] = int(actor["skip"]) - 1
 		var reden := str(actor.get("skip_reden", "bevriezing"))
-		var zin := "%s is verlamd en slaat over." if reden == "verlamming" else "%s is bevroren en slaat over."
+		var zin := "%s is paralyzed and skips a turn." if reden == "verlamming" else "%s is frozen and skips a turn."
 		if reden == Archief2Vijanden.SKIP_REDEN_BIND:
 			zin = "%s is bound and skips a turn."
 		show_message(zin % actor["name"])
@@ -1487,7 +1487,7 @@ func _revive(t, amount: int) -> void:
 	if ally.get("node") != null:
 		ally["node"].set_ko(false)
 	_refresh_party()
-	show_message("%s staat op." % ally["name"])
+	show_message("%s gets back up." % ally["name"])
 	await _wait(MESSAGE_TIME)
 
 

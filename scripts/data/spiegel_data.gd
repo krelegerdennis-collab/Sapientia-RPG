@@ -10,15 +10,15 @@ const WIE_DENNIS := "Dennis"
 ## Na de scène zeggen zij niets. Er is geen regel voor hen.
 const ZWIJGEN: Array[String] = ["Noor", "Lotte"]
 
-const KAMER := "Een kamer vol spiegelende oppervlakken."
-const WAARHEID := "De Spiegel vecht niet met geweld maar met waarheid."
+const KAMER := "A room full of mirrored surfaces."
+const WAARHEID := "The Mirror does not fight with force but with truth."
 const FEIT_H6 := "Dennis is Proefpersoon H-6."
-const FEIT_GEMAAKT := "Hij is niet geboren maar gemaakt."
-const FEIT_HANGER := "De Hanger is van hem, en hij is ook van de Hanger."
-const FEIT_TERUG := "Sapientia wil hem terug, niet verslaan."
-const WEIGERING := "Ik ben Dennis. En dat is genoeg."
-const LAATSTE := "Je bent sterker dan de vorige vijf. Misschien... ben jij de eerste die het haalt."
-const KERN := "De kern van Archief 4 is opgenomen."
+const FEIT_GEMAAKT := "He was not born but made."
+const FEIT_HANGER := "The Hanger belongs to him, and he belongs to the Hanger."
+const FEIT_TERUG := "Sapientia wants him back, not defeated."
+const WEIGERING := "I am Dennis. And that is enough."
+const LAATSTE := "You are stronger than the last five. Maybe... you will be the first to make it."
+const KERN := "The core of Archief 4 has been absorbed."
 
 ## Geen vijand. Bewust geen hp en geen max_hp.
 const SPIEGEL := {
@@ -38,9 +38,9 @@ const BEATS: Array = [
 	# Dennis vraagt de zojuist genoemde feiten terug. Alleen een vraagteken erbij.
 	{"id": "vragen", "wie": WIE_DENNIS, "vragen": true, "tekst": [
 		"Dennis is Proefpersoon H-6?",
-		"Hij is niet geboren maar gemaakt?",
-		"De Hanger is van hem, en hij is ook van de Hanger?",
-		"Sapientia wil hem terug, niet verslaan?",
+		"He was not born but made?",
+		"The Hanger belongs to him, and he belongs to the Hanger?",
+		"Sapientia wants him back, not defeated?",
 	]},
 	{"id": "weigering", "wie": WIE_DENNIS, "tekst": [WEIGERING]},
 	{"id": "laatste", "wie": WIE_SPIEGEL, "tekst": [LAATSTE]},

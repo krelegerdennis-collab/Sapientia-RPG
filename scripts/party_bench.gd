@@ -9,7 +9,7 @@ const RUSTKAMER := "res://world_warper/kamers/rustkamer.tscn"
 
 const DENNIS_BLIJFT := "Dennis stays in the party."
 const GAST_BLIJFT := "Temporary guests can't go on the bench."
-const VOL := "De groep is vol."
+const VOL := "The party is full."
 const ALLEEN_HIER := "You can only switch in the Rest Room."
 const OP_BANK := "%s is on the bench."
 const IN_GROEP := "%s is in the party."

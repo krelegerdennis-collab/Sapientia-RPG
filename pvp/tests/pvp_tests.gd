@@ -498,13 +498,13 @@ func _ui_tests() -> void:
 	var host_btn := _find_button(lobby, "Host", true)
 	check("menu toont Host", host_btn != null)
 	check("aanraakvlak is hoog genoeg", host_btn != null and host_btn.custom_minimum_size.y >= 22)
-	check("Terug meldt sluiten zonder de titel aan te raken", _press(lobby, "Terug", true) and int(left["n"]) == 1)
-	check("host kiest het apparaat", _press(lobby, "Host", true) and _press(lobby, "Zelfde apparaat", true))
+	check("Terug meldt sluiten zonder de titel aan te raken", _press(lobby, "Back", true) and int(left["n"]) == 1)
+	check("host kiest het apparaat", _press(lobby, "Host", true) and _press(lobby, "Same device", true))
 	var edit := _find_line(lobby)
 	check("code staat op het scherm", edit != null and lobby.host_session.code.length() == 6)
 	if edit != null:
 		edit.text = lobby.host_session.code
-	check("tweede speler verbindt", _press(lobby, "Verbinden", true))
+	check("tweede speler verbindt", _press(lobby, "Connect", true))
 	await get_tree().process_frame
 	check("host kiest Vroeg", _press(lobby, "Vroeg", false))
 	await get_tree().process_frame
@@ -513,11 +513,11 @@ func _ui_tests() -> void:
 	check("speler 2 kiest hetzelfde team", _press(lobby, "De Klassieke Drie", true))
 	await get_tree().process_frame
 	check("banner noemt de beurt", _label_has(lobby, "is aan de beurt"))
-	var attack := _find_button(lobby, "Aanval", true)
+	var attack := _find_button(lobby, "Attack", true)
 	check("acties staan naast elkaar", attack != null and attack.get_parent() is HBoxContainer and attack.custom_minimum_size.y >= 22)
-	check("alle acties zijn leesbaar", _find_button(lobby, "Magie", true) != null and _find_button(lobby, "Verdedigen", true) != null and _find_button(lobby, "Item", true) != null)
+	check("alle acties zijn leesbaar", _find_button(lobby, "Magic", true) != null and _find_button(lobby, "Defend", true) != null and _find_button(lobby, "Item", true) != null)
 	var before := _hp_sig(lobby.host_session)
-	check("aanval opent doelen", _press(lobby, "Aanval", true))
+	check("aanval opent doelen", _press(lobby, "Attack", true))
 	var target := _find_target(lobby)
 	var clicked := false
 	if target != null:
@@ -663,7 +663,7 @@ func _find_line(node: Node) -> LineEdit:
 func _find_target(node: Node) -> Button:
 	if node is Button:
 		var btn := node as Button
-		var skip := btn.text == "Aanval" or btn.text == "Magie" or btn.text == "Verdedigen" or btn.text == "Item" or btn.text == "Terug"
+		var skip := btn.text == "Attack" or btn.text == "Magic" or btn.text == "Defend" or btn.text == "Item" or btn.text == "Back"
 		if not skip and _shown(btn) and _has_digit(btn.text):
 			return btn
 	for child in node.get_children():

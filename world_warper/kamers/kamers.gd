@@ -22,25 +22,25 @@ const FLAG_HUB := "warper_hub_open"
 ## Leeg tot Archief 2 een kern-vlag heeft. Geen verzonnen naam.
 const ARCHIEF2_KERN_VLAG := ""
 
-const GESLOTEN := "Deze kamer is nog gesloten."
+const GESLOTEN := "This room is still closed."
 const ECHO_REGELS: Array[String] = ["Ik bedien deze hub."]
 const WERK_REGELS: Array[String] = [
-	"Smeden kan hier later.",
-	"Er liggen nog geen recepten.",
+	"Forging will be possible here later.",
+	"There are no recipes yet.",
 ]
-const HANDEL_DICHT := "De handel is nog gesloten."
-const KERN_ZIN := "Het verhaal van H-6 eindigt hier."
+const HANDEL_DICHT := "The shop is still closed."
+const KERN_ZIN := "The story of H-6 ends here."
 const OEFEN_KLAAR := "Oefening klaar. Geen buit."
-const OEFEN_VERLIES := "De oefening is voorbij. Je staat weer in de kamer."
-const OEFEN_VANGEN := "In een oefening schrijf je niets in."
-const GEGENEZEN := "De groep is genezen."
+const OEFEN_VERLIES := "The practice is over. You are back in the room."
+const OEFEN_VANGEN := "Nothing is recorded in a practice."
+const GEGENEZEN := "The party is healed."
 const OPGESLAGEN := "Opgeslagen."
 const OPSLAAN_MISLUKT := "Opslaan mislukt."
-const NIEMAND_WISSEL := "Er is niemand om mee te wisselen."
-const AL_VOORAAN := "Die staat al vooraan."
+const NIEMAND_WISSEL := "There is nobody to swap with."
+const AL_VOORAAN := "They are already at the front."
 const VOORAAN := "Vooraan: %s."
-const GEEN_SCHERM := "Dat scherm is er nog niet."
-const GEEN_POORT := "De poort doet het niet."
+const GEEN_SCHERM := "That screen doesn't exist yet."
+const GEEN_POORT := "The gate doesn't work."
 
 const OEFEN_VIJAND := "mosslijm"
 
@@ -257,7 +257,7 @@ static func voortgang_regels(step: int, flags: Dictionary, opdracht: String) -> 
 	var regels: Array[String] = []
 	regels.append("Verhaalstap: %s." % stapnaam)
 	if opdracht == "":
-		regels.append("Er is nu geen lopende opdracht.")
+		regels.append("There is no active quest right now.")
 	else:
 		regels.append("Lopende opdracht: %s" % opdracht)
 	regels.append("Bekende vlaggen: %d." % flags.size())

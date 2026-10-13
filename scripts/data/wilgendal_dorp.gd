@@ -81,7 +81,7 @@ const PANDEN := [
 		"tex": "wapen",
 		"bewoond": false,
 		"keeper_naam": "Jelle Hamer",
-		"keeper_lines": ["Staal. Wat heb je nodig?"],
+		"keeper_lines": ["Steel. What do you need?"],
 		"sfeer": "ambacht",
 		"map_naam": "Wapenwinkel",
 		"dicht": "",
@@ -113,7 +113,7 @@ const PANDEN := [
 		"tex": "magie",
 		"bewoond": false,
 		"keeper_naam": "Magiewinkel",
-		"keeper_lines": ["Spreuken. Wat zoek je?"],
+		"keeper_lines": ["Spells. What are you looking for?"],
 		"sfeer": "mystiek",
 		"map_naam": "Magiewinkel",
 		"dicht": "",
@@ -129,7 +129,7 @@ const PANDEN := [
 		"tex": "huis",
 		"bewoond": true,
 		"keeper_naam": "Tante Mien",
-		"keeper_lines": ["Kruiden. Wat heb je nodig?"],
+		"keeper_lines": ["Herbs. What do you need?"],
 		"sfeer": "kruid",
 		"map_naam": "Huis van Tante Mien",
 		"dicht": "",
@@ -147,9 +147,9 @@ const PANDEN := [
 		"keeper_naam": "",
 		"keeper_lines": [],
 		"sfeer": "haard",
-		"map_naam": "Huis van Bram en Els",
+		"map_naam": "Bram and Els's House",
 		"dicht": "",
-		"bord": "De haard gloeit nog. Bram en Els staan op het plein.",
+		"bord": "The hearth is still glowing. Bram and Els are out on the square.",
 	},
 	{
 		"id": "dicht_west",
@@ -165,7 +165,7 @@ const PANDEN := [
 		"keeper_lines": [],
 		"sfeer": "",
 		"map_naam": "",
-		"dicht": "De luiken zijn dicht. Hier woont niemand.",
+		"dicht": "The shutters are closed. Nobody lives here.",
 	},
 	{
 		"id": "dicht_oost",
@@ -181,7 +181,7 @@ const PANDEN := [
 		"keeper_lines": [],
 		"sfeer": "",
 		"map_naam": "",
-		"dicht": "Een dichte deur. Binnen blijft het stil.",
+		"dicht": "A closed door. It stays quiet inside.",
 	},
 ]
 
@@ -255,7 +255,7 @@ const SFEER := [
 		"naam": "Bram",
 		"tegel": Vector2i(11, 8),
 		"lus": [Vector2i(11, 8), Vector2i(11, 9), Vector2i(10, 9), Vector2i(10, 8)],
-		"lines": ["Els wil zo naar de smid. Ik blijf hier op het plein."],
+		"lines": ["Els wants to go to the smith soon. I'm staying here on the square."],
 	},
 	{
 		"node": "Els",
@@ -263,7 +263,7 @@ const SFEER := [
 		"naam": "Els",
 		"tegel": Vector2i(12, 8),
 		"lus": [Vector2i(12, 8), Vector2i(13, 8), Vector2i(13, 9), Vector2i(12, 9)],
-		"lines": ["De winkels gaan nooit dicht. Dat is wel zo rustig."],
+		"lines": ["The shops never close. That keeps things calm."],
 	},
 	{
 		"node": "Fien",
@@ -271,7 +271,7 @@ const SFEER := [
 		"naam": "Fien",
 		"tegel": Vector2i(14, 10),
 		"lus": [Vector2i(14, 10), Vector2i(15, 10), Vector2i(15, 11), Vector2i(14, 11)],
-		"lines": ["Die ster daar is de magiewinkel. Ik mag alleen kijken."],
+		"lines": ["That star over there is the magic shop. I'm only allowed to look."],
 	},
 	{
 		"node": "Wout",
@@ -279,7 +279,7 @@ const SFEER := [
 		"naam": "Wout",
 		"tegel": Vector2i(16, 8),
 		"lus": [Vector2i(16, 8), Vector2i(16, 9), Vector2i(15, 9), Vector2i(15, 8)],
-		"lines": ["Ik heb genoeg gevochten. Nu drink ik thee op het plein."],
+		"lines": ["I've fought enough. Now I drink tea on the square."],
 	},
 	{
 		"node": "Siem",
@@ -287,7 +287,7 @@ const SFEER := [
 		"naam": "Siem",
 		"tegel": Vector2i(9, 11),
 		"lus": [Vector2i(9, 11), Vector2i(10, 11), Vector2i(10, 10), Vector2i(9, 10)],
-		"lines": ["Post voor Wilgendal. Vandaag niets voor jou."],
+		"lines": ["Mail for Wilgendal. Nothing for you today."],
 	},
 ]
 

@@ -13,10 +13,10 @@ func _ready() -> void:
 	_box = PvpStyle.column(self)
 	_text = PvpStyle.label("", 8)
 	_box.add_child(_text)
-	var again := PvpStyle.button("Opnieuw verbinden")
+	var again := PvpStyle.button("Reconnect")
 	again.pressed.connect(func() -> void: reconnect_pressed.emit())
 	_box.add_child(again)
-	var menu := PvpStyle.button("Naar het menu")
+	var menu := PvpStyle.button("To the menu")
 	menu.pressed.connect(func() -> void: menu_pressed.emit())
 	_box.add_child(menu)
 

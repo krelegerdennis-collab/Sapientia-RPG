@@ -39,12 +39,12 @@ const ROOMS := {
 		"signs": [{
 			"tile": [12, 5],
 			"lines": [
-				"Een kas. De ranken groeien over de vloer.",
-				"Zet de hendel om. Daarna groeit de plaat tot een pad.",
-				"De Oude Mensheid maakte de zes Archieven als keten.",
-				"Elke kern activeert de volgende. Geen uitnodiging: een noodsignaal.",
-				"Archief 1 zond: Iemand is binnen. Archief 2 reageerde als eerste.",
-				"Sapientia heeft dat signaal gemanipuleerd. Je denkt dat je volgt. Sapientia leidt je.",
+				"A greenhouse. The vines grow across the floor.",
+				"Pull the lever. Then the plate grows into a path.",
+				"The Old Humanity made the six Archives as a chain.",
+				"Each core activates the next. Not an invitation: a distress signal.",
+				"Archief 1 sent: Someone is inside. Archief 2 answered first.",
+				"Sapientia manipulated that signal. You think you are following. Sapientia is leading you.",
 			],
 		}],
 		# Kaart: bestaande soorten; v0.21: Archief 2-vijanden (CANON besluit 13) vechten mee in de groep.
@@ -109,7 +109,7 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v1_plaat"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [4, 5], "lines": [
-			"De kas ademt. Alles hier groeit door, ook als je stilstaat.",
+			"The greenhouse breathes. Everything here keeps growing, even when you stand still.",
 		]}],
 		"monsters": [
 			{"id": "m1", "enemy": "rankje", "group": ["rankje", "rankje"], "tile": [5, 6], "moves": true},
@@ -124,7 +124,7 @@ static func rooms() -> Dictionary:
 		},
 		"signs": [{"tile": [4, 6], "lines": [
 			"Een groei-plaat. Stap erop.",
-			"Hij groeit tot een pad.",
+			"It grows into a path.",
 		]}],
 		"platen": [{"id": "p1", "soort": "groei", "tile": [9, 6], "start": 0}],
 		"bruggen": [{"plaat": "p1", "tiles": [[8, 4], [9, 4], [10, 4]]}],
@@ -158,8 +158,8 @@ static func rooms() -> Dictionary:
 			"n": {"map": "res://scenes/maps/leven_v3_combi.tscn", "spawn": "ingang"},
 		},
 		"signs": [{"tile": [3, 7], "lines": [
-			"Ketting-platen. Eén activeert de volgende.",
-			"De laatste groeit alleen als de vorige hem wekt.",
+			"Chain plates. One activates the next.",
+			"The last one only grows when the one before wakes it.",
 		]}],
 		"platen": [
 			{"id": "k0", "soort": "ketting", "index": 0, "tile": [4, 6], "start": 0},
@@ -178,8 +178,8 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v3_licht"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [3, 7], "lines": [
-			"Tegen-platen krimpen als je ze aanraakt.",
-			"Mijd ze, of neem de lange weg links.",
+			"Counter plates shrink when you touch them.",
+			"Avoid them, or take the long way on the left.",
 		]}],
 		"platen": [{"id": "t1", "soort": "tegen", "tile": [14, 6], "start": 2}],
 		"bruggen": [{"plaat": "t1", "tiles": [[12, 4], [13, 4], [14, 4]]}],
@@ -192,7 +192,7 @@ static func rooms() -> Dictionary:
 		},
 		"signs": [{"tile": [4, 7], "lines": [
 			"Deze plaat groeit alleen in Lotte's licht.",
-			"Ga ervoor staan en druk op A.",
+			"Stand in front of it and press A.",
 		]}],
 		"platen": [{"id": "l1", "soort": "licht", "tile": [9, 6], "start": 0}],
 		"bruggen": [{"plaat": "l1", "tiles": [[8, 4], [9, 4], [10, 4]]}],
@@ -205,20 +205,20 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v4_hal"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [4, 8], "lines": [
-			"Ranken versperren de kas. IJs en een zwaard snijden ze door.",
+			"Vines block the greenhouse. Ice and a sword cut through them.",
 		]}],
 		"monsters": [{
 			"id": "wurger", "enemy": "wurger", "group": ["wurger"],
 			"tile": [9, 5], "moves": false, "boss": true, "mini": true, "guard": true,
 		}],
 	})
-	var hal := _met(_basis("Hal van de Genezer", 4, 3), {
+	var hal := _met(_basis("Hall of De Genezer", 4, 3), {
 		"exits": {
 			"E": {"map": SCENES["archief_2_v3_wurger"], "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v4_genezer"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [4, 6], "lines": [
-			"Verderop staat iets dat geneest door te nemen.",
+			"Further on stands something that heals by taking.",
 		]}],
 		"monsters": [
 			{"id": "m1", "enemy": "wortelgeest", "group": ["wortelgeest", "bloeiende_schrik"], "tile": [13, 7], "moves": true},
@@ -244,7 +244,7 @@ static func rooms() -> Dictionary:
 		},
 		"warp": [9, 6],
 		"signs": [{"tile": [5, 5], "lines": [
-			"ECHO bedient de hub. Stap op het pad en kies.",
+			"ECHO operates the hub. Step onto the path and choose.",
 		]}],
 		"sfeer": [
 			{"name": "Echo", "texture": "res://assets/sprites/archief2/echo_groen.png", "tile": [4, 6], "scale": 1.0},

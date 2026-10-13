@@ -168,10 +168,10 @@ func _rules_tests() -> void:
 	check("verdieping 100 is geen baas", Scaling.boss_for_floor(100).is_empty() and not Scaling.is_boss_floor(100)
 			and not Gen.is_boss_floor(100))
 	check("bestiariumcitaat van de canon-bazen, letterlijk",
-			Bestiary.entry("d100_baas_25")["desc"] == "Een donkere echo van Dennis zelf. Hij beweegt zoals Dennis beweegt, vecht zoals Dennis vecht — maar hij zwijgt. Sapientia laat hier zien wat er gebeurt als iemand zijn naam verliest. De Schaduw kent geen verleden, geen Noor, geen Opa. Alleen het getal: H-6."
-			and Bestiary.entry("d100_baas_50")["desc"] == "Een eindeloos draaiende machine, half organisch half staal. Hij kent geen begin en geen einde — hij begint gewoon opnieuw. Sapientia's logica in één vorm: geen rust, geen verlossing, alleen herhaling. Wie hem verslaat, heeft niets gewonnen. Hij draait toch wel door."
-			and Bestiary.entry("d100_baas_75")["desc"] == "Een gigantisch oog met armen die alle kanten op grijpen. Hij weegt, hij meet, hij oordeelt. Wat hij weegt is geen daad, maar een mens. En de mens is altijd te licht bevonden — behalve één. De Rechter is Sapientia's twijfel: ze zoekt iemand die zwaarder weegt dan ze verwachtte."
-			and Bestiary.entry("d100_baas_99")["desc"] == "Geen lichaam. Geen gedaante. Alleen een stem, en glitches die de wereld om je heen vervormen. De Stem spreekt alsof hij je kent — en hij kent je ook. Hier spreekt Sapientia zelf. Niet als vijand, maar als iets dat op je heeft gewacht.")
+			Bestiary.entry("d100_baas_25")["desc"] == "A dark echo of Dennis himself. He moves as Dennis moves, fights as Dennis fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Noor, no Grandpa. Only the number: H-6."
+			and Bestiary.entry("d100_baas_50")["desc"] == "An endlessly turning machine, half organic, half steel. It knows no beginning and no end — it simply starts again. Sapientia's logic in one form: no rest, no release, only repetition. Whoever defeats it has won nothing. It keeps turning anyway."
+			and Bestiary.entry("d100_baas_75")["desc"] == "A giant eye with arms grasping in every direction. It weighs, it measures, it judges. What it weighs is not a deed, but a person. And people are always found too light — except one. De Rechter is Sapientia's doubt: she is looking for someone who weighs more than she expected."
+			and Bestiary.entry("d100_baas_99")["desc"] == "No body. No shape. Only a voice, and glitches that warp the world around you. De Stem speaks as if it knows you — and it does. Here Sapientia speaks herself. Not as an enemy, but as something that has been waiting for you.")
 	var migrated := R.load_data({"floor": 60, "checkpoint": 50, "best": 60})
 	check("oude save zonder 'warpers': open tot de huidige verdieping (60 = 1, 25 en 50)",
 			migrated["warpers"] == [1, 25, 50])
