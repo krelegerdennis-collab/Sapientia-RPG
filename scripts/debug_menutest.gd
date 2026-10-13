@@ -262,7 +262,7 @@ func _main_menu_tests() -> void:
 	for c in m.commands():
 		labels.append(str(m.buttons[c[0]].get_meta("label")))
 	# v0.22 partylimiet: vijfde knop 'Party' (rechts onder Warpen)
-	check("zes knoppen %s" % [labels], labels == ["Equipment", "Codex", "Items", "Magic", "Warp", "Party"] and m.buttons.size() == 6)
+	check("acht knoppen %s" % [labels], labels == ["Equipment", "Codex", "Items", "Magic", "Warp", "Party", "Settings", "Load"] and m.buttons.size() == 8)
 	check("label MENU boven Warpen", m.menu_label.text == "MENU"
 			and m.menu_label.get_global_rect().end.y <= m.buttons["warp"].get_global_rect().position.y + 1.0)
 	check("'Uitrusting' heeft de focus", m.buttons["equip"].has_focus())
