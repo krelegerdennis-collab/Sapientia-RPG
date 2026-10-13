@@ -39,16 +39,16 @@ Status: **PH** = placeholder staat in repo (zelfde maat); **—** = nog geen bes
 | 23 | assets/sprites/enemies/woudgeest.png | maat open (vgl. 90×94) | — (gebruikt mosslijm.png) |
 | 24 | assets/sprites/enemies/woudgeest_rug.png | = vooraanzicht | — |
 | 25 | assets/map_monsters/woudgeest.png | 32×64, 2×4 (alleen als hij gaat lopen) | — |
-| 26 | world_warper/art/echo_placeholder.png | 48×96, 3×4 van 16×24 | PH |
-| 27 | world_warper/art/party_placeholder.png | 48×96, 3×4 van 16×24 | PH |
-| 28 | world_warper/art/pc_placeholder.png | 32×32 (main PC + terminal) | PH |
+| 26 | world_warper/art/echo.png | 48×96, 3×4 van 16×24 | PH |
+| 27 | world_warper/art/party.png | 48×96, 3×4 van 16×24 | PH |
+| 28 | world_warper/art/pc.png | 32×32 (main PC + terminal) | PH |
 | 29 | world_warper/art/warp_platform.png | 32×16 | PH |
-| 30 | world_warper/art/tafel_placeholder.png | 32×16 | PH |
-| 31 | world_warper/art/toonbank_placeholder.png | 48×16 | PH |
+| 30 | world_warper/art/tafel.png | 32×16 | PH |
+| 31 | world_warper/art/toonbank.png | 48×16 | PH |
 | 32 | world_warper/art/bord_kamers.png | 32×16 | PH |
 | 33 | world_warper/art/bord_hal.png | 32×16 | PH |
 | 34 | world_warper/art/bord_warp.png | 48×16 | PH |
-| 35 | world_warper/art/tiles_placeholder.png | 128×32, tegels 16×16 | PH |
+| 35 | world_warper/art/tiles.png | 128×32, tegels 16×16 | PH |
 | 36 | assets/bg/spiegel_kamer.png | 384×216 | PH |
 | 37 | assets/bg/spiegel_kamer_gebroken.png | 384×216 | PH |
 | 38 | assets/sprites/buiten/molen_wieken.png | 192×64, 4 van 48×64 | — |
@@ -79,9 +79,9 @@ Status: **PH** = placeholder staat in repo (zelfde maat); **—** = nog geen bes
 - **Dennis:** lijst plant-vijanden + Codex-monsters (namen, element, lore); muziek-richting.
 
 ## Fase 3 — World Warper
-- **RPG ART batch 5:** world_warper exterieur 128×64; tiles_placeholder 128×32; echo.png 32×48 + echo_placeholder 48×96; pc_placeholder 32×32; warp_platform 32×16; sapientia_glitch 48×48; Hanger-gloed.
+- **RPG ART batch 5:** world_warper exterieur 128×64; tiles 128×32; echo.png 32×48 + echo 48×96; pc 32×32; warp_platform 32×16; sapientia_glitch 48×48; Hanger-gloed.
 - **RPG ART batch 5b:** 6 kleurvarianten warper per Archief.
-- **RPG ART batch 6:** borden (bord_kamers/bord_hal 32×16, bord_warp 48×16), tafel 32×16, toonbank 48×16, party_placeholder 48×96, WM-view UI-knoppen.
+- **RPG ART batch 6:** borden (bord_kamers/bord_hal 32×16, bord_warp 48×16), tafel 32×16, toonbank 48×16, party 48×96, WM-view UI-knoppen.
 - **Cursor-agents:** (a) cutscene na De Genezer: warper verschijnt in de lucht + zwevend gebouw; (b) Hanger-slot + systemen online per Hanger-signaal; (c) Sapientia-dreigingsscène (hologram/glitch, party-reactie); (d) ECHO-dialoog per act + questvoortgang.
 - **RPG CODE:** party live verversen in hal (refresh); Hanger-geluid + ECHO-stem (sfx-hooks).
 - **Dennis:** definitieve zinnen eerste binnenkomst/dreiging; hoeveel van ECHO-twist laten doorschemeren; universele warper-stijl of per Archief.

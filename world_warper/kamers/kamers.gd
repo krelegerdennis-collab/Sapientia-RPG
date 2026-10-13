@@ -44,12 +44,12 @@ const GEEN_POORT := "The gate doesn't work."
 
 const OEFEN_VIJAND := "mosslijm"
 
-const ART_ECHO := "res://world_warper/art/echo_placeholder.png"
-const ART_PC := "res://world_warper/art/pc_placeholder.png"
+const ART_ECHO := "res://world_warper/art/echo.png"
+const ART_PC := "res://world_warper/art/pc.png"
 const ART_WARP := "res://world_warper/art/warp_platform.png"
-const ART_TAFEL := "res://world_warper/art/tafel_placeholder.png"
-const ART_TOONBANK := "res://world_warper/art/toonbank_placeholder.png"
-const ART_PARTY := "res://world_warper/art/party_placeholder.png"
+const ART_TAFEL := "res://world_warper/art/tafel.png"
+const ART_TOONBANK := "res://world_warper/art/toonbank.png"
+const ART_PARTY := "res://world_warper/art/party.png"
 const ART_BORD := "res://world_warper/art/bord_kamers.png"
 
 const WARP_PAD := "res://scenes/maps/wereldkaart.tscn"
@@ -346,29 +346,29 @@ static func label(bron: String) -> String:
 		"grot_ingang":
 			return "Diepe Grot"
 		"warp":
-			return "Poort"
+			return "Gate"
 		"voortgang":
-			return "Voortgang"
+			return "Progress"
 		"bestiarium":
-			return "Bestiarium"
+			return "Bestiary"
 		"codex":
 			return "Codex"
 		"oefening":
-			return "Oefening"
+			return "Practice"
 		"opslaan":
-			return "Opslaan"
+			return "Save"
 		"helen":
-			return "Helen"
+			return "Heal"
 		"wisselen":
-			return "Wisselen"
+			return "Swap"
 		"werk":
-			return "Tafel"
+			return "Table"
 		"handel":
-			return "Toonbank"
+			return "Counter"
 		"kern":
-			return "Kern"
+			return "Core"
 		"kamers":
-			return "Kamers"
+			return "Rooms"
 		_:
 			return ""
 

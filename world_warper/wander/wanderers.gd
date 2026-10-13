@@ -7,9 +7,9 @@ class_name WorldWarperWanderers
 ## Sprite: AnimatedSprite2D met 16x24-frames uit een 48x96-veldsheet (3 kol x 4 rijen: kol 0 stil,
 ## 1 stap A, 2 stap B; rijen omlaag, links, rechts, omhoog; WALK_CYCLE [1,0,2,0]).
 ##   party  -> GameData.HEROES[*].field_sprite (player.png, noor_dorp.png, lotte_veld.png),
-##             onbekend lid -> world_warper/art/party_placeholder.png
-##   Codex  -> assets/sprites/hub/<soort>_hub.png (RPG ART batch 9), echo -> echo_placeholder.png
-## Geen sheet te vinden: het oude gekleurde vlak + de tekst PLACEHOLDER.
+##             onbekend lid -> world_warper/art/party.png
+##   Codex  -> assets/sprites/hub/<soort>_hub.png (RPG ART batch 9), echo -> echo.png
+## Geen sheet te vinden: een gekleurd vlak met de naam.
 ## Hub: instantieer wanderers.tscn en roep refresh() aan na een wijziging
 ## in de party of de Codex. Optioneel anker: Node2D of Control in de groep
 ## "ww_anchor_wander" (deze node zelf telt niet). Zonder anker lopen ze
@@ -25,10 +25,10 @@ const SNELHEID := 10.0
 const AANKOMST := 1.0
 const WACHT_MIN := 0.2
 const WACHT_MAX := 0.7
-const PLAATS := "PLACEHOLDER"
 const HUB_MAP := "res://assets/sprites/hub/%s_hub.png"
-const PARTY_PLAATSHOUDER := "res://world_warper/art/party_placeholder.png"
-const ECHO_SHEET := "res://world_warper/art/echo_placeholder.png"
+const MAP_SHEET := "res://assets/map_monsters/%s.png"
+const PARTY_PLAATSHOUDER := "res://world_warper/art/party.png"
+const ECHO_SHEET := "res://world_warper/art/echo.png"
 const FRAME := Vector2i(16, 24)
 const RICHTINGEN: Array[String] = ["omlaag", "links", "rechts", "omhoog"]
 const WALK_CYCLE: Array[int] = [1, 0, 2, 0]
@@ -173,8 +173,14 @@ static func _sheet_wezen(soort: String) -> String:
 	soort = soort.strip_edges()
 	if soort == "echo":
 		return ECHO_SHEET if ResourceLoader.exists(ECHO_SHEET) else ""
+	if soort == "":
+		return ""
 	var p := HUB_MAP % soort
-	return p if soort != "" and ResourceLoader.exists(p) else ""
+	if ResourceLoader.exists(p):
+		return p
+	# Geen hub-sheet: de kaart-sheet van het monster (32x64 = 2x4 frames van 16x16).
+	p = MAP_SHEET % soort
+	return p if ResourceLoader.exists(p) else ""
 
 
 ## SpriteFrames uit een 48x96-sheet: "stil_<richting>" (kol 0) en "loop_<richting>" (WALK_CYCLE).
@@ -182,16 +188,29 @@ static func frames_uit(tex: Texture2D) -> SpriteFrames:
 	var sf := SpriteFrames.new()
 	if sf.has_animation("default"):
 		sf.remove_animation("default")
+	var klein := tex != null and tex.get_width() == 32 and tex.get_height() == 64
 	for r in RICHTINGEN.size():
 		var stil := "stil_" + RICHTINGEN[r]
 		var loop := "loop_" + RICHTINGEN[r]
 		sf.add_animation(stil)
 		sf.add_animation(loop)
 		sf.set_animation_speed(loop, LOOP_FPS)
+		if klein:
+			sf.add_frame(stil, _frame_maat(tex, 0, r, Vector2i(16, 16)))
+			for kol in [0, 1]:
+				sf.add_frame(loop, _frame_maat(tex, kol, r, Vector2i(16, 16)))
+			continue
 		sf.add_frame(stil, _frame(tex, 0, r))
 		for kol in WALK_CYCLE:
 			sf.add_frame(loop, _frame(tex, kol, r))
 	return sf
+
+
+static func _frame_maat(tex: Texture2D, kol: int, rij: int, maat: Vector2i) -> AtlasTexture:
+	var a := AtlasTexture.new()
+	a.atlas = tex
+	a.region = Rect2(kol * maat.x, rij * maat.y, maat.x, maat.y)
+	return a
 
 
 static func _frame(tex: Texture2D, kol: int, rij: int) -> AtlasTexture:
@@ -213,7 +232,7 @@ func _maak(spec: Dictionary, party: bool, gebied: Rect2, sheet := "") -> void:
 		var anim := AnimatedSprite2D.new()
 		anim.name = "Sprite"
 		anim.sprite_frames = frames_uit(tex)
-		anim.offset = Vector2(0, -12)     # voeten (schaduw y 22-23) op de oorsprong
+		anim.offset = Vector2(0, -8 if tex.get_height() == 64 and tex.get_width() == 32 else -12)     # voeten op de oorsprong
 		anim.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		anim.play("stil_omlaag")
 		wortel.add_child(anim)
@@ -222,7 +241,6 @@ func _maak(spec: Dictionary, party: bool, gebied: Rect2, sheet := "") -> void:
 	else:
 		wortel.add_child(_vlak(id, party))
 		wortel.add_child(_label(naam, Vector2(-28, -26), Color(0.95, 0.94, 0.88)))
-		wortel.add_child(_label(PLAATS, Vector2(-36, 2), Color(1.0, 0.25, 0.72)))
 	add_child(wortel)
 	var start := _punt_in(gebied, Vector2.ZERO)
 	wortel.position = start

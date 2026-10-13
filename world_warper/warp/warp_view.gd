@@ -20,7 +20,6 @@ const TITEL_BESTEMMING := "Choose a destination"
 const LABEL_DICHT := "Locked"
 const LABEL_TERUG := "Back"
 const LABEL_REIS := "Travel"
-const LABEL_PLAATSHOUDER := "PLACEHOLDER"
 ## v0.21 RPG ART (art_batch8_v21): knop_<id>.png / knop_<id>_ingedrukt.png, 48x16, op 2x getoond.
 const KNOP_DIR := "res://world_warper/art/"
 const KNOP_SCHAAL := 2.0
@@ -195,6 +194,17 @@ func knop_id(row_id: String) -> String:
 	return id if ResourceLoader.exists(KNOP_DIR + "knop_%s.png" % id) else ""
 
 
+## Pad van het rij-icoon ("" als er geen art is). Ids zoals knop_<id>.png: village, wm1, wm2, wm3.
+func icoon_pad_voor(row_id: String, dicht: bool) -> String:
+	var id := row_id.to_lower()
+	if _step == STEP_PLACES:
+		id = "village" if row_id in KNOP_DORPEN else _wm_id.to_lower()
+	var p := KNOP_DIR + "warp_icoon_%s%s.png" % [id, "_dicht" if dicht else ""]
+	if not ResourceLoader.exists(p):
+		p = KNOP_DIR + "warp_icoon_%s.png" % id
+	return p if ResourceLoader.exists(p) else ""
+
+
 func _add_row(row_id: String, naam: String, dicht: bool, gekozen: bool, on_press: Callable) -> void:
 	var art := knop_id(row_id)
 	if art == "":
@@ -271,11 +281,15 @@ func _add_flat_row(row_id: String, naam: String, dicht: bool, gekozen: bool, on_
 	vak.add_theme_stylebox_override("panel", _flat(COLOR_SLOT))
 	rij.add_child(vak)
 
-	var icoon := Label.new()
+	# Icoon van RPG ART (72x20): warp_icoon_<id>.png, of _dicht als de rij vergrendeld is.
+	var icoon := TextureRect.new()
+	icoon.name = "Icoon"
 	icoon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icoon.text = LABEL_PLAATSHOUDER
-	icoon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	icoon.add_theme_color_override("font_color", UiStyle.TEXT_DIM if not dicht else UiStyle.TEXT_OFF)
+	icoon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icoon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+	var icoon_pad := icoon_pad_voor(row_id, dicht)
+	if icoon_pad != "":
+		icoon.texture = load(icoon_pad) as Texture2D
 	vak.add_child(icoon)
 
 	var label := Label.new()

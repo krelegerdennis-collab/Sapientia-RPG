@@ -13,16 +13,18 @@ const FLAG := "warper_archief"
 const BEWAKERS := {2: "bewaker:archief_2_v4_genezer/genezer"}
 ## Alleen deze bestanden hebben varianten.
 const MET_ACCENT := [
-	"res://world_warper/art/tiles_placeholder.png",
-	"res://world_warper/art/echo_placeholder.png",
-	"res://world_warper/art/pc_placeholder.png",
+	"res://world_warper/art/tiles.png",
+	"res://world_warper/art/echo.png",
+	"res://world_warper/art/pc.png",
 	"res://world_warper/art/warp_platform.png",
 	"res://world_warper/art/bord_hal.png",
 	"res://world_warper/art/bord_kamers.png",
 	"res://world_warper/art/bord_warp.png",
-	"res://world_warper/art/tafel_placeholder.png",
-	"res://world_warper/art/toonbank_placeholder.png",
-	"res://world_warper/art/party_placeholder.png",
+	"res://world_warper/art/tafel.png",
+	"res://world_warper/art/toonbank.png",
+	"res://world_warper/art/party.png",
+	"res://world_warper/art/vlak_warp.png",
+	"res://world_warper/art/vlak_gezelschap.png",
 	"res://assets/sprites/archief2/world_warper.png",
 	"res://assets/sprites/archief2/echo.png",
 ]
