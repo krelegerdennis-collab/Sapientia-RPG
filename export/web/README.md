@@ -1,12 +1,16 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`d3de708`), Godot 4.7.2, threads uit.
-Deze branch bevat ook `main` `83ac076`. Dat is alleen `TODO.md`. De gespeelde bestanden (`index.html`, `index.pck`, `index.wasm`) zijn de export van `d3de708`. Geen hard verversen nodig voor deze stap.
+Web-build van `main` (`577ccaa`, v0.20), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
-De touch-knoppen zitten erin: stuurknop links, A en B rechts.
-De muziek, de acteur-wavs en de algemene sfx zitten in `index.pck`.
+Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build, bovenop de vorige web-build (`c0df241`, grot-ingang):
+Nieuw in deze build (v0.20), bovenop `d3de708`:
+- Engelse ondertitel op het titelscherm (art van RPG ART).
+- De Ink Worm heeft weer RPG ART's tekeningen (gevecht, rug, idle, kaart).
+- De geheime kast in de Golemhal is één kast breed. Core Power laat roze kernscheuren oplichten, daarna breekt hij open.
+- Het bestiarium telt een Paper Wraith die door een status-effect valt ook als verslagen.
+
+Nog van de build van `d3de708`:
 - In het Donker Woud en de berggrot staan warpers bij begin, midden en eind. Het begin laat je in de dungeon. Midden en eind vragen of je wilt vertrekken en zetten je dan op de wereldkaart.
 - Op het plein van Wilgendal lopen Bram, Els, Fien, Wout en Siem een korte lus. Gerrit blijft bij de molen.
 - ECHO noemt de volgende plek: Noor in het Donker Woud, daarna de Golem, daarna De Genezer via de berggrot, anders een plek die je al bezocht hebt.
