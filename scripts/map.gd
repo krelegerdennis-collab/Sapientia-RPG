@@ -284,8 +284,6 @@ func _use_exit(exit: Node) -> void:
 		player.input_locked = true
 		BerggrotHaak.start()
 		return
-	if str(exit.name) == "NaarWorldWarper":
-		GameState.try_unlock_world_warper()
 	if "event" in exit and exit.event != "" and Story.trigger(exit.event, exit):
 		return
 	# v0.13: doel-scène bestaat (nog) niet maar er is tekst -> alleen het bericht

@@ -2,6 +2,8 @@ extends Node
 ## Headless suite voor Archief 2 (Het Levende Archief).
 ## Start: godot --path . -- --archief2test [--shots=/pad/map]
 
+const WarperCanon := preload("res://world_warper/cutscene/canon_scenes.gd")
+const GenezerScene := preload("res://world_warper/cutscene/genezer_scene.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
@@ -139,8 +141,8 @@ func _data() -> void:
 			and str(kamers["archief_2_v3_tegen"]["platen"][0]["soort"]) == "tegen")
 	check("licht-plaat na Lotte", str(kamers["archief_2_v3_licht"]["platen"][0]["soort"]) == "licht")
 	var echo := " ".join(Archief2.ECHO_REGELS)
-	check("ECHO-naam, geen onderzoeker", echo.find("ECHO") >= 0 and echo.find("onderzoeker") < 0
-			and echo.to_lower().find("digitale echo") < 0)
+	check("kaartkamer: geen ECHO-uitleg meer (canon in de Hal), geen onderzoeker", echo.find("H-6") < 0
+			and echo.find("onderzoeker") < 0 and echo.to_lower().find("digitale echo") < 0)
 	var cat = JSON.parse_string(FileAccess.get_file_as_string("res://assets/audio/actor_sfx.json"))
 	var monsters: Dictionary = cat.get("monsters", {}) if cat is Dictionary else {}
 	check("actor-sfx voor de drie bazen", monsters.has("lotte_glitch") and monsters.has("wurger")
@@ -500,12 +502,10 @@ func _na_genezer_hub() -> void:
 	check("hub is het exterieur", str(WarperEnter.HUB_SCENE).ends_with("exterieur.tscn") and str(WarperEnter.HUB_SPAWN) == "ingang")
 	check("Hanger gloeit paars", HangerScene.PURPLE == Color("b07ae8"))
 	var echo := " ".join(Archief2.ECHO_REGELS)
-	check("H-6 blijft bij de kaartkamer", echo.contains("H-6") and echo.contains("Test Subject"))
+	check("H-6 niet meer in de kaartkamer (canon 17: Sapientia zegt het in de Hal)", not echo.contains("H-6"))
 	var hubtekst := " ".join(WarperDreiging.lines())
-	for stap in WarperDialoog.steps():
-		hubtekst += " " + " ".join(stap.get("lines", []))
-	check("hub krijgt de H-6-regels niet", not hubtekst.contains("H-6") and not hubtekst.contains("Proefpersoon")
-			and not hubtekst.contains("biometrische"))
+	check("Hal-scène noemt H-6 maar onthult 'Proefpersoon' niet", hubtekst.contains("H-6")
+			and not hubtekst.contains("Proefpersoon") and not hubtekst.contains("Test Subject"))
 	GameState.new_game("Dennis")
 	GameState.encounter_multiplier = 0.0
 	Engine.time_scale = 1.0
@@ -526,7 +526,7 @@ func _na_genezer_hub() -> void:
 	var hub := false
 	while Time.get_ticks_msec() - t0 < 30000:
 		var s := _scène()
-		if s != null and s.name == "Exterieur" and s.is_node_ready() and not GameState.changing_map:
+		if s != null and s.name == "Hal" and s.is_node_ready() and not GameState.changing_map:
 			hub = true
 			break
 		if Dialog.is_open:
@@ -536,23 +536,51 @@ func _na_genezer_hub() -> void:
 				var regel := str(Dialog.text_label.text)
 				if regel != "" and (gezien.is_empty() or gezien[gezien.size() - 1] != regel):
 					gezien.append(regel)
+					if regel.contains("World Warper online") or regel.contains("glitches. Green turns grey"):
+						await get_tree().create_timer(1.8).timeout
+						await _shot("canon_genezer_warper" if regel.contains("online") else "canon_genezer_glitch")
 				Dialog.advance()
 		await get_tree().process_frame
 	var tekst := " ".join(gezien)
-	check("bestaande zinnen vóór de hub (%s)" % [tekst], tekst.contains(str(Archief2.NA_GENEZER[0]))
-			and tekst.contains(str(Archief2.NA_GENEZER[1])) and tekst.contains("It pulls you upward."))
-	check("geen H-6 in de warptekst", not tekst.contains("H-6") and not tekst.contains("Proefpersoon"))
-	check("party in het exterieur", hub and str(GameState.current_map).ends_with("exterieur.tscn")
+	var canon := true
+	for r in WarperCanon.GENEZER:
+		if not tekst.contains(str(r["text"])):
+			canon = false
+	check("canon-scène 1 compleet vóór de Hal (%d regels)" % gezien.size(), canon)
+	check("scène 1: vlag gezet", bool(GameState.story_flags.get(WarperCanon.FLAG_GENEZER, false)))
+	check("geen H-6 in scène 1", not tekst.contains("H-6") and not tekst.contains("Proefpersoon"))
+	check("party in de Hal", hub and str(GameState.current_map).ends_with("world_warper/maps/hal.tscn")
 			and str(GameState.current_map) != Archief2.WARPER_SCENE)
 	check("world_warper_unlocked na De Genezer", GameState.world_warper_is_unlocked()
 			and GameState.story_flags.has("archief2_naar_warper"))
 	var ex := _scène()
 	var spawn := ex.get_node_or_null("Spawns/ingang") if ex != null else null
 	var speler := ex.get_node_or_null("Objects/Player") if ex != null else null
-	check("spawn ingang van de hub", ex != null and ex.name == "Exterieur" and spawn != null and speler != null
+	check("spawn ingang van de Hal", ex != null and ex.name == "Hal" and spawn != null and speler != null
 			and speler.position.distance_to(spawn.position) < 2.0)
 	check("niet de kaartkamer Archief2Warper", ex != null and ex.name != "Archief2Warper")
+	await get_tree().create_timer(0.4).timeout
+	var hs := ex.get_node_or_null("HubBoot/HangerScene") if ex != null else null
+	if hs == null and ex != null:
+		hs = ex.find_child("HangerScene", true, false)
+	check("Hal: canon-scène 2 speelt bij binnenkomst", hs != null and bool(hs.get("_playing")))
 	await _shot("archief2_naar_hub")
+	if hs != null:
+		for _i in 60:
+			if not bool(hs.get("_playing")):
+				break
+			hs.call("_advance")
+			await get_tree().process_frame
+		await get_tree().create_timer(0.3).timeout
+	var warp := ex.find_child("WarpView", true, false) if ex != null else null
+	check("na scène 3: vlaggen gezet en de wereldkaart (warp-view) open", hs != null and not bool(hs.get("_playing"))
+			and bool(GameState.story_flags.get(WarperCanon.FLAG_DREIGING, false))
+			and warp != null and warp.visible)
+	await _shot("archief2_hal_warpview")
+	if warp != null and warp.has_method("close"):
+		warp.call("close")
+	# Terug in de Genezer-kamer: scène 1 speelt niet opnieuw.
+	check("scène 1 niet opnieuw", not GenezerScene.mag_spelen(GameState.story_flags))
 	await _dialoog_dicht(8)
 
 
