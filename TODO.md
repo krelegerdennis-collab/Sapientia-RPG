@@ -57,6 +57,8 @@ Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Cano
 ### Bestiarium
 
 - [ ] Bestiarium uitwerken tot endgame
+  De bestaande eindbazen van de Diepe Grot (verdieping 10 tot en met 100) hebben een entry en stats uit de bestaande monsterdata.
+  De vier lore-zinnen hieronder staan in het bestiarium (`desc` van kennis_beest, wortelkoning, wurger en genezer). De weergavenaam van Kustos blijft The Knowledge Beast; die naam zit in de tests vast.
 
 De notitie bij dit vakje en de vier lore-zinnen staan direct boven die zinnen, onder Canon & Design Reference.
 
