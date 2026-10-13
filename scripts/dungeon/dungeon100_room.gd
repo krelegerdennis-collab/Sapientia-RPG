@@ -15,6 +15,10 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 
 const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const WarperC := preload("res://scripts/dungeon/dungeon100_warper.gd")
+const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
+const KoopmanC := preload("res://scripts/dungeon/dungeon100_koopman.gd")
+const ValC := preload("res://scripts/dungeon/dungeon100_val.gd")
+const VAL_TEKST := {"spijker": "Spikes shoot up from the floor!", "rune": "A rune flares beneath your feet!"}
 
 ## Verdieping is gebouwd; data = Dungeon100Generator.generate() van deze verdieping.
 signal floor_ready(floor_no: int, data: Dictionary)
@@ -49,6 +53,7 @@ func _ready() -> void:
 	super._ready()
 	_place_rustpunt()
 	_place_warper()
+	_place_grot_kamer()
 	floor_ready.emit(floor_no, floor_data)
 
 
@@ -60,6 +65,45 @@ func _place_rustpunt() -> void:
 	rustpunt = Dungeon100Rustpunt.create(Vector2i(int(t[0]), int(t[1])))
 	rustpunt.name = "Rustpunt"
 	$Objects.add_child(rustpunt)
+
+
+## Kamersoort van deze verdieping (scripts/data/grot_kamers.gd): "val", "rust", "koopman" of "".
+var kamer_soort := ""
+var koopman: Node2D
+var vallen: Dictionary = {}     # Vector2i -> Dungeon100Val
+
+
+## Valkamer: vallen op de vloer (stap = trigger). Koopmankamer: kraam + H-5.
+## Rustkamer: het rustpunt zelf toont het kampvuur (dungeon100_rustpunt.gd).
+func _place_grot_kamer() -> void:
+	kamer_soort = GrotKamers.kamer_soort(GameState.dungeon100_seed, floor_no)
+	if kamer_soort == GrotKamers.SOORT_KOOPMAN:
+		var plek := GrotKamers.koopman_plek(room, floor_data)
+		if plek.is_empty():
+			return
+		var kraam: Node2D = KoopmanC.create(plek["kraam"],
+				_koopman_sleutel())
+		$Objects.add_child(kraam)
+		koopman = kraam.get_node("Koopman")
+	elif kamer_soort == GrotKamers.SOORT_VAL:
+		for d in GrotKamers.vallen(GameState.dungeon100_seed, room, floor_data):
+			var v: Node2D = ValC.create(d)
+			$Objects.add_child(v)
+			vallen[d["tile"]] = v
+		if is_instance_valid(player) and not player.is_connected("stepped", _on_val_stap):
+			player.connect("stepped", _on_val_stap)
+
+
+func _koopman_sleutel() -> String:
+	return "%d_%d" % [GameState.dungeon100_seed, floor_no]
+
+
+func _on_val_stap(t: Vector2i) -> void:
+	var v = vallen.get(t)
+	if v == null or not is_instance_valid(v) or v.afgegaan:
+		return
+	v.trigger()
+	Dialog.show_lines([str(VAL_TEKST.get(v.soort, "A trap!")), "The party takes damage."])
 
 
 ## Warper (verdieping 1, 25, 50, 75, 99) op room["warper"], naast de ingang.

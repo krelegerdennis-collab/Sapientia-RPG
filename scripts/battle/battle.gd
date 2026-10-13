@@ -34,6 +34,7 @@ signal damage_shown(target_name: String, amount: int)
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
+const KoopmanData := preload("res://scripts/data/koopman_data.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
@@ -1377,18 +1378,25 @@ func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> 
 ## Spreuken: power op level 1 + power_per_level per level erboven, maal het element, +/- 10%.
 func _spell_amount(caster: Dictionary, spell: Dictionary, target: Dictionary) -> int:
 	var lvl := int(caster["s"].get("level", 1))
-	var base := SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target)
+	var base := SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target) * _token_mult(caster)
 	return maxi(1, roundi(base * randf_range(0.9, 1.1)))
 
 
 func _buff_mult(c: Dictionary, stat: String) -> float:
-	var m := 1.0
+	var m := _token_mult(c)
 	for b in c.get("buffs", []):
 		if typeof(b) != TYPE_DICTIONARY:
 			continue
 		if str(b.get("stat", "")) == stat and int(b.get("turns", 0)) > 0:
 			m *= 1.0 + float(b.get("pct", 0.0))
 	return m
+
+
+## "H-5's Token" van de Koopman (CANON §12): +10% stats voor de helden tegen dienaren van Sapientia.
+func _token_mult(c: Dictionary) -> float:
+	if not bool(c.get("is_hero", false)):
+		return 1.0
+	return KoopmanData.token_factor(GameState.koopman_token, not GameState.practice_battle)
 
 
 func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:

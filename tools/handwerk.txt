@@ -349,3 +349,17 @@ assets/sprites/buiten/wilgendal_toonbank.png
 assets/sprites/buiten/wilgendal_vitrine.png
 assets/sprites/buiten/wilgendal_wapen.png
 assets/sprites/buiten/wilgendal_zwaard.png
+# v0.21: RPG ART batch 9 (art_batch9_v21/out): hub-rondlopers (48x96, 3x4 frames van 16x24) + de Koopman (H-5).
+assets/sprites/hub/glitchmot_hub.png
+assets/sprites/hub/inktwurm_hub.png
+assets/sprites/hub/kennis_beest_hub.png
+assets/sprites/hub/mech_wachter_hub.png
+assets/sprites/hub/mistuil_hub.png
+assets/sprites/hub/moskonijn_hub.png
+assets/sprites/hub/mosslijm_hub.png
+assets/sprites/hub/papiergeest_hub.png
+assets/sprites/hub/sporenzwam_hub.png
+assets/sprites/hub/wortelkruiper_hub.png
+assets/sprites/npc/koopman_veld.png
+# v0.21: RPG ART batch 10 (art_batch10_v21/out): Diepe Grot kamertegels (vallen, kampvuur, koopmankraam).
+assets/tiles/dungeon/grot_kamers.png
