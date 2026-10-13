@@ -53,6 +53,8 @@ func _run() -> void:
 	await _kaart()
 	print("=== Deel D: grot start zonder wereldkaart ===")
 	await _start()
+	print("=== Deel D2: Archief 2-kant van de grot ===")
+	await _archief2_kant()
 	print("=== Deel E: uitgang-warpers berggrot ===")
 	await _warper_tests()
 	print("BERGGROTTEST %d PASS, %d FAIL" % [passes, failures])
@@ -594,3 +596,29 @@ func screenshot(naam: String) -> void:
 func kaart_grot_pos() -> Vector2:
 	var g := scene().get_node_or_null("Exits/NaarBerggrot") as Node2D
 	return g.position if g != null else Vector2(-1, -1)
+
+
+## Uitmond: de boog in de noordwand (9,2) is de tunnel naar de kas (archief_2_v1_entree).
+## De kas-entree heeft onderin de dubbele deur (9-10,11) terug naar de Uitmond (spawn boog).
+func _archief2_kant() -> void:
+	var lay: Array = BG.ROOMS["berggrot_uitmond"]["layout"]
+	check("Uitmond: tunnelboog 'n' in de noordwand op (9,2)", str(lay[2]).find("n") == 9 and str(lay[1])[9] == "A")
+	GameState.change_map("res://scenes/maps/berggrot_uitmond.tscn", "boog")
+	var ok := await wait_scene("BerggrotUitmond", 20.0)
+	if ok:
+		await wait_fade()
+		await pframes(4)
+		await screenshot("berggrot_uitmond_boog")
+	check("Uitmond geladen bij de boog", ok and tile() == Vector2i(9, 3))
+	GameState.change_map("res://scenes/maps/archief_2_v1_entree.tscn", "ingang")
+	ok = await wait_scene("Archief2V1Entree", 20.0)
+	if ok:
+		await wait_fade()
+		await pframes(4)
+		await screenshot("archief2_entree_zuid")
+	var terug := false
+	if ok:
+		for uit in scene().get_node("Exits").get_children():
+			if str(uit.target_map).ends_with("berggrot_uitmond.tscn") and str(uit.target_spawn) == "boog":
+				terug = true
+	check("kas-entree heeft de weg terug naar de Uitmond", ok and terug)
