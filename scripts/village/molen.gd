@@ -4,15 +4,26 @@ extends RefCounted
 ## Het meel zit op de map (meta). Een nieuw bezoek is een nieuwe scène.
 
 const META := "zingend_meel_gegeven"
-const REGEL_RUST := "HP en MP zijn hersteld."
-const REGEL_MEEL := "Je krijgt Zingend Meel."
-const VRAAG := "Wat wil je?"
-const KEUZES := ["Opslaan", "Party wisselen", "Klaar"]
-const VRAAG_SAVE := "Voortgang opslaan?"
-const REGEL_OPGESLAGEN := "Opgeslagen."
-const REGEL_MISLUKT := "Opslaan mislukt."
-const VRAAG_PARTY := "Wie gaat voorop?"
-const REGEL_ALLEEN := "Je reist alleen."
+const REGEL_RUST := "HP and MP restored."
+const REGEL_MEEL := "You receive Singing Flour."
+const REGEL_ZANG := "The mill turns again."
+const REGEL_GEZANG := "Soft singing."
+const SFX_ZANG := "molen_zang"
+const VRAAG := "What would you like?"
+const KEUZES := ["Save", "Switch party", "Done"]
+const VRAAG_SAVE := "Save your progress?"
+const REGEL_OPGESLAGEN := "Saved."
+const REGEL_MISLUKT := "Save failed."
+const VRAAG_PARTY := "Who leads the way?"
+const REGEL_ALLEEN := "You travel alone."
+
+
+## Eenmalig, als het zaad de molen weer laat draaien. Placeholder-geluid.
+static func zang() -> void:
+	if AudioManager.has_sfx(SFX_ZANG):
+		AudioManager.play_sfx(SFX_ZANG)
+	Dialog.show_lines([REGEL_ZANG, REGEL_GEZANG])
+	await Dialog.finished
 
 
 static func bezoek() -> void:
@@ -52,7 +63,7 @@ static func _meel(map: Node) -> bool:
 
 
 static func _opslaan() -> void:
-	var keuze: int = await Dialog.ask(VRAAG_SAVE, ["Ja", "Nee"])
+	var keuze: int = await Dialog.ask(VRAAG_SAVE, ["Yes", "No"])
 	if keuze != 0:
 		return
 	var p := _player()
@@ -80,7 +91,7 @@ static func _wissel() -> void:
 	var i: int = await Dialog.ask(VRAAG_PARTY, namen)
 	if i < 0 or not GameState.move_member_to_front(i):
 		return
-	Dialog.show_lines(["%s gaat voorop." % namen[i]])
+	Dialog.show_lines(["%s leads the way." % namen[i]])
 	await Dialog.finished
 
 
