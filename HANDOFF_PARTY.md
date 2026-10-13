@@ -124,3 +124,20 @@ Extra aangepaste bestaande tests: `codex_tests.gd` (5 menuknoppen), `fusie_tests
 ## 6. Open punten
 - Met 5 vakken zijn de statusvakken ~41 eenheden breed; de getallen staan dan over het label "HP"/"MP" heen
   (nog leesbaar, zie screenshot). Mogelijke vervolgstap: labels weglaten bij smalle vakken.
+
+## 7. Update (besluit Dennis, 13-10 avond)
+- **Monster niet meer in de statusrij.** De rij onderaan heeft alleen de 4 heldenvakken. Het Codex-monster
+  is een kleine **zijspeler** boven de B-knop: groen label (52x11) met het icoon van RPG ART en de naam,
+  **geen HP/MP-balken**, met de rug-sprite er vlak boven. Hij vecht, wordt geraakt en is tikbaar als
+  doelwit zoals voorheen. Technisch heeft hij nog wel een element in `status_boxes` (zodat de indexen
+  gelijk blijven aan `heroes`), maar dat element tekent `hero_status_box.gd` (`monster = true`) als label.
+  `MONSTER_GAP` is weg; nu `SIDE_GAP` (ruimte label ↔ B-knop) en `HeroStatusBox.SIDE_SIZE`.
+- **Icoon van RPG ART**: `assets/ui/icon_monstervak.png` (7x6), staat in `tools/handwerk.txt`, en de
+  placeholder-regel is weg uit `tools/placeholders_v17.txt`. Ontbreekt het bestand, dan tekent de code
+  het oude boekje (terugval).
+- **Warpen-knop compact**: er is geen warp-knop in het gevecht zelf. Ik ga ervan uit dat de grote
+  **Warpen**-knop van het menu bedoeld is (die opent tijdens het spelen met MENU). Die is nu
+  96x24 (was ca. 210x60), met Party eronder in dezelfde maat. Tikhoogte >= 16 blijft. `menutest` controleert nu
+  "compact" in plaats van "groter".
+- partytest: nieuwe checks voor de zijspeler (klein, boven B, geen balken, sprite erboven), het
+  icoon (7x6) en de compacte Warpen. Er is ook een screenshot `party_veldmenu.png` bij.

@@ -113,6 +113,8 @@ func _build_buttons() -> void:
 		var b := UiMenu.button(str(c[1]))
 		b.custom_minimum_size = Vector2(LEFT_W, ROW_H)
 		_style_button(b, id == "warp")
+		if id == "warp" or id == "party":
+			b.custom_minimum_size = Vector2(WARP_W, ROW_H)   # v0.22 compact
 		if id == "warp":
 			b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.pressed.connect(choose.bind(id))

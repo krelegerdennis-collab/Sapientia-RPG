@@ -433,7 +433,7 @@ func _gevecht_tests() -> void:
 	check("heldenvakken overlappen niet, van links naar rechts", los)
 	check("monster heeft geen vak in de rij: zijspeler-label (klein, geen balken)", bool(zij.monster)
 			and zij.size == zij.SIDE_SIZE and zij.size.y < rij[0].size.y / 2.0
-			and zij.position.x >= rij[3].position.x + rij[3].size.x)
+			and zij.get_rect().end.y <= rij[0].position.y)
 	check("monster-icoon van RPG ART geladen (7x6)", zij._monster_icon != null and zij._monster_icon.get_size() == Vector2(7, 6))
 	var tc: Node = b.touch
 	if tc != null and tc.has_method("b_center"):
