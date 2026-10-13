@@ -32,6 +32,28 @@ wat hier staat. Wat hier niet staat: dan geldt wat er in de game staat (`scripts
     Oude Bram, ...). **Vonkkling** en **Bram Holt** krijgen een andere naam zodra ze ingebouwd
     worden. Nieuwe lore-items (**Gloeiende Inktfles, Kruidenthee, Wambuis** e.d.) mogen erbij.
 
+12. **5e party member: Kael Voss (WM2, psytech)**. **Kael Voss**, 19 jaar, is een
+    psytech-dwaler uit **WM2**. Hij bestuurt **de Stroom** met zijn geest. Hij was
+    **Proefpersoon K-7** in hetzelfde programma als **Dennis (H-6)**; **Sapientia**
+    gebruikte hem als 'ontvanger' via een neurale kroon in zijn achterhoofd en keek
+    door zijn ogen. Hij is ontsnapt, maar hoort haar stem nog als ruis. Hij vertrouwt
+    alleen Dennis, die hij van vroeger herkent zonder te weten waarvan. Hij weet dingen
+    over Dennis' verleden die **de Oude Man** verzwijgt, en brengt Sapientia's echte
+    kant in het verhaal.
+    - **Uiterlijk**: mager; zilvergrijs haar dat magenta glitcht bij slapen; gescheurde
+      academische mantel over techsuit; gebarsten cyaan kroon-implantaat; drie zwevende
+      prisma's (psyfocus).
+    - **Rol**: psytech-caster, crowd control/debuffs; ruilt MP voor IP.
+    - **Skills**: **Mindspike** (psychische schade, kans op Confuse); **Static Veil**
+      (party-schild dat glitch absorbeert); **Overclock** (bondgenoot extra beurt, kost
+      Kael HP); IP-skill **Sapientia's Echo** (glitch-schade op alle vijanden, daarna
+      Kael zelf Confused).
+    - **Joint**: in **WM2** (exact moment nog open).
+
+13. **Party-regel**. Max **4 actieve helden** + **1 monster** (Codex-gevangen) in
+    gevecht; overige helden in reserve, wisselbaar buiten gevecht. (Besluit Dennis
+    2026-10-13.)
+
 ## Makkelijk over te nemen (botst niet)
 
 Uit `BOTSINGEN.md`; dit mag zonder verdere beslissing gebruikt worden:
