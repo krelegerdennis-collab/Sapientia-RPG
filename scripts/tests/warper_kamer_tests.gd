@@ -418,7 +418,7 @@ func _update2_regels() -> void:
 			and not vlaggen.has(Kisten.FLAG_GETELD))
 	var molen := FileAccess.get_file_as_string("res://scripts/village/molen.gd")
 	var prop := FileAccess.get_file_as_string("res://world_warper/kamers/prop.gd")
-	check("de molen zet nog iemand vooraan", molen.contains("move_member_to_front") and molen.contains("Wie gaat voorop?"))
+	check("de molen zet nog iemand vooraan", molen.contains("move_member_to_front") and molen.contains("Who leads the way?"))
 	check("de Rustkamer wisselt via de bank", prop.contains("PartyWissel") and prop.contains("ALLEEN_HIER"))
 	GameState.new_game("Dennis")
 	GameState.add_member("noor")

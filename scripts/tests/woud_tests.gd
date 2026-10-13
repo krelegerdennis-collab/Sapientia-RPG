@@ -1027,7 +1027,7 @@ func _graan_data() -> void:
 			for cmd in v.get("do", []):
 				if cmd is Array and not cmd.is_empty():
 					namen.append(str(cmd[0]))
-	check("zangscène tussen herkenning en de molen, zonder nieuwe zin", namen == ["take", "flag", "say", "molen_zang", "molen"])
+	check("zangscène en zang tussen herkenning en de molen", namen == ["take", "flag", "say", "molen_zang", "zang", "molen"])
 	var sheet := Wieken.placeholder_sheet().get_image()
 	var tip: Vector2i = Wieken.zeil_punt(0)
 	var tip2 := Vector2i(tip.x + Wieken.FRAME_W, tip.y)
@@ -1149,6 +1149,8 @@ func _graan_tests() -> void:
 	Story.trigger("gerrit", g)
 	var af: Array = await lines_until_choice()
 	check("bij Gerrit: zaad herkend, molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZAAD))
+			and af.any(func(l): return Molen.REGEL_ZANG in str(l))
+			and af.any(func(l): return Molen.REGEL_GEZANG in str(l))
 			and not af.any(func(l): return SD.QUOTE_GRAAN_DANK in str(l))
 			and af.any(func(l): return Molen.REGEL_RUST in str(l)) and af.any(func(l): return Molen.REGEL_MEEL in str(l))
 			and Story.has_flag(SD.FLAG_GRAAN_KLAAR) and Story.active_quest() == ""
@@ -1177,7 +1179,7 @@ func _graan_tests() -> void:
 			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"]))
 	Dialog.choose(0)
 	await lines_until_choice()
-	check("opslaan vraagt Ja/Nee", Dialog.choices == ["Ja", "Nee"])
+	check("opslaan vraagt Yes/No", Dialog.choices == ["Yes", "No"])
 	Dialog.choose(0)
 	await run_story(8.0)
 	var sav := GameState.read_save()
