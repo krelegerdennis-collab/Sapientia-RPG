@@ -1076,7 +1076,7 @@ func _kast_tests() -> void:
 	await freeze_monsters()
 	var kast: Node = room.get_node_or_null("Objects/InktwurmKast")
 	check("J: kast staat dicht rechts in de hal", kast != null and not kast.is_open and kast.tile == Vector2i(17, 5)
-			and kast.sprite.hframes == 6 and kast.sprite.frame == 0)
+			and kast.sprite.hframes == 2 and kast.scheur.hframes == 4 and not kast.scheur.visible and kast.sprite.frame == 0)
 	if kast == null:
 		return
 	var blocked: Dictionary = veld().blocker_at(Vector2i(17, 5))
@@ -1096,7 +1096,7 @@ func _kast_tests() -> void:
 		if is_instance_valid(m) and str(m.enemy_id) == "inktwurm":
 			worm = m
 	check("J: kast open, vlag gezet, botsing weg, tekst gezien", opened and said and GameState.story_flags.has("inktwurm_kast_open")
-			and kast.shape.disabled and kast.sprite.frame == 5)
+			and kast.shape.disabled and kast.sprite.frame == 1 and not kast.scheur.visible)
 	check("J: Ink Worm staat in de kast en is nog te vangen", worm != null and worm.moves == false
 			and worm.tile == Vector2i(16, 5) and GameState.unique_available("inktwurm"))
 	player().place_at(Vector2i(13, 6), Vector2i.RIGHT)
@@ -1125,4 +1125,4 @@ func _kast_tests() -> void:
 			if is_instance_valid(m) and str(m.enemy_id) == "inktwurm":
 				worm2 = true
 	check("J: na opnieuw binnenkomen staat de kast open en de Ink Worm er nog", kast != null and kast.is_open
-			and kast.sprite.frame == 5 and kast.shape.disabled and worm2)
+			and kast.sprite.frame == 1 and not kast.scheur.visible and kast.shape.disabled and worm2)

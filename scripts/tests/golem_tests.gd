@@ -133,6 +133,7 @@ func _data_tests() -> void:
 	var kb: Dictionary = GD.ENEMIES["kennis_beest"]
 	check("gewoon Lore Beast (zwakke Golem-variant) blijft 46/14/7/6, 24 EXP",
 			int(kb["max_hp"]) == 46 and int(kb["atk"]) == 14 and int(kb["def"]) == 7 and int(kb["agi"]) == 6 and int(kb["exp"]) == 24)
+	check("Kustos: canon-zin in het bestiarium", str(kb["desc"]) == "Een wachter zonder ogen, maar met duizend oren. Hij hoort elke gedachte die het Archief binnenkomt. De Oude Mensheid bouwde hem niet om te doden, maar om te bewaren. Sapientia gaf hem een nieuw doel: alles wat niet past, wordt verwijderd.")
 	var mw: Dictionary = GD.ENEMIES["mech_wachter"]
 	var want_w := {"max_hp": 30, "atk": 12, "def": 8, "agi": 5, "mag": 0, "mdef": 4, "exp": 10, "gold": 8}
 	ok = true

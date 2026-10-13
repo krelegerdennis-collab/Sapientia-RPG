@@ -367,7 +367,7 @@ const ENEMIES := {
 		"habitat": ["archief", "baas"],
 	},
 	# Het Zingende Graan: klein mini-gevecht op de mistrand. Geen eigen art (art_pending).
-	# Bestiariumnummer 023: 013-022 zijn de eindbazen van de Diepe Grot (endgame_bestiary.gd).
+	# Bestiariumnummer 025: 013-024 zijn de twaalf eindbazen van de Diepe Grot (endgame_bestiary.gd).
 	"woudgeest": {
 		"name": "Woudgeest",
 		"sprite": "res://assets/sprites/enemies/woudgeest.png",
@@ -376,7 +376,7 @@ const ENEMIES := {
 		"max_hp": 12, "atk": 6, "def": 1, "agi": 5, "mag": 0, "mdef": 1,
 		"exp": 4, "gold": 2, "y_offset": 0,
 		"skills": [],
-		"no": 23, "mp": 0, "weak": ["vuur"], "resist": [],
+		"no": 25, "mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [],
 		"desc": "Een kleine geest uit het woud.",
 		"habitat": ["woud"],

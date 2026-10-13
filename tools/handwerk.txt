@@ -226,3 +226,12 @@ assets/sprites/enemies/inktwurm_rug.png
 assets/sprites/enemies/inktwurm_idle.png
 assets/map_monsters/inktwurm.png
 assets/puzzle/inktwurm_kast.png
+# v0.20: RPG ART's Inktwurm (art_inktwurm_v19/out, gevecht/rug 108x86 voet (54,80), idle 216x86 = 2 frames,
+#        kaart 32x64) staat weer op de bestanden hierboven. De geheime kast gebruikt nu RPG ART's geheimkast
+#        (art_geheimkast_v19/out): geheimkast_2hoog.png 32x32 = 2 frames 16x32 (dicht | open) en
+#        kernscheur.png 64x32 = 4 frames 16x32 overlay bij een Kernkracht-treffer (0.08 s, niet loopen).
+#        inktwurm_kast.png (192x32) blijft als oud bestand staan maar wordt niet meer geladen.
+assets/puzzle/geheimkast_2hoog.png
+assets/puzzle/kernscheur.png
+# v0.20: Engelse ondertitel van RPG ART (art_ondertitel_v20/out/title_ondertitel_en.png, 130x13) op (127,43).
+assets/ui/title_ondertitel.png

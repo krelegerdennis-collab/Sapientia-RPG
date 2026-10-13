@@ -1717,6 +1717,11 @@ func _flash_enemy(e: Dictionary) -> void:
 ## Pagina 1: EXP, goud en per held hoeveel EXP er nog nodig is voor het
 ## volgende level. Daarna één pagina per held die een level omhoog gaat.
 func _victory() -> void:
+	# Vijanden die buiten _report_kos vielen (bv. door een status-tick) tellen ook als verslagen.
+	for e in enemies:
+		if int(e["s"]["hp"]) <= 0 and not e.get("reported_ko", false):
+			e["reported_ko"] = true
+			GameState.mark_defeated(str(e.get("id", "")))
 	var practice := GameState.practice_battle
 	var exp_total := 0
 	var gold_total := 0
