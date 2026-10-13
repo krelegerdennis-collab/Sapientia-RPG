@@ -9,6 +9,7 @@ extends RefCounted
 ##   - victory_exp(): EXP en level-ups van de bondgenoot na de winst
 ## Regels staan in HANDOFF_CODEX.md.
 
+const Archief2Vijanden := preload("res://scripts/data/archief2_vijanden.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")
 const KamerData := preload("res://world_warper/kamers/kamers.gd")
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
@@ -118,6 +119,9 @@ func ally_turn(a: Dictionary) -> void:
 		if choice == "attack" and not attack_ids.is_empty() and randf() < float(ai["skill_chance"]):
 			choice = str(attack_ids.pick_random())
 	var target: Dictionary = _pick_foe(foes, str(ai["target"]))
+	var getrokken = Archief2Vijanden.pulled_target(c)   # v0.21: door een Wortelgeest aangetrokken
+	if getrokken != null and battle.in_battle(getrokken):
+		target = getrokken
 	if choice == "attack" or not CodexData.SKILLS.has(choice):
 		last_ally_action = {"kind": "attack", "skill": "", "target": target["name"]}
 		battle.show_message("%s attacks!" % c["name"])
@@ -150,6 +154,12 @@ func ally_turn(a: Dictionary) -> void:
 			await battle._heal(ally_t, int(sk["power"]) + 2 * int(page["level"]), 0)
 		"guard":
 			await battle._guard_up(c, sk)
+		"poison", "bind", "pull":
+			# v0.21 Archief 2: schade + effect (scripts/data/archief2_vijanden.gd)
+			await battle._hero_wind_up(c, true)
+			var dmg: int = battle._physical_damage(c, target, float(sk["power"]))
+			await battle._damage(target, dmg)
+			await battle._skill_effect(c, target, sk, dmg)
 	battle._hero_rest(c)
 
 
