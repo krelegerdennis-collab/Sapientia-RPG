@@ -1,13 +1,18 @@
 class_name WorldWarperHangerScene
 extends Node2D
-## Eerste-bezoekscène: paarse hal, paarse Hanger, korte zwarte flikkering, herstel.
-## Placeholder-hologram (geen definitieve art, geen shader). Tikken gaat verder.
-## TODO(design): de zinnen staan in dreiging.gd.
+## Eerste-bezoekscène in de Hal: canon-scène 2 (De Hanger) en 3 (Sapientia's dreiging).
+## Paarse hal, ECHO-hologram, paarse Hanger, roze glitch-silhouet van Sapientia, herstel.
+## Geen shader. Tikken gaat verder. De zinnen staan in canon_scenes.gd (via dreiging.gd).
 
 signal hanger_activated
 signal threat_finished
 
 const Dreiging := preload("res://world_warper/cutscene/dreiging.gd")
+const Canon := preload("res://world_warper/cutscene/canon_scenes.gd")
+## Bestaande glitch-art (RPG ART), roze getint als silhouet van licht en ruis.
+const SAPIENTIA_TEX := preload("res://assets/sprites/archief2/sapientia_glitch.png")
+const SAPIENTIA_ROZE := Color(1.0, 0.45, 0.85, 0.9)
+const FLITS_ROZE := Color(0.95, 0.3, 0.75, 1)
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 const WarperAccent := preload("res://world_warper/art/accent.gd")
@@ -34,6 +39,10 @@ var _jitter_i := 0
 var _arm_frame := -1
 var _advanced_frame := -1
 var _lines: Array[String] = []
+var _flags: Dictionary = {}
+var _hanger_einde := -1
+## Roze silhouet van Sapientia (beat 3). Publiek voor de tests.
+var sapientia: TextureRect
 var _hologram_home := Vector2.ZERO
 var _motion: Tween
 var _source: Node = null
@@ -138,7 +147,9 @@ func _start(flags_source: Node) -> void:
 	if not Dreiging.should_play(_read_flags(flags_source)):
 		_source = null
 		return
-	_lines = Dreiging.lines()
+	_flags = _read_flags(flags_source).duplicate()
+	_lines = Dreiging.lines(_flags)
+	_hanger_einde = Dreiging.einde_hanger(_flags)
 	if _lines.is_empty():
 		_mark_intro_seen()
 		_finished = true
@@ -184,6 +195,9 @@ func _is_advance(event: InputEvent) -> bool:
 
 func _advance() -> void:
 	var leaving := _beat
+	if _line_i == _hanger_einde:
+		_set_flag(_source, Canon.FLAG_HANGER)
+		_set_flag(_game_state(), Canon.FLAG_HANGER)
 	if _line_i >= _lines.size() - 1:
 		if leaving == 2:
 			_emit_activated()
@@ -196,7 +210,7 @@ func _advance() -> void:
 
 func _enter(line_index: int) -> void:
 	_line_i = line_index
-	var beat := Dreiging.beat_at(_line_i)
+	var beat := Dreiging.beat_at(_line_i, _flags)
 	if beat != _beat:
 		_beat = beat
 		_apply_beat(beat)
@@ -249,8 +263,19 @@ func _layout_if_idle() -> void:
 	_layout()
 
 
+func _toon_sapientia(aan: bool) -> void:
+	if sapientia == null:
+		return
+	sapientia.visible = aan
+	var vs := Vector2(384, 216)
+	if get_viewport() != null:
+		vs = get_viewport().get_visible_rect().size
+	sapientia.position = (Vector2(vs.x * 0.5 - 96.0, vs.y * 0.6) - sapientia.size * 0.5).round()
+
+
 func _beat_purple() -> void:
 	_kill_motion()
+	_toon_sapientia(false)
 	hall.color = HALL_QUIET
 	_set_flicker(0.0)
 	hologram.modulate = Color(0.78, 0.74, 0.9, 1)
@@ -268,6 +293,7 @@ func _beat_gloed() -> void:
 	hall.color = HALL_WARM
 	hanger.color = PURPLE
 	_zet_gloed(true)
+	_toon_sapientia(false)
 	hanger.scale = Vector2.ONE
 	hanger.modulate = Color(0.55, 0.35, 0.95, 1)
 	_motion = create_tween()
@@ -286,12 +312,16 @@ func _beat_threat() -> void:
 	hall.color = HALL_THREAT
 	hologram.modulate = Color.WHITE
 	_set_flicker(0.0)
+	flicker.color = FLITS_ROZE
+	_toon_sapientia(true)
 	_motion = create_tween()
 	_motion.set_loops(8)
 	_motion.tween_callback(_jitter_hologram)
-	_motion.tween_property(flicker, "modulate:a", 0.92, 0.05)
+	_motion.tween_property(flicker, "modulate:a", 0.45, 0.05)
+	_motion.parallel().tween_property(sapientia, "modulate:a", 0.35, 0.05)
 	_motion.parallel().tween_property(hologram, "modulate:a", 0.15, 0.05)
 	_motion.tween_property(flicker, "modulate:a", 0.0, 0.07)
+	_motion.parallel().tween_property(sapientia, "modulate:a", 0.9, 0.07)
 	_motion.parallel().tween_property(hologram, "modulate:a", 1.0, 0.07)
 
 
@@ -302,6 +332,7 @@ func _set_flicker(alpha: float) -> void:
 
 func _beat_restore() -> void:
 	_kill_motion()
+	_toon_sapientia(false)
 	_set_flicker(0.0)
 	hall.color = HALL_LIT
 	hologram.modulate = Color.WHITE
@@ -314,6 +345,8 @@ func _beat_restore() -> void:
 
 func _jitter_hologram() -> void:
 	hologram.position = _hologram_home + _kick(_jitter_i)
+	if sapientia != null and sapientia.visible:
+		sapientia.position += _kick(_jitter_i + 2)
 	_jitter_i += 1
 
 
@@ -392,17 +425,18 @@ func _flags_of(node: Node) -> Dictionary:
 
 
 func _mark_intro_seen() -> void:
-	_set_flag(_source)
-	_set_flag(_game_state())
+	for f in [Dreiging.FLAG, Canon.FLAG_HANGER, Canon.FLAG_DREIGING]:
+		_set_flag(_source, f)
+		_set_flag(_game_state(), f)
 
 
-func _set_flag(node: Node) -> void:
+func _set_flag(node: Node, flag: String = Dreiging.FLAG) -> void:
 	if node == null:
 		return
 	var raw: Variant = node.get("story_flags")
 	if raw is Dictionary:
 		var flags := raw as Dictionary
-		flags[Dreiging.FLAG] = true
+		flags[flag] = true
 		node.set("story_flags", flags)
 
 
@@ -420,6 +454,19 @@ func _style() -> void:
 	text_label.add_theme_constant_override("shadow_offset_y", 1)
 	_font_label(hint_label, 8, UiStyleC.TEXT_DIM)
 	_font_label(placeholder, 10, Color(0.1, 0.06, 0.14, 1))
+	if sapientia == null:
+		sapientia = TextureRect.new()
+		sapientia.name = "Sapientia"
+		sapientia.texture = SAPIENTIA_TEX
+		sapientia.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		sapientia.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		sapientia.stretch_mode = TextureRect.STRETCH_SCALE
+		sapientia.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		sapientia.size = Vector2(72, 72)
+		sapientia.modulate = SAPIENTIA_ROZE
+		sapientia.visible = false
+		layer.add_child(sapientia)
+		layer.move_child(sapientia, hologram.get_index())
 	# Hologram: ECHO-art van RPG ART in plaats van het woord PLACEHOLDER.
 	if hologram != null and hologram.get_node_or_null("EchoArt") == null:
 		var pad := WarperAccentArt.path(ECHO_HOLO, WarperAccentArt.current())

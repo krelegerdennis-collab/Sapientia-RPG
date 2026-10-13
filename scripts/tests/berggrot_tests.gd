@@ -178,9 +178,9 @@ func _kaart() -> void:
 	var spawn: Node2D = kaart.get_node("Spawns/van_berggrot")
 	var grot_tegel := Vector2i((grot.position / 16.0).floor())
 	var spawn_tegel := Vector2i((spawn.position / 16.0).floor())
-	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(14, 19)
-			and spawn_tegel == Vector2i(14, 20) and spawn.facing == Vector2i(0, 1)
-			and _terrein(grond, Vector2i(14, 18)) == "berg"
+	check("spawn van_berggrot aan de voet van de bergen", grot_tegel == Vector2i(21, 18)
+			and spawn_tegel == Vector2i(21, 19) and spawn.facing == Vector2i(0, 1)
+			and _terrein(grond, Vector2i(21, 17)) == "berg"
 			and _loopbaar(grond, grot_tegel) and _loopbaar(grond, spawn_tegel)
 			and _afstand(grond, Vector2i(14, 31), grot_tegel) > 0)
 	var kas: Node = kaart.get_node("Exits/NaarKas")
@@ -201,12 +201,19 @@ func _kaart() -> void:
 	check("de grot start niet meer van de kaart", kaart.get_node_or_null("Exits/NaarDiepeGrot") == null
 			and not bezet and grond.get_cell_source_id(oud) == 0
 			and grond.get_cell_atlas_coords(oud) == Vector2i(0, 0))
-	var platform: Node = kaart.get_node("Exits/NaarWorldWarper")
-	check("warper-platform op de kaart", str(platform.event) == "naar_world_warper"
-			and Vector2i((platform.position / 16.0).floor()) == Vector2i(26, 22)
-			and str(platform.target_map).ends_with("exterieur.tscn")
-			and str(platform.target_spawn) == "ingang"
-			and _loopbaar(grond, Vector2i(26, 22)) and _afstand(grond, Vector2i(14, 31), Vector2i(26, 22)) > 0)
+	# Dennis 2026-10-13: de World Warper is geen plek op de kaart. Alleen Warp in het menu.
+	var ww_uitgang := false
+	for uit in kaart.get_node("Exits").get_children():
+		if str(uit.target_map).begins_with("res://world_warper/") or str(uit.name).contains("WorldWarper"):
+			ww_uitgang = true
+	var fly: Node = kaart.get_node_or_null("WorldWarperFlyover")
+	var botsing := false
+	if fly != null:
+		for c in fly.find_children("*", "CollisionObject2D", true, false):
+			botsing = true
+	check("World Warper: geen uitgang of plek op de kaart, alleen een flyover zonder botsing", not ww_uitgang
+			and kaart.get_node_or_null("Objects/WorldWarper") == null and fly != null
+			and str(fly.get_script().resource_path).ends_with("world_warper/art/flyover.gd") and not botsing)
 	kaart.free()
 	GameState.new_game("Dennis")
 	GameState.story_step = SD.NACHT
@@ -215,13 +222,16 @@ func _kaart() -> void:
 	GameState.story_flags[TRAPZAAL_VLAG] = true
 	check("bewaker van verdieping 2 opent de warper niet", not GameState.try_unlock_world_warper()
 			and not GameState.world_warper_is_unlocked())
-	var dicht: Dictionary = Story.pick("naar_world_warper")
-	check("dicht platform wijst terug", dicht.get("do") is Array and str(dicht["do"]).contains("here yet"))
+	check("geen kaart-event naar de World Warper", not SD.EVENTS.has("naar_world_warper"))
 	GameState.story_flags.erase(TRAPZAAL_VLAG)
 	GameState.story_flags[GENEZER_VLAG] = true
 	check("warper-vlag na De Genezer", GameState.try_unlock_world_warper()
-			and GameState.world_warper_is_unlocked()
-			and str(Story.pick("naar_world_warper").get("do", "")) == "default")
+			and GameState.world_warper_is_unlocked())
+	# Enige ingang: de Warp-knop in het menu (field_menu.open_warp) -> hub van Enter.
+	var menu_bron := FileAccess.get_file_as_string("res://scripts/ui/field_menu.gd")
+	check("World Warper alleen via Warp in het menu", menu_bron.contains("func open_warp")
+			and menu_bron.contains("GameState.change_map(hub_scene_path(), spawn)")
+			and not FileAccess.get_file_as_string("res://scripts/map.gd").contains("NaarWorldWarper"))
 	GameState.change_map(BG.WERELD_MAP, "van_dorp")
 	var wereld_ok := await wait_scene("Wereldkaart", 20.0)
 	check("wereldkaart geladen", wereld_ok)
@@ -233,7 +243,23 @@ func _kaart() -> void:
 	await walk("move_up", 1)
 	check("op de oude grottegel blijft de wereldkaart", scene().name == "Wereldkaart" and tile() == oud
 			and not Dialog.is_open and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active())
-	player().place_at(Vector2i(14, 20), Vector2i.UP)
+	var flyover := scene().get_node_or_null("WorldWarperFlyover")
+	if flyover != null:
+		flyover.set("_t", WorldWarperFlyover.PAUZE + WorldWarperFlyover.VLUCHT * 0.4)
+		await pframes(2)
+	check("flyover vliegt over na ontgrendeling (puur beeld)", flyover != null and flyover.sprite.visible)
+	# Grotmond zichtbaar op de kaart: sprite in de bergwand recht boven de ingang (14,19).
+	var mond_sprite := scene().get_node_or_null("Objects/BerggrotIngang") as Sprite2D
+	check("grotmond-sprite boven de berggrot-ingang", mond_sprite != null and mond_sprite.visible
+			and mond_sprite.texture != null and mond_sprite.texture.get_size() == Vector2(16, 16)
+			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i(21, 18)
+			and Vector2i((mond_sprite.position / 16.0).floor()) == Vector2i((kaart_grot_pos() / 16.0).floor()))
+	var noord: Dictionary = BG.ROOMS["berggrot_uitmond"]["exits"]["n"]
+	check("berggrot leidt naar Archief 2 (kas-entree)", str(noord.get("map", "")) == BG.KAS_SCENE
+			and BG.KAS_SCENE.ends_with("archief_2_v1_entree.tscn") and ResourceLoader.exists(BG.KAS_SCENE))
+	player().place_at(Vector2i(21, 19), Vector2i.UP)
+	await pframes(4)
+	await screenshot("wereldkaart_grotmond")
 	await pframes(2)
 	await walk("move_up", 1)
 	var mond_ok := await wait_scene("BerggrotMond", 20.0)
@@ -556,3 +582,8 @@ func screenshot(naam: String) -> void:
 	DirAccess.make_dir_recursive_absolute(shots)
 	img.save_png(shots.path_join(naam + ".png"))
 	print("INFO  screenshot: ", shots.path_join(naam + ".png"), " ", img.get_size())
+
+
+func kaart_grot_pos() -> Vector2:
+	var g := scene().get_node_or_null("Exits/NaarBerggrot") as Node2D
+	return g.position if g != null else Vector2(-1, -1)
