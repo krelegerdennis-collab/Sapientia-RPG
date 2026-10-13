@@ -434,3 +434,9 @@ world_warper/art/knop_wm2.png
 world_warper/art/knop_wm2_ingedrukt.png
 world_warper/art/knop_wm3.png
 world_warper/art/knop_wm3_ingedrukt.png
+art/map_creatures/mosslijm_volg.png
+art/map_creatures/moskonijn_volg.png
+art/map_creatures/mosslijm_speel.png
+art/map_creatures/moskonijn_speel.png
+# v0.21 RPG ART batch 15: glitch-zijpaneel van de wereldkaart-cutscene (131x216, rechts gespiegeld)
+art/cutscene/glitch_panel.png
