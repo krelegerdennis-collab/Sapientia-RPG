@@ -7,7 +7,7 @@ extends Control
 ## roze glitch (title_glitch.gd). Art van RPG ART wordt gebruikt zodra die er is:
 ##   assets/ui/title_bg.png          -> achtergrond 384x216 i.p.v. de bibliotheek;
 ##   assets/ui/title_logo.png        -> logo 208x36 op (88,10) i.p.v. de tekst;
-##   assets/ui/title_ondertitel.png  -> ondertitel op (134,43) i.p.v. de tekst;
+##   assets/ui/title_ondertitel.png  -> ondertitel 130x13 op (127,43) i.p.v. de tekst (v0.20, Engels);
 ##   assets/ui/title_logo_glitch.png -> 6 frames over het logo, 1x per 3-5 s op 14 fps;
 ##   assets/ui/title_kern.png        -> kern van de Golem, 4 frames 24x28 op (188,50), 7 fps.
 ## Ontbreekt een bestand, dan valt alleen dat stuk terug (tekst / bibliotheek / code-glitch).
@@ -35,7 +35,7 @@ const TITLE_SUB := "res://assets/ui/title_ondertitel.png"
 const TITLE_LOGO_GLITCH := "res://assets/ui/title_logo_glitch.png"   # 6 frames van 208x36
 const TITLE_KERN := "res://assets/ui/title_kern.png"                 # 4 frames van 24x28
 const LOGO_POS := Vector2(88, 10)
-const SUB_POS := Vector2(134, 43)
+const SUB_POS := Vector2(127, 43)   # v0.20: Engelse ondertitel 130x13, midden onder het logo (x 192)
 const KERN_POS := Vector2(188, 50)
 const KERN_SIZE := Vector2(24, 28)
 const KERN_FPS := 7.0

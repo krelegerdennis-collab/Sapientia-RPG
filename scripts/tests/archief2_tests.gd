@@ -94,6 +94,8 @@ func _data() -> void:
 	var wurg := BossCore.apply_boss(GD.ENEMIES["wurger"])
 	check("Wurger zwak voor ijs en fysiek", bool(wurg.get("weak_matters", false))
 			and "ijs" in wurg.get("weak", []) and "fysiek" in wurg.get("weak", []))
+	check("Wurger: canon-zin in het bestiarium", str(GD.ENEMIES["wurger"]["desc"]) == "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden.")
+	check("Genezer: canon-zin in het bestiarium", str(GD.ENEMIES["genezer"]["desc"]) == "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg.")
 	check("thema kas en warper", DungeonRooms.THEMES.has("kas") and DungeonRooms.THEMES.has("warper_paars"))
 	var kamers: Dictionary = Rooms.rooms()
 	var breed := true

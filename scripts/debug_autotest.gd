@@ -1354,7 +1354,7 @@ func _title_v13_checks(t: Node) -> void:
 				t.logo != null and t.glitch.content == t.logo and not t.title_label.visible
 				and t.glitch.position == Vector2(88, 10) and t.glitch.size == Vector2(208, 36))
 		if ResourceLoader.exists("res://assets/ui/title_ondertitel.png"):
-			check("ondertitel-art op (134,43) i.p.v. tekst", t.subtitle_art != null and t.subtitle_art.position == Vector2(134, 43)
+			check("ondertitel-art 130x13 op (127,43) i.p.v. tekst, nearest", t.subtitle_art != null and t.subtitle_art.position == Vector2(127, 43) and t.subtitle_art.size == Vector2(130, 13) and t.subtitle_art.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST
 					and not t.subtitle_label.visible)
 		if ResourceLoader.exists("res://assets/ui/title_kern.png"):
 			var seen := {}
@@ -1403,7 +1403,7 @@ func _title_v13_checks(t: Node) -> void:
 			and absf(st.get_center().y - t.size.y / 2.0) <= 1.0)
 	check("menu rechtsonder (x 240..372, y ~150..200): %s" % cr,
 			absf(cr.position.x - 240.0) <= 1.0 and absf(cr.end.x - 372.0) <= 1.0 and cr.end.y <= 201.0 and cr.position.y >= 148.0)
-	check("versielabel v0.19 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.19"
+	check("versielabel v0.20 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.20"
 			and t.version_label.get_global_rect().end.x <= t.size.x and t.version_label.get_global_rect().end.y <= t.size.y)
 	if has_main:
 		return

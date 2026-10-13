@@ -1,21 +1,25 @@
 extends StaticBody2D
-## Geheime kast in de Golemhal (Archief 1). Twee tegels breed en hoog.
+## Geheime kast in de Golemhal (Archief 1). Eén tegel breed, twee hoog (16x32, art_geheimkast_v19).
 ## Dicht = boekenkast. A ervoor = een hint. Gaat alleen open als de veld-vuurbal
 ## (Kernkracht, pas na de Golem) hem raakt: on_kernkracht_hit(). Daarna kronkelt
 ## de unieke Inktwurm eruit, als die nog niet verslagen of gevangen is.
 ## Blijft open (story_flags "inktwurm_kast_open").
 
-const TEX := "res://assets/puzzle/inktwurm_kast.png"
+## v0.20: RPG ART's geheimkast (frame 0 = dicht, 1 = open) + kernscheur-overlay (4 frames, 0.08 s, niet loopen).
+const TEX := "res://assets/puzzle/geheimkast_2hoog.png"
+const SCHEUR_TEX := "res://assets/puzzle/kernscheur.png"
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
-const FRAME_TIME := 0.12
+const FRAME_TIME := 0.08
 const FLAG := "inktwurm_kast_open"
 const INKT_FLAG := "gloeiende_inktfles"
-const LAST := 5
+const LAST := 1          # open
+const SCHEUR_LAST := 3   # laatste overlay-frame
 
 var room: Node = null
 var tile := Vector2i(17, 5)
 var is_open := false
 var sprite: Sprite2D
+var scheur: Sprite2D
 var shape: CollisionShape2D
 var _anim := false
 var _t := 0.0
@@ -29,20 +33,29 @@ func setup(p_room: Node, spec: Dictionary) -> void:
 	name = "InktwurmKast"
 	var t: Array = spec.get("tile", [17, 5])
 	tile = Vector2i(int(t[0]), int(t[1]))
-	# voet = linkeronder-tegel; het plaatje dekt ook de tegel rechts en de rij erboven
+	# voet = de ondertegel; het plaatje dekt ook de tegel erboven
 	position = Vector2(tile) * 16 + Vector2(8, 8)
 	shape = CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
-	rect.size = Vector2(30, 30)
+	rect.size = Vector2(14, 30)
 	shape.shape = rect
-	shape.position = Vector2(8, -8)
+	shape.position = Vector2(0, -8)
 	add_child(shape)
 	sprite = Sprite2D.new()
 	sprite.texture = load(TEX)
-	sprite.hframes = 6
-	sprite.offset = Vector2(8, -8)
+	sprite.hframes = 2
+	sprite.offset = Vector2(0, -8)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(sprite)
+	scheur = Sprite2D.new()
+	scheur.name = "Kernscheur"
+	scheur.texture = load(SCHEUR_TEX)
+	scheur.hframes = 4
+	scheur.offset = sprite.offset
+	scheur.z_index = sprite.z_index + 1
+	scheur.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	scheur.visible = false
+	add_child(scheur)
 	if GameState.story_flags.has(FLAG):
 		_set_open_now()
 	else:
@@ -52,7 +65,7 @@ func setup(p_room: Node, spec: Dictionary) -> void:
 
 
 func covered_tiles() -> Array[Vector2i]:
-	return [tile, tile + Vector2i.RIGHT, tile + Vector2i.UP, tile + Vector2i.RIGHT + Vector2i.UP]
+	return [tile, tile + Vector2i.UP]
 
 
 func on_kernkracht_hit() -> void:
@@ -61,6 +74,8 @@ func on_kernkracht_hit() -> void:
 	_anim = true
 	_t = 0.0
 	sprite.frame = 0
+	scheur.frame = 0
+	scheur.visible = true
 
 
 func interact(_player: Node2D) -> void:
@@ -73,6 +88,7 @@ func _set_open_now() -> void:
 	is_open = true
 	_anim = false
 	sprite.frame = LAST
+	scheur.visible = false
 	shape.disabled = true
 	for b in covered_tiles():
 		if room != null and "_blocked" in room:
@@ -85,10 +101,11 @@ func _process(delta: float) -> void:
 		_t += delta
 		while _t >= FRAME_TIME and _anim:
 			_t -= FRAME_TIME
-			sprite.frame = mini(sprite.frame + 1, LAST)
-			if sprite.frame >= LAST:
+			if scheur.frame >= SCHEUR_LAST:
 				_anim = false
 				_finish()
+			else:
+				scheur.frame += 1
 	if not _say:
 		return
 	var veld: Node = room.get_node_or_null("KernKracht") if room != null else null
