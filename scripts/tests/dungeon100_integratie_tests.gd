@@ -243,7 +243,7 @@ func _data_tests() -> void:
 					details.append("baas sd%d vd%d" % [sd, f])
 			elif not bosses.is_empty():
 				no_boss_other = false
-			if f % 10 == 0:
+			if f % 10 == 0 or str(d.get("layout_type", "")) == "rust":
 				if not room.has("rustpunt") or tile_of(room["rustpunt"]) != d["rest_slot"]:
 					rest_ok = false
 					details.append("rust sd%d vd%d" % [sd, f])
@@ -273,7 +273,7 @@ func _data_tests() -> void:
 					details.append("kist sd%d vd%d %s tier%d" % [sd, f, kind, tier])
 	check("baas op boss_slot (2x2, bewaker, juiste vijand) op de canon-verdiepingen en nergens anders %s" % [details.slice(0, 3)],
 			boss_ok and no_boss_other)
-	check("rustpunt op rest_slot op elke 10e verdieping en nergens anders", rest_ok)
+	check("rustpunt op rest_slot op elke 10e verdieping en op gerolde RUST ROOMs, nergens anders", rest_ok)
 	check("spawn 'rustpunt': vrije bereikbare buurtegel naast het rustpunt (10, 20 ... 100)", spawn_ok)
 	check("elk monster draagt zijn verdieping (schaal via Dungeon100Scaling)", scale_ok)
 	check("elke kist heeft vooraf gerolde buit van de juiste verdieping (schaal, blauw = grade)", chest_ok)

@@ -173,6 +173,8 @@ De modus staat onder Canon & Design Reference. Open blijft:
 
 ### Diepe Grot — nog te bouwen
 
+- [x] Monsterpool: alle gewone bestiarium-monsters, op volgorde Archief 1 > Donker Woud > Bergtunnel > Archief 2 (wens Dennis). `Dungeon100Content.POOLS` met vensters per gebied; stats schalen per verdieping.
+
 De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, kansen en dialoog, onder Canon & Design Reference → Diepe Grot. Werk de specificatie daar als bron; deze lijst is het overzicht van dezelfde open vakjes.
 
 #### Diepe Grot – balans aanpassen
@@ -189,28 +191,28 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 #### Diepe Grot – map generatie (uitgebreid)
 
 ##### Kamer-types + kansen
-- [ ] MEDIUM MAP (35%)
-- [ ] LARGE ROOM (20%)
-- [ ] CHEST ROOM (10%)
+- [x] MEDIUM MAP (35%)
+- [x] LARGE ROOM (20%)
+- [x] CHEST ROOM (10%)
 - [ ] PUZZLE ROOM (5%)
-- [ ] TREASURE ROOM (5%)
-- [ ] EMPTY ROOM (5%)
+- [x] TREASURE ROOM (5%)
+- [x] EMPTY ROOM (5%)
 
 ##### Vaste kamers (geen random)
-- [ ] BOSS ROOM (floors 25/50/75/99)
-- [ ] FLOOR 100 ROOM (vast)
+- [x] BOSS ROOM (floors 25/50/75/99)
+- [x] FLOOR 100 ROOM (vast)
 
 ##### Generator logica
-- [ ] Per verdieping: 1 layout rollen uit bovenstaande tabel
-- [ ] Boss-floors (25/50/75/99) → altijd BOSS ROOM
-- [ ] Floor 100 → altijd FLOOR 100 ROOM
-- [ ] Layout-type onthouden voor save/load
-- [ ] Monsters spawnen passend bij layout-type
-- [ ] Kisten spawnen passend bij layout-type
+- [x] Per verdieping: 1 layout rollen uit bovenstaande tabel
+- [x] Boss-floors (25/50/75/99) → altijd BOSS ROOM
+- [x] Floor 100 → altijd FLOOR 100 ROOM
+- [x] Layout-type onthouden voor save/load
+- [x] Monsters spawnen passend bij layout-type
+- [x] Kisten spawnen passend bij layout-type
 
 ##### Balans-regels
-- [ ] REST ROOM + TREASURE ROOM niet op opeenvolgende verdiepingen
-- [ ] PUZZLE ROOM niet op floor 1-5
+- [x] REST ROOM + TREASURE ROOM niet op opeenvolgende verdiepingen
+- [x] PUZZLE ROOM niet op floor 1-5
 
 #### Systemen – push monster when stunned
 
@@ -882,6 +884,8 @@ De open vakjes van dit blok staan ook als overzicht in de actieve werklijst. De 
 
 Per verdieping: 1 layout rollen uit onderstaande tabel.
 
+In de code: `scripts/data/grot_layouts.gd` (+ `GrotKamers.layout_soort`, generator `layout_type`). Aannames: de tabel telt op tot 91% en wordt genormaliseerd; de Koopman blijft 1x per 10 (vaste regel, niet de 1%-worp); PUZZLE ROOM staat uit tot de puzzels gekozen zijn; Chest Room = 12x12 met vloer 8x7; val/schat/leeg/rust/koopman/baas/100 hebben de Medium-maat. Blauwe-kist-overrides per kamer-type horen bij de loot-taak (RPG CODE); tot dan geldt de bestaande kans per kist.
+
 Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
 
 ### Afmetingen
@@ -895,7 +899,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
 ### Kamer-types + kansen
 
-- [ ] MEDIUM MAP (35%)
+- [x] MEDIUM MAP (35%)
   Definitief. 25×25 tegels. Nieuwe NORM (meest voorkomend). Medium = ½ van Large in elke dimensie.
 
   Kisten:
@@ -911,7 +915,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Floor 81-99: 14-16 monsters
 
   Karakter: normale verdieping, snel te doorlopen.
-- [ ] LARGE ROOM (20%)
+- [x] LARGE ROOM (20%)
   Definitief. 50×50 tegels.
 
   Kisten:
@@ -927,7 +931,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Floor 81-99: 26-30 monsters
 
   Karakter: uitgebreide verkenning, langere sessie.
-- [ ] CHEST ROOM (10%)
+- [x] CHEST ROOM (10%)
   Definitief. 10×10 tegels (compact beloningskamertje).
 
   Kisten:
@@ -941,7 +945,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Dicht op elkaar (risico vs. reward)
 
   Karakter: compact beloningskamertje, hoge risico/dichtheid.
-- [ ] TRAP ROOM (7%)
+- [x] TRAP ROOM (7%)
   - Vallen (pijlen, gaten, spike-platen)
   - Weinig kisten (0-1 normale)
   - Lage monster-spawns
@@ -951,20 +955,20 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Geen of weinig monsters
   - Beloning: 1 blauwe kist bij succes
   - TODO(design): welke puzzels precies?
-- [ ] TREASURE ROOM (5%)
+- [x] TREASURE ROOM (5%)
   - GEEN monsters
   - Alleen kisten (2-3 normale, 1 blauwe kans)
   - Puur beloningskamer
-- [ ] EMPTY ROOM (5%)
+- [x] EMPTY ROOM (5%)
   - Geen kisten, geen monsters
   - Alleen doorgang
   - Soms met lore-item of notitie
   - TODO(design): lore-items of alleen leeg?
-- [ ] REST ROOM (3%)
+- [x] REST ROOM (3%)
   - Heal + save point
   - Geen monsters, geen kisten
   - Veilig moment in de Grot
-- [ ] MERCHANT ROOM (1%)
+- [x] MERCHANT ROOM (1%)
   - Een verdwaalde handelaar in de Grot
   - Verkoopt speciale items (alleen hier te koop)
   - Kan ook items KOPEN van de speler
@@ -981,28 +985,28 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
 ### Vaste kamers (geen random)
 
-- [ ] BOSS ROOM (floors 25/50/75/99)
+- [x] BOSS ROOM (floors 25/50/75/99)
   - Vast, niet random
   - Baas + eventueel wat monsters
-- [ ] FLOOR 100 ROOM (vast)
+- [x] FLOOR 100 ROOM (vast)
   - Warp-kristal + keuzescherm (3 opties)
   - Geen monsters
 
 ### Generator logica
 
-- [ ] Per verdieping: 1 layout rollen uit bovenstaande tabel
-- [ ] Boss-floors (25/50/75/99) → altijd BOSS ROOM
-- [ ] Floor 100 → altijd FLOOR 100 ROOM
-- [ ] Layout-type onthouden voor save/load
-- [ ] Monsters spawnen passend bij layout-type
-- [ ] Kisten spawnen passend bij layout-type
+- [x] Per verdieping: 1 layout rollen uit bovenstaande tabel
+- [x] Boss-floors (25/50/75/99) → altijd BOSS ROOM
+- [x] Floor 100 → altijd FLOOR 100 ROOM
+- [x] Layout-type onthouden voor save/load
+- [x] Monsters spawnen passend bij layout-type
+- [x] Kisten spawnen passend bij layout-type
 
 ### Balans-regels
 
-- [ ] REST ROOM + TREASURE ROOM niet op opeenvolgende verdiepingen
-- [ ] MERCHANT ROOM max 1× per 10 verdiepingen
-- [ ] PUZZLE ROOM niet op floor 1-5
-- [ ] TRAP ROOM niet op floor 1-3
+- [x] REST ROOM + TREASURE ROOM niet op opeenvolgende verdiepingen
+- [x] MERCHANT ROOM max 1× per 10 verdiepingen
+- [x] PUZZLE ROOM niet op floor 1-5
+- [x] TRAP ROOM niet op floor 1-3
 
 ## Systemen – push monster when stunned
 

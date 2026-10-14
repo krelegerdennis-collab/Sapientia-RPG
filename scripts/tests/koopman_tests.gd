@@ -167,9 +167,11 @@ func _data_tests() -> void:
 				regels = false
 			if k == GK.SOORT_KOOPMAN and (f % 10 == 0 or f in [25, 50, 75, 99, 100] or f == 1):
 				regels = false
-			if (f % 10 == 0 and f < 100) != (k == GK.SOORT_RUST):
+			if (f % 10 == 0 and f < 100) and k != GK.SOORT_RUST:
 				regels = false
-	check("val nooit op 1-3; koopman nooit op rust/baas/1/100; rust = elke 10e", regels)
+			if k == GK.SOORT_RUST and f % 10 != 0 and GK.layout_soort(s, f) != "rust":
+				regels = false
+	check("val nooit op 1-3; koopman nooit op rust/baas/1/100; rust = elke 10e + gerolde RUST ROOMs", regels)
 	check("deterministisch per (seed, verdieping)", GK.kamer_soort(SEED, 37) == GK.kamer_soort(SEED, 37))
 	var vals := 0
 	for f in range(4, 100):
