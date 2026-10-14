@@ -1,10 +1,13 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`2782887`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`db7d5ef`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build, bovenop `b605403`:
+Nieuw in deze build, bovenop `2782887`:
+- Willowdale v3: reuzenmolen over de beek (achter de molen langs lopen; stille wieken tot Garretts quest klaar is, daarna draaiend) en een groot burgemeestershuis (#113).
+
+Eerder, bovenop `b605403`:
 - Willowdale (Wilgendal) ~3x groter: hoofdstraat, beek van 1 tegel met brug, marktplein met nieuwe put, max 2 NPC's op het plein (#107).
 - Engelse spelersnamen overal; Spark/Arc en Ember/Glow uniek (#110).
 - Deep Learning Simulation-naam en warp-vlak, Warp-label op Dauwpixel 10 (#105); scenes-kijker hangt niet meer (#109).
