@@ -24,6 +24,8 @@ const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
+const Layouts := preload("res://scripts/data/grot_layouts.gd")
+const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
 
 const MAX_FLOOR := 100
 const SCENE := "res://scenes/maps/dungeon100.tscn"
@@ -38,10 +40,24 @@ const SPAWN_REST := "rustpunt"
 ## Aankomst via een warper, naast het kristal (zelfde naam als Dungeon100Rules.WARPER_SPAWN).
 const SPAWN_WARPER := "warper"
 const NO_TILE := Vector2i(-1, -1)
-## Tegelthema van alle verdiepingen (scripts/data/dungeon_rooms.gd THEMES, RPG ART).
+## Tegelthema (scripts/data/dungeon_rooms.gd THEMES, RPG ART). Basis; per verdieping: theme_for_floor.
 const THEME := "diepe_grot"
+const THEME_INTERVAL := 15
+const THEME_VARIANTS := 7
 
-const MIN_ROOMS := 4
+
+## Tegelvariant 1-7 van een verdieping: 1-15 -> 1, 16-30 -> 2, ... 91-100 -> 7.
+@warning_ignore("integer_division")
+static func theme_variant(floor_no: int) -> int:
+	return mini(maxi(floor_no - 1, 0) / THEME_INTERVAL, THEME_VARIANTS - 1) + 1
+
+
+static func theme_for_floor(floor_no: int) -> String:
+	return "%s_v%d" % [THEME, theme_variant(floor_no)]
+
+const MIN_ROOMS := 1
+## Minimum aantal kamers op een MEDIUM-kaart (25x25).
+const MIN_ROOMS_MEDIUM := 3
 const MAX_ATTEMPTS := 24
 const MIN_SLOT_DISTANCE := 6      # monsters beginnen minstens zoveel tegels (Manhattan) van de ingang
 
@@ -150,11 +166,30 @@ static func reachable_tiles(room: Dictionary, from: Vector2i) -> Dictionary:
 
 
 # ---------------------------------------------------------------- opbouw
+## Layout-type van een verdieping (scripts/data/grot_layouts.gd), met de koopmanregel van GrotKamers.
+static func layout_type(run_seed: int, floor_no: int) -> String:
+	return GrotKamers.layout_soort(run_seed, floor_no)
+
+
+## Kamers per kaartmaat: [aantal min, max, breedte min, max, hoogte min, max, marge, minimum].
+static func _room_plan(size: Vector2i) -> Array:
+	if size.x >= 50:
+		return [10, 16, 6, 12, 5, 9, 3, 8]
+	if size.x <= 12:
+		return [1, 1, 8, 8, 7, 7, 0, 1]
+	return [3, 5, 5, 8, 4, 6, 2, MIN_ROOMS_MEDIUM]
+
+
 static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: bool) -> Dictionary:
-	var w := 40 if fixed else rng.randi_range(36, 44)
-	var h := 26 if fixed else rng.randi_range(24, 30)
-	var rooms: Array[Rect2i] = _fixed_rooms() if fixed else _random_rooms(rng, w, h)
-	if rooms.size() < MIN_ROOMS:
+	var lt := layout_type(run_seed, f)
+	var size := Layouts.maat(lt)
+	var w := size.x
+	var h := size.y
+	var plan := _room_plan(size)
+	if lt == Layouts.KOOPMAN:
+		plan = [3, 4, 8, 9, 6, 6, 2, MIN_ROOMS_MEDIUM]      # ruimte voor de kraam (6x4 vrij, GrotKamers.koopman_plek)
+	var rooms: Array[Rect2i] = _fixed_rooms_for(size) if fixed else _random_rooms(rng, w, h, plan)
+	if rooms.size() < int(plan[7]):
 		return {}
 	var cells := PackedByteArray()
 	cells.resize(w * h)
@@ -185,6 +220,8 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 		if d > best:
 			best = d
 			stairs_room = i
+	if stairs_room < 0 and rooms.size() == 1:
+		stairs_room = entry_room
 	if stairs_room < 0:
 		return {}
 	var sr: Rect2i = rooms[stairs_room]
@@ -221,29 +258,44 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 
 	# obstakels
 	for i in rooms.size():
-		if i == entry_room or i == stairs_room:
+		if i == entry_room or i == stairs_room or lt == Layouts.KOOPMAN:
 			continue
 		_place_blocks(rng, cells, w, rooms[i])
 
-	# monsters, kisten
+	# monsters, kisten: aantallen uit het layout-type (Layouts)
+	var min_dist := Layouts.min_afstand(lt)
+	var want_monsters := Layouts.monsters(run_seed, f, lt)
 	var monster_slots: Array[Vector2i] = []
+	var free_tiles: Array[Vector2i] = []
 	for i in rooms.size():
 		if i == stairs_room and boss_slot != NO_TILE:
 			continue
 		var r: Rect2i = rooms[i]
-		var n := rng.randi_range(1, 2) if r.size.x * r.size.y >= 36 else 1
-		if i == entry_room:
-			n = rng.randi_range(0, 1)
-		for k in n:
-			for tries in 12:
-				var t := Vector2i(rng.randi_range(r.position.x, r.end.x - 1), rng.randi_range(r.position.y, r.end.y - 1))
-				if cells[t.y * w + t.x] != FLOOR or reserved.has(t) or monster_slots.has(t):
-					continue
-				if absi(t.x - spawn_up.x) + absi(t.y - spawn_up.y) < MIN_SLOT_DISTANCE:
-					continue
-				monster_slots.append(t)
+		for y in range(r.position.y, r.end.y):
+			for x in range(r.position.x, r.end.x):
+				var t := Vector2i(x, y)
+				if cells[t.y * w + t.x] == FLOOR and not reserved.has(t) \
+						and absi(t.x - spawn_up.x) + absi(t.y - spawn_up.y) >= min_dist:
+					free_tiles.append(t)
+	for k in free_tiles.size():
+		var j := rng.randi_range(k, free_tiles.size() - 1)
+		var tmp := free_tiles[k]
+		free_tiles[k] = free_tiles[j]
+		free_tiles[j] = tmp
+	for t in free_tiles:
+		if monster_slots.size() >= want_monsters:
+			break
+		var near := false
+		for o in monster_slots:
+			if absi(o.x - t.x) + absi(o.y - t.y) < 2:
+				near = true
 				break
-	var chest_slots: Array[Vector2i] = _place_chests(rng, cells, w, rooms, reserved, monster_slots, spawn_up)
+		if not near:
+			monster_slots.append(t)
+	# Blauwe kisten: blijft de bestaande kans per kist (Dungeon100Blue.kind_for); de overrides per
+	# kamer-type (Chest Room 2 blauw enz.) horen bij de loot-taak van RPG CODE.
+	var want_chests := Layouts.kisten(run_seed, f, lt)
+	var chest_slots: Array[Vector2i] = _place_chests(rng, cells, w, rooms, reserved, monster_slots, spawn_up, want_chests)
 
 	# controle op het logische raster: trap bereikbaar met kisten dicht
 	if has_down and not _distances(cells, w, h, spawn_up).has(stairs):
@@ -261,6 +313,7 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 		"warper_slot": warper_slot, "warper_spawn": warper_spawn,
 		"is_boss_floor": is_boss_floor(f), "is_milestone": f % 10 == 0,
 		"tier": Content.tier_for_floor(f),
+		"layout_type": lt, "min_slot_distance": min_dist,
 	}
 	data["room"] = _room_dict(data)
 	# eindcontrole op de echte tegels
@@ -285,8 +338,8 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		"floor": f, "tier": d["tier"],
 		"layout": d["layout"], "spawns": spawns, "exits": exits,
 		"monsters": [], "chests": [],
-		"dungeon100": true, "dungeon100_floor": f,
-		"theme": THEME,
+		"dungeon100": true, "dungeon100_floor": f, "dungeon100_layout": d["layout_type"],
+		"theme": theme_for_floor(f),
 	}
 	Content.fill_room(room, d)
 	if room.has("rustpunt"):
@@ -406,18 +459,23 @@ static func _center(r: Rect2i) -> Vector2i:
 	return Vector2i(r.position.x + r.size.x / 2, r.position.y + r.size.y / 2)
 
 
-static func _random_rooms(rng: RandomNumberGenerator, w: int, h: int) -> Array[Rect2i]:
-	var want := rng.randi_range(6, 10)
+static func _random_rooms(rng: RandomNumberGenerator, w: int, h: int, plan: Array) -> Array[Rect2i]:
+	var want := rng.randi_range(int(plan[0]), int(plan[1]))
 	var rooms: Array[Rect2i] = []
-	for tries in 120:
+	if want == 1:
+		rooms.append(Rect2i(2, 3, mini(int(plan[2]), w - 4), mini(int(plan[4]), h - 5)))
+		return rooms
+	for tries in 60 * want:
 		if rooms.size() >= want:
 			break
-		var rw := rng.randi_range(5, 10)
-		var rh := rng.randi_range(4, 7)
+		var rw := rng.randi_range(int(plan[2]), int(plan[3]))
+		var rh := rng.randi_range(int(plan[4]), int(plan[5]))
+		if w - 2 - rw < 2 or h - 2 - rh < 3:
+			continue
 		var r := Rect2i(rng.randi_range(2, w - 2 - rw), rng.randi_range(3, h - 2 - rh), rw, rh)
 		var ok := true
 		for o in rooms:
-			if r.grow(3).intersects(o):
+			if r.grow(int(plan[6])).intersects(o):
 				ok = false
 				break
 		if ok:
@@ -426,9 +484,18 @@ static func _random_rooms(rng: RandomNumberGenerator, w: int, h: int) -> Array[R
 	return rooms
 
 
-## Noodindeling (40x26) als willekeurige plaatsing mislukt: 4 vaste kamers.
-static func _fixed_rooms() -> Array[Rect2i]:
-	return [Rect2i(3, 4, 9, 6), Rect2i(3, 15, 9, 7), Rect2i(20, 4, 9, 6), Rect2i(20, 15, 9, 7), Rect2i(31, 9, 6, 8)]
+## Noodindeling per kaartmaat als willekeurige plaatsing mislukt.
+static func _fixed_rooms_for(size: Vector2i) -> Array[Rect2i]:
+	var out: Array[Rect2i] = []
+	if size.x <= 12:
+		out.append(Rect2i(2, 3, 8, 7))
+		return out
+	if size.x >= 50:
+		for gx in 3:
+			for gy in 3:
+				out.append(Rect2i(3 + gx * 16, 4 + gy * 15, 9, 7))
+		return out
+	return [Rect2i(2, 3, 7, 5), Rect2i(15, 3, 7, 5), Rect2i(2, 15, 7, 6), Rect2i(15, 15, 7, 6)]
 
 
 static func _connect(rng: RandomNumberGenerator, cells: PackedByteArray, w: int, h: int, rooms: Array[Rect2i]) -> void:
@@ -573,22 +640,44 @@ static func _place_blocks(rng: RandomNumberGenerator, cells: PackedByteArray, w:
 
 ## Kisten in kamerhoeken; een kist die iets afsluit (trap, kamer of gang erachter) komt er niet.
 static func _place_chests(rng: RandomNumberGenerator, cells: PackedByteArray, w: int, rooms: Array[Rect2i],
-		reserved: Dictionary, monster_slots: Array[Vector2i], spawn_up: Vector2i) -> Array[Vector2i]:
+		reserved: Dictionary, monster_slots: Array[Vector2i], spawn_up: Vector2i, want := 4) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
+	if want <= 0:
+		return out
 	var h := cells.size() / w
+	# kandidaten: eerst de hoeken van elke kamer, dan de randtegels (in willekeurige volgorde)
+	var corners: Array[Vector2i] = []
+	var edges: Array[Vector2i] = []
 	for r in rooms:
-		if out.size() >= 4 or rng.randf() > 0.45:
+		for t in [r.position, Vector2i(r.end.x - 1, r.position.y), Vector2i(r.position.x, r.end.y - 1), Vector2i(r.end.x - 1, r.end.y - 1)]:
+			corners.append(t)
+		for x in range(r.position.x + 1, r.end.x - 1):
+			edges.append(Vector2i(x, r.position.y))
+			edges.append(Vector2i(x, r.end.y - 1))
+		for y in range(r.position.y + 1, r.end.y - 1):
+			edges.append(Vector2i(r.position.x, y))
+			edges.append(Vector2i(r.end.x - 1, y))
+	for arr in [corners, edges]:
+		for k in arr.size():
+			var j := rng.randi_range(k, arr.size() - 1)
+			var tmp: Vector2i = arr[k]
+			arr[k] = arr[j]
+			arr[j] = tmp
+	var cands: Array[Vector2i] = []
+	cands.append_array(corners)
+	cands.append_array(edges)
+	var reach := _distances(cells, w, h, spawn_up).size()
+	for t in cands:
+		if out.size() >= want:
+			break
+		if cells[t.y * w + t.x] != FLOOR or reserved.has(t) or monster_slots.has(t) or t == spawn_up + Vector2i.DOWN:
 			continue
-		var corners: Array[Vector2i] = [r.position, Vector2i(r.end.x - 1, r.position.y),
-				Vector2i(r.position.x, r.end.y - 1), Vector2i(r.end.x - 1, r.end.y - 1)]
-		var t: Vector2i = corners[rng.randi_range(0, 3)]
-		if cells[t.y * w + t.x] != FLOOR or reserved.has(t) or monster_slots.has(t):
-			continue
-		var before := _distances(cells, w, h, spawn_up).size()
 		cells[t.y * w + t.x] = CHEST
-		if _distances(cells, w, h, spawn_up).size() != before - 1:     # de kist mag niets afsluiten
+		var now := _distances(cells, w, h, spawn_up).size()
+		if now != reach - 1:     # de kist mag niets afsluiten
 			cells[t.y * w + t.x] = FLOOR
 			continue
+		reach = now
 		out.append(t)
 	return out
 

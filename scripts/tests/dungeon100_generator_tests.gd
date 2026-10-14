@@ -290,10 +290,11 @@ func _generator_tests() -> void:
 	check("tier_for_floor: 1 t/m 4, nooit omlaag", Content.tier_for_floor(1) == 1 and Content.tier_for_floor(25) == 1
 			and Content.tier_for_floor(26) == 2 and Content.tier_for_floor(100) == 4
 			and range(1, 100).all(func(i): return Content.tier_for_floor(i) <= Content.tier_for_floor(i + 1)))
-	check("vijanden-pool groeit mee met de verdieping", Content.enemy_pool(1).size() < Content.enemy_pool(30).size()
-			and Content.enemy_pool(30).size() < Content.enemy_pool(100).size())
+	check("vijanden-pool groeit mee met de verdieping", Content.enemy_pool(1).size() < Content.enemy_pool(30).size())
+	_pool_tests()
+	_backdrop_tests()
 	check("alle vijanden en voorwerpen in de inhoud bestaan in game_data of de grade-buit",
-			range(1, 101).all(func(i): return Content.enemy_pool(i).all(func(e): return GD.ENEMIES.has(e)))
+			range(1, 101).all(func(i): return Content.enemy_pool(i).all(func(e): return _known_enemy(str(e))))
 			and range(1, 101).all(func(i): return fresh(1, i)["room"]["chests"].all(func(c): return c["loot"]["items"].all(
 					func(e): return _known_item(str(e["item"]))))))
 
@@ -390,7 +391,7 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 	for t in d["monster_slots"]:
 		if not reach.has(t) or seen.has(t):
 			return "monster-slot %s onbereikbaar of dubbel" % [t]
-		if absi(t.x - spawn_up.x) + absi(t.y - spawn_up.y) < Gen.MIN_SLOT_DISTANCE:
+		if absi(t.x - spawn_up.x) + absi(t.y - spawn_up.y) < int(d.get("min_slot_distance", Gen.MIN_SLOT_DISTANCE)):
 			return "monster-slot %s te dicht bij de ingang" % [t]
 		seen[t] = true
 	for t in d["chest_slots"]:
@@ -424,7 +425,7 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 	# kamerdata: monsters/kisten uit de inhoud
 	var ids := {}
 	for m in room["monsters"]:
-		if ids.has(m["id"]) or not GD.ENEMIES.has(m["enemy"]) or not (m["group"] as Array).all(func(e): return GD.ENEMIES.has(e)):
+		if ids.has(m["id"]) or not _known_enemy(str(m["enemy"])) or not (m["group"] as Array).all(func(e): return _known_enemy(str(e))):
 			return "monster %s ongeldig" % [m]
 		ids[m["id"]] = true
 		if not reach.has(tile_of(m["tile"])):
@@ -515,13 +516,20 @@ func _world_dist(g: TileMapLayer, from: Vector2i, to: Vector2i) -> int:
 func _route(r: Node, from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	var prev := {from: from}
 	var todo: Array[Vector2i] = [from]
+	var blocked := {}
+	for c in r.chests:
+		blocked[c.tile()] = true
+	if r.room.has("warper"):
+		blocked[Vector2i(int(r.room["warper"][0]), int(r.room["warper"][1]))] = true
+	if r.room.has("rustpunt"):
+		blocked[Vector2i(int(r.room["rustpunt"][0]), int(r.room["rustpunt"][1]))] = true
 	while not todo.is_empty():
 		var t: Vector2i = todo.pop_front()
 		if t == to:
 			break
 		for d in [U, D, L, R]:
 			var n: Vector2i = t + d
-			if prev.has(n) or r.is_wall(n):
+			if prev.has(n) or r.is_wall(n) or blocked.has(n):
 				continue
 			prev[n] = t
 			todo.append(n)
@@ -652,3 +660,60 @@ func _scene_tests() -> void:
 	check("na laden: Deep Cave verdieping 1, speler op de opgeslagen tegel %s" % tile(),
 			scene().floor_no == 1 and scene().room["layout"] == d["layout"] and tile() == d["spawn_down"])
 	GameState.encounter_multiplier = 1.0
+
+
+func _known_enemy(id: String) -> bool:
+	return GD.ENEMIES.has(id) or preload("res://scripts/data/berggrot_data.gd").has_enemy(id)
+
+
+## Dennis: alle bestiarium-monsters in de pool, op volgorde Archief 1 > Woud > Bergtunnel > Archief 2.
+func _pool_tests() -> void:
+	const BG := preload("res://scripts/data/berggrot_data.gd")
+	var all := Content.all_pool_enemies()
+	var missing: Array = []
+	for id in GD.bestiary_ids():
+		var e: Dictionary = GD.ENEMIES[id]
+		if e.has("boss") or bool(e.get("unique", false)) or id in ["mimic", "echo"]:
+			continue
+		if not all.has(id):
+			missing.append(id)
+	for id in BG.MONSTERS:
+		if not all.has(id):
+			missing.append(id)
+	check("alle gewone bestiarium-monsters (ook de Bergtunnel) zitten in de pool (mist: %s)" % [missing], missing.is_empty())
+	var seen := {}
+	for f in range(1, 101):
+		for e in Content.enemy_pool(f):
+			seen[e] = true
+	check("elk pool-monster komt op minstens één verdieping voor", all.all(func(e): return seen.has(e)))
+	var first := {}
+	for f in range(1, 101):
+		for p in Content.POOLS:
+			if Content.enemy_pool(f).has(p["enemies"][0]) and not first.has(p["gebied"]):
+				first[p["gebied"]] = f
+	var order_ok := true
+	for i in range(1, Content.GEBIEDEN.size()):
+		order_ok = order_ok and int(first.get(Content.GEBIEDEN[i - 1], 999)) < int(first.get(Content.GEBIEDEN[i], 999))
+	check("gebieden in verhaalvolgorde: %s" % [first], order_ok and first.size() == 4)
+	check("vroege gebieden ondiep, late diep: verdieping 1 alleen Archief 1, verdieping 99 geen Archief 1",
+			Content.enemy_pool(1).all(func(e): return e in ["mosslijm", "moskonijn", "papiergeest"])
+			and not Content.enemy_pool(99).has("mosslijm") and Content.enemy_pool(99).has("rankje"))
+	var S := preload("res://scripts/data/dungeon100_scaling.gd")
+	var base := BG.enemy("steenluis")
+	check("stats schalen per verdieping (steenluis 51 < 90)", int(S.monster_stats(base, 51)["max_hp"]) < int(S.monster_stats(base, 90)["max_hp"]))
+	var ok_art := true
+	for e in all:
+		var d: Dictionary = GD.ENEMIES.get(e, BG.enemy(e))
+		ok_art = ok_art and ResourceLoader.exists(str(d.get("sprite", ""))) and ResourceLoader.exists("res://assets/map_monsters/%s.png" % e)
+	check("elk pool-monster heeft gevechts- en kaartart", ok_art)
+
+
+## Gevechtsachtergrond per variant (RPG ART v3): zelfde keuze als de tegels.
+func _backdrop_tests() -> void:
+	var ok := true
+	for f in [1, 15, 16, 45, 46, 90, 91, 100]:
+		var id := GD.backdrop_id_for("dungeon100", false, f)
+		ok = ok and id == "cave_deep_v%d" % Gen.theme_variant(f) and ResourceLoader.exists(GD.backdrop_path(id))
+	check("Diepe Grot: gevechtsachtergrond cave_deep_v1..v7 per verdieping, plaatjes bestaan", ok)
+	check("zonder verdieping of buiten de grot: oude keuze", GD.backdrop_id_for("dungeon100") == "cave_deep"
+			and GD.backdrop_id_for("gras", false, 50) == "grass" and GD.backdrop_id_for("dungeon100", true, 50) == "boss")

@@ -1132,13 +1132,24 @@ const BACKDROPS := {
 	# v0.21: Berggrot en Diepe Grot, 1280x432 (RPG ART batch 13, handwerk)
 	"cave_berg": "res://assets/battle/berggrot.png",
 	"cave_deep": "res://assets/battle/diepe_grot.png",
+	# Diepe Grot per 15 verdiepingen (RPG ART v3, wens Dennis), zelfde keuze als de tegels.
+	"cave_deep_v1": "res://assets/battle/diepe_grot_battle_v1.png",
+	"cave_deep_v2": "res://assets/battle/diepe_grot_battle_v2.png",
+	"cave_deep_v3": "res://assets/battle/diepe_grot_battle_v3.png",
+	"cave_deep_v4": "res://assets/battle/diepe_grot_battle_v4.png",
+	"cave_deep_v5": "res://assets/battle/diepe_grot_battle_v5.png",
+	"cave_deep_v6": "res://assets/battle/diepe_grot_battle_v6.png",
+	"cave_deep_v7": "res://assets/battle/diepe_grot_battle_v7.png",
 	# v0.23: baasgevecht in de kas (De Genezer), 1280x432 (RPG ART art_kas_battle, handwerk)
 	"kas_boss": "res://assets/battle/kas_genezer.png",
 }
 
 
 ## Welke achtergrond bij dit terrein (een baasgevecht krijgt altijd "boss").
-static func backdrop_id_for(terrain: String, boss := false) -> String:
+## Diepe Grot: met een verdieping (> 0) de variant van die verdieping (cave_deep_v1..v7, gewone gevechten).
+static func backdrop_id_for(terrain: String, boss := false, floor_no := 0) -> String:
+	if terrain == "dungeon100" and floor_no > 0 and not boss:
+		return dungeon100_backdrop_id(floor_no)
 	if boss:
 		return str(BOSS_TERRAIN_BACKDROP.get(terrain, "boss"))
 	return str(TERRAIN_BACKDROP.get(terrain, DEFAULT_BACKDROP_ID))
@@ -1151,6 +1162,12 @@ static func backdrop_id_for(terrain: String, boss := false) -> String:
 const BACKDROP_STAGE := {
 	"boss": Vector2(800, 350),
 }
+
+
+## cave_deep_v1..v7: v = min((verdieping-1)/15, 6) + 1 (zoals Dungeon100Generator.theme_variant).
+@warning_ignore("integer_division")
+static func dungeon100_backdrop_id(floor_no: int) -> String:
+	return "cave_deep_v%d" % (mini(maxi(floor_no - 1, 0) / 15, 6) + 1)
 
 
 static func backdrop_path(id: String) -> String:

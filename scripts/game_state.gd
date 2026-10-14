@@ -308,6 +308,7 @@ func _ready() -> void:
 			["--dungeon100regelstest", "res://scripts/tests/dungeon100_tests.gd", "Dungeon100RegelsTest", "dungeon100regelstest"],
 			["--dungeon100integratietest", "res://scripts/tests/dungeon100_integratie_tests.gd", "Dungeon100IntegratieTest", "dungeon100integratietest"],
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
+			["--grotlayouttest", "res://scripts/tests/grot_layout_tests.gd", "GrotLayoutTest", "grotlayouttest"],
 			["--actorsfxtest", "res://scripts/tests/actor_sfx_tests.gd", "ActorSfxTest", "actorsfxtest"],
 			["--catalogustest", "res://scripts/tests/catalogus_tests.gd", "CatalogusTest", "catalogustest"],
 			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],
@@ -1562,7 +1563,7 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 	pending_boss = boss
 	pending_tier = 0 if boss else tier
 	pending_archief = archief and not boss
-	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss)
+	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
 	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
 	has_return_point = true
 	return_map = current_map
