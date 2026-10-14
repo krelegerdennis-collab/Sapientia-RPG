@@ -9,6 +9,7 @@ extends RefCounted
 ##     Act 2 t/m 6 = Archief 2 t/m 6). Thema per Archief uit CANON punt 14
 ##     (Kennis, Leven, Industrie, Magie, Kosmos, Hart).
 ##   - Alleen Act 1 en Act 2 staan in de game. Hun opdrachten zijn bestaande verhaalvlaggen.
+##     'Save Vesper from the Dark Wood' (noor_gered) hoort bij Act 1 (keuze Dennis).
 ##   - Act 3 t/m 6 hebben nog geen inhoud: status 'later' (upcoming), zonder opdrachten.
 ## ECHO zegt per act één zin. De Act 2-zin komt letterlijk uit canon-scène 1.
 ## Ids zijn Nederlands; alle tekst voor de speler is Engels.
@@ -38,8 +39,9 @@ const AKTES := [
 	{
 		"id": "akte_1", "nummer": 1, "archief": "The First Archive", "thema": "Knowledge",
 		"opdrachten": [
-			{"id": "archieven_in", "titel": "Follow the Old Man into the Archives", "stap": StoryData.NACHT},
+			{"id": "archieven_in", "titel": "The Archives of Sapientia", "stap": StoryData.NACHT},
 			{"id": "golem", "titel": "Defeat the Golem", "vlag": StoryData.GOLEM_FLAG},
+			{"id": "vesper", "titel": "Save Vesper from the Dark Wood", "vlag": "noor_gered"},
 		],
 		"echo_klaar": "The first Archive. The Golem has fallen and its core is yours.",
 		"echo_open": "The first Archive. Its guardian still stands.",
@@ -47,7 +49,6 @@ const AKTES := [
 	{
 		"id": "akte_2", "nummer": 2, "archief": "The Second Archive", "thema": "Life",
 		"opdrachten": [
-			{"id": "vesper", "titel": "Save Vesper from the Dark Wood", "vlag": "noor_gered"},
 			{"id": "seren", "titel": "Seren joins the party", "vlag": "archief2_lotte_lid"},
 			{"id": "genezer", "titel": "Defeat the guardian of the second Archive", "vlag": Unlock.BEWAKER_VLAG},
 			{"id": "warper", "titel": "Reach the World Warper", "vlag": Unlock.UNLOCK_VLAG},
