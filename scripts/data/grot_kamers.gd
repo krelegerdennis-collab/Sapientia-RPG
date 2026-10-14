@@ -33,6 +33,8 @@ const VAL_VANAF := 4
 const VAL_ZICHTBAAR_KANS := 0.6
 const VAL_MIN := 3
 const VAL_MAX := 5
+## Verborgen vallen flitsen als de speler binnen zoveel tegels komt (Chebyshev, dus ook schuin).
+const VAL_FLITS_BEREIK := 2
 
 ## Valsoorten: kolommen in rij 0 + schade (fractie van max HP, min/max).
 const VALLEN := {
@@ -246,3 +248,8 @@ static func notitie(run_seed: int, room: Dictionary, d: Dictionary) -> Dictionar
 		return {}
 	var h := _hash(run_seed, floor_no, 17)
 	return {"tile": kandidaten[h % kandidaten.size()], "lines": [NOTITIES[(h / 7) % NOTITIES.size()]]}
+
+
+## Binnen flitsbereik van een verborgen val (besluit Dennis 14 okt 2026)?
+static func in_flits_bereik(val: Vector2i, speler: Vector2i) -> bool:
+	return maxi(absi(val.x - speler.x), absi(val.y - speler.y)) <= VAL_FLITS_BEREIK
