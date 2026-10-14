@@ -7,8 +7,8 @@ const Equipment := preload("res://scripts/equipment.gd")
 const RING_ID := "simulatie_ring"
 const FLAG_RESET := "dungeon100_ring:reset"
 const RESET_LINE := "The Simulation Ring restarts this floor."
-const VRAAG := "Het Warp-kristal breekt open. Kies één beloning."
-const KEUZES: Array[String] = ["Codex-monster ECHO", "Grade 4-wapens", "Simulatie-ring"]
+const VRAAG := "The Warp Crystal breaks open. Choose one reward."
+const KEUZES: Array[String] = ["Codex monster ECHO", "Grade 4 weapons", "Simulation Ring"]
 const IDS: Array[String] = ["codex", "wapens", "ring"]
 const WAPENS: Array[String] = ["bg_g4_superzwaard", "bg_g4_staf_noor", "bg_g4_staf_lotte"]
 

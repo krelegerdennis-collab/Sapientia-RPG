@@ -46,6 +46,7 @@ const REGEL_KOOP := "Good choice. I left this behind myself... long ago."
 const REGEL_VERKOOP := "Everything has value down here. Even things you no longer need."
 const VRAAG := "Care to trade?"
 const KEUZES: Array[String] = ["Trade", "Leave"]
+const ACCESSOIRE_BODEM := 100
 
 
 static func basis_prijs(id: String) -> int:
@@ -141,8 +142,18 @@ static func _geschaald(run_seed: int, bezoek: int, floor_no: int) -> Array:
 		uit.append(_rij(id, maxi(1, roundi(basis_prijs(id) * factor)), "uitrusting", true))
 	var acc := accessoire_voor(run_seed, bezoek, floor_no)
 	if acc != "":
-		uit.append(_rij(acc, maxi(1, roundi(basis_prijs(acc) * factor)), "accessoire", true))
+		uit.append(_rij(acc, roundi(accessoire_prijs(acc, floor_no) * factor), "accessoire", true))
 	return uit
+
+
+## Basisprijs van een accessoire in de winkel. De d100-ringen zijn kistbuit met prijs 0; dan geldt de
+## grade-regel van de grot-uitrusting (grade x grade x 60) met de bladwijzer als bodem (100g).
+static func accessoire_prijs(id: String, floor_no: int) -> int:
+	var p := basis_prijs(id)
+	if p > 0:
+		return p
+	var g := grade_voor(floor_no)
+	return maxi(ACCESSOIRE_BODEM, g * g * 60)
 
 
 static func accessoire_voor(run_seed: int, bezoek: int, floor_no: int) -> String:

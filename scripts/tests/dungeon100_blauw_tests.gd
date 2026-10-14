@@ -128,7 +128,7 @@ func _g4_rol_tests() -> void:
 		var kort := str(it.get("short", naam))
 		if str(it.get("teach", "")) != sid or str(it.get("target", "")) != "ally":
 			rol_ok = false
-		if not naam.begins_with("Rol: ") or not naam.contains(spreuknaam):
+		if not naam.begins_with("Scroll: ") or not naam.contains(spreuknaam):
 			rol_ok = false
 		if kort.length() > 13 or (naam.length() > 13 and not it.has("short")):
 			rol_ok = false
