@@ -56,7 +56,7 @@ func _run() -> void:
 
 
 func _data() -> void:
-	check("grond is 42 bij 28 (v2, ~3x zo groot)", Data.grond_ok() and Data.W == 42 and Data.H == 28)
+	check("grond is 56 bij 30 (v3, westdeel voor de reuzenmolen)", Data.grond_ok() and Data.W == 56 and Data.H == 30)
 	check("max %d sfeer-NPC's op het marktplein (%d)" % [Data.PLEIN_MAX, Data.op_plein_aantal()],
 			Data.op_plein_aantal() <= Data.PLEIN_MAX and Data.op_plein_aantal() >= 1)
 	var beek_ok := true
@@ -123,7 +123,7 @@ func _data() -> void:
 	for doel in [Data.voor_tegel(Data.pand("pantser")), Data.voor_tegel(Data.pand("wapen")),
 			Data.voor_tegel(Data.pand("accessoire")), Data.voor_tegel(Data.pand("magie")),
 			Data.voor_tegel(Data.pand("mien")), Data.voor_tegel(Data.pand("echtpaar")),
-			Data.voor_tegel(Data.pand("dicht_west")), Data.voor_tegel(Data.pand("dicht_oost"))]:
+			Data.voor_tegel(Data.pand("dicht_west")), Data.voor_tegel(Data.pand("burgemeester"))]:
 		check("deur bereikbaar %s" % str(doel), Data.bereikbaar(Data.SPAWN_TEGEL, doel))
 	check("bronnen noemen geen tijdsysteem", _zonder_klok("res://scripts/data/wilgendal_dorp.gd")
 			and _zonder_klok("res://scripts/village/dorp_opbouw.gd")
@@ -187,7 +187,8 @@ func _dorp() -> void:
 			and g.event == "gerrit" and g.get_tile() == Data.GERRIT_TEGEL
 			and str(g.get_meta("rol")) == "gerrit")
 	var molen: Node = dorp.get_node("Objects/MolenWieken")
-	check("molen blijft op zijn plek", molen != null and molen.position == Vector2(24, 24))
+	check("reuzenmolen op zijn plek (linksonder van de basis, y-sort op de onderrand)", molen != null and molen.position == Data.molen_positie()
+			and molen.get_node("Basis").position == Vector2(0, -320) and molen.sprite.z_index == 1)
 	var rollen: Array = []
 	var winkel_op_plein := false
 	for kind in dorp.get_node("Objects").get_children():
@@ -212,7 +213,7 @@ func _dorp() -> void:
 	for id in ["mien", "echtpaar"]:
 		var deur: Node = dorp.get_node("Objects/Deur_%s" % id)
 		check("bewoond huis %s gaat open" % id, deur.target_map == BINNEN and deur.target_spawn == id)
-	for id in ["dicht_west", "dicht_oost"]:
+	for id in ["dicht_west", "burgemeester"]:
 		var deur: Node = dorp.get_node("Objects/Deur_%s" % id)
 		var zin := str(Data.pand(id)["dicht"])
 		check("dichte deur %s" % id, deur.target_map == "" and deur.lines.size() == 1 and deur.lines[0] == zin)
@@ -234,7 +235,57 @@ func _dorp() -> void:
 	check("props in de scène (%d)" % props, props == Data.PROPS.size())
 	check("beek + brug op een eigen laag", dorp.get_node_or_null("Ground/Beek/Brug") != null)
 	await _overzicht(dorp)
+	await _molen(dorp)
 	await _rondlopen(dorp)
+
+
+## v3: reuzenmolen. Stille wieken tot de quest van Gerrit klaar is (zingend_graan_klaar), dan draaiend.
+## Achter (noord van) de molen kun je lopen; alleen de voet botst; de toren tekent over de speler.
+func _molen(dorp: Node) -> void:
+	var molen: Node = dorp.get_node("Objects/MolenWieken")
+	var Wk := preload("res://scripts/village/molen_wieken.gd")
+	var vlag := "zingend_graan_klaar"
+	var had := GameState.story_flags.has(vlag)
+	GameState.story_flags.erase(vlag)
+	molen.story_refresh()
+	check("wieken stil vóór de quest van Garrett", molen.stil() and not molen.draait()
+			and molen.sprite.texture == Wk.wieken_stil() and molen.sprite.hframes == 1)
+	GameState.story_flags[vlag] = true
+	molen.story_refresh()
+	var f0: int = molen.frame_nu()
+	await get_tree().create_timer(0.5).timeout
+	check("na de quest: draaiende wieken (4 frames, 5 fps)", not molen.stil() and molen.draait()
+			and molen.sprite.texture == Wk.wieken_sheet() and molen.sprite.hframes == 4 and molen.frame_nu() != f0)
+	GameState.story_flags.erase(vlag)
+	if had:
+		GameState.story_flags[vlag] = true
+	molen.story_refresh()
+	check("wieken boven de speler (z+1), naaf op (112,112) van de basis", molen.sprite.z_index == 1
+			and molen.sprite.position == Vector2(112, 112 - 320))
+	var o := Data.MOLEN_OORSPRONG
+	var achter_ok := true
+	for x in range(o.x, o.x + Data.MOLEN_MAAT.x):
+		for y in range(o.y + 1, Data.BEEK_RIJ):
+			achter_ok = achter_ok and Data.beloopbaar(Vector2i(x, y))
+	check("molen steekt uit over de beek, achter de molen vrij lopen, alleen de voet botst", achter_ok
+			and Data.BEEK_RIJ > o.y and Data.BEEK_RIJ < o.y + 17
+			and not Data.beloopbaar(o + Vector2i(6, 19)) and not Data.beloopbaar(o + Vector2i(2, 17))
+			and Data.bereikbaar(Data.SPAWN_TEGEL, o + Vector2i(6, 10))
+			and Data.bereikbaar(Data.SPAWN_TEGEL, Data.MOLEN_DEUR[0] + Vector2i.DOWN))
+	var bg := Data.pand("burgemeester")
+	check("burgemeestershuis 7x6, botst alleen op de onderste 3 rijen, dubbele deur op (3,5)", bg.get("tex") == "burgemeester"
+			and Data.pand_blok(bg) == Rect2i(bg["oorsprong"] + Vector2i(0, 3), Vector2i(7, 3))
+			and bg["deur"] == bg["oorsprong"] + Vector2i(3, 5) and Data.beloopbaar(bg["oorsprong"] + Vector2i(3, 1))
+			and Data.bereikbaar(Data.SPAWN_TEGEL, Data.voor_tegel(bg)))
+	var p: Node2D = dorp.get_node("Objects/Player")
+	var oud := p.position
+	p.position = Vector2(o + Vector2i(6, 12)) * 16.0 + Vector2(8, 8)
+	var achter := p.position.y < (molen as Node2D).position.y
+	await get_tree().process_frame
+	p.position = Vector2(Data.MOLEN_DEUR[0] + Vector2i.DOWN) * 16.0 + Vector2(8, 8)
+	check("y-sort: achter de molen verdwijnt de speler, ervoor staat hij voor de molen", achter
+			and p.position.y > (molen as Node2D).position.y)
+	p.position = oud
 
 
 func _rondlopen(dorp: Node) -> void:
