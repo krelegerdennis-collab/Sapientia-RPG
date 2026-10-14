@@ -28,3 +28,4 @@ export_credentials.cfg
 .DS_Store
 Thumbs.db
 *.uid
+__pycache__/

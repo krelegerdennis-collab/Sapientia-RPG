@@ -42,6 +42,8 @@ const DEBUG_PUZZLE_ROOM := "res://scenes/maps/archief_test.tscn"
 
 func _ready() -> void:
 	GameState.enter_map(scene_file_path)
+	# SoM-stijl per gebied (scripts/data/kaart_stijl.gd); in de oude stijl verandert er niets.
+	KaartStijl.toepassen(self)
 	_fit_camera()
 	get_viewport().size_changed.connect(_fit_camera)
 
