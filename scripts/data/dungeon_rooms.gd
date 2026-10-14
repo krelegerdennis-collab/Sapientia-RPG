@@ -123,6 +123,50 @@ const THEMES := {
 		"sprites": {},
 		"solid_extra": [70, 71, 72],
 	},
+	# Diepe Grot-varianten per 15 verdiepingen (Dennis, RPG ART v2): zelfde nummering en botsing.
+	# Keuze: Dungeon100Generator.theme_for_floor (v = min((verdieping-1)/15, 6) + 1).
+	"diepe_grot_v1": {
+		"tiles": "res://assets/tiles/dungeon/diepe_grot_tiles_v1.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"sprites": {},
+		"solid_extra": [70, 71, 72],
+	},
+	"diepe_grot_v2": {
+		"tiles": "res://assets/tiles/dungeon/diepe_grot_tiles_v2.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"sprites": {},
+		"solid_extra": [70, 71, 72],
+	},
+	"diepe_grot_v3": {
+		"tiles": "res://assets/tiles/dungeon/diepe_grot_tiles_v3.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"sprites": {},
+		"solid_extra": [70, 71, 72],
+	},
+	"diepe_grot_v4": {
+		"tiles": "res://assets/tiles/dungeon/diepe_grot_tiles_v4.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"sprites": {},
+		"solid_extra": [70, 71, 72],
+	},
+	"diepe_grot_v5": {
+		"tiles": "res://assets/tiles/dungeon/diepe_grot_tiles_v5.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"sprites": {},
+		"solid_extra": [70, 71, 72],
+	},
+	"diepe_grot_v6": {
+		"tiles": "res://assets/tiles/dungeon/diepe_grot_tiles_v6.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"sprites": {},
+		"solid_extra": [70, 71, 72],
+	},
+	"diepe_grot_v7": {
+		"tiles": "res://assets/tiles/dungeon/diepe_grot_tiles_v7.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"sprites": {},
+		"solid_extra": [70, 71, 72],
+	},
 	# Hub na De Genezer. Zelfde atlas, paarse tint.
 	"warper_paars": {
 		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",

@@ -23,6 +23,7 @@ func check(name: String, ok: bool) -> void:
 
 func _ready() -> void:
 	await get_tree().process_frame
+	_tegelvarianten()
 	_vaste_kamers()
 	_kansen()
 	_balans()
@@ -31,6 +32,22 @@ func _ready() -> void:
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await get_tree().process_frame
 	get_tree().quit(1 if failures else 0)
+
+
+func _tegelvarianten() -> void:
+	const DR := preload("res://scripts/data/dungeon_rooms.gd")
+	var want := {1: 1, 15: 1, 16: 2, 30: 2, 31: 3, 46: 4, 61: 5, 76: 6, 90: 6, 91: 7, 99: 7, 100: 7}
+	var ok := true
+	for f in want:
+		ok = ok and Gen.theme_variant(f) == int(want[f])
+	check("tegelvariant = min((verdieping-1)/15, 6) + 1 (1-15 v1 ... 91-100 v7)", ok)
+	var th_ok := true
+	for i in range(1, 8):
+		var th := "diepe_grot_v%d" % i
+		th_ok = th_ok and DR.THEMES.has(th) and ResourceLoader.exists(str(DR.THEMES[th]["tiles"]))
+	check("zeven thema's diepe_grot_v1..v7 met bestaande atlas", th_ok)
+	check("generator zet het thema per verdieping", str(Gen.generate(4, 20)["room"]["theme"]) == "diepe_grot_v2"
+			and str(Gen.generate(4, 95)["room"]["theme"]) == "diepe_grot_v7")
 
 
 func _vaste_kamers() -> void:
