@@ -821,6 +821,7 @@ func _werkplaats_in_beeld() -> void:
 	await get_tree().process_frame
 	check("Strong Potion gemaakt in het scherm", int(GameState.inventory.get("sterk_drankje", 0)) == 1
 			and int(GameState.inventory.get("drankje", 0)) == 3 and scherm.message_text() == "Crafted: Strong Potion.")
+	await _pframes(30)
 	await _screenshot("werkplaats_crafting")
 	(scherm.content.get_node("Recept_elixer") as Button).pressed.emit()
 	await get_tree().process_frame
@@ -859,10 +860,11 @@ func _handelskamer_in_beeld() -> void:
 		GameState.gold = oud_goud
 		return
 	check("Sell-knop + vijf koopregels", shop.content.get_child_count() == 6
-			and (shop.content.get_child(0) as Button).text == "Sell")
+			and str((shop.content.get_child(0) as Button).get_meta("label")) == "Sell")
 	shop._on_buy("feniksveer", "item")
 	await get_tree().process_frame
 	check("Phoenix Feather gekocht in het scherm", GameState.gold == 300 and int(GameState.inventory.get("feniksveer", 0)) == 1)
+	await _pframes(30)
 	await _screenshot("handelskamer_kopen")
 	shop._show_verkoop()
 	await get_tree().process_frame
@@ -870,6 +872,7 @@ func _handelskamer_in_beeld() -> void:
 	await get_tree().process_frame
 	check("Potion verkocht in het scherm", GameState.gold == 315 and int(GameState.inventory.get("drankje", 0)) == 1
 			and shop.mode == "verkoop")
+	await _pframes(30)
 	await _screenshot("handelskamer_verkopen")
 	shop.close()
 	for _i in 10:

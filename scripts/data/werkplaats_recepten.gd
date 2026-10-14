@@ -59,12 +59,12 @@ static func kan_maken(r: Dictionary, inventory: Dictionary) -> bool:
 	return true
 
 
-## "3x Potion" etc., voor de knop.
+## "Potion 4/3" (heb/nodig), voor de knop.
 static func ingredienten_tekst(r: Dictionary, inventory: Dictionary) -> String:
 	var delen: PackedStringArray = []
 	var ingr: Dictionary = r.get("in", {})
 	for id in ingr:
-		delen.append("%d %s (%d)" % [int(ingr[id]), item_naam(str(id)), int(inventory.get(id, 0))])
+		delen.append("%s %d/%d" % [item_naam(str(id)), int(inventory.get(id, 0)), int(ingr[id])])
 	return ", ".join(delen)
 
 

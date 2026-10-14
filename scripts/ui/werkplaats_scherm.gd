@@ -15,7 +15,7 @@ func _build() -> void:
 func _clear() -> void:
 	for c in content.get_children():
 		content.remove_child(c)
-		c.free()
+		c.queue_free()
 
 
 func toon() -> void:
@@ -28,7 +28,7 @@ func toon() -> void:
 	for r in rows:
 		var rec: Dictionary = r
 		var id := str(rec["id"])
-		var b := UiMenu.button("%s  <- %s" % [Recepten.item_naam(str(rec["uit"])),
+		var b := UiMenu.button("%s: %s" % [Recepten.item_naam(str(rec["uit"])),
 				Recepten.ingredienten_tekst(rec, GameState.inventory)])
 		b.name = "Recept_" + id
 		if not Recepten.kan_maken(rec, GameState.inventory):
