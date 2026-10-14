@@ -114,6 +114,15 @@ const THEMES := {
 		"tint": Color(0.88, 0.92, 1.0),
 		"sprites": {},
 	},
+	# Diepe Grot (Dungeon100): eigen tegels van RPG ART (art_diepegrot): blauwgrijze grotsteen met cyaan
+	# datakristallen en paarse glitch-aders. Nummering = DUNGEON_TILES.txt. Bibliotheeknummers (kasten)
+	# komen uit de berggrot-atlas. Terrein blijft "dungeon100" (Dungeon100Room.terrain_at).
+	"diepe_grot": {
+		"tiles": "res://assets/tiles/dungeon/diepe_grot_tiles.png",
+		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
+		"sprites": {},
+		"solid_extra": [70, 71, 72],
+	},
 	# Hub na De Genezer. Zelfde atlas, paarse tint.
 	"warper_paars": {
 		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",
