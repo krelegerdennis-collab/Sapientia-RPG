@@ -1,10 +1,16 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`01f6ab8`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`3549d6e`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build, bovenop `28d75ce`:
+Nieuw in deze build, bovenop `01f6ab8`:
+- Bouwplaats bij de berggrot met echte art en vier werkers (#80).
+- Diepe Grot: eigen tegels in zeven kleurvarianten (per 15 verdiepingen) en bijpassende gevechtsachtergronden (#81, #83, #85).
+- Diepe Grot: kamer-types per verdieping (Medium 25x25, Large 50x50, kistkamertje, schatkamer, lege kamer, extra rustkamers) (#82).
+- Diepe Grot: alle gewone monsters uit het bestiarium, op volgorde Archief 1 > Woud > Bergtunnel > Archief 2 (#84).
+
+Eerder, bovenop `28d75ce`:
 - Het monster vecht als zijspeler boven de B-knop. In het veldmenu staan nu Magic, Bestiary, Settings, Load en Scenes (cutscenes opnieuw bekijken, ook de drie World Warper-scènes), met gecentreerde knoppen.
 - Archief 2 in de nieuwe kas-stijl: nieuwe tegels en versierde kamers. De Genezer staat op een podium en je kunt pas langs hem na het gevecht.
 - Het baasgevecht in de kas heeft een eigen achtergrond.
