@@ -49,7 +49,7 @@ static func steps() -> Array:
 			"id": "gesloten",
 			"flag": flag_for(2),
 			"lines": [
-				"ECHO's Room is open. The Diepe Grot begins there.",
+				"ECHO's Room is open. The Deep Learning Simulation begins there.",
 				"The story opens the other rooms.",
 			],
 		},

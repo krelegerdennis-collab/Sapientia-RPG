@@ -40,7 +40,7 @@ func _ready() -> void:
 	terug.text = "Back"
 	terug.custom_minimum_size = Vector2(0, 22)
 	terug.add_theme_font_override("font", FONT)
-	terug.add_theme_font_size_override("font_size", 8)
+	terug.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 	terug.pressed.connect(_sluit)
 	kolom.add_child(terug)
 	_vul()
@@ -104,7 +104,7 @@ func _knop(tekst: String, actie: Callable) -> Button:
 	knop.text = tekst
 	knop.custom_minimum_size = Vector2(0, 18)
 	knop.add_theme_font_override("font", FONT)
-	knop.add_theme_font_size_override("font_size", 8)
+	knop.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 	knop.pressed.connect(actie)
 	return knop
 

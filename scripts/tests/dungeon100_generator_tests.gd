@@ -593,7 +593,7 @@ func _scene_tests() -> void:
 	clear_monsters(r)
 	check("speler staat op de ingang (spawn_up %s), kijkt omlaag" % [d["spawn_up"]], tile() == d["spawn_up"] and player().facing == D)
 	check("kamer is dezelfde als de generator: id, naam, layout, monsters en kisten",
-			r.room_id == Gen.room_id(run_seed, 1) and r.map_name == "Deep Cave - Floor 1" and r.room["layout"] == d["layout"]
+			r.room_id == Gen.room_id(run_seed, 1) and r.map_name == "Deep Learning Simulation - Floor 1" and r.room["layout"] == d["layout"]
 			and r.chests.size() == d["chest_slots"].size() and r.cell(d["stairs_down"]) == 58 and r.cell(d["stairs_up"]) == 45
 			and not r.is_wall(d["spawn_up"]) and r.is_wall(d["spawn_up"] + Vector2i(-3, -3)))
 	check("geen random encounters in de grot, terrein = dungeon100 (v0.21: eigen gevechtsachtergrond)", not r.encounters and r.terrain_at(d["spawn_up"]) == "dungeon100")
@@ -609,7 +609,7 @@ func _scene_tests() -> void:
 	var r2 := scene()
 	var d2: Dictionary = Gen.generate(run_seed, 2)
 	check("verdieping 2: nieuwe kamer, speler op de ingang (ladder) van 2: %s" % tile(),
-			r2 != r and r2.floor_no == 2 and r2.map_name == "Deep Cave - Floor 2" and tile() == d2["spawn_up"]
+			r2 != r and r2.floor_no == 2 and r2.map_name == "Deep Learning Simulation - Floor 2" and tile() == d2["spawn_up"]
 			and r2.room["layout"] == d2["layout"] and d2["layout"] != d["layout"])
 	clear_monsters(r2)
 	await screenshot("d100_verdieping2")

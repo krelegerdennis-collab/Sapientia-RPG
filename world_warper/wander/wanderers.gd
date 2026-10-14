@@ -275,7 +275,7 @@ func _label(tekst: String, pos: Vector2, kleur: Color) -> Label:
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.add_theme_font_override("font", FONT)
-	l.add_theme_font_size_override("font_size", 8)
+	l.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 	l.add_theme_color_override("font_color", kleur)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	l.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

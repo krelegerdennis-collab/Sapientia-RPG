@@ -523,7 +523,7 @@ const ENEMIES := {
 		"skills": [],
 		"no": 33, "mp": 0, "weak": [], "resist": [],
 		"drops": [],
-		"desc": "A unique creature from the Diepe Grot. Only as a reward on floor 100.",
+		"desc": "A unique creature from the Deep Learning Simulation. Only as a reward on floor 100.",
 		"habitat": ["dungeon100"],
 	},
 }
@@ -1046,7 +1046,7 @@ const EQUIPMENT := {
 		"desc": "Loot from the depths of the Hundred Floors."},
 	# Verdieping 100, optie C. Geen class, niet in de blauwe-kistpool (die staat in grade_gear.gd).
 	"simulatie_ring": {"name": "Simulation Ring", "short": "Sim. Ring", "slot": "accessoire", "grade": 4, "price": 0,
-		"desc": "+10% to all stats in the Diepe Grot. Once per run, the ring restarts the current floor if the party falls."},
+		"desc": "+10% to all stats in the Deep Learning Simulation. Once per run, the ring restarts the current floor if the party falls."},
 }
 ## Sterkste: hoe zwaar elke stat telt per soort held (VOORLOPIG, eigen voorstel van RPG CODE;
 ## niet in het ontwerp). Score van een stuk = som van bonus x gewicht.

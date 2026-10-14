@@ -1286,7 +1286,7 @@ func _grot_monster_tests() -> void:
 	await frames(6)
 	check("bestiarium 040 Scanline Wolf: plaatje, tekst, stats, 'Deep Cave' (%s)" % bs.name_label.text,
 			bs.name_label.text == "040 Scanline Wolf" and bs.picture.texture != null and bs.stats_visible()
-			and "Deep Cave" in bs.stats_label.text)
+			and "Deep Learning Simulation" in bs.stats_label.text)
 	await screenshot("grot_bestiarium_scanline_wolf")
 	await tap("cancel")
 	await frames(3)
