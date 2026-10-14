@@ -23,7 +23,11 @@ const KIND_NORMAL := "normaal"
 const KIND_BLUE := "blauw"
 const KIND_MIMIC := "mimic"
 
+## Oud: vaste kans per kist. Blijft als constante voor oude code; de kans komt nu per verdieping uit
+## BLUE_FLOOR_CHANCE (CANON, TODO.md "Blue chest kans per floor-bracket"): 0-1 blauwe kist per verdieping.
 const BLUE_CHANCE := 0.05
+## [laatste verdieping van de bracket, kans]. Verdieping 100 heeft geen blauwe kist.
+const BLUE_FLOOR_CHANCE := [[10, 0.05], [20, 0.10], [35, 0.15], [50, 0.20], [65, 0.25], [80, 0.30], [95, 0.40], [99, 0.50]]
 const MIMIC_CHANCE := 0.10
 const MIMIC_GOLD_MULT := 2.0
 const MIMIC_ENEMY := "mimic"
@@ -46,26 +50,124 @@ static func roll(run_seed: int, floor_nr: int, chest_id: String) -> float:
 	return _rng(run_seed, floor_nr, chest_id, "soort").randf()
 
 
+## Kans op één blauwe kist op deze verdieping (normale kamer, floor-bracket-tabel).
+static func blue_floor_chance(floor_nr: int) -> float:
+	for b in BLUE_FLOOR_CHANCE:
+		if floor_nr >= 1 and floor_nr <= int(b[0]):
+			return float(b[1])
+	return 0.0
+
+
+## Welke kisten (index 0..chest_count-1) op deze verdieping blauw zijn. Normale kamer: met kans
+## blue_floor_chance() precies één, anders geen. 'forced' >= 0 = vast aantal (kamer-type-override,
+## bv. Chest Room 2), begrensd op chest_count. Deterministisch per (seed, verdieping).
+static func blue_indices(run_seed: int, floor_nr: int, chest_count: int, forced := -1) -> Array:
+	var out: Array = []
+	if floor_nr <= 0 or chest_count <= 0:
+		return out
+	var rng := _rng(run_seed, floor_nr, "verdieping", "blauwkans")
+	var n := 0
+	if forced >= 0:
+		n = mini(forced, chest_count)
+	elif rng.randf() < blue_floor_chance(floor_nr):
+		n = 1
+	var idx: Array = range(chest_count)
+	for i in n:
+		var k := rng.randi_range(i, chest_count - 1)
+		var tmp = idx[i]
+		idx[i] = idx[k]
+		idx[k] = tmp
+		out.append(int(idx[i]))
+	out.sort()
+	return out
+
+
 ## Soort kist: KIND_NORMAL, KIND_BLUE of KIND_MIMIC. Buiten de kerker (floor_nr <= 0) en bij
-## een baaskist altijd gewoon.
-static func kind_for(run_seed: int, floor_nr: int, chest_id: String, boss := false) -> String:
+## een baaskist altijd gewoon. Blauw alleen als de verdieping die kist aanwees ('blue', zie
+## blue_indices); anders is een kist met kans MIMIC_CHANCE een Mimic.
+static func kind_for(run_seed: int, floor_nr: int, chest_id: String, boss := false, blue := false) -> String:
 	if floor_nr <= 0 or boss:
 		return KIND_NORMAL
-	var r := roll(run_seed, floor_nr, chest_id)
-	if r < BLUE_CHANCE:
+	if blue:
 		return KIND_BLUE
-	if r < BLUE_CHANCE + MIMIC_CHANCE:
+	if roll(run_seed, floor_nr, chest_id) < MIMIC_CHANCE:
 		return KIND_MIMIC
 	return KIND_NORMAL
 
 
-## Permanente buit van een Blauwe Kist: {"tier", "items": [{"item", "n": 1}], "gold": 0, "blue": true}.
+## Verdeling van een Blauwe Kist per grade (CANON, TODO.md "Loot ratio consumables vs. equipment"):
+## [consumables, equipment, accessoires, goud, leeg] in procenten. Index 0 = G1.
+const BLUE_RATIO := [
+	[40, 15, 5, 30, 10],
+	[30, 25, 10, 25, 10],
+	[20, 30, 20, 20, 10],
+	[15, 35, 25, 15, 10],
+]
+const BLUE_KINDS := ["consumable", "equipment", "accessoire", "goud", "leeg"]
+## Blauwe consumables: sterker dan een gewone kist (elixers mogen), aantal schaalt met de grade.
+const BLUE_CONSUMABLES := [["sterk_drankje", "toverwater"], ["sterk_drankje", "toverbrouwsel"],
+		["toverbrouwsel", "elixer"], ["elixer"]]
+const BLUE_CONSUMABLE_COUNT := [[1, 2], [2, 2], [2, 3], [2, 4]]
+## Blauw goud = kistgoud van de verdieping x deze factor.
+const BLUE_GOLD_MULT := 3.0
+
+
+## Soort blauwe buit voor grade g (1-4) bij worp r (0..1).
+static func blue_kind_for_roll(grade: int, r: float) -> String:
+	var row: Array = BLUE_RATIO[clampi(grade, 1, 4) - 1]
+	var acc := 0.0
+	for i in row.size():
+		acc += float(row[i]) / 100.0
+		if r < acc:
+			return BLUE_KINDS[i]
+	return BLUE_KINDS[BLUE_KINDS.size() - 1]
+
+
+## Accessoire uit een Blauwe Kist: grade 4 de G4-accessoires, daaronder de ring-lijn een niveau boven
+## de gewone kisten (Dungeon100Scaling.GEAR "ring").
+static func _accessory(run_seed: int, floor_nr: int, chest_id: String, grade: int) -> String:
+	var rng := _rng(run_seed, floor_nr, chest_id, "accessoire")
+	if grade >= 4:
+		var pool: Array[String] = []
+		for id in GradeGear.ITEMS:
+			if str(GradeGear.ITEMS[id].get("slot", "")) == "accessoire":
+				pool.append(str(id))
+		if not pool.is_empty():
+			return pool[rng.randi_range(0, pool.size() - 1)]
+	var t := mini(Scaling.MAX_TIER, Scaling.tier_for_floor(floor_nr) + 1)
+	return Scaling.gear_id("ring", t)
+
+
+## Buit van een Blauwe Kist: {"tier", "grade", "items": [{"item", "n"}], "gold", "blue": true, "kind"}.
+## Eén deterministische worp kiest de soort uit BLUE_RATIO van de grade van de verdieping.
+## Items zijn permanent (databank); goud gaat bij het run-goud.
 static func blue_loot(run_seed: int, floor_nr: int, chest_id: String) -> Dictionary:
 	var f := Scaling.clamp_floor(floor_nr)
-	var id := GradeGear.pick(run_seed, f, chest_id)
 	var gate := 99 if f >= 100 else f
 	var grade := GradeGear.grade_for_floor(gate)
-	return {"tier": grade, "grade": grade, "items": [{"item": id, "n": 1}], "gold": 0, "blue": true}
+	var kind := blue_kind_for_roll(grade, _rng(run_seed, floor_nr, chest_id, "blauwsoort").randf())
+	var items: Array = []
+	var gold := 0
+	match kind:
+		"consumable":
+			var rng := _rng(run_seed, floor_nr, chest_id, "consumable")
+			var pool: Array = BLUE_CONSUMABLES[grade - 1]
+			var cnt: Array = BLUE_CONSUMABLE_COUNT[grade - 1]
+			items.append({"item": str(pool[rng.randi_range(0, pool.size() - 1)]), "n": rng.randi_range(int(cnt[0]), int(cnt[1]))})
+		"equipment":
+			items.append({"item": GradeGear.pick(run_seed, f, chest_id), "n": 1})
+		"accessoire":
+			items.append({"item": _accessory(run_seed, f, chest_id, grade), "n": 1})
+		"goud":
+			var rng2 := _rng(run_seed, floor_nr, chest_id, "goud")
+			gold = int(round(Scaling.chest_gold_base(f) * BLUE_GOLD_MULT * rng2.randf_range(0.9, 1.1)))
+	return {"tier": grade, "grade": grade, "items": items, "gold": gold, "blue": true, "kind": kind}
+
+
+## Alleen het uitrustingsstuk dat een Blauwe Kist op deze plek zou geven (voor code en tests die
+## altijd een stuk nodig hebben, zoals de oude één-stuk-regel).
+static func blue_gear(run_seed: int, floor_nr: int, chest_id: String) -> String:
+	return GradeGear.pick(run_seed, Scaling.clamp_floor(floor_nr), chest_id)
 
 
 ## Is dit een uitrustingsstuk dat een Blauwe Kist kan geven? (voor de tests en de opslag-opschoning)
@@ -91,16 +193,17 @@ static func mimic_loot(loot: Dictionary) -> Dictionary:
 
 ## Het Kistdata-record (zoals Dungeon100Scaling.chest_entry) met "kind", en voor een Blauwe Kist de
 ## permanente buit (en voor een Mimic de extra goud) al ingevuld. 'boss' = baaskist: altijd gewoon.
-static func chest_entry(run_seed: int, floor_nr: int, id: String, tile: Vector2i, rng, boss := false) -> Dictionary:
+static func chest_entry(run_seed: int, floor_nr: int, id: String, tile: Vector2i, rng, boss := false, blue := false) -> Dictionary:
 	var e := Scaling.chest_entry(floor_nr, id, tile, rng, boss)
-	var kind := kind_for(run_seed, floor_nr, id, boss)
+	var kind := kind_for(run_seed, floor_nr, id, boss, blue)
 	e["kind"] = kind
 	match kind:
 		KIND_BLUE:
 			var loot := blue_loot(run_seed, floor_nr, id)
 			e["loot"] = loot
-			e["item"] = loot["items"][0]["item"]
-			e["n"] = 1
+			if not (loot["items"] as Array).is_empty():
+				e["item"] = loot["items"][0]["item"]
+				e["n"] = int(loot["items"][0]["n"])
 		KIND_MIMIC:
 			e["loot"] = mimic_loot(e["loot"])
 	return e

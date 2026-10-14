@@ -180,13 +180,13 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 #### Diepe Grot – balans aanpassen
 
 ##### Loot table
-- [ ] Consumables in loot table verminderen
-  - [ ] Te veel consumables maakt de Grot te makkelijk
-  - [ ] Meer equipment/accessoires, minder potions/MP-items
-  - [ ] TODO(design): exacte ratio bepalen
-- [ ] Blue chest frequentie early game verlagen
-  - [ ] Te veel blue chests op floor 1-20
-  - [ ] TODO(design): exacte kans per floor-bracket
+- [x] Consumables in loot table verminderen
+  - [x] Te veel consumables maakt de Grot te makkelijk
+  - [x] Meer equipment/accessoires, minder potions/MP-items
+  - [x] TODO(design): exacte ratio bepalen
+- [x] Blue chest frequentie early game verlagen
+  - [x] Te veel blue chests op floor 1-20
+  - [x] TODO(design): exacte kans per floor-bracket
 
 #### Diepe Grot – map generatie (uitgebreid)
 
@@ -255,8 +255,8 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [ ] RUN werkt in REST ROOM, MERCHANT ROOM, etc.
 
 #### TODO(design) markers
-- [ ] Loot ratio consumables vs. equipment
-- [ ] Blue chest kans per floor-bracket
+- [x] Loot ratio consumables vs. equipment
+- [x] Blue chest kans per floor-bracket
 - [ ] Medium Map: exacte kisten + monsters
 - [ ] Trap Room: zichtbaar of verborgen vallen?
 - [ ] Puzzle Room: welke puzzels?
@@ -870,13 +870,13 @@ De open vakjes van dit blok staan ook als overzicht in de actieve werklijst. De 
 
 ### Loot table
 
-- [ ] Consumables in loot table verminderen
-  - [ ] Te veel consumables maakt de Grot te makkelijk
-  - [ ] Meer equipment/accessoires, minder potions/MP-items
-  - [ ] TODO(design): exacte ratio bepalen
-- [ ] Blue chest frequentie early game verlagen
-  - [ ] Te veel blue chests op floor 1-20
-  - [ ] TODO(design): exacte kans per floor-bracket
+- [x] Consumables in loot table verminderen
+  - [x] Te veel consumables maakt de Grot te makkelijk
+  - [x] Meer equipment/accessoires, minder potions/MP-items
+  - [x] TODO(design): exacte ratio bepalen
+- [x] Blue chest frequentie early game verlagen
+  - [x] Te veel blue chests op floor 1-20
+  - [x] TODO(design): exacte kans per floor-bracket
 
 ## Diepe Grot – map generatie (uitgebreid)
 
@@ -1063,8 +1063,8 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
 **CANON – niet wijzigen zonder overleg.**
 
-- [ ] Loot ratio consumables vs. equipment
-  Definitief. De checkbox blijft open tot de loot table in de code deze verdeling gebruikt.
+- [x] Loot ratio consumables vs. equipment
+  Definitief. In de code: `Dungeon100Scaling.CHEST_RATIO` (gewone kist, geen elixers) en `Dungeon100Blue.BLUE_RATIO` (per grade). Blauwe consumables en goud zijn run-buit; alleen uitrusting, accessoires en rollen gaan de databank in.
 
   **CANON – niet wijzigen zonder overleg.**
 
@@ -1090,8 +1090,8 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Speler krijgt significant minder consumables per run.
   - Equipment/accessoires worden de hoofdbeloning.
   - Goud wordt nuttig (voor merchant in Grot + verkopen).
-- [ ] Blue chest kans per floor-bracket
-  Definitief. De checkbox blijft open tot de blue-chest-kans in de code deze tabel gebruikt.
+- [x] Blue chest kans per floor-bracket
+  Definitief. In de code: `Dungeon100Blue.BLUE_FLOOR_CHANCE` + `blue_indices()` (0-1 blauwe kist per verdieping). De overrides per kamer-type gaan via `data["blue_forced"]` en komen met de kamer-types.
 
   **CANON – niet wijzigen zonder overleg.**
 

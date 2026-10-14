@@ -88,9 +88,12 @@ static func chests(data: Dictionary) -> Array:
 	rng.seed = int(data["floor_seed"]) + 202
 	var out: Array = []
 	var i := 0
-	for t in data["chest_slots"]:
+	var slots: Array = data["chest_slots"]
+	var blue: Array = Blue.blue_indices(int(data["run_seed"]), f, slots.size(), int(data.get("blue_forced", -1)))
+	for t in slots:
 		i += 1
-		out.append(Blue.chest_entry(int(data["run_seed"]), f, "d100_%d_%d_%d" % [int(data["run_seed"]), f, i], t, rng))
+		out.append(Blue.chest_entry(int(data["run_seed"]), f, "d100_%d_%d_%d" % [int(data["run_seed"]), f, i], t, rng,
+				false, blue.has(i - 1)))
 	return out
 
 
