@@ -121,6 +121,7 @@ func open_winkel(player: Node2D) -> Node:
 	shop.name = "ShopScreen"
 	shop.run_seed = GameState.dungeon100_seed
 	shop.bezoek = maxi(1, GameState.koopman_bezoeken)
+	shop.verdieping = maxi(1, GameState.dungeon100_floor)
 	shop.closed.connect(func() -> void:
 		if is_instance_valid(player) and "input_locked" in player:
 			player.input_locked = false)

@@ -242,6 +242,28 @@ func _gear_tier(id: String) -> int:
 	return 0
 
 
+## CANON-verdeling gewone kisten: Consumables 60% (1-2) / Goud 20% / Equipment 15% / Leeg 5%.
+func _ratio_tests() -> void:
+	var tel := {}
+	var n := 4000
+	var count_ok := true
+	for i in n:
+		var l := S.chest_loot(1 + i % 99, _rng(123000 + i))
+		var k := str(l["kind"])
+		tel[k] = int(tel.get(k, 0)) + 1
+		if k == S.LOOT_CONSUMABLE:
+			var c: int = int(l["items"][0]["n"])
+			count_ok = count_ok and c >= 1 and c <= 2
+	var want := {S.LOOT_CONSUMABLE: 0.60, S.LOOT_GOLD: 0.20, S.LOOT_EQUIPMENT: 0.15, S.LOOT_EMPTY: 0.05}
+	var ok := true
+	for k in want:
+		var p := float(tel.get(k, 0)) / float(n)
+		ok = ok and absf(p - float(want[k])) < 0.025
+	check("gewone kisten: 60/20/15/5 (consumable %d, goud %d, uitrusting %d, leeg %d van %d)" % [
+			int(tel.get(S.LOOT_CONSUMABLE, 0)), int(tel.get(S.LOOT_GOLD, 0)), int(tel.get(S.LOOT_EQUIPMENT, 0)), int(tel.get(S.LOOT_EMPTY, 0)), n], ok)
+	check("consumables in een gewone kist: 1-2 stuks", count_ok)
+
+
 func _loot_tests() -> void:
 	check("buit op verdieping 0 = leeg", S.chest_loot(0, _rng(1))["items"].is_empty() and S.chest_loot(0, _rng(1))["gold"] == 0
 			and S.boss_loot(0, _rng(1))["items"].is_empty())
@@ -250,9 +272,16 @@ func _loot_tests() -> void:
 	for f in range(1, 101):
 		for sd in 20:
 			var l := S.chest_loot(f, _rng(f * 1000 + sd))
-			ids_ok = ids_ok and _all_ids_exist(l) and int(l["gold"]) > 0
-			min_one = min_one and l["items"].size() >= 1
-	check("kistbuit: alle ids bestaan in ITEMS/EQUIPMENT, altijd >= 1 voorwerp en goud (verdieping 1-100)", ids_ok and min_one)
+			ids_ok = ids_ok and _all_ids_exist(l)
+			match str(l["kind"]):
+				S.LOOT_GOLD:
+					min_one = min_one and int(l["gold"]) > 0 and l["items"].is_empty()
+				S.LOOT_EMPTY:
+					min_one = min_one and int(l["gold"]) == 0 and l["items"].is_empty()
+				_:
+					min_one = min_one and l["items"].size() >= 1 and int(l["gold"]) == 0
+	check("kistbuit: alle ids bestaan, elke soort klopt (goud alleen bij goud, leeg is leeg; verdieping 1-100)", ids_ok and min_one)
+	_ratio_tests()
 	var gear_ok := true
 	for kind in S.GEAR:
 		for t in range(1, 6):
@@ -320,7 +349,8 @@ func _loot_tests() -> void:
 	for sd in 100:
 		for it in S.chest_loot(90, _rng(sd))["items"]:
 			potions_hi[it["item"]] = true
-	check("diepe kisten bevatten sterke genees-items (elixer op 90)", potions_hi.has("elixer"))
+	check("gewone kisten bevatten nooit een elixer (alleen blauw of handelaar), wel sterke items op 90",
+			not potions_hi.has("elixer") and potions_hi.has("toverbrouwsel"))
 	var potions_lo := {}
 	for sd in 100:
 		for it in S.chest_loot(3, _rng(sd))["items"]:
@@ -433,7 +463,9 @@ func _chest_tests() -> void:
 		var had := int(inv_before.get(it["item"], 0))
 		got_all = got_all and GameState.item_count(it["item"]) == had + int(it["n"])
 	check("kist openen: alle buit in de tas en goud erbij (+%d)" % int(fx.loot["gold"]), got_all and GameState.gold == expected_gold and fx.is_open())
-	check("melding noemt de buit (Nederlands)", Dialog.is_open and "finds" in str(Dialog._lines[-1]) and "gold" in str(Dialog._lines[-1]))
+	var last_line := str(Dialog._lines[-1])
+	check("melding noemt de buit (of dat de kist leeg is)", Dialog.is_open and (("finds" in last_line
+			and (int(fx.loot["gold"]) == 0 or "gold" in last_line)) or (S.loot_text(fx.loot) == "" and "empty" in last_line)))
 	Dialog.close()
 	await get_tree().process_frame
 	var g_after := GameState.gold

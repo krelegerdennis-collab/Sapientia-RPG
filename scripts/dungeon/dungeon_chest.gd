@@ -141,13 +141,22 @@ func _give_loot(intro: Array) -> void:
 		sprite.frame = 1
 		last_result = "gekregen"
 		var lines := intro.duplicate()
+		var txt := Dungeon100Scaling.loot_text(loot)
 		if kind == Blue.KIND_BLUE:
-			_secure_blue()
+			var kept := _secure_blue()
 			last_result = "blauw"
 			lines.append("A Blue Chest! A databank of the Old Humanity.")
-			lines.append("{naam} finds: %s! This stays, even if you are thrown out of the Archive." % Dungeon100Scaling.loot_text(loot))
+			if txt == "":
+				lines.append("The databank is empty. Its data was wiped long ago.")
+			elif kept:
+				lines.append("{naam} finds: %s! This stays, even if you are thrown out of the Archive." % txt)
+			else:
+				lines.append("{naam} finds: %s!" % txt)
+		elif txt == "":
+			last_result = "leeg_gerold"
+			lines.append("The chest is empty...")
 		else:
-			lines.append("{naam} finds: %s!" % Dungeon100Scaling.loot_text(loot))
+			lines.append("{naam} finds: %s!" % txt)
 		Dialog.show_lines(lines)
 		if kind == Blue.KIND_BLUE:
 			await Dialog.finished
@@ -162,8 +171,15 @@ func _give_loot(intro: Array) -> void:
 	Dialog.show_lines(lines2)
 
 
-## Blauwe buit ook in de permanente databank (GameState.dungeon100_permanent).
-func _secure_blue() -> void:
+## Blauwe buit ook in de permanente databank (GameState.dungeon100_permanent). Alleen uitrusting,
+## accessoires en rollen (Blue.is_blue_item); consumables en goud blijven run-buit.
+## Geeft true als er iets permanent is geworden.
+func _secure_blue() -> bool:
+	var kept := false
 	for it in loot.get("items", []):
 		var id := str(it["item"])
+		if not Blue.is_blue_item(id):
+			continue
+		kept = true
 		GameState.dungeon100_permanent[id] = int(GameState.dungeon100_permanent.get(id, 0)) + int(it.get("n", 1))
+	return kept

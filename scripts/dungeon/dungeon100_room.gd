@@ -17,6 +17,7 @@ const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const WarperC := preload("res://scripts/dungeon/dungeon100_warper.gd")
 const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
 const KoopmanC := preload("res://scripts/dungeon/dungeon100_koopman.gd")
+const KoopmanData := preload("res://scripts/data/koopman_data.gd")
 const ValC := preload("res://scripts/dungeon/dungeon100_val.gd")
 const PuzzelC := preload("res://scripts/dungeon/dungeon100_puzzel.gd")
 const VAL_TEKST := {"spijker": "Spikes shoot up from the floor!", "rune": "A rune flares beneath your feet!"}
@@ -79,6 +80,8 @@ var vallen: Dictionary = {}     # Vector2i -> Dungeon100Val
 ## Rustkamer: het rustpunt zelf toont het kampvuur (dungeon100_rustpunt.gd).
 func _place_grot_kamer() -> void:
 	kamer_soort = GrotKamers.kamer_soort(GameState.dungeon100_seed, floor_no)
+	if kamer_soort == GrotKamers.SOORT_KOOPMAN and KoopmanData.verdwenen(GameState.story_flags):
+		return     # H-5 is weg na de nederlaag van Sapientia (KoopmanData.einde): lege kamer
 	if kamer_soort == GrotKamers.SOORT_KOOPMAN:
 		var plek := GrotKamers.koopman_plek(room, floor_data)
 		if plek.is_empty():
@@ -126,6 +129,10 @@ func _koopman_sleutel() -> String:
 
 
 func _on_val_stap(t: Vector2i) -> void:
+	for vt in vallen:
+		var vv = vallen[vt]
+		if is_instance_valid(vv):
+			vv.speler_bij(t)
 	var v = vallen.get(t)
 	if v == null or not is_instance_valid(v) or v.afgegaan:
 		return

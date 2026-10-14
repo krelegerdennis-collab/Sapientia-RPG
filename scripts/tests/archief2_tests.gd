@@ -420,9 +420,22 @@ func _spel() -> void:
 	check("leech healt hetzelfde aantal (%s)" % [leech], n > 0 and int(leech.get("heal", -2)) == n
 			and int(leech.get("bij", -2)) == n and doel_max > 0
 			and float(n) / float(doel_max) >= 0.07 and float(n) / float(doel_max) <= 0.13)
-	if b != null and not b.enemies.is_empty():
-		b.enemies[0]["s"]["hp"] = 1
-	await _ronde(b, AANVAL)
+	# De Genezer kan vóór de held aan de beurt zijn en zich met leech boven 1 HP healen, of de slag
+	# mist: dan is één ronde niet genoeg. Elke ronde opnieuw op 1 HP zetten tot het gevecht voorbij is.
+	for _r in 6:
+		if b == null or not is_instance_valid(b) or _scène() == null or _scène().name != "Battle":
+			break
+		if _r > 0 and str(b.get("state")) != "command":
+			break     # overwinning loopt al (of geen nieuwe beurt): de taps hieronder ronden af
+		if not b.enemies.is_empty():
+			b.enemies[0]["s"]["hp"] = 1
+		await _ronde(b, AANVAL)
+		for _i in 12:
+			if _scène() == null or _scène().name != "Battle":
+				break
+			if is_instance_valid(b) and str(b.get("state")) == "command":
+				break
+			await _tik("interact")
 	for _i in 12:
 		if _scène() == null or _scène().name != "Battle":
 			break
