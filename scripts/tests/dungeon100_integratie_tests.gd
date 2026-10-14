@@ -18,6 +18,7 @@ const GK := preload("res://scripts/data/grot_kamers.gd")
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const GrotPuzzels := preload("res://scripts/data/grot_puzzels.gd")
+const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const TOWN := "res://scenes/maps/wilgendal.tscn"
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
@@ -613,12 +614,22 @@ func _push_koppel_tests() -> void:
 			continue
 		var pz_id := str(Gen.generate(KOPPEL_SEED, f)["room"].get("puzzel", {}).get("id", ""))
 		var objs: Dictionary = GrotPuzzels.puzzel(pz_id).get("objects", {})
-		if objs.values().any(func(o): return str(o.get("type", "")) == "plate"):
+		if pz_id == "kast_plaat":
 			pf = f
 			break
 	check("puzzelkamer gevonden (verdieping %d)" % pf, pf > 0)
 	if pf <= 0:
 		return
+	var aantal_ok := true
+	for sd in [777, 5, 99]:
+		for f in range(6, 99):
+			if GK.layout_soort(sd, f) != "puzzel":
+				continue
+			var rm: Dictionary = Gen.generate(sd, f)["room"]
+			var pid2 := str(rm.get("puzzel", {}).get("id", ""))
+			var heeft_plaat := not GrotPuzzels.duw_plan(pid2).is_empty()
+			aantal_ok = aantal_ok and (rm["monsters"] as Array).size() == (1 if heeft_plaat else 0)
+	check("generator: puzzelkamer met plaat = 1 monster, zonder plaat = 0", aantal_ok)
 	var r2 := await _koppel_start(pf)
 	var pz: Node = r2.get("puzzel") if r2 != null else null
 	check("puzzel geplaatst", pz != null and is_instance_valid(pz))
@@ -633,29 +644,30 @@ func _push_koppel_tests() -> void:
 			nis_ok = str(c.get("id", "")).ends_with("_puzzel")
 	check("Puzzle Room: precies 1 blauwe kist, de nis-kist (beloning bij succes)", blauw == 1 and nis_ok and not pz.opgelost())
 	var logic = pz.logic
-	var plan2 := {}
-	for pid in logic.plates:
-		var pt: Vector2i = logic.plates[pid]["tile"]
-		for d in [R, L, D, U]:
-			var a: Vector2i = pt - d
-			var p: Vector2i = pt - 2 * d
-			if _mfree(r2, a) and _mfree(r2, p) and not logic.is_solid(a) and not logic.is_solid(p) \
-					and logic.object_at(a) == "" and logic.object_at(p) == "":
-				plan2 = {"plaat": pid, "dir": d, "m": a, "p": p}
-				break
-		if not plan2.is_empty():
-			break
-	check("opstelling: speler - monster - drukplaat op een rij", not plan2.is_empty())
-	if plan2.is_empty():
+	# besluit Dennis: plaatpuzzel = precies 1 monster, passend bij de verdieping, naast de plaat
+	var levend: Array = r2.monsters.filter(func(o): return is_instance_valid(o))
+	var duw: Dictionary = r2.room.get("puzzel_duw", {})
+	check("plaatpuzzel: precies 1 monster in de kamer (%d)" % levend.size(), levend.size() == 1 and not duw.is_empty())
+	if levend.size() != 1 or duw.is_empty():
 		return
+	var m2: Node = levend[0]
+	var pool: Array = Content.enemy_pool(pf)
+	check("monster past bij de verdieping (%s in de pool van %d), staat stil" % [m2.get("enemy_id") if "enemy_id" in m2 else "?", pf],
+			not m2.moves and pool.has(str(r2.room["monsters"][0]["enemy"])))
+	var mt := Vector2i(int(duw["monster"][0]), int(duw["monster"][1]))
+	var dir2 := Vector2i(int(duw["dir"][0]), int(duw["dir"][1]))
+	var plan2 := {"plaat": str(duw["plaat"]), "dir": dir2, "m": mt,
+			"p": Vector2i(int(duw["speler"][0]), int(duw["speler"][1]))}
+	check("monster staat naast de plaat, speler kan erachter (oplosbaar)", m2.tile == mt
+			and logic.plates[plan2["plaat"]]["tile"] == mt + dir2 and not logic.is_solid(plan2["p"]))
 	await get_tree().create_timer(0.6).timeout     # ECHO-hint komt iets na binnenkomst
 	while Dialog.is_open:
 		Dialog.advance()
 		await pframes(4)
 	var pl2 := player()
 	pl2.place_at(plan2["p"], plan2["dir"])
-	var m2 := _spawn_monster(r2, plan2["m"])
 	await pframes(6)
+	await screenshot("puzzel_monster_klaar")
 	check("monster naast de plaat drukt hem nog niet in", not logic.plate_pressed(plan2["plaat"]))
 	m2.stun(10)
 	check("verlamd monster op de plaat geduwd", r2.push_monster(m2, plan2["dir"]))
@@ -666,7 +678,7 @@ func _push_koppel_tests() -> void:
 	await pframes(20)
 	await screenshot("puzzel_monster_op_plaat")
 	var ids: Array = logic.plates.keys()
-	check("puzzel met 1 plaat: poort/nis open door het monster (%s)" % [ids], solved or ids.size() > 1)
+	check("puzzel met 1 plaat: poort/nis open door het monster (%s)" % [ids], solved and ids.size() == 1)
 	# een geduwd monster gaat niet door kasten/poorten van de puzzel
 	var solid_t := Vector2i(-1, -1)
 	for t in logic.statics:
