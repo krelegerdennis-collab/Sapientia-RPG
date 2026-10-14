@@ -746,7 +746,11 @@ func _blocked_open_tests() -> void:
 
 func _autosave_tests() -> void:
 	var manual_before := file_text(GameState.save_path)
-	# 1) mapwissel -> autosave op de nieuwe map
+	# 1) mapwissel -> autosave op de nieuwe map. Save-slots: alleen bij kerker <-> wereldkaart,
+	# dus dorp -> wereldkaart niet; hier doen we alsof je uit een kerker komt.
+	check("save-slots: dorp -> wereldkaart is geen autosave-overgang",
+			not GameState.is_dungeon_transition(GameState.current_map, WORLD))
+	GameState.current_map = "res://scenes/maps/woud_rand.tscn"
 	GameState.change_map(WORLD, "van_dorp")
 	await frames(2)
 	check("tijdens de mapwissel: geen autosave mogelijk", not GameState.autosave(Vector2i.ZERO, Vector2i.DOWN, "test"))

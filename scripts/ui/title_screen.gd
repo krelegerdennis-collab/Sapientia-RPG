@@ -25,6 +25,7 @@ extends Control
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const SaveSlotList := preload("res://scripts/ui/save_slot_list.gd")
+const SavePrompt := preload("res://scripts/ui/save_prompt.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const TitleGlitch := preload("res://scripts/ui/title_glitch.gd")
 const BACKDROP := "res://assets/battle/bibliotheek.png"
@@ -361,7 +362,41 @@ func _on_slot_cancelled() -> void:
 		list.queue_free()
 
 
+## Nieuw spel: eerst een slot kiezen (1..4). Een gevuld slot vraagt om bevestiging
+## ('No' heeft de focus), daarna de naamkeuze; het spel slaat handmatig op in dat slot.
 func _on_new() -> void:
+	if get_node_or_null("SaveSlotList") != null:
+		return
+	var list := SaveSlotList.new()
+	list.mode = "new"
+	list.picked.connect(_on_new_slot_picked)
+	list.cancelled.connect(_on_slot_cancelled)
+	add_child(list)
+
+
+var new_slot_prompt: CanvasLayer = null
+
+
+func _on_new_slot_picked(slot: int) -> void:
+	if new_slot_prompt != null:
+		return
+	var rec := GameState.slot_record(slot)
+	if rec.is_empty():
+		_start_new_in(slot)
+		return
+	new_slot_prompt = SavePrompt.new()
+	new_slot_prompt.question = "Overwrite slot %d?" % slot
+	new_slot_prompt.detail = SaveSlotList.summary(rec.get("data", {}))
+	new_slot_prompt.default_no = true
+	new_slot_prompt.answered.connect(func(yes: bool) -> void:
+		new_slot_prompt = null
+		if yes:
+			_start_new_in(slot))
+	add_child(new_slot_prompt)
+
+
+func _start_new_in(slot: int) -> void:
+	GameState.pending_new_slot = slot
 	set_process(false)
 	get_tree().change_scene_to_file(GameState.NAME_SCENE)
 

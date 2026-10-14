@@ -43,7 +43,7 @@ func _on_picked(slot: int) -> void:
 		return
 	_slot = slot
 	prompt = SavePrompt.new()
-	prompt.question = QUESTION % slot
+	prompt.question = "Load Autosave?" if slot == GameState.AUTOSAVE_SLOT else QUESTION % slot
 	prompt.detail = DETAIL
 	prompt.default_no = true
 	prompt.answered.connect(_on_answer)
