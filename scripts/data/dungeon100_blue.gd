@@ -58,6 +58,22 @@ static func blue_floor_chance(floor_nr: int) -> float:
 	return 0.0
 
 
+## Kamer-type-override (CANON "Overrides per kamer-type"): vast aantal blauwe kisten, of -1 = volg
+## de floor-bracket-tabel. CHEST ROOM ("kist") altijd 2; TREASURE ROOM ("schat") 50% kans op 1 (anders 0).
+## PUZZLE ROOM (1 bij succes) volgt nog de tabel tot de puzzelkamer-beloning bestaat.
+const BLUE_ROOM_CHEST := 2
+const BLUE_TREASURE_CHANCE := 0.5
+
+
+static func blue_forced_for(run_seed: int, floor_nr: int, layout_type: String) -> int:
+	match layout_type:
+		"kist":
+			return BLUE_ROOM_CHEST
+		"schat":
+			return 1 if _rng(run_seed, floor_nr, "verdieping", "schatblauw").randf() < BLUE_TREASURE_CHANCE else 0
+	return -1
+
+
 ## Welke kisten (index 0..chest_count-1) op deze verdieping blauw zijn. Normale kamer: met kans
 ## blue_floor_chance() precies één, anders geen. 'forced' >= 0 = vast aantal (kamer-type-override,
 ## bv. Chest Room 2), begrensd op chest_count. Deterministisch per (seed, verdieping).

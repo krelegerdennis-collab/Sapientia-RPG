@@ -26,6 +26,7 @@ const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const Layouts := preload("res://scripts/data/grot_layouts.gd")
 const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
+const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 
 const MAX_FLOOR := 100
 const SCENE := "res://scenes/maps/dungeon100.tscn"
@@ -315,6 +316,7 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 		"tier": Content.tier_for_floor(f),
 		"layout_type": lt, "min_slot_distance": min_dist,
 	}
+	data["blue_forced"] = Blue.blue_forced_for(run_seed, f, lt)
 	data["room"] = _room_dict(data)
 	# eindcontrole op de echte tegels
 	if has_down and not reachable_tiles(data["room"], spawn_up).has(stairs):

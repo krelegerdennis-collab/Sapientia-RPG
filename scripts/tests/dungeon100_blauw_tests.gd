@@ -216,15 +216,36 @@ func _blue_bracket_tests() -> void:
 	check("verwacht ~23 blauwe kisten per run uit normale kamers (%.1f; was ~60-80)" % tot, tot > 20.0 and tot < 26.0)
 	var early := 0
 	var gen_ok := true
+	var room_ok := true
 	for f in range(1, 21):
 		var d := Gen.generate(5, f)
 		var nb := 0
 		for c in d["room"]["chests"]:
 			if str(c.get("kind", "")) == Blue.KIND_BLUE:
 				nb += 1
+		var lt := str(d.get("layout_type", ""))
+		if lt == "kist":
+			room_ok = room_ok and nb == mini(Blue.BLUE_ROOM_CHEST, (d["chest_slots"] as Array).size())
+			continue
 		gen_ok = gen_ok and nb <= 1
 		early += nb
-	check("generator: verdieping 1-20 hoogstens 1 blauwe kist per verdieping (%d totaal)" % early, gen_ok and early <= 8)
+	check("generator: verdieping 1-20 hoogstens 1 blauwe kist per verdieping buiten Chest Room (%d totaal)" % early, gen_ok and early <= 8)
+	check("generator: Chest Room heeft precies 2 blauwe kisten", room_ok)
+	# kamer-type-overrides (CANON)
+	var tr := 0
+	var tr_ok := true
+	for sd in 2000:
+		var v := Blue.blue_forced_for(sd, 30, "schat")
+		tr_ok = tr_ok and (v == 0 or v == 1)
+		tr += v
+	check("override: Chest Room 2, Treasure Room ~50%% op 1 (%.2f), andere kamers volgen de tabel" % (tr / 2000.0),
+			Blue.blue_forced_for(1, 30, "kist") == 2 and tr_ok and absf(tr / 2000.0 - 0.5) < 0.04
+			and Blue.blue_forced_for(1, 30, "medium") == -1 and Blue.blue_forced_for(1, 30, "puzzel") == -1)
+	# bracket-statistiek floor 1-20 vs. oud (5% per kist, ~2-4 kisten): flink lager
+	var per_floor_early := 0.0
+	for f in range(1, 21):
+		per_floor_early += Blue.blue_floor_chance(f)
+	check("verdieping 1-20: verwacht %.1f blauwe kisten (oud ~3-4 bij 5%% per kist)" % per_floor_early, absf(per_floor_early - 1.5) < 0.01)
 
 
 ## CANON-verdeling blauwe kisten per grade (TODO.md "Loot ratio consumables vs. equipment").
