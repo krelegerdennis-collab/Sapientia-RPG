@@ -201,6 +201,10 @@ ECHO: "Maar dat is een verhaal voor later."
   niet in de worp. Zijn 1% in de tabel is alleen ter informatie.
 - **Empty Room**: ~30% kans op een **lore-notitie** (kort Engels briefje van een eerdere
   kandidaat, op de vloer; A = lezen), anders leeg. Geen onthulling over ECHO of H-6 in die briefjes.
+- **Puzzle Room** (vanaf verdieping 6): kleine vaste puzzels uit de bestaande stukken van
+  Archief 1 en 2 (duwbare kast, zware drukplaat, poort, hendel, groei-plaat), per seed gekozen.
+  Geen monsters; beloning 1 blauwe kist in de nis. **ECHO** geeft bij binnenkomst één korte
+  Engelse hint. Geen nieuwe duw- of renmechaniek.
 - **Wereldkaart**: geen ingang en geen icoon van de Diepe Grot. De grot start alleen via ECHO
   (ECHO's Kamer). De oude spawn `van_dungeon100` blijft alleen voor oude saves.
 
