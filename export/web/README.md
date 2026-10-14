@@ -1,6 +1,6 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`d84d776`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`43cdbcd`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
