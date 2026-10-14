@@ -798,8 +798,8 @@ func click(c: Control) -> void:
 
 ## Namen-migratie: een oude save met Dennis/Noor/Lotte laadt als Dax/Vesper/Seren (ids gelijk).
 func _namen_migratie_tests() -> void:
-	var oud := {"map": "res://scenes/maps/wilgendal.tscn", "player_name": "Dax", "party": [
-		{"id": "dennis", "name": "Dax"}, {"id": "noor", "name": "Vesper"}, {"id": "lotte", "name": "Seren"}]}
+	var oud := {"map": "res://scenes/maps/wilgendal.tscn", "player_name": "Dennis", "party": [
+		{"id": "dennis", "name": "Dennis"}, {"id": "noor", "name": "Noor"}, {"id": "lotte", "name": "Lotte"}]}
 	var ok := GameState.apply_state(oud)
 	check("namen-migratie: oude save laadt", ok)
 	check("namen-migratie: speler heet Dax", GameState.player_name == "Dax")
@@ -808,4 +808,6 @@ func _namen_migratie_tests() -> void:
 		and GameState.party[1]["name"] == "Vesper" and GameState.party[2]["name"] == "Seren"
 		and GameState.party[1]["id"] == "noor" and GameState.party[2]["id"] == "lotte")
 	check("namen-migratie: eigen naam blijft", GameState.migrate_name("Kees") == "Kees")
+	check("namen-migratie: losse namen", GameState.migrate_name("Dennis") == "Dax" and GameState.migrate_name("Noor") == "Vesper"
+		and GameState.migrate_name("Lotte") == "Seren" and GameState.migrate_name("Dax") == "Dax")
 	check("nieuw spel: standaardnaam is Dax", GameState.DEFAULT_NAME == "Dax")

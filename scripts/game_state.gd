@@ -1010,7 +1010,7 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 
 ## v0.23 namen-migratie (besluit Dennis 13 okt 2026): oude saves bewaren de weergavenamen.
 ## Dennis -> Dax, Lotte -> Seren, Noor -> Vesper. Ids (dennis/lotte/noor) blijven gelijk.
-const OUDE_NAMEN := {"Dax": "Dax", "Seren": "Seren", "Vesper": "Vesper"}
+const OUDE_NAMEN := {"Dennis": "Dax", "Lotte": "Seren", "Noor": "Vesper"}
 
 static func migrate_name(n: String) -> String:
 	return str(OUDE_NAMEN.get(n, n))
