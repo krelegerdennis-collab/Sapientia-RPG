@@ -7,7 +7,7 @@
 [node name="Archief2V3Licht" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "archief_2_v3_licht"
-map_name = "Licht-platen"
+map_name = "Light Plates"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

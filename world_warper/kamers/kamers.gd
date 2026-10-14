@@ -30,15 +30,15 @@ const WERK_REGELS: Array[String] = [
 ]
 const HANDEL_DICHT := "The shop is still closed."
 const KERN_ZIN := "The story of H-6 ends here."
-const OEFEN_KLAAR := "Oefening klaar. Geen buit."
+const OEFEN_KLAAR := "Practice done. No loot."
 const OEFEN_VERLIES := "The practice is over. You are back in the room."
 const OEFEN_VANGEN := "Nothing is recorded in a practice."
 const GEGENEZEN := "The party is healed."
-const OPGESLAGEN := "Opgeslagen."
-const OPSLAAN_MISLUKT := "Opslaan mislukt."
+const OPGESLAGEN := "Saved."
+const OPSLAAN_MISLUKT := "Save failed."
 const NIEMAND_WISSEL := "There is nobody to swap with."
 const AL_VOORAAN := "They are already at the front."
-const VOORAAN := "Vooraan: %s."
+const VOORAAN := "In front: %s."
 const GEEN_SCHERM := "That screen doesn't exist yet."
 const GEEN_POORT := "The gate doesn't work."
 
@@ -109,21 +109,21 @@ const KAMER_NOORD := """
 """
 
 const ROOMS := {
-	"hal": {"naam": "De Hal", "min_act": 1, "layout": HAL,
+	"hal": {"naam": "The Atrium", "min_act": 1, "layout": HAL,
 		"scene": "res://world_warper/kamers/hal.tscn"},
-	"rustkamer": {"naam": "De Rustkamer", "min_act": 1, "layout": KAMER_OOST,
+	"rustkamer": {"naam": "The Rest Room", "min_act": 1, "layout": KAMER_OOST,
 		"scene": "res://world_warper/kamers/rustkamer.tscn"},
-	"echo_kamer": {"naam": "ECHO's Kamer", "min_act": 1, "layout": KAMER_WEST,
+	"echo_kamer": {"naam": "ECHO's Chamber", "min_act": 1, "layout": KAMER_WEST,
 		"scene": "res://world_warper/kamers/echo_kamer.tscn"},
-	"beeldkamer": {"naam": "De Beeldkamer", "min_act": 2, "layout": KAMER_ZUID,
+	"beeldkamer": {"naam": "The Screening Room", "min_act": 2, "layout": KAMER_ZUID,
 		"scene": "res://world_warper/kamers/beeldkamer.tscn"},
-	"trainingshal": {"naam": "De Trainingshal", "min_act": 3, "layout": KAMER_ZUID,
+	"trainingshal": {"naam": "The Training Hall", "min_act": 3, "layout": KAMER_ZUID,
 		"scene": "res://world_warper/kamers/trainingshal.tscn"},
-	"werkplaats": {"naam": "De Werkplaats", "min_act": 4, "layout": KAMER_NOORD,
+	"werkplaats": {"naam": "The Workshop", "min_act": 4, "layout": KAMER_NOORD,
 		"scene": "res://world_warper/kamers/werkplaats.tscn"},
-	"handelskamer": {"naam": "De Handelskamer", "min_act": 5, "layout": KAMER_NOORD,
+	"handelskamer": {"naam": "The Exchange", "min_act": 5, "layout": KAMER_NOORD,
 		"scene": "res://world_warper/kamers/handelskamer.tscn"},
-	"kern": {"naam": "De Kern", "min_act": 6, "layout": KAMER_NOORD,
+	"kern": {"naam": "The Core", "min_act": 6, "layout": KAMER_NOORD,
 		"scene": "res://world_warper/kamers/kern.tscn"},
 }
 
@@ -216,7 +216,7 @@ static func warp_doelen() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	out.append({
 		"id": "wilgendal",
-		"label": "Wereldkaart bij Wilgendal",
+		"label": "World Map near Willowdale",
 		"path": WARP_PAD,
 		"spawn": WARP_SPAWN,
 	})
@@ -255,12 +255,12 @@ static func naar_voren(party: Array, index: int) -> bool:
 static func voortgang_regels(step: int, flags: Dictionary, opdracht: String) -> Array[String]:
 	var stapnaam := str(StoryData.STEP_NAMES.get(step, str(step)))
 	var regels: Array[String] = []
-	regels.append("Verhaalstap: %s." % stapnaam)
+	regels.append("Story step: %s." % stapnaam)
 	if opdracht == "":
 		regels.append("There is no active quest right now.")
 	else:
-		regels.append("Lopende opdracht: %s" % opdracht)
-	regels.append("Bekende vlaggen: %d." % flags.size())
+		regels.append("Current quest: %s" % opdracht)
+	regels.append("Known flags: %d." % flags.size())
 	return regels
 
 

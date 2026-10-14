@@ -12,7 +12,7 @@ const M := "res://scenes/maps/"
 const ROOMS := {
 	# 1 KAS (16x11): entree vanaf de wereldkaart, zichtbare monsters, bord, opslag.
 	"leven_ingang": {
-		"name": "Het Levende Archief",
+		"name": "The Living Archive",
 		"floor": 1,
 		"tier": 2,
 		"archief": "2",
@@ -102,7 +102,7 @@ static func _met(basis: Dictionary, extra: Dictionary) -> Dictionary:
 
 
 static func rooms() -> Dictionary:
-	var entree := _met(_basis("Het Levende Archief", 1, 2), {
+	var entree := _met(_basis("The Living Archive", 1, 2), {
 		"save": [3, 8],
 		"exits": {
 			"E": {"map": "res://scenes/maps/berggrot_uitmond.tscn", "spawn": "boog"},
@@ -197,7 +197,7 @@ static func rooms() -> Dictionary:
 		"platen": [{"id": "l1", "soort": "licht", "tile": [9, 6], "start": 0}],
 		"bruggen": [{"plaat": "l1", "tiles": [[8, 4], [9, 4], [10, 4]]}],
 	})
-	var wurger := _met(_basis("De Wurger", 3, 3), {
+	var wurger := _met(_basis("The Strangler", 3, 3), {
 		"layout": [_TOP, _WU, _WL, _F, _F, _B, _F, _F, _F, _F, _F, _BOT],
 		"checkpoint": false,
 		"exits": {
@@ -212,7 +212,7 @@ static func rooms() -> Dictionary:
 			"tile": [9, 5], "moves": false, "boss": true, "mini": true, "guard": true,
 		}],
 	})
-	var hal := _met(_basis("Hall of De Genezer", 4, 3), {
+	var hal := _met(_basis("Hall of the Mender", 4, 3), {
 		"exits": {
 			"E": {"map": SCENES["archief_2_v3_wurger"], "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v4_genezer"], "spawn": "zuid"},
@@ -224,7 +224,7 @@ static func rooms() -> Dictionary:
 			{"id": "m1", "enemy": "wortelgeest", "group": ["wortelgeest", "bloeiende_schrik"], "tile": [13, 7], "moves": true},
 		],
 	})
-	var genezer := _met(_basis("De Genezer", 4, 3), {
+	var genezer := _met(_basis("The Mender", 4, 3), {
 		"layout": [_TOP, _WU, _WL, _F, _F, _B, _F, _F, _F, _F, _F, _BOT],
 		"checkpoint": false,
 		"exits": {

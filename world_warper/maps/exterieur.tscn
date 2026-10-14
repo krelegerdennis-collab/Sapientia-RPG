@@ -14,7 +14,7 @@ size = Vector2(14, 14)
 
 [node name="Exterieur" type="Node2D"]
 script = ExtResource("1_map")
-map_name = "Buiten"
+map_name = "Outside"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

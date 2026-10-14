@@ -66,7 +66,7 @@ func _run() -> void:
 	if not only_logic:
 		print("=== Deel B: echte scène ===")
 		await _integration()
-		print("=== Deel C: puzzelkamer Eerste Archief (3B) ===")
+		print("=== Deel C: puzzelkamer First Archive (3B) ===")
 		await _archief_integration()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await pframes(30)   # lopende fades laten eindigen (anders 'leaked instance' bij afsluiten)

@@ -7,7 +7,7 @@
 
 [node name="WilgendalBinnen" type="Node2D"]
 script = ExtResource("1_pand")
-map_name = "Winkel"
+map_name = "Shop"
 encounters = false
 sets_checkpoint = false
 

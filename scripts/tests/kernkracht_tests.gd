@@ -98,7 +98,7 @@ func _run() -> void:
 		print("=== Deel J: Ink Worm-kast in de Golem Hall ===")
 		await _kast_tests()
 	if part("K"):
-		print("=== Deel K: verlamd monster duwen (Diepe Grot push) ===")
+		print("=== Deel K: verlamd monster duwen (Deep Learning Simulation push) ===")
 		await _push_tests()
 	print("KERNKRACHTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])

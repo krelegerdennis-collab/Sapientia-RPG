@@ -8,7 +8,7 @@
 [node name="LevenV3Combi" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "leven_v3_combi"
-map_name = "Kast en hendel"
+map_name = "Cabinet and Lever"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

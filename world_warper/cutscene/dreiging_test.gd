@@ -51,7 +51,7 @@ func _run() -> void:
 	check("alleen bekende sprekers", sprekers)
 	var alles := " ".join(lines) + " " + " ".join(Canon.GENEZER.map(func(r): return str(r["text"])))
 	var nl := false
-	for woord in [" het ", " een ", " niet ", " wat ", " jij ", "Hanger. Ik", "Archieven"]:
+	for woord in [" het ", " een ", " niet ", " wat ", " jij ", "Pendant. Ik", "Archieven"]:
 		if alles.contains(woord):
 			nl = true
 	check("tekst is Engels (geen Nederlandse woorden)", not nl)

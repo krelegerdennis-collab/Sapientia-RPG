@@ -69,7 +69,7 @@ const GOLEM_FLAG := "bewaker:archief_golemhal/golem"
 ## Vlag van de verslagen Wortelkoning.
 const WORTELKONING_FLAG := "bewaker:woud_open_plek/baas"
 ## Het Zingende Graan (na noor_lid). Dialoog is de canon, letterlijk.
-const GERRIT := "Gerrit the Miller"
+const GERRIT := "Garrett the Miller"
 const FLAG_GRAAN := "quest_zingend_graan"
 const FLAG_ZAAD := "zingend_zaad"
 const FLAG_GRAAN_KLAAR := "zingend_graan_klaar"
@@ -400,7 +400,7 @@ const EVENTS := {
 	# Waarom die kern op een tweede signaal reageert, staat nog open. Geen nieuwe beat.
 	"naar_leven": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
-			["say", "", ["An overgrown greenhouse. The vines are sealed shut.", "Clear the Eerste Archief first."]],
+			["say", "", ["An overgrown greenhouse. The vines are sealed shut.", "Clear the First Archive first."]],
 			["walk", "player", "up", 1],
 		]},
 		{"do": "default"},
@@ -409,18 +409,18 @@ const EVENTS := {
 	# Bouwplaats voor de berggrot-tunnel. Dicht tot noor_lid (Noor in de party).
 	"bouwplaats_voorman": [
 		{"if": {"not_flags": ["noor_lid"]}, "do": [
-			["say", "Foreman Hendrik", ["Hold it right there. This tunnel isn't safe yet.", "The rock keeps shifting. Nobody goes in until we've shored it up.", "Come back later. Maybe with someone who can handle a few sparks."]],
+			["say", "Foreman Henrik", ["Hold it right there. This tunnel isn't safe yet.", "The rock keeps shifting. Nobody goes in until we've shored it up.", "Come back later. Maybe with someone who can handle a few sparks."]],
 		]},
 		{"do": [
-			["say", "Foreman Hendrik", ["The supports are in. The tunnel's open.", "It runs right through the mountain. Watch your step in there."]],
+			["say", "Foreman Henrik", ["The supports are in. The tunnel's open.", "It runs right through the mountain. Watch your step in there."]],
 		]},
 	],
 	"bouwplaats_werker": [
 		{"if": {"not_flags": ["noor_lid"]}, "do": [
-			["say", "Worker Sanne", ["Mind the cart! We're hauling rubble out all day.", "Something keeps cracking deep inside. Like it's growing back."]],
+			["say", "Worker Sunny", ["Mind the cart! We're hauling rubble out all day.", "Something keeps cracking deep inside. Like it's growing back."]],
 		]},
 		{"do": [
-			["say", "Worker Sanne", ["Finally done. My back is killing me.", "Funny thing: past the tunnel, there's a greenhouse. Nobody planted it."]],
+			["say", "Worker Sunny", ["Finally done. My back is killing me.", "Funny thing: past the tunnel, there's a greenhouse. Nobody planted it."]],
 		]},
 	],
 	"bouwplaats_hek": [
@@ -475,7 +475,7 @@ const EVENTS := {
 		["walk", "Marit", "left", 2],
 		["face", "Marit", "left"],
 		["face", "player", "right"],
-		["say", "Marit", ["Vesper! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
+		["say", "Marigold", ["Vesper! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
 		["flag", "noor_ontmoet"],
 		["flag", "quest_noor"],
 		["step", NOOR_KWIJT],
@@ -486,7 +486,7 @@ const EVENTS := {
 	# al eerder gezien is, bv. een oude save). Geen winkel nog; 2 extra in kisten van het Donker Woud.
 	"marit_boeken": [
 		{"if": {"not_flags": ["marit_boeken"]}, "do": [
-			["say", "Marit", ["Wait! Take these. Blank books from my grandfather's archive.", "Vesper always said monsters fit inside them. I never believed it... but maybe they'll help you."]],
+			["say", "Marigold", ["Wait! Take these. Blank books from my grandfather's archive.", "Vesper always said monsters fit inside them. I never believed it... but maybe they'll help you."]],
 			["give", "leeg_boek", 3],
 			["flag", "marit_boeken"],
 			["say", "", ["You receive 3x Blank Book!"]],
@@ -497,17 +497,17 @@ const EVENTS := {
 	# --- dorpelingen (hints over het donkere bos)
 	"marit": [
 		{"if": {"flags": ["noor_ontmoet"], "not_flags": ["marit_boeken"]}, "do": [["run", "marit_boeken"]]},
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Marit", ["You really brought her back! Mapleton will never forget this."]]]},
-		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Marit", ["The Dark Wood lies west of the village. Bring Vesper back, please!"]]]},
-		{"do": [["say", "Marit", ["Good day, traveler."]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Marigold", ["You really brought her back! Mapleton will never forget this."]]]},
+		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Marigold", ["The Dark Wood lies west of the village. Bring Vesper back, please!"]]]},
+		{"do": [["say", "Marigold", ["Good day, traveler."]]]},
 	],
 	"bram": [
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Old Bram", ["The mist is lifting. For the first time in months I hear birds again."]]]},
-		{"do": [["say", "Old Bram", ["We used to pick berries there. Now the trees hum like beehives.", "Stare at the mist too long and you see marks that don't belong."]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Old Bramwell", ["The mist is lifting. For the first time in months I hear birds again."]]]},
+		{"do": [["say", "Old Bramwell", ["We used to pick berries there. Now the trees hum like beehives.", "Stare at the mist too long and you see marks that don't belong."]]]},
 	],
 	"jens": [
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Jens", ["Vesper's back! Will she make sparks again? Please?"]]]},
-		{"do": [["say", "Jens", ["Mama says the mushrooms in the wood glow at night.", "And that they can sneeze. Really!"]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Jensen", ["Vesper's back! Will she make sparks again? Please?"]]]},
+		{"do": [["say", "Jensen", ["Mama says the mushrooms in the wood glow at night.", "And that they can sneeze. Really!"]]]},
 	],
 	"tobias": [
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Tobias", ["The water is clear again. Strange, isn't it? As if the wood was sick."]]]},
@@ -516,27 +516,27 @@ const EVENTS := {
 	"esdoorn_put": [{"do": [["say", "", ["An old well. Deep down, something pink flickers in the water."]]]}],
 	"ilse": [
 		{"if": {"flags": ["noor_gered"], "not_flags": ["ilse_thee"]}, "do": [
-			["say", "Ilse", ["You saved my Vesper. She wants to go with you. I can see it on her.", "Take good care of her. And take this tea, for the road."]],
+			["say", "Elise", ["You saved my Vesper. She wants to go with you. I can see it on her.", "Take good care of her. And take this tea, for the road."]],
 			["give", "kruidenthee", 3],
 			["flag", "ilse_thee"],
 			["say", "", ["You receive 3x Herbal Tea!"]],
 		]},
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Ilse", ["Take good care of her, {naam}."]]]},
-		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Ilse", ["My Vesper... She had those sparks for weeks. I should have seen it.", "Bring her back. Please."]]]},
-		{"do": [["say", "Ilse", ["Vesper is outside, on the square. As always."]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Elise", ["Take good care of her, {naam}."]]]},
+		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Elise", ["My Vesper... She had those sparks for weeks. I should have seen it.", "Bring her back. Please."]]]},
+		{"do": [["say", "Elise", ["Vesper is outside, on the square. As always."]]]},
 	],
 	"herbergier": [{"do": [
-		["choice", "Do you want to rest here? (free)", ["Yes", "No"], ["herberg_rust", "herberg_nee"], "Innkeeper Wout"],
+		["choice", "Do you want to rest here? (free)", ["Yes", "No"], ["herberg_rust", "herberg_nee"], "Innkeeper Walt"],
 	]}],
 	"herberg_rust": [{"do": [
 		["fade_out", 0.4],
 		["heal"],
 		["wait", 0.6],
 		["fade_in", 0.4],
-		["say", "Innkeeper Wout", ["Sleep well? The save book is on the lectern, if you want to write."]],
+		["say", "Innkeeper Walt", ["Sleep well? The save book is on the lectern, if you want to write."]],
 		["say", "", ["The party's HP and MP are restored."]],
 	]}],
-	"herberg_nee": [{"do": [["say", "Innkeeper Wout", ["That's fine. Come back when you're tired."]]]}],
+	"herberg_nee": [{"do": [["say", "Innkeeper Walt", ["That's fine. Come back when you're tired."]]]}],
 
 	# --- het Donker Woud
 	"cocon": [

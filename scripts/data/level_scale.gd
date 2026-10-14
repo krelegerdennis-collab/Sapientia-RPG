@@ -93,7 +93,7 @@ const VOORBIJ_ARCHIEF := {
 ## Al in het spel te vinden (niet alleen data). De rest van de nieuwe catalogus wacht op Act 2-6.
 const NU_TE_VINDEN := {
 	"wambuis": "Vesper gives it when she joins, into the bag.",
-	"kruidenthee": "Ilse in Mapleton, once, after Vesper is saved.",
+	"kruidenthee": "Elise in Mapleton, once, after Vesper is saved.",
 	"gloeiende_inktfles": "The Ink Worm's cabinet in Golem Hall, once, when it opens.",
 }
 

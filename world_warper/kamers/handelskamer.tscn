@@ -10,7 +10,7 @@
 
 [node name="Handelskamer" type="Node2D"]
 script = ExtResource("1_map")
-map_name = "De Handelskamer"
+map_name = "The Exchange"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

@@ -140,7 +140,7 @@ func _catalog_tests() -> void:
 		if _def(sid).has("bron") or str(sid) in LS.NU_TE_VINDEN:
 			start_ok = start_ok and not GD.START_INVENTORY.has(sid)
 	start_ok = start_ok and GD.KEY_ITEMS.has("hanger") and not GD.START_INVENTORY.has("hanger")
-	check("nieuwe stukken en de Hanger zitten niet in de startvoorraad", start_ok)
+	check("nieuwe stukken en the Pendant zitten niet in de startvoorraad", start_ok)
 
 
 func _score(id: String, etype: String) -> float:
@@ -198,7 +198,7 @@ func _place_tests() -> void:
 	for sid in LS.NU_TE_VINDEN:
 		find_ok = find_ok and not _def(str(sid)).is_empty()
 	check("de drie Act 1-vondsten bestaan", find_ok)
-	check("Vesper geeft het wambuis en Ilse de kruidenthee",
+	check("Vesper geeft het wambuis en Elise de kruidenthee",
 			_gives("noor_bevrijd", "wambuis") and _gives("ilse", "kruidenthee"))
 	var drop: Array = GD.ENEMIES["inktwurm"].get("drops", [])
 	check("het bestiarium noemt de inktfles, de kast deelt hem uit",

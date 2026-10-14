@@ -75,15 +75,15 @@ func _vlag_en_act() -> void:
 	var act2 := _party(14)
 	check("hub dicht zonder vlag", not Kamers.hub_open(leeg))
 	var na_genezer := {Unlock.UNLOCK_VLAG: true}
-	check("na De Genezer is ECHO's Kamer open", Kamers.hub_open(na_genezer)
+	check("na The Mender is ECHO's Chamber open", Kamers.hub_open(na_genezer)
 			and Kamers.is_open("echo_kamer", na_genezer, act1))
 	var alleen_bewaker := {Unlock.BEWAKER_VLAG: true}
-	check("Genezer-vlag opent ECHO's Kamer", Kamers.is_open("echo_kamer", alleen_bewaker, act1))
+	check("Genezer-vlag opent ECHO's Chamber", Kamers.is_open("echo_kamer", alleen_bewaker, act1))
 	for id in ["hal", "rustkamer", "echo_kamer", "beeldkamer", "trainingshal", "kern"]:
 		check("dicht zonder vlag: " + id, not Kamers.is_open(id, leeg, act2))
-	check("met vlag is De Hal open", Kamers.is_open("hal", open, act1) and Kamers.naam("hal") == "De Hal")
+	check("met vlag is The Atrium open", Kamers.is_open("hal", open, act1) and Kamers.naam("hal") == "The Atrium")
 	check("met vlag is de Rustkamer open", Kamers.is_open("rustkamer", open, act1))
-	check("met vlag is ECHO's Kamer open", Kamers.is_open("echo_kamer", open, act1))
+	check("met vlag is ECHO's Chamber open", Kamers.is_open("echo_kamer", open, act1))
 	check("Beeldkamer dicht in act 1", not Kamers.is_open("beeldkamer", open, act1))
 	check("Beeldkamer dicht op level 13", not Kamers.is_open("beeldkamer", open, act1_laat))
 	check("Beeldkamer open in act 2", Kamers.is_open("beeldkamer", open, act2) and GameData.act_for_level(14) == 2)
@@ -92,7 +92,7 @@ func _vlag_en_act() -> void:
 	check("Werkplaats open vanaf act 4", Kamers.is_open("werkplaats", open, _party(26)))
 	check("Handelskamer open vanaf act 5", Kamers.is_open("handelskamer", open, _party(32)))
 	check("Kern dicht vóór act 6", not Kamers.is_open("kern", open, _party(36)))
-	check("Kern open in act 6", Kamers.is_open("kern", open, _party(37)) and Kamers.naam("kern") == "De Kern")
+	check("Kern open in act 6", Kamers.is_open("kern", open, _party(37)) and Kamers.naam("kern") == "The Core")
 	check("onbekende kamer blijft dicht", not Kamers.is_open("hanger_nis", open, _party(40)))
 
 
@@ -129,7 +129,7 @@ func _buit_en_tekst() -> void:
 	var ids: Array[String] = []
 	for d in doelen:
 		ids.append(str(d.get("id", "")))
-	check("warp naar Wilgendal", doelen.size() == 1 and str(doelen[0]["spawn"]) == "van_wilgendal"
+	check("warp naar Willowdale", doelen.size() == 1 and str(doelen[0]["spawn"]) == "van_wilgendal"
 			and str(doelen[0]["path"]) == "res://scenes/maps/wereldkaart.tscn")
 	check("geen WM2/WM3", not ids.has("WM2") and not ids.has("WM3"))
 	var wereld: Node = load("res://scenes/maps/wereldkaart.tscn").instantiate()
@@ -151,7 +151,7 @@ func _buit_en_tekst() -> void:
 	check("wissel zet Vesper vooraan", Kamers.naar_voren(groep, 1) and str(groep[0]["name"]) == "Vesper")
 	check("vooraan wisselt niet met zichzelf", not Kamers.naar_voren(groep, 0))
 	var regels := Kamers.voortgang_regels(0, {}, "")
-	check("voortgang noemt de stap", regels.size() == 3 and regels[0].begins_with("Verhaalstap:"))
+	check("voortgang noemt de stap", regels.size() == 3 and regels[0].begins_with("Story step:"))
 	check("bestiarium en codex bestaan", Kamers.scherm_beschikbaar("bestiarium") and Kamers.scherm_beschikbaar("codex"))
 
 
@@ -180,9 +180,9 @@ func _scènes() -> void:
 		check("speler staat er", node.get_node_or_null("Objects/Player") != null)
 		if str(id) == "echo_kamer":
 			var echo := node.get_node_or_null("Objects/Echo")
-			check("ECHO staat in ECHO's Kamer", echo != null and str(echo.get("bron")) == "echo_grot")
+			check("ECHO staat in ECHO's Chamber", echo != null and str(echo.get("bron")) == "echo_grot")
 			var grot := node.get_node_or_null("Objects/Grot")
-			check("ingang Diepe Grot staat in ECHO's Kamer", grot != null
+			check("ingang Deep Learning Simulation staat in ECHO's Chamber", grot != null
 					and str(grot.get("bron")) == "grot_ingang"
 					and Kamers.label("grot_ingang") == "Deep Learning Simulation")
 		node.free()
@@ -210,7 +210,7 @@ func _hal_in_beeld() -> void:
 		if nu != null and nu.scene_file_path == Kamers.scene_path("hal") and not GameState.changing_map:
 			sc = nu
 			break
-	check("De Hal laadt", sc != null and str(sc.get("map_name")) == "De Hal")
+	check("The Atrium laadt", sc != null and str(sc.get("map_name")) == "The Atrium")
 	if sc == null:
 		return
 	await get_tree().process_frame
@@ -251,7 +251,7 @@ func _echo_grot() -> void:
 	GameState.change_map(EchoGrot.KAMER, EchoGrot.KAMER_SPAWN)
 	var kamer_ok := await _wacht_pad(EchoGrot.KAMER)
 	await _wacht_fade()
-	check("ECHO's Kamer laadt", kamer_ok)
+	check("ECHO's Chamber laadt", kamer_ok)
 	if not kamer_ok:
 		return
 	check("ECHO in de geladen kamer", _echo_node() != null and _player() != null)
@@ -473,7 +473,7 @@ func _genezer_warp() -> void:
 	var ging := NaGenezer.probeer()
 	var buiten := await _wacht_pad(Enter.HUB_SCENE, 20.0)
 	await _wacht_fade()
-	check("na De Genezer staat de party in het exterieur", ging and buiten
+	check("na The Mender staat de party in het exterieur", ging and buiten
 			and GameState.world_warper_is_unlocked() and not NaGenezer.pending)
 	NaGenezer.pending = false
 

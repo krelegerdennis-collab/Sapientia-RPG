@@ -80,7 +80,7 @@ func _run() -> void:
 	await _guard_tests()
 	print("=== Deel E: Levende Archief, verdieping 1 ===")
 	await _leven_tests()
-	print("=== Deel F: uitgang-warpers Eerste Archief ===")
+	print("=== Deel F: uitgang-warpers First Archive ===")
 	await _warper_tests()
 	print("ARCHIEFTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -109,7 +109,7 @@ func _flood(l: PuzzleLogic, start: Vector2i) -> Dictionary:
 
 
 func _logic_tests() -> void:
-	check("Eerste Archief doel-level is 7", GD.EERSTE_ARCHIEF_DOEL == 7)
+	check("First Archive doel-level is 7", GD.EERSTE_ARCHIEF_DOEL == 7)
 	var room: Dictionary = PuzzleRooms.ROOMS[ROOM_ID]
 	check("puzzelkamer '%s' is geldig: %s" % [ROOM_ID, PuzzleLogic.validate(room)], PuzzleLogic.validate(room).is_empty())
 	var l := PuzzleLogic.from_room(room, ROOM_ID)
@@ -558,7 +558,7 @@ func _leven_tests() -> void:
 	var room: Dictionary = A2.ROOMS[LEVEN_ID]
 	check("verdieping 1 bestaat, verdieping 1, thema kas", not room.is_empty() and int(room["floor"]) == 1
 			and str(room["theme"]) == "kas" and A2.ORDER[0][0] == LEVEN_ID)
-	check("niet in de lijst van het Eerste Archief", not DR.ROOMS.has(LEVEN_ID) and DR.ORDER.size() == 12
+	check("niet in de lijst van het First Archive", not DR.ROOMS.has(LEVEN_ID) and DR.ORDER.size() == 12
 			and DR.room(LEVEN_ID)["floor"] == 1)
 	check("scènes bestaan", ResourceLoader.exists(LEVEN_SCENE) and ResourceLoader.exists(PLAAT_SCENE)
 			and DR.scene_of(LEVEN_ID) == LEVEN_SCENE)
@@ -577,8 +577,8 @@ func _leven_tests() -> void:
 	var closed_txt := ""
 	if closed_do.size() > 0 and closed_do[0] is Array and closed_do[0].size() > 2:
 		closed_txt = " ".join(closed_do[0][2])
-	check("dicht zonder Eerste Archief", closed_do is Array and closed_txt.contains("sealed shut")
-			and closed_txt.contains("Eerste Archief") and closed_do.size() > 1
+	check("dicht zonder First Archive", closed_do is Array and closed_txt.contains("sealed shut")
+			and closed_txt.contains("First Archive") and closed_do.size() > 1
 			and closed_do[1][0] == "walk")
 	GameState.story_flags[SD.GOLEM_FLAG] = true
 	var opened: Dictionary = Story.pick("naar_leven")
@@ -709,7 +709,7 @@ func _warper_tests() -> void:
 	for p in spots:
 		if not DR.ROOMS.has(str(p["room"])):
 			only_a1 = false
-	check("alleen kamers van het Eerste Archief", only_a1)
+	check("alleen kamers van het First Archive", only_a1)
 
 	GameState.new_game("Dax")
 	GameState.story_step = SD.KLAAR
@@ -767,7 +767,7 @@ func _warper_tests() -> void:
 		if world_ok:
 			spawn_node = scene().get_node_or_null("Spawns/van_archief") as Node2D
 		var expect := Vector2i((spawn_node.position / 16.0).floor()) if spawn_node != null else Vector2i(-99, -99)
-		check("bevestigen zet je op de wereldkaart bij het Eerste Archief %s" % [tile()],
+		check("bevestigen zet je op de wereldkaart bij het First Archive %s" % [tile()],
 				world_ok and GameState.current_map == ExitWarper.WORLD_SCENE and spawn_node != null
 				and tile() == expect and tile() != mid_stay)
 	var eind_room := await _enter_map("res://scenes/maps/archief_golemhal.tscn", "zuid", "ArchiefGolemhal")
