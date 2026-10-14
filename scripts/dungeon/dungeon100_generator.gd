@@ -38,6 +38,8 @@ const SPAWN_REST := "rustpunt"
 ## Aankomst via een warper, naast het kristal (zelfde naam als Dungeon100Rules.WARPER_SPAWN).
 const SPAWN_WARPER := "warper"
 const NO_TILE := Vector2i(-1, -1)
+## Tegelthema van alle verdiepingen (scripts/data/dungeon_rooms.gd THEMES, RPG ART).
+const THEME := "diepe_grot"
 
 const MIN_ROOMS := 4
 const MAX_ATTEMPTS := 24
@@ -284,6 +286,7 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		"layout": d["layout"], "spawns": spawns, "exits": exits,
 		"monsters": [], "chests": [],
 		"dungeon100": true, "dungeon100_floor": f,
+		"theme": THEME,
 	}
 	Content.fill_room(room, d)
 	if room.has("rustpunt"):
