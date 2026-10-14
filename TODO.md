@@ -1216,8 +1216,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Licht-effect bij activeren
   - Blue chest verschijnt met animatie
 
-  - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
-    Definitief. Getrapt, geen directe hints. De checkbox blijft open tot de hints in de code deze fasen gebruiken.
+  - [x] Hint-systeem: Diepe Grot-puzzelkamers krijgen één korte hint van ECHO bij binnenkomst (besluit Dennis 2026-10-14). Vervangt de oude regel "getrapt, geen directe hints". In de code: `GrotPuzzels` "hint", `Dungeon100Room._puzzel_hint`.
 
     **CANON – niet wijzigen zonder overleg.**
 
