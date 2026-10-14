@@ -63,7 +63,7 @@ static func pas_toe(sprite: Sprite2D, maat := Vector2i.ZERO) -> Vector2i:
 static func zet_frame(sprite: Sprite2D, rij: int, kolom: int) -> void:
 	if sprite == null:
 		return
-	if sprite.vframes < RIJEN or sprite.hframes < KOLOMMEN:
-		sprite.frame = 0
+	if sprite.vframes < RIJEN:
+		sprite.frame = clampi(kolom, 0, sprite.hframes * sprite.vframes - 1)
 		return
-	sprite.frame = rij * sprite.hframes + kolom
+	sprite.frame = clampi(rij * sprite.hframes + kolom, 0, sprite.hframes * sprite.vframes - 1)

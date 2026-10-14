@@ -596,3 +596,4 @@ assets/sprites/buiten/wilgendal/windmolen_basis_v2.png
 assets/sprites/buiten/wilgendal/windmolen_wieken_v2.png
 assets/sprites/buiten/wilgendal/windmolen_wieken_stil_v2.png
 assets/sprites/buiten/wilgendal/burgemeestershuis.png
+assets/sprites/som/test/dax_24x32_v3.png

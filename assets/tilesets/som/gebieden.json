@@ -1,0 +1,13 @@
+{
+	"_uitleg": "SoM-stijl per gebied (Dennis 14 okt 2026). Een gebied is helemaal 'oud' of helemaal 'som'. tools/som/export_tilesets.py schrijft per gebied de tilesets naar assets/tilesets/som/<gebied>/<set>.png + .tres. Staat een gebied op 'som' maar ontbreekt er iets, dan blijft het hele gebied 'oud'.",
+	"standaard": "oud",
+	"gebieden": {
+		"wilgendal": {
+			"stijl": "oud",
+			"maps": ["dorp_wilgendal", "wilgendal_binnen"],
+			"palet": "normaal",
+			"tilesets": ["terrein", "gebouwen"],
+			"speler": "res://assets/sprites/som/kaart/dax.png"
+		}
+	}
+}
