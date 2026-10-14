@@ -17,12 +17,12 @@ const CANON_HANGER_FLAG := "ww_canon_hanger_gezien"
 const CANON_DREIGING_FLAG := "ww_canon_dreiging_gezien"
 const LOCKED_TITLE := "???"
 
+## v0.24 (Dennis): alleen zijn video-cutscenes staan in de lijst. 'The Hanger Awakens', 'The Hanger' en
+## 'Sapientia' zijn eruit (alleen uit deze lijst; in het verhaal spelen ze gewoon). Hun vlaggen blijven
+## hierboven staan omdat de tests en oude saves ze nog gebruiken.
 const SCENES := [
 	{"id": "wereldkaart", "title": "Into the Wide World", "flag": WORLDMAP_FLAG, "kind": "worldmap"},
-	{"id": "hanger", "title": "The Hanger Awakens", "flag": HANGER_FLAG, "kind": "hanger"},
 	{"id": "ww_warper", "title": "The World Warper", "flag": CANON_GENEZER_FLAG, "kind": "genezer"},
-	{"id": "ww_hanger", "title": "The Hanger", "flag": CANON_HANGER_FLAG, "kind": "hanger"},
-	{"id": "ww_sapientia", "title": "Sapientia", "flag": CANON_DREIGING_FLAG, "kind": "sapientia"},
 ]
 
 
