@@ -592,7 +592,7 @@ func _prepare_battle(id: String, mimic := "") -> Vector2i:
 
 ## Een Blauwe Kist is geopend: meteen automatisch opslaan, zodat de databank niet verloren gaat.
 func _on_blue_secured(_chest: DungeonChest) -> void:
-	try_autosave("blauw")
+	pass      # save-slots: geen autosave na een Blauwe Kist
 
 
 func _restore_after_battle(ctx: Dictionary) -> void:

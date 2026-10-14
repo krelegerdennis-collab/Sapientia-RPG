@@ -22,7 +22,7 @@ const ROWS := [
 	["touch_size", "Button Size", "Size of the D-pad and A/B on screen."],
 	["crt", "Scanlines", "Picture filter with lines, vignette, and glitches."],
 	["screen_shake", "Screen Shake", "Shake the screen when a hit lands."],
-	["autosave", "Autosave", "Save on a new map, after a win, and when you quit."],
+	["autosave", "Autosave", "Save when you enter or leave a dungeon."],
 	[RESET_KEY, "Default", "Set every option back to the default (A)."],
 ]
 

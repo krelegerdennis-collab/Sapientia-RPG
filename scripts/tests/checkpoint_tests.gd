@@ -552,8 +552,7 @@ func _room_tests() -> void:
 	check("alle monsters van de kamer staan er weer (%d)" % scene().monsters.size(), scene().monsters.size() == n_mon)
 	var line := await respawn_line()
 	check("bericht: '%s'" % line, line == "You wake where you came in...")
-	check("automatisch opgeslagen na het ontwaken (reden respawn)", GameState.last_autosave_reason == "respawn"
-			and GameState.read_save(GameState.autosave_path).get("map") == GANG)
+	check("save-slots: GEEN autosave na het ontwaken", GameState.last_autosave_reason != "respawn")
 	check("checkpoint blijft dezelfde (Gang, ingang)", GameState.checkpoint.get("map") == GANG and cp_tile() == sp[0])
 	await close_dialog()
 	# een gewonnen gevecht verschuift het checkpoint niet

@@ -54,6 +54,8 @@ var save_path := "user://save_1.json"
 var active_slot := 1
 ## Slot 0 = de aparte autosave (Laden: 'Autosave'). Die overschrijft nooit slot 1..4.
 const AUTOSAVE_SLOT := 0
+## De enige reden waarvoor nog automatisch wordt opgeslagen (Dennis).
+const AUTOSAVE_REASONS := ["map"]
 ## Gekozen slot voor het volgende nieuwe spel (titelscherm > New Game > slot kiezen).
 var pending_new_slot := 1
 ## Autosave alleen bij een overgang wereldkaart <-> kerker (niet bij elke kamer of een dorp).
@@ -919,6 +921,9 @@ func read_newest_save() -> Dictionary:
 ## v0.11 Automatisch opslaan in autosave_path. Doet niets (false) als het uit staat in
 ## Opties of als het nu niet veilig kan (gevecht, mapwissel, tekstvak open).
 func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
+	# save-slots (Dennis): alleen bij kerker <-> wereldkaart (reden "map")
+	if not AUTOSAVE_REASONS.has(reason):
+		return false
 	if not can_autosave():
 		return false
 	if not save_game(tile, facing, autosave_path):
@@ -954,7 +959,7 @@ func take_autosave_request() -> String:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
-		autosave_on_background()
+		pass      # save-slots (Dennis): geen autosave meer bij naar de achtergrond gaan
 
 
 func autosave_on_background() -> bool:
@@ -1654,7 +1659,7 @@ func end_battle(result: String) -> void:
 					p["hp"] = 1
 		# v0.11: na winst automatisch opslaan (zodra de map weer in beeld is)
 		if result == "win" and not oefening:
-			_autosave_request = "battle"
+			pass      # save-slots (Dennis): geen autosave meer na een gewonnen gevecht
 			# v0.15: baas verslagen -> de hoofdheld absorbeert zijn kern (eenmalig). Meteen
 			# vastleggen, dus de autosave hierna heeft hem al; het moment zelf speelt de map af.
 			if pending_boss and dungeon100_floor == 0:      # de simulatie geeft geen echte kernen
@@ -1715,7 +1720,7 @@ func respawn_at_checkpoint(boss := false) -> String:
 	pending_respawn_msg = (RESPAWN_LINES_BOSS if boss else RESPAWN_LINES).duplicate()
 	last_respawn = {"map": return_map, "tile": t, "facing": fc, "boss": boss}
 	# na het ontwaken automatisch opslaan (Doorgaan begint dan ook hier)
-	_autosave_request = "respawn"
+	_autosave_request = ""      # save-slots: geen autosave na respawn
 	return return_map
 
 
@@ -2037,7 +2042,7 @@ func dungeon100_defeat() -> String:
 		pending_spawn = Dungeon100RulesC.START_SPAWN
 		pending_respawn_msg = [Dungeon100Reward.RESET_LINE]
 		entry_kind = "respawn"
-		_autosave_request = "respawn"
+		_autosave_request = ""      # save-slots: geen autosave na respawn
 		return Dungeon100RulesC.dungeon_scene
 	if dungeon100_run_active():
 		dungeon100_end_run(true)
@@ -2051,7 +2056,7 @@ func dungeon100_defeat() -> String:
 	pending_spawn = Dungeon100RulesC.WORLD_SPAWN
 	pending_respawn_msg = DUNGEON100_RESET_LINES.duplicate()
 	entry_kind = "respawn"
-	_autosave_request = "respawn"
+	_autosave_request = ""      # save-slots: geen autosave na respawn
 	return Dungeon100RulesC.WORLD_SCENE
 
 

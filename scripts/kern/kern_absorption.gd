@@ -110,7 +110,7 @@ func start(p_map: Node, id: String) -> void:
 		player.input_locked = false
 	phase = "klaar"
 	if is_instance_valid(map) and map.has_method("try_autosave"):
-		map.try_autosave("kern")
+		pass      # save-slots: geen autosave na de absorptie
 	done.emit()
 	queue_free()
 
