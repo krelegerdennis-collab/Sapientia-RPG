@@ -1075,8 +1075,8 @@ func _graan_data() -> void:
 			and (load(GD.enemy_sprite(wg)) as Texture2D).get_size() == Vector2(90, 90)
 			and ResourceLoader.exists(str(wg["sprite_back"])) and wg_kaart != null and wg_kaart.get_size() == Vector2(32, 64))
 	check("bestiarium 007-012 blijft gelijk", GD.bestiary_ids().slice(6, 12) == ["wortelkruiper", "mistuil", "sporenzwam", "wortelkoning", "mimic", "inktwurm"])
-	check("Zingend Zaad is een sleutel, Zingend Meel geneest", GD.KEY_ITEMS[SD.ITEM_ZAAD]["name"] == "Zingend Zaad"
-			and GD.ITEMS[SD.ITEM_MEEL]["name"] == "Zingend Meel" and int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"]) > 0
+	check("Zingend Zaad is een sleutel, Zingend Meel geneest", GD.KEY_ITEMS[SD.ITEM_ZAAD]["name"] == "Singing Seed"
+			and GD.ITEMS[SD.ITEM_MEEL]["name"] == "Singing Flour" and int(GD.ITEMS[SD.ITEM_MEEL]["heal_hp"]) > 0
 			and PartyActions.item_usable_in_field(SD.ITEM_MEEL) and not PartyActions.item_usable_in_field(SD.ITEM_ZAAD))
 
 
@@ -1151,7 +1151,7 @@ func _graan_tests() -> void:
 	check("na het zaad bestaat het item", await wait_until(func(): return GameState.item_count(SD.ITEM_ZAAD) >= 1, 8.0)
 			and Story.has_flag(SD.FLAG_ZAAD))
 	var vondst: Array = await run_story(8.0)
-	check("vondst is alleen de itemregel, geesten weg", vondst.any(func(l): return "You find Zingend Zaad." in str(l))
+	check("vondst is alleen de itemregel, geesten weg", vondst.any(func(l): return "You find Singing Seed." in str(l))
 			and not scene().get_node("Objects/Woudgeesten").visible)
 	d = await enter(dorp, "zuid_ingang")
 	g = d.get_node("Objects/Gerrit")

@@ -42,6 +42,17 @@ var show_kern := false:
 					_set_touch_action(i, "")
 					_touch_owner.erase(i)
 		queue_redraw()
+## TODO.md "run feature": RUN-knop (toggle) boven de CORE-plek; zichtbaar zoals MENU (in het veld).
+## Drukt de actie "run"; de stand komt uit Settings ("run").
+var show_run := false:
+	set(v):
+		show_run = v
+		if not v:
+			for i in _touch_owner.keys():
+				if _touch_owner[i] == "run":
+					_set_touch_action(i, "")
+					_touch_owner.erase(i)
+		queue_redraw()
 var _touch_owner := {}    # vinger-index -> "dpad" of "a"
 var _touch_action := {}   # vinger-index -> actie die die vinger nu indrukt
 var _press_count := {}    # actie -> aantal vingers dat hem indrukt
@@ -112,6 +123,17 @@ func kern_rect() -> Rect2:
 	return Rect2(Vector2(right - KERN_SIZE.x, bottom - KERN_SIZE.y), KERN_SIZE)
 
 
+## RUN-knop: zelfde maat als CORE, recht erboven (ook als CORE nog niet vrijgespeeld is).
+func run_rect() -> Rect2:
+	var kr := kern_rect()
+	return Rect2(kr.position - Vector2(0, KERN_SIZE.y + 5.0), KERN_SIZE)
+
+
+func run_on() -> bool:
+	var st := get_node_or_null("/root/Settings")
+	return st != null and bool(st.get_value("run"))
+
+
 func kern_center() -> Vector2:
 	return kern_rect().get_center()
 
@@ -143,6 +165,10 @@ func _input(event: InputEvent) -> void:
 			elif show_kern and InputMap.has_action("kern") and kern_rect().grow(4.0).has_point(pos):
 				_touch_owner[event.index] = "kern"
 				_set_touch_action(event.index, "kern")
+				get_viewport().set_input_as_handled()
+			elif show_run and InputMap.has_action("run") and run_rect().grow(2.0).has_point(pos):
+				_touch_owner[event.index] = "run"
+				_set_touch_action(event.index, "run")
 				get_viewport().set_input_as_handled()
 			elif show_menu and menu_rect().grow(4.0).has_point(pos):
 				_touch_owner[event.index] = "menu"
@@ -275,6 +301,8 @@ func _draw() -> void:
 	_draw_button(b_center(), "B", "cancel", UiStyleC.MAGENTA, line)
 	if show_kern:
 		_draw_kern_button(line)
+	if show_run:
+		_draw_run_button(line)
 	if show_menu:
 		var mr := menu_rect()
 		var pressed := _press_count.has("menu")
@@ -334,3 +362,29 @@ func _draw_kern_button(line: float) -> void:
 	var tp := Vector2(kr.end.x - 4.0 - ts.x, kr.position.y + 12.0).round()
 	draw_string(font, tp + Vector2(1, 1), "CORE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyleC.SHADOW)
 	draw_string(font, tp, "CORE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, KERN_NEON.lerp(Color.WHITE, 0.7) if not pressed else Color.WHITE)
+
+
+## RUN-knop: pilletje zoals CORE. AAN = groen gevuld, groene rand, groen lampje + gloed; UIT = donker, grijs, lampje uit.
+const RUN_NEON := Color(0.35, 1.0, 0.55)
+
+
+func _draw_run_button(line: float) -> void:
+	var rr := run_rect()
+	var on := run_on()
+	var pressed := _press_count.has("run")
+	var neon := RUN_NEON if on else Color(0.55, 0.55, 0.6)
+	if on:
+		draw_rect(rr.grow(line), Color(neon.r, neon.g, neon.b, 0.3))   # gloed
+	draw_rect(rr, Color(0.08, 0.2, 0.11, 0.9) if on else Color(0.08, 0.08, 0.09, 0.8))
+	if pressed:
+		draw_rect(rr, Color(1, 1, 1, 0.15))
+	draw_rect(rr, neon, false, line)
+	# lampje links
+	var lamp := (rr.position + Vector2(7, rr.size.y / 2.0)).round()
+	draw_circle(lamp, 2.5, neon if on else Color(0.2, 0.2, 0.22))
+	var font := get_theme_default_font()
+	var txt := "RUN"
+	var ts := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10)
+	var tp := Vector2(rr.end.x - 4.0 - ts.x, rr.position.y + 12.0).round()
+	draw_string(font, tp + Vector2(1, 1), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyleC.SHADOW)
+	draw_string(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.WHITE if on else UiStyleC.TEXT)

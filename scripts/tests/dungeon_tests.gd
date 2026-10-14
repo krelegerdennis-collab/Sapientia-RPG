@@ -63,6 +63,8 @@ func _run() -> void:
 	await _dungeon_tests()
 	print("=== Deel G: v0.16 glitch alleen in de Archives, sterker bij de baas ===")
 	await _glitch_tests()
+	print("=== Deel R: RUN-knop (Diepe Grot TODO 'run feature') ===")
+	await _run_tests()
 	print("DUNGEONTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -1316,3 +1318,125 @@ func _gap_at(i: float) -> float:
 		tot += Crt.glitch_gap()
 	Crt.glitch_intensity = keep
 	return tot / 40.0
+
+
+# ================================================================ deel R: RUN (TODO.md "run feature")
+## Richting waarin de speler minstens n tegels vrij heeft (geen muur, geen monster, geen uitgang).
+func _free_dir(p: CharacterBody2D, n: int, avoid_more := false) -> Vector2i:
+	for d in [R, L, D, U]:
+		var ok := true
+		for k in range(1, n + 1):
+			if p.test_move(p.global_transform, Vector2(d) * 16 * k):
+				ok = false
+		if ok and avoid_more and not p.test_move(p.global_transform, Vector2(d) * 16 * (n + 1)):
+			ok = false
+		if ok:
+			return d
+	return Vector2i.ZERO
+
+
+## Eén druk op de pijl: hoeveel tegels loopt de speler en hoe lang duurt het (s)?
+func _one_move(d: Vector2i) -> Dictionary:
+	var p := player()
+	var t0: Vector2i = p.get_tile()
+	var act: String = {U: "move_up", D: "move_down", L: "move_left", R: "move_right"}[d]
+	await get_tree().process_frame
+	Input.action_press(act)
+	var ms0 := Time.get_ticks_msec()
+	await wait_until(func(): return p.is_moving, 1.0)
+	Input.action_release(act)
+	await wait_until(func(): return not p.is_moving, 3.0)
+	var dt := (Time.get_ticks_msec() - ms0) / 1000.0
+	await pframes(3)
+	var moved: Vector2i = p.get_tile() - t0
+	return {"n": absi(moved.x) + absi(moved.y), "dir_ok": moved == d * (absi(moved.x) + absi(moved.y)), "t": dt}
+
+
+func _run_scene_test(label: String, d_spawn: Callable) -> void:
+	var p := player()
+	if p == null:
+		check("R %s: speler" % label, false)
+		return
+	if "monsters" in scene():
+		for m in scene().monsters:
+			if is_instance_valid(m):
+				m.moves = false
+	Settings.set_value("run", true)
+	var d := _free_dir(p, 2)
+	check("R %s: ruimte voor 2 tegels" % label, d != Vector2i.ZERO)
+	if d == Vector2i.ZERO:
+		return
+	var r := await _one_move(d)
+	check("R %s: RUN aan -> 1 druk = 2 tegels (%d) in %.2fs (2x snel, ~0.25s)" % [label, r["n"], r["t"]],
+			r["n"] == 2 and r["dir_ok"] and r["t"] < 0.45)
+	Settings.set_value("run", false)
+	d = _free_dir(p, 2)
+	if d != Vector2i.ZERO:
+		r = await _one_move(d)
+		check("R %s: RUN uit -> 1 tegel (%d) in %.2fs" % [label, r["n"], r["t"]], r["n"] == 1 and r["t"] > 0.2)
+
+
+func _run_tests() -> void:
+	GameState.new_game("Dax")
+	GameState.story_step = SD.NACHT
+	GameState.encounter_multiplier = 0.0
+	Settings.set_value("run", false)
+	# dungeonkamer
+	GameState.change_map(ROOM_SCENE, "ingang")
+	await wait_until(func(): return scene() != null and scene().scene_file_path == ROOM_SCENE and not GameState.changing_map, 15.0)
+	await wait_fade()
+	await close_dialog()
+	await pframes(10)
+	var touch: Control = scene().get_node_or_null("TouchControls/Control")
+	check("R: RUN-knop zichtbaar in het veld, recht boven de CORE-plek", touch != null and touch.show_run
+			and touch.run_rect().end.y < touch.kern_rect().position.y and is_equal_approx(touch.run_rect().end.x, touch.kern_rect().end.x))
+	check("R: standaard uit", not bool(Settings.get_value("run")) and not touch.run_on())
+	await tap("run")
+	check("R: knop/toets R zet RUN aan (blijft aan)", bool(Settings.get_value("run")) and touch.run_on())
+	await pframes(4)
+	await screenshot("run_knop_aan")
+	await tap("run")
+	check("R: nog eens drukken zet RUN uit", not bool(Settings.get_value("run")))
+	await pframes(4)
+	await screenshot("run_knop_uit")
+	# echte touch op de knop
+	var ev := InputEventScreenTouch.new()
+	ev.index = 7
+	ev.position = get_tree().root.get_final_transform() * touch.run_rect().get_center()
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	await pframes(3)
+	ev = ev.duplicate()
+	ev.pressed = false
+	Input.parse_input_event(ev)
+	await pframes(3)
+	check("R: tik op de RUN-knop (touch) zet hem aan", bool(Settings.get_value("run")))
+	Settings.set_value("run", false)
+	await _run_scene_test("dungeon", Callable())
+	# tegen een muur na 1 tegel: loopt 1 tegel
+	var p := player()
+	Settings.set_value("run", true)
+	var d1 := _free_dir(p, 1, true)
+	if d1 != Vector2i.ZERO:
+		var r := await _one_move(d1)
+		check("R: RUN met maar 1 vrije tegel -> 1 tegel, geen botsing (%d)" % r["n"], r["n"] == 1)
+	# niet tijdens gevecht
+	GameState.in_battle = true
+	check("R: tijdens een gevecht geen RUN (2x snel uit)", not p.run_on() and is_equal_approx(p.current_speed(), p.walk_speed))
+	GameState.in_battle = false
+	check("R: buiten gevecht: snelheid 2x (%.0f px/s)" % p.current_speed(), is_equal_approx(p.current_speed(), p.walk_speed * 2.0))
+	Settings.set_value("run", false)
+	# wereldkaart
+	GameState.change_map(WORLD_SCENE, "van_dorp")
+	check("R: wereldkaart geladen", await wait_scene("Wereldkaart"))
+	await wait_fade()
+	await close_dialog()
+	await _run_scene_test("wereldkaart", Callable())
+	# dorp
+	GameState.change_map(TOWN_SCENE, "voor_huis")
+	await wait_until(func(): return scene() != null and scene().scene_file_path == TOWN_SCENE and not GameState.changing_map, 15.0)
+	await wait_fade()
+	await close_dialog()
+	await pframes(6)
+	await _run_scene_test("dorp", Callable())
+	Settings.set_value("run", false)

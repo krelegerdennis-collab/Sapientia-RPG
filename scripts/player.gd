@@ -13,6 +13,13 @@ signal bumped(tile: Vector2i)
 
 const TILE_SIZE := 16
 
+## TODO.md "run feature" (CANON): RUN aan = 2 tegels per zet, sprite 2x zo snel. Toggle via de
+## RUN-knop (touch, boven CORE) of toets R (actie "run"); de stand staat in Settings ("run").
+const RUN_ACTION := "run"
+const RUN_KEY := KEY_R
+const RUN_TILES := 2
+const RUN_SPEED_MULT := 2.0
+
 ## Loopsnelheid in pixels per seconde (64 = 4 tiles per seconde).
 @export var walk_speed := 64.0
 
@@ -35,6 +42,10 @@ var _walk_distance := 0.0
 var _bump_tile := Vector2i(-9999, -9999)
 ## v0.11: true zolang een cutscene de speler laat lopen
 var _scripted := false
+## Hoeveel tegels deze RUN-zet nog extra mag (0 = gewone stap).
+var _run_left := 0
+## Na een duw (TODO.md push): niet doorlopen naar de vrijgekomen tegel tot de richting is losgelaten.
+var hold_until_release := false
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var camera: Camera2D = $Camera2D
@@ -45,6 +56,34 @@ func _ready() -> void:
 	position = (position / TILE_SIZE).floor() * TILE_SIZE + Vector2.ONE * (TILE_SIZE / 2.0)
 	_target = position
 	_update_sprite()
+	ensure_run_action()
+
+
+## Actie "run" (toets R) als project.godot hem niet kent; de touch-knop drukt dezelfde actie in.
+static func ensure_run_action() -> void:
+	if InputMap.has_action(RUN_ACTION):
+		return
+	InputMap.add_action(RUN_ACTION)
+	var ev := InputEventKey.new()
+	ev.physical_keycode = RUN_KEY
+	InputMap.action_add_event(RUN_ACTION, ev)
+
+
+## Staat RUN aan? (nooit tijdens een gevecht)
+func run_on() -> bool:
+	var st := get_node_or_null("/root/Settings")
+	return st != null and bool(st.get_value("run")) and not GameState.in_battle
+
+
+func toggle_run() -> void:
+	var st := get_node_or_null("/root/Settings")
+	if st != null and not GameState.in_battle:
+		st.set_value("run", not bool(st.get_value("run")))
+
+
+## Loopsnelheid nu (RUN = 2x).
+func current_speed() -> float:
+	return walk_speed * (RUN_SPEED_MULT if run_on() else 1.0)
 
 
 ## v7 (prestaties): lopen gebeurt in _process (per beeld) i.p.v. _physics_process (vast
@@ -68,21 +107,30 @@ func _process(delta: float) -> void:
 	if Dialog.is_open:
 		return  # niet lopen terwijl er een tekstvak open staat
 
+	# --- RUN aan/uit (toets R of de RUN-knop) ---
+	if Input.is_action_just_pressed(RUN_ACTION) and not input_locked:
+		toggle_run()
+
 	# --- Lopen ---
-	var budget := walk_speed * delta  # hoeveel pixels we deze frame mogen bewegen
+	var budget := current_speed() * delta  # hoeveel pixels we deze frame mogen bewegen
 	if is_moving:
 		budget = _step_towards_target(budget)
 
 	if not is_moving:
 		var dir := _read_direction()
+		if hold_until_release and dir != facing:
+			hold_until_release = false
 		if dir == Vector2i.ZERO:
 			_walk_distance = 0.0
 			_bump_tile = Vector2i(-9999, -9999)
 		else:
 			facing = dir
-			if _can_move(dir):
+			if hold_until_release:
+				pass   # duw: speler blijft staan
+			elif _can_move(dir):
 				_target = position + Vector2(dir) * TILE_SIZE
 				is_moving = true
+				_run_left = RUN_TILES - 1 if run_on() else 0
 				_bump_tile = Vector2i(-9999, -9999)
 				# Gebruik de overgebleven beweging meteen: zo loop je zonder haperen door.
 				_step_towards_target(budget)
@@ -103,6 +151,15 @@ func _step_towards_target(amount: float) -> float:
 		_walk_distance += dist
 		is_moving = false
 		stepped.emit(get_tile())
+		# RUN: dezelfde zet loopt nog een tegel door (als dat kan en er niets gebeurde bij de stap)
+		if _run_left > 0:
+			_run_left -= 1
+			if not input_locked and not _scripted and not Dialog.is_open and not GameState.changing_map \
+					and not GameState.in_battle and is_inside_tree() and _can_move(facing):
+				_target = position + Vector2(facing) * TILE_SIZE
+				is_moving = true
+				return _step_towards_target(amount - dist)
+			_run_left = 0
 		return amount - dist
 	position = position.move_toward(_target, amount)
 	_walk_distance += amount
@@ -177,6 +234,7 @@ func place_at(tile: Vector2i, new_facing: Vector2i) -> void:
 	position = Vector2(tile) * TILE_SIZE + Vector2.ONE * (TILE_SIZE / 2.0)
 	_target = position
 	is_moving = false
+	_run_left = 0
 	_walk_distance = 0.0
 	facing = new_facing
 	_update_sprite()

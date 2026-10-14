@@ -217,36 +217,36 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 #### Systemen – push monster when stunned
 
 ##### Basis push
-- [ ] Als speler TEGEN een GESTUND monster aanloopt:
-  - [ ] Speler beweegt ÉN monster wordt geduwd (samen)
-  - [ ] Monster schuift 1 tegel in de richting van de speler
-  - [ ] Speler neemt de oorspronkelijke plek NIET in
-- [ ] Als monster tegen muur/obstakel wordt geduwd → blijft staan
-- [ ] Werkt ALLEEN bij stun-status (niet bij normale monsters)
-- [ ] Visuele feedback: monster schuift 1 tegel (geen teleport)
+- [x] Als speler TEGEN een GESTUND monster aanloopt:
+  - [x] Speler beweegt ÉN monster wordt geduwd (samen)
+  - [x] Monster schuift 1 tegel in de richting van de speler
+  - [x] Speler neemt de oorspronkelijke plek NIET in
+- [x] Als monster tegen muur/obstakel wordt geduwd → blijft staan
+- [x] Werkt ALLEEN bij stun-status (niet bij normale monsters)
+- [x] Visuele feedback: monster schuift 1 tegel (geen teleport)
 
 ##### Chain-push
-- [ ] Als geduwd monster tegen ANDER monster aan komt:
-  - [ ] Beide monsters worden geduwd (chain-push)
-  - [ ] Tweede monster schuift ook 1 tegel in dezelfde richting
-  - [ ] Als tweede tegen muur/obstakel komt → stopt daar
-  - [ ] Als tweede tegen een DERDE monster komt → keten gaat door
-- [ ] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
-- [ ] Alle geduwde monsters schuiven tegelijk (animatie)
+- [x] Als geduwd monster tegen ANDER monster aan komt:
+  - [x] Beide monsters worden geduwd (chain-push)
+  - [x] Tweede monster schuift ook 1 tegel in dezelfde richting
+  - [x] Als tweede tegen muur/obstakel komt → stopt daar
+  - [x] Als tweede tegen een DERDE monster komt → keten gaat door
+- [x] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
+- [x] Alle geduwde monsters schuiven tegelijk (animatie)
 
 #### Systemen – run feature
-- [ ] RUN-knop toevoegen BOVEN de CORE-knop
-- [ ] Toggle: aan/uit (blijft aan tot speler uitzet)
-- [ ] Wanneer RUN aan:
-  - [ ] Speler beweegt 2 tegels per move
-  - [ ] Sprite beweegt SNEL (animatie, geen teleport)
-  - [ ] Loopsnelheid sprite 2x
-- [ ] Wanneer RUN uit:
-  - [ ] Normale 1-tegel beweging
-- [ ] Werkt OVERAL (dungeons + worldmap + dorpen)
-- [ ] Geen verschil in vijand-interactie (agro-radius blijft gelijk)
-- [ ] NIET tijdens gevecht
-- [ ] Visuele indicator op knop: aan/uit status duidelijk
+- [x] RUN-knop toevoegen BOVEN de CORE-knop
+- [x] Toggle: aan/uit (blijft aan tot speler uitzet)
+- [x] Wanneer RUN aan:
+  - [x] Speler beweegt 2 tegels per move
+  - [x] Sprite beweegt SNEL (animatie, geen teleport)
+  - [x] Loopsnelheid sprite 2x
+- [x] Wanneer RUN uit:
+  - [x] Normale 1-tegel beweging
+- [x] Werkt OVERAL (dungeons + worldmap + dorpen)
+- [x] Geen verschil in vijand-interactie (agro-radius blijft gelijk)
+- [x] NIET tijdens gevecht
+- [x] Visuele indicator op knop: aan/uit status duidelijk
 
 #### Koppelingen tussen systemen
 - [ ] Push werkt samen met PUZZLE ROOM (gestund monster op drukplaat)
@@ -1019,40 +1019,40 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
 ### Basis push
 
-- [ ] Als speler TEGEN een GESTUND monster aanloopt:
-  - [ ] Speler beweegt ÉN monster wordt geduwd (samen)
-  - [ ] Monster schuift 1 tegel in de richting van de speler
-  - [ ] Speler neemt de oorspronkelijke plek NIET in
-- [ ] Als monster tegen muur/obstakel wordt geduwd → blijft staan
-- [ ] Werkt ALLEEN bij stun-status (niet bij normale monsters)
-- [ ] Visuele feedback: monster schuift 1 tegel (geen teleport)
+- [x] Als speler TEGEN een GESTUND monster aanloopt:
+  - [x] Speler beweegt ÉN monster wordt geduwd (samen)
+  - [x] Monster schuift 1 tegel in de richting van de speler
+  - [x] Speler neemt de oorspronkelijke plek NIET in
+- [x] Als monster tegen muur/obstakel wordt geduwd → blijft staan
+- [x] Werkt ALLEEN bij stun-status (niet bij normale monsters)
+- [x] Visuele feedback: monster schuift 1 tegel (geen teleport)
 
 ### Chain-push
 
-- [ ] Als geduwd monster tegen ANDER monster aan komt:
-  - [ ] Beide monsters worden geduwd (chain-push)
-  - [ ] Tweede monster schuift ook 1 tegel in dezelfde richting
-  - [ ] Als tweede tegen muur/obstakel komt → stopt daar
-  - [ ] Als tweede tegen een DERDE monster komt → keten gaat door
-- [ ] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
-- [ ] Alle geduwde monsters schuiven tegelijk (animatie)
+- [x] Als geduwd monster tegen ANDER monster aan komt:
+  - [x] Beide monsters worden geduwd (chain-push)
+  - [x] Tweede monster schuift ook 1 tegel in dezelfde richting
+  - [x] Als tweede tegen muur/obstakel komt → stopt daar
+  - [x] Als tweede tegen een DERDE monster komt → keten gaat door
+- [x] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
+- [x] Alle geduwde monsters schuiven tegelijk (animatie)
 
 ## Systemen – run feature
 
 **CANON – niet wijzigen zonder overleg.**
 
-- [ ] RUN-knop toevoegen BOVEN de CORE-knop
-- [ ] Toggle: aan/uit (blijft aan tot speler uitzet)
-- [ ] Wanneer RUN aan:
-  - [ ] Speler beweegt 2 tegels per move
-  - [ ] Sprite beweegt SNEL (animatie, geen teleport)
-  - [ ] Loopsnelheid sprite 2x
-- [ ] Wanneer RUN uit:
-  - [ ] Normale 1-tegel beweging
-- [ ] Werkt OVERAL (dungeons + worldmap + dorpen)
-- [ ] Geen verschil in vijand-interactie (agro-radius blijft gelijk)
-- [ ] NIET tijdens gevecht
-- [ ] Visuele indicator op knop: aan/uit status duidelijk
+- [x] RUN-knop toevoegen BOVEN de CORE-knop
+- [x] Toggle: aan/uit (blijft aan tot speler uitzet)
+- [x] Wanneer RUN aan:
+  - [x] Speler beweegt 2 tegels per move
+  - [x] Sprite beweegt SNEL (animatie, geen teleport)
+  - [x] Loopsnelheid sprite 2x
+- [x] Wanneer RUN uit:
+  - [x] Normale 1-tegel beweging
+- [x] Werkt OVERAL (dungeons + worldmap + dorpen)
+- [x] Geen verschil in vijand-interactie (agro-radius blijft gelijk)
+- [x] NIET tijdens gevecht
+- [x] Visuele indicator op knop: aan/uit status duidelijk
 
 ## Koppelingen tussen systemen
 

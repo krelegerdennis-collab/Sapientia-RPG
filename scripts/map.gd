@@ -228,6 +228,9 @@ func _spawn_garden_creatures() -> void:
 	g.setup(player, get_node_or_null("Exits/NaarWereld"))
 
 
+var _run_drawn := false
+
+
 func _process(_delta: float) -> void:
 	# MENU-knop verbergen zolang er een tekstvak of menu open is (anders valt hij erover)
 	var touch := get_node_or_null("TouchControls/Control")
@@ -235,6 +238,12 @@ func _process(_delta: float) -> void:
 		var want: bool = not Dialog.is_open and not menu_open() and not Story.running
 		if touch.show_menu != want:
 			touch.show_menu = want
+		if "show_run" in touch:
+			if touch.show_run != want:
+				touch.show_run = want
+			elif want and touch.run_on() != _run_drawn:
+				touch.queue_redraw()
+			_run_drawn = touch.run_on()
 	# Veldmenu (Esc/M/Tab of de MENU-knop): alleen als de speler stil staat
 	if Input.is_action_just_pressed("menu") and not menu_open() and not player.is_moving \
 			and not player.input_locked and not Dialog.is_open and not GameState.changing_map and not Story.running \
