@@ -127,6 +127,7 @@ static func regels(id: String, flags: Dictionary, stap: int) -> Array[String]:
 			uit.append(str(a["echo_open"]))
 		DICHT:
 			uit.append(ZIN_DICHT)
+			return uit
 		_:
 			uit.append(ZIN_LATER)
 			return uit

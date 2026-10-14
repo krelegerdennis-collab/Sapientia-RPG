@@ -531,8 +531,10 @@ func _questlog_tests() -> void:
 	var r2 := QL.regels("akte_2", {SD.GOLEM_FLAG: true, "noor_gered": true}, SD.NACHT)
 	check("questlog: Act 2 deels: Vesper [x], Seren [ ]", r2[1].contains("[x] Save Vesper") and r2[1].contains("[ ] Seren joins"))
 	check("questlog: Act 2 klaar = canonzin ECHO", QL.regels("akte_2", a2, SD.NACHT)[0] == "Two Archives active. World Warper online.")
-	check("questlog: dichte act toont geen opdrachten", Array(QL.regels("akte_2", leeg, 0)) == [QL.ZIN_DICHT]
-			and Array(QL.regels("akte_4", a2, SD.NACHT)) == [QL.ZIN_LATER])
+	var rd := QL.regels("akte_2", leeg, 0)
+	var rl := QL.regels("akte_4", a2, SD.NACHT)
+	check("questlog: dichte act toont geen opdrachten (%s | %s)" % [rd, rl], rd.size() == 1 and rd[0] == QL.ZIN_DICHT
+			and rl.size() == 1 and rl[0] == QL.ZIN_LATER)
 	var eng := true
 	for t in QL.speler_teksten():
 		for nl in ["opdracht", "klaar", "akte", "archief", "verslaan", "proefpersoon", "onderzoeker"]:
