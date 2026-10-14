@@ -1,79 +1,79 @@
 {
 	"accessoire": {
 		"deur": [
-			1,
-			4
+			2,
+			6
 		],
 		"maat": [
-			4,
-			5
+			6,
+			7
 		],
-		"muur_rijen": 2
+		"muur_rijen": 3
 	},
 	"dicht_west": {
 		"deur": [
-			1,
-			5
+			2,
+			7
 		],
 		"maat": [
-			4,
-			6
+			6,
+			8
 		],
-		"muur_rijen": 2
+		"muur_rijen": 3
 	},
 	"echtpaar": {
 		"deur": [
-			1,
-			5
+			2,
+			7
 		],
 		"maat": [
-			4,
-			6
+			6,
+			8
 		],
-		"muur_rijen": 2
+		"muur_rijen": 3
 	},
 	"magie": {
 		"deur": [
-			1,
-			4
+			2,
+			6
 		],
 		"maat": [
-			4,
-			5
+			6,
+			7
 		],
-		"muur_rijen": 2
+		"muur_rijen": 3
 	},
 	"mien": {
 		"deur": [
-			1,
-			5
+			2,
+			7
 		],
 		"maat": [
-			4,
-			6
+			6,
+			8
 		],
-		"muur_rijen": 2
+		"muur_rijen": 3
 	},
 	"pantser": {
 		"deur": [
-			1,
-			4
+			2,
+			6
 		],
 		"maat": [
-			4,
-			5
+			6,
+			7
 		],
-		"muur_rijen": 2
+		"muur_rijen": 3
 	},
 	"wapen": {
 		"deur": [
-			1,
-			4
+			2,
+			6
 		],
 		"maat": [
-			4,
-			5
+			6,
+			7
 		],
-		"muur_rijen": 2
+		"muur_rijen": 3
 	}
 }
