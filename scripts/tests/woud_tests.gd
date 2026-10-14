@@ -1028,26 +1028,20 @@ func _graan_data() -> void:
 				if cmd is Array and not cmd.is_empty():
 					namen.append(str(cmd[0]))
 	check("zangscène en zang tussen herkenning en de molen", namen == ["take", "flag", "say", "molen_zang", "zang", "molen"])
-	# v0.21: echte molen-art (4 frames, f*45 graden) -> 8 draaistappen van 22.5 graden.
+	# v3: reuzenmolen v2 (RPG ART): draaiende sheet 4 frames 224x224 (22.5 graden per frame, naadloos)
+	# en stille, versleten wieken als losse 224x224.
 	var art: Texture2D = load(Wieken.ART)
-	var sheet := Wieken.wieken_sheet().get_image()
-	var art_img := Wieken.art_image()
-	var tip: Vector2i = Wieken.zeil_punt(0)
-	var tip_tussen: Vector2i = Wieken.zeil_punt(1)
-	var tip2 := Vector2i(tip.x + Wieken.FRAME_W, tip.y)
-	var stap0_is_art := sheet.get_region(Rect2i(0, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data() \
-			== art_img.get_region(Rect2i(0, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data()
-	var stap2_is_art1 := sheet.get_region(Rect2i(2 * Wieken.FRAME_W, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data() \
-			== art_img.get_region(Rect2i(Wieken.FRAME_W, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data()
+	var stil_art: Texture2D = load(Wieken.ART_STIL)
+	var basis_art: Texture2D = load(Wieken.ART_BASIS)
 	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
-	check("echte molen-art: 4 frames 48x64, 8 stappen van 22.5 graden, wiek draait per stap", art != null
+	check("reuzenmolen-art: basis 224x320, wieken 4 frames 224x224, stil 224x224, 5 fps", art != null and stil_art != null
+			and basis_art != null and basis_art.get_width() == 224 and basis_art.get_height() == 320
 			and art.get_width() == Wieken.FRAME_W * Wieken.FRAMES and art.get_height() == Wieken.FRAME_H
-			and hw.contains("assets/sprites/buiten/molen_wieken.png")
-			and Wieken.STAPPEN == 8 and is_equal_approx(Wieken.STAP_GRADEN, 22.5)
-			and sheet.get_width() == Wieken.FRAME_W * Wieken.STAPPEN and sheet.get_height() == Wieken.FRAME_H
-			and stap0_is_art and stap2_is_art1
-			and sheet.get_pixelv(tip).a > 0.8 and sheet.get_pixelv(tip2).a < 0.1
-			and sheet.get_pixelv(tip_tussen).a > 0.8)
+			and stil_art.get_width() == 224 and stil_art.get_height() == 224
+			and hw.contains("assets/sprites/buiten/wilgendal/windmolen_wieken_v2.png")
+			and hw.contains("assets/sprites/buiten/wilgendal/windmolen_wieken_stil_v2.png")
+			and Wieken.STAPPEN == 4 and is_equal_approx(Wieken.STAP_GRADEN, 22.5)
+			and is_equal_approx(Wieken.STAP_TIJD, 0.2))
 	var toon := Wieken.maak_zang()
 	var top := Wieken.piek(toon)
 	check("zacht gezang uit de noten in de data", SD.MOLEN_ZANG.size() == 5 and SD.MOLEN_NODE == "MolenWieken"
@@ -1091,7 +1085,7 @@ func _graan_tests() -> void:
 	var wieken: Node = d.get_node_or_null("Objects/MolenWieken")
 	check("molen staat stil tot het zaad binnen is", wieken != null and not wieken.draait() and wieken.frame_nu() == 0
 			and not wieken.glow_aan() and not wieken.gezongen
-			and wieken.sprite.texture == Wieken.wieken_sheet())
+			and wieken.sprite.texture == Wieken.wieken_stil() and wieken.stil() and wieken.sprite.hframes == 1)
 	Story.trigger("gerrit", g)
 	var dicht: Array = await run_story(6.0)
 	check("quest dicht vóór Vesper", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)
@@ -1173,6 +1167,7 @@ func _graan_tests() -> void:
 	var wiek0: int = wieken.frame_nu()
 	await get_tree().create_timer(0.55).timeout
 	check("zangscène: de molen draait en zingt zacht", zong[0] and wieken.gezongen and wieken.draait()
+			and not wieken.stil() and wieken.sprite.texture == Wieken.wieken_sheet() and wieken.sprite.hframes == 4
 			and wieken.glow_aan() and wieken.noten >= 3 and wieken.frame_nu() != wiek0
 			and wieken.get_node_or_null("Zang") != null
 			and Wieken.piek(wieken.laatste_zang) > 0.04 and Wieken.piek(wieken.laatste_zang) < 0.2)
@@ -1203,7 +1198,8 @@ func _graan_tests() -> void:
 	await enter(WORLD, "van_wilgendal")
 	d = await enter(dorp, "zuid_ingang")
 	wieken = d.get_node("Objects/MolenWieken")
-	check("nieuw bezoek: de molen draait al, de zangscène niet opnieuw", wieken.draait() and wieken.glow_aan() and not wieken.gezongen)
+	check("nieuw bezoek: de molen draait al, de zangscène niet opnieuw", wieken.draait() and wieken.glow_aan() and not wieken.gezongen
+			and not wieken.stil())
 	Story.trigger("gerrit", d.get_node("Objects/Gerrit"))
 	await lines_until_choice()
 	check("nieuw bezoek: nog één Zingend Meel", GameState.item_count(SD.ITEM_MEEL) == 2)

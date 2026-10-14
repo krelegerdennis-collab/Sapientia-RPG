@@ -592,3 +592,7 @@ assets/sprites/buiten/wilgendal/marktkraam_1.png
 assets/sprites/buiten/wilgendal/marktkraam_2.png
 assets/sprites/buiten/wilgendal/marktkraam_3.png
 assets/sprites/buiten/wilgendal/put.png
+assets/sprites/buiten/wilgendal/windmolen_basis_v2.png
+assets/sprites/buiten/wilgendal/windmolen_wieken_v2.png
+assets/sprites/buiten/wilgendal/windmolen_wieken_stil_v2.png
+assets/sprites/buiten/wilgendal/burgemeestershuis.png

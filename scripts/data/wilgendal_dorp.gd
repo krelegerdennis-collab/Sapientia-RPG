@@ -9,50 +9,58 @@ const DORP := "res://scenes/maps/dorp_wilgendal.tscn"
 const BINNEN := "res://scenes/maps/wilgendal_binnen.tscn"
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const ALTIJD_OPEN := true
-const W := 42
-const H := 28
-const PLEIN := Rect2i(14, 8, 14, 7)
-const MOLEN := Rect2i(1, 1, 3, 4)
+const W := 56
+const H := 30
+const PLEIN := Rect2i(28, 8, 14, 7)
+## v3 (Dennis 14 okt 2026): reuzenmolen v2 (RPG ART, 14x20 tegels) in het nieuwe westdeel. De molen
+## steekt uit over de beek: alleen de voet (sprite-rijen 17-19, kolommen 2-11) blokkeert; achter (noord
+## van) de molen loop je vrij en verdwijn je achter de toren (y-sort op de onderrand).
+const MOLEN_OORSPRONG := Vector2i(1, 1)
+const MOLEN_MAAT := Vector2i(14, 20)
+const MOLEN := Rect2i(MOLEN_OORSPRONG + Vector2i(2, 17), Vector2i(10, 3))
+const MOLEN_DEUR: Array[Vector2i] = [Vector2i(7, 20), Vector2i(8, 20)]
 const SPAWN_ZUID := "zuid_ingang"
-const SPAWN_TEGEL := Vector2i(20, 25)
-const EXIT_TEGEL := Vector2i(19, 27)
+const SPAWN_TEGEL := Vector2i(34, 27)
+const EXIT_TEGEL := Vector2i(33, 29)
 const EXIT_MAAT := Vector2i(3, 1)
-const GERRIT_TEGEL := Vector2i(4, 6)
+const GERRIT_TEGEL := Vector2i(10, 22)
 ## Beek: één tegel breed, rij BEEK_RIJ over de hele breedte; de brug (BRUG) is beloopbaar.
 const BEEK_RIJ := 17
-const BRUG := Rect2i(20, 16, 2, 3)
+const BRUG := Rect2i(34, 16, 2, 3)
 ## Hoogstens zoveel sfeer-NPC's op het marktplein (besluit Dennis: 2-3).
 const PLEIN_MAX := 2
 
 const GROND: Array[String] = [
-	"TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
-	"T........................................T",
-	"T........................................T",
-	"T........................................T",
-	"T........................................T",
-	"T....================================....T",
-	"T...................==.................T.T",
-	"T...................==...................T",
-	"T.............######==######.............T",
-	"T.............##############.............T",
-	"T.............##############.............T",
-	"T...==========##############==========...T",
-	"T.............##############.............T",
-	"T.............##############...........T.T",
-	"T.T......T....######==######..T..........T",
-	"T...................==...................T",
-	"T...................==...................T",
-	"~~~~~~~~~~~~~~~~~~~~BB~~~~~~~~~~~~~~~~~~~~",
-	"T...................==...................T",
-	"T..........T........==...........T.......T",
-	"T...................==...................T",
-	"T...............T...==....T..............T",
-	"T...................==...................T",
-	"T...==================================...T",
-	"T...................==...................T",
-	"T......T............==.............T.....T",
-	"T..................===...................T",
-	"TTTTTTTTTTTTTTTTTTT===TTTTTTTTTTTTTTTTTTTT",
+	"TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+	"T......................................................T",
+	"T......................................................T",
+	"T......................................................T",
+	"T......................................................T",
+	"T..................================================....T",
+	"T.................................==.................T.T",
+	"T.................................==...................T",
+	"T...........................######==######.............T",
+	"T...........................##############.............T",
+	"T...........................##############.............T",
+	"T.==========================##############==========...T",
+	"T...........................##############.............T",
+	"T...........................##############...........T.T",
+	"T...............T......T....######==######..T..........T",
+	"T.................................==...................T",
+	"T.................................==...................T",
+	"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BB~~~~~~~~~~~~~~~~~~~~",
+	"T.................................==...................T",
+	"T.................................==...................T",
+	"T.................................==...................T",
+	"T......=============================...................T",
+	"T.................................==...................T",
+	"T.............................T...==....T..............T",
+	"T.................................==...................T",
+	"T.................==================================...T",
+	"T.................................==...................T",
+	"T....................T............==.............T.....T",
+	"T................................===...................T",
+	"TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT===TTTTTTTTTTTTTTTTTTTT",
 ]
 
 const TEGEL := {
@@ -79,14 +87,14 @@ const PANDEN := [
 		"id": "pantser",
 		"kind": "winkel",
 		"shop_id": "wilgendal_pantser",
-		"oorsprong": Vector2i(8, 2),
+		"oorsprong": Vector2i(22, 2),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(9, 4),
+		"deur": Vector2i(23, 4),
 		"icoon": "schild",
 		"tex": "pantser",
 		"bewoond": false,
 		"keeper_naam": "Jack Hammond",
-		"keeper_lines": ["Harnas en helmen."],
+		"keeper_lines": ["Armor and helmets."],
 		"sfeer": "stoer",
 		"map_naam": "Armor Shop",
 		"dicht": "",
@@ -95,9 +103,9 @@ const PANDEN := [
 		"id": "wapen",
 		"kind": "winkel",
 		"shop_id": "wilgendal_wapen",
-		"oorsprong": Vector2i(13, 2),
+		"oorsprong": Vector2i(27, 2),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(14, 4),
+		"deur": Vector2i(28, 4),
 		"icoon": "zwaard",
 		"tex": "wapen",
 		"bewoond": false,
@@ -111,14 +119,14 @@ const PANDEN := [
 		"id": "accessoire",
 		"kind": "winkel",
 		"shop_id": "wilgendal_accessoire",
-		"oorsprong": Vector2i(25, 2),
+		"oorsprong": Vector2i(39, 2),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(26, 4),
+		"deur": Vector2i(40, 4),
 		"icoon": "ring",
 		"tex": "accessoire",
 		"bewoond": false,
 		"keeper_naam": "Accessories",
-		"keeper_lines": ["Ringen en bladwijzers."],
+		"keeper_lines": ["Rings and bookmarks."],
 		"sfeer": "sier",
 		"map_naam": "Accessory Shop",
 		"dicht": "",
@@ -127,9 +135,9 @@ const PANDEN := [
 		"id": "magie",
 		"kind": "winkel",
 		"shop_id": "wilgendal_magie",
-		"oorsprong": Vector2i(30, 2),
+		"oorsprong": Vector2i(44, 2),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(31, 4),
+		"deur": Vector2i(45, 4),
 		"icoon": "ster",
 		"tex": "magie",
 		"bewoond": false,
@@ -143,9 +151,9 @@ const PANDEN := [
 		"id": "mien",
 		"kind": "huis",
 		"shop_id": "wilgendal_kruiden",
-		"oorsprong": Vector2i(3, 8),
+		"oorsprong": Vector2i(17, 8),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(4, 10),
+		"deur": Vector2i(18, 10),
 		"icoon": "",
 		"tex": "huis",
 		"bewoond": true,
@@ -159,9 +167,9 @@ const PANDEN := [
 		"id": "echtpaar",
 		"kind": "huis",
 		"shop_id": "",
-		"oorsprong": Vector2i(36, 8),
+		"oorsprong": Vector2i(50, 8),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(37, 10),
+		"deur": Vector2i(51, 10),
 		"icoon": "",
 		"tex": "huis",
 		"bewoond": true,
@@ -176,9 +184,9 @@ const PANDEN := [
 		"id": "dicht_west",
 		"kind": "huis",
 		"shop_id": "",
-		"oorsprong": Vector2i(3, 20),
+		"oorsprong": Vector2i(17, 22),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(4, 22),
+		"deur": Vector2i(18, 24),
 		"icoon": "",
 		"tex": "huis_dicht",
 		"bewoond": false,
@@ -189,20 +197,21 @@ const PANDEN := [
 		"dicht": "The shutters are closed. Nobody lives here.",
 	},
 	{
-		"id": "dicht_oost",
+		"id": "burgemeester",
 		"kind": "huis",
 		"shop_id": "",
-		"oorsprong": Vector2i(36, 20),
-		"maat": Vector2i(3, 3),
-		"deur": Vector2i(37, 22),
+		"oorsprong": Vector2i(42, 19),
+		"maat": Vector2i(7, 6),
+		"blok_rijen": 3,
+		"deur": Vector2i(45, 24),
 		"icoon": "",
-		"tex": "huis_dicht",
+		"tex": "burgemeester",
 		"bewoond": false,
 		"keeper_naam": "",
 		"keeper_lines": [],
 		"sfeer": "",
 		"map_naam": "",
-		"dicht": "A closed door. It stays quiet inside.",
+		"dicht": "The Mayor's House. The double doors are locked today.",
 	},
 ]
 
@@ -274,40 +283,40 @@ const SFEER := [
 		"node": "Bram",
 		"rol": "echtpaar",
 		"naam": "Bramwell",
-		"tegel": Vector2i(16, 11),
-		"lus": [Vector2i(16, 11), Vector2i(17, 11), Vector2i(17, 12), Vector2i(16, 12)],
+		"tegel": Vector2i(30, 11),
+		"lus": [Vector2i(30, 11), Vector2i(31, 11), Vector2i(31, 12), Vector2i(30, 12)],
 		"lines": ["Elsie wants to go to the smith soon. I'm staying here on the square."],
 	},
 	{
 		"node": "Els",
 		"rol": "echtpaar",
 		"naam": "Elsie",
-		"tegel": Vector2i(33, 12),
-		"lus": [Vector2i(33, 12), Vector2i(34, 12), Vector2i(34, 13), Vector2i(33, 13)],
+		"tegel": Vector2i(47, 12),
+		"lus": [Vector2i(47, 12), Vector2i(48, 12), Vector2i(48, 13), Vector2i(47, 13)],
 		"lines": ["The shops never close. That keeps things calm."],
 	},
 	{
 		"node": "Fien",
 		"rol": "kind",
 		"naam": "Fern",
-		"tegel": Vector2i(25, 10),
-		"lus": [Vector2i(25, 10), Vector2i(26, 10), Vector2i(26, 11), Vector2i(25, 11)],
+		"tegel": Vector2i(39, 10),
+		"lus": [Vector2i(39, 10), Vector2i(40, 10), Vector2i(40, 11), Vector2i(39, 11)],
 		"lines": ["That star over there is the magic shop. I'm only allowed to look."],
 	},
 	{
 		"node": "Wout",
 		"rol": "veteraan",
 		"naam": "Walt",
-		"tegel": Vector2i(26, 15),
-		"lus": [Vector2i(26, 15), Vector2i(27, 15), Vector2i(27, 16), Vector2i(26, 16)],
+		"tegel": Vector2i(40, 15),
+		"lus": [Vector2i(40, 15), Vector2i(41, 15), Vector2i(41, 16), Vector2i(40, 16)],
 		"lines": ["I've fought enough. Now I drink tea on the square."],
 	},
 	{
 		"node": "Siem",
 		"rol": "koerier",
 		"naam": "Simon",
-		"tegel": Vector2i(8, 21),
-		"lus": [Vector2i(8, 21), Vector2i(9, 21), Vector2i(9, 22), Vector2i(8, 22)],
+		"tegel": Vector2i(22, 23),
+		"lus": [Vector2i(22, 23), Vector2i(23, 23), Vector2i(23, 24), Vector2i(22, 24)],
 		"lines": ["Mail for Willowdale. Nothing for you today."],
 	},
 ]
@@ -316,33 +325,33 @@ const SFEER := [
 ## onderste rij, "blok" = blokkerende tegels (0 = loopbaar, bv. de brug). "flip" spiegelt horizontaal.
 const PROPS_MAP := "res://assets/sprites/buiten/wilgendal/"
 const PROPS := [
-	{"tex": "put", "tegel": Vector2i(17, 10), "blok": Vector2i(2, 1)},
-	{"tex": "marktkraam_1", "tegel": Vector2i(23, 9), "blok": Vector2i(3, 1)},
-	{"tex": "marktkraam_2", "tegel": Vector2i(23, 12), "blok": Vector2i(3, 1)},
-	{"tex": "marktkraam_3", "tegel": Vector2i(15, 13), "blok": Vector2i(2, 1)},
-	{"tex": "bloembak_1", "tegel": Vector2i(13, 8), "blok": Vector2i(1, 1)},
-	{"tex": "bloembak_2", "tegel": Vector2i(28, 8), "blok": Vector2i(1, 1)},
-	{"tex": "bloembak_2", "tegel": Vector2i(13, 14), "blok": Vector2i(1, 1)},
-	{"tex": "bloembak_1", "tegel": Vector2i(28, 14), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(19, 6), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(22, 6), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(19, 15), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(22, 19), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(12, 12), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(29, 12), "blok": Vector2i(1, 1)},
-	{"tex": "bankje_voor", "tegel": Vector2i(24, 15), "blok": Vector2i(2, 1)},
-	{"tex": "bankje_voor", "tegel": Vector2i(11, 15), "blok": Vector2i(2, 1)},
-	{"tex": "bankje_voor", "tegel": Vector2i(16, 8), "blok": Vector2i(2, 1)},
-	{"tex": "hek_eind", "tegel": Vector2i(2, 15), "blok": Vector2i(1, 1)},
-	{"tex": "hek_h", "tegel": Vector2i(3, 15), "blok": Vector2i(1, 1)},
-	{"tex": "hek_h", "tegel": Vector2i(4, 15), "blok": Vector2i(1, 1)},
-	{"tex": "hek_h", "tegel": Vector2i(5, 15), "blok": Vector2i(1, 1)},
-	{"tex": "hek_eind", "tegel": Vector2i(6, 15), "blok": Vector2i(1, 1), "flip": true},
-	{"tex": "hek_eind", "tegel": Vector2i(32, 15), "blok": Vector2i(1, 1)},
-	{"tex": "hek_h", "tegel": Vector2i(33, 15), "blok": Vector2i(1, 1)},
-	{"tex": "hek_h", "tegel": Vector2i(34, 15), "blok": Vector2i(1, 1)},
-	{"tex": "hek_h", "tegel": Vector2i(35, 15), "blok": Vector2i(1, 1)},
-	{"tex": "hek_eind", "tegel": Vector2i(36, 15), "blok": Vector2i(1, 1), "flip": true},
+	{"tex": "put", "tegel": Vector2i(31, 10), "blok": Vector2i(2, 1)},
+	{"tex": "marktkraam_1", "tegel": Vector2i(37, 9), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_2", "tegel": Vector2i(37, 12), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_3", "tegel": Vector2i(29, 13), "blok": Vector2i(2, 1)},
+	{"tex": "bloembak_1", "tegel": Vector2i(27, 8), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_2", "tegel": Vector2i(42, 8), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_2", "tegel": Vector2i(27, 14), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_1", "tegel": Vector2i(42, 14), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(33, 6), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(36, 6), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(33, 15), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(36, 21), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(26, 12), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(43, 12), "blok": Vector2i(1, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(38, 15), "blok": Vector2i(2, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(25, 15), "blok": Vector2i(2, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(30, 8), "blok": Vector2i(2, 1)},
+	{"tex": "hek_eind", "tegel": Vector2i(16, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(17, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(18, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(19, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_eind", "tegel": Vector2i(20, 15), "blok": Vector2i(1, 1), "flip": true},
+	{"tex": "hek_eind", "tegel": Vector2i(46, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(47, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(48, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(49, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_eind", "tegel": Vector2i(50, 15), "blok": Vector2i(1, 1), "flip": true},
 ]
 
 const ICOON_VAN_WINKEL := {
@@ -351,6 +360,19 @@ const ICOON_VAN_WINKEL := {
 	"accessoire": "ring",
 	"magie": "ster",
 }
+
+
+## Blokkerend deel van een pand: de onderste "blok_rijen" rijen (standaard het hele pand).
+static func pand_blok(rij: Dictionary) -> Rect2i:
+	var o: Vector2i = rij["oorsprong"]
+	var m: Vector2i = rij["maat"]
+	var n := int(rij.get("blok_rijen", m.y))
+	return Rect2i(o.x, o.y + m.y - n, m.x, n)
+
+
+## Molen-node: linksonder van de basis (y-sort op de onderrand), in pixels.
+static func molen_positie() -> Vector2:
+	return Vector2(MOLEN_OORSPRONG.x * 16.0, (MOLEN_OORSPRONG.y + MOLEN_MAAT.y) * 16.0)
 
 
 static func pand(id: String) -> Dictionary:
@@ -426,9 +448,7 @@ static func beloopbaar(t: Vector2i) -> bool:
 		return false
 	for ruw in PANDEN:
 		var rij: Dictionary = ruw
-		var o: Vector2i = rij["oorsprong"]
-		var m: Vector2i = rij["maat"]
-		if Rect2i(o, m).has_point(t):
+		if pand_blok(rij).has_point(t):
 			return false
 	return true
 

@@ -17,6 +17,7 @@ const TEX := {
 	"magie": preload("res://assets/sprites/buiten/wilgendal_magie.png"),
 	"huis": preload("res://assets/sprites/buiten/wilgendal_huis.png"),
 	"huis_dicht": preload("res://assets/sprites/buiten/wilgendal_huis_dicht.png"),
+	"burgemeester": preload("res://assets/sprites/buiten/wilgendal/burgemeestershuis.png"),
 	"schild": preload("res://assets/sprites/buiten/wilgendal_schild.png"),
 	"zwaard": preload("res://assets/sprites/buiten/wilgendal_zwaard.png"),
 	"ring": preload("res://assets/sprites/buiten/wilgendal_ring.png"),
@@ -29,6 +30,7 @@ func _ready() -> void:
 	var objects := kaart.get_node("Objects")
 	_beek_en_brug(kaart)
 	_props(objects)
+	_molen(objects)
 	_gerrit(objects)
 	_sfeer(objects)
 	for ruw in Data.PANDEN:
@@ -127,6 +129,13 @@ func _blok(ouder: Node, naam: String, r: Rect2i) -> void:
 	ouder.add_child(body)
 
 
+## v3: de reuzenmolen (MolenWieken in de scène) naar zijn plek in het westdeel.
+func _molen(objects: Node) -> void:
+	var molen := objects.get_node_or_null("MolenWieken")
+	if molen != null:
+		molen.position = Data.molen_positie()
+
+
 func _gerrit(objects: Node) -> void:
 	var gerrit := objects.get_node_or_null("Gerrit")
 	if gerrit == null:
@@ -158,19 +167,23 @@ func _pand(objects: Node, ruw: Dictionary) -> void:
 	var id := str(ruw["id"])
 	var oorsprong: Vector2i = ruw["oorsprong"]
 	var maat: Vector2i = ruw["maat"]
+	var blok := Data.pand_blok(ruw)
 	var lichaam := StaticBody2D.new()
 	lichaam.name = "Pand_%s" % id
-	lichaam.position = _midden(oorsprong, maat)
+	# v3: y-sort op de onderrand; alleen de onderste blok-rijen botsen (dak/gevel = erachter lopen)
+	lichaam.position = Vector2(oorsprong.x * 16.0 + maat.x * 8.0, (oorsprong.y + maat.y) * 16.0)
 	lichaam.set_meta("pand_id", id)
 	lichaam.set_meta("kind", str(ruw["kind"]))
 	var vorm := RectangleShape2D.new()
-	vorm.size = Vector2(maat) * 16.0 - Vector2(2, 2)
+	vorm.size = Vector2(blok.size) * 16.0 - Vector2(2, 2)
 	var bots := CollisionShape2D.new()
 	bots.shape = vorm
+	bots.position = Vector2(0, -blok.size.y * 8.0)
 	lichaam.add_child(bots)
 	var plaat := Sprite2D.new()
 	plaat.texture = TEX[str(ruw["tex"])]
 	plaat.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	plaat.position = Vector2(0, -maat.y * 8.0)
 	lichaam.add_child(plaat)
 	objects.add_child(lichaam)
 
