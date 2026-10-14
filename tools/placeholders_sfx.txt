@@ -99,3 +99,20 @@ assets/audio/sfx/monsters/wortelgeest/aanval.wav
 assets/audio/sfx/monsters/wortelgeest/raak.wav
 assets/audio/sfx/monsters/wortelgeest/dood.wav
 assets/audio/sfx/monsters/wortelgeest/vaardigheid.wav
+# Diepe Grot-monsters: PLACEHOLDER, kopie van een verwant monster (shard_codex<-papiergeest, scanline_wolf<-glitchmot, aureate_watcher<-mistuil, ledger_scarab<-mech_wachter)
+assets/audio/sfx/monsters/shard_codex/aanval.wav
+assets/audio/sfx/monsters/shard_codex/raak.wav
+assets/audio/sfx/monsters/shard_codex/dood.wav
+assets/audio/sfx/monsters/shard_codex/vaardigheid.wav
+assets/audio/sfx/monsters/scanline_wolf/aanval.wav
+assets/audio/sfx/monsters/scanline_wolf/raak.wav
+assets/audio/sfx/monsters/scanline_wolf/dood.wav
+assets/audio/sfx/monsters/scanline_wolf/vaardigheid.wav
+assets/audio/sfx/monsters/aureate_watcher/aanval.wav
+assets/audio/sfx/monsters/aureate_watcher/raak.wav
+assets/audio/sfx/monsters/aureate_watcher/dood.wav
+assets/audio/sfx/monsters/aureate_watcher/vaardigheid.wav
+assets/audio/sfx/monsters/ledger_scarab/aanval.wav
+assets/audio/sfx/monsters/ledger_scarab/raak.wav
+assets/audio/sfx/monsters/ledger_scarab/dood.wav
+assets/audio/sfx/monsters/ledger_scarab/vaardigheid.wav

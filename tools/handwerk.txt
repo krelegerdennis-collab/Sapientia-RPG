@@ -554,3 +554,20 @@ assets/battle/diepe_grot_battle_v4.png
 assets/battle/diepe_grot_battle_v5.png
 assets/battle/diepe_grot_battle_v6.png
 assets/battle/diepe_grot_battle_v7.png
+# Diepe Grot-monsters van RPG ART (art_diepegrot_monsters/out): voor/rug 96x96, kaart 32x64, hub 48x96.
+assets/sprites/enemies/shard_codex.png
+assets/sprites/enemies/shard_codex_rug.png
+assets/map_monsters/shard_codex.png
+assets/sprites/hub/shard_codex_hub.png
+assets/sprites/enemies/scanline_wolf.png
+assets/sprites/enemies/scanline_wolf_rug.png
+assets/map_monsters/scanline_wolf.png
+assets/sprites/hub/scanline_wolf_hub.png
+assets/sprites/enemies/aureate_watcher.png
+assets/sprites/enemies/aureate_watcher_rug.png
+assets/map_monsters/aureate_watcher.png
+assets/sprites/hub/aureate_watcher_hub.png
+assets/sprites/enemies/ledger_scarab.png
+assets/sprites/enemies/ledger_scarab_rug.png
+assets/map_monsters/ledger_scarab.png
+assets/sprites/hub/ledger_scarab_hub.png
