@@ -2,6 +2,8 @@ extends Node2D
 ## Eén val in een VALKAMER van de Diepe Grot (grot_kamers.png rij 0). Loopbaar (geen botsing);
 ## dungeon100_room.gd roept trigger() aan als de speler erop stapt. Verborgen vallen zijn bijna
 ## onzichtbaar (alleen de "verborgen"-tegel), na het afgaan blijven ze zichtbaar.
+## Besluit Dennis 14 okt 2026: een verborgen val FLITST kort (gloed + zichtbare tegel) zodra de speler
+## binnen GrotKamers.VAL_FLITS_BEREIK tegels komt; opnieuw pas na weglopen en terugkomen.
 ## Schade: GrotKamers.val_schade (spijker 5-10% / rune 10% max HP per held, nooit dodelijk).
 
 const Kamers := preload("res://scripts/data/grot_kamers.gd")
@@ -11,6 +13,12 @@ var verborgen := false
 var afgegaan := false
 var tile := Vector2i.ZERO
 var anim: AnimatedSprite2D
+## Flits loopt (voor de tests) / de speler is nog in de buurt (geen nieuwe flits tot hij weg is).
+var flitsend := false
+var in_buurt := false
+var flitsen := 0
+const FLITS_TIJD := 0.6
+const FLITS_KLEUR := Color(1.6, 0.7, 1.6)
 
 
 static func create(d: Dictionary) -> Node2D:
@@ -64,3 +72,26 @@ func trigger() -> Array[int]:
 	if anim:
 		anim.play("actief")
 	return uit
+
+
+## Speler staat op 'speler': flitsen als hij net binnen bereik komt (alleen verborgen, niet afgegaan).
+func speler_bij(speler: Vector2i) -> void:
+	var dichtbij := Kamers.in_flits_bereik(tile, speler)
+	if dichtbij and not in_buurt and verborgen and not afgegaan:
+		flits()
+	in_buurt = dichtbij
+
+
+func flits() -> void:
+	if anim == null or flitsend:
+		return
+	flitsend = true
+	flitsen += 1
+	anim.play("zichtbaar")
+	var tw := create_tween()
+	tw.tween_property(anim, "modulate", FLITS_KLEUR, FLITS_TIJD * 0.3)
+	tw.tween_property(anim, "modulate", Color.WHITE, FLITS_TIJD * 0.7)
+	tw.tween_callback(func() -> void:
+		flitsend = false
+		if verborgen and not afgegaan:
+			anim.play("verborgen"))
