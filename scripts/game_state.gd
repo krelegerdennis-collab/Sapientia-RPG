@@ -52,6 +52,15 @@ const SLOT_COUNT := 4
 var save_path := "user://save_1.json"
 ## Welk slot de volgende handmatige save schrijft. Laden van een slot zet dit.
 var active_slot := 1
+## Slot 0 = de aparte autosave (Laden: 'Autosave'). Die overschrijft nooit slot 1..4.
+const AUTOSAVE_SLOT := 0
+## De enige reden waarvoor nog automatisch wordt opgeslagen (Dennis).
+const AUTOSAVE_REASONS := ["map"]
+## Gekozen slot voor het volgende nieuwe spel (titelscherm > New Game > slot kiezen).
+var pending_new_slot := 1
+## Autosave alleen bij een overgang wereldkaart <-> kerker (niet bij elke kamer of een dorp).
+const NON_DUNGEON_MAPS := ["wilgendal", "dorp_wilgendal", "esdoorn", "wilgendal_binnen",
+		"huis_wilgendal", "esdoorn_herberg", "esdoorn_huis_noor"]
 ## v0.11 Automatisch opslaan: een EIGEN bestand (overschrijft de handmatige save nooit).
 ## Wordt geschreven na een mapwissel, na een gewonnen gevecht en als de app naar de
 ## achtergrond gaat (Android). Nooit tijdens een gevecht, een mapwissel of een tekstvak.
@@ -484,7 +493,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	pending_spawn = ""
 	_play_time_base = 0.0
 	_clock_start_ms = Time.get_ticks_msec()
-	active_slot = 1
+	active_slot = clampi(pending_new_slot, 1, SLOT_COUNT)
 
 
 ## Naam opschonen: spaties eraf, max. NAME_MAX tekens, leeg = DEFAULT_NAME.
@@ -759,33 +768,53 @@ func _slot_of_data(d: Dictionary) -> int:
 ## Nieuwste bestand van één slot: handmatig, of de autosave als die bij dit slot hoort en nieuwer is.
 ## {} = leeg. Even oud = de handmatige save.
 func slot_record(slot: int) -> Dictionary:
+	if slot == AUTOSAVE_SLOT:
+		return autosave_record()
 	var manual := slot_path(slot)
-	var best_path := ""
-	var best_stamp := -1.0
-	var best := {}
-	if manual != "" and FileAccess.file_exists(manual):
-		var d := read_save(manual)
-		if not d.is_empty():
-			best_path = manual
-			best = d
-			best_stamp = _save_stamp(manual)
-	if FileAccess.file_exists(autosave_path):
-		var ad := read_save(autosave_path)
-		if not ad.is_empty() and _slot_of_data(ad) == slot:
-			var st := _save_stamp(autosave_path)
-			if best_path == "" or st > best_stamp:
-				best_path = autosave_path
-				best = ad
-				best_stamp = st
-	if best_path == "":
+	if manual == "" or not FileAccess.file_exists(manual):
 		return {}
-	return {"path": best_path, "data": best, "stamp": best_stamp, "slot": slot}
+	var d := read_save(manual)
+	if d.is_empty():
+		return {}
+	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot}
+
+
+## De aparte autosave ({} = geen). Ook een oude autosave (v0.22, gestempeld met slot 1..4)
+## komt hier: die wordt niet meer in een handmatig slot gemengd, maar gaat niet verloren.
+func autosave_record() -> Dictionary:
+	if not FileAccess.file_exists(autosave_path):
+		return {}
+	var d := read_save(autosave_path)
+	if d.is_empty():
+		return {}
+	return {"path": autosave_path, "data": d, "stamp": _save_stamp(autosave_path), "slot": AUTOSAVE_SLOT}
+
+
+## Bij welk handmatig slot hoort een autosave (voor het volgende handmatige opslaan)?
+func home_slot_of(d: Dictionary) -> int:
+	var h = d.get("home_slot", d.get("slot", 1))
+	if not (h is int or h is float):
+		return 1
+	return clampi(int(h), 1, SLOT_COUNT)
+
+
+## Overgang wereldkaart <-> kerker? Dan (en alleen dan) autosaven bij een mapwissel.
+func is_dungeon_transition(from_map: String, to_map: String) -> bool:
+	var from_world := from_map == WORLD_MAP
+	var to_world := to_map == WORLD_MAP
+	if from_world == to_world:
+		return false
+	var other := to_map if from_world else from_map
+	if other == "":
+		return false
+	return not NON_DUNGEON_MAPS.has(other.get_file().get_basename())
 
 
 func newest_slot_record() -> Dictionary:
 	var best := {}
 	var stamp := -1.0
-	for i in range(1, SLOT_COUNT + 1):
+	# handmatige slots eerst: bij gelijke stempel wint de handmatige save, niet de autosave
+	for i in [1, 2, 3, 4, AUTOSAVE_SLOT]:
 		var rec := slot_record(i)
 		if rec.is_empty():
 			continue
@@ -892,6 +921,9 @@ func read_newest_save() -> Dictionary:
 ## v0.11 Automatisch opslaan in autosave_path. Doet niets (false) als het uit staat in
 ## Opties of als het nu niet veilig kan (gevecht, mapwissel, tekstvak open).
 func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
+	# save-slots (Dennis): alleen bij kerker <-> wereldkaart (reden "map")
+	if not AUTOSAVE_REASONS.has(reason):
+		return false
 	if not can_autosave():
 		return false
 	if not save_game(tile, facing, autosave_path):
@@ -927,7 +959,7 @@ func take_autosave_request() -> String:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
-		autosave_on_background()
+		pass      # save-slots (Dennis): geen autosave meer bij naar de achtergrond gaan
 
 
 func autosave_on_background() -> bool:
@@ -948,7 +980,11 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	data["saved_at"] = Time.get_datetime_string_from_system()
 	data["saved_unix"] = Time.get_unix_time_from_system()
 	data["autosave"] = path == autosave_path
-	data["slot"] = active_slot if path == autosave_path else _slot_for_path(path)
+	if path == autosave_path:
+		data["slot"] = AUTOSAVE_SLOT
+		data["home_slot"] = active_slot
+	else:
+		data["slot"] = _slot_for_path(path)
 	# v0.19 kamer-checkpoint (met zijn eigen voortgangs-kopie) gaat mee; altijd de sleutel
 	# ({} = nog geen), zodat handmatige save en autosave hetzelfde formaat houden
 	data["checkpoint"] = checkpoint.duplicate(true)
@@ -1208,7 +1244,9 @@ func apply_state(d: Dictionary) -> bool:
 	steps_until_encounter_possible = GameData.SAFE_STEPS
 	map_monster_battle = {}
 	defeated_map_monsters = {}
-	if d.has("slot") and (d["slot"] is int or d["slot"] is float):
+	if bool(d.get("autosave", false)):
+		active_slot = home_slot_of(d)
+	elif d.has("slot") and (d["slot"] is int or d["slot"] is float):
 		active_slot = clampi(int(d["slot"]), 1, SLOT_COUNT)
 	return true
 
@@ -1256,7 +1294,8 @@ func continue_slot(slot: int) -> bool:
 
 
 func _continue_record(rec: Dictionary) -> bool:
-	active_slot = int(rec.get("slot", 1))
+	var rs := int(rec.get("slot", 1))
+	active_slot = home_slot_of(rec.get("data", {})) if rs == AUTOSAVE_SLOT else clampi(rs, 1, SLOT_COUNT)
 	if changing_map or not load_game(str(rec.get("path", ""))):
 		return false
 	changing_map = true
@@ -1499,7 +1538,7 @@ func change_map(path: String, spawn_name: String) -> void:
 	pending_spawn = spawn_name
 	has_return_point = false
 	entry_kind = "door"
-	_autosave_request = "map"
+	_autosave_request = "map" if is_dungeon_transition(current_map, path) else ""
 	await Transition.fade_out()
 	_go_to_scene(path)
 
@@ -1620,7 +1659,7 @@ func end_battle(result: String) -> void:
 					p["hp"] = 1
 		# v0.11: na winst automatisch opslaan (zodra de map weer in beeld is)
 		if result == "win" and not oefening:
-			_autosave_request = "battle"
+			pass      # save-slots (Dennis): geen autosave meer na een gewonnen gevecht
 			# v0.15: baas verslagen -> de hoofdheld absorbeert zijn kern (eenmalig). Meteen
 			# vastleggen, dus de autosave hierna heeft hem al; het moment zelf speelt de map af.
 			if pending_boss and dungeon100_floor == 0:      # de simulatie geeft geen echte kernen
@@ -1681,7 +1720,7 @@ func respawn_at_checkpoint(boss := false) -> String:
 	pending_respawn_msg = (RESPAWN_LINES_BOSS if boss else RESPAWN_LINES).duplicate()
 	last_respawn = {"map": return_map, "tile": t, "facing": fc, "boss": boss}
 	# na het ontwaken automatisch opslaan (Doorgaan begint dan ook hier)
-	_autosave_request = "respawn"
+	_autosave_request = ""      # save-slots: geen autosave na respawn
 	return return_map
 
 
@@ -2003,7 +2042,7 @@ func dungeon100_defeat() -> String:
 		pending_spawn = Dungeon100RulesC.START_SPAWN
 		pending_respawn_msg = [Dungeon100Reward.RESET_LINE]
 		entry_kind = "respawn"
-		_autosave_request = "respawn"
+		_autosave_request = ""      # save-slots: geen autosave na respawn
 		return Dungeon100RulesC.dungeon_scene
 	if dungeon100_run_active():
 		dungeon100_end_run(true)
@@ -2017,7 +2056,7 @@ func dungeon100_defeat() -> String:
 	pending_spawn = Dungeon100RulesC.WORLD_SPAWN
 	pending_respawn_msg = DUNGEON100_RESET_LINES.duplicate()
 	entry_kind = "respawn"
-	_autosave_request = "respawn"
+	_autosave_request = ""      # save-slots: geen autosave na respawn
 	return Dungeon100RulesC.WORLD_SCENE
 
 

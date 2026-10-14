@@ -440,7 +440,9 @@ func _golem_tests() -> void:
 	await close_dialog()
 	check("moment klaar: effect weg, speler vrij, pending leeg", await wait_until(func(): return not is_instance_valid(ka), 3.0)
 			and not player().input_locked and GameState.pending_kern_absorb == "" and player().get_node_or_null("KernEffect") == null)
-	check("autosave na de absorptie (reden 'kern')", GameState.autosave_count > count_before and GameState.last_autosave_reason == "kern")
+	check("save-slots: GEEN autosave na de absorptie", GameState.autosave_count == count_before)
+	# de kern zit wel in de staat: een save (hier naar het autosave-bestand) bevat hem
+	GameState.save_game(player().get_tile(), player().facing, GameState.autosave_path)
 	var auto := GameState.read_save(GameState.autosave_path)
 	check("autosave bevat de golemkern", auto.get("kernen", {}).has("golemkern"))
 	# laden van de autosave: kern blijft, geen nieuw moment

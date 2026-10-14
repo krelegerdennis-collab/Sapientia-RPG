@@ -1463,7 +1463,13 @@ func _title_and_name_tests() -> void:
 	await frames(5)
 	check("tik op grijze 'Doorgaan' doet niets", map_name() == "Title")
 	await click_at(t.new_button.get_global_rect().get_center())
-	check("'Nieuw spel' -> naamscherm", await wait_scene("NameEntry"))
+	await frames(5)
+	# Save-slots: eerst een slot kiezen (geen saves: slot 1 is leeg, dus geen bevestiging)
+	var new_list: Node = t.get_node_or_null("SaveSlotList")
+	check("'Nieuw spel' -> slotkeuze (4 slots)", new_list != null and new_list.mode == "new" and new_list.slot_buttons.size() == 4)
+	if new_list != null:
+		await click_at(new_list.slot_buttons[0].get_global_rect().get_center())
+	check("'Nieuw spel' -> slot 1 -> naamscherm", await wait_scene("NameEntry") and GameState.pending_new_slot == 1)
 	await frames(10)
 	var n := scene()
 	check("'Hoe heet je?' voorgevuld met 'Dax'", n.edit.text == "Dax" and n.chosen_name() == "Dax")
@@ -1557,7 +1563,7 @@ func _house_tests() -> void:
 	await _wait_typed()
 	await press_interact()
 	check("vraag: 'Het boek gloeit zacht. Voortgang opslaan?' met Ja/Nee",
-			Dialog.has_choices() and Dialog._lines == ["The book glows softly. Save progress?"] and Dialog.choices == ["Yes", "No"])
+			Dialog.has_choices() and Dialog._lines == ["The book glows softly. Save progress? (Slot 1)"] and Dialog.choices == ["Yes", "No", "Other slot"])
 	await _wait_typed()
 	check("MENU-knop verborgen zolang het tekstvak open is", not scene().get_node("TouchControls/Control").show_menu)
 	await tap("move_down")
@@ -1574,7 +1580,7 @@ func _house_tests() -> void:
 	await frames(30)
 	await overworld_shot("_save_dialog")
 	await press_interact()
-	check("'Ja': 'Opgeslagen.'", Dialog.is_open and Dialog._lines == ["Saved."] and book.last_result == "saved")
+	check("'Ja': 'Opgeslagen.'", Dialog.is_open and Dialog._lines == ["Saved to slot 1."] and book.last_result == "saved")
 	check("save geschreven (%s)" % GameState.save_path, GameState.has_save())
 	var d := GameState.read_save()
 	check("save: map, plek (8,4) en kijkrichting omhoog",
@@ -1626,15 +1632,13 @@ func _load_restore_test() -> void:
 	GameState.party[0]["exp"] += 7
 	GameState.gold += 77
 	GameState.set_player_name("Anders")
-	# v0.11: het huis verlaten gaf een (nieuwere) autosave; deze test gaat over de
-	# handmatige save van het boek, dus die autosave eerst weg (zie ook --menutest).
-	for i in 60:      # autosave komt net na de fade-in (map.gd AUTOSAVE_DELAY)
-		if GameState.has_autosave() and GameState.last_autosave_reason == "map":
-			break
-		await frames(2)
-	check("v0.11: autosave na het verlaten van het huis (%s)" % GameState.last_autosave_reason,
-			GameState.has_autosave() and GameState.last_autosave_reason == "map")
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(GameState.autosave_path))
+	# Save-slots (Dennis): het huis verlaten is GEEN kerker-overgang, dus geen autosave meer;
+	# en een autosave zou nooit slot 1 overschrijven (eigen slot 'Autosave').
+	await frames(40)
+	check("save-slots: geen autosave na het verlaten van het huis (%s)" % GameState.last_autosave_reason,
+			GameState.last_autosave_reason != "map" or not GameState.has_autosave())
+	if GameState.has_autosave():
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(GameState.autosave_path))
 	GameState.go_to_title()
 	check("terug naar het titelscherm", await wait_scene("Title"))
 	await frames(20)
@@ -2157,7 +2161,7 @@ func _prologue_tests() -> void:
 	await _wait_typed()
 	await press_interact()   # Ja
 	await _wait_typed()
-	check("halverwege opgeslagen", Dialog._lines == ["Saved."] and GameState.has_save())
+	check("halverwege opgeslagen", str(Dialog._lines).contains("Saved to slot") and GameState.has_save())
 	await close_dialog()
 	var d := GameState.read_save()
 	var st: Dictionary = d.get("story", {})

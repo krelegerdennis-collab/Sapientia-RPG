@@ -142,10 +142,10 @@ var _asking := false
 
 
 ## Toon een vraag met keuzes en wacht tot er gekozen is. Geeft de index terug.
-func ask(question: String, options: Array, speaker := "") -> int:
+func ask(question: String, options: Array, speaker := "", default_index := 0) -> int:
 	_asking = true
 	choices = options.duplicate()
-	choice_index = 0
+	choice_index = clampi(default_index, 0, maxi(0, options.size() - 1))
 	choice_result = -1
 	show_lines([question], speaker)
 	_asking = false

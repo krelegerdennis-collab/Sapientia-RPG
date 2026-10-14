@@ -55,6 +55,8 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	print("=== Deel S: vier save-slots ===")
 	_slot_tests()
+	print("=== Deel N: nieuw spel kiest een slot, aparte autosave ===")
+	await _newgame_slot_tests()
 	print("=== Deel A: data ===")
 	_data_tests()
 	print("=== Deel B: gewone dungeonkamer ===")
@@ -300,6 +302,162 @@ func v19_shot(path: String) -> void:
 	print("INFO  v19-screenshot: ", path, " ", img.get_size())
 
 
+func _shot(file_name: String) -> void:
+	if shots != "":
+		await v19_shot(shots.path_join(file_name))
+
+
+func _clear_slots() -> void:
+	for p in [GameState.slot_path(1), GameState.slot_path(2), GameState.slot_path(3), GameState.slot_path(4), GameState.autosave_path]:
+		if p != "" and FileAccess.file_exists(p):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+
+
+## Save-slots (Dennis): nieuw spel kiest slot 1..4, handmatig opslaan gaat naar dat slot,
+## de autosave heeft een eigen slot (0, 'Autosave') en alleen kerker <-> wereldkaart autosavet.
+func _newgame_slot_tests() -> void:
+	_clear_slots()
+	# 1) data: nieuw spel in slot 3, opslaan raakt slot 1 niet
+	GameState.active_slot = 1
+	GameState.new_game("Kees")
+	GameState.current_map = "res://scenes/maps/huis_wilgendal.tscn"
+	GameState.gold = 11
+	GameState.save_game(Vector2i(1, 1), Vector2i.DOWN)
+	var slot1_text := FileAccess.get_file_as_string(GameState.slot_path(1))
+	GameState.pending_new_slot = 3
+	GameState.new_game("Mira")
+	check("nieuw spel in slot 3: actief slot 3", GameState.active_slot == 3)
+	GameState.current_map = "res://scenes/maps/huis_wilgendal.tscn"
+	GameState.gold = 33
+	check("handmatig opslaan gaat naar slot 3", GameState.save_game(Vector2i(2, 2), Vector2i.DOWN)
+			and int(GameState.read_save(GameState.slot_path(3)).get("gold", 0)) == 33)
+	check("slot 1 onaangeroerd", FileAccess.get_file_as_string(GameState.slot_path(1)) == slot1_text)
+	# 2) autosave: eigen slot, nooit slot 1 of het gekozen slot
+	GameState.gold = 44
+	check("autosave geschreven", GameState.save_game(Vector2i(3, 3), Vector2i.DOWN, GameState.autosave_path))
+	var a := GameState.read_save(GameState.autosave_path)
+	check("autosave: slot 0, home_slot 3", int(a.get("slot", -1)) == GameState.AUTOSAVE_SLOT and int(a.get("home_slot", 0)) == 3)
+	check("autosave overschrijft slot 1 en 3 niet", FileAccess.get_file_as_string(GameState.slot_path(1)) == slot1_text
+			and int(GameState.read_save(GameState.slot_path(3)).get("gold", 0)) == 33)
+	check("slot_record(3) is de handmatige save, niet de autosave",
+			GameState.slot_record(3).get("path", "") == GameState.slot_path(3))
+	check("slot_record(0) = Autosave", GameState.slot_record(GameState.AUTOSAVE_SLOT).get("path", "") == GameState.autosave_path)
+	# 3) migratie: oude autosave gestempeld met slot 1 blijft bestaan als 'Autosave'
+	var old := GameState.read_save(GameState.autosave_path)
+	old["slot"] = 1
+	old.erase("home_slot")
+	old["saved_unix"] = float(old.get("saved_unix", 0)) + 100.0
+	var f := FileAccess.open(GameState.autosave_path, FileAccess.WRITE)
+	f.store_string(JSON.stringify(old))
+	f.close()
+	check("migratie: slot 1 toont de handmatige save (niet de oude autosave)",
+			GameState.slot_record(1).get("path", "") == GameState.slot_path(1))
+	check("migratie: oude autosave staat onder 'Autosave'",
+			GameState.slot_record(GameState.AUTOSAVE_SLOT).get("path", "") == GameState.autosave_path
+			and int(GameState.slot_record(GameState.AUTOSAVE_SLOT)["data"].get("gold", 0)) == 44)
+	check("migratie: nieuwste save = oude autosave (Doorgaan)", GameState.newest_save_path() == GameState.autosave_path)
+	check("migratie: oude autosave laden -> actief slot 1", GameState.load_game(GameState.autosave_path) and GameState.active_slot == 1)
+	# 4) wanneer autosaven bij een mapwissel
+	var dorp := "res://scenes/maps/wilgendal.tscn"
+	check("wereldkaart -> kerker: autosave", GameState.is_dungeon_transition(WORLD, GANG))
+	check("kerker -> wereldkaart: autosave", GameState.is_dungeon_transition("res://scenes/maps/woud_rand.tscn", WORLD))
+	check("kamer -> kamer in de kerker: geen autosave", not GameState.is_dungeon_transition(GANG, BIEB))
+	check("dorp <-> wereldkaart: geen autosave", not GameState.is_dungeon_transition(dorp, WORLD)
+			and not GameState.is_dungeon_transition(WORLD, dorp))
+	check("huis -> dorp: geen autosave", not GameState.is_dungeon_transition("res://scenes/maps/huis_wilgendal.tscn", dorp))
+	# 5) titelscherm: New Game opent de slotlijst; gevuld slot vraagt bevestiging
+	GameState.go_to_title()
+	check("titelscherm", await wait_scene("Title"))
+	await pframes(20)
+	var t := scene()
+	t._on_new()
+	await pframes(4)
+	var list: Node = t.get_node_or_null("SaveSlotList")
+	check("New Game: slotlijst (mode new) met 4 slots, geen Autosave-rij", list != null and list.mode == "new"
+			and list.slot_buttons.size() == 4 and list.autosave_button == null
+			and list.slot_buttons.all(func(b): return not b.disabled))
+	check("slot 1 toont samenvatting, slot 2 'empty'", list != null and "Kees" in list.slot_buttons[0].text
+			and "empty" in list.slot_buttons[1].text)
+	await pframes(4)
+	await _shot("saveslots_newgame_picker.png")
+	list.picked.emit(1)
+	await pframes(4)
+	check("gevuld slot: 'Overwrite slot 1?' met No als focus", t.new_slot_prompt != null
+			and t.new_slot_prompt.question == "Overwrite slot 1?" and t.new_slot_prompt.no_button.has_focus())
+	await pframes(4)
+	await _shot("saveslots_newgame_overwrite.png")
+	t.new_slot_prompt.answer(false)
+	await pframes(4)
+	check("No: blijft op het titelscherm", scene() == t and t.new_slot_prompt == null)
+	list.picked.emit(2)
+	check("leeg slot 2: naar de naamkeuze, slot 2 gekozen", await wait_until(func(): return scene() != t, 5.0)
+			and GameState.pending_new_slot == 2)
+	await pframes(4)
+	# 6) opslagboek: vraag noemt het actieve slot; 'Other slot' kiest er een van de vier
+	GameState.pending_new_slot = 2
+	GameState.new_game("Mira")
+	GameState.story_step = SD.NACHT
+	GameState.change_map("res://scenes/maps/huis_wilgendal.tscn", "bed")
+	var house_ok := await wait_scene("Huis")
+	await wait_fade()
+	var house: Node = scene()
+	check("huis geladen", house_ok)
+	var book: Node = house.get_node_or_null("Objects/SaveBook")
+	check("opslagboek gevonden", book != null)
+	if book == null:
+		return
+	book.interact(player())
+	await wait_until(func(): return Dialog.is_open, 3.0)
+	await close_dialog_lines_until_choice()
+	check("vraag noemt slot 2: '%s'" % str(Dialog._lines), Dialog.has_choices()
+			and "(Slot 2)" in str(Dialog._lines[0]) and Dialog.choices == ["Yes", "No", "Other slot"])
+	await _wait_typed_cp()
+	await _shot("saveslots_book_prompt.png")
+	Dialog.choose(2)
+	await wait_until(func(): return Dialog.has_choices() and "which slot" in str(Dialog._lines), 3.0)
+	await _wait_typed_cp()
+	check("slotkeuze: 4 slots + Back, actief slot voorgeselecteerd", Dialog.choices.size() == 5
+			and Dialog.choice_index == 1 and str(Dialog.choices[1]).begins_with("*Slot 2"))
+	await _shot("saveslots_book_pick_slot.png")
+	Dialog.choose(3)       # slot 4, leeg
+	await wait_until(func(): return book.last_result == "saved", 3.0)
+	check("opgeslagen in slot 4, slot 1 onaangeroerd", book.last_result == "saved" and GameState.active_slot == 4
+			and FileAccess.file_exists(GameState.slot_path(4))
+			and FileAccess.get_file_as_string(GameState.slot_path(1)) == slot1_text)
+	await close_dialog()
+	# 7) Laden (veldmenu/titel): Autosave-rij
+	var LoadScreen := load("res://scripts/ui/load_screen.gd")
+	var ls: CanvasLayer = LoadScreen.new()
+	scene().add_child(ls)
+	await pframes(6)
+	var ab: Button = ls.list.autosave_button if ls.list != null else null
+	check("Laden toont 'Autosave' (%s)" % (ab.text if ab else "-"), ab != null and "Autosave:" in ab.text and not ab.disabled)
+	await _shot("saveslots_load_autosave.png")
+	ls.close()
+	await pframes(2)
+	_clear_slots()
+	GameState.active_slot = 1
+	GameState.pending_new_slot = 1
+
+
+func close_dialog_lines_until_choice() -> void:
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 8000:
+		if Dialog.has_choices():
+			return
+		if Dialog.is_open and not Dialog._is_typing():
+			await press_interact()
+		await frames(2)
+
+
+func _wait_typed_cp() -> void:
+	for i in 200:
+		if not Dialog.is_open or not Dialog._is_typing():
+			break
+		await frames(1)
+	await frames(3)
+
+
 # ================================================================ A: data
 func _slot_tests() -> void:
 	GameState.new_game("Kees")
@@ -394,8 +552,7 @@ func _room_tests() -> void:
 	check("alle monsters van de kamer staan er weer (%d)" % scene().monsters.size(), scene().monsters.size() == n_mon)
 	var line := await respawn_line()
 	check("bericht: '%s'" % line, line == "You wake where you came in...")
-	check("automatisch opgeslagen na het ontwaken (reden respawn)", GameState.last_autosave_reason == "respawn"
-			and GameState.read_save(GameState.autosave_path).get("map") == GANG)
+	check("save-slots: GEEN autosave na het ontwaken", GameState.last_autosave_reason != "respawn")
 	check("checkpoint blijft dezelfde (Gang, ingang)", GameState.checkpoint.get("map") == GANG and cp_tile() == sp[0])
 	await close_dialog()
 	# een gewonnen gevecht verschuift het checkpoint niet

@@ -547,7 +547,7 @@ func request_chest(chest: Node, p: Node2D) -> void:
 	chest.show_icon(false)
 	_busy = false
 	if is_instance_valid(player):
-		GameState.autosave(player.get_tile(), player.facing, "kist")
+		pass      # save-slots: geen autosave na een kist
 
 
 func _flush_pending() -> void:
