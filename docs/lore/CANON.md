@@ -179,6 +179,20 @@ ECHO (zacht): "Dat is niet waar, Dennis. Je weet het wel."
 ECHO: "Maar dat is een verhaal voor later."
 [Het warp-platform licht op. De wereldkaart verschijnt.]
 
+## Beslissingen 14 okt 2026
+
+18. **Namen party (besluit Dennis, 14 okt 2026).** In-game namen zijn hernoemd:
+    **Dennis → Dax**, **Lotte → Seren**, **Noor → Vesper**. **Dax** is ook de standaardnaam
+    bij een nieuw spel (speler mag hem nog steeds zelf invullen). **Kael Voss** en **Orion**
+    blijven zoals ze zijn.
+    - Interne ids (`dennis`, `lotte`, `noor`), sprite-bestandsnamen, scènes en res://-paden
+      blijven **ongewijzigd**.
+    - Oude saves worden bij laden gemigreerd (`GameState.migrate_name`): Dennis/Lotte/Noor
+      worden Dax/Seren/Vesper; een zelfgekozen naam blijft staan.
+    - Namen in eerdere punten en scènes hierboven (Dennis, Noor, Lotte) gelden als de oude
+      werknamen; lees ze als Dax, Vesper en Seren. "Beslissingen van Dennis" verwijst naar
+      Dennis als maker, niet naar het personage.
+
 ## Makkelijk over te nemen (botst niet)
 
 Uit `BOTSINGEN.md`; dit mag zonder verdere beslissing gebruikt worden:
