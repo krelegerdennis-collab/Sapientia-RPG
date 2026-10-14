@@ -2,7 +2,7 @@
 
 Afvinken alleen als het echt af is. Open punten zijn nog ontwerp of nog niet gebouwd.
 
-Hoe deze lijst werkt: de actieve werklijst is wat nu opgepakt kan worden. Canon-blokken staan woordelijk onder Canon & Design Reference, met hun oorspronkelijke markering. Afgevinkte items staan onderaan als referentie.
+Hoe deze lijst werkt: de actieve werklijst is wat nu opgepakt kan worden. Canon-blokken staan woordelijk onder Canon & Design Reference, met hun oorspronkelijke markering. Afgeronde items zijn uit deze lijst gehaald; zie de git-geschiedenis en de PR's.
 
 ## Status
 
@@ -10,261 +10,59 @@ Speelbaar: Worldmap 1 (start-eiland met Dennis' huis, Wilgendal en het Eerste Ar
 
 Niet zelf bouwen. Wacht op scènes: ECHO's twist (wanneer, hoe, confrontatie, H-1 tot en met H-5); De Spiegel koppelen aan Archief 4; worldmap 2 en 3 (kamerlijsten, monsters, paden).
 
-Open thema's: art-placeholders, World Warper (gebouw, dialoog, lege kamers, audio), sfeer, Codex en muziek van Archief 2, bestiarium tot endgame, PvP-relay en polish, Diepe Grot (loot, kaarten, push, rennen). Warper-stijl, Archief 2-roster en de Koopman (H-5) zijn beslist (CANON 12-14).
+Open thema's: art-placeholders, World Warper (gebouw, dialoog, lege kamers, audio), sfeer, Codex en muziek van Archief 2, bestiarium tot endgame, PvP-relay en polish. Warper-stijl, Archief 2-roster en de Koopman (H-5) zijn beslist (CANON 12-14).
 
 Grade 4-wapens en -sets, en het herzien van PvP-teams, wachten tot er nieuwe karakters in het verhaal komen. Gerrit blijft staan.
 
 ## Actieve werklijst
 
-### Act 1
+Gecontroleerd tegen code, scènes, CANON.md en main (14 okt 2026). Alleen wat echt open is, met de reden.
 
-- [ ] Act 1 = Worldmap 1 (start-eiland, Eerste Archief en Leven)
+### World Warper
 
-Act 2, Act 3 en de Spiegel-scène wachten op worldmap 2/3 en op scènes. Die vakjes staan open onder Canon & Design Reference.
+- [ ] De Werkplaats: crafting bouwen
+  De kamer staat (`world_warper/kamers/werkplaats.tscn`), maar heeft alleen een tafel. Er is geen crafting-systeem.
+- [ ] De Handelskamer: endgame-winkel bouwen
+  De kamer staat, maar de toonbank zegt "The shop is still closed." (`kamers.gd`, TODO(design) koopwaar).
+- [ ] ECHO: questvoortgang en dialoog per act
+  De gids heeft vaste stappen op vlaggen (`world_warper/guide/dialoog.gd`), geen questlog en geen dialoog per act.
+- [ ] Webversie bijwerken
+  De Pages-branch `cursor/web-build-29ec` staat nog op main `7237d2c`. De export is handmatig.
 
-### Dungeon-warpers
+### Audio
 
-- [x] Warper-stijl beslist: universeel met kleuraccent per Archief (CANON 14)
-- [ ] Cutscene-teksten (na De Genezer, eerste binnenkomst Hal, Sapientia-dreiging): tekst volgt van Dennis
-
-Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Canon & Design Reference, samen met de canon-regel voor de Diepe Grot.
-
-### Archief 2 — sfeer, art en Codex
-
-#### Sfeer en setting
-
-- [ ] Overwoekerde kas of broeikas (groen, vochtig, planten overal)
-- [ ] Zachte groene gloed als signature lighting
-- [ ] Leven dat niet stopt met groeien; alles is in beweging
-- [ ] Visueel contrast met het grauwe Eerste Archief
-
-#### Content en art
-
-- [x] Roster plant-vijanden beslist (CANON 13): Rankje, Sporekop, Doornige Loper, Bloeiende Schrik, Wortelgeest (Natuur)
-- [ ] EN-namen laten bevestigen door Dennis (voorstel: Tendril, Sporehead, Thorn Runner, Blooming Dread, Rootghost)
-- [ ] Achtergrondmuziek die bij de overwoekerde kas past
-
-#### Codex
-
-- [x] Codex-monsters Archief 2 beslist (CANON 13)
+- [ ] Muziek voor Archief 2 (overwoekerde kas)
+  `assets/audio/bgm` heeft geen kas-track.
+- [ ] Geluid van de World Warper: Hanger-activatie, ECHO-stem, hub-ambience
+  `world_warper/audio/PLACEHOLDERS.md`: er zijn geen clips, dus de cues zijn stil.
+- [ ] Geluidseffecten zijn nog placeholders: echte sfx maken
 
 ### Bestiarium
 
 - [ ] Bestiarium uitwerken tot endgame
-  De bestaande eindbazen van de Diepe Grot (verdieping 10 tot en met 100) hebben een entry en stats uit de bestaande monsterdata.
-  De vier lore-zinnen hieronder staan in het bestiarium (`desc` van kennis_beest, wortelkoning, wurger en genezer). De weergavenaam van Kustos blijft The Knowledge Beast; die naam zit in de tests vast.
-
-De notitie bij dit vakje en de vier lore-zinnen staan direct boven die zinnen, onder Canon & Design Reference.
-
-### World Warper
-
-De hub na De Genezer bestaat. Hieronder wat daar nog open is. Ontgrendeling van worldmap 2 en 3 staat niet in deze lijst.
-
-- [ ] Webversie.
-  De Pages-branch `cursor/web-build-29ec` heeft de export van main `7237d2c` (Godot 4.7.2, threads uit). De export blijft handmatig. Hard verversen na de publicatie.
-
-### Concept en lore
-
-- [ ] Zwevend hightech gebouw op de wereldkaart
-  Placeholder-exterieur staat. Het gebouw zweeft niet op de wereldkaart. Placeholder-kaarten staan in world_warper/maps.
-- [ ] Slot dat alleen op Dennis' Hanger reageert
-  De scène noemt de Hanger de Sleutel. Een slot dat alleen op Dennis reageert ontbreekt. De spelertekst onthult H-6 niet.
-
-### Verschijning en cutscene
-
-- [ ] Cutscene na De Genezer: de World Warper verschijnt in de lucht
-  De Genezer staat in Archief 2. De World Warper-scènes staan in CANON 17 en in de game. Er is geen platform op de kaart: alleen Warp in het menu.
-
-- [ ] Duidelijk maken wat dit is, wat het kan, en waarom het belangrijk is
-  Eerste-bezoekscène en de vier ECHO-stappen doen een eerste versie. De zinnen zijn voorlopig.
-
-### Eerste binnenkomst: Hanger en Sapientia
-
-- [ ] Systemen komen online door het Hanger-signaal
-  De scène speelt één keer. Losse systemen gaan niet aan.
-
-- [ ] Dialoogscène
-  - [ ] Dennis toont de Hanger (eerste keer expliciet in het verhaal)
-    De scène toont de Hanger paars. Dennis steekt hem niet apart op.
-  - [x] ECHO reageert herkennend op de Hanger
-    De hanger-stap zegt: "De Sleutel reageerde bij je aankomst." en "De Hanger is de Sleutel." De spreker heet ECHO. Over H-6 zegt de tekst niets.
-  - [ ] Uitleg bouwen: alleen de Hanger, de biometrische sleutel, activeert de World Warper
-    De tekst noemt de Hanger de Sleutel. Ze zegt niet dat alleen die de hub start. Geen H-6-onthulling.
-- [ ] Sapientia-dreiging
-  - [ ] Na de activering verschijnt Sapientia (glitch, stem of hologram)
-    Korte zwarte flikkering en een haperend hologram. Geen stem en geen hologram van Sapientia.
-  - [ ] Sapientia uit de dreiging: zij wil de World Warper, toegang tot alle zes Archieven tegelijk
-    De zin is: Sapientia weet dat de Sleutel hier is.
-  - [ ] Duidelijk maken dat Dennis en de Hanger het enige obstakel zijn: Sapientia wil zijn sleutel
-  - [ ] Dreiging opbouwen voor latere acts
-  - [ ] De party reageert geschokt; ECHO waarschuwt
-
-### Interieur
-
-- [ ] Kamers bouwen volgens de lijst hieronder
-  De kamers uit de lijst staan in world_warper/kamers en gaan open na De Genezer. Werkplaats en Handelskamer zijn leeg. codex_nis en sapientia_schot blijven dicht: world_warper_act2 en world_warper_act3 zet niemand.
-
-Per act:
-
-- [ ] Act 4: De Werkplaats, crafting
-  De kamer staat, maar is leeg.
-- [ ] Act 5: De Handelskamer, endgame-shops
-  De kamer staat, maar is leeg.
-
-Eerste versie, nog niet de kamers hierboven:
-
-- [ ] Paars als signature kleur, in lijn met het Codex Monument
-  Panelen, de hal en de Hanger-gloed zijn paars. Het blijven placeholder-tegels, geen definitieve art.
-- [ ] Hologrammen, schermen en tech-details
-  Placeholder-hologram in de eerste-bezoekscène en bij ECHO. Geen echte schermen.
-
-### Bewoners van de hub
-
-- [ ] Nieuwe party-leden voegen zich toe zodra ze aansluiten
-  refresh() leest de party bij het laden van de hal. Midden in de kamer werkt dat niet live bij.
-
-### AI-gids (in de main PC)
-
-Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderzoeker van de Oude Mensheid.
-
-- [ ] De AI-gids zit in de main PC van het warp-platform
-  ECHO staat in de hal (ww_anchor_gids), niet in de warp-ring. Het plaatje is een placeholder.
-
-- [ ] Functie: questvoortgang, missie-uitleg en begeleiding
-  Vier vaste stappen via Dialog.show_lines. Geen questvoortgang.
-- [ ] Reageert op verhaalprogressie (nieuwe dialoog per act)
-  Vlaggen world_warper_guide_0 tot en met 3, in volgorde. Niet per act.
-
-### Warp-systeem
-
-
-- [ ] Questvoortgang via de AI-gids
-  ECHO heeft vier vaste stappen (world_warper_guide_0 tot en met 3) plus een hint naar de volgende bestaande bestemming. Geen questlog.
-
-### Audio
-
-- [ ] Geluid bij de eerste Hanger-activatie
-  Bij hanger_activated gaat ww_sapientia_glitch af. Een eigen Hanger-geluid ontbreekt, en ook dat blijft stil.
-- [ ] Stem of hologramgeluid van de AI-gids
-
-### Visuals en art
-
-  tiles.png, tegels 16×16, met het woord PLACEHOLDER. Geregistreerd in tools/placeholders_v17.txt. Echte tileset ontbreekt nog.
-
-### Verhaal-integratie
-
-- [ ] Dennis' Hanger is de sleutel; dat meermaals benadrukken in dialoog
-  Eerste-bezoekscène en de ECHO-stap hanger noemen de Hanger de Sleutel. Zinnen zijn voorlopig. Geen H-6-onthulling. Het staat nog niet op meer plekken.
-- [ ] Sapientia's belang bij de World Warper opbouwen: alle zes kernen in één keer
-  Eén zin: Sapientia weet dat de Sleutel hier is.
+  Monsters van Archief 3 tot en met 6 en worldmap 2/3 bestaan nog niet.
 
 ### PvP
 
-De modus staat onder Canon & Design Reference. Open blijft:
+- [ ] Relay service kiezen (GD-Sync / NodeTunnel / eigen VPS)
+- [ ] Fase 2: online lobby + connect-code
+  De connect-code werkt alleen op LAN.
+- [ ] Fase 5: polish (UI)
+  Disconnect en reconnect werken. De rest van de polish ontbreekt.
 
-- [ ] Relay service kiezen
-  - [ ] TODO(design): GD-Sync / NodeTunnel / eigen VPS / TBD
+### Lopend
 
-- [ ] Fase 2: Online lobby + connect-code
-  De connect-code werkt op LAN. Een online lobby met relay is er niet.
+- [ ] Wilgendal herontwerp (in uitvoering)
+- [ ] Goedgekeurde Engelse namenlijst overal toepassen (in uitvoering)
 
-- [ ] Fase 5: Polish (UI, disconnect, reconnect)
-  Disconnect en reconnect op dezelfde hostsessie staan. De rest van de polish niet.
+### Art en nieuwe content
 
-### Diepe Grot — nog te bouwen
-
-- [x] Monsterpool: alle gewone bestiarium-monsters, op volgorde Archief 1 > Donker Woud > Bergtunnel > Archief 2 (wens Dennis). `Dungeon100Content.POOLS` met vensters per gebied; stats schalen per verdieping.
-
-De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, kansen en dialoog, onder Canon & Design Reference → Diepe Grot. Werk de specificatie daar als bron; deze lijst is het overzicht van dezelfde open vakjes.
-
-#### Diepe Grot – balans aanpassen
-
-##### Loot table
-- [x] Consumables in loot table verminderen
-  - [x] Te veel consumables maakt de Grot te makkelijk
-  - [x] Meer equipment/accessoires, minder potions/MP-items
-  - [x] TODO(design): exacte ratio bepalen
-- [x] Blue chest frequentie early game verlagen
-  - [x] Te veel blue chests op floor 1-20
-  - [x] TODO(design): exacte kans per floor-bracket
-
-#### Diepe Grot – map generatie (uitgebreid)
-
-##### Kamer-types + kansen
-- [x] MEDIUM MAP (35%)
-- [x] LARGE ROOM (20%)
-- [x] CHEST ROOM (10%)
-- [x] PUZZLE ROOM (5%)
-- [x] TREASURE ROOM (5%)
-- [x] EMPTY ROOM (5%)
-
-##### Vaste kamers (geen random)
-- [x] BOSS ROOM (floors 25/50/75/99)
-- [x] FLOOR 100 ROOM (vast)
-
-##### Generator logica
-- [x] Per verdieping: 1 layout rollen uit bovenstaande tabel
-- [x] Boss-floors (25/50/75/99) → altijd BOSS ROOM
-- [x] Floor 100 → altijd FLOOR 100 ROOM
-- [x] Layout-type onthouden voor save/load
-- [x] Monsters spawnen passend bij layout-type
-- [x] Kisten spawnen passend bij layout-type
-
-##### Balans-regels
-- [x] REST ROOM + TREASURE ROOM niet op opeenvolgende verdiepingen
-- [x] PUZZLE ROOM niet op floor 1-5
-
-#### Systemen – push monster when stunned
-
-##### Basis push
-- [x] Als speler TEGEN een GESTUND monster aanloopt:
-  - [x] Speler beweegt ÉN monster wordt geduwd (samen)
-  - [x] Monster schuift 1 tegel in de richting van de speler
-  - [x] Speler neemt de oorspronkelijke plek NIET in
-- [x] Als monster tegen muur/obstakel wordt geduwd → blijft staan
-- [x] Werkt ALLEEN bij stun-status (niet bij normale monsters)
-- [x] Visuele feedback: monster schuift 1 tegel (geen teleport)
-
-##### Chain-push
-- [x] Als geduwd monster tegen ANDER monster aan komt:
-  - [x] Beide monsters worden geduwd (chain-push)
-  - [x] Tweede monster schuift ook 1 tegel in dezelfde richting
-  - [x] Als tweede tegen muur/obstakel komt → stopt daar
-  - [x] Als tweede tegen een DERDE monster komt → keten gaat door
-- [x] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
-- [x] Alle geduwde monsters schuiven tegelijk (animatie)
-
-#### Systemen – run feature
-- [x] RUN-knop toevoegen BOVEN de CORE-knop
-- [x] Toggle: aan/uit (blijft aan tot speler uitzet)
-- [x] Wanneer RUN aan:
-  - [x] Speler beweegt 2 tegels per move
-  - [x] Sprite beweegt SNEL (animatie, geen teleport)
-  - [x] Loopsnelheid sprite 2x
-- [x] Wanneer RUN uit:
-  - [x] Normale 1-tegel beweging
-- [x] Werkt OVERAL (dungeons + worldmap + dorpen)
-- [x] Geen verschil in vijand-interactie (agro-radius blijft gelijk)
-- [x] NIET tijdens gevecht
-- [x] Visuele indicator op knop: aan/uit status duidelijk
-
-#### Koppelingen tussen systemen
-- [x] Push werkt samen met PUZZLE ROOM (gestund monster op drukplaat)
-- [x] Push werkt samen met TRAP ROOM (monster in gat duwen)
-- [ ] RUN werkt in alle kamer-types behalve tijdens gevecht
-- [ ] RUN werkt in REST ROOM, MERCHANT ROOM, etc.
-
-#### TODO(design) markers
-- [x] Loot ratio consumables vs. equipment
-- [x] Blue chest kans per floor-bracket
-- [x] Medium Map: 2-4 kisten (+0-1 blauw via de floor-bracket-tabel), monsters 8-10 / 10-12 / 12-14 / 14-16 per bracket 1-20 / 21-50 / 51-80 / 81-99 (besluit Dennis, 14 okt 2026)
-- [x] Trap Room: mix 60/40; verborgen vallen flitsen kort binnen 2 tegels (besluit Dennis, 14 okt 2026)
-- [x] Puzzle Room: 4 kleine puzzels uit bestaande stukken (besluit Dennis, 14 okt 2026)
-  - [x] Hint: ECHO zegt bij binnenkomst één korte Engelse zin (besluit Dennis, 14 okt 2026)
-- [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
-- [x] Merchant Room: uitrusting + accessoires geschaald op de verdieping, plus basis-consumables (besluit Dennis, 14 okt 2026)
-  - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
-  - [x] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest." Haak klaar (besluit Dennis, 14 okt 2026): Archief 6 roept `KoopmanData.einde(GameState.story_flags)` aan, toont de regel met spreker "the Merchant" en zet `sapientia_verslagen` + `h5_rust`; daarna zet de Grot geen Koopman meer neer. Archief 6 zelf bestaat nog niet.
+- [ ] Stijlbijbel (style bible) voor art en UI
+  `docs/ARTSTYLE.md` (v0.17) is alleen een pixel-artgids, geen volledige stijlbijbel.
+- [ ] Kael v4
+  Kael Voss staat alleen in de lore (CANON 15), nog niet in de data of in sprites.
+- [ ] WM2: worldmap 2
+  Er zijn geen kaarten. Het werk wacht op scènes (zie Status).
 
 ## RPG ART
 
@@ -1369,240 +1167,3 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 **CANON – niet wijzigen zonder overleg.**
 
 Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
-
-## Afgeronde items
-
-Afgevinkte vakjes, als referentie. Waar de volledige notitie al woordelijk bij Canon & Design Reference staat, staat hier alleen het vakje.
-
-### Worldmap 1
-
-- [x] Worldmap 1 = start-eiland
-  De speelbare wereldkaart is dit eiland. Eiland 2 en 3 zijn er niet.
-  - [x] Archief 1: Eerste Archief (bij Opa), startpunt van het verhaal
-    Het verhaal begint bij Opa. Het Eerste Archief staat op deze kaart.
-  - Bevat Dennis' huis en Wilgendal (eerste dorp met shops)
-
-### Archief 2 op de kaart en in de kas
-
-- [x] Kas linksboven op worldmap 1, achter bergen waar je niet overheen kunt lopen
-- [x] Grot-dungeon door de berg naar de andere kant: een paar puzzels, geen bazen, unieke omgeving, eigen bgm en monsters
-- [x] Geheime kamer met 2 kisten: een staf en een accessoire, geschaald naar het niveau richting Archief 2
-
-- [x] Combinaties met bestaande puzzel-elementen (kasten en hendels uit Archief 1)
-  Verdieping 3, kamer leven_v3_combi: duwbare kast op een zware plaat én een hendel, daarna de groei-plaat.
-
-### Bestiarium-zinnen en Diepe Grot-bazen
-
-- [x] Kustos (Archief 1): "Een wachter zonder ogen, maar met duizend oren. Hij hoort elke gedachte die het Archief binnenkomt. De Oude Mensheid bouwde hem niet om te doden, maar om te bewaren. Sapientia gaf hem een nieuw doel: alles wat niet past, wordt verwijderd."
-- [x] De Wortelkoning (Donker Woud): "Wat ooit een herder was van het woud, werd een koning van wortels. Hij sleept wat hij liefheeft de diepte in — niet uit wreedheid, maar uit angst om alleen te zijn. Sapientia fluisterde hem in dat alles wat loslaat, vergaat."
-- [x] De Wurger (Archief 2, verdieping 3): "Een slingerplant die geen kant op kon. De Oude Mensheid kweekte hem als bescherming, maar Sapientia draaide zijn groei naar binnen. Nu verstikt hij wat hij zou moeten beschermen. Wie hem verslaat, hoort hem zuchten — als een dier dat verlost wil worden."
-- [x] De Genezer (Archief 2, eindbaas): "Hij geneest door te nemen. Hij geeft niets terug. Sapientia's perfecte dienaar: zonder twijfel, zonder emotie, zonder einde. Wie hem ziet, ziet wat de mensheid wordt als Sapientia wint — stil, heel, en leeg."
-
-- [x] Diepe Grot-bazen bouwen
-  Verdieping 25, 50, 75 en 99 heten De Schaduw van H-6, De Cyclus, De Rechter en De Stem, met de canon-citaten in het bestiarium. De andere baasverdiepingen (10, 20, 30, 40, 60, 70, 80, 90) houden de oude Engelse namen.
-
-### Diepe Grot-toegang
-
-- [x] Diepe Grot verplaatsen naar ECHO's Kamer; ECHO beheert de simulatie en is de enige start; praten met ECHO → "Start Simulatie"; geen aparte worldmap-ingang.
-- [x] Drie kisten in ECHO's Kamer (Codex, Equipment, Accessoire). Leeg bij het eerste bezoek. Na elke Grot-run licht één kist op. Vulling per act staat hieronder.
-  `EchoKisten.gevulde`: act 2 en lager 0, act 3 één, act 4 twee, daarna drie. Vanaf act 6 pulseren de gevulde kisten en wordt ECHO feller. Kleurvlakken, geen buit.
-- [x] Flow: World Warper → ECHO's Kamer → optie "Diepe Grot Simulatie" → "Start nieuwe run" / "Ga terug". Start: floor 1, level 1, geen uitrusting. Na warp-kristal floor 100 terug naar ECHO's Kamer. ECHO toont resultaat en opent de volgende run.
-- [x] ECHO weet dat de grot een simulatie is en kan dat bij het eerste bezoek uitleggen.
-
-### Dungeon-warpers
-
-- [x] Begin: warper bij de ingang / start van de dungeon of het Archief
-  Eerste Archief (`archief_ingang`, tegel 8,10), Archief 2, Donker Woud (`woud_rand`, 8,10) en de berggrot (`berggrot_mond`, 8,10). Geen waarschuwing. De tekst is "Dit is de ingang. Je blijft in de dungeon." De party verlaat de dungeon niet.
-  - [x] Archief 2: bij de ingang, naast de start, niet op een uitgangstegel. Geen waarschuwing.
-- [x] Midden van de dungeon: warper na de mini-baas
-  Zonder mini-baas staat hij op een tussenkamer. Eerste Archief: middelste verdieping, tegel 3,4. Donker Woud: Mistpoel (`woud_mistpoel`, 4,6). Berggrot: de Nerf (`berggrot_nerf`, 8,6). Met waarschuwing.
-  - [x] Archief 2: na De Wurger (verdieping 3), met waarschuwing.
-- [x] Eind van de dungeon: warper na de eindbaas
-  Eerste Archief na de Golem. Donker Woud op de open plek, naast de sta-tegel na de Wortelkoning. Berggrot in de Uitmond (`berggrot_uitmond`, 12,7). Met waarschuwing. Spawn op de wereldkaart: `van_archief`, `van_kas`, `van_woud`, `van_berggrot`.
-  - [x] Archief 2: na De Genezer, met waarschuwing.
-- [x] Geldt voor elke normale dungeon, niet alleen de Diepe Grot
-  Gedaan voor het Eerste Archief, Archief 2, het Donker Woud en de berggrot. Archief 3 tot en met 6 wachten. De Diepe Grot heeft eigen warpers op verdieping 1, 25, 50, 75 en 99 en keert terug naar ECHO's Kamer.
-
-- [x] Warper brengt de party direct naar de worldmap of het dichtstbijzijnde dorp
-  Midden en eind van het Eerste Archief, Archief 2, het Donker Woud en de berggrot doen dat in één stap. De begin-warper verlaat de dungeon niet. De Diepe Grot komt uit in ECHO's Kamer, niet op de wereldkaart.
-- [x] De speler hoeft niet eerst terug naar de ingang
-  Geldt voor die midden- en eindwarpers. De begin-warper blijft de ingang.
-- [x] Eén stap: warper naar worldmap
-  - [x] Archief 2: midden en eind gaan in één stap naar de wereldkaart (`van_kas`). De begin-warper verlaat de dungeon niet.
-
-Bij activeren verschijnt een waarschuwing, in dezelfde stijl als de save- en quit-prompts. Die geldt voor de midden- en de eindwarper.
-
-- [x] Waarschuwingsscherm: "Weet je zeker dat je de dungeon wilt verlaten?"
-  Zelfde zin op de gedeelde dungeon-warper en op de Diepe Grot (verdieping 25, 50, 75 en 99). Verdieping 1 van de grot waarschuwt niet.
-  - [x] Optie: "Ja, warpen naar worldmap"
-    Die tekst staat op de gedeelde warper (Eerste Archief, Archief 2, Donker Woud, berggrot). De Diepe Grot gebruikt de kortere knop "Ja".
-  - [x] Optie: "Nee, blijf in de dungeon" (annuleren, de party blijft staan)
-    Die tekst staat op de gedeelde warper. De Diepe Grot gebruikt de kortere knop "Nee". Annuleren laat de party staan.
-  - [x] Archief 2: midden en eind gebruiken dit scherm en deze twee opties. De begin-warper waarschuwt niet.
-- [x] Voorkomt dat een speler per ongeluk de dungeon uitwarpt
-  Alleen na "Ja". "Nee" en de begin-warper houden de party in de dungeon.
-- [x] Waarschuwingsstijl passend bij de game-UI (vergelijkbaar met save- en quit-prompts)
-  Zelfde `Dialog.ask` als de andere ja/nee-vragen. Het plaatje is het opslagboek, violet getint.
-- [x] Werkt op zowel de midden- als de eindwarper
-  - [x] Archief 2: de waarschuwing staat op midden (De Wurger) en eind (De Genezer).
-
-### Wilgendal
-
-Huidige situatie:
-- [x] Shopkeepers staan in hun eigen winkel, achter de toonbank
-  Jelle Hamer op pantser en wapen. Accessoire en magie hebben een eigen winkelier. Ze lopen niet op het plein.
-- [x] Elke winkel heeft een vaste plek op het plein
-  Pantser, wapen, accessoire en magie, elk met een deur.
-
-Doel: winkels met vaste locaties:
-- [x] Eigen winkelpand per shopkeeper: armour, wapen, accessoire, magic
-  Vier panden in `scripts/data/wilgendal_dorp.gd`. Jelle houdt twee balies, zoals canon.
-- [x] Shopkeepers verplaatsen van het dorp naar hun eigen winkel
-- [x] NPC staat achter de toonbank in de winkel
-- [x] Niet meer rondlopend in het dorp
-  De winkeliers staan binnen. Op het plein lopen alleen de sfeer-NPC's.
-- [x] Speler moet de winkel binnengaan om te handelen
-- [x] Winkelinterieurs, per winkel eigen uitstraling (armour stoer, magic mystiek, wapen ambachtelijk, accessoire sierlijk)
-  Bestaande binnentegels met een tint: stoer, ambacht, sier, mystiek. Geen definitieve art.
-- [x] Toonbank, shopkeeper en item-display
-  Toonbank en vitrine in het interieur.
-- [x] Deur naar buiten, terug naar het dorp
-- [x] Klein maar sfeervol (dorpsschaal, niet stadsschaal)
-  Panden van 3×3 tegels aan het plein.
-- [x] Wilgendal: klein knus dorpsplein
-- [x] Paden tussen de winkelpanden
-  Het plein verbindt de deuren. Geen uitgang van het dorp naar de bibliotheek.
-- [x] 4 woonhuizen (2 bewoond, 2 decoratief)
-  Tante Mien en het huis van Bram en Els zijn open. Twee huizen blijven dicht.
-- [x] 6 sfeer-NPC's die rondlopen (geen shopkeepers): echtpaar (2), kind, Gerrit, veteraan, koerier
-  Bram, Els, Fien, Wout en Siem lopen een lus van vier tegels. Gerrit blijft op tegel (8, 7) voor Het Zingende Graan.
-- [x] Uithangborden als icoon: schild (armour), zwaard (wapen), ring (accessoire), ster (magic)
-- [x] Winkels altijd open; geen tijdsysteem
-- [x] Dorpsgevoel behouden (geen stadse drukte)
-  Het blijft het plein van Wilgendal.
-
-Scheiding:
-- [x] Wilgendal blijft op Worldmap 1 (start-eiland)
-- [x] Codex Bibliotheek ligt ten zuiden van Wilgendal
-  De archieftrap ligt ten zuiden van het dorp. Het dorp zelf heeft geen uitgang naar de bibliotheek.
-
-### Gerrit
-
-- [x] Gerrits quest
-
-### Magie
-
-- [x] Magic tier list opzetten en in het spel zetten (4 grades × 4 spreuken = 16 spreuken per element)
-  Vuur, Natuur, Bliksem, Licht en IJs staan in `scripts/data/spells.gd`. Grade 4 heeft `shop = false`. Water, Wind, Aarde en Aether staan nog niet in de code.
-
-- [x] Per spreuk eigen data: damage, healing en effect schalen per grade
-  De namen en cijfers hieronder zijn canon. Dezelfde spreuken staan in `scripts/data/spells.gd`, met MP, power en power per level. De grade-4-rollen zitten in `GradeGear.SCROLLS` en vallen vanaf verdieping 80. De vijf oude rol-ids blijven opzoekbaar voor saves en zitten niet meer in die pool.
-
-### World Warper — hub, ECHO en warp
-
-- [x] Na De Genezer: canon-scène 1 (CANON 17, `world_warper/cutscene/genezer_scene.gd`), daarna warp naar de Hal (`world_warper/maps/hal.tscn`, spawn ingang); daar scène 2 en 3 (`hanger_scene.gd`), daarna opent de warp-view. Vlaggen: `ww_canon_genezer_gezien`, `ww_canon_hanger_gezien`, `ww_canon_dreiging_gezien`.
-- [x] **De World Warper is geen plek op de wereldkaart** (Dennis 2026-10-13). Geen platform, geen uitgang, geen botsing. Alleen een overvliegend plaatje (`world_warper/art/flyover.gd`) na ontgrendeling. De enige ingang is **Warp in het menu** (`field_menu.open_warp`).
-- [x] Grotmond van de berggrot (weg naar Archief 2) zichtbaar op worldmap 1: bergtegel (21,17): de tunnel zit in de rotswand; omhoog lopen vanaf (21,18) gaat de grot in, de rest van de berg blokkeert; terug op (21,18), placeholder `assets/sprites/buiten/berggrot_ingang.png` (16x16).
-- [x] Bouwplaats voor de tunnel (`scenes/maps/berggrot_bouwplaats.tscn`, gebouwd met `tools/build_bouwplaats.gd`): eerst deze kaart na de grotmond. Voorman Hendrik en werker Sanne, hek, karretje, gereedschap, balken. Tunnel dicht tot `noor_lid` (Noor/Vesper in de party), daarna open naar de berggrot. Zuid terug naar de wereldkaart (21,18). De grotmond in de berg komt uit op de bouwplaats (`van_tunnel`); de exit-warpers gaan naar de wereldkaart (21,18).
-
-- [x] Dorpen eerst bezocht vóór een warp.
-  `GameState.bezochte_kaarten` bewaart het pad. Wilgendal, Esdoorn en de wereldkaart gaan alleen open als dat pad erin staat. Een oude save zonder lijst telt die drie WM1-plekken als bezocht.
-- [x] Party wisselen in de Rustkamer. De regels staan bij Functionaliteit.
-  `PartyBench`: maximaal 3 actief, Dennis en tijdelijke Codex-gasten blijven van de bank, gratis, alleen in `rustkamer.tscn`. De bank gaat mee in de save.
-- [x] Save-tegel op de echte spelerpositie.
-  `save_point.gd` leest `get_tile()` en `facing` van Objects/Player. Zonder speler blijft het (0, 0) en omlaag.
-- [x] Act-kamers bouwen en de deuren openen.
-  De kamers uit de lijst staan in `world_warper/kamers`. `hub_open` is waar bij `warper_hub_open` of zodra de World Warper na De Genezer open is. Werkplaats en Handelskamer zijn leeg: geen recepten, geen endgame-voorraad. `codex_nis` en `sapientia_schot` blijven dicht.
-- [x] Bestaande placeholder-kaarten registreren; ze staan niet in tools/placeholders_v17.txt.
-  bord_hal, bord_warp en tiles staan in tools/placeholders_v17.txt. De kaarten in world_warper/maps tekenen met die atlas.
-- [x] Kleur van de Hanger-gloed in de code van roze naar paars.
-  `HangerScene.PURPLE` is `Color("b07ae8")`. De scène zet de Hanger op die kleur.
-
-- [x] Runner in de CI-matrix op Godot 4.3. De job warper-runner in .github/workflows/tests.yml draait world_warper/tests/run.gd. warperkamertest stond al in de matrix.
-
-- [x] Komt online na De Genezer (Archief 2)
-  De code zet world_warper_unlocked na bewaker:archief_2_v4_genezer/genezer. De bewaker van verdieping 2 opent de hub niet.
-
-- [x] De party wordt automatisch gewarped naar het gebouw
-  Na De Genezer speelt NA_GENEZER. `WorldWarperNaGenezer.probeer()` zet de warp pas na de kernabsorptie. `Enter.enter()` zet world_warper_unlocked en wisselt naar het exterieur, spawn ingang. De kaartkamer archief_2_warper blijft de noorduitgang.
-- [x] Introductie van de AI-gids ECHO
-  In de hal, via Dialog.show_lines. Eerste zin: "Ik ben ECHO. Ik ben de gids van deze hub." Vier stappen, vlaggen world_warper_guide_0 tot en met 3. De overige zinnen zijn voorlopig. Geen losse cutscene.
-
-- [x] Dennis' Hanger licht op (paarse gloed, reageert op de World Warper)
-  De scène zet de Hanger op `Color("b07ae8")`. De hal is paars. Roze blijft de Stroom, het domein van Sapientia. Dennis steekt de Hanger niet apart op.
-
-  - [x] ECHO reageert herkennend op de Hanger
-    De hanger-stap zegt: "De Sleutel reageerde bij je aankomst." en "De Hanger is de Sleutel." De spreker heet ECHO. Over H-6 zegt de tekst niets.
-
-- [x] De gids in de tekst ECHO noemen
-  De spreker en de welkomstzin gebruiken de canon-naam ECHO. De overige zinnen blijven voorlopig.
-
-- [x] Geeft hints bij vastlopen en de volgende bestemming
-  Na de welkomst- en hanger-stap, en na de laatste stap. Volgorde: Noor in het Donker Woud, de Golem van het Eerste Archief, De Genezer via de berggrot, anders een al bezochte plek op wereld 1. Geen nieuw verhaal.
-- [x] Herkent de Hanger
-  De hanger-stap noemt de Hanger de Sleutel: "De Sleutel reageerde bij je aankomst." Over H-6 zegt de tekst niets. De bonus-lore over ECHO staat nog niet in de tekst.
-
-- [x] Alleen ontgrendelde dorpen zijn selecteerbaar
-  Wilgendal, Esdoorn en de wereldkaart vragen hun pad in `bezochte_kaarten`. WM2 en WM3 blijven dicht.
-
-- [x] Elk dorp moet eerst bezocht zijn voordat je ernaartoe kunt warpen
-  `enter_map` zet het pad in `bezochte_kaarten`. Zonder dat pad blijven Wilgendal, Esdoorn en de wereldkaart vergrendeld. Een oude save zonder lijst telt die drie als bezocht.
-
-### Functionaliteit in de World Warper
-
-- [x] Party kiezen en wisselen
-  Alleen in de Rustkamer, via `PartyBench`. Maximaal 3 actief. Dennis en tijdelijke Codex-gasten gaan niet op de bank. Gratis, en de bank gaat mee in de save.
-
-### Ingame-menu
-
-- [x] Indeling volgens de schets
-  `scripts/ui/field_menu.gd`: bord "MENU" is alleen een label. Links, gestapeld: Uitrusting, Codex, Items. Rechts: Warpen.
-
-### PvP
-
-De uitwerking staat bij Canon & Design Reference → PvP.
-
-- [x] Simpel 1v1 PvP-gevecht tussen vrienden
-- [x] Geen ranked, geen MMR, geen matchmaking, geen seizoenen
-- [x] Spelers nodigen elkaar uit via een connect-code
-- [x] APARTE modus, los van singleplayer
-- [x] Lore/kernen/Hanger/Codex gelden NIET in PvP
-- [x] Geen impact op save files
-   - [x] Alleen de host kiest
-   - [x] Keuze wordt naar beide spelers gestuurd
-   - [x] Speler A kiest team
-   - [x] Speler B kiest team
-   - [x] Mirror match TOEGESTAAN (beide mogen hetzelfde team)
-- [x] Early Game Mode
-- [x] Mid Game Mode
-- [x] High Game Mode
-- [x] Team 1: De Klassieke Drie
-- [x] Team 2: De Aanvalsdriehoek
-- [x] Team 3: De Verdedigingslinie
-- [x] Host genereert unieke connect-code
-- [x] Join-scherm: code invoeren
-- [x] Verbinding opzetten (relay of direct)
-- [x] Host-mode-select scherm (early/mid/high)
-- [x] Team-select scherm (beide spelers tegelijk)
-- [x] Load gevecht
-- [x] Result-scherm (winnaar + rematch optie)
-- [x] Netwerk-laag (Godot 4.3 Multiplayer API)
-- [x] Aparte PvP-scene (los van singleplayer)
-- [x] Turn-based combat synchroniseren
-- [x] Verbindingsverlies afhandelen
-  - [x] Disconnect → terug naar menu
-  - [x] Reconnect-optie (indien mogelijk)
-- [x] Connect-code generator (uniek, kort, makkelijk te delen)
-- [x] Eigen UI/menu los van singleplayer
-- [x] Eigen regels en balans
-- [x] Eigen stat-berekening per game mode
-- [x] Geen lore-items, geen kernkrachten, geen Hanger
-- [x] Geen save file impact
-- [x] Fase 1: Local PvP POC (LAN, 1v1, 1 team, 1 mode)
-- [x] Fase 3: Host-mode-select + team-select schermen
-- [x] Fase 4: 3 teams + 3 modes volledig
-- [x] Geen ranked, geen MMR, geen matchmaking
-- [x] Geen seizoenen, geen ranks
-- [x] Geen 2v2 (later eventueel)
-- [x] Geen anti-cheat (vrienden onder elkaar)
-- [x] Geen leaderboards
