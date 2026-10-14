@@ -773,13 +773,16 @@ func _scenes_tests() -> void:
 					and str(Dialog.text_label.text).begins_with("The core of the second Archive")
 					and pr.position.x >= 0.0 and pr.end.x <= vp.end.x and Dialog.text_label.get_global_rect().end.x <= pr.end.x)
 			var tikken := 0
+			var getoond := 0
 			while tikken < 120 and sc.playing != null:
+				if is_instance_valid(gz):
+					getoond = gz.regels_getoond.size()
 				if Dialog.is_open:
 					await tik_scherm()
 					tikken += 1
 				await pframes(3)
 			check("ww_warper: door de hele scène getikt -> vanzelf terug in de lijst (%d tikken)" % tikken,
-					sc.playing == null and gz != null and gz.regels_getoond.size() == WorldWarperCanon.GENEZER.size())
+					sc.playing == null and getoond == WorldWarperCanon.GENEZER.size())
 			await pframes(6)
 			check("ww_warper: na terugkomst menu bruikbaar (focus, dialoog dicht en op laag 5, geen restanten)",
 					sc.buttons.any(func(b): return b.has_focus()) and not Dialog.is_open and Dialog.layer == 5

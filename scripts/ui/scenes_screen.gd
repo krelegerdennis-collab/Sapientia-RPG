@@ -161,7 +161,7 @@ func _herstel_na_herhaling() -> void:
 func _input(event: InputEvent) -> void:
 	if playing == null or not Dialog.is_open:
 		return
-	var tik := (event is InputEventScreenTouch and event.pressed) or \
+	var tik: bool = (event is InputEventScreenTouch and event.pressed) or \
 			(event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
 			and event.device != InputEvent.DEVICE_ID_EMULATION)    # tik = ook een nagebootste muisklik: niet dubbel
 	if tik:
