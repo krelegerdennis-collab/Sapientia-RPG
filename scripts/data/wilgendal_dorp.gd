@@ -337,9 +337,9 @@ const SFEER := [
 const PROPS_MAP := "res://assets/sprites/buiten/wilgendal/"
 const PROPS := [
 	{"tex": "put", "tegel": Vector2i(31, 14), "blok": Vector2i(2, 1)},
-	{"tex": "marktkraam_1", "tegel": Vector2i(38, 11), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_1", "tegel": Vector2i(38, 12), "blok": Vector2i(3, 1)},
 	{"tex": "marktkraam_2", "tegel": Vector2i(41, 14), "blok": Vector2i(3, 1)},
-	{"tex": "marktkraam_3", "tegel": Vector2i(28, 14), "blok": Vector2i(2, 1)},
+	{"tex": "marktkraam_3", "tegel": Vector2i(27, 14), "blok": Vector2i(2, 1)},
 	{"tex": "bloembak_1", "tegel": Vector2i(26, 11), "blok": Vector2i(1, 1)},
 	{"tex": "bloembak_2", "tegel": Vector2i(44, 11), "blok": Vector2i(1, 1)},
 	{"tex": "bloembak_2", "tegel": Vector2i(26, 15), "blok": Vector2i(1, 1)},
@@ -536,10 +536,90 @@ static func beek(t: Vector2i) -> bool:
 ## Staat er een blokkerende prop op t?
 static func prop_op(t: Vector2i) -> bool:
 	for ruw in PROPS:
-		var rij: Dictionary = ruw
-		if Rect2i(rij["tegel"], rij["blok"]).has_point(t):
+		if prop_blok(ruw).has_point(t):
 			return true
 	return false
+
+
+## Blokkerende tegels van een prop in de actieve stijl.
+static func prop_blok(rij: Dictionary) -> Rect2i:
+	var sp := som_prop(rij)
+	if not sp.is_empty():
+		return sp["blok"]
+	return Rect2i(rij["tegel"], rij["blok"])
+
+
+## --- SoM fase 3 (RPG ART): props, NPC-sheets (24x32) ---
+## Oude prop -> SoM-prop uit props_index.json (botsing, y-sort-oorsprong). Hekken blijven de oude.
+## "tegel" blijft linksonder van de botsing; de sprite komt erboven/eromheen volgens de index.
+const SOM_PROPS_MAP := "res://assets/sprites/som/wilgendal/props/"
+const SOM_PROP_VAN := {
+	"put": "put",
+	"marktkraam_1": "kraam_rood",
+	"marktkraam_2": "kraam_blauw",
+	"marktkraam_3": "kraam_groen",
+	"bloembak_1": "bloembak",
+	"bloembak_2": "bloembak",
+	"lantaarnpaal": "lantaarn",
+	"bankje_voor": "bank",
+}
+## NPC-node -> 72x128-sheet (3x4, offset (0,-8)). Wie hier niet staat houdt zijn oude sprite.
+const SOM_NPC_MAP := "res://assets/sprites/som/wilgendal/npcs/"
+const SOM_NPC := {
+	"Gerrit": "gerrit",
+	"Bram": "bram",
+	"Els": "els",
+	"Fien": "fien",
+	"Wout": "wout",
+	"Siem": "siem",
+}
+static var _som_props: Variant = null
+
+
+static func som_props_index() -> Dictionary:
+	if _som_props == null:
+		_som_props = {}
+		var pad := SOM_PROPS_MAP + "props_index.json"
+		if FileAccess.file_exists(pad):
+			var d = JSON.parse_string(FileAccess.get_file_as_string(pad))
+			if d is Dictionary:
+				_som_props = d.get("props", {})
+	return _som_props
+
+
+## SoM-prop voor een PROPS-rij: {naam, tex, links_boven (tegel), blok (Rect2i), voet (px)}; leeg = oude prop.
+static func som_prop(rij: Dictionary) -> Dictionary:
+	if not som():
+		return {}
+	var naam := str(SOM_PROP_VAN.get(str(rij.get("tex", "")), ""))
+	var info: Dictionary = som_props_index().get(naam, {})
+	if info.is_empty():
+		return {}
+	var t: Vector2i = rij["tegel"]
+	var c := Vector2i(0, 0)
+	var m := Vector2i(int(info["size_tiles"][0]), 1)
+	var bots: Array = info.get("collision_tiles", [])
+	if not bots.is_empty():
+		c = Vector2i(int(bots[0][0]), int(bots[0][1]))
+		m = Vector2i(int(bots[0][2]), int(bots[0][3]))
+	var lb := Vector2i(t.x - c.x, t.y - (c.y + m.y - 1))
+	var blok := Rect2i(lb + c, m) if not bots.is_empty() else Rect2i(t, Vector2i.ZERO)
+	var o: Array = info["ysort_origin_px"]
+	return {
+		"naam": naam,
+		"tex": SOM_PROPS_MAP + str(info["file"]),
+		"links_boven": lb,
+		"blok": blok,
+		"voet": Vector2(lb) * 16.0 + Vector2(float(o[0]), float(o[1]) + 1.0),
+	}
+
+
+## Sheet voor een NPC-node in SoM-stijl, of "" (oude sprite houden).
+static func som_npc_sheet(node: String) -> String:
+	if not som() or not SOM_NPC.has(node):
+		return ""
+	var pad := SOM_NPC_MAP + str(SOM_NPC[node]) + ".png"
+	return pad if ResourceLoader.exists(pad) else ""
 
 
 ## Hoeveel sfeer-NPC's beginnen op het marktplein (max PLEIN_MAX).

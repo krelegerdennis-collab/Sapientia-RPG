@@ -204,6 +204,11 @@ def main(args):
             raise SystemExit("onbekend gebied: %s" % g)
         print(g)
         exporteer(g, gebieden[g], ramps, van, check)
+        if not check and "terrain" in gebieden[g].get("tilesets", []):
+            # fase 3: geanimeerd water als tweede bron in terrain.tres
+            sys.path.insert(0, HIER)
+            import water_anim
+            water_anim.maak(g, gebieden[g])
 
 
 if __name__ == "__main__":
