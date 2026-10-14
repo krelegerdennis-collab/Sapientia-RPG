@@ -1205,6 +1205,7 @@ func _grot_monster_tests() -> void:
 	GameState.codex_set_active("")
 	check("run begint", GameState.dungeon100_begin_run())
 	GameState.dungeon100_floor = 80
+	GameState.inventory[CD.BOOK_ITEM] = 2      # de run-tas heeft alleen permanente items; boeken komen uit grotkisten
 	var buiten := GameState.codex_add("mosslijm")      # gewone vangst tijdens de run: verdwijnt straks
 	var p := player()
 	GameState.start_battle(["scanline_wolf", "scanline_wolf"], p.get_tile(), p.facing, "dungeon100", false, Content.tier_for_floor(80))
@@ -1220,6 +1221,9 @@ func _grot_monster_tests() -> void:
 			and int(b.enemies[0]["s"]["max_hp"]) == int(Scaling.monster_stats(GD.ENEMIES["scanline_wolf"], 80)["max_hp"]))
 	await pframes(10)
 	await screenshot("grot_gevecht_scanline_wolf")
+	for en in b.enemies:      # de party is op level 1 (run): de wolven tandeloos maken, het gaat om het vangen
+		en["s"]["atk"] = 1
+		en["s"]["skills"] = []
 	var e: Dictionary = b.enemies[0]
 	e["s"]["hp"] = 1
 	b.codex.force_roll = 0.0
