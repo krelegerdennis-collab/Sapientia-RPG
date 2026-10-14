@@ -538,3 +538,11 @@ assets/sprites/buiten/bouw_karretje.png
 assets/sprites/buiten/bouw_gereedschap.png
 assets/sprites/buiten/bouw_balken.png
 assets/sprites/buiten/bouw_werker.png
+# RPG ART v2: Diepe Grot-tegelvarianten per 15 verdiepingen (art_diepegrot/out), thema diepe_grot_v1..v7.
+assets/tiles/dungeon/diepe_grot_tiles_v1.png
+assets/tiles/dungeon/diepe_grot_tiles_v2.png
+assets/tiles/dungeon/diepe_grot_tiles_v3.png
+assets/tiles/dungeon/diepe_grot_tiles_v4.png
+assets/tiles/dungeon/diepe_grot_tiles_v5.png
+assets/tiles/dungeon/diepe_grot_tiles_v6.png
+assets/tiles/dungeon/diepe_grot_tiles_v7.png

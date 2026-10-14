@@ -40,8 +40,20 @@ const SPAWN_REST := "rustpunt"
 ## Aankomst via een warper, naast het kristal (zelfde naam als Dungeon100Rules.WARPER_SPAWN).
 const SPAWN_WARPER := "warper"
 const NO_TILE := Vector2i(-1, -1)
-## Tegelthema van alle verdiepingen (scripts/data/dungeon_rooms.gd THEMES, RPG ART).
+## Tegelthema (scripts/data/dungeon_rooms.gd THEMES, RPG ART). Basis; per verdieping: theme_for_floor.
 const THEME := "diepe_grot"
+const THEME_INTERVAL := 15
+const THEME_VARIANTS := 7
+
+
+## Tegelvariant 1-7 van een verdieping: 1-15 -> 1, 16-30 -> 2, ... 91-100 -> 7.
+@warning_ignore("integer_division")
+static func theme_variant(floor_no: int) -> int:
+	return mini(maxi(floor_no - 1, 0) / THEME_INTERVAL, THEME_VARIANTS - 1) + 1
+
+
+static func theme_for_floor(floor_no: int) -> String:
+	return "%s_v%d" % [THEME, theme_variant(floor_no)]
 
 const MIN_ROOMS := 1
 ## Minimum aantal kamers op een MEDIUM-kaart (25x25).
@@ -327,7 +339,7 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		"layout": d["layout"], "spawns": spawns, "exits": exits,
 		"monsters": [], "chests": [],
 		"dungeon100": true, "dungeon100_floor": f, "dungeon100_layout": d["layout_type"],
-		"theme": THEME,
+		"theme": theme_for_floor(f),
 	}
 	Content.fill_room(room, d)
 	if room.has("rustpunt"):
