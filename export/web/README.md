@@ -1,10 +1,14 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`f25da72`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`b605403`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build, bovenop `43cdbcd`:
+Nieuw in deze build, bovenop `f25da72`:
+- Save-slots: bij New Game kies je slot 1-4; het opslagboek schrijft naar dat slot (of een ander slot). De autosave heeft een eigen rij 'Autosave' en overschrijft nooit meer een handmatig slot. Autosave alleen bij kerker in/uit (#103).
+- Diepe Grot: een verlamd monster op een drukplaat duwen drukt hem in; een plaatpuzzel heeft 1 monster naast de plaat; een monster in een val duwen verslaat het (#102).
+
+Eerder, bovenop `43cdbcd`:
 - Koopman-winkel: alle grot-uitrusting, rollen en items hebben Engelse namen; accessoires (o.a. Archive Ring) kosten een prijs naar verdieping, geen 1g meer (#101).
 - Diepe Grot: verlamd monster duwen, ook ketting-duw (#94).
 - RUN-knop boven de CORE-knop (toets R): 2 tegels per zet, 2x zo snel (#95).
