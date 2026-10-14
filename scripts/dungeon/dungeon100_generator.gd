@@ -174,6 +174,8 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 	var w := size.x
 	var h := size.y
 	var plan := _room_plan(size)
+	if lt == Layouts.KOOPMAN:
+		plan = [3, 4, 8, 9, 6, 6, 2, MIN_ROOMS_MEDIUM]      # ruimte voor de kraam (6x4 vrij, GrotKamers.koopman_plek)
 	var rooms: Array[Rect2i] = _fixed_rooms_for(size) if fixed else _random_rooms(rng, w, h, plan)
 	if rooms.size() < int(plan[7]):
 		return {}
@@ -244,7 +246,7 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 
 	# obstakels
 	for i in rooms.size():
-		if i == entry_room or i == stairs_room:
+		if i == entry_room or i == stairs_room or lt == Layouts.KOOPMAN:
 			continue
 		_place_blocks(rng, cells, w, rooms[i])
 
