@@ -104,6 +104,30 @@ static func puzzel(id: String) -> Dictionary:
 	return PUZZELS.get(id, {})
 
 
+## Besluit Dennis (14 okt 2026): een puzzelkamer met een drukplaat krijgt precies 1 monster, zodat de
+## speler het (verlamd) op de plaat kan duwen. Lokale opstelling: {"monster": Vector2i, "speler": Vector2i,
+## "dir": Vector2i, "plaat": id} met speler - monster - plaat op één rij over vrije vloer ('.'), of {}
+## zonder plaat. Eerste plaat in leesvolgorde; richtingen in vaste volgorde (deterministisch).
+static func duw_plan(id: String) -> Dictionary:
+	var d := puzzel(id)
+	var rows: Array = d.get("layout", [])
+	var objs: Dictionary = d.get("objects", {})
+	var vrij := func(t: Vector2i) -> bool:
+		return t.y >= 0 and t.y < rows.size() and t.x >= 0 and t.x < str(rows[t.y]).length() \
+				and str(rows[t.y])[t.x] == "."
+	for y in rows.size():
+		var row := str(rows[y])
+		for x in row.length():
+			var ch := row[x]
+			if not objs.has(ch) or str(objs[ch]["type"]) != "plate":
+				continue
+			var p := Vector2i(x, y)
+			for dir in [Vector2i.UP, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.DOWN]:
+				if vrij.call(p - dir) and vrij.call(p - 2 * dir):
+					return {"monster": p - dir, "speler": p - 2 * dir, "dir": dir, "plaat": str(objs[ch]["id"])}
+	return {}
+
+
 ## Lokale tegel van de kist ('c').
 static func kist_lokaal(id: String) -> Vector2i:
 	var rows: Array = puzzel(id).get("layout", [])

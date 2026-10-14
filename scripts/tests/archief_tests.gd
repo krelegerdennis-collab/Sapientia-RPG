@@ -346,9 +346,10 @@ func _room_tests() -> void:
 	await close_dialog()
 	await pframes(4)
 	await screenshot("archief_kist_open")   # zonder tekstvak: de open kist zelf
-	check("na het bericht: icoon weg, kist gewoon open (frame 1), autosave 'kist' (%s)" % GameState.last_autosave_reason,
+	check("na het bericht: icoon weg, kist gewoon open (frame 1), geen autosave (%s)" % GameState.last_autosave_reason,
 			not chest.icon.visible and chest.sprite.frame == 1
-			and GameState.autosave_count == autosaves + 1 and GameState.last_autosave_reason == "kist")
+			and GameState.autosave_count == autosaves)      # save-slots: geen autosave na een kist
+	GameState.save_game(player().get_tile(), player().facing, GameState.autosave_path)
 	var auto := GameState.read_save(GameState.autosave_path)
 	check("autosave bevat de vlag en het zwaard", FLAG in auto.get("story", {}).get("flags", [])
 			and int(auto.get("inventory", {}).get(SWORD, 0)) == 1)

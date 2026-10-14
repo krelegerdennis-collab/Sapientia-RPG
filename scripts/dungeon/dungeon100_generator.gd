@@ -392,6 +392,22 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		# blauw = de vaste beloning van de puzzel (CANON-override PUZZLE ROOM: 1 bij succes)
 		var e := Blue.chest_entry(int(d["run_seed"]), f, kid, kt, krng, false, true)
 		room["chests"] = room.get("chests", []) + [e]
+		# Besluit Dennis: plaatpuzzel = precies 1 monster (passend bij de verdieping), stilstaand naast de
+		# plaat, zodat verlammen + duwen de plaat indrukt. Voorstel: hij loopt niet rond (moves = false),
+		# anders kan de opstelling onoplosbaar worden; de kasten lossen de puzzel ook zonder hem op.
+		var plan := GrotPuzzels.duw_plan(str(pz["id"]))
+		if not plan.is_empty():
+			var mrng := RandomNumberGenerator.new()
+			mrng.seed = int(d["floor_seed"]) + 404
+			var pool := Content.enemy_pool(f)
+			var mt: Vector2i = po + Vector2i(plan["monster"])
+			var me := Scaling.monster_entry(pool[mrng.randi_range(0, pool.size() - 1)], f, mt, "puzzelmonster")
+			me["group"] = [me["enemy"]]
+			me["moves"] = false
+			me["puzzel_duw"] = true
+			room["monsters"] = [me]
+			room["puzzel_duw"] = {"monster": [mt.x, mt.y], "speler": [(po + Vector2i(plan["speler"])).x,
+					(po + Vector2i(plan["speler"])).y], "dir": [plan["dir"].x, plan["dir"].y], "plaat": plan["plaat"]}
 	if room.has("rustpunt"):
 		var rp: Array = room["rustpunt"]
 		var sp := _rest_spawn(room, d, Vector2i(int(rp[0]), int(rp[1])))

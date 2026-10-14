@@ -746,7 +746,11 @@ func _blocked_open_tests() -> void:
 
 func _autosave_tests() -> void:
 	var manual_before := file_text(GameState.save_path)
-	# 1) mapwissel -> autosave op de nieuwe map
+	# 1) mapwissel -> autosave op de nieuwe map. Save-slots: alleen bij kerker <-> wereldkaart,
+	# dus dorp -> wereldkaart niet; hier doen we alsof je uit een kerker komt.
+	check("save-slots: dorp -> wereldkaart is geen autosave-overgang",
+			not GameState.is_dungeon_transition(GameState.current_map, WORLD))
+	GameState.current_map = "res://scenes/maps/woud_rand.tscn"
 	GameState.change_map(WORLD, "van_dorp")
 	await frames(2)
 	check("tijdens de mapwissel: geen autosave mogelijk", not GameState.autosave(Vector2i.ZERO, Vector2i.DOWN, "test"))
@@ -769,37 +773,33 @@ func _autosave_tests() -> void:
 	await seconds(AUTOSAVE_WAIT)
 	check("autosave uit in Opties: niets geschreven", GameState.autosave_count == count and file_text(GameState.autosave_path) == stamp)
 	Settings.set_value("autosave", true)
-	# 3) app naar de achtergrond; niet met een tekstvak open
-	Dialog.show_lines(["Even wachten."])
-	await frames(2)
+	# 3) save-slots (Dennis): app naar de achtergrond autosavet niet meer
 	GameState._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
-	check("app naar achtergrond met tekstvak open: geen autosave", GameState.autosave_count == count)
-	Dialog.close()
-	await frames(2)
-	GameState._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
-	a = GameState.read_save(GameState.autosave_path)
-	check("app naar achtergrond: autosave (reden %s)" % GameState.last_autosave_reason,
-			GameState.autosave_count == count + 1 and GameState.last_autosave_reason == "achtergrond"
-			and str(a.get("map", "")).ends_with("wilgendal.tscn"))
-	# 4) gewonnen gevecht -> autosave (en niet tijdens het gevecht)
+	check("save-slots: app naar achtergrond: geen autosave", GameState.autosave_count == count)
+	check("save-slots: alleen reden 'map' mag autosaven",
+			not GameState.autosave(player().get_tile(), player().facing, "battle")
+			and not GameState.autosave(player().get_tile(), player().facing, "achtergrond")
+			and GameState.autosave_count == count)
+	# 4) gewonnen gevecht -> geen autosave meer
+	GameState.current_map = "res://scenes/maps/woud_rand.tscn"     # alsof je uit een kerker komt
 	GameState.change_map(WORLD, "van_dorp")
 	check("wereldkaart (voor het gevecht)", await wait_scene("Wereldkaart"))
 	await seconds(AUTOSAVE_WAIT)
 	var battle_tile: Vector2i = player().get_tile()
+	a = GameState.read_save(GameState.autosave_path)
+	check("kerker -> wereldkaart: autosave op de wereldkaart", GameState.last_autosave_reason == "map"
+			and Vector2i(int(a["tile"][0]), int(a["tile"][1])) == battle_tile)
 	GameState.debug_force_group = ["mosslijm"]
 	scene().start_battle(GameState.pick_encounter_group(""))
 	check("gevecht geladen", await wait_scene("Battle"))
 	count = GameState.autosave_count
-	GameState._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
-	check("tijdens het gevecht: geen autosave (ook niet bij achtergrond)",
-			not GameState.autosave(Vector2i.ZERO, Vector2i.DOWN, "test") and GameState.autosave_count == count)
+	check("tijdens het gevecht: geen autosave",
+			not GameState.autosave(Vector2i.ZERO, Vector2i.DOWN, "map") and GameState.autosave_count == count)
 	await _win_battle()
 	check("terug op de wereldkaart na winst", await wait_scene("Wereldkaart", 40.0))
 	await seconds(AUTOSAVE_WAIT)
-	a = GameState.read_save(GameState.autosave_path)
-	check("autosave na gewonnen gevecht (reden %s, tile %s)" % [GameState.last_autosave_reason, battle_tile],
-			GameState.last_battle_result == "win" and GameState.last_autosave_reason == "battle"
-			and Vector2i(int(a["tile"][0]), int(a["tile"][1])) == battle_tile)
+	check("save-slots: GEEN autosave na gewonnen gevecht", GameState.last_battle_result == "win"
+			and GameState.autosave_count == count)
 	GameState.debug_force_group = []
 	# 5) titelscherm: 'Doorgaan' laadt de nieuwste (nu de autosave op de wereldkaart)
 	var auto_hp := int(a["party"][0]["hp"])
@@ -819,9 +819,11 @@ func _autosave_tests() -> void:
 	var slots: Node = t.get_node_or_null("SaveSlotList")
 	var slot1: Node = slots.find_child("Slot1", true, false) if slots != null else null
 	var slot4: Node = slots.find_child("Slot4", true, false) if slots != null else null
-	check("Doorgaan toont vier slots", slot1 is Button and slot4 is Button and not (slot1 as Button).disabled)
-	if slot1 is Button:
-		await click(slot1)
+	var auto_row: Node = slots.find_child("Autosave", true, false) if slots != null else null
+	check("Doorgaan toont vier slots + Autosave", slot1 is Button and slot4 is Button and not (slot1 as Button).disabled
+			and auto_row is Button and not (auto_row as Button).disabled)
+	if auto_row is Button:
+		await click(auto_row)
 	check("'Doorgaan' -> wereldkaart (autosave is de nieuwste)", await wait_scene("Wereldkaart"))
 	await frames(5)
 	check("plek en HP uit de autosave (%s, HP %d)" % [player().get_tile(), GameState.party[0]["hp"]],
@@ -831,6 +833,7 @@ func _autosave_tests() -> void:
 	var aut := GameState.read_save(GameState.autosave_path)
 	var mk := man.keys()
 	var ak := aut.keys()
+	ak.erase("home_slot")      # save-slots: alleen de autosave weet bij welk slot hij hoort
 	mk.sort()
 	ak.sort()
 	check("autosave = zelfde formaat als de handmatige save (%d sleutels)" % ak.size(), mk == ak and not ak.is_empty())

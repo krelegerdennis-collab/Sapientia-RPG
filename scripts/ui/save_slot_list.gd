@@ -1,6 +1,9 @@
 extends Control
 ## Titelscherm: vier save-slots. Doorgaan en Laden openen allebei deze lijst.
 ## Lege slots zijn uit (grijs). Het nieuwste gevulde slot krijgt de focus.
+## Laden toont onderaan ook de aparte autosave ('Autosave', slot 0, signaal picked(0)).
+## mode "new" (Nieuw spel): alleen slot 1..4, ook lege slots kiesbaar; het actieve/eerste lege
+## slot krijgt de focus. Het titelscherm vraagt zelf om bevestiging bij een gevuld slot.
 
 signal picked(slot: int)
 signal cancelled
@@ -12,6 +15,9 @@ var slot_buttons: Array[Button] = []
 var venster: PanelContainer
 var dim: ColorRect
 var _placing := false
+## "load" (standaard) of "new"
+var mode := "load"
+var autosave_button: Button = null
 
 
 func _ready() -> void:
@@ -31,22 +37,41 @@ func _ready() -> void:
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 0)
 	box.add_child(list)
-	list.add_child(UiMenu.label("Choose a slot", UiStyleC.TEXT))
+	var is_new := mode == "new"
+	list.add_child(UiMenu.label("New game: choose a slot" if is_new else "Choose a slot", UiStyleC.TEXT))
 	var focus_btn: Button = null
 	var best := -1.0
 	for i in range(1, GameState.SLOT_COUNT + 1):
 		var rec := GameState.slot_record(i)
 		var b := UiMenu.button(_label(i, rec))
 		b.name = "Slot%d" % i
-		b.custom_minimum_size = Vector2(148, 16)
-		b.disabled = rec.is_empty()
-		b.focus_mode = Control.FOCUS_NONE if rec.is_empty() else Control.FOCUS_ALL
+		b.custom_minimum_size = Vector2(168, 18)
+		var off := rec.is_empty() and not is_new
+		b.disabled = off
+		b.focus_mode = Control.FOCUS_NONE if off else Control.FOCUS_ALL
 		b.pressed.connect(picked.emit.bind(i))
 		list.add_child(b)
 		slot_buttons.append(b)
-		if not rec.is_empty() and float(rec.get("stamp", 0.0)) > best:
+		if is_new:
+			if focus_btn == null and rec.is_empty():
+				focus_btn = b
+		elif not rec.is_empty() and float(rec.get("stamp", 0.0)) > best:
 			best = float(rec["stamp"])
 			focus_btn = b
+	if not is_new:
+		var arec := GameState.slot_record(GameState.AUTOSAVE_SLOT)
+		var ab := UiMenu.button(_label(GameState.AUTOSAVE_SLOT, arec))
+		ab.name = "Autosave"
+		ab.custom_minimum_size = Vector2(168, 18)
+		ab.disabled = arec.is_empty()
+		ab.focus_mode = Control.FOCUS_NONE if arec.is_empty() else Control.FOCUS_ALL
+		ab.pressed.connect(picked.emit.bind(GameState.AUTOSAVE_SLOT))
+		list.add_child(ab)
+		autosave_button = ab
+		if not arec.is_empty() and float(arec.get("stamp", 0.0)) > best:
+			focus_btn = ab
+	elif focus_btn == null and not slot_buttons.is_empty():
+		focus_btn = slot_buttons[0]
 	var back := UiMenu.button("Back")
 	back.name = "Terug"
 	back.pressed.connect(func() -> void: cancelled.emit())
@@ -83,14 +108,21 @@ func _place() -> void:
 
 
 func _label(slot: int, rec: Dictionary) -> String:
+	var title := "Autosave" if slot == GameState.AUTOSAVE_SLOT else "Slot %d" % slot
 	if rec.is_empty():
-		return "Slot %d: leeg" % slot
-	var d: Dictionary = rec.get("data", {})
+		return "%s: empty" % title
+	return "%s: %s" % [title, summary(rec.get("data", {}))]
+
+
+## Korte samenvatting van een save: naam, Lv en speeltijd.
+static func summary(d: Dictionary) -> String:
 	var who := str(d.get("player_name", ""))
+	var p = d.get("party", [])
+	if p is Array and not p.is_empty() and p[0] is Dictionary:
+		var lv = p[0].get("level", 1)
+		who += " Lv %d" % (int(lv) if (lv is int or lv is float) else 1)
 	var t: Variant = d.get("play_time", 0.0)
-	var tijd := UiMenu.format_time(float(t) if (t is int or t is float) else 0.0)
-	var auto := " (auto)" if bool(d.get("autosave", false)) else ""
-	return "Slot %d: %s %s%s" % [slot, who, tijd, auto]
+	return "%s %s" % [who, UiMenu.format_time(float(t) if (t is int or t is float) else 0.0)]
 
 
 func _unhandled_input(event: InputEvent) -> void:

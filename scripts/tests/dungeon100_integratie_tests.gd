@@ -14,6 +14,11 @@ const S := preload("res://scripts/data/dungeon100_scaling.gd")
 const Gear := preload("res://scripts/data/grade_gear.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
+const GK := preload("res://scripts/data/grot_kamers.gd")
+const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
+const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
+const GrotPuzzels := preload("res://scripts/data/grot_puzzels.gd")
+const Content := preload("res://scripts/dungeon/dungeon100_content.gd")
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const TOWN := "res://scenes/maps/wilgendal.tscn"
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
@@ -58,6 +63,8 @@ func _run() -> void:
 	await _floor10_tests()
 	print("=== Deel D: nederlaag in de grot ===")
 	await _defeat_tests()
+	print("=== Deel E: push + valkamer / puzzelkamer (TODO koppelingen) ===")
+	await _push_koppel_tests()
 	print("DUNGEON100INTEGRATIETEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await pframes(10)
@@ -475,3 +482,206 @@ func _defeat_tests() -> void:
 	check("verlaten zet de echte party terug", GameState.party[0]["level"] == 5 and GameState.gold == 200
 			and not GameState.dungeon100_run_active())
 	GameState.encounter_multiplier = 1.0
+
+
+# ================================================================ deel E: push x val / puzzel
+const KOPPEL_SEED := 777
+
+
+func _koppel_floor(soort: String, from: int) -> int:
+	for f in range(from, 99):
+		if GK.layout_soort(KOPPEL_SEED, f) == soort:
+			return f
+	return -1
+
+
+func _koppel_start(f: int) -> Node:
+	GameState.new_game("Dax")
+	GameState.story_step = SD.NACHT
+	GameState.encounter_multiplier = 0.0
+	GameState.dungeon100_seed = KOPPEL_SEED
+	GameState.dungeon100_floor = f
+	GameState.change_map(DUNGEON, "omhoog")
+	if not await wait_floor(f):
+		return null
+	await wait_until(func(): return not Dialog.is_open or Dialog.has_choices(), 0.5)
+	while Dialog.is_open and not Dialog.has_choices():
+		Dialog.advance()
+		await pframes(4)
+	var r := scene()
+	for m in r.monsters:
+		if is_instance_valid(m):
+			m.moves = false
+	await pframes(4)
+	return r
+
+
+## Vrij voor een monster: vloer, geen ander monster, geen object/puzzelstuk.
+func _mfree(r: Node, t: Vector2i, except: Node = null) -> bool:
+	var n: int = r.cell(t)
+	if n < 0 or DungeonRooms.is_solid(n) or DungeonRooms.is_no_monster(n) or r._blocked.has(t) or r.push_blocked(t):
+		return false
+	for o in r.monsters:
+		if is_instance_valid(o) and o != except and o.covers(t):
+			return false
+	return true
+
+
+## Een monster in de kamer zetten (puzzelkamers hebben er geen): data van een gewone verdieping.
+func _spawn_monster(r: Node, t: Vector2i) -> Node:
+	var src: Dictionary = {}
+	for f in range(4, 40):
+		var ms: Array = Gen.generate(KOPPEL_SEED, f)["room"].get("monsters", [])
+		for md in ms:
+			if not bool(md.get("boss", false)) and (md.get("size", [1, 1]) as Array) == [1, 1]:
+				src = (md as Dictionary).duplicate(true)
+				break
+		if not src.is_empty():
+			break
+	src["id"] = "test_duwmonster"
+	src["tile"] = [t.x, t.y]
+	var m: Node = MapMonsterScript.new()
+	m.setup(r, src, 99)
+	r.get_node("Objects").add_child(m)
+	r.monsters.append(m)
+	m.moves = false
+	return m
+
+
+func _push_koppel_tests() -> void:
+	# ---- valkamer: verlamd monster op een val duwen
+	var vf := _koppel_floor("val", 4)
+	check("valkamer gevonden (seed %d, verdieping %d)" % [KOPPEL_SEED, vf], vf > 0)
+	if vf > 0:
+		var r := await _koppel_start(vf)
+		check("valkamer geladen met vallen", r != null and not (r.vallen as Dictionary).is_empty())
+		if r != null and not (r.vallen as Dictionary).is_empty():
+			var m: Node = null
+			for o in r.monsters:
+				if is_instance_valid(o) and o.size == Vector2i.ONE and not o.boss:
+					m = o
+					break
+			if m == null:
+				m = _spawn_monster(r, Vector2i(-40, -40))
+			var plan := {}
+			for vt in r.vallen:
+				for d in [R, L, D, U]:
+					var a: Vector2i = vt - d
+					var p: Vector2i = vt - 2 * d
+					if _mfree(r, a, m) and _mfree(r, p, m) and not r.vallen.has(a) and not r.vallen.has(p):
+						plan = {"val": vt, "dir": d, "m": a, "p": p}
+						break
+				if not plan.is_empty():
+					break
+			check("opstelling: speler - monster - val op een rij", not plan.is_empty())
+			if not plan.is_empty():
+				var v = r.vallen[plan["val"]]
+				var pl := player()
+				pl.place_at(plan["p"], plan["dir"])
+				m.place_at(plan["m"], Vector2i.DOWN)
+				await pframes(4)
+				var hp0 := int(GameState.party[0]["hp"])
+				var mid: String = m.monster_id
+				m.stun(10)
+				check("verlamd monster geduwd", r.push_monster(m, plan["dir"]))
+				await wait_until(func(): return not is_instance_valid(m) or not r.monsters.has(m), 3.0)
+				await get_tree().create_timer(1.2).timeout     # tekst helemaal getypt
+				await screenshot("val_monster_geduwd")
+				check("monster in de val: weg en verslagen, val afgegaan", not r.monsters.has(m)
+						and r.val_slachtoffers.has(mid) and v.afgegaan
+						and bool(GameState.defeated_map_monsters.get(r.room_id, {}).get(mid, false)))
+				check("geen schade aan de party, geen gevecht", int(GameState.party[0]["hp"]) == hp0 and not GameState.in_battle)
+				check("melding (Engels)", Dialog.is_open and r.VAL_MONSTER_TEKST.begins_with("The monster"))
+				while Dialog.is_open:
+					Dialog.advance()
+					await pframes(4)
+				# niet verlamd: geen duw, val blijft onaangeroerd
+				var vt2: Vector2i = Vector2i(-1, -1)
+				for t in r.vallen:
+					if not r.vallen[t].afgegaan:
+						vt2 = t
+				check("val na de duw zichtbaar en onschadelijk (speler erop: geen schade)",
+						(func():
+							r.call("_on_val_stap", plan["val"])
+							return int(GameState.party[0]["hp"]) == hp0).call())
+				while Dialog.is_open:
+					Dialog.advance()
+					await pframes(4)
+	# ---- puzzelkamer: verlamd monster op de drukplaat
+	var pf := -1
+	for f in range(6, 99):
+		if GK.layout_soort(KOPPEL_SEED, f) != "puzzel":
+			continue
+		var pz_id := str(Gen.generate(KOPPEL_SEED, f)["room"].get("puzzel", {}).get("id", ""))
+		var objs: Dictionary = GrotPuzzels.puzzel(pz_id).get("objects", {})
+		if pz_id == "kast_plaat":
+			pf = f
+			break
+	check("puzzelkamer gevonden (verdieping %d)" % pf, pf > 0)
+	if pf <= 0:
+		return
+	var aantal_ok := true
+	for sd in [777, 5, 99]:
+		for f in range(6, 99):
+			if GK.layout_soort(sd, f) != "puzzel":
+				continue
+			var rm: Dictionary = Gen.generate(sd, f)["room"]
+			var pid2 := str(rm.get("puzzel", {}).get("id", ""))
+			var heeft_plaat := not GrotPuzzels.duw_plan(pid2).is_empty()
+			aantal_ok = aantal_ok and (rm["monsters"] as Array).size() == (1 if heeft_plaat else 0)
+	check("generator: puzzelkamer met plaat = 1 monster, zonder plaat = 0", aantal_ok)
+	var r2 := await _koppel_start(pf)
+	var pz: Node = r2.get("puzzel") if r2 != null else null
+	check("puzzel geplaatst", pz != null and is_instance_valid(pz))
+	if pz == null:
+		return
+	# beloning: precies 1 blauwe kist (de nis-kist), achter de dichte poort/spleet
+	var blauw := 0
+	var nis_ok := false
+	for c in r2.room["chests"]:
+		if str(c.get("kind", "")) == "blauw":
+			blauw += 1
+			nis_ok = str(c.get("id", "")).ends_with("_puzzel")
+	check("Puzzle Room: precies 1 blauwe kist, de nis-kist (beloning bij succes)", blauw == 1 and nis_ok and not pz.opgelost())
+	var logic = pz.logic
+	# besluit Dennis: plaatpuzzel = precies 1 monster, passend bij de verdieping, naast de plaat
+	var levend: Array = r2.monsters.filter(func(o): return is_instance_valid(o))
+	var duw: Dictionary = r2.room.get("puzzel_duw", {})
+	check("plaatpuzzel: precies 1 monster in de kamer (%d)" % levend.size(), levend.size() == 1 and not duw.is_empty())
+	if levend.size() != 1 or duw.is_empty():
+		return
+	var m2: Node = levend[0]
+	var pool: Array = Content.enemy_pool(pf)
+	check("monster past bij de verdieping (%s in de pool van %d), staat stil" % [m2.get("enemy_id") if "enemy_id" in m2 else "?", pf],
+			not m2.moves and pool.has(str(r2.room["monsters"][0]["enemy"])))
+	var mt := Vector2i(int(duw["monster"][0]), int(duw["monster"][1]))
+	var dir2 := Vector2i(int(duw["dir"][0]), int(duw["dir"][1]))
+	var plan2 := {"plaat": str(duw["plaat"]), "dir": dir2, "m": mt,
+			"p": Vector2i(int(duw["speler"][0]), int(duw["speler"][1]))}
+	check("monster staat naast de plaat, speler kan erachter (oplosbaar)", m2.tile == mt
+			and logic.plates[plan2["plaat"]]["tile"] == mt + dir2 and not logic.is_solid(plan2["p"]))
+	await get_tree().create_timer(0.6).timeout     # ECHO-hint komt iets na binnenkomst
+	while Dialog.is_open:
+		Dialog.advance()
+		await pframes(4)
+	var pl2 := player()
+	pl2.place_at(plan2["p"], plan2["dir"])
+	await pframes(6)
+	await screenshot("puzzel_monster_klaar")
+	check("monster naast de plaat drukt hem nog niet in", not logic.plate_pressed(plan2["plaat"]))
+	m2.stun(10)
+	check("verlamd monster op de plaat geduwd", r2.push_monster(m2, plan2["dir"]))
+	await wait_until(func(): return not m2.is_moving, 2.0)
+	await pframes(6)
+	check("monster op de zware drukplaat: plaat ingedrukt (voorstel: monster = zwaar)", logic.plate_pressed(plan2["plaat"]))
+	var solved: bool = await wait_until(func(): return pz.opgelost(), 2.0)
+	await pframes(20)
+	await screenshot("puzzel_monster_op_plaat")
+	var ids: Array = logic.plates.keys()
+	check("puzzel met 1 plaat: poort/nis open door het monster (%s)" % [ids], solved and ids.size() == 1)
+	# een geduwd monster gaat niet door kasten/poorten van de puzzel
+	var solid_t := Vector2i(-1, -1)
+	for t in logic.statics:
+		solid_t = t
+		break
+	check("puzzelstukken houden een geduwd monster tegen", solid_t == Vector2i(-1, -1) or r2.push_blocked(solid_t))

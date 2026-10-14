@@ -12,6 +12,7 @@ extends StaticBody2D
 ## (AURA_PERIOD). Eén sprite, geen Light2D: goedkoop op telefoons (gl_compatibility).
 
 const BookData := preload("res://scripts/data/book_data.gd")
+const SaveSlotListC := preload("res://scripts/ui/save_slot_list.gd")
 
 const FRAME_TIME := 0.22
 const ORDER := [0, 1, 2, 3]
@@ -129,14 +130,40 @@ func interact(player: Node2D) -> void:
 		Dialog.show_lines([line])
 		await Dialog.finished
 	if info.get("save", false):
-		var choice: int = await Dialog.ask(info.get("question", "Save progress?"), ["Yes", "No"])
+		var slot := GameState.active_slot
+		var q := "%s (Slot %d)" % [info.get("question", "Save progress?"), slot]
+		var choice: int = await Dialog.ask(q, ["Yes", "No", "Other slot"])
+		if choice == 2:
+			slot = await ask_slot()
+			choice = 0 if slot > 0 else 1
 		if choice == 0:
+			GameState.active_slot = slot
 			if GameState.save_game(player.get_tile(), player.facing):
 				last_result = "saved"
-				Dialog.show_lines(["Saved."])
+				Dialog.show_lines(["Saved to slot %d." % slot])
 			else:
 				last_result = "failed"
 				Dialog.show_lines(["Save failed."])
 		else:
 			last_result = "declined"
 	busy = false
+
+
+## Kies een van de vier slots (het actieve staat eerst geselecteerd). 0 = terug/nee.
+## Een gevuld ander slot vraagt om bevestiging.
+func ask_slot() -> int:
+	var opts: Array = []
+	for i in range(1, GameState.SLOT_COUNT + 1):
+		var rec := GameState.slot_record(i)
+		var mark := "*" if i == GameState.active_slot else ""
+		opts.append("%sSlot %d: %s" % [mark, i, "empty" if rec.is_empty() else SaveSlotListC.summary(rec.get("data", {}))])
+	opts.append("Back")
+	var pick: int = await Dialog.ask("Save to which slot?", opts, "", GameState.active_slot - 1)
+	if pick < 0 or pick >= GameState.SLOT_COUNT:
+		return 0
+	var slot := pick + 1
+	if slot != GameState.active_slot and not GameState.slot_record(slot).is_empty():
+		var ok: int = await Dialog.ask("Overwrite slot %d?" % slot, ["No", "Yes"])
+		if ok != 1:
+			return 0
+	return slot
