@@ -20,6 +20,7 @@ const SEED := 4242
 const W := preload("res://scripts/data/koopman_winkel.gd")
 const PA := preload("res://scripts/party_actions.gd")
 const GG := preload("res://scripts/data/grade_gear.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 const BATCH9 := ["mosslijm", "moskonijn", "papiergeest", "glitchmot", "mech_wachter", "kennis_beest",
 		"wortelkruiper", "mistuil", "sporenzwam", "inktwurm"]
 
@@ -422,6 +423,31 @@ func _winkel_data() -> void:
 		schaal_ok = schaal_ok and goed
 	check("waren geschaald op de verdieping: 2 uitrusting van de grade + 1 accessoire + Potion/Magic Water (%s)" % [info], schaal_ok)
 	check("geschaalde waren hebben een prijs en een naam", prijs_ok)
+	var acc_ok := true
+	var acc_info := ""
+	for f in [1, 2, 19, 20, 49, 50, 79, 80, 99]:
+		for row in W.voorraad(SEED, 1, [], f):
+			if row["soort"] == "accessoire":
+				acc_info += "%d:%s=%d " % [f, row["id"], int(row["price"])]
+				acc_ok = acc_ok and int(row["price"]) >= W.ACCESSOIRE_BODEM
+	check("accessoires nooit 1g: minstens %dg (%s)" % [W.ACCESSOIRE_BODEM, acc_info], acc_ok)
+	check("Archive Ring (kistbuit, prijs 0) krijgt de grade-prijs", W.accessoire_prijs("d100_ring_2", 2) == 100
+			and W.accessoire_prijs("d100_ring_3", 30) == 240 and W.accessoire_prijs("bladwijzer", 2) == 100)
+	var nl := ["zwaard", "staf van", "takken", "kap", "jas", "broek", "laarzen", "leren", "bronzen", "rol:", "simulatie", "zingend", "ring van", "amulet van"]
+	var nl_hits: Array[String] = []
+	var namen: Array = []
+	for id in GG.ITEMS:
+		namen.append(str(GG.ITEMS[id]["name"]))
+		for a in GG.ITEMS[id].get("affixen", []):
+			namen.append(str(a["naam"]))
+	for d in [GameData.ITEMS, GameData.EQUIPMENT, GameData.KEY_ITEMS]:
+		for id in d:
+			namen.append(str(d[id].get("name", "")))
+	for n in namen:
+		for w in nl:
+			if n.to_lower().contains(w):
+				nl_hits.append(n)
+	check("geen Nederlandse itemnamen meer (%s)" % [nl_hits], nl_hits.is_empty())
 	check("G4-verdieping: accessoire uit de G4-accessoires", GG.item(W.accessoire_voor(SEED, 1, 90)).get("slot", "") == "accessoire")
 	GameState.gold = 99999
 	var vk: Array = W.voorraad(SEED, 2, [], 55).filter(func(x): return x["soort"] == "uitrusting")
