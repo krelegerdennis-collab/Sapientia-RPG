@@ -193,6 +193,15 @@ ECHO: "Maar dat is een verhaal voor later."
       werknamen; lees ze als Dax, Vesper en Seren. "Beslissingen van Dennis" verwijst naar
       Dennis als maker, niet naar het personage.
 
+## Diepe Grot (besluiten Dennis, 14 okt 2026)
+
+- **Kamerkansen**: de tabel in TODO.md (35/20/10/7/5/5/5/3/1) telt op tot 91%. De worp
+  normaliseert over de actieve types naar 100% (`GrotLayouts.KANSEN`, `soort`).
+- **Koopman (H-5)**: vast **1x per 10 verdiepingen** (`GrotKamers.koopman_verdieping`); hij zit
+  niet in de worp. Zijn 1% in de tabel is alleen ter informatie.
+- **Wereldkaart**: geen ingang en geen icoon van de Diepe Grot. De grot start alleen via ECHO
+  (ECHO's Kamer). De oude spawn `van_dungeon100` blijft alleen voor oude saves.
+
 ## Makkelijk over te nemen (botst niet)
 
 Uit `BOTSINGEN.md`; dit mag zonder verdere beslissing gebruikt worden:

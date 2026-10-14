@@ -884,7 +884,7 @@ De open vakjes van dit blok staan ook als overzicht in de actieve werklijst. De 
 
 Per verdieping: 1 layout rollen uit onderstaande tabel.
 
-In de code: `scripts/data/grot_layouts.gd` (+ `GrotKamers.layout_soort`, generator `layout_type`). Aannames: de tabel telt op tot 91% en wordt genormaliseerd; de Koopman blijft 1x per 10 (vaste regel, niet de 1%-worp); PUZZLE ROOM staat uit tot de puzzels gekozen zijn; Chest Room = 12x12 met vloer 8x7; val/schat/leeg/rust/koopman/baas/100 hebben de Medium-maat. Blauwe-kist-overrides per kamer-type horen bij de loot-taak (RPG CODE); tot dan geldt de bestaande kans per kist.
+In de code: `scripts/data/grot_layouts.gd` (+ `GrotKamers.layout_soort`, generator `layout_type`). Besluiten (Dennis, 14 okt 2026): de tabel telt op tot 91% en wordt genormaliseerd naar 100% (elk actief type krijgt zijn aandeel van de 91, bv. Medium 35/91 ≈ 38%); de Koopman is vast 1x per 10 verdiepingen (geen 1%-worp); PUZZLE ROOM staat uit tot de puzzels gekozen zijn; Chest Room = 12x12 met vloer 8x7; val/schat/leeg/rust/koopman/baas/100 hebben de Medium-maat. Blauwe-kist-overrides per kamer-type horen bij de loot-taak (RPG CODE); tot dan geldt de bestaande kans per kist.
 
 Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
 
@@ -973,6 +973,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Verkoopt speciale items (alleen hier te koop)
   - Kan ook items KOPEN van de speler
   - Max 1× per 10 verdiepingen
+  - Besluit (Dennis, 14 okt 2026): vast 1× per 10 verdiepingen (`GrotKamers.koopman_verdieping`), niet de 1%-worp.
   - TODO(design): welke items verkoopt hij?
 
 ### Totaal-overzicht

@@ -8,9 +8,9 @@ extends RefCounted
 ##   - baasverdieping (BOSSES)   -> BAAS (baas + wat monsters). Dat zijn 10, 20, 25 ... 90 en 99; de
 ##     tien-tallen zijn ook rustpunt-verdiepingen (checkpoint), dat blijft zo.
 ##   - koopmanverdieping (GrotKamers.koopman_verdieping, 1x per 10) -> KOOPMAN
-## Anders een worp uit KANSEN. AANNAMES (zie de PR):
-##   - De CANON-tabel telt op tot 91%; de worp normaliseert over de actieve types.
-##   - De Koopman (1%) blijft de vaste 1x-per-10-regel van GrotKamers (H-5, CANON 12); hij zit niet in de worp.
+## Anders een worp uit KANSEN. BESLUITEN (Dennis, 14 okt 2026, CANON 'Diepe Grot'):
+##   - De CANON-tabel telt op tot 91%; de worp normaliseert over de actieve types naar 100%.
+##   - De Koopman (1%) is vast 1x per 10 (GrotKamers, H-5, CANON 12); hij zit niet in de worp.
 ##   - PUZZEL staat uit (PUZZEL_ACTIEF) tot Dennis kiest welke puzzels (TODO(design)); zijn 5% valt weg.
 ##   - Kamerafmeting = speelveld incl. buitenmuur: CHEST ROOM 12x12 (vloer 8x7), MEDIUM 25x25, LARGE 50x50.
 ##     Val, schat, leeg, rust, baas en vloer 100 gebruiken de MEDIUM-maat.
