@@ -488,6 +488,18 @@ func _state_tests() -> void:
 			and _world_walkable(ground, et) and not bezet)
 	var sp: Node2D = w.get_node_or_null("Spawns/van_dungeon100")
 	check("oude spawn van_dungeon100 blijft voor oude saves", sp != null)
+	# Besluit Dennis 14 okt 2026: geen ingang en geen icoon van de Diepe Grot op de wereldkaart.
+	var naar_grot := false
+	for e in w.get_node("Exits").get_children():
+		if str(e.get("target_map")) == DUNGEON or str(e.get("target_map")) == EchoGrot.KAMER:
+			naar_grot = true
+	var icoon := false
+	for o in w.get_node("Objects").get_children():
+		var nm := str(o.name).to_lower()
+		if nm.contains("diepe") or nm.contains("dungeon100") or nm.contains("echo"):
+			icoon = true
+	check("wereldkaart: geen uitgang naar de Diepe Grot", not naar_grot)
+	check("wereldkaart: geen Diepe Grot-icoon", not icoon)
 	w.free()
 
 
