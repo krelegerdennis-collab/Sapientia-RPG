@@ -210,6 +210,8 @@ ECHO: "Maar dat is een verhaal voor later."
   Engelse UI.
 - **Trap Room**: 60% zichtbare, 40% verborgen vallen. Een verborgen val **flitst kort** als de
   speler binnen 2 tegels komt (één keer per nadering); na het afgaan blijft hij zichtbaar.
+- **Medium Map** (25x25): 2-4 gewone kisten + 0-1 blauwe (floor-bracket-tabel); monsters
+  8-10 (1-20), 10-12 (21-50), 12-14 (51-80), 14-16 (81-99).
 - **Wereldkaart**: geen ingang en geen icoon van de Diepe Grot. De grot start alleen via ECHO
   (ECHO's Kamer). De oude spawn `van_dungeon100` blijft alleen voor oude saves.
 
