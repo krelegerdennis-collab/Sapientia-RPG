@@ -63,6 +63,8 @@ func _run() -> void:
 	print("=== Archief 2: na The Mender naar de hub ===")
 	await _genezer_podium()
 	await _na_genezer_hub()
+	print("=== Archief 2: veldmenu > Scenes > The World Warper (alleen het filmpje) ===")
+	await _scenes_warper_herhaling()
 	print("=== Archief 2: vijanden (data en regels) ===")
 	_vijanden()
 	print("=== Archief 2: vijanden en Codex-bondgenoten in het gevecht ===")
@@ -661,6 +663,57 @@ func _na_genezer_hub() -> void:
 	# Terug in de Genezer-kamer: scène 1 speelt niet opnieuw.
 	check("scène 1 niet opnieuw", not GenezerScene.mag_spelen(GameState.story_flags))
 	await _dialoog_dicht(8)
+
+
+## v0.25 Bug (Dennis): de herhaling van 'The World Warper' in het scenes-scherm speelde na zijn filmpje
+## nog een tweede (gescripte) cutscene. Nu: alleen het filmpje, daarna netjes terug in de lijst.
+## (Het verhaal zelf, filmpje + canon-scène, is hierboven in _na_genezer_hub getest.)
+func _scenes_warper_herhaling() -> void:
+	await _dialoog_dicht(30)
+	await _pframes(10)
+	var flags_voor: Dictionary = GameState.story_flags.duplicate()
+	var map_voor := str(_scène().scene_file_path) if _scène() != null else ""
+	var m: Node = null
+	for poging in 10:
+		await _tik("menu")
+		await _pframes(3)
+		m = _scène().get_node_or_null("FieldMenu") if _scène() != null else null
+		if m != null:
+			break
+		await _pframes(20)
+	if m == null or not m.buttons.has("scenes"):
+		check("scenes: veldmenu open", false)
+		return
+	m.buttons["scenes"].pressed.emit()
+	await _pframes(4)
+	var sc: Node = m.sub
+	if sc == null or sc.name != "Scenes":
+		check("scenes: scenes-scherm open", false)
+		return
+	check("scenes: 'The World Warper' ontgrendeld na het verhaal", GameState.scene_seen("ww_warper"))
+	sc.choose("ww_warper")
+	await _pframes(10)
+	var gz: Node = get_tree().root.get_node_or_null("SceneReplay/CanonGenezer")
+	var vs: Node = gz.video_speler if gz != null else null
+	check("scenes: herhaling speelt Dax' filmpje", vs != null and is_instance_valid(vs) and str(vs.video_path).ends_with("genezer_warper.ogv"))
+	if vs != null and is_instance_valid(vs):
+		vs.skip_now()
+	var ok: bool = await _wacht_tot(func(): return sc.playing == null, 5.0)
+	var geen_tweede: bool = not Dialog.is_open and (not is_instance_valid(gz) or gz.regels_getoond.is_empty())
+	for i in 40:     # een tweede scène zou nu dialoog openen
+		await _pframes(1)
+		geen_tweede = geen_tweede and not Dialog.is_open
+	check("scenes: na het filmpje GEEN gescripte scène erachteraan, vanzelf terug in de lijst", ok and geen_tweede)
+	check("scenes: terug in het scherm (focus, dialooglaag 5, geen restanten)", m.sub == sc and sc.buttons.any(func(b): return b.has_focus())
+			and Dialog.layer == 5 and get_tree().root.get_node_or_null("SceneReplay") == null
+			and get_tree().root.get_node_or_null("SceneReplayWeg") == null)
+	check("scenes: herhaling raakt het verhaal niet (vlaggen en map gelijk)", GameState.story_flags == flags_voor
+			and (str(_scène().scene_file_path) if _scène() != null else "") == map_voor)
+	await _shot("scenes_terug_na_warper")
+	sc.close()
+	await _pframes(4)
+	m.close()
+	await _pframes(4)
 
 
 func _zonder_lotte() -> void:

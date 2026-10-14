@@ -762,27 +762,10 @@ func _scenes_tests() -> void:
 			if vs != null and is_instance_valid(vs):
 				vs.skip_now()
 			await pframes(30)
-			check("ww_warper: Genezer-scène speelt los (eerste zin getoond, dialoog boven het menu)", gz != null
-					and gz.regels_getoond.size() >= 1 and gz.herhaling and Dialog.layer > sc.layer)
-			await screenshot("scenes_herhaling_warper")
-			# v0.24 bug Dennis: eerste vak ('The core of the second Archive ...') binnen beeld en
-			# met tikken door te klikken tot het eind (de touch-knoppen zijn weg zolang het menu open is)
-			var vp := Rect2(Vector2.ZERO, get_tree().root.get_visible_rect().size)
-			var pr: Rect2 = Dialog.panel.get_global_rect()
-			check("ww_warper: eerste tekstvak binnen de schermbreedte (%s in %s)" % [pr, vp], Dialog.is_open
-					and str(Dialog.text_label.text).begins_with("The core of the second Archive")
-					and pr.position.x >= 0.0 and pr.end.x <= vp.end.x and Dialog.text_label.get_global_rect().end.x <= pr.end.x)
-			var tikken := 0
-			var getoond := 0
-			while tikken < 120 and sc.playing != null:
-				if is_instance_valid(gz):
-					getoond = gz.regels_getoond.size()
-				if Dialog.is_open:
-					await tik_scherm()
-					tikken += 1
-				await pframes(3)
-			check("ww_warper: door de hele scène getikt -> vanzelf terug in de lijst (%d tikken)" % tikken,
-					sc.playing == null and getoond == WorldWarperCanon.GENEZER.size())
+			# v0.25 bug Dennis: na het filmpje GEEN tweede (gescripte) cutscene meer; meteen terug in de lijst
+			check("ww_warper: na het filmpje geen gescripte scène erachteraan (geen dialoog, geen regels)",
+					not Dialog.is_open and (not is_instance_valid(gz) or gz.regels_getoond.is_empty()))
+			check("ww_warper: na het filmpje vanzelf terug in de lijst", sc.playing == null)
 			await pframes(6)
 			check("ww_warper: na terugkomst menu bruikbaar (focus, dialoog dicht en op laag 5, geen restanten)",
 					sc.buttons.any(func(b): return b.has_focus()) and not Dialog.is_open and Dialog.layer == 5
