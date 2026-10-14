@@ -47,7 +47,15 @@ static func masker(t: Vector2i, soort: String) -> int:
 	return m
 
 
+## Fase 3: geanimeerd water (bron 1 van terrain.tres, tools/som/water_anim.py), anders het stilstaande water.
+var water_anim: Dictionary = {}
+
+
 func _zet(laag: TileMapLayer, t: Vector2i, naam: String) -> void:
+	if water_anim.has(naam):
+		var w: Array = water_anim[naam]
+		laag.set_cell(t, 1, Vector2i(int(w[0]), int(w[1])))
+		return
 	if not namen.has(naam):
 		push_warning("SoM-tegel ontbreekt: " + naam)
 		return
@@ -60,6 +68,11 @@ func _som() -> void:
 	tile_set = load(KaartStijl.tileset_pad("wilgendal", "terrain"))
 	namen = JSON.parse_string(FileAccess.get_file_as_string(
 			KaartStijl.tileset_pad("wilgendal", "terrain").replace(".tres", "_namen.json")))
+	var wpad := KaartStijl.tileset_pad("wilgendal", "terrain").get_base_dir().path_join("water_anim_namen.json")
+	if FileAccess.file_exists(wpad) and tile_set.has_source(1):
+		var wd = JSON.parse_string(FileAccess.get_file_as_string(wpad))
+		if wd is Dictionary:
+			water_anim = wd
 	var over := TileMapLayer.new()
 	over.name = "SomOverlay"
 	over.tile_set = tile_set

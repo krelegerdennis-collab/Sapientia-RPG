@@ -463,9 +463,36 @@ func _som_pilot(dorp: Node) -> void:
 			and g.tile_set.resource_path == KaartStijl.tileset_pad("wilgendal", "terrain"))
 	var namen: Dictionary = g.namen
 	var w := Vector2i(10, Data.BEEK_RIJ)
-	var wc: Array = namen["water_068"]
-	check("som: beek = water blob47 (E+W = 068) en botst", g.get_cell_atlas_coords(w) == Vector2i(int(wc[0]), int(wc[1]))
+	var wc: Array = g.water_anim.get("water_068", [-1, -1])
+	check("som: beek = geanimeerd water blob47 (E+W = 068, bron 1) en botst", g.get_cell_source_id(w) == 1
+			and g.get_cell_atlas_coords(w) == Vector2i(int(wc[0]), int(wc[1]))
 			and g.get_cell_tile_data(w).get_collision_polygons_count(0) > 0 and not Data.beloopbaar(w))
+	var wbron := g.tile_set.get_source(1) as TileSetAtlasSource
+	var wt := Vector2i(int(wc[0]), int(wc[1]))
+	check("som: water 4 frames, ~5 fps, kolommen 0, separatie (7,0)", wbron != null
+			and wbron.get_tile_animation_frames_count(wt) == 4 and wbron.get_tile_animation_columns(wt) == 0
+			and wbron.get_tile_animation_separation(wt) == Vector2i(7, 0) and is_equal_approx(wbron.get_tile_animation_speed(wt), 5.0))
+	var props_ok := true
+	var n_som := 0
+	for i in Data.PROPS.size():
+		var rij: Dictionary = Data.PROPS[i]
+		var body: Node = dorp.get_node_or_null("Objects/Prop_%s_%d" % [str(rij["tex"]), i])
+		var sp := Data.som_prop(rij)
+		if body == null:
+			props_ok = false
+		elif not sp.is_empty():
+			n_som += 1
+			var b: Rect2i = sp["blok"]
+			props_ok = props_ok and body.get_meta("som_prop") == sp["naam"] and (body as Node2D).position == sp["voet"]
+			props_ok = props_ok and not Data.beloopbaar(b.position) and Data.prop_blok(rij) == b
+	check("som: fase-3 props (put, kramen, lantaarns, bank, bloembak) met botsing/y-sort uit de index (%d)" % n_som,
+			props_ok and n_som == 17)
+	var npc_ok := true
+	for naam in ["Gerrit", "Bram", "Els", "Fien", "Wout", "Siem"]:
+		var spr: Sprite2D = dorp.get_node("Objects/%s/Sprite2D" % naam)
+		npc_ok = npc_ok and spr.texture.resource_path == Data.SOM_NPC_MAP + str(Data.SOM_NPC[naam]) + ".png"
+		npc_ok = npc_ok and spr.hframes == 3 and spr.vframes == 4 and spr.offset == Vector2(0, -8)
+	check("som: fase-3 NPC-sheets 24x32 (Gerrit, Bram, Els, Fien, Wout, Siem)", npc_ok)
 	var ov: TileMapLayer = dorp.get_node("Ground/SomOverlay")
 	var bm: Array = namen["brug_v_m"]
 	check("som: brug over de beek beloopbaar", ov.get_cell_atlas_coords(Vector2i(34, Data.BEEK_RIJ)) == Vector2i(int(bm[0]), int(bm[1]))

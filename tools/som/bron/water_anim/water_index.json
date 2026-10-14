@@ -1,0 +1,312 @@
+{
+ "tile": 16,
+ "frames": 4,
+ "fps_suggested": 5,
+ "sheet_px": [
+  512,
+  96
+ ],
+ "layout": "frame f occupies columns f*8..f*8+7; inside a frame, tile i (0..46) is at col i%8, row i//8 (tile 47 slot = empty)",
+ "godot": "TileSetAtlasSource: create the 47 tiles from the frame-0 block, animation_frames_count=4, animation_columns=0, animation_separation=(7,0), animation_speed=5",
+ "mask_bits": {
+  "N": 1,
+  "NE": 2,
+  "E": 4,
+  "SE": 8,
+  "S": 16,
+  "SW": 32,
+  "W": 64,
+  "NW": 128
+ },
+ "mask_rule": "bit set = neighbour is water; diagonal kept only if both adjacent cardinals are set",
+ "tiles": [
+  {
+   "mask": 0,
+   "index": 0,
+   "col": 0,
+   "row": 0
+  },
+  {
+   "mask": 1,
+   "index": 1,
+   "col": 1,
+   "row": 0
+  },
+  {
+   "mask": 4,
+   "index": 2,
+   "col": 2,
+   "row": 0
+  },
+  {
+   "mask": 5,
+   "index": 3,
+   "col": 3,
+   "row": 0
+  },
+  {
+   "mask": 7,
+   "index": 4,
+   "col": 4,
+   "row": 0
+  },
+  {
+   "mask": 16,
+   "index": 5,
+   "col": 5,
+   "row": 0
+  },
+  {
+   "mask": 17,
+   "index": 6,
+   "col": 6,
+   "row": 0
+  },
+  {
+   "mask": 20,
+   "index": 7,
+   "col": 7,
+   "row": 0
+  },
+  {
+   "mask": 21,
+   "index": 8,
+   "col": 0,
+   "row": 1
+  },
+  {
+   "mask": 23,
+   "index": 9,
+   "col": 1,
+   "row": 1
+  },
+  {
+   "mask": 28,
+   "index": 10,
+   "col": 2,
+   "row": 1
+  },
+  {
+   "mask": 29,
+   "index": 11,
+   "col": 3,
+   "row": 1
+  },
+  {
+   "mask": 31,
+   "index": 12,
+   "col": 4,
+   "row": 1
+  },
+  {
+   "mask": 64,
+   "index": 13,
+   "col": 5,
+   "row": 1
+  },
+  {
+   "mask": 65,
+   "index": 14,
+   "col": 6,
+   "row": 1
+  },
+  {
+   "mask": 68,
+   "index": 15,
+   "col": 7,
+   "row": 1
+  },
+  {
+   "mask": 69,
+   "index": 16,
+   "col": 0,
+   "row": 2
+  },
+  {
+   "mask": 71,
+   "index": 17,
+   "col": 1,
+   "row": 2
+  },
+  {
+   "mask": 80,
+   "index": 18,
+   "col": 2,
+   "row": 2
+  },
+  {
+   "mask": 81,
+   "index": 19,
+   "col": 3,
+   "row": 2
+  },
+  {
+   "mask": 84,
+   "index": 20,
+   "col": 4,
+   "row": 2
+  },
+  {
+   "mask": 85,
+   "index": 21,
+   "col": 5,
+   "row": 2
+  },
+  {
+   "mask": 87,
+   "index": 22,
+   "col": 6,
+   "row": 2
+  },
+  {
+   "mask": 92,
+   "index": 23,
+   "col": 7,
+   "row": 2
+  },
+  {
+   "mask": 93,
+   "index": 24,
+   "col": 0,
+   "row": 3
+  },
+  {
+   "mask": 95,
+   "index": 25,
+   "col": 1,
+   "row": 3
+  },
+  {
+   "mask": 112,
+   "index": 26,
+   "col": 2,
+   "row": 3
+  },
+  {
+   "mask": 113,
+   "index": 27,
+   "col": 3,
+   "row": 3
+  },
+  {
+   "mask": 116,
+   "index": 28,
+   "col": 4,
+   "row": 3
+  },
+  {
+   "mask": 117,
+   "index": 29,
+   "col": 5,
+   "row": 3
+  },
+  {
+   "mask": 119,
+   "index": 30,
+   "col": 6,
+   "row": 3
+  },
+  {
+   "mask": 124,
+   "index": 31,
+   "col": 7,
+   "row": 3
+  },
+  {
+   "mask": 125,
+   "index": 32,
+   "col": 0,
+   "row": 4
+  },
+  {
+   "mask": 127,
+   "index": 33,
+   "col": 1,
+   "row": 4
+  },
+  {
+   "mask": 193,
+   "index": 34,
+   "col": 2,
+   "row": 4
+  },
+  {
+   "mask": 197,
+   "index": 35,
+   "col": 3,
+   "row": 4
+  },
+  {
+   "mask": 199,
+   "index": 36,
+   "col": 4,
+   "row": 4
+  },
+  {
+   "mask": 209,
+   "index": 37,
+   "col": 5,
+   "row": 4
+  },
+  {
+   "mask": 213,
+   "index": 38,
+   "col": 6,
+   "row": 4
+  },
+  {
+   "mask": 215,
+   "index": 39,
+   "col": 7,
+   "row": 4
+  },
+  {
+   "mask": 221,
+   "index": 40,
+   "col": 0,
+   "row": 5
+  },
+  {
+   "mask": 223,
+   "index": 41,
+   "col": 1,
+   "row": 5
+  },
+  {
+   "mask": 241,
+   "index": 42,
+   "col": 2,
+   "row": 5
+  },
+  {
+   "mask": 245,
+   "index": 43,
+   "col": 3,
+   "row": 5
+  },
+  {
+   "mask": 247,
+   "index": 44,
+   "col": 4,
+   "row": 5
+  },
+  {
+   "mask": 253,
+   "index": 45,
+   "col": 5,
+   "row": 5
+  },
+  {
+   "mask": 255,
+   "index": 46,
+   "col": 6,
+   "row": 5
+  }
+ ],
+ "slots": "water_anim_slots.png: R=group (2 gras,3 pad,5 steen,7 water), G=shade, B=source ramp; palettes in /workspace/art_som_phase1/palettes",
+ "sheets": {
+  "wilgendal": "water_anim_wilgendal.png",
+  "herfst": "water_anim_herfst.png",
+  "donker_glitch": "water_anim_donker_glitch.png"
+ }
+}

@@ -98,6 +98,11 @@ func _props(objects: Node) -> void:
 	var i := 0
 	for ruw in Data.PROPS:
 		var rij: Dictionary = ruw
+		var sp := Data.som_prop(rij)
+		if not sp.is_empty():
+			_som_prop(objects, rij, sp, i)
+			i += 1
+			continue
 		var tex: Texture2D = load(Data.PROPS_MAP + str(rij["tex"]) + ".png")
 		var t: Vector2i = rij["tegel"]
 		var blok: Vector2i = rij["blok"]
@@ -124,6 +129,30 @@ func _props(objects: Node) -> void:
 		i += 1
 
 
+## SoM fase 3: prop uit props_index.json; y-sort op ysort_origin_px, botsing = collision_tiles.
+func _som_prop(objects: Node, rij: Dictionary, sp: Dictionary, i: int) -> void:
+	var body := StaticBody2D.new()
+	body.name = "Prop_%s_%d" % [str(rij["tex"]), i]
+	body.set_meta("prop", str(rij["tex"]))
+	body.set_meta("som_prop", str(sp["naam"]))
+	body.position = sp["voet"]
+	var spr := Sprite2D.new()
+	spr.texture = load(str(sp["tex"]))
+	spr.centered = false
+	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	spr.position = Vector2(sp["links_boven"]) * 16.0 - body.position
+	body.add_child(spr)
+	var blok: Rect2i = sp["blok"]
+	if blok.size.x > 0 and blok.size.y > 0:
+		var vorm := RectangleShape2D.new()
+		vorm.size = Vector2(blok.size) * 16.0 - Vector2(2, 2)
+		var bots := CollisionShape2D.new()
+		bots.shape = vorm
+		bots.position = Vector2(blok.position) * 16.0 + Vector2(blok.size) * 8.0 - body.position
+		body.add_child(bots)
+	objects.add_child(body)
+
+
 func _blok(ouder: Node, naam: String, r: Rect2i) -> void:
 	var body := StaticBody2D.new()
 	body.name = naam
@@ -148,6 +177,7 @@ func _gerrit(objects: Node) -> void:
 	if gerrit == null:
 		return
 	gerrit.set_meta("rol", "gerrit")
+	_som_sheet(gerrit)
 	if gerrit.has_method("place_at"):
 		gerrit.place_at(Data.GERRIT_TEGEL, Vector2i.DOWN)
 
@@ -162,12 +192,28 @@ func _sfeer(objects: Node) -> void:
 		npc.facing = Vector2i.DOWN
 		npc.event = ""
 		npc.set_meta("rol", str(rij["rol"]))
+		var sheet := Data.som_npc_sheet(str(rij["node"]))
+		if sheet != "":
+			npc.sheet = load(sheet)
 		objects.add_child(npc)
 		npc.place_at(rij["tegel"], Vector2i.DOWN)
 		var loper := Lus.new()
 		loper.name = "PleinLus"
 		loper.lus = Data.lus_tegels(rij)
 		npc.add_child(loper)
+
+
+## SoM fase 3: 24x32-sheet op een NPC die al in de scène staat (Gerrit).
+func _som_sheet(npc: Node) -> void:
+	var pad := Data.som_npc_sheet(str(npc.name))
+	if pad == "":
+		return
+	npc.sheet = load(pad)
+	var spr: Sprite2D = npc.get_node("Sprite2D")
+	spr.texture = npc.sheet
+	MapSprite.pas_toe(spr)
+	if npc.has_method("_update_sprite"):
+		npc._update_sprite()
 
 
 func _pand(objects: Node, ruw: Dictionary) -> void:
