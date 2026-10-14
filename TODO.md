@@ -16,162 +16,53 @@ Grade 4-wapens en -sets, en het herzien van PvP-teams, wachten tot er nieuwe kar
 
 ## Actieve werklijst
 
-### Act 1
+Gecontroleerd tegen code, scènes, CANON.md en main (14 okt 2026). Alleen wat echt open is, met de reden.
 
-- [ ] Act 1 = Worldmap 1 (start-eiland, Eerste Archief en Leven)
+### World Warper
 
-Act 2, Act 3 en de Spiegel-scène wachten op worldmap 2/3 en op scènes. Die vakjes staan open onder Canon & Design Reference.
+- [ ] De Werkplaats: crafting bouwen
+  De kamer staat (`world_warper/kamers/werkplaats.tscn`), maar heeft alleen een tafel. Er is geen crafting-systeem.
+- [ ] De Handelskamer: endgame-winkel bouwen
+  De kamer staat, maar de toonbank zegt "The shop is still closed." (`kamers.gd`, TODO(design) koopwaar).
+- [ ] ECHO: questvoortgang en dialoog per act
+  De gids heeft vaste stappen op vlaggen (`world_warper/guide/dialoog.gd`), geen questlog en geen dialoog per act.
+- [ ] Webversie bijwerken
+  De Pages-branch `cursor/web-build-29ec` staat nog op main `7237d2c`. De export is handmatig.
 
-### Dungeon-warpers
+### Audio
 
-- [ ] Cutscene-teksten (na De Genezer, eerste binnenkomst Hal, Sapientia-dreiging): tekst volgt van Dennis
-
-Archief 3 tot en met 6 hebben nog geen warpers. Dat vakje blijft open onder Canon & Design Reference, samen met de canon-regel voor de Diepe Grot.
-
-### Archief 2 — sfeer, art en Codex
-
-#### Sfeer en setting
-
-- [ ] Overwoekerde kas of broeikas (groen, vochtig, planten overal)
-- [ ] Zachte groene gloed als signature lighting
-- [ ] Leven dat niet stopt met groeien; alles is in beweging
-- [ ] Visueel contrast met het grauwe Eerste Archief
-
-#### Content en art
-
-- [ ] EN-namen laten bevestigen door Dennis (voorstel: Tendril, Sporehead, Thorn Runner, Blooming Dread, Rootghost)
-- [ ] Achtergrondmuziek die bij de overwoekerde kas past
+- [ ] Muziek voor Archief 2 (overwoekerde kas)
+  `assets/audio/bgm` heeft geen kas-track.
+- [ ] Geluid van de World Warper: Hanger-activatie, ECHO-stem, hub-ambience
+  `world_warper/audio/PLACEHOLDERS.md`: er zijn geen clips, dus de cues zijn stil.
+- [ ] Geluidseffecten zijn nog placeholders: echte sfx maken
 
 ### Bestiarium
 
 - [ ] Bestiarium uitwerken tot endgame
-  De bestaande eindbazen van de Diepe Grot (verdieping 10 tot en met 100) hebben een entry en stats uit de bestaande monsterdata.
-  De vier lore-zinnen hieronder staan in het bestiarium (`desc` van kennis_beest, wortelkoning, wurger en genezer). De weergavenaam van Kustos blijft The Knowledge Beast; die naam zit in de tests vast.
-
-De notitie bij dit vakje en de vier lore-zinnen staan direct boven die zinnen, onder Canon & Design Reference.
-
-### World Warper
-
-De hub na De Genezer bestaat. Hieronder wat daar nog open is. Ontgrendeling van worldmap 2 en 3 staat niet in deze lijst.
-
-- [ ] Webversie.
-  De Pages-branch `cursor/web-build-29ec` heeft de export van main `7237d2c` (Godot 4.7.2, threads uit). De export blijft handmatig. Hard verversen na de publicatie.
-
-### Concept en lore
-
-- [ ] Zwevend hightech gebouw op de wereldkaart
-  Placeholder-exterieur staat. Het gebouw zweeft niet op de wereldkaart. Placeholder-kaarten staan in world_warper/maps.
-- [ ] Slot dat alleen op Dennis' Hanger reageert
-  De scène noemt de Hanger de Sleutel. Een slot dat alleen op Dennis reageert ontbreekt. De spelertekst onthult H-6 niet.
-
-### Verschijning en cutscene
-
-- [ ] Cutscene na De Genezer: de World Warper verschijnt in de lucht
-  De Genezer staat in Archief 2. De World Warper-scènes staan in CANON 17 en in de game. Er is geen platform op de kaart: alleen Warp in het menu.
-
-- [ ] Duidelijk maken wat dit is, wat het kan, en waarom het belangrijk is
-  Eerste-bezoekscène en de vier ECHO-stappen doen een eerste versie. De zinnen zijn voorlopig.
-
-### Eerste binnenkomst: Hanger en Sapientia
-
-- [ ] Systemen komen online door het Hanger-signaal
-  De scène speelt één keer. Losse systemen gaan niet aan.
-
-- [ ] Dialoogscène
-  - [ ] Dennis toont de Hanger (eerste keer expliciet in het verhaal)
-    De scène toont de Hanger paars. Dennis steekt hem niet apart op.
-  - [ ] Uitleg bouwen: alleen de Hanger, de biometrische sleutel, activeert de World Warper
-    De tekst noemt de Hanger de Sleutel. Ze zegt niet dat alleen die de hub start. Geen H-6-onthulling.
-- [ ] Sapientia-dreiging
-  - [ ] Na de activering verschijnt Sapientia (glitch, stem of hologram)
-    Korte zwarte flikkering en een haperend hologram. Geen stem en geen hologram van Sapientia.
-  - [ ] Sapientia uit de dreiging: zij wil de World Warper, toegang tot alle zes Archieven tegelijk
-    De zin is: Sapientia weet dat de Sleutel hier is.
-  - [ ] Duidelijk maken dat Dennis en de Hanger het enige obstakel zijn: Sapientia wil zijn sleutel
-  - [ ] Dreiging opbouwen voor latere acts
-  - [ ] De party reageert geschokt; ECHO waarschuwt
-
-### Interieur
-
-- [ ] Kamers bouwen volgens de lijst hieronder
-  De kamers uit de lijst staan in world_warper/kamers en gaan open na De Genezer. Werkplaats en Handelskamer zijn leeg. codex_nis en sapientia_schot blijven dicht: world_warper_act2 en world_warper_act3 zet niemand.
-
-Per act:
-
-- [ ] Act 4: De Werkplaats, crafting
-  De kamer staat, maar is leeg.
-- [ ] Act 5: De Handelskamer, endgame-shops
-  De kamer staat, maar is leeg.
-
-Eerste versie, nog niet de kamers hierboven:
-
-- [ ] Paars als signature kleur, in lijn met het Codex Monument
-  Panelen, de hal en de Hanger-gloed zijn paars. Het blijven placeholder-tegels, geen definitieve art.
-- [ ] Hologrammen, schermen en tech-details
-  Placeholder-hologram in de eerste-bezoekscène en bij ECHO. Geen echte schermen.
-
-### Bewoners van de hub
-
-- [ ] Nieuwe party-leden voegen zich toe zodra ze aansluiten
-  refresh() leest de party bij het laden van de hal. Midden in de kamer werkt dat niet live bij.
-
-### AI-gids (in de main PC)
-
-Naam: ECHO. Bonus-lore, later onthullen: ECHO is de digitale echo van een onderzoeker van de Oude Mensheid.
-
-- [ ] De AI-gids zit in de main PC van het warp-platform
-  ECHO staat in de hal (ww_anchor_gids), niet in de warp-ring. Het plaatje is een placeholder.
-
-- [ ] Functie: questvoortgang, missie-uitleg en begeleiding
-  Vier vaste stappen via Dialog.show_lines. Geen questvoortgang.
-- [ ] Reageert op verhaalprogressie (nieuwe dialoog per act)
-  Vlaggen world_warper_guide_0 tot en met 3, in volgorde. Niet per act.
-
-### Warp-systeem
-
-- [ ] Questvoortgang via de AI-gids
-  ECHO heeft vier vaste stappen (world_warper_guide_0 tot en met 3) plus een hint naar de volgende bestaande bestemming. Geen questlog.
-
-### Audio
-
-- [ ] Geluid bij de eerste Hanger-activatie
-  Bij hanger_activated gaat ww_sapientia_glitch af. Een eigen Hanger-geluid ontbreekt, en ook dat blijft stil.
-- [ ] Stem of hologramgeluid van de AI-gids
-
-### Visuals en art
-
-  tiles.png, tegels 16×16, met het woord PLACEHOLDER. Geregistreerd in tools/placeholders_v17.txt. Echte tileset ontbreekt nog.
-
-### Verhaal-integratie
-
-- [ ] Dennis' Hanger is de sleutel; dat meermaals benadrukken in dialoog
-  Eerste-bezoekscène en de ECHO-stap hanger noemen de Hanger de Sleutel. Zinnen zijn voorlopig. Geen H-6-onthulling. Het staat nog niet op meer plekken.
-- [ ] Sapientia's belang bij de World Warper opbouwen: alle zes kernen in één keer
-  Eén zin: Sapientia weet dat de Sleutel hier is.
+  Monsters van Archief 3 tot en met 6 en worldmap 2/3 bestaan nog niet.
 
 ### PvP
 
-De modus staat onder Canon & Design Reference. Open blijft:
+- [ ] Relay service kiezen (GD-Sync / NodeTunnel / eigen VPS)
+- [ ] Fase 2: online lobby + connect-code
+  De connect-code werkt alleen op LAN.
+- [ ] Fase 5: polish (UI)
+  Disconnect en reconnect werken. De rest van de polish ontbreekt.
 
-- [ ] Relay service kiezen
-  - [ ] TODO(design): GD-Sync / NodeTunnel / eigen VPS / TBD
+### Lopend
 
-- [ ] Fase 2: Online lobby + connect-code
-  De connect-code werkt op LAN. Een online lobby met relay is er niet.
-
-- [ ] Fase 5: Polish (UI, disconnect, reconnect)
-  Disconnect en reconnect op dezelfde hostsessie staan. De rest van de polish niet.
-
-### Lopend en nieuw (14 okt 2026)
-
-- [ ] Titelscherm Engels (#104) — in uitvoering; nalopen dat alle titel- en menuteksten Engels zijn
-- [ ] Deep Learning Simulation: hernoemen van de Diepe Grot voor de speler + warp via de WarpHub (in uitvoering)
 - [ ] Wilgendal herontwerp (in uitvoering)
-- [ ] Goedgekeurde Engelse namenlijst toepassen in het hele spel (in uitvoering)
-- [ ] Geluidseffecten zijn nog placeholders: echte sfx maken
-- [ ] Stijlbijbel (style bible) voor art en UI opstellen
-- [ ] Kael v4 (sprite/ontwerp)
-- [ ] WM2: worldmap 2 (wacht deels op scènes, zie Status)
+- [ ] Goedgekeurde Engelse namenlijst overal toepassen (in uitvoering)
+
+### Art en nieuwe content
+
+- [ ] Stijlbijbel (style bible) voor art en UI
+  `docs/ARTSTYLE.md` (v0.17) is alleen een pixel-artgids, geen volledige stijlbijbel.
+- [ ] Kael v4
+  Kael Voss staat alleen in de lore (CANON 15), nog niet in de data of in sprites.
+- [ ] WM2: worldmap 2
+  Er zijn geen kaarten. Het werk wacht op scènes (zie Status).
 
 ## RPG ART
 
