@@ -13,8 +13,10 @@ extends Node
 ##           in kerkers en op de wereldkaart, niet in dorpen.
 ##   Deel G: betatest-account (aparte save, niveau 10, buddy, echte save blijft heel)
 ##           en eindstaat (niveau 40, eigen bestand, slot 1-4 blijft heel).
+##   Deel H: Diepe Grot-monsters (uitzondering Dennis): alleen op 76-90 (v6) / 91-100 (v7), vangbaar
+##           in een grotgevecht, en na de run (end_run) zitten ze nog in de Codex (andere vangsten niet).
 ## Met --shots=map: codex_boek_inschrijven, codex_gevangen, codex_bondgenoot, codex_bondgenoot_aanval,
-## codex_levelup, codex_scherm (+ _3x = 1152x648).
+## codex_levelup, codex_scherm, grot_gevecht_scanline_wolf, grot_bestiarium_scanline_wolf (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
 
 const GD := preload("res://scripts/data/game_data.gd")
@@ -77,6 +79,9 @@ func _run() -> void:
 	if part("G"):
 		print("=== Deel G: betatest-account ===")
 		_beta_account_tests()
+	if part("H"):
+		print("=== Deel H: Diepe Grot-monsters (vangbaar, je houdt ze) ===")
+		await _grot_monster_tests()
 	print("CODEXTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -1122,3 +1127,162 @@ func _write(path: String, d: Dictionary) -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify(d))
 	f.close()
+
+
+# ================================================================ H: Diepe Grot-monsters
+const GROT_V6 := ["shard_codex", "scanline_wolf"]
+const GROT_V7 := ["aureate_watcher", "ledger_scarab"]
+
+
+func _grot_monster_tests() -> void:
+	var Content := preload("res://scripts/dungeon/dungeon100_content.gd")
+	var Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
+	var Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+	var all4: Array = GROT_V6 + GROT_V7
+	# --- spawnverdiepingen
+	var bad: Array = []
+	for f in range(1, 101):
+		var pool: Array = Content.enemy_pool(f)
+		for id in GROT_V6:
+			if pool.has(id) != (f >= 76 and f <= 90):
+				bad.append("%s@%d" % [id, f])
+		for id in GROT_V7:
+			if pool.has(id) != (f >= 91):
+				bad.append("%s@%d" % [id, f])
+	check("spawn: Shard Codex/Scanline Wolf alleen op 76-90, Aureate Watcher/Ledger Scarab alleen op 91-100 (fout: %s)" % [bad], bad.is_empty())
+	check("vensters = tegelvariant: 76-90 is v6, 91-100 is v7",
+			range(76, 91).all(func(f): return Gen.theme_variant(f) == 6) and range(91, 101).all(func(f): return Gen.theme_variant(f) == 7))
+	var seen := {}
+	for f in [80, 85, 95, 99]:
+		for seed_i in 6:
+			for m in Content.monsters({"floor": f, "floor_seed": 4242 + seed_i * 31 + f, "monster_slots": [Vector2i(2, 2), Vector2i(3, 3), Vector2i(4, 4), Vector2i(5, 5)]}):
+				for e in m["group"]:
+					seen[str(e)] = f
+	check("de generator zet ze ook echt neer (gezien: %s)" % [all4.filter(func(e): return seen.has(e))],
+			all4.all(func(e): return seen.has(e) and (int(seen[e]) <= 90) == GROT_V6.has(e)))
+	var elders := true
+	for id in all4:
+		elders = elders and (GD.ENEMIES[id]["habitat"] as Array) == ["dungeon100"]
+	for path in ["res://scripts/data/archief2_rooms.gd", "res://scripts/data/dungeon_rooms.gd", "res://scripts/data/woud_rooms.gd"]:
+		var txt := FileAccess.get_file_as_string(path)
+		for id in all4:
+			elders = elders and not ('"%s"' % id) in txt
+	check("niet buiten de grot (habitat dungeon100, niet in andere kamerdata)", elders)
+	# --- stats passen bij de diepte: sterker dan de sterkste Archief 2-soort, zwakker dan een baas
+	var stat_ok := true
+	for id in all4:
+		var f := 76 if GROT_V6.has(id) else 91
+		var st := Scaling.monster_stats(GD.ENEMIES[id], f)
+		var ref := Scaling.monster_stats(GD.ENEMIES["wortelgeest"], f)
+		var boss := Scaling.boss_stats(GD.ENEMIES["kennis_beest"], 80)
+		stat_ok = stat_ok and int(st["max_hp"]) > int(ref["max_hp"]) and int(st["max_hp"]) < int(boss["max_hp"])
+		print("INFO  %s op verdieping %d: HP %d ATK %d DEF %d AGI %d (wortelgeest %d HP)" % [id, f, st["max_hp"], st["atk"], st["def"], st["agi"], ref["max_hp"]])
+	check("stats op diepte: boven Rootghost, onder een baas", stat_ok)
+	# --- Codex-data en art
+	var data_ok := true
+	for id in all4:
+		var sp := CD.species(id)
+		var e: Dictionary = GD.ENEMIES[id]
+		data_ok = data_ok and not sp.is_empty() and bool(sp["capturable"]) and CD.species_for_enemy(id) == id
+		data_ok = data_ok and float(sp["capture_rate"]) < 1.0 and (sp["learn"] as Dictionary).size() >= 2
+		data_ok = data_ok and CD.GROT_BEHOUD.has(id) and (e["skills"] as Array).size() >= 2
+		for k in [str(e["sprite"]), str(e["sprite_back"]), "res://assets/map_monsters/%s.png" % id, "res://assets/sprites/hub/%s_hub.png" % id]:
+			data_ok = data_ok and ResourceLoader.exists(k)
+		for lv in (sp["learn"] as Dictionary):
+			for sk in sp["learn"][lv]:
+				data_ok = data_ok and CD.SKILLS.has(sk)
+	check("4 soorten: vangbaar, eigen vaardigheden, art voor/rug/kaart/hub, Engelse namen", data_ok
+			and GD.ENEMIES["shard_codex"]["name"] == "Shard Codex" and GD.ENEMIES["ledger_scarab"]["name"] == "Ledger Scarab")
+	check("CodexData.validate() en validate_fusion() blijven leeg (%s %s)" % [CD.validate(), CD.validate_fusion()],
+			CD.validate().is_empty() and CD.validate_fusion().is_empty())
+	# --- echt vangen in een grotgevecht (verdieping 80, v6) en houden na de run
+	setup()
+	var room := await enter(GOLEM_SCENE, "zuid")
+	check("Golem Hall geladen (stand-in voor de grotkamer)", room != null)
+	if room == null:
+		return
+	var echt := GameState.codex_add("mosslijm", 3)
+	GameState.codex_set_active("")
+	check("run begint", GameState.dungeon100_begin_run())
+	GameState.dungeon100_floor = 80
+	var buiten := GameState.codex_add("mosslijm")      # gewone vangst tijdens de run: verdwijnt straks
+	var p := player()
+	GameState.start_battle(["scanline_wolf", "scanline_wolf"], p.get_tile(), p.facing, "dungeon100", false, Content.tier_for_floor(80))
+	if not await wait_scene_named("Battle"):
+		check("grotgevecht gestart", false)
+		return
+	var b := battle()
+	messages.clear()
+	_watch(b)
+	await wait_battle_state(["command"])
+	check("grotgevecht: achtergrond cave_deep_v6, wolf op verdieping-80-stats (HP %d)" % int(b.enemies[0]["s"]["max_hp"]),
+			GameState.pending_backdrop_id == "cave_deep_v6"
+			and int(b.enemies[0]["s"]["max_hp"]) == int(Scaling.monster_stats(GD.ENEMIES["scanline_wolf"], 80)["max_hp"]))
+	await pframes(10)
+	await screenshot("grot_gevecht_scanline_wolf")
+	var e: Dictionary = b.enemies[0]
+	e["s"]["hp"] = 1
+	b.codex.force_roll = 0.0
+	check("Blank Book op de Scanline Wolf", await use_book(b, e))
+	check("vangen lukt: written into the Codex", await wait_until(func(): return seen_message("written into the Codex"), 8.0)
+			and b.codex.last_capture.get("result") == "gelukt" and b.codex.last_capture.get("species") == "scanline_wolf")
+	await finish()
+	var wolf: Dictionary = {}
+	for pg in GameState.codex_pages:
+		if pg["species"] == "scanline_wolf":
+			wolf = pg
+	check("pagina Scanline Wolf op het kamerniveau (Lv %d), vaardigheid Scanline Rush" % int(wolf.get("level", -1)),
+			not wolf.is_empty() and int(wolf["level"]) == Content.tier_for_floor(80) and (wolf["skills"] as Array).has("lijnsprong"))
+	GameState.codex_set_active(str(wolf.get("uid", "")))
+	GameState.dungeon100_end_run(true)
+	var na := GameState.codex_page(str(wolf.get("uid", "")))
+	check("na de grot: Scanline Wolf zit nog in de Codex en is de bondgenoot",
+			not na.is_empty() and na["species"] == "scanline_wolf" and GameState.codex_active == na["uid"]
+			and int(na["level"]) == int(wolf["level"]) and GameState.dungeon100_floor == 0)
+	check("na de grot: de echte pagina's terug, gewone run-vangst weg",
+			not GameState.codex_page(str(echt["uid"])).is_empty() and GameState.codex_page(str(buiten["uid"])).is_empty()
+			and GameState.codex_pages.size() == 2)
+	var uids := GameState.codex_pages.map(func(x): return str(x["uid"]))
+	var nieuw := GameState.codex_add("moskonijn")
+	check("geen dubbele uid na het terugzetten", not uids.has(str(nieuw.get("uid", ""))))
+	# save/load houdt hem ook
+	var path := "user://grot_behoud.json"
+	GameState.save_game(Vector2i(3, 4), Vector2i.DOWN, path)
+	GameState.codex_reset()
+	GameState.load_game(path)
+	check("save/load: Scanline Wolf blijft", not GameState.codex_page(str(wolf.get("uid", ""))).is_empty())
+	# een tweede run: hij gaat mee (level 1) en komt weer terug op zijn eigen level, niet dubbel
+	GameState.dungeon100_begin_run()
+	GameState.dungeon100_end_run(true)
+	check("tweede run zonder vangst: precies 1 Scanline Wolf, level blijft",
+			GameState.codex_pages.filter(func(x): return x["species"] == "scanline_wolf").size() == 1
+			and int(GameState.codex_page(str(wolf.get("uid", "")))["level"]) == int(wolf["level"]))
+	# bestiarium-entry
+	await enter(GOLEM_SCENE, "zuid")
+	await tap("menu")
+	await frames(3)
+	var m := field_menu()
+	if m == null:
+		check("veldmenu open", false)
+		return
+	m.choose("bestiary")
+	await frames(3)
+	var bs: Node = m.get_node_or_null("Bestiary")
+	check("bestiarium open", bs != null)
+	if bs == null:
+		return
+	var k := -1
+	for i in bs.entries.size():
+		if str(bs.entry_text(i)).begins_with("040"):
+			k = i
+	if k >= 0:
+		bs.entries[k].grab_focus()
+		await frames(2)
+	bs.show_entry("scanline_wolf")
+	await frames(6)
+	check("bestiarium 040 Scanline Wolf: plaatje, tekst, stats, 'Deep Cave' (%s)" % bs.name_label.text,
+			bs.name_label.text == "040 Scanline Wolf" and bs.picture.texture != null and bs.stats_visible()
+			and "Deep Cave" in bs.stats_label.text)
+	await screenshot("grot_bestiarium_scanline_wolf")
+	await tap("cancel")
+	await frames(3)

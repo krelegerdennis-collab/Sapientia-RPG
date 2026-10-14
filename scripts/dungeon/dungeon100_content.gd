@@ -30,11 +30,15 @@ const POOLS := [
 	{"gebied": "woud", "from": 26, "tot": 80, "enemies": ["wortelkruiper", "mistuil", "sporenzwam", "woudgeest"]},
 	{"gebied": "bergtunnel", "from": 51, "tot": 100, "enemies": ["steenluis", "druipslak", "adermot"]},
 	{"gebied": "archief2", "from": 76, "tot": 100, "enemies": ["rankje", "sporekop", "doornige_loper", "bloeiende_schrik", "wortelgeest"]},
+	# Grot-eigen monsters (alleen hier; vangbaar en je houdt ze, CodexData.GROT_BEHOUD). Venster = tegelvariant:
+	# v6 = 76-90, v7 = 91-100 (Dungeon100Generator.theme_variant).
+	{"gebied": "diepe_grot", "from": 76, "tot": 90, "enemies": ["shard_codex", "scanline_wolf"]},
+	{"gebied": "diepe_grot", "from": 91, "tot": 100, "enemies": ["aureate_watcher", "ledger_scarab"]},
 ]
 ## Uitbreiden: een regel {"gebied", "from", "tot", "enemies"} toevoegen. Grot-eigen monsters met een
 ## smal venster (bv. 76-90) gaan zo ook; enemy_pool() kijkt alleen naar from/tot.
 ## Volgorde van de gebieden (voor tests en uitbreiding met nieuwe gebieden).
-const GEBIEDEN := ["archief1", "woud", "bergtunnel", "archief2"]
+const GEBIEDEN := ["archief1", "woud", "bergtunnel", "archief2", "diepe_grot"]
 
 
 ## Alle monsters uit de pools, in volgorde.

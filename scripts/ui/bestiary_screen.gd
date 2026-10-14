@@ -16,6 +16,7 @@ const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const TERRAIN_NAMES := {
 	"gras": "plains", "hoog_gras": "tall grass", "bos": "woods", "zand": "sand",
 	"baas": "boss", "archief": "archive", "woud": "wood",
+	"dungeon100": "Deep Cave",
 }
 
 var root: Control

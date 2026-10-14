@@ -692,9 +692,12 @@ func _pool_tests() -> void:
 			if Content.enemy_pool(f).has(p["enemies"][0]) and not first.has(p["gebied"]):
 				first[p["gebied"]] = f
 	var order_ok := true
+	# verhaalgebieden strikt oplopend; de grot-eigen monsters (laatste) niet eerder dan Archief 2
 	for i in range(1, Content.GEBIEDEN.size()):
-		order_ok = order_ok and int(first.get(Content.GEBIEDEN[i - 1], 999)) < int(first.get(Content.GEBIEDEN[i], 999))
-	check("gebieden in verhaalvolgorde: %s" % [first], order_ok and first.size() == 4)
+		var prev := int(first.get(Content.GEBIEDEN[i - 1], 999))
+		var cur := int(first.get(Content.GEBIEDEN[i], 999))
+		order_ok = order_ok and (cur >= prev if Content.GEBIEDEN[i] == "diepe_grot" else cur > prev)
+	check("gebieden in verhaalvolgorde: %s" % [first], order_ok and first.size() == Content.GEBIEDEN.size())
 	check("vroege gebieden ondiep, late diep: verdieping 1 alleen Archief 1, verdieping 99 geen Archief 1",
 			Content.enemy_pool(1).all(func(e): return e in ["mosslijm", "moskonijn", "papiergeest"])
 			and not Content.enemy_pool(99).has("mosslijm") and Content.enemy_pool(99).has("rankje"))
