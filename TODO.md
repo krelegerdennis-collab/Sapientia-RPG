@@ -258,7 +258,7 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [x] Loot ratio consumables vs. equipment
 - [x] Blue chest kans per floor-bracket
 - [ ] Medium Map: exacte kisten + monsters
-- [ ] Trap Room: zichtbaar of verborgen vallen?
+- [x] Trap Room: mix 60/40; verborgen vallen flitsen kort binnen 2 tegels (besluit Dennis, 14 okt 2026)
 - [x] Puzzle Room: 4 kleine puzzels uit bestaande stukken (besluit Dennis, 14 okt 2026)
   - [x] Hint: ECHO zegt bij binnenkomst één korte Engelse zin (besluit Dennis, 14 okt 2026)
 - [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
@@ -949,7 +949,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Vallen (pijlen, gaten, spike-platen)
   - Weinig kisten (0-1 normale)
   - Lage monster-spawns
-  - TODO(design): zichtbaar of verborgen vallen?
+  - Besluit (Dennis, 14 okt 2026): 60% zichtbaar / 40% verborgen; een verborgen val flitst kort (gloed + zichtbare tegel) als de speler binnen 2 tegels komt (ook schuin), één keer per nadering (`GrotKamers.VAL_FLITS_BEREIK`, `Dungeon100Val.speler_bij`).
 - [ ] PUZZLE ROOM (5%)
   - Specifieke puzzel (push / groei-platen)
   - Geen of weinig monsters
@@ -1119,7 +1119,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Early game (1-20) significant minder
   - Endgame (90-99) voelt als beloning
 - [ ] Medium Map: exacte kisten + monsters
-- [ ] Trap Room: zichtbaar of verborgen vallen?
+- [x] Trap Room: mix 60/40; verborgen vallen flitsen kort binnen 2 tegels (besluit Dennis, 14 okt 2026)
   Definitief. De checkbox blijft open tot de vallen in de code deze verdeling gebruiken.
 
   **CANON – niet wijzigen zonder overleg.**

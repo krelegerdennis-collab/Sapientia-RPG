@@ -126,6 +126,10 @@ func _koopman_sleutel() -> String:
 
 
 func _on_val_stap(t: Vector2i) -> void:
+	for vt in vallen:
+		var vv = vallen[vt]
+		if is_instance_valid(vv):
+			vv.speler_bij(t)
 	var v = vallen.get(t)
 	if v == null or not is_instance_valid(v) or v.afgegaan:
 		return

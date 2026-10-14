@@ -208,6 +208,8 @@ ECHO: "Maar dat is een verhaal voor later."
 - **Koopwaar van de Koopman**: uitrusting en accessoires **geschaald op de huidige verdieping**
   (2 stukken + 1 accessoire van de grade van die verdieping), plus een paar basis-consumables.
   Engelse UI.
+- **Trap Room**: 60% zichtbare, 40% verborgen vallen. Een verborgen val **flitst kort** als de
+  speler binnen 2 tegels komt (één keer per nadering); na het afgaan blijft hij zichtbaar.
 - **Wereldkaart**: geen ingang en geen icoon van de Diepe Grot. De grot start alleen via ECHO
   (ECHO's Kamer). De oude spawn `van_dungeon100` blijft alleen voor oude saves.
 
