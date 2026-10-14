@@ -17,6 +17,7 @@ var list: VBoxContainer
 ## Lopende herhaling (null = geen)
 var playing: Node = null
 var last_played := ""
+var _dialog_layer := 5
 
 
 func _build() -> void:
@@ -118,7 +119,7 @@ func _play_genezer() -> void:
 	achter.set_anchors_preset(Control.PRESET_FULL_RECT)
 	achter_laag.add_child(achter)
 	# de dialoog (laag 5) moet boven de herhaling en het menu staan; daarna terug
-	var dialog_layer: int = Dialog.layer
+	_dialog_layer = Dialog.layer
 	Dialog.layer = REPLAY_LAYER + 1
 	playing = holder
 	var s: Node = GenezerScene.herhaal(holder)
@@ -126,18 +127,46 @@ func _play_genezer() -> void:
 	if laag != null:
 		laag.layer = REPLAY_LAYER
 	s.klaar.connect(func() -> void:
-		Dialog.layer = dialog_layer
+		holder.name = "SceneReplayWeg"
 		holder.queue_free()
 		_replay_done(), CONNECT_ONE_SHOT)
 
 
 func _replay_done() -> void:
 	playing = null
+	_herstel_na_herhaling()
 	var map := get_tree().current_scene
 	if map != null and map.has_method("_play_map_music"):
 		map._play_map_music()
 	quiet()
 	_fill()
+
+
+## v0.24 Terug uit een herhaling: dialoog dicht en op zijn eigen laag, geen restanten van de scène,
+## focus terug in de lijst. Zo blijft het scherm nooit hangen, wat de scène ook achterlaat.
+func _herstel_na_herhaling() -> void:
+	Dialog.layer = _dialog_layer
+	if Dialog.is_open:
+		Dialog.close()
+	var rest := get_tree().root.get_node_or_null("SceneReplay")
+	if rest != null:
+		rest.name = "SceneReplayWeg"
+		rest.queue_free()
+
+
+## v0.24 Bug (Dennis): in de herhaling van 'The World Warper' bleef het eerste tekstvak ('The core of the
+## second Archive ...') op het zwarte scherm staan. Het tekstvak gaat verder via de speler (A/B) of de
+## A-knop van de touch-besturing, maar die is verborgen zolang het veldmenu open is. Op de telefoon kon je
+## dus niet verder en kwam je nooit meer terug in de lijst. Nu: tikken/klikken klikt de tekst door.
+func _input(event: InputEvent) -> void:
+	if playing == null or not Dialog.is_open:
+		return
+	var tik: bool = (event is InputEventScreenTouch and event.pressed) or \
+			(event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
+			and event.device != InputEvent.DEVICE_ID_EMULATION)    # tik = ook een nagebootste muisklik: niet dubbel
+	if tik:
+		get_viewport().set_input_as_handled()
+		Dialog.advance()
 
 
 ## Testhaakje: de lopende herhaling meteen afronden (zelfde weg als overslaan).
