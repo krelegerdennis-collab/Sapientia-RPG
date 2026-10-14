@@ -6,6 +6,7 @@ signal gestart
 signal klaar
 
 const Data := preload("res://scripts/data/echo_grot.gd")
+const Questlog := preload("res://world_warper/data/echo_questlog.gd")
 
 var bezig := false
 
@@ -43,6 +44,8 @@ func _menu() -> void:
 		if gekozen == Data.OPTIE_SIMULATIE:
 			if not await _startkeuze():
 				return
+		elif gekozen == Data.OPTIE_QUESTLOG:
+			await _questlog()
 		elif gekozen == Data.OPTIE_TWIJFEL:
 			await _een_zin(Data.ZIN_TWIJFEL)
 		elif gekozen == Data.OPTIE_DATA:
@@ -64,6 +67,20 @@ func _startkeuze() -> bool:
 		return false
 	await _een_zin(Data.ZIN_LOOPT)
 	return true
+
+
+## v0.24 Questlog: lijst met acts (status), per act ECHO's zin + de opdrachten. 'Go back' = terug naar het menu.
+func _questlog() -> void:
+	while is_inside_tree() and not GameState.changing_map and not GameState.in_battle:
+		var opties := Questlog.keuzes(GameState.story_flags, GameState.story_step)
+		var keuze := await Dialog.ask(Questlog.VRAAG, opties, Data.NAAM)
+		if not is_inside_tree() or GameState.changing_map:
+			return
+		if keuze < 0 or keuze >= Questlog.AKTES.size():
+			return
+		Dialog.show_lines(Questlog.regels(str(Questlog.AKTES[keuze]["id"]), GameState.story_flags,
+				GameState.story_step), Data.NAAM)
+		await Dialog.finished
 
 
 func _een_zin(zin: String) -> void:
