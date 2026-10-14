@@ -431,7 +431,8 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 		if not reach.has(tile_of(m["tile"])):
 			return "monster %s staat op een onbereikbare tegel" % [m["id"]]
 	var boss_n := 1 if d["is_boss_floor"] else 0     # de baas (Dungeon100Content.boss) staat op boss_slot, niet op een monster-slot
-	if room["monsters"].size() != d["monster_slots"].size() + boss_n or room["chests"].size() != d["chest_slots"].size():
+	var puzzel_n := 1 if room.has("puzzel") else 0   # Puzzle Room: de blauwe kist in de nis zit niet op een kist-slot
+	if room["monsters"].size() != d["monster_slots"].size() + boss_n or room["chests"].size() != d["chest_slots"].size() + puzzel_n:
 		return "aantal monsters/kisten komt niet overeen met de slots"
 	for c in room["chests"]:
 		if ids.has(c["id"]) or not _known_item(str(c["item"])) or int(c["n"]) < 1:

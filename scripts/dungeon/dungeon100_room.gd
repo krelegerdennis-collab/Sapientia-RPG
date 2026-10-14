@@ -18,6 +18,7 @@ const WarperC := preload("res://scripts/dungeon/dungeon100_warper.gd")
 const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
 const KoopmanC := preload("res://scripts/dungeon/dungeon100_koopman.gd")
 const ValC := preload("res://scripts/dungeon/dungeon100_val.gd")
+const PuzzelC := preload("res://scripts/dungeon/dungeon100_puzzel.gd")
 const VAL_TEKST := {"spijker": "Spikes shoot up from the floor!", "rune": "A rune flares beneath your feet!"}
 
 ## Verdieping is gebouwd; data = Dungeon100Generator.generate() van deze verdieping.
@@ -54,6 +55,7 @@ func _ready() -> void:
 	_place_rustpunt()
 	_place_warper()
 	_place_grot_kamer()
+	_place_puzzel()
 	floor_ready.emit(floor_no, floor_data)
 
 
@@ -92,6 +94,31 @@ func _place_grot_kamer() -> void:
 			vallen[d["tile"]] = v
 		if is_instance_valid(player) and not player.is_connected("stepped", _on_val_stap):
 			player.connect("stepped", _on_val_stap)
+
+
+## Puzzle Room (GrotPuzzels): de puzzel op room["puzzel"]; de blauwe kist staat al in de kamer.
+## Bij binnenkomst (na de overgang) één korte hint van ECHO.
+var puzzel: Node2D
+const PUZZEL_HINT_WACHT := 0.6
+
+
+func _place_puzzel() -> void:
+	if not room.has("puzzel"):
+		return
+	puzzel = PuzzelC.create(self, room["puzzel"], "%s_puzzel" % room_id)
+	add_child(puzzel)
+	move_child(puzzel, $Objects.get_index())
+	_puzzel_hint()
+
+
+func _puzzel_hint() -> void:
+	await get_tree().create_timer(PUZZEL_HINT_WACHT).timeout
+	if not is_instance_valid(puzzel) or not is_inside_tree() or GameState.changing_map or GameState.in_battle:
+		return
+	if Dialog.is_open:
+		await Dialog.finished
+	if is_instance_valid(puzzel) and not Dialog.is_open and not GameState.changing_map:
+		puzzel.show_hint()
 
 
 func _koopman_sleutel() -> String:
