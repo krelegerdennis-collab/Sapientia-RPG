@@ -82,13 +82,15 @@ func _kind_tests() -> void:
 						mimic_n += 1
 	var blue_p := float(blue_n) / float(n)
 	var mimic_p := float(mimic_n) / float(n)
-	check("Blauwe Kist ~5%% over %d kisten (%.2f%%)" % [n, blue_p * 100.0], blue_p > 0.035 and blue_p < 0.065)
+	check("kind_for zonder aanwijzing geeft nooit blauw (%d kisten)" % n, blue_n == 0 and Blue.kind_for(1, 7, "k", false, true) == Blue.KIND_BLUE)
+	_blue_bracket_tests()
 	check("Mimic ~10%% (%.2f%%)" % (mimic_p * 100.0), mimic_p > 0.08 and mimic_p < 0.12)
 	var loot := Blue.blue_loot(9, 12, "kist")
-	check("blauwe buit is één uitrustingsstuk, geen goud, gemarkeerd", int(loot["gold"]) == 0 and bool(loot["blue"])
-			and (loot["items"] as Array).size() == 1 and Blue.is_blue_item(str(loot["items"][0]["item"])))
+	check("blauwe buit is gemarkeerd en heeft een soort", bool(loot["blue"]) and str(loot["kind"]) in Blue.BLUE_KINDS)
 	var again := Blue.blue_loot(9, 12, "kist")
-	check("blauwe buit is deterministisch", str(loot["items"][0]["item"]) == str(again["items"][0]["item"]))
+	check("blauwe buit is deterministisch", loot == again)
+	check("blue_gear geeft altijd een blauw uitrustingsstuk", Blue.is_blue_item(Blue.blue_gear(9, 12, "kist")))
+	_blue_ratio_tests()
 	var boss := S.boss_loot(100, _rng(1))
 	var with := Blue.with_warp(boss, 100)
 	check("Warp Crystal zit in de baasbuit van verdieping 100 en nergens anders",
@@ -176,11 +178,116 @@ func _g4_rol_tests() -> void:
 			elif int(Gear.item(id).get("min_floor", 99)) > 80:
 				diep = false
 	var loot := Blue.blue_loot(4, 85, "diep")
-	var lid := str((loot["items"] as Array)[0]["item"])
+	var lid := Blue.blue_gear(4, 85, "diep")
 	check("vanaf verdieping 80 valt elke G4-rol, en geen oude rol", diep and gezien.size() == Gear.SCROLLS.size()
 			and int(loot["grade"]) == 4 and Blue.is_blue_item(lid)
 			and (Gear.is_scroll(lid) or int(Gear.item(lid).get("grade", 0)) == 4)
 			and not Gear.is_legacy_scroll(lid))
+
+
+## CANON: blauwe-kistkans per floor-bracket (TODO.md "Blue chest kans per floor-bracket").
+func _blue_bracket_tests() -> void:
+	var want := {5: 0.05, 15: 0.10, 30: 0.15, 40: 0.20, 60: 0.25, 70: 0.30, 90: 0.40, 97: 0.50}
+	var ok := true
+	var max_one := true
+	for f in want:
+		ok = ok and is_equal_approx(Blue.blue_floor_chance(f), float(want[f]))
+		var hits := 0
+		var n := 3000
+		for sd in n:
+			var b := Blue.blue_indices(sd * 31 + 7, f, 4)
+			max_one = max_one and b.size() <= 1
+			if not b.is_empty():
+				hits += 1
+		var p := float(hits) / float(n)
+		if absf(p - float(want[f])) > 0.03:
+			ok = false
+			print("  verdieping %d: %.3f (verwacht %.2f)" % [f, p, float(want[f])])
+	check("blauwe-kistkans per bracket: 5/10/15/20/25/30/40/50%", ok)
+	check("normale kamer: hoogstens 1 blauwe kist per verdieping", max_one)
+	check("verdieping 100 en zonder kisten: geen blauwe kist", Blue.blue_floor_chance(100) == 0.0
+			and Blue.blue_indices(1, 50, 0).is_empty())
+	var forced := Blue.blue_indices(3, 2, 5, 2)
+	check("vast aantal (kamer-override) geeft precies zoveel verschillende kisten", forced.size() == 2 and forced[0] != forced[1]
+			and Blue.blue_indices(3, 2, 1, 2).size() == 1)
+	var tot := 0.0
+	for f in range(1, 100):
+		tot += Blue.blue_floor_chance(f)
+	check("verwacht ~23 blauwe kisten per run uit normale kamers (%.1f; was ~60-80)" % tot, tot > 20.0 and tot < 26.0)
+	var early := 0
+	var gen_ok := true
+	var room_ok := true
+	for f in range(1, 21):
+		var d := Gen.generate(5, f)
+		var nb := 0
+		for c in d["room"]["chests"]:
+			if str(c.get("kind", "")) == Blue.KIND_BLUE:
+				nb += 1
+		var lt := str(d.get("layout_type", ""))
+		if lt == "kist":
+			room_ok = room_ok and nb == mini(Blue.BLUE_ROOM_CHEST, (d["chest_slots"] as Array).size())
+			continue
+		gen_ok = gen_ok and nb <= 1
+		early += nb
+	check("generator: verdieping 1-20 hoogstens 1 blauwe kist per verdieping buiten Chest Room (%d totaal)" % early, gen_ok and early <= 8)
+	check("generator: Chest Room heeft precies 2 blauwe kisten", room_ok)
+	# kamer-type-overrides (CANON)
+	var tr := 0
+	var tr_ok := true
+	for sd in 2000:
+		var v := Blue.blue_forced_for(sd, 30, "schat")
+		tr_ok = tr_ok and (v == 0 or v == 1)
+		tr += v
+	check("override: Chest Room 2, Treasure Room ~50%% op 1 (%.2f), andere kamers volgen de tabel" % (tr / 2000.0),
+			Blue.blue_forced_for(1, 30, "kist") == 2 and tr_ok and absf(tr / 2000.0 - 0.5) < 0.04
+			and Blue.blue_forced_for(1, 30, "medium") == -1 and Blue.blue_forced_for(1, 30, "puzzel") == 0)
+	# bracket-statistiek floor 1-20 vs. oud (5% per kist, ~2-4 kisten): flink lager
+	var per_floor_early := 0.0
+	for f in range(1, 21):
+		per_floor_early += Blue.blue_floor_chance(f)
+	check("verdieping 1-20: verwacht %.1f blauwe kisten (oud ~3-4 bij 5%% per kist)" % per_floor_early, absf(per_floor_early - 1.5) < 0.01)
+
+
+## CANON-verdeling blauwe kisten per grade (TODO.md "Loot ratio consumables vs. equipment").
+func _blue_ratio_tests() -> void:
+	var floors := {1: 10, 2: 30, 3: 60, 4: 90}
+	var all_ok := true
+	var ids_ok := true
+	var elixer_seen := false
+	for g in floors:
+		var tel := {}
+		var n := 5000
+		for i in n:
+			var l := Blue.blue_loot(i * 7919 + g, int(floors[g]), "d100_%d_%d" % [i, g])
+			var k := str(l["kind"])
+			tel[k] = int(tel.get(k, 0)) + 1
+			match k:
+				"leeg":
+					ids_ok = ids_ok and (l["items"] as Array).is_empty() and int(l["gold"]) == 0
+				"goud":
+					ids_ok = ids_ok and (l["items"] as Array).is_empty() and int(l["gold"]) > 0
+				"equipment", "accessoire":
+					ids_ok = ids_ok and Blue.is_blue_item(str(l["items"][0]["item"]))
+				"consumable":
+					var cid := str(l["items"][0]["item"])
+					ids_ok = ids_ok and GD.ITEMS.has(cid) and not Blue.is_blue_item(cid)
+					elixer_seen = elixer_seen or cid == "elixer"
+		var row: Array = Blue.BLUE_RATIO[g - 1]
+		for i in Blue.BLUE_KINDS.size():
+			var p := float(tel.get(Blue.BLUE_KINDS[i], 0)) / float(n)
+			var ok := absf(p - float(row[i]) / 100.0) < 0.035
+			all_ok = all_ok and ok
+			if not ok:
+				print("  G%d %s: %.3f (verwacht %.2f)" % [g, Blue.BLUE_KINDS[i], p, float(row[i]) / 100.0])
+	check("blauwe kisten volgen de CANON-verdeling per grade (G1-G4)", all_ok)
+	check("blauwe buit per soort klopt (leeg/goud/uitrusting/accessoire/consumable)", ids_ok)
+	check("elixers kunnen in een blauwe kist zitten", elixer_seen)
+	var acc_ok := true
+	for i in 200:
+		var l := Blue.blue_loot(i, 90, "acc%d" % i)
+		if str(l["kind"]) == "accessoire":
+			acc_ok = acc_ok and str(Gear.item(str(l["items"][0]["item"])).get("slot", "")) == "accessoire"
+	check("accessoire op grade 4 is een G4-accessoire", acc_ok)
 
 
 func _rng(s: int) -> RandomNumberGenerator:
@@ -204,8 +311,7 @@ func _run_tests() -> void:
 	GameState.dungeon100_floor = 4
 	GameState.inventory["sterk_drankje"] = 2
 	GameState.party[0]["level"] = 3
-	var blauw := Blue.blue_loot(5, 4, "testkist")
-	var item_id := str(blauw["items"][0]["item"])
+	var item_id := Blue.blue_gear(5, 4, "testkist")
 	GameState.dungeon100_permanent[item_id] = 1
 	GameState.inventory[item_id] = 1
 	var path := "user://dungeon100_blauw.json"
@@ -365,11 +471,12 @@ func _scene_tests() -> void:
 
 
 func _find_kind(kind: String) -> Dictionary:
-	for sd in [3, 11, 42, 99, 7]:
-		for f in range(1, 31):
+	for sd in [3, 11, 42, 99, 7, 5, 8]:
+		for f in range(1, 61):
 			var d := Gen.generate(sd, f)
 			for c in d["room"]["chests"]:
-				if str(c.get("kind", "")) == kind:
+				if str(c.get("kind", "")) == kind and (kind != Blue.KIND_BLUE
+						or Blue.is_blue_item(str(c.get("item", "")))):
 					return {"seed": sd, "floor": f, "id": str(c["id"])}
 	return {}
 

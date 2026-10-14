@@ -334,6 +334,7 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 		"tier": Content.tier_for_floor(f),
 		"layout_type": lt, "min_slot_distance": min_dist,
 	}
+	data["blue_forced"] = Blue.blue_forced_for(run_seed, f, lt)
 	if not puzzel.is_empty():
 		data["puzzel"] = puzzel
 	data["room"] = _room_dict(data)
@@ -388,12 +389,8 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		var krng := RandomNumberGenerator.new()
 		krng.seed = int(d["floor_seed"]) + 303
 		var kid := "d100_%d_%d_puzzel" % [int(d["run_seed"]), f]
-		var e := Blue.chest_entry(int(d["run_seed"]), f, kid, kt, krng)
-		var loot := Blue.blue_loot(int(d["run_seed"]), f, kid)
-		e["kind"] = Blue.KIND_BLUE
-		e["loot"] = loot
-		e["item"] = loot["items"][0]["item"]
-		e["n"] = 1
+		# blauw = de vaste beloning van de puzzel (CANON-override PUZZLE ROOM: 1 bij succes)
+		var e := Blue.chest_entry(int(d["run_seed"]), f, kid, kt, krng, false, true)
 		room["chests"] = room.get("chests", []) + [e]
 	if room.has("rustpunt"):
 		var rp: Array = room["rustpunt"]

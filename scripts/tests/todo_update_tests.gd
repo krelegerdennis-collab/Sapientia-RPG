@@ -173,9 +173,7 @@ func _gear_tests() -> void:
 	check("unieke wapens zitten in de diepe pool", seen_weapon)
 	var loot := Blue.blue_loot(9, 12, "kist")
 	var again := Blue.blue_loot(9, 12, "kist")
-	check("blauwe buit is vast, één stuk, geen goud", loot["gold"] == 0 and (loot["items"] as Array).size() == 1
-			and str(loot["items"][0]["item"]) == str(again["items"][0]["item"])
-			and Blue.is_blue_item(str(loot["items"][0]["item"])))
+	check("blauwe buit is vast (zelfde invoer, zelfde buit)", loot == again and Blue.is_blue_item(Blue.blue_gear(9, 12, "kist")))
 	check("oude d100-stukken blijven blauw", Blue.is_blue_item(Scaling.gear_id("zwaard", 2)))
 	GameState.new_game("Dax")
 	GameState.add_member("noor")
