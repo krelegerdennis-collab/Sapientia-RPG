@@ -45,7 +45,7 @@ static func gebied_van_map(pad: String) -> String:
 
 
 static func tileset_pad(gebied: String, set_naam: String) -> String:
-	return MAP + gebied + "/" + set_naam + ".tres"
+	return str(config().get("map", MAP)).trim_suffix("/") + "/" + gebied + "/" + set_naam + ".tres"
 
 
 ## Wat ontbreekt er om dit gebied in SoM-stijl te tonen? Leeg = alles is er.

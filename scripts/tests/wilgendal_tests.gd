@@ -50,6 +50,7 @@ func _run() -> void:
 	_wereld()
 	await _dorp()
 	await _panden()
+	await _som()
 	print("WILGENDALTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -449,3 +450,78 @@ func _overzicht(dorp: Node) -> void:
 	dorp.get_node("Objects/Player").set_camera_limits(Rect2i(0, 0, Data.W * 16, Data.H * 16))
 	for _i in 4:
 		await get_tree().process_frame
+
+
+## SoM-voorbereiding (Dennis 14 okt 2026): 24x32-kaartsprites, slot-tilesets per gebied, stijl per gebied.
+func _som() -> void:
+	const DAX := "res://assets/sprites/som/test/dax_24x32_v3.png"
+	const PROEF := "res://tools/som/test/uit/"
+	# oude sprites blijven precies zoals ze waren
+	var speler: Node = (load("res://scenes/player.tscn") as PackedScene).instantiate()
+	add_child(speler)
+	var spr: Sprite2D = speler.sprite
+	check("oude spelersprite ongewijzigd (3x4 van 16x24, offset -4)", spr.hframes == 3 and spr.vframes == 4
+			and spr.offset == Vector2(0, -4) and MapSprite.frame_maat(spr.texture) == MapSprite.OUD)
+	# Dax v3 (één los frame 24x32) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
+	speler.zet_sheet(load(DAX))
+	var vorm := (speler.get_node("CollisionShape2D") as CollisionShape2D).shape as RectangleShape2D
+	check("Dax 24x32 v3: één frame, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 1 and spr.vframes == 1
+			and is_equal_approx(spr.offset.y + 16.0, 8.0) and vorm.size == Vector2(14, 14)
+			and (speler.get_node("CollisionShape2D") as Node2D).position == Vector2.ZERO and spr.frame == 0)
+	speler.facing = Vector2i.UP
+	speler._update_sprite()
+	check("los frame: richting kiest geen ongeldig frame", spr.frame == 0)
+	speler.queue_free()
+	# volledige 24x32-sheet (3 loopframes x 4 richtingen = 72x128)
+	var img := Image.create(72, 128, false, Image.FORMAT_RGBA8)
+	var sheet := ImageTexture.create_from_image(img)
+	var s2 := Sprite2D.new()
+	s2.texture = sheet
+	var f := MapSprite.pas_toe(s2)
+	MapSprite.zet_frame(s2, 2, 1)
+	check("sheet 72x128 = 3x4 frames 24x32, offset -8, frame rij 2 kolom 1 = 7", f == MapSprite.NIEUW
+			and s2.hframes == 3 and s2.vframes == 4 and s2.offset == Vector2(0, -8) and s2.frame == 7)
+	s2.free()
+	# stijl per gebied: de echte config is overal nog oud
+	check("alle gebieden nu oud (geen zichtbare wijziging)", KaartStijl.stijl("wilgendal") == KaartStijl.OUD
+			and not KaartStijl.is_som(DORP) and KaartStijl.gebied_van_map(DORP) == "wilgendal")
+	# proef-config: som met complete art -> som; één tileset kwijt -> het HELE gebied oud
+	KaartStijl.zet_config({"map": PROEF, "gebieden": {"proef_herfst": {"stijl": "som", "maps": ["dorp_wilgendal"],
+			"tilesets": ["proef"], "speler": DAX}}})
+	check("som-gebied met alle art -> som", KaartStijl.stijl_van_map(DORP) == KaartStijl.SOM
+			and KaartStijl.ontbreekt("proef_herfst").is_empty())
+	var kaart := Node2D.new()
+	kaart.scene_file_path = DORP
+	var ground := TileMapLayer.new()
+	ground.name = "Ground"
+	kaart.add_child(ground)
+	var objs := Node2D.new()
+	objs.name = "Objects"
+	kaart.add_child(objs)
+	var p2: Node = (load("res://scenes/player.tscn") as PackedScene).instantiate()
+	p2.name = "Player"
+	objs.add_child(p2)
+	add_child(kaart)
+	var toegepast := KaartStijl.toepassen(kaart)
+	var ts := ground.tile_set
+	var bron := ts.get_source(0) as TileSetAtlasSource if ts != null else null
+	var water := bron.get_tile_data(Vector2i(2, 0), 0) if bron != null else null
+	var gras := bron.get_tile_data(Vector2i(0, 0), 0) if bron != null else null
+	check("toepassen: Ground krijgt de gebied-tileset, speler 24x32", toegepast and ts != null
+			and ts.resource_path.ends_with("proef_herfst/proef.tres") and (p2.sprite as Sprite2D).hframes == 1
+			and is_equal_approx((p2.sprite as Sprite2D).offset.y, -8.0))
+	check("geëxporteerde tileset: 16px, botsing op solid, terreinnaam", bron != null
+			and bron.texture_region_size == Vector2i(16, 16) and water != null and gras != null
+			and water.get_collision_polygons_count(0) == 1 and gras.get_collision_polygons_count(0) == 0
+			and str(water.get_custom_data("terrain")) == "water")
+	var normaal: Texture2D = load(PROEF + "proef_normaal/proef.png")
+	var herfst: Texture2D = load(PROEF + "proef_herfst/proef.png")
+	check("paletvariant: herfst kleurt gras om, omlijning blijft", normaal.get_image().get_pixel(8, 8)
+			!= herfst.get_image().get_pixel(8, 8) and normaal.get_image().get_pixel(0, 0) == herfst.get_image().get_pixel(0, 0))
+	KaartStijl.zet_config({"map": PROEF, "gebieden": {"proef_herfst": {"stijl": "som", "maps": ["dorp_wilgendal"],
+			"tilesets": ["proef", "bestaat_niet"], "speler": DAX}}})
+	check("som-gebied met ontbrekende tileset -> hele gebied oud", KaartStijl.stijl_van_map(DORP) == KaartStijl.OUD
+			and KaartStijl.ontbreekt("proef_herfst").size() == 1 and not KaartStijl.toepassen(kaart))
+	KaartStijl.zet_config({})
+	kaart.queue_free()
+	await get_tree().process_frame
