@@ -46,6 +46,20 @@ const SHOPS := {
 		],
 	},
 	"wilgendal_magie": {"name": "Magic", "magic": true},
+	# Handelskamer (World Warper, act 5). Alleen bestaande items. Prijzen = de "normale winkelprijs"
+	# uit KoopmanWinkel.BASIS_PRIJS (de Koopman vraagt 1,5x-2x); Blank Book = GameData-prijs.
+	# Bewust niet: Strong Potion, Magic Brew en Elixir (die maak je in de Werkplaats).
+	# TODO(design, Dennis): voorraad en prijzen bevestigen.
+	"handelskamer": {
+		"name": "Exchange",
+		"offers": [
+			{"id": "drankje", "min_act": 1, "price": 30},
+			{"id": "toverwater", "min_act": 1, "price": 50},
+			{"id": "tegengif", "min_act": 1, "price": 40},
+			{"id": "feniksveer", "min_act": 1, "price": 200},
+			{"id": "leeg_boek", "min_act": 1},
+		],
+	},
 }
 
 
@@ -150,10 +164,10 @@ static func buy_item(shop_id: String, id: String) -> Dictionary:
 		return {"ok": false, "text": "That isn't sold here."}
 	var price := int(row["price"])
 	if GameState.gold < price:
-		return {"ok": false, "text": "Te weinig goud."}
+		return {"ok": false, "text": "Not enough gold."}
 	GameState.gold -= price
 	GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
-	return {"ok": true, "text": "Gekocht."}
+	return {"ok": true, "text": "Bought."}
 
 
 static func buy_spell(shop_id: String, spell_id: String, hero: Dictionary) -> Dictionary:
@@ -169,11 +183,11 @@ static func buy_spell(shop_id: String, spell_id: String, hero: Dictionary) -> Di
 		return {"ok": false, "text": why}
 	var price := int(row["price"])
 	if GameState.gold < price:
-		return {"ok": false, "text": "Te weinig goud."}
+		return {"ok": false, "text": "Not enough gold."}
 	if not PartyActions.teach_spell(hero, spell_id):
 		return {"ok": false, "text": why if why != "" else "Nobody can learn this."}
 	GameState.gold -= price
-	return {"ok": true, "text": "Gekocht."}
+	return {"ok": true, "text": "Bought."}
 
 
 static func sell(id: String) -> Dictionary:
@@ -186,7 +200,7 @@ static func sell(id: String) -> Dictionary:
 	if int(GameState.inventory[id]) <= 0:
 		GameState.inventory.erase(id)
 	GameState.gold += price
-	return {"ok": true, "text": "Verkocht.", "gold": price}
+	return {"ok": true, "text": "Sold.", "gold": price}
 
 
 ## Wat de speler nu kan verkopen: id -> aantal, alleen met een verkoopprijs.
