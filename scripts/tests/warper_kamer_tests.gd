@@ -142,11 +142,11 @@ func _buit_en_tekst() -> void:
 			schoon = false
 			print("INFO  Proefpersoon in: ", regel)
 	check("geen Proefpersoon in de kamertekst", schoon)
-	var groep: Array = [{"name": "Dennis", "hp": 1, "max_hp": 10, "mp": 0, "max_mp": 4},
-			{"name": "Noor", "hp": 2, "max_hp": 8, "mp": 1, "max_mp": 6}]
+	var groep: Array = [{"name": "Dax", "hp": 1, "max_hp": 10, "mp": 0, "max_mp": 4},
+			{"name": "Vesper", "hp": 2, "max_hp": 8, "mp": 1, "max_mp": 6}]
 	Kamers.helen(groep)
 	check("helen vult HP en MP", int(groep[0]["hp"]) == 10 and int(groep[1]["mp"]) == 6)
-	check("wissel zet Noor vooraan", Kamers.naar_voren(groep, 1) and str(groep[0]["name"]) == "Noor")
+	check("wissel zet Vesper vooraan", Kamers.naar_voren(groep, 1) and str(groep[0]["name"]) == "Vesper")
 	check("vooraan wisselt niet met zichzelf", not Kamers.naar_voren(groep, 0))
 	var regels := Kamers.voortgang_regels(0, {}, "")
 	check("voortgang noemt de stap", regels.size() == 3 and regels[0].begins_with("Verhaalstap:"))
@@ -416,20 +416,20 @@ func _update2_regels() -> void:
 	var prop := FileAccess.get_file_as_string("res://world_warper/kamers/prop.gd")
 	check("de molen zet nog iemand vooraan", molen.contains("move_member_to_front") and molen.contains("Who leads the way?"))
 	check("de Rustkamer wisselt via de bank", prop.contains("PartyWissel") and prop.contains("ALLEEN_HIER"))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.add_member("noor")
 	GameState.add_member("lotte")
 	var goud := GameState.gold
 	check("buiten de Rustkamer geen wissel", PartyBench.naar_bank(1, "res://scenes/maps/dorp_wilgendal.tscn") == PartyBench.ALLEEN_HIER
 			and GameState.party.size() == 3)
-	check("Dennis blijft in de groep", PartyBench.naar_bank(0, PartyBench.RUSTKAMER) == PartyBench.DENNIS_BLIJFT
+	check("Dax blijft in de groep", PartyBench.naar_bank(0, PartyBench.RUSTKAMER) == PartyBench.DENNIS_BLIJFT
 			and str(GameState.party[0]["id"]) == "dennis")
 	var naar := PartyBench.naar_bank(2, PartyBench.RUSTKAMER)
-	check("Lotte gratis op de bank", naar == PartyBench.OP_BANK % "Lotte" and GameState.gold == goud
+	check("Seren gratis op de bank", naar == PartyBench.OP_BANK % "Seren" and GameState.gold == goud
 			and GameState.party.size() == 2 and GameState.party_bench.size() == 1
 			and str(GameState.party_bench[0]["id"]) == "lotte")
 	var terug := PartyBench.naar_groep(0, PartyBench.RUSTKAMER)
-	check("Lotte terug, nog steeds gratis", terug == PartyBench.IN_GROEP % "Lotte" and GameState.gold == goud
+	check("Seren terug, nog steeds gratis", terug == PartyBench.IN_GROEP % "Seren" and GameState.gold == goud
 			and GameState.party_bench.is_empty() and GameState.party.size() == 3)
 	var gast := {"id": "gast", "name": "Gast", "species": "mosslijm", "uid": "tijdelijk-1", "tijdelijk": true}
 	GameState.party.append(gast)
@@ -482,7 +482,7 @@ func _kisten() -> EchoKisten:
 
 
 func _wereld_weigert() -> bool:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(WERELD, "van_dorp")

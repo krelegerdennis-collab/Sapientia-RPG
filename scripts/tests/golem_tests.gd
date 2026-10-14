@@ -121,7 +121,7 @@ func _data_tests() -> void:
 	var ok := true
 	for k in want_g:
 		ok = ok and int(g.get(k, -1)) == int(want_g[k])
-	check("Golem-baas voor Dennis Lv 7 + Spark Sword: HP 360, ATK 27, DEF 15, SPD 6, MAG 11, MDEF 13, EXP 210, Goud 84", ok)
+	check("Golem-baas voor Dax Lv 7 + Spark Sword: HP 360, ATK 27, DEF 15, SPD 6, MAG 11, MDEF 13, EXP 210, Goud 84", ok)
 	check("Eerste Archief mikt op level 7", GD.EERSTE_ARCHIEF_DOEL == 7)
 	check("kern blijft: elke 3e ronde, x0,4 / x2, Hamerslag x2,2; drempel nu 45",
 			int(g["core"]["cycle"]) == 3 and is_equal_approx(float(g["core"]["closed_mult"]), 0.4)
@@ -150,7 +150,7 @@ func _data_tests() -> void:
 			["mosslijm", "moskonijn", "papiergeest", "glitchmot"].all(func(e): return int(GD.ENEMIES[e]["max_hp"]) < int(mw["max_hp"]))
 			and int(mw["max_hp"]) < int(kb["max_hp"]) and int(mw["atk"]) < int(kb["atk"]))
 	var az: Dictionary = GD.EQUIPMENT["vonkzwaard"]
-	check("Spark Sword: wapen voor krijgers, ATK +12 (keuze Dennis; Short Sword +%d)" % int(GD.EQUIPMENT["kort_zwaard"]["atk"]),
+	check("Spark Sword: wapen voor krijgers, ATK +12 (keuze Dax; Short Sword +%d)" % int(GD.EQUIPMENT["kort_zwaard"]["atk"]),
 			az["slot"] == "wapen" and az["wie"] == ["krijger"] and int(az["atk"]) == 12)
 	check("Golem in de Golem Hall (4D) = baasgevecht met kennis_beest, geen andere monsters daar",
 			DR.ROOMS["archief_golemhal"]["monsters"].size() == 1 and DR.ROOMS["archief_golemhal"]["monsters"].any(func(m): return m["id"] == "golem" and m["enemy"] == "kennis_beest" and m.get("boss", false)))
@@ -168,14 +168,14 @@ func _data_tests() -> void:
 	while GD.exp_for_level(lv + 1) <= exp_total:
 		lv += 1
 	print("INFO  EXP voor de Golem (oefengevecht + 34 gevechten met tiers): %d -> Lv %d" % [exp_total, lv])
-	check("34 gevechten; Dennis is bij de Golem Lv 7 (%d EXP, Lv %d)" % [exp_total, lv],
+	check("34 gevechten; Dax is bij de Golem Lv 7 (%d EXP, Lv %d)" % [exp_total, lv],
 			fights == 34 and lv == GD.EERSTE_ARCHIEF_DOEL)
 
 
 # ================================================================ deel C
 ## Dennis op level L zoals GameState hem maakt (give_exp -> groei per level) + wapen.
 func _dennis(level: int, weapon := "vonkzwaard") -> Dictionary:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	var h: Dictionary = GameState.party[0]
 	GameState.give_exp(h, GD.exp_for_level(level))
 	if weapon != "":
@@ -261,16 +261,16 @@ func _balance_tests() -> void:
 	seed(2026)
 	# Dennis Lv 7 zoals het spel hem maakt
 	var d7 := _dennis(7)
-	print("INFO  Dennis Lv 7 (+Spark Sword): HP %d, ATK %d, DEF %d, SPD %d (EXP %d)"
+	print("INFO  Dax Lv 7 (+Spark Sword): HP %d, ATK %d, DEF %d, SPD %d (EXP %d)"
 			% [d7["max_hp"], d7["atk"], d7["def"], d7["agi"], GD.exp_for_level(7)])
-	check("Dennis Lv 7 met Spark Sword: HP 96, ATK 44 (32+12), DEF 20, SPD 15",
+	check("Dax Lv 7 met Spark Sword: HP 96, ATK 44 (32+12), DEF 20, SPD 15",
 			int(d7["max_hp"]) == 96 and int(d7["atk"]) == 44 and int(d7["def"]) == 20 and int(d7["agi"]) == 15
 			and int(d7["level"]) == 7)
 	var boss := _boss_data()
 	var min_open := roundi(roundi((float(d7["atk"]) - float(boss["def"]) / 2.0) * 0.85) * 2.0)
-	check("drempel 45: elke klap van Dennis Lv 7 op de open kern haalt hem (min. %d)" % min_open, min_open >= 45)
+	check("drempel 45: elke klap van Dax Lv 7 op de open kern haalt hem (min. %d)" % min_open, min_open >= 45)
 	var weak_open := roundi((25.0 - float(boss["def"]) / 2.0) * 1.15 * 2.0)
-	check("drempel 45: een zwakke klap (ATK 25, bv. later Noor) haalt hem NIET (max. %d)" % weak_open, weak_open < 45)
+	check("drempel 45: een zwakke klap (ATK 25, bv. later Vesper) haalt hem NIET (max. %d)" % weak_open, weak_open < 45)
 	var n := 1500
 	var res := {}
 	for L in [5, 7, 9]:
@@ -329,17 +329,17 @@ func _balance_tests() -> void:
 			rounds += int(r[2])
 		var pct := float(lost) / 1000.0 / float(h["max_hp"]) * 100.0
 		wres["%d_%d" % [row[0], row[1]]] = {"wins": wins, "pct": pct}
-		print("INFO  Warden niveau %d (HP %d ATK %d DEF %d EXP %d) vs Dennis Lv %d (%s): winst %.1f%%, %.1f rondes, %.0f%% HP kwijt"
+		print("INFO  Warden niveau %d (HP %d ATK %d DEF %d EXP %d) vs Dax Lv %d (%s): winst %.1f%%, %.1f rondes, %.0f%% HP kwijt"
 				% [row[0], tw["max_hp"], tw["atk"], tw["def"], tw["exp"], row[1], row[2], wins / 10.0, rounds / 1000.0, pct])
-	check("Mech. Warden niveau 2 vs Dennis Lv 4: wint altijd zonder items (%.0f%% HP kwijt)" % wres["2_4"]["pct"], wres["2_4"]["wins"] == 1000)
-	check("Mech. Warden niveau 4 vs Dennis Lv 8 (+Spark Sword): wint altijd, maar kost HP (3-50%%: %.0f%%)" % wres["4_8"]["pct"],
+	check("Mech. Warden niveau 2 vs Dax Lv 4: wint altijd zonder items (%.0f%% HP kwijt)" % wres["2_4"]["pct"], wres["2_4"]["wins"] == 1000)
+	check("Mech. Warden niveau 4 vs Dax Lv 8 (+Spark Sword): wint altijd, maar kost HP (3-50%%: %.0f%%)" % wres["4_8"]["pct"],
 			wres["4_8"]["wins"] == 1000 and wres["4_8"]["pct"] >= 3.0 and wres["4_8"]["pct"] <= 50.0)
 	# EXP-curve (advies voor Forge)
 	var line := []
 	for L in range(2, 11):
 		line.append("Lv%d=%d" % [L, GD.exp_for_level(L)])
 	print("INFO  EXP-curve: " + ", ".join(line))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 
 
 ## Vijand op monsterniveau t in het Eerste Archief (doel-level 7).
@@ -496,7 +496,7 @@ func screenshot(name: String) -> void:
 
 
 func _start_boss(level: int) -> Node:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	var h: Dictionary = GameState.party[0]
@@ -535,7 +535,7 @@ func _battle_tests() -> void:
 	var core = g.get("core")
 	var view: Control = g["node"].get_node_or_null("BossCore")
 	var bd := _boss_data()
-	check("Golem: baas-stats in het gevecht (HP %d, ATK %d, DEF %d; Dennis Lv %d ATK %d)"
+	check("Golem: baas-stats in het gevecht (HP %d, ATK %d, DEF %d; Dax Lv %d ATK %d)"
 			% [g["s"]["max_hp"], g["s"]["atk"], g["s"]["def"], GameState.party[0]["level"], GameState.party[0]["atk"]], int(g["s"]["max_hp"]) == int(bd["max_hp"])
 			and int(g["s"]["hp"]) == int(bd["max_hp"]) and int(g["s"]["atk"]) == int(bd["atk"]) and int(g["s"]["def"]) == int(bd["def"])
 			and int(GameState.party[0]["level"]) == 10)
@@ -592,7 +592,7 @@ func _battle_tests() -> void:
 	var min_open := roundi(roundi(base * 0.85) * 2.0) - 2
 	check("ronde 3: open kern, schade x2 (%s, min ~%d) >= drempel %d" % [enemy_hits.slice(hits_before), min_open, core.break_damage],
 			enemy_hits.size() == hits_before + 1 and enemy_hits[hits_before] >= min_open and enemy_hits[hits_before] >= core.break_damage)
-	check("ronde 3: 'Hit! The charge bursts.' en geen schade voor Dennis", seen_message("The charge bursts")
+	check("ronde 3: 'Hit! The charge bursts.' en geen schade voor Dax", seen_message("The charge bursts")
 			and hero_hits.size() == hero_before and int(hero["hp"]) == hp_before)
 	check("daarna: 'The core seals shut.', platen terug", seen_message("The core seals shut") and not core.open
 			and core.broken_count == 1)

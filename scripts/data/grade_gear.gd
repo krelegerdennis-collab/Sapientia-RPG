@@ -49,10 +49,10 @@ const ITEMS := {
 	"bg_g4_superzwaard": {"name": "Superzwaard", "slot": "wapen", "atk": 32, "grade": 4, "min_floor": 80,
 		"wie": ["krijger"], "element": "fysiek",
 		"affixen": [{"id": "snee", "stat": "atk", "n": 6, "naam": "Snee"}, {"id": "wand", "stat": "def", "n": 4, "naam": "Wand"}]},
-	"bg_g4_staf_noor": {"name": "Staf van Noor", "slot": "wapen", "mag": 32, "grade": 4, "min_floor": 80,
+	"bg_g4_staf_noor": {"name": "Staf van Vesper", "slot": "wapen", "mag": 32, "grade": 4, "min_floor": 80,
 		"wie": ["magier"], "element": "natuur",
 		"affixen": [{"id": "groei", "stat": "mag", "n": 6, "naam": "Groei"}, {"id": "sluier", "stat": "mdef", "n": 4, "naam": "Sluier"}]},
-	"bg_g4_staf_lotte": {"name": "Staf van Lotte", "slot": "wapen", "mag": 28, "mdef": 6, "grade": 4, "min_floor": 80,
+	"bg_g4_staf_lotte": {"name": "Staf van Seren", "slot": "wapen", "mag": 28, "mdef": 6, "grade": 4, "min_floor": 80,
 		"wie": ["priester"], "element": "licht",
 		"affixen": [{"id": "glans", "stat": "mag", "n": 6, "naam": "Glans"}, {"id": "sluier", "stat": "mdef", "n": 4, "naam": "Sluier"}]},
 	# Grade 4 sets. Vier delen, niet mixen (set_id).

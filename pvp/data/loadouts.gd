@@ -24,9 +24,9 @@ const GEAR := {
 	"bg_g4_superzwaard": {"name": "Superzwaard", "slot": "wapen", "atk": 38, "def": 4, "wie": ["krijger"]},
 	"bg_g3_helm": {"name": "Kloofhelm", "slot": "helm", "def": 14, "wie": ["krijger", "magier", "priester"]},
 	"bg_g4_plated_harnas": {"name": "Platenharnas", "slot": "harnas", "def": 28, "wie": ["krijger"]},
-	"bg_g4_staf_noor": {"name": "Staf van Noor", "slot": "wapen", "mag": 38, "mdef": 4, "wie": ["magier"]},
+	"bg_g4_staf_noor": {"name": "Staf van Vesper", "slot": "wapen", "mag": 38, "mdef": 4, "wie": ["magier"]},
 	"bg_g4_natuur_helm": {"name": "Natuurkap", "slot": "helm", "mag": 12, "mdef": 12, "wie": ["magier"]},
-	"bg_g4_staf_lotte": {"name": "Staf van Lotte", "slot": "wapen", "mag": 34, "mdef": 10, "wie": ["priester"]},
+	"bg_g4_staf_lotte": {"name": "Staf van Seren", "slot": "wapen", "mag": 34, "mdef": 10, "wie": ["priester"]},
 	"bg_g4_robes_helm": {"name": "Lichtkap", "slot": "helm", "mag": 10, "mdef": 18, "wie": ["priester"]},
 }
 

@@ -54,13 +54,13 @@ const GEEN_CODEX := [
 	"Een Mosslijm vecht tijdelijk mee.",
 ]
 const LOTTE_AANSLUIT := [
-	"The glitch tears. Lotte breaks it herself.",
+	"The glitch tears. Seren breaks it herself.",
 	"I can hear the Order of the Silent Flame again.",
 	"Silence is what Sapientia wants: to erase emotion.",
 	"The Flame is life, warmth, emotion. That is why they sent me.",
 	"The Order is divided. Sapientia corrupted me as a symbol, instead of killing me.",
 	"Even those who cherish life, they wanted silenced.",
-	"Lotte joins. Priest, with Light and Ice, grade 1.",
+	"Seren joins. Priest, with Light and Ice, grade 1.",
 ]
 const NA_GENEZER := [
 	KERN_ZIN,

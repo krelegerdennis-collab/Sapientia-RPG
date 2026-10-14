@@ -233,7 +233,7 @@ func _enter_room() -> Node:
 
 
 func _room_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.KLAAR
 	GameState.encounter_multiplier = 0.0
 	# de hoofdpuzzel (poort 1) is al opgelost: dat test --puzzletest; hier gaat het om de geheime deur
@@ -325,7 +325,7 @@ func _room_tests() -> void:
 	check("nog geen zwaard, vlag niet gezet", GameState.item_count(SWORD) == 0 and not GameState.story_flags.has(FLAG))
 	await interact_dialog()
 	check("A op de kist: '%s'" % (Dialog._lines[0] if Dialog.is_open else ""), Dialog.is_open
-			and str(Dialog._lines[1]) == "Dennis finds the Spark Sword!" and room.last_chest_result == "gekregen")
+			and str(Dialog._lines[1]) == "Dax finds the Spark Sword!" and room.last_chest_result == "gekregen")
 	# v0.14 (handoff par. 9): de kist staat bovenin beeld -> tekstvak onderin, niet over kist + icoon
 	var chest_pos: Vector2 = chest.get_global_transform_with_canvas().origin
 	var chest_rect := Rect2(chest_pos + Vector2(-8, -26), Vector2(16, 34))   # kist + icoon erboven
@@ -417,7 +417,7 @@ func _strongest_tests() -> void:
 	check("Sterkste kiest het Spark Sword (boven Dagger en Short Sword): %s" % h["equip"]["wapen"],
 			n >= 1 and h["equip"]["wapen"] == SWORD and h["atk"] == base_atk + 12 and inv.get("dolk", 0) == 1 and inv.get("kort_zwaard", 0) == 1)
 	var noor := GameState.hero_template("noor")
-	check("Noor (magier) kan het Spark Sword niet dragen", not Equipment.equip(noor, {SWORD: 1}, "wapen", SWORD)["ok"])
+	check("Vesper (magier) kan het Spark Sword niet dragen", not Equipment.equip(noor, {SWORD: 1}, "wapen", SWORD)["ok"])
 
 
 func menu() -> Node:
@@ -710,7 +710,7 @@ func _warper_tests() -> void:
 			only_a1 = false
 	check("alleen kamers van het Eerste Archief", only_a1)
 
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.KLAAR
 	GameState.encounter_multiplier = 0.0
 	if Dialog.is_open:

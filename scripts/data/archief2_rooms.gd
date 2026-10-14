@@ -139,7 +139,7 @@ static func rooms() -> Dictionary:
 			{"id": "m2", "enemy": "sporekop", "group": ["sporekop", "sporenzwam"], "tile": [13, 7], "moves": true},
 		],
 	})
-	var lotte := _met(_basis("Lotte", 2, 2), {
+	var lotte := _met(_basis("Seren", 2, 2), {
 		"layout": [_TOP, _WU, _WL, _F, _F, _B, _F, _F, _F, _F, _F, _BOT],
 		"checkpoint": false,
 		"exits": {
@@ -191,7 +191,7 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v3_wurger"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [4, 7], "lines": [
-			"This plate only grows in Lotte's light.",
+			"This plate only grows in Seren's light.",
 			"Stand in front of it and press A.",
 		]}],
 		"platen": [{"id": "l1", "soort": "licht", "tile": [9, 6], "start": 0}],

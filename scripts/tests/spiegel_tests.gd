@@ -46,7 +46,7 @@ func _data() -> void:
 	for zin in [Data.KAMER, Data.WAARHEID, Data.FEIT_H6, Data.FEIT_GEMAAKT, Data.FEIT_HANGER,
 			Data.FEIT_TERUG, Data.WEIGERING, Data.LAATSTE, Data.KERN]:
 		check("zin exact: %s" % zin, Data.heeft_zin(zin))
-	check("weigering letterlijk", Data.heeft_zin("I am Dennis. And that is enough."))
+	check("weigering letterlijk", Data.heeft_zin("I am Dax. And that is enough."))
 	check("laatste woorden letterlijk",
 			Data.heeft_zin("You are stronger than the last five. Maybe... you will be the first to make it."))
 	var alles := "\n".join(Data.zinnen())
@@ -59,7 +59,7 @@ func _data() -> void:
 	var weigering := Data.beat_index("weigering")
 	var laatste := Data.beat_index("laatste")
 	var na := Data.beat_index("na")
-	check("Dennis: stilte, dan vragen, dan de weigering",
+	check("Dax: stilte, dan vragen, dan de weigering",
 			stilte >= 0 and stilte < vragen and vragen < weigering)
 	check("daarna de laatste woorden, dan de kern", weigering < laatste and laatste < na)
 	var vragen_beat: Dictionary = Data.BEATS[vragen]
@@ -85,9 +85,9 @@ func _data() -> void:
 			uit["gebroken"] == true and str(uit["gebroken_door"]) == "weigering" and uit["kracht_breekt"] == false)
 	check("afspelen: geen gevechts-HP", uit["gevechts_hp"] == false and not uit.has("hp"))
 	check("na-scène: kern van Archief 4 opgenomen", uit["kern_opgenomen"] == true and Data.heeft_zin(Data.KERN))
-	check("na de weigering zwijgt Dennis", (uit["dennis_na_weigering"] as Array).is_empty())
-	check("Noor zegt niets", (uit["noor"] as Array).is_empty() and not Data.sprekers().has("Noor"))
-	check("Lotte zegt niets", (uit["lotte"] as Array).is_empty() and not Data.sprekers().has("Lotte"))
+	check("na de weigering zwijgt Dax", (uit["dennis_na_weigering"] as Array).is_empty())
+	check("Vesper zegt niets", (uit["noor"] as Array).is_empty() and not Data.sprekers().has("Vesper"))
+	check("Seren zegt niets", (uit["lotte"] as Array).is_empty() and not Data.sprekers().has("Seren"))
 	check("geen gesprek op de World Warper", (uit["world_warper"] as Array).is_empty())
 	check("scène staat niet in scenes/maps", not Data.SCENE.contains("scenes/maps/"))
 	var ph := FileAccess.get_file_as_string("res://tools/placeholders_v17.txt")
@@ -129,10 +129,10 @@ func _kamer() -> void:
 		await pframes(1)
 	check("scène speelt af", kamer.klaar)
 	check("de weigering is getoond en breekt de spiegel",
-			kamer.gebroken and kamer.breek_zin == "I am Dennis. And that is enough."
+			kamer.gebroken and kamer.breek_zin == "I am Dax. And that is enough."
 			and kamer.getoond.has(Data.WEIGERING))
 	check("gebroken plaatje staat", str(kamer.achtergrond.texture.resource_path).ends_with("spiegel_kamer_gebroken.png"))
-	check("kern opgenomen, daarna niets meer van Dennis", kamer.kern_opgenomen
+	check("kern opgenomen, daarna niets meer van Dax", kamer.kern_opgenomen
 			and kamer.getoond[kamer.getoond.size() - 1] == Data.KERN
 			and kamer.getoond.has(Data.LAATSTE))
 	var dennis_na := false
@@ -143,7 +143,7 @@ func _kamer() -> void:
 			continue
 		if gezien and id in ["vragen", "stilte"]:
 			dennis_na = true
-	check("na de weigering geen nieuwe vraag of stilte van Dennis", gezien and not dennis_na)
+	check("na de weigering geen nieuwe vraag of stilte van Dax", gezien and not dennis_na)
 	check("verhaalstap ongewijzigd", GameState.story_step == stap)
 	check("geen verhaalvlag gezet", GameState.story_flags == vlaggen)
 	check("geen kern via het gevechtssysteem", GameState.kernfragmenten.size() == kernen)

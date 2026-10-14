@@ -124,7 +124,7 @@ func _tuin() -> void:
 	check("volgen gestart richting uitgang", g.mode == Garden.Mode.FOLLOW)
 	await get_tree().create_timer(1.2).timeout
 	var pos: Array[Vector2] = g.creature_positions()
-	check("moslijm vlak achter Dennis", pos[0].distance_to(p.global_position) < 28.0)
+	check("moslijm vlak achter Dax", pos[0].distance_to(p.global_position) < 28.0)
 	check("moskonijn daarachter", pos[1].distance_to(p.global_position) < 44.0)
 	await screenshot("garden_following")
 

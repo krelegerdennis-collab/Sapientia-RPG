@@ -179,6 +179,35 @@ ECHO (zacht): "Dat is niet waar, Dennis. Je weet het wel."
 ECHO: "Maar dat is een verhaal voor later."
 [Het warp-platform licht op. De wereldkaart verschijnt.]
 
+## Beslissingen 14 okt 2026
+
+18. **Namen party (besluit Dennis, 14 okt 2026).** In-game namen zijn hernoemd:
+    **Dennis → Dax**, **Lotte → Seren**, **Noor → Vesper**. **Dax** is ook de standaardnaam
+    bij een nieuw spel (speler mag hem nog steeds zelf invullen). **Kael Voss** en **Orion**
+    blijven zoals ze zijn.
+    - Interne ids (`dennis`, `lotte`, `noor`), sprite-bestandsnamen, scènes en res://-paden
+      blijven **ongewijzigd**.
+    - Oude saves worden bij laden gemigreerd (`GameState.migrate_name`): Dennis/Lotte/Noor
+      worden Dax/Seren/Vesper; een zelfgekozen naam blijft staan.
+    - Namen in eerdere punten en scènes hierboven (Dennis, Noor, Lotte) gelden als de oude
+      werknamen; lees ze als Dax, Vesper en Seren. "Beslissingen van Dennis" verwijst naar
+      Dennis als maker, niet naar het personage.
+
+## Diepe Grot (besluiten Dennis, 14 okt 2026)
+
+- **Kamerkansen**: de tabel in TODO.md (35/20/10/7/5/5/5/3/1) telt op tot 91%. De worp
+  normaliseert over de actieve types naar 100% (`GrotLayouts.KANSEN`, `soort`).
+- **Koopman (H-5)**: vast **1x per 10 verdiepingen** (`GrotKamers.koopman_verdieping`); hij zit
+  niet in de worp. Zijn 1% in de tabel is alleen ter informatie.
+- **Empty Room**: ~30% kans op een **lore-notitie** (kort Engels briefje van een eerdere
+  kandidaat, op de vloer; A = lezen), anders leeg. Geen onthulling over ECHO of H-6 in die briefjes.
+- **Puzzle Room** (vanaf verdieping 6): kleine vaste puzzels uit de bestaande stukken van
+  Archief 1 en 2 (duwbare kast, zware drukplaat, poort, hendel, groei-plaat), per seed gekozen.
+  Geen monsters; beloning 1 blauwe kist in de nis. **ECHO** geeft bij binnenkomst één korte
+  Engelse hint. Geen nieuwe duw- of renmechaniek.
+- **Wereldkaart**: geen ingang en geen icoon van de Diepe Grot. De grot start alleen via ECHO
+  (ECHO's Kamer). De oude spawn `van_dungeon100` blijft alleen voor oude saves.
+
 ## Makkelijk over te nemen (botst niet)
 
 Uit `BOTSINGEN.md`; dit mag zonder verdere beslissing gebruikt worden:

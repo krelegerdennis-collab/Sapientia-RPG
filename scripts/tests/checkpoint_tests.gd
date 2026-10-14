@@ -242,7 +242,7 @@ func lose_battle() -> String:
 
 
 func setup_game(level := 5) -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	var h: Dictionary = GameState.party[0]
@@ -330,7 +330,7 @@ func _slot_tests() -> void:
 		if p != "" and FileAccess.file_exists(p):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
 	GameState.active_slot = 1
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 
 
 func _data_tests() -> void:
@@ -349,7 +349,7 @@ func _data_tests() -> void:
 	check("alle baaskamers in de data: %s (alleen deze twee)" % [bosses], bosses == ["archief_golemhal", WR.BOSS_ROOM])
 	check("tekst Nederlands: 'Je ontwaakt voor de deur...' / 'Je ontwaakt waar je binnenkwam...'",
 			GameState.RESPAWN_LINES_BOSS[0] == "You wake before the door..." and GameState.RESPAWN_LINES[0] == "You wake where you came in...")
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: geen checkpoint; game over-tekst = de oude ('wakker bij het begin')",
 			GameState.checkpoint.is_empty() and not GameState.has_checkpoint()
 			and GameState.defeat_text(false) == "GAME OVER\nYou wake up back at the start.")
@@ -550,12 +550,12 @@ func _woud_tests() -> void:
 	check("na game over: in de Spore Ring", await wait_scene("WoudSporenkring"))
 	await pframes(3)
 	check("op de ingang %s (nu %s), vol HP/MP" % [sp[0], tile()], tile() == sp[0] and full_hp_mp())
-	check("Root King niet verslagen, Noor niet gered", not GameState.story_flags.has(SD.WORTELKONING_FLAG)
+	check("Root King niet verslagen, Vesper niet gered", not GameState.story_flags.has(SD.WORTELKONING_FLAG)
 			and not GameState.story_flags.has("noor_gered") and not GameState.has_member("noor"))
 	await respawn_line()
 	await close_dialog()
 	r = await enter("res://scenes/maps/woud_open_plek.tscn", "zuid")
-	check("Clearing opnieuw: baas + Noor in de cocon", r != null and r.get_monster("baas") != null
+	check("Clearing opnieuw: baas + Vesper in de cocon", r != null and r.get_monster("baas") != null
 			and r.get_node("Objects/Cocon").visible and not Story.running)
 
 

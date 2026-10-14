@@ -869,7 +869,7 @@ func _test_archief_puzzel() -> void:
 
 
 func _archief_integration() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(ARCHIEF_SCENE, "ingang")
 	check("puzzelkamer 3B geladen", await wait_scene("ArchiefPuzzel"))

@@ -408,10 +408,10 @@ func _items_tests() -> void:
 	check("omlaag: Magic Water gekozen", s.selected_id == "toverwater")
 	await tap("interact")
 	await tap("move_down")
-	check("omlaag in de doelkeuze: Noor", s.targets.focused_index() == 1)
+	check("omlaag in de doelkeuze: Vesper", s.targets.focused_index() == 1)
 	await tap("interact")
 	await frames(2)
-	check("Magic Water: Noor 2 -> %d MP, op = weg uit de lijst" % noor["mp"],
+	check("Magic Water: Vesper 2 -> %d MP, op = weg uit de lijst" % noor["mp"],
 			noor["mp"] == 12 and not GameState.inventory.has("toverwater") and s.entries.size() == 1 and not s.targeting)
 	# onbruikbaar item (onbekend / alleen in gevecht): grijs + melding, niets verbruikt
 	GameState.inventory["oude_sleutel"] = 1
@@ -482,16 +482,16 @@ func _status_tests() -> void:
 	check("klasse: %s" % s.class_label.text, s.class_label.text == "Warrior")
 	await shot("menu_status")
 	await tap("move_right")
-	check("rechts: Noor (%s)" % s.spells_label.text, s.index == 1 and "Vonk (4 MP)" in s.spells_label.text and "Kettingbliksem (8 MP)" in s.spells_label.text)
-	check("Noor: eigen portret (portrait_noor.png, 64x80, NEAREST)", s.portrait.get_meta("source", "") == "portrait"
+	check("rechts: Vesper (%s)" % s.spells_label.text, s.index == 1 and "Vonk (4 MP)" in s.spells_label.text and "Kettingbliksem (8 MP)" in s.spells_label.text)
+	check("Vesper: eigen portret (portrait_noor.png, 64x80, NEAREST)", s.portrait.get_meta("source", "") == "portrait"
 			and s.portrait.texture.resource_path.ends_with("portrait_noor.png") and s.portrait.custom_minimum_size == Vector2(64, 80)
 			and s.portrait.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
-	check("status: alles binnen het scherm (ook Noor met 2 spreuken)", _inside_screen(s.root, s.content)
+	check("status: alles binnen het scherm (ook Vesper met 2 spreuken)", _inside_screen(s.root, s.content)
 			and s.spells_label.get_global_rect().end.y <= s.hint.get_global_rect().position.y)
 	await shot("menu_status_noor")
 	await tap("move_left")
 	await tap("move_left")
-	check("links vanaf Kees = Lotte (rondlopen)", s.index == 2 and s.page_label.text == "3/3")
+	check("links vanaf Kees = Seren (rondlopen)", s.index == 2 and s.page_label.text == "3/3")
 	await click(s.next_button)
 	check("tik op '>' = volgende held", s.index == 0)
 	# echte level-up (GameState.give_exp): EXP-formule van het spel
@@ -513,12 +513,12 @@ func _magic_tests() -> void:
 	check("'Magie' opent het magiescherm", s != null)
 	if s == null:
 		return
-	check("begint bij de eerste held met magie (Noor)", s.caster_index == 1 and s.entries.size() == 2)
+	check("begint bij de eerste held met magie (Vesper)", s.caster_index == 1 and s.entries.size() == 2)
 	check("Fire/Lightning grijs (alleen in een gevecht)", s.is_greyed(0) and s.is_greyed(1))
 	await tap("interact")
 	check("A op Fire: melding '%s'" % s.message_text(), not s.targeting and s.message_text() == PartyActions.MSG_FIELD_ONLY)
 	await tap("move_right")
-	check("rechts: Lotte met Kleine Genezing", s.caster_index == 2 and s.entry_text(0).begins_with("Kleine Genezing") and not s.is_greyed(0))
+	check("rechts: Seren met Kleine Genezing", s.caster_index == 2 and s.entry_text(0).begins_with("Kleine Genezing") and not s.is_greyed(0))
 	var kees: Dictionary = GameState.party[0]
 	var lotte: Dictionary = GameState.party[2]
 	kees["hp"] = 5
@@ -530,7 +530,7 @@ func _magic_tests() -> void:
 	var base := PartyActions.spell_base(lotte, "genees")
 	var lo := 5 + roundi(base * 0.9)
 	var hi := mini(int(kees["max_hp"]), 5 + roundi(base * 1.1))
-	check("Heal op Kees: 5 -> %d HP (verwacht %d..%d), Lotte MP %d -> %d" % [kees["hp"], lo, hi, mp0, lotte["mp"]],
+	check("Heal op Kees: 5 -> %d HP (verwacht %d..%d), Seren MP %d -> %d" % [kees["hp"], lo, hi, mp0, lotte["mp"]],
 			kees["hp"] >= lo and kees["hp"] <= hi and lotte["mp"] == mp0 - 4)
 	await tap("cancel")
 	await tap("cancel")
@@ -639,7 +639,7 @@ func _menu_save_tests() -> void:
 			and HeroPortrait.view_rect(sc.hero_views[0]).texture.get_size() == HeroPortrait.MINI_CROP.size
 			and HeroPortrait.view_rect(sc.hero_views[0]).texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
 	var nv: TextureRect = HeroPortrait.view_rect(sc.hero_views[1])
-	check("opslagscherm: Noor = hoofd uit haar portret, 1:1 en NEAREST (%s)" % nv.get_meta("source", ""),
+	check("opslagscherm: Vesper = hoofd uit haar portret, 1:1 en NEAREST (%s)" % nv.get_meta("source", ""),
 			nv.get_meta("source", "") == "portrait_crop" and nv.texture.get_size() == HeroPortrait.MINI_CROP.size
 			and nv.custom_minimum_size == HeroPortrait.MINI_CROP.size and nv.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
 	var want_place := str(scene().map_name) if "map_name" in scene() else ""
@@ -954,7 +954,7 @@ func _equipment_logic_tests() -> void:
 	var mag_ok := true
 	for hd in GameData.HEROES:
 		mag_ok = mag_ok and hd.has("mag") and hd.has("mdef") and hd["growth"].has("mag") and hd["growth"].has("mdef")
-	check("MAG/MDEF bij elke held + groei (Dennis 2/4, Noor 10/8, Lotte 7/9)", mag_ok
+	check("MAG/MDEF bij elke held + groei (Dax 2/4, Vesper 10/8, Seren 7/9)", mag_ok
 			and GameData.HEROES[0]["mag"] == 2 and GameData.HEROES[0]["mdef"] == 4 and GameData.HEROES[1]["mag"] == 10)
 	var h := GameState.hero_template(GameState.MAIN_HERO)
 	check("nieuwe held: basis = data, lege vakken, effectief = basis", h["base"]["atk"] == 14 and h["atk"] == 14
@@ -1001,7 +1001,7 @@ func _equipment_logic_tests() -> void:
 	var n2 := GameState.hero_template("noor")
 	var inv2 := {"eiken_staf": 1, "dolk": 1, "reisgewaad": 1, "houten_schild": 1}
 	Equipment.strongest(n2, inv2)
-	check("Sterkste (Magiër Noor): Oak Staff (MAG %d), Travel Robe, geen schild" % n2["mag"], n2["equip"]["wapen"] == "eiken_staf"
+	check("Sterkste (Magiër Vesper): Oak Staff (MAG %d), Travel Robe, geen schild" % n2["mag"], n2["equip"]["wapen"] == "eiken_staf"
 			and n2["equip"]["harnas"] == "reisgewaad" and n2["equip"]["schild"] == "" and n2["mag"] == 14 and inv2.get("dolk", 0) == 1)
 	# stat-pijlen (los getekend)
 	var a := StatArrow.new()
@@ -1193,15 +1193,15 @@ func _equipment_screen_tests() -> void:
 			and kees["atk"] == kees["base"]["atk"] and kees["def"] == kees["base"]["def"])
 	# andere held: Noor (rechts), tik op een vak = meteen Uitrusten
 	await tap("move_right")
-	check("rechts: Noor", s.index == 1 and s.name_label.text == "Noor")
+	check("rechts: Vesper", s.index == 1 and s.name_label.text == "Vesper")
 	await click(s.slot_buttons["schild"])
-	check("tik op Schild bij Noor: niets dat past (Magiër, geen schild)", s.mode == "slot" and s.message_text() == s.MSG_NOTHING_FITS)
+	check("tik op Schild bij Vesper: niets dat past (Magiër, geen schild)", s.mode == "slot" and s.message_text() == s.MSG_NOTHING_FITS)
 	await click(s.slot_buttons["wapen"])
-	check("tik op Wapen bij Noor: Oak Staff en Dagger %s" % [s.list_ids], s.mode == "item" and s.list_ids == ["eiken_staf", "dolk"])
+	check("tik op Wapen bij Vesper: Oak Staff en Dagger %s" % [s.list_ids], s.mode == "item" and s.list_ids == ["eiken_staf", "dolk"])
 	check("Oak Staff: MAG %s -> %s omhoog" % [s.old_value_text("mag"), s.new_value_text("mag")], s.arrow_dir("mag") == 1
 			and s.new_value_text("mag") == str(int(GameState.party[1]["mag"]) + 4))
 	await click(s.list_buttons[0])
-	check("tik op Oak Staff: Noor draagt hem (MAG %d)" % GameState.party[1]["mag"], GameState.party[1]["equip"]["wapen"] == "eiken_staf"
+	check("tik op Oak Staff: Vesper draagt hem (MAG %d)" % GameState.party[1]["mag"], GameState.party[1]["equip"]["wapen"] == "eiken_staf"
 			and GameState.item_count("eiken_staf") == 0 and _equip_totals() == after_drop)
 	await tap("cancel")
 	await tap("cancel")
@@ -1246,7 +1246,7 @@ func _equipment_save_tests() -> void:
 	var k: Dictionary = GameState.party[0] if ok else {}
 	check("oude save zonder uitrusting laadt: Short Sword in het wapenvak, ATK 23 = 20 + 3", ok and k["equip"]["wapen"] == "kort_zwaard"
 			and k["atk"] == 23 and k["base"]["atk"] == 20 and k["equip"]["schild"] == "")
-	check("oude save: MAG/MDEF standaard (Lv 3: MAG 2, MDEF 4 + 2x1 = 6; Noor 10/8)", ok and k["mag"] == 2 and k["mdef"] == 6
+	check("oude save: MAG/MDEF standaard (Lv 3: MAG 2, MDEF 4 + 2x1 = 6; Vesper 10/8)", ok and k["mag"] == 2 and k["mdef"] == 6
 			and GameState.party[1]["mag"] == 10 and GameState.party[1]["mdef"] == 8 and GameState.party[1]["equip"] == Equipment.empty_equip())
 	# kapotte/onbekende uitrusting: niets crasht, niets kwijt (gaat naar de tas)
 	var bad := {"map": TOWN, "party": [{"id": GameState.MAIN_HERO, "equip": {"wapen": "eiken_staf", "helm": "bestaat_niet", "schild": 5,

@@ -12,7 +12,7 @@ const MAX_MONSTERS := 1
 const MAX_GEVECHT := MAX_HELDEN + MAX_MONSTERS
 
 const IN_GEVECHT := "You can't switch party members during battle."
-const DENNIS_BLIJFT := "Dennis stays in the party."
+const DENNIS_BLIJFT := "Dax stays in the party."
 const GAST_BLIJFT := "Temporary guests can't go to the reserve."
 const VOL := "The party is full (4 heroes)."
 const NAAR_RESERVE := "%s goes to the reserve."

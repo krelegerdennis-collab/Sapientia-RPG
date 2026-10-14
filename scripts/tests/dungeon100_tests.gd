@@ -168,7 +168,7 @@ func _rules_tests() -> void:
 	check("verdieping 100 is geen baas", Scaling.boss_for_floor(100).is_empty() and not Scaling.is_boss_floor(100)
 			and not Gen.is_boss_floor(100))
 	check("bestiariumcitaat van de canon-bazen, letterlijk",
-			Bestiary.entry("d100_baas_25")["desc"] == "A dark echo of Dennis himself. He moves as Dennis moves, fights as Dennis fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Noor, no Grandpa. Only the number: H-6."
+			Bestiary.entry("d100_baas_25")["desc"] == "A dark echo of Dax himself. He moves as Dax moves, fights as Dax fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Vesper, no Grandpa. Only the number: H-6."
 			and Bestiary.entry("d100_baas_50")["desc"] == "An endlessly turning machine, half organic, half steel. It knows no beginning and no end — it simply starts again. Sapientia's logic in one form: no rest, no release, only repetition. Whoever defeats it has won nothing. It keeps turning anyway."
 			and Bestiary.entry("d100_baas_75")["desc"] == "A giant eye with arms grasping in every direction. It weighs, it measures, it judges. What it weighs is not a deed, but a person. And people are always found too light — except one. De Rechter is Sapientia's doubt: she is looking for someone who weighs more than she expected."
 			and Bestiary.entry("d100_baas_99")["desc"] == "No body. No shape. Only a voice, and glitches that warp the world around you. De Stem speaks as if it knows you — and it does. Here Sapientia speaks herself. Not as an enemy, but as something that has been waiting for you.")
@@ -202,12 +202,12 @@ func _rules_tests() -> void:
 # ================================================================ deel B
 func _state_tests() -> void:
 	check("GameState.dungeon100_floor bestaat en begint op 0", GameState.dungeon100_floor == 0)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.dungeon100_floor = 42
 	GameState.dungeon100_checkpoint = 40
 	GameState.dungeon100_best = 44
 	GameState.dungeon100_warpers = [1, 50, 99]
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel zet verdieping, checkpoint, best en warpers terug op 0", GameState.dungeon100_floor == 0
 			and GameState.dungeon100_checkpoint == 0 and GameState.dungeon100_best == 0
 			and GameState.dungeon100_warpers.is_empty())
@@ -221,7 +221,7 @@ func _state_tests() -> void:
 	var raw := GameState.read_save(path)
 	check("save bevat het blok 'dungeon100'", raw.has("dungeon100") and raw["dungeon100"] is Dictionary
 			and int(raw["dungeon100"]["checkpoint"]) == 30)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("laden lukt", GameState.load_game(path))
 	check("laden zet verdieping 37, checkpoint 30, best 38 terug", GameState.dungeon100_floor == 37
 			and GameState.dungeon100_checkpoint == 30 and GameState.dungeon100_best == 38)
@@ -243,7 +243,7 @@ func _state_tests() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 	# warpers in het bestaande dungeon100-blok; de vier menuslots blijven vier
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("vier menuslots", GameState.SLOT_COUNT == 4 and GameState.slot_path(1).ends_with("save_1.json")
 			and GameState.slot_path(2).ends_with("save_2.json") and GameState.slot_path(3).ends_with("save_3.json")
 			and GameState.slot_path(4).ends_with("save_4.json") and GameState.slot_path(5) == "")
@@ -258,7 +258,7 @@ func _state_tests() -> void:
 			slot_raw.get("slot", 0) == 2 and slot_raw["dungeon100"] is Dictionary
 			and R.clean_warpers(slot_raw["dungeon100"]["warpers"]) == [1, 50]
 			and int(slot_raw["dungeon100"]["floor"]) == 50 and not slot_raw.has("warpers"))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("laden van slot 2 zet de warpers terug", GameState.load_game(slot2) and GameState.dungeon100_warpers == [1, 50]
 			and GameState.dungeon100_floor == 50)
 	GameState.dungeon100_end_run(true)
@@ -268,7 +268,7 @@ func _state_tests() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(slot2))
 
 	# game over (respawn) zonder kerker: precies zoals altijd
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.gold = 100
 	GameState.party[0]["hp"] = 0
 	GameState.respawn()
@@ -277,7 +277,7 @@ func _state_tests() -> void:
 			and GameState.party[0]["hp"] == GameState.party[0]["max_hp"] and GameState.dungeon100_floor == 0)
 	# in de kerker: respawn() = dood is dungeon uit (wereldkaart bij de ingang), ook met een rustpunt
 	R.dungeon_scene = STAND_IN
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.gold = 101
 	GameState.inventory["kruid"] = 2
 	GameState.party[0]["level"] = 6
@@ -304,9 +304,9 @@ func _state_tests() -> void:
 	check("buiten de kerker na de run: half goud, spawn 'start'",
 			GameState.gold == 40 and GameState.pending_spawn == GameState.RESPAWN_SPAWN and GameState.dungeon100_floor == 0)
 	R.dungeon_scene = _saved_scene
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	_strip_and_scroll_tests()
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 
 
 ## De grot neemt de hele party mee (ook wie zich later aansloot) en elke Codex-pagina, allemaal
@@ -331,7 +331,7 @@ func _strip_and_scroll_tests() -> void:
 	var fuse_element := str(fused["element"])
 	GameState.codex_set_active(worm_uid)
 	var next_before := GameState.codex_next_id
-	check("voor de grot: Noor level 8 met spreuken en staf, Ink Worm kent Ink Spit",
+	check("voor de grot: Vesper level 8 met spreuken en staf, Ink Worm kent Ink Spit",
 			int(GameState.party[1]["level"]) == 8 and (GameState.party[1]["spells"] as Array).has("vuur")
 			and (GameState.party[1]["spells"] as Array).has("bliksem") and (GameState.party[1]["spells"] as Array).has("genees")
 			and noor_weapon == "eiken_staf" and (worm["skills"] as Array).has("inktspuw")
@@ -363,15 +363,15 @@ func _strip_and_scroll_tests() -> void:
 	var dennis: Dictionary = GameState.party[0]
 	var inv := {"spreuk_vuur": 1}
 	var refused := PA.use_item(inv, "spreuk_vuur", dennis)
-	check("Dennis leert geen magie van een rol", not refused["ok"] and inv.has("spreuk_vuur")
-			and (dennis["spells"] as Array).is_empty() and str(refused["text"]) == "Dennis leert geen magie.")
+	check("Dax leert geen magie van een rol", not refused["ok"] and inv.has("spreuk_vuur")
+			and (dennis["spells"] as Array).is_empty() and str(refused["text"]) == "Dax leert geen magie.")
 	var noor: Dictionary = GameState.party[1]
 	noor["max_mp"] = 0
 	noor["mp"] = 0
 	var taught := PA.use_item(inv, "spreuk_vuur", noor)
-	check("Fire Scroll leert Noor Fire, vult haar MP en is op", taught["ok"] and (noor["spells"] as Array).has("vuur")
+	check("Fire Scroll leert Vesper Fire, vult haar MP en is op", taught["ok"] and (noor["spells"] as Array).has("vuur")
 			and not inv.has("spreuk_vuur") and int(noor["max_mp"]) >= 4 and int(noor["mp"]) >= 4
-			and str(taught["text"]) == "Noor learns Vonk!")
+			and str(taught["text"]) == "Vesper learns Vonk!")
 	var again := {"spreuk_vuur": 1}
 	var second := PA.use_item(again, "spreuk_vuur", noor)
 	check("een rol voor een spreuk die je al kent doet niets", not second["ok"] and int(again["spreuk_vuur"]) == 1
@@ -379,7 +379,7 @@ func _strip_and_scroll_tests() -> void:
 	var mp_before := int(noor["max_mp"])
 	var genees := {"spreuk_genees": 1}
 	var healed := PA.use_item(genees, "spreuk_genees", noor)
-	check("Heal Scroll leert Noor Heal (Grade 1 licht) zonder de MP-voorraad te verlagen", healed["ok"]
+	check("Heal Scroll leert Vesper Heal (Grade 1 licht) zonder de MP-voorraad te verlagen", healed["ok"]
 			and (noor["spells"] as Array).has("genees") and not genees.has("spreuk_genees")
 			and int(noor["max_mp"]) == mp_before)
 	dennis["hp"] = 0
@@ -389,7 +389,7 @@ func _strip_and_scroll_tests() -> void:
 	dennis["hp"] = int(dennis["max_hp"])
 	var noor_rol := {"spreuk_bliksem": 1}
 	var noor_learn := PA.use_item(noor_rol, "spreuk_bliksem", noor)
-	check("Noor kan tijdens de run Lightning leren", noor_learn["ok"] and (noor["spells"] as Array).has("bliksem")
+	check("Vesper kan tijdens de run Lightning leren", noor_learn["ok"] and (noor["spells"] as Array).has("bliksem")
 			and int(noor["max_mp"]) >= 7)
 	check("een rol is in het veld te gebruiken", PA.item_usable_in_field("spreuk_vuur") and PA.item_block_reason("spreuk_vuur") == ""
 			and PA.item_effect_text("spreuk_vuur") == "Teaches the spell Vonk.")
@@ -418,7 +418,7 @@ func _hud() -> Node:
 
 
 func _hud_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = load("res://scripts/data/story_data.gd").KLAAR
 	GameState.has_return_point = false
 	GameState.change_map(TOWN, "start")
@@ -473,7 +473,7 @@ func _hud_tests() -> void:
 
 # ================================================================ deel D
 func _rustpunt_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = load("res://scripts/data/story_data.gd").KLAAR
 	GameState.has_return_point = false
 	GameState.change_map(TOWN, "start")
@@ -567,7 +567,7 @@ func answer_no(rp: Node) -> void:
 # ================================================================ deel E
 func _defeat_tests() -> void:
 	# 1. nederlaag in de kerker: echte scènewissel naar de wereldkaart bij de ingang, run voorbij
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = load("res://scripts/data/story_data.gd").KLAAR
 	R.dungeon_scene = STAND_IN
 	GameState.gold = 200
@@ -617,7 +617,7 @@ func _defeat_tests() -> void:
 
 # ================================================================ deel F
 func _warper_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = load("res://scripts/data/story_data.gd").KLAAR
 	GameState.has_return_point = false
 	GameState.change_map(TOWN, "start")

@@ -55,6 +55,7 @@ func _run() -> void:
 	if part("B"):
 		print("=== Deel B: save/load en migratie ===")
 		_save_tests()
+		_namen_migratie_tests()
 	if part("C"):
 		print("=== Deel C: gevecht ===")
 		await _gevecht_tests()
@@ -243,7 +244,7 @@ func flee(b: Node) -> void:
 
 
 func setup() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.pending_kern_absorb = ""
@@ -282,23 +283,23 @@ func _regel_tests() -> void:
 	var verplaatst := PartyLimiet.normaliseer()
 	check("6 helden -> 4 actief + 2 reserve (%s | %s)" % [namen(GameState.party), namen(GameState.party_bench)],
 			verplaatst == 2 and GameState.party.size() == 4 and GameState.party_bench.size() == 2
-			and namen(GameState.party) == ["Dennis", "Noor", "Lotte", "Kai"] and namen(GameState.party_bench) == ["Sem", "Ivo"])
+			and namen(GameState.party) == ["Dax", "Vesper", "Seren", "Kai"] and namen(GameState.party_bench) == ["Sem", "Ivo"])
 	check("normaliseren is idempotent", PartyLimiet.normaliseer() == 0 and GameState.party.size() == 4)
 	check("gevechts_helden: max 4", PartyLimiet.gevechts_helden([1, 2, 3, 4, 5, 6]) == [1, 2, 3, 4])
 	# wisselen buiten het gevecht
 	var t := PartyLimiet.wissel(1, 0)
-	check("wissel Noor <-> Sem: '%s'" % t, t == PartyLimiet.GEWISSELD % ["Sem", "Noor"]
-			and str(GameState.party[1]["name"]) == "Sem" and str(GameState.party_bench[0]["name"]) == "Noor"
+	check("wissel Vesper <-> Sem: '%s'" % t, t == PartyLimiet.GEWISSELD % ["Sem", "Vesper"]
+			and str(GameState.party[1]["name"]) == "Sem" and str(GameState.party_bench[0]["name"]) == "Vesper"
 			and GameState.party.size() == 4 and GameState.party_bench.size() == 2)
-	check("Dennis kan niet naar de reserve", PartyLimiet.wissel(0, 0) == PartyLimiet.DENNIS_BLIJFT
+	check("Dax kan niet naar de reserve", PartyLimiet.wissel(0, 0) == PartyLimiet.DENNIS_BLIJFT
 			and PartyLimiet.naar_reserve(0) == PartyLimiet.DENNIS_BLIJFT and str(GameState.party[0]["id"]) == "dennis")
 	check("volle groep: erbij geweigerd", PartyLimiet.naar_groep(0) == PartyLimiet.VOL and GameState.party.size() == 4)
 	t = PartyLimiet.naar_reserve(3)
 	check("Kai naar de reserve: '%s'" % t, t == PartyLimiet.NAAR_RESERVE % "Kai" and GameState.party.size() == 3
 			and GameState.party_bench.size() == 3 and str(GameState.party_bench[2]["name"]) == "Kai")
 	t = PartyLimiet.naar_groep(0)
-	check("Noor terug erbij: '%s'" % t, t == PartyLimiet.IN_GROEP % "Noor" and GameState.party.size() == 4
-			and str(GameState.party[3]["name"]) == "Noor" and GameState.party_bench.size() == 2)
+	check("Vesper terug erbij: '%s'" % t, t == PartyLimiet.IN_GROEP % "Vesper" and GameState.party.size() == 4
+			and str(GameState.party[3]["name"]) == "Vesper" and GameState.party_bench.size() == 2)
 	var gast := {"id": "gast", "name": "Gast", "species": "mosslijm", "uid": "tijdelijk-1", "tijdelijk": true,
 			"hp": 1, "max_hp": 1, "mp": 0, "max_mp": 0, "level": 1}
 	GameState.party[3] = gast
@@ -311,7 +312,7 @@ func _regel_tests() -> void:
 	GameState.party.append(test_held("noor", "Kai"))
 	GameState.party.append(test_held("noor", "Sem"))
 	var ok := GameState.join_member("lotte", 5)
-	check("join_member bij volle groep: Lotte naar de reserve, op niveau 5", ok and GameState.party.size() == 4
+	check("join_member bij volle groep: Seren naar de reserve, op niveau 5", ok and GameState.party.size() == 4
 			and GameState.party_bench.size() == 1 and str(GameState.party_bench[0]["id"]) == "lotte"
 			and int(GameState.party_bench[0]["level"]) == 5 and GameState.has_member("lotte"))
 	# monster
@@ -369,7 +370,7 @@ func _save_tests() -> void:
 	oud["party"] = (ruw["party"] as Array).slice(0, 3)
 	_write("user://partytest_oud.json", oud)
 	geladen = GameState.load_game("user://partytest_oud.json")
-	check("oude save zonder party_bank: 3 actief, reserve leeg", geladen and namen(GameState.party) == ["Dennis", "Noor", "Lotte"]
+	check("oude save zonder party_bank: 3 actief, reserve leeg", geladen and namen(GameState.party) == ["Dax", "Vesper", "Seren"]
 			and GameState.party_bench.is_empty())
 	# oude save met te veel helden in "party": migratie naar de reserve
 	var vol := ruw.duplicate(true)
@@ -378,7 +379,7 @@ func _save_tests() -> void:
 	_write("user://partytest_migratie.json", vol)
 	geladen = GameState.load_game("user://partytest_migratie.json")
 	check("migratie: 6 helden in party -> 4 actief + 2 reserve (%s | %s)" % [namen(GameState.party), namen(GameState.party_bench)],
-			geladen and namen(GameState.party) == ["Dennis", "Noor", "Lotte", "Kai"] and namen(GameState.party_bench) == ["Sem", "Ivo"])
+			geladen and namen(GameState.party) == ["Dax", "Vesper", "Seren", "Kai"] and namen(GameState.party_bench) == ["Sem", "Ivo"])
 	# oude save met party_bank én te veel actief: de extra's komen vóór de bestaande reserve
 	var beide := ruw.duplicate(true)
 	beide["party"] = (ruw["party"] as Array) + [(ruw["party_bank"] as Array)[0]]
@@ -524,8 +525,8 @@ func _menu_tests() -> void:
 	await click(s.actief_knoppen[1])
 	check("held gemarkeerd", s.gekozen == 1)
 	await click(s.reserve_held_knoppen[0])
-	check("gewisseld via het scherm: Sem actief, Noor in de reserve (%s)" % s.laatste_tekst,
-			str(GameState.party[1]["name"]) == "Sem" and str(GameState.party_bench[0]["name"]) == "Noor" and s.gekozen == -1)
+	check("gewisseld via het scherm: Sem actief, Vesper in de reserve (%s)" % s.laatste_tekst,
+			str(GameState.party[1]["name"]) == "Sem" and str(GameState.party_bench[0]["name"]) == "Vesper" and s.gekozen == -1)
 	await click(s.reserve_monster_knoppen[0])
 	check("monster gewisseld via het scherm", GameState.codex_active == str(p2["uid"])
 			and str(s.monster_knop.get_meta("label")).contains(str(p2["name"])))
@@ -533,7 +534,7 @@ func _menu_tests() -> void:
 	await screenshot("party_menu_gewisseld")
 	await click(s.actief_knoppen[0])
 	await click(s.actief_knoppen[0])
-	check("Dennis 2x tikken: blijft (melding)", s.laatste_tekst == PartyLimiet.DENNIS_BLIJFT and str(GameState.party[0]["id"]) == "dennis")
+	check("Dax 2x tikken: blijft (melding)", s.laatste_tekst == PartyLimiet.DENNIS_BLIJFT and str(GameState.party[0]["id"]) == "dennis")
 	s.back()
 	await pframes(3)
 	check("B sluit het scherm", m.sub == null)
@@ -554,11 +555,11 @@ func _menu_tests() -> void:
 				li = i
 		ms.show_caster(li)
 		await pframes(3)
-		check("Lotte: genezing niet grijs in het veld", ms.entries.size() > 0 and not ms.is_greyed(0))
+		check("Seren: genezing niet grijs in het veld", ms.entries.size() > 0 and not ms.is_greyed(0))
 		await screenshot("veldmenu_magic")
 		var hp0 := int(dennis["hp"])
 		var genees_r: Dictionary = PartyActions.cast_spell(GameState.party[li], "genees", dennis)
-		check("genezen buiten het gevecht: Dennis %d -> %d HP" % [hp0, int(dennis["hp"])], bool(genees_r["ok"]) and int(dennis["hp"]) > hp0)
+		check("genezen buiten het gevecht: Dax %d -> %d HP" % [hp0, int(dennis["hp"])], bool(genees_r["ok"]) and int(dennis["hp"]) > hp0)
 		ms.close()
 		await pframes(3)
 	# v0.22 (Dennis): Settings en Load in het veldmenu
@@ -754,7 +755,7 @@ func _scenes_tests() -> void:
 			await pframes(10)
 			var gz: Node = get_tree().root.get_node_or_null("SceneReplay/CanonGenezer")
 			var vs: Node = gz.video_speler if gz != null else null
-			check("ww_warper: herhaling start met Dennis' filmpje (ook als het al gezien is)", vs != null and is_instance_valid(vs)
+			check("ww_warper: herhaling start met Dax' filmpje (ook als het al gezien is)", vs != null and is_instance_valid(vs)
 					and str(vs.video_path).ends_with("genezer_warper.ogv"))
 			await get_tree().create_timer(1.5).timeout
 			await screenshot("scenes_herhaling_warper_video")
@@ -793,3 +794,20 @@ func click(c: Control) -> void:
 	ev.pressed = false
 	Input.parse_input_event(ev)
 	await pframes(3)
+
+
+## Namen-migratie: een oude save met Dennis/Noor/Lotte laadt als Dax/Vesper/Seren (ids gelijk).
+func _namen_migratie_tests() -> void:
+	var oud := {"map": "res://scenes/maps/wilgendal.tscn", "player_name": "Dennis", "party": [
+		{"id": "dennis", "name": "Dennis"}, {"id": "noor", "name": "Noor"}, {"id": "lotte", "name": "Lotte"}]}
+	var ok := GameState.apply_state(oud)
+	check("namen-migratie: oude save laadt", ok)
+	check("namen-migratie: speler heet Dax", GameState.player_name == "Dax")
+	check("namen-migratie: party heet Dax/Vesper/Seren (%s)" % namen(GameState.party),
+		GameState.party.size() == 3 and GameState.party[0]["name"] == "Dax"
+		and GameState.party[1]["name"] == "Vesper" and GameState.party[2]["name"] == "Seren"
+		and GameState.party[1]["id"] == "noor" and GameState.party[2]["id"] == "lotte")
+	check("namen-migratie: eigen naam blijft", GameState.migrate_name("Kees") == "Kees")
+	check("namen-migratie: losse namen", GameState.migrate_name("Dennis") == "Dax" and GameState.migrate_name("Noor") == "Vesper"
+		and GameState.migrate_name("Lotte") == "Seren" and GameState.migrate_name("Dax") == "Dax")
+	check("nieuw spel: standaardnaam is Dax", GameState.DEFAULT_NAME == "Dax")

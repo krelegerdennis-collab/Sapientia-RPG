@@ -1,7 +1,7 @@
 extends Control
-## v0.10 Naam kiezen: 'Hoe heet je?' met een LineEdit, voorgevuld met 'Dennis',
-## max. 10 tekens, en een OK-knop. Leeg = 'Dennis'.
-## De eerste toets vervangt Dennis (alles geselecteerd). Op de telefoon (web en Android)
+## v0.10 Naam kiezen: 'Hoe heet je?' met een LineEdit, voorgevuld met 'Dax',
+## max. 10 tekens, en een OK-knop. Leeg = 'Dax'.
+## De eerste toets vervangt Dax (alles geselecteerd). Op de telefoon (web en Android)
 ## opent een tik het schermtoetsenbord. Daarna begint het nieuwe spel in Wilgendal.
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
@@ -10,7 +10,7 @@ const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 var edit: LineEdit
 var ok_button: Button
 var _done := false
-## Zolang de speler nog niets getypt heeft, vervangt de eerste letter 'Dennis'.
+## Zolang de speler nog niets getypt heeft, vervangt de eerste letter 'Dax'.
 var _pristine := true
 
 
@@ -74,7 +74,7 @@ func _exit_tree() -> void:
 
 
 ## Een tik (ook als het vak al focus heeft) opent het toetsenbord. Zonder dit blijft
-## 'Dennis' staan op een telefoon: de browser weigert een toetsenbord zonder tik.
+## 'Dax' staan op een telefoon: de browser weigert een toetsenbord zonder tik.
 func _select_default() -> void:
 	if edit != null and _pristine:
 		edit.select_all()
@@ -129,7 +129,7 @@ func _process(_delta: float) -> void:
 	UiMenu.pad_nav(get_viewport())
 
 
-## De naam zoals hij gebruikt wordt (leeg = Dennis).
+## De naam zoals hij gebruikt wordt (leeg = Dax).
 func chosen_name() -> String:
 	return GameState.clean_name(edit.text)
 

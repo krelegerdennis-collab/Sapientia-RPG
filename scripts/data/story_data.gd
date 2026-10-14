@@ -123,7 +123,7 @@ const STEP_NAMES := {0: "start", 10: "wakker", 15: "uitrusting", 20: "taken", 30
 ## v0.17 OPDRACHTEN (veldmenu: regel 'Opdracht' onder de groep zolang start_flag wel en done_flag niet
 ## gezet is). Story.active_quest() geeft de titel.
 const QUESTS := [
-	{"id": "noor", "title": "Save Noor from the Dark Wood", "start_flag": "quest_noor", "done_flag": "noor_gered"},
+	{"id": "noor", "title": "Save Vesper from the Dark Wood", "start_flag": "quest_noor", "done_flag": "noor_gered"},
 	{"id": "zingend_graan", "title": "Het Zingende Graan", "start_flag": FLAG_GRAAN, "done_flag": FLAG_GRAAN_KLAAR},
 ]
 ## v0.17 TODO(verhaal): deze events hebben PLACEHOLDER-tekst (kort, Nederlands). Dennis schrijft het
@@ -452,41 +452,41 @@ const EVENTS := {
 		["place", "player", [16, 21], "up"],
 		["wait", 0.3],
 		["walk", "player", "up", 3],
-		["walk", "Noor", "down", 1],
-		["say", "Noor", ["Hey! I don't know you. Did you come from over the hills? Nobody lives out there."]],
+		["walk", "Vesper", "down", 1],
+		["say", "Vesper", ["Hey! I don't know you. Did you come from over the hills? Nobody lives out there."]],
 		["walk", "player", "up", 1],
 		["say", "{naam}", ["I'm {naam}. I live with the Old Man, by the Archives. He sent me here."]],
-		["say", "Noor", ["I'm Noor. The village calls me 'that girl with the sparks'.", "Watch."]],
+		["say", "Vesper", ["I'm Vesper. The village calls me 'that girl with the sparks'.", "Watch."]],
 		["flash", "#ff3ad0", 0.25],
 		["say", "", ["Pink sparks dance between her fingers... and hitch, like a picture that sticks."]],
-		["say", "Noor", ["They've done that lately. And at night the woods whisper my name."]],
+		["say", "Vesper", ["They've done that lately. And at night the woods whisper my name."]],
 		["shake", 1.2, 2.5],
 		["glitch", 0.4],
 		["say", "", ["The ground splits open! Black roots full of flickering pink marks shoot up."]],
 		["show", "WortelGreep"],
-		["hide", "Noor"],
-		["say", "Noor", ["They're... they're pulling me! {naam}!"]],
+		["hide", "Vesper"],
+		["say", "Vesper", ["They're... they're pulling me! {naam}!"]],
 		["glitch", 0.5],
 		["flash", "#ff3ad0", 0.5],
 		["hide", "WortelGreep"],
 		["shake", 0.8, 1.5],
-		["say", "", ["When the light pulls away, Noor is gone.", "A trail of torn earth runs west... toward the Dark Wood."]],
+		["say", "", ["When the light pulls away, Vesper is gone.", "A trail of torn earth runs west... toward the Dark Wood."]],
 		["walk", "Marit", "down", 3],
 		["walk", "Marit", "left", 2],
 		["face", "Marit", "left"],
 		["face", "player", "right"],
-		["say", "Marit", ["Noor! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
+		["say", "Marit", ["Vesper! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
 		["flag", "noor_ontmoet"],
 		["flag", "quest_noor"],
 		["step", NOOR_KWIJT],
-		["say", "", ["New quest: Save Noor from the Dark Wood"]],
+		["say", "", ["New quest: Save Vesper from the Dark Wood"]],
 		["run", "marit_boeken"],
 	]}],
 	# v0.17 Codex: Marit geeft 3 Lege Boeken (eenmalig; ook via een gesprek met haar als de ontmoeting
 	# al eerder gezien is, bv. een oude save). Geen winkel nog; 2 extra in kisten van het Donker Woud.
 	"marit_boeken": [
 		{"if": {"not_flags": ["marit_boeken"]}, "do": [
-			["say", "Marit", ["Wait! Take these. Blank books from my grandfather's archive.", "Noor always said monsters fit inside them. I never believed it... but maybe they'll help you."]],
+			["say", "Marit", ["Wait! Take these. Blank books from my grandfather's archive.", "Vesper always said monsters fit inside them. I never believed it... but maybe they'll help you."]],
 			["give", "leeg_boek", 3],
 			["flag", "marit_boeken"],
 			["say", "", ["You receive 3x Blank Book!"]],
@@ -498,7 +498,7 @@ const EVENTS := {
 	"marit": [
 		{"if": {"flags": ["noor_ontmoet"], "not_flags": ["marit_boeken"]}, "do": [["run", "marit_boeken"]]},
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Marit", ["You really brought her back! Mapleton will never forget this."]]]},
-		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Marit", ["The Dark Wood lies west of the village. Bring Noor back, please!"]]]},
+		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Marit", ["The Dark Wood lies west of the village. Bring Vesper back, please!"]]]},
 		{"do": [["say", "Marit", ["Good day, traveler."]]]},
 	],
 	"bram": [
@@ -506,7 +506,7 @@ const EVENTS := {
 		{"do": [["say", "Old Bram", ["We used to pick berries there. Now the trees hum like beehives.", "Stare at the mist too long and you see marks that don't belong."]]]},
 	],
 	"jens": [
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Jens", ["Noor's back! Will she make sparks again? Please?"]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Jens", ["Vesper's back! Will she make sparks again? Please?"]]]},
 		{"do": [["say", "Jens", ["Mama says the mushrooms in the wood glow at night.", "And that they can sneeze. Really!"]]]},
 	],
 	"tobias": [
@@ -516,14 +516,14 @@ const EVENTS := {
 	"esdoorn_put": [{"do": [["say", "", ["An old well. Deep down, something pink flickers in the water."]]]}],
 	"ilse": [
 		{"if": {"flags": ["noor_gered"], "not_flags": ["ilse_thee"]}, "do": [
-			["say", "Ilse", ["You saved my Noor. She wants to go with you. I can see it on her.", "Take good care of her. And take this tea, for the road."]],
+			["say", "Ilse", ["You saved my Vesper. She wants to go with you. I can see it on her.", "Take good care of her. And take this tea, for the road."]],
 			["give", "kruidenthee", 3],
 			["flag", "ilse_thee"],
 			["say", "", ["You receive 3x Herbal Tea!"]],
 		]},
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Ilse", ["Take good care of her, {naam}."]]]},
-		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Ilse", ["My Noor... She had those sparks for weeks. I should have seen it.", "Bring her back. Please."]]]},
-		{"do": [["say", "Ilse", ["Noor is outside, on the square. As always."]]]},
+		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Ilse", ["My Vesper... She had those sparks for weeks. I should have seen it.", "Bring her back. Please."]]]},
+		{"do": [["say", "Ilse", ["Vesper is outside, on the square. As always."]]]},
 	],
 	"herbergier": [{"do": [
 		["choice", "Do you want to rest here? (free)", ["Yes", "No"], ["herberg_rust", "herberg_nee"], "Innkeeper Wout"],
@@ -541,7 +541,7 @@ const EVENTS := {
 	# --- het Donker Woud
 	"cocon": [
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "", ["The empty cocoon. The roots are grey and withered."]]]},
-		{"do": [["say", "", ["Noor! She hangs unconscious in a cocoon of roots.", "The Root King has to go first."]]]},
+		{"do": [["say", "", ["Vesper! She hangs unconscious in a cocoon of roots.", "The Root King has to go first."]]]},
 	],
 	"noor_bevrijd": [{"do": [
 		["place", "player", [9, 6], "up"],
@@ -552,18 +552,18 @@ const EVENTS := {
 		["say", "", ["The Root King collapses. His roots shrivel into grey dust...", "...and the cocoon tears open!"]],
 		["flag", "noor_gered"],
 		["refresh"],
-		["walk", "Noor", "down", 1],
-		["say", "Noor", ["...{naam}? You're that boy from the square.", "I heard you fighting, through the roots. As if it came from very far away."]],
+		["walk", "Vesper", "down", 1],
+		["say", "Vesper", ["...{naam}? You're that boy from the square.", "I heard you fighting, through the roots. As if it came from very far away."]],
 		["say", "{naam}", ["You're free. It's over."]],
-		["say", "Noor", ["No. Those roots whispered about the Archives. About a Warden.", "I'm coming with you. I want to know what's happening to my sparks."]],
+		["say", "Vesper", ["No. Those roots whispered about the Archives. About a Warden.", "I'm coming with you. I want to know what's happening to my sparks."]],
 		["join", "noor", {"level_from": "dennis", "level_delta": -1, "gear": ["eiken_staf", "reisgewaad"]}],
 		["give", "wambuis", 1],
 		["flag", "noor_lid"],
 		["step", NOOR_GERED],
 		["refresh"],
-		["say", "", ["Noor joins the party!", "She gives you a Padded Jerkin from Mapleton.", "Quest complete: Save Noor from the Dark Wood"]],
+		["say", "", ["Vesper joins the party!", "She gives you a Padded Jerkin from Mapleton.", "Quest complete: Save Vesper from the Dark Wood"]],
 	]}],
-	"noor_woud": [{"do": [["say", "Noor", ["Let's go, {naam}."]]]}],
+	"noor_woud": [{"do": [["say", "Vesper", ["Let's go, {naam}."]]]}],
 
 	# Het Zingende Graan. Canon-dialoog. Dicht zonder noor_lid.
 	# Eerste keer: bezoek, de vraag, dan Ja (opdracht aan) of Nee (weglopen, later nog mogelijk).

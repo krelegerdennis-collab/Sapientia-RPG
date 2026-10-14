@@ -40,6 +40,9 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const BOOK_ITEM := "leeg_boek"
 ## Max. aantal pagina's in de Codex. Vol = het boek wordt niet gebruikt (melding).
 const MAX_PAGES := 12
+## Diepe Grot-soorten die je HOUDT na een run (uitzondering van Dennis). Andere vangsten tijdens een run
+## verdwijnen met de momentopname (GameState.dungeon100_end_run); deze komen mee terug, op hun vangniveau.
+const GROT_BEHOUD := ["shard_codex", "scanline_wolf", "aureate_watcher", "ledger_scarab"]
 ## v0.19: de gewone (niet-unieke, niet-baas) soorten van Archief 1. Hun gemiddelde = 'normaal monster'
 ## (normal_stats_at / average_growth); daarvan is de Inktwurm afgeleid (beslissing Dennis).
 const ARCHIEF1_SPECIES := ["mosslijm", "moskonijn", "papiergeest", "glitchmot", "mech_wachter"]
@@ -108,6 +111,14 @@ const SKILLS := {
 	"gifspuw":      {"name": "Poison Spit",  "type": "poison", "power": 0.9, "mp": 0, "element": "natuur"},
 	"rankgreep":    {"name": "Bind",         "type": "bind",   "power": 0.8, "mp": 0, "element": "natuur"},
 	"wortelzuiging": {"name": "Root Pull",   "type": "pull",   "power": 1.1, "mp": 0, "element": "natuur", "counter": true},
+	# Diepe Grot-monsters (uitzondering Dennis: vangbaar, je houdt ze na de grot)
+	"scherfblad":   {"name": "Page Shard",    "type": "damage", "power": 1.45, "mp": 0, "element": "kennis"},
+	"indexslot":    {"name": "Index Lock",    "type": "bind",   "power": 0.9, "mp": 0, "element": "kennis"},
+	"lijnsprong":   {"name": "Scanline Rush", "type": "damage", "power": 1.6, "mp": 0, "element": "ruis"},
+	"ruishuil":     {"name": "Static Howl",   "type": "all",    "power": 0.85, "mp": 0, "element": "ruis"},
+	"oordeelblik":  {"name": "Judging Gaze",  "type": "damage", "power": 1.5, "mp": 0, "element": "licht"},
+	"halolicht":    {"name": "Halo Mend",     "type": "heal",   "power": 18,  "mp": 0, "element": "licht"},
+	"grootboekrol": {"name": "Ledger Roll",   "type": "damage", "power": 1.6, "mp": 0, "element": "metaal"},
 }
 
 ## De soorten. Volgorde = volgorde in het Codex-scherm (daarna op level).
@@ -225,6 +236,41 @@ const SPECIES := {
 		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "sterkste"},
 		"capture_rate": 0.7,
 		"glitch_name": "Glitch Ghost",
+	},
+	# Diepe Grot (alleen daar, zie GameData.ENEMIES): uitzondering van Dennis, vangbaar en je HOUDT ze na de
+	# grot (GROT_BEHOUD). Vangen op het kamerniveau (verdieping 76-100 = niveau 4), zoals Sporekop/Rankje;
+	# late soorten: lagere vangkans en iets meer groei dan de Archief 2-soorten.
+	"shard_codex": {
+		"enemy": "shard_codex", "name": "Shard Codex", "element": "kennis", "type": "boek", "fusion_tags": ["boek", "kennis"],
+		"growth": {"max_hp": 6, "max_mp": 1, "atk": 2, "def": 2, "agi": 1},
+		"learn": {1: ["scherfblad"], 6: ["indexslot"]},
+		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "sterkste"},
+		"capture_rate": 0.5,
+		"glitch_name": "Glitch Shard",
+	},
+	"scanline_wolf": {
+		"enemy": "scanline_wolf", "name": "Scanline Wolf", "element": "ruis", "type": "dier", "fusion_tags": ["ruis", "dier"],
+		"growth": {"max_hp": 5, "max_mp": 0, "atk": 3, "def": 1, "agi": 2},
+		"learn": {1: ["lijnsprong"], 6: ["ruishuil"]},
+		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "zwakste"},
+		"capture_rate": 0.5,
+		"glitch_name": "Glitch Wolf",
+	},
+	"aureate_watcher": {
+		"enemy": "aureate_watcher", "name": "Aureate Watcher", "element": "licht", "type": "oog", "fusion_tags": ["licht", "vleugel"],
+		"growth": {"max_hp": 6, "max_mp": 1, "atk": 2, "def": 2, "agi": 1},
+		"learn": {1: ["oordeelblik"], 5: ["halolicht"]},
+		"ai": {"skill_chance": 0.4, "heal_below": 0.35, "target": "willekeurig"},
+		"capture_rate": 0.4,
+		"glitch_name": "Glitch Halo",
+	},
+	"ledger_scarab": {
+		"enemy": "ledger_scarab", "name": "Ledger Scarab", "element": "metaal", "type": "insect", "fusion_tags": ["metaal", "licht"],
+		"growth": {"max_hp": 7, "max_mp": 0, "atk": 2, "def": 3, "agi": 1},
+		"learn": {1: ["grootboekrol"], 5: ["schild_omhoog"]},
+		"ai": {"skill_chance": 0.35, "heal_below": 0.0, "target": "sterkste"},
+		"capture_rate": 0.4,
+		"glitch_name": "Glitch Beetle",
 	},
 	# Verdieping 100, optie A. Geen nieuw verhaal: alleen een vangbare soort op de bestaande Codex-API.
 	"echo": {

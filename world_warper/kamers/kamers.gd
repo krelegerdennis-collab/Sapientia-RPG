@@ -389,7 +389,7 @@ static func speler_teksten() -> Array[String]:
 	out.append(OPSLAAN_MISLUKT)
 	out.append(NIEMAND_WISSEL)
 	out.append(AL_VOORAAN)
-	out.append(VOORAAN % "Dennis")
+	out.append(VOORAAN % "Dax")
 	out.append(GEEN_SCHERM)
 	out.append(GEEN_POORT)
 	for id in ROOMS.keys():

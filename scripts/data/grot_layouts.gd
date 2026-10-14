@@ -8,10 +8,11 @@ extends RefCounted
 ##   - baasverdieping (BOSSES)   -> BAAS (baas + wat monsters). Dat zijn 10, 20, 25 ... 90 en 99; de
 ##     tien-tallen zijn ook rustpunt-verdiepingen (checkpoint), dat blijft zo.
 ##   - koopmanverdieping (GrotKamers.koopman_verdieping, 1x per 10) -> KOOPMAN
-## Anders een worp uit KANSEN. AANNAMES (zie de PR):
-##   - De CANON-tabel telt op tot 91%; de worp normaliseert over de actieve types.
-##   - De Koopman (1%) blijft de vaste 1x-per-10-regel van GrotKamers (H-5, CANON 12); hij zit niet in de worp.
-##   - PUZZEL staat uit (PUZZEL_ACTIEF) tot Dennis kiest welke puzzels (TODO(design)); zijn 5% valt weg.
+## Anders een worp uit KANSEN. BESLUITEN (Dennis, 14 okt 2026, CANON 'Diepe Grot'):
+##   - De CANON-tabel telt op tot 91%; de worp normaliseert over de actieve types naar 100%.
+##   - De Koopman (1%) is vast 1x per 10 (GrotKamers, H-5, CANON 12); hij zit niet in de worp.
+##   - PUZZEL staat aan (besluit Dennis 14 okt 2026): kleine vaste puzzels uit grot_puzzels.gd, geen monsters,
+##     1 blauwe kist als beloning, een korte hint van ECHO bij binnenkomst.
 ##   - Kamerafmeting = speelveld incl. buitenmuur: CHEST ROOM 12x12 (vloer 8x7), MEDIUM 25x25, LARGE 50x50.
 ##     Val, schat, leeg, rust, baas en vloer 100 gebruiken de MEDIUM-maat.
 ## Balans-regels: PUZZEL niet op 1-5, VAL niet op 1-3, SCHAT nooit direct naast een RUST-verdieping
@@ -36,7 +37,7 @@ const VLOER100 := "vloer100"
 const KANSEN := {MEDIUM: 35, GROOT: 20, KIST: 10, VAL: 7, PUZZEL: 5, SCHAT: 5, LEEG: 5, RUST: 3, KOOPMAN: 1}
 ## Vaste volgorde van de worp (zelfde seed = zelfde type).
 const VOLGORDE := [MEDIUM, GROOT, KIST, VAL, PUZZEL, SCHAT, LEEG, RUST]
-const PUZZEL_ACTIEF := false
+const PUZZEL_ACTIEF := true
 const PUZZEL_VANAF := 6
 const VAL_VANAF := 4
 
@@ -48,7 +49,7 @@ const MAAT_STANDAARD := Vector2i(25, 25)
 const MONSTERS_MEDIUM := [[20, 8, 10], [50, 10, 12], [80, 12, 14], [99, 14, 16]]
 const MONSTERS_GROOT := [[20, 15, 18], [50, 18, 22], [80, 22, 26], [99, 26, 30]]
 ## Vaste aantallen [min, max] per type (monsters, gewone kisten).
-const MONSTERS_VAST := {KIST: [8, 10], VAL: [3, 5], PUZZEL: [0, 2], SCHAT: [0, 0], LEEG: [0, 0], RUST: [0, 0],
+const MONSTERS_VAST := {KIST: [8, 10], VAL: [3, 5], PUZZEL: [0, 0], SCHAT: [0, 0], LEEG: [0, 0], RUST: [0, 0],
 		KOOPMAN: [3, 5], BAAS: [4, 6], VLOER100: [0, 0]}
 const KISTEN := {MEDIUM: [2, 4], GROOT: [6, 10], KIST: [3, 3], VAL: [0, 1], PUZZEL: [0, 0], SCHAT: [2, 3],
 		LEEG: [0, 0], RUST: [0, 0], KOOPMAN: [0, 1], BAAS: [0, 1], VLOER100: [0, 0]}

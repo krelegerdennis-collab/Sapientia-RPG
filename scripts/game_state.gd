@@ -35,7 +35,7 @@ const TITLE_SCENE := "res://scenes/ui/title.tscn"
 const NAME_SCENE := "res://scenes/ui/name_entry.tscn"
 const HOUSE_MAP := "res://scenes/maps/huis_wilgendal.tscn"
 ## v0.10: naam van de hoofdpersoon (uit het naamscherm); leeg = DEFAULT_NAME.
-const DEFAULT_NAME := "Dennis"
+const DEFAULT_NAME := "Dax"
 const NAME_MAX := 10
 ## Held-id van de hoofdpersoon (v0.11: id 'dennis', sprites assets/sprites/battle/dennis*.png).
 const MAIN_HERO := "dennis"
@@ -997,6 +997,8 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 			if h.has(k) and h[k] is int and not (v is float or v is int):
 				continue      # kapot getal: standaardwaarde van de held houden
 			h[k] = int(v) if v is float else v
+		if h.get("name") is String:
+			h["name"] = migrate_name(str(h["name"]))
 		if e.has("spells") and e["spells"] is Array:
 			h["spells"] = e["spells"].duplicate()
 		# v0.14 uitrusting + basis-stats; oude saves zonder die sleutels krijgen
@@ -1004,6 +1006,14 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 		Equipment.load_hero(h, e, _hero_data(str(h["id"])), stray_equipment)
 		out.append(h)
 	return out
+
+
+## v0.23 namen-migratie (besluit Dennis 13 okt 2026): oude saves bewaren de weergavenamen.
+## Dennis -> Dax, Lotte -> Seren, Noor -> Vesper. Ids (dennis/lotte/noor) blijven gelijk.
+const OUDE_NAMEN := {"Dennis": "Dax", "Lotte": "Seren", "Noor": "Vesper"}
+
+static func migrate_name(n: String) -> String:
+	return str(OUDE_NAMEN.get(n, n))
 
 
 ## Tas uit save-data: id -> aantal (kapotte waarden vallen weg).
@@ -1095,7 +1105,7 @@ func apply_state(d: Dictionary) -> bool:
 	# of nieuwere saves) laten het spel nooit vastlopen.
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
-	player_name = clean_name(str(d.get("player_name", DEFAULT_NAME)))
+	player_name = migrate_name(clean_name(str(d.get("player_name", DEFAULT_NAME))))
 	party.clear()
 	var stray_equipment: Array = []
 	party = _party_from(d["party"], stray_equipment)
@@ -1411,6 +1421,9 @@ func _fill_eind_codex() -> void:
 		if ids.has(a2):
 			ids.erase(a2)
 			ids.append(a2)
+	# Diepe Grot-soorten (alleen in de grot te vangen) niet in de eind-Codex.
+	for dg in CodexData.GROT_BEHOUD:
+		ids.erase(dg)
 	for raw_id in ids:
 		if codex_full():
 			break
@@ -1816,6 +1829,52 @@ func _dungeon100_strip_codex() -> void:
 	codex_changed.emit()
 
 
+## Uitzondering Dennis: Diepe Grot-soorten (CodexData.GROT_BEHOUD) die TIJDENS de run gevangen zijn
+## (uid niet in de momentopname) gaan mee terug. Op hun vangniveau (zoals bij binnenkomst: geen run-levels),
+## met uid, naam en vangst. Was er een de actieve bondgenoot, dan blijft hij dat (alleen als de echte
+## Codex geen bondgenoot had). Geeft [pagina's, actieve uid] terug; aanroepen VOOR codex_load_data.
+func _dungeon100_kept_pages(snap_codex) -> Array:
+	var oud := {}
+	if snap_codex is Dictionary and snap_codex.get("pages") is Array:
+		for p in snap_codex["pages"]:
+			if p is Dictionary:
+				oud[str(p.get("uid", ""))] = true
+	var out: Array = []
+	var actief := ""
+	for page in codex_pages:
+		var sid := str(page.get("species", ""))
+		var uid := str(page.get("uid", ""))
+		if uid == "" or oud.has(uid) or not CodexData.GROT_BEHOUD.has(sid) or not CodexData.has_species(sid):
+			continue
+		var caught: Dictionary = page.get("caught", {}) if page.get("caught") is Dictionary else {}
+		var fresh := CodexData.make_page(sid, CodexData.capture_level(int(caught.get("tier", 1)), sid), uid)
+		if page.get("name") is String and str(page["name"]) != "":
+			fresh["name"] = str(page["name"])
+		fresh["caught"] = caught.duplicate(true)
+		out.append(fresh)
+		if uid == codex_active:
+			actief = uid
+	return [out, actief]
+
+
+func _dungeon100_restore_kept(behouden: Array) -> void:
+	var pages: Array = behouden[0]
+	for p in pages:
+		if codex_full():
+			break
+		codex_pages.append(p)
+		var n := str(p["uid"]).trim_prefix("codex_")
+		if n.is_valid_int():
+			codex_next_id = maxi(codex_next_id, int(n) + 1)
+	var actief := str(behouden[1])
+	if codex_active == "" and actief != "" and not codex_page(actief).is_empty():
+		codex_active = actief
+	elif codex_active == "" and not pages.is_empty() and not codex_page(str(pages[0]["uid"])).is_empty():
+		codex_active = str(pages[0]["uid"])
+	if not pages.is_empty():
+		codex_changed.emit()
+
+
 func _dungeon100_clear_run_flags() -> void:
 	for f in story_flags.keys():
 		if Dungeon100RulesC.is_run_flag(str(f)):
@@ -1840,7 +1899,9 @@ func dungeon100_end_run(deliver := true) -> bool:
 		inventory[id] = int(inventory.get(id, 0)) + 1
 	var g = snap.get("gold", 0)
 	gold = int(g) if (g is int or g is float) else 0
+	var behouden := _dungeon100_kept_pages(snap.get("codex", {}))
 	codex_load_data(snap.get("codex", {}))
+	_dungeon100_restore_kept(behouden)
 	dungeon100_snapshot = {}
 	_dungeon100_clear_run_flags()
 	defeated_map_monsters = {}

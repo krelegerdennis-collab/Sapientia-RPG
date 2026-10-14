@@ -7,6 +7,7 @@ const Gen := preload("res://scripts/dungeon/dungeon100_generator.gd")
 const GK := preload("res://scripts/data/grot_kamers.gd")
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const S := preload("res://scripts/data/dungeon100_scaling.gd")
+const GP := preload("res://scripts/data/grot_puzzels.gd")
 
 var passes := 0
 var failures := 0
@@ -28,6 +29,9 @@ func _ready() -> void:
 	_kansen()
 	_balans()
 	await _generator()
+	await _lege_kamers()
+	_puzzel_logica()
+	await _puzzel_kamers()
 	print("GROTLAYOUTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await get_tree().process_frame
@@ -86,7 +90,7 @@ func _kansen() -> void:
 		if absf(p - want) > 0.015:
 			ok = false
 			print("  %s: %.3f (verwacht %.3f)" % [s, p, want])
-	check("worp volgt de CANON-verhouding 35/20/10/7/5/5/3 (genormaliseerd, puzzel uit)", ok)
+	check("worp volgt de CANON-verhouding 35/20/10/7/5/5/3 (genormaliseerd naar 100 procent)", ok)
 
 
 func _balans() -> void:
@@ -167,3 +171,132 @@ func _generator() -> void:
 			var m := (d["monster_slots"] as Array).size()
 			bracket_ok = bracket_ok and m >= int(b[0]) and m <= int(b[1])
 	check("MEDIUM MAP: monsters per floor-bracket (8-10 / 10-12 / 12-14 / 14-16)", bracket_ok)
+
+
+## EMPTY ROOM: ~30% een lore-notitie (besluit Dennis 14 okt 2026), anders leeg; nooit een blokkade.
+func _lege_kamers() -> void:
+	var n := 0
+	var met := 0
+	var ok_plek := true
+	var ok_pad := true
+	var ok_tekst := true
+	var voorbeeld: Array = []
+	for sd in 60:
+		for f in range(2, 100):
+			if GK.layout_soort(sd, f) != L.LEEG:
+				continue
+			n += 1
+			var d := Gen.generate(sd, f)
+			var room: Dictionary = d["room"]
+			if not room.has("notitie"):
+				ok_plek = ok_plek and not GK.heeft_notitie(sd, f) or GK.notitie(sd, room, d).is_empty()
+				continue
+			met += 1
+			if voorbeeld.is_empty():
+				voorbeeld = [sd, f]
+			var t := Vector2i(int(room["notitie"][0]), int(room["notitie"][1]))
+			var props: Array = room.get("props", [])
+			var signs: Array = room.get("signs", [])
+			ok_plek = ok_plek and props.any(func(p): return p["type"] == GK.NOTITIE_PROP and Vector2i(int(p["tile"][0]), int(p["tile"][1])) == t) \
+					and signs.any(func(sg): return Vector2i(int(sg["tile"][0]), int(sg["tile"][1])) == t)
+			for sg in signs:
+				for line in sg["lines"]:
+					ok_tekst = ok_tekst and str(line) in GK.NOTITIES
+			# de notitie blokkeert de trap niet (BFS met de notitie als muur)
+			var bereik := Gen.reachable_tiles(room, d["spawn_up"])
+			if d["has_stairs_down"]:
+				ok_pad = ok_pad and bereik.has(d["stairs_down"])
+		if n > 400:
+			break
+	var frac := float(met) / maxf(1.0, float(n))
+	check("EMPTY ROOM: %d van %d lege kamers met een notitie (%.0f%%, doel ~30%%)" % [met, n, frac * 100.0],
+			n >= 40 and frac > 0.18 and frac < 0.42)
+	check("EMPTY ROOM: notitie = prop grot_notitie + leesplek op dezelfde tegel", ok_plek)
+	check("EMPTY ROOM: tekst komt uit GK.NOTITIES (Engels)", ok_tekst)
+	check("EMPTY ROOM: trap blijft bereikbaar", ok_pad)
+	check("EMPTY ROOM: plaatje bestaat", ResourceLoader.exists("res://assets/sprites/dungeon/grot_notitie.png"))
+	check("EMPTY ROOM: geen monsters en geen kisten ook met notitie", voorbeeld.size() == 2
+			and (Gen.generate(voorbeeld[0], voorbeeld[1])["room"]["monsters"] as Array).is_empty()
+			and (Gen.generate(voorbeeld[0], voorbeeld[1])["room"]["chests"] as Array).is_empty())
+	await get_tree().process_frame
+
+
+## PUZZLE ROOM: elke puzzel is met de bestaande stukken op te lossen (PuzzleLogic, zonder scène).
+func _puzzel_logica() -> void:
+	var o := Vector2i(2, 2)
+	var sz := Vector2i(12, 10)
+	var R := Vector2i.RIGHT
+	var Lf := Vector2i.LEFT
+	var U := Vector2i.UP
+	var oplossing := {
+		"kast_plaat": [["kast_a", R], ["kast_a", R]],
+		"twee_kasten": [["kast_a", Lf], ["kast_a", U], ["kast_b", R], ["kast_b", U]],
+		"kast_groei": [["kast_a", R], ["kast_a", R]],
+		"hendel_groei": [],
+	}
+	for id in GP.VOLGORDE:
+		var lg := PuzzleLogic.from_room(GP.logica_kamer(id, o, sz), "test_" + id)
+		lg.set_player_tile(o + Vector2i(0, 5))
+		var dicht := true
+		for g in lg.gates:
+			dicht = dicht and not lg.gate_open(g)
+		for g in lg.grows:
+			dicht = dicht and lg.try_grow(g) == "wacht"
+		var ok := true
+		for stap in oplossing[id]:
+			ok = ok and lg.try_push(str(stap[0]), stap[1])
+		for h in lg.levers:
+			lg.toggle_lever(h)
+		for g in lg.grows:
+			for i in 3:
+				lg.try_grow(g)
+		var open := false
+		for g in lg.gates:
+			open = open or lg.gate_open(g)
+		for g in lg.grows:
+			open = open or lg.grow_open(g)
+		var nis := o + GP.kist_lokaal(id) + Vector2i.DOWN
+		check("PUZZLE %s: eerst dicht, opgelost open (nis %s), kast blijft in het vak" % [id, nis], dicht and ok and open
+				and lg.walls.has(o + Vector2i(-1, 0)) and GP.puzzel(id).get("hint", "") != "")
+
+
+## PUZZLE ROOM in de generator: vanaf 6, geen monsters, 1 blauwe kist in de nis, trap + vak bereikbaar.
+func _puzzel_kamers() -> void:
+	var n := 0
+	var ok := true
+	var soorten := {}
+	for sd in 80:
+		for f in range(6, 100):
+			if GK.layout_soort(sd, f) != L.PUZZEL:
+				continue
+			n += 1
+			var d := Gen.generate(sd, f)
+			var room: Dictionary = d["room"]
+			if not room.has("puzzel"):
+				ok = false
+				print("  geen puzzel op seed %d verdieping %d" % [sd, f])
+				continue
+			var pz: Dictionary = room["puzzel"]
+			soorten[pz["id"]] = true
+			var po := Vector2i(int(pz["origin"][0]), int(pz["origin"][1]))
+			var kt := po + GP.kist_lokaal(str(pz["id"]))
+			var blauw := 0
+			var kist_ok := false
+			for c in room["chests"]:
+				if str(c.get("kind", "")) == Blue.KIND_BLUE:
+					blauw += 1
+				if Vector2i(int(c["tile"][0]), int(c["tile"][1])) == kt and str(c.get("kind", "")) == Blue.KIND_BLUE:
+					kist_ok = true
+			var bereik := Gen.reachable_tiles(room, d["spawn_up"])
+			var goed: bool = kist_ok and blauw == 1 and (room["monsters"] as Array).is_empty() \
+					and (not d["has_stairs_down"] or bereik.has(d["stairs_down"])) and bereik.has(po + Vector2i(3, 3)) \
+					and not bereik.has(kt)
+			if not goed:
+				print("  fout op seed %d verdieping %d: kist %s blauw %d" % [sd, f, kist_ok, blauw])
+			ok = ok and goed
+		if n >= 120:
+			break
+		if sd % 10 == 0:
+			await get_tree().process_frame
+	check("PUZZLE ROOM: %d kamers: puzzel, 0 monsters, 1 blauwe kist in de nis, trap en vak bereikbaar" % n, n >= 30 and ok)
+	check("PUZZLE ROOM: alle %d puzzels komen voor (%s)" % [GP.VOLGORDE.size(), soorten.keys()], soorten.size() == GP.VOLGORDE.size())

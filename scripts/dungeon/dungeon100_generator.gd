@@ -26,6 +26,8 @@ const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const Layouts := preload("res://scripts/data/grot_layouts.gd")
 const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
+const GrotPuzzels := preload("res://scripts/data/grot_puzzels.gd")
+const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 
 const MAX_FLOOR := 100
 const SCENE := "res://scenes/maps/dungeon100.tscn"
@@ -147,6 +149,10 @@ static func reachable_tiles(room: Dictionary, from: Vector2i) -> Dictionary:
 	var blocked := {}
 	for c in room.get("chests", []):
 		blocked[Vector2i(int(c["tile"][0]), int(c["tile"][1]))] = true
+	for p in room.get("props", []):
+		blocked[Vector2i(int(p["tile"][0]), int(p["tile"][1]))] = true
+	for t in room.get("puzzel_massief", []):
+		blocked[Vector2i(int(t[0]), int(t[1]))] = true
 	var seen := {from: 0}
 	var queue: Array[Vector2i] = [from]
 	var qi := 0
@@ -188,6 +194,8 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 	var plan := _room_plan(size)
 	if lt == Layouts.KOOPMAN:
 		plan = [3, 4, 8, 9, 6, 6, 2, MIN_ROOMS_MEDIUM]      # ruimte voor de kraam (6x4 vrij, GrotKamers.koopman_plek)
+	elif lt == Layouts.PUZZEL:
+		plan = [3, 4, 9, 10, 7, 8, 2, MIN_ROOMS_MEDIUM]     # ruimte voor het puzzelvak (GrotPuzzels 7x6)
 	var rooms: Array[Rect2i] = _fixed_rooms_for(size) if fixed else _random_rooms(rng, w, h, plan)
 	if rooms.size() < int(plan[7]):
 		return {}
@@ -256,9 +264,20 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 			if warper_spawn != spawn_up:
 				reserved[warper_spawn] = true
 
+	# Puzzle Room: een vrij vak van 7x6 in een kamer (liefst niet de ingangskamer), gereserveerd.
+	var puzzel := {}
+	if lt == Layouts.PUZZEL:
+		puzzel = _pick_puzzel(rng, cells, w, rooms, entry_room, reserved, run_seed, f)
+		if puzzel.is_empty():
+			return {}
+		var po: Vector2i = puzzel["origin"]
+		for y in GrotPuzzels.HOOGTE:
+			for x in GrotPuzzels.BREEDTE:
+				reserved[po + Vector2i(x, y)] = true
+
 	# obstakels
 	for i in rooms.size():
-		if i == entry_room or i == stairs_room or lt == Layouts.KOOPMAN:
+		if i == entry_room or i == stairs_room or lt == Layouts.KOOPMAN or lt == Layouts.PUZZEL:
 			continue
 		_place_blocks(rng, cells, w, rooms[i])
 
@@ -315,9 +334,15 @@ static func _build(rng: RandomNumberGenerator, run_seed: int, f: int, fixed: boo
 		"tier": Content.tier_for_floor(f),
 		"layout_type": lt, "min_slot_distance": min_dist,
 	}
+	if not puzzel.is_empty():
+		data["puzzel"] = puzzel
 	data["room"] = _room_dict(data)
 	# eindcontrole op de echte tegels
-	if has_down and not reachable_tiles(data["room"], spawn_up).has(stairs):
+	var bereik := reachable_tiles(data["room"], spawn_up)
+	if has_down and not bereik.has(stairs):
+		return {}
+	# Puzzle Room: het vak moet van buiten bereikbaar zijn (voor de poort/spleet staan kunnen)
+	if not puzzel.is_empty() and not bereik.has(Vector2i(puzzel["origin"]) + Vector2i(3, 3)):
 		return {}
 	return data
 
@@ -342,6 +367,34 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		"theme": theme_for_floor(f),
 	}
 	Content.fill_room(room, d)
+	# Empty Room: soms een lore-notitie (GrotKamers.notitie, ~30%).
+	if d["layout_type"] == Layouts.LEEG:
+		var nt := GrotKamers.notitie(int(d["run_seed"]), room, d)
+		if not nt.is_empty():
+			var t: Vector2i = nt["tile"]
+			room["props"] = room.get("props", []) + [{"type": GrotKamers.NOTITIE_PROP, "tile": [t.x, t.y]}]
+			room["signs"] = room.get("signs", []) + [{"tile": [t.x, t.y], "lines": nt["lines"]}]
+			room["notitie"] = [t.x, t.y]
+	# Puzzle Room: de puzzel (Dungeon100Puzzel) + 1 blauwe kist in de nis.
+	if d.has("puzzel"):
+		var pz: Dictionary = d["puzzel"]
+		var po: Vector2i = pz["origin"]
+		room["puzzel"] = {"id": pz["id"], "origin": [po.x, po.y]}
+		var solids: Array = []
+		for t in GrotPuzzels.massief(str(pz["id"]), po):
+			solids.append([t.x, t.y])
+		room["puzzel_massief"] = solids
+		var kt: Vector2i = po + GrotPuzzels.kist_lokaal(str(pz["id"]))
+		var krng := RandomNumberGenerator.new()
+		krng.seed = int(d["floor_seed"]) + 303
+		var kid := "d100_%d_%d_puzzel" % [int(d["run_seed"]), f]
+		var e := Blue.chest_entry(int(d["run_seed"]), f, kid, kt, krng)
+		var loot := Blue.blue_loot(int(d["run_seed"]), f, kid)
+		e["kind"] = Blue.KIND_BLUE
+		e["loot"] = loot
+		e["item"] = loot["items"][0]["item"]
+		e["n"] = 1
+		room["chests"] = room.get("chests", []) + [e]
 	if room.has("rustpunt"):
 		var rp: Array = room["rustpunt"]
 		var sp := _rest_spawn(room, d, Vector2i(int(rp[0]), int(rp[1])))
@@ -782,3 +835,35 @@ static func _top_char(cells: PackedByteArray, w: int, x: int, y: int) -> String:
 	if _open(cells, w, x + 1, y + 1):
 		return "a"
 	return "5"
+
+
+## Puzzle Room: {id, origin} of {}. Een vak van GrotPuzzels.BREEDTE x HOOGTE waarin alles vloer is en niets
+## gereserveerd (ladder, trap, spawns). Liefst niet in de ingangskamer.
+static func _pick_puzzel(rng: RandomNumberGenerator, cells: PackedByteArray, w: int, rooms: Array[Rect2i],
+		entry_room: int, reserved: Dictionary, run_seed: int, f: int) -> Dictionary:
+	var bw := GrotPuzzels.BREEDTE
+	var bh := GrotPuzzels.HOOGTE
+	var order: Array[int] = []
+	for i in rooms.size():
+		if i != entry_room:
+			order.append(i)
+	order.append(entry_room)
+	for i in order:
+		var r: Rect2i = rooms[i]
+		var opts: Array[Vector2i] = []
+		for y in range(r.position.y, r.end.y - bh + 1):
+			for x in range(r.position.x, r.end.x - bw + 1):
+				var ok := true
+				for dy in bh:
+					for dx in bw:
+						var t := Vector2i(x + dx, y + dy)
+						if _at(cells, w, t.x, t.y) != FLOOR or reserved.has(t):
+							ok = false
+							break
+					if not ok:
+						break
+				if ok:
+					opts.append(Vector2i(x, y))
+		if not opts.is_empty():
+			return {"id": GrotPuzzels.kies(run_seed, f), "origin": opts[rng.randi_range(0, opts.size() - 1)]}
+	return {}

@@ -198,7 +198,7 @@ func _place_tests() -> void:
 	for sid in LS.NU_TE_VINDEN:
 		find_ok = find_ok and not _def(str(sid)).is_empty()
 	check("de drie Act 1-vondsten bestaan", find_ok)
-	check("Noor geeft het wambuis en Ilse de kruidenthee",
+	check("Vesper geeft het wambuis en Ilse de kruidenthee",
 			_gives("noor_bevrijd", "wambuis") and _gives("ilse", "kruidenthee"))
 	var drop: Array = GD.ENEMIES["inktwurm"].get("drops", [])
 	check("het bestiarium noemt de inktfles, de kast deelt hem uit",

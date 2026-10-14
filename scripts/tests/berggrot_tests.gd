@@ -83,7 +83,7 @@ func _data() -> void:
 			and Equipment.is_equipment(BG.ACCESSOIRE_ID)
 			and Equipment.item_name(BG.STAF_ID) == "Bergnerfstaf"
 			and Equipment.slot_of(BG.ACCESSOIRE_ID) == "accessoire")
-	check("Noor kan de staf, Dennis niet; de steen kan iedereen",
+	check("Vesper kan de staf, Dax niet; de steen kan iedereen",
 			Equipment.can_wear({"equip_type": "magier"}, BG.STAF_ID)
 			and Equipment.can_wear({"equip_type": "priester"}, BG.STAF_ID)
 			and not Equipment.can_wear({"equip_type": "krijger"}, BG.STAF_ID)
@@ -219,7 +219,7 @@ func _kaart() -> void:
 			and kaart.get_node_or_null("Objects/WorldWarper") == null and fly != null
 			and str(fly.get_script().resource_path).ends_with("world_warper/art/flyover.gd") and not botsing)
 	kaart.free()
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	check("Genezer-vlag is de unlock", Unlock.BEWAKER_VLAG == GENEZER_VLAG)
@@ -371,7 +371,7 @@ func _warper_tests() -> void:
 			and str(uit["map"]) == BG.BOUWPLAATS and str(uit["spawn"]) == BG.BOUWPLAATS_SPAWN)
 	if spots.size() != 3:
 		return
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.KLAAR
 	GameState.encounter_multiplier = 0.0
 	if Dialog.is_open:
