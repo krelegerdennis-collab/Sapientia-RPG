@@ -1,10 +1,15 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`43cdbcd`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`f25da72`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build, bovenop `01f6ab8`:
+Nieuw in deze build, bovenop `43cdbcd`:
+- Koopman-winkel: alle grot-uitrusting, rollen en items hebben Engelse namen; accessoires (o.a. Archive Ring) kosten een prijs naar verdieping, geen 1g meer (#101).
+- Diepe Grot: verlamd monster duwen, ook ketting-duw (#94).
+- RUN-knop boven de CORE-knop (toets R): 2 tegels per zet, 2x zo snel (#95).
+
+Eerder, bovenop `01f6ab8`:
 - Bouwplaats bij de berggrot met echte art en vier werkers (#80).
 - Diepe Grot: eigen tegels in zeven kleurvarianten (per 15 verdiepingen) en bijpassende gevechtsachtergronden (#81, #83, #85).
 - Diepe Grot: kamer-types per verdieping (Medium 25x25, Large 50x50, kistkamertje, schatkamer, lege kamer, extra rustkamers) (#82).
