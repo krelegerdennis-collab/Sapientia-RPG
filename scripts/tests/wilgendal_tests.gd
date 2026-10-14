@@ -57,7 +57,7 @@ func _run() -> void:
 
 
 func _data() -> void:
-	check("grond is 56 bij 30 (v3, westdeel voor de reuzenmolen)", Data.grond_ok() and Data.W == 56 and Data.H == 30)
+	check("grond is 64 bij 40 (v4, grote SoM-huizen en brede paden)", Data.grond_ok() and Data.W == 64 and Data.H == 40)
 	check("max %d sfeer-NPC's op het marktplein (%d)" % [Data.PLEIN_MAX, Data.op_plein_aantal()],
 			Data.op_plein_aantal() <= Data.PLEIN_MAX and Data.op_plein_aantal() >= 1)
 	var beek_ok := true
@@ -470,7 +470,7 @@ func _som_pilot(dorp: Node) -> void:
 	var bm: Array = namen["brug_v_m"]
 	check("som: brug over de beek beloopbaar", ov.get_cell_atlas_coords(Vector2i(34, Data.BEEK_RIJ)) == Vector2i(int(bm[0]), int(bm[1]))
 			and Data.beloopbaar(Vector2i(34, Data.BEEK_RIJ)) and dorp.get_node_or_null("Ground/Beek/Brug") == null)
-	var pad := Vector2i(10, 11)
+	var pad := Vector2i(10, 10)
 	check("som: pad met autotile-masker", g.get_cell_tile_data(pad).get_custom_data("terrain").begins_with("pad_"))
 	check("som: kegelbomen op de rand", dorp.get_node("Objects/SomBomen").get_child_count() > 150)
 	var ok := true
@@ -482,8 +482,8 @@ func _som_pilot(dorp: Node) -> void:
 			ok = ok and not rij.has("som_tex") and tex.resource_path.ends_with("burgemeestershuis.png")
 		else:
 			ok = ok and rij.has("som_tex") and tex.resource_path == rij["som_tex"] and rij["deur"] == ruw["deur"]
-			ok = ok and tex.get_size() == Vector2(rij["maat"]) * 16.0 and Data.pand_blok(ruw).size.y == 2
-			ok = ok and Data.beloopbaar(rij["oorsprong"] + Vector2i(1, rij["maat"].y - 3)) and not Data.beloopbaar(ruw["deur"] + Vector2i.UP)
+			ok = ok and tex.get_size() == Vector2(rij["maat"]) * 16.0 and Data.pand_blok(ruw).size.y == 3 and rij["maat"].x == 6
+			ok = ok and Data.beloopbaar(rij["oorsprong"] + Vector2i(1, rij["maat"].y - 4)) and not Data.beloopbaar(ruw["deur"] + Vector2i.UP)
 	check("som: huizen uit fase 1 (zelfde deur, dak beloopbaar), burgemeestershuis blijft", ok)
 	var molen: Node = dorp.get_node("Objects/MolenWieken")
 	check("som: molen v2 blijft (positie, stille wieken tot Garrett)", molen.position == Data.molen_positie()

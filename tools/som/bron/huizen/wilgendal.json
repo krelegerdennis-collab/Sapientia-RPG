@@ -1,9 +1,9 @@
 {
-	"pantser": {"w": 4, "rh": 3, "wh": 2, "door": "enkel", "sign": "aambeeld", "seed": 1},
-	"wapen": {"w": 4, "rh": 3, "wh": 2, "door": "enkel", "sign": "aambeeld", "seed": 2},
-	"accessoire": {"w": 4, "rh": 3, "wh": 2, "door": "enkel", "sign": "mok", "seed": 3},
-	"magie": {"w": 4, "rh": 3, "wh": 2, "door": "enkel", "sign": "drankje", "seed": 4},
-	"mien": {"w": 4, "rh": 3, "wh": 2, "door": "enkel", "chimneys": [2], "seed": 5},
-	"echtpaar": {"w": 4, "rh": 3, "wh": 2, "door": "enkel", "chimneys": [1], "seed": 6},
-	"dicht_west": {"w": 4, "rh": 3, "wh": 2, "door": "enkel", "chimneys": [2], "seed": 7}
+	"pantser": {"w": 6, "rh": 4, "wh": 3, "door": "enkel", "sign": "aambeeld", "seed": 1},
+	"wapen": {"w": 6, "rh": 4, "wh": 3, "door": "enkel", "sign": "aambeeld", "seed": 2},
+	"accessoire": {"w": 6, "rh": 4, "wh": 3, "door": "enkel", "sign": "mok", "seed": 3},
+	"magie": {"w": 6, "rh": 4, "wh": 3, "door": "enkel", "sign": "drankje", "seed": 4},
+	"mien": {"w": 6, "rh": 4, "wh": 3, "door": "enkel", "chimneys": [2], "seed": 5},
+	"echtpaar": {"w": 6, "rh": 4, "wh": 3, "door": "enkel", "chimneys": [1], "seed": 6},
+	"dicht_west": {"w": 6, "rh": 4, "wh": 3, "door": "enkel", "chimneys": [2], "seed": 7}
 }
