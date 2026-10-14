@@ -292,6 +292,7 @@ func _generator_tests() -> void:
 			and range(1, 100).all(func(i): return Content.tier_for_floor(i) <= Content.tier_for_floor(i + 1)))
 	check("vijanden-pool groeit mee met de verdieping", Content.enemy_pool(1).size() < Content.enemy_pool(30).size())
 	_pool_tests()
+	_backdrop_tests()
 	check("alle vijanden en voorwerpen in de inhoud bestaan in game_data of de grade-buit",
 			range(1, 101).all(func(i): return Content.enemy_pool(i).all(func(e): return _known_enemy(str(e))))
 			and range(1, 101).all(func(i): return fresh(1, i)["room"]["chests"].all(func(c): return c["loot"]["items"].all(
@@ -705,3 +706,14 @@ func _pool_tests() -> void:
 		var d: Dictionary = GD.ENEMIES.get(e, BG.enemy(e))
 		ok_art = ok_art and ResourceLoader.exists(str(d.get("sprite", ""))) and ResourceLoader.exists("res://assets/map_monsters/%s.png" % e)
 	check("elk pool-monster heeft gevechts- en kaartart", ok_art)
+
+
+## Gevechtsachtergrond per variant (RPG ART v3): zelfde keuze als de tegels.
+func _backdrop_tests() -> void:
+	var ok := true
+	for f in [1, 15, 16, 45, 46, 90, 91, 100]:
+		var id := GD.backdrop_id_for("dungeon100", false, f)
+		ok = ok and id == "cave_deep_v%d" % Gen.theme_variant(f) and ResourceLoader.exists(GD.backdrop_path(id))
+	check("Diepe Grot: gevechtsachtergrond cave_deep_v1..v7 per verdieping, plaatjes bestaan", ok)
+	check("zonder verdieping of buiten de grot: oude keuze", GD.backdrop_id_for("dungeon100") == "cave_deep"
+			and GD.backdrop_id_for("gras", false, 50) == "grass" and GD.backdrop_id_for("dungeon100", true, 50) == "boss")
