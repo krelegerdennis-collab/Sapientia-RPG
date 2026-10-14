@@ -144,6 +144,15 @@ func _tex(n: String, t: Texture2D, sz: Vector2) -> TextureRect:
 
 func _speel() -> void:
 	await _speel_video()
+	# v0.25 Bug (Dennis): in de herhaling (veldmenu > Scenes > The World Warper) speelde na zijn filmpje
+	# nog de gescripte canon-scène (dialoog + effecten). De herhaling is nu alleen het filmpje; het echte
+	# verhaal speelt ongewijzigd filmpje + scène.
+	if herhaling:
+		if not _klaar_gemeld:
+			_klaar_gemeld = true
+			klaar.emit()
+			queue_free()
+		return
 	var speler: Node = _kamer.get("player") if _kamer != null and "player" in _kamer else null
 	if is_instance_valid(speler):
 		speler.set("input_locked", true)
