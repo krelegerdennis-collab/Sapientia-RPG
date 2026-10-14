@@ -295,10 +295,35 @@ static func gear_chance(floor_nr: int) -> float:
 	return CHEST_GEAR_BASE + CHEST_GEAR_PER_FLOOR * float(clamp_floor(floor_nr))
 
 
+## Verdeling van een gewone kist (CANON, TODO.md "Loot ratio consumables vs. equipment"):
+## Consumables 60% (1-2 stuks) / Goud 20% / Equipment 15% / Leeg 5%. Grenzen oplopend.
+const CHEST_RATIO := {"consumable": 0.60, "goud": 0.80, "equipment": 0.95}
+## Aantal consumables in een gewone kist (minder dan buiten de Grot).
+const CHEST_CONSUMABLE_COUNT := [1, 2]
+## Elixers alleen in blauwe kisten of bij de handelaar, nooit in een gewone kist.
+const NO_CHEST_ITEMS := ["elixer"]
+const LOOT_CONSUMABLE := "consumable"
+const LOOT_GOLD := "goud"
+const LOOT_EQUIPMENT := "equipment"
+const LOOT_EMPTY := "leeg"
+
+
+## Soort buit van een gewone kist bij worp r (0..1).
+static func chest_kind_for_roll(r: float) -> String:
+	if r < float(CHEST_RATIO["consumable"]):
+		return LOOT_CONSUMABLE
+	if r < float(CHEST_RATIO["goud"]):
+		return LOOT_GOLD
+	if r < float(CHEST_RATIO["equipment"]):
+		return LOOT_EQUIPMENT
+	return LOOT_EMPTY
+
+
 ## Buit van een gewone kist op deze verdieping. 'rng' = RandomNumberGenerator (of iets met
-## randf() / randi_range()): zelfde seed = zelfde buit. Altijd minstens 1 genees-item + goud;
-## uitrusting met kans gear_chance(); soms een spreukrol (SPELL_CHANCE). floor_nr <= 0: lege buit.
-## boss = true: baaskist (boss_loot(), geen spreukrol).
+## randf() / randi_range()): zelfde seed = zelfde buit. Eén worp kiest de soort (CHEST_RATIO):
+## consumables (1-2, geen elixer), goud, één uitrustingsstuk of niets. Bij consumables/uitrusting soms
+## een spreukrol (SPELL_CHANCE) of leeg boek. floor_nr <= 0: lege buit. boss = true: baaskist (boss_loot()).
+## "kind" in het resultaat = de soort (LOOT_*).
 static func chest_loot(floor_nr: int, rng, boss := false) -> Dictionary:
 	if floor_nr <= 0:
 		return {"tier": 0, "items": [], "gold": 0, "boss": false}
@@ -306,18 +331,38 @@ static func chest_loot(floor_nr: int, rng, boss := false) -> Dictionary:
 		return boss_loot(floor_nr, rng)
 	var f := clamp_floor(floor_nr)
 	var tier := tier_for_floor(f)
-	var items: Array = [_potion(tier, rng)]
-	if rng.randf() < gear_chance(f):
-		var gt := tier
-		if tier > 1 and rng.randf() < CHEST_LOWER_TIER_CHANCE:
-			gt = tier - 1
-		items.append({"item": gear_id(GEAR_KINDS[rng.randi_range(0, GEAR_KINDS.size() - 1)], gt), "n": 1})
-	if tier >= 2 and rng.randf() < BOOK_CHANCE:
-		items.append({"item": BOOK_ID, "n": 1})
-	if rng.randf() < SPELL_CHANCE:
-		items.append({"item": str(SPELL_SCROLLS[rng.randi_range(0, SPELL_SCROLLS.size() - 1)]), "n": 1})
-	var gold := GameData.round_half_even(chest_gold_base(f) * rng.randf_range(0.8, 1.2))
-	return {"tier": tier, "items": items, "gold": gold, "boss": false}
+	var kind := chest_kind_for_roll(rng.randf())
+	var items: Array = []
+	var gold := 0
+	match kind:
+		LOOT_CONSUMABLE:
+			items.append(_chest_potion(tier, rng))
+		LOOT_GOLD:
+			gold = GameData.round_half_even(chest_gold_base(f) * rng.randf_range(0.8, 1.2))
+		LOOT_EQUIPMENT:
+			var gt := tier
+			if tier > 1 and rng.randf() < CHEST_LOWER_TIER_CHANCE:
+				gt = tier - 1
+			items.append({"item": gear_id(GEAR_KINDS[rng.randi_range(0, GEAR_KINDS.size() - 1)], gt), "n": 1})
+	if kind == LOOT_CONSUMABLE or kind == LOOT_EQUIPMENT:
+		if tier >= 2 and rng.randf() < BOOK_CHANCE:
+			items.append({"item": BOOK_ID, "n": 1})
+		if rng.randf() < SPELL_CHANCE:
+			items.append({"item": str(SPELL_SCROLLS[rng.randi_range(0, SPELL_SCROLLS.size() - 1)]), "n": 1})
+	return {"tier": tier, "items": items, "gold": gold, "boss": false, "kind": kind}
+
+
+## Consumables voor een gewone kist: pool van het buitniveau zonder elixers, 1-2 stuks.
+static func _chest_potion(tier: int, rng) -> Dictionary:
+	var t := clampi(tier, 1, MAX_TIER)
+	var pool: Array = []
+	for id in POTIONS[t - 1]:
+		if not NO_CHEST_ITEMS.has(id):
+			pool.append(id)
+	if pool.is_empty():
+		pool = ["toverbrouwsel"]
+	return {"item": str(pool[rng.randi_range(0, pool.size() - 1)]),
+			"n": rng.randi_range(int(CHEST_CONSUMABLE_COUNT[0]), int(CHEST_CONSUMABLE_COUNT[1]))}
 
 
 ## Gegarandeerde buit na een baas: veel goud, een uitrustingsstuk van een niveau BOVEN de gewone

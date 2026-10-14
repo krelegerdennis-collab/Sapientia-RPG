@@ -29,6 +29,7 @@ func _ready() -> void:
 	_kansen()
 	_balans()
 	await _generator()
+	await _val_flits()
 	await _lege_kamers()
 	_puzzel_logica()
 	await _puzzel_kamers()
@@ -300,3 +301,37 @@ func _puzzel_kamers() -> void:
 			await get_tree().process_frame
 	check("PUZZLE ROOM: %d kamers: puzzel, 0 monsters, 1 blauwe kist in de nis, trap en vak bereikbaar" % n, n >= 30 and ok)
 	check("PUZZLE ROOM: alle %d puzzels komen voor (%s)" % [GP.VOLGORDE.size(), soorten.keys()], soorten.size() == GP.VOLGORDE.size())
+
+
+## TRAP ROOM: verborgen vallen flitsen binnen 2 tegels (besluit Dennis 14 okt 2026).
+func _val_flits() -> void:
+	var ValC := load("res://scripts/dungeon/dungeon100_val.gd")
+	check("flitsbereik: 2 tegels (ook schuin), 3 niet", GK.in_flits_bereik(Vector2i(5, 5), Vector2i(7, 7))
+			and GK.in_flits_bereik(Vector2i(5, 5), Vector2i(5, 3)) and not GK.in_flits_bereik(Vector2i(5, 5), Vector2i(8, 5)))
+	var v: Node2D = ValC.create({"tile": Vector2i(5, 5), "soort": "rune", "verborgen": true})
+	add_child(v)
+	await get_tree().process_frame
+	v.speler_bij(Vector2i(8, 5))
+	var a: int = v.flitsen
+	v.speler_bij(Vector2i(7, 5))
+	var b: int = v.flitsen
+	var bezig: bool = v.flitsend
+	v.speler_bij(Vector2i(6, 5))
+	var c: int = v.flitsen
+	await get_tree().create_timer(0.8).timeout
+	var terug: bool = str(v.anim.animation) == "verborgen" and not v.flitsend
+	v.speler_bij(Vector2i(10, 5))
+	v.speler_bij(Vector2i(7, 4))
+	check("verborgen val: geen flits op 3, flits op 2, één keer per nadering, daarna weer verborgen (%d %d %d %d)" % [a, b, c, v.flitsen],
+			a == 0 and b == 1 and bezig and c == 1 and terug and v.flitsen == 2)
+	var z: Node2D = ValC.create({"tile": Vector2i(5, 5), "soort": "spijker", "verborgen": false})
+	add_child(z)
+	await get_tree().process_frame
+	z.speler_bij(Vector2i(6, 5))
+	check("zichtbare val flitst niet", z.flitsen == 0)
+	v.trigger()
+	v.speler_bij(Vector2i(20, 20))
+	v.speler_bij(Vector2i(6, 5))
+	check("afgegane val flitst niet meer", v.flitsen == 2)
+	v.queue_free()
+	z.queue_free()

@@ -58,6 +58,8 @@ func _run() -> void:
 	_winkel_data()
 	print("=== Deel C: Koopman in de Grot ===")
 	await _koopman_scene()
+	print("=== Deel C2: einde H-5 (Archief 6-haak) ===")
+	await _einde_tests()
 	print("=== Deel D: val- en rustkamer ===")
 	await _val_rust_scene()
 	print("=== Deel E: hub-rondlopers ===")
@@ -400,6 +402,31 @@ func _winkel_data() -> void:
 	var rot2: String = W.voorraad(SEED, 2).filter(func(r): return r["soort"] == "rotatie")[0]["id"]
 	check("rotatie-item wisselt per bezoek (%s -> %s)" % [rot1, rot2], rot1 != rot2)
 	check("voorraad is vast per run + bezoek", str(W.voorraad(SEED, 2)) == str(W.voorraad(SEED, 2)))
+	# Besluit Dennis 14 okt 2026: uitrusting + accessoires geschaald op de verdieping, plus basis-consumables.
+	var schaal_ok := true
+	var prijs_ok := true
+	var info := []
+	for f in [5, 25, 55, 85, 99]:
+		var vf := W.voorraad(SEED, 1, [], f)
+		var g := W.grade_voor(f)
+		var uitr := vf.filter(func(x): return x["soort"] == "uitrusting")
+		var acc := vf.filter(func(x): return x["soort"] == "accessoire")
+		var basis := vf.filter(func(x): return x["id"] in W.BASIS_CONSUMABLES)
+		var goed: bool = uitr.size() == W.UITRUSTING_AANTAL and acc.size() == 1 and basis.size() == W.BASIS_CONSUMABLES.size() \
+				and not vf.any(func(x): return x["soort"] in ["g3", "g4"])
+		for x in uitr:
+			goed = goed and int(GG.item(x["id"]).get("grade", 0)) == g and int(GG.item(x["id"]).get("min_floor", 1)) <= f
+		for x in uitr + acc + basis:
+			prijs_ok = prijs_ok and int(x["price"]) > 0 and str(x["name"]) != ""
+		info.append("%d:G%d %s" % [f, g, acc[0]["id"] if acc.size() > 0 else "-"])
+		schaal_ok = schaal_ok and goed
+	check("waren geschaald op de verdieping: 2 uitrusting van de grade + 1 accessoire + Potion/Magic Water (%s)" % [info], schaal_ok)
+	check("geschaalde waren hebben een prijs en een naam", prijs_ok)
+	check("G4-verdieping: accessoire uit de G4-accessoires", GG.item(W.accessoire_voor(SEED, 1, 90)).get("slot", "") == "accessoire")
+	GameState.gold = 99999
+	var vk: Array = W.voorraad(SEED, 2, [], 55).filter(func(x): return x["soort"] == "uitrusting")
+	var kr := W.koop(SEED, 2, [], str(vk[0]["id"]), 55)
+	check("geschaald stuk kopen werkt", kr["ok"] and int(GameState.inventory.get(str(vk[0]["id"]), 0)) >= 1)
 	check("inkoop: consumable 50% (Elixir %d)" % W.inkoop_prijs("elixer"), W.inkoop_prijs("elixer") == 150)
 	check("inkoop: uitrusting 40% (Short Sword %d)" % W.inkoop_prijs("kort_zwaard"), W.inkoop_prijs("kort_zwaard") == 48)
 	var g4id: String = g4[0]["id"]
@@ -470,3 +497,29 @@ func _winkel_scene(k, pl) -> void:
 	GameState.inventory["stunbom"] = 1
 	var su := PA.use_item(GameState.inventory, "stunbom", GameState.party[0])
 	check("Stun Bomb: %d monster(s) verlamd" % levend.size(), levend.is_empty() or (su["ok"] and levend.all(func(m): return m.is_stunned())))
+
+
+## Einde (CANON 12): Sapientia verslagen -> "Thank you. Finally, rest.", daarna geen Koopman meer.
+func _einde_tests() -> void:
+	var flags := {}
+	check("voor het einde: niet verdwenen", not K.verdwenen(flags))
+	var regels := K.einde(flags)
+	check("einde: de afscheidsregel (EN canon)", regels == [K.AFSCHEID] and K.AFSCHEID == "Thank you. Finally, rest.")
+	check("einde: vlaggen sapientia_verslagen + h5_rust", bool(flags.get(K.FLAG_SAPIENTIA_VERSLAGEN, false))
+			and bool(flags.get(K.FLAG_RUST, false)) and K.verdwenen(flags))
+	check("einde: tweede keer geen regel meer", K.einde(flags).is_empty())
+	var kf := _floor_of(GK.SOORT_KOOPMAN)
+	var r := await _start_floor(kf)
+	check("voor het einde staat hij er", r.get("koopman") != null)
+	GameState.story_flags[K.FLAG_RUST] = true
+	GameState.story_flags[K.FLAG_SAPIENTIA_VERSLAGEN] = true
+	GameState.change_map(DUNGEON, "omhoog")
+	var t0 := Time.get_ticks_msec()
+	while (scene() == r or not is_instance_valid(scene()) or GameState.changing_map) and Time.get_ticks_msec() - t0 < 15000:
+		await get_tree().process_frame
+	check("verdieping opnieuw geladen", await wait_floor(kf) and scene() != r)
+	var r2 := scene()
+	check("na het einde: geen Koopman op zijn verdieping", str(r2.get("kamer_soort")) == GK.SOORT_KOOPMAN
+			and r2.get("koopman") == null and get_tree().get_nodes_in_group("koopman").is_empty())
+	var data := GameState.state_data(Vector2i(1, 1), Vector2i.DOWN)
+	check("vlag gaat mee in de save", str(data).contains(K.FLAG_RUST))
