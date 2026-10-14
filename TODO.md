@@ -173,6 +173,8 @@ De modus staat onder Canon & Design Reference. Open blijft:
 
 ### Diepe Grot — nog te bouwen
 
+- [x] Monsterpool: alle gewone bestiarium-monsters, op volgorde Archief 1 > Donker Woud > Bergtunnel > Archief 2 (wens Dennis). `Dungeon100Content.POOLS` met vensters per gebied; stats schalen per verdieping.
+
 De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, kansen en dialoog, onder Canon & Design Reference → Diepe Grot. Werk de specificatie daar als bron; deze lijst is het overzicht van dezelfde open vakjes.
 
 #### Diepe Grot – balans aanpassen

@@ -20,15 +20,29 @@ const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
 
-## Vijanden die op een verdieping kunnen voorkomen (game_data.gd ENEMIES, geen bazen).
+## Vijanden van de Diepe Grot: ALLE gewone bestiarium-monsters, in de volgorde van het verhaal
+## (Dennis): Archief 1 > Donker Woud > Bergtunnel > Archief 2. Elk blok heeft een venster
+## [from, tot]: vroege gebieden op lage verdiepingen, latere dieper. De stats schalen per verdieping
+## (Dungeon100Scaling.monster_stats). Bazen, unieke monsters, ECHO en de Mimic (kist) zitten er niet in.
 const POOLS := [
-	{"from": 1, "enemies": ["mosslijm", "moskonijn", "papiergeest"]},
-	{"from": 11, "enemies": ["glitchmot"]},
-	{"from": 31, "enemies": ["mech_wachter"]},
-	{"from": 51, "enemies": ["wortelkruiper", "mistuil"]},
-	{"from": 71, "enemies": ["sporenzwam"]},
+	{"gebied": "archief1", "from": 1, "tot": 40, "enemies": ["mosslijm", "moskonijn", "papiergeest"]},
+	{"gebied": "archief1", "from": 11, "tot": 55, "enemies": ["glitchmot", "mech_wachter"]},
+	{"gebied": "woud", "from": 26, "tot": 80, "enemies": ["wortelkruiper", "mistuil", "sporenzwam", "woudgeest"]},
+	{"gebied": "bergtunnel", "from": 51, "tot": 100, "enemies": ["steenluis", "druipslak", "adermot"]},
+	{"gebied": "archief2", "from": 76, "tot": 100, "enemies": ["rankje", "sporekop", "doornige_loper", "bloeiende_schrik", "wortelgeest"]},
 ]
+## Volgorde van de gebieden (voor tests en uitbreiding met nieuwe gebieden).
+const GEBIEDEN := ["archief1", "woud", "bergtunnel", "archief2"]
 
+
+## Alle monsters uit de pools, in volgorde.
+static func all_pool_enemies() -> Array:
+	var out: Array = []
+	for p in POOLS:
+		for e in p["enemies"]:
+			if not out.has(e):
+				out.append(e)
+	return out
 
 
 ## Monsterniveau (TIERS 1-4): per 25 verdiepingen een stap.
@@ -39,7 +53,7 @@ static func tier_for_floor(floor_no: int) -> int:
 static func enemy_pool(floor_no: int) -> Array:
 	var out: Array = []
 	for p in POOLS:
-		if floor_no >= int(p["from"]):
+		if floor_no >= int(p["from"]) and floor_no <= int(p["tot"]):
 			out.append_array(p["enemies"])
 	return out
 
