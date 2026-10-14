@@ -20,6 +20,7 @@ const Gear := preload("res://scripts/equipment.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
+const HUBHAL := "res://world_warper/maps/hal.tscn"
 
 var failures := 0
 var passes := 0
@@ -645,8 +646,10 @@ func _hal_simulatie() -> void:
 	if GameState.dungeon100_run_active():
 		GameState.dungeon100_end_run(false)
 	GameState.story_flags[Kamers.FLAG_HUB] = true
-	GameState.change_map(Kamers.scene_path("hal"), "ingang")
-	var ok := await _wacht_pad(Kamers.scene_path("hal"))
+	for f in ["ww_canon_genezer_gezien", "ww_canon_hanger_gezien", "ww_canon_dreiging_gezien"]:
+		GameState.story_flags[f] = true      # geen canon-scène over het screenshot
+	GameState.change_map(HUBHAL, "ingang")
+	var ok := await _wacht_pad(HUBHAL)
 	await _wacht_fade()
 	await _pframes(6)
 	var vlak: Node = scene().get_node_or_null("HubBoot/VlakSimulatie") if ok else null
@@ -680,7 +683,7 @@ func _hal_simulatie() -> void:
 	await _wacht_gesprek_weg()
 	await _pframes(4)
 	check("nee: blijft in de hal, speler vrij", boot.simulatie_uitkomst == "nee"
-			and scene().scene_file_path == Kamers.scene_path("hal") and not p.input_locked)
+			and scene().scene_file_path == HUBHAL and not p.input_locked)
 	vlak.interact(p)
 	if await _naar_keuze(boot.SIMULATIE_JA):
 		_kies(boot.SIMULATIE_JA)
