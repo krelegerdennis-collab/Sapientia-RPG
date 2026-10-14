@@ -81,7 +81,7 @@ func _data() -> void:
 			and int(steen.get("mag", 0)) == maxi(1, int(BG.staf_mag() / 6.0)))
 	check("uitrusting vindt de twee stukken", Equipment.is_equipment(BG.STAF_ID)
 			and Equipment.is_equipment(BG.ACCESSOIRE_ID)
-			and Equipment.item_name(BG.STAF_ID) == "Bergnerfstaf"
+			and Equipment.item_name(BG.STAF_ID) == "Mountain Vein Staff"
 			and Equipment.slot_of(BG.ACCESSOIRE_ID) == "accessoire")
 	check("Vesper kan de staf, Dax niet; de steen kan iedereen",
 			Equipment.can_wear({"equip_type": "magier"}, BG.STAF_ID)

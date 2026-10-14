@@ -482,7 +482,7 @@ func _status_tests() -> void:
 	check("klasse: %s" % s.class_label.text, s.class_label.text == "Warrior")
 	await shot("menu_status")
 	await tap("move_right")
-	check("rechts: Vesper (%s)" % s.spells_label.text, s.index == 1 and "Arc (4 MP)" in s.spells_label.text and "Chain Lightning (8 MP)" in s.spells_label.text)
+	check("rechts: Vesper (%s)" % s.spells_label.text, s.index == 1 and "Spark (4 MP)" in s.spells_label.text and "Chain Lightning (8 MP)" in s.spells_label.text)
 	check("Vesper: eigen portret (portrait_noor.png, 64x80, NEAREST)", s.portrait.get_meta("source", "") == "portrait"
 			and s.portrait.texture.resource_path.ends_with("portrait_noor.png") and s.portrait.custom_minimum_size == Vector2(64, 80)
 			and s.portrait.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)

@@ -151,7 +151,7 @@ func _buit_en_tekst() -> void:
 	check("wissel zet Vesper vooraan", Kamers.naar_voren(groep, 1) and str(groep[0]["name"]) == "Vesper")
 	check("vooraan wisselt niet met zichzelf", not Kamers.naar_voren(groep, 0))
 	var regels := Kamers.voortgang_regels(0, {}, "")
-	check("voortgang noemt de stap", regels.size() == 3 and regels[0].begins_with("Verhaalstap:"))
+	check("voortgang noemt de stap", regels.size() == 3 and regels[0].begins_with("Story step:"))
 	check("bestiarium en codex bestaan", Kamers.scherm_beschikbaar("bestiarium") and Kamers.scherm_beschikbaar("codex"))
 
 

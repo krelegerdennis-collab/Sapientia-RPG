@@ -246,7 +246,7 @@ func _rondlopen(dorp: Node) -> void:
 		return
 	var vast: Vector2 = gerrit.position
 	var voor := {}
-	for naam in ["Bramwell", "Elsie", "Fern", "Walt", "Simon"]:
+	for naam in ["Bram", "Els", "Fien", "Wout", "Siem"]:
 		var npc: Node = dorp.get_node("Objects/%s" % naam)
 		var loper := npc.get_node_or_null("PleinLus")
 		var n := 0
@@ -258,7 +258,7 @@ func _rondlopen(dorp: Node) -> void:
 	var t0 := Time.get_ticks_msec()
 	while Time.get_ticks_msec() - t0 < 1000:
 		await get_tree().process_frame
-	for naam in ["Bramwell", "Elsie", "Fern", "Walt", "Simon"]:
+	for naam in ["Bram", "Els", "Fien", "Wout", "Siem"]:
 		var npc: Node = dorp.get_node("Objects/%s" % naam)
 		var loper := npc.get_node_or_null("PleinLus")
 		var tegel: Vector2i = npc.get_tile()

@@ -334,7 +334,7 @@ static func _gear() -> Dictionary:
 	var mdef := accessoire_mdef()
 	return {
 		STAF_ID: {
-			"name": "Mountain Vein Staff",
+			"name": "Mountain Vein Staff", "short": "Vein Staff",
 			"slot": "wapen",
 			"atk": 3,
 			"mag": mag,

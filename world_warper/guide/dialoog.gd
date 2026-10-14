@@ -91,7 +91,7 @@ static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 	if not _vlag_aan(flags, FLAG_NOOR_LID):
 		return [
 			"Vesper hasn't joined yet.",
-			"Look for her in the Donker Woud.",
+			"Look for her in the Dark Wood.",
 		]
 	if not _vlag_aan(flags, FLAG_GOLEM):
 		return [
@@ -100,8 +100,8 @@ static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 		]
 	if not _vlag_aan(flags, FLAG_GENEZER):
 		return [
-			"The Mender still stands in the greenhouse of Archief 2.",
-			"Go through the berggrot.",
+			"The Mender still stands in the greenhouse of the Living Archive.",
+			"Go through the Hollow Mountain.",
 		]
 	var plek := _wm1_plek(bezocht)
 	if plek == "":

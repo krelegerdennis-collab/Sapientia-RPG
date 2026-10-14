@@ -693,7 +693,7 @@ func _town_tests() -> void:
 	p.stepped.disconnect(on_step)
 	check("veel stappen buiten (%d) over %s" % [count["steps"], terrains.keys()],
 			count["steps"] >= 50 and terrains.has("gras") and terrains.has("kassei"))
-	check("GEEN gevecht bij het huis (kans x100)", not GameState.in_battle and map_name() == "Willowdale")
+	check("GEEN gevecht bij het huis (kans x100)", not GameState.in_battle and map_name() == "Wilgendal")
 	await tap("debug_battle")
 	await frames(10)
 	check("F2 start geen gevecht bij het huis", not GameState.in_battle)
@@ -2041,7 +2041,7 @@ func _prologue_tests() -> void:
 	await frames(5)
 	check("pad naar de wereldkaart: 'Not today' (%s)" % _lines_text(), Dialog.is_open and "Not today" in _lines_text())
 	await _story_drain()
-	check("teruggestuurd, nog op de proloog-map (15,20): %s" % tile(), map_name() == "Willowdale" and tile() == Vector2i(15, 20))
+	check("teruggestuurd, nog op de proloog-map (15,20): %s" % tile(), map_name() == "Wilgendal" and tile() == Vector2i(15, 20))
 	# praten met de Oude Man (van links)
 	await walk("move_up", 11)
 	await walk("move_right", 5)
