@@ -27,6 +27,7 @@ const SaveScreen := preload("res://scripts/ui/save_screen.gd")
 const CodexScreen := preload("res://scripts/ui/codex_screen.gd")
 const PartyScreen := preload("res://scripts/ui/party_screen.gd")
 const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
+const QuestlogScreen := preload("res://scripts/ui/questlog_screen.gd")   # v0.24 Quest Log (zelfde data als ECHO)
 const LoadScreen := preload("res://scripts/ui/load_screen.gd")   # v0.22 Load vanuit het veldmenu   # v0.22 partylimiet
 
 const LAYER := 20
@@ -37,9 +38,9 @@ const BUTTON_H := 30
 const MENU_H := 20
 ## v0.22 compacte Warpen-/Party-knop (rechterkolom)
 const WARP_W := 96
-const WARP_H := 24
+const WARP_H := 20   # v0.24: 6 knoppen rechts (Quest Log erbij), past boven de opdrachtregel
 ## v0.22 rechterkolom (compact, onder het MENU-bord), van boven naar beneden
-const RIGHT_COL := ["warp", "party", "scenes", "options", "load"]
+const RIGHT_COL := ["warp", "party", "quests", "scenes", "options", "load"]
 ## v0.22 linkerkolom (grote knoppen); 5 x 30 + tussenruimte eindigt op y=182, past op 216 hoog (telefoon)
 const LEFT_COL := ["equip", "codex", "items", "magic", "bestiary"]
 ## Minimale tikhoogte (de knoppen zelf zijn hoger). Tests leunen op deze naam.
@@ -58,6 +59,7 @@ const COMMANDS := [
 	["bestiary", "Bestiary"],
 	["warp", "Warp"],
 	["party", "Party"],
+	["quests", "Quest Log"],
 	["scenes", "Scenes"],
 	["options", "Settings"],
 	["load", "Load"],
@@ -184,7 +186,7 @@ func _link_focus() -> void:
 		b.focus_neighbor_top = b.focus_previous
 		b.focus_neighbor_right = b.get_path_to(wp)
 	var eq: Button = col[0]
-	# rechterkolom: Warp > Party > Scenes > Settings > Load, daarna weer de linkerkolom
+	# rechterkolom: Warp > Party > Quest Log > Scenes > Settings > Load, daarna weer de linkerkolom
 	var rc: Array = RIGHT_COL.map(func(id): return buttons[id])
 	for i in rc.size():
 		var b: Button = rc[i]
@@ -312,6 +314,8 @@ func choose(id: String) -> void:
 			open_load()
 		"scenes":
 			open_scenes()
+		"quests":
+			open_quests()
 		"party":
 			open_party()
 		"close":
@@ -387,6 +391,15 @@ func open_scenes() -> void:
 	if buttons.has("scenes"):
 		_last_focus = buttons["scenes"]
 	_open_sub(ScenesScreen.new(), "Scenes")
+
+
+## v0.24 Quest Log: tabs Main (acts) en Side (zijopdrachten), data uit echo_questlog.gd.
+func open_quests() -> CanvasLayer:
+	if sub != null:
+		return null
+	if buttons.has("quests"):
+		_last_focus = buttons["quests"]
+	return _open_sub(QuestlogScreen.new(), "QuestLog")
 
 
 func open_bestiary() -> void:

@@ -377,6 +377,7 @@ static func speler_teksten() -> Array[String]:
 	var out: Array[String] = []
 	out.append_array(ECHO_REGELS)
 	out.append_array(EchoGrot.speler_teksten())
+	out.append_array(load("res://world_warper/data/echo_questlog.gd").speler_teksten())
 	out.append_array(WERK_REGELS)
 	out.append(HANDEL_DICHT)
 	out.append(KERN_ZIN)
