@@ -144,11 +144,11 @@ func _ready() -> void:
 	row.name = "ContinueRow"
 	row.add_theme_constant_override("separation", 2)
 	list.add_child(row)
-	continue_button = UiMenu.button("Doorgaan")
+	continue_button = UiMenu.button("Continue")
 	continue_button.custom_minimum_size = Vector2(0, 16)
 	continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(continue_button)
-	load_button = UiMenu.button("Laden")
+	load_button = UiMenu.button("Load")
 	load_button.name = "LoadButton"
 	load_button.custom_minimum_size = Vector2(0, 16)
 	load_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -159,7 +159,7 @@ func _ready() -> void:
 	save_info.clip_text = true
 	save_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	list.add_child(save_info)
-	new_button = UiMenu.button("Nieuw spel")
+	new_button = UiMenu.button("New Game")
 	list.add_child(new_button)
 	# Buiten het kaartje: het menu moet in y 148..200 blijven (titeltests).
 	pvp_button = UiMenu.button("PvP")
@@ -181,10 +181,10 @@ func _ready() -> void:
 	var beta_list := VBoxContainer.new()
 	beta_list.add_theme_constant_override("separation", 0)
 	beta_box.add_child(beta_list)
-	beta_button = UiMenu.button("Betatest")
+	beta_button = UiMenu.button("Beta Test")
 	beta_button.custom_minimum_size = Vector2(116, 16)
 	beta_list.add_child(beta_button)
-	eind_button = UiMenu.button("Eindstaat")
+	eind_button = UiMenu.button("End State")
 	eind_button.name = "EindButton"
 	eind_button.custom_minimum_size = Vector2(116, 16)
 	beta_list.add_child(eind_button)
@@ -314,7 +314,7 @@ func refresh() -> void:
 		new_button.grab_focus()
 	var beta := GameState.read_beta_save()
 	if beta.is_empty():
-		beta_info.text = "  aparte voortgang"
+		beta_info.text = "  separate progress"
 	else:
 		beta_info.text = "  %s  %s" % [str(beta.get("player_name", "")), UiMenu.format_time(float(beta.get("play_time", 0.0)))]
 	beta_info.visible = true

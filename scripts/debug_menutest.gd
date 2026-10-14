@@ -811,8 +811,8 @@ func _autosave_tests() -> void:
 	check("'Doorgaan' aan, toont '(auto)' (%s)" % t.save_info.text, not t.continue_button.disabled and "(auto)" in t.save_info.text)
 	check("Laden staat naast Doorgaan", t.load_button != null and not t.load_button.disabled
 			and t.load_button.get_parent() == t.continue_button.get_parent()
-			and str(t.load_button.get_meta("label", "")) == "Laden"
-			and str(t.continue_button.get_meta("label", "")) == "Doorgaan")
+			and str(t.load_button.get_meta("label", "")) == "Load"
+			and str(t.continue_button.get_meta("label", "")) == "Continue")
 	await shot("title_autosave")
 	await click(t.continue_button)
 	await frames(3)
