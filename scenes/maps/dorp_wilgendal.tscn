@@ -32,7 +32,7 @@ event = "gerrit"
 event_arg = ""
 
 [node name="MolenWieken" type="StaticBody2D" parent="Objects"]
-position = Vector2(24, 24)
+position = Vector2(16, 336)
 script = ExtResource("9_molen")
 event = ""
 event_arg = ""
@@ -43,7 +43,7 @@ glow_if = {
 }
 glow_color = Color(0.93, 0.78, 0.42, 1)
 glow_radius = 22.0
-tiles = Vector2i(3, 4)
+tiles = Vector2i(10, 3)
 bump_event = false
 loop_if = {
 "flags": ["zingend_graan_klaar"]
