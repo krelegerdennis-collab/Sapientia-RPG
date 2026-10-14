@@ -257,7 +257,7 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 #### TODO(design) markers
 - [x] Loot ratio consumables vs. equipment
 - [x] Blue chest kans per floor-bracket
-- [ ] Medium Map: exacte kisten + monsters
+- [x] Medium Map: 2-4 kisten (+0-1 blauw via de floor-bracket-tabel), monsters 8-10 / 10-12 / 12-14 / 14-16 per bracket 1-20 / 21-50 / 51-80 / 81-99 (besluit Dennis, 14 okt 2026)
 - [x] Trap Room: mix 60/40; verborgen vallen flitsen kort binnen 2 tegels (besluit Dennis, 14 okt 2026)
 - [x] Puzzle Room: 4 kleine puzzels uit bestaande stukken (besluit Dennis, 14 okt 2026)
   - [x] Hint: ECHO zegt bij binnenkomst één korte Engelse zin (besluit Dennis, 14 okt 2026)
@@ -915,6 +915,10 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Floor 81-99: 14-16 monsters
 
   Karakter: normale verdieping, snel te doorlopen.
+
+  Besluit (Dennis, 14 okt 2026): de huidige tabel is de definitieve. In de code: `GrotLayouts.KISTEN[MEDIUM] = [2, 4]`,
+  `GrotLayouts.MONSTERS_MEDIUM = [[20, 8, 10], [50, 10, 12], [80, 12, 14], [99, 14, 16]]`; blauw: 0-1 per verdieping met
+  `Dungeon100Blue.BLUE_FLOOR_CHANCE` (1-10 5%, 11-20 10%, 21-35 15%, 36-50 20%, 51-65 25%, 66-80 30%, 81-95 40%, 96-99 50%).
 - [x] LARGE ROOM (20%)
   Definitief. 50×50 tegels.
 
@@ -1118,9 +1122,9 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Gemiddeld 25-30 blue chests per volledige run (was ~60-80)
   - Early game (1-20) significant minder
   - Endgame (90-99) voelt als beloning
-- [ ] Medium Map: exacte kisten + monsters
+- [x] Medium Map: 2-4 kisten (+0-1 blauw via de floor-bracket-tabel), monsters 8-10 / 10-12 / 12-14 / 14-16 per bracket 1-20 / 21-50 / 51-80 / 81-99 (besluit Dennis, 14 okt 2026)
 - [x] Trap Room: mix 60/40; verborgen vallen flitsen kort binnen 2 tegels (besluit Dennis, 14 okt 2026)
-  Definitief. De checkbox blijft open tot de vallen in de code deze verdeling gebruiken.
+  Definitief en in de code (`GrotKamers.VAL_ZICHTBAAR_KANS`, `VAL_FLITS_BEREIK`).
 
   **CANON – niet wijzigen zonder overleg.**
 
