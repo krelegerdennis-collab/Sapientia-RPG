@@ -57,6 +57,7 @@ func _ready() -> void:
 	_place_warper()
 	_place_grot_kamer()
 	_place_puzzel()
+	monsters_pushed.connect(_on_monsters_pushed)
 	floor_ready.emit(floor_no, floor_data)
 
 
@@ -126,6 +127,56 @@ func _puzzel_hint() -> void:
 
 func _koopman_sleutel() -> String:
 	return "%d_%d" % [GameState.dungeon100_seed, floor_no]
+
+
+# ---------------------------------------------------------------- push + puzzel/val (TODO.md koppelingen)
+const VAL_MONSTER_TEKST := "The monster is pushed onto the trap and doesn't get up again!"
+## Voor de tests: monster-ids die in een val geduwd zijn.
+var val_slachtoffers: Array = []
+
+
+## Puzzelkasten, poorten en de spleet houden een geduwd monster tegen (inside() = alleen het puzzelvak).
+func push_blocked(t: Vector2i) -> bool:
+	return is_instance_valid(puzzel) and puzzel.has_method("blocks_monster") and puzzel.blocks_monster(t)
+
+
+## Na een duw: komt een monster op een (nog niet afgegane) val, dan gaat die af op het monster.
+## Voorstel: het monster is dan verslagen (weg, zonder gevecht en zonder EXP/buit), de val is daarna
+## zichtbaar en onschadelijk. Er is geen apart "gat": spijker- en rune-vallen werken allebei zo.
+func _on_monsters_pushed(chain: Array, _dir: Vector2i) -> void:
+	if vallen.is_empty():
+		return
+	await get_tree().create_timer(0.05).timeout
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 2000:
+		var moving := false
+		for m in chain:
+			if is_instance_valid(m) and m.is_moving:
+				moving = true
+		if not moving:
+			break
+		await get_tree().process_frame
+	var hit := false
+	for m in chain:
+		if not is_instance_valid(m) or not (m in monsters):
+			continue
+		var v = vallen.get(m.tile)
+		if v == null or not is_instance_valid(v) or v.afgegaan:
+			continue
+		v.trigger_monster()
+		_val_verslaat(m)
+		hit = true
+	if hit and not Dialog.is_open:
+		Dialog.show_lines([VAL_MONSTER_TEKST])
+
+
+func _val_verslaat(m: Node) -> void:
+	if not GameState.defeated_map_monsters.has(room_id):
+		GameState.defeated_map_monsters[room_id] = {}
+	GameState.defeated_map_monsters[room_id][m.monster_id] = true
+	val_slachtoffers.append(m.monster_id)
+	monsters.erase(m)
+	m.queue_free()
 
 
 func _on_val_stap(t: Vector2i) -> void:

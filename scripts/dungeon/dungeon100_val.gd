@@ -74,6 +74,14 @@ func trigger() -> Array[int]:
 	return uit
 
 
+## Gaat af op een geduwd monster (TODO.md "monster in gat duwen"): geen schade aan de party.
+func trigger_monster() -> void:
+	afgegaan = true
+	verborgen = false
+	if anim:
+		anim.play("actief")
+
+
 ## Speler staat op 'speler': flitsen als hij net binnen bereik komt (alleen verborgen, niet afgegaan).
 func speler_bij(speler: Vector2i) -> void:
 	var dichtbij := Kamers.in_flits_bereik(tile, speler)

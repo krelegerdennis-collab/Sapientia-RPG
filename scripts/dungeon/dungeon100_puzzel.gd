@@ -141,6 +141,27 @@ func _process(_delta: float) -> void:
 		var target_px: Vector2 = player.get("_target")
 		target = Vector2i((target_px / 16.0).floor())
 	logic.set_player_tile(player.get_tile(), target)
+	logic.set_weights(monster_tiles())
+
+
+## TODO.md "Push werkt samen met PUZZLE ROOM": tegels van map-monsters die stilstaan (een monster dat
+## nog schuift telt pas als het aankomt).
+func monster_tiles() -> Array:
+	var out: Array = []
+	if map == null or not ("monsters" in map):
+		return out
+	for m in map.monsters:
+		if is_instance_valid(m) and not m.is_moving:
+			for dx in m.size.x:
+				for dy in m.size.y:
+					out.append(m.tile + Vector2i(dx, dy))
+	return out
+
+
+## Mag een geduwd monster hier niet heen? Kasten, vaste kasten, hendels, dichte poorten, spleet, kist.
+## Platen en open poorten wel.
+func blocks_monster(t: Vector2i) -> bool:
+	return logic != null and logic.inside(t) and logic.is_solid(t)
 
 
 func _can_act(p: Node2D) -> bool:

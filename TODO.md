@@ -249,8 +249,8 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [ ] Visuele indicator op knop: aan/uit status duidelijk
 
 #### Koppelingen tussen systemen
-- [ ] Push werkt samen met PUZZLE ROOM (gestund monster op drukplaat)
-- [ ] Push werkt samen met TRAP ROOM (monster in gat duwen)
+- [x] Push werkt samen met PUZZLE ROOM (gestund monster op drukplaat)
+- [x] Push werkt samen met TRAP ROOM (monster in gat duwen)
 - [ ] RUN werkt in alle kamer-types behalve tijdens gevecht
 - [ ] RUN werkt in REST ROOM, MERCHANT ROOM, etc.
 
@@ -954,7 +954,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Weinig kisten (0-1 normale)
   - Lage monster-spawns
   - Besluit (Dennis, 14 okt 2026): 60% zichtbaar / 40% verborgen; een verborgen val flitst kort (gloed + zichtbare tegel) als de speler binnen 2 tegels komt (ook schuin), één keer per nadering (`GrotKamers.VAL_FLITS_BEREIK`, `Dungeon100Val.speler_bij`).
-- [ ] PUZZLE ROOM (5%)
+- [x] PUZZLE ROOM (5%)
   - Specifieke puzzel (push / groei-platen)
   - Geen of weinig monsters
   - Beloning: 1 blauwe kist bij succes
@@ -1058,8 +1058,8 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
 **CANON – niet wijzigen zonder overleg.**
 
-- [ ] Push werkt samen met PUZZLE ROOM (gestund monster op drukplaat)
-- [ ] Push werkt samen met TRAP ROOM (monster in gat duwen)
+- [x] Push werkt samen met PUZZLE ROOM (gestund monster op drukplaat)
+- [x] Push werkt samen met TRAP ROOM (monster in gat duwen)
 - [ ] RUN werkt in alle kamer-types behalve tijdens gevecht
 - [ ] RUN werkt in REST ROOM, MERCHANT ROOM, etc.
 
