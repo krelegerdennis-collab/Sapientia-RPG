@@ -610,7 +610,7 @@ const EVENTS := {
 		["give", ITEM_ZAAD, 1],
 		["flag", FLAG_ZAAD],
 		["refresh"],
-		["say", "", ["You find Zingend Zaad."]],
+		["say", "", ["You find Singing Seed."]],
 	]}],
 }
 

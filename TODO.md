@@ -180,13 +180,13 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 #### Diepe Grot – balans aanpassen
 
 ##### Loot table
-- [ ] Consumables in loot table verminderen
-  - [ ] Te veel consumables maakt de Grot te makkelijk
-  - [ ] Meer equipment/accessoires, minder potions/MP-items
-  - [ ] TODO(design): exacte ratio bepalen
-- [ ] Blue chest frequentie early game verlagen
-  - [ ] Te veel blue chests op floor 1-20
-  - [ ] TODO(design): exacte kans per floor-bracket
+- [x] Consumables in loot table verminderen
+  - [x] Te veel consumables maakt de Grot te makkelijk
+  - [x] Meer equipment/accessoires, minder potions/MP-items
+  - [x] TODO(design): exacte ratio bepalen
+- [x] Blue chest frequentie early game verlagen
+  - [x] Te veel blue chests op floor 1-20
+  - [x] TODO(design): exacte kans per floor-bracket
 
 #### Diepe Grot – map generatie (uitgebreid)
 
@@ -217,22 +217,22 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 #### Systemen – push monster when stunned
 
 ##### Basis push
-- [ ] Als speler TEGEN een GESTUND monster aanloopt:
-  - [ ] Speler beweegt ÉN monster wordt geduwd (samen)
-  - [ ] Monster schuift 1 tegel in de richting van de speler
-  - [ ] Speler neemt de oorspronkelijke plek NIET in
-- [ ] Als monster tegen muur/obstakel wordt geduwd → blijft staan
-- [ ] Werkt ALLEEN bij stun-status (niet bij normale monsters)
-- [ ] Visuele feedback: monster schuift 1 tegel (geen teleport)
+- [x] Als speler TEGEN een GESTUND monster aanloopt:
+  - [x] Speler beweegt ÉN monster wordt geduwd (samen)
+  - [x] Monster schuift 1 tegel in de richting van de speler
+  - [x] Speler neemt de oorspronkelijke plek NIET in
+- [x] Als monster tegen muur/obstakel wordt geduwd → blijft staan
+- [x] Werkt ALLEEN bij stun-status (niet bij normale monsters)
+- [x] Visuele feedback: monster schuift 1 tegel (geen teleport)
 
 ##### Chain-push
-- [ ] Als geduwd monster tegen ANDER monster aan komt:
-  - [ ] Beide monsters worden geduwd (chain-push)
-  - [ ] Tweede monster schuift ook 1 tegel in dezelfde richting
-  - [ ] Als tweede tegen muur/obstakel komt → stopt daar
-  - [ ] Als tweede tegen een DERDE monster komt → keten gaat door
-- [ ] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
-- [ ] Alle geduwde monsters schuiven tegelijk (animatie)
+- [x] Als geduwd monster tegen ANDER monster aan komt:
+  - [x] Beide monsters worden geduwd (chain-push)
+  - [x] Tweede monster schuift ook 1 tegel in dezelfde richting
+  - [x] Als tweede tegen muur/obstakel komt → stopt daar
+  - [x] Als tweede tegen een DERDE monster komt → keten gaat door
+- [x] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
+- [x] Alle geduwde monsters schuiven tegelijk (animatie)
 
 #### Systemen – run feature
 - [x] RUN-knop toevoegen BOVEN de CORE-knop
@@ -255,16 +255,16 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [ ] RUN werkt in REST ROOM, MERCHANT ROOM, etc.
 
 #### TODO(design) markers
-- [ ] Loot ratio consumables vs. equipment
-- [ ] Blue chest kans per floor-bracket
-- [ ] Medium Map: exacte kisten + monsters
-- [ ] Trap Room: zichtbaar of verborgen vallen?
+- [x] Loot ratio consumables vs. equipment
+- [x] Blue chest kans per floor-bracket
+- [x] Medium Map: 2-4 kisten (+0-1 blauw via de floor-bracket-tabel), monsters 8-10 / 10-12 / 12-14 / 14-16 per bracket 1-20 / 21-50 / 51-80 / 81-99 (besluit Dennis, 14 okt 2026)
+- [x] Trap Room: mix 60/40; verborgen vallen flitsen kort binnen 2 tegels (besluit Dennis, 14 okt 2026)
 - [x] Puzzle Room: 4 kleine puzzels uit bestaande stukken (besluit Dennis, 14 okt 2026)
   - [x] Hint: ECHO zegt bij binnenkomst één korte Engelse zin (besluit Dennis, 14 okt 2026)
 - [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
-- [ ] Merchant Room: welke items verkoopt hij?
+- [x] Merchant Room: uitrusting + accessoires geschaald op de verdieping, plus basis-consumables (besluit Dennis, 14 okt 2026)
   - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
-  - [ ] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest."
+  - [x] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest." Haak klaar (besluit Dennis, 14 okt 2026): Archief 6 roept `KoopmanData.einde(GameState.story_flags)` aan, toont de regel met spreker "the Merchant" en zet `sapientia_verslagen` + `h5_rust`; daarna zet de Grot geen Koopman meer neer. Archief 6 zelf bestaat nog niet.
 
 ## RPG ART
 
@@ -870,13 +870,13 @@ De open vakjes van dit blok staan ook als overzicht in de actieve werklijst. De 
 
 ### Loot table
 
-- [ ] Consumables in loot table verminderen
-  - [ ] Te veel consumables maakt de Grot te makkelijk
-  - [ ] Meer equipment/accessoires, minder potions/MP-items
-  - [ ] TODO(design): exacte ratio bepalen
-- [ ] Blue chest frequentie early game verlagen
-  - [ ] Te veel blue chests op floor 1-20
-  - [ ] TODO(design): exacte kans per floor-bracket
+- [x] Consumables in loot table verminderen
+  - [x] Te veel consumables maakt de Grot te makkelijk
+  - [x] Meer equipment/accessoires, minder potions/MP-items
+  - [x] TODO(design): exacte ratio bepalen
+- [x] Blue chest frequentie early game verlagen
+  - [x] Te veel blue chests op floor 1-20
+  - [x] TODO(design): exacte kans per floor-bracket
 
 ## Diepe Grot – map generatie (uitgebreid)
 
@@ -915,6 +915,10 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Floor 81-99: 14-16 monsters
 
   Karakter: normale verdieping, snel te doorlopen.
+
+  Besluit (Dennis, 14 okt 2026): de huidige tabel is de definitieve. In de code: `GrotLayouts.KISTEN[MEDIUM] = [2, 4]`,
+  `GrotLayouts.MONSTERS_MEDIUM = [[20, 8, 10], [50, 10, 12], [80, 12, 14], [99, 14, 16]]`; blauw: 0-1 per verdieping met
+  `Dungeon100Blue.BLUE_FLOOR_CHANCE` (1-10 5%, 11-20 10%, 21-35 15%, 36-50 20%, 51-65 25%, 66-80 30%, 81-95 40%, 96-99 50%).
 - [x] LARGE ROOM (20%)
   Definitief. 50×50 tegels.
 
@@ -949,7 +953,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Vallen (pijlen, gaten, spike-platen)
   - Weinig kisten (0-1 normale)
   - Lage monster-spawns
-  - TODO(design): zichtbaar of verborgen vallen?
+  - Besluit (Dennis, 14 okt 2026): 60% zichtbaar / 40% verborgen; een verborgen val flitst kort (gloed + zichtbare tegel) als de speler binnen 2 tegels komt (ook schuin), één keer per nadering (`GrotKamers.VAL_FLITS_BEREIK`, `Dungeon100Val.speler_bij`).
 - [ ] PUZZLE ROOM (5%)
   - Specifieke puzzel (push / groei-platen)
   - Geen of weinig monsters
@@ -974,7 +978,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Kan ook items KOPEN van de speler
   - Max 1× per 10 verdiepingen
   - Besluit (Dennis, 14 okt 2026): vast 1× per 10 verdiepingen (`GrotKamers.koopman_verdieping`), niet de 1%-worp.
-  - TODO(design): welke items verkoopt hij?
+  - Besluit (Dennis, 14 okt 2026): hij verkoopt uitrusting en accessoires GESCHAALD op de huidige verdieping (grade van `GradeGear.grade_for_floor`: 2 uitrustingsstukken + 1 accessoire, prijs x1,5 (G1-G2) / x2 (G3) / x3 (G4)), plus een paar basis-consumables (Potion, Magic Water x1,5) naast Elixir/Phoenix Feather/Antidote (x2), de Stun Bomb en het rotatie-item. Engelse UI (`KoopmanWinkel.voorraad(..., floor_no)`).
 
 ### Totaal-overzicht
 
@@ -1015,23 +1019,23 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
 ### Basis push
 
-- [ ] Als speler TEGEN een GESTUND monster aanloopt:
-  - [ ] Speler beweegt ÉN monster wordt geduwd (samen)
-  - [ ] Monster schuift 1 tegel in de richting van de speler
-  - [ ] Speler neemt de oorspronkelijke plek NIET in
-- [ ] Als monster tegen muur/obstakel wordt geduwd → blijft staan
-- [ ] Werkt ALLEEN bij stun-status (niet bij normale monsters)
-- [ ] Visuele feedback: monster schuift 1 tegel (geen teleport)
+- [x] Als speler TEGEN een GESTUND monster aanloopt:
+  - [x] Speler beweegt ÉN monster wordt geduwd (samen)
+  - [x] Monster schuift 1 tegel in de richting van de speler
+  - [x] Speler neemt de oorspronkelijke plek NIET in
+- [x] Als monster tegen muur/obstakel wordt geduwd → blijft staan
+- [x] Werkt ALLEEN bij stun-status (niet bij normale monsters)
+- [x] Visuele feedback: monster schuift 1 tegel (geen teleport)
 
 ### Chain-push
 
-- [ ] Als geduwd monster tegen ANDER monster aan komt:
-  - [ ] Beide monsters worden geduwd (chain-push)
-  - [ ] Tweede monster schuift ook 1 tegel in dezelfde richting
-  - [ ] Als tweede tegen muur/obstakel komt → stopt daar
-  - [ ] Als tweede tegen een DERDE monster komt → keten gaat door
-- [ ] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
-- [ ] Alle geduwde monsters schuiven tegelijk (animatie)
+- [x] Als geduwd monster tegen ANDER monster aan komt:
+  - [x] Beide monsters worden geduwd (chain-push)
+  - [x] Tweede monster schuift ook 1 tegel in dezelfde richting
+  - [x] Als tweede tegen muur/obstakel komt → stopt daar
+  - [x] Als tweede tegen een DERDE monster komt → keten gaat door
+- [x] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
+- [x] Alle geduwde monsters schuiven tegelijk (animatie)
 
 ## Systemen – run feature
 
@@ -1063,8 +1067,8 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
 **CANON – niet wijzigen zonder overleg.**
 
-- [ ] Loot ratio consumables vs. equipment
-  Definitief. De checkbox blijft open tot de loot table in de code deze verdeling gebruikt.
+- [x] Loot ratio consumables vs. equipment
+  Definitief. In de code: `Dungeon100Scaling.CHEST_RATIO` (gewone kist, geen elixers) en `Dungeon100Blue.BLUE_RATIO` (per grade). Blauwe consumables en goud zijn run-buit; alleen uitrusting, accessoires en rollen gaan de databank in.
 
   **CANON – niet wijzigen zonder overleg.**
 
@@ -1090,8 +1094,8 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Speler krijgt significant minder consumables per run.
   - Equipment/accessoires worden de hoofdbeloning.
   - Goud wordt nuttig (voor merchant in Grot + verkopen).
-- [ ] Blue chest kans per floor-bracket
-  Definitief. De checkbox blijft open tot de blue-chest-kans in de code deze tabel gebruikt.
+- [x] Blue chest kans per floor-bracket
+  Definitief. In de code: `Dungeon100Blue.BLUE_FLOOR_CHANCE` + `blue_indices()` (0-1 blauwe kist per verdieping). De overrides per kamer-type gaan via `data["blue_forced"]` en komen met de kamer-types.
 
   **CANON – niet wijzigen zonder overleg.**
 
@@ -1118,9 +1122,9 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Gemiddeld 25-30 blue chests per volledige run (was ~60-80)
   - Early game (1-20) significant minder
   - Endgame (90-99) voelt als beloning
-- [ ] Medium Map: exacte kisten + monsters
-- [ ] Trap Room: zichtbaar of verborgen vallen?
-  Definitief. De checkbox blijft open tot de vallen in de code deze verdeling gebruiken.
+- [x] Medium Map: 2-4 kisten (+0-1 blauw via de floor-bracket-tabel), monsters 8-10 / 10-12 / 12-14 / 14-16 per bracket 1-20 / 21-50 / 51-80 / 81-99 (besluit Dennis, 14 okt 2026)
+- [x] Trap Room: mix 60/40; verborgen vallen flitsen kort binnen 2 tegels (besluit Dennis, 14 okt 2026)
+  Definitief en in de code (`GrotKamers.VAL_ZICHTBAAR_KANS`, `VAL_FLITS_BEREIK`).
 
   **CANON – niet wijzigen zonder overleg.**
 
@@ -1279,7 +1283,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Overblijfselen: subtiele item-glow
   - Graffiti: symbolen op muur (paarse gloed?)
   - Geheime doorgang: verborgen, zichtbaar met Lotte's Licht
-- [ ] Merchant Room: welke items verkoopt hij?
+- [x] Merchant Room: uitrusting + accessoires geschaald op de verdieping, plus basis-consumables (besluit Dennis, 14 okt 2026)
   Definitief. De checkbox blijft open tot de merchant in de code deze voorraad gebruikt.
 
   **CANON – niet wijzigen zonder overleg.**

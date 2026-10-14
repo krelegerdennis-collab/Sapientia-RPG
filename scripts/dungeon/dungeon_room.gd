@@ -628,6 +628,62 @@ func _restore_after_battle(ctx: Dictionary) -> void:
 	NaGenezer.probeer()
 
 
+# ---------------------------------------------------------------- push (TODO.md "push monster when stunned")
+## Signaal na een geslaagde duw: de geduwde monsters (eerste = het verlamde monster) en de richting.
+## Puzzel-/valkamers kunnen hierop inhaken (drukplaat, gat).
+signal monsters_pushed(chain: Array, dir: Vector2i)
+## Voorstel (TODO(design)-vrij, maar niet in de spec): een baas wordt nooit geduwd.
+const PUSH_BOSS := false
+
+
+## Welke monsters schuiven mee als monster m in richting dir geduwd wordt? Leeg = niets beweegt
+## (muur/obstakel/speler aan het eind van de keten, een baas in de keten, of een monster dat nog loopt).
+## Chain-push: een monster dat in de weg staat schuift mee, ook als het zelf niet verlamd is.
+func push_chain(m: Node, dir: Vector2i) -> Array:
+	if dir == Vector2i.ZERO or not (m in monsters):
+		return []
+	var chain: Array = [m]
+	var i := 0
+	while i < chain.size():
+		var c: Node = chain[i]
+		i += 1
+		if c.is_moving or (bool(c.get("boss")) and not PUSH_BOSS):
+			return []
+		for dx in c.size.x:
+			for dy in c.size.y:
+				var t: Vector2i = c.tile + dir + Vector2i(dx, dy)
+				var n := cell(t)
+				if n < 0 or DungeonRooms.is_solid(n) or DungeonRooms.is_no_monster(n) or _blocked.has(t):
+					return []
+				if save_book and Vector2i((save_book.position / 16.0).floor()) == t:
+					return []
+				if t in player_tiles():
+					return []
+				for o in monsters:
+					if is_instance_valid(o) and not chain.has(o) and o.covers(t):
+						chain.append(o)
+	return chain
+
+
+## Duw het verlamde monster m (en de keten erachter) 1 tegel in richting dir. De speler blijft staan.
+## Alle monsters schuiven tegelijk en vloeiend (MapMonster beweegt naar target_tile). true = geduwd.
+func push_monster(m: Node, dir: Vector2i) -> bool:
+	# zoals monsters_active(), maar zonder de korte rustpauze na binnenkomen (een duw is geen aanval)
+	if not is_node_ready() or GameState.in_battle or GameState.changing_map or Dialog.is_open or menu_open() \
+			or Story.running or _touch_lock or not is_instance_valid(player) or player.input_locked or not m.is_stunned():
+		return false
+	var chain := push_chain(m, dir)
+	if chain.is_empty():
+		return false
+	for c in chain:
+		c.target_tile = c.tile + dir
+		c.is_moving = true
+	if is_instance_valid(player) and "hold_until_release" in player:
+		player.hold_until_release = true
+	monsters_pushed.emit(chain, dir)
+	return true
+
+
 ## v0.16: de speler zette een stap -> verlamde monsters tellen af.
 func _stun_step(_t: Vector2i) -> void:
 	for m in monsters:

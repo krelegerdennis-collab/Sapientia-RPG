@@ -50,6 +50,14 @@ const TOKEN_REGELS: Array[String] = [
 ]
 const VERTREK := "If you hear the Voice, don't stand still. I did."
 
+## EINDE (CANON 12, optie A; besluit Dennis 14 okt 2026). Bij de nederlaag van Sapientia (Archief 6)
+## lost de simulatie op en verdwijnt H-5 glimlachend. Archief 6 bestaat nog niet: de verhaalscène daar
+## roept KoopmanData.einde(GameState.story_flags) aan en toont de regels met spreker NAAM.
+## Daarna staat er geen Koopman meer in de Grot (FLAG_RUST).
+const FLAG_SAPIENTIA_VERSLAGEN := "sapientia_verslagen"
+const FLAG_RUST := "h5_rust"
+const AFSCHEID := "Thank you. Finally, rest."
+
 
 ## Fase bij een bezoekteller (1 = eerste bezoek). Na Archief 5 meteen de waarheid (CANON §12).
 static func fase(bezoeken: int, na_archief5 := false) -> int:
@@ -81,3 +89,17 @@ static func bezoek_sleutel(run_seed: int, floor_no: int) -> String:
 ## en de Diepe Grot (TIJDELIJKE AANNAME: elk echt gevecht; oefengevechten en PvP niet).
 static func token_factor(heeft_token: bool, tegen_dienaren: bool) -> float:
 	return 1.0 + TOKEN_BONUS if heeft_token and tegen_dienaren else 1.0
+
+
+## Haak voor Archief 6: zet de vlaggen en geeft de afscheidsregel (één keer; daarna []).
+static func einde(flags: Dictionary) -> Array[String]:
+	flags[FLAG_SAPIENTIA_VERSLAGEN] = true
+	if bool(flags.get(FLAG_RUST, false)):
+		return []
+	flags[FLAG_RUST] = true
+	return [AFSCHEID]
+
+
+## Is H-5 verdwenen? (dan zet de Grot geen Koopman meer neer)
+static func verdwenen(flags: Dictionary) -> bool:
+	return bool(flags.get(FLAG_RUST, false)) or bool(flags.get(FLAG_SAPIENTIA_VERSLAGEN, false))
