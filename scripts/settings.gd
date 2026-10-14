@@ -50,6 +50,7 @@ const DEFAULTS := {
 	"crt": true,
 	"screen_shake": true,
 	"autosave": true,
+	"run": false,      # TODO.md "run feature": RUN-toggle (blijft aan tot de speler hem uitzet)
 }
 
 var path := DEFAULT_PATH
