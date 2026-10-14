@@ -234,7 +234,10 @@ func _dorp() -> void:
 		if str(kind.get_meta("prop", "")) != "":
 			props += 1
 	check("props in de scène (%d)" % props, props == Data.PROPS.size())
-	check("beek + brug op een eigen laag", dorp.get_node_or_null("Ground/Beek/Brug") != null)
+	if Data.som():
+		_som_pilot(dorp)
+	else:
+		check("beek + brug op een eigen laag", dorp.get_node_or_null("Ground/Beek/Brug") != null)
 	await _overzicht(dorp)
 	await _molen(dorp)
 	await _rondlopen(dorp)
@@ -453,6 +456,44 @@ func _overzicht(dorp: Node) -> void:
 
 
 ## SoM-voorbereiding (Dennis 14 okt 2026): 24x32-kaartsprites, slot-tilesets per gebied, stijl per gebied.
+## Fase 3: Wilgendal in SoM-stijl (live dorp).
+func _som_pilot(dorp: Node) -> void:
+	var g: TileMapLayer = dorp.get_node("Ground")
+	check("som: grond = fase-1 terrain-tileset", g.has_meta("som_klaar")
+			and g.tile_set.resource_path == KaartStijl.tileset_pad("wilgendal", "terrain"))
+	var namen: Dictionary = g.namen
+	var w := Vector2i(10, Data.BEEK_RIJ)
+	var wc: Array = namen["water_068"]
+	check("som: beek = water blob47 (E+W = 068) en botst", g.get_cell_atlas_coords(w) == Vector2i(int(wc[0]), int(wc[1]))
+			and g.get_cell_tile_data(w).get_collision_polygons_count(0) > 0 and not Data.beloopbaar(w))
+	var ov: TileMapLayer = dorp.get_node("Ground/SomOverlay")
+	var bm: Array = namen["brug_v_m"]
+	check("som: brug over de beek beloopbaar", ov.get_cell_atlas_coords(Vector2i(34, Data.BEEK_RIJ)) == Vector2i(int(bm[0]), int(bm[1]))
+			and Data.beloopbaar(Vector2i(34, Data.BEEK_RIJ)) and dorp.get_node_or_null("Ground/Beek/Brug") == null)
+	var pad := Vector2i(10, 11)
+	check("som: pad met autotile-masker", g.get_cell_tile_data(pad).get_custom_data("terrain").begins_with("pad_"))
+	check("som: kegelbomen op de rand", dorp.get_node("Objects/SomBomen").get_child_count() > 150)
+	var ok := true
+	for ruw in Data.PANDEN:
+		var rij: Dictionary = Data.som_pand(ruw)
+		var body: Node = dorp.get_node("Objects/Pand_%s" % rij["id"])
+		var tex: Texture2D = body.get_child(1).texture
+		if str(rij["id"]) == "burgemeester":
+			ok = ok and not rij.has("som_tex") and tex.resource_path.ends_with("burgemeestershuis.png")
+		else:
+			ok = ok and rij.has("som_tex") and tex.resource_path == rij["som_tex"] and rij["deur"] == ruw["deur"]
+			ok = ok and tex.get_size() == Vector2(rij["maat"]) * 16.0 and Data.pand_blok(ruw).size.y == 2
+			ok = ok and Data.beloopbaar(rij["oorsprong"] + Vector2i(1, rij["maat"].y - 3)) and not Data.beloopbaar(ruw["deur"] + Vector2i.UP)
+	check("som: huizen uit fase 1 (zelfde deur, dak beloopbaar), burgemeestershuis blijft", ok)
+	var molen: Node = dorp.get_node("Objects/MolenWieken")
+	check("som: molen v2 blijft (positie, stille wieken tot Garrett)", molen.position == Data.molen_positie()
+			and molen.get_node_or_null("Basis") != null)
+	var sp: Sprite2D = dorp.get_node("Objects/Player/Sprite2D")
+	check("som: speler = fase-2 heldsheet 24x32 (%s)" % sp.texture.resource_path,
+			sp.texture.resource_path.begins_with("res://assets/sprites/som/kaart/")
+			and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
+
+
 func _som() -> void:
 	const DAX := "res://assets/sprites/som/test/dax_24x32_v3.png"
 	const PROEF := "res://tools/som/test/uit/"
@@ -483,8 +524,10 @@ func _som() -> void:
 			and s2.hframes == 3 and s2.vframes == 4 and s2.offset == Vector2(0, -8) and s2.frame == 7)
 	s2.free()
 	# stijl per gebied: de echte config is overal nog oud
-	check("alle gebieden nu oud (geen zichtbare wijziging)", KaartStijl.stijl("wilgendal") == KaartStijl.OUD
-			and not KaartStijl.is_som(DORP) and KaartStijl.gebied_van_map(DORP) == "wilgendal")
+	check("pilot: Wilgendal som, binnen + andere maps oud", KaartStijl.stijl("wilgendal") == KaartStijl.SOM
+			and KaartStijl.is_som(DORP) and KaartStijl.gebied_van_map(DORP) == "wilgendal"
+			and not KaartStijl.is_som(Data.BINNEN) and KaartStijl.gevraagd("") == KaartStijl.OUD
+			and not KaartStijl.is_som("res://scenes/maps/wereldkaart.tscn"))
 	# proef-config: som met complete art -> som; één tileset kwijt -> het HELE gebied oud
 	KaartStijl.zet_config({"map": PROEF, "gebieden": {"proef_herfst": {"stijl": "som", "maps": ["dorp_wilgendal"],
 			"tilesets": ["proef"], "speler": DAX}}})

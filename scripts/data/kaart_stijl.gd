@@ -97,10 +97,25 @@ static func toepassen(map: Node) -> bool:
 	var g: Dictionary = gebieden()[gebied]
 	var sets: Array = g.get("tilesets", [])
 	var ground := map.get_node_or_null("Ground") as TileMapLayer
-	if ground != null and not sets.is_empty():
+	# Een grondscript dat zelf SoM tekent (meta "som_klaar", bv. dorp_ground.gd) niet overschrijven.
+	if ground != null and not sets.is_empty() and not ground.has_meta("som_klaar"):
 		ground.tile_set = load(tileset_pad(gebied, str(sets[0])))
-	var speler := str(g.get("speler", ""))
+	var speler := speler_sheet(gebied)
 	var p := map.get_node_or_null("Objects/Player")
 	if p != null and speler != "" and p.has_method("zet_sheet"):
 		p.zet_sheet(load(speler))
 	return true
+
+
+## Kaartsprite van de partijleider: <helden>/<voornaam>.png (fase 2: dax, seren, vesper, kael, orion),
+## anders "speler" uit de config.
+static func speler_sheet(gebied: String) -> String:
+	var g: Dictionary = gebieden().get(gebied, {})
+	var map_ := str(g.get("helden", ""))
+	var gs = Engine.get_main_loop().root.get_node_or_null("GameState") if Engine.get_main_loop() is SceneTree else null
+	if map_ != "" and gs != null and not (gs.party as Array).is_empty():
+		var naam := str((gs.party[0] as Dictionary).get("name", "")).to_lower().get_slice(" ", 0)
+		var p := map_.trim_suffix("/") + "/" + naam + ".png"
+		if naam != "" and ResourceLoader.exists(p):
+			return p
+	return str(g.get("speler", ""))

@@ -52,6 +52,13 @@ func _beek_en_brug(kaart: Node) -> void:
 	# Kind van Ground: de kaart zelf is nog bezig met _ready (add_child daar faalt),
 	# en als kind tekent de laag boven de grondtegels maar onder Objects.
 	kaart.get_node("Ground").add_child(laag)
+	if Data.som():
+		# SoM: beek en brug zijn tegels (dorp_ground.gd); alleen de botsing blijft hier.
+		for x in Data.W:
+			var t := Vector2i(x, Data.BEEK_RIJ)
+			if Data.beek(t):
+				_blok(laag, "BeekRand_%d" % x, Rect2i(t, Vector2i.ONE))
+		return
 	var tex: Texture2D = load(Data.PROPS_MAP + "beek_h.png")
 	for x in Data.W:
 		var t := Vector2i(x, Data.BEEK_RIJ)
@@ -164,6 +171,7 @@ func _sfeer(objects: Node) -> void:
 
 
 func _pand(objects: Node, ruw: Dictionary) -> void:
+	ruw = Data.som_pand(ruw)
 	var id := str(ruw["id"])
 	var oorsprong: Vector2i = ruw["oorsprong"]
 	var maat: Vector2i = ruw["maat"]
@@ -181,7 +189,7 @@ func _pand(objects: Node, ruw: Dictionary) -> void:
 	bots.position = Vector2(0, -blok.size.y * 8.0)
 	lichaam.add_child(bots)
 	var plaat := Sprite2D.new()
-	plaat.texture = TEX[str(ruw["tex"])]
+	plaat.texture = load(str(ruw["som_tex"])) if ruw.has("som_tex") else TEX[str(ruw["tex"])]
 	plaat.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	plaat.position = Vector2(0, -maat.y * 8.0)
 	lichaam.add_child(plaat)
@@ -216,6 +224,9 @@ func _pand(objects: Node, ruw: Dictionary) -> void:
 		# v0.21: met de echte panden (RPG ART batch 13) hangt het bord een tegel lager, boven de deur,
 		# zodat de gevelversiering (helm, zwaarden, sterraam) zichtbaar blijft.
 		bord.position = Vector2(float(ruw["deur"].x) * 16.0 + 8.0, float(oorsprong.y) * 16.0 + 8.0 + BORD_OMLAAG)
+		# SoM: het uithangbord zit in de gevel (bord_* tegel); het oude icoon blijft als knoop maar onzichtbaar.
+		if ruw.has("som_tex"):
+			bord.visible = false
 		objects.add_child(bord)
 
 

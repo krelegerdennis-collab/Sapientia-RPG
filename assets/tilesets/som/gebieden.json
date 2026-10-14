@@ -3,11 +3,17 @@
 	"standaard": "oud",
 	"gebieden": {
 		"wilgendal": {
-			"stijl": "oud",
-			"maps": ["dorp_wilgendal", "wilgendal_binnen"],
-			"palet": "normaal",
-			"tilesets": ["terrein", "gebouwen"],
-			"speler": "res://assets/sprites/som/kaart/dax.png"
+			"stijl": "som",
+			"maps": [
+				"dorp_wilgendal"
+			],
+			"palet": "wilgendal",
+			"tilesets": [
+				"terrain",
+				"gebouw"
+			],
+			"speler": "res://assets/sprites/som/kaart/dax.png",
+			"helden": "res://assets/sprites/som/kaart/"
 		}
 	}
 }
