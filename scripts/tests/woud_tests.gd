@@ -308,7 +308,7 @@ func v17_shot(name: String) -> void:
 
 
 func setup_game(level := 11) -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	var h: Dictionary = GameState.party[0]
@@ -345,8 +345,8 @@ func freeze_monsters(r: Node) -> void:
 # ================================================================ A: data
 func _data_tests() -> void:
 	var q: Array = SD.QUESTS.filter(func(x): return x["id"] == "noor")
-	check("opdracht 'Red Noor uit het Dark Wood' (start quest_noor, klaar noor_gered)", q.size() == 1
-			and q[0]["title"] == "Save Noor from the Dark Wood" and q[0]["start_flag"] == "quest_noor" and q[0]["done_flag"] == "noor_gered")
+	check("opdracht 'Red Vesper uit het Dark Wood' (start quest_noor, klaar noor_gered)", q.size() == 1
+			and q[0]["title"] == "Save Vesper from the Dark Wood" and q[0]["start_flag"] == "quest_noor" and q[0]["done_flag"] == "noor_gered")
 	var missing := SD.TODO_STORY.filter(func(e): return not SD.EVENTS.has(e))
 	check("TODO(verhaal): placeholder-events gemarkeerd en aanwezig (%d, mist %s)" % [SD.TODO_STORY.size(), missing],
 			missing.is_empty() and SD.TODO_STORY.has("noor_ontmoeting") and SD.TODO_STORY.has("noor_bevrijd")
@@ -546,21 +546,21 @@ func _village_tests() -> void:
 	var v := scene()
 	check("ontmoeting start vanzelf bij binnenkomst", await wait_until(func(): return Story.running, 3.0)
 			and Story.current_event == "noor_ontmoeting")
-	var noor: Node = v.get_node_or_null("Objects/Noor")
-	check("Noor op het plein met haar loopsprite (noor_dorp.png, RPG ART)", noor != null and noor.visible
+	var noor: Node = v.get_node_or_null("Objects/Vesper")
+	check("Vesper op het plein met haar loopsprite (noor_dorp.png, RPG ART)", noor != null and noor.visible
 			and str(noor.sprite.texture.resource_path).ends_with("noor_dorp.png"))
 	var balloon := [false]
 	var lines := await run_story(60.0, "Jou ken ik niet", "noor_ballon")
 	# ballon-check: de eerste Noor-regel had een spreker-node (Noor) en de ballonstijl
-	check("blauwe ballonnen met namen (Noor, %s, Marit): %d regels" % [GameState.player_name, lines.size()],
-			lines.any(func(l): return str(l).begins_with("Noor: ")) and lines.any(func(l): return str(l).begins_with("Marit: "))
+	check("blauwe ballonnen met namen (Vesper, %s, Marit): %d regels" % [GameState.player_name, lines.size()],
+			lines.any(func(l): return str(l).begins_with("Vesper: ")) and lines.any(func(l): return str(l).begins_with("Marit: "))
 			and lines.any(func(l): return str(l).begins_with(GameState.player_name + ": ")))
-	check("eindigt met de opdracht (dorpeling vraagt Noor te redden)", lines.any(func(l): return "save her" in str(l))
-			and lines.any(func(l): return "New quest: Save Noor from the Dark Wood" in str(l)))
+	check("eindigt met de opdracht (dorpeling vraagt Vesper te redden)", lines.any(func(l): return "save her" in str(l))
+			and lines.any(func(l): return "New quest: Save Vesper from the Dark Wood" in str(l)))
 	check("vlaggen: noor_ontmoet + quest_noor, stap NOOR_KWIJT", Story.has_flag("noor_ontmoet") and Story.has_flag("quest_noor")
 			and GameState.story_step == SD.NOOR_KWIJT)
-	check("Noor is weg (meegesleurd), de wortelgreep ook", not noor.visible and not v.get_node("Objects/WortelGreep").visible)
-	check("opdracht loopt: '%s'" % Story.active_quest(), Story.active_quest() == "Save Noor from the Dark Wood")
+	check("Vesper is weg (meegesleurd), de wortelgreep ook", not noor.visible and not v.get_node("Objects/WortelGreep").visible)
+	check("opdracht loopt: '%s'" % Story.active_quest(), Story.active_quest() == "Save Vesper from the Dark Wood")
 	check("Codex: Marit geeft 3 Blank Books na de ontmoeting (geen startvoorraad) (%d)" % GameState.item_count("leeg_boek"),
 			GameState.item_count("leeg_boek") == 3 and Story.has_flag("marit_boeken") and not GD.START_INVENTORY.has("leeg_boek")
 			and lines.any(func(l): return "3x Blank Book" in str(l)))
@@ -568,8 +568,8 @@ func _village_tests() -> void:
 	v.open_field_menu()
 	await pframes(4)
 	var fm: Node = v.get_node_or_null("FieldMenu")
-	check("veldmenu: 'Opdracht' + 'Red Noor uit het Dark Wood'", fm != null and fm.quest_label != null
-			and fm.quest_label.text == "Save Noor from the Dark Wood" and fm.quest_label.is_visible_in_tree())
+	check("veldmenu: 'Opdracht' + 'Red Vesper uit het Dark Wood'", fm != null and fm.quest_label != null
+			and fm.quest_label.text == "Save Vesper from the Dark Wood" and fm.quest_label.is_visible_in_tree())
 	await v17_shot("veldmenu_opdracht")
 	if fm:
 		fm.close()
@@ -600,9 +600,9 @@ func _village_tests() -> void:
 	await walk("move_up", 1)
 	if not GameState.changing_map:
 		await press_interact()
-	check("huis van Noor is te betreden", await wait_scene("EsdoornHuisNoor"))
+	check("huis van Vesper is te betreden", await wait_scene("EsdoornHuisNoor"))
 	var ilse: Node = scene().get_node_or_null("Objects/Ilse")
-	check("binnen: Ilse (moeder van Noor)", ilse != null and ilse.event == "ilse")
+	check("binnen: Ilse (moeder van Vesper)", ilse != null and ilse.event == "ilse")
 	await wait_fade()
 	await walk("move_down", 2)
 	check("deur uit = terug in Mapleton voor het huis", await wait_scene("Esdoorn") and tile() == Vector2i(7, 9))
@@ -708,9 +708,9 @@ func _forest_tests() -> void:
 	await pframes(3)
 	var cocon: Node = r.get_node_or_null("Objects/Cocon")
 	var boss: Node = r.get_monster("baas")
-	check("open plek: Noor in de cocon (puls) achter de Root King", cocon != null and cocon.visible and cocon.looping
+	check("open plek: Vesper in de cocon (puls) achter de Root King", cocon != null and cocon.visible and cocon.looping
 			and str(cocon.sprite.texture.resource_path).ends_with("noor_cocon_puls.png") and boss != null and boss.boss
-			and not r.get_node("Objects/Noor").visible and not r.get_node("Objects/CoconOpen").visible)
+			and not r.get_node("Objects/Vesper").visible and not r.get_node("Objects/CoconOpen").visible)
 	check("glitch maximaal bij de baas (%.2f)" % Crt.glitch_intensity, Crt.glitch_intensity == 1.0)
 	# screenshot: Noor in de (pulserende) cocon achter de Wortelkoning
 	await freeze_monsters(r)
@@ -733,24 +733,24 @@ func _forest_tests() -> void:
 		await v17_shot("woud_achtergrond")
 	check("baas verslagen", await win_battle())
 	check("terug op de open plek", await wait_scene("WoudOpenPlek"))
-	check("Noor-bevrijding start vanzelf", await wait_until(func(): return Story.running, 3.0) and Story.current_event == "noor_bevrijd")
+	check("Vesper-bevrijding start vanzelf", await wait_until(func(): return Story.running, 3.0) and Story.current_event == "noor_bevrijd")
 	var ls := await run_story(60.0, "Ik ga met je mee", "noor_erbij")
-	check("tekst: Noor joins the party + quest complete", ls.any(func(l): return "Noor joins the party" in str(l))
+	check("tekst: Vesper joins the party + quest complete", ls.any(func(l): return "Vesper joins the party" in str(l))
 			and ls.any(func(l): return "Quest complete" in str(l)))
 	var noor := {}
 	for h in GameState.party:
 		if h["id"] == "noor":
 			noor = h
 	var lv_now := int(GameState.party[0]["level"])     # (de baas gaf EXP: Dennis kan gestegen zijn)
-	check("Noor in de groep (niveau Dennis-1 = %d, Dennis was Lv %d voor de baas, gevechtsplaatje noor.png)" % [lv_now - 1, lv], not noor.is_empty()
+	check("Vesper in de groep (niveau Dax-1 = %d, Dax was Lv %d voor de baas, gevechtsplaatje noor.png)" % [lv_now - 1, lv], not noor.is_empty()
 			and int(noor["level"]) == lv_now - 1 and str(noor["battle_sprite"]).ends_with("battle/noor.png"))
-	check("Noor draagt Oak Staff + Travel Robe, HP/MP vol", not noor.is_empty() and noor["equip"]["wapen"] == "eiken_staf"
+	check("Vesper draagt Oak Staff + Travel Robe, HP/MP vol", not noor.is_empty() and noor["equip"]["wapen"] == "eiken_staf"
 			and noor["equip"]["harnas"] == "reisgewaad" and int(noor["hp"]) == int(noor["max_hp"]) and int(noor["mp"]) == int(noor["max_mp"]))
 	check("opdracht klaar: noor_gered + noor_lid, stap NOOR_GERED, geen lopende opdracht", Story.has_flag("noor_gered")
 			and Story.has_flag("noor_lid") and Story.has_flag(SD.WORTELKONING_FLAG) and GameState.story_step == SD.NOOR_GERED and Story.active_quest() == "")
 	r = scene()
-	check("open plek daarna: lege cocon, geen Noor-NPC, geen baas", r.get_node("Objects/CoconOpen").visible and not r.get_node("Objects/Cocon").visible
-			and not r.get_node("Objects/Noor").visible and r.get_monster("baas") == null)
+	check("open plek daarna: lege cocon, geen Vesper-NPC, geen baas", r.get_node("Objects/CoconOpen").visible and not r.get_node("Objects/Cocon").visible
+			and not r.get_node("Objects/Vesper").visible and r.get_monster("baas") == null)
 	var n_b := count_in_history("noor_bevrijd")
 	await enter(SD.WOUD_BAAS, "zuid")
 	await get_tree().create_timer(0.8).timeout
@@ -772,7 +772,7 @@ func _save_tests() -> void:
 	for h in GameState.party:
 		if h["id"] == "noor":
 			noor = h
-	check("Noor terug in de groep (Lv %d, Oak Staff)" % lv_noor, not noor.is_empty() and int(noor["level"]) == lv_noor
+	check("Vesper terug in de groep (Lv %d, Oak Staff)" % lv_noor, not noor.is_empty() and int(noor["level"]) == lv_noor
 			and noor["equip"]["wapen"] == "eiken_staf")
 	GameState.continue_game()
 	check("verder spelen: op de open plek, geen cutscene", await wait_scene("WoudOpenPlek") and not Story.running)
@@ -787,7 +787,7 @@ func _save_tests() -> void:
 	GameState.new_game("Iemand")
 	GameState.load_game()
 	check("halverwege geladen: opdracht loopt nog ('%s'), ontmoeting niet opnieuw" % Story.active_quest(),
-			Story.active_quest() == "Save Noor from the Dark Wood" and Story.has_flag("noor_ontmoet"))
+			Story.active_quest() == "Save Vesper from the Dark Wood" and Story.has_flag("noor_ontmoet"))
 
 
 # ================================================================ F: Codex + wereldkaart-iconen
@@ -883,7 +883,7 @@ func _codex_forest_tests() -> void:
 	for c in b.heroes:
 		if c.get("ally", false):
 			ally = c
-	check("Root Crawler vecht mee naast Dennis (bos-achtergrond %s)" % GameState.pending_backdrop_id, not ally.is_empty()
+	check("Root Crawler vecht mee naast Dax (bos-achtergrond %s)" % GameState.pending_backdrop_id, not ally.is_empty()
 			and GameState.pending_backdrop_id == "forest_dark")
 	b.codex.force_skill = "wortelgreep"
 	b.codex.last_ally_action = {}
@@ -1094,7 +1094,7 @@ func _graan_tests() -> void:
 			and wieken.sprite.texture == Wieken.wieken_sheet())
 	Story.trigger("gerrit", g)
 	var dicht: Array = await run_story(6.0)
-	check("quest dicht vóór Noor", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)
+	check("quest dicht vóór Vesper", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)
 			and Story.active_quest() == "" and GameState.item_count(SD.ITEM_ZAAD) == 0
 			and not dicht.any(func(l): return SD.QUOTE_GRAAN_BEZOEK in str(l) or SD.QUOTE_GRAAN_DANK in str(l) or SD.QUOTE_GRAAN_WACHT in str(l)))
 	GameState.story_flags["noor_lid"] = true
@@ -1179,10 +1179,10 @@ func _graan_tests() -> void:
 	await v17_shot("molen_zingt")
 	Dialog.choose(1)
 	await lines_until_choice()
-	check("party wisselen noemt de groep", Dialog.choices.size() == 2 and str(Dialog.choices[1]) == "Noor")
+	check("party wisselen noemt de groep", Dialog.choices.size() == 2 and str(Dialog.choices[1]) == "Vesper")
 	Dialog.choose(1)
 	await run_story(8.0)
-	check("Noor gaat voorop", str(GameState.party[0].get("id", "")) == "noor" and str(GameState.party[1].get("id", "")) == "dennis")
+	check("Vesper gaat voorop", str(GameState.party[0].get("id", "")) == "noor" and str(GameState.party[1].get("id", "")) == "dennis")
 	var meel := GameState.item_count(SD.ITEM_MEEL)
 	GameState.party[0]["hp"] = 1
 	Story.trigger("gerrit", scene().get_node("Objects/Gerrit"))
@@ -1261,7 +1261,7 @@ func _warper_tests() -> void:
 			and str(uit["spawn"]) == "van_woud" and str(uit["map"]) == WORLD)
 	if spots.size() != 3:
 		return
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.KLAAR
 	GameState.encounter_multiplier = 0.0
 	if Dialog.is_open:

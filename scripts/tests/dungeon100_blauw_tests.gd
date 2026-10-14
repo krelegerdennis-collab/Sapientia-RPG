@@ -191,7 +191,7 @@ func _rng(s: int) -> RandomNumberGenerator:
 
 # ================================================================ deel B
 func _run_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.gold = 80
 	GameState.inventory["kruid"] = 2
 	GameState.party[0]["level"] = 8
@@ -228,12 +228,12 @@ func _run_tests() -> void:
 	check("wapenvak van voor de run is terug (%s)" % gear_before, str(GameState.party[0].get("equip", {}).get("wapen", "")) == gear_before)
 	var path_na := "user://dungeon100_blauw_na.json"
 	check("opslaan na de dood", GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, path_na))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("laden na de dood: databank en item blijven, geen lopende run, level 8 en 80 goud",
 			GameState.load_game(path_na) and not GameState.dungeon100_run_active()
 			and int(GameState.dungeon100_permanent.get(item_id, 0)) == 1 and GameState.item_count(item_id) == 1
 			and GameState.party[0]["level"] == 8 and GameState.gold == 80 and GameState.item_count("kruid") == 2)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("tussentijdse save laadt de run terug, met de echte party in de momentopname", GameState.load_game(path)
 			and GameState.dungeon100_run_active() and int(GameState.dungeon100_snapshot["party"][0]["level"]) == 8
 			and int(GameState.dungeon100_snapshot["gold"]) == 80)
@@ -258,11 +258,11 @@ func _run_tests() -> void:
 	check("na afloop is het blauwe item er één keer (niet verdubbeld)", GameState.item_count(item_id) == 1
 			and GameState.party[0]["level"] == 8 and GameState.gold == 80)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 
 
 func _ring_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("ring-run start", GameState.dungeon100_begin_run() and GameState.dungeon100_run_active())
 	GameState.dungeon100_floor = 100
 	GameState.inventory[Blue.WARP_ITEM] = 1
@@ -293,7 +293,7 @@ func _ring_tests() -> void:
 	check("tweede dood beëindigt de run naar ECHO", weg == Rules.WORLD_SCENE
 			and not GameState.dungeon100_run_active() and GameState.dungeon100_floor == 0)
 	GameState._autosave_request = ""
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 
 
 # ================================================================ deel C
@@ -303,7 +303,7 @@ func _scene_tests() -> void:
 	check("er is een verdieping met een Mimic en een met een Blauwe Kist", not mimic_floor.is_empty() and not blue_floor.is_empty())
 	if mimic_floor.is_empty():
 		return
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.gold = 55

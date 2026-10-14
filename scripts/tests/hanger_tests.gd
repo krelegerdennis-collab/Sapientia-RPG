@@ -78,7 +78,7 @@ func _canon_tests() -> void:
 	sc.maybe_play(bron)
 	await get_tree().process_frame
 	var n := Dreiging.lines().size()
-	check("Hal-scène start met de eerste canon-regel", sc._playing and sc.text_label.text == "Noor: We're... inside?")
+	check("Hal-scène start met de eerste canon-regel", sc._playing and sc.text_label.text == "Vesper: We're... inside?")
 	var hanger_vlag_tijdig := false
 	for i in n:
 		if i == Canon.HANGER.size():

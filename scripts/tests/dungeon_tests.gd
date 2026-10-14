@@ -88,9 +88,9 @@ func _data_tests() -> void:
 			if path.ends_with("story_data.gd") and "v0.17 ESDOORN + DONKER WOUD" in line:
 				break
 			var code := line.get_slice("#", 0) if path.ends_with(".gd") else line
-			if ("\"say\"" in code or "lines = " in code) and (code.contains("Noor") or code.contains("Lotte")):
+			if ("\"say\"" in code or "lines = " in code) and (code.contains("Vesper") or code.contains("Seren")):
 				named.append("%s:%d" % [path.get_file(), n])
-	check("Warden/Oude Man noemt Noor en Lotte nergens bij naam (%s)" % [named], named.is_empty())
+	check("Warden/Oude Man noemt Vesper en Seren nergens bij naam (%s)" % [named], named.is_empty())
 	var mw: Dictionary = GD.ENEMIES.get("mech_wachter", {})
 	var kb: Dictionary = GD.ENEMIES["kennis_beest"]
 	var small := ["mosslijm", "moskonijn", "papiergeest", "glitchmot"]
@@ -367,7 +367,7 @@ func positions(r: Node) -> Dictionary:
 func _title_shot() -> void:
 	check("titelscherm bij de start", await wait_scene("Title"))
 	# met een save, zodat 'Doorgaan' + de save-info in het menu staan
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.current_map = ROOM_SCENE
 	GameState.save_game(Vector2i(9, 10), U)
 	get_tree().change_scene_to_file(GameState.TITLE_SCENE)
@@ -376,7 +376,7 @@ func _title_shot() -> void:
 	var t := scene()
 	await wait_fade()
 	check("Doorgaan aan met save-info (%s)" % t.save_info.text, not t.continue_button.disabled and t.save_info.visible
-			and "Dennis" in t.save_info.text)
+			and "Dax" in t.save_info.text)
 	var st: Rect2 = t.stage.get_global_rect()
 	var cr: Rect2 = t.card.get_global_rect()
 	cr.position -= st.position
@@ -450,7 +450,7 @@ func _world_reachable(g: TileMapLayer, from: Vector2i, to: Vector2i) -> int:
 
 
 func _world_and_outdoor_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(WORLD_SCENE, "van_dorp")
@@ -805,7 +805,7 @@ func dir_action(d: Vector2i) -> String:
 
 # ================================================================ v0.14 deel C: de dungeon
 func _dungeon_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT      # proloog-scènes klaar: Archieven + wereldkaart open
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(WORLD_SCENE, "van_archief")
@@ -1039,7 +1039,7 @@ func _guard_chest_book_tests() -> void:
 		for b in Dialog._rects_for(bx):
 			over = over or b.intersects(f)
 	var py: float = player().get_global_transform_with_canvas().origin.y
-	check("v0.16: schat-tekst '%s' in het blauwe vak (geen ballon/staart/naam)" % line, line == "Dennis finds: 2x Potion!"
+	check("v0.16: schat-tekst '%s' in het blauwe vak (geen ballon/staart/naam)" % line, line == "Dax finds: 2x Potion!"
 			and Dialog.style_kind == "vak" and UiStyle.is_blue_box(Dialog.box_style(), "vak") and not Dialog.tail.visible
 			and not Dialog.name_tab.visible)
 	check("v0.16: schat-tekst bedekt speler/kist niet; laag tenzij de speler zelf onderin staat (%s, plek %s, speler y %.0f)"

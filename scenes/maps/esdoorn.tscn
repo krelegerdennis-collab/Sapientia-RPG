@@ -113,9 +113,9 @@ event_arg = ""
 show_if = {}
 sheet = null
 
-[node name="Noor" parent="Objects" instance=ExtResource("6_0dd4x")]
+[node name="Vesper" parent="Objects" instance=ExtResource("6_0dd4x")]
 position = Vector2(264, 248)
-npc_name = "Noor"
+npc_name = "Vesper"
 lines = Array[String](["..."])
 facing = Vector2i(0, 1)
 event = ""

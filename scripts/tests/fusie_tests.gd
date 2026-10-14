@@ -75,7 +75,7 @@ func _run() -> void:
 		print("=== Deel E: gevecht ===")
 		await _battle_tests()
 	if part("F"):
-		print("=== Deel F: Ink Worm (beslissing Dennis) ===")
+		print("=== Deel F: Ink Worm (beslissing Dax) ===")
 		await _unique_tests()
 	if part("G"):
 		print("=== Deel G: Codex-knop in het gevecht ===")
@@ -246,7 +246,7 @@ func _save_tests() -> void:
 	g["hp"] = 7
 	var p := player()
 	check("opslaan", GameState.save_game(p.get_tile(), p.facing))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("laden", GameState.load_game())
 	var q := GameState.codex_page(g["uid"])
 	check("na laden: Glitch Worm, generatie 1, label glitch, stats, HP 7, actief", not q.is_empty() and q["name"] == "Glitch Worm"
@@ -256,12 +256,12 @@ func _save_tests() -> void:
 	check("na laden: ouders blijven weg, nieuwe vangst krijgt een nieuwe uid", GameState.codex_page(a["uid"]).is_empty()
 			and GameState.codex_add("glitchmot")["uid"] == "codex_0005")
 	# geërfde vaardigheid blijft na laden (Mech. Wachter + Inktwurm)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	var m := GameState.codex_add("mech_wachter", 3)
 	var i := GameState.codex_add("inktwurm", 8)
 	var kb := GameState.codex_fuse(m["uid"], i["uid"])
 	GameState.save_game(p.get_tile(), p.facing)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.load_game()
 	var k2 := GameState.codex_page(kb["uid"])
 	check("na laden: Lore Beast houdt geërfde Shield Up + Ink Spit %s" % [k2.get("skills")], not k2.is_empty()
@@ -496,7 +496,7 @@ func _unique_tests() -> void:
 			and m8.any(func(x): return "learns Ink Spit" in x) and page["atk"] == CD.stats_at("inktwurm", 8)["atk"]
 			and page["max_hp"] == CD.stats_at("inktwurm", 8)["max_hp"])
 	# --- uniek: API
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: Ink Worm beschikbaar, gewone monsters altijd", GameState.unique_available("inktwurm") and GameState.is_unique("inktwurm")
 			and GameState.unique_available("mosslijm") and not GameState.is_unique("mosslijm"))
 	# --- vangen in het gevecht (in een kamer met tier: telt niet)
@@ -534,7 +534,7 @@ func _unique_tests() -> void:
 	var p := player()
 	check("opslaan", GameState.save_game(p.get_tile(), p.facing))
 	check("save bevat 'uniek': {inktwurm: gevangen}", GameState.read_save(GameState.save_path).get("uniek", {}) == {"inktwurm": "gevangen"})
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: weer beschikbaar", GameState.unique_available("inktwurm"))
 	check("laden: nooit meer (gevangen)", GameState.load_game() and not GameState.unique_available("inktwurm")
 			and GameState.unique_state("inktwurm") == "gevangen")
@@ -551,7 +551,7 @@ func _unique_tests() -> void:
 	p = player()
 	GameState.save_game(p.get_tile(), p.facing)
 	var raw := GameState.read_save(GameState.save_path)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("laden: verslagen blijft verslagen", GameState.load_game() and GameState.unique_state("inktwurm") == "verslagen")
 	# oude save zonder 'uniek' / kapot
 	raw.erase("uniek")
@@ -564,13 +564,13 @@ func _unique_tests() -> void:
 	GameState.unique_mark("inktwurm", "verslagen")
 	check("eerste uitkomst telt (gevangen blijft gevangen)", GameState.unique_state("inktwurm") == "gevangen")
 	# Checkpoint: verslagen overleeft game over; gevangen rolt mee met de Codex.
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.set_checkpoint(INGANG, Vector2i(2, 2), Vector2i.DOWN)
 	GameState.unique_mark("inktwurm", "verslagen")
 	GameState.respawn_at_checkpoint(false)
 	check("game over: verslagen Ink Worm blijft weg", GameState.unique_state("inktwurm") == "verslagen"
 			and not GameState.unique_available("inktwurm"))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.set_checkpoint(INGANG, Vector2i(2, 2), Vector2i.DOWN)
 	GameState.unique_mark("inktwurm", "gevangen")
 	GameState.respawn_at_checkpoint(false)
@@ -683,7 +683,7 @@ func enter(path: String, spawn: String) -> Node:
 
 
 func setup() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	var h: Dictionary = GameState.party[0]

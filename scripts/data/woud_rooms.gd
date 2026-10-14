@@ -158,7 +158,7 @@ const ROOMS := {
 			"n": {"map": M + "woud_open_plek.tscn", "spawn": "zuid"},
 		},
 		"chests": [{"id": "kist_w5", "tile": [17, 4], "item": "leeg_boek", "n": 1}],   # v0.17 Codex
-		"signs": [{"tile": [15, 4], "lines": ["Something whispers between the trunks. 'Noor...' It sounds like her own voice."]}],
+		"signs": [{"tile": [15, 4], "lines": ["Something whispers between the trunks. 'Vesper...' It sounds like her own voice."]}],
 		"trees": [[13, 8, "A"], [5, 7, "B"]],
 		"mist": [[7, 9, 6]],
 		"overlay": [[8, 4, 108], [16, 6, 108], [3, 9, 108], [11, 6, 108], [15, 3, 84]],
@@ -205,7 +205,7 @@ const ROOMS := {
 				"event": "cocon", "show_if": {"flags": ["noor_gered"]}},
 		],
 		"npcs": [
-			{"name": "Noor", "npc_name": "Noor", "tile": [9, 4], "sheet": "res://assets/sprites/noor_dorp.png",
+			{"name": "Vesper", "npc_name": "Vesper", "tile": [9, 4], "sheet": "res://assets/sprites/noor_dorp.png",
 				"facing": "down", "event": "noor_woud", "show_if": {"flags": ["noor_gered"], "not_flags": ["noor_lid"]}},
 			# Het Zingende Graan: vloer (4,9) direct boven de mistband op y=10. Alleen tijdens de opdracht.
 			{"name": "Woudgeesten", "npc_name": "Woudgeest", "tile": [4, 9], "facing": "down",

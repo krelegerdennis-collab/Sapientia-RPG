@@ -153,7 +153,7 @@ func _speel() -> void:
 			cue = c
 			_cue(c)
 		var wie := str(r.get("who", ""))
-		if wie == "Dennis":
+		if wie == "Dax":
 			wie = GameState.player_name
 		regels_getoond.append(str(r.get("text", "")))
 		await get_tree().create_timer(0.25).timeout

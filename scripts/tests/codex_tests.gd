@@ -189,7 +189,7 @@ func enter(path: String, spawn: String) -> Node:
 
 
 func setup() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	var h: Dictionary = GameState.party[0]
@@ -434,7 +434,7 @@ func _data_tests() -> void:
 	check("pagina Lv 3: stats = basis + 2x groei, Moss Mend geleerd, fusievelden", p3["max_hp"] == 10 + 2 * 5 and p3["max_hp"] == st3["max_hp"]
 			and p3["skills"] == ["slijmklodder", "mosheling"] and p3["exp"] == GD.exp_for_level(3)
 			and p3["fusion"] == {"generation": 0, "parents": []} and p3["element"] == "natuur")
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	var a := GameState.codex_add("mosslijm")
 	var b2 := GameState.codex_add("mosslijm")
 	check("dubbele soort: 2 pagina's met eigen uid, de eerste wordt bondgenoot", GameState.codex_pages.size() == 2
@@ -443,7 +443,7 @@ func _data_tests() -> void:
 		GameState.codex_add("glitchmot")
 	check("Codex vol na %d pagina's" % CD.MAX_PAGES, GameState.codex_pages.size() == CD.MAX_PAGES and GameState.codex_full()
 			and GameState.codex_add("glitchmot").is_empty())
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: lege Codex, geen bondgenoot", GameState.codex_pages.is_empty() and GameState.codex_active == "")
 	var it: Dictionary = GD.ITEMS.get(CD.BOOK_ITEM, {})
 	check("item Blank Book: op een vijand, alleen in gevecht, NIET in de startvoorraad (v0.17: van Marit + woudkisten)", it.get("target") == "enemy"
@@ -562,13 +562,13 @@ func _ally_tests() -> void:
 		return
 	var node: Control = a["node"]
 	# v0.22 (Dennis): het monster staat als zijspeler rechts, boven de B-knop (iets hoger dan de helden)
-	check("rechts van Dennis (zijspeler boven B), echte rug-sprite van ART (geen plaatsvervanger)", node.get_script() == AllyScript and not node.placeholder
+	check("rechts van Dax (zijspeler boven B), echte rug-sprite van ART (geen plaatsvervanger)", node.get_script() == AllyScript and not node.placeholder
 			and node.texture_path == str(GD.ENEMIES["mosslijm"]["sprite_back"])
 			and node.home.x > h["node"].home.x and node.home.y <= h["node"].home.y + 1.0
 			and (node.placeholder == not ResourceLoader.exists(str(GD.ENEMIES["mosslijm"].get("sprite_back", "")))))
 	var feet_row: float = node.art_rect(node.home).end.y - node.home.y
 	check("anker: voeten op rij H-6 van het plaatje (%.1f eenheden onder de voeten)" % feet_row, absf(feet_row - CD.FEET_FROM_BOTTOM * CD.ALLY_ART_SCALE) < 1.01)
-	check("Dennis kiest, de bondgenoot niet (kruis staat bij Dennis)", b.current_hero == h["row"])
+	check("Dax kiest, de bondgenoot niet (kruis staat bij Dax)", b.current_hero == h["row"])
 	await screenshot("codex_bondgenoot")
 	# handelt zelf: Dennis verdedigt, de bondgenoot valt aan
 	b.codex.force_skill = "slijmklodder"
@@ -597,7 +597,7 @@ func _ally_tests() -> void:
 	# KO
 	b._hit(a, 999)
 	await b._report_kos([a])
-	check("bondgenoot KO (grijs, plat), Dennis vecht door", int(page["hp"]) == 0 and node.is_ko and b.state != "lose")
+	check("bondgenoot KO (grijs, plat), Dax vecht door", int(page["hp"]) == 0 and node.is_ko and b.state != "lose")
 	b.codex.last_ally_action = {}
 	await defend(b)
 	await wait_battle_state(["command"], 30)
@@ -637,10 +637,10 @@ func _ally_tests() -> void:
 	b.codex.last_ally_action = {}
 	await defend(b)
 	var healed := await wait_until(func(): return not b.codex.last_ally_action.is_empty(), 15.0)
-	check("AI: Dennis bijna KO -> bondgenoot geneest met Moss Mend %s" % [b.codex.last_ally_action], healed
+	check("AI: Dax bijna KO -> bondgenoot geneest met Moss Mend %s" % [b.codex.last_ally_action], healed
 			and b.codex.last_ally_action.get("skill") == "mosheling" and b.codex.last_ally_action.get("target") == GameState.party[0]["name"])
 	await wait_battle_state(["command"], 30)
-	check("Dennis is genezen (HP %d > 3)" % int(GameState.party[0]["hp"]), int(GameState.party[0]["hp"]) > 3)
+	check("Dax is genezen (HP %d > 3)" % int(GameState.party[0]["hp"]), int(GameState.party[0]["hp"]) > 3)
 	# vluchten werkt nog met een bondgenoot erbij
 	await flee(b)
 	check("vluchten met bondgenoot: gevecht klaar ('flee')", GameState.last_battle_result == "flee" and not GameState.in_battle)
@@ -794,7 +794,7 @@ func _save_tests() -> void:
 	var raw := GameState.read_save(GameState.save_path)
 	check("save bevat 'codex' (2 pagina's, actief, teller)", raw.get("codex", {}).get("pages", []).size() == 2
 			and raw["codex"]["active"] == p2["uid"] and int(raw["codex"]["next"]) == 3)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: Codex leeg", GameState.codex_pages.is_empty())
 	check("laden", GameState.load_game())
 	var q := GameState.codex_page(p2["uid"])
@@ -866,13 +866,13 @@ func _follower_tests() -> void:
 	check("Moss Slime is de actieve bondgenoot", page.get("uid", "") != "" and GameState.codex_active == page["uid"])
 	var arch := await enter("res://scenes/maps/archief_ingang.tscn", "ingang")
 	var follower = scene().get_node_or_null("Objects/CodexFollower") if arch != null else null
-	check("in het archief staat de volger klaar (nog op Dennis, dus verborgen)", follower != null and not follower.visible
+	check("in het archief staat de volger klaar (nog op Dax, dus verborgen)", follower != null and not follower.visible
 			and follower.species_id == "mosslijm")
 	if follower != null:
 		var start: Vector2i = player().get_tile()
 		await _walk("move_up", 3)
 		var dist: float = follower.position.distance_to(player().position)
-		check("na 3 stappen omhoog loopt Moss Slime één tegel achter Dennis (afstand %.1f, tile %s -> %s)"
+		check("na 3 stappen omhoog loopt Moss Slime één tegel achter Dax (afstand %.1f, tile %s -> %s)"
 				% [dist, start, player().get_tile()], player().get_tile() == start + Vector2i(0, -3)
 				and follower.visible and follower.position.y > player().position.y + 8.0
 				and dist > 10.0 and dist < 22.0 and follower.facing == Vector2i.UP
@@ -897,7 +897,7 @@ func _follower_tests() -> void:
 	if wf != null:
 		var w0: Vector2i = player().get_tile()
 		await _walk("move_up", 2)
-		check("wereldkaart: achter Dennis (tile %s -> %s)" % [w0, player().get_tile()],
+		check("wereldkaart: achter Dax (tile %s -> %s)" % [w0, player().get_tile()],
 				player().get_tile() == w0 + Vector2i(0, -2) and wf.visible
 				and wf.position.distance_to(player().position) > 10.0
 				and wf.position.distance_to(player().position) < 22.0)
@@ -971,8 +971,8 @@ func _beta_account_tests() -> void:
 			and GameState.playing_beta and GameState.save_path.ends_with("save_beta.json"))
 	var hero: Dictionary = GameState.party[0]
 	var equip: Dictionary = hero.get("equip", {})
-	check("betatest: Dennis niveau 10 met Spark Sword, schild, kap en mantel",
-			hero["name"] == "Dennis" and int(hero["level"]) == 10 and str(equip.get("wapen", "")) == "vonkzwaard"
+	check("betatest: Dax niveau 10 met Spark Sword, schild, kap en mantel",
+			hero["name"] == "Dax" and int(hero["level"]) == 10 and str(equip.get("wapen", "")) == "vonkzwaard"
 			and str(equip.get("schild", "")) == "houten_schild" and str(equip.get("helm", "")) == "leren_kap"
 			and str(equip.get("harnas", "")) == "leerling_mantel")
 	check("betatest: 6 Blank Books, Ink Worm als buddy, Moss Slime en Moss Rabbit erbij",
@@ -994,7 +994,7 @@ func _beta_account_tests() -> void:
 	check("oude betatest krijgt alsnog een Ink Worm als buddy", GameState._grant_beta_inktwurm()
 			and GameState.codex_pages.size() == 3
 			and str(GameState.codex_active_page().get("species", "")) == "inktwurm")
-	check("betatest: proloog klaar, woud open, Golem nog niet verslagen, Noor nog niet in de groep",
+	check("betatest: proloog klaar, woud open, Golem nog niet verslagen, Vesper nog niet in de groep",
 			GameState.story_step == SD.KLAAR and GameState.story_flags.has("quest_noor")
 			and GameState.story_flags.has("marit_boeken") and not GameState.story_flags.has(SD.GOLEM_FLAG)
 			and not GameState.has_member("noor"))
@@ -1005,8 +1005,8 @@ func _beta_account_tests() -> void:
 	GameState.use_story_saves()
 	check("na Nieuw spel wijst opslaan weer naar de echte save", not GameState.playing_beta
 			and GameState.save_path == story_path)
-	check("betatest laden zet Dennis terug op de wereldkaart", GameState.load_game(GameState.newest_beta_path())
-			and GameState.player_name == "Dennis" and GameState.member_level("dennis") == 10
+	check("betatest laden zet Dax terug op de wereldkaart", GameState.load_game(GameState.newest_beta_path())
+			and GameState.player_name == "Dax" and GameState.member_level("dennis") == 10
 			and GameState.return_map == GameState.WORLD_MAP and GameState.return_tile == GameState.BETA_TILE)
 	check("echte save nog te laden", GameState.load_game(story_path) and GameState.player_name == "Echt")
 	_eind_account_tests(story_path)
@@ -1042,7 +1042,7 @@ func _eind_account_tests(story_path: String) -> void:
 			and GameState.member_level("dennis") == 40 and GameState.member_level("noor") == 40
 			and GameState.member_level("lotte") == 40)
 	var dennis: Dictionary = GameState.party[0]
-	check("eindstaat: Dennis heeft geen spreuk", str(dennis.get("id", "")) == "dennis"
+	check("eindstaat: Dax heeft geen spreuk", str(dennis.get("id", "")) == "dennis"
 			and (dennis.get("spells") as Array).is_empty())
 	var noor := _member("noor")
 	var noor_ok := not noor.is_empty()
@@ -1051,20 +1051,20 @@ func _eind_account_tests(story_path: String) -> void:
 		var sp: Dictionary = GD.SPELLS.get(spell_id, {})
 		noor_ok = noor_ok and SpellRules.can_learn("noor", spell_id) and int(sp.get("grade", 99)) <= 3
 	var noor_spells: Array = noor.get("spells", [])
-	check("eindstaat: Noor heeft geen verboden element", noor_ok
+	check("eindstaat: Vesper heeft geen verboden element", noor_ok
 			and noor_spells.has("vuurzee") and noor_spells.has("zegen") and noor_spells.has("inferno")
 			and not noor_spells.has("donderslag") and not noor_spells.has("zonneslag")
 			and not noor_spells.has("rijp"))
 	var lotte := _member("lotte")
 	var lotte_spells: Array = lotte.get("spells", [])
-	check("eindstaat: Lotte tot grade 3, geen grade 4", not lotte.is_empty()
+	check("eindstaat: Seren tot grade 3, geen grade 4", not lotte.is_empty()
 			and lotte_spells.has("ijsstorm") and lotte_spells.has("glans") and not lotte_spells.has("ijskern")
 			and not lotte_spells.has("aureool"))
 	check("eindstaat: G4-wapens, goud, geen hanger", str(dennis.get("equip", {}).get("wapen", "")) == "bg_g4_superzwaard"
 			and str(noor.get("equip", {}).get("wapen", "")) == "bg_g4_staf_noor"
 			and str(lotte.get("equip", {}).get("wapen", "")) == "bg_g4_staf_lotte"
 			and GameState.gold == GameState.EIND_GOLD and GameState.item_count("hanger") == 0)
-	check("eindstaat: verhaal tot Noor gered, grot niet gestart", GameState.story_step == SD.NOOR_GERED
+	check("eindstaat: verhaal tot Vesper gered, grot niet gestart", GameState.story_step == SD.NOOR_GERED
 			and GameState.story_flags.has(SD.GOLEM_FLAG) and GameState.story_flags.has(SD.WORTELKONING_FLAG)
 			and GameState.story_flags.has("noor_gered") and GameState.dungeon100_floor == 0)
 	var codex_n := 0

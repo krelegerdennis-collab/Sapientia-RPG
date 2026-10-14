@@ -190,7 +190,7 @@ func _data_tests() -> void:
 
 # ================================================================ B
 func _save_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: 0 bezoeken, geen token", GameState.koopman_bezoeken == 0 and not GameState.koopman_token)
 	check("bezoek telt", GameState.koopman_bezoek("1_5") == 1)
 	check("zelfde verdieping telt niet opnieuw", GameState.koopman_bezoek("1_5") == 1)
@@ -198,7 +198,7 @@ func _save_tests() -> void:
 	GameState.koopman_token = true
 	var data := GameState.state_data(Vector2i(3, 4), Vector2i.DOWN)
 	check("save heeft blok 'koopman'", data.get("koopman", {}).get("bezoeken", -1) == 2 and data["koopman"]["token"] == true)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("new_game wist de teller", GameState.koopman_bezoeken == 0)
 	GameState.apply_state(data)
 	check("load: teller 2 + token terug", GameState.koopman_bezoeken == 2 and GameState.koopman_token and GameState.koopman_laatste == "1_15")
@@ -216,7 +216,7 @@ func _save_tests() -> void:
 
 # ================================================================ C
 func _start_floor(f: int) -> Node:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.dungeon100_seed = SEED
@@ -319,7 +319,7 @@ func _val_rust_scene() -> void:
 
 # ================================================================ E
 func _hub_scene() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	for soort in ["mosslijm", "glitchmot", "mech_wachter", "inktwurm", "mistuil"]:
 		GameState.codex_add(soort, 3)
@@ -383,7 +383,7 @@ func _winkel_data() -> void:
 	var bom := v1.filter(func(r): return r["id"] == "stunbom")
 	check("Stun Bomb altijd, vaste hoge prijs", bom.size() == 1 and int(bom[0]["price"]) == W.STUNBOM_PRIJS
 			and W.voorraad(99, 7).any(func(r): return r["id"] == "stunbom"))
-	check("geen Simulatie-token (besluit Dennis)", not ids.has("simulatie_token") and not GameData_has("simulatie_token"))
+	check("geen Simulatie-token (besluit Dax)", not ids.has("simulatie_token") and not GameData_has("simulatie_token"))
 	var g3 := v1.filter(func(r): return r["soort"] == "g3")
 	check("1 Grade 3-stuk, 2x prijs", g3.size() == 1 and GG.item(g3[0]["id"])["grade"] == 3
 			and int(g3[0]["price"]) == 2 * W.basis_prijs(g3[0]["id"]))
@@ -404,7 +404,7 @@ func _winkel_data() -> void:
 	check("inkoop: Grade 4 60%", W.inkoop_prijs(g4id) == int(W.basis_prijs(g4id) * 0.6))
 	check("sleutel-items koopt hij niet", W.inkoop_prijs("hanger") == 0)
 	# kopen / restock
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.gold = 5000
 	GameState.koopman_bezoek("%d_5" % SEED)
 	var r := W.koop(SEED, 1, GameState.koopman_gekocht, rot1)

@@ -7,7 +7,7 @@ extends RefCounted
 const MAX_ACTIEF := preload("res://scripts/party_limiet.gd").MAX_HELDEN
 const RUSTKAMER := "res://world_warper/kamers/rustkamer.tscn"
 
-const DENNIS_BLIJFT := "Dennis stays in the party."
+const DENNIS_BLIJFT := "Dax stays in the party."
 const GAST_BLIJFT := "Temporary guests can't go on the bench."
 const VOL := "The party is full."
 const ALLEEN_HIER := "You can only switch in the Rest Room."

@@ -18,12 +18,12 @@ const ACTS := [
 	{
 		"act": 1, "min": 1, "max": 13,
 		"naam": "Warden's House, the First Archive, Mapleton and the Dark Wood",
-		"verwacht": "Starter set and Apprentice Cloak. Spark Sword from the archive chest. Noor joins after the Root King (Dennis's level minus 1) with Oak Staff and Travel Robe. Padded Jerkin, Herbal Tea and Glowing Ink can be found then.",
+		"verwacht": "Starter set and Apprentice Cloak. Spark Sword from the archive chest. Vesper joins after the Root King (Dax's level minus 1) with Oak Staff and Travel Robe. Padded Jerkin, Herbal Tea and Glowing Ink can be found then.",
 	},
 	{
 		"act": 2, "min": 14, "max": 19,
 		"naam": "The Second Archive, Progress",
-		"verwacht": "Forge gear: Kettle Blade, Scrap Plate, Work Cloak, Tuning Fork. Lotte is meant to join in this band; her place is not built yet.",
+		"verwacht": "Forge gear: Kettle Blade, Scrap Plate, Work Cloak, Tuning Fork. Seren is meant to join in this band; her place is not built yet.",
 	},
 	{
 		"act": 3, "min": 20, "max": 25,
@@ -33,7 +33,7 @@ const ACTS := [
 	{
 		"act": 4, "min": 26, "max": 31,
 		"naam": "The Fourth Archive, Life",
-		"verwacht": "Laboratory: Incision, Life Staff, Chitin Armor, Antiserum Zero. This is where Dennis is revealed as test subject H-6.",
+		"verwacht": "Laboratory: Incision, Life Staff, Chitin Armor, Antiserum Zero. This is where Dax is revealed as test subject H-6.",
 	},
 	{
 		"act": 5, "min": 32, "max": 36,
@@ -92,8 +92,8 @@ const VOORBIJ_ARCHIEF := {
 
 ## Al in het spel te vinden (niet alleen data). De rest van de nieuwe catalogus wacht op Act 2-6.
 const NU_TE_VINDEN := {
-	"wambuis": "Noor gives it when she joins, into the bag.",
-	"kruidenthee": "Ilse in Mapleton, once, after Noor is saved.",
+	"wambuis": "Vesper gives it when she joins, into the bag.",
+	"kruidenthee": "Ilse in Mapleton, once, after Vesper is saved.",
 	"gloeiende_inktfles": "The Ink Worm's cabinet in Golem Hall, once, when it opens.",
 }
 

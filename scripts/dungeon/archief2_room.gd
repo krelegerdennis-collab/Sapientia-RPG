@@ -141,7 +141,7 @@ func _verhaal() -> void:
 	if GameState.archief2_lotte_join:
 		GameState.archief2_lotte_join = false
 		Archief2.sluit_lotte_aan()
-		await _zeg(Archief2.LOTTE_AANSLUIT, "Lotte")
+		await _zeg(Archief2.LOTTE_AANSLUIT, "Seren")
 	if room_id == Archief2.ENTREE and not GameState.story_flags.has("archief2_keten"):
 		await _zeg(Archief2.KETEN, "")
 		GameState.story_flags["archief2_keten"] = true

@@ -356,7 +356,7 @@ func build_v17() -> void:
 func build_esdoorn_all() -> void:
 	save_scene(build_esdoorn(load("res://assets/tiles/dorp.tres")), ESDOORN_PATH)
 	var inside: TileSet = load("res://assets/tiles/binnen.tres")
-	save_scene(build_interior("EsdoornHuisNoor", "Mapleton - Noor's House", NOOR_HUIS_MAP, NOOR_HUIS_NPCS,
+	save_scene(build_interior("EsdoornHuisNoor", "Mapleton - Vesper's House", NOOR_HUIS_MAP, NOOR_HUIS_NPCS,
 			"voor_noor"), NOOR_HUIS_PATH)
 	save_scene(build_interior("EsdoornHerberg", "Mapleton - The Maple Inn", HERBERG_MAP, HERBERG_NPCS,
 			"voor_herberg"), HERBERG_PATH)
@@ -895,8 +895,8 @@ func build_esdoorn(tileset: TileSet) -> Node2D:
 	for d in ESDOORN_NPCS:
 		add_villager(objects, root, d)
 	# Noor (loopsprite van RPG ART), alleen tot de ontmoeting
-	var noor := add_instance(objects, root, "res://scenes/npc.tscn", "Noor", tile_center(ESDOORN_NOOR))
-	noor.npc_name = "Noor"
+	var noor := add_instance(objects, root, "res://scenes/npc.tscn", "Vesper", tile_center(ESDOORN_NOOR))
+	noor.npc_name = "Vesper"
 	noor.sheet = load(NOOR_SHEET)
 	noor.facing = Vector2i.DOWN
 	noor.show_if = {"not_flags": ["noor_ontmoet"]}

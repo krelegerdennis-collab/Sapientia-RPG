@@ -72,15 +72,15 @@ func _code_tests() -> void:
 
 
 func _data_tests() -> void:
-	check("klassiek is Dennis, Noor, Lotte", PvpTeams.members("team_klassiek") == ["dennis", "noor", "lotte"])
-	check("aanval is twee Dennis en Lotte", PvpTeams.members("team_aanval") == ["dennis", "dennis", "lotte"])
-	check("verdediging is twee Lotte en Dennis", PvpTeams.members("team_verdediging") == ["lotte", "lotte", "dennis"])
+	check("klassiek is Dax, Vesper, Seren", PvpTeams.members("team_klassiek") == ["dennis", "noor", "lotte"])
+	check("aanval is twee Dax en Seren", PvpTeams.members("team_aanval") == ["dennis", "dennis", "lotte"])
+	check("verdediging is twee Seren en Dax", PvpTeams.members("team_verdediging") == ["lotte", "lotte", "dennis"])
 	check("spiegelgevecht mag", PvpRules.mirror_allowed() and PvpRules.teams_ok("team_klassiek", "team_klassiek"))
 	check("vroeg level 8 in band 5-10", PvpModes.level_of("early") == 8 and PvpModes.band_min("early") == 5 and PvpModes.band_max("early") == 10 and PvpModes.in_band("early"))
 	check("midden level 18 in band 15-20", PvpModes.level_of("mid") == 18 and PvpModes.band_min("mid") == 15 and PvpModes.band_max("mid") == 20 and PvpModes.in_band("mid"))
 	check("hoog level 25 vanaf 20", PvpModes.level_of("high") == 25 and PvpModes.band_min("high") == 20 and PvpModes.band_max("high") < 0 and PvpModes.in_band("high"))
 	var dennis := PvpCharacters.scaled("dennis", 8)
-	check("Dennis level 8 heeft 105 HP en 35 aanval voor uitrusting", int(dennis["max_hp"]) == 105 and int(dennis["atk"]) == 35 and int(dennis["max_mp"]) == 0)
+	check("Dax level 8 heeft 105 HP en 35 aanval voor uitrusting", int(dennis["max_hp"]) == 105 and int(dennis["atk"]) == 35 and int(dennis["max_mp"]) == 0)
 	var early := PvpRoster.build_side("host", "team_klassiek", "early")
 	check("startzwaard telt mee", int(early[0]["atk"]) == 38 and int(early[0]["hp"]) == 105)
 	check("vuur, bliksem en genees houden mp en power", int(PvpSpells.SPELLS["vuur"]["mp"]) == 4 and int(PvpSpells.SPELLS["vuur"]["power"]) == 14 and int(PvpSpells.SPELLS["bliksem"]["mp"]) == 7 and int(PvpSpells.SPELLS["bliksem"]["power"]) == 9 and int(PvpSpells.SPELLS["genees"]["mp"]) == 3 and int(PvpSpells.SPELLS["genees"]["power"]) == 22)
@@ -98,7 +98,7 @@ func _data_tests() -> void:
 				uids[row["uid"]] = true
 	check("elke modus en elk team levert drie levende vechters", built)
 	var attack := PvpRoster.build_side("host", "team_aanval", "early")
-	check("twee Dennis zijn aparte vechters", str(attack[0]["uid"]) == "host:dennis" and str(attack[1]["uid"]) == "host:dennis_2")
+	check("twee Dax zijn aparte vechters", str(attack[0]["uid"]) == "host:dennis" and str(attack[1]["uid"]) == "host:dennis_2")
 	attack[0]["items"]["drankje"] = 0
 	check("dubbele vechters delen geen tas", int(attack[1]["items"]["drankje"]) == 2)
 
@@ -150,7 +150,7 @@ func _battle_tests() -> void:
 		var row: Dictionary = raw
 		if str(row["seat"]) != "host":
 			continue
-		if str(row["character_id"]) == "lotte" and str(row["display"]) == "Lotte":
+		if str(row["character_id"]) == "lotte" and str(row["display"]) == "Seren":
 			lotte = str(row["uid"])
 		elif ally == "" and int(row["hp"]) > 0:
 			ally = str(row["uid"])

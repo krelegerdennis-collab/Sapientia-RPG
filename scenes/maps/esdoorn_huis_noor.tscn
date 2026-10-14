@@ -10,7 +10,7 @@
 
 [node name="EsdoornHuisNoor" type="Node2D"]
 script = ExtResource("1_rblow")
-map_name = "Mapleton - Noor's House"
+map_name = "Mapleton - Vesper's House"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

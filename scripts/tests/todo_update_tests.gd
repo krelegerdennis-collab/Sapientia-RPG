@@ -41,13 +41,13 @@ func _run() -> void:
 
 func _spell_tests() -> void:
 	check("archief-doel is 7", GD.EERSTE_ARCHIEF_DOEL == 7)
-	check("Dennis leert geen enkele spreuk", not Rules.can_learn("dennis", "vuur") and not Rules.can_learn("dennis", "genees")
+	check("Dax leert geen enkele spreuk", not Rules.can_learn("dennis", "vuur") and not Rules.can_learn("dennis", "genees")
 			and not Rules.can_learn("dennis", "inferno"))
-	check("Noor: vuur/natuur/bliksem t/m 4, licht alleen grade 1", Rules.can_learn("noor", "inferno")
+	check("Vesper: vuur/natuur/bliksem t/m 4, licht alleen grade 1", Rules.can_learn("noor", "inferno")
 			and Rules.can_learn("noor", "oerwoud") and Rules.can_learn("noor", "donderslag")
 			and Rules.can_learn("noor", "genees") and Rules.can_learn("noor", "zegen")
 			and not Rules.can_learn("noor", "grote_genezing") and not Rules.can_learn("noor", "rijp"))
-	check("Lotte: licht en ijs, geen vuur/natuur/bliksem", Rules.can_learn("lotte", "aureool")
+	check("Seren: licht en ijs, geen vuur/natuur/bliksem", Rules.can_learn("lotte", "aureool")
 			and Rules.can_learn("lotte", "ijskern") and Rules.can_learn("lotte", "zegen")
 			and not Rules.can_learn("lotte", "vuur") and not Rules.can_learn("lotte", "doorn")
 			and not Rules.can_learn("lotte", "vonk"))
@@ -112,25 +112,25 @@ func _shop_tests() -> void:
 			and int(GameState.inventory.get("kort_zwaard", 0)) == 0)
 	var dennis: Dictionary = GameState.party[0]
 	var no_magic := Shop.buy_spell("wilgendal_magie", "vuur", dennis)
-	check("Dennis koopt geen magie", not no_magic["ok"] and str(no_magic["text"]) == "Dennis leert geen magie."
+	check("Dax koopt geen magie", not no_magic["ok"] and str(no_magic["text"]) == "Dax leert geen magie."
 			and (dennis["spells"] as Array).is_empty() and GameState.gold == 440)
 	var noor: Dictionary = GameState.party[1]
 	(noor["spells"] as Array).clear()
 	var yes := Shop.buy_spell("wilgendal_magie", "doorn", noor)
-	check("Noor koopt Doorn", yes["ok"] and (noor["spells"] as Array).has("doorn") and GameState.gold == 280)
+	check("Vesper koopt Doorn", yes["ok"] and (noor["spells"] as Array).has("doorn") and GameState.gold == 280)
 	var g4 := Shop.buy_spell("wilgendal_magie", "donderslag", noor)
 	check("grade 4 ligt niet in de winkel", not g4["ok"] and not (noor["spells"] as Array).has("donderslag"))
 	var scroll := {"spreuk_donderslag": 1}
 	var learned := PA.use_item(scroll, "spreuk_donderslag", noor)
-	check("grade 4 wel via een rol voor Noor", learned["ok"] and (noor["spells"] as Array).has("donderslag")
+	check("grade 4 wel via een rol voor Vesper", learned["ok"] and (noor["spells"] as Array).has("donderslag")
 			and not scroll.has("spreuk_donderslag"))
 	var lotte: Dictionary = GameState.party[2]
 	var ice := {"spreuk_ijskern": 1}
-	check("Lotte leert IJskern van een rol", PA.use_item(ice, "spreuk_ijskern", lotte)["ok"]
+	check("Seren leert IJskern van een rol", PA.use_item(ice, "spreuk_ijskern", lotte)["ok"]
 			and (lotte["spells"] as Array).has("ijskern"))
 	var fire := {"spreuk_inferno": 1}
 	var no_fire := PA.use_item(fire, "spreuk_inferno", lotte)
-	check("Lotte leert geen vuur en de rol blijft", not no_fire["ok"] and fire.has("spreuk_inferno")
+	check("Seren leert geen vuur en de rol blijft", not no_fire["ok"] and fire.has("spreuk_inferno")
 			and not (lotte["spells"] as Array).has("inferno"))
 
 
@@ -177,17 +177,17 @@ func _gear_tests() -> void:
 			and str(loot["items"][0]["item"]) == str(again["items"][0]["item"])
 			and Blue.is_blue_item(str(loot["items"][0]["item"])))
 	check("oude d100-stukken blijven blauw", Blue.is_blue_item(Scaling.gear_id("zwaard", 2)))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.add_member("noor")
 	GameState.add_member("lotte")
 	var dennis: Dictionary = GameState.party[0]
 	var noor: Dictionary = GameState.party[1]
 	var lotte: Dictionary = GameState.party[2]
-	check("Dennis draagt het superzwaard, Noor en Lotte niet", Equipment.can_wear(dennis, "bg_g4_superzwaard")
+	check("Dax draagt het superzwaard, Vesper en Seren niet", Equipment.can_wear(dennis, "bg_g4_superzwaard")
 			and not Equipment.can_wear(noor, "bg_g4_superzwaard") and not Equipment.can_wear(lotte, "bg_g4_superzwaard"))
-	check("staf van Noor alleen voor de magiër", Equipment.can_wear(noor, "bg_g4_staf_noor")
+	check("staf van Vesper alleen voor de magiër", Equipment.can_wear(noor, "bg_g4_staf_noor")
 			and not Equipment.can_wear(dennis, "bg_g4_staf_noor") and not Equipment.can_wear(lotte, "bg_g4_staf_noor"))
-	check("staf van Lotte alleen voor de priester", Equipment.can_wear(lotte, "bg_g4_staf_lotte")
+	check("staf van Seren alleen voor de priester", Equipment.can_wear(lotte, "bg_g4_staf_lotte")
 			and not Equipment.can_wear(noor, "bg_g4_staf_lotte"))
 	GameState.inventory["bg_g4_plated_helm"] = 1
 	GameState.inventory["bg_g4_plated_harnas"] = 1
@@ -214,7 +214,7 @@ func _bestiary_tests() -> void:
 		var e := Bestiary.entry(str(id))
 		var desc := str(e.get("desc", ""))
 		var canon_line := desc in [
-				"A dark echo of Dennis himself. He moves as Dennis moves, fights as Dennis fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Noor, no Grandpa. Only the number: H-6.",
+				"A dark echo of Dax himself. He moves as Dax moves, fights as Dax fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Vesper, no Grandpa. Only the number: H-6.",
 				"An endlessly turning machine, half organic, half steel. It knows no beginning and no end — it simply starts again. Sapientia's logic in one form: no rest, no release, only repetition. Whoever defeats it has won nothing. It keeps turning anyway.",
 				"A giant eye with arms grasping in every direction. It weighs, it measures, it judges. What it weighs is not a deed, but a person. And people are always found too light — except one. De Rechter is Sapientia's doubt: she is looking for someone who weighs more than she expected.",
 				"No body. No shape. Only a voice, and glitches that warp the world around you. De Stem speaks as if it knows you — and it does. Here Sapientia speaks herself. Not as an enemy, but as something that has been waiting for you.",
@@ -223,7 +223,7 @@ func _bestiary_tests() -> void:
 				and int(e.get("max_hp", 0)) > 0 and (desc.begins_with("Boss on floor") or canon_line)
 				and str(e.get("name", "")) != "")
 	check("verdieping 25 heet De Schaduw van H-6", Bestiary.entry("d100_baas_25")["name"] == "De Schaduw van H-6"
-			and Bestiary.entry("d100_baas_25")["desc"] == "A dark echo of Dennis himself. He moves as Dennis moves, fights as Dennis fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Noor, no Grandpa. Only the number: H-6.")
+			and Bestiary.entry("d100_baas_25")["desc"] == "A dark echo of Dax himself. He moves as Dax moves, fights as Dax fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Vesper, no Grandpa. Only the number: H-6.")
 	GameState.mark_seen("d100_baas_99")
 	GameState.mark_defeated("d100_baas_99")
 	check("De Stem telt in het bestiarium", GameState.is_seen("d100_baas_99") and GameState.defeated_count("d100_baas_99") == 1)
