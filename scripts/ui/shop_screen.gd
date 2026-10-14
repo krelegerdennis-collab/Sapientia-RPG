@@ -1,6 +1,6 @@
 extends "res://scripts/ui/menu_screen.gd"
 ## Winkel in Wilgendal. Kopen en verkopen. Magie kiest eerst een held.
-## Teksten die de speler ziet zijn Nederlands.
+## Teksten die de speler ziet zijn Engels (ook in de Handelskamer).
 
 const ShopData := preload("res://scripts/data/shop_data.gd")
 
@@ -11,7 +11,7 @@ var _pending_spell := ""
 
 func _build() -> void:
 	header.text = ShopData.shop_name(shop_id)
-	set_hint("A: kies   B: terug")
+	set_hint("A: choose   B: back")
 	_show_koop()
 
 
@@ -25,7 +25,7 @@ func _show_koop() -> void:
 	mode = "koop"
 	_pending_spell = ""
 	_clear()
-	var switch := UiMenu.button("Verkopen")
+	var switch := UiMenu.button("Sell")
 	switch.pressed.connect(_show_verkoop)
 	content.add_child(switch)
 	var rows: Array = ShopData.stock(shop_id)
@@ -44,7 +44,7 @@ func _show_koop() -> void:
 func _show_verkoop() -> void:
 	mode = "verkoop"
 	_clear()
-	var back := UiMenu.button("Kopen")
+	var back := UiMenu.button("Buy")
 	back.pressed.connect(_show_koop)
 	content.add_child(back)
 	var rows: Array = ShopData.sellable()
