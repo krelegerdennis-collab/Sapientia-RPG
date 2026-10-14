@@ -262,7 +262,7 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [x] Puzzle Room: 4 kleine puzzels uit bestaande stukken (besluit Dennis, 14 okt 2026)
   - [x] Hint: ECHO zegt bij binnenkomst één korte Engelse zin (besluit Dennis, 14 okt 2026)
 - [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
-- [ ] Merchant Room: welke items verkoopt hij?
+- [x] Merchant Room: uitrusting + accessoires geschaald op de verdieping, plus basis-consumables (besluit Dennis, 14 okt 2026)
   - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
   - [ ] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest."
 
@@ -974,7 +974,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Kan ook items KOPEN van de speler
   - Max 1× per 10 verdiepingen
   - Besluit (Dennis, 14 okt 2026): vast 1× per 10 verdiepingen (`GrotKamers.koopman_verdieping`), niet de 1%-worp.
-  - TODO(design): welke items verkoopt hij?
+  - Besluit (Dennis, 14 okt 2026): hij verkoopt uitrusting en accessoires GESCHAALD op de huidige verdieping (grade van `GradeGear.grade_for_floor`: 2 uitrustingsstukken + 1 accessoire, prijs x1,5 (G1-G2) / x2 (G3) / x3 (G4)), plus een paar basis-consumables (Potion, Magic Water x1,5) naast Elixir/Phoenix Feather/Antidote (x2), de Stun Bomb en het rotatie-item. Engelse UI (`KoopmanWinkel.voorraad(..., floor_no)`).
 
 ### Totaal-overzicht
 
@@ -1279,7 +1279,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Overblijfselen: subtiele item-glow
   - Graffiti: symbolen op muur (paarse gloed?)
   - Geheime doorgang: verborgen, zichtbaar met Lotte's Licht
-- [ ] Merchant Room: welke items verkoopt hij?
+- [x] Merchant Room: uitrusting + accessoires geschaald op de verdieping, plus basis-consumables (besluit Dennis, 14 okt 2026)
   Definitief. De checkbox blijft open tot de merchant in de code deze voorraad gebruikt.
 
   **CANON – niet wijzigen zonder overleg.**

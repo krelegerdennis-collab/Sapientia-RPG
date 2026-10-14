@@ -400,6 +400,31 @@ func _winkel_data() -> void:
 	var rot2: String = W.voorraad(SEED, 2).filter(func(r): return r["soort"] == "rotatie")[0]["id"]
 	check("rotatie-item wisselt per bezoek (%s -> %s)" % [rot1, rot2], rot1 != rot2)
 	check("voorraad is vast per run + bezoek", str(W.voorraad(SEED, 2)) == str(W.voorraad(SEED, 2)))
+	# Besluit Dennis 14 okt 2026: uitrusting + accessoires geschaald op de verdieping, plus basis-consumables.
+	var schaal_ok := true
+	var prijs_ok := true
+	var info := []
+	for f in [5, 25, 55, 85, 99]:
+		var vf := W.voorraad(SEED, 1, [], f)
+		var g := W.grade_voor(f)
+		var uitr := vf.filter(func(x): return x["soort"] == "uitrusting")
+		var acc := vf.filter(func(x): return x["soort"] == "accessoire")
+		var basis := vf.filter(func(x): return x["id"] in W.BASIS_CONSUMABLES)
+		var goed: bool = uitr.size() == W.UITRUSTING_AANTAL and acc.size() == 1 and basis.size() == W.BASIS_CONSUMABLES.size() \
+				and not vf.any(func(x): return x["soort"] in ["g3", "g4"])
+		for x in uitr:
+			goed = goed and int(GG.item(x["id"]).get("grade", 0)) == g and int(GG.item(x["id"]).get("min_floor", 1)) <= f
+		for x in uitr + acc + basis:
+			prijs_ok = prijs_ok and int(x["price"]) > 0 and str(x["name"]) != ""
+		info.append("%d:G%d %s" % [f, g, acc[0]["id"] if acc.size() > 0 else "-"])
+		schaal_ok = schaal_ok and goed
+	check("waren geschaald op de verdieping: 2 uitrusting van de grade + 1 accessoire + Potion/Magic Water (%s)" % [info], schaal_ok)
+	check("geschaalde waren hebben een prijs en een naam", prijs_ok)
+	check("G4-verdieping: accessoire uit de G4-accessoires", GG.item(W.accessoire_voor(SEED, 1, 90)).get("slot", "") == "accessoire")
+	GameState.gold = 99999
+	var vk: Array = W.voorraad(SEED, 2, [], 55).filter(func(x): return x["soort"] == "uitrusting")
+	var kr := W.koop(SEED, 2, [], str(vk[0]["id"]), 55)
+	check("geschaald stuk kopen werkt", kr["ok"] and int(GameState.inventory.get(str(vk[0]["id"]), 0)) >= 1)
 	check("inkoop: consumable 50% (Elixir %d)" % W.inkoop_prijs("elixer"), W.inkoop_prijs("elixer") == 150)
 	check("inkoop: uitrusting 40% (Short Sword %d)" % W.inkoop_prijs("kort_zwaard"), W.inkoop_prijs("kort_zwaard") == 48)
 	var g4id: String = g4[0]["id"]

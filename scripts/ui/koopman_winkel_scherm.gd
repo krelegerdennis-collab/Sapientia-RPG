@@ -6,6 +6,8 @@ const Winkel := preload("res://scripts/data/koopman_winkel.gd")
 
 var run_seed := 0
 var bezoek := 1
+## Verdieping (besluit Dennis 14 okt 2026: waren geschaald op de verdieping); 0 = oude regel.
+var verdieping := 0
 ## Laatste melding (voor de tests).
 var last_text := ""
 
@@ -23,7 +25,7 @@ func _show_koop() -> void:
 	var switch := UiMenu.button("Sell")
 	switch.pressed.connect(_show_verkoop)
 	content.add_child(switch)
-	for row in Winkel.voorraad(run_seed, bezoek, GameState.koopman_gekocht):
+	for row in Winkel.voorraad(run_seed, bezoek, GameState.koopman_gekocht, verdieping):
 		var label := "%s  %dg" % [str(row["name"]), int(row["price"])]
 		if int(row.get("grade", 0)) > 0:
 			label = "[G%d] %s" % [int(row["grade"]), label]
@@ -54,7 +56,7 @@ func _show_verkoop() -> void:
 
 
 func _on_buy(id: String, _kind: String) -> void:
-	var r := Winkel.koop(run_seed, bezoek, GameState.koopman_gekocht, id)
+	var r := Winkel.koop(run_seed, bezoek, GameState.koopman_gekocht, id, verdieping)
 	last_text = str(r["text"])
 	show_message(last_text)
 	if r["ok"]:
