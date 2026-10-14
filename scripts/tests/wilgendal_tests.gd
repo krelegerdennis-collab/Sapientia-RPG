@@ -56,7 +56,27 @@ func _run() -> void:
 
 
 func _data() -> void:
-	check("grond is 24 bij 16", Data.grond_ok() and Data.W == 24 and Data.H == 16)
+	check("grond is 42 bij 28 (v2, ~3x zo groot)", Data.grond_ok() and Data.W == 42 and Data.H == 28)
+	check("max %d sfeer-NPC's op het marktplein (%d)" % [Data.PLEIN_MAX, Data.op_plein_aantal()],
+			Data.op_plein_aantal() <= Data.PLEIN_MAX and Data.op_plein_aantal() >= 1)
+	var beek_ok := true
+	for x in Data.W:
+		var t := Vector2i(x, Data.BEEK_RIJ)
+		if Data.BRUG.has_point(t) != Data.beloopbaar(t) and x > 0 and x < Data.W - 1:
+			beek_ok = false
+	check("beek is 1 tegel breed, alleen de brug is beloopbaar", beek_ok
+			and Data.beloopbaar(Vector2i(20, Data.BEEK_RIJ - 1)) and Data.beloopbaar(Vector2i(20, Data.BEEK_RIJ + 1)))
+	var props_ok := true
+	for ruw in Data.PROPS:
+		if not ResourceLoader.exists(Data.PROPS_MAP + str(ruw["tex"]) + ".png"):
+			props_ok = false
+	check("props van RPG ART bestaan (put, kramen, hek, bloembak, lantaarn, bankje, beek, brug)", props_ok
+			and ResourceLoader.exists(Data.PROPS_MAP + "beek_h.png") and ResourceLoader.exists(Data.PROPS_MAP + "brug_v.png"))
+	check("dorp en interieurs zijn geen kerker voor de autosave",
+			not GameState.is_dungeon_transition(WERELD, DORP) and not GameState.is_dungeon_transition(DORP, WERELD)
+			and not GameState.is_dungeon_transition(WERELD, BINNEN) and not GameState.is_dungeon_transition(BINNEN, WERELD)
+			and GameState.NON_DUNGEON_MAPS.has(DORP.get_file().get_basename())
+			and GameState.NON_DUNGEON_MAPS.has(BINNEN.get_file().get_basename()))
 	check("vier winkelpanden", Data.winkels().size() == 4)
 	var ids: Array = []
 	for ruw in Data.winkels():
@@ -163,8 +183,8 @@ func _dorp() -> void:
 	check("geen uitgang naar de bibliotheek", dorp.get_node("Exits").get_children().all(func(e):
 		return str(e.target_map) != BIEB))
 	var g: Node = dorp.get_node("Objects/Gerrit")
-	check("Gerrit staat op het plein", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
-			and g.event == "gerrit" and g.get_tile() == Data.GERRIT_TEGEL and Data.op_plein(g.get_tile())
+	check("Gerrit staat bij de molen", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
+			and g.event == "gerrit" and g.get_tile() == Data.GERRIT_TEGEL
 			and str(g.get_meta("rol")) == "gerrit")
 	var molen: Node = dorp.get_node("Objects/MolenWieken")
 	check("molen blijft op zijn plek", molen != null and molen.position == Vector2(24, 24))
@@ -176,7 +196,7 @@ func _dorp() -> void:
 		if str(kind.get("event")) == "shop":
 			winkel_op_plein = true
 	rollen.sort()
-	check("zes sfeer-NPC's op het plein", rollen == ["echtpaar", "echtpaar", "gerrit", "kind", "koerier", "veteraan"])
+	check("zes sfeer-NPC's in het dorp", rollen == ["echtpaar", "echtpaar", "gerrit", "kind", "koerier", "veteraan"])
 	check("shopkeepers niet op het plein", not winkel_op_plein
 			and dorp.get_node_or_null("Objects/JelleWapen") == null
 			and dorp.get_node_or_null("Objects/JellePantser") == null
@@ -207,6 +227,13 @@ func _dorp() -> void:
 	check("kind veteraan en koerier hebben een praatje", dorp.get_node("Objects/Fien").lines[0] != ""
 			and dorp.get_node("Objects/Wout").lines[0] != ""
 			and dorp.get_node("Objects/Siem").lines[0] != "")
+	var props := 0
+	for kind in dorp.get_node("Objects").get_children():
+		if str(kind.get_meta("prop", "")) != "":
+			props += 1
+	check("props in de scène (%d)" % props, props == Data.PROPS.size())
+	check("beek + brug op een eigen laag", dorp.get_node_or_null("Ground/Beek/Brug") != null)
+	await _overzicht(dorp)
 	await _rondlopen(dorp)
 
 
@@ -238,7 +265,7 @@ func _rondlopen(dorp: Node) -> void:
 		var op_lus := false
 		if loper != null:
 			op_lus = tegel in loper.lus
-		check("%s stapt over het plein" % naam, loper != null and op_lus and Data.op_plein(tegel) and Data.beloopbaar(tegel)
+		check("%s loopt zijn rondje" % naam, loper != null and op_lus and Data.beloopbaar(tegel)
 				and tegel != Data.GERRIT_TEGEL and not Data.MOLEN.has_point(tegel)
 				and npc.position.distance_to(voor[naam]) > 6.0)
 	check("Gerrit blijft op de molentegel", gerrit.get_tile() == Data.GERRIT_TEGEL
@@ -339,3 +366,35 @@ func _fade() -> void:
 			break
 		await get_tree().process_frame
 	await get_tree().process_frame
+
+
+## Overzichtsfoto van het hele dorp (camera uitgezoomd).
+func _overzicht(dorp: Node) -> void:
+	var shots := OS.get_environment("WILGENDAL_SHOTS")
+	if shots == "":
+		return
+	var cam: Camera2D = get_viewport().get_camera_2d()
+	if cam == null:
+		return
+	var keep_zoom := cam.zoom
+	var keep_pos := cam.global_position
+	var keep_smooth := cam.position_smoothing_enabled
+	cam.position_smoothing_enabled = false
+	var vp := get_viewport().get_visible_rect().size
+	var z := minf(vp.x / (Data.W * 16.0), vp.y / (Data.H * 16.0))
+	cam.zoom = Vector2(z, z)
+	cam.limit_left = -10000; cam.limit_top = -10000; cam.limit_right = 10000; cam.limit_bottom = 10000
+	cam.top_level = true
+	cam.global_position = Vector2(Data.W, Data.H) * 8.0
+	for _i in 8:
+		await get_tree().process_frame
+	var img := get_viewport().get_texture().get_image()
+	if img != null:
+		img.save_png(shots.path_join("wilgendal_nieuw.png"))
+	cam.top_level = false
+	cam.zoom = keep_zoom
+	cam.position_smoothing_enabled = keep_smooth
+	cam.position = Vector2.ZERO
+	dorp.get_node("Objects/Player").set_camera_limits(Rect2i(0, 0, Data.W * 16, Data.H * 16))
+	for _i in 4:
+		await get_tree().process_frame

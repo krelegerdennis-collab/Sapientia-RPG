@@ -1,5 +1,5 @@
 extends Node
-## Zet panden, deuren, iconen en sfeer-NPC's op het plein van Wilgendal.
+## Zet panden, deuren, iconen, props (RPG ART), de beek met brug en de sfeer-NPC's in Wilgendal.
 ## Gerrit en de molen staan al in de scène; Gerrit blijft op zijn tegel.
 ## De andere vijf lopen de korte lus uit de data, tegel voor tegel.
 
@@ -27,12 +27,104 @@ const TEX := {
 func _ready() -> void:
 	var kaart := get_parent()
 	var objects := kaart.get_node("Objects")
+	_beek_en_brug(kaart)
+	_props(objects)
 	_gerrit(objects)
 	_sfeer(objects)
 	for ruw in Data.PANDEN:
 		_pand(objects, ruw)
 	_uitgang(kaart)
 	_spawn_zuid(kaart)
+
+
+## v2: beek (1 tegel, 3 frames) + brug op een eigen laag tussen de grond en de objecten.
+const BEEK_FPS := 4.0
+var _beek: Array[Sprite2D] = []
+var _beek_t := 0.0
+var _beek_frame := 0
+
+
+func _beek_en_brug(kaart: Node) -> void:
+	var laag := Node2D.new()
+	laag.name = "Beek"
+	# Kind van Ground: de kaart zelf is nog bezig met _ready (add_child daar faalt),
+	# en als kind tekent de laag boven de grondtegels maar onder Objects.
+	kaart.get_node("Ground").add_child(laag)
+	var tex: Texture2D = load(Data.PROPS_MAP + "beek_h.png")
+	for x in Data.W:
+		var t := Vector2i(x, Data.BEEK_RIJ)
+		var spr := Sprite2D.new()
+		spr.texture = tex
+		spr.hframes = 3
+		spr.centered = false
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		spr.position = Vector2(t) * 16.0
+		laag.add_child(spr)
+		_beek.append(spr)
+		if Data.beek(t):
+			_blok(laag, "BeekRand_%d" % x, Rect2i(t, Vector2i.ONE))
+	var brug := Sprite2D.new()
+	brug.name = "Brug"
+	brug.texture = load(Data.PROPS_MAP + "brug_v.png")
+	brug.centered = false
+	brug.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	brug.position = Vector2(Data.BRUG.position) * 16.0
+	laag.add_child(brug)
+
+
+func _process(delta: float) -> void:
+	if _beek.is_empty():
+		return
+	_beek_t += delta
+	if _beek_t < 1.0 / BEEK_FPS:
+		return
+	_beek_t = 0.0
+	_beek_frame = (_beek_frame + 1) % 3
+	for spr in _beek:
+		spr.frame = _beek_frame
+
+
+## Put, kramen, hekken, bloembakken, lantaarns, bankjes (y-sort op hun voetpunt).
+func _props(objects: Node) -> void:
+	var i := 0
+	for ruw in Data.PROPS:
+		var rij: Dictionary = ruw
+		var tex: Texture2D = load(Data.PROPS_MAP + str(rij["tex"]) + ".png")
+		var t: Vector2i = rij["tegel"]
+		var blok: Vector2i = rij["blok"]
+		var body := StaticBody2D.new()
+		body.name = "Prop_%s_%d" % [str(rij["tex"]), i]
+		body.set_meta("prop", str(rij["tex"]))
+		# voetpunt = onderrand van de blokkerende rij
+		body.position = Vector2(t.x * 16.0 + blok.x * 8.0, (t.y + 1) * 16.0)
+		var spr := Sprite2D.new()
+		spr.texture = tex
+		spr.centered = false
+		spr.flip_h = bool(rij.get("flip", false))
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		spr.position = Vector2(-tex.get_width() / 2.0, -tex.get_height())
+		body.add_child(spr)
+		if blok.x > 0 and blok.y > 0:
+			var vorm := RectangleShape2D.new()
+			vorm.size = Vector2(blok) * 16.0 - Vector2(2, 2)
+			var bots := CollisionShape2D.new()
+			bots.shape = vorm
+			bots.position = Vector2(0, -blok.y * 8.0)
+			body.add_child(bots)
+		objects.add_child(body)
+		i += 1
+
+
+func _blok(ouder: Node, naam: String, r: Rect2i) -> void:
+	var body := StaticBody2D.new()
+	body.name = naam
+	var vorm := RectangleShape2D.new()
+	vorm.size = Vector2(r.size) * 16.0
+	var bots := CollisionShape2D.new()
+	bots.shape = vorm
+	body.position = Vector2(r.position) * 16.0 + Vector2(r.size) * 8.0
+	body.add_child(bots)
+	ouder.add_child(body)
 
 
 func _gerrit(objects: Node) -> void:
