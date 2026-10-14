@@ -577,14 +577,26 @@ func walk(action: String, n: int) -> void:
 		var p := player()
 		if p == null or scene() != start_scene or GameState.changing_map:
 			return
-		Input.action_press(action)
-		var waited := 0
-		while is_instance_valid(p) and not p.is_moving and waited < 6:
+		# Flake-fix (CI, trage frames): de stap ging soms verloren als de speler niet binnen 6 physics-
+		# frames begon te lopen. Nu: langer wachten, en opnieuw drukken als hij niet liep en niet botste.
+		var van: Vector2i = p.get_tile()
+		var botste := [false]
+		var bij_bots := func(_t: Vector2i) -> void: botste[0] = true
+		p.bumped.connect(bij_bots)
+		for poging in 3:
+			Input.action_press(action)
+			var waited := 0
+			while is_instance_valid(p) and not p.is_moving and not botste[0] and waited < 20:
+				await get_tree().physics_frame
+				waited += 1
+			Input.action_release(action)
+			while is_instance_valid(p) and p.is_moving:
+				await get_tree().physics_frame
+			if not is_instance_valid(p) or botste[0] or p.get_tile() != van or GameState.changing_map or Dialog.is_open:
+				break
 			await get_tree().physics_frame
-			waited += 1
-		Input.action_release(action)
-		while is_instance_valid(p) and p.is_moving:
-			await get_tree().physics_frame
+		if is_instance_valid(p) and p.bumped.is_connected(bij_bots):
+			p.bumped.disconnect(bij_bots)
 		if GameState.changing_map or Dialog.is_open:
 			return
 
