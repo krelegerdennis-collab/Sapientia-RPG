@@ -1,0 +1,1240 @@
+{
+ "tileset": "gebouw",
+ "tile_size": 16,
+ "columns": 16,
+ "rows": 11,
+ "sheet_px": [
+  256,
+  176
+ ],
+ "sheets": {
+  "wilgendal": "gebouw_wilgendal.png",
+  "herfst": "gebouw_herfst.png",
+  "donker_glitch": "gebouw_donker_glitch.png"
+ },
+ "slot_map": "gebouw_slots.png",
+ "tiles": [
+  {
+   "name": "dak_vul_0",
+   "id": 0,
+   "col": 0,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_fill",
+   "walk": false
+  },
+  {
+   "name": "dak_vul_1",
+   "id": 1,
+   "col": 1,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_fill",
+   "walk": false
+  },
+  {
+   "name": "dak_vul_2",
+   "id": 2,
+   "col": 2,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_fill",
+   "walk": false
+  },
+  {
+   "name": "dak_vul_3",
+   "id": 3,
+   "col": 3,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_fill",
+   "walk": false
+  },
+  {
+   "name": "dak_nok_l",
+   "id": 4,
+   "col": 4,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_ridge",
+   "walk": false
+  },
+  {
+   "name": "dak_nok_m",
+   "id": 5,
+   "col": 5,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_ridge",
+   "walk": false
+  },
+  {
+   "name": "dak_nok_r",
+   "id": 6,
+   "col": 6,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_ridge",
+   "walk": false
+  },
+  {
+   "name": "dak_rand_l",
+   "id": 7,
+   "col": 7,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_gable_edge",
+   "walk": false
+  },
+  {
+   "name": "dak_rand_r",
+   "id": 8,
+   "col": 8,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_gable_edge",
+   "walk": false
+  },
+  {
+   "name": "dak_goot_l",
+   "id": 9,
+   "col": 9,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_eave",
+   "walk": false
+  },
+  {
+   "name": "dak_goot_m",
+   "id": 10,
+   "col": 10,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_eave",
+   "walk": false
+  },
+  {
+   "name": "dak_goot_r",
+   "id": 11,
+   "col": 11,
+   "row": 0,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "roof_eave",
+   "walk": false
+  },
+  {
+   "name": "dakkapel_c0r0",
+   "id": 16,
+   "col": 0,
+   "row": 1,
+   "kind": "dak",
+   "layer": "ground",
+   "module": "dakkapel",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "roof_dormer",
+   "walk": false
+  },
+  {
+   "name": "dakkapel_c1r0",
+   "id": 17,
+   "col": 1,
+   "row": 1,
+   "kind": "dak",
+   "layer": "ground",
+   "module": "dakkapel",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "roof_dormer",
+   "walk": false
+  },
+  {
+   "name": "dakkapel_c0r1",
+   "id": 32,
+   "col": 0,
+   "row": 2,
+   "kind": "dak",
+   "layer": "ground",
+   "module": "dakkapel",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "roof_dormer",
+   "walk": false
+  },
+  {
+   "name": "dakkapel_c1r1",
+   "id": 33,
+   "col": 1,
+   "row": 2,
+   "kind": "dak",
+   "layer": "ground",
+   "module": "dakkapel",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "roof_dormer",
+   "walk": false
+  },
+  {
+   "name": "schoorsteen_top",
+   "id": 18,
+   "col": 2,
+   "row": 1,
+   "kind": "dak",
+   "layer": "overlay",
+   "part": "chimney_top",
+   "walk": false
+  },
+  {
+   "name": "schoorsteen_voet_nok",
+   "id": 19,
+   "col": 3,
+   "row": 1,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "chimney_on_ridge",
+   "walk": false
+  },
+  {
+   "name": "schoorsteen_voet",
+   "id": 20,
+   "col": 4,
+   "row": 1,
+   "kind": "dak",
+   "layer": "ground",
+   "part": "chimney_on_fill",
+   "walk": false
+  },
+  {
+   "name": "muur_pleister_0",
+   "id": 48,
+   "col": 0,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "wall_fill",
+   "walk": false
+  },
+  {
+   "name": "muur_pleister_1",
+   "id": 49,
+   "col": 1,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "wall_fill",
+   "walk": false
+  },
+  {
+   "name": "muur_pleister_2",
+   "id": 50,
+   "col": 2,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "wall_fill",
+   "walk": false
+  },
+  {
+   "name": "muur_pleister_l",
+   "id": 51,
+   "col": 3,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "wall_edge",
+   "walk": false
+  },
+  {
+   "name": "muur_pleister_r",
+   "id": 52,
+   "col": 4,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "wall_edge",
+   "walk": false
+  },
+  {
+   "name": "muur_stijl",
+   "id": 53,
+   "col": 5,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "half_timber_post",
+   "walk": false
+  },
+  {
+   "name": "muur_vakwerk_a",
+   "id": 54,
+   "col": 6,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "half_timber_brace",
+   "walk": false
+  },
+  {
+   "name": "muur_vakwerk_b",
+   "id": 55,
+   "col": 7,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "half_timber_brace",
+   "walk": false
+  },
+  {
+   "name": "muur_balk_l",
+   "id": 56,
+   "col": 8,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "half_timber_beam",
+   "walk": false
+  },
+  {
+   "name": "muur_balk_m",
+   "id": 57,
+   "col": 9,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "half_timber_beam",
+   "walk": false
+  },
+  {
+   "name": "muur_balk_r",
+   "id": 58,
+   "col": 10,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "half_timber_beam",
+   "walk": false
+  },
+  {
+   "name": "muur_voet_l",
+   "id": 59,
+   "col": 11,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "stone_base",
+   "walk": false
+  },
+  {
+   "name": "muur_voet_m",
+   "id": 60,
+   "col": 12,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "stone_base",
+   "walk": false
+  },
+  {
+   "name": "muur_voet_r",
+   "id": 61,
+   "col": 13,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "stone_base",
+   "walk": false
+  },
+  {
+   "name": "muur_steen_m",
+   "id": 62,
+   "col": 14,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "stone_wall",
+   "walk": false
+  },
+  {
+   "name": "muur_steen_l",
+   "id": 63,
+   "col": 15,
+   "row": 3,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "stone_wall",
+   "walk": false
+  },
+  {
+   "name": "muur_steen_r",
+   "id": 64,
+   "col": 0,
+   "row": 4,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "stone_wall",
+   "walk": false
+  },
+  {
+   "name": "deur_enkel_c0r0",
+   "id": 80,
+   "col": 0,
+   "row": 5,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_enkel",
+   "module_size": [
+    1,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_enkel_c0r1",
+   "id": 96,
+   "col": 0,
+   "row": 6,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_enkel",
+   "module_size": [
+    1,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_dubbel_c0r0",
+   "id": 81,
+   "col": 1,
+   "row": 5,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_dubbel",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_dubbel_c1r0",
+   "id": 82,
+   "col": 2,
+   "row": 5,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_dubbel",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_dubbel_c0r1",
+   "id": 97,
+   "col": 1,
+   "row": 6,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_dubbel",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_dubbel_c1r1",
+   "id": 98,
+   "col": 2,
+   "row": 6,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_dubbel",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_boog_c0r0",
+   "id": 83,
+   "col": 3,
+   "row": 5,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_boog",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_boog_c1r0",
+   "id": 84,
+   "col": 4,
+   "row": 5,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_boog",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_boog_c0r1",
+   "id": 99,
+   "col": 3,
+   "row": 6,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_boog",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_boog_c1r1",
+   "id": 100,
+   "col": 4,
+   "row": 6,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_boog",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_enkel_steen_c0r0",
+   "id": 112,
+   "col": 0,
+   "row": 7,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_enkel_steen",
+   "module_size": [
+    1,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_enkel_steen_c0r1",
+   "id": 128,
+   "col": 0,
+   "row": 8,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_enkel_steen",
+   "module_size": [
+    1,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_dubbel_steen_c0r0",
+   "id": 113,
+   "col": 1,
+   "row": 7,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_dubbel_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_dubbel_steen_c1r0",
+   "id": 114,
+   "col": 2,
+   "row": 7,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_dubbel_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_dubbel_steen_c0r1",
+   "id": 129,
+   "col": 1,
+   "row": 8,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_dubbel_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_dubbel_steen_c1r1",
+   "id": 130,
+   "col": 2,
+   "row": 8,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_dubbel_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_boog_steen_c0r0",
+   "id": 115,
+   "col": 3,
+   "row": 7,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_boog_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_boog_steen_c1r0",
+   "id": 116,
+   "col": 4,
+   "row": 7,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_boog_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_boog_steen_c0r1",
+   "id": 131,
+   "col": 3,
+   "row": 8,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_boog_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "deur_boog_steen_c1r1",
+   "id": 132,
+   "col": 4,
+   "row": 8,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "deur_boog_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "door",
+   "door_cell": [
+    0,
+    1
+   ],
+   "walk": false
+  },
+  {
+   "name": "raam_luik_c0r0",
+   "id": 144,
+   "col": 0,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_c1r0",
+   "id": 145,
+   "col": 1,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_c0r1",
+   "id": 160,
+   "col": 0,
+   "row": 10,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_c1r1",
+   "id": 161,
+   "col": 1,
+   "row": 10,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_b_c0r0",
+   "id": 146,
+   "col": 2,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_b",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_b_c1r0",
+   "id": 147,
+   "col": 3,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_b",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_b_c0r1",
+   "id": 162,
+   "col": 2,
+   "row": 10,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_b",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_b_c1r1",
+   "id": 163,
+   "col": 3,
+   "row": 10,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_b",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_steen_c0r0",
+   "id": 148,
+   "col": 4,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_steen_c1r0",
+   "id": 149,
+   "col": 5,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_steen_c0r1",
+   "id": 164,
+   "col": 4,
+   "row": 10,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_steen_c1r1",
+   "id": 165,
+   "col": 5,
+   "row": 10,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_b_steen_c0r0",
+   "id": 150,
+   "col": 6,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_b_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    0
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_b_steen_c1r0",
+   "id": 151,
+   "col": 7,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_b_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    0
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_b_steen_c0r1",
+   "id": 166,
+   "col": 6,
+   "row": 10,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_b_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    0,
+    1
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_luik_b_steen_c1r1",
+   "id": 167,
+   "col": 7,
+   "row": 10,
+   "kind": "muur",
+   "layer": "ground",
+   "module": "raam_luik_b_steen",
+   "module_size": [
+    2,
+    2
+   ],
+   "cell": [
+    1,
+    1
+   ],
+   "part": "window_shutters_flowerbox",
+   "walk": false
+  },
+  {
+   "name": "raam_klein",
+   "id": 152,
+   "col": 8,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "window_small",
+   "walk": false
+  },
+  {
+   "name": "muurlamp",
+   "id": 153,
+   "col": 9,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "wall_lamp",
+   "walk": false
+  },
+  {
+   "name": "bord_mok",
+   "id": 154,
+   "col": 10,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "hanging_sign",
+   "walk": false
+  },
+  {
+   "name": "bord_aambeeld",
+   "id": 155,
+   "col": 11,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "hanging_sign",
+   "walk": false
+  },
+  {
+   "name": "bord_drankje",
+   "id": 156,
+   "col": 12,
+   "row": 9,
+   "kind": "muur",
+   "layer": "ground",
+   "part": "hanging_sign",
+   "walk": false
+  },
+  {
+   "name": "bord_paal",
+   "id": 157,
+   "col": 13,
+   "row": 9,
+   "kind": "hout",
+   "layer": "overlay",
+   "part": "standing_sign",
+   "walk": false
+  }
+ ],
+ "assembly": "see buildings.house(w,rh,wh,door,dormers,chimneys,sign,stone): row0 = chimney-top overlay row; rows 1..rh roof (nok / vul+rand / goot), then wh wall rows (pleister..., voet). Door modules occupy the bottom 2 wall rows; raam_luik 2x2 the top 2 wall rows.",
+ "modules": "multi-tile modules are named <module>_c<col>r<row>; module_size gives [w,h] in tiles"
+}

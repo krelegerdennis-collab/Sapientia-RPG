@@ -1,0 +1,314 @@
+{
+"bord_aambeeld": [
+11,
+9
+],
+"bord_drankje": [
+12,
+9
+],
+"bord_mok": [
+10,
+9
+],
+"bord_paal": [
+13,
+9
+],
+"dak_goot_l": [
+9,
+0
+],
+"dak_goot_m": [
+10,
+0
+],
+"dak_goot_r": [
+11,
+0
+],
+"dak_nok_l": [
+4,
+0
+],
+"dak_nok_m": [
+5,
+0
+],
+"dak_nok_r": [
+6,
+0
+],
+"dak_rand_l": [
+7,
+0
+],
+"dak_rand_r": [
+8,
+0
+],
+"dak_vul_0": [
+0,
+0
+],
+"dak_vul_1": [
+1,
+0
+],
+"dak_vul_2": [
+2,
+0
+],
+"dak_vul_3": [
+3,
+0
+],
+"dakkapel_c0r0": [
+0,
+1
+],
+"dakkapel_c0r1": [
+0,
+2
+],
+"dakkapel_c1r0": [
+1,
+1
+],
+"dakkapel_c1r1": [
+1,
+2
+],
+"deur_boog_c0r0": [
+3,
+5
+],
+"deur_boog_c0r1": [
+3,
+6
+],
+"deur_boog_c1r0": [
+4,
+5
+],
+"deur_boog_c1r1": [
+4,
+6
+],
+"deur_boog_steen_c0r0": [
+3,
+7
+],
+"deur_boog_steen_c0r1": [
+3,
+8
+],
+"deur_boog_steen_c1r0": [
+4,
+7
+],
+"deur_boog_steen_c1r1": [
+4,
+8
+],
+"deur_dubbel_c0r0": [
+1,
+5
+],
+"deur_dubbel_c0r1": [
+1,
+6
+],
+"deur_dubbel_c1r0": [
+2,
+5
+],
+"deur_dubbel_c1r1": [
+2,
+6
+],
+"deur_dubbel_steen_c0r0": [
+1,
+7
+],
+"deur_dubbel_steen_c0r1": [
+1,
+8
+],
+"deur_dubbel_steen_c1r0": [
+2,
+7
+],
+"deur_dubbel_steen_c1r1": [
+2,
+8
+],
+"deur_enkel_c0r0": [
+0,
+5
+],
+"deur_enkel_c0r1": [
+0,
+6
+],
+"deur_enkel_steen_c0r0": [
+0,
+7
+],
+"deur_enkel_steen_c0r1": [
+0,
+8
+],
+"muur_balk_l": [
+8,
+3
+],
+"muur_balk_m": [
+9,
+3
+],
+"muur_balk_r": [
+10,
+3
+],
+"muur_pleister_0": [
+0,
+3
+],
+"muur_pleister_1": [
+1,
+3
+],
+"muur_pleister_2": [
+2,
+3
+],
+"muur_pleister_l": [
+3,
+3
+],
+"muur_pleister_r": [
+4,
+3
+],
+"muur_steen_l": [
+15,
+3
+],
+"muur_steen_m": [
+14,
+3
+],
+"muur_steen_r": [
+0,
+4
+],
+"muur_stijl": [
+5,
+3
+],
+"muur_vakwerk_a": [
+6,
+3
+],
+"muur_vakwerk_b": [
+7,
+3
+],
+"muur_voet_l": [
+11,
+3
+],
+"muur_voet_m": [
+12,
+3
+],
+"muur_voet_r": [
+13,
+3
+],
+"muurlamp": [
+9,
+9
+],
+"raam_klein": [
+8,
+9
+],
+"raam_luik_b_c0r0": [
+2,
+9
+],
+"raam_luik_b_c0r1": [
+2,
+10
+],
+"raam_luik_b_c1r0": [
+3,
+9
+],
+"raam_luik_b_c1r1": [
+3,
+10
+],
+"raam_luik_b_steen_c0r0": [
+6,
+9
+],
+"raam_luik_b_steen_c0r1": [
+6,
+10
+],
+"raam_luik_b_steen_c1r0": [
+7,
+9
+],
+"raam_luik_b_steen_c1r1": [
+7,
+10
+],
+"raam_luik_c0r0": [
+0,
+9
+],
+"raam_luik_c0r1": [
+0,
+10
+],
+"raam_luik_c1r0": [
+1,
+9
+],
+"raam_luik_c1r1": [
+1,
+10
+],
+"raam_luik_steen_c0r0": [
+4,
+9
+],
+"raam_luik_steen_c0r1": [
+4,
+10
+],
+"raam_luik_steen_c1r0": [
+5,
+9
+],
+"raam_luik_steen_c1r1": [
+5,
+10
+],
+"schoorsteen_top": [
+2,
+1
+],
+"schoorsteen_voet": [
+4,
+1
+],
+"schoorsteen_voet_nok": [
+3,
+1
+]
+}

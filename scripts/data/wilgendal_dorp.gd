@@ -363,11 +363,56 @@ const ICOON_VAN_WINKEL := {
 
 
 ## Blokkerend deel van een pand: de onderste "blok_rijen" rijen (standaard het hele pand).
+## SoM-stijl: een huis uit huizen.json vervangt oorsprong/maat/blok_rijen (zie som_pand()).
 static func pand_blok(rij: Dictionary) -> Rect2i:
+	rij = som_pand(rij)
 	var o: Vector2i = rij["oorsprong"]
 	var m: Vector2i = rij["maat"]
 	var n := int(rij.get("blok_rijen", m.y))
 	return Rect2i(o.x, o.y + m.y - n, m.x, n)
+
+
+## --- SoM-pilot (fase 3) ---
+const SOM_HUIZEN := "res://assets/tilesets/som/wilgendal/huizen.json"
+static var _som_huizen: Variant = null
+
+
+static func som() -> bool:
+	return KaartStijl.is_som(DORP)
+
+
+## Alleen voor tests: huizen.json opnieuw lezen.
+static func som_herladen() -> void:
+	_som_huizen = null
+
+
+static func som_huizen() -> Dictionary:
+	if _som_huizen == null:
+		_som_huizen = {}
+		if FileAccess.file_exists(SOM_HUIZEN):
+			var d = JSON.parse_string(FileAccess.get_file_as_string(SOM_HUIZEN))
+			if d is Dictionary:
+				_som_huizen = d
+	return _som_huizen
+
+
+## Pand in de actieve stijl. SoM: zelfde deurtegel, het huis eromheen uit huizen.json
+## (alleen de muurrijen botsen; achter het dak lopen). Oud of geen SoM-huis: ongewijzigd.
+static func som_pand(rij: Dictionary) -> Dictionary:
+	if not som():
+		return rij
+	var h: Dictionary = som_huizen().get(str(rij.get("id", "")), {})
+	if h.is_empty():
+		return rij
+	var uit := rij.duplicate()
+	var deur: Vector2i = rij["deur"]
+	var maat := Vector2i(int(h["maat"][0]), int(h["maat"][1]))
+	var dc := Vector2i(int(h["deur"][0]), int(h["deur"][1]))
+	uit["oorsprong"] = deur - dc
+	uit["maat"] = maat
+	uit["blok_rijen"] = int(h["muur_rijen"])
+	uit["som_tex"] = SOM_HUIZEN.get_base_dir() + "/huizen/" + str(rij["id"]) + ".png"
+	return uit
 
 
 ## Molen-node: linksonder van de basis (y-sort op de onderrand), in pixels.

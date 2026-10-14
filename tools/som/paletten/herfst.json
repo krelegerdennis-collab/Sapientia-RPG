@@ -1,0 +1,30 @@
+{
+ "gras": [
+  "Gold",
+  -2
+ ],
+ "pad": [
+  "Brown/Wood",
+  -1
+ ],
+ "gebladerte": [
+  "Gold",
+  -1
+ ],
+ "dak": [
+  "Red/Danger",
+  -1
+ ],
+ "hout": [
+  "Brown/Wood",
+  -1
+ ],
+ "water": [
+  "Blue (Lotte/UI)",
+  -1
+ ],
+ "muur": [
+  "White/Paper",
+  -1
+ ]
+}
