@@ -823,9 +823,11 @@ func _autosave_tests() -> void:
 	var slots: Node = t.get_node_or_null("SaveSlotList")
 	var slot1: Node = slots.find_child("Slot1", true, false) if slots != null else null
 	var slot4: Node = slots.find_child("Slot4", true, false) if slots != null else null
-	check("Doorgaan toont vier slots", slot1 is Button and slot4 is Button and not (slot1 as Button).disabled)
-	if slot1 is Button:
-		await click(slot1)
+	var auto_row: Node = slots.find_child("Autosave", true, false) if slots != null else null
+	check("Doorgaan toont vier slots + Autosave", slot1 is Button and slot4 is Button and not (slot1 as Button).disabled
+			and auto_row is Button and not (auto_row as Button).disabled)
+	if auto_row is Button:
+		await click(auto_row)
 	check("'Doorgaan' -> wereldkaart (autosave is de nieuwste)", await wait_scene("Wereldkaart"))
 	await frames(5)
 	check("plek en HP uit de autosave (%s, HP %d)" % [player().get_tile(), GameState.party[0]["hp"]],
@@ -835,6 +837,7 @@ func _autosave_tests() -> void:
 	var aut := GameState.read_save(GameState.autosave_path)
 	var mk := man.keys()
 	var ak := aut.keys()
+	ak.erase("home_slot")      # save-slots: alleen de autosave weet bij welk slot hij hoort
 	mk.sort()
 	ak.sort()
 	check("autosave = zelfde formaat als de handmatige save (%d sleutels)" % ak.size(), mk == ak and not ak.is_empty())
