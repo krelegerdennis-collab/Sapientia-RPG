@@ -227,9 +227,15 @@ func _update_frame() -> void:
 
 
 ## De speler loopt ertegen (player.gd _try_bump) of drukt A ervoor (player.gd _try_interact).
+## TODO.md "push monster when stunned": loopt de speler tegen een VERLAMD monster aan, dan duwt hij
+## het (en een eventuele keten erachter) 1 tegel weg; zie DungeonRoom.push_monster().
 func bump(_by: Node) -> void:
-	if room:
-		room.monster_touch(self)
+	if room == null:
+		return
+	if is_stunned() and room.has_method("push_monster") and _by != null and "facing" in _by:
+		room.push_monster(self, _by.facing)
+		return
+	room.monster_touch(self)
 
 
 func interact(_by: Node) -> void:

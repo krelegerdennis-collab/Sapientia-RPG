@@ -35,6 +35,8 @@ var _walk_distance := 0.0
 var _bump_tile := Vector2i(-9999, -9999)
 ## v0.11: true zolang een cutscene de speler laat lopen
 var _scripted := false
+## Na een duw (TODO.md push): niet doorlopen naar de vrijgekomen tegel tot de richting is losgelaten.
+var hold_until_release := false
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var camera: Camera2D = $Camera2D
@@ -75,12 +77,16 @@ func _process(delta: float) -> void:
 
 	if not is_moving:
 		var dir := _read_direction()
+		if hold_until_release and dir != facing:
+			hold_until_release = false
 		if dir == Vector2i.ZERO:
 			_walk_distance = 0.0
 			_bump_tile = Vector2i(-9999, -9999)
 		else:
 			facing = dir
-			if _can_move(dir):
+			if hold_until_release:
+				pass   # duw: speler blijft staan
+			elif _can_move(dir):
 				_target = position + Vector2(dir) * TILE_SIZE
 				is_moving = true
 				_bump_tile = Vector2i(-9999, -9999)

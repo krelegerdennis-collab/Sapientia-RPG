@@ -217,22 +217,22 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 #### Systemen – push monster when stunned
 
 ##### Basis push
-- [ ] Als speler TEGEN een GESTUND monster aanloopt:
-  - [ ] Speler beweegt ÉN monster wordt geduwd (samen)
-  - [ ] Monster schuift 1 tegel in de richting van de speler
-  - [ ] Speler neemt de oorspronkelijke plek NIET in
-- [ ] Als monster tegen muur/obstakel wordt geduwd → blijft staan
-- [ ] Werkt ALLEEN bij stun-status (niet bij normale monsters)
-- [ ] Visuele feedback: monster schuift 1 tegel (geen teleport)
+- [x] Als speler TEGEN een GESTUND monster aanloopt:
+  - [x] Speler beweegt ÉN monster wordt geduwd (samen)
+  - [x] Monster schuift 1 tegel in de richting van de speler
+  - [x] Speler neemt de oorspronkelijke plek NIET in
+- [x] Als monster tegen muur/obstakel wordt geduwd → blijft staan
+- [x] Werkt ALLEEN bij stun-status (niet bij normale monsters)
+- [x] Visuele feedback: monster schuift 1 tegel (geen teleport)
 
 ##### Chain-push
-- [ ] Als geduwd monster tegen ANDER monster aan komt:
-  - [ ] Beide monsters worden geduwd (chain-push)
-  - [ ] Tweede monster schuift ook 1 tegel in dezelfde richting
-  - [ ] Als tweede tegen muur/obstakel komt → stopt daar
-  - [ ] Als tweede tegen een DERDE monster komt → keten gaat door
-- [ ] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
-- [ ] Alle geduwde monsters schuiven tegelijk (animatie)
+- [x] Als geduwd monster tegen ANDER monster aan komt:
+  - [x] Beide monsters worden geduwd (chain-push)
+  - [x] Tweede monster schuift ook 1 tegel in dezelfde richting
+  - [x] Als tweede tegen muur/obstakel komt → stopt daar
+  - [x] Als tweede tegen een DERDE monster komt → keten gaat door
+- [x] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
+- [x] Alle geduwde monsters schuiven tegelijk (animatie)
 
 #### Systemen – run feature
 - [ ] RUN-knop toevoegen BOVEN de CORE-knop
@@ -1019,23 +1019,23 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
 
 ### Basis push
 
-- [ ] Als speler TEGEN een GESTUND monster aanloopt:
-  - [ ] Speler beweegt ÉN monster wordt geduwd (samen)
-  - [ ] Monster schuift 1 tegel in de richting van de speler
-  - [ ] Speler neemt de oorspronkelijke plek NIET in
-- [ ] Als monster tegen muur/obstakel wordt geduwd → blijft staan
-- [ ] Werkt ALLEEN bij stun-status (niet bij normale monsters)
-- [ ] Visuele feedback: monster schuift 1 tegel (geen teleport)
+- [x] Als speler TEGEN een GESTUND monster aanloopt:
+  - [x] Speler beweegt ÉN monster wordt geduwd (samen)
+  - [x] Monster schuift 1 tegel in de richting van de speler
+  - [x] Speler neemt de oorspronkelijke plek NIET in
+- [x] Als monster tegen muur/obstakel wordt geduwd → blijft staan
+- [x] Werkt ALLEEN bij stun-status (niet bij normale monsters)
+- [x] Visuele feedback: monster schuift 1 tegel (geen teleport)
 
 ### Chain-push
 
-- [ ] Als geduwd monster tegen ANDER monster aan komt:
-  - [ ] Beide monsters worden geduwd (chain-push)
-  - [ ] Tweede monster schuift ook 1 tegel in dezelfde richting
-  - [ ] Als tweede tegen muur/obstakel komt → stopt daar
-  - [ ] Als tweede tegen een DERDE monster komt → keten gaat door
-- [ ] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
-- [ ] Alle geduwde monsters schuiven tegelijk (animatie)
+- [x] Als geduwd monster tegen ANDER monster aan komt:
+  - [x] Beide monsters worden geduwd (chain-push)
+  - [x] Tweede monster schuift ook 1 tegel in dezelfde richting
+  - [x] Als tweede tegen muur/obstakel komt → stopt daar
+  - [x] Als tweede tegen een DERDE monster komt → keten gaat door
+- [x] Chain stopt bij: muur, obstakel, of lege ruimte aan het einde
+- [x] Alle geduwde monsters schuiven tegelijk (animatie)
 
 ## Systemen – run feature
 

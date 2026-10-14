@@ -23,6 +23,7 @@ const SD := preload("res://scripts/data/story_data.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
 const KernVuurbal := preload("res://scripts/kern/kern_vuurbal.gd")
 const KernVeld := preload("res://scripts/kern/kern_kracht_veld.gd")
+const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const GOLEM_SCENE := "res://scenes/maps/archief_golemhal.tscn"
 const INGANG := "res://scenes/maps/archief_ingang.tscn"
 const GANG := "res://scenes/maps/archief_v1_gang.tscn"
@@ -96,6 +97,9 @@ func _run() -> void:
 	if part("J"):
 		print("=== Deel J: Ink Worm-kast in de Golem Hall ===")
 		await _kast_tests()
+	if part("K"):
+		print("=== Deel K: verlamd monster duwen (Diepe Grot push) ===")
+		await _push_tests()
 	print("KERNKRACHTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -1126,3 +1130,104 @@ func _kast_tests() -> void:
 				worm2 = true
 	check("J: na opnieuw binnenkomen staat de kast open en de Ink Worm er nog", kast != null and kast.is_open
 			and kast.sprite.frame == 1 and not kast.scheur.visible and kast.shape.disabled and worm2)
+
+
+# ================================================================ deel K: push (TODO.md "push monster when stunned")
+## Vrije tegel voor een monster (vloer, geen object, geen ander monster behalve 'except').
+func _push_free(room: Node, t: Vector2i, except: Array) -> bool:
+	var n: int = room.cell(t)
+	if n < 0 or DungeonRooms.is_solid(n) or DungeonRooms.is_no_monster(n) or room._blocked.has(t):
+		return false
+	for o in room.monsters:
+		if is_instance_valid(o) and not except.has(o) and o.covers(t):
+			return false
+	return true
+
+
+func _push_tests() -> void:
+	setup(SD.KLAAR, true)
+	var room := await enter(INGANG, "ingang")
+	if room == null:
+		check("archief_ingang geladen", false)
+		return
+	await freeze_monsters()
+	var small: Array = []
+	for m in room.monsters:
+		if is_instance_valid(m) and m.size == Vector2i.ONE and not m.boss:
+			small.append(m)
+	check("twee gewone monsters (1x1) in de kamer", small.size() >= 2)
+	if small.size() < 2:
+		return
+	var a: Node = small[0]
+	var b: Node = small[1]
+	var p := player()
+	# zoek een rij: speler op t-d, monster op t, vrij op t+d en t+2d (en verder tot de muur)
+	var spot := Vector2i(-99, -99)
+	var dir := Vector2i.ZERO
+	for t in room._cells.keys():
+		for d in DIRS:
+			if standable(t - d) and _push_free(room, t, [a, b]) and _push_free(room, t + d, [a, b]) \
+					and _push_free(room, t + 2 * d, [a, b]) and _push_free(room, t + 3 * d, [a, b]):
+				spot = t
+				dir = d
+				break
+		if dir != Vector2i.ZERO:
+			break
+	check("een rij van 4 vrije tegels gevonden", dir != Vector2i.ZERO)
+	if dir == Vector2i.ZERO:
+		return
+	b.place_at(Vector2i(-50, -50), Vector2i.DOWN)    # uit de weg
+	a.place_at(spot, Vector2i.DOWN)
+	p.place_at(spot - dir, dir)
+	await pframes(4)
+	# niet verlamd: geen duw
+	check("niet verlamd: push_monster doet niets", not room.push_monster(a, dir) and a.tile == spot)
+	a.stun(KernVeld.STUN_STEPS)
+	var stun0: int = a.stun_steps
+	var ptile: Vector2i = p.get_tile()
+	Input.action_press(ACTIONS[dir])
+	await wait_until(func(): return a.is_moving, 1.0)
+	var mid_px: Vector2 = a.position
+	await get_tree().create_timer(0.08).timeout
+	var sliding: bool = a.is_moving and a.position != a.tile_to_px(spot + dir)
+	await screenshot("push_verlamd_monster")
+	await wait_until(func(): return not a.is_moving, 2.0)
+	await pframes(10)
+	check("tegen verlamd monster aanlopen: monster schuift 1 tegel (%s -> %s), vloeiend" % [spot, a.tile],
+			a.tile == spot + dir and sliding and mid_px != a.tile_to_px(spot + dir))
+	check("speler blijft staan en neemt de plek niet in (ook met de knop ingedrukt)", p.get_tile() == ptile and not p.is_moving)
+	Input.action_release(ACTIONS[dir])
+	await pframes(4)
+	check("duwen telt niet als stap (verlamming %d -> %d), geen gevecht" % [stun0, a.stun_steps],
+			a.stun_steps == stun0 and not GameState.in_battle)
+	# chain-push: B direct achter A, A duwen -> beide 1 tegel (B is NIET verlamd)
+	a.place_at(spot, Vector2i.DOWN)
+	b.place_at(spot + dir, Vector2i.DOWN)
+	await pframes(2)
+	var ok_push: bool = room.push_monster(a, dir)
+	check("chain-push: twee monsters schuiven tegelijk", ok_push and a.is_moving and b.is_moving)
+	await wait_until(func(): return not a.is_moving and not b.is_moving, 2.0)
+	await screenshot("push_chain")
+	check("chain-push: A %s, B %s (elk 1 tegel)" % [a.tile, b.tile], a.tile == spot + dir and b.tile == spot + 2 * dir)
+	# blijven duwen tot de muur: dan stopt alles en schuift niemand meer
+	var guard := 0
+	while room.push_monster(a, dir) and guard < 40:
+		guard += 1
+		await wait_until(func(): return not a.is_moving and not b.is_moving, 2.0)
+	var end_b: Vector2i = b.tile
+	var a_before: Vector2i = a.tile
+	check("keten tegen muur/obstakel: niemand beweegt (A %s, B %s)" % [a.tile, b.tile],
+			not room.push_monster(a, dir) and a.tile == a_before and b.tile == end_b and a.tile + dir == b.tile
+			and not _push_free(room, b.tile + dir, [a, b]))
+	# enkel monster tegen muur
+	b.place_at(Vector2i(-50, -50), Vector2i.DOWN)
+	await pframes(2)
+	guard = 0
+	while room.push_monster(a, dir) and guard < 40:
+		guard += 1
+		await wait_until(func(): return not a.is_moving, 2.0)
+	var at: Vector2i = a.tile
+	check("monster tegen de muur blijft staan (%s)" % at, not room.push_monster(a, dir) and a.tile == at)
+	check("een baas wordt nooit geduwd (voorstel)", room.PUSH_BOSS == false)
+	a.stun_steps = 1
+	a.step_tick()
