@@ -18,6 +18,7 @@ const Kisten := preload("res://world_warper/kamers/echo_kisten.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const Gear := preload("res://scripts/equipment.gd")
 const SD := preload("res://scripts/data/story_data.gd")
+const QL := preload("res://world_warper/data/echo_questlog.gd")
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const HUBHAL := "res://world_warper/maps/hal.tscn"
@@ -302,6 +303,8 @@ func _echo_grot() -> void:
 	_kies(EchoGrot.KEUZE_TERUG)
 	check("tweede gesprek sluit", await _wacht_gesprek_weg())
 
+	await _questlog_tests()
+
 	GameState.story_flags[EchoGrot.FLAG_H6] = true
 	if not _praat():
 		check("na H-6 de kandidatenzin", false)
@@ -504,6 +507,102 @@ func _wereld_weigert() -> bool:
 			and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active()
 	check("wereldkaart start de grot niet", dicht)
 	return dicht
+
+
+## v0.24 ECHO-questlog: data (statussen per act) + live in ECHO's Kamer (lijst, act 1, act 3, terug).
+func _questlog_tests() -> void:
+	var leeg := {}
+	check("questlog: 6 acts, Nederlandse ids", QL.ids() == ["akte_1", "akte_2", "akte_3", "akte_4", "akte_5", "akte_6"])
+	check("questlog: nieuw spel -> Act 1 Active, Act 2 Locked, Act 3-6 Upcoming",
+			QL.status("akte_1", leeg, 0) == QL.OPEN and QL.status("akte_2", leeg, 0) == QL.DICHT
+			and ["akte_3", "akte_4", "akte_5", "akte_6"].all(func(i): return QL.status(i, leeg, 0) == QL.LATER))
+	var a1 := {SD.GOLEM_FLAG: true}
+	check("questlog: Golem verslagen + Archieven in -> Act 1 Done, Act 2 Active",
+			QL.status("akte_1", a1, SD.NACHT) == QL.KLAAR and QL.status("akte_2", a1, SD.NACHT) == QL.OPEN)
+	check("questlog: Golem zonder verhaalstap -> Act 1 nog Active", QL.status("akte_1", a1, SD.START) == QL.OPEN)
+	var a2 := {SD.GOLEM_FLAG: true, "noor_gered": true, "archief2_lotte_lid": true, Unlock.BEWAKER_VLAG: true, Unlock.UNLOCK_VLAG: true}
+	check("questlog: na De Genezer -> Act 2 Done, Act 3 Upcoming (geen inhoud)",
+			QL.status("akte_2", a2, SD.NACHT) == QL.KLAAR and QL.status("akte_3", a2, SD.NACHT) == QL.LATER)
+	check("questlog: keuzes = 6 acts + Go back", QL.keuzes(a1, SD.NACHT) == ["Act 1 - Done", "Act 2 - Active",
+			"Act 3 - Upcoming", "Act 4 - Upcoming", "Act 5 - Upcoming", "Act 6 - Upcoming", "Go back"])
+	var r1 := QL.regels("akte_1", a1, SD.NACHT)
+	check("questlog: Act 1 = ECHO-zin + opdrachten afgevinkt", r1.size() == 2 and r1[0] == QL.akte("akte_1")["echo_klaar"]
+			and r1[1].contains("[x] Defeat the Golem") and r1[1].contains("[x] Follow the Old Man"))
+	var r2 := QL.regels("akte_2", {SD.GOLEM_FLAG: true, "noor_gered": true}, SD.NACHT)
+	check("questlog: Act 2 deels: Vesper [x], Seren [ ]", r2[1].contains("[x] Save Vesper") and r2[1].contains("[ ] Seren joins"))
+	check("questlog: Act 2 klaar = canonzin ECHO", QL.regels("akte_2", a2, SD.NACHT)[0] == "Two Archives active. World Warper online.")
+	check("questlog: dichte act toont geen opdrachten", Array(QL.regels("akte_2", leeg, 0)) == [QL.ZIN_DICHT]
+			and Array(QL.regels("akte_4", a2, SD.NACHT)) == [QL.ZIN_LATER])
+	var eng := true
+	for t in QL.speler_teksten():
+		for nl in ["opdracht", "klaar", "akte", "archief", "verslaan", "proefpersoon", "onderzoeker"]:
+			if t.to_lower().contains(nl):
+				eng = false
+				print("INFO  niet-Engels/onthulling in: ", t)
+	check("questlog: spelertekst Engels, geen onthulling", eng)
+	check("questlog: in het ECHO-menu", EchoGrot.menu_opties().has(EchoGrot.OPTIE_QUESTLOG))
+
+	# live
+	var bewaar := GameState.story_flags.duplicate()
+	var stap_voor := GameState.story_step
+	GameState.story_flags[SD.GOLEM_FLAG] = true
+	GameState.story_flags["noor_gered"] = true
+	GameState.story_flags.erase("archief2_lotte_lid")
+	GameState.story_step = maxi(stap_voor, SD.NACHT)
+	if not _praat():
+		check("questlog live: gesprek", false)
+		return
+	check("questlog live: optie in het menu", await _naar_keuze(EchoGrot.OPTIE_QUESTLOG))
+	_kies(EchoGrot.OPTIE_QUESTLOG)
+	var lijst := await _naar_keuze(QL.TERUG)
+	check("questlog live: lijst met acts", lijst and Dialog.choices.size() == 7 and str(Dialog.choices[0]) == "Act 1 - Done"
+			and str(Dialog.choices[2]) == "Act 3 - Upcoming"
+			and str(Dialog.choices[1]) == ("Act 2 - Done" if bewaar.has(Unlock.UNLOCK_VLAG) and bewaar.has("archief2_lotte_lid") else "Act 2 - Active"))
+	await _pframes(10)
+	check("questlog live: lijst binnen beeld", _vak_in_beeld())
+	await _screenshot("echo_questlog_lijst")
+	Dialog.choose(0)
+	check("questlog live: Act 1 -> ECHO-zin", await _naar_tekst(str(QL.akte("akte_1")["echo_klaar"])))
+	Dialog.advance()
+	var blok := QL.regels("akte_1", GameState.story_flags, GameState.story_step)[1]
+	check("questlog live: Act 1 opdrachten afgevinkt", await _naar_tekst(blok) and blok.contains("[x] Defeat the Golem"))
+	Dialog.advance()
+	await _pframes(10)
+	check("questlog live: opdrachtenvak binnen beeld", _vak_in_beeld())
+	await _screenshot("echo_questlog_act1")
+	Dialog.advance()
+	check("questlog live: terug in de lijst", await _naar_keuze(QL.TERUG))
+	Dialog.choose(1)
+	var b2 := QL.regels("akte_2", GameState.story_flags, GameState.story_step)
+	check("questlog live: Act 2 met [ ] Seren", await _naar_tekst(b2[0]) and b2[1].contains("[ ] Seren joins"))
+	Dialog.advance()
+	if await _naar_tekst(b2[1]):
+		Dialog.advance()
+		await _pframes(10)
+		await _screenshot("echo_questlog_act2")
+	check("questlog live: lijst na Act 2", await _naar_keuze(QL.TERUG))
+	Dialog.choose(2)
+	check("questlog live: Act 3 = nog leeg", await _naar_tekst(QL.ZIN_LATER))
+	await _pframes(10)
+	await _screenshot("echo_questlog_act3")
+	check("questlog live: weer de lijst", await _naar_keuze(QL.TERUG))
+	_kies(QL.TERUG)
+	check("questlog live: Go back -> ECHO-menu", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE))
+	_kies(EchoGrot.KEUZE_TERUG)
+	check("questlog live: gesprek sluit", await _wacht_gesprek_weg())
+	GameState.story_flags = bewaar
+	GameState.story_step = stap_voor
+
+
+func _vak_in_beeld() -> bool:
+	var vp := Rect2(Vector2.ZERO, get_tree().root.get_visible_rect().size)
+	var r: Rect2 = Dialog.panel.get_global_rect()
+	var ok := vp.encloses(r)
+	if Dialog._choice_box != null and Dialog._choice_box.visible:
+		ok = ok and vp.encloses(Dialog._choice_box.get_global_rect())
+	if not ok:
+		print("INFO  vak %s keuzes %s scherm %s" % [r, Dialog._choice_box.get_global_rect() if Dialog._choice_box else null, vp])
+	return ok
 
 
 func _praat() -> bool:
