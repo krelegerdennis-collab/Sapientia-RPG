@@ -2161,7 +2161,7 @@ func _prologue_tests() -> void:
 	await _wait_typed()
 	await press_interact()   # Ja
 	await _wait_typed()
-	check("halverwege opgeslagen", Dialog._lines == ["Saved."] and GameState.has_save())
+	check("halverwege opgeslagen", str(Dialog._lines).contains("Saved to slot") and GameState.has_save())
 	await close_dialog()
 	var d := GameState.read_save()
 	var st: Dictionary = d.get("story", {})
