@@ -1,10 +1,15 @@
 # SAPIENTIA in de browser
 
-Web-build van `main` (`b605403`, v0.21), Godot 4.7.2, threads uit.
+Web-build van `main` (`2782887`, v0.21), Godot 4.7.2, threads uit.
 GitHub Pages zet geen COOP/COEP-headers, dus een build mét threads start niet op een telefoon.
 Hard verversen, anders blijft de vorige `index.pck` in het geheugen.
 
-Nieuw in deze build, bovenop `f25da72`:
+Nieuw in deze build, bovenop `b605403`:
+- Willowdale (Wilgendal) ~3x groter: hoofdstraat, beek van 1 tegel met brug, marktplein met nieuwe put, max 2 NPC's op het plein (#107).
+- Engelse spelersnamen overal; Spark/Arc en Ember/Glow uniek (#110).
+- Deep Learning Simulation-naam en warp-vlak, Warp-label op Dauwpixel 10 (#105); scenes-kijker hangt niet meer (#109).
+
+Eerder, bovenop `f25da72`:
 - Save-slots: bij New Game kies je slot 1-4; het opslagboek schrijft naar dat slot (of een ander slot). De autosave heeft een eigen rij 'Autosave' en overschrijft nooit meer een handmatig slot. Autosave alleen bij kerker in/uit (#103).
 - Diepe Grot: een verlamd monster op een drukplaat duwen drukt hem in; een plaatpuzzel heeft 1 monster naast de plaat; een monster in een val duwen verslaat het (#102).
 
