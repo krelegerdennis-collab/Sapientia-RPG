@@ -387,7 +387,7 @@ func _title_shot() -> void:
 	var br: Rect2 = t.beta_card.get_global_rect()
 	br.position -= st.position
 	check("Betatest links onder, los van het menu (%s)" % br, t.beta_button != null and not t.beta_button.disabled
-			and "Betatest" in str(t.beta_button.get_meta("label", "")) and br.end.x <= cr.position.x
+			and "Beta Test" in str(t.beta_button.get_meta("label", "")) and br.end.x <= cr.position.x
 			and br.position.x >= 0.0 and br.end.y <= 201.0 and br.position.y >= 140.0)
 	if t.glitch == null:
 		check("hoofdpagina title_main.png, menu onder de titel, Nearest",
