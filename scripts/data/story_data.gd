@@ -475,7 +475,7 @@ const EVENTS := {
 		["walk", "Marit", "left", 2],
 		["face", "Marit", "left"],
 		["face", "player", "right"],
-		["say", "Marit", ["Vesper! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
+		["say", "Marigold", ["Vesper! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
 		["flag", "noor_ontmoet"],
 		["flag", "quest_noor"],
 		["step", NOOR_KWIJT],
@@ -486,7 +486,7 @@ const EVENTS := {
 	# al eerder gezien is, bv. een oude save). Geen winkel nog; 2 extra in kisten van het Donker Woud.
 	"marit_boeken": [
 		{"if": {"not_flags": ["marit_boeken"]}, "do": [
-			["say", "Marit", ["Wait! Take these. Blank books from my grandfather's archive.", "Vesper always said monsters fit inside them. I never believed it... but maybe they'll help you."]],
+			["say", "Marigold", ["Wait! Take these. Blank books from my grandfather's archive.", "Vesper always said monsters fit inside them. I never believed it... but maybe they'll help you."]],
 			["give", "leeg_boek", 3],
 			["flag", "marit_boeken"],
 			["say", "", ["You receive 3x Blank Book!"]],
@@ -497,17 +497,17 @@ const EVENTS := {
 	# --- dorpelingen (hints over het donkere bos)
 	"marit": [
 		{"if": {"flags": ["noor_ontmoet"], "not_flags": ["marit_boeken"]}, "do": [["run", "marit_boeken"]]},
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Marit", ["You really brought her back! Mapleton will never forget this."]]]},
-		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Marit", ["The Dark Wood lies west of the village. Bring Vesper back, please!"]]]},
-		{"do": [["say", "Marit", ["Good day, traveler."]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Marigold", ["You really brought her back! Mapleton will never forget this."]]]},
+		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Marigold", ["The Dark Wood lies west of the village. Bring Vesper back, please!"]]]},
+		{"do": [["say", "Marigold", ["Good day, traveler."]]]},
 	],
 	"bram": [
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Old Bramwell", ["The mist is lifting. For the first time in months I hear birds again."]]]},
 		{"do": [["say", "Old Bramwell", ["We used to pick berries there. Now the trees hum like beehives.", "Stare at the mist too long and you see marks that don't belong."]]]},
 	],
 	"jens": [
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Jens", ["Vesper's back! Will she make sparks again? Please?"]]]},
-		{"do": [["say", "Jens", ["Mama says the mushrooms in the wood glow at night.", "And that they can sneeze. Really!"]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Jensen", ["Vesper's back! Will she make sparks again? Please?"]]]},
+		{"do": [["say", "Jensen", ["Mama says the mushrooms in the wood glow at night.", "And that they can sneeze. Really!"]]]},
 	],
 	"tobias": [
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Tobias", ["The water is clear again. Strange, isn't it? As if the wood was sick."]]]},
@@ -516,14 +516,14 @@ const EVENTS := {
 	"esdoorn_put": [{"do": [["say", "", ["An old well. Deep down, something pink flickers in the water."]]]}],
 	"ilse": [
 		{"if": {"flags": ["noor_gered"], "not_flags": ["ilse_thee"]}, "do": [
-			["say", "Ilse", ["You saved my Vesper. She wants to go with you. I can see it on her.", "Take good care of her. And take this tea, for the road."]],
+			["say", "Elise", ["You saved my Vesper. She wants to go with you. I can see it on her.", "Take good care of her. And take this tea, for the road."]],
 			["give", "kruidenthee", 3],
 			["flag", "ilse_thee"],
 			["say", "", ["You receive 3x Herbal Tea!"]],
 		]},
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Elise", ["Take good care of her, {naam}."]]]},
-		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Ilse", ["My Vesper... She had those sparks for weeks. I should have seen it.", "Bring her back. Please."]]]},
-		{"do": [["say", "Ilse", ["Vesper is outside, on the square. As always."]]]},
+		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Elise", ["My Vesper... She had those sparks for weeks. I should have seen it.", "Bring her back. Please."]]]},
+		{"do": [["say", "Elise", ["Vesper is outside, on the square. As always."]]]},
 	],
 	"herbergier": [{"do": [
 		["choice", "Do you want to rest here? (free)", ["Yes", "No"], ["herberg_rust", "herberg_nee"], "Innkeeper Walt"],

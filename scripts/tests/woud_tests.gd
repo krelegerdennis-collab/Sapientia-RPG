@@ -1056,7 +1056,7 @@ func _graan_data() -> void:
 			and absf(toon.get_length() - SD.MOLEN_ZANG_SEC) < 0.02)
 	var geesten: Dictionary = {}
 	for n in WR.ROOMS["woud_open_plek"].get("npcs", []):
-		if str(n.get("name", "")) == "Wood Wraiths":
+		if str(n.get("name", "")) == "Woudgeesten":
 			geesten = n
 	var t := Vector2i(int(geesten.get("tile", [0, 0])[0]), int(geesten.get("tile", [0, 0])[1]))
 	check("zaad op de grens van mist en open plek", not geesten.is_empty() and geesten["event"] == "zingend_zaad"
