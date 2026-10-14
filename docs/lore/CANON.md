@@ -199,6 +199,8 @@ ECHO: "Maar dat is een verhaal voor later."
   normaliseert over de actieve types naar 100% (`GrotLayouts.KANSEN`, `soort`).
 - **Koopman (H-5)**: vast **1x per 10 verdiepingen** (`GrotKamers.koopman_verdieping`); hij zit
   niet in de worp. Zijn 1% in de tabel is alleen ter informatie.
+- **Empty Room**: ~30% kans op een **lore-notitie** (kort Engels briefje van een eerdere
+  kandidaat, op de vloer; A = lezen), anders leeg. Geen onthulling over ECHO of H-6 in die briefjes.
 - **Wereldkaart**: geen ingang en geen icoon van de Diepe Grot. De grot start alleen via ECHO
   (ECHO's Kamer). De oude spawn `van_dungeon100` blijft alleen voor oude saves.
 

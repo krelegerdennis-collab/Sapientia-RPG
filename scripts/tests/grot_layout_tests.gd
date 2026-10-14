@@ -28,6 +28,7 @@ func _ready() -> void:
 	_kansen()
 	_balans()
 	await _generator()
+	await _lege_kamers()
 	print("GROTLAYOUTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await get_tree().process_frame
@@ -167,3 +168,51 @@ func _generator() -> void:
 			var m := (d["monster_slots"] as Array).size()
 			bracket_ok = bracket_ok and m >= int(b[0]) and m <= int(b[1])
 	check("MEDIUM MAP: monsters per floor-bracket (8-10 / 10-12 / 12-14 / 14-16)", bracket_ok)
+
+
+## EMPTY ROOM: ~30% een lore-notitie (besluit Dennis 14 okt 2026), anders leeg; nooit een blokkade.
+func _lege_kamers() -> void:
+	var n := 0
+	var met := 0
+	var ok_plek := true
+	var ok_pad := true
+	var ok_tekst := true
+	var voorbeeld: Array = []
+	for sd in 60:
+		for f in range(2, 100):
+			if GK.layout_soort(sd, f) != L.LEEG:
+				continue
+			n += 1
+			var d := Gen.generate(sd, f)
+			var room: Dictionary = d["room"]
+			if not room.has("notitie"):
+				ok_plek = ok_plek and not GK.heeft_notitie(sd, f) or GK.notitie(sd, room, d).is_empty()
+				continue
+			met += 1
+			if voorbeeld.is_empty():
+				voorbeeld = [sd, f]
+			var t := Vector2i(int(room["notitie"][0]), int(room["notitie"][1]))
+			var props: Array = room.get("props", [])
+			var signs: Array = room.get("signs", [])
+			ok_plek = ok_plek and props.any(func(p): return p["type"] == GK.NOTITIE_PROP and Vector2i(int(p["tile"][0]), int(p["tile"][1])) == t) \
+					and signs.any(func(sg): return Vector2i(int(sg["tile"][0]), int(sg["tile"][1])) == t)
+			for sg in signs:
+				for line in sg["lines"]:
+					ok_tekst = ok_tekst and str(line) in GK.NOTITIES
+			# de notitie blokkeert de trap niet (BFS met de notitie als muur)
+			var bereik := Gen.reachable_tiles(room, d["spawn_up"])
+			if d["has_stairs_down"]:
+				ok_pad = ok_pad and bereik.has(d["stairs_down"])
+		if n > 400:
+			break
+	var frac := float(met) / maxf(1.0, float(n))
+	check("EMPTY ROOM: %d van %d lege kamers met een notitie (%.0f%%, doel ~30%%)" % [met, n, frac * 100.0],
+			n >= 40 and frac > 0.18 and frac < 0.42)
+	check("EMPTY ROOM: notitie = prop grot_notitie + leesplek op dezelfde tegel", ok_plek)
+	check("EMPTY ROOM: tekst komt uit GK.NOTITIES (Engels)", ok_tekst)
+	check("EMPTY ROOM: trap blijft bereikbaar", ok_pad)
+	check("EMPTY ROOM: plaatje bestaat", ResourceLoader.exists("res://assets/sprites/dungeon/grot_notitie.png"))
+	check("EMPTY ROOM: geen monsters en geen kisten ook met notitie", voorbeeld.size() == 2
+			and (Gen.generate(voorbeeld[0], voorbeeld[1])["room"]["monsters"] as Array).is_empty()
+			and (Gen.generate(voorbeeld[0], voorbeeld[1])["room"]["chests"] as Array).is_empty())
+	await get_tree().process_frame

@@ -261,7 +261,7 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [ ] Trap Room: zichtbaar of verborgen vallen?
 - [ ] Puzzle Room: welke puzzels?
   - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
-- [ ] Empty Room: lore-items of alleen leeg?
+- [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
 - [ ] Merchant Room: welke items verkoopt hij?
   - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
   - [ ] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest."
@@ -963,7 +963,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Geen kisten, geen monsters
   - Alleen doorgang
   - Soms met lore-item of notitie
-  - TODO(design): lore-items of alleen leeg?
+  - Besluit (Dennis, 14 okt 2026): ~30% kans op een lore-notitie (kort Engels briefje, A = lezen; `GrotKamers.notitie`), anders leeg.
 - [x] REST ROOM (3%)
   - Heal + save point
   - Geen monsters, geen kisten
@@ -1228,7 +1228,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
     Fase 3 (10+ min vast): ECHO-hint. Via communicator (World Warper bereikt simulatie). Duidelijkere hint dan Lotte. Altijd beschikbaar. Voorbeeld: "Kandidaat, de volgorde is niet links-rechts, maar binnenstebuiten."
 
     Optioneel, na 3x falen: de puzzel licht op. Eén tegel licht kort op (startpunt). Geen volledige oplossing.
-- [ ] Empty Room: lore-items of alleen leeg?
+- [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
   Definitief. De checkbox blijft open tot de Empty Room in de code deze verdeling gebruikt.
 
   **CANON – niet wijzigen zonder overleg.**

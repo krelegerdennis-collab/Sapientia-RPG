@@ -195,3 +195,54 @@ static func val_schade(soort: String, max_hp: int, hp: int, rol: float) -> int:
 	var f := lerpf(float(s[0]), float(s[1]), clampf(rol, 0.0, 1.0))
 	var dmg := maxi(1, roundi(float(max_hp) * f))
 	return mini(dmg, maxi(0, hp - 1))
+
+
+## EMPTY ROOM (lege kamer, Layouts.LEEG): ~30% kans op een lore-notitie (besluit Dennis, 14 okt 2026);
+## anders echt leeg. Korte Engelse zinnen van eerdere kandidaten. Geen onthulling over ECHO of H-6.
+## De notitie is een massief briefje (prop "grot_notitie") met een leesplek erop (A = lezen), op een
+## tegel met een vrije ring eromheen (blokkeert dus nooit een doorgang), niet pal naast de ladder.
+const NOTITIE_KANS := 0.30
+const NOTITIE_PROP := "grot_notitie"
+const NOTITIES := [
+	"A torn note: \"Every floor is different. The silence is always the same.\"",
+	"Scratched into the stone: \"Count the floors. Not the days.\"",
+	"A faded page: \"The chests that glow blue stay with you. Nothing else does.\"",
+	"A note in neat handwriting: \"If you can read this, you got further than most.\"",
+	"Chalk on the wall: \"Rest at every tenth floor. Trust nothing in between.\"",
+	"A crumpled note: \"I heard someone laugh below. Who sells things down here?\"",
+	"A worn card: \"Candidate log, page 12. The numbers do not add up. Keep walking.\"",
+	"Ink, half washed away: \"Someone walked this cave before me. His footprints only go down.\"",
+]
+
+
+## Heeft deze lege verdieping een notitie? (deterministisch per run-seed + verdieping)
+static func heeft_notitie(run_seed: int, floor_no: int) -> bool:
+	return float(_hash(run_seed, floor_no, 13) % 1000) / 1000.0 < NOTITIE_KANS
+
+
+## {"tile": Vector2i, "lines": [tekst]} of {} (geen notitie of geen plek).
+static func notitie(run_seed: int, room: Dictionary, d: Dictionary) -> Dictionary:
+	var floor_no := int(room.get("dungeon100_floor", room.get("floor", 0)))
+	if not heeft_notitie(run_seed, floor_no):
+		return {}
+	var layout: Array = room.get("layout", [])
+	var taken := _bezet(room, d)
+	var start: Vector2i = d.get("spawn_up", Vector2i.ZERO)
+	var kandidaten: Array[Vector2i] = []
+	for y in range(1, layout.size() - 1):
+		for x in range(1, str(layout[y]).length() - 1):
+			var t := Vector2i(x, y)
+			if str(layout[y])[x] != "." or absi(t.x - start.x) + absi(t.y - start.y) < 4:
+				continue
+			var ok := true
+			for dy in range(-1, 2):
+				for dx in range(-1, 2):
+					var n := t + Vector2i(dx, dy)
+					if not _vrij(layout, n) or taken.has(n):
+						ok = false
+			if ok:
+				kandidaten.append(t)
+	if kandidaten.is_empty():
+		return {}
+	var h := _hash(run_seed, floor_no, 17)
+	return {"tile": kandidaten[h % kandidaten.size()], "lines": [NOTITIES[(h / 7) % NOTITIES.size()]]}

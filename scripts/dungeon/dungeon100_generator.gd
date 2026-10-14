@@ -147,6 +147,8 @@ static func reachable_tiles(room: Dictionary, from: Vector2i) -> Dictionary:
 	var blocked := {}
 	for c in room.get("chests", []):
 		blocked[Vector2i(int(c["tile"][0]), int(c["tile"][1]))] = true
+	for p in room.get("props", []):
+		blocked[Vector2i(int(p["tile"][0]), int(p["tile"][1]))] = true
 	var seen := {from: 0}
 	var queue: Array[Vector2i] = [from]
 	var qi := 0
@@ -342,6 +344,14 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 		"theme": theme_for_floor(f),
 	}
 	Content.fill_room(room, d)
+	# Empty Room: soms een lore-notitie (GrotKamers.notitie, ~30%).
+	if d["layout_type"] == Layouts.LEEG:
+		var nt := GrotKamers.notitie(int(d["run_seed"]), room, d)
+		if not nt.is_empty():
+			var t: Vector2i = nt["tile"]
+			room["props"] = room.get("props", []) + [{"type": GrotKamers.NOTITIE_PROP, "tile": [t.x, t.y]}]
+			room["signs"] = room.get("signs", []) + [{"tile": [t.x, t.y], "lines": nt["lines"]}]
+			room["notitie"] = [t.x, t.y]
 	if room.has("rustpunt"):
 		var rp: Array = room["rustpunt"]
 		var sp := _rest_spawn(room, d, Vector2i(int(rp[0]), int(rp[1])))
