@@ -53,7 +53,7 @@ static func places(wm_id: String) -> Array[Dictionary]:
 	})
 	out.append({
 		"id": PLACE_WILGENDAL,
-		"label": "Wilgendal",
+		"label": "Willowdale",
 		"path": WILGENDAL_PATH,
 		"spawn": WILGENDAL_SPAWN,
 	})

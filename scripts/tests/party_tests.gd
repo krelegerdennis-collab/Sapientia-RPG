@@ -721,8 +721,8 @@ func _scenes_tests() -> void:
 	h._finish()
 	h.queue_free()
 	await pframes(2)
-	check("Hanger bekeken -> ontgrendeld", GameState.scene_seen("hanger"))
-	check("canon: Hanger-intro ontgrendelt 'The Hanger' en 'Sapientia' (vlaggen ww_canon_*), 'The World Warper' nog op slot",
+	check("Pendant bekeken -> ontgrendeld", GameState.scene_seen("hanger"))
+	check("canon: Hanger-intro ontgrendelt 'The Pendant' en 'Sapientia' (vlaggen ww_canon_*), 'The World Warper' nog op slot",
 			GameState.scene_seen("ww_hanger") and GameState.scene_seen("ww_sapientia") and not GameState.scene_seen("ww_warper"))
 	GameState.story_flags[ScenesDataT.CANON_GENEZER_FLAG] = true     # = WorldWarperGenezerScene na De Genezer
 	check("canon: vlag ww_canon_genezer_gezien -> 'The World Warper' ontgrendeld", GameState.scene_seen("ww_warper"))
@@ -739,7 +739,7 @@ func _scenes_tests() -> void:
 	for i in ScenesDataT.SCENES.size():
 		titels_ok = titels_ok and sc.buttons[i].text.ends_with(ScenesDataT.SCENES[i]["title"]) and not sc.is_locked(i)
 	check("lijst toont nu de titels (ook The World Warper / The Hanger / Sapientia)", titels_ok
-			and ScenesDataT.scene("ww_warper")["title"] == "The World Warper" and ScenesDataT.scene("ww_hanger")["title"] == "The Hanger"
+			and ScenesDataT.scene("ww_warper")["title"] == "The World Warper" and ScenesDataT.scene("ww_hanger")["title"] == "The Pendant"
 			and ScenesDataT.scene("ww_sapientia")["title"] == "Sapientia")
 	var flags_voor: Dictionary = GameState.story_flags.duplicate()
 	var map_voor := scene().scene_file_path

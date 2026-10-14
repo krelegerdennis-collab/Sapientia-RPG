@@ -54,13 +54,13 @@ func _run() -> void:
 	_data()
 	print("=== Archief 2: poort en platen ===")
 	_poort_en_platen()
-	print("=== Archief 2: Seren, Mosslijm, Genezer ===")
+	print("=== Archief 2: Seren, Mosslijm, Mender ===")
 	_lotte_en_genezer()
 	print("=== Archief 2: wereldkaart ===")
 	await _wereldkaart()
 	print("=== Archief 2: kamer, gevecht, warp ===")
 	await _spel()
-	print("=== Archief 2: na De Genezer naar de hub ===")
+	print("=== Archief 2: na The Mender naar de hub ===")
 	await _genezer_podium()
 	await _na_genezer_hub()
 	print("=== Archief 2: vijanden (data en regels) ===")
@@ -114,10 +114,10 @@ func _data() -> void:
 			and str(toegepast.get("archief2_zin", "")) == Archief2.KERN_ZIN
 			and int(toegepast.get("max_hp", 0)) == Archief2.GENEZER_HP)
 	var wurg := BossCore.apply_boss(GD.ENEMIES["wurger"])
-	check("Wurger zwak voor ijs en fysiek", bool(wurg.get("weak_matters", false))
+	check("Strangler zwak voor ijs en fysiek", bool(wurg.get("weak_matters", false))
 			and "ijs" in wurg.get("weak", []) and "fysiek" in wurg.get("weak", []))
-	check("Wurger: canon-zin in het bestiarium", str(GD.ENEMIES["wurger"]["desc"]) == "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free.")
-	check("Genezer: canon-zin in het bestiarium", str(GD.ENEMIES["genezer"]["desc"]) == "He heals by taking. He gives nothing back. Sapientia's perfect servant: without doubt, without emotion, without end. Whoever sees him sees what humanity becomes if Sapientia wins — silent, whole, and empty.")
+	check("Strangler: canon-zin in het bestiarium", str(GD.ENEMIES["wurger"]["desc"]) == "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free.")
+	check("Mender: canon-zin in het bestiarium", str(GD.ENEMIES["genezer"]["desc"]) == "He heals by taking. He gives nothing back. Sapientia's perfect servant: without doubt, without emotion, without end. Whoever sees him sees what humanity becomes if Sapientia wins — silent, whole, and empty.")
 	check("thema kas en warper", DungeonRooms.THEMES.has("kas") and DungeonRooms.THEMES.has("warper_paars"))
 	var kamers: Dictionary = Rooms.rooms()
 	var breed := true
@@ -221,9 +221,9 @@ func _poort_en_platen() -> void:
 	var noor := {"is_hero": true, "ally": false, "s": {"id": "noor"}}
 	check("gewone vijand: geen zwakte", Archief2.schaal_element(10, mos, "vuur") == 10
 			and is_equal_approx(Archief2.zwakte_fysiek(dennis, mos), 1.0))
-	check("Wurger: elke fysieke klap", is_equal_approx(Archief2.zwakte_fysiek(dennis, wurger), Archief2.ZWAK)
+	check("Strangler: elke fysieke klap", is_equal_approx(Archief2.zwakte_fysiek(dennis, wurger), Archief2.ZWAK)
 			and is_equal_approx(Archief2.zwakte_fysiek(noor, wurger), Archief2.ZWAK))
-	check("Genezer: zwaard van Dax, niet van Vesper", is_equal_approx(Archief2.zwakte_fysiek(dennis, genezer), Archief2.ZWAK)
+	check("Mender: zwaard van Dax, niet van Vesper", is_equal_approx(Archief2.zwakte_fysiek(dennis, genezer), Archief2.ZWAK)
 			and is_equal_approx(Archief2.zwakte_fysiek(noor, genezer), 1.0))
 	check("ijs telt, vuur niet", Archief2.schaal_element(10, genezer, "ijs") == 15
 			and Archief2.schaal_element(10, genezer, "vuur") == 10)
@@ -293,7 +293,7 @@ func _lotte_en_genezer() -> void:
 	check("plaat valt terug op 0", GameState.archief2_plaat("archief_2_v1_plaat", "p1", 0) == 0)
 	check("warp WM2/WM3 leeg", Archief2.warp_doel("wm2").is_empty() and Archief2.warp_doel("wm3").is_empty())
 	var doel := Archief2.warp_doel("wilgendal")
-	check("warp Wilgendal", str(doel.get("map", "")) == Archief2.WERELD and str(doel.get("spawn", "")) == "van_wilgendal")
+	check("warp Willowdale", str(doel.get("map", "")) == Archief2.WERELD and str(doel.get("spawn", "")) == "van_wilgendal")
 	var archief := Archief2.warp_doel("archief")
 	check("warp Archief-ingang", str(archief.get("spawn", "")) == "van_archief")
 
@@ -440,7 +440,7 @@ func _spel() -> void:
 		if _scène() == null or _scène().name != "Battle":
 			break
 		await _tik("interact")
-	check("terug na de Genezer", await _wacht("Archief2V1Plaat", 25.0))
+	check("terug na de Mender", await _wacht("Archief2V1Plaat", 25.0))
 	await _dialoog_dicht(90)
 	check("Levenskern na winst", GameState.kernfragmenten.has(Archief2.KERN_ID)
 			and str(KernData.fragment(Archief2.KERN_ID).get("beschrijving", "")) == Archief2.KERN_ZIN)
@@ -498,7 +498,7 @@ func _spel() -> void:
 	GameState.changing_map = false
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(str(terug["map"]), str(terug["spawn"]))
-	check("warp naar Wilgendal", await _wacht("Wereldkaart", 20.0))
+	check("warp naar Willowdale", await _wacht("Wereldkaart", 20.0))
 	var slots_gelijk := true
 	for slot in range(1, GameState.SLOT_COUNT + 1):
 		var nu := FileAccess.get_file_as_bytes(GameState.slot_path(slot))
@@ -523,7 +523,7 @@ func _genezer_podium() -> void:
 	await _dialoog_dicht(10)
 	var k := _scène()
 	var blok := get_tree().get_nodes_in_group("dungeon_blokkade")
-	check("podium: 16 blokkades op rij 5 (alles behalve de Genezer op 9-10)", blok.size() == 16
+	check("podium: 16 blokkades op rij 5 (alles behalve de Mender op 9-10)", blok.size() == 16
 			and blok.all(func(b): return int(b.position.y) == 5 * 16 + 8))
 	# vrije tegels bereikbaar vanaf de ingang (9,10) zonder door rij 5 of de Genezer te gaan
 	var dicht := {}
@@ -562,7 +562,7 @@ func _na_genezer_hub() -> void:
 	check("noorduitgang blijft de kaartkamer", str(noord.get("map", "")) == Archief2.WARPER_SCENE
 			and str(noord.get("spawn", "")) == "ingang" and ResourceLoader.exists(Archief2.WARPER_SCENE))
 	check("hub is het exterieur", str(WarperEnter.HUB_SCENE).ends_with("exterieur.tscn") and str(WarperEnter.HUB_SPAWN) == "ingang")
-	check("Hanger gloeit paars", HangerScene.PURPLE == Color("b07ae8"))
+	check("Pendant gloeit paars", HangerScene.PURPLE == Color("b07ae8"))
 	var echo := " ".join(Archief2.ECHO_REGELS)
 	check("H-6 niet meer in de kaartkamer (canon 17: Sapientia zegt het in de Hal)", not echo.contains("H-6"))
 	var hubtekst := " ".join(WarperDreiging.lines())
@@ -630,7 +630,7 @@ func _na_genezer_hub() -> void:
 	check("geen H-6 in scène 1", not tekst.contains("H-6") and not tekst.contains("Proefpersoon"))
 	check("party in de Hal", hub and str(GameState.current_map).ends_with("world_warper/maps/hal.tscn")
 			and str(GameState.current_map) != Archief2.WARPER_SCENE)
-	check("world_warper_unlocked na De Genezer", GameState.world_warper_is_unlocked()
+	check("world_warper_unlocked na The Mender", GameState.world_warper_is_unlocked()
 			and GameState.story_flags.has("archief2_naar_warper"))
 	var ex := _scène()
 	var spawn := ex.get_node_or_null("Spawns/ingang") if ex != null else null

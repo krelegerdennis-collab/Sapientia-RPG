@@ -7,13 +7,13 @@ class_name PvpSpells
 
 const SPELLS := {
 	"vuur": {
-		"name": "Vuur", "mp": 4, "target": "enemy", "type": "damage", "power": 14,
+		"name": "Fire", "mp": 4, "target": "enemy", "type": "damage", "power": 14,
 	},
 	"bliksem": {
-		"name": "Bliksem", "mp": 7, "target": "all_enemies", "type": "damage", "power": 9,
+		"name": "Lightning", "mp": 7, "target": "all_enemies", "type": "damage", "power": 9,
 	},
 	"genees": {
-		"name": "Genees", "mp": 3, "target": "ally", "type": "heal", "power": 22,
+		"name": "Heal", "mp": 3, "target": "ally", "type": "heal", "power": 22,
 	},
 }
 

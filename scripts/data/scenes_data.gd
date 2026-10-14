@@ -19,9 +19,9 @@ const LOCKED_TITLE := "???"
 
 const SCENES := [
 	{"id": "wereldkaart", "title": "Into the Wide World", "flag": WORLDMAP_FLAG, "kind": "worldmap"},
-	{"id": "hanger", "title": "The Hanger Awakens", "flag": HANGER_FLAG, "kind": "hanger"},
+	{"id": "hanger", "title": "The Pendant Awakens", "flag": HANGER_FLAG, "kind": "hanger"},
 	{"id": "ww_warper", "title": "The World Warper", "flag": CANON_GENEZER_FLAG, "kind": "genezer"},
-	{"id": "ww_hanger", "title": "The Hanger", "flag": CANON_HANGER_FLAG, "kind": "hanger"},
+	{"id": "ww_hanger", "title": "The Pendant", "flag": CANON_HANGER_FLAG, "kind": "hanger"},
 	{"id": "ww_sapientia", "title": "Sapientia", "flag": CANON_DREIGING_FLAG, "kind": "sapientia"},
 ]
 

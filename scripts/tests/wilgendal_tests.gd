@@ -119,7 +119,7 @@ func _data() -> void:
 	check("korte zwaard houdt de databronprijs", Shop.list_price("kort_zwaard") == int(GD.EQUIPMENT["kort_zwaard"]["price"]))
 	check("kruiden blijven 20 goud", Shop.list_price("kruidenthee") == 20)
 	check("Gerrit-citaat blijft de canonzin", SD.QUOTE_GRAAN_BEZOEK == "Oh, a visitor. Sit down, lad. Or stay standing — doesn't matter. The mill doesn't turn anymore anyway."
-			and SD.GERRIT == "Gerrit the Miller")
+			and SD.GERRIT == "Garrett the Miller")
 	for doel in [Data.voor_tegel(Data.pand("pantser")), Data.voor_tegel(Data.pand("wapen")),
 			Data.voor_tegel(Data.pand("accessoire")), Data.voor_tegel(Data.pand("magie")),
 			Data.voor_tegel(Data.pand("mien")), Data.voor_tegel(Data.pand("echtpaar")),
@@ -149,9 +149,9 @@ func _wereld() -> void:
 	var tekst := FileAccess.get_file_as_string(WERELD)
 	var dorp_y := _tscn_y(tekst, "NaarWilgendal")
 	var trap_y := _tscn_y(tekst, "Trap")
-	check("Wilgendal blijft op de wereldkaart", tekst.contains("target_map = \"res://scenes/maps/dorp_wilgendal.tscn\"")
+	check("Willowdale blijft op de wereldkaart", tekst.contains("target_map = \"res://scenes/maps/dorp_wilgendal.tscn\"")
 			and tekst.contains("target_spawn = \"zuid_ingang\""))
-	check("archieftrap ligt ten zuiden van Wilgendal", dorp_y >= 0.0 and trap_y > dorp_y)
+	check("archieftrap ligt ten zuiden van Willowdale", dorp_y >= 0.0 and trap_y > dorp_y)
 	check("codex-bibliotheek bestaat nog", ResourceLoader.exists(BIEB))
 
 
@@ -183,7 +183,7 @@ func _dorp() -> void:
 	check("geen uitgang naar de bibliotheek", dorp.get_node("Exits").get_children().all(func(e):
 		return str(e.target_map) != BIEB))
 	var g: Node = dorp.get_node("Objects/Gerrit")
-	check("Gerrit staat bij de molen", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
+	check("Garrett staat bij de molen", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
 			and g.event == "gerrit" and g.get_tile() == Data.GERRIT_TEGEL
 			and str(g.get_meta("rol")) == "gerrit")
 	var molen: Node = dorp.get_node("Objects/MolenWieken")
@@ -222,7 +222,7 @@ func _dorp() -> void:
 		Dialog.close()
 	var bram: Node = dorp.get_node("Objects/Bram")
 	var els: Node = dorp.get_node("Objects/Els")
-	check("echtpaar praat Nederlands", bram.npc_name == "Bram" and els.npc_name == "Els"
+	check("echtpaar praat Nederlands", bram.npc_name == "Bramwell" and els.npc_name == "Elsie"
 			and bram.lines[0] != "" and els.lines[0] != "")
 	check("kind veteraan en koerier hebben een praatje", dorp.get_node("Objects/Fien").lines[0] != ""
 			and dorp.get_node("Objects/Wout").lines[0] != ""
@@ -246,7 +246,7 @@ func _rondlopen(dorp: Node) -> void:
 		return
 	var vast: Vector2 = gerrit.position
 	var voor := {}
-	for naam in ["Bram", "Els", "Fien", "Wout", "Siem"]:
+	for naam in ["Bramwell", "Elsie", "Fern", "Walt", "Simon"]:
 		var npc: Node = dorp.get_node("Objects/%s" % naam)
 		var loper := npc.get_node_or_null("PleinLus")
 		var n := 0
@@ -258,7 +258,7 @@ func _rondlopen(dorp: Node) -> void:
 	var t0 := Time.get_ticks_msec()
 	while Time.get_ticks_msec() - t0 < 1000:
 		await get_tree().process_frame
-	for naam in ["Bram", "Els", "Fien", "Wout", "Siem"]:
+	for naam in ["Bramwell", "Elsie", "Fern", "Walt", "Simon"]:
 		var npc: Node = dorp.get_node("Objects/%s" % naam)
 		var loper := npc.get_node_or_null("PleinLus")
 		var tegel: Vector2i = npc.get_tile()
@@ -268,7 +268,7 @@ func _rondlopen(dorp: Node) -> void:
 		check("%s loopt zijn rondje" % naam, loper != null and op_lus and Data.beloopbaar(tegel)
 				and tegel != Data.GERRIT_TEGEL and not Data.MOLEN.has_point(tegel)
 				and npc.position.distance_to(voor[naam]) > 6.0)
-	check("Gerrit blijft op de molentegel", gerrit.get_tile() == Data.GERRIT_TEGEL
+	check("Garrett blijft op de molentegel", gerrit.get_tile() == Data.GERRIT_TEGEL
 			and gerrit.position.distance_to(vast) < 0.5
 			and dorp.get_node_or_null("Objects/Gerrit") == gerrit)
 

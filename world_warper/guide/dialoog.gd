@@ -58,7 +58,7 @@ static func steps() -> Array:
 			"flag": flag_for(3),
 			"lines": [
 				"The Key reacted when you arrived.",
-				"The Hanger is the Key.",
+				"The Pendant is the Key.",
 			],
 		},
 	]
@@ -95,12 +95,12 @@ static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 		]
 	if not _vlag_aan(flags, FLAG_GOLEM):
 		return [
-			"The Golem of the Eerste Archief still stands.",
-			"Go to the Eerste Archief.",
+			"The Golem of the First Archive still stands.",
+			"Go to the First Archive.",
 		]
 	if not _vlag_aan(flags, FLAG_GENEZER):
 		return [
-			"De Genezer still stands in the greenhouse of Archief 2.",
+			"The Mender still stands in the greenhouse of Archief 2.",
 			"Go through the berggrot.",
 		]
 	var plek := _wm1_plek(bezocht)

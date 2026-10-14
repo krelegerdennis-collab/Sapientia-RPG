@@ -208,7 +208,7 @@ const ROOMS := {
 			{"name": "Vesper", "npc_name": "Vesper", "tile": [9, 4], "sheet": "res://assets/sprites/noor_dorp.png",
 				"facing": "down", "event": "noor_woud", "show_if": {"flags": ["noor_gered"], "not_flags": ["noor_lid"]}},
 			# Het Zingende Graan: vloer (4,9) direct boven de mistband op y=10. Alleen tijdens de opdracht.
-			{"name": "Woudgeesten", "npc_name": "Woudgeest", "tile": [4, 9], "facing": "down",
+			{"name": "Wood Wraiths", "npc_name": "Wood Wraith", "tile": [4, 9], "facing": "down",
 				"event": "zingend_zaad", "lines": [],
 				"show_if": {"flags": ["quest_zingend_graan"], "not_flags": ["zingend_zaad"]}},
 		],

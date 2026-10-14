@@ -73,10 +73,10 @@ func _data() -> void:
 			and BG.accessoire_mdef() == 5)
 	var staf := BG.gear(BG.STAF_ID)
 	var steen := BG.gear(BG.ACCESSOIRE_ID)
-	check("Bergnerfstaf is een staf voor magiër en priester", staf.get("name") == "Bergnerfstaf"
+	check("Mountain Vein Staff is een staf voor magiër en priester", staf.get("name") == "Mountain Vein Staff"
 			and staf.get("slot") == "wapen" and int(staf.get("mag", 0)) == BG.staf_mag()
 			and str(staf.get("wie", [])).contains("magier") and str(staf.get("wie", [])).contains("priester"))
-	check("Adersteen is een accessoire op die band", steen.get("name") == "Adersteen"
+	check("Veinstone is een accessoire op die band", steen.get("name") == "Veinstone"
 			and steen.get("slot") == "accessoire" and int(steen.get("mdef", 0)) == BG.accessoire_mdef()
 			and int(steen.get("mag", 0)) == maxi(1, int(BG.staf_mag() / 6.0)))
 	check("uitrusting vindt de twee stukken", Equipment.is_equipment(BG.STAF_ID)
@@ -129,7 +129,7 @@ func _data() -> void:
 	# v0.21 (RPG ART batch 13): eigen gevechtsachtergronden voor Berggrot en Diepe Grot
 	var bb: Texture2D = load(GDb.backdrop_path(GDb.backdrop_id_for(DR.terrain_of("berggrot"))))
 	var dg: Texture2D = load(GDb.backdrop_path(GDb.backdrop_id_for("dungeon100")))
-	check("gevechtsachtergrond: berggrot -> cave_berg, Diepe Grot -> cave_deep (1280x432)",
+	check("gevechtsachtergrond: berggrot -> cave_berg, Deep Learning Simulation -> cave_deep (1280x432)",
 			DR.terrain_of("berggrot") == "berggrot" and GDb.backdrop_id_for("berggrot") == "cave_berg"
 			and GDb.backdrop_id_for("dungeon100") == "cave_deep"
 			and bb != null and bb.get_size() == Vector2(1280, 432) and dg != null and dg.get_size() == Vector2(1280, 432)
@@ -229,7 +229,7 @@ func _kaart() -> void:
 	check("geen kaart-event naar de World Warper", not SD.EVENTS.has("naar_world_warper"))
 	GameState.story_flags.erase(TRAPZAAL_VLAG)
 	GameState.story_flags[GENEZER_VLAG] = true
-	check("warper-vlag na De Genezer", GameState.try_unlock_world_warper()
+	check("warper-vlag na The Mender", GameState.try_unlock_world_warper()
 			and GameState.world_warper_is_unlocked())
 	# Enige ingang: de Warp-knop in het menu (field_menu.open_warp) -> hub van Enter.
 	var menu_bron := FileAccess.get_file_as_string("res://scripts/ui/field_menu.gd")
@@ -342,7 +342,7 @@ func _warper_tests() -> void:
 			and roles.has("midden") and roles.has("eind"))
 	if not roles.has("begin") or not roles.has("midden") or not roles.has("eind"):
 		return
-	check("geen mini-baas: midden op de Nerf, eind in de Uitmond",
+	check("geen mini-baas: midden op de Nerf, eind in de Outlet",
 			str(roles["begin"]["room"]) == "berggrot_mond"
 			and str(roles["midden"]["room"]) == "berggrot_nerf"
 			and str(roles["eind"]["room"]) == "berggrot_uitmond"
@@ -606,14 +606,14 @@ func kaart_grot_pos() -> Vector2:
 ## De kas-entree heeft onderin de dubbele deur (9-10,11) terug naar de Uitmond (spawn boog).
 func _archief2_kant() -> void:
 	var lay: Array = BG.ROOMS["berggrot_uitmond"]["layout"]
-	check("Uitmond: tunnelboog 'n' in de noordwand op (9,2)", str(lay[2]).find("n") == 9 and str(lay[1])[9] == "A")
+	check("Outlet: tunnelboog 'n' in de noordwand op (9,2)", str(lay[2]).find("n") == 9 and str(lay[1])[9] == "A")
 	GameState.change_map("res://scenes/maps/berggrot_uitmond.tscn", "boog")
 	var ok := await wait_scene("BerggrotUitmond", 20.0)
 	if ok:
 		await wait_fade()
 		await pframes(4)
 		await screenshot("berggrot_uitmond_boog")
-	check("Uitmond geladen bij de boog", ok and tile() == Vector2i(9, 3))
+	check("Outlet geladen bij de boog", ok and tile() == Vector2i(9, 3))
 	# Geen kas-intro (archief2_keten) tijdens deze check: die dialoog blokkeerde de warpers in Deel E.
 	var had_keten := GameState.story_flags.has("archief2_keten")
 	GameState.story_flags["archief2_keten"] = true
@@ -628,7 +628,7 @@ func _archief2_kant() -> void:
 		for uit in scene().get_node("Exits").get_children():
 			if str(uit.target_map).ends_with("berggrot_uitmond.tscn") and str(uit.target_spawn) == "boog":
 				terug = true
-	check("kas-entree heeft de weg terug naar de Uitmond", ok and terug)
+	check("kas-entree heeft de weg terug naar de Outlet", ok and terug)
 	for _i in 300:
 		if Dialog.is_open:
 			if Dialog._is_typing():

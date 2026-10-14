@@ -69,7 +69,7 @@ const GOLEM_FLAG := "bewaker:archief_golemhal/golem"
 ## Vlag van de verslagen Wortelkoning.
 const WORTELKONING_FLAG := "bewaker:woud_open_plek/baas"
 ## Het Zingende Graan (na noor_lid). Dialoog is de canon, letterlijk.
-const GERRIT := "Gerrit the Miller"
+const GERRIT := "Garrett the Miller"
 const FLAG_GRAAN := "quest_zingend_graan"
 const FLAG_ZAAD := "zingend_zaad"
 const FLAG_GRAAN_KLAAR := "zingend_graan_klaar"
@@ -400,7 +400,7 @@ const EVENTS := {
 	# Waarom die kern op een tweede signaal reageert, staat nog open. Geen nieuwe beat.
 	"naar_leven": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
-			["say", "", ["An overgrown greenhouse. The vines are sealed shut.", "Clear the Eerste Archief first."]],
+			["say", "", ["An overgrown greenhouse. The vines are sealed shut.", "Clear the First Archive first."]],
 			["walk", "player", "up", 1],
 		]},
 		{"do": "default"},
@@ -409,18 +409,18 @@ const EVENTS := {
 	# Bouwplaats voor de berggrot-tunnel. Dicht tot noor_lid (Noor in de party).
 	"bouwplaats_voorman": [
 		{"if": {"not_flags": ["noor_lid"]}, "do": [
-			["say", "Foreman Hendrik", ["Hold it right there. This tunnel isn't safe yet.", "The rock keeps shifting. Nobody goes in until we've shored it up.", "Come back later. Maybe with someone who can handle a few sparks."]],
+			["say", "Foreman Henrik", ["Hold it right there. This tunnel isn't safe yet.", "The rock keeps shifting. Nobody goes in until we've shored it up.", "Come back later. Maybe with someone who can handle a few sparks."]],
 		]},
 		{"do": [
-			["say", "Foreman Hendrik", ["The supports are in. The tunnel's open.", "It runs right through the mountain. Watch your step in there."]],
+			["say", "Foreman Henrik", ["The supports are in. The tunnel's open.", "It runs right through the mountain. Watch your step in there."]],
 		]},
 	],
 	"bouwplaats_werker": [
 		{"if": {"not_flags": ["noor_lid"]}, "do": [
-			["say", "Worker Sanne", ["Mind the cart! We're hauling rubble out all day.", "Something keeps cracking deep inside. Like it's growing back."]],
+			["say", "Worker Sunny", ["Mind the cart! We're hauling rubble out all day.", "Something keeps cracking deep inside. Like it's growing back."]],
 		]},
 		{"do": [
-			["say", "Worker Sanne", ["Finally done. My back is killing me.", "Funny thing: past the tunnel, there's a greenhouse. Nobody planted it."]],
+			["say", "Worker Sunny", ["Finally done. My back is killing me.", "Funny thing: past the tunnel, there's a greenhouse. Nobody planted it."]],
 		]},
 	],
 	"bouwplaats_hek": [
@@ -502,8 +502,8 @@ const EVENTS := {
 		{"do": [["say", "Marit", ["Good day, traveler."]]]},
 	],
 	"bram": [
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Old Bram", ["The mist is lifting. For the first time in months I hear birds again."]]]},
-		{"do": [["say", "Old Bram", ["We used to pick berries there. Now the trees hum like beehives.", "Stare at the mist too long and you see marks that don't belong."]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Old Bramwell", ["The mist is lifting. For the first time in months I hear birds again."]]]},
+		{"do": [["say", "Old Bramwell", ["We used to pick berries there. Now the trees hum like beehives.", "Stare at the mist too long and you see marks that don't belong."]]]},
 	],
 	"jens": [
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Jens", ["Vesper's back! Will she make sparks again? Please?"]]]},
@@ -521,22 +521,22 @@ const EVENTS := {
 			["flag", "ilse_thee"],
 			["say", "", ["You receive 3x Herbal Tea!"]],
 		]},
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Ilse", ["Take good care of her, {naam}."]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Elise", ["Take good care of her, {naam}."]]]},
 		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Ilse", ["My Vesper... She had those sparks for weeks. I should have seen it.", "Bring her back. Please."]]]},
 		{"do": [["say", "Ilse", ["Vesper is outside, on the square. As always."]]]},
 	],
 	"herbergier": [{"do": [
-		["choice", "Do you want to rest here? (free)", ["Yes", "No"], ["herberg_rust", "herberg_nee"], "Innkeeper Wout"],
+		["choice", "Do you want to rest here? (free)", ["Yes", "No"], ["herberg_rust", "herberg_nee"], "Innkeeper Walt"],
 	]}],
 	"herberg_rust": [{"do": [
 		["fade_out", 0.4],
 		["heal"],
 		["wait", 0.6],
 		["fade_in", 0.4],
-		["say", "Innkeeper Wout", ["Sleep well? The save book is on the lectern, if you want to write."]],
+		["say", "Innkeeper Walt", ["Sleep well? The save book is on the lectern, if you want to write."]],
 		["say", "", ["The party's HP and MP are restored."]],
 	]}],
-	"herberg_nee": [{"do": [["say", "Innkeeper Wout", ["That's fine. Come back when you're tired."]]]}],
+	"herberg_nee": [{"do": [["say", "Innkeeper Walt", ["That's fine. Come back when you're tired."]]]}],
 
 	# --- het Donker Woud
 	"cocon": [

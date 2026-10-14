@@ -63,7 +63,7 @@ func _run() -> void:
 	await _dungeon_tests()
 	print("=== Deel G: v0.16 glitch alleen in de Archives, sterker bij de baas ===")
 	await _glitch_tests()
-	print("=== Deel R: RUN-knop (Diepe Grot TODO 'run feature') ===")
+	print("=== Deel R: RUN-knop (Deep Learning Simulation TODO 'run feature') ===")
 	await _run_tests()
 	print("DUNGEONTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -501,7 +501,7 @@ func _world_and_outdoor_tests() -> void:
 			and scene().get_node_or_null("Objects/Magie") == null
 			and scene().get_node_or_null("Objects/Accessoire") == null)
 	GameState.change_map(WORLD_SCENE, "van_wilgendal")
-	check("W: terug op de wereldkaart na Wilgendal", await wait_scene("Wereldkaart"))
+	check("W: terug op de wereldkaart na Willowdale", await wait_scene("Wereldkaart"))
 	await wait_fade()
 	# overzicht met beide iconen in beeld
 	player().place_at(Vector2i(23, 29), D)
@@ -650,7 +650,7 @@ static func exits_of(path: String) -> Array:
 
 func _archief_data_tests() -> void:
 	# alle kamers
-	check("Eerste Archief: 12 kamer-scènes (11 dungeonkamers + puzzelkamer met schatkamer)", DR.ORDER.size() == 12
+	check("First Archive: 12 kamer-scènes (11 dungeonkamers + puzzelkamer met schatkamer)", DR.ORDER.size() == 12
 			and DR.ORDER.all(func(e): return ResourceLoader.exists(e[1])))
 	var bad := []
 	for rid in DR.ROOMS:

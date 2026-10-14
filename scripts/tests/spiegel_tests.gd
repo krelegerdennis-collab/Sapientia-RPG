@@ -73,13 +73,13 @@ func _data() -> void:
 	check("kracht breekt de spiegel niet", door_kracht["gebroken"] == false and str(door_kracht["gebroken_door"]) == "")
 	check("de weigering breekt de spiegel", door_weigering["gebroken"] == true
 			and str(door_weigering["gebroken_door"]) == "weigering")
-	check("De Spiegel heeft geen gevechts-HP", not Data.heeft_gevechts_hp())
+	check("The Mirror heeft geen gevechts-HP", not Data.heeft_gevechts_hp())
 	var vijand := false
 	for id in GD.ENEMIES:
 		var e: Dictionary = GD.ENEMIES[id]
 		if str(id).find("spiegel") >= 0 or str(e.get("name", "")).find("Spiegel") >= 0:
 			vijand = true
-	check("De Spiegel staat niet als vijand met HP in de gevechtsdata", not vijand)
+	check("The Mirror staat niet als vijand met HP in de gevechtsdata", not vijand)
 	var uit: Dictionary = Data.speel()
 	check("afspelen: gebroken door de weigering, niet door kracht",
 			uit["gebroken"] == true and str(uit["gebroken_door"]) == "weigering" and uit["kracht_breekt"] == false)

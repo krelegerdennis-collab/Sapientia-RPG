@@ -153,9 +153,9 @@ func _boss_tests() -> void:
 	check("alle 12 bazen hebben een eigen naam", names.size() == 12)
 	check("boss_for_floor op een gewone verdieping = {}", S.boss_for_floor(1).is_empty() and S.boss_for_floor(95).is_empty()
 			and S.boss_for_floor(0).is_empty() and S.boss_for_floor(110).is_empty() and S.boss_for_floor(100).is_empty())
-	check("verdieping 25 heet De Schaduw van H-6", S.boss_for_floor(25)["name"] == "De Schaduw van H-6"
-			and S.boss_for_floor(50)["name"] == "De Cyclus" and S.boss_for_floor(75)["name"] == "De Rechter"
-			and S.boss_for_floor(99)["name"] == "De Stem")
+	check("verdieping 25 heet The Shadow of H-6", S.boss_for_floor(25)["name"] == "The Shadow of H-6"
+			and S.boss_for_floor(50)["name"] == "The Cycle" and S.boss_for_floor(75)["name"] == "The Judge"
+			and S.boss_for_floor(99)["name"] == "The Voice")
 	var bossier := true
 	var last: Dictionary = {}
 	var rising := true
@@ -197,7 +197,7 @@ func _boss_tests() -> void:
 			art_ok = art_ok and idle != null and idle.get_size() == Vector2(1024, 200) and int(bs3.get("idle_frames", 0)) == 4
 		else:
 			art_ok = art_ok and not bs3.has("idle")
-	check("canon-bazen: eigen art 256x200 + rug, is_boss; De Stem idle 4x256", art_ok)
+	check("canon-bazen: eigen art 256x200 + rug, is_boss; The Voice idle 4x256", art_ok)
 	# v0.21 batch 12: de acht andere bazen ook eigen art (geen geleende vijand-sprite meer)
 	var b12_ok := true
 	for f in [10, 20, 30, 40, 60, 70, 80, 90]:
@@ -206,7 +206,7 @@ func _boss_tests() -> void:
 		var r4: Texture2D = load(str(bs4.get("sprite_back", "")))
 		b12_ok = b12_ok and bool(bs4.get("is_boss", false)) and v4 != null and r4 != null \
 				and v4.get_size() == Vector2(256, 200) and r4.get_size() == Vector2(256, 200) and not bs4.has("idle")
-	check("alle 12 bazen van de Diepe Grot hebben eigen art 256x200 + rug", b12_ok)
+	check("alle 12 bazen van de Deep Learning Simulation hebben eigen art 256x200 + rug", b12_ok)
 	var b100 := S.boss_stats(GD.ENEMIES["kennis_beest"], 100)
 	var b90 := S.boss_stats(GD.ENEMIES["kennis_beest"], 90)
 	check("eindbaas (100) sterker dan een baas met dezelfde formule zonder eindbaas-bonus",
@@ -498,8 +498,8 @@ func _chest_tests() -> void:
 	add_child(mm2)
 	check("boss_entry(100) is leeg: verdieping 100 is geen baas", S.boss_entry(100, Vector2i(3, 3)).is_empty())
 	mm2.setup(null, S.boss_entry(99, Vector2i(3, 3)), 1)
-	check("MapMonster uit boss_entry(99): De Stem, floor 99, baasstats", mm2.boss and mm2.floor_nr == 99
-			and mm2.scaled_stats()["name"] == "De Stem"
+	check("MapMonster uit boss_entry(99): The Voice, floor 99, baasstats", mm2.boss and mm2.floor_nr == 99
+			and mm2.scaled_stats()["name"] == "The Voice"
 			and int(mm2.scaled_stats()["max_hp"]) == int(S.boss_stats(GD.ENEMIES["papiergeest"], 99)["max_hp"]))
 	GameState.dungeon100_floor = 0
 	var mm3 := MonsterScript.new()

@@ -122,7 +122,7 @@ func _data_tests() -> void:
 	for k in want_g:
 		ok = ok and int(g.get(k, -1)) == int(want_g[k])
 	check("Golem-baas voor Dax Lv 7 + Spark Sword: HP 360, ATK 27, DEF 15, SPD 6, MAG 11, MDEF 13, EXP 210, Goud 84", ok)
-	check("Eerste Archief mikt op level 7", GD.EERSTE_ARCHIEF_DOEL == 7)
+	check("First Archive mikt op level 7", GD.EERSTE_ARCHIEF_DOEL == 7)
 	check("kern blijft: elke 3e ronde, x0,4 / x2, Hamerslag x2,2; drempel nu 45",
 			int(g["core"]["cycle"]) == 3 and is_equal_approx(float(g["core"]["closed_mult"]), 0.4)
 			and is_equal_approx(float(g["core"]["open_mult"]), 2.0) and is_equal_approx(float(g["core"]["slam_power"]), 2.2)

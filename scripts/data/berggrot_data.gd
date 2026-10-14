@@ -32,36 +32,36 @@ const M := "res://scenes/maps/"
 
 const MONSTERS := {
 	"steenluis": {
-		"name": "Steenluis",
+		"name": "Stone Louse",
 		"sprite": "res://assets/sprites/enemies/steenluis.png",
 		"sprite_back": "res://assets/sprites/enemies/steenluis_rug.png",
 		"max_hp": 56, "atk": 15, "def": 11, "agi": 5, "mag": 0, "mdef": 6,
 		"exp": 16, "gold": 10, "y_offset": 0,
-		"skills": [{"name": "Steenbeet", "chance": 0.2, "power": 1.3}],
+		"skills": [{"name": "Stone Bite", "chance": 0.2, "power": 1.3}],
 		"mp": 0, "weak": ["bliksem"], "resist": [],
 		"drops": [{"item": "drankje", "chance": 0.15}],
 		"desc": "A louse of living stone. It crawls through the grain of the mountain.",
 		"habitat": ["berggrot"],
 	},
 	"druipslak": {
-		"name": "Druipslak",
+		"name": "Drip Slug",
 		"sprite": "res://assets/sprites/enemies/druipslak.png",
 		"sprite_back": "res://assets/sprites/enemies/druipslak_rug.png",
 		"max_hp": 68, "atk": 13, "def": 13, "agi": 3, "mag": 0, "mdef": 8,
 		"exp": 18, "gold": 12, "y_offset": 0,
-		"skills": [{"name": "Koude drup", "chance": 0.22, "power": 1.25}],
+		"skills": [{"name": "Cold Drip", "chance": 0.22, "power": 1.25}],
 		"mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "kruid", "chance": 0.18}],
 		"desc": "A slug of cold dripstone. Slow, and it leaves the rock wet behind it.",
 		"habitat": ["berggrot"],
 	},
 	"adermot": {
-		"name": "Adermot",
+		"name": "Vein Moth",
 		"sprite": "res://assets/sprites/enemies/adermot.png",
 		"sprite_back": "res://assets/sprites/enemies/adermot_rug.png",
 		"max_hp": 40, "atk": 17, "def": 6, "agi": 16, "mag": 4, "mdef": 8,
 		"exp": 16, "gold": 8, "y_offset": 0,
-		"skills": [{"name": "Adervonk", "chance": 0.2, "power": 1.3}],
+		"skills": [{"name": "Vein Spark", "chance": 0.2, "power": 1.3}],
 		"mp": 4, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "toverwater", "chance": 0.12}],
 		"desc": "A moth that follows the ore vein. Fast, and it flickers like a spark in the dark.",
@@ -71,7 +71,7 @@ const MONSTERS := {
 
 const ROOMS := {
 	"berggrot_mond": {
-		"name": "Berggrot",
+		"name": "Hollow Mountain",
 		"floor": 1, "tier": 0, "theme": THEME, "music": BGM, "checkpoint": true,
 		"layout": [
 			"a------------------b",
@@ -106,7 +106,7 @@ const ROOMS := {
 		],
 	},
 	"berggrot_nerf": {
-		"name": "Berggrot - Nerf",
+		"name": "Hollow Mountain - Vein",
 		"floor": 1, "tier": 0, "theme": THEME, "music": BGM, "checkpoint": true,
 		"layout": [
 			"a------------------b",
@@ -138,7 +138,7 @@ const ROOMS := {
 		],
 	},
 	"berggrot_uitmond": {
-		"name": "Berggrot - Uitmond",
+		"name": "Hollow Mountain - Outlet",
 		"floor": 1, "tier": 0, "theme": THEME, "music": BGM, "checkpoint": true,
 		"layout": [
 			"a------------------b",
@@ -177,7 +177,7 @@ const ROOMS := {
 ## glitch-graaf van het Eerste Archief (die graaf hoort bij een baas; hier is er geen).
 const PUZZLES := {
 	"berggrot_grendel": {
-		"name": "Berggrot - Grendel",
+		"name": "Hollow Mountain - Bolt Gate",
 		"style": "dungeon",
 		"theme": THEME,
 		"music": BGM,
@@ -221,7 +221,7 @@ const PUZZLES := {
 		"exit": {"map": M + "berggrot_nerf.tscn", "spawn": "zuid"},
 	},
 	"berggrot_geheim": {
-		"name": "Berggrot - Geheime kamer",
+		"name": "Hollow Mountain - Secret Chamber",
 		"style": "dungeon",
 		"theme": THEME,
 		"music": BGM,
@@ -266,13 +266,13 @@ const PUZZLES := {
 			"r": {"type": "reset", "id": "herstel_geheim"},
 			"G": {"type": "secret", "id": "geheime_deur", "needs": ["plaat_ader"], "mode": "all",
 					"hint": ["A crack in the stone. Cold air blows through it."],
-					"open_lines": ["De steen schuift opzij."]},
+					"open_lines": ["The stone slides aside."]},
 			"T": {"type": "chest", "id": "kist_bergnerfstaf", "item": STAF_ID, "n": 1,
 					"flag": "kist_bergnerfstaf",
-					"lines": ["{naam} opens the chest...", "{naam} finds the Bergnerfstaf!"]},
+					"lines": ["{naam} opens the chest...", "{naam} finds the Mountain Vein Staff!"]},
 			"U": {"type": "chest", "id": "kist_adersteen", "item": ACCESSOIRE_ID, "n": 1,
 					"flag": "kist_adersteen",
-					"lines": ["{naam} opens the chest...", "{naam} finds the Adersteen!"]},
+					"lines": ["{naam} opens the chest...", "{naam} finds the Veinstone!"]},
 		},
 		"spawns": {"noord": [14, 12, "left"]},
 		"dek": {"rect": [0, 0, 17, 5], "tiles": []},
@@ -334,7 +334,7 @@ static func _gear() -> Dictionary:
 	var mdef := accessoire_mdef()
 	return {
 		STAF_ID: {
-			"name": "Bergnerfstaf",
+			"name": "Mountain Vein Staff",
 			"slot": "wapen",
 			"atk": 3,
 			"mag": mag,
@@ -345,7 +345,7 @@ static func _gear() -> Dictionary:
 			"desc": "A staff from the mountain's vein. It hums softly, as if something grows behind the stone.",
 		},
 		ACCESSOIRE_ID: {
-			"name": "Adersteen",
+			"name": "Veinstone",
 			"slot": "accessoire",
 			"mdef": mdef,
 			"mag": maxi(1, int(mag / 6.0)),

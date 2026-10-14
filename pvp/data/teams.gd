@@ -7,17 +7,17 @@ class_name PvpTeams
 
 const TEAMS := {
 	"team_klassiek": {
-		"name": "De Klassieke Drie",
+		"name": "The Classic Three",
 		"blurb": "Gebalanceerd.",
 		"members": ["dennis", "noor", "lotte"],
 	},
 	"team_aanval": {
-		"name": "De Aanvalsdriehoek",
+		"name": "The Strike Triangle",
 		"blurb": "Hoog risico, hoge schade.",
 		"members": ["dennis", "dennis", "lotte"],
 	},
 	"team_verdediging": {
-		"name": "De Verdedigingslinie",
+		"name": "The Defensive Line",
 		"blurb": "Traag, dubbele genezing.",
 		"members": ["lotte", "lotte", "dennis"],
 	},

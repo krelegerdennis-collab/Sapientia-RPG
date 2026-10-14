@@ -13,7 +13,7 @@
 
 [node name="DorpWilgendal" type="Node2D"]
 script = ExtResource("1_map")
-map_name = "Wilgendal"
+map_name = "Willowdale"
 encounters = false
 
 [node name="Ground" type="TileMapLayer" parent="."]
@@ -25,7 +25,7 @@ y_sort_enabled = true
 
 [node name="Gerrit" parent="Objects" instance=ExtResource("4_npc")]
 position = Vector2(136, 120)
-npc_name = "Gerrit the Miller"
+npc_name = "Garrett the Miller"
 lines = Array[String]([])
 facing = Vector2i(0, 1)
 event = "gerrit"

@@ -28,7 +28,7 @@ func _bouw(id: String) -> void:
 	var rijen: Array = Data.kamer_rijen(id)
 	encounters = false
 	sets_checkpoint = false
-	map_name = str(rij.get("map_naam", "Wilgendal"))
+	map_name = str(rij.get("map_naam", "Willowdale"))
 	var vloer: TileMapLayer = get_node("Ground")
 	var tint: Color = Data.SFEER_KLEUR.get(str(rij.get("sfeer", "")), Color.WHITE)
 	vloer.modulate = tint

@@ -298,7 +298,7 @@ func _data_tests() -> void:
 	check("verdieping 100 is geen baas, wel een rustpunt, geen trap omlaag",
 			not fresh(7, 100)["room"]["monsters"].any(func(m): return m.get("boss", false))
 			and fresh(7, 100)["room"].has("rustpunt") and not fresh(7, 100)["has_stairs_down"]
-			and S.boss_for_floor(25)["name"] == "De Schaduw van H-6")
+			and S.boss_for_floor(25)["name"] == "The Shadow of H-6")
 
 
 func _is_scaled_to_10(m: MapMonster) -> bool:
@@ -461,9 +461,9 @@ func _defeat_tests() -> void:
 	check("game-over-tekst: death means out of the Archive (niet het rustpunt)", GameState.defeat_text(false).contains("out of the Archive")
 			and not GameState.defeat_text(false).contains("rustpunt"))
 	await lose_battle()
-	check("na de nederlaag: ECHO's Kamer, niet de grot", await wait_scene_path(Rules.WORLD_SCENE))
+	check("na de nederlaag: ECHO's Chamber, niet de grot", await wait_scene_path(Rules.WORLD_SCENE))
 	var wsp: Node2D = scene().get_node_or_null("Spawns/ingang")
-	check("speler staat in ECHO's Kamer (spawn ingang)", wsp != null and tile() == Vector2i((wsp.position / 16.0).floor()))
+	check("speler staat in ECHO's Chamber (spawn ingang)", wsp != null and tile() == Vector2i((wsp.position / 16.0).floor()))
 	check("echte party terug: level 5, 200 goud, kruid 2, verdieping 0, run voorbij, best 15",
 			GameState.party[0]["level"] == 5 and GameState.party[0]["hp"] == GameState.party[0]["max_hp"]
 			and GameState.gold == 200 and GameState.item_count("kruid") == 2 and GameState.dungeon100_floor == 0
