@@ -546,3 +546,11 @@ assets/tiles/dungeon/diepe_grot_tiles_v4.png
 assets/tiles/dungeon/diepe_grot_tiles_v5.png
 assets/tiles/dungeon/diepe_grot_tiles_v6.png
 assets/tiles/dungeon/diepe_grot_tiles_v7.png
+# RPG ART v3: Diepe Grot-gevechtsachtergronden per variant (1280x432), BACKDROPS cave_deep_v1..v7.
+assets/battle/diepe_grot_battle_v1.png
+assets/battle/diepe_grot_battle_v2.png
+assets/battle/diepe_grot_battle_v3.png
+assets/battle/diepe_grot_battle_v4.png
+assets/battle/diepe_grot_battle_v5.png
+assets/battle/diepe_grot_battle_v6.png
+assets/battle/diepe_grot_battle_v7.png
