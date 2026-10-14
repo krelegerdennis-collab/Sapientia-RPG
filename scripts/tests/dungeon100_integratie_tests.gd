@@ -584,7 +584,7 @@ func _push_koppel_tests() -> void:
 				m.stun(10)
 				check("verlamd monster geduwd", r.push_monster(m, plan["dir"]))
 				await wait_until(func(): return not is_instance_valid(m) or not r.monsters.has(m), 3.0)
-				await pframes(6)
+				await get_tree().create_timer(1.2).timeout     # tekst helemaal getypt
 				await screenshot("val_monster_geduwd")
 				check("monster in de val: weg en verslagen, val afgegaan", not r.monsters.has(m)
 						and r.val_slachtoffers.has(mid) and v.afgegaan
