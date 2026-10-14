@@ -517,11 +517,8 @@ func _questlog_tests() -> void:
 	check("questlog: nieuw spel -> Act 1 Active, Act 2 Locked, Act 3-6 Upcoming",
 			QL.status("akte_1", leeg, 0) == QL.OPEN and QL.status("akte_2", leeg, 0) == QL.DICHT
 			and ["akte_3", "akte_4", "akte_5", "akte_6"].all(func(i): return QL.status(i, leeg, 0) == QL.LATER))
-	var a1 := {SD.GOLEM_FLAG: true, "noor_gered": true}
-	check("questlog: Golem zonder Vesper -> Act 1 nog Active, Act 2 Locked",
-			QL.status("akte_1", {SD.GOLEM_FLAG: true}, SD.NACHT) == QL.OPEN
-			and QL.status("akte_2", {SD.GOLEM_FLAG: true}, SD.NACHT) == QL.DICHT)
-	check("questlog: Golem + Vesper + Archieven in -> Act 1 Done, Act 2 Active",
+	var a1 := {SD.GOLEM_FLAG: true}
+	check("questlog: Golem verslagen + Archieven in -> Act 1 Done, Act 2 Active",
 			QL.status("akte_1", a1, SD.NACHT) == QL.KLAAR and QL.status("akte_2", a1, SD.NACHT) == QL.OPEN)
 	check("questlog: Golem zonder verhaalstap -> Act 1 nog Active", QL.status("akte_1", a1, SD.START) == QL.OPEN)
 	var a2 := {SD.GOLEM_FLAG: true, "noor_gered": true, "archief2_lotte_lid": true, Unlock.BEWAKER_VLAG: true, Unlock.UNLOCK_VLAG: true}
@@ -532,9 +529,9 @@ func _questlog_tests() -> void:
 	var r1 := QL.regels("akte_1", a1, SD.NACHT)
 	check("questlog: Act 1 = ECHO-zin + opdrachten afgevinkt", r1.size() == 2 and r1[0] == QL.akte("akte_1")["echo_klaar"]
 			and r1[1].contains("[x] Defeat the Golem") and r1[1].contains("[x] The Archives of Sapientia")
-			and r1[1].contains("[x] Save Vesper from the Dark Wood"))
+			and not r1[1].contains("Vesper"))
 	var r2 := QL.regels("akte_2", {SD.GOLEM_FLAG: true, "noor_gered": true}, SD.NACHT)
-	check("questlog: Act 2 zonder Vesper, Seren [ ]", not r2[1].contains("Vesper") and r2[1].contains("[ ] Seren joins"))
+	check("questlog: Act 2 deels: Vesper [x], Seren [ ]", r2[1].contains("[x] Save Vesper") and r2[1].contains("[ ] Seren joins"))
 	check("questlog: Act 2 klaar = canonzin ECHO", QL.regels("akte_2", a2, SD.NACHT)[0] == "Two Archives active. World Warper online.")
 	var rd := QL.regels("akte_2", leeg, 0)
 	var rl := QL.regels("akte_4", a2, SD.NACHT)
@@ -592,7 +589,7 @@ func _questlog_tests() -> void:
 	Dialog.advance()
 	var blok := QL.regels("akte_1", GameState.story_flags, GameState.story_step)[1]
 	check("questlog live: Act 1 opdrachten afgevinkt", await _naar_tekst(blok) and blok.contains("[x] Defeat the Golem")
-			and blok.contains("[x] Save Vesper"))
+			and not blok.contains("Vesper"))
 	Dialog.advance()
 	await _pframes(10)
 	check("questlog live: opdrachtenvak binnen beeld", _vak_in_beeld())
@@ -602,7 +599,7 @@ func _questlog_tests() -> void:
 	Dialog.choose(1)
 	var b2 := QL.regels("akte_2", GameState.story_flags, GameState.story_step)
 	check("questlog live: Act 2 met [ ] Seren", await _naar_tekst(b2[0]) and b2[1].contains("[ ] Seren joins")
-			and not b2[1].contains("Vesper"))
+			and b2[1].contains("[x] Save Vesper"))
 	Dialog.advance()
 	if await _naar_tekst(b2[1]):
 		Dialog.advance()
