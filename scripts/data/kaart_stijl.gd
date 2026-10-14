@@ -107,15 +107,19 @@ static func toepassen(map: Node) -> bool:
 	return true
 
 
-## Kaartsprite van de partijleider: <helden>/<voornaam>.png (fase 2: dax, seren, vesper, kael, orion),
-## anders "speler" uit de config.
+## Kaartsprite van de partijleider: <helden>/<voornaam>_<held_variant>.png als die er is (WM1/WM2:
+## dax, seren; WM2-upgrade = "held_variant": "wm2" in gebieden.json), anders <helden>/<voornaam>.png
+## (fase 2: dax, seren, vesper, kael, orion), anders "speler" uit de config.
 static func speler_sheet(gebied: String) -> String:
 	var g: Dictionary = gebieden().get(gebied, {})
 	var map_ := str(g.get("helden", ""))
 	var gs = Engine.get_main_loop().root.get_node_or_null("GameState") if Engine.get_main_loop() is SceneTree else null
 	if map_ != "" and gs != null and not (gs.party as Array).is_empty():
 		var naam := str((gs.party[0] as Dictionary).get("name", "")).to_lower().get_slice(" ", 0)
-		var p := map_.trim_suffix("/") + "/" + naam + ".png"
-		if naam != "" and ResourceLoader.exists(p):
-			return p
+		var basis := map_.trim_suffix("/") + "/" + naam
+		var variant := str(g.get("held_variant", ""))
+		if naam != "" and variant != "" and ResourceLoader.exists(basis + "_" + variant + ".png"):
+			return basis + "_" + variant + ".png"
+		if naam != "" and ResourceLoader.exists(basis + ".png"):
+			return basis + ".png"
 	return str(g.get("speler", ""))

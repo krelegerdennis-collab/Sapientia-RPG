@@ -492,6 +492,9 @@ func _som_pilot(dorp: Node) -> void:
 	check("som: speler = fase-2 heldsheet 24x32 (%s)" % sp.texture.resource_path,
 			sp.texture.resource_path.begins_with("res://assets/sprites/som/kaart/")
 			and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
+	check("som: Dax/Seren in WM1 (WM2 = held_variant in gebieden.json)", sp.texture.resource_path.ends_with("dax_wm1.png")
+			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1"
+			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm2.png"))
 
 
 func _som() -> void:
