@@ -18,6 +18,7 @@ extends RefCounted
 
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
+const Layouts := preload("res://scripts/data/grot_layouts.gd")
 
 const ATLAS := preload("res://assets/tiles/dungeon/grot_kamers.png")
 const TEGEL := 16
@@ -74,17 +75,26 @@ static func koopman_verdieping(run_seed: int, floor_no: int) -> int:
 	return kandidaten[_hash(run_seed, blok, 7) % kandidaten.size()]
 
 
+## Layout-type (grot_layouts.gd) met de koopmanregel van deze file.
+static func layout_soort(run_seed: int, floor_no: int) -> String:
+	return Layouts.soort(run_seed, floor_no, func(f: int) -> bool:
+		return f >= 1 and f < 100 and not _speciaal(f) and koopman_verdieping(run_seed, f) == f)
+
+
+## Kamersoort voor de kamerbouwer: "val", "rust", "koopman" of "". Volgt het layout-type; de vaste
+## rustpunt-verdiepingen (elke 10e, behalve 100) blijven "rust".
 static func kamer_soort(run_seed: int, floor_no: int) -> String:
 	if floor_no < 1 or floor_no > 100:
 		return SOORT_GEWOON
 	if Rules.is_rest_floor(floor_no) and floor_no < 100:
 		return SOORT_RUST
-	if _speciaal(floor_no):
-		return SOORT_GEWOON
-	if koopman_verdieping(run_seed, floor_no) == floor_no:
-		return SOORT_KOOPMAN
-	if floor_no >= VAL_VANAF and float(_hash(run_seed, floor_no, 3) % 10000) / 10000.0 < VAL_KANS:
-		return SOORT_VAL
+	match layout_soort(run_seed, floor_no):
+		Layouts.KOOPMAN:
+			return SOORT_KOOPMAN
+		Layouts.VAL:
+			return SOORT_VAL
+		Layouts.RUST:
+			return SOORT_RUST
 	return SOORT_GEWOON
 
 
