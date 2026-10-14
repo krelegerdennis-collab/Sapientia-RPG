@@ -597,3 +597,13 @@ assets/sprites/buiten/wilgendal/windmolen_wieken_v2.png
 assets/sprites/buiten/wilgendal/windmolen_wieken_stil_v2.png
 assets/sprites/buiten/wilgendal/burgemeestershuis.png
 assets/sprites/som/test/dax_24x32_v3.png
+assets/sprites/som/kaart/dax.png
+assets/sprites/som/kaart/seren.png
+assets/sprites/som/kaart/vesper.png
+assets/sprites/som/kaart/kael.png
+assets/sprites/som/kaart/orion.png
+assets/sprites/som/wilgendal/kegelboom.png
+assets/sprites/som/wilgendal/kegelboom_klein.png
+tools/som/bron/terrain/tileset.png
+tools/som/bron/gebouw/tileset.png
+tools/som/bron/interieur/tileset.png

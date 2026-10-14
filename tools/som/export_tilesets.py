@@ -37,6 +37,11 @@ REGELS = {  # soort -> {ramp: groep}; '*' = rest (zelfde als somlib.RULES)
 }
 
 
+REGELS_EXTRA = {"klif": {"*": "steen", "Green/Moss": "gras", "Brown/Wood": "pad"},
+                "dak": {"*": "dak"}, "muur": {"White/Paper": "muur", "Brown/Wood": "hout", "Stone/Slate": "steen", "*": "accent"},
+                "binnen": {"Brown/Wood": "hout", "Stone/Slate": "steen", "*": "accent"}}
+
+
 def hx(c):
     c = c.lstrip("#")
     return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
@@ -53,7 +58,15 @@ def laad_palet():
 
 
 def lees_index(pad):
+    """index.txt (tab) of index.json (RPG ART fase 1: tiles[] met name,id,kind,layer,walk,...)."""
     tegels = {}
+    jpad = os.path.join(os.path.dirname(pad), "index.json")
+    if os.path.exists(jpad):
+        d = json.load(open(jpad))
+        for t in d["tiles"]:
+            tegels[int(t["id"])] = {"naam": t["name"], "soort": t.get("kind", "grond"),
+                                    "solid": not t.get("walk", True), "laag": t.get("layer", "ground")}
+        return tegels
     for regel in open(pad, encoding="utf-8"):
         regel = regel.rstrip("\n")
         if not regel.strip() or regel.startswith("#"):
@@ -130,8 +143,10 @@ def tres(res_png, w, h, tegels):
         if t["solid"]:
             regels.append("%d:%d/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)" % (x, y))
         regels.append('%d:%d/0/custom_data_0 = "%s"' % (x, y, t["naam"]))
+        regels.append('%d:%d/0/custom_data_1 = "%s"' % (x, y, t.get("laag", "ground")))
     regels += ["", "[resource]", "physics_layer_0/collision_layer = 1",
                'custom_data_layer_0/name = "terrain"', "custom_data_layer_0/type = 4",
+               'custom_data_layer_1/name = "laag"', "custom_data_layer_1/type = 4",
                'sources/0 = SubResource("TileSetAtlasSource_som")', ""]
     return "\n".join(regels)
 
@@ -157,6 +172,8 @@ def exporteer(gebied, cfg, ramps, van, alleen_check=False, bron_map=None, uit_ma
         if w % T or h % T:
             raise SystemExit("%s: maat %dx%d is geen veelvoud van 16" % (png, w, h))
         tegels = lees_index(os.path.join(bron, "index.txt"))
+        for k in REGELS_EXTRA:
+            REGELS.setdefault(k, REGELS_EXTRA[k])
         gpad = os.path.join(bron, "groepen.png")
         gim = Image.open(gpad).convert("RGBA") if os.path.exists(gpad) else None
         code = groepcode(im, tegels, ramps, van, gim)
@@ -170,6 +187,8 @@ def exporteer(gebied, cfg, ramps, van, alleen_check=False, bron_map=None, uit_ma
         uit.save(os.path.join(d, set_naam + ".png"))
         res_png = "%s/%s/%s.png" % (res_map, gebied, set_naam)
         open(os.path.join(d, set_naam + ".tres"), "w").write(tres(res_png, w, h, tegels))
+        namen = {t["naam"]: [tid % (w // T), tid // (w // T)] for tid, t in tegels.items()}
+        json.dump(namen, open(os.path.join(d, set_naam + "_namen.json"), "w"), indent=0, sort_keys=True)
         gemaakt.append(os.path.join(d, set_naam + ".tres"))
         print("  %s/%s -> %s" % (gebied, set_naam, os.path.relpath(d, REPO)))
     return gemaakt
