@@ -308,6 +308,7 @@ func _ready() -> void:
 			["--dungeon100regelstest", "res://scripts/tests/dungeon100_tests.gd", "Dungeon100RegelsTest", "dungeon100regelstest"],
 			["--dungeon100integratietest", "res://scripts/tests/dungeon100_integratie_tests.gd", "Dungeon100IntegratieTest", "dungeon100integratietest"],
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
+			["--grotlayouttest", "res://scripts/tests/grot_layout_tests.gd", "GrotLayoutTest", "grotlayouttest"],
 			["--actorsfxtest", "res://scripts/tests/actor_sfx_tests.gd", "ActorSfxTest", "actorsfxtest"],
 			["--catalogustest", "res://scripts/tests/catalogus_tests.gd", "CatalogusTest", "catalogustest"],
 			["--updatetest", "res://scripts/tests/todo_update_tests.gd", "UpdateTest", "updatetest"],

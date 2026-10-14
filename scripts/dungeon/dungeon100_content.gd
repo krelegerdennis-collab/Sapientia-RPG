@@ -102,5 +102,6 @@ static func fill_room(room: Dictionary, data: Dictionary) -> void:
 	room["monsters"] = mons
 	room["chests"] = chests(data)
 	var rp: Vector2i = data["rest_slot"]
-	if Rules.is_rest_floor(int(data["floor"])) and rp.x >= 0:
+	var extra_rust := str(data.get("layout_type", "")) == "rust"      # gerolde RUST ROOM (3%)
+	if (Rules.is_rest_floor(int(data["floor"])) or extra_rust) and rp.x >= 0:
 		room["rustpunt"] = [rp.x, rp.y]

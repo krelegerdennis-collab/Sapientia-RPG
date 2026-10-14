@@ -390,7 +390,7 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 	for t in d["monster_slots"]:
 		if not reach.has(t) or seen.has(t):
 			return "monster-slot %s onbereikbaar of dubbel" % [t]
-		if absi(t.x - spawn_up.x) + absi(t.y - spawn_up.y) < Gen.MIN_SLOT_DISTANCE:
+		if absi(t.x - spawn_up.x) + absi(t.y - spawn_up.y) < int(d.get("min_slot_distance", Gen.MIN_SLOT_DISTANCE)):
 			return "monster-slot %s te dicht bij de ingang" % [t]
 		seen[t] = true
 	for t in d["chest_slots"]:
@@ -515,13 +515,20 @@ func _world_dist(g: TileMapLayer, from: Vector2i, to: Vector2i) -> int:
 func _route(r: Node, from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	var prev := {from: from}
 	var todo: Array[Vector2i] = [from]
+	var blocked := {}
+	for c in r.chests:
+		blocked[c.tile()] = true
+	if r.room.has("warper"):
+		blocked[Vector2i(int(r.room["warper"][0]), int(r.room["warper"][1]))] = true
+	if r.room.has("rustpunt"):
+		blocked[Vector2i(int(r.room["rustpunt"][0]), int(r.room["rustpunt"][1]))] = true
 	while not todo.is_empty():
 		var t: Vector2i = todo.pop_front()
 		if t == to:
 			break
 		for d in [U, D, L, R]:
 			var n: Vector2i = t + d
-			if prev.has(n) or r.is_wall(n):
+			if prev.has(n) or r.is_wall(n) or blocked.has(n):
 				continue
 			prev[n] = t
 			todo.append(n)
