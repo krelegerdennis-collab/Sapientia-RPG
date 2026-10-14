@@ -1027,7 +1027,7 @@ func _graan_data() -> void:
 			for cmd in v.get("do", []):
 				if cmd is Array and not cmd.is_empty():
 					namen.append(str(cmd[0]))
-	check("zangscène en zang tussen herkenning en de molen", namen == ["take", "flag", "say", "molen_zang", "zang", "molen"])
+	check("zangscène en zang tussen herkenning en de molen", namen == ["flag", "take", "flag", "say", "molen_zang", "zang", "molen"])   # v0.24: eerst gesproken_gerrit (Quest Log)
 	# v0.21: echte molen-art (4 frames, f*45 graden) -> 8 draaistappen van 22.5 graden.
 	var art: Texture2D = load(Wieken.ART)
 	var sheet := Wieken.wieken_sheet().get_image()

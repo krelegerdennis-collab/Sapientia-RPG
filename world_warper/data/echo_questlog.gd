@@ -63,6 +63,41 @@ const AKTES := [
 ]
 
 
+## Zijopdrachten (tab 'Side' in de Quest Log). Elke regel hoort bij een NPC. Zolang je die NPC niet
+## gesproken hebt (vlag "gesproken"), toont de lijst alleen de Engelse naam van de NPC; daarna de
+## titel van de opdracht met [ ] of [x]. Alleen bestaande opdrachten: Het Zingende Graan (Gerrit).
+## Een oude save met de startvlag telt ook als gesproken.
+const ZIJ := [
+	{"id": "zingend_graan", "npc": StoryData.GERRIT, "titel": "The Singing Grain",
+		"gesproken": "gesproken_gerrit", "start": StoryData.FLAG_GRAAN, "klaar": StoryData.FLAG_GRAAN_KLAAR},
+]
+const TAB_HOOFD := "Main"
+const TAB_ZIJ := "Side"
+const ZIJ_LEEG := "No side quests yet."
+
+
+static func zij_gesproken(z: Dictionary, flags: Dictionary) -> bool:
+	return flags.has(str(z["gesproken"])) or flags.has(str(z.get("start", "")))
+
+
+static func zij_klaar(z: Dictionary, flags: Dictionary) -> bool:
+	return z.has("klaar") and flags.has(str(z["klaar"]))
+
+
+## Regel in de Side-tab: "Gerrit the Miller" (nog niet gesproken) of "[ ] The Singing Grain".
+static func zij_regel(z: Dictionary, flags: Dictionary) -> String:
+	if not zij_gesproken(z, flags):
+		return str(z["npc"])
+	return (VINK_KLAAR if zij_klaar(z, flags) else VINK_OPEN) + str(z["titel"])
+
+
+static func zij_regels(flags: Dictionary, lijst: Array = ZIJ) -> Array[String]:
+	var uit: Array[String] = []
+	for z in lijst:
+		uit.append(zij_regel(z, flags))
+	return uit
+
+
 static func ids() -> Array:
 	return AKTES.map(func(a): return str(a["id"]))
 
@@ -140,7 +175,10 @@ static func regels(id: String, flags: Dictionary, stap: int) -> Array[String]:
 
 
 static func speler_teksten() -> Array[String]:
-	var uit: Array[String] = [NAAM, OPTIE, VRAAG, TERUG, KOP_OPDRACHTEN, ZIN_DICHT, ZIN_LATER]
+	var uit: Array[String] = [NAAM, OPTIE, VRAAG, TERUG, KOP_OPDRACHTEN, ZIN_DICHT, ZIN_LATER, TAB_HOOFD, TAB_ZIJ, ZIJ_LEEG]
+	for z in ZIJ:
+		uit.append(str(z["npc"]))
+		uit.append(str(z["titel"]))
 	for s in STATUS_TEKST.values():
 		uit.append(str(s))
 	for a in AKTES:

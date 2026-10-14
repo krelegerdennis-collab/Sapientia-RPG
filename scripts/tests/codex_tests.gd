@@ -721,7 +721,7 @@ func _screen_tests() -> void:
 		check("veldmenu open", false)
 		return
 	var labels: Array = m.commands().map(func(c): return str(m.buttons[c[0]].get_meta("label")))
-	check("menu: tien knoppen (v0.22 +Party +Magic +Bestiary +Scenes +Settings +Load) %s" % [labels], labels == ["Equipment", "Codex", "Items", "Magic", "Bestiary", "Warp", "Party", "Scenes", "Settings", "Load"])
+	check("menu: elf knoppen (v0.22 +Party +Magic +Bestiary +Scenes +Settings +Load, v0.24 +Quest Log) %s" % [labels], labels == ["Equipment", "Codex", "Items", "Magic", "Bestiary", "Warp", "Party", "Quest Log", "Scenes", "Settings", "Load"])
 	var stack: Rect2 = m.buttons["equip"].get_global_rect().merge(m.buttons["codex"].get_global_rect()).merge(m.buttons["items"].get_global_rect())
 	check("links en Warpen overlappen niet", not stack.intersects(m.buttons["warp"].get_global_rect()))
 	m.choose("codex")

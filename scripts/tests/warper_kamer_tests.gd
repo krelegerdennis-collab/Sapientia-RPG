@@ -19,6 +19,7 @@ const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const Gear := preload("res://scripts/equipment.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const QL := preload("res://world_warper/data/echo_questlog.gd")
+const QLScherm := preload("res://scripts/ui/questlog_screen.gd")
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const HUBHAL := "res://world_warper/maps/hal.tscn"
@@ -548,6 +549,25 @@ func _questlog_tests() -> void:
 	check("questlog: spelertekst Engels, geen onthulling", eng)
 	check("questlog: in het ECHO-menu", EchoGrot.menu_opties().has(EchoGrot.OPTIE_QUESTLOG))
 
+	# zijopdrachten (Side-tab): eerst alleen de NPC-naam, na het gesprek de opdracht
+	var zg: Dictionary = QL.ZIJ[0]
+	check("side: Het Zingende Graan hoort bij Gerrit", str(zg["id"]) == "zingend_graan" and str(zg["npc"]) == SD.GERRIT
+			and str(zg["start"]) == SD.FLAG_GRAAN and str(zg["klaar"]) == SD.FLAG_GRAAN_KLAAR)
+	check("side: niet gesproken -> alleen de naam", QL.zij_regels({}) == ["Gerrit the Miller"])
+	check("side: gesproken -> [ ] The Singing Grain", QL.zij_regels({"gesproken_gerrit": true}) == ["[ ] The Singing Grain"])
+	check("side: oude save met startvlag telt als gesproken", QL.zij_regels({SD.FLAG_GRAAN: true}) == ["[ ] The Singing Grain"])
+	check("side: klaar -> [x]", QL.zij_regels({"gesproken_gerrit": true, SD.FLAG_GRAAN_KLAAR: true}) == ["[x] The Singing Grain"])
+	var fixture := [{"id": "test_npc", "npc": "Test Keeper", "titel": "A Test Errand", "gesproken": "gesproken_test"}]
+	check("side: fixture zonder start/klaar", QL.zij_regels({}, fixture) == ["Test Keeper"]
+			and QL.zij_regels({"gesproken_test": true}, fixture) == ["[ ] A Test Errand"])
+	var gesprek_zet := true
+	for rij in SD.EVENTS["gerrit"]:
+		var doe: Array = rij["do"]
+		if not doe.is_empty():
+			gesprek_zet = gesprek_zet and doe.any(func(x): return x == ["flag", "gesproken_gerrit"])
+	check("side: elk gesprek met Gerrit zet gesproken_gerrit", gesprek_zet)
+	await _questlog_scherm_tests()
+
 	# live
 	var bewaar := GameState.story_flags.duplicate()
 	var stap_voor := GameState.story_step
@@ -598,6 +618,46 @@ func _questlog_tests() -> void:
 	check("questlog live: Go back -> ECHO-menu", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE))
 	_kies(EchoGrot.KEUZE_TERUG)
 	check("questlog live: gesprek sluit", await _wacht_gesprek_weg())
+	GameState.story_flags = bewaar
+	GameState.story_step = stap_voor
+
+
+## v0.24 Veldmenu > Quest Log: tabs Main/Side, screenshots (main, side op slot, side open).
+func _questlog_scherm_tests() -> void:
+	var bewaar := GameState.story_flags.duplicate()
+	var stap_voor := GameState.story_step
+	GameState.story_flags = {SD.GOLEM_FLAG: true, "noor_gered": true, "noor_lid": true}
+	GameState.story_step = maxi(stap_voor, SD.NACHT)
+	var scherm: CanvasLayer = QLScherm.new()
+	scherm.layer = 120
+	get_tree().root.add_child(scherm)
+	await _pframes(5)
+	check("veldmenu-questlog: Main met 6 acts", scherm.tab == "hoofd"
+			and scherm.regel_teksten() == QL.keuzes(GameState.story_flags, GameState.story_step).slice(0, 6))
+	scherm.toon_akte("akte_1")
+	check("veldmenu-questlog: Act 1 = zelfde regels als ECHO",
+			scherm.detail.text == "\n".join(QL.regels("akte_1", GameState.story_flags, GameState.story_step)))
+	await _pframes(5)
+	await _screenshot("questlog_menu_act1")
+	scherm.back()
+	await _pframes(3)
+	check("veldmenu-questlog: B uit een act = terug naar de lijst", scherm.is_inside_tree() and scherm.list.visible
+			and scherm.open_akte == "")
+	await _screenshot("questlog_menu_main")
+	scherm.kies_tab("zij")
+	await _pframes(5)
+	check("veldmenu-questlog: Side op slot = Gerrit the Miller", scherm.regel_teksten() == ["Gerrit the Miller"]
+			and scherm.is_button_greyed(scherm.rows[0]))
+	await _screenshot("questlog_menu_side_locked")
+	GameState.story_flags["gesproken_gerrit"] = true
+	scherm.kies_tab("hoofd")
+	scherm.kies_tab("zij")
+	await _pframes(5)
+	check("veldmenu-questlog: Side na gesprek = opdracht", scherm.regel_teksten() == ["[ ] The Singing Grain"]
+			and not scherm.is_button_greyed(scherm.rows[0]))
+	await _screenshot("questlog_menu_side_unlocked")
+	scherm.close()
+	await _pframes(2)
 	GameState.story_flags = bewaar
 	GameState.story_step = stap_voor
 
