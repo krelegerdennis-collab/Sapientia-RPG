@@ -264,7 +264,7 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
 - [x] Merchant Room: uitrusting + accessoires geschaald op de verdieping, plus basis-consumables (besluit Dennis, 14 okt 2026)
   - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
-  - [ ] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest."
+  - [x] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest." Haak klaar (besluit Dennis, 14 okt 2026): Archief 6 roept `KoopmanData.einde(GameState.story_flags)` aan, toont de regel met spreker "the Merchant" en zet `sapientia_verslagen` + `h5_rust`; daarna zet de Grot geen Koopman meer neer. Archief 6 zelf bestaat nog niet.
 
 ## RPG ART
 

@@ -58,6 +58,8 @@ func _run() -> void:
 	_winkel_data()
 	print("=== Deel C: Koopman in de Grot ===")
 	await _koopman_scene()
+	print("=== Deel C2: einde H-5 (Archief 6-haak) ===")
+	await _einde_tests()
 	print("=== Deel D: val- en rustkamer ===")
 	await _val_rust_scene()
 	print("=== Deel E: hub-rondlopers ===")
@@ -495,3 +497,29 @@ func _winkel_scene(k, pl) -> void:
 	GameState.inventory["stunbom"] = 1
 	var su := PA.use_item(GameState.inventory, "stunbom", GameState.party[0])
 	check("Stun Bomb: %d monster(s) verlamd" % levend.size(), levend.is_empty() or (su["ok"] and levend.all(func(m): return m.is_stunned())))
+
+
+## Einde (CANON 12): Sapientia verslagen -> "Thank you. Finally, rest.", daarna geen Koopman meer.
+func _einde_tests() -> void:
+	var flags := {}
+	check("voor het einde: niet verdwenen", not K.verdwenen(flags))
+	var regels := K.einde(flags)
+	check("einde: de afscheidsregel (EN canon)", regels == [K.AFSCHEID] and K.AFSCHEID == "Thank you. Finally, rest.")
+	check("einde: vlaggen sapientia_verslagen + h5_rust", bool(flags.get(K.FLAG_SAPIENTIA_VERSLAGEN, false))
+			and bool(flags.get(K.FLAG_RUST, false)) and K.verdwenen(flags))
+	check("einde: tweede keer geen regel meer", K.einde(flags).is_empty())
+	var kf := _floor_of(GK.SOORT_KOOPMAN)
+	var r := await _start_floor(kf)
+	check("voor het einde staat hij er", r.get("koopman") != null)
+	GameState.story_flags[K.FLAG_RUST] = true
+	GameState.story_flags[K.FLAG_SAPIENTIA_VERSLAGEN] = true
+	GameState.change_map(DUNGEON, "omhoog")
+	var t0 := Time.get_ticks_msec()
+	while (scene() == r or not is_instance_valid(scene()) or GameState.changing_map) and Time.get_ticks_msec() - t0 < 15000:
+		await get_tree().process_frame
+	check("verdieping opnieuw geladen", await wait_floor(kf) and scene() != r)
+	var r2 := scene()
+	check("na het einde: geen Koopman op zijn verdieping", str(r2.get("kamer_soort")) == GK.SOORT_KOOPMAN
+			and r2.get("koopman") == null and get_tree().get_nodes_in_group("koopman").is_empty())
+	var data := GameState.state_data(Vector2i(1, 1), Vector2i.DOWN)
+	check("vlag gaat mee in de save", str(data).contains(K.FLAG_RUST))
