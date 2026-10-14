@@ -35,7 +35,7 @@ const TITLE_SCENE := "res://scenes/ui/title.tscn"
 const NAME_SCENE := "res://scenes/ui/name_entry.tscn"
 const HOUSE_MAP := "res://scenes/maps/huis_wilgendal.tscn"
 ## v0.10: naam van de hoofdpersoon (uit het naamscherm); leeg = DEFAULT_NAME.
-const DEFAULT_NAME := "Dennis"
+const DEFAULT_NAME := "Dax"
 const NAME_MAX := 10
 ## Held-id van de hoofdpersoon (v0.11: id 'dennis', sprites assets/sprites/battle/dennis*.png).
 const MAIN_HERO := "dennis"
@@ -997,6 +997,8 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 			if h.has(k) and h[k] is int and not (v is float or v is int):
 				continue      # kapot getal: standaardwaarde van de held houden
 			h[k] = int(v) if v is float else v
+		if h.get("name") is String:
+			h["name"] = migrate_name(str(h["name"]))
 		if e.has("spells") and e["spells"] is Array:
 			h["spells"] = e["spells"].duplicate()
 		# v0.14 uitrusting + basis-stats; oude saves zonder die sleutels krijgen
@@ -1004,6 +1006,14 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 		Equipment.load_hero(h, e, _hero_data(str(h["id"])), stray_equipment)
 		out.append(h)
 	return out
+
+
+## v0.23 namen-migratie (besluit Dennis 13 okt 2026): oude saves bewaren de weergavenamen.
+## Dennis -> Dax, Lotte -> Seren, Noor -> Vesper. Ids (dennis/lotte/noor) blijven gelijk.
+const OUDE_NAMEN := {"Dennis": "Dax", "Lotte": "Seren", "Noor": "Vesper"}
+
+static func migrate_name(n: String) -> String:
+	return str(OUDE_NAMEN.get(n, n))
 
 
 ## Tas uit save-data: id -> aantal (kapotte waarden vallen weg).
@@ -1095,7 +1105,7 @@ func apply_state(d: Dictionary) -> bool:
 	# of nieuwere saves) laten het spel nooit vastlopen.
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
-	player_name = clean_name(str(d.get("player_name", DEFAULT_NAME)))
+	player_name = migrate_name(clean_name(str(d.get("player_name", DEFAULT_NAME))))
 	party.clear()
 	var stray_equipment: Array = []
 	party = _party_from(d["party"], stray_equipment)

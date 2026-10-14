@@ -6,17 +6,17 @@ const SCENE := "res://scenes/story/spiegel_kamer.tscn"
 const DEBUG_ARG := "--spiegel"
 
 const WIE_SPIEGEL := "De Spiegel"
-const WIE_DENNIS := "Dennis"
+const WIE_DENNIS := "Dax"
 ## Na de scène zeggen zij niets. Er is geen regel voor hen.
-const ZWIJGEN: Array[String] = ["Noor", "Lotte"]
+const ZWIJGEN: Array[String] = ["Vesper", "Seren"]
 
 const KAMER := "A room full of mirrored surfaces."
 const WAARHEID := "The Mirror does not fight with force but with truth."
-const FEIT_H6 := "Dennis is Test Subject H-6."
+const FEIT_H6 := "Dax is Test Subject H-6."
 const FEIT_GEMAAKT := "He was not born but made."
 const FEIT_HANGER := "The Hanger belongs to him, and he belongs to the Hanger."
 const FEIT_TERUG := "Sapientia wants him back, not defeated."
-const WEIGERING := "I am Dennis. And that is enough."
+const WEIGERING := "I am Dax. And that is enough."
 const LAATSTE := "You are stronger than the last five. Maybe... you will be the first to make it."
 const KERN := "The core of Archief 4 has been absorbed."
 
@@ -37,7 +37,7 @@ const BEATS: Array = [
 	{"id": "stilte", "wie": WIE_DENNIS, "stilte": true},
 	# Dennis vraagt de zojuist genoemde feiten terug. Alleen een vraagteken erbij.
 	{"id": "vragen", "wie": WIE_DENNIS, "vragen": true, "tekst": [
-		"Dennis is Test Subject H-6?",
+		"Dax is Test Subject H-6?",
 		"He was not born but made?",
 		"The Hanger belongs to him, and he belongs to the Hanger?",
 		"Sapientia wants him back, not defeated?",
@@ -115,10 +115,10 @@ static func speel() -> Dictionary:
 		if na_weigering and wie == WIE_DENNIS:
 			for regel in tekst:
 				dennis_na.append(str(regel))
-		if wie == "Noor":
+		if wie == "Vesper":
 			for regel in tekst:
 				noor.append(str(regel))
-		if wie == "Lotte":
+		if wie == "Seren":
 			for regel in tekst:
 				lotte.append(str(regel))
 		if breek_door(id):

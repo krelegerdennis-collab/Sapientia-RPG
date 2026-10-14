@@ -90,7 +90,7 @@ static func _vlag_aan(flags: Dictionary, sleutel: String) -> bool:
 static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 	if not _vlag_aan(flags, FLAG_NOOR_LID):
 		return [
-			"Noor hasn't joined yet.",
+			"Vesper hasn't joined yet.",
 			"Look for her in the Donker Woud.",
 		]
 	if not _vlag_aan(flags, FLAG_GOLEM):

@@ -444,12 +444,12 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 
 # ================================================================ deel B
 func _state_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("GameState: dungeon100_floor en dungeon100_seed beginnen op 0", GameState.dungeon100_floor == 0 and GameState.dungeon100_seed == 0)
 	GameState.dungeon100_floor = 37
 	GameState.dungeon100_seed = 123456789
 	check("opslaan lukt", GameState.save_game(Vector2i(3, 4), Vector2i.DOWN))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("new_game zet de velden terug op 0", GameState.dungeon100_floor == 0 and GameState.dungeon100_seed == 0)
 	check("load_game: verdieping en seed komen terug", GameState.load_game() and GameState.dungeon100_floor == 37 and GameState.dungeon100_seed == 123456789)
 	var raw := GameState.read_save()
@@ -554,7 +554,7 @@ func _walk_route(path: Array[Vector2i]) -> void:
 
 
 func _scene_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(WORLD, "van_dorp")
@@ -652,7 +652,7 @@ func _scene_tests() -> void:
 			and scene().get_node("Exits").get_children().size() == 1
 			and GameState.item_count("warp") >= 1)
 	# laden uit de save
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("load_game (uit de save op verdieping 1)", GameState.load_game())
 	check("na laden: verdieping 1, seed %d" % run_seed, GameState.dungeon100_floor == 1 and GameState.dungeon100_seed == run_seed)
 	GameState._go_to_scene(GameState.return_map)

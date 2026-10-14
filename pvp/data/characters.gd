@@ -9,7 +9,7 @@ class_name PvpCharacters
 const HEROES := {
 	"dennis": {
 		"id": "dennis",
-		"name": "Dennis",
+		"name": "Dax",
 		"equip_type": "krijger",
 		"color": "c8c8d0",
 		"max_hp": 42, "max_mp": 0, "atk": 14, "def": 8, "agi": 9, "mag": 2, "mdef": 4,
@@ -18,7 +18,7 @@ const HEROES := {
 	},
 	"noor": {
 		"id": "noor",
-		"name": "Noor",
+		"name": "Vesper",
 		"equip_type": "magier",
 		"color": "e040a0",
 		"max_hp": 28, "max_mp": 18, "atk": 7, "def": 5, "agi": 11, "mag": 10, "mdef": 8,
@@ -27,7 +27,7 @@ const HEROES := {
 	},
 	"lotte": {
 		"id": "lotte",
-		"name": "Lotte",
+		"name": "Seren",
 		"equip_type": "priester",
 		"color": "40d0e0",
 		"max_hp": 32, "max_mp": 14, "atk": 9, "def": 6, "agi": 7, "mag": 7, "mdef": 9,

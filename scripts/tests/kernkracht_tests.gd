@@ -208,7 +208,7 @@ func enter(path: String, spawn: String) -> Node:
 
 
 func setup(step: int, with_kern: bool) -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = step
 	GameState.encounter_multiplier = 0.0
 	var h: Dictionary = GameState.party[0]
@@ -946,7 +946,7 @@ func _save_tests() -> void:
 	check("opslaan", GameState.save_game(p.get_tile(), p.facing))
 	var raw := GameState.read_save(GameState.save_path)
 	check("save bevat geen verlamming", not ("stun" in JSON.stringify(raw)) and raw.get("kernen", {}).has("golemkern"))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: kernvuur weg", not KernVeld.unlocked())
 	GameState.continue_game()
 	check("laden: terug in de kamer", await wait_scene_path(INGANG))

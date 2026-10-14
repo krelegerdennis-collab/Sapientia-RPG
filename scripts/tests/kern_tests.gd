@@ -113,7 +113,7 @@ func _data_tests() -> void:
 
 # ================================================================ deel B
 func _rule_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: geen kernen, geen vaardigheden", GameState.kernfragmenten.is_empty()
 			and GameState.kern_skills_of(GameState.MAIN_HERO).is_empty() and not GameState.has_world_ability("zware_blokken"))
 	check("grant_kern('golemkern') = true", GameState.grant_kern("golemkern", "kennis_beest"))
@@ -122,14 +122,14 @@ func _rule_tests() -> void:
 	check("hoofdheld (%s) heeft Kernkracht + 'Zware blokken duwen'" % GameState.MAIN_HERO,
 			GameState.kern_skills_of(GameState.MAIN_HERO) == ["kernslag"] and GameState.has_world_ability("zware_blokken")
 			and GameState.world_abilities().has("zware_blokken"))
-	check("Noor (en ieder ander) heeft geen kernvaardigheden", GameState.kern_skills_of("noor").is_empty()
+	check("Vesper (en ieder ander) heeft geen kernvaardigheden", GameState.kern_skills_of("noor").is_empty()
 			and GameState.kern_skills_of("") .is_empty())
 	# save / load
 	var path := "user://kerntest_save.json"
 	check("opslaan", GameState.save_game(Vector2i(3, 4), Vector2i.DOWN, path))
 	var raw := GameState.read_save(path)
 	check("save bevat 'kernen' met golemkern", raw.get("kernen", {}).has("golemkern"))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel wist de kern", not GameState.has_kern("golemkern"))
 	check("laden: golemkern terug, nog steeds eenmalig", GameState.load_game(path) and GameState.has_kern("golemkern")
 			and GameState.kernfragmenten.size() == 1 and not GameState.grant_kern("golemkern")
@@ -372,7 +372,7 @@ func _win(b: Node) -> bool:
 
 
 func _golem_setup() -> bool:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	var h: Dictionary = GameState.party[0]
@@ -416,7 +416,7 @@ func _golem_tests() -> void:
 	check("speler staat stil tijdens het moment", await wait_until(func(): return player().input_locked, 2.0))
 	await wait_until(func(): return ka.phase == "effect", 3.0)
 	var fx: Sprite2D = ka.fx
-	check("effect: kind van Dennis, op de borst (0,-4), 4 frames, midden (24,24), additieve gloed",
+	check("effect: kind van Dax, op de borst (0,-4), 4 frames, midden (24,24), additieve gloed",
 			fx != null and fx.get_parent() == player() and fx.position == Vector2(0, -4) and fx.hframes == 4
 			and fx.centered and fx.texture.get_size() == Vector2(192, 48) and ka.glow != null
 			and (ka.glow.material as CanvasItemMaterial).blend_mode == CanvasItemMaterial.BLEND_MODE_ADD)
@@ -431,8 +431,8 @@ func _golem_tests() -> void:
 			ka.frames_shown == [0, 1, 2, 3] and ka.effect_time >= 0.68 and ka.effect_time < 1.2 and fx.frame == 3)
 	check("daarna het bericht", await wait_until(func(): return Dialog.is_open, 3.0) and ka.phase == "bericht")
 	var lines: Array = Dialog._lines
-	check("'Dennis absorbeert de Golemkern!' + Kernkracht + Zware blokken duwen + vuurbal in het veld %s" % [lines], lines.size() == 4
-			and lines[0] == "Dennis absorbs the Golem Core!" and "Core Power" in str(lines[1]) and "Push Heavy Blocks" in str(lines[2])
+	check("'Dax absorbeert de Golemkern!' + Kernkracht + Zware blokken duwen + vuurbal in het veld %s" % [lines], lines.size() == 4
+			and lines[0] == "Dax absorbs the Golem Core!" and "Core Power" in str(lines[1]) and "Push Heavy Blocks" in str(lines[2])
 			and "Core Power" in str(lines[3]))
 	await get_tree().create_timer(1.6).timeout       # tekst helemaal uitgetypt
 	await screenshot("kern_absorptie_bericht")
@@ -444,7 +444,7 @@ func _golem_tests() -> void:
 	var auto := GameState.read_save(GameState.autosave_path)
 	check("autosave bevat de golemkern", auto.get("kernen", {}).has("golemkern"))
 	# laden van de autosave: kern blijft, geen nieuw moment
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("autosave laden: golemkern terug", GameState.load_game(GameState.autosave_path) and GameState.has_kern("golemkern")
 			and GameState.pending_kern_absorb == "")
 	# tweede overwinning op een baas met dezelfde kern: niets dubbel, geen nieuw moment
@@ -466,7 +466,7 @@ func _golem_tests() -> void:
 
 # ================================================================ deel D
 func _kernslag_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("Golem Hall (zonder kern) geladen", await _golem_setup())
 	# zonder kern: Magie uit voor Dennis (hij heeft geen spreuken)
 	var b := await _start_battle(["papiergeest"], false)
@@ -475,7 +475,7 @@ func _kernslag_tests() -> void:
 		return
 	await wait_battle_state(["command"])
 	await pframes(4)
-	check("zonder kern: 'Magie' staat uit voor Dennis", not b.cross.enabled[MAGIE])
+	check("zonder kern: 'Magie' staat uit voor Dax", not b.cross.enabled[MAGIE])
 	b.can_flee = true
 	b.cross.enabled[4] = true
 	await cross_to(b, 4)
@@ -494,7 +494,7 @@ func _kernslag_tests() -> void:
 	e["s"]["max_hp"] = 9999
 	await wait_battle_state(["command"])
 	await pframes(4)
-	check("met kern: 'Magie' aan voor Dennis", b.cross.enabled[MAGIE])
+	check("met kern: 'Magie' aan voor Dax", b.cross.enabled[MAGIE])
 	await cross_to(b, MAGIE)
 	await tap("interact")
 	check("menu open met titel 'Kern'", await wait_until(func(): return b.menu.visible, 3.0) and b.menu.title_label.text == "Core")
@@ -586,7 +586,7 @@ func _heavy_tests() -> void:
 	var a := PuzzleLogic.from_room(PuzzleRooms.ROOMS["archief_test"], "archief_test")
 	check("gewone kasten (archief_test) blijven gewoon: geen zware", a.heavy_blocks.is_empty())
 	# echte scène zonder kern
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.KLAAR
 	GameState.encounter_multiplier = 0.0
 	var room := await _enter_demo()
@@ -633,8 +633,8 @@ func _heavy_tests() -> void:
 # ================================================================ deel F
 func _status_tests() -> void:
 	var dennis: Dictionary = GameState.party[0]
-	check("kern_text: Dennis met Golemkern = 'Golemkern (Kernkracht)'", StatusScreenS.kern_text(dennis) == "Golem Core (Core Power)")
-	check("kern_text: Noor = '' (alleen de hoofdheld)", StatusScreenS.kern_text({"id": "noor"}) == "")
+	check("kern_text: Dax met Golemkern = 'Golemkern (Kernkracht)'", StatusScreenS.kern_text(dennis) == "Golem Core (Core Power)")
+	check("kern_text: Vesper = '' (alleen de hoofdheld)", StatusScreenS.kern_text({"id": "noor"}) == "")
 	if player() == null or Dialog.is_open:
 		await close_dialog()
 	await tap("menu")

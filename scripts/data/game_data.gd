@@ -24,7 +24,7 @@ const HEROES := [
 	{
 		"id": "dennis", "battle_sprite": "res://assets/sprites/battle/dennis_rug.png",   # v0.11: rugaanzicht (RPG ART)
 		"field_sprite": "res://assets/sprites/player.png",   # v0.14: loop-sheet (vooraanzicht in het menu)
-		"name": "Dennis", "class": "Warrior", "accent": "", "equip_type": "krijger",
+		"name": "Dax", "class": "Warrior", "accent": "", "equip_type": "krijger",
 		"level": 1, "exp": 0,
 		"max_hp": 42, "max_mp": 0, "atk": 14, "def": 8, "agi": 9, "mag": 2, "mdef": 4,
 		"spells": [],
@@ -34,7 +34,7 @@ const HEROES := [
 		"id": "noor", "battle_sprite": "res://assets/sprites/battle/noor.png",
 		# v0.17: dorp-/overworld-loopsheet van RPG ART (art_helden_dorp_v14, 48x96, zelfde indeling als player.png)
 		"field_sprite": "res://assets/sprites/noor_dorp.png",
-		"name": "Noor", "class": "Mage", "accent": "magenta", "equip_type": "magier",
+		"name": "Vesper", "class": "Mage", "accent": "magenta", "equip_type": "magier",
 		"level": 1, "exp": 0,
 		"max_hp": 28, "max_mp": 18, "atk": 7, "def": 5, "agi": 11, "mag": 10, "mdef": 8,
 		"spells": ["vuur", "bliksem"],
@@ -44,7 +44,7 @@ const HEROES := [
 		"id": "lotte", "battle_sprite": "res://assets/sprites/battle/lotte.png",
 		# Veld-sheet is een PLACEHOLDER (48x96). De gevechts-art blijft handwerk.
 		"field_sprite": "res://assets/sprites/archief2/lotte_veld.png",
-		"name": "Lotte", "class": "Priest", "accent": "cyaan", "equip_type": "priester",
+		"name": "Seren", "class": "Priest", "accent": "cyaan", "equip_type": "priester",
 		"level": 1, "exp": 0,
 		"max_hp": 32, "max_mp": 14, "atk": 9, "def": 6, "agi": 7, "mag": 7, "mdef": 9,
 		"spells": ["genees"],
@@ -317,7 +317,7 @@ const ENEMIES := {
 	# Plaatjes zijn PLACEHOLDERS (tools/art_archief2_placeholders.py).
 	# TODO(design): Lotte-glitch HP 90, ATK 14, DEF 5. Niet in de canon; onder de Golem (HP 360).
 	"lotte_glitch": {
-		"name": "Lotte", "sprite": "res://assets/sprites/archief2/lotte_glitch.png",
+		"name": "Seren", "sprite": "res://assets/sprites/archief2/lotte_glitch.png",
 		"max_hp": 90, "atk": 14, "def": 5, "agi": 8, "mag": 8, "mdef": 6,
 		"exp": 20, "gold": 0, "y_offset": 0,
 		"skills": [{"name": "Stilte", "chance": 0.25, "power": 1.2}],
@@ -329,7 +329,7 @@ const ENEMIES := {
 			"skills": [{"name": "Stilte", "chance": 0.25, "power": 1.2}],
 			"tint": [0.72, 0.40, 1.15],
 		},
-		"desc": "Lotte, priestess of the Order of the Silent Flame, stilled by Sapientia.",
+		"desc": "Seren, priestess of the Order of the Silent Flame, stilled by Sapientia.",
 		"habitat": ["archief"],
 	},
 	"wurger": {
@@ -746,7 +746,7 @@ const EQUIPMENT := {
 	"wambuis": {"name": "Padded Jerkin", "slot": "harnas", "def": 3, "mdef": 3,
 		"wie": ["krijger", "magier", "priester"], "price": 0,
 		"act": 1, "lijn": "harnas_stroom", "orde": 2,
-		"bron": "Act 1. Noor gives it when she joins (Mapleton), into the bag.",
+		"bron": "Act 1. Vesper gives it when she joins (Mapleton), into the bag.",
 		"desc": "Lined leather that smells of smoke and applewood. Warm enough for the wood."},
 	"ketelkling": {"name": "Kettle Blade", "slot": "wapen", "atk": 18, "wie": ["krijger"], "price": 0,
 		"act": 2, "lijn": "zwaard", "orde": 3,
@@ -758,7 +758,7 @@ const EQUIPMENT := {
 		"desc": "A staff full of soot and copper. Spells come out of it warmer."},
 	"stemvork": {"name": "Tuning Fork", "slot": "wapen", "atk": 3, "mag": 14, "mdef": 6, "agi": 1, "wie": ["priester"], "price": 0,
 		"act": 2, "lijn": "staf_lotte", "orde": 2,
-		"bron": "Act 2. For Lotte when she joins. Her place is still open (CANON). Not placed yet.",
+		"bron": "Act 2. For Seren when she joins. Her place is still open (CANON). Not placed yet.",
 		"desc": "A tuning fork that sings instead of speaking. Machines listen to it."},
 	"ketelschild": {"name": "Kettle Shield", "slot": "schild", "def": 8, "mdef": 3, "wie": ["krijger", "priester"], "price": 0,
 		"act": 2, "lijn": "schild", "orde": 3,
@@ -832,7 +832,7 @@ const EQUIPMENT := {
 		"desc": "A staff of laboratory glass. A cold glow pulses inside."},
 	"levensstaf": {"name": "Life Staff", "slot": "wapen", "atk": 4, "mag": 40, "mdef": 16, "agi": 2, "wie": ["priester"], "price": 0,
 		"act": 4, "lijn": "staf_lotte", "orde": 4,
-		"bron": "Act 4. Beside Lotte's capsule in the Cradle Room. Not placed yet.",
+		"bron": "Act 4. Beside Seren's capsule in the Cradle Room. Not placed yet.",
 		"desc": "A staff like a spine, with glass vertebrae and a warm glow."},
 	"kweekschild": {"name": "Growth Shield", "slot": "schild", "def": 22, "mdef": 8, "wie": ["krijger", "priester"], "price": 0,
 		"act": 4, "lijn": "schild", "orde": 5,

@@ -80,4 +80,4 @@ func _run() -> void:
 			and cues[cues.size() - 1] == "flits")
 	check("scène 1 eindigt in de Hal", Canon.HAL_SCENE.ends_with("world_warper/maps/hal.tscn") and Canon.HAL_SPAWN == "ingang")
 	check("als_tekst: verteller zonder naam", Canon.als_tekst({"who": "", "text": "x"}) == "x"
-			and Canon.als_tekst({"who": "Noor", "text": "y"}) == "Noor: y")
+			and Canon.als_tekst({"who": "Vesper", "text": "y"}) == "Vesper: y")

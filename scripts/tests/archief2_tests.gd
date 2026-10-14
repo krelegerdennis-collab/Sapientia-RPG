@@ -54,7 +54,7 @@ func _run() -> void:
 	_data()
 	print("=== Archief 2: poort en platen ===")
 	_poort_en_platen()
-	print("=== Archief 2: Lotte, Mosslijm, Genezer ===")
+	print("=== Archief 2: Seren, Mosslijm, Genezer ===")
 	_lotte_en_genezer()
 	print("=== Archief 2: wereldkaart ===")
 	await _wereldkaart()
@@ -140,7 +140,7 @@ func _data() -> void:
 	check("verdieping 3: drie ketting-platen", ketting["platen"].size() == 3)
 	check("tegen-plaat start volgroeid", int(kamers["archief_2_v3_tegen"]["platen"][0]["start"]) == 2
 			and str(kamers["archief_2_v3_tegen"]["platen"][0]["soort"]) == "tegen")
-	check("licht-plaat na Lotte", str(kamers["archief_2_v3_licht"]["platen"][0]["soort"]) == "licht")
+	check("licht-plaat na Seren", str(kamers["archief_2_v3_licht"]["platen"][0]["soort"]) == "licht")
 	var echo := " ".join(Archief2.ECHO_REGELS)
 	check("kaartkamer: geen ECHO-uitleg meer (canon in de Hal), geen onderzoeker", echo.find("H-6") < 0
 			and echo.find("onderzoeker") < 0 and echo.to_lower().find("digitale echo") < 0)
@@ -175,7 +175,7 @@ func _poort_en_platen() -> void:
 	check("vlag = Archief 1 golem", Archief2.GOLEM_VLAG == SD.GOLEM_FLAG)
 	check("dicht zonder vlag", not Archief2.open_na({}))
 	check("open na de golem", Archief2.open_na({Archief2.GOLEM_VLAG: true}))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	var dicht: Dictionary = Story.pick("naar_leven")
 	check("verhaal houdt de kas dicht", dicht.get("do") is Array)
 	GameState.story_flags[SD.GOLEM_FLAG] = true
@@ -223,7 +223,7 @@ func _poort_en_platen() -> void:
 			and is_equal_approx(Archief2.zwakte_fysiek(dennis, mos), 1.0))
 	check("Wurger: elke fysieke klap", is_equal_approx(Archief2.zwakte_fysiek(dennis, wurger), Archief2.ZWAK)
 			and is_equal_approx(Archief2.zwakte_fysiek(noor, wurger), Archief2.ZWAK))
-	check("Genezer: zwaard van Dennis, niet van Noor", is_equal_approx(Archief2.zwakte_fysiek(dennis, genezer), Archief2.ZWAK)
+	check("Genezer: zwaard van Dax, niet van Vesper", is_equal_approx(Archief2.zwakte_fysiek(dennis, genezer), Archief2.ZWAK)
 			and is_equal_approx(Archief2.zwakte_fysiek(noor, genezer), 1.0))
 	check("ijs telt, vuur niet", Archief2.schaal_element(10, genezer, "ijs") == 15
 			and Archief2.schaal_element(10, genezer, "vuur") == 10)
@@ -241,31 +241,31 @@ func _groei_reeks() -> bool:
 
 
 func _lotte_en_genezer() -> void:
-	GameState.new_game("Dennis")
-	check("zonder Lotte geen licht", not Archief2.lotte_heeft_licht())
+	GameState.new_game("Dax")
+	check("zonder Seren geen licht", not Archief2.lotte_heeft_licht())
 	GameState.give_exp(GameState.party[0], GD.exp_for_level(7))
-	check("Dennis level 7", GameState.member_level("dennis") == 7)
-	check("Lotte sluit aan op dat level", Archief2.sluit_lotte_aan())
+	check("Dax level 7", GameState.member_level("dennis") == 7)
+	check("Seren sluit aan op dat level", Archief2.sluit_lotte_aan())
 	var lotte := _held("lotte")
 	check("level gelijk, priester, graad 1", GameState.member_level("lotte") == 7
 			and str(lotte.get("class", "")) == "Priest"
 			and lotte.get("spells", []) == ["genees", "rijp"])
 	check("staf en gewaad", Equipment.equipped(lotte, "wapen") == "eiken_staf"
 			and Equipment.equipped(lotte, "harnas") == "reisgewaad")
-	check("Lotte heeft Licht graad 1", Archief2.lotte_heeft_licht())
+	check("Seren heeft Licht graad 1", Archief2.lotte_heeft_licht())
 	GameState.archief2_lotte_join = false
 	GameState.pending_story_loss = true
 	var winst := GameState.archief2_verwerk_einde("win")
-	check("winst: Lotte sluit aan, geen game over", winst == "win" and GameState.archief2_lotte_join)
+	check("winst: Seren sluit aan, geen game over", winst == "win" and GameState.archief2_lotte_join)
 	GameState.archief2_lotte_join = false
 	GameState.pending_story_loss = true
 	var verlies := GameState.archief2_verwerk_einde("lose")
-	check("verlies wordt verhaal, Lotte sluit aan", verlies == "story" and GameState.archief2_lotte_join)
+	check("verlies wordt verhaal, Seren sluit aan", verlies == "story" and GameState.archief2_lotte_join)
 	GameState.archief2_lotte_join = false
 	GameState.pending_story_loss = true
 	var vlucht := GameState.archief2_verwerk_einde("flee")
 	check("vluchten telt niet", vlucht == "flee" and not GameState.archief2_lotte_join)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	var voor := GameState.codex_pages.size()
 	var tijdelijk := Archief2.bondgenoot_voor([], GameState.member_level("dennis"))
 	check("zonder Codex: tijdelijke Mosslijm", bool(tijdelijk.get("tijdelijk", false))
@@ -361,7 +361,7 @@ func _afstand(grond: TileMapLayer, van: Vector2i, naar: Vector2i) -> int:
 
 
 func _spel() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(Archief2.PLAAT_SCENE, "zuid")
 	check("groei-plaatkamer", await _wacht("Archief2V1Plaat"))
@@ -446,7 +446,7 @@ func _spel() -> void:
 	await _dialoog_dicht(40)
 	check("verlies is verhaal, goud en vlag blijven", GameState.last_battle_result == "story"
 			and GameState.gold == 7777 and GameState.story_flags.has("archief2_marker"))
-	check("Lotte sluit aan na verlies, level gelijk", GameState.has_member("lotte")
+	check("Seren sluit aan na verlies, level gelijk", GameState.has_member("lotte")
 			and GameState.member_level("lotte") == GameState.member_level("dennis")
 			and Archief2.lotte_heeft_licht())
 	_zonder_lotte()
@@ -462,7 +462,7 @@ func _spel() -> void:
 	check("winst laadt de kamer", await _wacht("Archief2V1Plaat", 20.0))
 	await _pframes(8)
 	await _dialoog_dicht(40)
-	check("Lotte sluit aan na winst, level gelijk", GameState.last_battle_result == "win"
+	check("Seren sluit aan na winst, level gelijk", GameState.last_battle_result == "win"
 			and GameState.has_member("lotte")
 			and GameState.member_level("lotte") == GameState.member_level("dennis"))
 	GameState.change_map(LICHT_SCENE, "zuid")
@@ -472,7 +472,7 @@ func _spel() -> void:
 	check("stap laat de licht-plaat met rust", int(licht.plaat_van("l1").staat) == 0 and licht.is_wall(Vector2i(9, 4)))
 	licht.raak_plaat("l1", "licht")
 	licht.raak_plaat("l1", "licht")
-	check("Lotte's licht opent het pad", int(licht.plaat_van("l1").staat) == 2 and not licht.is_wall(Vector2i(9, 4)))
+	check("Seren's licht opent het pad", int(licht.plaat_van("l1").staat) == 2 and not licht.is_wall(Vector2i(9, 4)))
 	var voor_bytes := {}
 	for slot in range(1, GameState.SLOT_COUNT + 1):
 		var pad := GameState.slot_path(slot)
@@ -497,7 +497,7 @@ func _spel() -> void:
 
 ## v0.23 podium (RPG ART): rij 5 is dicht tot De Genezer verslagen is (onzichtbare blokkades).
 func _genezer_podium() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.encounter_multiplier = 0.0
 	GameState.story_flags.erase("bewaker:archief_2_v4_genezer/genezer")
 	GameState.in_battle = false
@@ -555,7 +555,7 @@ func _na_genezer_hub() -> void:
 	var hubtekst := " ".join(WarperDreiging.lines())
 	check("Hal-scène noemt H-6 maar onthult 'Proefpersoon' niet", hubtekst.contains("H-6")
 			and not hubtekst.contains("Proefpersoon") and not hubtekst.contains("Test Subject"))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.encounter_multiplier = 0.0
 	Engine.time_scale = 1.0
 	GameState.story_flags[WarperUnlock.BEWAKER_VLAG] = true
@@ -812,10 +812,10 @@ func _vijanden() -> void:
 			and is_equal_approx(AV.CHARGE_POWER, 2.0))
 	# regels op losse combatants
 	var a := _combatant("Rankje", 30, 30, false)
-	var h := _combatant("Dennis", 50, 50, true)
+	var h := _combatant("Dax", 50, 50, true)
 	var zin := AV.apply(a, h, {"type": "bind"}, 5)
 	check("binden: 1 beurt overslaan", int(h["skip"]) == 1 and str(h["skip_reden"]) == AV.SKIP_REDEN_BIND and "bound" in zin)
-	h = _combatant("Dennis", 50, 50, true)
+	h = _combatant("Dax", 50, 50, true)
 	zin = AV.apply(a, h, {"type": "poison"}, 5)
 	var gif: Array = h.get("dots", [])
 	check("gif: 3 beurten, %d%% per ronde" % roundi(AV.POISON_PCT * 100.0), gif.size() == 1 and int(gif[0]["turns"]) == 3
@@ -827,7 +827,7 @@ func _vijanden() -> void:
 	AV.apply(schrik, h, {"type": "drain"}, 10)
 	check("heelt niet boven max HP", int(schrik["s"]["hp"]) == 40)
 	var geest := _combatant("Rootghost", 30, 30, false)
-	h = _combatant("Dennis", 50, 50, true)
+	h = _combatant("Dax", 50, 50, true)
 	h["defending"] = true
 	AV.apply(geest, h, {"type": "pull"}, 5)
 	check("trekken: doel getrokken, verdedigen weg, geen counter voor een vijand", h.get("pulled_by") == geest
@@ -861,7 +861,7 @@ func _vijanden() -> void:
 
 func _vijanden_gevecht() -> void:
 	Engine.time_scale = 4.0
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(Archief2.PLAAT_SCENE, "zuid")
 	if not await _wacht("Archief2V1Plaat", 20.0):
@@ -895,10 +895,10 @@ func _vijanden_gevecht() -> void:
 	# Rankje bindt Dennis
 	er["s"]["skills"][0]["chance"] = 1.0
 	await b._execute({"type": "attack", "actor": er, "target": held})
-	check("Tendril bindt Dennis (1 beurt)", int(held.get("skip", 0)) == 1 and b.last_skill_effect.get("type") == "bind")
+	check("Tendril bindt Dax (1 beurt)", int(held.get("skip", 0)) == 1 and b.last_skill_effect.get("type") == "bind")
 	var hp_r := int(er["s"]["hp"])
 	await b._execute({"type": "attack", "actor": held, "target": er})
-	check("gebonden Dennis slaat over", int(held.get("skip", 0)) == 0 and int(er["s"]["hp"]) == hp_r)
+	check("gebonden Dax slaat over", int(held.get("skip", 0)) == 0 and int(er["s"]["hp"]) == hp_r)
 	# Sporekop vergiftigt
 	es["s"]["skills"][0]["chance"] = 1.0
 	await b._execute({"type": "attack", "actor": es, "target": held})
@@ -910,7 +910,7 @@ func _vijanden_gevecht() -> void:
 	# Wortelgeest trekt Dennis: zijn klap op Tendril gaat naar de Wortelgeest
 	ew["s"]["skills"][0]["chance"] = 1.0
 	await b._execute({"type": "attack", "actor": ew, "target": held})
-	check("Rootghost trekt Dennis aan", held.get("pulled_by") == ew)
+	check("Rootghost trekt Dax aan", held.get("pulled_by") == ew)
 	var hp_w := int(ew["s"]["hp"])
 	hp_r = int(er["s"]["hp"])
 	await b._execute({"type": "attack", "actor": held, "target": er})

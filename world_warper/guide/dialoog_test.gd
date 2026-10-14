@@ -131,7 +131,7 @@ static func _check_hint(fouten: Array) -> void:
 		fouten.append("vlag-bronnen laden niet")
 		return
 	if str(Dialoog.FLAG_NOOR_LID) != "noor_lid":
-		fouten.append("Noor-vlag is niet noor_lid")
+		fouten.append("Vesper-vlag is niet noor_lid")
 	if str(Dialoog.FLAG_GOLEM) != str(story.GOLEM_FLAG):
 		fouten.append("Golem-vlag wijkt af van de bewaker")
 	if str(Dialoog.FLAG_GENEZER) != str(unlock.BEWAKER_VLAG):

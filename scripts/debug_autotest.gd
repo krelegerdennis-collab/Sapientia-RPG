@@ -792,7 +792,7 @@ func _encounter_and_battle_tests() -> void:
 		return
 	b.damage_shown.connect(_on_damage_shown)
 	check("commandomenu verschijnt", await wait_battle_state(["command"]) == "command")
-	check("Dennis is als eerste aan de beurt", b.current_hero == 0)
+	check("Dax is als eerste aan de beurt", b.current_hero == 0)
 	check("2 vijanden: %s" % [b.enemies.map(func(e): return e["name"])], b.enemies.size() == 2)
 	check("3 heldensprites en 3 statusvakken", b.hero_nodes.size() == 3 and b.status_boxes.size() == 3)
 	var textures := {}
@@ -830,16 +830,16 @@ func _encounter_and_battle_tests() -> void:
 	check_layout(b, "3 helden")
 	_v7_style_checks(b)
 	await pframes(20)
-	check("actieve held (Dennis) stapt naar voren", b.hero_nodes[0].stepped_forward and not b.hero_nodes[1].stepped_forward)
-	check("statusvak van Dennis gemarkeerd", b.status_boxes[0].active and not b.status_boxes[1].active)
-	check("Dennis heeft geen MP: lege grijze MP-balk", not b.status_boxes[0].has_mp() and b.status_boxes[1].has_mp())
+	check("actieve held (Dax) stapt naar voren", b.hero_nodes[0].stepped_forward and not b.hero_nodes[1].stepped_forward)
+	check("statusvak van Dax gemarkeerd", b.status_boxes[0].active and not b.status_boxes[1].active)
+	check("Dax heeft geen MP: lege grijze MP-balk", not b.status_boxes[0].has_mp() and b.status_boxes[1].has_mp())
 	await check_bars(b, "start")
 	# idle-animatie: Noor (niet aan de beurt) ademt (wisselt tussen frame 8/0/9)
 	var seen_frames := {}
 	for i in 70:
 		seen_frames[b.hero_nodes[1]._sprite.frame] = true
 		await get_tree().process_frame
-	check("idle-animatie (ademen/cape/bol) bij Noor: frames %s" % [seen_frames.keys()],
+	check("idle-animatie (ademen/cape/bol) bij Vesper: frames %s" % [seen_frames.keys()],
 			b.hero_nodes[1].has_idle_animation() and (seen_frames.has(8) or seen_frames.has(9)) and seen_frames.size() >= 2)
 	await battle_shot("_1_menu")
 	Engine.time_scale = 3.0
@@ -870,10 +870,10 @@ func _encounter_and_battle_tests() -> void:
 	await tap("interact")
 
 	# Noor: Magie -> B (terug) -> Magie -> Vuur -> tweede vijand
-	check("Noor aan de beurt", await wait_hero(1))
+	check("Vesper aan de beurt", await wait_hero(1))
 	await pframes(4)
-	_check_cross(b, "Noor")
-	check("Noor kan Magie kiezen (knop niet grijs)", b.cross.is_enabled(1) and cross_frame(b, 1) == 0)
+	_check_cross(b, "Vesper")
+	check("Vesper kan Magie kiezen (knop niet grijs)", b.cross.is_enabled(1) and cross_frame(b, 1) == 0)
 	await battle_shot("_1b_noor_menu")
 	await choose_command(1)
 	await pframes(3)
@@ -881,7 +881,7 @@ func _encounter_and_battle_tests() -> void:
 	_check_submenu(b, "Magic")
 	check("kruis blijft zichtbaar maar bedient niet tijdens het lijstje", b.cross.visible and not b.cross.active)
 	await tap("cancel")
-	check("B gaat terug naar het kruis van Noor, Magie nog gekozen",
+	check("B gaat terug naar het kruis van Vesper, Magie nog gekozen",
 			await wait_hero(1) and b.cross.active and b.cross.selected == 1 and not b.menu.visible)
 	await choose_command(1)
 	await pframes(3)
@@ -891,14 +891,14 @@ func _encounter_and_battle_tests() -> void:
 	await tap("interact")
 
 	# Lotte: Item -> Drankje -> Dennis
-	check("Lotte aan de beurt", await wait_hero(2))
+	check("Seren aan de beurt", await wait_hero(2))
 	for i in 60:
 		if not b.menu.is_sliding():
 			break
 		await get_tree().process_frame
 	await pframes(4)
-	_check_cross(b, "Lotte")
-	check_layout(b, "kruis voor Lotte")
+	_check_cross(b, "Seren")
+	check_layout(b, "kruis voor Seren")
 	await choose_command(2)
 	await pframes(3)
 	check("itemmenu open (met tabje 'Item')", b.menu.title_label.text == "Item" and b.menu.tab.visible)
@@ -908,9 +908,9 @@ func _encounter_and_battle_tests() -> void:
 	await pframes(3)
 	check("doel-label bij een held: '%s'" % b.target_name_label.text,
 			b.target_name.visible and b.target_name_label.text == GameState.party[0]["name"])
-	_check_target_ui(b, "doel = Dennis", true)
+	_check_target_ui(b, "doel = Dax", true)
 	var head: Vector2 = b.hero_nodes[0].head_position()
-	check("doel-pijltje boven Dennis' sprite (%s)" % b.target_cursor.tip(),
+	check("doel-pijltje boven Dax' sprite (%s)" % b.target_cursor.tip(),
 			b.target_cursor.visible and absf(b.target_cursor.tip().x - head.x) <= 2 and b.target_cursor.tip().y <= head.y)
 	check("statusvak van het doel gemarkeerd", b.status_boxes[0].targeted)
 	for i in 30:
@@ -920,11 +920,11 @@ func _encounter_and_battle_tests() -> void:
 	await battle_shot("_2b_target_ally")
 	await tap("move_right")                  # pijltje naar Noor...
 	await pframes(2)
-	check("pijltje naar Noor", b.status_boxes[1].targeted and not b.status_boxes[0].targeted
-			and b.target_name_label.text == "Noor")
+	check("pijltje naar Vesper", b.status_boxes[1].targeted and not b.status_boxes[0].targeted
+			and b.target_name_label.text == "Vesper")
 	await click_at(b.hero_nodes[0].get_global_rect().get_center())   # ...maar tik op Dennis' sprite
 	await pframes(2)
-	check("tik op heldensprite kiest Dennis", b.last_ally_target_row == 0 and b.state != "target_ally")
+	check("tik op heldensprite kiest Dax", b.last_ally_target_row == 0 and b.state != "target_ally")
 
 	var st := await wait_battle_state(["command", "message_wait"], 60)
 	check("ronde 1 afgehandeld (%s)" % st, st != "")
@@ -957,7 +957,7 @@ func _encounter_and_battle_tests() -> void:
 				await pframes(2)
 				await click_at(b.status_boxes[1].get_global_rect().get_center())
 				await pframes(2)
-				check("tik op statusvak kiest Noor", b.last_ally_target_row == 1 and b.state != "target_ally")
+				check("tik op statusvak kiest Vesper", b.last_ally_target_row == 1 and b.state != "target_ally")
 				continue
 			await choose_command(0)
 			await wait_battle_state(["target_enemy"])
@@ -1025,7 +1025,7 @@ func _cross_nav_tests(b: Node) -> void:
 			path == [1, 0, 2, 0, 3, 4, 0])
 	check("naam-tabje volgt de keuze ('%s')" % b.cross.name_label.text, b.cross.name_label.text.ends_with("Attack"))
 	# Magie is uit voor Dennis: grijs; A doet niets
-	check("Magie grijs voor Dennis (geen spreuken)", not b.cross.is_enabled(1) and cross_frame(b, 1) == 2)
+	check("Magie grijs voor Dax (geen spreuken)", not b.cross.is_enabled(1) and cross_frame(b, 1) == 2)
 	await tap("move_up")
 	check("ook naar een grijze knop kun je bewegen (frame blijft 'uit')", b.cross.selected == 1 and cross_frame(b, 1) == 2)
 	await tap("interact")
@@ -1099,7 +1099,7 @@ func _v7_style_checks(b: Node) -> void:
 			and b.cross.name_label.text == "%s: Attack" % GameState.party[0]["name"])
 	_check_cross(b, GameState.party[0]["name"])
 	check("actieve held: gouden kaart (HUD v2 kaart_actief), naam in inkt", b.status_boxes[0].card_kind() == "actief" and b.status_boxes[0].name_color() == b.status_boxes[0].INK)
-	check("HP-balken in het palet: Noor '%s', Lotte '%s'" % [b.status_boxes[1].hp_bar_kind(), b.status_boxes[2].hp_bar_kind()],
+	check("HP-balken in het palet: Vesper '%s', Seren '%s'" % [b.status_boxes[1].hp_bar_kind(), b.status_boxes[2].hp_bar_kind()],
 			b.status_boxes[1].hp_bar_kind() == "hp" and b.status_boxes[2].hp_bar_kind() == "hp")
 	check("scanline-filter aan, over alles, vangt geen tikken",
 			Crt.visible and Crt.layer >= 100 and Crt.scanlines.mouse_filter == Control.MOUSE_FILTER_IGNORE
@@ -1196,10 +1196,10 @@ func _flee_test() -> void:
 	check("tik op 'Aanval': pijltje + label bij de vijand", b.target_cursor.visible and b.target_name.visible
 			and b.target_name_label.text == b.enemies[0]["name"])
 	await click_at(b.enemies[0]["node"].get_global_rect().get_center())
-	check("tik op vijand kiest doel -> Noor aan de beurt", await wait_hero(1))
+	check("tik op vijand kiest doel -> Vesper aan de beurt", await wait_hero(1))
 	# B bij Noor = terug naar Dennis
 	await tap("cancel")
-	check("B gaat terug naar de vorige held (Dennis)", await wait_hero(0))
+	check("B gaat terug naar de vorige held (Dax)", await wait_hero(0))
 	# Tik op 'Vluchten'
 	await click_at(b.cross.buttons[4].get_global_rect().get_center())
 	await pframes(2)
@@ -1466,25 +1466,25 @@ func _title_and_name_tests() -> void:
 	check("'Nieuw spel' -> naamscherm", await wait_scene("NameEntry"))
 	await frames(10)
 	var n := scene()
-	check("'Hoe heet je?' voorgevuld met 'Dennis'", n.edit.text == "Dennis" and n.chosen_name() == "Dennis")
+	check("'Hoe heet je?' voorgevuld met 'Dax'", n.edit.text == "Dax" and n.chosen_name() == "Dax")
 	check("LineEdit: te wijzigen, schermtoetsenbord aan, max. 10 tekens, focus",
 			n.edit.editable and n.edit.virtual_keyboard_enabled and n.edit.select_all_on_focus
 			and n.edit.max_length == 10 and n.edit.has_focus())
-	check("lege naam -> 'Dennis', te lang -> 10 tekens",
-			GameState.clean_name("   ") == "Dennis" and GameState.clean_name("Abcdefghijklmn") == "Abcdefghij")
+	check("lege naam -> 'Dax', te lang -> 10 tekens",
+			GameState.clean_name("   ") == "Dax" and GameState.clean_name("Abcdefghijklmn") == "Abcdefghij")
 	n.edit.text = ""
-	check("leeg veld kiest 'Dennis'", n.chosen_name() == "Dennis")
-	n.edit.text = "Dennis"
+	check("leeg veld kiest 'Dax'", n.chosen_name() == "Dax")
+	n.edit.text = "Dax"
 	await frames(10)
 	await overworld_shot("_name_entry")
 	n.edit.text = "Kees"
 	await click_at(n.ok_button.get_global_rect().get_center())
 	check("OK -> nieuw spel: wakker worden in het huis", await wait_scene("Huis"))
 	check("naam = Kees", GameState.player_name == "Kees")
-	check("nieuw spel: party van 1 (Dennis-sprites/stats, naam Kees)", GameState.party.size() == 1
+	check("nieuw spel: party van 1 (Dax-sprites/stats, naam Kees)", GameState.party.size() == 1
 			and GameState.party[0]["id"] == "dennis" and GameState.party[0]["name"] == "Kees"
 			and GameState.party[0]["max_hp"] == GameData.HEROES[0]["max_hp"])
-	check("Noor en Lotte nog niet in de party (wel in de data)",
+	check("Vesper en Seren nog niet in de party (wel in de data)",
 			not GameState.has_member("noor") and not GameState.has_member("lotte")
 			and not GameState.hero_template("noor").is_empty())
 
@@ -1731,10 +1731,10 @@ func _solo_battle_test() -> void:
 		await _flee_battle()
 	check("terug na solo-gevecht op dezelfde tile", await wait_scene("Wereldkaart") and tile() == before)
 	await frames(5)
-	check("add_member: Noor en Lotte sluiten aan", GameState.add_member("noor") and GameState.add_member("lotte"))
+	check("add_member: Vesper en Seren sluiten aan", GameState.add_member("noor") and GameState.add_member("lotte"))
 	check("add_member: niet dubbel en geen onbekende held", not GameState.add_member("noor") and not GameState.add_member("niemand"))
 	check("party nu 3: %s" % [GameState.party.map(func(h): return h["name"])], GameState.party.size() == 3
-			and GameState.party[1]["name"] == "Noor" and GameState.party[2]["name"] == "Lotte")
+			and GameState.party[1]["name"] == "Vesper" and GameState.party[2]["name"] == "Seren")
 
 
 ## Bestiarium: gezien/verslagen bijhouden, het scherm (MENU-knop) en opslaan/laden.
@@ -2487,7 +2487,7 @@ func _book_tests() -> void:
 	await frames(5)
 	await press_interact()
 	check("groen boek: 'Je geest raakt helder. MP hersteld.'", Dialog.is_open and Dialog._lines == ["Your mind clears. MP restored."])
-	check("groen boek: MP van de hele party vol, HP niet (Noor %d/%d MP)" % [GameState.party[1]["mp"], GameState.party[1]["max_mp"]],
+	check("groen boek: MP van de hele party vol, HP niet (Vesper %d/%d MP)" % [GameState.party[1]["mp"], GameState.party[1]["max_mp"]],
 			GameState.party.all(func(h): return h["mp"] == h["max_mp"] and h["hp"] == 1) and GameState.party[1]["mp"] > 0)
 	await _wait_typed()
 	await press_interact()

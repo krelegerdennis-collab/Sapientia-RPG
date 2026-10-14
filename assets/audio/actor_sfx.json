@@ -9,7 +9,7 @@
 	],
 	"helden": {
 		"dennis": {
-			"naam": "Dennis",
+			"naam": "Dax",
 			"klas": "Krijger",
 			"stem": "Lage mannenstem en een zwaard.",
 			"klank": "zwaard",
@@ -23,7 +23,7 @@
 			}
 		},
 		"noor": {
-			"naam": "Noor",
+			"naam": "Vesper",
 			"klas": "Magiër",
 			"stem": "Hoge, magische stem. Vuur en bliksem.",
 			"klank": "magie",
@@ -37,7 +37,7 @@
 			}
 		},
 		"lotte": {
-			"naam": "Lotte",
+			"naam": "Seren",
 			"klas": "Priester",
 			"stem": "Warme middenstem en een staf. Genezen klinkt als klokjes.",
 			"klank": "klok",
@@ -209,7 +209,7 @@
 			}
 		},
 		"lotte_glitch": {
-			"naam": "Lotte",
+			"naam": "Seren",
 			"stem": "Een priesteresstem die hapert, alsof er stilte overheen ligt.",
 			"klank": "glitch",
 			"volume_db": -6,

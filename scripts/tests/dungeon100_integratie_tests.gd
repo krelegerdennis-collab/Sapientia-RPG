@@ -315,7 +315,7 @@ func _plain(v) -> Variant:
 
 # ================================================================ deel B
 func _save_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("nieuw spel: verdieping, seed, checkpoint en best zijn 0", GameState.dungeon100_floor == 0 and GameState.dungeon100_seed == 0
 			and GameState.dungeon100_checkpoint == 0 and GameState.dungeon100_best == 0)
 	GameState.dungeon100_floor = 37
@@ -328,17 +328,17 @@ func _save_tests() -> void:
 	check("één blok 'dungeon100' met floor, seed, checkpoint en best", raw["dungeon100"] is Dictionary
 			and int(raw["dungeon100"]["floor"]) == 37 and int(raw["dungeon100"]["seed"]) == 123456789
 			and int(raw["dungeon100"]["checkpoint"]) == 30 and int(raw["dungeon100"]["best"]) == 38)
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	check("laden", GameState.load_game(path))
 	check("na laden: alle vier terug", GameState.dungeon100_floor == 37 and GameState.dungeon100_seed == 123456789
 			and GameState.dungeon100_checkpoint == 30 and GameState.dungeon100_best == 38)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 
 
 # ================================================================ deel C
 func _floor10_tests() -> void:
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.dungeon100_seed = 4242
@@ -429,7 +429,7 @@ func _floor10_tests() -> void:
 # ================================================================ deel D
 func _defeat_tests() -> void:
 	# nederlaag op verdieping 15, ook mét rustpunt 10: terug naar de wereldkaart bij de ingang
-	GameState.new_game("Dennis")
+	GameState.new_game("Dax")
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.gold = 200
