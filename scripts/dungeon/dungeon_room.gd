@@ -657,12 +657,17 @@ func push_chain(m: Node, dir: Vector2i) -> Array:
 					return []
 				if save_book and Vector2i((save_book.position / 16.0).floor()) == t:
 					return []
-				if t in player_tiles():
+				if t in player_tiles() or push_blocked(t):
 					return []
 				for o in monsters:
 					if is_instance_valid(o) and not chain.has(o) and o.covers(t):
 						chain.append(o)
 	return chain
+
+
+## Extra obstakels voor een duw (kamer-specifiek, bv. puzzelkasten). Basis: geen.
+func push_blocked(_t: Vector2i) -> bool:
+	return false
 
 
 ## Duw het verlamde monster m (en de keten erachter) 1 tegel in richting dir. De speler blijft staan.

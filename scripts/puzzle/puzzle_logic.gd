@@ -71,6 +71,9 @@ var heavy_blocks := {}
 ## Wereldvaardigheden van de party (gezet door PuzzleRoom uit GameState; dit model blijft los).
 var abilities := {}
 const DEFAULT_HEAVY_ABILITY := "zware_blokken"
+## Tegels waar een map-monster op staat (Diepe Grot: geduwd verlamd monster). Drukt elke plaat in,
+## ook een zware (voorstel: een monster is zwaar genoeg). Zie set_weights().
+var weights := {}
 var plates := {}         # id -> {"tile": Vector2i, "heavy": bool, "pressed": bool}
 var levers := {}         # id -> {"tile": Vector2i, "on": bool, "start": bool}
 var gates := {}          # id -> {"tile", "needs", "mode", "invert", "latch", "latched", "open"}
@@ -460,6 +463,17 @@ func set_player_tile(t: Vector2i, target := NOWHERE) -> Array:
 	return update()
 
 
+## Monster-tegels (gewicht op platen). Rekent alleen opnieuw als er iets veranderde.
+func set_weights(tiles: Array) -> Array:
+	var w := {}
+	for t in tiles:
+		w[Vector2i(t)] = true
+	if w == weights:
+		return []
+	weights = w
+	return update()
+
+
 ## Alles opnieuw uitrekenen; zendt 'changed' als er iets veranderde.
 func update() -> Array:
 	var ids := _evaluate()
@@ -564,7 +578,8 @@ func _evaluate() -> Array:
 	var ids: Array = []
 	for id in plates:
 		var p: Dictionary = plates[id]
-		var pressed: bool = _block_at.has(p["tile"]) or (not p["heavy"] and p["tile"] == player_tile)
+		var pressed: bool = _block_at.has(p["tile"]) or weights.has(p["tile"]) \
+				or (not p["heavy"] and p["tile"] == player_tile)
 		if pressed != p["pressed"]:
 			p["pressed"] = pressed
 			ids.append(id)
