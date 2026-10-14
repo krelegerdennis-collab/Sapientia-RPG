@@ -431,7 +431,8 @@ func _validate(d: Dictionary, run_seed: int, f: int) -> String:
 		if not reach.has(tile_of(m["tile"])):
 			return "monster %s staat op een onbereikbare tegel" % [m["id"]]
 	var boss_n := 1 if d["is_boss_floor"] else 0     # de baas (Dungeon100Content.boss) staat op boss_slot, niet op een monster-slot
-	if room["monsters"].size() != d["monster_slots"].size() + boss_n or room["chests"].size() != d["chest_slots"].size():
+	var puzzel_n := 1 if room.has("puzzel") else 0   # Puzzle Room: de blauwe kist in de nis zit niet op een kist-slot
+	if room["monsters"].size() != d["monster_slots"].size() + boss_n or room["chests"].size() != d["chest_slots"].size() + puzzel_n:
 		return "aantal monsters/kisten komt niet overeen met de slots"
 	for c in room["chests"]:
 		if ids.has(c["id"]) or not _known_item(str(c["item"])) or int(c["n"]) < 1:
@@ -704,9 +705,12 @@ func _pool_tests() -> void:
 			if Content.enemy_pool(f).has(p["enemies"][0]) and not first.has(p["gebied"]):
 				first[p["gebied"]] = f
 	var order_ok := true
+	# verhaalgebieden strikt oplopend; de grot-eigen monsters (laatste) niet eerder dan Archief 2
 	for i in range(1, Content.GEBIEDEN.size()):
-		order_ok = order_ok and int(first.get(Content.GEBIEDEN[i - 1], 999)) < int(first.get(Content.GEBIEDEN[i], 999))
-	check("gebieden in verhaalvolgorde: %s" % [first], order_ok and first.size() == 4)
+		var prev := int(first.get(Content.GEBIEDEN[i - 1], 999))
+		var cur := int(first.get(Content.GEBIEDEN[i], 999))
+		order_ok = order_ok and (cur >= prev if Content.GEBIEDEN[i] == "diepe_grot" else cur > prev)
+	check("gebieden in verhaalvolgorde: %s" % [first], order_ok and first.size() == Content.GEBIEDEN.size())
 	check("vroege gebieden ondiep, late diep: verdieping 1 alleen Archief 1, verdieping 99 geen Archief 1",
 			Content.enemy_pool(1).all(func(e): return e in ["mosslijm", "moskonijn", "papiergeest"])
 			and not Content.enemy_pool(99).has("mosslijm") and Content.enemy_pool(99).has("rankje"))

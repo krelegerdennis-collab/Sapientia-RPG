@@ -194,7 +194,7 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [x] MEDIUM MAP (35%)
 - [x] LARGE ROOM (20%)
 - [x] CHEST ROOM (10%)
-- [ ] PUZZLE ROOM (5%)
+- [x] PUZZLE ROOM (5%)
 - [x] TREASURE ROOM (5%)
 - [x] EMPTY ROOM (5%)
 
@@ -259,9 +259,9 @@ De vakjes hieronder zijn de open bouwtaak. Elke regel staat ook, met aantallen, 
 - [x] Blue chest kans per floor-bracket
 - [ ] Medium Map: exacte kisten + monsters
 - [ ] Trap Room: zichtbaar of verborgen vallen?
-- [ ] Puzzle Room: welke puzzels?
-  - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
-- [ ] Empty Room: lore-items of alleen leeg?
+- [x] Puzzle Room: 4 kleine puzzels uit bestaande stukken (besluit Dennis, 14 okt 2026)
+  - [x] Hint: ECHO zegt bij binnenkomst één korte Engelse zin (besluit Dennis, 14 okt 2026)
+- [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
 - [ ] Merchant Room: welke items verkoopt hij?
   - [x] Verhaal beslist: hij is H-5, "de Koopman" / EN "the Merchant" (CANON 12)
   - [ ] Einde: bij nederlaag Sapientia (Archief 6) verdwijnt H-5: "Thank you. Finally, rest."
@@ -884,7 +884,7 @@ De open vakjes van dit blok staan ook als overzicht in de actieve werklijst. De 
 
 Per verdieping: 1 layout rollen uit onderstaande tabel.
 
-In de code: `scripts/data/grot_layouts.gd` (+ `GrotKamers.layout_soort`, generator `layout_type`). Besluiten (Dennis, 14 okt 2026): de tabel telt op tot 91% en wordt genormaliseerd naar 100% (elk actief type krijgt zijn aandeel van de 91, bv. Medium 35/91 ≈ 38%); de Koopman is vast 1x per 10 verdiepingen (geen 1%-worp); PUZZLE ROOM staat uit tot de puzzels gekozen zijn; Chest Room = 12x12 met vloer 8x7; val/schat/leeg/rust/koopman/baas/100 hebben de Medium-maat. Blauwe-kist-overrides per kamer-type horen bij de loot-taak (RPG CODE); tot dan geldt de bestaande kans per kist.
+In de code: `scripts/data/grot_layouts.gd` (+ `GrotKamers.layout_soort`, generator `layout_type`). Besluiten (Dennis, 14 okt 2026): de tabel telt op tot 91% en wordt genormaliseerd naar 100% (elk actief type krijgt zijn aandeel van de 91, bv. Medium 35/91 ≈ 38%); de Koopman is vast 1x per 10 verdiepingen (geen 1%-worp); PUZZLE ROOM staat aan (4 kleine puzzels, besluit 14 okt 2026); Chest Room = 12x12 met vloer 8x7; val/schat/leeg/rust/koopman/baas/100 hebben de Medium-maat. Blauwe-kist-overrides per kamer-type horen bij de loot-taak (RPG CODE); tot dan geldt de bestaande kans per kist.
 
 Nieuwe verdeling (35/20/10/7/5/5/5/3/1) is CANON.
 
@@ -954,7 +954,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Specifieke puzzel (push / groei-platen)
   - Geen of weinig monsters
   - Beloning: 1 blauwe kist bij succes
-  - TODO(design): welke puzzels precies?
+  - Besluit (Dennis, 14 okt 2026): kleine vaste puzzels uit bestaande stukken van Archief 1/2 (duwbare kast + zware plaat + poort, hendel + groei-plaat + spleet), 4 layouts per seed gekozen (`scripts/data/grot_puzzels.gd`, `Dungeon100Puzzel`). Geen monsters. Beloning: 1 blauwe kist in de nis. Hint: één korte Engelse zin van ECHO bij binnenkomst. Geen nieuwe push/run-mechaniek (RPG CODE).
 - [x] TREASURE ROOM (5%)
   - GEEN monsters
   - Alleen kisten (2-3 normale, 1 blauwe kans)
@@ -963,7 +963,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Geen kisten, geen monsters
   - Alleen doorgang
   - Soms met lore-item of notitie
-  - TODO(design): lore-items of alleen leeg?
+  - Besluit (Dennis, 14 okt 2026): ~30% kans op een lore-notitie (kort Engels briefje, A = lezen; `GrotKamers.notitie`), anders leeg.
 - [x] REST ROOM (3%)
   - Heal + save point
   - Geen monsters, geen kisten
@@ -1216,8 +1216,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
   - Licht-effect bij activeren
   - Blue chest verschijnt met animatie
 
-  - [ ] TODO(design): hint-systeem, wel of niet? (ECHO / Lotte / geen)
-    Definitief. Getrapt, geen directe hints. De checkbox blijft open tot de hints in de code deze fasen gebruiken.
+  - [x] Hint-systeem: Diepe Grot-puzzelkamers krijgen één korte hint van ECHO bij binnenkomst (besluit Dennis 2026-10-14). Vervangt de oude regel "getrapt, geen directe hints". In de code: `GrotPuzzels` "hint", `Dungeon100Room._puzzel_hint`.
 
     **CANON – niet wijzigen zonder overleg.**
 
@@ -1228,7 +1227,7 @@ Deze afmetingen zijn CANON. Vervangt eerdere ~17×17 en ~25×25 specificaties.
     Fase 3 (10+ min vast): ECHO-hint. Via communicator (World Warper bereikt simulatie). Duidelijkere hint dan Lotte. Altijd beschikbaar. Voorbeeld: "Kandidaat, de volgorde is niet links-rechts, maar binnenstebuiten."
 
     Optioneel, na 3x falen: de puzzel licht op. Eén tegel licht kort op (startpunt). Geen volledige oplossing.
-- [ ] Empty Room: lore-items of alleen leeg?
+- [x] Empty Room: ~30% een lore-notitie, anders leeg (besluit Dennis, 14 okt 2026)
   Definitief. De checkbox blijft open tot de Empty Room in de code deze verdeling gebruikt.
 
   **CANON – niet wijzigen zonder overleg.**

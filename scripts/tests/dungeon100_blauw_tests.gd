@@ -240,7 +240,7 @@ func _blue_bracket_tests() -> void:
 		tr += v
 	check("override: Chest Room 2, Treasure Room ~50%% op 1 (%.2f), andere kamers volgen de tabel" % (tr / 2000.0),
 			Blue.blue_forced_for(1, 30, "kist") == 2 and tr_ok and absf(tr / 2000.0 - 0.5) < 0.04
-			and Blue.blue_forced_for(1, 30, "medium") == -1 and Blue.blue_forced_for(1, 30, "puzzel") == -1)
+			and Blue.blue_forced_for(1, 30, "medium") == -1 and Blue.blue_forced_for(1, 30, "puzzel") == 0)
 	# bracket-statistiek floor 1-20 vs. oud (5% per kist, ~2-4 kisten): flink lager
 	var per_floor_early := 0.0
 	for f in range(1, 21):

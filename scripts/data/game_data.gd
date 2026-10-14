@@ -439,6 +439,66 @@ const ENEMIES := {
 		"desc": "A pale ghost of roots. It pulls you toward it, so your next strike can only find the ghost.",
 		"habitat": ["archief"],
 	},
+	# ------------------------------------------------------------ DIEPE GROT: EIGEN MONSTERS
+	# Alleen in de Diepe Grot (dungeon100_content.gd POOLS, gebied "diepe_grot"): Shard Codex en Scanline Wolf
+	# op 76-90 (tegelvariant v6), Aureate Watcher en Ledger Scarab op 91-100 (v7). Uitzondering van Dennis:
+	# vangbaar in de Codex en je houdt ze na de grot (CodexData.GROT_BEHOUD). Art: RPG ART
+	# (art_diepegrot_monsters/out, in tools/handwerk.txt): voor/rug 96x96, kaart 32x64, hub 48x96.
+	# Stats = basis op verdieping 1 (Dungeon100Scaling.monster_stats schaalt ze, zoals de pool-monsters).
+	# Iets boven de sterkste Archief 2-soorten (HP 30-40, ATK 17-22): op 76-90 ~1,2x, op 91-100 ~1,35x.
+	# Bestiarium 039-042.
+	"shard_codex": {
+		"name": "Shard Codex", "sprite": "res://assets/sprites/enemies/shard_codex.png",
+		"sprite_back": "res://assets/sprites/enemies/shard_codex_rug.png",
+		"element": "kennis", "weak_matters": true,
+		"max_hp": 40, "atk": 21, "def": 12, "agi": 9, "mag": 14, "mdef": 14,
+		"exp": 24, "gold": 16, "y_offset": 0,
+		"skills": [{"name": "Index Lock", "type": "bind", "chance": 0.2, "power": 0.9},
+				{"name": "Page Shard", "chance": 0.25, "power": 1.4}],
+		"no": 39, "mp": 0, "weak": ["vuur"], "resist": [],
+		"drops": [{"item": "toverbrouwsel", "chance": 0.15}],
+		"desc": "A corrupted index book whose crystal pages break loose. Its magenta eye reads you as data, and files you away for a moment.",
+		"habitat": ["dungeon100"],
+	},
+	"scanline_wolf": {
+		"name": "Scanline Wolf", "sprite": "res://assets/sprites/enemies/scanline_wolf.png",
+		"sprite_back": "res://assets/sprites/enemies/scanline_wolf_rug.png",
+		"element": "ruis", "weak_matters": true,
+		"max_hp": 38, "atk": 25, "def": 9, "agi": 16, "mag": 0, "mdef": 8,
+		"exp": 24, "gold": 15, "y_offset": 0,
+		"skills": [{"name": "Scanline Rush", "type": "charge", "chance": 0.2, "power": 2.0},
+				{"name": "Lag Bite", "type": "drain", "chance": 0.25, "power": 1.2}],
+		"no": 40, "mp": 0, "weak": ["bliksem"], "resist": [],
+		"drops": [{"item": "sterk_drankje", "chance": 0.2}],
+		"desc": "A hunter built from purple scanlines and magenta data spikes. Its head lags one frame behind, but its teeth do not.",
+		"habitat": ["dungeon100"],
+	},
+	"aureate_watcher": {
+		"name": "Aureate Watcher", "sprite": "res://assets/sprites/enemies/aureate_watcher.png",
+		"sprite_back": "res://assets/sprites/enemies/aureate_watcher_rug.png",
+		"element": "licht", "weak_matters": true,
+		"max_hp": 46, "atk": 23, "def": 14, "agi": 11, "mag": 18, "mdef": 18,
+		"exp": 28, "gold": 20, "y_offset": 0,
+		"skills": [{"name": "Judging Gaze", "chance": 0.25, "power": 1.5},
+				{"name": "Halo Guard", "type": "guard", "chance": 0.15, "def_mult": 2.0}],
+		"no": 41, "mp": 0, "weak": ["ijs"], "resist": [],
+		"drops": [{"item": "elixer", "chance": 0.1}],
+		"desc": "A golden halo-eye with wings of pages. Sapientia's final quality check: it weighs every candidate who gets this deep.",
+		"habitat": ["dungeon100"],
+	},
+	"ledger_scarab": {
+		"name": "Ledger Scarab", "sprite": "res://assets/sprites/enemies/ledger_scarab.png",
+		"sprite_back": "res://assets/sprites/enemies/ledger_scarab_rug.png",
+		"element": "metaal", "weak_matters": true,
+		"max_hp": 52, "atk": 24, "def": 18, "agi": 8, "mag": 6, "mdef": 12,
+		"exp": 28, "gold": 24, "y_offset": 0,
+		"skills": [{"name": "Ledger Roll", "type": "charge", "chance": 0.2, "power": 2.0},
+				{"name": "Shell Up", "type": "guard", "chance": 0.15, "def_mult": 2.0}],
+		"no": 42, "mp": 0, "weak": ["bliksem", "vuur"], "resist": [],
+		"drops": [{"item": "toverbrouwsel", "chance": 0.2}],
+		"desc": "A golden data scarab rolling a ball of pure light: the score of everyone who got this far.",
+		"habitat": ["dungeon100"],
+	},
 	# Het Zingende Graan: klein mini-gevecht op de mistrand. v0.21: eigen art van RPG ART (batch 7).
 	# Bestiariumnummer 025: 013-024 zijn de twaalf eindbazen van de Diepe Grot (endgame_bestiary.gd).
 	"woudgeest": {
@@ -1073,6 +1133,7 @@ const ELEMENT_NAMES := {
 	"mist": "mist",
 	"neutraal": "neutral",
 	"water": "water",
+	"licht": "light",
 }
 
 

@@ -233,6 +233,8 @@ const PROPS := {
 	# grote deur naar de Golemhal (2x2 tiles over de muurvoorkant); de botsing komt van de tegels
 	# eronder: bovenste rij muur, onderste rij = boog-doorgang 'n' (uitgang)
 	"golemdeur": {"texture": "res://assets/sprites/dungeon/golemdeur.png", "hframes": 2, "w": 32, "h": 32, "solid": false},
+	# Diepe Grot, Empty Room: losse lore-notitie op de vloer (GrotKamers.notitie); A = lezen.
+	"grot_notitie": {"texture": "res://assets/sprites/dungeon/grot_notitie.png", "h": 16, "solid": true},
 }
 
 ## teken -> tegelnummer

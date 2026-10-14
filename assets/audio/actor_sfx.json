@@ -337,6 +337,58 @@
 				"dood": "Zucht die wegvalt.",
 				"vaardigheid": "Een iets langere windvlaag."
 			}
+		},
+		"shard_codex": {
+			"naam": "Shard Codex",
+			"stem": "PLACEHOLDER (kopie van papiergeest). Kristallen bladzijden die breken.",
+			"klank": "papier",
+			"volume_db": -7,
+			"pitch_variatie": 0.05,
+			"slots": {
+				"aanval": "Bladzijde die als glas snijdt.",
+				"raak": "Kristal dat barst.",
+				"dood": "Bladzijden die rinkelend vallen.",
+				"vaardigheid": "Indexslot, een harde digitale klik."
+			}
+		},
+		"scanline_wolf": {
+			"naam": "Scanline Wolf",
+			"stem": "PLACEHOLDER (kopie van glitchmot). Ruis van scanlijnen, een janker die een frame achterloopt.",
+			"klank": "glitch",
+			"volume_db": -7,
+			"pitch_variatie": 0.08,
+			"slots": {
+				"aanval": "Ruisende hap.",
+				"raak": "Beeld dat even hapert.",
+				"dood": "Signaal dat wegvalt.",
+				"vaardigheid": "Scanlijnsprong, snelle ruisstoot."
+			}
+		},
+		"aureate_watcher": {
+			"naam": "Aureate Watcher",
+			"stem": "PLACEHOLDER (kopie van mistuil). Gouden oog, zacht gezoem van een halo.",
+			"klank": "uil",
+			"volume_db": -6,
+			"pitch_variatie": 0.04,
+			"slots": {
+				"aanval": "Felle gouden flits.",
+				"raak": "Halo die trilt.",
+				"dood": "Licht dat dooft.",
+				"vaardigheid": "Oordelende blik, hoge toon."
+			}
+		},
+		"ledger_scarab": {
+			"naam": "Ledger Scarab",
+			"stem": "PLACEHOLDER (kopie van mech_wachter). Metalen scarabee met een rollende lichtbal.",
+			"klank": "metaal",
+			"volume_db": -5,
+			"pitch_variatie": 0.03,
+			"slots": {
+				"aanval": "Metalen klik van kaken.",
+				"raak": "Dof schild dat dreunt.",
+				"dood": "Bal die uitrolt en stilvalt.",
+				"vaardigheid": "Grootboekrol, rollend gedreun."
+			}
 		}
 	}
 }
