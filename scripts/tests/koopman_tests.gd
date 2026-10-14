@@ -498,7 +498,7 @@ func _winkel_scene(k, pl) -> void:
 	GameState.inventory["kort_zwaard"] = 1
 	var shop = k.open_winkel(pl)
 	await pframes(20)
-	check("winkelraam open (zelfde shop_screen als Wilgendal)", shop != null and shop.is_inside_tree() and shop.mode == "koop")
+	check("winkelraam open (zelfde shop_screen als Willowdale)", shop != null and shop.is_inside_tree() and shop.mode == "koop")
 	var knoppen: Array = shop.content.get_children().filter(func(c): return c is Button)
 	check("kooplijst: Sell + %d regels" % (knoppen.size() - 1), knoppen.size() >= 6 and str(knoppen[0].text).contains("Sell"))
 	await get_tree().create_timer(0.5).timeout

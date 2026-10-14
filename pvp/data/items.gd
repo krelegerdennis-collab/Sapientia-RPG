@@ -5,8 +5,8 @@ class_name PvpItems
 
 
 const ITEMS := {
-	"drankje": {"name": "Drankje", "heal_hp": 30, "heal_mp": 0},
-	"toverwater": {"name": "Toverwater", "heal_hp": 0, "heal_mp": 10},
+	"drankje": {"name": "Potion", "heal_hp": 30, "heal_mp": 0},
+	"toverwater": {"name": "Magic Water", "heal_hp": 0, "heal_mp": 10},
 }
 
 const BAGS := {

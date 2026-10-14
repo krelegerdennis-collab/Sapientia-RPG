@@ -67,7 +67,7 @@ func _plaats_bord() -> void:
 	lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	lab.add_theme_font_override("font", FONT)
-	lab.add_theme_font_size_override("font_size", 8)
+	lab.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 	lab.add_theme_color_override("font_color", Color("f2e9d8"))
 	add_child(lab)
 

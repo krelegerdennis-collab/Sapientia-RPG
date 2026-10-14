@@ -647,18 +647,20 @@ func _scenes_tests() -> void:
 	for cf in [ScenesDataT.CANON_GENEZER_FLAG, ScenesDataT.CANON_HANGER_FLAG, ScenesDataT.CANON_DREIGING_FLAG]:
 		GameState.story_flags.erase(cf)
 	GameState.scenes_seen = []
-	check("scenes: lijst = alle cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "hanger", "ww_warper", "ww_hanger", "ww_sapientia"]
+	check("scenes: lijst = alleen de video-cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "ww_warper"]
 			and GameState.seen_scenes().is_empty())
-	GameState.mark_scene_seen("hanger")
+	GameState.mark_scene_seen("ww_warper")
+	GameState.mark_scene_seen("hanger")         # v0.24 niet meer in de lijst: telt niet
 	GameState.mark_scene_seen("bestaat_niet")
 	var pad := "user://partytest_scenes.json"
 	var weg := GameState.save_game(Vector2i(3, 3), Vector2i.DOWN, pad)
 	var ruw := GameState.read_save(pad)
-	check("save: scenes_seen = ['hanger'] (%s)" % [ruw.get("scenes_seen")], weg and ruw.get("scenes_seen") == ["hanger"])
+	check("save: scenes_seen = ['ww_warper'] (%s)" % [ruw.get("scenes_seen")], weg and ruw.get("scenes_seen") == ["ww_warper"])
 	GameState.scenes_seen = []
 	GameState.story_flags.erase(ScenesDataT.HANGER_FLAG)
+	GameState.story_flags.erase(ScenesDataT.CANON_GENEZER_FLAG)
 	var ok := GameState.load_game(pad)
-	check("load: scenes_seen terug", ok and GameState.scenes_seen == ["hanger"] and not GameState.scene_seen("wereldkaart"))
+	check("load: scenes_seen terug", ok and GameState.scenes_seen == ["ww_warper"] and not GameState.scene_seen("wereldkaart"))
 	var oud := ruw.duplicate(true)
 	oud.erase("scenes_seen")
 	(oud["story"] as Dictionary)["flags"] = [ScenesDataT.WORLDMAP_FLAG]
@@ -703,7 +705,7 @@ func _scenes_tests() -> void:
 	await click(m.buttons["scenes"])
 	await pframes(4)
 	var sc: Node = m.sub
-	check("Scenes opent het scenes-scherm", sc != null and sc.name == "Scenes" and sc.buttons.size() == 5)
+	check("Scenes opent het scenes-scherm", sc != null and sc.name == "Scenes" and sc.buttons.size() == 2)
 	if sc == null:
 		return
 	check("niet bekeken: '???' en op slot", sc.buttons[0].text.ends_with("???") and sc.is_locked(0) and sc.is_locked(1))
@@ -721,9 +723,9 @@ func _scenes_tests() -> void:
 	h._finish()
 	h.queue_free()
 	await pframes(2)
-	check("Hanger bekeken -> ontgrendeld", GameState.scene_seen("hanger"))
-	check("canon: Hanger-intro ontgrendelt 'The Hanger' en 'Sapientia' (vlaggen ww_canon_*), 'The World Warper' nog op slot",
-			GameState.scene_seen("ww_hanger") and GameState.scene_seen("ww_sapientia") and not GameState.scene_seen("ww_warper"))
+	check("Hanger-scène speelt nog in het verhaal (vlag gezet), maar staat niet in de lijst; 'The World Warper' nog op slot",
+			GameState.story_flags.has(ScenesDataT.HANGER_FLAG) and not GameState.seen_scenes().has("hanger")
+			and not GameState.scene_seen("ww_warper") and not GameState.scenes_seen.has("hanger"))
 	GameState.story_flags[ScenesDataT.CANON_GENEZER_FLAG] = true     # = WorldWarperGenezerScene na De Genezer
 	check("canon: vlag ww_canon_genezer_gezien -> 'The World Warper' ontgrendeld", GameState.scene_seen("ww_warper"))
 	WorldmapCutscene.start_on(scene())
@@ -738,19 +740,17 @@ func _scenes_tests() -> void:
 	var titels_ok := true
 	for i in ScenesDataT.SCENES.size():
 		titels_ok = titels_ok and sc.buttons[i].text.ends_with(ScenesDataT.SCENES[i]["title"]) and not sc.is_locked(i)
-	check("lijst toont nu de titels (ook The World Warper / The Hanger / Sapientia)", titels_ok
-			and ScenesDataT.scene("ww_warper")["title"] == "The World Warper" and ScenesDataT.scene("ww_hanger")["title"] == "The Hanger"
-			and ScenesDataT.scene("ww_sapientia")["title"] == "Sapientia")
+	check("lijst toont nu de titels (Into the Wide World / The World Warper), geen Hanger/Sapientia", titels_ok
+			and sc.buttons.size() == 2 and ScenesDataT.scene("ww_warper")["title"] == "The World Warper"
+			and ScenesDataT.scene("hanger").is_empty() and ScenesDataT.scene("ww_hanger").is_empty() and ScenesDataT.scene("ww_sapientia").is_empty())
 	var flags_voor: Dictionary = GameState.story_flags.duplicate()
 	var map_voor := scene().scene_file_path
 	await screenshot("scenes_scherm")
 	# herhaling: afspelen en terug naar het scherm
-	for id in ["hanger", "wereldkaart", "ww_warper", "ww_hanger", "ww_sapientia"]:
+	for id in ["wereldkaart", "ww_warper"]:
 		await click(sc.buttons[ScenesDataT.ids().find(id)])
 		await pframes(4)
 		check("%s: herhaling speelt" % id, sc.playing != null and is_instance_valid(sc.playing))
-		if id == "hanger":
-			await screenshot("scenes_herhaling_hanger")
 		if id == "ww_warper":
 			await pframes(10)
 			var gz: Node = get_tree().root.get_node_or_null("SceneReplay/CanonGenezer")
@@ -765,9 +765,33 @@ func _scenes_tests() -> void:
 			check("ww_warper: Genezer-scène speelt los (eerste zin getoond, dialoog boven het menu)", gz != null
 					and gz.regels_getoond.size() >= 1 and gz.herhaling and Dialog.layer > sc.layer)
 			await screenshot("scenes_herhaling_warper")
-		if id == "ww_sapientia":
-			var hs: Node = get_tree().root.get_node_or_null("SceneReplay")
-			check("ww_sapientia: alleen de dreiging (begint bij Sapientia)", hs != null and str(hs._lines[0]).begins_with("Sapientia"))
+			# v0.24 bug Dennis: eerste vak ('The core of the second Archive ...') binnen beeld en
+			# met tikken door te klikken tot het eind (de touch-knoppen zijn weg zolang het menu open is)
+			var vp := Rect2(Vector2.ZERO, get_tree().root.get_visible_rect().size)
+			var pr: Rect2 = Dialog.panel.get_global_rect()
+			check("ww_warper: eerste tekstvak binnen de schermbreedte (%s in %s)" % [pr, vp], Dialog.is_open
+					and str(Dialog.text_label.text).begins_with("The core of the second Archive")
+					and pr.position.x >= 0.0 and pr.end.x <= vp.end.x and Dialog.text_label.get_global_rect().end.x <= pr.end.x)
+			var tikken := 0
+			var getoond := 0
+			while tikken < 120 and sc.playing != null:
+				if is_instance_valid(gz):
+					getoond = gz.regels_getoond.size()
+				if Dialog.is_open:
+					await tik_scherm()
+					tikken += 1
+				await pframes(3)
+			check("ww_warper: door de hele scène getikt -> vanzelf terug in de lijst (%d tikken)" % tikken,
+					sc.playing == null and getoond == WorldWarperCanon.GENEZER.size())
+			await pframes(6)
+			check("ww_warper: na terugkomst menu bruikbaar (focus, dialoog dicht en op laag 5, geen restanten)",
+					sc.buttons.any(func(b): return b.has_focus()) and not Dialog.is_open and Dialog.layer == 5
+					and get_tree().root.get_node_or_null("SceneReplay") == null and get_tree().root.get_node_or_null("SceneReplayWeg") == null)
+			await screenshot("scenes_terug_na_warper")
+			# en B werkt weer gewoon: het scherm reageert op invoer
+			await click(sc.buttons[ScenesDataT.ids().find("ww_warper")])
+			await pframes(4)
+			check("ww_warper: na terugkomst nog eens af te spelen", sc.playing != null)
 		sc.finish_replay()
 		await pframes(4)
 		check("%s: na afloop terug in Scenes (focus in de lijst)" % id, sc.playing == null and m.sub == sc and is_instance_valid(sc)
@@ -779,6 +803,18 @@ func _scenes_tests() -> void:
 	check("Scenes dicht: terug in het veldmenu", m.sub == null and m.buttons["scenes"].has_focus())
 	m.close()
 	await pframes(3)
+
+
+func tik_scherm() -> void:
+	var ev := InputEventScreenTouch.new()
+	ev.position = get_tree().root.get_visible_rect().size * Vector2(0.5, 0.3)
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	await pframes(2)
+	ev = ev.duplicate()
+	ev.pressed = false
+	Input.parse_input_event(ev)
+	await pframes(2)
 
 
 func click(c: Control) -> void:

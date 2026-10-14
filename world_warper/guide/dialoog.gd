@@ -49,7 +49,7 @@ static func steps() -> Array:
 			"id": "gesloten",
 			"flag": flag_for(2),
 			"lines": [
-				"ECHO's Room is open. The Diepe Grot begins there.",
+				"ECHO's Room is open. The Deep Learning Simulation begins there.",
 				"The story opens the other rooms.",
 			],
 		},
@@ -58,7 +58,7 @@ static func steps() -> Array:
 			"flag": flag_for(3),
 			"lines": [
 				"The Key reacted when you arrived.",
-				"The Hanger is the Key.",
+				"The Pendant is the Key.",
 			],
 		},
 	]
@@ -91,17 +91,17 @@ static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 	if not _vlag_aan(flags, FLAG_NOOR_LID):
 		return [
 			"Vesper hasn't joined yet.",
-			"Look for her in the Donker Woud.",
+			"Look for her in the Dark Wood.",
 		]
 	if not _vlag_aan(flags, FLAG_GOLEM):
 		return [
-			"The Golem of the Eerste Archief still stands.",
-			"Go to the Eerste Archief.",
+			"The Golem of the First Archive still stands.",
+			"Go to the First Archive.",
 		]
 	if not _vlag_aan(flags, FLAG_GENEZER):
 		return [
-			"De Genezer still stands in the greenhouse of Archief 2.",
-			"Go through the berggrot.",
+			"The Mender still stands in the greenhouse of the Living Archive.",
+			"Go through the Hollow Mountain.",
 		]
 	var plek := _wm1_plek(bezocht)
 	if plek == "":

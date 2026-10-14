@@ -49,7 +49,7 @@ static func wm1_echte_bestemming() -> PackedStringArray:
 			fouten.append("de hub is geen warp-bestemming")
 			continue
 		if path.ends_with("/wilgendal.tscn"):
-			fouten.append("wilgendal.tscn is het Wachtershuis, niet Wilgendal")
+			fouten.append("wilgendal.tscn is het Wachtershuis, niet Willowdale")
 			continue
 		if str(ECHTE_SPAWN.get(path, "")) != spawn:
 			fouten.append("geen echte scène: %s / %s" % [path, spawn])
@@ -73,7 +73,7 @@ static func bezoek_filter() -> PackedStringArray:
 	GameState.bezochte_kaarten = []
 	var dicht := Destinations.resolve(Destinations.WM1, Destinations.PLACE_WILGENDAL, {})
 	if not dicht.is_empty():
-		fouten.append("Wilgendal hoort dicht zolang het dorp niet bezocht is")
+		fouten.append("Willowdale hoort dicht zolang het dorp niet bezocht is")
 	var esdoorn := Destinations.resolve(Destinations.WM1, Destinations.PLACE_ESDOORN, {})
 	if not esdoorn.is_empty():
 		fouten.append("Esdoorn hoort dicht zolang het dorp niet bezocht is")
@@ -83,9 +83,9 @@ static func bezoek_filter() -> PackedStringArray:
 	GameState.bezochte_kaarten = [Destinations.WILGENDAL_PATH]
 	var open_wilg := Destinations.resolve(Destinations.WM1, Destinations.PLACE_WILGENDAL, {})
 	if str(open_wilg.get("spawn", "")) != Destinations.WILGENDAL_SPAWN:
-		fouten.append("bezocht Wilgendal hoort te warpen")
+		fouten.append("bezocht Willowdale hoort te warpen")
 	if not Destinations.resolve(Destinations.WM1, Destinations.PLACE_ESDOORN, {}).is_empty():
-		fouten.append("Esdoorn blijft dicht als alleen Wilgendal bezocht is")
+		fouten.append("Esdoorn blijft dicht als alleen Willowdale bezocht is")
 	if not Destinations.places(Destinations.WM2).is_empty():
 		fouten.append("het bezoek-filter mag WM2 niet vullen")
 	GameState.bezochte_kaarten = oud

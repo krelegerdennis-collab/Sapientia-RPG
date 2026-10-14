@@ -28,7 +28,7 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	var regels: Array[String] = Dreiging.lines()
 	var ah := regels.find("ECHO: ...Ah.")
-	check("Hanger gloeit op ECHO's '...Ah' (beat 2)", ah > 0 and Dreiging.beat_at(ah) == 2)
+	check("Pendant gloeit op ECHO's '...Ah' (beat 2)", ah > 0 and Dreiging.beat_at(ah) == 2)
 	var scene := HangerScene.instantiate() as WorldWarperHangerScene
 	add_child(scene)
 	await get_tree().process_frame
@@ -50,7 +50,7 @@ func _run() -> void:
 	check("herstel blijft paars", scene.hanger.color == Color(0.72, 0.55, 0.95, 1)
 			and scene.hanger.color != Color(0.95, 0.72, 0.8, 1))
 	scene._beat_purple()
-	check("stille hal houdt de Hanger metaal", scene.hanger.color == WorldWarperHangerScene.METAL)
+	check("stille hal houdt the Pendant metaal", scene.hanger.color == WorldWarperHangerScene.METAL)
 	scene._beat_threat()
 	check("Sapientia: roze glitch-silhouet (sapientia_glitch.png) in beat 3", scene.sapientia != null
 			and scene.sapientia.visible and scene.sapientia.texture.get_size() == Vector2(48, 48)
@@ -150,7 +150,7 @@ func _accent_tests() -> void:
 	check("geen varianten voor sapientia_glitch en hanger_gloed",
 			Accent.path("res://assets/sprites/archief2/sapientia_glitch.png", 2) == "res://assets/sprites/archief2/sapientia_glitch.png"
 			and Accent.path(Accent.HANGER_GLOED, 3) == Accent.HANGER_GLOED)
-	check("Archief 1 grijs, na De Genezer groen, vlag wint", Accent.archief_for({}) == 1
+	check("Archief 1 grijs, na The Mender groen, vlag wint", Accent.archief_for({}) == 1
 			and Accent.archief_for({Accent.BEWAKERS[2]: true}) == 2 and Accent.archief_for({Accent.FLAG: 5}) == 5)
 	var root := Node2D.new()
 	var spr := Sprite2D.new()
@@ -198,6 +198,6 @@ func _knop_tests() -> void:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		var dorp := view.find_child("Rij_wilgendal", true, false) as TextureButton
-		check("Wilgendal = knop_village", dorp != null and dorp.texture_normal.resource_path.ends_with("knop_village.png")
+		check("Willowdale = knop_village", dorp != null and dorp.texture_normal.resource_path.ends_with("knop_village.png")
 				and dorp.texture_pressed.resource_path.ends_with("knop_village_ingedrukt.png"))
 	view.queue_free()

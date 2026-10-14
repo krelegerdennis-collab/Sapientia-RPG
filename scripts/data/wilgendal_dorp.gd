@@ -1,5 +1,7 @@
 extends RefCounted
-## Dorp Wilgendal: plein, vier winkelpanden, vier woonhuizen, zes sfeer-NPC's.
+## Dorp Wilgendal (v2, Dennis 14 okt 2026: ruimer, ~3x zo groot): winkelstraat, marktplein, beek met
+## brug, zijstraten. Vier winkelpanden, vier woonhuizen, vijf sfeer-NPC's verspreid (max 2 op het plein).
+## Props (put, kramen, hekken, bloembakken, beek, brug, lantaarns, bankjes): RPG ART, zie PROPS.
 ## Prijzen en voorraad blijven in shop_data.gd. De molen blijft de molen.
 ## Winkels zijn altijd open. Er is geen tijdsysteem.
 
@@ -7,33 +9,50 @@ const DORP := "res://scenes/maps/dorp_wilgendal.tscn"
 const BINNEN := "res://scenes/maps/wilgendal_binnen.tscn"
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const ALTIJD_OPEN := true
-const W := 24
-const H := 16
-const PLEIN := Rect2i(7, 6, 10, 6)
+const W := 42
+const H := 28
+const PLEIN := Rect2i(14, 8, 14, 7)
 const MOLEN := Rect2i(1, 1, 3, 4)
 const SPAWN_ZUID := "zuid_ingang"
-const SPAWN_TEGEL := Vector2i(12, 14)
-const EXIT_TEGEL := Vector2i(11, 15)
+const SPAWN_TEGEL := Vector2i(20, 25)
+const EXIT_TEGEL := Vector2i(19, 27)
 const EXIT_MAAT := Vector2i(3, 1)
-const GERRIT_TEGEL := Vector2i(8, 7)
+const GERRIT_TEGEL := Vector2i(4, 6)
+## Beek: één tegel breed, rij BEEK_RIJ over de hele breedte; de brug (BRUG) is beloopbaar.
+const BEEK_RIJ := 17
+const BRUG := Rect2i(20, 16, 2, 3)
+## Hoogstens zoveel sfeer-NPC's op het marktplein (besluit Dennis: 2-3).
+const PLEIN_MAX := 2
 
 const GROND: Array[String] = [
-	"TTTTTTTTTTTTTTTTTTTTTTTT",
-	"T......................T",
-	"T......................T",
-	"T......................T",
-	"T...=================..T",
-	"T.....=...=...=...=....T",
-	"T.....=##########.=....T",
-	"T......##########......T",
-	"T......##########......T",
-	"T.=....##########....=.T",
-	"T......##########......T",
-	"T......##########......T",
-	"T..........===.........T",
-	"T..........===.........T",
-	"T.====================.T",
-	"TTTTTTTTTTT===TTTTTTTTTT",
+	"TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+	"T........................................T",
+	"T........................................T",
+	"T........................................T",
+	"T........................................T",
+	"T....================================....T",
+	"T...................==.................T.T",
+	"T...................==...................T",
+	"T.............######==######.............T",
+	"T.............##############.............T",
+	"T.............##############.............T",
+	"T...==========##############==========...T",
+	"T.............##############.............T",
+	"T.............##############...........T.T",
+	"T.T......T....######==######..T..........T",
+	"T...................==...................T",
+	"T...................==...................T",
+	"~~~~~~~~~~~~~~~~~~~~BB~~~~~~~~~~~~~~~~~~~~",
+	"T...................==...................T",
+	"T..........T........==...........T.......T",
+	"T...................==...................T",
+	"T...............T...==....T..............T",
+	"T...................==...................T",
+	"T...==================================...T",
+	"T...................==...................T",
+	"T......T............==.............T.....T",
+	"T..................===...................T",
+	"TTTTTTTTTTTTTTTTTTT===TTTTTTTTTTTTTTTTTTTT",
 ]
 
 const TEGEL := {
@@ -41,6 +60,8 @@ const TEGEL := {
 	".": 0,
 	"=": 2,
 	"#": 33,
+	"~": 0,      # beek: gras eronder, de beek-art ligt erover (PROPS/dorp_opbouw)
+	"B": 2,      # pad onder de brug
 }
 
 const SFEER_KLEUR := {
@@ -58,13 +79,13 @@ const PANDEN := [
 		"id": "pantser",
 		"kind": "winkel",
 		"shop_id": "wilgendal_pantser",
-		"oorsprong": Vector2i(5, 1),
+		"oorsprong": Vector2i(8, 2),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(6, 3),
+		"deur": Vector2i(9, 4),
 		"icoon": "schild",
 		"tex": "pantser",
 		"bewoond": false,
-		"keeper_naam": "Jelle Hamer",
+		"keeper_naam": "Jack Hammond",
 		"keeper_lines": ["Harnas en helmen."],
 		"sfeer": "stoer",
 		"map_naam": "Armor Shop",
@@ -74,13 +95,13 @@ const PANDEN := [
 		"id": "wapen",
 		"kind": "winkel",
 		"shop_id": "wilgendal_wapen",
-		"oorsprong": Vector2i(9, 1),
+		"oorsprong": Vector2i(13, 2),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(10, 3),
+		"deur": Vector2i(14, 4),
 		"icoon": "zwaard",
 		"tex": "wapen",
 		"bewoond": false,
-		"keeper_naam": "Jelle Hamer",
+		"keeper_naam": "Jack Hammond",
 		"keeper_lines": ["Steel. What do you need?"],
 		"sfeer": "ambacht",
 		"map_naam": "Weapon Shop",
@@ -90,9 +111,9 @@ const PANDEN := [
 		"id": "accessoire",
 		"kind": "winkel",
 		"shop_id": "wilgendal_accessoire",
-		"oorsprong": Vector2i(13, 1),
+		"oorsprong": Vector2i(25, 2),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(14, 3),
+		"deur": Vector2i(26, 4),
 		"icoon": "ring",
 		"tex": "accessoire",
 		"bewoond": false,
@@ -106,9 +127,9 @@ const PANDEN := [
 		"id": "magie",
 		"kind": "winkel",
 		"shop_id": "wilgendal_magie",
-		"oorsprong": Vector2i(17, 1),
+		"oorsprong": Vector2i(30, 2),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(18, 3),
+		"deur": Vector2i(31, 4),
 		"icoon": "ster",
 		"tex": "magie",
 		"bewoond": false,
@@ -122,42 +143,42 @@ const PANDEN := [
 		"id": "mien",
 		"kind": "huis",
 		"shop_id": "wilgendal_kruiden",
-		"oorsprong": Vector2i(1, 6),
+		"oorsprong": Vector2i(3, 8),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(2, 8),
+		"deur": Vector2i(4, 10),
 		"icoon": "",
 		"tex": "huis",
 		"bewoond": true,
-		"keeper_naam": "Tante Mien",
+		"keeper_naam": "Aunt Minna",
 		"keeper_lines": ["Herbs. What do you need?"],
 		"sfeer": "kruid",
-		"map_naam": "Aunt Mien's House",
+		"map_naam": "Aunt Minna's House",
 		"dicht": "",
 	},
 	{
 		"id": "echtpaar",
 		"kind": "huis",
 		"shop_id": "",
-		"oorsprong": Vector2i(20, 6),
+		"oorsprong": Vector2i(36, 8),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(21, 8),
+		"deur": Vector2i(37, 10),
 		"icoon": "",
 		"tex": "huis",
 		"bewoond": true,
 		"keeper_naam": "",
 		"keeper_lines": [],
 		"sfeer": "haard",
-		"map_naam": "Bram and Els's House",
+		"map_naam": "Bramwell and Elsie's House",
 		"dicht": "",
-		"bord": "The hearth is still glowing. Bram and Els are out on the square.",
+		"bord": "The hearth is still glowing. Bramwell and Elsie are out on the square.",
 	},
 	{
 		"id": "dicht_west",
 		"kind": "huis",
 		"shop_id": "",
-		"oorsprong": Vector2i(1, 11),
+		"oorsprong": Vector2i(3, 20),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(2, 13),
+		"deur": Vector2i(4, 22),
 		"icoon": "",
 		"tex": "huis_dicht",
 		"bewoond": false,
@@ -171,9 +192,9 @@ const PANDEN := [
 		"id": "dicht_oost",
 		"kind": "huis",
 		"shop_id": "",
-		"oorsprong": Vector2i(20, 11),
+		"oorsprong": Vector2i(36, 20),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(21, 13),
+		"deur": Vector2i(37, 22),
 		"icoon": "",
 		"tex": "huis_dicht",
 		"bewoond": false,
@@ -252,43 +273,76 @@ const SFEER := [
 	{
 		"node": "Bram",
 		"rol": "echtpaar",
-		"naam": "Bram",
-		"tegel": Vector2i(11, 8),
-		"lus": [Vector2i(11, 8), Vector2i(11, 9), Vector2i(10, 9), Vector2i(10, 8)],
-		"lines": ["Els wants to go to the smith soon. I'm staying here on the square."],
+		"naam": "Bramwell",
+		"tegel": Vector2i(16, 11),
+		"lus": [Vector2i(16, 11), Vector2i(17, 11), Vector2i(17, 12), Vector2i(16, 12)],
+		"lines": ["Elsie wants to go to the smith soon. I'm staying here on the square."],
 	},
 	{
 		"node": "Els",
 		"rol": "echtpaar",
-		"naam": "Els",
-		"tegel": Vector2i(12, 8),
-		"lus": [Vector2i(12, 8), Vector2i(13, 8), Vector2i(13, 9), Vector2i(12, 9)],
+		"naam": "Elsie",
+		"tegel": Vector2i(33, 12),
+		"lus": [Vector2i(33, 12), Vector2i(34, 12), Vector2i(34, 13), Vector2i(33, 13)],
 		"lines": ["The shops never close. That keeps things calm."],
 	},
 	{
 		"node": "Fien",
 		"rol": "kind",
-		"naam": "Fien",
-		"tegel": Vector2i(14, 10),
-		"lus": [Vector2i(14, 10), Vector2i(15, 10), Vector2i(15, 11), Vector2i(14, 11)],
+		"naam": "Fern",
+		"tegel": Vector2i(25, 10),
+		"lus": [Vector2i(25, 10), Vector2i(26, 10), Vector2i(26, 11), Vector2i(25, 11)],
 		"lines": ["That star over there is the magic shop. I'm only allowed to look."],
 	},
 	{
 		"node": "Wout",
 		"rol": "veteraan",
-		"naam": "Wout",
-		"tegel": Vector2i(16, 8),
-		"lus": [Vector2i(16, 8), Vector2i(16, 9), Vector2i(15, 9), Vector2i(15, 8)],
+		"naam": "Walt",
+		"tegel": Vector2i(26, 15),
+		"lus": [Vector2i(26, 15), Vector2i(27, 15), Vector2i(27, 16), Vector2i(26, 16)],
 		"lines": ["I've fought enough. Now I drink tea on the square."],
 	},
 	{
 		"node": "Siem",
 		"rol": "koerier",
-		"naam": "Siem",
-		"tegel": Vector2i(9, 11),
-		"lus": [Vector2i(9, 11), Vector2i(10, 11), Vector2i(10, 10), Vector2i(9, 10)],
-		"lines": ["Mail for Wilgendal. Nothing for you today."],
+		"naam": "Simon",
+		"tegel": Vector2i(8, 21),
+		"lus": [Vector2i(8, 21), Vector2i(9, 21), Vector2i(9, 22), Vector2i(8, 22)],
+		"lines": ["Mail for Willowdale. Nothing for you today."],
 	},
+]
+
+## Props van RPG ART (assets/sprites/buiten/wilgendal/). "tegel" = linksboven van de blokkerende
+## onderste rij, "blok" = blokkerende tegels (0 = loopbaar, bv. de brug). "flip" spiegelt horizontaal.
+const PROPS_MAP := "res://assets/sprites/buiten/wilgendal/"
+const PROPS := [
+	{"tex": "put", "tegel": Vector2i(17, 10), "blok": Vector2i(2, 1)},
+	{"tex": "marktkraam_1", "tegel": Vector2i(23, 9), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_2", "tegel": Vector2i(23, 12), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_3", "tegel": Vector2i(15, 13), "blok": Vector2i(2, 1)},
+	{"tex": "bloembak_1", "tegel": Vector2i(13, 8), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_2", "tegel": Vector2i(28, 8), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_2", "tegel": Vector2i(13, 14), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_1", "tegel": Vector2i(28, 14), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(19, 6), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(22, 6), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(19, 15), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(22, 19), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(12, 12), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(29, 12), "blok": Vector2i(1, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(24, 15), "blok": Vector2i(2, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(11, 15), "blok": Vector2i(2, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(16, 8), "blok": Vector2i(2, 1)},
+	{"tex": "hek_eind", "tegel": Vector2i(2, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(3, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(4, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(5, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_eind", "tegel": Vector2i(6, 15), "blok": Vector2i(1, 1), "flip": true},
+	{"tex": "hek_eind", "tegel": Vector2i(32, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(33, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(34, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_h", "tegel": Vector2i(35, 15), "blok": Vector2i(1, 1)},
+	{"tex": "hek_eind", "tegel": Vector2i(36, 15), "blok": Vector2i(1, 1), "flip": true},
 ]
 
 const ICOON_VAN_WINKEL := {
@@ -366,6 +420,10 @@ static func beloopbaar(t: Vector2i) -> bool:
 		return false
 	if MOLEN.has_point(t):
 		return false
+	if beek(t):
+		return false
+	if prop_op(t):
+		return false
 	for ruw in PANDEN:
 		var rij: Dictionary = ruw
 		var o: Vector2i = rij["oorsprong"]
@@ -394,19 +452,42 @@ static func bereikbaar(van: Vector2i, naar: Vector2i) -> bool:
 	return false
 
 
+## Beektegel (niet de brug)?
+static func beek(t: Vector2i) -> bool:
+	return t.y == BEEK_RIJ and not BRUG.has_point(t)
+
+
+## Staat er een blokkerende prop op t?
+static func prop_op(t: Vector2i) -> bool:
+	for ruw in PROPS:
+		var rij: Dictionary = ruw
+		if Rect2i(rij["tegel"], rij["blok"]).has_point(t):
+			return true
+	return false
+
+
+## Hoeveel sfeer-NPC's beginnen op het marktplein (max PLEIN_MAX).
+static func op_plein_aantal() -> int:
+	var n := 0
+	for ruw in SFEER:
+		if op_plein((ruw as Dictionary)["tegel"]):
+			n += 1
+	return n
+
+
 static func op_plein(t: Vector2i) -> bool:
 	return PLEIN.has_point(t)
 
 
-## Eén tegel verder op het plein. Geen zoektocht: de lus staat al vast.
-## Muren, panden (dus de winkel) en de molen vallen af via beloopbaar.
+## Eén tegel verder. Geen zoektocht: de lus staat al vast. v2: de lopers staan verspreid door het
+## dorp (niet allemaal op het plein). Muren, panden, molen, beek en props vallen af via beloopbaar.
 static func stap_ok(van: Vector2i, naar: Vector2i) -> bool:
 	var d := naar - van
 	if absi(d.x) + absi(d.y) != 1:
 		return false
 	if naar == GERRIT_TEGEL:
 		return false
-	return op_plein(naar) and beloopbaar(naar)
+	return beloopbaar(naar)
 
 
 static func lus_tegels(rij: Dictionary) -> Array[Vector2i]:

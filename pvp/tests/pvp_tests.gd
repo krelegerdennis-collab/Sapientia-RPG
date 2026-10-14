@@ -508,9 +508,9 @@ func _ui_tests() -> void:
 	await get_tree().process_frame
 	check("host kiest Vroeg", _press(lobby, "Vroeg", false))
 	await get_tree().process_frame
-	check("speler 1 kiest Klassiek", _press(lobby, "De Klassieke Drie", true))
+	check("speler 1 kiest Klassiek", _press(lobby, "The Classic Three", true))
 	check("apparaat gaat naar speler 2", _label_has(lobby, "Pass the device on"))
-	check("speler 2 kiest hetzelfde team", _press(lobby, "De Klassieke Drie", true))
+	check("speler 2 kiest hetzelfde team", _press(lobby, "The Classic Three", true))
 	await get_tree().process_frame
 	check("banner noemt de beurt", _label_has(lobby, "'s turn"))
 	var attack := _find_button(lobby, "Attack", true)

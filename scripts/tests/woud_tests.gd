@@ -552,8 +552,8 @@ func _village_tests() -> void:
 	var balloon := [false]
 	var lines := await run_story(60.0, "Jou ken ik niet", "noor_ballon")
 	# ballon-check: de eerste Noor-regel had een spreker-node (Noor) en de ballonstijl
-	check("blauwe ballonnen met namen (Vesper, %s, Marit): %d regels" % [GameState.player_name, lines.size()],
-			lines.any(func(l): return str(l).begins_with("Vesper: ")) and lines.any(func(l): return str(l).begins_with("Marit: "))
+	check("blauwe ballonnen met namen (Vesper, %s, Marigold): %d regels" % [GameState.player_name, lines.size()],
+			lines.any(func(l): return str(l).begins_with("Vesper: ")) and lines.any(func(l): return str(l).begins_with("Marigold: "))
 			and lines.any(func(l): return str(l).begins_with(GameState.player_name + ": ")))
 	check("eindigt met de opdracht (dorpeling vraagt Vesper te redden)", lines.any(func(l): return "save her" in str(l))
 			and lines.any(func(l): return "New quest: Save Vesper from the Dark Wood" in str(l)))
@@ -561,7 +561,7 @@ func _village_tests() -> void:
 			and GameState.story_step == SD.NOOR_KWIJT)
 	check("Vesper is weg (meegesleurd), de wortelgreep ook", not noor.visible and not v.get_node("Objects/WortelGreep").visible)
 	check("opdracht loopt: '%s'" % Story.active_quest(), Story.active_quest() == "Save Vesper from the Dark Wood")
-	check("Codex: Marit geeft 3 Blank Books na de ontmoeting (geen startvoorraad) (%d)" % GameState.item_count("leeg_boek"),
+	check("Codex: Marigold geeft 3 Blank Books na de ontmoeting (geen startvoorraad) (%d)" % GameState.item_count("leeg_boek"),
 			GameState.item_count("leeg_boek") == 3 and Story.has_flag("marit_boeken") and not GD.START_INVENTORY.has("leeg_boek")
 			and lines.any(func(l): return "3x Blank Book" in str(l)))
 	# veldmenu: regel met de opdracht
@@ -602,7 +602,7 @@ func _village_tests() -> void:
 		await press_interact()
 	check("huis van Vesper is te betreden", await wait_scene("EsdoornHuisNoor"))
 	var ilse: Node = scene().get_node_or_null("Objects/Ilse")
-	check("binnen: Ilse (moeder van Vesper)", ilse != null and ilse.event == "ilse")
+	check("binnen: Elise (moeder van Vesper)", ilse != null and ilse.event == "ilse")
 	await wait_fade()
 	await walk("move_down", 2)
 	check("deur uit = terug in Mapleton voor het huis", await wait_scene("Esdoorn") and tile() == Vector2i(7, 9))
@@ -814,7 +814,7 @@ func _codex_forest_tests() -> void:
 		if marit and Story.trigger(marit.event, marit):
 			await run_story(15.0)
 		got = GameState.item_count(CD.BOOK_ITEM) if i == 0 else got
-	check("oude save: Marit geeft 3 Blank Books bij een gesprek, maar één keer (%d, daarna %d)" % [got, GameState.item_count(CD.BOOK_ITEM)],
+	check("oude save: Marigold geeft 3 Blank Books bij een gesprek, maar één keer (%d, daarna %d)" % [got, GameState.item_count(CD.BOOK_ITEM)],
 			got == 3 and GameState.item_count(CD.BOOK_ITEM) == 3)
 	# --- wereldkaart met de iconen van RPG ART
 	var w := await enter(WORLD, "van_esdoorn")
@@ -1011,7 +1011,7 @@ func _graan_data() -> void:
 		for cmd in v.get("do", []):
 			if cmd is Array and cmd.size() >= 3 and str(cmd[0]) == "say" and str(cmd[1]) == "{naam}":
 				speler_vraagt = cmd[2].has(SD.QUOTE_GRAAN_VRAAG)
-	check("Gerrit zegt de canon-zinnen, zonder TODO(verhaal) en zonder de oude twee", mist.is_empty()
+	check("Garrett zegt de canon-zinnen, zonder TODO(verhaal) en zonder de oude twee", mist.is_empty()
 			and quotes.size() == canon.size()
 			and not quotes.has("Het zaad zingt aan de rand van de mist.")
 			and not quotes.has("De molen kan weer malen.")
@@ -1069,7 +1069,7 @@ func _graan_data() -> void:
 	var wg: Dictionary = GD.ENEMIES["woudgeest"]
 	# v0.21: eigen art van RPG ART (batch 7), niet meer de Mosslijm-plaatsvervanger.
 	var wg_kaart: Texture2D = load("res://assets/map_monsters/woudgeest.png")
-	check("Woudgeest is klein, hoort in het woud, eigen art (voor/rug 90x90, kaart 32x64)", wg["name"] == "Woudgeest" and int(wg["max_hp"]) <= 16
+	check("Woudgeest is klein, hoort in het woud, eigen art (voor/rug 90x90, kaart 32x64)", wg["name"] == "Wood Wraith" and int(wg["max_hp"]) <= 16
 			and "woud" in wg["habitat"] and not bool(wg.get("art_pending", false)) and not GD.enemy_sprite_is_placeholder(wg)
 			and GD.enemy_sprite(wg) == "res://assets/sprites/enemies/woudgeest.png"
 			and (load(GD.enemy_sprite(wg)) as Texture2D).get_size() == Vector2(90, 90)
@@ -1086,7 +1086,7 @@ func _graan_tests() -> void:
 	var dorp := "res://scenes/maps/dorp_wilgendal.tscn"
 	var d := await enter(dorp, "zuid_ingang")
 	var g: Node = d.get_node("Objects/Gerrit")
-	check("één Gerrit de Molenaar, zonder Goedendag", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
+	check("één Garrett de Molenaar, zonder Goedendag", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
 			and g.event == "gerrit" and d.get_node("Objects").get_children().filter(func(n): return n.name == "Gerrit").size() == 1)
 	var wieken: Node = d.get_node_or_null("Objects/MolenWieken")
 	check("molen staat stil tot het zaad binnen is", wieken != null and not wieken.draait() and wieken.frame_nu() == 0
@@ -1144,7 +1144,7 @@ func _graan_tests() -> void:
 	check("mini-gevecht begint", await wait_scene("Battle"))
 	var b := battle()
 	var ids: Array = b.enemies.map(func(e): return str(e.get("id", ""))) if b != null else []
-	check("twee Woudgeesten op basis-HP", ids == ["woudgeest", "woudgeest"]
+	check("twee Wood Wraiths op basis-HP", ids == ["woudgeest", "woudgeest"]
 			and b.enemies.all(func(e): return int(e["s"]["max_hp"]) == int(GD.ENEMIES["woudgeest"]["max_hp"])))
 	check("mini-gevecht gewonnen", await win_battle())
 	check("terug op de open plek", await wait_scene("WoudOpenPlek"))
@@ -1161,7 +1161,7 @@ func _graan_tests() -> void:
 	GameState.party[0]["hp"] = 1
 	Story.trigger("gerrit", g)
 	var af: Array = await lines_until_choice()
-	check("bij Gerrit: zaad herkend, molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZAAD))
+	check("bij Garrett: zaad herkend, molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZAAD))
 			and af.any(func(l): return Molen.REGEL_ZANG in str(l))
 			and af.any(func(l): return Molen.REGEL_GEZANG in str(l))
 			and not af.any(func(l): return SD.QUOTE_GRAAN_DANK in str(l))
@@ -1197,7 +1197,7 @@ func _graan_tests() -> void:
 	await run_story(8.0)
 	var sav := GameState.read_save()
 	var sav_party: Array = sav.get("party", [])
-	check("de molen slaat op in Wilgendal", str(sav.get("map", "")).ends_with("dorp_wilgendal.tscn")
+	check("de molen slaat op in Willowdale", str(sav.get("map", "")).ends_with("dorp_wilgendal.tscn")
 			and not sav_party.is_empty() and str(sav_party[0].get("id", "")) == "noor")
 	check("na het opslaan nog steeds één meel", GameState.item_count(SD.ITEM_MEEL) == 1)
 	await enter(WORLD, "van_wilgendal")

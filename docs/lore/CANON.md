@@ -217,6 +217,11 @@ ECHO: "Maar dat is een verhaal voor later."
   haak met vlaggen (`KoopmanData.einde`, `sapientia_verslagen`, `h5_rust`); Archief 6 roept hem aan.
 - **Wereldkaart**: geen ingang en geen icoon van de Diepe Grot. De grot start alleen via ECHO
   (ECHO's Kamer). De oude spawn `van_dungeon100` blijft alleen voor oude saves.
+- **Naam in de game** (besluit Dennis, 14 okt 2026): de speler ziet de Diepe Grot als
+  **Deep Learning Simulation**, een AI-trainingsprogramma (van Sapientia, door ECHO gedraaid).
+  Ids, bestanden en docs blijven "Diepe Grot" / `dungeon100`. Starten kan via ECHO (ECHO's Kamer)
+  én via een eigen warp-vlak in de hal van de World Warper (naast het Warp-vlak; placeholder:
+  het warp-vlak, cyaan getint).
 
 ## Makkelijk over te nemen (botst niet)
 
@@ -226,3 +231,10 @@ Uit `BOTSINGEN.md`; dit mag zonder verdere beslissing gebruikt worden:
 - NPC's voor Wilgendal: Tante Mien (kruiden), Jelle Hamer (smid), Gerrit Molenaar.
 - Vijanden: Inktwurm (Archieven), Roestkruiper/Echo-Soldaat (Industriestad).
 - Items: Gloeiende Inktfles, Wambuis, Kruidenthee; statussen (roest, stilte...); de Hanger.
+
+## Engelse spelersnamen (goedgekeurd door Dennis, 2026-10-14)
+Alle spelersgerichte tekst gebruikt de Engelse namen uit de naamlijst (`namen_engels.md`); ids, bestandsnamen, nodenamen en docs blijven Nederlands.
+Belangrijkste: Wilgendal = Willowdale, Gerrit = Garrett the Miller, Bram/Els = Bramwell/Elsie, Wout = Walt, Fien = Fern, Siem = Simon, Ilse = Elise, Marit = Marigold, Jens = Jensen, Tante Mien = Aunt Minna, Jelle Hamer = Jack Hammond, Opa = Grandpa;
+Berggrot = Hollow Mountain, Het Levende Archief = The Living Archive, De Hal = The Atrium, De Hanger = The Pendant, Diepe Grot = Deep Learning Simulation;
+bazen: The Mender, The Strangler, The Shadow of H-6, The Cycle, The Judge, The Voice.
+Dubbele spreuknamen zijn nu uniek: vuur `vuur` = Spark, bliksem `vonk` = Arc; vuur `gloed` = Ember, licht `lichtgloed` = Glow.

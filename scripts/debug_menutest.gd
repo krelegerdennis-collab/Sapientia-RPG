@@ -482,7 +482,7 @@ func _status_tests() -> void:
 	check("klasse: %s" % s.class_label.text, s.class_label.text == "Warrior")
 	await shot("menu_status")
 	await tap("move_right")
-	check("rechts: Vesper (%s)" % s.spells_label.text, s.index == 1 and "Vonk (4 MP)" in s.spells_label.text and "Kettingbliksem (8 MP)" in s.spells_label.text)
+	check("rechts: Vesper (%s)" % s.spells_label.text, s.index == 1 and "Spark (4 MP)" in s.spells_label.text and "Chain Lightning (8 MP)" in s.spells_label.text)
 	check("Vesper: eigen portret (portrait_noor.png, 64x80, NEAREST)", s.portrait.get_meta("source", "") == "portrait"
 			and s.portrait.texture.resource_path.ends_with("portrait_noor.png") and s.portrait.custom_minimum_size == Vector2(64, 80)
 			and s.portrait.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
@@ -518,7 +518,7 @@ func _magic_tests() -> void:
 	await tap("interact")
 	check("A op Fire: melding '%s'" % s.message_text(), not s.targeting and s.message_text() == PartyActions.MSG_FIELD_ONLY)
 	await tap("move_right")
-	check("rechts: Seren met Kleine Genezing", s.caster_index == 2 and s.entry_text(0).begins_with("Kleine Genezing") and not s.is_greyed(0))
+	check("rechts: Seren met Minor Heal", s.caster_index == 2 and s.entry_text(0).begins_with("Minor Heal") and not s.is_greyed(0))
 	var kees: Dictionary = GameState.party[0]
 	var lotte: Dictionary = GameState.party[2]
 	kees["hp"] = 5
@@ -811,8 +811,8 @@ func _autosave_tests() -> void:
 	check("'Doorgaan' aan, toont '(auto)' (%s)" % t.save_info.text, not t.continue_button.disabled and "(auto)" in t.save_info.text)
 	check("Laden staat naast Doorgaan", t.load_button != null and not t.load_button.disabled
 			and t.load_button.get_parent() == t.continue_button.get_parent()
-			and str(t.load_button.get_meta("label", "")) == "Laden"
-			and str(t.continue_button.get_meta("label", "")) == "Doorgaan")
+			and str(t.load_button.get_meta("label", "")) == "Load"
+			and str(t.continue_button.get_meta("label", "")) == "Continue")
 	await shot("title_autosave")
 	await click(t.continue_button)
 	await frames(3)

@@ -176,4 +176,4 @@ static func logica_kamer(id: String, origin: Vector2i, size: Vector2i) -> Dictio
 			line += ch
 		out.append(line)
 	var objs: Dictionary = d.get("objects", {}).duplicate(true)
-	return {"name": "Deep Cave Puzzle", "layout": out, "objects": objs}
+	return {"name": "Deep Learning Simulation Puzzle", "layout": out, "objects": objs}

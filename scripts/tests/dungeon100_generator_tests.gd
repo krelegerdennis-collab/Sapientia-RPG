@@ -267,7 +267,7 @@ func _generator_tests() -> void:
 
 	# --- verdieping 1 en 100
 	var f1 := fresh(1, 1)
-	check("verdieping 1: ladder omhoog -> ECHO's Kamer, trap omlaag -> dezelfde scène 'omhoog'",
+	check("verdieping 1: ladder omhoog -> ECHO's Chamber, trap omlaag -> dezelfde scène 'omhoog'",
 			f1["room"]["exits"]["h"] == {"map": Gen.WORLD_SCENE, "spawn": Gen.WORLD_SPAWN}
 			and f1["room"]["exits"]["v"] == {"map": Gen.SCENE, "spawn": "omhoog"})
 	var f2 := fresh(1, 2)
@@ -282,8 +282,8 @@ func _generator_tests() -> void:
 	for m in f25["room"]["monsters"]:
 		if m.get("boss", false) and str(m.get("id", "")) == "d100_baas_25":
 			schaduw = true
-	check("verdieping 25 heeft een warper en de baas De Schaduw van H-6",
-			f25["room"].has("warper") and schaduw and Scaling.boss_for_floor(25)["name"] == "De Schaduw van H-6"
+	check("verdieping 25 heeft een warper en de baas The Shadow of H-6",
+			f25["room"].has("warper") and schaduw and Scaling.boss_for_floor(25)["name"] == "The Shadow of H-6"
 			and not f100["room"].has("warper") and not Scaling.is_boss_floor(100))
 
 	# --- inhoud
@@ -500,7 +500,7 @@ func _state_tests() -> void:
 		var nm := str(o.name).to_lower()
 		if nm.contains("diepe") or nm.contains("dungeon100") or nm.contains("echo"):
 			icoon = true
-	check("wereldkaart: geen uitgang naar de Diepe Grot", not naar_grot)
+	check("wereldkaart: geen uitgang naar de Deep Learning Simulation", not naar_grot)
 	check("wereldkaart: geen Diepe Grot-icoon", not icoon)
 	w.free()
 
@@ -593,7 +593,7 @@ func _scene_tests() -> void:
 	clear_monsters(r)
 	check("speler staat op de ingang (spawn_up %s), kijkt omlaag" % [d["spawn_up"]], tile() == d["spawn_up"] and player().facing == D)
 	check("kamer is dezelfde als de generator: id, naam, layout, monsters en kisten",
-			r.room_id == Gen.room_id(run_seed, 1) and r.map_name == "Deep Cave - Floor 1" and r.room["layout"] == d["layout"]
+			r.room_id == Gen.room_id(run_seed, 1) and r.map_name == "Deep Learning Simulation - Floor 1" and r.room["layout"] == d["layout"]
 			and r.chests.size() == d["chest_slots"].size() and r.cell(d["stairs_down"]) == 58 and r.cell(d["stairs_up"]) == 45
 			and not r.is_wall(d["spawn_up"]) and r.is_wall(d["spawn_up"] + Vector2i(-3, -3)))
 	check("geen random encounters in de grot, terrein = dungeon100 (v0.21: eigen gevechtsachtergrond)", not r.encounters and r.terrain_at(d["spawn_up"]) == "dungeon100")
@@ -609,7 +609,7 @@ func _scene_tests() -> void:
 	var r2 := scene()
 	var d2: Dictionary = Gen.generate(run_seed, 2)
 	check("verdieping 2: nieuwe kamer, speler op de ingang (ladder) van 2: %s" % tile(),
-			r2 != r and r2.floor_no == 2 and r2.map_name == "Deep Cave - Floor 2" and tile() == d2["spawn_up"]
+			r2 != r and r2.floor_no == 2 and r2.map_name == "Deep Learning Simulation - Floor 2" and tile() == d2["spawn_up"]
 			and r2.room["layout"] == d2["layout"] and d2["layout"] != d["layout"])
 	clear_monsters(r2)
 	await screenshot("d100_verdieping2")
@@ -633,10 +633,10 @@ func _scene_tests() -> void:
 	check("ladder op verdieping 1 vraagt eerst om bevestiging (Het Gesimuleerde Archief)",
 			await wait_until(func(): return Dialog.has_choices(), 5.0))
 	Dialog.choose(0)       # Verlaten
-	check("ladder op verdieping 1 -> ECHO's Kamer", await wait_scene("EchoKamer"))
+	check("ladder op verdieping 1 -> ECHO's Chamber", await wait_scene("EchoKamer"))
 	await wait_fade()
 	var wsp: Node2D = scene().get_node("Spawns/ingang")
-	check("buiten de grot: verdieping 0, speler in ECHO's Kamer %s" % tile(),
+	check("buiten de grot: verdieping 0, speler in ECHO's Chamber %s" % tile(),
 			GameState.dungeon100_floor == 0 and tile() == Vector2i((wsp.position / 16.0).floor())
 			and GameState.dungeon100_seed == 0 and not GameState.dungeon100_run_active()
 			and not GameState.story_flags.has(EchoGrot.FLAG_RESULTAAT))
@@ -731,6 +731,6 @@ func _backdrop_tests() -> void:
 	for f in [1, 15, 16, 45, 46, 90, 91, 100]:
 		var id := GD.backdrop_id_for("dungeon100", false, f)
 		ok = ok and id == "cave_deep_v%d" % Gen.theme_variant(f) and ResourceLoader.exists(GD.backdrop_path(id))
-	check("Diepe Grot: gevechtsachtergrond cave_deep_v1..v7 per verdieping, plaatjes bestaan", ok)
+	check("Deep Learning Simulation: gevechtsachtergrond cave_deep_v1..v7 per verdieping, plaatjes bestaan", ok)
 	check("zonder verdieping of buiten de grot: oude keuze", GD.backdrop_id_for("dungeon100") == "cave_deep"
 			and GD.backdrop_id_for("gras", false, 50) == "grass" and GD.backdrop_id_for("dungeon100", true, 50) == "boss")

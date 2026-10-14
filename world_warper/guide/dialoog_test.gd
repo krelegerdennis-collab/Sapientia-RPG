@@ -109,7 +109,7 @@ static func _check_inhoud(fouten: Array) -> void:
 	_eist(fouten, stappen[0], ["guide", "echo"])
 	_eist(fouten, stappen[1], ["ring", "world map", "place"])
 	_eist(fouten, stappen[2], ["room", "story"])
-	_eist(fouten, stappen[3], ["key", "hanger"])
+	_eist(fouten, stappen[3], ["key", "pendant"])
 
 
 static func _eist(fouten: Array, stap: Dictionary, woorden: Array) -> void:
@@ -138,22 +138,22 @@ static func _check_hint(fouten: Array) -> void:
 		fouten.append("Genezer-vlag wijkt af van de bewaker")
 	var leeg := {}
 	_hint_eis(fouten, "zonder vlag", Dialoog.hint_lines(leeg),
-			["donker woud"],
-			["eerste archief", "genezer", "warp ring", "berggrot"])
+			["dark wood"],
+			["first archive", "mender", "warp ring", "hollow mountain"])
 	var alleen_golem := {Dialoog.FLAG_GOLEM: true}
 	_hint_eis(fouten, "golem zonder noor", Dialoog.hint_lines(alleen_golem),
-			["donker woud"], ["eerste archief"])
+			["dark wood"], ["first archive"])
 	var getal := {Dialoog.FLAG_NOOR_LID: 1}
 	_hint_eis(fouten, "getal telt niet als noor", Dialoog.hint_lines(getal),
-			["donker woud"], ["eerste archief"])
+			["dark wood"], ["first archive"])
 	var noor := {Dialoog.FLAG_NOOR_LID: true}
 	_hint_eis(fouten, "na noor", Dialoog.hint_lines(noor),
-			["eerste archief", "golem"],
-			["donker woud", "genezer", "warp ring", "berggrot"])
+			["first archive", "golem"],
+			["dark wood", "mender", "warp ring", "hollow mountain"])
 	var golem := {Dialoog.FLAG_NOOR_LID: true, Dialoog.FLAG_GOLEM: true}
 	_hint_eis(fouten, "na golem", Dialoog.hint_lines(golem),
-			["genezer", "greenhouse", "archief 2", "berggrot"],
-			["donker woud", "eerste archief", "warp ring"])
+			["mender", "greenhouse", "living archive", "hollow mountain"],
+			["dark wood", "first archive", "warp ring"])
 	var klaar := {
 		Dialoog.FLAG_NOOR_LID: true,
 		Dialoog.FLAG_GOLEM: true,
@@ -161,27 +161,27 @@ static func _check_hint(fouten: Array) -> void:
 	}
 	_hint_eis(fouten, "na genezer zonder bezoek", Dialoog.hint_lines(klaar, []),
 			["warp ring", "world 1", "visited"],
-			["donker woud", "genezer", "wilgendal", "esdoorn", "world map", "berggrot"])
+			["dark wood", "mender", "willowdale", "mapleton", "world map", "hollow mountain"])
 	var bestemmingen: GDScript = load("res://world_warper/warp/destinations.gd") as GDScript
 	if bestemmingen == null:
 		fouten.append("warp-bestemmingen laden niet")
 		return
 	var esdoorn_eerst: Array = [str(bestemmingen.ESDOORN_PATH), str(bestemmingen.WILGENDAL_PATH)]
 	_hint_eis(fouten, "laatst bezocht op wereld 1", Dialoog.hint_lines(klaar, esdoorn_eerst),
-			["warp ring", "wilgendal", "world 1"],
-			["esdoorn", "world map", "genezer", "donker woud"])
+			["warp ring", "willowdale", "world 1"],
+			["mapleton", "world map", "mender", "dark wood"])
 	var vreemd: Array = ["res://scenes/maps/archief_2_v1_entree.tscn"]
 	_hint_eis(fouten, "kas is geen wereld-1-plek", Dialoog.hint_lines(klaar, vreemd),
 			["warp ring", "visited"],
-			["wilgendal", "esdoorn", "world map", "greenhouse"])
+			["willowdale", "mapleton", "world map", "greenhouse"])
 	var welkom: Array = Dialoog.regels_voor(0, leeg)
-	_hint_eis(fouten, "welkom met hint", welkom, ["echo", "guide", "donker woud"], ["iva"])
+	_hint_eis(fouten, "welkom met hint", welkom, ["echo", "guide", "dark wood"], ["iva"])
 	var warp: Array = Dialoog.regels_voor(1, leeg)
-	_hint_eis(fouten, "warp zonder hint", warp, ["ring", "world map"], ["donker woud"])
+	_hint_eis(fouten, "warp zonder hint", warp, ["ring", "world map"], ["dark wood"])
 	var hanger: Array = Dialoog.regels_voor(3, leeg)
-	_hint_eis(fouten, "hanger met hint", hanger, ["hanger", "key", "donker woud"], ["iva"])
+	_hint_eis(fouten, "hanger met hint", hanger, ["pendant", "key", "dark wood"], ["iva"])
 	var na: Array = Dialoog.regels_voor(Dialoog.steps().size(), noor)
-	_hint_eis(fouten, "na de stappen alleen de hint", na, ["eerste archief"], ["echo", "hanger", "donker woud"])
+	_hint_eis(fouten, "na de stappen alleen de hint", na, ["first archive"], ["echo", "pendant", "dark wood"])
 
 
 static func _hint_eis(fouten: Array, waar: String, regels: Array, moet: Array, niet: Array) -> void:

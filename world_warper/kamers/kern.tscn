@@ -10,7 +10,7 @@
 
 [node name="Kern" type="Node2D"]
 script = ExtResource("1_map")
-map_name = "De Kern"
+map_name = "The Core"
 encounters = false
 
 [node name="Void" type="ColorRect" parent="."]

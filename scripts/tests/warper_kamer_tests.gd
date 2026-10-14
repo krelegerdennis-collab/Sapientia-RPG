@@ -20,6 +20,7 @@ const Gear := preload("res://scripts/equipment.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
+const HUBHAL := "res://world_warper/maps/hal.tscn"
 
 var failures := 0
 var passes := 0
@@ -55,6 +56,7 @@ func _run() -> void:
 	await _hal_in_beeld()
 	await _echo_grot()
 	await _genezer_warp()
+	await _hal_simulatie()
 	print("WARPERKAMERTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await get_tree().process_frame
@@ -73,15 +75,15 @@ func _vlag_en_act() -> void:
 	var act2 := _party(14)
 	check("hub dicht zonder vlag", not Kamers.hub_open(leeg))
 	var na_genezer := {Unlock.UNLOCK_VLAG: true}
-	check("na De Genezer is ECHO's Kamer open", Kamers.hub_open(na_genezer)
+	check("na The Mender is ECHO's Chamber open", Kamers.hub_open(na_genezer)
 			and Kamers.is_open("echo_kamer", na_genezer, act1))
 	var alleen_bewaker := {Unlock.BEWAKER_VLAG: true}
-	check("Genezer-vlag opent ECHO's Kamer", Kamers.is_open("echo_kamer", alleen_bewaker, act1))
+	check("Genezer-vlag opent ECHO's Chamber", Kamers.is_open("echo_kamer", alleen_bewaker, act1))
 	for id in ["hal", "rustkamer", "echo_kamer", "beeldkamer", "trainingshal", "kern"]:
 		check("dicht zonder vlag: " + id, not Kamers.is_open(id, leeg, act2))
-	check("met vlag is De Hal open", Kamers.is_open("hal", open, act1) and Kamers.naam("hal") == "De Hal")
+	check("met vlag is The Atrium open", Kamers.is_open("hal", open, act1) and Kamers.naam("hal") == "The Atrium")
 	check("met vlag is de Rustkamer open", Kamers.is_open("rustkamer", open, act1))
-	check("met vlag is ECHO's Kamer open", Kamers.is_open("echo_kamer", open, act1))
+	check("met vlag is ECHO's Chamber open", Kamers.is_open("echo_kamer", open, act1))
 	check("Beeldkamer dicht in act 1", not Kamers.is_open("beeldkamer", open, act1))
 	check("Beeldkamer dicht op level 13", not Kamers.is_open("beeldkamer", open, act1_laat))
 	check("Beeldkamer open in act 2", Kamers.is_open("beeldkamer", open, act2) and GameData.act_for_level(14) == 2)
@@ -90,7 +92,7 @@ func _vlag_en_act() -> void:
 	check("Werkplaats open vanaf act 4", Kamers.is_open("werkplaats", open, _party(26)))
 	check("Handelskamer open vanaf act 5", Kamers.is_open("handelskamer", open, _party(32)))
 	check("Kern dicht vóór act 6", not Kamers.is_open("kern", open, _party(36)))
-	check("Kern open in act 6", Kamers.is_open("kern", open, _party(37)) and Kamers.naam("kern") == "De Kern")
+	check("Kern open in act 6", Kamers.is_open("kern", open, _party(37)) and Kamers.naam("kern") == "The Core")
 	check("onbekende kamer blijft dicht", not Kamers.is_open("hanger_nis", open, _party(40)))
 
 
@@ -127,7 +129,7 @@ func _buit_en_tekst() -> void:
 	var ids: Array[String] = []
 	for d in doelen:
 		ids.append(str(d.get("id", "")))
-	check("warp naar Wilgendal", doelen.size() == 1 and str(doelen[0]["spawn"]) == "van_wilgendal"
+	check("warp naar Willowdale", doelen.size() == 1 and str(doelen[0]["spawn"]) == "van_wilgendal"
 			and str(doelen[0]["path"]) == "res://scenes/maps/wereldkaart.tscn")
 	check("geen WM2/WM3", not ids.has("WM2") and not ids.has("WM3"))
 	var wereld: Node = load("res://scenes/maps/wereldkaart.tscn").instantiate()
@@ -149,7 +151,7 @@ func _buit_en_tekst() -> void:
 	check("wissel zet Vesper vooraan", Kamers.naar_voren(groep, 1) and str(groep[0]["name"]) == "Vesper")
 	check("vooraan wisselt niet met zichzelf", not Kamers.naar_voren(groep, 0))
 	var regels := Kamers.voortgang_regels(0, {}, "")
-	check("voortgang noemt de stap", regels.size() == 3 and regels[0].begins_with("Verhaalstap:"))
+	check("voortgang noemt de stap", regels.size() == 3 and regels[0].begins_with("Story step:"))
 	check("bestiarium en codex bestaan", Kamers.scherm_beschikbaar("bestiarium") and Kamers.scherm_beschikbaar("codex"))
 
 
@@ -178,11 +180,11 @@ func _scènes() -> void:
 		check("speler staat er", node.get_node_or_null("Objects/Player") != null)
 		if str(id) == "echo_kamer":
 			var echo := node.get_node_or_null("Objects/Echo")
-			check("ECHO staat in ECHO's Kamer", echo != null and str(echo.get("bron")) == "echo_grot")
+			check("ECHO staat in ECHO's Chamber", echo != null and str(echo.get("bron")) == "echo_grot")
 			var grot := node.get_node_or_null("Objects/Grot")
-			check("ingang Diepe Grot staat in ECHO's Kamer", grot != null
+			check("ingang Deep Learning Simulation staat in ECHO's Chamber", grot != null
 					and str(grot.get("bron")) == "grot_ingang"
-					and Kamers.label("grot_ingang") == "Diepe Grot")
+					and Kamers.label("grot_ingang") == "Deep Learning Simulation")
 		node.free()
 	var hal: Node = load(Kamers.scene_path("hal")).instantiate()
 	check("ECHO staat in de Hal", hal.get_node_or_null("Objects/Echo") != null and str(hal.get_node("Objects/Echo").get("bron")) == "echo")
@@ -208,7 +210,7 @@ func _hal_in_beeld() -> void:
 		if nu != null and nu.scene_file_path == Kamers.scene_path("hal") and not GameState.changing_map:
 			sc = nu
 			break
-	check("De Hal laadt", sc != null and str(sc.get("map_name")) == "De Hal")
+	check("The Atrium laadt", sc != null and str(sc.get("map_name")) == "The Atrium")
 	if sc == null:
 		return
 	await get_tree().process_frame
@@ -224,7 +226,7 @@ func _echo_grot() -> void:
 		var regels: Array = stappen[0].get("lines", [])
 		if not regels.is_empty():
 			welkom = str(regels[0])
-	var eerste_letterlijk := "The Diepe Grot. A simulation — a hundred floors, different every time. I run it. Sapientia... Sapientia helps with the data. That's just how it works."
+	var eerste_letterlijk := "The Deep Learning Simulation. An AI training program — a hundred floors, different every time. I run it. Sapientia... Sapientia helps with the data. That's just how it works."
 	var twijfel_letterlijk := "Why I do it? Because it is my task. The Old Humanity built me to measure, to count, to preserve."
 	var h6_letterlijk := "I have let hundreds of candidates through. You are the sixth who stayed standing. The others... I don't know what happened to them."
 	var data_letterlijk := "I don't know. I deliver, she takes. It has always been that way."
@@ -249,7 +251,7 @@ func _echo_grot() -> void:
 	GameState.change_map(EchoGrot.KAMER, EchoGrot.KAMER_SPAWN)
 	var kamer_ok := await _wacht_pad(EchoGrot.KAMER)
 	await _wacht_fade()
-	check("ECHO's Kamer laadt", kamer_ok)
+	check("ECHO's Chamber laadt", kamer_ok)
 	if not kamer_ok:
 		return
 	check("ECHO in de geladen kamer", _echo_node() != null and _player() != null)
@@ -266,7 +268,9 @@ func _echo_grot() -> void:
 		await _screenshot("echo_eerste_bezoek")
 	check("naam ECHO en niet IVA", str(Dialoog.NAAM) == "ECHO" and str(Dialoog.NAAM) != "IVA"
 			and welkom.contains("ECHO") and not welkom.contains("IVA") and live_naam)
-	check("menu Diepe Grot Simulatie", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE))
+	check("menu Deep Learning Simulation", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE)
+			and EchoGrot.OPTIE_SIMULATIE == "Deep Learning Simulation")
+	await _screenshot("dls_naam_echo_menu")
 	_kies(EchoGrot.OPTIE_TWIJFEL)
 	check("bij twijfel de taakzin", await _naar_tekst(EchoGrot.ZIN_TWIJFEL))
 	check("menu terug na twijfel", await _naar_keuze(EchoGrot.OPTIE_DATA))
@@ -469,7 +473,7 @@ func _genezer_warp() -> void:
 	var ging := NaGenezer.probeer()
 	var buiten := await _wacht_pad(Enter.HUB_SCENE, 20.0)
 	await _wacht_fade()
-	check("na De Genezer staat de party in het exterieur", ging and buiten
+	check("na The Mender staat de party in het exterieur", ging and buiten
 			and GameState.world_warper_is_unlocked() and not NaGenezer.pending)
 	NaGenezer.pending = false
 
@@ -635,3 +639,59 @@ func _screenshot(name: String) -> void:
 	DirAccess.make_dir_recursive_absolute(shots)
 	img.save_png(shots.path_join(name + ".png"))
 	print("INFO  screenshot: ", shots.path_join(name + ".png"), " ", img.get_size())
+
+
+## Dennis (14 okt 2026): warp-vlak naar de Deep Learning Simulation in de hal.
+func _hal_simulatie() -> void:
+	if GameState.dungeon100_run_active():
+		GameState.dungeon100_end_run(false)
+	GameState.story_flags[Kamers.FLAG_HUB] = true
+	for f in ["ww_canon_genezer_gezien", "ww_canon_hanger_gezien", "ww_canon_dreiging_gezien"]:
+		GameState.story_flags[f] = true      # geen canon-scène over het screenshot
+	GameState.change_map(HUBHAL, "ingang")
+	var ok := await _wacht_pad(HUBHAL)
+	await _wacht_fade()
+	await _pframes(6)
+	var vlak: Node = scene().get_node_or_null("HubBoot/VlakSimulatie") if ok else null
+	var label_ok := false
+	if vlak != null:
+		for c in vlak.get_children():
+			if c is Label and c.text == "Deep Learning Simulation":
+				label_ok = true
+	check("hal: warp-vlak 'Deep Learning Simulation'", vlak != null and label_ok)
+	var wl: Label = null
+	var wv: Node = scene().get_node_or_null("HubBoot/VlakWarp") if ok else null
+	if wv != null:
+		for c in wv.get_children():
+			if c is Label:
+				wl = c
+	check("hal: label 'Warp' op Dauwpixel 10 (1:1, de W blijft een W)", wl != null and wl.text == "Warp"
+			and wl.get_theme_font_size("font_size") == 10)
+	if vlak == null:
+		return
+	var p := _player()
+	if p != null:
+		p.place_at(Vector2i((vlak.global_position / 16.0).floor()) + Vector2i.DOWN, Vector2i.UP)
+	await _pframes(4)
+	await _screenshot("dls_warp_hal")
+	var boot: Node = scene().get_node("HubBoot")
+	vlak.interact(p)
+	var vraag := await _naar_keuze(boot.SIMULATIE_NEE)
+	check("vlak vraagt: Enter the Deep Learning Simulation?", vraag and str(Dialog.text_label.text) == boot.SIMULATIE_VRAAG)
+	await _screenshot("dls_warp_vraag")
+	_kies(boot.SIMULATIE_NEE)
+	await _wacht_gesprek_weg()
+	await _pframes(4)
+	check("nee: blijft in de hal, speler vrij", boot.simulatie_uitkomst == "nee"
+			and scene().scene_file_path == HUBHAL and not p.input_locked)
+	vlak.interact(p)
+	if await _naar_keuze(boot.SIMULATIE_JA):
+		_kies(boot.SIMULATIE_JA)
+	var binnen := await _wacht_pad(DUNGEON, 20.0)
+	await _wacht_fade()
+	await _pframes(10)
+	check("ja: verdieping 1 van de simulatie, run actief", binnen
+			and GameState.dungeon100_floor == 1 and GameState.dungeon100_run_active())
+	await _screenshot("dls_hud_verdieping1")
+	if GameState.dungeon100_run_active():
+		GameState.dungeon100_end_run(false)

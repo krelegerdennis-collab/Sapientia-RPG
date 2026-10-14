@@ -129,7 +129,7 @@ func _rules_tests() -> void:
 	check("start alleen via ECHO, niet via de wereldkaart", EchoGrot.blokkeert_wereldkaart(EchoGrot.WERELD, EchoGrot.DUNGEON)
 			and not EchoGrot.blokkeert_wereldkaart(EchoGrot.DUNGEON, EchoGrot.DUNGEON)
 			and EchoGrot.KAMER == R.WORLD_SCENE and EchoGrot.KAMER_SPAWN == R.WORLD_SPAWN
-			and EchoGrot.ZIN_EERSTE.begins_with("The Diepe Grot."))
+			and EchoGrot.ZIN_EERSTE.begins_with("The Deep Learning Simulation."))
 	var party := [{"hp": 0, "max_hp": 30, "mp": 1, "max_mp": 8}, {"hp": 5, "max_hp": 20, "mp": 0, "max_mp": 4}]
 	var pages := [{"hp": 0, "max_hp": 12, "mp": 0, "max_mp": 3}]
 	R.heal_party(party, pages)
@@ -161,17 +161,17 @@ func _rules_tests() -> void:
 	check("waarschuwing is de vertrekvraag, Ja en Nee", R.WARPER_WARNING == "Are you sure you want to leave the dungeon?"
 			and R.WARPER_YES == "Yes" and R.WARPER_NO == "No"
 			and R.WARPER_SPAWN == Gen.SPAWN_WARPER and R.WORLD_SPAWN == EchoGrot.KAMER_SPAWN)
-	check("verdieping 25 heet De Schaduw van H-6", Scaling.boss_for_floor(25)["name"] == "De Schaduw van H-6"
-			and Scaling.boss_for_floor(50)["name"] == "De Cyclus"
-			and Scaling.boss_for_floor(75)["name"] == "De Rechter"
-			and Scaling.boss_for_floor(99)["name"] == "De Stem")
+	check("verdieping 25 heet The Shadow of H-6", Scaling.boss_for_floor(25)["name"] == "The Shadow of H-6"
+			and Scaling.boss_for_floor(50)["name"] == "The Cycle"
+			and Scaling.boss_for_floor(75)["name"] == "The Judge"
+			and Scaling.boss_for_floor(99)["name"] == "The Voice")
 	check("verdieping 100 is geen baas", Scaling.boss_for_floor(100).is_empty() and not Scaling.is_boss_floor(100)
 			and not Gen.is_boss_floor(100))
 	check("bestiariumcitaat van de canon-bazen, letterlijk",
 			Bestiary.entry("d100_baas_25")["desc"] == "A dark echo of Dax himself. He moves as Dax moves, fights as Dax fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Vesper, no Grandpa. Only the number: H-6."
 			and Bestiary.entry("d100_baas_50")["desc"] == "An endlessly turning machine, half organic, half steel. It knows no beginning and no end — it simply starts again. Sapientia's logic in one form: no rest, no release, only repetition. Whoever defeats it has won nothing. It keeps turning anyway."
-			and Bestiary.entry("d100_baas_75")["desc"] == "A giant eye with arms grasping in every direction. It weighs, it measures, it judges. What it weighs is not a deed, but a person. And people are always found too light — except one. De Rechter is Sapientia's doubt: she is looking for someone who weighs more than she expected."
-			and Bestiary.entry("d100_baas_99")["desc"] == "No body. No shape. Only a voice, and glitches that warp the world around you. De Stem speaks as if it knows you — and it does. Here Sapientia speaks herself. Not as an enemy, but as something that has been waiting for you.")
+			and Bestiary.entry("d100_baas_75")["desc"] == "A giant eye with arms grasping in every direction. It weighs, it measures, it judges. What it weighs is not a deed, but a person. And people are always found too light — except one. The Judge is Sapientia's doubt: she is looking for someone who weighs more than she expected."
+			and Bestiary.entry("d100_baas_99")["desc"] == "No body. No shape. Only a voice, and glitches that warp the world around you. The Voice speaks as if it knows you — and it does. Here Sapientia speaks herself. Not as an enemy, but as something that has been waiting for you.")
 	var migrated := R.load_data({"floor": 60, "checkpoint": 50, "best": 60})
 	check("oude save zonder 'warpers': open tot de huidige verdieping (60 = 1, 25 en 50)",
 			migrated["warpers"] == [1, 25, 50])
@@ -371,7 +371,7 @@ func _strip_and_scroll_tests() -> void:
 	var taught := PA.use_item(inv, "spreuk_vuur", noor)
 	check("Fire Scroll leert Vesper Fire, vult haar MP en is op", taught["ok"] and (noor["spells"] as Array).has("vuur")
 			and not inv.has("spreuk_vuur") and int(noor["max_mp"]) >= 4 and int(noor["mp"]) >= 4
-			and str(taught["text"]) == "Vesper learns Vonk!")
+			and str(taught["text"]) == "Vesper learns Spark!")
 	var again := {"spreuk_vuur": 1}
 	var second := PA.use_item(again, "spreuk_vuur", noor)
 	check("een rol voor een spreuk die je al kent doet niets", not second["ok"] and int(again["spreuk_vuur"]) == 1
@@ -392,7 +392,7 @@ func _strip_and_scroll_tests() -> void:
 	check("Vesper kan tijdens de run Lightning leren", noor_learn["ok"] and (noor["spells"] as Array).has("bliksem")
 			and int(noor["max_mp"]) >= 7)
 	check("een rol is in het veld te gebruiken", PA.item_usable_in_field("spreuk_vuur") and PA.item_block_reason("spreuk_vuur") == ""
-			and PA.item_effect_text("spreuk_vuur") == "Teaches the spell Vonk.")
+			and PA.item_effect_text("spreuk_vuur") == "Teaches the spell Spark.")
 	check("de run eindigt", GameState.dungeon100_end_run(false))
 	check("na de grot: levels, spreuken, staf en Codex zijn weer van voor de run",
 			int(GameState.party[0]["level"]) == 9 and (GameState.party[0]["spells"] as Array).is_empty()
@@ -586,7 +586,7 @@ func _defeat_tests() -> void:
 	var ok := await wait_scene("EchoKamer", 20.0)
 	await wait_fade()
 	var wsp: Node2D = scene().get_node_or_null("Spawns/ingang")
-	check("verlies in de kerker: ECHO's Kamer, niet de kerker en niet verdieping 1",
+	check("verlies in de kerker: ECHO's Chamber, niet de kerker en niet verdieping 1",
 			ok and scene().scene_file_path == R.WORLD_SCENE and wsp != null
 			and tile() == Vector2i((wsp.position / 16.0).floor())
 			and not GameState.story_flags.has(EchoGrot.FLAG_RESULTAAT))
@@ -676,7 +676,7 @@ func _warper_tests() -> void:
 	var moved := await wait_scene("EchoKamer", 20.0)
 	await wait_fade()
 	var wsp: Node2D = scene().get_node_or_null("Spawns/ingang")
-	check("verdieping 99 gaat naar ECHO's Kamer",
+	check("verdieping 99 gaat naar ECHO's Chamber",
 			moved and scene().scene_file_path == R.WORLD_SCENE and wsp != null
 			and tile() == Vector2i((wsp.position / 16.0).floor())
 			and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active()

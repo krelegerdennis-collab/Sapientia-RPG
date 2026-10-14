@@ -370,7 +370,7 @@ func flee(b: Node) -> void:
 func _data_tests() -> void:
 	var errs := CD.validate()
 	check("CodexData.validate zonder fouten %s" % [errs], errs.is_empty())
-	check("bestiariumcitaten van Kustos, de Wortelkoning, De Wurger en De Genezer letterlijk",
+	check("bestiariumcitaten van Kustos, de Wortelkoning, The Strangler en The Mender letterlijk",
 			GD.ENEMIES["kennis_beest"]["desc"] == "A guardian without eyes, but with a thousand ears. It hears every thought that enters the Archive. The Old Humanity built it not to kill, but to preserve. Sapientia gave it a new purpose: whatever doesn't fit is removed."
 			and GD.ENEMIES["wortelkoning"]["desc"] == "What was once a shepherd of the wood became a king of roots. He drags what he loves into the depths — not out of cruelty, but out of fear of being alone. Sapientia whispered to him that everything that lets go, perishes."
 			and GD.ENEMIES["wurger"]["desc"] == "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free."
@@ -451,13 +451,13 @@ func _data_tests() -> void:
 	GameState.new_game("Dax")
 	check("nieuw spel: lege Codex, geen bondgenoot", GameState.codex_pages.is_empty() and GameState.codex_active == "")
 	var it: Dictionary = GD.ITEMS.get(CD.BOOK_ITEM, {})
-	check("item Blank Book: op een vijand, alleen in gevecht, NIET in de startvoorraad (v0.17: van Marit + woudkisten)", it.get("target") == "enemy"
+	check("item Blank Book: op een vijand, alleen in gevecht, NIET in de startvoorraad (v0.17: van Marigold + woudkisten)", it.get("target") == "enemy"
 			and it.get("field") == false and it.get("capture") == true and GameState.item_count(CD.BOOK_ITEM) == 0
 			and not GD.START_INVENTORY.has(CD.BOOK_ITEM))
 	var golem_drops: Array = GD.fixed_drops(GD.ENEMIES["kennis_beest"]["boss"].get("drops", []))
 	var plain_drops: Array = GD.fixed_drops(GD.ENEMIES["kennis_beest"].get("drops", []))
 	var woud_drops: Array = GD.fixed_drops(GD.ENEMIES["wortelkoning"].get("drops", []))
-	check("Golem-baas (Eerste Archief): vaste buit 3x Blank Book", golem_drops.size() == 1
+	check("Golem-baas (First Archive): vaste buit 3x Blank Book", golem_drops.size() == 1
 			and golem_drops[0]["item"] == CD.BOOK_ITEM and int(golem_drops[0]["n"]) == 3)
 	check("gewone Lore Beast en The Root King: geen vaste boekbuit", plain_drops.is_empty() and woud_drops.is_empty())
 	check("volger wel in kerkers en op de wereldkaart", Follower.allowed("res://scenes/maps/archief_golemhal.tscn")
@@ -1286,7 +1286,7 @@ func _grot_monster_tests() -> void:
 	await frames(6)
 	check("bestiarium 040 Scanline Wolf: plaatje, tekst, stats, 'Deep Cave' (%s)" % bs.name_label.text,
 			bs.name_label.text == "040 Scanline Wolf" and bs.picture.texture != null and bs.stats_visible()
-			and "Deep Cave" in bs.stats_label.text)
+			and "Deep Learning Simulation" in bs.stats_label.text)
 	await screenshot("grot_bestiarium_scanline_wolf")
 	await tap("cancel")
 	await frames(3)
