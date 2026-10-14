@@ -674,6 +674,11 @@ func _bouwplaats() -> void:
 			and scene().get_node_or_null("Objects/Gereedschap") != null and scene().get_node_or_null("Objects/Balken") != null)
 	check("dicht: voorman zegt dat de tunnel niet veilig is (%s)" % voorman_tekst, voorman_tekst.contains("isn't safe yet"))
 	check("dicht: werker praat Engels", werker_tekst.contains("Mind the cart"))
+	var sheet_ok := true
+	for nm in ["Voorman", "Werker", "Werker2", "Werker3"]:
+		var npc := scene().get_node_or_null("Objects/" + nm)
+		sheet_ok = sheet_ok and npc != null and npc.sheet != null and npc.sheet.resource_path.ends_with("bouw_werker.png")
+	check("bouwplaats: vier werkers met de bouwvakker-sheet van RPG ART", sheet_ok)
 	check("dicht: hek staat en blokkeert", hek != null and hek.visible and int(hek.get("collision_layer")) != 0)
 	player().place_at(Vector2i(12, 5), Vector2i.UP)
 	await pframes(4)

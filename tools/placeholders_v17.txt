@@ -94,10 +94,10 @@ assets/sprites/buiten/wilgendal_vitrine.png     48x16    item-display in de wink
 # Echte art later: art/cutscene/glitch_panel.png  96x216  (linkerpaneel; rechts = gespiegeld, uitgerekt tot de randbreedte)   [KLAAR v0.21: echte art van RPG ART batch 15 (131x216), zie tools/handwerk.txt]
 (code, geen bestand) hero_status_box.gd _draw_monster_icon   7x6    Codex-icoontje rechtsboven in het monstervak (gevecht, v0.22 partylimiet)   [PLACEHOLDER: getekend in code; echte art gewenst: assets/ui/icon_monstervak.png 7x6 (14x12 op 2x)]   [KLAAR v0.22: echte art assets/ui/icon_monstervak.png van RPG ART, zie tools/handwerk.txt]
 # Grotmond van de berggrot op worldmap 1, tegel (21,17), in de bergwand; ingang = tegen de wand oplopen vanaf (21,18) (tools/art_berggrot_ingang_placeholder.py). Magenta hoekjes, geen definitieve art.
-assets/sprites/buiten/berggrot_ingang.png      16x16    tunnelopening in de bergwand (weg naar Archief 2), Sprite2D Objects/BerggrotIngang op de wereldkaart
+assets/sprites/buiten/berggrot_ingang.png      16x16    tunnelopening in de bergwand (weg naar Archief 2), Sprite2D Objects/BerggrotIngang op de wereldkaart   [KLAAR: echte art van RPG ART, zie tools/handwerk.txt]
 # Bouwplaats voor de berggrot-tunnel (scenes/maps/berggrot_bouwplaats.tscn, tools/art_bouwplaats_placeholder.py). Magenta hoekjes, geen definitieve art.
-assets/sprites/buiten/bouw_hek.png             32x16    afzetting voor de tunnel (verdwijnt na noor_lid)
-assets/sprites/buiten/bouw_karretje.png        16x16    mijnkarretje met stenen
-assets/sprites/buiten/bouw_gereedschap.png     16x16    houweel en schep tegen een kist
-assets/sprites/buiten/bouw_balken.png          16x16    stapel stutbalken
-# Werkers gebruiken nu de bestaande npc.png met een tint. Nodig: eigen bouwvakker-sheet (zelfde formaat als assets/sprites/npc.png).
+assets/sprites/buiten/bouw_hek.png             32x16    afzetting voor de tunnel (verdwijnt na noor_lid)   [KLAAR: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/bouw_karretje.png        16x16    mijnkarretje met stenen   [KLAAR: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/bouw_gereedschap.png     16x16    houweel en schep tegen een kist   [KLAAR: echte art van RPG ART, zie tools/handwerk.txt]
+assets/sprites/buiten/bouw_balken.png          16x16    stapel stutbalken   [KLAAR: echte art van RPG ART, zie tools/handwerk.txt]
+# Werkers gebruiken nu de bestaande npc.png met een tint. Nodig: eigen bouwvakker-sheet (zelfde formaat als assets/sprites/npc.png).   [KLAAR: assets/sprites/buiten/bouw_werker.png, RPG ART]

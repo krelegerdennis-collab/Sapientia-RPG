@@ -530,3 +530,11 @@ assets/ui/battlehud/vul_mp.png
 assets/battle/kas_genezer.png
 assets/map_monsters/genezer_groot.png
 assets/video/genezer_warper.ogv
+# RPG ART: bouwplaats van de berggrot-tunnel (art_bouwplaats/out): grotmond 16x16 (ook op de wereldkaart, tegel 21,17),
+#        hek 32x16, karretje/gereedschap/balken 16x16, werker-sheet 48x96 (3x4 frames 16x24, zoals player.png).
+assets/sprites/buiten/berggrot_ingang.png
+assets/sprites/buiten/bouw_hek.png
+assets/sprites/buiten/bouw_karretje.png
+assets/sprites/buiten/bouw_gereedschap.png
+assets/sprites/buiten/bouw_balken.png
+assets/sprites/buiten/bouw_werker.png
