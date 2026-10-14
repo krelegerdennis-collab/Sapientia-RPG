@@ -17,6 +17,16 @@ const WARP_SCENE := preload("res://world_warper/warp/warp_view.tscn")
 const HANGER_SCENE := preload("res://world_warper/cutscene/hanger_scene.tscn")
 const AmbienceScript := preload("res://world_warper/audio/ambience.gd")
 
+## Warp naar de Deep Learning Simulation: rechts van het Warp-vlak (fallback zonder anker).
+const SIMULATIE_OFFSET := Vector2(80, 0)
+const EchoGrotData := preload("res://scripts/data/echo_grot.gd")
+const SIMULATIE_VRAAG := "Enter the Deep Learning Simulation?"
+const SIMULATIE_JA := "Yes, start a new run"
+const SIMULATIE_NEE := "No"
+const SIMULATIE_LOOPT := "The simulation is already running."
+## Voor de tests: laatste uitkomst van het simulatie-vlak ("gestart", "nee", "loopt", "").
+var simulatie_uitkomst := ""
+
 ## Boven touch (10) en dialoog (5), onder de hanger-scène (30).
 const SCHERM_LAAG := 20
 
@@ -87,6 +97,10 @@ func _bouw_hal() -> void:
 
 	_maak_vlak(warp_pos, "Warp", _open_warp)
 	_maak_vlak(party_pos, "Gezelschap", _open_party)
+	# Dennis (14 okt 2026): warp naar de Deep Learning Simulation (de Diepe Grot) direct vanuit de hal.
+	# ECHO's gesprek in ECHO's Kamer blijft ook werken.
+	_maak_vlak(_anker_positie("ww_anchor_simulatie") if _heeft_anker("ww_anchor_simulatie") else warp_pos + SIMULATIE_OFFSET,
+			"Simulatie", _open_simulatie)
 
 	if not _warp.is_connected("warp_requested", _on_warp_requested):
 		_warp.connect("warp_requested", _on_warp_requested)
@@ -130,6 +144,33 @@ func _open_party() -> void:
 	if _warp != null and _warp.visible:
 		_warp.call("close")
 	_party.call("open")
+
+
+func _open_simulatie() -> void:
+	if _geblokkeerd() or GameState.changing_map or GameState.in_battle:
+		return
+	simulatie_uitkomst = ""
+	var speler := get_parent().get_node_or_null("Objects/Player") if get_parent() != null else null
+	if speler != null and "input_locked" in speler:
+		speler.input_locked = true
+	var keuze: int = await Dialog.ask(SIMULATIE_VRAAG, [SIMULATIE_JA, SIMULATIE_NEE])
+	if not is_inside_tree():
+		return
+	if keuze == 0:
+		if GameState.dungeon100_echo_start():
+			simulatie_uitkomst = "gestart"
+			return
+		simulatie_uitkomst = "loopt"
+		Dialog.show_lines([SIMULATIE_LOOPT])
+		await Dialog.finished
+	else:
+		simulatie_uitkomst = "nee"
+	if is_instance_valid(speler) and "input_locked" in speler:
+		speler.input_locked = false
+
+
+func _heeft_anker(groep: String) -> bool:
+	return is_inside_tree() and not get_tree().get_nodes_in_group(groep).is_empty()
 
 
 func _geblokkeerd() -> bool:
@@ -184,6 +225,7 @@ class Interactievlak extends Area2D:
 	const VLAK_ART := {
 		"Warp": "res://world_warper/art/vlak_warp.png",
 		"Gezelschap": "res://world_warper/art/vlak_gezelschap.png",
+		"Simulatie": "res://world_warper/art/vlak_warp.png",
 	}
 	const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 	var titel := ""
@@ -206,16 +248,18 @@ class Interactievlak extends Area2D:
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		var basis := VLAK_ART.get(titel, VLAK_ART["Warp"]) as String
 		sprite.texture = load(WarperAccent.path(basis, WarperAccent.current())) as Texture2D
+		if titel == "Simulatie":
+			sprite.modulate = Color(0.55, 0.95, 1.0)    # placeholder: het warp-vlak, cyaan getint
 		add_child(sprite)
 		var label := Label.new()
-		label.text = {"Gezelschap": "Party"}.get(titel, titel)
-		label.position = Vector2(-48, -22)
-		label.size = Vector2(96, 12)
+		label.text = {"Gezelschap": "Party", "Simulatie": "Deep Learning Simulation"}.get(titel, titel)
+		label.position = Vector2(-72, -22)
+		label.size = Vector2(144, 12)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		label.add_theme_font_override("font", FONT)
-		label.add_theme_font_size_override("font_size", 8)
+		label.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 		label.add_theme_color_override("font_color", Color("f2e9d8"))
 		label.add_theme_color_override("font_shadow_color", Color("07060a"))
 		label.add_theme_constant_override("shadow_offset_x", 1)

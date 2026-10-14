@@ -217,6 +217,11 @@ ECHO: "Maar dat is een verhaal voor later."
   haak met vlaggen (`KoopmanData.einde`, `sapientia_verslagen`, `h5_rust`); Archief 6 roept hem aan.
 - **Wereldkaart**: geen ingang en geen icoon van de Diepe Grot. De grot start alleen via ECHO
   (ECHO's Kamer). De oude spawn `van_dungeon100` blijft alleen voor oude saves.
+- **Naam in de game** (besluit Dennis, 14 okt 2026): de speler ziet de Diepe Grot als
+  **Deep Learning Simulation**, een AI-trainingsprogramma (van Sapientia, door ECHO gedraaid).
+  Ids, bestanden en docs blijven "Diepe Grot" / `dungeon100`. Starten kan via ECHO (ECHO's Kamer)
+  én via een eigen warp-vlak in de hal van de World Warper (naast het Warp-vlak; placeholder:
+  het warp-vlak, cyaan getint).
 
 ## Makkelijk over te nemen (botst niet)
 

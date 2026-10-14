@@ -360,7 +360,7 @@ static func _room_dict(d: Dictionary) -> Dictionary:
 	if d["has_stairs_down"]:
 		spawns[SPAWN_FROM_BELOW] = _spawn_arr(d["spawn_down"], "down")
 	var room := {
-		"name": "Deep Cave - Floor %d" % f,
+		"name": "Deep Learning Simulation - Floor %d" % f,
 		"floor": f, "tier": d["tier"],
 		"layout": d["layout"], "spawns": spawns, "exits": exits,
 		"monsters": [], "chests": [],

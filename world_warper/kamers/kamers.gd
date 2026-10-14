@@ -344,7 +344,7 @@ static func label(bron: String) -> String:
 		"echo", "echo_grot":
 			return "ECHO"
 		"grot_ingang":
-			return "Diepe Grot"
+			return "Deep Learning Simulation"
 		"warp":
 			return "Gate"
 		"voortgang":

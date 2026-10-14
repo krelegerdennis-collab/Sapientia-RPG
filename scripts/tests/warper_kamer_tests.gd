@@ -20,6 +20,7 @@ const Gear := preload("res://scripts/equipment.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
+const HUBHAL := "res://world_warper/maps/hal.tscn"
 
 var failures := 0
 var passes := 0
@@ -55,6 +56,7 @@ func _run() -> void:
 	await _hal_in_beeld()
 	await _echo_grot()
 	await _genezer_warp()
+	await _hal_simulatie()
 	print("WARPERKAMERTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await get_tree().process_frame
@@ -182,7 +184,7 @@ func _scènes() -> void:
 			var grot := node.get_node_or_null("Objects/Grot")
 			check("ingang Diepe Grot staat in ECHO's Kamer", grot != null
 					and str(grot.get("bron")) == "grot_ingang"
-					and Kamers.label("grot_ingang") == "Diepe Grot")
+					and Kamers.label("grot_ingang") == "Deep Learning Simulation")
 		node.free()
 	var hal: Node = load(Kamers.scene_path("hal")).instantiate()
 	check("ECHO staat in de Hal", hal.get_node_or_null("Objects/Echo") != null and str(hal.get_node("Objects/Echo").get("bron")) == "echo")
@@ -224,7 +226,7 @@ func _echo_grot() -> void:
 		var regels: Array = stappen[0].get("lines", [])
 		if not regels.is_empty():
 			welkom = str(regels[0])
-	var eerste_letterlijk := "The Diepe Grot. A simulation — a hundred floors, different every time. I run it. Sapientia... Sapientia helps with the data. That's just how it works."
+	var eerste_letterlijk := "The Deep Learning Simulation. An AI training program — a hundred floors, different every time. I run it. Sapientia... Sapientia helps with the data. That's just how it works."
 	var twijfel_letterlijk := "Why I do it? Because it is my task. The Old Humanity built me to measure, to count, to preserve."
 	var h6_letterlijk := "I have let hundreds of candidates through. You are the sixth who stayed standing. The others... I don't know what happened to them."
 	var data_letterlijk := "I don't know. I deliver, she takes. It has always been that way."
@@ -266,7 +268,9 @@ func _echo_grot() -> void:
 		await _screenshot("echo_eerste_bezoek")
 	check("naam ECHO en niet IVA", str(Dialoog.NAAM) == "ECHO" and str(Dialoog.NAAM) != "IVA"
 			and welkom.contains("ECHO") and not welkom.contains("IVA") and live_naam)
-	check("menu Diepe Grot Simulatie", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE))
+	check("menu Deep Learning Simulation", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE)
+			and EchoGrot.OPTIE_SIMULATIE == "Deep Learning Simulation")
+	await _screenshot("dls_naam_echo_menu")
 	_kies(EchoGrot.OPTIE_TWIJFEL)
 	check("bij twijfel de taakzin", await _naar_tekst(EchoGrot.ZIN_TWIJFEL))
 	check("menu terug na twijfel", await _naar_keuze(EchoGrot.OPTIE_DATA))
@@ -635,3 +639,59 @@ func _screenshot(name: String) -> void:
 	DirAccess.make_dir_recursive_absolute(shots)
 	img.save_png(shots.path_join(name + ".png"))
 	print("INFO  screenshot: ", shots.path_join(name + ".png"), " ", img.get_size())
+
+
+## Dennis (14 okt 2026): warp-vlak naar de Deep Learning Simulation in de hal.
+func _hal_simulatie() -> void:
+	if GameState.dungeon100_run_active():
+		GameState.dungeon100_end_run(false)
+	GameState.story_flags[Kamers.FLAG_HUB] = true
+	for f in ["ww_canon_genezer_gezien", "ww_canon_hanger_gezien", "ww_canon_dreiging_gezien"]:
+		GameState.story_flags[f] = true      # geen canon-scène over het screenshot
+	GameState.change_map(HUBHAL, "ingang")
+	var ok := await _wacht_pad(HUBHAL)
+	await _wacht_fade()
+	await _pframes(6)
+	var vlak: Node = scene().get_node_or_null("HubBoot/VlakSimulatie") if ok else null
+	var label_ok := false
+	if vlak != null:
+		for c in vlak.get_children():
+			if c is Label and c.text == "Deep Learning Simulation":
+				label_ok = true
+	check("hal: warp-vlak 'Deep Learning Simulation'", vlak != null and label_ok)
+	var wl: Label = null
+	var wv: Node = scene().get_node_or_null("HubBoot/VlakWarp") if ok else null
+	if wv != null:
+		for c in wv.get_children():
+			if c is Label:
+				wl = c
+	check("hal: label 'Warp' op Dauwpixel 10 (1:1, de W blijft een W)", wl != null and wl.text == "Warp"
+			and wl.get_theme_font_size("font_size") == 10)
+	if vlak == null:
+		return
+	var p := _player()
+	if p != null:
+		p.place_at(Vector2i((vlak.global_position / 16.0).floor()) + Vector2i.DOWN, Vector2i.UP)
+	await _pframes(4)
+	await _screenshot("dls_warp_hal")
+	var boot: Node = scene().get_node("HubBoot")
+	vlak.interact(p)
+	var vraag := await _naar_keuze(boot.SIMULATIE_NEE)
+	check("vlak vraagt: Enter the Deep Learning Simulation?", vraag and str(Dialog.text_label.text) == boot.SIMULATIE_VRAAG)
+	await _screenshot("dls_warp_vraag")
+	_kies(boot.SIMULATIE_NEE)
+	await _wacht_gesprek_weg()
+	await _pframes(4)
+	check("nee: blijft in de hal, speler vrij", boot.simulatie_uitkomst == "nee"
+			and scene().scene_file_path == HUBHAL and not p.input_locked)
+	vlak.interact(p)
+	if await _naar_keuze(boot.SIMULATIE_JA):
+		_kies(boot.SIMULATIE_JA)
+	var binnen := await _wacht_pad(DUNGEON, 20.0)
+	await _wacht_fade()
+	await _pframes(10)
+	check("ja: verdieping 1 van de simulatie, run actief", binnen
+			and GameState.dungeon100_floor == 1 and GameState.dungeon100_run_active())
+	await _screenshot("dls_hud_verdieping1")
+	if GameState.dungeon100_run_active():
+		GameState.dungeon100_end_run(false)
