@@ -50,6 +50,7 @@ const DEFAULTS := {
 	"crt": true,
 	"screen_shake": true,
 	"autosave": true,
+	"sessielog": true,   # playtest: sessielogboek (scripts/sessielog.gd); geen persoonsgegevens
 	"run": false,      # TODO.md "run feature": RUN-toggle (blijft aan tot de speler hem uitzet)
 }
 
