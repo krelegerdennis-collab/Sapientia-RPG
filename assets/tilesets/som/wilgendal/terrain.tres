@@ -1,8 +1,10 @@
-[gd_resource type="TileSet" load_steps=5 format=3]
+[gd_resource type="TileSet" load_steps=7 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/tilesets/som/wilgendal/terrain.png" id="1_som"]
 
 [ext_resource type="Texture2D" path="res://assets/tilesets/som/wilgendal/water_anim.png" id="2_water"]
+
+[ext_resource type="Texture2D" path="res://assets/tilesets/som/wilgendal/hekken.png" id="3_hekken"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_som"]
 texture = ExtResource("1_som")
@@ -908,6 +910,95 @@ texture = ExtResource("2_water")
 6:5/0/custom_data_0 = "water_255"
 6:5/0/custom_data_1 = "ground"
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hekken"]
+texture = ExtResource("3_hekken")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:0/0/custom_data_0 = "hek_00"
+0:0/0/custom_data_1 = "overlay"
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0/custom_data_0 = "hek_01"
+1:0/0/custom_data_1 = "overlay"
+2:0/0 = 0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:0/0/custom_data_0 = "hek_02"
+2:0/0/custom_data_1 = "overlay"
+3:0/0 = 0
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:0/0/custom_data_0 = "hek_03"
+3:0/0/custom_data_1 = "overlay"
+4:0/0 = 0
+4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:0/0/custom_data_0 = "hek_04"
+4:0/0/custom_data_1 = "overlay"
+5:0/0 = 0
+5:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+5:0/0/custom_data_0 = "hek_05"
+5:0/0/custom_data_1 = "overlay"
+6:0/0 = 0
+6:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+6:0/0/custom_data_0 = "hek_06"
+6:0/0/custom_data_1 = "overlay"
+7:0/0 = 0
+7:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+7:0/0/custom_data_0 = "hek_07"
+7:0/0/custom_data_1 = "overlay"
+8:0/0 = 0
+8:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+8:0/0/custom_data_0 = "hek_08"
+8:0/0/custom_data_1 = "overlay"
+9:0/0 = 0
+9:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+9:0/0/custom_data_0 = "hek_09"
+9:0/0/custom_data_1 = "overlay"
+10:0/0 = 0
+10:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+10:0/0/custom_data_0 = "hek_10"
+10:0/0/custom_data_1 = "overlay"
+11:0/0 = 0
+11:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+11:0/0/custom_data_0 = "hek_11"
+11:0/0/custom_data_1 = "overlay"
+12:0/0 = 0
+12:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+12:0/0/custom_data_0 = "hek_12"
+12:0/0/custom_data_1 = "overlay"
+13:0/0 = 0
+13:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+13:0/0/custom_data_0 = "hek_13"
+13:0/0/custom_data_1 = "overlay"
+14:0/0 = 0
+14:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+14:0/0/custom_data_0 = "hek_14"
+14:0/0/custom_data_1 = "overlay"
+15:0/0 = 0
+15:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+15:0/0/custom_data_0 = "hek_15"
+15:0/0/custom_data_1 = "overlay"
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:1/0/custom_data_0 = "hek_10_b"
+0:1/0/custom_data_1 = "overlay"
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:1/0/custom_data_0 = "hek_05_b"
+1:1/0/custom_data_1 = "overlay"
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:1/0/custom_data_0 = "hek_poort_h_dicht"
+2:1/0/custom_data_1 = "overlay"
+3:1/0 = 0
+3:1/0/custom_data_0 = "hek_poort_h_open"
+3:1/0/custom_data_1 = "overlay"
+4:1/0 = 0
+4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:1/0/custom_data_0 = "hek_poort_v_dicht"
+4:1/0/custom_data_1 = "overlay"
+5:1/0 = 0
+5:1/0/custom_data_0 = "hek_poort_v_open"
+5:1/0/custom_data_1 = "overlay"
+
 [resource]
 physics_layer_0/collision_layer = 1
 custom_data_layer_0/name = "terrain"
@@ -916,3 +1007,4 @@ custom_data_layer_1/name = "laag"
 custom_data_layer_1/type = 4
 sources/0 = SubResource("TileSetAtlasSource_som")
 sources/1 = SubResource("TileSetAtlasSource_water")
+sources/2 = SubResource("TileSetAtlasSource_hekken")
