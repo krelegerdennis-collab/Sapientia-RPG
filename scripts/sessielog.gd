@@ -296,6 +296,8 @@ func _poll_toestand() -> void:
 			var n := 0
 			if dlg.get("name_label") != null:
 				wie = str(dlg.name_label.text)
+			if wie != "" and wie == GameState.player_name:
+				wie = "player"      # de naam die de speler zelf koos, loggen we niet
 			var l = dlg.get("_lines")
 			if l is Array:
 				n = l.size()
