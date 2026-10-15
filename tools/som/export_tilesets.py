@@ -209,6 +209,8 @@ def main(args):
             sys.path.insert(0, HIER)
             import water_anim
             water_anim.maak(g, gebieden[g])
+            import hekken
+            hekken.maak(g, gebieden[g])  # fase 4: hekken als bron 2
 
 
 if __name__ == "__main__":
