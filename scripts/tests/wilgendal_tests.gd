@@ -233,9 +233,13 @@ func _dorp() -> void:
 	for kind in dorp.get_node("Objects").get_children():
 		if str(kind.get_meta("prop", "")) != "":
 			props += 1
-	check("props in de scène (%d)" % props, props == Data.PROPS.size())
+	var verwacht := 0
+	for ruw in Data.PROPS:
+		if not (Data.som() and Data.hek_prop(ruw)):
+			verwacht += 1
+	check("props in de scène (%d; SoM-hekken zijn grondtegels)" % props, props == verwacht)
 	if Data.som():
-		_som_pilot(dorp)
+		await _som_pilot(dorp)
 	else:
 		check("beek + brug op een eigen laag", dorp.get_node_or_null("Ground/Beek/Brug") != null)
 	await _overzicht(dorp)
@@ -476,6 +480,9 @@ func _som_pilot(dorp: Node) -> void:
 	var n_som := 0
 	for i in Data.PROPS.size():
 		var rij: Dictionary = Data.PROPS[i]
+		if Data.hek_prop(rij):
+			props_ok = props_ok and dorp.get_node_or_null("Objects/Prop_%s_%d" % [str(rij["tex"]), i]) == null
+			continue
 		var body: Node = dorp.get_node_or_null("Objects/Prop_%s_%d" % [str(rij["tex"]), i])
 		var sp := Data.som_prop(rij)
 		if body == null:
@@ -522,6 +529,61 @@ func _som_pilot(dorp: Node) -> void:
 	check("som: Dax/Seren in WM1 (WM2 = held_variant in gebieden.json)", sp.texture.resource_path.ends_with("dax_wm1.png")
 			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1"
 			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm2.png"))
+	await _hekken(dorp, g, ov)
+
+
+## Fase 4: SoM-hekken (autotiles uit hekken.png, bron 2), botsing en poorten.
+func _hekken(dorp: Node, g: TileMapLayer, ov: TileMapLayer) -> void:
+	var hn: Dictionary = g.hekken
+	var bron := g.tile_set.get_source(2) as TileSetAtlasSource
+	check("som: hekken-bron 2 in terrain.tres (256x32, 22 tegels, namen)", bron != null and hn.size() == 22
+			and bron.texture.get_size() == Vector2(256, 32) and hn.has("hek_10") and hn.has("hek_poort_h_open"))
+	var poorten := Data.poorten()
+	check("som: 2 poorten (west hek, tuin), oude hek-props weg", poorten.size() == 2 and Data.hek_prop(Data.PROPS[Data.PROPS.size() - 1]))
+	var ok := true
+	var n := 0
+	for y in Data.H:
+		for x in Data.W:
+			var t := Vector2i(x, y)
+			if not Data.hek_aanwezig(t):
+				continue
+			n += 1
+			var naam := Data.hek_tegel(t)
+			var c: Array = hn[naam]
+			ok = ok and ov.get_cell_source_id(t) == 2 and ov.get_cell_atlas_coords(t) == Vector2i(int(c[0]), int(c[1]))
+			ok = ok and Data.hek_blok(t) == (ov.get_cell_tile_data(t).get_collision_polygons_count(0) > 0)
+			ok = ok and not Data.beloopbaar(t) and ov.get_cell_tile_data(t).get_custom_data("terrain").begins_with("hek_")
+	check("som: elk hek-teken (%d) = hek-tegel met masker, botsing zoals Data.hek_blok, niet beloopbaar" % n, ok and n > 20)
+	var e := Vector2i(15, 16)
+	var m := Vector2i(16, 16)
+	var h := Vector2i(6, 25)
+	check("som: masker N1 E2 S4 W8: einde (E)=hek_02, midden=hek_10(_b), hoek NW=hek_06 (SE)", Data.hek_masker(e) == 2 and Data.hek_tegel(e) == "hek_02"
+			and Data.hek_masker(m) == 10 and Data.hek_tegel(m).begins_with("hek_10")
+			and Data.hek_masker(h) == 6 and Data.hek_tegel(h) == "hek_06" and Data.hek_masker(Vector2i(6, 26)) == 5)
+	var p0: Vector2i = poorten[0]
+	var gate: Node = dorp.get_node_or_null("Objects/Poort_%d_%d" % [p0.x, p0.y])
+	var dicht := not Data.beloopbaar(p0) and ov.get_cell_atlas_coords(p0) == Vector2i(int(hn["hek_poort_h_dicht"][0]), int(hn["hek_poort_h_dicht"][1]))
+	dicht = dicht and ov.get_cell_tile_data(p0).get_collision_polygons_count(0) > 0
+	check("som: poort start dicht (tegel hek_poort_h_dicht, botst)", gate != null and dicht)
+	if gate == null:
+		return
+	gate.interact(null)
+	var open := Data.beloopbaar(p0) and ov.get_cell_atlas_coords(p0) == Vector2i(int(hn["hek_poort_h_open"][0]), int(hn["hek_poort_h_open"][1]))
+	open = open and ov.get_cell_tile_data(p0).get_collision_polygons_count(0) == 0
+	check("som: poort open = tegel hek_poort_h_open, geen botsing, beloopbaar", open and gate.is_open())
+	gate.interact(null)
+	check("som: poort weer dicht", not Data.beloopbaar(p0) and not gate.is_open()
+			and ov.get_cell_tile_data(p0).get_collision_polygons_count(0) > 0)
+	var tuin := Vector2i(8, 26)
+	var poort2: Vector2i = poorten[1]
+	gate = dorp.get_node("Objects/Poort_%d_%d" % [poort2.x, poort2.y])
+	var voor := poort2 + Vector2i.DOWN
+	check("som: tuin: binnen onbereikbaar bij dichte poort", not Data.bereikbaar(voor, tuin) and Data.beloopbaar(tuin))
+	gate.interact(null)
+	check("som: tuin: met open poort bereikbaar", Data.bereikbaar(voor, tuin))
+	gate.interact(null)
+	check("som: hekken-resources bestaan (hekken.png, namen)", ResourceLoader.exists("res://assets/tilesets/som/wilgendal/hekken.png")
+			and FileAccess.file_exists("res://assets/tilesets/som/wilgendal/hekken_namen.json"))
 
 
 func _som() -> void:

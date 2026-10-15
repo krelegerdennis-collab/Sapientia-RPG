@@ -48,7 +48,7 @@ const GROND: Array[String] = [
 	"T.................T.......###################......T...........T",
 	"T.....................T...###################.............T....T",
 	"T.........................###################..................T",
-	"T.................................===..........................T",
+	"T..............FFGFF..............===.........FFFFF............T",
 	"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BBB~~~~~~~~~~~~~~~~~~~~~~~~~~~",
 	"T.................................===..........................T",
 	"T.................................===..........................T",
@@ -57,10 +57,10 @@ const GROND: Array[String] = [
 	"T...=================================..........................T",
 	"T.................................===..........................T",
 	"T.................................===..........................T",
-	"T...........................T.....===..........................T",
-	"T.................................===............==............T",
-	"T.................................===............==............T",
-	"T.................................===...T........==............T",
+	"T.....FFFFFF................T.....===..........................T",
+	"T.....F....F......................===............==............T",
+	"T.....F....F......................===............==............T",
+	"T.....FFGFFF......................===...T........==............T",
 	"T.................................===............==............T",
 	"T...........T.....................===............==............T",
 	"T...............==============================================.T",
@@ -81,6 +81,8 @@ const TEGEL := {
 	"#": 33,
 	"~": 0,      # beek: gras eronder, de beek-art ligt erover (PROPS/dorp_opbouw)
 	"B": 2,      # pad onder de brug
+	"F": 0,      # hek (SoM: autotile uit hekken.png, oud: props hek_*)
+	"G": 0,      # poort (E-W)
 }
 
 const SFEER_KLEUR := {
@@ -500,7 +502,7 @@ static func beloopbaar(t: Vector2i) -> bool:
 		return false
 	if beek(t):
 		return false
-	if prop_op(t):
+	if prop_op(t) or hek_blok(t):
 		return false
 	for ruw in PANDEN:
 		var rij: Dictionary = ruw
@@ -536,9 +538,79 @@ static func beek(t: Vector2i) -> bool:
 ## Staat er een blokkerende prop op t?
 static func prop_op(t: Vector2i) -> bool:
 	for ruw in PROPS:
+		if hek_prop(ruw) and som():
+			continue  # SoM: de hekken zijn grondtegels (hek_blok)
 		if prop_blok(ruw).has_point(t):
 			return true
 	return false
+
+
+## Oude hek-prop (hek_eind/hek_h)? In SoM vervangen door de hek-autotiles.
+static func hek_prop(rij: Dictionary) -> bool:
+	return str(rij.get("tex", "")).begins_with("hek")
+
+
+## --- SoM-hekken (RPG ART fase 4): grondtekens F (hek) en G (poort, E-W) ---
+## Poortstand per tegel; ontbreekt = dicht. Open poort botst niet (tegel hek_poort_h_open).
+static var poorten_open := {}
+
+
+static func hek_teken(t: Vector2i) -> String:
+	if t.x < 0 or t.y < 0 or t.x >= W or t.y >= H:
+		return ""
+	return GROND[t.y][t.x]
+
+
+static func hek_aanwezig(t: Vector2i) -> bool:
+	var c := hek_teken(t)
+	return c == "F" or c == "G"
+
+
+## Tegel blokkeert door een hek of een gesloten poort (alleen in SoM; oud = props).
+static func hek_blok(t: Vector2i) -> bool:
+	if not som():
+		return false
+	var c := hek_teken(t)
+	return c == "F" or (c == "G" and not poort_open(t))
+
+
+static func poort_open(t: Vector2i) -> bool:
+	return bool(poorten_open.get(t, false))
+
+
+static func poorten() -> Array[Vector2i]:
+	var uit: Array[Vector2i] = []
+	for y in H:
+		for x in W:
+			if GROND[y][x] == "G":
+				uit.append(Vector2i(x, y))
+	return uit
+
+
+## Hekmasker N1 E2 S4 W8: buur is hek of poort.
+static func hek_masker(t: Vector2i) -> int:
+	var m := 0
+	if hek_aanwezig(t + Vector2i.UP):
+		m |= 1
+	if hek_aanwezig(t + Vector2i.RIGHT):
+		m |= 2
+	if hek_aanwezig(t + Vector2i.DOWN):
+		m |= 4
+	if hek_aanwezig(t + Vector2i.LEFT):
+		m |= 8
+	return m
+
+
+## Tegelnaam in hekken_namen.json: hek_<masker>, met een paalvariant op elke 3e rechte tegel.
+static func hek_tegel(t: Vector2i) -> String:
+	if hek_teken(t) == "G":
+		return "hek_poort_h_open" if poort_open(t) else "hek_poort_h_dicht"
+	var m := hek_masker(t)
+	if m == 10 and t.x % 3 == 0:
+		return "hek_10_b"
+	if m == 5 and t.y % 3 == 0:
+		return "hek_05_b"
+	return "hek_%02d" % m
 
 
 ## Blokkerende tegels van een prop in de actieve stijl.

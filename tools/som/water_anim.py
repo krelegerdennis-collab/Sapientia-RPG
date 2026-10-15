@@ -54,6 +54,7 @@ def maak(gebied, cfg):
         namen["water_%03d" % t["mask"]] = [t["col"], t["row"]]
     uit = kop.rstrip("\n") + "\n\n" + "\n".join(sub) + "\n\n[resource]\n" + rest.rstrip("\n") \
         + '\nsources/1 = SubResource("TileSetAtlasSource_water")\n'
+    uit = re.sub(r"load_steps=\d+", "load_steps=%d" % (1 + len(re.findall(r"^\[(?:ext_resource|sub_resource)", uit, flags=re.M))), uit, count=1)
     open(tres, "w").write(uit)
     json.dump(namen, open(os.path.join(d, "water_anim_namen.json"), "w"), indent=0, sort_keys=True)
     print("  %s: water_anim (%d tegels, %d frames)" % (gebied, len(namen), index["frames"]))
