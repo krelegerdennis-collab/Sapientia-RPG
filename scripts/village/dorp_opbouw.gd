@@ -7,6 +7,7 @@ const Data := preload("res://scripts/data/wilgendal_dorp.gd")
 const NPC := preload("res://scenes/npc.tscn")
 const DEUR := preload("res://scenes/door.tscn")
 const Lus := preload("res://scripts/village/plein_lus.gd")
+const Poort := preload("res://scripts/village/hek_poort.gd")
 
 ## v0.21: bord een tegel onder de gevel (zie bord.position).
 const BORD_OMLAAG := 16.0
@@ -30,6 +31,7 @@ func _ready() -> void:
 	var objects := kaart.get_node("Objects")
 	_beek_en_brug(kaart)
 	_props(objects)
+	_poorten(kaart, objects)
 	_molen(objects)
 	_gerrit(objects)
 	_sfeer(objects)
@@ -98,6 +100,9 @@ func _props(objects: Node) -> void:
 	var i := 0
 	for ruw in Data.PROPS:
 		var rij: Dictionary = ruw
+		if Data.som() and Data.hek_prop(rij):
+			i += 1
+			continue  # SoM: hekken zijn grondtegels (dorp_ground.gd)
 		var sp := Data.som_prop(rij)
 		if not sp.is_empty():
 			_som_prop(objects, rij, sp, i)
@@ -127,6 +132,20 @@ func _props(objects: Node) -> void:
 			body.add_child(bots)
 		objects.add_child(body)
 		i += 1
+
+
+## SoM fase 4: elke poort (teken G) krijgt een Area die 'interact' opvangt; de botsing zit in de tegel.
+func _poorten(kaart: Node, objects: Node) -> void:
+	if not Data.som():
+		return
+	Data.poorten_open.clear()
+	for t in Data.poorten():
+		var p := Poort.new()
+		p.name = "Poort_%d_%d" % [t.x, t.y]
+		p.tegel = t
+		p.grond = kaart.get_node("Ground")
+		p.position = _tegel_midden(t)
+		objects.add_child(p)
 
 
 ## SoM fase 3: prop uit props_index.json; y-sort op ysort_origin_px, botsing = collision_tiles.

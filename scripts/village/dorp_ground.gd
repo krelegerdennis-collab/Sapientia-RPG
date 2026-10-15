@@ -49,9 +49,16 @@ static func masker(t: Vector2i, soort: String) -> int:
 
 ## Fase 3: geanimeerd water (bron 1 van terrain.tres, tools/som/water_anim.py), anders het stilstaande water.
 var water_anim: Dictionary = {}
+## Fase 4: hek-autotiles (bron 2 van terrain.tres, tools/som/hekken.py), tegelnaam -> atlas.
+var hekken: Dictionary = {}
+var overlay: TileMapLayer
 
 
 func _zet(laag: TileMapLayer, t: Vector2i, naam: String) -> void:
+	if hekken.has(naam):
+		var h: Array = hekken[naam]
+		laag.set_cell(t, 2, Vector2i(int(h[0]), int(h[1])))
+		return
 	if water_anim.has(naam):
 		var w: Array = water_anim[naam]
 		laag.set_cell(t, 1, Vector2i(int(w[0]), int(w[1])))
@@ -73,6 +80,11 @@ func _som() -> void:
 		var wd = JSON.parse_string(FileAccess.get_file_as_string(wpad))
 		if wd is Dictionary:
 			water_anim = wd
+	var hpad := KaartStijl.tileset_pad("wilgendal", "terrain").get_base_dir().path_join("hekken_namen.json")
+	if FileAccess.file_exists(hpad) and tile_set.has_source(2):
+		var hd = JSON.parse_string(FileAccess.get_file_as_string(hpad))
+		if hd is Dictionary:
+			hekken = hd
 	var over := TileMapLayer.new()
 	over.name = "SomOverlay"
 	over.tile_set = tile_set
@@ -100,6 +112,13 @@ func _som() -> void:
 					_zet(self, t, "gras_hoog")
 				_:
 					_zet(self, t, gras[h])
+	overlay = over
+	# hekken en poorten: overlay-tegel op gras, botsing uit de tegel (open poort botst niet)
+	for y in Data.H:
+		for x in Data.W:
+			var t := Vector2i(x, y)
+			if Data.hek_aanwezig(t):
+				_zet(over, t, Data.hek_tegel(t))
 	# brug: noord-zuid over de beek (BRUG = 2 breed, 3 hoog)
 	var b := Data.BRUG
 	for x in range(b.position.x, b.end.x):
@@ -138,3 +157,10 @@ func _bomen(ouder: Node2D) -> void:
 				spr.position += Vector2(0, -6)
 			body.add_child(spr)
 			ouder.add_child(body)
+
+
+## Poort open/dicht: wisselt de tegel (en dus de botsing).
+func zet_poort(t: Vector2i, open: bool) -> void:
+	Data.poorten_open[t] = open
+	if overlay != null:
+		_zet(overlay, t, Data.hek_tegel(t))
