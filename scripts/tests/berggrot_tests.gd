@@ -678,11 +678,12 @@ func _bouwplaats() -> void:
 	check("dicht: voorman zegt dat de tunnel niet veilig is (%s)" % voorman_tekst, voorman_tekst.contains("isn't safe yet"))
 	check("dicht: werker praat Engels", werker_tekst.contains("Mind the cart"))
 	var sheet_ok := true
-	for nm in ["Werker", "Werker2", "Werker3"]:
-		var npc := scene().get_node_or_null("Objects/" + nm)
-		sheet_ok = sheet_ok and npc != null and npc.sheet != null and npc.sheet.resource_path.ends_with("bouw_werker_wm1_slim.png")
+	# 20 okt 2026: Sunny = bouw_werker (slank), George = b (witte helm), Fay = c (rode helm)
+	for paar in [["Werker", "bouw_werker_wm1_slim.png"], ["Werker2", "bouw_werker_b.png"], ["Werker3", "bouw_werker_c.png"]]:
+		var npc := scene().get_node_or_null("Objects/" + paar[0])
+		sheet_ok = sheet_ok and npc != null and npc.sheet != null and npc.sheet.resource_path.ends_with("buiten/" + paar[1])
 		sheet_ok = sheet_ok and npc.sprite.hframes == 3 and npc.sprite.vframes == 4 and npc.sprite.offset == Vector2(0, -8)
-	check("bouwplaats: drie werkers met de bouwvakker-sheet van RPG ART", sheet_ok)
+	check("bouwplaats: drie werkers met eigen bouwvakker-sheets van RPG ART (a/b/c)", sheet_ok)
 	var vm := scene().get_node_or_null("Objects/Voorman")
 	check("bouwplaats: Voorman heeft eigen WM1-sheet (henrik.png 24x32, offset -8)", vm != null and vm.sheet != null
 			and vm.sheet.resource_path.ends_with("som/wilgendal/npcs/henrik_wm1_slim.png") and vm.sprite.hframes == 3

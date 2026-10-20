@@ -322,7 +322,7 @@ const HERBERG_MAP := [
 	"Ld.,.zPc.,.R",
 	"CCCCCCDCCCCC",
 ]
-const HERBERG_NPCS := [["Waard", "Innkeeper Wout", Vector2i(6, 3), Vector2i.DOWN, "herbergier", Color(0.95, 0.85, 0.7)]]
+const HERBERG_NPCS := [["Waard", "Innkeeper Wout", Vector2i(6, 3), Vector2i.DOWN, "herbergier", Color(1, 1, 1)]]
 
 
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=4]
+[gd_scene load_steps=21 format=4]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_2270x"]
 [ext_resource type="TileSet" path="res://assets/tiles/wereld.tres" id="2_uoeba"]
@@ -17,6 +17,8 @@
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="15_8w33c"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="16_kwuv0"]
 [ext_resource type="Texture2D" path="res://assets/sprites/buiten/bouw_werker.png" id="17_werkr"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/bouw_werker_b.png" id="17_werkr_b"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/bouw_werker_c.png" id="17_werkr_c"]
 [ext_resource type="Texture2D" path="res://assets/sprites/som/wilgendal/npcs/henrik.png" id="90_henrik"]
 
 [node name="BerggrotBouwplaats" type="Node2D"]
@@ -172,7 +174,7 @@ facing = Vector2i(0, 1)
 event = ""
 event_arg = ""
 show_if = {}
-sheet = ExtResource("17_werkr")
+sheet = ExtResource("17_werkr_b")
 
 [node name="Werker3" type="StaticBody2D" parent="Objects" instance=ExtResource("12_qdr2b")]
 position = Vector2(296, 136)
@@ -183,7 +185,7 @@ facing = Vector2i(-1, 0)
 event = ""
 event_arg = ""
 show_if = {}
-sheet = ExtResource("17_werkr")
+sheet = ExtResource("17_werkr_c")
 
 [node name="Spawns" type="Node2D" parent="."]
 

@@ -500,8 +500,8 @@ func _som_pilot(dorp: Node) -> void:
 		npc_ok = npc_ok and spr.texture.resource_path == Data.som_npc_sheet(naam)
 		npc_ok = npc_ok and spr.hframes == 3 and spr.vframes == 4 and spr.offset == Vector2(0, -8)
 	check("som: fase-3 NPC-sheets 24x32 (Gerrit, Bram, Els, Fien, Wout, Siem)", npc_ok)
-	check("som: slanke WM1-NPC's (20 okt): Gerrit = gerrit_wm1_slim.png (handwerk blijft), Bram = bram.png (vervangen)",
-			Data.som_npc_sheet("Gerrit").ends_with("npcs/gerrit_wm1_slim.png")
+	check("som: slanke WM1-NPC's (20 okt): Gerrit = gerrit_wm1_slim_v2.png (stapframes-fix; handwerk blijft), Bram = bram.png (vervangen)",
+			Data.som_npc_sheet("Gerrit").ends_with("npcs/gerrit_wm1_slim_v2.png")
 			and Data.som_npc_sheet("Bram").ends_with("npcs/bram.png")
 			and Data.som_npc_sheet("OudeMan").ends_with("npcs/oude_man_wm1_slim.png"))
 	var ov: TileMapLayer = dorp.get_node("Ground/SomOverlay")
@@ -629,7 +629,8 @@ func _som() -> void:
 	# 20 okt 2026: slanke WM1-NPC-sheets. Voeten op de onderste rij van elk frame, zodat offset -8 ze op de tegelrand zet.
 	var voeten_ok := true
 	var slank := ["som/wilgendal/npcs/oude_man_wm1_slim", "som/wilgendal/npcs/gerrit_wm1_slim", "som/wilgendal/npcs/henrik_wm1_slim",
-			"npc_wm1_slim", "buiten/bouw_werker_wm1_slim"]
+			"npc_wm1_slim", "buiten/bouw_werker_wm1_slim", "som/wilgendal/npcs/gerrit_wm1_slim_v2",
+			"buiten/waard", "buiten/bouw_werker_b", "buiten/bouw_werker_c"]
 	for id in ["bram", "els", "fien", "wout", "siem", "mien", "jelle", "magier", "accessoire"]:
 		slank.append("som/wilgendal/npcs/" + id)
 	for id in slank:
@@ -648,7 +649,10 @@ func _som() -> void:
 			KaartStijl.npc_sheet_pad("res://assets/sprites/npc.png") == "res://assets/sprites/npc_wm1_slim.png"
 			and KaartStijl.npc_sheet_pad("res://assets/sprites/buiten/bouw_werker.png") == "res://assets/sprites/buiten/bouw_werker_wm1_slim.png"
 			and KaartStijl.npc_sheet_pad("res://assets/sprites/som/wilgendal/npcs/marit.png") == "res://assets/sprites/som/wilgendal/npcs/marit.png"
-			and KaartStijl.npc_sheet_pad("res://assets/sprites/npc_wm1_slim.png") == "res://assets/sprites/npc_wm1_slim.png")
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/npc_wm1_slim.png") == "res://assets/sprites/npc_wm1_slim.png"
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/som/wilgendal/npcs/gerrit.png") == "res://assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim_v2.png"
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim_v2.png") == "res://assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim_v2.png"
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/buiten/bouw_werker_b.png") == "res://assets/sprites/buiten/bouw_werker_b.png")
 	var gen: Node = (load("res://scenes/npc.tscn") as PackedScene).instantiate()
 	add_child(gen)
 	var gs: Sprite2D = gen.get_node("Sprite2D")

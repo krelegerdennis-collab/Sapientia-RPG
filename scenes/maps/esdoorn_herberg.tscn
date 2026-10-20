@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=4]
+[gd_scene load_steps=10 format=4]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_47mup"]
 [ext_resource type="TileSet" path="res://assets/tiles/binnen.tres" id="2_bnnb7"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/map_spawn.gd" id="6_70k46"]
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="7_hohgb"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="8_l768s"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buiten/waard.png" id="9_waard"]
 
 [node name="EsdoornHerberg" type="Node2D"]
 script = ExtResource("1_47mup")
@@ -34,7 +35,6 @@ position = Vector2(136, 56)
 type = "save"
 
 [node name="Waard" parent="Objects" instance=ExtResource("4_vruc5")]
-modulate = Color(0.95, 0.85, 0.7, 1)
 position = Vector2(104, 56)
 npc_name = "Innkeeper Walt"
 lines = Array[String](["..."])
@@ -42,7 +42,7 @@ facing = Vector2i(0, 1)
 event = "herbergier"
 event_arg = ""
 show_if = {}
-sheet = null
+sheet = ExtResource("9_waard")
 
 [node name="Player" parent="Objects" instance=ExtResource("5_kks8v")]
 position = Vector2(104, 120)
