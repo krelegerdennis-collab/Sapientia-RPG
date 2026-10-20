@@ -521,19 +521,19 @@ func _outdoor_tests() -> void:
 	var arch: Node = sc.get_node("Objects/Archief")
 	var well: Node = sc.get_node("Objects/Put")
 	var chest: Node = sc.get_node("Objects/Kist")
-	check("B: ingang = RPG ART archief_ingang.png (2 frames 48x32), 3x2 tiles op (25,2)", arch.texture.resource_path.ends_with("buiten/archief_ingang.png")
+	check("B: ingang = RPG ART archief_ingang.png (2 frames 48x32), 3x2 tiles op (35,4)", arch.texture.resource_path.ends_with("buiten/archief_ingang.png")
 			and arch.hframes == 2 and arch.texture.get_size() == Vector2(96, 32) and arch.tiles == Vector2i(3, 2)
-			and Vector2i((arch.position / 16.0).floor()) == Vector2i(25, 2))
+			and Vector2i((arch.position / 16.0).floor()) == Vector2i(35, 4))
 	var cs: CollisionShape2D = arch.get_node("CollisionShape2D")
 	var sprite_rect := Rect2(arch.sprite.global_position + arch.sprite.offset - Vector2(24, 16), Vector2(48, 32))
-	check("B: ingang-plaatje precies op het raster (x 400..448, y 32..64) en botsing = 3x2 (%s)" % sprite_rect,
-			sprite_rect == Rect2(400, 32, 48, 32) and (cs.shape as RectangleShape2D).size == Vector2(46, 30)
-			and cs.global_position == Vector2(424, 48))
+	check("B: ingang-plaatje precies op het raster (x 560..608, y 64..96) en botsing = 3x2 (%s)" % sprite_rect,
+			sprite_rect == Rect2(560, 64, 48, 32) and (cs.shape as RectangleShape2D).size == Vector2(46, 30)
+			and cs.global_position == Vector2(584, 80))
 	check("B: nacht -> ingang open + flakkerende gloed (open_flikker, 2 frames)", arch.looping
 			and arch.sprite.texture.resource_path.ends_with("archief_ingang_open_flikker.png") and arch.glow.visible)
 	check("B: waterput 32x32 = 2x2 tiles, plaatje op het raster", well.texture.resource_path.ends_with("buiten/put.png")
 			and well.tiles == Vector2i(2, 2) and (well.get_node("CollisionShape2D").shape as RectangleShape2D).size == Vector2(30, 30)
-			and well.sprite.global_position + well.sprite.offset == Vector2(160, 96))
+			and well.sprite.global_position + well.sprite.offset == Vector2(272, 128))
 	var seals: Array = sc.get_node("Objects").get_children().filter(func(n): return n.name.begins_with("Zegel") or str(n.get("event")) == "zegel")
 	check("B: v0.16 geen zegelstenen meer bij het Wachtershuis (runen-tutorial weg) (%s)" % [seals], seals.is_empty())
 	check("B: kist van RPG ART (2 frames 16x16)", chest.texture.resource_path.ends_with("buiten/kist.png") and chest.hframes == 2)
@@ -541,7 +541,7 @@ func _outdoor_tests() -> void:
 	check("B: %d ruïne-stukken (ruine.png, 10 stukken) rond de ingang, blokkeren" % ruins.size(), ruins.size() >= 4
 			and ruins.all(_ruin_ok))
 	# de ingang blijft bereikbaar: van de voordeur naar de open ingang lopen (zoals de autotest)
-	player().place_at(Vector2i(20, 6), D)
+	player().place_at(Vector2i(28, 8), D)
 	await pframes(20)
 	await screenshot("v13_buiten_nacht")
 	# overdag (taken-stap, ingang nog dicht) voor de echte kleuren
@@ -553,7 +553,7 @@ func _outdoor_tests() -> void:
 	sc = scene()
 	check("B: overdag: ingang dicht (frame 0)", not sc.get_node("Objects/Archief").looping
 			and sc.get_node("Objects/Archief").sprite.frame == 0)
-	player().place_at(Vector2i(20, 6), D)
+	player().place_at(Vector2i(28, 8), D)
 	await pframes(20)
 	await screenshot("v13_buiten")
 	GameState.story_step = SD.NACHT
@@ -572,7 +572,7 @@ func _lrect(b: Control, c: Control) -> Rect2:
 
 func _ruin_ok(n: Node) -> bool:
 	return n.texture.resource_path.ends_with("buiten/ruine.png") and n.hframes == 10 and n.collision_layer == 1 \
-			and absf(n.position.x - 424.0) <= 64.0 and n.position.y <= 96.0
+			and absf(n.position.x - 584.0) <= 64.0 and n.position.y <= 128.0
 
 
 func _story_settle() -> void:

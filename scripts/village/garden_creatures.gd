@@ -16,13 +16,13 @@ const ART_DIR := "res://art/map_creatures/"
 const FALLBACK_DIR := "res://assets/map_monsters/"
 const DIR_ROW := {Vector2i.DOWN: 0, Vector2i.LEFT: 1, Vector2i.RIGHT: 2, Vector2i.UP: 3}
 ## Speelplek in de tuin (naast het pad, onder het huis).
-const PLAY_CENTER := Vector2(312, 184)
+const PLAY_CENTER := Vector2(440, 232)   # 1.4x-erf (45x31), was (312, 184)
 const PLAY_RADIUS := 12.0
 const PLAY_SPEED := 1.6          # rad/s rondje om elkaar heen
 const PLAY_FPS := 8.0
 const WALK_FPS := 8.0
-## Komt de speler zuidelijker dan dit (richting uitgang NaarWereld, y=336), dan volgen ze.
-const FOLLOW_TRIGGER_Y := 232.0
+## Komt de speler zuidelijker dan dit (richting uitgang NaarWereld, y=480), dan volgen ze.
+const FOLLOW_TRIGGER_Y := 296.0   # 1.4x-erf, was 232
 const FOLLOW_GAP := 16.0         # afstand per volger op het spoor
 const CATCH_UP_SPEED := 96.0     # px/s om bij het spoor te komen
 
