@@ -187,7 +187,7 @@ const THEMES := {
 	#                   (overlay-laag boven de speler)}; kamers zetten bomen met "trees": [[x, y, soort]]
 	#   "mist_band"   = [begin, midden..., eind] overlay-tegels voor "mist": [[x, y, lengte]] in een kamer
 	"donker_woud": {
-		"tiles": "res://assets/tiles/dungeon/woud_tiles.png",
+		"tiles": "res://assets/tiles/dungeon/woud_tiles_v8.png",
 		"lib_tiles": "res://assets/tiles/dungeon/archief_grijs_bibliotheek.png",
 		"single_atlas": true,
 		"terrain": "woud",

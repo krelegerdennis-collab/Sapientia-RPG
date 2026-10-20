@@ -197,6 +197,7 @@ assets/sprites/enemies/wortelkoning_hit.png
 #        (woud_achtergrond.png, 1280x432), Noor in de wortelcocon (dicht / puls 2 frames / open), anker (16,47)
 assets/tiles/dungeon/woud_tiles.png
 assets/tiles/dungeon/donker_woud_tiles.png
+assets/tiles/dungeon/woud_tiles_v8.png
 assets/battle/donker_woud.png
 assets/sprites/woud/noor_cocon.png
 assets/sprites/woud/noor_cocon_open.png

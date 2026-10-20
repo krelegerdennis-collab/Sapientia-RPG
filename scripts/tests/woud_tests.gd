@@ -445,7 +445,7 @@ func _data_tests() -> void:
 	check("Codex-art: rugaanzichten van de 4 oude vijanden (zelfde maat), icoon + inschrijf-effect (%s)" % [codex_bad], codex_bad.is_empty()
 			and ResourceLoader.exists("res://assets/ui/icons/leeg_boek.png") and ResourceLoader.exists("res://assets/fx/inschrijf.png"))
 	var hw := hw_lines()
-	var need := ["assets/sprites/noor_dorp.png", "assets/tiles/dungeon/woud_tiles.png", "assets/battle/donker_woud.png",
+	var need := ["assets/sprites/noor_dorp.png", "assets/tiles/dungeon/woud_tiles_v8.png", "assets/battle/donker_woud.png",
 		"assets/sprites/woud/noor_cocon.png", "assets/sprites/woud/noor_cocon_open.png", "assets/sprites/woud/noor_cocon_puls.png",
 		"assets/sprites/enemies/wortelkoning.png", "assets/sprites/enemies/wortelkoning_idle.png", "assets/sprites/enemies/wortelkoning_hit.png",
 		"assets/sprites/enemies/mistuil_rug.png", "assets/ui/icons/leeg_boek.png", "assets/fx/inschrijf.png", "art/enemies/mosslijm_rug.png",
@@ -659,7 +659,7 @@ func _forest_tests() -> void:
 	check("met de opdracht: het Dark Wood in (Wood's Edge)", await wait_scene("WoudRand"))
 	await wait_fade()
 	var r := scene()
-	check("thema: woud-tegels, terrein 'woud', tint + mist", r.ground.tile_set.get_source(0).texture.resource_path.ends_with("woud_tiles.png")
+	check("thema: woud-tegels, terrein 'woud', tint + mist", r.ground.tile_set.get_source(0).texture.resource_path.ends_with("woud_tiles_v8.png")
 			and r.terrain_at(Vector2i(7, 13)) == "woud" and r.get_node_or_null("ThemaTint") != null and r.get_node_or_null("WoudMist") != null)
 	var ov: TileMapLayer = r.get_node_or_null("Overlay")
 	check("overlay-laag (kruinen + mist) boven de speler, zonder botsing", ov != null and ov.z_index > player().z_index
