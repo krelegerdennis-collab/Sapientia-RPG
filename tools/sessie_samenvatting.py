@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """Samenvatting van een sessielogboek (scripts/sessielog.gd, JSON-lines).
 
-Gebruik: python3 tools/sessie_samenvatting.py <log.jsonl> [meer.jsonl ...] [--json]
+Gebruik: python3 tools/sessie_samenvatting.py <log.jsonl> [meer.jsonl ...] [--json] [--heatmap[=map]]
 Leest één of meer logboeken (ook een geëxporteerd bestand met meerdere sessies achter elkaar) en
 geeft per sessie: duur, apparaat, kaarten met tijd, plekken waar de speler lang stilstond, botsingen
 (bump) per plek, gevechten (resultaat, ronden, hp-verlies, acties), doden en respawns, menu's,
 dialogen en cutscenes. Kapotte regels worden overgeslagen en geteld.
+
+--heatmap[=map]: per kaart een PNG <map>/heatmap_<kaart>.png (standaard ./heatmaps) met het aantal
+bezoeken per tegel (pos-regels, alle sessies samen) over de hele kaart (kaart_info "rect"; anders de
+bezochte tegels). Groot genoeg voor een telefoon: minstens 1080 px breed, kop met kaart, stijl en
+tileset (RPG ART), legenda onderaan.
 """
 import json, sys
 from collections import Counter, defaultdict
@@ -121,14 +126,80 @@ def tekst(s):
     return "\n".join(r)
 
 
+def heatmaps(sessies, map_uit):
+    from PIL import Image, ImageDraw, ImageFont
+    import math, os
+    tel = defaultdict(Counter)
+    info = {}
+    for regels in sessies:
+        for d in regels:
+            if d.get("e") == "pos":
+                tel[d.get("kaart", "?")][(int(d["x"]), int(d["y"]))] += 1
+                info.setdefault(d.get("kaart", "?"), {}).setdefault("stijl", d.get("stijl", ""))
+                info[d.get("kaart", "?")].setdefault("tileset", d.get("tileset", ""))
+            elif d.get("e") == "kaart_info":
+                k = info.setdefault(d.get("kaart", "?"), {})
+                k.update({x: d.get(x) for x in ("stijl", "tileset", "gebied", "palet") if d.get(x)})
+                if d.get("rect"):
+                    k["rect"] = d["rect"]
+    os.makedirs(map_uit, exist_ok=True)
+    try:
+        font = ImageFont.truetype("DejaVuSans-Bold.ttf", 30)
+        klein = ImageFont.truetype("DejaVuSans.ttf", 24)
+    except OSError:
+        font = klein = ImageFont.load_default()
+    gemaakt = []
+    for kaart, c in sorted(tel.items()):
+        k = info.get(kaart, {})
+        xs = [p[0] for p in c]; ys = [p[1] for p in c]
+        if k.get("rect") and k["rect"][2] > 0:
+            x0, y0, w, h = [int(v) for v in k["rect"]]
+        else:
+            x0, y0 = min(xs), min(ys)
+            w, h = max(xs) - x0 + 1, max(ys) - y0 + 1
+        cel = max(8, min(48, 1080 // max(1, w)))
+        kop, voet = 96, 70
+        img = Image.new("RGB", (max(w * cel, 1080), kop + h * cel + voet), (24, 24, 30))
+        dr = ImageDraw.Draw(img)
+        hoogst = max(c.values())
+        def kleur(n):
+            f = math.log1p(n) / math.log1p(hoogst)
+            # geel -> oranje -> rood
+            return (255, int(235 - 200 * f), int(90 - 80 * f))
+        for ty in range(h):
+            for tx in range(w):
+                n = c.get((x0 + tx, y0 + ty), 0)
+                px, py = tx * cel, kop + ty * cel
+                dr.rectangle([px, py, px + cel - 1, py + cel - 1], fill=kleur(n) if n else (52, 58, 52),
+                             outline=(36, 40, 36) if cel >= 10 else None)
+        dr.text((16, 10), "%s  (%s)" % (kaart, k.get("stijl", "?")), fill=(255, 255, 255), font=font)
+        dr.text((16, 52), "tileset: %s   %dx%d tiles   max %d visits" % (k.get("tileset", "?") or "?", w, h, hoogst),
+                fill=(200, 200, 210), font=klein)
+        ly = kop + h * cel + 20
+        for i in range(10):
+            n = max(1, round(hoogst ** (i / 9)))
+            dr.rectangle([16 + i * 44, ly, 16 + i * 44 + 40, ly + 30], fill=kleur(n))
+        dr.text((16 + 10 * 44 + 12, ly), "1 .. %d  (grey = never)" % hoogst, fill=(220, 220, 220), font=klein)
+        p = os.path.join(map_uit, "heatmap_%s.png" % kaart)
+        img.save(p)
+        gemaakt.append(p)
+    return gemaakt
+
+
 def main(args):
     js = "--json" in args
+    hm = [a for a in args if a == "--heatmap" or a.startswith("--heatmap=")]
     paden = [a for a in args if not a.startswith("--")]
     if not paden:
         print(__doc__.strip())
         return 2
     sessies, kapot = lees(paden)
     samen = [vat_samen(x) for x in sessies]
+    if hm:
+        for p in heatmaps(sessies, hm[0].split("=", 1)[1] if "=" in hm[0] else "heatmaps"):
+            print("heatmap: %s" % p)
+        if not js:
+            return 0
     if js:
         print(json.dumps({"sessies": [als_json(s) for s in samen], "kapotte_regels": kapot}, indent=1, default=str))
     else:
