@@ -459,6 +459,8 @@ func _data_tests() -> void:
 		"gevecht_normaal": "bgm_gevecht_normaal.ogg",
 		"gevecht_miniboss": "bgm_gevecht_miniboss.ogg",
 		"wereld": "bgm_wereld.ogg",
+		"dorp_wilgendal": "bgm_dorp_wilgendal.ogg",
+		"donker_woud": "bgm_donker_woud.ogg",
 	}
 	var suno_bad: Array[String] = []
 	for key in suno:
@@ -471,6 +473,26 @@ func _data_tests() -> void:
 	var menu_stream: Resource = load("res://assets/audio/bgm/bgm_main_menu.ogg")
 	var menu_len := (menu_stream as AudioStream).get_length() if menu_stream is AudioStream else 0.0
 	check("titel-ogg is echte muziek (langer dan een minuut)", menu_len > 60.0)
+	var loop_bad: Array[String] = []
+	for key in ["main_menu", "dorp_wilgendal", "donker_woud"]:
+		var lst: Resource = load("res://assets/audio/bgm/" + str(suno[key]))
+		if not (lst is AudioStream) or (lst as AudioStream).get_length() < 60.0 or not bool(AudioManager._bgm.get(key, {}).get("loop", false)):
+			loop_bad.append(key)
+	check("titel, Willowdale en Dark Wood: echte muziek die loopt (%s)" % [loop_bad], loop_bad.is_empty())
+	var room_bad: Array[String] = []
+	for rid in ["woud_rand", "woud_pad", "woud_mistpoel", "woud_sporenkring", "woud_open_plek"]:
+		var ps: PackedScene = load("res://scenes/maps/%s.tscn" % rid)
+		var inst := ps.instantiate()
+		if str(inst.get("music_track")) != "donker_woud":
+			room_bad.append(rid)
+		inst.free()
+	var dorp: Node = (load("res://scenes/maps/dorp_wilgendal.tscn") as PackedScene).instantiate()
+	if str(dorp.get("music_track")) != "dorp_wilgendal":
+		room_bad.append("dorp_wilgendal")
+	dorp.free()
+	check("woudkamers spelen 'donker_woud', het dorp 'dorp_wilgendal' (%s)" % [room_bad], room_bad.is_empty())
+	var mp0 := AudioManager.get_node_or_null("MusicPlayer0") as AudioStreamPlayer
+	check("muziek speelt op de Music-bus", AudioServer.get_bus_index(AudioManager.BUS_MUSIC) >= 0 and mp0 != null and mp0.bus == AudioManager.BUS_MUSIC)
 	var music_player := AudioManager.get_node_or_null("MusicPlayer0") as AudioStreamPlayer
 	check("muziekspeler gebruikt stream-playback (web Sample-bus blijft anders stil)",
 			music_player != null and music_player.playback_type == AudioServer.PLAYBACK_TYPE_STREAM)

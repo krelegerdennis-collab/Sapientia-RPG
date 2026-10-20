@@ -8,12 +8,12 @@
 	"bgm": {
 		"main_menu": {
 			"bestand": "bgm_main_menu.ogg",
-			"titel": "Het Ontwaken van Sapientia",
+			"titel": "SapientiaBattleBGM",
 			"locatie": "Titelscherm",
-			"beschrijving": "Eenzame, melancholische piano boven een langzaam tikkend uurwerk. Voelt als een stoffige machine die langzaam wakker wordt.",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/WksrPta1XeSGqCS4). Titel- en startmenu-muziek; staart in de kop gemengd zodat hij naadloos loopt.",
 			"loop": true,
 			"volume_db": -4.0,
-			"bpm": 62
+			"bpm": 0
 		},
 		"wereld": {
 			"bestand": "bgm_wereld.ogg",
@@ -167,6 +167,24 @@
 			"loop": true,
 			"volume_db": -6.0,
 			"bpm": 72
+		},
+		"dorp_wilgendal": {
+			"bestand": "bgm_dorp_wilgendal.ogg",
+			"titel": "Ochtend in een veilig dorp",
+			"locatie": "Dorp Wilgendal",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/bomgvxDLCEOJXk7D). Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
+		},
+		"donker_woud": {
+			"bestand": "bgm_donker_woud.ogg",
+			"titel": "SapientiaSadBGM",
+			"locatie": "Het Donker Woud (woud_rand t/m woud_open_plek, Vesper)",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/MFdr64WaYsVpGvKH). Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
 		}
 	},
 	"sfx": {
