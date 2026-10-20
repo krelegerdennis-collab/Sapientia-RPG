@@ -1,0 +1,524 @@
+{
+ "tile": 16,
+ "collision_note": "collision_tiles = list of [col,row,w,h] in tiles from the sprite top-left; walk_behind_rows = top rows the player walks behind (Y-sort on ysort_origin_px).",
+ "props": {
+  "put": {
+   "file": "put.png",
+   "size_tiles": [
+    3,
+    3
+   ],
+   "size_px": [
+    48,
+    48
+   ],
+   "collision_tiles": [
+    [
+     0,
+     2,
+     3,
+     1
+    ]
+   ],
+   "walk_behind_rows": 2,
+   "kind": "steen",
+   "ysort_origin_px": [
+    24,
+    47
+   ],
+   "note": "well; roof + winch walk-behind, stone ring blocks"
+  },
+  "kraam_rood": {
+   "file": "kraam_rood.png",
+   "size_tiles": [
+    3,
+    3
+   ],
+   "size_px": [
+    48,
+    48
+   ],
+   "collision_tiles": [
+    [
+     0,
+     1,
+     3,
+     2
+    ]
+   ],
+   "walk_behind_rows": 1,
+   "kind": "huis",
+   "ysort_origin_px": [
+    24,
+    47
+   ],
+   "note": "market stall; awning row 0 walk-behind; talk to the keeper from the south (row 3)"
+  },
+  "kraam_blauw": {
+   "file": "kraam_blauw.png",
+   "size_tiles": [
+    3,
+    3
+   ],
+   "size_px": [
+    48,
+    48
+   ],
+   "collision_tiles": [
+    [
+     0,
+     1,
+     3,
+     2
+    ]
+   ],
+   "walk_behind_rows": 1,
+   "kind": "huis",
+   "ysort_origin_px": [
+    24,
+    47
+   ],
+   "note": "market stall; awning row 0 walk-behind; talk to the keeper from the south (row 3)"
+  },
+  "kraam_groen": {
+   "file": "kraam_groen.png",
+   "size_tiles": [
+    3,
+    3
+   ],
+   "size_px": [
+    48,
+    48
+   ],
+   "collision_tiles": [
+    [
+     0,
+     1,
+     3,
+     2
+    ]
+   ],
+   "walk_behind_rows": 1,
+   "kind": "huis",
+   "ysort_origin_px": [
+    24,
+    47
+   ],
+   "note": "market stall; awning row 0 walk-behind; talk to the keeper from the south (row 3)"
+  },
+  "lantaarn": {
+   "file": "lantaarn.png",
+   "size_tiles": [
+    1,
+    3
+   ],
+   "size_px": [
+    16,
+    48
+   ],
+   "collision_tiles": [
+    [
+     0,
+     2,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 2,
+   "kind": "steen",
+   "ysort_origin_px": [
+    8,
+    47
+   ],
+   "note": "street lamp, lit (night) \u2014 swap with lantaarn_uit by day"
+  },
+  "lantaarn_uit": {
+   "file": "lantaarn_uit.png",
+   "size_tiles": [
+    1,
+    3
+   ],
+   "size_px": [
+    16,
+    48
+   ],
+   "collision_tiles": [
+    [
+     0,
+     2,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 2,
+   "kind": "steen",
+   "ysort_origin_px": [
+    8,
+    47
+   ],
+   "note": "street lamp, unlit"
+  },
+  "bank": {
+   "file": "bank.png",
+   "size_tiles": [
+    2,
+    1
+   ],
+   "size_px": [
+    32,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     2,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "hout",
+   "ysort_origin_px": [
+    16,
+    15
+   ],
+   "note": "bench, 2 wide"
+  },
+  "bloembak": {
+   "file": "bloembak.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "plant",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": "planter box"
+  },
+  "bloembed": {
+   "file": "bloembed.png",
+   "size_tiles": [
+    2,
+    1
+   ],
+   "size_px": [
+    32,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     2,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "plant",
+   "ysort_origin_px": [
+    16,
+    15
+   ],
+   "note": "long planter, 2 wide"
+  },
+  "ton": {
+   "file": "ton.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "hout",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": ""
+  },
+  "krat": {
+   "file": "krat.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "hout",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": ""
+  },
+  "zakken": {
+   "file": "zakken.png",
+   "size_tiles": [
+    2,
+    1
+   ],
+   "size_px": [
+    32,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     2,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "hout",
+   "ysort_origin_px": [
+    16,
+    15
+   ],
+   "note": "flour sacks (windmill)"
+  },
+  "kist": {
+   "file": "kist.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "hout",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": "chest closed"
+  },
+  "kist_open": {
+   "file": "kist_open.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "hout",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": "chest open"
+  },
+  "wegwijzer": {
+   "file": "wegwijzer.png",
+   "size_tiles": [
+    1,
+    2
+   ],
+   "size_px": [
+    16,
+    32
+   ],
+   "collision_tiles": [
+    [
+     0,
+     1,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 1,
+   "kind": "hout",
+   "ysort_origin_px": [
+    8,
+    31
+   ],
+   "note": "signpost"
+  },
+  "bord_schild": {
+   "file": "bord_schild.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [],
+   "walk_behind_rows": 0,
+   "kind": "huis",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": "shop icon sign (schild); hangs on the shop facade, no collision"
+  },
+  "bord_zwaard": {
+   "file": "bord_zwaard.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [],
+   "walk_behind_rows": 0,
+   "kind": "huis",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": "shop icon sign (zwaard); hangs on the shop facade, no collision"
+  },
+  "bord_ring": {
+   "file": "bord_ring.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [],
+   "walk_behind_rows": 0,
+   "kind": "huis",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": "shop icon sign (ring); hangs on the shop facade, no collision"
+  },
+  "bord_ster": {
+   "file": "bord_ster.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [],
+   "walk_behind_rows": 0,
+   "kind": "huis",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": "shop icon sign (ster); hangs on the shop facade, no collision"
+  },
+  "den": {
+   "file": "den.png",
+   "size_tiles": [
+    2,
+    3
+   ],
+   "size_px": [
+    32,
+    48
+   ],
+   "collision_tiles": [
+    [
+     0,
+     2,
+     2,
+     1
+    ]
+   ],
+   "walk_behind_rows": 2,
+   "kind": "kruin",
+   "ysort_origin_px": [
+    16,
+    47
+   ],
+   "note": "conifer (somlib.cone_tree); trunk tile row blocks"
+  },
+  "struik": {
+   "file": "struik.png",
+   "size_tiles": [
+    1,
+    1
+   ],
+   "size_px": [
+    16,
+    16
+   ],
+   "collision_tiles": [
+    [
+     0,
+     0,
+     1,
+     1
+    ]
+   ],
+   "walk_behind_rows": 0,
+   "kind": "plant",
+   "ysort_origin_px": [
+    8,
+    15
+   ],
+   "note": "bush (somlib.bush)"
+  }
+ }
+}

@@ -50,13 +50,34 @@ func _run() -> void:
 	_wereld()
 	await _dorp()
 	await _panden()
+	await _som()
 	print("WILGENDALTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures else 0)
 
 
 func _data() -> void:
-	check("grond is 24 bij 16", Data.grond_ok() and Data.W == 24 and Data.H == 16)
+	check("grond is 64 bij 40 (v4, grote SoM-huizen en brede paden)", Data.grond_ok() and Data.W == 64 and Data.H == 40)
+	check("max %d sfeer-NPC's op het marktplein (%d)" % [Data.PLEIN_MAX, Data.op_plein_aantal()],
+			Data.op_plein_aantal() <= Data.PLEIN_MAX and Data.op_plein_aantal() >= 1)
+	var beek_ok := true
+	for x in Data.W:
+		var t := Vector2i(x, Data.BEEK_RIJ)
+		if Data.BRUG.has_point(t) != Data.beloopbaar(t) and x > 0 and x < Data.W - 1:
+			beek_ok = false
+	check("beek is 1 tegel breed, alleen de brug is beloopbaar", beek_ok
+			and Data.beloopbaar(Vector2i(20, Data.BEEK_RIJ - 1)) and Data.beloopbaar(Vector2i(20, Data.BEEK_RIJ + 1)))
+	var props_ok := true
+	for ruw in Data.PROPS:
+		if not ResourceLoader.exists(Data.PROPS_MAP + str(ruw["tex"]) + ".png"):
+			props_ok = false
+	check("props van RPG ART bestaan (put, kramen, hek, bloembak, lantaarn, bankje, beek, brug)", props_ok
+			and ResourceLoader.exists(Data.PROPS_MAP + "beek_h.png") and ResourceLoader.exists(Data.PROPS_MAP + "brug_v.png"))
+	check("dorp en interieurs zijn geen kerker voor de autosave",
+			not GameState.is_dungeon_transition(WERELD, DORP) and not GameState.is_dungeon_transition(DORP, WERELD)
+			and not GameState.is_dungeon_transition(WERELD, BINNEN) and not GameState.is_dungeon_transition(BINNEN, WERELD)
+			and GameState.NON_DUNGEON_MAPS.has(DORP.get_file().get_basename())
+			and GameState.NON_DUNGEON_MAPS.has(BINNEN.get_file().get_basename()))
 	check("vier winkelpanden", Data.winkels().size() == 4)
 	var ids: Array = []
 	for ruw in Data.winkels():
@@ -99,11 +120,11 @@ func _data() -> void:
 	check("korte zwaard houdt de databronprijs", Shop.list_price("kort_zwaard") == int(GD.EQUIPMENT["kort_zwaard"]["price"]))
 	check("kruiden blijven 20 goud", Shop.list_price("kruidenthee") == 20)
 	check("Gerrit-citaat blijft de canonzin", SD.QUOTE_GRAAN_BEZOEK == "Oh, a visitor. Sit down, lad. Or stay standing — doesn't matter. The mill doesn't turn anymore anyway."
-			and SD.GERRIT == "Gerrit the Miller")
+			and SD.GERRIT == "Garrett the Miller")
 	for doel in [Data.voor_tegel(Data.pand("pantser")), Data.voor_tegel(Data.pand("wapen")),
 			Data.voor_tegel(Data.pand("accessoire")), Data.voor_tegel(Data.pand("magie")),
 			Data.voor_tegel(Data.pand("mien")), Data.voor_tegel(Data.pand("echtpaar")),
-			Data.voor_tegel(Data.pand("dicht_west")), Data.voor_tegel(Data.pand("dicht_oost"))]:
+			Data.voor_tegel(Data.pand("dicht_west")), Data.voor_tegel(Data.pand("burgemeester"))]:
 		check("deur bereikbaar %s" % str(doel), Data.bereikbaar(Data.SPAWN_TEGEL, doel))
 	check("bronnen noemen geen tijdsysteem", _zonder_klok("res://scripts/data/wilgendal_dorp.gd")
 			and _zonder_klok("res://scripts/village/dorp_opbouw.gd")
@@ -129,9 +150,9 @@ func _wereld() -> void:
 	var tekst := FileAccess.get_file_as_string(WERELD)
 	var dorp_y := _tscn_y(tekst, "NaarWilgendal")
 	var trap_y := _tscn_y(tekst, "Trap")
-	check("Wilgendal blijft op de wereldkaart", tekst.contains("target_map = \"res://scenes/maps/dorp_wilgendal.tscn\"")
+	check("Willowdale blijft op de wereldkaart", tekst.contains("target_map = \"res://scenes/maps/dorp_wilgendal.tscn\"")
 			and tekst.contains("target_spawn = \"zuid_ingang\""))
-	check("archieftrap ligt ten zuiden van Wilgendal", dorp_y >= 0.0 and trap_y > dorp_y)
+	check("archieftrap ligt ten zuiden van Willowdale", dorp_y >= 0.0 and trap_y > dorp_y)
 	check("codex-bibliotheek bestaat nog", ResourceLoader.exists(BIEB))
 
 
@@ -163,11 +184,12 @@ func _dorp() -> void:
 	check("geen uitgang naar de bibliotheek", dorp.get_node("Exits").get_children().all(func(e):
 		return str(e.target_map) != BIEB))
 	var g: Node = dorp.get_node("Objects/Gerrit")
-	check("Gerrit staat op het plein", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
-			and g.event == "gerrit" and g.get_tile() == Data.GERRIT_TEGEL and Data.op_plein(g.get_tile())
+	check("Garrett staat bij de molen", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
+			and g.event == "gerrit" and g.get_tile() == Data.GERRIT_TEGEL
 			and str(g.get_meta("rol")) == "gerrit")
 	var molen: Node = dorp.get_node("Objects/MolenWieken")
-	check("molen blijft op zijn plek", molen != null and molen.position == Vector2(24, 24))
+	check("reuzenmolen op zijn plek (linksonder van de basis, y-sort op de onderrand)", molen != null and molen.position == Data.molen_positie()
+			and molen.get_node("Basis").position == Vector2(0, -320) and molen.sprite.z_index == 1)
 	var rollen: Array = []
 	var winkel_op_plein := false
 	for kind in dorp.get_node("Objects").get_children():
@@ -176,7 +198,7 @@ func _dorp() -> void:
 		if str(kind.get("event")) == "shop":
 			winkel_op_plein = true
 	rollen.sort()
-	check("zes sfeer-NPC's op het plein", rollen == ["echtpaar", "echtpaar", "gerrit", "kind", "koerier", "veteraan"])
+	check("zes sfeer-NPC's in het dorp", rollen == ["echtpaar", "echtpaar", "gerrit", "kind", "koerier", "veteraan"])
 	check("shopkeepers niet op het plein", not winkel_op_plein
 			and dorp.get_node_or_null("Objects/JelleWapen") == null
 			and dorp.get_node_or_null("Objects/JellePantser") == null
@@ -192,7 +214,7 @@ func _dorp() -> void:
 	for id in ["mien", "echtpaar"]:
 		var deur: Node = dorp.get_node("Objects/Deur_%s" % id)
 		check("bewoond huis %s gaat open" % id, deur.target_map == BINNEN and deur.target_spawn == id)
-	for id in ["dicht_west", "dicht_oost"]:
+	for id in ["dicht_west", "burgemeester"]:
 		var deur: Node = dorp.get_node("Objects/Deur_%s" % id)
 		var zin := str(Data.pand(id)["dicht"])
 		check("dichte deur %s" % id, deur.target_map == "" and deur.lines.size() == 1 and deur.lines[0] == zin)
@@ -202,12 +224,76 @@ func _dorp() -> void:
 		Dialog.close()
 	var bram: Node = dorp.get_node("Objects/Bram")
 	var els: Node = dorp.get_node("Objects/Els")
-	check("echtpaar praat Nederlands", bram.npc_name == "Bram" and els.npc_name == "Els"
+	check("echtpaar praat Nederlands", bram.npc_name == "Bramwell" and els.npc_name == "Elsie"
 			and bram.lines[0] != "" and els.lines[0] != "")
 	check("kind veteraan en koerier hebben een praatje", dorp.get_node("Objects/Fien").lines[0] != ""
 			and dorp.get_node("Objects/Wout").lines[0] != ""
 			and dorp.get_node("Objects/Siem").lines[0] != "")
+	var props := 0
+	for kind in dorp.get_node("Objects").get_children():
+		if str(kind.get_meta("prop", "")) != "":
+			props += 1
+	var verwacht := 0
+	for ruw in Data.PROPS:
+		if not (Data.som() and Data.hek_prop(ruw)):
+			verwacht += 1
+	check("props in de scène (%d; SoM-hekken zijn grondtegels)" % props, props == verwacht)
+	if Data.som():
+		await _som_pilot(dorp)
+	else:
+		check("beek + brug op een eigen laag", dorp.get_node_or_null("Ground/Beek/Brug") != null)
+	await _overzicht(dorp)
+	await _molen(dorp)
 	await _rondlopen(dorp)
+
+
+## v3: reuzenmolen. Stille wieken tot de quest van Gerrit klaar is (zingend_graan_klaar), dan draaiend.
+## Achter (noord van) de molen kun je lopen; alleen de voet botst; de toren tekent over de speler.
+func _molen(dorp: Node) -> void:
+	var molen: Node = dorp.get_node("Objects/MolenWieken")
+	var Wk := preload("res://scripts/village/molen_wieken.gd")
+	var vlag := "zingend_graan_klaar"
+	var had := GameState.story_flags.has(vlag)
+	GameState.story_flags.erase(vlag)
+	molen.story_refresh()
+	check("wieken stil vóór de quest van Garrett", molen.stil() and not molen.draait()
+			and molen.sprite.texture == Wk.wieken_stil() and molen.sprite.hframes == 1)
+	GameState.story_flags[vlag] = true
+	molen.story_refresh()
+	var f0: int = molen.frame_nu()
+	await get_tree().create_timer(0.5).timeout
+	check("na de quest: draaiende wieken (4 frames, 5 fps)", not molen.stil() and molen.draait()
+			and molen.sprite.texture == Wk.wieken_sheet() and molen.sprite.hframes == 4 and molen.frame_nu() != f0)
+	GameState.story_flags.erase(vlag)
+	if had:
+		GameState.story_flags[vlag] = true
+	molen.story_refresh()
+	check("wieken boven de speler (z+1), naaf op (112,112) van de basis", molen.sprite.z_index == 1
+			and molen.sprite.position == Vector2(112, 112 - 320))
+	var o := Data.MOLEN_OORSPRONG
+	var achter_ok := true
+	for x in range(o.x, o.x + Data.MOLEN_MAAT.x):
+		for y in range(o.y + 1, Data.BEEK_RIJ):
+			achter_ok = achter_ok and Data.beloopbaar(Vector2i(x, y))
+	check("molen steekt uit over de beek, achter de molen vrij lopen, alleen de voet botst", achter_ok
+			and Data.BEEK_RIJ > o.y and Data.BEEK_RIJ < o.y + 17
+			and not Data.beloopbaar(o + Vector2i(6, 19)) and not Data.beloopbaar(o + Vector2i(2, 17))
+			and Data.bereikbaar(Data.SPAWN_TEGEL, o + Vector2i(6, 10))
+			and Data.bereikbaar(Data.SPAWN_TEGEL, Data.MOLEN_DEUR[0] + Vector2i.DOWN))
+	var bg := Data.pand("burgemeester")
+	check("burgemeestershuis 7x6, botst alleen op de onderste 3 rijen, dubbele deur op (3,5)", bg.get("tex") == "burgemeester"
+			and Data.pand_blok(bg) == Rect2i(bg["oorsprong"] + Vector2i(0, 3), Vector2i(7, 3))
+			and bg["deur"] == bg["oorsprong"] + Vector2i(3, 5) and Data.beloopbaar(bg["oorsprong"] + Vector2i(3, 1))
+			and Data.bereikbaar(Data.SPAWN_TEGEL, Data.voor_tegel(bg)))
+	var p: Node2D = dorp.get_node("Objects/Player")
+	var oud := p.position
+	p.position = Vector2(o + Vector2i(6, 12)) * 16.0 + Vector2(8, 8)
+	var achter := p.position.y < (molen as Node2D).position.y
+	await get_tree().process_frame
+	p.position = Vector2(Data.MOLEN_DEUR[0] + Vector2i.DOWN) * 16.0 + Vector2(8, 8)
+	check("y-sort: achter de molen verdwijnt de speler, ervoor staat hij voor de molen", achter
+			and p.position.y > (molen as Node2D).position.y)
+	p.position = oud
 
 
 func _rondlopen(dorp: Node) -> void:
@@ -238,10 +324,10 @@ func _rondlopen(dorp: Node) -> void:
 		var op_lus := false
 		if loper != null:
 			op_lus = tegel in loper.lus
-		check("%s stapt over het plein" % naam, loper != null and op_lus and Data.op_plein(tegel) and Data.beloopbaar(tegel)
+		check("%s loopt zijn rondje" % naam, loper != null and op_lus and Data.beloopbaar(tegel)
 				and tegel != Data.GERRIT_TEGEL and not Data.MOLEN.has_point(tegel)
 				and npc.position.distance_to(voor[naam]) > 6.0)
-	check("Gerrit blijft op de molentegel", gerrit.get_tile() == Data.GERRIT_TEGEL
+	check("Garrett blijft op de molentegel", gerrit.get_tile() == Data.GERRIT_TEGEL
 			and gerrit.position.distance_to(vast) < 0.5
 			and dorp.get_node_or_null("Objects/Gerrit") == gerrit)
 
@@ -338,4 +424,239 @@ func _fade() -> void:
 		if Transition._rect.color.a <= 0.01:
 			break
 		await get_tree().process_frame
+	await get_tree().process_frame
+
+
+## Overzichtsfoto van het hele dorp (camera uitgezoomd).
+func _overzicht(dorp: Node) -> void:
+	var shots := OS.get_environment("WILGENDAL_SHOTS")
+	if shots == "":
+		return
+	var cam: Camera2D = get_viewport().get_camera_2d()
+	if cam == null:
+		return
+	var keep_zoom := cam.zoom
+	var keep_pos := cam.global_position
+	var keep_smooth := cam.position_smoothing_enabled
+	cam.position_smoothing_enabled = false
+	var vp := get_viewport().get_visible_rect().size
+	var z := minf(vp.x / (Data.W * 16.0), vp.y / (Data.H * 16.0))
+	cam.zoom = Vector2(z, z)
+	cam.limit_left = -10000; cam.limit_top = -10000; cam.limit_right = 10000; cam.limit_bottom = 10000
+	cam.top_level = true
+	cam.global_position = Vector2(Data.W, Data.H) * 8.0
+	for _i in 8:
+		await get_tree().process_frame
+	var img := get_viewport().get_texture().get_image()
+	if img != null:
+		img.save_png(shots.path_join("wilgendal_nieuw.png"))
+	cam.top_level = false
+	cam.zoom = keep_zoom
+	cam.position_smoothing_enabled = keep_smooth
+	cam.position = Vector2.ZERO
+	dorp.get_node("Objects/Player").set_camera_limits(Rect2i(0, 0, Data.W * 16, Data.H * 16))
+	for _i in 4:
+		await get_tree().process_frame
+
+
+## SoM-voorbereiding (Dennis 14 okt 2026): 24x32-kaartsprites, slot-tilesets per gebied, stijl per gebied.
+## Fase 3: Wilgendal in SoM-stijl (live dorp).
+func _som_pilot(dorp: Node) -> void:
+	var g: TileMapLayer = dorp.get_node("Ground")
+	check("som: grond = fase-1 terrain-tileset", g.has_meta("som_klaar")
+			and g.tile_set.resource_path == KaartStijl.tileset_pad("wilgendal", "terrain"))
+	var namen: Dictionary = g.namen
+	var w := Vector2i(10, Data.BEEK_RIJ)
+	var wc: Array = g.water_anim.get("water_068", [-1, -1])
+	check("som: beek = geanimeerd water blob47 (E+W = 068, bron 1) en botst", g.get_cell_source_id(w) == 1
+			and g.get_cell_atlas_coords(w) == Vector2i(int(wc[0]), int(wc[1]))
+			and g.get_cell_tile_data(w).get_collision_polygons_count(0) > 0 and not Data.beloopbaar(w))
+	var wbron := g.tile_set.get_source(1) as TileSetAtlasSource
+	var wt := Vector2i(int(wc[0]), int(wc[1]))
+	check("som: water 4 frames, ~5 fps, kolommen 0, separatie (7,0)", wbron != null
+			and wbron.get_tile_animation_frames_count(wt) == 4 and wbron.get_tile_animation_columns(wt) == 0
+			and wbron.get_tile_animation_separation(wt) == Vector2i(7, 0) and is_equal_approx(wbron.get_tile_animation_speed(wt), 5.0))
+	var props_ok := true
+	var n_som := 0
+	for i in Data.PROPS.size():
+		var rij: Dictionary = Data.PROPS[i]
+		if Data.hek_prop(rij):
+			props_ok = props_ok and dorp.get_node_or_null("Objects/Prop_%s_%d" % [str(rij["tex"]), i]) == null
+			continue
+		var body: Node = dorp.get_node_or_null("Objects/Prop_%s_%d" % [str(rij["tex"]), i])
+		var sp := Data.som_prop(rij)
+		if body == null:
+			props_ok = false
+		elif not sp.is_empty():
+			n_som += 1
+			var b: Rect2i = sp["blok"]
+			props_ok = props_ok and body.get_meta("som_prop") == sp["naam"] and (body as Node2D).position == sp["voet"]
+			props_ok = props_ok and not Data.beloopbaar(b.position) and Data.prop_blok(rij) == b
+	check("som: fase-3 props (put, kramen, lantaarns, bank, bloembak) met botsing/y-sort uit de index (%d)" % n_som,
+			props_ok and n_som == 17)
+	var npc_ok := true
+	for naam in ["Gerrit", "Bram", "Els", "Fien", "Wout", "Siem"]:
+		var spr: Sprite2D = dorp.get_node("Objects/%s/Sprite2D" % naam)
+		npc_ok = npc_ok and spr.texture.resource_path == Data.SOM_NPC_MAP + str(Data.SOM_NPC[naam]) + ".png"
+		npc_ok = npc_ok and spr.hframes == 3 and spr.vframes == 4 and spr.offset == Vector2(0, -8)
+	check("som: fase-3 NPC-sheets 24x32 (Gerrit, Bram, Els, Fien, Wout, Siem)", npc_ok)
+	var ov: TileMapLayer = dorp.get_node("Ground/SomOverlay")
+	var bm: Array = namen["brug_v_m"]
+	check("som: brug over de beek beloopbaar", ov.get_cell_atlas_coords(Vector2i(34, Data.BEEK_RIJ)) == Vector2i(int(bm[0]), int(bm[1]))
+			and Data.beloopbaar(Vector2i(34, Data.BEEK_RIJ)) and dorp.get_node_or_null("Ground/Beek/Brug") == null)
+	var pad := Vector2i(10, 10)
+	check("som: pad met autotile-masker", g.get_cell_tile_data(pad).get_custom_data("terrain").begins_with("pad_"))
+	check("som: kegelbomen op de rand", dorp.get_node("Objects/SomBomen").get_child_count() > 150)
+	var ok := true
+	for ruw in Data.PANDEN:
+		var rij: Dictionary = Data.som_pand(ruw)
+		var body: Node = dorp.get_node("Objects/Pand_%s" % rij["id"])
+		var tex: Texture2D = body.get_child(1).texture
+		if str(rij["id"]) == "burgemeester":
+			ok = ok and not rij.has("som_tex") and tex.resource_path.ends_with("burgemeestershuis.png")
+		else:
+			ok = ok and rij.has("som_tex") and tex.resource_path == rij["som_tex"] and rij["deur"] == ruw["deur"]
+			ok = ok and tex.get_size() == Vector2(rij["maat"]) * 16.0 and Data.pand_blok(ruw).size.y == 3 and rij["maat"].x == 6
+			ok = ok and Data.beloopbaar(rij["oorsprong"] + Vector2i(1, rij["maat"].y - 4)) and not Data.beloopbaar(ruw["deur"] + Vector2i.UP)
+	check("som: huizen uit fase 1 (zelfde deur, dak beloopbaar), burgemeestershuis blijft", ok)
+	var molen: Node = dorp.get_node("Objects/MolenWieken")
+	check("som: molen v2 blijft (positie, stille wieken tot Garrett)", molen.position == Data.molen_positie()
+			and molen.get_node_or_null("Basis") != null)
+	var sp: Sprite2D = dorp.get_node("Objects/Player/Sprite2D")
+	check("som: speler = fase-2 heldsheet 24x32 (%s)" % sp.texture.resource_path,
+			sp.texture.resource_path.begins_with("res://assets/sprites/som/kaart/")
+			and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
+	check("som: Dax/Seren in WM1 (WM2 = held_variant in gebieden.json)", sp.texture.resource_path.ends_with("dax_wm1.png")
+			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1"
+			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm2.png"))
+	await _hekken(dorp, g, ov)
+
+
+## Fase 4: SoM-hekken (autotiles uit hekken.png, bron 2), botsing en poorten.
+func _hekken(dorp: Node, g: TileMapLayer, ov: TileMapLayer) -> void:
+	var hn: Dictionary = g.hekken
+	var bron := g.tile_set.get_source(2) as TileSetAtlasSource
+	check("som: hekken-bron 2 in terrain.tres (256x32, 22 tegels, namen)", bron != null and hn.size() == 22
+			and bron.texture.get_size() == Vector2(256, 32) and hn.has("hek_10") and hn.has("hek_poort_h_open"))
+	var poorten := Data.poorten()
+	check("som: 2 poorten (west hek, tuin), oude hek-props weg", poorten.size() == 2 and Data.hek_prop(Data.PROPS[Data.PROPS.size() - 1]))
+	var ok := true
+	var n := 0
+	for y in Data.H:
+		for x in Data.W:
+			var t := Vector2i(x, y)
+			if not Data.hek_aanwezig(t):
+				continue
+			n += 1
+			var naam := Data.hek_tegel(t)
+			var c: Array = hn[naam]
+			ok = ok and ov.get_cell_source_id(t) == 2 and ov.get_cell_atlas_coords(t) == Vector2i(int(c[0]), int(c[1]))
+			ok = ok and Data.hek_blok(t) == (ov.get_cell_tile_data(t).get_collision_polygons_count(0) > 0)
+			ok = ok and not Data.beloopbaar(t) and ov.get_cell_tile_data(t).get_custom_data("terrain").begins_with("hek_")
+	check("som: elk hek-teken (%d) = hek-tegel met masker, botsing zoals Data.hek_blok, niet beloopbaar" % n, ok and n > 20)
+	var e := Vector2i(15, 16)
+	var m := Vector2i(16, 16)
+	var h := Vector2i(6, 25)
+	check("som: masker N1 E2 S4 W8: einde (E)=hek_02, midden=hek_10(_b), hoek NW=hek_06 (SE)", Data.hek_masker(e) == 2 and Data.hek_tegel(e) == "hek_02"
+			and Data.hek_masker(m) == 10 and Data.hek_tegel(m).begins_with("hek_10")
+			and Data.hek_masker(h) == 6 and Data.hek_tegel(h) == "hek_06" and Data.hek_masker(Vector2i(6, 26)) == 5)
+	var p0: Vector2i = poorten[0]
+	var gate: Node = dorp.get_node_or_null("Objects/Poort_%d_%d" % [p0.x, p0.y])
+	var dicht := not Data.beloopbaar(p0) and ov.get_cell_atlas_coords(p0) == Vector2i(int(hn["hek_poort_h_dicht"][0]), int(hn["hek_poort_h_dicht"][1]))
+	dicht = dicht and ov.get_cell_tile_data(p0).get_collision_polygons_count(0) > 0
+	check("som: poort start dicht (tegel hek_poort_h_dicht, botst)", gate != null and dicht)
+	if gate == null:
+		return
+	gate.interact(null)
+	var open := Data.beloopbaar(p0) and ov.get_cell_atlas_coords(p0) == Vector2i(int(hn["hek_poort_h_open"][0]), int(hn["hek_poort_h_open"][1]))
+	open = open and ov.get_cell_tile_data(p0).get_collision_polygons_count(0) == 0
+	check("som: poort open = tegel hek_poort_h_open, geen botsing, beloopbaar", open and gate.is_open())
+	gate.interact(null)
+	check("som: poort weer dicht", not Data.beloopbaar(p0) and not gate.is_open()
+			and ov.get_cell_tile_data(p0).get_collision_polygons_count(0) > 0)
+	var tuin := Vector2i(8, 26)
+	var poort2: Vector2i = poorten[1]
+	gate = dorp.get_node("Objects/Poort_%d_%d" % [poort2.x, poort2.y])
+	var voor := poort2 + Vector2i.DOWN
+	check("som: tuin: binnen onbereikbaar bij dichte poort", not Data.bereikbaar(voor, tuin) and Data.beloopbaar(tuin))
+	gate.interact(null)
+	check("som: tuin: met open poort bereikbaar", Data.bereikbaar(voor, tuin))
+	gate.interact(null)
+	check("som: hekken-resources bestaan (hekken.png, namen)", ResourceLoader.exists("res://assets/tilesets/som/wilgendal/hekken.png")
+			and FileAccess.file_exists("res://assets/tilesets/som/wilgendal/hekken_namen.json"))
+
+
+func _som() -> void:
+	const DAX := "res://assets/sprites/som/test/dax_24x32_v3.png"
+	const PROEF := "res://tools/som/test/uit/"
+	# oude sprites blijven precies zoals ze waren
+	var speler: Node = (load("res://scenes/player.tscn") as PackedScene).instantiate()
+	add_child(speler)
+	var spr: Sprite2D = speler.sprite
+	check("oude spelersprite ongewijzigd (3x4 van 16x24, offset -4)", spr.hframes == 3 and spr.vframes == 4
+			and spr.offset == Vector2(0, -4) and MapSprite.frame_maat(spr.texture) == MapSprite.OUD)
+	# Dax v3 (één los frame 24x32) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
+	speler.zet_sheet(load(DAX))
+	var vorm := (speler.get_node("CollisionShape2D") as CollisionShape2D).shape as RectangleShape2D
+	check("Dax 24x32 v3: één frame, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 1 and spr.vframes == 1
+			and is_equal_approx(spr.offset.y + 16.0, 8.0) and vorm.size == Vector2(14, 14)
+			and (speler.get_node("CollisionShape2D") as Node2D).position == Vector2.ZERO and spr.frame == 0)
+	speler.facing = Vector2i.UP
+	speler._update_sprite()
+	check("los frame: richting kiest geen ongeldig frame", spr.frame == 0)
+	speler.queue_free()
+	# volledige 24x32-sheet (3 loopframes x 4 richtingen = 72x128)
+	var img := Image.create(72, 128, false, Image.FORMAT_RGBA8)
+	var sheet := ImageTexture.create_from_image(img)
+	var s2 := Sprite2D.new()
+	s2.texture = sheet
+	var f := MapSprite.pas_toe(s2)
+	MapSprite.zet_frame(s2, 2, 1)
+	check("sheet 72x128 = 3x4 frames 24x32, offset -8, frame rij 2 kolom 1 = 7", f == MapSprite.NIEUW
+			and s2.hframes == 3 and s2.vframes == 4 and s2.offset == Vector2(0, -8) and s2.frame == 7)
+	s2.free()
+	# stijl per gebied: de echte config is overal nog oud
+	check("pilot: Wilgendal som, binnen + andere maps oud", KaartStijl.stijl("wilgendal") == KaartStijl.SOM
+			and KaartStijl.is_som(DORP) and KaartStijl.gebied_van_map(DORP) == "wilgendal"
+			and not KaartStijl.is_som(Data.BINNEN) and KaartStijl.gevraagd("") == KaartStijl.OUD
+			and not KaartStijl.is_som("res://scenes/maps/wereldkaart.tscn"))
+	# proef-config: som met complete art -> som; één tileset kwijt -> het HELE gebied oud
+	KaartStijl.zet_config({"map": PROEF, "gebieden": {"proef_herfst": {"stijl": "som", "maps": ["dorp_wilgendal"],
+			"tilesets": ["proef"], "speler": DAX}}})
+	check("som-gebied met alle art -> som", KaartStijl.stijl_van_map(DORP) == KaartStijl.SOM
+			and KaartStijl.ontbreekt("proef_herfst").is_empty())
+	var kaart := Node2D.new()
+	kaart.scene_file_path = DORP
+	var ground := TileMapLayer.new()
+	ground.name = "Ground"
+	kaart.add_child(ground)
+	var objs := Node2D.new()
+	objs.name = "Objects"
+	kaart.add_child(objs)
+	var p2: Node = (load("res://scenes/player.tscn") as PackedScene).instantiate()
+	p2.name = "Player"
+	objs.add_child(p2)
+	add_child(kaart)
+	var toegepast := KaartStijl.toepassen(kaart)
+	var ts := ground.tile_set
+	var bron := ts.get_source(0) as TileSetAtlasSource if ts != null else null
+	var water := bron.get_tile_data(Vector2i(2, 0), 0) if bron != null else null
+	var gras := bron.get_tile_data(Vector2i(0, 0), 0) if bron != null else null
+	check("toepassen: Ground krijgt de gebied-tileset, speler 24x32", toegepast and ts != null
+			and ts.resource_path.ends_with("proef_herfst/proef.tres") and (p2.sprite as Sprite2D).hframes == 1
+			and is_equal_approx((p2.sprite as Sprite2D).offset.y, -8.0))
+	check("geëxporteerde tileset: 16px, botsing op solid, terreinnaam", bron != null
+			and bron.texture_region_size == Vector2i(16, 16) and water != null and gras != null
+			and water.get_collision_polygons_count(0) == 1 and gras.get_collision_polygons_count(0) == 0
+			and str(water.get_custom_data("terrain")) == "water")
+	var normaal: Texture2D = load(PROEF + "proef_normaal/proef.png")
+	var herfst: Texture2D = load(PROEF + "proef_herfst/proef.png")
+	check("paletvariant: herfst kleurt gras om, omlijning blijft", normaal.get_image().get_pixel(8, 8)
+			!= herfst.get_image().get_pixel(8, 8) and normaal.get_image().get_pixel(0, 0) == herfst.get_image().get_pixel(0, 0))
+	KaartStijl.zet_config({"map": PROEF, "gebieden": {"proef_herfst": {"stijl": "som", "maps": ["dorp_wilgendal"],
+			"tilesets": ["proef", "bestaat_niet"], "speler": DAX}}})
+	check("som-gebied met ontbrekende tileset -> hele gebied oud", KaartStijl.stijl_van_map(DORP) == KaartStijl.OUD
+			and KaartStijl.ontbreekt("proef_herfst").size() == 1 and not KaartStijl.toepassen(kaart))
+	KaartStijl.zet_config({})
+	kaart.queue_free()
 	await get_tree().process_frame

@@ -5,7 +5,7 @@ extends RefCounted
 const SCENE := "res://scenes/story/spiegel_kamer.tscn"
 const DEBUG_ARG := "--spiegel"
 
-const WIE_SPIEGEL := "De Spiegel"
+const WIE_SPIEGEL := "The Mirror"
 const WIE_DENNIS := "Dax"
 ## Na de scène zeggen zij niets. Er is geen regel voor hen.
 const ZWIJGEN: Array[String] = ["Vesper", "Seren"]
@@ -14,7 +14,7 @@ const KAMER := "A room full of mirrored surfaces."
 const WAARHEID := "The Mirror does not fight with force but with truth."
 const FEIT_H6 := "Dax is Test Subject H-6."
 const FEIT_GEMAAKT := "He was not born but made."
-const FEIT_HANGER := "The Hanger belongs to him, and he belongs to the Hanger."
+const FEIT_HANGER := "The Pendant belongs to him, and he belongs to the Pendant."
 const FEIT_TERUG := "Sapientia wants him back, not defeated."
 const WEIGERING := "I am Dax. And that is enough."
 const LAATSTE := "You are stronger than the last five. Maybe... you will be the first to make it."
@@ -23,7 +23,7 @@ const KERN := "The core of Archief 4 has been absorbed."
 ## Geen vijand. Bewust geen hp en geen max_hp.
 const SPIEGEL := {
 	"id": "de_spiegel",
-	"naam": "De Spiegel",
+	"naam": "The Mirror",
 }
 
 ## Volgorde van de scène. "stilte" toont geen tekst. "breekt" hoort bij de weigering.
@@ -39,7 +39,7 @@ const BEATS: Array = [
 	{"id": "vragen", "wie": WIE_DENNIS, "vragen": true, "tekst": [
 		"Dax is Test Subject H-6?",
 		"He was not born but made?",
-		"The Hanger belongs to him, and he belongs to the Hanger?",
+		"The Pendant belongs to him, and he belongs to the Pendant?",
 		"Sapientia wants him back, not defeated?",
 	]},
 	{"id": "weigering", "wie": WIE_DENNIS, "tekst": [WEIGERING]},

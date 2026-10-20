@@ -231,3 +231,10 @@ Uit `BOTSINGEN.md`; dit mag zonder verdere beslissing gebruikt worden:
 - NPC's voor Wilgendal: Tante Mien (kruiden), Jelle Hamer (smid), Gerrit Molenaar.
 - Vijanden: Inktwurm (Archieven), Roestkruiper/Echo-Soldaat (Industriestad).
 - Items: Gloeiende Inktfles, Wambuis, Kruidenthee; statussen (roest, stilte...); de Hanger.
+
+## Engelse spelersnamen (goedgekeurd door Dennis, 2026-10-14)
+Alle spelersgerichte tekst gebruikt de Engelse namen uit de naamlijst (`namen_engels.md`); ids, bestandsnamen, nodenamen en docs blijven Nederlands.
+Belangrijkste: Wilgendal = Willowdale, Gerrit = Garrett the Miller, Bram/Els = Bramwell/Elsie, Wout = Walt, Fien = Fern, Siem = Simon, Ilse = Elise, Marit = Marigold, Jens = Jensen, Tante Mien = Aunt Minna, Jelle Hamer = Jack Hammond, Opa = Grandpa;
+Berggrot = Hollow Mountain, Het Levende Archief = The Living Archive, De Hal = The Atrium, De Hanger = The Pendant, Diepe Grot = Deep Learning Simulation;
+bazen: The Mender, The Strangler, The Shadow of H-6, The Cycle, The Judge, The Voice.
+Dubbele spreuknamen zijn nu uniek: vuur `vuur` = Spark, bliksem `vonk` = Arc; vuur `gloed` = Ember, licht `lichtgloed` = Glow.

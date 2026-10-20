@@ -164,7 +164,7 @@ func _ensure_ui() -> void:
 	var titel := Label.new()
 	titel.name = "Titel"
 	titel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	titel.text = "Gezelschap"
+	titel.text = "Party"
 	titel.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	titel.add_theme_color_override("font_color", UiStyle.HILITE)
 	kolom.add_child(titel)

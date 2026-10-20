@@ -204,7 +204,7 @@ const ROOMS := {
 	# Verdieping 1, Het Levende Archief. Tutorial: hendel, daarna de plaat drie stadia.
 	# De spleet is de volle breedte, dus er is geen omweg. TODO(design): verdieping 2-4 niet hier.
 	"leven_v1_plaat": {
-		"name": "Het Levende Archief - Groeiplaat",
+		"name": "The Living Archive - Growth Plate",
 		"style": "dungeon",
 		"theme": "kas",
 		"dungeon_set": "leven",
@@ -250,7 +250,7 @@ const ROOMS := {
 	# Verdieping 3. Kast uit Archief 1, hendel, en pas dan de groei-plaat.
 	# Heenweg vanaf de ketting-platen. Terug vanaf de tegen-platen slaat deze kamer over.
 	"leven_v3_combi": {
-		"name": "Kast en hendel",
+		"name": "Cabinet and Lever",
 		"style": "dungeon",
 		"theme": "kas",
 		"dungeon_set": "leven",

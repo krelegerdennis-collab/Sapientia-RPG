@@ -1,0 +1,4 @@
+0	gras	grond
+1	pad	grond
+2	water	grond	solid
+3	muur	steen	solid

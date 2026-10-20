@@ -2051,11 +2051,11 @@ func _prologue_tests() -> void:
 	var def_before := int(GameState.party[0]["def"])
 	await press_interact()
 	await _wait_typed()
-	check("vroeg keuzemenu bij Opa (%s)" % [Dialog.choices],
+	check("vroeg keuzemenu bij Grandpa (%s)" % [Dialog.choices],
 			Dialog.has_choices() and Dialog.choices == INTRO_CHOICES
 			and _named("What do you say, {naam}?") in _lines_text() and Dialog.name_label.text == "Old Man")
 	check("Oude Man draait naar je toe", opa.facing == Vector2i.LEFT)
-	_check_bubble("keuze Opa", opa)
+	_check_bubble("keuze Grandpa", opa)
 	await frames(20)
 	await overworld_shot("_v11_intro_keuze")
 	await press_interact()
@@ -2095,7 +2095,7 @@ func _prologue_tests() -> void:
 				tutorial_repeat = true
 			await press_interact()
 		await frames(1)
-	check("Update 5: Opa legt het menu uit in één ballon", menu_seen)
+	check("Update 5: Grandpa legt het menu uit in één ballon", menu_seen)
 	check("Update 5: manteltekst één keer, geen herhaalde tutorialregel", narr_seen and not tutorial_repeat)
 	check("v0.16: Apprentice Cloak gekregen (in de tas, nog niet aan), stap UITRUSTING",
 			GameState.item_count(ARMOR) == 1 and not Story.wears(ARMOR) and GameState.story_step == SD.UITRUSTING)

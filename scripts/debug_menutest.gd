@@ -497,7 +497,7 @@ func _status_tests() -> void:
 	check("klasse: %s" % s.class_label.text, s.class_label.text == "Warrior")
 	await shot("menu_status")
 	await tap("move_right")
-	check("rechts: Vesper (%s)" % s.spells_label.text, s.index == 1 and "Vonk (4 MP)" in s.spells_label.text and "Kettingbliksem (8 MP)" in s.spells_label.text)
+	check("rechts: Vesper (%s)" % s.spells_label.text, s.index == 1 and "Spark (4 MP)" in s.spells_label.text and "Chain Lightning (8 MP)" in s.spells_label.text)
 	check("Vesper: eigen portret (portrait_noor.png, 64x80, NEAREST)", s.portrait.get_meta("source", "") == "portrait"
 			and s.portrait.texture.resource_path.ends_with("portrait_noor.png") and s.portrait.custom_minimum_size == Vector2(64, 80)
 			and s.portrait.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
@@ -533,7 +533,7 @@ func _magic_tests() -> void:
 	await tap("interact")
 	check("A op Fire: melding '%s'" % s.message_text(), not s.targeting and s.message_text() == PartyActions.MSG_FIELD_ONLY)
 	await tap("move_right")
-	check("rechts: Seren met Kleine Genezing", s.caster_index == 2 and s.entry_text(0).begins_with("Kleine Genezing") and not s.is_greyed(0))
+	check("rechts: Seren met Minor Heal", s.caster_index == 2 and s.entry_text(0).begins_with("Minor Heal") and not s.is_greyed(0))
 	var kees: Dictionary = GameState.party[0]
 	var lotte: Dictionary = GameState.party[2]
 	kees["hp"] = 5
@@ -567,7 +567,8 @@ func _bestiary_and_options_tests() -> void:
 	check("'Opties' opent het optiescherm", s != null)
 	if s == null:
 		return
-	check("10 regels %s" % [s.keys], s.keys.size() == 10 and s.keys[0] == "music_volume" and s.keys[-1] == "_reset")
+	check("12 regels %s" % [s.keys], s.keys.size() == 12 and s.keys[0] == "music_volume" and s.keys[9] == "_reset"
+			and s.keys[10] == "sessielog" and s.keys[11] == "_export")
 	check("alle regels in beeld", s.rows[-1].get_global_rect().end.y <= s.hint.get_global_rect().position.y)
 	await shot("menu_options")
 	# Muziek: links = 7

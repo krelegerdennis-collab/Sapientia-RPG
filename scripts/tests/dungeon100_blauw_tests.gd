@@ -458,7 +458,7 @@ func _scene_tests() -> void:
 	check("Warp zonder keuze doet niets", not GameState.dungeon100_warp()
 			and GameState.dungeon100_can_warp() and GameState.dungeon100_run_active())
 	check("Warp vanuit de run", GameState.dungeon100_warp("ring"))
-	check("Warp: ECHO's Kamer", await wait_scene_path(EchoGrot.KAMER))
+	check("Warp: ECHO's Chamber", await wait_scene_path(EchoGrot.KAMER))
 	var wsp: Node2D = scene().get_node_or_null("Spawns/" + EchoGrot.KAMER_SPAWN)
 	check("Warp: bij ECHO, level 6, 55 goud, blauw item in de echte tas, geen kristal, run voorbij",
 			wsp != null and tile() == Vector2i((wsp.position / 16.0).floor()) and GameState.party[0]["level"] == 6

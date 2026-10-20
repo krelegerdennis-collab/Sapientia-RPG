@@ -54,15 +54,17 @@ func _run() -> void:
 	_data()
 	print("=== Archief 2: poort en platen ===")
 	_poort_en_platen()
-	print("=== Archief 2: Seren, Mosslijm, Genezer ===")
+	print("=== Archief 2: Seren, Mosslijm, Mender ===")
 	_lotte_en_genezer()
 	print("=== Archief 2: wereldkaart ===")
 	await _wereldkaart()
 	print("=== Archief 2: kamer, gevecht, warp ===")
 	await _spel()
-	print("=== Archief 2: na De Genezer naar de hub ===")
+	print("=== Archief 2: na The Mender naar de hub ===")
 	await _genezer_podium()
 	await _na_genezer_hub()
+	print("=== Archief 2: veldmenu > Scenes > The World Warper (alleen het filmpje) ===")
+	await _scenes_warper_herhaling()
 	print("=== Archief 2: vijanden (data en regels) ===")
 	_vijanden()
 	print("=== Archief 2: vijanden en Codex-bondgenoten in het gevecht ===")
@@ -114,10 +116,10 @@ func _data() -> void:
 			and str(toegepast.get("archief2_zin", "")) == Archief2.KERN_ZIN
 			and int(toegepast.get("max_hp", 0)) == Archief2.GENEZER_HP)
 	var wurg := BossCore.apply_boss(GD.ENEMIES["wurger"])
-	check("Wurger zwak voor ijs en fysiek", bool(wurg.get("weak_matters", false))
+	check("Strangler zwak voor ijs en fysiek", bool(wurg.get("weak_matters", false))
 			and "ijs" in wurg.get("weak", []) and "fysiek" in wurg.get("weak", []))
-	check("Wurger: canon-zin in het bestiarium", str(GD.ENEMIES["wurger"]["desc"]) == "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free.")
-	check("Genezer: canon-zin in het bestiarium", str(GD.ENEMIES["genezer"]["desc"]) == "He heals by taking. He gives nothing back. Sapientia's perfect servant: without doubt, without emotion, without end. Whoever sees him sees what humanity becomes if Sapientia wins — silent, whole, and empty.")
+	check("Strangler: canon-zin in het bestiarium", str(GD.ENEMIES["wurger"]["desc"]) == "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free.")
+	check("Mender: canon-zin in het bestiarium", str(GD.ENEMIES["genezer"]["desc"]) == "He heals by taking. He gives nothing back. Sapientia's perfect servant: without doubt, without emotion, without end. Whoever sees him sees what humanity becomes if Sapientia wins — silent, whole, and empty.")
 	check("thema kas en warper", DungeonRooms.THEMES.has("kas") and DungeonRooms.THEMES.has("warper_paars"))
 	var kamers: Dictionary = Rooms.rooms()
 	var breed := true
@@ -221,9 +223,9 @@ func _poort_en_platen() -> void:
 	var noor := {"is_hero": true, "ally": false, "s": {"id": "noor"}}
 	check("gewone vijand: geen zwakte", Archief2.schaal_element(10, mos, "vuur") == 10
 			and is_equal_approx(Archief2.zwakte_fysiek(dennis, mos), 1.0))
-	check("Wurger: elke fysieke klap", is_equal_approx(Archief2.zwakte_fysiek(dennis, wurger), Archief2.ZWAK)
+	check("Strangler: elke fysieke klap", is_equal_approx(Archief2.zwakte_fysiek(dennis, wurger), Archief2.ZWAK)
 			and is_equal_approx(Archief2.zwakte_fysiek(noor, wurger), Archief2.ZWAK))
-	check("Genezer: zwaard van Dax, niet van Vesper", is_equal_approx(Archief2.zwakte_fysiek(dennis, genezer), Archief2.ZWAK)
+	check("Mender: zwaard van Dax, niet van Vesper", is_equal_approx(Archief2.zwakte_fysiek(dennis, genezer), Archief2.ZWAK)
 			and is_equal_approx(Archief2.zwakte_fysiek(noor, genezer), 1.0))
 	check("ijs telt, vuur niet", Archief2.schaal_element(10, genezer, "ijs") == 15
 			and Archief2.schaal_element(10, genezer, "vuur") == 10)
@@ -293,7 +295,7 @@ func _lotte_en_genezer() -> void:
 	check("plaat valt terug op 0", GameState.archief2_plaat("archief_2_v1_plaat", "p1", 0) == 0)
 	check("warp WM2/WM3 leeg", Archief2.warp_doel("wm2").is_empty() and Archief2.warp_doel("wm3").is_empty())
 	var doel := Archief2.warp_doel("wilgendal")
-	check("warp Wilgendal", str(doel.get("map", "")) == Archief2.WERELD and str(doel.get("spawn", "")) == "van_wilgendal")
+	check("warp Willowdale", str(doel.get("map", "")) == Archief2.WERELD and str(doel.get("spawn", "")) == "van_wilgendal")
 	var archief := Archief2.warp_doel("archief")
 	check("warp Archief-ingang", str(archief.get("spawn", "")) == "van_archief")
 
@@ -440,7 +442,7 @@ func _spel() -> void:
 		if _scène() == null or _scène().name != "Battle":
 			break
 		await _tik("interact")
-	check("terug na de Genezer", await _wacht("Archief2V1Plaat", 25.0))
+	check("terug na de Mender", await _wacht("Archief2V1Plaat", 25.0))
 	await _dialoog_dicht(90)
 	check("Levenskern na winst", GameState.kernfragmenten.has(Archief2.KERN_ID)
 			and str(KernData.fragment(Archief2.KERN_ID).get("beschrijving", "")) == Archief2.KERN_ZIN)
@@ -498,7 +500,7 @@ func _spel() -> void:
 	GameState.changing_map = false
 	GameState.encounter_multiplier = 0.0
 	GameState.change_map(str(terug["map"]), str(terug["spawn"]))
-	check("warp naar Wilgendal", await _wacht("Wereldkaart", 20.0))
+	check("warp naar Willowdale", await _wacht("Wereldkaart", 20.0))
 	var slots_gelijk := true
 	for slot in range(1, GameState.SLOT_COUNT + 1):
 		var nu := FileAccess.get_file_as_bytes(GameState.slot_path(slot))
@@ -523,7 +525,7 @@ func _genezer_podium() -> void:
 	await _dialoog_dicht(10)
 	var k := _scène()
 	var blok := get_tree().get_nodes_in_group("dungeon_blokkade")
-	check("podium: 16 blokkades op rij 5 (alles behalve de Genezer op 9-10)", blok.size() == 16
+	check("podium: 16 blokkades op rij 5 (alles behalve de Mender op 9-10)", blok.size() == 16
 			and blok.all(func(b): return int(b.position.y) == 5 * 16 + 8))
 	# vrije tegels bereikbaar vanaf de ingang (9,10) zonder door rij 5 of de Genezer te gaan
 	var dicht := {}
@@ -562,7 +564,7 @@ func _na_genezer_hub() -> void:
 	check("noorduitgang blijft de kaartkamer", str(noord.get("map", "")) == Archief2.WARPER_SCENE
 			and str(noord.get("spawn", "")) == "ingang" and ResourceLoader.exists(Archief2.WARPER_SCENE))
 	check("hub is het exterieur", str(WarperEnter.HUB_SCENE).ends_with("exterieur.tscn") and str(WarperEnter.HUB_SPAWN) == "ingang")
-	check("Hanger gloeit paars", HangerScene.PURPLE == Color("b07ae8"))
+	check("Pendant gloeit paars", HangerScene.PURPLE == Color("b07ae8"))
 	var echo := " ".join(Archief2.ECHO_REGELS)
 	check("H-6 niet meer in de kaartkamer (canon 17: Sapientia zegt het in de Hal)", not echo.contains("H-6"))
 	var hubtekst := " ".join(WarperDreiging.lines())
@@ -630,7 +632,7 @@ func _na_genezer_hub() -> void:
 	check("geen H-6 in scène 1", not tekst.contains("H-6") and not tekst.contains("Proefpersoon"))
 	check("party in de Hal", hub and str(GameState.current_map).ends_with("world_warper/maps/hal.tscn")
 			and str(GameState.current_map) != Archief2.WARPER_SCENE)
-	check("world_warper_unlocked na De Genezer", GameState.world_warper_is_unlocked()
+	check("world_warper_unlocked na The Mender", GameState.world_warper_is_unlocked()
 			and GameState.story_flags.has("archief2_naar_warper"))
 	var ex := _scène()
 	var spawn := ex.get_node_or_null("Spawns/ingang") if ex != null else null
@@ -661,6 +663,57 @@ func _na_genezer_hub() -> void:
 	# Terug in de Genezer-kamer: scène 1 speelt niet opnieuw.
 	check("scène 1 niet opnieuw", not GenezerScene.mag_spelen(GameState.story_flags))
 	await _dialoog_dicht(8)
+
+
+## v0.25 Bug (Dennis): de herhaling van 'The World Warper' in het scenes-scherm speelde na zijn filmpje
+## nog een tweede (gescripte) cutscene. Nu: alleen het filmpje, daarna netjes terug in de lijst.
+## (Het verhaal zelf, filmpje + canon-scène, is hierboven in _na_genezer_hub getest.)
+func _scenes_warper_herhaling() -> void:
+	await _dialoog_dicht(30)
+	await _pframes(10)
+	var flags_voor: Dictionary = GameState.story_flags.duplicate()
+	var map_voor := str(_scène().scene_file_path) if _scène() != null else ""
+	var m: Node = null
+	for poging in 10:
+		await _tik("menu")
+		await _pframes(3)
+		m = _scène().get_node_or_null("FieldMenu") if _scène() != null else null
+		if m != null:
+			break
+		await _pframes(20)
+	if m == null or not m.buttons.has("scenes"):
+		check("scenes: veldmenu open", false)
+		return
+	m.buttons["scenes"].pressed.emit()
+	await _pframes(4)
+	var sc: Node = m.sub
+	if sc == null or sc.name != "Scenes":
+		check("scenes: scenes-scherm open", false)
+		return
+	check("scenes: 'The World Warper' ontgrendeld na het verhaal", GameState.scene_seen("ww_warper"))
+	sc.choose("ww_warper")
+	await _pframes(10)
+	var gz: Node = get_tree().root.get_node_or_null("SceneReplay/CanonGenezer")
+	var vs: Node = gz.video_speler if gz != null else null
+	check("scenes: herhaling speelt Dax' filmpje", vs != null and is_instance_valid(vs) and str(vs.video_path).ends_with("genezer_warper.ogv"))
+	if vs != null and is_instance_valid(vs):
+		vs.skip_now()
+	var ok: bool = await _wacht_tot(func(): return sc.playing == null, 5.0)
+	var geen_tweede: bool = not Dialog.is_open and (not is_instance_valid(gz) or gz.regels_getoond.is_empty())
+	for i in 40:     # een tweede scène zou nu dialoog openen
+		await _pframes(1)
+		geen_tweede = geen_tweede and not Dialog.is_open
+	check("scenes: na het filmpje GEEN gescripte scène erachteraan, vanzelf terug in de lijst", ok and geen_tweede)
+	check("scenes: terug in het scherm (focus, dialooglaag 5, geen restanten)", m.sub == sc and sc.buttons.any(func(b): return b.has_focus())
+			and Dialog.layer == 5 and get_tree().root.get_node_or_null("SceneReplay") == null
+			and get_tree().root.get_node_or_null("SceneReplayWeg") == null)
+	check("scenes: herhaling raakt het verhaal niet (vlaggen en map gelijk)", GameState.story_flags == flags_voor
+			and (str(_scène().scene_file_path) if _scène() != null else "") == map_voor)
+	await _shot("scenes_terug_na_warper")
+	sc.close()
+	await _pframes(4)
+	m.close()
+	await _pframes(4)
 
 
 func _zonder_lotte() -> void:

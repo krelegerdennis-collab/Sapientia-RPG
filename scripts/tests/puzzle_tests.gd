@@ -66,7 +66,7 @@ func _run() -> void:
 	if not only_logic:
 		print("=== Deel B: echte scène ===")
 		await _integration()
-		print("=== Deel C: puzzelkamer Eerste Archief (3B) ===")
+		print("=== Deel C: puzzelkamer First Archive (3B) ===")
 		await _archief_integration()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await pframes(30)   # lopende fades laten eindigen (anders 'leaked instance' bij afsluiten)
@@ -577,14 +577,18 @@ func walk(action: String, n: int) -> void:
 		var p := player()
 		if p == null or scene() != start_scene or GameState.changing_map:
 			return
+		# Flake-fix (CI, trage frames): de stap ging soms verloren als de speler niet binnen 6 physics-
+		# frames begon te lopen. Nu: tot 20 physics-frames wachten.
+		# (geen herhaalde druk: een tweede druk duwt een kast soms twee keer)
 		Input.action_press(action)
 		var waited := 0
-		while is_instance_valid(p) and not p.is_moving and waited < 6:
+		while is_instance_valid(p) and not p.is_moving and waited < 20:
 			await get_tree().physics_frame
 			waited += 1
 		Input.action_release(action)
 		while is_instance_valid(p) and p.is_moving:
 			await get_tree().physics_frame
+		await get_tree().physics_frame
 		if GameState.changing_map or Dialog.is_open:
 			return
 

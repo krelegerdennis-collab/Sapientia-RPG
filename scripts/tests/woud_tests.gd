@@ -552,8 +552,8 @@ func _village_tests() -> void:
 	var balloon := [false]
 	var lines := await run_story(60.0, "Jou ken ik niet", "noor_ballon")
 	# ballon-check: de eerste Noor-regel had een spreker-node (Noor) en de ballonstijl
-	check("blauwe ballonnen met namen (Vesper, %s, Marit): %d regels" % [GameState.player_name, lines.size()],
-			lines.any(func(l): return str(l).begins_with("Vesper: ")) and lines.any(func(l): return str(l).begins_with("Marit: "))
+	check("blauwe ballonnen met namen (Vesper, %s, Marigold): %d regels" % [GameState.player_name, lines.size()],
+			lines.any(func(l): return str(l).begins_with("Vesper: ")) and lines.any(func(l): return str(l).begins_with("Marigold: "))
 			and lines.any(func(l): return str(l).begins_with(GameState.player_name + ": ")))
 	check("eindigt met de opdracht (dorpeling vraagt Vesper te redden)", lines.any(func(l): return "save her" in str(l))
 			and lines.any(func(l): return "New quest: Save Vesper from the Dark Wood" in str(l)))
@@ -561,7 +561,7 @@ func _village_tests() -> void:
 			and GameState.story_step == SD.NOOR_KWIJT)
 	check("Vesper is weg (meegesleurd), de wortelgreep ook", not noor.visible and not v.get_node("Objects/WortelGreep").visible)
 	check("opdracht loopt: '%s'" % Story.active_quest(), Story.active_quest() == "Save Vesper from the Dark Wood")
-	check("Codex: Marit geeft 3 Blank Books na de ontmoeting (geen startvoorraad) (%d)" % GameState.item_count("leeg_boek"),
+	check("Codex: Marigold geeft 3 Blank Books na de ontmoeting (geen startvoorraad) (%d)" % GameState.item_count("leeg_boek"),
 			GameState.item_count("leeg_boek") == 3 and Story.has_flag("marit_boeken") and not GD.START_INVENTORY.has("leeg_boek")
 			and lines.any(func(l): return "3x Blank Book" in str(l)))
 	# veldmenu: regel met de opdracht
@@ -602,7 +602,7 @@ func _village_tests() -> void:
 		await press_interact()
 	check("huis van Vesper is te betreden", await wait_scene("EsdoornHuisNoor"))
 	var ilse: Node = scene().get_node_or_null("Objects/Ilse")
-	check("binnen: Ilse (moeder van Vesper)", ilse != null and ilse.event == "ilse")
+	check("binnen: Elise (moeder van Vesper)", ilse != null and ilse.event == "ilse")
 	await wait_fade()
 	await walk("move_down", 2)
 	check("deur uit = terug in Mapleton voor het huis", await wait_scene("Esdoorn") and tile() == Vector2i(7, 9))
@@ -814,7 +814,7 @@ func _codex_forest_tests() -> void:
 		if marit and Story.trigger(marit.event, marit):
 			await run_story(15.0)
 		got = GameState.item_count(CD.BOOK_ITEM) if i == 0 else got
-	check("oude save: Marit geeft 3 Blank Books bij een gesprek, maar één keer (%d, daarna %d)" % [got, GameState.item_count(CD.BOOK_ITEM)],
+	check("oude save: Marigold geeft 3 Blank Books bij een gesprek, maar één keer (%d, daarna %d)" % [got, GameState.item_count(CD.BOOK_ITEM)],
 			got == 3 and GameState.item_count(CD.BOOK_ITEM) == 3)
 	# --- wereldkaart met de iconen van RPG ART
 	var w := await enter(WORLD, "van_esdoorn")
@@ -1011,7 +1011,7 @@ func _graan_data() -> void:
 		for cmd in v.get("do", []):
 			if cmd is Array and cmd.size() >= 3 and str(cmd[0]) == "say" and str(cmd[1]) == "{naam}":
 				speler_vraagt = cmd[2].has(SD.QUOTE_GRAAN_VRAAG)
-	check("Gerrit zegt de canon-zinnen, zonder TODO(verhaal) en zonder de oude twee", mist.is_empty()
+	check("Garrett zegt de canon-zinnen, zonder TODO(verhaal) en zonder de oude twee", mist.is_empty()
 			and quotes.size() == canon.size()
 			and not quotes.has("Het zaad zingt aan de rand van de mist.")
 			and not quotes.has("De molen kan weer malen.")
@@ -1028,26 +1028,20 @@ func _graan_data() -> void:
 				if cmd is Array and not cmd.is_empty():
 					namen.append(str(cmd[0]))
 	check("zangscène en zang tussen herkenning en de molen", namen == ["flag", "take", "flag", "say", "molen_zang", "zang", "molen"])   # v0.24: eerst gesproken_gerrit (Quest Log)
-	# v0.21: echte molen-art (4 frames, f*45 graden) -> 8 draaistappen van 22.5 graden.
+	# v3: reuzenmolen v2 (RPG ART): draaiende sheet 4 frames 224x224 (22.5 graden per frame, naadloos)
+	# en stille, versleten wieken als losse 224x224.
 	var art: Texture2D = load(Wieken.ART)
-	var sheet := Wieken.wieken_sheet().get_image()
-	var art_img := Wieken.art_image()
-	var tip: Vector2i = Wieken.zeil_punt(0)
-	var tip_tussen: Vector2i = Wieken.zeil_punt(1)
-	var tip2 := Vector2i(tip.x + Wieken.FRAME_W, tip.y)
-	var stap0_is_art := sheet.get_region(Rect2i(0, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data() \
-			== art_img.get_region(Rect2i(0, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data()
-	var stap2_is_art1 := sheet.get_region(Rect2i(2 * Wieken.FRAME_W, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data() \
-			== art_img.get_region(Rect2i(Wieken.FRAME_W, 0, Wieken.FRAME_W, Wieken.FRAME_H)).get_data()
+	var stil_art: Texture2D = load(Wieken.ART_STIL)
+	var basis_art: Texture2D = load(Wieken.ART_BASIS)
 	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
-	check("echte molen-art: 4 frames 48x64, 8 stappen van 22.5 graden, wiek draait per stap", art != null
+	check("reuzenmolen-art: basis 224x320, wieken 4 frames 224x224, stil 224x224, 5 fps", art != null and stil_art != null
+			and basis_art != null and basis_art.get_width() == 224 and basis_art.get_height() == 320
 			and art.get_width() == Wieken.FRAME_W * Wieken.FRAMES and art.get_height() == Wieken.FRAME_H
-			and hw.contains("assets/sprites/buiten/molen_wieken.png")
-			and Wieken.STAPPEN == 8 and is_equal_approx(Wieken.STAP_GRADEN, 22.5)
-			and sheet.get_width() == Wieken.FRAME_W * Wieken.STAPPEN and sheet.get_height() == Wieken.FRAME_H
-			and stap0_is_art and stap2_is_art1
-			and sheet.get_pixelv(tip).a > 0.8 and sheet.get_pixelv(tip2).a < 0.1
-			and sheet.get_pixelv(tip_tussen).a > 0.8)
+			and stil_art.get_width() == 224 and stil_art.get_height() == 224
+			and hw.contains("assets/sprites/buiten/wilgendal/windmolen_wieken_v2.png")
+			and hw.contains("assets/sprites/buiten/wilgendal/windmolen_wieken_stil_v2.png")
+			and Wieken.STAPPEN == 4 and is_equal_approx(Wieken.STAP_GRADEN, 22.5)
+			and is_equal_approx(Wieken.STAP_TIJD, 0.2))
 	var toon := Wieken.maak_zang()
 	var top := Wieken.piek(toon)
 	check("zacht gezang uit de noten in de data", SD.MOLEN_ZANG.size() == 5 and SD.MOLEN_NODE == "MolenWieken"
@@ -1069,7 +1063,7 @@ func _graan_data() -> void:
 	var wg: Dictionary = GD.ENEMIES["woudgeest"]
 	# v0.21: eigen art van RPG ART (batch 7), niet meer de Mosslijm-plaatsvervanger.
 	var wg_kaart: Texture2D = load("res://assets/map_monsters/woudgeest.png")
-	check("Woudgeest is klein, hoort in het woud, eigen art (voor/rug 90x90, kaart 32x64)", wg["name"] == "Woudgeest" and int(wg["max_hp"]) <= 16
+	check("Woudgeest is klein, hoort in het woud, eigen art (voor/rug 90x90, kaart 32x64)", wg["name"] == "Wood Wraith" and int(wg["max_hp"]) <= 16
 			and "woud" in wg["habitat"] and not bool(wg.get("art_pending", false)) and not GD.enemy_sprite_is_placeholder(wg)
 			and GD.enemy_sprite(wg) == "res://assets/sprites/enemies/woudgeest.png"
 			and (load(GD.enemy_sprite(wg)) as Texture2D).get_size() == Vector2(90, 90)
@@ -1086,12 +1080,12 @@ func _graan_tests() -> void:
 	var dorp := "res://scenes/maps/dorp_wilgendal.tscn"
 	var d := await enter(dorp, "zuid_ingang")
 	var g: Node = d.get_node("Objects/Gerrit")
-	check("één Gerrit de Molenaar, zonder Goedendag", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
+	check("één Garrett de Molenaar, zonder Goedendag", g != null and g.npc_name == SD.GERRIT and g.lines.is_empty()
 			and g.event == "gerrit" and d.get_node("Objects").get_children().filter(func(n): return n.name == "Gerrit").size() == 1)
 	var wieken: Node = d.get_node_or_null("Objects/MolenWieken")
 	check("molen staat stil tot het zaad binnen is", wieken != null and not wieken.draait() and wieken.frame_nu() == 0
 			and not wieken.glow_aan() and not wieken.gezongen
-			and wieken.sprite.texture == Wieken.wieken_sheet())
+			and wieken.sprite.texture == Wieken.wieken_stil() and wieken.stil() and wieken.sprite.hframes == 1)
 	Story.trigger("gerrit", g)
 	var dicht: Array = await run_story(6.0)
 	check("quest dicht vóór Vesper", not Story.has_flag("noor_lid") and not Story.has_flag(SD.FLAG_GRAAN)
@@ -1144,7 +1138,7 @@ func _graan_tests() -> void:
 	check("mini-gevecht begint", await wait_scene("Battle"))
 	var b := battle()
 	var ids: Array = b.enemies.map(func(e): return str(e.get("id", ""))) if b != null else []
-	check("twee Woudgeesten op basis-HP", ids == ["woudgeest", "woudgeest"]
+	check("twee Wood Wraiths op basis-HP", ids == ["woudgeest", "woudgeest"]
 			and b.enemies.all(func(e): return int(e["s"]["max_hp"]) == int(GD.ENEMIES["woudgeest"]["max_hp"])))
 	check("mini-gevecht gewonnen", await win_battle())
 	check("terug op de open plek", await wait_scene("WoudOpenPlek"))
@@ -1161,7 +1155,7 @@ func _graan_tests() -> void:
 	GameState.party[0]["hp"] = 1
 	Story.trigger("gerrit", g)
 	var af: Array = await lines_until_choice()
-	check("bij Gerrit: zaad herkend, molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZAAD))
+	check("bij Garrett: zaad herkend, molen maalt, groep uitgerust, één meel", af.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZAAD))
 			and af.any(func(l): return Molen.REGEL_ZANG in str(l))
 			and af.any(func(l): return Molen.REGEL_GEZANG in str(l))
 			and not af.any(func(l): return SD.QUOTE_GRAAN_DANK in str(l))
@@ -1173,6 +1167,7 @@ func _graan_tests() -> void:
 	var wiek0: int = wieken.frame_nu()
 	await get_tree().create_timer(0.55).timeout
 	check("zangscène: de molen draait en zingt zacht", zong[0] and wieken.gezongen and wieken.draait()
+			and not wieken.stil() and wieken.sprite.texture == Wieken.wieken_sheet() and wieken.sprite.hframes == 4
 			and wieken.glow_aan() and wieken.noten >= 3 and wieken.frame_nu() != wiek0
 			and wieken.get_node_or_null("Zang") != null
 			and Wieken.piek(wieken.laatste_zang) > 0.04 and Wieken.piek(wieken.laatste_zang) < 0.2)
@@ -1197,13 +1192,14 @@ func _graan_tests() -> void:
 	await run_story(8.0)
 	var sav := GameState.read_save()
 	var sav_party: Array = sav.get("party", [])
-	check("de molen slaat op in Wilgendal", str(sav.get("map", "")).ends_with("dorp_wilgendal.tscn")
+	check("de molen slaat op in Willowdale", str(sav.get("map", "")).ends_with("dorp_wilgendal.tscn")
 			and not sav_party.is_empty() and str(sav_party[0].get("id", "")) == "noor")
 	check("na het opslaan nog steeds één meel", GameState.item_count(SD.ITEM_MEEL) == 1)
 	await enter(WORLD, "van_wilgendal")
 	d = await enter(dorp, "zuid_ingang")
 	wieken = d.get_node("Objects/MolenWieken")
-	check("nieuw bezoek: de molen draait al, de zangscène niet opnieuw", wieken.draait() and wieken.glow_aan() and not wieken.gezongen)
+	check("nieuw bezoek: de molen draait al, de zangscène niet opnieuw", wieken.draait() and wieken.glow_aan() and not wieken.gezongen
+			and not wieken.stil())
 	Story.trigger("gerrit", d.get_node("Objects/Gerrit"))
 	await lines_until_choice()
 	check("nieuw bezoek: nog één Zingend Meel", GameState.item_count(SD.ITEM_MEEL) == 2)

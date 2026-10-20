@@ -8,7 +8,7 @@
 [node name="BerggrotGrendel" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "berggrot_grendel"
-map_name = "Berggrot - Grendel"
+map_name = "Hollow Mountain - Bolt Gate"
 music_track = "berggrot"
 encounters = false
 

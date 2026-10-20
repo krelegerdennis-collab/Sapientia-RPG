@@ -56,7 +56,7 @@ func _spell_tests() -> void:
 			and Rules.in_shop("vuurzee", 3) and Rules.in_shop("inferno", 6) and not Rules.in_shop("zonneslag", 6)
 			and not Rules.in_shop("donderslag", 6))
 	var vuur: Dictionary = GD.SPELLS["vuur"]
-	check("Vonk is grade 1 vuur, power 15, +2 per level", str(vuur["name"]) == "Vonk" and int(vuur["power"]) == 15
+	check("Vonk is grade 1 vuur, power 15, +2 per level", str(vuur["name"]) == "Spark" and int(vuur["power"]) == 15
 			and int(vuur["mp"]) == 4 and Rules.power_at(vuur, 1) == 15.0 and Rules.power_at(vuur, 2) == 17.0)
 	var shop_g := 0
 	var shop_g4 := 0
@@ -72,8 +72,8 @@ func _spell_tests() -> void:
 		elif Rules.in_shop(str(sid), 6):
 			shop_g += 1
 	check("winkel toont de canon-lijst G1-G3, geen oude Engelse namen en geen grade 4", shop_g == 61
-			and shop_g4 == 20 and not oude and str(GD.SPELLS["genees"]["name"]) == "Kleine Genezing"
-			and str(GD.SPELLS["rijp"]["name"]) == "IJspegel" and str(GD.SPELLS["bliksem"]["name"]) == "Kettingbliksem")
+			and shop_g4 == 20 and not oude and str(GD.SPELLS["genees"]["name"]) == "Minor Heal"
+			and str(GD.SPELLS["rijp"]["name"]) == "Icicle" and str(GD.SPELLS["bliksem"]["name"]) == "Chain Lightning")
 	for sid in GD.SPELLS:
 		var sp: Dictionary = GD.SPELLS[sid]
 		check("spreuk %s heeft element en grade" % sid, str(sp.get("element", "")) != "" and int(sp.get("grade", 0)) >= 1)
@@ -214,17 +214,17 @@ func _bestiary_tests() -> void:
 		var canon_line := desc in [
 				"A dark echo of Dax himself. He moves as Dax moves, fights as Dax fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Vesper, no Grandpa. Only the number: H-6.",
 				"An endlessly turning machine, half organic, half steel. It knows no beginning and no end — it simply starts again. Sapientia's logic in one form: no rest, no release, only repetition. Whoever defeats it has won nothing. It keeps turning anyway.",
-				"A giant eye with arms grasping in every direction. It weighs, it measures, it judges. What it weighs is not a deed, but a person. And people are always found too light — except one. De Rechter is Sapientia's doubt: she is looking for someone who weighs more than she expected.",
-				"No body. No shape. Only a voice, and glitches that warp the world around you. De Stem speaks as if it knows you — and it does. Here Sapientia speaks herself. Not as an enemy, but as something that has been waiting for you.",
+				"A giant eye with arms grasping in every direction. It weighs, it measures, it judges. What it weighs is not a deed, but a person. And people are always found too light — except one. The Judge is Sapientia's doubt: she is looking for someone who weighs more than she expected.",
+				"No body. No shape. Only a voice, and glitches that warp the world around you. The Voice speaks as if it knows you — and it does. Here Sapientia speaks herself. Not as an enemy, but as something that has been waiting for you.",
 		]
 		check("entry %s heeft stats en een regel" % id, int(e.get("no", 0)) >= 13
 				and int(e.get("max_hp", 0)) > 0 and (desc.begins_with("Boss on floor") or canon_line)
 				and str(e.get("name", "")) != "")
-	check("verdieping 25 heet De Schaduw van H-6", Bestiary.entry("d100_baas_25")["name"] == "De Schaduw van H-6"
+	check("verdieping 25 heet The Shadow of H-6", Bestiary.entry("d100_baas_25")["name"] == "The Shadow of H-6"
 			and Bestiary.entry("d100_baas_25")["desc"] == "A dark echo of Dax himself. He moves as Dax moves, fights as Dax fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Vesper, no Grandpa. Only the number: H-6.")
 	GameState.mark_seen("d100_baas_99")
 	GameState.mark_defeated("d100_baas_99")
-	check("De Stem telt in het bestiarium", GameState.is_seen("d100_baas_99") and GameState.defeated_count("d100_baas_99") == 1)
+	check("The Voice telt in het bestiarium", GameState.is_seen("d100_baas_99") and GameState.defeated_count("d100_baas_99") == 1)
 
 
 func _slot_migration() -> void:

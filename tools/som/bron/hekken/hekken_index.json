@@ -1,0 +1,756 @@
+{
+ "tileset": "hekken",
+ "tile_size": 16,
+ "columns": 16,
+ "rows": 2,
+ "sheet_px": [
+  256,
+  32
+ ],
+ "sheets": {
+  "wilgendal": "hekken_wilgendal.png",
+  "herfst": "hekken_herfst.png",
+  "donker_glitch": "hekken_donker_glitch.png"
+ },
+ "slot_map": "hekken_slots.png",
+ "tiles": [
+  {
+   "name": "hek_00",
+   "id": 0,
+   "col": 0,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 0,
+   "role": "lone post",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_01",
+   "id": 1,
+   "col": 1,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 1,
+   "role": "end, opens north",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_02",
+   "id": 2,
+   "col": 2,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 2,
+   "role": "end, opens east",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_03",
+   "id": 3,
+   "col": 3,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 3,
+   "role": "corner N+E",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_04",
+   "id": 4,
+   "col": 4,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 4,
+   "role": "end, opens south",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_05",
+   "id": 5,
+   "col": 5,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 5,
+   "role": "straight N-S",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_06",
+   "id": 6,
+   "col": 6,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 6,
+   "role": "corner E+S",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_07",
+   "id": 7,
+   "col": 7,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 7,
+   "role": "T N+E+S (stem east)",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_08",
+   "id": 8,
+   "col": 8,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 8,
+   "role": "end, opens west",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_09",
+   "id": 9,
+   "col": 9,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 9,
+   "role": "corner W+N",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_10",
+   "id": 10,
+   "col": 10,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 10,
+   "role": "straight E-W",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_11",
+   "id": 11,
+   "col": 11,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 11,
+   "role": "T N+E+W (stem north)",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_12",
+   "id": 12,
+   "col": 12,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 12,
+   "role": "corner S+W",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_13",
+   "id": 13,
+   "col": 13,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 13,
+   "role": "T N+S+W (stem west)",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_14",
+   "id": 14,
+   "col": 14,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 14,
+   "role": "T E+S+W (stem south)",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_15",
+   "id": 15,
+   "col": 15,
+   "row": 0,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "cardinal16",
+   "mask": 15,
+   "role": "cross",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_10_b",
+   "id": 16,
+   "col": 0,
+   "row": 1,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "variant_of",
+   "variant_of": "hek_10",
+   "mask": 10,
+   "role": "straight E-W with post (use every 3rd-4th tile)",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_05_b",
+   "id": 17,
+   "col": 1,
+   "row": 1,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "variant_of",
+   "variant_of": "hek_05",
+   "mask": 5,
+   "role": "straight N-S, taller post",
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_poort_h_dicht",
+   "id": 18,
+   "col": 2,
+   "row": 1,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "gate",
+   "role": "gate E-W closed",
+   "gate_axis": "h",
+   "gate_open": false,
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_poort_h_open",
+   "id": 19,
+   "col": 3,
+   "row": 1,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "gate",
+   "role": "gate E-W open (leaf swung south)",
+   "gate_axis": "h",
+   "gate_open": true,
+   "solid": false,
+   "walk": true,
+   "collision_polygon": null,
+   "collision_rect_px": null
+  },
+  {
+   "name": "hek_poort_v_dicht",
+   "id": 20,
+   "col": 4,
+   "row": 1,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "gate",
+   "role": "gate N-S closed",
+   "gate_axis": "v",
+   "gate_open": false,
+   "solid": true,
+   "walk": false,
+   "collision_polygon": [
+    -8,
+    -8,
+    8,
+    -8,
+    8,
+    8,
+    -8,
+    8
+   ],
+   "collision_rect_px": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "name": "hek_poort_v_open",
+   "id": 21,
+   "col": 5,
+   "row": 1,
+   "kind": "hout",
+   "layer": "overlay",
+   "autotile": "gate",
+   "role": "gate N-S open (leaf swung east)",
+   "gate_axis": "v",
+   "gate_open": true,
+   "solid": false,
+   "walk": true,
+   "collision_polygon": null,
+   "collision_rect_px": null
+  }
+ ],
+ "mask_bits": {
+  "N": 1,
+  "E": 2,
+  "S": 4,
+  "W": 8
+ },
+ "mask_rule": "bit set = neighbouring cell is fence or gate (gate_h counts as E+W, gate_v as N+S). Same N1 E2 S4 W8 order as the repo path/cobble masks. Tile hek_<mask:02d>; atlas col = mask, row 0.",
+ "autotile_lookup_mask_to_atlas_xy": {
+  "0": [
+   0,
+   0
+  ],
+  "1": [
+   1,
+   0
+  ],
+  "2": [
+   2,
+   0
+  ],
+  "3": [
+   3,
+   0
+  ],
+  "4": [
+   4,
+   0
+  ],
+  "5": [
+   5,
+   0
+  ],
+  "6": [
+   6,
+   0
+  ],
+  "7": [
+   7,
+   0
+  ],
+  "8": [
+   8,
+   0
+  ],
+  "9": [
+   9,
+   0
+  ],
+  "10": [
+   10,
+   0
+  ],
+  "11": [
+   11,
+   0
+  ],
+  "12": [
+   12,
+   0
+  ],
+  "13": [
+   13,
+   0
+  ],
+  "14": [
+   14,
+   0
+  ],
+  "15": [
+   15,
+   0
+  ]
+ },
+ "variants": {
+  "10": [
+   0,
+   1
+  ],
+  "5": [
+   1,
+   1
+  ]
+ },
+ "gates": {
+  "h_closed": [
+   2,
+   1
+  ],
+  "h_open": [
+   3,
+   1
+  ],
+  "v_closed": [
+   4,
+   1
+  ],
+  "v_open": [
+   5,
+   1
+  ]
+ },
+ "old_fence": {
+  "file": "assets/tiles/dorp.png",
+  "tile_index": 50,
+  "tile_size": [
+   16,
+   16
+  ],
+  "tileset": "assets/tiles/dorp.tres",
+  "custom_data": "hek",
+  "map_char": "-",
+  "collision": "full 16x16 polygon (-8,-8,8,-8,8,8,-8,8)",
+  "build_maps_const": "TOWN_SOLID contains 50, TOWN_TERRAIN[50]=\"hek\"",
+  "not_used_on_dorp_wilgendal_GROND": "GROND/TEGEL in wilgendal_dorp.gd has no \"-\"; the screenshot fence is the old tile 50 via a map layer/prop"
+ },
+ "collision": "all solid pieces: full 16x16 tile polygon (identical to the old hek). Open gates: no collision. Closed gates: full tile. Movement is tile-based (14x14 body), so a full-tile footprint is what blocks; the posts sit inside the tile.",
+ "sheets_opaque": {
+  "wilgendal": "hekken_opaque_wilgendal.png",
+  "herfst": "hekken_opaque_herfst.png",
+  "donker_glitch": "hekken_opaque_donker_glitch.png"
+ },
+ "sheets_opaque_note": "same cells with the Willowdale grass baked in (opaque 16x16 tiles) - closest 1:1 swap for old opaque dorp.png tile 50; transparent sheets are for an overlay layer"
+}

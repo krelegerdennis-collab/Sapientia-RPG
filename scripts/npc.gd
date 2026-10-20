@@ -14,6 +14,8 @@ extends StaticBody2D
 ## v0.13: eigen spritesheet (zelfde indeling als npc.png/player.png: 48x96, 3 loopframes x
 ## 4 richtingen: omlaag, links, rechts, omhoog). Leeg = npc.png uit de scène.
 @export var sheet: Texture2D
+## SoM-stijl: framemaat (16x24 oud, 24x32 nieuw). ZERO = uit de sheet afleiden.
+@export var frame_maat := Vector2i.ZERO
 
 const ShopScreen := preload("res://scripts/ui/shop_screen.gd")
 const DIR_ROW := {
@@ -31,6 +33,7 @@ var _col := 0
 func _ready() -> void:
 	if sheet:
 		sprite.texture = sheet
+	MapSprite.pas_toe(sprite, frame_maat)
 	add_to_group("story")
 	_update_sprite()
 	story_refresh()
@@ -124,4 +127,4 @@ func script_walk(dir: Vector2i, n: int, speed := 56.0) -> void:
 func _update_sprite() -> void:
 	if sprite == null:
 		return
-	sprite.frame = DIR_ROW.get(facing, 0) * sprite.hframes + _col
+	MapSprite.zet_frame(sprite, DIR_ROW.get(facing, 0), _col)

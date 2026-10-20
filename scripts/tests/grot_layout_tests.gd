@@ -289,7 +289,12 @@ func _puzzel_kamers() -> void:
 				if Vector2i(int(c["tile"][0]), int(c["tile"][1])) == kt and str(c.get("kind", "")) == Blue.KIND_BLUE:
 					kist_ok = true
 			var bereik := Gen.reachable_tiles(room, d["spawn_up"])
-			var goed: bool = kist_ok and blauw == 1 and (room["monsters"] as Array).is_empty() \
+			# Besluit Dennis (PR #102): plaatpuzzels (puzzel_duw) hebben precies 1 stilstaand monster naast de plaat,
+			# de andere puzzels (kast_groei, hendel_groei) blijven monsterloos.
+			var mons: Array = room["monsters"]
+			var mon_ok: bool = mons.is_empty() if not room.has("puzzel_duw") \
+					else (mons.size() == 1 and bool(mons[0].get("puzzel_duw", false)))
+			var goed: bool = kist_ok and blauw == 1 and mon_ok \
 					and (not d["has_stairs_down"] or bereik.has(d["stairs_down"])) and bereik.has(po + Vector2i(3, 3)) \
 					and not bereik.has(kt)
 			if not goed:
@@ -299,7 +304,7 @@ func _puzzel_kamers() -> void:
 			break
 		if sd % 10 == 0:
 			await get_tree().process_frame
-	check("PUZZLE ROOM: %d kamers: puzzel, 0 monsters, 1 blauwe kist in de nis, trap en vak bereikbaar" % n, n >= 30 and ok)
+	check("PUZZLE ROOM: %d kamers: puzzel, 0 monsters (plaatpuzzel: 1 monster naast de plaat), 1 blauwe kist in de nis, trap en vak bereikbaar" % n, n >= 30 and ok)
 	check("PUZZLE ROOM: alle %d puzzels komen voor (%s)" % [GP.VOLGORDE.size(), soorten.keys()], soorten.size() == GP.VOLGORDE.size())
 
 
