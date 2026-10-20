@@ -433,8 +433,16 @@ func _data_tests() -> void:
 	# --- thema / tegels
 	var th: Dictionary = DR.THEMES["donker_woud"]
 	var tex: Texture2D = load(th["tiles"])
-	check("thema donker_woud: woud_tiles.png 256x112 (RPG ART), terrein 'woud', één atlas",
-			tex != null and tex.get_size() == Vector2(256, 112) and DR.terrain_of("donker_woud") == "woud" and DR.single_atlas("donker_woud"))
+	check("thema donker_woud: woud_tiles_v9b.png 256x128 (RPG ART, rij 7 kuilranden), terrein 'woud', één atlas",
+			tex != null and tex.get_size() == Vector2(256, 128) and DR.terrain_of("donker_woud") == "woud" and DR.single_atlas("donker_woud"))
+	var pr: Dictionary = DR.pit_edge_tiles(DR.room("woud_mistpoel"))
+	check("kuilranden 112-118: massief in het woud, randen rond de kuil, art aanwezig",
+			[112, 113, 114, 115, 116, 117, 118].all(func(n): return DR.is_solid(n, "donker_woud"))
+			and pr.get(Vector2i(7, 13), -1) == 115 and pr.get(Vector2i(14, 13), -1) == 116 and pr.get(Vector2i(10, 13), -1) == 114
+			and pr.get(Vector2i(7, 10), -1) == 112 and pr.get(Vector2i(14, 10), -1) == 113 and pr.get(Vector2i(7, 8), -1) == 117 and pr.get(Vector2i(14, 8), -1) == 118
+			and not tex.get_image().get_region(Rect2i(0, 112, 112, 16)).is_invisible())
+	var pt5: Dictionary = DR.path_tiles(DR.room("woud_open_plek"))
+	check("open plek: pad loopt de heuveltrap in (geen bovenrand op rij 8)", pt5.get(Vector2i(13, 8), -1) == 68 and pt5.get(Vector2i(14, 8), -1) == 70)
 	var solid_ok := [87, 88, 89, 90, 96, 97, 98, 99, 104].all(func(n): return DR.is_solid(n, "donker_woud"))
 	check("massief in het woud: 87-90, 96-99, 104 (archief-thema's: niet)", solid_ok and not DR.is_solid(96, "archief_grijs")
 			and DR.is_no_monster(91, "donker_woud") and not DR.is_solid(91, "donker_woud") and not DR.is_solid(86, "donker_woud"))
@@ -482,7 +490,7 @@ func _data_tests() -> void:
 	check("Codex-art: rugaanzichten van de 4 oude vijanden (zelfde maat), icoon + inschrijf-effect (%s)" % [codex_bad], codex_bad.is_empty()
 			and ResourceLoader.exists("res://assets/ui/icons/leeg_boek.png") and ResourceLoader.exists("res://assets/fx/inschrijf.png"))
 	var hw := hw_lines()
-	var need := ["assets/sprites/noor_dorp.png", "assets/tiles/dungeon/woud_tiles_v9.png", "assets/battle/donker_woud.png",
+	var need := ["assets/sprites/noor_dorp.png", "assets/tiles/dungeon/woud_tiles_v9b.png", "assets/battle/donker_woud.png",
 		"assets/sprites/woud/noor_cocon.png", "assets/sprites/woud/noor_cocon_open.png", "assets/sprites/woud/noor_cocon_puls.png",
 		"assets/sprites/enemies/wortelkoning.png", "assets/sprites/enemies/wortelkoning_idle.png", "assets/sprites/enemies/wortelkoning_hit.png",
 		"assets/sprites/enemies/mistuil_rug.png", "assets/ui/icons/leeg_boek.png", "assets/fx/inschrijf.png", "art/enemies/mosslijm_rug.png",
@@ -696,7 +704,7 @@ func _forest_tests() -> void:
 	check("met de opdracht: het Dark Wood in (Wood's Edge)", await wait_scene("WoudRand"))
 	await wait_fade()
 	var r := scene()
-	check("thema: woud-tegels, terrein 'woud', tint + mist", r.ground.tile_set.get_source(0).texture.resource_path.ends_with("woud_tiles_v9.png")
+	check("thema: woud-tegels, terrein 'woud', tint + mist", r.ground.tile_set.get_source(0).texture.resource_path.ends_with("woud_tiles_v9b.png")
 			and r.terrain_at(Vector2i(7, 13)) == "woud" and r.get_node_or_null("ThemaTint") != null and r.get_node_or_null("WoudMist") != null)
 	var ov: TileMapLayer = r.get_node_or_null("Overlay")
 	check("overlay-laag (kruinen + mist) boven de speler, zonder botsing", ov != null and ov.z_index > player().z_index

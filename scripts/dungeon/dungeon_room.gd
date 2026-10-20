@@ -155,6 +155,7 @@ func _build() -> void:
 	for t in pad:
 		_cells[t] = int(pad[t])
 		set_tile(ground, t, int(pad[t]))
+	_build_pit_edges()
 	_build_overlay()
 	var objects: Node2D = $Objects
 	# opslagboek op de sokkel (4 px hoger, zodat de lessenaar op de sokkel staat);
@@ -346,6 +347,28 @@ func _place_exit_warper(objects: Node2D) -> void:
 ##              (2x2) op de overlay erboven. Soorten: THEMES[thema]["trees"] (Donker Woud: A, B).
 ##   "mist":    [[x, y, lengte]] mistband (THEMES[thema]["mist_band"]: begin, midden..., eind)
 ##   "overlay": [[x, y, tegel]]  losse overlay-tegels (bv. 84 mistwolk, 108 glitch-pixels)
+## Kuilranden (DungeonRooms.pit_edge_tiles) op een eigen laag "KuilRand" boven de grond. Lege atlascel
+## (nog geen art van RPG ART) -> niets: dan blijft de huidige kuil (13/14) het beeld. Botsing: de grond.
+var pit_layer: TileMapLayer = null
+func _build_pit_edges() -> void:
+	var pe := DungeonRooms.pit_edge_tiles(room)
+	if pe.is_empty():
+		return
+	var img: Image = (ground.tile_set.get_source(0) as TileSetAtlasSource).texture.get_image()
+	for t in pe:
+		var n := int(pe[t])
+		var c := Vector2i(n % DungeonRooms.COLS, n / DungeonRooms.COLS)
+		if img == null or (c.y + 1) * 16 > img.get_height() or img.get_region(Rect2i(c * 16, Vector2i(16, 16))).is_invisible():
+			continue
+		if pit_layer == null:
+			pit_layer = TileMapLayer.new()
+			pit_layer.name = "KuilRand"
+			pit_layer.tile_set = tileset(false, DungeonRooms.current_theme)
+			add_child(pit_layer)
+			move_child(pit_layer, ground.get_index() + 1)
+		set_tile(pit_layer, t, n)
+
+
 func _build_overlay() -> void:
 	var td: Dictionary = DungeonRooms.theme_data(DungeonRooms.current_theme)
 	if not (room.has("trees") or room.has("mist") or room.has("overlay")):

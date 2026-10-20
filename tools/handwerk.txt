@@ -640,3 +640,5 @@ assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim.png
 assets/sprites/som/wilgendal/npcs/henrik_wm1_slim.png
 assets/sprites/npc_wm1_slim.png
 assets/sprites/buiten/bouw_werker_wm1_slim.png
+# 20 okt 2026: woud_tiles_v9b.png van RPG ART (art_mapsprites_v4/out/tiles_v9/woud, 256x128): donkerder pad, 14 opnieuw, kuilranden 112-118
+assets/tiles/dungeon/woud_tiles_v9b.png

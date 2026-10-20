@@ -188,7 +188,7 @@ const ROOMS := {
 		"mist": [[10, 12, 7]],
 		"overlay": [[12, 4, 108], [23, 7, 108], [4, 12, 108], [15, 7, 108], [21, 3, 84]],
 		"monsters": [
-			{"id": "m1", "enemy": "sporenzwam", "group": ["sporenzwam", "sporenzwam", "mistuil"], "tile": [13, 9], "moves": true},
+			{"id": "m1", "enemy": "sporenzwam", "group": ["sporenzwam", "sporenzwam", "mistuil"], "tile": [9, 9], "moves": true},
 			{"id": "m2", "enemy": "wortelkruiper", "group": ["wortelkruiper", "wortelkruiper", "sporenzwam"], "tile": [14, 4], "moves": false, "guard": true},
 			{"id": "m3", "enemy": "mistuil", "group": ["mistuil", "wortelkruiper"], "tile": [21, 10], "moves": true},
 		],
@@ -216,7 +216,7 @@ const ROOMS := {
 			"c___________(UU)___________d",
 		],
 		"checkpoint": false,      # v0.19 baaskamer: game over = terug in de Sporenkring
-		"path": {"width": 2, "lines": [[[13, 15], [13, 8]]]},   # v0.24 bospad ingang -> uitgangen
+		"path": {"width": 2, "lines": [[[13, 15], [13, 8]]], "join": "^"},   # join: pad sluit naadloos aan op de heuveltrap (rij 7)   # v0.24 bospad ingang -> uitgangen
 		"spawns": {"zuid": [13, 15, "up"]},
 		"exits": {
 			"U": {"map": M + "woud_sporenkring.tscn", "spawn": "boog"},
