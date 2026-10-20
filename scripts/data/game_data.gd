@@ -89,7 +89,7 @@ const ENEMIES := {
 	"mosslijm": {
 		"name": "Moss Slime", "sprite": "res://art/enemies/mosslijm.png",
 		"sprite_back": "res://art/enemies/mosslijm_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
-		"max_hp": 10, "atk": 7, "def": 2, "agi": 3,
+		"max_hp": 13, "atk": 10, "def": 2, "agi": 3,
 		"exp": 3, "gold": 2, "y_offset": 0,
 		"skills": [],
 		"no": 1, "mp": 0, "weak": ["vuur"], "resist": [],
@@ -100,7 +100,7 @@ const ENEMIES := {
 	"moskonijn": {
 		"name": "Moss Rabbit", "sprite": "res://art/enemies/moskonijn.png",
 		"sprite_back": "res://art/enemies/moskonijn_rug.png",   # v0.18 rugaanzicht (Codex-bondgenoot; RPG ART art_rug_v18)
-		"max_hp": 14, "atk": 9, "def": 3, "agi": 12,
+		"max_hp": 18, "atk": 14, "def": 3, "agi": 12,
 		"exp": 4, "gold": 3, "y_offset": 0,
 		"skills": [],
 		"no": 2, "mp": 0, "weak": ["vuur"], "resist": [],
@@ -111,7 +111,7 @@ const ENEMIES := {
 	"papiergeest": {
 		"name": "Paper Wraith", "sprite": "res://assets/sprites/enemies/papiergeest.png",
 		"sprite_back": "res://assets/sprites/enemies/papiergeest_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
-		"max_hp": 16, "atk": 9, "def": 3, "agi": 4,
+		"max_hp": 21, "atk": 14, "def": 3, "agi": 4,
 		"exp": 5, "gold": 4, "y_offset": 0,
 		"skills": [],
 		"no": 3, "mp": 0, "weak": ["vuur"], "resist": [],
@@ -122,7 +122,7 @@ const ENEMIES := {
 	"glitchmot": {
 		"name": "Glitch Moth", "sprite": "res://assets/sprites/enemies/glitchmot.png",
 		"sprite_back": "res://assets/sprites/enemies/glitchmot_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
-		"max_hp": 12, "atk": 10, "def": 2, "agi": 14,
+		"max_hp": 16, "atk": 15, "def": 2, "agi": 14,
 		"exp": 6, "gold": 3, "y_offset": 0,
 		"skills": [],
 		"no": 4, "mp": 0, "weak": ["bliksem"], "resist": [],
@@ -144,7 +144,7 @@ const ENEMIES := {
 		# HANDOFF_ARCHIEF1.md voor de tabel per niveau. Nieuw trucje 'Schild omhoog' ("type": "guard"):
 		# i.p.v. aanvallen DEF x2, de rest van deze ronde en de hele volgende ronde (bericht, blauwe
 		# tint en een strook tijdens het kiezen).
-		"max_hp": 30, "atk": 12, "def": 8, "agi": 5, "mag": 0, "mdef": 4,
+		"max_hp": 39, "atk": 18, "def": 8, "agi": 5, "mag": 0, "mdef": 4,
 		"exp": 10, "gold": 8, "y_offset": 0,
 		"skills": [{"name": "Shield Up", "chance": 0.2, "type": "guard", "def_mult": 2.0},
 				{"name": "Seal Strike", "chance": 0.15, "power": 1.4}],
@@ -259,7 +259,7 @@ const ENEMIES := {
 		"no": 10, "mp": 0, "weak": ["vuur"], "resist": ["bliksem"],
 		"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 1.0}],
 		"boss": {
-			"max_hp": 440, "atk": 34, "def": 20, "agi": 8, "mag": 14, "mdef": 16, "mp": 0,
+			"max_hp": 440, "atk": 36, "def": 20, "agi": 8, "mag": 14, "mdef": 16, "mp": 0,
 			"exp": 400, "gold": 150,
 			"skills": [{"name": "Root Grip", "chance": 0.25, "power": 1.6}],
 		},
@@ -324,7 +324,7 @@ const ENEMIES := {
 		"no": 30, "mp": 12, "weak": [], "resist": [],
 		"drops": [],
 		"boss": {
-			"max_hp": 90, "atk": 14, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
+			"max_hp": 270, "atk": 32, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
 			"exp": 20, "gold": 0,
 			"skills": [{"name": "Silence", "chance": 0.25, "power": 1.2}],
 			"tint": [0.72, 0.40, 1.15],
@@ -1073,10 +1073,13 @@ const EERSTE_ARCHIEF_DOEL := 7
 const ARCHIEF_STAT_SCHAAL := 0.7
 const ARCHIEF_EXP_SCHAAL := 0.50
 const TIERS := {
-	1: {"hp": 1.0, "atk": 0, "def": 0, "exp": 2.0, "gold": 1.0},
-	2: {"hp": 1.5, "atk": 4, "def": 3, "exp": 2.5, "gold": 1.5},
-	3: {"hp": 1.9, "atk": 7, "def": 5, "exp": 3.0, "gold": 2.0},
+	1: {"hp": 1.0, "atk": 6, "def": 1, "exp": 2.0, "gold": 1.0},
+	2: {"hp": 1.5, "atk": 7, "def": 3, "exp": 2.5, "gold": 1.5},
+	3: {"hp": 1.9, "atk": 8, "def": 5, "exp": 3.0, "gold": 2.0},
 	4: {"hp": 2.3, "atk": 10, "def": 7, "exp": 3.0, "gold": 2.5},
+	5: {"hp": 5.0, "atk": 40, "def": 4, "exp": 2.5, "gold": 1.5},
+	6: {"hp": 5.0, "atk": 44, "def": 6, "exp": 3.0, "gold": 2.0},
+	7: {"hp": 3.5, "atk": 28, "def": 0, "exp": 1.0, "gold": 1.0},
 }
 
 
