@@ -59,7 +59,7 @@ func _run() -> void:
 	print("=== Deel E: uitgang-warpers berggrot ===")
 	await _warper_tests()
 	print("=== Deel F: World Warper vlieg-AI (wereldkaart) ===")
-	_warper_brain()
+	await _warper_brain()
 	print("BERGGROTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await pframes(8)
@@ -747,6 +747,7 @@ func _rust() -> void:
 
 ## World Warper op de wereldkaart: gesimuleerd met vaste seed, sneller dan realtime.
 func _warper_brain() -> void:
+	await pframes(1)
 	var gebied := Rect2(0, 0, 1024, 800)
 	var speler := Vector2(500, 400)
 	for seed_nr in [1, 7, 42]:
@@ -831,11 +832,54 @@ func _warper_brain() -> void:
 		if z.view.grow(WarperBrain.VIEW_PAD + 40.0).has_point(z.pos):
 			dichtbij += 1
 	check("warper: blijft meestal rond het beeld (%d%%)" % (100 * dichtbij / n), dichtbij > n * 0.9)
+	await _warper_knoppen()
+
+
+## Touch-knoppen: echte rechthoeken uit touch_controls.gd; romp komt er 600 s nooit in (3 seeds).
+func _warper_knoppen() -> void:
+	var laag: CanvasLayer = load("res://scenes/ui/touch_controls.tscn").instantiate()
+	add_child(laag)
+	await pframes(2)
+	var tc := laag.get_node("Control")
+	tc.show_menu = true
+	tc.show_run = true
+	tc.show_kern = true
+	var scherm: Array[Rect2] = tc.button_rects()
+	laag.queue_free()
+	check("touch: knop-rechthoeken voor d-pad, A, B, MENU, RUN, CORE", scherm.size() == 6)
+	var beeld := Rect2(200, 200, 384, 216)
+	var wereld: Array[Rect2] = []
+	for r in scherm:
+		wereld.append(Rect2(beeld.position + r.position, r.size))
+	for seed_nr in [2, 13, 77]:
+		var b := WarperBrain.new()
+		b.setup(seed_nr, Rect2(0, 0, 1024, 800), beeld.get_center())
+		b.view = beeld
+		b.set_avoid_from_buttons(wereld)
+		var raak := 0
+		var in_beeld := 0
+		var n := int(600.0 * 60.0)
+		for i in n:
+			b.step(1.0 / 60.0)
+			var romp := Rect2(b.hull_center(b.pos, b.visual_alt()) - WarperBrain.HULL_HALF, WarperBrain.HULL_HALF * 2.0)
+			for r in wereld:
+				if romp.intersects(r):
+					raak += 1
+					break
+			if beeld.has_point(romp.get_center()):
+				in_beeld += 1
+		check("warper seed %d: 600 s nooit over een touch-knop (%d frames raak)" % [seed_nr, raak], raak == 0)
+		check("warper seed %d: zacht om knoppen heen, zelden noodduw (%d)" % [seed_nr, b.hard_pushes],
+				b.hard_pushes < n / 200)
+		check("warper seed %d: met knoppen nog steeds levend (bursts %d, landingen %d, %d%% in beeld)"
+				% [seed_nr, b.bursts, b.landings, 100 * in_beeld / n],
+				b.bursts >= 2 and b.landings >= 2 and in_beeld > n * 0.85)
 
 
 ## In de echte wereldkaart: beweegt, geen botsing/ingang, schaduw los van het schip.
 func _warper_in_scene(fly: WorldWarperFlyover) -> void:
 	var start: Vector2 = fly.brain.pos
+	var knop_frames := 0
 	var frames := 0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--warperframes="):
@@ -850,6 +894,8 @@ func _warper_in_scene(fly: WorldWarperFlyover) -> void:
 			print("INFO  wf_%03d %s pos=%s alt=%.1f v=%.0f inbeeld=%d" % [i, WarperBrain.State.keys()[fly.brain.state],
 					fly.brain.pos.round(), fly.brain.alt, fly.brain.vel.length(),
 					int(fly.brain.view.has_point(fly.sprite.global_position))])
+			if fly.brain.blocked(fly.brain.pos, fly.brain.visual_alt()):
+				knop_frames += 1
 	else:
 		await get_tree().create_timer(1.5).timeout
 	var r: Rect2i = (scene().get_node("Ground") as TileMapLayer).get_used_rect()
@@ -864,3 +910,5 @@ func _warper_in_scene(fly: WorldWarperFlyover) -> void:
 		if fly._mag_landen(p):
 			land_ok = false
 	check("warper: landt niet buiten de kaart", land_ok)
+	check("warper: kent de echte touch-knoppen van de kaart", fly.brain.avoid.size() >= 3)
+	check("warper: in de kaart-capture nooit achter een knop (%d)" % knop_frames, knop_frames == 0)

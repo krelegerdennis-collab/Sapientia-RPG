@@ -129,6 +129,26 @@ func run_rect() -> Rect2:
 	return Rect2(kr.position - Vector2(0, KERN_SIZE.y + 5.0), KERN_SIZE)
 
 
+## Schermrechthoeken (384x216-eenheden) van alle zichtbare knoppen; o.a. de World Warper
+## op de wereldkaart vliegt hier omheen (world_warper/art/flyover.gd).
+func button_rects() -> Array[Rect2]:
+	var uit: Array[Rect2] = []
+	if not is_visible_in_tree():
+		return uit
+	var d := dpad_center()
+	var dr := dpad_radius * 1.35  # incl. de printplaat-sporen eromheen
+	uit.append(Rect2(d - Vector2.ONE * dr, Vector2.ONE * dr * 2.0))
+	for c in [a_center(), b_center()]:
+		uit.append(Rect2(c - Vector2.ONE * button_radius, Vector2.ONE * button_radius * 2.0))
+	if show_menu:
+		uit.append(menu_rect())
+	if show_run:
+		uit.append(run_rect())
+	if show_kern:
+		uit.append(kern_rect())
+	return uit
+
+
 func run_on() -> bool:
 	var st := get_node_or_null("/root/Settings")
 	return st != null and bool(st.get_value("run"))

@@ -13,8 +13,14 @@ const TILE := 16
 const LAND_TERREIN := ["gras", "hoog_gras", "zand"]
 const BANK_MAX := 0.16            ## radialen kantelen in de bocht
 const BANK_SMOOTH := 6.0
-const TRAIL_N := 4                ## nabeelden tijdens een burst
-const TRAIL_STEP := 0.05          ## seconden tussen nabeelden
+const GHOST_N := 2                ## getinte nabeelden tijdens een burst
+const GHOST_STEP := 0.06          ## seconden tussen nabeelden
+const GHOST_TINT := Color(1.35, 1.1, 2.1)  ## >1 = oplichten (goedkoop, geen shader)
+const STREAK_POINTS := 14         ## punten per straal (Line2D, ~0.2 s lang)
+const STREAK_WIDTH := 4.0
+const STREAK_TIPS := [Vector2(-24, 3), Vector2(24, 3)]  ## vleugelpunten t.o.v. romp-midden
+const STREAK_COLOR := Color(0.75, 0.95, 1.0)
+const GLOW_FADE := 5.0            ## hoe snel het spoor op- en uitfadet (1/s)
 const SHADOW_ALPHA := 0.5
 const SPRITE_ALPHA := 0.95
 const GROUND_OFFSET := Brain.HULL_LIFT       ## schip-midden boven het grondpunt (schaduw piept eronder uit)
@@ -26,9 +32,11 @@ var seed_override := -1
 var sprite: Sprite2D
 var shadow: Sprite2D
 var brain: WarperBrain = Brain.new()
-var _trail: Array[Sprite2D] = []
-var _history: Array[Vector2] = []
-var _hist_t := 0.0
+var _ghosts: Array[Sprite2D] = []
+var _ghost_pos: Array[Vector2] = []
+var _ghost_t := 0.0
+var _streaks: Array[Line2D] = []
+var _glow := 0.0                  ## 0..1, hoe sterk het burst-spoor nu is
 var _grond: TileMapLayer
 var _squash_t := 0.0
 var _squash_sign := 1.0
@@ -47,14 +55,28 @@ func _ready() -> void:
 	shadow.texture = _shadow_tex()
 	shadow.z_index = -49  # net boven de grond, onder het schip
 	add_child(shadow)
-	for i in TRAIL_N:
+	for i in GHOST_N:
 		var g := Sprite2D.new()
 		g.texture = TEX
 		g.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		g.scale = Vector2(SCHAAL, SCHAAL)
 		g.visible = false
 		add_child(g)
-		_trail.append(g)
+		_ghosts.append(g)
+	for tip in STREAK_TIPS:
+		var l := Line2D.new()
+		l.width = STREAK_WIDTH
+		var curve := Curve.new()
+		curve.add_point(Vector2(0, 1))
+		curve.add_point(Vector2(1, 0.15))
+		l.width_curve = curve
+		var grad := Gradient.new()
+		grad.set_color(0, Color(STREAK_COLOR, 0.9))
+		grad.set_color(1, Color(STREAK_COLOR, 0.0))
+		l.gradient = grad
+		l.joint_mode = Line2D.LINE_JOINT_ROUND
+		l.visible = false
+		add_child(l)
+		_streaks.append(l)
 	sprite = Sprite2D.new()
 	sprite.name = "Sprite"
 	sprite.texture = TEX
@@ -91,9 +113,21 @@ func _feed_context() -> void:
 	if cam != null:
 		var size := get_viewport_rect().size / cam.zoom
 		brain.view = Rect2(cam.get_screen_center_position() - size * 0.5, size)
+	_feed_buttons()
 	var speler := get_parent().get_node_or_null("Objects/Player") as Node2D
 	if speler != null:
 		brain.player_pos = speler.position
+
+
+## Touch-knoppen (scherm) -> wereld, zodat het schip er nooit achter verdwijnt.
+func _feed_buttons() -> void:
+	var tc := get_parent().get_node_or_null("TouchControls/Control")
+	var uit: Array[Rect2] = []
+	if tc != null and tc.has_method("button_rects") and brain.view.has_area():
+		var schaal: Vector2 = brain.view.size / (tc as Control).size
+		for r: Rect2 in tc.button_rects():
+			uit.append(Rect2(brain.view.position + r.position * schaal, r.size * schaal))
+	brain.set_avoid_from_buttons(uit)
 
 
 func _render(delta: float) -> void:
@@ -124,28 +158,44 @@ func _render(delta: float) -> void:
 
 
 func _update_trail(delta: float) -> void:
-	_hist_t += delta
-	if _hist_t >= TRAIL_STEP:
-		_hist_t = 0.0
-		_history.push_front(sprite.position)
-		if _history.size() > TRAIL_N + 1:
-			_history.pop_back()
-	var aan := brain.state == WarperBrain.State.BURST and brain.vel.length() > Brain.CRUISE_SPEED * 1.3
-	for i in TRAIL_N:
-		var g := _trail[i]
-		g.visible = aan and i + 1 < _history.size()
+	var aan := brain.state == WarperBrain.State.BURST and brain.vel.length() > Brain.CRUISE_SPEED * 1.25
+	_glow = move_toward(_glow, 1.0 if aan else 0.0, GLOW_FADE * delta)
+	# vleugelstralen: Line2D met kleurverloop en taps toelopend, nieuwste punt vooraan
+	for k in _streaks.size():
+		var l := _streaks[k]
+		var tip: Vector2 = sprite.position + (STREAK_TIPS[k] as Vector2).rotated(sprite.rotation)
+		if _glow > 0.0:
+			l.add_point(tip, 0)
+		while l.get_point_count() > (STREAK_POINTS if _glow > 0.0 else maxi(l.get_point_count() - 2, 0)):
+			l.remove_point(l.get_point_count() - 1)
+		l.visible = l.get_point_count() > 1
+		l.modulate.a = _glow
+	# getinte nabeelden: elk iets kleiner en vager
+	_ghost_t += delta
+	if _ghost_t >= GHOST_STEP:
+		_ghost_t = 0.0
+		_ghost_pos.push_front(sprite.position)
+		if _ghost_pos.size() > GHOST_N + 1:
+			_ghost_pos.pop_back()
+	for i in GHOST_N:
+		var g := _ghosts[i]
+		g.visible = _glow > 0.02 and i + 1 < _ghost_pos.size()
 		if g.visible:
-			g.position = _history[i + 1]
+			g.position = _ghost_pos[i + 1]
 			g.rotation = sprite.rotation
-			g.modulate = Color(0.75, 0.8, 1.0, 0.42 - 0.09 * i)
+			g.scale = sprite.scale * (0.94 - 0.05 * i)
+			g.modulate = Color(GHOST_TINT, (0.4 - 0.18 * i) * _glow)
 
 
 func _set_visible(v: bool) -> void:
 	sprite.visible = v
 	shadow.visible = v
 	if not v:
-		for g in _trail:
+		for g in _ghosts:
 			g.visible = false
+		for l in _streaks:
+			l.clear_points()
+			l.visible = false
 
 
 func _mag_landen(p: Vector2) -> bool:

@@ -32,6 +32,10 @@ const LAND_FORCE_AFTER := 25.0    ## na zolang zonder landing: zeker landen
 const LAND_PLAYER_MIN := 56.0     ## nooit vlak bij de speler landen
 const LAND_SPOOK_DIST := 22.0     ## speler loopt erheen -> eerder opstijgen
 const LAND_TRIES := 32
+const HULL_HALF := Vector2(32.0, 16.0)  ## halve romp (128x64 op schaal 0.5)
+const AVOID_MARGIN := 6.0         ## extra ruimte rond touch-knoppen
+const AVOID_LOOKAHEAD := 28.0     ## vanaf deze afstand zacht wegsturen
+const AVOID_PUSH := 360.0         ## px/s^2 wegduwen in de zachte zone
 const HULL_LIFT := 12.0           ## romp-midden boven het grondpunt (zelfde als flyover.GROUND_OFFSET)
 const LAND_CONE := 0.9            ## radialen links/rechts van de vliegrichting
 const LAND_DIST := Vector2(50.0, 150.0)
@@ -63,6 +67,9 @@ var _from_alt := 0.0
 var _approach_t := 0.0
 var _cruise_v := CRUISE_SPEED
 var _plain_legs := 0
+## Wereld-rechthoeken van de touch-knoppen (al vergroot met romp + marge), per frame gezet.
+var avoid: Array[Rect2] = []
+var hard_pushes := 0  ## telt noodduwen (tests: moet zeldzaam zijn, anders schokt het)
 
 
 func setup(seed_value: int, area: Rect2, start: Vector2) -> void:
@@ -142,6 +149,9 @@ func step(delta: float) -> void:
 		if state != State.DESCEND:
 			alt = move_toward(alt, CRUISE_ALT, 30.0 * delta)
 	pos += vel * delta
+	_avoid_buttons(delta)
+	if state == State.LANDED and blocked(pos, 0.0):
+		_enter(State.ASCEND)  # camera schoof een knop over het schip: opstijgen
 	# veiligheidsnet: nooit buiten de kaart; rand = terugsturen
 	var inner := bounds.grow(-EDGE_MARGIN * 0.5)
 	if not inner.has_point(pos):
@@ -149,6 +159,77 @@ func step(delta: float) -> void:
 		vel *= 0.5
 		if state == State.CRUISE or state == State.BURST:
 			target = _random_waypoint()
+
+
+## Midden van de romp op het scherm voor grondpunt p op hoogte h.
+func hull_center(p: Vector2, h: float) -> Vector2:
+	return p - Vector2(0.0, HULL_LIFT + h)
+
+
+## Knoppen in wereldcoördinaten -> rechthoeken waar het rompmidden niet mag komen.
+func set_avoid_from_buttons(world_rects: Array[Rect2]) -> void:
+	avoid.clear()
+	for r in world_rects:
+		avoid.append(r.grow_individual(HULL_HALF.x + AVOID_MARGIN, HULL_HALF.y + AVOID_MARGIN,
+				HULL_HALF.x + AVOID_MARGIN, HULL_HALF.y + AVOID_MARGIN))
+
+
+func blocked(p: Vector2, h: float) -> bool:
+	var c := hull_center(p, h)
+	for r in avoid:
+		if r.has_point(c):
+			return true
+	return false
+
+
+## Zacht om knoppen heen sturen, en hard eruit duwen als hij er toch in zou komen.
+func _avoid_buttons(delta: float) -> void:
+	if avoid.is_empty():
+		return
+	var h := visual_alt()
+	for r in avoid:
+		var c := hull_center(pos, h)
+		var zacht := r.grow(AVOID_LOOKAHEAD)
+		if not zacht.has_point(c):
+			continue
+		var weg := _out_vector(r, c)
+		if r.has_point(c):
+			hard_pushes += 1
+			pos += weg  # hard: naar de dichtstbijzijnde rand
+			var n := weg.normalized()
+			if vel.dot(n) < 0.0:
+				vel -= n * vel.dot(n)
+		else:
+			var dichtbij := 1.0 - clampf(_dist_out(r, c) / AVOID_LOOKAHEAD, 0.0, 1.0)
+			vel += _away_dir(r, c) * AVOID_PUSH * dichtbij * delta
+
+
+## Kortste verschuiving die punt c buiten r zet.
+static func _out_vector(r: Rect2, c: Vector2) -> Vector2:
+	var l := c.x - r.position.x
+	var rr := r.end.x - c.x
+	var t := c.y - r.position.y
+	var b := r.end.y - c.y
+	var m := minf(minf(l, rr), minf(t, b))
+	if m == l:
+		return Vector2(-l - 0.5, 0)
+	if m == rr:
+		return Vector2(rr + 0.5, 0)
+	if m == t:
+		return Vector2(0, -t - 0.5)
+	return Vector2(0, b + 0.5)
+
+
+static func _dist_out(r: Rect2, c: Vector2) -> float:
+	var dx := maxf(maxf(r.position.x - c.x, c.x - r.end.x), 0.0)
+	var dy := maxf(maxf(r.position.y - c.y, c.y - r.end.y), 0.0)
+	return Vector2(dx, dy).length()
+
+
+static func _away_dir(r: Rect2, c: Vector2) -> Vector2:
+	var q := Vector2(clampf(c.x, r.position.x, r.end.x), clampf(c.y, r.position.y, r.end.y))
+	var d := c - q
+	return d.normalized() if d.length() > 0.01 else (c - r.get_center()).normalized()
 
 
 func _steer(speed: float, accel: float, delta: float) -> void:
@@ -182,6 +263,8 @@ func _try_land() -> bool:
 				-LAND_VIEW_INSET, -LAND_VIEW_INSET * 0.5).has_point(p):
 			continue
 		if not bounds.grow(-EDGE_MARGIN).has_point(p) or player_pos.distance_to(p) < LAND_PLAYER_MIN:
+			continue
+		if blocked(p, 0.0) or blocked(p, CRUISE_ALT * 0.5) or blocked(p, CRUISE_ALT):
 			continue
 		if landable.is_valid() and not bool(landable.call(p)):
 			continue
@@ -234,12 +317,15 @@ func _random_waypoint(dist_mult := 1.0, kegel := PI) -> Vector2:
 		if kegel < PI and i < 8 and vel.length() > 5.0:
 			hoek = vel.angle() + rng.randf_range(-kegel, kegel)
 		var p := pos + Vector2.from_angle(hoek) * rng.randf_range(WAYPOINT_DIST.x, WAYPOINT_DIST.y) * dist_mult
-		if area.has_point(p):
+		if area.has_point(p) and not blocked(p, CRUISE_ALT):
 			return p
 		best = p
-	# geen punt in de buurt past: ergens binnen het gebied
-	return Vector2(rng.randf_range(area.position.x, area.end.x), rng.randf_range(area.position.y, area.end.y)) \
-			if not area.has_point(best) else best
+	# geen punt in de buurt past: ergens binnen het gebied, liefst niet achter een knop
+	for i in 8:
+		var q := Vector2(rng.randf_range(area.position.x, area.end.x), rng.randf_range(area.position.y, area.end.y))
+		if not blocked(q, CRUISE_ALT):
+			return q
+	return best if area.has_point(best) else area.get_center()
 
 
 ## Landplek: liefst vóór de neus (kegel), zodat hij er in één boog heen glijdt.
