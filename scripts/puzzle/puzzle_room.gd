@@ -308,6 +308,9 @@ func _build_dungeon_ground() -> void:
 			var n: int = legend[ch]
 			if ch == ".":
 				n = DungeonRoomScript.floor_variant(x, y)
+				# Berggrot v8: vrije even 2x2-vakken in "look" -> blok A/B (alleen beeld)
+				if room_id in DungeonRooms.BERGGROT_BLOCK_ROOMS:
+					n = DungeonRooms.berggrot_floor_at(x, y, look, n)
 			DungeonRoomScript.set_tile(ground, Vector2i(x, y), n)
 	var body := StaticBody2D.new()
 	body.name = "Muren"

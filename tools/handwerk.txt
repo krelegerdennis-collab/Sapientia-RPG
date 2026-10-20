@@ -654,3 +654,7 @@ assets/tiles/dungeon/kas_tiles_v8.png
 assets/tiles/dungeon/kas_bibliotheek_v8.png
 # 20 okt 2026: v8.1-kastegels (256x96, blok A 80-83 / B 84-87, vulvloer 88-95); thema "kas" wijst hierheen
 assets/tiles/dungeon/kas_tiles_v8b.png
+# 21 okt 2026: berggrot v8 van RPG ART (art_mapsprites_v4/out/tiles_v8/berggrot, 256x96: blok A 80-83 / B 84-87, losse rots 88); thema "berggrot" wijst hierheen, tint wit
+assets/tiles/dungeon/berggrot_tiles_v8.png
+# 21 okt 2026: kas_tiles_v8c = v8b met zachtere lichtbundels 65/66 (RPG ART tiles_v8/archief2); thema "kas" wijst hierheen
+assets/tiles/dungeon/kas_tiles_v8c.png
