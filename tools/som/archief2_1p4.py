@@ -15,8 +15,8 @@ R = "scripts/data/archief2_rooms.gd"
 GR = "scripts/data/archief2_ground.gd"
 WR = "scripts/dungeon/archief2_warpers.gd"
 
-# extra kopieën per kolom (20 breed): links 2,3,4,7; rechts 15,16(x2),17 -> 28; uitgang (EE) 9-10 -> 13-14
-COLS20 = {2: 1, 3: 1, 4: 1, 7: 1, 15: 1, 16: 2, 17: 1}
+# extra kopieën per kolom (20 breed): links 2,3,4,7; rechts 15,16,17 -> 27 (feedback Forge: geen driedubbele kolommen)
+COLS20 = {2: 1, 3: 1, 4: 1, 7: 1, 15: 1, 16: 1, 17: 1}   # 27 breed, symmetrisch rond (EE) 13-14; nooit 3x
 # leven_ingang (16 breed): uitgang (EE) 7-8, boog n 9 -> 6 extra
 COLS16 = {2: 1, 3: 1, 5: 1, 11: 1, 12: 1, 13: 1}
 GENEZER_PODIUM_ROWS = {4, 5, 6, 7}   # podium 48-56 + zegel 62/63
@@ -110,6 +110,8 @@ def fix_gap_ground(g2, lay_oud, lay2, cd, Ynew):
             for k in range(cd.get(x, 0)):
                 nx = Xf[x] + 1 + k
                 if c == "." and lay2[ny][nx] == "#": g2[ny][nx] = 59
+        for nx, c in enumerate(lay2[ny]):   # open tegel in een '#'-rij is nooit plantenbak
+            if c == "." and g2[ny][nx] == 59: g2[ny][nx] = vloer(nx, ny)
 
 
 def pick_rows(layout, extra, verboden=set()):
@@ -120,11 +122,7 @@ def pick_rows(layout, extra, verboden=set()):
     step = len(ok) / min(extra, len(ok))
     for i in range(min(extra, len(ok))):
         y = ok[int(i * step + step / 2)]; rd[y] = 1
-    rest = extra - len(rd)
-    for y in reversed(ok):     # te weinig vrije rijen (Genezer): onderste vrije rijen 3x
-        if rest <= 0: break
-        rd[y] += 1; rest -= 1
-    return rd
+    return rd   # te weinig vrije rijen (Genezer): kamer wordt iets lager, nooit 3x
 
 
 def gd_rows(g, ind="\t\t"):
@@ -139,6 +137,10 @@ def lees_ground(rid):
 src = open(R).read()
 consts = dict(re.findall(r'^const (_\w+) := "([^"]*)"$', src, re.M))
 assert len(consts["_F"]) == 20, "al geschaald?"
+# baaspoort 2 breed (kolom 9-10, in lijn met de uitgang (EE)); de tweede tegel is dicht tot de baas verslagen is
+assert consts["_B"] == "<S#######.#########>"
+src = src.replace('const _B := "<S#######.#########>"', 'const _B := "<S#######..########>"')
+consts["_B"] = "<S#######..########>"
 report = []
 
 # ---- 20x12-kamers: constanten (kolommen) + per kamer de rijen ----
@@ -176,6 +178,11 @@ for var, a, b in var_blocks(src):
     nl = '"layout": [' + ", ".join(new_names) + "]"
     if lm: blk = blk[:lm.start()] + nl + blk[lm.end():]
     else: blk = blk.replace("_met(_basis(", "_met(_basis(", 1).replace("{\n", "{\n\t\t" + nl + ",\n", 1)
+    if H2 != 17:   # lagere kamer (Genezer): eigen spawns, zuid blijft vlak boven de uitgang
+        blk = blk.replace(nl + ",", nl + ',\n\t\t"spawns": {"zuid": [%d, %d, "up"], "noord": [%d, 3, "down"], "ingang": [%d, %d, "up"]},' % (Xf[9], Y(10), Xf[9], Xf[9], Y(10)), 1)
+    if rid in ("archief_2_v2_lotte", "archief_2_v3_wurger"):   # tweede poorttegel dicht tot de baas weg is
+        bid = "lotte" if "lotte" in rid else "wurger"
+        blk = blk.replace('\t\t"monsters": [{', '\t\t# poort 2 breed: (10,5) dicht tot de bewaker verslagen is\n\t\t"blokkades": {"tot_vlag": "bewaker:%s/%s", "tiles": [[10, 5]]},\n\t\t"monsters": [{' % (rid, bid), 1)
     pt = lambda m: f'{m.group(1)}[{Xf[int(m.group(2))]}, {Y(int(m.group(3)))}]'
     blk = re.sub(r'("(?:tile|save|warp)": )\[(\d+), (\d+)\]', pt, blk)
     def lijst(m):
@@ -191,17 +198,18 @@ for var, a, b in var_blocks(src):
     g2 = scale_ground(g, COLS20, rd, lay)
     lay2 = [scale_row(consts[n], COLS20) for n in new_names]
     fix_gap_ground(g2, lay, lay2, COLS20, Yf)
-    assert len(g2) == len(lay2) == 17 and all(len(r) == 28 for r in g2), rid
+    assert len(g2) == len(lay2) == 12 + sum(rd.values()) and all(len(r) == W2 for r in g2), rid
     gpatch[rid] = g2
-    report.append(f"{rid}: 20x12 -> 28x17; rijen {dict(rd)}")
+    report.append(f"{rid}: 20x12 -> {W2}x{12 + sum(rd.values())}; rijen {dict(rd)}")
 pieces.append(src[last:])
 src = "".join(pieces)
 # _basis: standaard-layout 17 rijen (F-kamer) en spawns
 Yb, Ybl, _ = maps(12, pick_rows([consts[n] for n in basis_layout], 5))
 src = src.replace('"layout": [_TOP, _WU, _WL, _SH, _F, _F, _F, _F, _F, _F, _F, _BOT],',
                   '"layout": [_TOP, _WU, _WL, _SH' + ", _F" * 12 + ", _BOT],", 1)
-src = re.sub(r'("(?:zuid|ingang)": )\[9, 10,', lambda m: f'{m.group(1)}[{Xf[9]}, 15,', src)
-src = re.sub(r'("noord": )\[9, 3,', lambda m: f'{m.group(1)}[{Xf[9]}, 3,', src)
+src = src.replace('"spawns": {"zuid": [9, 10, "up"], "noord": [9, 3, "down"], "ingang": [9, 10, "up"]},',
+                  '"spawns": {"zuid": [%d, 15, "up"], "noord": [%d, 3, "down"], "ingang": [%d, 15, "up"]},' % (Xf[9], Xf[9], Xf[9]))
+
 
 # ---- leven_ingang 16x11 -> 22x15 ----
 m = re.search(r'("leven_ingang": \{.*?"layout": \[\n)(.*?)(\n\t\t\],)(.*?)\n\t\},', src, re.S)
@@ -238,5 +246,29 @@ w = open(WR).read()
 w = w.replace("## Naast de ingang-spawn (9, 10), niet op de uitgang.\nconst BEGIN_TILE := Vector2i(8, 10)",
               f"## Naast de ingang-spawn ({Xf[9]}, 15), niet op de uitgang (1.4x: was (8, 10)).\nconst BEGIN_TILE := Vector2i({Xf[8]}, 15)")
 open(WR, "w").write(w)
-print(f"kolommen 20->28: {COLS20} (X(9)={Xf[9]})")
+# ---- puzzelkamers (puzzle_rooms.gd): alleen de rand/aanloop, rooster ongewijzigd ----
+# Links en rechts extra vloer-/kloofkolommen (de kloof '~'/'V' loopt door tot de muur), onderaan extra
+# aanlooprijen tussen puzzel en ingang E. De puzzel zelf (hendel, kast, plaat, groei-plaat, kloof, X) schuift
+# alleen mee met de linkermarge: onderlinge posities en rijnummers blijven gelijk.
+PR = "scripts/data/puzzle_rooms.gd"
+PUZ = {"leven_v1_plaat": (3, 3, 4), "leven_v3_combi": (2, 2, 3)}   # links, rechts, rijen onder
+ps = open(PR).read()
+for rid, (L, Rr, B) in PUZ.items():
+    m = re.search(r'\t"%s": \{.*?\n\t\},\n' % rid, ps, re.S)
+    blk = m.group(0)
+    def breed(key, blk):
+        lm = re.search(r'("%s": \[\n)(.*?)(\n\t\t\],)' % key, blk, re.S)
+        rows = re.findall(r'"([^"]*)"', lm.group(2))
+        assert len(rows[0]) in (15, 11), (rid, "al geschaald?")
+        vul = lambda c: c if c in "#~V-_." else "."   # nooit een puzzelobject kopiëren
+        out = [r[:2] + vul(r[2]) * L + r[2:-1] + vul(r[-2]) * Rr + r[-1] for r in rows]
+        out = out[:-1] + [out[-2]] * B + out[-1:]
+        return blk[:lm.start()] + lm.group(1) + "\n".join(f'\t\t\t"{r}",' for r in out) + lm.group(3) + blk[lm.end():], (len(rows[0]), len(rows), len(out[0]), len(out))
+    blk, maat = breed("layout", blk)
+    blk, _ = breed("look", blk)
+    blk = re.sub(r'("noord": )\[(\d+), (\d+)', lambda mm: f'{mm.group(1)}[{int(mm.group(2)) + L}, {mm.group(3)}', blk)
+    ps = ps[:m.start()] + blk + ps[m.end():]
+    report.append(f"{rid}: {maat[0]}x{maat[1]} -> {maat[2]}x{maat[3]} (puzzel +{L} in x, rijen gelijk)")
+open(PR, "w").write(ps)
+print(f"kolommen 20->{W2}: {COLS20} (X(9)={Xf[9]})")
 print("\n".join(report))

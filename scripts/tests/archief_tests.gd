@@ -550,8 +550,8 @@ const LEVEN_ID := "leven_ingang"
 const PLAAT_ID := "leven_v1_plaat"
 const LEVEN_SCENE := "res://scenes/maps/leven_ingang.tscn"
 const PLAAT_SCENE := "res://scenes/maps/leven_v1_plaat.tscn"
-const GAP := Vector2i(7, 2)
-const NOORD := Vector2i(7, 1)
+const GAP := Vector2i(10, 2)   # 1.4x: puzzel +3 in x (rand breder), rooster gelijk
+const NOORD := Vector2i(10, 1)
 const BRUG := "groei_brug"
 const HENDEL := "hendel_kas"
 

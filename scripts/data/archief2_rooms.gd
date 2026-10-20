@@ -79,15 +79,15 @@ const SCENES := {
 	"archief_2_warper": "res://scenes/maps/archief_2_warper.tscn",
 }
 
-const _F := "<S.........................>"
-const _G := "<S#########################>"
-const _B := "<S###########.#############>"
-const _T := "<S...######################>"
-const _TOP := "a--------------------------b"
-const _WU := "<LFFFFMFFGFFFAFFFFFFFFFFFFR>"
-const _WL := "<lffffmffgfffnffffffffffffr>"
-const _BOT := "c___________(EE)___________d"
-const _SH := "<Zsssssssssssssssssssssssss>"
+const _F := "<S........................>"
+const _G := "<S########################>"
+const _B := "<S###########..###########>"
+const _T := "<S...#####################>"
+const _TOP := "a-------------------------b"
+const _WU := "<LFFFFMFFGFFFAFFFFFFFFFFFR>"
+const _WL := "<lffffmffgfffnfffffffffffr>"
+const _BOT := "c___________(EE)__________d"
+const _SH := "<Zssssssssssssssssssssssss>"
 
 
 static func _basis(naam: String, verdieping: int, tier: int) -> Dictionary:
@@ -152,6 +152,8 @@ static func rooms() -> Dictionary:
 			"E": {"map": SCENES["archief_2_v2_gang"], "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v3_ketting"], "spawn": "zuid"},
 		},
+		# poort 2 breed: (10,5) dicht tot de bewaker verslagen is
+		"blokkades": {"tot_vlag": "bewaker:archief_2_v2_lotte/lotte", "tiles": [[14, 6]]},
 		"monsters": [{
 			"id": "lotte", "enemy": "lotte_glitch", "group": ["lotte_glitch"],
 			"tile": [13, 6], "moves": false, "boss": true, "guard": true,
@@ -213,6 +215,8 @@ static func rooms() -> Dictionary:
 		"signs": [{"tile": [6, 10], "lines": [
 			"Vines block the greenhouse. Ice and a sword cut through them.",
 		]}],
+		# poort 2 breed: (10,5) dicht tot de bewaker verslagen is
+		"blokkades": {"tot_vlag": "bewaker:archief_2_v3_wurger/wurger", "tiles": [[14, 6]]},
 		"monsters": [{
 			"id": "wurger", "enemy": "wurger", "group": ["wurger"],
 			"tile": [13, 6], "moves": false, "boss": true, "mini": true, "guard": true,
@@ -232,7 +236,8 @@ static func rooms() -> Dictionary:
 		],
 	})
 	var genezer := _met(_basis("The Mender", 4, 3), {
-		"layout": [_TOP, _WU, _WL, _F, _F, _B, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
+		"layout": [_TOP, _WU, _WL, _F, _F, _B, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
+		"spawns": {"zuid": [13, 13, "up"], "noord": [13, 3, "down"], "ingang": [13, 13, "up"]},
 		"checkpoint": false,
 		"exits": {
 			"E": {"map": SCENES["archief_2_v4_hal"], "spawn": "noord"},
@@ -246,7 +251,7 @@ static func rooms() -> Dictionary:
 		}],
 		# v0.23 (Dennis): het podium heeft geen hekje meer; rij 5 blijft dicht tot De Genezer verslagen is
 		"blokkades": {"tot_vlag": "bewaker:archief_2_v4_genezer/genezer",
-			"tiles": [[1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5], [8, 5], [9, 5], [10, 5], [11, 5], [12, 5], [15, 5], [16, 5], [17, 5], [18, 5], [19, 5], [20, 5], [21, 5], [22, 5], [23, 5], [24, 5], [25, 5], [26, 5]]},
+			"tiles": [[1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5], [8, 5], [9, 5], [10, 5], [11, 5], [12, 5], [15, 5], [16, 5], [17, 5], [18, 5], [19, 5], [20, 5], [21, 5], [22, 5], [23, 5], [24, 5], [25, 5]]},
 	})
 	var warper := _met(_basis("World Warper", 4, 0), {
 		"layout": [_TOP, _WU, _WL, _SH, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
