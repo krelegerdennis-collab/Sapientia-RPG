@@ -218,7 +218,25 @@ func _enemy_ai_tests() -> void:
 		await seconds(2.0)
 		t.check("SoM: vijand achtervolgt (%.0f -> %.0f px)" % [d0, far.position.distance_to(t.player().position)],
 				not is_instance_valid(far) or far.position.distance_to(t.player().position) < d0)
-	await gif_frames("fight", 1, 1)
+	await _gif_fight()
+
+
+## Korte GIF-reeks: slaan op de dichtstbijzijnde vijand (alleen met --som-shots).
+func _gif_fight() -> void:
+	if shots == "":
+		return
+	var a := arena()
+	var m := _first_enemy()
+	if m == null:
+		return
+	face_monster(m)
+	a.enemies[m]["hp"] = 999
+	for i in 60:
+		if i % 14 == 4 and a.enemies.has(m):
+			a.attack()
+		await gif_frames("fight_%02d" % i, 1, 2)
+	if a.enemies.has(m):
+		a.enemies[m]["hp"] = 5
 
 
 func _ring_tests() -> void:
@@ -336,7 +354,26 @@ func _style_path_tests() -> void:
 			GameState.end_battle("flee")
 			await t.wait_scene("ArchiefV1Gang", 20)
 			await t.frames(10)
-	# Action via Opties (zonder SoM-knop): realtime in een SoM-kamer
+	# Action via Opties (veldmenu > Options > Battle Style, zonder SoM-knop): realtime in een SoM-kamer
+	room().open_field_menu()
+	await t.frames(5)
+	var fm: Node = room().get_node_or_null("FieldMenu")
+	if fm:
+		fm.choose("options")
+		await t.frames(3)
+		var o: Node = fm.get_node_or_null("Options")
+		t.check("SoM: Opties heeft de regel Battle Style", o != null and o.keys.has("battle_style") and o.value_text("battle_style") == "Classic")
+		if o:
+			o.rows[o.keys.find("battle_style")].grab_focus()
+			o.change("battle_style", 1)
+			await t.frames(3)
+			t.check("SoM: Battle Style -> Action via Opties", Settings.action_battles() and o.value_text("battle_style") == "Action")
+			await shot("som_5_settings")
+		for i in 3:
+			if room().get_node_or_null("FieldMenu") == null:
+				break
+			await t.tap("cancel")
+			await t.frames(5)
 	Settings.set_value("battle_style", 1)
 	t.check("SoM: Action (Opties) -> arena", await goto(SomData.START_MAP, SomData.START_SPAWN) and arena() != null)
 	await t.frames(10)
