@@ -8,12 +8,12 @@
 	"bgm": {
 		"main_menu": {
 			"bestand": "bgm_main_menu.ogg",
-			"titel": "Het Ontwaken van Sapientia",
+			"titel": "SapientiaBattleBGM",
 			"locatie": "Titelscherm",
-			"beschrijving": "Eenzame, melancholische piano boven een langzaam tikkend uurwerk. Voelt als een stoffige machine die langzaam wakker wordt.",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/WksrPta1XeSGqCS4). Titel- en startmenu-muziek; staart in de kop gemengd zodat hij naadloos loopt.",
 			"loop": true,
 			"volume_db": -4.0,
-			"bpm": 62
+			"bpm": 0
 		},
 		"wereld": {
 			"bestand": "bgm_wereld.ogg",
@@ -161,12 +161,57 @@
 		},
 		"berggrot": {
 			"bestand": "bgm_berggrot.ogg",
-			"titel": "Door de Bergader",
-			"locatie": "De berggrot naar het Levende Archief",
-			"beschrijving": "Koude druppels in een stenen nerf. Lage strijkers, een holle fluit en af en toe een tik van vallend gruis. Geen baasdreiging: een pad door de berg.",
+			"titel": "Subterranean Wonder",
+			"locatie": "Tunnel-bouwplaats en de berggrot naar het Levende Archief",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/PT8xcVLrL3uc6Ofu). Bouwplaats, mond, nerf, grendel, geheim en uitmond. Naadloze loop.",
 			"loop": true,
 			"volume_db": -6.0,
-			"bpm": 72
+			"bpm": 0
+		},
+		"dorp_wilgendal": {
+			"bestand": "bgm_dorp_wilgendal.ogg",
+			"titel": "Ochtend in een veilig dorp",
+			"locatie": "Dorp Wilgendal",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/bomgvxDLCEOJXk7D). Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
+		},
+		"donker_woud": {
+			"bestand": "bgm_donker_woud.ogg",
+			"titel": "SapientiaSadBGM",
+			"locatie": "Het Donker Woud (woud_rand t/m woud_open_plek, Vesper)",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/MFdr64WaYsVpGvKH). Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
+		},
+		"levend_archief": {
+			"bestand": "bgm_levend_archief.ogg",
+			"titel": "Nature's Pulse",
+			"locatie": "Het Levende Archief (Archief 2: leven_ingang en de kamers erna)",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/EPlZ4r416IgJ5A67). Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
+		},
+		"baas_archief2": {
+			"bestand": "bgm_baas_archief2.ogg",
+			"titel": "Máquina de Guerra",
+			"locatie": "Baasgevecht Archief 2 (De Genezer)",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/xfbzeL9WWL7aJaxi). Alleen voor de baas van Archief 2. Naadloze loop.",
+			"loop": true,
+			"volume_db": -5.0,
+			"bpm": 0
+		},
+		"diepe_grot": {
+			"bestand": "bgm_diepe_grot.ogg",
+			"titel": "Biomechanical Dungeon",
+			"locatie": "Deep Learning Simulation (Dungeon100 / Diepe Grot), alle verdiepingen",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/NcOHhEACJuYsj6Ts). Eén scène voor alle verdiepingen, dus de track loopt door. Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
 		}
 	},
 	"sfx": {
