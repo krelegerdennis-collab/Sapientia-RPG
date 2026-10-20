@@ -187,13 +187,14 @@ const THEMES := {
 	#                   (overlay-laag boven de speler)}; kamers zetten bomen met "trees": [[x, y, soort]]
 	#   "mist_band"   = [begin, midden..., eind] overlay-tegels voor "mist": [[x, y, lengte]] in een kamer
 	"donker_woud": {
-		"tiles": "res://assets/tiles/dungeon/woud_tiles.png",
+		"tiles": "res://assets/tiles/dungeon/woud_tiles_v9b.png",
 		"lib_tiles": "res://assets/tiles/dungeon/archief_grijs_bibliotheek.png",
 		"single_atlas": true,
 		"terrain": "woud",
 		"tint": Color(0.86, 0.92, 0.90),
 		"mist": true,
-		"solid_extra": [87, 88, 89, 90, 96, 97, 98, 99, 100, 101, 104],
+		"solid_extra": [87, 88, 89, 90, 96, 97, 98, 99, 100, 101, 104, 112, 113, 114, 115, 116, 117, 118],   # 112-118 kuilranden (blokkeren als de kuil)
+		"pit_edges": [112, 113, 114, 115, 116, 117, 118],   # links, rechts, onder, linksonder, rechtsonder, linksboven, rechtsboven (DungeonRooms.pit_edge_tiles)
 		"no_monster_extra": [91],
 		"trees": {
 			"A": {"feet": [96, 97], "crown": [[76, 77], [92, 93]]},     # dode boom met glitch-litteken
@@ -935,3 +936,113 @@ static func glitch_intensity(scene_path: String) -> float:
 		return 1.0
 	var t := float(d - full) / float(far - full)   # 0 dichtbij .. 1 verst
 	return lerpf(1.0, GLITCH_MIN, t)
+
+
+## v0.24 Bospad (Donker Woud): "path": {"width": 2|3, "lines": [[[x, y], [x, y], ...], ...]} in een kamer.
+## Elke lijn is een reeks recht (horizontaal/verticaal) verbonden punten; een vierkante kwast van
+## width x width tegels (width 3: -1..+1 rond het punt, width 2: 0..+1) loopt erlangs. Alleen gewone
+## vloer (PATH_FLOOR_CHARS) wordt pad; boomvoeten blijven staan. De rand volgt de autotegel van
+## docs/WOUD_TILES.txt: 65 66 67 / 68 69 70 / 71 72 73, binnenhoeken 74 75 80 81. (106 'pad midden B' niet: 106 staat in SOLID.)
+## Uitgangen (EXIT_CHARS) tellen als pad, zodat het pad naadloos de uitgang in loopt.
+## Geeft {Vector2i: tegelnummer}; alle nummers zijn beloopbaar (geen SOLID).
+const PATH_FLOOR_CHARS := ".,wxpX*sZ"
+static func path_tiles(room: Dictionary) -> Dictionary:
+	var out := {}
+	var pd: Dictionary = room.get("path", {})
+	if pd.is_empty():
+		return out
+	var layout: Array = room["layout"]
+	var w := int(pd.get("width", 2))
+	var lo := -1 if w >= 3 else 0
+	var hi := lo + w - 1
+	var feet := {}
+	for tr in room.get("trees", []):
+		feet[Vector2i(int(tr[0]), int(tr[1]))] = true
+		feet[Vector2i(int(tr[0]) + 1, int(tr[1]))] = true
+	var ch_at := func(t: Vector2i) -> String:
+		if t.y < 0 or t.y >= layout.size() or t.x < 0 or t.x >= str(layout[t.y]).length():
+			return ""
+		return str(layout[t.y])[t.x]
+	var mask := {}
+	for line in pd.get("lines", []):
+		for i in range(1, (line as Array).size()):
+			var a := Vector2i(int(line[i - 1][0]), int(line[i - 1][1]))
+			var b := Vector2i(int(line[i][0]), int(line[i][1]))
+			var step := Vector2i(signi(b.x - a.x), signi(b.y - a.y))
+			var p := a
+			while true:
+				for dx in range(lo, hi + 1):
+					for dy in range(lo, hi + 1):
+						var t := p + Vector2i(dx, dy)
+						var c: String = ch_at.call(t)
+						if c != "" and PATH_FLOOR_CHARS.contains(c) and not feet.has(t):
+							mask[t] = true
+				if p == b:
+					break
+				p += step
+	var join := str(pd.get("join", ""))   # tekens die als pad tellen voor de rand (bv. "^" heuveltrap)
+	var inn := func(t: Vector2i) -> bool:
+		var c: String = ch_at.call(t)
+		return mask.has(t) or EXIT_CHARS.has(c) or (c != "" and join.contains(c))
+	for t in mask:
+		var n: bool = inn.call(t + Vector2i.UP)
+		var s: bool = inn.call(t + Vector2i.DOWN)
+		var we: bool = inn.call(t + Vector2i.LEFT)
+		var e: bool = inn.call(t + Vector2i.RIGHT)
+		var tile := 69
+		if not n:
+			tile = 65 if not we else (67 if not e else 66)
+		elif not s:
+			tile = 71 if not we else (73 if not e else 72)
+		elif not we:
+			tile = 68
+		elif not e:
+			tile = 70
+		elif not inn.call(t + Vector2i(-1, -1)):
+			tile = 74
+		elif not inn.call(t + Vector2i(1, -1)):
+			tile = 75
+		elif not inn.call(t + Vector2i(-1, 1)):
+			tile = 80
+		elif not inn.call(t + Vector2i(1, 1)):
+			tile = 81
+		out[t] = tile
+	return out
+
+
+## Kuilranden (Donker Woud, woud_tiles_v9b 112-118): voor elke kuilcel (legenda-tegel 13 of 14) aan de
+## rand van de kuil de randtegel: 115 linksonder, 116 rechtsonder, 114 onder, 117 linksboven, 118 rechtsboven, 112 links,
+## 113 rechts. Thema-veld "pit_edges" = [links, rechts, onder, linksonder, rechtsonder, linksboven, rechtsboven].
+## Geeft {Vector2i: tegelnummer}; leeg als het thema geen pit_edges heeft. De grondtegel (13/14) blijft
+## staan; dungeon_room.gd legt de rand er als extra laag over, alleen als de cel in de atlas niet leeg is.
+static func pit_edge_tiles(room: Dictionary) -> Dictionary:
+	var out := {}
+	var pe: Array = theme_data(theme_of(room)).get("pit_edges", [])
+	if pe.size() < 7:
+		return out
+	var legend := legend_of(room)
+	var layout: Array = room["layout"]
+	var pit := func(x: int, y: int) -> bool:
+		if y < 0 or y >= layout.size() or x < 0 or x >= str(layout[y]).length():
+			return false
+		var c := str(layout[y])[x]
+		return legend.has(c) and int(legend[c]) in [13, 14]
+	for y in layout.size():
+		for x in str(layout[y]).length():
+			if not pit.call(x, y):
+				continue
+			var l: bool = not pit.call(x - 1, y)
+			var r: bool = not pit.call(x + 1, y)
+			var b: bool = not pit.call(x, y + 1)
+			var tp: bool = not pit.call(x, y - 1)
+			var n := -1
+			if b and l: n = int(pe[3])
+			elif b and r: n = int(pe[4])
+			elif b: n = int(pe[2])
+			elif tp and l: n = int(pe[5])
+			elif tp and r: n = int(pe[6])
+			elif l: n = int(pe[0])
+			elif r: n = int(pe[1])
+			if n >= 0:
+				out[Vector2i(x, y)] = n
+	return out

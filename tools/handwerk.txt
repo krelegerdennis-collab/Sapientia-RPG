@@ -197,6 +197,8 @@ assets/sprites/enemies/wortelkoning_hit.png
 #        (woud_achtergrond.png, 1280x432), Noor in de wortelcocon (dicht / puls 2 frames / open), anker (16,47)
 assets/tiles/dungeon/woud_tiles.png
 assets/tiles/dungeon/donker_woud_tiles.png
+assets/tiles/dungeon/woud_tiles_v8.png
+assets/tiles/dungeon/woud_tiles_v9.png
 assets/battle/donker_woud.png
 assets/sprites/woud/noor_cocon.png
 assets/sprites/woud/noor_cocon_open.png
@@ -645,3 +647,5 @@ assets/sprites/buiten/bouw_werker_b.png
 assets/sprites/buiten/bouw_werker_c.png
 # 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor het Wachtershuis-erf (proloog) 1.4x (tools/som/wachtershuis_v8_grond.py)
 assets/tilesets/som/wachtershuis/grond_v8.png
+# 20 okt 2026: woud_tiles_v9b.png van RPG ART (art_mapsprites_v4/out/tiles_v9/woud, 256x128): donkerder pad, 14 opnieuw, kuilranden 112-118
+assets/tiles/dungeon/woud_tiles_v9b.png

@@ -393,11 +393,56 @@ func _data_tests() -> void:
 	check("baas op de open plek: The Root King (2x2, bewaker)", boss.size() == 1 and boss[0]["enemy"] == "wortelkoning"
 			and boss[0].get("guard", false) and boss[0]["size"] == [2, 2])
 	check("de Archives ongemoeid (DR.ROOMS zonder woudkamers)", not DR.ROOMS.has("woud_rand") and DR.room("archief_ingang") == DR.ROOMS["archief_ingang"])
+	# --- v0.24 bospad: elke woudkamer heeft een pad (2-3 breed) van de ingang naar elke uitgang
+	var pad_bad: Array[String] = []
+	var PAD_OK := [65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 80, 81]
+	for rid in WR.ROOMS:
+		var rr: Dictionary = WR.ROOMS[rid]
+		var pt: Dictionary = DR.path_tiles(rr)
+		var pw := int(rr.get("path", {}).get("width", 0))
+		if pt.size() < 12 or pw < 2 or pw > 3:
+			pad_bad.append("%s: geen pad" % rid)
+			continue
+		for t in pt:
+			if not PAD_OK.has(int(pt[t])) or DR.is_solid(int(pt[t]), "donker_woud"):
+				pad_bad.append("%s: tegel %d op %s" % [rid, int(pt[t]), t])
+		# samenhang: flood fill over pad + uitgangen; elke uitgang moet geraakt worden
+		var lay: Array = rr["layout"]
+		var exits := []
+		for y in lay.size():
+			for x in str(lay[y]).length():
+				if DR.EXIT_CHARS.has(str(lay[y])[x]):
+					exits.append(Vector2i(x, y))
+		var start: Vector2i = pt.keys()[0]
+		var seen := {start: true}
+		var todo := [start]
+		while not todo.is_empty():
+			var c: Vector2i = todo.pop_back()
+			for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+				var nb: Vector2i = c + d
+				if not seen.has(nb) and (pt.has(nb) or exits.has(nb)):
+					seen[nb] = true
+					if pt.has(nb):
+						todo.append(nb)
+		if seen.size() - exits.filter(func(e): return seen.has(e)).size() != pt.size():
+			pad_bad.append("%s: pad niet aaneengesloten" % rid)
+		for e in exits:
+			if not seen.has(e):
+				pad_bad.append("%s: uitgang %s niet op het pad" % [rid, e])
+	check("bospad in alle 5 woudkamers, 2-3 breed, alleen padtegels 65-75/80/81, ingang -> elke uitgang (%s)" % [pad_bad], pad_bad.is_empty())
 	# --- thema / tegels
 	var th: Dictionary = DR.THEMES["donker_woud"]
 	var tex: Texture2D = load(th["tiles"])
-	check("thema donker_woud: woud_tiles.png 256x112 (RPG ART), terrein 'woud', één atlas",
-			tex != null and tex.get_size() == Vector2(256, 112) and DR.terrain_of("donker_woud") == "woud" and DR.single_atlas("donker_woud"))
+	check("thema donker_woud: woud_tiles_v9b.png 256x128 (RPG ART, rij 7 kuilranden), terrein 'woud', één atlas",
+			tex != null and tex.get_size() == Vector2(256, 128) and DR.terrain_of("donker_woud") == "woud" and DR.single_atlas("donker_woud"))
+	var pr: Dictionary = DR.pit_edge_tiles(DR.room("woud_mistpoel"))
+	check("kuilranden 112-118: massief in het woud, randen rond de kuil, art aanwezig",
+			[112, 113, 114, 115, 116, 117, 118].all(func(n): return DR.is_solid(n, "donker_woud"))
+			and pr.get(Vector2i(7, 13), -1) == 115 and pr.get(Vector2i(14, 13), -1) == 116 and pr.get(Vector2i(10, 13), -1) == 114
+			and pr.get(Vector2i(7, 10), -1) == 112 and pr.get(Vector2i(14, 10), -1) == 113 and pr.get(Vector2i(7, 8), -1) == 117 and pr.get(Vector2i(14, 8), -1) == 118
+			and not tex.get_image().get_region(Rect2i(0, 112, 112, 16)).is_invisible())
+	var pt5: Dictionary = DR.path_tiles(DR.room("woud_open_plek"))
+	check("open plek: pad loopt de heuveltrap in (geen bovenrand op rij 8)", pt5.get(Vector2i(13, 8), -1) == 68 and pt5.get(Vector2i(14, 8), -1) == 70)
 	var solid_ok := [87, 88, 89, 90, 96, 97, 98, 99, 104].all(func(n): return DR.is_solid(n, "donker_woud"))
 	check("massief in het woud: 87-90, 96-99, 104 (archief-thema's: niet)", solid_ok and not DR.is_solid(96, "archief_grijs")
 			and DR.is_no_monster(91, "donker_woud") and not DR.is_solid(91, "donker_woud") and not DR.is_solid(86, "donker_woud"))
@@ -445,7 +490,7 @@ func _data_tests() -> void:
 	check("Codex-art: rugaanzichten van de 4 oude vijanden (zelfde maat), icoon + inschrijf-effect (%s)" % [codex_bad], codex_bad.is_empty()
 			and ResourceLoader.exists("res://assets/ui/icons/leeg_boek.png") and ResourceLoader.exists("res://assets/fx/inschrijf.png"))
 	var hw := hw_lines()
-	var need := ["assets/sprites/noor_dorp.png", "assets/tiles/dungeon/woud_tiles.png", "assets/battle/donker_woud.png",
+	var need := ["assets/sprites/noor_dorp.png", "assets/tiles/dungeon/woud_tiles_v9b.png", "assets/battle/donker_woud.png",
 		"assets/sprites/woud/noor_cocon.png", "assets/sprites/woud/noor_cocon_open.png", "assets/sprites/woud/noor_cocon_puls.png",
 		"assets/sprites/enemies/wortelkoning.png", "assets/sprites/enemies/wortelkoning_idle.png", "assets/sprites/enemies/wortelkoning_hit.png",
 		"assets/sprites/enemies/mistuil_rug.png", "assets/ui/icons/leeg_boek.png", "assets/fx/inschrijf.png", "art/enemies/mosslijm_rug.png",
@@ -663,14 +708,17 @@ func _forest_tests() -> void:
 	check("met de opdracht: het Dark Wood in (Wood's Edge)", await wait_scene("WoudRand"))
 	await wait_fade()
 	var r := scene()
-	check("thema: woud-tegels, terrein 'woud', tint + mist", r.ground.tile_set.get_source(0).texture.resource_path.ends_with("woud_tiles.png")
-			and r.terrain_at(Vector2i(5, 9)) == "woud" and r.get_node_or_null("ThemaTint") != null and r.get_node_or_null("WoudMist") != null)
+	check("thema: woud-tegels, terrein 'woud', tint + mist", r.ground.tile_set.get_source(0).texture.resource_path.ends_with("woud_tiles_v9b.png")
+			and r.terrain_at(Vector2i(7, 13)) == "woud" and r.get_node_or_null("ThemaTint") != null and r.get_node_or_null("WoudMist") != null)
 	var ov: TileMapLayer = r.get_node_or_null("Overlay")
 	check("overlay-laag (kruinen + mist) boven de speler, zonder botsing", ov != null and ov.z_index > player().z_index
-			and ov.get_cell_atlas_coords(Vector2i(5, 3)) == Vector2i(76 % 16, 76 / 16)
+			and ov.get_cell_atlas_coords(Vector2i(7, 4)) == Vector2i(76 % 16, 76 / 16)
 			and ov.tile_set.get_source(0).get_tile_data(Vector2i(12, 4), 0).get_collision_polygons_count(0) == 0)
-	check("boomvoet massief (96 op 5,5), wortels beloopbaar", r.cell(Vector2i(5, 5)) == 96 and r.is_wall(Vector2i(5, 5))
-			and not r.is_wall(Vector2i(11, 9)))
+	var ml: TileMapLayer = r.get_node_or_null("MistLaag")
+	check("mist (82-84/109/110) op een eigen laag, alpha 0.6, niet op de overlay", ml != null and is_equal_approx(ml.modulate.a, 0.6)
+			and ml.z_index > ov.z_index and ml.get_cell_source_id(Vector2i(14, 7)) != -1 and ov.get_cell_source_id(Vector2i(14, 7)) == -1)
+	check("boomvoet massief (96 op 7,6), wortels beloopbaar", r.cell(Vector2i(7, 6)) == 96 and r.is_wall(Vector2i(7, 6))
+			and not r.is_wall(Vector2i(15, 13)))
 	await pframes(3)
 	check("glitch: zwakst bij de ingang (Crt %.2f)" % Crt.glitch_intensity, is_equal_approx(Crt.glitch_intensity, DR.GLITCH_MIN))
 	# echt door de boog naar het Wortelpad
@@ -678,7 +726,7 @@ func _forest_tests() -> void:
 	for m in r.monsters.duplicate():
 		m.queue_free()
 	r.monsters.clear()
-	player().place_at(Vector2i(10, 3), Vector2i.UP)
+	player().place_at(Vector2i(14, 3), Vector2i.UP)
 	await frames(3)
 	await walk("move_up", 1)
 	check("Wood's Edge -> (boog) -> Root Path", await wait_scene("WoudPad"))
@@ -726,7 +774,7 @@ func _forest_tests() -> void:
 	await freeze_monsters(r)
 	await pframes(3)
 	check("glitch sterker dieper in het woud (Mist Pool %.2f > ingang)" % Crt.glitch_intensity, Crt.glitch_intensity > DR.GLITCH_MIN + 0.1)
-	player().place_at(Vector2i(9, 11), Vector2i.UP)
+	player().place_at(Vector2i(13, 14), Vector2i.UP)
 	await get_tree().create_timer(0.5).timeout
 	await v17_shot("woud_kamer")
 	# de baas
@@ -740,7 +788,7 @@ func _forest_tests() -> void:
 	check("glitch maximaal bij de baas (%.2f)" % Crt.glitch_intensity, Crt.glitch_intensity == 1.0)
 	# screenshot: Noor in de (pulserende) cocon achter de Wortelkoning
 	await freeze_monsters(r)
-	player().place_at(Vector2i(9, 7), Vector2i.UP)
+	player().place_at(Vector2i(13, 8), Vector2i.UP)
 	await get_tree().create_timer(0.6).timeout
 	await v17_shot("noor_cocon")
 	var lv := int(GameState.party[0]["level"])
@@ -809,7 +857,7 @@ func _save_tests() -> void:
 	GameState.story_flags.erase("noor_lid")
 	GameState.story_flags.erase(SD.WORTELKONING_FLAG)
 	GameState.story_step = SD.NOOR_KWIJT
-	check("opslaan halverwege", GameState.save_game(Vector2i(9, 10), Vector2i.UP))
+	check("opslaan halverwege", GameState.save_game(Vector2i(13, 15), Vector2i.UP))
 	GameState.new_game("Iemand")
 	GameState.load_game()
 	check("halverwege geladen: opdracht loopt nog ('%s'), ontmoeting niet opnieuw" % Story.active_quest(),
@@ -1158,7 +1206,7 @@ func _graan_tests() -> void:
 	plek = await enter(SD.WOUD_BAAS, "zuid")
 	await get_tree().create_timer(0.5).timeout
 	geest = plek.get_node_or_null("Objects/Woudgeesten")
-	check("woudgeesten staan op de afgesproken tegel", geest != null and geest.visible and geest.get_tile() == Vector2i(4, 9)
+	check("woudgeesten staan op de afgesproken tegel", geest != null and geest.visible and geest.get_tile() == Vector2i(6, 14)
 			and geest.event == "zingend_zaad")
 	Story.trigger("zingend_zaad", geest)
 	check("mini-gevecht begint", await wait_scene("Battle"))

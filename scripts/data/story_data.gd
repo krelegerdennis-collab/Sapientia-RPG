@@ -544,7 +544,7 @@ const EVENTS := {
 		{"do": [["say", "", ["Vesper! She hangs unconscious in a cocoon of roots.", "The Root King has to go first."]]]},
 	],
 	"noor_bevrijd": [{"do": [
-		["place", "player", [9, 6], "up"],
+		["place", "player", [13, 6], "up"],
 		["wait", 0.4],
 		["shake", 0.8, 2.0],
 		["glitch", 0.3],
