@@ -86,14 +86,31 @@ func _run() -> void:
 			and str(regels[0]["utc"]).ends_with("Z") and regels[0].has("os"))
 	var kaart_ok := false
 	var pos_ok := false
+	var art_pos := true
+	var art_kaart := false
+	var n_pos := 0
+	var info := {}
 	for d in regels:
 		if d["e"] == "kaart" and d["kaart"] == "dorp_wilgendal" and d["stijl"] == "som":
 			kaart_ok = true
 		if d["e"] == "pos" and d["kaart"] == "dorp_wilgendal" and d.has("x") and d.has("y") and d.has("f"):
 			pos_ok = true
+		if d["e"] == "pos":
+			art_pos = art_pos and d.get("stijl", "") in ["som", "oud"] and str(d.get("tileset", "")) != ""
+			n_pos += 1
+		if d["e"] == "kaart" and d["kaart"] == "dorp_wilgendal":
+			art_kaart = d.get("gebied") == "wilgendal" and d.get("palet") == "wilgendal" \
+					and str(d.get("tileset", "")).ends_with("som/wilgendal/terrain.tres")
+		if d["e"] == "kaart_info" and d["kaart"] == "dorp_wilgendal":
+			info = d
 	check("kaart-regel (dorp_wilgendal, stijl som)", kaart_ok)
 	var niet_knop := soorten.filter(func(x): return x != "knop")
 	check("positie-regel met kaart, tegel en kijkrichting (%s)" % [niet_knop], pos_ok)
+	check("elke pos-regel draagt stijl en tileset (%d)" % n_pos, art_pos and n_pos > 0)
+	check("kaart-regel: gebied, palet en SoM-tileset (RPG ART)", art_kaart)
+	var rect: Array = info.get("rect", [])
+	check("kaart_info: stijl som, grondrechthoek van de kaart (%s)" % [rect], info.get("stijl") == "som"
+			and rect.size() == 4 and int(rect[2]) == 64 and int(rect[3]) == 40)
 	check("gevecht_start, gevecht_eind, dood en respawn gelogd", "gevecht_start" in soorten and "gevecht_eind" in soorten
 			and "dood" in soorten and "respawn" in soorten)
 	var tekst := FileAccess.get_file_as_string(log.pad)
