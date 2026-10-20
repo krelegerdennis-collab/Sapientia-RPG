@@ -316,8 +316,15 @@ func _exit_tree() -> void:
 		get_window().content_scale_size = _previous_scale_size
 
 
+## Alleen de baas van Archief 2 (De Genezer) heeft een eigen track; de rest blijft zoals het was.
+static func battle_music_for(enemies: Array, boss: bool) -> String:
+	if boss and "genezer" in enemies:
+		return "baas_archief2"
+	return "gevecht_miniboss" if boss else "gevecht_normaal"
+
+
 func _start_battle_music() -> void:
-	var track := "gevecht_miniboss" if GameState.pending_boss else "gevecht_normaal"
+	var track := battle_music_for(GameState.pending_enemies, GameState.pending_boss)
 	_battle_music_pushed = true
 	AudioManager.push_music(track, 0.4)
 

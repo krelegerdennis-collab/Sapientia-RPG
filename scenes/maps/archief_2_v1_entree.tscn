@@ -7,6 +7,7 @@
 [node name="Archief2V1Entree" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "archief_2_v1_entree"
+music_track = "levend_archief"
 map_name = "The Living Archive"
 encounters = false
 

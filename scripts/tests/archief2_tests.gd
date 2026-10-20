@@ -56,6 +56,8 @@ func _run() -> void:
 	_poort_en_platen()
 	print("=== Archief 2: Seren, Mosslijm, Mender ===")
 	_lotte_en_genezer()
+	print("=== Archief 2: muziek ===")
+	_muziek()
 	print("=== Archief 2: wereldkaart ===")
 	await _wereldkaart()
 	print("=== Archief 2: kamer, gevecht, warp ===")
@@ -387,6 +389,7 @@ func _spel() -> void:
 	GameState.archief2_last_leech = {}
 	GameState.start_battle(["genezer"], speler.get_tile(), speler.facing, "archief", true)
 	check("Genezer-gevecht", await _wacht("Battle", 20.0))
+	check("Genezer-gevecht speelt 'baas_archief2'", AudioManager.get_current_music() == "baas_archief2")
 	var b := _gevecht()
 	var zin := false
 	var t0 := Time.get_ticks_msec()
@@ -1017,3 +1020,26 @@ func _vijanden_gevecht() -> void:
 	GameState.end_battle("flee")
 	check("terug uit het vijandgevecht", await _wacht("Archief2V1Plaat", 20.0))
 	Engine.time_scale = 1.0
+
+
+func _muziek() -> void:
+	const BattleScript := preload("res://scripts/battle/battle.gd")
+	for key in ["levend_archief", "baas_archief2"]:
+		var st: Resource = load("res://assets/audio/bgm/bgm_%s.ogg" % key)
+		check("track %s: ogg-vorbis in het manifest, loopt, > 1 min" % key, AudioManager.has_music(key)
+				and st is AudioStreamOggVorbis and (st as AudioStream).get_length() > 60.0
+				and bool(AudioManager._bgm[key].get("loop", false)))
+	var bad: Array[String] = []
+	var paden: Array = ["res://scenes/maps/leven_ingang.tscn", "res://scenes/maps/leven_v1_plaat.tscn",
+			"res://scenes/maps/leven_v3_combi.tscn"]
+	paden.append_array(Rooms.SCENES.values())
+	for p in paden:
+		var inst: Node = (load(p) as PackedScene).instantiate()
+		if str(inst.get("music_track")) != "levend_archief":
+			bad.append(p.get_file())
+		inst.free()
+	check("alle Archief 2-kamers spelen 'levend_archief' (%s)" % [bad], bad.is_empty())
+	check("alleen de Genezer krijgt de baastrack", BattleScript.battle_music_for(["genezer"], true) == "baas_archief2"
+			and BattleScript.battle_music_for(["wortelkoning"], true) == "gevecht_miniboss"
+			and BattleScript.battle_music_for(["genezer"], false) == "gevecht_normaal"
+			and BattleScript.battle_music_for(["mosslijm"], false) == "gevecht_normaal")

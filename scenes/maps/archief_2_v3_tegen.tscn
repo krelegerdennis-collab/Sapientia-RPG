@@ -7,6 +7,7 @@
 [node name="Archief2V3Tegen" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "archief_2_v3_tegen"
+music_track = "levend_archief"
 map_name = "Counter Plates"
 encounters = false
 

@@ -185,6 +185,24 @@
 			"loop": true,
 			"volume_db": -6.0,
 			"bpm": 0
+		},
+		"levend_archief": {
+			"bestand": "bgm_levend_archief.ogg",
+			"titel": "Nature's Pulse",
+			"locatie": "Het Levende Archief (Archief 2: leven_ingang en de kamers erna)",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/EPlZ4r416IgJ5A67). Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
+		},
+		"baas_archief2": {
+			"bestand": "bgm_baas_archief2.ogg",
+			"titel": "Máquina de Guerra",
+			"locatie": "Baasgevecht Archief 2 (De Genezer)",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/xfbzeL9WWL7aJaxi). Alleen voor de baas van Archief 2. Naadloze loop.",
+			"loop": true,
+			"volume_db": -5.0,
+			"bpm": 0
 		}
 	},
 	"sfx": {
