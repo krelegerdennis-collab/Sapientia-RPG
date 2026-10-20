@@ -182,9 +182,15 @@ func autosave_enabled() -> bool:
 	return bool(get_value("autosave"))
 
 
+## Hoogste busvolume (lineair) bij de schuif op 100%. Het spel was veel te luid: wat vroeger
+## 10% was (lineair 0.1, ca. -20 dB) is nu het maximum; de hele schaal schaalt mee.
+## Opgeslagen stappen (0..VOLUME_STEPS) blijven geldig en klinken nu zachter.
+const VOLUME_MAX_LINEAR := 0.1
+
 ## Volume 0..VOLUME_STEPS -> decibel voor de bus (0 = gedempt).
 static func volume_db(steps: int) -> float:
-	return linear_to_db(maxf(float(steps) / VOLUME_STEPS, 0.0001))
+	var lin := clampf(float(steps) / VOLUME_STEPS, 0.0, 1.0) * VOLUME_MAX_LINEAR
+	return linear_to_db(maxf(lin, 0.00001))
 
 
 # ---------------------------------------------------------------- toepassen

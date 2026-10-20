@@ -575,7 +575,15 @@ func _bestiary_and_options_tests() -> void:
 	await tap("move_left")
 	var bus := AudioServer.get_bus_index("Music")
 	check("Muziek 8 -> 7 (bus %.1f dB)" % AudioServer.get_bus_volume_db(bus),
-			Settings.get_value("music_volume") == 7 and is_equal_approx(AudioServer.get_bus_volume_db(bus), linear_to_db(0.7)))
+			Settings.get_value("music_volume") == 7 and is_equal_approx(AudioServer.get_bus_volume_db(bus), linear_to_db(0.07)))
+	# v-fix volume: 100% = oude 10% (lineair 0.1, ~-20 dB); schaal evenredig, 0 = gedempt
+	check("volume 10 -> -20 dB", is_equal_approx(Settings.volume_db(10), linear_to_db(0.1)) and absf(Settings.volume_db(10) + 20.0) < 0.01)
+	check("volume 1 -> oude 1%", is_equal_approx(Settings.volume_db(1), linear_to_db(0.01)))
+	check("volume 5 -> lineair 0.05", is_equal_approx(db_to_linear(Settings.volume_db(5)), 0.05))
+	check("volume te hoog opgeslagen wordt begrensd", is_equal_approx(Settings.volume_db(99), linear_to_db(0.1)))
+	var sfxbus := AudioServer.get_bus_index("SFX")
+	check("SFX-bus ook geschaald (%.1f dB)" % AudioServer.get_bus_volume_db(sfxbus),
+			is_equal_approx(AudioServer.get_bus_volume_db(sfxbus), Settings.volume_db(int(Settings.get_value("sfx_volume")))) and AudioServer.get_bus_volume_db(sfxbus) <= -20.0 + 0.01)
 	# Tekstsnelheid: rechts = Snel
 	await tap("move_down")
 	await tap("move_down")
