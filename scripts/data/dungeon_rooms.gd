@@ -95,11 +95,13 @@ const THEMES := {
 	"archief_v14": {"tiles": TILES, "lib_tiles": LIB_TILES, "sprites": {}},
 	# Het Levende Archief. Zelfde tegelnummers als archief_grijs, groen beeld.
 	# PLACEHOLDER: tools/art_kas_placeholder.py (magenta hoekjes). terrain "kas".
+	# v8 (RPG ART art_mapsprites_v4 tiles_v8/archief2): eigen _v8-kopieen (originelen staan in handwerk.txt),
+	# zelfde nummering/maten; kleur zit in de tegels zelf, dus tint wit.
 	"kas": {
-		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",
-		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek.png",
+		"tiles": "res://assets/tiles/dungeon/kas_tiles_v8.png",
+		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek_v8.png",
 		"terrain": "kas",
-		"tint": Color(0.78, 1.0, 0.84),
+		"tint": Color(1, 1, 1),
 		"sprites": {},
 		# v0.23 kas v2 (RPG ART): ijzeren pilaar 70/71, bloembak 72, podiumrand met wortel 78
 		"solid_extra": [70, 71, 72, 78],

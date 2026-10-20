@@ -154,6 +154,8 @@ func _data() -> void:
 			and monsters.has("genezer"))
 	var maten := {
 		"res://assets/tiles/dungeon/kas_tiles.png": Vector2(256, 80),
+		"res://assets/tiles/dungeon/kas_tiles_v8.png": Vector2(256, 80),
+		"res://assets/tiles/dungeon/kas_bibliotheek_v8.png": Vector2(256, 64),
 		"res://assets/puzzle/groei_plaat.png": Vector2(48, 16),
 		"res://assets/sprites/archief2/lotte_veld.png": Vector2(48, 96),
 		"res://assets/sprites/archief2/lotte_glitch.png": Vector2(64, 80),

@@ -645,3 +645,6 @@ assets/sprites/buiten/bouw_werker_b.png
 assets/sprites/buiten/bouw_werker_c.png
 # 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor het Wachtershuis-erf (proloog) 1.4x (tools/som/wachtershuis_v8_grond.py)
 assets/tilesets/som/wachtershuis/grond_v8.png
+# 20 okt 2026: v8-kastegels Archief 2 van RPG ART (art_mapsprites_v4/out/tiles_v8/archief2), zelfde nummering; thema "kas" wijst hierheen, tint wit
+assets/tiles/dungeon/kas_tiles_v8.png
+assets/tiles/dungeon/kas_bibliotheek_v8.png
