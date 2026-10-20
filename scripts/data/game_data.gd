@@ -259,7 +259,7 @@ const ENEMIES := {
 		"no": 10, "mp": 0, "weak": ["vuur"], "resist": ["bliksem"],
 		"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 1.0}],
 		"boss": {
-			"max_hp": 440, "atk": 36, "def": 20, "agi": 8, "mag": 14, "mdef": 16, "mp": 0,
+			"max_hp": 440, "atk": 39, "def": 20, "agi": 8, "mag": 14, "mdef": 16, "mp": 0,
 			"exp": 400, "gold": 150,
 			"skills": [{"name": "Root Grip", "chance": 0.25, "power": 1.6}],
 		},
@@ -1072,13 +1072,23 @@ const EERSTE_ARCHIEF_DOEL := 7
 ## Bevestigd: 0,7 op gevechtsstats en 0,50 op EXP, zodat 34 kamergevechten + het oefengevecht op level 7 landen.
 const ARCHIEF_STAT_SCHAAL := 0.7
 const ARCHIEF_EXP_SCHAAL := 0.50
+## v0.2x POWER SCALING (PR #126, docs/BATTLE_BALANCE_REPORT.md): een gedocumenteerde schaal per gebied,
+## gemeten met de battlesim (seed 20261020). Doel: gewone gevechten ~10-20% party-HP, bazen ~60-80% winst.
+##   Act-1 basismonsters (mosslijm, moskonijn, papiergeest, glitchmot, mech_wachter): HP x1,3, ATK x1,5.
+##   Tier 1-3 (Eerste Archief): ATK +8 / +9 / +9 (was 0 / 4 / 7), DEF +1 / +3 / +5.
+##   Tier 5-6 = Tweede Archief verdieping 1-2 / 3-4 (archief2_rooms.gd; was tier 2 / 3, gedeeld met Archief 1):
+##     de party is daar Lv 14-16, de archiefschaal 0,7 blijft (canon) en komt erna.
+##   Tier 7 = Berggrot (berggrot_data.gd; was tier 0): HP x3,5, ATK +28.
+##   EXP/goud per tier blijven gelijk aan de oude tier (5 = oud 2, 6 = oud 3, 7 = basis).
+##   Seren (lotte_glitch baas-blok): HP x3, ATK x2,3. Wortelkoning baas-blok: ATK x1,15.
+##   Canon-bazen (Golem 360/27/15, Wurger, Genezer, Diepe Grot 25/50/75/99) NIET gewijzigd.
 const TIERS := {
-	1: {"hp": 1.0, "atk": 6, "def": 1, "exp": 2.0, "gold": 1.0},
-	2: {"hp": 1.5, "atk": 7, "def": 3, "exp": 2.5, "gold": 1.5},
-	3: {"hp": 1.9, "atk": 8, "def": 5, "exp": 3.0, "gold": 2.0},
+	1: {"hp": 1.0, "atk": 8, "def": 1, "exp": 2.0, "gold": 1.0},
+	2: {"hp": 1.5, "atk": 9, "def": 3, "exp": 2.5, "gold": 1.5},
+	3: {"hp": 1.9, "atk": 9, "def": 5, "exp": 3.0, "gold": 2.0},
 	4: {"hp": 2.3, "atk": 10, "def": 7, "exp": 3.0, "gold": 2.5},
-	5: {"hp": 5.0, "atk": 40, "def": 4, "exp": 2.5, "gold": 1.5},
-	6: {"hp": 5.0, "atk": 44, "def": 6, "exp": 3.0, "gold": 2.0},
+	5: {"hp": 5.0, "atk": 46, "def": 4, "exp": 2.5, "gold": 1.5},
+	6: {"hp": 6.5, "atk": 66, "def": 6, "exp": 3.0, "gold": 2.0},
 	7: {"hp": 3.5, "atk": 28, "def": 0, "exp": 1.0, "gold": 1.0},
 }
 
