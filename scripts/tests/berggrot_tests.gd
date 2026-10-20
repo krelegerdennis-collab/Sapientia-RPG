@@ -680,11 +680,12 @@ func _bouwplaats() -> void:
 	var sheet_ok := true
 	for nm in ["Werker", "Werker2", "Werker3"]:
 		var npc := scene().get_node_or_null("Objects/" + nm)
-		sheet_ok = sheet_ok and npc != null and npc.sheet != null and npc.sheet.resource_path.ends_with("bouw_werker.png")
+		sheet_ok = sheet_ok and npc != null and npc.sheet != null and npc.sheet.resource_path.ends_with("bouw_werker_wm1_slim.png")
+		sheet_ok = sheet_ok and npc.sprite.hframes == 3 and npc.sprite.vframes == 4 and npc.sprite.offset == Vector2(0, -8)
 	check("bouwplaats: drie werkers met de bouwvakker-sheet van RPG ART", sheet_ok)
 	var vm := scene().get_node_or_null("Objects/Voorman")
 	check("bouwplaats: Voorman heeft eigen WM1-sheet (henrik.png 24x32, offset -8)", vm != null and vm.sheet != null
-			and vm.sheet.resource_path.ends_with("som/wilgendal/npcs/henrik.png") and vm.sprite.hframes == 3
+			and vm.sheet.resource_path.ends_with("som/wilgendal/npcs/henrik_wm1_slim.png") and vm.sprite.hframes == 3
 			and vm.sprite.vframes == 4 and vm.sprite.offset == Vector2(0, -8))
 	check("dicht: hek staat en blokkeert", hek != null and hek.visible and int(hek.get("collision_layer")) != 0)
 	player().place_at(Vector2i(12, 5), Vector2i.UP)
