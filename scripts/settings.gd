@@ -13,6 +13,7 @@ extends Node
 ##   crt                        -> scanline-filter aan/uit (autoload Crt)
 ##   screen_shake               -> schudden bij treffers in gevechten (battle.gd _shake)
 ##   autosave                   -> automatisch opslaan (GameState.autosave)
+##   battle_style               -> SoM-proef: 0 Classic (turn-based) / 1 Action (realtime, scripts/som/)
 ## Andere scripts kunnen luisteren naar het signaal 'changed(key)'.
 
 signal changed(key: String)
@@ -38,6 +39,9 @@ const OPACITY_STEP := 10
 ## Touch-knoppen: grootte (index -> schaal van de D-pad/A/B-straal).
 const TOUCH_SIZE_SCALE := [0.85, 1.0, 1.15]
 const TOUCH_SIZE_NAMES := ["Small", "Normal", "Large"]
+## SoM-proef: gevechtsstijl. Bazen blijven in beide stijlen turn-based (scripts/data/som_data.gd).
+const BATTLE_STYLE_NAMES := ["Classic", "Action"]
+const BATTLE_STYLE_ACTION := 1
 
 ## Standaardwaarden (ook = 'nieuw bestand'). Volgorde = volgorde in het optiemenu.
 const DEFAULTS := {
@@ -52,6 +56,7 @@ const DEFAULTS := {
 	"autosave": true,
 	"sessielog": true,   # playtest: sessielogboek (scripts/sessielog.gd); geen persoonsgegevens
 	"run": false,      # TODO.md "run feature": RUN-toggle (blijft aan tot de speler hem uitzet)
+	"battle_style": 0,   # SoM-proef: 0 = Classic (turn-based), 1 = Action (realtime in de SoM-kamers)
 }
 
 var path := DEFAULT_PATH
@@ -119,6 +124,8 @@ func _sanitize(key: String, v):
 			return clampi(snappedi(n, OPACITY_STEP), OPACITY_MIN, OPACITY_MAX)
 		"touch_size":
 			return clampi(n, 0, TOUCH_SIZE_SCALE.size() - 1)
+		"battle_style":
+			return clampi(n, 0, BATTLE_STYLE_NAMES.size() - 1)
 	return n
 
 
@@ -172,6 +179,11 @@ func touch_scale() -> float:
 
 func touch_alpha() -> float:
 	return int(get_value("touch_opacity")) / 100.0
+
+
+## SoM-proef: staat de gevechtsstijl op Action (realtime)?
+func action_battles() -> bool:
+	return int(get_value("battle_style")) == BATTLE_STYLE_ACTION
 
 
 func shake_enabled() -> bool:

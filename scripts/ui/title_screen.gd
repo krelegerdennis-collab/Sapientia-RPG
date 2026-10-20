@@ -50,6 +50,8 @@ var continue_button: Button
 var load_button: Button
 var new_button: Button
 var pvp_button: Button
+## SoM-proef: knop naast PvP die meteen de realtime-gevechtsproef start (scripts/som/).
+var som_button: Button
 var beta_button: Button
 var eind_button: Button
 var beta_card: PanelContainer
@@ -164,8 +166,16 @@ func _ready() -> void:
 	# Buiten het kaartje: het menu moet in y 148..200 blijven (titeltests).
 	pvp_button = UiMenu.button("PvP")
 	pvp_button.name = "PvpButton"
-	pvp_button.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 16)
+	pvp_button.custom_minimum_size = Vector2((CARD_RIGHT - CARD_LEFT - 2.0) / 2.0, 16)
 	add_child(pvp_button)
+	som_button = UiMenu.button("SoM")
+	som_button.name = "SomButton"
+	som_button.custom_minimum_size = pvp_button.custom_minimum_size
+	add_child(som_button)
+	som_button.pressed.connect(_on_som)
+	pvp_button.focus_neighbor_right = som_button.get_path()
+	som_button.focus_neighbor_left = pvp_button.get_path()
+	som_button.focus_neighbor_bottom = new_button.get_path()
 	continue_button.pressed.connect(_on_continue)
 	load_button.pressed.connect(_on_load)
 	new_button.pressed.connect(_on_new)
@@ -283,6 +293,8 @@ func _place_card() -> void:
 	card.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - card.size.y)).round()
 	pvp_button.reset_size()
 	pvp_button.position = (card.position + Vector2(0, -pvp_button.size.y - 1.0)).round()
+	som_button.reset_size()
+	som_button.position = (card.position + Vector2(card.size.x - som_button.size.x, -som_button.size.y - 1.0)).round()
 	beta_card.reset_size()
 	beta_card.position = (stage.position + Vector2(8, CARD_BOTTOM - beta_card.size.y)).round()
 	version_label.reset_size()
@@ -404,6 +416,12 @@ func _start_new_in(slot: int) -> void:
 func _on_pvp() -> void:
 	set_process(false)
 	get_tree().change_scene_to_file("res://pvp/scenes/pvp_lobby.tscn")
+
+
+## SoM-proef: nieuw los spel (eigen save-pad), standaard-party, meteen de proefkerker in.
+func _on_som() -> void:
+	set_process(false)
+	await GameState.start_som_prototype()
 
 
 func _on_beta() -> void:

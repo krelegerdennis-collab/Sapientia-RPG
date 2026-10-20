@@ -178,6 +178,9 @@ var bezochte_kaarten: Array[String] = []
 var echo_grot_voltooid := 0
 var inventory := {}            # item-id -> aantal
 var gold := 0
+## SoM-proef (scripts/data/som_data.gd): realtime gevecht in de SoM-kamers. Alleen aan via de knop
+## "SoM" op het titelscherm; niet in de save, uit bij elk nieuw/geladen spel.
+var som_mode := false
 
 ## Vermenigvuldiger voor alle encounter-kansen (1.0 = normaal, 0 = uit).
 ## Handig om te testen; de kansen zelf staan per terrein in game_data.gd.
@@ -456,6 +459,7 @@ func _go_to_scene(path: String) -> void:
 ## Nieuw spel (v0.10): de party is alleen de hoofdpersoon (held 'dennis') met
 ## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
 func new_game(hero_name := DEFAULT_NAME) -> void:
+	som_mode = false
 	player_name = clean_name(hero_name)
 	party.clear()
 	party_bench = []
@@ -1113,6 +1117,7 @@ func read_save(path := "") -> Dictionary:
 ## geeft false als er geen (geldige) save is. Daarna: continue_game() gaat naar de map.
 ## v0.11: 'path' = welke save ("" = de handmatige).
 func load_game(path := "") -> bool:
+	som_mode = false      # SoM-proef: een geladen spel is altijd het gewone (turn-based) spel
 	var d := read_save(path)
 	if not apply_state(d):
 		return false
@@ -1311,6 +1316,43 @@ func _continue_record(rec: Dictionary) -> bool:
 ## Betatest-account: verdergaan in de aparte voortgang, of die de eerste keer aanmaken.
 ## Proloog is klaar, Dennis is niveau 10 met het Vonkzwaard, de Codex heeft al een buddy.
 ## De Golem staat er nog (3 Lege Boeken), het woud is open, Esdoorn pas na de Golem.
+## SoM-proef: verse standaard-party (data: som_data.gd), eigen save-bestand, meteen de proefkerker in.
+func start_som_prototype() -> void:
+	const SomData := preload("res://scripts/data/som_data.gd")
+	if changing_map or in_battle or not SomData.ENABLED:
+		return
+	_build_som_state()
+	save_path = SomData.SAVE_PATH
+	autosave_path = SomData.AUTOSAVE_PATH
+	current_map = SomData.START_MAP
+	changing_map = false
+	change_map(SomData.START_MAP, SomData.START_SPAWN)
+
+
+func _build_som_state() -> void:
+	const SomData := preload("res://scripts/data/som_data.gd")
+	new_game(DEFAULT_NAME)
+	story_step = StoryData.KLAAR
+	story_flags = {}
+	for f in BETA_FLAGS:
+		story_flags[f] = true
+	for id in SomData.START_MEMBERS:
+		add_member(id)
+	for hero in party:
+		give_exp(hero, GameData.exp_for_level(SomData.START_LEVEL) - int(hero["exp"]))
+	var dax: Dictionary = party[0]
+	for id in SomData.START_GEAR:
+		inventory[id] = item_count(id) + 1
+		Equipment.equip(dax, inventory, Equipment.slot_of(id), id)
+	for hero in party:
+		hero["hp"] = hero["max_hp"]
+		hero["mp"] = hero["max_mp"]
+	for id in SomData.START_ITEMS:
+		inventory[id] = int(SomData.START_ITEMS[id])
+	gold = SomData.START_GOLD
+	som_mode = true
+
+
 func start_beta_game() -> void:
 	if changing_map or in_battle:
 		return
@@ -1505,6 +1547,7 @@ func go_to_title() -> void:
 	if changing_map or in_battle:
 		return
 	use_story_saves()
+	som_mode = false
 	if dungeon100_run_active():
 		dungeon100_end_run(true)
 	changing_map = true

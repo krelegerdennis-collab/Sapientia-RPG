@@ -585,6 +585,13 @@ func check_layout(b: Node, label: String) -> void:
 
 # ---------------------------------------------------------------- de test
 func _run() -> void:
+	if "--som-only" in OS.get_cmdline_user_args():
+		# SoM-proef: alleen de SoM-tests (snel ontwikkelen); CI draait de hele suite.
+		check("titelscherm (som-only)", await wait_scene("Title"))
+		await preload("res://scripts/tests/som_autotest.gd").new(self).run()
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
+		get_tree().quit(1 if failures else 0)
+		return
 	await _title_and_name_tests()
 	await _prologue_tests()
 	await _end_prologue()
@@ -602,6 +609,8 @@ func _run() -> void:
 	await _game_over_test()
 	await _stun_chance_test()
 	await _battlesim_sample_test()
+	# SoM-proef: realtime gevecht + pauzering + baas-overdracht (scripts/tests/som_autotest.gd)
+	await preload("res://scripts/tests/som_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
