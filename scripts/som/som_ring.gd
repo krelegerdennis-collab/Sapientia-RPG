@@ -10,7 +10,8 @@ const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const THEME := preload("res://assets/theme.tres")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
-const RADIUS := Vector2(86, 52)
+## Straal = midden van de ringband van ring_bg.png (180x110: buitenrand ~88x53, binnenrand ~64x38).
+const RADIUS := Vector2(76, 45)
 
 var arena: Node
 var is_open := false
@@ -23,6 +24,8 @@ var selected := 0
 var entries: Array = []
 var root: Control
 var buttons: Array[Button] = []
+## Aantal-labels ("x3") per knop, BINNEN de ring (los van het icoon op de band); "" = geen label.
+var counts: Array[Label] = []
 var title: Label
 ## Naam (+ aantal/MP) van de geselecteerde keuze, op een eigen regel ONDER de ring.
 var name_label: Label
@@ -143,6 +146,10 @@ func build_with(list: Array) -> void:
 		root.remove_child(b)
 		b.queue_free()
 	buttons.clear()
+	for l in counts:
+		root.remove_child(l)
+		l.queue_free()
+	counts.clear()
 	entries = list
 	var vs := root.get_viewport_rect().size
 	var c := vs / 2.0
@@ -152,7 +159,8 @@ func build_with(list: Array) -> void:
 	for i in entries.size():
 		var ic := icon_for(entries[i])
 		var b := UiMenu.button("")
-		b.text = short_label(entries[i], ic != null)
+		# met icoon: alleen het icoon op de band; het aantal krijgt een eigen label binnen de ring
+		b.text = "" if ic != null else short_label(entries[i], false)
 		b.name = "Ring_%d" % i
 		b.focus_mode = Control.FOCUS_NONE
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -164,6 +172,15 @@ func build_with(list: Array) -> void:
 			selected = i
 			_highlight())
 		buttons.append(b)
+		var cl := Label.new()
+		cl.name = "RingCount_%d" % i
+		cl.text = short_label(entries[i], true) if ic != null else ""
+		cl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cl.add_theme_color_override("font_outline_color", Color.BLACK)
+		cl.add_theme_constant_override("outline_size", 2)
+		root.add_child(cl)
+		cl.size = cl.get_minimum_size()
+		counts.append(cl)
 	_layout(vs)
 	selected = clampi(selected, 0, maxi(0, entries.size() - 1))
 	_highlight()
@@ -185,6 +202,7 @@ func _layout(vs: Vector2) -> void:
 	radius = RADIUS
 	for _k in 12:
 		_place_buttons(c, n)
+		_place_counts(c)
 		if not _any_overlap():
 			break
 		radius = Vector2(minf(radius.x * 1.12, rx_max), minf(radius.y * 1.12, ry_max))
@@ -199,10 +217,58 @@ func _place_buttons(c: Vector2, n: int) -> void:
 		buttons[i].position = (c + Vector2(cos(a), sin(a)) * radius - buttons[i].size / 2.0).round()
 
 
+## Binnenrand van de ringband bij de huidige straal (aantallen moeten daarbinnen blijven).
+func inner_radius() -> Vector2:
+	return radius - SomData.RING_BAND_HALF
+
+
+## Zet elk aantal-label op de straal van zijn icoon naar het midden, zo ver naar buiten als kan
+## terwijl de hele rect binnen de binnenrand min RING_COUNT_MARGIN blijft (raakt de band nooit).
+func _place_counts(c: Vector2) -> void:
+	var n := maxi(1, buttons.size())
+	var lim := inner_radius() - Vector2.ONE * SomData.RING_COUNT_MARGIN
+	for i in counts.size():
+		var l := counts[i]
+		if l.text == "":
+			continue
+		var a := -PI / 2.0 + TAU * float(i) / float(n)
+		var d := Vector2(cos(a), sin(a))
+		var tt := 1.0
+		while tt > 0.0:
+			var p := (c + d * lim * tt - l.size / 2.0).round()
+			l.position = p
+			if rect_in_ellipse(Rect2(p, l.size), c, lim):
+				break
+			tt -= 0.02
+
+
+static func rect_in_ellipse(r: Rect2, c: Vector2, e: Vector2) -> bool:
+	if e.x <= 0.0 or e.y <= 0.0:
+		return false
+	for q in [r.position, r.position + Vector2(r.size.x, 0), r.position + Vector2(0, r.size.y), r.end]:
+		var v: Vector2 = (q - c) / e
+		if v.length_squared() > 1.0:
+			return false
+	return true
+
+
+## Rects van de aantal-labels (alleen zichtbare).
+func count_rects() -> Array:
+	var out: Array = []
+	for l in counts:
+		if l.text != "":
+			out.append(Rect2(l.position, l.size))
+	return out
+
+
 func _any_overlap() -> bool:
-	for i in buttons.size():
-		for j in range(i + 1, buttons.size()):
-			if Rect2(buttons[i].position, buttons[i].size).grow(1).intersects(Rect2(buttons[j].position, buttons[j].size)):
+	var rs: Array = []
+	for b in buttons:
+		rs.append(Rect2(b.position, b.size))
+	rs.append_array(count_rects())
+	for i in rs.size():
+		for j in range(i + 1, rs.size()):
+			if (rs[i] as Rect2).grow(1).intersects(rs[j]):
 				return true
 	return false
 
@@ -212,6 +278,7 @@ func label_rects() -> Array:
 	var out: Array = []
 	for b in buttons:
 		out.append(Rect2(b.position, b.size))
+	out.append_array(count_rects())
 	out.append(Rect2(title.position, title.size))
 	if name_label.text != "":
 		out.append(Rect2(name_label.position, name_label.size))
@@ -258,6 +325,8 @@ static func spell_icon(id: String) -> Texture2D:
 func _highlight() -> void:
 	for i in buttons.size():
 		buttons[i].modulate = Color(1, 1, 0.5) if i == selected else Color(0.75, 0.75, 0.8)
+		if i < counts.size():
+			counts[i].modulate = buttons[i].modulate
 	name_label.text = str(entries[selected].get("label", "")) if selected < entries.size() else ""
 	name_label.size = name_label.get_minimum_size()
 	name_label.position.x = roundf(root.get_viewport_rect().size.x / 2.0 - name_label.size.x / 2.0)
