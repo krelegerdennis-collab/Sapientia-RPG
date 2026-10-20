@@ -83,7 +83,7 @@ static func zij_klaar(z: Dictionary, flags: Dictionary) -> bool:
 	return z.has("klaar") and flags.has(str(z["klaar"]))
 
 
-## Regel in de Side-tab: "Gerrit the Miller" (nog niet gesproken) of "[ ] The Singing Grain".
+## Regel in de Side-tab: "Garrett the Miller" (nog niet gesproken) of "[ ] The Singing Grain".
 static func zij_regel(z: Dictionary, flags: Dictionary) -> String:
 	if not zij_gesproken(z, flags):
 		return str(z["npc"])

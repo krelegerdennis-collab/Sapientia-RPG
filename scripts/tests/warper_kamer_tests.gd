@@ -550,7 +550,7 @@ func _questlog_tests() -> void:
 	var zg: Dictionary = QL.ZIJ[0]
 	check("side: Het Zingende Graan hoort bij Gerrit", str(zg["id"]) == "zingend_graan" and str(zg["npc"]) == SD.GERRIT
 			and str(zg["start"]) == SD.FLAG_GRAAN and str(zg["klaar"]) == SD.FLAG_GRAAN_KLAAR)
-	check("side: niet gesproken -> alleen de naam", QL.zij_regels({}) == ["Gerrit the Miller"])
+	check("side: niet gesproken -> alleen de naam", QL.zij_regels({}) == [SD.GERRIT])
 	check("side: gesproken -> [ ] The Singing Grain", QL.zij_regels({"gesproken_gerrit": true}) == ["[ ] The Singing Grain"])
 	check("side: oude save met startvlag telt als gesproken", QL.zij_regels({SD.FLAG_GRAAN: true}) == ["[ ] The Singing Grain"])
 	check("side: klaar -> [x]", QL.zij_regels({"gesproken_gerrit": true, SD.FLAG_GRAAN_KLAAR: true}) == ["[x] The Singing Grain"])
@@ -643,7 +643,7 @@ func _questlog_scherm_tests() -> void:
 	await _screenshot("questlog_menu_main")
 	scherm.kies_tab("zij")
 	await _pframes(5)
-	check("veldmenu-questlog: Side op slot = Gerrit the Miller", scherm.regel_teksten() == ["Gerrit the Miller"]
+	check("veldmenu-questlog: Side op slot = Garrett the Miller", scherm.regel_teksten() == [SD.GERRIT]
 			and scherm.is_button_greyed(scherm.rows[0]))
 	await _screenshot("questlog_menu_side_locked")
 	GameState.story_flags["gesproken_gerrit"] = true
