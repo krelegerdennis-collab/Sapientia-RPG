@@ -1038,6 +1038,15 @@ func _muziek() -> void:
 		if str(inst.get("music_track")) != "levend_archief":
 			bad.append(p.get_file())
 		inst.free()
+	var grot: Array[String] = []
+	for g in ["bouwplaats", "mond", "nerf", "grendel", "geheim", "uitmond"]:
+		var gi: Node = (load("res://scenes/maps/berggrot_%s.tscn" % g) as PackedScene).instantiate()
+		if str(gi.get("music_track")) != "berggrot":
+			grot.append(g)
+		gi.free()
+	var gst: Resource = load("res://assets/audio/bgm/bgm_berggrot.ogg")
+	check("bouwplaats en berggrot spelen 'berggrot', echte loopende ogg (%s)" % [grot], grot.is_empty()
+			and gst is AudioStreamOggVorbis and (gst as AudioStream).get_length() > 60.0)
 	check("alle Archief 2-kamers spelen 'levend_archief' (%s)" % [bad], bad.is_empty())
 	check("alleen de Genezer krijgt de baastrack", BattleScript.battle_music_for(["genezer"], true) == "baas_archief2"
 			and BattleScript.battle_music_for(["wortelkoning"], true) == "gevecht_miniboss"

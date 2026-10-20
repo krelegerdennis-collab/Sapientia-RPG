@@ -161,12 +161,12 @@
 		},
 		"berggrot": {
 			"bestand": "bgm_berggrot.ogg",
-			"titel": "Door de Bergader",
-			"locatie": "De berggrot naar het Levende Archief",
-			"beschrijving": "Koude druppels in een stenen nerf. Lage strijkers, een holle fluit en af en toe een tik van vallend gruis. Geen baasdreiging: een pad door de berg.",
+			"titel": "Subterranean Wonder",
+			"locatie": "Tunnel-bouwplaats en de berggrot naar het Levende Archief",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/PT8xcVLrL3uc6Ofu). Bouwplaats, mond, nerf, grendel, geheim en uitmond. Naadloze loop.",
 			"loop": true,
 			"volume_db": -6.0,
-			"bpm": 72
+			"bpm": 0
 		},
 		"dorp_wilgendal": {
 			"bestand": "bgm_dorp_wilgendal.ogg",
