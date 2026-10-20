@@ -600,10 +600,75 @@ func _run() -> void:
 	await _four_heroes_test()
 	await _stairs_and_town_return_tests()
 	await _game_over_test()
+	await _stun_chance_test()
 	await _battlesim_sample_test()
 	Engine.time_scale = 1.0
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
+
+
+## Verlamming/bevriezing is een KANS (SpellRules.STUN_CHANCE, 30%), ook op bazen (STUN_BOSS_IMMUNE = false).
+func _stun_chance_test() -> void:
+	var SR := preload("res://scripts/data/spell_rules.gd")
+	check("stun: STUN_CHANCE = 0,30 en STUN_BOSS_IMMUNE = false", is_equal_approx(SR.STUN_CHANCE, 0.30) and not SR.STUN_BOSS_IMMUNE)
+	var schok: Dictionary = GameData.SPELLS["schok"]
+	var rijp: Dictionary = GameData.SPELLS["rijp"]
+	check("stun: bliksem/ijs geven skip 1 met skip_chance", int(SR.on_hit(schok).get("skip", 0)) == 1
+			and is_equal_approx(float(SR.on_hit(rijp).get("skip_chance", 0)), SR.STUN_CHANCE))
+	var non := true
+	for id in ["vuur", "rank", "genees", "zegen"]:
+		var fx: Dictionary = SR.on_hit(GameData.SPELLS[id])
+		non = non and not fx.has("skip") and not SR.stun_lands(fx, false, 0.0)
+	check("stun: vuur/natuur/genezen/buff verlammen nooit (ook niet bij roll 0)", non)
+	check("stun: vuur houdt zijn brand (dot 5%, 3 beurten)", is_equal_approx(float(SR.on_hit(GameData.SPELLS["vuur"]).get("dot_pct", 0)), 0.05))
+	# ECHT gevecht: battle.gd _apply_spell_status met de randf() van het gevecht, 4000 keer geseed.
+	var b: Control = load("res://scenes/battle/battle.tscn").instantiate()
+	b.set_script(load("res://tools/battlesim/sim_battle.gd"))
+	GameState.pending_enemies = ["mosslijm"]
+	GameState.pending_boss = false
+	GameState.pending_tutorial = {}
+	GameState.dungeon100_floor = 0
+	b.sim_started = true          # geen automatisch gevecht: alleen _apply_spell_status testen
+	add_child(b)
+	var e: Dictionary = b.enemies[0]
+	var n := 4000
+	var counts := {}
+	for mode in ["gewoon", "baas", "baas_immuun"]:
+		seed(31337)
+		GameState.pending_boss = mode != "gewoon"
+		b.stun_boss_immune = mode == "baas_immuun"
+		var hits := 0
+		for i in n:
+			e["skip"] = 0
+			e["s"]["hp"] = e["s"]["max_hp"]
+			b._apply_spell_status(e, schok if i % 2 == 0 else rijp)
+			hits += 1 if int(e.get("skip", 0)) > 0 else 0
+		counts[mode] = hits
+	GameState.pending_boss = false
+	var f := float(counts["gewoon"]) / n
+	check("stun: gewone vijand ~30%% over %d geseede treffers (%.3f)" % [n, f], absf(f - 0.30) < 0.025)
+	var fb := float(counts["baas"]) / n
+	check("stun: baas standaard ook ~30%% (%.3f)" % fb, absf(fb - 0.30) < 0.025)
+	check("stun: met stun_boss_immune nooit op een baas", int(counts["baas_immuun"]) == 0)
+	seed(99)
+	var r1: Array = []
+	for i in 50:
+		e["skip"] = 0
+		b._apply_spell_status(e, schok)
+		r1.append(int(e.get("skip", 0)))
+	seed(99)
+	var same := true
+	for i in 50:
+		e["skip"] = 0
+		b._apply_spell_status(e, schok)
+		same = same and int(e.get("skip", 0)) == r1[i]
+	check("stun: zelfde seed = zelfde verlammingen (simulator blijft deterministisch)", same)
+	e["skip"] = 0
+	e["dots"] = []
+	b._apply_spell_status(e, GameData.SPELLS["vuur"])
+	check("stun: vuur in het gevecht: brand, geen skip", int(e.get("skip", 0)) == 0 and (e["dots"] as Array).size() == 1)
+	b.queue_free()
+	await frames(2)
 
 
 ## Battle simulator (tools/battlesim): klein vast-seed-monster. Echte gevechtsscène, eenvoudige AI.
