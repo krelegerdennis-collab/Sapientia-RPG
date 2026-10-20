@@ -95,11 +95,14 @@ const THEMES := {
 	"archief_v14": {"tiles": TILES, "lib_tiles": LIB_TILES, "sprites": {}},
 	# Het Levende Archief. Zelfde tegelnummers als archief_grijs, groen beeld.
 	# PLACEHOLDER: tools/art_kas_placeholder.py (magenta hoekjes). terrain "kas".
+	# v8 (RPG ART art_mapsprites_v4 tiles_v8/archief2): eigen _v8-kopieen (originelen staan in handwerk.txt),
+	# zelfde nummering/maten; kleur zit in de tegels zelf, dus tint wit.
+	# v8.1: kas_tiles_v8b.png 256x96 (0-79 gelijk; blok A 80-83, blok B 84-87, effen vloer 88-95).
 	"kas": {
-		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",
-		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek.png",
+		"tiles": "res://assets/tiles/dungeon/kas_tiles_v8b.png",
+		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek_v8.png",
 		"terrain": "kas",
-		"tint": Color(0.78, 1.0, 0.84),
+		"tint": Color(1, 1, 1),
 		"sprites": {},
 		# v0.23 kas v2 (RPG ART): ijzeren pilaar 70/71, bloembak 72, podiumrand met wortel 78
 		"solid_extra": [70, 71, 72, 78],
@@ -246,6 +249,33 @@ const ARCHIEF_MACRO_TILES := ARCHIEF_BLOCK_A
 ## Blok A (0) of B (1) voor het 2x2-raster-vak (bx, by): vaste hash.
 static func archief_block_choice(bx: int, by: int) -> int:
 	return absi((bx * 73856093) ^ (by * 19349663)) % 2
+
+
+## Kas (Archief 2) v8.1: effen vloertegels in de vaste grondlaag (archief2_ground.gd) die tot een blok mogen.
+const KAS_PLAIN_FLOOR := [0, 1, 2, 3]
+const KAS_BLOCK_A := [80, 81, 82, 83]
+const KAS_BLOCK_B := [84, 85, 86, 87]
+const KAS_FILLERS := [88, 89, 90, 91, 92, 93, 94, 95]
+
+
+## Kas-vloer op (x, y): ligt (x, y) in een even 2x2-vak waarvan alle vier tegels '.' in de lay-out en effen
+## vloer (0-3) in de grondlaag zijn -> blok A of B (archief_block_choice van (x>>1, y>>1)); anders de
+## bestaande tegel uit de grondlaag (decor, randen en losse vloer blijven ongemoeid).
+static func kas_floor_at(x: int, y: int, ground: Array, layout: Array) -> int:
+	var cur := int(ground[y][x])
+	if not KAS_PLAIN_FLOOR.has(cur):
+		return cur
+	var bx := x >> 1
+	var by := y >> 1
+	for i in 4:
+		var cx := bx * 2 + (i & 1)
+		var cy := by * 2 + (i >> 1)
+		if cy >= ground.size() or cx >= (ground[cy] as Array).size() or not KAS_PLAIN_FLOOR.has(int(ground[cy][cx])):
+			return cur
+		if cy >= layout.size() or cx >= (layout[cy] as String).length() or layout[cy][cx] != ".":
+			return cur
+	var blk: Array = KAS_BLOCK_A if archief_block_choice(bx, by) == 0 else KAS_BLOCK_B
+	return int(blk[(y & 1) * 2 + (x & 1)])
 
 
 ## Vloertegel voor '.' op (x, y) in een archief-lay-out. Blok-modus: vak = (x>>1, y>>1) op het even raster;
