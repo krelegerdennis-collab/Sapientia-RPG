@@ -5,6 +5,7 @@ const Kamers := preload("res://world_warper/kamers/kamers.gd")
 const Gesprek := preload("res://world_warper/kamers/echo_gesprek.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 const ShopScreen := preload("res://scripts/ui/shop_screen.gd")
+const WerkScherm := preload("res://scripts/ui/werkplaats_scherm.gd")
 
 @export var bron := ""
 
@@ -54,7 +55,7 @@ func interact(player: Node) -> void:
 		"echo_grot", "grot_ingang":
 			_grot(player)
 		"werk":
-			_zeg(Kamers.WERK_REGELS, "")
+			_werk(player)
 		"kern":
 			_zeg([Kamers.KERN_ZIN], "")
 		"handel":
@@ -129,6 +130,23 @@ func _handel(player: Node) -> void:
 			player.input_locked = false
 	)
 	get_tree().current_scene.add_child(shop)
+
+
+func _werk(player: Node) -> void:
+	if Kamers.RECEPTEN.is_empty():
+		_zeg(Kamers.WERK_REGELS, "")
+		return
+	if get_tree().current_scene.get_node_or_null("WerkScherm") != null:
+		return
+	if "input_locked" in player:
+		player.input_locked = true
+	var scherm := WerkScherm.new()
+	scherm.name = "WerkScherm"
+	scherm.closed.connect(func() -> void:
+		if is_instance_valid(player) and "input_locked" in player:
+			player.input_locked = false
+	)
+	get_tree().current_scene.add_child(scherm)
 
 
 func _open_scherm(welk: String, player: Node) -> void:

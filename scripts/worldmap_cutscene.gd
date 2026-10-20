@@ -70,6 +70,7 @@ func _init() -> void:
 
 func begin(map: Node) -> void:
 	_map = map
+	Sessielog.cutscene("wereldkaart_film", true)
 	_player = map.get_node_or_null("Objects/Player")
 	if _player != null and "input_locked" in _player:
 		_player.input_locked = true
@@ -211,6 +212,7 @@ func _finish() -> void:
 	if _done:
 		return
 	_done = true
+	Sessielog.cutscene("wereldkaart_film", false)
 	if video != null and video.is_playing():
 		video.stop()
 	if _player != null and is_instance_valid(_player) and "input_locked" in _player:

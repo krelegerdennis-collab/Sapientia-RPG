@@ -18,6 +18,11 @@ const Kisten := preload("res://world_warper/kamers/echo_kisten.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const Gear := preload("res://scripts/equipment.gd")
 const SD := preload("res://scripts/data/story_data.gd")
+const Recepten := preload("res://scripts/data/werkplaats_recepten.gd")
+const ShopData := preload("res://scripts/data/shop_data.gd")
+const Koopman := preload("res://scripts/data/koopman_winkel.gd")
+const QL := preload("res://world_warper/data/echo_questlog.gd")
+const QLScherm := preload("res://scripts/ui/questlog_screen.gd")
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const DUNGEON := "res://scenes/maps/dungeon100.tscn"
 const HUBHAL := "res://world_warper/maps/hal.tscn"
@@ -57,6 +62,10 @@ func _run() -> void:
 	await _echo_grot()
 	await _genezer_warp()
 	await _hal_simulatie()
+	_recepten_data()
+	_handel_data()
+	await _werkplaats_in_beeld()
+	await _handelskamer_in_beeld()
 	print("WARPERKAMERTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await get_tree().process_frame
@@ -122,9 +131,10 @@ func _buit_en_tekst() -> void:
 	check("Trainingshal geeft geen items", int((na["items"] as Dictionary).get("drankje", 0)) == 1)
 	check("Trainingshal geeft_buit is uit", not Kamers.geeft_buit())
 	check("oefenvijand bestaat", GameData.ENEMIES.has(Kamers.OEFEN_VIJAND))
-	check("geen recepten", Kamers.RECEPTEN.is_empty())
-	check("geen endgame-winkel", Kamers.endgame_winkel() == "" and not Kamers.handel_open())
-	check("handelstekst", Kamers.HANDEL_DICHT == "The shop is still closed.")
+	check("Werkplaats heeft recepten uit de datafile", not Kamers.RECEPTEN.is_empty()
+			and Kamers.RECEPTEN == Recepten.RECEPTEN)
+	check("Handelskamer heeft een winkel", Kamers.endgame_winkel() == "handelskamer" and Kamers.handel_open()
+			and ShopData.SHOPS.has("handelskamer"))
 	var doelen := Kamers.warp_doelen()
 	var ids: Array[String] = []
 	for d in doelen:
@@ -301,6 +311,8 @@ func _echo_grot() -> void:
 			and tweede_tekst != EchoGrot.ZIN_H6)
 	_kies(EchoGrot.KEUZE_TERUG)
 	check("tweede gesprek sluit", await _wacht_gesprek_weg())
+
+	await _questlog_tests()
 
 	GameState.story_flags[EchoGrot.FLAG_H6] = true
 	if not _praat():
@@ -506,6 +518,166 @@ func _wereld_weigert() -> bool:
 	return dicht
 
 
+## v0.24 ECHO-questlog: data (statussen per act) + live in ECHO's Kamer (lijst, act 1, act 3, terug).
+func _questlog_tests() -> void:
+	var leeg := {}
+	check("questlog: 6 acts, Nederlandse ids", QL.ids() == ["akte_1", "akte_2", "akte_3", "akte_4", "akte_5", "akte_6"])
+	check("questlog: nieuw spel -> Act 1 Active, Act 2 Locked, Act 3-6 Upcoming",
+			QL.status("akte_1", leeg, 0) == QL.OPEN and QL.status("akte_2", leeg, 0) == QL.DICHT
+			and ["akte_3", "akte_4", "akte_5", "akte_6"].all(func(i): return QL.status(i, leeg, 0) == QL.LATER))
+	var a1 := {SD.GOLEM_FLAG: true}
+	check("questlog: Golem verslagen + Archieven in -> Act 1 Done, Act 2 Active",
+			QL.status("akte_1", a1, SD.NACHT) == QL.KLAAR and QL.status("akte_2", a1, SD.NACHT) == QL.OPEN)
+	check("questlog: Golem zonder verhaalstap -> Act 1 nog Active", QL.status("akte_1", a1, SD.START) == QL.OPEN)
+	var a2 := {SD.GOLEM_FLAG: true, "noor_gered": true, "archief2_lotte_lid": true, Unlock.BEWAKER_VLAG: true, Unlock.UNLOCK_VLAG: true}
+	check("questlog: na De Genezer -> Act 2 Done, Act 3 Upcoming (geen inhoud)",
+			QL.status("akte_2", a2, SD.NACHT) == QL.KLAAR and QL.status("akte_3", a2, SD.NACHT) == QL.LATER)
+	check("questlog: keuzes = 6 acts + Go back", QL.keuzes(a1, SD.NACHT) == ["Act 1 - Done", "Act 2 - Active",
+			"Act 3 - Upcoming", "Act 4 - Upcoming", "Act 5 - Upcoming", "Act 6 - Upcoming", "Go back"])
+	var r1 := QL.regels("akte_1", a1, SD.NACHT)
+	check("questlog: Act 1 = ECHO-zin + opdrachten afgevinkt", r1.size() == 2 and r1[0] == QL.akte("akte_1")["echo_klaar"]
+			and r1[1].contains("[x] Defeat the Golem") and r1[1].contains("[x] The Archives of Sapientia")
+			and not r1[1].contains("Vesper"))
+	var r2 := QL.regels("akte_2", {SD.GOLEM_FLAG: true, "noor_gered": true}, SD.NACHT)
+	check("questlog: Act 2 deels: Vesper [x], Seren [ ]", r2[1].contains("[x] Save Vesper") and r2[1].contains("[ ] Seren joins"))
+	check("questlog: Act 2 klaar = canonzin ECHO", QL.regels("akte_2", a2, SD.NACHT)[0] == "Two Archives active. World Warper online.")
+	var rd := QL.regels("akte_2", leeg, 0)
+	var rl := QL.regels("akte_4", a2, SD.NACHT)
+	check("questlog: dichte act toont geen opdrachten (%s | %s)" % [rd, rl], rd.size() == 1 and rd[0] == QL.ZIN_DICHT
+			and rl.size() == 1 and rl[0] == QL.ZIN_LATER)
+	var eng := true
+	for t in QL.speler_teksten():
+		for nl in ["opdracht", "klaar", "akte", "archief", "verslaan", "proefpersoon", "onderzoeker"]:
+			if t.to_lower().contains(nl):
+				eng = false
+				print("INFO  niet-Engels/onthulling in: ", t)
+	check("questlog: spelertekst Engels, geen onthulling", eng)
+	check("questlog: in het ECHO-menu", EchoGrot.menu_opties().has(EchoGrot.OPTIE_QUESTLOG))
+
+	# zijopdrachten (Side-tab): eerst alleen de NPC-naam, na het gesprek de opdracht
+	var zg: Dictionary = QL.ZIJ[0]
+	check("side: Het Zingende Graan hoort bij Gerrit", str(zg["id"]) == "zingend_graan" and str(zg["npc"]) == SD.GERRIT
+			and str(zg["start"]) == SD.FLAG_GRAAN and str(zg["klaar"]) == SD.FLAG_GRAAN_KLAAR)
+	check("side: niet gesproken -> alleen de naam", QL.zij_regels({}) == [SD.GERRIT])
+	check("side: gesproken -> [ ] The Singing Grain", QL.zij_regels({"gesproken_gerrit": true}) == ["[ ] The Singing Grain"])
+	check("side: oude save met startvlag telt als gesproken", QL.zij_regels({SD.FLAG_GRAAN: true}) == ["[ ] The Singing Grain"])
+	check("side: klaar -> [x]", QL.zij_regels({"gesproken_gerrit": true, SD.FLAG_GRAAN_KLAAR: true}) == ["[x] The Singing Grain"])
+	var fixture := [{"id": "test_npc", "npc": "Test Keeper", "titel": "A Test Errand", "gesproken": "gesproken_test"}]
+	check("side: fixture zonder start/klaar", QL.zij_regels({}, fixture) == ["Test Keeper"]
+			and QL.zij_regels({"gesproken_test": true}, fixture) == ["[ ] A Test Errand"])
+	var gesprek_zet := true
+	for rij in SD.EVENTS["gerrit"]:
+		var doe: Array = rij["do"]
+		if not doe.is_empty():
+			gesprek_zet = gesprek_zet and doe.any(func(x): return x == ["flag", "gesproken_gerrit"])
+	check("side: elk gesprek met Gerrit zet gesproken_gerrit", gesprek_zet)
+	await _questlog_scherm_tests()
+
+	# live
+	var bewaar := GameState.story_flags.duplicate()
+	var stap_voor := GameState.story_step
+	GameState.story_flags[SD.GOLEM_FLAG] = true
+	GameState.story_flags["noor_gered"] = true
+	GameState.story_flags.erase("archief2_lotte_lid")
+	GameState.story_step = maxi(stap_voor, SD.NACHT)
+	if not _praat():
+		check("questlog live: gesprek", false)
+		return
+	check("questlog live: optie in het menu", await _naar_keuze(EchoGrot.OPTIE_QUESTLOG))
+	_kies(EchoGrot.OPTIE_QUESTLOG)
+	var lijst := await _naar_keuze(QL.TERUG)
+	check("questlog live: lijst met acts", lijst and Dialog.choices.size() == 7 and str(Dialog.choices[0]) == "Act 1 - Done"
+			and str(Dialog.choices[2]) == "Act 3 - Upcoming"
+			and str(Dialog.choices[1]) == ("Act 2 - Done" if bewaar.has(Unlock.UNLOCK_VLAG) and bewaar.has("archief2_lotte_lid") else "Act 2 - Active"))
+	await _pframes(10)
+	check("questlog live: lijst binnen beeld", _vak_in_beeld())
+	await _screenshot("echo_questlog_lijst")
+	Dialog.choose(0)
+	check("questlog live: Act 1 -> ECHO-zin", await _naar_tekst(str(QL.akte("akte_1")["echo_klaar"])))
+	Dialog.advance()
+	var blok := QL.regels("akte_1", GameState.story_flags, GameState.story_step)[1]
+	check("questlog live: Act 1 opdrachten afgevinkt", await _naar_tekst(blok) and blok.contains("[x] Defeat the Golem")
+			and not blok.contains("Vesper"))
+	Dialog.advance()
+	await _pframes(10)
+	check("questlog live: opdrachtenvak binnen beeld", _vak_in_beeld())
+	await _screenshot("echo_questlog_act1")
+	Dialog.advance()
+	check("questlog live: terug in de lijst", await _naar_keuze(QL.TERUG))
+	Dialog.choose(1)
+	var b2 := QL.regels("akte_2", GameState.story_flags, GameState.story_step)
+	check("questlog live: Act 2 met [ ] Seren", await _naar_tekst(b2[0]) and b2[1].contains("[ ] Seren joins")
+			and b2[1].contains("[x] Save Vesper"))
+	Dialog.advance()
+	if await _naar_tekst(b2[1]):
+		Dialog.advance()
+		await _pframes(10)
+		await _screenshot("echo_questlog_act2")
+	check("questlog live: lijst na Act 2", await _naar_keuze(QL.TERUG))
+	Dialog.choose(2)
+	check("questlog live: Act 3 = nog leeg", await _naar_tekst(QL.ZIN_LATER))
+	await _pframes(10)
+	await _screenshot("echo_questlog_act3")
+	check("questlog live: weer de lijst", await _naar_keuze(QL.TERUG))
+	_kies(QL.TERUG)
+	check("questlog live: Go back -> ECHO-menu", await _naar_keuze(EchoGrot.OPTIE_SIMULATIE))
+	_kies(EchoGrot.KEUZE_TERUG)
+	check("questlog live: gesprek sluit", await _wacht_gesprek_weg())
+	GameState.story_flags = bewaar
+	GameState.story_step = stap_voor
+
+
+## v0.24 Veldmenu > Quest Log: tabs Main/Side, screenshots (main, side op slot, side open).
+func _questlog_scherm_tests() -> void:
+	var bewaar := GameState.story_flags.duplicate()
+	var stap_voor := GameState.story_step
+	GameState.story_flags = {SD.GOLEM_FLAG: true, "noor_gered": true, "noor_lid": true}
+	GameState.story_step = maxi(stap_voor, SD.NACHT)
+	var scherm: CanvasLayer = QLScherm.new()
+	scherm.layer = 120
+	get_tree().root.add_child(scherm)
+	await _pframes(5)
+	check("veldmenu-questlog: Main met 6 acts", scherm.tab == "hoofd"
+			and scherm.regel_teksten() == QL.keuzes(GameState.story_flags, GameState.story_step).slice(0, 6))
+	scherm.toon_akte("akte_1")
+	check("veldmenu-questlog: Act 1 = zelfde regels als ECHO",
+			scherm.detail.text == "\n".join(QL.regels("akte_1", GameState.story_flags, GameState.story_step)))
+	await _pframes(5)
+	await _screenshot("questlog_menu_act1")
+	scherm.back()
+	await _pframes(3)
+	check("veldmenu-questlog: B uit een act = terug naar de lijst", scherm.is_inside_tree() and scherm.list.visible
+			and scherm.open_akte == "")
+	await _screenshot("questlog_menu_main")
+	scherm.kies_tab("zij")
+	await _pframes(5)
+	check("veldmenu-questlog: Side op slot = Garrett the Miller", scherm.regel_teksten() == [SD.GERRIT]
+			and scherm.is_button_greyed(scherm.rows[0]))
+	await _screenshot("questlog_menu_side_locked")
+	GameState.story_flags["gesproken_gerrit"] = true
+	scherm.kies_tab("hoofd")
+	scherm.kies_tab("zij")
+	await _pframes(5)
+	check("veldmenu-questlog: Side na gesprek = opdracht", scherm.regel_teksten() == ["[ ] The Singing Grain"]
+			and not scherm.is_button_greyed(scherm.rows[0]))
+	await _screenshot("questlog_menu_side_unlocked")
+	scherm.close()
+	await _pframes(2)
+	GameState.story_flags = bewaar
+	GameState.story_step = stap_voor
+
+
+func _vak_in_beeld() -> bool:
+	var vp := Rect2(Vector2.ZERO, get_tree().root.get_visible_rect().size)
+	var r: Rect2 = Dialog.panel.get_global_rect()
+	var ok := vp.encloses(r)
+	if Dialog._choice_box != null and Dialog._choice_box.visible:
+		ok = ok and vp.encloses(Dialog._choice_box.get_global_rect())
+	if not ok:
+		print("INFO  vak %s keuzes %s scherm %s" % [r, Dialog._choice_box.get_global_rect() if Dialog._choice_box else null, vp])
+	return ok
+
+
 func _praat() -> bool:
 	var echo := _echo_node()
 	var pl := _player()
@@ -695,3 +867,181 @@ func _hal_simulatie() -> void:
 	await _screenshot("dls_hud_verdieping1")
 	if GameState.dungeon100_run_active():
 		GameState.dungeon100_end_run(false)
+
+
+# ------------------------------------------------------------ Werkplaats en Handelskamer
+
+func _recepten_data() -> void:
+	var fout := Recepten.fouten()
+	for f in fout:
+		print("INFO  ", f)
+	check("recepten: alleen bestaande items die monsters laten vallen", fout.is_empty())
+	var ids := {}
+	var uniek := true
+	for r in Recepten.RECEPTEN:
+		if ids.has(str(r["id"])):
+			uniek = false
+		ids[str(r["id"])] = true
+	check("recept-ids uniek", uniek)
+	check("recepten in act 4, niet in act 3", Recepten.lijst(4).size() == Recepten.RECEPTEN.size()
+			and Recepten.lijst(3).is_empty())
+	var zak := {"drankje": 4, "toverwater": 2}
+	var r1 := Recepten.maak("sterk_drankje", zak)
+	check("3 Potion -> Strong Potion", r1["ok"] and int(zak.get("drankje", 0)) == 1
+			and int(zak.get("sterk_drankje", 0)) == 1 and str(r1["text"]) == "Crafted: Strong Potion.")
+	var r2 := Recepten.maak("toverbrouwsel", zak)
+	check("te weinig Magic Water: niets verandert", not r2["ok"] and str(r2["text"]) == Recepten.TE_WEINIG
+			and int(zak.get("toverwater", 0)) == 2 and not zak.has("toverbrouwsel"))
+	var r3 := Recepten.maak("bestaat_niet", zak)
+	check("onbekend recept", not r3["ok"] and str(r3["text"]) == Recepten.ONBEKEND)
+	var zak2 := {"sterk_drankje": 2, "toverbrouwsel": 2}
+	check("Elixir uit 2+2, lege stapels weg", Recepten.maak("elixer", zak2)["ok"] and zak2 == {"elixer": 1})
+	var engels := true
+	for t in Recepten.speler_teksten():
+		for nl in ["recept", "gemaakt", "te weinig", "werkplaats"]:
+			if str(t).to_lower().contains(nl):
+				engels = false
+	check("Werkplaats-teksten zijn Engels", engels)
+
+
+func _handel_data() -> void:
+	var oud_party: Array = GameState.party.duplicate(true)
+	GameState.party = [{"level": 32, "name": "Kees", "hp": 10}]
+	var rows: Array = ShopData.stock("handelskamer")
+	var ids: Array[String] = []
+	var bestaan := true
+	for row in rows:
+		ids.append(str(row["id"]))
+		if not GameData.ITEMS.has(str(row["id"])) or int(row["price"]) <= 0:
+			bestaan = false
+	check("Exchange: vijf bestaande items met prijs", rows.size() == 5 and bestaan)
+	check("Exchange: Elixir/Strong Potion/Magic Brew niet te koop (Werkplaats)",
+			not ids.has("elixer") and not ids.has("sterk_drankje") and not ids.has("toverbrouwsel"))
+	var prijs_ok := true
+	for id in ["drankje", "toverwater", "tegengif", "feniksveer"]:
+		if ShopData.list_price(id) != int(Koopman.BASIS_PRIJS[id]):
+			prijs_ok = false
+	check("Exchange-prijzen = normale winkelprijs van de Koopman", prijs_ok
+			and ShopData.list_price("leeg_boek") == int(GameData.ITEMS["leeg_boek"]["price"]))
+	check("Exchange-naam is Engels", ShopData.shop_name("handelskamer") == "Exchange")
+	var oud_goud := GameState.gold
+	var oud_zak: Dictionary = GameState.inventory.duplicate(true)
+	GameState.gold = 100
+	GameState.inventory = {}
+	var k := ShopData.buy_item("handelskamer", "drankje")
+	check("koop Potion voor 30", k["ok"] and GameState.gold == 70 and int(GameState.inventory.get("drankje", 0)) == 1
+			and str(k["text"]) == "Bought.")
+	var arm := ShopData.buy_item("handelskamer", "feniksveer")
+	check("te weinig goud voor Phoenix Feather", not arm["ok"] and str(arm["text"]) == "Not enough gold."
+			and GameState.gold == 70)
+	var v := ShopData.sell("drankje")
+	check("verkoop Potion voor de helft", v["ok"] and GameState.gold == 85 and not GameState.inventory.has("drankje")
+			and str(v["text"]) == "Sold.")
+	GameState.gold = oud_goud
+	GameState.inventory = oud_zak
+	GameState.party = oud_party
+
+
+func _laad_kamer(id: String) -> Node:
+	GameState.change_map(Kamers.scene_path(id), "ingang")
+	for _i in 400:
+		await get_tree().process_frame
+		var nu := get_tree().current_scene
+		if nu != null and nu.scene_file_path == Kamers.scene_path(id) and not GameState.changing_map:
+			await get_tree().process_frame
+			await get_tree().process_frame
+			return nu
+	return null
+
+
+func _werkplaats_in_beeld() -> void:
+	var oud_party: Array = GameState.party.duplicate(true)
+	var oud_zak: Dictionary = GameState.inventory.duplicate(true)
+	for h in GameState.party:
+		h["level"] = 26
+	GameState.story_flags[Kamers.FLAG_HUB] = true
+	var sc := await _laad_kamer("werkplaats")
+	check("The Workshop laadt", sc != null and str(sc.get("map_name")) == "The Workshop")
+	if sc == null:
+		GameState.party = oud_party
+		return
+	GameState.inventory = {"drankje": 6, "toverwater": 3, "toverbrouwsel": 1}
+	var tafel := sc.get_node("Objects/Tafel")
+	var speler := sc.get_node("Objects/Player")
+	tafel.interact(speler)
+	await get_tree().process_frame
+	var scherm := sc.get_node_or_null("WerkScherm")
+	check("tafel opent het Workshop-scherm", scherm != null and str(scherm.header.text) == "Workshop")
+	if scherm == null:
+		GameState.party = oud_party
+		GameState.inventory = oud_zak
+		return
+	check("speler staat stil in het scherm", bool(speler.get("input_locked")))
+	var knop := scherm.content.get_node_or_null("Recept_sterk_drankje") as Button
+	check("drie recepten in beeld", scherm.content.get_child_count() == 3 and knop != null)
+	var elix := scherm.content.get_node_or_null("Recept_elixer") as Button
+	check("Elixir grijs zonder ingrediënten", elix != null and scherm.is_button_greyed(elix))
+	knop.pressed.emit()
+	await get_tree().process_frame
+	check("Strong Potion gemaakt in het scherm", int(GameState.inventory.get("sterk_drankje", 0)) == 1
+			and int(GameState.inventory.get("drankje", 0)) == 3 and scherm.message_text() == "Crafted: Strong Potion.")
+	await _pframes(30)
+	await _screenshot("werkplaats_crafting")
+	(scherm.content.get_node("Recept_elixer") as Button).pressed.emit()
+	await get_tree().process_frame
+	check("Elixir weigert: te weinig", scherm.message_text() == Recepten.TE_WEINIG
+			and not GameState.inventory.has("elixer"))
+	scherm.close()
+	for _i in 10:
+		await get_tree().process_frame
+	check("scherm dicht, speler los", sc.get_node_or_null("WerkScherm") == null and not bool(speler.get("input_locked")))
+	GameState.inventory = oud_zak
+	GameState.party = oud_party
+
+
+func _handelskamer_in_beeld() -> void:
+	var oud_party: Array = GameState.party.duplicate(true)
+	var oud_zak: Dictionary = GameState.inventory.duplicate(true)
+	var oud_goud := GameState.gold
+	for h in GameState.party:
+		h["level"] = 32
+	var sc := await _laad_kamer("handelskamer")
+	check("The Exchange laadt", sc != null and str(sc.get("map_name")) == "The Exchange")
+	if sc == null:
+		GameState.party = oud_party
+		return
+	GameState.gold = 500
+	GameState.inventory = {"drankje": 2}
+	var speler := sc.get_node("Objects/Player")
+	sc.get_node("Objects/Toonbank").interact(speler)
+	await get_tree().process_frame
+	var shop := sc.get_node_or_null("ShopScreen")
+	check("toonbank opent de winkel (niet meer dicht)", shop != null and str(shop.shop_id) == "handelskamer"
+			and str(shop.header.text) == "Exchange")
+	if shop == null:
+		GameState.party = oud_party
+		GameState.inventory = oud_zak
+		GameState.gold = oud_goud
+		return
+	check("Sell-knop + vijf koopregels", shop.content.get_child_count() == 6
+			and str((shop.content.get_child(0) as Button).get_meta("label")) == "Sell")
+	shop._on_buy("feniksveer", "item")
+	await get_tree().process_frame
+	check("Phoenix Feather gekocht in het scherm", GameState.gold == 300 and int(GameState.inventory.get("feniksveer", 0)) == 1)
+	await _pframes(30)
+	await _screenshot("handelskamer_kopen")
+	shop._show_verkoop()
+	await get_tree().process_frame
+	shop._on_sell("drankje")
+	await get_tree().process_frame
+	check("Potion verkocht in het scherm", GameState.gold == 315 and int(GameState.inventory.get("drankje", 0)) == 1
+			and shop.mode == "verkoop")
+	await _pframes(30)
+	await _screenshot("handelskamer_verkopen")
+	shop.close()
+	for _i in 10:
+		await get_tree().process_frame
+	check("winkel dicht, speler los", sc.get_node_or_null("ShopScreen") == null and not bool(speler.get("input_locked")))
+	GameState.inventory = oud_zak
+	GameState.gold = oud_goud
+	GameState.party = oud_party
