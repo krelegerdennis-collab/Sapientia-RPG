@@ -1,7 +1,7 @@
 [gd_scene load_steps=16 format=4]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_scakf"]
-[ext_resource type="TileSet" path="res://assets/tiles/dorp.tres" id="2_j1o7s"]
+[ext_resource type="TileSet" path="res://assets/tiles/dorp_v8.tres" id="2_j1o7s"]
 [ext_resource type="PackedScene" path="res://scenes/story_object.tscn" id="3_tpjq0"]
 [ext_resource type="Texture2D" path="res://assets/sprites/buiten/put.png" id="4_iekqy"]
 [ext_resource type="PackedScene" path="res://scenes/door.tscn" id="5_p8hj2"]

@@ -629,3 +629,6 @@ assets/sprites/som/kaart/vesper_wm1_slim.png
 assets/tilesets/som/wilgendal/grond_v8.png
 # 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor Esdoorn 1.4x (tools/som/esdoorn_v8_grond.py)
 assets/tilesets/som/esdoorn/grond_v8.png
+# 20 okt 2026: v8-props van RPG ART voor Mapleton/Esdoorn (art_mapsprites_v4/out/props_v8/mapleton/dorp.png; tegels 3, 5, 26-32, 49, 50, 52, 53 nieuw).
+#        dorp.png staat hierboven als handwerk en blijft ongewijzigd; alleen esdoorn.tscn gebruikt dorp_v8.tres -> dorp_v8.png.
+assets/tiles/dorp_v8.png
