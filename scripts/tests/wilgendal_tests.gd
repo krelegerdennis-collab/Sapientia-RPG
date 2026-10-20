@@ -507,6 +507,12 @@ func _som_pilot(dorp: Node) -> void:
 	var pad := Vector2i(14, 16)
 	check("som: pad met autotile-masker", g.get_cell_tile_data(pad).get_custom_data("terrain").begins_with("pad_"))
 	check("som: kegelbomen op de rand", dorp.get_node("Objects/SomBomen").get_child_count() > 150)
+	var v8: TileMapLayer = dorp.get_node_or_null("Ground/SomV8")
+	var v8tex: Texture2D = v8.tile_set.get_source(0).texture if v8 != null else null
+	check("som: v8-grond (RPG ART) over de hele kaart, atlas <= 2048x2048, beek blijft geanimeerd water",
+			v8 != null and v8tex != null and v8tex.get_width() <= 2048 and v8tex.get_height() <= 2048
+			and v8.get_used_cells().size() == Data.W * Data.H - Data.W + Data.BRUG.size.x
+			and v8.get_cell_source_id(Vector2i(10, Data.BEEK_RIJ)) == -1 and v8.get_cell_source_id(pad) == 0)
 	var ok := true
 	for ruw in Data.PANDEN:
 		var rij: Dictionary = Data.som_pand(ruw)
@@ -526,8 +532,10 @@ func _som_pilot(dorp: Node) -> void:
 	check("som: speler = fase-2 heldsheet 24x32 (%s)" % sp.texture.resource_path,
 			sp.texture.resource_path.begins_with("res://assets/sprites/som/kaart/")
 			and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
-	check("som: Dax/Seren in WM1, WM2 in de wacht", sp.texture.resource_path.ends_with("dax_wm1.png")
-			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1"
+	check("som: Dax/Seren in WM1 (slanke sheets 20 okt), WM2 in de wacht", sp.texture.resource_path.ends_with("dax_wm1_slim.png")
+			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1_slim"
+			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm1_slim.png")
+			and ResourceLoader.exists("res://assets/sprites/som/kaart/vesper_wm1_slim.png")
 			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm1.png")
 			and ResourceLoader.exists("res://assets/sprites/som/kaart/vesper.png")
 			and not ResourceLoader.exists("res://assets/sprites/som/kaart/dax_wm2.png")

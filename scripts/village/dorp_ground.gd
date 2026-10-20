@@ -85,6 +85,7 @@ func _som() -> void:
 		var hd = JSON.parse_string(FileAccess.get_file_as_string(hpad))
 		if hd is Dictionary:
 			hekken = hd
+	_v8()
 	var over := TileMapLayer.new()
 	over.name = "SomOverlay"
 	over.tile_set = tile_set
@@ -164,3 +165,40 @@ func zet_poort(t: Vector2i, open: bool) -> void:
 	Data.poorten_open[t] = open
 	if overlay != null:
 		_zet(overlay, t, Data.hek_tegel(t))
+
+
+## v8-grond (RPG ART, 20 okt 2026): gebakken gras/pad/plein per cel (tools/som/wilgendal_v8_grond.py),
+## een eigen laag boven de semantische grondlaag (die blijft: terrain-data, water-animatie, tests).
+## Op beek-cellen blijft het geanimeerde water zichtbaar. Geen botsing: alleen beeld.
+const V8_JSON := "res://assets/tilesets/som/wilgendal/grond_v8.json"
+const V8_PNG := "res://assets/tilesets/som/wilgendal/grond_v8.png"
+var v8: TileMapLayer
+
+
+func _v8() -> void:
+	if not FileAccess.file_exists(V8_JSON) or not ResourceLoader.exists(V8_PNG):
+		return
+	var d = JSON.parse_string(FileAccess.get_file_as_string(V8_JSON))
+	if not (d is Dictionary) or int(d.get("w", 0)) != Data.W or int(d.get("h", 0)) != Data.H:
+		push_warning("grond_v8.json past niet bij de kaart (opnieuw bakken)")
+		return
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(16, 16)
+	var bron := TileSetAtlasSource.new()
+	bron.texture = load(V8_PNG)
+	bron.texture_region_size = Vector2i(16, 16)
+	var kol := int(d["kolommen"])
+	for i in int(d["uniek"]):
+		bron.create_tile(Vector2i(i % kol, i / kol))
+	ts.add_source(bron, 0)
+	v8 = TileMapLayer.new()
+	v8.name = "SomV8"
+	v8.tile_set = ts
+	add_child(v8)
+	var cellen: Array = d["cellen"]
+	for y in Data.H:
+		for x in Data.W:
+			if Data.GROND[y][x] == "~":
+				continue
+			var i := int(cellen[y * Data.W + x])
+			v8.set_cell(Vector2i(x, y), 0, Vector2i(i % kol, i / kol))

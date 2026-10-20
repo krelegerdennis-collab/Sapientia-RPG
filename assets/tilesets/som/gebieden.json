@@ -12,9 +12,9 @@
 				"terrain",
 				"gebouw"
 			],
-			"speler": "res://assets/sprites/som/kaart/dax_wm1.png",
+			"speler": "res://assets/sprites/som/kaart/dax_wm1_slim.png",
 			"helden": "res://assets/sprites/som/kaart/",
-			"held_variant": "wm1"
+			"held_variant": "wm1_slim"
 		}
 	}
 }
