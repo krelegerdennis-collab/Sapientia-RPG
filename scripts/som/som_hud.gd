@@ -5,6 +5,7 @@ extends CanvasLayer
 const SomData := preload("res://scripts/data/som_data.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const THEME := preload("res://assets/theme.tres")
+const SomFx := preload("res://scripts/som/som_fx.gd")
 
 var arena: Node
 var root: Control
@@ -26,7 +27,7 @@ func _ready() -> void:
 	bars = Control.new()
 	bars.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.position = Vector2(4, 4)
-	bars.size = Vector2(80, 44)
+	bars.size = Vector2(80, 64)
 	bars.draw.connect(_draw_bars)
 	root.add_child(bars)
 	ring_button = UiMenu.button(SomData.TXT_RING)
@@ -61,8 +62,8 @@ func _place() -> void:
 	ring_button.position = Vector2(vs.x - 4.0 - 38.0 - 4.0 - ring_button.size.x, 2.0)
 	switch_button.reset_size()
 	switch_button.position = Vector2(ring_button.position.x - 4.0 - switch_button.size.x, 2.0)
-	toast_label.position = Vector2(40, 24)
-	toast_label.size = Vector2(vs.x - 80, 30)
+	toast_label.position = Vector2(80, 24)
+	toast_label.size = Vector2(vs.x - 160, 30)
 
 
 func _process(delta: float) -> void:
@@ -78,25 +79,30 @@ func toast(text: String) -> void:
 	_toast_t = 2.2
 
 
-## Eén regel per partylid (naam, HP-balk); de bestuurde held met een kader + wapenmeter.
+## Eén vak per partylid (hud_frame.png 72x20 van RPG ART, anders getekend): naam + HP, HP-balk;
+## de bestuurde held geel gemarkeerd + zijn wapenmeter.
 func _draw_bars() -> void:
 	if GameState.party.is_empty() or arena == null:
 		return
 	var f: Font = THEME.default_font if THEME.default_font else ThemeDB.fallback_font
+	var frame: Texture2D = SomFx.tex(SomData.UI_HUD_FRAME)
 	var y := 0.0
 	for h in GameState.party:
 		var id := str(h.get("id", ""))
 		var act: bool = id == arena.active_id
 		var ko := int(h["hp"]) <= 0
-		bars.draw_rect(Rect2(0, y, 72, 14), Color(0, 0, 0, 0.65))
-		if act:
-			bars.draw_rect(Rect2(0, y, 72, 14), Color(1, 0.85, 0.3), false, 1.0)
+		if frame:
+			bars.draw_texture(frame, Vector2(0, y), Color(1, 0.9, 0.45) if act else Color(0.8, 0.8, 0.85, 0.9))
+		else:
+			bars.draw_rect(Rect2(0, y, 72, 20), Color(0, 0, 0, 0.65))
+			if act:
+				bars.draw_rect(Rect2(0, y, 72, 20), Color(1, 0.85, 0.3), false, 1.0)
 		var col := Color(0.6, 0.6, 0.65) if ko else (Color(1, 0.95, 0.6) if act else Color(1, 1, 1))
-		bars.draw_string(f, Vector2(2, y + 7), "%s %d/%d" % [h["name"], int(h["hp"]), int(h["max_hp"])], HORIZONTAL_ALIGNMENT_LEFT, 70, 8, col)
+		bars.draw_string(f, Vector2(4, y + 9), "%s %d/%d" % [h["name"], int(h["hp"]), int(h["max_hp"])], HORIZONTAL_ALIGNMENT_LEFT, 66, 8, col)
 		var r := float(h["hp"]) / maxf(1.0, float(h["max_hp"]))
-		bars.draw_rect(Rect2(2, y + 9, 68, 2), Color(0.2, 0.05, 0.05))
-		bars.draw_rect(Rect2(2, y + 9, 68.0 * r, 2), Color(0.3, 1, 0.4) if r > 0.25 else Color(1, 0.3, 0.3))
+		bars.draw_rect(Rect2(4, y + 12, 64, 2), Color(0.2, 0.05, 0.05))
+		bars.draw_rect(Rect2(4, y + 12, 64.0 * r, 2), Color(0.3, 1, 0.4) if r > 0.25 else Color(1, 0.3, 0.3))
 		if act:
 			var c: float = arena.charge
-			bars.draw_rect(Rect2(2, y + 12, 68.0 * c, 1), Color(0.3, 0.9, 1.0) if c >= 1.0 else Color(1.0, 0.8, 0.2))
-		y += 15.0
+			bars.draw_rect(Rect2(4, y + 15, 64.0 * c, 2), Color(0.3, 0.9, 1.0) if c >= 1.0 else Color(1.0, 0.8, 0.2))
+		y += 21.0

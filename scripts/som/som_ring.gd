@@ -8,6 +8,8 @@ extends CanvasLayer
 const SomData := preload("res://scripts/data/som_data.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const THEME := preload("res://assets/theme.tres")
+const SomFx := preload("res://scripts/som/som_fx.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 const RADIUS := Vector2(86, 52)
 
 var arena: Node
@@ -18,6 +20,7 @@ var entries: Array = []
 var root: Control
 var buttons: Array[Button] = []
 var title: Label
+var bg: TextureRect
 var _was_paused := false
 var _open_frame := -1
 ## Frame waarin het menu sloot (dan telt dezelfde A niet ook als slag).
@@ -40,6 +43,14 @@ func _ready() -> void:
 		if ev is InputEventMouseButton and ev.pressed:
 			close({}))
 	root.add_child(dim)
+	var bg_tex := SomFx.tex(SomData.UI_RING_BG)
+	if bg_tex:
+		bg = TextureRect.new()
+		bg.name = "RingBg"
+		bg.texture = bg_tex
+		bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(bg)
 	title = Label.new()
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -79,6 +90,8 @@ func _build() -> void:
 	entries = arena.ring_entries().get(tab, [])
 	var vs := root.get_viewport_rect().size
 	var c := vs / 2.0
+	if bg:
+		bg.position = (c - bg.texture.get_size() / 2.0).round()
 	title.text = "< %s >" % (SomData.TXT_ITEMS if tab == "items" else SomData.TXT_SKILLS)
 	title.size = Vector2(120, 12)
 	title.position = (c - Vector2(60, 8)).round()
@@ -88,6 +101,7 @@ func _build() -> void:
 		b.name = "Ring_%d" % i
 		b.focus_mode = Control.FOCUS_NONE
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.icon = icon_for(entries[i])
 		root.add_child(b)
 		b.reset_size()
 		var a := -PI / 2.0 + TAU * float(i) / float(n)
@@ -96,6 +110,23 @@ func _build() -> void:
 		buttons.append(b)
 	selected = clampi(selected, 0, maxi(0, entries.size() - 1))
 	_highlight()
+
+
+## Icoon uit ring_icons.png (7 x 16x16) voor een item/spreuk; null = geen.
+func icon_for(e: Dictionary) -> Texture2D:
+	var sheet := SomFx.tex(SomData.UI_RING_ICONS)
+	if sheet == null:
+		return null
+	var id := str(e.get("id", ""))
+	var idx := int(SomData.RING_ICON.get(id, -1))
+	if idx < 0 and str(e.get("kind", "")) == "spell" and str(GameData.SPELLS.get(id, {}).get("type", "")) == "damage":
+		idx = SomData.RING_ICON_DAMAGE
+	if idx < 0:
+		return null
+	var a := AtlasTexture.new()
+	a.atlas = sheet
+	a.region = Rect2(idx * 16, 0, 16, 16)
+	return a
 
 
 func _highlight() -> void:

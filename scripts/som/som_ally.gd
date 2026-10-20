@@ -9,6 +9,7 @@ extends CharacterBody2D
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomMove := preload("res://scripts/som/som_move.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
+const SomFx := preload("res://scripts/som/som_fx.gd")
 const DIR_ROW := {Vector2i.DOWN: 0, Vector2i.LEFT: 1, Vector2i.RIGHT: 2, Vector2i.UP: 3}
 const WALK_CYCLE := [1, 0, 2, 0]
 
@@ -49,6 +50,8 @@ func setup(p_arena: Node, id: String, p_slot: int) -> void:
 
 ## Andere held in dit lichaam (bij wisselen van besturing).
 func set_hero(id: String) -> void:
+	SomFx.set_ko(self, arena.pose_tex(hero_id, "ko"), false)
+	state = "follow"
 	hero_id = id
 	name = "Ally_" + id
 	var tex: Texture2D = arena.sheet_for(id)
@@ -83,12 +86,16 @@ func formation_point() -> Vector2:
 
 func tick(delta: float) -> void:
 	if not alive():
+		if state != "ko":
+			var ko: Texture2D = arena.pose_tex(hero_id, "ko")
+			SomFx.set_ko(self, ko, true)
+			if ko == null:
+				sprite.modulate = Color(0.45, 0.45, 0.5, 0.8)
 		state = "ko"
-		sprite.modulate = Color(0.45, 0.45, 0.5, 0.8)
-		sprite.rotation = 0.0
 		return
 	if state == "ko":
 		state = "follow"
+		SomFx.set_ko(self, arena.pose_tex(hero_id, "ko"), false)
 	sprite.modulate = Color.WHITE
 	charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
 	spell_cd -= delta

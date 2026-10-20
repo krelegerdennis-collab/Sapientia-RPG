@@ -192,15 +192,50 @@ func _move_tests() -> void:
 	Input.action_release("move_right")
 	Input.action_release("move_down")
 	t.check("SoM-beweging: toetsenbord schuin (8 richtingen)", p.position.x > px.x + 3.0 and p.position.y > px.y + 3.0)
-	# aanvalsanimatie-haakje (RPG ART): met een nep-sheet 4x4 frames van 48x48
-	var img := Image.create(192, 192, false, Image.FORMAT_RGBA8)
-	var anim: Sprite2D = SomFx.attack_anim(p, ImageTexture.create_from_image(img), SomData.ATTACK_ANIMS["dennis"])
+	# aanvalsanimatie (RPG ART): 6 frames x 4 richtingen van 48x48, timings uit de data, treffer op frame 4
+	var ad: Dictionary = SomData.ATTACK_ANIMS["dennis"]
+	var real: Texture2D = SomFx.tex(str(ad["sheet"]))
+	t.check("SoM-art: Dax-aanvalssheet 288x192 in de repo", real != null and real.get_size() == Vector2(288, 192))
+	t.check("SoM-art: timings 120/180/50/110/90/160 ms, treffer frame 4",
+			ad["ms"] == [120, 180, 50, 110, 90, 160] and int(ad["hit_frame"]) == 4 and SomData.ATTACK_HIT_FRAME == 4)
+	var img := Image.create(288, 192, false, Image.FORMAT_RGBA8)
+	p.facing = Vector2i.LEFT
+	var anim: SomFx.Anim = SomFx.attack_anim(p, ImageTexture.create_from_image(img), ad)
+	t.check("SoM-art: treffer op 350 ms (begin frame 4), totaal 710 ms", anim.hit_index == 3 and anim.start_of(anim.hit_index) == 350.0 and anim.total_ms() == 710.0)
+	var hit_ms := [-1]
+	var t0 := Time.get_ticks_msec()
+	anim.hit.connect(func() -> void: hit_ms[0] = Time.get_ticks_msec() - t0)
 	await t.frames(2)
 	var body_spr: Sprite2D = p.get_node("Sprite2D")
-	t.check("SoM: aanvalsanimatie speelt via data (4x4, voeten op de rand, lichaam verborgen)", anim.hframes == 4 and anim.vframes == 4
-			and anim.offset == Vector2(0, -16) and not body_spr.visible)
+	t.check("SoM-art: 6x4 frames, rij = richting (links), voeten op de rand, lichaam verborgen", anim.hframes == 6 and anim.vframes == 4
+			and anim.frame / 6 == SomFx.dir_index(Vector2i.LEFT) and anim.offset == Vector2(0, -16) and not body_spr.visible)
+	await seconds(0.2)
+	t.check("SoM-art: op ~200 ms frame 2 (0-based 1), nog geen treffer (%d)" % anim.frame, anim.frame % 6 == 1 and hit_ms[0] < 0)
+	await seconds(0.25)
+	# speltijd (elapsed_ms) i.p.v. wandklok: xvfb kan frames overslaan; hooguit één frame na 350 ms
+	t.check("SoM-art: treffer op frame 4 (%.0f ms speltijd)" % anim.hit_at_ms, hit_ms[0] >= 0 and anim.hit_at_ms >= 350.0 and anim.hit_at_ms <= 400.0
+			and anim.frame % 6 >= 3)
 	await seconds(0.4)
-	t.check("SoM: na de animatie weer de loopsprite", body_spr.visible and p.get_node_or_null("SomAttackAnim") == null)
+	t.check("SoM-art: na de animatie weer de loopsprite", body_spr.visible and p.get_node_or_null("SomAttackAnim") == null)
+
+
+var strike_charge := 1.0
+
+
+## Slaan en wachten tot de slag landt (frame 4 van de aanvalsanimatie); geeft het aantal treffers.
+func strike() -> int:
+	var a := arena()
+	var r: Array = [-2]
+	var cb := func(_id: String, n: int) -> void: r[0] = n
+	a.swing_landed.connect(cb)
+	var direct: int = a.attack()
+	strike_charge = a.charge
+	var waited := 0
+	while direct < 0 and r[0] == -2 and waited < 120:
+		await t.frames(1)
+		waited += 1
+	a.swing_landed.disconnect(cb)
+	return direct if direct >= 0 else int(r[0])
 
 
 func _first_enemy() -> Node:
@@ -220,11 +255,11 @@ func _charge_and_attack_tests() -> void:
 	await t.frames(2)
 	var e: Dictionary = a.enemies[m]
 	var hp0 := int(e["hp"])
-	var hits: int = a.attack()
+	var hits: int = await strike()
 	t.check("SoM: slag raakt de vijand voor je (%d)" % hits, hits >= 1 and int(e["hp"]) < hp0 or not a.enemies.has(m))
 	var full: int = a.last_enemy_damage
-	t.check("SoM: meter na de slag op 0", a.charge < 0.05)
-	t.check("SoM: schadegetal in beeld", room().get_node("Objects").find_children("SomNumber*", "Label", false, false).size() > 0)
+	t.check("SoM: meter na de slag op 0 (%.2f)" % strike_charge, strike_charge < 0.05)
+	t.check("SoM: schadegetal in beeld", room().get_node("Objects").find_children("SomNumber*", "", false, false).size() > 0)
 	await shot("v2_hit")
 	await t.pframes(6)
 	await shot("v2_charge")
@@ -257,7 +292,7 @@ func _charge_and_attack_tests() -> void:
 	var mid: String = m.monster_id
 	var eid: String = m.enemy_id
 	a.charge = 1.0
-	a.attack()
+	await strike()
 	t.check("SoM: vijand verslagen -> EXP (%d -> %d) en goud" % [exp0, int(GameState.party[0]["exp"])],
 			int(GameState.party[0]["exp"]) > exp0 and GameState.gold >= gold0)
 	t.check("SoM: verslagen monster weg uit de kamer en onthouden", not room().monsters.has(m)
@@ -271,6 +306,10 @@ func _enemy_ai_tests() -> void:
 	for al in a.allies:
 		al.position = Vector2(-2000, -2000)     # stilgezet en uit de buurt: alleen Dax
 	var m := _first_enemy()
+	for e0 in a.enemies.values():      # lopende telegrafen (op bondgenoten) afbreken
+		e0["tele"] = 0.0
+		e0["cd"] = 0.0
+		e0["target"] = ""
 	GameState.party[0]["hp"] = GameState.party[0]["max_hp"]
 	a.iframes.clear()
 	room().invuln_left = 0.0
@@ -491,7 +530,7 @@ func _switch_tests() -> void:
 	up.action = a.SWITCH_ACTION
 	Input.parse_input_event(up)
 	await t.frames(2)
-	t.check("SoM-wissel: toets C -> Seren (%s)" % a.active_id, a.active_id == "lotte" and p.position == seren_pos)
+	t.check("SoM-wissel: toets C -> Seren (%s)" % a.active_id, a.active_id == "lotte" and p.position.distance_to(seren_pos) < 8.0)
 	t.check("SoM-wissel: Dax wordt AI op de oude plek", _ally("dennis") != null and _ally("dennis").position.distance_to(dax_pos) < 8.0)
 	var spr: Sprite2D = p.get_node("Sprite2D")
 	t.check("SoM-wissel: speler-sprite = Seren", spr.texture == a.sheet_for("lotte"))

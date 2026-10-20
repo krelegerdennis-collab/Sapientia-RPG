@@ -39,14 +39,51 @@ const SWITCH_ORDER: Array[String] = ["dennis", "lotte", "noor"]
 const CAMERA_SMOOTH := 7.0
 ## Lichaamsmidden t.o.v. de node (voeten op +8, 24x32-frame -> midden op -8). Slag/raakpunt rekent hiervandaan.
 const BODY_Y := -6.0
-## AANVALSANIMATIES (RPG ART, HANDOFF_SOM.md). Komt het bestand er, dan speelt het i.p.v. de placeholder-boog.
-## Sheet: 4 rijen (onder, links, rechts, boven) x "frames" kolommen, frame "frame" px, voeten op de onderrand
-## (zelfde anker als de 24x32-loopsheet). Lege/ontbrekende sheet = placeholder.
+## AANVALSANIMATIES van RPG ART (assets/sprites/som/combat/, README van combat_som):
+## sheet 288x192 = 6 kolommen x 4 rijen (onder, links, rechts, boven), frames 48x48; het 24x32-loopframe
+## zit op (12,16) in elke cel, dus de voeten liggen op de onderrand (= de voetlijn van de loopsheet).
+## "ms" = duur per frame; de treffer valt aan het BEGIN van frame "hit_frame" (1-based).
+## Ontbreekt de sheet: magenta placeholder-boog en de treffer valt meteen.
+const ATTACK_FRAME := [48, 48]
+const ATTACK_MS: Array[int] = [120, 180, 50, 110, 90, 160]
+const ATTACK_HIT_FRAME := 4
 const ATTACK_ANIMS := {
-	"dennis": {"sheet": "res://assets/sprites/som/aanval/dax_aanval.png", "frame": [48, 48], "frames": 4, "fps": 16.0},
-	"noor": {"sheet": "res://assets/sprites/som/aanval/vesper_aanval.png", "frame": [48, 48], "frames": 4, "fps": 16.0},
-	"lotte": {"sheet": "res://assets/sprites/som/aanval/seren_aanval.png", "frame": [48, 48], "frames": 4, "fps": 16.0},
+	"dennis": {"sheet": "res://assets/sprites/som/combat/dax_attack.png", "frame": ATTACK_FRAME, "frames": 6, "ms": ATTACK_MS, "hit_frame": ATTACK_HIT_FRAME},
+	"noor": {"sheet": "res://assets/sprites/som/combat/vesper_attack.png", "frame": ATTACK_FRAME, "frames": 6, "ms": ATTACK_MS, "hit_frame": ATTACK_HIT_FRAME},
+	"lotte": {"sheet": "res://assets/sprites/som/combat/seren_attack.png", "frame": ATTACK_FRAME, "frames": 6, "ms": ATTACK_MS, "hit_frame": ATTACK_HIT_FRAME},
 }
+## Overige held-poses (48x48, zelfde anker): hurt = 4 kolommen (onder, links, rechts, boven) x 1 rij,
+## ko = 1 frame, cast = 3 kolommen x 4 rijen (frame 1 200 ms, daarna 2-3 in een lus van 120 ms).
+const HERO_POSES := {
+	"dennis": {"hurt": "res://assets/sprites/som/combat/dax_hurt.png", "ko": "res://assets/sprites/som/combat/dax_ko.png"},
+	"noor": {"hurt": "res://assets/sprites/som/combat/vesper_hurt.png", "ko": "res://assets/sprites/som/combat/vesper_ko.png",
+			"cast": "res://assets/sprites/som/combat/vesper_cast.png"},
+	"lotte": {"hurt": "res://assets/sprites/som/combat/seren_hurt.png", "ko": "res://assets/sprites/som/combat/seren_ko.png",
+			"cast": "res://assets/sprites/som/combat/seren_cast.png"},
+}
+const HURT_TIME := 0.25
+const CAST_MS: Array[int] = [200, 120, 120, 120, 120]
+## Vijand-sheets (assets/sprites/som/monsters/<enemy>_attack|hurt|death.png, 16x16 frames):
+## attack 3 kolommen (opladen, uithaal, terug) x 4 rijen; hurt 4 kolommen (richtingen); death 4 frames.
+## Duur aanval: opladen = de telegraaf (TELEGRAPH), uithaal 110 ms, terug 300 ms. Dood: 4 x 100 ms.
+const MONSTER_SHEET_DIR := "res://assets/sprites/som/monsters/"
+const MONSTER_STRIKE_MS := 110
+const MONSTER_RETURN_MS := 300
+const MONSTER_DEATH_MS := 100
+## FX/UI (assets/sprites/som/fx|ui). Ontbreekt een bestand: de placeholder in code.
+const FX_SLASH := "res://assets/sprites/som/fx/fx_slash.png"          # 128x32, 4 frames 32x32
+const FX_SPARK := "res://assets/sprites/som/fx/fx_hit_spark.png"      # 64x16, 4 frames 16x16
+const FX_TELEGRAPH := "res://assets/sprites/som/fx/fx_telegraph.png"  # 8x8
+const UI_DIGITS := "res://assets/sprites/som/ui/dmg_digits.png"       # 50x21: rijen wit, rood, groen; cijfers 5x7
+const UI_GAUGE_BAR := "res://assets/sprites/som/ui/gauge_bar.png"     # 18x4
+const UI_GAUGE_FILL := "res://assets/sprites/som/ui/gauge_fill.png"   # 16x2 (op (1,1))
+const UI_GAUGE_GLINT := "res://assets/sprites/som/ui/gauge_full_glint.png"  # 36x4, 2 frames
+const UI_HUD_FRAME := "res://assets/sprites/som/ui/hud_frame.png"     # 72x20 per held
+const UI_RING_BG := "res://assets/sprites/som/ui/ring_bg.png"         # 180x110
+const UI_RING_ICONS := "res://assets/sprites/som/ui/ring_icons.png"   # 112x16, 7 iconen
+## Icoon-index in ring_icons.png per item/spreuk-id.
+const RING_ICON := {"drankje": 0, "kruid": 1, "toverwater": 2, "genees": 4, "vuur": 5, "bliksem": 6}
+const RING_ICON_DAMAGE := 3      # 'spark': elke andere aanvalsspreuk
 ## Seconden om de wapenmeter van 0 tot 100% te vullen.
 const CHARGE_TIME := 0.5
 ## Schade bij 0% lading (lineair naar 1.0 bij 100%).

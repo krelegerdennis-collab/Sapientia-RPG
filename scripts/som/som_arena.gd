@@ -20,6 +20,8 @@ signal player_hit(damage: int)
 signal member_down(hero_id: String)
 signal player_defeated
 signal hero_switched(hero_id: String)
+## Slag geland (bij art: aan het begin van frame SomData.ATTACK_HIT_FRAME), met het aantal treffers.
+signal swing_landed(hero_id: String, hits: int)
 signal ring_opened
 signal ring_closed
 signal action_resolved(text: String)
@@ -130,6 +132,11 @@ static func _ensure_actions() -> void:
 		var ev := InputEventKey.new()
 		ev.physical_keycode = pair[1]
 		InputMap.action_add_event(pair[0], ev)
+
+
+## Held-pose van RPG ART ("hurt", "ko", "cast"); null = ontbreekt.
+func pose_tex(id: String, kind: String) -> Texture2D:
+	return SomFx.tex(str(SomData.HERO_POSES.get(id, {}).get(kind, "")))
 
 
 func sheet_for(id: String) -> Texture2D:
@@ -338,14 +345,23 @@ func attack() -> int:
 	return _swing(active_id, player, mult)
 
 
-## Slag van een held-node (speler of bondgenoot) in zijn kijkrichting.
+## Slag van een held-node (speler of bondgenoot) in zijn kijkrichting. Met een aanvalssheet valt de treffer
+## pas op het hit-frame (SomFx.Anim 'hit'); dan geeft dit -1 terug en volgt swing_landed. Zonder art: meteen.
 func _swing(id: String, n: Node2D, mult: float) -> int:
+	if attack_texs.has(id):
+		var anim: Node = SomFx.attack_anim(n, attack_texs[id], SomData.ATTACK_ANIMS[id])
+		anim.hit.connect(func() -> void: _land(id, n, mult), CONNECT_ONE_SHOT)
+		return -1
+	return _land(id, n, mult)
+
+
+func _land(id: String, n: Node2D, mult: float) -> int:
+	if not is_instance_valid(n) or not is_alive(id):
+		swing_landed.emit(id, 0)
+		return 0
 	var f := Vector2(n.facing)
 	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.ATTACK_OFFSET
-	if attack_texs.has(id):
-		SomFx.attack_anim(n, attack_texs[id], SomData.ATTACK_ANIMS[id])
-	else:
-		SomFx.slash(room.get_node("Objects"), point, f)
+	SomFx.slash(room.get_node("Objects"), point, f)
 	var hits := 0
 	var atk := float(GameState.effective_stat(member(id), "atk"))
 	for m in enemies.keys():
@@ -356,6 +372,7 @@ func _swing(id: String, n: Node2D, mult: float) -> int:
 			last_attacker = id
 			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), n.facing)
 			hits += 1
+	swing_landed.emit(id, hits)
 	return hits
 
 
@@ -391,10 +408,13 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i) -> void:
 	e["tele"] = 0.0          # geraakt = telegraaf afgebroken
 	last_enemy_damage = dmg
 	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), Color(1, 1, 1))
+	SomFx.spark(room.get_node("Objects"), center_of(m))
 	enemy_hit.emit(m, dmg)
 	if int(e["hp"]) <= 0:
 		_defeat_enemy(m)
 		return
+	e["tele"] = 0.0
+	_monster_pose(m, e, "hurt", 0, 0.2)
 	_knockback(m, dir)
 
 
@@ -440,12 +460,83 @@ func _defeat_enemy(m: Node) -> void:
 	enemy_defeated.emit(m, gained_exp, gained_gold, got)
 	m.set_process(false)
 	m.collision_layer = 0
+	var dt := _monster_sheet(m, "death")
+	if dt and m.sprite:
+		# doodgaan-sheet: 4 frames x MONSTER_DEATH_MS
+		_restore_monster(m, e)
+		m.sprite.texture = dt
+		m.sprite.hframes = 4
+		m.sprite.vframes = 1
+		m.sprite.modulate = Color.WHITE
+		var tw := m.create_tween()
+		for f in 4:
+			tw.tween_callback(func() -> void: m.sprite.frame = f)
+			tw.tween_interval(SomData.MONSTER_DEATH_MS / 1000.0)
+		tw.tween_callback(m.queue_free)
+		return
 	var tw := m.create_tween()
 	tw.tween_property(m, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(m.queue_free)
 
 
 # ---------------------------------------------------------------- vijanden
+## Sheet van RPG ART voor dit monster ("attack", "hurt", "death"); null = geen (of geen 1x1-monster).
+func _monster_sheet(m: Node, kind: String) -> Texture2D:
+	if m.placeholder or m.size != Vector2i.ONE:
+		return null
+	return SomFx.tex(SomData.MONSTER_SHEET_DIR + str(m.enemy_id) + "_" + kind + ".png")
+
+
+## Pose tonen voor 'sec' seconden. attack: kolom col (0 opladen, 1 uithaal, 2 terug) in de rij van de
+## kijkrichting; hurt: kolom = richting. Het monster staat zolang stil (zijn eigen loopanimatie uit).
+func _monster_pose(m: Node, e: Dictionary, kind: String, col: int, sec: float) -> void:
+	var t := _monster_sheet(m, kind)
+	if t == null or m.sprite == null:
+		return
+	if not e.has("orig"):
+		e["orig"] = [m.sprite.texture, m.sprite.hframes, m.sprite.vframes]
+	m.set_process(false)
+	m.sprite.texture = t
+	var d := SomFx.dir_index(m.facing)
+	if kind == "attack":
+		m.sprite.hframes = 3
+		m.sprite.vframes = 4
+		m.sprite.frame = d * 3 + clampi(col, 0, 2)
+	else:
+		m.sprite.hframes = 4
+		m.sprite.vframes = 1
+		m.sprite.frame = d
+	e["pose"] = kind
+	e["pose_col"] = col
+	e["pose_t"] = sec
+
+
+func _restore_monster(m: Node, e: Dictionary) -> void:
+	if e.has("orig") and m.sprite:
+		var o: Array = e["orig"]
+		m.sprite.texture = o[0]
+		m.sprite.hframes = o[1]
+		m.sprite.vframes = o[2]
+		e.erase("orig")
+		m._update_frame()
+	e["pose"] = ""
+	e["pose_t"] = 0.0
+	if m.room != null:
+		m.set_process(true)
+
+
+func _pose_tick(m: Node, e: Dictionary, delta: float) -> void:
+	if str(e.get("pose", "")) == "" or float(e.get("pose_t", 0.0)) <= 0.0:
+		return
+	e["pose_t"] = float(e["pose_t"]) - delta
+	if float(e["pose_t"]) > 0.0:
+		return
+	if str(e["pose"]) == "attack" and int(e["pose_col"]) == 1:
+		_monster_pose(m, e, "attack", 2, SomData.MONSTER_RETURN_MS / 1000.0)
+	else:
+		_restore_monster(m, e)
+
+
 ## Dichtstbijzijnde levende held (id) voor een vijand.
 func _target_for(m: Node) -> String:
 	var best := ""
@@ -464,6 +555,7 @@ func _enemy_ai(m: Node, delta: float) -> void:
 	var e: Dictionary = enemies[m]
 	if float(e["flash"]) > 0.0:
 		e["flash"] = float(e["flash"]) - delta
+	_pose_tick(m, e, delta)
 	if m.is_stunned():
 		_tint(m, e)
 		return
@@ -478,12 +570,16 @@ func _enemy_ai(m: Node, delta: float) -> void:
 		e["tele"] = float(e["tele"]) - delta
 		if float(e["tele"]) <= 0.0:
 			e["cd"] = SomData.ATTACK_COOLDOWN
+			_monster_pose(m, e, "attack", 1, SomData.MONSTER_STRIKE_MS / 1000.0)
 			if dist <= SomData.ENEMY_REACH + 8.0 * (maxf(m.size.x, m.size.y) - 1.0):
 				hit_member(tid, int(e["atk"]))
 	elif float(e["cd"]) > 0.0:
 		e["cd"] = float(e["cd"]) - delta
 	elif dist <= SomData.ENEMY_REACH:
 		e["tele"] = SomData.TELEGRAPH
+		var to := body_of(tid) - center_of(m)
+		m.facing = Vector2i(signi(roundi(to.x)), 0) if absf(to.x) >= absf(to.y) else Vector2i(0, signi(roundi(to.y)))
+		_monster_pose(m, e, "attack", 0, SomData.TELEGRAPH + 0.05)
 		SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), SomData.TELEGRAPH)
 	if dist > SomData.ENEMY_REACH - 6.0 and float(e["tele"]) <= 0.0:
 		e["chase"] = float(e["chase"]) - delta
@@ -538,6 +634,9 @@ func hit_member(id: String, atk: int) -> void:
 	iframes[id] = SomData.PLAYER_IFRAMES
 	if id == active_id:
 		room.start_invuln(SomData.PLAYER_IFRAMES)
+	var hurt := pose_tex(id, "hurt")
+	if hurt and node_of(id) and int(h["hp"]) > 0:
+		SomFx.hurt_pose(node_of(id), hurt, SomData.HURT_TIME)
 	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(1, 0.4, 0.4))
 	player_hit.emit(dmg)
 	if int(h["hp"]) <= 0:
@@ -560,6 +659,7 @@ func _member_ko(id: String) -> void:
 func _party_down() -> void:
 	down = true
 	player.input_locked = true
+	SomFx.set_ko(player, pose_tex(active_id, "ko"), true)
 	_say(SomData.TXT_FALLEN % "The party")
 	player_defeated.emit()
 	await get_tree().create_timer(1.2).timeout
@@ -643,6 +743,7 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) ->
 		if targets.is_empty():
 			return SomData.TXT_NO_TARGET
 		caster["mp"] = int(caster["mp"]) - cost
+		_cast_pose(caster_id)
 		for m in targets:
 			var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {"s": enemies[m]["data"]})
 			last_attacker = caster_id
@@ -655,11 +756,18 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) ->
 		if t.is_empty():
 			t = caster
 		caster["mp"] = int(caster["mp"]) - cost
+		_cast_pose(caster_id)
 		var amt := roundi(SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {}))
 		var got := PartyActions.restore(t, amt, 0)
 		SomFx.number(room.get_node("Objects"), body_of(str(t.get("id", ""))) + Vector2(0, -22), "+%d" % got.x, Color(0.4, 1, 0.5))
 		return "%s casts %s! %s recovers %d HP." % [caster.get("name", ""), sp.get("name", spell_id), t.get("name", ""), got.x]
 	return SomData.TXT_MISS_BUFF % str(sp.get("name", spell_id))
+
+
+func _cast_pose(id: String) -> void:
+	var t := pose_tex(id, "cast")
+	if t and node_of(id):
+		SomFx.cast_anim(node_of(id), t)
 
 
 ## Ringmenu-inhoud voor de bestuurde held: items die in het veld werken, en zijn eigen spreuken.
