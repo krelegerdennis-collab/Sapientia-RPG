@@ -264,6 +264,11 @@ var ui_theme: Theme
 
 
 func _ready() -> void:
+	# TIJDELIJK CI-DIAG (#141)
+	var _d := DirAccess.get_files_at("res://.godot/imported")
+	var _ww := Array(_d).filter(func(f): return f.begins_with("world_warper") or f.ends_with("_v8.png-") or "_v8" in f)
+	print("CIDIAG imported=", _d.size(), " ww/v8=", _ww)
+	print("CIDIAG ww_exists=", ResourceLoader.exists("res://assets/sprites/archief2/world_warper.png"))
 	ui_theme = load("res://assets/theme.tres")
 	preload("res://scripts/ui/ui_style.gd").apply_to_theme(ui_theme)
 	_ensure_input_actions()
