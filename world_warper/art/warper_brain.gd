@@ -55,6 +55,8 @@ var vel := Vector2.ZERO
 var alt := CRUISE_ALT
 var bounds := Rect2(0, 0, 1024, 1024)
 var view := Rect2()                ## leeg = geen camera-voorkeur
+## true = zwerft over de hele wereldkaart en mag gerust buiten beeld vliegen (geen camera-klem).
+var global_roam := true
 var player_pos := Vector2(INF, INF)
 ## Callable(Vector2) -> bool: mag hier geland worden? Leeg = overal.
 var landable: Callable
@@ -266,7 +268,7 @@ func _try_land() -> bool:
 	for i in LAND_TRIES:
 		var kegel := LAND_CONE if i < LAND_TRIES / 2 else LAND_CONE * 2.0
 		var p := _land_candidate(kegel if i < LAND_TRIES - 4 else PI)
-		if view.has_area() and not view.grow_individual(-LAND_VIEW_INSET, -LAND_VIEW_INSET - HULL_LIFT * 2.0,
+		if not global_roam and view.has_area() and not view.grow_individual(-LAND_VIEW_INSET, -LAND_VIEW_INSET - HULL_LIFT * 2.0,
 				-LAND_VIEW_INSET, -LAND_VIEW_INSET * 0.5).has_point(p):
 			continue
 		if not bounds.grow(-EDGE_MARGIN).has_point(p) or player_pos.distance_to(p) < LAND_PLAYER_MIN:
@@ -308,10 +310,10 @@ func _enter(s: State) -> void:
 			target = _random_waypoint()
 
 
-## Willekeurig punt in een willekeurige richting, binnen kaart (en liefst rond het beeld).
+## Willekeurig punt in een willekeurige richting, binnen de kaart (global_roam: hele kaart, ook buiten beeld).
 func _waypoint_area() -> Rect2:
 	var area := bounds.grow(-EDGE_MARGIN)
-	if view.has_area():
+	if not global_roam and view.has_area():
 		# het schip hangt CRUISE_ALT + romp boven zijn grondpunt: beeld voor het grondpunt zakt mee
 		var v := view.grow_individual(VIEW_PAD, -8.0, VIEW_PAD, -8.0)
 		v.position.y += CRUISE_ALT + HULL_LIFT
