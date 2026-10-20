@@ -332,6 +332,7 @@ func _ready() -> void:
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
+			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
@@ -1527,6 +1528,7 @@ func enter_map(path: String) -> void:
 			dungeon100_end_run(true)
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
+	Sessielog.kaart(path)      # playtest-logboek (no-op als het uit staat)
 	if path.ends_with("/rustkamer.tscn"):
 		PartyBenchLib.normaliseer()
 
@@ -1537,6 +1539,7 @@ func change_map(path: String, spawn_name: String) -> void:
 	if changing_map or in_battle:
 		return
 	changing_map = true
+	Sessielog.warp(current_map, path, spawn_name)
 	pending_spawn = spawn_name
 	has_return_point = false
 	entry_kind = "door"
@@ -1603,6 +1606,7 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 		return
 	practice_battle = practice
 	in_battle = true
+	Sessielog.gevecht_start(enemies, boss, terrain, from_tile)
 	pending_enemies = enemies
 	pending_boss = boss
 	pending_tier = 0 if boss else tier
@@ -1621,6 +1625,7 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 ## of naar het begin van het spel (game over).
 func end_battle(result: String) -> void:
 	result = archief2_verwerk_einde(result)
+	Sessielog.gevecht_eind(result)
 	var oefening := practice_battle
 	practice_battle = false
 	last_battle_result = result
@@ -1629,8 +1634,11 @@ func end_battle(result: String) -> void:
 	steps_until_encounter_possible = GameData.SAFE_STEPS
 	pending_tutorial = {}
 	var target := return_map if return_map != "" else START_MAP
+	var respawn_soort := ""      # playtest-logboek: hoe je na verliezen weer opstaat
 	if result == "lose":
 		map_monster_battle = {}
+		respawn_soort = "oefening" if oefening else "dungeon100" if (dungeon100_floor > 0 or dungeon100_run_active()) \
+				else "checkpoint" if has_checkpoint() else "start"
 		if oefening:
 			# Terug in de kamer, genezen. Geen checkpoint-rollback en geen game-over.
 			_full_heal()
@@ -1669,6 +1677,9 @@ func end_battle(result: String) -> void:
 					var kid := KernData.fragment_for_boss(str(e))
 					if kid != "" and grant_kern(kid, str(e)):
 						pending_kern_absorb = kid
+	if result == "lose":
+		Sessielog.dood("practice" if oefening else "boss" if pending_boss else "battle")
+		Sessielog.respawn(target, respawn_soort)
 	await Transition.fade_out()
 	in_battle = false
 	_go_to_scene(target)
