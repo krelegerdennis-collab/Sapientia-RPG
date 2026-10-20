@@ -124,6 +124,7 @@ func _build() -> void:
 	var legend := DungeonRooms.legend_of(room)
 	var floor_tiles: Array = room.get("floor_tiles", DungeonRooms.FLOOR)
 	var layout: Array = room["layout"]
+	var scatter4: bool = room_id in DungeonRooms.ARCHIEF_SCATTER_ROOMS and not room.has("floor_tiles")
 	# v0.23: vaste grondlaag (tegelnummers) als de kamer die heeft (Archief 2 v2-deco); anders willekeurige vloer
 	var vast: Array = room.get("ground", Archief2Ground.GROUND.get(room_id, []))
 	var exit_cells := {}           # sleutel in "exits" -> Array[Vector2i]
@@ -136,7 +137,11 @@ func _build() -> void:
 				continue
 			var n: int = legend[ch]
 			if ch == ".":
-				n = floor_variant(x, y, floor_tiles)
+				# Archives v8: archief-kamers zonder eigen "floor_tiles" -> vloer 0-3 verstrooid (vaste hash)
+				if scatter4:
+					n = DungeonRooms.archief_floor_at(x, y, layout)
+				else:
+					n = floor_variant(x, y, floor_tiles)
 			if y < vast.size() and x < (vast[y] as Array).size():
 				n = int(vast[y][x])
 			_cells[Vector2i(x, y)] = n

@@ -82,6 +82,8 @@ func _run() -> void:
 	await _leven_tests()
 	print("=== Deel F: uitgang-warpers First Archive ===")
 	await _warper_tests()
+	print("=== Deel G: Archives v8 vloer-verstrooiing 0-3 ===")
+	await _scatter_tests()
 	print("ARCHIEFTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -776,6 +778,73 @@ func _warper_tests() -> void:
 		eind_wp = eind_room.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
 	check("eind-warper in de Golemhal op %s" % [eind], eind_wp != null and eind_wp.role == "eind"
 			and eind_wp.waarschuwt() and _warper_tile(eind_wp) == eind)
+
+
+## Deel G: in archief_ingang t/m archief_golemhal wordt '.' bij het laden vloer 0-3 via
+## ((x*73856093) ^ (y*19349663)) % 4: elke keer gelijk, en de beloopbaarheid blijft gelijk aan vloer 0.
+func _scatter_tests() -> void:
+	check("G: vloer 0-3 zijn niet massief en niet monstervrij (zelfde botsing als 0)",
+			DR.ARCHIEF_FLOOR_SCATTER.all(func(n): return not DR.is_solid(n, "archief_grijs") and not DR.is_no_monster(n, "archief_grijs")))
+	var ts: TileSet = DungeonRoom.tileset(true, "archief_grijs")
+	var src: TileSetAtlasSource = ts.get_source(0)
+	var poly_ok := true
+	for n in DR.ARCHIEF_FLOOR_SCATTER:
+		if src.get_tile_data(Vector2i(n, 0), 0).get_collision_polygons_count(0) != 0:
+			poly_ok = false
+	check("G: tileset archief_grijs: geen botsingsvorm op 0-3", poly_ok)
+	check("G: hash is vast: (5,7) = %d, (0,0) = 0, twee keer gelijk" % DR.archief_floor_scatter(5, 7),
+			DR.archief_floor_scatter(0, 0) == 0 and DR.archief_floor_scatter(5, 7) == absi((5 * 73856093) ^ (7 * 19349663)) % 4
+			and DR.archief_floor_scatter(13, 4) == DR.archief_floor_scatter(13, 4))
+	# macro-modus: vrij 2x2-blok met even blokhash -> ARCHIEF_MACRO_TILES (LB, RB, LO, RO), anders per tegel
+	var open4 := [".....", ".....", ".....", "....."]
+	var bx := 0
+	while absi((bx * 73856093) ^ (0 * 19349663)) % 2 != 0:
+		bx += 1
+	var mt: Array = DR.ARCHIEF_MACRO_TILES
+	check("G: macroblok %d,0 = %s in volgorde LB/RB/LO/RO" % [bx, str(mt)], bx < 2
+			and DR.archief_floor_at(bx * 2, 0, open4) == mt[0] and DR.archief_floor_at(bx * 2 + 1, 0, open4) == mt[1]
+			and DR.archief_floor_at(bx * 2, 1, open4) == mt[2] and DR.archief_floor_at(bx * 2 + 1, 1, open4) == mt[3])
+	var blocked := [".#...", ".....", ".....", "....."]
+	check("G: geblokkeerd 2x2-blok -> per-tegel-hash", DR.archief_floor_at(0, 0, blocked) == DR.archief_floor_scatter(0, 0)
+			and DR.archief_floor_at(1, 1, blocked) == DR.archief_floor_scatter(1, 1))
+	check("G: tile-modus = per-tegel-hash", DR.archief_floor_at(bx * 2, 0, open4, "tile") == DR.archief_floor_scatter(bx * 2, 0))
+	var gezien := {}
+	var first_ingang := {}
+	for rid in DR.ARCHIEF_SCATTER_ROOMS + ["archief_ingang"]:
+		var room: Dictionary = DR.room(rid)
+		var spawn: String = (room["spawns"] as Dictionary).keys()[0]
+		var scene_name: String = str(rid).to_pascal_case()
+		var s := await _enter_map("res://scenes/maps/%s.tscn" % rid, spawn, scene_name)
+		if s == null:
+			continue
+		var cells: Dictionary = s._cells.duplicate()
+		var legend := DR.legend_of(room)
+		var vast_ok := true
+		var walk_ok := true
+		var layout: Array = room["layout"]
+		var scatter: bool = not room.has("floor_tiles")
+		for y in layout.size():
+			for x in (layout[y] as String).length():
+				var ch: String = layout[y][x]
+				var t := Vector2i(x, y)
+				var basis: int = 0 if ch == "." else int(legend[ch])
+				if ch == "." and scatter and not room.has("ground"):
+					if cells[t] != DR.archief_floor_at(x, y, layout):
+						vast_ok = false
+					gezien[cells[t]] = true
+				if s.is_wall(t) != DR.is_solid(basis):
+					walk_ok = false
+		check("G: %s: '.' = hash-variant 0-3%s" % [rid, "" if scatter else " (eigen floor_tiles, ongemoeid)"], vast_ok)
+		check("G: %s: beloopbaarheid gelijk aan de lay-out met '.' = 0" % rid, walk_ok)
+		if rid == "archief_ingang":
+			if first_ingang.is_empty():
+				first_ingang = cells
+				await screenshot("archief_v8_ingang")
+			else:
+				check("G: archief_ingang twee keer geladen = identieke tegels", cells == first_ingang)
+		elif rid in ["archief_v2_kastenzaal", "archief_v3_zuilenhal", "archief_golemhal"]:
+			await screenshot("archief_v8_" + str(rid).trim_prefix("archief_"))
+	check("G: alle 4 varianten komen voor (%s)" % str(gezien.keys()), gezien.size() == 4)
 
 
 func _enter_map(path: String, spawn_name: String, scene_name: String) -> Node:

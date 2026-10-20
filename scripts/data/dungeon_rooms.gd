@@ -219,6 +219,49 @@ const SOLID := [12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 
 const NO_MONSTER := [30, 43, 44, 45, 48, 49, 50, 51, 52, 53, 57, 58, 62, 63, 64]
 ## Vloervarianten voor '.' (vloer A, B, C).
 const FLOOR := [0, 1, 2]
+## Archives v8 (RPG ART): in de Vergeten Archieven (archief_ingang t/m archief_golemhal) wordt '.' bij het
+## laden verstrooid over vloer 0-3 met een vaste hash van de tegelpositie (elke keer hetzelfde).
+## 0-3 zijn allemaal beloopbaar en niet monstervrij: botsing verandert niet.
+const ARCHIEF_FLOOR_SCATTER := [0, 1, 2, 3]
+const ARCHIEF_SCATTER_ROOMS := ["archief_ingang", "archief_v1_gang", "archief_v2_kastenzaal",
+	"archief_v2_leeszaal", "archief_v2_trapzaal", "archief_v3_zuilenhal", "archief_v3_gang",
+	"archief_v4_wachtersgang", "archief_v4_voorhal", "archief_bibliotheek", "archief_golemhal"]
+
+
+## Vaste vloervariant 0-3 voor (x, y): ((x*73856093) ^ (y*19349663)) % 4.
+static func archief_floor_scatter(x: int, y: int) -> int:
+	return int(ARCHIEF_FLOOR_SCATTER[absi((x * 73856093) ^ (y * 19349663)) % 4])
+
+
+## Verstrooi-modus van de archief-vloer: "tile" = per tegel 0-3, "macro" = 32x32-blokken (2x2) waar het kan.
+const ARCHIEF_SCATTER_MODE := "macro"
+## Tegelnummers van één 32x32 macroblok in volgorde [linksboven, rechtsboven, linksonder, rechtsonder].
+## Placeholder 0,1,2,3 tot RPG ART echte macrotegels levert: alleen deze constante aanpassen.
+const ARCHIEF_MACRO_TILES := [0, 1, 2, 3]
+
+
+## Vloertegel voor '.' op (x, y) in een archief-lay-out. Macro-modus: blok = (x>>1, y>>1); als alle 4
+## tegels van dat blok '.' zijn en de hash van (x>>1, y>>1) even is -> macroblok, anders per-tegel-hash.
+static func archief_floor_at(x: int, y: int, layout: Array, mode := ARCHIEF_SCATTER_MODE) -> int:
+	if mode == "macro":
+		var bx := x >> 1
+		var by := y >> 1
+		if absi((bx * 73856093) ^ (by * 19349663)) % 2 == 0 and _block_free(bx, by, layout):
+			return int(ARCHIEF_MACRO_TILES[(y & 1) * 2 + (x & 1)])
+	return archief_floor_scatter(x, y)
+
+
+static func _block_free(bx: int, by: int, layout: Array) -> bool:
+	for dy in 2:
+		var y := by * 2 + dy
+		if y >= layout.size():
+			return false
+		var row: String = layout[y]
+		for dx in 2:
+			var x := bx * 2 + dx
+			if x >= row.length() or row[x] != ".":
+				return false
+	return true
 ## Terrein van alle tegels (custom data "terrain"): bepaalt de gevechtsachtergrond
 ## (game_data.gd TERRAIN_BACKDROP: "archief" -> de bibliotheek). Geen random encounters:
 ## "archief" staat niet in ENCOUNTER_RATES en de kamer heeft encounters = false.
