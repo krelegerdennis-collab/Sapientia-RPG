@@ -14,7 +14,7 @@
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="8_qu7f7"]
 [ext_resource type="Texture2D" path="res://assets/sprites/buiten/put.png" id="9_3y0t8"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="9_7hk3y"]
-[ext_resource type="Texture2D" path="res://assets/sprites/wachter.png" id="10_1m7ox"]
+[ext_resource type="Texture2D" path="res://assets/sprites/som/wilgendal/npcs/oude_man.png" id="10_1m7ox"]
 [ext_resource type="Texture2D" path="res://assets/sprites/buiten/kist.png" id="10_muq5l"]
 
 [node name="Wilgendal" type="Node2D"]

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://l3nfpqo3pgxc"
-path="res://.godot/imported/dax_wm2.png-cb8691f6d2a30e182eb0f12b3d711528.ctex"
+uid="uid://cknymhwuyp66y"
+path="res://.godot/imported/marit.png-8094361ae4f3f39cf92ca9db0d882e4c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/som/kaart/dax_wm2.png"
-dest_files=["res://.godot/imported/dax_wm2.png-cb8691f6d2a30e182eb0f12b3d711528.ctex"]
+source_file="res://assets/sprites/som/wilgendal/npcs/marit.png"
+dest_files=["res://.godot/imported/marit.png-8094361ae4f3f39cf92ca9db0d882e4c.ctex"]
 
 [params]
 
