@@ -8,11 +8,14 @@ enum State { CRUISE, BURST, HOVER, DESCEND, LANDED, ASCEND }
 
 # --- Tunables ---
 const CRUISE_SPEED := 96.0        ## px/s (speler loopt 64, rent 128)
+const CRUISE_VARIANCE := Vector2(0.8, 1.2)  ## per waypoint iets sneller/trager
 const BURST_SPEED := 260.0        ## topsnelheid tijdens een burst
 const HOVER_SPEED := 14.0
 const STEER_ACCEL := 150.0        ## px/s^2 bijsturen in cruise (bepaalt de draaicirkel)
 const BURST_ACCEL := 420.0
-const BURST_TIME := Vector2(1.2, 2.0)      ## min/max seconden
+const BURST_BRAKE := 1.4          ## px/s extra snelheid per px afstand tot het doel
+const BURST_CONE := 0.8           ## burst schiet ongeveer vooruit (radialen)
+const BURST_TIME := Vector2(1.4, 2.4)      ## min/max seconden
 const HOVER_TIME := Vector2(1.5, 3.5)
 const LANDED_TIME := Vector2(2.5, 5.0)
 const CRUISE_ALT := 34.0          ## px boven de grond
@@ -23,7 +26,7 @@ const ASCEND_TIME := 1.1
 const WAYPOINT_DIST := Vector2(110.0, 320.0)
 const ARRIVE_RADIUS := 14.0
 const EDGE_MARGIN := 24.0
-const VIEW_PAD := 48.0           ## waypoints liefst binnen beeld + deze rand
+const VIEW_PAD := 24.0           ## waypoints liefst binnen beeld + deze rand
 const LAND_COOLDOWN := 12.0       ## minimaal tussen twee landingen
 const LAND_FORCE_AFTER := 25.0    ## na zolang zonder landing: zeker landen
 const LAND_PLAYER_MIN := 56.0     ## nooit vlak bij de speler landen
@@ -37,6 +40,7 @@ const LAND_VIEW_INSET := 36.0    ## landen liefst goed in beeld
 const P_BURST := 0.24
 const P_HOVER := 0.16
 const P_LAND := 0.25
+const MAX_PLAIN_LEGS := 3         ## hoogstens zoveel gewone cruise-stukken achter elkaar
 
 var rng := RandomNumberGenerator.new()
 var state: State = State.CRUISE
@@ -57,6 +61,8 @@ var bursts := 0
 var landings := 0
 var _from_alt := 0.0
 var _approach_t := 0.0
+var _cruise_v := CRUISE_SPEED
+var _plain_legs := 0
 
 
 func setup(seed_value: int, area: Rect2, start: Vector2) -> void:
@@ -64,7 +70,7 @@ func setup(seed_value: int, area: Rect2, start: Vector2) -> void:
 	bounds = area
 	pos = _clamp_in(start)
 	alt = CRUISE_ALT
-	since_land = LAND_COOLDOWN * 0.5
+	since_land = LAND_COOLDOWN * 0.75
 	_enter(State.CRUISE)
 
 
@@ -85,13 +91,15 @@ func step(delta: float) -> void:
 	since_land += delta
 	match state:
 		State.CRUISE:
-			_steer(CRUISE_SPEED, STEER_ACCEL, delta)
+			_steer(_cruise_v, STEER_ACCEL, delta)
 			if pos.distance_to(target) < ARRIVE_RADIUS * 3.0 or t_state > 9.0:
 				_pick_next()
 		State.BURST:
 			# ease-in-out: snelheid volgt een sinusboog over de burst
 			var f := clampf(t_state / dur_state, 0.0, 1.0)
 			var top := lerpf(CRUISE_SPEED, BURST_SPEED, sin(f * PI))
+			# op tijd afremmen: geen grote bocht ver buiten beeld
+			top = minf(top, CRUISE_SPEED + pos.distance_to(target) * BURST_BRAKE)
 			_steer(top, BURST_ACCEL, delta)
 			if f >= 1.0 or pos.distance_to(target) < ARRIVE_RADIUS * 2.0:
 				_enter(State.CRUISE)
@@ -156,6 +164,8 @@ func _pick_next() -> void:
 		if _try_land():
 			return
 	r = rng.randf()
+	if _plain_legs >= MAX_PLAIN_LEGS:
+		r *= P_BURST + P_HOVER  # na een paar gewone stukken altijd iets bijzonders
 	if r < P_BURST:
 		_enter(State.BURST)
 	elif r < P_BURST + P_HOVER:
@@ -186,15 +196,20 @@ func _enter(s: State) -> void:
 	t_state = 0.0
 	match s:
 		State.CRUISE:
+			_plain_legs += 1
 			target = _random_waypoint()
+			_cruise_v = CRUISE_SPEED * rng.randf_range(CRUISE_VARIANCE.x, CRUISE_VARIANCE.y)
 		State.BURST:
+			_plain_legs = 0
 			bursts += 1
 			dur_state = rng.randf_range(BURST_TIME.x, BURST_TIME.y)
-			target = _random_waypoint(1.6)
+			target = _random_waypoint(1.3, BURST_CONE)
 		State.HOVER:
+			_plain_legs = 0
 			dur_state = rng.randf_range(HOVER_TIME.x, HOVER_TIME.y)
 			target = pos + Vector2.from_angle(rng.randf() * TAU) * 20.0
 		State.DESCEND:
+			_plain_legs = 0
 			_from_alt = alt
 			_approach_t = 0.0
 		State.LANDED:
@@ -204,18 +219,20 @@ func _enter(s: State) -> void:
 
 
 ## Willekeurig punt in een willekeurige richting, binnen kaart (en liefst rond het beeld).
-func _random_waypoint(dist_mult := 1.0) -> Vector2:
+func _random_waypoint(dist_mult := 1.0, kegel := PI) -> Vector2:
 	var area := bounds.grow(-EDGE_MARGIN)
 	if view.has_area():
 		# het schip hangt CRUISE_ALT + romp boven zijn grondpunt: beeld voor het grondpunt zakt mee
-		var v := view.grow(VIEW_PAD)
+		var v := view.grow_individual(VIEW_PAD, -8.0, VIEW_PAD, -8.0)
 		v.position.y += CRUISE_ALT + HULL_LIFT
 		v = v.intersection(area)
 		if v.has_area():
 			area = v
 	var best := pos
-	for i in 8:
+	for i in 12:
 		var hoek := rng.randf() * TAU
+		if kegel < PI and i < 8 and vel.length() > 5.0:
+			hoek = vel.angle() + rng.randf_range(-kegel, kegel)
 		var p := pos + Vector2.from_angle(hoek) * rng.randf_range(WAYPOINT_DIST.x, WAYPOINT_DIST.y) * dist_mult
 		if area.has_point(p):
 			return p

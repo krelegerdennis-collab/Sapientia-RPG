@@ -13,7 +13,7 @@ const TILE := 16
 const LAND_TERREIN := ["gras", "hoog_gras", "zand"]
 const BANK_MAX := 0.16            ## radialen kantelen in de bocht
 const BANK_SMOOTH := 6.0
-const TRAIL_N := 3                ## nabeelden tijdens een burst
+const TRAIL_N := 4                ## nabeelden tijdens een burst
 const TRAIL_STEP := 0.05          ## seconden tussen nabeelden
 const SHADOW_ALPHA := 0.5
 const SPRITE_ALPHA := 0.95
@@ -137,7 +137,7 @@ func _update_trail(delta: float) -> void:
 		if g.visible:
 			g.position = _history[i + 1]
 			g.rotation = sprite.rotation
-			g.modulate = Color(0.75, 0.8, 1.0, 0.32 - 0.09 * i)
+			g.modulate = Color(0.75, 0.8, 1.0, 0.42 - 0.09 * i)
 
 
 func _set_visible(v: bool) -> void:
