@@ -58,6 +58,8 @@ func _run() -> void:
 	await _rust()
 	print("=== Deel E: uitgang-warpers berggrot ===")
 	await _warper_tests()
+	print("=== Deel F: World Warper vlieg-AI (wereldkaart) ===")
+	_warper_brain()
 	print("BERGGROTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await pframes(8)
@@ -248,10 +250,11 @@ func _kaart() -> void:
 	check("op de oude grottegel blijft de wereldkaart", scene().name == "Wereldkaart" and tile() == oud
 			and not Dialog.is_open and GameState.dungeon100_floor == 0 and not GameState.dungeon100_run_active())
 	var flyover := scene().get_node_or_null("WorldWarperFlyover")
+	await pframes(2)
+	check("flyover vliegt over na ontgrendeling (puur beeld)", flyover != null and flyover.sprite.visible
+			and flyover.shadow.visible)
 	if flyover != null:
-		flyover.set("_t", WorldWarperFlyover.PAUZE + WorldWarperFlyover.VLUCHT * 0.4)
-		await pframes(2)
-	check("flyover vliegt over na ontgrendeling (puur beeld)", flyover != null and flyover.sprite.visible)
+		await _warper_in_scene(flyover)
 	# Grotmond zichtbaar op de kaart: sprite in de bergwand recht boven de ingang (14,19).
 	var mond_sprite := scene().get_node_or_null("Objects/BerggrotIngang") as Sprite2D
 	check("grotmond-sprite boven de berggrot-ingang", mond_sprite != null and mond_sprite.visible
@@ -740,3 +743,118 @@ func _rust() -> void:
 			break
 		await get_tree().process_frame
 	await pframes(5)
+
+
+## World Warper op de wereldkaart: gesimuleerd met vaste seed, sneller dan realtime.
+func _warper_brain() -> void:
+	var gebied := Rect2(0, 0, 1024, 800)
+	var speler := Vector2(500, 400)
+	for seed_nr in [1, 7, 42]:
+		var b := WarperBrain.new()
+		b.setup(seed_nr, gebied, Vector2(300, 300))
+		b.player_pos = speler
+		b.landable = func(p: Vector2) -> bool: return p.x < 700.0
+		var dt := 1.0 / 60.0
+		var binnen := true
+		var eindig := true
+		var octanten := {}
+		var max_v := 0.0
+		var max_vy := 0.0
+		var land_ok := true
+		var vast := false
+		var venster_start := b.pos
+		var venster_t := 0.0
+		var vorige: int = b.state
+		for i in int(600.0 / dt):
+			b.step(dt)
+			if not gebied.has_point(b.pos):
+				binnen = false
+			if is_nan(b.pos.x) or is_nan(b.pos.y) or is_nan(b.alt) or is_inf(b.vel.x) or is_inf(b.vel.y):
+				eindig = false
+				break
+			var v := b.vel.length()
+			max_v = maxf(max_v, v)
+			max_vy = maxf(max_vy, absf(b.vel.y))
+			if v > 30.0:
+				octanten[int(posmod(roundi(b.vel.angle() / (TAU / 8.0)), 8))] = true
+			if b.state == WarperBrain.State.LANDED and vorige != WarperBrain.State.LANDED:
+				if b.pos.x >= 700.0 or b.pos.distance_to(speler) < WarperBrain.LAND_PLAYER_MIN - 2.0 or b.alt != 0.0:
+					land_ok = false
+			vorige = b.state
+			venster_t += dt
+			if venster_t >= 12.0:
+				if b.pos.distance_to(venster_start) < 8.0:
+					vast = true
+				venster_start = b.pos
+				venster_t = 0.0
+		check("warper seed %d: 600 s binnen de kaart" % seed_nr, binnen)
+		check("warper seed %d: nooit NaN/inf" % seed_nr, eindig)
+		check("warper seed %d: alle kanten op (>=6 van 8 richtingen, ook verticaal)" % seed_nr,
+				octanten.size() >= 6 and max_vy > 60.0)
+		check("warper seed %d: bursts (%d) en landingen (%d)" % [seed_nr, b.bursts, b.landings],
+				b.bursts >= 2 and b.landings >= 2)
+		check("warper seed %d: burst haalt voertuigsnelheid (%.0f px/s)" % [seed_nr, max_v],
+				max_v > WarperBrain.BURST_SPEED * 0.8 and max_v <= WarperBrain.BURST_SPEED + 1.0)
+		check("warper seed %d: landt alleen op landbaar terrein, niet bij de speler" % seed_nr, land_ok)
+		check("warper seed %d: nooit 12 s stil" % seed_nr, not vast)
+	# deterministisch per seed
+	var a := WarperBrain.new()
+	var c := WarperBrain.new()
+	a.setup(99, gebied, Vector2(200, 200))
+	c.setup(99, gebied, Vector2(200, 200))
+	for i in 3600:
+		a.step(1.0 / 60.0)
+		c.step(1.0 / 60.0)
+	check("warper: zelfde seed = zelfde vlucht", a.pos == c.pos and a.state == c.state)
+	# speler loopt naar het gelande schip -> het stijgt op
+	var l := WarperBrain.new()
+	l.setup(5, gebied, Vector2(400, 300))
+	var geland := false
+	for i in 60 * 120:
+		l.step(1.0 / 60.0)
+		if l.state == WarperBrain.State.LANDED:
+			geland = true
+			break
+	l.player_pos = l.pos + Vector2(4, 0)
+	l.step(1.0 / 60.0)
+	check("warper: speler dichtbij een gelande warper -> hij stijgt op", geland
+			and l.state == WarperBrain.State.ASCEND)
+	# camera-voorkeur: waypoints rond het beeld, dus hij blijft in de buurt
+	var z := WarperBrain.new()
+	z.setup(3, gebied, Vector2(150, 150))
+	z.view = Rect2(40, 40, 384, 216)
+	var dichtbij := 0
+	var n := 0
+	for i in 60 * 300:
+		z.step(1.0 / 60.0)
+		n += 1
+		if z.view.grow(WarperBrain.VIEW_PAD + 40.0).has_point(z.pos):
+			dichtbij += 1
+	check("warper: blijft meestal rond het beeld (%d%%)" % (100 * dichtbij / n), dichtbij > n * 0.9)
+
+
+## In de echte wereldkaart: beweegt, geen botsing/ingang, schaduw los van het schip.
+func _warper_in_scene(fly: WorldWarperFlyover) -> void:
+	var start: Vector2 = fly.brain.pos
+	var frames := 0
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--warperframes="):
+			frames = int(arg.get_slice("=", 1))
+	if frames > 0 and shots != "":
+		for i in frames:
+			await get_tree().create_timer(0.25).timeout
+			screenshot("wf_%03d" % i)
+	else:
+		await get_tree().create_timer(1.5).timeout
+	var r: Rect2i = (scene().get_node("Ground") as TileMapLayer).get_used_rect()
+	var kaart := Rect2(Vector2(r.position * 16), Vector2(r.size * 16))
+	check("warper beweegt op de kaart en blijft erbinnen", fly.brain.pos.distance_to(start) > 20.0
+			and kaart.has_point(fly.brain.pos))
+	check("warper: schaduw op de grond, schip erboven", fly.shadow.position.y > fly.sprite.position.y)
+	check("warper: nog steeds geen botsing of interactie-area",
+			fly.find_children("*", "CollisionObject2D", true, false).is_empty())
+	var land_ok := true
+	for p in [Vector2(-50, -50), Vector2(kaart.end.x + 40, 10)]:
+		if fly._mag_landen(p):
+			land_ok = false
+	check("warper: landt niet buiten de kaart", land_ok)
