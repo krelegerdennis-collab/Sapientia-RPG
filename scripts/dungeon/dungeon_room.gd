@@ -153,6 +153,7 @@ func _build() -> void:
 	var scatter4: bool = room_id in DungeonRooms.ARCHIEF_SCATTER_ROOMS and not room.has("floor_tiles")
 	# v0.23: vaste grondlaag (tegelnummers) als de kamer die heeft (Archief 2 v2-deco); anders willekeurige vloer
 	var vast: Array = room.get("ground", Archief2Ground.GROUND.get(room_id, []))
+	var kas_blocks: bool = DungeonRooms.current_theme == "kas"
 	var exit_cells := {}           # sleutel in "exits" -> Array[Vector2i]
 	for y in layout.size():
 		var row: String = layout[y]
@@ -170,6 +171,9 @@ func _build() -> void:
 					n = floor_variant(x, y, floor_tiles)
 			if y < vast.size() and x < (vast[y] as Array).size():
 				n = int(vast[y][x])
+				# v8.1: kas-thema -> vrije effen 2x2-vakken worden blok A/B (80-87)
+				if kas_blocks:
+					n = DungeonRooms.kas_floor_at(x, y, vast, layout)
 			_cells[Vector2i(x, y)] = n
 			set_tile(ground, Vector2i(x, y), n)
 			if DungeonRooms.EXIT_CHARS.has(ch):
