@@ -920,10 +920,11 @@ func ring_entries() -> Dictionary:
 		var sid := str(id)
 		if GameState.item_count(sid) > 0 and GameData.ITEMS.has(sid) and PartyActions.item_block_reason(sid) == "" \
 				and not bool(GameData.ITEMS[sid].get("warp", false)):
-			items.append({"kind": "item", "id": sid, "label": "%s x%d" % [PartyActions.item_name(sid), GameState.item_count(sid)]})
+			items.append({"kind": "item", "id": sid, "label": "%s x%d" % [PartyActions.item_name(sid), GameState.item_count(sid)],
+					"name": PartyActions.item_name(sid), "count": GameState.item_count(sid)})
 	var skills: Array = []
 	for sk in SomData.SKILLS.get(active_id, []):
-		skills.append({"kind": "skill", "id": str(sk["id"]), "caster": active_id, "label": str(sk["name"])})
+		skills.append({"kind": "skill", "id": str(sk["id"]), "caster": active_id, "label": str(sk["name"]), "name": str(sk["name"])})
 	var magic: Array = []
 	var h := hero()
 	for s in h.get("spells", []):
@@ -931,7 +932,7 @@ func ring_entries() -> Dictionary:
 		if sp.is_empty():
 			continue
 		magic.append({"kind": "spell", "id": str(s), "caster": active_id,
-				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))]})
+				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))], "name": str(sp.get("name", s))})
 	return {"items": items, "skills": skills, "magic": magic}
 
 
@@ -947,7 +948,7 @@ func spell_targets(spell_id: String, caster_id: String) -> Array:
 	if str(sp.get("target", "")) == "ally":
 		for h in GameState.alive_heroes():
 			out.append({"kind": "target", "id": str(h["id"]), "target": str(h["id"]),
-					"label": "%s %d/%d" % [h["name"], int(h["hp"]), int(h["max_hp"])]})
+					"label": "%s %d/%d" % [h["name"], int(h["hp"]), int(h["max_hp"])], "name": str(h["name"])})
 		return out
 	var from := body_of(caster_id)
 	var list: Array = []
@@ -958,7 +959,7 @@ func spell_targets(spell_id: String, caster_id: String) -> Array:
 	for m in list:
 		var e: Dictionary = enemies[m]
 		out.append({"kind": "target", "id": str(m.monster_id), "target": m,
-				"label": "%s %d" % [str(e["data"].get("name", m.enemy_id)), int(e["hp"])]})
+				"label": "%s %d" % [str(e["data"].get("name", m.enemy_id)), int(e["hp"])], "name": str(e["data"].get("name", m.enemy_id))})
 	return out
 
 

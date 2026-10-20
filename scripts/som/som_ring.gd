@@ -24,6 +24,10 @@ var entries: Array = []
 var root: Control
 var buttons: Array[Button] = []
 var title: Label
+## Naam (+ aantal/MP) van de geselecteerde keuze, op een eigen regel ONDER de ring.
+var name_label: Label
+## Huidige ringstraal (groeit mee als korte labels elkaar anders zouden raken).
+var radius := RADIUS
 var bg: TextureRect
 var _was_paused := false
 var _open_frame := -1
@@ -60,6 +64,13 @@ func _ready() -> void:
 	title.add_theme_color_override("font_outline_color", Color.BLACK)
 	title.add_theme_constant_override("outline_size", 2)
 	root.add_child(title)
+	name_label = Label.new()
+	name_label.name = "RingName"
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.add_theme_color_override("font_color", Color(1, 1, 0.6))
+	name_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	name_label.add_theme_constant_override("outline_size", 2)
+	root.add_child(name_label)
 
 
 func open() -> void:
@@ -110,35 +121,101 @@ func _tab_title() -> String:
 
 
 func _build() -> void:
+	if tab == "target":
+		build_with(arena.spell_targets(str(pending_spell.get("id", "")), str(pending_spell.get("caster", ""))))
+	else:
+		build_with(arena.ring_entries().get(tab, []))
+
+
+## Kort label op de ring zelf: met icoon alleen het aantal ("x3") of niets; zonder icoon de
+## eerste woord-afkorting. De volledige naam staat onder de ring (name_label).
+static func short_label(e: Dictionary, has_icon: bool) -> String:
+	if has_icon:
+		return ("x%d" % int(e["count"])) if e.has("count") else ""
+	var nm := str(e.get("name", e.get("label", "")))
+	var w := nm.split(" ")[0] if nm != "" else ""
+	return w.substr(0, SomData.RING_SHORT_MAX) if w.length() > SomData.RING_SHORT_MAX else w
+
+
+## Bouwt de ring voor een gegeven lijst (los aanroepbaar voor de overlap-test).
+func build_with(list: Array) -> void:
 	for b in buttons:
+		root.remove_child(b)
 		b.queue_free()
 	buttons.clear()
-	if tab == "target":
-		entries = arena.spell_targets(str(pending_spell.get("id", "")), str(pending_spell.get("caster", "")))
-	else:
-		entries = arena.ring_entries().get(tab, [])
+	entries = list
 	var vs := root.get_viewport_rect().size
 	var c := vs / 2.0
 	if bg:
 		bg.position = (c - bg.texture.get_size() / 2.0).round()
 	title.text = "< %s >" % _tab_title()
-	title.size = Vector2(120, 12)
-	title.position = (c - Vector2(60, 8)).round()
-	var n := maxi(1, entries.size())
 	for i in entries.size():
-		var b := UiMenu.button(str(entries[i]["label"]))
+		var ic := icon_for(entries[i])
+		var b := UiMenu.button("")
+		b.text = short_label(entries[i], ic != null)
 		b.name = "Ring_%d" % i
 		b.focus_mode = Control.FOCUS_NONE
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		b.icon = icon_for(entries[i])
+		b.icon = ic
 		root.add_child(b)
 		b.reset_size()
-		var a := -PI / 2.0 + TAU * float(i) / float(n)
-		b.position = (c + Vector2(cos(a), sin(a)) * RADIUS - b.size / 2.0).round()
 		b.pressed.connect(func() -> void: choose(i))
+		b.mouse_entered.connect(func() -> void:
+			selected = i
+			_highlight())
 		buttons.append(b)
+	_layout(vs)
 	selected = clampi(selected, 0, maxi(0, entries.size() - 1))
 	_highlight()
+
+
+## Plaatst de knoppen op de ellips; groeit de straal tot geen twee knoppen elkaar raken.
+func _layout(vs: Vector2) -> void:
+	var c := vs / 2.0
+	var n := maxi(1, buttons.size())
+	var bw := 0.0
+	var bh := 12.0
+	for b in buttons:
+		bw = maxf(bw, b.size.x)
+		bh = maxf(bh, b.size.y)
+	var th := title.get_minimum_size().y
+	# max. straal: kop boven + naam onder moeten in beeld blijven
+	var ry_max := c.y - bh / 2.0 - th * 2.0 - SomData.RING_LABEL_GAP * 2.0
+	var rx_max := c.x - bw / 2.0 - 2.0
+	radius = RADIUS
+	for _k in 12:
+		_place_buttons(c, n)
+		if not _any_overlap():
+			break
+		radius = Vector2(minf(radius.x * 1.12, rx_max), minf(radius.y * 1.12, ry_max))
+	title.size = title.get_minimum_size()
+	title.position = (Vector2(c.x - title.size.x / 2.0, c.y - radius.y - bh / 2.0 - SomData.RING_LABEL_GAP - title.size.y)).round()
+	name_label.position.y = roundf(c.y + radius.y + bh / 2.0 + SomData.RING_LABEL_GAP)
+
+
+func _place_buttons(c: Vector2, n: int) -> void:
+	for i in buttons.size():
+		var a := -PI / 2.0 + TAU * float(i) / float(n)
+		buttons[i].position = (c + Vector2(cos(a), sin(a)) * radius - buttons[i].size / 2.0).round()
+
+
+func _any_overlap() -> bool:
+	for i in buttons.size():
+		for j in range(i + 1, buttons.size()):
+			if Rect2(buttons[i].position, buttons[i].size).grow(1).intersects(Rect2(buttons[j].position, buttons[j].size)):
+				return true
+	return false
+
+
+## Alle tekst-/knop-rects van de open ring (voor de overlap-test).
+func label_rects() -> Array:
+	var out: Array = []
+	for b in buttons:
+		out.append(Rect2(b.position, b.size))
+	out.append(Rect2(title.position, title.size))
+	if name_label.text != "":
+		out.append(Rect2(name_label.position, name_label.size))
+	return out
 
 
 ## Icoon uit ring_icons.png (8 x 16x16) voor een item/spreuk; null = geen.
@@ -181,6 +258,9 @@ static func spell_icon(id: String) -> Texture2D:
 func _highlight() -> void:
 	for i in buttons.size():
 		buttons[i].modulate = Color(1, 1, 0.5) if i == selected else Color(0.75, 0.75, 0.8)
+	name_label.text = str(entries[selected].get("label", "")) if selected < entries.size() else ""
+	name_label.size = name_label.get_minimum_size()
+	name_label.position.x = roundf(root.get_viewport_rect().size.x / 2.0 - name_label.size.x / 2.0)
 
 
 func choose(i: int) -> void:

@@ -91,9 +91,11 @@ func run() -> void:
 	await _boss_handoff_tests()
 	await _style_path_tests()
 	await _hud_layout_tests()
+	await _ring_layout_tests()
 	await _magic_tests()
 	await _death_tests()
 	await _actionsim_tests()      # als laatste: bouwt de SoM-startparty opnieuw op
+	await _action_boss_tests()
 
 
 func _settings_tests() -> void:
@@ -890,6 +892,121 @@ func _hud_layout_tests() -> void:
 	a.ring.close({})
 	await t.frames(3)
 	await shot("v3_hud_closed")
+
+
+## Geen enkele tekst/knop van de ring overlapt (elke ring, elk aantal keuzes) en alles blijft in beeld.
+static func rects_ok(rs: Array, vs: Vector2) -> String:
+	var screen := Rect2(Vector2.ZERO, vs)
+	for i in rs.size():
+		var r: Rect2 = rs[i]
+		if not screen.encloses(r):
+			return "rect %d %s buiten beeld" % [i, r]
+		for j in range(i + 1, rs.size()):
+			if r.intersects(rs[j]):
+				return "rect %d %s raakt %d %s" % [i, r, j, rs[j]]
+	return ""
+
+
+func _ring_layout_tests() -> void:
+	var a := arena()
+	var ring = a.ring
+	var w := 0
+	while not a.active() and w < 180:
+		await t.frames(1)
+		w += 1
+	GameState.inventory["feniksveer"] = 1
+	a.open_ring()
+	await t.pframes(2)
+	var vs: Vector2 = ring.root.get_viewport_rect().size
+	var bad := ""
+	for tb in ["items", "skills", "magic"]:
+		ring.set_tab(tb)
+		await t.pframes(1)
+		for i in ring.entries.size():
+			ring.selected = i
+			ring._highlight()
+			var e := rects_ok(ring.label_rects(), vs)
+			if e != "":
+				bad += "%s/%d: %s; " % [tb, i, e]
+	t.check("SoM-ring: geen overlappende labels in items/skills/magie (%s)" % (bad if bad != "" else "ok"), bad == "")
+	ring.set_tab("items")
+	var fi := -1
+	for i in ring.entries.size():
+		if ring.entries[i]["id"] == "feniksveer":
+			fi = i
+	ring.selected = fi
+	ring._highlight()
+	var on_ring := false
+	for b in ring.buttons:
+		on_ring = on_ring or "Phoenix" in b.text or "Items" in b.text
+	t.check("SoM-ring: volle naam staat NIET op de ring (alleen icoon + aantal)", fi >= 0 and not on_ring and ring.buttons[fi].text == "x1")
+	t.check("SoM-ring: geselecteerde naam op eigen regel onder de ring ('%s')" % ring.name_label.text,
+			ring.name_label.text == "Phoenix Feather x1" and ring.name_label.position.y > ring.buttons[0].position.y + ring.buttons[0].size.y
+			and ring.title.position.y + ring.title.size.y <= ring.buttons[0].position.y)
+	await t.pframes(1)
+	await shot("v3b_ring_phoenix")
+	# synthetische ringen: 1..12 keuzes, lange namen, met en zonder icoon, alle soorten
+	var ids := ["drankje", "kruid", "toverwater", "feniksveer", "zzz_onbekend"]
+	var worst := ""
+	for kind in ["item", "skill", "spell", "target"]:
+		for n in range(1, 13):
+			var list: Array = []
+			for i in n:
+				var e := {"kind": kind, "id": ids[i % ids.size()], "label": "Extraordinarily Long Name %d x99" % i,
+						"name": "Extraordinarily Long Name %d" % i, "caster": "dennis", "target": "dennis"}
+				if kind == "item":
+					e["count"] = 99
+				list.append(e)
+			ring.tab = "target" if kind == "target" else "items"
+			ring.selected = n - 1
+			ring.build_with(list)
+			var e2 := rects_ok(ring.label_rects(), vs)
+			if e2 != "" and worst == "":
+				worst = "%s n=%d: %s" % [kind, n, e2]
+	t.check("SoM-ring: label-rects overlappen nooit bij 1..12 keuzes van elke soort (%s)" % (worst if worst != "" else "ok"), worst == "")
+	ring.tab = "items"
+	ring.close({})
+	await t.frames(3)
+
+
+## Action-modus bazen: SomData-vermenigvuldiger; Classic-baas exact ongewijzigd (echt battle.tscn).
+func _action_boss_tests() -> void:
+	const BossCore := preload("res://scripts/battle/boss_core.gd")
+	var base: Dictionary = BossCore.apply_boss(GameData.ENEMIES["kennis_beest"].duplicate(true))
+	t.check("SoM-baas: action_boss(..., Classic) = dezelfde data", SomData.action_boss(base, false) == base)
+	var m3 := SomData.action_boss_mult(SomData.START_LEVEL)
+	var m5 := SomData.action_boss_mult(SomData.START_LEVEL + 2)
+	t.check("SoM-baas: Lv 3 HP x%.2f ATK x%.2f, Lv 5 ATK x%.2f (data-gedreven)" % [m3["max_hp"], m3["atk"], m5["atk"]],
+			float(m3["max_hp"]) > 1.0 and float(m5["atk"]) > float(m3["atk"]))
+	var was_som: bool = GameState.som_mode
+	var was_style = Settings.get_value("battle_style")
+	var got := {}
+	for mode in ["classic", "action"]:
+		GameState.som_mode = mode == "action"
+		Settings.set_value("battle_style", 0)
+		var b: Control = load("res://scenes/battle/battle.tscn").instantiate()
+		b.set_script(load("res://tools/battlesim/sim_battle.gd"))
+		GameState.pending_enemies = ["kennis_beest"]
+		GameState.pending_boss = true
+		GameState.pending_tutorial = {}
+		GameState.dungeon100_floor = 0
+		b.sim_started = true
+		t.add_child(b)
+		var st: Dictionary = b.enemies[0]["s"]
+		got[mode] = {"max_hp": int(st["max_hp"]), "atk": int(st["atk"]), "def": int(st["def"])}
+		b.queue_free()
+		await t.frames(1)
+	GameState.pending_boss = false
+	GameState.som_mode = was_som
+	Settings.set_value("battle_style", was_style)
+	var c: Dictionary = got["classic"]
+	t.check("SoM-baas: Classic Golem ongewijzigd (HP %d ATK %d DEF %d = %d/%d/%d)" % [c["max_hp"], c["atk"], c["def"], base["max_hp"], base["atk"], base["def"]],
+			c["max_hp"] == int(base["max_hp"]) and c["atk"] == int(base["atk"]) and c["def"] == int(base["def"]))
+	var ac: Dictionary = got["action"]
+	var lvl: float = load("res://scripts/battle/battle.gd").action_party_level()
+	var expd := SomData.action_boss(base, true, lvl)
+	t.check("SoM-baas: Action Golem sterker (HP %d ATK %d bij Lv %.1f)" % [ac["max_hp"], ac["atk"], lvl],
+			ac["max_hp"] == int(expd["max_hp"]) and ac["atk"] == int(expd["atk"]) and ac["max_hp"] > c["max_hp"])
 
 
 func _ally(id: String) -> Node:

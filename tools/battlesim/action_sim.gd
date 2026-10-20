@@ -307,7 +307,22 @@ func _ally_spell(hr: Dictionary, heroes: Array, active: Array, p: Dictionary) ->
 			return
 
 
-## Bazen (turn-based, ongewijzigd): bestaande battlesim met de SoM-startparty (Lv 3) en met Lv 5.
+## Baas-iteraties (Action-modus, SomData.ACTION_BOSS_MULT). Classic = zonder vermenigvuldiger (referentie).
+const BOSS_ITERATIONS := [
+	{"label": "Classic (no multiplier)", "classic": true},
+	{"label": "flat HP x1.5", "mult": {"max_hp": 1.5}, "per_level": {}},
+	{"label": "flat HP x2.0, ATK x1.5", "mult": {"max_hp": 2.0, "atk": 1.5}, "per_level": {}},
+	{"label": "flat HP x2.5, ATK x1.7", "mult": {"max_hp": 2.5, "atk": 1.7}, "per_level": {}},
+	{"label": "flat HP x3.0, ATK x1.8", "mult": {"max_hp": 3.0, "atk": 1.8}, "per_level": {}},
+	{"label": "flat HP x2.5, ATK x2.2", "mult": {"max_hp": 2.5, "atk": 2.2}, "per_level": {}},
+	{"label": "flat HP x5.0, ATK x1.2", "mult": {"max_hp": 5.0, "atk": 1.2}, "per_level": {}},
+	{"label": "level-scaled: HP x2.5, ATK x1.7 +0.25/lv", "mult": {"max_hp": 2.5, "atk": 1.7}, "per_level": {"atk": 0.25}},
+	{"label": "level-scaled: HP x2.4, ATK x1.65 +0.25/lv", "mult": {"max_hp": 2.4, "atk": 1.65}, "per_level": {"atk": 0.25}},
+	{"label": "level-scaled: HP x2.2, ATK x1.55 +0.30/lv", "mult": {"max_hp": 2.2, "atk": 1.55}, "per_level": {"atk": 0.3}},
+	{"label": "level-scaled: HP x2.3, ATK x1.6 +0.35/lv (CHOSEN = SomData)", "mult": {}, "per_level": {}},
+]
+
+## Bazen (turn-based): bestaande battlesim met de SoM-startparty (Lv 3) en met Lv 5, per baas-iteratie.
 func _bosses() -> void:
 	boss_results = []
 	if boss_fights <= 0 or not ResourceLoader.exists(BATTLESIM_PATH):
@@ -322,16 +337,36 @@ func _bosses() -> void:
 	bs.holder = Node.new()
 	bs.add_child(bs.holder)
 	var inv: Dictionary = SomData.START_ITEMS.duplicate()
-	for lv in [SomData.START_LEVEL, SomData.START_LEVEL + 2]:
-		var gear: Array = SomData.START_GEAR
-		var sc := {"id": "som_golem_lv%d" % lv, "name": "BOSS Golem (turn-based) vs SoM party Lv %d" % lv,
-			"party": [["dennis", lv, gear], ["noor", lv, []], ["lotte", lv, []]], "inv": inv,
-			"encounters": bs._room_groups(DungeonRooms.ROOMS, -1, true, true)}
-		var r: Dictionary = await bs.run_scenario(sc)
-		boss_results.append(r)
-		if standalone:
-			print("ACTIONSIM boss %s: win %.1f%%, HP loss %.1f%%" % [sc["id"], float(r.get("win_rate", 0.0)) * 100.0, float(r.get("avg_hp_loss", 0.0)) * 100.0])
+	var was_som: bool = GameState.som_mode
+	var its: Array = BOSS_ITERATIONS
+	if only_final:
+		its = [BOSS_ITERATIONS[0], BOSS_ITERATIONS[BOSS_ITERATIONS.size() - 1]]
+	for it in its:
+		var classic := bool(it.get("classic", false))
+		var chosen := not classic and (it["mult"] as Dictionary).is_empty()
+		SomData.action_boss_override = {} if classic or chosen else {"mult": it["mult"], "per_level": it["per_level"]}
+		var row := {"label": it["label"], "classic": classic, "m3": SomData.action_boss_mult(SomData.START_LEVEL),
+			"m5": SomData.action_boss_mult(SomData.START_LEVEL + 2), "levels": []}
+		for lv in [SomData.START_LEVEL, SomData.START_LEVEL + 2]:
+			GameState.som_mode = not classic
+			var gear: Array = SomData.START_GEAR
+			var sc := {"id": "som_golem_lv%d" % lv, "name": "BOSS Golem vs SoM party Lv %d" % lv,
+				"party": [["dennis", lv, gear], ["noor", lv, []], ["lotte", lv, []]], "inv": inv, "som": not classic,
+				"encounters": bs._room_groups(DungeonRooms.ROOMS, -1, true, true)}
+			var r: Dictionary = await bs.run_scenario(sc)
+			r["level"] = lv
+			row["levels"].append(r)
+			if standalone:
+				print("ACTIONSIM boss [%s] Lv %d: win %.1f%%, HP loss %.1f%%, rounds %s" % [it["label"], lv, float(r.get("win_rate", 0.0)) * 100.0,
+					float(r.get("avg_hp_loss", 0.0)) * 100.0, str(r.get("avg_rounds", "?"))])
+		boss_results.append(row)
+	SomData.action_boss_override = {}
+	GameState.som_mode = was_som
 	bs.queue_free()
+
+
+static func _mx(m: Dictionary, k: String) -> String:
+	return "-" if m.is_empty() else "%.2f" % float(m.get(k, 1.0))
 
 
 func report_markdown(ms: int) -> String:
@@ -353,7 +388,15 @@ func report_markdown(ms: int) -> String:
 		for k in last["rooms"]:
 			parts.append("%s %.1f%%" % [k, float(last["rooms"][k]) * 100.0])
 		s += ", ".join(parts) + "\n"
-	s += "\n## Bosses (turn-based, unchanged)\n\n| Scenario | Fights | Win rate | Avg HP loss |\n|---|---|---|---|\n"
-	for b in boss_results:
-		s += "| %s | %d | %.1f%% | %.1f%% |\n" % [b.get("name", ""), int(b.get("n", 0)), float(b.get("win_rate", 0.0)) * 100.0, float(b.get("avg_hp_loss", 0.0)) * 100.0]
+	s += "\n## Bosses: Action-mode multiplier (turn-based Golem fight, Classic unchanged)\n\n"
+	s += "Target: 60-80%% win rate at Lv 3 and Lv 5. Multiplier applies only when GameState.som_mode or Battle Style = Action (SomData.ACTION_BOSS_MULT); %d fights per level.\n\n" % boss_fights
+	s += "| # | Iteration | Lv 3 HP x / ATK x | Lv 5 HP x / ATK x | Lv 3 win | Lv 3 HP loss | Lv 5 win | Lv 5 HP loss |\n|---|---|---|---|---|---|---|---|\n"
+	for i in boss_results.size():
+		var b: Dictionary = boss_results[i]
+		var c3 := "-" if b["classic"] else "%s / %s" % [_mx(b["m3"], "max_hp"), _mx(b["m3"], "atk")]
+		var c5 := "-" if b["classic"] else "%s / %s" % [_mx(b["m5"], "max_hp"), _mx(b["m5"], "atk")]
+		s += "| %d | %s | %s | %s |" % [i + 1, b["label"], c3, c5]
+		for r in b["levels"]:
+			s += " %.1f%% | %.1f%% |" % [float(r.get("win_rate", 0.0)) * 100.0, float(r.get("avg_hp_loss", 0.0)) * 100.0]
+		s += "\n"
 	return s

@@ -62,3 +62,16 @@ tests die map tellen. Ontbreekt een bestand, dan valt alles terug op de placehol
 - `ui/joystick_ring.png` 60x60 (midden 30,30) + `joystick_knob(_pressed).png` 24x24; de knop reist max 18 art-px (`JOY_KNOB_TRAVEL`).
 - `ui/ring_icons_8.png` 128x16, `RING_ICON["feniksveer"] = 7`; de oude `ring_icons.png` blijft als fallback.
 - Ontbreekt een bestand: getekende placeholder (ring-effect, tekstknop, getekende joystick, 7-iconen-sheet).
+
+### v3b (review Forge, 20 okt 2026)
+- **HUD v3**: joystick kleiner (x0.75) en midden-links (60% hoogte), RUN / SWAP / RING in één rij naast MENU, A/B rechtsonder.
+- **Ring-labels**: op de ring alleen icoon + kort label (items: `x3`; spreuken: alleen icoon; zonder icoon de eerste
+  woord-afkorting, max `RING_SHORT_MAX` = 7 tekens). De kop `< Items >` staat BOVEN de ring, de volle naam van de keuze
+  (`name_label`, bv. `Phoenix Feather x1`) op een eigen regel ONDER de ring. De straal groeit (tot het scherm) tot geen
+  knoppen elkaar raken. `SomRing.label_rects()` + test: geen overlap / alles in beeld, voor elke ring en 1..12 keuzes.
+- **Bazen in Action-modus** (alleen `GameState.som_mode` of Battle Style = Action, niet de dungeon van 100; Classic ongewijzigd):
+  `SomData.ACTION_BOSS_MULT` {HP x2.3, ATK x1.6} + `ACTION_BOSS_PER_LEVEL` {ATK +0.35 per gemiddeld partylevel boven Lv 3},
+  toegepast in `battle.gd _spawn_enemies` (`SomData.action_boss`). Een vaste vermenigvuldiger haalde nooit Lv 3 én Lv 5
+  in 60-80% (zie de baastabel in `docs/ACTION_BALANCE_REPORT.md`); gekozen: Lv 3 73.7%, Lv 5 75.7% winst.
+  Test: echte `battle.tscn` met Classic = Golem 360/27/15 exact, met Action = sterker volgens de data.
+- Simulator: `-- --actionsim` draait nu ook `BOSS_ITERATIONS` (battlesim-scenario's kennen `"som": true`).

@@ -211,6 +211,43 @@ const SPELL_RANGE := 160.0
 const TXT_RING := "Ring"
 const TXT_ITEMS := "Items"
 const TXT_SKILLS := "Skills"
+## ACTION-MODUS BAZEN: in Action/SoM-modus (GameState.som_mode of Settings Battle Style = Action) krijgt een
+## baasgevecht (niet de dungeon van 100) deze vermenigvuldigers bovenop de baas-stats. Classic blijft ongewijzigd.
+## Getuned met -- --actionsim (docs/ACTION_BALANCE_REPORT.md): doel 60-80% winst op Lv 3 en Lv 5.
+## Eén vaste vermenigvuldiger haalde nooit Lv 3 EN Lv 5 tegelijk (zie rapport): daarom basis (op START_LEVEL)
+## plus een toename per gemiddeld partylevel boven START_LEVEL (ACTION_BOSS_PER_LEVEL, nooit onder de basis).
+const ACTION_BOSS_MULT := {"max_hp": 2.3, "atk": 1.6}
+const ACTION_BOSS_PER_LEVEL := {"atk": 0.35}
+## Alleen voor de simulator: andere waarden proberen ({"mult": {...}, "per_level": {...}}; {} = de consts).
+static var action_boss_override: Dictionary = {}
+
+
+## Baas-data voor Action-modus; on == false (Classic) = exact dezelfde data terug.
+static func action_boss(data: Dictionary, on: bool, party_level: float = START_LEVEL) -> Dictionary:
+	if not on:
+		return data
+	var m := action_boss_mult(party_level)
+	var out := data.duplicate(true)
+	for k in m:
+		if out.has(k):
+			out[k] = maxi(1, roundi(float(out[k]) * float(m[k])))
+	return out
+
+
+## Vermenigvuldigers bij een gemiddeld partylevel.
+static func action_boss_mult(party_level: float) -> Dictionary:
+	var base: Dictionary = action_boss_override.get("mult", ACTION_BOSS_MULT)
+	var per: Dictionary = action_boss_override.get("per_level", ACTION_BOSS_PER_LEVEL)
+	var extra := maxf(0.0, party_level - float(START_LEVEL))
+	var m := base.duplicate()
+	for k in per:
+		m[k] = float(m.get(k, 1.0)) + float(per[k]) * extra
+	return m
+
+
+## Ring-opmaak: max. lengte kort label (zonder icoon) en ruimte tussen ring, kop en naamregel.
+const RING_SHORT_MAX := 7
+const RING_LABEL_GAP := 4.0
 const TXT_MAGIC := "Magic"
 const TXT_TARGET := "%s: target?"
 const TXT_ALL_ENEMIES := "All enemies"
