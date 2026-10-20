@@ -5,6 +5,7 @@ extends RefCounted
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomArena := preload("res://scripts/som/som_arena.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 const SomHud := preload("res://scripts/som/som_hud.gd")
 
 var t: Node
@@ -89,6 +90,7 @@ func run() -> void:
 	await _switch_tests()
 	await _boss_handoff_tests()
 	await _style_path_tests()
+	await _magic_tests()
 	await _death_tests()
 
 
@@ -396,8 +398,16 @@ func _ring_tests() -> void:
 	a.open_ring()
 	await t.pframes(2)
 	a.ring.switch_tab()
-	t.check("SoM: skills-ring = spreuken van de bestuurde held", a.ring.entries.size() == (a.hero().get("spells", []) as Array).size())
+	t.check("SoM: skills-ring = technieken van de bestuurde held (%s)" % a.ring.tab, a.ring.tab == "skills"
+			and a.ring.entries.size() == (SomData.SKILLS[a.active_id] as Array).size())
 	await shot("v2_ring_skills")
+	a.ring.switch_tab()
+	t.check("SoM: magie-ring = spreuken van de bestuurde held", a.ring.tab == "magic"
+			and a.ring.entries.size() == (a.hero().get("spells", []) as Array).size())
+	a.ring.switch_tab()
+	t.check("SoM: ringen draaien rond (items -> skills -> magic -> items)", a.ring.tab == "items")
+	a.ring.switch_tab(-1)
+	t.check("SoM: omhoog = vorige ring (magic)", a.ring.tab == "magic")
 	a.ring.close({})
 	t.check("SoM: sluiten zonder keuze hervat", not t.get_tree().paused)
 	await t.frames(5)
@@ -445,6 +455,7 @@ func _ui2_tests() -> void:
 			e_feet.append(a.feet_of_enemy(e))
 			a.enemies[e]["hp"] = 999      # niet laten sterven: dan blijft de positie te vergelijken
 		a.cast_spell("vuur", caster, {})
+		await released()
 		var found := objs.find_children("SomSpellImpact*", "", false, false)
 		imp = found[0] if found.size() > 0 else null
 	var on_feet := false
@@ -506,6 +517,272 @@ func _ui2_tests() -> void:
 	await t.frames(5)
 
 
+## Wachten tot een spreuk vrijkomt (cast6 frame 4, ~540 ms), max ~1,5 s.
+func released() -> void:
+	var a := arena()
+	var got := [false]
+	var cb := func(_s: String, _c: String) -> void: got[0] = true
+	a.spell_released.connect(cb)
+	var n := 0
+	while not got[0] and n < 90:
+		await t.frames(1)
+		n += 1
+	a.spell_released.disconnect(cb)
+	await t.frames(1)
+
+
+func _press(action: String) -> void:
+	var w := 0
+	while not arena().active() and w < 180:
+		await t.frames(1)
+		w += 1
+	var ev := InputEventAction.new()
+	ev.action = action
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	await t.pframes(2)
+	var up := InputEventAction.new()
+	up.action = action
+	Input.parse_input_event(up)
+	await t.frames(2)
+
+
+## v3: B tovert (Seren/Vesper), magie-ring met doelkeuze, spell_icons, gauge_ready_glow.
+func _magic_tests() -> void:
+	var a := arena()
+	var p: CharacterBody2D = t.player()
+	a.allies_enabled = false
+	while a.active_id != "dennis":
+		a.switch_hero()
+	for h in GameState.party:
+		h["hp"] = h["max_hp"]
+		h["mp"] = h["max_mp"]
+	p.place_at(Vector2i(10, 8), Vector2i.RIGHT)
+	for al in a.allies:
+		al.position = p.position + Vector2(0, 20)
+	var m: Node = room().add_monster({"id": "mag_geest", "enemy": "papiergeest", "tile": [13, 8], "moves": false})
+	await t.frames(3)
+	a.enemies[m]["hp"] = 999
+	# Dax: B doet niets
+	var n0: int = a.b_casts
+	await _press("cancel")
+	t.check("SoM-magie: B met Dax tovert niet", a.b_casts == n0)
+	# Vesper: B = Spark op de dichtstbijzijnde vijand
+	a.switch_hero("noor")
+	await t.frames(2)
+	p.place_at(Vector2i(10, 8), Vector2i.RIGHT)
+	await t.frames(2)
+	a.b_cast_cd = 0.0
+	var mp0 := int(a.member("noor")["mp"])
+	var hp0 := int(a.enemies[m]["hp"])
+	await _press("cancel")
+	await released()
+	t.check("SoM-magie: B met Vesper tovert Spark (MP %d -> %d, vijand %d -> %d)" % [mp0, int(a.member("noor")["mp"]), hp0, int(a.enemies[m]["hp"])],
+			a.b_casts == n0 + 1 and int(a.member("noor")["mp"]) < mp0 and a.last_attacker == "noor")
+	await _press("cancel")
+	t.check("SoM-magie: B-cooldown (%.1f s) voorkomt spam" % SomData.B_CAST_COOLDOWN, a.b_casts == n0 + 1)
+	# Seren: B = Minor Heal op de gewondste
+	a.switch_hero("lotte")
+	await t.frames(2)
+	a.b_cast_cd = 0.0
+	var dax: Dictionary = a.member("dennis")
+	dax["hp"] = int(dax["max_hp"]) / 2
+	var dhp := int(dax["hp"])
+	await _press("cancel")
+	await released()
+	t.check("SoM-magie: B met Seren geneest Dax (%d -> %d)" % [dhp, int(dax["hp"])], int(dax["hp"]) > dhp)
+	# magie-ring met doelkeuze: Vesper kiest Spark -> doel = de tweede (verste) vijand
+	a.switch_hero("noor")
+	await t.frames(2)
+	p.place_at(Vector2i(10, 8), Vector2i.RIGHT)
+	var m2: Node = room().add_monster({"id": "mag_mot", "enemy": "glitchmot", "tile": [15, 8], "moves": false})
+	await t.frames(3)
+	a.enemies[m2]["hp"] = 999
+	a.member("noor")["mp"] = a.member("noor")["max_mp"]
+	a.open_ring()
+	await t.pframes(2)
+	a.ring.set_tab("magic")
+	var si := -1
+	for i in a.ring.entries.size():
+		if a.ring.entries[i]["id"] == "vuur":
+			si = i
+	var ic: AtlasTexture = a.ring.buttons[si].icon if si >= 0 else null
+	t.check("SoM-magie: Spark-icoon uit spell_icons (x=0, 64x16)", ic != null and ic.region == Rect2(0, 0, 16, 16)
+			and ic.atlas.get_size() == Vector2(64, 16))
+	var ib: AtlasTexture = a.ring.spell_icon("bliksem")
+	var ih: AtlasTexture = a.ring.spell_icon("genees")
+	t.check("SoM-magie: iconen bliksem x=16, genezing x=48", ib.region.position.x == 16.0 and ih.region.position.x == 48.0)
+	a.ring.choose(si)
+	t.check("SoM-magie: Spark vraagt een doel (ring blijft open, %d doelen)" % a.ring.entries.size(), a.ring.is_open and a.ring.tab == "target"
+			and a.ring.entries.size() >= 2 and a.ring.entries.any(func(x): return x["target"] == m)
+			and a.ring.entries.any(func(x): return x["target"] == m2))
+	await shot("v3_magic_target")
+	var ti := -1
+	for i in a.ring.entries.size():
+		if a.ring.entries[i]["target"] == m2:
+			ti = i
+	var h1 := int(a.enemies[m]["hp"])
+	var h2 := int(a.enemies[m2]["hp"])
+	a.ring.choose(ti)
+	await seconds(SomData.RING_CAST_DELAY + 0.9)
+	t.check("SoM-magie: gekozen doel geraakt, de andere niet (%d -> %d, %d -> %d)" % [h2, int(a.enemies[m2]["hp"]), h1, int(a.enemies[m]["hp"])],
+			int(a.enemies[m2]["hp"]) < h2 and int(a.enemies[m]["hp"]) == h1)
+	# heal-doel: Seren -> Vesper
+	a.switch_hero("lotte")
+	await t.frames(2)
+	var ves: Dictionary = a.member("noor")
+	ves["hp"] = 5
+	dax["hp"] = int(dax["max_hp"]) - 1
+	a.open_ring()
+	await t.pframes(2)
+	a.ring.set_tab("magic")
+	a.ring.choose(0)
+	t.check("SoM-magie: heal-doelen = levende partyleden", a.ring.tab == "target" and a.ring.entries.size() == GameState.alive_heroes().size())
+	var vi := -1
+	for i in a.ring.entries.size():
+		if a.ring.entries[i]["target"] == "noor":
+			vi = i
+	a.ring.choose(vi)
+	await seconds(SomData.RING_CAST_DELAY + 0.9)
+	t.check("SoM-magie: Minor Heal op het gekozen doel (Vesper %d)" % int(ves["hp"]), int(ves["hp"]) > 5)
+	# B in de doelkeuze = terug naar de magie-ring
+	a.open_ring()
+	await t.pframes(2)
+	a.ring.set_tab("magic")
+	a.ring.choose(0)
+	a.ring.switch_tab()
+	t.check("SoM-magie: terug uit de doelkeuze -> magie-ring", a.ring.tab == "magic" and a.ring.pending_spell.is_empty())
+	a.ring.close({})
+	await t.frames(2)
+	# skill-ring: volle meter nodig
+	a.switch_hero("dennis")
+	await t.frames(2)
+	p.place_at(Vector2i(12, 8), Vector2i.RIGHT)
+	await t.frames(2)
+	a.charge = 0.3
+	t.check("SoM-skill: zonder volle meter 'Not ready yet!'", a.use_skill("wervelslag", "dennis") == SomData.TXT_NOT_READY)
+	m.place_at(Vector2i(13, 8), Vector2i.LEFT)
+	await t.frames(2)
+	a.charge = 1.0
+	var hh := int(a.enemies[m]["hp"])
+	a.use_skill("wervelslag", "dennis")
+	t.check("SoM-skill: Whirl Slash raakt rondom en leegt de meter", int(a.enemies[m]["hp"]) < hh and a.charge < 0.05)
+	await _art3_tests(m)
+	# gauge_ready_glow
+	var g: Node = a.gauge
+	a.charge = 0.5
+	await t.frames(2)
+	t.check("SoM-meter: niet vol -> geen ready-glow", g.ready_frame() == -1)
+	a.charge = 1.0
+	t.check("SoM-meter: gauge_ready_glow 72x4 geladen", g.ready_glow != null and g.ready_glow.get_size() == Vector2(72, 4))
+	var seen := {}
+	for i in 30:
+		await t.frames(1)
+		if g.ready_frame() >= 0:
+			seen[g.ready_frame()] = true
+	t.check("SoM-meter: vol -> ready-glow loopt door 4 frames (90 ms)", seen.size() == 4 and SomData.GAUGE_READY_MS == 90)
+	g._t = 0.0
+	t.check("SoM-meter: frame 0 op t=0, 1 op 0,1 s", g.ready_frame() == 0)
+	g._t = 0.1
+	var f1: int = g.ready_frame()
+	g._t = 0.37
+	t.check("SoM-meter: lus van 360 ms (%d, %d)" % [f1, g.ready_frame()], f1 == 1 and g.ready_frame() == 0)
+	await shot("v3_gauge_ready")
+	for mm in [m, m2]:
+		if is_instance_valid(mm) and a.enemies.has(mm):
+			a.enemies[mm]["hp"] = 1
+	a.allies_enabled = true
+
+
+## RPG ART pass 7-9: cast6 + castcirkel + spreuk-effecten, monster-sheets (nieuwe maten), held-poses.
+func _art3_tests(m: Node) -> void:
+	var a := arena()
+	var p: CharacterBody2D = t.player()
+	var objs: Node = room().get_node("Objects")
+	for h in ["dax", "seren", "vesper"]:
+		var ok := true
+		for k in ["dodge", "hurt"]:
+			var tx := SomFx.tex("res://assets/sprites/som/combat/%s_%s.png" % [h, k])
+			ok = ok and tx != null and tx.get_size() == Vector2(192, 48)
+		var ko := SomFx.tex("res://assets/sprites/som/combat/%s_ko.png" % h)
+		t.check("SoM-art3: %s dodge/hurt 192x48, ko 48x48" % h, ok and ko != null and ko.get_size() == Vector2(48, 48))
+	for id in ["noor", "lotte"]:
+		var ct: Texture2D = a.pose_tex(id, "cast")
+		t.check("SoM-art3: %s cast6 288x192 (6 x 48x48 x 4)" % id, ct != null and ct.get_size() == Vector2(288, 192))
+	# spreuk-effect-definities uit de data (frames uit de sheetbreedte)
+	var dv := SomFx.spell_fx_def("vuur", GameData.SPELLS["vuur"])
+	var dk := SomFx.spell_fx_def("vonk", GameData.SPELLS["vonk"])
+	var dg := SomFx.spell_fx_def("genees", GameData.SPELLS["genees"])
+	var dx := SomFx.spell_fx_def("schok", GameData.SPELLS["schok"])
+	t.check("SoM-art3: spell_vuur 6 x 32x48, anker (16,48)", int(dv.get("frames", 0)) == 6 and dv["anchor"] == [16, 48])
+	t.check("SoM-art3: spell_vonk 5 x 32x32, anker (16,32)", int(dk.get("frames", 0)) == 5 and dk["anchor"] == [16, 32])
+	t.check("SoM-art3: spell_genees 6 x 32x48; Shock (bliksem) -> spell_bliksem", int(dg.get("frames", 0)) == 6 and str(dx.get("key", "")) == "bliksem")
+	# Vesper cast: cirkel onder haar, schade pas op frame 4
+	a.switch_hero("noor")
+	await t.frames(2)
+	p.place_at(Vector2i(10, 8), Vector2i.RIGHT)
+	await t.frames(2)
+	a.member("noor")["mp"] = a.member("noor")["max_mp"]
+	a.enemies[m]["hp"] = 999
+	var h0 := int(a.enemies[m]["hp"])
+	a.cast_spell("vuur", "noor", {}, m)
+	await t.frames(1)
+	var anim: Node = p.get_node_or_null("SomCastAnim")
+	var circ: Node = p.get_node_or_null("SomCastCircle")
+	t.check("SoM-art3: cast6 speelt (6x4) met castcirkel eronder (4 x 48x16, lus)", anim != null and anim.hframes == 6 and anim.vframes == 4
+			and circ != null and circ.hframes == 4 and circ.loop and circ.z_index < 0 and int(anim.hit_index) == 3)
+	t.check("SoM-art3: nog geen schade bij het begin van de cast", int(a.enemies[m]["hp"]) == h0)
+	await released()
+	t.check("SoM-art3: spreuk vrij op frame 4 (%.0f ms; verwacht 540)" % float(anim.hit_at_ms if is_instance_valid(anim) else -1.0),
+			is_instance_valid(anim) and anim.hit_at_ms >= 540.0 and anim.hit_at_ms <= 600.0 and int(a.enemies[m]["hp"]) < h0)
+	var fx: Node = null
+	for n in objs.get_children():
+		if str(n.name).begins_with("SomSpell_vuur"):
+			fx = n
+	t.check("SoM-art3: spell_vuur op de voeten van het doel (onderkant-midden)", fx != null and fx.position == a.feet_of_enemy(m)
+			and fx.offset == Vector2(-16, -48) and fx.hframes == 6)
+	await shot("v3_cast_fire")
+	await seconds(0.5)
+	t.check("SoM-art3: castcirkel weg na de cast", p.get_node_or_null("SomCastCircle") == null)
+	# Seren geneest: spell_genees op de voeten van Dax
+	a.switch_hero("lotte")
+	await t.frames(2)
+	var dax: Dictionary = a.member("dennis")
+	dax["hp"] = int(dax["max_hp"]) / 2
+	a.member("lotte")["mp"] = a.member("lotte")["max_mp"]
+	a.cast_spell("genees", "lotte", dax)
+	await released()
+	var gfx: Node = null
+	for n in objs.get_children():
+		if str(n.name).begins_with("SomSpell_genees"):
+			gfx = n
+	t.check("SoM-art3: spell_genees op de voeten van Dax", gfx != null and gfx.position == a.node_of("dennis").position)
+	await shot("v3_cast_heal")
+	a.switch_hero("dennis")
+	await t.frames(2)
+	# monster-sheets: nieuwe maten en offsets uit de data
+	var e: Dictionary = a.enemies[m]
+	a._monster_pose(m, e, "attack", 1, 0.3)
+	t.check("SoM-art3: monster-aanval 3x4 cellen 32x24, offset (-8,-8) t.o.v. de mapsprite (%s)" % m.sprite.offset,
+			m.sprite.texture.get_size() == Vector2(96, 96) and m.sprite.hframes == 3 and m.sprite.vframes == 4
+			and m.sprite.offset == Vector2(0, -4))
+	a._restore_monster(m, e)
+	t.check("SoM-art3: terug naar de mapsprite (offset hersteld)", m.sprite.offset == Vector2.ZERO and m.sprite.hframes != 3)
+	a._monster_pose(m, e, "hurt", 0, a._hurt_seconds())
+	var f0: int = m.sprite.frame
+	t.check("SoM-art3: monster-hurt 2 frames x 4 richtingen (32x64)", m.sprite.texture.get_size() == Vector2(32, 64)
+			and m.sprite.hframes == 2 and m.sprite.vframes == 4 and m.sprite.offset == Vector2.ZERO and f0 % 2 == 0)
+	await seconds(0.12)
+	t.check("SoM-art3: na 70 ms het tweede hurt-frame", m.sprite.frame % 2 == 1 or str(e.get("pose", "")) != "hurt")
+	await seconds(0.3)
+	t.check("SoM-art3: hurt voorbij -> mapsprite", str(e.get("pose", "")) == "")
+	var dt: Texture2D = a._monster_sheet(m, "death")
+	a._monster_pose(m, e, "death", 0, 0.1)
+	t.check("SoM-art3: monster-death 4 x 24x24, offset (-4,-8)", dt.get_size() == Vector2(96, 24) and m.sprite.hframes == 4
+			and m.sprite.offset == Vector2(0, -4))
+	a._restore_monster(m, e)
+
+
 func _ally(id: String) -> Node:
 	return arena().ally_of(id)
 
@@ -550,7 +827,7 @@ func _ally_tests() -> void:
 	var hp0 := int(dax["hp"])
 	var mp0 := int(a.member("lotte")["mp"])
 	seren.spell_cd = 0.0
-	await seconds(0.3)
+	await seconds(0.9)
 	t.check("SoM-AI: Seren geneest Dax (<40%%): HP %d -> %d, MP %d -> %d" % [hp0, int(dax["hp"]), mp0, int(a.member("lotte")["mp"])],
 			int(dax["hp"]) > hp0 and int(a.member("lotte")["mp"]) < mp0)
 	# aanvallen: vijand vlak bij Dax
@@ -639,7 +916,7 @@ func _switch_tests() -> void:
 	t.check("SoM-wissel: Dax wordt AI op de oude plek", _ally("dennis") != null and _ally("dennis").position.distance_to(dax_pos) < 8.0)
 	var spr: Sprite2D = p.get_node("Sprite2D")
 	t.check("SoM-wissel: speler-sprite = Seren", spr.texture == a.sheet_for("lotte"))
-	t.check("SoM-wissel: ring toont Serens spreuken", a.ring_entries()["skills"].any(func(e): return e["caster"] == "lotte"))
+	t.check("SoM-wissel: ring toont Serens spreuken", a.ring_entries()["magic"].any(func(e): return e["caster"] == "lotte" and e["id"] == "genees"))
 	# camera glijdt mee
 	a.allies_enabled = false
 	p.position = Vector2(200, p.position.y)

@@ -22,6 +22,8 @@ signal player_defeated
 signal hero_switched(hero_id: String)
 ## Slag geland (bij art: aan het begin van frame SomData.ATTACK_HIT_FRAME), met het aantal treffers.
 signal swing_landed(hero_id: String, hits: int)
+## Spreuk komt vrij (cast6 frame 4, of meteen zonder sheet): schade/genezing is toegepast.
+signal spell_released(spell_id: String, caster_id: String)
 signal ring_opened
 signal ring_closed
 signal action_resolved(text: String)
@@ -74,6 +76,9 @@ var attacks := 0
 var switches := 0
 ## Autotest: bondgenoten even stilzetten (false = geen AI-tick).
 var allies_enabled := true
+## Resterende tijd tot de volgende B-spreuk (SomData.B_CAST_COOLDOWN).
+var b_cast_cd := 0.0
+var b_casts := 0
 
 
 func setup(p_room: Node) -> void:
@@ -305,8 +310,11 @@ func _process(delta: float) -> void:
 		iframes[k] = maxf(0.0, float(iframes[k]) - delta)
 	if Input.is_action_just_pressed(SWITCH_ACTION):
 		switch_hero()
+	b_cast_cd = maxf(0.0, b_cast_cd - delta)
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame:
 		attack()
+	if Input.is_action_just_pressed("cancel") and Engine.get_process_frames() != ring.closed_frame:
+		quick_cast()
 	if not queued.is_empty():
 		_queue_t -= delta
 		if _queue_t <= 0.0:
@@ -321,6 +329,26 @@ func _process(delta: float) -> void:
 			_enemy_ai(m, delta)
 		else:
 			enemies.erase(m)
+
+
+## B: de bestuurde held tovert zijn snelspreuk (SomData.B_MAGIC; alleen Seren/Vesper). Geeft de melding
+## ("" = geen magiër of nog in cooldown).
+func quick_cast() -> String:
+	var spell := str(SomData.B_MAGIC.get(active_id, ""))
+	if spell == "" or not is_alive(active_id) or b_cast_cd > 0.0:
+		return ""
+	var sp: Dictionary = GameData.SPELLS.get(spell, {})
+	var text := ""
+	if str(sp.get("type", "")) == "heal":
+		var t := lowest_member(0.999)
+		text = SomData.TXT_NO_WOUNDED if t.is_empty() else cast_spell(spell, active_id, t)
+	else:
+		text = cast_spell(spell, active_id, {})
+	b_cast_cd = SomData.B_CAST_COOLDOWN
+	b_casts += 1
+	_say(text)
+	action_resolved.emit(text)
+	return text
 
 
 # ---------------------------------------------------------------- aanvallen
@@ -414,7 +442,7 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i) -> void:
 		_defeat_enemy(m)
 		return
 	e["tele"] = 0.0
-	_monster_pose(m, e, "hurt", 0, 0.2)
+	_monster_pose(m, e, "hurt", 0, _hurt_seconds())
 	_knockback(m, dir)
 
 
@@ -464,14 +492,13 @@ func _defeat_enemy(m: Node) -> void:
 	if dt and m.sprite:
 		# doodgaan-sheet: 4 frames x MONSTER_DEATH_MS
 		_restore_monster(m, e)
-		m.sprite.texture = dt
-		m.sprite.hframes = 4
-		m.sprite.vframes = 1
+		_apply_sheet(m, dt, "death")
 		m.sprite.modulate = Color.WHITE
 		var tw := m.create_tween()
-		for f in 4:
+		var dms: Array = SomData.MONSTER_SHEETS["death"]["ms"]
+		for f in m.sprite.hframes:
 			tw.tween_callback(func() -> void: m.sprite.frame = f)
-			tw.tween_interval(SomData.MONSTER_DEATH_MS / 1000.0)
+			tw.tween_interval(float(dms[mini(f, dms.size() - 1)]) / 1000.0)
 		tw.tween_callback(m.queue_free)
 		return
 	var tw := m.create_tween()
@@ -481,6 +508,13 @@ func _defeat_enemy(m: Node) -> void:
 
 # ---------------------------------------------------------------- vijanden
 ## Sheet van RPG ART voor dit monster ("attack", "hurt", "death"); null = geen (of geen 1x1-monster).
+func _hurt_seconds() -> float:
+	var t := 0.0
+	for v in SomData.MONSTER_SHEETS["hurt"]["ms"]:
+		t += float(v)
+	return t / 1000.0
+
+
 func _monster_sheet(m: Node, kind: String) -> Texture2D:
 	if m.placeholder or m.size != Vector2i.ONE:
 		return null
@@ -494,21 +528,43 @@ func _monster_pose(m: Node, e: Dictionary, kind: String, col: int, sec: float) -
 	if t == null or m.sprite == null:
 		return
 	if not e.has("orig"):
-		e["orig"] = [m.sprite.texture, m.sprite.hframes, m.sprite.vframes]
+		e["orig"] = [m.sprite.texture, m.sprite.hframes, m.sprite.vframes, m.sprite.offset]
 	m.set_process(false)
-	m.sprite.texture = t
-	var d := SomFx.dir_index(m.facing)
-	if kind == "attack":
-		m.sprite.hframes = 3
-		m.sprite.vframes = 4
-		m.sprite.frame = d * 3 + clampi(col, 0, 2)
-	else:
-		m.sprite.hframes = 4
-		m.sprite.vframes = 1
-		m.sprite.frame = d
+	_apply_sheet(m, t, kind)
+	var spec: Dictionary = SomData.MONSTER_SHEETS[kind]
+	var cols := int(spec["cols"])
+	var row := mini(SomFx.dir_index(m.facing), m.sprite.vframes - 1)
+	m.sprite.frame = row * m.sprite.hframes + clampi(col, 0, cols - 1)
 	e["pose"] = kind
 	e["pose_col"] = col
 	e["pose_t"] = sec
+	e["pose_el"] = 0.0
+
+
+## Sheet + celindeling (uit de textuur en SomData.MONSTER_SHEETS) + offset t.o.v. de 16x16-mapsprite.
+func _apply_sheet(m: Node, t: Texture2D, kind: String) -> void:
+	var spec: Dictionary = SomData.MONSTER_SHEETS[kind]
+	var cell: Array = spec["cell"]
+	m.sprite.texture = t
+	m.sprite.hframes = maxi(1, t.get_width() / int(cell[0]))
+	m.sprite.vframes = maxi(1, t.get_height() / int(cell[1]))
+	var o: Vector2 = (e_orig_offset(m))
+	var off := Vector2(float(spec["offset"][0]), float(spec["offset"][1]))
+	# gecentreerde sprite: het 16x16-midden blijft staan; de cel schuift met 'offset'
+	m.sprite.offset = o + (off + Vector2(float(cell[0]), float(cell[1])) / 2.0 - Vector2(8, 8)) if m.sprite.centered else o + off
+
+
+func e_orig_offset(m: Node) -> Vector2:
+	var e: Dictionary = enemies.get(m, {})
+	return (e["orig"][3] as Vector2) if e.has("orig") and (e["orig"] as Array).size() > 3 else m.sprite.offset
+
+
+func _hurt_frame(m: Node, e: Dictionary, delta: float) -> void:
+	# 2 frames: wit (70 ms), dan rode terugslag (220 ms)
+	e["pose_el"] = float(e.get("pose_el", 0.0)) + delta
+	var hms: Array = SomData.MONSTER_SHEETS["hurt"]["ms"]
+	var f := 1 if float(e["pose_el"]) * 1000.0 >= float(hms[0]) else 0
+	m.sprite.frame = mini(SomFx.dir_index(m.facing), m.sprite.vframes - 1) * m.sprite.hframes + mini(f, m.sprite.hframes - 1)
 
 
 func _restore_monster(m: Node, e: Dictionary) -> void:
@@ -517,6 +573,8 @@ func _restore_monster(m: Node, e: Dictionary) -> void:
 		m.sprite.texture = o[0]
 		m.sprite.hframes = o[1]
 		m.sprite.vframes = o[2]
+		if o.size() > 3:
+			m.sprite.offset = o[3]
 		e.erase("orig")
 		m._update_frame()
 	e["pose"] = ""
@@ -529,7 +587,10 @@ func _pose_tick(m: Node, e: Dictionary, delta: float) -> void:
 	if str(e.get("pose", "")) == "" or float(e.get("pose_t", 0.0)) <= 0.0:
 		return
 	e["pose_t"] = float(e["pose_t"]) - delta
+	if float(e["pose_t"]) > 0.0 and str(e["pose"]) != "hurt":
+		return
 	if float(e["pose_t"]) > 0.0:
+		_hurt_frame(m, e, delta)
 		return
 	if str(e["pose"]) == "attack" and int(e["pose_col"]) == 1:
 		_monster_pose(m, e, "attack", 2, SomData.MONSTER_RETURN_MS / 1000.0)
@@ -711,8 +772,13 @@ func resolve(q: Dictionary) -> String:
 		if int(r.get("hp", 0)) > 0:
 			SomFx.number(room.get_node("Objects"), body_of(str(target.get("id", ""))) + Vector2(0, -22), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
 			heal_glow(str(target.get("id", "")))
+	elif str(q.get("kind", "")) == "skill":
+		text = use_skill(str(q.get("id", "")), str(q.get("caster", "")))
 	else:
-		text = cast_spell(str(q.get("id", "")), str(q.get("caster", "")), {})
+		var tgt: Variant = q.get("target", null)
+		var heal_t: Dictionary = member(str(tgt)) if tgt is String else {}
+		var en: Node = tgt if tgt is Node else null
+		text = cast_spell(str(q.get("id", "")), str(q.get("caster", "")), heal_t, en)
 	_say(text)
 	action_resolved.emit(text)
 	return text
@@ -720,7 +786,7 @@ func resolve(q: Dictionary) -> String:
 
 ## Spreuk van een held (MP van de caster). damage: dichtstbijzijnde/alle vijanden bij de caster;
 ## heal: 'heal_target' of het levende partylid met het laagste HP-deel.
-func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) -> String:
+func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, enemy_target: Node = null) -> String:
 	var sp: Dictionary = GameData.SPELLS.get(spell_id, {})
 	var caster := member(caster_id)
 	if sp.is_empty() or caster.is_empty() or int(caster.get("hp", 0)) <= 0:
@@ -737,6 +803,8 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) ->
 			for m in enemies.keys():
 				if is_instance_valid(m) and center_of(m).distance_to(from) <= 10.0 * 16.0:
 					targets.append(m)
+		elif enemy_target != null and is_instance_valid(enemy_target) and enemies.has(enemy_target):
+			targets.append(enemy_target)
 		else:
 			var best := nearest_enemy(from, 10.0 * 16.0)
 			if best:
@@ -744,12 +812,15 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) ->
 		if targets.is_empty():
 			return SomData.TXT_NO_TARGET
 		caster["mp"] = int(caster["mp"]) - cost
-		_cast_pose(caster_id)
-		for m in targets:
-			var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {"s": enemies[m]["data"]})
-			last_attacker = caster_id
-			SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
-			damage_enemy(m, maxi(1, roundi(amt * randf_range(0.9, 1.1))), Vector2i.ZERO)
+		_cast_then(caster_id, spell_id, func() -> void:
+			for m in targets:
+				if not is_instance_valid(m) or not enemies.has(m):
+					continue
+				var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {"s": enemies[m]["data"]})
+				last_attacker = caster_id
+				spell_effect(spell_id, feet_of_enemy(m))
+				SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
+				damage_enemy(m, maxi(1, roundi(amt * randf_range(0.9, 1.1))), Vector2i.ZERO))
 		return "%s casts %s!" % [caster.get("name", ""), sp.get("name", spell_id)]
 	if kind == "heal":
 		var t := heal_target
@@ -758,12 +829,18 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) ->
 		if t.is_empty():
 			t = caster
 		caster["mp"] = int(caster["mp"]) - cost
-		_cast_pose(caster_id)
 		var amt := roundi(SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {}))
-		var got := PartyActions.restore(t, amt, 0)
-		SomFx.number(room.get_node("Objects"), body_of(str(t.get("id", ""))) + Vector2(0, -22), "+%d" % got.x, Color(0.4, 1, 0.5))
-		heal_glow(str(t.get("id", "")))
-		return "%s casts %s! %s recovers %d HP." % [caster.get("name", ""), sp.get("name", spell_id), t.get("name", ""), got.x]
+		var expect := mini(amt, int(t["max_hp"]) - int(t["hp"]))
+		var tid := str(t.get("id", ""))
+		_cast_then(caster_id, spell_id, func() -> void:
+			if int(t.get("hp", 0)) <= 0:
+				return             # intussen KO: genezen wekt niet
+			var got := PartyActions.restore(t, amt, 0)
+			var n := node_of(tid)
+			spell_effect(spell_id, n.position if n else player.position)
+			SomFx.number(room.get_node("Objects"), body_of(tid) + Vector2(0, -22), "+%d" % got.x, Color(0.4, 1, 0.5))
+			heal_glow(tid))
+		return "%s casts %s! %s recovers %d HP." % [caster.get("name", ""), sp.get("name", spell_id), t.get("name", ""), expect]
 	return SomData.TXT_MISS_BUFF % str(sp.get("name", spell_id))
 
 
@@ -785,6 +862,32 @@ func _cast_pose(id: String) -> void:
 		SomFx.cast_anim(node_of(id), t)
 
 
+## Cast-animatie (cast6) van de caster; 'apply' draait op het vrijgavemoment (frame 4), daarna
+## spell_released. Zonder cast6-sheet of zonder node: meteen.
+func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
+	var t := pose_tex(caster_id, "cast")
+	var n := node_of(caster_id)
+	var done := func() -> void:
+		apply.call()
+		spell_released.emit(spell_id, caster_id)
+	var cols := int(SomData.CAST6["frames"])
+	if t and n and t.get_width() == cols * int(SomData.CAST6["frame"][0]):
+		var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
+		var anim: Node = SomFx.cast6_anim(n, t, circle)
+		anim.hit.connect(done, CONNECT_ONE_SHOT)
+		return
+	done.call()
+
+
+## Spreuk-effect (SomData.SPELL_FX) onderkant-midden op 'feet'. Geeft false zonder art.
+func spell_effect(spell_id: String, feet: Vector2) -> bool:
+	var d := SomFx.spell_fx_def(spell_id, GameData.SPELLS.get(spell_id, {}))
+	if d.is_empty():
+		return false
+	SomFx.oneshot(room.get_node("Objects"), d, feet, "SomSpell_" + str(d["key"]), Color.WHITE)
+	return true
+
+
 ## Ringmenu-inhoud voor de bestuurde held: items die in het veld werken, en zijn eigen spreuken.
 func ring_entries() -> Dictionary:
 	var items: Array = []
@@ -794,14 +897,73 @@ func ring_entries() -> Dictionary:
 				and not bool(GameData.ITEMS[sid].get("warp", false)):
 			items.append({"kind": "item", "id": sid, "label": "%s x%d" % [PartyActions.item_name(sid), GameState.item_count(sid)]})
 	var skills: Array = []
+	for sk in SomData.SKILLS.get(active_id, []):
+		skills.append({"kind": "skill", "id": str(sk["id"]), "caster": active_id, "label": str(sk["name"])})
+	var magic: Array = []
 	var h := hero()
 	for s in h.get("spells", []):
 		var sp: Dictionary = GameData.SPELLS.get(str(s), {})
 		if sp.is_empty():
 			continue
-		skills.append({"kind": "spell", "id": str(s), "caster": active_id,
+		magic.append({"kind": "spell", "id": str(s), "caster": active_id,
 				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))]})
-	return {"items": items, "skills": skills}
+	return {"items": items, "skills": skills, "magic": magic}
+
+
+## Spreuk met één doel (vijand of partylid) -> in de ring eerst een doel kiezen.
+func needs_target(spell_id: String) -> bool:
+	return str(GameData.SPELLS.get(spell_id, {}).get("target", "")) in ["enemy", "ally"]
+
+
+## Doelen voor de doelkeuze: vijanden binnen SPELL_RANGE van de caster (dichtstbij eerst) of levende partyleden.
+func spell_targets(spell_id: String, caster_id: String) -> Array:
+	var sp: Dictionary = GameData.SPELLS.get(spell_id, {})
+	var out: Array = []
+	if str(sp.get("target", "")) == "ally":
+		for h in GameState.alive_heroes():
+			out.append({"kind": "target", "id": str(h["id"]), "target": str(h["id"]),
+					"label": "%s %d/%d" % [h["name"], int(h["hp"]), int(h["max_hp"])]})
+		return out
+	var from := body_of(caster_id)
+	var list: Array = []
+	for m in enemies.keys():
+		if is_instance_valid(m) and center_of(m).distance_to(from) <= SomData.SPELL_RANGE:
+			list.append(m)
+	list.sort_custom(func(x, y): return center_of(x).distance_to(from) < center_of(y).distance_to(from))
+	for m in list:
+		var e: Dictionary = enemies[m]
+		out.append({"kind": "target", "id": str(m.monster_id), "target": m,
+				"label": "%s %d" % [str(e["data"].get("name", m.enemy_id)), int(e["hp"])]})
+	return out
+
+
+## Skill uit de skill-ring (SomData.SKILLS): vraagt een volle wapenmeter en zet hem op 0.
+## radius > 0 = rondom (alle vijanden binnen radius), anders een slag recht vooruit met 'mult'.
+func use_skill(skill_id: String, hero_id: String) -> String:
+	var sk := {}
+	for s in SomData.SKILLS.get(hero_id, []):
+		if str(s["id"]) == skill_id:
+			sk = s
+	if sk.is_empty() or not is_alive(hero_id) or hero_id != active_id:
+		return ""
+	if charge < 1.0:
+		return SomData.TXT_NOT_READY
+	charge = 0.0
+	var mult := float(sk.get("mult", 1.0))
+	var radius := float(sk.get("radius", 0.0))
+	if radius <= 0.0:
+		_swing(hero_id, player, mult)
+	else:
+		SomFx.spark(room.get_node("Objects"), body_of(hero_id))
+		var atk := float(GameState.effective_stat(member(hero_id), "atk"))
+		for m in enemies.keys():
+			if is_instance_valid(m) and center_of(m).distance_to(body_of(hero_id)) <= radius:
+				last_attacker = hero_id
+				var e: Dictionary = enemies[m]
+				var away := center_of(m) - body_of(hero_id)
+				damage_enemy(m, physical_damage(atk, float(e["def"]), mult),
+						Vector2i(signi(roundi(away.x)), 0) if absf(away.x) >= absf(away.y) else Vector2i(0, signi(roundi(away.y))))
+	return "%s uses %s!" % [member(hero_id).get("name", ""), sk["name"]]
 
 
 func _say(text: String) -> void:

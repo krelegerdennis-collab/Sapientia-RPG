@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## SoM-proef: PAUZE-RINGMENU (Secret of Mana-stijl). Openen = get_tree().paused (alles bevriest);
-## dit menu draait door (PROCESS_MODE_ALWAYS). Twee ringen: Items en Skills (bestaande data).
+## dit menu draait door (PROCESS_MODE_ALWAYS). Drie ringen: Items, Skills en Magie; een spreuk met één doel opent daarna de doelkeuze.
 ## Bediening: tik op een keuze, of links/rechts draaien + A kiezen; omhoog/omlaag = andere ring;
 ## B (cancel) of de Ring-knop = sluiten zonder keuze. De keuze landt na het sluiten in realtime
 ## (SomArena.on_ring_closed -> resolve). PLACEHOLDER-opmaak (gewone knoppen op een cirkel).
@@ -14,7 +14,11 @@ const RADIUS := Vector2(86, 52)
 
 var arena: Node
 var is_open := false
+## Ringen in volgorde (omhoog/omlaag draait erdoor). "target" = doelkeuze na een spreuk uit de magie-ring.
+const TABS := ["items", "skills", "magic"]
 var tab := "items"
+## Gekozen spreuk die nog een doel nodig heeft ({} = geen).
+var pending_spell := {}
 var selected := 0
 var entries: Array = []
 var root: Control
@@ -77,22 +81,47 @@ func close(choice: Dictionary) -> void:
 	arena.on_ring_closed(choice)
 
 
-func switch_tab() -> void:
-	tab = "skills" if tab == "items" else "items"
+func switch_tab(dir := 1) -> void:
+	if tab == "target":
+		tab = "magic"
+		pending_spell = {}
+	else:
+		tab = TABS[(TABS.find(tab) + dir + TABS.size()) % TABS.size()]
 	selected = 0
 	_build()
+
+
+func set_tab(t: String) -> void:
+	tab = t
+	pending_spell = {}
+	selected = 0
+	_build()
+
+
+func _tab_title() -> String:
+	match tab:
+		"skills":
+			return SomData.TXT_SKILLS
+		"magic":
+			return SomData.TXT_MAGIC
+		"target":
+			return SomData.TXT_TARGET % str(pending_spell.get("label", ""))
+	return SomData.TXT_ITEMS
 
 
 func _build() -> void:
 	for b in buttons:
 		b.queue_free()
 	buttons.clear()
-	entries = arena.ring_entries().get(tab, [])
+	if tab == "target":
+		entries = arena.spell_targets(str(pending_spell.get("id", "")), str(pending_spell.get("caster", "")))
+	else:
+		entries = arena.ring_entries().get(tab, [])
 	var vs := root.get_viewport_rect().size
 	var c := vs / 2.0
 	if bg:
 		bg.position = (c - bg.texture.get_size() / 2.0).round()
-	title.text = "< %s >" % (SomData.TXT_ITEMS if tab == "items" else SomData.TXT_SKILLS)
+	title.text = "< %s >" % _tab_title()
 	title.size = Vector2(120, 12)
 	title.position = (c - Vector2(60, 8)).round()
 	var n := maxi(1, entries.size())
@@ -120,9 +149,27 @@ func icon_for(e: Dictionary) -> Texture2D:
 	if sheet == null:
 		return null
 	var id := str(e.get("id", ""))
+	if str(e.get("kind", "")) == "spell":
+		var si := spell_icon(id)
+		if si:
+			return si
 	var idx := int(SomData.RING_ICON.get(id, -1))
 	if idx < 0 and str(e.get("kind", "")) == "spell" and str(GameData.SPELLS.get(id, {}).get("type", "")) == "damage":
 		idx = SomData.RING_ICON_DAMAGE
+	if idx < 0 or (idx + 1) * 16 > sheet.get_width():
+		return null
+	var a := AtlasTexture.new()
+	a.atlas = sheet
+	a.region = Rect2(idx * 16, 0, 16, 16)
+	return a
+
+
+## Icoon uit spell_icons.png (4 x 16x16, n op x = 16n) voor een spreuk; null = geen art/geen icoon.
+static func spell_icon(id: String) -> Texture2D:
+	var sheet := SomFx.tex(SomData.UI_SPELL_ICONS)
+	if sheet == null:
+		return null
+	var idx := int(SomData.SPELL_ICON.get(id, SomData.SPELL_ICON_BY_TYPE.get(str(GameData.SPELLS.get(id, {}).get("type", "")), -1)))
 	if idx < 0 or (idx + 1) * 16 > sheet.get_width():
 		return null
 	var a := AtlasTexture.new()
@@ -140,13 +187,27 @@ func choose(i: int) -> void:
 	if i < 0 or i >= entries.size():
 		return
 	var e: Dictionary = entries[i]
+	if tab == "target":
+		var q := {"kind": "spell", "id": pending_spell["id"], "caster": pending_spell["caster"], "target": e["target"]}
+		pending_spell = {}
+		tab = "magic"
+		close(q)
+		return
+	if str(e["kind"]) == "spell" and arena.needs_target(str(e["id"])):
+		pending_spell = e
+		tab = "target"
+		selected = 0
+		_build()
+		return
 	close({"kind": e["kind"], "id": e["id"], "caster": e.get("caster", "")})
 
 
 func _process(_delta: float) -> void:
 	if not is_open or Engine.get_process_frames() == _open_frame:
 		return
-	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed(arena.RING_ACTION):
+	if Input.is_action_just_pressed("cancel") and tab == "target":
+		switch_tab()       # terug naar de magie-ring
+	elif Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed(arena.RING_ACTION):
 		close({})
 	elif Input.is_action_just_pressed("interact"):
 		choose(selected)
@@ -156,5 +217,7 @@ func _process(_delta: float) -> void:
 	elif Input.is_action_just_pressed("move_left"):
 		selected = (selected - 1 + maxi(1, entries.size())) % maxi(1, entries.size())
 		_highlight()
-	elif Input.is_action_just_pressed("move_up") or Input.is_action_just_pressed("move_down"):
-		switch_tab()
+	elif Input.is_action_just_pressed("move_up"):
+		switch_tab(-1)
+	elif Input.is_action_just_pressed("move_down"):
+		switch_tab(1)

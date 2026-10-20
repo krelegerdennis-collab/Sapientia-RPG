@@ -57,16 +57,44 @@ const ATTACK_ANIMS := {
 const HERO_POSES := {
 	"dennis": {"hurt": "res://assets/sprites/som/combat/dax_hurt.png", "ko": "res://assets/sprites/som/combat/dax_ko.png"},
 	"noor": {"hurt": "res://assets/sprites/som/combat/vesper_hurt.png", "ko": "res://assets/sprites/som/combat/vesper_ko.png",
-			"cast": "res://assets/sprites/som/combat/vesper_cast.png"},
+			"cast": "res://assets/sprites/som/combat/vesper_cast6.png"},
 	"lotte": {"hurt": "res://assets/sprites/som/combat/seren_hurt.png", "ko": "res://assets/sprites/som/combat/seren_ko.png",
-			"cast": "res://assets/sprites/som/combat/seren_cast.png"},
+			"cast": "res://assets/sprites/som/combat/seren_cast6.png"},
 }
 const HURT_TIME := 0.25
-const CAST_MS: Array[int] = [200, 120, 120, 120, 120]
+const CAST_MS: Array[int] = [200, 120, 120, 120, 120]      # oude 3-frame cast-sheet (fallback)
+## Magiër-cast (RPG ART pass 7): <held>_cast6.png 288x192, cellen 48x48, 6 frames x 4 richtingen.
+## De spreuk komt vrij aan het begin van frame 4 (hit_frame): dan pas schade/genezing + effect.
+const CAST6 := {"frame": [48, 48], "frames": 6, "ms": [160, 180, 200, 120, 160, 200], "hit_frame": 4}
+## Cirkel onder de caster tijdens het casten (lus, achter de held, midden op de voeten).
+const CAST_CIRCLE := {
+	"lotte": "res://assets/sprites/som/fx/cast_circle_seren.png",
+	"noor": "res://assets/sprites/som/fx/cast_circle_vesper.png",
+}
+const CAST_CIRCLE_CELL := [48, 16]
+const CAST_CIRCLE_MS := 90
+## Spreuk-effecten, onderkant-midden op de voeten van het doel. Aantal frames = breedte / cel (uit de sheet).
+const SPELL_FX := {
+	"vuur": {"sheet": "res://assets/sprites/som/fx/spell_vuur.png", "cell": [32, 48]},
+	"bliksem": {"sheet": "res://assets/sprites/som/fx/spell_bliksem.png", "cell": [32, 48]},
+	"vonk": {"sheet": "res://assets/sprites/som/fx/spell_vonk.png", "cell": [32, 32]},
+	"genees": {"sheet": "res://assets/sprites/som/fx/spell_genees.png", "cell": [32, 48]},
+}
+const SPELL_FX_MS := 90
+## Andere spreuken: per element, anders per type (damage -> vonk, heal -> genees).
+const SPELL_FX_BY_ELEMENT := {"vuur": "vuur", "bliksem": "bliksem", "licht": "genees"}
+const SPELL_FX_BY_TYPE := {"damage": "vonk", "heal": "genees"}
 ## Vijand-sheets (assets/sprites/som/monsters/<enemy>_attack|hurt|death.png, 16x16 frames):
 ## attack 3 kolommen (opladen, uithaal, terug) x 4 rijen; hurt 4 kolommen (richtingen); death 4 frames.
 ## Duur aanval: opladen = de telegraaf (TELEGRAPH), uithaal 110 ms, terug 300 ms. Dood: 4 x 100 ms.
 const MONSTER_SHEET_DIR := "res://assets/sprites/som/monsters/"
+## Monster-sheets (RPG ART pass 9). cell = framegrootte, cols x rows (rij = richting), offset = waar de cel
+## t.o.v. de 16x16-mapsprite getekend wordt (linksboven), ms = duur per kolom.
+const MONSTER_SHEETS := {
+	"attack": {"cell": [32, 24], "cols": 3, "rows": 4, "offset": [-8, -8]},
+	"hurt": {"cell": [16, 16], "cols": 2, "rows": 4, "offset": [0, 0], "ms": [70, 220]},
+	"death": {"cell": [24, 24], "cols": 4, "rows": 1, "offset": [-4, -8], "ms": [100, 100, 100, 100]},
+}
 const MONSTER_STRIKE_MS := 110
 const MONSTER_RETURN_MS := 300
 const MONSTER_DEATH_MS := 100
@@ -96,7 +124,15 @@ const JOY_ART_RADIUS := 30.0     # straal van joystick_ring in art-pixels
 const JOY_KNOB_TRAVEL := 18.0    # knopuitslag in art-pixels
 ## Icoon-index in ring_icons.png per item/spreuk-id.
 const RING_ICON := {"drankje": 0, "kruid": 1, "toverwater": 2, "genees": 4, "vuur": 5, "bliksem": 6, "feniksveer": 7}
-const RING_ICON_DAMAGE := 3      # 'spark': elke andere aanvalsspreuk
+const RING_ICON_DAMAGE := 3
+## Magie-ring (RPG ART batch 3): spell_icons.png 64x16, icoon n op x = 16n (vuur, bliksem, vonk, genezing).
+const UI_SPELL_ICONS := "res://assets/sprites/som/ui/spell_icons.png"
+const SPELL_ICON := {"vuur": 0, "bliksem": 1, "vonk": 2, "genees": 3}
+## Andere spreuken: per type (damage -> vonk, heal -> genezing).
+const SPELL_ICON_BY_TYPE := {"damage": 2, "heal": 3}
+## Wapenmeter vol: gauge_ready_glow.png 72x4, 4 frames 18x4 van 90 ms (lus), zelfde anker als gauge_bar.
+const UI_GAUGE_READY := "res://assets/sprites/som/ui/gauge_ready_glow.png"
+const GAUGE_READY_MS := 90      # 'spark': elke andere aanvalsspreuk
 ## Seconden om de wapenmeter van 0 tot 100% te vullen.
 const CHARGE_TIME := 0.5
 ## Schade bij 0% lading (lineair naar 1.0 bij 100%).
@@ -144,12 +180,32 @@ const ATTACK_COOLDOWN := 1.6
 const ENEMY_REACH := 22.0
 const HIT_FLASH := 0.12
 
+## --- Skill-ring: technieken per held-id (vragen een volle wapenmeter). radius > 0 = rondom.
+const SKILLS := {
+	"dennis": [{"id": "wervelslag", "name": "Whirl Slash", "mult": 0.9, "radius": 30.0}],
+	"lotte": [{"id": "staafstoot", "name": "Staff Smash", "mult": 1.5, "radius": 0.0}],
+	"noor": [{"id": "vonkstoot", "name": "Arc Jab", "mult": 1.3, "radius": 0.0}],
+}
+
+## --- B = toveren (alleen Seren/Vesper als bestuurde held) ---
+## Snelspreuk per held-id: heal -> partylid met het laagste HP-deel; damage -> dichtstbijzijnde vijand.
+const B_MAGIC := {"lotte": "genees", "noor": "vuur"}
+## Minimale tijd (s) tussen twee B-spreuken.
+const B_CAST_COOLDOWN := 1.0
+## Bereik (px) waarbinnen een spreuk een vijand kan kiezen.
+const SPELL_RANGE := 160.0
+
 ## Speler-tekst (Engels).
 const TXT_RING := "Ring"
 const TXT_ITEMS := "Items"
 const TXT_SKILLS := "Skills"
+const TXT_MAGIC := "Magic"
+const TXT_TARGET := "%s: target?"
+const TXT_ALL_ENEMIES := "All enemies"
+const TXT_NOT_READY := "Not ready yet!"
 const TXT_NO_MP := "Not enough MP."
 const TXT_NO_TARGET := "No enemy in range."
+const TXT_NO_WOUNDED := "Nobody needs healing."
 const TXT_FALLEN := "%s has fallen..."
 const TXT_LEVEL := "%s is now level %d!"
 const TXT_GOT := "Got %s!"

@@ -48,7 +48,7 @@ static func _hero_anim(p: Node2D, t: Texture2D, hf: int, vf: int, frames: Array,
 
 
 ## Aanval: rij = kijkrichting, kolommen = frames; treffer aan het begin van d["hit_frame"].
-static func attack_anim(p: Node2D, t: Texture2D, d: Dictionary) -> Anim:
+static func attack_anim(p: Node2D, t: Texture2D, d: Dictionary, anim_name := "SomAttackAnim") -> Anim:
 	var n := maxi(1, int(d.get("frames", 6)))
 	var fr: Array = d.get("frame", [48, 48])
 	var vf := maxi(1, t.get_height() / maxi(1, int(fr[1])))
@@ -61,9 +61,59 @@ static func attack_anim(p: Node2D, t: Texture2D, d: Dictionary) -> Anim:
 		ms = []
 		for i in n:
 			ms.append(int(1000.0 / float(d.get("fps", 16.0))))
-	var a := _hero_anim(p, t, n, vf, frames, ms)
+	var a := _hero_anim(p, t, n, vf, frames, ms, anim_name)
 	a.hit_index = clampi(int(d.get("hit_frame", 1)) - 1, 0, n - 1)
 	return a
+
+
+## Magiër-cast6 (SomData.CAST6): 6 frames per richting; 'hit' = de spreuk komt vrij (frame 4).
+## Met een cirkel-sheet loopt die in een lus onder de caster tot de animatie klaar is.
+static func cast6_anim(p: Node2D, t: Texture2D, circle: Texture2D) -> Anim:
+	var a := attack_anim(p, t, SomData.CAST6, "SomCastAnim")
+	if circle:
+		var old := p.get_node_or_null("SomCastCircle")
+		if old:
+			old.free()
+		var c := Anim.new()
+		c.name = "SomCastCircle"
+		c.texture = circle
+		c.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var cw := int(SomData.CAST_CIRCLE_CELL[0])
+		var n := maxi(1, circle.get_width() / cw)
+		c.hframes = n
+		var seq: Array = []
+		var ms: Array = []
+		for i in n:
+			seq.append(i)
+			ms.append(SomData.CAST_CIRCLE_MS)
+		c.seq = seq
+		c.ms = ms
+		c.loop = true
+		c.z_index = -1                 # achter de held
+		c.show_behind_parent = true
+		c.position = Vector2(0, 8.0 - float(circle.get_height()) / 2.0)    # midden op de voeten
+		p.add_child(c)
+		a.finished.connect(func() -> void:
+			if is_instance_valid(c):
+				c.queue_free())
+	return a
+
+
+## Definitie voor oneshot() van een spreuk-effect: sheet/cel uit SomData.SPELL_FX, frames uit de sheetbreedte,
+## anker onderkant-midden (voeten). {} = geen art.
+static func spell_fx_def(spell_id: String, sp: Dictionary) -> Dictionary:
+	var key := spell_id
+	if not SomData.SPELL_FX.has(key):
+		key = str(SomData.SPELL_FX_BY_ELEMENT.get(str(sp.get("element", "")), SomData.SPELL_FX_BY_TYPE.get(str(sp.get("type", "")), "")))
+	if not SomData.SPELL_FX.has(key):
+		return {}
+	var e: Dictionary = SomData.SPELL_FX[key]
+	var t := tex(str(e["sheet"]))
+	if t == null:
+		return {}
+	var cell: Array = e["cell"]
+	return {"sheet": e["sheet"], "cell": cell, "frames": maxi(1, t.get_width() / int(cell[0])), "ms": SomData.SPELL_FX_MS,
+		"anchor": [int(cell[0]) / 2, int(cell[1])], "key": key}
 
 
 ## Spreuk: 3 kolommen x 4 rijen; frame 1, daarna 2-3 in een lus (SomData.CAST_MS).
@@ -254,6 +304,8 @@ class Anim extends Sprite2D:
 	var hit_done := false
 	var hit_at_ms := -1.0
 	var _done := false
+	## Lus (castcirkel): na het laatste frame weer van voren.
+	var loop := false
 
 	func _ready() -> void:
 		frame = int(seq[0])
@@ -283,6 +335,11 @@ class Anim extends Sprite2D:
 			if index == hit_index:
 				_hit()
 		if elapsed_ms >= total_ms():
+			if loop:
+				elapsed_ms = fmod(elapsed_ms, maxf(1.0, total_ms()))
+				index = 0
+				frame = int(seq[0])
+				return
 			finish_now()
 			queue_free()
 
@@ -343,13 +400,21 @@ class Gauge extends Node2D:
 	var bar: Texture2D
 	var fill: Texture2D
 	var glint: Texture2D
+	var ready_glow: Texture2D
 
 	func _ready() -> void:
+		ready_glow = _load_tex(SomData.UI_GAUGE_READY)
 		z_index = 25
 		name = "SomGauge"
 		bar = _load_tex(SomData.UI_GAUGE_BAR)
 		fill = _load_tex(SomData.UI_GAUGE_FILL)
 		glint = _load_tex(SomData.UI_GAUGE_GLINT)
+
+	## Frame van gauge_ready_glow dat nu getoond wordt (-1 = meter niet vol of geen art).
+	func ready_frame() -> int:
+		if ready_glow == null or arena == null or float(arena.charge) < 1.0:
+			return -1
+		return int(_t * 1000.0 / float(SomData.GAUGE_READY_MS)) % 4
 
 	static func _load_tex(p: String) -> Texture2D:
 		return load(p) if ResourceLoader.exists(p) else null
@@ -365,6 +430,11 @@ class Gauge extends Node2D:
 		if arena == null:
 			return
 		var c: float = arena.charge
+		var rf := ready_frame()
+		if rf >= 0:
+			# vol: gauge_ready_glow vervangt balk en vulling (zelfde 18x4-frame, linksboven-anker)
+			draw_texture_rect_region(ready_glow, Rect2(-9, 0, 18, 4), Rect2(rf * 18, 0, 18, 4))
+			return
 		if bar and fill:
 			draw_texture(bar, Vector2(-9, 0))
 			draw_texture_rect_region(fill, Rect2(-8, 1, roundf(16.0 * c), 2), Rect2(0, 0, roundf(16.0 * c), 2))
