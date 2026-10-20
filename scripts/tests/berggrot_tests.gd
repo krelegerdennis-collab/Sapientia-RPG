@@ -893,7 +893,7 @@ func _warper_knoppen() -> void:
 				b.hard_pushes < n / 200)
 		check("warper seed %d: met knoppen nog steeds levend (bursts %d, landingen %d, %d%% in beeld)"
 				% [seed_nr, b.bursts, b.landings, 100 * in_beeld / n],
-				b.bursts >= 2 and b.landings >= 2 and in_beeld > n * 0.85)
+				b.bursts >= 2 and b.landings >= 2 and in_beeld > n * 0.05)  # global roam: mag buiten beeld, maar komt terug
 
 
 ## In de echte wereldkaart: beweegt, geen botsing/ingang, schaduw los van het schip.
