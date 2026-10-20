@@ -545,6 +545,7 @@ func _capture_tests() -> void:
 	check("baas: boek blijft (1), geen pagina, baas staat nog", GameState.item_count(CD.BOOK_ITEM) == 1
 			and GameState.codex_pages.size() == 1 and int(e["s"]["hp"]) > 0 and b.codex.last_capture.get("result") == "baas")
 	e["s"]["hp"] = 400
+	e["s"]["atk"] = 1  # PR #126: andere RNG-volgorde; de test gaat over vluchten, niet over overleven
 	await flee(b)
 	check("baas: weggevlucht (test), terug op de kaart", not GameState.in_battle)
 
