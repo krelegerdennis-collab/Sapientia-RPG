@@ -296,6 +296,7 @@ func _ready() -> void:
 	# Vriendenmodus: of  godot -- --pvptest  (pvp/tests/pvp_tests.gd).
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
+	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -331,7 +332,8 @@ func _ready() -> void:
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
-			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"]]:
+			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
+			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet

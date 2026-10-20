@@ -68,6 +68,8 @@ Suites (v0.18, aantallen PASS ter referentie):
 | `--codextest` | `scripts/tests/codex_tests.gd` | 90 |
 | `--checkpointtest` | `scripts/tests/checkpoint_tests.gd` | 65 |
 | `--dungeon100gentest` | `scripts/tests/dungeon100_generator_tests.gd` | 58 |
+
+Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`tools/battlesim/`) schrijft `docs/BATTLE_BALANCE_REPORT.md`; een kleine vaste-seed steekproef zit in `--autotest`.
 | `--dungeon100schaaltest` | `scripts/tests/dungeon100_schaal_tests.gd` | 78 |
 | `--dungeon100regelstest` | `scripts/tests/dungeon100_tests.gd` | 72 |
 | `--dungeon100integratietest` | `scripts/tests/dungeon100_integratie_tests.gd` | 41 |
