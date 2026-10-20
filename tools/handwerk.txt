@@ -198,6 +198,7 @@ assets/sprites/enemies/wortelkoning_hit.png
 assets/tiles/dungeon/woud_tiles.png
 assets/tiles/dungeon/donker_woud_tiles.png
 assets/tiles/dungeon/woud_tiles_v8.png
+assets/tiles/dungeon/woud_tiles_v9.png
 assets/battle/donker_woud.png
 assets/sprites/woud/noor_cocon.png
 assets/sprites/woud/noor_cocon_open.png

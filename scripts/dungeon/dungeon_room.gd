@@ -64,6 +64,10 @@ var _blocked := {}             # tile -> true: kist/boek/meubel (map-monsters lo
 ## v0.17 laag met boomkruinen/mist boven Objects (null = deze kamer heeft er geen)
 var overlay: TileMapLayer
 const OVERLAY_Z := 10
+## v0.24 mist-tegels (Donker Woud) op een eigen laag boven de overlay, half doorzichtig
+const MIST_TILES := [82, 83, 84, 109, 110]
+const MIST_ALPHA := 0.6
+var mist_layer: TileMapLayer
 
 
 func _ready() -> void:
@@ -146,6 +150,11 @@ func _build() -> void:
 				if not exit_cells.has(key):
 					exit_cells[key] = []
 				exit_cells[key].append(Vector2i(x, y))
+	# v0.24 bospad (Donker Woud) over de gewone vloer, zie DungeonRooms.path_tiles
+	var pad := DungeonRooms.path_tiles(room)
+	for t in pad:
+		_cells[t] = int(pad[t])
+		set_tile(ground, t, int(pad[t]))
 	_build_overlay()
 	var objects: Node2D = $Objects
 	# opslagboek op de sokkel (4 px hoger, zodat de lessenaar op de sokkel staat);
@@ -373,9 +382,25 @@ func _build_overlay() -> void:
 				tile = int(band[band.size() - 1])
 			else:
 				tile = int(band[1 + (i - 1) % (band.size() - 2)])
-			set_tile(overlay, Vector2i(int(m[0]) + i, int(m[1])), tile)
+			_set_overlay_tile(Vector2i(int(m[0]) + i, int(m[1])), tile)
 	for o in room.get("overlay", []):
-		set_tile(overlay, Vector2i(int(o[0]), int(o[1])), int(o[2]))
+		_set_overlay_tile(Vector2i(int(o[0]), int(o[1])), int(o[2]))
+
+
+## v0.24 overlay-tegel; mist (MIST_TILES) gaat naar de eigen laag "MistLaag" (modulate alpha MIST_ALPHA).
+func _set_overlay_tile(t: Vector2i, n: int) -> void:
+	if not MIST_TILES.has(n):
+		set_tile(overlay, t, n)
+		return
+	if mist_layer == null:
+		mist_layer = TileMapLayer.new()
+		mist_layer.name = "MistLaag"
+		mist_layer.tile_set = overlay.tile_set
+		mist_layer.z_index = OVERLAY_Z + 1
+		mist_layer.modulate = Color(1, 1, 1, MIST_ALPHA)
+		add_child(mist_layer)
+		move_child(mist_layer, overlay.get_index() + 1)
+	set_tile(mist_layer, t, n)
 
 
 ## v0.17 naam, tile, event en show_if van een verhaal-object/NPC uit de kamerdata.
