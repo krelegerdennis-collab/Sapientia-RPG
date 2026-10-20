@@ -98,8 +98,9 @@ const THEMES := {
 	# v8 (RPG ART art_mapsprites_v4 tiles_v8/archief2): eigen _v8-kopieen (originelen staan in handwerk.txt),
 	# zelfde nummering/maten; kleur zit in de tegels zelf, dus tint wit.
 	# v8.1: kas_tiles_v8b.png 256x96 (0-79 gelijk; blok A 80-83, blok B 84-87, effen vloer 88-95).
+	# v8.2: kas_tiles_v8c.png = v8b met zachtere lichtbundels 65/66 (v8b staat in handwerk.txt).
 	"kas": {
-		"tiles": "res://assets/tiles/dungeon/kas_tiles_v8b.png",
+		"tiles": "res://assets/tiles/dungeon/kas_tiles_v8c.png",
 		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek_v8.png",
 		"terrain": "kas",
 		"tint": Color(1, 1, 1),
@@ -110,11 +111,15 @@ const THEMES := {
 	# Berggrot naar de kas. Zelfde tegelnummers, koud steenblauw beeld.
 	# v0.21: echte tegels van RPG ART (art_batch1_v21). Tint lichter gemaakt (was 0.70, 0.78, 0.95: te donker).
 	# v0.21: eigen terrein "berggrot" -> gevechtsachtergrond cave_berg (game_data TERRAIN_BACKDROP).
+	# v8 (RPG ART art_mapsprites_v4 tiles_v8/berggrot): berggrot_tiles_v8.png 256x96 (origineel staat in
+	# handwerk.txt); 0-79 zelfde nummering, blok A 80-83 / B 84-87, 88 = losse rots, 89-95 vulvloer.
+	# Kleur zit in de tegels zelf, dus tint wit. 88 is massief (zelfde botsing als 59 '#').
 	"berggrot": {
-		"tiles": "res://assets/tiles/dungeon/berggrot_tiles.png",
+		"tiles": "res://assets/tiles/dungeon/berggrot_tiles_v8.png",
 		"lib_tiles": "res://assets/tiles/dungeon/berggrot_bibliotheek.png",
 		"terrain": "berggrot",
-		"tint": Color(0.88, 0.92, 1.0),
+		"tint": Color(1, 1, 1),
+		"solid_extra": [88],
 		"sprites": {},
 	},
 	# Diepe Grot (Dungeon100): eigen tegels van RPG ART (art_diepegrot): blauwgrijze grotsteen met cyaan
@@ -276,6 +281,42 @@ static func kas_floor_at(x: int, y: int, ground: Array, layout: Array) -> int:
 			return cur
 	var blk: Array = KAS_BLOCK_A if archief_block_choice(bx, by) == 0 else KAS_BLOCK_B
 	return int(blk[(y & 1) * 2 + (x & 1)])
+
+
+## Berggrot v8: kamers met blokvloer (A/B op elk even 2x2-vak dat helemaal '.' is) en kamers waar een losse
+## rots '#' (geen massieve buur links/rechts/boven/onder) als tegel 88 getekend wordt. 88 is massief in dit
+## thema, dus de botsing blijft gelijk aan 59.
+const BERGGROT_BLOCK_ROOMS := ["berggrot_mond", "berggrot_nerf", "berggrot_uitmond", "berggrot_grendel", "berggrot_geheim"]
+const BERGGROT_LONE_ROCK_ROOMS := ["berggrot_mond", "berggrot_nerf"]
+const BERGGROT_BLOCK_A := [80, 81, 82, 83]
+const BERGGROT_BLOCK_B := [84, 85, 86, 87]
+const BERGGROT_LONE_ROCK := 88
+
+
+## Berggrot-vloer voor '.' op (x, y): vrij even 2x2-vak -> blok A/B (archief_block_choice(x>>1, y>>1)),
+## anders fallback (de gewone floor_variant).
+static func berggrot_floor_at(x: int, y: int, layout: Array, fallback: int) -> int:
+	var bx := x >> 1
+	var by := y >> 1
+	if not _block_free(bx, by, layout):
+		return fallback
+	var blk: Array = BERGGROT_BLOCK_A if archief_block_choice(bx, by) == 0 else BERGGROT_BLOCK_B
+	return int(blk[(y & 1) * 2 + (x & 1)])
+
+
+## Losse rots: '#' op (x, y) zonder massieve buur (volgens legend); buiten de kaart telt als muur.
+static func berggrot_lone_rock(x: int, y: int, layout: Array, legend: Dictionary) -> bool:
+	if y < 0 or y >= layout.size() or x < 0 or x >= (layout[y] as String).length() or layout[y][x] != "#":
+		return false
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var nx: int = x + d.x
+		var ny: int = y + d.y
+		if ny < 0 or ny >= layout.size() or nx < 0 or nx >= (layout[ny] as String).length():
+			return false
+		var ch: String = layout[ny][nx]
+		if not legend.has(ch) or is_solid(int(legend[ch]), "berggrot"):
+			return false
+	return true
 
 
 ## Vloertegel voor '.' op (x, y) in een archief-lay-out. Blok-modus: vak = (x>>1, y>>1) op het even raster;
