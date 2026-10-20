@@ -1,0 +1,15 @@
+[gd_resource type="TileSet" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/tiles/vijver_v8_teal_erf.png" id="1_vijv8"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vijv8"]
+texture = ExtResource("1_vijv8")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+
+[resource]
+sources/0 = SubResource("TileSetAtlasSource_vijv8")

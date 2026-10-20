@@ -521,7 +521,7 @@ func _outdoor_tests() -> void:
 	var arch: Node = sc.get_node("Objects/Archief")
 	var well: Node = sc.get_node("Objects/Put")
 	var chest: Node = sc.get_node("Objects/Kist")
-	check("B: ingang = RPG ART archief_ingang.png (2 frames 48x32), 3x2 tiles op (35,4)", arch.texture.resource_path.ends_with("buiten/archief_ingang.png")
+	check("B: ingang = RPG ART archief_ingang.png (2 frames 48x32), 3x2 tiles op (35,4)", arch.texture.resource_path.replace("_v8.png", ".png").ends_with("buiten/archief_ingang.png")
 			and arch.hframes == 2 and arch.texture.get_size() == Vector2(96, 32) and arch.tiles == Vector2i(3, 2)
 			and Vector2i((arch.position / 16.0).floor()) == Vector2i(35, 4))
 	var cs: CollisionShape2D = arch.get_node("CollisionShape2D")
@@ -530,13 +530,18 @@ func _outdoor_tests() -> void:
 			sprite_rect == Rect2(560, 64, 48, 32) and (cs.shape as RectangleShape2D).size == Vector2(46, 30)
 			and cs.global_position == Vector2(584, 80))
 	check("B: nacht -> ingang open + flakkerende gloed (open_flikker, 2 frames)", arch.looping
-			and arch.sprite.texture.resource_path.ends_with("archief_ingang_open_flikker.png") and arch.glow.visible)
-	check("B: waterput 32x32 = 2x2 tiles, plaatje op het raster", well.texture.resource_path.ends_with("buiten/put.png")
+			and arch.sprite.texture.resource_path.replace("_v8.png", ".png").ends_with("archief_ingang_open_flikker.png") and arch.glow.visible)
+	check("B: waterput 32x32 = 2x2 tiles, plaatje op het raster", well.texture.resource_path.replace("_v8.png", ".png").ends_with("buiten/put.png")
 			and well.tiles == Vector2i(2, 2) and (well.get_node("CollisionShape2D").shape as RectangleShape2D).size == Vector2(30, 30)
 			and well.sprite.global_position + well.sprite.offset == Vector2(272, 128))
 	var seals: Array = sc.get_node("Objects").get_children().filter(func(n): return n.name.begins_with("Zegel") or str(n.get("event")) == "zegel")
 	check("B: v0.16 geen zegelstenen meer bij het Wachtershuis (runen-tutorial weg) (%s)" % [seals], seals.is_empty())
-	check("B: kist van RPG ART (2 frames 16x16)", chest.texture.resource_path.ends_with("buiten/kist.png") and chest.hframes == 2)
+	check("B: kist van RPG ART (2 frames 16x16)", chest.texture.resource_path.replace("_v8.png", ".png").ends_with("buiten/kist.png") and chest.hframes == 2)
+	var vijver: TileMapLayer = sc.get_node_or_null("VijverV8")
+	check("B: v8-vijver (vijver_v8_teal.png rij 0 + rij 2, gebakken op de erfgrond) over het water op (14..16, 16..17)", vijver != null
+			and vijver.get_used_cells().size() == 6 and vijver.get_cell_atlas_coords(Vector2i(15, 17)) == Vector2i(1, 1)
+			and (vijver.tile_set.get_source(0) as TileSetAtlasSource).texture.resource_path.ends_with("vijver_v8_teal_erf.png")
+			and vijver.get_cell_atlas_coords(Vector2i(14, 16)) == Vector2i(0, 0))
 	var ruins: Array = sc.get_node("Objects").get_children().filter(func(n): return n.name.begins_with("Ruine_"))
 	check("B: %d ruïne-stukken (ruine.png, 10 stukken) rond de ingang, blokkeren" % ruins.size(), ruins.size() >= 4
 			and ruins.all(_ruin_ok))
@@ -556,6 +561,9 @@ func _outdoor_tests() -> void:
 	player().place_at(Vector2i(28, 8), D)
 	await pframes(20)
 	await screenshot("v13_buiten")
+	player().place_at(Vector2i(15, 19), D)   # v8-vijver + waterput (proloog-props v8)
+	await pframes(20)
+	await screenshot("proloog_vijver_v8")
 	GameState.story_step = SD.NACHT
 	GameState.story_flags = {}
 
@@ -571,7 +579,7 @@ func _lrect(b: Control, c: Control) -> Rect2:
 
 
 func _ruin_ok(n: Node) -> bool:
-	return n.texture.resource_path.ends_with("buiten/ruine.png") and n.hframes == 10 and n.collision_layer == 1 \
+	return n.texture.resource_path.replace("_v8.png", ".png").ends_with("buiten/ruine.png") and n.hframes == 10 and n.collision_layer == 1 \
 			and absf(n.position.x - 584.0) <= 64.0 and n.position.y <= 128.0
 
 
