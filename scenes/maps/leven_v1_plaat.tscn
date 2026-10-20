@@ -8,6 +8,7 @@
 [node name="LevenV1Plaat" type="Node2D"]
 script = ExtResource("1_room")
 room_id = "leven_v1_plaat"
+music_track = "levend_archief"
 map_name = "The Living Archive - Growth Plate"
 encounters = false
 
