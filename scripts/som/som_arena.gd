@@ -5,17 +5,21 @@ extends Node
 ## loopt alles turn-based zoals altijd. Bazen ("boss": true) doen hier NIET aan mee: die starten
 ## gewoon het bestaande turn-based gevecht (DungeonRoom.start_monster_battle).
 ##
-## Speler: A (interact) = slag. Wapenmeter vult in SomData.CHARGE_TIME; slaan onder 100% doet minder
-## schade (SomData.CHARGE_MIN_MULT .. 1.0). Ring-knop (of Tab) = pauze-ringmenu (items/spreuken uit de
-## bestaande data); de keuze wordt na het sluiten in realtime uitgevoerd.
+## Party: de held die je bestuurt zit in de speler-node (camera, deuren, praten); de anderen zijn
+## AI-bondgenoten (som_ally.gd). SWITCH (knop/toets C) wisselt: het lichaam van de speler en dat van de
+## bondgenoot ruilen van held (sprite + plek), de camera glijdt mee. KO -> automatisch naar de volgende;
+## game over pas als iedereen KO is.
+## Speler: analoge joystick/toetsen, A = slag met wapenmeter (SomData.CHARGE_TIME), Ring (Tab) = pauze.
 ## Schade: dezelfde formule als battle.gd _physical_damage (atk*mult - def/2, +/-15%, min 1).
 ## Buit: EXP/goud/drops gaan in GameState.party/inventory/gold (zoals een gewonnen gevecht).
-## Visuals (slag-boog, "!", balkjes, cijfers) zijn PLACEHOLDERS (getekend in code, magenta = placeholder).
+## Visuals (slag-boog, "!", balkjes, cijfers) zijn PLACEHOLDERS (in code getekend).
 
 signal enemy_hit(monster: Node, damage: int)
 signal enemy_defeated(monster: Node, exp_gain: int, gold_gain: int, drops: Array)
 signal player_hit(damage: int)
+signal member_down(hero_id: String)
 signal player_defeated
+signal hero_switched(hero_id: String)
 signal ring_opened
 signal ring_closed
 signal action_resolved(text: String)
@@ -29,37 +33,84 @@ const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const SomHud := preload("res://scripts/som/som_hud.gd")
 const SomRing := preload("res://scripts/som/som_ring.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const SomMove := preload("res://scripts/som/som_move.gd")
+const SomAlly := preload("res://scripts/som/som_ally.gd")
 const RING_ACTION := "som_ring"
-const PLACEHOLDER_COLOR := Color("ff1ee6")
+const SWITCH_ACTION := "som_switch"
 
 var room: Node
 var player: CharacterBody2D
-## Wapenmeter 0..1 (1 = 100%).
+## Held die nu bestuurd wordt (in de speler-node).
+var active_id := "dennis"
+## Wapenmeter van de bestuurde held 0..1 (1 = 100%).
 var charge := 1.0
-## MapMonster -> {"hp", "max_hp", "atk", "def", "exp", "gold", "drops", "data", "cd", "tele", "chase", "flash", "kb"}
+## MapMonster -> {"hp", "max_hp", "atk", "def", "exp", "gold", "drops", "data", "cd", "tele", "chase", "flash", "target"}
 var enemies := {}
-var iframes := 0.0
+var allies: Array = []
+## Onkwetsbaar-tijd per held-id.
+var iframes := {}
 var down := false
-var hud: SomHud
-var ring: SomRing
+var hud: Node
+var ring: Node
 var gauge: Node2D
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
 var queued := {}
 var _queue_t := 0.0
-## Voor de autotest: laatste schade aan een vijand en aan de speler, en laatste melding.
+var touch: Control
+## Autotest: vaste joystick-stand (ZERO = echte input).
+var forced_joy := Vector2.ZERO
+## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
+var sheets := {}
+var attack_texs := {}
+## Voor de autotest: laatste schade, laatste melding, tellers.
 var last_enemy_damage := 0
 var last_player_damage := 0
+var last_hit_id := ""
+var last_attacker := ""
 var last_text := ""
 var attacks := 0
+var switches := 0
+## Autotest: bondgenoten even stilzetten (false = geen AI-tick).
+var allies_enabled := true
 
 
 func setup(p_room: Node) -> void:
 	room = p_room
 	player = room.player
 	name = "SomArena"
-	_ensure_action()
+	_ensure_actions()
+	for id in SomData.SHEETS:
+		var path := str(SomData.SHEETS[id])
+		if ResourceLoader.exists(path):
+			sheets[id] = load(path)
+	for id in SomData.ATTACK_ANIMS:
+		var sheet := str(SomData.ATTACK_ANIMS[id].get("sheet", ""))
+		if sheet != "" and ResourceLoader.exists(sheet):
+			attack_texs[id] = load(sheet)
+	active_id = str(GameState.party[0].get("id", "dennis")) if not GameState.party.is_empty() else "dennis"
 	for m in room.monsters:
 		register(m)
+	# Action: analoge beweging + joystick, 24x32-kaartsprite, soepele camera
+	touch = room.get_node_or_null("TouchControls/Control") as Control
+	if touch and "joystick_mode" in touch:
+		touch.joystick_mode = true
+	player.set_analog(analog_dir, SomData.MOVE_SPEED)
+	_apply_player_sheet()
+	var cam := player.get_node_or_null("Camera2D") as Camera2D
+	if cam:
+		cam.position_smoothing_enabled = true
+		cam.position_smoothing_speed = SomData.CAMERA_SMOOTH
+	var objects := room.get_node("Objects")
+	var slot := 0
+	for h in GameState.party:
+		var id := str(h.get("id", ""))
+		if id == active_id:
+			continue
+		var a: CharacterBody2D = SomAlly.new()
+		objects.add_child(a)
+		a.setup(self, id, slot)
+		allies.append(a)
+		slot += 1
 	hud = SomHud.new()
 	hud.arena = self
 	add_child(hud)
@@ -68,16 +119,27 @@ func setup(p_room: Node) -> void:
 	add_child(ring)
 	gauge = SomFx.Gauge.new()
 	gauge.arena = self
-	room.get_node("Objects").add_child(gauge)
+	objects.add_child(gauge)
 
 
-static func _ensure_action() -> void:
-	if InputMap.has_action(RING_ACTION):
-		return
-	InputMap.add_action(RING_ACTION)
-	var ev := InputEventKey.new()
-	ev.physical_keycode = KEY_TAB
-	InputMap.action_add_event(RING_ACTION, ev)
+static func _ensure_actions() -> void:
+	for pair in [[RING_ACTION, KEY_TAB], [SWITCH_ACTION, KEY_C]]:
+		if InputMap.has_action(pair[0]):
+			continue
+		InputMap.add_action(pair[0])
+		var ev := InputEventKey.new()
+		ev.physical_keycode = pair[1]
+		InputMap.action_add_event(pair[0], ev)
+
+
+func sheet_for(id: String) -> Texture2D:
+	return sheets.get(id, null)
+
+
+func _apply_player_sheet() -> void:
+	var tex := sheet_for(active_id)
+	if tex and player.has_method("zet_sheet"):
+		player.zet_sheet(tex)
 
 
 ## Bestaande vijand-data (game_data.gd / berggrot_data.gd) met hetzelfde kamerniveau als het gevecht.
@@ -104,11 +166,119 @@ func register(m: Node) -> void:
 	enemies[m] = {"hp": int(d.get("max_hp", 1)), "max_hp": int(d.get("max_hp", 1)), "atk": int(d.get("atk", 1)),
 			"def": int(d.get("def", 0)), "exp": int(d.get("exp", 0)), "gold": int(d.get("gold", 0)),
 			"drops": d.get("drops", []), "data": d, "cd": 0.6, "tele": 0.0, "chase": randf() * SomData.CHASE_INTERVAL,
-			"flash": 0.0}
+			"flash": 0.0, "target": ""}
 
 
+# ---------------------------------------------------------------- party
+func member(id: String) -> Dictionary:
+	return GameState.member(id) if GameState.has_member(id) else {}
+
+
+## De bestuurde held.
 func hero() -> Dictionary:
-	return GameState.party[0] if not GameState.party.is_empty() else {}
+	var h := member(active_id)
+	if h.is_empty() and not GameState.party.is_empty():
+		return GameState.party[0]
+	return h
+
+
+func is_alive(id: String) -> bool:
+	return int(member(id).get("hp", 0)) > 0
+
+
+func ally_of(id: String) -> Node:
+	for a in allies:
+		if a.hero_id == id:
+			return a
+	return null
+
+
+## Node (speler of bondgenoot) van een held.
+func node_of(id: String) -> Node2D:
+	return player if id == active_id else ally_of(id)
+
+
+## Lichaamsmidden van een held-node (24x32-sprite).
+func body_of(id: String) -> Vector2:
+	var n := node_of(id)
+	return (n.position if n else player.position) + Vector2(0, SomData.BODY_Y)
+
+
+func body() -> Vector2:
+	return body_of(active_id)
+
+
+func party_ids() -> Array[String]:
+	var out: Array[String] = []
+	for h in GameState.party:
+		out.append(str(h.get("id", "")))
+	return out
+
+
+## Levend partylid met het laagste HP-deel onder 'below' ({} = niemand).
+func lowest_member(below: float) -> Dictionary:
+	var best := {}
+	var best_r := below
+	for h in GameState.alive_heroes():
+		var r := float(h["hp"]) / maxf(1.0, float(h["max_hp"]))
+		if r < best_r:
+			best_r = r
+			best = h
+	return best
+
+
+## Volgende levende held in SomData.SWITCH_ORDER na 'from' ("" = niemand).
+func next_alive(from: String) -> String:
+	var order: Array[String] = []
+	for id in SomData.SWITCH_ORDER:
+		if GameState.has_member(id):
+			order.append(id)
+	for id in party_ids():
+		if not order.has(id):
+			order.append(id)
+	var i := order.find(from)
+	for k in range(1, order.size() + 1):
+		var id := order[(i + k) % order.size()]
+		if is_alive(id) and id != from:
+			return id
+	return ""
+
+
+## SWITCH: besturing naar de volgende levende held. Speler-lichaam en bondgenoot-lichaam ruilen van held
+## (sprite + plek); de camera glijdt mee. Geeft de nieuwe held-id ("" = niets gewisseld).
+func switch_hero(to := "") -> String:
+	var nxt := to if to != "" else next_alive(active_id)
+	if nxt == "" or nxt == active_id or not is_alive(nxt):
+		return ""
+	var a := ally_of(nxt)
+	if a == null:
+		return ""
+	var old := active_id
+	var p_pos: Vector2 = player.position
+	var p_face: Vector2i = player.facing
+	player.position = a.position
+	player.set("_target", a.position)
+	player.facing = a.facing
+	a.position = p_pos
+	a.facing = p_face
+	active_id = nxt
+	a.set_hero(old)
+	_apply_player_sheet()
+	var c := charge
+	charge = a.charge
+	a.charge = c
+	switches += 1
+	_say(SomData.TXT_NOW % str(hero().get("name", nxt)))
+	hero_switched.emit(nxt)
+	return nxt
+
+
+func analog_dir() -> Vector2:
+	if forced_joy != Vector2.ZERO:
+		return SomMove.joy_to_dir(forced_joy)
+	if touch and "joy_raw" in touch and touch.joy_raw != Vector2.ZERO:
+		return SomMove.joy_to_dir(touch.joy_raw)
+	return SomMove.keys_to_dir()
 
 
 func active() -> bool:
@@ -124,7 +294,10 @@ func _process(delta: float) -> void:
 	if not active():
 		return
 	charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
-	iframes = maxf(0.0, iframes - delta)
+	for k in iframes.keys():
+		iframes[k] = maxf(0.0, float(iframes[k]) - delta)
+	if Input.is_action_just_pressed(SWITCH_ACTION):
+		switch_hero()
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame:
 		attack()
 	if not queued.is_empty():
@@ -133,6 +306,9 @@ func _process(delta: float) -> void:
 			var q := queued
 			queued = {}
 			resolve(q)
+	if allies_enabled:
+		for a in allies:
+			a.tick(delta)
 	for m in enemies.keys():
 		if is_instance_valid(m):
 			_enemy_ai(m, delta)
@@ -140,7 +316,7 @@ func _process(delta: float) -> void:
 			enemies.erase(m)
 
 
-# ---------------------------------------------------------------- speler
+# ---------------------------------------------------------------- aanvallen
 ## Schademultiplier van de wapenmeter (1.0 bij 100%).
 static func charge_mult(c: float) -> float:
 	return 1.0 if c >= 1.0 else lerpf(SomData.CHARGE_MIN_MULT, 1.0, clampf(c, 0.0, 1.0))
@@ -152,28 +328,58 @@ static func physical_damage(atk: float, def: float, mult: float) -> int:
 	return maxi(1, roundi(base * randf_range(0.85, 1.15)))
 
 
-## Eén slag. Geeft het aantal geraakte vijanden.
+## Eén slag van de bestuurde held. Geeft het aantal geraakte vijanden.
 func attack() -> int:
+	if not is_alive(active_id):
+		return 0
 	attacks += 1
 	var mult := charge_mult(charge)
 	charge = 0.0
-	var f: Vector2 = Vector2(player.facing)
-	var point: Vector2 = player.position + f * SomData.ATTACK_OFFSET
-	SomFx.slash(room.get_node("Objects"), point, f)
-	var n := 0
-	var atk := float(GameState.effective_stat(hero(), "atk"))
+	return _swing(active_id, player, mult)
+
+
+## Slag van een held-node (speler of bondgenoot) in zijn kijkrichting.
+func _swing(id: String, n: Node2D, mult: float) -> int:
+	var f := Vector2(n.facing)
+	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.ATTACK_OFFSET
+	if attack_texs.has(id):
+		SomFx.attack_anim(n, attack_texs[id], SomData.ATTACK_ANIMS[id])
+	else:
+		SomFx.slash(room.get_node("Objects"), point, f)
+	var hits := 0
+	var atk := float(GameState.effective_stat(member(id), "atk"))
 	for m in enemies.keys():
 		if not is_instance_valid(m):
 			continue
-		if _center(m).distance_to(point) <= SomData.ATTACK_REACH + 8.0 * maxf(m.size.x, m.size.y):
+		if center_of(m).distance_to(point) <= SomData.ATTACK_REACH + 8.0 * maxf(m.size.x, m.size.y):
 			var e: Dictionary = enemies[m]
-			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), player.facing)
-			n += 1
-	return n
+			last_attacker = id
+			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), n.facing)
+			hits += 1
+	return hits
 
 
-func _center(m: Node) -> Vector2:
+## Bondgenoot slaat (volle meter; som_ally.gd heeft hem al naar de vijand gedraaid).
+func ally_attack(a: Node2D, _enemy: Node) -> int:
+	return _swing(a.hero_id, a, 1.0)
+
+
+func center_of(m: Node) -> Vector2:
 	return m.position + Vector2(0, -(m.size.y - 1) * 8.0)
+
+
+## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
+func nearest_enemy(from: Vector2, within: float) -> Node:
+	var best: Node = null
+	var bd := within
+	for m in enemies.keys():
+		if not is_instance_valid(m):
+			continue
+		var d := center_of(m).distance_to(from)
+		if d <= bd:
+			bd = d
+			best = m
+	return best
 
 
 func damage_enemy(m: Node, dmg: int, dir: Vector2i) -> void:
@@ -184,7 +390,7 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i) -> void:
 	e["flash"] = SomData.HIT_FLASH
 	e["tele"] = 0.0          # geraakt = telegraaf afgebroken
 	last_enemy_damage = dmg
-	SomFx.number(room.get_node("Objects"), _center(m) + Vector2(0, -10), str(dmg), Color(1, 1, 1))
+	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), Color(1, 1, 1))
 	enemy_hit.emit(m, dmg)
 	if int(e["hp"]) <= 0:
 		_defeat_enemy(m)
@@ -240,6 +446,20 @@ func _defeat_enemy(m: Node) -> void:
 
 
 # ---------------------------------------------------------------- vijanden
+## Dichtstbijzijnde levende held (id) voor een vijand.
+func _target_for(m: Node) -> String:
+	var best := ""
+	var bd := 1e9
+	for id in party_ids():
+		if not is_alive(id) or node_of(id) == null:
+			continue
+		var d := center_of(m).distance_to(body_of(id))
+		if d < bd:
+			bd = d
+			best = id
+	return best
+
+
 func _enemy_ai(m: Node, delta: float) -> void:
 	var e: Dictionary = enemies[m]
 	if float(e["flash"]) > 0.0:
@@ -247,28 +467,34 @@ func _enemy_ai(m: Node, delta: float) -> void:
 	if m.is_stunned():
 		_tint(m, e)
 		return
-	var dist: float = _center(m).distance_to(player.position)
+	if float(e["tele"]) <= 0.0:
+		e["target"] = _target_for(m)
+	var tid := str(e["target"])
+	if tid == "":
+		_tint(m, e)
+		return
+	var dist: float = center_of(m).distance_to(body_of(tid))
 	if float(e["tele"]) > 0.0:
 		e["tele"] = float(e["tele"]) - delta
 		if float(e["tele"]) <= 0.0:
 			e["cd"] = SomData.ATTACK_COOLDOWN
 			if dist <= SomData.ENEMY_REACH + 8.0 * (maxf(m.size.x, m.size.y) - 1.0):
-				hit_player(int(e["atk"]), _center(m))
+				hit_member(tid, int(e["atk"]))
 	elif float(e["cd"]) > 0.0:
 		e["cd"] = float(e["cd"]) - delta
 	elif dist <= SomData.ENEMY_REACH:
 		e["tele"] = SomData.TELEGRAPH
-		SomFx.number(room.get_node("Objects"), _center(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), SomData.TELEGRAPH)
+		SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), SomData.TELEGRAPH)
 	if dist > SomData.ENEMY_REACH - 6.0 and float(e["tele"]) <= 0.0:
 		e["chase"] = float(e["chase"]) - delta
 		if float(e["chase"]) <= 0.0 and not m.is_moving and dist < SomData.CHASE_RANGE * 16.0:
 			e["chase"] = SomData.CHASE_INTERVAL
-			_step_toward(m)
+			_step_toward(m, body_of(tid))
 	_tint(m, e)
 
 
-func _step_toward(m: Node) -> void:
-	var d: Vector2 = player.position - _center(m)
+func _step_toward(m: Node, to: Vector2) -> void:
+	var d: Vector2 = to - center_of(m)
 	var a := Vector2i(signi(roundi(d.x)), 0)
 	var b := Vector2i(0, signi(roundi(d.y)))
 	if absf(d.y) > absf(d.x):
@@ -296,26 +522,45 @@ func _tint(m: Node, e: Dictionary) -> void:
 		m.sprite.modulate = Color.WHITE
 
 
-func hit_player(atk: int, from: Vector2) -> void:
-	if iframes > 0.0 or down:
+## Vijand raakt een held. Bestuurde held = de oude naam hit_player (ook voor tests).
+func hit_player(atk: int, _from := Vector2.ZERO) -> void:
+	hit_member(active_id, atk)
+
+
+func hit_member(id: String, atk: int) -> void:
+	if down or float(iframes.get(id, 0.0)) > 0.0 or not is_alive(id):
 		return
-	var h := hero()
+	var h := member(id)
 	var dmg := physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0)
 	h["hp"] = maxi(0, int(h["hp"]) - dmg)
 	last_player_damage = dmg
-	iframes = SomData.PLAYER_IFRAMES
-	room.start_invuln(SomData.PLAYER_IFRAMES)
-	SomFx.number(room.get_node("Objects"), player.position + Vector2(0, -14), str(dmg), Color(1, 0.4, 0.4))
+	last_hit_id = id
+	iframes[id] = SomData.PLAYER_IFRAMES
+	if id == active_id:
+		room.start_invuln(SomData.PLAYER_IFRAMES)
+	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(1, 0.4, 0.4))
 	player_hit.emit(dmg)
 	if int(h["hp"]) <= 0:
-		_player_down()
+		_member_ko(id)
 
 
-## Dax valt: zelfde afloop als een verloren gevecht (checkpoint/respawn via GameState.end_battle).
-func _player_down() -> void:
+## Held KO: bondgenoot blijft liggen (som_ally.gd); bestuurde held -> wissel naar de volgende levende.
+## Niemand meer over = game over.
+func _member_ko(id: String) -> void:
+	_say(SomData.TXT_KO % str(member(id).get("name", id)))
+	member_down.emit(id)
+	if GameState.alive_heroes().is_empty():
+		_party_down()
+		return
+	if id == active_id:
+		switch_hero()
+
+
+## Iedereen KO: zelfde afloop als een verloren gevecht (checkpoint/respawn via GameState.end_battle).
+func _party_down() -> void:
 	down = true
 	player.input_locked = true
-	_say(SomData.TXT_FALLEN % str(hero().get("name", "Dax")))
+	_say(SomData.TXT_FALLEN % "The party")
 	player_defeated.emit()
 	await get_tree().create_timer(1.2).timeout
 	GameState.in_battle = true
@@ -341,66 +586,83 @@ func on_ring_closed(choice: Dictionary) -> void:
 		_queue_t = SomData.RING_CAST_DELAY
 
 
+## Doel van een item: opstaan-item -> eerste KO-held; anders de bestuurde held als die gewond is,
+## anders het levende partylid met het laagste HP-deel.
+func item_target(id: String) -> Dictionary:
+	if float(GameData.ITEMS.get(id, {}).get("revive", 0.0)) > 0.0:
+		for h in GameState.party:
+			if int(h["hp"]) <= 0:
+				return h
+		return hero()
+	var h := hero()
+	if int(h["hp"]) < int(h["max_hp"]) and int(h["hp"]) > 0:
+		return h
+	var low := lowest_member(1.0)
+	return low if not low.is_empty() else h
+
+
 ## Voert een keuze uit het ringmenu uit. Geeft de melding terug.
 func resolve(q: Dictionary) -> String:
 	var text := ""
 	if str(q.get("kind", "")) == "item":
-		var r: Dictionary = PartyActions.use_item(GameState.inventory, str(q["id"]), hero())
+		var target := item_target(str(q["id"]))
+		var r: Dictionary = PartyActions.use_item(GameState.inventory, str(q["id"]), target)
 		text = str(r.get("text", ""))
 		if int(r.get("hp", 0)) > 0:
-			SomFx.number(room.get_node("Objects"), player.position + Vector2(0, -14), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
+			SomFx.number(room.get_node("Objects"), body_of(str(target.get("id", ""))) + Vector2(0, -22), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
 	else:
-		text = _cast(str(q.get("id", "")), str(q.get("caster", "")))
+		text = cast_spell(str(q.get("id", "")), str(q.get("caster", "")), {})
 	_say(text)
 	action_resolved.emit(text)
 	return text
 
 
-func _cast(spell_id: String, caster_id: String) -> String:
+## Spreuk van een held (MP van de caster). damage: dichtstbijzijnde/alle vijanden bij de caster;
+## heal: 'heal_target' of het levende partylid met het laagste HP-deel.
+func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) -> String:
 	var sp: Dictionary = GameData.SPELLS.get(spell_id, {})
-	var caster: Dictionary = GameState.member(caster_id) if GameState.has_member(caster_id) else hero()
-	if sp.is_empty():
+	var caster := member(caster_id)
+	if sp.is_empty() or caster.is_empty() or int(caster.get("hp", 0)) <= 0:
 		return ""
 	var cost := int(sp.get("mp", 0))
 	if int(caster.get("mp", 0)) < cost:
 		return SomData.TXT_NO_MP
 	var kind := str(sp.get("type", ""))
 	var lvl := int(caster.get("level", 1))
-	var cid := str(caster.get("id", ""))
+	var from := body_of(caster_id)
 	if kind == "damage":
 		var targets: Array = []
-		var best: Node = null
-		var best_d := 1e9
-		for m in enemies.keys():
-			if not is_instance_valid(m):
-				continue
-			var dd: float = _center(m).distance_to(player.position)
-			if dd > 10.0 * 16.0:
-				continue
-			if str(sp.get("target", "")) == "all_enemies":
-				targets.append(m)
-			elif dd < best_d:
-				best_d = dd
-				best = m
-		if best:
-			targets.append(best)
+		if str(sp.get("target", "")) == "all_enemies":
+			for m in enemies.keys():
+				if is_instance_valid(m) and center_of(m).distance_to(from) <= 10.0 * 16.0:
+					targets.append(m)
+		else:
+			var best := nearest_enemy(from, 10.0 * 16.0)
+			if best:
+				targets.append(best)
 		if targets.is_empty():
 			return SomData.TXT_NO_TARGET
 		caster["mp"] = int(caster["mp"]) - cost
 		for m in targets:
-			var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, cid, {"s": enemies[m]["data"]})
+			var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {"s": enemies[m]["data"]})
+			last_attacker = caster_id
 			damage_enemy(m, maxi(1, roundi(amt * randf_range(0.9, 1.1))), Vector2i.ZERO)
 		return "%s casts %s!" % [caster.get("name", ""), sp.get("name", spell_id)]
 	if kind == "heal":
+		var t := heal_target
+		if t.is_empty():
+			t = lowest_member(1.0)
+		if t.is_empty():
+			t = caster
 		caster["mp"] = int(caster["mp"]) - cost
-		var amt := roundi(SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, cid, {}))
-		var got := PartyActions.restore(hero(), amt, 0)
-		SomFx.number(room.get_node("Objects"), player.position + Vector2(0, -14), "+%d" % got.x, Color(0.4, 1, 0.5))
-		return "%s casts %s! %s recovers %d HP." % [caster.get("name", ""), sp.get("name", spell_id), hero().get("name", ""), got.x]
+		var amt := roundi(SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {}))
+		var got := PartyActions.restore(t, amt, 0)
+		SomFx.number(room.get_node("Objects"), body_of(str(t.get("id", ""))) + Vector2(0, -22), "+%d" % got.x, Color(0.4, 1, 0.5))
+		return "%s casts %s! %s recovers %d HP." % [caster.get("name", ""), sp.get("name", spell_id), t.get("name", ""), got.x]
 	return SomData.TXT_MISS_BUFF % str(sp.get("name", spell_id))
 
 
-## Ringmenu-inhoud: items die in het veld werken, en spreuken van levende partyleden.
+## Ringmenu-inhoud voor de bestuurde held: items die in het veld werken, en zijn eigen spreuken.
 func ring_entries() -> Dictionary:
 	var items: Array = []
 	for id in GameState.inventory.keys():
@@ -409,13 +671,13 @@ func ring_entries() -> Dictionary:
 				and not bool(GameData.ITEMS[sid].get("warp", false)):
 			items.append({"kind": "item", "id": sid, "label": "%s x%d" % [PartyActions.item_name(sid), GameState.item_count(sid)]})
 	var skills: Array = []
-	for h in GameState.alive_heroes():
-		for s in h.get("spells", []):
-			var sp: Dictionary = GameData.SPELLS.get(str(s), {})
-			if sp.is_empty():
-				continue
-			skills.append({"kind": "spell", "id": str(s), "caster": str(h.get("id", "")),
-					"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))]})
+	var h := hero()
+	for s in h.get("spells", []):
+		var sp: Dictionary = GameData.SPELLS.get(str(s), {})
+		if sp.is_empty():
+			continue
+		skills.append({"kind": "spell", "id": str(s), "caster": active_id,
+				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))]})
 	return {"items": items, "skills": skills}
 
 

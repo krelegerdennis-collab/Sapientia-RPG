@@ -4,6 +4,7 @@ extends RefCounted
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomArena := preload("res://scripts/som/som_arena.gd")
+const SomFx := preload("res://scripts/som/som_fx.gd")
 
 var t: Node
 var shots := ""
@@ -76,9 +77,14 @@ func run() -> void:
 	if arena() == null:
 		t.check("SoM: arena bestaat (rest overgeslagen)", false)
 		return
+	arena().allies_enabled = false      # eerst de speler alleen
+	await _move_tests()
 	await _charge_and_attack_tests()
 	await _enemy_ai_tests()
 	await _ring_tests()
+	arena().allies_enabled = true
+	await _ally_tests()
+	await _switch_tests()
 	await _boss_handoff_tests()
 	await _style_path_tests()
 	await _death_tests()
@@ -114,7 +120,7 @@ func _title_button_tests() -> void:
 	var pvp: Button = t.scene().get_node_or_null("PvpButton")
 	t.check("SoM: knop 'SoM' naast PvP", b != null and pvp != null and b.text.strip_edges() == "SoM"
 			and absf(b.position.y - pvp.position.y) < 1.0 and b.position.x > pvp.position.x and b.visible)
-	await shot("som_0_title")
+	await shot("v2_title")
 	if b == null:
 		return
 	b.pressed.emit()
@@ -122,9 +128,79 @@ func _title_button_tests() -> void:
 	await t.frames(30)
 	t.check("SoM: som_mode aan + arena in de kamer", GameState.som_mode and arena() != null)
 	t.check("SoM: standaard-party Dax + Vesper + Seren", GameState.party.size() == 3 and str(GameState.party[0]["name"]) == "Dax")
+	t.check("SoM: 2 AI-bondgenoten op het veld", arena() != null and arena().allies.size() == 2)
+	var spr: Sprite2D = t.player().get_node("Sprite2D")
+	t.check("SoM: Dax met 24x32-sprite, voeten op de tegelrand (offset %s)" % spr.offset,
+			MapSprite.frame_maat(spr.texture) == MapSprite.NIEUW and spr.offset == Vector2(0, -8))
+	t.check("SoM: joystick-modus op de touch-laag", arena().touch != null and arena().touch.joystick_mode)
 	t.check("SoM: startitems (Potion x%d)" % GameState.item_count("drankje"), GameState.item_count("drankje") == int(SomData.START_ITEMS["drankje"]))
 	t.check("SoM: zichtbare vijanden geregistreerd (%d)" % (arena().enemies.size() if arena() else 0), arena() != null and arena().enemies.size() >= 3)
 	t.check("SoM: eigen save-pad", GameState.save_path == SomData.SAVE_PATH)
+
+
+func _move_tests() -> void:
+	const SomMove := preload("res://scripts/som/som_move.gd")
+	t.check("SoM-beweging: dode zone", SomMove.joy_to_dir(Vector2(0.1, 0.1)) == Vector2.ZERO)
+	var half := SomMove.joy_to_velocity(Vector2(0.6, 0.0), 80.0)
+	var full := SomMove.joy_to_velocity(Vector2(1.0, 0.0), 80.0)
+	t.check("SoM-beweging: snelheid evenredig met duwen (%.0f < %.0f = 80)" % [half.x, full.x], half.x > 20.0 and half.x < full.x and is_equal_approx(full.x, 80.0))
+	var d := SomMove.joy_to_dir(Vector2(0.9, 0.5))
+	t.check("SoM-beweging: 8 richtingen (schuin = 45 graden)", is_equal_approx(absf(d.normalized().x), absf(d.normalized().y)))
+	t.check("SoM-beweging: kijkrichting", SomMove.facing_for(Vector2(0.2, -1), Vector2i.DOWN) == Vector2i.UP
+			and SomMove.facing_for(Vector2(1, 0.1), Vector2i.UP) == Vector2i.RIGHT)
+	var a := arena()
+	var p: CharacterBody2D = t.player()
+	# vrije pixelbeweging met de joystick
+	p.place_at(Vector2i(12, 8), Vector2i.DOWN)
+	await t.frames(2)
+	var x0 := p.position.x
+	a.forced_joy = Vector2(0.5, 0.0)
+	await seconds(0.25)
+	var x_half := p.position.x - x0
+	a.forced_joy = Vector2.ZERO
+	t.check("SoM-beweging: joystick beweegt vrij (geen tegelsprong: %.1f px)" % x_half, x_half > 3.0 and fmod(p.position.x, 16.0) != 8.0)
+	# muur-glijden: schuin tegen een muur in: blijft tegen de muur, glijdt opzij
+	var r := room()
+	var wt := Vector2i(-1, -1)
+	for y in range(2, 11):
+		for x in range(2, 28):
+			var c := Vector2i(x, y)
+			if r.is_wall(c + Vector2i.UP) and not r.is_wall(c) and not r.is_wall(c + Vector2i.RIGHT) and not r.is_wall(c + Vector2i(2, 0)) \
+					and r.is_wall(c + Vector2i(1, -1)) and r.is_wall(c + Vector2i(2, -1)):
+				wt = c
+				break
+		if wt.x >= 0:
+			break
+	if wt.x >= 0:
+		p.place_at(wt, Vector2i.UP)
+		await t.frames(2)
+		var start := p.position
+		a.forced_joy = Vector2(0.7, -0.7)
+		await seconds(0.4)
+		a.forced_joy = Vector2.ZERO
+		t.check("SoM-beweging: glijdt langs de muur (dx %.1f, dy %.1f)" % [p.position.x - start.x, p.position.y - start.y],
+				p.position.x - start.x > 6.0 and p.position.y >= wt.y * 16.0 and p.position.y - start.y > -8.0)
+	else:
+		t.check("SoM-beweging: muurtegel gevonden", false)
+	# toetsenbord
+	p.place_at(Vector2i(12, 8), Vector2i.DOWN)
+	await t.frames(2)
+	var px := p.position
+	Input.action_press("move_right")
+	Input.action_press("move_down")
+	await seconds(0.2)
+	Input.action_release("move_right")
+	Input.action_release("move_down")
+	t.check("SoM-beweging: toetsenbord schuin (8 richtingen)", p.position.x > px.x + 3.0 and p.position.y > px.y + 3.0)
+	# aanvalsanimatie-haakje (RPG ART): met een nep-sheet 4x4 frames van 48x48
+	var img := Image.create(192, 192, false, Image.FORMAT_RGBA8)
+	var anim: Sprite2D = SomFx.attack_anim(p, ImageTexture.create_from_image(img), SomData.ATTACK_ANIMS["dennis"])
+	await t.frames(2)
+	var body_spr: Sprite2D = p.get_node("Sprite2D")
+	t.check("SoM: aanvalsanimatie speelt via data (4x4, voeten op de rand, lichaam verborgen)", anim.hframes == 4 and anim.vframes == 4
+			and anim.offset == Vector2(0, -16) and not body_spr.visible)
+	await seconds(0.4)
+	t.check("SoM: na de animatie weer de loopsprite", body_spr.visible and p.get_node_or_null("SomAttackAnim") == null)
 
 
 func _first_enemy() -> Node:
@@ -149,9 +225,9 @@ func _charge_and_attack_tests() -> void:
 	var full: int = a.last_enemy_damage
 	t.check("SoM: meter na de slag op 0", a.charge < 0.05)
 	t.check("SoM: schadegetal in beeld", room().get_node("Objects").find_children("SomNumber*", "Label", false, false).size() > 0)
-	await shot("som_1_hit")
+	await shot("v2_hit")
 	await t.pframes(6)
-	await shot("som_2_charge")
+	await shot("v2_charge")
 	# lage lading: gemiddeld minder schade (atk/def uit de data; zelfde formule)
 	var atk := float(GameState.effective_stat(GameState.party[0], "atk"))
 	var low := 0
@@ -161,7 +237,12 @@ func _charge_and_attack_tests() -> void:
 		high += SomArena.physical_damage(atk, float(e["def"]), 1.0)
 	t.check("SoM: slag <100%% doet minder schade (%d < %d)" % [low, high], low < high and full >= 1)
 	await seconds(SomData.CHARGE_TIME + 0.1)
-	t.check("SoM: meter vult in ~1 s", a.charge >= 1.0)
+	t.check("SoM: meter vult in ~%.1f s" % SomData.CHARGE_TIME, a.charge >= 1.0 and is_equal_approx(SomData.CHARGE_TIME, 0.5))
+	a.attack()
+	await seconds(0.25)
+	t.check("SoM: na 0,25 s nog niet vol (%.2f)" % a.charge, a.charge < 1.0 and a.charge > 0.2)
+	await seconds(0.3)
+	t.check("SoM: na 0,55 s vol", a.charge >= 1.0)
 	# verslaan: EXP/goud/buit
 	if a.enemies.has(m):
 		face_monster(m)
@@ -187,9 +268,11 @@ func _charge_and_attack_tests() -> void:
 
 func _enemy_ai_tests() -> void:
 	var a := arena()
+	for al in a.allies:
+		al.position = Vector2(-2000, -2000)     # stilgezet en uit de buurt: alleen Dax
 	var m := _first_enemy()
 	GameState.party[0]["hp"] = GameState.party[0]["max_hp"]
-	a.iframes = 0.0
+	a.iframes.clear()
 	room().invuln_left = 0.0
 	face_monster(m)
 	var hp0 := int(GameState.party[0]["hp"])
@@ -198,7 +281,7 @@ func _enemy_ai_tests() -> void:
 	while frames < 240 and int(GameState.party[0]["hp"]) == hp0:
 		await t.get_tree().process_frame
 		frames += 1
-		if a.enemies.has(m) and float(a.enemies[m]["tele"]) > 0.0:
+		if a.enemies.values().any(func(e): return float(e["tele"]) > 0.0):
 			saw_tele = true
 	t.check("SoM: vijand telegrafeert eerst", saw_tele)
 	t.check("SoM: vijand raakt de speler (-%d HP)" % a.last_player_damage, int(GameState.party[0]["hp"]) < hp0 and a.last_player_damage > 0)
@@ -218,7 +301,6 @@ func _enemy_ai_tests() -> void:
 		await seconds(2.0)
 		t.check("SoM: vijand achtervolgt (%.0f -> %.0f px)" % [d0, far.position.distance_to(t.player().position)],
 				not is_instance_valid(far) or far.position.distance_to(t.player().position) < d0)
-	await _gif_fight()
 
 
 ## Korte GIF-reeks: slaan op de dichtstbijzijnde vijand (alleen met --som-shots).
@@ -257,7 +339,7 @@ func _ring_tests() -> void:
 			frozen = false
 	t.check("SoM: tijdens pauze staat alles stil", frozen and is_equal_approx(a.charge, c))
 	t.check("SoM: ring toont items", a.ring.entries.size() >= 1)
-	await shot("som_3_ring")
+	await shot("v2_ring")
 	var idx := -1
 	for i in a.ring.entries.size():
 		if a.ring.entries[i]["id"] == "drankje":
@@ -273,11 +355,199 @@ func _ring_tests() -> void:
 	a.open_ring()
 	await t.pframes(2)
 	a.ring.switch_tab()
-	t.check("SoM: skills-ring met spreuken van de party", a.ring.entries.size() >= 1)
-	await shot("som_4_ring_skills")
+	t.check("SoM: skills-ring = spreuken van de bestuurde held", a.ring.entries.size() == (a.hero().get("spells", []) as Array).size())
+	await shot("v2_ring_skills")
 	a.ring.close({})
 	t.check("SoM: sluiten zonder keuze hervat", not t.get_tree().paused)
 	await t.frames(5)
+
+
+func _ally(id: String) -> Node:
+	return arena().ally_of(id)
+
+
+func _ally_tests() -> void:
+	var a := arena()
+	var p: CharacterBody2D = t.player()
+	for h in GameState.party:
+		h["hp"] = h["max_hp"]
+		h["mp"] = h["max_mp"]
+	# volgen
+	p.place_at(Vector2i(6, 8), Vector2i.RIGHT)
+	for al in a.allies:
+		al.position = p.position
+	a.forced_joy = Vector2(1, 0)
+	await seconds(1.0)
+	a.forced_joy = Vector2.ZERO
+	await seconds(1.2)
+	var near := true
+	for al in a.allies:
+		if al.position.distance_to(p.position) > 40.0:
+			near = false
+	t.check("SoM-AI: bondgenoten volgen Dax in formatie", near)
+	t.check("SoM-AI: bondgenoten blokkeren Dax niet (botsingslaag 0)", a.allies.all(func(x): return x.collision_layer == 0))
+	# niet vast > 5 s: in een muur gezet -> binnen 5 s weer bij Dax
+	var al0: Node = a.allies[0]
+	al0.position = Vector2(8, 8)        # hoek-muur
+	var ok := false
+	for i in 300:
+		await t.get_tree().process_frame
+		if al0.position.distance_to(p.position) < 48.0:
+			ok = true
+			break
+	t.check("SoM-AI: nooit langer dan 5 s vast (teleport %d)" % al0.teleports, ok)
+	al0.position = p.position + Vector2(400, 0)
+	await t.frames(3)
+	t.check("SoM-AI: buiten beeld -> bijteleporteren", al0.position.distance_to(p.position) < 48.0)
+	# genezen: Dax onder 40% -> Seren geneest eerst
+	var seren: Node = _ally("lotte")
+	var dax: Dictionary = a.member("dennis")
+	dax["hp"] = int(float(dax["max_hp"]) * 0.3)
+	var hp0 := int(dax["hp"])
+	var mp0 := int(a.member("lotte")["mp"])
+	seren.spell_cd = 0.0
+	await seconds(0.3)
+	t.check("SoM-AI: Seren geneest Dax (<40%%): HP %d -> %d, MP %d -> %d" % [hp0, int(dax["hp"]), mp0, int(a.member("lotte")["mp"])],
+			int(dax["hp"]) > hp0 and int(a.member("lotte")["mp"]) < mp0)
+	# aanvallen: vijand vlak bij Dax
+	var m := _first_enemy()
+	if m:
+		face_monster(m)
+		a.enemies[m]["hp"] = 999
+		a.enemies[m]["cd"] = 99.0
+		var att := 0
+		for i in 360:
+			await t.get_tree().process_frame
+			att = a.allies.reduce(func(acc, x): return acc + x.attacks, 0)
+			if att > 0:
+				break
+		t.check("SoM-AI: bondgenoot valt aan met eigen meter (%s)" % a.last_attacker, att > 0 and a.last_attacker in ["noor", "lotte"])
+		a.enemies[m]["hp"] = 3
+		a.enemies[m]["cd"] = 0.5
+	# vijanden kiezen elk partylid: bondgenoot stil op afstand van Dax, vijand ernaast
+	a.allies_enabled = false
+	p.place_at(Vector2i(4, 8), Vector2i.LEFT)
+	a.allies[0].position = Vector2(10 * 16 + 8, 8 * 16 + 8)
+	a.allies[1].position = Vector2(10 * 16 + 8, 9 * 16 + 8)
+	var hit_ally := false
+	for e in a.enemies.values():
+		e["cd"] = 0.0
+	a.iframes.clear()
+	for i in 600:
+		await t.get_tree().process_frame
+		if a.last_hit_id in ["noor", "lotte"]:
+			hit_ally = true
+			break
+		if i % 60 == 0:
+			for h in GameState.party:
+				h["hp"] = h["max_hp"]
+			var mm := _first_enemy()
+			if mm and a.room.monster_can_enter(mm, Vector2i(11, 8)) == "free":
+				mm.place_at(Vector2i(11, 8), Vector2i.LEFT)
+	t.check("SoM-AI: vijanden raken ook bondgenoten (%s)" % a.last_hit_id, hit_ally)
+	a.allies_enabled = true
+	# KO: Vesper KO -> blijft liggen; opstaan via de ring (Phoenix Feather)
+	var vesper: Node = _ally("noor")
+	a.member("noor")["hp"] = 0
+	await t.frames(2)
+	var pos: Vector2 = vesper.position
+	await t.frames(30)
+	t.check("SoM-AI: KO-bondgenoot staat stil (%s)" % vesper.state, vesper.state == "ko" and vesper.position == pos)
+	var feathers := GameState.item_count("feniksveer")
+	a.resolve({"kind": "item", "id": "feniksveer"})
+	t.check("SoM-AI: Phoenix Feather uit de ring wekt Vesper (%d HP)" % int(a.member("noor")["hp"]),
+			int(a.member("noor")["hp"]) > 0 and GameState.item_count("feniksveer") == feathers - 1)
+	# pauze bevriest de bondgenoten
+	p.place_at(Vector2i(6, 8), Vector2i.RIGHT)
+	a.forced_joy = Vector2(1, 0)
+	await seconds(0.3)
+	a.forced_joy = Vector2.ZERO
+	a.open_ring()
+	await t.pframes(2)
+	var ap: Array = a.allies.map(func(x): return x.position)
+	await t.pframes(30)
+	t.check("SoM-AI: ringmenu bevriest de bondgenoten", a.allies.map(func(x): return x.position) == ap)
+	await shot("v2_ring_party")
+	a.ring.close({})
+	await t.frames(5)
+	await _gif_party()
+
+
+func _switch_tests() -> void:
+	var a := arena()
+	var p: CharacterBody2D = t.player()
+	for h in GameState.party:
+		h["hp"] = h["max_hp"]
+	t.check("SoM-wissel: start met Dax", a.active_id == "dennis")
+	var cam: Camera2D = p.get_node("Camera2D")
+	var seren_pos: Vector2 = _ally("lotte").position
+	var dax_pos: Vector2 = p.position
+	var ev := InputEventAction.new()
+	ev.action = a.SWITCH_ACTION
+	ev.pressed = true
+	Input.parse_input_event(ev)        # gebufferd: telt als 'just pressed' in het volgende beeld
+	await t.pframes(2)
+	var up := InputEventAction.new()
+	up.action = a.SWITCH_ACTION
+	Input.parse_input_event(up)
+	await t.frames(2)
+	t.check("SoM-wissel: toets C -> Seren (%s)" % a.active_id, a.active_id == "lotte" and p.position == seren_pos)
+	t.check("SoM-wissel: Dax wordt AI op de oude plek", _ally("dennis") != null and _ally("dennis").position.distance_to(dax_pos) < 8.0)
+	var spr: Sprite2D = p.get_node("Sprite2D")
+	t.check("SoM-wissel: speler-sprite = Seren", spr.texture == a.sheet_for("lotte"))
+	t.check("SoM-wissel: ring toont Serens spreuken", a.ring_entries()["skills"].any(func(e): return e["caster"] == "lotte"))
+	# camera glijdt mee
+	a.allies_enabled = false
+	p.position = Vector2(200, p.position.y)
+	await t.pframes(60)
+	p.position = Vector2(330, p.position.y)
+	await t.pframes(1)
+	var d0 := cam.get_screen_center_position().distance_to(p.global_position)
+	await t.pframes(20)
+	var d1 := cam.get_screen_center_position().distance_to(p.global_position)
+	t.check("SoM-wissel: camera volgt soepel (%.0f -> %.0f)" % [d0, d1], d1 < d0 and cam.position_smoothing_enabled)
+	a.allies_enabled = true
+	await seconds(0.8)
+	await shot("v2_switch_seren")
+	t.check("SoM-wissel: Seren -> Vesper", a.switch_hero() == "noor")
+	a.member("lotte")["hp"] = 0
+	t.check("SoM-wissel: Vesper -> Dax (Seren KO overgeslagen)", a.switch_hero() == "dennis")
+	t.check("SoM-wissel: Dax -> Vesper (Seren KO overgeslagen)", a.switch_hero() == "noor")
+	a.switch_hero("dennis")
+	a.member("lotte")["hp"] = a.member("lotte")["max_hp"]
+	t.check("SoM-wissel: knop 'Swap' in de HUD", a.hud.switch_button != null and a.hud.switch_button.visible)
+	await t.frames(5)
+
+
+## GIF: de hele party vecht (alleen met --som-shots).
+func _gif_party() -> void:
+	if shots == "":
+		return
+	var a := arena()
+	var p: CharacterBody2D = t.player()
+	p.place_at(Vector2i(10, 8), Vector2i.RIGHT)
+	for h in GameState.party:
+		h["hp"] = h["max_hp"]
+	var m: Node = room().add_monster({"id": "gif_geest", "enemy": "papiergeest", "tile": [13, 8], "moves": true})
+	room().add_monster({"id": "gif_mot", "enemy": "glitchmot", "tile": [12, 6], "moves": true})
+	face_monster(m)
+	a.enemies[m]["hp"] = 999
+	for i in 90:
+		if i % 10 == 3 and a.enemies.has(m):
+			a.attack()
+		if i == 30:
+			a.forced_joy = Vector2(0.0, 0.8)
+		if i == 45:
+			a.forced_joy = Vector2(-0.8, -0.6)
+		if i == 60:
+			a.forced_joy = Vector2.ZERO
+			face_monster(m)
+		if i == 70:
+			await shot("v2_party_fight")
+		await gif_frames("v2_%03d" % i, 1, 2)
+	a.forced_joy = Vector2.ZERO
+	if a.enemies.has(m):
+		a.enemies[m]["hp"] = 5
 
 
 func _boss_handoff_tests() -> void:
@@ -368,7 +638,7 @@ func _style_path_tests() -> void:
 			o.change("battle_style", 1)
 			await t.frames(3)
 			t.check("SoM: Battle Style -> Action via Opties", Settings.action_battles() and o.value_text("battle_style") == "Action")
-			await shot("som_5_settings")
+			await shot("v2_settings")
 		for i in 3:
 			if room().get_node_or_null("FieldMenu") == null:
 				break
@@ -385,10 +655,20 @@ func _death_tests() -> void:
 		return
 	var h: Dictionary = GameState.party[0]
 	var old_room: Node = room()
+	a.allies_enabled = false
+	for o in GameState.party:
+		o["hp"] = 1
+	a.iframes.clear()
+	a.hit_member(a.active_id, 999)
+	t.check("SoM: één held KO -> geen game over, besturing wisselt", not a.down and a.is_alive(a.active_id) and GameState.alive_heroes().size() == 2)
+	for o in GameState.party:
+		if int(o["hp"]) > 0 and str(o["id"]) != a.active_id:
+			o["hp"] = 0
+	h = a.hero()
 	h["hp"] = 1
-	a.iframes = 0.0
+	a.iframes.clear()
 	a.hit_player(999, Vector2.ZERO)
-	t.check("SoM: Dax valt bij 0 HP", a.down and int(h["hp"]) == 0)
+	t.check("SoM: laatste held KO -> game over", a.down and GameState.alive_heroes().is_empty())
 	var ok := false
 	for i in 600:
 		await t.get_tree().process_frame

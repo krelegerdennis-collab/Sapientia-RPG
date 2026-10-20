@@ -537,6 +537,12 @@ func monsters_active() -> bool:
 ## Tile van de speler en (tijdens een stap) waar hij heen loopt.
 func player_tiles() -> Array[Vector2i]:
 	var out: Array[Vector2i] = [player.get_tile()]
+	if som:
+		# SoM-proef: vrije beweging; de speler kan op twee tegels tegelijk staan (botsing 10x8 aan de voeten)
+		for off in [Vector2(-5, 0), Vector2(5, 0), Vector2(-5, 7), Vector2(5, 7)]:
+			var t2 := Vector2i(((player.position + off) / 16.0).floor())
+			if not out.has(t2):
+				out.append(t2)
 	if player.is_moving:
 		var tp: Vector2 = player.get("_target")
 		var t := Vector2i((tp / 16.0).floor())

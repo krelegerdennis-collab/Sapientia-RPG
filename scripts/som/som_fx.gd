@@ -17,6 +17,29 @@ static func slash(parent: Node, at: Vector2, dir: Vector2) -> Node2D:
 	return s
 
 
+## Aanvalsanimatie van RPG ART (SomData.ATTACK_ANIMS) over de speler-sprite; die is zolang verborgen.
+## Sheet: rijen onder/links/rechts/boven, kolommen = frames; voeten op de onderrand.
+static func attack_anim(p: Node2D, tex: Texture2D, d: Dictionary) -> Sprite2D:
+	var fr: Array = d.get("frame", [48, 48])
+	var n := maxi(1, int(d.get("frames", 4)))
+	var a := AttackAnim.new()
+	a.name = "SomAttackAnim"
+	a.texture = tex
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	a.vframes = maxi(1, tex.get_height() / maxi(1, int(fr[1])))
+	a.offset = Vector2(0, 8.0 - float(fr[1]) / 2.0)
+	var rows := {Vector2i.DOWN: 0, Vector2i.LEFT: 1, Vector2i.RIGHT: 2, Vector2i.UP: 3}
+	a.row = mini(int(rows.get(p.facing, 0)), a.vframes - 1)
+	a.fps = float(d.get("fps", 16.0))
+	a.body = p.get_node_or_null("Sprite2D") as Sprite2D
+	var old := p.get_node_or_null("SomAttackAnim")
+	if old:
+		old.free()
+	p.add_child(a)
+	return a
+
+
 static func number(parent: Node, at: Vector2, text: String, color: Color, life := 0.6) -> Label:
 	var l := Label.new()
 	l.theme = THEME
@@ -67,7 +90,7 @@ class Gauge extends Node2D:
 	func _process(_delta: float) -> void:
 		if arena == null or not is_instance_valid(arena.player):
 			return
-		position = arena.player.position + Vector2(0, -16)
+		position = arena.player.position + Vector2(0, -30)
 		queue_redraw()
 
 	func _draw() -> void:
@@ -80,3 +103,25 @@ class Gauge extends Node2D:
 		if c < 1.0:
 			var f: Font = THEME.default_font if THEME.default_font else ThemeDB.fallback_font
 			draw_string(f, Vector2(-8, -1), "%d%%" % int(c * 100.0), HORIZONTAL_ALIGNMENT_CENTER, 16, 6, Color(1, 1, 1))
+
+
+class AttackAnim extends Sprite2D:
+	var row := 0
+	var fps := 16.0
+	var t := 0.0
+	var body: Sprite2D
+
+	func _ready() -> void:
+		frame = row * hframes
+		if body:
+			body.visible = false
+
+	func _process(delta: float) -> void:
+		t += delta
+		var i := int(t * fps)
+		if i >= hframes:
+			if body:
+				body.visible = true
+			queue_free()
+			return
+		frame = row * hframes + i

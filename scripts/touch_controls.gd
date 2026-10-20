@@ -53,6 +53,14 @@ var show_run := false:
 					_set_touch_action(i, "")
 					_touch_owner.erase(i)
 		queue_redraw()
+## SoM-proef (Action): de D-pad wordt een analoge joystick. Geen move_*-acties; de vinger geeft
+## joy_raw (-1..1, t.o.v. het midden, lengte max 1). De speler leest hem (scripts/som/som_move.gd).
+var joystick_mode := false:
+	set(v):
+		joystick_mode = v
+		joy_raw = Vector2.ZERO
+		queue_redraw()
+var joy_raw := Vector2.ZERO
 var _touch_owner := {}    # vinger-index -> "dpad" of "a"
 var _touch_action := {}   # vinger-index -> actie die die vinger nu indrukt
 var _press_count := {}    # actie -> aantal vingers dat hem indrukt
@@ -150,7 +158,11 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var pos := _local(event.position)
 		if event.pressed:
-			if pos.distance_to(dpad_center()) <= dpad_radius * 1.2:
+			if joystick_mode and pos.distance_to(dpad_center()) <= dpad_radius * 1.6:
+				_touch_owner[event.index] = "joy"
+				_set_joy(pos)
+				get_viewport().set_input_as_handled()
+			elif pos.distance_to(dpad_center()) <= dpad_radius * 1.2:
 				_touch_owner[event.index] = "dpad"
 				_set_touch_action(event.index, _dpad_action(pos))
 				get_viewport().set_input_as_handled()
@@ -175,9 +187,16 @@ func _input(event: InputEvent) -> void:
 				_set_touch_action(event.index, "menu")
 				get_viewport().set_input_as_handled()
 		else:
+			if _touch_owner.get(event.index, "") == "joy":
+				joy_raw = Vector2.ZERO
+				queue_redraw()
 			_set_touch_action(event.index, "")
 			_touch_owner.erase(event.index)
 	elif event is InputEventScreenDrag:
+		if _touch_owner.get(event.index, "") == "joy":
+			_set_joy(_local(event.position))
+			get_viewport().set_input_as_handled()
+			return
 		# Over de D-pad schuiven verandert de richting (zoals op een echte D-pad).
 		if _touch_owner.get(event.index, "") == "dpad":
 			_set_touch_action(event.index, _dpad_action(_local(event.position)))
@@ -187,6 +206,12 @@ func _input(event: InputEvent) -> void:
 ## Schermpositie (viewport) -> positie binnen deze knoppen-laag.
 func _local(viewport_pos: Vector2) -> Vector2:
 	return get_global_transform_with_canvas().affine_inverse() * viewport_pos
+
+
+## Joystick: positie van de vinger -> joy_raw (lengte max 1). Dode zone/8 richtingen: som_move.gd.
+func _set_joy(pos: Vector2) -> void:
+	joy_raw = ((pos - dpad_center()) / maxf(1.0, dpad_radius)).limit_length(1.0)
+	queue_redraw()
 
 
 func _dpad_action(pos: Vector2) -> String:
@@ -225,6 +250,7 @@ func release_all() -> void:
 	_press_count.clear()
 	_touch_action.clear()
 	_touch_owner.clear()
+	joy_raw = Vector2.ZERO
 	queue_redraw()
 
 
@@ -259,6 +285,10 @@ func _draw() -> void:
 	var c := dpad_center()
 	var r := dpad_radius
 	draw_circle(c, r, Color(0, 0, 0, 0.28))
+	if joystick_mode:
+		_draw_joystick(c, r, line)
+		_draw_rest(line)
+		return
 	# printplaat-sporen met gloed
 	for path in CIRCUIT:
 		var pts := PackedVector2Array()
@@ -296,6 +326,21 @@ func _draw() -> void:
 		else:
 			draw_colored_polygon(tri, Color(mag.r, mag.g, mag.b, 0.25))
 		draw_polyline(PackedVector2Array([tip, back + side, back - side, tip]), mag, line)
+	_draw_rest(line)
+
+
+## SoM-proef: joystick (PLACEHOLDER-opmaak): ring + knop die met de vinger meeschuift.
+func _draw_joystick(c: Vector2, r: float, line: float) -> void:
+	var mag := UiStyleC.MAGENTA
+	draw_arc(c, r * 0.98, 0.0, TAU, 48, Color(mag.r, mag.g, mag.b, 0.6), line)
+	draw_arc(c, r * dead_zone, 0.0, TAU, 16, Color(mag.r, mag.g, mag.b, 0.25), line)
+	var k := (c + joy_raw * r * 0.7).round()
+	draw_circle(k, r * 0.38, Color(0.16, 0.16, 0.18, 0.92))
+	draw_arc(k, r * 0.38, 0.0, TAU, 24, UiStyleC.MAGENTA_HOT if joy_raw != Vector2.ZERO else mag, line)
+
+
+func _draw_rest(line: float) -> void:
+	var mag := UiStyleC.MAGENTA
 	# A- en B-knop
 	_draw_button(a_center(), "A", "interact", UiStyleC.CYAN, line)
 	_draw_button(b_center(), "B", "cancel", UiStyleC.MAGENTA, line)
