@@ -92,6 +92,7 @@ func run() -> void:
 	await _style_path_tests()
 	await _magic_tests()
 	await _death_tests()
+	await _actionsim_tests()      # als laatste: bouwt de SoM-startparty opnieuw op
 
 
 func _settings_tests() -> void:
@@ -815,6 +816,41 @@ func _art3_tests(m: Node) -> void:
 	t.check("SoM-art3: monster-death 4 x 24x24, offset (-4,-8)", dt.get_size() == Vector2(96, 24) and m.sprite.hframes == 4
 			and m.sprite.offset == Vector2(0, -4))
 	a._restore_monster(m, e)
+
+
+## v3: headless actie-simulator (tools/battlesim/action_sim.gd): klein vast-seed-monster.
+func _actionsim_tests() -> void:
+	var path := "res://tools/battlesim/action_sim.gd"
+	t.check("SoM-sim: action_sim.gd bestaat", ResourceLoader.exists(path))
+	if not ResourceLoader.exists(path):
+		return
+	var sim: Node = load(path).new()
+	sim.standalone = false
+	t.add_child(sim)
+	sim.setup()
+	t.check("SoM-sim: 6 SoM-kamers met map-monsters (zonder baas)", sim.rooms.size() == SomData.ROOMS.size()
+			and sim.rooms.all(func(r): return (r["enemies"] as Array).size() >= 1))
+	var p: Dictionary = sim.params_base()
+	var r1: Dictionary = sim.run_iteration(p, 6)
+	var r2: Dictionary = sim.run_iteration(p, 6)
+	t.check("SoM-sim: vaste seed = dezelfde uitkomst", JSON.stringify(r1) == JSON.stringify(r2))
+	t.check("SoM-sim: getallen kloppen (verlies %.1f%%, winst %.0f%%)" % [r1["loss"] * 100.0, r1["win"] * 100.0],
+			r1["loss"] >= 0.0 and r1["loss"] <= 1.0 and r1["win"] >= 0.0 and r1["win"] <= 1.0 and r1["p90"] >= 0.0)
+	var chosen := {}
+	for it in sim.ITERATIONS:
+		if str(it["label"]).contains("CHOSEN"):
+			chosen = it["set"]
+	t.check("SoM-sim: gekozen iteratie staat in SomData (meter %.1f s, x%.1f, cd %.1f, telegraaf %.2f)" % [SomData.CHARGE_TIME,
+			SomData.ENEMY_DAMAGE_MULT, SomData.ATTACK_COOLDOWN, SomData.TELEGRAPH], not chosen.is_empty()
+			and is_equal_approx(float(chosen["charge_time"]), SomData.CHARGE_TIME)
+			and is_equal_approx(float(chosen["enemy_dmg"]), SomData.ENEMY_DAMAGE_MULT)
+			and is_equal_approx(float(chosen["enemy_cd"]), SomData.ATTACK_COOLDOWN)
+			and is_equal_approx(float(chosen["telegraph"]), SomData.TELEGRAPH))
+	var spam := p.duplicate()
+	spam["policy"] = "spam"
+	var rs: Dictionary = sim.run_iteration(spam, 6)
+	t.check("SoM-sim: spammen kost meer tijd per kamer (%.1f s vs %.1f s)" % [rs["time"], r1["time"]], rs["time"] > r1["time"])
+	sim.queue_free()
 
 
 func _ally(id: String) -> Node:

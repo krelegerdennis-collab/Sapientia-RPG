@@ -134,13 +134,13 @@ const SPELL_ICON_BY_TYPE := {"damage": 2, "heal": 3}
 const UI_GAUGE_READY := "res://assets/sprites/som/ui/gauge_ready_glow.png"
 const GAUGE_READY_MS := 90      # 'spark': elke andere aanvalsspreuk
 ## Seconden om de wapenmeter van 0 tot 100% te vullen.
-const CHARGE_TIME := 0.5
+const CHARGE_TIME := 1.0     # v3: --actionsim iteratie 7 (was 0.5)
 ## Slag onder 100%: schade x max(CHARGE_MIN_MULT, lading) (SoM: spammen loont niet).
 const CHARGE_MIN_MULT := 0.1
 ## SoM-stijl: de meter vult pas weer als de slag-animatie klaar is (lading 0 tijdens de animatie).
 const CHARGE_AFTER_ANIM := true
 ## Vijandschade in realtime x deze factor (zelfde formule als turn-based; balans via --actionsim).
-const ENEMY_DAMAGE_MULT := 1.0
+const ENEMY_DAMAGE_MULT := 2.2     # v3: --actionsim iteratie 7
 ## Bereik van een slag (px, vanaf een punt 10 px voor de speler).
 const ATTACK_REACH := 14.0
 const ATTACK_OFFSET := 12.0
@@ -178,8 +178,8 @@ const ALLY_DAMAGE_SPELL_CHANCE := 0.5
 const CHASE_INTERVAL := 0.45
 const CHASE_RANGE := 7
 ## Aanval: telegraaf (knipperen + "!") en daarna cooldown.
-const TELEGRAPH := 0.55
-const ATTACK_COOLDOWN := 1.6
+const TELEGRAPH := 0.45     # v3: --actionsim iteratie 7 (was 0.55)
+const ATTACK_COOLDOWN := 1.2     # v3: --actionsim iteratie 7 (was 1.6)
 ## Afstand (px, middelpunten) waarop een vijand kan aanvallen/raken.
 const ENEMY_REACH := 22.0
 const HIT_FLASH := 0.12
