@@ -35,26 +35,25 @@ Proef, geen definitieve feature. Turn-based blijft het standaard en is nergens w
 
 ## Code
 - `scripts/som/som_arena.gd` (SomArena: speler, AI, schade, ring-afhandeling, signalen)
-- `scripts/som/som_ring.gd`, `som_hud.gd`, `som_fx.gd` (placeholders)
+- `scripts/som/som_ring.gd`, `som_hud.gd`, `som_fx.gd` (art van RPG ART, placeholder als een bestand ontbreekt)
 - haakjes: `dungeon_room.gd` (`_setup_som`, `add_monster`, `monster_touch`), `game_state.gd` (`start_som_prototype`),
   `title_screen.gd` (knop), `settings.gd` + `options_screen.gd` (Battle Style).
 - Tests: `scripts/tests/som_autotest.gd`, draait aan het eind van `--autotest`.
-  Snel alleen SoM: `-- --autotest --som-only [--som-shots=/pad]`.
+  Snel alleen SoM: `-- --## Art (RPG ART, aangesloten in v2.1) — `assets/sprites/som/{combat,fx,ui,monsters}/`
+Ongewijzigd gekopieerd uit `/workspace/art_mapsprites_v4/out/combat_som/` (alleen de PNG's; `.import` wordt lokaal
+gemaakt met `--import`). Monster-sheets staan in `som/monsters/` en niet in `assets/map_monsters/`, omdat bestaande
+tests die map tellen. Ontbreekt een bestand, dan valt alles terug op de placeholder.
+- **Aanval** (`SomData.ATTACK_ANIMS`): `<held>_attack.png` **288x192**, cellen 48x48, 6 frames x 4 rijen
+  (onder, links, rechts, boven); lichaam staat op (12,16) in de cel, voeten op de onderrand (offset (0,-16)).
+  Timings **120/180/50/110/90/160 ms** (totaal 710). **Schade valt op frame 4** (`hit_frame` 4 = begin van frame 4,
+  350 ms na de start): `SomFx.Anim.hit` -> `SomArena._land` -> signaal `swing_landed(hero_id, hits)`.
+  `attack()` geeft dan -1 terug (zonder sheet: meteen, het aantal treffers). Geldt ook voor de bondgenoten.
+- **Spreuk** `seren_cast`/`vesper_cast` 144x192 (3x4), **getroffen** `<held>_hurt` 192x48 (4 richtingen),
+  **KO** `<held>_ko` 48x48. **Ontwijken** `<held>_dodge` 192x48 staat in de repo maar is nog **niet aangesloten** (geen dodge-actie).
+- **Monsters** (`<id>_attack` 48x64: telegraaf / uithaal 110 ms / terug 300 ms; `_hurt` 64x16; `_death` 64x16, 4x100 ms).
+- **FX**: `fx_slash` 128x32, `fx_hit_spark` 64x16, `fx_telegraph` 8x8. **UI**: `dmg_digits` 50x21 (wit/rood/groen),
+  gauge 18x4 + vulling 16x2 + glinster 36x4, `hud_frame` 72x20 per held, `ring_bg` 180x110, `ring_icons` 112x16 (7 iconen).
+- Tests: framegrootte/rij, 350 ms-treffer (speltijd), 710 ms totaal, terug naar de loopsprite, slag landt via `swing_landed`.
 
-## Art voor de volledige versie (RPG ART) — basis 24x32-helden
-Haakje: `SomData.ATTACK_ANIMS` (per held-id `sheet`, `frame`, `frames`, `fps`). Staat het bestand er, dan speelt het
-automatisch i.p.v. de magenta placeholder-boog (`som_fx.gd attack_anim`). Geen code nodig, alleen het bestand.
-- **Aanval per held** (Dax, Vesper, Seren): frames **48x48**, 4 rijen (onder, links, rechts, boven) x **4 frames**
-  -> sheet **192x192**. `assets/sprites/som/aanval/dax_aanval.png`, `vesper_aanval.png`, `seren_aanval.png`.
-  Anker: het 24x32-lichaam staat midden-onder in het 48x48-frame (x 12..36, y 16..48), **voeten op de onderrand**
-  (zelfde voetlijn als de loopsheet); het wapen mag de 12 px links/rechts en 16 px boven gebruiken. 16 fps.
-- **Getroffen** per held: 4 richtingen x 1 frame **24x32** (96x32). **KO**: 1 frame **32x24** (liggend), voeten/onderrand gelijk.
-- **Spreuk-pose** (Vesper/Seren): 4 richtingen x 2 frames 24x32 (48x128).
-- **Vijanden** (map-sprite 16x16): aanval 4 richtingen x 3 frames (telegraaf, uithaal, terug) = 48x64;
-  getroffen 4x1 (16x64); doodgaan 4 frames 16x16 (64x16). Eerst Mosslijm, Moskonijn, Papiergeest, Glitchmot.
-- **Effecten**: zwaai 32x32 x 4 (128x32); treffer-vonk 16x16 x 4 (64x16); telegraaf-"!" 8x8;
-  genees-glans 16x16 x 4; spreuk-impact 24x24 x 4.
-- **Schadecijfers**: cijfers 0-9 5x7 px (wit/rood/groen), sheet 50x7.
-- **HUD**: kader per held 72x14 (normaal + actief), wapenmeter 18x4 + 2 frames "vol"-glinster, Swap/Ring-knoppen 38x14.
-- **Joystick**: ring 60x60 + knop 24x24 (nu getekend in code).
-- **Ringmenu**: ring ~180x110 + iconen 16x16 (Potion, Herb, Magic Water, Phoenix Feather, Spark, Minor Heal, ...).
+### Nog gewenst
+- Genees-glans 16x16 x 4 en spreuk-impact 24x24 x 4; Swap/Ring-knoppen 38x14; joystick-ring 60x60 + knop 24x24.
