@@ -756,7 +756,7 @@ func _town_tests() -> void:
 	check("buiten: encounters UIT", town.encounters == false)
 	var start := tile()
 	print("INFO  start tile ", start)
-	check("speler start voor het huis op (16,8): %s" % start, start == Vector2i(16, 8))
+	check("speler start voor het huis op (24,10): %s" % start, start == Vector2i(24, 10))
 	check("kijkt omlaag bij de start", player().facing == Vector2i.DOWN)
 	_dorpsprite_checks()
 	check("na de proloog: dag-tint, Oude Man weg", scene().get_node("StoryTint").color.is_equal_approx(Color.WHITE)
@@ -767,7 +767,7 @@ func _town_tests() -> void:
 
 	# 1) v0.10: het huis is open. Tegen de deur lopen -> korte fade naar binnen.
 	await walk("move_up", 1)
-	check("op de fundering voor de deur (16,7): %s" % tile(), tile() == Vector2i(16, 7))
+	check("op de fundering voor de deur (24,9): %s" % tile(), tile() == Vector2i(24, 9))
 	await overworld_shot("_door")
 	await walk("move_up", 1)
 	check("deur -> binnen in het huis (scène 'Huis')", await wait_scene("Huis"))
@@ -776,8 +776,8 @@ func _town_tests() -> void:
 	await _load_restore_test()
 
 	# 2) Botsing: naar links over de fundering en het gras tot tegen de bosrand (x=1)
-	await walk("move_left", 16)
-	check("bos blokkeert, staat op (2,7): %s" % tile(), tile() == Vector2i(2, 7))
+	await walk("move_left", 22)
+	check("bos blokkeert, staat op (4,9): %s" % tile(), tile() == Vector2i(4, 9))
 	check("kijkt naar links", player() != null and player().facing == Vector2i.LEFT)
 
 	# 3) Touch D-pad + B-knop
@@ -793,9 +793,9 @@ func _town_tests() -> void:
 		count["steps"] += 1
 		terrains[terrain(t)] = true
 	p.stepped.connect(on_step)
-	await walk("move_right", 20)   # (3,7) -> (23,7): gras en kassei (fundering)
-	await walk("move_left", 20)    # -> (3,7)
-	await walk("move_right", 12)   # -> (15,7)
+	await walk("move_right", 20)   # 1.4x: (5,9) -> (25,9): gras en kassei (fundering)
+	await walk("move_left", 20)    # -> (5,9)
+	await walk("move_right", 18)   # -> (23,9)
 	p.stepped.disconnect(on_step)
 	check("veel stappen buiten (%d) over %s" % [count["steps"], terrains.keys()],
 			count["steps"] >= 50 and terrains.has("gras") and terrains.has("kassei"))
@@ -804,10 +804,10 @@ func _town_tests() -> void:
 	await frames(10)
 	check("F2 start geen gevecht bij het huis", not GameState.in_battle)
 	GameState.encounter_multiplier = 0.0
-	check("terug op (15,7): %s" % tile(), tile() == Vector2i(15, 7))
+	check("terug op (23,9): %s" % tile(), tile() == Vector2i(23, 9))
 
 	# 5) Over het pad naar het zuiden: de uitgang naar de wereldkaart (na de proloog open)
-	await walk("move_down", 14)
+	await walk("move_down", 21)
 	check("uitgang -> wereldkaart geladen", await wait_scene("Wereldkaart"))
 	await frames(5)
 
@@ -1427,7 +1427,7 @@ func _stairs_and_town_return_tests() -> void:
 	await walk("move_up", 1)
 	check("stad-icoon -> dorp Willowdale geladen", await wait_scene("Wilgendal"))
 	await frames(5)
-	check("in het dorp bij de zuid-ingang (15,19): %s" % tile(), tile() == Vector2i(15, 19))
+	check("in het dorp bij de zuid-ingang (23,28): %s" % tile(), tile() == Vector2i(23, 28))
 	check("kijkt omhoog (het dorp in)", player() != null and player().facing == Vector2i.UP)
 	check("huidige map = wilgendal.tscn", GameState.current_map.ends_with("wilgendal.tscn"))
 	await frames(20)
@@ -1702,7 +1702,7 @@ func _house_tests() -> void:
 	await walk("move_down", 4)
 	check("deur onderin -> terug in Willowdale", await wait_scene("Wilgendal"))
 	await frames(5)
-	check("net onder de huisdeur (16,7), kijkt omlaag: %s" % tile(), tile() == Vector2i(16, 7) and player().facing == Vector2i.DOWN)
+	check("net onder de huisdeur (24,9), kijkt omlaag: %s" % tile(), tile() == Vector2i(24, 9) and player().facing == Vector2i.DOWN)
 
 
 func _v2i(a) -> Vector2i:
@@ -1785,7 +1785,7 @@ func _load_restore_test() -> void:
 	await walk("move_down", 4)
 	check("weer naar buiten -> Willowdale", await wait_scene("Wilgendal"))
 	await frames(5)
-	check("weer op (16,7): %s" % tile(), tile() == Vector2i(16, 7))
+	check("weer op (24,9): %s" % tile(), tile() == Vector2i(24, 9))
 
 
 ## Vluchten tot het gevecht voorbij is (B/A-berichten doorklikken).
@@ -2122,10 +2122,10 @@ func _prologue_tests() -> void:
 	check("deur -> naar buiten (Willowdale = huis aan de bosrand)", await wait_scene("Wilgendal"))
 	await frames(10)
 	var opa := _obj("OudeMan")
-	check("buiten: voor de deur (16,7): %s" % tile(), tile() == Vector2i(16, 7))
+	check("buiten: voor de deur (24,9): %s" % tile(), tile() == Vector2i(24, 9))
 	check("geen dorp meer: geen bordje en geen dorpsbewoners", _obj("Sign") == null and _obj("OldMan") == null)
-	check("Oude Man buiten op (21,8), staart naar de ruïnes (omhoog)",
-			opa != null and opa.visible and opa.get_tile() == Vector2i(21, 8) and opa.facing == Vector2i.UP)
+	check("Oude Man buiten op (29,10), staart naar de ruïnes (omhoog)",
+			opa != null and opa.visible and opa.get_tile() == Vector2i(29, 10) and opa.facing == Vector2i.UP)
 	check("v0.13: Oude Man buiten = WM1-sheet (oude_man.png 24x32, 3x4 frames, kijkt omhoog = rij 3)",
 			_wachter_ok(opa) and opa.sprite.frame / 3 == 3)
 	check("put, kist en de ingang van de Archives staan er",
@@ -2144,17 +2144,16 @@ func _prologue_tests() -> void:
 	# wereldkaart-uitgang is dicht tijdens de proloog
 	await walk("move_down", 1)
 	await walk("move_left", 1)
-	await walk("move_down", 13)
+	await walk("move_down", 20)
 	await frames(5)
 	check("pad naar de wereldkaart: 'Not today' (%s)" % _lines_text(), Dialog.is_open and "Not today" in _lines_text())
 	await _story_drain()
-	check("teruggestuurd, nog op de proloog-map (15,20): %s" % tile(), map_name() == "Wilgendal" and tile() == Vector2i(15, 20))
+	check("teruggestuurd, nog op de proloog-map (23,29): %s" % tile(), map_name() == "Wilgendal" and tile() == Vector2i(23, 29))
 	# praten met de Oude Man (van links)
-	await walk("move_up", 11)
+	await walk("move_up", 19)
 	await walk("move_right", 5)
-	await walk("move_up", 1)
 	await walk("move_right", 1)
-	check("naast de Oude Man (20,8), kijkt naar rechts: %s" % tile(), tile() == Vector2i(20, 8) and player().facing == Vector2i.RIGHT)
+	check("naast de Oude Man (28,10), kijkt naar rechts: %s" % tile(), tile() == Vector2i(28, 10) and player().facing == Vector2i.RIGHT)
 	var def_before := int(GameState.party[0]["def"])
 	await press_interact()
 	await _wait_typed()
@@ -2214,17 +2213,17 @@ func _prologue_tests() -> void:
 	check("opdracht gekregen: stap TAKEN", GameState.story_step == SD.TAKEN)
 	# ingang Archieven: dicht
 	await walk("move_down", 1)
-	await walk("move_right", 5)
+	await walk("move_right", 7)
 	await walk("move_up", 5)
 	await walk("move_up", 1)
 	await frames(5)
-	check("ingang Archives (25,4) is dicht ('%s')" % _lines_text(), tile() == Vector2i(25, 4) and "vines" in _lines_text())
+	check("ingang Archives (35,6) is dicht ('%s')" % _lines_text(), tile() == Vector2i(35, 6) and "vines" in _lines_text())
 	await _story_drain()
-	# kist (19,6) (v0.16: geen zegel 2 meer onderweg)
+	# kist (19,6) -> 1.4x (27,8) (v0.16: geen zegel 2 meer onderweg)
 	await walk("move_down", 5)
-	await walk("move_left", 6)
+	await walk("move_left", 8)
 	await walk("move_up", 2)
-	check("voor de kist (19,7): %s" % tile(), tile() == Vector2i(19, 7))
+	check("voor de kist (27,9): %s" % tile(), tile() == Vector2i(27, 9))
 	await press_interact()
 	# v0.16: schat-tekst in het blauwe vak, laag boven de knoppen
 	var kg := 0
@@ -2247,15 +2246,15 @@ func _prologue_tests() -> void:
 	await _wait_typed()
 	check("tweede keer: 'De kist is leeg.'", Dialog._lines == ["The chest is empty."])
 	await _story_drain()
-	# put (9,5); v0.13: RPG ART's put is 2x2 (9..10, 5..6), dus je staat op (9,7)
-	await walk("move_left", 10)
+	# put (9,5); v0.13: RPG ART's put is 2x2 (9..10, 5..6), dus je staat op (9,7)  (1.4x: put (16,7), je staat op (16,9))
+	await walk("move_left", 11)
 	await walk("move_up", 1)
-	check("voor de put (9,7), kijkt omhoog: %s" % tile(), tile() == Vector2i(9, 7) and player().facing == Vector2i.UP)
+	check("voor de put (16,9), kijkt omhoog: %s" % tile(), tile() == Vector2i(16, 9) and player().facing == Vector2i.UP)
 	await press_interact()
 	await _story_drain()
 	check("put: bucket of water gekregen", GameState.item_count("emmer_water") == 1)
 	# ---------------- opslaan halverwege (het boek in het huis) en laden
-	await walk("move_right", 7)
+	await walk("move_right", 8)
 	await walk("move_up", 1)
 	check("naar binnen om op te slaan", await wait_scene("Huis"))
 	await frames(10)
@@ -2298,7 +2297,7 @@ func _prologue_tests() -> void:
 	await walk("move_down", 2)
 	await walk("move_right", 5)
 	await walk("move_up", 1)
-	check("weer voor de Oude Man (21,9): %s" % tile(), tile() == Vector2i(21, 9))
+	check("weer voor de Oude Man (29,11): %s" % tile(), tile() == Vector2i(29, 11))
 	var atk_before := int(GameState.party[0]["atk"])
 	await press_interact()
 	var lesson_seen := false
@@ -2406,10 +2405,10 @@ func _prologue_tests() -> void:
 			and _obj("Archief").looping and _obj("Archief").sprite.texture.resource_path.ends_with("archief_ingang_open_flikker.png")
 			and _obj("Archief").glow.visible)
 	await walk("move_down", 2)
-	await walk("move_right", 9)
+	await walk("move_right", 11)
 	await walk("move_up", 5)
 	await walk("move_up", 1)
-	check("tegen de open ingang (25,4): %s" % tile(), tile() == Vector2i(25, 4))
+	check("tegen de open ingang (35,6): %s" % tile(), tile() == Vector2i(35, 6))
 	# v0.13: geen 'Wordt vervolgd' meer: na de proloog-scènes ga je echt De Vergeten Archieven in
 	await _story_drain()
 	check("v0.13: open ingang -> eerste dungeonkamer (ArchiefIngang)", await wait_scene("ArchiefIngang")
@@ -2425,7 +2424,7 @@ func _prologue_tests() -> void:
 	await wait_scene("Wilgendal")
 	await frames(10)
 	await walk("move_down", 2)
-	await walk("move_right", 9)
+	await walk("move_right", 11)
 	await walk("move_up", 5)
 	await walk("move_up", 1)
 	await _story_drain()
@@ -2555,8 +2554,8 @@ func _book_tests() -> void:
 	var start_facing: Vector2i = p.facing
 	var red: Node = _obj("BoekHP")
 	var green: Node = _obj("BoekMP")
-	check("rood + groen boek naast de Archives (24,4) en (27,4)", red != null and green != null
-			and red.position == Vector2(24 * 16 + 8, 4 * 16 + 8) and green.position == Vector2(27 * 16 + 8, 4 * 16 + 8))
+	check("rood + groen boek naast de Archives (34,6) en (37,6)", red != null and green != null
+			and red.position == Vector2(34 * 16 + 8, 6 * 16 + 8) and green.position == Vector2(37 * 16 + 8, 6 * 16 + 8))
 	if red == null or green == null:
 		return
 	check("rood boek: type hp, eigen art (4 frames), rode aura (additief)", red.type == "hp" and red.sprite.hframes == 4
@@ -2579,7 +2578,7 @@ func _book_tests() -> void:
 		h["mp"] = 0
 	var save_before := FileAccess.get_file_as_string(GameState.save_path) if GameState.has_save() else ""
 	# rood: alleen HP
-	p.place_at(Vector2i(24, 5), Vector2i.UP)
+	p.place_at(Vector2i(34, 7), Vector2i.UP)
 	await frames(10)
 	await overworld_shot("_v11_books")
 	await press_interact()
@@ -2594,7 +2593,7 @@ func _book_tests() -> void:
 	# groen: alleen MP
 	for h in GameState.party:
 		h["hp"] = 1
-	p.place_at(Vector2i(27, 5), Vector2i.UP)
+	p.place_at(Vector2i(37, 7), Vector2i.UP)
 	await frames(5)
 	await press_interact()
 	check("groen boek: 'Je geest raakt helder. MP hersteld.'", Dialog.is_open and Dialog._lines == ["Your mind clears. MP restored."])

@@ -643,3 +643,5 @@ assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim_v2.png
 assets/sprites/buiten/waard.png
 assets/sprites/buiten/bouw_werker_b.png
 assets/sprites/buiten/bouw_werker_c.png
+# 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor het Wachtershuis-erf (proloog) 1.4x (tools/som/wachtershuis_v8_grond.py)
+assets/tilesets/som/wachtershuis/grond_v8.png
