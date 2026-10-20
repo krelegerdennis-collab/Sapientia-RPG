@@ -33,6 +33,13 @@ var _col := 0
 func _ready() -> void:
 	if sheet:
 		sprite.texture = sheet
+	# WM1: slanke variant van de sheet (npc_wm1_slim, gerrit_wm1_slim, ...) als die er is
+	if sprite.texture != null:
+		var slank := KaartStijl.npc_sheet_pad(sprite.texture.resource_path)
+		if slank != sprite.texture.resource_path:
+			sprite.texture = load(slank)
+			if sheet:
+				sheet = sprite.texture
 	MapSprite.pas_toe(sprite, frame_maat)
 	add_to_group("story")
 	_update_sprite()

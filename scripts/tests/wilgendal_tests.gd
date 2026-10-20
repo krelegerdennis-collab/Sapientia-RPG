@@ -497,9 +497,13 @@ func _som_pilot(dorp: Node) -> void:
 	var npc_ok := true
 	for naam in ["Gerrit", "Bram", "Els", "Fien", "Wout", "Siem"]:
 		var spr: Sprite2D = dorp.get_node("Objects/%s/Sprite2D" % naam)
-		npc_ok = npc_ok and spr.texture.resource_path == Data.SOM_NPC_MAP + str(Data.SOM_NPC[naam]) + ".png"
+		npc_ok = npc_ok and spr.texture.resource_path == Data.som_npc_sheet(naam)
 		npc_ok = npc_ok and spr.hframes == 3 and spr.vframes == 4 and spr.offset == Vector2(0, -8)
 	check("som: fase-3 NPC-sheets 24x32 (Gerrit, Bram, Els, Fien, Wout, Siem)", npc_ok)
+	check("som: slanke WM1-NPC's (20 okt): Gerrit = gerrit_wm1_slim.png (handwerk blijft), Bram = bram.png (vervangen)",
+			Data.som_npc_sheet("Gerrit").ends_with("npcs/gerrit_wm1_slim.png")
+			and Data.som_npc_sheet("Bram").ends_with("npcs/bram.png")
+			and Data.som_npc_sheet("OudeMan").ends_with("npcs/oude_man_wm1_slim.png"))
 	var ov: TileMapLayer = dorp.get_node("Ground/SomOverlay")
 	var bm: Array = namen["brug_v_m"]
 	check("som: brug over de beek beloopbaar", ov.get_cell_atlas_coords(Vector2i(Data.BRUG.position.x, Data.BEEK_RIJ)) == Vector2i(int(bm[0]), int(bm[1]))
@@ -622,6 +626,42 @@ func _som() -> void:
 	check("los frame 24x32: één frame, voeten op +8, richting kiest geen ongeldig frame", spr.hframes == 1
 			and spr.vframes == 1 and is_equal_approx(spr.offset.y + 16.0, 8.0) and spr.frame == 0)
 	speler.queue_free()
+	# 20 okt 2026: slanke WM1-NPC-sheets. Voeten op de onderste rij van elk frame, zodat offset -8 ze op de tegelrand zet.
+	var voeten_ok := true
+	var slank := ["som/wilgendal/npcs/oude_man_wm1_slim", "som/wilgendal/npcs/gerrit_wm1_slim", "som/wilgendal/npcs/henrik_wm1_slim",
+			"npc_wm1_slim", "buiten/bouw_werker_wm1_slim"]
+	for id in ["bram", "els", "fien", "wout", "siem", "mien", "jelle", "magier", "accessoire"]:
+		slank.append("som/wilgendal/npcs/" + id)
+	for id in slank:
+		var tex: Texture2D = load("res://assets/sprites/%s.png" % id)
+		var im := tex.get_image() if tex != null else null
+		voeten_ok = voeten_ok and im != null and im.get_size() == Vector2i(72, 128)
+		if im == null:
+			continue
+		if im.is_compressed():
+			im.decompress()
+		for rij in 4:
+			var r := im.get_region(Rect2i(0, rij * 32, 24, 32)).get_used_rect()
+			voeten_ok = voeten_ok and r.end.y == 32
+	check("slanke WM1-NPC-sheets 72x128, voeten op de onderrand van elk staand frame", voeten_ok)
+	check("npc_variant wm1_slim: npc.png -> npc_wm1_slim.png, sheet zonder variant blijft",
+			KaartStijl.npc_sheet_pad("res://assets/sprites/npc.png") == "res://assets/sprites/npc_wm1_slim.png"
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/buiten/bouw_werker.png") == "res://assets/sprites/buiten/bouw_werker_wm1_slim.png"
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/som/wilgendal/npcs/marit.png") == "res://assets/sprites/som/wilgendal/npcs/marit.png"
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/npc_wm1_slim.png") == "res://assets/sprites/npc_wm1_slim.png")
+	var gen: Node = (load("res://scenes/npc.tscn") as PackedScene).instantiate()
+	add_child(gen)
+	var gs: Sprite2D = gen.get_node("Sprite2D")
+	check("generieke NPC (npc.tscn) = npc_wm1_slim.png 3x4 van 24x32, voeten op +8", gs.texture.resource_path.ends_with("npc_wm1_slim.png")
+			and gs.hframes == 3 and gs.vframes == 4 and gs.offset == Vector2(0, -8))
+	gen.queue_free()
+	var oud: Node = (load("res://scenes/npc.tscn") as PackedScene).instantiate()
+	oud.sheet = load("res://assets/sprites/player.png")
+	add_child(oud)
+	var os_: Sprite2D = oud.get_node("Sprite2D")
+	check("NPC met een oude 48x96-sheet zonder slanke variant blijft 3x4 van 16x24, offset -4",
+			os_.texture.resource_path.ends_with("player.png") and os_.hframes == 3 and os_.vframes == 4 and os_.offset == Vector2(0, -4))
+	oud.queue_free()
 	# volledige 24x32-sheet (3 loopframes x 4 richtingen = 72x128)
 	var img := Image.create(72, 128, false, Image.FORMAT_RGBA8)
 	var sheet := ImageTexture.create_from_image(img)

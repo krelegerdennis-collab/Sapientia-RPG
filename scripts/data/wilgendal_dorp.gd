@@ -710,7 +710,7 @@ static func som_prop(rij: Dictionary) -> Dictionary:
 static func som_npc_sheet(node: String) -> String:
 	if not som() or not SOM_NPC.has(node):
 		return ""
-	var pad := SOM_NPC_MAP + str(SOM_NPC[node]) + ".png"
+	var pad := KaartStijl.npc_sheet_pad(SOM_NPC_MAP + str(SOM_NPC[node]) + ".png")
 	return pad if ResourceLoader.exists(pad) else ""
 
 

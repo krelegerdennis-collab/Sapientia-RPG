@@ -2086,7 +2086,7 @@ func _dorpsprite_checks() -> void:
 
 
 func _wachter_ok(npc: Node) -> bool:
-	return npc != null and npc.sprite.texture != null and npc.sprite.texture.resource_path.ends_with("som/wilgendal/npcs/oude_man.png") \
+	return npc != null and npc.sprite.texture != null and npc.sprite.texture.resource_path.ends_with("som/wilgendal/npcs/oude_man_wm1_slim.png") \
 			and npc.sprite.hframes == 3 and npc.sprite.vframes == 4 and npc.sprite.texture.get_size() == Vector2(72, 128) \
 			and npc.sprite.offset == Vector2(0, -8)
 

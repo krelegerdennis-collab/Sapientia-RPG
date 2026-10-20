@@ -1,6 +1,8 @@
 {
 	"_uitleg": "SoM-stijl per gebied (Dennis 14 okt 2026). Een gebied is helemaal 'oud' of helemaal 'som'. tools/som/export_tilesets.py schrijft per gebied de tilesets naar assets/tilesets/som/<gebied>/<set>.png + .tres. Staat een gebied op 'som' maar ontbreekt er iets, dan blijft het hele gebied 'oud'.",
 	"standaard": "oud",
+	"npc_variant": "wm1_slim",
+	"_npc_variant": "NPC-sheet <pad>.png -> <pad>_<npc_variant>.png als die bestaat (slanke WM1-NPC's van RPG ART, 20 okt 2026). De oude sheets blijven staan.",
 	"gebieden": {
 		"wilgendal": {
 			"stijl": "som",
