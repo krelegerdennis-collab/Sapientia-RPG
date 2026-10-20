@@ -43,6 +43,19 @@ func _leeg(map_pad: String) -> void:
 		DirAccess.remove_absolute(map_pad.path_join(f))
 
 
+func _wacht_story() -> void:
+	for _i in 10:
+		await get_tree().process_frame
+	var n := 0
+	while (Story.running or Dialog.is_open) and n < 600:
+		if Dialog.is_open:
+			Dialog.advance()
+		await get_tree().create_timer(0.1).timeout
+		n += 1
+	for _i in 5:
+		await get_tree().process_frame
+
+
 func _run() -> void:
 	var log: Node = get_node("/root/Sessielog")
 	check("in een test staat het logboek uit tot de test hem start", not log.actief)
@@ -89,6 +102,15 @@ func _run() -> void:
 		for _i in 3:
 			p.place_at(Vector2i(35, 12), Vector2i.UP)
 			await get_tree().create_timer(log.POS_SECS + 0.05).timeout
+	# object bekijken (story_object -> origin "examine") vs. dezelfde tekst als echte cutscene (Story.run)
+	var obj: Node = load("res://scenes/story_object.tscn").instantiate()
+	obj.event = "cocon"
+	get_tree().current_scene.add_child(obj)
+	obj.interact(p)
+	await _wacht_story()
+	Story.run("cocon")
+	await _wacht_story()
+	obj.queue_free()
 	log.gevecht_start(["moskonijn"], false, "gras", Vector2i(35, 30))
 	log.ronde(1, [{"actor": {"is_hero": true}, "type": "attack"}])
 	log.gevecht_eind("win")
@@ -132,6 +154,12 @@ func _run() -> void:
 			and rect.size() == 4 and int(rect[2]) == 64 and int(rect[3]) == 40)
 	check("gevecht_start, gevecht_eind, dood en respawn gelogd", "gevecht_start" in soorten and "gevecht_eind" in soorten
 			and "dood" in soorten and "respawn" in soorten)
+	var ex := regels.filter(func(d): return d["e"] == "examine")
+	var cs := regels.filter(func(d): return d["e"] == "cutscene_start")
+	check("object bekijken: 'examine' met id en kaart (geen cutscene_start)", ex.size() == 1 and ex[0].get("id") == "cocon"
+			and ex[0].get("kaart") == "dorp_wilgendal" and "examine_eind" in soorten)
+	check("echte cutscene (Story.run): cutscene_start + cutscene_eind", cs.size() == 1 and cs[0].get("id") == "cocon"
+			and "cutscene_eind" in soorten)
 	var bewaar := OS.get_environment("SESSIELOG_BEWAAR")
 	if bewaar != "":
 		# voorbeeldlogboek bewaren (bv. voor tools/sessie_samenvatting.py --heatmap)
