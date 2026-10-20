@@ -24,6 +24,7 @@ var SimBattle: Script
 var BATTLE_SCENE: PackedScene
 
 const DEFAULT_SEED := 20261020
+const STUN_ELEMENTS := ["bliksem", "ijs"]
 const DEFAULT_FIGHTS := 2000
 const D100_LAYOUTS := 6            # zoveel run-seeds per sample-verdieping (verschillende monstergroepen)
 const D100_SAMPLE_FLOORS := [1, 5, 15, 35, 45, 65, 85, 95]
@@ -160,6 +161,20 @@ func scenarios() -> Array:
 		out.append({"id": "d100_v%d" % f, "lazy_d100": [f, false]})
 	for f in Dungeon100Scaling.boss_floors():
 		out.append({"id": "d100_boss_%d" % f, "lazy_d100": [int(f), true]})
+	# Gevoeligheid: dezelfde gevechten, maar de AI gebruikt geen bliksem/ijs (die verlammen/bevriezen
+	# bij ELKE treffer, SpellRules.on_hit). Alleen voor scenario's met een caster die zo'n spreuk kent.
+	var variants: Array = []
+	for sc in out:
+		if sc.has("lazy_d100"):
+			if int(sc["lazy_d100"][0]) >= 30:
+				variants.append({"id": str(sc["id"]) + "_nostun", "lazy_d100": sc["lazy_d100"], "ban": STUN_ELEMENTS})
+		elif (sc["party"] as Array).any(func(p): return str(p[0]) in ["noor", "lotte"]) and str(sc.get("filter", "")) == "":
+			var v: Dictionary = sc.duplicate(true)
+			v["id"] = str(sc["id"]) + "_nostun"
+			v["name"] = str(sc["name"]) + " [no stun spells]"
+			v["ban"] = STUN_ELEMENTS
+			variants.append(v)
+	out.append_array(variants)
 	if not only.is_empty():
 		out = out.filter(func(s): return only.has(s["id"]))
 	return out
@@ -323,7 +338,13 @@ func run_all() -> void:
 func run_scenario(sc: Dictionary) -> Dictionary:
 	if sc.has("lazy_d100"):
 		var t0 := Time.get_ticks_msec()
+		var ban: Array = sc.get("ban", [])
+		var sid := str(sc["id"])
 		sc = _d100_scenario(int(sc["lazy_d100"][0]), bool(sc["lazy_d100"][1]))
+		if not ban.is_empty():
+			sc["id"] = sid
+			sc["name"] = str(sc["name"]) + " [no stun spells]"
+			sc["ban"] = ban
 		if standalone:
 			print("BATTLESIM %s generated in %d ms" % [sc["id"], Time.get_ticks_msec() - t0])
 	_build_party(sc)
@@ -397,6 +418,7 @@ func _fight(sc: Dictionary, g: Dictionary) -> Dictionary:
 	var b: Control = BATTLE_SCENE.instantiate()
 	b.set_script(SimBattle)
 	b.sim_trace = trace
+	b.sim_ban_elements = sc.get("ban", [])
 	holder.add_child(b)
 	if b.sim_result == "":
 		b._run()

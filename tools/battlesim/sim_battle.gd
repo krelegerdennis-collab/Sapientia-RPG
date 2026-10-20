@@ -16,6 +16,7 @@ const AI_MP_BELOW := 0.25       # Toverwater als MP onder deze fractie (alleen c
 const MAX_ROUNDS := 60          # vangnet: daarboven telt het als verlies ("timeout")
 
 var sim_trace := false          # true = elk bericht printen (--trace)
+var sim_ban_elements: Array = []  # AI gebruikt geen schade-spreuken van deze elementen (gevoeligheid)
 var sim_started := false
 var sim_result := ""            # "win" | "lose" | "timeout"
 var sim_rounds := 0
@@ -247,6 +248,8 @@ func _ai_action(h: Dictionary, planned_heal: Dictionary) -> Dictionary:
 	for id in s["spells"]:
 		var sp: Dictionary = GameData.SPELLS[id]
 		if str(sp.get("type", "damage")) != "damage" or int(s["mp"]) < int(sp["mp"]):
+			continue
+		if sim_ban_elements.has(str(sp.get("element", ""))):
 			continue
 		var tgt: Dictionary = strongest if sp["target"] == "enemy" else weakest
 		var one := SpellRules.power_at(sp, int(s.get("level", 1))) * SpellRules.factor(sp, str(s.get("id", "")), tgt)

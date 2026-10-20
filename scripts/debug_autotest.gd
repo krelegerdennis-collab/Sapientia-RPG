@@ -600,9 +600,50 @@ func _run() -> void:
 	await _four_heroes_test()
 	await _stairs_and_town_return_tests()
 	await _game_over_test()
+	await _battlesim_sample_test()
 	Engine.time_scale = 1.0
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
+
+
+## Battle simulator (tools/battlesim): klein vast-seed-monster. Echte gevechtsscène, eenvoudige AI.
+## Draait als laatste: het bouwt de party/tas opnieuw op (GameState.new_game).
+func _battlesim_sample_test() -> void:
+	var path := "res://tools/battlesim/battlesim.gd"
+	check("battlesim: script bestaat", ResourceLoader.exists(path))
+	if not ResourceLoader.exists(path):
+		return
+	var runs: Array = []
+	for k in 2:
+		var sim: Node = load(path).new()
+		sim.standalone = false
+		sim.base_seed = 777
+		sim.fights = 24
+		sim.only = ["wereldkaart1", "golem", "archief2_v3", "d100_boss_10"]
+		add_child(sim)
+		await sim.run_all()
+		runs.append(sim.results.duplicate(true))
+		if k == 0:
+			var md: String = sim.report_markdown(0)
+			check("battlesim: rapport heeft de tabel per gebied", md.contains("| Area | Fights | Win rate | Avg rounds | Avg HP loss | p90 HP loss |"))
+		sim.queue_free()
+		await frames(2)
+	var a: Array = runs[0]
+	var b: Array = runs[1]
+	check("battlesim: 4 gebieden gesimuleerd", a.size() == 4)
+	check("battlesim: vaste seed = exact dezelfde uitkomst", JSON.stringify(a) == JSON.stringify(b))
+	var sane := true
+	for r in a:
+		sane = sane and int(r["n"]) == 24 and float(r["win_rate"]) >= 0.0 and float(r["win_rate"]) <= 1.0 \
+				and float(r["avg_rounds"]) >= 1.0 and float(r["p90_hp_loss"]) >= float(r["avg_hp_loss"]) - 0.0001 \
+				and int(r["timeouts"]) == 0 and not (r["groups"] as Array).is_empty()
+	check("battlesim: getallen kloppen (24 gevechten, winkans 0..1, >= 1 ronde, p90 >= gem., geen timeouts)", sane)
+	if a.size() == 4:
+		check("battlesim: wereldkaart 1 op Lv 3 bijna altijd gewonnen", float(a[0]["win_rate"]) >= 0.9)
+		check("battlesim: Golem kost HP en items", float(a[1]["avg_hp_loss"]) > 0.1 and float(a[1]["avg_items"]) > 0.0)
+		check("battlesim: Archief 2 v3 met drie helden (spreuken gebruikt)", float(a[2]["avg_mp"]) > 0.0)
+		check("battlesim: Diepe Grot baas 10 gegenereerd", str(a[3]["id"]) == "d100_boss_10" and int(a[3]["n"]) == 24)
+	check("battlesim: speelstand niet in een gevecht blijven hangen", not GameState.in_battle)
 
 
 ## v0.11: na de proloog-test: save weg, proloog 'klaar' (wereldkaart open), naar buiten.
