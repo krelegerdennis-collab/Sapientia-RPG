@@ -122,6 +122,14 @@ const UI_JOY_KNOB := "res://assets/sprites/som/ui/joystick_knob.png"            
 const UI_JOY_KNOB_PRESSED := "res://assets/sprites/som/ui/joystick_knob_pressed.png"
 const JOY_ART_RADIUS := 30.0     # straal van joystick_ring in art-pixels
 const JOY_KNOB_TRAVEL := 18.0    # knopuitslag in art-pixels
+## v3 HUD (feedback Dennis): joystick kleiner (x D-pad-straal) en hoger (midden-links, fractie van de hoogte).
+const JOY_SCALE := 0.75
+const JOY_CENTER_Y := 0.6
+## Vinger telt binnen zoveel x de joystickstraal (ruim touch-doel, ook als de ring klein is).
+const JOY_TOUCH_REACH := 2.2
+## Bovenste rij rechts: [RUN][Swap][Ring][MENU]. Knop-art is 38x14; het touch-vak is groter (de art staat erin gecentreerd).
+const TOP_BUTTON_SIZE := Vector2(46, 22)
+const TOP_BUTTON_GAP := 3.0
 ## Icoon-index in ring_icons.png per item/spreuk-id.
 const RING_ICON := {"drankje": 0, "kruid": 1, "toverwater": 2, "genees": 4, "vuur": 5, "bliksem": 6, "feniksveer": 7}
 const RING_ICON_DAMAGE := 3

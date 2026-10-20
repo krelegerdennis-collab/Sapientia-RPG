@@ -67,10 +67,17 @@ static func skin_button(b: Button, key: String) -> bool:
 	var p := SomFx.tex(str(paths[1]))
 	if n == null or p == null:
 		return false
+	# groter touch-vak (SomData.TOP_BUTTON_SIZE), de 38x14-art gecentreerd erin (negatieve expand-marges)
+	var pad: Vector2 = (SomData.TOP_BUTTON_SIZE - n.get_size()) / 2.0
 	var sn := StyleBoxTexture.new()
 	sn.texture = n
 	var sp := StyleBoxTexture.new()
 	sp.texture = p
+	for sb in [sn, sp]:
+		sb.expand_margin_left = -pad.x
+		sb.expand_margin_right = -pad.x
+		sb.expand_margin_top = -pad.y
+		sb.expand_margin_bottom = -pad.y
 	for st in ["normal", "hover", "focus", "disabled"]:
 		b.add_theme_stylebox_override(st, sn)
 	b.add_theme_stylebox_override("pressed", sp)
@@ -78,23 +85,34 @@ static func skin_button(b: Button, key: String) -> bool:
 	b.tooltip_text = b.text
 	b.text = ""
 	b.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	b.custom_minimum_size = Vector2(38, 14)
-	b.size = Vector2(38, 14)
+	b.custom_minimum_size = SomData.TOP_BUTTON_SIZE
+	b.size = SomData.TOP_BUTTON_SIZE
 	b.set_meta("som_skin", key)
 	return true
 
 
 func _place() -> void:
 	var vs := root.get_viewport_rect().size
-	ring_button.reset_size()
-	ring_button.position = Vector2(vs.x - 4.0 - 38.0 - 4.0 - ring_button.size.x, 2.0)
-	switch_button.reset_size()
-	switch_button.position = Vector2(ring_button.position.x - 4.0 - switch_button.size.x, 2.0)
+	var tc: Control = arena.touch if arena != null else null
+	if tc and tc.has_method("som_row_slot"):
+		# één rij rechtsboven naast MENU: [RUN][Swap][Ring][MENU] (RUN zet touch_controls zelf neer)
+		var rr: Rect2 = tc.som_row_slot(0)
+		var sr: Rect2 = tc.som_row_slot(1)
+		ring_button.position = tc.position + rr.position
+		ring_button.size = rr.size
+		switch_button.position = tc.position + sr.position
+		switch_button.size = sr.size
+	else:
+		ring_button.reset_size()
+		ring_button.position = Vector2(vs.x - 4.0 - 38.0 - 4.0 - ring_button.size.x, 2.0)
+		switch_button.reset_size()
+		switch_button.position = Vector2(ring_button.position.x - 4.0 - switch_button.size.x, 2.0)
 	toast_label.position = Vector2(80, 24)
 	toast_label.size = Vector2(vs.x - 160, 30)
 
 
 func _process(delta: float) -> void:
+	_place()
 	bars.queue_redraw()
 	if _toast_t > 0.0:
 		_toast_t -= delta

@@ -90,6 +90,7 @@ func run() -> void:
 	await _switch_tests()
 	await _boss_handoff_tests()
 	await _style_path_tests()
+	await _hud_layout_tests()
 	await _magic_tests()
 	await _death_tests()
 	await _actionsim_tests()      # als laatste: bouwt de SoM-startparty opnieuw op
@@ -524,10 +525,10 @@ func _ui2_tests() -> void:
 	var rbp: StyleBoxTexture = rb.get_theme_stylebox("pressed") as StyleBoxTexture
 	t.check("SoM-ui2: Swap-knop = btn_swap / btn_swap_pressed (38x14)", swn != null and swp != null
 			and swn.texture.resource_path.ends_with("btn_swap.png") and swp.texture.resource_path.ends_with("btn_swap_pressed.png")
-			and sw.size == Vector2(38, 14) and sw.text == "")
+			and sw.size == SomData.TOP_BUTTON_SIZE and sw.text == "")
 	t.check("SoM-ui2: Ring-knop = btn_ring / btn_ring_pressed (38x14)", rbn != null and rbp != null
 			and rbn.texture.resource_path.ends_with("btn_ring.png") and rbp.texture.resource_path.ends_with("btn_ring_pressed.png")
-			and rb.size == Vector2(38, 14))
+			and rb.size == SomData.TOP_BUTTON_SIZE)
 	t.check("SoM-ui2: Swap-/Ring-art-knoppen blijven gekoppeld", sw.pressed.get_connections().size() > 0
 			and rb.pressed.get_connections().size() > 0)
 	var fb := Button.new()
@@ -851,6 +852,44 @@ func _actionsim_tests() -> void:
 	var rs: Dictionary = sim.run_iteration(spam, 6)
 	t.check("SoM-sim: spammen kost meer tijd per kamer (%.1f s vs %.1f s)" % [rs["time"], r1["time"]], rs["time"] > r1["time"])
 	sim.queue_free()
+
+
+## v3 HUD-indeling (feedback Dennis): joystick kleiner/hoger, één rij rechtsboven [RUN][Swap][Ring][MENU], A/B rechtsonder.
+func _hud_layout_tests() -> void:
+	var a := arena()
+	var tc: Control = a.touch
+	var vs: Vector2 = tc.size
+	var c: Vector2 = tc.dpad_center()
+	t.check("SoM-HUD: joystick midden-links (%s in %s)" % [c, vs], c.x < vs.x * 0.25 and c.y > vs.y * 0.4 and c.y < vs.y * 0.75)
+	t.check("SoM-HUD: joystick kleiner dan de D-pad (%.0f < %.0f)" % [tc.joy_radius(), tc.dpad_radius], tc.joy_radius() < tc.dpad_radius)
+	t.check("SoM-HUD: ruim touch-vak rond de joystick (%.0f px)" % (tc.joy_radius() * SomData.JOY_TOUCH_REACH), tc.joy_radius() * SomData.JOY_TOUCH_REACH >= 44.0)
+	var menu: Rect2 = tc.menu_rect()
+	var ring_r := Rect2(a.hud.ring_button.position - tc.position, a.hud.ring_button.size)
+	var swap_r := Rect2(a.hud.switch_button.position - tc.position, a.hud.switch_button.size)
+	var run_r: Rect2 = tc.run_rect()
+	var cy := menu.get_center().y
+	t.check("SoM-HUD: Swap/Ring/RUN in één rij met MENU (y %.0f/%.0f/%.0f/%.0f)" % [swap_r.get_center().y, ring_r.get_center().y, run_r.get_center().y, cy],
+			absf(ring_r.get_center().y - cy) < 1.5 and absf(swap_r.get_center().y - cy) < 1.5 and absf(run_r.get_center().y - cy) < 1.5)
+	t.check("SoM-HUD: volgorde RUN < Swap < Ring < MENU, zonder overlap", run_r.end.x <= swap_r.position.x and swap_r.end.x <= ring_r.position.x
+			and ring_r.end.x <= menu.position.x + 0.5 and cy < vs.y * 0.2)
+	t.check("SoM-HUD: touch-vakken Swap/Ring >= 46x22 (art 38x14 erin)", swap_r.size.x >= 46.0 and swap_r.size.y >= 22.0 and ring_r.size.y >= 22.0)
+	t.check("SoM-HUD: A/B blijven rechtsonder", tc.a_center().x > vs.x * 0.75 and tc.a_center().y > vs.y * 0.6 and tc.b_center().y > vs.y * 0.6)
+	# tik op Ring in de nieuwe plek opent de ring
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = true
+	ev.position = a.hud.ring_button.get_global_rect().get_center()
+	var w := 0
+	while not a.active() and w < 180:
+		await t.frames(1)
+		w += 1
+	a.hud.ring_button.emit_signal("pressed")
+	await t.pframes(2)
+	t.check("SoM-HUD: Ring-knop (nieuwe plek) opent de ring", a.ring.is_open)
+	await shot("v3_hud")
+	a.ring.close({})
+	await t.frames(3)
+	await shot("v3_hud_closed")
 
 
 func _ally(id: String) -> Node:
