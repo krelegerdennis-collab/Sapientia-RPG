@@ -1,0 +1,126 @@
+# MAP_SCALE_PLAN — WM1-kaarten 1.4x (besluit Dennis, 20 okt 2026)
+
+Doel: alle WM1-kaarten (eerste wereld) ~1.4x zo groot, loopbare paden 2-3 tegels breed, passend bij de
+24x32-heldsheets (slanke definitieve sheets van RPG ART: `assets/sprites/som/kaart/*_wm1_slim.png`).
+**Buiten scope:** de wereldkaart (`wereldkaart.tscn`, blijft klein met de oude 16x24-sprite) en alles in
+`wacht/wm2/` (niet gelezen). Tegelmaat blijft 16 px; alleen het aantal tegels groeit.
+
+## Wat vanzelf meegaat
+- **Camera-grenzen**: `map.gd::_fit_camera()` leest de `used_rect` van de grondlaag → niets met de hand.
+- **Encounter-zones**: geen. Alle WM1-kaarten hebben `encounters = false`; gevechten komen van zichtbare
+  map-monsters (`map_monster.gd`), waarvan de posities in de kamerdata staan (moeten wel mee).
+- **Cutscenes**: `story_data.gd` gebruikt relatieve `walk`-stappen (`["walk", wie, richting, tiles]`) plus
+  enkele vaste tegels (bv. bed in `huis_wilgendal` (8,4) in autotest). Relatieve stappen opnieuw nalopen per kaart.
+- **Warps tussen kaarten** gaan via spawn-*namen* (`target_spawn`), niet via coördinaten → alleen de
+  spawnpunten zelf verplaatsen.
+
+## Methode (bewezen op Wilgendal, zie PR)
+Geen vrije herschaling (dan worden paden 3→4-5 breed en schuiven deuren van het pad af), maar een
+**rij/kolom-verdubbeling**: ~40% van de rijen en kolommen wordt dubbel, *nooit* een padrij/-kolom, beek,
+brug, hekrij of deurrij. Zo blijven paden 2-3 breed, groeien gras, plein en tussenruimte. Puntcoördinaten:
+`x' = X(x)` (eerste kopie), deuren/props met de onderrand (`y' = Yl(y)`, laatste kopie) zodat de deur tegen
+het pad blijft; NPC-lussen = oude offsets vanaf de nieuwe start. Grote sprites (molen, huizen) houden hun
+maat en worden opnieuw verankerd op hun voet/deur.
+
+## Inventaris (gemeten in Godot 4.3: used_rect van de grondlaag + nodes na `_ready`)
+Kolom "moet mee" = nodes/data met een vaste tegel- of pixelpositie.
+
+| kaart | bron van de layout | nu (tegels) | 1.4x | moet mee |
+|---|---|---|---|---|
+| `archief_2_v1_entree.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 boeken, 1 exit-warper, 1 bordjes, 2 exits, 2 map-monsters, 3 spawns |
+| `archief_2_v1_plaat.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
+| `archief_2_v2_gang.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 2 exits, 2 map-monsters, 3 spawns |
+| `archief_2_v2_lotte.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_v3_ketting.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 3 groeiplaten, 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_v3_licht.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
+| `archief_2_v3_tegen.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
+| `archief_2_v3_wurger.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 exit-warper, 1 bordjes, 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_v4_genezer.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 exit-warper, 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_v4_hal.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_warper.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 boeken, 1 bordjes, 1 exits, 3 spawns |
+| `archief_bibliotheek.tscn` | dungeon_rooms.gd | 12x9 | 17x13 | 1 boeken, 7 meubels, 3 bordjes, 2 exits, 2 spawns |
+| `archief_golemhal.tscn` | dungeon_rooms.gd | 20x12 | 28x17 | 1 exit-warper, 1 exits, 1 map-monsters, 1 spawns |
+| `archief_ingang.tscn` | dungeon_rooms.gd | 20x12 | 28x17 | 1 boeken, 1 exit-warper, 2 exits, 3 map-monsters, 2 spawns |
+| `archief_puzzel.tscn` | puzzle_rooms.gd | 18x19 | 25x27 | 2 exits, 2 spawns |
+| `archief_test.tscn` | puzzle_rooms.gd | 14x11 | 20x15 | 2 exits, 1 spawns |
+| `archief_v1_gang.tscn` | dungeon_rooms.gd | 32x12 | 45x17 | 1 kisten, 2 exits, 6 map-monsters, 2 spawns |
+| `archief_v2_kastenzaal.tscn` | dungeon_rooms.gd | 24x13 | 34x18 | 2 exits, 3 map-monsters, 2 spawns |
+| `archief_v2_leeszaal.tscn` | dungeon_rooms.gd | 20x24 | 28x34 | 1 kisten, 2 exits, 4 map-monsters, 2 spawns |
+| `archief_v2_trapzaal.tscn` | dungeon_rooms.gd | 20x12 | 28x17 | 1 boeken, 1 kisten, 2 exits, 2 map-monsters, 2 spawns |
+| `archief_v3_gang.tscn` | dungeon_rooms.gd | 20x12 | 28x17 | 2 exits, 3 map-monsters, 2 spawns |
+| `archief_v3_zuilenhal.tscn` | dungeon_rooms.gd | 32x13 | 45x18 | 1 boeken, 1 kisten, 1 exit-warper, 2 exits, 5 map-monsters, 2 spawns |
+| `archief_v4_voorhal.tscn` | dungeon_rooms.gd | 20x12 | 28x17 | 1 kisten, 2 exits, 3 map-monsters, 2 spawns |
+| `archief_v4_wachtersgang.tscn` | dungeon_rooms.gd | 32x12 | 45x17 | 1 boeken, 2 exits, 5 map-monsters, 2 spawns |
+| `berggrot_bouwplaats.tscn` | scene | 24x13 | 34x18 | 2 exits, 2 spawns, 4 NPC, 5 story-obj |
+| `berggrot_geheim.tscn` | berggrot_data.gd + puzzle_rooms.gd | 17x14 | 24x20 | 2 exits, 2 spawns |
+| `berggrot_grendel.tscn` | berggrot_data.gd + puzzle_rooms.gd | 15x11 | 21x15 | 2 exits, 2 spawns |
+| `berggrot_mond.tscn` | berggrot_data.gd | 20x12 | 28x17 | 1 boeken, 1 exit-warper, 1 bordjes, 2 exits, 2 map-monsters, 2 spawns |
+| `berggrot_nerf.tscn` | berggrot_data.gd | 20x12 | 28x17 | 1 boeken, 1 exit-warper, 1 bordjes, 2 exits, 2 map-monsters, 2 spawns |
+| `berggrot_uitmond.tscn` | berggrot_data.gd | 20x12 | 28x17 | 1 boeken, 1 exit-warper, 1 bordjes, 2 exits, 1 map-monsters, 2 spawns |
+| `dorp_wilgendal.tscn` | wilgendal_dorp.gd (data) | 64x40 | **90x56 (gedaan)** | 8 deuren, 1 exits, 9 spawns, 6 NPC |
+| `dungeon100.tscn` | dungeon100_generator.gd (procedureel) | 25x25 | 35x35 | 1 warper, 3 kisten, 2 exits, 10 map-monsters, 3 spawns |
+| `esdoorn.tscn` | scene | 34x24 | 48x34 | 3 deuren, 1 exits, 4 spawns, 5 NPC, 1 bordjes, 2 story-obj |
+| `esdoorn_herberg.tscn` | scene | 12x9 | 17x13 | 1 boeken, 1 exits, 1 spawns, 1 NPC |
+| `esdoorn_huis_noor.tscn` | scene | 10x8 | 14x11 | 1 exits, 1 spawns, 1 NPC |
+| `huis_wilgendal.tscn` | scene | 12x9 | 17x13 | 1 boeken, 1 exits, 3 spawns, 1 NPC, 1 story-obj |
+| `kern_demo.tscn` | puzzle_rooms.gd | 9x7 | 13x10 | 2 exits, 1 spawns |
+| `leven_ingang.tscn` | archief2_rooms.gd | 16x11 | 22x15 | 1 boeken, 1 bordjes, 2 exits, 2 map-monsters, 2 spawns |
+| `leven_v1_plaat.tscn` | puzzle_rooms.gd | 15x11 | 21x15 | 2 exits, 2 spawns |
+| `leven_v3_combi.tscn` | puzzle_rooms.gd | 11x8 | 15x11 | 2 exits, 1 spawns |
+| `wilgendal.tscn` | scene (TileMap + nodes in px) | 32x22 | 45x31 | 2 boeken, 1 deuren, 1 exits, 3 spawns, 1 NPC, 9 story-obj |
+| `wilgendal_binnen.tscn` | wilgendal_dorp.gd KAMERS (pand_binnen.gd) | 9x8 | 13x11 | 1 exits, 1 spawns, 1 NPC |
+| `woud_mistpoel.tscn` | woud_rooms.gd | 20x16 | 28x22 | 1 kisten, 1 exit-warper, 1 bordjes, 2 exits, 4 map-monsters, 2 spawns |
+| `woud_open_plek.tscn` | woud_rooms.gd | 20x12 | 28x17 | 1 exit-warper, 1 exits, 1 map-monsters, 1 spawns, 2 NPC, 2 story-obj |
+| `woud_pad.tscn` | woud_rooms.gd | 32x12 | 45x17 | 2 kisten, 2 exits, 5 map-monsters, 2 spawns |
+| `woud_rand.tscn` | woud_rooms.gd | 20x12 | 28x17 | 1 boeken, 1 kisten, 1 exit-warper, 2 exits, 3 map-monsters, 2 spawns |
+| `woud_sporenkring.tscn` | woud_rooms.gd | 20x12 | 28x17 | 1 boeken, 1 kisten, 1 bordjes, 2 exits, 3 map-monsters, 2 spawns |
+Totaal: 46 WM1-kaarten (wereldkaart uitgezonderd). Groepen en aanpak:
+
+1. **Dorp Wilgendal** (`dorp_wilgendal`, data in `wilgendal_dorp.gd`): **klaar in deze PR** — zie onder.
+2. **Hand-gebouwde scènes** (`wilgendal.tscn` Wachtershuis-erf 32x22, `huis_wilgendal` 12x9, `esdoorn` 34x24,
+   `esdoorn_herberg` 12x9, `esdoorn_huis_noor` 10x8, `berggrot_bouwplaats` 24x13): TileMap-data zit in de .tscn,
+   NPC/deur/story-object/spawn/exit-posities in px. Aanpak: een klein Godot-tool-script dat de tegels met
+   dezelfde rij/kolom-verdubbeling herschrijft en alle Node2D-posities omrekent. Let op: autotest en menutest
+   hebben vaste tegels in `wilgendal.tscn`/`huis_wilgendal.tscn` (respawn, bed (8,4), opslagboek); `story_data.gd`
+   proloog-cutscene loopt relatief.
+3. **Dungeonkamers uit data** (`dungeon_room.gd`: `dungeon_rooms.gd`, `woud_rooms.gd`, `berggrot_data.gd`,
+   `archief2_rooms.gd`; meestal 20x12, gangen 32x12): ASCII-layout + tekens voor exits/spawns/monsters/kisten/
+   boeken/bordjes. Eén schaalfunctie op de layoutstrings in een tool-script; aparte coördinatenlijsten
+   (monsterpaden, `guard`, `exit_warper`-plek, `archief_warpers.gd`/`woud_warpers.gd`/`berggrot_warpers.gd`)
+   mee. Tests met vaste tegels: `dungeon_tests`, `woud_tests`, `berggrot_tests`, `archief2_tests`, `golem_tests`.
+4. **Puzzelkamers** (`puzzle_room.gd`: `archief_puzzel`, `archief_test`, `kern_demo`, `leven_v1_plaat`,
+   `leven_v3_combi`, `berggrot_geheim`, `berggrot_grendel`): **niet** het puzzelrooster schalen (blokken,
+   platen en oplossingen hangen aan exacte tegels; `puzzletest`/`kerntest` controleren oplossingen). Voorstel:
+   puzzelrooster gelijk laten, alleen de rand/aanloop 1.4x (gangen naar de puzzel breder, marge rond het
+   rooster). Vraag aan Dennis of dat volstaat.
+5. **Dungeon100** (25x25 per verdieping, procedureel): schaal via de generator (kamergrootte/gangbreedte in
+   `dungeon100_generator.gd`), niet per kaart; `dungeon100*`-suites (o.a. `dungeon100schaaltest`) bewaken dit.
+6. **Interieurs** (`wilgendal_binnen` 9x8 uit `KAMERS`, herberg, huizen): klein houden of hooguit +2 kolommen;
+   het interieur vult nu al het scherm (384x216 = 24x13.5 tegels). Voorstel: interieurs niet schalen.
+
+Volgorde-voorstel: (1) Wilgendal ✓ → (2) Wachtershuis-erf + Esdoorn (hand-scènes, één tool) →
+(3) Donker Woud + Berggrot (dungeon-data, één tool) → (4) Archief 1/2 → (5) puzzels (alleen rand) →
+(6) Dungeon100-generator.
+
+## Atlas / mobiele texturelimieten
+- RPG ART v8 (`maps_test`): `v8_town_ground_tileset.png` 256x624 (613 unieke tegels), cave 256x528 (526),
+  dungeon 256x272 (257). Dit zijn **gebakken** sets per testkaart (unieke tegels van één render), geen
+  autotile-sets met namen.
+- Voor Wilgendal 90x56 is de v8-grond met RPG ART's eigen generator gebakken
+  (`tools/som/wilgendal_v8_grond.py`): **1297 unieke tegels → atlas 1024x336** (64 tegels breed), ruim onder
+  2048x2048 (max 16 384 tegels). Bestaande `terrain.png` 256x176, `hekken.png` 256x32. VRAM ≈ 1.4 MB (RGBA8).
+- Schatting andere kaarten: unieke tegels groeien ongeveer met het oppervlak (Wilgendal: 5040 cellen → 1297); alle
+  andere WM1-kaarten zijn kleiner, dus naar verwachting ruim binnen 1024x1024. Het script weigert (assert) een atlas > 2048 in een van beide richtingen.
+- Advies RPG ART: op termijn een benoemde v8-autotile-set (blob47 pad/water/plein + N grasvarianten), dan
+  hoeft er niet per kaart gebakken te worden en deelt WM1 één atlas.
+
+## Wilgendal: wat er verschoven is (64x40 → 90x56)
+Verdubbelde rijen: 1,2,3,4,5,7,12,14,23,24,26,27,33,35,36,37. Verdubbelde kolommen:
+1,2,4,9,12,13,22-25,28,30,32,38,40,41,43,45,53-55,58-62.
+- Winkelrij-deuren (y 8→14): pantser 26, wapen 37, accessoire 58, magie 67, tante Minna 78.
+- Huizen zuid (deur y 30→42): dicht_west x26, echtpaar x78; burgemeester deur (49,25)→(67,35).
+- Molen: oorsprong (1,1)→(1,9), voet blijft direct onder de beek (rij 25); molendeuren nu relatief aan de oorsprong.
+- Beek rij 17→25, brug (34,16)→(47,24). Plein (26,11,19,5)→(36,17,26,7).
+- Spawn zuid (35,37)→(48,52), uitgang (34,39)→(47,55), Garrett (10,22)→(14,30).
+- 5 sfeer-NPC's + lussen, 27 props (lantaarns, kramen, banken, bloembakken, oude hekprops) omgerekend.
+- Poorten/hekken/paden komen uit `GROND` en schalen dus vanzelf mee; padbreedtes bleven 2 en 3.

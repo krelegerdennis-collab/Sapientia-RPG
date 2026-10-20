@@ -5,6 +5,7 @@ extends Node
 
 const MAP := "user://sessielog_test"
 const EXPORT := "user://sessielog_test_export"
+const WilgendalDorpData := preload("res://scripts/data/wilgendal_dorp.gd")
 
 var failures := 0
 var passes := 0
@@ -151,7 +152,7 @@ func _run() -> void:
 	check("kaart-regel: gebied, palet en SoM-tileset (RPG ART)", art_kaart)
 	var rect: Array = info.get("rect", [])
 	check("kaart_info: stijl som, grondrechthoek van de kaart (%s)" % [rect], info.get("stijl") == "som"
-			and rect.size() == 4 and int(rect[2]) == 64 and int(rect[3]) == 40)
+			and rect.size() == 4 and int(rect[2]) == WilgendalDorpData.W and int(rect[3]) == WilgendalDorpData.H)
 	check("gevecht_start, gevecht_eind, dood en respawn gelogd", "gevecht_start" in soorten and "gevecht_eind" in soorten
 			and "dood" in soorten and "respawn" in soorten)
 	var ex := regels.filter(func(d): return d["e"] == "examine")
