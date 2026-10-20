@@ -35,6 +35,16 @@ static func gebieden() -> Dictionary:
 	return config().get("gebieden", {})
 
 
+## NPC-sheet in de WM1-variant (20 okt 2026): <pad>.png -> <pad>_<npc_variant>.png als die bestaat,
+## anders <pad> zelf. Zo blijven handwerk-sheets staan en wijst de kaart naar de slanke versie.
+static func npc_sheet_pad(pad: String) -> String:
+	var v := str(config().get("npc_variant", ""))
+	if v == "" or pad == "" or not pad.ends_with(".png") or pad.ends_with("_" + v + ".png"):
+		return pad
+	var slank := pad.get_basename() + "_" + v + ".png"
+	return slank if ResourceLoader.exists(slank) else pad
+
+
 ## Gebied van een map (bestandsnaam zonder .tscn), of "" als de map bij geen gebied hoort.
 static func gebied_van_map(pad: String) -> String:
 	var naam := pad.get_file().get_basename()
