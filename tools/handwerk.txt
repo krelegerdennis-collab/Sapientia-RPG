@@ -627,3 +627,5 @@ assets/sprites/som/kaart/seren_wm1_slim.png
 assets/sprites/som/kaart/vesper_wm1_slim.png
 # 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor Wilgendal 1.4x (tools/som/wilgendal_v8_grond.py)
 assets/tilesets/som/wilgendal/grond_v8.png
+# 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor Esdoorn 1.4x (tools/som/esdoorn_v8_grond.py)
+assets/tilesets/som/esdoorn/grond_v8.png
