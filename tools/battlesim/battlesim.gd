@@ -514,6 +514,46 @@ func outlier_tag(s: Dictionary) -> String:
 	return ""
 
 
+## Automatische bevindingen (uit de getallen; geen handwerk, dus altijd in lijn met de tabel).
+func findings() -> Array:
+	var L: Array = ["## Key findings (generated)", ""]
+	var by_id := {}
+	for r in results:
+		by_id[str(r["id"])] = r
+	var hard: Array = []
+	var trivial: Array = []
+	for r in results:
+		var tag := outlier_tag(r)
+		if tag == "HARD" or tag == "NEAR-IMPOSSIBLE":
+			hard.append("%s (%s wins, p90 HP loss %s)" % [r["name"], pct(r["win_rate"]), pct(r["p90_hp_loss"])])
+		elif tag == "TRIVIAL":
+			trivial.append(str(r["name"]))
+	L.append("- **Hard / near-impossible areas**: %s." % ("; ".join(hard) if not hard.is_empty() else "none"))
+	L.append("- **Trivial areas** (100%% wins, < %d%% HP loss, <= 2 rounds): %s." % [roundi(EASY_LOSS * 100),
+			", ".join(trivial) if not trivial.is_empty() else "none"])
+	var bosses: Array = []
+	for r in results:
+		if str(r["name"]).begins_with("BOSS") and not str(r["id"]).ends_with("_nostun"):
+			bosses.append("%s %s/%.1f rounds/%s HP" % [str(r["name"]).trim_prefix("BOSS "), pct(r["win_rate"]), r["avg_rounds"], pct(r["avg_hp_loss"])])
+	if not bosses.is_empty():
+		L.append("- **Bosses** (win / rounds / avg HP loss): %s." % "; ".join(bosses))
+	var stun: Array = []
+	for r in results:
+		var id := str(r["id"])
+		if not id.ends_with("_nostun") or not by_id.has(id.trim_suffix("_nostun")):
+			continue
+		var base: Dictionary = by_id[id.trim_suffix("_nostun")]
+		if absf(float(base["avg_hp_loss"]) - float(r["avg_hp_loss"])) >= 0.08 or absf(float(base["win_rate"]) - float(r["win_rate"])) >= 0.05:
+			stun.append("%s: %s -> %s HP loss, %s -> %s wins" % [base["name"], pct(base["avg_hp_loss"]), pct(r["avg_hp_loss"]),
+					pct(base["win_rate"]), pct(r["win_rate"])])
+	if not stun.is_empty():
+		L.append("- **Stun-lock**: `SpellRules.on_hit` gives every lightning/ice damage spell a 100% one-turn skip (no roll, no boss")
+		L.append("  immunity). A caster with Chain Lightning (all enemies) can stop every enemy every round. Without lightning/ice")
+		L.append("  (`[no stun spells]` rows, same seeds) the numbers change a lot: " + "; ".join(stun) + ".")
+	L.append("")
+	return L
+
+
 func report_markdown(ms: int) -> String:
 	var L: Array = []
 	L.append("# Battle balance report (headless simulator)")
@@ -522,6 +562,9 @@ func report_markdown(ms: int) -> String:
 			base_seed, fights, Engine.get_version_info()["string"], ms / 1000.0])
 	L.append("Same seed + same code = same numbers. **No gameplay was changed**: the simulator instantiates the real")
 	L.append("`scenes/battle/battle.tscn` and only swaps the menu, waits and animations (`tools/battlesim/sim_battle.gd`).")
+	L.append("")
+	L.append("Run it again: `xvfb-run -a godot --rendering-driver opengl3 --path . -- --battlesim [--seed=N] [--fights=N] [--only=id,id] [--out=file.md] [--json=file.json]`")
+	L.append("(`--headless` also works; `--trace --fights=1 --only=<id>` prints every battle message). A 24-fight fixed-seed sample runs in `--autotest`.")
 	L.append("")
 	L.append("## Summary per area")
 	L.append("")
@@ -535,6 +578,7 @@ func report_markdown(ms: int) -> String:
 	L.append("Each fight starts with the party at full HP/MP and the listed bag (fights are independent, no carry-over).")
 	L.append("Items = consumables used per fight; MP = MP spent per fight. Rounds = battle rounds (all heroes + enemies act once).")
 	L.append("")
+	L.append_array(findings())
 	L.append("## Outliers (per encounter group)")
 	L.append("")
 	L.append("NEAR-IMPOSSIBLE = win rate < 50%%; HARD = win rate < %d%%; TRIVIAL = 100%% wins, avg HP loss < %d%% and <= 2 rounds." % [
