@@ -135,8 +135,12 @@ const UI_GAUGE_READY := "res://assets/sprites/som/ui/gauge_ready_glow.png"
 const GAUGE_READY_MS := 90      # 'spark': elke andere aanvalsspreuk
 ## Seconden om de wapenmeter van 0 tot 100% te vullen.
 const CHARGE_TIME := 0.5
-## Schade bij 0% lading (lineair naar 1.0 bij 100%).
-const CHARGE_MIN_MULT := 0.25
+## Slag onder 100%: schade x max(CHARGE_MIN_MULT, lading) (SoM: spammen loont niet).
+const CHARGE_MIN_MULT := 0.1
+## SoM-stijl: de meter vult pas weer als de slag-animatie klaar is (lading 0 tijdens de animatie).
+const CHARGE_AFTER_ANIM := true
+## Vijandschade in realtime x deze factor (zelfde formule als turn-based; balans via --actionsim).
+const ENEMY_DAMAGE_MULT := 1.0
 ## Bereik van een slag (px, vanaf een punt 10 px voor de speler).
 const ATTACK_REACH := 14.0
 const ATTACK_OFFSET := 12.0

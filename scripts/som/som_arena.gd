@@ -78,6 +78,10 @@ var switches := 0
 var allies_enabled := true
 ## Resterende tijd tot de volgende B-spreuk (SomData.B_CAST_COOLDOWN).
 var b_cast_cd := 0.0
+## Zolang de slag-animatie loopt vult de meter niet (SomData.CHARGE_AFTER_ANIM).
+var swing_lock := 0.0
+## Laatste slag was vol (stagger: telegraaf afbreken + knockback alleen bij 100%).
+var _full_swing := true
 var b_casts := 0
 
 
@@ -305,7 +309,9 @@ func _process(delta: float) -> void:
 		return
 	if not active():
 		return
-	charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
+	swing_lock = maxf(0.0, swing_lock - delta)
+	if swing_lock <= 0.0 or not SomData.CHARGE_AFTER_ANIM:
+		charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
 	for k in iframes.keys():
 		iframes[k] = maxf(0.0, float(iframes[k]) - delta)
 	if Input.is_action_just_pressed(SWITCH_ACTION):
@@ -354,12 +360,17 @@ func quick_cast() -> String:
 # ---------------------------------------------------------------- aanvallen
 ## Schademultiplier van de wapenmeter (1.0 bij 100%).
 static func charge_mult(c: float) -> float:
-	return 1.0 if c >= 1.0 else lerpf(SomData.CHARGE_MIN_MULT, 1.0, clampf(c, 0.0, 1.0))
+	return charge_mult_with(c, SomData.CHARGE_MIN_MULT)
+
+
+## Schade x max(floor, lading); 1.0 bij een volle meter.
+static func charge_mult_with(c: float, floor_mult: float) -> float:
+	return 1.0 if c >= 1.0 else maxf(floor_mult, clampf(c, 0.0, 1.0))
 
 
 ## battle.gd _physical_damage zonder buffs/verdediging.
 static func physical_damage(atk: float, def: float, mult: float) -> int:
-	var base := atk * mult - def / 2.0
+	var base := (atk - def / 2.0) * mult
 	return maxi(1, roundi(base * randf_range(0.85, 1.15)))
 
 
@@ -369,8 +380,20 @@ func attack() -> int:
 		return 0
 	attacks += 1
 	var mult := charge_mult(charge)
+	_full_swing = charge >= 1.0
 	charge = 0.0
+	swing_lock = anim_seconds(active_id)
 	return _swing(active_id, player, mult)
+
+
+## Duur (s) van de aanvalsanimatie van een held (0 zonder sheet).
+func anim_seconds(id: String) -> float:
+	if not attack_texs.has(id):
+		return 0.0
+	var tot := 0.0
+	for v in SomData.ATTACK_ANIMS[id].get("ms", []):
+		tot += float(v)
+	return tot / 1000.0
 
 
 ## Slag van een held-node (speler of bondgenoot) in zijn kijkrichting. Met een aanvalssheet valt de treffer
@@ -398,7 +421,7 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 		if center_of(m).distance_to(point) <= SomData.ATTACK_REACH + 8.0 * maxf(m.size.x, m.size.y):
 			var e: Dictionary = enemies[m]
 			last_attacker = id
-			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), n.facing)
+			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), n.facing, mult >= 1.0)
 			hits += 1
 	swing_landed.emit(id, hits)
 	return hits
@@ -427,13 +450,13 @@ func nearest_enemy(from: Vector2, within: float) -> Node:
 	return best
 
 
-func damage_enemy(m: Node, dmg: int, dir: Vector2i) -> void:
+## stagger = false (slag onder 100%): wel schade, maar geen afgebroken telegraaf en geen knockback.
+func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true) -> void:
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
 	e["hp"] = int(e["hp"]) - dmg
 	e["flash"] = SomData.HIT_FLASH
-	e["tele"] = 0.0          # geraakt = telegraaf afgebroken
 	last_enemy_damage = dmg
 	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), Color(1, 1, 1))
 	SomFx.spark(room.get_node("Objects"), center_of(m))
@@ -441,7 +464,9 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i) -> void:
 	if int(e["hp"]) <= 0:
 		_defeat_enemy(m)
 		return
-	e["tele"] = 0.0
+	if not stagger:
+		return
+	e["tele"] = 0.0          # volle treffer = telegraaf afgebroken
 	_monster_pose(m, e, "hurt", 0, _hurt_seconds())
 	_knockback(m, dir)
 
@@ -688,7 +713,7 @@ func hit_member(id: String, atk: int) -> void:
 	if down or float(iframes.get(id, 0.0)) > 0.0 or not is_alive(id):
 		return
 	var h := member(id)
-	var dmg := physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0)
+	var dmg := maxi(1, roundi(physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0) * SomData.ENEMY_DAMAGE_MULT))
 	h["hp"] = maxi(0, int(h["hp"]) - dmg)
 	last_player_damage = dmg
 	last_hit_id = id

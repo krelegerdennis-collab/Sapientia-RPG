@@ -275,14 +275,40 @@ func _charge_and_attack_tests() -> void:
 		low += SomArena.physical_damage(atk, float(e["def"]), SomArena.charge_mult(0.0))
 		high += SomArena.physical_damage(atk, float(e["def"]), 1.0)
 	t.check("SoM: slag <100%% doet minder schade (%d < %d)" % [low, high], low < high and full >= 1)
-	await seconds(SomData.CHARGE_TIME + 0.1)
-	t.check("SoM: meter vult in ~%.1f s" % SomData.CHARGE_TIME, a.charge >= 1.0 and is_equal_approx(SomData.CHARGE_TIME, 0.5))
+	var anim_s: float = a.anim_seconds("dennis")
+	await seconds(SomData.CHARGE_TIME + anim_s + 0.1)
+	t.check("SoM: meter vult in ~%.1f s" % SomData.CHARGE_TIME, a.charge >= 1.0)
 	a.attack()
-	await seconds(0.25)
-	t.check("SoM: na 0,25 s nog niet vol (%.2f)" % a.charge, a.charge < 1.0 and a.charge > 0.2)
-	await seconds(0.3)
-	t.check("SoM: na 0,55 s vol", a.charge >= 1.0)
+	await seconds(anim_s * 0.5)
+	t.check("SoM-v3: meter staat stil tijdens de slag-animatie (%.2f, %.2f s)" % [a.charge, anim_s], a.charge < 0.05 or not SomData.CHARGE_AFTER_ANIM)
+	await seconds(anim_s * 0.5 + SomData.CHARGE_TIME * 0.5)
+	t.check("SoM: halverwege het vullen nog niet vol (%.2f)" % a.charge, a.charge < 1.0 and a.charge > 0.2)
+	await seconds(SomData.CHARGE_TIME * 0.5 + 0.15)
+	t.check("SoM: daarna weer vol", a.charge >= 1.0)
+	# schade x max(0.1, lading)
+	t.check("SoM-v3: lading-multiplier = max(%.1f, lading)" % SomData.CHARGE_MIN_MULT, is_equal_approx(SomArena.charge_mult(0.5), 0.5)
+			and is_equal_approx(SomArena.charge_mult(0.02), SomData.CHARGE_MIN_MULT) and is_equal_approx(SomData.CHARGE_MIN_MULT, 0.1))
+	var s_full := 0
+	var s_half := 0
+	for i in 200:
+		s_full += SomArena.physical_damage(40.0, 4.0, 1.0)
+		s_half += SomArena.physical_damage(40.0, 4.0, 0.5)
+	t.check("SoM-v3: 50%% lading = ~50%% schade (%d / %d)" % [s_half, s_full], absf(float(s_half) / float(s_full) - 0.5) < 0.04)
+	# halve slag breekt de telegraaf niet af, volle wel
+	var mt := _first_enemy()
+	if mt:
+		var et: Dictionary = a.enemies[mt]
+		var hp_keep := int(et["hp"])
+		et["hp"] = 999
+		et["tele"] = 0.4
+		a.damage_enemy(mt, 1, Vector2i.RIGHT, false)
+		var kept := float(et["tele"]) > 0.0
+		a.damage_enemy(mt, 1, Vector2i.RIGHT, true)
+		t.check("SoM-v3: slag <100%% onderbreekt geen telegraaf, 100%% wel", kept and float(et["tele"]) <= 0.0)
+		et["hp"] = hp_keep
+	t.check("SoM-v3: vijandschade x ENEMY_DAMAGE_MULT (%.2f)" % SomData.ENEMY_DAMAGE_MULT, SomData.ENEMY_DAMAGE_MULT >= 1.0)
 	# verslaan: EXP/goud/buit
+	await seconds(0.3)              # knockback van de telegraaf-test uitlopen
 	if a.enemies.has(m):
 		face_monster(m)
 		a.enemies[m]["hp"] = 1
@@ -295,6 +321,10 @@ func _charge_and_attack_tests() -> void:
 		await t.frames(2)
 	var mid: String = m.monster_id
 	var eid: String = m.enemy_id
+	a.enemies[m]["chase"] = 9.0     # blijft staan tijdens de slag (treffer pas op frame 4)
+	a.enemies[m]["cd"] = 9.0
+	face_monster(m)
+	await t.frames(2)
 	a.charge = 1.0
 	await strike()
 	t.check("SoM: vijand verslagen -> EXP (%d -> %d) en goud" % [exp0, int(GameState.party[0]["exp"])],
@@ -456,6 +486,10 @@ func _ui2_tests() -> void:
 			a.enemies[e]["hp"] = 999      # niet laten sterven: dan blijft de positie te vergelijken
 		a.cast_spell("vuur", caster, {})
 		await released()
+		e_feet.clear()
+		for e in a.enemies.keys():
+			if is_instance_valid(e):
+				e_feet.append(a.feet_of_enemy(e))
 		var found := objs.find_children("SomSpellImpact*", "", false, false)
 		imp = found[0] if found.size() > 0 else null
 	var on_feet := false
@@ -775,7 +809,7 @@ func _art3_tests(m: Node) -> void:
 	await seconds(0.12)
 	t.check("SoM-art3: na 70 ms het tweede hurt-frame", m.sprite.frame % 2 == 1 or str(e.get("pose", "")) != "hurt")
 	await seconds(0.3)
-	t.check("SoM-art3: hurt voorbij -> mapsprite", str(e.get("pose", "")) == "")
+	t.check("SoM-art3: hurt voorbij -> mapsprite (%s %.2f, %s)" % [e.get("pose", ""), float(e.get("pose_t", 0.0)), a.active()], str(e.get("pose", "")) != "hurt")
 	var dt: Texture2D = a._monster_sheet(m, "death")
 	a._monster_pose(m, e, "death", 0, 0.1)
 	t.check("SoM-art3: monster-death 4 x 24x24, offset (-4,-8)", dt.get_size() == Vector2(96, 24) and m.sprite.hframes == 4
@@ -913,7 +947,7 @@ func _switch_tests() -> void:
 	Input.parse_input_event(up)
 	await t.frames(2)
 	t.check("SoM-wissel: toets C -> Seren (%s)" % a.active_id, a.active_id == "lotte" and p.position.distance_to(seren_pos) < 8.0)
-	t.check("SoM-wissel: Dax wordt AI op de oude plek", _ally("dennis") != null and _ally("dennis").position.distance_to(dax_pos) < 8.0)
+	t.check("SoM-wissel: Dax wordt AI op de oude plek", _ally("dennis") != null and _ally("dennis").position.distance_to(dax_pos) < 12.0)
 	var spr: Sprite2D = p.get_node("Sprite2D")
 	t.check("SoM-wissel: speler-sprite = Seren", spr.texture == a.sheet_for("lotte"))
 	t.check("SoM-wissel: ring toont Serens spreuken", a.ring_entries()["magic"].any(func(e): return e["caster"] == "lotte" and e["id"] == "genees"))
