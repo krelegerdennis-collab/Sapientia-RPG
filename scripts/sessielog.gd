@@ -13,8 +13,9 @@ extends Node
 ##   Spelnamen komen niet in het logboek (alleen held-ids). Uit te zetten: Opties > Session Log.
 ## - Export: Opties > Export Log (web = download, anders Downloads/Documenten, anders het pad).
 ##
+## Elke kaart- en positieregel draagt de art op het scherm: "stijl" (som/oud, KaartStijl) en "tileset".
 ## Andere scripts melden alleen kort: Sessielog.noteer("soort", {...}); uit/zonder start = no-op.
-## Gebeurtenissen: start, kaart, kaart_tijd, warp, pos, dir, knop, bump, menu, dialoog_start,
+## Gebeurtenissen: start, kaart, kaart_info (stijl/gebied/palet/tileset/rect), kaart_tijd, warp, pos, dir, knop, bump, menu, dialoog_start,
 ## dialoog_eind, cutscene_start, cutscene_eind, gevecht_start, ronde, gevecht_eind, dood,
 ## respawn, scherm, pauze, hervat, einde. Samenvatten: tools/sessie_samenvatting.py.
 
@@ -61,6 +62,8 @@ var _scherm := Vector2i.ZERO
 var _speler: Node
 var _gevecht := {}
 var _pauze_ms := 0
+## Art van de huidige kaart (stijl/tileset), gemeld bij de eerste positie (dan is de scène er).
+var _art_nu := {}
 
 
 func _ready() -> void:
@@ -330,6 +333,36 @@ func _stijl(p: String) -> String:
 	return "som" if KaartStijl.is_som(p) else "oud"
 
 
+## Art op het scherm (voor RPG ART): stijl (som/oud), gebied, palet en de grond-tileset van de geladen kaart.
+func _art(p: String) -> Dictionary:
+	var gebied := KaartStijl.gebied_van_map(p)
+	var st := _stijl(p)
+	var palet := ""
+	if gebied != "":
+		palet = str(KaartStijl.gebieden().get(gebied, {}).get("palet", ""))
+	var ts := ""
+	var scene := get_tree().current_scene
+	if scene != null and str(scene.scene_file_path) == p:
+		var g := scene.get_node_or_null("Ground") as TileMapLayer
+		if g != null and g.tile_set != null:
+			ts = g.tile_set.resource_path.trim_prefix("res://")
+	if ts == "" and st == "som" and gebied != "":
+		ts = KaartStijl.tileset_pad(gebied, "terrain").trim_prefix("res://")
+	return {"stijl": st, "gebied": gebied, "palet": palet, "tileset": ts}
+
+
+## Rechthoek van de grond (tegels) van de geladen kaart, voor de heatmap; [x, y, w, h] of [].
+func _kaart_rect(p: String) -> Array:
+	var scene := get_tree().current_scene
+	if scene == null or str(scene.scene_file_path) != p:
+		return []
+	var g := scene.get_node_or_null("Ground") as TileMapLayer
+	if g == null:
+		return []
+	var r := g.get_used_rect()
+	return [r.position.x, r.position.y, r.size.x, r.size.y]
+
+
 func _meld_scherm(eerste: bool) -> void:
 	var vp := get_viewport()
 	if vp == null:
@@ -366,7 +399,15 @@ func _meet_positie() -> void:
 	var f := "down"
 	if "facing" in p:
 		f = _richting_naam(p.facing)
-	noteer("pos", {"kaart": _kaart_id(), "x": t.x, "y": t.y, "f": f})
+	var kp: String = GameState.current_map
+	if _art_nu.is_empty():
+		# eerste positie op deze kaart: nu is de scène geladen (tileset + maat kloppen)
+		_art_nu = _art(kp)
+		var ki := {"kaart": _kaart_id(kp), "rect": _kaart_rect(kp)}
+		ki.merge(_art_nu)
+		noteer("kaart_info", ki)
+	noteer("pos", {"kaart": _kaart_id(), "x": t.x, "y": t.y, "f": f,
+			"stijl": _art_nu["stijl"], "tileset": _art_nu["tileset"]})
 
 
 func _richting_naam(v: Vector2i) -> String:
@@ -388,11 +429,14 @@ func kaart(p: String) -> void:
 	_kaart_sinds_ms = Time.get_ticks_msec()
 	_laatste_tegel = Vector2i(-99999, -99999)
 	_speler = null
+	_art_nu = {}
 	var w := Vector2i(DisplayServer.window_get_size())
 	var vp := get_viewport()
 	var v := Vector2i(vp.get_visible_rect().size) if vp != null else Vector2i.ZERO
-	noteer("kaart", {"kaart": _kaart_id(p), "stijl": _stijl(p), "hoe": GameState.entry_kind,
-			"spawn": GameState.pending_spawn, "vp": [v.x, v.y], "venster": [w.x, w.y]})
+	var info := {"kaart": _kaart_id(p), "hoe": GameState.entry_kind,
+			"spawn": GameState.pending_spawn, "vp": [v.x, v.y], "venster": [w.x, w.y]}
+	info.merge(_art(p))
+	noteer("kaart", info)
 
 
 ## Tijd op de kaart die we verlaten.
