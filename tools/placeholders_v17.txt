@@ -101,3 +101,8 @@ assets/sprites/buiten/bouw_karretje.png        16x16    mijnkarretje met stenen 
 assets/sprites/buiten/bouw_gereedschap.png     16x16    houweel en schep tegen een kist   [KLAAR: echte art van RPG ART, zie tools/handwerk.txt]
 assets/sprites/buiten/bouw_balken.png          16x16    stapel stutbalken   [KLAAR: echte art van RPG ART, zie tools/handwerk.txt]
 # Werkers gebruiken nu de bestaande npc.png met een tint. Nodig: eigen bouwvakker-sheet (zelfde formaat als assets/sprites/npc.png).   [KLAAR: assets/sprites/buiten/bouw_werker.png, RPG ART]
+# SoM-proef (realtime gevecht, scripts/som/): ALLES in code getekend, geen bestanden. Magenta = placeholder.
+#   slag-boog (som_fx.gd Slash), wapenmeter boven het hoofd + HUD-balkjes (som_fx.gd Gauge, som_hud.gd),
+#   schadegetallen / telegraaf-"!" (som_fx.gd number), ringmenu = gewone knoppen op een cirkel (som_ring.gd),
+#   vijand-treffer = witte flits, telegraaf = rood knipperen (modulate op de bestaande map-sprite).
+#   Nodig van RPG ART: zie HANDOFF_SOM.md "Art voor de volledige versie".

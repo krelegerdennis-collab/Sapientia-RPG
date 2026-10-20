@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bu6eba3k75xo1"
-path="res://.godot/imported/groepen.png-073e49ee545fecd9508691542769f0ba.ctex"
+uid="uid://cc4df40o2nbg0"
+path="res://.godot/imported/wilgendal.png-17964270051b847cf5e7ade4feb4750d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tools/som/bron/gebouw/groepen.png"
-dest_files=["res://.godot/imported/groepen.png-073e49ee545fecd9508691542769f0ba.ctex"]
+source_file="res://tools/som/bron/hekken/wilgendal.png"
+dest_files=["res://.godot/imported/wilgendal.png-17964270051b847cf5e7ade4feb4750d.ctex"]
 
 [params]
 

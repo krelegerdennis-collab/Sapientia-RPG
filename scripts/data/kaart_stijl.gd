@@ -36,12 +36,17 @@ static func gebieden() -> Dictionary:
 
 
 ## NPC-sheet in de WM1-variant (20 okt 2026): <pad>.png -> <pad>_<npc_variant>.png als die bestaat,
-## anders <pad> zelf. Zo blijven handwerk-sheets staan en wijst de kaart naar de slanke versie.
+## anders <pad> zelf. <pad>_<npc_variant>_v2.png (fix-versie) gaat voor als die bestaat.
+## Zo blijven handwerk-sheets staan en wijst de kaart naar de slanke versie.
 static func npc_sheet_pad(pad: String) -> String:
 	var v := str(config().get("npc_variant", ""))
-	if v == "" or pad == "" or not pad.ends_with(".png") or pad.ends_with("_" + v + ".png"):
+	if v == "" or pad == "" or not pad.ends_with(".png") or pad.get_file().contains("_" + v):
 		return pad
 	var slank := pad.get_basename() + "_" + v + ".png"
+	# Een gecorrigeerde versie (<pad>_<v>_v2.png) gaat voor, want de eerste slanke sheet kan handwerk zijn.
+	var v2 := pad.get_basename() + "_" + v + "_v2.png"
+	if ResourceLoader.exists(v2):
+		return v2
 	return slank if ResourceLoader.exists(slank) else pad
 
 

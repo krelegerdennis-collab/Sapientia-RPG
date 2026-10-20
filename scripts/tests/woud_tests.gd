@@ -678,6 +678,10 @@ func _village_tests() -> void:
 	var h := await enter(SD.ESDOORN_HERBERG, "binnen")
 	check("herberg met opslagboek en waard", h != null and h.get_node_or_null("Objects/SaveBook") != null
 			and h.get_node("Objects/SaveBook").type == "save" and h.get_node_or_null("Objects/Waard") != null)
+	var waard: Node = h.get_node("Objects/Waard")
+	check("herberg: Waard heeft eigen sheet (waard.png met schort, 24x32, offset -8) en geen tint", waard.sheet != null
+			and waard.sheet.resource_path.ends_with("buiten/waard.png") and waard.modulate == Color(1, 1, 1, 1)
+			and waard.sprite.hframes == 3 and waard.sprite.vframes == 4 and waard.sprite.offset == Vector2(0, -8))
 	GameState.party[0]["hp"] = 1
 	Story.trigger("herbergier", h.get_node("Objects/Waard"))
 	await run_story(15.0)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://du4iuqpb1u0xd"
-path="res://.godot/imported/tileset.png-6789b96ad60ca21d6469e526636d6621.ctex"
+uid="uid://dm05h5ahq8sx3"
+path="res://.godot/imported/herfst.png-3916ede8cf93cc5071b247d3a2facdef.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tools/som/bron/interieur/tileset.png"
-dest_files=["res://.godot/imported/tileset.png-6789b96ad60ca21d6469e526636d6621.ctex"]
+source_file="res://tools/som/bron/hekken/herfst.png"
+dest_files=["res://.godot/imported/herfst.png-3916ede8cf93cc5071b247d3a2facdef.ctex"]
 
 [params]
 

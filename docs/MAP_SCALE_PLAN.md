@@ -157,3 +157,21 @@ decortegels vloer. De rij vlak boven de zuiduitgang krijgt zijn kopie erboven, z
 - Uitgangen: zuid `(UU)`/`(EE)` 2 breed, boog `n` 1 breed (deur, niet verbreed).
 - Grond: geen v8-bos-generator/-tegels in `art_mapsprites_v4/out` (alleen town/cave/dungeon + Mapleton-props),
   dus de bestaande `woud_tiles.png` (art_woud_v17) blijft. Nodig van RPG ART voor v8: zie PR.
+
+## Wachtershuis-erf (proloog, `wilgendal.tscn`): wat er verschoven is (32x22 → 45x31)
+Tool: `tools/som/wachtershuis_1p4.py` (eenmalig, op de .tscn). Verdubbelde rijen: 0,1,10,11,14-18. Verdubbelde
+kolommen: 0-6,11,21,22,29-31. Nooit: huis (kolom 14-18, rij 2-6), deurrij 6, keienplein (rij 7-8), tuinpad
+(kolom 15), uitgang (rij 21, kolom 14-16), ruines/Archief-ingang (kolom 23-28, rij 2-5), put (kolom 9-10),
+vijver (rij 12-13). Het tuinpad was 1 breed en is nu 2 breed (kolom 23-24); de uitgang blijft 3 breed (22-24).
+Interieur `huis_wilgendal.tscn` niet geschaald (bed (8,4), opslagboek ongewijzigd).
+- Deur (16,6)→(24,8); spawns voor_huis (16,7)→(24,9), start (16,8)→(24,10), zuid_ingang (15,19)→(23,28);
+  uitgang NaarWereld (14,21)→(22,30).
+- Oude Man (21,8)→(29,10); kist (19,6)→(27,8); put (9,5)→(16,7); Archief-ingang (25,2)→(35,4) (3x2);
+  6 ruines + boeken HP (24,4)→(34,6), MP (27,4)→(37,6).
+- Tuinwezens (`garden_creatures.gd`): speelplek (312,184)→(440,232), volg-grens y 232→296.
+- Proloog-cutscenes (`story_data.gd`) lopen relatief (`walk … 1`) en blijven gelijk; autotest-looproutes en
+  vaste tegels (autotest, dungeontest `_outdoor_tests`) omgerekend.
+- v8-grond: `tools/som/wachtershuis_v8_grond.py` → `assets/tilesets/som/wachtershuis/grond_v8.*` (471 unieke
+  tegels, atlas 1024x128), tileset `dorp_v8.tres` (bomen, rotsen, vijver uit dorp_v8.png).
+- Ontbrekende v8-art: huis (huis.png, nog v0.x), put/kist/ruines/Archief-ingang (`assets/sprites/buiten/`), en een
+  kleine-vijverset (de v8-wateranden in dorp_v8.png zijn voor de Mapleton-vijver; op een 3x2-vijver lezen ze hoekig).

@@ -27,6 +27,7 @@ const ROWS := [
 	[RESET_KEY, "Default", "Set every option back to the default (A)."],
 	["sessielog", "Session Log", "Notes where you walk and fight so the game can be improved. No personal data."],
 	[EXPORT_KEY, "Export Log", "Save or share the session log (A) so you can send it."],
+	["battle_style", "Battle Style", "Classic: turn-based. Action: real time (bosses stay turn-based)."],
 ]
 
 var settings: Node
@@ -96,6 +97,8 @@ func value_text(key: String) -> String:
 			return "%d%%" % int(v)
 		"touch_size":
 			return settings.TOUCH_SIZE_NAMES[int(v)]
+		"battle_style":
+			return settings.BATTLE_STYLE_NAMES[int(v)]
 	if v is bool:
 		return "On" if v else "Off"
 	return str(v)

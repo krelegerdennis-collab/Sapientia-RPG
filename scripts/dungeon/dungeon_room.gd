@@ -68,6 +68,10 @@ const OVERLAY_Z := 10
 const MIST_TILES := [82, 83, 84, 109, 110]
 const MIST_ALPHA := 0.6
 var mist_layer: TileMapLayer
+## SoM-proef (scripts/som/som_arena.gd): realtime gevecht in deze kamer, of null (turn-based zoals altijd).
+const SomData := preload("res://scripts/data/som_data.gd")
+const SomArenaScript := preload("res://scripts/som/som_arena.gd")
+var som: Node = null
 
 
 func _ready() -> void:
@@ -82,6 +86,7 @@ func _ready() -> void:
 	if from_battle:
 		_restore_after_battle(ctx)
 	GameState.map_monster_battle = {}
+	_setup_som()
 	# v0.16 Kernkracht-stun telt af per stap van de speler
 	player.stepped.connect(_stun_step)
 	if GameState.pending_spawn == "" and not returning:
@@ -98,6 +103,27 @@ func _ready() -> void:
 ## v0.19: een BAASKAMER zet het kamer-checkpoint niet (wie bij de baas sneuvelt, ontwaakt in de
 ## kamer ervoor). Data: "checkpoint": true/false per kamer; zonder die sleutel = geen checkpoint als
 ## er een monster met "boss": true in de kamer staat (ook als hij al verslagen is).
+## SoM-proef: Battle Style = Action (Settings) of de SoM-knop (GameState.som_mode), en deze kamer
+## staat in SomData.ROOMS. Anders gebeurt er niets.
+func _setup_som() -> void:
+	if not SomData.room_enabled(room_id, GameState.som_mode or Settings.action_battles()):
+		return
+	som = SomArenaScript.new()
+	add_child(som)
+	som.setup(self)
+
+
+## SoM-proef/autotest: extra map-monster in deze kamer zetten (bv. een baas voor de baas-overdracht).
+func add_monster(d: Dictionary) -> MapMonster:
+	var m: MapMonster = MapMonsterScript.new()
+	m.setup(self, d, hash(room_id) + monsters.size() * 7919)
+	$Objects.add_child(m)
+	monsters.append(m)
+	if som:
+		som.register(m)
+	return m
+
+
 func allows_checkpoint() -> bool:
 	if not sets_checkpoint:
 		return false
@@ -559,6 +585,12 @@ func monsters_active() -> bool:
 ## Tile van de speler en (tijdens een stap) waar hij heen loopt.
 func player_tiles() -> Array[Vector2i]:
 	var out: Array[Vector2i] = [player.get_tile()]
+	if som:
+		# SoM-proef: vrije beweging; de speler kan op twee tegels tegelijk staan (botsing 10x8 aan de voeten)
+		for off in [Vector2(-5, 0), Vector2(5, 0), Vector2(-5, 7), Vector2(5, 7)]:
+			var t2 := Vector2i(((player.position + off) / 16.0).floor())
+			if not out.has(t2):
+				out.append(t2)
 	if player.is_moving:
 		var tp: Vector2 = player.get("_target")
 		var t := Vector2i((tp / 16.0).floor())
@@ -598,6 +630,8 @@ func monster_touch(m: Node) -> void:
 		return
 	if m.is_stunned():
 		return       # v0.16: verlamd door Kernkracht: geen gevecht
+	if som and not m.boss:
+		return       # SoM-proef: realtime; aanraken is geen gevecht (bazen blijven turn-based)
 	start_monster_battle(m)
 
 

@@ -149,7 +149,7 @@ const ROOMS := {
 		"monsters": [
 			{"id": "m1", "enemy": "mistuil", "group": ["mistuil", "mistuil"], "tile": [13, 4], "moves": true},
 			{"id": "m2", "enemy": "sporenzwam", "group": ["sporenzwam", "sporenzwam"], "tile": [21, 9], "moves": true},
-			{"id": "m3", "enemy": "wortelkruiper", "group": ["wortelkruiper", "mistuil", "wortelkruiper"], "tile": [12, 16], "moves": true},
+			{"id": "m3", "enemy": "wortelkruiper", "group": ["wortelkruiper", "mistuil", "wortelkruiper"], "tile": [9, 17], "moves": true},
 			{"id": "m4", "enemy": "wortelkruiper", "group": ["wortelkruiper", "sporenzwam"], "tile": [4, 17], "moves": true},
 		],
 	},

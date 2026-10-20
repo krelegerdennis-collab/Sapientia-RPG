@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://sb8hsbjmoqya"
-path="res://.godot/imported/groepen.png-a62ba6a64d652fdd09695bf82ffb31d9.ctex"
+uid="uid://bhg707fbgykro"
+path="res://.godot/imported/bouw_werker_c.png-2483987b40dcea78f5fe83c9078104b7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tools/som/bron/interieur/groepen.png"
-dest_files=["res://.godot/imported/groepen.png-a62ba6a64d652fdd09695bf82ffb31d9.ctex"]
+source_file="res://assets/sprites/buiten/bouw_werker_c.png"
+dest_files=["res://.godot/imported/bouw_werker_c.png-2483987b40dcea78f5fe83c9078104b7.ctex"]
 
 [params]
 
