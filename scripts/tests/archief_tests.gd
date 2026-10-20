@@ -788,26 +788,33 @@ func _scatter_tests() -> void:
 	var ts: TileSet = DungeonRoom.tileset(true, "archief_grijs")
 	var src: TileSetAtlasSource = ts.get_source(0)
 	var poly_ok := true
-	for n in DR.ARCHIEF_FLOOR_SCATTER:
-		if src.get_tile_data(Vector2i(n, 0), 0).get_collision_polygons_count(0) != 0:
+	for n in DR.ARCHIEF_FLOOR_SCATTER + DR.ARCHIEF_BLOCK_A + DR.ARCHIEF_BLOCK_B:
+		if src.get_tile_data(Vector2i(n % DR.COLS, n / DR.COLS), 0).get_collision_polygons_count(0) != 0:
 			poly_ok = false
-	check("G: tileset archief_grijs: geen botsingsvorm op 0-3", poly_ok)
+	check("G: tileset archief_grijs: geen botsingsvorm op 0-3 en 80-87", poly_ok)
 	check("G: hash is vast: (5,7) = %d, (0,0) = 0, twee keer gelijk" % DR.archief_floor_scatter(5, 7),
 			DR.archief_floor_scatter(0, 0) == 0 and DR.archief_floor_scatter(5, 7) == absi((5 * 73856093) ^ (7 * 19349663)) % 4
 			and DR.archief_floor_scatter(13, 4) == DR.archief_floor_scatter(13, 4))
-	# macro-modus: vrij 2x2-blok met even blokhash -> ARCHIEF_MACRO_TILES (LB, RB, LO, RO), anders per tegel
+	# blok-modus: elk vrij 2x2-vak op het even raster -> blok A (80-83) of B (84-87) via hash van (x>>1, y>>1)
 	var open4 := [".....", ".....", ".....", "....."]
-	var bx := 0
-	while absi((bx * 73856093) ^ (0 * 19349663)) % 2 != 0:
-		bx += 1
-	var mt: Array = DR.ARCHIEF_MACRO_TILES
-	check("G: macroblok %d,0 = %s in volgorde LB/RB/LO/RO" % [bx, str(mt)], bx < 2
-			and DR.archief_floor_at(bx * 2, 0, open4) == mt[0] and DR.archief_floor_at(bx * 2 + 1, 0, open4) == mt[1]
-			and DR.archief_floor_at(bx * 2, 1, open4) == mt[2] and DR.archief_floor_at(bx * 2 + 1, 1, open4) == mt[3])
+	var blok_ok := true
+	var keuzes := {}
+	for by in 2:
+		for bx in 2:
+			var blk: Array = DR.ARCHIEF_BLOCK_A if DR.archief_block_choice(bx, by) == 0 else DR.ARCHIEF_BLOCK_B
+			keuzes[DR.archief_block_choice(bx, by)] = true
+			for i in 4:
+				if DR.archief_floor_at(bx * 2 + (i & 1), by * 2 + (i >> 1), open4) != blk[i]:
+					blok_ok = false
+	check("G: vrije 2x2-vakken = blok A/B in volgorde LB/RB/LO/RO", blok_ok)
+	check("G: onvolledig vak (kolom 4) -> 0-3", DR.archief_floor_at(4, 0, open4) == DR.archief_floor_scatter(4, 0)
+			and DR.archief_floor_at(4, 0, open4) < 4)
+	check("G: tegels 80-87 bestaan in de tileset en zijn beloopbaar", range(80, 88).all(func(n):
+			return src.has_tile(Vector2i(n % 16, n / 16)) and not DR.is_solid(n, "archief_grijs")))
 	var blocked := [".#...", ".....", ".....", "....."]
 	check("G: geblokkeerd 2x2-blok -> per-tegel-hash", DR.archief_floor_at(0, 0, blocked) == DR.archief_floor_scatter(0, 0)
 			and DR.archief_floor_at(1, 1, blocked) == DR.archief_floor_scatter(1, 1))
-	check("G: tile-modus = per-tegel-hash", DR.archief_floor_at(bx * 2, 0, open4, "tile") == DR.archief_floor_scatter(bx * 2, 0))
+	check("G: tile-modus = per-tegel-hash", DR.archief_floor_at(0, 0, open4, "tile") == DR.archief_floor_scatter(0, 0))
 	var gezien := {}
 	var first_ingang := {}
 	for rid in DR.ARCHIEF_SCATTER_ROOMS + ["archief_ingang"]:
@@ -834,7 +841,7 @@ func _scatter_tests() -> void:
 					gezien[cells[t]] = true
 				if s.is_wall(t) != DR.is_solid(basis):
 					walk_ok = false
-		check("G: %s: '.' = hash-variant 0-3%s" % [rid, "" if scatter else " (eigen floor_tiles, ongemoeid)"], vast_ok)
+		check("G: %s: '.' = blok A/B of rand 0-3%s" % [rid, "" if scatter else " (eigen floor_tiles, ongemoeid)"], vast_ok)
 		check("G: %s: beloopbaarheid gelijk aan de lay-out met '.' = 0" % rid, walk_ok)
 		if rid == "archief_ingang":
 			if first_ingang.is_empty():
@@ -844,7 +851,7 @@ func _scatter_tests() -> void:
 				check("G: archief_ingang twee keer geladen = identieke tegels", cells == first_ingang)
 		elif rid in ["archief_v2_kastenzaal", "archief_v3_zuilenhal", "archief_golemhal"]:
 			await screenshot("archief_v8_" + str(rid).trim_prefix("archief_"))
-	check("G: alle 4 varianten komen voor (%s)" % str(gezien.keys()), gezien.size() == 4)
+	check("G: blok A en B komen beide voor (%s)" % str(gezien.keys()), gezien.has(80) and gezien.has(84))
 
 
 func _enter_map(path: String, spawn_name: String, scene_name: String) -> Node:

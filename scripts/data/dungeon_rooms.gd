@@ -233,21 +233,29 @@ static func archief_floor_scatter(x: int, y: int) -> int:
 	return int(ARCHIEF_FLOOR_SCATTER[absi((x * 73856093) ^ (y * 19349663)) % 4])
 
 
-## Verstrooi-modus van de archief-vloer: "tile" = per tegel 0-3, "macro" = 32x32-blokken (2x2) waar het kan.
-const ARCHIEF_SCATTER_MODE := "macro"
-## Tegelnummers van één 32x32 macroblok in volgorde [linksboven, rechtsboven, linksonder, rechtsonder].
-## Placeholder 0,1,2,3 tot RPG ART echte macrotegels levert: alleen deze constante aanpassen.
-const ARCHIEF_MACRO_TILES := [0, 1, 2, 3]
+## Verstrooi-modus van de archief-vloer: "block" = alleen 32x32-blokken op het even 2x2-raster (RPG ART v8),
+## "tile" = per tegel 0-3.
+const ARCHIEF_SCATTER_MODE := "block"
+## Blok A en blok B (RPG ART archief_grijs v8, 256x96), elk [linksboven, rechtsboven, linksonder, rechtsonder].
+const ARCHIEF_BLOCK_A := [80, 81, 82, 83]
+const ARCHIEF_BLOCK_B := [84, 85, 86, 87]
+const ARCHIEF_MACRO_TILES := ARCHIEF_BLOCK_A
 
 
-## Vloertegel voor '.' op (x, y) in een archief-lay-out. Macro-modus: blok = (x>>1, y>>1); als alle 4
-## tegels van dat blok '.' zijn en de hash van (x>>1, y>>1) even is -> macroblok, anders per-tegel-hash.
+## Blok A (0) of B (1) voor het 2x2-raster-vak (bx, by): vaste hash.
+static func archief_block_choice(bx: int, by: int) -> int:
+	return absi((bx * 73856093) ^ (by * 19349663)) % 2
+
+
+## Vloertegel voor '.' op (x, y) in een archief-lay-out. Blok-modus: vak = (x>>1, y>>1) op het even raster;
+## is het hele vak '.' -> blok A of B (hash van het vak), anders (muurranden / onvolledige vakken) 0-3 per tegel.
 static func archief_floor_at(x: int, y: int, layout: Array, mode := ARCHIEF_SCATTER_MODE) -> int:
-	if mode == "macro":
+	if mode == "block" or mode == "macro":
 		var bx := x >> 1
 		var by := y >> 1
-		if absi((bx * 73856093) ^ (by * 19349663)) % 2 == 0 and _block_free(bx, by, layout):
-			return int(ARCHIEF_MACRO_TILES[(y & 1) * 2 + (x & 1)])
+		if _block_free(bx, by, layout):
+			var blk: Array = ARCHIEF_BLOCK_A if archief_block_choice(bx, by) == 0 else ARCHIEF_BLOCK_B
+			return int(blk[(y & 1) * 2 + (x & 1)])
 	return archief_floor_scatter(x, y)
 
 
