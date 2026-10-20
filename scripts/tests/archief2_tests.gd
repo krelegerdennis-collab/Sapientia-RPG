@@ -71,6 +71,8 @@ func _run() -> void:
 	_vijanden()
 	print("=== Archief 2: vijanden en Codex-bondgenoten in het gevecht ===")
 	await _vijanden_gevecht()
+	print("=== Archief 2: Deel G kas v8.1 blokvloer ===")
+	await _kas_blok_tests()
 	print("ARCHIEF2TEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -154,6 +156,9 @@ func _data() -> void:
 			and monsters.has("genezer"))
 	var maten := {
 		"res://assets/tiles/dungeon/kas_tiles.png": Vector2(256, 80),
+		"res://assets/tiles/dungeon/kas_tiles_v8.png": Vector2(256, 80),
+		"res://assets/tiles/dungeon/kas_tiles_v8b.png": Vector2(256, 96),
+		"res://assets/tiles/dungeon/kas_bibliotheek_v8.png": Vector2(256, 64),
 		"res://assets/puzzle/groei_plaat.png": Vector2(48, 16),
 		"res://assets/sprites/archief2/lotte_veld.png": Vector2(48, 96),
 		"res://assets/sprites/archief2/lotte_glitch.png": Vector2(64, 80),
@@ -1052,3 +1057,58 @@ func _muziek() -> void:
 			and BattleScript.battle_music_for(["wortelkoning"], true) == "gevecht_miniboss"
 			and BattleScript.battle_music_for(["genezer"], false) == "gevecht_normaal"
 			and BattleScript.battle_music_for(["mosslijm"], false) == "gevecht_normaal")
+
+
+## Deel G (kas v8.1): effen vloer 0-3 op een even 2x2-vak (lay-out '.') -> blok A 80-83 / B 84-87 via
+## archief_block_choice(x>>1, y>>1); al het andere blijft de tegel uit archief2_ground.gd.
+func _kas_blok_tests() -> void:
+	const A2G := preload("res://scripts/data/archief2_ground.gd")
+	var DR := DungeonRooms
+	var tex: Texture2D = load(str(DR.theme_data("kas")["tiles"]))
+	check("G: kas-atlas v8.1 is 256x96", tex != null and tex.get_size() == Vector2(256, 96))
+	var ts: TileSet = DungeonRoom.tileset(true, "kas")
+	var src: TileSetAtlasSource = ts.get_source(0)
+	check("G: tegelaantal volgt de hoogte (96 tegels, 80-95 bestaan)", src.get_tiles_count() == 96
+			and range(80, 96).all(func(n): return src.has_tile(Vector2i(n % 16, n / 16))))
+	var poly_ok := true
+	for n in DR.KAS_BLOCK_A + DR.KAS_BLOCK_B + DR.KAS_FILLERS:
+		if DR.is_solid(n, "kas") or src.get_tile_data(Vector2i(n % 16, n / 16), 0).get_collision_polygons_count(0) != 0:
+			poly_ok = false
+	check("G: 80-95 beloopbaar, geen botsingsvorm", poly_ok)
+	var g := [[0, 1, 2, 3, 4], [2, 0, 1, 1, 0], [0, 0, 65, 1, 2], [1, 2, 3, 0, 1]]
+	var lay := [".....", ".....", ".....", "....."]
+	var blk: Array = DR.KAS_BLOCK_A if DR.archief_block_choice(0, 0) == 0 else DR.KAS_BLOCK_B
+	check("G: vrij vak (0,0) = blok A/B in volgorde LB/RB/LO/RO", range(4).all(func(i):
+			return DR.kas_floor_at(i & 1, i >> 1, g, lay) == blk[i]))
+	check("G: vak met decor (65) blijft ongemoeid", DR.kas_floor_at(2, 2, g, lay) == 65
+			and DR.kas_floor_at(3, 2, g, lay) == 1 and DR.kas_floor_at(3, 3, g, lay) == 0)
+	check("G: onvolledig vak (kolom 4) blijft ongemoeid", DR.kas_floor_at(4, 1, g, lay) == 0)
+	check("G: geblokkeerde lay-out ('#') -> geen blok", DR.kas_floor_at(0, 0, g, ["#....", ".....", ".....", "....."]) == 0)
+	check("G: vaste hash (twee keer gelijk)", DR.kas_floor_at(1, 1, g, lay) == DR.kas_floor_at(1, 1, g, lay))
+	var gezien := {}
+	GameState.new_game("Dax")
+	GameState.encounter_multiplier = 0.0
+	for rid in ["archief_2_v1_entree", "archief_2_v2_gang", "archief_2_v3_licht", "archief_2_v4_hal"]:
+		var room: Dictionary = Rooms.ROOMS[rid] if Rooms.ROOMS.has(rid) else DR.room(rid)
+		var spawn: String = (room["spawns"] as Dictionary).keys()[0]
+		GameState.change_map("res://scenes/maps/%s.tscn" % rid, spawn)
+		if not await _wacht(str(rid).to_pascal_case()):
+			check("G: %s geladen" % rid, false)
+			continue
+		var s := _scène()
+		var grond: Array = A2G.GROUND[rid]
+		var layout: Array = room["layout"]
+		var ok := true
+		var walk_ok := true
+		for y in grond.size():
+			for x in (grond[y] as Array).size():
+				var t := Vector2i(x, y)
+				var want: int = DR.kas_floor_at(x, y, grond, layout)
+				if s.cell(t) != want:
+					ok = false
+				gezien[s.cell(t)] = true
+				if s.is_wall(t) != DR.is_solid(int(grond[y][x]), "kas"):
+					walk_ok = false
+		check("G: %s: vloer = blok A/B of de oude grondtegel" % rid, ok)
+		check("G: %s: beloopbaarheid gelijk aan de grondlaag" % rid, walk_ok)
+	check("G: blok A en B komen beide voor", gezien.has(80) and gezien.has(84))

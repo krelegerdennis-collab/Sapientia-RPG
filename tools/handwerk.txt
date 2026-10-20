@@ -657,3 +657,8 @@ assets/sprites/buiten/archief_ingang_open_flikker_v8.png
 assets/sprites/buiten/put_v8.png
 # 20 okt 2026: woud_tiles_v9b.png van RPG ART (art_mapsprites_v4/out/tiles_v9/woud, 256x128): donkerder pad, 14 opnieuw, kuilranden 112-118
 assets/tiles/dungeon/woud_tiles_v9b.png
+# 20 okt 2026: v8-kastegels Archief 2 van RPG ART (art_mapsprites_v4/out/tiles_v8/archief2), zelfde nummering; thema "kas" wijst hierheen, tint wit
+assets/tiles/dungeon/kas_tiles_v8.png
+assets/tiles/dungeon/kas_bibliotheek_v8.png
+# 20 okt 2026: v8.1-kastegels (256x96, blok A 80-83 / B 84-87, vulvloer 88-95); thema "kas" wijst hierheen
+assets/tiles/dungeon/kas_tiles_v8b.png
