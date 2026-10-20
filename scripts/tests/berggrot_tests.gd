@@ -176,6 +176,16 @@ func _puzzels() -> void:
 			and items.get(BG.ACCESSOIRE_ID, "") == "kist_adersteen" and items.size() == 2)
 	check("buit-vakken kloppen", Equipment.slot_of(BG.STAF_ID) == "wapen"
 			and Equipment.slot_of(BG.ACCESSOIRE_ID) == "accessoire")
+	# Geheime kamer: "dek" is muurtegels (geen zwart vlak), zoals de schatkamer van het Archief.
+	var dek: Dictionary = BG.puzzle("berggrot_geheim").get("dek", {})
+	var dek_ok: bool = dek.get("rect", []) == [0, 0, 17, 4] and dek.get("tiles", []).size() == 68
+	var dek_set := {}
+	for e in dek.get("tiles", []):
+		dek_ok = dek_ok and int(e[2]) == 59 and int(e[0]) >= 0 and int(e[0]) < 17 and int(e[1]) >= 0 and int(e[1]) < 4
+		dek_set[Vector2i(int(e[0]), int(e[1]))] = true
+	check("geheime kamer: dek = 17x4 muurtegels 59 (68 stuks, rij 0-3 volledig)", dek_ok and dek_set.size() == 68)
+	check("geheime kamer: boog (7,4) is verborgen vloer achter de deur (7,5)",
+			geheim.hidden.has(Vector2i(7, 4)) and geheim.gates["geheime_deur"]["tile"] == Vector2i(7, 5))
 
 
 func _kaart() -> void:
@@ -327,6 +337,19 @@ func _start() -> void:
 	check("scène van de geheime kamer heeft beide kisten", heeft_staf and heeft_steen
 			and not str(GameState.current_map).contains("wereldkaart"))
 	await screenshot("berggrot_geheim")
+	if geheim != null and geheim.logic != null:
+		var dicht: bool = not geheim.logic.gate_open("geheime_deur")
+		check("geheime kamer dicht: dek met muurtegels zichtbaar, boog (7,4) afgedekt", dicht
+				and geheim.hidden_cover != null and geheim.hidden_cover.visible
+				and geheim.hidden_cover.get_node("Muur").get_used_cells().size() == 68
+				and geheim.hidden_layer != null and geheim.hidden_layer.visible
+				and geheim.hidden_layer.get_cell_source_id(Vector2i(7, 4)) != -1)
+		await screenshot("berggrot_geheim_dek_dicht")
+		geheim._reveal_hidden(false)
+		await pframes(2)
+		check("geheime kamer open: dek en afdekking weg", not geheim.hidden_cover.visible
+				and not geheim.hidden_layer.visible)
+		await screenshot("berggrot_geheim_dek_open")
 	GameState.change_map("res://scenes/maps/berggrot_grendel.tscn", "ingang")
 	var grendel_ok := await wait_scene("BerggrotGrendel", 20.0)
 	check("grendelkamer is een scène", grendel_ok)
