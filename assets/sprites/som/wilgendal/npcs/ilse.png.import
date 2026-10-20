@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://be18v8u3fhjyh"
-path="res://.godot/imported/seren_wm2.png-8db5932854352d85a6250ccf9d542cb0.ctex"
+uid="uid://btwvyye754hlk"
+path="res://.godot/imported/ilse.png-6bf26b8a4b00e567c42a974f04f08516.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/som/kaart/seren_wm2.png"
-dest_files=["res://.godot/imported/seren_wm2.png-8db5932854352d85a6250ccf9d542cb0.ctex"]
+source_file="res://assets/sprites/som/wilgendal/npcs/ilse.png"
+dest_files=["res://.godot/imported/ilse.png-6bf26b8a4b00e567c42a974f04f08516.ctex"]
 
 [params]
 

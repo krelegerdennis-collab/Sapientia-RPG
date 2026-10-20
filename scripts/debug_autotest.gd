@@ -2095,8 +2095,9 @@ func _dorpsprite_checks() -> void:
 
 
 func _wachter_ok(npc: Node) -> bool:
-	return npc != null and npc.sprite.texture != null and npc.sprite.texture.resource_path.ends_with("assets/sprites/wachter.png") \
-			and npc.sprite.hframes == 3 and npc.sprite.vframes == 4 and npc.sprite.texture.get_size() == Vector2(48, 96)
+	return npc != null and npc.sprite.texture != null and npc.sprite.texture.resource_path.ends_with("som/wilgendal/npcs/oude_man.png") \
+			and npc.sprite.hframes == 3 and npc.sprite.vframes == 4 and npc.sprite.texture.get_size() == Vector2(72, 128) \
+			and npc.sprite.offset == Vector2(0, -8)
 
 
 func _obj(n: String) -> Node:
@@ -2134,7 +2135,7 @@ func _prologue_tests() -> void:
 	check("geen dorp meer: geen bordje en geen dorpsbewoners", _obj("Sign") == null and _obj("OldMan") == null)
 	check("Oude Man buiten op (21,8), staart naar de ruïnes (omhoog)",
 			opa != null and opa.visible and opa.get_tile() == Vector2i(21, 8) and opa.facing == Vector2i.UP)
-	check("v0.13: Oude Man buiten = Warden-sprite (wachter.png, 3x4 frames, kijkt omhoog = rij 3)",
+	check("v0.13: Oude Man buiten = WM1-sheet (oude_man.png 24x32, 3x4 frames, kijkt omhoog = rij 3)",
 			_wachter_ok(opa) and opa.sprite.frame / 3 == 3)
 	check("put, kist en de ingang van de Archives staan er",
 			_obj("Put") != null and _obj("Kist") != null and _obj("Archief") != null)
@@ -2341,7 +2342,7 @@ func _prologue_tests() -> void:
 			and scene().get_node("StoryTint").color.is_equal_approx(SD.TINTS["evening"]))
 	check("lezen op de stoel (9,5), Oude Man binnen op (9,3)",
 			tile() == Vector2i(9, 5) and _obj("OudeMan").visible and _obj("OudeMan").get_tile() == Vector2i(9, 3))
-	check("v0.13: Oude Man binnen = Warden-sprite (wachter.png, 3x4 frames)", _wachter_ok(_obj("OudeMan")))
+	check("v0.13: Oude Man binnen = WM1-sheet (oude_man.png 24x32, 3x4 frames)", _wachter_ok(_obj("OudeMan")))
 	for i in 60:
 		if Transition._rect.color.a < 0.01:
 			break
