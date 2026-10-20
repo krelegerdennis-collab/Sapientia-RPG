@@ -907,6 +907,18 @@ static func rects_ok(rs: Array, vs: Vector2) -> String:
 	return ""
 
 
+## "" = alle aantal-labels liggen binnen (binnenrand - marge) en raken geen knop/icoon.
+static func count_margin_fout(ring: Node, c: Vector2, tag: String) -> String:
+	var lim: Vector2 = ring.inner_radius() - Vector2.ONE * SomData.RING_COUNT_MARGIN
+	for r in ring.count_rects():
+		if not ring.rect_in_ellipse(r, c, lim):
+			return "%s: aantal %s raakt de ringrand; " % [tag, r]
+		for b in ring.buttons:
+			if (r as Rect2).intersects(Rect2(b.position, b.size)):
+				return "%s: aantal %s raakt icoon %s; " % [tag, r, b.name]
+	return ""
+
+
 func _ring_layout_tests() -> void:
 	var a := arena()
 	var ring = a.ring
@@ -939,7 +951,20 @@ func _ring_layout_tests() -> void:
 	var on_ring := false
 	for b in ring.buttons:
 		on_ring = on_ring or "Phoenix" in b.text or "Items" in b.text
-	t.check("SoM-ring: volle naam staat NIET op de ring (alleen icoon + aantal)", fi >= 0 and not on_ring and ring.buttons[fi].text == "x1")
+	t.check("SoM-ring: volle naam staat NIET op de ring (alleen icoon + aantal)", fi >= 0 and not on_ring and ring.buttons[fi].text == ""
+			and ring.counts[fi].text == "x1")
+	# aantallen (x1/x3) liggen BINNEN de binnenrand van de ring, met marge, en raken geen icoon
+	var cbad := ""
+	var cc: Vector2 = vs / 2.0
+	for tb in ["items", "skills", "magic"]:
+		ring.set_tab(tb)
+		await t.pframes(1)
+		cbad += count_margin_fout(ring, cc, tb)
+	ring.set_tab("items")
+	ring.selected = fi
+	ring._highlight()
+	t.check("SoM-ring: aantal-labels binnen de ring met >= %dpx marge, raken geen icoon (%s)" % [int(SomData.RING_COUNT_MARGIN), cbad if cbad != "" else "ok"],
+			cbad == "" and ring.count_rects().size() >= 1)
 	t.check("SoM-ring: geselecteerde naam op eigen regel onder de ring ('%s')" % ring.name_label.text,
 			ring.name_label.text == "Phoenix Feather x1" and ring.name_label.position.y > ring.buttons[0].position.y + ring.buttons[0].size.y
 			and ring.title.position.y + ring.title.size.y <= ring.buttons[0].position.y)
@@ -961,6 +986,8 @@ func _ring_layout_tests() -> void:
 			ring.selected = n - 1
 			ring.build_with(list)
 			var e2 := rects_ok(ring.label_rects(), vs)
+			if e2 == "":
+				e2 = count_margin_fout(ring, vs / 2.0, kind)
 			if e2 != "" and worst == "":
 				worst = "%s n=%d: %s" % [kind, n, e2]
 	t.check("SoM-ring: label-rects overlappen nooit bij 1..12 keuzes van elke soort (%s)" % (worst if worst != "" else "ok"), worst == "")
