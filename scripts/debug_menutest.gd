@@ -552,7 +552,8 @@ func _bestiary_and_options_tests() -> void:
 	check("'Opties' opent het optiescherm", s != null)
 	if s == null:
 		return
-	check("10 regels %s" % [s.keys], s.keys.size() == 10 and s.keys[0] == "music_volume" and s.keys[-1] == "_reset")
+	check("12 regels %s" % [s.keys], s.keys.size() == 12 and s.keys[0] == "music_volume" and s.keys[9] == "_reset"
+			and s.keys[10] == "sessielog" and s.keys[11] == "_export")
 	check("alle regels in beeld", s.rows[-1].get_global_rect().end.y <= s.hint.get_global_rect().position.y)
 	await shot("menu_options")
 	# Muziek: links = 7
