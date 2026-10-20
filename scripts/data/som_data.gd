@@ -248,6 +248,10 @@ static func action_boss_mult(party_level: float) -> Dictionary:
 ## Ring-opmaak: max. lengte kort label (zonder icoon) en ruimte tussen ring, kop en naamregel.
 const RING_SHORT_MAX := 7
 const RING_LABEL_GAP := 4.0
+## Halve dikte van de ringband (ring_bg.png): binnenrand = ringstraal - dit.
+const RING_BAND_HALF := Vector2(12, 7)
+## Minimale marge (px) tussen een aantal-label ("x3") en de binnenrand van de ring.
+const RING_COUNT_MARGIN := 3.0
 const TXT_MAGIC := "Magic"
 const TXT_TARGET := "%s: target?"
 const TXT_ALL_ENEMIES := "All enemies"

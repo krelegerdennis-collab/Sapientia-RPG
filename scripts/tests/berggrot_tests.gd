@@ -13,6 +13,7 @@ const Gear := preload("res://scripts/data/grade_gear.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const Scale := preload("res://scripts/data/level_scale.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
+const BergRoom := preload("res://scripts/dungeon/dungeon_room.gd")
 const GDb := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const Unlock := preload("res://world_warper/flow/unlock.gd")
@@ -60,6 +61,8 @@ func _run() -> void:
 	await _warper_tests()
 	print("=== Deel F: World Warper vlieg-AI (wereldkaart) ===")
 	await _warper_brain()
+	print("=== Deel G: berggrot v8 blokvloer en losse rots ===")
+	await _berg_blok_tests()
 	print("BERGGROTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await pframes(8)
@@ -173,6 +176,16 @@ func _puzzels() -> void:
 			and items.get(BG.ACCESSOIRE_ID, "") == "kist_adersteen" and items.size() == 2)
 	check("buit-vakken kloppen", Equipment.slot_of(BG.STAF_ID) == "wapen"
 			and Equipment.slot_of(BG.ACCESSOIRE_ID) == "accessoire")
+	# Geheime kamer: "dek" is muurtegels (geen zwart vlak), zoals de schatkamer van het Archief.
+	var dek: Dictionary = BG.puzzle("berggrot_geheim").get("dek", {})
+	var dek_ok: bool = dek.get("rect", []) == [0, 0, 17, 4] and dek.get("tiles", []).size() == 68
+	var dek_set := {}
+	for e in dek.get("tiles", []):
+		dek_ok = dek_ok and int(e[2]) == 59 and int(e[0]) >= 0 and int(e[0]) < 17 and int(e[1]) >= 0 and int(e[1]) < 4
+		dek_set[Vector2i(int(e[0]), int(e[1]))] = true
+	check("geheime kamer: dek = 17x4 muurtegels 59 (68 stuks, rij 0-3 volledig)", dek_ok and dek_set.size() == 68)
+	check("geheime kamer: boog (7,4) is verborgen vloer achter de deur (7,5)",
+			geheim.hidden.has(Vector2i(7, 4)) and geheim.gates["geheime_deur"]["tile"] == Vector2i(7, 5))
 
 
 func _kaart() -> void:
@@ -324,6 +337,19 @@ func _start() -> void:
 	check("scène van de geheime kamer heeft beide kisten", heeft_staf and heeft_steen
 			and not str(GameState.current_map).contains("wereldkaart"))
 	await screenshot("berggrot_geheim")
+	if geheim != null and geheim.logic != null:
+		var dicht: bool = not geheim.logic.gate_open("geheime_deur")
+		check("geheime kamer dicht: dek met muurtegels zichtbaar, boog (7,4) afgedekt", dicht
+				and geheim.hidden_cover != null and geheim.hidden_cover.visible
+				and geheim.hidden_cover.get_node("Muur").get_used_cells().size() == 68
+				and geheim.hidden_layer != null and geheim.hidden_layer.visible
+				and geheim.hidden_layer.get_cell_source_id(Vector2i(7, 4)) != -1)
+		await screenshot("berggrot_geheim_dek_dicht")
+		geheim._reveal_hidden(false)
+		await pframes(2)
+		check("geheime kamer open: dek en afdekking weg", not geheim.hidden_cover.visible
+				and not geheim.hidden_layer.visible)
+		await screenshot("berggrot_geheim_dek_open")
 	GameState.change_map("res://scenes/maps/berggrot_grendel.tscn", "ingang")
 	var grendel_ok := await wait_scene("BerggrotGrendel", 20.0)
 	check("grendelkamer is een scène", grendel_ok)
@@ -934,3 +960,103 @@ func _warper_in_scene(fly: WorldWarperFlyover) -> void:
 	check("warper: landt niet buiten de kaart", land_ok)
 	check("warper: kent de echte touch-knoppen van de kaart", fly.brain.avoid.size() >= 3)
 	check("warper: in de kaart-capture nooit achter een knop (%d)" % knop_frames, knop_frames == 0)
+
+
+## Deel G (berggrot v8): '.' op een even 2x2-vak dat helemaal '.' is -> blok A 80-83 / B 84-87 via
+## archief_block_choice(x>>1, y>>1); anders floor_variant. In mond en nerf: losse '#' -> 88 (massief).
+func _berg_blok_tests() -> void:
+	var td: Dictionary = DR.theme_data("berggrot")
+	var tex: Texture2D = load(str(td["tiles"]))
+	check("G: berggrot-atlas v8 is 256x96, tint wit", tex != null and tex.get_size() == Vector2(256, 96)
+			and str(td["tiles"]).ends_with("berggrot_tiles_v8.png") and (td["tint"] as Color).is_equal_approx(Color(1, 1, 1)))
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	check("G: berggrot_tiles_v8.png en kas_tiles_v8c.png in handwerk, kas wijst naar v8c",
+			hw.contains("assets/tiles/dungeon/berggrot_tiles_v8.png") and hw.contains("assets/tiles/dungeon/kas_tiles_v8c.png")
+			and str(DR.theme_data("kas")["tiles"]).ends_with("kas_tiles_v8c.png"))
+	var ts: TileSet = BergRoom.tileset(true, "berggrot")
+	var src: TileSetAtlasSource = ts.get_source(0)
+	check("G: 96 tegels, 80-95 bestaan", src.get_tiles_count() == 96
+			and range(80, 96).all(func(n): return src.has_tile(Vector2i(n % 16, n / 16))))
+	var poly_ok := true
+	for n in DR.BERGGROT_BLOCK_A + DR.BERGGROT_BLOCK_B:
+		if DR.is_solid(n, "berggrot") or src.get_tile_data(Vector2i(n % 16, n / 16), 0).get_collision_polygons_count(0) != 0:
+			poly_ok = false
+	check("G: blokken 80-87 beloopbaar, geen botsingsvorm", poly_ok)
+	check("G: 88 massief zoals 59 (botsingsvorm)", DR.is_solid(88, "berggrot")
+			and src.get_tile_data(Vector2i(8, 5), 0).get_collision_polygons_count(0) == 1)
+	var lay := [".....", ".....", "..#..", "....."]
+	var blk: Array = DR.BERGGROT_BLOCK_A if DR.archief_block_choice(0, 0) == 0 else DR.BERGGROT_BLOCK_B
+	check("G: vrij vak (0,0) = blok A/B in volgorde LB/RB/LO/RO", range(4).all(func(i):
+			return DR.berggrot_floor_at(i & 1, i >> 1, lay, -7) == blk[i]))
+	check("G: vak met '#' -> fallback", DR.berggrot_floor_at(3, 2, lay, -7) == -7 and DR.berggrot_floor_at(2, 3, lay, -7) == -7)
+	check("G: onvolledig vak (kolom 4) -> fallback", DR.berggrot_floor_at(4, 1, lay, -7) == -7)
+	check("G: vaste hash (twee keer gelijk)", DR.berggrot_floor_at(1, 1, lay, -7) == DR.berggrot_floor_at(1, 1, lay, -7))
+	var leg: Dictionary = DR.LEGEND
+	check("G: losse rots herkend, rots naast muur niet", DR.berggrot_lone_rock(2, 2, lay, leg)
+			and not DR.berggrot_lone_rock(2, 2, [".....", "..-..", "..#..", "....."], leg)
+			and not DR.berggrot_lone_rock(0, 0, ["#....", "....."], leg)
+			and not DR.berggrot_lone_rock(1, 1, lay, leg))
+	var gezien := {}
+	GameState.new_game("Dax")
+	GameState.encounter_multiplier = 0.0
+	for rid in ["berggrot_mond", "berggrot_nerf", "berggrot_uitmond"]:
+		var room: Dictionary = DR.room(rid)
+		var spawn: String = (room["spawns"] as Dictionary).keys()[0]
+		var s := await _enter("res://scenes/maps/%s.tscn" % rid, spawn, str(rid).to_pascal_case())
+		if s == null:
+			continue
+		var layout: Array = room["layout"]
+		var legend: Dictionary = DR.legend_of(room)
+		var ok := true
+		var walk_ok := true
+		var rocks := 0
+		for y in layout.size():
+			for x in (layout[y] as String).length():
+				var t := Vector2i(x, y)
+				var ch: String = layout[y][x]
+				var oud: int = legend[ch]
+				if ch == ".":
+					oud = BergRoom.floor_variant(x, y, room.get("floor_tiles", DR.FLOOR))
+				var want: int = oud
+				if ch == ".":
+					want = DR.berggrot_floor_at(x, y, layout, oud)
+				elif ch == "#" and rid in DR.BERGGROT_LONE_ROCK_ROOMS and DR.berggrot_lone_rock(x, y, layout, legend):
+					want = 88
+				if want == 88:
+					rocks += 1
+				if s.cell(t) != want:
+					ok = false
+				gezien[s.cell(t)] = true
+				if s.is_wall(t) != DR.is_solid(oud, "berggrot"):
+					walk_ok = false
+				if s.ground.get_cell_atlas_coords(t) != Vector2i(want % 16, want / 16) and want < 100:
+					ok = false
+		check("G: %s: vloer = blok A/B of de oude tegel, 88 alleen op losse rots" % rid, ok)
+		check("G: %s: beloopbaarheid gelijk aan de oude tegels" % rid, walk_ok)
+		if rid in DR.BERGGROT_LONE_ROCK_ROOMS:
+			check("G: %s: drie losse rotsen als 88 (%d)" % [rid, rocks], rocks == 3 and s.cell(Vector2i(11, 6)) == 88 and s.cell(Vector2i(2, 4)) == 88 and s.cell(Vector2i(16, 4)) == 88)
+		else:
+			check("G: %s: geen 88" % rid, rocks == 0)
+	check("G: blok A en B komen beide voor", gezien.has(80) and gezien.has(84))
+	for rid in ["berggrot_grendel", "berggrot_geheim"]:
+		var room: Dictionary = BG.PUZZLES[rid]
+		var spawn: String = (room["spawns"] as Dictionary).keys()[0]
+		var s := await _enter("res://scenes/maps/%s.tscn" % rid, spawn, str(rid).to_pascal_case())
+		if s == null:
+			continue
+		var look: Array = room["look"]
+		var ok := true
+		var blokken := 0
+		var g: TileMapLayer = s.ground
+		for y in look.size():
+			for x in (look[y] as String).length():
+				if look[y][x] != ".":
+					continue
+				var want: int = DR.berggrot_floor_at(x, y, look, BergRoom.floor_variant(x, y))
+				if want >= 80:
+					blokken += 1
+				if g.get_cell_atlas_coords(Vector2i(x, y)) != Vector2i(want % 16, want / 16):
+					ok = false
+		check("G: %s: look-vloer = blok A/B of floor_variant (%d bloktegels)" % [rid, blokken], ok and blokken > 0)
+		check("G: %s: botsing uit de lay-out (blokken zijn alleen beeld)" % rid, s.logic != null
+				and s.logic.is_solid(Vector2i(0, 0)) and not s.logic.is_solid(Vector2i(3, 2)))
