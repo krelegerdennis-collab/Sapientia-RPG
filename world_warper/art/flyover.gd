@@ -17,6 +17,9 @@ const TRAIL_N := 3                ## nabeelden tijdens een burst
 const TRAIL_STEP := 0.05          ## seconden tussen nabeelden
 const SHADOW_ALPHA := 0.5
 const SPRITE_ALPHA := 0.95
+const GROUND_OFFSET := Brain.HULL_LIFT       ## schip-midden boven het grondpunt (schaduw piept eronder uit)
+const SQUASH_TIME := 0.28         ## touchdown/lift-off veer
+const SQUASH_AMT := 0.12
 ## <0 = willekeurig; tests zetten een vaste seed vóór _ready.
 var seed_override := -1
 
@@ -27,6 +30,9 @@ var _trail: Array[Sprite2D] = []
 var _history: Array[Vector2] = []
 var _hist_t := 0.0
 var _grond: TileMapLayer
+var _squash_t := 0.0
+var _squash_sign := 1.0
+var _prev_state := -1
 
 
 func _ready() -> void:
@@ -93,7 +99,20 @@ func _feed_context() -> void:
 func _render(delta: float) -> void:
 	var grond_pos := brain.pos.round()
 	var hoogte := brain.visual_alt()
-	sprite.position = (brain.pos + Vector2(0, -8.0 - hoogte)).round()
+	sprite.position = (brain.pos + Vector2(0, -GROUND_OFFSET - hoogte)).round()
+	if brain.state != _prev_state:
+		if brain.state == WarperBrain.State.LANDED:
+			_squash_t = SQUASH_TIME
+			_squash_sign = 1.0
+		elif brain.state == WarperBrain.State.ASCEND:
+			_squash_t = SQUASH_TIME
+			_squash_sign = -1.0
+		_prev_state = brain.state
+	var sq := 0.0
+	if _squash_t > 0.0:
+		_squash_t = maxf(0.0, _squash_t - delta)
+		sq = sin((1.0 - _squash_t / SQUASH_TIME) * PI) * SQUASH_AMT * _squash_sign
+	sprite.scale = Vector2(SCHAAL * (1.0 + sq * 0.6), SCHAAL * (1.0 - sq))
 	var bank := clampf(brain.vel.x / Brain.BURST_SPEED, -1.0, 1.0) * BANK_MAX
 	sprite.rotation = lerpf(sprite.rotation, bank, 1.0 - exp(-BANK_SMOOTH * delta))
 	# schaduw: kleiner en vager naarmate hij hoger vliegt

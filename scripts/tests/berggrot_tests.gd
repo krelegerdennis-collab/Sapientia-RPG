@@ -841,6 +841,9 @@ func _warper_in_scene(fly: WorldWarperFlyover) -> void:
 		if arg.begins_with("--warperframes="):
 			frames = int(arg.get_slice("=", 1))
 	if frames > 0 and shots != "":
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--warperseed="):
+				fly.brain.rng.seed = int(arg.get_slice("=", 1))
 		for i in frames:
 			await get_tree().create_timer(0.25).timeout
 			screenshot("wf_%03d" % i)

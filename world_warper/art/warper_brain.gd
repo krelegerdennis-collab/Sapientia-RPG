@@ -25,15 +25,18 @@ const ARRIVE_RADIUS := 14.0
 const EDGE_MARGIN := 24.0
 const VIEW_PAD := 48.0           ## waypoints liefst binnen beeld + deze rand
 const LAND_COOLDOWN := 12.0       ## minimaal tussen twee landingen
-const LAND_FORCE_AFTER := 35.0    ## na zolang zonder landing: zeker landen
+const LAND_FORCE_AFTER := 25.0    ## na zolang zonder landing: zeker landen
 const LAND_PLAYER_MIN := 56.0     ## nooit vlak bij de speler landen
 const LAND_SPOOK_DIST := 22.0     ## speler loopt erheen -> eerder opstijgen
 const LAND_TRIES := 32
+const HULL_LIFT := 12.0           ## romp-midden boven het grondpunt (zelfde als flyover.GROUND_OFFSET)
+const LAND_CONE := 0.9            ## radialen links/rechts van de vliegrichting
+const LAND_DIST := Vector2(50.0, 150.0)
 const LAND_VIEW_INSET := 36.0    ## landen liefst goed in beeld
 ## Kansen na het bereiken van een waypoint (rest = gewoon doorcruisen).
 const P_BURST := 0.24
 const P_HOVER := 0.16
-const P_LAND := 0.16
+const P_LAND := 0.25
 
 var rng := RandomNumberGenerator.new()
 var state: State = State.CRUISE
@@ -53,6 +56,7 @@ var since_land := 0.0
 var bursts := 0
 var landings := 0
 var _from_alt := 0.0
+var _approach_t := 0.0
 
 
 func setup(seed_value: int, area: Rect2, start: Vector2) -> void:
@@ -101,6 +105,9 @@ func step(delta: float) -> void:
 				# aanvliegen, afremmen in de laatste 60 px
 				_steer(clampf(d * 1.6, 18.0, CRUISE_SPEED), STEER_ACCEL * 1.4, delta)
 				t_state = 0.0
+				_approach_t += delta
+				if _approach_t > 10.0:  # veiligheidsnet: plek onbereikbaar
+					_enter(State.CRUISE)
 			else:
 				vel = vel.move_toward(Vector2.ZERO, 200.0 * delta)
 				pos = pos.move_toward(target, 20.0 * delta)
@@ -159,10 +166,12 @@ func _pick_next() -> void:
 
 func _try_land() -> bool:
 	for i in LAND_TRIES:
-		var p := _random_waypoint(0.6)
-		if view.has_area() and not view.grow(-LAND_VIEW_INSET).has_point(p):
+		var kegel := LAND_CONE if i < LAND_TRIES / 2 else LAND_CONE * 2.0
+		var p := _land_candidate(kegel if i < LAND_TRIES - 4 else PI)
+		if view.has_area() and not view.grow_individual(-LAND_VIEW_INSET, -LAND_VIEW_INSET - HULL_LIFT * 2.0,
+				-LAND_VIEW_INSET, -LAND_VIEW_INSET * 0.5).has_point(p):
 			continue
-		if player_pos.distance_to(p) < LAND_PLAYER_MIN:
+		if not bounds.grow(-EDGE_MARGIN).has_point(p) or player_pos.distance_to(p) < LAND_PLAYER_MIN:
 			continue
 		if landable.is_valid() and not bool(landable.call(p)):
 			continue
@@ -187,6 +196,7 @@ func _enter(s: State) -> void:
 			target = pos + Vector2.from_angle(rng.randf() * TAU) * 20.0
 		State.DESCEND:
 			_from_alt = alt
+			_approach_t = 0.0
 		State.LANDED:
 			dur_state = rng.randf_range(LANDED_TIME.x, LANDED_TIME.y)
 		State.ASCEND:
@@ -197,7 +207,10 @@ func _enter(s: State) -> void:
 func _random_waypoint(dist_mult := 1.0) -> Vector2:
 	var area := bounds.grow(-EDGE_MARGIN)
 	if view.has_area():
-		var v := view.grow(VIEW_PAD).intersection(area)
+		# het schip hangt CRUISE_ALT + romp boven zijn grondpunt: beeld voor het grondpunt zakt mee
+		var v := view.grow(VIEW_PAD)
+		v.position.y += CRUISE_ALT + HULL_LIFT
+		v = v.intersection(area)
 		if v.has_area():
 			area = v
 	var best := pos
@@ -210,6 +223,14 @@ func _random_waypoint(dist_mult := 1.0) -> Vector2:
 	# geen punt in de buurt past: ergens binnen het gebied
 	return Vector2(rng.randf_range(area.position.x, area.end.x), rng.randf_range(area.position.y, area.end.y)) \
 			if not area.has_point(best) else best
+
+
+## Landplek: liefst vóór de neus (kegel), zodat hij er in één boog heen glijdt.
+func _land_candidate(kegel: float) -> Vector2:
+	var hoek := rng.randf() * TAU
+	if vel.length() > 5.0:
+		hoek = vel.angle() + rng.randf_range(-kegel, kegel)
+	return pos + Vector2.from_angle(hoek) * rng.randf_range(LAND_DIST.x, LAND_DIST.y)
 
 
 func _clamp_in(p: Vector2) -> Vector2:
