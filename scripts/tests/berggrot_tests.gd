@@ -829,7 +829,7 @@ func _warper_brain() -> void:
 	for i in 60 * 300:
 		z.step(1.0 / 60.0)
 		n += 1
-		if z.view.grow(WarperBrain.VIEW_PAD + 40.0).has_point(z.pos):
+		if z.view.grow(64.0).has_point(z.pos):
 			dichtbij += 1
 	check("warper: blijft meestal rond het beeld (%d%%)" % (100 * dichtbij / n), dichtbij > n * 0.9)
 	await _warper_knoppen()

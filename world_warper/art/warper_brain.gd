@@ -13,7 +13,7 @@ const BURST_SPEED := 260.0        ## topsnelheid tijdens een burst
 const HOVER_SPEED := 14.0
 const STEER_ACCEL := 150.0        ## px/s^2 bijsturen in cruise (bepaalt de draaicirkel)
 const BURST_ACCEL := 420.0
-const BURST_BRAKE := 1.4          ## px/s extra snelheid per px afstand tot het doel
+const BURST_BRAKE := 1.1          ## px/s extra snelheid per px afstand tot het doel
 const BURST_CONE := 0.8           ## burst schiet ongeveer vooruit (radialen)
 const BURST_TIME := Vector2(1.4, 2.4)      ## min/max seconden
 const HOVER_TIME := Vector2(1.5, 3.5)
@@ -26,7 +26,7 @@ const ASCEND_TIME := 1.1
 const WAYPOINT_DIST := Vector2(110.0, 320.0)
 const ARRIVE_RADIUS := 14.0
 const EDGE_MARGIN := 24.0
-const VIEW_PAD := 24.0           ## waypoints liefst binnen beeld + deze rand
+const VIEW_PAD := -16.0           ## waypoints liefst zoveel binnen de beeldrand (negatief = inset)
 const LAND_COOLDOWN := 12.0       ## minimaal tussen twee landingen
 const LAND_FORCE_AFTER := 25.0    ## na zolang zonder landing: zeker landen
 const LAND_PLAYER_MIN := 56.0     ## nooit vlak bij de speler landen
@@ -35,14 +35,16 @@ const LAND_TRIES := 32
 const HULL_HALF := Vector2(32.0, 16.0)  ## halve romp (128x64 op schaal 0.5)
 const AVOID_MARGIN := 6.0         ## extra ruimte rond touch-knoppen
 const AVOID_LOOKAHEAD := 28.0     ## vanaf deze afstand zacht wegsturen
+const AVOID_SPEED_LOOK := 0.18   ## extra kijkafstand per px/s snelheid
+const AVOID_DAMP := 8.0           ## 1/s: hoe snel snelheid naar de knop wegvalt
 const AVOID_PUSH := 360.0         ## px/s^2 wegduwen in de zachte zone
 const HULL_LIFT := 12.0           ## romp-midden boven het grondpunt (zelfde als flyover.GROUND_OFFSET)
 const LAND_CONE := 0.9            ## radialen links/rechts van de vliegrichting
 const LAND_DIST := Vector2(50.0, 150.0)
 const LAND_VIEW_INSET := 36.0    ## landen liefst goed in beeld
 ## Kansen na het bereiken van een waypoint (rest = gewoon doorcruisen).
-const P_BURST := 0.24
-const P_HOVER := 0.16
+const P_BURST := 0.3
+const P_HOVER := 0.12
 const P_LAND := 0.25
 const MAX_PLAIN_LEGS := 3         ## hoogstens zoveel gewone cruise-stukken achter elkaar
 
@@ -189,7 +191,8 @@ func _avoid_buttons(delta: float) -> void:
 	var h := visual_alt()
 	for r in avoid:
 		var c := hull_center(pos, h)
-		var zacht := r.grow(AVOID_LOOKAHEAD)
+		var vooruit := AVOID_LOOKAHEAD + vel.length() * AVOID_SPEED_LOOK
+		var zacht := r.grow(vooruit)
 		if not zacht.has_point(c):
 			continue
 		var weg := _out_vector(r, c)
@@ -200,8 +203,12 @@ func _avoid_buttons(delta: float) -> void:
 			if vel.dot(n) < 0.0:
 				vel -= n * vel.dot(n)
 		else:
-			var dichtbij := 1.0 - clampf(_dist_out(r, c) / AVOID_LOOKAHEAD, 0.0, 1.0)
-			vel += _away_dir(r, c) * AVOID_PUSH * dichtbij * delta
+			var dichtbij := 1.0 - clampf(_dist_out(r, c) / vooruit, 0.0, 1.0)
+			var n := _away_dir(r, c)
+			vel += n * AVOID_PUSH * dichtbij * delta
+			var naar := -vel.dot(n)
+			if naar > 0.0:  # snelheid richting de knop wegnemen (afremmen + langs glijden)
+				vel += n * naar * minf(1.0, AVOID_DAMP * dichtbij * delta)
 
 
 ## Kortste verschuiving die punt c buiten r zet.
@@ -286,7 +293,7 @@ func _enter(s: State) -> void:
 			_plain_legs = 0
 			bursts += 1
 			dur_state = rng.randf_range(BURST_TIME.x, BURST_TIME.y)
-			target = _random_waypoint(1.3, BURST_CONE)
+			target = _burst_target()
 		State.HOVER:
 			_plain_legs = 0
 			dur_state = rng.randf_range(HOVER_TIME.x, HOVER_TIME.y)
@@ -302,7 +309,7 @@ func _enter(s: State) -> void:
 
 
 ## Willekeurig punt in een willekeurige richting, binnen kaart (en liefst rond het beeld).
-func _random_waypoint(dist_mult := 1.0, kegel := PI) -> Vector2:
+func _waypoint_area() -> Rect2:
 	var area := bounds.grow(-EDGE_MARGIN)
 	if view.has_area():
 		# het schip hangt CRUISE_ALT + romp boven zijn grondpunt: beeld voor het grondpunt zakt mee
@@ -311,6 +318,11 @@ func _random_waypoint(dist_mult := 1.0, kegel := PI) -> Vector2:
 		v = v.intersection(area)
 		if v.has_area():
 			area = v
+	return area
+
+
+func _random_waypoint(dist_mult := 1.0, kegel := PI) -> Vector2:
+	var area := _waypoint_area()
 	var best := pos
 	for i in 12:
 		var hoek := rng.randf() * TAU
@@ -326,6 +338,24 @@ func _random_waypoint(dist_mult := 1.0, kegel := PI) -> Vector2:
 		if not blocked(q, CRUISE_ALT):
 			return q
 	return best if area.has_point(best) else area.get_center()
+
+
+## Burst-doel: zo ver mogelijk weg binnen het gebied, liefst ongeveer vooruit (lange, snelle streep).
+func _burst_target() -> Vector2:
+	var area := _waypoint_area()
+	var best := Vector2.INF
+	var best_d := -1.0
+	for i in 16:
+		var hoek := rng.randf() * TAU
+		if i < 10 and vel.length() > 5.0:
+			hoek = vel.angle() + rng.randf_range(-BURST_CONE, BURST_CONE)
+		var p := pos + Vector2.from_angle(hoek) * rng.randf_range(WAYPOINT_DIST.y * 0.6, WAYPOINT_DIST.y * 1.3)
+		p = Vector2(clampf(p.x, area.position.x, area.end.x), clampf(p.y, area.position.y, area.end.y))
+		var d := pos.distance_to(p)
+		if d > best_d and not blocked(p, CRUISE_ALT):
+			best = p
+			best_d = d
+	return best if best_d > 0.0 else _random_waypoint()
 
 
 ## Landplek: liefst vóór de neus (kegel), zodat hij er in één boog heen glijdt.
