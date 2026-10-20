@@ -162,6 +162,7 @@ var can_flee := true
 var tip_panel: Panel
 var tip_label: Label
 var round_no := 0
+var stun_boss_immune := SpellRules.STUN_BOSS_IMMUNE   # simulator kan dit per gevecht omzetten
 ## v0.21 (tests): laatste effect van een vaardigheid en aantal counters in dit gevecht
 var last_skill_effect: Dictionary = {}
 var counters_done := 0
@@ -1494,9 +1495,17 @@ func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
 		if not target.has("dots"):
 			target["dots"] = []
 		(target["dots"] as Array).append({"pct": float(fx["dot_pct"]), "turns": int(fx.get("dot_turns", 3))})
-	if int(fx.get("skip", 0)) > 0:
+	# Verlamming/bevriezing: kans (SpellRules.STUN_CHANCE), met de randf() van het gevecht.
+	if int(fx.get("skip", 0)) > 0 and SpellRules.stun_lands(fx, is_boss_target(target), randf(), stun_boss_immune):
 		target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
 		target["skip_reden"] = str(fx.get("skip_reden", "bevriezing"))
+
+
+## Telt als baas voor verlamming/bevriezing: een vijand in een baasgevecht of met "is_boss".
+func is_boss_target(t: Dictionary) -> bool:
+	if bool(t.get("is_hero", false)):
+		return false
+	return GameState.pending_boss or bool(t["s"].get("is_boss", false))
 
 
 func _tick_ailments(c: Dictionary) -> void:

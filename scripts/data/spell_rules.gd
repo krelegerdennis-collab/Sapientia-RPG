@@ -85,7 +85,26 @@ static func buff_factor(spell: Dictionary, caster_id: String) -> float:
 	return 1.0
 
 
+## Kans dat bliksem (verlamming) of ijs (bevriezing) een beurt laat overslaan (was: altijd).
+## Goedgekeurd door Dennis (20 okt 2026), na de gevechtssimulator (docs/BATTLE_BALANCE_REPORT.md).
+const STUN_CHANCE := 0.30
+## true = bazen worden nooit verlamd/bevroren. Standaard false: de 30% geldt ook voor bazen.
+## (De simulator kan true proberen met --stun-boss-immune; dat verandert de standaard niet.)
+const STUN_BOSS_IMMUNE := false
+
+
+## Valt de verlamming/bevriezing van 'fx' (uit on_hit) echt? roll = randf() van het gevecht
+## (0..1), zodat een geseede run (simulator, tests) altijd hetzelfde uitkomt.
+static func stun_lands(fx: Dictionary, target_is_boss: bool, roll: float, boss_immune := STUN_BOSS_IMMUNE) -> bool:
+	if int(fx.get("skip", 0)) <= 0:
+		return false
+	if target_is_boss and boss_immune:
+		return false
+	return roll < float(fx.get("skip_chance", STUN_CHANCE))
+
+
 ## Brand, vergif, verlamming of bevriezing na een schade-treffer. {} = geen.
+## Verlamming/bevriezing heeft "skip_chance" (STUN_CHANCE): zie stun_lands().
 static func on_hit(spell: Dictionary) -> Dictionary:
 	if str(spell.get("type", "")) != "damage":
 		return {}
@@ -93,9 +112,9 @@ static func on_hit(spell: Dictionary) -> Dictionary:
 		"vuur", "natuur":
 			return {"dot_pct": 0.05, "dot_turns": 3}
 		"bliksem":
-			return {"skip": 1, "skip_reden": "verlamming"}
+			return {"skip": 1, "skip_reden": "verlamming", "skip_chance": STUN_CHANCE}
 		"ijs":
-			return {"skip": 1, "skip_reden": "bevriezing"}
+			return {"skip": 1, "skip_reden": "bevriezing", "skip_chance": STUN_CHANCE}
 		_:
 			return {}
 
