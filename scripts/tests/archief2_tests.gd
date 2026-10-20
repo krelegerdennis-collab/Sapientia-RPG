@@ -569,6 +569,22 @@ func _schaal_1p4() -> void:
 	check("1.4x: brug-/deurrijen niet verdubbeld, bruggen op de brugrij (%s)" % (rij_fout if rij_fout != "" else "ok"), rij_fout == "")
 	check("1.4x: doorgangen niet breder (poort 1-3, uitgang 2, boog 1) (%s)" % (breed_fout if breed_fout != "" else "ok"), breed_fout == "")
 	check("1.4x: spawns/uitgangen/bord/opslag/monsters/platen/warp bereikbaar (%s)" % (bereik_fout if bereik_fout != "" else "ok"), bereik_fout == "")
+	# v8.1 (#142): na het schalen liggen de 2x2-blokken (80-87) nog steeds alleen op even vakken
+	var blok_fout := ""
+	for id in kamers:
+		var lay2: Array = kamers[id]["layout"]
+		var g2: Array = A2Ground.GROUND.get(id, [])
+		var n_blok := 0
+		for y in g2.size():
+			for x in (g2[y] as Array).size():
+				var v := DungeonRooms.kas_floor_at(x, y, g2, lay2)
+				if v >= 80 and v <= 87:
+					n_blok += 1
+					if (v - 80) % 4 != (y & 1) * 2 + (x & 1):
+						blok_fout += "%s (%d,%d) %d; " % [id, x, y, v]
+		if n_blok < 16:
+			blok_fout += "%s maar %d bloktegels; " % [id, n_blok]
+	check("1.4x: v8.1-blokvloer op even 2x2-vakken, genoeg blokken per kamer (%s)" % (blok_fout if blok_fout != "" else "ok"), blok_fout == "")
 	check("1.4x: begin-warper naast de ingang-spawn (12,15), beloopbaar",
 			Archief2Warpers.BEGIN_TILE == Vector2i(12, 15) and A1W.walkable(kamers["archief_2_v1_entree"], Archief2Warpers.BEGIN_TILE))
 
