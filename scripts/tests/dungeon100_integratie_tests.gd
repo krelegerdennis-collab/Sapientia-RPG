@@ -226,6 +226,13 @@ func tile_of(a: Array) -> Vector2i:
 
 # ================================================================ deel A
 func _data_tests() -> void:
+	var d100: Node = (load(Gen.SCENE) as PackedScene).instantiate()
+	var dst: Resource = load("res://assets/audio/bgm/bgm_diepe_grot.ogg")
+	check("dungeon100-scène (alle verdiepingen) speelt 'diepe_grot', loopende ogg in het manifest",
+			str(d100.get("music_track")) == "diepe_grot" and AudioManager.has_music("diepe_grot")
+			and dst is AudioStreamOggVorbis and (dst as AudioStream).get_length() > 60.0
+			and bool(AudioManager._bgm["diepe_grot"].get("loop", false)))
+	d100.free()
 	check("Dungeon100Rules.dungeon_scene wijst naar de scène van de generator", Rules.dungeon_scene == Gen.SCENE
 			and Gen.SCENE == DUNGEON and Rules.scene_available())
 	check("spawnnaam van het rustpunt is gelijk in generator en regels", Gen.SPAWN_REST == Rules.REST_SPAWN)

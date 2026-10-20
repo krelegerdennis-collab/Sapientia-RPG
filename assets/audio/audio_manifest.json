@@ -203,6 +203,15 @@
 			"loop": true,
 			"volume_db": -5.0,
 			"bpm": 0
+		},
+		"diepe_grot": {
+			"bestand": "bgm_diepe_grot.ogg",
+			"titel": "Biomechanical Dungeon",
+			"locatie": "Deep Learning Simulation (Dungeon100 / Diepe Grot), alle verdiepingen",
+			"beschrijving": "Suno-track van Dennis (suno.com/s/NcOHhEACJuYsj6Ts). Eén scène voor alle verdiepingen, dus de track loopt door. Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
 		}
 	},
 	"sfx": {
