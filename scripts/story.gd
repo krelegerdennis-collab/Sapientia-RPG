@@ -18,6 +18,8 @@ const WALK_SPEED := 56.0
 
 var running := false
 var current_event := ""
+## Herkomst van het lopende event: "examine" = bekijken van een object (story_object), "" = cutscene.
+var current_origin := ""
 ## Alle events die gestart zijn (voor de autotest / debuggen).
 var history: Array[String] = []
 ## Event dat moet lopen als de map na een gevecht weer geladen is.
@@ -40,6 +42,7 @@ func _ready() -> void:
 func reset(keep_history := false) -> void:
 	running = false
 	current_event = ""
+	current_origin = ""
 	if not keep_history:
 		history.clear()
 	after_battle_event = ""
@@ -122,7 +125,8 @@ func pick(event_id: String, arg := "") -> Dictionary:
 
 # ---------------------------------------------------------------- starten
 ## Object-trigger. true = er loopt nu een event (het object doet verder niets).
-func trigger(event_id: String, _source: Node = null, arg := "") -> bool:
+## origin: zie current_origin (story_object geeft "examine" mee).
+func trigger(event_id: String, _source: Node = null, arg := "", origin := "") -> bool:
 	if event_id == "":
 		return false
 	if running:
@@ -130,13 +134,14 @@ func trigger(event_id: String, _source: Node = null, arg := "") -> bool:
 	var v := pick(event_id, arg)
 	if v.is_empty() or v.get("do") is String:
 		return false
-	run(event_id, arg)
+	run(event_id, arg, origin)
 	return true
 
 
-func run(event_id: String, arg := "") -> void:
+func run(event_id: String, arg := "", origin := "") -> void:
 	if running:
 		return
+	current_origin = origin
 	running = true
 	_lock(true)
 	var next := event_id
@@ -150,6 +155,7 @@ func run(event_id: String, arg := "") -> void:
 	var done := current_event
 	running = false
 	current_event = ""
+	current_origin = ""
 	if next != "__stop":
 		_lock(false)
 	event_finished.emit(done)

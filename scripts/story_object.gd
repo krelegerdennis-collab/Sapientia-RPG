@@ -1,6 +1,6 @@
 extends StaticBody2D
 ## v0.11 Verhaal-object: put, zegelsteen, kist, schilderij, ingang van de Archieven...
-## Sta ervoor en druk op A -> Story.trigger(event, self, event_arg) (zie story_data.gd).
+## Sta ervoor en druk op A -> Story.trigger(event, self, event_arg, "examine") (zie story_data.gd).
 ## - show_if:     voorwaarde om zichtbaar/aanwezig te zijn ({} = altijd)
 ## - frame_rules: [[voorwaarde, frame], ...]  de LAATSTE passende regel bepaalt het frame
 ##                (geen = frame 0). Bv. kist: [[{"flags": ["kist_open"]}, 1]]
@@ -137,7 +137,7 @@ func _process(delta: float) -> void:
 
 func interact(_player: Node2D) -> void:
 	if visible and not Dialog.is_open:
-		Story.trigger(event, self, event_arg)
+		Story.trigger(event, self, event_arg, "examine")
 
 
 func bump(_player: Node2D) -> void:

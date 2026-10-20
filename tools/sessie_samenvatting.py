@@ -5,7 +5,7 @@ Gebruik: python3 tools/sessie_samenvatting.py <log.jsonl> [meer.jsonl ...] [--js
 Leest één of meer logboeken (ook een geëxporteerd bestand met meerdere sessies achter elkaar) en
 geeft per sessie: duur, apparaat, kaarten met tijd, plekken waar de speler lang stilstond, botsingen
 (bump) per plek, gevechten (resultaat, ronden, hp-verlies, acties), doden en respawns, menu's,
-dialogen en cutscenes. Kapotte regels worden overgeslagen en geteld.
+dialogen, cutscenes en bekeken objecten (examine). Kapotte regels worden overgeslagen en geteld.
 
 --heatmap[=map]: per kaart een PNG <map>/heatmap_<kaart>.png (standaard ./heatmaps) met het aantal
 bezoeken per tegel (pos-regels, alle sessies samen) over de hele kaart (kaart_info "rect"; anders de
@@ -40,7 +40,7 @@ def lees(paden):
 def vat_samen(regels):
     s = {"sessie": "", "duur": 0.0, "apparaat": {}, "kaarten": Counter(), "warps": 0, "stil": [],
          "bumps": Counter(), "gevechten": [], "doden": [], "respawns": [], "menus": Counter(),
-         "dialogen": 0, "cutscenes": Counter(), "knoppen": Counter(), "bron": Counter(), "afgekapt": False}
+         "dialogen": 0, "cutscenes": Counter(), "examines": Counter(), "knoppen": Counter(), "bron": Counter(), "afgekapt": False}
     vorige = None  # (kaart, x, y, t)
     for d in regels:
         e, t = d.get("e"), float(d.get("t", 0))
@@ -74,6 +74,8 @@ def vat_samen(regels):
             s["dialogen"] += 1
         elif e == "cutscene_start":
             s["cutscenes"][d.get("id", "?")] += 1
+        elif e == "examine":
+            s["examines"][d.get("id", "?")] += 1
         elif e == "knop":
             s["knoppen"][d.get("a", "?")] += 1
             s["bron"][d.get("bron", "?")] += 1
@@ -89,7 +91,7 @@ def als_json(s):
     uit = dict(s)
     uit["kaarten"] = {k: round(v, 1) for k, v in s["kaarten"].most_common()}
     uit["bumps"] = [{"kaart": k[0], "x": k[1], "y": k[2], "n": n} for k, n in s["bumps"].most_common()]
-    for k in ("menus", "cutscenes", "knoppen", "bron"):
+    for k in ("menus", "cutscenes", "examines", "knoppen", "bron"):
         uit[k] = dict(s[k])
     return uit
 
@@ -121,6 +123,8 @@ def tekst(s):
         r.append("  Respawn: " + ", ".join("%s (%s)" % (x["naar"], x["soort"]) for x in s["respawns"]))
     if s["cutscenes"]:
         r.append("  Cutscenes: " + ", ".join("%s x%d" % kv for kv in s["cutscenes"].most_common()))
+    if s["examines"]:
+        r.append("  Bekeken (examine): " + ", ".join("%s x%d" % kv for kv in s["examines"].most_common()))
     if s["bron"]:
         r.append("  Invoer: %s   knoppen: %s" % (dict(s["bron"]), dict(s["knoppen"])))
     return "\n".join(r)

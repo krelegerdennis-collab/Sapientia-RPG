@@ -16,7 +16,7 @@ extends Node
 ## Elke kaart- en positieregel draagt de art op het scherm: "stijl" (som/oud, KaartStijl) en "tileset".
 ## Andere scripts melden alleen kort: Sessielog.noteer("soort", {...}); uit/zonder start = no-op.
 ## Gebeurtenissen: start, kaart, kaart_info (stijl/gebied/palet/tileset/rect), kaart_tijd, warp, pos, dir, knop, bump, menu, dialoog_start,
-## dialoog_eind, cutscene_start, cutscene_eind, gevecht_start, ronde, gevecht_eind, dood,
+## dialoog_eind, cutscene_start, cutscene_eind, examine, examine_eind (object bekijken, Story-origin "examine"), gevecht_start, ronde, gevecht_eind, dood,
 ## respawn, scherm, pauze, hervat, einde. Samenvatten: tools/sessie_samenvatting.py.
 
 const MAP := "user://sessielogs"
@@ -58,6 +58,7 @@ var _acties_aan := {}
 var _bron := "toets"
 var _dialoog := false
 var _cutscene := false
+var _examine := false
 var _scherm := Vector2i.ZERO
 var _speler: Node
 var _gevecht := {}
@@ -111,6 +112,7 @@ func start(map_pad := MAP) -> void:
 	_acties_aan = {}
 	_dialoog = false
 	_cutscene = false
+	_examine = false
 	_gevecht = {}
 	_scherm = Vector2i.ZERO
 	_speler = null
@@ -312,9 +314,11 @@ func _poll_toestand() -> void:
 	if loopt != _cutscene:
 		_cutscene = loopt
 		if loopt:
-			noteer("cutscene_start", {"id": str(story.current_event), "kaart": _kaart_id()})
+			_examine = str(story.current_origin) == "examine"
+			noteer("examine" if _examine else "cutscene_start", {"id": str(story.current_event), "kaart": _kaart_id()})
 		else:
-			noteer("cutscene_eind", {})
+			noteer("examine_eind" if _examine else "cutscene_eind", {})
+			_examine = false
 
 
 ## Losse cutscene (bv. de wereldkaart-film) die niet via Story loopt.
