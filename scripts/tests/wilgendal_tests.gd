@@ -526,9 +526,12 @@ func _som_pilot(dorp: Node) -> void:
 	check("som: speler = fase-2 heldsheet 24x32 (%s)" % sp.texture.resource_path,
 			sp.texture.resource_path.begins_with("res://assets/sprites/som/kaart/")
 			and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
-	check("som: Dax/Seren in WM1 (WM2 = held_variant in gebieden.json)", sp.texture.resource_path.ends_with("dax_wm1.png")
+	check("som: Dax/Seren in WM1, WM2 in de wacht", sp.texture.resource_path.ends_with("dax_wm1.png")
 			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1"
-			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm2.png"))
+			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm1.png")
+			and ResourceLoader.exists("res://assets/sprites/som/kaart/vesper.png")
+			and not ResourceLoader.exists("res://assets/sprites/som/kaart/dax_wm2.png")
+			and not ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm2.png"))
 	await _hekken(dorp, g, ov)
 
 
@@ -587,7 +590,7 @@ func _hekken(dorp: Node, g: TileMapLayer, ov: TileMapLayer) -> void:
 
 
 func _som() -> void:
-	const DAX := "res://assets/sprites/som/kaart/dax_wm2.png"
+	const DAX := "res://assets/sprites/som/kaart/dax_wm1.png"
 	const PROEF := "res://tools/som/test/uit/"
 	# oude sprites blijven precies zoals ze waren
 	var speler: Node = (load("res://scenes/player.tscn") as PackedScene).instantiate()
@@ -595,10 +598,10 @@ func _som() -> void:
 	var spr: Sprite2D = speler.sprite
 	check("oude spelersprite ongewijzigd (3x4 van 16x24, offset -4)", spr.hframes == 3 and spr.vframes == 4
 			and spr.offset == Vector2(0, -4) and MapSprite.frame_maat(spr.texture) == MapSprite.OUD)
-	# Dax WM2 (24x32-sheet 72x128) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
+	# Dax WM1 (24x32-sheet 72x128) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
 	speler.zet_sheet(load(DAX))
 	var vorm := (speler.get_node("CollisionShape2D") as CollisionShape2D).shape as RectangleShape2D
-	check("Dax WM2 24x32: 3x4 frames, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 3 and spr.vframes == 4
+	check("Dax WM1 24x32: 3x4 frames, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 3 and spr.vframes == 4
 			and is_equal_approx(spr.offset.y + 16.0, 8.0) and vorm.size == Vector2(14, 14)
 			and (speler.get_node("CollisionShape2D") as Node2D).position == Vector2.ZERO
 			and MapSprite.frame_maat(spr.texture) == MapSprite.NIEUW)
