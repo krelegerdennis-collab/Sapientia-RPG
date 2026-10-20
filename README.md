@@ -972,7 +972,13 @@ Gebufferd: hooguit elke 2 s of na 48 regels naar schijf. Geen spelersnaam, geen 
 - Aan/uit: **Opties > Session Log**. In autotests staat hij uit.
 - Versturen: **Opties > Export Log** (web: download; Android/pc: Downloads of Documenten, anders
   blijft het in de app-map en gaat het laatste stuk naar het klembord).
+- Art: elke `kaart`- en `pos`-regel heeft `stijl` (`som`/`oud`, uit `assets/tilesets/som/gebieden.json`
+  via `kaart_stijl.gd`) en `tileset`; `kaart` en `kaart_info` ook `gebied`, `palet` en (kaart_info) de
+  grondrechthoek `rect`. Zo koppelt RPG ART feedback aan de art die op het scherm stond.
 - Samenvatten: `python3 tools/sessie_samenvatting.py sapientia_sessielog_<id>.jsonl` (of `--json`).
+- Heatmap: `... --heatmap` (of `--heatmap=map`) schrijft per kaart `heatmap_<kaart>.png`: bezoeken per
+  tegel over de hele kaart, minstens 1080 px breed (leesbaar op een telefoon).
+- Voorbeeldlogboek: `SESSIELOG_BEWAAR=/tmp/log.jsonl godot --headless --path . -- --sessielogtest`.
 - Test: `godot --headless --path . -- --sessielogtest`.
 
 ## Licenties
