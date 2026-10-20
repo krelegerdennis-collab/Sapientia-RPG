@@ -301,7 +301,7 @@ const ENEMIES := {
 		"sprite_back": "res://assets/sprites/enemies/inktwurm_rug.png",
 		"idle": "res://assets/sprites/enemies/inktwurm_idle.png", "idle_frames": 2, "idle_time": 0.55,
 		"unique": true, "encounter_level": 5,
-		"max_hp": 68, "atk": 36, "def": 17, "agi": 26, "mag": 0, "mdef": 2,
+		"max_hp": 74, "atk": 44, "def": 17, "agi": 26, "mag": 0, "mdef": 2,  # PR #126: 2x de (opgeschaalde) normaal Lv 5
 		# TIJDELIJKE AANNAME: EXP/goud ongeveer 2x een Mech. Wachter op niveau 4 (unieke beloning)
 		"exp": 60, "gold": 40, "y_offset": 0,
 		"skills": [],

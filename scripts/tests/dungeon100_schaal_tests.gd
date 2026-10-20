@@ -100,8 +100,8 @@ func _scaling_tests() -> void:
 	for k in STAT_KEYS:
 		ok1 = ok1 and int(f1[k]) == int(base[k])
 	check("verdieping 1 = de basiswaarden van de vijand", ok1)
-	check("de bron-data wordt niet aangepast (duplicate)", int(GD.ENEMIES["mosslijm"]["max_hp"]) == 10
-			and int(S.monster_stats(base, 50)["max_hp"]) > 10 and int(base["max_hp"]) == 10)
+	check("de bron-data wordt niet aangepast (duplicate)", int(GD.ENEMIES["mosslijm"]["max_hp"]) == 13
+			and int(S.monster_stats(base, 50)["max_hp"]) > 13 and int(base["max_hp"]) == 13)
 	var mono := true
 	var strict := true
 	for id in NORMAL_ENEMIES:
@@ -138,7 +138,7 @@ func _scaling_tests() -> void:
 	check("mag/mdef schalen mee als de vijand ze heeft", int(wk50["mag"]) >= int(wk["mag"]) and int(wk50["mdef"]) > int(wk["mdef"])
 			and not S.monster_stats(base, 50).has("mag"))
 	# een held van niveau 1 kan hem op verdieping 1 nog neerleggen, op 100 niet in 1 slag
-	check("verdieping 1 voelt als de wereldkaart: Moss Slime-HP 10 blijft 10", int(f1["max_hp"]) == 10)
+	check("verdieping 1 voelt als de wereldkaart: Moss Slime-HP 13 blijft 13 (PR #126)", int(f1["max_hp"]) == 13)
 
 
 func _boss_tests() -> void:
@@ -535,8 +535,8 @@ func _battle_tests() -> void:
 	var b := _make_battle(["papiergeest", "mosslijm"], 0, false)
 	await get_tree().process_frame
 	var e0: Dictionary = b.enemies[0]["s"]
-	check("gevecht verdieping 0: Paper Wraith HP/ATK/DEF/EXP/goud = game_data.gd", int(e0["max_hp"]) == 16 and int(e0["atk"]) == 9
-			and int(e0["def"]) == 3 and int(e0["exp"]) == 5 and int(e0["gold"]) == 4 and int(e0["hp"]) == 16)
+	check("gevecht verdieping 0: Paper Wraith HP/ATK/DEF/EXP/goud = game_data.gd", int(e0["max_hp"]) == 21 and int(e0["atk"]) == 14
+			and int(e0["def"]) == 3 and int(e0["exp"]) == 5 and int(e0["gold"]) == 4 and int(e0["hp"]) == 21)
 	_free_battle(b)
 	await get_tree().process_frame
 	# verdieping 0 + tier (oude kamerniveaus) blijft werken
