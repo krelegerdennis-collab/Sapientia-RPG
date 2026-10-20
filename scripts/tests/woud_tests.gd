@@ -638,13 +638,13 @@ func _forest_tests() -> void:
 	await wait_fade()
 	var r := scene()
 	check("thema: woud-tegels, terrein 'woud', tint + mist", r.ground.tile_set.get_source(0).texture.resource_path.ends_with("woud_tiles.png")
-			and r.terrain_at(Vector2i(5, 9)) == "woud" and r.get_node_or_null("ThemaTint") != null and r.get_node_or_null("WoudMist") != null)
+			and r.terrain_at(Vector2i(7, 13)) == "woud" and r.get_node_or_null("ThemaTint") != null and r.get_node_or_null("WoudMist") != null)
 	var ov: TileMapLayer = r.get_node_or_null("Overlay")
 	check("overlay-laag (kruinen + mist) boven de speler, zonder botsing", ov != null and ov.z_index > player().z_index
-			and ov.get_cell_atlas_coords(Vector2i(5, 3)) == Vector2i(76 % 16, 76 / 16)
+			and ov.get_cell_atlas_coords(Vector2i(7, 4)) == Vector2i(76 % 16, 76 / 16)
 			and ov.tile_set.get_source(0).get_tile_data(Vector2i(12, 4), 0).get_collision_polygons_count(0) == 0)
-	check("boomvoet massief (96 op 5,5), wortels beloopbaar", r.cell(Vector2i(5, 5)) == 96 and r.is_wall(Vector2i(5, 5))
-			and not r.is_wall(Vector2i(11, 9)))
+	check("boomvoet massief (96 op 7,6), wortels beloopbaar", r.cell(Vector2i(7, 6)) == 96 and r.is_wall(Vector2i(7, 6))
+			and not r.is_wall(Vector2i(15, 13)))
 	await pframes(3)
 	check("glitch: zwakst bij de ingang (Crt %.2f)" % Crt.glitch_intensity, is_equal_approx(Crt.glitch_intensity, DR.GLITCH_MIN))
 	# echt door de boog naar het Wortelpad
@@ -652,7 +652,7 @@ func _forest_tests() -> void:
 	for m in r.monsters.duplicate():
 		m.queue_free()
 	r.monsters.clear()
-	player().place_at(Vector2i(10, 3), Vector2i.UP)
+	player().place_at(Vector2i(14, 3), Vector2i.UP)
 	await frames(3)
 	await walk("move_up", 1)
 	check("Wood's Edge -> (boog) -> Root Path", await wait_scene("WoudPad"))
@@ -700,7 +700,7 @@ func _forest_tests() -> void:
 	await freeze_monsters(r)
 	await pframes(3)
 	check("glitch sterker dieper in het woud (Mist Pool %.2f > ingang)" % Crt.glitch_intensity, Crt.glitch_intensity > DR.GLITCH_MIN + 0.1)
-	player().place_at(Vector2i(9, 11), Vector2i.UP)
+	player().place_at(Vector2i(13, 14), Vector2i.UP)
 	await get_tree().create_timer(0.5).timeout
 	await v17_shot("woud_kamer")
 	# de baas
@@ -714,7 +714,7 @@ func _forest_tests() -> void:
 	check("glitch maximaal bij de baas (%.2f)" % Crt.glitch_intensity, Crt.glitch_intensity == 1.0)
 	# screenshot: Noor in de (pulserende) cocon achter de Wortelkoning
 	await freeze_monsters(r)
-	player().place_at(Vector2i(9, 7), Vector2i.UP)
+	player().place_at(Vector2i(13, 8), Vector2i.UP)
 	await get_tree().create_timer(0.6).timeout
 	await v17_shot("noor_cocon")
 	var lv := int(GameState.party[0]["level"])
@@ -783,7 +783,7 @@ func _save_tests() -> void:
 	GameState.story_flags.erase("noor_lid")
 	GameState.story_flags.erase(SD.WORTELKONING_FLAG)
 	GameState.story_step = SD.NOOR_KWIJT
-	check("opslaan halverwege", GameState.save_game(Vector2i(9, 10), Vector2i.UP))
+	check("opslaan halverwege", GameState.save_game(Vector2i(13, 15), Vector2i.UP))
 	GameState.new_game("Iemand")
 	GameState.load_game()
 	check("halverwege geladen: opdracht loopt nog ('%s'), ontmoeting niet opnieuw" % Story.active_quest(),
@@ -1132,7 +1132,7 @@ func _graan_tests() -> void:
 	plek = await enter(SD.WOUD_BAAS, "zuid")
 	await get_tree().create_timer(0.5).timeout
 	geest = plek.get_node_or_null("Objects/Woudgeesten")
-	check("woudgeesten staan op de afgesproken tegel", geest != null and geest.visible and geest.get_tile() == Vector2i(4, 9)
+	check("woudgeesten staan op de afgesproken tegel", geest != null and geest.visible and geest.get_tile() == Vector2i(6, 14)
 			and geest.event == "zingend_zaad")
 	Story.trigger("zingend_zaad", geest)
 	check("mini-gevecht begint", await wait_scene("Battle"))
