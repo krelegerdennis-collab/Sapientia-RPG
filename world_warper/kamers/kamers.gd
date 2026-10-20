@@ -9,14 +9,15 @@ extends RefCounted
 ## Tot die tijd gaan de kamers open met warper_hub_open, of zodra de World Warper
 ## zelf open is (na De Genezer). Anders blijft ECHO's Kamer dicht en is de
 ## ingang van de Diepe Grot onbereikbaar.
-## TODO(design): koopwaar van de Handelskamer. shop_data.gd heeft alleen Wilgendal;
-## die voorraad is geen endgame-winkel en wordt hier niet gebruikt.
+## Handelskamer: winkel "handelskamer" in shop_data.gd (zelfde ShopScreen als Wilgendal).
+## Werkplaats: recepten in scripts/data/werkplaats_recepten.gd (scherm: scripts/ui/werkplaats_scherm.gd).
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const StoryData := preload("res://scripts/data/story_data.gd")
 const ShopData := preload("res://scripts/data/shop_data.gd")
 const Unlock := preload("res://world_warper/flow/unlock.gd")
+const Recepten := preload("res://scripts/data/werkplaats_recepten.gd")
 
 const FLAG_HUB := "warper_hub_open"
 ## Leeg tot Archief 2 een kern-vlag heeft. Geen verzonnen naam.
@@ -24,10 +25,7 @@ const ARCHIEF2_KERN_VLAG := ""
 
 const GESLOTEN := "This room is still closed."
 const ECHO_REGELS: Array[String] = ["I operate this hub."]
-const WERK_REGELS: Array[String] = [
-	"Forging will be possible here later.",
-	"There are no recipes yet.",
-]
+const WERK_REGELS: Array[String] = [Recepten.LEEG]
 const HANDEL_DICHT := "The shop is still closed."
 const KERN_ZIN := "The story of H-6 ends here."
 const OEFEN_KLAAR := "Practice done. No loot."
@@ -138,8 +136,9 @@ const DEUREN := {
 	"kern": ["hal"],
 }
 
-## Leeg: er zijn geen recepten. Niet verzinnen.
-const RECEPTEN: Array = []
+## Data staat in scripts/data/werkplaats_recepten.gd.
+const RECEPTEN: Array = Recepten.RECEPTEN
+const HANDEL_WINKEL := "handelskamer"
 
 
 static func hub_open(flags: Dictionary) -> bool:
@@ -305,14 +304,9 @@ static func pas_buit_toe(practice: bool, gold: int, exp: int, inventory: Diction
 	return {"gold": gold + buit.y, "exp": exp + buit.x, "items": zak}
 
 
-## Eerste shop die geen Wilgendal-balie is. Leeg zolang die tabel er niet is.
+## De winkel van de Handelskamer (shop_data.gd). Leeg als die tabel er niet is.
 static func endgame_winkel() -> String:
-	for id in ShopData.SHOPS.keys():
-		var sleutel := str(id)
-		if sleutel.begins_with("wilgendal"):
-			continue
-		return sleutel
-	return ""
+	return HANDEL_WINKEL if ShopData.SHOPS.has(HANDEL_WINKEL) else ""
 
 
 static func handel_open() -> bool:
@@ -379,6 +373,7 @@ static func speler_teksten() -> Array[String]:
 	out.append_array(EchoGrot.speler_teksten())
 	out.append_array(load("res://world_warper/data/echo_questlog.gd").speler_teksten())
 	out.append_array(WERK_REGELS)
+	out.append_array(Recepten.speler_teksten())
 	out.append(HANDEL_DICHT)
 	out.append(KERN_ZIN)
 	out.append(GESLOTEN)

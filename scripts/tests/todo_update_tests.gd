@@ -101,7 +101,7 @@ func _shop_tests() -> void:
 			and Shop.list_price("vuurzee") == 1440)
 	check("een grade-1-spreuk verkoopt voor 80", Shop.sell_price("vuur") == 80 and Shop.sell_price("doorn") == 80)
 	var broke := Shop.buy_item("wilgendal_wapen", "kort_zwaard")
-	check("te weinig goud koopt niets", not broke["ok"] and str(broke["text"]) == "Te weinig goud."
+	check("te weinig goud koopt niets", not broke["ok"] and str(broke["text"]) == "Not enough gold."
 			and int(GameState.inventory.get("kort_zwaard", 0)) == 0)
 	GameState.gold = 500
 	var bought := Shop.buy_item("wilgendal_wapen", "kort_zwaard")
