@@ -14,7 +14,7 @@ const ROOMS := {
 	"leven_ingang": {
 		"name": "The Living Archive",
 		"floor": 1,
-		"tier": 2,
+		"tier": 5,
 		"archief": "2",
 		"theme": THEME,
 		"layout": [
@@ -102,7 +102,7 @@ static func _met(basis: Dictionary, extra: Dictionary) -> Dictionary:
 
 
 static func rooms() -> Dictionary:
-	var entree := _met(_basis("The Living Archive", 1, 2), {
+	var entree := _met(_basis("The Living Archive", 1, 5), {
 		"save": [3, 8],
 		"exits": {
 			"E": {"map": "res://scenes/maps/berggrot_uitmond.tscn", "spawn": "boog"},
@@ -116,7 +116,7 @@ static func rooms() -> Dictionary:
 			{"id": "m2", "enemy": "doornige_loper", "group": ["doornige_loper", "wortelkruiper"], "tile": [14, 7], "moves": true},
 		],
 	})
-	var plaat := _met(_basis("Groei-plaat", 1, 2), {
+	var plaat := _met(_basis("Groei-plaat", 1, 5), {
 		"layout": [_TOP, _WU, _WL, _F, _G, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v1_entree"], "spawn": "noord"},
@@ -129,7 +129,7 @@ static func rooms() -> Dictionary:
 		"platen": [{"id": "p1", "soort": "groei", "tile": [9, 6], "start": 0}],
 		"bruggen": [{"plaat": "p1", "tiles": [[8, 4], [9, 4], [10, 4]]}],
 	})
-	var gang := _met(_basis("Kasgang", 2, 2), {
+	var gang := _met(_basis("Kasgang", 2, 5), {
 		"exits": {
 			"E": {"map": "res://scenes/maps/leven_v1_plaat.tscn", "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v2_lotte"], "spawn": "zuid"},
@@ -139,7 +139,7 @@ static func rooms() -> Dictionary:
 			{"id": "m2", "enemy": "sporekop", "group": ["sporekop", "sporenzwam"], "tile": [13, 7], "moves": true},
 		],
 	})
-	var lotte := _met(_basis("Seren", 2, 2), {
+	var lotte := _met(_basis("Seren", 2, 5), {
 		"layout": [_TOP, _WU, _WL, _F, _F, _B, _F, _F, _F, _F, _F, _BOT],
 		"checkpoint": false,
 		"exits": {
@@ -151,7 +151,7 @@ static func rooms() -> Dictionary:
 			"tile": [9, 5], "moves": false, "boss": true, "guard": true,
 		}],
 	})
-	var ketting := _met(_basis("Ketting-platen", 3, 3), {
+	var ketting := _met(_basis("Ketting-platen", 3, 6), {
 		"layout": [_TOP, _WU, _WL, _F, _G, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v2_lotte"], "spawn": "noord"},
@@ -171,7 +171,7 @@ static func rooms() -> Dictionary:
 			{"id": "m1", "enemy": "bloeiende_schrik", "group": ["bloeiende_schrik", "sporekop"], "tile": [15, 8], "moves": true},
 		],
 	})
-	var tegen := _met(_basis("Tegen-platen", 3, 3), {
+	var tegen := _met(_basis("Tegen-platen", 3, 6), {
 		"layout": [_TOP, _WU, _WL, _F, _T, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v3_ketting"], "spawn": "noord"},
@@ -184,7 +184,7 @@ static func rooms() -> Dictionary:
 		"platen": [{"id": "t1", "soort": "tegen", "tile": [14, 6], "start": 2}],
 		"bruggen": [{"plaat": "t1", "tiles": [[12, 4], [13, 4], [14, 4]]}],
 	})
-	var licht := _met(_basis("Licht-platen", 3, 3), {
+	var licht := _met(_basis("Licht-platen", 3, 6), {
 		"layout": [_TOP, _WU, _WL, _F, _G, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v3_tegen"], "spawn": "noord"},
@@ -197,7 +197,7 @@ static func rooms() -> Dictionary:
 		"platen": [{"id": "l1", "soort": "licht", "tile": [9, 6], "start": 0}],
 		"bruggen": [{"plaat": "l1", "tiles": [[8, 4], [9, 4], [10, 4]]}],
 	})
-	var wurger := _met(_basis("The Strangler", 3, 3), {
+	var wurger := _met(_basis("The Strangler", 3, 6), {
 		"layout": [_TOP, _WU, _WL, _F, _F, _B, _F, _F, _F, _F, _F, _BOT],
 		"checkpoint": false,
 		"exits": {
@@ -212,7 +212,7 @@ static func rooms() -> Dictionary:
 			"tile": [9, 5], "moves": false, "boss": true, "mini": true, "guard": true,
 		}],
 	})
-	var hal := _met(_basis("Hall of the Mender", 4, 3), {
+	var hal := _met(_basis("Hall of the Mender", 4, 6), {
 		"exits": {
 			"E": {"map": SCENES["archief_2_v3_wurger"], "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v4_genezer"], "spawn": "zuid"},
@@ -224,7 +224,7 @@ static func rooms() -> Dictionary:
 			{"id": "m1", "enemy": "wortelgeest", "group": ["wortelgeest", "bloeiende_schrik"], "tile": [13, 7], "moves": true},
 		],
 	})
-	var genezer := _met(_basis("The Mender", 4, 3), {
+	var genezer := _met(_basis("The Mender", 4, 6), {
 		"layout": [_TOP, _WU, _WL, _F, _F, _B, _F, _F, _F, _F, _F, _BOT],
 		"checkpoint": false,
 		"exits": {

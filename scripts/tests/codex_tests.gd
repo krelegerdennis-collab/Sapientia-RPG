@@ -436,7 +436,7 @@ func _data_tests() -> void:
 	# pagina's
 	var p3 := CD.make_page("mosslijm", 3, "codex_x")
 	var st3 := CD.stats_at("mosslijm", 3)
-	check("pagina Lv 3: stats = basis + 2x groei, Moss Mend geleerd, fusievelden", p3["max_hp"] == 10 + 2 * 5 and p3["max_hp"] == st3["max_hp"]
+	check("pagina Lv 3: stats = basis + 2x groei, Moss Mend geleerd, fusievelden", p3["max_hp"] == 13 + 2 * 5 and p3["max_hp"] == st3["max_hp"]
 			and p3["skills"] == ["slijmklodder", "mosheling"] and p3["exp"] == GD.exp_for_level(3)
 			and p3["fusion"] == {"generation": 0, "parents": []} and p3["element"] == "natuur")
 	GameState.new_game("Dax")
@@ -526,6 +526,11 @@ func _capture_tests() -> void:
 			and is_equal_approx(float(b.codex.last_capture["chance"]), CD.CAPTURE_MIN))
 	await finish()
 	# 3) baas weigert (boek blijft)
+	# PR #126: sterkere Act-1-monsters -> eerst iedereen weer vol, anders kan de Golem de party neerleggen vóór het vluchten
+	for h in GameState.party:
+		h["hp"] = h["max_hp"]
+	for pg in GameState.codex_pages:
+		pg["hp"] = pg["max_hp"]
 	b = await start_battle(["kennis_beest"], true)
 	if b == null:
 		check("baasgevecht gestart", false)
@@ -540,6 +545,7 @@ func _capture_tests() -> void:
 	check("baas: boek blijft (1), geen pagina, baas staat nog", GameState.item_count(CD.BOOK_ITEM) == 1
 			and GameState.codex_pages.size() == 1 and int(e["s"]["hp"]) > 0 and b.codex.last_capture.get("result") == "baas")
 	e["s"]["hp"] = 400
+	e["s"]["atk"] = 1  # PR #126: andere RNG-volgorde; de test gaat over vluchten, niet over overleven
 	await flee(b)
 	check("baas: weggevlucht (test), terug op de kaart", not GameState.in_battle)
 
