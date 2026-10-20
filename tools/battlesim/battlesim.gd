@@ -355,6 +355,7 @@ func run_scenario(sc: Dictionary) -> Dictionary:
 		if standalone:
 			print("BATTLESIM %s generated in %d ms" % [sc["id"], Time.get_ticks_msec() - t0])
 	_build_party(sc)
+	GameState.som_mode = bool(sc.get("som", false))   # SoM-proef: Action-modus (baas-vermenigvuldiger); new_game zet hem uit
 	if standalone:
 		print("BATTLESIM %s: %d groups, %d fights" % [sc["id"], (sc["encounters"] as Array).size(), fights])
 	var snap := _party_snapshot()

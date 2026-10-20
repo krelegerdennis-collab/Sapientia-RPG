@@ -8,6 +8,7 @@ extends Control
 
 ## (preload i.p.v. class_name: dit script wordt al door een autoload geladen)
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const SomDataC := preload("res://scripts/data/som_data.gd")
 
 @export var dpad_radius := 30.0
 @export var button_radius := 15.0
@@ -53,6 +54,14 @@ var show_run := false:
 					_set_touch_action(i, "")
 					_touch_owner.erase(i)
 		queue_redraw()
+## SoM-proef (Action): de D-pad wordt een analoge joystick. Geen move_*-acties; de vinger geeft
+## joy_raw (-1..1, t.o.v. het midden, lengte max 1). De speler leest hem (scripts/som/som_move.gd).
+var joystick_mode := false:
+	set(v):
+		joystick_mode = v
+		joy_raw = Vector2.ZERO
+		queue_redraw()
+var joy_raw := Vector2.ZERO
 var _touch_owner := {}    # vinger-index -> "dpad" of "a"
 var _touch_action := {}   # vinger-index -> actie die die vinger nu indrukt
 var _press_count := {}    # actie -> aantal vingers dat hem indrukt
@@ -101,7 +110,24 @@ func refit() -> void:
 
 
 func dpad_center() -> Vector2:
+	if joystick_mode:
+		# SoM-proef (feedback Dennis): kleiner en hoger, ongeveer midden-links
+		return Vector2(edge_margin + 6.0 + joy_radius(), roundf(size.y * SomDataC.JOY_CENTER_Y))
 	return Vector2(edge_margin + dpad_radius, size.y - edge_margin - dpad_radius)
+
+
+## Straal van de analoge joystick (kleiner dan de D-pad; de vinger mag er ruim omheen: JOY_TOUCH_REACH).
+func joy_radius() -> float:
+	return roundf(dpad_radius * SomDataC.JOY_SCALE)
+
+
+## SoM-proef: bovenste rij rechts = [RUN][Swap][Ring][MENU]; Swap/Ring zet de HUD (som_hud.gd) neer.
+func som_row_slot(i: int) -> Rect2:
+	var m := menu_rect()
+	var w: float = SomDataC.TOP_BUTTON_SIZE.x
+	var gap: float = SomDataC.TOP_BUTTON_GAP
+	var x := m.position.x - (gap + w) * float(i + 1)
+	return Rect2(Vector2(x, m.get_center().y - SomDataC.TOP_BUTTON_SIZE.y / 2.0), SomDataC.TOP_BUTTON_SIZE)
 
 
 func a_center() -> Vector2:
@@ -125,6 +151,10 @@ func kern_rect() -> Rect2:
 
 ## RUN-knop: zelfde maat als CORE, recht erboven (ook als CORE nog niet vrijgespeeld is).
 func run_rect() -> Rect2:
+	if joystick_mode:
+		var s := som_row_slot(2)          # links van Swap en Ring
+		var rs: Vector2 = SomDataC.TOP_BUTTON_SIZE
+		return Rect2(Vector2(s.end.x - KERN_SIZE.x, s.position.y), Vector2(KERN_SIZE.x, rs.y))
 	var kr := kern_rect()
 	return Rect2(kr.position - Vector2(0, KERN_SIZE.y + 5.0), KERN_SIZE)
 
@@ -170,7 +200,11 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var pos := _local(event.position)
 		if event.pressed:
-			if pos.distance_to(dpad_center()) <= dpad_radius * 1.2:
+			if joystick_mode and pos.distance_to(dpad_center()) <= joy_radius() * SomDataC.JOY_TOUCH_REACH:
+				_touch_owner[event.index] = "joy"
+				_set_joy(pos)
+				get_viewport().set_input_as_handled()
+			elif pos.distance_to(dpad_center()) <= dpad_radius * 1.2:
 				_touch_owner[event.index] = "dpad"
 				_set_touch_action(event.index, _dpad_action(pos))
 				get_viewport().set_input_as_handled()
@@ -195,9 +229,16 @@ func _input(event: InputEvent) -> void:
 				_set_touch_action(event.index, "menu")
 				get_viewport().set_input_as_handled()
 		else:
+			if _touch_owner.get(event.index, "") == "joy":
+				joy_raw = Vector2.ZERO
+				queue_redraw()
 			_set_touch_action(event.index, "")
 			_touch_owner.erase(event.index)
 	elif event is InputEventScreenDrag:
+		if _touch_owner.get(event.index, "") == "joy":
+			_set_joy(_local(event.position))
+			get_viewport().set_input_as_handled()
+			return
 		# Over de D-pad schuiven verandert de richting (zoals op een echte D-pad).
 		if _touch_owner.get(event.index, "") == "dpad":
 			_set_touch_action(event.index, _dpad_action(_local(event.position)))
@@ -207,6 +248,12 @@ func _input(event: InputEvent) -> void:
 ## Schermpositie (viewport) -> positie binnen deze knoppen-laag.
 func _local(viewport_pos: Vector2) -> Vector2:
 	return get_global_transform_with_canvas().affine_inverse() * viewport_pos
+
+
+## Joystick: positie van de vinger -> joy_raw (lengte max 1). Dode zone/8 richtingen: som_move.gd.
+func _set_joy(pos: Vector2) -> void:
+	joy_raw = ((pos - dpad_center()) / maxf(1.0, joy_radius())).limit_length(1.0)
+	queue_redraw()
 
 
 func _dpad_action(pos: Vector2) -> String:
@@ -245,6 +292,7 @@ func release_all() -> void:
 	_press_count.clear()
 	_touch_action.clear()
 	_touch_owner.clear()
+	joy_raw = Vector2.ZERO
 	queue_redraw()
 
 
@@ -278,7 +326,13 @@ func _draw() -> void:
 	# D-pad
 	var c := dpad_center()
 	var r := dpad_radius
+	if joystick_mode:
+		r = joy_radius()
 	draw_circle(c, r, Color(0, 0, 0, 0.28))
+	if joystick_mode:
+		_draw_joystick(c, r, line)
+		_draw_rest(line)
+		return
 	# printplaat-sporen met gloed
 	for path in CIRCUIT:
 		var pts := PackedVector2Array()
@@ -316,6 +370,57 @@ func _draw() -> void:
 		else:
 			draw_colored_polygon(tri, Color(mag.r, mag.g, mag.b, 0.25))
 		draw_polyline(PackedVector2Array([tip, back + side, back - side, tip]), mag, line)
+	_draw_rest(line)
+
+
+## SoM-proef: joystick (PLACEHOLDER-opmaak): ring + knop die met de vinger meeschuift.
+func _draw_joystick(c: Vector2, r: float, line: float) -> void:
+	if _draw_joystick_art(c, r):
+		return
+	_draw_joystick_placeholder(c, r, line)
+
+
+## RPG ART: joystick_ring (60x60, midden 30,30) geschaald naar de joystickstraal; de knop (24x24) schuift
+## maximaal JOY_KNOB_TRAVEL (18) art-pixels uit. Geeft false als de art ontbreekt.
+func _draw_joystick_art(c: Vector2, r: float) -> bool:
+	var ring_t: Texture2D = _som_tex(SomDataC.UI_JOY_RING)
+	var knob_t: Texture2D = _som_tex(SomDataC.UI_JOY_KNOB_PRESSED if joy_raw != Vector2.ZERO else SomDataC.UI_JOY_KNOB)
+	if ring_t == null or knob_t == null:
+		return false
+	var s := maxf(1.0, floorf(r / SomDataC.JOY_ART_RADIUS))
+	var rs := ring_t.get_size() * s
+	draw_texture_rect(ring_t, Rect2((c - rs / 2.0).round(), rs), false)
+	var k := joy_knob_pos(c, s)
+	var ks := knob_t.get_size() * s
+	draw_texture_rect(knob_t, Rect2((k - ks / 2.0).round(), ks), false)
+	return true
+
+
+## Midden van de knop: joy_raw (lengte <= 1) x 18 art-pixels x schaal.
+func joy_knob_pos(c: Vector2, s: float) -> Vector2:
+	return (c + joy_raw.limit_length(1.0) * SomDataC.JOY_KNOB_TRAVEL * s).round()
+
+
+var _tex_cache := {}
+
+
+func _som_tex(path: String) -> Texture2D:
+	if not _tex_cache.has(path):
+		_tex_cache[path] = load(path) if ResourceLoader.exists(path) else null
+	return _tex_cache[path]
+
+
+func _draw_joystick_placeholder(c: Vector2, r: float, line: float) -> void:
+	var mag := UiStyleC.MAGENTA
+	draw_arc(c, r * 0.98, 0.0, TAU, 48, Color(mag.r, mag.g, mag.b, 0.6), line)
+	draw_arc(c, r * dead_zone, 0.0, TAU, 16, Color(mag.r, mag.g, mag.b, 0.25), line)
+	var k := (c + joy_raw * r * 0.7).round()
+	draw_circle(k, r * 0.38, Color(0.16, 0.16, 0.18, 0.92))
+	draw_arc(k, r * 0.38, 0.0, TAU, 24, UiStyleC.MAGENTA_HOT if joy_raw != Vector2.ZERO else mag, line)
+
+
+func _draw_rest(line: float) -> void:
+	var mag := UiStyleC.MAGENTA
 	# A- en B-knop
 	_draw_button(a_center(), "A", "interact", UiStyleC.CYAN, line)
 	_draw_button(b_center(), "B", "cancel", UiStyleC.MAGENTA, line)

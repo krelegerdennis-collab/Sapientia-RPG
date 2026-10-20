@@ -41,6 +41,7 @@ const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const Dungeon100Blue := preload("res://scripts/data/dungeon100_blue.gd")
 const KamerData := preload("res://world_warper/kamers/kamers.gd")
+const SomDataB := preload("res://scripts/data/som_data.gd")   # SoM-proef: Action-modus baas-vermenigvuldiger
 const COMMANDS := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 ## v0.19 Codex-knop (index 5): submenu 'Vangen' (Leeg Boek op een vijand, met vangkans per doel)
 ## en 'Wissel bondgenoot' (niet-KO pagina's + 'Geen'; kost de beurt van de held). Verborgen in
@@ -346,6 +347,19 @@ func _enemy_base(id: String) -> Dictionary:
 	return BerggrotData.enemy(id)
 
 
+## SoM-proef: geldt de Action-modus baas-vermenigvuldiger in dit gevecht?
+static func action_boss_on() -> bool:
+	return GameState.dungeon100_floor <= 0 and (GameState.som_mode or Settings.action_battles())
+
+
+## Gemiddeld level van de party (voor de Action-baas-schaal).
+static func action_party_level() -> float:
+	var s := 0.0
+	for h in GameState.party:
+		s += float(h.get("level", 1))
+	return s / float(maxi(1, GameState.party.size()))
+
+
 func _spawn_enemies(ids: Array) -> void:
 	# onbekende id's (bv. een oude naam) overslaan; nooit een gevecht zonder vijanden
 	ids = ids.filter(func(i): return _enemy_known(str(i)))
@@ -363,6 +377,8 @@ func _spawn_enemies(ids: Array) -> void:
 			can_flee = false                   # v0.15: niet vluchten voor een baas
 			# Task #4: baas van de dungeon van 100 verdiepingen (verdieping 0 = ongewijzigd)
 			data = Dungeon100Scaling.battle_enemy(data, GameState.dungeon100_floor, true)
+			# SoM-proef: alleen in Action-modus sterker (Classic ongewijzigd); niet in de dungeon van 100
+			data = SomDataB.action_boss(data, action_boss_on(), action_party_level())
 		else:
 			data.erase("boss")
 			if GameState.dungeon100_floor > 0:

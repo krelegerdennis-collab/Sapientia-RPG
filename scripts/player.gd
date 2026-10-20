@@ -12,6 +12,7 @@ signal stepped(tile: Vector2i)
 signal bumped(tile: Vector2i)
 
 const TILE_SIZE := 16
+const SomMove := preload("res://scripts/som/som_move.gd")
 
 ## TODO.md "run feature" (CANON): RUN aan = 2 tegels per zet, sprite 2x zo snel. Toggle via de
 ## RUN-knop (touch, boven CORE) of toets R (actie "run"); de stand staat in Settings ("run").
@@ -47,6 +48,11 @@ var _bump_tile := Vector2i(-9999, -9999)
 var _scripted := false
 ## Hoeveel tegels deze RUN-zet nog extra mag (0 = gewone stap).
 var _run_left := 0
+## SoM-proef (Action): analoge beweging. Geldig = vrije pixelbeweging met move_and_slide (glijdt langs
+## muren); geeft per frame een richting x kracht (lengte 0..1). Leeg = de gewone tegelbeweging.
+var analog_input: Callable
+## Topsnelheid in analoge modus (px/s).
+var analog_speed := 80.0
 ## Na een duw (TODO.md push): niet doorlopen naar de vrijgekomen tegel tot de richting is losgelaten.
 var hold_until_release := false
 
@@ -115,6 +121,10 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(RUN_ACTION) and not input_locked:
 		toggle_run()
 
+	if analog_input.is_valid():
+		_process_analog(delta)
+		return
+
 	# --- Lopen ---
 	var budget := current_speed() * delta  # hoeveel pixels we deze frame mogen bewegen
 	if is_moving:
@@ -144,6 +154,49 @@ func _process(delta: float) -> void:
 					_bump_tile = get_tile() + dir
 					_try_bump()
 
+	_update_sprite()
+
+
+## SoM-proef: analoge modus aan (provider = Callable -> Vector2) of uit (Callable()).
+## Kleinere botsing aan de voeten (10x8) zodat je soepel door 1-tegel-gangen glijdt.
+func set_analog(provider: Callable, speed := 80.0) -> void:
+	analog_input = provider
+	analog_speed = speed
+	is_moving = false
+	_target = position
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING if provider.is_valid() else CharacterBody2D.MOTION_MODE_GROUNDED
+	var cs := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if cs and provider.is_valid():
+		var r := RectangleShape2D.new()
+		r.size = Vector2(10, 8)
+		cs.shape = r
+		cs.position = Vector2(0, 3)
+
+
+func _process_analog(delta: float) -> void:
+	var v := Vector2.ZERO
+	if not input_locked and not GameState.changing_map and not GameState.in_battle:
+		v = analog_input.call()
+	if v != Vector2.ZERO:
+		facing = SomMove.facing_for(v, facing)
+	var before := position
+	var old_tile := get_tile()
+	velocity = v * analog_speed
+	if velocity != Vector2.ZERO:
+		move_and_slide()
+	var moved := position.distance_to(before)
+	if moved > 0.001:
+		_walk_distance += moved
+	else:
+		_walk_distance = 0.0
+	_target = position
+	if get_tile() != old_tile:
+		_bump_tile = Vector2i(-9999, -9999)
+		stepped.emit(get_tile())
+	elif v != Vector2.ZERO and moved < analog_speed * delta * 0.2:
+		if get_tile() + facing != _bump_tile:
+			_bump_tile = get_tile() + facing
+			_try_bump()
 	_update_sprite()
 
 
