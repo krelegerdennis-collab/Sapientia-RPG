@@ -144,7 +144,7 @@ const ENEMIES := {
 		# HANDOFF_ARCHIEF1.md voor de tabel per niveau. Nieuw trucje 'Schild omhoog' ("type": "guard"):
 		# i.p.v. aanvallen DEF x2, de rest van deze ronde en de hele volgende ronde (bericht, blauwe
 		# tint en een strook tijdens het kiezen).
-		"max_hp": 39, "atk": 18, "def": 8, "agi": 5, "mag": 0, "mdef": 4,
+		"max_hp": 30, "atk": 12, "def": 8, "agi": 5, "mag": 0, "mdef": 4,
 		"exp": 10, "gold": 8, "y_offset": 0,
 		"skills": [{"name": "Shield Up", "chance": 0.2, "type": "guard", "def_mult": 2.0},
 				{"name": "Seal Strike", "chance": 0.15, "power": 1.4}],
@@ -1074,7 +1074,7 @@ const ARCHIEF_STAT_SCHAAL := 0.7
 const ARCHIEF_EXP_SCHAAL := 0.50
 ## v0.2x POWER SCALING (PR #126, docs/BATTLE_BALANCE_REPORT.md): een gedocumenteerde schaal per gebied,
 ## gemeten met de battlesim (seed 20261020). Doel: gewone gevechten ~10-20% party-HP, bazen ~60-80% winst.
-##   Act-1 basismonsters (mosslijm, moskonijn, papiergeest, glitchmot, mech_wachter): HP x1,3, ATK x1,5.
+##   Act-1 basismonsters (mosslijm, moskonijn, papiergeest, glitchmot): HP x1,3, ATK x1,5 (Mech. Warden blijft 30/12, golemtest).
 ##   Tier 1-3 (Eerste Archief): ATK +8 / +9 / +9 (was 0 / 4 / 7), DEF +1 / +3 / +5.
 ##   Tier 5-6 = Tweede Archief verdieping 1-2 / 3-4 (archief2_rooms.gd; was tier 2 / 3, gedeeld met Archief 1):
 ##     de party is daar Lv 14-16, de archiefschaal 0,7 blijft (canon) en komt erna.
