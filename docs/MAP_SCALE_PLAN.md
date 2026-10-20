@@ -69,11 +69,11 @@ Kolom "moet mee" = nodes/data met een vaste tegel- of pixelpositie.
 | `leven_v3_combi.tscn` | puzzle_rooms.gd | 11x8 | 15x11 | 2 exits, 1 spawns |
 | `wilgendal.tscn` | scene (TileMap + nodes in px) | 32x22 | 45x31 | 2 boeken, 1 deuren, 1 exits, 3 spawns, 1 NPC, 9 story-obj |
 | `wilgendal_binnen.tscn` | wilgendal_dorp.gd KAMERS (pand_binnen.gd) | 9x8 | 13x11 | 1 exits, 1 spawns, 1 NPC |
-| `woud_mistpoel.tscn` | woud_rooms.gd | 20x16 | 28x22 | 1 kisten, 1 exit-warper, 1 bordjes, 2 exits, 4 map-monsters, 2 spawns |
-| `woud_open_plek.tscn` | woud_rooms.gd | 20x12 | 28x17 | 1 exit-warper, 1 exits, 1 map-monsters, 1 spawns, 2 NPC, 2 story-obj |
-| `woud_pad.tscn` | woud_rooms.gd | 32x12 | 45x17 | 2 kisten, 2 exits, 5 map-monsters, 2 spawns |
-| `woud_rand.tscn` | woud_rooms.gd | 20x12 | 28x17 | 1 boeken, 1 kisten, 1 exit-warper, 2 exits, 3 map-monsters, 2 spawns |
-| `woud_sporenkring.tscn` | woud_rooms.gd | 20x12 | 28x17 | 1 boeken, 1 kisten, 1 bordjes, 2 exits, 3 map-monsters, 2 spawns |
+| `woud_mistpoel.tscn` | woud_rooms.gd | 20x16 | **28x22 (gedaan)** | 1 kisten, 1 exit-warper, 1 bordjes, 2 exits, 4 map-monsters, 2 spawns |
+| `woud_open_plek.tscn` | woud_rooms.gd | 20x12 | **28x17 (gedaan)** | 1 exit-warper, 1 exits, 1 map-monsters, 1 spawns, 2 NPC, 2 story-obj |
+| `woud_pad.tscn` | woud_rooms.gd | 32x12 | **45x17 (gedaan)** | 2 kisten, 2 exits, 5 map-monsters, 2 spawns |
+| `woud_rand.tscn` | woud_rooms.gd | 20x12 | **28x17 (gedaan)** | 1 boeken, 1 kisten, 1 exit-warper, 2 exits, 3 map-monsters, 2 spawns |
+| `woud_sporenkring.tscn` | woud_rooms.gd | 20x12 | **28x17 (gedaan)** | 1 boeken, 1 kisten, 1 bordjes, 2 exits, 3 map-monsters, 2 spawns |
 Totaal: 46 WM1-kaarten (wereldkaart uitgezonderd). Groepen en aanpak:
 
 1. **Dorp Wilgendal** (`dorp_wilgendal`, data in `wilgendal_dorp.gd`): **klaar in deze PR** — zie onder.
@@ -138,6 +138,25 @@ zuidpad kolom 24-25); de uitgang blijft 3 breed. Padranden (dorp.png 10+masker) 
 - v8-grond: `tools/som/esdoorn_v8_grond.py` → `assets/tilesets/som/esdoorn/grond_v8.*` (567 unieke tegels,
   atlas 1024x144), getoond door `scripts/village/v8_grond.gd` (laag GrondV8) op gras/pad/plein; bomen,
   vijver, hek, heg, tonnen en bloembakken blijven de oude dorp.png-tegels. Interieurs niet geschaald.
+
+## Donker Woud (5 kamers): wat er verschoven is
+Tool: `tools/som/woud_1p4.py` (eenmalig, op de ASCII-layouts in `scripts/data/woud_rooms.gd`). Nooit verdubbeld:
+rand (rij 0-3, onderrij, kolom 0-1 en de laatste 2), boog-/uitgangkolommen (de doorgang boog -> zuiduitgang blijft
+in lijn), pilaar-toprijen (`13`), kuilrand `Y`, de wortelheuvel-onderkant (`{~^^~}`/`oO`) en het opslagstuk `@`.
+Wel: vloer, wortels `j` (in de breedte), de mistpoel `V` en de bovenste heuvelrij `[====]`. In een kopie worden losse
+decortegels vloer. De rij vlak boven de zuiduitgang krijgt zijn kopie erboven, zodat spawn/mist tegen de uitgang blijven.
+- woud_rand: 20x12 -> 28x17; rijen [4, 6, 7, 8, 10]; kolommen [2, 4, 5, 7, 12, 14, 15, 17]
+- woud_pad: 32x12 -> 45x17; rijen [4, 5, 7, 8, 10]; kolommen [6, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 25, 28]
+- woud_mistpoel: 20x16 -> 28x22; rijen [5, 8, 10, 11, 13, 14]; kolommen [2, 3, 6, 7, 12, 14, 16, 17]
+- woud_sporenkring: 20x12 -> 28x17; rijen [4, 6, 8, 9, 10]; kolommen [2, 5, 6, 7, 13, 14, 15, 17]
+- woud_open_plek: 20x12 -> 28x17; rijen [4, 7, 8, 9, 10]; kolommen [2, 3, 5, 6, 13, 14, 16, 17]
+- Spawns/kisten/boeken/borden/monsters/NPC's/objecten/bomen/mist/overlay omgerekend (x' = eerste kopie).
+- Warpers: begin (8,10)->(12,15), midden Mistpoel (4,6)->(6,7); eind volgt uit de baas (13,4).
+- Open plek: baas/Vesper (9,4)->(13,4), cocon (9,3)->(13,3), Woudgeesten (4,9)->(6,14) boven de mistband y=15.
+- Cutscene `noor_bevrijd`: speler naar (13,6) (overwinningstegel onder de baas; was (9,6)). Vesper loopt 1 omlaag.
+- Uitgangen: zuid `(UU)`/`(EE)` 2 breed, boog `n` 1 breed (deur, niet verbreed).
+- Grond: geen v8-bos-generator/-tegels in `art_mapsprites_v4/out` (alleen town/cave/dungeon + Mapleton-props),
+  dus de bestaande `woud_tiles.png` (art_woud_v17) blijft. Nodig van RPG ART voor v8: zie PR.
 
 ## Wachtershuis-erf (proloog, `wilgendal.tscn`): wat er verschoven is (32x22 → 45x31)
 Tool: `tools/som/wachtershuis_1p4.py` (eenmalig, op de .tscn). Verdubbelde rijen: 0,1,10,11,14-18. Verdubbelde

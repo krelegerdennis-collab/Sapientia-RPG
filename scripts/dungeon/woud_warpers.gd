@@ -8,10 +8,10 @@ const WoudRooms := preload("res://scripts/data/woud_rooms.gd")
 const ArchiefWarpers := preload("res://scripts/dungeon/archief_warpers.gd")
 
 const BEGIN_ROOM := "woud_rand"
-## Naast de ingang-spawn (9, 10), niet op de uitgang naar de wereldkaart.
-const BEGIN_TILE := Vector2i(8, 10)
+## Naast de ingang-spawn (13, 15; 1.4x, was 9,10), niet op de uitgang naar de wereldkaart.
+const BEGIN_TILE := Vector2i(12, 15)
 ## Vrije vloer in de Mistpoel. Niet op spawn, kist, boom, monster of het bord.
-const MIDDEN_TILE := Vector2i(4, 6)
+const MIDDEN_TILE := Vector2i(6, 7)
 const EIND_ROOM := "woud_open_plek"
 ## Zelfde terugkeer als de zuiduitgang van de Woudrand: woud-ingang op de wereldkaart.
 const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"

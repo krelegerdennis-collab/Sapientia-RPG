@@ -1089,8 +1089,8 @@ func _theme_tests(hw: String) -> void:
 	var t: Dictionary = DR.theme_data("archief_grijs")
 	var a: Texture2D = load(str(t["tiles"]))
 	var l: Texture2D = load(str(t["lib_tiles"]))
-	check("grijze atlassen even groot als die van RPG ART (256x80 / 256x64)", a != null and l != null
-			and a.get_size() == Vector2(256, 80) and l.get_size() == Vector2(256, 64))
+	check("grijze atlassen even groot als die van RPG ART (256x96 v8 met blok A/B 80-87 / 256x64)", a != null and l != null
+			and a.get_size() == Vector2(256, 96) and l.get_size() == Vector2(256, 64))
 	var no_theme := []
 	for rid in DR.ROOMS:
 		if DR.theme_of(DR.ROOMS[rid]) != "archief_grijs":

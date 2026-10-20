@@ -64,6 +64,10 @@ var _blocked := {}             # tile -> true: kist/boek/meubel (map-monsters lo
 ## v0.17 laag met boomkruinen/mist boven Objects (null = deze kamer heeft er geen)
 var overlay: TileMapLayer
 const OVERLAY_Z := 10
+## v0.24 mist-tegels (Donker Woud) op een eigen laag boven de overlay, half doorzichtig
+const MIST_TILES := [82, 83, 84, 109, 110]
+const MIST_ALPHA := 0.6
+var mist_layer: TileMapLayer
 ## SoM-proef (scripts/som/som_arena.gd): realtime gevecht in deze kamer, of null (turn-based zoals altijd).
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomArenaScript := preload("res://scripts/som/som_arena.gd")
@@ -150,6 +154,7 @@ func _build() -> void:
 	var legend := DungeonRooms.legend_of(room)
 	var floor_tiles: Array = room.get("floor_tiles", DungeonRooms.FLOOR)
 	var layout: Array = room["layout"]
+	var scatter4: bool = room_id in DungeonRooms.ARCHIEF_SCATTER_ROOMS and not room.has("floor_tiles")
 	# v0.23: vaste grondlaag (tegelnummers) als de kamer die heeft (Archief 2 v2-deco); anders willekeurige vloer
 	var vast: Array = room.get("ground", Archief2Ground.GROUND.get(room_id, []))
 	var exit_cells := {}           # sleutel in "exits" -> Array[Vector2i]
@@ -162,7 +167,11 @@ func _build() -> void:
 				continue
 			var n: int = legend[ch]
 			if ch == ".":
-				n = floor_variant(x, y, floor_tiles)
+				# Archives v8: archief-kamers zonder eigen "floor_tiles" -> vloer 0-3 verstrooid (vaste hash)
+				if scatter4:
+					n = DungeonRooms.archief_floor_at(x, y, layout)
+				else:
+					n = floor_variant(x, y, floor_tiles)
 			if y < vast.size() and x < (vast[y] as Array).size():
 				n = int(vast[y][x])
 			_cells[Vector2i(x, y)] = n
@@ -172,6 +181,12 @@ func _build() -> void:
 				if not exit_cells.has(key):
 					exit_cells[key] = []
 				exit_cells[key].append(Vector2i(x, y))
+	# v0.24 bospad (Donker Woud) over de gewone vloer, zie DungeonRooms.path_tiles
+	var pad := DungeonRooms.path_tiles(room)
+	for t in pad:
+		_cells[t] = int(pad[t])
+		set_tile(ground, t, int(pad[t]))
+	_build_pit_edges()
 	_build_overlay()
 	var objects: Node2D = $Objects
 	# opslagboek op de sokkel (4 px hoger, zodat de lessenaar op de sokkel staat);
@@ -363,6 +378,28 @@ func _place_exit_warper(objects: Node2D) -> void:
 ##              (2x2) op de overlay erboven. Soorten: THEMES[thema]["trees"] (Donker Woud: A, B).
 ##   "mist":    [[x, y, lengte]] mistband (THEMES[thema]["mist_band"]: begin, midden..., eind)
 ##   "overlay": [[x, y, tegel]]  losse overlay-tegels (bv. 84 mistwolk, 108 glitch-pixels)
+## Kuilranden (DungeonRooms.pit_edge_tiles) op een eigen laag "KuilRand" boven de grond. Lege atlascel
+## (nog geen art van RPG ART) -> niets: dan blijft de huidige kuil (13/14) het beeld. Botsing: de grond.
+var pit_layer: TileMapLayer = null
+func _build_pit_edges() -> void:
+	var pe := DungeonRooms.pit_edge_tiles(room)
+	if pe.is_empty():
+		return
+	var img: Image = (ground.tile_set.get_source(0) as TileSetAtlasSource).texture.get_image()
+	for t in pe:
+		var n := int(pe[t])
+		var c := Vector2i(n % DungeonRooms.COLS, n / DungeonRooms.COLS)
+		if img == null or (c.y + 1) * 16 > img.get_height() or img.get_region(Rect2i(c * 16, Vector2i(16, 16))).is_invisible():
+			continue
+		if pit_layer == null:
+			pit_layer = TileMapLayer.new()
+			pit_layer.name = "KuilRand"
+			pit_layer.tile_set = tileset(false, DungeonRooms.current_theme)
+			add_child(pit_layer)
+			move_child(pit_layer, ground.get_index() + 1)
+		set_tile(pit_layer, t, n)
+
+
 func _build_overlay() -> void:
 	var td: Dictionary = DungeonRooms.theme_data(DungeonRooms.current_theme)
 	if not (room.has("trees") or room.has("mist") or room.has("overlay")):
@@ -399,9 +436,25 @@ func _build_overlay() -> void:
 				tile = int(band[band.size() - 1])
 			else:
 				tile = int(band[1 + (i - 1) % (band.size() - 2)])
-			set_tile(overlay, Vector2i(int(m[0]) + i, int(m[1])), tile)
+			_set_overlay_tile(Vector2i(int(m[0]) + i, int(m[1])), tile)
 	for o in room.get("overlay", []):
-		set_tile(overlay, Vector2i(int(o[0]), int(o[1])), int(o[2]))
+		_set_overlay_tile(Vector2i(int(o[0]), int(o[1])), int(o[2]))
+
+
+## v0.24 overlay-tegel; mist (MIST_TILES) gaat naar de eigen laag "MistLaag" (modulate alpha MIST_ALPHA).
+func _set_overlay_tile(t: Vector2i, n: int) -> void:
+	if not MIST_TILES.has(n):
+		set_tile(overlay, t, n)
+		return
+	if mist_layer == null:
+		mist_layer = TileMapLayer.new()
+		mist_layer.name = "MistLaag"
+		mist_layer.tile_set = overlay.tile_set
+		mist_layer.z_index = OVERLAY_Z + 1
+		mist_layer.modulate = Color(1, 1, 1, MIST_ALPHA)
+		add_child(mist_layer)
+		move_child(mist_layer, overlay.get_index() + 1)
+	set_tile(mist_layer, t, n)
 
 
 ## v0.17 naam, tile, event en show_if van een verhaal-object/NPC uit de kamerdata.
