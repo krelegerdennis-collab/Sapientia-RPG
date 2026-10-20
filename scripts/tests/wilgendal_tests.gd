@@ -57,7 +57,7 @@ func _run() -> void:
 
 
 func _data() -> void:
-	check("grond is 64 bij 40 (v4, grote SoM-huizen en brede paden)", Data.grond_ok() and Data.W == 64 and Data.H == 40)
+	check("grond is 90 bij 56 (schaal 1.4x voor 24x32-helden, paden 2-3 breed)", Data.grond_ok() and Data.W == 90 and Data.H == 56)
 	check("max %d sfeer-NPC's op het marktplein (%d)" % [Data.PLEIN_MAX, Data.op_plein_aantal()],
 			Data.op_plein_aantal() <= Data.PLEIN_MAX and Data.op_plein_aantal() >= 1)
 	var beek_ok := true
@@ -66,7 +66,7 @@ func _data() -> void:
 		if Data.BRUG.has_point(t) != Data.beloopbaar(t) and x > 0 and x < Data.W - 1:
 			beek_ok = false
 	check("beek is 1 tegel breed, alleen de brug is beloopbaar", beek_ok
-			and Data.beloopbaar(Vector2i(20, Data.BEEK_RIJ - 1)) and Data.beloopbaar(Vector2i(20, Data.BEEK_RIJ + 1)))
+			and Data.beloopbaar(Vector2i(26, Data.BEEK_RIJ - 1)) and Data.beloopbaar(Vector2i(26, Data.BEEK_RIJ + 1)))
 	var props_ok := true
 	for ruw in Data.PROPS:
 		if not ResourceLoader.exists(Data.PROPS_MAP + str(ruw["tex"]) + ".png"):
@@ -502,11 +502,17 @@ func _som_pilot(dorp: Node) -> void:
 	check("som: fase-3 NPC-sheets 24x32 (Gerrit, Bram, Els, Fien, Wout, Siem)", npc_ok)
 	var ov: TileMapLayer = dorp.get_node("Ground/SomOverlay")
 	var bm: Array = namen["brug_v_m"]
-	check("som: brug over de beek beloopbaar", ov.get_cell_atlas_coords(Vector2i(34, Data.BEEK_RIJ)) == Vector2i(int(bm[0]), int(bm[1]))
-			and Data.beloopbaar(Vector2i(34, Data.BEEK_RIJ)) and dorp.get_node_or_null("Ground/Beek/Brug") == null)
-	var pad := Vector2i(10, 10)
+	check("som: brug over de beek beloopbaar", ov.get_cell_atlas_coords(Vector2i(Data.BRUG.position.x, Data.BEEK_RIJ)) == Vector2i(int(bm[0]), int(bm[1]))
+			and Data.beloopbaar(Vector2i(Data.BRUG.position.x, Data.BEEK_RIJ)) and dorp.get_node_or_null("Ground/Beek/Brug") == null)
+	var pad := Vector2i(14, 16)
 	check("som: pad met autotile-masker", g.get_cell_tile_data(pad).get_custom_data("terrain").begins_with("pad_"))
 	check("som: kegelbomen op de rand", dorp.get_node("Objects/SomBomen").get_child_count() > 150)
+	var v8: TileMapLayer = dorp.get_node_or_null("Ground/SomV8")
+	var v8tex: Texture2D = v8.tile_set.get_source(0).texture if v8 != null else null
+	check("som: v8-grond (RPG ART) over de hele kaart, atlas <= 2048x2048, beek blijft geanimeerd water",
+			v8 != null and v8tex != null and v8tex.get_width() <= 2048 and v8tex.get_height() <= 2048
+			and v8.get_used_cells().size() == Data.W * Data.H - Data.W + Data.BRUG.size.x
+			and v8.get_cell_source_id(Vector2i(10, Data.BEEK_RIJ)) == -1 and v8.get_cell_source_id(pad) == 0)
 	var ok := true
 	for ruw in Data.PANDEN:
 		var rij: Dictionary = Data.som_pand(ruw)
@@ -526,8 +532,10 @@ func _som_pilot(dorp: Node) -> void:
 	check("som: speler = fase-2 heldsheet 24x32 (%s)" % sp.texture.resource_path,
 			sp.texture.resource_path.begins_with("res://assets/sprites/som/kaart/")
 			and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
-	check("som: Dax/Seren in WM1, WM2 in de wacht", sp.texture.resource_path.ends_with("dax_wm1.png")
-			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1"
+	check("som: Dax/Seren in WM1 (slanke sheets 20 okt), WM2 in de wacht", sp.texture.resource_path.ends_with("dax_wm1_slim.png")
+			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1_slim"
+			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm1_slim.png")
+			and ResourceLoader.exists("res://assets/sprites/som/kaart/vesper_wm1_slim.png")
 			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm1.png")
 			and ResourceLoader.exists("res://assets/sprites/som/kaart/vesper.png")
 			and not ResourceLoader.exists("res://assets/sprites/som/kaart/dax_wm2.png")
@@ -557,12 +565,12 @@ func _hekken(dorp: Node, g: TileMapLayer, ov: TileMapLayer) -> void:
 			ok = ok and Data.hek_blok(t) == (ov.get_cell_tile_data(t).get_collision_polygons_count(0) > 0)
 			ok = ok and not Data.beloopbaar(t) and ov.get_cell_tile_data(t).get_custom_data("terrain").begins_with("hek_")
 	check("som: elk hek-teken (%d) = hek-tegel met masker, botsing zoals Data.hek_blok, niet beloopbaar" % n, ok and n > 20)
-	var e := Vector2i(15, 16)
-	var m := Vector2i(16, 16)
-	var h := Vector2i(6, 25)
+	var e := Vector2i(21, 24)
+	var m := Vector2i(22, 24)
+	var h := Vector2i(9, 35)
 	check("som: masker N1 E2 S4 W8: einde (E)=hek_02, midden=hek_10(_b), hoek NW=hek_06 (SE)", Data.hek_masker(e) == 2 and Data.hek_tegel(e) == "hek_02"
 			and Data.hek_masker(m) == 10 and Data.hek_tegel(m).begins_with("hek_10")
-			and Data.hek_masker(h) == 6 and Data.hek_tegel(h) == "hek_06" and Data.hek_masker(Vector2i(6, 26)) == 5)
+			and Data.hek_masker(h) == 6 and Data.hek_tegel(h) == "hek_06" and Data.hek_masker(Vector2i(9, 36)) == 5)
 	var p0: Vector2i = poorten[0]
 	var gate: Node = dorp.get_node_or_null("Objects/Poort_%d_%d" % [p0.x, p0.y])
 	var dicht := not Data.beloopbaar(p0) and ov.get_cell_atlas_coords(p0) == Vector2i(int(hn["hek_poort_h_dicht"][0]), int(hn["hek_poort_h_dicht"][1]))
@@ -577,7 +585,7 @@ func _hekken(dorp: Node, g: TileMapLayer, ov: TileMapLayer) -> void:
 	gate.interact(null)
 	check("som: poort weer dicht", not Data.beloopbaar(p0) and not gate.is_open()
 			and ov.get_cell_tile_data(p0).get_collision_polygons_count(0) > 0)
-	var tuin := Vector2i(8, 26)
+	var tuin := Vector2i(11, 36)
 	var poort2: Vector2i = poorten[1]
 	gate = dorp.get_node("Objects/Poort_%d_%d" % [poort2.x, poort2.y])
 	var voor := poort2 + Vector2i.DOWN

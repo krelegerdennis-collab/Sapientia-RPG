@@ -621,3 +621,9 @@ assets/sprites/som/wilgendal/npcs/henrik.png
 # 20 okt 2026: WM2 in de wacht (Dennis). dax_wm2.png en seren_wm2.png staan nu in wacht/wm2/assets/sprites/som/kaart/ (niet geïmporteerd, wacht/.gdignore)
 wacht/wm2/assets/sprites/som/kaart/dax_wm2.png
 wacht/wm2/assets/sprites/som/kaart/seren_wm2.png
+# 20 okt 2026: slanke WM1-kaartsprites van RPG ART (final_trio_slim, goedgekeurd met de 1.4x-kaarten); oude sheets blijven staan
+assets/sprites/som/kaart/dax_wm1_slim.png
+assets/sprites/som/kaart/seren_wm1_slim.png
+assets/sprites/som/kaart/vesper_wm1_slim.png
+# 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor Wilgendal 1.4x (tools/som/wilgendal_v8_grond.py)
+assets/tilesets/som/wilgendal/grond_v8.png
