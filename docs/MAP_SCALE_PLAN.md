@@ -59,7 +59,7 @@ Kolom "moet mee" = nodes/data met een vaste tegel- of pixelpositie.
 | `berggrot_uitmond.tscn` | berggrot_data.gd | 20x12 | 28x17 | 1 boeken, 1 exit-warper, 1 bordjes, 2 exits, 1 map-monsters, 2 spawns |
 | `dorp_wilgendal.tscn` | wilgendal_dorp.gd (data) | 64x40 | **90x56 (gedaan)** | 8 deuren, 1 exits, 9 spawns, 6 NPC |
 | `dungeon100.tscn` | dungeon100_generator.gd (procedureel) | 25x25 | 35x35 | 1 warper, 3 kisten, 2 exits, 10 map-monsters, 3 spawns |
-| `esdoorn.tscn` | scene | 34x24 | 48x34 | 3 deuren, 1 exits, 4 spawns, 5 NPC, 1 bordjes, 2 story-obj |
+| `esdoorn.tscn` | scene | 34x24 | **48x34 (gedaan)** | 3 deuren, 1 exits, 4 spawns, 5 NPC, 1 bordjes, 2 story-obj |
 | `esdoorn_herberg.tscn` | scene | 12x9 | 17x13 | 1 boeken, 1 exits, 1 spawns, 1 NPC |
 | `esdoorn_huis_noor.tscn` | scene | 10x8 | 14x11 | 1 exits, 1 spawns, 1 NPC |
 | `huis_wilgendal.tscn` | scene | 12x9 | 17x13 | 1 boeken, 1 exits, 3 spawns, 1 NPC, 1 story-obj |
@@ -124,3 +124,17 @@ Verdubbelde rijen: 1,2,3,4,5,7,12,14,23,24,26,27,33,35,36,37. Verdubbelde kolomm
 - Spawn zuid (35,37)→(48,52), uitgang (34,39)→(47,55), Garrett (10,22)→(14,30).
 - 5 sfeer-NPC's + lussen, 27 props (lantaarns, kramen, banken, bloembakken, oude hekprops) omgerekend.
 - Poorten/hekken/paden komen uit `GROND` en schalen dus vanzelf mee; padbreedtes bleven 2 en 3.
+
+## Esdoorn (Mapleton): wat er verschoven is (34x24 → 48x34)
+Tool: `tools/som/esdoorn_1p4.py` (eenmalig, op de .tscn). Verdubbelde rijen: 0,1,2,11,15,17-21. Verdubbelde
+kolommen: 0-4,10,12,13,19,20,22,23,31,32. Nooit: huizen (5x5), deur-/padrijen 8-10, hekrij 16, vijver, zuidpad
+kolom 15-17, uitgang (rij 22-23). De twee paden die 1 breed waren zijn nu 2 breed (hoofdweg rij 13-14,
+zuidpad kolom 24-25); de uitgang blijft 3 breed. Padranden (dorp.png 10+masker) opnieuw gekozen.
+- Deuren: Vesper (7,8)→(12,11), herberg (16,7)→(24,10), dicht (26,8)→(38,11); spawns 1 eronder.
+- Spawn/uitgang zuid (16,21)/(15,23)→(24,30)/(23,33); put (16,12)→(24,16).
+- NPC's: Marit (19,14)→(27,18), Bram (6,12)→(11,16), Jens (24,18)→(36,24), Tobias (26,14)→(38,18),
+  Vesper (16,15)→(24,19), wortelgreep 1 onder Vesper (24,20); bord (5,11)→(10,15).
+- Cutscene `noor_ontmoeting`: speler start (24,30) en loopt 8 omhoog (was 3); Marit-stappen ongewijzigd.
+- v8-grond: `tools/som/esdoorn_v8_grond.py` → `assets/tilesets/som/esdoorn/grond_v8.*` (567 unieke tegels,
+  atlas 1024x144), getoond door `scripts/village/v8_grond.gd` (laag GrondV8) op gras/pad/plein; bomen,
+  vijver, hek, heg, tonnen en bloembakken blijven de oude dorp.png-tegels. Interieurs niet geschaald.

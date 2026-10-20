@@ -627,6 +627,11 @@ assets/sprites/som/kaart/seren_wm1_slim.png
 assets/sprites/som/kaart/vesper_wm1_slim.png
 # 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor Wilgendal 1.4x (tools/som/wilgendal_v8_grond.py)
 assets/tilesets/som/wilgendal/grond_v8.png
+# 20 okt 2026: v8-stadsgrond van RPG ART, gebakken voor Esdoorn 1.4x (tools/som/esdoorn_v8_grond.py)
+assets/tilesets/som/esdoorn/grond_v8.png
+# 20 okt 2026: v8-props van RPG ART voor Mapleton/Esdoorn (art_mapsprites_v4/out/props_v8/mapleton/dorp.png; tegels 3, 5, 26-32, 49, 50, 52, 53 nieuw).
+#        dorp.png staat hierboven als handwerk en blijft ongewijzigd; alleen esdoorn.tscn gebruikt dorp_v8.tres -> dorp_v8.png.
+assets/tiles/dorp_v8.png
 # 20 okt 2026: slanke WM1-NPC-sheets van RPG ART (npc_slim, 72x128 / 24x32); de handwerk-sheets blijven staan, de kaart gebruikt <id>_wm1_slim.png (gebieden.json npc_variant)
 assets/sprites/som/wilgendal/npcs/oude_man_wm1_slim.png
 assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim.png

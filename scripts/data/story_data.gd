@@ -449,9 +449,9 @@ const EVENTS := {
 
 	# --- de ontmoeting (eenmalig, MAP_ENTER; vlag noor_ontmoet)
 	"noor_ontmoeting": [{"do": [
-		["place", "player", [16, 21], "up"],
+		["place", "player", [24, 30], "up"],   # 1.4x-kaart (48x34): zuidpad, Vesper op (24,19)
 		["wait", 0.3],
-		["walk", "player", "up", 3],
+		["walk", "player", "up", 8],
 		["walk", "Vesper", "down", 1],
 		["say", "Vesper", ["Hey! I don't know you. Did you come from over the hills? Nobody lives out there."]],
 		["walk", "player", "up", 1],

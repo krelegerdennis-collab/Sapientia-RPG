@@ -591,11 +591,11 @@ func _village_tests() -> void:
 				hints += 1
 	check("4 dorpelingen, korte hints over het donkere bos (%d/4)" % hints, hints == 4)
 	# dorp-screenshot: op het plein
-	player().place_at(Vector2i(14, 14), Vector2i.UP)
+	player().place_at(Vector2i(22, 18), Vector2i.UP)
 	await get_tree().create_timer(0.4).timeout
 	await v17_shot("dorp")
 	# huis van Noor: echt naar binnen
-	player().place_at(Vector2i(7, 9), Vector2i.UP)
+	player().place_at(Vector2i(12, 12), Vector2i.UP)
 	await frames(3)
 	await walk("move_up", 1)
 	if not GameState.changing_map:
@@ -605,7 +605,7 @@ func _village_tests() -> void:
 	check("binnen: Elise (moeder van Vesper)", ilse != null and ilse.event == "ilse")
 	await wait_fade()
 	await walk("move_down", 2)
-	check("deur uit = terug in Mapleton voor het huis", await wait_scene("Esdoorn") and tile() == Vector2i(7, 9))
+	check("deur uit = terug in Mapleton voor het huis", await wait_scene("Esdoorn") and tile() == Vector2i(12, 12))
 	await get_tree().create_timer(0.5).timeout
 	# herberg: rusten + opslagboek
 	var h := await enter(SD.ESDOORN_HERBERG, "binnen")

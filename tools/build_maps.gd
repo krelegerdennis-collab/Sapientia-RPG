@@ -334,6 +334,10 @@ func _ready() -> void:
 		return
 	var town_ts := build_town_tileset()
 	print("dorp.tres opgeslagen: ", error_string(ResourceSaver.save(town_ts, "res://assets/tiles/dorp.tres")))
+	# Esdoorn (Mapleton) gebruikt v8-props van RPG ART: zelfde tileset, textuur dorp_v8.png
+	var town_v8 := build_town_tileset()
+	(town_v8.get_source(0) as TileSetAtlasSource).texture = load("res://assets/tiles/dorp_v8.png")
+	print("dorp_v8.tres opgeslagen: ", error_string(ResourceSaver.save(town_v8, "res://assets/tiles/dorp_v8.tres")))
 	var world_ts := build_world_tileset()
 	print("wereld.tres opgeslagen: ", error_string(ResourceSaver.save(world_ts, "res://assets/tiles/wereld.tres")))
 	save_scene(build_town(load("res://assets/tiles/dorp.tres")), TOWN_PATH)
@@ -354,7 +358,7 @@ func build_v17() -> void:
 
 
 func build_esdoorn_all() -> void:
-	save_scene(build_esdoorn(load("res://assets/tiles/dorp.tres")), ESDOORN_PATH)
+	save_scene(build_esdoorn(load("res://assets/tiles/dorp_v8.tres")), ESDOORN_PATH)
 	var inside: TileSet = load("res://assets/tiles/binnen.tres")
 	save_scene(build_interior("EsdoornHuisNoor", "Mapleton - Vesper's House", NOOR_HUIS_MAP, NOOR_HUIS_NPCS,
 			"voor_noor"), NOOR_HUIS_PATH)
