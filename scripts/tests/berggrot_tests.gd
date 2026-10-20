@@ -844,6 +844,8 @@ func _warper_in_scene(fly: WorldWarperFlyover) -> void:
 		for i in frames:
 			await get_tree().create_timer(0.25).timeout
 			screenshot("wf_%03d" % i)
+			print("INFO  wf_%03d %s pos=%s alt=%.1f v=%.0f" % [i, WarperBrain.State.keys()[fly.brain.state],
+					fly.brain.pos.round(), fly.brain.alt, fly.brain.vel.length()])
 	else:
 		await get_tree().create_timer(1.5).timeout
 	var r: Rect2i = (scene().get_node("Ground") as TileMapLayer).get_used_rect()

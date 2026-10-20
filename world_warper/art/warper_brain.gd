@@ -23,12 +23,13 @@ const ASCEND_TIME := 1.1
 const WAYPOINT_DIST := Vector2(110.0, 320.0)
 const ARRIVE_RADIUS := 14.0
 const EDGE_MARGIN := 24.0
-const VIEW_PAD := 140.0           ## waypoints liefst binnen beeld + deze rand
+const VIEW_PAD := 48.0           ## waypoints liefst binnen beeld + deze rand
 const LAND_COOLDOWN := 12.0       ## minimaal tussen twee landingen
 const LAND_FORCE_AFTER := 35.0    ## na zolang zonder landing: zeker landen
 const LAND_PLAYER_MIN := 56.0     ## nooit vlak bij de speler landen
 const LAND_SPOOK_DIST := 22.0     ## speler loopt erheen -> eerder opstijgen
-const LAND_TRIES := 24
+const LAND_TRIES := 32
+const LAND_VIEW_INSET := 36.0    ## landen liefst goed in beeld
 ## Kansen na het bereiken van een waypoint (rest = gewoon doorcruisen).
 const P_BURST := 0.24
 const P_HOVER := 0.16
@@ -159,6 +160,8 @@ func _pick_next() -> void:
 func _try_land() -> bool:
 	for i in LAND_TRIES:
 		var p := _random_waypoint(0.6)
+		if view.has_area() and not view.grow(-LAND_VIEW_INSET).has_point(p):
+			continue
 		if player_pos.distance_to(p) < LAND_PLAYER_MIN:
 			continue
 		if landable.is_valid() and not bool(landable.call(p)):
