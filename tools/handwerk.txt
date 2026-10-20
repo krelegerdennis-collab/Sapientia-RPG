@@ -611,3 +611,4 @@ assets/sprites/som/kaart/dax_wm1.png
 assets/sprites/som/kaart/dax_wm2.png
 assets/sprites/som/kaart/seren_wm1.png
 assets/sprites/som/kaart/seren_wm2.png
+# art-audit 14 okt 2026: som/kaart/dax.png, som/kaart/seren.png en som/test/dax_24x32_v3.png verwijderd (WM2-sheets nemen het over)

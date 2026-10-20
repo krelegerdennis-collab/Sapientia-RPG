@@ -109,7 +109,7 @@ static func toepassen(map: Node) -> bool:
 
 ## Kaartsprite van de partijleider: <helden>/<voornaam>_<held_variant>.png als die er is (WM1/WM2:
 ## dax, seren; WM2-upgrade = "held_variant": "wm2" in gebieden.json), anders <helden>/<voornaam>.png
-## (fase 2: dax, seren, vesper, kael, orion), anders "speler" uit de config.
+## (fase 2: vesper, kael, orion), anders <helden>/<voornaam>_wm2.png (dax, seren), anders "speler" uit de config.
 static func speler_sheet(gebied: String) -> String:
 	var g: Dictionary = gebieden().get(gebied, {})
 	var map_ := str(g.get("helden", ""))
@@ -122,4 +122,7 @@ static func speler_sheet(gebied: String) -> String:
 			return basis + "_" + variant + ".png"
 		if naam != "" and ResourceLoader.exists(basis + ".png"):
 			return basis + ".png"
+		# art-audit 20 okt 2026: dax.png/seren.png zijn weg (gelijk aan de WM2-sheet), dus WM2 als terugval
+		if naam != "" and ResourceLoader.exists(basis + "_wm2.png"):
+			return basis + "_wm2.png"
 	return str(g.get("speler", ""))

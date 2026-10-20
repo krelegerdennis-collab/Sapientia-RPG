@@ -587,7 +587,7 @@ func _hekken(dorp: Node, g: TileMapLayer, ov: TileMapLayer) -> void:
 
 
 func _som() -> void:
-	const DAX := "res://assets/sprites/som/test/dax_24x32_v3.png"
+	const DAX := "res://assets/sprites/som/kaart/dax_wm2.png"
 	const PROEF := "res://tools/som/test/uit/"
 	# oude sprites blijven precies zoals ze waren
 	var speler: Node = (load("res://scenes/player.tscn") as PackedScene).instantiate()
@@ -595,15 +595,21 @@ func _som() -> void:
 	var spr: Sprite2D = speler.sprite
 	check("oude spelersprite ongewijzigd (3x4 van 16x24, offset -4)", spr.hframes == 3 and spr.vframes == 4
 			and spr.offset == Vector2(0, -4) and MapSprite.frame_maat(spr.texture) == MapSprite.OUD)
-	# Dax v3 (één los frame 24x32) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
+	# Dax WM2 (24x32-sheet 72x128) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
 	speler.zet_sheet(load(DAX))
 	var vorm := (speler.get_node("CollisionShape2D") as CollisionShape2D).shape as RectangleShape2D
-	check("Dax 24x32 v3: één frame, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 1 and spr.vframes == 1
+	check("Dax WM2 24x32: 3x4 frames, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 3 and spr.vframes == 4
 			and is_equal_approx(spr.offset.y + 16.0, 8.0) and vorm.size == Vector2(14, 14)
-			and (speler.get_node("CollisionShape2D") as Node2D).position == Vector2.ZERO and spr.frame == 0)
+			and (speler.get_node("CollisionShape2D") as Node2D).position == Vector2.ZERO
+			and MapSprite.frame_maat(spr.texture) == MapSprite.NIEUW)
 	speler.facing = Vector2i.UP
 	speler._update_sprite()
-	check("los frame: richting kiest geen ongeldig frame", spr.frame == 0)
+	check("richting omhoog kiest rij 3 van de sheet", spr.frame >= 9 and spr.frame <= 11)
+	# één los frame (24x32, in het geheugen): geen loop- of richtingsanimatie
+	speler.zet_sheet(ImageTexture.create_from_image(Image.create(24, 32, false, Image.FORMAT_RGBA8)))
+	speler._update_sprite()
+	check("los frame 24x32: één frame, voeten op +8, richting kiest geen ongeldig frame", spr.hframes == 1
+			and spr.vframes == 1 and is_equal_approx(spr.offset.y + 16.0, 8.0) and spr.frame == 0)
 	speler.queue_free()
 	# volledige 24x32-sheet (3 loopframes x 4 richtingen = 72x128)
 	var img := Image.create(72, 128, false, Image.FORMAT_RGBA8)
@@ -643,7 +649,7 @@ func _som() -> void:
 	var water := bron.get_tile_data(Vector2i(2, 0), 0) if bron != null else null
 	var gras := bron.get_tile_data(Vector2i(0, 0), 0) if bron != null else null
 	check("toepassen: Ground krijgt de gebied-tileset, speler 24x32", toegepast and ts != null
-			and ts.resource_path.ends_with("proef_herfst/proef.tres") and (p2.sprite as Sprite2D).hframes == 1
+			and ts.resource_path.ends_with("proef_herfst/proef.tres") and (p2.sprite as Sprite2D).hframes == 3
 			and is_equal_approx((p2.sprite as Sprite2D).offset.y, -8.0))
 	check("geëxporteerde tileset: 16px, botsing op solid, terreinnaam", bron != null
 			and bron.texture_region_size == Vector2i(16, 16) and water != null and gras != null

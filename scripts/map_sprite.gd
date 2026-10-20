@@ -6,7 +6,7 @@ class_name MapSprite
 ## Het raster blijft 16 px. De node staat op het midden van zijn tegel; de voeten (onderrand van het
 ## frame) staan altijd op de onderrand van die tegel (+8 px), zodat de botsing 14x14 aan de voeten
 ## blijft en de y-sort (op de node-positie) voor beide maten gelijk werkt.
-## Eén los frame (bv. dax_24x32_v3.png) mag ook: dan is er geen loop- of richtingsanimatie.
+## Eén los frame (24x32) mag ook: dan is er geen loop- of richtingsanimatie.
 
 const OUD := Vector2i(16, 24)
 const NIEUW := Vector2i(24, 32)
