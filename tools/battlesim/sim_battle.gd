@@ -253,7 +253,13 @@ func _ai_action(h: Dictionary, planned_heal: Dictionary) -> Dictionary:
 			continue
 		var tgt: Dictionary = strongest if sp["target"] == "enemy" else weakest
 		var one := SpellRules.power_at(sp, int(s.get("level", 1))) * SpellRules.factor(sp, str(s.get("id", "")), tgt)
-		var val := one * (foes.size() if sp["target"] == "all_enemies" else 1)
+		var fx := SpellRules.on_hit(sp)
+		var hit_list: Array = foes if sp["target"] == "all_enemies" else [tgt]
+		var val := 0.0
+		for ft in hit_list:
+			val += one
+			# brand/vergif (vuur, natuur): pct van max HP per beurt, max wat er nog over is
+			val += minf(float(ft["s"]["hp"]), float(fx.get("dot_pct", 0.0)) * float(ft["s"]["max_hp"]) * float(fx.get("dot_turns", 0)))
 		if val > best_val:
 			best_val = val
 			best_id = id

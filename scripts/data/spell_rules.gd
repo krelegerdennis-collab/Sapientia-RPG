@@ -95,12 +95,13 @@ const STUN_BOSS_IMMUNE := false
 
 ## Valt de verlamming/bevriezing van 'fx' (uit on_hit) echt? roll = randf() van het gevecht
 ## (0..1), zodat een geseede run (simulator, tests) altijd hetzelfde uitkomt.
-static func stun_lands(fx: Dictionary, target_is_boss: bool, roll: float, boss_immune := STUN_BOSS_IMMUNE) -> bool:
+## chance < 0 = de kans uit fx (STUN_CHANCE); de simulator kan een andere kans meegeven.
+static func stun_lands(fx: Dictionary, target_is_boss: bool, roll: float, boss_immune := STUN_BOSS_IMMUNE, chance := -1.0) -> bool:
 	if int(fx.get("skip", 0)) <= 0:
 		return false
 	if target_is_boss and boss_immune:
 		return false
-	return roll < float(fx.get("skip_chance", STUN_CHANCE))
+	return roll < (chance if chance >= 0.0 else float(fx.get("skip_chance", STUN_CHANCE)))
 
 
 ## Brand, vergif, verlamming of bevriezing na een schade-treffer. {} = geen.

@@ -163,6 +163,7 @@ var tip_panel: Panel
 var tip_label: Label
 var round_no := 0
 var stun_boss_immune := SpellRules.STUN_BOSS_IMMUNE   # simulator kan dit per gevecht omzetten
+var stun_chance := -1.0                               # < 0 = SpellRules.STUN_CHANCE (simulator: vergelijking)
 ## v0.21 (tests): laatste effect van een vaardigheid en aantal counters in dit gevecht
 var last_skill_effect: Dictionary = {}
 var counters_done := 0
@@ -1496,7 +1497,7 @@ func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
 			target["dots"] = []
 		(target["dots"] as Array).append({"pct": float(fx["dot_pct"]), "turns": int(fx.get("dot_turns", 3))})
 	# Verlamming/bevriezing: kans (SpellRules.STUN_CHANCE), met de randf() van het gevecht.
-	if int(fx.get("skip", 0)) > 0 and SpellRules.stun_lands(fx, is_boss_target(target), randf(), stun_boss_immune):
+	if int(fx.get("skip", 0)) > 0 and SpellRules.stun_lands(fx, is_boss_target(target), randf(), stun_boss_immune, stun_chance):
 		target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
 		target["skip_reden"] = str(fx.get("skip_reden", "bevriezing"))
 
