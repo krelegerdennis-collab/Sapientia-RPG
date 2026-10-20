@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/book_point.tscn" id="5_jaads"]
 [ext_resource type="Script" path="res://scripts/map_spawn.gd" id="5_u7uxe"]
 [ext_resource type="Script" path="res://scripts/map_exit.gd" id="6_nkovl"]
-[ext_resource type="Texture2D" path="res://assets/sprites/wachter.png" id="7_t32rv"]
+[ext_resource type="Texture2D" path="res://assets/sprites/som/wilgendal/npcs/oude_man.png" id="7_t32rv"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="7_ul471"]
 
 [node name="Huis" type="Node2D"]
