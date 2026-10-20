@@ -962,6 +962,19 @@ precies 2x, met elke fijne pixel als 2x2.
 
 ---
 
+## 9. Sessielogboek (playtest)
+
+Het spel houdt een licht logboek bij (`scripts/sessielog.gd`, autoload `Sessielog`): waar je loopt,
+waar je tegenaan loopt, welke kaarten, dialogen en cutscenes, hoe gevechten gaan, doden en respawns.
+Eén JSON-object per regel in `user://sessielogs/sessie_<id>.jsonl` (hooguit 8 sessies, 3 MB per sessie).
+Gebufferd: hooguit elke 2 s of na 48 regels naar schijf. Geen spelersnaam, geen apparaat-id, geen locatie.
+
+- Aan/uit: **Opties > Session Log**. In autotests staat hij uit.
+- Versturen: **Opties > Export Log** (web: download; Android/pc: Downloads of Documenten, anders
+  blijft het in de app-map en gaat het laatste stuk naar het klembord).
+- Samenvatten: `python3 tools/sessie_samenvatting.py sapientia_sessielog_<id>.jsonl` (of `--json`).
+- Test: `godot --headless --path . -- --sessielogtest`.
+
 ## Licenties
 
 - Alle plaatjes in `assets/` en `icon.png` zijn zelf gegenereerd met `tools/generate_art.py`
