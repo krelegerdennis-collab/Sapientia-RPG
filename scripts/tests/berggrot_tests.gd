@@ -824,18 +824,34 @@ func _warper_brain() -> void:
 	l.step(1.0 / 60.0)
 	check("warper: speler dichtbij een gelande warper -> hij stijgt op", geland
 			and l.state == WarperBrain.State.ASCEND)
-	# camera-voorkeur: waypoints rond het beeld, dus hij blijft in de buurt
-	var z := WarperBrain.new()
-	z.setup(3, gebied, Vector2(150, 150))
-	z.view = Rect2(40, 40, 384, 216)
-	var dichtbij := 0
-	var n := 0
-	for i in 60 * 300:
-		z.step(1.0 / 60.0)
-		n += 1
-		if z.view.grow(64.0).has_point(z.pos):
-			dichtbij += 1
-	check("warper: blijft meestal rond het beeld (%d%%)" % (100 * dichtbij / n), dichtbij > n * 0.9)
+	# global roam: vliegt over de hele kaart, ook buiten beeld, en komt vanzelf weer terug
+	for seed_nr in [3, 11, 21]:
+		var z := WarperBrain.new()
+		z.setup(seed_nr, gebied, Vector2(150, 150))
+		z.view = Rect2(40, 40, 384, 216)
+		var buiten := 0
+		var weg := 0
+		var terug := 0
+		var was_in := true
+		var kwadranten := {}
+		var in_kaart := true
+		for i in 60 * 600:
+			z.step(1.0 / 60.0)
+			var nu_in := z.view.has_point(z.hull_center(z.pos, z.visual_alt()))
+			if not nu_in:
+				buiten += 1
+			if was_in and not nu_in:
+				weg += 1
+			elif nu_in and not was_in:
+				terug += 1
+			was_in = nu_in
+			kwadranten[int(z.pos.x > gebied.get_center().x) + 2 * int(z.pos.y > gebied.get_center().y)] = true
+			if not gebied.has_point(z.pos):
+				in_kaart = false
+		check("warper seed %d: vliegt buiten beeld (%d%%) en komt terug (%dx weg, %dx terug)" % [seed_nr,
+				100 * buiten / (60 * 600), weg, terug], buiten > 0 and weg >= 2 and terug >= 2)
+		check("warper seed %d: zwerft over de hele kaart (%d/4 kwadranten), blijft op de kaart" % [seed_nr,
+				kwadranten.size()], kwadranten.size() == 4 and in_kaart)
 	await _warper_knoppen()
 
 
@@ -877,7 +893,7 @@ func _warper_knoppen() -> void:
 				b.hard_pushes < n / 200)
 		check("warper seed %d: met knoppen nog steeds levend (bursts %d, landingen %d, %d%% in beeld)"
 				% [seed_nr, b.bursts, b.landings, 100 * in_beeld / n],
-				b.bursts >= 2 and b.landings >= 2 and in_beeld > n * 0.85)
+				b.bursts >= 2 and b.landings >= 2 and in_beeld > n * 0.05)  # global roam: mag buiten beeld, maar komt terug
 
 
 ## In de echte wereldkaart: beweegt, geen botsing/ingang, schaduw los van het schip.
