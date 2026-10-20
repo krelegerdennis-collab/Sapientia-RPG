@@ -644,6 +644,10 @@ const SOM_NPC := {
 	"Fien": "fien",
 	"Wout": "wout",
 	"Siem": "siem",
+	"OudeMan": "oude_man",
+	"Marit": "marit",
+	"Ilse": "ilse",
+	"Voorman": "henrik",
 }
 static var _som_props: Variant = null
 

@@ -612,6 +612,12 @@ assets/sprites/som/kaart/dax_wm2.png
 assets/sprites/som/kaart/seren_wm1.png
 assets/sprites/som/kaart/seren_wm2.png
 # art-audit 14 okt 2026: som/kaart/dax.png, som/kaart/seren.png en som/test/dax_24x32_v3.png verwijderd (WM2-sheets nemen het over)
+# 20 okt 2026: WM1 quest-NPC kaartsheets van RPG ART (npc_wm1, 72x128)
+assets/sprites/som/wilgendal/npcs/gerrit.png
+assets/sprites/som/wilgendal/npcs/oude_man.png
+assets/sprites/som/wilgendal/npcs/marit.png
+assets/sprites/som/wilgendal/npcs/ilse.png
+assets/sprites/som/wilgendal/npcs/henrik.png
 # 20 okt 2026: WM2 in de wacht (Dennis). dax_wm2.png en seren_wm2.png staan nu in wacht/wm2/assets/sprites/som/kaart/ (niet geïmporteerd, wacht/.gdignore)
 wacht/wm2/assets/sprites/som/kaart/dax_wm2.png
 wacht/wm2/assets/sprites/som/kaart/seren_wm2.png
