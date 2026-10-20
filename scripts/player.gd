@@ -20,6 +20,9 @@ const RUN_KEY := KEY_R
 const RUN_TILES := 2
 const RUN_SPEED_MULT := 2.0
 
+## SoM-stijl: framemaat van de kaartsprite (16x24 oud, 24x32 nieuw). ZERO = uit de sheet afleiden.
+@export var frame_maat := Vector2i.ZERO
+
 ## Loopsnelheid in pixels per seconde (64 = 4 tiles per seconde).
 @export var walk_speed := 64.0
 
@@ -55,6 +58,7 @@ func _ready() -> void:
 	# Zet de speler precies in het midden van de tile waar hij staat.
 	position = (position / TILE_SIZE).floor() * TILE_SIZE + Vector2.ONE * (TILE_SIZE / 2.0)
 	_target = position
+	MapSprite.pas_toe(sprite, frame_maat)
 	_update_sprite()
 	ensure_run_action()
 
@@ -226,7 +230,15 @@ func _update_sprite() -> void:
 	var col := 0
 	if is_moving or _walk_distance > 0.0:
 		col = WALK_CYCLE[int(_walk_distance / (TILE_SIZE / 2.0)) % WALK_CYCLE.size()]
-	sprite.frame = DIR_ROW[facing] * sprite.hframes + col
+	MapSprite.zet_frame(sprite, DIR_ROW[facing], col)
+
+
+## Andere kaartsprite (bv. 24x32 SoM-stijl); botsing blijft 14x14 aan de voeten.
+func zet_sheet(tex: Texture2D, maat := Vector2i.ZERO) -> void:
+	sprite.texture = tex
+	frame_maat = maat
+	MapSprite.pas_toe(sprite, maat)
+	_update_sprite()
 
 
 ## Zet de speler direct op een tile (bv. terug na een gevecht).

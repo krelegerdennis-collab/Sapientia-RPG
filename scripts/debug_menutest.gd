@@ -29,6 +29,7 @@ const HeroPortrait := preload("res://scripts/ui/hero_portrait.gd")
 const StatArrow := preload("res://scripts/ui/stat_arrow.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const StatusScreenS := preload("res://scripts/ui/status_screen.gd")
+const QuestlogData := preload("res://world_warper/data/echo_questlog.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const TOWN := "res://scenes/maps/wilgendal.tscn"
 ## Wachttijd (sec) tot de autosave na binnenkomst geschreven is (map.gd AUTOSAVE_DELAY + marge).
@@ -262,7 +263,8 @@ func _main_menu_tests() -> void:
 	for c in m.commands():
 		labels.append(str(m.buttons[c[0]].get_meta("label")))
 	# v0.22 partylimiet: vijfde knop 'Party' (rechts onder Warpen)
-	check("tien knoppen %s" % [labels], labels == ["Equipment", "Codex", "Items", "Magic", "Bestiary", "Warp", "Party", "Scenes", "Settings", "Load"] and m.buttons.size() == 10)
+	# v0.24: 'Quest Log' rechts onder Party
+	check("elf knoppen %s" % [labels], labels == ["Equipment", "Codex", "Items", "Magic", "Bestiary", "Warp", "Party", "Quest Log", "Scenes", "Settings", "Load"] and m.buttons.size() == 11)
 	check("label MENU boven Warpen", m.menu_label.text == "MENU"
 			and m.menu_label.get_global_rect().end.y <= m.buttons["warp"].get_global_rect().position.y + 1.0)
 	check("'Uitrusting' heeft de focus", m.buttons["equip"].has_focus())
@@ -338,6 +340,19 @@ func _direct_button_tests() -> void:
 	await tap("cancel")
 	await frames(3)
 	check("B sluit Items, focus op Items", m.get_node_or_null("Items") == null and m.buttons["items"].has_focus())
+	m.choose("quests")
+	await frames(3)
+	var ql: Node = m.get_node_or_null("QuestLog")
+	check("Quest Log opent met tab Main (6 acts)", ql != null and ql.tab == "hoofd" and ql.rows.size() == 6
+			and str(ql.regel_teksten()[0]).begins_with("Act 1 - "))
+	if ql != null:
+		await tap("move_right")
+		check("rechts = tab Side", ql.tab == "zij" and ql.rows.size() == QuestlogData.ZIJ.size())
+		await tap("move_left")
+		check("links = terug naar Main", ql.tab == "hoofd")
+	await tap("cancel")
+	await frames(3)
+	check("B sluit Quest Log, focus op Quest Log", m.get_node_or_null("QuestLog") == null and m.buttons["quests"].has_focus())
 	m.choose("warp")
 	await frames(3)
 	check("Warpen zonder hub: '%s'" % m.message_label.text,
@@ -552,7 +567,8 @@ func _bestiary_and_options_tests() -> void:
 	check("'Opties' opent het optiescherm", s != null)
 	if s == null:
 		return
-	check("10 regels %s" % [s.keys], s.keys.size() == 10 and s.keys[0] == "music_volume" and s.keys[-1] == "_reset")
+	check("12 regels %s" % [s.keys], s.keys.size() == 12 and s.keys[0] == "music_volume" and s.keys[9] == "_reset"
+			and s.keys[10] == "sessielog" and s.keys[11] == "_export")
 	check("alle regels in beeld", s.rows[-1].get_global_rect().end.y <= s.hint.get_global_rect().position.y)
 	await shot("menu_options")
 	# Muziek: links = 7

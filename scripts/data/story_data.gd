@@ -572,10 +572,12 @@ const EVENTS := {
 	"gerrit": [
 		{"if": {"not_flags": ["noor_lid"]}, "do": []},
 		{"if": {"flags": [FLAG_GRAAN_KLAAR]}, "do": [
+			["flag", "gesproken_gerrit"],   # Quest Log > Side: naam wordt opdracht
 			["say", GERRIT, [QUOTE_GRAAN_DANK]],
 			["molen"],
 		]},
 		{"if": {"flags": ["noor_lid", FLAG_ZAAD], "not_flags": [FLAG_GRAAN_KLAAR]}, "do": [
+			["flag", "gesproken_gerrit"],   # Quest Log > Side: naam wordt opdracht
 			["take", ITEM_ZAAD, 1],
 			["flag", FLAG_GRAAN_KLAAR],
 			["say", GERRIT, [QUOTE_GRAAN_ZAAD]],
@@ -584,9 +586,11 @@ const EVENTS := {
 			["molen"],
 		]},
 		{"if": {"flags": ["noor_lid", FLAG_GRAAN], "not_flags": [FLAG_ZAAD]}, "do": [
+			["flag", "gesproken_gerrit"],   # Quest Log > Side: naam wordt opdracht
 			["say", GERRIT, [QUOTE_GRAAN_ZONDER]],
 		]},
 		{"if": {"flags": ["noor_lid"], "not_flags": [FLAG_GRAAN]}, "do": [
+			["flag", "gesproken_gerrit"],   # Quest Log > Side: naam wordt opdracht
 			["say", GERRIT, [QUOTE_GRAAN_BEZOEK, QUOTE_GRAAN_WIND]],
 			["say", "{naam}", [QUOTE_GRAAN_VRAAG]],
 			["say", GERRIT, [QUOTE_GRAAN_OP]],
