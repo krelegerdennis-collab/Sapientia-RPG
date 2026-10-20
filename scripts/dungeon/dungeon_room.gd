@@ -158,6 +158,8 @@ func _build() -> void:
 	# v0.23: vaste grondlaag (tegelnummers) als de kamer die heeft (Archief 2 v2-deco); anders willekeurige vloer
 	var vast: Array = room.get("ground", Archief2Ground.GROUND.get(room_id, []))
 	var kas_blocks: bool = DungeonRooms.current_theme == "kas"
+	var berg_blocks: bool = room_id in DungeonRooms.BERGGROT_BLOCK_ROOMS
+	var berg_rocks: bool = room_id in DungeonRooms.BERGGROT_LONE_ROCK_ROOMS
 	var exit_cells := {}           # sleutel in "exits" -> Array[Vector2i]
 	for y in layout.size():
 		var row: String = layout[y]
@@ -173,6 +175,11 @@ func _build() -> void:
 					n = DungeonRooms.archief_floor_at(x, y, layout)
 				else:
 					n = floor_variant(x, y, floor_tiles)
+				# Berggrot v8: vrije even 2x2-vakken -> blok A/B (80-87)
+				if berg_blocks:
+					n = DungeonRooms.berggrot_floor_at(x, y, layout, n)
+			elif ch == "#" and berg_rocks and DungeonRooms.berggrot_lone_rock(x, y, layout, legend):
+				n = DungeonRooms.BERGGROT_LONE_ROCK     # losse rots, massief zoals 59
 			if y < vast.size() and x < (vast[y] as Array).size():
 				n = int(vast[y][x])
 				# v8.1: kas-thema -> vrije effen 2x2-vakken worden blok A/B (80-87)
