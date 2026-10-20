@@ -8,6 +8,7 @@ extends Control
 
 ## (preload i.p.v. class_name: dit script wordt al door een autoload geladen)
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const SomDataC := preload("res://scripts/data/som_data.gd")
 
 @export var dpad_radius := 30.0
 @export var button_radius := 15.0
@@ -331,6 +332,42 @@ func _draw() -> void:
 
 ## SoM-proef: joystick (PLACEHOLDER-opmaak): ring + knop die met de vinger meeschuift.
 func _draw_joystick(c: Vector2, r: float, line: float) -> void:
+	if _draw_joystick_art(c, r):
+		return
+	_draw_joystick_placeholder(c, r, line)
+
+
+## RPG ART: joystick_ring (60x60, midden 30,30) geschaald naar de joystickstraal; de knop (24x24) schuift
+## maximaal JOY_KNOB_TRAVEL (18) art-pixels uit. Geeft false als de art ontbreekt.
+func _draw_joystick_art(c: Vector2, r: float) -> bool:
+	var ring_t: Texture2D = _som_tex(SomDataC.UI_JOY_RING)
+	var knob_t: Texture2D = _som_tex(SomDataC.UI_JOY_KNOB_PRESSED if joy_raw != Vector2.ZERO else SomDataC.UI_JOY_KNOB)
+	if ring_t == null or knob_t == null:
+		return false
+	var s := maxf(1.0, roundf(r / SomDataC.JOY_ART_RADIUS))
+	var rs := ring_t.get_size() * s
+	draw_texture_rect(ring_t, Rect2((c - rs / 2.0).round(), rs), false)
+	var k := joy_knob_pos(c, s)
+	var ks := knob_t.get_size() * s
+	draw_texture_rect(knob_t, Rect2((k - ks / 2.0).round(), ks), false)
+	return true
+
+
+## Midden van de knop: joy_raw (lengte <= 1) x 18 art-pixels x schaal.
+func joy_knob_pos(c: Vector2, s: float) -> Vector2:
+	return (c + joy_raw.limit_length(1.0) * SomDataC.JOY_KNOB_TRAVEL * s).round()
+
+
+var _tex_cache := {}
+
+
+func _som_tex(path: String) -> Texture2D:
+	if not _tex_cache.has(path):
+		_tex_cache[path] = load(path) if ResourceLoader.exists(path) else null
+	return _tex_cache[path]
+
+
+func _draw_joystick_placeholder(c: Vector2, r: float, line: float) -> void:
 	var mag := UiStyleC.MAGENTA
 	draw_arc(c, r * 0.98, 0.0, TAU, 48, Color(mag.r, mag.g, mag.b, 0.6), line)
 	draw_arc(c, r * dead_zone, 0.0, TAU, 16, Color(mag.r, mag.g, mag.b, 0.25), line)

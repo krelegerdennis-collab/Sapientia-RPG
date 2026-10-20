@@ -710,6 +710,7 @@ func resolve(q: Dictionary) -> String:
 		text = str(r.get("text", ""))
 		if int(r.get("hp", 0)) > 0:
 			SomFx.number(room.get_node("Objects"), body_of(str(target.get("id", ""))) + Vector2(0, -22), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
+			heal_glow(str(target.get("id", "")))
 	else:
 		text = cast_spell(str(q.get("id", "")), str(q.get("caster", "")), {})
 	_say(text)
@@ -747,6 +748,7 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) ->
 		for m in targets:
 			var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {"s": enemies[m]["data"]})
 			last_attacker = caster_id
+			SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
 			damage_enemy(m, maxi(1, roundi(amt * randf_range(0.9, 1.1))), Vector2i.ZERO)
 		return "%s casts %s!" % [caster.get("name", ""), sp.get("name", spell_id)]
 	if kind == "heal":
@@ -760,8 +762,21 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary) ->
 		var amt := roundi(SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {}))
 		var got := PartyActions.restore(t, amt, 0)
 		SomFx.number(room.get_node("Objects"), body_of(str(t.get("id", ""))) + Vector2(0, -22), "+%d" % got.x, Color(0.4, 1, 0.5))
+		heal_glow(str(t.get("id", "")))
 		return "%s casts %s! %s recovers %d HP." % [caster.get("name", ""), sp.get("name", spell_id), t.get("name", ""), got.x]
 	return SomData.TXT_MISS_BUFF % str(sp.get("name", spell_id))
+
+
+## Genees-glans (fx_heal_glow, anker (8,16)) op de voeten van een held.
+func heal_glow(id: String) -> void:
+	var n := node_of(id)
+	var feet: Vector2 = n.position if n else player.position
+	SomFx.oneshot(room.get_node("Objects"), SomData.FX_HEAL_GLOW, feet, "SomHealGlow", Color(0.4, 1, 0.5))
+
+
+## Voeten (onderrand) van een vijand: onderkant van zijn onderste tegel.
+func feet_of_enemy(m: Node) -> Vector2:
+	return m.position + Vector2(0, 8)
 
 
 func _cast_pose(id: String) -> void:

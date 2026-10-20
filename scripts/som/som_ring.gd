@@ -112,16 +112,18 @@ func _build() -> void:
 	_highlight()
 
 
-## Icoon uit ring_icons.png (7 x 16x16) voor een item/spreuk; null = geen.
+## Icoon uit ring_icons.png (8 x 16x16) voor een item/spreuk; null = geen.
 func icon_for(e: Dictionary) -> Texture2D:
 	var sheet := SomFx.tex(SomData.UI_RING_ICONS)
+	if sheet == null:
+		sheet = SomFx.tex(SomData.UI_RING_ICONS_FALLBACK)
 	if sheet == null:
 		return null
 	var id := str(e.get("id", ""))
 	var idx := int(SomData.RING_ICON.get(id, -1))
 	if idx < 0 and str(e.get("kind", "")) == "spell" and str(GameData.SPELLS.get(id, {}).get("type", "")) == "damage":
 		idx = SomData.RING_ICON_DAMAGE
-	if idx < 0:
+	if idx < 0 or (idx + 1) * 16 > sheet.get_width():
 		return null
 	var a := AtlasTexture.new()
 	a.atlas = sheet

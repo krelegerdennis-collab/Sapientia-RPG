@@ -55,5 +55,10 @@ tests die map tellen. Ontbreekt een bestand, dan valt alles terug op de placehol
   gauge 18x4 + vulling 16x2 + glinster 36x4, `hud_frame` 72x20 per held, `ring_bg` 180x110, `ring_icons` 112x16 (7 iconen).
 - Tests: framegrootte/rij, 350 ms-treffer (speltijd), 710 ms totaal, terug naar de loopsprite, slag landt via `swing_landed`.
 
-### Nog gewenst
-- Genees-glans 16x16 x 4 en spreuk-impact 24x24 x 4; Swap/Ring-knoppen 38x14; joystick-ring 60x60 + knop 24x24.
+### Batch ui2 (aangesloten)
+- `fx/fx_heal_glow.png` 64x16 (4 x 16x16, 100 ms, anker (8,16)) op de voeten van wie geneest wordt (Minor Heal en items uit de ring).
+- `fx/fx_spell_impact.png` 96x24 (4 x 24x24, 70 ms, anker (12,24)) op de voeten van elk doelwit van een aanvalsspreuk.
+- `ui/btn_swap(_pressed).png`, `ui/btn_ring(_pressed).png` 38x14 als StyleBoxTexture op de Swap-/Ring-knop (de tekst zit in de art).
+- `ui/joystick_ring.png` 60x60 (midden 30,30) + `joystick_knob(_pressed).png` 24x24; de knop reist max 18 art-px (`JOY_KNOB_TRAVEL`).
+- `ui/ring_icons_8.png` 128x16, `RING_ICON["feniksveer"] = 7`; de oude `ring_icons.png` blijft als fallback.
+- Ontbreekt een bestand: getekende placeholder (ring-effect, tekstknop, getekende joystick, 7-iconen-sheet).

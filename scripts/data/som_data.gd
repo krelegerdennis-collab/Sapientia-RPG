@@ -73,6 +73,9 @@ const MONSTER_DEATH_MS := 100
 ## FX/UI (assets/sprites/som/fx|ui). Ontbreekt een bestand: de placeholder in code.
 const FX_SLASH := "res://assets/sprites/som/fx/fx_slash.png"          # 128x32, 4 frames 32x32
 const FX_SPARK := "res://assets/sprites/som/fx/fx_hit_spark.png"      # 64x16, 4 frames 16x16
+## Eenmalige effecten: sheet, celgrootte, frames, ms per frame, anker (voeten) in de cel.
+const FX_HEAL_GLOW := {"sheet": "res://assets/sprites/som/fx/fx_heal_glow.png", "cell": [16, 16], "frames": 4, "ms": 100, "anchor": [8, 16]}
+const FX_SPELL_IMPACT := {"sheet": "res://assets/sprites/som/fx/fx_spell_impact.png", "cell": [24, 24], "frames": 4, "ms": 70, "anchor": [12, 24]}
 const FX_TELEGRAPH := "res://assets/sprites/som/fx/fx_telegraph.png"  # 8x8
 const UI_DIGITS := "res://assets/sprites/som/ui/dmg_digits.png"       # 50x21: rijen wit, rood, groen; cijfers 5x7
 const UI_GAUGE_BAR := "res://assets/sprites/som/ui/gauge_bar.png"     # 18x4
@@ -80,9 +83,19 @@ const UI_GAUGE_FILL := "res://assets/sprites/som/ui/gauge_fill.png"   # 16x2 (op
 const UI_GAUGE_GLINT := "res://assets/sprites/som/ui/gauge_full_glint.png"  # 36x4, 2 frames
 const UI_HUD_FRAME := "res://assets/sprites/som/ui/hud_frame.png"     # 72x20 per held
 const UI_RING_BG := "res://assets/sprites/som/ui/ring_bg.png"         # 180x110
-const UI_RING_ICONS := "res://assets/sprites/som/ui/ring_icons.png"   # 112x16, 7 iconen
+const UI_RING_ICONS := "res://assets/sprites/som/ui/ring_icons_8.png"  # 128x16, 8 iconen (7 = Phoenix Feather)
+const UI_RING_ICONS_FALLBACK := "res://assets/sprites/som/ui/ring_icons.png"   # 112x16, 7 iconen (eerste batch)
+const UI_BTN := {   # 38x14, normaal / ingedrukt (RPG ART ui2)
+	"swap": ["res://assets/sprites/som/ui/btn_swap.png", "res://assets/sprites/som/ui/btn_swap_pressed.png"],
+	"ring": ["res://assets/sprites/som/ui/btn_ring.png", "res://assets/sprites/som/ui/btn_ring_pressed.png"],
+}
+const UI_JOY_RING := "res://assets/sprites/som/ui/joystick_ring.png"            # 60x60, midden (30,30)
+const UI_JOY_KNOB := "res://assets/sprites/som/ui/joystick_knob.png"            # 24x24, midden (12,12)
+const UI_JOY_KNOB_PRESSED := "res://assets/sprites/som/ui/joystick_knob_pressed.png"
+const JOY_ART_RADIUS := 30.0     # straal van joystick_ring in art-pixels
+const JOY_KNOB_TRAVEL := 18.0    # knopuitslag in art-pixels
 ## Icoon-index in ring_icons.png per item/spreuk-id.
-const RING_ICON := {"drankje": 0, "kruid": 1, "toverwater": 2, "genees": 4, "vuur": 5, "bliksem": 6}
+const RING_ICON := {"drankje": 0, "kruid": 1, "toverwater": 2, "genees": 4, "vuur": 5, "bliksem": 6, "feniksveer": 7}
 const RING_ICON_DAMAGE := 3      # 'spark': elke andere aanvalsspreuk
 ## Seconden om de wapenmeter van 0 tot 100% te vullen.
 const CHARGE_TIME := 0.5

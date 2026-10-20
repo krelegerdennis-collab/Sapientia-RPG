@@ -5,6 +5,7 @@ extends RefCounted
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomArena := preload("res://scripts/som/som_arena.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const SomHud := preload("res://scripts/som/som_hud.gd")
 
 var t: Node
 var shots := ""
@@ -82,6 +83,7 @@ func run() -> void:
 	await _charge_and_attack_tests()
 	await _enemy_ai_tests()
 	await _ring_tests()
+	await _ui2_tests()
 	arena().allies_enabled = true
 	await _ally_tests()
 	await _switch_tests()
@@ -398,6 +400,109 @@ func _ring_tests() -> void:
 	await shot("v2_ring_skills")
 	a.ring.close({})
 	t.check("SoM: sluiten zonder keuze hervat", not t.get_tree().paused)
+	await t.frames(5)
+
+
+## RPG ART batch ui2: genees-glans, spreuk-impact, Swap/Ring-knoppen, joystick, Phoenix-icoon (+ placeholders).
+func _ui2_tests() -> void:
+	var a := arena()
+	var objs: Node = room().get_node("Objects")
+	var p: CharacterBody2D = t.player()
+	# Phoenix Feather-icoon: index 7 in ring_icons_8 (x=112)
+	var ic: AtlasTexture = a.ring.icon_for({"kind": "item", "id": "feniksveer"})
+	t.check("SoM-ui2: Phoenix Feather-icoon = index 7 van ring_icons_8 (128x16)", ic != null and ic.region == Rect2(112, 0, 16, 16)
+			and ic.atlas.get_size() == Vector2(128, 16) and SomData.RING_ICON["feniksveer"] == 7)
+	var ic0: AtlasTexture = a.ring.icon_for({"kind": "item", "id": "drankje"})
+	t.check("SoM-ui2: bestaande iconen ongewijzigd (Potion = 0)", ic0 != null and ic0.region.position == Vector2.ZERO)
+	# genees-glans
+	for n in objs.get_children():
+		if str(n.name).begins_with("SomHealGlow") or str(n.name).begins_with("SomSpellImpact"):
+			n.free()
+	p.place_at(Vector2i(12, 8), Vector2i.RIGHT)
+	await t.frames(2)
+	a.heal_glow(a.active_id)
+	var g: Node = objs.find_children("SomHealGlow*", "", false, false)[0] if objs.find_children("SomHealGlow*", "", false, false).size() > 0 else null
+	t.check("SoM-ui2: genees-glans 4x16x16, 100 ms, anker (8,16) op de voeten", g is Sprite2D and g.hframes == 4
+			and g.texture.get_size() == Vector2(64, 16) and g.offset == Vector2(-8, -16) and g.position == p.position
+			and g.ms == [100, 100, 100, 100])
+	# spreuk-impact op de voeten van het doelwit (echte spreuk via cast_spell)
+	var m := _first_enemy()
+	var caster := ""
+	for h in GameState.party:
+		if "vuur" in (h.get("spells", []) as Array):
+			caster = str(h["id"])
+			h["mp"] = h["max_mp"]
+	var imp: Node = null
+	var e_feet: Array = []
+	if m and caster != "":
+		m.place_at(Vector2i(14, 8), Vector2i.LEFT)
+		a.enemies[m]["hp"] = 999
+		await t.frames(2)
+		var cnode: Node2D = a.node_of(caster)
+		if cnode:
+			cnode.position = p.position + Vector2(-16, 0)
+		for e in a.enemies.keys():
+			e_feet.append(a.feet_of_enemy(e))
+			a.enemies[e]["hp"] = 999      # niet laten sterven: dan blijft de positie te vergelijken
+		a.cast_spell("vuur", caster, {})
+		var found := objs.find_children("SomSpellImpact*", "", false, false)
+		imp = found[0] if found.size() > 0 else null
+	var on_feet := false
+	if imp:
+		on_feet = imp.position in e_feet
+	t.check("SoM-ui2: spreuk-impact 4x24x24, 70 ms, anker (12,24) op de voeten van het doelwit", imp is Sprite2D and imp.hframes == 4
+			and imp.texture.get_size() == Vector2(96, 24) and imp.offset == Vector2(-12, -24)
+			and on_feet and imp.ms == [70, 70, 70, 70])
+	a.heal_glow(a.active_id)
+	await t.frames(3)
+	await shot("v2_heal_impact")
+	await seconds(0.6)
+	t.check("SoM-ui2: effecten ruimen zichzelf op", objs.find_children("SomHealGlow*", "", false, false).is_empty()
+			and objs.find_children("SomSpellImpact*", "", false, false).is_empty())
+	# genezen via de ring (Potion) zet ook de glans
+	var h0: Dictionary = GameState.party[0]
+	h0["hp"] = maxi(1, int(h0["max_hp"]) - 20)
+	a.resolve({"kind": "item", "id": "drankje"})
+	t.check("SoM-ui2: Potion uit de ring -> genees-glans", objs.find_children("SomHealGlow*", "", false, false).size() > 0)
+	# placeholder: ontbrekende art -> getekende ring
+	var ph: Node = SomFx.oneshot(objs, {"sheet": "res://bestaat_niet.png", "cell": [16, 16], "frames": 4, "ms": 100, "anchor": [8, 16]},
+			p.position, "SomTestPh", Color.WHITE)
+	t.check("SoM-ui2: zonder art een placeholder-effect", ph != null and not (ph is Sprite2D))
+	# knoppen
+	var hud: Node = a.hud
+	var sw: Button = hud.switch_button
+	var rb: Button = hud.ring_button
+	var swn: StyleBoxTexture = sw.get_theme_stylebox("normal") as StyleBoxTexture
+	var swp: StyleBoxTexture = sw.get_theme_stylebox("pressed") as StyleBoxTexture
+	var rbn: StyleBoxTexture = rb.get_theme_stylebox("normal") as StyleBoxTexture
+	var rbp: StyleBoxTexture = rb.get_theme_stylebox("pressed") as StyleBoxTexture
+	t.check("SoM-ui2: Swap-knop = btn_swap / btn_swap_pressed (38x14)", swn != null and swp != null
+			and swn.texture.resource_path.ends_with("btn_swap.png") and swp.texture.resource_path.ends_with("btn_swap_pressed.png")
+			and sw.size == Vector2(38, 14) and sw.text == "")
+	t.check("SoM-ui2: Ring-knop = btn_ring / btn_ring_pressed (38x14)", rbn != null and rbp != null
+			and rbn.texture.resource_path.ends_with("btn_ring.png") and rbp.texture.resource_path.ends_with("btn_ring_pressed.png")
+			and rb.size == Vector2(38, 14))
+	t.check("SoM-ui2: Swap-/Ring-art-knoppen blijven gekoppeld", sw.pressed.get_connections().size() > 0
+			and rb.pressed.get_connections().size() > 0)
+	var fb := Button.new()
+	fb.text = "X"
+	t.check("SoM-ui2: knop zonder art blijft een tekstknop", not SomHud.skin_button(fb, "bestaat_niet") and fb.text == "X")
+	fb.free()
+	# joystick
+	var tc: Node = a.touch
+	t.check("SoM-ui2: joystick-art geladen (ring 60x60, knop 24x24)", tc._som_tex(SomData.UI_JOY_RING) != null
+			and tc._som_tex(SomData.UI_JOY_RING).get_size() == Vector2(60, 60)
+			and tc._som_tex(SomData.UI_JOY_KNOB).get_size() == Vector2(24, 24)
+			and tc._som_tex(SomData.UI_JOY_KNOB_PRESSED).get_size() == Vector2(24, 24))
+	tc.joy_raw = Vector2(1, 0)
+	var k1: Vector2 = tc.joy_knob_pos(Vector2(100, 100), 1.0)
+	tc.joy_raw = Vector2(0, -0.5)
+	var k2: Vector2 = tc.joy_knob_pos(Vector2(100, 100), 2.0)
+	tc.joy_raw = Vector2(3, 4)
+	var k3: Vector2 = tc.joy_knob_pos(Vector2(100, 100), 1.0)
+	tc.joy_raw = Vector2.ZERO
+	t.check("SoM-ui2: knop reist max 18 art-px (%s, %s, %s)" % [k1, k2, k3], k1 == Vector2(118, 100) and k2 == Vector2(100, 82)
+			and k3.distance_to(Vector2(100, 100)) <= 18.5)
 	await t.frames(5)
 
 

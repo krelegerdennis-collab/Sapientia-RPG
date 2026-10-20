@@ -46,6 +46,8 @@ func _ready() -> void:
 	switch_button.pressed.connect(func() -> void:
 		if arena.active():
 			arena.switch_hero())
+	skin_button(ring_button, "ring")
+	skin_button(switch_button, "swap")
 	toast_label = Label.new()
 	toast_label.add_theme_font_size_override("font_size", 8)
 	toast_label.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -54,6 +56,32 @@ func _ready() -> void:
 	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(toast_label)
 	_place()
+
+
+## Knop-art (38x14, normaal/ingedrukt) van RPG ART; de tekst zit in de art. Zonder art: tekstknop.
+static func skin_button(b: Button, key: String) -> bool:
+	var paths: Array = SomData.UI_BTN.get(key, [])
+	if paths.size() < 2:
+		return false
+	var n := SomFx.tex(str(paths[0]))
+	var p := SomFx.tex(str(paths[1]))
+	if n == null or p == null:
+		return false
+	var sn := StyleBoxTexture.new()
+	sn.texture = n
+	var sp := StyleBoxTexture.new()
+	sp.texture = p
+	for st in ["normal", "hover", "focus", "disabled"]:
+		b.add_theme_stylebox_override(st, sn)
+	b.add_theme_stylebox_override("pressed", sp)
+	b.add_theme_stylebox_override("hover_pressed", sp)
+	b.tooltip_text = b.text
+	b.text = ""
+	b.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	b.custom_minimum_size = Vector2(38, 14)
+	b.size = Vector2(38, 14)
+	b.set_meta("som_skin", key)
+	return true
 
 
 func _place() -> void:

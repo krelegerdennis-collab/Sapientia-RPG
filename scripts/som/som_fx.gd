@@ -134,6 +134,60 @@ static func spark(parent: Node, at: Vector2) -> void:
 	parent.add_child(a)
 
 
+## Eenmalig effect (SomData.FX_HEAL_GLOW / FX_SPELL_IMPACT) met zijn anker op 'feet'.
+## Zonder art: een getekende placeholder-ring in dezelfde kleur. Geeft de node terug.
+static func oneshot(parent: Node, d: Dictionary, feet: Vector2, node_name: String, color: Color) -> Node2D:
+	var t := tex(str(d["sheet"]))
+	var cell: Array = d["cell"]
+	var anc: Array = d["anchor"]
+	var n := int(d["frames"])
+	if t == null:
+		var ph := Ring.new()
+		ph.name = node_name
+		ph.color = color
+		ph.position = feet + Vector2(0, -float(cell[1]) / 2.0)
+		ph.radius = float(cell[0]) / 2.0
+		ph.z_index = 22
+		parent.add_child(ph)
+		return ph
+	var a := Anim.new()
+	a.name = node_name
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	a.centered = false
+	a.offset = Vector2(-float(anc[0]), -float(anc[1]))
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(int(d["ms"]))
+	a.seq = seq
+	a.ms = ms
+	a.position = feet
+	a.z_index = 22
+	parent.add_child(a)
+	return a
+
+
+## Placeholder voor ontbrekende effect-art: uitdijende ring, 0,3 s.
+class Ring extends Node2D:
+	var color := Color.WHITE
+	var radius := 8.0
+	var t := 0.0
+
+	func _process(delta: float) -> void:
+		t += delta
+		queue_redraw()
+		if t >= 0.3:
+			queue_free()
+
+	func _draw() -> void:
+		var c := color
+		c.a = 1.0 - t / 0.3
+		draw_arc(Vector2.ZERO, radius * (0.4 + t / 0.3 * 0.6), 0.0, TAU, 16, c, 1.0)
+
+
 ## Rij in dmg_digits.png: 0 wit, 1 rood (schade aan de party), 2 groen (genezen).
 static func _digit_row(color: Color) -> int:
 	if color.g > color.r + 0.2:
