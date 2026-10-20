@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bu6eba3k75xo1"
-path="res://.godot/imported/groepen.png-073e49ee545fecd9508691542769f0ba.ctex"
+uid="uid://dds1ei7s6qv4h"
+path="res://.godot/imported/waard.png-be3fd575720b410c42e5462160d4e178.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tools/som/bron/gebouw/groepen.png"
-dest_files=["res://.godot/imported/groepen.png-073e49ee545fecd9508691542769f0ba.ctex"]
+source_file="res://assets/sprites/buiten/waard.png"
+dest_files=["res://.godot/imported/waard.png-be3fd575720b410c42e5462160d4e178.ctex"]
 
 [params]
 

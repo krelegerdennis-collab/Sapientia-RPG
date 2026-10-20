@@ -638,3 +638,8 @@ assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim.png
 assets/sprites/som/wilgendal/npcs/henrik_wm1_slim.png
 assets/sprites/npc_wm1_slim.png
 assets/sprites/buiten/bouw_werker_wm1_slim.png
+#        20 okt 2026 NPC-fixes van RPG ART (npc_slim batch 2): Gerrit-stapframes, Waard met schort, bouwvakkers b/c
+assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim_v2.png
+assets/sprites/buiten/waard.png
+assets/sprites/buiten/bouw_werker_b.png
+assets/sprites/buiten/bouw_werker_c.png

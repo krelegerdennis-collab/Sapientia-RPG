@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://sb8hsbjmoqya"
-path="res://.godot/imported/groepen.png-a62ba6a64d652fdd09695bf82ffb31d9.ctex"
+uid="uid://cjf12klvsgvl7"
+path="res://.godot/imported/gerrit_wm1_slim_v2.png-4eb9d4ea2143d4dd5f8dd836cfc160cc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tools/som/bron/interieur/groepen.png"
-dest_files=["res://.godot/imported/groepen.png-a62ba6a64d652fdd09695bf82ffb31d9.ctex"]
+source_file="res://assets/sprites/som/wilgendal/npcs/gerrit_wm1_slim_v2.png"
+dest_files=["res://.godot/imported/gerrit_wm1_slim_v2.png-4eb9d4ea2143d4dd5f8dd836cfc160cc.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dla4demo7sgju"
-path="res://.godot/imported/tileset.png-04a5c3ddcf2aaf83f3bb6975286196d9.ctex"
+uid="uid://d05d2scuh8eav"
+path="res://.godot/imported/bouw_werker_b.png-81f76647ff8441a306d3fd08c4875989.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tools/som/bron/gebouw/tileset.png"
-dest_files=["res://.godot/imported/tileset.png-04a5c3ddcf2aaf83f3bb6975286196d9.ctex"]
+source_file="res://assets/sprites/buiten/bouw_werker_b.png"
+dest_files=["res://.godot/imported/bouw_werker_b.png-81f76647ff8441a306d3fd08c4875989.ctex"]
 
 [params]
 
