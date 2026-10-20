@@ -330,7 +330,8 @@ func _ready() -> void:
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
-			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"]]:
+			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
+			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet

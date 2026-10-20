@@ -493,7 +493,8 @@ func respawn(naar: String, soort: String) -> void:
 ## Samengevoegd logboek van de laatste sessies (nieuwste laatst), als tekst.
 func export_tekst(max_sessies := EXPORT_SESSIES) -> String:
 	flush()
-	var lijst := bestanden()
+	# de map van de lopende sessie (tests schrijven naar een eigen map)
+	var lijst := bestanden(pad.get_base_dir() if pad != "" else MAP)
 	var uit := ""
 	var vanaf := maxi(0, lijst.size() - max_sessies)
 	for i in range(vanaf, lijst.size()):
