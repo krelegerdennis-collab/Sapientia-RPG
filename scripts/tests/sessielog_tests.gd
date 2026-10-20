@@ -70,6 +70,25 @@ func _run() -> void:
 	if p != null and p.has_method("place_at"):
 		p.place_at(Vector2i(35, 30), Vector2i.UP)
 	await get_tree().create_timer(1.2).timeout
+	# korte wandeling (voor de heatmap): over de straat, het plein en het hoofdpad
+	if p != null and p.has_method("place_at"):
+		var route: Array[Vector2i] = []
+		for y in range(30, 20, -1):
+			route.append(Vector2i(35, y))
+		for x in range(35, 20, -1):
+			route.append(Vector2i(x, 21))
+		for x in range(21, 36):
+			route.append(Vector2i(x, 22))
+		for y in range(16, 8, -1):
+			route.append(Vector2i(35, y))
+		for x in range(35, 50):
+			route.append(Vector2i(x, 10))
+		for i in route.size():
+			p.place_at(route[i], Vector2i.UP)
+			await get_tree().create_timer(log.POS_SECS + 0.05).timeout
+		for _i in 3:
+			p.place_at(Vector2i(35, 12), Vector2i.UP)
+			await get_tree().create_timer(log.POS_SECS + 0.05).timeout
 	log.gevecht_start(["moskonijn"], false, "gras", Vector2i(35, 30))
 	log.ronde(1, [{"actor": {"is_hero": true}, "type": "attack"}])
 	log.gevecht_eind("win")
@@ -113,6 +132,12 @@ func _run() -> void:
 			and rect.size() == 4 and int(rect[2]) == 64 and int(rect[3]) == 40)
 	check("gevecht_start, gevecht_eind, dood en respawn gelogd", "gevecht_start" in soorten and "gevecht_eind" in soorten
 			and "dood" in soorten and "respawn" in soorten)
+	var bewaar := OS.get_environment("SESSIELOG_BEWAAR")
+	if bewaar != "":
+		# voorbeeldlogboek bewaren (bv. voor tools/sessie_samenvatting.py --heatmap)
+		var f := FileAccess.open(bewaar, FileAccess.WRITE)
+		if f != null:
+			f.store_string(FileAccess.get_file_as_string(log.pad))
 	var tekst := FileAccess.get_file_as_string(log.pad)
 	check("privacy: de spelersnaam staat niet in het logboek", not tekst.contains("Testnaam Geheim"))
 
