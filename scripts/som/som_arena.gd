@@ -656,7 +656,7 @@ func _enemy_ai(m: Node, delta: float) -> void:
 	if float(e["tele"]) > 0.0:
 		e["tele"] = float(e["tele"]) - delta
 		if float(e["tele"]) <= 0.0:
-			e["cd"] = SomData.attack_cooldown(room.room_id)
+			e["cd"] = SomData.attack_cooldown(room.room_id, room.tier())
 			_monster_pose(m, e, "attack", 1, SomData.MONSTER_STRIKE_MS / 1000.0)
 			if dist <= SomData.ENEMY_REACH + 8.0 * (maxf(m.size.x, m.size.y) - 1.0):
 				hit_member(tid, int(e["atk"]))
@@ -717,7 +717,7 @@ func hit_member(id: String, atk: int) -> void:
 		_dodge(id)
 		return
 	var h := member(id)
-	var dmg := maxi(1, roundi(physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0) * SomData.ENEMY_DAMAGE_MULT))
+	var dmg := maxi(1, roundi(physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0) * SomData.enemy_damage_mult(room.room_id, room.tier())))
 	h["hp"] = maxi(0, int(h["hp"]) - dmg)
 	last_player_damage = dmg
 	last_hit_id = id

@@ -37,6 +37,7 @@ func _run() -> void:
 	print("=== Balans Archief 1 (Action) ===")
 	_data()
 	_slagen()
+	_winst()
 	await _arena_en_classic()
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	print("BALANSTEST %d PASS, %d FAIL" % [passes, failures])
@@ -47,7 +48,11 @@ func _run() -> void:
 func _data() -> void:
 	var a: Dictionary = SomData.ACTION_AREAS.get("archief1", {})
 	check("ACTION_AREAS.archief1 bestaat met rooms/tier_level/hp_hits/hits/atk", a.has("rooms") and a.has("tier_level") and a.has("hp_hits") and a.has("hits") and a.has("atk"))
-	check("vijanden slaan harder in Action (atk x%.2f > 1)" % float(a.get("atk", 0)), float(a.get("atk", 0)) > 1.0)
+	var tiers_ok := true
+	for t in [1, 2, 3, 4]:
+		var tr: Dictionary = a.get("tiers", {}).get(t, {})
+		tiers_ok = tiers_ok and tr.has("atk") and tr.has("cooldown") and a.get("targets", {}).has(t)
+	check("elke tier 1-4 heeft eigen atk/cooldown en een doel", tiers_ok)
 	var n := 0
 	for rid in DR.ROOMS:
 		if str(rid).begins_with("archief_v"):
@@ -81,6 +86,38 @@ func _slagen() -> void:
 	check("alle gewone vijanden uit archief_v1..v4 gemeten (%d)" % gezien.size(), gezien.size() >= 10)
 
 
+## Dax solo op het verwachte level, 150 gevechten per kamer (action_sim-model): winst/verlies per tier binnen
+## SomData.ACTION_AREAS.archief1.targets, en geleidelijk oplopend (gemiddelde winst per tier daalt niet stijgend).
+func _winst() -> void:
+	var a: Dictionary = SomData.ACTION_AREAS["archief1"]
+	var b: Node = Balans.new()
+	b.fights = 150
+	var per_tier := {}
+	for r in b.verwacht():
+		var t := int(r["tier"])
+		if not per_tier.has(t):
+			per_tier[t] = {"win": [], "loss": [], "ids": []}
+		per_tier[t]["win"].append(float(r["win"]))
+		per_tier[t]["loss"].append(float(r["loss"]))
+		per_tier[t]["ids"].append("%s %d%%/%d%%" % [r["id"], roundi(r["win"] * 100.0), roundi(r["loss"] * 100.0)])
+	var vorige := 2.0
+	for t in [1, 2, 3, 4]:
+		var d: Dictionary = per_tier.get(t, {"win": [0.0], "loss": [1.0], "ids": []})
+		var w: float = Balans._mean(d["win"])
+		var l: float = Balans._mean(d["loss"])
+		var doel: Dictionary = a["targets"][t]
+		var wv: Array = doel["win"]
+		check("tier %d (Dax lv %d solo): winst %d%% binnen %d-%d%% [%s]" % [t, int(a["tier_level"][t]), roundi(w * 100.0), roundi(wv[0] * 100.0), roundi(wv[1] * 100.0), ", ".join(d["ids"])],
+				w >= float(wv[0]) and w <= float(wv[1]))
+		if doel.has("loss"):
+			var lv: Array = doel["loss"]
+			check("tier %d: gemiddeld HP-verlies %d%% binnen %d-%d%%" % [t, roundi(l * 100.0), roundi(lv[0] * 100.0), roundi(lv[1] * 100.0)],
+					l >= float(lv[0]) and l <= float(lv[1]))
+		check("tier %d: niet makkelijker dan de vorige tier (%d%% <= %d%%)" % [t, roundi(w * 100.0), roundi(minf(vorige, 1.0) * 100.0)], w <= vorige + 0.02)
+		vorige = w
+	b.free()
+
+
 func _laad(pad: String) -> Node:
 	GameState.in_battle = false
 	GameState.changing_map = false
@@ -111,8 +148,11 @@ func _arena_en_classic() -> void:
 		await get_tree().process_frame
 		var e: Dictionary = arena.enemies.get(m, {})
 		check("arena: mosslijm HP %d (Classic %d), ATK %d (Classic %d)" % [int(e.get("max_hp", -1)), int(oud["max_hp"]), int(e.get("atk", -1)), int(oud["atk"])],
-				int(e.get("max_hp", -1)) == int(nieuw["max_hp"]) and int(e.get("atk", -1)) == int(nieuw["atk"]) and int(nieuw["atk"]) > int(oud["atk"]))
-		check("arena: vijand-cooldown uit de gebiedsregels", is_equal_approx(SomData.attack_cooldown("archief_v1_gang"), SomData.ATTACK_COOLDOWN * float(SomData.ACTION_AREAS["archief1"].get("cooldown", 1.0))))
+				int(e.get("max_hp", -1)) == int(nieuw["max_hp"]) and int(e.get("atk", -1)) == int(nieuw["atk"]))
+		check("arena: vijandschade = ENEMY_DAMAGE_MULT x tier-atk (%.2f)" % SomData.enemy_damage_mult("archief_v1_gang", tier),
+				is_equal_approx(SomData.enemy_damage_mult("archief_v1_gang", tier), SomData.ENEMY_DAMAGE_MULT * float(SomData.ACTION_AREAS["archief1"]["tiers"][tier]["atk"]))
+				and is_equal_approx(SomData.enemy_damage_mult("woud_1"), SomData.ENEMY_DAMAGE_MULT))
+		check("arena: vijand-cooldown uit de tierregels", is_equal_approx(SomData.attack_cooldown("archief_v1_gang", tier), SomData.ATTACK_COOLDOWN * float(SomData.ACTION_AREAS["archief1"]["tiers"][tier]["cooldown"])))
 		await _shot("action_archief_v1_balans")
 	# Classic: exact de oude stats
 	GameState.new_game("Dax")

@@ -18,7 +18,47 @@ func _ready() -> void:
 			fights = maxi(1, int(arg.get_slice("=", 1)))
 		elif arg.begins_with("--out="):
 			out_path = arg.get_slice("=", 1)
-	_meet.call_deferred()
+	if OS.get_cmdline_user_args().has("--tune"):
+		_tune.call_deferred()
+	else:
+		_meet.call_deferred()
+
+
+## Rooster per tier: atk x cooldown -> winst/verlies per kamer op het verwachte level. Alleen ter afstemming.
+func _tune() -> void:
+	var a: Dictionary = SomData.ACTION_AREAS[AREA]
+	var basis := kamers(false)
+	for tier in [1, 2, 3, 4]:
+		var lv := int(a["tier_level"].get(tier, 1))
+		var h := dax(lv)
+		var atks: Array = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
+		var cds: Array = [1.0, 1.3, 1.6, 2.0, 2.4, 2.8, 3.2]
+		if OS.get_cmdline_user_args().has("--fijn"):
+			atks = []
+			cds = []
+			for i in 17:
+				atks.append(0.5 + 0.05 * i)
+			for i in 16:
+				cds.append(1.0 + 0.2 * i)
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--tiers="):
+				if not (str(tier) in arg.get_slice("=", 1).split(",")):
+					atks = []
+		for atk_f in atks:
+			for cd_f in cds:
+				var regel := "TUNE t%d atk %.2f cd %.1f:" % [tier, atk_f, cd_f]
+				var ws := []
+				for r in basis:
+					if int(r["tier"]) != tier:
+						continue
+					var en: Array = []
+					for d in r["enemies"]:
+						en.append(SomData.apply_action_area(d, str(r["id"]), tier))
+					var o := kamer(h, en, cd_f, params_base()["dodge_player"], str(r["id"]), lv, atk_f)
+					regel += " %s %d%%/%d%%" % [str(r["id"]).trim_prefix("archief_"), roundi(o["win"] * 100.0), roundi(o["loss"] * 100.0)]
+					ws.append(o["win"])
+				print(regel + " | gem %d%%" % roundi(_mean(ws) * 100.0))
+	get_tree().quit(0)
 
 
 ## Gewone vijanden per kamer (zoals action_sim.setup), zonder of met de gebiedsfactoren.
@@ -69,6 +109,36 @@ static func slagen(atk: float, d: Dictionary) -> float:
 	return float(tot) / float(SWINGS)
 
 
+## Dax (h) solo tegen deze kamer, 'fights' keer, vol HP: {"win": fractie, "loss": gemiddeld verlies als fractie}.
+func kamer(h: Dictionary, enemies: Array, cd_factor: float, dodge: float, rid: String, lv: int, dmg_factor := 1.0) -> Dictionary:
+	party_base = [h.duplicate(true)]
+	var p := params_base()
+	p["enemy_cd"] = float(p["enemy_cd"]) * cd_factor
+	p["enemy_dmg"] = float(p["enemy_dmg"]) * dmg_factor
+	p["dodge_player"] = dodge
+	var l := 0.0
+	var wins := 0
+	for i in fights:
+		seed(hash([base_seed, rid, i, lv, dodge]))
+		var o := fight_room(enemies, p)
+		l += float(o["loss"])
+		wins += 1 if o["win"] else 0
+	return {"win": float(wins) / float(fights), "loss": l / float(fights)}
+
+
+## Elke kamer op het verwachte level (tier_level), met de huidige data: [{id, tier, lv, win, loss}].
+func verwacht() -> Array:
+	var a: Dictionary = SomData.ACTION_AREAS[AREA]
+	var uit: Array = []
+	for r in kamers(true):
+		var lv := int(a["tier_level"].get(int(r["tier"]), 1))
+		var h := dax(lv)
+		var o := kamer(h, r["enemies"], SomData.area_rule(str(r["id"]), int(r["tier"]), "cooldown"), params_base()["dodge_player"], str(r["id"]), lv,
+				SomData.area_rule(str(r["id"]), int(r["tier"]), "atk"))
+		uit.append({"id": r["id"], "tier": int(r["tier"]), "lv": lv, "win": o["win"], "loss": o["loss"]})
+	return uit
+
+
 ## {level: {"hits": {enemy_id: x}, "min":, "max":, "loss": {room: hp}}}
 func meet(met_gebied: bool) -> Dictionary:
 	seed(base_seed)
@@ -83,29 +153,14 @@ func meet(met_gebied: bool) -> Dictionary:
 				if not hits.has(d["id"] + "@" + str(r["tier"])):
 					hits[d["id"] + "@" + str(r["tier"])] = slagen(atk, d)
 		var vals: Array = hits.values()
-		party_base = [h.duplicate(true)]
-		var p := params_base()
-		if met_gebied:
-			p["enemy_cd"] = float(p["enemy_cd"]) * float(SomData.ACTION_AREAS[AREA].get("cooldown", 1.0))
 		var loss := {}
 		for r in ks:
-			var l := 0.0
-			var wins := 0
-			var l2 := 0.0
-			var wins2 := 0
-			var p2 := p.duplicate()
-			p2["dodge_player"] = float(SomData.ACTION_AREAS[AREA].get("dodge_skill", 0.6))
-			for i in fights:
-				seed(hash([base_seed, r["id"], i, lv]))
-				var o := fight_room(r["enemies"], p)
-				l += float(o["loss"]) * float(h["max_hp"])
-				wins += 1 if o["win"] else 0
-				seed(hash([base_seed, r["id"], i, lv, "skill"]))
-				var o2 := fight_room(r["enemies"], p2)
-				l2 += float(o2["loss"]) * float(h["max_hp"])
-				wins2 += 1 if o2["win"] else 0
-			loss[r["id"]] = {"hp": l / float(fights), "win": float(wins) / float(fights),
-					"hp2": l2 / float(fights), "win2": float(wins2) / float(fights)}
+			var cdf := SomData.area_rule(str(r["id"]), int(r["tier"]), "cooldown") if met_gebied else 1.0
+			var dmf := SomData.area_rule(str(r["id"]), int(r["tier"]), "atk") if met_gebied else 1.0
+			var o := kamer(h, r["enemies"], cdf, params_base()["dodge_player"], str(r["id"]), lv, dmf)
+			var o2 := kamer(h, r["enemies"], cdf, float(SomData.ACTION_AREAS[AREA].get("dodge_skill", 0.6)), str(r["id"]), lv, dmf)
+			loss[r["id"]] = {"hp": o["loss"] * float(h["max_hp"]), "win": o["win"], "frac": o["loss"],
+					"hp2": o2["loss"] * float(h["max_hp"]), "win2": o2["win"]}
 		uit[lv] = {"hits": hits, "min": vals.min(), "max": vals.max(), "mean": _mean(vals), "loss": loss,
 				"max_hp": int(h["max_hp"]), "atk": atk, "def": float(GameState.effective_stat(h, "def"))}
 	return uit
@@ -133,7 +188,7 @@ static func ref_level(key: String) -> int:
 
 func tabel(voor: Dictionary, na: Dictionary, a: Dictionary) -> String:
 	var s := "## Archief 1 (Action) - meting, %d gevechten per kamer per level\n\n" % fights
-	s += "Regels nu (SomData.ACTION_AREAS.archief1): HP geklemd op %s x volle slag van verse Dax op tier-level %s, atk x%.2f, cooldown x%.2f.\n\n" % [str(a["hp_hits"]), str(a["tier_level"]), float(a["atk"]), float(a.get("cooldown", 1.0))]
+	s += "Regels nu (SomData.ACTION_AREAS.archief1): HP geklemd op %s x volle slag van verse Dax op tier-level %s; per tier schade (atk) / cooldown: %s.\n\n" % [str(a["hp_hits"]), str(a["tier_level"]), str(a["tiers"])]
 	s += "### Volle slagen per gewone vijand (gemiddeld; min-max over de vijanden)\n\n| Dax lv | Dax HP/ATK/DEF | voor | na |\n|---|---|---|---|\n"
 	for lv in LEVELS:
 		s += "| %d | %d / %d / %d | %.2f (%.2f-%.2f) | %.2f (%.2f-%.2f) |\n" % [lv, na[lv]["max_hp"], na[lv]["atk"], na[lv]["def"],
@@ -149,4 +204,19 @@ func tabel(voor: Dictionary, na: Dictionary, a: Dictionary) -> String:
 			var n: Dictionary = na[lv]["loss"][r]
 			s += "| %s | %d | %.1f (%d%%) | %.1f (%d%%) | %.1f (%d%%) | %.1f (%d%%) |\n" % [r, lv, v["hp"], roundi(v["win"] * 100.0),
 					n["hp"], roundi(n["win"] * 100.0), v["hp2"], roundi(v["win2"] * 100.0), n["hp2"], roundi(n["win2"] * 100.0)]
+	s += "\n### Doel per tier (Dax solo op het verwachte level, 35% ontwijken)\n\n| tier | Dax lv | kamers (winst/verlies) | gem. winst | doel winst | gem. verlies | doel verlies |\n|---|---|---|---|---|---|---|\n"
+	var per := {}
+	for r in verwacht():
+		var t := int(r["tier"])
+		if not per.has(t):
+			per[t] = {"w": [], "l": [], "ids": [], "lv": r["lv"]}
+		per[t]["w"].append(r["win"])
+		per[t]["l"].append(r["loss"])
+		per[t]["ids"].append("%s %d%%/%d%%" % [str(r["id"]).trim_prefix("archief_"), roundi(r["win"] * 100.0), roundi(r["loss"] * 100.0)])
+	for t in [1, 2, 3, 4]:
+		var d: Dictionary = per[t]
+		var doel: Dictionary = a["targets"][t]
+		s += "| %d | %d | %s | %d%% | %d-%d%% | %d%% | %s |\n" % [t, d["lv"], ", ".join(d["ids"]), roundi(_mean(d["w"]) * 100.0),
+				roundi(doel["win"][0] * 100.0), roundi(doel["win"][1] * 100.0), roundi(_mean(d["l"]) * 100.0),
+				("%d-%d%%" % [roundi(doel["loss"][0] * 100.0), roundi(doel["loss"][1] * 100.0)]) if doel.has("loss") else "-"]
 	return s

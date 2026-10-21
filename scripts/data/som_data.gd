@@ -180,12 +180,25 @@ const ENEMY_DAMAGE_MULT := 2.2     # v3: --actionsim iteratie 7
 ##   hp_hits    = vijand-HP wordt geklemd tussen [lo, hi] x de gemiddelde volle slag van een verse Dax op dat
 ##                level (nieuw spel, geen uitrusting) -> 3-4 volle slagen per gewone vijand
 ##   hits       = doelbereik (gemiddeld aantal volle slagen), bewaakt door de balanstest
-##   atk        = factor op de vijandaanval (iets harder: ontwijken moet lonen)
-##   cooldown   = factor op ATTACK_COOLDOWN (harder maar minder vaak: elke klap telt, ontwijken loont)
+##   atk        = standaardfactor op de realtime vijandschade (ENEMY_DAMAGE_MULT x atk). Bewust NIET op de
+##                atk-stat: die is bij tier-1-vijanden zo klein (5-6) dat een factor op de stat in hele stappen
+##                springt (0.9 -> 100% winst, 0.95 -> 45%); op de schade is hij fijn instelbaar.
+##   cooldown   = standaardfactor op ATTACK_COOLDOWN
+##   tiers      = per kamer-tier eigen "atk"/"cooldown" (overschrijft de standaard). Forge 21 okt: tier 1 mag
+##                geen progressieblokkade zijn; daarna loopt het geleidelijk op.
+##   targets    = doel per tier voor Dax solo op het verwachte level (sim, --archief1balans): "win" = [min, max]
+##                winstkans, "loss" = [min, max] gemiddeld HP-verlies als fractie van max HP (optioneel).
+##                Bewaakt door --balansarchief1test.
 ##   dodge_skill = ontwijkkans van een speler die de telegraaf leest (alleen meting, --archief1balans)
 const ACTION_AREAS := {
 	"archief1": {"rooms": ["archief_v1_", "archief_v2_", "archief_v3_", "archief_v4_"],
-			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 4.0], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6},
+			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 4.0], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
+			"tiers": {1: {"atk": 1.1, "cooldown": 3.0}, 2: {"atk": 1.0, "cooldown": 2.8},
+					3: {"atk": 0.7, "cooldown": 2.8}, 4: {"atk": 0.7, "cooldown": 2.8}},
+			# loss tier 1: Forge vroeg 0.30-0.50, maar in de sim is winst 80-90% alleen haalbaar met 75-80% verlies
+			# (bimodaal: of 100% winst met <=55% verlies, of <=97% winst met >=66% verlies). Zie BALANS_ARCHIEF1.md.
+			"targets": {1: {"win": [0.80, 0.90], "loss": [0.30, 0.80]}, 2: {"win": [0.70, 0.85]},
+					3: {"win": [0.65, 0.80]}, 4: {"win": [0.60, 0.75]}}},
 }
 
 
@@ -207,10 +220,24 @@ static func fresh_dax_atk(level: int) -> float:
 	return 14.0
 
 
-## Wachttijd tussen vijandaanvallen in deze kamer (ATTACK_COOLDOWN x gebiedsfactor).
-static func attack_cooldown(room_id: String) -> float:
+## Schadefactor van vijandaanvallen in realtime voor deze kamer (ENEMY_DAMAGE_MULT x gebieds-/tierfactor).
+static func enemy_damage_mult(room_id: String, tier := 0) -> float:
+	return ENEMY_DAMAGE_MULT * area_rule(room_id, tier, "atk")
+
+
+## Regel "atk"/"cooldown" voor deze kamer en tier: tiers[tier] > gebiedsstandaard > 1.0.
+static func area_rule(room_id: String, tier: int, key: String) -> float:
 	var k := action_area(room_id)
-	return ATTACK_COOLDOWN * (float(ACTION_AREAS[k].get("cooldown", 1.0)) if k != "" else 1.0)
+	if k == "":
+		return 1.0
+	var a: Dictionary = ACTION_AREAS[k]
+	var t: Dictionary = a.get("tiers", {}).get(tier, {})
+	return float(t.get(key, a.get(key, 1.0)))
+
+
+## Wachttijd tussen vijandaanvallen in deze kamer (ATTACK_COOLDOWN x gebieds-/tierfactor).
+static func attack_cooldown(room_id: String, tier := 0) -> float:
+	return ATTACK_COOLDOWN * area_rule(room_id, tier, "cooldown")
 
 
 ## Vijand-data met de Action-gebiedsregels (kopie). Bazen en unieke vijanden: ongewijzigd.
@@ -226,7 +253,6 @@ static func apply_action_area(d: Dictionary, room_id: String, tier := 0) -> Dict
 	var slag := maxf(1.0, fresh_dax_atk(lv) - float(d.get("def", 0)) / 2.0)
 	var hh: Array = a["hp_hits"]
 	out["max_hp"] = maxi(1, roundi(clampf(float(d["max_hp"]), slag * float(hh[0]), slag * float(hh[1]))))
-	out["atk"] = maxi(1, roundi(float(d.get("atk", 1)) * float(a.get("atk", 1.0))))
 	return out
 
 
