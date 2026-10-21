@@ -341,7 +341,7 @@ func _touch_rects() -> Dictionary:
 	if touch and touch.is_visible_in_tree() and touch.modulate.a > 0.01 and touch.has_method("dpad_center"):
 		var xf := touch.get_global_transform_with_canvas()
 		var sc := xf.get_scale().x
-		var dr: float = touch.dpad_radius * 1.25 * sc
+		var dr: float = (touch.joy_radius() if touch.has_method("joy_radius") else touch.dpad_radius) * 1.25 * sc
 		var br: float = touch.button_radius * 1.3 * sc
 		var d: Vector2 = xf * touch.dpad_center()
 		var a: Vector2 = xf * touch.a_center()

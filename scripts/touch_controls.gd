@@ -127,7 +127,13 @@ func dpad_center() -> Vector2:
 	return stick_center()
 
 
+## Classic-gevecht: joystick linksonder (waar de D-pad zat), zodat het commandokruis naast de helden past.
+var stick_low := false
+
+
 func stick_center() -> Vector2:
+	if stick_low:
+		return Vector2(edge_margin + 6.0 + joy_radius(), size.y - edge_margin - 6.0 - joy_radius())
 	return Vector2(edge_margin + 6.0 + joy_radius(), roundf(size.y * SomDataC.JOY_CENTER_Y))
 
 
