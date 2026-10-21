@@ -178,6 +178,8 @@ func hurt() -> void:
 	for i in 4:
 		tw.tween_property(self, "position:x", origin.x + (-3.0 if i % 2 == 0 else 3.0), 0.035)
 	tw.tween_property(self, "position:x", origin.x, 0.035)
+	if not is_inside_tree():
+		return      # gevecht al weg (scènewissel)
 	await get_tree().create_timer(0.35).timeout
 	if not is_ko:
 		set_pose("klaar" if stepped_forward else "stil")

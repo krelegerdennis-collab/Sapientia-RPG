@@ -346,6 +346,7 @@ func _ready() -> void:
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
+			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
 			["--musictest", "res://scripts/tests/music_tests.gd", "MusicTest", "musictest"],
 			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
@@ -1120,6 +1121,7 @@ static func _inventory_from(raw) -> Dictionary:
 ## Gebruikt door save_game en door het kamer-checkpoint (set_checkpoint).
 func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	var data := {
+		"battle_style": int(Settings.get_value("battle_style")),   # 21 okt 2026: gevechtsstijl reist mee met de save
 		"version": SAVE_VERSION,
 		"map": map if map != "" else current_map,
 		"tile": [tile.x, tile.y],
@@ -1169,6 +1171,8 @@ func load_game(path := "") -> bool:
 	var d := read_save(path)
 	if not apply_state(d):
 		return false
+	# Gevechtsstijl van deze save; oude saves zonder sleutel houden hun vroegere effectieve waarde: Classic.
+	Settings.set_value("battle_style", int(d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)))
 	# v0.19 kamer-checkpoint uit de save (oude saves: geen; dan zet de map hem bij binnenkomst)
 	checkpoint = _checkpoint_from(d.get("checkpoint", {}))
 	entry_kind = "load"
@@ -1590,6 +1594,9 @@ func _fill_eind_codex() -> void:
 func start_new_game(hero_name: String) -> void:
 	use_story_saves()
 	new_game(hero_name)
+	# Forge/Dennis 21 okt 2026: een NIEUW spel begint altijd in Action (Classic blijft kiesbaar in Settings).
+	# Geladen saves houden hun eigen keuze (load_game; zonder sleutel = Classic).
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	changing_map = false
 	change_map(START_MAP, START_SPAWN)
 	# v0.11: niet meteen automatisch opslaan bij een nieuw spel (anders is de autosave van

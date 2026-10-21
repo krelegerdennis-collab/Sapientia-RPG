@@ -243,7 +243,9 @@ func _remove(path: String) -> void:
 
 func _settings_basics() -> void:
 	check("Settings: eigen testbestand (%s)" % Settings.path, Settings.path == Settings.TEST_PATH)
-	check("Settings: standaardwaarden", Settings.values == Settings.DEFAULTS)
+	var verwacht := Settings.DEFAULTS.duplicate()
+	verwacht["battle_style"] = Settings.BATTLE_STYLE_CLASSIC     # testruns starten in Classic; vers spel = Action (somroomstest)
+	check("Settings: standaardwaarden", Settings.values == verwacht)
 	check("audiobussen Music en SFX bestaan",
 			AudioServer.get_bus_index("Music") != -1 and AudioServer.get_bus_index("SFX") != -1)
 	check("tekstsnelheid 'Normaal' = 40 letters/sec in Dialog", is_equal_approx(Dialog.chars_per_second, 40.0))

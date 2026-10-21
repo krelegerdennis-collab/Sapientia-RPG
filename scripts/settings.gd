@@ -42,6 +42,7 @@ const TOUCH_SIZE_NAMES := ["Small", "Normal", "Large"]
 ## SoM-proef: gevechtsstijl. Bazen blijven in beide stijlen turn-based (scripts/data/som_data.gd).
 const BATTLE_STYLE_NAMES := ["Classic", "Action"]
 const BATTLE_STYLE_ACTION := 1
+const BATTLE_STYLE_CLASSIC := 0
 
 ## Standaardwaarden (ook = 'nieuw bestand'). Volgorde = volgorde in het optiemenu.
 const DEFAULTS := {
@@ -56,7 +57,7 @@ const DEFAULTS := {
 	"autosave": true,
 	"sessielog": true,   # playtest: sessielogboek (scripts/sessielog.gd); geen persoonsgegevens
 	"run": false,      # TODO.md "run feature": RUN-toggle (blijft aan tot de speler hem uitzet)
-	"battle_style": 0,   # SoM-proef: 0 = Classic (turn-based), 1 = Action (realtime in de SoM-kamers)
+	"battle_style": 1,   # 0 = Classic (turn-based), 1 = Action (realtime in de WM1-dungeons). Dennis 21 okt 2026: Action is de standaard
 }
 
 var path := DEFAULT_PATH
@@ -71,6 +72,10 @@ func _ready() -> void:
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	_ensure_buses()
 	load_settings()
+	# Testsuites (--autotest, --woudtest, ...) beginnen zoals altijd in Classic; wie Action test, zet het zelf.
+	# (Een vers spel begint in Action: DEFAULTS, zie som_rooms_tests.gd.)
+	if Array(args).any(func(a): return str(a).begins_with("--") and str(a).ends_with("test")):
+		values["battle_style"] = BATTLE_STYLE_CLASSIC
 	# Dialog en Crt zijn eerder geladen autoloads; voor de zekerheid pas na _ready toepassen.
 	apply_all.call_deferred()
 
@@ -92,6 +97,8 @@ func load_settings() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(path) != OK:
 		return
+	# Bestaand instellingenbestand zonder battle_style (van voor Action-als-standaard): houdt Classic.
+	values["battle_style"] = BATTLE_STYLE_CLASSIC
 	for key in DEFAULTS:
 		if cfg.has_section_key(SECTION, key):
 			values[key] = _sanitize(key, cfg.get_value(SECTION, key))
