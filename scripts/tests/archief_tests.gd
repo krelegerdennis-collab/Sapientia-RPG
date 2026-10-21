@@ -84,6 +84,8 @@ func _run() -> void:
 	await _warper_tests()
 	print("=== Deel G: Archives v8 vloer-verstrooiing 0-3 ===")
 	await _scatter_tests()
+	print("=== Deel H: niet vast na een warp (Golemhal) + alle WM1-aankomstpunten ===")
+	await _warp_vast_tests()
 	print("ARCHIEFTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	Engine.time_scale = 1.0
@@ -1068,3 +1070,155 @@ func screenshot(name: String) -> void:
 	big.resize(1152, 648, Image.INTERPOLATE_NEAREST)
 	big.save_png(shots.path_join(name + "_3x.png"))
 	print("INFO  screenshot: ", shots.path_join(name + ".png"), " ", img.get_size(), " + _3x ", big.get_size())
+
+
+# ---------------------------------------------------------------- Deel H: vast na warp (Golemhal)
+## Sessielog Dennis 21 okt 2026 (f974642b, web): vinger nog op de D-pad (Classic) tijdens de warp
+## Bibliotheek -> Golemhal, in de Opties net naar Action gezet. De oude touchlaag verdween zonder
+## move_* los te laten -> 'spook'-richting -> spawn_hold (#156) bleef eeuwig aan: niet meer lopen op (9,10).
+const WV_MAPS := "res://scenes/maps/"
+
+
+func _wv_laad(pad: String, spawn := "") -> Node:
+	GameState.in_battle = false
+	GameState.changing_map = false
+	GameState.has_return_point = false
+	GameState.pending_spawn = spawn
+	get_tree().change_scene_to_file(pad)
+	for i in 240:
+		await get_tree().process_frame
+		var s := get_tree().current_scene
+		if s != null and str(s.scene_file_path) == pad and s.is_node_ready() and i > 4:
+			return s
+	return null
+
+
+func _wv_wacht(sec: float) -> void:
+	await get_tree().create_timer(sec).timeout
+
+
+func _wv_nieuw() -> void:
+	GameState.new_game("Dax")
+	GameState.encounter_multiplier = 0.0
+
+
+func _warp_vast_tests() -> void:
+	Engine.time_scale = 1.0
+	var oud = Settings.get_value("battle_style")
+	await _golemhal_vast()
+	await _aankomsten()
+	Settings.set_value("battle_style", oud)
+func _touch(t: Control, pos: Vector2, aan: bool) -> void:
+	var ev := InputEventScreenTouch.new()
+	ev.index = 0
+	ev.pressed = aan
+	ev.position = t.get_global_transform_with_canvas() * pos
+	t._input(ev)
+
+
+func _golemhal_vast() -> void:
+	_wv_nieuw()
+	GameState.story_flags["bewaker:archief_golemhal/golem"] = true
+	# Classic in de Bibliotheek (D-pad), dan in de Opties naar Action (zoals Dennis)
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+	var s := await _wv_laad(WV_MAPS + "archief_bibliotheek.tscn", "deur")
+	var t := s.get_node_or_null("TouchControls/Control") as Control if s else null
+	check("golemhal-vast: Bibliotheek met D-pad", t != null and not t.joystick_mode)
+	if t == null:
+		return
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	# vinger op de D-pad 'omhoog' de golemdeur in, en blijft liggen (wordt 'omlaag' na de warp)
+	var c: Vector2 = t.dpad_center()
+	_touch(t, c + Vector2(0, -t.dpad_radius * 0.8), true)
+	var cs: Node = null
+	for i in 240:
+		await get_tree().process_frame
+		cs = get_tree().current_scene
+		if cs != null and str(cs.scene_file_path).ends_with("archief_golemhal.tscn") and cs.is_node_ready() and not GameState.changing_map:
+			break
+	check("golemhal-vast: via de golemdeur in de Golemhal", cs != null and str(cs.scene_file_path).ends_with("archief_golemhal.tscn"))
+	await _wv_wacht(0.5)
+	var nog := []
+	for a in ["move_up", "move_down", "move_left", "move_right"]:
+		if Input.is_action_pressed(a):
+			nog.append(a)
+	check("golemhal-vast: geen 'spook'-richting meer ingedrukt na de warp (%s)" % [nog], nog.is_empty())
+	if cs == null or not ("player" in cs):
+		return
+	var p: Node = cs.player
+	check("golemhal-vast: spawn_hold niet blijvend aan", not p.spawn_hold)
+	var nt := cs.get_node_or_null("TouchControls/Control") as Control
+	check("golemhal-vast: Golemhal in Action (joystick)", nt != null and nt.joystick_mode)
+	var bewogen := false
+	for joy in [Vector2.UP, Vector2.LEFT, Vector2.RIGHT, Vector2.DOWN]:
+		var t0: Vector2 = p.global_position
+		if nt:
+			nt.joy_raw = joy
+		await _wv_wacht(0.3)
+		if nt:
+			nt.joy_raw = Vector2.ZERO
+		bewogen = bewogen or p.global_position.distance_to(t0) > 8.0
+		await _wv_wacht(0.1)
+		if bewogen:
+			break
+	check("golemhal-vast: met de joystick lopen vanaf het spawnpunt (9,10)", bewogen)
+	for a in ["move_up", "move_down", "move_left", "move_right"]:
+		Input.action_release(a)
+
+
+# ---------------------------------------------------------------- Deel H2: alle WM1-aankomstpunten
+## Alle uitgangen van alle WM1-kaarten (scenes/maps + wat ze bereiken, nooit wacht/wm2) -> elk
+## aankomstpunt: niet op een uitgang (geen terugwarp) en minstens 1 richting vrij (Classic en Action).
+func _aankomsten() -> void:
+	_wv_nieuw()
+	GameState.story_flags["bewaker:archief_golemhal/golem"] = true
+	# speelstand waarin elk aankomstpunt bereikbaar is (bv. bouwplaats van_tunnel: hek weg zodra noor_lid)
+	GameState.story_flags["noor_lid"] = true
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+	var todo: Array = []
+	for f in DirAccess.get_files_at(WV_MAPS):
+		if f.ends_with(".tscn") and f != "wereldkaart.tscn" and f != "dungeon100.tscn" and f != "archief_test.tscn":
+			todo.append(WV_MAPS + f)
+	var gezien := {}
+	var aankomst := {}
+	while not todo.is_empty():
+		var pad: String = todo.pop_front()
+		if gezien.has(pad) or pad.contains("wacht/") or pad.contains("wm2"):
+			continue
+		gezien[pad] = true
+		var s := await _wv_laad(pad)
+		if s == null or s.get_node_or_null("Exits") == null:
+			continue
+		for e in s.get_node("Exits").get_children():
+			var tm := str(e.get("target_map")) if "target_map" in e else ""
+			var sp := str(e.get("target_spawn")) if "target_spawn" in e else ""
+			if tm == "" or sp == "" or tm.ends_with("wereldkaart.tscn") or tm.ends_with("dungeon100.tscn"):
+				continue
+			aankomst[tm + "#" + sp] = [tm, sp]
+			if not gezien.has(tm):
+				todo.append(tm)
+	check("aankomsten: >= 40 WM1-aankomstpunten gevonden (%d)" % aankomst.size(), aankomst.size() >= 40)
+	var fout := []
+	for stijl in [Settings.BATTLE_STYLE_CLASSIC, Settings.BATTLE_STYLE_ACTION]:
+		Settings.set_value("battle_style", stijl)
+		for k in aankomst:
+			var s := await _wv_laad(aankomst[k][0], aankomst[k][1])
+			if s == null or not ("player" in s) or s.get_spawn(aankomst[k][1]) == null:
+				fout.append("%s: spawn ontbreekt" % k)
+				continue
+			await get_tree().process_frame
+			var p: CharacterBody2D = s.player
+			var tile: Vector2i = p.get_tile()
+			for e in s.get_node("Exits").get_children():
+				if e.has_method("contains") and e.contains(tile) and str(e.get("target_map")) != "":
+					fout.append("%s (stijl %d): spawn %s ligt op uitgang %s" % [k, stijl, tile, e.name])
+			var vrij := 0
+			var stap := 16.0 if not p.analog_input.is_valid() else 6.0
+			for d in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+				if not p.test_move(p.global_transform, d * stap):
+					vrij += 1
+			if vrij == 0:
+				fout.append("%s (stijl %d): geen enkele richting vrij op %s" % [k, stijl, tile])
+	for f in fout:
+		print("INFO  aankomst-fout: ", f)
+	check("aankomsten: elk aankomstpunt (Classic + Action) los van uitgangen en >= 1 richting vrij (%d fout)" % fout.size(), fout.is_empty())
