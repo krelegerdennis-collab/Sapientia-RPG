@@ -152,7 +152,7 @@ static func rooms() -> Dictionary:
 			"E": {"map": SCENES["archief_2_v2_gang"], "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v3_ketting"], "spawn": "zuid"},
 		},
-		# poort 2 breed: (10,5) dicht tot de bewaker verslagen is
+		# poort 2 breed: (14,6) dicht tot de bewaker verslagen is (was poort (9,5) 1 breed)
 		"blokkades": {"tot_vlag": "bewaker:archief_2_v2_lotte/lotte", "tiles": [[14, 6]]},
 		"monsters": [{
 			"id": "lotte", "enemy": "lotte_glitch", "group": ["lotte_glitch"],
@@ -215,7 +215,7 @@ static func rooms() -> Dictionary:
 		"signs": [{"tile": [6, 10], "lines": [
 			"Vines block the greenhouse. Ice and a sword cut through them.",
 		]}],
-		# poort 2 breed: (10,5) dicht tot de bewaker verslagen is
+		# poort 2 breed: (14,6) dicht tot de bewaker verslagen is (was poort (9,5) 1 breed)
 		"blokkades": {"tot_vlag": "bewaker:archief_2_v3_wurger/wurger", "tiles": [[14, 6]]},
 		"monsters": [{
 			"id": "wurger", "enemy": "wurger", "group": ["wurger"],

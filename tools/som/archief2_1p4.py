@@ -106,10 +106,10 @@ def fix_gap_ground(g2, lay_oud, lay2, cd, Ynew):
     for y, row in enumerate(lay_oud):
         if "#" not in row: continue
         ny = Ynew[y]
-        for x, c in enumerate(row):
-            for k in range(cd.get(x, 0)):
-                nx = Xf[x] + 1 + k
-                if c == "." and lay2[ny][nx] == "#": g2[ny][nx] = 59
+        Xl_ = maps(len(lay_oud[0]), cd)[1]
+        for x in range(len(row)):   # elke dichtgemaakte tegel van een opening (ook het origineel, bv. tegen (6,4))
+            for nx in range(Xf[x], Xl_[x] + 1):
+                if row[x] == "." and lay2[ny][nx] == "#": g2[ny][nx] = 59
         for nx, c in enumerate(lay2[ny]):   # open tegel in een '#'-rij is nooit plantenbak
             if c == "." and g2[ny][nx] == 59: g2[ny][nx] = vloer(nx, ny)
 
@@ -182,7 +182,7 @@ for var, a, b in var_blocks(src):
         blk = blk.replace(nl + ",", nl + ',\n\t\t"spawns": {"zuid": [%d, %d, "up"], "noord": [%d, 3, "down"], "ingang": [%d, %d, "up"]},' % (Xf[9], Y(10), Xf[9], Xf[9], Y(10)), 1)
     if rid in ("archief_2_v2_lotte", "archief_2_v3_wurger"):   # tweede poorttegel dicht tot de baas weg is
         bid = "lotte" if "lotte" in rid else "wurger"
-        blk = blk.replace('\t\t"monsters": [{', '\t\t# poort 2 breed: (10,5) dicht tot de bewaker verslagen is\n\t\t"blokkades": {"tot_vlag": "bewaker:%s/%s", "tiles": [[10, 5]]},\n\t\t"monsters": [{' % (rid, bid), 1)
+        blk = blk.replace('\t\t"monsters": [{', '\t\t# poort 2 breed: (10,5) in 20x12-coördinaten = (14,6) na schalen; dicht tot de bewaker verslagen is\n\t\t"blokkades": {"tot_vlag": "bewaker:%s/%s", "tiles": [[10, 5]]},\n\t\t"monsters": [{' % (rid, bid), 1)
     pt = lambda m: f'{m.group(1)}[{Xf[int(m.group(2))]}, {Y(int(m.group(3)))}]'
     blk = re.sub(r'("(?:tile|save|warp)": )\[(\d+), (\d+)\]', pt, blk)
     def lijst(m):
