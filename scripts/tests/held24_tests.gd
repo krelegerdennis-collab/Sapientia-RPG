@@ -84,13 +84,13 @@ func _run() -> void:
 	check("held 24x32 op alle %d maps met speler, 16x24 alleen op wereldkaart/bouwplaats, botsing 14x14 (%s)" % [n, fout if fout != "" else "ok"],
 			fout == "" and n >= 40)
 	# 2) screenshots: huis-interieur en een dungeondeur
-	var huis: Node = await _laad(MAPS + "huis_wilgendal.tscn")
+	var huis_ok: bool = (await _laad(MAPS + "huis_wilgendal.tscn")) != null
 	await get_tree().create_timer(0.3).timeout
 	await _shot("huis_wilgendal_interieur")
-	var gang: Node = await _laad(MAPS + "archief_ingang.tscn")
+	var gang_ok: bool = (await _laad(MAPS + "archief_ingang.tscn")) != null
 	await get_tree().create_timer(0.3).timeout
 	await _shot("archief_ingang_deur")
-	check("screenshots geladen (huis + dungeondeur)", huis != null and gang != null)
+	check("screenshots geladen (huis + dungeondeur)", huis_ok and gang_ok)
 	# 3) leiderwissel: Dax/Seren/Vesper/Kael/Orion
 	var s3: Node = await _laad(MAPS + "huis_wilgendal.tscn")
 	var p3 := _speler(s3)
