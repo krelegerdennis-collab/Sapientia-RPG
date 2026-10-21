@@ -243,7 +243,7 @@ func _check_cross(b: Node, who: String) -> void:
 		if tab.intersects(solid[key]):
 			bad.append("naam-tabje over " + key)
 	var tc: Control = b.touch
-	for circ in [[tc.dpad_center(), tc.dpad_radius * 1.2], [tc.a_center(), tc.button_radius * 1.25],
+	for circ in [[tc.dpad_center(), tc.joy_radius() * 1.2], [tc.a_center(), tc.button_radius * 1.25],
 			[tc.b_center(), tc.button_radius * 1.25]]:
 		if _rect_hits_circle(c, circ[0], circ[1]):
 			bad.append("kruis onder een knop")
@@ -509,7 +509,7 @@ func _check_menu_above(b: Node, i: int, who: String) -> void:
 func check_layout(b: Node, label: String) -> void:
 	var tc: Control = b.touch
 	var vp: Vector2 = b.size
-	var circles := [[tc.dpad_center(), tc.dpad_radius * 1.2], [tc.a_center(), tc.button_radius * 1.25],
+	var circles := [[tc.dpad_center(), tc.joy_radius() * 1.2], [tc.a_center(), tc.button_radius * 1.25],
 			[tc.b_center(), tc.button_radius * 1.25]]
 	var rects := {}
 	for box in b.status_boxes:
@@ -827,7 +827,7 @@ func _touch_test() -> void:
 	var ev := InputEventScreenTouch.new()
 	ev.index = 3
 	# parse_input_event verwacht venster-coördinaten -> omrekenen vanuit 384x216
-	ev.position = get_tree().root.get_final_transform() * (touch.dpad_center() + Vector2(touch.dpad_radius * 0.7, 0))
+	ev.position = get_tree().root.get_final_transform() * (touch.dpad_center() + Vector2(touch.joy_radius() * 0.7, 0))
 	ev.pressed = true
 	Input.parse_input_event(ev)
 	await frames(3)
@@ -2477,7 +2477,7 @@ func _check_box_clear(label: String) -> void:
 				bad.append("over speler/doel %s" % f)
 	var touch: Control = scene().get_node_or_null("TouchControls/Control")
 	if touch and touch.visible:
-		for c in [[touch.dpad_center(), touch.dpad_radius * 1.2], [touch.a_center(), touch.button_radius * 1.25],
+		for c in [[touch.dpad_center(), touch.joy_radius() * 1.2], [touch.a_center(), touch.button_radius * 1.25],
 				[touch.b_center(), touch.button_radius * 1.25]]:
 			if _rect_hits_circle(Dialog.box_rect(), c[0], c[1]):
 				bad.append("onder een knop")
@@ -2640,7 +2640,7 @@ func _tutorial_battle_test() -> void:
 	for hk in _hero_rects(b).values():
 		ok_tip = ok_tip and not tip_r.intersects(hk)
 	var tc: Control = b.touch
-	for c in [[tc.dpad_center(), tc.dpad_radius * 1.2], [tc.a_center(), tc.button_radius * 1.25], [tc.b_center(), tc.button_radius * 1.25]]:
+	for c in [[tc.dpad_center(), tc.joy_radius() * 1.2], [tc.a_center(), tc.button_radius * 1.25], [tc.b_center(), tc.button_radius * 1.25]]:
 		ok_tip = ok_tip and not _rect_hits_circle(tip_r, c[0], c[1])
 	check("tip-venster valt nergens over (vijand, kruis, held, vak, strook, D-pad, A/B) %s" % tip_r, ok_tip)
 	check("v0.16: tutorial-tip in het blauwe vertellervak (tekstvak_blauw.png)",

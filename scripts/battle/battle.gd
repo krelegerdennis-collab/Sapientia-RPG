@@ -182,6 +182,8 @@ var _battle_music_pushed := false
 
 func _ready() -> void:
 	tutorial = GameState.pending_tutorial.duplicate(true)
+	if touch and "stick_low" in touch:
+		touch.stick_low = true      # Action-HUD overal: joystick linksonder, kruis past naast de helden
 	_enter_detail_mode()
 	_apply_hd_ui()
 	_make_cross()
@@ -556,12 +558,12 @@ func _layout() -> void:
 	var w := size.x if size.x > 0 else 384.0
 	var h := size.y if size.y > 0 else 216.0
 	var dx := roundf((w - 384.0) / 2.0)
-	# Knoppen: statusvakken tussen de D-pad en de B-knop, menu links van de A-knop.
+	# Knoppen: statusvakken tussen de joystick en de B-knop, menu links van de A-knop.
 	var left := 78.0
 	var right := 300.0
 	var menu_right := w - 49.0
 	if touch and touch.has_method("dpad_center"):
-		left = touch.dpad_center().x + touch.dpad_radius * 1.2 + 4.0
+		left = touch.dpad_center().x + touch.joy_radius() * 1.2 + 4.0
 		right = touch.b_center().x - touch.button_radius * 1.25 - 4.0
 		menu_right = floorf(touch.a_center().x - touch.button_radius * 1.25 - 1.0)
 	# v0.13: lijstje (spreuken/items) rechtsboven; het kruis rechtsonder boven A/B
@@ -659,7 +661,7 @@ func _place_cross(w: float, h: float) -> void:
 			bottom_limit = minf(bottom_limit, br.position.y - 2.0)
 	if touch and touch.has_method("dpad_center"):
 		var dc: Vector2 = touch.dpad_center()
-		var dr: float = touch.dpad_radius * 1.2
+		var dr: float = touch.joy_radius() * 1.2
 		if x0 < dc.x + dr:
 			bottom_limit = minf(bottom_limit, dc.y - dr - 2.0)
 	var cy: float

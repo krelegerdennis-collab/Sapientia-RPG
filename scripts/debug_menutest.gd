@@ -602,11 +602,25 @@ func _bestiary_and_options_tests() -> void:
 			Settings.get_value("touch_opacity") == 90 and is_equal_approx(touch().modulate.a, 0.9))
 	# Knopgrootte: rechts = Groot
 	await tap("move_down")
-	var r0: float = touch().dpad_radius
+	# joystickstraal per stand (Klein/Normaal/Groot = Settings.TOUCH_SIZE_SCALE), A/B schaalt mee
+	var jr := {}
+	var br := {}
+	jr[1] = touch().joy_radius()
+	br[1] = touch().button_radius
 	await tap("move_right")
-	check("Knopgrootte Groot: D-pad straal %.1f -> %.1f" % [r0, touch().dpad_radius],
-			touch().dpad_radius > r0 and is_equal_approx(touch().dpad_radius, touch()._base_dpad_radius * 1.15))
+	jr[2] = touch().joy_radius()
+	br[2] = touch().button_radius
 	await tap("move_left")
+	await tap("move_left")
+	jr[0] = touch().joy_radius()
+	br[0] = touch().button_radius
+	await tap("move_right")
+	for i in 3:
+		var want := roundf(touch()._base_dpad_radius * float(Settings.TOUCH_SIZE_SCALE[i]) * preload("res://scripts/data/som_data.gd").JOY_SCALE)
+		check("Knopgrootte %s: joystickstraal %.1f = %.1f" % [Settings.TOUCH_SIZE_NAMES[i], jr[i], want], is_equal_approx(jr[i], want))
+	check("Knopgrootte: Klein < Normaal < Groot (joystick %.0f/%.0f/%.0f, A/B %.1f/%.1f/%.1f)" % [jr[0], jr[1], jr[2], br[0], br[1], br[2]],
+			jr[0] < jr[1] and jr[1] < jr[2] and br[0] < br[1] and br[1] < br[2])
+	check("Knopgrootte terug op Normaal", int(Settings.get_value("touch_size")) == 1 and is_equal_approx(touch().joy_radius(), jr[1]))
 	# Scanlines uit en weer aan (A wisselt)
 	await tap("move_down")
 	check("focus op Scanlines", s.focused_key() == "crt")

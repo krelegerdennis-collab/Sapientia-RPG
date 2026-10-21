@@ -4,7 +4,7 @@ extends CanvasLayer
 ##   bovenaan: titel links, (optioneel extra knoppen) en een grote 'Terug'-knop rechts
 ##   midden:   'content' (VBoxContainer) - hier bouwt het scherm zijn inhoud in
 ##   onderaan: een hulpregel ('hint'), of tijdelijk een melding (show_message)
-## Besturing: D-pad/pijltjes + A (UiMenu.pad_nav), B / MENU = terug, en tikken.
+## Besturing: joystick/pijltjes + A (UiMenu.pad_nav), B / MENU = terug, en tikken.
 ## Een scherm erft hiervan met  extends "res://scripts/ui/menu_screen.gd"  en vult
 ## _build() en (optioneel) _handle_input() en back() in.
 
@@ -136,7 +136,7 @@ func quiet() -> void:
 	_quiet_frame = Engine.get_process_frames()
 
 
-## -1 = links, +1 = rechts, 0 = niets (D-pad, pijltjes of A/D; telt één keer per druk).
+## -1 = links, +1 = rechts, 0 = niets (joystick, pijltjes of A/D; telt één keer per druk).
 static func horizontal_pressed() -> int:
 	if Input.is_action_just_pressed("move_left") or Input.is_action_just_pressed("ui_left"):
 		return -1
@@ -151,7 +151,7 @@ static func lock_horizontal_focus(c: Control) -> void:
 	c.focus_neighbor_right = NodePath(".")
 
 
-## Kleine knop ('<', '>') die je alleen aantikt; de D-pad doet hetzelfde met links/rechts.
+## Kleine knop ('<', '>') die je alleen aantikt; de joystick doet hetzelfde met links/rechts.
 static func arrow_button(text: String) -> Button:
 	var b := Button.new()
 	b.text = text

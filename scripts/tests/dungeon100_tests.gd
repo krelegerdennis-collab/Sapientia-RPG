@@ -441,8 +441,8 @@ func _hud_tests() -> void:
 			and r.end.x < 200 and r.end.y < 30)
 	var touch: Control = scene().get_node_or_null("TouchControls/Control")
 	check("HUD botst niet met de MENU-knop (touch)", touch != null and not r.intersects(touch.menu_rect()))
-	check("HUD botst niet met D-pad, A, B of KERN", touch != null and not r.intersects(Rect2(touch.dpad_center() - Vector2.ONE * touch.dpad_radius,
-			Vector2.ONE * touch.dpad_radius * 2.0)) and not r.intersects(touch.kern_rect()))
+	check("HUD botst niet met D-pad, A, B of KERN", touch != null and not r.intersects(Rect2(touch.dpad_center() - Vector2.ONE * touch.joy_radius(),
+			Vector2.ONE * touch.joy_radius() * 2.0)) and not r.intersects(touch.kern_rect()))
 	check("HUD vangt geen tikken (mouse_filter = ignore)", hud.view.mouse_filter == Control.MOUSE_FILTER_IGNORE)
 	await screenshot("d100_hud_floor12")
 	GameState.dungeon100_floor = 1

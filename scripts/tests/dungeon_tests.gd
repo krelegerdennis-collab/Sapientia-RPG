@@ -1396,8 +1396,9 @@ func _run_tests() -> void:
 	await close_dialog()
 	await pframes(10)
 	var touch: Control = scene().get_node_or_null("TouchControls/Control")
-	check("R: RUN-knop zichtbaar in het veld, recht boven de CORE-plek", touch != null and touch.show_run
-			and touch.run_rect().end.y < touch.kern_rect().position.y and is_equal_approx(touch.run_rect().end.x, touch.kern_rect().end.x))
+	check("R: RUN-knop zichtbaar in het veld, in de bovenste rij links van MENU", touch != null and touch.show_run
+			and touch.run_rect().end.y < touch.kern_rect().position.y and touch.run_rect().end.x <= touch.menu_rect().position.x
+			and absf(touch.run_rect().get_center().y - touch.menu_rect().get_center().y) < 1.0)
 	check("R: standaard uit", not bool(Settings.get_value("run")) and not touch.run_on())
 	await tap("run")
 	check("R: knop/toets R zet RUN aan (blijft aan)", bool(Settings.get_value("run")) and touch.run_on())
