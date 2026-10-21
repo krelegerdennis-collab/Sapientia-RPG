@@ -355,6 +355,7 @@ func _ready() -> void:
 				DirAccess.remove_absolute(ProjectSettings.globalize_path(sp))
 		if FileAccess.file_exists(autosave_path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(autosave_path))
+		_finish_preload()   # tests: achtergrond-laden eerst afmaken (geen race/deadlock met load() in de suite)
 		var tester: Node = load(t[1]).new()
 		tester.name = t[2]
 		get_tree().root.add_child.call_deferred(tester)
@@ -411,7 +412,8 @@ func _preload_paths() -> Array[String]:
 const MAIN_THREAD_SCRIPTS := ["res://scripts/map.gd", "res://scripts/player.gd", "res://scripts/npc.gd",
 	"res://scripts/sign.gd", "res://scripts/door.gd", "res://scripts/book_point.gd",
 	"res://scripts/map_exit.gd", "res://scripts/map_spawn.gd", "res://scripts/touch_controls.gd",
-	"res://scripts/battle/battle.gd", "res://scripts/story_object.gd"]
+	"res://scripts/battle/battle.gd", "res://scripts/story_object.gd",
+	"res://world_warper/art/flyover.gd"]   # preload()t een textuur: nooit in de laad-thread compileren
 
 
 func _start_preload() -> void:
@@ -438,6 +440,16 @@ func _process(_delta: float) -> void:
 			_preloading.remove_at(i)
 	if _preloading.is_empty():
 		set_process(false)
+
+
+## Wacht tot alle achtergrond-loads klaar zijn (alleen voor de testmodi).
+func _finish_preload() -> void:
+	for p in _preloading.duplicate():
+		var r := ResourceLoader.load_threaded_get(p)
+		if r != null:
+			_loaded[p] = r
+	_preloading.clear()
+	set_process(false)
 
 
 ## Geeft een (voor)geladen resource; wacht zo nodig tot het laden klaar is.
