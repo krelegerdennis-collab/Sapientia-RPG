@@ -52,7 +52,7 @@ func _run() -> void:
 	for t in MusicTracks.TRACKS:
 		for mid in t["ids"]:
 			var e: Dictionary = m["bgm"].get(mid, {})
-			data_ok = data_ok and not e.is_empty() and FileAccess.file_exists("res://assets/audio/bgm/" + str(e.get("bestand", ""))) \\
+			data_ok = data_ok and not e.is_empty() and FileAccess.file_exists("res://assets/audio/bgm/" + str(e.get("bestand", ""))) \
 					and str(e.get("beschrijving", "")).to_lower().contains("suno")
 		data_ok = data_ok and str(t["name"]) != "" and str(t["name"]).is_valid_identifier() == false
 	check("7 Suno-tracks, elk in het manifest met bestand, Engelse naam in music_tracks.gd", data_ok)
