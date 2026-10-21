@@ -17,6 +17,7 @@ size = Vector2(14, 14)
 
 [node name="Hal" type="Node2D"]
 script = ExtResource("1_map")
+music_track = "ww_ambient"
 map_name = "The Atrium"
 encounters = false
 

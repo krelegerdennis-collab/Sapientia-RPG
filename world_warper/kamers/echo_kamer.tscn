@@ -11,6 +11,7 @@
 
 [node name="EchoKamer" type="Node2D"]
 script = ExtResource("1_map")
+music_track = "ww_ambient"
 map_name = "ECHO's Chamber"
 encounters = false
 
