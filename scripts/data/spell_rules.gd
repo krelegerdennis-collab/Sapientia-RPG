@@ -11,6 +11,8 @@ const CAP := {
 	"dennis": {},
 	"noor": {"vuur": 4, "natuur": 4, "bliksem": 4, "licht": 1},
 	"lotte": {"licht": 4, "ijs": 4},
+	"kael": {"bliksem": 4},
+	"orion": {},
 }
 
 

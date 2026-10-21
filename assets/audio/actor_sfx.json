@@ -49,6 +49,34 @@
 				"dood": "Dalende klok die uitdooft.",
 				"vaardigheid": "Stijgende klokjes, genezing."
 			}
+		},
+		"kael": {
+			"naam": "Kael Voss",
+			"klas": "Psytech",
+			"stem": "Kalme, heldere mannenstem. Zoemende prisma's.",
+			"klank": "psytech",
+			"volume_db": -6,
+			"pitch_variatie": 0.05,
+			"slots": {
+				"aanval": "Prisma-straal: kort zoemen en een heldere tik.",
+				"raak": "Ingehouden grom, flikkerende prisma's.",
+				"dood": "Prisma's vallen rinkelend stil.",
+				"vaardigheid": "Prisma-ring: drie tonen die rondzoemen."
+			}
+		},
+		"orion": {
+			"naam": "Orion",
+			"klas": "Boogschutter",
+			"stem": "Rustige, lage stem. Boogpees en pijlen.",
+			"klank": "boog",
+			"volume_db": -6,
+			"pitch_variatie": 0.05,
+			"slots": {
+				"aanval": "Pees spant en schiet: twang en een zoevende pijl.",
+				"raak": "Korte, droge kreet.",
+				"dood": "Boog valt, een lange uitademing.",
+				"vaardigheid": "Doorborend schot: zware twang, scherpe inslag."
+			}
 		}
 	},
 	"monsters": {

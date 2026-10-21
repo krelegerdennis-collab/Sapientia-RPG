@@ -116,3 +116,11 @@ assets/audio/sfx/monsters/ledger_scarab/aanval.wav
 assets/audio/sfx/monsters/ledger_scarab/raak.wav
 assets/audio/sfx/monsters/ledger_scarab/dood.wav
 assets/audio/sfx/monsters/ledger_scarab/vaardigheid.wav
+assets/audio/sfx/helden/kael/aanval.wav
+assets/audio/sfx/helden/kael/raak.wav
+assets/audio/sfx/helden/kael/dood.wav
+assets/audio/sfx/helden/kael/vaardigheid.wav
+assets/audio/sfx/helden/orion/aanval.wav
+assets/audio/sfx/helden/orion/raak.wav
+assets/audio/sfx/helden/orion/dood.wav
+assets/audio/sfx/helden/orion/vaardigheid.wav

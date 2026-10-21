@@ -34,9 +34,11 @@ const SHEETS := {
 	"dennis": "res://assets/sprites/som/kaart/dax_wm1_slim.png",
 	"noor": "res://assets/sprites/som/kaart/vesper.png",
 	"lotte": "res://assets/sprites/som/kaart/seren_wm1.png",
+	"kael": "res://assets/sprites/som/kaart/kael_wm1_slim.png",
+	"orion": "res://assets/sprites/som/kaart/orion_wm1_slim.png",
 }
 ## Wisselvolgorde (SWITCH-knop / toets C): Dax -> Seren -> Vesper; KO wordt overgeslagen.
-const SWITCH_ORDER: Array[String] = ["dennis", "lotte", "noor"]
+const SWITCH_ORDER: Array[String] = ["dennis", "lotte", "noor", "kael", "orion"]
 ## Camera glijdt naar de nieuwe held (Camera2D position_smoothing_speed).
 const CAMERA_SMOOTH := 7.0
 ## Lichaamsmidden t.o.v. de node (voeten op +8, 24x32-frame -> midden op -8). Slag/raakpunt rekent hiervandaan.
@@ -53,7 +55,20 @@ const ATTACK_ANIMS := {
 	"dennis": {"sheet": "res://assets/sprites/som/combat/dax_attack.png", "frame": ATTACK_FRAME, "frames": 6, "ms": ATTACK_MS, "hit_frame": ATTACK_HIT_FRAME},
 	"noor": {"sheet": "res://assets/sprites/som/combat/vesper_attack.png", "frame": ATTACK_FRAME, "frames": 6, "ms": ATTACK_MS, "hit_frame": ATTACK_HIT_FRAME},
 	"lotte": {"sheet": "res://assets/sprites/som/combat/seren_attack.png", "frame": ATTACK_FRAME, "frames": 6, "ms": ATTACK_MS, "hit_frame": ATTACK_HIT_FRAME},
+	# Rekruten (World Warper): RPG ART wm1_combat 8.5 (Kael prisma-straal, Orion boog)
+	"kael": {"sheet": "res://assets/sprites/som/combat/kael_attack.png", "frame": ATTACK_FRAME, "frames": 6, "ms": ATTACK_MS, "hit_frame": ATTACK_HIT_FRAME},
+	"orion": {"sheet": "res://assets/sprites/som/combat/orion_attack.png", "frame": ATTACK_FRAME, "frames": 6, "ms": ATTACK_MS, "hit_frame": ATTACK_HIT_FRAME},
 }
+## Langer bereik per held (px, i.p.v. ATTACK_REACH/ATTACK_OFFSET): Kael's prisma-straal en Orion's pijl.
+const ATTACK_RANGE_BY_HERO := {"kael": {"offset": 18.0, "reach": 20.0}, "orion": {"offset": 30.0, "reach": 26.0}}
+
+
+static func attack_offset(id: String) -> float:
+	return float(ATTACK_RANGE_BY_HERO.get(id, {}).get("offset", ATTACK_OFFSET))
+
+
+static func attack_reach(id: String) -> float:
+	return float(ATTACK_RANGE_BY_HERO.get(id, {}).get("reach", ATTACK_REACH))
 ## Overige held-poses (48x48, zelfde anker): hurt = 4 kolommen (onder, links, rechts, boven) x 1 rij,
 ## ko = 1 frame, cast = 3 kolommen x 4 rijen (frame 1 200 ms, daarna 2-3 in een lus van 120 ms).
 const HERO_POSES := {
@@ -62,6 +77,10 @@ const HERO_POSES := {
 			"cast": "res://assets/sprites/som/combat/vesper_cast6.png"},
 	"lotte": {"hurt": "res://assets/sprites/som/combat/seren_hurt.png", "ko": "res://assets/sprites/som/combat/seren_ko.png",
 			"cast": "res://assets/sprites/som/combat/seren_cast6.png"},
+	"kael": {"hurt": "res://assets/sprites/som/combat/kael_hurt.png", "ko": "res://assets/sprites/som/combat/kael_ko.png",
+			"cast": "res://assets/sprites/som/combat/kael_cast.png"},
+	"orion": {"hurt": "res://assets/sprites/som/combat/orion_hurt.png", "ko": "res://assets/sprites/som/combat/orion_ko.png",
+			"cast": "res://assets/sprites/som/combat/orion_cast.png"},
 }
 const HURT_TIME := 0.25
 const CAST_MS: Array[int] = [200, 120, 120, 120, 120]      # oude 3-frame cast-sheet (fallback)
@@ -164,7 +183,7 @@ const RING_CAST_DELAY := 0.35
 
 ## --- bondgenoten (AI, SoM-stijl): Vesper en Seren vechten mee ---
 ## Formatie: plekken achter Dax (in px, t.o.v. zijn kijkrichting: x = opzij, y = erachter).
-const FORMATION := [Vector2(-10, 18), Vector2(10, 18)]
+const FORMATION := [Vector2(-10, 18), Vector2(10, 18), Vector2(0, 32)]
 const ALLY_SPEED := 78.0
 ## Dichter bij het doel dan dit = stilstaan.
 const ALLY_ARRIVE := 5.0
@@ -199,11 +218,13 @@ const SKILLS := {
 	"dennis": [{"id": "wervelslag", "name": "Whirl Slash", "mult": 0.9, "radius": 30.0}],
 	"lotte": [{"id": "staafstoot", "name": "Staff Smash", "mult": 1.5, "radius": 0.0}],
 	"noor": [{"id": "vonkstoot", "name": "Arc Jab", "mult": 1.3, "radius": 0.0}],
+	"kael": [{"id": "prismaring", "name": "Prism Ring", "mult": 0.8, "radius": 32.0}],
+	"orion": [{"id": "scherpschot", "name": "Piercing Shot", "mult": 1.6, "radius": 0.0}],
 }
 
 ## --- B = toveren (alleen Seren/Vesper als bestuurde held) ---
 ## Snelspreuk per held-id: heal -> partylid met het laagste HP-deel; damage -> dichtstbijzijnde vijand.
-const B_MAGIC := {"lotte": "genees", "noor": "vuur"}
+const B_MAGIC := {"lotte": "genees", "noor": "vuur", "kael": "vonk"}
 ## Minimale tijd (s) tussen twee B-spreuken.
 const B_CAST_COOLDOWN := 1.0
 ## Bereik (px) waarbinnen een spreuk een vijand kan kiezen.

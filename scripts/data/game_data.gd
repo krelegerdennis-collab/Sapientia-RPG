@@ -50,6 +50,26 @@ const HEROES := [
 		"spells": ["genees"],
 		"growth": {"max_hp": 6, "max_mp": 3, "atk": 2, "def": 1, "agi": 1, "mag": 2, "mdef": 2},
 	},
+	# Rekruten in de World Warper-hal (world_warper/services/rekruut.gd). Nog geen turn-based gevechtsart:
+	# battle.gd valt terug op het reserve-plaatje (battle_sprite leeg).
+	{
+		"id": "kael", "battle_sprite": "",
+		"field_sprite": "res://assets/sprites/som/kaart/kael_wm1_slim.png",
+		"name": "Kael Voss", "class": "Psytech", "accent": "cyaan", "equip_type": "magier",
+		"level": 1, "exp": 0,
+		"max_hp": 30, "max_mp": 16, "atk": 10, "def": 6, "agi": 9, "mag": 9, "mdef": 7,
+		"spells": ["vonk"],
+		"growth": {"max_hp": 6, "max_mp": 3, "atk": 2, "def": 1, "agi": 1, "mag": 2, "mdef": 2},
+	},
+	{
+		"id": "orion", "battle_sprite": "",
+		"field_sprite": "res://assets/sprites/som/kaart/orion_wm1_slim.png",
+		"name": "Orion", "class": "Archer", "accent": "magenta", "equip_type": "krijger",
+		"level": 1, "exp": 0,
+		"max_hp": 34, "max_mp": 0, "atk": 12, "def": 6, "agi": 12, "mag": 3, "mdef": 5,
+		"spells": [],
+		"growth": {"max_hp": 7, "max_mp": 0, "atk": 3, "def": 1, "agi": 2, "mag": 0, "mdef": 1},
+	},
 ]
 
 ## Totale EXP die nodig is om een level te bereiken.

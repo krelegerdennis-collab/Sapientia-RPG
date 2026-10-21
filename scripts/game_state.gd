@@ -349,6 +349,7 @@ func _ready() -> void:
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
 			["--musictest", "res://scripts/tests/music_tests.gd", "MusicTest", "musictest"],
 			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
+			["--rekruuttest", "res://scripts/tests/rekruut_tests.gd", "RekruutTest", "rekruuttest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
@@ -406,7 +407,8 @@ func _preload_paths() -> Array[String]:
 	for p in GameData.BACKDROPS.values():
 		out.append(str(p))
 	for h in GameData.HEROES:
-		out.append(str(h["battle_sprite"]))
+		if str(h["battle_sprite"]) != "":
+			out.append(str(h["battle_sprite"]))
 	for e in GameData.ENEMIES.values():
 		out.append(GameData.enemy_sprite(e))
 	return out
