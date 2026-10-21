@@ -115,11 +115,18 @@ func _tuin() -> void:
 	check("ze bewegen om elkaar heen", g.creatures[0].position.distance_to(a) > 1.0)
 	await screenshot("garden_creatures")
 	var p: Node2D = t.get_node("Objects/Player")
-	# loop (gesimuleerd) naar de uitgang NaarWereld
-	var pad: Array[Vector2] = [Vector2(264, 160), Vector2(264, 240), Vector2(248, 300)]
+	# loop (gesimuleerd) over het tuinpad naar de uitgang NaarWereld. Erf 1.4x (tools/som/wachtershuis_1p4.py, 45x31):
+	# oude route (264,160)->(264,240)->(248,300) omgerekend met X()/Y() uit tools/som/wachtershuis_1p4.py
+	# (tuinpad kolom 16->24, rij 10->12, 15->20, 18->26, kolom 15->23). De oude route kwam pas op y=300 net
+	# over FOLLOW_TRIGGER_Y (296) en stopte daar, waardoor de wezens vanaf de speelplek (440,232) te laat aankwamen.
+	var pad: Array[Vector2] = [Vector2(392, 192), Vector2(392, 320), Vector2(376, 428)]
+	check("route kruist de volg-grens ruim (y %d > %d)" % [int(pad[2].y), int(Garden.FOLLOW_TRIGGER_Y)],
+			pad[1].y > Garden.FOLLOW_TRIGGER_Y + 16.0 and pad[0].y < Garden.FOLLOW_TRIGGER_Y)
 	for doel in pad:
 		while p.position.distance_to(doel) > 0.5:
-			p.position = p.position.move_toward(doel, 1.0)
+			# loopsnelheid in px/s (zoals player.gd), niet 1 px per frame: onder xvfb zonder vsync liep de speler
+			# anders 3-5x te snel en haalden de wezens (CATCH_UP_SPEED 96 px/s) hem niet in (flaky)
+			p.position = p.position.move_toward(doel, float(p.walk_speed) * get_process_delta_time())
 			await get_tree().process_frame
 	check("volgen gestart richting uitgang", g.mode == Garden.Mode.FOLLOW)
 	await get_tree().create_timer(1.2).timeout
