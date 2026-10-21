@@ -368,6 +368,11 @@ func _notification(what: int) -> void:
 	# App naar de achtergrond of venster kwijt: laat alle knoppen los.
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		release_all()
+	# Sessielog 21 okt 2026 (vast in de Golemhal): deze laag verdwijnt met de oude kaart (warp) terwijl
+	# een vinger nog op de D-pad ligt. Input.action_press is globaal en niemand liet move_* dan nog los:
+	# op de nieuwe kaart bleef de richting 'ingedrukt', spawn_hold wachtte eeuwig op loslaten = niet lopen.
+	elif what == NOTIFICATION_EXIT_TREE:
+		release_all()
 
 
 # ------------------------------------------------------------- tekenen
