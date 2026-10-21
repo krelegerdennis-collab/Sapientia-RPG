@@ -195,9 +195,9 @@ const ACTION_AREAS := {
 			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 4.0], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
 			"tiers": {1: {"atk": 1.1, "cooldown": 3.0}, 2: {"atk": 1.0, "cooldown": 2.8},
 					3: {"atk": 0.7, "cooldown": 2.8}, 4: {"atk": 0.7, "cooldown": 2.8}},
-			# loss tier 1: Forge vroeg 0.30-0.50, maar in de sim is winst 80-90% alleen haalbaar met 75-80% verlies
-			# (bimodaal: of 100% winst met <=55% verlies, of <=97% winst met >=66% verlies). Zie BALANS_ARCHIEF1.md.
-			"targets": {1: {"win": [0.80, 0.90], "loss": [0.30, 0.80]}, 2: {"win": [0.70, 0.85]},
+			# loss tier 1: Forge (21 okt): 89% winst / 77% verlies geaccepteerd, grens = gemiddeld verlies <= 80%.
+			# Herstel: het opslagboek in archief_ingang (vlak voor archief_v1_gang) geneest de party vol.
+			"targets": {1: {"win": [0.80, 0.90], "loss": [0.0, 0.80]}, 2: {"win": [0.70, 0.85]},
 					3: {"win": [0.65, 0.80]}, 4: {"win": [0.60, 0.75]}}},
 }
 

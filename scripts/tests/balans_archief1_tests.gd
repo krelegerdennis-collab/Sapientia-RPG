@@ -38,6 +38,7 @@ func _run() -> void:
 	_data()
 	_slagen()
 	_winst()
+	await _herstelpunt()
 	await _arena_en_classic()
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	print("BALANSTEST %d PASS, %d FAIL" % [passes, failures])
@@ -111,7 +112,7 @@ func _winst() -> void:
 				w >= float(wv[0]) and w <= float(wv[1]))
 		if doel.has("loss"):
 			var lv: Array = doel["loss"]
-			check("tier %d: gemiddeld HP-verlies %d%% binnen %d-%d%%" % [t, roundi(l * 100.0), roundi(lv[0] * 100.0), roundi(lv[1] * 100.0)],
+			check("tier %d: gemiddeld HP-verlies %d%% <= %d%% (min %d%%)" % [t, roundi(l * 100.0), roundi(lv[1] * 100.0), roundi(lv[0] * 100.0)],
 					l >= float(lv[0]) and l <= float(lv[1]))
 		check("tier %d: niet makkelijker dan de vorige tier (%d%% <= %d%%)" % [t, roundi(w * 100.0), roundi(minf(vorige, 1.0) * 100.0)], w <= vorige + 0.02)
 		vorige = w
@@ -128,6 +129,30 @@ func _laad(pad: String) -> Node:
 		if s != null and str(s.scene_file_path) == pad and s.is_node_ready() and i > 4:
 			return s
 	return null
+
+
+## Geen soft-lock na een zware archief_v1_gang: de kamer ervoor (archief_ingang) heeft een opslagboek dat de
+## party vol geneest, en verliezen in v1 zet je terug op het checkpoint met volle HP.
+func _herstelpunt() -> void:
+	var ingang: Dictionary = DR.room("archief_ingang")
+	var naar_v1 := false
+	for k in ingang.get("exits", ingang.get("doors", {})):
+		var ex = ingang.get("exits", ingang.get("doors", {}))[k]
+		if ex is Dictionary and str(ex.get("map", "")).ends_with("archief_v1_gang.tscn"):
+			naar_v1 = true
+	check("archief_ingang leidt naar archief_v1_gang", naar_v1)
+	check("archief_ingang heeft een opslagboek (type save)", ingang.has("save") and str(ingang.get("save_type", "save")) == "save")
+	GameState.new_game("Dax")
+	GameState.encounter_multiplier = 0.0
+	var s := await _laad("res://scenes/maps/archief_ingang.tscn")
+	var boek: Node = s.get("save_book") if s else null
+	check("opslagboek staat in de ingang", boek != null)
+	if boek:
+		for h in GameState.party:
+			h["hp"] = 1
+		boek.restore()
+		check("opslagboek geneest de party vol (HP %d/%d)" % [int(GameState.party[0]["hp"]), int(GameState.party[0]["max_hp"])],
+				GameState.party.all(func(h): return int(h["hp"]) == int(h["max_hp"])))
 
 
 func _arena_en_classic() -> void:

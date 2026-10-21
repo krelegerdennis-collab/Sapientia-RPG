@@ -15,7 +15,7 @@ archief_v1_gang 80-90% winst en 30-50% HP-verlies; v2-v4 op hun verwachte level 
 | tiers.2 | schade x1.00, cooldown x2.8 | |
 | tiers.3 | schade x0.70, cooldown x2.8 | |
 | tiers.4 | schade x0.70, cooldown x2.8 | |
-| targets | per tier winst (en voor tier 1 verlies) | bewaakt door --balansarchief1test |
+| targets | per tier winst; tier 1 ook gemiddeld verlies <= 80% | bewaakt door --balansarchief1test |
 
 - "atk" werkt nu op de realtime vijandschade (`SomData.enemy_damage_mult(room, tier)` = ENEMY_DAMAGE_MULT x factor), niet
   op de atk-stat: tier-1-vijanden hebben atk 5-6, dus een factor op de stat springt in hele stappen (0.90 -> 100% winst,
@@ -139,3 +139,10 @@ deze uitleg. Alternatief voor Forge: 0.60 / 3.4 (100% winst, 38% verlies) als he
 Oorzaak: een solo-Dax zonder genezing tegen een hele kamer; wie het haalt, haalt het meestal net.
 Binnen een tier verschillen kamers sterk (v3_zuilenhal 48% vs v3_gang 96%); per-tier data kan dat niet gelijk trekken
 zonder per-kamer-regels.
+
+
+## Besluit Forge (21 okt 2026) en herstelpunt
+
+- Tier 1 blijft op schade x1.10 / cooldown x3.0 (89% winst, 77% gemiddeld verlies). Testgrens: winst 80-90%, gemiddeld verlies <= 80%.
+- Geen soft-lock: archief_ingang (de kamer vlak voor archief_v1_gang, uitgang "n") heeft een opslagboek (type "save") dat de party
+  vol geneest (getest: HP 1 -> vol). Verliezen in archief_v1_gang zet je terug op het checkpoint (respawn_at_checkpoint, volle HP).
