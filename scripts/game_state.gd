@@ -353,8 +353,10 @@ func _ready() -> void:
 			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
 			["--sessiefixtest", "res://scripts/tests/sessiefix_tests.gd", "SessiefixTest", "sessiefixtest"],
 			["--rekruuttest", "res://scripts/tests/rekruut_tests.gd", "RekruutTest", "rekruuttest"],
+			["--balansarchief1test", "res://scripts/tests/balans_archief1_tests.gd", "BalansArchief1Test", "balansarchief1test"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
-			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"]]:
+			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
+			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet

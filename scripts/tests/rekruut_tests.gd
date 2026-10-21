@@ -316,10 +316,22 @@ func _action(id: String) -> void:
 		if hid == id:
 			res[0] = hits
 	a.swing_landed.connect(cb2)
-	a.attack()
-	var t1 := Time.get_ticks_msec()
-	while res[0] < 0 and Time.get_ticks_msec() - t1 < 2500:      # op tijd wachten (frames kunnen heel kort zijn)
-		await get_tree().process_frame
+	# tot 2 pogingen: een rondlopende kamervijand kan de speler net raken/verplaatsen (zelden, flaky)
+	for poging in 2:
+		if poging > 0:
+			m.place_at(Vector2i(pt.x + 3, pt.y), Vector2i.LEFT)
+			await get_tree().process_frame
+			p.position = a.center_of(m) - Vector2(SomData.attack_offset(id) + 4.0, SomData.BODY_Y)
+			p.set("_target", p.position)
+			p.facing = Vector2i.RIGHT
+			a.swing_lock = 0.0
+			a.charge = 1.0
+		a.attack()
+		var t1 := Time.get_ticks_msec()
+		while res[0] < 0 and Time.get_ticks_msec() - t1 < 2500:      # op tijd wachten (frames kunnen heel kort zijn)
+			await get_tree().process_frame
+		if res[0] >= 1:
+			break
 	a.swing_landed.disconnect(cb2)
 	check("%s: bestuurde slag raakt (%d)" % [id, res[0]], res[0] >= 1)
 	# 3b) ontwijken: een klap tijdens de iframes -> <held>_dodge.png-pose, geen schade
