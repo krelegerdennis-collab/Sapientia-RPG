@@ -166,8 +166,9 @@ func _stick(t: Control, local: Vector2, pressed: bool, idx := 0) -> void:
 	var ev := InputEventScreenTouch.new()
 	ev.index = idx
 	ev.pressed = pressed
-	ev.position = t.get_global_transform_with_canvas() * local
-	t._input(ev)      # viewport-coördinaten, zoals _input ze krijgt (parse_input_event zou nog door de vensterschaal gaan)
+	# echte invoer via de wachtrij (vensterschaal erbij, zoals debug_autotest): komt vóór _process binnen
+	ev.position = get_tree().root.get_final_transform() * (t.get_global_transform_with_canvas() * local)
+	Input.parse_input_event(ev)
 	await pframes(2)
 
 
@@ -321,11 +322,15 @@ func _menu(t: Control) -> void:
 	check("D menu: MENU-knop in de rij opent het veldmenu", open)
 	await pframes(15)
 	await _screenshot("menu")
-	Input.action_press("cancel")
-	await pframes(3)
-	Input.action_release("cancel")
-	await wait_until(func(): return not scene().menu_open(), 3.0)
+	for i in 10:
+		if not scene().menu_open():
+			break
+		Input.action_press("cancel")
+		await pframes(3)
+		Input.action_release("cancel")
+		await pframes(10)
 	await pframes(5)
+	check("D menu: dicht -> joystick + rij terug", not scene().menu_open() and t.is_visible_in_tree() and t.show_menu)
 
 
 func _classic_battle() -> void:

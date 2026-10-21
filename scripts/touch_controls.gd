@@ -293,9 +293,14 @@ func _process(delta: float) -> void:
 	_repeat_t += delta
 	while _repeat_t >= STICK_REPEAT_RATE:
 		_repeat_t -= STICK_REPEAT_RATE
+		# als echte invoer (wachtrij, volgende beeld): dan ziet iedereen een 'just pressed', ook wie vóór
+		# deze _process al keek. Eerst los, dan weer in; de stand blijft ingedrukt.
 		for a in acts:
-			Input.action_release(a)
-			Input.action_press(a)
+			for down in [false, true]:
+				var ev := InputEventAction.new()
+				ev.action = a
+				ev.pressed = down
+				Input.parse_input_event(ev)
 		repeat_count += 1
 
 
