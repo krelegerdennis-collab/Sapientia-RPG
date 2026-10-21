@@ -680,6 +680,7 @@ func move_member_to_front(index: int) -> bool:
 	var h: Dictionary = party[index]
 	party.remove_at(index)
 	party.insert(0, h)
+	KaartStijl.ververs_held()   # 24x32-kaartsprite van de nieuwe leider
 	return true
 
 

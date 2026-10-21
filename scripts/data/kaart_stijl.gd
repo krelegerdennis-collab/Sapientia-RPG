@@ -99,9 +99,62 @@ static func is_som(pad: String) -> bool:
 	return stijl_van_map(pad) == SOM
 
 
-## Op een geladen map toepassen (map.gd _ready). In de oude stijl gebeurt er niets.
-## SoM: Ground krijgt de eerste tileset van het gebied, de speler zijn 24x32-sprite.
+## Held 24x32 (Forge, 21 okt 2026): los van de SoM-tilesets. Op elke map behalve deze de 24x32-sheet van
+## de partijleider; daar blijft de oude 16x24 player.png (wereldkaart = kleine kaart, bouwplaats = eigen schaal).
+const HELD_OUD_MAPS: Array[String] = ["wereldkaart", "berggrot_bouwplaats"]
+const HELDEN := "res://assets/sprites/som/kaart/"
+## Volgorde: slanke WM1-sheet, WM1-sheet, sheet zonder variant (kael/orion tot ART de _wm1_slim levert).
+const HELD_VARIANTEN: Array[String] = ["_wm1_slim", "_wm1", ""]
+
+
+## Toont deze map de held in 24x32?
+static func held_nieuw_op(pad: String) -> bool:
+	return pad != "" and not HELD_OUD_MAPS.has(pad.get_file().get_basename())
+
+
+## 24x32-sheet voor een heldnaam ("Dax" -> dax_wm1_slim.png); "" = geen sheet (oude 16x24 blijft).
+static func held_sheet(naam: String) -> String:
+	var n := naam.to_lower().get_slice(" ", 0)
+	if n == "":
+		return ""
+	for v in HELD_VARIANTEN:
+		var p := HELDEN + n + v + ".png"
+		if ResourceLoader.exists(p):
+			return p
+	return ""
+
+
+## Sheet van de huidige partijleider (GameState.party[0]); Dax als er geen party is.
+static func leider_sheet() -> String:
+	var gs = Engine.get_main_loop().root.get_node_or_null("GameState") if Engine.get_main_loop() is SceneTree else null
+	if gs == null or (gs.party as Array).is_empty():
+		return held_sheet("Dax")
+	return held_sheet(str((gs.party[0] as Dictionary).get("name", "")))
+
+
+## Zet de 24x32-sheet van de leider op de speler van deze map (offset (0,-8), botsing blijft 14x14).
+static func held_toepassen(map: Node) -> bool:
+	if map == null or not held_nieuw_op(str(map.scene_file_path)):
+		return false
+	var p := map.get_node_or_null("Objects/Player")
+	var sheet := leider_sheet()
+	if p == null or sheet == "" or not p.has_method("zet_sheet"):
+		return false
+	p.zet_sheet(load(sheet))
+	return true
+
+
+## Na een leiderwissel (molen) de speler op de huidige map bijwerken.
+static func ververs_held() -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree != null and tree.current_scene != null:
+		held_toepassen(tree.current_scene)
+
+
+## Op een geladen map toepassen (map.gd _ready): eerst de held (elke map, los van de stijl), daarna in
+## SoM-gebieden de tileset. In de oude stijl verandert er aan de grond niets.
 static func toepassen(map: Node) -> bool:
+	held_toepassen(map)
 	var pad := str(map.scene_file_path)
 	if not is_som(pad):
 		return false
@@ -115,10 +168,6 @@ static func toepassen(map: Node) -> bool:
 	# Een grondscript dat zelf SoM tekent (meta "som_klaar", bv. dorp_ground.gd) niet overschrijven.
 	if ground != null and not sets.is_empty() and not ground.has_meta("som_klaar"):
 		ground.tile_set = load(tileset_pad(gebied, str(sets[0])))
-	var speler := speler_sheet(gebied)
-	var p := map.get_node_or_null("Objects/Player")
-	if p != null and speler != "" and p.has_method("zet_sheet"):
-		p.zet_sheet(load(speler))
 	return true
 
 
