@@ -63,7 +63,7 @@ position = Vector2(136, 152)
 walk_speed = 64.0
 
 [node name="Kael" parent="Objects" instance=ExtResource("12_npc")]
-position = Vector2(232, 168)
+position = Vector2(216, 168)
 script = ExtResource("13_rekruut")
 hero_id = "kael"
 npc_name = "Kael Voss"
@@ -71,7 +71,7 @@ lines = Array[String](["Join the party?"])
 sheet = ExtResource("14_kael")
 
 [node name="Orion" parent="Objects" instance=ExtResource("12_npc")]
-position = Vector2(296, 168)
+position = Vector2(312, 168)
 script = ExtResource("13_rekruut")
 hero_id = "orion"
 npc_name = "Orion"

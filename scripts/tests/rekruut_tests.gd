@@ -7,6 +7,7 @@ const HAL := "res://world_warper/maps/hal.tscn"
 const GANG := "res://scenes/maps/archief_v1_gang.tscn"
 const SAVE := "user://rekruut_test.json"
 const SomData := preload("res://scripts/data/som_data.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 const Kamers := preload("res://world_warper/kamers/kamers.gd")
 const Rekruut := preload("res://world_warper/services/rekruut.gd")
 
@@ -111,6 +112,8 @@ func _run() -> void:
 	check("Kael en Orion staan in de hal (rekruut.gd)", kael != null and orion != null and kael.get_script() == Rekruut and orion.get_script() == Rekruut)
 	if kael != null and orion != null:
 		check("naambordjes boven Kael en Orion (Kael Voss / Orion)", kael.naam_label != null and kael.naam_label.text == "Kael Voss" and orion.naam_label != null and orion.naam_label.text == "Orion" and kael.naam_label.is_visible_in_tree())
+		check("hal: naambordjes raken elkaar niet", preload("res://scripts/tests/koopman_tests.gd").hub_label_overlap(hal) == 0)
+		await _shot("hub_naambordjes")
 	if kael == null or orion == null:
 		_eind()
 		return
@@ -164,7 +167,55 @@ func _run() -> void:
 	await _shot("hal_rekruten_beide")
 	await _action("kael")
 	await _action("orion")
+	_geen_reserve()
+	await _classic()
 	_eind()
+
+
+## Geen enkele held valt terug op het reserve-plaatje dennis.png (battle.gd), ook Kael en Orion niet.
+func _geen_reserve() -> void:
+	for h in GameData.HEROES:
+		var pad := str(h.get("battle_sprite", ""))
+		check("%s: eigen gevechtssprite (%s), geen dennis.png-reserve" % [h["id"], pad.get_file()],
+				pad != "" and not pad.ends_with("/dennis.png") and ResourceLoader.exists(pad))
+	for id in ["kael", "orion"]:
+		var t: Texture2D = load("res://assets/sprites/battle/%s.png" % id)
+		check("%s.png 2100x210 (10 frames van 210)" % id, t != null and t.get_size() == Vector2(2100, 210))
+		var d: Texture2D = load("res://assets/sprites/som/combat/%s_dodge.png" % id)
+		check("%s_dodge.png 192x48 en in HERO_POSES" % id, d != null and d.get_size() == Vector2(192, 48)
+				and str(SomData.HERO_POSES[id].get("dodge", "")).ends_with("%s_dodge.png" % id))
+
+
+## Classic (turn-based) gevecht met Dax, Kael, Orion en Vesper: elke held tekent zijn eigen sheet.
+func _classic() -> void:
+	Settings.set_value("battle_style", 0)
+	GameState.party.clear()
+	GameState.party_bench.clear()
+	for id in ["dennis", "kael", "orion", "noor"]:
+		GameState.add_member(id)
+	var g := await _laad(GANG, "zuid")
+	if g == null:
+		check("classic: gang geladen", false)
+		return
+	var p: Node = g.get_node("Objects/Player")
+	GameState.start_battle(["papiergeest"], p.get_tile(), p.facing, "archief")
+	var ok := await _wacht(func(): return get_tree().current_scene != null and get_tree().current_scene.name == "Battle" and get_tree().current_scene.is_node_ready(), 15.0)
+	check("classic: turn-based gevecht open", ok)
+	if not ok:
+		return
+	await _sec(1.2)
+	var b: Node = get_tree().current_scene
+	var paden := {}
+	for c in b.heroes:
+		var n: Node = c.get("node")
+		var spr: Sprite2D = n.get("_sprite") if n else null
+		paden[str(c["s"].get("id", c.get("name")))] = spr.texture.resource_path if spr and spr.texture else ""
+	var goed := paden.size() == 4
+	for k in paden:
+		goed = goed and not str(paden[k]).ends_with("/dennis.png") and str(paden[k]) != ""
+	check("classic: alle 4 helden met eigen sheet, geen dennis.png (%s)" % str(paden), goed)
+	check("classic: Kael en Orion tekenen kael.png / orion.png", str(paden).contains("battle/kael.png") and str(paden).contains("battle/orion.png"))
+	await _shot("classic_kael_orion")
 
 
 ## Action-gevecht met held 'id' (bondgenoot-AI + zelf besturen + ring).
@@ -257,6 +308,18 @@ func _action(id: String) -> void:
 		await get_tree().process_frame
 	a.swing_landed.disconnect(cb2)
 	check("%s: bestuurde slag raakt (%d)" % [id, res[0]], res[0] >= 1)
+	# 3b) ontwijken: een klap tijdens de iframes -> <held>_dodge.png-pose, geen schade
+	var hp_d := int(a.member(id)["hp"])
+	var d0: int = a.dodges
+	a.iframes[id] = 0.5
+	a.hit_member(id, 50)
+	await get_tree().process_frame
+	var dn: Node = a.node_of(id)
+	var da: Node = dn.get_node_or_null("SomDodgeAnim") if dn else null
+	check("%s: ontwijkt tijdens iframes met %s_dodge.png (geen schade)" % [id, id], da != null and a.dodges == d0 + 1
+			and int(a.member(id)["hp"]) == hp_d and da.texture.resource_path.ends_with("%s_dodge.png" % id))
+	await _shot("action_%s_dodge" % id)
+	await _sec(0.3)
 	# 4) ring: skill (+ Kael magie), opmaak zonder overlap
 	var ent: Dictionary = a.ring_entries()
 	var sk: Array = ent["skills"].map(func(x): return x["id"])
@@ -287,3 +350,12 @@ func _eind() -> void:
 	print("REKRUUTTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAILED", passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
+
+
+func _wacht(f: Callable, max_s: float) -> bool:
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < int(max_s * 1000.0):
+		if f.call():
+			return true
+		await get_tree().process_frame
+	return f.call()

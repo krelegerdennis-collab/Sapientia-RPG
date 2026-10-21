@@ -349,7 +349,33 @@ func _hub_scene() -> void:
 	w.call("refresh")
 	await pframes(5)
 	var lopers := w.get_children().filter(func(c): return str(c.name).begins_with("Loper_"))
-	check("1 held + 5 wezens lopen rond (%d)" % lopers.size(), lopers.size() == 6)
+	check("alleen de 5 wezens lopen rond, geen held uit de actieve party (%d)" % lopers.size(), lopers.size() == 5)
+	var party_ids := GameState.party.map(func(x): return str(x["id"]))
+	check("geen rondloper voor de leider/partyleden (geen tweede Dax)", lopers.all(func(l): return not party_ids.has(str(l.get_meta("ww_id", "")))))
+	# held in de rustkamer loopt wel rond; terug in de party -> weer weg
+	GameState.add_member("noor")
+	var vesper: Dictionary = GameState.member("noor")
+	GameState.party.erase(vesper)
+	GameState.party_bench.append(vesper)
+	w.call("refresh")
+	await pframes(2)
+	var bank := w.get_children().filter(func(c): return str(c.name).begins_with("Loper_") and str(c.get_meta("ww_id", "")) == "noor")
+	check("held in de rustkamer (Vesper) loopt wel rond", bank.size() == 1)
+	GameState.party_bench.erase(vesper)
+	GameState.party.append(vesper)
+	w.call("refresh")
+	await pframes(2)
+	bank = w.get_children().filter(func(c): return str(c.name).begins_with("Loper_") and str(c.get_meta("ww_id", "")) == "noor")
+	check("terug in de party -> geen rondloper meer", bank.size() == 0)
+	GameState.party.erase(vesper)
+	# naambordjes (lopers + vaste NPC's zoals Kael/Orion) raken elkaar nooit, ook niet na 4 s lopen
+	var raak := 0
+	for f in 240:
+		await get_tree().process_frame
+		if f % 10 == 0:
+			raak += hub_label_overlap(scene())
+	check("hal-naambordjes overlappen nooit (%d botsingen)" % raak, raak == 0)
+	lopers = w.get_children().filter(func(c): return str(c.name).begins_with("Loper_"))
 	var anim_ok := true
 	var geen_vlak := true
 	for l in lopers:
@@ -549,3 +575,20 @@ func _einde_tests() -> void:
 			and r2.get("koopman") == null and get_tree().get_nodes_in_group("koopman").is_empty())
 	var data := GameState.state_data(Vector2i(1, 1), Vector2i.DOWN)
 	check("vlag gaat mee in de save", str(data).contains(K.FLAG_RUST))
+
+
+## Aantal paren zichtbare hal-naambordjes waarvan de rechthoeken elkaar raken.
+static func hub_label_overlap(root: Node) -> int:
+	var rs: Array[Rect2] = []
+	for n in root.get_tree().get_nodes_in_group("hub_naambord"):
+		var c := n as Control
+		if c and c.is_visible_in_tree():
+			rs.append(c.get_global_rect())
+	var x := 0
+	for i in rs.size():
+		for j in range(i + 1, rs.size()):
+			if rs[i].intersects(rs[j]):
+				x += 1
+				if x <= 3:
+					print("INFO  overlap ", rs[i], " ", rs[j])
+	return x
