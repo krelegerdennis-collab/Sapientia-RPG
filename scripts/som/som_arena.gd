@@ -98,7 +98,10 @@ func setup(p_room: Node) -> void:
 		var sheet := str(SomData.ATTACK_ANIMS[id].get("sheet", ""))
 		if sheet != "" and ResourceLoader.exists(sheet):
 			attack_texs[id] = load(sheet)
-	active_id = str(GameState.party[0].get("id", "dennis")) if not GameState.party.is_empty() else "dennis"
+	# leider-behoud: de held die je met SWAP koos (GameState.leader_id), terugval Dax bij KO / niet in de party
+	active_id = GameState.active_leader()
+	if member(active_id).is_empty():
+		active_id = str(GameState.party[0].get("id", "dennis")) if not GameState.party.is_empty() else "dennis"
 	for m in room.monsters:
 		register(m)
 	# Action: analoge beweging + joystick, 24x32-kaartsprite, soepele camera
@@ -280,6 +283,7 @@ func switch_hero(to := "") -> String:
 	a.position = p_pos
 	a.facing = p_face
 	active_id = nxt
+	GameState.set_leader(nxt)
 	a.set_hero(old)
 	_apply_player_sheet()
 	var c := charge

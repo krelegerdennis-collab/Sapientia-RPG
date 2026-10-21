@@ -39,6 +39,22 @@ const DEFAULT_NAME := "Dax"
 const NAME_MAX := 10
 ## Held-id van de hoofdpersoon (v0.11: id 'dennis', sprites assets/sprites/battle/dennis*.png).
 const MAIN_HERO := "dennis"
+## Action-modus: wie je bestuurt (SWAP in som_arena.gd). Blijft over warps/kamers, opslaan/laden en
+## Classic<->Action. Opgeslagen als "leader"; oude saves zonder veld = MAIN_HERO (Dax).
+var leader_id := MAIN_HERO
+
+
+## Geldige leider: leader_id als die held in de actieve party zit en niet KO is, anders Dax (MAIN_HERO).
+## (Is Dax zelf KO, dan blijft het Dax: de arena regelt KO van de bestuurde held zelf.)
+func active_leader() -> String:
+	for h in party:
+		if str(h.get("id", "")) == leader_id and int(h.get("hp", 0)) > 0:
+			return leader_id
+	return MAIN_HERO
+
+
+func set_leader(id: String) -> void:
+	leader_id = id if id != "" else MAIN_HERO
 ## v0.11 veldmenu (oude id -> dennis): HERO_ID = de enige plek met de id-tekst voor nieuwe
 ## code; HERO_ID_LEGACY = oude id in saves van voor v0.11. Laden zet die om (resolve_hero_id).
 const HERO_ID := MAIN_HERO
@@ -493,6 +509,7 @@ func _go_to_scene(path: String) -> void:
 ## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
 func new_game(hero_name := DEFAULT_NAME) -> void:
 	som_mode = false
+	leader_id = MAIN_HERO
 	player_name = clean_name(hero_name)
 	party.clear()
 	party_bench = []
@@ -1157,6 +1174,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	}
 	data["party"] = _party_save()
 	data["party_bank"] = _party_save_from(party_bench)
+	data["leader"] = leader_id
 	return data
 
 
@@ -1217,6 +1235,7 @@ func apply_state(d: Dictionary) -> bool:
 		party_bench = _party_from(d["party_bank"], stray_equipment)
 	if party.is_empty():
 		add_member(MAIN_HERO)
+	leader_id = str(d.get("leader", MAIN_HERO)) if d.get("leader", MAIN_HERO) is String else MAIN_HERO
 	# v0.22 migratie: oude saves met meer dan 4 actieve helden -> de rest naar de reserve
 	PartyLimiet.normaliseer()
 	inventory = _inventory_from(d.get("inventory", {}))
