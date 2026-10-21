@@ -615,8 +615,9 @@ func _village_tests() -> void:
 	check("ontmoeting start vanzelf bij binnenkomst", await wait_until(func(): return Story.running, 3.0)
 			and Story.current_event == "noor_ontmoeting")
 	var noor: Node = v.get_node_or_null("Objects/Vesper")
-	check("Vesper op het plein met haar loopsprite (noor_dorp.png, RPG ART)", noor != null and noor.visible
-			and str(noor.sprite.texture.resource_path).ends_with("noor_dorp.png"))
+	# 21 okt 2026: veld-NPC Noor/Vesper gebruikt de slanke variant naast de oude sheet (npc_variant wm1_slim)
+	check("Vesper op het plein met haar loopsprite (noor_dorp_wm1_slim.png, RPG ART)", noor != null and noor.visible
+			and str(noor.sprite.texture.resource_path).ends_with("noor_dorp_wm1_slim.png"))
 	var balloon := [false]
 	var lines := await run_story(60.0, "Jou ken ik niet", "noor_ballon")
 	# ballon-check: de eerste Noor-regel had een spreker-node (Noor) en de ballonstijl
