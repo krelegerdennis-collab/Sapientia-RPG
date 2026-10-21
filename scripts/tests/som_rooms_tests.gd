@@ -138,6 +138,13 @@ func _instellingen() -> void:
 	f.close()
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	check("oude save zonder battle_style laadt als Classic", GameState.load_game(SAVE) and not Settings.action_battles())
+	# nieuw spel (titelscherm -> naam -> start_new_game) is ALTIJD Action, ook als Settings op Classic stond
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+	GameState.start_new_game("Dax")
+	for i in 60:
+		await get_tree().process_frame
+	check("nieuw spel (start_new_game) zet Battle Style op Action, ook vanuit Classic", Settings.action_battles())
+	check("daarna oude save zonder sleutel: weer Classic", GameState.load_game(SAVE) and not Settings.action_battles())
 
 
 # ---------------------------------------------------------------- sprites (audit)
