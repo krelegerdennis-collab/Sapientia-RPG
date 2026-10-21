@@ -67,6 +67,7 @@ func _run() -> void:
 	await _spel()
 	print("=== Archief 2: na The Mender naar de hub ===")
 	await _genezer_podium()
+	await _poort_blokkades()
 	await _na_genezer_hub()
 	print("=== Archief 2: veldmenu > Scenes > The World Warper (alleen het filmpje) ===")
 	await _scenes_warper_herhaling()
@@ -624,6 +625,32 @@ func _schaal_1p4() -> void:
 			if str(pl3[t.y])[t.x] != ch:
 				puz_fout += "%s '%s' niet op %s; " % [pid, ch, t]
 	check("1.4x puzzelkamers: rand/aanloop groter, rooster onderling gelijk, noorden alleen via de puzzel (%s)" % (puz_fout if puz_fout != "" else "ok"), puz_fout == "")
+	# muren: geen layout-'#' boven een beloopbare grondtegel (behalve blokkades en bruggen)
+	var muur_fout := ""
+	for id in kamers:
+		var room2: Dictionary = kamers[id]
+		var lay3: Array = room2["layout"]
+		var g3: Array = A2Ground.GROUND.get(id, [])
+		var uitzon := {}
+		for b in room2.get("blokkades", {}).get("tiles", []):
+			uitzon[Vector2i(int(b[0]), int(b[1]))] = true
+		for br in room2.get("bruggen", []):
+			for b in br["tiles"]:
+				uitzon[Vector2i(int(b[0]), int(b[1]))] = true
+		var thema := DungeonRooms.theme_of(room2)
+		for y in lay3.size():
+			for x in str(lay3[y]).length():
+				if str(lay3[y])[x] == "#" and not uitzon.has(Vector2i(x, y)) and y < g3.size() \
+						and not DungeonRooms.is_solid(int(g3[y][x]), thema):
+					muur_fout += "%s (%d,%d)=%d; " % [id, x, y, int(g3[y][x])]
+	for pid in ["leven_v1_plaat", "leven_v3_combi"]:
+		var lp2 := PuzzleLogic.from_room(PuzzleRooms.ROOMS[pid], pid)
+		var pl4: Array = PuzzleRooms.ROOMS[pid]["layout"]
+		for y in pl4.size():
+			for x in str(pl4[y]).length():
+				if str(pl4[y])[x] == "#" and not lp2.is_solid(Vector2i(x, y)):
+					muur_fout += "%s (%d,%d); " % [pid, x, y]
+	check("1.4x: elke layout-'#' heeft een dichte grondtegel (blokkades/bruggen uitgezonderd) (%s)" % (muur_fout if muur_fout != "" else "ok"), muur_fout == "")
 	check("1.4x: begin-warper naast de ingang-spawn (12,15), beloopbaar",
 			Archief2Warpers.BEGIN_TILE == Vector2i(12, 15) and A1W.walkable(kamers["archief_2_v1_entree"], Archief2Warpers.BEGIN_TILE))
 
@@ -692,6 +719,51 @@ func _bereik_1p4(id: String, room: Dictionary) -> String:
 		if not naast.call(t):
 			fout += "%s: %s %s; " % [id, naam, t]
 	return fout
+
+
+## 1.4x baaspoort 2 breed: (14,6) is dicht zonder bewakervlag, open met vlag, en blijft open na opslaan/laden.
+func _poort_blokkades() -> void:
+	for paar in [["archief_2_v2_lotte", "lotte", "Archief2V2Lotte"], ["archief_2_v3_wurger", "wurger", "Archief2V3Wurger"]]:
+		var rid: String = paar[0]
+		var vlag := "bewaker:%s/%s" % [rid, paar[1]]
+		var scene := "res://scenes/maps/%s.tscn" % rid
+		GameState.new_game("Dax")
+		GameState.encounter_multiplier = 0.0
+		GameState.story_flags.erase(vlag)
+		GameState.in_battle = false
+		GameState.changing_map = false
+		GameState.change_map(scene, "zuid")
+		var ok := await _wacht(paar[2], 20.0)
+		await _dialoog_dicht(10)
+		var dicht := false
+		for b in get_tree().get_nodes_in_group("dungeon_blokkade"):
+			dicht = dicht or Vector2i(int(b.position.x) / 16, int(b.position.y) / 16) == Vector2i(14, 6)
+		var k := _scène()
+		var speler: Node = k.get_node("Objects/Player") if ok else null
+		var geen_door := false
+		if speler:
+			speler.position = Vector2(14, 7) * 16 + Vector2(8, 8)
+			await get_tree().physics_frame
+			await get_tree().physics_frame
+			geen_door = not speler._can_move(Vector2i.UP)
+		check("poort %s: (14,6) dicht zonder vlag (blokkade + speler kan er niet door)" % rid, ok and dicht and geen_door)
+		GameState.story_flags[vlag] = true
+		GameState.change_map(scene, "zuid")
+		ok = await _wacht(paar[2], 20.0)
+		await get_tree().create_timer(0.3).timeout
+		check("poort %s: met vlag geen blokkade meer" % rid, ok and get_tree().get_nodes_in_group("dungeon_blokkade").is_empty())
+		var pad := "user://poort_test_%s.json" % paar[1]
+		var opgeslagen := GameState.save_game(Vector2i(13, 15), Vector2i.UP, pad)
+		GameState.story_flags.erase(vlag)
+		var geladen := GameState.load_game(pad)
+		GameState.in_battle = false
+		GameState.changing_map = false
+		GameState.change_map(scene, "zuid")
+		ok = await _wacht(paar[2], 20.0)
+		await get_tree().create_timer(0.3).timeout
+		check("poort %s: na opslaan/laden vlag terug en (14,6) open" % rid, opgeslagen and geladen and ok
+				and GameState.story_flags.has(vlag) and get_tree().get_nodes_in_group("dungeon_blokkade").is_empty())
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(pad))
 
 
 ## v0.23 podium (RPG ART): rij 5 is dicht tot De Genezer verslagen is (onzichtbare blokkades).
