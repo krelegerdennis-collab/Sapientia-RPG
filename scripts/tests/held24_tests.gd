@@ -102,20 +102,25 @@ func _run() -> void:
 		var naam := str(GameState.party[i]["name"])
 		GameState.move_member_to_front(i)
 		var verwacht := KaartStijl.held_sheet(naam)
-		var slank := "res://assets/sprites/som/kaart/%s_wm1_slim.png" % naam.to_lower()
+		var slank: String = KaartStijl.HELD_VAST.get(naam.to_lower(), "res://assets/sprites/som/kaart/%s_wm1_slim.png" % naam.to_lower())
 		if not ResourceLoader.exists(slank):
 			print("INFO  %s: %s ontbreekt nog (RPG ART), terugval = %s" % [naam, slank.get_file(), verwacht if verwacht != "" else "oude sheet"])
 		var tex: String = p3.sprite.texture.resource_path
-		var ok := tex == slank and verwacht == slank and p3.sprite.offset == Vector2(0, -8) and p3.sprite.hframes == 3 and p3.sprite.vframes == 4
+		var ok: bool = tex == slank and verwacht == slank and p3.sprite.offset == Vector2(0, -8) and p3.sprite.hframes == 3 and p3.sprite.vframes == 4
 		if not ok:
 			wissel_fout += "%s -> %s (verwacht %s); " % [naam, tex.get_file(), verwacht.get_file()]
-	check("leiderwissel: alle 5 helden (Dax/Seren/Vesper/Kael/Orion) krijgen hun _wm1_slim-sheet (%s)" % (wissel_fout if wissel_fout != "" else "ok"), wissel_fout == "")
-	check("alle 5 helden hebben een slanke WM1-sheet (72x128)", ["dax", "seren", "vesper", "kael", "orion"].all(func(h):
-			var t: Texture2D = load("res://assets/sprites/som/kaart/%s_wm1_slim.png" % h)
+	check("leiderwissel: alle 5 helden (Dax/Seren/Vesper/Kael/Orion) krijgen hun sheet (Dax/Kael/Orion _wm1_slim, Seren/Vesper final_trio) (%s)" % (wissel_fout if wissel_fout != "" else "ok"), wissel_fout == "")
+	check("alle 5 heldsheets bestaan en zijn 72x128 (3x4 van 24x32)", ["Dax", "Seren", "Vesper", "Kael", "Orion"].all(func(h):
+			var t: Texture2D = load(KaartStijl.held_sheet(h))
 			return t != null and t.get_size() == Vector2(72, 128)))
+	check("veld-NPC's Noor/Lotte/koopman: slanke varianten naast de oude sheets", KaartStijl.npc_sheet_pad("res://assets/sprites/noor_dorp.png").ends_with("noor_dorp_wm1_slim.png")
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/archief2/lotte_veld.png").ends_with("lotte_veld_wm1_slim.png")
+			and KaartStijl.npc_sheet_pad("res://assets/sprites/npc/koopman_veld.png").ends_with("koopman_veld_wm1_slim.png")
+			and ResourceLoader.exists("res://assets/sprites/noor_dorp.png") and ResourceLoader.exists("res://assets/sprites/archief2/lotte_veld.png"))
 	# terugval zonder sheet: onbekende held -> "" (speler houdt zijn huidige sheet)
 	check("terugval: held zonder sheet geeft geen pad", KaartStijl.held_sheet("Onbekend") == "")
-	check("SomData.SHEETS wijst naar de _wm1_slim-sheets", SomData.SHEETS.values().all(func(v): return str(v).ends_with("_wm1_slim.png")))
+	check("SomData.SHEETS: Dax _wm1_slim, Seren/Vesper final_trio", str(SomData.SHEETS["dennis"]).ends_with("dax_wm1_slim.png")
+			and SomData.SHEETS["lotte"] == KaartStijl.HELD_VAST["seren"] and SomData.SHEETS["noor"] == KaartStijl.HELD_VAST["vesper"])
 	GameState.new_game("Dax")
 	print("HELD24TEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])

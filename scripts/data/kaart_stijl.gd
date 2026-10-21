@@ -103,8 +103,11 @@ static func is_som(pad: String) -> bool:
 ## de partijleider; daar blijft de oude 16x24 player.png (wereldkaart = kleine kaart, bouwplaats = eigen schaal).
 const HELD_OUD_MAPS: Array[String] = ["wereldkaart", "berggrot_bouwplaats"]
 const HELDEN := "res://assets/sprites/som/kaart/"
-## Volgorde: slanke WM1-sheet, WM1-sheet, sheet zonder variant (kael/orion tot ART de _wm1_slim levert).
+## Volgorde: slanke WM1-sheet, WM1-sheet, sheet zonder variant.
 const HELD_VARIANTEN: Array[String] = ["_wm1_slim", "_wm1", ""]
+## Vaste partijsheets (RPG ART, 21 okt 2026): Seren en Vesper gebruiken de goedgekeurde final_trio-sheets,
+## niet de _slim-varianten (die zijn voor de veld-NPC's Lotte/Noor zonder staf).
+const HELD_VAST := {"seren": "res://assets/sprites/som/kaart/seren_wm1.png", "vesper": "res://assets/sprites/som/kaart/vesper.png"}
 
 
 ## Toont deze map de held in 24x32?
@@ -117,6 +120,8 @@ static func held_sheet(naam: String) -> String:
 	var n := naam.to_lower().get_slice(" ", 0)
 	if n == "":
 		return ""
+	if HELD_VAST.has(n) and ResourceLoader.exists(str(HELD_VAST[n])):
+		return str(HELD_VAST[n])
 	for v in HELD_VARIANTEN:
 		var p := HELDEN + n + v + ".png"
 		if ResourceLoader.exists(p):

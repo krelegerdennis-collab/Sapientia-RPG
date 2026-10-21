@@ -28,10 +28,11 @@ const START_GOLD := 50
 const MOVE_SPEED := 80.0
 const JOY_DEADZONE := 0.2
 ## Kaartsprites per held-id in Action (24x32, MapSprite.NIEUW; voeten op de tegelrand = offset (0,-8)).
+## Seren/Vesper: goedgekeurde final_trio-sheets van RPG ART (seren_wm1.png / vesper.png); Dax: slanke WM1-sheet.
 const SHEETS := {
 	"dennis": "res://assets/sprites/som/kaart/dax_wm1_slim.png",
-	"noor": "res://assets/sprites/som/kaart/vesper_wm1_slim.png",
-	"lotte": "res://assets/sprites/som/kaart/seren_wm1_slim.png",
+	"noor": "res://assets/sprites/som/kaart/vesper.png",
+	"lotte": "res://assets/sprites/som/kaart/seren_wm1.png",
 }
 ## Wisselvolgorde (SWITCH-knop / toets C): Dax -> Seren -> Vesper; KO wordt overgeslagen.
 const SWITCH_ORDER: Array[String] = ["dennis", "lotte", "noor"]
