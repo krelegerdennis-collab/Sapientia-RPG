@@ -192,7 +192,7 @@ const ENEMY_DAMAGE_MULT := 2.2     # v3: --actionsim iteratie 7
 ##   dodge_skill = ontwijkkans van een speler die de telegraaf leest (alleen meting, --archief1balans)
 const ACTION_AREAS := {
 	"archief1": {"rooms": ["archief_v1_", "archief_v2_", "archief_v3_", "archief_v4_"],
-			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 4.0], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
+			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 3.5], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
 			"tiers": {1: {"atk": 1.1, "cooldown": 3.0}, 2: {"atk": 1.0, "cooldown": 2.8},
 					3: {"atk": 0.7, "cooldown": 2.8}, 4: {"atk": 0.7, "cooldown": 2.8}},
 			# loss tier 1: Forge (21 okt): 89% winst / 77% verlies geaccepteerd, grens = gemiddeld verlies <= 80%.

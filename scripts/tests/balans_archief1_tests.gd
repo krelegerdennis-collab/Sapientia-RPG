@@ -1,7 +1,7 @@
 extends Node
 ## Balans Archief 1 in Action (PR7, Forge 21 okt 2026). Bewaakt:
 ##  - elke gewone vijand in archief_v1..v4 kost een verse Dax op het verwachte level van de tier gemiddeld
-##    3-4 volle slagen (SomData.ACTION_AREAS.archief1 "hits"), via de echte schadeformule;
+##    3.0-3.5 volle slagen (SomData.ACTION_AREAS.archief1 "hits"), via de echte schadeformule;
 ##  - vijanden slaan in Action harder dan in Classic (atk-factor > 1) en de arena gebruikt de gebiedsregels;
 ##  - Classic (turn-based) krijgt exact de oude stats; unieke vijanden en kamers buiten het gebied ongewijzigd.
 ##    (Bazen: altijd turn-based met Classic-stats, bewaakt in --somroomstest.)
@@ -39,7 +39,9 @@ func _run() -> void:
 	_slagen()
 	_winst()
 	await _herstelpunt()
+	_bazen()
 	await _arena_en_classic()
+	await _baas_classic()
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	print("BALANSTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAILED", passes, failures])
@@ -83,16 +85,16 @@ func _slagen() -> void:
 			var h := Balans.dax(lv)
 			var x := Balans.slagen(float(GameState.effective_stat(h, "atk")), d)
 			gezien[k] = x
-			check("%s: verse Dax lv %d heeft %.2f volle slagen nodig (doel %.0f-%.0f)" % [k, lv, x, lo, hi], x >= lo and x <= hi)
+			check("%s: verse Dax lv %d heeft %.3f volle slagen nodig (doel %.1f-%.1f)" % [k, lv, x, lo, hi], x >= lo - 0.001 and x <= hi + 0.001)
 	check("alle gewone vijanden uit archief_v1..v4 gemeten (%d)" % gezien.size(), gezien.size() >= 10)
 
 
-## Dax solo op het verwachte level, 150 gevechten per kamer (action_sim-model): winst/verlies per tier binnen
+## Dax solo op het verwachte level, 500 gevechten per kamer (action_sim-model): winst/verlies per tier binnen
 ## SomData.ACTION_AREAS.archief1.targets, en geleidelijk oplopend (gemiddelde winst per tier daalt niet stijgend).
 func _winst() -> void:
 	var a: Dictionary = SomData.ACTION_AREAS["archief1"]
 	var b: Node = Balans.new()
-	b.fights = 150
+	b.fights = 500      # Forge: 500+ gevechten, zodat de uitkomst niet op het plafond leunt
 	var per_tier := {}
 	for r in b.verwacht():
 		var t := int(r["tier"])
@@ -153,6 +155,60 @@ func _herstelpunt() -> void:
 		boek.restore()
 		check("opslagboek geneest de party vol (HP %d/%d)" % [int(GameState.party[0]["hp"]), int(GameState.party[0]["max_hp"])],
 				GameState.party.all(func(h): return int(h["hp"]) == int(h["max_hp"])))
+
+
+## Bazen blijven Classic: elk baas-monster (boss: true) staat buiten een Action-gebied, dus geen HP-, schade- of
+## cooldownregels; de arena neemt een baas nooit op (som_arena.register). kennis_beest is hier een gewone vijand;
+## zijn "boss"-sleutel in GameData is de config van het Golem-baasgevecht (turn-based).
+func _bazen() -> void:
+	var n := 0
+	for rid in DR.ROOMS:
+		var r: Dictionary = DR.room(rid)
+		for m in r.get("monsters", []):
+			if not m.get("boss", false):
+				continue
+			n += 1
+			var d: Dictionary = (GameData.ENEMIES[str(m["enemy"])] as Dictionary).duplicate(true)
+			var t := int(r.get("tier", 0))
+			check("baas %s in %s: geen Action-gebied, stats/schade/cooldown ongewijzigd" % [m["enemy"], rid],
+					SomData.action_area(str(rid)) == "" and SomData.apply_action_area(d, str(rid), t) == d
+					and is_equal_approx(SomData.enemy_damage_mult(str(rid), t), SomData.ENEMY_DAMAGE_MULT)
+					and is_equal_approx(SomData.attack_cooldown(str(rid), t), SomData.ATTACK_COOLDOWN))
+	check("bazen gevonden in de kamers (%d)" % n, n >= 1)
+
+
+## Echt Golem-baasgevecht (Classic, turn-based): stats exact uit GameData.ENEMIES.kennis_beest.
+func _baas_classic() -> void:
+	GameState.new_game("Dax")
+	GameState.encounter_multiplier = 0.0
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	var s := await _laad(GANG)
+	if s == null:
+		check("baas: kamer geladen", false)
+		return
+	var arena: Node = s.get("som")
+	if arena:
+		var p: Node = s.get_node("Objects/Player")
+		var m: Node = s.add_monster({"id": "balans_baas", "enemy": "kennis_beest", "tile": [p.get_tile().x + 3, p.get_tile().y + 1], "moves": false, "boss": true})
+		await get_tree().process_frame
+		check("Action: een baas-monster komt niet in de arena", m != null and not arena.enemies.has(m))
+	var pl: Node = s.get_node("Objects/Player")
+	GameState.start_battle(["kennis_beest"], pl.get_tile(), pl.facing, "archief", true)
+	var bt: Node = null
+	for i in 240:
+		await get_tree().process_frame
+		var cs := get_tree().current_scene
+		if cs != null and cs.name == "Battle" and "enemies" in cs and not (cs.enemies as Array).is_empty():
+			bt = cs
+			break
+	var g: Dictionary = GameData.ENEMIES["kennis_beest"].get("boss", GameData.ENEMIES["kennis_beest"])   # baasconfig
+	if bt:
+		var st: Dictionary = bt.enemies[0].get("s", {})
+		check("Golem (Classic baas): HP/ATK/DEF %d/%d/%d = GameData-baasconfig %d/%d/%d" % [int(st.get("max_hp", -1)), int(st.get("atk", -1)), int(st.get("def", -1)), int(g["max_hp"]), int(g["atk"]), int(g["def"])],
+				int(st.get("max_hp", -1)) == int(g["max_hp"]) and int(st.get("atk", -1)) == int(g["atk"]) and int(st.get("def", -1)) == int(g["def"]))
+	else:
+		check("Golem (Classic baas): gevecht open", false)
+	GameState.in_battle = false
 
 
 func _arena_en_classic() -> void:

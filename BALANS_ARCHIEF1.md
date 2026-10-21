@@ -110,14 +110,14 @@ ontwijkt = kans dat de speler een getelegrafeerde klap ontwijkt (sim-model actio
 | archief_v4_voorhal | 4 | 69.0 (0%) | 44.8 (90%) | 67.4 (9%) | 30.7 (100%) |
 | archief_v4_voorhal | 5 | 77.6 (4%) | 34.4 (100%) | 70.6 (39%) | 19.8 (100%) |
 
-### Doel per tier (Dax solo op het verwachte level, 35% ontwijken)
+### Doel per tier (Dax solo op het verwachte level, 35% ontwijken, 500 gevechten per kamer)
 
 | tier | Dax lv | kamers (winst/verlies) | gem. winst | doel winst | gem. verlies | doel verlies |
 |---|---|---|---|---|---|---|
-| 1 | 1 | v1_gang 89%/77% | 89% | 80-90% | 77% | 30-80% |
-| 2 | 2 | v2_kastenzaal 97%/62%, v2_leeszaal 67%/83%, v2_trapzaal 88%/61% | 84% | 70-85% | 69% | - |
-| 3 | 3 | v3_zuilenhal 48%/93%, v3_gang 96%/57% | 72% | 65-80% | 75% | - |
-| 4 | 4 | v4_wachtersgang 37%/94%, v4_voorhal 90%/65% | 64% | 60-75% | 79% | - |
+| 1 | 1 | v1_gang 87%/77% | 87% | 80-90% | 77% | <=80% |
+| 2 | 2 | v2_kastenzaal 98%/63%, v2_leeszaal 64%/83%, v2_trapzaal 87%/61% | 83% | 70-85% | 69% | - |
+| 3 | 3 | v3_zuilenhal 49%/91%, v3_gang 96%/59% | 72% | 65-80% | 75% | - |
+| 4 | 4 | v4_wachtersgang 42%/92%, v4_voorhal 90%/65% | 66% | 60-75% | 79% | - |
 
 
 ## Eerlijke kanttekening: tier-1-verliesdoel (30-50%) is niet samen met 80-90% winst haalbaar in de sim
@@ -146,3 +146,22 @@ zonder per-kamer-regels.
 - Tier 1 blijft op schade x1.10 / cooldown x3.0 (89% winst, 77% gemiddeld verlies). Testgrens: winst 80-90%, gemiddeld verlies <= 80%.
 - Geen soft-lock: archief_ingang (de kamer vlak voor archief_v1_gang, uitgang "n") heeft een opslagboek (type "save") dat de party
   vol geneest (getest: HP 1 -> vol). Verliezen in archief_v1_gang zet je terug op het checkpoint (respawn_at_checkpoint, volle HP).
+
+
+## Forge-review 2 (21 okt 2026)
+
+- Slagen per gewone vijand: testgrens nu [3.0, 3.5] (data "hits"). Gemeten met 20000 slagen per vijand (was 2000, te veel
+  ruis): alle gewone vijanden 3.00, kennis_beest 3.42-3.49. **Let op:** kennis_beest@2 zit op 3.493, vlak onder de grens.
+  HP is niet aangepast.
+- Tier 1 gemeten over 500 gevechten: **87% winst / 77% verlies** (bij 150 gevechten was dat 89%, tegen het plafond).
+  Schade x1.10 en cooldown x3.0 blijven. Rooster met 500 gevechten: 1.10/2.8 = 73%/83%, 1.10/3.0 = 87%/77%,
+  1.15/3.0 = 84%/80%, 1.10/3.2 = 96%/72%. Dichter bij 85% kan alleen met 80% verlies (precies op de grens), dus 1.10/3.0.
+  De test draait nu ook 500 gevechten per kamer.
+- Bazen blijven Classic, nu ook expliciet getest:
+  1. Elk baas-monster (`boss: true`, nu alleen de Golem in archief_golemhal) staat buiten een Action-gebied, dus HP, schade en cooldown zijn ongewijzigd.
+  2. De arena neemt een baas nooit op.
+  3. Het echte Golem-baasgevecht (turn-based) heeft HP/ATK/DEF 360/27/15, zoals de baasconfig in GameData.
+- Waarom kennis_beest als gewone vijand meetelt:
+  - In archief_v2..v4 staat kennis_beest als gewone kamervijand (geen `boss: true` op de kaart), dus de Action-regels gelden.
+  - De `"boss"`-sleutel in `GameData.ENEMIES.kennis_beest` is de configuratie van het Golem-baasgevecht (360/27/15, turn-based).
+  - Dat baasgevecht start alleen via het baas-monster in archief_golemhal. Dat monster staat buiten archief1 en komt niet in de arena.

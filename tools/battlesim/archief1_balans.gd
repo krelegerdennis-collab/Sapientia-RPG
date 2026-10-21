@@ -6,7 +6,7 @@ extends "res://tools/battlesim/action_sim.gd"
 
 const AREA := "archief1"
 const LEVELS := [1, 2, 3, 4, 5]
-const SWINGS := 2000
+const SWINGS := 20000
 
 
 func _ready() -> void:
