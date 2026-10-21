@@ -3,6 +3,7 @@ extends Node
 ## Start: godot --path . -- --musictest [--shots=/pad/map]
 
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
+const NAMEN := {"main_menu": "Sapientia", "dorp_wilgendal": "Wind over Willowdale", "donker_woud": "Where the Mist Remembers", "berggrot": "Echoes in the Collapse", "levend_archief": "Shelves of Glass and Root", "baas_archief2": "The Overgrown Index", "diepe_grot": "Epoch 100"}
 const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
 const SAVE := "user://music_test.json"
 const MAP := "res://scenes/maps/wilgendal.tscn"
@@ -54,8 +55,8 @@ func _run() -> void:
 			var e: Dictionary = m["bgm"].get(mid, {})
 			data_ok = data_ok and not e.is_empty() and FileAccess.file_exists("res://assets/audio/bgm/" + str(e.get("bestand", ""))) \
 					and str(e.get("beschrijving", "")).to_lower().contains("suno")
-		data_ok = data_ok and str(t["name"]) != "" and str(t["name"]).is_valid_identifier() == false
-	check("7 Suno-tracks, elk in het manifest met bestand, Engelse naam in music_tracks.gd", data_ok)
+		data_ok = data_ok and str(t["name"]) != "" and str(t["name"]) == str(NAMEN.get(str(t["id"]), "?"))
+	check("7 Suno-tracks, elk in het manifest met bestand, Engelse naam uit data/music_tracks.json", data_ok)
 	# --- vrijspelen
 	check("nieuw spel: niets gehoord (titelmuziek speelde niet)", GameState.heard_music.is_empty())
 	AudioManager.play_music("wereld", 0.0)
@@ -63,10 +64,10 @@ func _run() -> void:
 	check("gewone (niet-Suno) track speelt niets vrij", GameState.heard_music.is_empty())
 	AudioManager.play_music("donker_woud", 0.0)
 	await _frames(2)
-	check("Donker Woud gehoord -> 'Sapientia Lament' vrij", GameState.heard_music == ["donker_woud"])
+	check("Donker Woud gehoord -> 'Where the Mist Remembers' vrij", GameState.heard_music == ["donker_woud"])
 	AudioManager.play_music("ww_ambient", 0.0)
 	await _frames(2)
-	check("ww_ambient (zelfde bestand) speelt 'Biomechanical Dungeon' vrij", GameState.heard_music.has("diepe_grot"))
+	check("ww_ambient (zelfde bestand) speelt 'Epoch 100' vrij", GameState.heard_music.has("diepe_grot"))
 	AudioManager.play_music("donker_woud", 0.0, true)
 	await _frames(2)
 	check("nog eens horen = niet dubbel", GameState.heard_music.count("donker_woud") == 1)

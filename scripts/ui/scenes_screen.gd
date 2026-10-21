@@ -36,7 +36,7 @@ var _dialog_layer := 5
 
 
 func _build() -> void:
-	header.text = "Scenes"
+	header.text = "Scenes & Music"
 	set_hint(HINT)
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 4)

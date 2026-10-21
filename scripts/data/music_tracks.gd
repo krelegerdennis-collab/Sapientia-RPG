@@ -1,19 +1,21 @@
 extends RefCounted
-## Veldmenu > Scenes > tab Music: de Suno-tracks van Dennis, met Engelse namen.
+## Veldmenu > Scenes & Music > tab Music: de Suno-tracks van Dennis, met Engelse namen.
 ## Een track staat pas in de lijst (speelbaar) als de speler hem in het spel gehoord heeft
 ## (GameState.heard_music, in de save). "ids" = de manifest-tracks (assets/audio/audio_manifest.json)
 ## die deze muziek spelen; de eerste wordt afgespeeld.
 
+## Namen en volgorde staan in res://data/music_tracks.json (Dennis, 21 okt 2026).
+const JSON_PATH := "res://data/music_tracks.json"
 const LOCKED_NAME := "???"
-const TRACKS := [
-	{"id": "main_menu", "ids": ["main_menu"], "name": "Sapientia Battle Theme", "where": "Title screen"},
-	{"id": "dorp_wilgendal", "ids": ["dorp_wilgendal"], "name": "Morning in a Safe Village", "where": "Willowdale"},
-	{"id": "donker_woud", "ids": ["donker_woud"], "name": "Sapientia Lament", "where": "The Dark Wood"},
-	{"id": "levend_archief", "ids": ["levend_archief"], "name": "Nature's Pulse", "where": "The Living Archive"},
-	{"id": "baas_archief2", "ids": ["baas_archief2"], "name": "Machine of War", "where": "Archive 2 boss"},
-	{"id": "berggrot", "ids": ["berggrot"], "name": "Subterranean Wonder", "where": "The Mountain Cave"},
-	{"id": "diepe_grot", "ids": ["diepe_grot", "ww_ambient"], "name": "Biomechanical Dungeon", "where": "The World Warper"},
-]
+static var TRACKS: Array = _laad()
+
+
+static func _laad() -> Array:
+	var d = JSON.parse_string(FileAccess.get_file_as_string(JSON_PATH))
+	if d is Dictionary and d.get("tracks") is Array:
+		return d["tracks"]
+	push_error("music_tracks.json ontbreekt of is ongeldig")
+	return []
 
 
 ## Track-id (uit TRACKS) bij een manifest-track, "" = geen Suno-track uit deze lijst.
