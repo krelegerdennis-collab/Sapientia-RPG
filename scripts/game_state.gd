@@ -342,6 +342,7 @@ func _ready() -> void:
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
+			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
@@ -680,6 +681,7 @@ func move_member_to_front(index: int) -> bool:
 	var h: Dictionary = party[index]
 	party.remove_at(index)
 	party.insert(0, h)
+	KaartStijl.ververs_held()   # 24x32-kaartsprite van de nieuwe leider
 	return true
 
 
