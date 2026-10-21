@@ -104,6 +104,7 @@ Alleen de UI-vensters zijn fel (diep indigoblauw).
 | boomstam | `#2a1a0c` `#4a2e16` `#6a4422` |
 | steen (muur) | `#23282f` `#3b454f` `#4b525d` `#5a606b` `#6b717c` `#858b96` |
 | water | `#101d3e` `#18295a` `#213a78` `#2c4c92` `#4a6cae` `#8aa6d6` |
+| water (vijver, teal; goedgekeurd 20 okt 2026) | `#10262c` `#1d4a52` `#2f7076` `#5aa3a0` |
 | hout (brug, bordje) | `#311d17` `#553524` `#714a33` `#8c6246` `#a87e5e` `#c49c78` |
 | rots | `#231c1e` `#3c3234` `#574a49` `#726560` `#8f827a` `#aea296` |
 | aarde (gevechtsvloer) | `#2a170b` `#3a2112` `#4a2d18` `#5a3a22` `#6e4a2e` `#86603e` |

@@ -2411,7 +2411,7 @@ func _prologue_tests() -> void:
 	await frames(10)
 	check("buiten is het nacht, Oude Man weg, ingang open en gloeit",
 			scene().get_node("StoryTint").color.is_equal_approx(SD.TINTS["night"]) and not _obj("OudeMan").visible
-			and _obj("Archief").looping and _obj("Archief").sprite.texture.resource_path.ends_with("archief_ingang_open_flikker.png")
+			and _obj("Archief").looping and _obj("Archief").sprite.texture.resource_path.replace("_v8.png", ".png").ends_with("archief_ingang_open_flikker.png")
 			and _obj("Archief").glow.visible)
 	await walk("move_down", 2)
 	await walk("move_right", 11)
