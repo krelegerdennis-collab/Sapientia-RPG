@@ -238,9 +238,23 @@ func _spawn_garden_creatures() -> void:
 var _run_drawn := false
 
 
+## Schermvullend scherm open (veldmenu, codex, winkel, werkplaats, ...: menu_screen.gd LAYER 21+)?
+## Dan zijn joystick/A/B/rij weg: je tikt direct op het scherm (B/Esc = terug). Anders zou de onzichtbare
+## joystick (onder het venster) tikken op de linkerkolom opeten.
+func screen_open() -> bool:
+	for c in get_children():
+		if c is CanvasLayer and c.name != "TouchControls" and (c as CanvasLayer).layer >= 21 and (c as CanvasLayer).visible:
+			return true
+	return false
+
+
 func _process(_delta: float) -> void:
 	# MENU-knop verbergen zolang er een tekstvak of menu open is (anders valt hij erover)
 	var touch := get_node_or_null("TouchControls/Control")
+	if touch and not menu_open():
+		var vis := not screen_open()
+		if touch.visible != vis:
+			_set_touch_visible(vis)
 	if touch and "show_menu" in touch:
 		var want: bool = not Dialog.is_open and not menu_open() and not Story.running
 		if touch.show_menu != want:

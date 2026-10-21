@@ -268,6 +268,48 @@ func _local(viewport_pos: Vector2) -> Vector2:
 
 ## Joystick: positie van de vinger -> joy_raw (lengte max 1). Analoog (Action): som_move.gd. Anders drukt de
 ## vinger de overheersende richting in als move_* + ui_* (raster en menu's), met de dode zone JOY_DEADZONE.
+## Vasthouden in een lijst (menu, keuzes, gevechtsmenu): na STICK_REPEAT_DELAY s herhaalt de richting elke
+## STICK_REPEAT_RATE s (zoals een toets die je vasthoudt). In het vrije veld niet nodig: lopen gaat door zolang je duwt.
+const STICK_REPEAT_DELAY := 0.35
+const STICK_REPEAT_RATE := 0.09
+var _repeat_t := 0.0
+var _repeat_acts: Array = ["", ""]
+## Aantal herhaalde drukken sinds het begin (voor tests).
+var repeat_count := 0
+
+
+func _process(delta: float) -> void:
+	var idx := -1
+	for k in _touch_owner:
+		if _touch_owner[k] == "joy":
+			idx = k
+	var acts: Array = stick_actions(joy_raw) if idx >= 0 and not analog_only else ["", ""]
+	if acts != _repeat_acts:
+		_repeat_acts = acts
+		_repeat_t = -STICK_REPEAT_DELAY
+		return
+	if acts[0] == "" or not _in_list():
+		return
+	_repeat_t += delta
+	while _repeat_t >= STICK_REPEAT_RATE:
+		_repeat_t -= STICK_REPEAT_RATE
+		for a in acts:
+			Input.action_release(a)
+			Input.action_press(a)
+		repeat_count += 1
+
+
+## Staat er een lijst open waarin de joystick een cursor bestuurt?
+func _in_list() -> bool:
+	if get_viewport().gui_get_focus_owner() != null:
+		return true
+	var gs := get_node_or_null("/root/GameState")
+	if gs != null and bool(gs.get("in_battle")):
+		return true
+	var dlg := get_node_or_null("/root/Dialog")
+	return dlg != null and dlg.has_method("has_choices") and dlg.has_choices()
+
+
 func _set_joy(pos: Vector2, index := -1) -> void:
 	joy_raw = ((pos - stick_center()) / maxf(1.0, joy_radius())).limit_length(1.0)
 	if index >= 0 and not analog_only:
