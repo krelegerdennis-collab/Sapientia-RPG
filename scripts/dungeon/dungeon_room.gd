@@ -157,7 +157,7 @@ func _build() -> void:
 	var scatter4: bool = room_id in DungeonRooms.ARCHIEF_SCATTER_ROOMS and not room.has("floor_tiles")
 	# v0.23: vaste grondlaag (tegelnummers) als de kamer die heeft (Archief 2 v2-deco); anders willekeurige vloer
 	var vast: Array = room.get("ground", Archief2Ground.GROUND.get(room_id, []))
-	var kas_blocks: bool = DungeonRooms.current_theme == "kas"
+	var kas_blocks: bool = DungeonRooms.current_theme in ["kas", "warper_paars"]   # WM1-fix: warper deelt de v8-kasatlas
 	var berg_blocks: bool = room_id in DungeonRooms.BERGGROT_BLOCK_ROOMS
 	var berg_rocks: bool = room_id in DungeonRooms.BERGGROT_LONE_ROCK_ROOMS
 	var exit_cells := {}           # sleutel in "exits" -> Array[Vector2i]
