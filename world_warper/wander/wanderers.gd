@@ -100,6 +100,7 @@ func refresh() -> void:
 	for spec in wezens:
 		_maak(spec, false, gebied, str(sheets.get(str(spec.get("id", "")), "")))
 	set_process(not _lopers.is_empty())
+	schik_labels()
 
 
 func _process(delta: float) -> void:
@@ -108,11 +109,56 @@ func _process(delta: float) -> void:
 	_anker_bevroren = true
 	for loper in _lopers:
 		_beweeg(loper, delta, gebied)
+	schik_labels()
 
 
+## Naambordjes mogen elkaar niet raken (ook niet die van vaste hal-NPC's, groep NAAM_GROEP).
+## Vaste bordjes blijven staan; een loper-bordje schuift in stappen omhoog, past het nergens dan
+## verbergen we het tot er weer ruimte is.
+const NAAM_GROEP := "hub_naambord"
+const LABEL_STAP := 10.0
+func schik_labels() -> void:
+	var bezet: Array[Rect2] = []
+	if is_inside_tree():
+		for n in get_tree().get_nodes_in_group(NAAM_GROEP):
+			var c := n as Control
+			if c and c.is_visible_in_tree() and not c.has_meta("ww_loper"):
+				bezet.append(c.get_global_rect())
+	for loper in _lopers:
+		var node: Node2D = loper["node"]
+		if not is_instance_valid(node):
+			continue
+		var l := node.get_node_or_null("Naam") as Label
+		if l == null:
+			continue
+		var basis: Vector2 = l.get_meta("ww_basis", l.position)
+		l.set_meta("ww_basis", basis)
+		l.visible = false
+		for i in 4:
+			l.position = basis - Vector2(0, LABEL_STAP * i)
+			var r := Rect2(node.global_position + l.position * node.global_scale, l.size * node.global_scale)
+			var vrij := true
+			for b in bezet:
+				if r.intersects(b):
+					vrij = false
+					break
+			if vrij:
+				l.visible = true
+				bezet.append(r)
+				break
+
+
+## Alleen helden in de rustkamer (party_bench) lopen rond. De actieve party (met de leider = de
+## speler zelf) nooit: anders liep er een tweede Dax door de hal (Forge, 21 okt 2026).
 func _lees_party() -> Array:
 	var uit: Array = []
+	var actief := {}
 	for lid in GameState.party:
+		if lid is Dictionary:
+			actief[str(lid.get("id", ""))] = true
+	for lid in GameState.party_bench:
+		if lid is Dictionary and actief.has(str(lid.get("id", ""))):
+			continue
 		if not (lid is Dictionary):
 			continue
 		uit.append({
@@ -273,6 +319,9 @@ func _vlak(id: String, party: bool) -> ColorRect:
 
 func _label(tekst: String, pos: Vector2, kleur: Color) -> Label:
 	var l := Label.new()
+	l.name = "Naam"
+	l.add_to_group(NAAM_GROEP)
+	l.set_meta("ww_loper", true)
 	l.text = tekst
 	l.position = pos
 	l.size = Vector2(72, 10)

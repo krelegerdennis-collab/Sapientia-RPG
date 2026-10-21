@@ -72,17 +72,20 @@ static func attack_reach(id: String) -> float:
 ## Overige held-poses (48x48, zelfde anker): hurt = 4 kolommen (onder, links, rechts, boven) x 1 rij,
 ## ko = 1 frame, cast = 3 kolommen x 4 rijen (frame 1 200 ms, daarna 2-3 in een lus van 120 ms).
 const HERO_POSES := {
-	"dennis": {"hurt": "res://assets/sprites/som/combat/dax_hurt.png", "ko": "res://assets/sprites/som/combat/dax_ko.png"},
-	"noor": {"hurt": "res://assets/sprites/som/combat/vesper_hurt.png", "ko": "res://assets/sprites/som/combat/vesper_ko.png",
+	"dennis": {"hurt": "res://assets/sprites/som/combat/dax_hurt.png", "dodge": "res://assets/sprites/som/combat/dax_dodge.png", "ko": "res://assets/sprites/som/combat/dax_ko.png"},
+	"noor": {"hurt": "res://assets/sprites/som/combat/vesper_hurt.png", "dodge": "res://assets/sprites/som/combat/vesper_dodge.png", "ko": "res://assets/sprites/som/combat/vesper_ko.png",
 			"cast": "res://assets/sprites/som/combat/vesper_cast6.png"},
-	"lotte": {"hurt": "res://assets/sprites/som/combat/seren_hurt.png", "ko": "res://assets/sprites/som/combat/seren_ko.png",
+	"lotte": {"hurt": "res://assets/sprites/som/combat/seren_hurt.png", "dodge": "res://assets/sprites/som/combat/seren_dodge.png", "ko": "res://assets/sprites/som/combat/seren_ko.png",
 			"cast": "res://assets/sprites/som/combat/seren_cast6.png"},
-	"kael": {"hurt": "res://assets/sprites/som/combat/kael_hurt.png", "ko": "res://assets/sprites/som/combat/kael_ko.png",
+	"kael": {"hurt": "res://assets/sprites/som/combat/kael_hurt.png", "dodge": "res://assets/sprites/som/combat/kael_dodge.png", "ko": "res://assets/sprites/som/combat/kael_ko.png",
 			"cast": "res://assets/sprites/som/combat/kael_cast.png"},
-	"orion": {"hurt": "res://assets/sprites/som/combat/orion_hurt.png", "ko": "res://assets/sprites/som/combat/orion_ko.png",
+	"orion": {"hurt": "res://assets/sprites/som/combat/orion_hurt.png", "dodge": "res://assets/sprites/som/combat/orion_dodge.png", "ko": "res://assets/sprites/som/combat/orion_ko.png",
 			"cast": "res://assets/sprites/som/combat/orion_cast.png"},
 }
 const HURT_TIME := 0.25
+## Ontwijk-pose (<held>_dodge.png 192x48, 4 richtingen zoals hurt): een vijandelijke klap die tijdens de
+## onkwetsbaarheid (iframes) binnenkomt, wordt zichtbaar ontweken in plaats van stil genegeerd.
+const DODGE_TIME := 0.22
 const CAST_MS: Array[int] = [200, 120, 120, 120, 120]      # oude 3-frame cast-sheet (fallback)
 ## Magiër-cast (RPG ART pass 7): <held>_cast6.png 288x192, cellen 48x48, 6 frames x 4 richtingen.
 ## De spreuk komt vrij aan het begin van frame 4 (hit_frame): dan pas schade/genezing + effect.

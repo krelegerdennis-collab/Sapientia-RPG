@@ -710,7 +710,10 @@ func hit_player(atk: int, _from := Vector2.ZERO) -> void:
 
 
 func hit_member(id: String, atk: int) -> void:
-	if down or float(iframes.get(id, 0.0)) > 0.0 or not is_alive(id):
+	if down or not is_alive(id):
+		return
+	if float(iframes.get(id, 0.0)) > 0.0:
+		_dodge(id)
 		return
 	var h := member(id)
 	var dmg := maxi(1, roundi(physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0) * SomData.ENEMY_DAMAGE_MULT))
@@ -727,6 +730,17 @@ func hit_member(id: String, atk: int) -> void:
 	player_hit.emit(dmg)
 	if int(h["hp"]) <= 0:
 		_member_ko(id)
+
+
+## Klap tijdens iframes: ontwijk-pose (geen schade). Telt mee in dodges (tests).
+var dodges := 0
+func _dodge(id: String) -> void:
+	var t := pose_tex(id, "dodge")
+	var n := node_of(id)
+	if t == null or n == null or n.get_node_or_null("SomHurtAnim") != null or n.get_node_or_null("SomDodgeAnim") != null:
+		return
+	dodges += 1
+	SomFx.dodge_pose(n, t, SomData.DODGE_TIME)
 
 
 ## Held KO: bondgenoot blijft liggen (som_ally.gd); bestuurde held -> wissel naar de volgende levende.

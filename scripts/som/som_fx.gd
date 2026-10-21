@@ -128,6 +128,11 @@ static func hurt_pose(p: Node2D, t: Texture2D, sec: float) -> Anim:
 	return _hero_anim(p, t, 4, 1, [dir_index(p.facing)], [int(sec * 1000.0)], "SomHurtAnim")
 
 
+## Ontwijken: zelfde indeling als hurt (192x48, kolom = richting).
+static func dodge_pose(p: Node2D, t: Texture2D, sec: float) -> Anim:
+	return _hero_anim(p, t, 4, 1, [dir_index(p.facing)], [int(sec * 1000.0)], "SomDodgeAnim")
+
+
 ## KO (blijft liggen tot hij weer opstaat): los Sprite2D "SomKO"; lichaam verborgen.
 static func set_ko(p: Node2D, t: Texture2D, on: bool) -> void:
 	var k := p.get_node_or_null("SomKO") as Sprite2D
