@@ -343,6 +343,7 @@ func _ready() -> void:
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
+			["--rekruuttest", "res://scripts/tests/rekruut_tests.gd", "RekruutTest", "rekruuttest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):

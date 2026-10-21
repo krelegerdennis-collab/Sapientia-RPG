@@ -200,9 +200,13 @@ static func frames_uit(tex: Texture2D) -> SpriteFrames:
 			for kol in [0, 1]:
 				sf.add_frame(loop, _frame_maat(tex, kol, r, Vector2i(16, 16)))
 			continue
-		sf.add_frame(stil, _frame(tex, 0, r))
+		# 3x4-sheet: framemaat uit de sheet (48x96 -> 16x24, 72x128 -> 24x32 zoals Kael/Orion)
+		var maat := FRAME
+		if tex != null and tex.get_width() % 3 == 0 and tex.get_height() % 4 == 0:
+			maat = Vector2i(tex.get_width() / 3, tex.get_height() / 4)
+		sf.add_frame(stil, _frame_maat(tex, 0, r, maat))
 		for kol in WALK_CYCLE:
-			sf.add_frame(loop, _frame(tex, kol, r))
+			sf.add_frame(loop, _frame_maat(tex, kol, r, maat))
 	return sf
 
 
