@@ -99,8 +99,8 @@ func run() -> void:
 
 
 func _settings_tests() -> void:
-	# 21 okt 2026: standaard voor een vers spel = Action; testsuites beginnen bewust in Classic (settings.gd)
-	t.check("SoM: Battle Style standaard Action (vers spel), testrun start Classic", int(Settings.DEFAULTS["battle_style"]) == 1 and not Settings.action_battles())
+	# 21 okt 2026: standaard = Action; de autotest start via titelscherm -> start_new_game, dus staat nu op Action
+	t.check("SoM: Battle Style standaard Action (DEFAULTS + nieuw spel via start_new_game)", int(Settings.DEFAULTS["battle_style"]) == 1 and Settings.action_battles())
 	Settings.set_value("battle_style", 1)
 	Settings.load_settings()       # opnieuw van schijf
 	t.check("SoM: Battle Style = Action blijft bewaard (settings.cfg)", Settings.action_battles())
