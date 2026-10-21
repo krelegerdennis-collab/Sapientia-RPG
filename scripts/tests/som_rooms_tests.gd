@@ -196,7 +196,7 @@ func _kamers() -> void:
 		var gebied := rid.get_slice("_", 0) + ("_2" if rid.begins_with("archief_2") else "")
 		if not shot_gebieden.has(gebied):
 			shot_gebieden[gebied] = true
-			await get_tree().create_timer(0.3).timeout
+			await get_tree().create_timer(2.6).timeout     # kamernaam-banner eerst weg
 			await _shot("action_" + rid)
 		# Classic: geen arena
 		Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
