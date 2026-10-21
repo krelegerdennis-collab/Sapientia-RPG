@@ -178,8 +178,9 @@ func kern_rect() -> Rect2:
 ## RUN-knop: in de bovenste rij, direct links van MENU (veld) of links van Swap en Ring (Action-arena).
 func run_rect() -> Rect2:
 	var s := som_row_slot(2 if analog_only else 0)
-	var rs: Vector2 = SomDataC.TOP_BUTTON_SIZE
-	return Rect2(Vector2(s.end.x - KERN_SIZE.x, s.position.y), Vector2(KERN_SIZE.x, rs.y))
+	var m := menu_rect()
+	# zelfde hoogte als MENU (zelfde stijl), op dezelfde middenlijn
+	return Rect2(Vector2(s.end.x - KERN_SIZE.x, m.position.y), Vector2(KERN_SIZE.x, m.size.y))
 
 
 ## Schermrechthoeken (384x216-eenheden) van alle zichtbare knoppen; o.a. de World Warper
@@ -391,14 +392,14 @@ func _draw_rest(line: float) -> void:
 		_draw_run_button(line)
 	if show_menu:
 		var mr := menu_rect()
-		var pressed := _press_count.has("menu")
-		draw_rect(mr, Color(0.08, 0.08, 0.09, 0.8) if not pressed else Color(0.24, 0.24, 0.27, 0.9))
-		draw_rect(mr, Color(mag.r, mag.g, mag.b, 0.8), false, line)
+		var st := top_style(_press_count.has("menu"))
+		draw_rect(mr, st["fill"])
+		draw_rect(mr, st["border"], false, line)
 		var font := get_theme_default_font()
 		var ts := font.get_string_size("MENU", HORIZONTAL_ALIGNMENT_LEFT, -1, 10)
 		var tp := Vector2(mr.get_center().x - ts.x / 2.0, mr.position.y + 11.0).round()
 		draw_string(font, tp + Vector2(1, 1), "MENU", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyleC.SHADOW)
-		draw_string(font, tp, "MENU", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyleC.TEXT)
+		draw_string(font, tp, "MENU", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, st["text"])
 
 
 func _fine() -> bool:
@@ -450,27 +451,30 @@ func _draw_kern_button(line: float) -> void:
 	draw_string(font, tp, "CORE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, KERN_NEON.lerp(Color.WHITE, 0.7) if not pressed else Color.WHITE)
 
 
-## RUN-knop: pilletje zoals CORE. AAN = groen gevuld, groene rand, groen lampje + gloed; UIT = donker, grijs, lampje uit.
+## Stijl van de bovenste rij (MENU en RUN gelijk, feedback Forge): vulling, rand en tekst; ingedrukt = lichter.
+static func top_style(pressed: bool) -> Dictionary:
+	var mag := UiStyleC.MAGENTA
+	return {"fill": Color(0.08, 0.08, 0.09, 0.8) if not pressed else Color(0.24, 0.24, 0.27, 0.9),
+			"border": Color(mag.r, mag.g, mag.b, 0.8), "text": UiStyleC.TEXT}
+
+
+## RUN-knop: zelfde stijl/helderheid als MENU (top_style). AAN/UIT zie je alleen aan het lampje links (groen/donker).
 const RUN_NEON := Color(0.35, 1.0, 0.55)
 
 
 func _draw_run_button(line: float) -> void:
 	var rr := run_rect()
 	var on := run_on()
-	var pressed := _press_count.has("run")
-	var neon := RUN_NEON if on else Color(0.55, 0.55, 0.6)
-	if on:
-		draw_rect(rr.grow(line), Color(neon.r, neon.g, neon.b, 0.3))   # gloed
-	draw_rect(rr, Color(0.08, 0.2, 0.11, 0.9) if on else Color(0.08, 0.08, 0.09, 0.8))
-	if pressed:
-		draw_rect(rr, Color(1, 1, 1, 0.15))
-	draw_rect(rr, neon, false, line)
-	# lampje links
+	var st := top_style(_press_count.has("run"))
+	draw_rect(rr, st["fill"])
+	draw_rect(rr, st["border"], false, line)
 	var lamp := (rr.position + Vector2(7, rr.size.y / 2.0)).round()
-	draw_circle(lamp, 2.5, neon if on else Color(0.2, 0.2, 0.22))
+	if on:
+		draw_circle(lamp, 3.5, Color(RUN_NEON.r, RUN_NEON.g, RUN_NEON.b, 0.3))
+	draw_circle(lamp, 2.5, RUN_NEON if on else Color(0.2, 0.2, 0.22))
 	var font := get_theme_default_font()
 	var txt := "RUN"
 	var ts := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10)
-	var tp := Vector2(rr.end.x - 4.0 - ts.x, rr.position.y + 12.0).round()
+	var tp := Vector2(rr.end.x - 4.0 - ts.x, rr.get_center().y + 4.0).round()
 	draw_string(font, tp + Vector2(1, 1), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyleC.SHADOW)
-	draw_string(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.WHITE if on else UiStyleC.TEXT)
+	draw_string(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, st["text"])
