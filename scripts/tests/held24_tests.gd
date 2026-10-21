@@ -118,6 +118,13 @@ func _run() -> void:
 			and KaartStijl.npc_sheet_pad("res://assets/sprites/npc/koopman_veld.png").ends_with("koopman_veld_wm1_slim.png")
 			and ResourceLoader.exists("res://assets/sprites/noor_dorp.png") and ResourceLoader.exists("res://assets/sprites/archief2/lotte_veld.png"))
 	# terugval zonder sheet: onbekende held -> "" (speler houdt zijn huidige sheet)
+	var oud_naam: String = str(GameState.party[0].get("name", ""))
+	var oud_id: String = str(GameState.party[0].get("id", ""))
+	GameState.party[0]["name"] = "Kees"
+	GameState.party[0]["id"] = "dennis"
+	check("hernoemde Dax ('Kees') houdt dax_wm1_slim.png (op id)", KaartStijl.leider_sheet().ends_with("dax_wm1_slim.png"))
+	GameState.party[0]["name"] = oud_naam
+	GameState.party[0]["id"] = oud_id
 	check("terugval: held zonder sheet geeft geen pad", KaartStijl.held_sheet("Onbekend") == "")
 	check("SomData.SHEETS: Dax _wm1_slim, Seren/Vesper final_trio", str(SomData.SHEETS["dennis"]).ends_with("dax_wm1_slim.png")
 			and SomData.SHEETS["lotte"] == KaartStijl.HELD_VAST["seren"] and SomData.SHEETS["noor"] == KaartStijl.HELD_VAST["vesper"])

@@ -107,6 +107,8 @@ const HELDEN := "res://assets/sprites/som/kaart/"
 const HELD_VARIANTEN: Array[String] = ["_wm1_slim", "_wm1", ""]
 ## Vaste partijsheets (RPG ART, 21 okt 2026): Seren en Vesper gebruiken de goedgekeurde final_trio-sheets,
 ## niet de _slim-varianten (die zijn voor de veld-NPC's Lotte/Noor zonder staf).
+## Held-id (game_data.HEROES) -> sheetnaam.
+const HELD_ID := {"dennis": "dax", "noor": "vesper", "lotte": "seren", "kael": "kael", "orion": "orion"}
 const HELD_VAST := {"seren": "res://assets/sprites/som/kaart/seren_wm1.png", "vesper": "res://assets/sprites/som/kaart/vesper.png"}
 
 
@@ -134,7 +136,12 @@ static func leider_sheet() -> String:
 	var gs = Engine.get_main_loop().root.get_node_or_null("GameState") if Engine.get_main_loop() is SceneTree else null
 	if gs == null or (gs.party as Array).is_empty():
 		return held_sheet("Dax")
-	return held_sheet(str((gs.party[0] as Dictionary).get("name", "")))
+	var lid := gs.party[0] as Dictionary
+	# Op id, niet op naam: de speler kan Dax hernoemen (bv. "Kees"). Leden zonder bekend id: op naam.
+	var id := str(lid.get("id", ""))
+	if HELD_ID.has(id):
+		return held_sheet(str(HELD_ID[id]))
+	return held_sheet(str(lid.get("name", "")))
 
 
 ## Zet de 24x32-sheet van de leider op de speler van deze map (offset (0,-8), botsing blijft 14x14).
