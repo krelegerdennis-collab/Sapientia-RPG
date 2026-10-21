@@ -166,6 +166,9 @@ var story_flags := {}
 ## v0.22 Veldmenu > Scenes: ids van bekeken cutscenes (scripts/data/scenes_data.gd). Gaat mee in de save
 ## als "scenes_seen"; oude saves worden gemigreerd via de vlaggen die de cutscenes zelf zetten.
 var scenes_seen: Array = []
+## Gehoorde Suno-tracks (scripts/data/music_tracks.gd ids) voor Menu > Scenes > Music. In de save.
+var heard_music: Array = []
+const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 ## v0.11: opties voor het volgende gevecht als het een oefengevecht is ({} = gewoon)
 var pending_tutorial := {}
 
@@ -264,6 +267,7 @@ var ui_theme: Theme
 
 
 func _ready() -> void:
+	_koppel_muziek.call_deferred()
 	# TIJDELIJK CI-DIAG (#141)
 	var _d := DirAccess.get_files_at("res://.godot/imported")
 	var _ww := Array(_d).filter(func(f): return f.begins_with("world_warper") or f.ends_with("_v8.png-") or "_v8" in f)
@@ -342,6 +346,7 @@ func _ready() -> void:
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
+			["--musictest", "res://scripts/tests/music_tests.gd", "MusicTest", "musictest"],
 			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
 			["--rekruuttest", "res://scripts/tests/rekruut_tests.gd", "RekruutTest", "rekruuttest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
@@ -506,6 +511,8 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	story_step = StoryData.START
 	story_flags = {}
 	scenes_seen = []
+	heard_music = []
+	_hoor_huidige_muziek()     # bv. de titelmuziek die nu speelt
 	archief2 = {"platen": {}}
 	archief2_temp_ally = {}
 	archief2_party_filter = ""
@@ -582,6 +589,25 @@ func add_member(id: String) -> bool:
 
 
 ## v0.22 Is cutscene 'id' al bekeken? (eigen lijst, of de vlag die de cutscene zelf zet)
+## Muziek-tab: elke track die in het spel start (AudioManager.music_started) telt als gehoord.
+func _koppel_muziek() -> void:
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null and am.has_signal("music_started") and not am.music_started.is_connected(hoor_muziek):
+		am.music_started.connect(hoor_muziek)
+
+
+func hoor_muziek(manifest_id: String) -> void:
+	var tid := MusicTracks.track_for(manifest_id)
+	if tid != "" and not heard_music.has(tid):
+		heard_music.append(tid)
+
+
+func _hoor_huidige_muziek() -> void:
+	var am := get_node_or_null("/root/AudioManager")
+	if am != null and am.has_method("get_current_music"):
+		hoor_muziek(str(am.get_current_music()))
+
+
 func scene_seen(id: String) -> bool:
 	if scenes_seen.has(id):
 		return true
@@ -1118,6 +1144,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
 		"scenes_seen": seen_scenes(),
+		"heard_music": heard_music.duplicate(),
 		"archief2": archief2.duplicate(true),
 		"koopman": koopman_save_data(),
 	}
@@ -1212,6 +1239,13 @@ func apply_state(d: Dictionary) -> bool:
 			if ScenesData.ids().has(str(sid)) and not scenes_seen.has(str(sid)):
 				scenes_seen.append(str(sid))
 	scenes_seen = seen_scenes()
+	heard_music = []
+	var heard_raw = d.get("heard_music", [])
+	if heard_raw is Array:
+		for tid in heard_raw:
+			if MusicTracks.ids().has(str(tid)) and not heard_music.has(str(tid)):
+				heard_music.append(str(tid))
+	_hoor_huidige_muziek()
 	pending_tutorial = {}
 	if has_node("/root/Story"):
 		get_node("/root/Story").reset(true)

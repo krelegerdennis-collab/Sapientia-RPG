@@ -37,7 +37,7 @@ const LEFT_W := 156
 const BUTTON_H := 30
 const MENU_H := 20
 ## v0.22 compacte Warpen-/Party-knop (rechterkolom)
-const WARP_W := 96
+const WARP_W := 112   # 21 okt 2026: ruimte voor "Scenes & Music"
 const WARP_H := 20   # v0.24: 6 knoppen rechts (Quest Log erbij), past boven de opdrachtregel
 ## v0.22 rechterkolom (compact, onder het MENU-bord), van boven naar beneden
 const RIGHT_COL := ["warp", "party", "quests", "scenes", "options", "load"]
@@ -60,7 +60,7 @@ const COMMANDS := [
 	["warp", "Warp"],
 	["party", "Party"],
 	["quests", "Quest Log"],
-	["scenes", "Scenes"],
+	["scenes", "Scenes & Music"],
 	["options", "Settings"],
 	["load", "Load"],
 ]
