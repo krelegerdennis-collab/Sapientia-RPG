@@ -4,7 +4,7 @@ extends "res://scripts/ui/menu_screen.gd"
 ##   rechts: naam, plaatje, level, HP/MP, ATK/DEF/SPD, EXP, vaardigheden, element
 ## A / tik op een pagina = die wordt de bondgenoot (vecht mee); A op 'Geen' = niemand.
 ## B / MENU / 'Terug' = terug naar het hoofdmenu. Alles is tikbaar (regels van 16 hoog).
-## v0.19 GLITCH-FUSIE (Kernfragment stap 3): knop 'Fusie' rechtsboven (of rechts op de D-pad):
+## v0.19 GLITCH-FUSIE (Kernfragment stap 3): knop 'Fusie' rechtsboven (of rechts op de joystick):
 ##   1. kies pagina 1   2. kies pagina 2   3. voorbeeld van het resultaat -> 'Fuseren!' of 'Annuleren'.
 ##   B gaat telkens één stap terug. Regels: CodexData.FUSION_TABLE / GameState.codex_fuse().
 
@@ -108,7 +108,7 @@ func _build() -> void:
 	state_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	state_label.custom_minimum_size = Vector2(100, 0)
 	detail.add_child(state_label)
-	# v0.19 fusie: knop vóór 'Terug' (tikken; met de D-pad: rechts)
+	# v0.19 fusie: knop vóór 'Terug' (tikken; met de joystick: rechts)
 	fuse_button = UiMenu.button("Fusion")
 	fuse_button.custom_minimum_size = Vector2(FUSE_W, ROW_H)
 	fuse_button.focus_mode = Control.FOCUS_NONE

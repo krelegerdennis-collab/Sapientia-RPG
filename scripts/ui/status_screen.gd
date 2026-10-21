@@ -6,7 +6,7 @@ extends "res://scripts/ui/menu_screen.gd"
 ##   rechts: naam/Lv/HP/MP (PartyCard), EXP en EXP tot het volgende level (formule
 ##           GameData.exp_for_level), v0.14: ATK/DEF/MAG/MDEF/SPD (effectief, met de bonus
 ##           van de uitrusting erachter: '17 (+3)'), het wapen en de spreuken
-## Links/rechts (D-pad of de '<' '>' knoppen bovenin) = andere held, als de party >1 is.
+## Links/rechts (joystick of de '<' '>' knoppen bovenin) = andere held, als de party >1 is.
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")

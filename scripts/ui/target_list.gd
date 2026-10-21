@@ -39,7 +39,7 @@ func build(party: Array) -> void:
 		add_child(b)
 		buttons.append(b)
 		cards.append(card)
-	# omhoog/omlaag blijft binnen deze lijst en loopt rond (D-pad én pijltjes)
+	# omhoog/omlaag blijft binnen deze lijst en loopt rond (joystick én pijltjes)
 	link_ring(buttons)
 
 

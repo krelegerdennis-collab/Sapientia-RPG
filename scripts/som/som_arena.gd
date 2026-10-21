@@ -105,6 +105,8 @@ func setup(p_room: Node) -> void:
 	touch = room.get_node_or_null("TouchControls/Control") as Control
 	if touch and "joystick_mode" in touch:
 		touch.joystick_mode = true
+	if touch and "analog_only" in touch:
+		touch.analog_only = true      # alleen joy_raw; geen move_*-stappen (anders dubbele beweging)
 	player.set_analog(analog_dir, SomData.MOVE_SPEED)
 	_apply_player_sheet()
 	var cam := player.get_node_or_null("Camera2D") as Camera2D

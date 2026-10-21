@@ -177,8 +177,8 @@ func open_field_menu() -> void:
 		return
 	player.input_locked = true
 	Sessielog.menu("veld")
-	# v0.11: touch-D-pad/A/B weg zolang het menu open is (je tikt direct op het menu;
-	# anders zou een tik op een menuregel boven de D-pad als 'lopen' tellen)
+	# v0.11: touch-joystick/A/B weg zolang het menu open is (je tikt direct op het menu;
+	# anders zou een tik op een menuregel bij de joystick als lopen tellen)
 	_set_touch_visible(false)
 	var m: CanvasLayer = load("res://scripts/ui/field_menu.gd").new()
 	m.name = "FieldMenu"

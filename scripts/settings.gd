@@ -9,7 +9,7 @@ extends Node
 ##                                 AudioStreamPlayer gewoon bus = "Music" of "SFX")
 ##   text_speed                 -> Dialog.chars_per_second (typemachine van het tekstvak)
 ##   battle_speed               -> tempo van de berichten/wachttijden in gevechten (battle.gd _wait)
-##   touch_opacity / touch_size -> doorzichtigheid en grootte van de D-pad en A/B (touch_controls.gd)
+##   touch_opacity / touch_size -> doorzichtigheid en grootte van de joystick, A/B en de knoppenrij (touch_controls.gd)
 ##   crt                        -> scanline-filter aan/uit (autoload Crt)
 ##   screen_shake               -> schudden bij treffers in gevechten (battle.gd _shake)
 ##   autosave                   -> automatisch opslaan (GameState.autosave)
@@ -36,7 +36,7 @@ const BATTLE_SPEED_NAMES := ["Slow", "Normal", "Fast"]
 const OPACITY_MIN := 30
 const OPACITY_MAX := 100
 const OPACITY_STEP := 10
-## Touch-knoppen: grootte (index -> schaal van de D-pad/A/B-straal).
+## Touch-knoppen: grootte (index -> schaal van de joystick/A/B-straal).
 const TOUCH_SIZE_SCALE := [0.85, 1.0, 1.15]
 const TOUCH_SIZE_NAMES := ["Small", "Normal", "Large"]
 ## SoM-proef: gevechtsstijl. Bazen blijven in beide stijlen turn-based (scripts/data/som_data.gd).

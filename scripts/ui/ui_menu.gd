@@ -1,7 +1,7 @@
 extends RefCounted
 ## v0.10 Hulpjes voor eenvoudige menuschermen (titel, naam, veldmenu, bestiarium) in de
 ## UI-stijl 'De Vergeten Bibliotheek': knoppen met een magenta '>' als ze gekozen zijn,
-## donkere vensters, en besturing met toetsenbord, touch-D-pad/A én tikken.
+## donkere vensters, en besturing met toetsenbord, touch-joystick/A én tikken.
 ## (preload i.p.v. class_name, zodat het ook bij de allereerste import werkt)
 
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
@@ -82,7 +82,7 @@ static func _mark(b: Button, on: bool) -> void:
 		b.add_theme_color_override(k, c)
 
 
-## Touch-D-pad (move_*) en A (interact) laten werken in menu's. Toetsenbord-pijltjes en
+## Touch-joystick (move_*) en A (interact) laten werken in menu's. Toetsenbord-pijltjes en
 ## Enter/Spatie doet Godot zelf al (ui_up/ui_down/ui_accept), die slaan we hier over.
 static func pad_nav(vp: Viewport) -> void:
 	var f := vp.gui_get_focus_owner()

@@ -1,8 +1,10 @@
 extends Control
-## Virtuele D-pad (linksonder) en A- en B-knop (rechtsonder) voor telefoons.
-## Ze "drukken" dezelfde input actions in als het toetsenbord
-## (move_up/down/left/right, interact = A, cancel = B), dus de rest van het spel
-## merkt geen verschil tussen toetsenbord en touch.
+## Action-HUD OVERAL (Dennis, 21 okt 2026): kleine, hoge joystick (midden-links), A- en B-knop (rechtsonder)
+## en de knoppenrij rechtsboven ([RUN] .. [MENU]; in de Action-arena [RUN][Swap][Ring][MENU]). De oude D-pad is weg.
+## Rasterbeweging (veld, dorpen, World Warper) en menu's/Classic-gevecht: de joystick drukt buiten de dode zone
+## de overheersende richting in als move_* en ui_* (4 richtingen; een 'flick' = één stap/menuregel). In de
+## Action-arena leest de speler alleen de analoge joy_raw (analog_only, som_arena.gd).
+## A = interact, B = cancel. De rest van het spel merkt geen verschil met het toetsenbord.
 ## Werkt met multi-touch: elke vinger wordt apart bijgehouden.
 ## Op PC kun je met de muis klikken (emulate_touch_from_mouse staat aan).
 
@@ -20,12 +22,15 @@ const SomDataC := preload("res://scripts/data/som_data.gd")
 var _base_dpad_radius := 0.0
 var _base_button_radius := 0.0
 
-const DPAD_ACTIONS := {
-	Vector2i.UP: "move_up",
-	Vector2i.DOWN: "move_down",
-	Vector2i.LEFT: "move_left",
-	Vector2i.RIGHT: "move_right",
+## Joystick -> rasteracties (richting -> [move_*, ui_*]).
+const STICK_ACTIONS := {
+	Vector2i.UP: ["move_up", "ui_up"],
+	Vector2i.DOWN: ["move_down", "ui_down"],
+	Vector2i.LEFT: ["move_left", "ui_left"],
+	Vector2i.RIGHT: ["move_right", "ui_right"],
 }
+## Tweede 'vinger'-sleutel voor de ui_*-actie van dezelfde vinger (zodat _set_touch_action per sleutel één actie houdt).
+const UI_KEY := 1000
 
 ## v0.10: kleine MENU-knop rechtsboven (alleen in de overworld, map.gd zet hem aan).
 var show_menu := false:
@@ -54,15 +59,23 @@ var show_run := false:
 					_set_touch_action(i, "")
 					_touch_owner.erase(i)
 		queue_redraw()
-## SoM-proef (Action): de D-pad wordt een analoge joystick. Geen move_*-acties; de vinger geeft
-## joy_raw (-1..1, t.o.v. het midden, lengte max 1). De speler leest hem (scripts/som/som_move.gd).
-var joystick_mode := false:
+## Altijd de joystick (de D-pad bestaat niet meer). Blijft als eigenschap voor bestaande code/tests.
+var joystick_mode := true:
 	set(v):
 		joystick_mode = v
 		joy_raw = Vector2.ZERO
 		queue_redraw()
 var joy_raw := Vector2.ZERO
-var _touch_owner := {}    # vinger-index -> "dpad" of "a"
+## Action-arena: alleen analoog (joy_raw), geen move_*/ui_*-acties (anders liep de speler dubbel).
+var analog_only := false:
+	set(v):
+		analog_only = v
+		for i in _touch_owner.keys():
+			if _touch_owner[i] == "joy":
+				_set_touch_action(i, "")
+				_set_touch_action(i + UI_KEY, "")
+		queue_redraw()
+var _touch_owner := {}    # vinger-index -> "joy", "a", "b", "kern", "run", "menu"
 var _touch_action := {}   # vinger-index -> actie die die vinger nu indrukt
 var _press_count := {}    # actie -> aantal vingers dat hem indrukt
 
@@ -109,19 +122,26 @@ func refit() -> void:
 	queue_redraw()
 
 
+## Midden van de joystick (naam bewaard uit de D-pad-tijd): klein en hoog, midden-links.
 func dpad_center() -> Vector2:
-	if joystick_mode:
-		# SoM-proef (feedback Dennis): kleiner en hoger, ongeveer midden-links
-		return Vector2(edge_margin + 6.0 + joy_radius(), roundf(size.y * SomDataC.JOY_CENTER_Y))
-	return Vector2(edge_margin + dpad_radius, size.y - edge_margin - dpad_radius)
+	return stick_center()
 
 
-## Straal van de analoge joystick (kleiner dan de D-pad; de vinger mag er ruim omheen: JOY_TOUCH_REACH).
+func stick_center() -> Vector2:
+	return Vector2(edge_margin + 6.0 + joy_radius(), roundf(size.y * SomDataC.JOY_CENTER_Y))
+
+
+## Tikvlak van de joystick (vinger mag er ruim omheen).
+func stick_reach() -> float:
+	return joy_radius() * SomDataC.JOY_TOUCH_REACH
+
+
+## Straal van de joystick (dpad_radius = basismaat uit de Opties x JOY_SCALE; vinger mag ruim eromheen).
 func joy_radius() -> float:
 	return roundf(dpad_radius * SomDataC.JOY_SCALE)
 
 
-## SoM-proef: bovenste rij rechts = [RUN][Swap][Ring][MENU]; Swap/Ring zet de HUD (som_hud.gd) neer.
+## Bovenste rij rechts: [RUN][MENU] in het veld, [RUN][Swap][Ring][MENU] in de Action-arena (Swap/Ring: som_hud.gd).
 func som_row_slot(i: int) -> Rect2:
 	var m := menu_rect()
 	var w: float = SomDataC.TOP_BUTTON_SIZE.x
@@ -149,14 +169,11 @@ func kern_rect() -> Rect2:
 	return Rect2(Vector2(right - KERN_SIZE.x, bottom - KERN_SIZE.y), KERN_SIZE)
 
 
-## RUN-knop: zelfde maat als CORE, recht erboven (ook als CORE nog niet vrijgespeeld is).
+## RUN-knop: in de bovenste rij, direct links van MENU (veld) of links van Swap en Ring (Action-arena).
 func run_rect() -> Rect2:
-	if joystick_mode:
-		var s := som_row_slot(2)          # links van Swap en Ring
-		var rs: Vector2 = SomDataC.TOP_BUTTON_SIZE
-		return Rect2(Vector2(s.end.x - KERN_SIZE.x, s.position.y), Vector2(KERN_SIZE.x, rs.y))
-	var kr := kern_rect()
-	return Rect2(kr.position - Vector2(0, KERN_SIZE.y + 5.0), KERN_SIZE)
+	var s := som_row_slot(2 if analog_only else 0)
+	var rs: Vector2 = SomDataC.TOP_BUTTON_SIZE
+	return Rect2(Vector2(s.end.x - KERN_SIZE.x, s.position.y), Vector2(KERN_SIZE.x, rs.y))
 
 
 ## Schermrechthoeken (384x216-eenheden) van alle zichtbare knoppen; o.a. de World Warper
@@ -165,8 +182,8 @@ func button_rects() -> Array[Rect2]:
 	var uit: Array[Rect2] = []
 	if not is_visible_in_tree():
 		return uit
-	var d := dpad_center()
-	var dr := dpad_radius * 1.35  # incl. de printplaat-sporen eromheen
+	var d := stick_center()
+	var dr := joy_radius()
 	uit.append(Rect2(d - Vector2.ONE * dr, Vector2.ONE * dr * 2.0))
 	for c in [a_center(), b_center()]:
 		uit.append(Rect2(c - Vector2.ONE * button_radius, Vector2.ONE * button_radius * 2.0))
@@ -200,13 +217,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var pos := _local(event.position)
 		if event.pressed:
-			if joystick_mode and pos.distance_to(dpad_center()) <= joy_radius() * SomDataC.JOY_TOUCH_REACH:
+			if pos.distance_to(stick_center()) <= stick_reach():
 				_touch_owner[event.index] = "joy"
-				_set_joy(pos)
-				get_viewport().set_input_as_handled()
-			elif pos.distance_to(dpad_center()) <= dpad_radius * 1.2:
-				_touch_owner[event.index] = "dpad"
-				_set_touch_action(event.index, _dpad_action(pos))
+				_set_joy(pos, event.index)
 				get_viewport().set_input_as_handled()
 			elif pos.distance_to(a_center()) <= button_radius * 1.25:
 				_touch_owner[event.index] = "a"
@@ -231,17 +244,13 @@ func _input(event: InputEvent) -> void:
 		else:
 			if _touch_owner.get(event.index, "") == "joy":
 				joy_raw = Vector2.ZERO
+				_set_touch_action(event.index + UI_KEY, "")
 				queue_redraw()
 			_set_touch_action(event.index, "")
 			_touch_owner.erase(event.index)
 	elif event is InputEventScreenDrag:
 		if _touch_owner.get(event.index, "") == "joy":
-			_set_joy(_local(event.position))
-			get_viewport().set_input_as_handled()
-			return
-		# Over de D-pad schuiven verandert de richting (zoals op een echte D-pad).
-		if _touch_owner.get(event.index, "") == "dpad":
-			_set_touch_action(event.index, _dpad_action(_local(event.position)))
+			_set_joy(_local(event.position), event.index)
 			get_viewport().set_input_as_handled()
 
 
@@ -250,22 +259,27 @@ func _local(viewport_pos: Vector2) -> Vector2:
 	return get_global_transform_with_canvas().affine_inverse() * viewport_pos
 
 
-## Joystick: positie van de vinger -> joy_raw (lengte max 1). Dode zone/8 richtingen: som_move.gd.
-func _set_joy(pos: Vector2) -> void:
-	joy_raw = ((pos - dpad_center()) / maxf(1.0, joy_radius())).limit_length(1.0)
+## Joystick: positie van de vinger -> joy_raw (lengte max 1). Analoog (Action): som_move.gd. Anders drukt de
+## vinger de overheersende richting in als move_* + ui_* (raster en menu's), met de dode zone JOY_DEADZONE.
+func _set_joy(pos: Vector2, index := -1) -> void:
+	joy_raw = ((pos - stick_center()) / maxf(1.0, joy_radius())).limit_length(1.0)
+	if index >= 0 and not analog_only:
+		var acts := stick_actions(joy_raw)
+		_set_touch_action(index, acts[0])
+		_set_touch_action(index + UI_KEY, acts[1])
 	queue_redraw()
 
 
-func _dpad_action(pos: Vector2) -> String:
-	var v := pos - dpad_center()
-	if v.length() < dpad_radius * dead_zone:
-		return ""
+## [move_*, ui_*] voor een joystickstand (lengte 0..1); ["", ""] binnen de dode zone. 4 richtingen.
+static func stick_actions(raw: Vector2) -> Array:
+	if raw.length() < SomDataC.JOY_DEADZONE:
+		return ["", ""]
 	var dir: Vector2i
-	if absf(v.x) > absf(v.y):
-		dir = Vector2i.RIGHT if v.x > 0 else Vector2i.LEFT
+	if absf(raw.x) > absf(raw.y):
+		dir = Vector2i.RIGHT if raw.x > 0 else Vector2i.LEFT
 	else:
-		dir = Vector2i.DOWN if v.y > 0 else Vector2i.UP
-	return DPAD_ACTIONS[dir]
+		dir = Vector2i.DOWN if raw.y > 0 else Vector2i.UP
+	return STICK_ACTIONS[dir]
 
 
 func _set_touch_action(index: int, action: String) -> void:
@@ -303,73 +317,14 @@ func _notification(what: int) -> void:
 
 
 # ------------------------------------------------------------- tekenen
-## v7 'De Vergeten Bibliotheek': grijze metalen D-pad met magenta 'printplaat'-sporen
-## eromheen, A/B grijs met een neon rand (A cyaan, B magenta). Lijnen van 0,5 eenheid =
-## 1 echte pixel in het gevecht (2x-raster); in de overworld worden ze 1 pixel.
-## Alles wordt alleen opnieuw getekend als er iets verandert (geen werk per frame).
-const CIRCUIT := [
-	# [punten (in stralen t.o.v. het midden)], eindpunt krijgt een rondje
-	[Vector2(0.55, -0.95), Vector2(0.95, -0.95), Vector2(1.12, -0.78)],
-	[Vector2(0.95, -0.55), Vector2(1.12, -0.55)],
-	[Vector2(-0.55, -0.95), Vector2(-0.95, -0.95), Vector2(-1.1, -1.1)],
-	[Vector2(0.95, 0.55), Vector2(0.95, 0.95), Vector2(1.1, 1.1)],
-	[Vector2(-0.95, 0.55), Vector2(-1.12, 0.55)],
-	[Vector2(-0.55, 0.95), Vector2(-0.95, 0.95), Vector2(-1.12, 0.78)],
-	[Vector2(0.38, -1.0), Vector2(0.38, -1.15)],
-	[Vector2(-0.38, 1.0), Vector2(-0.38, 1.15)],
-]
-
-
+## Joystick (RPG ART joystick_ring/knob; anders een placeholder) + A/B + knoppenrij. Alleen opnieuw tekenen
+## als er iets verandert (geen werk per frame).
 func _draw() -> void:
 	var line := 0.5 if _fine() else 1.0
-	var mag := UiStyleC.MAGENTA
-	# D-pad
-	var c := dpad_center()
-	var r := dpad_radius
-	if joystick_mode:
-		r = joy_radius()
+	var c := stick_center()
+	var r := joy_radius()
 	draw_circle(c, r, Color(0, 0, 0, 0.28))
-	if joystick_mode:
-		_draw_joystick(c, r, line)
-		_draw_rest(line)
-		return
-	# printplaat-sporen met gloed
-	for path in CIRCUIT:
-		var pts := PackedVector2Array()
-		for q in path:
-			pts.append((c + q * r).round())
-		draw_polyline(pts, Color(mag.r, mag.g, mag.b, 0.18), line * 3.0)
-		draw_polyline(pts, Color(mag.r, mag.g, mag.b, 0.75), line)
-		draw_circle(pts[pts.size() - 1], line * 2.2, Color(mag.r, mag.g, mag.b, 0.85))
-		draw_circle(pts[pts.size() - 1], line, Color(0.08, 0.02, 0.08, 1))
-	draw_arc(c, r * 0.98, 0.0, TAU, 48, Color(mag.r, mag.g, mag.b, 0.22), line)
-	var arm := roundf(r * 0.33)
-	var reach := roundf(r * 0.86)
-	var body := Color(0.16, 0.16, 0.18, 0.92)
-	var lit := Color(0.46, 0.46, 0.5, 0.95)
-	var dark := Color(0.04, 0.04, 0.05, 0.95)
-	for rect in [Rect2(c.x - arm, c.y - reach, arm * 2, reach * 2), Rect2(c.x - reach, c.y - arm, reach * 2, arm * 2)]:
-		draw_rect(rect.grow(line), dark)
-		draw_rect(rect, body)
-	# afschuining (licht linksboven, donker rechtsonder)
-	draw_line(Vector2(c.x - arm, c.y - reach + line), Vector2(c.x + arm, c.y - reach + line), lit, line)
-	draw_line(Vector2(c.x - reach + line, c.y - arm), Vector2(c.x - reach + line, c.y + arm), lit, line)
-	draw_line(Vector2(c.x - arm, c.y + reach - line), Vector2(c.x + arm, c.y + reach - line), dark, line)
-	draw_line(Vector2(c.x + reach - line, c.y - arm), Vector2(c.x + reach - line, c.y + arm), dark, line)
-	draw_circle(c, arm * 0.55, Color(0.09, 0.09, 0.1, 1))
-	draw_arc(c, arm * 0.55, 0.0, TAU, 20, Color(0.32, 0.32, 0.36, 1), line)
-	for dir in DPAD_ACTIONS:
-		var pressed := _press_count.has(DPAD_ACTIONS[dir])
-		var d := Vector2(dir)
-		var tip := c + d * reach * 0.82
-		var side := Vector2(-d.y, d.x) * arm * 0.6
-		var back := c + d * reach * 0.42
-		var tri := PackedVector2Array([tip, back + side, back - side])
-		if pressed:
-			draw_colored_polygon(tri, UiStyleC.MAGENTA_HOT)
-		else:
-			draw_colored_polygon(tri, Color(mag.r, mag.g, mag.b, 0.25))
-		draw_polyline(PackedVector2Array([tip, back + side, back - side, tip]), mag, line)
+	_draw_joystick(c, r, line)
 	_draw_rest(line)
 
 
