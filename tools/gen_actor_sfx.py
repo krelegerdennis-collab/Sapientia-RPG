@@ -258,6 +258,23 @@ def render(actor_id: str, slot: str) -> list[float]:
 		zap = _decay(_sweep(400, 1900, 0.28, "saw", 0.6), 0.01, 0.08)
 		crackle = _scale(_env(_highpass(_noise(0.2, seed), 2500), 0.01, 0.05), 0.45)
 		return _mix(zap, crackle)
+	if actor_id == "kael":
+		if slot == "aanval":
+			return _mix(_decay(_sweep(900, 2600, 0.18, "sine", 0.5), 0.005, 0.08), _scale(_clang(1300, 0.1), 0.4))
+		if slot == "raak":
+			return _cry(210, 130, 0.22, seed, 0.15)
+		if slot == "dood":
+			return _mix(_shimmer(1500, 300, 0.5), _delay(_scale(_clang(900, 0.25), 0.5), 0.12))
+		return _mix(_decay(_tone(660, 0.3, "sine"), 0.01, 0.1), _delay(_decay(_tone(880, 0.3, "sine", 0.7), 0.01, 0.1), 0.06),
+				_delay(_decay(_tone(1100, 0.3, "sine", 0.5), 0.01, 0.1), 0.12))
+	if actor_id == "orion":
+		if slot == "aanval":
+			return _mix(_decay(_tone(196, 0.2, "saw", 0.6), 0.002, 0.1), _delay(_whoosh(0.18, seed, 1600), 0.04))
+		if slot == "raak":
+			return _cry(190, 120, 0.2, seed, 0.2)
+		if slot == "dood":
+			return _mix(_cry(160, 70, 0.45, seed, 0.25), _delay(_scale(_clang(150, 0.3), 0.6), 0.2))
+		return _mix(_decay(_tone(147, 0.28, "saw", 0.7), 0.002, 0.12), _delay(_whoosh(0.2, seed, 2200), 0.03), _delay(_scale(_clang(400, 0.2), 0.7), 0.2))
 	if actor_id == "lotte":
 		if slot == "aanval":
 			return _mix(_scale(_clang(520, 0.16), 0.5), _decay(_tone(440, 0.25, "sine"), 0.01, 0.12))
@@ -486,7 +503,7 @@ def main() -> None:
 	print("geschreven: %d wavs" % len(written))
 
 
-def write_only(ids: list[str]) -> None:
+def write_only(ids: list[str], soort: str = "monsters") -> None:
 	"""Schrijf alleen deze monster-wavs. main() herschrijft alles; die niet aanroepen."""
 	with open(CATALOG, encoding="utf-8") as handle:
 		catalog = json.load(handle)
@@ -500,12 +517,12 @@ def write_only(ids: list[str]) -> None:
 			hashes[blob] = path
 	written = []
 	for actor_id in ids:
-		entry = catalog["monsters"][actor_id]
-		folder = os.path.join(SFX_ROOT, "monsters", actor_id)
+		entry = catalog[soort][actor_id]
+		folder = os.path.join(SFX_ROOT, soort, actor_id)
 		_leesmij(folder, entry["naam"], entry["stem"], entry["slots"])
 		for slot in SLOTS:
 			samples = render(actor_id, slot)
-			rel = "assets/audio/sfx/monsters/%s/%s.wav" % (actor_id, slot)
+			rel = "assets/audio/sfx/%s/%s/%s.wav" % (soort, actor_id, slot)
 			path = os.path.join(ROOT, rel)
 			_write_wav(path, samples)
 			blob = open(path, "rb").read()
@@ -528,7 +545,9 @@ def write_only(ids: list[str]) -> None:
 
 if __name__ == "__main__":
 	import sys
-	if len(sys.argv) > 1 and sys.argv[1] == "--alleen":
+	if len(sys.argv) > 2 and sys.argv[1] == "--alleen-helden":
+		write_only(sys.argv[2:], "helden")
+	elif len(sys.argv) > 1 and sys.argv[1] == "--alleen":
 		write_only(sys.argv[2:])
 	else:
 		main()
