@@ -175,11 +175,11 @@ const THEMES := {
 		"sprites": {},
 		"solid_extra": [70, 71, 72],
 	},
-	# Hub na De Genezer. Zelfde atlas, paarse tint.
+	# Hub na De Genezer. WM1-fix: zelfde v8-atlas als de andere Archief 2-kamers (kas), geen paarse tint meer.
 	"warper_paars": {
-		"tiles": "res://assets/tiles/dungeon/kas_tiles.png",
-		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek.png",
-		"tint": Color(0.78, 0.68, 1.0),
+		"tiles": "res://assets/tiles/dungeon/kas_tiles_v8c.png",
+		"lib_tiles": "res://assets/tiles/dungeon/kas_bibliotheek_v8.png",
+		"tint": Color(1, 1, 1),
 		"terrain": "kas",
 		"solid_extra": [70, 71, 72, 78],
 	},
@@ -199,7 +199,7 @@ const THEMES := {
 		"lib_tiles": "res://assets/tiles/dungeon/archief_grijs_bibliotheek.png",
 		"single_atlas": true,
 		"terrain": "woud",
-		"tint": Color(0.86, 0.92, 0.90),
+		"tint": Color(1, 1, 1),   # WM1-fix: geen tint meer op de v9-tegels (RPG ART)
 		"mist": true,
 		"solid_extra": [87, 88, 89, 90, 96, 97, 98, 99, 100, 101, 104, 112, 113, 114, 115, 116, 117, 118],   # 112-118 kuilranden (blokkeren als de kuil)
 		"pit_edges": [112, 113, 114, 115, 116, 117, 118],   # links, rechts, onder, linksonder, rechtsonder, linksboven, rechtsboven (DungeonRooms.pit_edge_tiles)

@@ -432,6 +432,7 @@ func _data_tests() -> void:
 	check("bospad in alle 5 woudkamers, 2-3 breed, alleen padtegels 65-75/80/81, ingang -> elke uitgang (%s)" % [pad_bad], pad_bad.is_empty())
 	# --- thema / tegels
 	var th: Dictionary = DR.THEMES["donker_woud"]
+	check("WM1: geen tint op de v9-woudtegels (wit)", (th.get("tint", Color(1, 1, 1)) as Color).is_equal_approx(Color(1, 1, 1)))
 	var tex: Texture2D = load(th["tiles"])
 	check("thema donker_woud: woud_tiles_v9b.png 256x128 (RPG ART, rij 7 kuilranden), terrein 'woud', één atlas",
 			tex != null and tex.get_size() == Vector2(256, 128) and DR.terrain_of("donker_woud") == "woud" and DR.single_atlas("donker_woud"))
