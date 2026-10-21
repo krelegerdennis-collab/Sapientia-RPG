@@ -38,9 +38,12 @@ func _maak_naam() -> void:
 	naam_label.add_theme_constant_override("outline_size", 2)
 	naam_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	naam_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	# 80 breed ("Kael Voss" is ~73 px); Kael en Orion staan 96 px uit elkaar, dus nooit overlap
-	naam_label.size = Vector2(80, 10)
-	naam_label.position = Vector2(-40, -42)
+	# Breedte = tekst + 6 px ("Kael Voss" ~73, "Orion" ~40); Kael (x 200) en Orion (x 288) staan 88 px uit
+	# elkaar, dus geen overlap, en Orions bordje blijft links van de RUN-knop (21 okt 2026).
+	var f: Font = naam_label.get_theme_font("font")
+	var bw := ceilf(f.get_string_size(npc_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x) + 6.0 if f else 80.0
+	naam_label.size = Vector2(bw, 10)
+	naam_label.position = Vector2(-bw / 2.0, -42)
 	naam_label.z_index = 5
 	add_child(naam_label)
 

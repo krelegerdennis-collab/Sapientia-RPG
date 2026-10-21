@@ -114,6 +114,20 @@ func _run() -> void:
 		check("naambordjes boven Kael en Orion (Kael Voss / Orion)", kael.naam_label != null and kael.naam_label.text == "Kael Voss" and orion.naam_label != null and orion.naam_label.text == "Orion" and kael.naam_label.is_visible_in_tree())
 		check("hal: naambordjes raken elkaar niet", preload("res://scripts/tests/koopman_tests.gd").hub_label_overlap(hal) == 0)
 		await _shot("hub_naambordjes")
+		# Orions (en Kaels) bordje raakt de RUN-knop niet (schermcoördinaten, camera op de spawn)
+		await get_tree().create_timer(0.6).timeout
+		var tc: Control = hal.get_node_or_null("TouchControls/Control")
+		var raakt := ""
+		if tc and tc.has_method("run_rect"):
+			var run: Rect2 = tc.run_rect()
+			run.position += tc.get_global_rect().position
+			for n in [kael, orion]:
+				var l: Label = n.naam_label
+				var xf := l.get_global_transform_with_canvas()
+				var r := Rect2(xf.origin, l.size * xf.get_scale())
+				if r.intersects(run, true):
+					raakt += "%s %s x RUN %s; " % [l.text, r, run]
+		check("hal: naambordjes raken de RUN-knop niet (%s)" % (raakt if raakt != "" else "ok"), tc != null and raakt == "")
 	if kael == null or orion == null:
 		_eind()
 		return
