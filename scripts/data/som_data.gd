@@ -173,6 +173,63 @@ const CHARGE_MIN_MULT := 0.1
 const CHARGE_AFTER_ANIM := true
 ## Vijandschade in realtime x deze factor (zelfde formule als turn-based; balans via --actionsim).
 const ENEMY_DAMAGE_MULT := 2.2     # v3: --actionsim iteratie 7
+## Balans per gebied, ALLEEN in Action (som_arena.gd enemy_stats en --archief1balans). Classic (battle.gd) en
+## bazen/unieke vijanden blijven ongemoeid. Zie BALANS_ARCHIEF1.md (meting met --archief1balans).
+##   rooms      = room_id-voorvoegsels van het gebied
+##   tier_level = verwacht level van Dax per archief-tier (kamer-tier uit dungeon_rooms.gd)
+##   hp_hits    = vijand-HP wordt geklemd tussen [lo, hi] x de gemiddelde volle slag van een verse Dax op dat
+##                level (nieuw spel, geen uitrusting) -> 3-4 volle slagen per gewone vijand
+##   hits       = doelbereik (gemiddeld aantal volle slagen), bewaakt door de balanstest
+##   atk        = factor op de vijandaanval (iets harder: ontwijken moet lonen)
+##   cooldown   = factor op ATTACK_COOLDOWN (harder maar minder vaak: elke klap telt, ontwijken loont)
+##   dodge_skill = ontwijkkans van een speler die de telegraaf leest (alleen meting, --archief1balans)
+const ACTION_AREAS := {
+	"archief1": {"rooms": ["archief_v1_", "archief_v2_", "archief_v3_", "archief_v4_"],
+			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 4.0], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6},
+}
+
+
+## Gebied-sleutel uit ACTION_AREAS voor deze kamer ("" = geen).
+static func action_area(room_id: String) -> String:
+	for k in ACTION_AREAS:
+		for pre in ACTION_AREAS[k]["rooms"]:
+			if room_id.begins_with(str(pre)):
+				return k
+	return ""
+
+
+## ATK van een verse Dax (GameData.HEROES "dennis": basis + groei, geen uitrusting) op dit level.
+static func fresh_dax_atk(level: int) -> float:
+	var GD: Script = load("res://scripts/data/game_data.gd")
+	for h in GD.HEROES:
+		if str(h["id"]) == "dennis":
+			return float(h["atk"]) + float(h["growth"]["atk"]) * float(maxi(0, level - 1))
+	return 14.0
+
+
+## Wachttijd tussen vijandaanvallen in deze kamer (ATTACK_COOLDOWN x gebiedsfactor).
+static func attack_cooldown(room_id: String) -> float:
+	var k := action_area(room_id)
+	return ATTACK_COOLDOWN * (float(ACTION_AREAS[k].get("cooldown", 1.0)) if k != "" else 1.0)
+
+
+## Vijand-data met de Action-gebiedsregels (kopie). Bazen en unieke vijanden: ongewijzigd.
+static func apply_action_area(d: Dictionary, room_id: String, tier := 0) -> Dictionary:
+	var k := action_area(room_id)
+	# NB: "boss" in de vijand-data (kennis_beest) is de config van het baasgevecht (turn-based); als gewone
+	# vijand in de kamer telt hij gewoon mee. Baas-monsters op de kaart komen nooit in de arena (register).
+	if k == "" or d.get("unique", false) or not d.has("max_hp"):
+		return d
+	var a: Dictionary = ACTION_AREAS[k]
+	var out := d.duplicate(true)
+	var lv := int(a["tier_level"].get(tier, a["tier_level"].get(0, 1)))
+	var slag := maxf(1.0, fresh_dax_atk(lv) - float(d.get("def", 0)) / 2.0)
+	var hh: Array = a["hp_hits"]
+	out["max_hp"] = maxi(1, roundi(clampf(float(d["max_hp"]), slag * float(hh[0]), slag * float(hh[1]))))
+	out["atk"] = maxi(1, roundi(float(d.get("atk", 1)) * float(a.get("atk", 1.0))))
+	return out
+
+
 ## Bereik van een slag (px, vanaf een punt 10 px voor de speler).
 const ATTACK_REACH := 14.0
 const ATTACK_OFFSET := 12.0
