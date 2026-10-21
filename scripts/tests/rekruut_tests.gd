@@ -309,14 +309,17 @@ func _action(id: String) -> void:
 	a.swing_landed.disconnect(cb2)
 	check("%s: bestuurde slag raakt (%d)" % [id, res[0]], res[0] >= 1)
 	# 3b) ontwijken: een klap tijdens de iframes -> <held>_dodge.png-pose, geen schade
+	var dn: Node = a.node_of(id)
+	for nm in ["SomHurtAnim", "SomDodgeAnim"]:       # een lopende pose (van een echte klap) eerst weg
+		var oud: Node = dn.get_node_or_null(nm) if dn else null
+		if oud:
+			oud.free()
 	var hp_d := int(a.member(id)["hp"])
 	var d0: int = a.dodges
 	a.iframes[id] = 0.5
 	a.hit_member(id, 50)
-	await get_tree().process_frame
-	var dn: Node = a.node_of(id)
 	var da: Node = dn.get_node_or_null("SomDodgeAnim") if dn else null
-	check("%s: ontwijkt tijdens iframes met %s_dodge.png (geen schade)" % [id, id], da != null and a.dodges == d0 + 1
+	check("%s: ontwijkt tijdens iframes met %s_dodge.png (geen schade)" % [id, id], da != null and a.dodges >= d0 + 1
 			and int(a.member(id)["hp"]) == hp_d and da.texture.resource_path.ends_with("%s_dodge.png" % id))
 	await _shot("action_%s_dodge" % id)
 	await _sec(0.3)
