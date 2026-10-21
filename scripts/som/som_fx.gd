@@ -28,11 +28,17 @@ static func dir_index(d: Vector2i) -> int:
 
 
 ## Held-pose-sprite op node p (48x48-cellen, voeten op de onderrand).
+## Namen van held-pose-overlays (één tegelijk op een held).
+const HELD_POSES := ["SomAttackAnim", "SomHurtAnim", "SomDodgeAnim"]   # cast niet: die geeft de spreuk pas op frame 4 vrij
+
+
 static func _hero_anim(p: Node2D, t: Texture2D, hf: int, vf: int, frames: Array, ms: Array, anim_name := "SomAttackAnim") -> Anim:
-	var old := p.get_node_or_null(anim_name)
-	if old:
-		old.finish_now()
-		old.free()
+	# Sessielog-review 21 okt 2026: één held-pose tegelijk. Een nieuwe pose (bv. hurt midden in een aanval)
+	# rondt de lopende af (treffer valt nog) i.p.v. erover te tekenen.
+	for old in p.get_children():
+		if old is Anim and not old.is_queued_for_deletion() and (old.name == anim_name or old.name in HELD_POSES):
+			old.finish_now()
+			old.free()
 	var a := Anim.new()
 	a.name = anim_name
 	a.texture = t
@@ -348,6 +354,15 @@ class Anim extends Sprite2D:
 			finish_now()
 			queue_free()
 
+	func _andere_pose_actief() -> bool:
+		var p := get_parent()
+		if p == null:
+			return false
+		for c in p.get_children():
+			if c != self and c is Anim and c.body == body and not c._done and not c.is_queued_for_deletion():
+				return true
+		return false
+
 	func _hit() -> void:
 		if hit_done:
 			return
@@ -361,7 +376,10 @@ class Anim extends Sprite2D:
 		_done = true
 		if hit_index >= 0 and not hit_done:
 			_hit()
-		if body and is_instance_valid(body) and body.get_parent().get_node_or_null("SomKO") == null:
+		# Sessielog-review 21 okt 2026: alleen terug naar de loopsprite als er geen andere held-pose meer loopt
+		# (aanval + hurt tegelijk gaf de loopsprite EN een 48x48-pose over elkaar).
+		if body and is_instance_valid(body) and body.get_parent().get_node_or_null("SomKO") == null \
+				and not _andere_pose_actief():
 			body.visible = true
 		finished.emit()
 

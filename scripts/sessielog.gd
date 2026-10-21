@@ -31,6 +31,9 @@ const MAX_BESTANDEN := 8
 const EXPORT_SESSIES := 3
 const KLEMBORD_MAX := 30000
 const ACTIES := ["interact", "cancel", "run", "kern"]
+## Frame-gat (ms) dat als "gat" gelogd wordt: het spel liep niet (achtergrond, scherm uit).
+const GAT_MS := 3000
+var _vorige_frame_ms := 0
 const RICHTING := {"move_up": "up", "move_down": "down", "move_left": "left", "move_right": "right"}
 
 ## Aan in het spel; in autotests (--...test) uit tot een test hem zelf start.
@@ -133,6 +136,7 @@ func start(map_pad := MAP) -> void:
 	noteer("start", {
 		"v": FORMAAT,
 		"spel": str(ProjectSettings.get_setting("application/config/version", "")),
+		"build": _build_id(),
 		"motor": Engine.get_version_info().get("string", ""),
 		"os": OS.get_name(),
 		"web": OS.has_feature("web"),
@@ -171,8 +175,22 @@ func _notification(what: int) -> void:
 			flush()
 		NOTIFICATION_APPLICATION_RESUMED:
 			noteer("hervat", {})
+		NOTIFICATION_APPLICATION_FOCUS_OUT:
+			noteer("focus", {"aan": false})
+			flush()
+		NOTIFICATION_APPLICATION_FOCUS_IN:
+			noteer("focus", {"aan": true})
 		NOTIFICATION_WM_CLOSE_REQUEST:
 			stop()
+
+
+## Welke build draait er? res://build.json ({"commit": "..."}) wordt bij de web-export neergezet
+## (niet in git); ontbreekt hij, dan "dev". Zo is in een logboek te zien of een oude (gecachte) build speelde.
+func _build_id() -> String:
+	if not FileAccess.file_exists("res://build.json"):
+		return "dev"
+	var d = JSON.parse_string(FileAccess.get_file_as_string("res://build.json"))
+	return str(d.get("commit", "dev")) if d is Dictionary else "dev"
 
 
 ## Willekeurige sessie-id (8 hex-tekens), niet te herleiden tot iemand.
@@ -243,6 +261,11 @@ func flush() -> void:
 func _process(delta: float) -> void:
 	if not actief:
 		return
+	# Sessielog-review 21 okt 2026: lange stilte (tabblad op de achtergrond / telefoon weg) zichtbaar maken.
+	var nu_ms := Time.get_ticks_msec()
+	if _vorige_frame_ms > 0 and nu_ms - _vorige_frame_ms >= GAT_MS:
+		noteer("gat", {"secs": snappedf((nu_ms - _vorige_frame_ms) / 1000.0, 0.1)})
+	_vorige_frame_ms = nu_ms
 	_flush_in -= delta
 	if _flush_in <= 0.0:
 		_flush_in = FLUSH_SECS
@@ -440,7 +463,27 @@ func kaart(p: String) -> void:
 	var info := {"kaart": _kaart_id(p), "hoe": GameState.entry_kind,
 			"spawn": GameState.pending_spawn, "vp": [v.x, v.y], "venster": [w.x, w.y]}
 	info.merge(_art(p))
+	info.merge(_held_info())
 	noteer("kaart", info)
+
+
+## Sessielog-review 21 okt 2026: "stijl" gaat over de grond-tileset (KaartStijl), niet over de held of de
+## gevechtsmodus. Daarom apart: gevechtsstijl (classic/action) en de kaartsheet + framemaat van de leider.
+func _held_info() -> Dictionary:
+	var st := "action" if Settings.action_battles() else "classic"
+	var sheet := KaartStijl.leider_sheet() if KaartStijl.held_nieuw_op(_laatste_kaart) else "res://assets/sprites/player.png"
+	var leider := str(GameState.party[0].get("id", "")) if not GameState.party.is_empty() else ""
+	return {"gevechtsstijl": st, "leider": leider, "held_sheet": sheet.get_file(),
+			"held_frame": [24, 32] if KaartStijl.held_nieuw_op(_laatste_kaart) else [16, 24]}
+
+
+## Action-gevecht (som_arena.gd): slag van een held en treffer op een held (turn-based logt al via ronde).
+func actie_slag(held: String, raak: int) -> void:
+	noteer("actie_slag", {"kaart": _kaart_id(), "held": held, "raak": raak})
+
+
+func actie_treffer(held: String, schade: int, hp: int) -> void:
+	noteer("actie_treffer", {"kaart": _kaart_id(), "held": held, "schade": schade, "hp": hp})
 
 
 ## Tijd op de kaart die we verlaten.

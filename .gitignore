@@ -29,3 +29,4 @@ export_credentials.cfg
 Thumbs.db
 *.uid
 __pycache__/
+build.json
