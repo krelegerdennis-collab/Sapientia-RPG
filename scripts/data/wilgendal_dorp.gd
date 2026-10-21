@@ -269,7 +269,7 @@ const KAMERS := {
 		"CCCCCCCCC",
 		"L..qwe..R",
 		"L.V.K...R",
-		"L..z.c..R",
+		"L..zxc..R",
 		"L.ttttt.R",
 		"L.......R",
 		"L...P...R",

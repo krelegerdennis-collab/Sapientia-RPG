@@ -11,6 +11,7 @@
 
 [node name="EsdoornHuisNoor" type="Node2D"]
 script = ExtResource("1_rblow")
+music_track = "wachtershuis"
 map_name = "Mapleton - Vesper's House"
 encounters = false
 

@@ -10,6 +10,7 @@
 
 [node name="Werkplaats" type="Node2D"]
 script = ExtResource("1_map")
+music_track = "ww_ambient"
 map_name = "The Workshop"
 encounters = false
 
