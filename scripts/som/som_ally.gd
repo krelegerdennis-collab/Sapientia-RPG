@@ -116,8 +116,10 @@ func tick(delta: float) -> void:
 		var side := Vector2(signf(position.x - c.x), 0)
 		if side == Vector2.ZERO:
 			side = Vector2(1, 0)
-		target = c + side * 14.0 - Vector2(0, SomData.BODY_Y)
-		if body().distance_to(c) <= SomData.ATTACK_REACH + 10.0 and charge >= 1.0:
+		# Kael/Orion (lang bereik) houden afstand; de rest gaat er vlak naast staan
+		var stand := maxf(14.0, SomData.attack_offset(hero_id))
+		target = c + side * stand - Vector2(0, SomData.BODY_Y)
+		if body().distance_to(c) <= SomData.attack_offset(hero_id) + SomData.attack_reach(hero_id) - 2.0 and charge >= 1.0:
 			facing = SomMove.facing_for(c - body(), facing)
 			charge = 0.0
 			attacks += 1

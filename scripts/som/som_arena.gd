@@ -411,14 +411,14 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 		swing_landed.emit(id, 0)
 		return 0
 	var f := Vector2(n.facing)
-	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.ATTACK_OFFSET
+	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
 	SomFx.slash(room.get_node("Objects"), point, f)
 	var hits := 0
 	var atk := float(GameState.effective_stat(member(id), "atk"))
 	for m in enemies.keys():
 		if not is_instance_valid(m):
 			continue
-		if center_of(m).distance_to(point) <= SomData.ATTACK_REACH + 8.0 * maxf(m.size.x, m.size.y):
+		if center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y):
 			var e: Dictionary = enemies[m]
 			last_attacker = id
 			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), n.facing, mult >= 1.0)

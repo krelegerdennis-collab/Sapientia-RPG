@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
 [ext_resource type="TileSet" path="res://world_warper/art/tiles.tres" id="2_tiles"]
@@ -11,6 +11,10 @@
 [ext_resource type="Texture2D" path="res://world_warper/art/bord_warp.png" id="9_warp"]
 [ext_resource type="Script" path="res://world_warper/flow/hub_boot.gd" id="10_boot"]
 [ext_resource type="PackedScene" path="res://world_warper/kamers/naar_kamers.tscn" id="11_kamers"]
+[ext_resource type="PackedScene" path="res://scenes/npc.tscn" id="12_npc"]
+[ext_resource type="Script" path="res://world_warper/services/rekruut.gd" id="13_rekruut"]
+[ext_resource type="Texture2D" path="res://assets/sprites/som/kaart/kael_wm1_slim.png" id="14_kael"]
+[ext_resource type="Texture2D" path="res://assets/sprites/som/kaart/orion_wm1_slim.png" id="15_orion"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bord"]
 size = Vector2(14, 14)
@@ -56,6 +60,22 @@ shape = SubResource("RectangleShape2D_bord")
 [node name="Player" parent="Objects" instance=ExtResource("3_player")]
 position = Vector2(136, 152)
 walk_speed = 64.0
+
+[node name="Kael" parent="Objects" instance=ExtResource("12_npc")]
+position = Vector2(232, 104)
+script = ExtResource("13_rekruut")
+hero_id = "kael"
+npc_name = "Kael Voss"
+lines = Array[String](["Join the party?"])
+sheet = ExtResource("14_kael")
+
+[node name="Orion" parent="Objects" instance=ExtResource("12_npc")]
+position = Vector2(312, 104)
+script = ExtResource("13_rekruut")
+hero_id = "orion"
+npc_name = "Orion"
+lines = Array[String](["Join the party?"])
+sheet = ExtResource("15_orion")
 
 [node name="Spawns" type="Node2D" parent="."]
 

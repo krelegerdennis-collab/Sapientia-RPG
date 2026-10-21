@@ -400,7 +400,8 @@ func _preload_paths() -> Array[String]:
 	for p in GameData.BACKDROPS.values():
 		out.append(str(p))
 	for h in GameData.HEROES:
-		out.append(str(h["battle_sprite"]))
+		if str(h["battle_sprite"]) != "":
+			out.append(str(h["battle_sprite"]))
 	for e in GameData.ENEMIES.values():
 		out.append(GameData.enemy_sprite(e))
 	return out
