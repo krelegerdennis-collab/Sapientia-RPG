@@ -1119,17 +1119,17 @@ func _touch(t: Control, pos: Vector2, aan: bool) -> void:
 func _golemhal_vast() -> void:
 	_wv_nieuw()
 	GameState.story_flags["bewaker:archief_golemhal/golem"] = true
-	# Classic in de Bibliotheek (D-pad), dan in de Opties naar Action (zoals Dennis)
+	# Classic in de Bibliotheek (joystick, rasterlopen; de D-pad bestaat niet meer), dan in de Opties naar Action (zoals Dennis)
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	var s := await _wv_laad(WV_MAPS + "archief_bibliotheek.tscn", "deur")
 	var t := s.get_node_or_null("TouchControls/Control") as Control if s else null
-	check("golemhal-vast: Bibliotheek met D-pad", t != null and not t.joystick_mode)
+	check("golemhal-vast: Bibliotheek (Classic) met joystick, rasterlopen", t != null and t.joystick_mode and not t.analog_only)
 	if t == null:
 		return
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
-	# vinger op de D-pad 'omhoog' de golemdeur in, en blijft liggen (wordt 'omlaag' na de warp)
-	var c: Vector2 = t.dpad_center()
-	_touch(t, c + Vector2(0, -t.dpad_radius * 0.8), true)
+	# vinger op de joystick 'omhoog' de golemdeur in, en blijft liggen (wordt 'omlaag' na de warp)
+	var c: Vector2 = t.stick_center()
+	_touch(t, c + Vector2(0, -t.joy_radius() * 0.8), true)
 	var cs: Node = null
 	for i in 240:
 		await get_tree().process_frame
