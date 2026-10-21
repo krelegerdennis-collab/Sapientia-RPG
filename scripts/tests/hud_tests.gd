@@ -106,6 +106,9 @@ func _layout_tests() -> void:
 	var r: Rect2 = t.run_rect()
 	check("B: rij rechtsboven: RUN direct links van MENU, op één hoogte", r.end.x <= m.position.x and absf(r.get_center().y - m.get_center().y) < 1.0
 			and m.position.y < vs.y * 0.15 and m.end.x > vs.x * 0.85)
+	check("B: RUN zelfde hoogte als MENU (%.0f = %.0f) en zelfde stijl (top_style, uit en ingedrukt)" % [r.size.y, m.size.y],
+			is_equal_approx(r.size.y, m.size.y) and TC.top_style(false)["text"] == TC.top_style(false)["text"]
+			and FileAccess.get_file_as_string("res://scripts/touch_controls.gd").count("top_style(_press_count.has(") == 2)
 	var k: Rect2 = t.kern_rect()
 	check("B: KERN boven A, rechts uitgelijnd", k.end.y < t.a_center().y - t.button_radius and absf(k.end.x - (t.a_center().x + t.button_radius)) < 1.0)
 	check("B: A/B rechtsonder", t.a_center().x > vs.x * 0.75 and t.a_center().y > vs.y * 0.6 and t.b_center().x < t.a_center().x)
