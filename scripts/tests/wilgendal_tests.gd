@@ -49,6 +49,7 @@ func _run() -> void:
 	_art()
 	_wereld()
 	await _dorp()
+	_kleed_vakken()
 	await _panden()
 	await _som()
 	print("WILGENDALTEST %d PASS, %d FAIL" % [passes, failures])
@@ -332,6 +333,41 @@ func _rondlopen(dorp: Node) -> void:
 			and dorp.get_node_or_null("Objects/Gerrit") == gerrit)
 
 
+## Kleed 3x3 in binnen_v8.png = vakken 12-20 (q w e / a m f / z x c): elk vak heeft een teken in BINNEN, en elk
+## kleed in KAMERS heeft geen gat (onderrij z?c heeft x in het midden).
+func _kamer_shot(naam: String) -> void:
+	var map := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots="):
+			map = a.get_slice("=", 1)
+	if map == "":
+		return
+	await get_tree().create_timer(0.3).timeout
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	img.resize(img.get_width() * 3, img.get_height() * 3, Image.INTERPOLATE_NEAREST)
+	img.save_png(map.path_join(naam + ".png"))
+	print("INFO  screenshot: ", map.path_join(naam + ".png"))
+
+
+func _kleed_vakken() -> void:
+	const PB := preload("res://scripts/village/pand_binnen.gd")
+	var vakken: Array = PB.BINNEN.values()
+	var mis := []
+	for n in range(12, 21):
+		if not vakken.has(n):
+			mis.append(n)
+	check("kleed: elk vak 12-20 heeft een teken in BINNEN (mist %s)" % [mis], mis.is_empty() and PB.BINNEN.get("x", -1) == 19)
+	var gat := ""
+	for id in Data.KAMERS:
+		for regel in Data.KAMERS[id]:
+			var r := str(regel)
+			var z := r.find("z")
+			if z >= 0 and z + 2 < r.length() and r[z + 2] == "c" and r[z + 1] != "x":
+				gat += "%s '%s'; " % [id, r]
+	check("kleed: geen gat in de onderrij (%s)" % (gat if gat != "" else "ok"), gat == "")
+
+
 func _panden() -> void:
 	var sfeer_tegel := {
 		"pantser": Vector2i(1, 1),
@@ -346,10 +382,13 @@ func _panden() -> void:
 		check("binnen %s" % id, kamer != null and kamer.map_name == str(rij["map_naam"]) and kamer.encounters == false)
 		if kamer == null:
 			continue
-		var tint: Color = Data.SFEER_KLEUR[str(rij["sfeer"])]
-		check("sfeer %s" % id, kamer.get_node("Ground").modulate.is_equal_approx(tint))
+		# v8: geen sfeertint meer, binnen.tres = binnen_v8.png
+		check("v8 zonder tint %s (binnen_v8.png)" % id, kamer.get_node("Ground").modulate.is_equal_approx(Color(1, 1, 1))
+				and (kamer.get_node("Ground").tile_set.get_source(0) as TileSetAtlasSource).texture.resource_path.ends_with("binnen_v8.png"))
 		var uit: Node = kamer.get_node("Exits/NaarDorp")
 		check("deur terug %s" % id, uit.target_map == DORP and uit.target_spawn == Data.voor_spawn(id))
+		if id == "accessoire":
+			await _kamer_shot("binnen_v8_accessoire")
 		if id in sfeer_atlas:
 			var tegel: Vector2i = sfeer_tegel[id]
 			var atlas: Vector2i = kamer.get_node("Ground").get_cell_atlas_coords(tegel)

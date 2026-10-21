@@ -1,6 +1,6 @@
 extends "res://scripts/map.gd"
 ## Interieur van een Wilgendal-pand. Welk pand: de spawn-naam (pantser, wapen, ...).
-## Bestaande binnentegels, eigen tint per sfeer. Deur terug naar het dorp.
+## Binnentegels binnen_v8.png (25 vakken; kleed 12-20 = q w e / a m f / z x c), geen tint meer. Deur terug naar het dorp.
 
 const Data := preload("res://scripts/data/wilgendal_dorp.gd")
 const NPC := preload("res://scenes/npc.tscn")
@@ -11,7 +11,7 @@ const VITRINE_TEX := preload("res://assets/sprites/buiten/wilgendal_vitrine.png"
 const BINNEN := {
 	".": 0, ",": 1, "C": 2, "U": 3, "W": 4, "D": 5, "S": 6, "s": 7,
 	"t": 8, "h": 9, "b": 10, "d": 11, "q": 12, "w": 13, "e": 14,
-	"a": 15, "m": 16, "f": 17, "z": 18, "c": 20, "k": 21, "L": 23, "R": 24,
+	"a": 15, "m": 16, "f": 17, "z": 18, "x": 19, "c": 20, "k": 21, "L": 23, "R": 24,
 }
 
 
@@ -30,8 +30,8 @@ func _bouw(id: String) -> void:
 	sets_checkpoint = false
 	map_name = str(rij.get("map_naam", "Willowdale"))
 	var vloer: TileMapLayer = get_node("Ground")
-	var tint: Color = Data.SFEER_KLEUR.get(str(rij.get("sfeer", "")), Color.WHITE)
-	vloer.modulate = tint
+	# v8 (binnen_v8.png, RPG ART): de kleur zit in de tegels zelf, dus geen sfeertint meer (SFEER_KLEUR blijft als data)
+	vloer.modulate = Color(1, 1, 1)
 	var keeper_tegel := Vector2i(-1, -1)
 	var vitrine_tegel := Vector2i(-1, -1)
 	var bord_tegel := Vector2i(-1, -1)
