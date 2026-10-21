@@ -212,6 +212,15 @@
 			"loop": true,
 			"volume_db": -6.0,
 			"bpm": 0
+		},
+		"ww_ambient": {
+			"bestand": "bgm_diepe_grot.ogg",
+			"titel": "Biomechanical Dungeon",
+			"locatie": "World Warper (hal, kamers en buiten)",
+			"beschrijving": "Hergebruikt de Diepe Grot-track (Suno, suno.com/s/NcOHhEACJuYsj6Ts) tot de hub een eigen lage tech-hum krijgt. Naadloze loop.",
+			"loop": true,
+			"volume_db": -6.0,
+			"bpm": 0
 		}
 	},
 	"sfx": {

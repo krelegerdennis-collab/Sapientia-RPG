@@ -12,6 +12,8 @@ var gebroken := false
 var kern_opgenomen := false
 var klaar := false
 var breek_zin := ""
+const MUSIC_TRACK := "levend_archief"
+
 var gespeeld: Array[String] = []
 var getoond: Array[String] = []
 
@@ -20,6 +22,8 @@ func _ready() -> void:
 	achtergrond.centered = false
 	achtergrond.position = Vector2.ZERO
 	achtergrond.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# Geen map.gd hier, dus zelf de BGM starten (zonder track zou de kamer stil blijven).
+	AudioManager.play_music(MUSIC_TRACK)
 	_volgende()
 
 

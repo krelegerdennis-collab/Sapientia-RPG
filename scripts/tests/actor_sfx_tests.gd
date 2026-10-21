@@ -36,6 +36,7 @@ func _run() -> void:
 	_bestanden(catalog)
 	_audio(catalog)
 	_sleutels()
+	_map_muziek()
 	print("ACTORSFXTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await _frames(10)
@@ -135,3 +136,65 @@ func _sleutels() -> void:
 func _frames(n: int) -> void:
 	for _i in n:
 		await get_tree().process_frame
+
+
+## WM1-muziek: elke niet-test map in scenes/maps/ (en de Spiegel) hoort een track te
+## hebben die in het manifest staat en waarvan het bestand bestaat. Geen stille maps.
+## Uitzondering: archief_test (testkaart, mag stil). WM2 (wacht/wm2/) valt hierbuiten.
+const MUSIC_SILENT_OK := ["archief_test"]
+const SPIEGEL_SCENE := "res://scenes/story/spiegel_kamer.tscn"
+const SPIEGEL_SCRIPT := preload("res://scripts/spiegel/spiegel_kamer.gd")
+
+
+func _map_muziek() -> void:
+	print("=== WM1 map-muziek ===")
+	var count := 0
+	for pair in _muziek_scenes():
+		var dir: String = pair[0]
+		var f: String = pair[1]
+		var base := f.get_basename()
+		if base in MUSIC_SILENT_OK:
+			continue
+		var packed: PackedScene = load(dir + f)
+		var map: Node = packed.instantiate()
+		if not map.has_method("_resolved_music_track"):
+			map.free()   # geen map.gd (bijv. een deur-scène): geen eigen muziek
+			continue
+		var track := ""
+		if map.has_method("_resolved_music_track"):
+			track = map._resolved_music_track()
+			# _resolved_music_track kijkt naar scene_file_path; instantiate() zet die
+			if track == "" and "music_track" in map:
+				track = map.music_track
+		# Zelfde terugval als dungeon_room.gd: Archief-kamers krijgen vergeten_archieven.
+		if track == "" and "room_id" in map and str(map.room_id).begins_with("archief") \
+				and map.get_script() != null and map.get_script().resource_path.ends_with("dungeon_room.gd"):
+			track = "vergeten_archieven"
+		map.free()
+		_check_track(base, track)
+		count += 1
+	check("minstens 50 WM1-maps gecontroleerd (%d)" % count, count >= 50)
+	_check_track("spiegel_kamer", SPIEGEL_SCRIPT.MUSIC_TRACK)
+	check("spiegel_kamer.tscn bestaat", ResourceLoader.exists(SPIEGEL_SCENE))
+	_check_track("world_warper hub (ww_ambient)", "ww_ambient")
+	for t in ["main_menu", "gevecht_normaal", "gevecht_miniboss", "baas_archief2"]:
+		_check_track("vast: " + t, t)
+
+
+## scenes/maps/ plus de World Warper (maps/ en kamers/). Nooit wacht/wm2/.
+func _muziek_scenes() -> Array:
+	var out: Array = []
+	for dir in ["res://scenes/maps/", "res://world_warper/maps/", "res://world_warper/kamers/"]:
+		for f in DirAccess.get_files_at(dir):
+			if f.ends_with(".tscn"):
+				out.append([dir, f])
+	return out
+
+
+func _check_track(label: String, track: String) -> void:
+	var ok := track != "" and AudioManager.has_music(track)
+	var path := ""
+	if ok:
+		path = AudioManager._bgm_dir + str(AudioManager._bgm[track].get("bestand", ""))
+		ok = ResourceLoader.exists(path)
+	check("muziek %s -> '%s' %s" % [label, track, path], ok)
