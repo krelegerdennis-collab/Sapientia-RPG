@@ -13,6 +13,7 @@ const SomData := preload("res://scripts/data/som_data.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const SAVE := "user://somrooms_test.json"
+const GameData := preload("res://scripts/data/game_data.gd")
 
 var failures := 0
 var passes := 0
@@ -230,49 +231,49 @@ func _bazen() -> void:
 		if bazen.is_empty() or not SomData.is_wm1_room(rid):
 			continue
 		for bd in bazen:
-			_nieuw()
-			Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
-			var s := await _laad(pad)
-			if s == null:
-				check("baas %s/%s: kamer laadt" % [rid, bd.get("enemy", "")], false)
-				continue
-			var m: Node = null
-			for x in s.monsters:
-				if is_instance_valid(x) and x.boss and str(x.data.get("enemy", "")) == str(bd.get("enemy", "")):
-					m = x
-			if m == null:
-				m = s.add_monster(bd.duplicate(true))     # verborgen tot een verhaalvlag: zelf neerzetten
-				await get_tree().process_frame
-			var a: Node = s.get("som")
-			check("baas %s (%s): Action-arena actief, baas NIET realtime" % [bd.get("enemy", ""), rid], a != null and not a.enemies.has(m))
-			s.start_monster_battle(m)
-			var b: Node = null
-			for i in 240:
-				await get_tree().process_frame
-				if Dialog.has_choices():
-					Dialog.choose(0)
-				var cs := get_tree().current_scene
-				if cs != null and cs.name == "Battle":
-					b = cs
-					break
-			var ok := b != null and GameState.pending_boss
-			var stats_ok := true
-			if b != null and "enemies" in b and not (b.enemies as Array).is_empty():
-				var eid := str(bd.get("enemy", ""))
-				var base: Dictionary = BossCore.apply_boss(_enemy(eid).duplicate(true))
-				for en in b.enemies:
-					var st: Dictionary = en.get("s", {})
-					if str(en.get("id", st.get("id", ""))) == eid or str(st.get("name", "")) == str(base.get("name", "")):
-						stats_ok = int(st.get("max_hp", 0)) <= int(base.get("max_hp", 0)) * 1.05 + 1
-			check("baas %s (%s): opent het TURN-BASED gevecht in Action, zonder Action-vermenigvuldiger" % [bd.get("enemy", ""), rid], ok and stats_ok)
-			if b != null and not gevonden.has(rid):
-				await get_tree().create_timer(0.4).timeout
-				await _shot("baas_turnbased_" + rid)
+			var stats := {}
+			var geopend := {}
+			for stijl in [Settings.BATTLE_STYLE_CLASSIC, Settings.BATTLE_STYLE_ACTION]:
+				_nieuw()
+				Settings.set_value("battle_style", stijl)
+				var s := await _laad(pad)
+				if s == null:
+					continue
+				var m: Node = null
+				for x in s.monsters:
+					if is_instance_valid(x) and x.boss and str(x.data.get("enemy", "")) == str(bd.get("enemy", "")):
+						m = x
+				if m == null:
+					m = s.add_monster(bd.duplicate(true))     # verborgen tot een verhaalvlag: zelf neerzetten
+					await get_tree().process_frame
+				var a: Node = s.get("som")
+				if stijl == Settings.BATTLE_STYLE_ACTION:
+					check("baas %s (%s): Action-arena actief, baas NIET realtime" % [bd.get("enemy", ""), rid], a != null and not a.enemies.has(m))
+				s.start_monster_battle(m)
+				var bt: Node = null
+				for i in 240:
+					await get_tree().process_frame
+					if Dialog.has_choices():
+						Dialog.choose(0)
+					var cs := get_tree().current_scene
+					if cs != null and cs.name == "Battle" and "enemies" in cs and not (cs.enemies as Array).is_empty():
+						bt = cs
+						break
+				geopend[stijl] = bt != null and GameState.pending_boss
+				if bt != null:
+					var st: Dictionary = bt.enemies[0].get("s", {})
+					stats[stijl] = [int(st.get("max_hp", -1)), int(st.get("atk", -1)), int(st.get("def", -1))]
+					if stijl == Settings.BATTLE_STYLE_ACTION and not gevonden.has(rid):
+						await _shot("baas_turnbased_" + rid)
+				GameState.pending_boss = false
+				GameState.in_battle = false
+				GameState.pending_story_loss = false
+				GameState.archief2_party_filter = ""
+			var ca: Array = stats.get(Settings.BATTLE_STYLE_ACTION, [])
+			var cc: Array = stats.get(Settings.BATTLE_STYLE_CLASSIC, [])
+			check("baas %s (%s): opent het TURN-BASED gevecht in Action, stats = Classic (HP/ATK/DEF %s = %s, geen Action-vermenigvuldiger)" % [bd.get("enemy", ""), rid, ca, cc],
+					bool(geopend.get(Settings.BATTLE_STYLE_ACTION, false)) and not ca.is_empty() and ca == cc)
 			gevonden.append(rid)
-			GameState.pending_boss = false
-			GameState.in_battle = false
-			GameState.pending_story_loss = false
-			GameState.archief2_party_filter = ""
 	print("INFO  baaskamers: ", gevonden)
 	check("alle WM1-bazen gecontroleerd (Golem, Wortelkoning, Archief 2: Lotte/Wurger/Genezer)", gevonden.size() >= 5)
 

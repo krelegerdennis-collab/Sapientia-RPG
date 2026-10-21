@@ -74,7 +74,7 @@ func _ready() -> void:
 	load_settings()
 	# Testsuites (--autotest, --woudtest, ...) beginnen zoals altijd in Classic; wie Action test, zet het zelf.
 	# (Een vers spel begint in Action: DEFAULTS, zie som_rooms_tests.gd.)
-	if args.any(func(a): return str(a).begins_with("--") and str(a).ends_with("test")):
+	if Array(args).any(func(a): return str(a).begins_with("--") and str(a).ends_with("test")):
 		values["battle_style"] = BATTLE_STYLE_CLASSIC
 	# Dialog en Crt zijn eerder geladen autoloads; voor de zekerheid pas na _ready toepassen.
 	apply_all.call_deferred()
