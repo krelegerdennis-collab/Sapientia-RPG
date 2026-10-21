@@ -100,7 +100,7 @@ func _run() -> void:
 	await _frames(3)
 	s.kies_tab("music")
 	await _frames(3)
-	var greyed := s.buttons.filter(func(b): return s.is_button_greyed(b)).size()
+	var greyed: int = s.buttons.filter(func(b): return s.is_button_greyed(b)).size()
 	check("tab Music: 7 regels, 4 op slot (???), 3 speelbaar", s.buttons.size() == 7 and greyed == 4
 			and s.buttons.filter(func(b): return UiMenu_text(b).contains("???")).size() == 4)
 	check("touch: regels en tabs >= 22 px hoog", s.buttons.all(func(b): return b.size.y >= 22.0)
