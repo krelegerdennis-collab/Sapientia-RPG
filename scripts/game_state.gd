@@ -342,6 +342,7 @@ func _ready() -> void:
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
+			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
@@ -1092,6 +1093,7 @@ static func _inventory_from(raw) -> Dictionary:
 ## Gebruikt door save_game en door het kamer-checkpoint (set_checkpoint).
 func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	var data := {
+		"battle_style": int(Settings.get_value("battle_style")),   # 21 okt 2026: gevechtsstijl reist mee met de save
 		"version": SAVE_VERSION,
 		"map": map if map != "" else current_map,
 		"tile": [tile.x, tile.y],
@@ -1140,6 +1142,8 @@ func load_game(path := "") -> bool:
 	var d := read_save(path)
 	if not apply_state(d):
 		return false
+	# Gevechtsstijl van deze save; oude saves zonder sleutel houden hun vroegere effectieve waarde: Classic.
+	Settings.set_value("battle_style", int(d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)))
 	# v0.19 kamer-checkpoint uit de save (oude saves: geen; dan zet de map hem bij binnenkomst)
 	checkpoint = _checkpoint_from(d.get("checkpoint", {}))
 	entry_kind = "load"

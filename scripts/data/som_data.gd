@@ -1,7 +1,8 @@
 ## SoM-PROEF (Secret of Mana-stijl realtime gevecht) — alle instellingen/content op één plek.
 ## Schakelaar: ENABLED (hoofdschakelaar) + ROOMS (alleen deze WM1-kamers). Daarbuiten, en als
 ## GameState.som_mode uit staat (het gewone spel), blijven de turn-based gevechten precies zoals ze waren.
-## Bazen (monster met "boss": true) blijven ALTIJD turn-based, ook in een SoM-kamer.
+## Bazen (monster met "boss": true) blijven ALTIJD turn-based, ook in een SoM-kamer en ook bij Battle Style = Action
+## (Dennis, 21 okt 2026). De Action-baasvermenigvuldiger (ACTION_BOSS_MULT) wordt daarom NIET meer gebruikt.
 extends RefCounted
 
 ## Hoofdschakelaar. false = de proef bestaat niet (geen realtime, knop op het titelscherm doet niets).
@@ -211,7 +212,8 @@ const SPELL_RANGE := 160.0
 const TXT_RING := "Ring"
 const TXT_ITEMS := "Items"
 const TXT_SKILLS := "Skills"
-## ACTION-MODUS BAZEN: in Action/SoM-modus (GameState.som_mode of Settings Battle Style = Action) krijgt een
+## ONGEBRUIKT sinds 21 okt 2026 (alle bazen turn-based, ook in Action): data blijft voor de simulator/historie,
+## battle.gd past hem niet meer toe. Oud: ACTION-MODUS BAZEN: in Action/SoM-modus (GameState.som_mode of Settings Battle Style = Action) krijgt een
 ## baasgevecht (niet de dungeon van 100) deze vermenigvuldigers bovenop de baas-stats. Classic blijft ongewijzigd.
 ## Getuned met -- --actionsim (docs/ACTION_BALANCE_REPORT.md): doel 60-80% winst op Lv 3 en Lv 5.
 ## Eén vaste vermenigvuldiger haalde nooit Lv 3 EN Lv 5 tegelijk (zie rapport): daarom basis (op START_LEVEL)
@@ -270,4 +272,24 @@ const TXT_MISS_BUFF := "%s has no effect in real time yet."
 
 
 static func room_enabled(room_id: String, action: bool) -> bool:
-	return ENABLED and action and ROOMS.has(room_id)
+	return ENABLED and action and is_wm1_room(room_id)
+
+
+## Forge/Dennis (21 okt 2026): Action geldt in ALLE WM1-dungeons: Archief 1 (dungeon_rooms.gd), Donker Woud
+## (woud_rooms.gd), Archief 2 + Leven (archief2_rooms.gd, ROOMS en rooms()), Berggrot (berggrot_data.gd).
+## Niet in de dungeon van 100. ROOMS hierboven blijft de balans-set van de actie-simulator (--actionsim).
+static func is_wm1_room(room_id: String) -> bool:
+	if room_id == "" or room_id.begins_with("dungeon100_"):
+		return false
+	return wm1_rooms().has(room_id)
+
+
+static func wm1_rooms() -> Array[String]:
+	var out: Array[String] = []
+	var DR: Script = load("res://scripts/data/dungeon_rooms.gd")
+	var bronnen: Array = [DR.ROOMS, DR.woud().ROOMS, DR.archief2().ROOMS, DR.archief2().rooms(), DR.berggrot().ROOMS]
+	for bron in bronnen:
+		for id in (bron as Dictionary).keys():
+			if not out.has(str(id)) and not str(id).begins_with("dungeon100_"):
+				out.append(str(id))
+	return out

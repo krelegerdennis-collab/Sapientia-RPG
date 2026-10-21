@@ -377,8 +377,7 @@ func _spawn_enemies(ids: Array) -> void:
 			can_flee = false                   # v0.15: niet vluchten voor een baas
 			# Task #4: baas van de dungeon van 100 verdiepingen (verdieping 0 = ongewijzigd)
 			data = Dungeon100Scaling.battle_enemy(data, GameState.dungeon100_floor, true)
-			# SoM-proef: alleen in Action-modus sterker (Classic ongewijzigd); niet in de dungeon van 100
-			data = SomDataB.action_boss(data, action_boss_on(), action_party_level())
+			# Bazen zijn altijd turn-based, ook in Action (21 okt 2026): GEEN Action-baasvermenigvuldiger meer.
 		else:
 			data.erase("boss")
 			if GameState.dungeon100_floor > 0:

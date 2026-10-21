@@ -1032,8 +1032,9 @@ func _action_boss_tests() -> void:
 	var ac: Dictionary = got["action"]
 	var lvl: float = load("res://scripts/battle/battle.gd").action_party_level()
 	var expd := SomData.action_boss(base, true, lvl)
-	t.check("SoM-baas: Action Golem sterker (HP %d ATK %d bij Lv %.1f)" % [ac["max_hp"], ac["atk"], lvl],
-			ac["max_hp"] == int(expd["max_hp"]) and ac["atk"] == int(expd["atk"]) and ac["max_hp"] > c["max_hp"])
+	# 21 okt 2026: bazen altijd turn-based, ook in Action -> de Action-vermenigvuldiger geldt niet meer
+	t.check("SoM-baas: Action Golem = Classic Golem, geen Action-vermenigvuldiger (HP %d ATK %d; oud zou %d/%d zijn bij Lv %.1f)" % [ac["max_hp"], ac["atk"], int(expd["max_hp"]), int(expd["atk"]), lvl],
+			ac["max_hp"] == c["max_hp"] and ac["atk"] == c["atk"] and ac["def"] == c["def"])
 
 
 func _ally(id: String) -> Node:
