@@ -50,10 +50,10 @@ const HEROES := [
 		"spells": ["genees"],
 		"growth": {"max_hp": 6, "max_mp": 3, "atk": 2, "def": 1, "agi": 1, "mag": 2, "mdef": 2},
 	},
-	# Rekruten in de World Warper-hal (world_warper/services/rekruut.gd). Nog geen turn-based gevechtsart:
-	# battle.gd valt terug op het reserve-plaatje (battle_sprite leeg).
+	# Rekruten in de World Warper-hal (world_warper/services/rekruut.gd). Gevechtsart (RPG ART, 21 okt 2026):
+	# 2100x210, 10 frames van 210, voeten op (105,203); framekaart als Dax (0 stand,1 ready,2-3 attack,4-5 spell,6 hit,7 ko,8-9 breathe).
 	{
-		"id": "kael", "battle_sprite": "",
+		"id": "kael", "battle_sprite": "res://assets/sprites/battle/kael.png",
 		"field_sprite": "res://assets/sprites/som/kaart/kael_wm1_slim.png",
 		"name": "Kael Voss", "class": "Psytech", "accent": "cyaan", "equip_type": "magier",
 		"level": 1, "exp": 0,
@@ -62,7 +62,7 @@ const HEROES := [
 		"growth": {"max_hp": 6, "max_mp": 3, "atk": 2, "def": 1, "agi": 1, "mag": 2, "mdef": 2},
 	},
 	{
-		"id": "orion", "battle_sprite": "",
+		"id": "orion", "battle_sprite": "res://assets/sprites/battle/orion.png",
 		"field_sprite": "res://assets/sprites/som/kaart/orion_wm1_slim.png",
 		"name": "Orion", "class": "Archer", "accent": "magenta", "equip_type": "krijger",
 		"level": 1, "exp": 0,
