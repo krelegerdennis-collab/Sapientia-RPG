@@ -337,6 +337,7 @@ func _ready() -> void:
 	# Esdoorn (Mapleton) gebruikt v8-props van RPG ART: zelfde tileset, textuur dorp_v8.png
 	var town_v8 := build_town_tileset()
 	(town_v8.get_source(0) as TileSetAtlasSource).texture = load("res://assets/tiles/dorp_v8.png")
+	(town_v8.get_source(1) as TileSetAtlasSource).texture = load("res://assets/tiles/huis_v8.png")   # WM1-fix: v8-huis
 	print("dorp_v8.tres opgeslagen: ", error_string(ResourceSaver.save(town_v8, "res://assets/tiles/dorp_v8.tres")))
 	var world_ts := build_world_tileset()
 	print("wereld.tres opgeslagen: ", error_string(ResourceSaver.save(world_ts, "res://assets/tiles/wereld.tres")))

@@ -129,6 +129,10 @@ func _data() -> void:
 	check("Strangler: canon-zin in het bestiarium", str(GD.ENEMIES["wurger"]["desc"]) == "A vine with nowhere to go. The Old Humanity grew it as protection, but Sapientia turned its growth inward. Now it strangles what it should protect. Whoever defeats it hears it sigh — like an animal that wants to be set free.")
 	check("Mender: canon-zin in het bestiarium", str(GD.ENEMIES["genezer"]["desc"]) == "He heals by taking. He gives nothing back. Sapientia's perfect servant: without doubt, without emotion, without end. Whoever sees him sees what humanity becomes if Sapientia wins — silent, whole, and empty.")
 	check("thema kas en warper", DungeonRooms.THEMES.has("kas") and DungeonRooms.THEMES.has("warper_paars"))
+	var wp: Dictionary = DungeonRooms.THEMES.get("warper_paars", {})
+	check("WM1: warper op v8-kasatlas (kas_tiles_v8c + kas_bibliotheek_v8), tint wit",
+			str(wp.get("tiles", "")).ends_with("kas_tiles_v8c.png") and str(wp.get("lib_tiles", "")).ends_with("kas_bibliotheek_v8.png")
+			and (wp.get("tint", Color.BLACK) as Color).is_equal_approx(Color(1, 1, 1)))
 	var kamers: Dictionary = Rooms.rooms()
 	var breed := true
 	for id in kamers:
