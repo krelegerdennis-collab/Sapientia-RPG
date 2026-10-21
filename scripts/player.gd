@@ -55,6 +55,23 @@ var analog_input: Callable
 var analog_speed := 80.0
 ## Na een duw (TODO.md push): niet doorlopen naar de vrijgekomen tegel tot de richting is losgelaten.
 var hold_until_release := false
+## Sessielog-review 21 okt 2026: na binnenkomen via een uitgang met de richting nog ingedrukt: niet lopen
+## tot alle richtingen zijn losgelaten (geen warp-pingpong tussen twee kaarten).
+var spawn_hold := false
+
+
+func richting_ingedrukt() -> bool:
+	for a in ["move_up", "move_down", "move_left", "move_right"]:
+		if InputMap.has_action(a) and Input.is_action_pressed(a):
+			return true
+	return false
+
+
+## true = deze frame niet lopen (spawn_hold actief); laat los zodra er geen richting meer is.
+func _spawn_hold_actief() -> bool:
+	if spawn_hold and not richting_ingedrukt():
+		spawn_hold = false
+	return spawn_hold
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var camera: Camera2D = $Camera2D
@@ -132,6 +149,8 @@ func _process(delta: float) -> void:
 
 	if not is_moving:
 		var dir := _read_direction()
+		if _spawn_hold_actief():
+			dir = Vector2i.ZERO
 		if hold_until_release and dir != facing:
 			hold_until_release = false
 		if dir == Vector2i.ZERO:
@@ -177,6 +196,8 @@ func _process_analog(delta: float) -> void:
 	var v := Vector2.ZERO
 	if not input_locked and not GameState.changing_map and not GameState.in_battle:
 		v = analog_input.call()
+	if _spawn_hold_actief():
+		v = Vector2.ZERO
 	if v != Vector2.ZERO:
 		facing = SomMove.facing_for(v, facing)
 	var before := position

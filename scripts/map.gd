@@ -56,6 +56,10 @@ func _ready() -> void:
 		var spawn := get_spawn(GameState.pending_spawn)
 		if spawn:
 			player.place_at(spawn.get_tile(), spawn.facing)
+			# Sessielog-review 21 okt 2026: richting nog ingehouden van de vorige kaart -> eerst loslaten
+			# (anders stap je vanaf het spawnpunt meteen terug op de uitgang: warp-pingpong).
+			if "spawn_hold" in player:
+				player.spawn_hold = player.richting_ingedrukt()
 		else:
 			push_warning("Spawnpunt '%s' bestaat niet in %s" % [GameState.pending_spawn, scene_file_path])
 		GameState.pending_spawn = ""
