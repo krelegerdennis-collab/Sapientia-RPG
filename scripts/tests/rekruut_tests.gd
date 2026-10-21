@@ -109,6 +109,8 @@ func _run() -> void:
 	var kael: Node = hal.get_node_or_null("Objects/Kael")
 	var orion: Node = hal.get_node_or_null("Objects/Orion")
 	check("Kael en Orion staan in de hal (rekruut.gd)", kael != null and orion != null and kael.get_script() == Rekruut and orion.get_script() == Rekruut)
+	if kael != null and orion != null:
+		check("naambordjes boven Kael en Orion (Kael Voss / Orion)", kael.naam_label != null and kael.naam_label.text == "Kael Voss" and orion.naam_label != null and orion.naam_label.text == "Orion" and kael.naam_label.is_visible_in_tree())
 	if kael == null or orion == null:
 		_eind()
 		return

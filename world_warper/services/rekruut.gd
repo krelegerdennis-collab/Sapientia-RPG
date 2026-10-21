@@ -14,11 +14,29 @@ const LATER := "I'll be here if you change your mind."
 @export var hero_id := ""
 ## Voor de tests: "joined", "nee", "vol", "".
 var uitkomst := ""
+## Naambordje boven het hoofd (Forge: zichtbaar wie Kael en Orion zijn).
+var naam_label: Label
 
 
 func _ready() -> void:
 	super._ready()
+	_maak_naam()
 	_ververs()
+
+
+func _maak_naam() -> void:
+	naam_label = Label.new()
+	naam_label.name = "Naam"
+	naam_label.text = npc_name
+	naam_label.add_theme_font_size_override("font_size", 8)
+	naam_label.add_theme_color_override("font_color", Color(1, 0.95, 0.75))
+	naam_label.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.08))
+	naam_label.add_theme_constant_override("outline_size", 3)
+	naam_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	naam_label.size = Vector2(64, 10)
+	naam_label.position = Vector2(-32, -36)
+	naam_label.z_index = 5
+	add_child(naam_label)
 
 
 func story_refresh() -> void:
