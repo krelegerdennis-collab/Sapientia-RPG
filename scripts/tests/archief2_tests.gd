@@ -26,6 +26,8 @@ const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_dow
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
 const AV := preload("res://scripts/data/archief2_vijanden.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
+const A1W := preload("res://scripts/dungeon/archief_warpers.gd")
+const A2Ground := preload("res://scripts/data/archief2_ground.gd")
 const LICHT_SCENE := "res://scenes/maps/archief_2_v3_licht.tscn"
 
 var failures := 0
@@ -52,6 +54,7 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	print("=== Archief 2: data ===")
 	_data()
+	_schaal_1p4()
 	print("=== Archief 2: poort en platen ===")
 	_poort_en_platen()
 	print("=== Archief 2: Seren, Mosslijm, Mender ===")
@@ -64,6 +67,7 @@ func _run() -> void:
 	await _spel()
 	print("=== Archief 2: na The Mender naar de hub ===")
 	await _genezer_podium()
+	await _poort_blokkades()
 	await _na_genezer_hub()
 	print("=== Archief 2: veldmenu > Scenes > The World Warper (alleen het filmpje) ===")
 	await _scenes_warper_herhaling()
@@ -193,24 +197,24 @@ func _poort_en_platen() -> void:
 	var pr: Dictionary = PuzzleRooms.ROOMS["leven_v1_plaat"]
 	var pl := PuzzleLogic.from_room(pr, "leven_v1_plaat")
 	check("groei-plaat vóór de hendel blijft zaad", pl.try_grow("groei_brug") == "wacht" and pl.grow_stage("groei_brug") == 0
-			and pl.is_solid(Vector2i(7, 2)))
+			and pl.is_solid(Vector2i(10, 2)))
 	check("na de hendel groeit de plaat één stadium", pl.toggle_lever("hendel_kas") and pl.try_grow("groei_brug") == "groei"
-			and pl.grow_stage("groei_brug") == 1 and pl.is_solid(Vector2i(7, 2)))
+			and pl.grow_stage("groei_brug") == 1 and pl.is_solid(Vector2i(10, 2)))
 	check("tweede groei opent het pad", pl.try_grow("groei_brug") == "open" and pl.grow_open("groei_brug")
-			and not pl.is_solid(Vector2i(7, 2)))
+			and not pl.is_solid(Vector2i(10, 2)))
 	var combi: Dictionary = PuzzleRooms.ROOMS["leven_v3_combi"]
 	var combi_fouten: Array = PuzzleLogic.validate(combi)
 	check("combinatiekamer is geldig %s" % [combi_fouten], combi_fouten.is_empty())
 	check("ketting gaat naar de combinatiekamer", str(Rooms.rooms()["archief_2_v3_ketting"]["exits"]["n"]["map"]).ends_with("leven_v3_combi.tscn"))
 	var cp := PuzzleLogic.from_room(combi, "leven_v3_combi")
-	check("plaat wacht op hendel en kast", cp.try_grow("groei_combi") == "wacht" and cp.is_solid(Vector2i(5, 2)))
+	check("plaat wacht op hendel en kast", cp.try_grow("groei_combi") == "wacht" and cp.is_solid(Vector2i(7, 2)))
 	check("alleen de hendel is niet genoeg", cp.toggle_lever("hendel_combi") and cp.try_grow("groei_combi") == "wacht")
 	check("hendel weer uit", cp.toggle_lever("hendel_combi") == false)
 	check("kast landt op de plaat", cp.try_push("kast_combi", Vector2i.RIGHT) and cp.try_push("kast_combi", Vector2i.RIGHT)
 			and cp.plate_pressed("plaat_kast"))
 	check("kast zonder hendel wacht nog", cp.try_grow("groei_combi") == "wacht")
 	check("hendel en kast laten de plaat groeien", cp.toggle_lever("hendel_combi") and cp.try_grow("groei_combi") == "groei")
-	check("tweede groei opent de spleet", cp.try_grow("groei_combi") == "open" and not cp.is_solid(Vector2i(5, 2)))
+	check("tweede groei opent de spleet", cp.try_grow("groei_combi") == "open" and not cp.is_solid(Vector2i(7, 2)))
 	check("groei + stap 0-1-2 en blijft", _groei_reeks())
 	check("groei negeert licht", Archief2.volgende_staat("groei", 0, "licht", true) == 0)
 	check("tegen krimpt en groeit niet", Archief2.volgende_staat("tegen", 2, "stap", false) == 1
@@ -375,7 +379,7 @@ func _spel() -> void:
 	GameState.change_map(Archief2.PLAAT_SCENE, "zuid")
 	check("groei-plaatkamer", await _wacht("Archief2V1Plaat"))
 	var kamer := _scène()
-	var poort := Vector2i(9, 4)
+	var poort := Vector2i(13, 4)   # 1.4x: brug kolom 12-14 (was 8-10)
 	check("brug dicht", kamer.cell(poort) == 59 and kamer.is_wall(poort))
 	kamer.raak_plaat("p1", "licht")
 	check("licht laat een groei-plaat met rust", int(kamer.plaat_van("p1").staat) == 0 and kamer.is_wall(poort))
@@ -492,10 +496,10 @@ func _spel() -> void:
 	check("licht-plaatkamer", await _wacht("Archief2V3Licht"))
 	var licht := _scène()
 	licht.raak_plaat("l1", "stap")
-	check("stap laat de licht-plaat met rust", int(licht.plaat_van("l1").staat) == 0 and licht.is_wall(Vector2i(9, 4)))
+	check("stap laat de licht-plaat met rust", int(licht.plaat_van("l1").staat) == 0 and licht.is_wall(Vector2i(13, 4)))
 	licht.raak_plaat("l1", "licht")
 	licht.raak_plaat("l1", "licht")
-	check("Seren's licht opent het pad", int(licht.plaat_van("l1").staat) == 2 and not licht.is_wall(Vector2i(9, 4)))
+	check("Seren's licht opent het pad", int(licht.plaat_van("l1").staat) == 2 and not licht.is_wall(Vector2i(13, 4)))
 	var voor_bytes := {}
 	for slot in range(1, GameState.SLOT_COUNT + 1):
 		var pad := GameState.slot_path(slot)
@@ -518,6 +522,250 @@ func _spel() -> void:
 	Engine.time_scale = 1.0
 
 
+## 1.4x (tools/som/archief2_1p4.py): maat, grond = layout, brug-/deurrijen niet verdubbeld,
+## smalle doorgangen niet breder, en alles (spawns, uitgangen, bord, opslag, monsters, platen,
+## warp, sfeer) bereikbaar vanaf de zuid-spawn met open bruggen en zonder blokkades.
+func _schaal_1p4() -> void:
+	var kamers: Dictionary = Rooms.rooms()
+	kamers["leven_ingang"] = Rooms.ROOMS["leven_ingang"]
+	var maat_fout := ""
+	var rij_fout := ""
+	var breed_fout := ""
+	var bereik_fout := ""
+	for id in kamers:
+		var room: Dictionary = kamers[id]
+		var lay: Array = room["layout"]
+		var w := 22 if id == "leven_ingang" else 27
+		var h := 15 if id == "leven_ingang" else (15 if id == "archief_2_v4_genezer" else 17)
+		var g: Array = A2Ground.GROUND.get(id, [])
+		if lay.size() != h or str(lay[0]).length() != w or g.size() != h or (g[0] as Array).size() != w:
+			maat_fout += "%s %dx%d; " % [id, str(lay[0]).length(), lay.size()]
+		# brug-/deurrijen ('#') nooit dubbel: hoogstens één, en nooit twee gelijke '#'-rijen onder elkaar
+		var bot := str(lay[h - 1])
+		var n_gap := 0
+		for y in lay.size():
+			if "#" in str(lay[y]):
+				n_gap += 1
+				if y > 0 and "#" in str(lay[y - 1]):
+					rij_fout += "%s rij %d; " % [id, y]
+				# openingen in een '#'-rij: 1-3 breed (baaspoort 1, lange weg links 3)
+				var run := 0
+				for x in range(2, w - 1):
+					run = run + 1 if str(lay[y])[x] == "." else 0
+					if run > 3:
+						breed_fout += "%s rij %d opening > 3; " % [id, y]
+						break
+		# baaspoort (_B, bewaker in de poort): precies 2 breed, onder de uitgang (EE), 2e tegel dicht tot de baas weg is
+		for y in lay.size():
+			var r := str(lay[y])
+			if "#" in r and r.count(".") == 2 and r.find("..") >= 0:
+				var gx := r.find("..")
+				var boss: Dictionary = A1W.boss_monster(room)
+				var bt := Vector2i(int(boss.get("tile", [-1, -1])[0]), int(boss.get("tile", [-1, -1])[1]))
+				var blokt: Array = room.get("blokkades", {}).get("tiles", [])
+				var dicht2 := bt == Vector2i(gx, y) and (int(boss.get("size", [1, 1])[0]) == 2
+						or blokt.any(func(b): return int(b[0]) == gx + 1 and int(b[1]) == y))
+				if gx != bot.find("EE") or not dicht2:
+					breed_fout += "%s baaspoort x=%d (uitgang %d) baas %s; " % [id, gx, bot.find("EE"), bt]
+			elif r.begins_with("<S#") and r.count(".") == 1:
+				breed_fout += "%s baaspoort 1 breed; " % id
+		if n_gap > 1:
+			rij_fout += "%s %d gap-rijen; " % [id, n_gap]
+		# uitgang (EE) 2 breed, boog n 1 breed
+		if bot.count("E") != 2 or str(lay[2]).count("n") != 1:
+			breed_fout += "%s uitgang E%d n%d; " % [id, bot.count("E"), str(lay[2]).count("n")]
+		# bruggen liggen op de '#'-rij
+		for br in room.get("bruggen", []):
+			for t in br["tiles"]:
+				if str(lay[int(t[1])])[int(t[0])] != "#":
+					rij_fout += "%s brug %s niet op de brugrij; " % [id, t]
+		bereik_fout += _bereik_1p4(id, room)
+	check("1.4x: alle Archief 2-kamers 27x17 (Genezer 27x15) en leven_ingang 22x15, grond = layout (%s)" % (maat_fout if maat_fout != "" else "ok"), maat_fout == "")
+	check("1.4x: brug-/deurrijen niet verdubbeld, bruggen op de brugrij (%s)" % (rij_fout if rij_fout != "" else "ok"), rij_fout == "")
+	check("1.4x: doorgangen niet breder (poort 1-3, uitgang 2, boog 1) (%s)" % (breed_fout if breed_fout != "" else "ok"), breed_fout == "")
+	check("1.4x: spawns/uitgangen/bord/opslag/monsters/platen/warp bereikbaar (%s)" % (bereik_fout if bereik_fout != "" else "ok"), bereik_fout == "")
+	# v8.1 (#142): na het schalen liggen de 2x2-blokken (80-87) nog steeds alleen op even vakken
+	var blok_fout := ""
+	for id in kamers:
+		var lay2: Array = kamers[id]["layout"]
+		var g2: Array = A2Ground.GROUND.get(id, [])
+		var n_blok := 0
+		for y in g2.size():
+			for x in (g2[y] as Array).size():
+				var v := DungeonRooms.kas_floor_at(x, y, g2, lay2)
+				if v >= 80 and v <= 87:
+					n_blok += 1
+					if (v - 80) % 4 != (y & 1) * 2 + (x & 1):
+						blok_fout += "%s (%d,%d) %d; " % [id, x, y, v]
+		if n_blok < 16:
+			blok_fout += "%s maar %d bloktegels; " % [id, n_blok]
+	check("1.4x: v8.1-blokvloer op even 2x2-vakken, genoeg blokken per kamer (%s)" % (blok_fout if blok_fout != "" else "ok"), blok_fout == "")
+	# puzzelkamers: alleen rand/aanloop groter, het puzzelrooster (objecten, kloof, X/E) onderling gelijk
+	var puz_fout := ""
+	for pid in {"leven_v1_plaat": [21, 15, 3], "leven_v3_combi": [15, 11, 2]}:
+		var want: Array = {"leven_v1_plaat": [21, 15, 3], "leven_v3_combi": [15, 11, 2]}[pid]
+		var pl2: Array = PuzzleRooms.ROOMS[pid]["layout"]
+		var lk: Array = PuzzleRooms.ROOMS[pid]["look"]
+		if str(pl2[0]).length() != int(want[0]) or pl2.size() != int(want[1]) or lk.size() != pl2.size() or str(lk[0]).length() != int(want[0]):
+			puz_fout += "%s maat %dx%d; " % [pid, str(pl2[0]).length(), pl2.size()]
+			continue
+		var kloof := str(pl2[2])
+		if kloof.count("~") != kloof.length() - 2:
+			puz_fout += "%s kloof niet tot de muur; " % pid
+		var lp := PuzzleLogic.from_room(PuzzleRooms.ROOMS[pid], pid)
+		if _afstand_puzzel(lp, lp.spawn_tile, Vector2i(int(want[2]) + (7 if pid == "leven_v1_plaat" else 5), 1)) >= 0:
+			puz_fout += "%s noorden zonder puzzel bereikbaar; " % pid
+	# onderlinge posities van de puzzel = origineel (+ marge links): v1 hendel (3,4)/plaat (7,3), v3 hendel (2,5)/kast (5,5)/plaat (7,5)/groei (5,3)
+	var verwacht := {"leven_v1_plaat": {"h": Vector2i(6, 4), "g": Vector2i(10, 3), "X": Vector2i(10, 0), "E": Vector2i(10, 14)},
+			"leven_v3_combi": {"h": Vector2i(4, 5), "a": Vector2i(7, 5), "p": Vector2i(9, 5), "g": Vector2i(7, 3), "X": Vector2i(7, 0), "E": Vector2i(7, 10)}}
+	for pid in verwacht:
+		var pl3: Array = PuzzleRooms.ROOMS[pid]["layout"]
+		for ch in verwacht[pid]:
+			var t: Vector2i = verwacht[pid][ch]
+			if str(pl3[t.y])[t.x] != ch:
+				puz_fout += "%s '%s' niet op %s; " % [pid, ch, t]
+	check("1.4x puzzelkamers: rand/aanloop groter, rooster onderling gelijk, noorden alleen via de puzzel (%s)" % (puz_fout if puz_fout != "" else "ok"), puz_fout == "")
+	# muren: geen layout-'#' boven een beloopbare grondtegel (behalve blokkades en bruggen)
+	var muur_fout := ""
+	for id in kamers:
+		var room2: Dictionary = kamers[id]
+		var lay3: Array = room2["layout"]
+		var g3: Array = A2Ground.GROUND.get(id, [])
+		var uitzon := {}
+		for b in room2.get("blokkades", {}).get("tiles", []):
+			uitzon[Vector2i(int(b[0]), int(b[1]))] = true
+		for br in room2.get("bruggen", []):
+			for b in br["tiles"]:
+				uitzon[Vector2i(int(b[0]), int(b[1]))] = true
+		var thema := DungeonRooms.theme_of(room2)
+		for y in lay3.size():
+			for x in str(lay3[y]).length():
+				if str(lay3[y])[x] == "#" and not uitzon.has(Vector2i(x, y)) and y < g3.size() \
+						and not DungeonRooms.is_solid(int(g3[y][x]), thema):
+					muur_fout += "%s (%d,%d)=%d; " % [id, x, y, int(g3[y][x])]
+	for pid in ["leven_v1_plaat", "leven_v3_combi"]:
+		var lp2 := PuzzleLogic.from_room(PuzzleRooms.ROOMS[pid], pid)
+		var pl4: Array = PuzzleRooms.ROOMS[pid]["layout"]
+		for y in pl4.size():
+			for x in str(pl4[y]).length():
+				if str(pl4[y])[x] == "#" and not lp2.is_solid(Vector2i(x, y)):
+					muur_fout += "%s (%d,%d); " % [pid, x, y]
+	check("1.4x: elke layout-'#' heeft een dichte grondtegel (blokkades/bruggen uitgezonderd) (%s)" % (muur_fout if muur_fout != "" else "ok"), muur_fout == "")
+	check("1.4x: begin-warper naast de ingang-spawn (12,15), beloopbaar",
+			Archief2Warpers.BEGIN_TILE == Vector2i(12, 15) and A1W.walkable(kamers["archief_2_v1_entree"], Archief2Warpers.BEGIN_TILE))
+
+
+func _afstand_puzzel(l, van: Vector2i, naar: Vector2i) -> int:
+	var dist := {van: 0}
+	var todo: Array = [van]
+	while not todo.is_empty():
+		var t: Vector2i = todo.pop_front()
+		if t == naar:
+			return dist[t]
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var n: Vector2i = t + d
+			if not dist.has(n) and n.x >= 0 and n.y >= 0 and n.x < 40 and n.y < 40 and not l.is_solid(n):
+				dist[n] = dist[t] + 1
+				todo.append(n)
+	return -1
+
+
+func _bereik_1p4(id: String, room: Dictionary) -> String:
+	var lay: Array = room["layout"]
+	var open := {}
+	for br in room.get("bruggen", []):
+		for t in br["tiles"]:
+			open[Vector2i(int(t[0]), int(t[1]))] = true
+	var loopbaar := func(t: Vector2i) -> bool:
+		return open.has(t) or A1W.walkable(room, t)
+	var sp: Dictionary = room["spawns"]
+	var start_key := "ingang" if sp.has("ingang") else "zuid"
+	var start := Vector2i(int(sp[start_key][0]), int(sp[start_key][1]))
+	var gezien := {start: true}
+	var rij: Array = [start]
+	while not rij.is_empty():
+		var t: Vector2i = rij.pop_front()
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var n: Vector2i = t + d
+			if not gezien.has(n) and loopbaar.call(n):
+				gezien[n] = true
+				rij.append(n)
+	var naast := func(t: Vector2i) -> bool:
+		if gezien.has(t):
+			return true
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			if gezien.has(t + d):
+				return true
+		return false
+	var doelen := {}
+	for k in sp:
+		doelen["spawn " + k] = Vector2i(int(sp[k][0]), int(sp[k][1]))
+	for lijst in ["signs", "monsters", "platen", "sfeer"]:
+		for e in room.get(lijst, []):
+			doelen["%s %s" % [lijst, e.get("id", e.get("name", ""))]] = Vector2i(int(e["tile"][0]), int(e["tile"][1]))
+	for k in ["save", "warp"]:
+		if room.has(k):
+			doelen[k] = Vector2i(int(room[k][0]), int(room[k][1]))
+	for y in lay.size():
+		for x in str(lay[y]).length():
+			var ch := str(lay[y])[x]
+			if DungeonRooms.EXIT_CHARS.has(ch):
+				doelen["uitgang %s" % ch] = Vector2i(x, y)
+	var fout := ""
+	for naam in doelen:
+		var t: Vector2i = doelen[naam]
+		if naam.begins_with("sfeer Warper"):
+			continue   # decor in de wand
+		if not naast.call(t):
+			fout += "%s: %s %s; " % [id, naam, t]
+	return fout
+
+
+## 1.4x baaspoort 2 breed: (14,6) is dicht zonder bewakervlag, open met vlag, en blijft open na opslaan/laden.
+func _poort_blokkades() -> void:
+	for paar in [["archief_2_v2_lotte", "lotte", "Archief2V2Lotte"], ["archief_2_v3_wurger", "wurger", "Archief2V3Wurger"]]:
+		var rid: String = paar[0]
+		var vlag := "bewaker:%s/%s" % [rid, paar[1]]
+		var scene := "res://scenes/maps/%s.tscn" % rid
+		GameState.new_game("Dax")
+		GameState.encounter_multiplier = 0.0
+		GameState.story_flags.erase(vlag)
+		GameState.in_battle = false
+		GameState.changing_map = false
+		GameState.change_map(scene, "zuid")
+		var ok := await _wacht(paar[2], 20.0)
+		await _dialoog_dicht(10)
+		var dicht := false
+		for b in get_tree().get_nodes_in_group("dungeon_blokkade"):
+			dicht = dicht or Vector2i(int(b.position.x) / 16, int(b.position.y) / 16) == Vector2i(14, 6)
+		var k := _scène()
+		var speler: Node = k.get_node("Objects/Player") if ok else null
+		var geen_door := false
+		if speler:
+			speler.position = Vector2(14, 7) * 16 + Vector2(8, 8)
+			await get_tree().physics_frame
+			await get_tree().physics_frame
+			geen_door = not speler._can_move(Vector2i.UP)
+		check("poort %s: (14,6) dicht zonder vlag (blokkade + speler kan er niet door)" % rid, ok and dicht and geen_door)
+		GameState.story_flags[vlag] = true
+		GameState.change_map(scene, "zuid")
+		ok = await _wacht(paar[2], 20.0)
+		await get_tree().create_timer(0.3).timeout
+		check("poort %s: met vlag geen blokkade meer" % rid, ok and get_tree().get_nodes_in_group("dungeon_blokkade").is_empty())
+		var pad := "user://poort_test_%s.json" % paar[1]
+		var opgeslagen := GameState.save_game(Vector2i(13, 15), Vector2i.UP, pad)
+		GameState.story_flags.erase(vlag)
+		var geladen := GameState.load_game(pad)
+		GameState.in_battle = false
+		GameState.changing_map = false
+		GameState.change_map(scene, "zuid")
+		ok = await _wacht(paar[2], 20.0)
+		await get_tree().create_timer(0.3).timeout
+		check("poort %s: na opslaan/laden vlag terug en (14,6) open" % rid, opgeslagen and geladen and ok
+				and GameState.story_flags.has(vlag) and get_tree().get_nodes_in_group("dungeon_blokkade").is_empty())
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(pad))
+
+
 ## v0.23 podium (RPG ART): rij 5 is dicht tot De Genezer verslagen is (onzichtbare blokkades).
 func _genezer_podium() -> void:
 	GameState.new_game("Dax")
@@ -533,16 +781,16 @@ func _genezer_podium() -> void:
 	await _dialoog_dicht(10)
 	var k := _scène()
 	var blok := get_tree().get_nodes_in_group("dungeon_blokkade")
-	check("podium: 16 blokkades op rij 5 (alles behalve de Mender op 9-10)", blok.size() == 16
+	check("podium: 23 blokkades op rij 5 (alles behalve de Mender op 13-14, 1.4x)", blok.size() == 23
 			and blok.all(func(b): return int(b.position.y) == 5 * 16 + 8))
-	# vrije tegels bereikbaar vanaf de ingang (9,10) zonder door rij 5 of de Genezer te gaan
+	# vrije tegels bereikbaar vanaf de ingang (13,13) zonder door rij 5 of de Genezer te gaan
 	var dicht := {}
 	for b in blok:
 		dicht[Vector2i(int(b.position.x) / 16, int(b.position.y) / 16)] = true
-	dicht[Vector2i(9, 5)] = true
-	dicht[Vector2i(10, 5)] = true
-	var gezien := {Vector2i(9, 10): true}
-	var rij := [Vector2i(9, 10)]
+	dicht[Vector2i(13, 5)] = true
+	dicht[Vector2i(14, 5)] = true
+	var gezien := {Vector2i(13, 13): true}
+	var rij := [Vector2i(13, 13)]
 	while not rij.is_empty():
 		var t: Vector2i = rij.pop_front()
 		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
@@ -551,13 +799,13 @@ func _genezer_podium() -> void:
 				continue
 			gezien[n] = true
 			rij.append(n)
-	check("podium: noorduitgang (9,2) niet bereikbaar zonder gevecht", not gezien.has(Vector2i(9, 2)) and not gezien.has(Vector2i(3, 4)))
-	check("podium: wel de Genezer zelf (trap 9,7 / 9,6)", gezien.has(Vector2i(9, 6)) and gezien.has(Vector2i(10, 6)))
+	check("podium: noorduitgang (13,2) niet bereikbaar zonder gevecht", not gezien.has(Vector2i(13, 2)) and not gezien.has(Vector2i(4, 4)))
+	check("podium: wel de Genezer zelf (trap 13,6 / 14,6)", gezien.has(Vector2i(13, 6)) and gezien.has(Vector2i(14, 6)))
 	var speler: Node = k.get_node("Objects/Player")
-	speler.position = Vector2(3, 6) * 16 + Vector2(8, 8)
+	speler.position = Vector2(4, 6) * 16 + Vector2(8, 8)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
-	check("podium: speler kan op (3,6) niet omhoog door de blokkade", not speler._can_move(Vector2i.UP))
+	check("podium: speler kan op (4,6) niet omhoog door de blokkade", not speler._can_move(Vector2i.UP))
 	GameState.story_flags["bewaker:archief_2_v4_genezer/genezer"] = true
 	GameState.change_map(GENEZER_SCENE, "zuid")
 	ok = await _wacht("Archief2V4Genezer", 20.0)

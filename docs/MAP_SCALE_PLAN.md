@@ -27,17 +27,17 @@ Kolom "moet mee" = nodes/data met een vaste tegel- of pixelpositie.
 
 | kaart | bron van de layout | nu (tegels) | 1.4x | moet mee |
 |---|---|---|---|---|
-| `archief_2_v1_entree.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 boeken, 1 exit-warper, 1 bordjes, 2 exits, 2 map-monsters, 3 spawns |
-| `archief_2_v1_plaat.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
-| `archief_2_v2_gang.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 2 exits, 2 map-monsters, 3 spawns |
-| `archief_2_v2_lotte.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 2 exits, 1 map-monsters, 3 spawns |
-| `archief_2_v3_ketting.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 3 groeiplaten, 2 exits, 1 map-monsters, 3 spawns |
-| `archief_2_v3_licht.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
-| `archief_2_v3_tegen.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
-| `archief_2_v3_wurger.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 exit-warper, 1 bordjes, 2 exits, 1 map-monsters, 3 spawns |
-| `archief_2_v4_genezer.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 exit-warper, 2 exits, 1 map-monsters, 3 spawns |
-| `archief_2_v4_hal.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 bordjes, 2 exits, 1 map-monsters, 3 spawns |
-| `archief_2_warper.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | 28x17 | 1 boeken, 1 bordjes, 1 exits, 3 spawns |
+| `archief_2_v1_entree.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 boeken, 1 exit-warper, 1 bordjes, 2 exits, 2 map-monsters, 3 spawns |
+| `archief_2_v1_plaat.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
+| `archief_2_v2_gang.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 2 exits, 2 map-monsters, 3 spawns |
+| `archief_2_v2_lotte.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_v3_ketting.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 bordjes, 3 groeiplaten, 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_v3_licht.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
+| `archief_2_v3_tegen.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 bordjes, 1 groeiplaten, 2 exits, 3 spawns |
+| `archief_2_v3_wurger.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 exit-warper, 1 bordjes, 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_v4_genezer.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 exit-warper, 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_v4_hal.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 bordjes, 2 exits, 1 map-monsters, 3 spawns |
+| `archief_2_warper.tscn` | archief2_rooms.gd (archief2_room.gd) | 20x12 | **28x17 (gedaan)** | 1 boeken, 1 bordjes, 1 exits, 3 spawns |
 | `archief_bibliotheek.tscn` | dungeon_rooms.gd | 12x9 | 17x13 | 1 boeken, 7 meubels, 3 bordjes, 2 exits, 2 spawns |
 | `archief_golemhal.tscn` | dungeon_rooms.gd | 20x12 | 28x17 | 1 exit-warper, 1 exits, 1 map-monsters, 1 spawns |
 | `archief_ingang.tscn` | dungeon_rooms.gd | 20x12 | 28x17 | 1 boeken, 1 exit-warper, 2 exits, 3 map-monsters, 2 spawns |
@@ -64,7 +64,7 @@ Kolom "moet mee" = nodes/data met een vaste tegel- of pixelpositie.
 | `esdoorn_huis_noor.tscn` | scene | 10x8 | 14x11 | 1 exits, 1 spawns, 1 NPC |
 | `huis_wilgendal.tscn` | scene | 12x9 | 17x13 | 1 boeken, 1 exits, 3 spawns, 1 NPC, 1 story-obj |
 | `kern_demo.tscn` | puzzle_rooms.gd | 9x7 | 13x10 | 2 exits, 1 spawns |
-| `leven_ingang.tscn` | archief2_rooms.gd | 16x11 | 22x15 | 1 boeken, 1 bordjes, 2 exits, 2 map-monsters, 2 spawns |
+| `leven_ingang.tscn` | archief2_rooms.gd | 16x11 | **22x15 (gedaan)** | 1 boeken, 1 bordjes, 2 exits, 2 map-monsters, 2 spawns |
 | `leven_v1_plaat.tscn` | puzzle_rooms.gd | 15x11 | 21x15 | 2 exits, 2 spawns |
 | `leven_v3_combi.tscn` | puzzle_rooms.gd | 11x8 | 15x11 | 2 exits, 1 spawns |
 | `wilgendal.tscn` | scene (TileMap + nodes in px) | 32x22 | 45x31 | 2 boeken, 1 deuren, 1 exits, 3 spawns, 1 NPC, 9 story-obj |
@@ -175,3 +175,22 @@ Interieur `huis_wilgendal.tscn` niet geschaald (bed (8,4), opslagboek ongewijzig
   tegels, atlas 1024x128), tileset `dorp_v8.tres` (bomen, rotsen, vijver uit dorp_v8.png).
 - Ontbrekende v8-art: huis (huis.png, nog v0.x), put/kist/ruines/Archief-ingang (`assets/sprites/buiten/`), en een
   kleine-vijverset (de v8-wateranden in dorp_v8.png zijn voor de Mapleton-vijver; op een 3x2-vijver lezen ze hoekig).
+
+## Archief 2 / Het Levende Archief (14 kamers): wat er verschoven is
+Tool: `tools/som/archief2_1p4.py` (eenmalig, op `archief2_rooms.gd`, `archief2_ground.gd` en `puzzle_rooms.gd`), zelfde
+rij/kolom-verdubbeling als Esdoorn (#133) / Donker Woud, **nooit een rij of kolom 3x** (feedback Forge op #145).
+- 11 kas-kamers 20x12 -> **27x17** (De Genezer 27x15), `leven_ingang` 16x11 -> 22x15.
+- Kolommen (20 breed, gedeeld via de constanten `_F/_G/_B/_T/...`): 2,3,4,7,15,16,17 dubbel -> 27, symmetrisch rond de
+  uitgang (EE) 13-14. Nooit: rand, uitgang 8-11, boog 9, brugkolommen 8-10 / 12-14, podium van De Genezer (5,6,8-10,12,13).
+- Rijen per kamer: nooit rij 0-3, de onderrij, een `#`-rij (brugrij, baaspoort) of het podium (rij 4-7). De Genezer houdt
+  maar 3 vrije rijen (8-10) en wordt daarom 15 hoog (eigen spawns zuid/ingang (13,13)).
+- **Baaspoort 2 breed** (kolom 13-14, in lijn met de uitgang): Seren/Wurger staan op 13, tegel 14 is een onzichtbare
+  blokkade (`blokkades.tot_vlag` = bewakervlag) tot de baas verslagen is; De Genezer is al 2 breed (23 blokkades op rij 5).
+- Andere openingen in `#`-rijen blijven even breed (lange weg links 3, bruggen 3).
+- Grond: muurvarianten -> gewone muur, losse props/plantenbakken in een kopie -> vloer 0-2, pilaren 70/71 heel; open tegels
+  in een `#`-rij nooit plantenbak. v8.1-blokken (80-87) komen vanzelf op even 2x2-vakken (getest).
+- Puzzelkamers (`puzzle_rooms.gd`): **alleen rand/aanloop**. `leven_v1_plaat` 15x11 -> 21x15 (+3 links/rechts, +4 aanlooprijen
+  onderaan), `leven_v3_combi` 11x8 -> 15x11 (+2/+2, +3). Kloof loopt door tot de muur; hendel/kast/platen/groei-plaat/X/E
+  onderling gelijk en op dezelfde rij (x + marge). Noord-spawn (7,1)->(10,1).
+- Tests: `archief2test` `_schaal_1p4` (maat, grond = layout, rijen niet dubbel, poort 2 breed + dicht tot de baas,
+  bereikbaarheid, blokvloer, puzzelkamers). Voor/na: `tools/som/kaart_shots.gd`.

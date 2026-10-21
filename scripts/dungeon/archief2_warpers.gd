@@ -8,8 +8,8 @@ const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const ArchiefWarpers := preload("res://scripts/dungeon/archief_warpers.gd")
 
 const BEGIN_ROOM := "archief_2_v1_entree"
-## Naast de ingang-spawn (9, 10), niet op de uitgang.
-const BEGIN_TILE := Vector2i(8, 10)
+## Naast de ingang-spawn (13, 15), niet op de uitgang (1.4x: was (8, 10)).
+const BEGIN_TILE := Vector2i(12, 15)
 const MIDDEN_ROOM := "archief_2_v3_wurger"
 const EIND_ROOM := "archief_2_v4_genezer"
 const WORLD_SCENE := "res://scenes/maps/wereldkaart.tscn"
