@@ -264,6 +264,11 @@ var ui_theme: Theme
 
 
 func _ready() -> void:
+	# TIJDELIJK CI-DIAG (#141)
+	var _d := DirAccess.get_files_at("res://.godot/imported")
+	var _ww := Array(_d).filter(func(f): return f.begins_with("world_warper") or f.ends_with("_v8.png-") or "_v8" in f)
+	print("CIDIAG imported=", _d.size(), " ww/v8=", _ww)
+	print("CIDIAG ww_exists=", ResourceLoader.exists("res://assets/sprites/archief2/world_warper.png"))
 	ui_theme = load("res://assets/theme.tres")
 	preload("res://scripts/ui/ui_style.gd").apply_to_theme(ui_theme)
 	_ensure_input_actions()
@@ -350,6 +355,7 @@ func _ready() -> void:
 				DirAccess.remove_absolute(ProjectSettings.globalize_path(sp))
 		if FileAccess.file_exists(autosave_path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(autosave_path))
+		_finish_preload()   # tests: achtergrond-laden eerst afmaken (geen race/deadlock met load() in de suite)
 		var tester: Node = load(t[1]).new()
 		tester.name = t[2]
 		get_tree().root.add_child.call_deferred(tester)
@@ -406,7 +412,8 @@ func _preload_paths() -> Array[String]:
 const MAIN_THREAD_SCRIPTS := ["res://scripts/map.gd", "res://scripts/player.gd", "res://scripts/npc.gd",
 	"res://scripts/sign.gd", "res://scripts/door.gd", "res://scripts/book_point.gd",
 	"res://scripts/map_exit.gd", "res://scripts/map_spawn.gd", "res://scripts/touch_controls.gd",
-	"res://scripts/battle/battle.gd", "res://scripts/story_object.gd"]
+	"res://scripts/battle/battle.gd", "res://scripts/story_object.gd",
+	"res://world_warper/art/flyover.gd"]   # preload()t een textuur: nooit in de laad-thread compileren
 
 
 func _start_preload() -> void:
@@ -433,6 +440,16 @@ func _process(_delta: float) -> void:
 			_preloading.remove_at(i)
 	if _preloading.is_empty():
 		set_process(false)
+
+
+## Wacht tot alle achtergrond-loads klaar zijn (alleen voor de testmodi).
+func _finish_preload() -> void:
+	for p in _preloading.duplicate():
+		var r := ResourceLoader.load_threaded_get(p)
+		if r != null:
+			_loaded[p] = r
+	_preloading.clear()
+	set_process(false)
 
 
 ## Geeft een (voor)geladen resource; wacht zo nodig tot het laden klaar is.
