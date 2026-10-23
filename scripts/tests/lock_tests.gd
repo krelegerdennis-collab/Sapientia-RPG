@@ -79,6 +79,15 @@ func _frames(n: int) -> void:
 		await get_tree().process_frame
 
 
+func _wait_arena_active(max_frames: int = 180) -> bool:
+	for i in max_frames:
+		var a := arena()
+		if a != null and a.active():
+			return true
+		await get_tree().process_frame
+	return false
+
+
 func _sorted_enemies() -> Array:
 	var list: Array = []
 	for m in arena().enemies.keys():
@@ -174,21 +183,25 @@ func _touch_ui_priority_tests() -> void:
 func _auto_scan_throttle_tests() -> void:
 	await _clear_lock()
 	lock().timed_auto_scans = 0
-	lock()._auto_scan_t = SomTargetLock.AUTO_SCAN_INTERVAL
 	var p: CharacterBody2D = room().player
+	p.input_locked = false
 	var pt: Vector2i = p.get_tile()
 	var near_m: Node = room().add_monster({"id": "lock_throttle", "enemy": "mosslijm", "tile": [pt.x + 1, pt.y]})
 	near_m.place_at(Vector2i(pt.x + 1, pt.y), Vector2i.LEFT)
-	await _frames(4)
-	var start: int = lock().timed_auto_scans
-	await _frames(3)
-	var mid: int = lock().timed_auto_scans
-	check("auto-scan: niet elke frame (3 frames)", mid <= start + 1)
-	var t0: int = Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < int(SomTargetLock.AUTO_SCAN_INTERVAL * 1000.0) + 80:
-		await get_tree().process_frame
-	var end: int = lock().timed_auto_scans
-	check("auto-scan: loopt op interval (~%.2fs)" % SomTargetLock.AUTO_SCAN_INTERVAL, end >= start + 1)
+	await _frames(2)
+	lock().manual = false
+	check("arena actief voor auto-scan timer", await _wait_arena_active())
+	# Deterministisch via tick(delta), geen wall-clock (flake in headless/CI).
+	lock().timed_auto_scans = 0
+	lock()._auto_scan_t = SomTargetLock.AUTO_SCAN_INTERVAL
+	var step := SomTargetLock.AUTO_SCAN_INTERVAL / 10.0
+	for i in 3:
+		lock().tick(step)
+	check("auto-scan: niet elke frame (3 ticks)", lock().timed_auto_scans == 0)
+	lock().timed_auto_scans = 0
+	lock()._auto_scan_t = 0.0
+	lock().tick(SomTargetLock.AUTO_SCAN_INTERVAL)
+	check("auto-scan: loopt op interval (~%.2fs)" % SomTargetLock.AUTO_SCAN_INTERVAL, lock().timed_auto_scans >= 1)
 
 
 func _tap_monster(m: Node) -> void:
