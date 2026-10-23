@@ -117,8 +117,8 @@ func _run() -> void:
 	await _frames(20)
 	AudioManager.play_music("wereld", 0.0, true)
 	await get_tree().create_timer(0.6).timeout
-	# De kaart kan tijdens het laden zelf muziek starten; voor dit schermscenario kiezen we exact drie unlocks.
-	GameState.heard_music = ["donker_woud", "diepe_grot", "levend_archief"]
+	# De kaart kan tijdens het laden zelf muziek starten; voor dit schermscenario kiezen we exact vier unlocks.
+	GameState.heard_music = ["wereld", "donker_woud", "diepe_grot", "levend_archief"]
 	var pos0: float = AudioManager._active_player.get_playback_position()
 	var s: CanvasLayer = ScenesScreen.new()
 	get_tree().root.add_child(s)
@@ -127,8 +127,8 @@ func _run() -> void:
 	s.kies_tab("music")
 	await _frames(3)
 	var greyed: int = s.buttons.filter(func(b): return s.is_button_greyed(b)).size()
-	check("tab Music: 12 regels, 9 op slot (???), 3 speelbaar", s.buttons.size() == 12 and greyed == 9
-			and s.buttons.filter(func(b): return UiMenu_text(b).contains("???")).size() == 9)
+	check("tab Music: 12 regels, 8 op slot (???), 4 speelbaar", s.buttons.size() == 12 and greyed == 8
+			and s.buttons.filter(func(b): return UiMenu_text(b).contains("???")).size() == 8)
 	check("touch: regels en tabs >= 22 px hoog", s.buttons.all(func(b): return b.size.y >= 22.0)
 			and s.tab_buttons.values().all(func(b): return b.size.y >= 22.0))
 	await _shot("music_tab")
@@ -169,7 +169,7 @@ func _run() -> void:
 	s.close()
 	await _frames(3)
 	check("scherm sluiten tijdens afspelen: mapmuziek terug", AudioManager.get_current_music() == "wereld" and AudioManager._music_stack.is_empty())
-	check("afspelen in het menu verandert de gehoord-lijst niet onterecht", GameState.heard_music.size() == 3)
+	check("afspelen in het menu ontgrendelt geen onbekende tracks", GameState.heard_music.size() == 4)
 	if FileAccess.file_exists(SAVE):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	print("MUSICTEST %d PASS, %d FAIL" % [passes, failures])
