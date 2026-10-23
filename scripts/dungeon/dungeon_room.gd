@@ -79,14 +79,16 @@ func _ready() -> void:
 	var returning: bool = GameState.has_return_point and GameState.return_map == scene_file_path
 	var ctx: Dictionary = GameState.map_monster_battle
 	var from_battle: bool = returning and not ctx.is_empty() and ctx.get("map", "") == scene_file_path
-	if not from_battle:
+	if not from_battle and not GameState.reload_in_place:
 		# vers binnen (of geladen): alle monsters zijn er weer
 		GameState.defeated_map_monsters.erase(room_id)
+	GameState.reload_in_place = false
 	_spawn_monsters()
 	if from_battle:
 		_restore_after_battle(ctx)
 	GameState.map_monster_battle = {}
 	_setup_som()
+	Settings.changed.connect(_on_setting)
 	# v0.16 Kernkracht-stun telt af per stap van de speler
 	player.stepped.connect(_stun_step)
 	if GameState.pending_spawn == "" and not returning:
@@ -106,11 +108,46 @@ func _ready() -> void:
 ## SoM-proef: Battle Style = Action (Settings) of de SoM-knop (GameState.som_mode), en deze kamer
 ## staat in SomData.ROOMS. Anders gebeurt er niets.
 func _setup_som() -> void:
-	if not SomData.room_enabled(room_id, GameState.som_mode or Settings.action_battles()):
+	if not wants_som():
 		return
 	som = SomArenaScript.new()
 	add_child(som)
 	som.setup(self)
+
+
+## Modus-direct: Battle Style (Classic/Action) in de Opties geldt meteen in deze kamer, niet pas na een
+## kamerwissel. Staat het menu nog open, dan bij het sluiten ervan (map.gd menu_closed_hook).
+var _style_pending := false
+
+
+func wants_som() -> bool:
+	return SomData.room_enabled(room_id, GameState.som_mode or Settings.action_battles())
+
+
+func _on_setting(key: String) -> void:
+	if key != "battle_style":
+		return
+	_style_pending = true
+	# twee beelden wachten: wie meteen daarna zelf van kamer wisselt (tests, laden) gaat voor
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if is_inside_tree() and not menu_open() and not screen_open():
+		apply_battle_style()
+
+
+## Klopt de kamer niet (meer) met de gekozen stijl? Dan op deze plek opnieuw opbouwen.
+func apply_battle_style() -> void:
+	_style_pending = false
+	if not is_inside_tree() or get_tree().current_scene != self or GameState.changing_map or GameState.in_battle:
+		return
+	if (som != null) == wants_som():
+		return
+	GameState.reload_room(player.get_tile(), player.facing)
+
+
+func menu_closed_hook() -> void:
+	if _style_pending:
+		apply_battle_style()
 
 
 ## SoM-proef/autotest: extra map-monster in deze kamer zetten (bv. een baas voor de baas-overdracht).
