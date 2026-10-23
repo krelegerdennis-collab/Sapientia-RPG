@@ -53,6 +53,8 @@ var _run_left := 0
 var analog_input: Callable
 ## Topsnelheid in analoge modus (px/s).
 var analog_speed := 80.0
+## Action doel-lock: als deze Callable een richting geeft, kijkt de held naar het doel (strafen).
+var facing_provider: Callable
 ## Na een duw (TODO.md push): niet doorlopen naar de vrijgekomen tegel tot de richting is losgelaten.
 var hold_until_release := false
 ## Sessielog-review 21 okt 2026: na binnenkomen via een uitgang met de richting nog ingedrukt: niet lopen
@@ -192,14 +194,24 @@ func set_analog(provider: Callable, speed := 80.0) -> void:
 		cs.position = Vector2(0, 3)
 
 
+func _action_pose_active() -> bool:
+	return get_node_or_null("SomCastAnim") != null or get_node_or_null("SomAttackAnim") != null
+
+
 func _process_analog(delta: float) -> void:
 	var v := Vector2.ZERO
 	if not input_locked and not GameState.changing_map and not GameState.in_battle:
 		v = analog_input.call()
 	if _spawn_hold_actief():
 		v = Vector2.ZERO
+	var lock_face := Vector2i.ZERO
+	if facing_provider.is_valid():
+		lock_face = facing_provider.call()
 	if v != Vector2.ZERO:
-		facing = SomMove.facing_for(v, facing)
+		if lock_face != Vector2i.ZERO and not _action_pose_active():
+			facing = lock_face
+		else:
+			facing = SomMove.facing_for(v, facing)
 	var before := position
 	var old_tile := get_tile()
 	velocity = v * analog_speed

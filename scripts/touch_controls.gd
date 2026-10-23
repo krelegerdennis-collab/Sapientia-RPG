@@ -175,9 +175,9 @@ func kern_rect() -> Rect2:
 	return Rect2(Vector2(right - KERN_SIZE.x, bottom - KERN_SIZE.y), KERN_SIZE)
 
 
-## RUN-knop: in de bovenste rij, direct links van MENU (veld) of links van Swap en Ring (Action-arena).
+## RUN-knop: in de bovenste rij, direct links van MENU (veld) of links van Swap, Codex en Ring (Action-arena).
 func run_rect() -> Rect2:
-	var s := som_row_slot(2 if analog_only else 0)
+	var s := som_row_slot(3 if analog_only else 0)
 	var m := menu_rect()
 	# zelfde hoogte als MENU (zelfde stijl), op dezelfde middenlijn
 	return Rect2(Vector2(s.end.x - KERN_SIZE.x, m.position.y), Vector2(KERN_SIZE.x, m.size.y))
@@ -248,6 +248,8 @@ func _input(event: InputEvent) -> void:
 				_touch_owner[event.index] = "menu"
 				_set_touch_action(event.index, "menu")
 				get_viewport().set_input_as_handled()
+			elif analog_only and _try_lock_tap(event.position):
+				get_viewport().set_input_as_handled()
 		else:
 			if _touch_owner.get(event.index, "") == "joy":
 				joy_raw = Vector2.ZERO
@@ -264,6 +266,17 @@ func _input(event: InputEvent) -> void:
 ## Schermpositie (viewport) -> positie binnen deze knoppen-laag.
 func _local(viewport_pos: Vector2) -> Vector2:
 	return get_global_transform_with_canvas().affine_inverse() * viewport_pos
+
+
+## Action-arena: tik op een monster = lock (geen joystick/A in dezelfde tik).
+func _try_lock_tap(viewport_pos: Vector2) -> bool:
+	var map := get_tree().current_scene
+	if map == null or not ("som" in map) or map.som == null:
+		return false
+	var arena: Node = map.som
+	if not arena.has_method("try_lock_tap") or not arena.active():
+		return false
+	return arena.try_lock_tap(viewport_pos)
 
 
 ## Joystick: positie van de vinger -> joy_raw (lengte max 1). Analoog (Action): som_move.gd. Anders drukt de

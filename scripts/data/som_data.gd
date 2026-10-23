@@ -96,6 +96,22 @@ const CAST_CIRCLE := {
 	"noor": "res://assets/sprites/som/fx/cast_circle_vesper.png",
 }
 const CAST_CIRCLE_CELL := [48, 16]
+## Kaart-cast (RPG ART art_cast v9): 24x32-cellen zoals de loopsheet (zelfde anker), 4 frames
+## (verzamelen, gloed, loslaten, herstel) x 4 rijen (omlaag, links, rechts, omhoog). Gaat voor op cast6:
+## de held blijft zijn eigen kaartfiguur. De spreuk komt vrij aan het begin van frame 2 ('release'),
+## dan verschijnt ook de cast-gloed (castfx, 4 x 24x24, midden op de staf).
+const MAP_CAST := {
+	"lotte": {"sheet": "res://assets/sprites/som/cast/seren_cast.png", "fx": "res://assets/sprites/som/cast/seren_castfx.png"},
+	"noor": {"sheet": "res://assets/sprites/som/cast/vesper_cast.png", "fx": "res://assets/sprites/som/cast/vesper_castfx.png"},
+}
+const MAP_CAST_CELL := [24, 32]
+const MAP_CAST_MS := [150, 170, 130, 170]
+const MAP_CAST_RELEASE := 2
+const MAP_CAST_FX_CELL := [24, 24]
+const MAP_CAST_FX_MS := 80
+## Midden van de cast-gloed t.o.v. de held-node (voeten op +8): boven het hoofd, iets naar de kijkrichting.
+const MAP_CAST_FX_POS := Vector2(0, -18)
+const MAP_CAST_FX_SIDE := 7.0
 const CAST_CIRCLE_MS := 90
 ## Spreuk-effecten, onderkant-midden op de voeten van het doel. Aantal frames = breedte / cel (uit de sheet).
 const SPELL_FX := {
@@ -135,11 +151,13 @@ const UI_GAUGE_FILL := "res://assets/sprites/som/ui/gauge_fill.png"   # 16x2 (op
 const UI_GAUGE_GLINT := "res://assets/sprites/som/ui/gauge_full_glint.png"  # 36x4, 2 frames
 const UI_HUD_FRAME := "res://assets/sprites/som/ui/hud_frame.png"     # 72x20 per held
 const UI_RING_BG := "res://assets/sprites/som/ui/ring_bg.png"         # 180x110
-const UI_RING_ICONS := "res://assets/sprites/som/ui/ring_icons_8.png"  # 128x16, 8 iconen (7 = Phoenix Feather)
+const UI_RING_ICONS := "res://assets/sprites/som/ui/ring_icons_9.png"  # 144x16, 9 iconen (7 = Phoenix Feather, 8 = Codex)
+const UI_RING_ICONS_8 := "res://assets/sprites/som/ui/ring_icons_8.png"  # 128x16 (vorige batch; terugval)
 const UI_RING_ICONS_FALLBACK := "res://assets/sprites/som/ui/ring_icons.png"   # 112x16, 7 iconen (eerste batch)
 const UI_BTN := {   # 38x14, normaal / ingedrukt (RPG ART ui2)
 	"swap": ["res://assets/sprites/som/ui/btn_swap.png", "res://assets/sprites/som/ui/btn_swap_pressed.png"],
 	"ring": ["res://assets/sprites/som/ui/btn_ring.png", "res://assets/sprites/som/ui/btn_ring_pressed.png"],
+	"codex": ["res://assets/sprites/som/ui/btn_codex.png", "res://assets/sprites/som/ui/btn_codex_pressed.png"],
 }
 const UI_JOY_RING := "res://assets/sprites/som/ui/joystick_ring.png"            # 60x60, midden (30,30)
 const UI_JOY_KNOB := "res://assets/sprites/som/ui/joystick_knob.png"            # 24x24, midden (12,12)
@@ -155,7 +173,7 @@ const JOY_TOUCH_REACH := 2.2
 const TOP_BUTTON_SIZE := Vector2(46, 22)
 const TOP_BUTTON_GAP := 3.0
 ## Icoon-index in ring_icons.png per item/spreuk-id.
-const RING_ICON := {"drankje": 0, "kruid": 1, "toverwater": 2, "genees": 4, "vuur": 5, "bliksem": 6, "feniksveer": 7}
+const RING_ICON := {"drankje": 0, "kruid": 1, "toverwater": 2, "genees": 4, "vuur": 5, "bliksem": 6, "feniksveer": 7, "codex": 8}
 const RING_ICON_DAMAGE := 3
 ## Magie-ring (RPG ART batch 3): spell_icons.png 64x16, icoon n op x = 16n (vuur, bliksem, vonk, genezing).
 const UI_SPELL_ICONS := "res://assets/sprites/som/ui/spell_icons.png"
@@ -375,8 +393,30 @@ const TXT_GOT := "Got %s!"
 const TXT_EXP := "+%d EXP  +%d G"
 const TXT_KO := "%s is down!"
 const TXT_SWITCH := "Swap"
+## Codex vangen in Action (zelfde regels als Classic, scripts/som/som_codex.gd)
+const TXT_CODEX := "Codex"
+const TXT_CODEX_ENTRY := "Capture Book x%d"
+const TXT_CODEX_NO_BOOK := "No Blank Book left."
+const TXT_CODEX_BUSY := "The Codex is still writing..."
+const TXT_CODEX_GONE := "The target is gone. (The book stays whole.)"
+const TXT_CODEX_DOWN := "Nobody can hold the book."
+## Vang-effect (RPG ART): 6 frames van 48x48, midden (24,24); 70 ms per frame, frame 4 100 ms.
+const FX_CODEX_CAPTURE := {"sheet": "res://assets/sprites/som/fx/codex_capture_fx.png", "cell": [48, 48], "frames": 6,
+		"ms": [70, 70, 70, 100, 70, 70], "anchor": [24, 24]}
 const TXT_NOW := "Now playing: %s"
 const TXT_MISS_BUFF := "%s has no effect in real time yet."
+
+## Doel-lock HUD (handwerk assets/ui/lock/): marker (lus) + wissel (eenmalig bij nieuw doel).
+const TARGET_LOCK := {
+	"marker": "res://assets/ui/lock/lock_marker.png",
+	"wissel": "res://assets/ui/lock/lock_wissel.png",
+	"marker_frames": 4,
+	"wissel_frames": 3,
+	"marker_fps": 8.0,
+	"wissel_fps": 12.0,
+	"marker_anchor": [8, 16],
+	"wissel_anchor": [8, 16],
+}
 
 
 static func room_enabled(room_id: String, action: bool) -> bool:

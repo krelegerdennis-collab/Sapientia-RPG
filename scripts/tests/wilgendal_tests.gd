@@ -54,6 +54,7 @@ func _run() -> void:
 	_kleed_vakken()
 	await _panden()
 	await _som()
+	await _huis_herkomst()
 	print("WILGENDALTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -953,11 +954,34 @@ func _plein10() -> void:
 			and scene().get_node("Objects/Player").get_tile() == Vector2i((scene().get_node("Spawns/binnen").position / 16.0).floor()))
 	if not binnen:
 		return
-	# het interieur (RPG CODE) leidt terug naar wilgendal.tscn; hier terug via de spawn voor de deur
-	dorp = await enter(DORP, "voor_dax")
-	var terug := dorp != null
+	# echt naar buiten lopen: de uitgang van het interieur (NaarDorp) gaat naar dorp_wilgendal.tscn, spawn voor_dax
+	var uitg: Node = scene().get_node_or_null("Exits/NaarDorp")
+	check("huis-uitgang: NaarDorp -> wilgendal.tscn / voor_huis (standaard), herkomst dorp onthouden", uitg != null
+			and str(uitg.target_map) == GameState.TOWN_MAP and str(uitg.target_spawn) == "voor_huis" and GameState.huis_herkomst == "dorp")
+	check("huis-uitgang: route vanuit het dorp -> dorp_wilgendal.tscn / voor_dax",
+			GameState.huis_route(GameState.HOUSE_MAP, GameState.TOWN_MAP, "voor_huis") == [DORP, "voor_dax"])
+	GameState.story_flags.erase("locked:HuisDeur")
+	Input.action_press("move_down")
+	var buiten := await _wacht("DorpWilgendal", 8.0)
+	Input.action_release("move_down")
+	await _fade()
+	dorp = scene() if buiten else await enter(DORP, "voor_dax")
 	p = dorp.get_node("Objects/Player")
-	check("plein10: weer buiten voor de deur van Dax", terug and p.get_tile() == doel)
+	var vd: Node = dorp.get_node_or_null("Spawns/voor_dax")
+	check("huis-uitgang: naar buiten gelopen, in het dorp op voor_dax %s (= tegel voor de deur %s)" % [str(p.get_tile()), str(doel)],
+			buiten and vd != null and p.get_tile() == Vector2i((vd.position / 16.0).floor()) and p.get_tile() == doel)
+	check("huis-uitgang: voor_dax ligt niet in een botsing (beloopbaar)", Data.beloopbaar(p.get_tile()))
+	await _shot(dorp, "huis_uitgang_voor_dax")
+	var t_voor: Vector2i = p.get_tile()
+	# pass 5: de tegel recht onder voor_dax kan bezet zijn; loop naar de eerste beloopbare buur (niet terug de deur in)
+	var weg := t_voor + Vector2i.DOWN
+	for d in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+		if Data.beloopbaar(t_voor + d):
+			weg = t_voor + d
+			break
+	await _loop(p, weg)
+	check("huis-uitgang: vanaf voor_dax kun je weglopen (%s -> %s)" % [str(t_voor), str(p.get_tile())], p.get_tile() == weg and Data.beloopbaar(weg))
+	await _loop(p, t_voor)
 	# over de brug: van zuid naar noord en het plein op
 	var zuid := Vector2i(b.position.x + 1, b.end.y)
 	var noord := Vector2i(b.position.x + 1, b.position.y - 1)
@@ -1313,3 +1337,106 @@ func _pass5(dorp: Node, kl: TileMapLayer) -> void:
 		inham = inham and not Data.beloopbaar(m + Vector2i.DOWN) and not Data.beloopbaar(m + Vector2i.LEFT) and not Data.beloopbaar(m + Vector2i.RIGHT)
 	check("pass5: zonder brug geen doorsteek over de beek; oeverinhammen (7,29) en (28,29) bereikbaar van noord en doodlopend",
 			not gezien.has(naar) and inham and Data.bereikbaar(van, naar))
+
+
+# ---------------------------------------------------------------- #166: huis-uitgang hangt af van de herkomst
+const HUIS := "res://scenes/maps/huis_wilgendal.tscn"
+const OUDE_DEUR := Vector2i(24, 9)
+
+
+## Loop vanuit het huis (spawn binnen) naar buiten; geeft de scène-naam en tegel terug.
+func _huis_uit() -> Array:
+	GameState.story_flags.erase("locked:HuisDeur")
+	await get_tree().process_frame
+	Input.action_press("move_down")
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 8000.0:
+		var sc := scene()
+		if sc != null and sc.name != "Huis" and sc.is_node_ready() and not GameState.changing_map:
+			break
+		await get_tree().process_frame
+	Input.action_release("move_down")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await _fade()
+	var sc := scene()
+	var p: Node = sc.get_node_or_null("Objects/Player") if sc != null else null
+	return [str(sc.name) if sc != null else "", p.get_tile() if p != null else Vector2i(-1, -1)]
+
+
+## Binnen via een deur: van map `van` (spawn) omhoog lopen tot in het huis.
+func _huis_in(van: String, spawn: String) -> bool:
+	var m := await enter(van, spawn)
+	if m == null:
+		return false
+	if van == DORP:
+		var p: Node2D = m.get_node("Objects/Player")
+		await _loop(p, Data.voor_tegel(Data.pand("dax")))
+	Input.action_press("move_up")
+	var binnen := await _wacht("Huis", 6.0)
+	Input.action_release("move_up")
+	await _fade()
+	return binnen
+
+
+## Save in het huis, herkomst omgooien, laden (zoals Doorgaan) en terug in het huis.
+func _save_laad_in_huis(zonder_sleutel := false) -> bool:
+	var pad := "user://test_huis_herkomst.json"
+	var p: Node = scene().get_node("Objects/Player")
+	if not GameState.save_game(p.get_tile(), p.facing, pad):
+		return false
+	if zonder_sleutel:
+		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(pad))
+		d.erase("huis_herkomst")
+		var f := FileAccess.open(pad, FileAccess.WRITE)
+		f.store_string(JSON.stringify(d))
+		f.close()
+	GameState.huis_herkomst = "" if GameState.huis_herkomst == "dorp" else "dorp"   # moet uit de save terugkomen
+	if not GameState.load_game(pad):
+		return false
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(pad))
+	GameState.changing_map = true
+	await Transition.fade_out()
+	GameState._go_to_scene(GameState.return_map)
+	var ok := await _wacht("Huis", 8.0)
+	await _fade()
+	return ok
+
+
+func _huis_herkomst() -> void:
+	var keep_step: int = GameState.story_step
+	GameState.story_step = SD.KLAAR
+	# oude save zonder sleutel en een nieuw spel = standaard (geen dorp)
+	check("herkomst: oude save zonder huis_herkomst -> ''", GameState.apply_state(GameState.state_data(Vector2i.ZERO, Vector2i.DOWN).merged({"huis_herkomst": null}, true)) and GameState.huis_herkomst == "")
+	check("herkomst: zonder dorp -> wilgendal.tscn / voor_huis", GameState.huis_route(GameState.HOUSE_MAP, GameState.TOWN_MAP, "voor_huis") == [GameState.TOWN_MAP, "voor_huis"])
+	# route 1: vanuit wilgendal.tscn -> terug naar (24,9)
+	var in1 := await _huis_in(GameState.TOWN_MAP, "voor_huis")
+	check("herkomst wilgendal: door de deur van wilgendal.tscn het huis in (herkomst '%s')" % GameState.huis_herkomst, in1 and GameState.huis_herkomst == "")
+	var uit1 := await _huis_uit()
+	check("herkomst wilgendal: naar buiten -> Wilgendal %s (%s, %s)" % [str(OUDE_DEUR), uit1[0], str(uit1[1])], uit1[0] == "Wilgendal" and uit1[1] == OUDE_DEUR)
+	# route 2: vanuit dorp_wilgendal.tscn -> voor_dax
+	var vd: Vector2i = Data.voor_tegel(Data.pand("dax"))
+	var in2 := await _huis_in(DORP, "zuid_ingang")
+	check("herkomst dorp: door de deur van Dax het huis in (herkomst '%s')" % GameState.huis_herkomst, in2 and GameState.huis_herkomst == "dorp")
+	var uit2 := await _huis_uit()
+	check("herkomst dorp: naar buiten -> DorpWilgendal voor_dax %s (%s, %s)" % [str(vd), uit2[0], str(uit2[1])], uit2[0] == "DorpWilgendal" and uit2[1] == vd)
+	await _shot(scene(), "herkomst_dorp_voor_dax")
+	# save + laden in het huis, per herkomst
+	var in3 := await _huis_in(DORP, "zuid_ingang")
+	var l3 := in3 and await _save_laad_in_huis()
+	check("herkomst dorp: save+laden in het huis houdt herkomst '%s'" % GameState.huis_herkomst, l3 and GameState.huis_herkomst == "dorp")
+	var uit3 := await _huis_uit()
+	check("herkomst dorp na laden: uitgang -> DorpWilgendal voor_dax (%s, %s)" % [uit3[0], str(uit3[1])], uit3[0] == "DorpWilgendal" and uit3[1] == vd)
+	var in4 := await _huis_in(GameState.TOWN_MAP, "voor_huis")
+	var l4 := in4 and await _save_laad_in_huis()
+	check("herkomst wilgendal: save+laden in het huis houdt herkomst '%s'" % GameState.huis_herkomst, l4 and GameState.huis_herkomst == "")
+	var uit4 := await _huis_uit()
+	check("herkomst wilgendal na laden: uitgang -> Wilgendal %s (%s, %s)" % [str(OUDE_DEUR), uit4[0], str(uit4[1])], uit4[0] == "Wilgendal" and uit4[1] == OUDE_DEUR)
+	await _shot(scene(), "herkomst_wilgendal_24_9")
+	# oude save (zonder sleutel) in het huis, binnengekomen via het dorp -> toch de oude uitgang
+	var in5 := await _huis_in(DORP, "zuid_ingang")
+	var l5 := in5 and await _save_laad_in_huis(true)
+	check("oude save in het huis: herkomst '' (%s)" % GameState.huis_herkomst, l5 and GameState.huis_herkomst == "")
+	var uit5 := await _huis_uit()
+	check("oude save na laden: uitgang -> Wilgendal %s (%s, %s)" % [str(OUDE_DEUR), uit5[0], str(uit5[1])], uit5[0] == "Wilgendal" and uit5[1] == OUDE_DEUR)
+	GameState.story_step = keep_step
