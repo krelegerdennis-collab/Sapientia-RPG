@@ -394,7 +394,7 @@ func open_scenes() -> void:
 	_open_sub(ScenesScreen.new(), "Scenes")
 
 
-## v0.24 Quest Log: tabs Main (acts) en Side (zijopdrachten), data uit echo_questlog.gd.
+## Quest Log: tabs Active en Done, per act gegroepeerd (data/quests.json, scripts/data/quest_data.gd).
 func open_quests() -> CanvasLayer:
 	if sub != null:
 		return null

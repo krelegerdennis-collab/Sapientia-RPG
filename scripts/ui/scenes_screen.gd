@@ -234,6 +234,8 @@ func _handle_input() -> void:
 func kies_tab(t: String) -> void:
 	if t == tab or not t in TABS or playing != null:
 		return
+	if tab == "music":
+		stop_preview()
 	tab = t
 	header.text = TAB_NAMES[t]
 	quiet()

@@ -75,7 +75,7 @@ func _run() -> void:
 		var col := p.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		var col_ok := col == null or not (col.shape is RectangleShape2D) or (col.shape as RectangleShape2D).size == Vector2(14, 14)
 		if KaartStijl.held_nieuw_op(pad):
-			if not (sp.texture.resource_path.ends_with("dax_wm1_slim.png") and sp.hframes == 3 and sp.vframes == 4
+			if not (sp.texture.resource_path.ends_with("dax_wm1.png") and sp.hframes == 3 and sp.vframes == 4
 					and sp.offset == Vector2(0, -8) and col_ok):
 				fout += "%s (%s, %dx%d, %s); " % [f, sp.texture.resource_path.get_file(), sp.hframes, sp.vframes, sp.offset]
 		elif not (sp.texture.resource_path == OUD and sp.offset == Vector2(0, -4) and col_ok):
@@ -109,7 +109,7 @@ func _run() -> void:
 		var ok: bool = tex == slank and verwacht == slank and p3.sprite.offset == Vector2(0, -8) and p3.sprite.hframes == 3 and p3.sprite.vframes == 4
 		if not ok:
 			wissel_fout += "%s -> %s (verwacht %s); " % [naam, tex.get_file(), verwacht.get_file()]
-	check("leiderwissel: alle 5 helden (Dax/Seren/Vesper/Kael/Orion) krijgen hun sheet (Dax/Kael/Orion _wm1_slim, Seren/Vesper final_trio) (%s)" % (wissel_fout if wissel_fout != "" else "ok"), wissel_fout == "")
+	check("leiderwissel: alle 5 helden (Dax/Seren/Vesper/Kael/Orion) krijgen hun sheet (Kael/Orion _wm1_slim, Dax/Seren/Vesper final_trio) (%s)" % (wissel_fout if wissel_fout != "" else "ok"), wissel_fout == "")
 	check("alle 5 heldsheets bestaan en zijn 72x128 (3x4 van 24x32)", ["Dax", "Seren", "Vesper", "Kael", "Orion"].all(func(h):
 			var t: Texture2D = load(KaartStijl.held_sheet(h))
 			return t != null and t.get_size() == Vector2(72, 128)))
@@ -122,7 +122,7 @@ func _run() -> void:
 	var oud_id: String = str(GameState.party[0].get("id", ""))
 	GameState.party[0]["name"] = "Kees"
 	GameState.party[0]["id"] = "dennis"
-	check("hernoemde Dax ('Kees') houdt dax_wm1_slim.png (op id)", KaartStijl.leider_sheet().ends_with("dax_wm1_slim.png"))
+	check("hernoemde Dax ('Kees') houdt dax_wm1.png (op id)", KaartStijl.leider_sheet().ends_with("dax_wm1.png"))
 	GameState.party[0]["name"] = oud_naam
 	GameState.party[0]["id"] = oud_id
 	check("terugval: held zonder sheet geeft geen pad", KaartStijl.held_sheet("Onbekend") == "")

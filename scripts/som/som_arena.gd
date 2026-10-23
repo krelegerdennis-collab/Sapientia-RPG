@@ -95,6 +95,8 @@ func setup(p_room: Node) -> void:
 	_ensure_actions()
 	for id in SomData.SHEETS:
 		var path := str(SomData.SHEETS[id])
+		if id == "dennis":
+			path = dax_sheet_path()
 		if ResourceLoader.exists(path):
 			sheets[id] = load(path)
 	for id in SomData.ATTACK_ANIMS:
@@ -143,6 +145,21 @@ func setup(p_room: Node) -> void:
 	gauge = SomFx.Gauge.new()
 	gauge.arena = self
 	objects.add_child(gauge)
+
+
+## Kaartsheet van Dax via KaartStijl (#169): speler_sheet() van het gebied van deze kamer als Dax leidt
+## (anders, of zonder gebied, held_sheet("Dax") = dezelfde vaste partijsheet HELD_VAST["dax"]).
+## Pas als KaartStijl niets heeft: SomData.SHEETS["dennis"].
+func dax_sheet_path() -> String:
+	var p := ""
+	if not GameState.party.is_empty() and str(GameState.party[0].get("id", "")) == "dennis":
+		var gebied := KaartStijl.gebied_van_map(str(room.scene_file_path)) if room != null else ""
+		p = KaartStijl.speler_sheet(gebied if gebied != "" else "wilgendal")
+	if p == "" or not ResourceLoader.exists(p):
+		p = KaartStijl.held_sheet("Dax")
+	if p == "" or not ResourceLoader.exists(p):
+		p = str(SomData.SHEETS["dennis"])
+	return p
 
 
 static func _ensure_actions() -> void:
