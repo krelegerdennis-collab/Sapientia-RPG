@@ -50,6 +50,7 @@ var continue_button: Button
 var load_button: Button
 var new_button: Button
 var pvp_button: Button
+var coop_button: Button
 ## SoM-proef: knop naast PvP die meteen de realtime-gevechtsproef start (scripts/som/).
 var som_button: Button
 var beta_button: Button
@@ -164,6 +165,11 @@ func _ready() -> void:
 	new_button = UiMenu.button("New Game")
 	list.add_child(new_button)
 	# Buiten het kaartje: het menu moet in y 148..200 blijven (titeltests).
+	coop_button = UiMenu.button("Co-op (LAN)")
+	coop_button.name = "CoopButton"
+	coop_button.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 16)
+	add_child(coop_button)
+	coop_button.pressed.connect(_on_coop)
 	pvp_button = UiMenu.button("PvP")
 	pvp_button.name = "PvpButton"
 	pvp_button.custom_minimum_size = Vector2((CARD_RIGHT - CARD_LEFT - 2.0) / 2.0, 16)
@@ -293,6 +299,8 @@ func _place_card() -> void:
 	card.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - card.size.y)).round()
 	pvp_button.reset_size()
 	pvp_button.position = (card.position + Vector2(0, -pvp_button.size.y - 1.0)).round()
+	coop_button.reset_size()
+	coop_button.position = (card.position + Vector2(0, -pvp_button.size.y - 1.0 - coop_button.size.y - 1.0)).round()
 	som_button.reset_size()
 	som_button.position = (card.position + Vector2(card.size.x - som_button.size.x, -som_button.size.y - 1.0)).round()
 	beta_card.reset_size()
@@ -416,6 +424,11 @@ func _start_new_in(slot: int) -> void:
 func _on_pvp() -> void:
 	set_process(false)
 	get_tree().change_scene_to_file("res://pvp/scenes/pvp_lobby.tscn")
+
+
+func _on_coop() -> void:
+	set_process(false)
+	get_tree().change_scene_to_file("res://scenes/ui/coop_lobby.tscn")
 
 
 ## SoM-proef: nieuw los spel (eigen save-pad), standaard-party, meteen de proefkerker in.

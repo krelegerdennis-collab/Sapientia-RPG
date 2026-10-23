@@ -11,6 +11,8 @@ signal refused(reason: int)
 signal roster_changed
 signal member_left(peer_id: int)
 signal link_lost
+signal start_game_received
+signal session_ended(reason: String)
 
 enum Phase { IDLE, JOINING, IN, REFUSED, LOST }
 
@@ -98,6 +100,20 @@ func close() -> void:
 
 func player_count() -> int:
 	return slots.size()
+
+
+## Host: iedereen mag de Action-sandbox laden.
+func host_start_game() -> void:
+	if not is_host or _peer == null:
+		return
+	_unicast_remotes(Protocol.Kind.START_GAME, {})
+
+
+## Host: sessie beëindigen (bv. app op pauze). Gasten krijgen session_ended.
+func broadcast_session_end(reason: String) -> void:
+	if not is_host or _peer == null:
+		return
+	_unicast_remotes(Protocol.Kind.SESSION_END, {"reason": reason})
 
 
 func remote_link_count() -> int:
@@ -252,6 +268,11 @@ func _on_client_packet(msg: Dictionary) -> void:
 			_take_welcome(msg["body"])
 		Protocol.Kind.ROSTER:
 			_apply_roster(msg["body"])
+		Protocol.Kind.SESSION_END:
+			_on_session_end(msg["body"])
+		Protocol.Kind.START_GAME:
+			if phase == Phase.IN:
+				start_game_received.emit()
 
 
 func _take_welcome(body: Dictionary) -> void:
@@ -263,6 +284,17 @@ func _take_welcome(body: Dictionary) -> void:
 	phase = Phase.IN
 	refuse_reason = Protocol.Refuse.NONE
 	assigned.emit(local_slot, local_character)
+
+
+func _on_session_end(body: Dictionary) -> void:
+	if phase != Phase.IN and phase != Phase.JOINING:
+		return
+	var reason := str((body as Dictionary).get("reason", "ended"))
+	phase = Phase.LOST
+	local_slot = Protocol.NO_SLOT
+	local_character = ""
+	session_ended.emit(reason)
+	_drop_socket()
 
 
 func _apply_roster(body: Dictionary) -> void:
@@ -366,11 +398,20 @@ func _row_from_net(raw: Dictionary) -> Dictionary:
 	}
 
 
+func _unicast_remotes(kind: int, body: Dictionary) -> void:
+	for row in slots:
+		var peer_id := int(row["peer_id"])
+		if peer_id == Protocol.HOST_PEER_ID:
+			continue
+		_send_to(peer_id, kind, body)
+
+
 func _broadcast(kind: int, body: Dictionary) -> void:
 	if _peer == null:
 		return
 	_peer.set_target_peer(MultiplayerPeer.TARGET_PEER_BROADCAST)
 	_peer.put_packet(Protocol.encode(kind, body))
+	_peer.poll()
 
 
 func _send_to(peer_id: int, kind: int, body: Dictionary, version: int = Protocol.VERSION) -> void:
@@ -378,3 +419,4 @@ func _send_to(peer_id: int, kind: int, body: Dictionary, version: int = Protocol
 		return
 	_peer.set_target_peer(peer_id)
 	_peer.put_packet(Protocol.encode(kind, body, version))
+	_peer.poll()

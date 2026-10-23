@@ -46,6 +46,69 @@ const MAIN_HERO := "dennis"
 ## Action-modus: wie je bestuurt (SWAP in som_arena.gd). Blijft over warps/kamers, opslaan/laden en
 ## Classic<->Action. Opgeslagen als "leader"; oude saves zonder veld = MAIN_HERO (Dax).
 var leader_id := MAIN_HERO
+## Fase B co-op: "host", "guest", of leeg (solo). Gasten schrijven nooit som_save_1.json.
+var coop_role := ""
+var _coop_lobby: Node = null
+var _coop_discovery: Node = null
+var _coop_pending_message := ""
+
+
+func coop_is_host() -> bool:
+	return coop_role == "host"
+
+
+func coop_is_guest() -> bool:
+	return coop_role == "guest"
+
+
+func coop_in_session() -> bool:
+	return coop_role != ""
+
+
+func coop_register_lobby(lobby: Node, discovery: Node = null) -> void:
+	_coop_lobby = lobby
+	_coop_discovery = discovery
+	if _coop_lobby != null and _coop_lobby.has_signal("session_ended"):
+		if not _coop_lobby.session_ended.is_connected(_on_coop_session_ended):
+			_coop_lobby.session_ended.connect(_on_coop_session_ended)
+
+
+func coop_clear_lobby_refs() -> void:
+	_coop_lobby = null
+	_coop_discovery = null
+
+
+func coop_end_session(reason: String = "") -> void:
+	if coop_is_host() and _coop_lobby != null and _coop_lobby.has_method("broadcast_session_end"):
+		if reason != "":
+			_coop_lobby.broadcast_session_end(reason)
+		if _coop_lobby.has_method("close"):
+			_coop_lobby.close()
+	if _coop_discovery != null and _coop_discovery.has_method("stop"):
+		_coop_discovery.stop()
+	coop_role = ""
+	coop_clear_lobby_refs()
+
+
+func coop_session_end_message(reason: String) -> String:
+	const Protocol := preload("res://scripts/net/net_protocol.gd")
+	return str(Protocol.SESSION_END_TEXT.get(reason, Protocol.SESSION_END_TEXT["ended"]))
+
+
+func _on_coop_session_ended(reason: String) -> void:
+	if coop_role == "" and reason == "":
+		return
+	var tree := get_tree()
+	var scene := tree.current_scene if tree != null else null
+	if scene != null and scene is CanvasItem:
+		var path := str(scene.get_script().resource_path) if scene.get_script() != null else ""
+		if path.ends_with("coop_lobby_screen.gd"):
+			return
+	var msg := coop_session_end_message(reason)
+	coop_role = ""
+	coop_clear_lobby_refs()
+	go_to_title()
+	Dialog.show_lines([msg])
 
 
 ## Geldige leider: leader_id als die held in de actieve party zit en niet KO is, anders Dax (MAIN_HERO).
@@ -1062,6 +1125,8 @@ func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
 
 
 func can_autosave() -> bool:
+	if coop_is_guest():
+		return false
 	var settings := get_node_or_null("/root/Settings")
 	if settings != null and not settings.autosave_enabled():
 		return false
@@ -1085,6 +1150,18 @@ func take_autosave_request() -> String:
 ## v0.11 App naar de achtergrond (Android: PAUSED; op telefoons ook FOCUS_OUT):
 ## automatisch opslaan via de huidige map (die weet waar de speler staat).
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_PAUSED:
+		if coop_is_host() and _coop_lobby != null:
+			const Protocol := preload("res://scripts/net/net_protocol.gd")
+			_coop_pending_message = coop_session_end_message(Protocol.SESSION_END_HOST_PAUSED)
+			coop_end_session(Protocol.SESSION_END_HOST_PAUSED)
+	if what == NOTIFICATION_APPLICATION_RESUMED:
+		if _coop_pending_message != "":
+			var pending := _coop_pending_message
+			_coop_pending_message = ""
+			coop_role = ""
+			go_to_title()
+			Dialog.show_lines([pending])
 	if what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
 		pass      # save-slots (Dennis): geen autosave meer bij naar de achtergrond gaan
@@ -1100,6 +1177,8 @@ func autosave_on_background() -> bool:
 ## Schrijft de voortgang naar save_path (JSON), of naar 'path' (v0.11: de autosave).
 ## Geeft true als het gelukt is.
 func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
+	if coop_is_guest():
+		return false
 	if path == "":
 		var slot_file := slot_path(active_slot)
 		path = slot_file if slot_file != "" else save_path
@@ -1471,6 +1550,30 @@ func start_som_prototype() -> void:
 	_build_som_state()
 	save_path = SomData.SAVE_PATH
 	autosave_path = SomData.AUTOSAVE_PATH
+	current_map = SomData.START_MAP
+	changing_map = false
+	change_map(SomData.START_MAP, SomData.START_SPAWN)
+
+
+## Co-op host: Action-sandbox; alleen deze save telt (som_save_1.json).
+func start_som_coop_host() -> void:
+	const SomData := preload("res://scripts/data/som_data.gd")
+	if changing_map or in_battle or not SomData.ENABLED:
+		return
+	coop_role = "host"
+	await start_som_prototype()
+
+
+## Co-op gast: zelfde sandbox om te spelen, maar nooit som_save_1.json schrijven.
+func start_som_coop_guest(character_id: String) -> void:
+	const SomData := preload("res://scripts/data/som_data.gd")
+	if changing_map or in_battle or not SomData.ENABLED or character_id == "":
+		return
+	coop_role = "guest"
+	_build_som_state()
+	leader_id = character_id if character_id != "" else MAIN_HERO
+	save_path = "user://coop_guest_session.json"
+	autosave_path = "user://coop_guest_autosave.json"
 	current_map = SomData.START_MAP
 	changing_map = false
 	change_map(SomData.START_MAP, SomData.START_SPAWN)

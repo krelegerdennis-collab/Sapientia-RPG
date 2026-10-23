@@ -6,6 +6,8 @@ extends Node
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Lobby := preload("res://scripts/net/lan_lobby.gd")
 const Discovery := preload("res://scripts/net/lan_discovery.gd")
+const CoopLobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
+const SomData := preload("res://scripts/data/som_data.gd")
 
 const STEP_SEC := 2.0
 const SESSION_SEC := 6.0
@@ -13,10 +15,14 @@ const SESSION_SEC := 6.0
 var failures := 0
 var passes := 0
 var _found: Dictionary = {}
+var shots := ""
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--shots="):
+			shots = arg.get_slice("=", 1)
 	_run.call_deferred()
 
 
@@ -32,6 +38,9 @@ func _run() -> void:
 	_protocol_tests()
 	await _session_tests()
 	await _discovery_tests()
+	await _lifecycle_tests()
+	_coop_save_tests()
+	await _coop_ui_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
 
@@ -193,3 +202,72 @@ func _shutdown(nodes: Array[Node]) -> void:
 		if is_instance_valid(n) and n.has_method("close"):
 			n.close()
 			n.queue_free()
+
+
+func _lifecycle_tests() -> void:
+	var host: Node = Lobby.new()
+	host.name = "LifeHost"
+	add_child(host)
+	var guest: Node = _client([host], "LifeGuest")
+	check("host voor lifecycle", host.host_session("Dax") == OK)
+	check("gast voor lifecycle", guest.join_session(Protocol.LOOPBACK, "lotte", "Seren") == OK)
+	var joined := await wait_until(func() -> bool:
+		return guest.phase == Lobby.Phase.IN
+	, STEP_SEC)
+	check("gast in lobby voor start", joined)
+	var bag: Dictionary = {"started": false, "ended": false, "reason": ""}
+	guest.start_game_received.connect(func() -> void: bag["started"] = true)
+	host.host_start_game()
+	var got_start := await wait_until(func() -> bool: return bool(bag["started"]), STEP_SEC)
+	check("START_GAME bereikt gast", got_start)
+	guest.session_ended.connect(func(reason: String) -> void:
+		bag["ended"] = true
+		bag["reason"] = reason)
+	host.broadcast_session_end(Protocol.SESSION_END_HOST_PAUSED)
+	var got_end := await wait_until(func() -> bool: return bool(bag["ended"]), STEP_SEC)
+	var end_reason := str(bag["reason"])
+	check("SESSION_END host pause tekst", got_end and end_reason == Protocol.SESSION_END_HOST_PAUSED
+			and GameState.coop_session_end_message(end_reason) == Protocol.SESSION_END_TEXT[Protocol.SESSION_END_HOST_PAUSED])
+	_shutdown([host, guest])
+
+
+func _coop_save_tests() -> void:
+	GameState.coop_role = "guest"
+	check("gast schrijft niet", not GameState.save_game(Vector2i.ZERO, Vector2i.ZERO, SomData.SAVE_PATH))
+	GameState.coop_role = "guest"
+	GameState.save_path = SomData.SAVE_PATH
+	check("gast mag som_save_1 niet wegschrijven", not GameState.save_game(Vector2i.ZERO, Vector2i.ZERO))
+	GameState.coop_role = ""
+	GameState.save_path = "user://save_1.json"
+
+
+func _coop_ui_tests() -> void:  # async via await in body
+	check("co-op scène bestaat", ResourceLoader.exists("res://scenes/ui/coop_lobby.tscn"))
+	var ui: CoopLobbyScreen = CoopLobbyScreen.new()
+	ui.name = "CoopUi"
+	add_child(ui)
+	await get_tree().process_frame
+	check("co-op lobby nodes", ui.lobby != null and ui.discovery != null)
+	if shots != "":
+		await _coop_screenshots(ui)
+	ui.queue_free()
+
+
+func _coop_screenshots(ui: CoopLobbyScreen) -> void:
+	DirAccess.make_dir_recursive_absolute(shots)
+	await get_tree().process_frame
+	await _save_shot(ui, "coop_menu")
+	ui._show_host()
+	for _i in 3:
+		await get_tree().process_frame
+	await _save_shot(ui, "coop_host")
+	ui._show_join_listen()
+	for _i in 3:
+		await get_tree().process_frame
+	await _save_shot(ui, "coop_join")
+
+
+func _save_shot(node: Node, name: String) -> void:
+	var img: Image = node.get_viewport().get_texture().get_image()
+	img.save_png(shots.path_join(name + ".png"))
+	print("INFO  screenshot: ", shots.path_join(name + ".png"))
