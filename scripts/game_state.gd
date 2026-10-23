@@ -335,6 +335,7 @@ func _ready() -> void:
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
+	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
@@ -377,6 +378,7 @@ func _ready() -> void:
 			["--sessiefixtest", "res://scripts/tests/sessiefix_tests.gd", "SessiefixTest", "sessiefixtest"],
 			["--rekruuttest", "res://scripts/tests/rekruut_tests.gd", "RekruutTest", "rekruuttest"],
 			["--balansarchief1test", "res://scripts/tests/balans_archief1_tests.gd", "BalansArchief1Test", "balansarchief1test"],
+			["--questtest", "res://scripts/tests/quest_tests.gd", "QuestTest", "questtest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
