@@ -767,3 +767,5 @@ assets/sprites/som/cast/seren_cast.png
 assets/sprites/som/cast/seren_castfx.png
 assets/sprites/som/cast/vesper_cast.png
 assets/sprites/som/cast/vesper_castfx.png
+assets/ui/lock/lock_marker.png
+assets/ui/lock/lock_wissel.png

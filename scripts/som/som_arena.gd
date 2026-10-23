@@ -483,7 +483,7 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), Vector2i(roundi(f.x), roundi(f.y)), mult >= 1.0)
 			hits += 1
 	swing_landed.emit(id, hits)
-	Sessielog.actie_slag(id, hits)
+	SessieLog.actie_slag(id, hits)
 	return hits
 
 
@@ -818,7 +818,7 @@ func hit_member(id: String, atk: int) -> void:
 		SomFx.hurt_pose(node_of(id), hurt, SomData.HURT_TIME)
 	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(1, 0.4, 0.4))
 	player_hit.emit(dmg)
-	Sessielog.actie_treffer(id, dmg, int(h["hp"]))
+	SessieLog.actie_treffer(id, dmg, int(h["hp"]))
 	if int(h["hp"]) <= 0:
 		_member_ko(id)
 

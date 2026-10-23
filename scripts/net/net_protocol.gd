@@ -47,7 +47,7 @@ const INPUT_BYTES := 6
 ## UDP/IPv4 (28) plus een ruime ENet-kop. Schatting, geen meting.
 const UDP_OVERHEAD_BYTES := 48
 
-## Host is Dax. Gasten: Seren, Vesper, Kael. Orion is bewust geen vierde (zie QUESTION in de doc).
+## Host is Dax. Gasten: Seren, Vesper, Kael. Orion is bewust geen vierde (DECISION 1).
 const HOST_CHARACTER := "dennis"
 const ROSTER: Array[String] = ["dennis", "lotte", "noor", "kael"]
 

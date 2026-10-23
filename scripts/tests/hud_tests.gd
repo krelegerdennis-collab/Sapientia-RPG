@@ -60,6 +60,9 @@ func _run() -> void:
 	print("=== Deel G: Codex vangen in Action ===")
 	await _codex_tests()
 	await _codex_extra_tests()
+	print("=== Deel H: geen 'x0' + Kael/Orion casten direct ===")
+	await _x0_tests()
+	await _kael_orion_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
 
@@ -837,3 +840,108 @@ func _codex_extra_tests() -> void:
 
 func SomData_txt_entry() -> String:
 	return preload("res://scripts/data/som_data.gd").TXT_CODEX_ENTRY
+
+
+# ---------------------------------------------------------------- Deel H
+func _codex_in_ring(a: Node) -> Dictionary:
+	for e in a.ring_entries()["items"]:
+		if str(e.get("kind", "")) == "codex":
+			return e
+	return {}
+
+
+## Laatste Leeg Boek verbruikt: geen 'x0' in de ring (zoals andere verbruiksitems verdwijnt de ingang).
+func _x0_tests() -> void:
+	const V1 := "res://scenes/maps/archief_v1_gang.tscn"
+	var stijl: int = int(Settings.get_value("battle_style"))
+	GameState.new_game("Dax")
+	GameState.encounter_multiplier = 0.0
+	var boek: String = CodexDataT.BOOK_ITEM
+	GameState.inventory[boek] = 1
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	var a: Node = await _naar(V1, "zuid")
+	await _close_dialogs()
+	if a == null or not await wait_until(func(): return a.active(), 6.0):
+		check("H: Action-arena actief", false)
+		Settings.set_value("battle_style", stijl)
+		return
+	var e1 := _codex_in_ring(a)
+	check("H: 1 boek: ring-ingang 'Capture Book x1'", str(e1.get("label", "")) == "Capture Book x1" and int(e1.get("count", 0)) == 1)
+	var m: Node = _vangbaar(a)
+	a.codex.force_roll = 0.999                    # mislukt: boek op, geen pagina
+	a.codex.capture(m)
+	await wait_until(func(): return not a.codex.busy, 3.0)
+	check("H: laatste boek verbruikt (0 over)", GameState.item_count(boek) == 0)
+	check("H: 0 boeken: geen Codex-ingang meer in de ring (geen 'x0')", _codex_in_ring(a).is_empty())
+	a.open_ring()
+	a.ring.set_tab("items")
+	await pframes(2)
+	var x0 := false
+	for e in a.ring.entries:
+		if str(e.get("label", "")).ends_with("x0") or a.ring.short_label(e, true) == "x0":
+			x0 = true
+	for lb in a.ring.counts:
+		if lb.text == "x0":
+			x0 = true
+	check("H: open ring (Items): nergens 'x0'", not x0)
+	a.ring.close({})
+	await pframes(2)
+	check("H: 0 boeken en 0 pagina's: CODEX-knop verborgen", not a.hud.codex_button.visible)
+	GameState.codex_add("mosslijm", 1, {})
+	await pframes(3)
+	check("H: met pagina's maar 0 boeken: knop zichtbaar, tik meldt 'No Blank Book left.'",
+			a.hud.codex_button.visible and a.codex.capture() == "No Blank Book left." and _codex_in_ring(a).is_empty())
+	GameState.inventory[boek] = 2
+	check("H: weer boeken: ingang terug ('Capture Book x2')", str(_codex_in_ring(a).get("label", "")) == "Capture Book x2")
+	a.codex.force_roll = -1.0
+	Settings.set_value("battle_style", stijl)
+
+
+## Kael en Orion IN de party: hun cast is echt 'direct' (geen kaart-cast/cast6, spreuk meteen vrij).
+func _kael_orion_tests() -> void:
+	const V1 := "res://scenes/maps/archief_v1_gang.tscn"
+	var stijl: int = int(Settings.get_value("battle_style"))
+	GameState.new_game("Dax")
+	GameState.add_member("kael")
+	GameState.add_member("orion")
+	GameState.encounter_multiplier = 0.0
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	var a: Node = await _naar(V1, "zuid")
+	await _close_dialogs()
+	if a == null or not await wait_until(func(): return a.active(), 6.0):
+		check("H: Action-arena actief (Kael/Orion)", false)
+		Settings.set_value("battle_style", stijl)
+		return
+	check("H: Kael en Orion in de party", GameState.has_member("kael") and GameState.has_member("orion"))
+	for hid in ["kael", "orion"]:
+		a.switch_hero(hid)
+		await pframes(3)
+		var n: Node = a.node_of(hid)
+		check("H: %s bestuurd, node bestaat (check niet triviaal)" % hid, a.active_id == hid and n != null)
+		check("H: %s cast_kind = direct" % hid, a.cast_kind(hid) == "direct")
+		var m: Node = _vangbaar(a)
+		if m == null or n == null:
+			check("H: %s testmonster" % hid, false)
+			continue
+		var h: Dictionary = a.member(hid)
+		if not h.has("spells"):
+			h["spells"] = []
+		if not (h["spells"] as Array).has("vuur"):
+			(h["spells"] as Array).append("vuur")
+		h["mp"] = maxi(int(h.get("max_mp", 0)), 20)
+		a.enemies[m]["hp"] = 999
+		var got := [false]
+		var cb := func(_s: String, c: String) -> void:
+			if c == hid:
+				got[0] = true
+		a.spell_released.connect(cb)
+		var hp0: int = int(a.enemies[m]["hp"])
+		var txt: String = a.cast_spell("vuur", hid, {}, m)
+		var meteen: bool = got[0]
+		a.spell_released.disconnect(cb)
+		check("H: %s: spreuk komt METEEN vrij (zelfde frame), schade toegepast (%s)" % [hid, txt], meteen and int(a.enemies[m]["hp"]) < hp0)
+		check("H: %s: geen cast-animatie of castcirkel (geen kaart-cast/cast6)" % hid, n.get_node_or_null("SomCastAnim") == null
+				and n.get_node_or_null("SomCastCircle") == null and n.get_node_or_null("SomCastFx") == null)
+		await pframes(10)
+	a.switch_hero("dennis")
+	Settings.set_value("battle_style", stijl)
