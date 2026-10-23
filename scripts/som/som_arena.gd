@@ -22,7 +22,7 @@ signal player_defeated
 signal hero_switched(hero_id: String)
 ## Slag geland (bij art: aan het begin van frame SomData.ATTACK_HIT_FRAME), met het aantal treffers.
 signal swing_landed(hero_id: String, hits: int)
-## Spreuk komt vrij (cast6 frame 4, of meteen zonder sheet): schade/genezing is toegepast.
+## Spreuk komt vrij (kaart-cast frame 2 / cast6 frame 4, of meteen zonder sheet): schade/genezing is toegepast.
 signal spell_released(spell_id: String, caster_id: String)
 signal ring_opened
 signal ring_closed
@@ -39,6 +39,8 @@ const SomRing := preload("res://scripts/som/som_ring.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const SomMove := preload("res://scripts/som/som_move.gd")
 const SomAlly := preload("res://scripts/som/som_ally.gd")
+const SomCodex := preload("res://scripts/som/som_codex.gd")
+const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
 
@@ -56,6 +58,10 @@ var iframes := {}
 var down := false
 var hud: Node
 var ring: Node
+## Codex vangen in Action (scripts/som/som_codex.gd)
+var codex: Node
+## Doel-lock (tap + auto-lock in bereik)
+var target_lock: Node2D
 var gauge: Node2D
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
 var queued := {}
@@ -83,6 +89,8 @@ var swing_lock := 0.0
 ## Laatste slag was vol (stagger: telegraaf afbreken + knockback alleen bij 100%).
 var _full_swing := true
 var b_casts := 0
+## Alleen voor tests/vergelijk-shots: held-ids waarvoor de kaart-cast uit staat (dan cast6 of direct).
+var map_cast_uit: Array = []
 
 
 func setup(p_room: Node) -> void:
@@ -92,6 +100,8 @@ func setup(p_room: Node) -> void:
 	_ensure_actions()
 	for id in SomData.SHEETS:
 		var path := str(SomData.SHEETS[id])
+		if id == "dennis":
+			path = dax_sheet_path()
 		if ResourceLoader.exists(path):
 			sheets[id] = load(path)
 	for id in SomData.ATTACK_ANIMS:
@@ -111,6 +121,7 @@ func setup(p_room: Node) -> void:
 	if touch and "analog_only" in touch:
 		touch.analog_only = true      # alleen joy_raw; geen move_*-stappen (anders dubbele beweging)
 	player.set_analog(analog_dir, SomData.MOVE_SPEED)
+	player.facing_provider = Callable(self, "_lock_facing")
 	_apply_player_sheet()
 	var cam := player.get_node_or_null("Camera2D") as Camera2D
 	if cam:
@@ -127,6 +138,10 @@ func setup(p_room: Node) -> void:
 		a.setup(self, id, slot)
 		allies.append(a)
 		slot += 1
+	codex = SomCodex.new()
+	codex.name = "SomCodex"
+	codex.arena = self
+	add_child(codex)
 	hud = SomHud.new()
 	hud.arena = self
 	add_child(hud)
@@ -136,6 +151,25 @@ func setup(p_room: Node) -> void:
 	gauge = SomFx.Gauge.new()
 	gauge.arena = self
 	objects.add_child(gauge)
+	target_lock = SomTargetLock.new()
+	target_lock.name = "SomTargetLock"
+	target_lock.setup(self)
+	objects.add_child(target_lock)
+
+
+## Kaartsheet van Dax via KaartStijl (#169): speler_sheet() van het gebied van deze kamer als Dax leidt
+## (anders, of zonder gebied, held_sheet("Dax") = dezelfde vaste partijsheet HELD_VAST["dax"]).
+## Pas als KaartStijl niets heeft: SomData.SHEETS["dennis"].
+func dax_sheet_path() -> String:
+	var p := ""
+	if not GameState.party.is_empty() and str(GameState.party[0].get("id", "")) == "dennis":
+		var gebied := KaartStijl.gebied_van_map(str(room.scene_file_path)) if room != null else ""
+		p = KaartStijl.speler_sheet(gebied if gebied != "" else "wilgendal")
+	if p == "" or not ResourceLoader.exists(p):
+		p = KaartStijl.held_sheet("Dax")
+	if p == "" or not ResourceLoader.exists(p):
+		p = str(SomData.SHEETS["dennis"])
+	return p
 
 
 static func _ensure_actions() -> void:
@@ -303,6 +337,19 @@ func analog_dir() -> Vector2:
 	return SomMove.keys_to_dir()
 
 
+func _lock_facing() -> Vector2i:
+	return target_lock.facing_for_player() if target_lock else Vector2i.ZERO
+
+
+func _attack_suppressed() -> bool:
+	return target_lock != null and int(target_lock.suppress_attack_frame) == Engine.get_process_frames()
+
+
+## Schermtik op een monster (touch_controls); true = lock verwerkt, geen A/joy.
+func try_lock_tap(viewport_pos: Vector2) -> bool:
+	return target_lock.try_tap_viewport(viewport_pos) if target_lock else false
+
+
 func active() -> bool:
 	return not down and room != null and room.monsters_active() and not ring.is_open
 
@@ -315,6 +362,8 @@ func _process(delta: float) -> void:
 		return
 	if not active():
 		return
+	if target_lock:
+		target_lock.tick(delta)
 	swing_lock = maxf(0.0, swing_lock - delta)
 	if swing_lock <= 0.0 or not SomData.CHARGE_AFTER_ANIM:
 		charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
@@ -323,7 +372,8 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(SWITCH_ACTION):
 		switch_hero()
 	b_cast_cd = maxf(0.0, b_cast_cd - delta)
-	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame:
+	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
+			and not _attack_suppressed():
 		attack()
 	if Input.is_action_just_pressed("cancel") and Engine.get_process_frames() != ring.closed_frame:
 		quick_cast()
@@ -416,7 +466,7 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 	if not is_instance_valid(n) or not is_alive(id):
 		swing_landed.emit(id, 0)
 		return 0
-	var f := Vector2(n.facing)
+	var f := Vector2(_swing_facing(id, n))
 	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
 	SomFx.slash(room.get_node("Objects"), point, f)
 	var hits := 0
@@ -427,7 +477,7 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 		if center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y):
 			var e: Dictionary = enemies[m]
 			last_attacker = id
-			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), n.facing, mult >= 1.0)
+			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), Vector2i(roundi(f.x), roundi(f.y)), mult >= 1.0)
 			hits += 1
 	swing_landed.emit(id, hits)
 	Sessielog.actie_slag(id, hits)
@@ -443,6 +493,25 @@ func center_of(m: Node) -> Vector2:
 	return m.position + Vector2(0, -(m.size.y - 1) * 8.0)
 
 
+func _enemy_in_attack_reach(id: String, n: Node2D, m: Node) -> bool:
+	var f := Vector2(n.facing)
+	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
+	return center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y)
+
+
+func _swing_facing(id: String, n: Node2D) -> Vector2i:
+	if id == active_id and target_lock:
+		var m: Node = target_lock.locked_enemy()
+		if m != null:
+			var aim_lock: bool = bool(target_lock.manual) or _enemy_in_attack_reach(id, n, m)
+			if aim_lock:
+				var lf: Vector2i = target_lock.facing_for_player()
+				if lf != Vector2i.ZERO:
+					n.facing = lf
+					return lf
+	return n.facing
+
+
 ## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
 func nearest_enemy(from: Vector2, within: float) -> Node:
 	var best: Node = null
@@ -455,6 +524,15 @@ func nearest_enemy(from: Vector2, within: float) -> Node:
 			bd = d
 			best = m
 	return best
+
+
+func _aim_caster_at(caster_id: String, m: Node) -> void:
+	if m == null or not is_instance_valid(m) or caster_id != active_id:
+		return
+	var to: Vector2 = center_of(m) - body_of(caster_id)
+	if to.length() < 0.5:
+		return
+	player.facing = SomMove.facing_for(to.normalized(), player.facing)
 
 
 ## stagger = false (slag onder 100%): wel schade, maar geen afgebroken telegraaf en geen knockback.
@@ -497,6 +575,8 @@ func _knockback(m: Node, dir: Vector2i) -> void:
 func _defeat_enemy(m: Node) -> void:
 	var e: Dictionary = enemies[m]
 	enemies.erase(m)
+	if target_lock:
+		target_lock.on_target_gone(m)
 	GameState.mark_defeated(m.enemy_id)
 	var gained_exp := int(e["exp"])
 	var gained_gold := int(e["gold"])
@@ -819,6 +899,11 @@ func resolve(q: Dictionary) -> String:
 		if int(r.get("hp", 0)) > 0:
 			SomFx.number(room.get_node("Objects"), body_of(str(target.get("id", ""))) + Vector2(0, -22), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
 			heal_glow(str(target.get("id", "")))
+	elif str(q.get("kind", "")) == "codex":
+		var ct: Variant = q.get("target", null)
+		text = codex.capture(ct if typeof(ct) == TYPE_OBJECT else null)   # ook een intussen vrijgegeven doel (boek terug)
+		action_resolved.emit(text)
+		return text
 	elif str(q.get("kind", "")) == "skill":
 		text = use_skill(str(q.get("id", "")), str(q.get("caster", "")))
 	else:
@@ -852,12 +937,16 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 					targets.append(m)
 		elif enemy_target != null and is_instance_valid(enemy_target) and enemies.has(enemy_target):
 			targets.append(enemy_target)
+		elif target_lock and target_lock.locked_enemy() != null:
+			targets.append(target_lock.locked_enemy())
 		else:
 			var best := nearest_enemy(from, 10.0 * 16.0)
 			if best:
 				targets.append(best)
 		if targets.is_empty():
 			return SomData.TXT_NO_TARGET
+		if targets[0] is Node:
+			_aim_caster_at(caster_id, targets[0])
 		caster["mp"] = int(caster["mp"]) - cost
 		_cast_then(caster_id, spell_id, func() -> void:
 			for m in targets:
@@ -909,21 +998,39 @@ func _cast_pose(id: String) -> void:
 		SomFx.cast_anim(node_of(id), t)
 
 
-## Cast-animatie (cast6) van de caster; 'apply' draait op het vrijgavemoment (frame 4), daarna
-## spell_released. Zonder cast6-sheet of zonder node: meteen.
+## Cast-animatie van de caster; 'apply' draait op het vrijgavemoment, daarna spell_released.
+## Eerst de kaart-cast (SomData.MAP_CAST, 24x32, loslaten op frame 2), anders cast6 (48x48, frame 4),
+## zonder sheet of zonder node: meteen.
 func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
-	var t := pose_tex(caster_id, "cast")
 	var n := node_of(caster_id)
 	var done := func() -> void:
 		apply.call()
 		spell_released.emit(spell_id, caster_id)
-	var cols := int(SomData.CAST6["frames"])
-	if t and n and t.get_width() == cols * int(SomData.CAST6["frame"][0]):
-		var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
-		var anim: Node = SomFx.cast6_anim(n, t, circle)
-		anim.hit.connect(done, CONNECT_ONE_SHOT)
-		return
-	done.call()
+	var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
+	match cast_kind(caster_id):
+		"map":
+			var mc: Dictionary = SomData.MAP_CAST[caster_id]
+			var anim0: Node = SomFx.map_cast_anim(n, SomFx.tex(str(mc["sheet"])), SomFx.tex(str(mc.get("fx", ""))), circle)
+			anim0.hit.connect(done, CONNECT_ONE_SHOT)
+		"cast6":
+			var anim: Node = SomFx.cast6_anim(n, pose_tex(caster_id, "cast"), circle)
+			anim.hit.connect(done, CONNECT_ONE_SHOT)
+		_:
+			done.call()
+
+
+## Welke cast-animatie krijgt deze held? "map" (SomData.MAP_CAST, 24x32), anders "cast6" (48x48-sheet van
+## 6 kolommen), anders "direct" (geen passende sheet of geen node: de spreuk komt meteen vrij).
+func cast_kind(caster_id: String) -> String:
+	if node_of(caster_id) == null:
+		return "direct"
+	var mc: Dictionary = SomData.MAP_CAST.get(caster_id, {})
+	if not map_cast_uit.has(caster_id) and SomFx.tex(str(mc.get("sheet", ""))) != null:
+		return "map"
+	var t := pose_tex(caster_id, "cast")
+	if t and t.get_width() == int(SomData.CAST6["frames"]) * int(SomData.CAST6["frame"][0]):
+		return "cast6"
+	return "direct"
 
 
 ## Spreuk-effect (SomData.SPELL_FX) onderkant-midden op 'feet'. Geeft false zonder art.
@@ -955,7 +1062,31 @@ func ring_entries() -> Dictionary:
 			continue
 		magic.append({"kind": "spell", "id": str(s), "caster": active_id,
 				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))], "name": str(sp.get("name", s))})
+	# Codex-boek (zoals de Codex-opdracht in Classic): vangen met een Leeg Boek, daarna een doel kiezen
+	if SomCodex.shown():
+		var books := GameState.item_count(SomCodex.CodexData.BOOK_ITEM)
+		items.append({"kind": "codex", "id": "codex", "label": SomData.TXT_CODEX_ENTRY % books if books > 0 else SomData.TXT_CODEX_NO_BOOK,
+				"name": SomData.TXT_CODEX, "count": books})
 	return {"items": items, "skills": skills, "magic": magic}
+
+
+## Doelen voor het Codex-boek: vijanden (ook een baas, die dan weigert) binnen SPELL_RANGE, dichtstbij eerst,
+## met de Classic-hint ("35%", "too strong", "won't fit", "Codex full").
+func codex_targets() -> Array:
+	var from := body()
+	var list: Array = []
+	for m in enemies.keys():
+		if is_instance_valid(m) and center_of(m).distance_to(from) <= SomData.SPELL_RANGE:
+			list.append(m)
+	for m in room.monsters:
+		if is_instance_valid(m) and bool(m.get("boss")) and not list.has(m) and center_of(m).distance_to(from) <= SomData.SPELL_RANGE:
+			list.append(m)
+	list.sort_custom(func(x, y): return center_of(x).distance_to(from) < center_of(y).distance_to(from))
+	var out: Array = []
+	for m in list:
+		var nm: String = codex._name(m)
+		out.append({"kind": "target", "id": str(m.monster_id), "target": m, "label": "%s %s" % [nm, codex.hint(m)], "name": nm})
+	return out
 
 
 ## Spreuk met één doel (vijand of partylid) -> in de ring eerst een doel kiezen.
