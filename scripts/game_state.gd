@@ -74,17 +74,18 @@ var save_path := "user://save_1.json"
 var active_slot := 1
 ## Slot 0 = de aparte autosave (Laden: 'Autosave'). Die overschrijft nooit slot 1..4.
 const AUTOSAVE_SLOT := 0
-## De enige reden waarvoor nog automatisch wordt opgeslagen (Dennis).
-const AUTOSAVE_REASONS := ["map"]
+## Redenen waarvoor automatisch wordt opgeslagen (Dennis).
+## "achtergrond" is de verplichte pauze-save en negeert alleen de instelling, niet de blokkades.
+const AUTOSAVE_REASONS := ["map", "achtergrond"]
 ## Gekozen slot voor het volgende nieuwe spel (titelscherm > New Game > slot kiezen).
 var pending_new_slot := 1
 ## Autosave alleen bij een overgang wereldkaart <-> kerker (niet bij elke kamer of een dorp).
 const NON_DUNGEON_MAPS := ["wilgendal", "dorp_wilgendal", "esdoorn", "wilgendal_binnen",
 		"huis_wilgendal", "esdoorn_herberg", "esdoorn_huis_noor"]
 ## v0.11 Automatisch opslaan: een EIGEN bestand (overschrijft de handmatige save nooit).
-## Wordt geschreven na een mapwissel, na een gewonnen gevecht en als de app naar de
-## achtergrond gaat (Android). Nooit tijdens een gevecht, een mapwissel of een tekstvak.
-## Uit te zetten in Opties ('Autom. opslaan', autoload Settings).
+## Wordt geschreven bij een kerker-overgang en als de app naar de achtergrond gaat (Android).
+## De optie schakelt alleen de gewone autosave uit; de pauze-save blijft verplicht.
+## Nooit tijdens een gevecht, een mapwissel of een tekstvak.
 const AUTOSAVE_PATH := "user://autosave.json"
 var autosave_path := AUTOSAVE_PATH
 ## Betatest: een eigen voortgang, los van Nieuw spel en Doorgaan. Zo kun je nieuwe
@@ -1061,13 +1062,12 @@ func read_newest_save() -> Dictionary:
 	return read_save(p) if p != "" else {}
 
 
-## v0.11 Automatisch opslaan in autosave_path. Doet niets (false) als het uit staat in
-## Opties of als het nu niet veilig kan (gevecht, mapwissel, tekstvak open).
+## v0.11 Automatisch opslaan in autosave_path. De pauze-save ("achtergrond") gaat ook door
+## als autosave uit staat; alle veiligheidsblokkades blijven gelden.
 func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
-	# save-slots (Dennis): alleen bij kerker <-> wereldkaart (reden "map")
 	if not AUTOSAVE_REASONS.has(reason):
 		return false
-	if not can_autosave():
+	if not can_autosave(reason == "achtergrond"):
 		return false
 	if not save_game(tile, facing, autosave_path):
 		return false
@@ -1076,9 +1076,9 @@ func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
 	return true
 
 
-func can_autosave() -> bool:
+func can_autosave(ignore_setting: bool = false) -> bool:
 	var settings := get_node_or_null("/root/Settings")
-	if settings != null and not settings.autosave_enabled():
+	if not ignore_setting and settings != null and not settings.autosave_enabled():
 		return false
 	var dialog := get_node_or_null("/root/Dialog")
 	if dialog != null and dialog.is_open:
@@ -1102,7 +1102,7 @@ func take_autosave_request() -> String:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
-		pass      # save-slots (Dennis): geen autosave meer bij naar de achtergrond gaan
+		autosave_on_background()
 
 
 func autosave_on_background() -> bool:
