@@ -22,7 +22,7 @@ signal player_defeated
 signal hero_switched(hero_id: String)
 ## Slag geland (bij art: aan het begin van frame SomData.ATTACK_HIT_FRAME), met het aantal treffers.
 signal swing_landed(hero_id: String, hits: int)
-## Spreuk komt vrij (cast6 frame 4, of meteen zonder sheet): schade/genezing is toegepast.
+## Spreuk komt vrij (kaart-cast frame 2 / cast6 frame 4, of meteen zonder sheet): schade/genezing is toegepast.
 signal spell_released(spell_id: String, caster_id: String)
 signal ring_opened
 signal ring_closed
@@ -909,14 +909,22 @@ func _cast_pose(id: String) -> void:
 		SomFx.cast_anim(node_of(id), t)
 
 
-## Cast-animatie (cast6) van de caster; 'apply' draait op het vrijgavemoment (frame 4), daarna
-## spell_released. Zonder cast6-sheet of zonder node: meteen.
+## Cast-animatie van de caster; 'apply' draait op het vrijgavemoment, daarna spell_released.
+## Eerst de kaart-cast (SomData.MAP_CAST, 24x32, loslaten op frame 2), anders cast6 (48x48, frame 4),
+## zonder sheet of zonder node: meteen.
 func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
 	var t := pose_tex(caster_id, "cast")
 	var n := node_of(caster_id)
 	var done := func() -> void:
 		apply.call()
 		spell_released.emit(spell_id, caster_id)
+	var mc: Dictionary = SomData.MAP_CAST.get(caster_id, {})
+	var mt := SomFx.tex(str(mc.get("sheet", "")))
+	if mt and n:
+		var circle0 := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
+		var anim0: Node = SomFx.map_cast_anim(n, mt, SomFx.tex(str(mc.get("fx", ""))), circle0)
+		anim0.hit.connect(done, CONNECT_ONE_SHOT)
+		return
 	var cols := int(SomData.CAST6["frames"])
 	if t and n and t.get_width() == cols * int(SomData.CAST6["frame"][0]):
 		var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))

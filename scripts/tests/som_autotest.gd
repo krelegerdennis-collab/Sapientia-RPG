@@ -768,12 +768,22 @@ func _art3_tests(m: Node) -> void:
 	await t.frames(1)
 	var anim: Node = p.get_node_or_null("SomCastAnim")
 	var circ: Node = p.get_node_or_null("SomCastCircle")
-	t.check("SoM-art3: cast6 speelt (6x4) met castcirkel eronder (4 x 48x16, lus)", anim != null and anim.hframes == 6 and anim.vframes == 4
-			and circ != null and circ.hframes == 4 and circ.loop and circ.z_index < 0 and int(anim.hit_index) == 3)
+	var body: Sprite2D = p.get_node_or_null("Sprite2D") as Sprite2D
+	t.check("SoM-cast: kaart-cast Vesper speelt (4 x 24x32 x 4 rijen, rij = rechts) met castcirkel eronder", anim != null and anim.hframes == 4 and anim.vframes == 4
+			and anim.texture != null and anim.texture.get_size() == Vector2(96, 128) and int(anim.frame) == 2 * 4
+			and circ != null and circ.hframes == 4 and circ.loop and circ.z_index < 0 and int(anim.hit_index) == 2)
+	t.check("SoM-cast: kaart-cast op de plek van de loopsprite (zelfde offset/centrering), lichaam verborgen", anim != null and body != null
+			and anim.offset == body.offset and anim.centered == body.centered and anim.position == body.position and not body.visible)
+	t.check("SoM-cast: nog geen cast-gloed voor het loslaten", p.get_node_or_null("SomCastFx") == null)
 	t.check("SoM-art3: nog geen schade bij het begin van de cast", int(a.enemies[m]["hp"]) == h0)
 	await released()
-	t.check("SoM-art3: spreuk vrij op frame 4 (%.0f ms; verwacht 540)" % float(anim.hit_at_ms if is_instance_valid(anim) else -1.0),
-			is_instance_valid(anim) and anim.hit_at_ms >= 540.0 and anim.hit_at_ms <= 600.0 and int(a.enemies[m]["hp"]) < h0)
+	t.check("SoM-cast: spreuk vrij bij loslaten = frame 2 (%.0f ms; verwacht 320)" % float(anim.hit_at_ms if is_instance_valid(anim) else -1.0),
+			is_instance_valid(anim) and anim.hit_at_ms >= 320.0 and anim.hit_at_ms <= 380.0 and int(a.enemies[m]["hp"]) < h0)
+	var gl: Node = p.get_node_or_null("SomCastFx")
+	t.check("SoM-cast: cast-gloed (vesper_castfx 4 x 24x24) verschijnt bij het loslaten, bij de staf", gl != null and gl.hframes == 4
+			and gl.texture.get_size() == Vector2(96, 24) and gl.position == SomData.MAP_CAST_FX_POS + Vector2(SomData.MAP_CAST_FX_SIDE, 0))
+	await t.frames(3)
+	await shot("cast_vesper_release")
 	var fx: Node = null
 	for n in objs.get_children():
 		if str(n.name).begins_with("SomSpell_vuur"):
@@ -790,7 +800,14 @@ func _art3_tests(m: Node) -> void:
 	dax["hp"] = int(dax["max_hp"]) / 2
 	a.member("lotte")["mp"] = a.member("lotte")["max_mp"]
 	a.cast_spell("genees", "lotte", dax)
+	await t.frames(1)
+	var sa: Node = p.get_node_or_null("SomCastAnim")
+	t.check("SoM-cast: kaart-cast Seren (seren_cast 96x128)", sa != null and sa.texture != null and sa.texture.resource_path.ends_with("seren_cast.png"))
+	await t.frames(8)
+	await shot("cast_seren_gather")
 	await released()
+	var sg: Node = p.get_node_or_null("SomCastFx")
+	t.check("SoM-cast: Seren cast-gloed (seren_castfx)", sg != null and sg.texture.resource_path.ends_with("seren_castfx.png"))
 	var gfx: Node = null
 	for n in objs.get_children():
 		if str(n.name).begins_with("SomSpell_genees"):

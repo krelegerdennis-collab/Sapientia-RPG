@@ -76,32 +76,83 @@ static func attack_anim(p: Node2D, t: Texture2D, d: Dictionary, anim_name := "So
 ## Met een cirkel-sheet loopt die in een lus onder de caster tot de animatie klaar is.
 static func cast6_anim(p: Node2D, t: Texture2D, circle: Texture2D) -> Anim:
 	var a := attack_anim(p, t, SomData.CAST6, "SomCastAnim")
-	if circle:
-		var old := p.get_node_or_null("SomCastCircle")
-		if old:
-			old.free()
-		var c := Anim.new()
-		c.name = "SomCastCircle"
-		c.texture = circle
-		c.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		var cw := int(SomData.CAST_CIRCLE_CELL[0])
-		var n := maxi(1, circle.get_width() / cw)
-		c.hframes = n
-		var seq: Array = []
-		var ms: Array = []
-		for i in n:
-			seq.append(i)
-			ms.append(SomData.CAST_CIRCLE_MS)
-		c.seq = seq
-		c.ms = ms
-		c.loop = true
-		c.z_index = -1                 # achter de held
-		c.show_behind_parent = true
-		c.position = Vector2(0, 8.0 - float(circle.get_height()) / 2.0)    # midden op de voeten
-		p.add_child(c)
-		a.finished.connect(func() -> void:
-			if is_instance_valid(c):
-				c.queue_free())
+	cast_circle(p, circle, a)
+	return a
+
+
+## Castcirkel in een lus onder de caster tot animatie 'a' klaar is (geen cirkel-sheet: niets).
+static func cast_circle(p: Node2D, circle: Texture2D, a: Anim) -> void:
+	if circle == null:
+		return
+	var old := p.get_node_or_null("SomCastCircle")
+	if old:
+		old.free()
+	var c := Anim.new()
+	c.name = "SomCastCircle"
+	c.texture = circle
+	c.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var cw := int(SomData.CAST_CIRCLE_CELL[0])
+	var n := maxi(1, circle.get_width() / cw)
+	c.hframes = n
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(SomData.CAST_CIRCLE_MS)
+	c.seq = seq
+	c.ms = ms
+	c.loop = true
+	c.z_index = -1                 # achter de held
+	c.show_behind_parent = true
+	c.position = Vector2(0, 8.0 - float(circle.get_height()) / 2.0)    # midden op de voeten
+	p.add_child(c)
+	a.finished.connect(func() -> void:
+		if is_instance_valid(c):
+			c.queue_free())
+
+
+## Kaart-cast (SomData.MAP_CAST): 4 x 24x32 per richting, precies op de plek van de loopsprite
+## (zelfde offset/centrering als het lichaam, dat zolang verborgen is). 'hit' = loslaten (frame 2);
+## dan verschijnt de cast-gloed 'fx' (4 x 24x24) bij de staf.
+static func map_cast_anim(p: Node2D, t: Texture2D, fx: Texture2D, circle: Texture2D) -> Anim:
+	var cw := int(SomData.MAP_CAST_CELL[0])
+	var ch := int(SomData.MAP_CAST_CELL[1])
+	var hf := maxi(1, t.get_width() / cw)
+	var vf := maxi(1, t.get_height() / ch)
+	var row := mini(dir_index(p.facing), vf - 1)
+	var frames: Array = []
+	for i in hf:
+		frames.append(row * hf + i)
+	var a := _hero_anim(p, t, hf, vf, frames, SomData.MAP_CAST_MS.duplicate(), "SomCastAnim")
+	if a.body:
+		a.centered = a.body.centered
+		a.offset = a.body.offset
+		a.position = a.body.position
+		a.flip_h = false
+	else:
+		a.offset = Vector2(0, 8.0 - float(ch) / 2.0)
+	a.hit_index = clampi(SomData.MAP_CAST_RELEASE, 0, hf - 1)
+	cast_circle(p, circle, a)
+	if fx:
+		a.hit.connect(func() -> void:
+			if not is_instance_valid(p):
+				return
+			var g := Anim.new()
+			g.name = "SomCastFx"
+			g.texture = fx
+			g.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			var n := maxi(1, fx.get_width() / int(SomData.MAP_CAST_FX_CELL[0]))
+			g.hframes = n
+			var seq: Array = []
+			var ms: Array = []
+			for i in n:
+				seq.append(i)
+				ms.append(SomData.MAP_CAST_FX_MS)
+			g.seq = seq
+			g.ms = ms
+			g.z_index = 1
+			g.position = SomData.MAP_CAST_FX_POS + Vector2(float(Vector2i(p.facing).x) * SomData.MAP_CAST_FX_SIDE, 0)
+			p.add_child(g), CONNECT_ONE_SHOT)
 	return a
 
 
