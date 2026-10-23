@@ -115,6 +115,7 @@ func _full_flow() -> void:
 		await get_tree().process_frame
 	_assert_arena_avatars("na spread host", host_som, roster)
 	if shots != "":
+		_spread_host_visuals(host_som)
 		await _save_shot_room_only(host_pack["room"] as Node)
 	_attach_peer_viewports(g1_pack, g2_pack)
 	_assert_arena_avatars("na spread g1", g1_som, roster)
@@ -198,11 +199,7 @@ func _full_flow() -> void:
 	for pack in [host_pack, g1_pack, g2_pack]:
 		var vp: SubViewport = pack.get("vp") as SubViewport
 		if is_instance_valid(vp):
-			var par := vp.get_parent()
-			if par != null and par.name == "HostWrap":
-				par.queue_free()
-			else:
-				vp.queue_free()
+			vp.queue_free()
 		var room: Node = pack.get("room") as Node
 		if is_instance_valid(room):
 			room.queue_free()
@@ -214,16 +211,7 @@ func _spawn_peer_arena(vp_name: String, _slot: int) -> Dictionary:
 	vp.size = VIEWPORT
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	vp.handle_input_locally = true
-	if vp_name == "HostVP":
-		var wrap := SubViewportContainer.new()
-		wrap.name = "HostWrap"
-		wrap.stretch = true
-		wrap.custom_minimum_size = VIEWPORT
-		wrap.size = VIEWPORT
-		add_child(wrap)
-		wrap.add_child(vp)
-	else:
-		add_child(vp)
+	add_child(vp)
 	var room: DungeonRoom = (load(SomData.START_MAP) as PackedScene).instantiate()
 	vp.add_child(room)
 	var som: SomArena = null
@@ -253,6 +241,16 @@ func _shutdown(nodes: Array[Node]) -> void:
 func _frames(n: int) -> void:
 	for i in n:
 		await get_tree().process_frame
+
+
+func _spread_host_visuals(som: SomArena) -> void:
+	var base := Vector2(200, 140)
+	som.player.position = base + Vector2(-48, 0)
+	if som._coop_avatars.has(1):
+		(som._coop_avatars[1] as Node2D).position = base + Vector2(0, -40)
+	if som._coop_avatars.has(2):
+		(som._coop_avatars[2] as Node2D).position = base + Vector2(48, 0)
+	await _frames(8)
 
 
 func _detach_peer_viewports(g1_pack: Dictionary, g2_pack: Dictionary) -> void:
