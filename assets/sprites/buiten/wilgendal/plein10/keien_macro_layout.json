@@ -1,0 +1,160 @@
+{
+ "tile_size": 16,
+ "blocks": [
+  {
+   "name": "macro_0",
+   "atlas_px": [
+    0,
+    0
+   ],
+   "atlas_tiles": [
+    0,
+    0
+   ],
+   "size_tiles": [
+    2,
+    2
+   ],
+   "kind": "licht",
+   "probability": 1.0
+  },
+  {
+   "name": "macro_1",
+   "atlas_px": [
+    32,
+    0
+   ],
+   "atlas_tiles": [
+    2,
+    0
+   ],
+   "size_tiles": [
+    2,
+    2
+   ],
+   "kind": "licht",
+   "probability": 1.0
+  },
+  {
+   "name": "macro_2",
+   "atlas_px": [
+    64,
+    0
+   ],
+   "atlas_tiles": [
+    4,
+    0
+   ],
+   "size_tiles": [
+    2,
+    2
+   ],
+   "kind": "warm",
+   "probability": 1.0
+  },
+  {
+   "name": "macro_3",
+   "atlas_px": [
+    0,
+    32
+   ],
+   "atlas_tiles": [
+    0,
+    2
+   ],
+   "size_tiles": [
+    2,
+    2
+   ],
+   "kind": "mos",
+   "probability": 1.0
+  },
+  {
+   "name": "macro_4",
+   "atlas_px": [
+    32,
+    32
+   ],
+   "atlas_tiles": [
+    2,
+    2
+   ],
+   "size_tiles": [
+    2,
+    2
+   ],
+   "kind": "licht",
+   "probability": 1.0
+  },
+  {
+   "name": "macro_5",
+   "atlas_px": [
+    64,
+    32
+   ],
+   "atlas_tiles": [
+    4,
+    2
+   ],
+   "size_tiles": [
+    2,
+    2
+   ],
+   "kind": "warm",
+   "probability": 1.0
+  },
+  {
+   "name": "put_ring",
+   "atlas_px": [
+    96,
+    0
+   ],
+   "atlas_tiles": [
+    6,
+    0
+   ],
+   "size_tiles": [
+    3,
+    3
+   ],
+   "kind": "decal",
+   "note": "centre the well sprite on its middle (24,24)"
+  },
+  {
+   "name": "looplijn_a",
+   "atlas_px": [
+    0,
+    64
+   ],
+   "atlas_tiles": [
+    0,
+    4
+   ],
+   "size_tiles": [
+    2,
+    3
+   ],
+   "kind": "decal",
+   "note": "N-S worn walking line, stacks vertically"
+  },
+  {
+   "name": "looplijn_b",
+   "atlas_px": [
+    32,
+    64
+   ],
+   "atlas_tiles": [
+    2,
+    4
+   ],
+   "size_tiles": [
+    2,
+    3
+   ],
+   "kind": "decal",
+   "note": "N-S worn walking line, stacks vertically"
+  }
+ ],
+ "seam_rule": "every block perimeter uses the same 16px border-stone ring as keien_licht and plein_rand -> any block can sit next to any fill/edge tile or block; align blocks to the 16px grid.",
+ "godot": "import as 16px atlas; register each block as a TileMapPattern (or scatter on a 2nd pass after terrain): replace runs of mask-255 tiles with whole blocks."
+}
