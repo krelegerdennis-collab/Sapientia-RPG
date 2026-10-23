@@ -202,6 +202,25 @@ func _save_tests() -> void:
 	check("na laden speelt de tutorial niet opnieuw", not Story.history.slice(hist).has(EV) and not Story.running
 			and Story.pending_unique_event == "")
 
+	# App dicht vlak na het gevecht: het eenmalige event wacht nog op de kaart.
+	setup()
+	GameState.in_battle = true
+	GameState.unique_mark("inktwurm", "verslagen")
+	check("tutorial wacht vlak na het gevecht", Story.pending_unique_event == EV)
+	check("opslaan bewaart wachtende tutorial", GameState.save_game(Vector2i(2, 2), Vector2i.DOWN)
+			and GameState.read_save(GameState.save_path).get("pending_unique_event", "") == EV)
+	GameState.in_battle = false
+	GameState.new_game("Dax")
+	check("laden herstelt wachtende tutorial", GameState.load_game()
+			and Story.pending_unique_event == EV)
+
+	var old := GameState.read_save(GameState.save_path)
+	old.erase("pending_unique_event")
+	_write(GameState.save_path, old)
+	Story.pending_unique_event = "oud_wordt_gewist"
+	check("oude save zonder pending_unique_event krijgt lege standaard",
+			GameState.load_game() and Story.pending_unique_event == "")
+
 
 # ================================================================ deel F: oude save
 func _old_save_tests() -> void:

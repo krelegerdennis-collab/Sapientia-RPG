@@ -168,7 +168,9 @@ func _pingpong() -> void:
 func _log() -> void:
 	_nieuw()
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
-	Sessielog.start(LOG_MAP)
+	var sl := get_node("/root/SessieLog")
+	sl.volgt_instelling = false
+	sl.start(LOG_MAP)
 	var s := await _laad(MAPS + "archief_v1_gang.tscn")
 	var a: Node = s.get("som") if s else null
 	if a:
@@ -179,8 +181,8 @@ func _log() -> void:
 		a.iframes.clear()
 		a.hit_member("dennis", 1)
 	await _wacht(0.3)
-	var pad: String = Sessielog.pad
-	Sessielog.stop()
+	var pad: String = sl.pad
+	sl.stop()
 	var kaart := {}
 	var start := {}
 	var slag := false
@@ -189,13 +191,14 @@ func _log() -> void:
 		var d = JSON.parse_string(regel) if regel != "" else null
 		if not d is Dictionary:
 			continue
-		if d.get("e") == "start":
-			start = d
-		if d.get("e") == "kaart" and d.get("kaart") == "archief_v1_gang":
-			kaart = d
-		slag = slag or d.get("e") == "actie_slag"
-		treffer = treffer or d.get("e") == "actie_treffer"
+		var dd: Dictionary = d.get("data", {})
+		if d.get("type") == "sessie_start":
+			start = dd
+		if d.get("type") == "kaart" and dd.get("kaart") == "archief_v1_gang":
+			kaart = dd
+		slag = slag or d.get("type") == "actie_slag"
+		treffer = treffer or d.get("type") == "actie_treffer"
 	check("kaartregel: gevechtsstijl action + heldsheet dax_wm1.png 24x32 (%s)" % [kaart],
 			kaart.get("gevechtsstijl") == "action" and kaart.get("held_sheet") == "dax_wm1.png" and str(kaart.get("held_frame")) in ["[24, 32]", "[24.0, 32.0]"])
 	check("Action-slag en -treffer staan in het logboek", slag and treffer)
-	check("startregel draagt een build-id (%s)" % start.get("build", "?"), str(start.get("build", "")) != "")
+	check("startregel draagt een build-id (%s)" % start.get("build_id", "?"), str(start.get("build_id", "")) != "")

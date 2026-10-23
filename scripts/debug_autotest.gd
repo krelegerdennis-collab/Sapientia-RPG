@@ -1997,6 +1997,7 @@ func _backdrop_tests() -> void:
 		check("baas: 'Vluchten' staat uit (v0.15)", not b.can_flee and not b.cross.enabled[4])
 		b.can_flee = true
 		b.cross.enabled[4] = true
+		b.flee_roll_override = 0.0
 		await _flee_battle()
 	check("terug na baas-test", await wait_scene("Wereldkaart"))
 	await frames(5)
@@ -2006,7 +2007,9 @@ func _backdrop_tests() -> void:
 		h["mp"] = h["max_mp"]
 	await walk("move_up", 2)
 	await walk("move_right", 1)
-	check("terug op (21,31): %s" % tile(), tile() == Vector2i(21, 31))
+	check("baas-test eindigt als flee en gaat verder op (21,31): %s / %s" %
+			[GameState.last_battle_result, tile()],
+			GameState.last_battle_result == "flee" and tile() == Vector2i(21, 31))
 
 
 # ================================================================ v0.11 proloog

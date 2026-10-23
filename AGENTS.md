@@ -79,6 +79,10 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--tutorialtest` | `scripts/tests/tutorial_tests.gd` | 52 |
 | `--questtest` | `scripts/tests/quest_tests.gd` | 63 |
 | `--echotest` | `scripts/tests/echo_tests.gd` | 12 |
+| `--battlesimtest` | `scripts/tests/battlesim_tests.gd` | 57 |
+
+Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`
+schrijft `user://sim/battlesim_<policy>_s<seed>.csv`; `python3 tools/battlesim/rapport.py [csv|map]` geeft winrate, mediaan beurten en de zwaarste groepen.
 
 Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest archieftest kerntest kernkrachttest woudtest codextest checkpointtest dungeon100gentest dungeon100schaaltest dungeon100regelstest dungeon100integratietest dungeon100blauwtest actorsfxtest; do .github/scripts/run_suite.sh $s; done`
 (samen ~12 min; CI draait ze parallel). Een eigen `XDG_DATA_HOME` per suite houdt `user://` (saves/instellingen) gescheiden.
