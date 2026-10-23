@@ -55,6 +55,8 @@ func _run() -> void:
 	await _game_tests()
 	print("=== Deel E: leider-behoud (Action SWAP) ===")
 	await _leider_tests()
+	print("=== Deel F: modus-direct (Classic<->Action meteen) ===")
+	await _modus_direct_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
 
@@ -449,3 +451,69 @@ func _leider_tests() -> void:
 	a = await _naar(V1, "zuid")
 	check("E: leider uit de party gehaald: na warp Dax bestuurd", a != null and a.active_id == "dennis")
 	Settings.set_value("battle_style", stijl)
+
+
+## Wacht op een herbouwde kamer (zelfde pad) na reload_room; geeft de nieuwe scène.
+func _wacht_reload(oud: Node) -> Node:
+	await wait_until(func(): return scene() != null and scene() != oud and not GameState.changing_map and scene().is_node_ready(), 8.0)
+	await pframes(10)
+	return scene()
+
+
+## Battle Style in de Opties geldt meteen in de huidige kamer (niet pas na een kamerwissel); de leider blijft (#161),
+## de speler blijft op zijn tile en verslagen monsters blijven weg.
+func _modus_direct_tests() -> void:
+	const V1 := "res://scenes/maps/archief_v1_gang.tscn"
+	var stijl: int = int(Settings.get_value("battle_style"))
+	GameState.new_game("Dax")
+	GameState.add_member("noor")
+	GameState.encounter_multiplier = 0.0
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	var a: Node = await _naar(V1, "zuid")
+	if a == null:
+		check("F: Action-arena", false)
+		Settings.set_value("battle_style", stijl)
+		return
+	a.switch_hero("noor")
+	var s0 := scene()
+	var tile0: Vector2i = s0.player.get_tile()
+	var weg := ""
+	for m in s0.monsters:
+		if is_instance_valid(m) and not m.boss:
+			weg = str(m.monster_id)
+			a.damage_enemy(m, 9999, Vector2i.DOWN)
+			break
+	await pframes(30)
+	check("F: monster %s verslagen in Action" % weg, weg != "" and GameState.defeated_map_monsters.get(s0.room_id, {}).has(weg))
+	# Action -> Classic, rechtstreeks (zoals de Opties doen: Settings.set_value)
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+	var s1 := await _wacht_reload(s0)
+	check("F: Classic meteen: kamer herbouwd zonder arena", s1 != s0 and s1.scene_file_path == V1 and s1.get("som") == null)
+	check("F: zelfde tile (%s -> %s)" % [tile0, s1.player.get_tile() if s1 else Vector2i(-1, -1)], s1 != null and s1.player.get_tile() == tile0)
+	var nog := false
+	for m in s1.monsters:
+		nog = nog or str(m.monster_id) == weg
+	check("F: verslagen monster blijft weg", not nog)
+	check("F: leider blijft Vesper (noor) in Classic", GameState.leader_id == "noor")
+	var touch := s1.get_node_or_null("TouchControls/Control")
+	check("F: Classic: joystick zonder analog_only (rasterlopen)", touch != null and not touch.analog_only)
+	# Classic -> Action via het veldmenu: pas bij sluiten
+	s1.open_field_menu()
+	await pframes(10)
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	await pframes(10)
+	check("F: met open menu nog niet herbouwd", scene() == s1 and s1.menu_open())
+	var fm := s1.get_node_or_null("FieldMenu")
+	if fm:
+		fm.close()
+	var s2 := await _wacht_reload(s1)
+	var a2: Node = s2.get("som") if s2 else null
+	check("F: menu dicht -> Action meteen, Vesper bestuurd", s2 != s1 and a2 != null and a2.active_id == "noor")
+	check("F: zelfde tile na terug naar Action", s2 != null and s2.player.get_tile() == tile0)
+	# zelfde stijl opnieuw zetten = niets herbouwen
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	await pframes(30)
+	check("F: zelfde stijl = geen herbouw", scene() == s2 and not GameState.changing_map)
+	Settings.set_value("battle_style", stijl)
+	await pframes(30)
+	await wait_until(func(): return not GameState.changing_map, 8.0)

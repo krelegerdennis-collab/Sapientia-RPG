@@ -1127,6 +1127,18 @@ func _golemhal_vast() -> void:
 	if t == null:
 		return
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	# modus-direct: Action geldt meteen, de kamer wordt op dezelfde tile herbouwd -> wachten en de nieuwe knoppen pakken
+	for i in 300:
+		await get_tree().process_frame
+		var ns := get_tree().current_scene
+		if ns != null and ns != s and ns.is_node_ready() and not GameState.changing_map:
+			break
+	await _wv_wacht(0.3)
+	s = get_tree().current_scene
+	t = s.get_node_or_null("TouchControls/Control") as Control if s else null
+	check("golemhal-vast: Action meteen in de Bibliotheek (arena, joystick analoog)", s != null and s.get("som") != null and t != null and t.analog_only)
+	if t == null:
+		return
 	# vinger op de joystick 'omhoog' de golemdeur in, en blijft liggen (wordt 'omlaag' na de warp)
 	var c: Vector2 = t.stick_center()
 	_touch(t, c + Vector2(0, -t.joy_radius() * 0.8), true)
