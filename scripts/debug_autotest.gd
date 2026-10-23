@@ -192,6 +192,9 @@ func choose_command(index: int) -> void:
 			break
 		await get_tree().process_frame
 	await pframes(2)
+	if index == 4:
+		# Autotests verifiëren het vluchtpad, niet de willekeurige kans of een nederlaag.
+		b.flee_roll_override = 0.0
 	await cross_select(b, index)
 	await tap("interact")
 
@@ -1326,6 +1329,7 @@ func _flee_test() -> void:
 	await tap("cancel")
 	check("B gaat terug naar de vorige held (Dax)", await wait_hero(0))
 	# Tik op 'Vluchten'
+	b.flee_roll_override = 0.0
 	await click_at(b.cross.buttons[4].get_global_rect().get_center())
 	await pframes(2)
 	check("tik op 'Vluchten' start de vluchtpoging",
