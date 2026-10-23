@@ -892,11 +892,24 @@ func _plein10() -> void:
 			and scene().get_node("Objects/Player").get_tile() == Vector2i((scene().get_node("Spawns/binnen").position / 16.0).floor()))
 	if not binnen:
 		return
-	# het interieur (RPG CODE) leidt terug naar wilgendal.tscn; hier terug via de spawn voor de deur
-	dorp = await enter(DORP, "voor_dax")
-	var terug := dorp != null
+	# echt naar buiten lopen: de uitgang van het interieur (NaarDorp) gaat naar dorp_wilgendal.tscn, spawn voor_dax
+	var uitg: Node = scene().get_node_or_null("Exits/NaarDorp")
+	check("huis-uitgang: NaarDorp -> dorp_wilgendal.tscn / voor_dax", uitg != null and str(uitg.target_map) == DORP and str(uitg.target_spawn) == "voor_dax")
+	GameState.story_flags.erase("locked:HuisDeur")
+	Input.action_press("move_down")
+	var buiten := await _wacht("DorpWilgendal", 8.0)
+	Input.action_release("move_down")
+	await _fade()
+	dorp = scene() if buiten else await enter(DORP, "voor_dax")
 	p = dorp.get_node("Objects/Player")
-	check("plein10: weer buiten voor de deur van Dax", terug and p.get_tile() == doel)
+	var vd: Node = dorp.get_node_or_null("Spawns/voor_dax")
+	check("huis-uitgang: naar buiten gelopen, in het dorp op voor_dax %s (= tegel voor de deur %s)" % [str(p.get_tile()), str(doel)],
+			buiten and vd != null and p.get_tile() == Vector2i((vd.position / 16.0).floor()) and p.get_tile() == doel)
+	check("huis-uitgang: voor_dax ligt niet in een botsing (beloopbaar)", Data.beloopbaar(p.get_tile()))
+	var t_voor: Vector2i = p.get_tile()
+	await _loop(p, t_voor + Vector2i.DOWN)
+	check("huis-uitgang: vanaf voor_dax kun je weglopen (%s -> %s)" % [str(t_voor), str(p.get_tile())], p.get_tile() == t_voor + Vector2i.DOWN)
+	await _loop(p, t_voor)
 	# over de brug: van zuid naar noord en het plein op
 	var zuid := Vector2i(b.position.x + 1, b.end.y)
 	var noord := Vector2i(b.position.x + 1, b.position.y - 1)
