@@ -1220,6 +1220,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot,
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
+		"pending_unique_event": Story.pending_unique_event if has_node("/root/Story") else "",
 		"scenes_seen": seen_scenes(),
 		"heard_music": heard_music.duplicate(),
 		"quests": _quests_save(),
@@ -1340,7 +1341,11 @@ func apply_state(d: Dictionary) -> bool:
 	quest_sync()
 	pending_tutorial = {}
 	if has_node("/root/Story"):
-		get_node("/root/Story").reset(true)
+		var story: Node = get_node("/root/Story")
+		story.reset(true)
+		# Oude saves hebben deze sleutel niet en krijgen dus geen uitgesteld event.
+		story.pending_unique_event = str(d.get("pending_unique_event", "")) \
+				if d.get("pending_unique_event", "") is String else ""
 	# v0.12: oude saves zonder dit veld laden gewoon (dan {}).
 	# v0.15 kernfragmenten; oude saves zonder dit veld = geen kernen. Onbekende ids vallen weg.
 	kernfragmenten = {}
