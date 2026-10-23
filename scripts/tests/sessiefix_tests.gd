@@ -195,7 +195,7 @@ func _log() -> void:
 			kaart = d
 		slag = slag or d.get("e") == "actie_slag"
 		treffer = treffer or d.get("e") == "actie_treffer"
-	check("kaartregel: gevechtsstijl action + heldsheet dax_wm1_slim.png 24x32 (%s)" % [kaart],
-			kaart.get("gevechtsstijl") == "action" and kaart.get("held_sheet") == "dax_wm1_slim.png" and str(kaart.get("held_frame")) in ["[24, 32]", "[24.0, 32.0]"])
+	check("kaartregel: gevechtsstijl action + heldsheet dax_wm1.png 24x32 (%s)" % [kaart],
+			kaart.get("gevechtsstijl") == "action" and kaart.get("held_sheet") == "dax_wm1.png" and str(kaart.get("held_frame")) in ["[24, 32]", "[24.0, 32.0]"])
 	check("Action-slag en -treffer staan in het logboek", slag and treffer)
 	check("startregel draagt een build-id (%s)" % start.get("build", "?"), str(start.get("build", "")) != "")
