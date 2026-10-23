@@ -155,8 +155,8 @@ class _RingArenaMock:
 	extends Node
 	var coop_ring_no_pause := true
 
-	func ring_entries() -> Array:
-		return []
+	func ring_entries() -> Dictionary:
+		return {"items": [], "skills": [], "magic": []}
 
 	func on_ring_closed(_choice: Dictionary) -> void:
 		pass

@@ -48,8 +48,10 @@ const MAIN_HERO := "dennis"
 var leader_id := MAIN_HERO
 ## Fase B co-op: "host", "guest", of leeg (solo). Gasten schrijven nooit som_save_1.json.
 var coop_role := ""
+const COOP_SANDBOX_SCENE := "res://scenes/coop/action_sandbox.tscn"
 var _coop_lobby: Node = null
 var _coop_discovery: Node = null
+var _coop_session: Node = null
 var _coop_pending_message := ""
 
 
@@ -65,12 +67,19 @@ func coop_in_session() -> bool:
 	return coop_role != ""
 
 
+func coop_lobby() -> LanLobby:
+	return _coop_lobby as LanLobby
+
+
 func coop_register_lobby(lobby: Node, discovery: Node = null) -> void:
 	_coop_lobby = lobby
 	_coop_discovery = discovery
 	if _coop_lobby != null and _coop_lobby.has_signal("session_ended"):
 		if not _coop_lobby.session_ended.is_connected(_on_coop_session_ended):
 			_coop_lobby.session_ended.connect(_on_coop_session_ended)
+	if _coop_lobby != null and _coop_lobby.has_signal("link_lost"):
+		if not _coop_lobby.link_lost.is_connected(_on_coop_link_lost):
+			_coop_lobby.link_lost.connect(_on_coop_link_lost)
 
 
 func coop_clear_lobby_refs() -> void:
@@ -78,7 +87,21 @@ func coop_clear_lobby_refs() -> void:
 	_coop_discovery = null
 
 
+func coop_bind_session(session: Node) -> void:
+	_coop_session = session
+	if session != null and session.has_signal("link_lost"):
+		if not session.link_lost.is_connected(_on_coop_link_lost):
+			session.link_lost.connect(_on_coop_link_lost)
+
+
+func coop_shutdown_session() -> void:
+	if _coop_session != null and is_instance_valid(_coop_session) and _coop_session.has_method("shutdown"):
+		_coop_session.shutdown(true)
+	_coop_session = null
+
+
 func coop_end_session(reason: String = "") -> void:
+	coop_shutdown_session()
 	if coop_is_host() and _coop_lobby != null and _coop_lobby.has_method("broadcast_session_end"):
 		if reason != "":
 			_coop_lobby.broadcast_session_end(reason)
@@ -88,6 +111,15 @@ func coop_end_session(reason: String = "") -> void:
 		_coop_discovery.stop()
 	coop_role = ""
 	coop_clear_lobby_refs()
+
+
+func _on_coop_link_lost() -> void:
+	if not coop_in_session():
+		return
+	var msg := "Connection lost."
+	coop_end_session("")
+	go_to_title()
+	Dialog.show_lines([msg])
 
 
 func coop_session_end_message(reason: String) -> String:
@@ -105,6 +137,7 @@ func _on_coop_session_ended(reason: String) -> void:
 		if path.ends_with("coop_lobby_screen.gd"):
 			return
 	var msg := coop_session_end_message(reason)
+	coop_shutdown_session()
 	coop_role = ""
 	coop_clear_lobby_refs()
 	go_to_title()
@@ -425,6 +458,7 @@ func _ready() -> void:
 	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
+	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
@@ -475,6 +509,7 @@ func _ready() -> void:
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
+			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
@@ -1590,7 +1625,13 @@ func start_som_coop_host() -> void:
 	if changing_map or in_battle or not SomData.ENABLED:
 		return
 	coop_role = "host"
-	await start_som_prototype()
+	_build_som_state()
+	save_path = SomData.SAVE_PATH
+	autosave_path = SomData.AUTOSAVE_PATH
+	current_map = SomData.START_MAP
+	changing_map = false
+	await Transition.fade_out()
+	_go_to_scene(COOP_SANDBOX_SCENE)
 
 
 ## Co-op gast: zelfde sandbox om te spelen, maar nooit som_save_1.json schrijven.
@@ -1605,7 +1646,8 @@ func start_som_coop_guest(character_id: String) -> void:
 	autosave_path = "user://coop_guest_autosave.json"
 	current_map = SomData.START_MAP
 	changing_map = false
-	change_map(SomData.START_MAP, SomData.START_SPAWN)
+	await Transition.fade_out()
+	_go_to_scene(COOP_SANDBOX_SCENE)
 
 
 func _build_som_state() -> void:

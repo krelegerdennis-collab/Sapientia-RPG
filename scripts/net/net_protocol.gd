@@ -202,6 +202,13 @@ static func decode(raw: PackedByteArray) -> Dictionary:
 	}
 
 
+static func is_binary_gameplay(raw: PackedByteArray) -> bool:
+	if raw.is_empty():
+		return false
+	var k := int(raw[0])
+	return k == BinKind.INPUT or k == BinKind.SNAPSHOT
+
+
 ## {ok, compatible, version, port, name, players, max_players}. Onleesbaar -> ok false.
 static func parse_announce(raw: PackedByteArray) -> Dictionary:
 	var empty := {
