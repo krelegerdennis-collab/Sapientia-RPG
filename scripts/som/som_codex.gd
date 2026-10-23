@@ -126,6 +126,8 @@ func _capture(target) -> String:
 	var page: Dictionary = GameState.codex_add(sid, CodexData.capture_level(tier, sid), caught)
 	GameState.unique_mark(str(m.enemy_id), "gevangen")
 	arena.enemies.erase(m)
+	if arena.target_lock:
+		arena.target_lock.on_target_gone(m)
 	var rid := str(arena.room.room_id)
 	if not GameState.defeated_map_monsters.has(rid):
 		GameState.defeated_map_monsters[rid] = {}

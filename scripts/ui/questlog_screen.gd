@@ -10,7 +10,8 @@ const HINT := "Left/Right: tab   B: back"
 const TABS := ["actief", "klaar"]
 const TAB_W := 84
 const LIST_W := 172
-const RIJ_H := 18               # iets hoger dan ROW_H: duimvriendelijk op de telefoon
+## Minimale tikhoogte (logische px); bij 2x viewport-schaal ≈ 48dp op telefoon.
+const TOUCH_H := 24
 
 var tab := "actief"
 var tab_buttons := {}
@@ -34,7 +35,7 @@ func _build() -> void:
 	for t in TABS:
 		var b := UiMenu.button(_tab_naam(t))
 		b.name = "Tab_" + t
-		b.custom_minimum_size = Vector2(TAB_W, RIJ_H)
+		b.custom_minimum_size = Vector2(TAB_W, TOUCH_H)
 		b.focus_mode = Control.FOCUS_NONE
 		b.pressed.connect(kies_tab.bind(t))
 		bar.add_child(b)
@@ -143,7 +144,7 @@ func _rij(q: Dictionary, flags: Dictionary, stap: int, vg: Dictionary) -> void:
 	var b := UiMenu.button(tekst)
 	b.name = "Quest_" + str(q["id"])
 	b.set_meta("quest", str(q["id"]))
-	b.custom_minimum_size = Vector2(0, RIJ_H)
+	b.custom_minimum_size = Vector2(0, TOUCH_H)
 	b.clip_text = true
 	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	lock_horizontal_focus(b)
@@ -165,4 +166,11 @@ func toon(id: String) -> void:
 	var stap: int = GameState.story_step
 	var vg: Dictionary = GameState.quest_progress
 	detail_titel.text = QD.regel(q, flags, stap, vg)
-	detail.text = "\n".join(QD.detail_regels(q, flags, stap, vg))
+	var regels := QD.detail_regels(q, flags, stap, vg)
+	var doel := QD.huidige_doel(q, flags, stap, vg)
+	if doel != "":
+		var ins := 1 if QD.is_zij(q) and not regels.is_empty() else 0
+		if regels.size() > ins:
+			ins += 1
+		regels.insert(ins, "%s %s" % [QD.OBJECTIVE_LABEL, doel])
+	detail.text = "\n".join(regels)
