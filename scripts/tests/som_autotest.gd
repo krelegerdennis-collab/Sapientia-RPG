@@ -808,6 +808,13 @@ func _art3_tests(m: Node) -> void:
 	await released()
 	var sg: Node = p.get_node_or_null("SomCastFx")
 	t.check("SoM-cast: Seren cast-gloed (seren_castfx)", sg != null and sg.texture.resource_path.ends_with("seren_castfx.png"))
+
+	var gfx: Node = null
+	for n in objs.get_children():
+		if str(n.name).begins_with("SomSpell_genees"):
+			gfx = n
+	t.check("SoM-art3: spell_genees op de voeten van Dax", gfx != null and gfx.position == a.node_of("dennis").position)
+	await shot("v3_cast_heal")
 	# terugval zonder kaart-cast: Kael/Orion hebben geen MAP_CAST en geen 6-koloms cast6 -> direct (ongewijzigd);
 	# een held met cast6 maar zonder kaart-cast (hier Vesper met de kaart-cast uit) -> cast6 (48x48, vrij op frame 4)
 	t.check("SoM-cast: Kael/Orion zonder kaart-cast (MAP_CAST heeft ze niet)", not SomData.MAP_CAST.has("kael") and not SomData.MAP_CAST.has("orion"))
@@ -829,14 +836,6 @@ func _art3_tests(m: Node) -> void:
 			is_instance_valid(c6) and c6.hit_at_ms >= 540.0 and c6.hit_at_ms <= 600.0)
 	a.map_cast_uit = []
 	await seconds(0.4)
-	a.switch_hero("lotte")
-	await t.frames(2)
-	var gfx: Node = null
-	for n in objs.get_children():
-		if str(n.name).begins_with("SomSpell_genees"):
-			gfx = n
-	t.check("SoM-art3: spell_genees op de voeten van Dax", gfx != null and gfx.position == a.node_of("dennis").position)
-	await shot("v3_cast_heal")
 	a.switch_hero("dennis")
 	await t.frames(2)
 	# monster-sheets: nieuwe maten en offsets uit de data
