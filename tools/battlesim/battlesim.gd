@@ -8,6 +8,8 @@ extends Node
 ##            [--only=id1,id2] [--out=pad.md] [--json=pad.json]
 ## Standaard: seed 20261020, 2000 gevechten per gebied, rapport naar docs/BATTLE_BALANCE_REPORT.md.
 ## Dezelfde seed + dezelfde code = exact dezelfde getallen.
+## Met --party=/--enemy=/--runs=/--policy= draait in plaats daarvan de CSV-modus per run
+## (tools/battlesim/battlesim_runs.gd, uitvoer in user://sim/).
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
@@ -18,6 +20,7 @@ const Archief2 := preload("res://scripts/data/archief2.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const BattlesimRuns := preload("res://tools/battlesim/battlesim_runs.gd")
 ## Pas bij het draaien geladen (niet als preload: dit script wordt al tijdens GameState._ready gemaakt)
 const SIM_BATTLE_PATH := "res://tools/battlesim/sim_battle.gd"
 const BATTLE_SCENE_PATH := "res://scenes/battle/battle.tscn"
@@ -49,6 +52,11 @@ var holder: Node
 
 func _ready() -> void:
 	if not standalone:
+		return
+	if BattlesimRuns.wants_runs(OS.get_cmdline_user_args()):
+		var runner: Node = BattlesimRuns.new()
+		runner.name = "BattlesimRuns"
+		add_child(runner)
 		return
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--seed="):
