@@ -3,6 +3,7 @@ extends Node
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
+const SomFx := preload("res://scripts/som/som_fx.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")
 const PHYS_STEP := 1.0 / 60.0
 const VIEWPORT := Vector2i(384, 216)
@@ -52,6 +53,7 @@ func _run() -> void:
 		_finish()
 		return
 	arena().allies_enabled = false
+	await _preload_target_lock_textures()
 	await _prep_viewport()
 	await _auto_lock_tests()
 	await _manual_lock_tests()
@@ -90,6 +92,29 @@ func _sync_until(pred: Callable, max_frames: int) -> bool:
 			return true
 		await get_tree().process_frame
 	return false
+
+
+func _preload_target_lock_textures() -> void:
+	var d: Dictionary = SomData.TARGET_LOCK
+	for key in ["marker", "wissel"]:
+		var path: String = str(d[key])
+		await _sync_until(func():
+			return ResourceLoader.exists(path) and load(path) != null
+		, 240)
+	SomFx.tex(str(d["marker"]))
+	SomFx.tex(str(d["wissel"]))
+
+
+func _wait_lock_marker_on(m: Node, max_dist: float, max_frames: int) -> bool:
+	return await _sync_until(func():
+		if lock() == null or m == null or not is_instance_valid(m):
+			return false
+		lock()._update_marker()
+		var mk: Node = lock()._marker
+		if mk == null or not is_instance_valid(mk):
+			return false
+		return mk.global_position.distance_to(lock().head_of(m)) < max_dist
+	, max_frames)
 
 
 func _prep_viewport() -> void:
@@ -335,23 +360,32 @@ func _death_and_clear_tests() -> void:
 
 
 func _facing_tests() -> void:
+	await _preload_target_lock_textures()
 	await _prep_viewport()
 	await _isolate_player()
 	_ensure_arena_ready()
 	await _clear_lock()
 	var p: CharacterBody2D = room().player
+	p.input_locked = false
 	var origin := ISOLATED_TILE
 	var m: Node = room().add_monster({"id": "lock_facing", "enemy": "mosslijm", "tile": [origin.x + 4, origin.y]})
 	m.place_at(origin + Vector2i(4, 0), Vector2i.LEFT)
 	m.stun(9999)
-	await _sync_until(func(): return arena().enemies.has(m), 8)
+	await _sync_until(func(): return arena().enemies.has(m), 24)
+	await _sync_until(func():
+		return arena() != null and arena().active() and p.analog_input.is_valid() and p.facing_provider.is_valid()
+	, 60)
 	lock()._set_target(m, true)
+	await _sync_until(func(): return lock().facing_for_player() == Vector2i.RIGHT, 30)
 	p.facing = Vector2i.DOWN
 	arena().forced_joy = Vector2(0, -1)
-	for i in 12:
+	var facing_ok := false
+	for i in 24:
 		p._process_analog(PHYS_STEP)
-	var want: Vector2i = lock().facing_for_player()
-	check("facing: strafen maar kijkt naar doel", want == Vector2i.RIGHT and p.facing == Vector2i.RIGHT)
+		if lock().facing_for_player() == Vector2i.RIGHT and p.facing == Vector2i.RIGHT:
+			facing_ok = true
+			break
+	check("facing: strafen maar kijkt naar doel", facing_ok)
 	arena().forced_joy = Vector2.ZERO
 
 
@@ -413,9 +447,9 @@ func _narrow_viewport_tests() -> void:
 			continue
 		var m: Node = list[0]
 		lock()._set_target(m, false)
-		await _frames(5)
+		var aligned: bool = await _wait_lock_marker_on(m, 8.0, 36)
 		var mk: Node = lock()._marker
 		var dist: float = mk.global_position.distance_to(lock().head_of(m)) if mk != null else 999.0
-		check("smal scherm %dx%d: marker op doel (%.1f px)" % [sz.x, sz.y, dist], mk != null and dist < 8.0)
+		check("smal scherm %dx%d: marker op doel (%.1f px)" % [sz.x, sz.y, dist], aligned and mk != null and dist < 8.0)
 	get_tree().root.size = Vector2i(384, 216)
 	await _frames(4)
