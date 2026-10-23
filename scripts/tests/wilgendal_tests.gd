@@ -49,6 +49,7 @@ func _run() -> void:
 	_art()
 	_wereld()
 	await _dorp()
+	await _plein10()
 	_kleed_vakken()
 	await _panden()
 	await _som()
@@ -563,11 +564,17 @@ func _som_pilot(dorp: Node) -> void:
 		var tex: Texture2D = body.get_child(1).texture
 		if str(rij["id"]) == "burgemeester":
 			ok = ok and not rij.has("som_tex") and tex.resource_path.ends_with("burgemeestershuis.png")
+		elif Data.P10_HUIZEN.has(str(rij["id"])):
+			# Plein 10 (art_10): nieuwe panden, zelfde deur, dak beloopbaar, muur botst
+			var p10: Dictionary = Data.P10_HUIZEN[str(rij["id"])]
+			ok = ok and tex.resource_path == rij["som_tex"] and rij["deur"] == ruw["deur"]
+			ok = ok and tex.get_size() == Vector2(p10["maat"]) * 16.0 and Data.pand_blok(ruw).size.y == int(p10["muur_rijen"])
+			ok = ok and Data.beloopbaar(rij["oorsprong"] + Vector2i(1, 1)) and not Data.beloopbaar(ruw["deur"] + Vector2i.UP)
 		else:
 			ok = ok and rij.has("som_tex") and tex.resource_path == rij["som_tex"] and rij["deur"] == ruw["deur"]
 			ok = ok and tex.get_size() == Vector2(rij["maat"]) * 16.0 and Data.pand_blok(ruw).size.y == 3 and rij["maat"].x == 6
 			ok = ok and Data.beloopbaar(rij["oorsprong"] + Vector2i(1, rij["maat"].y - 4)) and not Data.beloopbaar(ruw["deur"] + Vector2i.UP)
-	check("som: huizen uit fase 1 (zelfde deur, dak beloopbaar), burgemeestershuis blijft", ok)
+	check("som: huizen uit fase 1 / plein 10 (zelfde deur, dak beloopbaar), burgemeestershuis blijft", ok)
 	var molen: Node = dorp.get_node("Objects/MolenWieken")
 	check("som: molen v2 blijft (positie, stille wieken tot Garrett)", molen.position == Data.molen_positie()
 			and molen.get_node_or_null("Basis") != null)
@@ -760,3 +767,229 @@ func _som() -> void:
 	KaartStijl.zet_config({})
 	kaart.queue_free()
 	await get_tree().process_frame
+
+
+## --- Plein 10 (RPG ART art_10): plein, huis van Dax, brug ---
+## Echt lopen (invoer, botsing via test_move) van de zuidingang naar de deur van Dax, naar binnen en terug,
+## dan over de brug naar het plein. Elke deur en uitgang bereikbaar (geen soft lock) en de botsing van de
+## scène klopt met Data.beloopbaar. Screenshots op native resolutie (--shots=map).
+func _plein10() -> void:
+	var dorp := await enter(DORP, "zuid_ingang")
+	check("plein10: dorp geladen", dorp != null)
+	if dorp == null:
+		return
+	check("plein10: grondlaag met keien, brug en schaduwen", dorp.get_node_or_null("Ground/Plein10/Keien") != null
+			and dorp.get_node("Ground/Plein10/Keien").get_child_count() == Data.PLEIN.size.x * Data.PLEIN.size.y
+			and dorp.get_node_or_null("Ground/Plein10/Brug10") != null
+			and dorp.get_node("Ground/Plein10").get_index() > dorp.get_node("Ground/SomV8").get_index())
+	# schaduw: zelfde linksboven-anker als het object, op de grondlaag (onder Objects)
+	var sch: Node = dorp.get_node("Ground/Plein10/Schaduwen")
+	var dax: Dictionary = Data.som_pand(Data.pand("dax"))
+	var dax_s: Sprite2D = sch.get_node_or_null("huis_dax_11_schaduw")
+	var dax_body: Node2D = dorp.get_node_or_null("Objects/Pand_dax")
+	var dax_spr: Sprite2D = dax_body.get_child(1) if dax_body != null else null
+	check("plein10: huis van Dax (huis_dax_11) met schaduw op hetzelfde linksboven-anker", dax_s != null and dax_spr != null
+			and dax_spr.texture.resource_path.ends_with("huis_dax_11.png")
+			and dax_s.position == dax_spr.global_position - dax_spr.texture.get_size() / 2.0
+			and dax_s.position == Vector2(dax["oorsprong"]) * 16.0)
+	var n_sch := 0
+	var anker_ok := true
+	for b in dorp.get_node("Objects/Bomen10").get_children():
+		var spr: Sprite2D = b.get_node("Sprite")
+		var s: Sprite2D = null
+		for k in sch.get_children():
+			if (k as Sprite2D).position == spr.global_position and k.name.begins_with(spr.texture.resource_path.get_file().get_basename()):
+				s = k
+		anker_ok = anker_ok and s != null
+	for i in Data.PROPS.size():
+		var rij: Dictionary = Data.PROPS[i]
+		if not Data.P10_PROPS.has(str(rij["tex"])):
+			continue
+		var sp := Data.som_prop(rij)
+		var body: Node2D = dorp.get_node("Objects/Prop_%s_%d" % [str(rij["tex"]), i])
+		var spr: Sprite2D = body.get_child(0)
+		var gevonden := false
+		for k in sch.get_children():
+			if k.name.begins_with(str(rij["tex"])) and (k as Sprite2D).position == spr.global_position:
+				gevonden = true
+		anker_ok = anker_ok and gevonden and spr.hframes == 3 and spr.global_position == Vector2(sp["links_boven"]) * 16.0
+		n_sch += 1
+	check("plein10: kramen (3 frames) en bomen hebben hun schaduw op hetzelfde anker (%d kramen)" % n_sch, anker_ok and n_sch == 3)
+	var filter_ok := true
+	for spr in dorp.find_children("*", "Sprite2D", true, false):
+		if spr.texture != null and spr.texture.resource_path.contains("/plein10/"):
+			var lb: Vector2 = spr.global_position
+			if spr.centered:
+				lb -= Vector2(spr.texture.get_width() / spr.hframes, spr.texture.get_height()) / 2.0
+			filter_ok = filter_ok and spr.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST and lb.round() == lb
+	check("plein10: pixel-perfect (Nearest, hele pixels)", filter_ok)
+	# botsing van de scène = Data.beloopbaar (huizen, bomen, kramen, put, beek dicht; brug open)
+	var p: Node2D = dorp.get_node("Objects/Player")
+	var ruimte := p.get_world_2d().direct_space_state
+	var mis: Array = []
+	var gebied := Rect2i(18, 4, 60, 38)
+	for y in range(gebied.position.y, gebied.end.y):
+		for x in range(gebied.position.x, gebied.end.x):
+			var t := Vector2i(x, y)
+			var q := PhysicsPointQueryParameters2D.new()
+			q.position = Vector2(t) * 16.0 + Vector2(8, 8)
+			q.collide_with_bodies = true
+			q.collide_with_areas = false
+			var dicht := false
+			for hit in ruimte.intersect_point(q, 8):
+				var c: Object = hit["collider"]
+				if c is CharacterBody2D or c.get("npc_name") != null:
+					continue
+				dicht = true
+			if dicht == Data.beloopbaar(t):
+				mis.append(t)
+	check("plein10: botsing klopt met de kaartdata rond plein, huizen en brug (verschil %s)" % [mis.slice(0, 6)], mis.is_empty())
+	var b := Data.BRUG
+	var brug_open := true
+	for y in range(b.position.y, b.end.y):
+		for x in range(b.position.x, b.end.x):
+			brug_open = brug_open and Data.beloopbaar(Vector2i(x, y))
+	check("plein10: brug beloopbaar, beek ernaast niet", brug_open and not Data.beloopbaar(Vector2i(b.position.x - 1, Data.BEEK_RIJ))
+			and not Data.beloopbaar(Vector2i(b.end.x, Data.BEEK_RIJ)))
+	# elke warp (deur en uitgang) bereikbaar vanaf de ingang: geen soft lock
+	var warps := 0
+	var vast: Array = []
+	for d in dorp.get_node("Objects").get_children():
+		if not str(d.name).begins_with("Deur_"):
+			continue
+		warps += 1
+		var voor: Vector2i = Vector2i((d.position / 16.0).floor()) + Vector2i.DOWN
+		if not Data.bereikbaar(Data.SPAWN_TEGEL, voor):
+			vast.append(str(d.name))
+		elif str(d.target_map) != "" and not Data.bereikbaar(voor, Data.SPAWN_TEGEL):
+			vast.append(str(d.name) + " (terug)")
+	for e in dorp.get_node("Exits").get_children():
+		warps += 1
+		var r: Rect2i = e.tile_rect()
+		var ok := false
+		for x in range(r.position.x, r.end.x):
+			ok = ok or Data.bereikbaar(Data.SPAWN_TEGEL, Vector2i(x, r.position.y - 1))
+		if not ok:
+			vast.append(str(e.name))
+	for id in ["dax", "pantser", "wapen", "accessoire", "magie", "mien", "echtpaar"]:
+		var spawn: Node = dorp.get_node_or_null("Spawns/" + Data.voor_spawn(id))
+		if spawn == null or not Data.bereikbaar(Vector2i((spawn.position / 16.0).floor()), Data.SPAWN_TEGEL):
+			vast.append("spawn " + id)
+	check("plein10: alle %d warps bereikbaar en terug (%s)" % [warps, vast], vast.is_empty() and warps == Data.PANDEN.size() + 1)
+	# NPC's verspreid
+	check("plein10: hoogstens %d NPC's op het plein (%d)" % [Data.PLEIN_MAX, Data.op_plein_aantal()], Data.op_plein_aantal() <= Data.PLEIN_MAX)
+	# echt lopen: ingang -> deur van Dax
+	var doel: Vector2i = Data.voor_tegel(Data.pand("dax"))
+	var gelopen := await _loop(p, doel)
+	check("plein10: gelopen van de zuidingang naar de deur van Dax (%s)" % str(p.get_tile()), gelopen)
+	await _shot(dorp, "plein10_dax")
+	Input.action_press("move_up")
+	var binnen := await _wacht("Huis", 6.0)
+	Input.action_release("move_up")
+	await _fade()
+	check("plein10: deur van Dax warpt naar het bestaande interieur (huis_wilgendal.tscn, spawn binnen)", binnen
+			and scene().scene_file_path == "res://scenes/maps/huis_wilgendal.tscn"
+			and scene().get_node("Objects/Player").get_tile() == Vector2i((scene().get_node("Spawns/binnen").position / 16.0).floor()))
+	if not binnen:
+		return
+	# het interieur (RPG CODE) leidt terug naar wilgendal.tscn; hier terug via de spawn voor de deur
+	dorp = await enter(DORP, "voor_dax")
+	var terug := dorp != null
+	p = dorp.get_node("Objects/Player")
+	check("plein10: weer buiten voor de deur van Dax", terug and p.get_tile() == doel)
+	# over de brug: van zuid naar noord en het plein op
+	var zuid := Vector2i(b.position.x + 1, b.end.y)
+	var noord := Vector2i(b.position.x + 1, b.position.y - 1)
+	var naar_zuid := await _loop(p, zuid)
+	var over := naar_zuid and await _loop(p, noord)
+	check("plein10: over de brug gelopen (%s -> %s)" % [str(zuid), str(noord)], over and p.get_tile() == noord)
+	await _shot(dorp, "plein10_brug", Vector2(0, 40))
+	var midden := Vector2i(Data.PLEIN.position.x + Data.PLEIN.size.x / 2, Data.PLEIN.position.y + 1)
+	var plein := await _loop(p, midden)
+	check("plein10: het plein op gelopen (%s)" % str(p.get_tile()), plein)
+	await _shot(dorp, "plein10_plein", Vector2(0, 8))
+
+
+## Pad over beloopbare tegels (Data), zonder NPC-lussen, Gerrit en uitgangen. Daarna echt lopen met invoer.
+func _pad(van: Vector2i, naar: Vector2i) -> Array[Vector2i]:
+	var npc := {Data.GERRIT_TEGEL: true}
+	for ruw in Data.SFEER:
+		for t in Data.lus_tegels(ruw):
+			npc[t] = true
+	var vorige := {van: van}
+	var rij: Array[Vector2i] = [van]
+	while not rij.is_empty():
+		var nu: Vector2i = rij.pop_front()
+		if nu == naar:
+			break
+		for dir in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var v: Vector2i = nu + dir
+			if vorige.has(v) or not Data.beloopbaar(v) or npc.has(v) or v.y >= Data.H - 1:
+				continue
+			vorige[v] = nu
+			rij.append(v)
+	var uit: Array[Vector2i] = []
+	if not vorige.has(naar):
+		return uit
+	var t := naar
+	while t != van:
+		uit.push_front(t)
+		t = vorige[t]
+	return uit
+
+
+func _loop(p: Node2D, naar: Vector2i) -> bool:
+	var pad := _pad(p.get_tile(), naar)
+	if pad.is_empty() and p.get_tile() != naar:
+		print("INFO  geen pad naar ", naar)
+		return false
+	var acties := {Vector2i.UP: "move_up", Vector2i.DOWN: "move_down", Vector2i.LEFT: "move_left", Vector2i.RIGHT: "move_right"}
+	for stap in pad:
+		var dir: Vector2i = stap - p.get_tile()
+		if not acties.has(dir):
+			return false
+		var actie: String = acties[dir]
+		Input.action_press(actie)
+		var t0 := Time.get_ticks_msec()
+		while p.get_tile() != stap and Time.get_ticks_msec() - t0 < 2000:
+			await get_tree().process_frame
+		Input.action_release(actie)
+		while p.is_moving and Time.get_ticks_msec() - t0 < 2500:
+			await get_tree().process_frame
+		if p.get_tile() != stap:
+			print("INFO  vast op ", p.get_tile(), " richting ", stap)
+			return false
+	return p.get_tile() == naar
+
+
+## Screenshot op native resolutie (viewport, geen schaling), camera op de speler (+ verschuiving), zonder HUD.
+func _shot(dorp: Node, naam: String, schuif := Vector2.ZERO) -> void:
+	var map := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots="):
+			map = a.get_slice("=", 1)
+	if map == "":
+		return
+	var tc: Node = dorp.get_node_or_null("TouchControls")
+	var zicht: Array = []
+	for c in get_tree().root.find_children("*", "CanvasLayer", true, false):
+		zicht.append([c, c.visible])
+		c.visible = false
+	var cam: Camera2D = get_viewport().get_camera_2d()
+	var oud := Vector2.ZERO
+	if cam != null:
+		oud = cam.offset
+		cam.offset = schuif
+		cam.reset_smoothing()
+	for _i in 6:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	img.save_png(map.path_join(naam + ".png"))
+	print("INFO  screenshot (native %dx%d): %s" % [img.get_width(), img.get_height(), map.path_join(naam + ".png")])
+	if cam != null:
+		cam.offset = oud
+	for z in zicht:
+		z[0].visible = z[1]
+	if tc != null:
+		pass

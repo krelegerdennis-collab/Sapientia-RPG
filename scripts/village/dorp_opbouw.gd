@@ -39,6 +39,7 @@ func _ready() -> void:
 		_pand(objects, ruw)
 	_uitgang(kaart)
 	_spawn_zuid(kaart)
+	_plein10(kaart, objects)
 
 
 ## v2: beek (1 tegel, 3 frames) + brug op een eigen laag tussen de grond en de objecten.
@@ -84,6 +85,12 @@ func _beek_en_brug(kaart: Node) -> void:
 
 
 func _process(delta: float) -> void:
+	_anim_t += delta
+	if _anim_t >= 1.0 / ANIM_FPS:
+		_anim_t = 0.0
+		for spr in _anim:
+			if is_instance_valid(spr):
+				spr.frame = (spr.frame + 1) % spr.hframes
 	if _beek.is_empty():
 		return
 	_beek_t += delta
@@ -161,6 +168,13 @@ func _som_prop(objects: Node, rij: Dictionary, sp: Dictionary, i: int) -> void:
 	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	spr.position = Vector2(sp["links_boven"]) * 16.0 - body.position
 	body.add_child(spr)
+	var info: Dictionary = Data.P10_PROPS.get(str(rij["tex"]), {})
+	if info.has("anim"):
+		spr.texture = load(Data.P10 + str(info["anim"]))
+		spr.hframes = int(info["frames"])
+		_anim.append(spr)
+	if str(sp.get("schaduw", "")) != "":
+		_schaduw(str(sp["schaduw"]), Vector2(sp["links_boven"]) * 16.0)
 	var blok: Rect2i = sp["blok"]
 	if blok.size.x > 0 and blok.size.y > 0:
 		var vorm := RectangleShape2D.new()
@@ -257,7 +271,10 @@ func _pand(objects: Node, ruw: Dictionary) -> void:
 	plaat.texture = load(str(ruw["som_tex"])) if ruw.has("som_tex") else TEX[str(ruw["tex"])]
 	plaat.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	plaat.position = Vector2(0, -maat.y * 8.0)
+	plaat.flip_h = bool(ruw.get("flip", false))
 	lichaam.add_child(plaat)
+	if ruw.has("schaduw"):
+		_schaduw(str(ruw["schaduw"]), Vector2(oorsprong) * 16.0)
 	objects.add_child(lichaam)
 
 	var deur := DEUR.instantiate()
@@ -266,7 +283,11 @@ func _pand(objects: Node, ruw: Dictionary) -> void:
 	deur.set_meta("pand_id", id)
 	deur.set_meta("kind", str(ruw["kind"]))
 	var dicht := str(ruw.get("dicht", ""))
-	if dicht == "":
+	if ruw.has("warp_map"):
+		deur.target_map = str(ruw["warp_map"])
+		deur.target_spawn = str(ruw["warp_spawn"])
+		deur.lines = _zinnen([])
+	elif dicht == "":
 		deur.target_map = Data.BINNEN
 		deur.target_spawn = id
 		deur.lines = _zinnen([])
@@ -338,3 +359,96 @@ func _zinnen(bron: Array) -> Array[String]:
 	for regel in bron:
 		uit.append(str(regel))
 	return uit
+
+
+## --- Plein 10 (RPG ART art_10) ---
+## Grondlaag "Plein10" (kind van Ground, boven SomV8/SomOverlay, onder Objects): keienplein, brug en
+## alle schaduwen. Schaduwen hebben hetzelfde linksboven-anker als hun object (README art_10).
+const ANIM_FPS := 3.0
+var _anim: Array[Sprite2D] = []
+var _anim_t := 0.0
+var _grond10: Node2D = null
+
+
+func _grondlaag() -> Node2D:
+	if _grond10 == null:
+		var kaart := get_parent()
+		_grond10 = Node2D.new()
+		_grond10.name = "Plein10"
+		kaart.get_node("Ground").add_child(_grond10)
+		_grond10.add_child(Node2D.new())
+		_grond10.get_child(0).name = "Keien"
+		_grond10.add_child(Node2D.new())
+		_grond10.get_child(1).name = "Schaduwen"
+	return _grond10
+
+
+func _plat(ouder: Node, pad: String, pos: Vector2) -> Sprite2D:
+	var spr := Sprite2D.new()
+	spr.texture = load(pad)
+	spr.centered = false
+	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	spr.position = pos
+	ouder.add_child(spr)
+	return spr
+
+
+func _schaduw(pad: String, linksboven: Vector2) -> void:
+	if not Data.som() or not ResourceLoader.exists(pad):
+		return
+	var s := _plat(_grondlaag().get_node("Schaduwen"), pad, linksboven)
+	s.name = pad.get_file().get_basename()
+
+
+func _plein10(kaart: Node, objects: Node) -> void:
+	if not Data.som():
+		return
+	var laag := _grondlaag()
+	var keien := laag.get_node("Keien")
+	var r := Data.PLEIN
+	for y in range(r.position.y, r.end.y):
+		for x in range(r.position.x, r.end.x):
+			var n := ""
+			var w := x == r.position.x
+			var o := x == r.end.x - 1
+			var nn := y == r.position.y
+			var z := y == r.end.y - 1
+			if nn and w: n = "kei_hoek_nw"
+			elif nn and o: n = "kei_hoek_no"
+			elif z and w: n = "kei_hoek_zw"
+			elif z and o: n = "kei_hoek_zo"
+			elif nn: n = "kei_rand_n"
+			elif z: n = "kei_base" if x >= Data.BRUG.position.x and x < Data.BRUG.end.x else "kei_rand_z"
+			elif w: n = "kei_rand_w"
+			elif o: n = "kei_rand_o"
+			else:
+				var h := absi((x * 73856093) ^ (y * 19349663)) % Data.P10_KEI.size()
+				n = Data.P10_KEI[h]
+			_plat(keien, Data.P10 + n + ".png", Vector2(x, y) * 16.0)
+	# brug (48x48 = BRUG, 3x3 tegels) over de SoM-brugtegels; beloopbaar (geen botsing)
+	var brug := _plat(laag, Data.P10 + "brug_11.png", Vector2(Data.BRUG.position) * 16.0)
+	brug.name = "Brug10"
+	laag.move_child(laag.get_node("Schaduwen"), -1)
+	# losse bomen: y-sort op de stamtegel, botsing = de stamtegel
+	var bomen := Node2D.new()
+	bomen.name = "Bomen10"
+	bomen.y_sort_enabled = true
+	objects.add_child(bomen)
+	for b in Data.P10_BOMEN:
+		var rij: Dictionary = b
+		var stam: Vector2i = rij["stam"]
+		var tex: Texture2D = load(Data.P10 + str(rij["file"]) + ".png")
+		var lb := Data.boom_linksboven(stam, Vector2i(tex.get_size()))
+		var body := StaticBody2D.new()
+		body.name = "Boom10_%d_%d" % [stam.x, stam.y]
+		body.position = Vector2(stam) * 16.0 + Vector2(8, 16)
+		var vorm := RectangleShape2D.new()
+		vorm.size = Vector2(14, 14)
+		var bots := CollisionShape2D.new()
+		bots.shape = vorm
+		bots.position = Vector2(0, -8)
+		body.add_child(bots)
+		var spr := _plat(body, tex.resource_path, lb - body.position)
+		spr.name = "Sprite"
+		bomen.add_child(body)
+		_schaduw(Data.P10 + str(rij["file"]) + "_schaduw.png", lb)

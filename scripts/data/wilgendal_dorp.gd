@@ -116,9 +116,9 @@ const PANDEN := [
 		"id": "pantser",
 		"kind": "winkel",
 		"shop_id": "wilgendal_pantser",
-		"oorsprong": Vector2i(25, 12),
+		"oorsprong": Vector2i(23, 12),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(26, 14),
+		"deur": Vector2i(24, 14),
 		"icoon": "schild",
 		"tex": "pantser",
 		"bewoond": false,
@@ -242,6 +242,27 @@ const PANDEN := [
 		"map_naam": "",
 		"dicht": "The Mayor's House. The double doors are locked today.",
 	},
+	## Plein 10 (RPG ART art_10): het huis van Dax, rechtsonder bij de brug (zoals plein_mockup.png).
+	## kind "thuis": telt niet mee bij winkels() of huizen(); de deur gaat naar huis_wilgendal.tscn (spawn "binnen").
+	{
+		"id": "dax",
+		"kind": "thuis",
+		"shop_id": "",
+		"oorsprong": Vector2i(53, 33),
+		"maat": Vector2i(3, 3),
+		"deur": Vector2i(56, 35),
+		"icoon": "",
+		"tex": "huis",
+		"bewoond": true,
+		"keeper_naam": "",
+		"keeper_lines": [],
+		"sfeer": "haard",
+		"map_naam": "Dax's House",
+		"dicht": "",
+		## deur naar het bestaande interieur (scène van RPG CODE, hier niet aangepast)
+		"warp_map": "res://scenes/maps/huis_wilgendal.tscn",
+		"warp_spawn": "binnen",
+	},
 ]
 
 const KAMERS := {
@@ -336,8 +357,8 @@ const SFEER := [
 		"node": "Wout",
 		"rol": "veteraan",
 		"naam": "Walt",
-		"tegel": Vector2i(54, 33),
-		"lus": [Vector2i(54, 33), Vector2i(55, 33), Vector2i(55, 34), Vector2i(54, 34)],
+		"tegel": Vector2i(40, 34),
+		"lus": [Vector2i(40, 34), Vector2i(41, 34), Vector2i(41, 35), Vector2i(40, 35)],
 		"lines": ["I've fought enough. Now I drink tea on the square."],
 	},
 	{
@@ -354,10 +375,10 @@ const SFEER := [
 ## onderste rij, "blok" = blokkerende tegels (0 = loopbaar, bv. de brug). "flip" spiegelt horizontaal.
 const PROPS_MAP := "res://assets/sprites/buiten/wilgendal/"
 const PROPS := [
-	{"tex": "put", "tegel": Vector2i(43, 22), "blok": Vector2i(2, 1)},
-	{"tex": "marktkraam_1", "tegel": Vector2i(51, 19), "blok": Vector2i(3, 1)},
-	{"tex": "marktkraam_2", "tegel": Vector2i(56, 22), "blok": Vector2i(3, 1)},
-	{"tex": "marktkraam_3", "tegel": Vector2i(37, 22), "blok": Vector2i(2, 1)},
+	{"tex": "put", "tegel": Vector2i(47, 21), "blok": Vector2i(2, 1)},
+	{"tex": "marktkraam_1", "tegel": Vector2i(38, 20), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_2", "tegel": Vector2i(57, 20), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_3", "tegel": Vector2i(53, 23), "blok": Vector2i(2, 1)},
 	{"tex": "bloembak_1", "tegel": Vector2i(36, 17), "blok": Vector2i(1, 1)},
 	{"tex": "bloembak_2", "tegel": Vector2i(61, 17), "blok": Vector2i(1, 1)},
 	{"tex": "bloembak_2", "tegel": Vector2i(36, 23), "blok": Vector2i(1, 1)},
@@ -430,6 +451,17 @@ static func som_huizen() -> Dictionary:
 static func som_pand(rij: Dictionary) -> Dictionary:
 	if not som():
 		return rij
+	var p10: Dictionary = P10_HUIZEN.get(str(rij.get("id", "")), {})
+	if not p10.is_empty():
+		var u := rij.duplicate()
+		var d: Vector2i = rij["deur"]
+		u["oorsprong"] = d - Vector2i(p10["deur"])
+		u["maat"] = p10["maat"]
+		u["blok_rijen"] = int(p10["muur_rijen"])
+		u["som_tex"] = P10 + str(p10["file"]) + ".png"
+		u["schaduw"] = P10 + str(p10["file"]) + "_schaduw.png"
+		u["flip"] = bool(p10.get("flip", false))
+		return u
 	var h: Dictionary = som_huizen().get(str(rij.get("id", "")), {})
 	if h.is_empty():
 		return rij
@@ -518,7 +550,7 @@ static func beloopbaar(t: Vector2i) -> bool:
 		return false
 	if beek(t):
 		return false
-	if prop_op(t) or hek_blok(t):
+	if prop_op(t) or hek_blok(t) or boom_op(t):
 		return false
 	for ruw in PANDEN:
 		var rij: Dictionary = ruw
@@ -544,6 +576,57 @@ static func bereikbaar(van: Vector2i, naar: Vector2i) -> bool:
 			gezien[volg] = true
 			rij.append(volg)
 	return false
+
+
+## --- Plein 10 (RPG ART art_10, 10/10-pass): huizen, kramen, bomen, keien en brug ---
+## Panden met nieuwe art: file in P10, maat in tegels, deur = deurtegel in het plaatje (onderste rij),
+## muur_rijen = botsende onderste rijen (dak = erachter lopen). De deurtegel in PANDEN blijft de waarheid.
+const P10 := "res://assets/sprites/buiten/wilgendal/plein10/"
+const P10_HUIZEN := {
+	"pantser": {"file": "huis_vleugel_11", "maat": Vector2i(12, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+	"wapen": {"file": "wilgendal_wapen_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+	"accessoire": {"file": "huis_smal_11", "maat": Vector2i(6, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+	"magie": {"file": "wilgendal_magie_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+	"dax": {"file": "huis_dax_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+}
+## Kramen (zelfde vorm als props_index.json): luifel-rij erachter lopen, toonbank (2 rijen) botst.
+## frames = geanimeerde luifel (<file>_3f.png, 3 frames).
+const P10_PROPS := {
+	"marktkraam_1": {"naam": "kraam10_1", "file": "marktkraam_1_10.png", "schaduw": "marktkraam_1_10_schaduw.png",
+		"anim": "marktkraam_1_10_3f.png", "frames": 3, "size_tiles": [3, 3], "collision_tiles": [[0, 1, 3, 2]], "ysort_origin_px": [24, 47]},
+	"marktkraam_2": {"naam": "kraam10_2", "file": "marktkraam_2_10.png", "schaduw": "marktkraam_2_10_schaduw.png",
+		"anim": "marktkraam_2_10_3f.png", "frames": 3, "size_tiles": [3, 3], "collision_tiles": [[0, 1, 3, 2]], "ysort_origin_px": [24, 47]},
+	"marktkraam_3": {"naam": "kraam10_3", "file": "marktkraam_3_10.png", "schaduw": "marktkraam_3_10_schaduw.png",
+		"anim": "marktkraam_3_10_3f.png", "frames": 3, "size_tiles": [2, 3], "collision_tiles": [[0, 1, 2, 2]], "ysort_origin_px": [16, 47]},
+}
+## Losse bomen rond het plein (de bosrand = de bestaande kegelbomen op de T-tegels). "stam" = botsende tegel;
+## het plaatje (48 breed) staat er gecentreerd boven, de schaduw met hetzelfde linksboven-anker.
+const P10_BOMEN := [
+	{"file": "loofboom_12", "stam": Vector2i(30, 21)},
+	{"file": "kegelboom_licht_11", "stam": Vector2i(32, 28)},
+	{"file": "loofboom_b_12", "stam": Vector2i(70, 21)},
+	{"file": "kegelboom_licht_11", "stam": Vector2i(73, 18)},
+	{"file": "loofboom_12", "stam": Vector2i(43, 28)},
+	{"file": "loofboom_b_12", "stam": Vector2i(62, 28)},
+	{"file": "kegelboom_licht_11", "stam": Vector2i(38, 37)},
+	{"file": "loofboom_12", "stam": Vector2i(52, 40)},
+]
+## Keienplein = PLEIN (rand- en hoektegels op de buitenring).
+const P10_KEI := ["kei_base", "kei_base", "kei_worn", "kei_base", "kei_mix", "kei_cracked", "kei_base", "kei_mossy"]
+
+
+static func boom_op(t: Vector2i) -> bool:
+	if not som():
+		return false
+	for b in P10_BOMEN:
+		if (b as Dictionary)["stam"] == t:
+			return true
+	return false
+
+
+## Linksboven (px) van een boomplaatje met maat m, stam = tegel onder het midden.
+static func boom_linksboven(stam: Vector2i, m: Vector2i) -> Vector2:
+	return Vector2(stam.x * 16.0 + 8.0 - m.x / 2.0, (stam.y + 1) * 16.0 - m.y)
 
 
 ## Beektegel (niet de brug)?
@@ -685,6 +768,9 @@ static func som_prop(rij: Dictionary) -> Dictionary:
 		return {}
 	var naam := str(SOM_PROP_VAN.get(str(rij.get("tex", "")), ""))
 	var info: Dictionary = som_props_index().get(naam, {})
+	if P10_PROPS.has(str(rij.get("tex", ""))):
+		info = P10_PROPS[str(rij["tex"])]
+		naam = str(info["naam"])
 	if info.is_empty():
 		return {}
 	var t: Vector2i = rij["tegel"]
@@ -697,9 +783,12 @@ static func som_prop(rij: Dictionary) -> Dictionary:
 	var lb := Vector2i(t.x - c.x, t.y - (c.y + m.y - 1))
 	var blok := Rect2i(lb + c, m) if not bots.is_empty() else Rect2i(t, Vector2i.ZERO)
 	var o: Array = info["ysort_origin_px"]
+	var map := P10 if info.has("naam") else SOM_PROPS_MAP
 	return {
 		"naam": naam,
-		"tex": SOM_PROPS_MAP + str(info["file"]),
+		"tex": map + str(info["file"]),
+		"frames": int(info.get("frames", 1)),
+		"schaduw": (map + str(info["schaduw"])) if info.has("schaduw") else "",
 		"links_boven": lb,
 		"blok": blok,
 		"voet": Vector2(lb) * 16.0 + Vector2(float(o[0]), float(o[1]) + 1.0),

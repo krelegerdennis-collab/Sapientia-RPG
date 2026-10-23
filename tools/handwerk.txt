@@ -666,3 +666,44 @@ assets/tiles/dungeon/kas_tiles_v8b.png
 assets/tiles/dungeon/berggrot_tiles_v8.png
 # 21 okt 2026: kas_tiles_v8c = v8b met zachtere lichtbundels 65/66 (RPG ART tiles_v8/archief2); thema "kas" wijst hierheen
 assets/tiles/dungeon/kas_tiles_v8c.png
+# Plein 10 van RPG ART (art_10/out, 10/10-pass): panden 128x160 (smal 96x160, vleugel 192x160) + *_schaduw
+#        (zelfde linksboven-anker, 16px groter), kramen 48x48/32x48 (+ _3f luifel, 3 frames), bomen, keien 16x16, brug 48x48.
+assets/sprites/buiten/wilgendal/plein10/brug_11.png
+assets/sprites/buiten/wilgendal/plein10/huis_dax_11.png
+assets/sprites/buiten/wilgendal/plein10/huis_dax_11_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/huis_smal_11.png
+assets/sprites/buiten/wilgendal/plein10/huis_smal_11_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/huis_vleugel_11.png
+assets/sprites/buiten/wilgendal/plein10/huis_vleugel_11_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/kegelboom_licht_11.png
+assets/sprites/buiten/wilgendal/plein10/kegelboom_licht_11_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/kei_base.png
+assets/sprites/buiten/wilgendal/plein10/kei_cracked.png
+assets/sprites/buiten/wilgendal/plein10/kei_hoek_no.png
+assets/sprites/buiten/wilgendal/plein10/kei_hoek_nw.png
+assets/sprites/buiten/wilgendal/plein10/kei_hoek_zo.png
+assets/sprites/buiten/wilgendal/plein10/kei_hoek_zw.png
+assets/sprites/buiten/wilgendal/plein10/kei_mix.png
+assets/sprites/buiten/wilgendal/plein10/kei_mossy.png
+assets/sprites/buiten/wilgendal/plein10/kei_rand_n.png
+assets/sprites/buiten/wilgendal/plein10/kei_rand_o.png
+assets/sprites/buiten/wilgendal/plein10/kei_rand_w.png
+assets/sprites/buiten/wilgendal/plein10/kei_rand_z.png
+assets/sprites/buiten/wilgendal/plein10/kei_worn.png
+assets/sprites/buiten/wilgendal/plein10/loofboom_12.png
+assets/sprites/buiten/wilgendal/plein10/loofboom_12_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/loofboom_b_12.png
+assets/sprites/buiten/wilgendal/plein10/loofboom_b_12_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_1_10.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_1_10_3f.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_1_10_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_2_10.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_2_10_3f.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_2_10_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_3_10.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_3_10_3f.png
+assets/sprites/buiten/wilgendal/plein10/marktkraam_3_10_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/wilgendal_magie_11.png
+assets/sprites/buiten/wilgendal/plein10/wilgendal_magie_11_schaduw.png
+assets/sprites/buiten/wilgendal/plein10/wilgendal_wapen_11.png
+assets/sprites/buiten/wilgendal/plein10/wilgendal_wapen_11_schaduw.png
