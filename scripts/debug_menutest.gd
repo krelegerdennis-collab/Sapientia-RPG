@@ -13,8 +13,8 @@ extends Node
 ##     volume (bus), CRT, autosave; settings.cfg geschreven én opnieuw ingelezen
 ##   - Opslaan via het menu (Nee / Ja), menu dicht -> speler los
 ##   - menu gaat niet open tijdens een tekstvak of mapwissel
-##   - autosave: na mapwissel, na gewonnen gevecht, bij app naar achtergrond; niet tijdens
-##     gevecht/mapwissel/tekstvak, niet als het uit staat; handmatige save blijft heel;
+##   - autosave: bij kerker-overgang; pauze-save in de vrije wereld ook als autosave uit staat;
+##     niet tijdens gevecht/mapwissel/tekstvak; handmatige save blijft heel;
 ##     titelscherm 'Doorgaan' laadt de nieuwste
 ##   - v0.14 (menu L2): Uitrusting (uitrusten/afdoen/sterkste/alles afdoen/weggooien, stat-
 ##     pijlen, tas <-> vakken zonder dubbel/kwijt, andere held, level-up), opslaan/laden van
@@ -820,13 +820,29 @@ func _autosave_tests() -> void:
 	check("terug in Willowdale", await wait_scene("Wilgendal"))
 	await seconds(AUTOSAVE_WAIT)
 	check("autosave uit in Opties: niets geschreven", GameState.autosave_count == count and file_text(GameState.autosave_path) == stamp)
-	Settings.set_value("autosave", true)
-	# 3) save-slots (Dennis): app naar de achtergrond autosavet niet meer
+	# 3) verplichte pauze-save: in de vrije wereld ook schrijven als autosave uit staat
+	Dialog.show_lines(["Test."])
+	await frames(2)
 	GameState._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
-	check("save-slots: app naar achtergrond: geen autosave", GameState.autosave_count == count)
-	check("save-slots: alleen reden 'map' mag autosaven",
+	check("pauze-save blijft geblokkeerd tijdens een tekstvak", GameState.autosave_count == count)
+	Dialog.close()
+	await frames(2)
+	GameState.changing_map = true
+	GameState._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	check("pauze-save blijft geblokkeerd tijdens een mapwissel", GameState.autosave_count == count)
+	GameState.changing_map = false
+	var pause_tile: Vector2i = player().get_tile()
+	GameState._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	a = GameState.read_save(GameState.autosave_path)
+	check("autosave uit + pauze in vrije wereld = wel save",
+			GameState.autosave_count == count + 1 and GameState.last_autosave_reason == "achtergrond"
+			and str(a.get("map", "")).ends_with("wilgendal.tscn")
+			and Vector2i(int(a["tile"][0]), int(a["tile"][1])) == pause_tile)
+	check("pauze-save laat handmatige save ongemoeid", file_text(GameState.save_path) == manual_before)
+	count = GameState.autosave_count
+	Settings.set_value("autosave", true)
+	check("onbekende autosave-redenen blijven geblokkeerd",
 			not GameState.autosave(player().get_tile(), player().facing, "battle")
-			and not GameState.autosave(player().get_tile(), player().facing, "achtergrond")
 			and GameState.autosave_count == count)
 	# 4) gewonnen gevecht -> geen autosave meer
 	GameState.current_map = "res://scenes/maps/woud_rand.tscn"     # alsof je uit een kerker komt
