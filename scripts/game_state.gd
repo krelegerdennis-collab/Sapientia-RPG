@@ -222,6 +222,9 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 var current_map := ""
 var pending_spawn := ""
 var changing_map := false
+## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
+## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
+var huis_herkomst := ""
 
 ## Positie op de map waar het gevecht begon (om daarna terug te keren).
 var has_return_point := false
@@ -341,6 +344,7 @@ func _ready() -> void:
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
+	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
@@ -351,6 +355,7 @@ func _ready() -> void:
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
 			["--hudtest", "res://scripts/tests/hud_tests.gd", "HudTest", "hudtest"],
+			["--locktest", "res://scripts/tests/lock_tests.gd", "LockTest", "locktest"],
 			["--puzzletest", "res://scripts/tests/puzzle_tests.gd", "PuzzleTest", "puzzletest"],
 			["--dungeontest", "res://scripts/tests/dungeon_tests.gd", "DungeonTest", "dungeontest"],
 			["--golemtest", "res://scripts/tests/golem_tests.gd", "GolemTest", "golemtest"],
@@ -525,13 +530,6 @@ func _go_to_scene(path: String) -> void:
 		get_tree().change_scene_to_file(path)
 
 
-## Nieuw spel (v0.10): de party is alleen de hoofdpersoon (held 'dennis') met
-## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
-## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
-## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
-var huis_herkomst := ""
-
-
 ## #166: kies de echte bestemming van een warp en onthoud de herkomst bij het binnengaan van het huis.
 func huis_route(van: String, path: String, spawn_name: String) -> Array:
 	if path == HOUSE_MAP and van != HOUSE_MAP:
@@ -541,6 +539,8 @@ func huis_route(van: String, path: String, spawn_name: String) -> Array:
 	return [path, spawn_name]
 
 
+## Nieuw spel (v0.10): de party is alleen de hoofdpersoon (held 'dennis') met
+## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
 func new_game(hero_name := DEFAULT_NAME) -> void:
 	huis_herkomst = ""
 	som_mode = false
