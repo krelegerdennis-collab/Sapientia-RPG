@@ -69,6 +69,9 @@ var _queue_t := 0.0
 var touch: Control
 ## Autotest: vaste joystick-stand (ZERO = echte input).
 var forced_joy := Vector2.ZERO
+## Co-op: ring opent zonder get_tree().paused (ActionCoopSession zet dit aan).
+var coop_ring_no_pause := false
+var _coop_snap: Dictionary = {}
 ## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
 var sheets := {}
 var attack_texs := {}
@@ -1151,3 +1154,12 @@ func _say(text: String) -> void:
 	last_text = text
 	if hud:
 		hud.toast(text)
+
+
+## Netwerk-host stuurt snapshot; gasten tekenen en houden een kopie voor tests.
+func apply_coop_snapshot(snap: Dictionary) -> void:
+	_coop_snap = snap
+
+
+func coop_snapshot() -> Dictionary:
+	return _coop_snap
