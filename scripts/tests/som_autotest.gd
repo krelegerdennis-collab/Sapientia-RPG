@@ -808,6 +808,29 @@ func _art3_tests(m: Node) -> void:
 	await released()
 	var sg: Node = p.get_node_or_null("SomCastFx")
 	t.check("SoM-cast: Seren cast-gloed (seren_castfx)", sg != null and sg.texture.resource_path.ends_with("seren_castfx.png"))
+	# terugval zonder kaart-cast: Kael/Orion hebben geen MAP_CAST en geen 6-koloms cast6 -> direct (ongewijzigd);
+	# een held met cast6 maar zonder kaart-cast (hier Vesper met de kaart-cast uit) -> cast6 (48x48, vrij op frame 4)
+	t.check("SoM-cast: Kael/Orion zonder kaart-cast (MAP_CAST heeft ze niet)", not SomData.MAP_CAST.has("kael") and not SomData.MAP_CAST.has("orion"))
+	for hid in ["kael", "orion"]:
+		var kt: Texture2D = a.pose_tex(hid, "cast")
+		var verwacht := "cast6" if kt != null and kt.get_width() == 288 else "direct"
+		t.check("SoM-cast: %s valt terug op %s (geen kaart-cast)" % [hid, verwacht], a.node_of(hid) == null or a.cast_kind(hid) == verwacht)
+	a.switch_hero("noor")
+	await t.frames(2)
+	a.map_cast_uit = ["noor"]
+	t.check("SoM-cast: held met cast6 maar zonder kaart-cast -> cast_kind = cast6", a.cast_kind("noor") == "cast6")
+	a.member("noor")["mp"] = a.member("noor")["max_mp"]
+	a.cast_spell("vuur", "noor", {}, m)
+	await t.frames(1)
+	var c6: Node = p.get_node_or_null("SomCastAnim")
+	t.check("SoM-cast: terugval speelt cast6 (6 x 48x48, vrij op frame 4)", c6 != null and c6.hframes == 6 and int(c6.hit_index) == 3)
+	await released()
+	t.check("SoM-cast: cast6-terugval vrij rond 540 ms (%.0f)" % float(c6.hit_at_ms if is_instance_valid(c6) else -1.0),
+			is_instance_valid(c6) and c6.hit_at_ms >= 540.0 and c6.hit_at_ms <= 600.0)
+	a.map_cast_uit = []
+	await seconds(0.4)
+	a.switch_hero("lotte")
+	await t.frames(2)
 	var gfx: Node = null
 	for n in objs.get_children():
 		if str(n.name).begins_with("SomSpell_genees"):

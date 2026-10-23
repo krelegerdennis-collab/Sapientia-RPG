@@ -83,6 +83,8 @@ var swing_lock := 0.0
 ## Laatste slag was vol (stagger: telegraaf afbreken + knockback alleen bij 100%).
 var _full_swing := true
 var b_casts := 0
+## Alleen voor tests/vergelijk-shots: held-ids waarvoor de kaart-cast uit staat (dan cast6 of direct).
+var map_cast_uit: Array = []
 
 
 func setup(p_room: Node) -> void:
@@ -913,25 +915,35 @@ func _cast_pose(id: String) -> void:
 ## Eerst de kaart-cast (SomData.MAP_CAST, 24x32, loslaten op frame 2), anders cast6 (48x48, frame 4),
 ## zonder sheet of zonder node: meteen.
 func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
-	var t := pose_tex(caster_id, "cast")
 	var n := node_of(caster_id)
 	var done := func() -> void:
 		apply.call()
 		spell_released.emit(spell_id, caster_id)
+	var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
+	match cast_kind(caster_id):
+		"map":
+			var mc: Dictionary = SomData.MAP_CAST[caster_id]
+			var anim0: Node = SomFx.map_cast_anim(n, SomFx.tex(str(mc["sheet"])), SomFx.tex(str(mc.get("fx", ""))), circle)
+			anim0.hit.connect(done, CONNECT_ONE_SHOT)
+		"cast6":
+			var anim: Node = SomFx.cast6_anim(n, pose_tex(caster_id, "cast"), circle)
+			anim.hit.connect(done, CONNECT_ONE_SHOT)
+		_:
+			done.call()
+
+
+## Welke cast-animatie krijgt deze held? "map" (SomData.MAP_CAST, 24x32), anders "cast6" (48x48-sheet van
+## 6 kolommen), anders "direct" (geen passende sheet of geen node: de spreuk komt meteen vrij).
+func cast_kind(caster_id: String) -> String:
+	if node_of(caster_id) == null:
+		return "direct"
 	var mc: Dictionary = SomData.MAP_CAST.get(caster_id, {})
-	var mt := SomFx.tex(str(mc.get("sheet", "")))
-	if mt and n:
-		var circle0 := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
-		var anim0: Node = SomFx.map_cast_anim(n, mt, SomFx.tex(str(mc.get("fx", ""))), circle0)
-		anim0.hit.connect(done, CONNECT_ONE_SHOT)
-		return
-	var cols := int(SomData.CAST6["frames"])
-	if t and n and t.get_width() == cols * int(SomData.CAST6["frame"][0]):
-		var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
-		var anim: Node = SomFx.cast6_anim(n, t, circle)
-		anim.hit.connect(done, CONNECT_ONE_SHOT)
-		return
-	done.call()
+	if not map_cast_uit.has(caster_id) and SomFx.tex(str(mc.get("sheet", ""))) != null:
+		return "map"
+	var t := pose_tex(caster_id, "cast")
+	if t and t.get_width() == int(SomData.CAST6["frames"]) * int(SomData.CAST6["frame"][0]):
+		return "cast6"
+	return "direct"
 
 
 ## Spreuk-effect (SomData.SPELL_FX) onderkant-midden op 'feet'. Geeft false zonder art.
