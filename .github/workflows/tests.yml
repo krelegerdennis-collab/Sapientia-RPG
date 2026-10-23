@@ -27,12 +27,8 @@ jobs:
                 dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
                 actorsfxtest, fusietest, catalogustest, updatetest, archief2test,
                 warperkamertest, hangertest, spiegeltest, berggrottest, pvptest,
-<<<<<<< HEAD
-                wilgendaltest, battlesimtest, echotest, muziektest, sessielogcoretest,
-                locktest]
-=======
-                wilgendaltest, questtest, tutorialtest]
->>>>>>> origin/main
+                wilgendaltest, questtest, tutorialtest, battlesimtest, echotest,
+                muziektest, sessielogcoretest, locktest]
     steps:
       - uses: actions/checkout@v4
 
