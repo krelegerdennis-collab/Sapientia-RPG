@@ -796,9 +796,9 @@ func _plein10() -> void:
 		return
 	var gt: TileMapLayer = dorp.get_node_or_null("Ground/Plein10/Grond/GrondTegels")
 	var lay := Data.p10_layout()
-	check("plein10: gebakken grond van RPG ART (plein_grond_tileset + plein_grond_map, 40x32) op het blok, bosrand, brug",
+	check("plein10: gebakken grond van RPG ART (%s_tileset + _map, 40x32) op het blok, bosrand, brug" % Data.p10_bake(),
 			gt != null and gt.get_used_cells().size() == 40 * 32
-			and (gt.tile_set.get_source(0) as TileSetAtlasSource).texture.resource_path.ends_with("plein_grond_tileset.png")
+			and (gt.tile_set.get_source(0) as TileSetAtlasSource).texture.resource_path.ends_with(Data.p10_bake() + "_tileset.png")
 			and gt.position == Vector2(float(lay["ox"]), float(lay["oy"])) * 16.0
 			and dorp.get_node_or_null("Ground/Plein10/Bosrand/BosDak") != null
 			and dorp.get_node_or_null("Ground/Plein10/Brug/Brug10") != null
@@ -1113,11 +1113,18 @@ func _pass3(dorp: Node) -> void:
 	var blok := Rect2i(ob, Vector2i(int(lay["w"]), int(lay["h"])))
 	var kl: TileMapLayer = dorp.get_node_or_null("Ground/Plein10/Grond/Keien10")
 	var ts: TileSet = kl.tile_set if kl != null else null
+	_pass5(dorp, kl)
+	if Data.p10_bake() == "wilgendal_grond":
+		kl = null      # bake13: keien zitten in de grond gebakken; de autotile-checks gelden alleen voor de terugval
+	if kl == null:
+		_pass3_rest(dorp, lay, ob, blok)
+		return
 	check("pass3: keienlaag boven de gebakken grond, terrain-set MATCH_CORNERS_AND_SIDES (0 = gras, 1 = kei)", kl != null
 			and ts.get_terrain_sets_count() == 1 and ts.get_terrain_set_mode(0) == TileSet.TERRAIN_MODE_MATCH_CORNERS_AND_SIDES
 			and ts.get_terrain_name(0, 0) == "gras" and ts.get_terrain_name(0, 1) == "kei"
 			and kl.get_index() > dorp.get_node("Ground/Plein10/Grond/GrondTegels").get_index())
 	if kl == null:
+		_pass3_rest(dorp, lay, ob, blok)
 		return
 	# elke keitegel: de rand-tegel past bij het blob-masker van de kaart (bron 0), of een volle tegel (1/2) bij masker 255
 	var km := Data.p10_keien()
@@ -1157,6 +1164,10 @@ func _pass3(dorp: Node) -> void:
 	check("pass3: put_ring (48x48) met de put op +24,+24", not put_sp.is_empty()
 			and Vector2(pr + ob) * 16.0 + Vector2(24, 24) == Vector2(put_sp["links_boven"]) * 16.0 + Vector2(24, 24)
 			and kl.get_cell_atlas_coords(pr) == Vector2i(6, 0) and kl.get_cell_atlas_coords(pr + Vector2i(2, 2)) == Vector2i(8, 2))
+	_pass3_rest(dorp, lay, ob, blok)
+
+
+func _pass3_rest(dorp: Node, lay: Dictionary, ob: Vector2i, blok: Rect2i) -> void:
 	# licht gras buiten het blok (zelfde basis als de plein-grond), paden houden hun v8-tegel
 	var v8: TileMapLayer = dorp.get_node("Ground/SomV8")
 	var licht := 0
@@ -1255,3 +1266,50 @@ func _pass3(dorp: Node) -> void:
 	check("pass3: geen bomen of hek over het rietgedekte huis (%s)" % [over], over.is_empty())
 	check("pass3: accessoirewinkel in huis_dax_11 op blok-px (256,32)", Data.P10_HUIZEN["accessoire"]["file"] == "huis_dax_11"
 			and Vector2(Vector2i(Data.som_pand(Data.pand("accessoire"))["oorsprong"]) - ob) * 16.0 == Vector2(256, 32))
+
+
+## Pass 5: bake13-grond, brug precies op (19..20, 29..30) van het blok met de sprite erop gecentreerd,
+## geen beloopbaar water, geen dichte brug, oeverinhammen (7,29)/(28,29) zijn doodlopend (geen doorsteek).
+func _pass5(dorp: Node, kl: TileMapLayer) -> void:
+	var lay := Data.p10_layout()
+	var ob := Vector2i(int(lay["ox"]), int(lay["oy"]))
+	var gm = JSON.parse_string(FileAccess.get_file_as_string(Data.P10 + "wilgendal_grond_map.json"))
+	check("pass5: bake13 (wilgendal_grond, 40x32) is de grond, geen keien-autotile erover", Data.p10_bake() == "wilgendal_grond"
+			and gm is Dictionary and (gm["map"] as Array).size() == 32 and (gm["map"][0] as Array).size() == 40 and kl == null)
+	var b := Data.BRUG
+	var tegels_ok := b == Rect2i(ob + Vector2i(19, 29), Vector2i(2, 2))
+	for y in range(b.position.y, b.end.y):
+		for x in range(b.position.x, b.end.x):
+			tegels_ok = tegels_ok and Data.GROND[y][x] == "B" and Data.beloopbaar(Vector2i(x, y))
+	var bp: Array = lay["brug_px"]
+	var spr: Sprite2D = dorp.get_node_or_null("Ground/Plein10/Brug/Brug10")
+	var midden := Vector2(float(bp[0]), float(bp[1])) + spr.texture.get_size() / 2.0 if spr != null else Vector2.ZERO
+	check("pass5: brugtegels B = blok (19..20, 29..30), beloopbaar; sprite 48x48 gecentreerd (midden %s)" % [midden], tegels_ok
+			and spr != null and spr.texture.get_size() == Vector2(48, 48) and midden == Vector2(b.get_center()) * 16.0
+			and spr.position == Vector2(float(bp[0]), float(bp[1])))
+	var nat := 0
+	for y in Data.H:
+		for x in Data.W:
+			if Data.GROND[y][x] == "~" and Data.beloopbaar(Vector2i(x, y)):
+				nat += 1
+	check("pass5: geen beloopbaar water (%d)" % nat, nat == 0)
+	# zonder brug kom je niet van noord naar zuid: de inhammen zijn doodlopend
+	var van := Vector2i(b.position.x, b.position.y - 1)
+	var naar := Vector2i(b.position.x, b.end.y)
+	var gezien := {van: true}
+	var rij: Array[Vector2i] = [van]
+	while not rij.is_empty():
+		var nu: Vector2i = rij.pop_front()
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var v: Vector2i = nu + d
+			if gezien.has(v) or b.has_point(v) or not Data.beloopbaar(v):
+				continue
+			gezien[v] = true
+			rij.append(v)
+	var inham := true
+	for t in [Vector2i(7, 29), Vector2i(28, 29)]:
+		var m: Vector2i = ob + t
+		inham = inham and Data.GROND[m.y][m.x] == "." and Data.beloopbaar(m) and gezien.has(m)
+		inham = inham and not Data.beloopbaar(m + Vector2i.DOWN) and not Data.beloopbaar(m + Vector2i.LEFT) and not Data.beloopbaar(m + Vector2i.RIGHT)
+	check("pass5: zonder brug geen doorsteek over de beek; oeverinhammen (7,29) en (28,29) bereikbaar van noord en doodlopend",
+			not gezien.has(naar) and inham and Data.bereikbaar(van, naar))

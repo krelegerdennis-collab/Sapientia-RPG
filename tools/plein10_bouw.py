@@ -49,6 +49,10 @@ def shadow_of(im, dx=10, dy=4, start=0.4):
 
 
 # --- art ---
+# pass 5: gebakken grond bake13 van RPG ART (vervangt plein_grond 1:1 op de pass-4-layout)
+for n in ('wilgendal_grond_tileset.png', 'wilgendal_grond_map.json'):
+    if not os.path.exists(os.path.join(DST, n)):
+        shutil.copy(os.path.join(OUT, 'bake13', n), os.path.join(DST, n))
 for n in ('plein_grond_tileset', 'bos_dak_13', 'rook_4f', 'lantaarnpaal_flikker_4f', 'bloemstrook_13', 'bloemstrook_b_13',
           'kar_10', 'kar_10_schaduw', 'wegwijzer_10', 'wegwijzer_10_schaduw', 'hek_10', 'hek_10_schaduw',
           'krat_10', 'krat_10_schaduw', 'krat_klein_10', 'krat_klein_10_schaduw', 'ton_10', 'ton_10_schaduw',
@@ -162,8 +166,9 @@ for ty in range(TH):
     for tx in range(TW):
         if dek[ty][tx] >= 128: kaart[ty][tx] = 'W'
         elif blauw(tx, ty) >= 0.10: kaart[ty][tx] = '~'
-# brug (blok-px 296..344, 450..498): kolommen 19-20 over de beek beloopbaar
-brug = [(tx, ty) for ty in range(TH) for tx in BRUG_KOL if kaart[ty][tx] == '~']
+# brug: precies tegels (19..20, 29..30) = Data.BRUG; sprite 48x48 gecentreerd erop (blok-px 296..344, 456..504)
+BRUG_RIJ = (29, 30)
+brug = [(tx, ty) for ty in BRUG_RIJ for tx in BRUG_KOL]
 for tx, ty in brug: kaart[ty][tx] = 'B'
 # pass 3: de oude beek (rij 25 buiten het blok) buigt omlaag en loopt onder het bosdak het blok in:
 # links via blok (0,30), rechts via blok (38,28)-(39,28); de rest van de bocht staat buiten het blok in GROND.
@@ -205,7 +210,7 @@ for n, hx, hy in (('wilgendal_wapen_11', 16, 32), ('huis_smal_11', 144, 32), ('h
     rook.append({'x': hx + cx - 11 + OX * 16, 'y': hy + yy - 46 + OY * 16})
 rook.append({'x': RIET[0] + 84 - 11 + OX * 16, 'y': RIET[1] + 2 - 46 + OY * 16})   # spec RPG ART: onder-midden op (x+84, y+2)
 lay = {'ox': OX, 'oy': OY, 'w': TW, 'h': TH, 'kaart': [''.join(r) for r in kaart], 'decor': decor, 'rook': rook,
-       'brug_px': [296 + OX * 16, 450 + OY * 16]}
+       'brug_px': [BRUG_KOL[0] * 16 + 16 - 24 + OX * 16, BRUG_RIJ[0] * 16 + 16 - 24 + OY * 16]}
 json.dump(lay, open(os.path.join(DST, 'layout.json'), 'w'), indent=1)
 
 # --- GROND in wilgendal_dorp.gd: blok erin ---

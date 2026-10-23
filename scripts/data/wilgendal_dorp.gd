@@ -66,7 +66,7 @@ const GROND: Array[String] = [
 	"T...........................~WW....................................WW~...................T",
 	"T...........................~WW...................................~~~~...................T",
 	"T.....=====================.~WW~~~~~.~~~~~~~~~~~BB~~~~~~~.~~~~~~~~~WW....................T",
-	"T.....=====================.~~~~~~~~~~~..........B~~~~~~~~~~.......WW....................T",
+	"T.....=====================.~~~~~~~~~~~.........BB~~~~~~~~~~.......WW....................T",
 	"T............................W.....................................WW....................T",
 	"T..............................................===.......................................T",
 	"T..............................................===.......................................T",
@@ -714,6 +714,13 @@ static func p10_kei_masker(t: Vector2i) -> int:
 ## Vaste hash per tegel (varianten zonder toeval: screenshots en tests blijven gelijk).
 static func p10_hash(t: Vector2i) -> int:
 	return absi((t.x * 73856093) ^ (t.y * 19349663))
+
+
+## Pass 5: welke gebakken grond? "wilgendal_grond" (bake13, RPG ART) als die er is, anders "plein_grond" + keien-autotile.
+static func p10_bake() -> String:
+	if FileAccess.file_exists(P10 + "wilgendal_grond_map.json") and ResourceLoader.exists(P10 + "wilgendal_grond_tileset.png"):
+		return "wilgendal_grond"
+	return "plein_grond"
 
 
 static func p10_vast_tegels() -> Array:

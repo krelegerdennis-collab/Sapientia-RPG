@@ -414,11 +414,14 @@ func _plein10(kaart: Node, objects: Node) -> void:
 		return
 	var laag := _grondlaag()
 	var o := Vector2(float(lay["ox"]), float(lay["oy"])) * 16.0
-	var gm = JSON.parse_string(FileAccess.get_file_as_string(Data.P10 + "plein_grond_map.json"))
+	# pass 5: bake13 van RPG ART (wilgendal_grond_*) vervangt plein_grond 1:1; keien, keien-zandovergang en
+	# beekoevers zitten erin gebakken, dus dan geen keien-autotile erover (die blijft de terugval).
+	var bake := Data.p10_bake()
+	var gm = JSON.parse_string(FileAccess.get_file_as_string(Data.P10 + bake + "_map.json"))
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
 	var bron := TileSetAtlasSource.new()
-	bron.texture = load(Data.P10 + "plein_grond_tileset.png")
+	bron.texture = load(Data.P10 + bake + "_tileset.png")
 	bron.texture_region_size = Vector2i(16, 16)
 	var kol := int(gm["cols"])
 	var rijen := bron.texture.get_height() / 16
@@ -438,7 +441,8 @@ func _plein10(kaart: Node, objects: Node) -> void:
 		for x in rij.size():
 			var i := int(rij[x])
 			grond.set_cell(Vector2i(x, y), 0, Vector2i(i % kol, i / kol))
-	_keien10(laag.get_node("Grond"), o)
+	if bake == "plein_grond":
+		_keien10(laag.get_node("Grond"), o)
 	_plat(laag.get_node("Bosrand"), Data.P10 + "bos_rand.png", o).name = "BosDak"
 	var bp: Array = lay["brug_px"]
 	_plat(laag.get_node("Brug"), Data.P10 + "brug_11.png", Vector2(float(bp[0]), float(bp[1]))).name = "Brug10"
