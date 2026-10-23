@@ -758,3 +758,6 @@ assets/sprites/buiten/wilgendal/plein10/keien_macro_tileset.png
 assets/sprites/buiten/wilgendal/plein10/gras_licht_tileset.png
 assets/sprites/buiten/wilgendal/plein10/huis_riet_11.png
 assets/sprites/buiten/wilgendal/plein10/huis_riet_11_schaduw.png
+assets/sprites/party_24x32/dax_wm1.png
+assets/sprites/party_24x32/seren_wm1.png
+assets/sprites/party_24x32/vesper_wm1.png

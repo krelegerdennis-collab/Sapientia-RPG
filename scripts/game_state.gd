@@ -1679,6 +1679,27 @@ func change_map(path: String, spawn_name: String) -> void:
 	_go_to_scene(path)
 
 
+## Modus-direct: dezelfde kamer opnieuw opbouwen op de plek van de speler (Classic<->Action meteen toepassen).
+## Verslagen monsters, kisten enz. blijven zoals ze waren (reload_in_place); de leider blijft (leader_id, #161).
+var reload_in_place := false
+
+
+func reload_room(tile: Vector2i, facing: Vector2i) -> void:
+	if changing_map or in_battle or current_map == "":
+		return
+	changing_map = true
+	return_map = current_map
+	return_tile = tile
+	return_facing = facing
+	has_return_point = true
+	pending_spawn = ""
+	entry_kind = "reload"
+	reload_in_place = true
+	_autosave_request = ""
+	await Transition.fade_out()
+	_go_to_scene(current_map)
+
+
 # ---------------------------------------------------------------- encounters
 ## Kans op een gevecht per stap op dit terrein (0 = nooit).
 func encounter_rate_for(terrain: String) -> float:
