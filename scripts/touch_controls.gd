@@ -175,9 +175,9 @@ func kern_rect() -> Rect2:
 	return Rect2(Vector2(right - KERN_SIZE.x, bottom - KERN_SIZE.y), KERN_SIZE)
 
 
-## RUN-knop: in de bovenste rij, direct links van MENU (veld) of links van Swap en Ring (Action-arena).
+## RUN-knop: in de bovenste rij, direct links van MENU (veld) of links van Swap, Codex en Ring (Action-arena).
 func run_rect() -> Rect2:
-	var s := som_row_slot(2 if analog_only else 0)
+	var s := som_row_slot(3 if analog_only else 0)
 	var m := menu_rect()
 	# zelfde hoogte als MENU (zelfde stijl), op dezelfde middenlijn
 	return Rect2(Vector2(s.end.x - KERN_SIZE.x, m.position.y), Vector2(KERN_SIZE.x, m.size.y))

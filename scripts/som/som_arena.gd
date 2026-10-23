@@ -39,6 +39,7 @@ const SomRing := preload("res://scripts/som/som_ring.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const SomMove := preload("res://scripts/som/som_move.gd")
 const SomAlly := preload("res://scripts/som/som_ally.gd")
+const SomCodex := preload("res://scripts/som/som_codex.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
 
@@ -56,6 +57,8 @@ var iframes := {}
 var down := false
 var hud: Node
 var ring: Node
+## Codex vangen in Action (scripts/som/som_codex.gd)
+var codex: Node
 var gauge: Node2D
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
 var queued := {}
@@ -92,6 +95,8 @@ func setup(p_room: Node) -> void:
 	_ensure_actions()
 	for id in SomData.SHEETS:
 		var path := str(SomData.SHEETS[id])
+		if id == "dennis":
+			path = dax_sheet_path()
 		if ResourceLoader.exists(path):
 			sheets[id] = load(path)
 	for id in SomData.ATTACK_ANIMS:
@@ -127,6 +132,10 @@ func setup(p_room: Node) -> void:
 		a.setup(self, id, slot)
 		allies.append(a)
 		slot += 1
+	codex = SomCodex.new()
+	codex.name = "SomCodex"
+	codex.arena = self
+	add_child(codex)
 	hud = SomHud.new()
 	hud.arena = self
 	add_child(hud)
@@ -136,6 +145,21 @@ func setup(p_room: Node) -> void:
 	gauge = SomFx.Gauge.new()
 	gauge.arena = self
 	objects.add_child(gauge)
+
+
+## Kaartsheet van Dax via KaartStijl (#169): speler_sheet() van het gebied van deze kamer als Dax leidt
+## (anders, of zonder gebied, held_sheet("Dax") = dezelfde vaste partijsheet HELD_VAST["dax"]).
+## Pas als KaartStijl niets heeft: SomData.SHEETS["dennis"].
+func dax_sheet_path() -> String:
+	var p := ""
+	if not GameState.party.is_empty() and str(GameState.party[0].get("id", "")) == "dennis":
+		var gebied := KaartStijl.gebied_van_map(str(room.scene_file_path)) if room != null else ""
+		p = KaartStijl.speler_sheet(gebied if gebied != "" else "wilgendal")
+	if p == "" or not ResourceLoader.exists(p):
+		p = KaartStijl.held_sheet("Dax")
+	if p == "" or not ResourceLoader.exists(p):
+		p = str(SomData.SHEETS["dennis"])
+	return p
 
 
 static func _ensure_actions() -> void:
@@ -819,6 +843,11 @@ func resolve(q: Dictionary) -> String:
 		if int(r.get("hp", 0)) > 0:
 			SomFx.number(room.get_node("Objects"), body_of(str(target.get("id", ""))) + Vector2(0, -22), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
 			heal_glow(str(target.get("id", "")))
+	elif str(q.get("kind", "")) == "codex":
+		var ct: Variant = q.get("target", null)
+		text = codex.capture(ct if typeof(ct) == TYPE_OBJECT else null)   # ook een intussen vrijgegeven doel (boek terug)
+		action_resolved.emit(text)
+		return text
 	elif str(q.get("kind", "")) == "skill":
 		text = use_skill(str(q.get("id", "")), str(q.get("caster", "")))
 	else:
@@ -955,7 +984,31 @@ func ring_entries() -> Dictionary:
 			continue
 		magic.append({"kind": "spell", "id": str(s), "caster": active_id,
 				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))], "name": str(sp.get("name", s))})
+	# Codex-boek (zoals de Codex-opdracht in Classic): vangen met een Leeg Boek, daarna een doel kiezen
+	if SomCodex.shown():
+		var books := GameState.item_count(SomCodex.CodexData.BOOK_ITEM)
+		items.append({"kind": "codex", "id": "codex", "label": SomData.TXT_CODEX_ENTRY % books if books > 0 else SomData.TXT_CODEX_NO_BOOK,
+				"name": SomData.TXT_CODEX, "count": books})
 	return {"items": items, "skills": skills, "magic": magic}
+
+
+## Doelen voor het Codex-boek: vijanden (ook een baas, die dan weigert) binnen SPELL_RANGE, dichtstbij eerst,
+## met de Classic-hint ("35%", "too strong", "won't fit", "Codex full").
+func codex_targets() -> Array:
+	var from := body()
+	var list: Array = []
+	for m in enemies.keys():
+		if is_instance_valid(m) and center_of(m).distance_to(from) <= SomData.SPELL_RANGE:
+			list.append(m)
+	for m in room.monsters:
+		if is_instance_valid(m) and bool(m.get("boss")) and not list.has(m) and center_of(m).distance_to(from) <= SomData.SPELL_RANGE:
+			list.append(m)
+	list.sort_custom(func(x, y): return center_of(x).distance_to(from) < center_of(y).distance_to(from))
+	var out: Array = []
+	for m in list:
+		var nm: String = codex._name(m)
+		out.append({"kind": "target", "id": str(m.monster_id), "target": m, "label": "%s %s" % [nm, codex.hint(m)], "name": nm})
+	return out
 
 
 ## Spreuk met één doel (vijand of partylid) -> in de ring eerst een doel kiezen.
