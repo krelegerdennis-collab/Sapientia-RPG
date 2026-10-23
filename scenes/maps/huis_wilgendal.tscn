@@ -96,8 +96,8 @@ facing = Vector2i(0, -1)
 position = Vector2(64, 128)
 script = ExtResource("6_nkovl")
 size_tiles = Vector2i(1, 1)
-target_map = "res://scenes/maps/dorp_wilgendal.tscn"
-target_spawn = "voor_dax"
+target_map = "res://scenes/maps/wilgendal.tscn"
+target_spawn = "voor_huis"
 lines = Array[String]([])
 event = "huis_uit"
 

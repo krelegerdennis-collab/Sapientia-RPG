@@ -18,6 +18,10 @@ const START_SPAWN := "bed"
 const RESPAWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const RESPAWN_SPAWN := "start"
 const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
+## #166: het dorp (plein 10) met de deur van Dax naar HOUSE_MAP.
+const DORP_MAP := "res://scenes/maps/dorp_wilgendal.tscn"
+## #166: spawn voor de deur van Dax in DORP_MAP.
+const DORP_HUIS_SPAWN := "voor_dax"
 const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
@@ -516,7 +520,22 @@ func _go_to_scene(path: String) -> void:
 
 ## Nieuw spel (v0.10): de party is alleen de hoofdpersoon (held 'dennis') met
 ## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
+## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
+## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
+var huis_herkomst := ""
+
+
+## #166: kies de echte bestemming van een warp en onthoud de herkomst bij het binnengaan van het huis.
+func huis_route(van: String, path: String, spawn_name: String) -> Array:
+	if path == HOUSE_MAP and van != HOUSE_MAP:
+		huis_herkomst = "dorp" if van == DORP_MAP else ""
+	elif van == HOUSE_MAP and path == TOWN_MAP and spawn_name == "voor_huis" and huis_herkomst == "dorp":
+		return [DORP_MAP, DORP_HUIS_SPAWN]
+	return [path, spawn_name]
+
+
 func new_game(hero_name := DEFAULT_NAME) -> void:
+	huis_herkomst = ""
 	som_mode = false
 	leader_id = MAIN_HERO
 	player_name = clean_name(hero_name)
@@ -1181,6 +1200,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"party_bank": [],
 		"bezocht": bezochte_kaarten.duplicate(),
 		"echo_grot_voltooid": echo_grot_voltooid,
+		"huis_herkomst": huis_herkomst,
 		"inventory": inventory.duplicate(true),
 		"gold": gold,
 		"play_time": play_time(),
@@ -1259,6 +1279,8 @@ func apply_state(d: Dictionary) -> bool:
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
 	player_name = migrate_name(clean_name(str(d.get("player_name", DEFAULT_NAME))))
+	# #166: ontbrekende sleutel (oude save) = "" = uitgang naar wilgendal.tscn zoals vroeger
+	huis_herkomst = "dorp" if str(d.get("huis_herkomst", "")) == "dorp" else ""
 	party.clear()
 	var stray_equipment: Array = []
 	party = _party_from(d["party"], stray_equipment)
@@ -1705,6 +1727,9 @@ func change_map(path: String, spawn_name: String) -> void:
 	if changing_map or in_battle:
 		return
 	changing_map = true
+	var route := huis_route(current_map, path, spawn_name)
+	path = route[0]
+	spawn_name = route[1]
 	Sessielog.warp(current_map, path, spawn_name)
 	pending_spawn = spawn_name
 	has_return_point = false
