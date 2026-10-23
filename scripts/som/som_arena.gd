@@ -1063,9 +1063,11 @@ func ring_entries() -> Dictionary:
 		magic.append({"kind": "spell", "id": str(s), "caster": active_id,
 				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))], "name": str(sp.get("name", s))})
 	# Codex-boek (zoals de Codex-opdracht in Classic): vangen met een Leeg Boek, daarna een doel kiezen
-	if SomCodex.shown():
-		var books := GameState.item_count(SomCodex.CodexData.BOOK_ITEM)
-		items.append({"kind": "codex", "id": "codex", "label": SomData.TXT_CODEX_ENTRY % books if books > 0 else SomData.TXT_CODEX_NO_BOOK,
+	# Zoals andere verbruiksitems: bij 0 Lege Boeken geen ingang (geen 'x0' in de ring). De CODEX-knop blijft
+	# zichtbaar zolang er pagina's zijn en meldt dan "No Blank Book left.".
+	var books := GameState.item_count(SomCodex.CodexData.BOOK_ITEM)
+	if SomCodex.shown() and books > 0:
+		items.append({"kind": "codex", "id": "codex", "label": SomData.TXT_CODEX_ENTRY % books,
 				"name": SomData.TXT_CODEX, "count": books})
 	return {"items": items, "skills": skills, "magic": magic}
 
