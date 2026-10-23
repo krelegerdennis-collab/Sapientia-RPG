@@ -18,6 +18,10 @@ const START_SPAWN := "bed"
 const RESPAWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const RESPAWN_SPAWN := "start"
 const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
+## #166: het dorp (plein 10) met de deur van Dax naar HOUSE_MAP.
+const DORP_MAP := "res://scenes/maps/dorp_wilgendal.tscn"
+## #166: spawn voor de deur van Dax in DORP_MAP.
+const DORP_HUIS_SPAWN := "voor_dax"
 const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
@@ -148,6 +152,8 @@ var codex_next_id := 1
 ## v0.19 UNIEKE monsters (GameData.ENEMIES "unique": true, bv. de Inktwurm; beslissing Dennis): id ->
 ## "verslagen" / "gevangen". Staat erin = komt nooit meer terug. In de save als "uniek".
 var unique_done := {}
+## Uniek monster net voor het eerst weg (verslagen of gevangen). Story luistert (StoryData.AFTER_UNIQUE).
+signal unique_marked(id: String, how: String)
 
 ## 100-verdiepingen-kerker (de Diepe Grot): alles gaat mee in de save, blok "dungeon100"
 ## (Dungeon100Rules.save_data/load_data). Zie HANDOFF_DUNGEON100*.md.
@@ -336,6 +342,7 @@ func _ready() -> void:
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
+	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
@@ -379,6 +386,7 @@ func _ready() -> void:
 			["--rekruuttest", "res://scripts/tests/rekruut_tests.gd", "RekruutTest", "rekruuttest"],
 			["--balansarchief1test", "res://scripts/tests/balans_archief1_tests.gd", "BalansArchief1Test", "balansarchief1test"],
 			["--questtest", "res://scripts/tests/quest_tests.gd", "QuestTest", "questtest"],
+			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
@@ -516,7 +524,22 @@ func _go_to_scene(path: String) -> void:
 
 ## Nieuw spel (v0.10): de party is alleen de hoofdpersoon (held 'dennis') met
 ## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
+## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
+## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
+var huis_herkomst := ""
+
+
+## #166: kies de echte bestemming van een warp en onthoud de herkomst bij het binnengaan van het huis.
+func huis_route(van: String, path: String, spawn_name: String) -> Array:
+	if path == HOUSE_MAP and van != HOUSE_MAP:
+		huis_herkomst = "dorp" if van == DORP_MAP else ""
+	elif van == HOUSE_MAP and path == TOWN_MAP and spawn_name == "voor_huis" and huis_herkomst == "dorp":
+		return [DORP_MAP, DORP_HUIS_SPAWN]
+	return [path, spawn_name]
+
+
 func new_game(hero_name := DEFAULT_NAME) -> void:
+	huis_herkomst = ""
 	som_mode = false
 	leader_id = MAIN_HERO
 	player_name = clean_name(hero_name)
@@ -1181,6 +1204,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"party_bank": [],
 		"bezocht": bezochte_kaarten.duplicate(),
 		"echo_grot_voltooid": echo_grot_voltooid,
+		"huis_herkomst": huis_herkomst,
 		"inventory": inventory.duplicate(true),
 		"gold": gold,
 		"play_time": play_time(),
@@ -1259,6 +1283,8 @@ func apply_state(d: Dictionary) -> bool:
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
 	player_name = migrate_name(clean_name(str(d.get("player_name", DEFAULT_NAME))))
+	# #166: ontbrekende sleutel (oude save) = "" = uitgang naar wilgendal.tscn zoals vroeger
+	huis_herkomst = "dorp" if str(d.get("huis_herkomst", "")) == "dorp" else ""
 	party.clear()
 	var stray_equipment: Array = []
 	party = _party_from(d["party"], stray_equipment)
@@ -1333,6 +1359,7 @@ func apply_state(d: Dictionary) -> bool:
 		for k in un:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
+	_unique_seen_flags()
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
 	var a2 = d.get("archief2", {})
@@ -1705,6 +1732,9 @@ func change_map(path: String, spawn_name: String) -> void:
 	if changing_map or in_battle:
 		return
 	changing_map = true
+	var route := huis_route(current_map, path, spawn_name)
+	path = route[0]
+	spawn_name = route[1]
 	Sessielog.warp(current_map, path, spawn_name)
 	pending_spawn = spawn_name
 	has_return_point = false
@@ -1896,12 +1926,17 @@ func respawn_at_checkpoint(boss := false) -> String:
 	# 'gevangen' rolt mee met de Codex, die bij het checkpoint hoort.
 	var keep_unique := unique_done.duplicate(true)
 	var keep_koopman := koopman_save_data()      # bezoeken aan H-5 rollen niet terug
+	# Een al gezien eenmalige tutorial (na een uniek monster) rolt niet terug: nooit twee keer.
+	var keep_seen: Array = StoryData.UNIQUE_SEEN_FLAGS.values().filter(func(f): return story_flags.has(str(f)))
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
 	koopman_load(keep_koopman)
 	for id in keep_unique:
 		if str(keep_unique[id]) == "verslagen" and not unique_done.has(str(id)):
 			unique_done[str(id)] = "verslagen"
+	_unique_seen_flags()
+	for f in keep_seen:
+		story_flags[str(f)] = true
 	dungeon100_permanent = keep_permanent
 	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
@@ -2493,6 +2528,15 @@ func unique_state(id: String) -> String:
 func unique_mark(id: String, how: String) -> void:
 	if is_unique(id) and not unique_done.has(id):
 		unique_done[id] = how
+		unique_marked.emit(id, how)
+
+
+## Oude saves (of een checkpoint van vóór het gevecht): is het unieke monster al weg, dan geldt zijn
+## eenmalige tutorial als gezien (StoryData.UNIQUE_SEEN_FLAGS). Nooit achteraf afspelen.
+func _unique_seen_flags() -> void:
+	for id in StoryData.UNIQUE_SEEN_FLAGS:
+		if unique_done.has(str(id)):
+			story_flags[str(StoryData.UNIQUE_SEEN_FLAGS[id])] = true
 
 
 # ---------------------------------------------------------------- world warper
