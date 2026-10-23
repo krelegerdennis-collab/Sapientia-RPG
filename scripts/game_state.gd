@@ -185,6 +185,12 @@ var scenes_seen: Array = []
 ## Gehoorde Suno-tracks (scripts/data/music_tracks.gd ids) voor Menu > Scenes > Music. In de save.
 var heard_music: Array = []
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
+## v0.25 Quest Log (scripts/data/quest_data.gd, res://data/quests.json): voortgang per opdracht
+## ({quest_id: {"steps": [...], "done": bool}}). In de save als "quests"; oude saves zonder dat veld
+## worden aangevuld uit de vlaggen en de verhaalstap. Stappen met een event worden klaar via
+## Story.event_finished (quest_event).
+var quest_progress := {}
+const QuestData := preload("res://scripts/data/quest_data.gd")
 ## v0.11: opties voor het volgende gevecht als het een oefengevecht is ({} = gewoon)
 var pending_tutorial := {}
 
@@ -284,6 +290,7 @@ var ui_theme: Theme
 
 func _ready() -> void:
 	_koppel_muziek.call_deferred()
+	_koppel_quests.call_deferred()
 	# TIJDELIJK CI-DIAG (#141)
 	var _d := DirAccess.get_files_at("res://.godot/imported")
 	var _ww := Array(_d).filter(func(f): return f.begins_with("world_warper") or f.ends_with("_v8.png-") or "_v8" in f)
@@ -535,6 +542,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	story_flags = {}
 	scenes_seen = []
 	heard_music = []
+	quest_progress = {}
 	_hoor_huidige_muziek()     # bv. de titelmuziek die nu speelt
 	archief2 = {"platen": {}}
 	archief2_temp_ally = {}
@@ -617,6 +625,22 @@ func _koppel_muziek() -> void:
 	var am := get_node_or_null("/root/AudioManager")
 	if am != null and am.has_signal("music_started") and not am.music_started.is_connected(hoor_muziek):
 		am.music_started.connect(hoor_muziek)
+
+
+func _koppel_quests() -> void:
+	var st := get_node_or_null("/root/Story")
+	if st != null and st.has_signal("event_finished") and not st.event_finished.is_connected(quest_event):
+		st.event_finished.connect(quest_event)
+
+
+## Story heeft een event afgerond: stappen met dat event worden klaar (en alles wat de vlaggen nu zeggen).
+func quest_event(event_id: String) -> void:
+	QuestData.on_event(quest_progress, event_id, story_flags, story_step)
+
+
+## Legt vast wat volgens de vlaggen/verhaalstap klaar is (bv. een baas uit een gevecht).
+func quest_sync() -> void:
+	QuestData.sync(quest_progress, story_flags, story_step)
 
 
 func hoor_muziek(manifest_id: String) -> void:
@@ -1169,6 +1193,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"story": {"step": story_step, "flags": story_flags.keys()},
 		"scenes_seen": seen_scenes(),
 		"heard_music": heard_music.duplicate(),
+		"quests": _quests_save(),
 		"archief2": archief2.duplicate(true),
 		"koopman": koopman_save_data(),
 	}
@@ -1176,6 +1201,11 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	data["party_bank"] = _party_save_from(party_bench)
 	data["leader"] = leader_id
 	return data
+
+
+func _quests_save() -> Dictionary:
+	quest_sync()
+	return quest_progress.duplicate(true)
 
 
 ## Leest een save (standaard de handmatige; v0.11: of 'path', bv. autosave_path).
@@ -1274,6 +1304,9 @@ func apply_state(d: Dictionary) -> bool:
 			if MusicTracks.ids().has(str(tid)) and not heard_music.has(str(tid)):
 				heard_music.append(str(tid))
 	_hoor_huidige_muziek()
+	# v0.25 Quest Log; oude saves zonder "quests" -> afgeleid van de vlaggen en de verhaalstap
+	quest_progress = QuestData.van_save(d.get("quests", {}))
+	quest_sync()
 	pending_tutorial = {}
 	if has_node("/root/Story"):
 		get_node("/root/Story").reset(true)
