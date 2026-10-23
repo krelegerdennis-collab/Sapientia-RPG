@@ -14,6 +14,9 @@ const FLAG_RESULTAAT := "echo_grot_resultaat"
 const FLAG_H6_GEZEGD := "echo_grot_h6_gezegd"
 ## De Spiegel zet deze vlag nog niet. Zolang ze uit staat, zegt ECHO de zin niet.
 const FLAG_H6 := "h6_onthuld"
+## v0.25 ECHO zegt de zinnen van de huidige act (data/quests.json, "echo_dialogue") één keer per act
+## vanzelf; daarna via OPTIE_AKTE. Vlag = FLAG_AKTE + act-id.
+const FLAG_AKTE := "echo_akte_gezegd:"
 
 const NAAM := "ECHO"
 const OPTIE_SIMULATIE := "Deep Learning Simulation"
@@ -21,6 +24,7 @@ const OPTIE_TWIJFEL := "Why do you do it?"
 const OPTIE_DATA := "And the data?"
 ## v0.24 ECHO's questlog per act (world_warper/data/echo_questlog.gd)
 const OPTIE_QUESTLOG := "Quest Log"
+const OPTIE_AKTE := "Current act"
 const KEUZE_START := "Start new run"
 const KEUZE_TERUG := "Go back"
 const VRAAG_MENU := "What do you want?"
@@ -64,7 +68,7 @@ static func markeer(flags: Dictionary, regels: Array) -> void:
 
 
 static func menu_opties() -> Array[String]:
-	return [OPTIE_SIMULATIE, OPTIE_QUESTLOG, OPTIE_TWIJFEL, OPTIE_DATA, KEUZE_TERUG]
+	return [OPTIE_SIMULATIE, OPTIE_QUESTLOG, OPTIE_AKTE, OPTIE_TWIJFEL, OPTIE_DATA, KEUZE_TERUG]
 
 
 static func start_opties() -> Array[String]:
@@ -73,7 +77,7 @@ static func start_opties() -> Array[String]:
 
 static func speler_teksten() -> Array[String]:
 	return [ZIN_EERSTE, ZIN_TWIJFEL, ZIN_H6, ZIN_DATA, ZIN_RESULTAAT, ZIN_WERELD, ZIN_LOOPT,
-			OPTIE_SIMULATIE, OPTIE_QUESTLOG, OPTIE_TWIJFEL, OPTIE_DATA, KEUZE_START, KEUZE_TERUG, VRAAG_MENU, NAAM]
+			OPTIE_SIMULATIE, OPTIE_QUESTLOG, OPTIE_AKTE, OPTIE_TWIJFEL, OPTIE_DATA, KEUZE_START, KEUZE_TERUG, VRAAG_MENU, NAAM]
 
 
 static func _aan(flags: Dictionary, sleutel: String) -> bool:

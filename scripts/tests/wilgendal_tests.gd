@@ -575,7 +575,7 @@ func _som_pilot(dorp: Node) -> void:
 	check("som: speler = fase-2 heldsheet 24x32 (%s)" % sp.texture.resource_path,
 			sp.texture.resource_path.begins_with("res://assets/sprites/som/kaart/")
 			and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
-	check("som: Dax/Seren in WM1 (slanke sheets 20 okt), WM2 in de wacht", sp.texture.resource_path.ends_with("dax_wm1_slim.png")
+	check("som: Dax/Seren in WM1 (Dax final_trio dax_wm1.png 23 okt), WM2 in de wacht", sp.texture.resource_path.ends_with("dax_wm1.png")
 			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1_slim"
 			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm1_slim.png")
 			and ResourceLoader.exists("res://assets/sprites/som/kaart/vesper_wm1_slim.png")

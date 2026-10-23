@@ -627,43 +627,48 @@ func _questlog_tests() -> void:
 	GameState.story_step = stap_voor
 
 
-## v0.24 Veldmenu > Quest Log: tabs Main/Side, screenshots (main, side op slot, side open).
+## v0.25 Veldmenu > Quest Log: tabs Active/Done, gegroepeerd per act; screenshots (actief, klaar,
+## side op slot, side open).
 func _questlog_scherm_tests() -> void:
 	var bewaar := GameState.story_flags.duplicate()
+	var vg_voor: Dictionary = GameState.quest_progress.duplicate(true)
 	var stap_voor := GameState.story_step
 	GameState.story_flags = {SD.GOLEM_FLAG: true, "noor_gered": true, "noor_lid": true}
+	GameState.quest_progress = {}
 	GameState.story_step = maxi(stap_voor, SD.NACHT)
 	var scherm: CanvasLayer = QLScherm.new()
 	scherm.layer = 120
 	get_tree().root.add_child(scherm)
 	await _pframes(5)
-	check("veldmenu-questlog: Main met 6 acts", scherm.tab == "hoofd"
-			and scherm.regel_teksten() == QL.keuzes(GameState.story_flags, GameState.story_step).slice(0, 6))
-	scherm.toon_akte("akte_1")
-	check("veldmenu-questlog: Act 1 = zelfde regels als ECHO",
-			scherm.detail.text == "\n".join(QL.regels("akte_1", GameState.story_flags, GameState.story_step)))
-	await _pframes(5)
-	await _screenshot("questlog_menu_act1")
-	scherm.back()
-	await _pframes(3)
-	check("veldmenu-questlog: B uit een act = terug naar de lijst", scherm.is_inside_tree() and scherm.list.visible
-			and scherm.open_akte == "")
+	check("veldmenu-questlog: Active = open opdrachten van Act 2 (%s)" % [scherm.regel_teksten()], scherm.tab == "actief"
+			and scherm.kop_teksten() == ["Act 2: The Second Archive"]
+			and scherm.regel_teksten() == ["Seren joins the party", "Defeat the guardian of the second Archive",
+				"Reach the World Warper", SD.GERRIT])
+	check("veldmenu-questlog: Side op slot = Garrett the Miller, grijs", scherm.rows.size() == 4
+			and scherm.is_button_greyed(scherm.rows[3]) and not scherm.is_button_greyed(scherm.rows[0]))
 	await _screenshot("questlog_menu_main")
-	scherm.kies_tab("zij")
+	scherm.kies_tab("klaar")
 	await _pframes(5)
-	check("veldmenu-questlog: Side op slot = Garrett the Miller", scherm.regel_teksten() == [SD.GERRIT]
-			and scherm.is_button_greyed(scherm.rows[0]))
-	await _screenshot("questlog_menu_side_locked")
+	check("veldmenu-questlog: Done = Act 1 + Vesper (%s)" % [scherm.regel_teksten()],
+			scherm.kop_teksten() == ["Act 1: The First Archive", "Act 2: The Second Archive"]
+			and scherm.regel_teksten() == ["The Archives of Sapientia", "Defeat the Golem", "Save Vesper from the Dark Wood"])
+	scherm.toon("golem")
+	check("veldmenu-questlog: Golem = stappen afgevinkt", scherm.gekozen == "golem"
+			and scherm.detail.text.contains("[x] Defeat the Golem") and scherm.detail.text.contains("[x] Enter the Forgotten Archives"))
+	await _pframes(3)
+	await _screenshot("questlog_menu_act1")
 	GameState.story_flags["gesproken_gerrit"] = true
-	scherm.kies_tab("hoofd")
-	scherm.kies_tab("zij")
+	scherm.kies_tab("actief")
 	await _pframes(5)
-	check("veldmenu-questlog: Side na gesprek = opdracht", scherm.regel_teksten() == ["[ ] The Singing Grain"]
-			and not scherm.is_button_greyed(scherm.rows[0]))
+	check("veldmenu-questlog: Side na gesprek = opdracht", scherm.regel_teksten().back() == "The Singing Grain"
+			and not scherm.is_button_greyed(scherm.rows.back()))
+	scherm.toon("zingend_graan")
+	await _pframes(3)
 	await _screenshot("questlog_menu_side_unlocked")
 	scherm.close()
 	await _pframes(2)
 	GameState.story_flags = bewaar
+	GameState.quest_progress = vg_voor
 	GameState.story_step = stap_voor
 
 

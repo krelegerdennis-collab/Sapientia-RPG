@@ -39,6 +39,10 @@ var placeholder := false
 var trail_spawned := 0
 var _anim_t := 0.0
 var _trail_dist := 0.0
+## Afgelegde baanlengte (px, ruimte van de ouder) en de trail-afstand daarbij; tests rekenen hiermee
+## (trail_spawned = floor(traveled / trail_step)), los van de beeldsnelheid.
+var traveled := 0.0
+var trail_step := 0.0
 
 
 func _init() -> void:
@@ -81,6 +85,7 @@ func fly(from: Vector2, to: Vector2, speed: float, arc := 0.0) -> void:
 	var total := path_len / maxf(speed, 1.0)
 	var t := 0.0
 	var step_px := TRAIL_SPACING * scale.x
+	trail_step = step_px
 	var prev := from
 	while t < total:
 		await get_tree().process_frame
@@ -94,6 +99,7 @@ func fly(from: Vector2, to: Vector2, speed: float, arc := 0.0) -> void:
 			rotation = mv.angle()
 		position = p
 		_trail_dist += mv.length()
+		traveled += mv.length()
 		prev = p
 		while _trail_dist >= step_px:
 			_trail_dist -= step_px
