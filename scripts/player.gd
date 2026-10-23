@@ -207,10 +207,11 @@ func _process_analog(delta: float) -> void:
 	var lock_face := Vector2i.ZERO
 	if facing_provider.is_valid():
 		lock_face = facing_provider.call()
-	if lock_face != Vector2i.ZERO and not _action_pose_active():
-		facing = lock_face
-	elif v != Vector2.ZERO:
-		facing = SomMove.facing_for(v, facing)
+	if v != Vector2.ZERO:
+		if lock_face != Vector2i.ZERO and not _action_pose_active():
+			facing = lock_face
+		else:
+			facing = SomMove.facing_for(v, facing)
 	var before := position
 	var old_tile := get_tile()
 	velocity = v * analog_speed

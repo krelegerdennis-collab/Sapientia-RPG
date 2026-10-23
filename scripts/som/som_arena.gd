@@ -493,12 +493,22 @@ func center_of(m: Node) -> Vector2:
 	return m.position + Vector2(0, -(m.size.y - 1) * 8.0)
 
 
+func _enemy_in_attack_reach(id: String, n: Node2D, m: Node) -> bool:
+	var f := Vector2(n.facing)
+	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
+	return center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y)
+
+
 func _swing_facing(id: String, n: Node2D) -> Vector2i:
 	if id == active_id and target_lock:
-		var lf: Vector2i = target_lock.facing_for_player()
-		if lf != Vector2i.ZERO:
-			n.facing = lf
-			return lf
+		var m: Node = target_lock.locked_enemy()
+		if m != null:
+			var aim_lock: bool = bool(target_lock.manual) or _enemy_in_attack_reach(id, n, m)
+			if aim_lock:
+				var lf: Vector2i = target_lock.facing_for_player()
+				if lf != Vector2i.ZERO:
+					n.facing = lf
+					return lf
 	return n.facing
 
 

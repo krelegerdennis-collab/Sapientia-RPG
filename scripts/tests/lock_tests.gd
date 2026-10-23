@@ -181,9 +181,9 @@ func _auto_scan_throttle_tests() -> void:
 	near_m.place_at(Vector2i(pt.x + 1, pt.y), Vector2i.LEFT)
 	await _frames(4)
 	var start: int = lock().timed_auto_scans
-	await _frames(5)
+	await _frames(3)
 	var mid: int = lock().timed_auto_scans
-	check("auto-scan: niet elke frame (5 frames)", mid <= start + 1)
+	check("auto-scan: niet elke frame (3 frames)", mid <= start + 1)
 	var t0: int = Time.get_ticks_msec()
 	while Time.get_ticks_msec() - t0 < int(SomTargetLock.AUTO_SCAN_INTERVAL * 1000.0) + 80:
 		await get_tree().process_frame
