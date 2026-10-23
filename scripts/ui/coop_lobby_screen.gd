@@ -9,6 +9,9 @@ const Protocol := preload("res://scripts/net/net_protocol.gd")
 const LobbyScript := preload("res://scripts/net/lan_lobby.gd")
 const DiscoveryScript := preload("res://scripts/net/lan_discovery.gd")
 
+## Android 48dp minimum; bij viewport 384 en window override 1152 is dat 16 logische px.
+const TOUCH_TARGET_DP := 48
+
 signal leave_requested
 
 enum Screen { MENU, HOST, JOIN, MESSAGE }
@@ -42,7 +45,7 @@ func _ready() -> void:
 	_panel.offset_bottom = -10.0
 	add_child(_panel)
 	_box = VBoxContainer.new()
-	_box.add_theme_constant_override("separation", 2)
+	_box.add_theme_constant_override("separation", 4)
 	_panel.add_child(_box)
 	lobby = LobbyScript.new()
 	lobby.name = "CoopLobby"
@@ -140,14 +143,14 @@ func _rebuild() -> void:
 func _build_menu() -> void:
 	_box.add_child(UiMenu.label("Co-op (LAN)", UiStyleC.HILITE, 12))
 	_box.add_child(UiMenu.label("Action sandbox, up to 4 players.", UiStyleC.TEXT_DIM, 8))
-	var host := UiMenu.button("Host")
+	var host := _touch_button("Host")
 	host.pressed.connect(func() -> void: _show_host())
 	_box.add_child(host)
-	var join := UiMenu.button("Join")
+	var join := _touch_button("Join")
 	join.pressed.connect(func() -> void: _show_join_listen())
 	_box.add_child(join)
 	_box.add_child(UiMenu.label("Friend mode (PvP) is separate.", UiStyleC.TEXT_DIM, 8))
-	var back := UiMenu.button("Back")
+	var back := _touch_button("Back")
 	back.pressed.connect(_on_back)
 	_box.add_child(back)
 
@@ -156,11 +159,11 @@ func _build_host() -> void:
 	_box.add_child(UiMenu.label("Hosting as Dax", UiStyleC.HILITE, 10))
 	_box.add_child(UiMenu.label("Waiting for friends on Wi‑Fi…", UiStyleC.TEXT_DIM, 8))
 	_add_roster_rows(true)
-	var start := UiMenu.button("Start Action sandbox")
+	var start := _touch_button("Start Action sandbox")
 	start.disabled = not lobby.is_host
 	start.pressed.connect(_on_host_start)
 	_box.add_child(start)
-	var cancel := UiMenu.button("Cancel")
+	var cancel := _touch_button("Cancel")
 	cancel.pressed.connect(_show_menu)
 	_box.add_child(cancel)
 
@@ -168,7 +171,7 @@ func _build_host() -> void:
 func _build_join() -> void:
 	if _joining_ip != "":
 		_box.add_child(UiMenu.label("Joining %s…" % _joining_ip, UiStyleC.TEXT_DIM, 8))
-		var cancel := UiMenu.button("Cancel")
+		var cancel := _touch_button("Cancel")
 		cancel.pressed.connect(_show_join_listen)
 		_box.add_child(cancel)
 		return
@@ -180,19 +183,47 @@ func _build_join() -> void:
 		for ip in _hosts.keys():
 			var info: Dictionary = _hosts[ip]
 			var line := "%s  (%d/%d)" % [str(info.get("name", "?")), int(info.get("players", 0)), Protocol.MAX_PLAYERS]
-			var btn := UiMenu.button(line)
+			var btn := _touch_button(line)
 			btn.pressed.connect(func() -> void: _join_host(ip))
 			_box.add_child(btn)
-	var back := UiMenu.button("Back")
+	var back := _touch_button("Back")
 	back.pressed.connect(_show_menu)
 	_box.add_child(back)
 
 
 func _build_message() -> void:
 	_box.add_child(UiMenu.label(_message, UiStyleC.TEXT, 9))
-	var ok := UiMenu.button("Back to title")
+	var ok := _touch_button("Back to title")
 	ok.pressed.connect(_leave_to_title)
 	_box.add_child(ok)
+
+
+static func touch_min_height_px() -> int:
+	var vw := int(ProjectSettings.get_setting("display/window/size/viewport_width", 384))
+	var ow := int(ProjectSettings.get_setting("display/window/size/window_width_override", vw))
+	var scale := maxf(1.0, float(ow) / float(vw))
+	return int(ceil(float(TOUCH_TARGET_DP) / scale))
+
+
+func _touch_button(text: String) -> Button:
+	var btn := UiMenu.button(text)
+	var h := float(touch_min_height_px())
+	btn.custom_minimum_size = Vector2(0.0, maxf(btn.custom_minimum_size.y, h))
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return btn
+
+
+func all_touch_buttons() -> Array[Button]:
+	var out: Array[Button] = []
+	_collect_buttons(_box, out)
+	return out
+
+
+func _collect_buttons(node: Node, out: Array[Button]) -> void:
+	if node is Button:
+		out.append(node)
+	for child in node.get_children():
+		_collect_buttons(child, out)
 
 
 func _add_roster_rows(host_view: bool) -> void:
