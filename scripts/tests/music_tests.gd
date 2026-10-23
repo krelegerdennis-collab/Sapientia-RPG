@@ -3,7 +3,20 @@ extends Node
 ## Start: godot --path . -- --musictest [--shots=/pad/map]
 
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
-const NAMEN := {"main_menu": "Sapientia", "dorp_wilgendal": "Wind over Willowdale", "donker_woud": "Where the Mist Remembers", "berggrot": "Echoes in the Collapse", "levend_archief": "Shelves of Glass and Root", "baas_archief2": "The Overgrown Index", "diepe_grot": "Epoch 100"}
+const NAMEN := {
+	"main_menu": "Sapientia",
+	"wachtershuis": "The Guardian's Hearth",
+	"wereld": "Under Open Skies",
+	"dorp_wilgendal": "Wind over Willowdale",
+	"donker_woud": "Where the Mist Remembers",
+	"vergeten_archieven": "Dust and Forgotten Words",
+	"gevecht_normaal": "Clockwork in Motion",
+	"gevecht_miniboss": "The Weight of Steel",
+	"berggrot": "Echoes in the Collapse",
+	"levend_archief": "Shelves of Glass and Root",
+	"baas_archief2": "The Overgrown Index",
+	"diepe_grot": "Epoch 100",
+}
 const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
 const SAVE := "user://music_test.json"
 const MAP := "res://scenes/maps/wilgendal.tscn"
@@ -49,22 +62,31 @@ func _run() -> void:
 	GameState.new_game("Dax")
 	# --- data
 	var m: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/audio/audio_manifest.json"))
-	var data_ok := MusicTracks.TRACKS.size() == 7
+	var actual_files: Array[String] = []
+	for bestand in DirAccess.get_files_at("res://assets/audio/bgm"):
+		if bestand.ends_with(".ogg"):
+			actual_files.append(bestand)
+	var listed_files: Array[String] = []
+	var data_ok := MusicTracks.TRACKS.size() == NAMEN.size()
 	for t in MusicTracks.TRACKS:
 		for mid in t["ids"]:
 			var e: Dictionary = m["bgm"].get(mid, {})
-			data_ok = data_ok and not e.is_empty() and FileAccess.file_exists("res://assets/audio/bgm/" + str(e.get("bestand", ""))) \
-					and str(e.get("beschrijving", "")).to_lower().contains("suno")
-		data_ok = data_ok and str(t["name"]) != "" and str(t["name"]) == str(NAMEN.get(str(t["id"]), "?"))
-	check("7 Suno-tracks, elk in het manifest met bestand, Engelse naam uit data/music_tracks.json", data_ok)
+			var bestand := str(e.get("bestand", ""))
+			data_ok = data_ok and not e.is_empty() and FileAccess.file_exists("res://assets/audio/bgm/" + bestand)
+			if bestand != "" and not listed_files.has(bestand):
+				listed_files.append(bestand)
+		data_ok = data_ok and str(t["name"]) == str(NAMEN.get(str(t["id"]), "?")) and str(t["where"]) != ""
+	actual_files.sort()
+	listed_files.sort()
+	check("tracklijst dekt elk aanwezig BGM-bestand met Engelse naam en locatie", data_ok and listed_files == actual_files)
 	# --- vrijspelen
 	check("nieuw spel: niets gehoord (titelmuziek speelde niet)", GameState.heard_music.is_empty())
 	AudioManager.play_music("wereld", 0.0)
 	await _frames(2)
-	check("gewone (niet-Suno) track speelt niets vrij", GameState.heard_music.is_empty())
+	check("wereldkaart gehoord -> 'Under Open Skies' vrij", GameState.heard_music == ["wereld"])
 	AudioManager.play_music("donker_woud", 0.0)
 	await _frames(2)
-	check("Donker Woud gehoord -> 'Where the Mist Remembers' vrij", GameState.heard_music == ["donker_woud"])
+	check("Donker Woud gehoord -> 'Where the Mist Remembers' vrij", GameState.heard_music.has("donker_woud"))
 	AudioManager.play_music("ww_ambient", 0.0)
 	await _frames(2)
 	check("ww_ambient (zelfde bestand) speelt 'Epoch 100' vrij", GameState.heard_music.has("diepe_grot"))
@@ -78,7 +100,8 @@ func _run() -> void:
 	GameState.new_game("Dax")
 	check("nieuw spel wist de lijst", GameState.heard_music.is_empty())
 	check("laden zet de gehoorde tracks terug", GameState.load_game(SAVE) and GameState.heard_music.has("donker_woud")
-			and GameState.heard_music.has("diepe_grot") and GameState.heard_music.size() == 2)
+			and GameState.heard_music.has("diepe_grot") and GameState.heard_music.has("wereld")
+			and GameState.heard_music.size() == 3)
 	var f := FileAccess.open(SAVE, FileAccess.READ)
 	var d: Dictionary = JSON.parse_string(f.get_as_text())
 	f.close()
@@ -99,11 +122,12 @@ func _run() -> void:
 	var s: CanvasLayer = ScenesScreen.new()
 	get_tree().root.add_child(s)
 	await _frames(3)
+	check("scherm opent op Scenes en Music-tab is beschikbaar", s.tab == "scenes" and s.tab_buttons.has("music"))
 	s.kies_tab("music")
 	await _frames(3)
 	var greyed: int = s.buttons.filter(func(b): return s.is_button_greyed(b)).size()
-	check("tab Music: 7 regels, 4 op slot (???), 3 speelbaar", s.buttons.size() == 7 and greyed == 4
-			and s.buttons.filter(func(b): return UiMenu_text(b).contains("???")).size() == 4)
+	check("tab Music: 12 regels, 9 op slot (???), 3 speelbaar", s.buttons.size() == 12 and greyed == 9
+			and s.buttons.filter(func(b): return UiMenu_text(b).contains("???")).size() == 9)
 	check("touch: regels en tabs >= 22 px hoog", s.buttons.all(func(b): return b.size.y >= 22.0)
 			and s.tab_buttons.values().all(func(b): return b.size.y >= 22.0))
 	await _shot("music_tab")
@@ -121,7 +145,7 @@ func _run() -> void:
 	var db8 := AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))
 	Settings.set_value("music_volume", vol0)
 	check("muziekvolume stuurt de bus (3: %.1f dB < 8: %.1f dB)" % [db3, db8], db3 < db8)
-	check("regel toont wat er speelt", UiMenu_text(s.buttons[2]).contains("[Playing]"))
+	check("regel toont wat er speelt", UiMenu_text(_track_button(s, "donker_woud")).contains("[Playing]"))
 	await _shot("music_tab_playing")
 	s.choose_track("levend_archief")
 	await _frames(3)
@@ -131,6 +155,14 @@ func _run() -> void:
 	check("zelfde nog eens = stop: mapmuziek terug (positie %.2f)" % AudioManager._active_player.get_playback_position(),
 			AudioManager.get_current_music() == "wereld" and AudioManager._music_stack.is_empty()
 			and AudioManager._active_player.get_playback_position() >= pos0 - 0.05)
+	s.choose_track("donker_woud")
+	await _frames(2)
+	s.kies_tab("scenes")
+	await _frames(3)
+	check("Music-tab verlaten herstelt mapmuziek", s.preview == "" and AudioManager.get_current_music() == "wereld"
+			and AudioManager._music_stack.is_empty())
+	s.kies_tab("music")
+	await _frames(3)
 	s.choose_track("donker_woud")
 	await _frames(2)
 	s.close()
@@ -146,3 +178,7 @@ func _run() -> void:
 
 static func UiMenu_text(b: Button) -> String:
 	return str(b.get_meta("label", b.text))
+
+
+static func _track_button(s: CanvasLayer, id: String) -> Button:
+	return s.list.get_node("Track_" + id) as Button
