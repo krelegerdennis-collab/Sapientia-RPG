@@ -29,7 +29,7 @@ const HeroPortrait := preload("res://scripts/ui/hero_portrait.gd")
 const StatArrow := preload("res://scripts/ui/stat_arrow.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const StatusScreenS := preload("res://scripts/ui/status_screen.gd")
-const QuestlogData := preload("res://world_warper/data/echo_questlog.gd")
+const QuestData := preload("res://scripts/data/quest_data.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const TOWN := "res://scenes/maps/wilgendal.tscn"
 ## Wachttijd (sec) tot de autosave na binnenkomst geschreven is (map.gd AUTOSAVE_DELAY + marge).
@@ -88,6 +88,14 @@ func frames(n: int) -> void:
 func pframes(n: int) -> void:
 	for i in n:
 		await get_tree().process_frame
+
+
+## Aantal opdrachten in een tab van de Quest Log (alle acts samen) bij de huidige voortgang.
+func _quest_aantal(tab: String) -> int:
+	var n := 0
+	for id in QuestData.act_ids():
+		n += QuestData.voor_tab(str(id), tab, GameState.story_flags, GameState.story_step, GameState.quest_progress).size()
+	return n
 
 
 func seconds(t: float) -> void:
@@ -345,13 +353,13 @@ func _direct_button_tests() -> void:
 	m.choose("quests")
 	await frames(3)
 	var ql: Node = m.get_node_or_null("QuestLog")
-	check("Quest Log opent met tab Main (6 acts)", ql != null and ql.tab == "hoofd" and ql.rows.size() == 6
-			and str(ql.regel_teksten()[0]).begins_with("Act 1 - "))
+	check("Quest Log opent met tab Active", ql != null and ql.tab == "actief"
+			and ql.rows.size() == _quest_aantal("actief"))
 	if ql != null:
 		await tap("move_right")
-		check("rechts = tab Side", ql.tab == "zij" and ql.rows.size() == QuestlogData.ZIJ.size())
+		check("rechts = tab Done", ql.tab == "klaar" and ql.rows.size() == _quest_aantal("klaar"))
 		await tap("move_left")
-		check("links = terug naar Main", ql.tab == "hoofd")
+		check("links = terug naar Active", ql.tab == "actief")
 	await tap("cancel")
 	await frames(3)
 	check("B sluit Quest Log, focus op Quest Log", m.get_node_or_null("QuestLog") == null and m.buttons["quests"].has_focus())
