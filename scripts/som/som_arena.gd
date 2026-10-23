@@ -1182,8 +1182,11 @@ const Codec := preload("res://scripts/net/net_codec.gd")
 
 func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 	coop_mode = true
-	coop_sim_host = GameState.coop_is_host()
 	coop_local_slot = local_slot
+	if session != null and "is_host" in session:
+		coop_sim_host = bool(session.is_host)
+	else:
+		coop_sim_host = GameState.coop_is_host() and local_slot == Protocol.HOST_SLOT
 	coop_ring_no_pause = true
 	allies_enabled = false
 	for a in allies:
@@ -1191,48 +1194,90 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 			a.queue_free()
 	allies.clear()
 	_coop_slots.clear()
-	_coop_avatars.clear()
 	_coop_lock_idx.clear()
 	_coop_attack_cd.clear()
 	_rebuild_enemy_order()
-	for row in roster:
-		var slot := int(row.get("slot", Protocol.NO_SLOT))
-		var cid := str(row.get("character_id", ""))
-		if slot == Protocol.NO_SLOT or cid == "":
-			continue
-		_coop_slots[slot] = cid
-		if slot == local_slot:
-			active_id = cid
-			GameState.set_leader(cid)
-			_apply_player_sheet()
-		else:
-			_spawn_coop_avatar(slot, cid)
+	_clear_coop_avatars()
+	coop_sync_roster(roster)
 	if not coop_sim_host:
 		player.set_analog(func() -> Vector2: return Vector2.ZERO, SomData.MOVE_SPEED)
-	coop_sync_roster(roster)
 
 
 func coop_sync_roster(roster: Array) -> void:
+	var seated: Dictionary = {}
 	for row in roster:
 		var slot := int(row.get("slot", Protocol.NO_SLOT))
 		var cid := str(row.get("character_id", ""))
 		if slot == Protocol.NO_SLOT or cid == "":
 			continue
-		_coop_slots[slot] = cid
-		if slot == coop_local_slot:
+		seated[slot] = cid
+	for slot in _coop_avatars.keys():
+		if not seated.has(int(slot)):
+			coop_deactivate_slot(int(slot))
+	for slot in seated.keys():
+		var cid: String = str(seated[slot])
+		_coop_slots[int(slot)] = cid
+		if int(slot) == coop_local_slot:
 			active_id = cid
 			_apply_player_sheet()
-		elif not _coop_avatars.has(slot):
-			_spawn_coop_avatar(slot, cid)
+		else:
+			_ensure_coop_avatar(int(slot), cid)
+	_prune_coop_avatar_orphans(seated)
+
+
+func _prune_coop_avatar_orphans(seated: Dictionary) -> void:
+	var objects: Node = room.get_node("Objects")
+	for c in objects.get_children():
+		if not (c is CoopAvatar):
+			continue
+		var av: CoopAvatar = c as CoopAvatar
+		if av.slot == coop_local_slot or not seated.has(av.slot):
+			if _coop_avatars.get(av.slot) == av:
+				_coop_avatars.erase(av.slot)
+			av.queue_free()
+			continue
+		if not _coop_avatars.has(av.slot):
+			_coop_avatars[av.slot] = av
 
 
 func coop_deactivate_slot(slot: int) -> void:
 	_coop_slots.erase(slot)
+	if not _coop_avatars.has(slot):
+		return
+	var n: Node = _coop_avatars[slot]
+	_coop_avatars.erase(slot)
+	if is_instance_valid(n):
+		n.queue_free()
+
+
+func _clear_coop_avatars() -> void:
+	for slot in _coop_avatars.keys():
+		coop_deactivate_slot(int(slot))
+	var objects: Node = room.get_node("Objects")
+	for c in objects.get_children():
+		if c is CoopAvatar:
+			c.queue_free()
+	_coop_avatars.clear()
+
+
+func _ensure_coop_avatar(slot: int, hero_id: String) -> void:
 	if _coop_avatars.has(slot):
-		var n: Node = _coop_avatars[slot]
+		var existing: CoopAvatar = _coop_avatars[slot] as CoopAvatar
+		if is_instance_valid(existing):
+			if existing.hero_id != hero_id:
+				var tex := sheet_for(hero_id)
+				existing.setup(slot, hero_id, tex)
+			return
 		_coop_avatars.erase(slot)
-		if is_instance_valid(n):
-			n.queue_free()
+	var objects: Node = room.get_node("Objects")
+	var named := objects.get_node_or_null("CoopAvatar_%d" % slot)
+	if named is CoopAvatar:
+		var reuse: CoopAvatar = named as CoopAvatar
+		var tex := sheet_for(hero_id)
+		reuse.setup(slot, hero_id, tex)
+		_coop_avatars[slot] = reuse
+		return
+	_spawn_coop_avatar(slot, hero_id)
 
 
 func _spawn_coop_avatar(slot: int, hero_id: String) -> void:
@@ -1243,6 +1288,65 @@ func _spawn_coop_avatar(slot: int, hero_id: String) -> void:
 	room.get_node("Objects").add_child(av)
 	av.position = player.position + Vector2(slot * 12, 0)
 	_coop_avatars[slot] = av
+
+
+## Headless/tests: remote CoopAvatar-nodes (niet de lokale speler-body).
+func coop_remote_avatar_count() -> int:
+	_purge_invalid_coop_avatars()
+	var n := 0
+	for slot in _coop_avatars.keys():
+		var av: Variant = _coop_avatars[slot]
+		if is_instance_valid(av):
+			n += 1
+	return n
+
+
+func coop_avatar_nodes_in_scene() -> int:
+	var n := 0
+	for c in room.get_node("Objects").get_children():
+		if c is CoopAvatar:
+			n += 1
+	return n
+
+
+func coop_expected_remote_avatars(roster: Array) -> int:
+	var n := 0
+	for row in roster:
+		var slot := int(row.get("slot", Protocol.NO_SLOT))
+		var cid := str(row.get("character_id", ""))
+		if slot == Protocol.NO_SLOT or cid == "" or slot == coop_local_slot:
+			continue
+		n += 1
+	return n
+
+
+func _purge_invalid_coop_avatars() -> void:
+	for slot in _coop_avatars.keys():
+		if not is_instance_valid(_coop_avatars[slot]):
+			_coop_avatars.erase(slot)
+
+
+func coop_avatar_seats_unique() -> bool:
+	_purge_invalid_coop_avatars()
+	var seats := {}
+	for slot in _coop_avatars.keys():
+		if seats.has(slot):
+			return false
+		var av: CoopAvatar = _coop_avatars[slot] as CoopAvatar
+		if not is_instance_valid(av) or av.slot != int(slot):
+			return false
+		seats[slot] = true
+	for c in room.get_node("Objects").get_children():
+		if c is CoopAvatar and not _coop_avatar_tracked(c):
+			return false
+	return true
+
+
+func _coop_avatar_tracked(node: Node) -> bool:
+	for av in _coop_avatars.values():
+		if av == node:
+			return true
+	return false
 
 
 func _rebuild_enemy_order() -> void:
@@ -1256,7 +1360,11 @@ func _coop_body(slot: int) -> Node2D:
 	if slot == coop_local_slot:
 		return player
 	if _coop_avatars.has(slot):
-		return _coop_avatars[slot]
+		var av: Node2D = _coop_avatars[slot] as Node2D
+		if not is_instance_valid(av):
+			_coop_avatars.erase(slot)
+			return null
+		return av
 	return null
 
 
