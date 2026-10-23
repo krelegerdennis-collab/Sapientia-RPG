@@ -168,6 +168,8 @@ var stun_chance := -1.0                               # < 0 = SpellRules.STUN_CH
 ## v0.21 (tests): laatste effect van een vaardigheid en aantal counters in dit gevecht
 var last_skill_effect: Dictionary = {}
 var counters_done := 0
+## Alleen voor tests: >= 0 forceert de eerstvolgende vluchtworp (0.0 = succes).
+var flee_roll_override := -1.0
 ## Welke tips er getoond zijn (voor de autotest): "aanval", "item"
 var tips_shown := {}
 var hero_nodes: Array = []    # battle_hero.gd per held
@@ -1697,7 +1699,9 @@ func _try_flee() -> bool:
 	show_message("The party tries to flee...")
 	await _wait(MESSAGE_TIME)
 	var chance := clampf(0.5 + (_avg_agi(heroes) - _avg_agi(enemies)) * 0.04, 0.1, 0.95)
-	if randf() < chance:
+	var roll := flee_roll_override if flee_roll_override >= 0.0 else randf()
+	flee_roll_override = -1.0
+	if roll < chance:
 		show_message("Made it! You got away.")
 		await _wait(MESSAGE_TIME)
 		return true
