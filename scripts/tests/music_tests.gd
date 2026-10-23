@@ -111,13 +111,14 @@ func _run() -> void:
 	f.close()
 	check("oude save zonder heard_music laadt (lege lijst)", GameState.load_game(SAVE) and GameState.heard_music.is_empty())
 	GameState.load_game(SAVE)
-	GameState.heard_music = ["donker_woud", "diepe_grot", "levend_archief"]
 	# --- scherm
 	GameState.changing_map = false
 	get_tree().change_scene_to_file(MAP)
 	await _frames(20)
 	AudioManager.play_music("wereld", 0.0, true)
 	await get_tree().create_timer(0.6).timeout
+	# De kaart kan tijdens het laden zelf muziek starten; voor dit schermscenario kiezen we exact drie unlocks.
+	GameState.heard_music = ["donker_woud", "diepe_grot", "levend_archief"]
 	var pos0: float = AudioManager._active_player.get_playback_position()
 	var s: CanvasLayer = ScenesScreen.new()
 	get_tree().root.add_child(s)
