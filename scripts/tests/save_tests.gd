@@ -69,7 +69,12 @@ func _run() -> void:
 	GameState.save_path = SAVE
 	check("zonder beide bestanden toont het slot schoon als leeg voor New Game",
 			GameState.slot_record(1).is_empty())
+	_write(SAVE, "{\"gold\":")
+	var corrupt_record := GameState.slot_record(1)
+	check("onherstelbaar corrupt bestaand slot wordt niet stil als leeg behandeld",
+			not corrupt_record.is_empty() and bool(corrupt_record.get("corrupt", false)))
 	GameState.save_path = old_path
+	_remove_save(SAVE)
 
 	GameState.gold = 33
 	check("save voor oud-formaatproef lukt", GameState.save_game(Vector2i(6, 7), Vector2i.LEFT, SAVE))

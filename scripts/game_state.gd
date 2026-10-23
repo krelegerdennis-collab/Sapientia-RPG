@@ -942,8 +942,8 @@ func newest_save_path() -> String:
 
 
 func _newest_of(manual: String, auto: String) -> String:
-	var has_manual := FileAccess.file_exists(manual)
-	var has_auto := FileAccess.file_exists(auto)
+	var has_manual := _save_file_exists(manual)
+	var has_auto := _save_file_exists(auto)
 	if not has_auto:
 		return manual if has_manual else ""
 	if not has_manual:
@@ -989,7 +989,7 @@ func use_eind_saves() -> void:
 
 
 func has_eind_save() -> bool:
-	return FileAccess.file_exists(eind_save_path()) or FileAccess.file_exists(eind_autosave_path())
+	return _save_file_exists(eind_save_path()) or _save_file_exists(eind_autosave_path())
 
 
 func newest_eind_path() -> String:
@@ -1002,7 +1002,7 @@ func read_eind_save() -> Dictionary:
 
 
 func has_beta_save() -> bool:
-	return FileAccess.file_exists(beta_save_path()) or FileAccess.file_exists(beta_autosave_path())
+	return _save_file_exists(beta_save_path()) or _save_file_exists(beta_autosave_path())
 
 
 func newest_beta_path() -> String:
@@ -1075,7 +1075,9 @@ func take_autosave_request() -> String:
 ## App naar de achtergrond of het venster sluit: synchroon opslaan via de huidige map
 ## (die weet waar de speler staat). can_autosave blokkeert gevecht, cutscene en overgang.
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST:
+	var test_suspend := "--savetest" in OS.get_cmdline_user_args()
+	if (OS.has_feature("mobile") or test_suspend) \
+			and (what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST):
 		autosave_on_background()
 
 
@@ -1295,7 +1297,7 @@ func _read_save_file(path: String) -> Dictionary:
 
 func _valid_save_data(data: Dictionary) -> bool:
 	return not data.is_empty() and data.get("map") is String \
-			and str(data.get("map", "")) != "" and data.get("party") is Array
+			and data.get("party") is Array
 
 
 ## Laadt de save en zet alles terug (party, spullen, goud, speeltijd, bestiarium);
