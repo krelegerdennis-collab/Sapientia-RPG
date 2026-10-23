@@ -438,6 +438,7 @@ func _plein10(kaart: Node, objects: Node) -> void:
 		for x in rij.size():
 			var i := int(rij[x])
 			grond.set_cell(Vector2i(x, y), 0, Vector2i(i % kol, i / kol))
+	_keien10(laag.get_node("Grond"), o)
 	_plat(laag.get_node("Bosrand"), Data.P10 + "bos_rand.png", o).name = "BosDak"
 	var bp: Array = lay["brug_px"]
 	_plat(laag.get_node("Brug"), Data.P10 + "brug_11.png", Vector2(float(bp[0]), float(bp[1]))).name = "Brug10"
@@ -499,3 +500,174 @@ func _plein10(kaart: Node, objects: Node) -> void:
 		npc.sheet = load(Data.P10 + str(rij["sheet"]) + ".png")
 		objects.add_child(npc)
 		npc.place_at(rij["tegel"], rij["kijk"])
+
+
+## Plein 10 pass 3: het keienplein als autotile (RPG ART rand10/rand11) boven de gebakken grond.
+## Terrain-set 0 (MATCH_CORNERS_AND_SIDES): terrain 0 = gras (gras_licht), 1 = kei (plein_rand + keien_licht).
+## Daarna macro-keien (2x2), put_ring onder de put en looplijnen op volle (masker 255) keitegels.
+## keien_map.json (tools/plein10_keien.py): k = kei, g = gras_licht over de gebakken keienrand.
+const KEI_RICHTING := {"N": TileSet.CELL_NEIGHBOR_TOP_SIDE, "NE": TileSet.CELL_NEIGHBOR_TOP_RIGHT_CORNER,
+		"E": TileSet.CELL_NEIGHBOR_RIGHT_SIDE, "SE": TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_CORNER,
+		"S": TileSet.CELL_NEIGHBOR_BOTTOM_SIDE, "SW": TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_CORNER,
+		"W": TileSet.CELL_NEIGHBOR_LEFT_SIDE, "NW": TileSet.CELL_NEIGHBOR_TOP_LEFT_CORNER}
+const KEI_VARIANT_KANS := 0.7
+var keien10: TileMapLayer
+
+
+static func kei_tileset() -> TileSet:
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(16, 16)
+	ts.add_terrain_set(0)
+	ts.set_terrain_set_mode(0, TileSet.TERRAIN_MODE_MATCH_CORNERS_AND_SIDES)
+	ts.add_terrain(0, 0)
+	ts.set_terrain_name(0, 0, "gras")
+	ts.set_terrain_color(0, 0, Color(0.45, 0.6, 0.25))
+	ts.add_terrain(0, 1)
+	ts.set_terrain_name(0, 1, "kei")
+	ts.set_terrain_color(0, 1, Color(0.8, 0.78, 0.7))
+	# bron 0: rand (47 blob-maskers + varianten)
+	var rand := TileSetAtlasSource.new()
+	rand.texture = load(Data.P10 + "plein_rand_tileset.png")
+	rand.texture_region_size = Vector2i(16, 16)
+	ts.add_source(rand, 0)
+	var rl = JSON.parse_string(FileAccess.get_file_as_string(Data.P10 + "plein_rand_layout.json"))
+	for ruw in rl["tiles"]:
+		var t: Dictionary = ruw
+		var a := Vector2i(int(t["atlas"][0]), int(t["atlas"][1]))
+		rand.create_tile(a)
+		var td := rand.get_tile_data(a, 0)
+		td.terrain_set = 0
+		td.terrain = 1
+		var peer: Array = t["peering"]
+		for r in KEI_RICHTING:
+			td.set_terrain_peering_bit(KEI_RICHTING[r], 1 if peer.has(r) else 0)
+		td.probability = 1.0 if int(t["variant"]) == 0 else KEI_VARIANT_KANS
+		td.set_meta("masker", int(t["mask"]))
+	# bron 1: lichte keien (vulling, masker 255, gewogen)
+	var licht := TileSetAtlasSource.new()
+	licht.texture = load(Data.P10 + "keien_licht_tileset.png")
+	licht.texture_region_size = Vector2i(16, 16)
+	ts.add_source(licht, 1)
+	var ll = JSON.parse_string(FileAccess.get_file_as_string(Data.P10 + "keien_licht_layout.json"))
+	for ruw in ll["tiles"]:
+		var t: Dictionary = ruw
+		var a := Vector2i(int(t["atlas"][0]), int(t["atlas"][1]))
+		licht.create_tile(a)
+		var td := licht.get_tile_data(a, 0)
+		td.terrain_set = 0
+		td.terrain = 1
+		for r in KEI_RICHTING:
+			td.set_terrain_peering_bit(KEI_RICHTING[r], 1)
+		td.probability = float(t["probability"])
+		td.set_meta("masker", 255)
+	# bron 2: macro-blokken en decals (geen terrain: tweede pass)
+	var macro := TileSetAtlasSource.new()
+	macro.texture = load(Data.P10 + "keien_macro_tileset.png")
+	macro.texture_region_size = Vector2i(16, 16)
+	ts.add_source(macro, 2)
+	var ml = JSON.parse_string(FileAccess.get_file_as_string(Data.P10 + "keien_macro_layout.json"))
+	for ruw in ml["blocks"]:
+		var b: Dictionary = ruw
+		for dy in int(b["size_tiles"][1]):
+			for dx in int(b["size_tiles"][0]):
+				macro.create_tile(Vector2i(int(b["atlas_tiles"][0]) + dx, int(b["atlas_tiles"][1]) + dy))
+	# bron 3: licht gras (terrain 0)
+	var gras := TileSetAtlasSource.new()
+	gras.texture = load(Data.P10 + "gras_licht_tileset.png")
+	gras.texture_region_size = Vector2i(16, 16)
+	ts.add_source(gras, 3)
+	for i in gras.texture.get_width() / 16:
+		gras.create_tile(Vector2i(i, 0))
+		var td := gras.get_tile_data(Vector2i(i, 0), 0)
+		td.terrain_set = 0
+		td.terrain = 0
+		for r in KEI_RICHTING:
+			td.set_terrain_peering_bit(KEI_RICHTING[r], 0)
+	return ts
+
+
+func _keien10(ouder: Node, o: Vector2) -> void:
+	var km := Data.p10_keien()
+	if km.is_empty() or not ResourceLoader.exists(Data.P10 + "plein_rand_tileset.png"):
+		return
+	var ts := kei_tileset()
+	keien10 = TileMapLayer.new()
+	keien10.name = "Keien10"
+	keien10.tile_set = ts
+	keien10.position = o
+	keien10.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	ouder.add_child(keien10)
+	var w := int(km["w"])
+	var h := int(km["h"])
+	var kei: Array[Vector2i] = []
+	var gras: Array[Vector2i] = []
+	for y in h:
+		for x in w:
+			var t := Vector2i(x, y)
+			if Data.p10_kei(t):
+				kei.append(t)
+			else:
+				for dy in [-1, 0, 1]:
+					for dx in [-1, 0, 1]:
+						if Data.p10_kei(t + Vector2i(dx, dy)) and not gras.has(t):
+							gras.append(t)
+	# eerst de grasrand (terrain 0), dan de keien (terrain 1): Godot kiest per cel de tegel met passende peering-bits
+	keien10.set_cells_terrain_connect(gras, 0, 0, false)
+	keien10.set_cells_terrain_connect(kei, 0, 1, false)
+	# gras alleen waar de kaart 'g' zegt (anders gebakken grond: zandpad, bloemen), in gras_licht-varianten
+	for t in gras:
+		if Data.p10_keien_teken(t) == "g":
+			keien10.set_cell(t, 3, Vector2i(Data.p10_hash(t) % 4, 0))
+		else:
+			keien10.erase_cell(t)
+	_kei_macro(km)
+
+
+## Tweede pass: put_ring onder de put, looplijnen (N-Z), daarna 2x2 macro-keien op vrije volle keitegels.
+func _kei_macro(km: Dictionary) -> void:
+	var lay := Data.p10_layout()
+	var ob := Vector2i(int(lay["ox"]), int(lay["oy"]))
+	var bezet := {}
+	var vol := func(t: Vector2i) -> bool: return Data.p10_kei_masker(t) == 255 and not bezet.has(t)
+	var past := func(p: Vector2i, m: Vector2i) -> bool:
+		for dy in m.y:
+			for dx in m.x:
+				if not vol.call(p + Vector2i(dx, dy)):
+					return false
+		return true
+	var leg := func(p: Vector2i, atlas: Vector2i, m: Vector2i) -> void:
+		for dy in m.y:
+			for dx in m.x:
+				keien10.set_cell(p + Vector2i(dx, dy), 2, atlas + Vector2i(dx, dy))
+				bezet[p + Vector2i(dx, dy)] = true
+	# put_ring: 48x48, de put (48x48, links_boven op het raster) staat precies op +24,+24
+	var put_mid := Vector2i(-100, -100)
+	for ruw in Data.PROPS:
+		if str(ruw.get("tex", "")) == "put":
+			var sp := Data.som_prop(ruw)
+			if not sp.is_empty():
+				var p: Vector2i = Vector2i(sp["links_boven"]) - ob
+				put_mid = p + Vector2i(1, 1)
+				if past.call(p, Vector2i(3, 3)):
+					leg.call(p, Vector2i(6, 0), Vector2i(3, 3))
+					keien10.set_meta("put_ring", p)
+	# looplijnen: 2x3, zo dicht mogelijk bij de as van de put, onder elkaar
+	var lijnen := 0
+	for y in int(km["h"]):
+		for dx in [0, -1, 1, -2, 2, -3, 3, 2, -4, 4]:
+			var p := Vector2i(put_mid.x + dx - 1, y)
+			if lijnen < 3 and past.call(p, Vector2i(2, 3)):
+				leg.call(p, Vector2i(0, 4) if lijnen % 2 == 0 else Vector2i(2, 4), Vector2i(2, 3))
+				lijnen += 1
+				break
+	keien10.set_meta("looplijnen", lijnen)
+	# macro 0..5 (2x2) op ~ de helft van de vrije volle plekken, vaste volgorde (hash)
+	var macro := [Vector2i(0, 0), Vector2i(2, 0), Vector2i(4, 0), Vector2i(0, 2), Vector2i(2, 2), Vector2i(4, 2)]
+	var n := 0
+	for y in int(km["h"]):
+		for x in int(km["w"]):
+			var p := Vector2i(x, y)
+			if Data.p10_hash(p) % 5 < 2 and past.call(p, Vector2i(2, 2)):
+				leg.call(p, macro[Data.p10_hash(p + Vector2i(7, 3)) % macro.size()], Vector2i(2, 2))
+				n += 1
+	keien10.set_meta("macro", n)

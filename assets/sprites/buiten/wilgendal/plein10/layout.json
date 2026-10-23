@@ -32,30 +32,12 @@
   "WW....................................WW",
   "WW....................................WW",
   "WW....................................WW",
-  "WW...................................~WW",
+  "WW...................................~~~",
   "WW~~~~~.~~~~~~~~~~~BB~~~~~~~.~~~~~~~~~WW",
-  "W~~~~~~~~~..........B~~~~~~~~~~.......WW",
+  "~~~~~~~~~~..........B~~~~~~~~~~.......WW",
   "W.....................................WW"
  ],
  "decor": [
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1049,
-   "y": -24,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 56
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1074,
-   "y": -39,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 41
-  },
   {
    "file": "loofboom_12.png",
    "x": 437,
@@ -66,61 +48,6 @@
    "voet": 73
   },
   {
-   "file": "loofboom_12.png",
-   "x": 1033,
-   "y": 9,
-   "soort": "boom",
-   "schaduw": "loofboom_12_schaduw.png",
-   "vast": [
-    [
-     66,
-     4
-    ]
-   ],
-   "voet": 72
-  },
-  {
-   "file": "loofboom_b_12.png",
-   "x": 1061,
-   "y": 5,
-   "soort": "boom",
-   "schaduw": "loofboom_b_12_schaduw.png",
-   "vast": [],
-   "voet": 68
-  },
-  {
-   "file": "loofboom_b_12.png",
-   "x": 1084,
-   "y": -14,
-   "soort": "boom",
-   "schaduw": "loofboom_b_12_schaduw.png",
-   "vast": [],
-   "voet": 49
-  },
-  {
-   "file": "loofboom_b_12.png",
-   "x": 1046,
-   "y": 33,
-   "soort": "boom",
-   "schaduw": "loofboom_b_12_schaduw.png",
-   "vast": [
-    [
-     66,
-     5
-    ]
-   ],
-   "voet": 96
-  },
-  {
-   "file": "loofboom_12.png",
-   "x": 1069,
-   "y": 39,
-   "soort": "boom",
-   "schaduw": "loofboom_12_schaduw.png",
-   "vast": [],
-   "voet": 102
-  },
-  {
    "file": "loofboom_b_12.png",
    "x": 437,
    "y": 65,
@@ -131,127 +58,12 @@
   },
   {
    "file": "loofboom_12.png",
-   "x": 1038,
-   "y": 54,
-   "soort": "boom",
-   "schaduw": "loofboom_12_schaduw.png",
-   "vast": [
-    [
-     66,
-     7
-    ]
-   ],
-   "voet": 117
-  },
-  {
-   "file": "loofboom_12.png",
-   "x": 1055,
-   "y": 65,
-   "soort": "boom",
-   "schaduw": "loofboom_12_schaduw.png",
-   "vast": [
-    [
-     67,
-     7
-    ]
-   ],
-   "voet": 128
-  },
-  {
-   "file": "loofboom_12.png",
-   "x": 1077,
-   "y": 65,
-   "soort": "boom",
-   "schaduw": "loofboom_12_schaduw.png",
-   "vast": [],
-   "voet": 128
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1048,
-   "y": 96,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     67,
-     10
-    ]
-   ],
-   "voet": 176
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1070,
-   "y": 82,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 162
-  },
-  {
-   "file": "loofboom_12.png",
    "x": 432,
    "y": 123,
    "soort": "boom",
    "schaduw": "loofboom_12_schaduw.png",
    "vast": [],
    "voet": 186
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1034,
-   "y": 129,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     66,
-     12
-    ]
-   ],
-   "voet": 209
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1056,
-   "y": 124,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 204
-  },
-  {
-   "file": "loofboom_b_12.png",
-   "x": 1079,
-   "y": 106,
-   "soort": "boom",
-   "schaduw": "loofboom_b_12_schaduw.png",
-   "vast": [],
-   "voet": 169
-  },
-  {
-   "file": "loofboom_b_12.png",
-   "x": 1046,
-   "y": 155,
-   "soort": "boom",
-   "schaduw": "loofboom_b_12_schaduw.png",
-   "vast": [
-    [
-     66,
-     13
-    ]
-   ],
-   "voet": 218
-  },
-  {
-   "file": "loofboom_12.png",
-   "x": 1068,
-   "y": 154,
-   "soort": "boom",
-   "schaduw": "loofboom_12_schaduw.png",
-   "vast": [],
-   "voet": 217
   },
   {
    "file": "kegelboom_licht_11.png",
@@ -270,15 +82,6 @@
    "schaduw": "loofboom_b_12_schaduw.png",
    "vast": [],
    "voet": 237
-  },
-  {
-   "file": "loofboom_b_12.png",
-   "x": 1079,
-   "y": 171,
-   "soort": "boom",
-   "schaduw": "loofboom_b_12_schaduw.png",
-   "vast": [],
-   "voet": 234
   },
   {
    "file": "loofboom_12.png",
@@ -311,15 +114,6 @@
     ]
    ],
    "voet": 280
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1071,
-   "y": 196,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 276
   },
   {
    "file": "loofboom_12.png",
@@ -732,48 +526,6 @@
    "voet": 581
   },
   {
-   "file": "kegelboom_licht_11.png",
-   "x": 505,
-   "y": -42,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     33,
-     2
-    ]
-   ],
-   "voet": 38
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 515,
-   "y": -22,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     33,
-     3
-    ]
-   ],
-   "voet": 58
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 528,
-   "y": -44,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     34,
-     2
-    ]
-   ],
-   "voet": 36
-  },
-  {
    "file": "loofboom_12.png",
    "x": 540,
    "y": -38,
@@ -792,20 +544,6 @@
    "voet": 24
   },
   {
-   "file": "kegelboom_licht_11.png",
-   "x": 566,
-   "y": -21,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     36,
-     3
-    ]
-   ],
-   "voet": 59
-  },
-  {
    "file": "loofboom_12.png",
    "x": 578,
    "y": -44,
@@ -813,15 +551,6 @@
    "schaduw": "loofboom_12_schaduw.png",
    "vast": [],
    "voet": 19
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 597,
-   "y": -39,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 41
   },
   {
    "file": "loofboom_12.png",
@@ -833,20 +562,6 @@
    "voet": 27
   },
   {
-   "file": "kegelboom_licht_11.png",
-   "x": 622,
-   "y": -24,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     40,
-     3
-    ]
-   ],
-   "voet": 56
-  },
-  {
    "file": "loofboom_12.png",
    "x": 629,
    "y": -44,
@@ -856,15 +571,6 @@
    "voet": 19
   },
   {
-   "file": "kegelboom_licht_11.png",
-   "x": 647,
-   "y": -41,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 39
-  },
-  {
    "file": "loofboom_12.png",
    "x": 656,
    "y": -46,
@@ -872,20 +578,6 @@
    "schaduw": "loofboom_12_schaduw.png",
    "vast": [],
    "voet": 17
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 674,
-   "y": -24,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     43,
-     3
-    ]
-   ],
-   "voet": 56
   },
   {
    "file": "kegelboom_licht_11.png",
@@ -902,94 +594,6 @@
    "voet": 36
   },
   {
-   "file": "kegelboom_licht_11.png",
-   "x": 699,
-   "y": -39,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     45,
-     2
-    ]
-   ],
-   "voet": 41
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 713,
-   "y": -44,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     46,
-     2
-    ]
-   ],
-   "voet": 36
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 724,
-   "y": -24,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     46,
-     3
-    ]
-   ],
-   "voet": 56
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 736,
-   "y": -41,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     47,
-     2
-    ]
-   ],
-   "voet": 39
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 751,
-   "y": -41,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 39
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 761,
-   "y": -39,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 41
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 775,
-   "y": -26,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     49,
-     3
-    ]
-   ],
-   "voet": 54
-  },
-  {
    "file": "loofboom_12.png",
    "x": 785,
    "y": -40,
@@ -997,15 +601,6 @@
    "schaduw": "loofboom_12_schaduw.png",
    "vast": [],
    "voet": 23
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 806,
-   "y": -39,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 41
   },
   {
    "file": "loofboom_12.png",
@@ -1052,177 +647,6 @@
    "schaduw": "loofboom_12_schaduw.png",
    "vast": [],
    "voet": 23
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 865,
-   "y": -38,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     55,
-     2
-    ]
-   ],
-   "voet": 42
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 882,
-   "y": -23,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     56,
-     3
-    ]
-   ],
-   "voet": 57
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 895,
-   "y": -38,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 42
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 906,
-   "y": -43,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 37
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 921,
-   "y": -41,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 39
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 933,
-   "y": -23,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     59,
-     3
-    ]
-   ],
-   "voet": 57
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 946,
-   "y": -46,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 34
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 962,
-   "y": -41,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     61,
-     2
-    ]
-   ],
-   "voet": 39
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 969,
-   "y": -38,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     62,
-     2
-    ]
-   ],
-   "voet": 42
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 985,
-   "y": -22,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     63,
-     3
-    ]
-   ],
-   "voet": 58
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 995,
-   "y": -39,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     63,
-     2
-    ]
-   ],
-   "voet": 41
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1010,
-   "y": -37,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     64,
-     2
-    ]
-   ],
-   "voet": 43
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1024,
-   "y": -42,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [],
-   "voet": 38
-  },
-  {
-   "file": "kegelboom_licht_11.png",
-   "x": 1034,
-   "y": -22,
-   "soort": "boom",
-   "schaduw": "kegelboom_licht_11_schaduw.png",
-   "vast": [
-    [
-     66,
-     3
-    ]
-   ],
-   "voet": 58
   },
   {
    "file": "loofboom_12.png",
@@ -1353,15 +777,6 @@
   },
   {
    "file": "loofboom_b_12.png",
-   "x": 1070,
-   "y": 140,
-   "soort": "boom",
-   "schaduw": "loofboom_b_12_schaduw.png",
-   "vast": [],
-   "voet": 203
-  },
-  {
-   "file": "loofboom_b_12.png",
    "x": 480,
    "y": 468,
    "soort": "boom",
@@ -1407,7 +822,16 @@
   },
   {
    "file": "bloemstrook_b_13.png",
-   "x": 776,
+   "x": 728,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "bloemstrook_13.png",
+   "x": 792,
    "y": 162,
    "soort": "vloer",
    "schaduw": "",
@@ -1426,6 +850,24 @@
   {
    "file": "bloemstrook_b_13.png",
    "x": 936,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "bloemstrook_b_13.png",
+   "x": 1000,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "bloemstrook_13.png",
+   "x": 1048,
    "y": 162,
    "soort": "vloer",
    "schaduw": "",
@@ -1631,48 +1073,6 @@
     ],
     [
      53,
-     14
-    ]
-   ],
-   "voet": 228
-  },
-  {
-   "file": "bloembed_c_10.png",
-   "x": 1002,
-   "y": 196,
-   "soort": "prop",
-   "schaduw": "bloembed_c_10_schaduw.png",
-   "vast": [
-    [
-     62,
-     13
-    ],
-    [
-     63,
-     13
-    ],
-    [
-     64,
-     13
-    ],
-    [
-     65,
-     13
-    ],
-    [
-     62,
-     14
-    ],
-    [
-     63,
-     14
-    ],
-    [
-     64,
-     14
-    ],
-    [
-     65,
      14
     ]
    ],
@@ -1887,12 +1287,16 @@
    "y": -11
   },
   {
-   "x": 751,
-   "y": -11
+   "x": 797,
+   "y": -14
   },
   {
    "x": 973,
    "y": 242
+  },
+  {
+   "x": 1065,
+   "y": -12
   }
  ],
  "brug_px": [

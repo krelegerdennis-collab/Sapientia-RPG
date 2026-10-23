@@ -173,6 +173,12 @@ func zet_poort(t: Vector2i, open: bool) -> void:
 const V8_JSON := "res://assets/tilesets/som/wilgendal/grond_v8.json"
 const V8_PNG := "res://assets/tilesets/som/wilgendal/grond_v8.png"
 var v8: TileMapLayer
+const GRAS_LICHT := "res://assets/sprites/buiten/wilgendal/plein10/gras_licht_tileset.png"
+
+
+## Licht gras op deze cel? Gras (ook onder bomen en hekken), buiten het plein-blok (dat heeft eigen grond).
+static func gras_licht_hier(t: Vector2i, blok: Rect2i) -> bool:
+	return ".TFG".contains(Data.GROND[t.y][t.x]) and not blok.has_point(t)
 
 
 func _v8() -> void:
@@ -191,6 +197,20 @@ func _v8() -> void:
 	for i in int(d["uniek"]):
 		bron.create_tile(Vector2i(i % kol, i / kol))
 	ts.add_source(bron, 0)
+	# pass 3: licht gras (RPG ART gras_licht, 4 varianten) buiten het plein-blok: zelfde basis (74963e) als
+	# de gebakken plein-grond, dus geen naad meer tussen blok en dorp. Paden en hekken houden hun v8-tegel.
+	var licht: Texture2D = load(GRAS_LICHT) if ResourceLoader.exists(GRAS_LICHT) else null
+	if licht != null:
+		var gb := TileSetAtlasSource.new()
+		gb.texture = licht
+		gb.texture_region_size = Vector2i(16, 16)
+		for i in licht.get_width() / 16:
+			gb.create_tile(Vector2i(i, 0))
+		ts.add_source(gb, 1)
+	var blok := Rect2i()
+	var lay := Data.p10_layout()
+	if not lay.is_empty():
+		blok = Rect2i(int(lay["ox"]), int(lay["oy"]), int(lay["w"]), int(lay["h"]))
 	v8 = TileMapLayer.new()
 	v8.name = "SomV8"
 	v8.tile_set = ts
@@ -199,6 +219,9 @@ func _v8() -> void:
 	for y in Data.H:
 		for x in Data.W:
 			if Data.GROND[y][x] == "~":
+				continue
+			if licht != null and gras_licht_hier(Vector2i(x, y), blok):
+				v8.set_cell(Vector2i(x, y), 1, Vector2i(Data.p10_hash(Vector2i(x, y)) % (licht.get_width() / 16), 0))
 				continue
 			var i := int(cellen[y * Data.W + x])
 			v8.set_cell(Vector2i(x, y), 0, Vector2i(i % kol, i / kol))

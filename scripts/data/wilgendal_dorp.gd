@@ -28,7 +28,9 @@ const GERRIT_TEGEL := Vector2i(14, 30)
 ## v4 (Dennis 14 okt 2026): grotere SoM-huizen (6 breed) en paden van 2-3 tegels; kaart 64x40.
 ## Beek: één tegel breed, rij BEEK_RIJ over de hele breedte; de brug (BRUG) is beloopbaar.
 const BEEK_RIJ := 25
-## Plein 10: brug_11 over de beek in het blok (kolommen 48-49, beek-rijen 29-30); de beek buiten het blok blijft rij BEEK_RIJ.
+## Plein 10: brug_11 over de beek in het blok (kolommen 48-49, beek-rijen 29-30). Buiten het blok ligt de beek op
+## rij BEEK_RIJ en buigt bij het bos omlaag (links kolom 28 tot rij 30, rechts kolom 69 tot rij 28) onder het bosdak
+## het blok in, zodat het water één doorlopende beek is (pass 3).
 const BRUG := Rect2i(48, 29, 2, 2)
 ## Hoogstens zoveel sfeer-NPC's op het marktplein (besluit Dennis: 2-3).
 const PLEIN_MAX := 2
@@ -60,11 +62,11 @@ const GROND: Array[String] = [
 	"T............................WW....................................WW....................T",
 	"T....................FFGFF...WW....................................WW....................T",
 	"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~WW....................................WW~~~~~~~~~~~~~~~~~~~~~",
-	"T............................WW....................................WW....................T",
-	"T............................WW....................................WW....................T",
-	"T............................WW...................................~WW....................T",
-	"T.....=======================WW~~~~~.~~~~~~~~~~~BB~~~~~~~.~~~~~~~~~WW....................T",
-	"T.....=======================W~~~~~~~~~..........B~~~~~~~~~~.......WW....................T",
+	"T...........................~WW....................................WW~...................T",
+	"T...........................~WW....................................WW~...................T",
+	"T...........................~WW...................................~~~~...................T",
+	"T.....=====================.~WW~~~~~.~~~~~~~~~~~BB~~~~~~~.~~~~~~~~~WW....................T",
+	"T.....=====================.~~~~~~~~~~~..........B~~~~~~~~~~.......WW....................T",
 	"T............................W.....................................WW....................T",
 	"T..............................................===.......................................T",
 	"T..............................................===.......................................T",
@@ -211,6 +213,23 @@ const PANDEN := [
 		"map_naam": "Bramwell and Elsie's House",
 		"dicht": "",
 		"bord": "The hearth is still glowing. Bramwell and Elsie are out on the square.",
+	},
+	{
+		## pass 3: rietgedekt huis rechtsboven op het plein (RPG ART huis_riet_11); geen winkel, deur zit op slot.
+		"id": "riet",
+		"kind": "huis",
+		"shop_id": "",
+		"oorsprong": Vector2i(62, 9),
+		"maat": Vector2i(3, 3),
+		"deur": Vector2i(65, 11),
+		"icoon": "",
+		"tex": "huis_dicht",
+		"bewoond": false,
+		"keeper_naam": "",
+		"keeper_lines": [],
+		"sfeer": "",
+		"map_naam": "",
+		"dicht": "The door is locked. Someone is away for the day.",
 	},
 	{
 		"id": "dicht_west",
@@ -588,8 +607,10 @@ const P10 := "res://assets/sprites/buiten/wilgendal/plein10/"
 const P10_HUIZEN := {
 	"wapen": {"file": "wilgendal_wapen_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
 	"pantser": {"file": "huis_smal_11", "maat": Vector2i(6, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
-	## geen eigen art voor de derde plek: het smalle huis gespiegeld (tools/plein10_bouw.py), deur op kolom 2
-	"accessoire": {"file": "huis_smal_11_spiegel", "maat": Vector2i(6, 10), "deur": Vector2i(2, 9), "muur_rijen": 4},
+	## pass 3: derde plek = huis_dax_11 (zoals de mockup); het gespiegelde smalle huis is weg
+	"accessoire": {"file": "huis_dax_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+	## pass 3: rietgedekt huis van RPG ART rechtsboven (7x10, deur kolom 3, rij 6-9 botst, dak rij 0-5 erachter lopen)
+	"riet": {"file": "huis_riet_11", "maat": Vector2i(7, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
 	"magie": {"file": "wilgendal_magie_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
 	"dax": {"file": "huis_dax_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
 	"mien": {"file": "huis_vleugel_11", "maat": Vector2i(12, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
@@ -647,13 +668,61 @@ static func boom_op(t: Vector2i) -> bool:
 	return _p10_vast.has(t)
 
 
+## Pass 3: keienplein-kaart (tools/plein10_keien.py), bloktegels: k = kei, g = gras_licht, . = gebakken grond.
+static var _p10_keien: Variant = null
+
+
+static func p10_keien() -> Dictionary:
+	if _p10_keien == null:
+		_p10_keien = {}
+		var pad := P10 + "keien_map.json"
+		if FileAccess.file_exists(pad):
+			var d = JSON.parse_string(FileAccess.get_file_as_string(pad))
+			if d is Dictionary:
+				_p10_keien = d
+	return _p10_keien
+
+
+## Teken op bloktegel t (buiten het blok: ".").
+static func p10_keien_teken(t: Vector2i) -> String:
+	var km := p10_keien()
+	if km.is_empty() or t.x < 0 or t.y < 0 or t.x >= int(km["w"]) or t.y >= int(km["h"]):
+		return "."
+	return str(km["kaart"][t.y])[t.x]
+
+
+static func p10_kei(t: Vector2i) -> bool:
+	return p10_keien_teken(t) == "k"
+
+
+## blob47-masker van een keitegel (N1 NE2 E4 SE8 S16 SW32 W64 NW128; schuin alleen met beide zijden).
+static func p10_kei_masker(t: Vector2i) -> int:
+	if not p10_kei(t):
+		return -1
+	var zijden := [[Vector2i(0, -1), 1], [Vector2i(1, 0), 4], [Vector2i(0, 1), 16], [Vector2i(-1, 0), 64]]
+	var m := 0
+	for z in zijden:
+		if p10_kei(t + z[0]):
+			m |= int(z[1])
+	var hoeken := [[Vector2i(1, -1), 2, 1, 4], [Vector2i(1, 1), 8, 4, 16], [Vector2i(-1, 1), 32, 16, 64], [Vector2i(-1, -1), 128, 64, 1]]
+	for c in hoeken:
+		if (m & int(c[2])) and (m & int(c[3])) and p10_kei(t + c[0]):
+			m |= int(c[1])
+	return m
+
+
+## Vaste hash per tegel (varianten zonder toeval: screenshots en tests blijven gelijk).
+static func p10_hash(t: Vector2i) -> int:
+	return absi((t.x * 73856093) ^ (t.y * 19349663))
+
+
 static func p10_vast_tegels() -> Array:
 	p10_layout()
 	return _p10_vast.keys()
 
 
 ## Beektegel (niet de brug)?
-## Plein 10: de beek staat in GROND ("~"): rij BEEK_RIJ buiten het blok, de kronkelende beek erin.
+## Plein 10: de beek staat in GROND ("~"): rij BEEK_RIJ buiten het blok met een bocht naar het blok, de kronkelende beek erin.
 static func beek(t: Vector2i) -> bool:
 	if t.x < 0 or t.y < 0 or t.x >= W or t.y >= H:
 		return false

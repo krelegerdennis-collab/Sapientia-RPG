@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Plein 10 (RPG ART art_10) -> Wilgendal. Maakt assets/sprites/buiten/wilgendal/plein10/layout.json,
-bos_rand.png (bosdak-band met openingen voor de straat), gespiegeld smal huis, schaduwen voor oude props,
+bos_rand.png (bosdak-band met openingen voor de straat), schaduwen voor oude props,
 en zet het blok (40x32 tegels, plein_mockup.png) in GROND van scripts/data/wilgendal_dorp.gd.
 Kopieert art alleen als het doelbestand nog niet bestaat (handwerk wordt nooit overschreven).
 Gebruik: python3 tools/plein10_bouw.py [/workspace/art_10]"""
@@ -60,10 +60,10 @@ for n in ('plein_grond_tileset', 'bos_dak_13', 'rook_4f', 'lantaarnpaal_flikker_
     kopie(n)
 if not os.path.exists(os.path.join(DST, 'plein_grond_map.json')):
     shutil.copy(os.path.join(OUT, 'plein_grond_map.json'), DST)
-# gespiegeld smal huis (derde pand bovenaan; geen eigen art voor die plek)
-sp = L('huis_smal_11').transpose(Image.FLIP_LEFT_RIGHT)
-sp.save(os.path.join(DST, 'huis_smal_11_spiegel.png'))
-shadow_of(sp, 12, 4, 0.45).save(os.path.join(DST, 'huis_smal_11_spiegel_schaduw.png'))
+# pass 3: huis_riet_11 (RPG ART, 7x10) rechtsboven; het gespiegelde smalle huis is weg (accessoire = huis_dax_11)
+for n in ('huis_riet_11', 'huis_riet_11_schaduw', 'huis_dax_11', 'huis_dax_11_schaduw'):
+    kopie(n)
+RIET = (528, 32, 112, 160)   # blok-px: x, y, b, h (deur kolom 3 -> dorpstegel (65, 11))
 # schaduwen voor de oude SoM-props en de flikkerlamp (frame 0)
 PROPS = os.path.join(REPO, 'assets/sprites/som/wilgendal/props')
 for n in ('put', 'bank', 'bloembak', 'lantaarn'):
@@ -144,10 +144,10 @@ for i, (x, y) in enumerate(trees):
     n = ('loofboom_12', 'kegelboom_licht_11', 'loofboom_b_12', 'loofboom_12')[(i * 7 + x // 13) % 4]
     objs.append((n, x + (0 if i % 4 == 1 else -2), y + (16 if i % 4 != 1 else 0), 'boom'))
 for x, y in ((-14, 214), (600, 236), (-10, 330), (606, 140), (16, 468), (560, 486)): objs.append(('loofboom_b_12', x, y, 'boom'))
-HUIS = ((16, 128), (144, 96), (272, 96), (400, 128))   # blok-px van de vier panden bovenaan (op tegels)
+HUIS = ((16, 128), (144, 96), (256, 128), (400, 128), (528, 112))   # blok-px van de vier panden bovenaan (op tegels)
 for i, (hx, hw) in enumerate(HUIS):
-    objs.append(('bloemstrook_13' if i % 2 else 'bloemstrook_b_13', hx + 8 if hx != 272 else hx + 40, 162, 'vloer'))
-    if hw == 128: objs.append(('bloemstrook_b_13' if i % 2 else 'bloemstrook_13', hx + hw - 56, 162, 'vloer'))
+    objs.append(('bloemstrook_13' if i % 2 else 'bloemstrook_b_13', hx + 8, 162, 'vloer'))
+    if hw >= 112: objs.append(('bloemstrook_b_13' if i % 2 else 'bloemstrook_13', hx + hw - 56, 162, 'vloer'))
 for n, x, y in (('krat_10', 150, 250), ('ton_10', 92, 246), ('zak_10', 196, 264), ('zak_graan_10', 206, 270),
                 ('kar_10', 84, 286), ('zak_10', 72, 318), ('ton_10', 512, 250), ('krat_10', 530, 268),
                 ('bloembed_10', 112, 196), ('bloembed_b_10', 352, 196), ('bloembed_c_10', 538, 196),
@@ -165,16 +165,23 @@ for ty in range(TH):
 # brug (blok-px 296..344, 450..498): kolommen 19-20 over de beek beloopbaar
 brug = [(tx, ty) for ty in range(TH) for tx in BRUG_KOL if kaart[ty][tx] == '~']
 for tx, ty in brug: kaart[ty][tx] = 'B'
+# pass 3: de oude beek (rij 25 buiten het blok) buigt omlaag en loopt onder het bosdak het blok in:
+# links via blok (0,30), rechts via blok (38,28)-(39,28); de rest van de bocht staat buiten het blok in GROND.
+for tx, ty in ((0, 30), (38, 28), (39, 28)): kaart[ty][tx] = '~'
 # beek dicht tot aan de bosrand (geen lekken langs de oever)
 decor = []; bezet = set()
 for n, x, y, soort in objs:
     im = L(n)
+    b0 = bbox(im)
+    if soort in ('boom', 'prop') and x + b0[2] > RIET[0] and x + b0[0] < RIET[0] + RIET[2] and y + b0[1] < RIET[1] + RIET[3] + 24 and y + b0[3] > RIET[1]:
+        continue                                 # pass 3: geen bomen/hek over het rietgedekte huis
     if y + im.height < 8 or x + im.width < 0 or x > TW * 16: continue
     vast = []
     if soort == 'boom':
         b = bbox(im); ft = ((x + (b[0] + b[2]) // 2) // 16, (y + b[3] - 4) // 16)
         if not (0 <= ft[0] < TW and 0 <= ft[1] < TH): ft = None
         if ft and in_gap(*ft): continue          # geen boom in de straat-opening
+        if ft and any(hx // 16 <= ft[0] < (hx + hw) // 16 and 2 <= ft[1] < 12 for hx, hw in HUIS): continue   # stam onder een dak
         if ft and kaart[ft[1]][ft[0]] == '.': vast = [ft]
     elif soort == 'prop':
         vast = [t for t in voet_tegels(im, x, y) if 0 <= t[0] < TW and 0 <= t[1] < TH and kaart[t[1]][t[0]] == '.']
@@ -189,13 +196,14 @@ for n, x, y, soort in objs:
                   'voet': y + OY * 16 + bbox(im)[3]})
 # rook op de schoorstenen (bovenste ondoorzichtige kolommen van het pand), anker onder-midden (x+11, y+46)
 rook = []
-for n, hx, hy in (('wilgendal_wapen_11', 16, 32), ('huis_smal_11', 144, 32), ('huis_smal_11_spiegel', 272, 32), ('huis_dax_11', 432, 288)):
-    im = Image.open(os.path.join(DST, n + '.png')) if n.endswith('spiegel') else L(n)
+for n, hx, hy in (('wilgendal_wapen_11', 16, 32), ('huis_smal_11', 144, 32), ('huis_dax_11', 256, 32), ('huis_dax_11', 432, 288)):
+    im = L(n)
     for yy in range(im.height):
         xs = [x for x in range(im.width) if im.getpixel((x, yy))[3]]
         if xs: break
     cx = (xs[0] + xs[-1]) // 2
     rook.append({'x': hx + cx - 11 + OX * 16, 'y': hy + yy - 46 + OY * 16})
+rook.append({'x': RIET[0] + 84 - 11 + OX * 16, 'y': RIET[1] + 2 - 46 + OY * 16})   # spec RPG ART: onder-midden op (x+84, y+2)
 lay = {'ox': OX, 'oy': OY, 'w': TW, 'h': TH, 'kaart': [''.join(r) for r in kaart], 'decor': decor, 'rook': rook,
        'brug_px': [296 + OX * 16, 450 + OY * 16]}
 json.dump(lay, open(os.path.join(DST, 'layout.json'), 'w'), indent=1)

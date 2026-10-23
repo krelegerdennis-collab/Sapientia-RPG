@@ -750,3 +750,11 @@ assets/sprites/buiten/wilgendal/plein10/zak_10.png
 assets/sprites/buiten/wilgendal/plein10/zak_10_schaduw.png
 assets/sprites/buiten/wilgendal/plein10/zak_graan_10.png
 assets/sprites/buiten/wilgendal/plein10/zak_graan_10_schaduw.png
+# Plein 10 pass 3 (art_10/out, rand10/rand11): keienplein-autotile, licht gras, rietgedekt huis.
+# De kei_*.png van pass 1 (regels hierboven) zijn uit het project verwijderd; die regels wijzen nergens meer naar.
+assets/sprites/buiten/wilgendal/plein10/plein_rand_tileset.png
+assets/sprites/buiten/wilgendal/plein10/keien_licht_tileset.png
+assets/sprites/buiten/wilgendal/plein10/keien_macro_tileset.png
+assets/sprites/buiten/wilgendal/plein10/gras_licht_tileset.png
+assets/sprites/buiten/wilgendal/plein10/huis_riet_11.png
+assets/sprites/buiten/wilgendal/plein10/huis_riet_11_schaduw.png
