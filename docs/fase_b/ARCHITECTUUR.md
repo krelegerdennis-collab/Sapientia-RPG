@@ -2,7 +2,8 @@
 
 Action-co-op op lokaal wifi, maximaal 4 spelers. De telefoon van de eigenaar is de host.
 Vrienden stappen in als Seren, Vesper of een andere party-held. Fase C vult lege stoelen
-met AI en gaat daarna via een relay het internet op. Dat relay-ontwerp hoort niet in deze nota.
+met AI en gaat daarna via een relay het internet op. Het relay-protocol zelf staat hier niet;
+de save-eisen van fase C wel, in [Fase C requirements](#fase-c-requirements).
 
 Dit document is gelezen tegen de Action-code zoals die nu op `main` staat (`scripts/som/som_arena.gd`
 en wat daaromheen hangt). De module `scripts/net/` is nog aan geen enkele scène gekoppeld.
@@ -12,53 +13,47 @@ en de lobby raken die scripts niet aan.
 Vriendenmodus (`pvp/`, turn-based, 1 tegen 1, poorten 7777–7779 in `pvp/scripts/net/lan_transport.gd`)
 is een ander spel. Fase B gebruikt 38421–38423 en deelt geen peer met die lobby.
 
-## Vragen voor Dennis
+## Besluiten
 
-Elke open keuze staat hier als **QUESTION**, met het voorstel dat de lobby nu al volgt
-zodat een latere PR niet hoeft te gokken. Een "ja" op het voorstel is genoeg.
+Dennis heeft de tien voorstellen goedgekeurd zoals ze stonden. Fase B volgt ze.
+Waar fase C er later van afwijkt, staat dat onder [Fase C requirements](#fase-c-requirements).
 
-1. **QUESTION — wie speelt wie?** Voorstel: de host is altijd Dax (`dennis`, stoel 0).
-   Gasten krijgen de eerste vrije held uit Seren (`lotte`), Vesper (`noor`), Kael (`kael`).
-   Orion zit niet in die vier. De party-limiet is 4 helden (`scripts/party_limiet.gd:10`).
-   Klopt die volgorde, en blijft Orion buiten fase B?
+1. **DECISION — wie speelt wie.** De host is Dax (`dennis`, stoel 0). Gasten krijgen de
+   eerste vrije held uit Seren (`lotte`), Vesper (`noor`), Kael (`kael`). Orion zit niet
+   in fase B. De party-limiet is 4 helden (`scripts/party_limiet.gd:10`).
 
-2. **QUESTION — lege stoelen in fase B.** Voorstel: een stoel zonder gast is leeg.
-   Geen `SomAlly`-AI tot fase C. Nu vechten de niet-bestuurde helden wél mee
-   (`scripts/som/som_arena.gd:127`, `scripts/som/som_ally.gd:87`).
+2. **DECISION — lege stoelen.** Een stoel zonder gast is leeg. Geen `SomAlly`-AI tot fase C.
+   Nu vechten de niet-bestuurde helden nog wél mee (`scripts/som/som_arena.gd:127`,
+   `scripts/som/som_ally.gd:87`); de co-op-kamer doet dat niet.
 
-3. **QUESTION — van wie is de wereld?** Voorstel: alleen de save van de host telt.
-   Een gast neemt goud, EXP, items en Codex-pagina's niet mee naar zijn eigen spel.
+3. **DECISION — van wie is de wereld.** Alleen de save van de host telt. Een gast neemt
+   goud, EXP, items en Codex-pagina's niet mee naar zijn eigen spel.
 
-4. **QUESTION — ringmenu.** Openen zet nu `get_tree().paused = true` (`scripts/som/som_ring.gd:83`)
-   en het hele gevecht staat stil. Voorstel voor co-op: de ring is alleen lokaal UI;
-   de host simuleert door. Mag een speler shoppen/toveren terwijl de anderen blijven lopen?
+4. **DECISION — ringmenu.** De ring is lokale UI. De host simuleert door. Openen mag
+   `get_tree().paused` niet zetten (`scripts/som/som_ring.gd:83` doet dat nu wel, in solo).
 
-5. **QUESTION — host op slot.** Godot stopt met `_process` bij `NOTIFICATION_APPLICATION_PAUSED`.
-   ENet valt dan na ongeveer 5–30 s weg (standaard ENet-timeout: factor 32, minimum 5000 ms,
-   maximum 30000 ms). Voorstel: de sessie is dan weg, geen host-wissel. Mag de host binnen
-   die 30 s terugkomen en doorgaan, of is "even op slot" altijd game over voor de tafel?
+5. **DECISION — host op slot.** Godot stopt met `_process` bij `NOTIFICATION_APPLICATION_PAUSED`.
+   ENet valt dan na ongeveer 5–30 s weg (standaard timeout: factor 32, minimum 5000 ms,
+   maximum 30000 ms). De sessie is dan weg. Geen host-wissel en geen doorgaan na die timeout.
 
-6. **QUESTION — gast weg.** De lobby maakt het personage meteen vrij. Rejoin krijgt de
-   laagste vrije stoel en, als die nog vrij is, dezelfde held. Voorstel: zo houden, geen
-   reservering van een paar seconden. Akkoord?
+6. **DECISION — gast weg.** Het personage is meteen vrij. Geen reservering. Rejoin krijgt
+   de laagste vrije stoel en, als die nog vrij is, dezelfde held.
 
-7. **QUESTION — welke save?** Het verhaal van de host (`story_step`, vlaggen, quests),
-   of een losse Action-sandbox zoals de SoM-knop (`user://som_save_1.json` in
-   `scripts/data/som_data.gd:17`)? Voorstel voor de prototype-kamer: de sandbox, niet het
-   verhaal. Het verhaal blijft singleplayer tot fase C.
+7. **DECISION — welke save.** De prototype-kamer is de Action-sandbox
+   (`user://som_save_1.json`, `scripts/data/som_data.gd:17`), niet het verhaal
+   (`story_step`, vlaggen, quests). Het verhaal blijft singleplayer.
 
-8. **QUESTION — bazen.** Bazen starten het turn-based scherm (`scripts/som/som_arena.gd:5`,
-   `scripts/game_state.gd:1821`). Dat scherm kent één lokale partij. Voorstel: in fase B
-   geen baasgevecht in co-op (de kamer blijft Action, een baas weigert net als nu).
-   Gasten kijken niet mee in een turn-based gevecht. Akkoord?
+8. **DECISION — bazen.** Geen baasgevecht in co-op. De kamer blijft Action; een baas weigert
+   net als nu (`scripts/som/som_arena.gd:5`, `scripts/game_state.gd:1821`). Gasten kijken
+   niet mee in een turn-based gevecht.
 
-9. **QUESTION — target lock.** In deze branch is er nog geen speler-lock (fase A).
-   Wat er wél is: elke vijand jaagt op één held-id (`scripts/som/som_arena.gd:52`,
-   `_target_for` op regel 660). Voorstel: straks één lock per speler (zijn eigen doel
-   voor aanval en spreuk), en het vijand-doel blijft van de host. Geen gedeelde party-lock.
+9. **DECISION — target lock.** Eén lock per speler (zijn doel voor aanval en spreuk).
+   Het vijand-doel (`enemies[m]["target"]`, `scripts/som/som_arena.gd:52` en `_target_for`
+   op regel 660) blijft van de host. Geen gedeelde party-lock. De solo-lock van fase A
+   zit nog niet in deze branch.
 
-10. **QUESTION — één LAN-scherm of twee?** Voorstel: co-op en Vriendenmodus blijven
-    twee ingangen en twee poortblokken. Later mag het titelscherm ze naast elkaar zetten.
+10. **DECISION — twee LAN-ingangen.** Co-op en Vriendenmodus blijven twee ingangen en twee
+    poortblokken (38421–38423 naast 7777–7779). Het titelscherm mag ze later naast elkaar zetten.
 
 ## Model: host is de baas
 
@@ -149,9 +144,9 @@ als host getoond (`parse_announce`: wel parsen, `compatible` false).
 Op één pc komt broadcast naar 255.255.255.255 vaak niet terug op 127.0.0.1.
 De suite test daarom de parser, en één unicast naar de loopback. Productie blijft broadcast.
 
-Er is nog geen "tik het IP in". Dat is de uitweg als multicast op een telefoon dood
-blijft (zie Android). **QUESTION** 10 dekt of dat een zichtbare knop moet worden;
-het voorstel is: ja, als fallback, niet als de enige weg.
+Er is nog geen veld om een IP in te tikken. Dat blijft de uitweg als multicast op een
+telefoon dood blijft (zie Android): een fallback, niet de enige weg. DECISION 10 gaat
+over twee LAN-ingangen, niet over dat veld.
 
 ## Android
 
@@ -181,7 +176,7 @@ Pauze en hervat:
   moet een stille gast als stilstaande input behandelen, niet als "laatste richting vasthouden".
 - Hervat: meteen pollen. Is de peer weg, Engelse melding "Connection lost" en terug naar
   de lobby. Geen stille hervatting van een half dooie socket.
-- Host weg of host-app dood: de sessie stopt. Geen host-migratie in fase B (QUESTION 5).
+- Host weg of host-app dood: de sessie stopt. Geen host-migratie (DECISION 5).
 
 Disconnect van een gast: stoel vrij, held weer kiesbaar, de host blijft de kamer draaien.
 De verbinding van de host die sterft: iedereen eruit. De lobby doet het stoel-stuk al;
@@ -201,8 +196,10 @@ Regels voor de PR die de kamer aansluit:
 - Bij een volledige disconnect is er niets te mergen. Wie opnieuw joint, ziet de
   wereld zoals de host die nú heeft, niet zoals bij zijn vertrek.
 
-Dat volgt voorstel QUESTION 3 en 7. Tot die vraag beantwoord is, schrijft de
-netcode-module zelf niets naar `user://`.
+Dat is DECISION 3 en 7. De module schrijft zelf niets naar `user://`.
+Fase C schrijft de gast wél terug, maar naar zijn eigen save en pas aan het eind
+van de sessie. Zie [Fase C requirements](#fase-c-requirements). Fase B mag beloningen
+daarom niet in één tas zonder eigenaar stoppen.
 
 ## Audit — wat multiplayer blokkeert
 
@@ -220,13 +217,13 @@ De rest blokkeert, plus een paar statische variabelen en de engine-singleton `In
 | Staat | Regel | Refactor |
 |---|---|---|
 | `leader_id` | 48 | per stoel, niet één globale bestuurde held. De host kent de stoel→held-map |
-| `party`, `party_bench` | 203, 205 | host-kopie. Gasten krijgen een read-only snapshot. Mutaties (`give_exp` `:2359`) alleen op de host |
-| `inventory`, `gold` | 210, 211 | zelfde poort. `SomArena` schrijft hier nu direct (`:529`, `:538`) |
-| `codex_pages`, `codex_active`, `codex_next_id` | 149–151 | vangst via `codex_add` `:2396` alleen op de host |
-| `story_step`, `story_flags` | 186–187 | singleplayer tot QUESTION 7 anders beslist. Geen sync in fase B |
+| `party`, `party_bench` | 203, 205 | host-kopie van wie er nu in de kamer staat. Mutaties (`give_exp` `:2359`) alleen op de host. Sleutel is de stoel, niet alleen de held-id |
+| `inventory`, `gold` | 210, 211 | zelfde poort. `SomArena` schrijft hier nu direct (`:529`, `:538`). Fase B: één wereld-tas. Elke grant noemt wel een stoel |
+| `codex_pages`, `codex_active`, `codex_next_id` | 149–151 | vangst via `codex_add` `:2396` alleen op de host, met stoel van de vanger |
+| `story_step`, `story_flags` | 186–187 | singleplayer (DECISION 7). Geen sync in fase B |
 | `quest_progress` | 198 | zelfde. ECHO-log is fase A; niet aankoppelen |
 | `som_mode` | 214 | de host beslist Action. Een gast met Classic mag de kamer niet lokaal omschakelen |
-| `in_battle`, `pending_*`, `map_monster_battle` | 254, 248, 260 | baasgevecht is een scènewissel naar één lokaal gevecht (`start_battle` `:1821`). Co-op gaat daar niet doorheen (QUESTION 8) |
+| `in_battle`, `pending_*`, `map_monster_battle` | 254, 248, 260 | baasgevecht is een scènewissel naar één lokaal gevecht (`start_battle` `:1821`). Co-op gaat daar niet doorheen (DECISION 8) |
 | `defeated_map_monsters` | 261 | host houdt bij welke map-monsters weg zijn. Meesturen bij kamerwissel, niet per frame |
 | `checkpoint` | 271 | alleen de host schrijft hem weg |
 | `save_game` / pauze-hook | 1102, 1087 | vroeg `return` als dit toestel geen host is |
@@ -242,7 +239,7 @@ Geen tweede inventaris verzinnen.
 Een gast die lokaal een event start, desynct de vlaggen.
 
 Refactor: in co-op roept alleen de host `Story.trigger` aan. Gasten tekenen het tekstvak
-als de host de regels stuurt. Tot QUESTION 7: in de Action-sandbox geen story-triggers.
+als de host de regels stuurt. In de Action-sandbox geen story-triggers (DECISION 7).
 
 ### 3. `Dialog` is één tekstvak
 
@@ -288,7 +285,7 @@ blijven de haak voor oog en geluid.
 
 Refactor: per stoel een body. De lokale stoel leest `TouchControls` (`joy_raw` op
 `scripts/touch_controls.gd:68`). Andere stoelen krijgen hun richting uit de snapshot.
-Lege stoelen krijgen in fase B geen body (QUESTION 2).
+Lege stoelen krijgen in fase B geen body (DECISION 2).
 
 ### 7. De ring zet de hele SceneTree op pauze
 
@@ -296,8 +293,8 @@ Lege stoelen krijgen in fase B geen body (QUESTION 2).
 vijanden en een netwerk-tick die per ongeluk pausable is. De lobby zet zichzelf daarom
 op `PROCESS_MODE_ALWAYS`. De arena doet dat niet.
 
-Refactor: zie QUESTION 4. Tot die tijd de ring in co-op niet openen, of hem tekenen
-zonder `get_tree().paused`.
+Refactor: de ring tekenen zonder `get_tree().paused` (DECISION 4). Een gekozen item
+blijft een verzoek aan de host.
 
 ### 8. Sessielog gaat uit van één speler
 
@@ -332,6 +329,56 @@ niet te sturen als alléén hij rolt en het resultaat meestuurt.
 4. De ring pauzeert de boom (`som_ring.gd:83`).
 5. Baas en verhaal zijn één lokaal scherm of één event (`game_state.gd:1821`, `story.gd:19`, `dialog_box.gd:32`).
 
+## Fase C requirements
+
+Fase B blijft zoals de besluiten hierboven. Fase C komt daar bovenop. Drie eisen:
+
+1. Elke gast joint met zijn **eigen** save en zijn **eigen** held, van zijn eigen telefoon, en speelt die in de wereld van de host.
+2. Wat de gast in co-op verdient, gaat terug naar die eigen save: EXP, levels, items, goud en Codex-vangsten.
+3. Daar hoort een save per speler bij, en een sync/merge aan het eind van de sessie, met anti-duplicaat en anti-cheat.
+
+AI op lege stoelen en de relay komen in dezelfde fase, ná dit save-model. Het relay-protocol zelf is hier nog niet uitgewerkt.
+
+### Wie wat bezit
+
+De host bezit de wereld. Kamer, vijanden, geopende kisten, verslagen of gevangen map-monsters, de worpen (`randf`), en de sandbox-save. Hij is de enige die de simulatie draait.
+
+Elke gast bezit zijn held. Dat is het personage uit zijn eigen save: niveau, EXP, HP/MP, uitrusting, zijn tas, zijn goud, zijn Codex. Die blob reist mee in de join. Hij wordt geen extra lid in `user://som_save_1.json` van de host.
+
+Tijdens het spelen houdt de host per stoel een grootboek bij. Een regel is een grant: id, stoel, soort (EXP, goud, item, Codex-pagina of verbruik), bedrag, en of hij al terug is geschreven. Wereld-staat en grootboek blijven twee dingen. DECISION 3 (de gast neemt in fase B niets mee) betekent dan: fase B schrijft het grootboek niet terug. Het betekent niet dat de buit in één tas zonder eigenaar valt.
+
+### Terugschrijven bij vertrek en bij een breuk
+
+Schoon vertrek. De host sluit het grootboek van die stoel af op de laatste sim-tick en stuurt de delta. De gast past hem toe op zijn eigen save en bevestigt. De host markeert die grants als geclaimd. De gast schrijft de wereld van de host niet weg.
+
+Breuk (app weg, ENet-timeout). De stoel gaat meteen vrij (DECISION 6). Het grootboek niet. De host bewaart de ongeclaimde delta onder het save-id van de gast. Bij de volgende join bij deze host komt die delta binnen vóór het spelen. Alleen een delta die de host heeft uitgedeeld, mag op de gast-save. Wat nog niet bevestigd was, blijft bij de host tot die join, of tot de save van de host zelf weg is.
+
+### Geen duplicaat, en geen vertrouwen in de gast
+
+Een wereld-item (kist, drop, uniek monster) heeft een id in de host-wereld en wordt één keer verbruikt. Een tweede speler leegt dezelfde kist niet.
+
+Een persoonlijke grant heeft een id (sessie plus teller). De gast-save onthoudt welke ids al toegepast zijn. Dezelfde delta nog eens toepassen doet niets.
+
+De tas van de gast wordt niet gekopieerd naar `GameState.inventory` van de host. Meenemen, gebruiken of laten vallen is een delta: min één bij de gast, en alleen als het voorwerp in de wereld blijft een nieuw wereld-item. Anders heeft het twee eigenaren.
+
+Goud van de gast en goud van de host blijven twee beurzen. Gevechtsgoud voor de gast is een grant, geen optelling bij het goud van de host.
+
+Een Codex-pagina krijgt één uid en gaat naar de vanger. Het monster is daarna weg uit de wereld. Een soort die die speler al had, levert geen tweede pagina.
+
+De sleutel is stoel plus save-id, niet de held-id. Twee Serens delen geen `party`-entry.
+
+Gasten sturen input, geen uitkomst. Schade, buit en vang-worpen bestaan alleen op de host. Een gast die lokaal items bijschrijft zonder grant-id telt niet mee in de gedeelde wereld. Na afloop kan iemand zijn eigen `user://` nog met de hand wijzigen; dat valt buiten de sessie. De gedeelde wereld en het grootboek vertrouwen de gast niet. Een latere relay kan de delta ondertekenen als online spelen dat eist. Op lokaal wifi is de host de handtekening.
+
+### Wat fase B niet mag dichtmetselen
+
+- DECISION 1 (Dax, Seren, Vesper, Kael) geldt voor fase B. Een stoel moet later een willekeurige held uit een gast-save kunnen dragen. `NetProtocol.ROSTER` blijft een fase-B-lijst. Gevechtsstaat sleutelt op stoel, de held-id is stats en sprite.
+- DECISION 3 schrijft in fase B niets terug naar de gast. De events noemen toch al een stoel, zodat het grootboek later aan kan zonder de arena een tweede keer te splitsen.
+- DECISION 7 maakt de sandbox de wereld-container van het prototype. Gast-voortgang hoort daar niet in als extra party-leden.
+- DECISION 6 maakt het lichaam vrij, niet het grootboek van die stoel.
+- DECISION 2 houdt de bezetting als drie standen: leeg, remote, en later AI. Geen tweede party-structuur voor de AI-vulling.
+- DECISION 4: een item uit de ring blijft een verzoek aan de host, zodat verbruik in het grootboek staat.
+- DECISION 9 (één lock per speler) past al op een stoel. Zo houden.
+
 ## Stap-plan (kleine PR's)
 
 Elke PR blijft van `som_*.gd`, `touch_controls.gd`, de HUD, Settings en de fase-A-bestanden
@@ -343,17 +390,17 @@ de CI-matrix pas als deze voorbereiding gemerged is; deze PR laat de workflow me
 2. **Snapshot-roundtrip** — nog steeds `scripts/net/`. Vaste 60 Hz-stap, 20 Hz-snapshot, één
    nep-positie host→gast in `--nettest`. Geen Godot-node uit het spel.
 3. **Host-poort op `GameState`** — `mutate` / "alleen host schrijft". Bestaande solo-pad
-   blijft de host. Tests: een gast-vlag schrijft geen `user://`. Dit is de eerste PR die
-   `game_state.gd` écht aanraakt; klein houden.
+   blijft de host. Tests: een gast-vlag schrijft geen `user://`. Elk belonings-event noemt
+   al een stoel, ook al gooit fase B de kopie van de gast weg (zie fase C). Dit is de
+   eerste PR die `game_state.gd` écht aanraakt; klein houden.
 4. **Arena splitsen** — ná fase A. `tick` puur, tekening blijft in de nodes. Eén kamer,
    vijanden en HP, nog zonder menu. Headless: twee inputs, één HP-uitkomst.
 5. **Debug-ingang** — niet het titelscherm. Lobby koppelen aan die kamer. Vier stoelen,
    camera op de lokale stoel.
-6. **Lichamen** — gevulde stoel is een speler, geen `SomAlly`. Lege stoel is leeg (tenzij
-   QUESTION 2 anders uitvalt).
+6. **Lichamen** — gevulde stoel is een speler, geen `SomAlly`. Lege stoel is leeg (DECISION 2).
 7. **Events** — slag, spreuk, Codex, buit, target-lock. Betrouwbaar. Lock pas als fase A
    de solo-lock gemerged heeft.
 8. **Android** — rechten, multicast-lock-plugin, pauze/hervat, Engelse disconnect-tekst.
    Nog geen APK-versie en geen signing.
-9. **Fase C** — AI op lege stoelen, daarna een relay. Aparte nota. Niet beginnen vanuit
-   deze lobby door stiekem internet open te zetten.
+9. **Fase C** — AI op lege stoelen, per-speler-save en merge zoals hierboven, daarna een relay.
+   Niet beginnen vanuit deze lobby door stiekem internet open te zetten.
