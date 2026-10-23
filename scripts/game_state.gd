@@ -148,6 +148,8 @@ var codex_next_id := 1
 ## v0.19 UNIEKE monsters (GameData.ENEMIES "unique": true, bv. de Inktwurm; beslissing Dennis): id ->
 ## "verslagen" / "gevangen". Staat erin = komt nooit meer terug. In de save als "uniek".
 var unique_done := {}
+## Uniek monster net voor het eerst weg (verslagen of gevangen). Story luistert (StoryData.AFTER_UNIQUE).
+signal unique_marked(id: String, how: String)
 
 ## 100-verdiepingen-kerker (de Diepe Grot): alles gaat mee in de save, blok "dungeon100"
 ## (Dungeon100Rules.save_data/load_data). Zie HANDOFF_DUNGEON100*.md.
@@ -1333,6 +1335,7 @@ func apply_state(d: Dictionary) -> bool:
 		for k in un:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
+	_unique_seen_flags()
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
 	var a2 = d.get("archief2", {})
@@ -1896,12 +1899,17 @@ func respawn_at_checkpoint(boss := false) -> String:
 	# 'gevangen' rolt mee met de Codex, die bij het checkpoint hoort.
 	var keep_unique := unique_done.duplicate(true)
 	var keep_koopman := koopman_save_data()      # bezoeken aan H-5 rollen niet terug
+	# Een al gezien eenmalige tutorial (na een uniek monster) rolt niet terug: nooit twee keer.
+	var keep_seen: Array = StoryData.UNIQUE_SEEN_FLAGS.values().filter(func(f): return story_flags.has(str(f)))
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
 	koopman_load(keep_koopman)
 	for id in keep_unique:
 		if str(keep_unique[id]) == "verslagen" and not unique_done.has(str(id)):
 			unique_done[str(id)] = "verslagen"
+	_unique_seen_flags()
+	for f in keep_seen:
+		story_flags[str(f)] = true
 	dungeon100_permanent = keep_permanent
 	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
@@ -2493,6 +2501,15 @@ func unique_state(id: String) -> String:
 func unique_mark(id: String, how: String) -> void:
 	if is_unique(id) and not unique_done.has(id):
 		unique_done[id] = how
+		unique_marked.emit(id, how)
+
+
+## Oude saves (of een checkpoint van vóór het gevecht): is het unieke monster al weg, dan geldt zijn
+## eenmalige tutorial als gezien (StoryData.UNIQUE_SEEN_FLAGS). Nooit achteraf afspelen.
+func _unique_seen_flags() -> void:
+	for id in StoryData.UNIQUE_SEEN_FLAGS:
+		if unique_done.has(str(id)):
+			story_flags[str(StoryData.UNIQUE_SEEN_FLAGS[id])] = true
 
 
 # ---------------------------------------------------------------- world warper

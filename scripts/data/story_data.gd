@@ -166,6 +166,25 @@ const MENU_CLOSED := [
 	{"if": {"step": UITRUSTING, "equipped": TUTORIAL_ARMOR}, "event": "mantel_aan"},
 ]
 
+## Tutorial na de eerste overwinning op de Inktwurm: Classic/Action-schakelaar en de Quest Log.
+## Vlagnaam NIET wijzigen: RPG CODE hangt hier later de vang-tutorial aan.
+const TUTORIAL_INKTWURM := "tutorial_na_inktwurm"
+const TUTORIAL_INKTWURM_FLAG := "tutorial_na_inktwurm_gezien"
+const TUT_NEXT := "Next"
+const TUT_SKIP := "Skip"
+## Max. 2 korte regels per pagina (384x216); rechtsonder staan Next/Skip, dus de regels kort houden.
+const TUT_INKT_PAGES := [
+	"The Ink Worm is dealt with!\nTwo quick tips before you go on.",
+	"MENU > Settings > Battle Style:\nClassic is turn-based, Action is real time.",
+	"The switch works at once, even mid-room.\nBosses always stay turn-based.",
+	"MENU > Quest Log lists your quests and steps.\nLost? Check the Active tab.",
+]
+## Uniek monster weg (GameState.unique_mark: verslagen of gevangen) -> dit event, één keer.
+## Story speelt het zodra de speler weer vrij is (Classic: terug op de kaart, Action: in de kamer).
+const AFTER_UNIQUE := {"inktwurm": TUTORIAL_INKTWURM}
+## Oude saves waarin dit unieke monster al weg is: de vlag meteen als 'gezien' zetten (GameState.apply_state).
+const UNIQUE_SEEN_FLAGS := {"inktwurm": TUTORIAL_INKTWURM_FLAG}
+
 const EVENTS := {
 	# ------------------------------------------------------------ scène 1: ochtend
 	# Update 5: geen wakker-cutscene. Spawn "bed" staat op (2,3), naast het bedmeubel
@@ -615,6 +634,24 @@ const EVENTS := {
 		["flag", FLAG_ZAAD],
 		["refresh"],
 		["say", "", ["You find Singing Seed."]],
+	]}],
+	# Tutorial na de Inktwurm (eenmalig, zie AFTER_UNIQUE). De vlag gaat er als eerste op: ook wie
+	# halverwege overslaat of het spel afsluit krijgt hem nooit opnieuw. Elke pagina: Next / Skip.
+	TUTORIAL_INKTWURM: [
+		{"if": {"not_flags": [TUTORIAL_INKTWURM_FLAG]}, "do": [
+			["flag", TUTORIAL_INKTWURM_FLAG],
+			["choice", TUT_INKT_PAGES[0], [TUT_NEXT, TUT_SKIP], [TUTORIAL_INKTWURM + "_2", ""], ""],
+		]},
+		{"do": []},
+	],
+	TUTORIAL_INKTWURM + "_2": [{"do": [
+		["choice", TUT_INKT_PAGES[1], [TUT_NEXT, TUT_SKIP], [TUTORIAL_INKTWURM + "_3", ""], ""],
+	]}],
+	TUTORIAL_INKTWURM + "_3": [{"do": [
+		["choice", TUT_INKT_PAGES[2], [TUT_NEXT, TUT_SKIP], [TUTORIAL_INKTWURM + "_4", ""], ""],
+	]}],
+	TUTORIAL_INKTWURM + "_4": [{"do": [
+		["say", "", [TUT_INKT_PAGES[3]]],
 	]}],
 }
 
