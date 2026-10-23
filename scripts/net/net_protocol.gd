@@ -58,6 +58,8 @@ enum Kind {
 	REFUSE = 4,
 	LEAVE = 5,
 	ANNOUNCE = 6,
+	SESSION_END = 7,
+	START_GAME = 8,
 }
 
 ## Binaire gameplay-berichten (zelfde ENet-peer als de lobby; geen JSON).
@@ -88,6 +90,12 @@ const REFUSE_TEXT := {
 	Refuse.VERSION: "Game versions do not match.",
 	Refuse.BAD_PACKET: "The join message was not understood.",
 	Refuse.TIMEOUT: "Could not join the host.",
+}
+
+const SESSION_END_HOST_PAUSED := "host_paused"
+const SESSION_END_TEXT := {
+	SESSION_END_HOST_PAUSED: "The host paused the game. Session ended.",
+	"ended": "The session ended.",
 }
 
 
@@ -182,7 +190,7 @@ static func decode(raw: PackedByteArray) -> Dictionary:
 			"body": body,
 			"reason": Refuse.VERSION,
 		}
-	if kind < Kind.HELLO or kind > Kind.ANNOUNCE or not (body_v is Dictionary):
+	if kind < Kind.HELLO or kind > Kind.START_GAME or not (body_v is Dictionary):
 		return fail
 	return {
 		"ok": true,

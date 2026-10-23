@@ -6,6 +6,8 @@ extends Node
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Lobby := preload("res://scripts/net/lan_lobby.gd")
 const Discovery := preload("res://scripts/net/lan_discovery.gd")
+const CoopLobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
+const SomData := preload("res://scripts/data/som_data.gd")
 
 const STEP_SEC := 2.0
 const SESSION_SEC := 6.0
@@ -13,10 +15,14 @@ const SESSION_SEC := 6.0
 var failures := 0
 var passes := 0
 var _found: Dictionary = {}
+var shots := ""
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--shots="):
+			shots = arg.get_slice("=", 1)
 	_run.call_deferred()
 
 
@@ -32,6 +38,9 @@ func _run() -> void:
 	_protocol_tests()
 	await _session_tests()
 	await _discovery_tests()
+	await _lifecycle_tests()
+	_coop_save_tests()
+	await _coop_ui_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
 
@@ -89,6 +98,8 @@ func _protocol_tests() -> void:
 	}, Protocol.VERSION + 1)
 	var old_info := Protocol.parse_announce(old_beacon)
 	check("oud baken parst maar is niet compatible", bool(old_info["ok"]) and not bool(old_info["compatible"]) and int(old_info["port"]) == Protocol.ENET_PORT)
+	check("Orion niet in fase-B-roster", not Protocol.ROSTER.has("orion"))
+	check("maximaal 3 gasten", Protocol.MAX_REMOTE == 3 and Protocol.MAX_PLAYERS == 4)
 
 
 func _session_tests() -> void:
@@ -116,17 +127,18 @@ func _session_tests() -> void:
 	var seren_in := await wait_until(func() -> bool:
 		return seren.local_character == "lotte" and seren.local_slot == Protocol.HOST_SLOT + 1
 	, STEP_SEC)
-	check("Seren krijgt stoel 1", seren_in)
+	check("Seren krijgt stoel 1 (lotte)", seren_in and seren.local_character == "lotte")
+	check("lege stoelen na Seren", host.character_at(Protocol.HOST_SLOT + 2) == "" and host.character_at(Protocol.HOST_SLOT + 3) == "")
 	check("Vesper join", vesper.join_session(Protocol.LOOPBACK, "lotte", "Vesper") == OK)
 	var vesper_in := await wait_until(func() -> bool:
 		return vesper.local_character == "noor" and vesper.local_slot == Protocol.HOST_SLOT + 2
 	, STEP_SEC)
-	check("bezet Seren schuift door naar Vesper", vesper_in)
+	check("Vesper krijgt stoel 2 (noor)", vesper_in and vesper.local_character == "noor")
 	check("Kael join", kael.join_session(Protocol.LOOPBACK, "", "Kael") == OK)
 	var kael_in := await wait_until(func() -> bool:
 		return kael.local_character == "kael" and kael.local_slot == Protocol.HOST_SLOT + 3 and host.player_count() == Protocol.MAX_PLAYERS
 	, STEP_SEC)
-	check("vierde speler vult Kael", kael_in)
+	check("Kael krijgt stoel 3 (kael)", kael_in and kael.local_character == "kael")
 	var roster_seen := await wait_until(func() -> bool:
 		return seren.player_count() == Protocol.MAX_PLAYERS and seren.character_at(Protocol.HOST_SLOT) == Protocol.HOST_CHARACTER
 	, STEP_SEC)
@@ -136,18 +148,22 @@ func _session_tests() -> void:
 	var fifth_refused := await wait_until(func() -> bool:
 		return fifth.refuse_reason == Protocol.Refuse.FULL
 	, SESSION_SEC)
-	check("vijfde speler geweigerd (%s)" % str(Protocol.REFUSE_TEXT.get(fifth.refuse_reason, fifth.refuse_reason)), fifth_refused and fifth.local_slot == Protocol.NO_SLOT and host.player_count() == Protocol.MAX_PLAYERS)
+	check("4e join geweigerd met party full", fifth_refused and fifth.refuse_reason == Protocol.Refuse.FULL
+			and fifth.local_slot == Protocol.NO_SLOT and host.player_count() == Protocol.MAX_PLAYERS
+			and str(Protocol.REFUSE_TEXT.get(fifth.refuse_reason, "")) == "The party is full.")
+	check("Orion krijgt geen stoel", not host.character_ids().has("orion"))
 	fifth.close()
 	vesper.close()
 	var left := await wait_until(func() -> bool:
 		return host.player_count() == Protocol.MAX_PLAYERS - 1 and host.character_at(Protocol.HOST_SLOT + 2) == ""
 	, STEP_SEC)
-	check("gast weg, stoel vrij", left)
+	check("drop: Vesper-stoel meteen vrij", left and host.character_at(Protocol.HOST_SLOT + 3) == "kael")
 	check("Vesper opnieuw", vesper.join_session(Protocol.LOOPBACK, "noor", "Vesper") == OK)
 	var back := await wait_until(func() -> bool:
 		return vesper.local_character == "noor" and vesper.local_slot == Protocol.HOST_SLOT + 2 and host.player_count() == Protocol.MAX_PLAYERS
 	, STEP_SEC)
-	check("disconnect en rejoin krijgt Vesper terug", back and host.character_at(Protocol.HOST_SLOT + 1) == "lotte" and host.character_at(Protocol.HOST_SLOT + 3) == "kael")
+	check("rejoin: laagste vrije stoel + Vesper terug", back and vesper.local_slot == Protocol.HOST_SLOT + 2
+			and host.character_at(Protocol.HOST_SLOT + 1) == "lotte" and host.character_at(Protocol.HOST_SLOT + 3) == "kael")
 	_shutdown(nodes)
 
 
@@ -193,3 +209,90 @@ func _shutdown(nodes: Array[Node]) -> void:
 		if is_instance_valid(n) and n.has_method("close"):
 			n.close()
 			n.queue_free()
+
+
+func _lifecycle_tests() -> void:
+	var host: Node = Lobby.new()
+	host.name = "LifeHost"
+	add_child(host)
+	var guest: Node = _client([host], "LifeGuest")
+	check("host voor lifecycle", host.host_session("Dax") == OK)
+	check("gast voor lifecycle", guest.join_session(Protocol.LOOPBACK, "lotte", "Seren") == OK)
+	var joined := await wait_until(func() -> bool:
+		return guest.phase == Lobby.Phase.IN
+	, STEP_SEC)
+	check("gast in lobby voor start", joined)
+	var bag: Dictionary = {"started": false, "ended": false, "reason": ""}
+	guest.start_game_received.connect(func() -> void: bag["started"] = true)
+	host.host_start_game()
+	var got_start := await wait_until(func() -> bool: return bool(bag["started"]), STEP_SEC)
+	check("START_GAME bereikt gast", got_start)
+	guest.session_ended.connect(func(reason: String) -> void:
+		bag["ended"] = true
+		bag["reason"] = reason)
+	host.broadcast_session_end(Protocol.SESSION_END_HOST_PAUSED)
+	var got_end := await wait_until(func() -> bool: return bool(bag["ended"]), STEP_SEC)
+	var end_reason := str(bag["reason"])
+	check("SESSION_END host pause tekst", got_end and end_reason == Protocol.SESSION_END_HOST_PAUSED
+			and GameState.coop_session_end_message(end_reason) == Protocol.SESSION_END_TEXT[Protocol.SESSION_END_HOST_PAUSED])
+	_shutdown([host, guest])
+
+
+func _coop_save_tests() -> void:
+	var som_path := SomData.SAVE_PATH
+	var som_abs := ProjectSettings.globalize_path(som_path)
+	if FileAccess.file_exists(som_path):
+		DirAccess.remove_absolute(som_abs)
+	GameState.coop_role = "guest"
+	check("gast save_game faalt", not GameState.save_game(Vector2i.ZERO, Vector2i.ZERO, som_path))
+	check("gast maakt som_save_1 niet", not FileAccess.file_exists(som_path))
+	GameState.coop_role = "guest"
+	GameState.save_path = som_path
+	check("gast default save pad geblokkeerd", not GameState.save_game(Vector2i.ZERO, Vector2i.ZERO))
+	check("gast schrijft som_save_1 niet weg", not FileAccess.file_exists(som_path))
+	GameState.coop_role = "host"
+	GameState.save_path = som_path
+	check("host mag wel schrijven", GameState.save_game(Vector2i.ZERO, Vector2i.ZERO))
+	if FileAccess.file_exists(som_path):
+		DirAccess.remove_absolute(som_abs)
+	GameState.coop_role = ""
+	GameState.save_path = "user://save_1.json"
+
+
+func _coop_ui_tests() -> void:  # async via await in body
+	check("co-op scène bestaat", ResourceLoader.exists("res://scenes/ui/coop_lobby.tscn"))
+	var ui: CoopLobbyScreen = CoopLobbyScreen.new()
+	ui.name = "CoopUi"
+	add_child(ui)
+	await get_tree().process_frame
+	check("co-op lobby nodes", ui.lobby != null and ui.discovery != null)
+	var min_h := CoopLobbyScreen.touch_min_height_px()
+	check("touch min hoogte 48dp (~%d px)" % min_h, min_h >= 16)
+	var touch_ok := true
+	for btn in ui.all_touch_buttons():
+		if btn.custom_minimum_size.y < float(min_h):
+			touch_ok = false
+	check("co-op knoppen >= 48dp", touch_ok)
+	if shots != "":
+		await _coop_screenshots(ui)
+	ui.queue_free()
+
+
+func _coop_screenshots(ui: CoopLobbyScreen) -> void:
+	DirAccess.make_dir_recursive_absolute(shots)
+	await get_tree().process_frame
+	await _save_shot(ui, "coop_menu")
+	ui._show_host()
+	for _i in 3:
+		await get_tree().process_frame
+	await _save_shot(ui, "coop_host")
+	ui._show_join_listen()
+	for _i in 3:
+		await get_tree().process_frame
+	await _save_shot(ui, "coop_join")
+
+
+func _save_shot(node: Node, name: String) -> void:
+	var img: Image = node.get_viewport().get_texture().get_image()
+	img.save_png(shots.path_join(name + ".png"))
+	print("INFO  screenshot: ", shots.path_join(name + ".png"))
