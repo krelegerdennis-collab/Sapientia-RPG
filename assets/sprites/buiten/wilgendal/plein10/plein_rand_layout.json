@@ -1,0 +1,1025 @@
+{
+ "tile_size": 16,
+ "columns": 8,
+ "bit_order": {
+  "N": 1,
+  "NE": 2,
+  "E": 4,
+  "SE": 8,
+  "S": 16,
+  "SW": 32,
+  "W": 64,
+  "NW": 128
+ },
+ "rule": "bit set = neighbour cell is cobble; diagonal bits only count when both adjacent sides are set (canonical 47-blob). Godot 4: TileSet terrain mode MATCH_CORNERS_AND_SIDES, terrain 0=gras, 1=kei; set peering bits of each tile per its mask (centre=kei). Variants share a mask -> give them lower probability.",
+ "tiles": [
+  {
+   "mask": 0,
+   "variant": 0,
+   "atlas": [
+    0,
+    0
+   ],
+   "probability": 1.0,
+   "peering": []
+  },
+  {
+   "mask": 1,
+   "variant": 0,
+   "atlas": [
+    1,
+    0
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N"
+   ]
+  },
+  {
+   "mask": 4,
+   "variant": 0,
+   "atlas": [
+    2,
+    0
+   ],
+   "probability": 1.0,
+   "peering": [
+    "E"
+   ]
+  },
+  {
+   "mask": 5,
+   "variant": 0,
+   "atlas": [
+    3,
+    0
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E"
+   ]
+  },
+  {
+   "mask": 7,
+   "variant": 0,
+   "atlas": [
+    4,
+    0
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E"
+   ]
+  },
+  {
+   "mask": 16,
+   "variant": 0,
+   "atlas": [
+    5,
+    0
+   ],
+   "probability": 1.0,
+   "peering": [
+    "S"
+   ]
+  },
+  {
+   "mask": 17,
+   "variant": 0,
+   "atlas": [
+    6,
+    0
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "S"
+   ]
+  },
+  {
+   "mask": 20,
+   "variant": 0,
+   "atlas": [
+    7,
+    0
+   ],
+   "probability": 1.0,
+   "peering": [
+    "E",
+    "S"
+   ]
+  },
+  {
+   "mask": 21,
+   "variant": 0,
+   "atlas": [
+    0,
+    1
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "S"
+   ]
+  },
+  {
+   "mask": 23,
+   "variant": 0,
+   "atlas": [
+    1,
+    1
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "S"
+   ]
+  },
+  {
+   "mask": 28,
+   "variant": 0,
+   "atlas": [
+    2,
+    1
+   ],
+   "probability": 1.0,
+   "peering": [
+    "E",
+    "SE",
+    "S"
+   ]
+  },
+  {
+   "mask": 29,
+   "variant": 0,
+   "atlas": [
+    3,
+    1
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "SE",
+    "S"
+   ]
+  },
+  {
+   "mask": 31,
+   "variant": 0,
+   "atlas": [
+    4,
+    1
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S"
+   ]
+  },
+  {
+   "mask": 64,
+   "variant": 0,
+   "atlas": [
+    5,
+    1
+   ],
+   "probability": 1.0,
+   "peering": [
+    "W"
+   ]
+  },
+  {
+   "mask": 65,
+   "variant": 0,
+   "atlas": [
+    6,
+    1
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "W"
+   ]
+  },
+  {
+   "mask": 68,
+   "variant": 0,
+   "atlas": [
+    7,
+    1
+   ],
+   "probability": 1.0,
+   "peering": [
+    "E",
+    "W"
+   ]
+  },
+  {
+   "mask": 69,
+   "variant": 0,
+   "atlas": [
+    0,
+    2
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "W"
+   ]
+  },
+  {
+   "mask": 71,
+   "variant": 0,
+   "atlas": [
+    1,
+    2
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "W"
+   ]
+  },
+  {
+   "mask": 80,
+   "variant": 0,
+   "atlas": [
+    2,
+    2
+   ],
+   "probability": 1.0,
+   "peering": [
+    "S",
+    "W"
+   ]
+  },
+  {
+   "mask": 81,
+   "variant": 0,
+   "atlas": [
+    3,
+    2
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "S",
+    "W"
+   ]
+  },
+  {
+   "mask": 84,
+   "variant": 0,
+   "atlas": [
+    4,
+    2
+   ],
+   "probability": 1.0,
+   "peering": [
+    "E",
+    "S",
+    "W"
+   ]
+  },
+  {
+   "mask": 85,
+   "variant": 0,
+   "atlas": [
+    5,
+    2
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "S",
+    "W"
+   ]
+  },
+  {
+   "mask": 87,
+   "variant": 0,
+   "atlas": [
+    6,
+    2
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "S",
+    "W"
+   ]
+  },
+  {
+   "mask": 92,
+   "variant": 0,
+   "atlas": [
+    7,
+    2
+   ],
+   "probability": 1.0,
+   "peering": [
+    "E",
+    "SE",
+    "S",
+    "W"
+   ]
+  },
+  {
+   "mask": 93,
+   "variant": 0,
+   "atlas": [
+    0,
+    3
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "SE",
+    "S",
+    "W"
+   ]
+  },
+  {
+   "mask": 95,
+   "variant": 0,
+   "atlas": [
+    1,
+    3
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S",
+    "W"
+   ]
+  },
+  {
+   "mask": 112,
+   "variant": 0,
+   "atlas": [
+    2,
+    3
+   ],
+   "probability": 1.0,
+   "peering": [
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 113,
+   "variant": 0,
+   "atlas": [
+    3,
+    3
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 116,
+   "variant": 0,
+   "atlas": [
+    4,
+    3
+   ],
+   "probability": 1.0,
+   "peering": [
+    "E",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 117,
+   "variant": 0,
+   "atlas": [
+    5,
+    3
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 119,
+   "variant": 0,
+   "atlas": [
+    6,
+    3
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 124,
+   "variant": 0,
+   "atlas": [
+    7,
+    3
+   ],
+   "probability": 1.0,
+   "peering": [
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 125,
+   "variant": 0,
+   "atlas": [
+    0,
+    4
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 127,
+   "variant": 0,
+   "atlas": [
+    1,
+    4
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 193,
+   "variant": 0,
+   "atlas": [
+    2,
+    4
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 197,
+   "variant": 0,
+   "atlas": [
+    3,
+    4
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 199,
+   "variant": 0,
+   "atlas": [
+    4,
+    4
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 209,
+   "variant": 0,
+   "atlas": [
+    5,
+    4
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "S",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 213,
+   "variant": 0,
+   "atlas": [
+    6,
+    4
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "S",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 215,
+   "variant": 0,
+   "atlas": [
+    7,
+    4
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "S",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 221,
+   "variant": 0,
+   "atlas": [
+    0,
+    5
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "SE",
+    "S",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 223,
+   "variant": 0,
+   "atlas": [
+    1,
+    5
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 241,
+   "variant": 0,
+   "atlas": [
+    2,
+    5
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "S",
+    "SW",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 245,
+   "variant": 0,
+   "atlas": [
+    3,
+    5
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "S",
+    "SW",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 247,
+   "variant": 0,
+   "atlas": [
+    4,
+    5
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "S",
+    "SW",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 253,
+   "variant": 0,
+   "atlas": [
+    5,
+    5
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 255,
+   "variant": 0,
+   "atlas": [
+    6,
+    5
+   ],
+   "probability": 1.0,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 124,
+   "variant": 1,
+   "atlas": [
+    7,
+    5
+   ],
+   "probability": 0.7,
+   "peering": [
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 124,
+   "variant": 2,
+   "atlas": [
+    0,
+    6
+   ],
+   "probability": 0.7,
+   "peering": [
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 124,
+   "variant": 3,
+   "atlas": [
+    1,
+    6
+   ],
+   "probability": 0.7,
+   "peering": [
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 199,
+   "variant": 1,
+   "atlas": [
+    2,
+    6
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 199,
+   "variant": 2,
+   "atlas": [
+    3,
+    6
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 199,
+   "variant": 3,
+   "atlas": [
+    4,
+    6
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 241,
+   "variant": 1,
+   "atlas": [
+    5,
+    6
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "S",
+    "SW",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 241,
+   "variant": 2,
+   "atlas": [
+    6,
+    6
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "S",
+    "SW",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 241,
+   "variant": 3,
+   "atlas": [
+    7,
+    6
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "S",
+    "SW",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 31,
+   "variant": 1,
+   "atlas": [
+    0,
+    7
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S"
+   ]
+  },
+  {
+   "mask": 31,
+   "variant": 2,
+   "atlas": [
+    1,
+    7
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S"
+   ]
+  },
+  {
+   "mask": 31,
+   "variant": 3,
+   "atlas": [
+    2,
+    7
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S"
+   ]
+  },
+  {
+   "mask": 28,
+   "variant": 1,
+   "atlas": [
+    3,
+    7
+   ],
+   "probability": 0.7,
+   "peering": [
+    "E",
+    "SE",
+    "S"
+   ]
+  },
+  {
+   "mask": 28,
+   "variant": 3,
+   "atlas": [
+    4,
+    7
+   ],
+   "probability": 0.7,
+   "peering": [
+    "E",
+    "SE",
+    "S"
+   ]
+  },
+  {
+   "mask": 112,
+   "variant": 1,
+   "atlas": [
+    5,
+    7
+   ],
+   "probability": 0.7,
+   "peering": [
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 112,
+   "variant": 3,
+   "atlas": [
+    6,
+    7
+   ],
+   "probability": 0.7,
+   "peering": [
+    "S",
+    "SW",
+    "W"
+   ]
+  },
+  {
+   "mask": 7,
+   "variant": 1,
+   "atlas": [
+    7,
+    7
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "NE",
+    "E"
+   ]
+  },
+  {
+   "mask": 7,
+   "variant": 3,
+   "atlas": [
+    0,
+    8
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "NE",
+    "E"
+   ]
+  },
+  {
+   "mask": 193,
+   "variant": 1,
+   "atlas": [
+    1,
+    8
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "W",
+    "NW"
+   ]
+  },
+  {
+   "mask": 193,
+   "variant": 3,
+   "atlas": [
+    2,
+    8
+   ],
+   "probability": 0.7,
+   "peering": [
+    "N",
+    "W",
+    "NW"
+   ]
+  }
+ ]
+}

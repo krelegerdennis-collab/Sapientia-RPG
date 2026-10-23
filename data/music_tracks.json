@@ -2,8 +2,13 @@
 	"locked_name": "???",
 	"tracks": [
 		{"id": "main_menu", "ids": ["main_menu"], "name": "Sapientia", "where": "Main theme"},
+		{"id": "wachtershuis", "ids": ["wachtershuis"], "name": "The Guardian's Hearth", "where": "Guardian's House"},
+		{"id": "wereld", "ids": ["wereld"], "name": "Under Open Skies", "where": "World map"},
 		{"id": "dorp_wilgendal", "ids": ["dorp_wilgendal"], "name": "Wind over Willowdale", "where": "Willowdale"},
 		{"id": "donker_woud", "ids": ["donker_woud"], "name": "Where the Mist Remembers", "where": "The Dark Wood"},
+		{"id": "vergeten_archieven", "ids": ["vergeten_archieven"], "name": "Dust and Forgotten Words", "where": "Forgotten Archives"},
+		{"id": "gevecht_normaal", "ids": ["gevecht_normaal"], "name": "Clockwork in Motion", "where": "Battle"},
+		{"id": "gevecht_miniboss", "ids": ["gevecht_miniboss"], "name": "The Weight of Steel", "where": "Boss battle"},
 		{"id": "berggrot", "ids": ["berggrot"], "name": "Echoes in the Collapse", "where": "Cave / tunnel"},
 		{"id": "levend_archief", "ids": ["levend_archief"], "name": "Shelves of Glass and Root", "where": "Archive 2"},
 		{"id": "baas_archief2", "ids": ["baas_archief2"], "name": "The Overgrown Index", "where": "Archive 2 boss"},

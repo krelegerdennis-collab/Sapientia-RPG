@@ -1,5 +1,5 @@
 extends RefCounted
-## Veldmenu > Scenes & Music > tab Music: de Suno-tracks van Dennis, met Engelse namen.
+## Veldmenu > Scenes & Music > tab Music: alle aanwezige BGM-bestanden, met Engelse namen.
 ## Een track staat pas in de lijst (speelbaar) als de speler hem in het spel gehoord heeft
 ## (GameState.heard_music, in de save). "ids" = de manifest-tracks (assets/audio/audio_manifest.json)
 ## die deze muziek spelen; de eerste wordt afgespeeld.
@@ -18,7 +18,7 @@ static func _laad() -> Array:
 	return []
 
 
-## Track-id (uit TRACKS) bij een manifest-track, "" = geen Suno-track uit deze lijst.
+## Track-id (uit TRACKS) bij een manifest-track, "" = geen aanwezige BGM uit deze lijst.
 static func track_for(manifest_id: String) -> String:
 	for t in TRACKS:
 		if (t["ids"] as Array).has(manifest_id):

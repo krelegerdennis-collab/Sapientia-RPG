@@ -1,8 +1,9 @@
 class_name EchoQuestlog
 extends RefCounted
-## ECHO's questlog (ECHO's Kamer > ECHO > "Quest Log"). Data only: één regel per act.
-## Geen scène en geen GameState: alles werkt op een vlaggen-dictionary + verhaalstap, zodat
-## de headless suite het kan naspelen.
+## ECHO's questlog (ECHO's Kamer > ECHO > "Quest Log"). Geen eigen data meer: alles komt uit
+## res://data/quests.json via scripts/data/quest_data.gd (zelfde bron als Veldmenu > Quest Log).
+## Geen scène en geen GameState: alles werkt op een vlaggen-dictionary + verhaalstap (+ optioneel
+## de opgeslagen voortgang), zodat de headless suite het kan naspelen.
 ##
 ## Act-indeling (niet verzonnen):
 ##   - Act N hoort bij Archief N (Lore_basis.md: Act 1 = het Eerste Archief; Verhaal_Act2_tot_6.md:
@@ -13,66 +14,55 @@ extends RefCounted
 ## ECHO zegt per act één zin. De Act 2-zin komt letterlijk uit canon-scène 1.
 ## Ids zijn Nederlands; alle tekst voor de speler is Engels.
 
-const StoryData := preload("res://scripts/data/story_data.gd")
-const Unlock := preload("res://world_warper/flow/unlock.gd")
+const QD := preload("res://scripts/data/quest_data.gd")
 
 ## Status van een act (ids)
-const KLAAR := "klaar"      # alle opdrachten gedaan
-const OPEN := "open"        # speelbaar, nog niet klaar
-const DICHT := "dicht"      # er is inhoud, maar de vorige act is nog niet klaar
-const LATER := "later"      # nog geen inhoud in de game
+const KLAAR := QD.KLAAR
+const OPEN := QD.OPEN
+const DICHT := QD.DICHT
+const LATER := QD.LATER
 
 const NAAM := "ECHO"
 const OPTIE := "Quest Log"
 const VRAAG := "Which act?"
 const TERUG := "Go back"
 const KOP_OPDRACHTEN := "Quests:"
-const VINK_KLAAR := "[x] "
-const VINK_OPEN := "[ ] "
+const VINK_KLAAR := QD.VINK_KLAAR
+const VINK_OPEN := QD.VINK_OPEN
 const STATUS_TEKST := {KLAAR: "Done", OPEN: "Active", DICHT: "Locked", LATER: "Upcoming"}
 const ZIN_DICHT := "That record is locked. Finish the act before it first."
 const ZIN_LATER := "That record is still empty. A story for later."
 
-## Opdracht klaar via:  "vlag" (sleutel in story_flags)  of  "stap" (GameState.story_step >= stap)
-const AKTES := [
-	{
-		"id": "akte_1", "nummer": 1, "archief": "The First Archive", "thema": "Knowledge",
-		"opdrachten": [
-			{"id": "archieven_in", "titel": "The Archives of Sapientia", "stap": StoryData.NACHT},
-			{"id": "golem", "titel": "Defeat the Golem", "vlag": StoryData.GOLEM_FLAG},
-		],
-		"echo_klaar": "The first Archive. The Golem has fallen and its core is yours.",
-		"echo_open": "The first Archive. Its guardian still stands.",
-	},
-	{
-		"id": "akte_2", "nummer": 2, "archief": "The Second Archive", "thema": "Life",
-		"opdrachten": [
-			{"id": "vesper", "titel": "Save Vesper from the Dark Wood", "vlag": "noor_gered"},
-			{"id": "seren", "titel": "Seren joins the party", "vlag": "archief2_lotte_lid"},
-			{"id": "genezer", "titel": "Defeat the guardian of the second Archive", "vlag": Unlock.BEWAKER_VLAG},
-			{"id": "warper", "titel": "Reach the World Warper", "vlag": Unlock.UNLOCK_VLAG},
-		],
-		"echo_klaar": "Two Archives active. World Warper online.",
-		"echo_open": "The second Archive. Its core is not free yet.",
-	},
-	{"id": "akte_3", "nummer": 3, "archief": "The Third Archive", "thema": "Industry", "opdrachten": []},
-	{"id": "akte_4", "nummer": 4, "archief": "The Fourth Archive", "thema": "Magic", "opdrachten": []},
-	{"id": "akte_5", "nummer": 5, "archief": "The Fifth Archive", "thema": "Cosmos", "opdrachten": []},
-	{"id": "akte_6", "nummer": 6, "archief": "The Sixth Archive", "thema": "Heart", "opdrachten": []},
-]
-
-
-## Zijopdrachten (tab 'Side' in de Quest Log). Elke regel hoort bij een NPC. Zolang je die NPC niet
-## gesproken hebt (vlag "gesproken"), toont de lijst alleen de Engelse naam van de NPC; daarna de
-## titel van de opdracht met [ ] of [x]. Alleen bestaande opdrachten: Het Zingende Graan (Gerrit).
+## Acts in de oude vorm (id, nummer, archief, thema, echo_klaar/echo_open, opdrachten = hoofdopdrachten).
+static var AKTES: Array = _aktes()
+## Zijopdrachten in de oude vorm (id, npc, titel, gesproken, start, klaar). Zolang je die NPC niet
+## gesproken hebt (vlag "gesproken"), toont de lijst alleen de Engelse naam van de NPC.
 ## Een oude save met de startvlag telt ook als gesproken.
-const ZIJ := [
-	{"id": "zingend_graan", "npc": StoryData.GERRIT, "titel": "The Singing Grain",
-		"gesproken": "gesproken_gerrit", "start": StoryData.FLAG_GRAAN, "klaar": StoryData.FLAG_GRAAN_KLAAR},
-]
-const TAB_HOOFD := "Main"
-const TAB_ZIJ := "Side"
-const ZIJ_LEEG := "No side quests yet."
+static var ZIJ: Array = _zij()
+
+
+static func _aktes() -> Array:
+	var uit: Array = []
+	for a in QD.acts():
+		var id := str(a["id"])
+		var e := {"id": id, "nummer": int(a["number"]), "archief": str(a["archive"]), "thema": str(a["theme"]),
+				"opdrachten": QD.in_act(id, QD.HOOFD).map(func(q): return {"id": str(q["id"]), "titel": str(q["title"])})}
+		if a.has("echo_done"):
+			e["echo_klaar"] = str(a["echo_done"])
+		if a.has("echo_open"):
+			e["echo_open"] = str(a["echo_open"])
+		uit.append(e)
+	return uit
+
+
+static func _zij() -> Array:
+	var uit: Array = []
+	for q in QD.quests():
+		if QD.is_zij(q):
+			uit.append({"id": str(q["id"]), "npc": str(q.get("npc", "")), "titel": str(q["title"]),
+					"gesproken": str(q.get("spoken_flag", "")), "start": str(q.get("start_flag", "")),
+					"klaar": str(q.get("done_flag", ""))})
+	return uit
 
 
 static func zij_gesproken(z: Dictionary, flags: Dictionary) -> bool:
@@ -83,7 +73,7 @@ static func zij_klaar(z: Dictionary, flags: Dictionary) -> bool:
 	return z.has("klaar") and flags.has(str(z["klaar"]))
 
 
-## Regel in de Side-tab: "Garrett the Miller" (nog niet gesproken) of "[ ] The Singing Grain".
+## Regel in de Side-lijst: "Garrett the Miller" (nog niet gesproken) of "[ ] The Singing Grain".
 static func zij_regel(z: Dictionary, flags: Dictionary) -> String:
 	if not zij_gesproken(z, flags):
 		return str(z["npc"])
@@ -98,7 +88,7 @@ static func zij_regels(flags: Dictionary, lijst: Array = ZIJ) -> Array[String]:
 
 
 static func ids() -> Array:
-	return AKTES.map(func(a): return str(a["id"]))
+	return QD.act_ids()
 
 
 static func akte(id: String) -> Dictionary:
@@ -108,27 +98,17 @@ static func akte(id: String) -> Dictionary:
 	return {}
 
 
-static func opdracht_klaar(o: Dictionary, flags: Dictionary, stap: int) -> bool:
-	if o.has("vlag"):
-		return flags.has(str(o["vlag"]))
-	if o.has("stap"):
-		return stap >= int(o["stap"])
-	return false
+static func status(id: String, flags: Dictionary, stap: int, voortgang := {}) -> String:
+	return QD.akte_status(id, flags, stap, voortgang)
 
 
-static func status(id: String, flags: Dictionary, stap: int) -> String:
-	var a := akte(id)
-	if a.is_empty():
-		return LATER
-	var lijst: Array = a.get("opdrachten", [])
-	if lijst.is_empty():
-		return LATER
-	if lijst.all(func(o): return opdracht_klaar(o, flags, stap)):
-		return KLAAR
-	var i := ids().find(id)
-	if i > 0 and status(str(AKTES[i - 1]["id"]), flags, stap) != KLAAR:
-		return DICHT
-	return OPEN
+## De act waar de speler nu is (ECHO's gesprek per act).
+static func huidige_akte(flags: Dictionary, stap: int, voortgang := {}) -> String:
+	return QD.huidige_akte(flags, stap, voortgang)
+
+
+static func echo_dialoog(id: String) -> Array[String]:
+	return QD.echo_dialoog(id)
 
 
 ## "Act 1: The First Archive (Knowledge)"
@@ -138,22 +118,22 @@ static func titel(id: String) -> String:
 
 
 ## Keuzeregel in de lijst: "Act 1 - Done"
-static func keuze(id: String, flags: Dictionary, stap: int) -> String:
-	return "Act %d - %s" % [int(akte(id)["nummer"]), STATUS_TEKST[status(id, flags, stap)]]
+static func keuze(id: String, flags: Dictionary, stap: int, voortgang := {}) -> String:
+	return "Act %d - %s" % [int(akte(id)["nummer"]), STATUS_TEKST[status(id, flags, stap, voortgang)]]
 
 
-static func keuzes(flags: Dictionary, stap: int) -> Array[String]:
+static func keuzes(flags: Dictionary, stap: int, voortgang := {}) -> Array[String]:
 	var uit: Array[String] = []
 	for id in ids():
-		uit.append(keuze(str(id), flags, stap))
+		uit.append(keuze(str(id), flags, stap, voortgang))
 	uit.append(TERUG)
 	return uit
 
 
 ## Wat ECHO over een act zegt: zijn zin, daarna de titel met de opdrachten (alleen als er inhoud is).
-static func regels(id: String, flags: Dictionary, stap: int) -> Array[String]:
+static func regels(id: String, flags: Dictionary, stap: int, voortgang := {}) -> Array[String]:
 	var a := akte(id)
-	var st := status(id, flags, stap)
+	var st := status(id, flags, stap, voortgang)
 	var uit: Array[String] = []
 	match st:
 		KLAAR:
@@ -167,14 +147,14 @@ static func regels(id: String, flags: Dictionary, stap: int) -> Array[String]:
 			uit.append(ZIN_LATER)
 			return uit
 	var blok := "%s\n%s" % [titel(id), KOP_OPDRACHTEN]
-	for o in a["opdrachten"]:
-		blok += "\n" + (VINK_KLAAR if opdracht_klaar(o, flags, stap) else VINK_OPEN) + str(o["titel"])
+	for q in QD.in_act(id, QD.HOOFD):
+		blok += "\n" + (VINK_KLAAR if QD.quest_klaar(q, flags, stap, voortgang) else VINK_OPEN) + str(q["title"])
 	uit.append(blok)
 	return uit
 
 
 static func speler_teksten() -> Array[String]:
-	var uit: Array[String] = [NAAM, OPTIE, VRAAG, TERUG, KOP_OPDRACHTEN, ZIN_DICHT, ZIN_LATER, TAB_HOOFD, TAB_ZIJ, ZIJ_LEEG]
+	var uit: Array[String] = [NAAM, OPTIE, VRAAG, TERUG, KOP_OPDRACHTEN, ZIN_DICHT, ZIN_LATER]
 	for z in ZIJ:
 		uit.append(str(z["npc"]))
 		uit.append(str(z["titel"]))
@@ -182,9 +162,5 @@ static func speler_teksten() -> Array[String]:
 		uit.append(str(s))
 	for a in AKTES:
 		uit.append(titel(str(a["id"])))
-		for k in ["echo_klaar", "echo_open"]:
-			if a.has(k):
-				uit.append(str(a[k]))
-		for o in a["opdrachten"]:
-			uit.append(str(o["titel"]))
+	uit.append_array(QD.speler_teksten())
 	return uit

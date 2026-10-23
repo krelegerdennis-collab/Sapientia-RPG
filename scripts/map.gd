@@ -186,9 +186,15 @@ func open_field_menu() -> void:
 	m.closed.connect(func():
 		player.input_locked = false
 		_set_touch_visible(true)
+		menu_closed_hook()
 		# v0.16 uitrusting-tutorial: mantel aan? Dan gaat het verhaal verder (story_data MENU_CLOSED)
 		Story.menu_closed())
 	add_child(m)
+
+
+## Na het sluiten van het veldmenu (dungeon_room.gd: Battle Style meteen toepassen).
+func menu_closed_hook() -> void:
+	pass
 
 
 func _set_touch_visible(on: bool) -> void:

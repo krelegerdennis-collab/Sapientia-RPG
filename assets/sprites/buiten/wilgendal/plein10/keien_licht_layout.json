@@ -1,0 +1,70 @@
+{
+ "tile_size": 16,
+ "tiles": [
+  {
+   "atlas": [
+    0,
+    0
+   ],
+   "kind": "licht",
+   "probability": 1
+  },
+  {
+   "atlas": [
+    1,
+    0
+   ],
+   "kind": "licht",
+   "probability": 1
+  },
+  {
+   "atlas": [
+    2,
+    0
+   ],
+   "kind": "licht",
+   "probability": 1
+  },
+  {
+   "atlas": [
+    3,
+    0
+   ],
+   "kind": "warm",
+   "probability": 0.6
+  },
+  {
+   "atlas": [
+    4,
+    0
+   ],
+   "kind": "warm",
+   "probability": 0.6
+  },
+  {
+   "atlas": [
+    5,
+    0
+   ],
+   "kind": "mos",
+   "probability": 0.35
+  },
+  {
+   "atlas": [
+    6,
+    0
+   ],
+   "kind": "licht",
+   "probability": 1
+  },
+  {
+   "atlas": [
+    7,
+    0
+   ],
+   "kind": "mos",
+   "probability": 0.35
+  }
+ ],
+ "note": "all variants share identical border stones -> any random arrangement is seamless; also seamless with every plein_rand tile interior"
+}
