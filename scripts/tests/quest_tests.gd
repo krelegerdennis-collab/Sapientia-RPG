@@ -188,7 +188,7 @@ func _scherm_tests() -> void:
 	scherm.layer = 120
 	get_tree().root.add_child(scherm)
 	await _pframes(5)
-	check("scherm: opent op Active", scherm.tab == "actief" and scherm.header.text == "Quest Log")
+	check("scherm: opent op Active", scherm.tab == "actief" and scherm.header.text == QD.TITEL)
 	check("scherm Active: alleen Act 2 (%s | %s)" % [scherm.kop_teksten(), scherm.regel_teksten()],
 			scherm.kop_teksten() == ["Act 2: The Second Archive"]
 			and scherm.regel_teksten() == ["Save Vesper from the Dark Wood", "Seren joins the party",

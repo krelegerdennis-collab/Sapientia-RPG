@@ -18,14 +18,16 @@ const OPEN := "open"        # speelbaar, nog niet klaar
 const DICHT := "dicht"      # er is inhoud, maar de vorige act is nog niet klaar
 const LATER := "later"      # nog geen inhoud in de game
 
-## Speler-tekst van het scherm
-const TITEL := "Quest Log"
+## Speler-tekst: schermtitel ECHO; pausemenu/tutorial blijven "Quest Log" (menutest).
+const TITEL := "ECHO"
+const MENU_KNOP := "Quest Log"
 const TAB_ACTIEF := "Active"
 const TAB_KLAAR := "Done"
 const LEEG_ACTIEF := "No active quests."
 const LEEG_KLAAR := "No completed quests yet."
 const ZIJ_LABEL := "Side quest"
 const NIET_GESTART := "Not started yet."
+const OBJECTIVE_LABEL := "Current objective:"
 const VINK_KLAAR := "[x] "
 const VINK_OPEN := "[ ] "
 
@@ -192,6 +194,18 @@ static func regel(q: Dictionary, flags: Dictionary, stap: int, voortgang := {}) 
 	return str(q["title"])
 
 
+## Eerste open stap (leeg als klaar of nog niet gestart bij een zijopdracht).
+static func huidige_doel(q: Dictionary, flags: Dictionary, stap: int, voortgang := {}) -> String:
+	if quest_klaar(q, flags, stap, voortgang):
+		return ""
+	if is_zij(q) and not zij_gesproken(q, flags, stap, voortgang):
+		return ""
+	for s in q.get("steps", []):
+		if not stap_klaar(q, s, flags, stap, voortgang):
+			return str(s["text"])
+	return ""
+
+
 ## De opdracht rechts in het scherm: (zijopdracht-regel), omschrijving, stappen met [x]/[ ].
 static func detail_regels(q: Dictionary, flags: Dictionary, stap: int, voortgang := {}) -> Array[String]:
 	var uit: Array[String] = []
@@ -270,7 +284,8 @@ static func van_save(raw) -> Dictionary:
 
 
 static func speler_teksten() -> Array[String]:
-	var uit: Array[String] = [TITEL, TAB_ACTIEF, TAB_KLAAR, LEEG_ACTIEF, LEEG_KLAAR, ZIJ_LABEL, NIET_GESTART]
+	var uit: Array[String] = [TITEL, MENU_KNOP, TAB_ACTIEF, TAB_KLAAR, LEEG_ACTIEF, LEEG_KLAAR, ZIJ_LABEL, NIET_GESTART,
+			OBJECTIVE_LABEL]
 	for a in acts():
 		uit.append(act_kop(str(a["id"])))
 		uit.append(str(a.get("theme", "")))
