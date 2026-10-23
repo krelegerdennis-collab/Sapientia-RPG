@@ -175,6 +175,8 @@ func _som_prop(objects: Node, rij: Dictionary, sp: Dictionary, i: int) -> void:
 		_anim.append(spr)
 	if str(sp.get("schaduw", "")) != "":
 		_schaduw(str(sp["schaduw"]), Vector2(sp["links_boven"]) * 16.0)
+	elif Data.P10_OUDE_SCHADUW.has(str(sp["naam"])):
+		_schaduw(Data.P10 + str(Data.P10_OUDE_SCHADUW[str(sp["naam"])]), Vector2(sp["links_boven"]) * 16.0)
 	var blok: Rect2i = sp["blok"]
 	if blok.size.x > 0 and blok.size.y > 0:
 		var vorm := RectangleShape2D.new()
@@ -376,10 +378,10 @@ func _grondlaag() -> Node2D:
 		_grond10 = Node2D.new()
 		_grond10.name = "Plein10"
 		kaart.get_node("Ground").add_child(_grond10)
-		_grond10.add_child(Node2D.new())
-		_grond10.get_child(0).name = "Keien"
-		_grond10.add_child(Node2D.new())
-		_grond10.get_child(1).name = "Schaduwen"
+		for naam in ["Grond", "Bosrand", "Schaduwen", "Brug"]:
+			var n := Node2D.new()
+			n.name = naam
+			_grond10.add_child(n)
 	return _grond10
 
 
@@ -400,55 +402,100 @@ func _schaduw(pad: String, linksboven: Vector2) -> void:
 	s.name = pad.get_file().get_basename()
 
 
+## Plein 10: gebakken grond van RPG ART (plein_grond_tileset.png + plein_grond_map.json) als tegellaag op het
+## blok, de bosrand, de brug, decor (bomen, kar, kratten, tonnen, zakken, bloemen, wegwijzer, hekken, struiken,
+## stenen) met botsing uit layout.json, schoorsteenrook en extra dorpelingen.
 func _plein10(kaart: Node, objects: Node) -> void:
 	if not Data.som():
 		return
+	var lay := Data.p10_layout()
+	if lay.is_empty():
+		push_warning("plein10/layout.json ontbreekt (python3 tools/plein10_bouw.py)")
+		return
 	var laag := _grondlaag()
-	var keien := laag.get_node("Keien")
-	var r := Data.PLEIN
-	for y in range(r.position.y, r.end.y):
-		for x in range(r.position.x, r.end.x):
-			var n := ""
-			var w := x == r.position.x
-			var o := x == r.end.x - 1
-			var nn := y == r.position.y
-			var z := y == r.end.y - 1
-			if nn and w: n = "kei_hoek_nw"
-			elif nn and o: n = "kei_hoek_no"
-			elif z and w: n = "kei_hoek_zw"
-			elif z and o: n = "kei_hoek_zo"
-			elif nn: n = "kei_rand_n"
-			elif z: n = "kei_base" if x >= Data.BRUG.position.x and x < Data.BRUG.end.x else "kei_rand_z"
-			elif w: n = "kei_rand_w"
-			elif o: n = "kei_rand_o"
-			else:
-				var h := absi((x * 73856093) ^ (y * 19349663)) % Data.P10_KEI.size()
-				n = Data.P10_KEI[h]
-			_plat(keien, Data.P10 + n + ".png", Vector2(x, y) * 16.0)
-	# brug (48x48 = BRUG, 3x3 tegels) over de SoM-brugtegels; beloopbaar (geen botsing)
-	var brug := _plat(laag, Data.P10 + "brug_11.png", Vector2(Data.BRUG.position) * 16.0)
-	brug.name = "Brug10"
-	laag.move_child(laag.get_node("Schaduwen"), -1)
-	# losse bomen: y-sort op de stamtegel, botsing = de stamtegel
-	var bomen := Node2D.new()
-	bomen.name = "Bomen10"
-	bomen.y_sort_enabled = true
-	objects.add_child(bomen)
-	for b in Data.P10_BOMEN:
-		var rij: Dictionary = b
-		var stam: Vector2i = rij["stam"]
-		var tex: Texture2D = load(Data.P10 + str(rij["file"]) + ".png")
-		var lb := Data.boom_linksboven(stam, Vector2i(tex.get_size()))
-		var body := StaticBody2D.new()
-		body.name = "Boom10_%d_%d" % [stam.x, stam.y]
-		body.position = Vector2(stam) * 16.0 + Vector2(8, 16)
+	var o := Vector2(float(lay["ox"]), float(lay["oy"])) * 16.0
+	var gm = JSON.parse_string(FileAccess.get_file_as_string(Data.P10 + "plein_grond_map.json"))
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(16, 16)
+	var bron := TileSetAtlasSource.new()
+	bron.texture = load(Data.P10 + "plein_grond_tileset.png")
+	bron.texture_region_size = Vector2i(16, 16)
+	var kol := int(gm["cols"])
+	var rijen := bron.texture.get_height() / 16
+	for y in rijen:
+		for x in kol:
+			bron.create_tile(Vector2i(x, y))
+	ts.add_source(bron, 0)
+	var grond := TileMapLayer.new()
+	grond.name = "GrondTegels"
+	grond.tile_set = ts
+	grond.position = o
+	grond.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	laag.get_node("Grond").add_child(grond)
+	var kaartje: Array = gm["map"]
+	for y in kaartje.size():
+		var rij: Array = kaartje[y]
+		for x in rij.size():
+			var i := int(rij[x])
+			grond.set_cell(Vector2i(x, y), 0, Vector2i(i % kol, i / kol))
+	_plat(laag.get_node("Bosrand"), Data.P10 + "bos_rand.png", o).name = "BosDak"
+	var bp: Array = lay["brug_px"]
+	_plat(laag.get_node("Brug"), Data.P10 + "brug_11.png", Vector2(float(bp[0]), float(bp[1]))).name = "Brug10"
+	# botsing: bosdak (W) en vaste decortegels
+	var vast := StaticBody2D.new()
+	vast.name = "Vast10"
+	objects.add_child(vast)
+	var tegels: Array = Data.p10_vast_tegels()
+	for y in Data.H:
+		for x in Data.W:
+			if Data.GROND[y][x] == "W":
+				tegels.append(Vector2i(x, y))
+	for t in tegels:
 		var vorm := RectangleShape2D.new()
-		vorm.size = Vector2(14, 14)
+		vorm.size = Vector2(16, 16)
 		var bots := CollisionShape2D.new()
 		bots.shape = vorm
-		bots.position = Vector2(0, -8)
-		body.add_child(bots)
-		var spr := _plat(body, tex.resource_path, lb - body.position)
+		bots.position = Vector2(t) * 16.0 + Vector2(8, 8)
+		vast.add_child(bots)
+	# decor: y-sort op de voet
+	var decor := Node2D.new()
+	decor.name = "Decor10"
+	decor.y_sort_enabled = true
+	objects.add_child(decor)
+	var i := 0
+	for ruw in lay["decor"]:
+		var d: Dictionary = ruw
+		var lb := Vector2(float(d["x"]), float(d["y"]))
+		var knoop := Node2D.new()
+		knoop.name = "%s_%d" % [str(d["file"]).get_basename(), i]
+		knoop.position = Vector2(lb.x, float(d["voet"]))
+		knoop.set_meta("soort", str(d["soort"]))
+		decor.add_child(knoop)
+		var spr := _plat(knoop, Data.P10 + str(d["file"]), lb - knoop.position)
 		spr.name = "Sprite"
-		bomen.add_child(body)
-		_schaduw(Data.P10 + str(rij["file"]) + "_schaduw.png", lb)
+		if str(d["schaduw"]) != "":
+			_schaduw(Data.P10 + str(d["schaduw"]), lb)
+		i += 1
+	# rook op de schoorstenen (4 frames), boven alles
+	var j := 0
+	for r in lay["rook"]:
+		var spr := _plat(objects, Data.P10 + "rook_4f.png", Vector2(float(r["x"]), float(r["y"])))
+		spr.name = "Rook_%d" % j
+		spr.hframes = 4
+		spr.frame = j % 4
+		spr.z_index = 3
+		spr.modulate.a = 0.9
+		_anim.append(spr)
+		j += 1
+	# extra dorpelingen (geen rol: tellen niet als sfeer-NPC), vast op hun tegel
+	for ruw in Data.P10_DORPELINGEN:
+		var rij: Dictionary = ruw
+		var npc := NPC.instantiate()
+		npc.name = str(rij["node"])
+		npc.npc_name = str(rij["naam"])
+		npc.lines = _zinnen(rij["lines"])
+		npc.facing = rij["kijk"]
+		npc.event = ""
+		npc.sheet = load(Data.P10 + str(rij["sheet"]) + ".png")
+		objects.add_child(npc)
+		npc.place_at(rij["tegel"], rij["kijk"])

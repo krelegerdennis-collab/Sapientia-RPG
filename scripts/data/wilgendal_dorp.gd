@@ -11,7 +11,8 @@ const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const ALTIJD_OPEN := true
 const W := 90
 const H := 56
-const PLEIN := Rect2i(36, 17, 26, 7)
+## Plein 10: het keienplein van RPG ART (blok P10_OX/P10_OY, plein_mockup.png tegels 4..35 x 12..21).
+const PLEIN := Rect2i(33, 12, 32, 10)
 ## v3 (Dennis 14 okt 2026): reuzenmolen v2 (RPG ART, 14x20 tegels) in het nieuwe westdeel. De molen
 ## steekt uit over de beek: alleen de voet (sprite-rijen 17-19, kolommen 2-11) blokkeert; achter (noord
 ## van) de molen loop je vrij en verdwijn je achter de toren (y-sort op de onderrand).
@@ -27,43 +28,44 @@ const GERRIT_TEGEL := Vector2i(14, 30)
 ## v4 (Dennis 14 okt 2026): grotere SoM-huizen (6 breed) en paden van 2-3 tegels; kaart 64x40.
 ## Beek: één tegel breed, rij BEEK_RIJ over de hele breedte; de brug (BRUG) is beloopbaar.
 const BEEK_RIJ := 25
-const BRUG := Rect2i(47, 24, 3, 3)
+## Plein 10: brug_11 over de beek in het blok (kolommen 48-49, beek-rijen 29-30); de beek buiten het blok blijft rij BEEK_RIJ.
+const BRUG := Rect2i(48, 29, 2, 2)
 ## Hoogstens zoveel sfeer-NPC's op het marktplein (besluit Dennis: 2-3).
 const PLEIN_MAX := 2
 
 const GROND: Array[String] = [
-	"TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T........................................................................................T",
-	"T..====================================================================================..T",
-	"T..====================================================================================..T",
-	"T...................................##########################...........................T",
-	"T...................................##########################...........................T",
-	"T...................................##########################...........................T",
-	"T.......................T...........##########################.......T...................T",
-	"T...........................TT......##########################.................TT........T",
-	"T...........................TT......##########################.................TT........T",
-	"T...................................##########################...........................T",
-	"T....................FFGFF.....................===..............FFFFF....................T",
-	"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BBB~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
-	"T..............................................===.......................................T",
-	"T..............................................===.......................................T",
-	"T..............................................===.......................................T",
-	"T.....============================================.......................................T",
-	"T.....============================================.......................................T",
-	"T..............................................===.......................................T",
+	"TTTTTTTTTTTTTTTTTTTTTTTTTTTTTWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWTTTTTTTTTTTTTTTTTTTTT",
+	"T............................WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW....................T",
+	"T............................WWWW.....WWWW......WWWW....WWWWW....WWWW....................T",
+	"T............................WW....................................WW....................T",
+	"T............................WW....................................WW....................T",
+	"T............................WW....................................WW....................T",
+	"T............................W.....................................WW....................T",
+	"T............................WW.....................................W....................T",
+	"T............................W......................................W....................T",
+	"T............................W......................................W....................T",
+	"T............................W......................................W....................T",
+	"T............................WW.....................................W....................T",
+	"T............................WW....................................WW....................T",
+	"T............................WW....................................WW....................T",
+	"T............................WW....................................WW....................T",
+	"T..==========================........................................==================..T",
+	"T..==========================........................................==================..T",
+	"T............................WW....................................WW....................T",
+	"T............................WW....................................WW....................T",
+	"T............................W......................................W....................T",
+	"T.......................T....W......................................WT...................T",
+	"T...........................TWW.....................................W..........TT........T",
+	"T...........................TWW....................................WW..........TT........T",
+	"T............................WW....................................WW....................T",
+	"T....................FFGFF...WW....................................WW....................T",
+	"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~WW....................................WW~~~~~~~~~~~~~~~~~~~~~",
+	"T............................WW....................................WW....................T",
+	"T............................WW....................................WW....................T",
+	"T............................WW...................................~WW....................T",
+	"T.....=======================WW~~~~~.~~~~~~~~~~~BB~~~~~~~.~~~~~~~~~WW....................T",
+	"T.....=======================W~~~~~~~~~..........B~~~~~~~~~~.......WW....................T",
+	"T............................W.....................................WW....................T",
 	"T..............................................===.......................................T",
 	"T..............................................===.......................................T",
 	"T..............................................===.......................................T",
@@ -95,6 +97,7 @@ const TEGEL := {
 	".": 0,
 	"=": 2,
 	"#": 33,
+	"W": 3,      # bosrand (plein 10, dicht)
 	"~": 0,      # beek: gras eronder, de beek-art ligt erover (PROPS/dorp_opbouw)
 	"B": 2,      # pad onder de brug
 	"F": 0,      # hek (SoM: autotile uit hekken.png, oud: props hek_*)
@@ -116,9 +119,9 @@ const PANDEN := [
 		"id": "pantser",
 		"kind": "winkel",
 		"shop_id": "wilgendal_pantser",
-		"oorsprong": Vector2i(23, 12),
+		"oorsprong": Vector2i(40, 9),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(24, 14),
+		"deur": Vector2i(41, 11),
 		"icoon": "schild",
 		"tex": "pantser",
 		"bewoond": false,
@@ -132,9 +135,9 @@ const PANDEN := [
 		"id": "wapen",
 		"kind": "winkel",
 		"shop_id": "wilgendal_wapen",
-		"oorsprong": Vector2i(36, 12),
+		"oorsprong": Vector2i(32, 9),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(37, 14),
+		"deur": Vector2i(33, 11),
 		"icoon": "zwaard",
 		"tex": "wapen",
 		"bewoond": false,
@@ -148,9 +151,9 @@ const PANDEN := [
 		"id": "accessoire",
 		"kind": "winkel",
 		"shop_id": "wilgendal_accessoire",
-		"oorsprong": Vector2i(57, 12),
+		"oorsprong": Vector2i(47, 9),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(58, 14),
+		"deur": Vector2i(48, 11),
 		"icoon": "ring",
 		"tex": "accessoire",
 		"bewoond": false,
@@ -164,9 +167,9 @@ const PANDEN := [
 		"id": "magie",
 		"kind": "winkel",
 		"shop_id": "wilgendal_magie",
-		"oorsprong": Vector2i(66, 12),
+		"oorsprong": Vector2i(56, 9),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(67, 14),
+		"deur": Vector2i(57, 11),
 		"icoon": "ster",
 		"tex": "magie",
 		"bewoond": false,
@@ -229,10 +232,10 @@ const PANDEN := [
 		"id": "burgemeester",
 		"kind": "huis",
 		"shop_id": "",
-		"oorsprong": Vector2i(64, 30),
+		"oorsprong": Vector2i(66, 34),
 		"maat": Vector2i(7, 6),
 		"blok_rijen": 3,
-		"deur": Vector2i(67, 35),
+		"deur": Vector2i(69, 39),
 		"icoon": "",
 		"tex": "burgemeester",
 		"bewoond": false,
@@ -242,15 +245,15 @@ const PANDEN := [
 		"map_naam": "",
 		"dicht": "The Mayor's House. The double doors are locked today.",
 	},
-	## Plein 10 (RPG ART art_10): het huis van Dax, rechtsonder bij de brug (zoals plein_mockup.png).
+	## Plein 10 (RPG ART art_10): het huis van Dax, rechtsonder ten noorden van de beek (zoals plein_mockup.png).
 	## kind "thuis": telt niet mee bij winkels() of huizen(); de deur gaat naar huis_wilgendal.tscn (spawn "binnen").
 	{
 		"id": "dax",
 		"kind": "thuis",
 		"shop_id": "",
-		"oorsprong": Vector2i(53, 33),
+		"oorsprong": Vector2i(58, 25),
 		"maat": Vector2i(3, 3),
-		"deur": Vector2i(56, 35),
+		"deur": Vector2i(59, 27),
 		"icoon": "",
 		"tex": "huis",
 		"bewoond": true,
@@ -333,40 +336,40 @@ const SFEER := [
 		"node": "Bram",
 		"rol": "echtpaar",
 		"naam": "Bramwell",
-		"tegel": Vector2i(41, 18),
-		"lus": [Vector2i(41, 18), Vector2i(42, 18), Vector2i(42, 19), Vector2i(41, 19)],
+		"tegel": Vector2i(40, 38),
+		"lus": [Vector2i(40, 38), Vector2i(41, 38), Vector2i(41, 39), Vector2i(40, 39)],
 		"lines": ["Elsie wants to go to the smith soon. I'm staying here on the square."],
 	},
 	{
 		"node": "Els",
 		"rol": "echtpaar",
 		"naam": "Elsie",
-		"tegel": Vector2i(65, 20),
-		"lus": [Vector2i(65, 20), Vector2i(66, 20), Vector2i(66, 21), Vector2i(65, 21)],
+		"tegel": Vector2i(72, 18),
+		"lus": [Vector2i(72, 18), Vector2i(73, 18), Vector2i(73, 19), Vector2i(72, 19)],
 		"lines": ["The shops never close. That keeps things calm."],
 	},
 	{
 		"node": "Fien",
 		"rol": "kind",
 		"naam": "Fern",
-		"tegel": Vector2i(53, 20),
-		"lus": [Vector2i(53, 20), Vector2i(54, 20), Vector2i(54, 21), Vector2i(53, 21)],
+		"tegel": Vector2i(53, 17),
+		"lus": [Vector2i(53, 17), Vector2i(54, 17), Vector2i(54, 18), Vector2i(53, 18)],
 		"lines": ["That star over there is the magic shop. I'm only allowed to look."],
 	},
 	{
 		"node": "Wout",
 		"rol": "veteraan",
 		"naam": "Walt",
-		"tegel": Vector2i(40, 34),
-		"lus": [Vector2i(40, 34), Vector2i(41, 34), Vector2i(41, 35), Vector2i(40, 35)],
+		"tegel": Vector2i(42, 16),
+		"lus": [Vector2i(42, 16), Vector2i(43, 16), Vector2i(43, 17), Vector2i(42, 17)],
 		"lines": ["I've fought enough. Now I drink tea on the square."],
 	},
 	{
 		"node": "Siem",
 		"rol": "koerier",
 		"naam": "Simon",
-		"tegel": Vector2i(36, 45),
-		"lus": [Vector2i(36, 45), Vector2i(37, 45), Vector2i(37, 46), Vector2i(36, 46)],
+		"tegel": Vector2i(52, 36),
+		"lus": [Vector2i(52, 36), Vector2i(53, 36), Vector2i(53, 37), Vector2i(52, 37)],
 		"lines": ["Mail for Willowdale. Nothing for you today."],
 	},
 ]
@@ -375,23 +378,23 @@ const SFEER := [
 ## onderste rij, "blok" = blokkerende tegels (0 = loopbaar, bv. de brug). "flip" spiegelt horizontaal.
 const PROPS_MAP := "res://assets/sprites/buiten/wilgendal/"
 const PROPS := [
-	{"tex": "put", "tegel": Vector2i(47, 21), "blok": Vector2i(2, 1)},
-	{"tex": "marktkraam_1", "tegel": Vector2i(38, 20), "blok": Vector2i(3, 1)},
-	{"tex": "marktkraam_2", "tegel": Vector2i(57, 20), "blok": Vector2i(3, 1)},
-	{"tex": "marktkraam_3", "tegel": Vector2i(53, 23), "blok": Vector2i(2, 1)},
-	{"tex": "bloembak_1", "tegel": Vector2i(36, 17), "blok": Vector2i(1, 1)},
-	{"tex": "bloembak_2", "tegel": Vector2i(61, 17), "blok": Vector2i(1, 1)},
-	{"tex": "bloembak_2", "tegel": Vector2i(36, 23), "blok": Vector2i(1, 1)},
-	{"tex": "bloembak_1", "tegel": Vector2i(61, 23), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(46, 14), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(50, 14), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(46, 24), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(50, 28), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(32, 19), "blok": Vector2i(1, 1)},
-	{"tex": "lantaarnpaal", "tegel": Vector2i(64, 19), "blok": Vector2i(1, 1)},
-	{"tex": "bankje_voor", "tegel": Vector2i(51, 24), "blok": Vector2i(2, 1)},
-	{"tex": "bankje_voor", "tegel": Vector2i(32, 24), "blok": Vector2i(2, 1)},
-	{"tex": "bankje_voor", "tegel": Vector2i(41, 17), "blok": Vector2i(2, 1)},
+	{"tex": "put", "tegel": Vector2i(47, 18), "blok": Vector2i(2, 1)},
+	{"tex": "marktkraam_1", "tegel": Vector2i(36, 16), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_2", "tegel": Vector2i(58, 17), "blok": Vector2i(3, 1)},
+	{"tex": "marktkraam_3", "tegel": Vector2i(52, 42), "blok": Vector2i(2, 1)},
+	{"tex": "bloembak_1", "tegel": Vector2i(40, 44), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_2", "tegel": Vector2i(42, 44), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_2", "tegel": Vector2i(54, 44), "blok": Vector2i(1, 1)},
+	{"tex": "bloembak_1", "tegel": Vector2i(56, 44), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(44, 13), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(53, 13), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(46, 34), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(50, 34), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(46, 44), "blok": Vector2i(1, 1)},
+	{"tex": "lantaarnpaal", "tegel": Vector2i(50, 44), "blok": Vector2i(1, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(38, 36), "blok": Vector2i(2, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(57, 36), "blok": Vector2i(2, 1)},
+	{"tex": "bankje_voor", "tegel": Vector2i(60, 49), "blok": Vector2i(2, 1)},
 	{"tex": "hek_eind", "tegel": Vector2i(21, 24), "blok": Vector2i(1, 1)},
 	{"tex": "hek_h", "tegel": Vector2i(22, 24), "blok": Vector2i(1, 1)},
 	{"tex": "hek_h", "tegel": Vector2i(23, 24), "blok": Vector2i(1, 1)},
@@ -544,7 +547,7 @@ static func grond_ok() -> bool:
 static func beloopbaar(t: Vector2i) -> bool:
 	if t.x < 0 or t.y < 0 or t.x >= W or t.y >= H:
 		return false
-	if GROND[t.y][t.x] == "T":
+	if GROND[t.y][t.x] == "T" or GROND[t.y][t.x] == "W":
 		return false
 	if MOLEN.has_point(t):
 		return false
@@ -583,14 +586,16 @@ static func bereikbaar(van: Vector2i, naar: Vector2i) -> bool:
 ## muur_rijen = botsende onderste rijen (dak = erachter lopen). De deurtegel in PANDEN blijft de waarheid.
 const P10 := "res://assets/sprites/buiten/wilgendal/plein10/"
 const P10_HUIZEN := {
-	"pantser": {"file": "huis_vleugel_11", "maat": Vector2i(12, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
 	"wapen": {"file": "wilgendal_wapen_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
-	"accessoire": {"file": "huis_smal_11", "maat": Vector2i(6, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+	"pantser": {"file": "huis_smal_11", "maat": Vector2i(6, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+	## geen eigen art voor de derde plek: het smalle huis gespiegeld (tools/plein10_bouw.py), deur op kolom 2
+	"accessoire": {"file": "huis_smal_11_spiegel", "maat": Vector2i(6, 10), "deur": Vector2i(2, 9), "muur_rijen": 4},
 	"magie": {"file": "wilgendal_magie_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
 	"dax": {"file": "huis_dax_11", "maat": Vector2i(8, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
+	"mien": {"file": "huis_vleugel_11", "maat": Vector2i(12, 10), "deur": Vector2i(3, 9), "muur_rijen": 4},
 }
-## Kramen (zelfde vorm als props_index.json): luifel-rij erachter lopen, toonbank (2 rijen) botst.
-## frames = geanimeerde luifel (<file>_3f.png, 3 frames).
+## Kramen en lantaarns (zelfde vorm als props_index.json): luifel/kap erachter lopen, voet botst.
+## anim = strook met frames (luifels 3, lamp 4).
 const P10_PROPS := {
 	"marktkraam_1": {"naam": "kraam10_1", "file": "marktkraam_1_10.png", "schaduw": "marktkraam_1_10_schaduw.png",
 		"anim": "marktkraam_1_10_3f.png", "frames": 3, "size_tiles": [3, 3], "collision_tiles": [[0, 1, 3, 2]], "ysort_origin_px": [24, 47]},
@@ -598,40 +603,61 @@ const P10_PROPS := {
 		"anim": "marktkraam_2_10_3f.png", "frames": 3, "size_tiles": [3, 3], "collision_tiles": [[0, 1, 3, 2]], "ysort_origin_px": [24, 47]},
 	"marktkraam_3": {"naam": "kraam10_3", "file": "marktkraam_3_10.png", "schaduw": "marktkraam_3_10_schaduw.png",
 		"anim": "marktkraam_3_10_3f.png", "frames": 3, "size_tiles": [2, 3], "collision_tiles": [[0, 1, 2, 2]], "ysort_origin_px": [16, 47]},
+	"lantaarnpaal": {"naam": "lamp10", "file": "lantaarnpaal_flikker_4f.png", "schaduw": "schaduw_lantaarnpaal.png",
+		"anim": "lantaarnpaal_flikker_4f.png", "frames": 4, "size_tiles": [1, 3], "collision_tiles": [[0, 2, 1, 1]], "ysort_origin_px": [8, 47]},
 }
-## Losse bomen rond het plein (de bosrand = de bestaande kegelbomen op de T-tegels). "stam" = botsende tegel;
-## het plaatje (48 breed) staat er gecentreerd boven, de schaduw met hetzelfde linksboven-anker.
-const P10_BOMEN := [
-	{"file": "loofboom_12", "stam": Vector2i(30, 21)},
-	{"file": "kegelboom_licht_11", "stam": Vector2i(32, 28)},
-	{"file": "loofboom_b_12", "stam": Vector2i(70, 21)},
-	{"file": "kegelboom_licht_11", "stam": Vector2i(73, 18)},
-	{"file": "loofboom_12", "stam": Vector2i(43, 28)},
-	{"file": "loofboom_b_12", "stam": Vector2i(62, 28)},
-	{"file": "kegelboom_licht_11", "stam": Vector2i(38, 37)},
-	{"file": "loofboom_12", "stam": Vector2i(52, 40)},
+## Schaduw voor de oude SoM-props (gemaakt door tools/plein10_bouw.py, zelfde methode als art_10).
+const P10_OUDE_SCHADUW := {"put": "schaduw_put.png", "bank": "schaduw_bank.png", "bloembak": "schaduw_bloembak.png", "lantaarn": "schaduw_lantaarn.png"}
+## Dorpelingen van RPG ART (24x32): sheets voor de sfeer-NPC's (Bram houdt zijn eigen sheet) en extra
+## vaste dorpelingen (zonder rol, praten wel). Verspreid: hoogstens PLEIN_MAX lopers op het plein.
+const P10_NPC := {"Els": "dorpeling_rood", "Fien": "dorpeling_kind", "Wout": "dorpeling_blauw", "Siem": "dorpeling_groen"}
+const P10_DORPELINGEN := [
+	{"node": "Koopman", "sheet": "dorpeling_koopman", "naam": "Merchant", "tegel": Vector2i(37, 17), "kijk": Vector2i(0, 1),
+		"lines": ["Fresh bread and apples! Best prices this side of the stream."]},
+	{"node": "Oma", "sheet": "dorpeling_oma", "naam": "Granny Wil", "tegel": Vector2i(51, 21), "kijk": Vector2i(-1, 0),
+		"lines": ["My knees remember when that well was dug."]},
+	{"node": "Oker", "sheet": "dorpeling_oker", "naam": "Farmer", "tegel": Vector2i(61, 33), "kijk": Vector2i(0, 1),
+		"lines": ["The bridge creaks, but it has never let anyone fall."]},
 ]
-## Keienplein = PLEIN (rand- en hoektegels op de buitenring).
-const P10_KEI := ["kei_base", "kei_base", "kei_worn", "kei_base", "kei_mix", "kei_cracked", "kei_base", "kei_mossy"]
+static var _p10_layout: Variant = null
+static var _p10_vast: Dictionary = {}
 
 
+## layout.json (tools/plein10_bouw.py): blok-offset, decor (bomen, props, bloemstroken), rook, brug.
+static func p10_layout() -> Dictionary:
+	if _p10_layout == null:
+		_p10_layout = {}
+		_p10_vast = {}
+		var pad := P10 + "layout.json"
+		if FileAccess.file_exists(pad):
+			var d = JSON.parse_string(FileAccess.get_file_as_string(pad))
+			if d is Dictionary:
+				_p10_layout = d
+				for o in d.get("decor", []):
+					for t in (o as Dictionary).get("vast", []):
+						_p10_vast[Vector2i(int(t[0]), int(t[1]))] = true
+	return _p10_layout
+
+
+## Blokkeert een decorstuk van plein 10 (boomstam, kar, krat, ton, ...) deze tegel?
 static func boom_op(t: Vector2i) -> bool:
 	if not som():
 		return false
-	for b in P10_BOMEN:
-		if (b as Dictionary)["stam"] == t:
-			return true
-	return false
+	p10_layout()
+	return _p10_vast.has(t)
 
 
-## Linksboven (px) van een boomplaatje met maat m, stam = tegel onder het midden.
-static func boom_linksboven(stam: Vector2i, m: Vector2i) -> Vector2:
-	return Vector2(stam.x * 16.0 + 8.0 - m.x / 2.0, (stam.y + 1) * 16.0 - m.y)
+static func p10_vast_tegels() -> Array:
+	p10_layout()
+	return _p10_vast.keys()
 
 
 ## Beektegel (niet de brug)?
+## Plein 10: de beek staat in GROND ("~"): rij BEEK_RIJ buiten het blok, de kronkelende beek erin.
 static func beek(t: Vector2i) -> bool:
-	return t.y == BEEK_RIJ and not BRUG.has_point(t)
+	if t.x < 0 or t.y < 0 or t.x >= W or t.y >= H:
+		return false
+	return GROND[t.y][t.x] == "~" and not BRUG.has_point(t)
 
 
 ## Staat er een blokkerende prop op t?
@@ -797,6 +823,8 @@ static func som_prop(rij: Dictionary) -> Dictionary:
 
 ## Sheet voor een NPC-node in SoM-stijl, of "" (oude sprite houden).
 static func som_npc_sheet(node: String) -> String:
+	if som() and P10_NPC.has(node) and ResourceLoader.exists(P10 + str(P10_NPC[node]) + ".png"):
+		return P10 + str(P10_NPC[node]) + ".png"
 	if not som() or not SOM_NPC.has(node):
 		return ""
 	var pad := KaartStijl.npc_sheet_pad(SOM_NPC_MAP + str(SOM_NPC[node]) + ".png")

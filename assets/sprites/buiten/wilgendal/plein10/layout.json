@@ -1,0 +1,1902 @@
+{
+ "ox": 29,
+ "oy": 0,
+ "w": 40,
+ "h": 32,
+ "kaart": [
+  "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+  "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+  "WWWW.....WWWW......WWWW....WWWWW....WWWW",
+  "WW....................................WW",
+  "WW....................................WW",
+  "WW....................................WW",
+  "W.....................................WW",
+  "WW.....................................W",
+  "W......................................W",
+  "W......................................W",
+  "W......................................W",
+  "WW.....................................W",
+  "WW....................................WW",
+  "WW....................................WW",
+  "WW....................................WW",
+  "........................................",
+  "........................................",
+  "WW....................................WW",
+  "WW....................................WW",
+  "W......................................W",
+  "W......................................W",
+  "WW.....................................W",
+  "WW....................................WW",
+  "WW....................................WW",
+  "WW....................................WW",
+  "WW....................................WW",
+  "WW....................................WW",
+  "WW....................................WW",
+  "WW...................................~WW",
+  "WW~~~~~.~~~~~~~~~~~BB~~~~~~~.~~~~~~~~~WW",
+  "W~~~~~~~~~..........B~~~~~~~~~~.......WW",
+  "W.....................................WW"
+ ],
+ "decor": [
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1049,
+   "y": -24,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 56
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1074,
+   "y": -39,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 41
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 437,
+   "y": 10,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 73
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1033,
+   "y": 9,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     66,
+     4
+    ]
+   ],
+   "voet": 72
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1061,
+   "y": 5,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 68
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1084,
+   "y": -14,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 49
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1046,
+   "y": 33,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [
+    [
+     66,
+     5
+    ]
+   ],
+   "voet": 96
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1069,
+   "y": 39,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 102
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 437,
+   "y": 65,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 128
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1038,
+   "y": 54,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     66,
+     7
+    ]
+   ],
+   "voet": 117
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1055,
+   "y": 65,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     67,
+     7
+    ]
+   ],
+   "voet": 128
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1077,
+   "y": 65,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 128
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1048,
+   "y": 96,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     67,
+     10
+    ]
+   ],
+   "voet": 176
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1070,
+   "y": 82,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 162
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 432,
+   "y": 123,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 186
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1034,
+   "y": 129,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     66,
+     12
+    ]
+   ],
+   "voet": 209
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1056,
+   "y": 124,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 204
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1079,
+   "y": 106,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 169
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1046,
+   "y": 155,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [
+    [
+     66,
+     13
+    ]
+   ],
+   "voet": 218
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1068,
+   "y": 154,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 217
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 433,
+   "y": 187,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 267
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 456,
+   "y": 174,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 237
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1079,
+   "y": 171,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 234
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 444,
+   "y": 214,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 277
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 464,
+   "y": 216,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 296
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1045,
+   "y": 217,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     66,
+     17
+    ]
+   ],
+   "voet": 280
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1071,
+   "y": 196,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 276
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 435,
+   "y": 247,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 310
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 453,
+   "y": 246,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 309
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 475,
+   "y": 246,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     31,
+     20
+    ]
+   ],
+   "voet": 326
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1038,
+   "y": 231,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     66,
+     18
+    ]
+   ],
+   "voet": 294
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1056,
+   "y": 249,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     67,
+     19
+    ]
+   ],
+   "voet": 312
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1080,
+   "y": 244,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 307
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 441,
+   "y": 276,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 339
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 465,
+   "y": 261,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     30,
+     20
+    ]
+   ],
+   "voet": 324
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1051,
+   "y": 278,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     67,
+     21
+    ]
+   ],
+   "voet": 341
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1067,
+   "y": 280,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 343
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 437,
+   "y": 308,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 371
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 457,
+   "y": 292,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 355
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 477,
+   "y": 302,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     31,
+     22
+    ]
+   ],
+   "voet": 365
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1036,
+   "y": 302,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     66,
+     23
+    ]
+   ],
+   "voet": 382
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1060,
+   "y": 304,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 367
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1083,
+   "y": 289,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 352
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 441,
+   "y": 335,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 398
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 469,
+   "y": 339,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 419
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1047,
+   "y": 340,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     66,
+     26
+    ]
+   ],
+   "voet": 420
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1071,
+   "y": 324,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 404
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 433,
+   "y": 369,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 432
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 453,
+   "y": 367,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 430
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 479,
+   "y": 366,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     31,
+     27
+    ]
+   ],
+   "voet": 446
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1079,
+   "y": 352,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 415
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 441,
+   "y": 395,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 458
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 465,
+   "y": 400,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 480
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 435,
+   "y": 427,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 507
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 456,
+   "y": 411,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 474
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 475,
+   "y": 430,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 493
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1077,
+   "y": 426,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 489
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 446,
+   "y": 457,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 520
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 467,
+   "y": 438,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     30,
+     31
+    ]
+   ],
+   "voet": 501
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 437,
+   "y": 483,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 546
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 458,
+   "y": 484,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 547
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 478,
+   "y": 486,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 566
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1082,
+   "y": 468,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 531
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 446,
+   "y": 512,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 575
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 463,
+   "y": 520,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 600
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1048,
+   "y": 512,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 592
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1070,
+   "y": 501,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 581
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 505,
+   "y": -42,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     33,
+     2
+    ]
+   ],
+   "voet": 38
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 515,
+   "y": -22,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     33,
+     3
+    ]
+   ],
+   "voet": 58
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 528,
+   "y": -44,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     34,
+     2
+    ]
+   ],
+   "voet": 36
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 540,
+   "y": -38,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 25
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 551,
+   "y": -39,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 24
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 566,
+   "y": -21,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     36,
+     3
+    ]
+   ],
+   "voet": 59
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 578,
+   "y": -44,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 19
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 597,
+   "y": -39,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 41
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 604,
+   "y": -36,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 27
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 622,
+   "y": -24,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     40,
+     3
+    ]
+   ],
+   "voet": 56
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 629,
+   "y": -44,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 19
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 647,
+   "y": -41,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 39
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 656,
+   "y": -46,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 17
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 674,
+   "y": -24,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     43,
+     3
+    ]
+   ],
+   "voet": 56
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 683,
+   "y": -44,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     44,
+     2
+    ]
+   ],
+   "voet": 36
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 699,
+   "y": -39,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     45,
+     2
+    ]
+   ],
+   "voet": 41
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 713,
+   "y": -44,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     46,
+     2
+    ]
+   ],
+   "voet": 36
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 724,
+   "y": -24,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     46,
+     3
+    ]
+   ],
+   "voet": 56
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 736,
+   "y": -41,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     47,
+     2
+    ]
+   ],
+   "voet": 39
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 751,
+   "y": -41,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 39
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 761,
+   "y": -39,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 41
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 775,
+   "y": -26,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     49,
+     3
+    ]
+   ],
+   "voet": 54
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 785,
+   "y": -40,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 23
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 806,
+   "y": -39,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 41
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 812,
+   "y": -36,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 27
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 827,
+   "y": -21,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     53,
+     3
+    ]
+   ],
+   "voet": 59
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 839,
+   "y": -44,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     53,
+     2
+    ]
+   ],
+   "voet": 36
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 852,
+   "y": -40,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 23
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 865,
+   "y": -38,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     55,
+     2
+    ]
+   ],
+   "voet": 42
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 882,
+   "y": -23,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     56,
+     3
+    ]
+   ],
+   "voet": 57
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 895,
+   "y": -38,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 42
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 906,
+   "y": -43,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 37
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 921,
+   "y": -41,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 39
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 933,
+   "y": -23,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     59,
+     3
+    ]
+   ],
+   "voet": 57
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 946,
+   "y": -46,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 34
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 962,
+   "y": -41,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     61,
+     2
+    ]
+   ],
+   "voet": 39
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 969,
+   "y": -38,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     62,
+     2
+    ]
+   ],
+   "voet": 42
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 985,
+   "y": -22,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     63,
+     3
+    ]
+   ],
+   "voet": 58
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 995,
+   "y": -39,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     63,
+     2
+    ]
+   ],
+   "voet": 41
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1010,
+   "y": -37,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     64,
+     2
+    ]
+   ],
+   "voet": 43
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1024,
+   "y": -42,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 38
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 1034,
+   "y": -22,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     66,
+     3
+    ]
+   ],
+   "voet": 58
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1074,
+   "y": 346,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 409
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1084,
+   "y": 372,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 435
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1068,
+   "y": 426,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 489
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1084,
+   "y": 462,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 525
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1074,
+   "y": 496,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 559
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 1088,
+   "y": 500,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 563
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 502,
+   "y": 396,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [],
+   "voet": 476
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 658,
+   "y": 388,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [
+    [
+     42,
+     27
+    ]
+   ],
+   "voet": 451
+  },
+  {
+   "file": "loofboom_12.png",
+   "x": 712,
+   "y": 502,
+   "soort": "boom",
+   "schaduw": "loofboom_12_schaduw.png",
+   "vast": [],
+   "voet": 565
+  },
+  {
+   "file": "kegelboom_licht_11.png",
+   "x": 864,
+   "y": 420,
+   "soort": "boom",
+   "schaduw": "kegelboom_licht_11_schaduw.png",
+   "vast": [
+    [
+     55,
+     31
+    ]
+   ],
+   "voet": 500
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 450,
+   "y": 214,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 277
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1064,
+   "y": 236,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 299
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 454,
+   "y": 330,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 393
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1070,
+   "y": 140,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 203
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 480,
+   "y": 468,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 531
+  },
+  {
+   "file": "loofboom_b_12.png",
+   "x": 1024,
+   "y": 486,
+   "soort": "boom",
+   "schaduw": "loofboom_b_12_schaduw.png",
+   "vast": [],
+   "voet": 549
+  },
+  {
+   "file": "bloemstrook_b_13.png",
+   "x": 488,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "bloemstrook_13.png",
+   "x": 552,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "bloemstrook_13.png",
+   "x": 616,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "bloemstrook_b_13.png",
+   "x": 776,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "bloemstrook_13.png",
+   "x": 872,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "bloemstrook_b_13.png",
+   "x": 936,
+   "y": 162,
+   "soort": "vloer",
+   "schaduw": "",
+   "vast": [],
+   "voet": 178
+  },
+  {
+   "file": "krat_10.png",
+   "x": 614,
+   "y": 250,
+   "soort": "prop",
+   "schaduw": "krat_10_schaduw.png",
+   "vast": [
+    [
+     38,
+     17
+    ],
+    [
+     39,
+     17
+    ]
+   ],
+   "voet": 281
+  },
+  {
+   "file": "ton_10.png",
+   "x": 556,
+   "y": 246,
+   "soort": "prop",
+   "schaduw": "ton_10_schaduw.png",
+   "vast": [
+    [
+     35,
+     16
+    ],
+    [
+     35,
+     17
+    ]
+   ],
+   "voet": 278
+  },
+  {
+   "file": "zak_10.png",
+   "x": 660,
+   "y": 264,
+   "soort": "prop",
+   "schaduw": "zak_10_schaduw.png",
+   "vast": [
+    [
+     41,
+     18
+    ]
+   ],
+   "voet": 296
+  },
+  {
+   "file": "zak_graan_10.png",
+   "x": 670,
+   "y": 270,
+   "soort": "prop",
+   "schaduw": "zak_graan_10_schaduw.png",
+   "vast": [
+    [
+     42,
+     18
+    ]
+   ],
+   "voet": 302
+  },
+  {
+   "file": "kar_10.png",
+   "x": 548,
+   "y": 286,
+   "soort": "prop",
+   "schaduw": "kar_10_schaduw.png",
+   "vast": [
+    [
+     34,
+     20
+    ],
+    [
+     35,
+     20
+    ],
+    [
+     36,
+     20
+    ]
+   ],
+   "voet": 334
+  },
+  {
+   "file": "zak_10.png",
+   "x": 536,
+   "y": 318,
+   "soort": "prop",
+   "schaduw": "zak_10_schaduw.png",
+   "vast": [
+    [
+     33,
+     21
+    ],
+    [
+     34,
+     21
+    ]
+   ],
+   "voet": 350
+  },
+  {
+   "file": "ton_10.png",
+   "x": 976,
+   "y": 250,
+   "soort": "prop",
+   "schaduw": "ton_10_schaduw.png",
+   "vast": [
+    [
+     61,
+     17
+    ]
+   ],
+   "voet": 282
+  },
+  {
+   "file": "krat_10.png",
+   "x": 994,
+   "y": 268,
+   "soort": "prop",
+   "schaduw": "krat_10_schaduw.png",
+   "vast": [
+    [
+     62,
+     18
+    ],
+    [
+     63,
+     18
+    ]
+   ],
+   "voet": 299
+  },
+  {
+   "file": "bloembed_10.png",
+   "x": 576,
+   "y": 196,
+   "soort": "prop",
+   "schaduw": "bloembed_10_schaduw.png",
+   "vast": [
+    [
+     36,
+     13
+    ],
+    [
+     37,
+     13
+    ],
+    [
+     38,
+     13
+    ],
+    [
+     36,
+     14
+    ],
+    [
+     37,
+     14
+    ],
+    [
+     38,
+     14
+    ]
+   ],
+   "voet": 228
+  },
+  {
+   "file": "bloembed_b_10.png",
+   "x": 816,
+   "y": 196,
+   "soort": "prop",
+   "schaduw": "bloembed_b_10_schaduw.png",
+   "vast": [
+    [
+     51,
+     13
+    ],
+    [
+     52,
+     13
+    ],
+    [
+     53,
+     13
+    ],
+    [
+     51,
+     14
+    ],
+    [
+     52,
+     14
+    ],
+    [
+     53,
+     14
+    ]
+   ],
+   "voet": 228
+  },
+  {
+   "file": "bloembed_c_10.png",
+   "x": 1002,
+   "y": 196,
+   "soort": "prop",
+   "schaduw": "bloembed_c_10_schaduw.png",
+   "vast": [
+    [
+     62,
+     13
+    ],
+    [
+     63,
+     13
+    ],
+    [
+     64,
+     13
+    ],
+    [
+     65,
+     13
+    ],
+    [
+     62,
+     14
+    ],
+    [
+     63,
+     14
+    ],
+    [
+     64,
+     14
+    ],
+    [
+     65,
+     14
+    ]
+   ],
+   "voet": 228
+  },
+  {
+   "file": "wegwijzer_10.png",
+   "x": 824,
+   "y": 350,
+   "soort": "prop",
+   "schaduw": "wegwijzer_10_schaduw.png",
+   "vast": [
+    [
+     51,
+     25
+    ],
+    [
+     52,
+     25
+    ],
+    [
+     53,
+     25
+    ]
+   ],
+   "voet": 414
+  },
+  {
+   "file": "hek_10.png",
+   "x": 484,
+   "y": 208,
+   "soort": "prop",
+   "schaduw": "hek_10_schaduw.png",
+   "vast": [
+    [
+     31,
+     14
+    ],
+    [
+     32,
+     14
+    ]
+   ],
+   "voet": 240
+  },
+  {
+   "file": "hek_10.png",
+   "x": 1036,
+   "y": 208,
+   "soort": "prop",
+   "schaduw": "hek_10_schaduw.png",
+   "vast": [
+    [
+     65,
+     14
+    ],
+    [
+     66,
+     14
+    ]
+   ],
+   "voet": 240
+  },
+  {
+   "file": "struik_10.png",
+   "x": 468,
+   "y": 250,
+   "soort": "prop",
+   "schaduw": "struik_10_schaduw.png",
+   "vast": [],
+   "voet": 281
+  },
+  {
+   "file": "struik_klein_10.png",
+   "x": 1024,
+   "y": 330,
+   "soort": "prop",
+   "schaduw": "struik_klein_10_schaduw.png",
+   "vast": [
+    [
+     64,
+     22
+    ]
+   ],
+   "voet": 361
+  },
+  {
+   "file": "struik_10.png",
+   "x": 614,
+   "y": 400,
+   "soort": "prop",
+   "schaduw": "struik_10_schaduw.png",
+   "vast": [
+    [
+     38,
+     26
+    ],
+    [
+     39,
+     26
+    ]
+   ],
+   "voet": 431
+  },
+  {
+   "file": "struik_klein_10.png",
+   "x": 864,
+   "y": 372,
+   "soort": "prop",
+   "schaduw": "struik_klein_10_schaduw.png",
+   "vast": [
+    [
+     54,
+     24
+    ],
+    [
+     54,
+     25
+    ]
+   ],
+   "voet": 403
+  },
+  {
+   "file": "struik_10.png",
+   "x": 614,
+   "y": 486,
+   "soort": "prop",
+   "schaduw": "struik_10_schaduw.png",
+   "vast": [
+    [
+     38,
+     31
+    ],
+    [
+     39,
+     31
+    ]
+   ],
+   "voet": 517
+  },
+  {
+   "file": "steen_10.png",
+   "x": 584,
+   "y": 372,
+   "soort": "prop",
+   "schaduw": "steen_10_schaduw.png",
+   "vast": [
+    [
+     36,
+     23
+    ],
+    [
+     37,
+     23
+    ],
+    [
+     36,
+     24
+    ],
+    [
+     37,
+     24
+    ]
+   ],
+   "voet": 388
+  },
+  {
+   "file": "steen_klein_10.png",
+   "x": 984,
+   "y": 410,
+   "soort": "prop",
+   "schaduw": "steen_klein_10_schaduw.png",
+   "vast": [
+    [
+     61,
+     26
+    ]
+   ],
+   "voet": 426
+  },
+  {
+   "file": "steen_10.png",
+   "x": 1044,
+   "y": 474,
+   "soort": "prop",
+   "schaduw": "steen_10_schaduw.png",
+   "vast": [
+    [
+     65,
+     30
+    ]
+   ],
+   "voet": 490
+  },
+  {
+   "file": "steen_klein_10.png",
+   "x": 504,
+   "y": 476,
+   "soort": "prop",
+   "schaduw": "steen_klein_10_schaduw.png",
+   "vast": [],
+   "voet": 492
+  }
+ ],
+ "rook": [
+  {
+   "x": 557,
+   "y": -14
+  },
+  {
+   "x": 666,
+   "y": -11
+  },
+  {
+   "x": 751,
+   "y": -11
+  },
+  {
+   "x": 973,
+   "y": 242
+  }
+ ],
+ "brug_px": [
+  760,
+  450
+ ]
+}
