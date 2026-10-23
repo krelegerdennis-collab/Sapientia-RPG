@@ -53,6 +53,8 @@ func _run() -> void:
 	_stick_tests()
 	print("=== Deel D: in het spel ===")
 	await _game_tests()
+	print("=== Deel E: leider-behoud (Action SWAP) ===")
+	await _leider_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
 
@@ -375,3 +377,75 @@ func _screenshot(name: String) -> void:
 	big.resize(1152, 648, Image.INTERPOLATE_NEAREST)
 	big.save_png(shots.path_join(name + "_3x.png"))
 	print("INFO  screenshot: ", shots.path_join(name + ".png"))
+
+
+## Naar een kamer en wachten tot hij klaar is; geeft de Action-arena (of null in Classic).
+func _naar(pad: String, spawn: String) -> Node:
+	GameState.in_battle = false
+	GameState.change_map(pad, spawn)
+	await wait_until(func(): return scene() != null and scene().scene_file_path == pad and not GameState.changing_map, 15.0)
+	await pframes(20)
+	await _close_dialogs()
+	return scene().get("som") if scene() and "som" in scene() else null
+
+
+## Bug Dennis: met SWAP een andere held kiezen en door een warp lopen = weer Dax. De gekozen leider moet blijven
+## over warps, opslaan/laden en Classic<->Action; terugval naar Dax bij KO of niet (meer) in de party.
+func _leider_tests() -> void:
+	const V1 := "res://scenes/maps/archief_v1_gang.tscn"
+	const V2 := "res://scenes/maps/archief_v2_kastenzaal.tscn"
+	var stijl: int = int(Settings.get_value("battle_style"))
+	GameState.new_game("Dax")
+	GameState.add_member("noor")
+	GameState.add_member("lotte")
+	GameState.encounter_multiplier = 0.0
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	check("E: nieuw spel: leider = Dax", GameState.leader_id == GameState.MAIN_HERO)
+	var a: Node = await _naar(V1, "zuid")
+	check("E: Action-arena in archief_v1_gang, Dax bestuurd", a != null and a.active_id == "dennis")
+	if a == null:
+		Settings.set_value("battle_style", stijl)
+		return
+	var nu: String = a.switch_hero("noor")
+	check("E: SWAP naar Vesper (noor) zet de leider", nu == "noor" and a.active_id == "noor" and GameState.leader_id == "noor")
+	# warp naar de volgende kamer
+	a = await _naar(V2, "ladder")
+	check("E: na warp naar archief_v2_kastenzaal nog steeds Vesper bestuurd (%s)" % (a.active_id if a else "-"), a != null and a.active_id == "noor")
+	check("E: na de warp loopt Dax mee als bondgenoot", a != null and a.ally_of("dennis") != null and a.ally_of("noor") == null)
+	# en weer terug (kamerwissel de andere kant op)
+	a = await _naar(V1, "zuid")
+	check("E: terug naar archief_v1_gang: nog steeds Vesper", a != null and a.active_id == "noor")
+	# opslaan / laden
+	var d: Dictionary = GameState.state_data(Vector2i(5, 5), Vector2i.DOWN, V1)
+	check("E: save bevat leader = noor", str(d.get("leader", "")) == "noor")
+	GameState.set_leader(GameState.MAIN_HERO)
+	check("E: laden zet de leider terug (noor)", GameState.apply_state(d.duplicate(true)) and GameState.leader_id == "noor")
+	var oud := d.duplicate(true)
+	oud.erase("leader")
+	check("E: oude save zonder 'leader' = Dax", GameState.apply_state(oud) and GameState.leader_id == GameState.MAIN_HERO)
+	GameState.apply_state(d.duplicate(true))
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	a = await _naar(V1, "zuid")
+	check("E: na laden + kamer: Vesper bestuurd", a != null and a.active_id == "noor")
+	# Classic <-> Action
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+	a = await _naar(V2, "ladder")
+	check("E: Classic: geen arena, leider blijft bewaard (noor)", a == null and GameState.leader_id == "noor")
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	a = await _naar(V1, "zuid")
+	check("E: terug naar Action: Vesper bestuurd", a != null and a.active_id == "noor")
+	# terugval: KO
+	GameState.member("noor")["hp"] = 0
+	check("E: KO-leider -> active_leader() = Dax", GameState.active_leader() == GameState.MAIN_HERO)
+	a = await _naar(V2, "ladder")
+	check("E: KO-leider: na warp Dax bestuurd", a != null and a.active_id == "dennis")
+	GameState.member("noor")["hp"] = int(GameState.member("noor").get("max_hp", 10))
+	# terugval: niet (meer) in de party
+	GameState.set_leader("seren")
+	check("E: leider niet in de party -> Dax", not GameState.has_member("seren") and GameState.active_leader() == GameState.MAIN_HERO)
+	GameState.set_leader("noor")
+	var noor: Dictionary = GameState.member("noor")
+	GameState.party.erase(noor)
+	a = await _naar(V1, "zuid")
+	check("E: leider uit de party gehaald: na warp Dax bestuurd", a != null and a.active_id == "dennis")
+	Settings.set_value("battle_style", stijl)
