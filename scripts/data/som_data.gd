@@ -406,6 +406,18 @@ const FX_CODEX_CAPTURE := {"sheet": "res://assets/sprites/som/fx/codex_capture_f
 const TXT_NOW := "Now playing: %s"
 const TXT_MISS_BUFF := "%s has no effect in real time yet."
 
+## Doel-lock HUD (handwerk assets/ui/lock/): marker (lus) + wissel (eenmalig bij nieuw doel).
+const TARGET_LOCK := {
+	"marker": "res://assets/ui/lock/lock_marker.png",
+	"wissel": "res://assets/ui/lock/lock_wissel.png",
+	"marker_frames": 4,
+	"wissel_frames": 3,
+	"marker_fps": 8.0,
+	"wissel_fps": 12.0,
+	"marker_anchor": [8, 16],
+	"wissel_anchor": [8, 16],
+}
+
 
 static func room_enabled(room_id: String, action: bool) -> bool:
 	return ENABLED and action and is_wm1_room(room_id)

@@ -40,6 +40,7 @@ const SomFx := preload("res://scripts/som/som_fx.gd")
 const SomMove := preload("res://scripts/som/som_move.gd")
 const SomAlly := preload("res://scripts/som/som_ally.gd")
 const SomCodex := preload("res://scripts/som/som_codex.gd")
+const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
 
@@ -59,6 +60,8 @@ var hud: Node
 var ring: Node
 ## Codex vangen in Action (scripts/som/som_codex.gd)
 var codex: Node
+## Doel-lock (tap + auto-lock in bereik)
+var target_lock: Node2D
 var gauge: Node2D
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
 var queued := {}
@@ -66,6 +69,9 @@ var _queue_t := 0.0
 var touch: Control
 ## Autotest: vaste joystick-stand (ZERO = echte input).
 var forced_joy := Vector2.ZERO
+## Co-op: ring opent zonder get_tree().paused (ActionCoopSession zet dit aan).
+var coop_ring_no_pause := false
+var _coop_snap: Dictionary = {}
 ## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
 var sheets := {}
 var attack_texs := {}
@@ -118,6 +124,7 @@ func setup(p_room: Node) -> void:
 	if touch and "analog_only" in touch:
 		touch.analog_only = true      # alleen joy_raw; geen move_*-stappen (anders dubbele beweging)
 	player.set_analog(analog_dir, SomData.MOVE_SPEED)
+	player.facing_provider = Callable(self, "_lock_facing")
 	_apply_player_sheet()
 	var cam := player.get_node_or_null("Camera2D") as Camera2D
 	if cam:
@@ -147,6 +154,10 @@ func setup(p_room: Node) -> void:
 	gauge = SomFx.Gauge.new()
 	gauge.arena = self
 	objects.add_child(gauge)
+	target_lock = SomTargetLock.new()
+	target_lock.name = "SomTargetLock"
+	target_lock.setup(self)
+	objects.add_child(target_lock)
 
 
 ## Kaartsheet van Dax via KaartStijl (#169): speler_sheet() van het gebied van deze kamer als Dax leidt
@@ -329,6 +340,19 @@ func analog_dir() -> Vector2:
 	return SomMove.keys_to_dir()
 
 
+func _lock_facing() -> Vector2i:
+	return target_lock.facing_for_player() if target_lock else Vector2i.ZERO
+
+
+func _attack_suppressed() -> bool:
+	return target_lock != null and int(target_lock.suppress_attack_frame) == Engine.get_process_frames()
+
+
+## Schermtik op een monster (touch_controls); true = lock verwerkt, geen A/joy.
+func try_lock_tap(viewport_pos: Vector2) -> bool:
+	return target_lock.try_tap_viewport(viewport_pos) if target_lock else false
+
+
 func active() -> bool:
 	return not down and room != null and room.monsters_active() and not ring.is_open
 
@@ -341,6 +365,8 @@ func _process(delta: float) -> void:
 		return
 	if not active():
 		return
+	if target_lock:
+		target_lock.tick(delta)
 	swing_lock = maxf(0.0, swing_lock - delta)
 	if swing_lock <= 0.0 or not SomData.CHARGE_AFTER_ANIM:
 		charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
@@ -349,7 +375,8 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(SWITCH_ACTION):
 		switch_hero()
 	b_cast_cd = maxf(0.0, b_cast_cd - delta)
-	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame:
+	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
+			and not _attack_suppressed():
 		attack()
 	if Input.is_action_just_pressed("cancel") and Engine.get_process_frames() != ring.closed_frame:
 		quick_cast()
@@ -442,7 +469,7 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 	if not is_instance_valid(n) or not is_alive(id):
 		swing_landed.emit(id, 0)
 		return 0
-	var f := Vector2(n.facing)
+	var f := Vector2(_swing_facing(id, n))
 	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
 	SomFx.slash(room.get_node("Objects"), point, f)
 	var hits := 0
@@ -453,7 +480,7 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 		if center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y):
 			var e: Dictionary = enemies[m]
 			last_attacker = id
-			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), n.facing, mult >= 1.0)
+			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), Vector2i(roundi(f.x), roundi(f.y)), mult >= 1.0)
 			hits += 1
 	swing_landed.emit(id, hits)
 	Sessielog.actie_slag(id, hits)
@@ -469,6 +496,25 @@ func center_of(m: Node) -> Vector2:
 	return m.position + Vector2(0, -(m.size.y - 1) * 8.0)
 
 
+func _enemy_in_attack_reach(id: String, n: Node2D, m: Node) -> bool:
+	var f := Vector2(n.facing)
+	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
+	return center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y)
+
+
+func _swing_facing(id: String, n: Node2D) -> Vector2i:
+	if id == active_id and target_lock:
+		var m: Node = target_lock.locked_enemy()
+		if m != null:
+			var aim_lock: bool = bool(target_lock.manual) or _enemy_in_attack_reach(id, n, m)
+			if aim_lock:
+				var lf: Vector2i = target_lock.facing_for_player()
+				if lf != Vector2i.ZERO:
+					n.facing = lf
+					return lf
+	return n.facing
+
+
 ## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
 func nearest_enemy(from: Vector2, within: float) -> Node:
 	var best: Node = null
@@ -481,6 +527,15 @@ func nearest_enemy(from: Vector2, within: float) -> Node:
 			bd = d
 			best = m
 	return best
+
+
+func _aim_caster_at(caster_id: String, m: Node) -> void:
+	if m == null or not is_instance_valid(m) or caster_id != active_id:
+		return
+	var to: Vector2 = center_of(m) - body_of(caster_id)
+	if to.length() < 0.5:
+		return
+	player.facing = SomMove.facing_for(to.normalized(), player.facing)
 
 
 ## stagger = false (slag onder 100%): wel schade, maar geen afgebroken telegraaf en geen knockback.
@@ -523,6 +578,8 @@ func _knockback(m: Node, dir: Vector2i) -> void:
 func _defeat_enemy(m: Node) -> void:
 	var e: Dictionary = enemies[m]
 	enemies.erase(m)
+	if target_lock:
+		target_lock.on_target_gone(m)
 	GameState.mark_defeated(m.enemy_id)
 	var gained_exp := int(e["exp"])
 	var gained_gold := int(e["gold"])
@@ -883,12 +940,16 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 					targets.append(m)
 		elif enemy_target != null and is_instance_valid(enemy_target) and enemies.has(enemy_target):
 			targets.append(enemy_target)
+		elif target_lock and target_lock.locked_enemy() != null:
+			targets.append(target_lock.locked_enemy())
 		else:
 			var best := nearest_enemy(from, 10.0 * 16.0)
 			if best:
 				targets.append(best)
 		if targets.is_empty():
 			return SomData.TXT_NO_TARGET
+		if targets[0] is Node:
+			_aim_caster_at(caster_id, targets[0])
 		caster["mp"] = int(caster["mp"]) - cost
 		_cast_then(caster_id, spell_id, func() -> void:
 			for m in targets:
@@ -1005,9 +1066,11 @@ func ring_entries() -> Dictionary:
 		magic.append({"kind": "spell", "id": str(s), "caster": active_id,
 				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))], "name": str(sp.get("name", s))})
 	# Codex-boek (zoals de Codex-opdracht in Classic): vangen met een Leeg Boek, daarna een doel kiezen
-	if SomCodex.shown():
-		var books := GameState.item_count(SomCodex.CodexData.BOOK_ITEM)
-		items.append({"kind": "codex", "id": "codex", "label": SomData.TXT_CODEX_ENTRY % books if books > 0 else SomData.TXT_CODEX_NO_BOOK,
+	# Zoals andere verbruiksitems: bij 0 Lege Boeken geen ingang (geen 'x0' in de ring). De CODEX-knop blijft
+	# zichtbaar zolang er pagina's zijn en meldt dan "No Blank Book left.".
+	var books := GameState.item_count(SomCodex.CodexData.BOOK_ITEM)
+	if SomCodex.shown() and books > 0:
+		items.append({"kind": "codex", "id": "codex", "label": SomData.TXT_CODEX_ENTRY % books,
 				"name": SomData.TXT_CODEX, "count": books})
 	return {"items": items, "skills": skills, "magic": magic}
 
@@ -1091,3 +1154,12 @@ func _say(text: String) -> void:
 	last_text = text
 	if hud:
 		hud.toast(text)
+
+
+## Netwerk-host stuurt snapshot; gasten tekenen en houden een kopie voor tests.
+func apply_coop_snapshot(snap: Dictionary) -> void:
+	_coop_snap = snap
+
+
+func coop_snapshot() -> Dictionary:
+	return _coop_snap
