@@ -10,7 +10,7 @@ const TargetList := preload("res://scripts/ui/target_list.gd")
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 
 const OPTION_ROW_H := 13       # iets lager dan ROW_H: 12 regels moeten op 216 px passen
-const TAB_BAR_H := 22          # past bij General-tab (menutest: alle regels in beeld)
+const TAB_BAR_H := 24          # zelfde tikminimum als questlog-tab (ROW_H / RIJ_H-traditie: 24 logic px)
 const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks: mobiel tikdoel (logic pixels)
 const VALUE_W := 66            # breedte van de waarde tussen '<' en '>'
 const RESET_KEY := "_reset"

@@ -31,6 +31,50 @@ func _frames(n: int) -> void:
 		await get_tree().process_frame
 
 
+func _set_view(grootte: Vector2) -> void:
+	var w := get_window()
+	w.size = Vector2i(grootte)
+	await _frames(3)
+
+
+func _layout_past(o: OptionsScreen) -> bool:
+	var vp := Rect2(Vector2.ZERO, get_tree().root.get_visible_rect().size)
+	var ok := true
+	for tb in o.tab_buttons.values():
+		var r: Rect2 = (tb as Control).get_global_rect()
+		if r.size.y < 24.0 or not vp.encloses(r):
+			ok = false
+			print("INFO  tab buiten beeld of te laag: %s %s" % [tb.name, r])
+	if o.tab == "general" and not o.rows.is_empty():
+		var laatste: Rect2 = o.rows[-1].get_global_rect()
+		var hint_y: float = o.hint.get_global_rect().position.y
+		if laatste.end.y > hint_y + 0.5:
+			ok = false
+			print("INFO  General laatste regel onder hint: %.1f > %.1f" % [laatste.end.y, hint_y])
+	if o.tab == "music":
+		for key in ["music_volume", "sfx_volume"]:
+			var sl: Control = o.music_sliders[key]
+			if not vp.encloses(sl.get_global_rect()):
+				ok = false
+				print("INFO  slider buiten beeld: %s" % key)
+		if o.mute_button != null and not vp.encloses(o.mute_button.get_global_rect()):
+			ok = false
+			print("INFO  mute-knop buiten beeld")
+	return ok
+
+
+func _layout_op_resoluties(o: OptionsScreen) -> void:
+	for g in [Vector2(384, 216), Vector2(288, 216), Vector2(270, 216)]:
+		await _set_view(g)
+		o.kies_tab("general")
+		await _frames(2)
+		check("layout General past op %.0fx%.0f" % [g.x, g.y], _layout_past(o))
+		o.kies_tab("music")
+		await _frames(2)
+		check("layout Music past op %.0fx%.0f" % [g.x, g.y], _layout_past(o))
+	await _set_view(Vector2(384, 216))
+
+
 func _shot(naam: String) -> void:
 	if shots == "":
 		return
@@ -84,9 +128,13 @@ func _run() -> void:
 	var playable: int = o.track_buttons.size() - locked
 	check("lijst toont alle tracks, alleen gehoord speelbaar", o.track_buttons.size() == MusicTracks.TRACKS.size()
 			and playable == 2 and locked == MusicTracks.TRACKS.size() - 2)
+	check("touch: tab General/Music >= 24 px",
+			o.tab_buttons["general"].custom_minimum_size.y >= 24.0
+			and o.tab_buttons["music"].custom_minimum_size.y >= 24.0)
 	check("touch: schuifregels en tracks >= 48 px",
 			o.music_sliders["music_volume"].custom_minimum_size.y >= 48.0
 			and o.track_buttons.all(func(b): return b.custom_minimum_size.y >= 48.0))
+	await _layout_op_resoluties(o)
 	var slider: HSlider = o.music_sliders["music_volume"]
 	slider.value = 2
 	await _frames(2)
