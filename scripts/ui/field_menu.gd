@@ -28,6 +28,7 @@ const CodexScreen := preload("res://scripts/ui/codex_screen.gd")
 const PartyScreen := preload("res://scripts/ui/party_screen.gd")
 const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
 const QuestlogScreen := preload("res://scripts/ui/questlog_screen.gd")   # v0.24 Quest Log (zelfde data als ECHO)
+const QD := preload("res://scripts/data/quest_data.gd")
 const LoadScreen := preload("res://scripts/ui/load_screen.gd")   # v0.22 Load vanuit het veldmenu   # v0.22 partylimiet
 
 const LAYER := 20
@@ -59,7 +60,7 @@ const COMMANDS := [
 	["bestiary", "Bestiary"],
 	["warp", "Warp"],
 	["party", "Party"],
-	["quests", "Quest Log"],
+	["quests", QD.MENU_KNOP],
 	["scenes", "Scenes & Music"],
 	["options", "Settings"],
 	["load", "Load"],
