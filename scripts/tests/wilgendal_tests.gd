@@ -967,9 +967,16 @@ func _plein10() -> void:
 	check("huis-uitgang: naar buiten gelopen, in het dorp op voor_dax %s (= tegel voor de deur %s)" % [str(p.get_tile()), str(doel)],
 			buiten and vd != null and p.get_tile() == Vector2i((vd.position / 16.0).floor()) and p.get_tile() == doel)
 	check("huis-uitgang: voor_dax ligt niet in een botsing (beloopbaar)", Data.beloopbaar(p.get_tile()))
+	await _shot(dorp, "huis_uitgang_voor_dax")
 	var t_voor: Vector2i = p.get_tile()
-	await _loop(p, t_voor + Vector2i.DOWN)
-	check("huis-uitgang: vanaf voor_dax kun je weglopen (%s -> %s)" % [str(t_voor), str(p.get_tile())], p.get_tile() == t_voor + Vector2i.DOWN)
+	# pass 5: de tegel recht onder voor_dax kan bezet zijn; loop naar de eerste beloopbare buur (niet terug de deur in)
+	var weg := t_voor + Vector2i.DOWN
+	for d in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+		if Data.beloopbaar(t_voor + d):
+			weg = t_voor + d
+			break
+	await _loop(p, weg)
+	check("huis-uitgang: vanaf voor_dax kun je weglopen (%s -> %s)" % [str(t_voor), str(p.get_tile())], p.get_tile() == weg and Data.beloopbaar(weg))
 	await _loop(p, t_voor)
 	# over de brug: van zuid naar noord en het plein op
 	var zuid := Vector2i(b.position.x + 1, b.end.y)
