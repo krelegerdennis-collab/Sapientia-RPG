@@ -33,6 +33,7 @@ var _suppress := false
 var _remotes: Array[int] = []
 var _kick_queued: Array[int] = []
 var _drop_ids: Array[int] = []
+var _gameplay: Node = null
 
 
 func _ready() -> void:
@@ -80,6 +81,7 @@ func join_session(ip: String, character_id: String, display_name: String, versio
 ## Maakt de peer los. Daarna mag host_session of join_session opnieuw.
 func close() -> void:
 	_suppress = true
+	unbind_gameplay()
 	var peer := _peer
 	_peer = null
 	if peer != null:
@@ -100,6 +102,19 @@ func close() -> void:
 
 func player_count() -> int:
 	return slots.size()
+
+
+func enet_peer() -> ENetMultiplayerPeer:
+	return _peer
+
+
+## ActionCoopSession: lobby pollt de peer; JSON blijft hier, INPUT/SNAPSHOT naar de sessie.
+func bind_gameplay(session: Node) -> void:
+	_gameplay = session
+
+
+func unbind_gameplay() -> void:
+	_gameplay = null
 
 
 ## Host: iedereen mag de Action-sandbox laden.
@@ -211,6 +226,10 @@ func _drain() -> void:
 	while _peer != null and _peer.get_available_packet_count() > 0:
 		var from_id := _peer.get_packet_peer()
 		var raw := _peer.get_packet()
+		if Protocol.is_binary_gameplay(raw):
+			if _gameplay != null and _gameplay.has_method("ingest_packet"):
+				_gameplay.ingest_packet(from_id, raw)
+			continue
 		var msg := Protocol.decode(raw)
 		if is_host:
 			_on_host_packet(from_id, msg)
