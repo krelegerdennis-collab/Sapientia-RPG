@@ -11,6 +11,10 @@ on:
         options:
           - release
           - debug
+  # Valideer fixes op deze branch (workflow_dispatch vereist repo-rechten).
+  push:
+    branches:
+      - ci/fix-build-apk
 
 concurrency:
   group: build-apk-${{ github.ref }}
@@ -22,6 +26,8 @@ env:
   GODOT: ${{ github.workspace }}/.godot-bin/Godot_v4.3-stable_linux.x86_64
   APK_OUTPUT: build/sapientia.apk
   ANDROID_EXPORT_PRESET: Android
+  # push / PR-events hebben geen inputs; debug heeft geen release-secrets nodig.
+  BUILD_TYPE: ${{ github.event_name == 'workflow_dispatch' && inputs.build_type || 'debug' }}
 
 jobs:
   export:
@@ -101,7 +107,7 @@ jobs:
           } > ~/.config/godot/editor_settings-4.3.tres
 
       - name: Require release signing secrets
-        if: inputs.build_type == 'release'
+        if: env.BUILD_TYPE == 'release'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -119,7 +125,7 @@ jobs:
           fi
 
       - name: Prepare release keystore
-        if: inputs.build_type == 'release'
+        if: env.BUILD_TYPE == 'release'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -144,7 +150,7 @@ jobs:
 
       - name: Export Android APK
         run: |
-          if [ "${{ inputs.build_type }}" = "debug" ]; then
+          if [ "${{ env.BUILD_TYPE }}" = "debug" ]; then
             "$GODOT" --headless --path . --export-debug "${ANDROID_EXPORT_PRESET}" "$APK_OUTPUT"
           else
             "$GODOT" --headless --path . --export-release "${ANDROID_EXPORT_PRESET}" "$APK_OUTPUT"
