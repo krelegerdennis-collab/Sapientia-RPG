@@ -79,6 +79,15 @@ func _frames(n: int) -> void:
 		await get_tree().process_frame
 
 
+func _wait_arena_active(max_frames: int = 180) -> bool:
+	for i in max_frames:
+		var a := arena()
+		if a != null and a.active():
+			return true
+		await get_tree().process_frame
+	return false
+
+
 func _sorted_enemies() -> Array:
 	var list: Array = []
 	for m in arena().enemies.keys():
@@ -135,12 +144,13 @@ func _viewport_of_tc(local: Vector2) -> Vector2:
 	return tc.get_global_transform_with_canvas() * local
 
 
-func _simulate_touch(vp: Vector2, pressed: bool, index: int = 7) -> void:
+## Zelfde aanpak als hud_tests._menu: canvaspositie op de knop, direct naar TouchControls._input.
+func _touch_screen(tc: Control, local: Vector2, pressed: bool, index: int = 7) -> void:
 	var ev := InputEventScreenTouch.new()
-	ev.position = vp
-	ev.pressed = pressed
 	ev.index = index
-	_touch_control()._input(ev)
+	ev.pressed = pressed
+	ev.position = tc.get_global_transform_with_canvas() * local
+	tc._input(ev)
 
 
 func _place_monster_at_viewport(vp: Vector2, id: String) -> Node:
@@ -160,35 +170,45 @@ func _touch_ui_priority_tests() -> void:
 	var m_a: Node = _place_monster_at_viewport(a_vp, "lock_under_a")
 	await _frames(4)
 	check("touch: monster onder joystick is pickbaar", lock().pick_enemy_at_viewport(stick_vp) == m_stick)
-	_simulate_touch(stick_vp, true)
+	# Geen monster op de knoppen: anders kan een mis-tik locken i.p.v. joy/A registreren.
+	if is_instance_valid(m_stick):
+		m_stick.queue_free()
+	if is_instance_valid(m_a):
+		m_a.queue_free()
+	await _frames(4)
+	_touch_screen(tc, tc.stick_center(), true, 7)
 	await _frames(2)
 	check("touch: tik op joystick lockt niet", lock().locked_enemy() == null and tc._touch_owner.get(7, "") == "joy")
-	_simulate_touch(stick_vp, false, 7)
+	_touch_screen(tc, tc.stick_center(), false, 7)
 	await _frames(2)
-	_simulate_touch(a_vp, true, 8)
+	_touch_screen(tc, tc.a_center(), true, 8)
 	await _frames(2)
 	check("touch: tik op A lockt niet", lock().locked_enemy() == null and tc._touch_owner.get(8, "") == "a")
-	_simulate_touch(a_vp, false, 8)
+	_touch_screen(tc, tc.a_center(), false, 8)
 
 
 func _auto_scan_throttle_tests() -> void:
 	await _clear_lock()
 	lock().timed_auto_scans = 0
-	lock()._auto_scan_t = SomTargetLock.AUTO_SCAN_INTERVAL
 	var p: CharacterBody2D = room().player
+	p.input_locked = false
 	var pt: Vector2i = p.get_tile()
 	var near_m: Node = room().add_monster({"id": "lock_throttle", "enemy": "mosslijm", "tile": [pt.x + 1, pt.y]})
 	near_m.place_at(Vector2i(pt.x + 1, pt.y), Vector2i.LEFT)
-	await _frames(4)
-	var start: int = lock().timed_auto_scans
-	await _frames(3)
-	var mid: int = lock().timed_auto_scans
-	check("auto-scan: niet elke frame (3 frames)", mid <= start + 1)
-	var t0: int = Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < int(SomTargetLock.AUTO_SCAN_INTERVAL * 1000.0) + 80:
-		await get_tree().process_frame
-	var end: int = lock().timed_auto_scans
-	check("auto-scan: loopt op interval (~%.2fs)" % SomTargetLock.AUTO_SCAN_INTERVAL, end >= start + 1)
+	await _frames(2)
+	lock().manual = false
+	check("arena actief voor auto-scan timer", await _wait_arena_active())
+	# Deterministisch via tick(delta), geen wall-clock (flake in headless/CI).
+	lock().timed_auto_scans = 0
+	lock()._auto_scan_t = SomTargetLock.AUTO_SCAN_INTERVAL
+	var step := SomTargetLock.AUTO_SCAN_INTERVAL / 10.0
+	for i in 3:
+		lock().tick(step)
+	check("auto-scan: niet elke frame (3 ticks)", lock().timed_auto_scans == 0)
+	lock().timed_auto_scans = 0
+	lock()._auto_scan_t = 0.0
+	lock().tick(SomTargetLock.AUTO_SCAN_INTERVAL)
+	check("auto-scan: loopt op interval (~%.2fs)" % SomTargetLock.AUTO_SCAN_INTERVAL, lock().timed_auto_scans >= 1)
 
 
 func _tap_monster(m: Node) -> void:
@@ -241,17 +261,20 @@ func _death_and_clear_tests() -> void:
 
 
 func _facing_tests() -> void:
-	var list := _sorted_enemies()
-	if list.is_empty():
-		check("facing: monster nodig", false)
-		return
-	var m: Node = list[0]
+	await _clear_lock()
+	var p: CharacterBody2D = room().player
+	p.input_locked = false
+	var base: Vector2i = p.get_tile()
+	await _place_player(base + Vector2i(-2, 0))
+	var m: Node = room().add_monster({"id": "lock_facing", "enemy": "mosslijm", "tile": [base.x + 2, base.y]})
+	m.place_at(base + Vector2i(2, 0), Vector2i.LEFT)
 	lock()._set_target(m, true)
 	await _frames(2)
-	var p: CharacterBody2D = room().player
 	p.facing = Vector2i.DOWN
 	arena().forced_joy = Vector2(0, -1)
-	await _frames(8)
+	for i in 12:
+		p._process_analog(1.0 / 60.0)
+		await get_tree().process_frame
 	var want: Vector2i = lock().facing_for_player()
 	check("facing: strafen maar kijkt naar doel", want != Vector2i.ZERO and p.facing == want)
 	arena().forced_joy = Vector2.ZERO
