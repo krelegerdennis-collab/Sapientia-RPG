@@ -1,6 +1,6 @@
 # CI-builds (APK en Web)
 
-Handmatige GitHub Actions-workflows om exporten te maken zonder de Godot-editor. Ze draaien **alleen** via **Run workflow** (workflow_dispatch), niet automatisch bij pushes of PR’s.
+GitHub Actions-workflows om exporten te maken zonder de Godot-editor. **APK** draait alleen via **Run workflow** (workflow_dispatch). **Web** exporteert en publiceert naar GitHub Pages bij **push naar `main`** of handmatig via **Run workflow**.
 
 ## Workflows
 
@@ -25,8 +25,11 @@ Preset **Android arm64** (alleen arm64) blijft beschikbaar in de editor; deze wo
 
 ### Web (`build-web`)
 
-1. GitHub → **Actions** → workflow **build-web** → **Run workflow**.
+1. GitHub → **Actions** → workflow **build-web** → **Run workflow** (of automatisch na merge op `main`).
 2. Artifact **sapientia-web** bevat de map `export/web/` (preset **Web**, `export_path` in `export_presets.cfg`).
+3. **GitHub Pages** (bron: GitHub Actions): na een geslaagde run staat de build op  
+   https://krelegerdennis-collab.github.io/Sapientia-RPG/  
+   Preset **Web** heeft `variant/thread_support=false` (geen COOP/COEP op Pages nodig).
 
 De workflow maakt `export/web/` aan als die map nog niet bestaat (vereiste van Godot vóór export).
 
