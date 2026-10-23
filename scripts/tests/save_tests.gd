@@ -10,8 +10,6 @@ var passes := 0
 
 
 class SuspendScene extends Node:
-	var path := ""
-
 	func try_autosave(reason: String) -> bool:
 		return GameState.autosave(Vector2i(7, 8), Vector2i.DOWN, reason)
 
@@ -30,7 +28,7 @@ func check(label: String, ok: bool) -> void:
 
 func _remove_save(path: String) -> void:
 	for suffix in ["", ".tmp", ".bak", ".bak.tmp"]:
-		var p := path + suffix
+		var p: String = path + suffix
 		if FileAccess.file_exists(p):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
 
