@@ -39,6 +39,7 @@ var _flash_tween: Tween
 var _frames := 8
 var _idle_t := 0.0
 var _idle_i := 0
+var _idle_timer: Timer
 
 
 func setup(texture: Texture2D, feet_position: Vector2) -> void:
@@ -67,21 +68,36 @@ func setup(texture: Texture2D, feet_position: Vector2) -> void:
 	_idle_i = _idle_counter % IDLE_CYCLE.size()
 	_idle_t = 0.13 * (_idle_counter % 3)
 	_idle_counter += 1
-	set_process(_frames >= 10)
+	_setup_idle_timer(_frames >= 10)
 
 
 func has_idle_animation() -> bool:
 	return _frames >= 10
 
 
-func _process(delta: float) -> void:
+func _setup_idle_timer(aan: bool) -> void:
+	if _idle_timer != null:
+		_idle_timer.stop()
+		_idle_timer.queue_free()
+		_idle_timer = null
+	set_process(false)
+	if not aan:
+		return
+	_idle_timer = Timer.new()
+	_idle_timer.wait_time = IDLE_STEP
+	_idle_timer.one_shot = false
+	_idle_timer.autostart = true
+	_idle_timer.timeout.connect(_idle_stap)
+	add_child(_idle_timer)
+	# faseverschil per held (zelfde als vroeger via _idle_t)
+	_idle_timer.start(maxf(0.01, IDLE_STEP - _idle_t))
+
+
+func _idle_stap() -> void:
 	if pose != "stil" or is_ko:
 		return
-	_idle_t += delta
-	if _idle_t >= IDLE_STEP:
-		_idle_t -= IDLE_STEP
-		_idle_i = (_idle_i + 1) % IDLE_CYCLE.size()
-		_sprite.frame = IDLE_CYCLE[_idle_i]
+	_idle_i = (_idle_i + 1) % IDLE_CYCLE.size()
+	_sprite.frame = IDLE_CYCLE[_idle_i]
 
 
 func set_home(feet_position: Vector2) -> void:
@@ -130,6 +146,11 @@ func set_pose(p: String) -> void:
 	if _sprite:
 		_sprite.frame = FRAME.get(p, 0)
 		_idle_t = 0.0
+	if _idle_timer != null:
+		if p == "stil" and not is_ko:
+			_idle_timer.start(IDLE_STEP)
+		else:
+			_idle_timer.stop()
 
 
 ## Een stapje naar voren (aan de beurt) of terug naar de eigen plek.

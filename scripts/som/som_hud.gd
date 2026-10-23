@@ -12,6 +12,8 @@ var root: Control
 var bars: Control
 var ring_button: Button
 var switch_button: Button
+## Codex vangen (touch; zelfde stijl als Ring/Swap)
+var codex_button: Button
 var toast_label: Label
 var _toast_t := 0.0
 
@@ -46,6 +48,15 @@ func _ready() -> void:
 	switch_button.pressed.connect(func() -> void:
 		if arena.active():
 			arena.switch_hero())
+	codex_button = UiMenu.button(SomData.TXT_CODEX)
+	codex_button.name = "CodexButton"
+	codex_button.focus_mode = Control.FOCUS_NONE
+	codex_button.custom_minimum_size = Vector2(38, 14)
+	root.add_child(codex_button)
+	codex_button.pressed.connect(func() -> void:
+		if arena.active() and arena.codex != null:
+			arena.codex.capture())
+	skin_button(codex_button, "codex")
 	skin_button(ring_button, "ring")
 	skin_button(switch_button, "swap")
 	toast_label = Label.new()
@@ -95,9 +106,12 @@ func _place() -> void:
 	var vs := root.get_viewport_rect().size
 	var tc: Control = arena.touch if arena != null else null
 	if tc and tc.has_method("som_row_slot"):
-		# één rij rechtsboven naast MENU: [RUN][Swap][Ring][MENU] (RUN zet touch_controls zelf neer)
+		# één rij rechtsboven naast MENU: [RUN][Swap][Codex][Ring][MENU] (RUN zet touch_controls zelf neer)
 		var rr: Rect2 = tc.som_row_slot(0)
-		var sr: Rect2 = tc.som_row_slot(1)
+		var cr: Rect2 = tc.som_row_slot(1)
+		var sr: Rect2 = tc.som_row_slot(2)
+		codex_button.position = tc.position + cr.position
+		codex_button.size = cr.size
 		ring_button.position = tc.position + rr.position
 		ring_button.size = rr.size
 		switch_button.position = tc.position + sr.position
@@ -105,13 +119,16 @@ func _place() -> void:
 	else:
 		ring_button.reset_size()
 		ring_button.position = Vector2(vs.x - 4.0 - 38.0 - 4.0 - ring_button.size.x, 2.0)
+		codex_button.reset_size()
+		codex_button.position = Vector2(ring_button.position.x - 4.0 - codex_button.size.x, 2.0)
 		switch_button.reset_size()
-		switch_button.position = Vector2(ring_button.position.x - 4.0 - switch_button.size.x, 2.0)
+		switch_button.position = Vector2(codex_button.position.x - 4.0 - switch_button.size.x, 2.0)
 	toast_label.position = Vector2(80, 24)
 	toast_label.size = Vector2(vs.x - 160, 30)
 
 
 func _process(delta: float) -> void:
+	codex_button.visible = arena != null and arena.codex != null and arena.codex.shown()
 	_place()
 	bars.queue_redraw()
 	if _toast_t > 0.0:
