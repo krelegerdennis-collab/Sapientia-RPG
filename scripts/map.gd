@@ -176,7 +176,7 @@ func open_field_menu() -> void:
 	if menu_open():
 		return
 	player.input_locked = true
-	Sessielog.menu("veld")
+	SessieLog.menu("veld")
 	GameState.menu_opened.emit("veld")
 	# v0.11: touch-joystick/A/B weg zolang het menu open is (je tikt direct op het menu;
 	# anders zou een tik op een menuregel bij de joystick als lopen tellen)
@@ -320,7 +320,7 @@ func _on_player_stepped(tile: Vector2i) -> void:
 ## Grotmond in de bergwand: de bergtegel blijft blokkeren, maar wie er van onderaf
 ## tegenaan loopt, gaat de berggrot in (Dennis 2026-10-13, tegel 21,17).
 func _on_player_bumped(tile: Vector2i) -> void:
-	Sessielog.bump(tile)
+	SessieLog.bump(tile)
 	if GameState.changing_map or GameState.in_battle or Dialog.is_open:
 		return
 	# Wereldkaart: NaarBouwplaats in de bergtegel. Bouwplaats: NaarBerggrot (de tunnel zelf).

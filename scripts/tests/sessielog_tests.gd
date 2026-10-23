@@ -1,5 +1,5 @@
 extends Node
-## Sessielog (playtest-logboek, scripts/sessielog.gd): buffer, JSON-lines, kaart/positie, gevecht,
+## SessieLog (scripts/core/sessie_log.gd): buffer, JSON-lines, kaart/positie, gevecht,
 ## privacy, uitzetten, afkappen en export.
 ## Start: godot --headless --path . -- --sessielogtest
 
@@ -34,8 +34,12 @@ func _soorten(regels: Array) -> Array:
 	var uit: Array = []
 	for d in regels:
 		if d is Dictionary:
-			uit.append(str(d.get("e", "")))
+			uit.append(str(d.get("type", "")))
 	return uit
+
+
+func _data(d: Dictionary) -> Dictionary:
+	return d.get("data", {}) if d is Dictionary else {}
 
 
 func _leeg(map_pad: String) -> void:
@@ -58,11 +62,12 @@ func _wacht_story() -> void:
 
 
 func _run() -> void:
-	var log: Node = get_node("/root/Sessielog")
+	var log: Node = get_node("/root/SessieLog")
 	check("in een test staat het logboek uit tot de test hem start", not log.actief)
 	_leeg(MAP)
 	_leeg(EXPORT)
 	GameState.player_name = "Testnaam Geheim"
+	log.volgt_instelling = false
 	log.start(MAP)
 	check("start: bestand in de testmap, 8 hex-tekens sessie-id", log.actief and log.pad.begins_with(MAP)
 			and log.sessie_id.length() == 8 and log.sessie_id.is_valid_hex_number())
@@ -84,7 +89,6 @@ func _run() -> void:
 	if p != null and p.has_method("place_at"):
 		p.place_at(Vector2i(35, 30), Vector2i.UP)
 	await get_tree().create_timer(1.2).timeout
-	# korte wandeling (voor de heatmap): over de straat, het plein en het hoofdpad
 	if p != null and p.has_method("place_at"):
 		var route: Array[Vector2i] = []
 		for y in range(30, 20, -1):
@@ -103,7 +107,6 @@ func _run() -> void:
 		for _i in 3:
 			p.place_at(Vector2i(35, 12), Vector2i.UP)
 			await get_tree().create_timer(log.POS_SECS + 0.05).timeout
-	# object bekijken (story_object -> origin "examine") vs. dezelfde tekst als echte cutscene (Story.run)
 	var obj: Node = load("res://scenes/story_object.tscn").instantiate()
 	obj.event = "cocon"
 	get_tree().current_scene.add_child(obj)
@@ -122,10 +125,11 @@ func _run() -> void:
 	var soorten := _soorten(regels)
 	var geldig := true
 	for d in regels:
-		geldig = geldig and d is Dictionary and d.has("t") and d.has("e")
-	check("elke regel is JSON met t en e (%d regels)" % regels.size(), geldig and regels.size() > 60)
-	check("startregel: formaat, utc, os, geen naam", soorten[0] == "start" and regels[0]["v"] == log.FORMAAT
-			and str(regels[0]["utc"]).ends_with("Z") and regels[0].has("os"))
+		geldig = geldig and d is Dictionary and d.has("t") and d.has("type") and d.has("data")
+	check("elke regel is JSON met t, type en data (%d regels)" % regels.size(), geldig and regels.size() > 60)
+	var start_d := _data(regels[0])
+	check("startregel: formaat, utc, os, geen naam", soorten[0] == "sessie_start" and start_d.get("v") == log.FORMAAT
+			and str(start_d.get("utc", "")).ends_with("Z") and start_d.has("os"))
 	var kaart_ok := false
 	var pos_ok := false
 	var art_pos := true
@@ -133,18 +137,19 @@ func _run() -> void:
 	var n_pos := 0
 	var info := {}
 	for d in regels:
-		if d["e"] == "kaart" and d["kaart"] == "dorp_wilgendal" and d["stijl"] == "som":
+		var dd := _data(d)
+		if d["type"] == "kaart" and dd.get("kaart") == "dorp_wilgendal" and dd.get("stijl") == "som":
 			kaart_ok = true
-		if d["e"] == "pos" and d["kaart"] == "dorp_wilgendal" and d.has("x") and d.has("y") and d.has("f"):
+		if d["type"] == "pos" and dd.get("kaart") == "dorp_wilgendal" and dd.has("x") and dd.has("y") and dd.has("f"):
 			pos_ok = true
-		if d["e"] == "pos":
-			art_pos = art_pos and d.get("stijl", "") in ["som", "oud"] and str(d.get("tileset", "")) != ""
+		if d["type"] == "pos":
+			art_pos = art_pos and dd.get("stijl", "") in ["som", "oud"] and str(dd.get("tileset", "")) != ""
 			n_pos += 1
-		if d["e"] == "kaart" and d["kaart"] == "dorp_wilgendal":
-			art_kaart = d.get("gebied") == "wilgendal" and d.get("palet") == "wilgendal" \
-					and str(d.get("tileset", "")).ends_with("som/wilgendal/terrain.tres")
-		if d["e"] == "kaart_info" and d["kaart"] == "dorp_wilgendal":
-			info = d
+		if d["type"] == "kaart" and dd.get("kaart") == "dorp_wilgendal":
+			art_kaart = dd.get("gebied") == "wilgendal" and dd.get("palet") == "wilgendal" \
+					and str(dd.get("tileset", "")).ends_with("som/wilgendal/terrain.tres")
+		if d["type"] == "kaart_info" and dd.get("kaart") == "dorp_wilgendal":
+			info = dd
 	check("kaart-regel (dorp_wilgendal, stijl som)", kaart_ok)
 	var niet_knop := soorten.filter(func(x): return x != "knop")
 	check("positie-regel met kaart, tegel en kijkrichting (%s)" % [niet_knop], pos_ok)
@@ -155,15 +160,14 @@ func _run() -> void:
 			and rect.size() == 4 and int(rect[2]) == WilgendalDorpData.W and int(rect[3]) == WilgendalDorpData.H)
 	check("gevecht_start, gevecht_eind, dood en respawn gelogd", "gevecht_start" in soorten and "gevecht_eind" in soorten
 			and "dood" in soorten and "respawn" in soorten)
-	var ex := regels.filter(func(d): return d["e"] == "examine")
-	var cs := regels.filter(func(d): return d["e"] == "cutscene_start")
-	check("object bekijken: 'examine' met id en kaart (geen cutscene_start)", ex.size() == 1 and ex[0].get("id") == "cocon"
-			and ex[0].get("kaart") == "dorp_wilgendal" and "examine_eind" in soorten)
-	check("echte cutscene (Story.run): cutscene_start + cutscene_eind", cs.size() == 1 and cs[0].get("id") == "cocon"
+	var ex := regels.filter(func(d): return d["type"] == "examine")
+	var cs := regels.filter(func(d): return d["type"] == "cutscene_start")
+	check("object bekijken: 'examine' met id en kaart (geen cutscene_start)", ex.size() == 1 and _data(ex[0]).get("id") == "cocon"
+			and _data(ex[0]).get("kaart") == "dorp_wilgendal" and "examine_eind" in soorten)
+	check("echte cutscene (Story.run): cutscene_start + cutscene_eind", cs.size() == 1 and _data(cs[0]).get("id") == "cocon"
 			and "cutscene_eind" in soorten)
 	var bewaar := OS.get_environment("SESSIELOG_BEWAAR")
 	if bewaar != "":
-		# voorbeeldlogboek bewaren (bv. voor tools/sessie_samenvatting.py --heatmap)
 		var f := FileAccess.open(bewaar, FileAccess.WRITE)
 		if f != null:
 			f.store_string(FileAccess.get_file_as_string(log.pad))
@@ -173,27 +177,32 @@ func _run() -> void:
 	log.export_map = EXPORT
 	var uit: Dictionary = log.exporteer()
 	check("export naar een map (%s)" % str(uit.get("pad", "")), bool(uit["ok"]) and FileAccess.file_exists(str(uit["pad"]))
-			and FileAccess.get_file_as_string(str(uit["pad"])).contains("\"e\":\"start\""))
+			and FileAccess.get_file_as_string(str(uit["pad"])).contains("\"type\":\"sessie_start\""))
 	log.export_map = ""
 
-	Settings.set_value("sessielog", false)
+	Settings.set_value("sessie_log", 1)
+	log.volgt_instelling = true
 	await get_tree().process_frame
-	check("Opties > Session Log uit: logboek stopt, laatste regel 'einde'", not log.actief
-			and _soorten(_regels(log.pad))[-1] == "einde")
+	Settings.set_value("sessie_log", 0)
+	await get_tree().process_frame
+	check("Opties > Session Log uit: logboek stopt, laatste regel sessie_stop", not log.actief
+			and _soorten(_regels(log.pad))[-1] == "sessie_stop")
 	var n: int = log.regels
 	log.noteer("knop", {"a": "interact"})
 	check("uit = noteer doet niets", log.regels == n)
-	Settings.set_value("sessielog", true)
+	Settings.set_value("sessie_log", 1)
 	await get_tree().process_frame
 	check("weer aan: nieuwe sessie", log.actief)
 	log.stop()
 	log.start(MAP)
 	log.bytes = log.MAX_BYTES
-	log.noteer("pos", {"x": 1})
+	log.afgekapt = true
+	log.vol = true
 	var voor: int = log.regels
+	log.noteer("pos", {"x": 1})
 	log.noteer("pos", {"x": 2})
 	log.noteer("dood", {"reden": "test"})
-	check("na MAX_BYTES: 'afgekapt', geen pos meer, wel belangrijke regels", log.afgekapt and log.regels == voor + 1)
+	check("na MAX_BYTES: afgekapt, geen pos meer, wel belangrijke regels", log.afgekapt and log.regels == voor + 1)
 	log.stop()
 	check("bestanden() vindt de sessies; opruimen houdt er hooguit MAX_BESTANDEN", log.bestanden(MAP).size() >= 2
 			and log.bestanden(MAP).size() <= log.MAX_BESTANDEN)

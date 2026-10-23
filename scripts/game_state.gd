@@ -1734,7 +1734,7 @@ func enter_map(path: String) -> void:
 			dungeon100_end_run(true)
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
-	Sessielog.kaart(path)      # playtest-logboek (no-op als het uit staat)
+	SessieLog.kaart(path)
 	if path.ends_with("/rustkamer.tscn"):
 		PartyBenchLib.normaliseer()
 
@@ -1748,7 +1748,7 @@ func change_map(path: String, spawn_name: String) -> void:
 	var route := huis_route(current_map, path, spawn_name)
 	path = route[0]
 	spawn_name = route[1]
-	Sessielog.warp(current_map, path, spawn_name)
+	SessieLog.warp(current_map, path, spawn_name)
 	pending_spawn = spawn_name
 	has_return_point = false
 	entry_kind = "door"
@@ -1836,7 +1836,7 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 		return
 	practice_battle = practice
 	in_battle = true
-	Sessielog.gevecht_start(enemies, boss, terrain, from_tile)
+	SessieLog.gevecht_start(enemies, boss, terrain, from_tile)
 	battle_started.emit(enemies, boss)
 	pending_enemies = enemies
 	pending_boss = boss
@@ -1856,10 +1856,8 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 ## of naar het begin van het spel (game over).
 func end_battle(result: String) -> void:
 	result = archief2_verwerk_einde(result)
-	Sessielog.gevecht_eind(result)
+	SessieLog.gevecht_eind(result)
 	battle_ended.emit(result)
-	if result == "lose" and not practice_battle:
-		game_over.emit(current_map)
 	var oefening := practice_battle
 	practice_battle = false
 	last_battle_result = result
@@ -1912,8 +1910,11 @@ func end_battle(result: String) -> void:
 					if kid != "" and grant_kern(kid, str(e)):
 						pending_kern_absorb = kid
 	if result == "lose":
-		Sessielog.dood("practice" if oefening else "boss" if pending_boss else "battle")
-		Sessielog.respawn(target, respawn_soort)
+		SessieLog.dood("practice" if oefening else "boss" if pending_boss else "battle")
+		SessieLog.respawn(target, respawn_soort)
+		if not oefening and not pending_story_loss:
+			var plek := return_map if return_map != "" else current_map
+			game_over.emit(plek)
 	await Transition.fade_out()
 	in_battle = false
 	_go_to_scene(target)

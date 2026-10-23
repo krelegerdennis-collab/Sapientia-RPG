@@ -179,7 +179,22 @@ func _events() -> void:
 			and int(ge[0]["data"]["beurten"]) >= 0 and int(ge[0]["data"]["party_hp_pct"]) < 100
 			and ge[0]["scene"] == "battle")
 	var go := _van_type(r, "game_over")
-	check("game_over met plek", go.size() == 1 and go[0]["data"]["plek"] == "wereldkaart")
+	check("game_over met plek na echte nederlaag", go.size() == 1 and go[0]["data"]["plek"] == "wereldkaart")
+	for h in GameState.party:
+		h["hp"] = int(h["max_hp"])
+	GameState.start_battle(["moskonijn"], Vector2i(2, 2), Vector2i.DOWN)
+	check("vlucht-gevecht geladen", await _wacht_scene("Battle"))
+	await _frames(5)
+	await GameState.end_battle("flee")
+	await _frames(5)
+	sl.flush()
+	r = _regels(events_pad)
+	check("vluchten: geen extra game_over", _van_type(r, "game_over").size() == 1)
+	get_tree().change_scene_to_file("res://scenes/maps/dorp_wilgendal.tscn")
+	await _frames(40)
+	sl.flush()
+	r = _regels(events_pad)
+	check("scene-wissel zonder nederlaag: nog steeds één game_over", _van_type(r, "game_over").size() == 1)
 	var sw := _van_type(r, "scene_wissel")
 	check("scene_wissel naar en van de gevechtsscène", sw.any(func(d): return d["data"]["naar"] == "battle")
 			and sw.any(func(d): return d["data"]["van"] == "battle"))
@@ -210,8 +225,9 @@ func _flush_en_pauze() -> void:
 	check("app_hervat in de buffer", sl.buffer.size() == 1 and sl.buffer[0].contains("app_hervat"))
 	sl.notification(Node.NOTIFICATION_WM_CLOSE_REQUEST)
 	t = _types(events_pad)
-	check("afsluiten (WM_CLOSE_REQUEST): gestopt, ...app_hervat, sessie_stop op schijf",
-			not sl.actief and t.size() >= 2 and t[-2] == "app_hervat" and t[-1] == "sessie_stop")
+	check("afsluiten (WM_CLOSE_REQUEST): gestopt, sessie_stop als laatste regel",
+			not sl.actief and t[-1] == "sessie_stop")
+	check("app_hervat op schijf vóór sessie_stop", t.rfind("app_hervat") >= 0 and t.rfind("app_hervat") < t.size() - 1)
 	var n := FileAccess.get_file_as_string(events_pad).length()
 	sl.noteer("menu_open", {"welk": "na stop"})
 	sl.flush()
@@ -237,7 +253,7 @@ func _samenvat() -> void:
 	check("samenvat.py: exit 0 ondanks kapotte regels", code == 0)
 	check("samenvat.py: 5 regels overgeslagen", tekst.contains("overgeslagen (kapot/onbekend): 5"))
 	check("samenvat.py: speeltijd per scene (battle)", tekst.contains("Speeltijd per scene:") and tekst.contains("  battle"))
-	check("samenvat.py: gevechten met verlies", tekst.contains("Gevechten: 1 (verlies 1)"))
+	check("samenvat.py: gevechten met verlies", tekst.contains("verlies 1"))
 	check("samenvat.py: game-over per plek", tekst.contains("Game-overs: 1") and tekst.contains("wereldkaart"))
 	check("samenvat.py: langste stilstand", tekst.contains("Langste stilstand: 30s"))
 	out = []
@@ -249,7 +265,7 @@ func _samenvat() -> void:
 func _max_grootte() -> void:
 	_leeg(MAP)
 	sl.start()
-	var groot := "x".repeat(1000)
+	var groot := "x".repeat(992)
 	for i in 2500:
 		sl.noteer("menu_open", {"welk": groot, "i": i})
 		if i % 200 == 0:

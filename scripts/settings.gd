@@ -56,8 +56,7 @@ const DEFAULTS := {
 	"crt": true,
 	"screen_shake": true,
 	"autosave": true,
-	"sessielog": true,   # playtest: sessielogboek (scripts/sessielog.gd); geen persoonsgegevens
-	"sessie_log": -1,    # sessielog (scripts/core/sessie_log.gd): -1 = aan in debug-builds, uit in release; 0 uit; 1 aan. Geen menuregel
+	"sessie_log": -1,    # SessieLog: -1 = aan in debug-builds, uit in release; 0 uit; 1 aan
 	"run": false,      # TODO.md "run feature": RUN-toggle (blijft aan tot de speler hem uitzet)
 	"battle_style": 1,   # 0 = Classic (turn-based), 1 = Action (realtime in de WM1-dungeons). Dennis 21 okt 2026: Action is de standaard
 }
@@ -104,6 +103,9 @@ func load_settings() -> void:
 	for key in DEFAULTS:
 		if cfg.has_section_key(SECTION, key):
 			values[key] = _sanitize(key, cfg.get_value(SECTION, key))
+	# Oude sleutel sessielog (bool) -> sessie_log (1/0); sessie_log in het bestand wint.
+	if cfg.has_section_key(SECTION, "sessielog") and not cfg.has_section_key(SECTION, "sessie_log"):
+		values["sessie_log"] = 1 if bool(cfg.get_value(SECTION, "sessielog")) else 0
 
 
 func save_settings() -> bool:
@@ -165,6 +167,8 @@ func step(key: String, dir: int) -> void:
 		set_value(key, not v)
 	elif key == "touch_opacity":
 		set_value(key, int(v) + dir * OPACITY_STEP)
+	elif key == "sessie_log":
+		set_value(key, int(v) + dir)
 	else:
 		set_value(key, int(v) + dir)
 
