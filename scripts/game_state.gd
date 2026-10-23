@@ -142,6 +142,13 @@ var archief2_last_leech := {}
 ## de actieve bondgenoot ("" = geen) en de teller voor unieke ids (nooit hergebruikt).
 ## codex_changed: de actieve bondgenoot (of de lijst) is veranderd. De volger op de kaart luistert.
 signal codex_changed
+## Sessielog (scripts/core/sessie_log.gd) luistert hiernaar; ze sturen niets aan.
+signal battle_started(enemies: Array, boss: bool)
+signal battle_ended(result: String)
+signal game_over(map_path: String)
+signal game_saved(path: String, ok: bool)
+signal game_loaded(path: String, ok: bool)
+signal menu_opened(which: String)
 var codex_pages: Array = []
 var codex_active := ""
 var codex_next_id := 1
@@ -338,6 +345,7 @@ func _ready() -> void:
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
+	# Sessielog (SessieLog, scripts/core/sessie_log.gd): of  godot -- --sessielogcoretest  (scripts/tests/sessielog_core_tests.gd).
 	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -375,6 +383,7 @@ func _ready() -> void:
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
+			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
 			["--musictest", "res://scripts/tests/music_tests.gd", "MusicTest", "musictest"],
 			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
@@ -1100,9 +1109,11 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
 		push_warning("Opslaan mislukt: %s" % error_string(FileAccess.get_open_error()))
+		game_saved.emit(path, false)
 		return false
 	f.store_string(JSON.stringify(data, "  "))
 	f.close()
+	game_saved.emit(path, true)
 	return true
 
 
@@ -1231,6 +1242,7 @@ func load_game(path := "") -> bool:
 	som_mode = false      # SoM-proef: een geladen spel is altijd het gewone (turn-based) spel
 	var d := read_save(path)
 	if not apply_state(d):
+		game_loaded.emit(path if path != "" else save_path, false)
 		return false
 	# Gevechtsstijl van deze save; oude saves zonder sleutel houden hun vroegere effectieve waarde: Classic.
 	Settings.set_value("battle_style", int(d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)))
@@ -1238,6 +1250,7 @@ func load_game(path := "") -> bool:
 	checkpoint = _checkpoint_from(d.get("checkpoint", {}))
 	entry_kind = "load"
 	pending_respawn_msg = []
+	game_loaded.emit(path if path != "" else save_path, true)
 	return true
 
 
@@ -1799,6 +1812,7 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 	practice_battle = practice
 	in_battle = true
 	Sessielog.gevecht_start(enemies, boss, terrain, from_tile)
+	battle_started.emit(enemies, boss)
 	pending_enemies = enemies
 	pending_boss = boss
 	pending_tier = 0 if boss else tier
@@ -1818,6 +1832,9 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 func end_battle(result: String) -> void:
 	result = archief2_verwerk_einde(result)
 	Sessielog.gevecht_eind(result)
+	battle_ended.emit(result)
+	if result == "lose" and not practice_battle:
+		game_over.emit(current_map)
 	var oefening := practice_battle
 	practice_battle = false
 	last_battle_result = result

@@ -177,6 +177,7 @@ func open_field_menu() -> void:
 		return
 	player.input_locked = true
 	Sessielog.menu("veld")
+	GameState.menu_opened.emit("veld")
 	# v0.11: touch-joystick/A/B weg zolang het menu open is (je tikt direct op het menu;
 	# anders zou een tik op een menuregel bij de joystick als lopen tellen)
 	_set_touch_visible(false)

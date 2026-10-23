@@ -326,6 +326,7 @@ func _open_sub(screen: CanvasLayer, node_name: String) -> CanvasLayer:
 	sub = screen
 	screen.name = node_name
 	Sessielog.menu(node_name)
+	GameState.menu_opened.emit(node_name)
 	var back_to: Button = _last_focus if _last_focus != null else buttons["equip"]
 	message_label.visible = false
 	_message_left = 0.0
