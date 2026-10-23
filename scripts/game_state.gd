@@ -381,6 +381,7 @@ func _ready() -> void:
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
 			["--musictest", "res://scripts/tests/music_tests.gd", "MusicTest", "musictest"],
+			["--muziektest", "res://scripts/tests/muziek_tests.gd", "MuziekTest", "muziektest"],
 			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
 			["--sessiefixtest", "res://scripts/tests/sessiefix_tests.gd", "SessiefixTest", "sessiefixtest"],
 			["--rekruuttest", "res://scripts/tests/rekruut_tests.gd", "RekruutTest", "rekruuttest"],
