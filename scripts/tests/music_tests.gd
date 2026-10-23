@@ -51,8 +51,11 @@ func _shot(naam: String) -> void:
 		return
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
-	img.resize(img.get_width() * 3, img.get_height() * 3, Image.INTERPOLATE_NEAREST)
 	DirAccess.make_dir_recursive_absolute(shots)
+	var native_path := shots.path_join(naam + "_384x216.png")
+	img.save_png(native_path)
+	print("INFO  native screenshot: ", native_path)
+	img.resize(img.get_width() * 3, img.get_height() * 3, Image.INTERPOLATE_NEAREST)
 	img.save_png(shots.path_join(naam + ".png"))
 	print("INFO  screenshot: ", shots.path_join(naam + ".png"))
 
