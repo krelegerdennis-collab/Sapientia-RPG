@@ -763,3 +763,7 @@ assets/sprites/party_24x32/seren_wm1.png
 assets/sprites/party_24x32/vesper_wm1.png
 # Plein 10 pass 5: gebakken grond bake13 van RPG ART (art_10/out/bake13), vervangt plein_grond 1:1
 assets/sprites/buiten/wilgendal/plein10/wilgendal_grond_tileset.png
+assets/sprites/som/cast/seren_cast.png
+assets/sprites/som/cast/seren_castfx.png
+assets/sprites/som/cast/vesper_cast.png
+assets/sprites/som/cast/vesper_castfx.png

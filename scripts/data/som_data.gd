@@ -96,6 +96,22 @@ const CAST_CIRCLE := {
 	"noor": "res://assets/sprites/som/fx/cast_circle_vesper.png",
 }
 const CAST_CIRCLE_CELL := [48, 16]
+## Kaart-cast (RPG ART art_cast v9): 24x32-cellen zoals de loopsheet (zelfde anker), 4 frames
+## (verzamelen, gloed, loslaten, herstel) x 4 rijen (omlaag, links, rechts, omhoog). Gaat voor op cast6:
+## de held blijft zijn eigen kaartfiguur. De spreuk komt vrij aan het begin van frame 2 ('release'),
+## dan verschijnt ook de cast-gloed (castfx, 4 x 24x24, midden op de staf).
+const MAP_CAST := {
+	"lotte": {"sheet": "res://assets/sprites/som/cast/seren_cast.png", "fx": "res://assets/sprites/som/cast/seren_castfx.png"},
+	"noor": {"sheet": "res://assets/sprites/som/cast/vesper_cast.png", "fx": "res://assets/sprites/som/cast/vesper_castfx.png"},
+}
+const MAP_CAST_CELL := [24, 32]
+const MAP_CAST_MS := [150, 170, 130, 170]
+const MAP_CAST_RELEASE := 2
+const MAP_CAST_FX_CELL := [24, 24]
+const MAP_CAST_FX_MS := 80
+## Midden van de cast-gloed t.o.v. de held-node (voeten op +8): boven het hoofd, iets naar de kijkrichting.
+const MAP_CAST_FX_POS := Vector2(0, -18)
+const MAP_CAST_FX_SIDE := 7.0
 const CAST_CIRCLE_MS := 90
 ## Spreuk-effecten, onderkant-midden op de voeten van het doel. Aantal frames = breedte / cel (uit de sheet).
 const SPELL_FX := {
