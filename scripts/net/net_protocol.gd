@@ -62,6 +62,20 @@ enum Kind {
 	START_GAME = 8,
 }
 
+## Binaire gameplay-berichten (zelfde ENet-peer als de lobby; geen JSON).
+enum BinKind {
+	INPUT = 16,
+	SNAPSHOT = 17,
+}
+
+## Losse poort voor headless sync-tests (geen botsing met een lopende lobby).
+const SYNC_TEST_PORT := 38424
+
+## Vlaggen per speler in snapshots (u16).
+const FLAG_RING_OPEN := 1
+const FLAG_ATTACK := 2
+const FLAG_DOWN := 4
+
 enum Refuse {
 	NONE = 0,
 	FULL = 1,
