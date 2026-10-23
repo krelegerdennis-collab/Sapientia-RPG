@@ -305,14 +305,76 @@ func noteer(type: String, data: Dictionary = {}) -> void:
 			noteer("log_vol", {"bytes": bytes})
 		if type in DETAIL_NA_VOL:
 			return
-	if bytes + n > MAX_BYTES and not type in RESERVE_TYPES:
-		if not (afgekapt and not type in DETAIL_NA_VOL):
-			return
+	if bytes + n > MAX_BYTES and not _zorg_ruimte(n):
+		return
 	buffer.append(regel)
 	bytes += n
 	regels += 1
 	if buffer.size() >= FLUSH_LINES:
 		flush()
+
+
+## Verwijder oudste regels tot er minstens n bytes vrije ruimte is (bestand blijft geldige JSONL).
+func _zorg_ruimte(n: int) -> bool:
+	while bytes + n > MAX_BYTES:
+		if not _verwijder_oudste_regel():
+			return false
+	return true
+
+
+func _regel_bewaard(json_regel: String) -> bool:
+	var parsed: Variant = JSON.parse_string(json_regel)
+	if parsed is Dictionary:
+		var t := str(parsed.get("type", ""))
+		return t in RESERVE_TYPES or t == "sessie_start"
+	return false
+
+
+func _verwijder_oudste_regel() -> bool:
+	if not buffer.is_empty():
+		var bi := 0
+		while bi < buffer.size() and _regel_bewaard(buffer[bi]):
+			bi += 1
+		if bi >= buffer.size():
+			return false
+		var oud := buffer[bi]
+		buffer.remove_at(bi)
+		bytes -= oud.to_utf8_buffer().size() + 1
+		regels = maxi(0, regels - 1)
+		return true
+	flush()
+	if pad == "" or not FileAccess.file_exists(pad):
+		return false
+	var tekst := FileAccess.get_file_as_string(pad)
+	if tekst.is_empty():
+		return false
+	var lijnen := tekst.split("\n", false)
+	if lijnen.is_empty():
+		return false
+	var idx := 0
+	while idx < lijnen.size() and _regel_bewaard(lijnen[idx]):
+		idx += 1
+	if idx >= lijnen.size():
+		return false
+	var weg := lijnen[idx] + "\n"
+	lijnen.remove_at(idx)
+	var nieuw := ""
+	if not lijnen.is_empty():
+		nieuw = "\n".join(lijnen) + "\n"
+	if _bestand != null:
+		_bestand.close()
+		_bestand = null
+	var f := FileAccess.open(pad, FileAccess.WRITE)
+	if f == null:
+		return false
+	f.store_string(nieuw)
+	f.close()
+	_bestand = FileAccess.open(pad, FileAccess.READ_WRITE)
+	if _bestand != null:
+		_bestand.seek_end()
+	bytes -= weg.to_utf8_buffer().size()
+	regels = maxi(0, regels - 1)
+	return true
 
 
 func flush() -> void:
