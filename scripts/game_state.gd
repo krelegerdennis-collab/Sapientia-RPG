@@ -229,6 +229,9 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 var current_map := ""
 var pending_spawn := ""
 var changing_map := false
+## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
+## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
+var huis_herkomst := ""
 
 ## Positie op de map waar het gevecht begon (om daarna terug te keren).
 var has_return_point := false
@@ -346,6 +349,9 @@ func _ready() -> void:
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
 	# Actie-balans (SoM-proef): godot -- --actionsim [--fights=N] [--boss-fights=N] [--out=pad]  (tools/battlesim/action_sim.gd)
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
+	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
+	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
+	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
@@ -357,6 +363,7 @@ func _ready() -> void:
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
 			["--hudtest", "res://scripts/tests/hud_tests.gd", "HudTest", "hudtest"],
+			["--locktest", "res://scripts/tests/lock_tests.gd", "LockTest", "locktest"],
 			["--puzzletest", "res://scripts/tests/puzzle_tests.gd", "PuzzleTest", "puzzletest"],
 			["--dungeontest", "res://scripts/tests/dungeon_tests.gd", "DungeonTest", "dungeontest"],
 			["--golemtest", "res://scripts/tests/golem_tests.gd", "GolemTest", "golemtest"],
@@ -396,6 +403,7 @@ func _ready() -> void:
 			["--balansarchief1test", "res://scripts/tests/balans_archief1_tests.gd", "BalansArchief1Test", "balansarchief1test"],
 			["--questtest", "res://scripts/tests/quest_tests.gd", "QuestTest", "questtest"],
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
+			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
@@ -531,13 +539,6 @@ func _go_to_scene(path: String) -> void:
 		get_tree().change_scene_to_file(path)
 
 
-## Nieuw spel (v0.10): de party is alleen de hoofdpersoon (held 'dennis') met
-## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
-## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
-## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
-var huis_herkomst := ""
-
-
 ## #166: kies de echte bestemming van een warp en onthoud de herkomst bij het binnengaan van het huis.
 func huis_route(van: String, path: String, spawn_name: String) -> Array:
 	if path == HOUSE_MAP and van != HOUSE_MAP:
@@ -547,6 +548,8 @@ func huis_route(van: String, path: String, spawn_name: String) -> Array:
 	return [path, spawn_name]
 
 
+## Nieuw spel (v0.10): de party is alleen de hoofdpersoon (held 'dennis') met
+## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
 func new_game(hero_name := DEFAULT_NAME) -> void:
 	huis_herkomst = ""
 	som_mode = false
@@ -1228,6 +1231,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot,
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
+		"pending_unique_event": Story.pending_unique_event if has_node("/root/Story") else "",
 		"scenes_seen": seen_scenes(),
 		"heard_music": heard_music.duplicate(),
 		"quests": _quests_save(),
@@ -1350,7 +1354,11 @@ func apply_state(d: Dictionary) -> bool:
 	quest_sync()
 	pending_tutorial = {}
 	if has_node("/root/Story"):
-		get_node("/root/Story").reset(true)
+		var story: Node = get_node("/root/Story")
+		story.reset(true)
+		# Oude saves hebben deze sleutel niet en krijgen dus geen uitgesteld event.
+		story.pending_unique_event = str(d.get("pending_unique_event", "")) \
+				if d.get("pending_unique_event", "") is String else ""
 	# v0.12: oude saves zonder dit veld laden gewoon (dan {}).
 	# v0.15 kernfragmenten; oude saves zonder dit veld = geen kernen. Onbekende ids vallen weg.
 	kernfragmenten = {}
@@ -1834,22 +1842,29 @@ func boss_group() -> Dictionary:
 func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
 	if in_battle or changing_map:
 		return
-	practice_battle = practice
 	in_battle = true
 	SessieLog.gevecht_start(enemies, boss, terrain, from_tile)
 	battle_started.emit(enemies, boss)
-	pending_enemies = enemies
-	pending_boss = boss
-	pending_tier = 0 if boss else tier
-	pending_archief = archief and not boss
-	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
-	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
+	prepare_battle(enemies, terrain, boss, tier, archief, practice)
 	has_return_point = true
 	return_map = current_map
 	return_tile = from_tile
 	return_facing = facing
 	await Transition.encounter_out()
 	_go_to_scene(BATTLE_SCENE)
+
+
+## Alles wat battle.gd bij _ready uit GameState leest (vijanden, baas, tier, archief, achtergrond).
+## Gedeeld door start_battle en de headless simulator (tools/battlesim/battlesim_runs.gd), die geen
+## kaart, terugkeerpunt, sessielog of scènewissel wil.
+func prepare_battle(enemies: Array, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
+	practice_battle = practice
+	pending_enemies = enemies
+	pending_boss = boss
+	pending_tier = 0 if boss else tier
+	pending_archief = archief and not boss
+	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
+	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
 
 
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),
