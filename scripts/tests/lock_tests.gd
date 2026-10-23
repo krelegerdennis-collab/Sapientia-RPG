@@ -4,7 +4,6 @@ extends Node
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")
-
 var failures := 0
 var passes := 0
 var shots := ""
@@ -51,6 +50,8 @@ func _run() -> void:
 	arena().allies_enabled = false
 	await _auto_lock_tests()
 	await _manual_lock_tests()
+	await _touch_ui_priority_tests()
+	await _auto_scan_throttle_tests()
 	await _facing_tests()
 	await _marker_tests()
 	await _codex_lock_tests()
@@ -125,6 +126,71 @@ func _auto_lock_tests() -> void:
 	check("auto-lock: dichtstbijzijnde vijand", locked == nearest and nearest == near_m)
 
 
+func _touch_control() -> Control:
+	return room().get_node("TouchControls/Control") as Control
+
+
+func _viewport_of_tc(local: Vector2) -> Vector2:
+	var tc := _touch_control()
+	return tc.get_global_transform_with_canvas() * local
+
+
+func _simulate_touch(vp: Vector2, pressed: bool, index: int = 7) -> void:
+	var ev := InputEventScreenTouch.new()
+	ev.position = vp
+	ev.pressed = pressed
+	ev.index = index
+	_touch_control()._input(ev)
+
+
+func _place_monster_at_viewport(vp: Vector2, id: String) -> Node:
+	var world: Vector2 = get_viewport().get_canvas_transform().affine_inverse() * vp
+	var tile := Vector2i(roundi(world.x / 16.0), roundi(world.y / 16.0))
+	var m: Node = room().add_monster({"id": id, "enemy": "mosslijm", "tile": [tile.x, tile.y]})
+	m.place_at(tile, Vector2i.LEFT)
+	return m
+
+
+func _touch_ui_priority_tests() -> void:
+	await _clear_lock()
+	var tc: Control = _touch_control()
+	var stick_vp: Vector2 = _viewport_of_tc(tc.stick_center())
+	var a_vp: Vector2 = _viewport_of_tc(tc.a_center())
+	var m_stick: Node = _place_monster_at_viewport(stick_vp, "lock_under_stick")
+	var m_a: Node = _place_monster_at_viewport(a_vp, "lock_under_a")
+	await _frames(4)
+	check("touch: monster onder joystick is pickbaar", lock().pick_enemy_at_viewport(stick_vp) == m_stick)
+	_simulate_touch(stick_vp, true)
+	await _frames(2)
+	check("touch: tik op joystick lockt niet", lock().locked_enemy() == null and tc._touch_owner.get(7, "") == "joy")
+	_simulate_touch(stick_vp, false, 7)
+	await _frames(2)
+	_simulate_touch(a_vp, true, 8)
+	await _frames(2)
+	check("touch: tik op A lockt niet", lock().locked_enemy() == null and tc._touch_owner.get(8, "") == "a")
+	_simulate_touch(a_vp, false, 8)
+
+
+func _auto_scan_throttle_tests() -> void:
+	await _clear_lock()
+	lock().timed_auto_scans = 0
+	lock()._auto_scan_t = SomTargetLock.AUTO_SCAN_INTERVAL
+	var p: CharacterBody2D = room().player
+	var pt: Vector2i = p.get_tile()
+	var near_m: Node = room().add_monster({"id": "lock_throttle", "enemy": "mosslijm", "tile": [pt.x + 1, pt.y]})
+	near_m.place_at(Vector2i(pt.x + 1, pt.y), Vector2i.LEFT)
+	await _frames(4)
+	var start: int = lock().timed_auto_scans
+	await _frames(5)
+	var mid: int = lock().timed_auto_scans
+	check("auto-scan: niet elke frame (5 frames)", mid <= start + 1)
+	var t0: int = Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < int(SomTargetLock.AUTO_SCAN_INTERVAL * 1000.0) + 80:
+		await get_tree().process_frame
+	var end: int = lock().timed_auto_scans
+	check("auto-scan: loopt op interval (~%.2fs)" % SomTargetLock.AUTO_SCAN_INTERVAL, end >= start + 1)
+
+
 func _tap_monster(m: Node) -> void:
 	var world: Vector2 = arena().center_of(m)
 	var vp: Vector2 = get_viewport().get_canvas_transform() * world
@@ -165,7 +231,7 @@ func _death_and_clear_tests() -> void:
 	arena().enemies[first]["hp"] = 1
 	arena().damage_enemy(first, 99, Vector2i.ZERO, false)
 	await _frames(4)
-	check("death: wissel naar volgende in bereik", lock().locked_enemy() == second or lock().locked_enemy() != null)
+	check("death: wissel naar exact volgende doel", lock().locked_enemy() == second)
 	for m in arena().enemies.keys():
 		if is_instance_valid(m):
 			arena().enemies[m]["hp"] = 0

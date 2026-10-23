@@ -8,12 +8,17 @@ const SomMove := preload("res://scripts/som/som_move.gd")
 ## Auto-lock: levend monster binnen deze afstand (tegels, midden-tot-midden).
 const AUTO_LOCK_TILES := 6.0
 const AUTO_LOCK_RADIUS := AUTO_LOCK_TILES * 16.0
+## Hoe vaak (zonder manual lock) opnieuw nearest_enemy scannen in auto-modus.
+const AUTO_SCAN_INTERVAL := 0.2
 
 var arena: Node
 var target: Node = null
 var manual := false
 var _marker: SomFx.Anim = null
 var _wissel: SomFx.Anim = null
+var _auto_scan_t := 0.0
+## locktest: teller van getimede auto-scans (niet direct na dood/vangst).
+var timed_auto_scans := 0
 ## Laatste tap-frame (touch_controls): interact op A in hetzelfde frame onderdrukken.
 var suppress_attack_frame := -1
 
@@ -28,7 +33,11 @@ func tick(delta: float) -> void:
 		_clear_visuals()
 		return
 	if not manual:
-		_refresh_auto()
+		_auto_scan_t -= delta
+		if _auto_scan_t <= 0.0:
+			_auto_scan_t = AUTO_SCAN_INTERVAL
+			timed_auto_scans += 1
+			_refresh_auto()
 	_update_marker()
 	if target != null and (not is_instance_valid(target) or not arena.enemies.has(target)):
 		_on_target_gone(target)
@@ -78,18 +87,19 @@ func facing_for_player() -> Vector2i:
 func on_target_gone(m: Node) -> void:
 	if target != m:
 		return
-	var from: Vector2 = arena.body()
 	target = null
 	manual = false
-	var nxt: Node = arena.nearest_enemy(from, AUTO_LOCK_RADIUS)
-	if nxt != null:
-		_set_target(nxt, false)
-	else:
-		_kill_marker()
+	rescan_auto()
 
 
 func _on_target_gone(m: Node) -> void:
 	on_target_gone(m)
+
+
+## Directe auto-scan (dood/vangst); zet de timer opnieuw zodat tick niet meteen dubbel scant.
+func rescan_auto() -> void:
+	_auto_scan_t = AUTO_SCAN_INTERVAL
+	_refresh_auto()
 
 
 func _refresh_auto() -> void:
@@ -152,6 +162,8 @@ func _update_marker() -> void:
 		_spawn_marker()
 	if _marker:
 		_marker.position = pos
+	if _wissel != null and is_instance_valid(_wissel):
+		_wissel.position = pos
 
 
 func _spawn_marker() -> void:

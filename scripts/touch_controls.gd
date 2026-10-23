@@ -224,9 +224,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var pos := _local(event.position)
 		if event.pressed:
-			if analog_only and _try_lock_tap(event.position):
-				get_viewport().set_input_as_handled()
-			elif pos.distance_to(stick_center()) <= stick_reach():
+			if pos.distance_to(stick_center()) <= stick_reach():
 				_touch_owner[event.index] = "joy"
 				_set_joy(pos, event.index)
 				get_viewport().set_input_as_handled()
@@ -249,6 +247,8 @@ func _input(event: InputEvent) -> void:
 			elif show_menu and menu_rect().grow(4.0).has_point(pos):
 				_touch_owner[event.index] = "menu"
 				_set_touch_action(event.index, "menu")
+				get_viewport().set_input_as_handled()
+			elif analog_only and _try_lock_tap(event.position):
 				get_viewport().set_input_as_handled()
 		else:
 			if _touch_owner.get(event.index, "") == "joy":

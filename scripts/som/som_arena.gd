@@ -493,16 +493,6 @@ func center_of(m: Node) -> Vector2:
 	return m.position + Vector2(0, -(m.size.y - 1) * 8.0)
 
 
-## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
-func _aim_caster_at(caster_id: String, m: Node) -> void:
-	if m == null or not is_instance_valid(m) or caster_id != active_id:
-		return
-	var to: Vector2 = center_of(m) - body_of(caster_id)
-	if to.length() < 0.5:
-		return
-	player.facing = SomMove.facing_for(to.normalized(), player.facing)
-
-
 func _swing_facing(id: String, n: Node2D) -> Vector2i:
 	if id == active_id and target_lock:
 		var lf: Vector2i = target_lock.facing_for_player()
@@ -512,6 +502,7 @@ func _swing_facing(id: String, n: Node2D) -> Vector2i:
 	return n.facing
 
 
+## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
 func nearest_enemy(from: Vector2, within: float) -> Node:
 	var best: Node = null
 	var bd := within
@@ -523,6 +514,15 @@ func nearest_enemy(from: Vector2, within: float) -> Node:
 			bd = d
 			best = m
 	return best
+
+
+func _aim_caster_at(caster_id: String, m: Node) -> void:
+	if m == null or not is_instance_valid(m) or caster_id != active_id:
+		return
+	var to: Vector2 = center_of(m) - body_of(caster_id)
+	if to.length() < 0.5:
+		return
+	player.facing = SomMove.facing_for(to.normalized(), player.facing)
 
 
 ## stagger = false (slag onder 100%): wel schade, maar geen afgebroken telegraaf en geen knockback.
