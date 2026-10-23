@@ -50,10 +50,13 @@ func _run() -> void:
 
 
 func _assert_arena_avatars(label: String, som: SomArena, roster: Array) -> void:
+	var seated: int = som.coop_seated_player_count(roster)
 	var want: int = som.coop_expected_remote_avatars(roster)
 	check("%s remote avatars=%d" % [label, want], som.coop_remote_avatar_count() == want)
 	check("%s geen orphan CoopAvatar" % label, som.coop_avatar_nodes_in_scene() == want)
 	check("%s unieke stoelen" % label, som.coop_avatar_seats_unique())
+	var party_sprites: int = som.coop_party_texture_sprite_count()
+	check("%s party sprites=%d" % [label, seated], party_sprites == seated)
 
 
 func _full_flow() -> void:
@@ -104,9 +107,18 @@ func _full_flow() -> void:
 	_assert_arena_avatars("na join host", host_som, roster)
 	_assert_arena_avatars("na join g1", g1_som, roster)
 	_assert_arena_avatars("na join g2", g2_som, roster)
+	_detach_peer_viewports(g1_pack, g2_pack)
+	for i in 60:
+		host_sess.set_local_input(Vector2(-0.85, 0), false, false, false)
+		g1_sess.set_local_input(Vector2(0.85, 0), false, false, false)
+		g2_sess.set_local_input(Vector2(0, -0.85), false, false, false)
+		await get_tree().process_frame
+	_assert_arena_avatars("na spread host", host_som, roster)
 	if shots != "":
-		await _frames(25)
-		await _save_shot(host_pack["vp"] as SubViewport)
+		await _save_shot_room_only(host_pack["room"] as Node)
+	_attach_peer_viewports(g1_pack, g2_pack)
+	_assert_arena_avatars("na spread g1", g1_som, roster)
+	_assert_arena_avatars("na spread g2", g2_som, roster)
 	g1_sess.set_local_input(Vector2(1, 0), false, false, false)
 	var moved := await wait_until(func() -> bool:
 		return host_som._coop_avatars.has(1) and (host_som._coop_avatars[1] as Node2D).position.x > 12.0
@@ -151,6 +163,7 @@ func _full_flow() -> void:
 	check("g2 rejoin", g2.join_session(Protocol.LOOPBACK, "noor", "Vesper") == OK)
 	var back := await wait_until(func() -> bool: return g2.local_slot == 2, STEP)
 	check("rejoin Vesper stoel", back)
+	check("drie spelers na rejoin", host.player_count() == 3)
 	if back:
 		roster.clear()
 		for row in host.slots:
@@ -182,16 +195,17 @@ func _full_flow() -> void:
 	g1_sess.shutdown(true)
 	g2_sess.shutdown(true)
 	_shutdown(nodes)
-	for key in ["room", "vp"]:
-		var n: Node = host_pack.get(key) as Node
-		if is_instance_valid(n):
-			n.queue_free()
-		n = g1_pack.get(key) as Node
-		if is_instance_valid(n):
-			n.queue_free()
-		n = g2_pack.get(key) as Node
-		if is_instance_valid(n):
-			n.queue_free()
+	for pack in [host_pack, g1_pack, g2_pack]:
+		var vp: SubViewport = pack.get("vp") as SubViewport
+		if is_instance_valid(vp):
+			var par := vp.get_parent()
+			if par != null and par.name == "HostWrap":
+				par.queue_free()
+			else:
+				vp.queue_free()
+		var room: Node = pack.get("room") as Node
+		if is_instance_valid(room):
+			room.queue_free()
 
 
 func _spawn_peer_arena(vp_name: String, _slot: int) -> Dictionary:
@@ -199,7 +213,17 @@ func _spawn_peer_arena(vp_name: String, _slot: int) -> Dictionary:
 	vp.name = vp_name
 	vp.size = VIEWPORT
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	add_child(vp)
+	vp.handle_input_locally = true
+	if vp_name == "HostVP":
+		var wrap := SubViewportContainer.new()
+		wrap.name = "HostWrap"
+		wrap.stretch = true
+		wrap.custom_minimum_size = VIEWPORT
+		wrap.size = VIEWPORT
+		add_child(wrap)
+		wrap.add_child(vp)
+	else:
+		add_child(vp)
 	var room: DungeonRoom = (load(SomData.START_MAP) as PackedScene).instantiate()
 	vp.add_child(room)
 	var som: SomArena = null
@@ -231,12 +255,37 @@ func _frames(n: int) -> void:
 		await get_tree().process_frame
 
 
-func _save_shot(vp: SubViewport) -> void:
-	await _frames(10)
-	if vp == null:
+func _detach_peer_viewports(g1_pack: Dictionary, g2_pack: Dictionary) -> void:
+	for pack in [g1_pack, g2_pack]:
+		var vp: SubViewport = pack.get("vp") as SubViewport
+		if vp != null and vp.get_parent() != null:
+			vp.get_parent().remove_child(vp)
+
+
+func _attach_peer_viewports(g1_pack: Dictionary, g2_pack: Dictionary) -> void:
+	for pack in [g1_pack, g2_pack]:
+		var vp: SubViewport = pack.get("vp") as SubViewport
+		if vp != null and vp.get_parent() == null:
+			add_child(vp)
+
+
+func _save_shot_room_only(room: Node) -> void:
+	if room == null:
 		return
-	var tex := vp.get_texture()
-	if tex == null:
-		return
-	DirAccess.make_dir_recursive_absolute(shots)
-	tex.get_image().save_png(shots.path_join("coop_e2e_arena.png"))
+	var snap := SubViewport.new()
+	snap.name = "ShotVP"
+	snap.size = VIEWPORT
+	snap.render_target_update_mode = SubViewport.UPDATE_ONCE
+	snap.handle_input_locally = true
+	add_child(snap)
+	var old_parent: Node = room.get_parent()
+	old_parent.remove_child(room)
+	snap.add_child(room)
+	await _frames(4)
+	var tex := snap.get_texture()
+	if tex != null:
+		DirAccess.make_dir_recursive_absolute(shots)
+		tex.get_image().save_png(shots.path_join("coop_e2e_arena.png"))
+	snap.remove_child(room)
+	old_parent.add_child(room)
+	snap.queue_free()

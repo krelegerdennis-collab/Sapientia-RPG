@@ -139,16 +139,18 @@ func setup(p_room: Node) -> void:
 		cam.position_smoothing_enabled = true
 		cam.position_smoothing_speed = SomData.CAMERA_SMOOTH
 	var objects := room.get_node("Objects")
-	var slot := 0
-	for h in GameState.party:
-		var id := str(h.get("id", ""))
-		if id == active_id:
-			continue
-		var a: CharacterBody2D = SomAlly.new()
-		objects.add_child(a)
-		a.setup(self, id, slot)
-		allies.append(a)
-		slot += 1
+	# Co-op: geen solo SomAlly-bondgenoten; alleen CoopAvatar per stoel.
+	if not GameState.coop_in_session():
+		var slot := 0
+		for h in GameState.party:
+			var id := str(h.get("id", ""))
+			if id == active_id:
+				continue
+			var a: CharacterBody2D = SomAlly.new()
+			objects.add_child(a)
+			a.setup(self, id, slot)
+			allies.append(a)
+			slot += 1
 	codex = SomCodex.new()
 	codex.name = "SomCodex"
 	codex.arena = self
@@ -386,7 +388,7 @@ func _process(delta: float) -> void:
 		charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
 	for k in iframes.keys():
 		iframes[k] = maxf(0.0, float(iframes[k]) - delta)
-	if Input.is_action_just_pressed(SWITCH_ACTION):
+	if Input.is_action_just_pressed(SWITCH_ACTION) and not coop_mode:
 		switch_hero()
 	b_cast_cd = maxf(0.0, b_cast_cd - delta)
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
@@ -1189,10 +1191,7 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 		coop_sim_host = GameState.coop_is_host() and local_slot == Protocol.HOST_SLOT
 	coop_ring_no_pause = true
 	allies_enabled = false
-	for a in allies:
-		if is_instance_valid(a):
-			a.queue_free()
-	allies.clear()
+	_remove_solo_party_bodies()
 	_coop_slots.clear()
 	_coop_lock_idx.clear()
 	_coop_attack_cd.clear()
@@ -1248,6 +1247,24 @@ func coop_deactivate_slot(slot: int) -> void:
 	_coop_avatars.erase(slot)
 	if is_instance_valid(n):
 		n.queue_free()
+
+
+func _remove_solo_party_bodies() -> void:
+	for a in allies:
+		if is_instance_valid(a):
+			a.queue_free()
+	allies.clear()
+	if room == null:
+		return
+	var objects: Node = room.get_node_or_null("Objects")
+	if objects == null:
+		return
+	for c in objects.get_children():
+		if c is SomAlly:
+			c.queue_free()
+	var follower := objects.get_node_or_null("CodexFollower")
+	if follower != null:
+		follower.queue_free()
 
 
 func _clear_coop_avatars() -> void:
@@ -1307,6 +1324,71 @@ func coop_avatar_nodes_in_scene() -> int:
 		if c is CoopAvatar:
 			n += 1
 	return n
+
+
+func coop_seated_player_count(roster: Array) -> int:
+	var n := 0
+	for row in roster:
+		if str(row.get("character_id", "")) != "" and int(row.get("slot", Protocol.NO_SLOT)) != Protocol.NO_SLOT:
+			n += 1
+	return n
+
+
+func _party_sprite_path_set() -> Dictionary:
+	var out := {}
+	for p in sheets.values():
+		if p is Texture2D:
+			var path: String = (p as Texture2D).resource_path
+			if path != "":
+				out[path] = true
+	for id in SomData.SHEETS.keys():
+		out[str(SomData.SHEETS[id])] = true
+	if sheets.has("dennis"):
+		var dax: Texture2D = sheets["dennis"] as Texture2D
+		if dax != null and dax.resource_path != "":
+			out[dax.resource_path] = true
+	return out
+
+
+func _sprite_uses_party_texture(spr: Node, paths: Dictionary) -> bool:
+	var tex: Texture2D = null
+	if spr is Sprite2D:
+		tex = (spr as Sprite2D).texture
+	elif spr is AnimatedSprite2D:
+		var fr := (spr as AnimatedSprite2D).sprite_frames
+		if fr != null and fr.get_animation_names().size() > 0:
+			tex = fr.get_frame_texture(fr.get_animation_names()[0], 0)
+	if tex == null:
+		return false
+	var path: String = tex.resource_path
+	if path != "" and paths.has(path):
+		return true
+	for t in sheets.values():
+		if tex == t:
+			return true
+	return false
+
+
+func _count_party_texture_sprites(node: Node, paths: Dictionary, under_canvas: bool) -> int:
+	if node is CanvasLayer:
+		under_canvas = true
+	if node is SomArena:
+		# HUD/ring/codex hangen onder SomArena, niet meetellen.
+		under_canvas = true
+	var n := 0
+	if not under_canvas and (node is Sprite2D or node is AnimatedSprite2D):
+		if _sprite_uses_party_texture(node, paths):
+			n += 1
+	for ch in node.get_children():
+		n += _count_party_texture_sprites(ch, paths, under_canvas)
+	return n
+
+
+## Wereld-sprites met party-kaarttexturen (speler + CoopAvatar; geen HUD/FX).
+func coop_party_texture_sprite_count() -> int:
+	if room == null:
+		return 0
+	return _count_party_texture_sprites(room, _party_sprite_path_set(), false)
 
 
 func coop_expected_remote_avatars(roster: Array) -> int:
