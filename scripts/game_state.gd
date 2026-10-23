@@ -1096,9 +1096,6 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	if path == "":
 		var slot_file := slot_path(active_slot)
 		path = slot_file if slot_file != "" else save_path
-	# region agent log
-	_agent_debug({"hypothesisId": "A/B/C", "location": "scripts/game_state.gd:save_game:entry", "message": "save_game gestart", "data": {"path": path, "exists": FileAccess.file_exists(path), "tmp_exists": FileAccess.file_exists(path + ".tmp"), "bak_exists": FileAccess.file_exists(path + ".bak")}, "timestamp": Time.get_ticks_msec()})
-	# endregion
 	var data := state_data(tile, facing)
 	data["game_version"] = str(ProjectSettings.get_setting("application/config/version", ""))
 	data["saved_at"] = Time.get_datetime_string_from_system()
@@ -1115,9 +1112,6 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	var text := JSON.stringify(data, "  ")
 	var tmp := path + ".tmp"
 	_remove_file(tmp)
-	# region agent log
-	_agent_debug({"hypothesisId": "C/D", "location": "scripts/game_state.gd:save_game:after_tmp_remove", "message": "tijdelijk pad opgeschoond", "data": {"path": path, "tmp_exists": FileAccess.file_exists(tmp), "global_tmp": ProjectSettings.globalize_path(tmp), "global_dest": ProjectSettings.globalize_path(path)}, "timestamp": Time.get_ticks_msec()})
-	# endregion
 	var f := FileAccess.open(tmp, FileAccess.WRITE)
 	if f == null:
 		push_warning("Opslaan mislukt: %s" % error_string(FileAccess.get_open_error()))
@@ -1125,9 +1119,6 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	f.store_string(text)
 	f.flush()
 	f.close()
-	# region agent log
-	_agent_debug({"hypothesisId": "D", "location": "scripts/game_state.gd:save_game:after_tmp_close", "message": "tijdelijk bestand gesloten", "data": {"tmp_exists": FileAccess.file_exists(tmp), "tmp_length": FileAccess.get_file_as_bytes(tmp).size()}, "timestamp": Time.get_ticks_msec()})
-	# endregion
 	if not _valid_save_data(_read_save_file(tmp)):
 		push_warning("Opslaan mislukt: tijdelijk bestand is niet geldig")
 		_remove_file(tmp)
@@ -1135,35 +1126,16 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	# Alleen een aantoonbaar goede hoofd-save wordt de reservekopie. Een corrupte
 	# hoofd-save mag een bestaande goede .bak nooit verdringen.
 	var old := _read_save_file(path)
-	# region agent log
-	_agent_debug({"hypothesisId": "A/B/C", "location": "scripts/game_state.gd:save_game:old_state", "message": "bestaande save beoordeeld", "data": {"path": path, "exists": FileAccess.file_exists(path), "old_valid": _valid_save_data(old), "bak_exists": FileAccess.file_exists(path + ".bak")}, "timestamp": Time.get_ticks_msec()})
-	# endregion
 	if _valid_save_data(old) and not _write_backup(path, path + ".bak"):
 		_remove_file(tmp)
 		return false
-	# region agent log
-	_agent_debug({"hypothesisId": "A/D", "location": "scripts/game_state.gd:save_game:before_rename", "message": "voor atomaire vervanging", "data": {"source_exists": FileAccess.file_exists(tmp), "dest_exists": FileAccess.file_exists(path), "backup_exists": FileAccess.file_exists(path + ".bak")}, "timestamp": Time.get_ticks_msec()})
-	# endregion
 	var rename_error := DirAccess.rename_absolute(
 			ProjectSettings.globalize_path(tmp), ProjectSettings.globalize_path(path))
-	# region agent log
-	_agent_debug({"hypothesisId": "A/D", "location": "scripts/game_state.gd:save_game:after_rename", "message": "atomaire vervanging voltooid", "data": {"error": rename_error, "error_text": error_string(rename_error), "source_exists": FileAccess.file_exists(tmp), "dest_exists": FileAccess.file_exists(path)}, "timestamp": Time.get_ticks_msec()})
-	# endregion
 	if rename_error != OK:
 		push_warning("Opslaan mislukt bij vervangen: %s" % error_string(rename_error))
 		_remove_file(tmp)
 		return false
 	return true
-
-
-func _agent_debug(payload: Dictionary) -> void:
-	var log := FileAccess.open("/opt/cursor/logs/debug.log", FileAccess.READ_WRITE)
-	if log == null:
-		log = FileAccess.open("/opt/cursor/logs/debug.log", FileAccess.WRITE)
-	if log != null:
-		log.seek_end()
-		log.store_line(JSON.stringify(payload))
-		log.close()
 
 
 func _write_backup(source: String, backup: String) -> bool:
