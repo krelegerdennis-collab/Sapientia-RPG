@@ -339,6 +339,8 @@ func _ready() -> void:
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
 	# Actie-balans (SoM-proef): godot -- --actionsim [--fights=N] [--boss-fights=N] [--out=pad]  (tools/battlesim/action_sim.gd)
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
+	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
+	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
@@ -387,6 +389,7 @@ func _ready() -> void:
 			["--balansarchief1test", "res://scripts/tests/balans_archief1_tests.gd", "BalansArchief1Test", "balansarchief1test"],
 			["--questtest", "res://scripts/tests/quest_tests.gd", "QuestTest", "questtest"],
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
+			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
@@ -1821,21 +1824,28 @@ func boss_group() -> Dictionary:
 func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
 	if in_battle or changing_map:
 		return
-	practice_battle = practice
 	in_battle = true
 	Sessielog.gevecht_start(enemies, boss, terrain, from_tile)
-	pending_enemies = enemies
-	pending_boss = boss
-	pending_tier = 0 if boss else tier
-	pending_archief = archief and not boss
-	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
-	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
+	prepare_battle(enemies, terrain, boss, tier, archief, practice)
 	has_return_point = true
 	return_map = current_map
 	return_tile = from_tile
 	return_facing = facing
 	await Transition.encounter_out()
 	_go_to_scene(BATTLE_SCENE)
+
+
+## Alles wat battle.gd bij _ready uit GameState leest (vijanden, baas, tier, archief, achtergrond).
+## Gedeeld door start_battle en de headless simulator (tools/battlesim/battlesim_runs.gd), die geen
+## kaart, terugkeerpunt, sessielog of scènewissel wil.
+func prepare_battle(enemies: Array, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
+	practice_battle = practice
+	pending_enemies = enemies
+	pending_boss = boss
+	pending_tier = 0 if boss else tier
+	pending_archief = archief and not boss
+	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
+	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
 
 
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),

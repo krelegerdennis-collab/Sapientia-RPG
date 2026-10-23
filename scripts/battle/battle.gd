@@ -1453,8 +1453,7 @@ func _enemy_lunge(actor: Dictionary, target: Dictionary) -> void:
 ## Schadeformule: ATK - DEF/2, +/- 15% geluk, verdedigen = halve schade.
 ## Zwakte telt alleen als het doel weak_matters heeft (Archief 2). Andere vijanden blijven gelijk.
 func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> int:
-	var base := float(attacker["s"]["atk"]) * _buff_mult(attacker, "atk") * mult - _defense_of(target) / 2.0
-	var dmg := maxi(1, roundi(base * randf_range(0.85, 1.15)))
+	var dmg := maxi(1, roundi(physical_base(attacker, target, mult) * randf_range(0.85, 1.15)))
 	if target["defending"]:
 		dmg = maxi(1, int(dmg / 2.0))
 	dmg = maxi(1, roundi(float(dmg) * Archief2.zwakte_fysiek(attacker, target)))
@@ -1463,9 +1462,18 @@ func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> 
 
 ## Spreuken: power op level 1 + power_per_level per level erboven, maal het element, +/- 10%.
 func _spell_amount(caster: Dictionary, spell: Dictionary, target: Dictionary) -> int:
+	return maxi(1, roundi(spell_base(caster, spell, target) * randf_range(0.9, 1.1)))
+
+
+## Basis van de formules hierboven, zonder geluk en zonder randf(): de simulator-AI
+## (tools/battlesim) schat er schade mee zonder de RNG-volgorde van het gevecht te verschuiven.
+func physical_base(attacker: Dictionary, target: Dictionary, mult: float) -> float:
+	return float(attacker["s"]["atk"]) * _buff_mult(attacker, "atk") * mult - _defense_of(target) / 2.0
+
+
+func spell_base(caster: Dictionary, spell: Dictionary, target: Dictionary) -> float:
 	var lvl := int(caster["s"].get("level", 1))
-	var base := SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target) * _token_mult(caster)
-	return maxi(1, roundi(base * randf_range(0.9, 1.1)))
+	return SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target) * _token_mult(caster)
 
 
 func _buff_mult(c: Dictionary, stat: String) -> float:
@@ -2253,12 +2261,15 @@ func kern_entry_text(hero: Dictionary, id: String) -> String:
 ## Schade van een fysieke kernvaardigheid: ATK x atk_mult - DEF x def_factor, +/- 15%,
 ## verdedigen = helft (zoals _physical_damage, maar met minder pantser).
 func kern_damage(attacker: Dictionary, target: Dictionary, skill: Dictionary) -> int:
-	var base := float(attacker["s"]["atk"]) * float(skill.get("atk_mult", 1.5)) \
-			- _defense_of(target) * float(skill.get("def_factor", 0.25))
-	var dmg := maxi(1, roundi(base * randf_range(0.85, 1.15)))
+	var dmg := maxi(1, roundi(kern_base(attacker, target, skill) * randf_range(0.85, 1.15)))
 	if target["defending"]:
 		dmg = maxi(1, int(dmg / 2.0))
 	return dmg
+
+
+func kern_base(attacker: Dictionary, target: Dictionary, skill: Dictionary) -> float:
+	return float(attacker["s"]["atk"]) * float(skill.get("atk_mult", 1.5)) \
+			- _defense_of(target) * float(skill.get("def_factor", 0.25))
 
 
 func _kern_strike(a: Dictionary) -> void:
