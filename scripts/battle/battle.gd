@@ -824,7 +824,7 @@ func _run() -> void:
 			if a["type"] == "defend":
 				a["actor"]["defending"] = true   # verdedigen telt vanaf het begin van de ronde
 		plan.sort_custom(func(a, b): return a["speed"] > b["speed"])
-		Sessielog.ronde(round_no, plan)
+		SessieLog.ronde(round_no, plan)
 		last_plan = plan.duplicate()   # v0.22: beurtvolgorde van deze ronde (partytest)
 		for a in plan:
 			if a["actor"]["s"]["hp"] <= 0:

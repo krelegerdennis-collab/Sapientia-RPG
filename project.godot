@@ -26,7 +26,7 @@ Story="*res://scripts/story.gd"
 Crt="*res://scripts/ui/crt_overlay.gd"
 Settings="*res://scripts/settings.gd"
 AudioManager="*res://scripts/audio_manager.gd"
-Sessielog="*res://scripts/sessielog.gd"
+SessieLog="*res://scripts/core/sessie_log.gd"
 
 [display]
 

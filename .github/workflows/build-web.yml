@@ -1,0 +1,75 @@
+name: build-web
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: build-web-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.3-stable
+  GODOT_TEMPLATES_DIR: 4.3.stable
+  GODOT: ${{ github.workspace }}/.godot-bin/Godot_v4.3-stable_linux.x86_64
+  WEB_EXPORT_DIR: export/web
+  WEB_EXPORT_PRESET: Web
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot editor
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: .godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      - name: Download Godot 4.3-stable
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .godot-bin
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d .godot-bin
+          chmod +x "$GODOT"
+
+      - name: Cache Godot export templates
+        id: cache-templates
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}
+          key: godot-export-templates-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot export templates
+        if: steps.cache-templates.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_TEMPLATES_DIR}
+          curl -fsSL -o /tmp/godot-templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          unzip -q /tmp/godot-templates.tpz -d /tmp/godot-templates
+          cp -a /tmp/godot-templates/templates/. \
+            ~/.local/share/godot/export_templates/${GODOT_TEMPLATES_DIR}/
+
+      - name: Import project
+        run: |
+          "$GODOT" --version
+          timeout 600 "$GODOT" --headless --path . --import > import.log 2>&1 || { tail -50 import.log; exit 1; }
+          if grep -q 'SCRIPT ERROR' import.log; then grep -n 'SCRIPT ERROR' -A3 import.log; exit 1; fi
+
+      - name: Export Web build
+        run: |
+          mkdir -p "$WEB_EXPORT_DIR"
+          "$GODOT" --headless --path . --export-release "${WEB_EXPORT_PRESET}"
+          test -f "${WEB_EXPORT_DIR}/index.html"
+          ls -la "$WEB_EXPORT_DIR"
+
+      - name: Upload Web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sapientia-web
+          path: ${{ env.WEB_EXPORT_DIR }}
+          retention-days: 14

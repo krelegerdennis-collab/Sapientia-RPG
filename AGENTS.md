@@ -77,6 +77,8 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--actorsfxtest` | `scripts/tests/actor_sfx_tests.gd` | 199 |
 | `--koopmantest` | `scripts/tests/koopman_tests.gd` | 83 |
 | `--tutorialtest` | `scripts/tests/tutorial_tests.gd` | 52 |
+| `--questtest` | `scripts/tests/quest_tests.gd` | 63 |
+| `--echotest` | `scripts/tests/echo_tests.gd` | 12 |
 | `--battlesimtest` | `scripts/tests/battlesim_tests.gd` | 57 |
 
 Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`

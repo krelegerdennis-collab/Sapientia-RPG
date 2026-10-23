@@ -27,7 +27,7 @@ jobs:
                 dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
                 actorsfxtest, fusietest, catalogustest, updatetest, archief2test,
                 warperkamertest, hangertest, spiegeltest, berggrottest, pvptest,
-                wilgendaltest]
+                wilgendaltest, questtest, tutorialtest]
     steps:
       - uses: actions/checkout@v4
 

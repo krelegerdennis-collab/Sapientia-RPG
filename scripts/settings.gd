@@ -14,6 +14,7 @@ extends Node
 ##   screen_shake               -> schudden bij treffers in gevechten (battle.gd _shake)
 ##   autosave                   -> automatisch opslaan (GameState.autosave)
 ##   battle_style               -> SoM-proef: 0 Classic (turn-based) / 1 Action (realtime, scripts/som/)
+##   sessie_log                 -> autoload SessieLog (scripts/core/sessie_log.gd) luistert zelf naar 'changed'
 ## Andere scripts kunnen luisteren naar het signaal 'changed(key)'.
 
 signal changed(key: String)
@@ -48,6 +49,7 @@ const BATTLE_STYLE_CLASSIC := 0
 const DEFAULTS := {
 	"music_volume": 8,
 	"sfx_volume": 8,
+	"audio_mute": false,
 	"text_speed": 1,
 	"battle_speed": 1,
 	"touch_opacity": 100,
@@ -55,7 +57,7 @@ const DEFAULTS := {
 	"crt": true,
 	"screen_shake": true,
 	"autosave": true,
-	"sessielog": true,   # playtest: sessielogboek (scripts/sessielog.gd); geen persoonsgegevens
+	"sessie_log": -1,    # SessieLog: -1 = aan in debug-builds, uit in release; 0 uit; 1 aan
 	"run": false,      # TODO.md "run feature": RUN-toggle (blijft aan tot de speler hem uitzet)
 	"battle_style": 1,   # 0 = Classic (turn-based), 1 = Action (realtime in de WM1-dungeons). Dennis 21 okt 2026: Action is de standaard
 }
@@ -102,6 +104,9 @@ func load_settings() -> void:
 	for key in DEFAULTS:
 		if cfg.has_section_key(SECTION, key):
 			values[key] = _sanitize(key, cfg.get_value(SECTION, key))
+	# Oude sleutel sessielog (bool) -> sessie_log (1/0); sessie_log in het bestand wint.
+	if cfg.has_section_key(SECTION, "sessielog") and not cfg.has_section_key(SECTION, "sessie_log"):
+		values["sessie_log"] = 1 if bool(cfg.get_value(SECTION, "sessielog")) else 0
 
 
 func save_settings() -> bool:
@@ -123,6 +128,8 @@ func _sanitize(key: String, v):
 	match key:
 		"music_volume", "sfx_volume":
 			return clampi(n, 0, VOLUME_STEPS)
+		"audio_mute":
+			return bool(v)
 		"text_speed":
 			return clampi(n, 0, TEXT_SPEED_CPS.size() - 1)
 		"battle_speed":
@@ -133,6 +140,8 @@ func _sanitize(key: String, v):
 			return clampi(n, 0, TOUCH_SIZE_SCALE.size() - 1)
 		"battle_style":
 			return clampi(n, 0, BATTLE_STYLE_NAMES.size() - 1)
+		"sessie_log":
+			return clampi(n, -1, 1)
 	return n
 
 
@@ -161,6 +170,8 @@ func step(key: String, dir: int) -> void:
 		set_value(key, not v)
 	elif key == "touch_opacity":
 		set_value(key, int(v) + dir * OPACITY_STEP)
+	elif key == "sessie_log":
+		set_value(key, int(v) + dir)
 	else:
 		set_value(key, int(v) + dir)
 
@@ -201,6 +212,12 @@ func autosave_enabled() -> bool:
 	return bool(get_value("autosave"))
 
 
+## Sessielog (SessieLog): -1 volgt de build (debug aan, release uit).
+func sessie_log_enabled() -> bool:
+	var v := int(get_value("sessie_log"))
+	return OS.is_debug_build() if v < 0 else v == 1
+
+
 ## Hoogste busvolume (lineair) bij de schuif op 100%. Het spel was veel te luid: wat vroeger
 ## 10% was (lineair 0.1, ca. -20 dB) is nu het maximum; de hele schaal schaalt mee.
 ## Opgeslagen stappen (0..VOLUME_STEPS) blijven geldig en klinken nu zachter.
@@ -224,6 +241,9 @@ func _apply(key: String) -> void:
 			_apply_bus(BUS_MUSIC, int(get_value(key)))
 		"sfx_volume":
 			_apply_bus(BUS_SFX, int(get_value(key)))
+		"audio_mute":
+			_apply_bus(BUS_MUSIC, int(get_value("music_volume")))
+			_apply_bus(BUS_SFX, int(get_value("sfx_volume")))
 		"text_speed":
 			var dialog := get_node_or_null("/root/Dialog")
 			if dialog and "chars_per_second" in dialog:
@@ -242,4 +262,4 @@ func _apply_bus(bus: String, steps: int) -> void:
 	if i == -1:
 		return
 	AudioServer.set_bus_volume_db(i, volume_db(steps))
-	AudioServer.set_bus_mute(i, steps <= 0)
+	AudioServer.set_bus_mute(i, steps <= 0 or bool(get_value("audio_mute")))
