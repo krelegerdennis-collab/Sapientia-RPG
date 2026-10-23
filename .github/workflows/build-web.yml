@@ -1,10 +1,17 @@
 name: build-web
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 concurrency:
-  group: build-web-${{ github.ref }}
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -15,7 +22,7 @@ env:
   WEB_EXPORT_PRESET: Web
 
 jobs:
-  export:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -65,7 +72,18 @@ jobs:
           mkdir -p "$WEB_EXPORT_DIR"
           "$GODOT" --headless --path . --export-release "${WEB_EXPORT_PRESET}"
           test -f "${WEB_EXPORT_DIR}/index.html"
+          test -f "${WEB_EXPORT_DIR}/index.wasm"
+          test -f "${WEB_EXPORT_DIR}/index.pck"
+          grep -q 'GODOT_THREADS_ENABLED = false' "${WEB_EXPORT_DIR}/index.html"
           ls -la "$WEB_EXPORT_DIR"
+
+      - name: Prepare GitHub Pages
+        run: touch "${WEB_EXPORT_DIR}/.nojekyll"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.WEB_EXPORT_DIR }}
 
       - name: Upload Web artifact
         uses: actions/upload-artifact@v4
@@ -73,3 +91,14 @@ jobs:
           name: sapientia-web
           path: ${{ env.WEB_EXPORT_DIR }}
           retention-days: 14
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
