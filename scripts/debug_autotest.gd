@@ -2090,9 +2090,9 @@ func _opaque_pixels(path: String) -> int:
 
 func _dorpsprite_checks() -> void:
 	var tex: Texture2D = player().sprite.texture
-	# Held 24x32 (21 okt 2026): buiten wereldkaart/bouwplaats de slanke WM1-sheet van de leider (72x128 = 3x4 van 24x32)
-	check("speler-sprite = dax_wm1_slim.png 72x128, 3x4 frames van 24x32, voeten op +8 (%s)" % tex.resource_path,
-			tex.resource_path.ends_with("som/kaart/dax_wm1_slim.png") and tex.get_size() == Vector2(72, 128)
+	# Held 24x32 (21 okt 2026): buiten wereldkaart/bouwplaats de WM1-sheet van de leider (72x128 = 3x4 van 24x32; Dax final_trio 23 okt)
+	check("speler-sprite = dax_wm1.png 72x128, 3x4 frames van 24x32, voeten op +8 (%s)" % tex.resource_path,
+			tex.resource_path.ends_with("som/kaart/dax_wm1.png") and tex.get_size() == Vector2(72, 128)
 			and player().sprite.hframes == 3 and player().sprite.vframes == 4 and player().sprite.offset == Vector2(0, -8))
 	for path in DORP_SPRITES:
 		var n := _opaque_pixels(path)
