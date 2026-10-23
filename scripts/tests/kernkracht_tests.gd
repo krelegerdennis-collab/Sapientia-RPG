@@ -555,11 +555,15 @@ func _battle_tests() -> void:
 			is_instance_valid(vb) and (vb.position - p0).length() > 0.1 and absf(angle_difference(vb.rotation, (vb.position - p0).angle())) < 0.35)
 	check("bal vertrekt bij de hand (%s, start %s)" % [from, p0], p0.distance_to(from) < 12.0)
 	var vbw: WeakRef = weakref(vb)
+	# deterministisch (niet beeldsnelheid-afhankelijk): wachten op afgelegde baanlengte i.p.v. een moment in tijd;
+	# het spoor volgt exact de afstand (1 sprite per trail_step px), ongeacht hoe groot de beeldstappen zijn
 	await wait_until(func():
 		var o: Node2D = vbw.get_ref()
-		return o == null or o.position.distance_to(from) > from.distance_to(to) * 0.45, 2.0)
-	if is_instance_valid(vb) and vb.flying:
-		check("onderweg: spoor (trail) achter de bal (%d)" % vb.trail_spawned, vb.trail_spawned >= 3)
+		return o == null or not o.flying or o.traveled >= o.trail_step * 3.0, 2.0)
+	if is_instance_valid(vb):
+		var verwacht := floori(vb.traveled / maxf(vb.trail_step, 0.001))
+		check("onderweg: spoor (trail) achter de bal (%d na %.1f px, 1 per %.1f px = %d)" % [vb.trail_spawned, vb.traveled, vb.trail_step, verwacht],
+				vb.trail_step > 0.0 and vb.trail_spawned >= 3 and absi(vb.trail_spawned - verwacht) <= 1)   # ±1: afronding aan de grens
 		await screenshot("kk_gevecht_vlucht")
 	check("inslag op de vijand", await wait_until(func(): return is_instance_valid(b.last_kern_impact), 3.0))
 	var imp: Node2D = b.last_kern_impact
