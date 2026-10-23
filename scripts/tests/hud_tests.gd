@@ -55,6 +55,8 @@ func _run() -> void:
 	await _game_tests()
 	print("=== Deel E: leider-behoud (Action SWAP) ===")
 	await _leider_tests()
+	print("=== Deel G: Codex vangen in Action ===")
+	await _codex_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
 
@@ -449,3 +451,172 @@ func _leider_tests() -> void:
 	a = await _naar(V1, "zuid")
 	check("E: leider uit de party gehaald: na warp Dax bestuurd", a != null and a.active_id == "dennis")
 	Settings.set_value("battle_style", stijl)
+
+
+# ---------------------------------------------------------------- Deel G: Codex vangen in Action
+const CodexDataT := preload("res://scripts/data/codex_data.gd")
+
+
+## Echte tik (muis = touch-emulatie) midden op een HUD-knop.
+func _tik(b: Control) -> void:
+	var c: Vector2 = b.get_global_rect().get_center()
+	for pressed in [true, false]:
+		var ev := InputEventMouseButton.new()
+		ev.button_index = MOUSE_BUTTON_LEFT
+		ev.pressed = pressed
+		ev.position = c
+		ev.global_position = c
+		get_viewport().push_input(ev, true)
+		await pframes(2)
+
+
+## Een geregistreerde arena-vijand als Mosslijm (vangbare Codex-soort) vlak naast de speler.
+func _vangbaar(a: Node) -> Node:
+	for m in a.enemies.keys():
+		if is_instance_valid(m):
+			m.enemy_id = "mosslijm"
+			var p: Node = a.player
+			m.place_at(p.get_tile() + Vector2i(1, 0), Vector2i.LEFT)
+			a.enemies[m]["data"]["name"] = "Moss Slime"
+			return m
+	return null
+
+
+func _codex_tests() -> void:
+	const V1 := "res://scenes/maps/archief_v1_gang.tscn"
+	var stijl: int = int(Settings.get_value("battle_style"))
+	GameState.new_game("Dax")
+	GameState.encounter_multiplier = 0.0
+	var boek: String = CodexDataT.BOOK_ITEM
+	GameState.inventory[boek] = 5
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	var a: Node = await _naar(V1, "zuid")
+	check("G: Action-arena met Codex-module", a != null and a.codex != null)
+	if a == null:
+		Settings.set_value("battle_style", stijl)
+		return
+	var hud: Node = a.hud
+	var cb: Button = hud.codex_button
+	await pframes(3)
+	check("G: CODEX-knop in de HUD-rij, zichtbaar, art btn_codex (38x14)", cb != null and cb.is_visible_in_tree()
+			and str(cb.get_meta("som_skin", "")) == "codex" and cb.size == SomData_TOP())
+	var rr: Rect2 = hud.ring_button.get_global_rect()
+	var cr: Rect2 = cb.get_global_rect()
+	var sr: Rect2 = hud.switch_button.get_global_rect()
+	check("G: rij [RUN][Swap][Codex][Ring][MENU]: Codex direct naast Ring, één hoogte, geen overlap",
+			cr.end.x <= rr.position.x and rr.position.x - cr.end.x < 6.0 and absf(cr.get_center().y - rr.get_center().y) < 1.0
+			and sr.end.x <= cr.position.x and not cr.intersects(rr) and not cr.intersects(sr)
+			and _touch().run_rect().end.x <= sr.position.x + 0.5)
+	await _screenshot("hud_codex_knop")
+	# --- tik: vangt de dichtstbijzijnde (geseed: gelukt)
+	var m: Node = _vangbaar(a)
+	check("G: testmonster in de arena", m != null)
+	if m == null:
+		Settings.set_value("battle_style", stijl)
+		return
+	await _close_dialogs()
+	var actief := await wait_until(func(): return a.active(), 6.0)
+	if not actief:
+		var r: Node = scene()
+		print("INFO  arena niet actief: grace=%s battle=%s dialog=%s menu=%s story=%s lock=%s" % [r.get("_grace_left"), GameState.in_battle,
+				Dialog.is_open, r.menu_open(), Story.running, r.get("_touch_lock")])
+	check("G: arena actief (monsters bewegen)", actief)
+	var n0: int = GameState.codex_pages.size()
+	a.codex.force_roll = 0.0
+	await _tik(cb)
+	print("INFO  na tik: active=%s result=%s" % [a.active(), a.codex.last_capture])
+	check("G: tik op CODEX = vangpoging op het dichtstbijzijnde monster (%s)" % str(a.codex.last_capture.get("result", "")),
+			str(a.codex.last_capture.get("result", "")) == "gelukt")
+	check("G: gelukt: pagina in de Codex (Mosslijm), Leeg Boek -1, monster uit de arena",
+			GameState.codex_pages.size() == n0 + 1 and str(GameState.codex_pages.back()["species"] if not GameState.codex_pages.is_empty() else "") == "mosslijm"
+			and GameState.item_count(boek) == 4 and not a.enemies.has(m))
+	check("G: Engelse melding als Classic", str(a.codex.last_capture.get("text", "")).begins_with("Moss Slime is written into the Codex!"))
+	check("G: niveau/gegevens als Classic (capture_level, tier, play_time)", not GameState.codex_pages.is_empty() and int(GameState.codex_pages.back()["level"]) == CodexDataT.capture_level(int(scene().tier()), "mosslijm")
+			and GameState.defeated_map_monsters.get(str(scene().room_id), {}).has(str(m.monster_id)))
+	# effect speelt: 6 frames, midden op het monster
+	var fx: Node = a.codex.fx_node
+	check("G: codex_capture_fx speelt (6 frames van 48x48)", fx != null and fx is Sprite2D and (fx as Sprite2D).hframes == 6
+			and (fx as Sprite2D).texture != null and (fx as Sprite2D).texture.get_size() == Vector2(288, 48))
+	await pframes(4)
+	await _screenshot("vang_effect")
+	# --- geen dubbele vangst: tijdens het effect nog eens
+	var b0: int = GameState.item_count(boek)
+	var p0: int = GameState.codex_pages.size()
+	a.codex.capture(m)
+	check("G: geen dubbele vangst tijdens het effect (boek en pagina's gelijk)", str(a.codex.last_capture.get("result", "")) == "bezig"
+			and GameState.item_count(boek) == b0 and GameState.codex_pages.size() == p0)
+	await wait_until(func(): return not a.codex.busy, 3.0)
+	await pframes(3)
+	check("G: na het effect is het monster weg (vrijgegeven)", not is_instance_valid(m))
+	# --- mislukt (geseed)
+	var m2: Node = _vangbaar(a)
+	if m2 == null:
+		check("G: tweede testmonster", false)
+	else:
+		a.codex.force_roll = 0.999
+		var hp: int = int(a.enemies[m2]["hp"])
+		var txt: String = a.codex.capture(m2)
+		check("G: mislukt (geseed): boek weg, geen pagina, monster blijft met zelfde HP",
+				str(a.codex.last_capture.get("result", "")) == "mislukt" and GameState.item_count(boek) == b0 - 1
+				and GameState.codex_pages.size() == p0 and a.enemies.has(m2) and int(a.enemies[m2]["hp"]) == hp)
+		check("G: mislukt-melding als Classic", txt.begins_with("The book stays blank... Moss Slime slips out! (chance "))
+		await wait_until(func(): return not a.codex.busy, 3.0)
+		check("G: na mislukken weer zichtbaar", is_instance_valid(m2) and m2.modulate.a > 0.99)
+		# --- ring: Codex-boek (icoon 8 van ring_icons_9), doelkeuze met hint, vangen
+		a.codex.force_roll = 0.0
+		a.open_ring()
+		a.ring.set_tab("items")
+		await pframes(2)
+		var idx := -1
+		for i in a.ring.entries.size():
+			if str(a.ring.entries[i].get("kind", "")) == "codex":
+				idx = i
+		var ic: AtlasTexture = a.ring.icon_for({"kind": "codex", "id": "codex"}) as AtlasTexture
+		check("G: ring: Codex-boek in Items, icoon index 8 van ring_icons_9 (x=128)", idx >= 0 and ic != null
+				and ic.region == Rect2(128, 0, 16, 16) and ic.atlas.get_size() == Vector2(144, 16))
+		a.ring.selected = maxi(idx, 0)
+		a.ring._highlight()
+		await _screenshot("ring_codex")
+		a.ring.choose(idx)
+		await pframes(2)
+		var doel: Array = a.ring.entries
+		check("G: ring: Codex vraagt een doel, met Classic-hint (%s)" % (str(doel[0].get("label", "")) if not doel.is_empty() else "-"),
+				a.ring.tab == "target" and not doel.is_empty() and doel[0]["target"] == m2 and str(doel[0]["label"]).ends_with("%"))
+		await _screenshot("ring_codex_doel")
+		a.ring.choose(0)
+		var klaar := await wait_until(func(): return str(a.codex.last_capture.get("result", "")) == "gelukt", 3.0)
+		check("G: ring: gekozen doel gevangen", klaar and GameState.codex_pages.size() == p0 + 1 and not a.enemies.has(m2))
+		await wait_until(func(): return not a.codex.busy, 3.0)
+	# --- baas: nooit te vangen, boek blijft
+	var bm: Node = null
+	for x in a.enemies.keys():
+		if is_instance_valid(x):
+			bm = x
+	if bm == null:
+		check("G: baas-testmonster", false)
+	else:
+		bm.boss = true
+		a.enemies.erase(bm)          # zoals register(): een baas zit niet in de arena-lijst
+		a.codex.force_roll = 0.0
+		var bb: int = GameState.item_count(boek)
+		var pp: int = GameState.codex_pages.size()
+		var bt: String = a.codex.capture(bm)
+		check("G: baas: weigert ('too strong'), boek blijft, geen pagina", str(a.codex.last_capture.get("result", "")) == "baas"
+				and bt.contains("is too strong! A boss won't be written in.") and GameState.item_count(boek) == bb and GameState.codex_pages.size() == pp)
+		check("G: baas-hint = too strong", a.codex.hint(bm) == "too strong")
+	# --- geen boek
+	GameState.inventory[boek] = 0
+	check("G: zonder Leeg Boek: melding, niets gevangen", a.codex.capture() == "No Blank Book left.")
+	# --- opslaan en laden: de gevangen pagina's
+	var pages_voor: Array = GameState.codex_pages.map(func(p): return [str(p["uid"]), str(p["species"]), int(p["level"])])
+	var d: Dictionary = GameState.state_data(Vector2i(5, 5), Vector2i.DOWN, V1)
+	GameState.codex_pages = []
+	var geladen := GameState.apply_state(JSON.parse_string(JSON.stringify(d)))
+	var pages_na: Array = GameState.codex_pages.map(func(p): return [str(p["uid"]), str(p["species"]), int(p["level"])])
+	check("G: opslaan/laden: Codex-pagina's uit Action blijven (%d)" % pages_na.size(), geladen and pages_na == pages_voor and pages_na.size() >= 2)
+	a.codex.force_roll = -1.0
+	Settings.set_value("battle_style", stijl)
+
+
+func SomData_TOP() -> Vector2:
+	return preload("res://scripts/data/som_data.gd").TOP_BUTTON_SIZE

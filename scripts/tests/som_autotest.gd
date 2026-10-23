@@ -455,8 +455,8 @@ func _ui2_tests() -> void:
 	var p: CharacterBody2D = t.player()
 	# Phoenix Feather-icoon: index 7 in ring_icons_8 (x=112)
 	var ic: AtlasTexture = a.ring.icon_for({"kind": "item", "id": "feniksveer"})
-	t.check("SoM-ui2: Phoenix Feather-icoon = index 7 van ring_icons_8 (128x16)", ic != null and ic.region == Rect2(112, 0, 16, 16)
-			and ic.atlas.get_size() == Vector2(128, 16) and SomData.RING_ICON["feniksveer"] == 7)
+	t.check("SoM-ui2: Phoenix Feather-icoon = index 7 van ring_icons_9 (144x16)", ic != null and ic.region == Rect2(112, 0, 16, 16)
+			and ic.atlas.get_size() == Vector2(144, 16) and SomData.RING_ICON["feniksveer"] == 7)
 	var ic0: AtlasTexture = a.ring.icon_for({"kind": "item", "id": "drankje"})
 	t.check("SoM-ui2: bestaande iconen ongewijzigd (Potion = 0)", ic0 != null and ic0.region.position == Vector2.ZERO)
 	# genees-glans
