@@ -71,13 +71,9 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager --install \
-            "platform-tools" \
-            "platforms;android-34" \
-            "build-tools;34.0.0"
+        with:
+          # cmdline-tools 16+ removed the legacy "tools" package (action default).
+          packages: platform-tools platforms;android-34 build-tools;34.0.0
 
       - name: Configure Godot Android editor settings
         env:
