@@ -14,7 +14,7 @@ const TAB_BAR_H := 24          # zelfde tikminimum als questlog-tab (ROW_H / RIJ
 const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks: mobiel tikdoel (logic pixels)
 const VALUE_W := 66            # breedte van de waarde tussen '<' en '>'
 const RESET_KEY := "_reset"
-const EXPORT_KEY := "_export"      # playtest: logboek aanbieden (scripts/sessielog.gd)
+const EXPORT_KEY := "_export"      # playtest: logboek aanbieden (SessieLog)
 const TABS := ["general", "music"]
 const TAB_NAMES := {"general": "General", "music": "Music"}
 const MUSIC_HINT := "A: play/stop   Tap Music tab   B: back"
@@ -34,7 +34,7 @@ const ROWS := [
 	["screen_shake", "Screen Shake", "Shake the screen when a hit lands."],
 	["autosave", "Autosave", "Save when you enter or leave a dungeon."],
 	[RESET_KEY, "Default", "Set every option back to the default (A)."],
-	["sessielog", "Session Log", "Notes where you walk and fight so the game can be improved. No personal data."],
+	["sessie_log", "Session Log", "Notes where you walk and fight so the game can be improved. No personal data."],
 	[EXPORT_KEY, "Export Log", "Save or share the session log (A) so you can send it."],
 	["battle_style", "Battle Style", "Classic: turn-based. Action: real time (bosses stay turn-based)."],
 ]
@@ -322,6 +322,8 @@ func value_text(key: String) -> String:
 			return settings.TOUCH_SIZE_NAMES[int(v)]
 		"battle_style":
 			return settings.BATTLE_STYLE_NAMES[int(v)]
+		"sessie_log":
+			return ["Auto", "Off", "On"][int(v) + 1]
 	if v is bool:
 		return "On" if v else "Off"
 	return str(v)
@@ -368,7 +370,7 @@ func activate(key: String) -> void:
 		show_message("All options are back to the default.")
 		return
 	if key == EXPORT_KEY:
-		var uit: Dictionary = Sessielog.exporteer()
+		var uit: Dictionary = SessieLog.exporteer()
 		show_message(str(uit["bericht"]))
 		return
 	var before = settings.get_value(key)

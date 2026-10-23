@@ -14,6 +14,7 @@ extends Node
 ##   screen_shake               -> schudden bij treffers in gevechten (battle.gd _shake)
 ##   autosave                   -> automatisch opslaan (GameState.autosave)
 ##   battle_style               -> SoM-proef: 0 Classic (turn-based) / 1 Action (realtime, scripts/som/)
+##   sessie_log                 -> autoload SessieLog (scripts/core/sessie_log.gd) luistert zelf naar 'changed'
 ## Andere scripts kunnen luisteren naar het signaal 'changed(key)'.
 
 signal changed(key: String)
@@ -56,7 +57,7 @@ const DEFAULTS := {
 	"crt": true,
 	"screen_shake": true,
 	"autosave": true,
-	"sessielog": true,   # playtest: sessielogboek (scripts/sessielog.gd); geen persoonsgegevens
+	"sessie_log": -1,    # SessieLog: -1 = aan in debug-builds, uit in release; 0 uit; 1 aan
 	"run": false,      # TODO.md "run feature": RUN-toggle (blijft aan tot de speler hem uitzet)
 	"battle_style": 1,   # 0 = Classic (turn-based), 1 = Action (realtime in de WM1-dungeons). Dennis 21 okt 2026: Action is de standaard
 }
@@ -103,6 +104,9 @@ func load_settings() -> void:
 	for key in DEFAULTS:
 		if cfg.has_section_key(SECTION, key):
 			values[key] = _sanitize(key, cfg.get_value(SECTION, key))
+	# Oude sleutel sessielog (bool) -> sessie_log (1/0); sessie_log in het bestand wint.
+	if cfg.has_section_key(SECTION, "sessielog") and not cfg.has_section_key(SECTION, "sessie_log"):
+		values["sessie_log"] = 1 if bool(cfg.get_value(SECTION, "sessielog")) else 0
 
 
 func save_settings() -> bool:
@@ -136,6 +140,8 @@ func _sanitize(key: String, v):
 			return clampi(n, 0, TOUCH_SIZE_SCALE.size() - 1)
 		"battle_style":
 			return clampi(n, 0, BATTLE_STYLE_NAMES.size() - 1)
+		"sessie_log":
+			return clampi(n, -1, 1)
 	return n
 
 
@@ -164,6 +170,8 @@ func step(key: String, dir: int) -> void:
 		set_value(key, not v)
 	elif key == "touch_opacity":
 		set_value(key, int(v) + dir * OPACITY_STEP)
+	elif key == "sessie_log":
+		set_value(key, int(v) + dir)
 	else:
 		set_value(key, int(v) + dir)
 
@@ -202,6 +210,12 @@ func shake_enabled() -> bool:
 
 func autosave_enabled() -> bool:
 	return bool(get_value("autosave"))
+
+
+## Sessielog (SessieLog): -1 volgt de build (debug aan, release uit).
+func sessie_log_enabled() -> bool:
+	var v := int(get_value("sessie_log"))
+	return OS.is_debug_build() if v < 0 else v == 1
 
 
 ## Hoogste busvolume (lineair) bij de schuif op 100%. Het spel was veel te luid: wat vroeger

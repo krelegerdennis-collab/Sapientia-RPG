@@ -20,6 +20,9 @@ const HELDEN := {
 	"Vesper": ["noor", "vesper.png", "vesper_wm1.png"],
 }
 const RICHTING := {Vector2i.UP: "move_up", Vector2i.DOWN: "move_down", Vector2i.LEFT: "move_left", Vector2i.RIGHT: "move_right"}
+const WM1_MAP := MAPS + "wilgendal.tscn"
+const RICHTING_NAAM := {Vector2i.DOWN: "down", Vector2i.UP: "up", Vector2i.LEFT: "left", Vector2i.RIGHT: "right"}
+const DAX_OFFSET := Vector2(0, -8)
 
 ## Uitgangen in een muur/berg waar je van onderaf tegenaan loopt (map.gd _on_player_bumped).
 const BUMP_UITGANGEN: Array[String] = ["NaarBouwplaats", "NaarBerggrot"]
@@ -48,9 +51,11 @@ func run() -> void:
 	GameState.story_step = SD.KLAAR
 	_sheet_checks()
 	_anker_checks()
+	_anker_gelijk_dax()
 	await _leider_checks()
 	await _deur_sweep()
 	await _deur_wandelingen()
+	await _wm1_direction_shots()
 	Settings.set_value("battle_style", oude_stijl)
 
 
@@ -182,13 +187,15 @@ func _aanloop(p: CharacterBody2D, d: Dictionary) -> Array:
 	return uit
 
 
-func _shot(naam: String) -> void:
+func _shot(naam: String, scale_3x := false) -> void:
 	if shots == "":
 		return
 	await RenderingServer.frame_post_draw
 	var img: Image = t.get_viewport().get_texture().get_image()
 	if img == null or img.is_empty():
 		return
+	if scale_3x:
+		img.resize(img.get_width() * 3, img.get_height() * 3, Image.INTERPOLATE_NEAREST)
 	img.save_png(shots.path_join(naam + ".png"))
 	print("INFO  party-screenshot (%dx%d): %s" % [img.get_width(), img.get_height(), shots.path_join(naam + ".png")])
 
@@ -237,6 +244,43 @@ func _anker_checks() -> void:
 					fout += "r%dk%d %s; " % [rij, kol, used]
 		t.check("party-sprites: %s alle 12 frames: voeten in de onderste 3 px, horizontaal gecentreerd (%s)" % [naam, fout if fout != "" else "ok"], fout == "")
 	speler.queue_free()
+
+
+func _anker_gelijk_dax() -> void:
+	var dax_tex: Texture2D = load(KAART + "dax_wm1.png")
+	var speler: CharacterBody2D = (load("res://scenes/player.tscn") as PackedScene).instantiate()
+	t.add_child(speler)
+	speler.zet_sheet(dax_tex)
+	var dax_off: Vector2 = speler.sprite.offset
+	var dax_rect: Rect2 = speler.sprite.get_rect()
+	for naam in ["Seren", "Vesper"]:
+		speler.zet_sheet(load(KAART + HELDEN[naam][1]))
+		t.check("party-sprites: %s anker/offset gelijk aan Dax (offset %s, rect.end.y %s)" % [naam, speler.sprite.offset, speler.sprite.get_rect().end.y],
+				speler.sprite.offset == dax_off and speler.sprite.offset == DAX_OFFSET
+				and speler.sprite.get_rect().end.y == dax_rect.end.y)
+	speler.queue_free()
+
+
+# ---------------------------------------------------------------- WM1: vier richtingen (3x nearest) voor PR-artifacts
+func _wm1_direction_shots() -> void:
+	if shots == "":
+		return
+	var s := await _laad(WM1_MAP)
+	var p := _speler(s)
+	if p == null:
+		t.check("party-sprites: WM1 %s geladen voor richting-screenshots" % WM1_MAP.get_file(), false)
+		return
+	await t.get_tree().create_timer(0.5).timeout
+	for naam in ["Seren", "Vesper"]:
+		_zet_leider(naam)
+		KaartStijl.held_toepassen(s)
+		var sheet_ok: bool = p.sprite.texture.resource_path == KAART + HELDEN[naam][1]
+		t.check("party-sprites: WM1 leider %s sheet %s" % [naam, HELDEN[naam][1]], sheet_ok and p.sprite.offset == DAX_OFFSET)
+		for dir in [Vector2i.DOWN, Vector2i.UP, Vector2i.LEFT, Vector2i.RIGHT]:
+			p.face(dir)
+			await t.frames(2)
+			var slug: String = naam.to_lower()
+			await _shot("wm1_%s_%s" % [slug, RICHTING_NAAM[dir]], true)
 
 
 # ---------------------------------------------------------------- 3) juiste sheet per leider
