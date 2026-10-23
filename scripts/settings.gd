@@ -49,6 +49,7 @@ const BATTLE_STYLE_CLASSIC := 0
 const DEFAULTS := {
 	"music_volume": 8,
 	"sfx_volume": 8,
+	"audio_mute": false,
 	"text_speed": 1,
 	"battle_speed": 1,
 	"touch_opacity": 100,
@@ -127,6 +128,8 @@ func _sanitize(key: String, v):
 	match key:
 		"music_volume", "sfx_volume":
 			return clampi(n, 0, VOLUME_STEPS)
+		"audio_mute":
+			return bool(v)
 		"text_speed":
 			return clampi(n, 0, TEXT_SPEED_CPS.size() - 1)
 		"battle_speed":
@@ -238,6 +241,9 @@ func _apply(key: String) -> void:
 			_apply_bus(BUS_MUSIC, int(get_value(key)))
 		"sfx_volume":
 			_apply_bus(BUS_SFX, int(get_value(key)))
+		"audio_mute":
+			_apply_bus(BUS_MUSIC, int(get_value("music_volume")))
+			_apply_bus(BUS_SFX, int(get_value("sfx_volume")))
 		"text_speed":
 			var dialog := get_node_or_null("/root/Dialog")
 			if dialog and "chars_per_second" in dialog:
@@ -256,4 +262,4 @@ func _apply_bus(bus: String, steps: int) -> void:
 	if i == -1:
 		return
 	AudioServer.set_bus_volume_db(i, volume_db(steps))
-	AudioServer.set_bus_mute(i, steps <= 0)
+	AudioServer.set_bus_mute(i, steps <= 0 or bool(get_value("audio_mute")))
