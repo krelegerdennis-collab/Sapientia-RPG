@@ -3,6 +3,7 @@ extends Node
 ## Vijf lopen een korte lus op het plein. Gerrit blijft op zijn molentegel.
 ## Start: godot --path . -- --wilgendaltest
 
+const Ground := preload("res://scripts/village/dorp_ground.gd")
 const Data := preload("res://scripts/data/wilgendal_dorp.gd")
 const Shop := preload("res://scripts/data/shop_data.gd")
 const GD := preload("res://scripts/data/game_data.gd")
@@ -571,7 +572,7 @@ func _som_pilot(dorp: Node) -> void:
 	check("som: v8-grond (RPG ART) over de hele kaart, atlas <= 2048x2048, beek blijft geanimeerd water",
 			v8 != null and v8tex != null and v8tex.get_width() <= 2048 and v8tex.get_height() <= 2048
 			and v8.get_used_cells().size() == Data.W * Data.H - _tel("~")
-			and v8.get_cell_source_id(Vector2i(10, Data.BEEK_RIJ)) == -1 and v8.get_cell_source_id(pad) == 0)
+			and v8.get_cell_source_id(Vector2i(10, Data.BEEK_RIJ)) == -1 and v8.get_cell_source_id(pad) in [0, 2])
 	var ok := true
 	for ruw in Data.PANDEN:
 		var rij: Dictionary = Data.som_pand(ruw)
@@ -1140,7 +1141,7 @@ func _pass3(dorp: Node) -> void:
 			elif not ((bron == 1 or bron == 2) and m == 255):
 				fout.append([t, m, bron])
 	check("pass3: %d keitegels, %d randtegels, autotile volgt het blob47-masker (fout %s)" % [n_kei, n_rand, fout.slice(0, 4)],
-			fout.is_empty() and n_kei > 100 and n_rand > 30 and rand.get_tiles_count() == 67)
+			fout.is_empty() and n_kei > 80 and n_rand > 30 and rand.get_tiles_count() == 67)
 	var var_ok := true
 	for i in rand.get_tiles_count():
 		var td := rand.get_tile_data(rand.get_tile_id(i), 0)
@@ -1166,11 +1167,25 @@ func _pass3(dorp: Node) -> void:
 			if blok.has_point(t) or not ".TFG".contains(Data.GROND[y][x]):
 				continue
 			gras += 1
-			if v8.get_cell_source_id(t) == 1:
+			var bron := v8.get_cell_source_id(t)
+			if bron == 1 or (bron == 2 and Ground.pad_zoom(t, blok)):
 				licht += 1
 	var gl := v8.tile_set.get_source(1) as TileSetAtlasSource
-	check("pass3: licht gras (gras_licht) op alle %d grascellen buiten het blok, pad blijft v8" % gras, licht == gras
-			and gl != null and gl.texture.resource_path.ends_with("gras_licht_tileset.png") and v8.get_cell_source_id(Vector2i(14, 16)) == 0)
+	check("pass3: licht gras (gras_licht) op alle %d grascellen buiten het blok" % gras, licht == gras
+			and gl != null and gl.texture.resource_path.ends_with("gras_licht_tileset.png"))
+	# pass 4: pad + graszoom in de omgekleurde v8-atlas: geen donkere grastint (4a7038 als basis) meer langs de oude paden
+	var lb := v8.tile_set.get_source(2) as TileSetAtlasSource
+	var donker := 0
+	if lb != null:
+		var img := lb.texture.get_image()
+		for yy in img.get_height():
+			for xx in img.get_width():
+				var c := img.get_pixel(xx, yy)
+				if c.a > 0 and c.to_html(false) == "1c3424":
+					donker += 1
+	check("pass4: pad (14,16) en zijn graszoom in grond_v8_licht (bron 2), donkerste grastint weg (%d px)" % donker, lb != null
+			and lb.texture.resource_path.ends_with("grond_v8_licht.png") and v8.get_cell_source_id(Vector2i(14, 16)) == 2
+			and v8.get_cell_source_id(Vector2i(14, 14)) == 2 and donker == 0)
 	# beek: een doorlopend water van west naar oost (brug telt mee), en de beek blijft onbeloopbaar
 	var gezien := {Vector2i(0, Data.BEEK_RIJ): true}
 	var rij: Array[Vector2i] = [Vector2i(0, Data.BEEK_RIJ)]

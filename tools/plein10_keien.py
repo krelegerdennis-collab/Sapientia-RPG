@@ -41,7 +41,14 @@ kaart = [['.'] * W for _ in range(H)]
 for y in range(10, 24):
     for x in range(W):
         c = ruw[y][x]
-        if c == '#' or (c == '+' and any(0 <= x + a < W and ruw[y + b][x + a] == '#' for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)))):
+        # pass 4: alleen tegels die voor meer dan de helft kei zijn -> de organische omtrek van de mockup
+        # (onregelmatige randen, ronde hoeken) en een smalle noordsteeg (2 breed) i.p.v. een rechthoek
+        if c == '#':
+            kaart[y][x] = 'k'
+# gaten (gras omringd door kei) dicht
+for y in range(1, H - 1):
+    for x in range(1, W - 1):
+        if kaart[y][x] == '.' and all(kaart[y + b][x + a] == 'k' for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))):
             kaart[y][x] = 'k'
 # losse uitsteeksels (1 tegel met maar 1 keibuur) weg: geven anders een smal tongetje
 for _ in range(2):
@@ -49,7 +56,7 @@ for _ in range(2):
         for x in range(W):
             if kaart[y][x] == 'k':
                 n = sum(1 for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)) if 0 <= x + a < W and 0 <= y + b < H and kaart[y + b][x + a] == 'k')
-                if n <= 1 and not (ruw[y][x] == '#' and n == 1):
+                if n == 0:
                     kaart[y][x] = '.'
 # gras_licht over de gebakken keienrand rond het plein (buren van k, geen zandpad)
 for y in range(H):
