@@ -129,8 +129,10 @@ func _on_setting(key: String) -> void:
 		return
 	_style_pending = true
 	# twee beelden wachten: wie meteen daarna zelf van kamer wisselt (tests, laden) gaat voor
-	await get_tree().process_frame
-	await get_tree().process_frame
+	for i in 2:
+		if not is_inside_tree():
+			return
+		await get_tree().process_frame
 	if is_inside_tree() and not menu_open() and not screen_open():
 		apply_battle_style()
 
