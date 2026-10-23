@@ -224,7 +224,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var pos := _local(event.position)
 		if event.pressed:
-			if pos.distance_to(stick_center()) <= stick_reach():
+			if analog_only and _try_lock_tap(event.position):
+				get_viewport().set_input_as_handled()
+			elif pos.distance_to(stick_center()) <= stick_reach():
 				_touch_owner[event.index] = "joy"
 				_set_joy(pos, event.index)
 				get_viewport().set_input_as_handled()
@@ -264,6 +266,17 @@ func _input(event: InputEvent) -> void:
 ## Schermpositie (viewport) -> positie binnen deze knoppen-laag.
 func _local(viewport_pos: Vector2) -> Vector2:
 	return get_global_transform_with_canvas().affine_inverse() * viewport_pos
+
+
+## Action-arena: tik op een monster = lock (geen joystick/A in dezelfde tik).
+func _try_lock_tap(viewport_pos: Vector2) -> bool:
+	var map := get_tree().current_scene
+	if map == null or not ("som" in map) or map.som == null:
+		return false
+	var arena: Node = map.som
+	if not arena.has_method("try_lock_tap") or not arena.active():
+		return false
+	return arena.try_lock_tap(viewport_pos)
 
 
 ## Joystick: positie van de vinger -> joy_raw (lengte max 1). Analoog (Action): som_move.gd. Anders drukt de
