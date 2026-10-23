@@ -4,7 +4,8 @@ extends Node
 ##   Codex vol -> melding; anders kost het één Leeg Boek en wordt er gegooid tegen
 ##   CodexData.capture_chance(soort, hp, max_hp). Gelukt = GameState.codex_add(...) precies als Classic
 ##   (zelfde niveau, zelfde 'caught'-gegevens, unique_mark) en het monster verdwijnt zonder EXP/goud/buit.
-## Doel: het gekozen monster (ring > doel) of anders het dichtstbijzijnde binnen SPELL_RANGE.
+## Doel: het gekozen monster (ring > doel) of anders het dichtstbijzijnde binnen SPELL_RANGE. Is het gekozen
+## doel weg (verslagen, in zijn doodsanimatie of vrijgegeven) als het boek zou landen: boek blijft, geen ander doel.
 ## Tijdens het vang-effect kan er niet nog eens gevangen worden (geen dubbele vangst).
 
 const SomData := preload("res://scripts/data/som_data.gd")
@@ -55,8 +56,8 @@ func chance_for(m: Node) -> float:
 	return CodexData.capture_chance(CodexData.species_for_enemy(str(m.enemy_id)), int(e["hp"]), int(e["max_hp"]), is_boss(m))
 
 
-func target_or_nearest(target: Node = null) -> Node:
-	if target != null and is_instance_valid(target) and (arena.enemies.has(target) or bool(target.get("boss"))):
+func target_or_nearest(target = null) -> Node:
+	if typeof(target) == TYPE_OBJECT and is_instance_valid(target) and (arena.enemies.has(target) or bool(target.get("boss"))):
 		return target
 	return arena.nearest_enemy(arena.body(), SomData.SPELL_RANGE)
 
@@ -69,14 +70,14 @@ func _name(m: Node) -> String:
 
 
 ## Eén vangpoging. Geeft de melding terug (ook in last_capture["text"]); het effect speelt daarna.
-func capture(target: Node = null) -> String:
+func capture(target = null) -> String:
 	var text := _capture(target)
 	last_capture["text"] = text
 	arena._say(text)
 	return text
 
 
-func _capture(target: Node) -> String:
+func _capture(target) -> String:
 	if busy:
 		last_capture = {"result": "bezig"}
 		return SomData.TXT_CODEX_BUSY
@@ -86,6 +87,13 @@ func _capture(target: Node) -> String:
 	if GameState.item_count(CodexData.BOOK_ITEM) <= 0:
 		last_capture = {"result": "geen_boek"}
 		return SomData.TXT_CODEX_NO_BOOK
+	if arena.down:
+		last_capture = {"result": "ko"}
+		return SomData.TXT_CODEX_DOWN
+	# Gekozen doel (ring) intussen verslagen/stervend of weg: boek terug, NIET naar een ander monster.
+	if typeof(target) == TYPE_OBJECT and not (is_instance_valid(target) and (arena.enemies.has(target) or bool(target.get("boss")))):
+		last_capture = {"result": "doel_weg"}
+		return SomData.TXT_CODEX_GONE
 	var m := target_or_nearest(target)
 	if m == null:
 		last_capture = {"result": "geen_doel"}

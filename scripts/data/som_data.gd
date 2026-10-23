@@ -379,9 +379,11 @@ const TXT_KO := "%s is down!"
 const TXT_SWITCH := "Swap"
 ## Codex vangen in Action (zelfde regels als Classic, scripts/som/som_codex.gd)
 const TXT_CODEX := "Codex"
-const TXT_CODEX_ENTRY := "Capture  Book x%d"
+const TXT_CODEX_ENTRY := "Capture Book x%d"
 const TXT_CODEX_NO_BOOK := "No Blank Book left."
 const TXT_CODEX_BUSY := "The Codex is still writing..."
+const TXT_CODEX_GONE := "The target is gone. (The book stays whole.)"
+const TXT_CODEX_DOWN := "Nobody can hold the book."
 ## Vang-effect (RPG ART): 6 frames van 48x48, midden (24,24); 70 ms per frame, frame 4 100 ms.
 const FX_CODEX_CAPTURE := {"sheet": "res://assets/sprites/som/fx/codex_capture_fx.png", "cell": [48, 48], "frames": 6,
 		"ms": [70, 70, 70, 100, 70, 70], "anchor": [24, 24]}

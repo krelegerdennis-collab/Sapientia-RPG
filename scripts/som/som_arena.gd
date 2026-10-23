@@ -845,7 +845,7 @@ func resolve(q: Dictionary) -> String:
 			heal_glow(str(target.get("id", "")))
 	elif str(q.get("kind", "")) == "codex":
 		var ct: Variant = q.get("target", null)
-		text = codex.capture(ct if ct is Node else null)
+		text = codex.capture(ct if typeof(ct) == TYPE_OBJECT else null)   # ook een intussen vrijgegeven doel (boek terug)
 		action_resolved.emit(text)
 		return text
 	elif str(q.get("kind", "")) == "skill":
