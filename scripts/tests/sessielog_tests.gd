@@ -195,14 +195,38 @@ func _run() -> void:
 	check("weer aan: nieuwe sessie", log.actief)
 	log.stop()
 	log.start(MAP)
-	log.bytes = log.MAX_BYTES
-	log.afgekapt = true
-	log.vol = true
-	var voor: int = log.regels
+	var groot := "x".repeat(992)
+	for i in 2600:
+		log.noteer("menu_open", {"welk": groot, "i": i})
+		if i % 200 == 0:
+			log.flush()
+	log.flush()
+	var menu_voor: int = _regels(log.pad).filter(func(d): return d is Dictionary and d.get("type") == "menu_open").size()
+	var eerste_menu_i := -1
+	for d in _regels(log.pad):
+		if d is Dictionary and d.get("type") == "menu_open":
+			eerste_menu_i = int(_data(d).get("i", -1))
+			break
+	check("log vol en afgekapt bij echte MAX_BYTES", log.vol and log.afgekapt and log.bytes <= log.MAX_BYTES)
+	var regels_voor: int = log.regels
 	log.noteer("pos", {"x": 1})
 	log.noteer("pos", {"x": 2})
 	log.noteer("dood", {"reden": "test"})
-	check("na MAX_BYTES: afgekapt, geen pos meer, wel belangrijke regels", log.afgekapt and log.regels == voor + 1)
+	log.flush()
+	var regels_na := _regels(log.pad)
+	var menu_na: int = regels_na.filter(func(d): return d is Dictionary and d.get("type") == "menu_open").size()
+	var eerste_menu_i_na := -1
+	for d in regels_na:
+		if d is Dictionary and d.get("type") == "menu_open":
+			eerste_menu_i_na = int(_data(d).get("i", -1))
+			break
+	var pos_nieuw := regels_na.any(func(d): return d is Dictionary and d.get("type") == "pos" and int(_data(d).get("x", -1)) in [1, 2])
+	var dood_ok := regels_na.any(func(d): return d is Dictionary and d.get("type") == "dood" and str(_data(d).get("reden", "")) == "test")
+	var file_bytes: int = FileAccess.open(log.pad, FileAccess.READ).get_length()
+	var trim := menu_na < menu_voor or eerste_menu_i_na > eerste_menu_i
+	check("na MAX_BYTES: afgekapt, geen pos meer, dood behouden (_zorg_ruimte)", log.afgekapt and not pos_nieuw and dood_ok
+			and file_bytes <= log.MAX_BYTES and log.bytes <= log.MAX_BYTES and log.regels <= regels_voor + 1
+			and (trim or log.regels == regels_voor + 1))
 	log.stop()
 	check("bestanden() vindt de sessies; opruimen houdt er hooguit MAX_BESTANDEN", log.bestanden(MAP).size() >= 2
 			and log.bestanden(MAP).size() <= log.MAX_BESTANDEN)
