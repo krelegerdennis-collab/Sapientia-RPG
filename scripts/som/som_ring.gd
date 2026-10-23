@@ -80,7 +80,11 @@ func open() -> void:
 	is_open = true
 	_open_frame = Engine.get_process_frames()
 	_was_paused = get_tree().paused
-	get_tree().paused = true
+	var pause_world := true
+	if arena != null and "coop_ring_no_pause" in arena and bool(arena.coop_ring_no_pause):
+		pause_world = false
+	if pause_world:
+		get_tree().paused = true
 	root.visible = true
 	_build()
 
@@ -90,7 +94,8 @@ func close(choice: Dictionary) -> void:
 		return
 	is_open = false
 	root.visible = false
-	get_tree().paused = _was_paused
+	if get_tree().paused and not _was_paused:
+		get_tree().paused = _was_paused
 	closed_frame = Engine.get_process_frames()
 	arena.on_ring_closed(choice)
 
