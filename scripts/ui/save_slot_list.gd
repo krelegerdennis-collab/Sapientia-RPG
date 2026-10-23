@@ -111,6 +111,8 @@ func _label(slot: int, rec: Dictionary) -> String:
 	var title := "Autosave" if slot == GameState.AUTOSAVE_SLOT else "Slot %d" % slot
 	if rec.is_empty():
 		return "%s: empty" % title
+	if bool(rec.get("corrupt", false)):
+		return "%s: unreadable save" % title
 	return "%s: %s" % [title, summary(rec.get("data", {}))]
 
 
