@@ -43,6 +43,8 @@ const WOUD_OPEN := M + "woud_open_plek.tscn"
 const GENEZER := M + "archief_2_v4_genezer.tscn"
 const CROSS_DIRS := {1: "move_up", 2: "move_left", 3: "move_right", 4: "move_down"}
 const CROSS_BACK := {1: "move_down", 2: "move_right", 3: "move_left", 4: "move_up"}
+## Action-stijl: bondgenoten vechten zelf, dus beloning en groep veranderen tussen twee momentopnames.
+const VOLATILE := ["bestiary", "gold", "party", "inventory", "codex"]
 const DIRS := {Vector2i.UP: "move_up", Vector2i.DOWN: "move_down", Vector2i.LEFT: "move_left", Vector2i.RIGHT: "move_right"}
 ## Nederlandse functiewoorden: spelertekst is Engels (AGENTS.md regel 3).
 const DUTCH_WORDS := "de|het|een|je|niet|geen|wordt|maar|voor|naar|nog|ook|deze|zijn|heeft|kunt|vecht|mee|alleen|stap|erop"
@@ -56,6 +58,7 @@ var texts_seen := {}
 var milestones: Array = []
 var _dutch: RegEx
 var _walk_speed := 4.0
+var _base_scale := 2.0
 var _t_start := Time.get_ticks_msec()
 var _snap_after_golem := PackedByteArray()
 var _variant := ""
@@ -66,6 +69,8 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--shots="):
 			shots = arg.get_slice("=", 1)
+		elif arg.begins_with("--speed="):
+			_base_scale = clampf(float(arg.get_slice("=", 1)), 1.0, 4.0)
 	_dutch = RegEx.new()
 	_dutch.compile("(?i)\\b(%s)\\b" % DUTCH_WORDS)
 	seed(1234)
@@ -196,7 +201,8 @@ func settle(label: String, timeout := 45.0, auto_battle := true, grace := 0.0) -
 			quiet = 0
 			note_dialog()
 			if Dialog._is_typing():
-				await frames(2)
+				Dialog.advance()
+				await frames(1)
 			elif Dialog.has_choices():
 				var i := int(choice_plan.pop_front()) if not choice_plan.is_empty() else 0
 				Dialog.choose(clampi(i, 0, Dialog.choices.size() - 1))
@@ -246,6 +252,9 @@ func win_battle() -> bool:
 		if st == "command":
 			for e in b.enemies:
 				e["s"]["hp"] = mini(int(e["s"]["hp"]), 1)
+			# het gaat om de voortgang, niet om de balans (die heeft eigen suites): niemand valt om
+			for h in GameState.party:
+				h["hp"] = h["max_hp"]
 			await cross_to(b, 0)
 			await tap("interact")
 		else:
@@ -256,6 +265,9 @@ func win_battle() -> bool:
 	if not won:
 		await wait_until(func(): return battle() == null and not GameState.in_battle, 8.0)
 		won = GameState.last_battle_result == "win"
+		if not won:
+			print("INFO  win_battle: resultaat '%s', groep %s, kaart %s" % [GameState.last_battle_result,
+					GameState.party.map(func(h): return "%s %d/%d" % [h["id"], int(h["hp"]), int(h["max_hp"])]), str(scene().scene_file_path).get_file() if scene() else "?"])
 	return won
 
 
@@ -320,6 +332,9 @@ func fight_monster(room: Node, monster_id: String) -> bool:
 		check("[BLOCKER] monster %s ontbreekt in %s" % [monster_id, room.room_id], false)
 		return false
 	room.start_monster_battle(m)
+	await pframes(2)
+	check("[STATE] gevecht met %s begint pas als er geen tekstvak meer open staat (%s)" % [monster_id, Dialog._lines if Dialog.is_open else ""],
+			not (GameState.in_battle and Dialog.is_open))
 	var t0 := Time.get_ticks_msec()
 	while Time.get_ticks_msec() - t0 < 25000:
 		if battle() != null and battle().is_node_ready():
@@ -329,7 +344,8 @@ func fight_monster(room: Node, monster_id: String) -> bool:
 		if Dialog.is_open and battle() == null:
 			note_dialog()
 			if Dialog._is_typing():
-				await frames(2)
+				Dialog.advance()
+				await frames(1)
 			elif Dialog.has_choices():
 				Dialog.choose(0)
 				await pframes(2)
@@ -389,6 +405,8 @@ func through(exit_name: String, expect_path: String) -> bool:
 		var sp: Node2D = scene().get_spawn(spawn)
 		check("[BLOCKER] spawn '%s' bestaat in %s" % [spawn, expect_path.get_file()], sp != null)
 	await settle("aankomst %s" % expect_path.get_file(), 45.0, true, 0.6)
+	if scene().has_method("start_invuln"):
+		await quiet_room(scene())
 	return true
 
 
@@ -596,7 +614,7 @@ func diff_keys(a: Dictionary, b: Dictionary) -> Array:
 
 ## Opslaan in 'slot', alles wissen (nieuw spel) en 'Doorgaan' via de echte slotlijst-code: de staat
 ## na het laden moet gelijk zijn aan die ervoor, en de speler moet vrij kunnen bewegen.
-func save_roundtrip(label: String, slot := 1, expect_path := "") -> bool:
+func save_roundtrip(label: String, slot := 1, expect_path := "", volatile := false) -> bool:
 	var p := player()
 	if p == null:
 		check("[SAVE] %s: geen speler om op te slaan" % label, false)
@@ -628,6 +646,9 @@ func save_roundtrip(label: String, slot := 1, expect_path := "") -> bool:
 	var after := GameState.state_data(p2.get_tile() if p2 else Vector2i.ZERO, p2.facing if p2 else Vector2i.DOWN)
 	var diff := diff_keys(before, after)
 	diff.erase("checkpoint")
+	if volatile:
+		for k in VOLATILE:
+			diff.erase(k)
 	check("[SAVE] %s: state_data gelijk na laden (verschil: %s)" % [label, diff], diff.is_empty())
 	check("[SAVE] %s: speler staat op dezelfde tegel %s -> %s" % [label, t, p2.get_tile() if p2 else "?"], p2 != null and p2.get_tile() == t)
 	check("[SAVE] %s: verhaal niet blijven hangen na laden" % label, not Story.running and not Dialog.is_open and not GameState.in_battle)
@@ -635,7 +656,7 @@ func save_roundtrip(label: String, slot := 1, expect_path := "") -> bool:
 
 
 ## Pauze/hervat zoals Android doet. 'expect_save' = er hoort een autosave "achtergrond" te komen.
-func pause_resume(label: String, expect_save: bool) -> void:
+func pause_resume(label: String, expect_save: bool, volatile := false) -> void:
 	var n0 := GameState.autosave_count
 	var before := GameState.state_data(tile(), player().facing if player() else Vector2i.DOWN)
 	GameState.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
@@ -651,11 +672,18 @@ func pause_resume(label: String, expect_save: bool) -> void:
 		var diff := diff_keys(before, saved)
 		for k in ["checkpoint", "slot", "home_slot", "autosave"]:
 			diff.erase(k)
+		if volatile:
+			for k in VOLATILE:
+				diff.erase(k)
 		check("[PAUSE] %s: autosave = staat op het moment van pauze (verschil: %s)" % [label, diff], diff.is_empty())
 	GameState.notification(Node.NOTIFICATION_APPLICATION_RESUMED)
 	await pframes(3)
 	var after := GameState.state_data(tile(), player().facing if player() else Vector2i.DOWN)
-	check("[PAUSE] %s: hervatten verandert de voortgang niet (verschil: %s)" % [label, diff_keys(before, after)], diff_keys(before, after).is_empty())
+	var d2 := diff_keys(before, after)
+	if volatile:
+		for k in VOLATILE:
+			d2.erase(k)
+	check("[PAUSE] %s: hervatten verandert de voortgang niet (verschil: %s)" % [label, d2], d2.is_empty())
 
 
 ## Pauze terwijl de speler halverwege een stap is: geen autosave (niet op een halve tegel), geen crash.
@@ -850,6 +878,8 @@ func room_data_audit() -> void:
 					elif DungeonRooms.EXIT_CHARS.has(ch):
 						keys[DungeonRooms.EXIT_CHARS[ch]] = true
 			for k in keys:
+				if exits.get(k, {}).is_empty() and (room.get("decor_exits", []) as Array).has(k):
+					continue
 				if exits.get(k, {}).is_empty():
 					bad.append("%s: uitgang '%s' heeft geen doel in \"exits\"" % [id, k])
 				else:
@@ -871,7 +901,7 @@ func _gd_files(dir: String) -> Array:
 
 # ================================================================ het spel
 func _run() -> void:
-	Engine.time_scale = 1.0
+	Engine.time_scale = _base_scale
 	GameState.encounter_multiplier = 0.0
 	static_audit()
 	if "--static-only" in OS.get_cmdline_user_args():
@@ -966,7 +996,8 @@ func stage_prologue() -> void:
 		if Dialog.is_open:
 			note_dialog()
 			if Dialog._is_typing():
-				await frames(2)
+				Dialog.advance()
+				await frames(1)
 			elif Dialog.has_choices():
 				var i := int(choice_plan.pop_front()) if not choice_plan.is_empty() else 0
 				if GameState.story_step == SD.OPGESLOTEN and i == 0:
@@ -1195,6 +1226,8 @@ func traverse(next: String, area: String) -> bool:
 	if sp != null:
 		check("[BLOCKER] %s: speler staat op spawn '%s' (%s)" % [area, spawn, next.get_file()], tile().distance_to(Vector2(sp.get_tile())) <= 2.0)
 	await settle("aankomst %s" % next.get_file(), 45.0, true, 0.6)
+	if scene().has_method("start_invuln"):
+		await quiet_room(scene())
 	return true
 
 
@@ -1610,8 +1643,8 @@ func stage_action_mode() -> void:
 		return
 	await settle("Action: Archief 1 ingang", 45.0, true, 0.8)
 	check("[STATE] Action-stijl: de dungeonkamer draait de Action-arena", s.get("som") != null)
-	await pause_resume("Action-stijl: Archief 1 ingang", true)
-	await save_roundtrip("Action-stijl: Archief 1 ingang", 4)
+	await pause_resume("Action-stijl: Archief 1 ingang", true, true)
+	await save_roundtrip("Action-stijl: Archief 1 ingang", 4, "", true)
 	check("[SAVE] Action-stijl blijft na laden Action", Settings.action_battles())
 	s = scene()
 	await quiet_room(s)

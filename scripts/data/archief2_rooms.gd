@@ -88,9 +88,6 @@ const _WU := "<LFFFFMFFGFFFAFFFFFFFFFFFR>"
 const _WL := "<lffffmffgfffnfffffffffffr>"
 const _BOT := "c___________(EE)__________d"
 const _SH := "<Zssssssssssssssssssssssss>"
-## Kaartkamer (warper): achterwand zonder boog; een 'n' zonder doel in "exits" gaf elke keer een push_error.
-const _WU_ZONDER_BOOG := "<LFFFFMFFGFFFFFFFFFFFFFFFR>"
-const _WL_ZONDER_BOOG := "<lffffmffgfffffffffffffffr>"
 
 
 static func _basis(naam: String, verdieping: int, tier: int) -> Dictionary:
@@ -257,12 +254,14 @@ static func rooms() -> Dictionary:
 			"tiles": [[1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5], [8, 5], [9, 5], [10, 5], [11, 5], [12, 5], [15, 5], [16, 5], [17, 5], [18, 5], [19, 5], [20, 5], [21, 5], [22, 5], [23, 5], [24, 5], [25, 5]]},
 	})
 	var warper := _met(_basis("World Warper", 4, 0), {
-		"layout": [_TOP, _WU_ZONDER_BOOG, _WL_ZONDER_BOOG, _SH, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
+		"layout": [_TOP, _WU, _WL, _SH, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
 		"theme": "warper_paars",
 		"save": [4, 11],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v4_genezer"], "spawn": "noord"},
 		},
+		# de boog 'n' in de achterwand is alleen decor (de hub gaat via de warp-tegel): geen push_error
+		"decor_exits": ["n"],
 		"warp": [13, 7],
 		"signs": [{"tile": [8, 6], "lines": [
 			"ECHO operates the hub. Step onto the path and choose.",
