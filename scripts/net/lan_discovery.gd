@@ -10,6 +10,9 @@ const Protocol := preload("res://scripts/net/net_protocol.gd")
 signal host_found(info: Dictionary)
 
 var last_info: Dictionary = {}
+## Laatste mislukte bind (voor de melding en de logcat). OK = geen fout.
+var last_error: Error = OK
+var last_error_port := 0
 var _udp: PacketPeerUDP
 var _announcing := false
 var _listening := false
@@ -31,6 +34,7 @@ func start_announce(session_name: String, players: int) -> Error:
 	udp.set_broadcast_enabled(true)
 	var err := udp.bind(Protocol.ANNOUNCE_BIND_PORT)
 	if err != OK:
+		_note_failure("announce", err, Protocol.ANNOUNCE_BIND_PORT)
 		return err
 	_udp = udp
 	_announcing = true
@@ -43,10 +47,17 @@ func start_listen() -> Error:
 	var udp := PacketPeerUDP.new()
 	var err := udp.bind(Protocol.DISCOVERY_PORT)
 	if err != OK:
+		_note_failure("listen", err, Protocol.DISCOVERY_PORT)
 		return err
 	_udp = udp
 	_listening = true
 	return OK
+
+
+func _note_failure(what: String, err: Error, port: int) -> void:
+	last_error = err
+	last_error_port = port
+	push_warning("LanDiscovery: %s failed: %s, UDP port %d" % [what, Protocol.error_name(err), port])
 
 
 func stop() -> void:

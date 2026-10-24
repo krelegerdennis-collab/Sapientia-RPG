@@ -99,6 +99,49 @@ const SESSION_END_TEXT := {
 }
 
 
+## Namen van de Godot-foutcodes, voor een leesbare melding (error_string geeft alleen de zin).
+const ERROR_NAMES := {
+	OK: "OK",
+	FAILED: "FAILED",
+	ERR_UNAVAILABLE: "ERR_UNAVAILABLE",
+	ERR_UNCONFIGURED: "ERR_UNCONFIGURED",
+	ERR_UNAUTHORIZED: "ERR_UNAUTHORIZED",
+	ERR_PARAMETER_RANGE_ERROR: "ERR_PARAMETER_RANGE_ERROR",
+	ERR_OUT_OF_MEMORY: "ERR_OUT_OF_MEMORY",
+	ERR_FILE_NO_PERMISSION: "ERR_FILE_NO_PERMISSION",
+	ERR_FILE_ALREADY_IN_USE: "ERR_FILE_ALREADY_IN_USE",
+	ERR_CANT_OPEN: "ERR_CANT_OPEN",
+	ERR_CANT_CREATE: "ERR_CANT_CREATE",
+	ERR_QUERY_FAILED: "ERR_QUERY_FAILED",
+	ERR_ALREADY_IN_USE: "ERR_ALREADY_IN_USE",
+	ERR_LOCKED: "ERR_LOCKED",
+	ERR_TIMEOUT: "ERR_TIMEOUT",
+	ERR_CANT_CONNECT: "ERR_CANT_CONNECT",
+	ERR_CANT_RESOLVE: "ERR_CANT_RESOLVE",
+	ERR_CONNECTION_ERROR: "ERR_CONNECTION_ERROR",
+	ERR_CANT_ACQUIRE_RESOURCE: "ERR_CANT_ACQUIRE_RESOURCE",
+	ERR_INVALID_DATA: "ERR_INVALID_DATA",
+	ERR_INVALID_PARAMETER: "ERR_INVALID_PARAMETER",
+	ERR_ALREADY_EXISTS: "ERR_ALREADY_EXISTS",
+	ERR_DOES_NOT_EXIST: "ERR_DOES_NOT_EXIST",
+	ERR_BUSY: "ERR_BUSY",
+}
+
+
+## "ERR_CANT_CREATE (20)": de constante-naam plus het getal. Onbekende code: "ERR_?".
+static func error_name(err: int) -> String:
+	return "%s (%d)" % [str(ERROR_NAMES.get(err, "ERR_?")), err]
+
+
+## Meldingtekst voor de speler: wat mislukte, met foutnaam en poort, zodat een melding
+## van een telefoon genoeg zegt om de oorzaak te vinden. Engels (speler-tekst).
+static func net_error_text(what: String, err: int, port: int, transport: String = "UDP") -> String:
+	var text := "%s (%s).\n%s, %s port %d." % [what, error_string(err), error_name(err), transport, port]
+	if err == ERR_CANT_CREATE or err == ERR_UNAUTHORIZED or err == ERR_FILE_NO_PERMISSION:
+		text += "\nCheck the app's network permission and that no other app uses this port."
+	return text
+
+
 static func clean_name(raw: String) -> String:
 	var out := ""
 	for i in raw.length():

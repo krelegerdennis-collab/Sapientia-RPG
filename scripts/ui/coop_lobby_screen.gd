@@ -98,12 +98,12 @@ func _show_host() -> void:
 	_screen = Screen.HOST
 	var err := lobby.host_session(_host_display_name())
 	if err != OK:
-		_show_message("Could not host (%s)." % error_string(err))
+		_show_message(Protocol.net_error_text("Could not host", err, Protocol.ENET_PORT))
 		return
 	err = discovery.start_announce(_host_display_name(), lobby.player_count())
 	if err != OK:
 		lobby.close()
-		_show_message("Could not open LAN beacon.")
+		_show_message(Protocol.net_error_text("Could not open LAN beacon", err, Protocol.ANNOUNCE_BIND_PORT))
 		return
 	GameState.coop_register_lobby(lobby, discovery)
 	_rebuild()
@@ -115,7 +115,7 @@ func _show_join_listen() -> void:
 	_hosts.clear()
 	var err := discovery.start_listen()
 	if err != OK:
-		_show_message("Could not listen for hosts.")
+		_show_message(Protocol.net_error_text("Could not listen for hosts", err, Protocol.DISCOVERY_PORT))
 		return
 	GameState.coop_register_lobby(lobby, discovery)
 	_rebuild()
@@ -192,7 +192,10 @@ func _build_join() -> void:
 
 
 func _build_message() -> void:
-	_box.add_child(UiMenu.label(_message, UiStyleC.TEXT, 9))
+	var msg := UiMenu.label(_message, UiStyleC.TEXT, 9)
+	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	msg.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_box.add_child(msg)
 	var ok := _touch_button("Back to title")
 	ok.pressed.connect(_leave_to_title)
 	_box.add_child(ok)
@@ -279,7 +282,7 @@ func _join_host(ip: String) -> void:
 	var err := lobby.join_session(ip, "", _guest_display_name())
 	if err != OK:
 		_joining_ip = ""
-		_show_message("Could not connect.")
+		_show_message(Protocol.net_error_text("Could not connect", err, Protocol.ENET_PORT))
 		return
 	GameState.coop_register_lobby(lobby, null)
 
