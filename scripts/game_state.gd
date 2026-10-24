@@ -462,6 +462,7 @@ func _ready() -> void:
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
 	# WM1-bugjacht: of  godot -- --wm1bugtest [--shots=/pad/map]  (scripts/tests/wm1_bugjacht_tests.gd).
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
+	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
@@ -534,6 +535,7 @@ func _ready() -> void:
 			["--combattick", "res://scripts/tests/combat_tick_tests.gd", "CombatTickTest", "combattick"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
 			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
@@ -593,8 +595,8 @@ func _ensure_input_actions() -> void:
 
 func _preload_paths() -> Array[String]:
 	var out: Array[String] = [BATTLE_SCENE, START_MAP, TOWN_MAP, "res://scenes/maps/wereldkaart.tscn"]
-	for p in GameData.BACKDROPS.values():
-		out.append(str(p))
+	for id in GameData.BACKDROPS_BOOT:
+		out.append(GameData.backdrop_path(str(id)))
 	for h in GameData.HEROES:
 		if str(h["battle_sprite"]) != "":
 			out.append(str(h["battle_sprite"]))
@@ -624,6 +626,22 @@ func _start_preload() -> void:
 		if ResourceLoader.load_threaded_request(p) == OK:
 			_preloading.append(p)
 	set_process(not _preloading.is_empty())
+
+
+## Gevechtsachtergrond die niet bij het opstarten is geladen: op de achtergrond laden terwijl de
+## gevechtsflits loopt, en de vorige "late" achtergrond weer loslaten (er staat er hooguit één in het geheugen).
+func _prefetch_backdrop(path: String) -> void:
+	if path == "":
+		return
+	for id in GameData.BACKDROPS:
+		var p := str(GameData.BACKDROPS[id])
+		if p != path and not (id in GameData.BACKDROPS_BOOT):
+			_loaded.erase(p)
+	if _loaded.has(path) or _preloading.has(path) or not ResourceLoader.exists(path):
+		return
+	if ResourceLoader.load_threaded_request(path) == OK:
+		_preloading.append(path)
+		set_process(true)
 
 
 ## Kijkt elk frame (alleen zolang er nog iets laadt) of er iets klaar is.
@@ -2180,6 +2198,7 @@ func prepare_battle(enemies: Array, terrain := "", boss := false, tier := 0, arc
 	pending_archief = archief and not boss
 	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
 	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
+	_prefetch_backdrop(pending_backdrop)
 
 
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),

@@ -134,6 +134,9 @@ func _som() -> void:
 func _bomen(ouder: Node2D) -> void:
 	var groot: Texture2D = load(SOM_BOOM)
 	var klein: Texture2D = load(SOM_BOOM_KLEIN)
+	# één gedeelde botsvorm voor alle bomen (was: een nieuwe RectangleShape2D per boom)
+	var vorm := RectangleShape2D.new()
+	vorm.size = Vector2(16, 16)
 	for y in Data.H:
 		for x in Data.W:
 			var t := Vector2i(x, y)
@@ -142,8 +145,6 @@ func _bomen(ouder: Node2D) -> void:
 			var body := StaticBody2D.new()
 			body.name = "Boom_%d_%d" % [x, y]
 			body.position = Vector2(t) * 16.0 + Vector2(8, 8)
-			var vorm := RectangleShape2D.new()
-			vorm.size = Vector2(16, 16)
 			var bots := CollisionShape2D.new()
 			bots.shape = vorm
 			body.add_child(bots)
