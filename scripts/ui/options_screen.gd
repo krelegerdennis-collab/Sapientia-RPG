@@ -9,10 +9,10 @@ extends "res://scripts/ui/menu_screen.gd"
 const TargetList := preload("res://scripts/ui/target_list.gd")
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 
-const OPTION_ROW_H := 13       # iets lager dan ROW_H: 12 regels moeten op 216 px passen
+const OPTION_ROW_H := 19       # 13 regels in twee kolommen (7 + 6) passen met tabbalk en hulpregel op 216 hoog
 const TAB_BAR_H := 24          # zelfde tikminimum als questlog-tab (ROW_H / RIJ_H-traditie: 24 logic px)
 const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks: mobiel tikdoel (logic pixels)
-const VALUE_W := 66            # breedte van de waarde tussen '<' en '>'
+const VALUE_W := 50            # breedte van de waarde tussen '<' en '>' (twee kolommen: elke kolom is ~178 breed)
 const RESET_KEY := "_reset"
 const EXPORT_KEY := "_export"      # playtest: logboek aanbieden (SessieLog)
 const TABS := ["general", "music"]
@@ -45,7 +45,9 @@ var keys: Array[String] = []
 var value_labels := {}         # sleutel -> Label
 var tab := "general"
 var tab_buttons := {}
-var general_box: VBoxContainer
+var general_box: HBoxContainer   # twee kolommen met regels (links 7, rechts 6)
+var _col_a: VBoxContainer
+var _col_b: VBoxContainer
 var music_root: Control
 var music_sliders := {}        # music_volume / sfx_volume -> HSlider
 var music_value_labels := {}   # sleutel -> Label (percentage)
@@ -73,10 +75,17 @@ func _build() -> void:
 		tb.pressed.connect(kies_tab.bind(t))
 		bar.add_child(tb)
 		tab_buttons[t] = tb
-	general_box = VBoxContainer.new()
+	general_box = HBoxContainer.new()
 	general_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	general_box.add_theme_constant_override("separation", 0)
+	general_box.add_theme_constant_override("separation", 8)
 	outer.add_child(general_box)
+	_col_a = VBoxContainer.new()
+	_col_b = VBoxContainer.new()
+	for col in [_col_a, _col_b]:
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		col.add_theme_constant_override("separation", 0)
+		general_box.add_child(col)
 	if settings == null:
 		general_box.add_child(UiMenu.label("Options are unavailable (Settings autoload is missing).", MenuColors.TEXT_DIM))
 		back_button.grab_focus()
@@ -91,13 +100,14 @@ func _build() -> void:
 
 
 func _build_general_rows() -> void:
-	for r in ROWS:
+	var shown: Array = ROWS.filter(func(r): return not (str(r[0]) == "crt" and get_node_or_null("/root/Crt") == null))
+	var split := (shown.size() + 1) / 2
+	for n in shown.size():
+		var r: Array = shown[n]
 		var key: String = r[0]
-		if key == "crt" and get_node_or_null("/root/Crt") == null:
-			continue
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 2)
-		general_box.add_child(line)
+		(_col_a if n < split else _col_b).add_child(line)
 		var b := UiMenu.button(str(r[1]))
 		b.custom_minimum_size = Vector2(0, OPTION_ROW_H)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
