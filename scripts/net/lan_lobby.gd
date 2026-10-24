@@ -22,6 +22,9 @@ var local_slot := Protocol.NO_SLOT
 var local_character := ""
 var refuse_reason := Protocol.Refuse.NONE
 var slots: Array[Dictionary] = []
+## Laatste mislukte host/join-poging (voor de melding en de logcat). OK = geen fout.
+var last_error: Error = OK
+var last_error_port := 0
 
 var _peer: ENetMultiplayerPeer
 var _display_name := ""
@@ -47,7 +50,10 @@ func host_session(display_name: String) -> Error:
 	peer.transfer_mode = MultiplayerPeer.TRANSFER_MODE_RELIABLE
 	var err := peer.create_server(Protocol.ENET_PORT, Protocol.MAX_REMOTE + Protocol.ENET_REFUSE_SLACK)
 	if err != OK:
+		_note_failure("host", err, Protocol.ENET_PORT)
 		return err
+	last_error = OK
+	last_error_port = 0
 	_bind(peer)
 	is_host = true
 	phase = Phase.IN
@@ -66,7 +72,10 @@ func join_session(ip: String, character_id: String, display_name: String, versio
 	peer.transfer_mode = MultiplayerPeer.TRANSFER_MODE_RELIABLE
 	var err := peer.create_client(ip, Protocol.ENET_PORT)
 	if err != OK:
+		_note_failure("join %s" % ip, err, Protocol.ENET_PORT)
 		return err
+	last_error = OK
+	last_error_port = 0
 	_bind(peer)
 	is_host = false
 	phase = Phase.JOINING
@@ -76,6 +85,12 @@ func join_session(ip: String, character_id: String, display_name: String, versio
 	_hello_sent = false
 	_join_wait = 0.0
 	return OK
+
+
+func _note_failure(what: String, err: Error, port: int) -> void:
+	last_error = err
+	last_error_port = port
+	push_warning("LanLobby: %s failed: %s, UDP port %d" % [what, Protocol.error_name(err), port])
 
 
 ## Maakt de peer los. Daarna mag host_session of join_session opnieuw.
