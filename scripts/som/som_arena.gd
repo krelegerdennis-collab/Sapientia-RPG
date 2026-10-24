@@ -665,6 +665,8 @@ func _knockback(m: Node, dir: Vector2i) -> void:
 
 
 func _defeat_enemy(m: Node) -> void:
+	if not enemies.has(m):
+		return
 	var e: Dictionary = enemies[m]
 	enemies.erase(m)
 	if target_lock:
@@ -822,6 +824,8 @@ func _target_for(m: Node) -> String:
 
 
 func _enemy_ai(m: Node, delta: float) -> void:
+	if not enemies.has(m):
+		return
 	var e: Dictionary = enemies[m]
 	if float(e["flash"]) > 0.0:
 		e["flash"] = float(e["flash"]) - delta
