@@ -25,6 +25,7 @@ extends CanvasLayer
 signal finished
 
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 ## Letters per seconde voor het typemachine-effect.
 @export var chars_per_second := 40.0
@@ -53,6 +54,8 @@ var tail_dir := ""
 var speaker_node: Node2D = null
 ## Bovenkant van het vak bovenin (y) en minimale hoogte (2 regels, zoals vroeger 48).
 const TOP_Y := 15.0
+## Hoogste y waar een vak mag beginnen: erboven valt het naamtabje (11 hoog) buiten beeld.
+const MIN_TOP := 12.0
 const MIN_H := 44.0
 const SIDE := 8.0
 ## Ruimte onder het onderste vak als er geen touch-knoppen zijn: 8 px (zoals de zijkanten).
@@ -65,6 +68,10 @@ const PAD_R := 12.0
 const PAD_T := 8.0
 const PAD_B := 4.0
 const LINE_SPACING := 4
+## Keuzeregels: tikmaat (~48 dp) tot 3 keuzes; bij meer keuzes krapper zodat het vak niet het halve scherm vult.
+const CHOICE_ROW_TOUCH := 25.0
+const CHOICE_ROW_MANY := 20.0
+const CHOICE_MIN_W := 60.0
 ## Staart (16x12 per frame): punt op (6,10) bij omlaag, (6,1) bij omhoog (LEESMIJ.txt).
 const TAIL_SIZE := Vector2(16, 12)
 const TAIL_TIP_X := 6.0
@@ -217,22 +224,28 @@ func candidates() -> Array:
 	var vs := get_viewport().get_visible_rect().size
 	var ctrl := _touch_rects()
 	var out := []
-	var x0 := SIDE
-	var x1 := vs.x - SIDE
-	out.append(_low_candidate("onder", x0, x1, ctrl, vs))
+	var ins := UiTouchC.insets(get_viewport())
+	var x0 := SIDE + ins.x
+	var x1 := vs.x - SIDE - ins.z
+	var min_y := MIN_TOP + ins.y
+	var low := _low_candidate("onder", x0, x1, ctrl, vs)
+	if (low["rect"] as Rect2).position.y >= min_y:
+		out.append(low)
 	if ctrl.has("dpad"):
 		var dx: float = (ctrl["dpad"] as Rect2).end.x + 4.0
 		if x1 - dx >= 200.0:
-			out.append(_low_candidate("onder_smal", dx, x1, ctrl, vs))
+			var narrow := _low_candidate("onder_smal", dx, x1, ctrl, vs)
+			if (narrow["rect"] as Rect2).position.y >= min_y:
+				out.append(narrow)
 	var w := x1 - x0
-	out.append({"name": "boven", "rect": Rect2(x0, TOP_Y, w, needed_height(w)), "bottom": false})
+	out.append({"name": "boven", "rect": Rect2(x0, TOP_Y + ins.y, w, needed_height(w)), "bottom": false})
 	return out
 
 
 func _low_candidate(cname: String, x0: float, x1: float, ctrl: Dictionary, vs: Vector2) -> Dictionary:
 	var w := x1 - x0
 	var h := needed_height(w)
-	var bottom := vs.y - BOTTOM_MARGIN
+	var bottom := vs.y - BOTTOM_MARGIN - UiTouchC.insets(get_viewport()).w
 	for k in ctrl:
 		var r: Rect2 = ctrl[k]
 		if r.position.x < x1 and r.end.x > x0:
@@ -253,7 +266,7 @@ func needed_height(w: float) -> float:
 		lines = maxi(lines, maxi(1, roundi(sz.y / lh)))
 	var h := PAD_T + lines * lh + (lines - 1) * LINE_SPACING + PAD_B + 2.0
 	if not choices.is_empty():
-		h = maxf(h, PAD_T + lh + choices.size() * (lh + 1.0) + 4.0)
+		h = maxf(h, PAD_T + lh + choices.size() * (choice_row_h() + 1.0) + 4.0)
 	return ceilf(maxf(MIN_H, h))
 
 
@@ -376,6 +389,19 @@ func _focus_rects() -> Array[Rect2]:
 	return out
 
 
+## Hoogte van een keuzeregel (tikvlak).
+func choice_row_h() -> float:
+	return CHOICE_ROW_TOUCH if choices.size() <= 3 else CHOICE_ROW_MANY
+
+
+## Schermrechthoeken van de keuzeregels (voor de tests): leeg zolang er geen keuzes zijn.
+func choice_rects() -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	for l in _choice_labels:
+		out.append(l.get_global_rect())
+	return out
+
+
 func has_choices() -> bool:
 	return is_open and not choices.is_empty()
 
@@ -405,6 +431,8 @@ func _build_choices() -> void:
 	panel.add_child(_choice_box)
 	for i in choices.size():
 		var l := Label.new()
+		l.custom_minimum_size = Vector2(CHOICE_MIN_W, choice_row_h())
+		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		l.mouse_filter = Control.MOUSE_FILTER_STOP
 		l.gui_input.connect(_on_choice_input.bind(i))
 		_choice_box.add_child(l)
