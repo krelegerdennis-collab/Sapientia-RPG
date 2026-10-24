@@ -353,10 +353,18 @@ assets/tiles/dungeon/grot_kamers.png
 # v0.21: World Warper van RPG ART (art_batch5_v21 + art_batch6_v21/out). Grijs = Archief 1 (zonder achtervoegsel),
 #        <naam>_<accent>.png = groen/oranje/roze/blauw/rood (Archief 2-6), gekozen in world_warper/art/accent.gd.
 assets/sprites/archief2/echo.png
+assets/sprites/archief2/echo_blauw.png
 assets/sprites/archief2/echo_groen.png
+assets/sprites/archief2/echo_oranje.png
+assets/sprites/archief2/echo_rood.png
+assets/sprites/archief2/echo_roze.png
 assets/sprites/archief2/sapientia_glitch.png
 assets/sprites/archief2/world_warper.png
+assets/sprites/archief2/world_warper_blauw.png
 assets/sprites/archief2/world_warper_groen.png
+assets/sprites/archief2/world_warper_oranje.png
+assets/sprites/archief2/world_warper_rood.png
+assets/sprites/archief2/world_warper_roze.png
 world_warper/art/bord_hal.png
 world_warper/art/bord_hal_blauw.png
 world_warper/art/bord_hal_groen.png
