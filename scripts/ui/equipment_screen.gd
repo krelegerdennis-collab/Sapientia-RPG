@@ -73,6 +73,8 @@ func hero() -> Dictionary:
 
 func _build() -> void:
 	header.text = "Equipment"
+	# 7 vakken + submenu passen op 216 hoog alleen met krappe marges (anders valt de hulpregel van het scherm af)
+	_outer.add_theme_constant_override("separation", 1)
 	prev_button = arrow_button("<")
 	prev_button.pressed.connect(switch.bind(-1))
 	page_label = UiMenu.label("", MenuColors.TEXT_DIM)
@@ -147,13 +149,20 @@ func _build_left(body: HBoxContainer) -> void:
 		stat_rows[s] = {"old": old, "arrow": arrow, "new": nw}
 
 
+## Vak met 1 eenheid binnenmarge (de standaard is 4).
+func _tight_style(border := MenuColors.LINE) -> StyleBoxFlat:
+	var st := UiMenu.inner_style(border)
+	st.set_content_margin_all(1)
+	return st
+
+
 func _build_right(body: HBoxContainer) -> void:
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.add_theme_constant_override("separation", 4)
+	right.add_theme_constant_override("separation", 2)
 	body.add_child(right)
 	var slot_panel := PanelContainer.new()
-	slot_panel.add_theme_stylebox_override("panel", UiMenu.inner_style())
+	slot_panel.add_theme_stylebox_override("panel", _tight_style())
 	right.add_child(slot_panel)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 0)
@@ -171,7 +180,7 @@ func _build_right(body: HBoxContainer) -> void:
 	TargetList.link_ring(list)
 	# submenu (2 kolommen, kolom voor kolom)
 	cmd_panel = PanelContainer.new()
-	cmd_panel.add_theme_stylebox_override("panel", UiMenu.inner_style())
+	cmd_panel.add_theme_stylebox_override("panel", _tight_style())
 	cmd_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(cmd_panel)
 	var cols := HBoxContainer.new()
