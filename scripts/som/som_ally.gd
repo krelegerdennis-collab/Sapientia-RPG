@@ -180,7 +180,7 @@ func _think_spell() -> void:
 				arena.cast_spell(str(s), hero_id, low)
 				return
 	# 2) aanvallen met een spreuk
-	if randf() > SomData.ALLY_DAMAGE_SPELL_CHANCE or arena.nearest_enemy(arena.player.position, SomData.ALLY_ENGAGE_RANGE) == null:
+	if arena.rng.randf() > SomData.ALLY_DAMAGE_SPELL_CHANCE or arena.nearest_enemy(arena.player.position, SomData.ALLY_ENGAGE_RANGE) == null:
 		return
 	for s in spells:
 		var sp: Dictionary = GameData.SPELLS.get(str(s), {})

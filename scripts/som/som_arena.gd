@@ -103,6 +103,25 @@ var b_casts := 0
 ## Alleen voor tests/vergelijk-shots: held-ids waarvoor de kaart-cast uit staat (dan cast6 of direct).
 var map_cast_uit: Array = []
 
+## Eén seeded RNG voor alle toeval in dit gevecht (schade-spreiding, drops, achtervolg-start, bondgenoot-keuze,
+## Codex-vangkans). Standaard willekeurig (randomize, zelfde gedrag als de globale randf); seed_rng(n) maakt een
+## gevecht reproduceerbaar (--combatrngtest, COMBAT_DESIGN.md §16).
+var rng := RandomNumberGenerator.new()
+var rng_seed := 0
+
+
+func _init() -> void:
+	rng.randomize()
+
+
+## Zet de seed van dit gevecht (0 = willekeurig, zoals voorheen).
+func seed_rng(s: int) -> void:
+	rng_seed = s
+	if s == 0:
+		rng.randomize()
+	else:
+		rng.seed = s
+
 
 func setup(p_room: Node) -> void:
 	room = p_room
@@ -233,7 +252,7 @@ func register(m: Node) -> void:
 	m.moves = false      # zijn eigen willekeurige wandeling uit; de AI hieronder stuurt
 	enemies[m] = {"hp": int(d.get("max_hp", 1)), "max_hp": int(d.get("max_hp", 1)), "atk": int(d.get("atk", 1)),
 			"def": int(d.get("def", 0)), "exp": int(d.get("exp", 0)), "gold": int(d.get("gold", 0)),
-			"drops": d.get("drops", []), "data": d, "cd": 0.6, "tele": 0.0, "chase": randf() * SomData.CHASE_INTERVAL,
+			"drops": d.get("drops", []), "data": d, "cd": 0.6, "tele": 0.0, "chase": rng.randf() * SomData.CHASE_INTERVAL,
 			"flash": 0.0, "target": ""}
 
 
@@ -444,9 +463,11 @@ static func charge_mult_with(c: float, floor_mult: float) -> float:
 
 
 ## battle.gd _physical_damage zonder buffs/verdediging.
-static func physical_damage(atk: float, def: float, mult: float) -> int:
+## r = de RNG van het gevecht; null = globale randf_range (tools/battlesim, ongewijzigd).
+static func physical_damage(atk: float, def: float, mult: float, r: RandomNumberGenerator = null) -> int:
 	var base := (atk - def / 2.0) * mult
-	return maxi(1, roundi(base * randf_range(0.85, 1.15)))
+	var spread := r.randf_range(0.85, 1.15) if r != null else randf_range(0.85, 1.15)
+	return maxi(1, roundi(base * spread))
 
 
 ## Eén slag van de bestuurde held. Geeft het aantal geraakte vijanden.
@@ -496,7 +517,7 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 		if center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y):
 			var e: Dictionary = enemies[m]
 			last_attacker = id
-			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), Vector2i(roundi(f.x), roundi(f.y)), mult >= 1.0)
+			damage_enemy(m, physical_damage(atk, float(e["def"]), mult, rng), Vector2i(roundi(f.x), roundi(f.y)), mult >= 1.0)
 			hits += 1
 	swing_landed.emit(id, hits)
 	SessieLog.actie_slag(id, hits)
@@ -606,7 +627,7 @@ func _defeat_enemy(m: Node) -> void:
 		lines.append_array(msgs)
 	var got: Array = []
 	for d in e["drops"]:
-		if typeof(d) == TYPE_DICTIONARY and GameData.ITEMS.has(str(d.get("item", ""))) and randf() < float(d.get("chance", 0.0)):
+		if typeof(d) == TYPE_DICTIONARY and GameData.ITEMS.has(str(d.get("item", ""))) and rng.randf() < float(d.get("chance", 0.0)):
 			var id := str(d["item"])
 			GameState.inventory[id] = GameState.item_count(id) + 1
 			got.append(id)
@@ -827,7 +848,7 @@ func hit_member(id: String, atk: int) -> void:
 		_dodge(id)
 		return
 	var h := member(id)
-	var dmg := maxi(1, roundi(physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0) * SomData.enemy_damage_mult(room.room_id, room.tier())))
+	var dmg := maxi(1, roundi(physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0, rng) * SomData.enemy_damage_mult(room.room_id, room.tier())))
 	h["hp"] = maxi(0, int(h["hp"]) - dmg)
 	last_player_damage = dmg
 	last_hit_id = id
@@ -980,7 +1001,7 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 				last_attacker = caster_id
 				spell_effect(spell_id, feet_of_enemy(m))
 				SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
-				damage_enemy(m, maxi(1, roundi(amt * randf_range(0.9, 1.1))), Vector2i.ZERO))
+				damage_enemy(m, maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))), Vector2i.ZERO))
 		return "%s casts %s!" % [caster.get("name", ""), sp.get("name", spell_id)]
 	if kind == "heal":
 		var t := heal_target
@@ -1166,7 +1187,7 @@ func use_skill(skill_id: String, hero_id: String) -> String:
 				last_attacker = hero_id
 				var e: Dictionary = enemies[m]
 				var away := center_of(m) - body_of(hero_id)
-				damage_enemy(m, physical_damage(atk, float(e["def"]), mult),
+				damage_enemy(m, physical_damage(atk, float(e["def"]), mult, rng),
 						Vector2i(signi(roundi(away.x)), 0) if absf(away.x) >= absf(away.y) else Vector2i(0, signi(roundi(away.y))))
 	return "%s uses %s!" % [member(hero_id).get("name", ""), sk["name"]]
 
