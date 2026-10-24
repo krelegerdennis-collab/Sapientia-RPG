@@ -321,6 +321,8 @@ func switch_hero(to := "") -> String:
 	var a := ally_of(nxt)
 	if a == null:
 		return ""
+	if a.in_wall():
+		a._teleport()      # anders belandt de bestuurde held in de muur en kan hij niet meer lopen
 	var old := active_id
 	var p_pos: Vector2 = player.position
 	var p_face: Vector2i = player.facing
