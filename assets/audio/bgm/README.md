@@ -17,3 +17,7 @@ Deze zes nummers komen uit Suno (mp3 omgezet naar ogg Vorbis):
 De wereldkaart speelt `wereld`. De andere sleutels staan klaar; die mappen en gevechten vragen hun track nog niet aan.
 Ontbreekt een bestand uit het manifest, dan blijft dat stuk stil (geen errors).
 Licenties (Suno/Freesound) eerst controleren voordat er iets in de APK komt.
+
+**APK-grootte:** de oggs zijn herencoded naar Ogg Vorbis `-q:a 3` zonder coverbeeld
+(zelfde aantal samples, dus dezelfde loop). Nieuwe muziek liefst direct zo aanleveren;
+zie `docs/APK_SIZE.md` en `tools/apk_size/bgm_herencode.py`.
