@@ -32,6 +32,7 @@ ROWS = [
     ("Engine start -> autoloads klaar (GameState._ready e.a.)", lambda r: r["engine_start_to_harness_ms"], "ms"),
     ("Titelscherm, eerste keer opbouwen (cold)", lambda r: r["startup_title_first_ready_ms"], "ms"),
     ("Titelscherm opbouwen (warm, mediaan)", stat("startup_title_warm_ready_ms"), "ms"),
+    ("Langste frame op het titelscherm (4 s dwell)", lambda r: r["title_dwell_worst_frame_ms"], "ms"),
     ("Titel -> WM1", None, None),
     ("Titelscherm klaar, 4 saves aanwezig", stat("title_ready_with_saves_ms"), "ms"),
     ("Slotlijst openen", stat("title_slotlist_open_ms"), "ms"),

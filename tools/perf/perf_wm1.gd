@@ -232,9 +232,18 @@ func _bench_startup() -> void:
 	Engine.time_scale = 1.0
 	print("PERF startup_title_first_ready_ms           %8.2f ms (hitch %.2f)" % [result["startup_title_first_ready_ms"],
 			result["startup_title_first_hitch_ms"]])
+	# Langste frame tijdens het wachten op het titelscherm: zichtbaar maakt dit de stalls van achtergrondwerk
+	# (voorladen/prewarm) die het titelscherm kort laten haperen.
 	var d0 := Time.get_ticks_msec()
+	var dwell_worst_us := 0
+	var prev_us := _now_us()
 	while Time.get_ticks_msec() - d0 < dwell_ms:
 		await get_tree().process_frame
+		var nu := _now_us()
+		dwell_worst_us = maxi(dwell_worst_us, nu - prev_us)
+		prev_us = nu
+	result["title_dwell_worst_frame_ms"] = snappedf(float(dwell_worst_us) / 1000.0, 0.01)
+	print("PERF title_dwell_worst_frame_ms             %8.2f ms (dwell %d ms)" % [result["title_dwell_worst_frame_ms"], dwell_ms])
 	var t: Array = []
 	var hitch: Array = []
 	for i in runs:
