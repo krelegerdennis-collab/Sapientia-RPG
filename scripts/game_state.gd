@@ -460,6 +460,7 @@ func _ready() -> void:
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
 	# WM1-bugjacht: of  godot -- --wm1bugtest [--shots=/pad/map]  (scripts/tests/wm1_bugjacht_tests.gd).
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
+	# WM1-playthrough (nieuw spel t/m de hub, save/load, pauze): of  godot -- --wm1playthroughtest [--speed=N] [--static-only]  (scripts/tests/wm1_playthrough_tests.gd).
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
@@ -538,6 +539,7 @@ func _ready() -> void:
 			["--combatsimtest", "res://scripts/tests/combat_sim_tests.gd", "CombatSimTest", "combatsimtest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
 			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
 			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
