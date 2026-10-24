@@ -119,3 +119,16 @@ Niet bekeken, niet gebouwd. `wacht/wm2/` is niet gelezen. Alle punten staan in `
 - Art: de bestandspaden uit `docs/PLAN.md` tegen `tools/handwerk.txt` en `tools/placeholders_*.txt`.
 - Niet gedaan: kaart-voor-kaart meting van de 1.4x-schaal (het plan zelf is de bron), en een scan van alle spelertekst
   op oude namen (kan pas met de naamlijst, A5).
+
+## F. Bevindingen issues #2 tot #5 (niet gesloten)
+
+Stand `main` `c55b77b`. Alle vier lijken af en getest; sluiten laat ik aan RPG Forge. De bevindingen zijn bedoeld als comment
+op elk issue, maar de token van deze agent mag geen issue-comments plaatsen (`gh issue comment` geeft "Resource not accessible
+by integration"). Daarom staan ze hier.
+
+| Issue | Oordeel | Bewijs | Bewust anders dan in het issue |
+|---|---|---|---|
+| [#2](https://github.com/krelegerdennis-collab/Sapientia-RPG/issues/2) Respawn-fix afmaken | lijkt af en getest | [PR #6](https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/6) gemerged. `GameState.set_checkpoint()`, `respawn_at_checkpoint()`, `has_checkpoint()`, terugval `respawn()`; checkpoint in de save (sleutel `checkpoint`, oude saves laden). `--checkpointtest` 102 PASS lokaal, in de CI-matrix, CI op `main` groen. | In de Diepe Grot is game over sinds PR #11 "dood is dungeon uit". |
+| [#3](https://github.com/krelegerdennis-collab/Sapientia-RPG/issues/3) Procedurele generator | lijkt af en getest | [PR #8](https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/8) gemerged. `scripts/dungeon/dungeon100_generator.gd` (seed per run en verdieping, 16x16, trap omhoog en omlaag, bereikbaarheidscontrole), `scenes/maps/dungeon100.tscn`. `--dungeon100gentest` 69 PASS lokaal, in de CI-matrix. | De ingang op de wereldkaart is weg: de Diepe Grot start alleen via ECHO (CANON, `scripts/data/echo_grot.gd`). |
+| [#4](https://github.com/krelegerdennis-collab/Sapientia-RPG/issues/4) Monsterschaal en buit | lijkt af en getest, balans open | [PR #9](https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/9) gemerged. `scripts/data/dungeon100_scaling.gd` (`hp_mult()`, `monster_stats()`, `chest_loot()`, `BOSSES`, `GEAR`), `dungeon100_reward.gd`, `dungeon100_blue.gd`. `--dungeon100schaaltest` 86 PASS en `--dungeon100blauwtest` 69 PASS lokaal, in de CI-matrix. | CANON zet bazen op 25, 50, 75 en 99 en geeft verdieping 100 geen baas; de bazen op de 10e verdiepingen bestaan daarnaast. Balans: zie A3. |
+| [#5](https://github.com/krelegerdennis-collab/Sapientia-RPG/issues/5) Regels, checkpoints en HUD | lijkt af en getest | [PR #7](https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/7) gemerged. `Dungeon100Rules.is_rest_floor()`, `scripts/dungeon/dungeon100_rustpunt.gd`, HUD `scripts/ui/dungeon100_hud.gd` (`hud_text()`, "X/100"), checkpoint en best in de save. `--dungeon100regelstest` 113 PASS en `--dungeon100integratietest` 62 PASS lokaal, in de CI-matrix. | Game over is "dood is dungeon uit" (PR #11, `DUNGEON100_DEFEAT_TEXT`), niet een respawn op het rustpunt. Rustpunt-art: zie A12. |
