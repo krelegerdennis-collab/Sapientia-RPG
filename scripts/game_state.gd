@@ -404,16 +404,11 @@ var ui_theme: Theme
 func _ready() -> void:
 	_koppel_muziek.call_deferred()
 	_koppel_quests.call_deferred()
-	# TIJDELIJK CI-DIAG (#141)
-	var _d := DirAccess.get_files_at("res://.godot/imported")
-	var _ww := Array(_d).filter(func(f): return f.begins_with("world_warper") or f.ends_with("_v8.png-") or "_v8" in f)
-	print("CIDIAG imported=", _d.size(), " ww/v8=", _ww)
-	print("CIDIAG ww_exists=", ResourceLoader.exists("res://assets/sprites/archief2/world_warper.png"))
 	ui_theme = load("res://assets/theme.tres")
 	preload("res://scripts/ui/ui_style.gd").apply_to_theme(ui_theme)
 	_ensure_input_actions()
 	new_game()
-	_start_preload()
+	_plan_preload()
 	add_child.call_deferred(preload("res://scripts/ui/dungeon100_hud.gd").new())   # 'Verdieping X/100' (alleen in de kerker)
 	# Alleen voor testen: start met  godot -- --autotest  (zie scripts/debug_autotest.gd).
 	# De tester hangt aan de root, zodat hij blijft bestaan als de scène wisselt.
@@ -448,6 +443,8 @@ func _ready() -> void:
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
+	# Prestatiewerk WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
+	# De tijden meet tools/perf/run_perf_wm1.sh (geen dispatch hier: dat is een losse scène).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
@@ -513,6 +510,7 @@ func _ready() -> void:
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
@@ -589,20 +587,81 @@ const MAIN_THREAD_SCRIPTS := ["res://scripts/map.gd", "res://scripts/player.gd",
 	"res://world_warper/art/flyover.gd"]   # preload()t een textuur: nooit in de laad-thread compileren
 
 
+## Opstart-voorladen (prestaties): eerst laten we het eerste beeld (titelscherm) zien, pas daarna
+##  fase 1: de scripts uit MAIN_THREAD_SCRIPTS op de hoofdthread compileren (één per frame; samen ~0,4 s),
+##  fase 2: de achtergrond-loads aanvragen (die hebben die gecompileerde scripts nodig) en afwachten,
+##  daarna, alleen in rustige schermen (titel / naam invoeren): PREWARM_SCRIPTS compileren, zodat het
+##  eerste dorp / woud / archief niet 0,1-0,3 s stilstaat op het moment van binnenkomen.
+## Wie eerder een scène nodig heeft, laadt gewoon synchroon via get_resource() (zelfde resultaat).
+const FRAMES_BEFORE_PRELOAD := 2
+const PREWARM_GAP := 0.05
+const PREWARM_SCENES: Array[String] = [TITLE_SCENE, NAME_SCENE]
+## Zware scripts die WM1 bij de eerste binnenkomst / het eerste gebruik compileert (gemeten onder xvfb, Godot 4.3:
+## field_menu.gd ~210 ms, dungeon_room.gd ~260 ms, puzzle_room.gd ~140 ms, archief2_room.gd ~100 ms, dorp ~80 ms,
+## pand_binnen.gd ~65 ms, kern_kracht_veld.gd ~40 ms, kern_absorption.gd ~35 ms). Volgorde = waarschijnlijke
+## speelvolgorde; scripts die een ander script preloadt staan er vóór, zodat elke stap klein blijft
+## (de titel hapert dan hooguit ~110 ms per stap i.p.v. ~270 ms in één keer).
+const PREWARM_SCRIPTS: Array[String] = ["res://scripts/kern/kern_kracht_veld.gd",
+	"res://scripts/village/pand_binnen.gd", "res://scripts/village/dorp_ground.gd",
+	"res://scripts/village/dorp_opbouw.gd", "res://scripts/village/molen_wieken.gd",
+	"res://scripts/ui/codex_screen.gd", "res://scripts/ui/equipment_screen.gd",
+	"res://scripts/ui/status_screen.gd", "res://scripts/ui/items_screen.gd",
+	"res://scripts/ui/magic_screen.gd", "res://scripts/ui/party_screen.gd",
+	"res://scripts/ui/bestiary_screen.gd", "res://scripts/ui/field_menu.gd",
+	"res://scripts/som/som_codex.gd", "res://scripts/som/som_ally.gd", "res://scripts/som/som_hud.gd",
+	"res://scripts/som/som_ring.gd", "res://scripts/som/som_arena.gd", "res://scripts/dungeon/map_monster.gd",
+	"res://scripts/dungeon/dungeon_chest.gd", "res://scripts/dungeon/dungeon_room.gd",
+	"res://scripts/dungeon/archief2_room.gd", "res://scripts/puzzle/puzzle_room.gd",
+	"res://scripts/kern/kern_absorption.gd"]
+var _preload_phase := 0            # 0 = wacht op het eerste beeld, 1 = scripts, 2 = loads lopen / prewarm
+var _preload_frames := 0
+var _script_queue: Array[String] = []
+var _prewarm_queue: Array[String] = []
+var _prewarm_wait := 0.0
+
+
+func _plan_preload() -> void:
+	_script_queue.assign(MAIN_THREAD_SCRIPTS)
+	_prewarm_queue.assign(PREWARM_SCRIPTS)
+	set_process(true)
+
+
+## Alles in één keer, op de hoofdthread (testmodi en _finish_preload): scripts, dan de loads aanvragen.
 func _start_preload() -> void:
-	for sp in MAIN_THREAD_SCRIPTS:
-		if ResourceLoader.exists(sp):
-			load(sp)
+	while not _script_queue.is_empty():
+		_compile_next_script()
+	_request_preloads()
+	_preload_phase = 2
+	set_process(not _preloading.is_empty() or not _prewarm_queue.is_empty())
+
+
+func _compile_next_script() -> void:
+	var sp: String = _script_queue.pop_front()
+	if ResourceLoader.exists(sp):
+		load(sp)
+
+
+func _request_preloads() -> void:
 	for p in _preload_paths():
 		if _preloading.has(p) or _loaded.has(p) or not ResourceLoader.exists(p):
 			continue
 		if ResourceLoader.load_threaded_request(p) == OK:
 			_preloading.append(p)
-	set_process(not _preloading.is_empty())
 
 
-## Kijkt elk frame (alleen zolang er nog iets laadt) of er iets klaar is.
-func _process(_delta: float) -> void:
+## Kijkt elk frame (alleen zolang er nog iets te doen is) hoe ver het voorladen is.
+func _process(delta: float) -> void:
+	if _preload_phase == 0:
+		_preload_frames += 1
+		if _preload_frames < FRAMES_BEFORE_PRELOAD:
+			return
+		_preload_phase = 1
+	if _preload_phase == 1:
+		if not _script_queue.is_empty():
+			_compile_next_script()
+			return
+		_request_preloads()
+		_preload_phase = 2
 	for i in range(_preloading.size() - 1, -1, -1):
 		var p := _preloading[i]
 		var status := ResourceLoader.load_threaded_get_status(p)
@@ -611,12 +670,32 @@ func _process(_delta: float) -> void:
 			_preloading.remove_at(i)
 		elif status != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 			_preloading.remove_at(i)
-	if _preloading.is_empty():
+	_prewarm_step(delta)
+	if _preloading.is_empty() and _prewarm_queue.is_empty():
 		set_process(false)
 
 
-## Wacht tot alle achtergrond-loads klaar zijn (alleen voor de testmodi).
+## Eén zwaar script per PREWARM_GAP seconden, alleen als de speler niets aan het doen is (titelscherm).
+func _prewarm_step(delta: float) -> void:
+	if _prewarm_queue.is_empty() or not _preloading.is_empty():
+		return
+	var scene := get_tree().current_scene
+	if scene == null or not (scene.scene_file_path in PREWARM_SCENES) or changing_map or in_battle:
+		return
+	_prewarm_wait -= delta
+	if _prewarm_wait > 0.0:
+		return
+	_prewarm_wait = PREWARM_GAP
+	var sp: String = _prewarm_queue.pop_front()
+	if ResourceLoader.exists(sp) and not _loaded.has(sp):
+		_loaded[sp] = load(sp)
+
+
+## Wacht tot alle achtergrond-loads klaar zijn (alleen voor de testmodi); geen prewarm in tests.
 func _finish_preload() -> void:
+	_prewarm_queue.clear()
+	if _preload_phase < 2:
+		_start_preload()
 	for p in _preloading.duplicate():
 		var r := ResourceLoader.load_threaded_get(p)
 		if r != null:
@@ -1026,7 +1105,7 @@ func slot_record(slot: int) -> Dictionary:
 	if d.is_empty():
 		return {"path": manual, "data": {}, "stamp": _save_modified_time(manual),
 				"slot": slot, "corrupt": true}
-	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot}
+	return {"path": manual, "data": d, "stamp": _stamp_of(d, manual), "slot": slot}
 
 
 ## De aparte autosave ({} = geen). Ook een oude autosave (v0.22, gestempeld met slot 1..4)
@@ -1038,7 +1117,7 @@ func autosave_record() -> Dictionary:
 	if d.is_empty():
 		return {"path": autosave_path, "data": {}, "stamp": _save_modified_time(autosave_path),
 				"slot": AUTOSAVE_SLOT, "corrupt": true}
-	return {"path": autosave_path, "data": d, "stamp": _save_stamp(autosave_path), "slot": AUTOSAVE_SLOT}
+	return {"path": autosave_path, "data": d, "stamp": _stamp_of(d, autosave_path), "slot": AUTOSAVE_SLOT}
 
 
 ## Bij welk handmatig slot hoort een autosave (voor het volgende handmatige opslaan)?
@@ -1157,7 +1236,11 @@ func read_beta_save() -> Dictionary:
 
 
 func _save_stamp(path: String) -> float:
-	var d := read_save(path)
+	return _stamp_of(read_save(path), path)
+
+
+## Stempel van een al gelezen save (voorkomt een tweede JSON-parse van hetzelfde bestand).
+func _stamp_of(d: Dictionary, path: String) -> float:
 	if d.has("saved_unix"):
 		return float(d["saved_unix"])
 	return _save_modified_time(path)
@@ -1477,9 +1560,10 @@ func _valid_save_data(data: Dictionary) -> bool:
 ## Laadt de save en zet alles terug (party, spullen, goud, speeltijd, bestiarium);
 ## geeft false als er geen (geldige) save is. Daarna: continue_game() gaat naar de map.
 ## v0.11: 'path' = welke save ("" = de handmatige).
-func load_game(path := "") -> bool:
+## 'gelezen' = de save die de aanroeper net al gelezen heeft (slotlijst/Doorgaan): dan geen derde parse.
+func load_game(path := "", gelezen: Dictionary = {}) -> bool:
 	som_mode = false      # SoM-proef: een geladen spel is altijd het gewone (turn-based) spel
-	var d := read_save(path)
+	var d := gelezen if not gelezen.is_empty() else read_save(path)
 	if not apply_state(d):
 		game_loaded.emit(path if path != "" else save_path, false)
 		return false
@@ -1687,7 +1771,7 @@ func continue_slot(slot: int) -> bool:
 func _continue_record(rec: Dictionary) -> bool:
 	var rs := int(rec.get("slot", 1))
 	active_slot = home_slot_of(rec.get("data", {})) if rs == AUTOSAVE_SLOT else clampi(rs, 1, SLOT_COUNT)
-	if changing_map or not load_game(str(rec.get("path", ""))):
+	if changing_map or not load_game(str(rec.get("path", "")), rec.get("data", {})):
 		return false
 	changing_map = true
 	in_battle = false
