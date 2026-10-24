@@ -22,7 +22,7 @@ signal player_defeated
 signal hero_switched(hero_id: String)
 ## Slag geland (bij art: aan het begin van frame SomData.ATTACK_HIT_FRAME), met het aantal treffers.
 signal swing_landed(hero_id: String, hits: int)
-## Spreuk komt vrij (cast6 frame 4, of meteen zonder sheet): schade/genezing is toegepast.
+## Spreuk komt vrij (kaart-cast frame 2 / cast6 frame 4, of meteen zonder sheet): schade/genezing is toegepast.
 signal spell_released(spell_id: String, caster_id: String)
 signal ring_opened
 signal ring_closed
@@ -39,6 +39,8 @@ const SomRing := preload("res://scripts/som/som_ring.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const SomMove := preload("res://scripts/som/som_move.gd")
 const SomAlly := preload("res://scripts/som/som_ally.gd")
+const SomCodex := preload("res://scripts/som/som_codex.gd")
+const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
 
@@ -56,6 +58,10 @@ var iframes := {}
 var down := false
 var hud: Node
 var ring: Node
+## Codex vangen in Action (scripts/som/som_codex.gd)
+var codex: Node
+## Doel-lock (tap + auto-lock in bereik)
+var target_lock: Node2D
 var gauge: Node2D
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
 var queued := {}
@@ -63,6 +69,17 @@ var _queue_t := 0.0
 var touch: Control
 ## Autotest: vaste joystick-stand (ZERO = echte input).
 var forced_joy := Vector2.ZERO
+## Co-op: ring opent zonder get_tree().paused (ActionCoopSession zet dit aan).
+var coop_ring_no_pause := false
+var coop_mode := false
+var coop_sim_host := false
+var coop_local_slot := -1
+var _coop_slots: Dictionary = {}
+var _coop_avatars: Dictionary = {}
+var _coop_lock_idx: Dictionary = {}
+var _enemy_order: Array = []
+var _coop_attack_cd: Dictionary = {}
+var _coop_snap: Dictionary = {}
 ## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
 var sheets := {}
 var attack_texs := {}
@@ -83,6 +100,8 @@ var swing_lock := 0.0
 ## Laatste slag was vol (stagger: telegraaf afbreken + knockback alleen bij 100%).
 var _full_swing := true
 var b_casts := 0
+## Alleen voor tests/vergelijk-shots: held-ids waarvoor de kaart-cast uit staat (dan cast6 of direct).
+var map_cast_uit: Array = []
 
 
 func setup(p_room: Node) -> void:
@@ -92,6 +111,8 @@ func setup(p_room: Node) -> void:
 	_ensure_actions()
 	for id in SomData.SHEETS:
 		var path := str(SomData.SHEETS[id])
+		if id == "dennis":
+			path = dax_sheet_path()
 		if ResourceLoader.exists(path):
 			sheets[id] = load(path)
 	for id in SomData.ATTACK_ANIMS:
@@ -111,22 +132,29 @@ func setup(p_room: Node) -> void:
 	if touch and "analog_only" in touch:
 		touch.analog_only = true      # alleen joy_raw; geen move_*-stappen (anders dubbele beweging)
 	player.set_analog(analog_dir, SomData.MOVE_SPEED)
+	player.facing_provider = Callable(self, "_lock_facing")
 	_apply_player_sheet()
 	var cam := player.get_node_or_null("Camera2D") as Camera2D
 	if cam:
 		cam.position_smoothing_enabled = true
 		cam.position_smoothing_speed = SomData.CAMERA_SMOOTH
 	var objects := room.get_node("Objects")
-	var slot := 0
-	for h in GameState.party:
-		var id := str(h.get("id", ""))
-		if id == active_id:
-			continue
-		var a: CharacterBody2D = SomAlly.new()
-		objects.add_child(a)
-		a.setup(self, id, slot)
-		allies.append(a)
-		slot += 1
+	# Co-op: geen solo SomAlly-bondgenoten; alleen CoopAvatar per stoel.
+	if not GameState.coop_in_session():
+		var slot := 0
+		for h in GameState.party:
+			var id := str(h.get("id", ""))
+			if id == active_id:
+				continue
+			var a: CharacterBody2D = SomAlly.new()
+			objects.add_child(a)
+			a.setup(self, id, slot)
+			allies.append(a)
+			slot += 1
+	codex = SomCodex.new()
+	codex.name = "SomCodex"
+	codex.arena = self
+	add_child(codex)
 	hud = SomHud.new()
 	hud.arena = self
 	add_child(hud)
@@ -136,6 +164,25 @@ func setup(p_room: Node) -> void:
 	gauge = SomFx.Gauge.new()
 	gauge.arena = self
 	objects.add_child(gauge)
+	target_lock = SomTargetLock.new()
+	target_lock.name = "SomTargetLock"
+	target_lock.setup(self)
+	objects.add_child(target_lock)
+
+
+## Kaartsheet van Dax via KaartStijl (#169): speler_sheet() van het gebied van deze kamer als Dax leidt
+## (anders, of zonder gebied, held_sheet("Dax") = dezelfde vaste partijsheet HELD_VAST["dax"]).
+## Pas als KaartStijl niets heeft: SomData.SHEETS["dennis"].
+func dax_sheet_path() -> String:
+	var p := ""
+	if not GameState.party.is_empty() and str(GameState.party[0].get("id", "")) == "dennis":
+		var gebied := KaartStijl.gebied_van_map(str(room.scene_file_path)) if room != null else ""
+		p = KaartStijl.speler_sheet(gebied if gebied != "" else "wilgendal")
+	if p == "" or not ResourceLoader.exists(p):
+		p = KaartStijl.held_sheet("Dax")
+	if p == "" or not ResourceLoader.exists(p):
+		p = str(SomData.SHEETS["dennis"])
+	return p
 
 
 static func _ensure_actions() -> void:
@@ -303,6 +350,19 @@ func analog_dir() -> Vector2:
 	return SomMove.keys_to_dir()
 
 
+func _lock_facing() -> Vector2i:
+	return target_lock.facing_for_player() if target_lock else Vector2i.ZERO
+
+
+func _attack_suppressed() -> bool:
+	return target_lock != null and int(target_lock.suppress_attack_frame) == Engine.get_process_frames()
+
+
+## Schermtik op een monster (touch_controls); true = lock verwerkt, geen A/joy.
+func try_lock_tap(viewport_pos: Vector2) -> bool:
+	return target_lock.try_tap_viewport(viewport_pos) if target_lock else false
+
+
 func active() -> bool:
 	return not down and room != null and room.monsters_active() and not ring.is_open
 
@@ -310,20 +370,29 @@ func active() -> bool:
 func _process(delta: float) -> void:
 	if room == null or GameState.party.is_empty():
 		return
+	if coop_mode and not coop_sim_host:
+		if target_lock:
+			target_lock.tick(delta)
+		if Input.is_action_just_pressed(RING_ACTION) and active():
+			open_ring()
+		return
 	if Input.is_action_just_pressed(RING_ACTION) and active():
 		open_ring()
 		return
 	if not active():
 		return
+	if target_lock:
+		target_lock.tick(delta)
 	swing_lock = maxf(0.0, swing_lock - delta)
 	if swing_lock <= 0.0 or not SomData.CHARGE_AFTER_ANIM:
 		charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
 	for k in iframes.keys():
 		iframes[k] = maxf(0.0, float(iframes[k]) - delta)
-	if Input.is_action_just_pressed(SWITCH_ACTION):
+	if Input.is_action_just_pressed(SWITCH_ACTION) and not coop_mode:
 		switch_hero()
 	b_cast_cd = maxf(0.0, b_cast_cd - delta)
-	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame:
+	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
+			and not _attack_suppressed():
 		attack()
 	if Input.is_action_just_pressed("cancel") and Engine.get_process_frames() != ring.closed_frame:
 		quick_cast()
@@ -416,7 +485,7 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 	if not is_instance_valid(n) or not is_alive(id):
 		swing_landed.emit(id, 0)
 		return 0
-	var f := Vector2(n.facing)
+	var f := Vector2(_swing_facing(id, n))
 	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
 	SomFx.slash(room.get_node("Objects"), point, f)
 	var hits := 0
@@ -427,10 +496,10 @@ func _land(id: String, n: Node2D, mult: float) -> int:
 		if center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y):
 			var e: Dictionary = enemies[m]
 			last_attacker = id
-			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), n.facing, mult >= 1.0)
+			damage_enemy(m, physical_damage(atk, float(e["def"]), mult), Vector2i(roundi(f.x), roundi(f.y)), mult >= 1.0)
 			hits += 1
 	swing_landed.emit(id, hits)
-	Sessielog.actie_slag(id, hits)
+	SessieLog.actie_slag(id, hits)
 	return hits
 
 
@@ -441,6 +510,25 @@ func ally_attack(a: Node2D, _enemy: Node) -> int:
 
 func center_of(m: Node) -> Vector2:
 	return m.position + Vector2(0, -(m.size.y - 1) * 8.0)
+
+
+func _enemy_in_attack_reach(id: String, n: Node2D, m: Node) -> bool:
+	var f := Vector2(n.facing)
+	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
+	return center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y)
+
+
+func _swing_facing(id: String, n: Node2D) -> Vector2i:
+	if id == active_id and target_lock:
+		var m: Node = target_lock.locked_enemy()
+		if m != null:
+			var aim_lock: bool = bool(target_lock.manual) or _enemy_in_attack_reach(id, n, m)
+			if aim_lock:
+				var lf: Vector2i = target_lock.facing_for_player()
+				if lf != Vector2i.ZERO:
+					n.facing = lf
+					return lf
+	return n.facing
 
 
 ## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
@@ -455,6 +543,15 @@ func nearest_enemy(from: Vector2, within: float) -> Node:
 			bd = d
 			best = m
 	return best
+
+
+func _aim_caster_at(caster_id: String, m: Node) -> void:
+	if m == null or not is_instance_valid(m) or caster_id != active_id:
+		return
+	var to: Vector2 = center_of(m) - body_of(caster_id)
+	if to.length() < 0.5:
+		return
+	player.facing = SomMove.facing_for(to.normalized(), player.facing)
 
 
 ## stagger = false (slag onder 100%): wel schade, maar geen afgebroken telegraaf en geen knockback.
@@ -497,6 +594,8 @@ func _knockback(m: Node, dir: Vector2i) -> void:
 func _defeat_enemy(m: Node) -> void:
 	var e: Dictionary = enemies[m]
 	enemies.erase(m)
+	if target_lock:
+		target_lock.on_target_gone(m)
 	GameState.mark_defeated(m.enemy_id)
 	var gained_exp := int(e["exp"])
 	var gained_gold := int(e["gold"])
@@ -632,6 +731,11 @@ func _pose_tick(m: Node, e: Dictionary, delta: float) -> void:
 
 ## Dichtstbijzijnde levende held (id) voor een vijand.
 func _target_for(m: Node) -> String:
+	if coop_mode:
+		var hid: String = str(_coop_slots.get(0, "dennis"))
+		if is_alive(hid):
+			return hid
+		return ""
 	var best := ""
 	var bd := 1e9
 	for id in party_ids():
@@ -735,7 +839,7 @@ func hit_member(id: String, atk: int) -> void:
 		SomFx.hurt_pose(node_of(id), hurt, SomData.HURT_TIME)
 	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(1, 0.4, 0.4))
 	player_hit.emit(dmg)
-	Sessielog.actie_treffer(id, dmg, int(h["hp"]))
+	SessieLog.actie_treffer(id, dmg, int(h["hp"]))
 	if int(h["hp"]) <= 0:
 		_member_ko(id)
 
@@ -819,6 +923,11 @@ func resolve(q: Dictionary) -> String:
 		if int(r.get("hp", 0)) > 0:
 			SomFx.number(room.get_node("Objects"), body_of(str(target.get("id", ""))) + Vector2(0, -22), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
 			heal_glow(str(target.get("id", "")))
+	elif str(q.get("kind", "")) == "codex":
+		var ct: Variant = q.get("target", null)
+		text = codex.capture(ct if typeof(ct) == TYPE_OBJECT else null)   # ook een intussen vrijgegeven doel (boek terug)
+		action_resolved.emit(text)
+		return text
 	elif str(q.get("kind", "")) == "skill":
 		text = use_skill(str(q.get("id", "")), str(q.get("caster", "")))
 	else:
@@ -852,12 +961,16 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 					targets.append(m)
 		elif enemy_target != null and is_instance_valid(enemy_target) and enemies.has(enemy_target):
 			targets.append(enemy_target)
+		elif target_lock and target_lock.locked_enemy() != null:
+			targets.append(target_lock.locked_enemy())
 		else:
 			var best := nearest_enemy(from, 10.0 * 16.0)
 			if best:
 				targets.append(best)
 		if targets.is_empty():
 			return SomData.TXT_NO_TARGET
+		if targets[0] is Node:
+			_aim_caster_at(caster_id, targets[0])
 		caster["mp"] = int(caster["mp"]) - cost
 		_cast_then(caster_id, spell_id, func() -> void:
 			for m in targets:
@@ -909,21 +1022,39 @@ func _cast_pose(id: String) -> void:
 		SomFx.cast_anim(node_of(id), t)
 
 
-## Cast-animatie (cast6) van de caster; 'apply' draait op het vrijgavemoment (frame 4), daarna
-## spell_released. Zonder cast6-sheet of zonder node: meteen.
+## Cast-animatie van de caster; 'apply' draait op het vrijgavemoment, daarna spell_released.
+## Eerst de kaart-cast (SomData.MAP_CAST, 24x32, loslaten op frame 2), anders cast6 (48x48, frame 4),
+## zonder sheet of zonder node: meteen.
 func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
-	var t := pose_tex(caster_id, "cast")
 	var n := node_of(caster_id)
 	var done := func() -> void:
 		apply.call()
 		spell_released.emit(spell_id, caster_id)
-	var cols := int(SomData.CAST6["frames"])
-	if t and n and t.get_width() == cols * int(SomData.CAST6["frame"][0]):
-		var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
-		var anim: Node = SomFx.cast6_anim(n, t, circle)
-		anim.hit.connect(done, CONNECT_ONE_SHOT)
-		return
-	done.call()
+	var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
+	match cast_kind(caster_id):
+		"map":
+			var mc: Dictionary = SomData.MAP_CAST[caster_id]
+			var anim0: Node = SomFx.map_cast_anim(n, SomFx.tex(str(mc["sheet"])), SomFx.tex(str(mc.get("fx", ""))), circle)
+			anim0.hit.connect(done, CONNECT_ONE_SHOT)
+		"cast6":
+			var anim: Node = SomFx.cast6_anim(n, pose_tex(caster_id, "cast"), circle)
+			anim.hit.connect(done, CONNECT_ONE_SHOT)
+		_:
+			done.call()
+
+
+## Welke cast-animatie krijgt deze held? "map" (SomData.MAP_CAST, 24x32), anders "cast6" (48x48-sheet van
+## 6 kolommen), anders "direct" (geen passende sheet of geen node: de spreuk komt meteen vrij).
+func cast_kind(caster_id: String) -> String:
+	if node_of(caster_id) == null:
+		return "direct"
+	var mc: Dictionary = SomData.MAP_CAST.get(caster_id, {})
+	if not map_cast_uit.has(caster_id) and SomFx.tex(str(mc.get("sheet", ""))) != null:
+		return "map"
+	var t := pose_tex(caster_id, "cast")
+	if t and t.get_width() == int(SomData.CAST6["frames"]) * int(SomData.CAST6["frame"][0]):
+		return "cast6"
+	return "direct"
 
 
 ## Spreuk-effect (SomData.SPELL_FX) onderkant-midden op 'feet'. Geeft false zonder art.
@@ -955,7 +1086,33 @@ func ring_entries() -> Dictionary:
 			continue
 		magic.append({"kind": "spell", "id": str(s), "caster": active_id,
 				"label": "%s %d" % [str(sp.get("name", s)), int(sp.get("mp", 0))], "name": str(sp.get("name", s))})
+	# Codex-boek (zoals de Codex-opdracht in Classic): vangen met een Leeg Boek, daarna een doel kiezen
+	# Zoals andere verbruiksitems: bij 0 Lege Boeken geen ingang (geen 'x0' in de ring). De CODEX-knop blijft
+	# zichtbaar zolang er pagina's zijn en meldt dan "No Blank Book left.".
+	var books := GameState.item_count(SomCodex.CodexData.BOOK_ITEM)
+	if SomCodex.shown() and books > 0:
+		items.append({"kind": "codex", "id": "codex", "label": SomData.TXT_CODEX_ENTRY % books,
+				"name": SomData.TXT_CODEX, "count": books})
 	return {"items": items, "skills": skills, "magic": magic}
+
+
+## Doelen voor het Codex-boek: vijanden (ook een baas, die dan weigert) binnen SPELL_RANGE, dichtstbij eerst,
+## met de Classic-hint ("35%", "too strong", "won't fit", "Codex full").
+func codex_targets() -> Array:
+	var from := body()
+	var list: Array = []
+	for m in enemies.keys():
+		if is_instance_valid(m) and center_of(m).distance_to(from) <= SomData.SPELL_RANGE:
+			list.append(m)
+	for m in room.monsters:
+		if is_instance_valid(m) and bool(m.get("boss")) and not list.has(m) and center_of(m).distance_to(from) <= SomData.SPELL_RANGE:
+			list.append(m)
+	list.sort_custom(func(x, y): return center_of(x).distance_to(from) < center_of(y).distance_to(from))
+	var out: Array = []
+	for m in list:
+		var nm: String = codex._name(m)
+		out.append({"kind": "target", "id": str(m.monster_id), "target": m, "label": "%s %s" % [nm, codex.hint(m)], "name": nm})
+	return out
 
 
 ## Spreuk met één doel (vijand of partylid) -> in de ring eerst een doel kiezen.
@@ -1018,3 +1175,429 @@ func _say(text: String) -> void:
 	last_text = text
 	if hud:
 		hud.toast(text)
+
+
+const CoopAvatar := preload("res://scripts/coop/coop_avatar.gd")
+const Protocol := preload("res://scripts/net/net_protocol.gd")
+const Codec := preload("res://scripts/net/net_codec.gd")
+
+
+func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
+	coop_mode = true
+	coop_local_slot = local_slot
+	if session != null and "is_host" in session:
+		coop_sim_host = bool(session.is_host)
+	else:
+		coop_sim_host = GameState.coop_is_host() and local_slot == Protocol.HOST_SLOT
+	coop_ring_no_pause = true
+	allies_enabled = false
+	_remove_solo_party_bodies()
+	_coop_slots.clear()
+	_coop_lock_idx.clear()
+	_coop_attack_cd.clear()
+	_rebuild_enemy_order()
+	_clear_coop_avatars()
+	coop_sync_roster(roster)
+	if not coop_sim_host:
+		player.set_analog(func() -> Vector2: return Vector2.ZERO, SomData.MOVE_SPEED)
+
+
+func coop_sync_roster(roster: Array) -> void:
+	var seated: Dictionary = {}
+	for row in roster:
+		var slot := int(row.get("slot", Protocol.NO_SLOT))
+		var cid := str(row.get("character_id", ""))
+		if slot == Protocol.NO_SLOT or cid == "":
+			continue
+		seated[slot] = cid
+	for slot in _coop_avatars.keys():
+		if not seated.has(int(slot)):
+			coop_deactivate_slot(int(slot))
+	for slot in seated.keys():
+		var cid: String = str(seated[slot])
+		_coop_slots[int(slot)] = cid
+		if int(slot) == coop_local_slot:
+			active_id = cid
+			_apply_player_sheet()
+		else:
+			_ensure_coop_avatar(int(slot), cid)
+	_prune_coop_avatar_orphans(seated)
+
+
+func _prune_coop_avatar_orphans(seated: Dictionary) -> void:
+	var objects: Node = room.get_node("Objects")
+	for c in objects.get_children():
+		if not (c is CoopAvatar):
+			continue
+		var av: CoopAvatar = c as CoopAvatar
+		if av.slot == coop_local_slot or not seated.has(av.slot):
+			if _coop_avatars.get(av.slot) == av:
+				_coop_avatars.erase(av.slot)
+			av.queue_free()
+			continue
+		if not _coop_avatars.has(av.slot):
+			_coop_avatars[av.slot] = av
+
+
+func coop_deactivate_slot(slot: int) -> void:
+	_coop_slots.erase(slot)
+	if not _coop_avatars.has(slot):
+		return
+	var n: Node = _coop_avatars[slot]
+	_coop_avatars.erase(slot)
+	if is_instance_valid(n):
+		n.queue_free()
+
+
+func _remove_solo_party_bodies() -> void:
+	for a in allies:
+		if is_instance_valid(a):
+			a.queue_free()
+	allies.clear()
+	if room == null:
+		return
+	var objects: Node = room.get_node_or_null("Objects")
+	if objects == null:
+		return
+	for c in objects.get_children():
+		if c is SomAlly:
+			c.queue_free()
+	var follower := objects.get_node_or_null("CodexFollower")
+	if follower != null:
+		follower.queue_free()
+
+
+func _clear_coop_avatars() -> void:
+	for slot in _coop_avatars.keys():
+		coop_deactivate_slot(int(slot))
+	var objects: Node = room.get_node("Objects")
+	for c in objects.get_children():
+		if c is CoopAvatar:
+			c.queue_free()
+	_coop_avatars.clear()
+
+
+func _ensure_coop_avatar(slot: int, hero_id: String) -> void:
+	if _coop_avatars.has(slot):
+		var existing: CoopAvatar = _coop_avatars[slot] as CoopAvatar
+		if is_instance_valid(existing):
+			if existing.hero_id != hero_id:
+				var tex := sheet_for(hero_id)
+				existing.setup(slot, hero_id, tex)
+			return
+		_coop_avatars.erase(slot)
+	var objects: Node = room.get_node("Objects")
+	var named := objects.get_node_or_null("CoopAvatar_%d" % slot)
+	if named is CoopAvatar:
+		var reuse: CoopAvatar = named as CoopAvatar
+		var tex := sheet_for(hero_id)
+		reuse.setup(slot, hero_id, tex)
+		_coop_avatars[slot] = reuse
+		return
+	_spawn_coop_avatar(slot, hero_id)
+
+
+func _spawn_coop_avatar(slot: int, hero_id: String) -> void:
+	var av: CoopAvatar = CoopAvatar.new()
+	av.name = "CoopAvatar_%d" % slot
+	var tex := sheet_for(hero_id)
+	av.setup(slot, hero_id, tex)
+	room.get_node("Objects").add_child(av)
+	av.position = player.position + Vector2(slot * 12, 0)
+	_coop_avatars[slot] = av
+
+
+## Headless/tests: remote CoopAvatar-nodes (niet de lokale speler-body).
+func coop_remote_avatar_count() -> int:
+	_purge_invalid_coop_avatars()
+	var n := 0
+	for slot in _coop_avatars.keys():
+		var av: Variant = _coop_avatars[slot]
+		if is_instance_valid(av):
+			n += 1
+	return n
+
+
+func coop_avatar_nodes_in_scene() -> int:
+	var n := 0
+	for c in room.get_node("Objects").get_children():
+		if c is CoopAvatar:
+			n += 1
+	return n
+
+
+func coop_seated_player_count(roster: Array) -> int:
+	var n := 0
+	for row in roster:
+		if str(row.get("character_id", "")) != "" and int(row.get("slot", Protocol.NO_SLOT)) != Protocol.NO_SLOT:
+			n += 1
+	return n
+
+
+func _party_sprite_path_set() -> Dictionary:
+	var out := {}
+	for p in sheets.values():
+		if p is Texture2D:
+			var path: String = (p as Texture2D).resource_path
+			if path != "":
+				out[path] = true
+	for id in SomData.SHEETS.keys():
+		out[str(SomData.SHEETS[id])] = true
+	if sheets.has("dennis"):
+		var dax: Texture2D = sheets["dennis"] as Texture2D
+		if dax != null and dax.resource_path != "":
+			out[dax.resource_path] = true
+	return out
+
+
+func _sprite_uses_party_texture(spr: Node, paths: Dictionary) -> bool:
+	var tex: Texture2D = null
+	if spr is Sprite2D:
+		tex = (spr as Sprite2D).texture
+	elif spr is AnimatedSprite2D:
+		var fr := (spr as AnimatedSprite2D).sprite_frames
+		if fr != null and fr.get_animation_names().size() > 0:
+			tex = fr.get_frame_texture(fr.get_animation_names()[0], 0)
+	if tex == null:
+		return false
+	var path: String = tex.resource_path
+	if path != "" and paths.has(path):
+		return true
+	for t in sheets.values():
+		if tex == t:
+			return true
+	return false
+
+
+func _count_party_texture_sprites(node: Node, paths: Dictionary, under_canvas: bool) -> int:
+	if node is CanvasLayer:
+		under_canvas = true
+	if node is SomArena:
+		# HUD/ring/codex hangen onder SomArena, niet meetellen.
+		under_canvas = true
+	var n := 0
+	if not under_canvas and (node is Sprite2D or node is AnimatedSprite2D):
+		if _sprite_uses_party_texture(node, paths):
+			n += 1
+	for ch in node.get_children():
+		n += _count_party_texture_sprites(ch, paths, under_canvas)
+	return n
+
+
+## Wereld-sprites met party-kaarttexturen (speler + CoopAvatar; geen HUD/FX).
+func coop_party_texture_sprite_count() -> int:
+	if room == null:
+		return 0
+	return _count_party_texture_sprites(room, _party_sprite_path_set(), false)
+
+
+func coop_expected_remote_avatars(roster: Array) -> int:
+	var n := 0
+	for row in roster:
+		var slot := int(row.get("slot", Protocol.NO_SLOT))
+		var cid := str(row.get("character_id", ""))
+		if slot == Protocol.NO_SLOT or cid == "" or slot == coop_local_slot:
+			continue
+		n += 1
+	return n
+
+
+func _purge_invalid_coop_avatars() -> void:
+	for slot in _coop_avatars.keys():
+		if not is_instance_valid(_coop_avatars[slot]):
+			_coop_avatars.erase(slot)
+
+
+func coop_avatar_seats_unique() -> bool:
+	_purge_invalid_coop_avatars()
+	var seats := {}
+	for slot in _coop_avatars.keys():
+		if seats.has(slot):
+			return false
+		var av: CoopAvatar = _coop_avatars[slot] as CoopAvatar
+		if not is_instance_valid(av) or av.slot != int(slot):
+			return false
+		seats[slot] = true
+	for c in room.get_node("Objects").get_children():
+		if c is CoopAvatar and not _coop_avatar_tracked(c):
+			return false
+	return true
+
+
+func _coop_avatar_tracked(node: Node) -> bool:
+	for av in _coop_avatars.values():
+		if av == node:
+			return true
+	return false
+
+
+func _rebuild_enemy_order() -> void:
+	_enemy_order.clear()
+	for m in enemies.keys():
+		if is_instance_valid(m):
+			_enemy_order.append(m)
+
+
+func _coop_body(slot: int) -> Node2D:
+	if slot == coop_local_slot:
+		return player
+	if _coop_avatars.has(slot):
+		var av: Node2D = _coop_avatars[slot] as Node2D
+		if not is_instance_valid(av):
+			_coop_avatars.erase(slot)
+			return null
+		return av
+	return null
+
+
+func coop_poll_local_input() -> Dictionary:
+	if not coop_mode or coop_local_slot < 0:
+		return {}
+	var stick := analog_dir()
+	var buttons := 0
+	if Input.is_action_just_pressed("interact") and not _attack_suppressed():
+		buttons |= Codec.BTN_ATTACK
+	if Input.is_action_just_pressed(RING_ACTION):
+		buttons |= Codec.BTN_RING
+	var lock_idx := -1
+	if target_lock and target_lock.locked_enemy() != null:
+		lock_idx = _enemy_index(target_lock.locked_enemy())
+	return {"stick": stick, "buttons": buttons, "lock_idx": lock_idx}
+
+
+func coop_host_step(inputs: Array, dt: float) -> void:
+	if not coop_sim_host:
+		return
+	if target_lock:
+		target_lock.tick(dt)
+	for inp in inputs:
+		_apply_coop_input(inp, dt)
+	swing_lock = maxf(0.0, swing_lock - dt)
+	for m in enemies.keys():
+		if is_instance_valid(m):
+			_enemy_ai(m, dt)
+		else:
+			enemies.erase(m)
+	_rebuild_enemy_order()
+
+
+func _apply_coop_input(inp: Dictionary, dt: float) -> void:
+	var slot := int(inp.get("slot", Protocol.NO_SLOT))
+	if not _coop_slots.has(slot):
+		return
+	var body: Node2D = _coop_body(slot)
+	if body == null:
+		return
+	var stick: Vector2 = inp.get("stick", Vector2.ZERO)
+	if stick.length_squared() > 0.01:
+		var dir := stick.normalized()
+		body.position += dir * SomData.MOVE_SPEED * dt
+		if body == player:
+			body.facing = SomMove.facing_for(dir, body.facing)
+	var lock_i := int(inp.get("lock_idx", -1))
+	if lock_i >= 0:
+		_coop_lock_idx[slot] = lock_i
+	var buttons := int(inp.get("buttons", 0))
+	if buttons & Codec.BTN_RING and slot == coop_local_slot:
+		open_ring()
+	var cd := float(_coop_attack_cd.get(slot, 0.0))
+	cd = maxf(0.0, cd - dt)
+	_coop_attack_cd[slot] = cd
+	if buttons & Codec.BTN_ATTACK and cd <= 0.0:
+		var hid := str(_coop_slots[slot])
+		if is_alive(hid):
+			_swing(hid, body, charge_mult(charge if slot == coop_local_slot else 1.0))
+			_coop_attack_cd[slot] = 0.35
+
+
+func _enemy_index(m: Node) -> int:
+	if not _enemy_order.has(m):
+		_rebuild_enemy_order()
+	return _enemy_order.find(m)
+
+
+func coop_encode_snapshot(tick: int) -> PackedByteArray:
+	var players: Array = []
+	for slot in _coop_slots.keys():
+		var body: Node2D = _coop_body(int(slot))
+		if body == null:
+			continue
+		var hid := str(_coop_slots[slot])
+		var h := member(hid)
+		players.append({
+			"slot": int(slot),
+			"x": int(body.position.x),
+			"y": int(body.position.y),
+			"face": _coop_face_bits(body.facing),
+			"frame": 0,
+			"hp": int(h.get("hp", 0)),
+			"mp": int(h.get("mp", 0)),
+			"flags": Protocol.FLAG_RING_OPEN if ring.is_open and int(slot) == coop_local_slot else 0,
+		})
+	var elist: Array = []
+	_rebuild_enemy_order()
+	for i in _enemy_order.size():
+		var m: Node = _enemy_order[i]
+		if not is_instance_valid(m) or not enemies.has(m):
+			continue
+		var e: Dictionary = enemies[m]
+		elist.append({
+			"idx": i,
+			"x": int(center_of(m).x),
+			"y": int(center_of(m).y),
+			"hp": int(e.get("hp", 0)),
+			"pose": 0,
+			"target_slot": Protocol.HOST_SLOT,
+		})
+	return Codec.pack_snapshot(tick, players, elist)
+
+
+func apply_coop_snapshot(snap: Dictionary) -> void:
+	_coop_snap = snap
+	if coop_sim_host:
+		return
+	for row in snap.get("players", []):
+		var slot := int(row.get("slot", Protocol.NO_SLOT))
+		var body: Node2D = _coop_body(slot)
+		if body == null:
+			continue
+		var pos := Vector2(float(row.get("x", 0)), float(row.get("y", 0)))
+		var face_i := int(row.get("face", 0))
+		var face := Vector2i(1, 0) if face_i == 2 else Vector2i(-1, 0) if face_i == 0 else Vector2i(0, 1)
+		if body is CoopAvatar:
+			(body as CoopAvatar).place(pos, face)
+		else:
+			body.position = pos
+			body.facing = face
+		var hid := str(_coop_slots.get(slot, ""))
+		if not hid.is_empty():
+			var h := member(hid)
+			if not h.is_empty():
+				h["hp"] = int(row.get("hp", h["hp"]))
+				h["mp"] = int(row.get("mp", h["mp"]))
+	for row in snap.get("enemies", []):
+		var idx := int(row.get("idx", -1))
+		if idx < 0 or idx >= _enemy_order.size():
+			continue
+		var m: Node = _enemy_order[idx]
+		if not is_instance_valid(m) or not enemies.has(m):
+			continue
+		var e: Dictionary = enemies[m]
+		e["hp"] = int(row.get("hp", e["hp"]))
+		var cx := float(row.get("x", 0))
+		var cy := float(row.get("y", 0))
+		m.position = Vector2(cx, cy) - Vector2(0, center_of(m).y - m.position.y)
+
+
+func coop_snapshot() -> Dictionary:
+	return _coop_snap
+
+
+static func _coop_face_bits(f: Vector2i) -> int:
+	if f.x > 0:
+		return 2
+	if f.x < 0:
+		return 0
+	if f.y > 0:
+		return 3
+	return 1

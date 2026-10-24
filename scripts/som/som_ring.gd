@@ -80,7 +80,11 @@ func open() -> void:
 	is_open = true
 	_open_frame = Engine.get_process_frames()
 	_was_paused = get_tree().paused
-	get_tree().paused = true
+	var pause_world := true
+	if arena != null and "coop_ring_no_pause" in arena and bool(arena.coop_ring_no_pause):
+		pause_world = false
+	if pause_world:
+		get_tree().paused = true
 	root.visible = true
 	_build()
 
@@ -90,14 +94,15 @@ func close(choice: Dictionary) -> void:
 		return
 	is_open = false
 	root.visible = false
-	get_tree().paused = _was_paused
+	if get_tree().paused and not _was_paused:
+		get_tree().paused = _was_paused
 	closed_frame = Engine.get_process_frames()
 	arena.on_ring_closed(choice)
 
 
 func switch_tab(dir := 1) -> void:
 	if tab == "target":
-		tab = "magic"
+		tab = "items" if str(pending_spell.get("kind", "")) == "codex" else "magic"
 		pending_spell = {}
 	else:
 		tab = TABS[(TABS.find(tab) + dir + TABS.size()) % TABS.size()]
@@ -124,7 +129,9 @@ func _tab_title() -> String:
 
 
 func _build() -> void:
-	if tab == "target":
+	if tab == "target" and str(pending_spell.get("kind", "")) == "codex":
+		build_with(arena.codex_targets())
+	elif tab == "target":
 		build_with(arena.spell_targets(str(pending_spell.get("id", "")), str(pending_spell.get("caster", ""))))
 	else:
 		build_with(arena.ring_entries().get(tab, []))
@@ -289,6 +296,8 @@ func label_rects() -> Array:
 func icon_for(e: Dictionary) -> Texture2D:
 	var sheet := SomFx.tex(SomData.UI_RING_ICONS)
 	if sheet == null:
+		sheet = SomFx.tex(SomData.UI_RING_ICONS_8)
+	if sheet == null:
 		sheet = SomFx.tex(SomData.UI_RING_ICONS_FALLBACK)
 	if sheet == null:
 		return null
@@ -337,12 +346,16 @@ func choose(i: int) -> void:
 		return
 	var e: Dictionary = entries[i]
 	if tab == "target":
-		var q := {"kind": "spell", "id": pending_spell["id"], "caster": pending_spell["caster"], "target": e["target"]}
+		var back := "items" if str(pending_spell.get("kind", "")) == "codex" else "magic"
+		var q := {"kind": str(pending_spell.get("kind", "spell")), "id": pending_spell["id"], "caster": pending_spell.get("caster", ""), "target": e["target"]}
 		pending_spell = {}
-		tab = "magic"
+		tab = back
 		close(q)
 		return
-	if str(e["kind"]) == "spell" and arena.needs_target(str(e["id"])):
+	if str(e["kind"]) == "codex" and int(e.get("count", 0)) <= 0:
+		close({"kind": "codex", "id": "codex"})      # geen boek: de melding komt via capture()
+		return
+	if (str(e["kind"]) == "spell" and arena.needs_target(str(e["id"]))) or str(e["kind"]) == "codex":
 		pending_spell = e
 		tab = "target"
 		selected = 0

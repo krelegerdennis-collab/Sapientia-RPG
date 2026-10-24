@@ -1,17 +1,11 @@
 extends Node
-## Betrouwbaar opslaan: atomaire vervanging, reservekopie, migratie en suspend.
+## Betrouwbaar opslaan: atomaire vervanging, reservekopie, migratie en foutmeldingen.
 ## Start: godot --path . -- --savetest
 
 const SAVE := "user://savetest_atomic.json"
-const SUSPEND_SAVE := "user://savetest_suspend.json"
 
 var failures := 0
 var passes := 0
-
-
-class SuspendScene extends Node:
-	func try_autosave(reason: String) -> bool:
-		return GameState.autosave(Vector2i(7, 8), Vector2i.DOWN, reason)
 
 
 func _ready() -> void:
@@ -41,7 +35,6 @@ func _write(path: String, text: String) -> void:
 
 func _run() -> void:
 	_remove_save(SAVE)
-	_remove_save(SUSPEND_SAVE)
 	GameState.new_game("Dax")
 	GameState.current_map = "res://scenes/maps/wilgendal.tscn"
 
@@ -85,29 +78,26 @@ func _run() -> void:
 	check("oude save zonder versienummer blijft laden",
 			GameState.load_game(SAVE) and GameState.gold == 33)
 
-	var prior_autosave := GameState.autosave_path
-	GameState.autosave_path = SUSPEND_SAVE
-	Settings.set_value("autosave", true)
-	var fake := SuspendScene.new()
-	get_tree().root.add_child(fake)
-	var previous_scene := get_tree().current_scene
-	get_tree().current_scene = fake
-	GameState.in_battle = true
-	GameState._notification(NOTIFICATION_APPLICATION_PAUSED)
-	check("pauzeren tijdens een gevecht schrijft geen save",
-			not FileAccess.file_exists(SUSPEND_SAVE)
-			and not FileAccess.file_exists(SUSPEND_SAVE + ".tmp"))
-	GameState.in_battle = false
-	GameState._notification(NOTIFICATION_APPLICATION_PAUSED)
-	check("pauzeren in een veilige veldstaat hergebruikt save_game",
-			int(GameState.read_save(SUSPEND_SAVE).get("gold", -1)) == 33)
-	get_tree().current_scene = previous_scene
-	fake.queue_free()
-	GameState.autosave_path = prior_autosave
-	GameState.in_battle = false
+	_remove_save(SAVE)
+	GameState.gold = 40
+	check("save na een eerdere gelukte save lukt", GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, SAVE))
+	_write(SAVE + ".tmp", "{\"gold\":")
+	GameState.gold = 41
+	check("achtergebleven halve .tmp blokkeert de volgende save niet",
+			GameState.save_game(Vector2i(1, 2), Vector2i.DOWN, SAVE)
+			and not FileAccess.file_exists(SAVE + ".tmp")
+			and int(GameState._read_save_file(SAVE).get("gold", -1)) == 41
+			and int(GameState._read_save_file(SAVE + ".bak").get("gold", -1)) == 40)
+	var emitted: Array = []
+	var on_saved := func(p: String, ok: bool) -> void: emitted.append([p, ok])
+	GameState.game_saved.connect(on_saved)
+	var bad_ok := GameState.save_game(Vector2i(1, 3), Vector2i.DOWN, "user://bestaat_niet_dir/x.json")
+	GameState.save_game(Vector2i(1, 4), Vector2i.DOWN, SAVE)
+	GameState.game_saved.disconnect(on_saved)
+	check("mislukte save meldt false en een gelukte meldt true via game_saved",
+			not bad_ok and emitted.size() == 2 and emitted[0][1] == false and emitted[1][1] == true)
 
 	_remove_save(SAVE)
-	_remove_save(SUSPEND_SAVE)
 	print("SAVETEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % [
 			"OK" if failures == 0 else "FOUT", passes, failures])

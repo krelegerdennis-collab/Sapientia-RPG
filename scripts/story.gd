@@ -27,6 +27,12 @@ var after_battle_event := ""
 var last_choice := -1
 ## Getimed event: {"event": id, "left": sec, "map": pad}
 var scheduled := {}
+## Eenmalig event na een uniek monster (SD.AFTER_UNIQUE), wacht tot de speler vrij is. Niet in de save:
+## wie eerder opslaat en laadt krijgt de vlag via GameState._unique_seen_flags (nooit achteraf afspelen).
+var pending_unique_event := ""
+var _pending_free := 0.0
+## Zo lang moet de speler vrij zijn (kaart ingefade, geen tekst/menu) voordat het event start.
+const PENDING_FREE_SEC := 0.5
 var _shake_left := 0.0
 var _shake_total := 0.0
 var _shake_strength := 0.0
@@ -36,6 +42,7 @@ var card_label: Label
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
+	GameState.unique_marked.connect(_on_unique_marked)
 
 
 ## Bij een nieuw spel (keep_history = false) en bij laden (geschiedenis blijft, voor debuggen).
@@ -47,6 +54,8 @@ func reset(keep_history := false) -> void:
 		history.clear()
 	after_battle_event = ""
 	scheduled = {}
+	pending_unique_event = ""
+	_pending_free = 0.0
 
 
 # ---------------------------------------------------------------- voorwaarden
@@ -566,7 +575,47 @@ func card_visible() -> bool:
 	return _card_layer != null and _card_layer.visible
 
 
+func _on_unique_marked(id: String, _how: String) -> void:
+	var ev := str(SD.AFTER_UNIQUE.get(id, ""))
+	if ev == "":
+		return
+	# al gezien -> de variant zonder commando's
+	var v := pick(ev)
+	if v.get("do") is Array and not (v["do"] as Array).is_empty():
+		pending_unique_event = ev
+		_pending_free = 0.0
+
+
+## Is de speler vrij rondlopend op een kaart (geen gevecht, overgang, tekst, menu of ander event)?
+func player_free() -> bool:
+	if running or Dialog.is_open or GameState.changing_map or GameState.in_battle or card_visible():
+		return false
+	if GameState.pending_kern_absorb != "":
+		return false
+	var m := _map()
+	var p := _player()
+	if m == null or p == null or bool(p.get("input_locked")):
+		return false
+	return not (m.has_method("menu_open") and m.menu_open())
+
+
+func _process_pending(delta: float) -> void:
+	if pending_unique_event == "":
+		return
+	if not player_free():
+		_pending_free = 0.0
+		return
+	_pending_free += delta
+	if _pending_free < PENDING_FREE_SEC:
+		return
+	var ev := pending_unique_event
+	pending_unique_event = ""
+	_pending_free = 0.0
+	run(ev)
+
+
 func _process(delta: float) -> void:
+	_process_pending(delta)
 	# schudden: camera-offset
 	if _shake_left > 0.0:
 		_shake_left -= delta

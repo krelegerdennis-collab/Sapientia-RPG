@@ -107,9 +107,11 @@ const HELDEN := "res://assets/sprites/som/kaart/"
 const HELD_VARIANTEN: Array[String] = ["_wm1_slim", "_wm1", ""]
 ## Vaste partijsheets (RPG ART, 21 okt 2026): Seren en Vesper gebruiken de goedgekeurde final_trio-sheets,
 ## niet de _slim-varianten (die zijn voor de veld-NPC's Lotte/Noor zonder staf).
+## 23 okt 2026: ook Dax gebruikt de final_trio-sheet (dax_wm1.png, bron assets/sprites/party_24x32/).
 ## Held-id (game_data.HEROES) -> sheetnaam.
 const HELD_ID := {"dennis": "dax", "noor": "vesper", "lotte": "seren", "kael": "kael", "orion": "orion"}
-const HELD_VAST := {"seren": "res://assets/sprites/som/kaart/seren_wm1.png", "vesper": "res://assets/sprites/som/kaart/vesper.png"}
+const HELD_VAST := {"dax": "res://assets/sprites/som/kaart/dax_wm1.png",
+		"seren": "res://assets/sprites/som/kaart/seren_wm1.png", "vesper": "res://assets/sprites/som/kaart/vesper.png"}
 
 
 ## Toont deze map de held in 24x32?
@@ -183,7 +185,8 @@ static func toepassen(map: Node) -> bool:
 	return true
 
 
-## Kaartsprite van de partijleider: <helden>/<voornaam>_<held_variant>.png als die er is (WM1: dax, seren),
+## Kaartsprite van de partijleider: eerst de vaste partijsheet (HELD_VAST: dax, seren, vesper),
+## dan <helden>/<voornaam>_<held_variant>.png als die er is,
 ## anders <helden>/<voornaam>.png (vesper, kael, orion), anders <helden>/<voornaam>_wm1.png (dax, seren),
 ## anders "speler" uit de config. WM2 staat in de wacht (wacht/wm2/, Dennis 20 okt 2026).
 static func speler_sheet(gebied: String) -> String:
@@ -192,6 +195,8 @@ static func speler_sheet(gebied: String) -> String:
 	var gs = Engine.get_main_loop().root.get_node_or_null("GameState") if Engine.get_main_loop() is SceneTree else null
 	if map_ != "" and gs != null and not (gs.party as Array).is_empty():
 		var naam := str((gs.party[0] as Dictionary).get("name", "")).to_lower().get_slice(" ", 0)
+		if HELD_VAST.has(naam) and ResourceLoader.exists(str(HELD_VAST[naam])):
+			return str(HELD_VAST[naam])
 		var basis := map_.trim_suffix("/") + "/" + naam
 		var variant := str(g.get("held_variant", ""))
 		if naam != "" and variant != "" and ResourceLoader.exists(basis + "_" + variant + ".png"):

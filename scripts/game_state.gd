@@ -18,6 +18,10 @@ const START_SPAWN := "bed"
 const RESPAWN_MAP := "res://scenes/maps/wilgendal.tscn"
 const RESPAWN_SPAWN := "start"
 const TOWN_MAP := "res://scenes/maps/wilgendal.tscn"
+## #166: het dorp (plein 10) met de deur van Dax naar HOUSE_MAP.
+const DORP_MAP := "res://scenes/maps/dorp_wilgendal.tscn"
+## #166: spawn voor de deur van Dax in DORP_MAP.
+const DORP_HUIS_SPAWN := "voor_dax"
 const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
 const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
@@ -42,6 +46,102 @@ const MAIN_HERO := "dennis"
 ## Action-modus: wie je bestuurt (SWAP in som_arena.gd). Blijft over warps/kamers, opslaan/laden en
 ## Classic<->Action. Opgeslagen als "leader"; oude saves zonder veld = MAIN_HERO (Dax).
 var leader_id := MAIN_HERO
+## Fase B co-op: "host", "guest", of leeg (solo). Gasten schrijven nooit som_save_1.json.
+var coop_role := ""
+const COOP_SANDBOX_SCENE := "res://scenes/coop/action_sandbox.tscn"
+var _coop_lobby: Node = null
+var _coop_discovery: Node = null
+var _coop_session: Node = null
+var _coop_pending_message := ""
+
+
+func coop_is_host() -> bool:
+	return coop_role == "host"
+
+
+func coop_is_guest() -> bool:
+	return coop_role == "guest"
+
+
+func coop_in_session() -> bool:
+	return coop_role != ""
+
+
+func coop_lobby() -> LanLobby:
+	return _coop_lobby as LanLobby
+
+
+func coop_register_lobby(lobby: Node, discovery: Node = null) -> void:
+	_coop_lobby = lobby
+	_coop_discovery = discovery
+	if _coop_lobby != null and _coop_lobby.has_signal("session_ended"):
+		if not _coop_lobby.session_ended.is_connected(_on_coop_session_ended):
+			_coop_lobby.session_ended.connect(_on_coop_session_ended)
+	if _coop_lobby != null and _coop_lobby.has_signal("link_lost"):
+		if not _coop_lobby.link_lost.is_connected(_on_coop_link_lost):
+			_coop_lobby.link_lost.connect(_on_coop_link_lost)
+
+
+func coop_clear_lobby_refs() -> void:
+	_coop_lobby = null
+	_coop_discovery = null
+
+
+func coop_bind_session(session: Node) -> void:
+	_coop_session = session
+	if session != null and session.has_signal("link_lost"):
+		if not session.link_lost.is_connected(_on_coop_link_lost):
+			session.link_lost.connect(_on_coop_link_lost)
+
+
+func coop_shutdown_session() -> void:
+	if _coop_session != null and is_instance_valid(_coop_session) and _coop_session.has_method("shutdown"):
+		_coop_session.shutdown(true)
+	_coop_session = null
+
+
+func coop_end_session(reason: String = "") -> void:
+	coop_shutdown_session()
+	if coop_is_host() and _coop_lobby != null and _coop_lobby.has_method("broadcast_session_end"):
+		if reason != "":
+			_coop_lobby.broadcast_session_end(reason)
+		if _coop_lobby.has_method("close"):
+			_coop_lobby.close()
+	if _coop_discovery != null and _coop_discovery.has_method("stop"):
+		_coop_discovery.stop()
+	coop_role = ""
+	coop_clear_lobby_refs()
+
+
+func _on_coop_link_lost() -> void:
+	if not coop_in_session():
+		return
+	var msg := "Connection lost."
+	coop_end_session("")
+	go_to_title()
+	Dialog.show_lines([msg])
+
+
+func coop_session_end_message(reason: String) -> String:
+	const Protocol := preload("res://scripts/net/net_protocol.gd")
+	return str(Protocol.SESSION_END_TEXT.get(reason, Protocol.SESSION_END_TEXT["ended"]))
+
+
+func _on_coop_session_ended(reason: String) -> void:
+	if coop_role == "" and reason == "":
+		return
+	var tree := get_tree()
+	var scene := tree.current_scene if tree != null else null
+	if scene != null and scene is CanvasItem:
+		var path := str(scene.get_script().resource_path) if scene.get_script() != null else ""
+		if path.ends_with("coop_lobby_screen.gd"):
+			return
+	var msg := coop_session_end_message(reason)
+	coop_shutdown_session()
+	coop_role = ""
+	coop_clear_lobby_refs()
+	go_to_title()
+	Dialog.show_lines([msg])
 
 
 ## Geldige leider: leader_id als die held in de actieve party zit en niet KO is, anders Dax (MAIN_HERO).
@@ -70,18 +170,18 @@ var save_path := "user://save_1.json"
 var active_slot := 1
 ## Slot 0 = de aparte autosave (Laden: 'Autosave'). Die overschrijft nooit slot 1..4.
 const AUTOSAVE_SLOT := 0
-## Redenen waarvoor automatisch mag worden opgeslagen. "map" blijft de enige geplande
-## autosave; "suspend" wordt alleen synchroon bij pauzeren/afsluiten gebruikt.
-const AUTOSAVE_REASONS := ["map", "suspend"]
+## Redenen waarvoor automatisch wordt opgeslagen (Dennis).
+## "achtergrond" is de verplichte pauze-save en negeert alleen de instelling, niet de blokkades.
+const AUTOSAVE_REASONS := ["map", "achtergrond"]
 ## Gekozen slot voor het volgende nieuwe spel (titelscherm > New Game > slot kiezen).
 var pending_new_slot := 1
 ## Autosave alleen bij een overgang wereldkaart <-> kerker (niet bij elke kamer of een dorp).
 const NON_DUNGEON_MAPS := ["wilgendal", "dorp_wilgendal", "esdoorn", "wilgendal_binnen",
 		"huis_wilgendal", "esdoorn_herberg", "esdoorn_huis_noor"]
 ## v0.11 Automatisch opslaan: een EIGEN bestand (overschrijft de handmatige save nooit).
-## Wordt geschreven na een mapwissel, na een gewonnen gevecht en als de app naar de
-## achtergrond gaat (Android). Nooit tijdens een gevecht, een mapwissel of een tekstvak.
-## Uit te zetten in Opties ('Autom. opslaan', autoload Settings).
+## Wordt geschreven bij een kerker-overgang en als de app naar de achtergrond gaat (Android).
+## De optie schakelt alleen de gewone autosave uit; de pauze-save blijft verplicht.
+## Nooit tijdens een gevecht, een mapwissel of een tekstvak.
 const AUTOSAVE_PATH := "user://autosave.json"
 var autosave_path := AUTOSAVE_PATH
 ## Betatest: een eigen voortgang, los van Nieuw spel en Doorgaan. Zo kun je nieuwe
@@ -143,12 +243,21 @@ var archief2_last_leech := {}
 ## de actieve bondgenoot ("" = geen) en de teller voor unieke ids (nooit hergebruikt).
 ## codex_changed: de actieve bondgenoot (of de lijst) is veranderd. De volger op de kaart luistert.
 signal codex_changed
+## Sessielog (scripts/core/sessie_log.gd) luistert hiernaar; ze sturen niets aan.
+signal battle_started(enemies: Array, boss: bool)
+signal battle_ended(result: String)
+signal game_over(map_path: String)
+signal game_saved(path: String, ok: bool)
+signal game_loaded(path: String, ok: bool)
+signal menu_opened(which: String)
 var codex_pages: Array = []
 var codex_active := ""
 var codex_next_id := 1
 ## v0.19 UNIEKE monsters (GameData.ENEMIES "unique": true, bv. de Inktwurm; beslissing Dennis): id ->
 ## "verslagen" / "gevangen". Staat erin = komt nooit meer terug. In de save als "uniek".
 var unique_done := {}
+## Uniek monster net voor het eerst weg (verslagen of gevangen). Story luistert (StoryData.AFTER_UNIQUE).
+signal unique_marked(id: String, how: String)
 
 ## 100-verdiepingen-kerker (de Diepe Grot): alles gaat mee in de save, blok "dungeon100"
 ## (Dungeon100Rules.save_data/load_data). Zie HANDOFF_DUNGEON100*.md.
@@ -217,6 +326,9 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 var current_map := ""
 var pending_spawn := ""
 var changing_map := false
+## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
+## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
+var huis_herkomst := ""
 
 ## Positie op de map waar het gevecht begon (om daarna terug te keren).
 var has_return_point := false
@@ -334,15 +446,26 @@ func _ready() -> void:
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
 	# Actie-balans (SoM-proef): godot -- --actionsim [--fights=N] [--boss-fights=N] [--out=pad]  (tools/battlesim/action_sim.gd)
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
+	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
+	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
+	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
+	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
+	# ECHO questlog (smoke): of  godot -- --echotest [--shots=/pad/map]  (scripts/tests/echo_tests.gd).
+	# Sessielog (SessieLog, scripts/core/sessie_log.gd): of  godot -- --sessielogcoretest  (scripts/tests/sessielog_core_tests.gd).
+	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
+	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
+	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
+	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
 			["--hudtest", "res://scripts/tests/hud_tests.gd", "HudTest", "hudtest"],
+			["--locktest", "res://scripts/tests/lock_tests.gd", "LockTest", "locktest"],
 			["--puzzletest", "res://scripts/tests/puzzle_tests.gd", "PuzzleTest", "puzzletest"],
 			["--dungeontest", "res://scripts/tests/dungeon_tests.gd", "DungeonTest", "dungeontest"],
 			["--golemtest", "res://scripts/tests/golem_tests.gd", "GolemTest", "golemtest"],
@@ -374,13 +497,22 @@ func _ready() -> void:
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
+			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
 			["--musictest", "res://scripts/tests/music_tests.gd", "MusicTest", "musictest"],
+			["--muziektest", "res://scripts/tests/muziek_tests.gd", "MuziekTest", "muziektest"],
 			["--held24test", "res://scripts/tests/held24_tests.gd", "Held24Test", "held24test"],
 			["--sessiefixtest", "res://scripts/tests/sessiefix_tests.gd", "SessiefixTest", "sessiefixtest"],
 			["--rekruuttest", "res://scripts/tests/rekruut_tests.gd", "RekruutTest", "rekruuttest"],
 			["--balansarchief1test", "res://scripts/tests/balans_archief1_tests.gd", "BalansArchief1Test", "balansarchief1test"],
 			["--questtest", "res://scripts/tests/quest_tests.gd", "QuestTest", "questtest"],
+			["--echotest", "res://scripts/tests/echo_tests.gd", "EchoTest", "echotest"],
+			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
+			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
+			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
+			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
+			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
+			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
@@ -516,9 +648,19 @@ func _go_to_scene(path: String) -> void:
 		get_tree().change_scene_to_file(path)
 
 
+## #166: kies de echte bestemming van een warp en onthoud de herkomst bij het binnengaan van het huis.
+func huis_route(van: String, path: String, spawn_name: String) -> Array:
+	if path == HOUSE_MAP and van != HOUSE_MAP:
+		huis_herkomst = "dorp" if van == DORP_MAP else ""
+	elif van == HOUSE_MAP and path == TOWN_MAP and spawn_name == "voor_huis" and huis_herkomst == "dorp":
+		return [DORP_MAP, DORP_HUIS_SPAWN]
+	return [path, spawn_name]
+
+
 ## Nieuw spel (v0.10): de party is alleen de hoofdpersoon (held 'dennis') met
 ## de gekozen naam. Noor en Lotte komen later via add_member("noor") / add_member("lotte").
 func new_game(hero_name := DEFAULT_NAME) -> void:
+	huis_herkomst = ""
 	som_mode = false
 	leader_id = MAIN_HERO
 	player_name = clean_name(hero_name)
@@ -1036,13 +1178,12 @@ func read_newest_save() -> Dictionary:
 	return read_save(p) if p != "" else {}
 
 
-## v0.11 Automatisch opslaan in autosave_path. Doet niets (false) als het uit staat in
-## Opties of als het nu niet veilig kan (gevecht, mapwissel, tekstvak open).
+## v0.11 Automatisch opslaan in autosave_path. De pauze-save ("achtergrond") gaat ook door
+## als autosave uit staat; alle veiligheidsblokkades blijven gelden.
 func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
-	# save-slots (Dennis): alleen bij kerker <-> wereldkaart (reden "map")
 	if not AUTOSAVE_REASONS.has(reason):
 		return false
-	if not can_autosave():
+	if not can_autosave(reason == "achtergrond"):
 		return false
 	if not save_game(tile, facing, autosave_path):
 		return false
@@ -1051,9 +1192,11 @@ func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
 	return true
 
 
-func can_autosave() -> bool:
+func can_autosave(ignore_setting: bool = false) -> bool:
+	if coop_is_guest():
+		return false
 	var settings := get_node_or_null("/root/Settings")
-	if settings != null and not settings.autosave_enabled():
+	if not ignore_setting and settings != null and not settings.autosave_enabled():
 		return false
 	var dialog := get_node_or_null("/root/Dialog")
 	if dialog != null and dialog.is_open:
@@ -1072,27 +1215,38 @@ func take_autosave_request() -> String:
 	return r
 
 
-## App naar de achtergrond of het venster sluit: synchroon opslaan via de huidige map
-## (die weet waar de speler staat). can_autosave blokkeert gevecht, cutscene en overgang.
+## v0.11 App naar de achtergrond (Android: PAUSED; op telefoons ook FOCUS_OUT):
+## automatisch opslaan via de huidige map (die weet waar de speler staat).
 func _notification(what: int) -> void:
-	var test_suspend := "--savetest" in OS.get_cmdline_user_args()
-	if (OS.has_feature("mobile") or test_suspend) \
-			and (what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST):
+	if what == NOTIFICATION_APPLICATION_PAUSED:
+		if coop_is_host() and _coop_lobby != null:
+			const Protocol := preload("res://scripts/net/net_protocol.gd")
+			_coop_pending_message = coop_session_end_message(Protocol.SESSION_END_HOST_PAUSED)
+			coop_end_session(Protocol.SESSION_END_HOST_PAUSED)
+	if what == NOTIFICATION_APPLICATION_RESUMED:
+		if _coop_pending_message != "":
+			var pending := _coop_pending_message
+			_coop_pending_message = ""
+			coop_role = ""
+			go_to_title()
+			Dialog.show_lines([pending])
+	if what == NOTIFICATION_APPLICATION_PAUSED \
+			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
 		autosave_on_background()
 
 
 func autosave_on_background() -> bool:
-	if not can_autosave():
-		return false
 	var s := get_tree().current_scene if is_inside_tree() else null
 	if s != null and s.has_method("try_autosave"):
-		return s.try_autosave("suspend")
+		return s.try_autosave("achtergrond")
 	return false
 
 
 ## Schrijft de voortgang naar save_path (JSON), of naar 'path' (v0.11: de autosave).
 ## Geeft true als het gelukt is.
 func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
+	if coop_is_guest():
+		return false
 	if path == "":
 		var slot_file := slot_path(active_slot)
 		path = slot_file if slot_file != "" else save_path
@@ -1111,6 +1265,14 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	data["checkpoint"] = checkpoint.duplicate(true)
 	var text := JSON.stringify(data, "  ")
 	var tmp := path + ".tmp"
+	var saved := _write_save_atomic(path, tmp, text)
+	game_saved.emit(path, saved)
+	return saved
+
+
+## Schrijft eerst een volledig .tmp-bestand (flush + close), controleert het en vervangt
+## pas dan het doel via rename. De goede oude save blijft als .bak bewaard.
+func _write_save_atomic(path: String, tmp: String, text: String) -> bool:
 	_remove_file(tmp)
 	var f := FileAccess.open(tmp, FileAccess.WRITE)
 	if f == null:
@@ -1118,7 +1280,12 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 		return false
 	f.store_string(text)
 	f.flush()
+	var write_error := f.get_error()
 	f.close()
+	if write_error != OK:
+		push_warning("Opslaan mislukt bij schrijven: %s" % error_string(write_error))
+		_remove_file(tmp)
+		return false
 	if not _valid_save_data(_read_save_file(tmp)):
 		push_warning("Opslaan mislukt: tijdelijk bestand is niet geldig")
 		_remove_file(tmp)
@@ -1147,7 +1314,12 @@ func _write_backup(source: String, backup: String) -> bool:
 		return false
 	f.store_string(FileAccess.get_file_as_string(source))
 	f.flush()
+	var backup_error := f.get_error()
 	f.close()
+	if backup_error != OK:
+		push_warning("Reservekopie mislukt bij schrijven: %s" % error_string(backup_error))
+		_remove_file(backup_tmp)
+		return false
 	if not _valid_save_data(_read_save_file(backup_tmp)):
 		push_warning("Reservekopie mislukt: tijdelijk bestand is niet geldig")
 		_remove_file(backup_tmp)
@@ -1245,6 +1417,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"party_bank": [],
 		"bezocht": bezochte_kaarten.duplicate(),
 		"echo_grot_voltooid": echo_grot_voltooid,
+		"huis_herkomst": huis_herkomst,
 		"inventory": inventory.duplicate(true),
 		"gold": gold,
 		"play_time": play_time(),
@@ -1257,6 +1430,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				{"permanent": dungeon100_permanent, "delivered": dungeon100_delivered, "snapshot": dungeon100_snapshot,
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
+		"pending_unique_event": Story.pending_unique_event if has_node("/root/Story") else "",
 		"scenes_seen": seen_scenes(),
 		"heard_music": heard_music.duplicate(),
 		"quests": _quests_save(),
@@ -1307,6 +1481,7 @@ func load_game(path := "") -> bool:
 	som_mode = false      # SoM-proef: een geladen spel is altijd het gewone (turn-based) spel
 	var d := read_save(path)
 	if not apply_state(d):
+		game_loaded.emit(path if path != "" else save_path, false)
 		return false
 	# Gevechtsstijl van deze save; oude saves zonder sleutel houden hun vroegere effectieve waarde: Classic.
 	Settings.set_value("battle_style", int(d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)))
@@ -1314,6 +1489,7 @@ func load_game(path := "") -> bool:
 	checkpoint = _checkpoint_from(d.get("checkpoint", {}))
 	entry_kind = "load"
 	pending_respawn_msg = []
+	game_loaded.emit(path if path != "" else save_path, true)
 	return true
 
 
@@ -1339,6 +1515,8 @@ func apply_state(d: Dictionary) -> bool:
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
 	player_name = migrate_name(clean_name(str(d.get("player_name", DEFAULT_NAME))))
+	# #166: ontbrekende sleutel (oude save) = "" = uitgang naar wilgendal.tscn zoals vroeger
+	huis_herkomst = "dorp" if str(d.get("huis_herkomst", "")) == "dorp" else ""
 	party.clear()
 	var stray_equipment: Array = []
 	party = _party_from(d["party"], stray_equipment)
@@ -1391,7 +1569,11 @@ func apply_state(d: Dictionary) -> bool:
 	quest_sync()
 	pending_tutorial = {}
 	if has_node("/root/Story"):
-		get_node("/root/Story").reset(true)
+		var story: Node = get_node("/root/Story")
+		story.reset(true)
+		# Oude saves hebben deze sleutel niet en krijgen dus geen uitgesteld event.
+		story.pending_unique_event = str(d.get("pending_unique_event", "")) \
+				if d.get("pending_unique_event", "") is String else ""
 	# v0.12: oude saves zonder dit veld laden gewoon (dan {}).
 	# v0.15 kernfragmenten; oude saves zonder dit veld = geen kernen. Onbekende ids vallen weg.
 	kernfragmenten = {}
@@ -1413,6 +1595,7 @@ func apply_state(d: Dictionary) -> bool:
 		for k in un:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
+	_unique_seen_flags()
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
 	var a2 = d.get("archief2", {})
@@ -1527,6 +1710,37 @@ func start_som_prototype() -> void:
 	current_map = SomData.START_MAP
 	changing_map = false
 	change_map(SomData.START_MAP, SomData.START_SPAWN)
+
+
+## Co-op host: Action-sandbox; alleen deze save telt (som_save_1.json).
+func start_som_coop_host() -> void:
+	const SomData := preload("res://scripts/data/som_data.gd")
+	if changing_map or in_battle or not SomData.ENABLED:
+		return
+	coop_role = "host"
+	_build_som_state()
+	save_path = SomData.SAVE_PATH
+	autosave_path = SomData.AUTOSAVE_PATH
+	current_map = SomData.START_MAP
+	changing_map = false
+	await Transition.fade_out()
+	_go_to_scene(COOP_SANDBOX_SCENE)
+
+
+## Co-op gast: zelfde sandbox om te spelen, maar nooit som_save_1.json schrijven.
+func start_som_coop_guest(character_id: String) -> void:
+	const SomData := preload("res://scripts/data/som_data.gd")
+	if changing_map or in_battle or not SomData.ENABLED or character_id == "":
+		return
+	coop_role = "guest"
+	_build_som_state()
+	leader_id = character_id if character_id != "" else MAIN_HERO
+	save_path = "user://coop_guest_session.json"
+	autosave_path = "user://coop_guest_autosave.json"
+	current_map = SomData.START_MAP
+	changing_map = false
+	await Transition.fade_out()
+	_go_to_scene(COOP_SANDBOX_SCENE)
 
 
 func _build_som_state() -> void:
@@ -1774,7 +1988,7 @@ func enter_map(path: String) -> void:
 			dungeon100_end_run(true)
 		dungeon100_floor = 0      # buiten de Diepe Grot (ook na game over of een andere map)
 	changing_map = false
-	Sessielog.kaart(path)      # playtest-logboek (no-op als het uit staat)
+	SessieLog.kaart(path)
 	if path.ends_with("/rustkamer.tscn"):
 		PartyBenchLib.normaliseer()
 
@@ -1785,7 +1999,10 @@ func change_map(path: String, spawn_name: String) -> void:
 	if changing_map or in_battle:
 		return
 	changing_map = true
-	Sessielog.warp(current_map, path, spawn_name)
+	var route := huis_route(current_map, path, spawn_name)
+	path = route[0]
+	spawn_name = route[1]
+	SessieLog.warp(current_map, path, spawn_name)
 	pending_spawn = spawn_name
 	has_return_point = false
 	entry_kind = "door"
@@ -1871,15 +2088,10 @@ func boss_group() -> Dictionary:
 func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
 	if in_battle or changing_map:
 		return
-	practice_battle = practice
 	in_battle = true
-	Sessielog.gevecht_start(enemies, boss, terrain, from_tile)
-	pending_enemies = enemies
-	pending_boss = boss
-	pending_tier = 0 if boss else tier
-	pending_archief = archief and not boss
-	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
-	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
+	SessieLog.gevecht_start(enemies, boss, terrain, from_tile)
+	battle_started.emit(enemies, boss)
+	prepare_battle(enemies, terrain, boss, tier, archief, practice)
 	has_return_point = true
 	return_map = current_map
 	return_tile = from_tile
@@ -1888,11 +2100,25 @@ func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain
 	_go_to_scene(BATTLE_SCENE)
 
 
+## Alles wat battle.gd bij _ready uit GameState leest (vijanden, baas, tier, archief, achtergrond).
+## Gedeeld door start_battle en de headless simulator (tools/battlesim/battlesim_runs.gd), die geen
+## kaart, terugkeerpunt, sessielog of scènewissel wil.
+func prepare_battle(enemies: Array, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
+	practice_battle = practice
+	pending_enemies = enemies
+	pending_boss = boss
+	pending_tier = 0 if boss else tier
+	pending_archief = archief and not boss
+	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
+	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
+
+
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),
 ## of naar het begin van het spel (game over).
 func end_battle(result: String) -> void:
 	result = archief2_verwerk_einde(result)
-	Sessielog.gevecht_eind(result)
+	SessieLog.gevecht_eind(result)
+	battle_ended.emit(result)
 	var oefening := practice_battle
 	practice_battle = false
 	last_battle_result = result
@@ -1945,8 +2171,11 @@ func end_battle(result: String) -> void:
 					if kid != "" and grant_kern(kid, str(e)):
 						pending_kern_absorb = kid
 	if result == "lose":
-		Sessielog.dood("practice" if oefening else "boss" if pending_boss else "battle")
-		Sessielog.respawn(target, respawn_soort)
+		SessieLog.dood("practice" if oefening else "boss" if pending_boss else "battle")
+		SessieLog.respawn(target, respawn_soort)
+		if not oefening and not pending_story_loss:
+			var plek := return_map if return_map != "" else current_map
+			game_over.emit(plek)
 	await Transition.fade_out()
 	in_battle = false
 	_go_to_scene(target)
@@ -1976,12 +2205,17 @@ func respawn_at_checkpoint(boss := false) -> String:
 	# 'gevangen' rolt mee met de Codex, die bij het checkpoint hoort.
 	var keep_unique := unique_done.duplicate(true)
 	var keep_koopman := koopman_save_data()      # bezoeken aan H-5 rollen niet terug
+	# Een al gezien eenmalige tutorial (na een uniek monster) rolt niet terug: nooit twee keer.
+	var keep_seen: Array = StoryData.UNIQUE_SEEN_FLAGS.values().filter(func(f): return story_flags.has(str(f)))
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
 	koopman_load(keep_koopman)
 	for id in keep_unique:
 		if str(keep_unique[id]) == "verslagen" and not unique_done.has(str(id)):
 			unique_done[str(id)] = "verslagen"
+	_unique_seen_flags()
+	for f in keep_seen:
+		story_flags[str(f)] = true
 	dungeon100_permanent = keep_permanent
 	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
@@ -2573,6 +2807,15 @@ func unique_state(id: String) -> String:
 func unique_mark(id: String, how: String) -> void:
 	if is_unique(id) and not unique_done.has(id):
 		unique_done[id] = how
+		unique_marked.emit(id, how)
+
+
+## Oude saves (of een checkpoint van vóór het gevecht): is het unieke monster al weg, dan geldt zijn
+## eenmalige tutorial als gezien (StoryData.UNIQUE_SEEN_FLAGS). Nooit achteraf afspelen.
+func _unique_seen_flags() -> void:
+	for id in StoryData.UNIQUE_SEEN_FLAGS:
+		if unique_done.has(str(id)):
+			story_flags[str(StoryData.UNIQUE_SEEN_FLAGS[id])] = true
 
 
 # ---------------------------------------------------------------- world warper
