@@ -11,6 +11,7 @@ extends Control
 ## (preload i.p.v. class_name: dit script wordt al door een autoload geladen)
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const SomDataC := preload("res://scripts/data/som_data.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 @export var dpad_radius := 30.0
 @export var button_radius := 15.0
@@ -75,6 +76,8 @@ var analog_only := false:
 				_set_touch_action(i, "")
 				_set_touch_action(i + UI_KEY, "")
 		queue_redraw()
+## Veilig gebied (notch, gebarenbalk) in de eenheden van deze laag: links, boven, rechts, onder.
+var safe_inset := Vector4.ZERO
 var _touch_owner := {}    # vinger-index -> "joy", "a", "b", "kern", "run", "menu"
 var _touch_action := {}   # vinger-index -> actie die die vinger nu indrukt
 var _press_count := {}    # actie -> aantal vingers dat hem indrukt
@@ -119,6 +122,7 @@ func refit() -> void:
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	position = Vector2.ZERO
 	size = get_viewport_rect().size / s
+	safe_inset = UiTouchC.insets(get_viewport()) / s.x
 	queue_redraw()
 
 
@@ -132,9 +136,10 @@ var stick_low := false
 
 
 func stick_center() -> Vector2:
+	var x := edge_margin + safe_inset.x + 6.0 + joy_radius()
 	if stick_low:
-		return Vector2(edge_margin + 6.0 + joy_radius(), size.y - edge_margin - 6.0 - joy_radius())
-	return Vector2(edge_margin + 6.0 + joy_radius(), roundf(size.y * SomDataC.JOY_CENTER_Y))
+		return Vector2(x, size.y - edge_margin - safe_inset.w - 6.0 - joy_radius())
+	return Vector2(x, roundf(size.y * SomDataC.JOY_CENTER_Y))
 
 
 ## Tikvlak van de joystick (vinger mag er ruim omheen).
@@ -157,11 +162,12 @@ func som_row_slot(i: int) -> Rect2:
 
 
 func a_center() -> Vector2:
-	return Vector2(size.x - edge_margin - button_radius - 6.0, size.y - edge_margin - button_radius - 10.0)
+	return Vector2(size.x - edge_margin - safe_inset.z - button_radius - 6.0,
+			size.y - edge_margin - safe_inset.w - button_radius - 10.0)
 
 
 func menu_rect() -> Rect2:
-	return Rect2(size.x - edge_margin - 38.0, edge_margin - 2.0, 38.0, 14.0)
+	return Rect2(size.x - edge_margin - safe_inset.z - 38.0, edge_margin - 2.0 + safe_inset.y, 38.0, 14.0)
 
 
 ## v0.16 KERN-knop: een paars 'pilletje' zoals MENU (vuurbal-icoon + "KERN"), recht boven de
@@ -236,15 +242,15 @@ func _input(event: InputEvent) -> void:
 				_touch_owner[event.index] = "b"
 				_set_touch_action(event.index, "cancel")
 				get_viewport().set_input_as_handled()
-			elif show_kern and InputMap.has_action("kern") and kern_rect().grow(4.0).has_point(pos):
+			elif show_kern and InputMap.has_action("kern") and UiTouchC.hit_rect(kern_rect(), 4.0).has_point(pos):
 				_touch_owner[event.index] = "kern"
 				_set_touch_action(event.index, "kern")
 				get_viewport().set_input_as_handled()
-			elif show_run and InputMap.has_action("run") and run_rect().grow(2.0).has_point(pos):
+			elif show_run and InputMap.has_action("run") and UiTouchC.hit_rect(run_rect(), 2.0).has_point(pos):
 				_touch_owner[event.index] = "run"
 				_set_touch_action(event.index, "run")
 				get_viewport().set_input_as_handled()
-			elif show_menu and menu_rect().grow(4.0).has_point(pos):
+			elif show_menu and UiTouchC.hit_rect(menu_rect(), 4.0).has_point(pos):
 				_touch_owner[event.index] = "menu"
 				_set_touch_action(event.index, "menu")
 				get_viewport().set_input_as_handled()

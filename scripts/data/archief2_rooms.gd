@@ -128,7 +128,7 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v2_gang"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [6, 7], "lines": [
-			"Een groei-plaat. Stap erop.",
+			"A growth plate. Step on it.",
 			"It grows into a path.",
 		]}],
 		"platen": [{"id": "p1", "soort": "groei", "tile": [13, 7], "start": 0}],
@@ -260,6 +260,8 @@ static func rooms() -> Dictionary:
 		"exits": {
 			"E": {"map": SCENES["archief_2_v4_genezer"], "spawn": "noord"},
 		},
+		# de boog (n) in de noordmuur is hier alleen beeld: geen uitgang, dus geen doel nodig
+		"decor_uitgangen": ["n"],
 		"warp": [13, 7],
 		"signs": [{"tile": [8, 6], "lines": [
 			"ECHO operates the hub. Step onto the path and choose.",
