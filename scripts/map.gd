@@ -156,6 +156,10 @@ func _show_respawn_msg(lines: Array) -> void:
 ## Camera-grenzen = de map. Is de map kleiner dan het scherm (een kamer), dan staat
 ## hij in het midden en is de rest zwart (node 'Void' in de kamer-scène).
 func _fit_camera() -> void:
+	# size_changed blijft aan de viewport hangen tot de kaart vrijkomt; een kaart die al uit de
+	# boom is (kamerwissel, Classic <-> Action) heeft geen viewport-rect meer (WM1-bugjacht O-3).
+	if not is_inside_tree():
+		return
 	var used := ground.get_used_rect()
 	var r := Rect2i(used.position * TILE, used.size * TILE)
 	var vs := Vector2i(get_viewport_rect().size)
