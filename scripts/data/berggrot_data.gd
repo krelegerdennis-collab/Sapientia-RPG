@@ -77,7 +77,7 @@ const MONSTERS := {
 const ROOMS := {
 	"berggrot_mond": {
 		"name": "Hollow Mountain",
-		"floor": 1, "tier": 0, "theme": THEME, "music": BGM, "checkpoint": true,
+		"floor": 1, "tier": 7, "theme": THEME, "music": BGM, "checkpoint": true,
 		"layout": [
 			"a------------------b",
 			"<LFFMFGFFAFFFFFFFFR>",
@@ -112,7 +112,7 @@ const ROOMS := {
 	},
 	"berggrot_nerf": {
 		"name": "Hollow Mountain - Vein",
-		"floor": 1, "tier": 0, "theme": THEME, "music": BGM, "checkpoint": true,
+		"floor": 1, "tier": 7, "theme": THEME, "music": BGM, "checkpoint": true,
 		"layout": [
 			"a------------------b",
 			"<LFFMFGFFAFFFFFFFFR>",
@@ -144,7 +144,7 @@ const ROOMS := {
 	},
 	"berggrot_uitmond": {
 		"name": "Hollow Mountain - Outlet",
-		"floor": 1, "tier": 0, "theme": THEME, "music": BGM, "checkpoint": true,
+		"floor": 1, "tier": 7, "theme": THEME, "music": BGM, "checkpoint": true,
 		"layout": [
 			"a------------------b",
 			"<LFFMFGFFAFFFFFFFFR>",

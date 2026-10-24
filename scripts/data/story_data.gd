@@ -22,6 +22,8 @@ extends RefCounted
 ##   "not_flags": [..] (minstens één NIET gezet)
 ##   "item": id  "not_item": id
 ##   "equipped": id  "not_equipped": id   (v0.16: de hoofdheld draagt dit stuk wel/niet)
+##   "unique_open": id   (uniek monster nog niet verslagen of gevangen)
+##   "codex_room": true  (de Codex heeft nog een vrije pagina)
 ##
 ## COMMANDO'S (["naam", argumenten...]):
 ##   ["say", spreker, [regels]]          tekstvak ({naam} = spelernaam), wacht tot dicht
@@ -184,6 +186,30 @@ const TUT_INKT_PAGES := [
 const AFTER_UNIQUE := {"inktwurm": TUTORIAL_INKTWURM}
 ## Oude saves waarin dit unieke monster al weg is: de vlag meteen als 'gezien' zetten (GameState.apply_state).
 const UNIQUE_SEEN_FLAGS := {"inktwurm": TUTORIAL_INKTWURM_FLAG}
+
+## Vang-tutorial (Codex), direct na de Inktwurm-tutorial. Speelt eenmalig zodra de speler in de Golemhal
+## vrij is (FREE_EVENTS), ook als de eerste tutorial overgeslagen is. Max. 2 korte regels per pagina.
+const TUTORIAL_CODEX := "tutorial_codex_vangen"
+const TUTORIAL_CODEX_FLAG := "tutorial_codex_vangen_gezien"
+const TUT_CODEX_PAGES := [
+	"Blank Books can catch monsters.\nA caught monster joins your Codex.",
+	"Classic: in battle pick Codex > Capture,\nthen choose the target.",
+	"Action: tap the Codex button or use the Ring.\nThe same rules as in Classic apply.",
+	"Bosses can't be caught. A hurt monster\nis easier to catch.",
+]
+## De Inktwurm moet in de Codex staan (gevangen) voordat de Golemhal weer open gaat. De vlag blijft staan,
+## ook als de pagina later wordt gefuseerd (GameState.codex_add / _codex_inktwurm_sync).
+const CODEX_INKTWURM_FLAG := "inktwurm_in_codex"
+## Soort (CodexData) -> vlag die GameState.codex_add zet zodra die soort in de Codex komt.
+const CODEX_SPECIES_FLAGS := {"inktwurm": CODEX_INKTWURM_FLAG}
+const GOLEMHAL := "res://scenes/maps/archief_golemhal.tscn"
+const GOLEMHAL_EXIT := "golemhal_uitgang"
+## Events die starten zodra de speler op die kaart vrij is (Story._free_event), zonder opslag: de vlaggen
+## bepalen alles. Rij: {"map": scènepad, "if": voorwaarde, "event": id}.
+const FREE_EVENTS := [
+	{"map": GOLEMHAL, "if": {"flags": [TUTORIAL_INKTWURM_FLAG], "not_flags": [TUTORIAL_CODEX_FLAG]},
+		"event": TUTORIAL_CODEX},
+]
 
 const EVENTS := {
 	# ------------------------------------------------------------ scène 1: ochtend
@@ -653,6 +679,47 @@ const EVENTS := {
 	TUTORIAL_INKTWURM + "_4": [{"do": [
 		["say", "", [TUT_INKT_PAGES[3]]],
 	]}],
+	# Vang-tutorial: zelfde opzet als hierboven (vlag eerst, Next/Skip per pagina).
+	TUTORIAL_CODEX: [
+		{"if": {"not_flags": [TUTORIAL_CODEX_FLAG]}, "do": [
+			["flag", TUTORIAL_CODEX_FLAG],
+			["choice", TUT_CODEX_PAGES[0], [TUT_NEXT, TUT_SKIP], [TUTORIAL_CODEX + "_2", ""], ""],
+		]},
+		{"do": []},
+	],
+	TUTORIAL_CODEX + "_2": [{"do": [
+		["choice", TUT_CODEX_PAGES[1], [TUT_NEXT, TUT_SKIP], [TUTORIAL_CODEX + "_3", ""], ""],
+	]}],
+	TUTORIAL_CODEX + "_3": [{"do": [
+		["choice", TUT_CODEX_PAGES[2], [TUT_NEXT, TUT_SKIP], [TUTORIAL_CODEX + "_4", ""], ""],
+	]}],
+	TUTORIAL_CODEX + "_4": [{"do": [
+		["say", "", [TUT_CODEX_PAGES[3]]],
+	]}],
+	# Uitgang van de Golemhal: na de Golem op slot tot de Inktwurm in de Codex staat. Geen val: is de
+	# Inktwurm al weg (verslagen) of is de Codex vol, dan kan hij niet meer ingeschreven worden en gaat
+	# de deur gewoon open. Zonder Leeg Boek krijg je er één.
+	GOLEMHAL_EXIT: [
+		{"if": {"flags": [GOLEM_FLAG], "not_flags": [CODEX_INKTWURM_FLAG], "unique_open": "inktwurm",
+				"codex_room": true, "not_item": "leeg_boek"}, "do": [
+			["give", "leeg_boek", 1],
+			["say", "", ["Loose pages block the exit.", "You find a Blank Book among them.",
+					"Write the Ink Worm into the Codex to pass."]],
+			["walk", "player", "up", 1],
+		]},
+		{"if": {"flags": [GOLEM_FLAG, "inktwurm_kast_open"], "not_flags": [CODEX_INKTWURM_FLAG],
+				"unique_open": "inktwurm", "codex_room": true}, "do": [
+			["say", "", ["Loose pages block the exit.", "Write the Ink Worm into the Codex to pass."]],
+			["walk", "player", "up", 1],
+		]},
+		{"if": {"flags": [GOLEM_FLAG], "not_flags": [CODEX_INKTWURM_FLAG], "unique_open": "inktwurm",
+				"codex_room": true}, "do": [
+			["say", "", ["Loose pages block the exit.", "Something rustles in the cabinet on the right.",
+					"Core Power might tear the parchment."]],
+			["walk", "player", "up", 1],
+		]},
+		{"do": "default"},
+	],
 }
 
 
