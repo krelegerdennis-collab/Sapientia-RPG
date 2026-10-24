@@ -1,7 +1,7 @@
 # COMBAT_DESIGN — Action-combat (solo + 4-speler co-op)
 
 Status: ontwerp, docs only. Basis: `main` @ `61986e9` (na PR #208 power scaling v2).
-Analyse vooraf: fase 0 (feiten met regelnummers, samengevat in §2 en §19).
+Analyse vooraf: fase 0-analyse (niet in de repo); de feiten staan met regelnummers in dit document.
 Regelnummers verwijzen naar `main` @ `61986e9`.
 
 **Balansgetallen** (monster-/baas-stats, HP-schaal, schade-multipliers per kamer/tier) zijn van het fase 5-balanswerk (PR #208). Dit document zet daar **geen** getallen voor neer. Waar het over balans gaat, verwijst het naar:
@@ -35,7 +35,7 @@ Pijlers:
 
 | # | Besluit | Vervangt |
 |---|---|---|
-| D1 | **Relay:** eigen kleine relay-server (VPS). Zie §3. | `pvp/scripts/net/lan_transport.gd:4` TODO "relay niet gekozen" |
+| D1 | **Relay:** eigen kleine relay-server (VPS), gebouwd door RPG Forge. Zie §3. | `pvp/scripts/net/lan_transport.gd:4` TODO "relay niet gekozen" |
 | D2 | **Rollen:** Dax = tank, Seren = heal, Vesper = control, Kael en Orion = dps. Orion is kiesbaar in co-op. | **fase B DECISION 1** (Orion niet in co-op; vaste toewijzing host=Dax) |
 | D3 | **Bazen realtime** in Action/co-op, met fases. Turn-based alleen in Classic. | **fase B DECISION 8** + **besluit 21 okt 2026** (`som_data.gd:4-5`: bazen altijd turn-based) |
 | D4 | **AI op lege stoelen** vanaf de co-op MVP. Wie joint, neemt de held over. | **fase B DECISION 2** (lege stoel blijft leeg tot fase C) |
@@ -57,7 +57,7 @@ Bij DEC 6 komt erbij: als een gast weggaat, neemt de AI zijn held over (D4).
 - **Transport:**
   - LAN: ENet zoals nu (38421-38423);
   - online: via de **relay van RPG Forge**. Die zit tussen host en gasten en stuurt pakketten opaak door, zonder spellogica en zonder state.
-- **Relay-contract** (afgestemd op het relay-werk van RPG Forge):
+- **Relay-contract** (aanname; nog af te stemmen met het relay-werk van RPG Forge, dat niet in deze repo staat):
   - de host vraagt een **kamercode van 6 tekens** aan (A-Z/2-9, zonder 0/O/1/I);
   - een kamer telt **maximaal 4 deelnemers** (host + 3). Een vijfde krijgt `REFUSE FULL`, net als `ENET_REFUSE_SLACK` nu;
   - de relay kent een `slot` per verbinding en zet dat in elk doorgestuurd frame, zodat de host de afzender weet. Gasten kunnen elkaar niet direct adresseren;
