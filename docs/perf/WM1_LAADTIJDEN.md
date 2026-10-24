@@ -78,7 +78,7 @@ exact dezelfde meting op de oude en de nieuwe code.
 | dorp_wilgendal | 0.24 | 0.22 | -8% |
 | woud_pad / archief_v1_gang | 0.48 / 0.48 | 0.48 / 0.51 | gelijk |
 
-Volledige tabel (alle rijen): `/opt/cursor/artifacts/perf/before_after_table.md` in de PR-artefacten; ruwe JSON per run ook.
+Volledige tabel (alle rijen, rechtstreeks uit `compare_perf.py`): zie de bijlage onderaan.
 
 Leesvoorbehouden:
 - "Titelscherm, eerste keer opbouwen" in de volledige tabel staat +30 ms hoger na de wijziging. Dat is een meetartefact: het
@@ -149,3 +149,62 @@ Leesvoorbehouden:
 - Wie binnen ~2,5 s na de start doorklikt compileert de rest van de prewarm gewoon lazy, precies zoals voor deze wijziging.
 - De harnasgetallen komen van llvmpipe; op een S25 Ultra is renderen goedkoper en compileren (bytecode in de APK) sneller, de
   *verhouding* (script-compile en tegels aanmaken zijn de grote posten) blijft naar verwachting gelijk maar is daar niet gemeten.
+
+## Bijlage: volledige tabel
+
+| Meting | Voor | Na | Delta |
+|---|---:|---:|---:|
+| **Startup** | | | |
+| Engine start -> autoloads klaar (GameState._ready e.a.) (ms) | 1999 | 1445 | -28% |
+| Titelscherm, eerste keer opbouwen (cold) (ms) | 76.17 | 106 | +40% |
+| Titelscherm opbouwen (warm, mediaan) (ms) | 8.20 | 8.05 | -2% |
+| Langste frame op het titelscherm (4 s dwell) (ms) | 8.19 | 191 | +2237% |
+| **Titel -> WM1** | | | |
+| Titelscherm klaar, 4 saves aanwezig (ms) | 22.70 | 20.75 | -9% |
+| Slotlijst openen (ms) | 10.60 | 9.68 | -9% |
+| Doorgaan -> wereldkaart klaar (ms) | 40.85 | 41.49 | +2% |
+| Doorgaan -> wereldkaart settled (+4 frames) (ms) | 62.87 | 68.86 | +10% |
+| Doorgaan -> wereldkaart, langste frame (ms) | 34.49 | 34.86 | +1% |
+| **Kaartwissels WM1 (13 stappen)** | | | |
+| Cold, mediaan klaar (ms) | 30.02 | 30.59 | +2% |
+| Cold, mediaan langste frame (ms) | 20.29 | 20.38 | +0% |
+| Cold, zwaarste kaart klaar (ms) | 339 | 166 | -51% |
+| Cold, totaal 13 wissels (klaar) (ms) | 886 | 495 | -44% |
+| Warm, mediaan klaar (ms) | 27.51 | 26.19 | -5% |
+| Warm, mediaan langste frame (ms) | 17.55 | 16.46 | -6% |
+| Warm, zwaarste kaart klaar (ms) | 203 | 122 | -40% |
+| Warm, totaal 13 wissels (klaar) (ms) | 452 | 368 | -19% |
+| **Per kaart** | | | |
+| dorp_wilgendal cold (ms) | 288 | 166 | -42% |
+| dorp_wilgendal warm (ms) | 203 | 122 | -40% |
+| woud_rand cold (eerste kerker/woud-kamer) (ms) | 339 | 61.62 | -82% |
+| archief_ingang cold (ms) | 48.40 | 47.34 | -2% |
+| esdoorn cold (ms) | 54.26 | 55.55 | +2% |
+| wilgendal cold (ms) | 45.37 | 47.94 | +6% |
+| **Gevecht** | | | |
+| Gevecht in, eerste keer (cold) (ms) | 48.10 | 47.13 | -2% |
+| Gevecht in (warm) (ms) | 32.09 | 32.20 | +0% |
+| Gevecht in (warm), langste frame (ms) | 12.74 | 12.91 | +1% |
+| Gevecht uit, eerste keer (cold) (ms) | 16.50 | 18.69 | +13% |
+| Gevecht uit (warm) (ms) | 16.45 | 16.72 | +2% |
+| Gevecht uit (warm), langste frame (ms) | 11.33 | 11.32 | -0% |
+| **Save laden / opslaan (CPU per aanroep)** | | | |
+| read_save (1 slot) (ms) | 0.59 | 0.53 | -10% |
+| apply_state (ms) | 1.31 | 1.30 | -1% |
+| save_game (schrijven + verifieren) (ms) | 2.66 | 2.67 | +0% |
+| slot_record x5 (slotlijst) (ms) | 2.79 | 1.37 | -51% |
+| newest_slot_record (ms) | 2.90 | 1.44 | -50% |
+| set_checkpoint (elke kaartwissel) (ms) | 0.22 | 0.22 | +0% |
+| **Script-tijd per frame (stilstaand, zonder renderen)** | | | |
+| wereldkaart (ms) | 0.16 | 0.16 | -0% |
+| wilgendal (ms) | 0.18 | 0.19 | +1% |
+| dorp_wilgendal (ms) | 0.24 | 0.22 | -8% |
+| esdoorn (ms) | 0.16 | 0.16 | -2% |
+| woud_pad (ms) | 0.48 | 0.48 | +2% |
+| archief_v1_gang (ms) | 0.48 | 0.51 | +5% |
+| wereldkaart lopend (ms) | 0.17 | 0.17 | -1% |
+| **Som van alle _process-aanroepen (probe, us)** | | | |
+| wereldkaart (us) | 13.12 | 13.27 | +1% |
+| dorp (us) | 176 | 199 | +13% |
+| woud_pad (us) | 158 | 157 | -0% |
+| archief_gang (us) | 166 | 185 | +12% |
