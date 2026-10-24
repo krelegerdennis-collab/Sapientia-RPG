@@ -211,8 +211,11 @@ const ENEMY_DAMAGE_MULT := 2.2     # v3: --actionsim iteratie 7
 const ACTION_AREAS := {
 	"archief1": {"rooms": ["archief_v1_", "archief_v2_", "archief_v3_", "archief_v4_"],
 			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 3.5], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
-			"tiers": {1: {"atk": 1.1, "cooldown": 3.0}, 2: {"atk": 1.0, "cooldown": 2.8},
-					3: {"atk": 0.7, "cooldown": 2.8}, 4: {"atk": 0.7, "cooldown": 2.8}},
+			# Power scaling v2 (#208) verhoogde de vijand-ATK in tier 1-3 (+8/+9/+9) en van de Act-1-basismonsters
+			# (x1.5); dit zijn Action-factoren op de schade, dus herijkt (cooldowns ongewijzigd): 1.1/1.0/0.7/0.7 -> 0.21/0.53/0.50/0.65.
+			# Classic (turn-based) en de HP/ATK-stats in GameData blijven de #208-waarden. Meting: --archief1balans --tune.
+			"tiers": {1: {"atk": 0.21, "cooldown": 3.0}, 2: {"atk": 0.53, "cooldown": 2.8},
+					3: {"atk": 0.50, "cooldown": 2.8}, 4: {"atk": 0.65, "cooldown": 2.8}},
 			# loss tier 1: Forge (21 okt): 89% winst / 77% verlies geaccepteerd, grens = gemiddeld verlies <= 80%.
 			# Herstel: het opslagboek in archief_ingang (vlak voor archief_v1_gang) geneest de party vol.
 			"targets": {1: {"win": [0.80, 0.90], "loss": [0.0, 0.80]}, 2: {"win": [0.70, 0.85]},

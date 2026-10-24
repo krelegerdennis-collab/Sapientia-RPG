@@ -4,6 +4,7 @@ extends Node
 ## en waar hij stond voordat een gevecht begon. Data komt uit scripts/data/game_data.gd.
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 ## v0.14 (menu L2): uitrusting en effectieve stats (basis + uitrusting).
 const Equipment := preload("res://scripts/equipment.gd")
@@ -461,6 +462,7 @@ func _ready() -> void:
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
+	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	var args := OS.get_cmdline_user_args()
@@ -515,7 +517,9 @@ func _ready() -> void:
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
+			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
@@ -1599,6 +1603,7 @@ func apply_state(d: Dictionary) -> bool:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	_unique_seen_flags()
+	_codex_inktwurm_sync()
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
 	var a2 = d.get("archief2", {})
@@ -2001,6 +2006,8 @@ func enter_map(path: String) -> void:
 func change_map(path: String, spawn_name: String) -> void:
 	if changing_map or in_battle:
 		return
+	if ReleaseFlags.dev_scene_blocked(path):
+		return
 	changing_map = true
 	var route := huis_route(current_map, path, spawn_name)
 	path = route[0]
@@ -2210,6 +2217,8 @@ func respawn_at_checkpoint(boss := false) -> String:
 	var keep_koopman := koopman_save_data()      # bezoeken aan H-5 rollen niet terug
 	# Een al gezien eenmalige tutorial (na een uniek monster) rolt niet terug: nooit twee keer.
 	var keep_seen: Array = StoryData.UNIQUE_SEEN_FLAGS.values().filter(func(f): return story_flags.has(str(f)))
+	if story_flags.has(StoryData.TUTORIAL_CODEX_FLAG):
+		keep_seen.append(StoryData.TUTORIAL_CODEX_FLAG)
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
 	koopman_load(keep_koopman)
@@ -2219,6 +2228,7 @@ func respawn_at_checkpoint(boss := false) -> String:
 	_unique_seen_flags()
 	for f in keep_seen:
 		story_flags[str(f)] = true
+	_codex_inktwurm_sync()
 	dungeon100_permanent = keep_permanent
 	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
@@ -2685,6 +2695,9 @@ func codex_add(species_id: String, level := 1, caught := {}) -> Dictionary:
 	codex_pages.append(page)
 	if codex_active == "":
 		codex_active = uid
+	var flag := str(StoryData.CODEX_SPECIES_FLAGS.get(species_id, ""))
+	if flag != "":
+		story_flags[flag] = true
 	codex_changed.emit()
 	return page
 
@@ -2819,6 +2832,28 @@ func _unique_seen_flags() -> void:
 	for id in StoryData.UNIQUE_SEEN_FLAGS:
 		if unique_done.has(str(id)):
 			story_flags[str(StoryData.UNIQUE_SEEN_FLAGS[id])] = true
+
+
+## Vlag 'Inktwurm in de Codex' bijhouden bij laden en bij een checkpoint. Staat er een Inktwurm-pagina, dan
+## is de vlag gezet. Oude saves die al voorbij de Inktwurm zijn (hij is verslagen of gevangen): de Golemhal
+## gaat pas open als hij in de Codex staat, dus die krijgen hem alsnog en de vang-tutorial telt als gezien.
+## 'Gevangen' en daarna gefuseerd: wel de vlag, geen nieuwe pagina. Codex vol: geen pagina (de uitgang gaat
+## dan al open, zie StoryData.GOLEMHAL_EXIT) en we proberen het bij de volgende load weer.
+func _codex_inktwurm_sync() -> void:
+	var flag := StoryData.CODEX_INKTWURM_FLAG
+	for page in codex_pages:
+		if str(page.get("species", "")) == "inktwurm":
+			story_flags[flag] = true
+	if not unique_done.has("inktwurm"):
+		return
+	story_flags[StoryData.TUTORIAL_CODEX_FLAG] = true
+	if story_flags.has(flag):
+		return
+	if unique_state("inktwurm") == "gevangen":
+		story_flags[flag] = true
+	elif not codex_full():
+		codex_add("inktwurm", CodexData.capture_level(0, "inktwurm"), {"play_time": int(play_time())})
+		mark_seen("inktwurm")
 
 
 # ---------------------------------------------------------------- world warper
