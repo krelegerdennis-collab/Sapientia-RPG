@@ -436,7 +436,7 @@ func _data_tests() -> void:
 	# pagina's
 	var p3 := CD.make_page("mosslijm", 3, "codex_x")
 	var st3 := CD.stats_at("mosslijm", 3)
-	check("pagina Lv 3: stats = basis + 2x groei, Moss Mend geleerd, fusievelden", p3["max_hp"] == 10 + 2 * 5 and p3["max_hp"] == st3["max_hp"]
+	check("pagina Lv 3: stats = basis + 2x groei, Moss Mend geleerd, fusievelden", p3["max_hp"] == 13 + 2 * 5 and p3["max_hp"] == st3["max_hp"]
 			and p3["skills"] == ["slijmklodder", "mosheling"] and p3["exp"] == GD.exp_for_level(3)
 			and p3["fusion"] == {"generation": 0, "parents": []} and p3["element"] == "natuur")
 	GameState.new_game("Dax")
@@ -540,6 +540,8 @@ func _capture_tests() -> void:
 	check("baas: boek blijft (1), geen pagina, baas staat nog", GameState.item_count(CD.BOOK_ITEM) == 1
 			and GameState.codex_pages.size() == 1 and int(e["s"]["hp"]) > 0 and b.codex.last_capture.get("result") == "baas")
 	e["s"]["hp"] = 400
+	# power scaling v2: de vluchtworp is random en de Golem kan de party eerder neerleggen; forceer een geslaagde worp
+	b.flee_roll_override = 0.0
 	await flee(b)
 	check("baas: weggevlucht (test), terug op de kaart", not GameState.in_battle)
 
