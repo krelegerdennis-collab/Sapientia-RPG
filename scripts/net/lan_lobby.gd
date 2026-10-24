@@ -1,10 +1,12 @@
 class_name LanLobby
 extends Node
-## Host/join over ENet voor maximaal 4 spelers. Niet aan een scène gekoppeld.
+## Host/join voor maximaal 4 spelers, over ENet (LAN) of over de relay (RelayPeer, WebSocket).
+## Het protocol (HELLO/WELCOME/ROSTER/...) is voor beide transporten hetzelfde. Niet aan een scène gekoppeld.
 ## Zet bewust NIET de SceneTree-multiplayer: de rest van het spel blijft singleplayer
 ## tot een latere PR deze peer daar ophangt. Elke instantie pollt haar eigen peer.
 
 const Protocol := preload("res://scripts/net/net_protocol.gd")
+const RelayPeerScript := preload("res://scripts/net/relay_peer.gd")
 
 signal assigned(slot: int, character_id: String)
 signal refused(reason: int)
@@ -13,8 +15,11 @@ signal member_left(peer_id: int)
 signal link_lost
 signal start_game_received
 signal session_ended(reason: String)
+## Relay-host: de relay gaf een kamercode. Alleen bij transport RELAY.
+signal room_ready(code: String)
 
 enum Phase { IDLE, JOINING, IN, REFUSED, LOST }
+enum Transport { LAN, RELAY }
 
 var is_host := false
 var phase: Phase = Phase.IDLE
@@ -25,8 +30,14 @@ var slots: Array[Dictionary] = []
 ## Laatste mislukte host/join-poging (voor de melding en de logcat). OK = geen fout.
 var last_error: Error = OK
 var last_error_port := 0
+var transport: Transport = Transport.LAN
+## Relay: kamercode (host: pas na room_ready; gast: de ingetikte code).
+var room_code := ""
+## Relay: laatste reden van de relay/verbinding (RelayPeer.last_reason), "" = geen.
+var relay_reason := ""
 
-var _peer: ENetMultiplayerPeer
+var _peer: MultiplayerPeer
+var _join_timeout := Protocol.JOIN_TIMEOUT_SEC
 var _display_name := ""
 var _want_character := ""
 var _hello_version := Protocol.VERSION
@@ -87,6 +98,65 @@ func join_session(ip: String, character_id: String, display_name: String, versio
 	return OK
 
 
+## Host via de relay: opent een kamer. De code komt async via room_ready.
+func host_relay(url: String, display_name: String) -> Error:
+	if phase != Phase.IDLE or _peer != null:
+		return ERR_ALREADY_IN_USE
+	var peer: RelayPeer = RelayPeerScript.new()
+	var err := peer.create_host(url)
+	if err != OK:
+		_note_failure("host relay", err, 0)
+		return err
+	last_error = OK
+	last_error_port = 0
+	transport = Transport.RELAY
+	room_code = ""
+	relay_reason = ""
+	peer.room_ready.connect(_on_relay_room_ready)
+	_bind(peer)
+	is_host = true
+	phase = Phase.IN
+	_display_name = Protocol.clean_name(display_name)
+	_add_slot(Protocol.HOST_PEER_ID, Protocol.HOST_SLOT, Protocol.HOST_CHARACTER, _display_name)
+	local_slot = Protocol.HOST_SLOT
+	local_character = Protocol.HOST_CHARACTER
+	return OK
+
+
+## Gast via de relay met een kamercode. version: zie join_session.
+func join_relay(url: String, code: String, character_id: String, display_name: String, version: int = Protocol.VERSION) -> Error:
+	if phase != Phase.IDLE or _peer != null:
+		return ERR_ALREADY_IN_USE
+	var clean := Protocol.filter_room_code(code)
+	if not Protocol.is_room_code(clean):
+		return ERR_INVALID_PARAMETER
+	var peer: RelayPeer = RelayPeerScript.new()
+	var err := peer.create_client(url, clean)
+	if err != OK:
+		_note_failure("join relay", err, 0)
+		return err
+	last_error = OK
+	last_error_port = 0
+	transport = Transport.RELAY
+	room_code = clean
+	relay_reason = ""
+	_bind(peer)
+	is_host = false
+	phase = Phase.JOINING
+	_want_character = character_id
+	_display_name = Protocol.clean_name(display_name)
+	_hello_version = version
+	_hello_sent = false
+	_join_wait = 0.0
+	_join_timeout = Protocol.RELAY_JOIN_TIMEOUT_SEC
+	return OK
+
+
+func _on_relay_room_ready(code: String) -> void:
+	room_code = code
+	room_ready.emit(code)
+
+
 func _note_failure(what: String, err: Error, port: int) -> void:
 	last_error = err
 	last_error_port = port
@@ -112,6 +182,10 @@ func close() -> void:
 	_drop_ids.clear()
 	_hello_sent = false
 	_join_wait = 0.0
+	_join_timeout = Protocol.JOIN_TIMEOUT_SEC
+	transport = Transport.LAN
+	room_code = ""
+	relay_reason = ""
 	_suppress = false
 
 
@@ -119,7 +193,8 @@ func player_count() -> int:
 	return slots.size()
 
 
-func enet_peer() -> ENetMultiplayerPeer:
+## De open peer (ENet of RelayPeer); de naam blijft voor bestaande aanroepers.
+func enet_peer() -> MultiplayerPeer:
 	return _peer
 
 
@@ -174,12 +249,14 @@ func _process(delta: float) -> void:
 	_flush_kicks()
 	_drain()
 	_apply_drops()
+	_check_relay_host()
 	if phase != Phase.JOINING or _peer == null:
 		return
 	var status := _peer.get_connection_status()
 	# ENet weigert boven MAX_REMOTE vóór HELLO: geen pakket, wel meteen DISCONNECTED.
+	# Relay: een fout van de relay (geen kamer, vol, onbereikbaar) komt ook zo binnen.
 	if status == MultiplayerPeer.CONNECTION_DISCONNECTED and local_slot == Protocol.NO_SLOT and refuse_reason == Protocol.Refuse.NONE:
-		_set_refused(Protocol.Refuse.FULL)
+		_set_refused(_join_failure_reason())
 		return
 	if status == MultiplayerPeer.CONNECTION_CONNECTED and not _hello_sent:
 		_send_to(Protocol.HOST_PEER_ID, Protocol.Kind.HELLO, {
@@ -188,11 +265,37 @@ func _process(delta: float) -> void:
 		}, _hello_version)
 		_hello_sent = true
 	_join_wait += minf(delta, Protocol.JOIN_TICK_CAP_SEC)
-	if _join_wait >= Protocol.JOIN_TIMEOUT_SEC and local_slot == Protocol.NO_SLOT and refuse_reason == Protocol.Refuse.NONE:
+	if _join_wait >= _join_timeout and local_slot == Protocol.NO_SLOT and refuse_reason == Protocol.Refuse.NONE:
 		_set_refused(Protocol.Refuse.TIMEOUT)
 
 
-func _bind(peer: ENetMultiplayerPeer) -> void:
+## Relay-host zonder relay (onbereikbaar, kamer verlopen): zelfde afhandeling als een gast die de host verliest.
+func _check_relay_host() -> void:
+	if not is_host or transport != Transport.RELAY or _peer == null or phase != Phase.IN:
+		return
+	if _peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
+		return
+	_note_relay_reason()
+	phase = Phase.LOST
+	local_slot = Protocol.NO_SLOT
+	local_character = ""
+	link_lost.emit()
+	_drop_socket()
+
+
+func _join_failure_reason() -> int:
+	_note_relay_reason()
+	if _peer is RelayPeer:
+		return (_peer as RelayPeer).refuse_reason()
+	return Protocol.Refuse.FULL
+
+
+func _note_relay_reason() -> void:
+	if _peer is RelayPeer:
+		relay_reason = (_peer as RelayPeer).last_reason
+
+
+func _bind(peer: MultiplayerPeer) -> void:
 	_peer = peer
 	peer.peer_connected.connect(_on_peer_connected)
 	peer.peer_disconnected.connect(_on_peer_disconnected)
@@ -225,6 +328,7 @@ func _apply_drops() -> void:
 
 func _on_link_lost() -> void:
 	if phase == Phase.IN:
+		_note_relay_reason()
 		phase = Phase.LOST
 		local_slot = Protocol.NO_SLOT
 		local_character = ""
@@ -232,7 +336,7 @@ func _on_link_lost() -> void:
 		_drop_socket()
 		return
 	if phase == Phase.JOINING and refuse_reason == Protocol.Refuse.NONE and local_slot == Protocol.NO_SLOT:
-		_set_refused(Protocol.Refuse.FULL)
+		_set_refused(_join_failure_reason())
 
 
 func _drain() -> void:

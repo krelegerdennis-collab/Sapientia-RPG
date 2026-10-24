@@ -25,6 +25,7 @@ extends RefCounted
 ##   "exits"  {teken: {"map", "spawn"}}      alle tiles met dat teken = één uitgang (zie EXIT_CHARS):
 ##            'E' naar buiten (30), 'U' onderrand-doorgang (64), 'n' boog/deur (43, onderste rij),
 ##            'v' trap omlaag (58), 'h' ladder omhoog (44/45, beide tiles)
+##   "decor_uitgangen" [teken, ...]          uitgangstekens (bv. "n") die hier alleen beeld zijn: geen doel nodig
 ##   "save"   [x, y] opslagboek (+ "save_type" uit book_data.gd, "save_offset" [x, y] in pixels)
 ##   "books"  [{"type": "hp"/"mp", "tile": [x, y]}]   boekpunten (rood/groen)
 ##   "chests" [{"id", "tile", "item", "n"}]  kist (assets/sprites/buiten/kist.png); eenmalig: de vlag
@@ -743,7 +744,8 @@ const ROOMS := {
 		"checkpoint": false,      # v0.19 baaskamer: game over = terug in de Bibliotheek
 		"spawns": {"zuid": [9, 10, "up"]},
 		"exits": {
-			"U": {"map": "res://scenes/maps/archief_bibliotheek.tscn", "spawn": "deur"},
+			# op slot na de Golem tot de Inktwurm in de Codex staat (StoryData.GOLEMHAL_EXIT)
+			"U": {"map": "res://scenes/maps/archief_bibliotheek.tscn", "spawn": "deur", "event": "golemhal_uitgang"},
 		},
 		"monsters": [
 			# De Golem: baas, staat stil op het platform (2x2 tiles), kern pulseert langzaam.

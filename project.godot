@@ -28,6 +28,7 @@ Crt="*res://scripts/ui/crt_overlay.gd"
 Settings="*res://scripts/settings.gd"
 AudioManager="*res://scripts/audio_manager.gd"
 SessieLog="*res://scripts/core/sessie_log.gd"
+AppLifecycle="*res://scripts/core/app_lifecycle.gd"
 
 [display]
 
@@ -99,6 +100,12 @@ pointing/emulate_touch_from_mouse=true
 ; Web-standaard is Sample (1). Sample + extra bussen (Music/SFX) is stil in de
 ; browser (Godot 4.7, godot#119026). 0 = Stream.
 general/default_playback_type.web=0
+
+[sapientia]
+
+; Online co-op: WebSocket-URL van de relay (relay/README.md), bv. "wss://naam.fly.dev".
+; Leeg = alleen LAN. Omgevingsvariabele SAPIENTIA_RELAY_URL wint (dev/test).
+net/relay_url=""
 
 [rendering]
 

@@ -76,8 +76,8 @@ func _begin(peer: MultiplayerPeer, roster: Array, local_slot_in: int, use_tree_m
 		mp.multiplayer_peer = peer
 		mp.peer_connected.connect(_on_peer_connected)
 		mp.peer_disconnected.connect(_on_peer_disconnected)
-	if peer is ENetMultiplayerPeer:
-		(peer as ENetMultiplayerPeer).peer_disconnected.connect(_on_peer_disconnected)
+	if peer is ENetMultiplayerPeer or peer is RelayPeer:
+		peer.peer_disconnected.connect(_on_peer_disconnected)
 	sim = Sim.new()
 	sim.reset(roster, 4242)
 	_build_peer_map(roster)
