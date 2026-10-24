@@ -374,7 +374,7 @@ func _codex_tests(tag: String) -> void:
 
 # ---------------------------------------------------------------- co-op lobby
 func _lobby_tests(tag: String) -> void:
-	for name in ["lobby_menu", "lobby_host", "lobby_join"]:
+	for name in ["lobby_menu", "lobby_host", "lobby_join", "lobby_join_code", "lobby_menu_online"]:
 		await sc.open(name)
 		var lobby: Control = sc._lobby
 		var buttons: Array[Button] = lobby.all_touch_buttons()
@@ -397,9 +397,9 @@ func _lobby_tests(tag: String) -> void:
 		if name == "lobby_host":
 			await _event_action("cancel")
 			check(tag + "lobby_host: B gaat terug naar het lobbymenu", lobby._screen == CoopLobbyScreen.Screen.MENU)
-		elif name == "lobby_join":
+		elif name == "lobby_join" or name == "lobby_join_code":
 			await _event_action("cancel")
-			check(tag + "lobby_join: B gaat terug naar het lobbymenu", lobby._screen == CoopLobbyScreen.Screen.MENU)
+			check(tag + "%s: B gaat terug naar het lobbymenu" % name, lobby._screen == CoopLobbyScreen.Screen.MENU)
 		await sc.close_all()
 
 

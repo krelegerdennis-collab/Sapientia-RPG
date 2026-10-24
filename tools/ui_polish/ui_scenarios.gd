@@ -8,6 +8,7 @@ const WORLD_TOWN := "res://scenes/maps/wilgendal.tscn"
 const ShopScreen := preload("res://scripts/ui/shop_screen.gd")
 const KoopmanScherm := preload("res://scripts/ui/koopman_winkel_scherm.gd")
 const CoopLobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
+const Protocol := preload("res://scripts/net/net_protocol.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 
 ## Profielen: naam -> viewportgrootte in 384x216-eenheden (wat Godot met stretch 'expand' toont).
@@ -25,6 +26,7 @@ const PROFILE_INSETS := {"19_5x9_notch": Vector4(22, 4, 10, 6)}
 const UI_TOUCH := "res://scripts/ui/ui_touch.gd"
 
 ## Veldscenario's (in de Wilgendal-kaart) en gevechtsscenario's, in vaste volgorde.
+## Ook te openen met open(): "lobby_join_code" en "lobby_menu_online" (online co-op, alleen in de tests).
 const FIELD_SCENARIOS: Array[String] = [
 	"hud", "dialog_narrator", "dialog_choices",
 	"menu_main", "menu_items", "menu_equipment", "menu_magic", "menu_status", "menu_codex",
@@ -187,7 +189,9 @@ func open(name: String) -> bool:
 			k.run_seed = 7
 			k.bezoek = 1
 			scene().add_child(k)
-		"lobby_menu", "lobby_host", "lobby_join":
+		"lobby_menu", "lobby_host", "lobby_join", "lobby_join_code", "lobby_menu_online":
+			if name == "lobby_menu_online":
+				OS.set_environment(Protocol.RELAY_URL_ENV, "wss://relay.example.test")
 			_lobby_layer = CanvasLayer.new()
 			_lobby_layer.layer = 30
 			get_tree().root.add_child(_lobby_layer)
@@ -203,6 +207,8 @@ func open(name: String) -> bool:
 				_lobby._show_host()
 			elif name == "lobby_join":
 				_lobby._show_join_listen()
+			elif name == "lobby_join_code":
+				_lobby._show_join_code()
 		_:
 			return false
 	await pframes(6)
@@ -211,6 +217,7 @@ func open(name: String) -> bool:
 
 ## Sluit wat een scenario opende, zodat het volgende vanaf de kaart begint.
 func close_all() -> void:
+	OS.unset_environment(Protocol.RELAY_URL_ENV)
 	if _lobby != null and is_instance_valid(_lobby):
 		_lobby_layer.queue_free()
 		_lobby = null
