@@ -165,6 +165,10 @@ func _teleport() -> void:
 
 
 func _think_spell() -> void:
+	# Staat de besturing op deze held (lichaam niet gewisseld), dan is node_of(hero_id) de speler: de AI mag
+	# daar geen cast-animatie (SomCastAnim/-Circle/-Fx) naast het loopframe leggen.
+	if hero_id == arena.active_id:
+		return
 	var m: Dictionary = member()
 	var spells: Array = m.get("spells", [])
 	# 1) genezen: partylid (levend) onder ALLY_HEAL_BELOW
