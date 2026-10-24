@@ -743,7 +743,8 @@ const ROOMS := {
 		"checkpoint": false,      # v0.19 baaskamer: game over = terug in de Bibliotheek
 		"spawns": {"zuid": [9, 10, "up"]},
 		"exits": {
-			"U": {"map": "res://scenes/maps/archief_bibliotheek.tscn", "spawn": "deur"},
+			# op slot na de Golem tot de Inktwurm in de Codex staat (StoryData.GOLEMHAL_EXIT)
+			"U": {"map": "res://scenes/maps/archief_bibliotheek.tscn", "spawn": "deur", "event": "golemhal_uitgang"},
 		},
 		"monsters": [
 			# De Golem: baas, staat stil op het platform (2x2 tiles), kern pulseert langzaam.
