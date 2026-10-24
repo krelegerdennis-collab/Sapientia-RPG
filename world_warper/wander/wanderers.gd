@@ -29,6 +29,7 @@ const HUB_MAP := "res://assets/sprites/hub/%s_hub.png"
 const MAP_SHEET := "res://assets/map_monsters/%s.png"
 const PARTY_PLAATSHOUDER := "res://world_warper/art/party.png"
 const ECHO_SHEET := "res://world_warper/art/echo.png"
+const ECHO_ALPHA := 0.6
 const FRAME := Vector2i(16, 24)
 const RICHTINGEN: Array[String] = ["omlaag", "links", "rechts", "omhoog"]
 const WALK_CYCLE: Array[int] = [1, 0, 2, 0]
@@ -285,6 +286,8 @@ func _maak(spec: Dictionary, party: bool, gebied: Rect2, sheet := "") -> void:
 		anim.offset = Vector2(0, -8 if tex.get_height() == 64 and tex.get_width() == 32 else -12)     # voeten op de oorsprong
 		anim.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		anim.play("stil_omlaag")
+		if sheet.get_file().begins_with("echo"):
+			anim.modulate.a = ECHO_ALPHA     # ECHO is doorschijnend (RPG ART: alpha in de engine)
 		wortel.add_child(anim)
 		wortel.set_meta("ww_sheet", sheet)
 		wortel.add_child(_label(naam, Vector2(-36, -34), Color(0.95, 0.94, 0.88)))

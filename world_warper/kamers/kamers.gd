@@ -325,7 +325,7 @@ static func handel_open() -> bool:
 static func plaatje(bron: String) -> Dictionary:
 	match bron:
 		"echo", "echo_grot":
-			return {"pad": ART_ECHO, "h": 3, "v": 4, "offset": Vector2(0, -10)}
+			return {"pad": ART_ECHO, "h": 3, "v": 4, "offset": Vector2(0, -10), "alpha": 0.6}
 		"grot_ingang":
 			return {"pad": ART_WARP, "h": 1, "v": 1, "offset": Vector2(0, 0), "tint": Color(0.55, 0.35, 0.95)}
 		"party":

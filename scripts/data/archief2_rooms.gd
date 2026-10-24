@@ -265,7 +265,7 @@ static func rooms() -> Dictionary:
 			"ECHO operates the hub. Step onto the path and choose.",
 		]}],
 		"sfeer": [
-			{"name": "Echo", "texture": "res://assets/sprites/archief2/echo_groen.png", "tile": [6, 7], "scale": 1.0},
+			{"name": "Echo", "texture": "res://assets/sprites/archief2/echo_groen.png", "tile": [6, 7], "scale": 1.0, "alpha": 0.6},
 			{"name": "Warper", "texture": "res://assets/sprites/archief2/world_warper_groen.png", "tile": [18, 4], "scale": 0.25},
 			{"name": "Sapientia", "texture": "res://assets/sprites/archief2/sapientia_glitch.png", "tile": [19, 9], "scale": 0.5},
 		],

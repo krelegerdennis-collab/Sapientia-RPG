@@ -86,6 +86,29 @@ func _maak_gloed() -> void:
 	gloed.size = Vector2(WarperAccent.HANGER_FRAME) * GLOED_SCALE
 	gloed.visible = false
 	hanger.add_child(gloed)
+	# Zachte halo in de engine (RPG ART: semi-alpha zit niet in de pixelart). Additief, geen shader.
+	var grad := Gradient.new()
+	grad.set_color(0, Color(0.85, 0.7, 1.0, 0.55))
+	grad.set_color(1, Color(0.85, 0.7, 1.0, 0.0))
+	var halo_tex := GradientTexture2D.new()
+	halo_tex.gradient = grad
+	halo_tex.fill = GradientTexture2D.FILL_RADIAL
+	halo_tex.fill_from = Vector2(0.5, 0.5)
+	halo_tex.fill_to = Vector2(1.0, 0.5)
+	halo_tex.width = 64
+	halo_tex.height = 64
+	var halo_mat := CanvasItemMaterial.new()
+	halo_mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	var halo := TextureRect.new()
+	halo.name = "Halo"
+	halo.texture = halo_tex
+	halo.material = halo_mat
+	halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	halo.stretch_mode = TextureRect.STRETCH_SCALE
+	halo.show_behind_parent = true
+	halo.size = gloed.size * 2.0
+	halo.position = (gloed.size - halo.size) * 0.5
+	gloed.add_child(halo)
 	_zet_gloed(false)
 
 
@@ -482,6 +505,7 @@ func _style() -> void:
 			art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			art.modulate.a = 0.6     # ECHO doorschijnend (RPG ART: alpha in de engine)
 			hologram.add_child(art)
 
 

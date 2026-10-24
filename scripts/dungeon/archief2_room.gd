@@ -94,6 +94,7 @@ func _plaats_sfeer() -> void:
 		sp.centered = true
 		var sc := float(s.get("scale", 1.0))
 		sp.scale = Vector2(sc, sc)
+		sp.modulate.a = float(s.get("alpha", 1.0))     # ECHO doorschijnend (RPG ART)
 		var t: Array = s.get("tile", [0, 0])
 		sp.position = Vector2(int(t[0]), int(t[1])) * 16.0 + Vector2(8, 8)
 		sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

@@ -31,6 +31,8 @@ func _ready() -> void:
 	spr.offset = p.get("offset", Vector2.ZERO)
 	if p.has("tint"):
 		spr.modulate = p["tint"]
+	if p.has("alpha"):
+		spr.modulate.a = float(p["alpha"])     # ECHO doorschijnend (RPG ART)
 	add_child(spr)
 	var titel := Kamers.label(bron)
 	if titel == "":
