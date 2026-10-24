@@ -1,0 +1,18 @@
+{
+  "name": "sapientia-relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kleine WebSocket-relay voor SAPIENTIA online co-op: stuurt berichten door tussen de peers van een kamer.",
+  "license": "UNLICENSED",
+  "main": "src/relay.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

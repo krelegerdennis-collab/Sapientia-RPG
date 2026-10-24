@@ -40,7 +40,8 @@ const GOLD_QUAD := 0.002
 ## Basis-stats van een baas (de curves hierboven worden er eerst op losgelaten); het sprite, de
 ## naam en de skills komen van de gekozen vijand (BOSSES). Daarna de bazen-vermenigvuldigers.
 const BOSS_BASE := {"max_hp": 120, "atk": 24, "def": 14, "agi": 8, "mag": 12, "mdef": 10, "exp": 60, "gold": 40}
-const BOSS_MULT := {"max_hp": 2.5, "atk": 1.25, "def": 1.2, "mag": 1.2, "mdef": 1.2, "exp": 5.0, "gold": 5.0}
+## Power scaling v2 (vervangt PR #126): max_hp 2,5 -> 3,0 en atk 1,25 -> 1,34. Canon-bazen (CANON_BOSS) overschrijven dit daarna.
+const BOSS_MULT := {"max_hp": 3.0, "atk": 1.34, "def": 1.2, "mag": 1.2, "mdef": 1.2, "exp": 5.0, "gold": 5.0}
 ## Formulebonus die boss_stats nog op verdieping 100 toepast. Er staat daar geen baas meer.
 const FINAL_MULT := {"max_hp": 1.3, "atk": 1.15, "def": 1.1, "mag": 1.15, "mdef": 1.1, "exp": 3.0, "gold": 3.0}
 ## "enemy" = bestaande vijand uit game_data.gd (skills; art als de baas geen eigen art heeft).

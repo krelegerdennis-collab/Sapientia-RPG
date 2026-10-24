@@ -111,7 +111,7 @@ func _data_tests() -> void:
 		if int(iw[k]) != GD.round_half_even(2.0 * float(normal[k])):
 			twice = false
 	check("Ink Worm = 2x normaal Lv 5 (normaal HP %.1f ATK %.1f DEF %.1f SPD %.1f -> %d/%d/%d/%d)" % [normal["max_hp"], normal["atk"],
-			normal["def"], normal["agi"], iw["max_hp"], iw["atk"], iw["def"], iw["agi"]], twice and int(iw["max_hp"]) == 68)
+			normal["def"], normal["agi"], iw["max_hp"], iw["atk"], iw["def"], iw["agi"]], twice and int(iw["max_hp"]) == 74)
 	check("Ink Worm: uniek, gevechtsniveau 5, als vijand nog geen vaardigheid", bool(iw.get("unique", false))
 			and int(iw.get("encounter_level", 0)) == 5 and (iw["skills"] as Array).is_empty() and iw["weak"] == ["vuur"])
 	var sp_path := GD.enemy_sprite(iw)
@@ -130,7 +130,7 @@ func _data_tests() -> void:
 	check("Codex Lv 5 = de stats van het gevecht; vangen = Lv 5; kans 100%% ook bij volle HP",
 			CD.stats_at("inktwurm", 5) == {"max_hp": iw["max_hp"], "max_mp": 0, "atk": iw["atk"], "def": iw["def"], "agi": iw["agi"]}
 			and CD.capture_level(0, "inktwurm") == 5 and CD.capture_level(3, "inktwurm") == 5
-			and CD.capture_chance("inktwurm", 68, 68) == 1.0 and CD.species_for_enemy("inktwurm") == "inktwurm")
+			and CD.capture_chance("inktwurm", 74, 74) == 1.0 and CD.species_for_enemy("inktwurm") == "inktwurm")
 	check("andere soorten: vangniveau = tier zoals altijd", CD.capture_level(3, "mosslijm") == 3 and CD.capture_level(0) == 1)
 	check("Ink Worm zit in de fusietabel", CD.FUSION_TABLE.any(func(r): return (r["tags"] as Array).has("inkt")))
 	# --- regels
