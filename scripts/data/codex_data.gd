@@ -7,7 +7,7 @@ extends RefCounted
 ##
 ## Een soort hergebruikt de vijand uit GameData.ENEMIES (naam, vooraanzicht "sprite", rug-sprite
 ## "sprite_back", basis-stats). Hier staat alleen wat de Codex extra nodig heeft:
-##   "enemy"        (VERPLICHT) id in GameData.ENEMIES; basis-stats = de gewone stats van die
+##   "enemy"        (VERPLICHT) id in GameData.ENEMIES (of in BerggrotData.MONSTERS, zie enemy_data()); basis-stats = de gewone stats van die
 ##                  vijand (niet de baas-stats), op level 1
 ##   "name"         naam in de Codex (standaard de naam van de vijand)
 ##   "element"      element van de soort (voor fusie later; standaard "neutraal")
@@ -35,6 +35,7 @@ extends RefCounted
 ## Bazen (een gevecht met GameState.pending_boss) zijn NOOIT te vangen, ook al staat de soort hier.
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 
 ## Het item (staat in GameData.ITEMS en in START_INVENTORY).
 const BOOK_ITEM := "leeg_boek"
@@ -119,6 +120,10 @@ const SKILLS := {
 	"oordeelblik":  {"name": "Judging Gaze",  "type": "damage", "power": 1.5, "mp": 0, "element": "licht"},
 	"halolicht":    {"name": "Halo Mend",     "type": "heal",   "power": 18,  "mp": 0, "element": "licht"},
 	"grootboekrol": {"name": "Ledger Roll",   "type": "damage", "power": 1.6, "mp": 0, "element": "metaal"},
+	# Berggrot (Hollow Mountain): de drie grotmonsters, ook vangbaar in de Diepe Grot-pool "bergtunnel"
+	"steenbeet":    {"name": "Stone Bite",    "type": "damage", "power": 1.4, "mp": 0, "element": "steen"},
+	"koude_druppel": {"name": "Cold Drip",    "type": "damage", "power": 1.35, "mp": 0, "element": "water"},
+	"aderspark":    {"name": "Vein Spark",    "type": "damage", "power": 1.5, "mp": 0, "element": "ader"},
 }
 
 ## De soorten. Volgorde = volgorde in het Codex-scherm (daarna op level).
@@ -272,6 +277,33 @@ const SPECIES := {
 		"capture_rate": 0.4,
 		"glitch_name": "Glitch Beetle",
 	},
+	# Berggrot (Hollow Mountain, WM1): de vijand staat in BerggrotData.MONSTERS (niet in ENEMIES; art en rug-art
+	# bestaan al, handwerk). TIJDELIJKE AANNAME: groei en AI in de band van de Archief 2-soorten; vangkans iets
+	# lager omdat het Act 2-monsters zijn. Geen regel in FUSION_TABLE: fusie geeft de glitch-variant.
+	"steenluis": {
+		"enemy": "steenluis", "name": "Stone Louse", "element": "steen", "type": "insect", "fusion_tags": ["steen", "berg"],
+		"growth": {"max_hp": 7, "max_mp": 0, "atk": 2, "def": 2, "agi": 1},
+		"learn": {1: ["steenbeet"], 6: ["schild_omhoog"]},
+		"ai": {"skill_chance": 0.35, "heal_below": 0.0, "target": "sterkste"},
+		"capture_rate": 0.7,
+		"glitch_name": "Glitch Louse",
+	},
+	"druipslak": {
+		"enemy": "druipslak", "name": "Drip Slug", "element": "water", "type": "slak", "fusion_tags": ["druip", "berg"],
+		"growth": {"max_hp": 8, "max_mp": 0, "atk": 2, "def": 2, "agi": 0},
+		"learn": {1: ["koude_druppel"]},
+		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "willekeurig"},
+		"capture_rate": 0.7,
+		"glitch_name": "Glitch Slug",
+	},
+	"adermot": {
+		"enemy": "adermot", "name": "Vein Moth", "element": "ader", "type": "insect", "fusion_tags": ["ader", "berg", "mot"],
+		"growth": {"max_hp": 5, "max_mp": 1, "atk": 3, "def": 1, "agi": 3},
+		"learn": {1: ["aderspark"]},
+		"ai": {"skill_chance": 0.4, "heal_below": 0.0, "target": "zwakste"},
+		"capture_rate": 0.7,
+		"glitch_name": "Glitch Moth",
+	},
 	# Verdieping 100, optie A. Geen nieuw verhaal: alleen een vangbare soort op de bestaande Codex-API.
 	"echo": {
 		"enemy": "echo", "name": "ECHO", "element": "licht", "type": "gids",
@@ -319,8 +351,15 @@ const PAGE_STATS := ["max_hp", "max_mp", "atk", "def", "agi"]
 
 
 # ---------------------------------------------------------------- opzoeken
+## De vijand-data achter een soort: GameData.ENEMIES, anders de Berggrot-monsters ({} = onbekend).
+static func enemy_data(enemy_id: String) -> Dictionary:
+	if GameData.ENEMIES.has(enemy_id):
+		return GameData.ENEMIES[enemy_id]
+	return BerggrotData.enemy(enemy_id)
+
+
 static func has_species(id: String) -> bool:
-	return SPECIES.has(id) and GameData.ENEMIES.has(str(SPECIES[id].get("enemy", "")))
+	return SPECIES.has(id) and not enemy_data(str(SPECIES[id].get("enemy", ""))).is_empty()
 
 
 ## Soort met alle standaardwaarden ingevuld ({} als hij niet bestaat).
@@ -333,10 +372,10 @@ static func species(id: String) -> Dictionary:
 ## Zelfde, voor een losse data-regel 'raw' (ook gebruikt door de codextest om te bewijzen dat
 ## een nieuwe soort met alleen {"enemy": ...} werkt).
 static func species_from(id: String, raw: Dictionary) -> Dictionary:
-	if not GameData.ENEMIES.has(str(raw.get("enemy", ""))):
+	var e: Dictionary = enemy_data(str(raw.get("enemy", "")))
+	if e.is_empty():
 		return {}
 	var s: Dictionary = raw.duplicate(true)
-	var e: Dictionary = GameData.ENEMIES[str(s["enemy"])]
 	if not s.has("name"):
 		s["name"] = str(e["name"])
 	for k in [["element", "neutraal"], ["type", "monster"], ["fusion_tags", []], ["growth", DEFAULT_GROWTH],
@@ -364,7 +403,7 @@ static func species_for_enemy(enemy_id: String) -> String:
 
 ## Basis-stats op level 1 = de gewone stats van de vijand (niet de baas-stats).
 static func base_stats(id: String) -> Dictionary:
-	var e: Dictionary = GameData.ENEMIES[str(SPECIES[id]["enemy"])]
+	var e: Dictionary = enemy_data(str(SPECIES[id]["enemy"]))
 	return {"max_hp": int(e["max_hp"]), "max_mp": int(e.get("mp", 0)), "atk": int(e["atk"]),
 			"def": int(e["def"]), "agi": int(e["agi"])}
 
@@ -609,8 +648,8 @@ static func validate() -> Array[String]:
 		errs.append("item %s ontbreekt in GameData.ITEMS" % BOOK_ITEM)
 	for id in SPECIES:
 		var raw: Dictionary = SPECIES[id]
-		if not GameData.ENEMIES.has(str(raw.get("enemy", ""))):
-			errs.append("%s: 'enemy' bestaat niet in ENEMIES" % id)
+		if enemy_data(str(raw.get("enemy", ""))).is_empty():
+			errs.append("%s: 'enemy' bestaat niet in ENEMIES of BerggrotData.MONSTERS" % id)
 			continue
 		var s := species(id)
 		for k in PAGE_STATS:

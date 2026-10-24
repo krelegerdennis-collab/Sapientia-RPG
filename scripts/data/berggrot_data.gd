@@ -30,6 +30,8 @@ const STAF_ID := "bergnerfstaf"
 const ACCESSOIRE_ID := "adersteen"
 const M := "res://scenes/maps/"
 
+## "no" = bestiariumnummer (043-045, na de 42 van GameData.ENEMIES); "habitat" noemt ook de Diepe Grot
+## (pool "bergtunnel", dungeon100_content.gd). Bestiarium en Codex: zie bestiary_ids() en CodexData.SPECIES.
 const MONSTERS := {
 	"steenluis": {
 		"name": "Stone Louse",
@@ -41,7 +43,8 @@ const MONSTERS := {
 		"mp": 0, "weak": ["bliksem"], "resist": [],
 		"drops": [{"item": "drankje", "chance": 0.15}],
 		"desc": "A louse of living stone. It crawls through the grain of the mountain.",
-		"habitat": ["berggrot"],
+		"habitat": ["berggrot", "dungeon100"],
+		"no": 43,
 	},
 	"druipslak": {
 		"name": "Drip Slug",
@@ -53,7 +56,8 @@ const MONSTERS := {
 		"mp": 0, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "kruid", "chance": 0.18}],
 		"desc": "A slug of cold dripstone. Slow, and it leaves the rock wet behind it.",
-		"habitat": ["berggrot"],
+		"habitat": ["berggrot", "dungeon100"],
+		"no": 44,
 	},
 	"adermot": {
 		"name": "Vein Moth",
@@ -65,7 +69,8 @@ const MONSTERS := {
 		"mp": 4, "weak": ["vuur"], "resist": [],
 		"drops": [{"item": "toverwater", "chance": 0.12}],
 		"desc": "A moth that follows the ore vein. Fast, and it flickers like a spark in the dark.",
-		"habitat": ["berggrot"],
+		"habitat": ["berggrot", "dungeon100"],
+		"no": 45,
 	},
 }
 
@@ -296,6 +301,13 @@ static func start() -> void:
 
 static func has_enemy(id: String) -> bool:
 	return MONSTERS.has(id)
+
+
+## Bestiarium-ids van de grotmonsters, op nummer.
+static func bestiary_ids() -> Array:
+	var ids: Array = MONSTERS.keys()
+	ids.sort_custom(func(a, b): return int(MONSTERS[a].get("no", 999)) < int(MONSTERS[b].get("no", 999)))
+	return ids
 
 
 static func enemy(id: String) -> Dictionary:
