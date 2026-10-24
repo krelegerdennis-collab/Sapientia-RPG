@@ -13,6 +13,7 @@ Het spel rendert 384x216 eenheden over de hoogte van het scherm. Een telefoon in
 | `TOUCH_MIN` (knoppen die je moet raken) | 25 | 47,6 |
 | `ROW_TOUCH` (lijstregels in winkel, Codex, tekstvak-keuzes, gevechtslijsten) | 25 | 47,6 |
 | Commandokruis (RPG ART-art 24x24) | 24 | 45,7 |
+| Gevechtslijstjes (Magic/Item/Swap), afhankelijk van de ruimte boven de helden | 16 tot 25 | 30 tot 48 |
 | Gewone lijstregel (`menu_screen.ROW_H`) | 16 | 30 |
 
 Het tikvlak mag groter zijn dan wat je ziet (`UiTouch.hit_rect`): de MENU/RUN/CORE-knoppen in de HUD hebben dezelfde
@@ -28,8 +29,11 @@ Touch en tikmaat
 - HUD (`touch_controls.gd`): joystick, A/B, MENU, RUN en CORE blijven binnen het veilige gebied; tikvlak van MENU/RUN/CORE >= 25 hoog.
 - Alle menuschermen (`menu_screen.gd`, Bestiary): onzichtbaar tikvlak rond Back (>= 25 x 25, tot de schermrand), venster en inhoud binnen het veilige gebied.
 - Veldmenu: rechterkolom (Warp ... Load) 20 -> 25 hoog.
-- Tekstvak: keuzeregels 11 -> 25 hoog (bij 4 of meer keuzes 20), tikken op een keuze werkt op de hele regel.
-- Gevecht: Magic/Item/Codex-lijsten 11 of 16 -> 25 per regel, met venster en pijlregels als er meer dan 5 zijn.
+- Tekstvak: keuzeregels 11 -> 25 hoog. Korte keuzes (Yes/No, Next/Skip) staan zoals altijd rechtsonder onder elkaar; langere
+  keuzes (tot 3) staan op een rij onderin het vak, zodat het vak laag blijft en de speler niet bedekt (bestaande plaatsingstests);
+  bij 4+ keuzes staan ze onder elkaar met 20 hoog. Tikken werkt op de hele regel; bij een rij werkt ook links/rechts.
+- Gevecht: Magic/Item/Codex-lijsten 11 of 16 -> 25 per regel, maar nooit hoger dan er boven de helden past (de bestaande autotest
+  eist dat het lijstje niet over de helden valt): 25 bij 1 tot 2 regels, 19 bij 3 regels, minimaal 16. Venster en pijlregels als er meer dan 5 zijn.
 - Winkel (Wilgendal en Koopman): regels 16 -> 25, lijst scrolt met de vinger of de joystick.
 - Codex: lijstregels, Fusion-knop en Back 16 -> 25.
 - Opslaan: Yes/No 16 -> 25.
