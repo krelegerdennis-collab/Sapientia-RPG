@@ -133,6 +133,7 @@ func _rich_state() -> void:
 	if GameState.is_unique("inktwurm"):
 		GameState.unique_done["inktwurm"] = "verslagen"
 	GameState._unique_seen_flags()
+	GameState._codex_inktwurm_sync()      # sinds de vang-tutorial: een verslagen Inktwurm staat ook in de Codex (3e pagina)
 	GameState.scenes_seen = [str(ScenesData.ids()[0])]
 	GameState.heard_music = [str(MusicTracks.ids()[0])]
 	GameState.puzzle_latched = {"kamer_a": ["poort_1", "poort_2"]}
@@ -531,8 +532,8 @@ func _roundtrip_tests() -> void:
 			and GameState.echo_grot_voltooid == 2 and GameState.bezochte_kaarten == [TOWN])
 	check("round-trip: verhaalstap en vlaggen", GameState.story_step == StoryData.KLAAR
 			and GameState.story_flags.has("kist_open") and GameState.story_flags.has("water_klaar"))
-	check("round-trip: Codex (2 vangsten, actieve bondgenoot, volgende uid, vangstgegevens)",
-			GameState.codex_pages.size() == 2 and GameState.codex_active == "codex_0002" and GameState.codex_next_id == 3
+	check("round-trip: Codex (2 vangsten + Inktwurm-migratie, actieve bondgenoot, volgende uid, vangstgegevens)",
+			GameState.codex_pages.size() == 3 and GameState.codex_active == "codex_0002" and GameState.codex_next_id == 4
 			and int(GameState.codex_pages[0]["level"]) == 3 and int(GameState.codex_pages[1]["caught"]["tier"]) == 1
 			and str(GameState.codex_pages[0]["species"]) == "mosslijm")
 	check("round-trip: bestiarium, kernfragment, scenes, muziek, puzzels, koopman, dungeon100, archief2",
@@ -764,7 +765,7 @@ func _duplication_tests() -> void:
 		GameState.load_game(SAVE)
 	check("5x laden: goud, drankjes en zwaarden (tas + gedragen) blijven gelijk",
 			GameState.gold == gold and GameState.item_count("drankje") == potions and _total_of("kort_zwaard") == swords)
-	check("5x laden: Codex en reserve niet verdubbeld", GameState.codex_pages.size() == 2 and GameState.party_bench.size() == 1
+	check("5x laden: Codex en reserve niet verdubbeld", GameState.codex_pages.size() == 3 and GameState.party_bench.size() == 1
 			and GameState.party.size() == 4)
 
 	# 2) spullen weggeven/gebruiken en terug laden geeft de oude toestand, geen extra
@@ -858,17 +859,17 @@ func _duplication_tests() -> void:
 	for p in GameState.codex_pages:
 		uids[str(p["uid"])] = true
 	check("Codex na laden: nieuwe vangst krijgt een nieuw uid (%s), geen dubbele uids" % np.get("uid", "?"),
-			not np.is_empty() and uids.size() == GameState.codex_pages.size() and str(np["uid"]) == "codex_0003")
+			not np.is_empty() and uids.size() == GameState.codex_pages.size() and str(np["uid"]) == "codex_0004")
 	var cd := JSON.parse_string(_read(SAVE)) as Dictionary
 	cd["codex"]["pages"].append((cd["codex"]["pages"][0] as Dictionary).duplicate(true))
 	_write(SAVE, JSON.stringify(cd))
 	GameState.load_game(SAVE)
-	check("Codex-pagina met dubbel uid in een save: maar één exemplaar", GameState.codex_pages.size() == 2)
+	check("Codex-pagina met dubbel uid in een save: maar één exemplaar", GameState.codex_pages.size() == 3)
 	cd["codex"]["next"] = 0
 	_write(SAVE, JSON.stringify(cd))
 	GameState.load_game(SAVE)
 	var nn := GameState.codex_add("moskonijn", 1, {})
-	check("Codex 'next' ontbreekt of te laag: nooit een uid hergebruiken", str(nn["uid"]) == "codex_0003")
+	check("Codex 'next' ontbreekt of te laag: nooit een uid hergebruiken", str(nn["uid"]) == "codex_0004")
 
 	# 7) game over + checkpoint: terugdraaien geeft geen extra of verloren spullen
 	_rich_state()
