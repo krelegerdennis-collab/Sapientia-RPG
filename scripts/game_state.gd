@@ -506,6 +506,7 @@ func _ready() -> void:
 			["--koopmantest", "res://scripts/tests/koopman_tests.gd", "KoopmanTest", "koopmantest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
+			["--berggrotdextest", "res://scripts/tests/berggrot_dex_tests.gd", "BerggrotDexTest", "berggrotdextest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
@@ -1079,13 +1080,13 @@ func _beast(id: String) -> Dictionary:
 
 
 func mark_seen(id: String) -> void:
-	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id):
+	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id) or BerggrotData.has_enemy(id):
 		_beast(id)["seen"] = true
 
 
 func mark_defeated(id: String) -> void:
 	unique_mark(id, "verslagen")      # v0.19: uniek monster verslagen = nooit meer
-	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id):
+	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id) or BerggrotData.has_enemy(id):
 		var b := _beast(id)
 		b["seen"] = true
 		b["defeated"] = int(b["defeated"]) + 1
@@ -2097,6 +2098,9 @@ func _fill_eind_codex() -> void:
 	# Diepe Grot-soorten (alleen in de grot te vangen) niet in de eind-Codex.
 	for dg in CodexData.GROT_BEHOUD:
 		ids.erase(dg)
+	# Berggrot-soorten (Hollow Mountain) ook niet: de eindstaat houdt zijn vaste Codex-samenstelling.
+	for bg in BerggrotData.MONSTERS:
+		ids.erase(bg)
 	for raw_id in ids:
 		if codex_full():
 			break

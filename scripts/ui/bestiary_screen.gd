@@ -10,13 +10,14 @@ signal closed
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
+const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const TERRAIN_NAMES := {
 	"gras": "plains", "hoog_gras": "tall grass", "bos": "woods", "zand": "sand",
 	"baas": "boss", "archief": "archive", "woud": "wood",
-	"dungeon100": "Deep Learning Simulation",
+	"dungeon100": "Deep Learning Simulation", "berggrot": "Hollow Mountain",
 }
 
 var root: Control
@@ -143,6 +144,11 @@ func _ready() -> void:
 
 	ids = GameData.bestiary_ids()
 	ids.append_array(EndgameBestiary.ids())
+	# Berggrot-monsters (043-045) komen in de lijst zodra je er een gezien hebt; de vaste lijst en teller
+	# hierboven blijven daarmee gelijk voor een speler die ze nog niet kent.
+	for bid in BerggrotData.bestiary_ids():
+		if GameState.is_seen(str(bid)):
+			ids.append(bid)
 	var seen := 0
 	var beaten := 0
 	for id in ids:
@@ -171,6 +177,8 @@ func entry_text(i: int) -> String:
 func _entry(id: String) -> Dictionary:
 	if GameData.ENEMIES.has(id):
 		return GameData.ENEMIES[id]
+	if BerggrotData.has_enemy(id):
+		return BerggrotData.enemy(id)
 	return EndgameBestiary.entry(id)
 
 
