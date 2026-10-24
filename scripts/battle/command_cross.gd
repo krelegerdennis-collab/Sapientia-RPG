@@ -260,7 +260,8 @@ func _refresh() -> void:
 
 
 func _place_name() -> void:
-	if name_tab == null or buttons.is_empty():
+	# Een kruis dat al uit de boom is (gevecht net afgesloten) heeft geen viewport-rect (WM1-bugjacht O-3).
+	if name_tab == null or buttons.is_empty() or not is_inside_tree():
 		return
 	name_tab.size = Vector2.ZERO
 	name_tab.reset_size()

@@ -90,6 +90,11 @@ var _sfx_last_played_ms: Dictionary = {}
 var _sfx_last_variant: Dictionary = {}
 
 var _stream_cache: Dictionary = {}
+## Geheugen: BGM-oggs zijn 2-4 MB per stuk en blijven als ze in de cache staan altijd in het RAM.
+## Alleen de laatste BGM_CACHE_MAX tracks (huidige, vorige en gevechtsmuziek) blijven gecachet;
+## SFX (klein) blijven altijd staan. Oudste eerst.
+const BGM_CACHE_MAX := 3
+var _bgm_lru: Array[String] = []
 var _reported: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 
@@ -371,6 +376,7 @@ func load_manifest() -> bool:
 	_bgm.clear()
 	_sfx.clear()
 	_stream_cache.clear()
+	_bgm_lru.clear()
 	_manifest_loaded = false
 
 	if not FileAccess.file_exists(MANIFEST_PATH):
@@ -627,7 +633,10 @@ func _pick_variant(sound_name: String, files: Array) -> Variant:
 
 
 func _load_stream(path: String, report_key: String) -> AudioStream:
+	var is_bgm := report_key.begins_with("bgm:")
 	if _stream_cache.has(path):
+		if is_bgm:
+			_bgm_cache_aanraken(path)
 		return _stream_cache[path]
 	if not ResourceLoader.exists(path):
 		# Verwacht zolang de audio nog niet gemaakt is: geen warning, alleen --verbose.
@@ -640,7 +649,18 @@ func _load_stream(path: String, report_key: String) -> AudioStream:
 		_report("file_invalid:" + report_key, "Bestand is geen geldige audio-stream: %s" % path, true)
 		return null
 	_stream_cache[path] = resource
+	if is_bgm:
+		_bgm_cache_aanraken(path)
 	return resource
+
+
+## Zet `path` als meest recent gebruikte BGM en laat de oudste los boven BGM_CACHE_MAX. Een track die nog
+## speelt blijft leven via zijn AudioStreamPlayer; alleen de cache-verwijzing verdwijnt.
+func _bgm_cache_aanraken(path: String) -> void:
+	_bgm_lru.erase(path)
+	_bgm_lru.append(path)
+	while _bgm_lru.size() > BGM_CACHE_MAX:
+		_stream_cache.erase(_bgm_lru.pop_front())
 
 
 func _apply_loop(stream: AudioStream, should_loop: bool) -> void:

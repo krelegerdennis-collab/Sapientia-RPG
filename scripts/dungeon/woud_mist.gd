@@ -17,6 +17,7 @@ const LANTERN_SCALE := 1.5          # x 64 px = ~96 px doorsnee
 const PLAYER_BRIGHT := Color(1.3, 1.3, 1.3)
 
 var _lantern: Sprite2D = null
+var _player: Node2D
 
 var _blobs: Array = []      # [Sprite2D, snelheid]
 var _rect := Rect2()
@@ -49,6 +50,7 @@ func _add_lantern() -> void:
 	var pl: Node2D = map.get_node_or_null("Objects/Player") as Node2D
 	if ground == null or pl == null:
 		return
+	_player = pl
 	if pl.get("sprite") is Sprite2D:
 		(pl.get("sprite") as Sprite2D).self_modulate = PLAYER_BRIGHT
 	_lantern = Sprite2D.new()
@@ -81,7 +83,7 @@ static func _texture() -> Texture2D:
 
 
 func _process(delta: float) -> void:
-	var pl: Node2D = get_parent().get_node_or_null("Objects/Player") as Node2D
+	var pl: Node2D = _player
 	if _lantern != null and pl != null:
 		_lantern.global_position = pl.global_position + Vector2(0, -4)
 	for b in _blobs:

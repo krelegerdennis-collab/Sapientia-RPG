@@ -112,6 +112,7 @@ func pas_toe(act: int, runs: int) -> void:
 		else:
 			vlak.modulate = Color(0.55, 0.55, 0.62, 1)
 	_echo_tint(echo_feller(act))
+	set_process(_pulse)
 
 
 func gevuld_aantal() -> int:

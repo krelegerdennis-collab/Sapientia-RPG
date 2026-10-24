@@ -1,0 +1,16 @@
+{
+	"v": 1,
+	"opmerking": "WM1-gebieden voor de playtest-log (SessieLog) en tools/sessielog/playtest_rapport.py. Volgorde = speelvolgorde. Een kaart hoort bij het gebied met een exacte 'maps'-match; anders bij de langste passende 'prefix'; geen match = 'overig'.",
+	"gebieden": [
+		{"id": "wachtershuis", "naam": "Wachtershuis-erf", "maps": ["huis_wilgendal", "wilgendal"], "prefix": []},
+		{"id": "wereldkaart", "naam": "Wereldkaart", "maps": ["wereldkaart"], "prefix": []},
+		{"id": "wilgendal", "naam": "Wilgendal", "maps": ["dorp_wilgendal", "wilgendal_binnen"], "prefix": []},
+		{"id": "archief1", "naam": "Archief 1", "maps": [], "prefix": ["archief_"]},
+		{"id": "esdoorn", "naam": "Esdoorn", "maps": [], "prefix": ["esdoorn"]},
+		{"id": "woud", "naam": "Donker Woud", "maps": [], "prefix": ["woud_"]},
+		{"id": "berggrot", "naam": "Berggrot", "maps": [], "prefix": ["berggrot_"]},
+		{"id": "archief2", "naam": "Archief 2 (Levende Archief)", "maps": [], "prefix": ["archief_2_", "leven_"]},
+		{"id": "hub", "naam": "World Warper-hub", "maps": ["exterieur", "hal", "rustkamer", "echo_kamer", "beeldkamer", "codex_nis", "hanger_nis", "sapientia_schot", "trainingshal", "werkplaats", "handelskamer", "kern"], "prefix": []},
+		{"id": "diepe_grot", "naam": "Diepe Grot", "maps": ["dungeon100"], "prefix": []}
+	]
+}

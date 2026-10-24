@@ -164,6 +164,11 @@ func touches(p: Vector2) -> bool:
 	return absf(p.x - c.x) < h.x and absf(p.y - c.y) < h.y
 
 
+## true = SomArena stuurt de beweging via sim_move() op de vaste 60 Hz-stap (Action-gevecht, stap 3b).
+## _process tekent dan alleen (loop-/verlamd-animatie).
+var sim_driven := false
+
+
 func _process(delta: float) -> void:
 	if room == null or not room.monsters_active():
 		return
@@ -171,6 +176,14 @@ func _process(delta: float) -> void:
 		_stun_look(delta)
 	else:
 		_animate(delta)
+	if not sim_driven:
+		sim_move(delta)
+
+
+## Beweging: naar de doeltegel schuiven en (zonder doel) rondzwerven. Per frame, of per vaste stap (sim_driven).
+func sim_move(delta: float) -> void:
+	if room == null or not room.monsters_active():
+		return
 	if is_moving:
 		var to := tile_to_px(target_tile)
 		position = position.move_toward(to, WALK_SPEED * delta)
