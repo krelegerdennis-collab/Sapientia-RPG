@@ -14,6 +14,7 @@ config/name="SAPIENTIA"
 config/description="Top-down JRPG prototype for mobile"
 config/version="0.20"
 run/main_scene="res://scenes/ui/title.tscn"
+run/max_fps=60
 config/features=PackedStringArray("4.3", "Mobile")
 config/icon="res://icon.png"
 
