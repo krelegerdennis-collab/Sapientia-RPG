@@ -80,6 +80,7 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--questtest` | `scripts/tests/quest_tests.gd` | 63 |
 | `--echotest` | `scripts/tests/echo_tests.gd` | 12 |
 | `--battlesimtest` | `scripts/tests/battlesim_tests.gd` | 57 |
+| `--wm1bugtest` | `scripts/tests/wm1_bugjacht_tests.gd` | 14 |
 
 Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`
 schrijft `user://sim/battlesim_<policy>_s<seed>.csv`; `python3 tools/battlesim/rapport.py [csv|map]` geeft winrate, mediaan beurten en de zwaarste groepen.
