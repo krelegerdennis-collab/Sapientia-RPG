@@ -8,6 +8,8 @@ extends RefCounted
 ##               (+10% stats tegen dienaren van Sapientia)
 ## Een BEZOEK = de eerste keer praten op een koopmanverdieping van een run (zelfde verdieping in
 ## dezelfde run telt één keer). Teller + token staan in de save (GameState.koopman_*).
+## WM1 (content-lock H13, besluit Dennis 24 okt 2026): de Archief 4-lore is uit de fragmentregels gehaald
+## ("Archive 4" en de regel "I came out of there too ... H-5"); die hoort bij een latere wereld.
 ## Tekst in de game is Engels; ids en commentaar Nederlands.
 
 const NAAM := "the Merchant"
@@ -32,8 +34,7 @@ const REGELS := {
 		"Don't ask what's below. I sell. That's all I do down here.",
 	],
 	FASE_FRAGMENT: [
-		"You again. No... wait. That pendant. That face. Archive 4.",
-		"I came out of there too. Before you. H-5, they wrote on my sleeve.",
+		"You again. No... wait. That pendant. That face.",
 		"There were four before me. None of them reached the bottom. Neither did I.",
 		"The Cave is not a dungeon. It's a filter. Keep that to yourself... she listens.",
 	],
