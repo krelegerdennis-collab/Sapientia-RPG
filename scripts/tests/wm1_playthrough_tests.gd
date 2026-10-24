@@ -741,6 +741,7 @@ func menu_sweep(label: String) -> void:
 	var s := scene()
 	var p := player()
 	if s == null or p == null or not s.has_method("open_field_menu"):
+		check("[SOFTLOCK] %s: geen kaart met veldmenu" % label, false)
 		return
 	p.input_locked = false
 	s.open_field_menu()
@@ -749,22 +750,43 @@ func menu_sweep(label: String) -> void:
 	check("[SOFTLOCK] %s: veldmenu opent" % label, m != null)
 	if m == null:
 		return
-	for id in ["items", "magic", "equip", "status", "bestiary", "codex", "options", "quests", "party", "scenes", "load", "warp"]:
-		if not is_instance_valid(m) or not (m.commands() as Array).has(id):
+	var ids: Array = (m.commands() as Array).map(func(c): return str(c[0]))
+	var opened := 0
+	for id in ids:
+		if id in ["save", "load", "close", "warp"] or not is_instance_valid(m):
 			continue
 		m.choose(id)
 		await pframes(6)
 		if m.sub == null:
 			continue
+		opened += 1
 		var tries := 0
 		while is_instance_valid(m) and m.sub != null and tries < 8:
 			await tap("cancel")
 			tries += 1
 		check("[SOFTLOCK] %s: menu-onderdeel '%s' gaat met B weer dicht" % [label, id], not is_instance_valid(m) or m.sub == null)
+	check("[SOFTLOCK] %s: %d menu-onderdelen geopend (%s)" % [label, opened, ids], opened >= 6)
 	if is_instance_valid(m):
 		m.close()
 	await pframes(4)
 	check("[SOFTLOCK] %s: veldmenu sluit en de speler is weer vrij" % label, s.get_node_or_null("FieldMenu") == null and not p.input_locked)
+
+
+## Dev: alleen het veldmenu, op een late WM1-staat (--menu-only).
+func menu_only() -> void:
+	GameState.new_game("Dax")
+	GameState.story_step = SD.NOOR_GERED
+	for f in [SD.GOLEM_FLAG, "noor_gered", "noor_lid", "archief_gezien", "quest_noor", "noor_ontmoet"]:
+		GameState.story_flags[f] = true
+	GameState.join_member("noor", 8, ["eiken_staf", "reisgewaad"])
+	GameState.join_member("lotte", 8, [])
+	GameState.grant_kern(Archief2.KERN_ID, "genezer")
+	GameState.codex_add("mosslijm", 3)
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+	var w := await goto(WORLD, "van_dorp")
+	if w != null:
+		await settle("menu-only", 45.0, true, 0.8)
+		await menu_sweep("menu-only")
 
 
 # ================================================================ statische audit
@@ -906,6 +928,12 @@ func _run() -> void:
 	static_audit()
 	if "--static-only" in OS.get_cmdline_user_args():
 		print("WM1PLAYTHROUGHTEST %d PASS, %d FAIL (alleen statische audit)" % [passes, failures])
+		print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
+		get_tree().quit(1 if failures else 0)
+		return
+	if "--menu-only" in OS.get_cmdline_user_args():
+		await menu_only()
+		print("WM1PLAYTHROUGHTEST %d PASS, %d FAIL (alleen veldmenu)" % [passes, failures])
 		print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 		get_tree().quit(1 if failures else 0)
 		return

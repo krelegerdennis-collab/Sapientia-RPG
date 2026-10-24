@@ -7,6 +7,8 @@ daarbij crashes, scriptfouten, softlocks en voortgangsblokkades zoekt. Alleen WM
 GODOT=/pad/naar/Godot_v4.3-stable_linux.x86_64 .github/scripts/run_suite.sh wm1playthroughtest
 # alleen de statische audit (spelertekst + kamerdata, ~2 s):
 GODOT=... .github/scripts/run_suite.sh wm1playthroughtest --static-only
+# alleen het veldmenu op een late WM1-staat (~5 s):
+GODOT=... .github/scripts/run_suite.sh wm1playthroughtest --menu-only
 ```
 
 Script: `scripts/tests/wm1_playthrough_tests.gd`. Registratie: één regel in `scripts/game_state.gd` (`_ready()`).
