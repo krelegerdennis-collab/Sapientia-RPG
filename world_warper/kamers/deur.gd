@@ -1,7 +1,7 @@
 extends Node2D
 ## Deur naar een extra World Warper-kamer.
 ## target_map blijft leeg: map.gd wisselt deze deur niet zelf.
-## Dicht = Nederlandse melding. Open = GameState.change_map.
+## Dicht = vaste melding (Kamers.GESLOTEN). Open = GameState.change_map.
 
 const Kamers := preload("res://world_warper/kamers/kamers.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
@@ -42,7 +42,7 @@ func _on_player_stepped(tile: Vector2i) -> void:
 		return
 	if GameState.changing_map or GameState.in_battle:
 		return
-	if not Kamers.is_open(room_id, GameState.story_flags, GameState.party):
+	if not Kamers.release_open(room_id, GameState.story_flags, GameState.party):
 		if not Dialog.is_open:
 			Dialog.show_lines([Kamers.GESLOTEN], "")
 		return
