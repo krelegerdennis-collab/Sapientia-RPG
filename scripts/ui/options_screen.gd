@@ -8,6 +8,7 @@ extends "res://scripts/ui/menu_screen.gd"
 
 const TargetList := preload("res://scripts/ui/target_list.gd")
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 
 const OPTION_ROW_H := 19       # 13 regels in twee kolommen (7 + 6) passen met tabbalk en hulpregel op 216 hoog
 const TAB_BAR_H := 24          # zelfde tikminimum als questlog-tab (ROW_H / RIJ_H-traditie: 24 logic px)
@@ -333,6 +334,8 @@ func value_text(key: String) -> String:
 		"battle_style":
 			return settings.BATTLE_STYLE_NAMES[int(v)]
 		"sessie_log":
+			if not ReleaseFlags.is_debug_build():
+				return "Debug only"
 			return ["Auto", "Off", "On"][int(v) + 1]
 	if v is bool:
 		return "On" if v else "Off"
