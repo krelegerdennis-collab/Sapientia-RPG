@@ -4,7 +4,7 @@ extends RefCounted
 ##
 ## Godot (4.3) maakt voor elke TileSetAtlasSource met padding een tweede, opgevulde kopie van de hele atlas
 ## als ImageTexture (+1 pixel rand per tegel) naast het geimporteerde origineel. Voor Wilgendal is dat ~8 MB
-## extra textuurgeheugen (de originele atlas blijft ook staan), voor elke kamer meer dan 100 KB.
+## extra textuurgeheugen (de originele atlas blijft ook staan), voor een dungeonkamer ~0,2 MB.
 ## De padding voorkomt alleen "bleeding" bij schalen, draaien of lineaire filtering. Dit spel tekent met
 ## Nearest, zonder camerazoom, op een gesnapte 1:1-viewport (stretch mode viewport): elke tegel-texel landt
 ## precies op een schermpixel. Het beeld blijft bit-voor-bit gelijk (tools/geheugen/beeldcheck.py).

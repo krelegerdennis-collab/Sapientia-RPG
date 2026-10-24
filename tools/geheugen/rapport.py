@@ -83,13 +83,13 @@ def main():
     uit = []
     info = na["info"]
     uit.append(f"Engine: {info.get('godot', '?')}, renderer {info.get('renderer', '?')} (adapter: {info.get('adapter', '?')}). "
-               "MB = 10^6 bytes. Texturen = `RENDER_TEXTURE_MEM_USED`, statisch = `MEMORY_STATIC`, RSS = /proc (llvmpipe, dus ook GL-geheugen).\n")
+               "MB = 10^6 bytes. Texturen = `RENDER_TEXTURE_MEM_USED`, statisch = `MEMORY_STATIC`. "
+               "RSS en laadtijden staan in de JSON maar niet in dit rapport: onder software-GL (llvmpipe) schommelen ze te veel (RSS +-20 MB tussen identieke runs).\n")
 
     uit.append("### 1. Opstart (autoloads + achtergrond-preload, nog geen kaart)\n")
     uit.append(kop(voor))
     s, vs = na["start"], (voor["start"] if voor else None)
     for lab, k, f in [("Texturen (VRAM) MB", "textuur_mem", mb), ("Statisch geheugen MB", "statisch", mb),
-                      ("Statisch piek MB", "statisch_piek", mb), ("RSS MB", "rss", mb),
                       ("Objecten", "objecten", str), ("Resources", "resources", str)]:
         uit.append(rij(lab, s, vs, k, f))
     if na["preload"]:
@@ -100,17 +100,17 @@ def main():
 
     uit.append("### 2. Per WM1-kaart, verse proces (totaal met de kaart open; baseline = opstart)\n")
     if voor is None:
-        uit.append("| Kaart | Texturen MB | Statisch MB | RSS MB | Objecten | Resources | Knopen | Uniek tex | Laadtijd ms |\n|---|---:|---:|---:|---:|---:|---:|---:|---:|")
+        uit.append("| Kaart | Texturen MB | Statisch MB | Objecten | Resources | Knopen | Uniek tex |\n|---|---:|---:|---:|---:|---:|---:|")
     else:
-        uit.append("| Kaart | Texturen MB voor | na | Δ | Statisch MB voor | na | RSS MB voor | na | Resources voor | na |\n|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+        uit.append("| Kaart | Texturen MB voor | na | Δ | Statisch MB voor | na | Resources voor | na |\n|---|---:|---:|---:|---:|---:|---:|---:|")
     sommen = collections.Counter()
     for naam, k in na["kaarten"].items():
         n = k["na"]
         if voor is None or naam not in voor["kaarten"]:
-            uit.append(f"| {naam} | {mb(n['textuur_mem'])} | {mb(n['statisch'])} | {mb(n['rss'])} | {n['objecten']} | {n['resources']} | {k['knopen']} | {k['texturen']['uniek']} | {k['laadtijd_ms']:.0f} |")
+            uit.append(f"| {naam} | {mb(n['textuur_mem'])} | {mb(n['statisch'])} | {n['objecten']} | {n['resources']} | {k['knopen']} | {k['texturen']['uniek']} |")
         else:
             v = voor["kaarten"][naam]["na"]
-            uit.append(f"| {naam} | {mb(v['textuur_mem'])} | {mb(n['textuur_mem'])} | {(n['textuur_mem'] - v['textuur_mem']) / MB:+.1f} | {mb(v['statisch'])} | {mb(n['statisch'])} | {mb(v['rss'])} | {mb(n['rss'])} | {v['resources']} | {n['resources']} |")
+            uit.append(f"| {naam} | {mb(v['textuur_mem'])} | {mb(n['textuur_mem'])} | {(n['textuur_mem'] - v['textuur_mem']) / MB:+.1f} | {mb(v['statisch'])} | {mb(n['statisch'])} | {v['resources']} | {n['resources']} |")
             sommen["tex_v"] += v["textuur_mem"]
             sommen["tex_n"] += n["textuur_mem"]
             sommen["stat_v"] += v["statisch"]
@@ -122,7 +122,7 @@ def main():
             sommen["n"] += 1
     if voor is not None and sommen["n"]:
         c = sommen["n"]
-        uit.append(f"| **Gemiddelde ({c} kaarten)** | {sommen['tex_v'] / c / MB:.1f} | {sommen['tex_n'] / c / MB:.1f} | {(sommen['tex_n'] - sommen['tex_v']) / c / MB:+.1f} | {sommen['stat_v'] / c / MB:.1f} | {sommen['stat_n'] / c / MB:.1f} | {sommen['rss_v'] / c / MB:.1f} | {sommen['rss_n'] / c / MB:.1f} | {sommen['res_v'] / c:.0f} | {sommen['res_n'] / c:.0f} |")
+        uit.append(f"| **Gemiddelde ({c} kaarten)** | {sommen['tex_v'] / c / MB:.1f} | {sommen['tex_n'] / c / MB:.1f} | {(sommen['tex_n'] - sommen['tex_v']) / c / MB:+.1f} | {sommen['stat_v'] / c / MB:.1f} | {sommen['stat_n'] / c / MB:.1f} | {sommen['res_v'] / c:.0f} | {sommen['res_n'] / c:.0f} |")
     uit.append("")
 
     def atl(d):
@@ -142,8 +142,7 @@ def main():
         e, ve = na["sessie"]["eind"], (voor["sessie"]["eind"] if voor and voor["sessie"] else None)
         uit.append(kop(voor))
         for lab, k, f in [("Texturen na afloop MB", "textuur_mem", mb), ("Statisch na afloop MB", "statisch", mb),
-                          ("Statisch piek MB", "statisch_piek", mb), ("RSS na afloop MB", "rss", mb),
-                          ("RSS piek MB", "rss_piek", mb), ("Objecten", "objecten", str), ("Resources", "resources", str)]:
+                          ("Statisch piek MB", "statisch_piek", mb), ("Objecten", "objecten", str), ("Resources", "resources", str)]:
             uit.append(rij(lab, e, ve, k, f))
         uit.append("")
 
