@@ -9,11 +9,10 @@ extends Control
 ## Op PC kun je met de muis klikken (emulate_touch_from_mouse staat aan).
 
 ## (preload i.p.v. class_name: dit script wordt al door een autoload geladen)
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const SomDataC := preload("res://scripts/data/som_data.gd")
-const UiTouch := preload("res://scripts/ui/ui_touch.gd")
-const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
-const SafeArea := preload("res://scripts/ui/safe_area.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 @export var dpad_radius := 30.0
 @export var button_radius := 15.0
@@ -78,6 +77,8 @@ var analog_only := false:
 				_set_touch_action(i, "")
 				_set_touch_action(i + UI_KEY, "")
 		queue_redraw()
+## Veilig gebied (notch, gebarenbalk) in de eenheden van deze laag: links, boven, rechts, onder.
+var safe_inset := Vector4.ZERO
 var _touch_owner := {}    # vinger-index -> "joy", "a", "b", "kern", "run", "menu"
 var _touch_action := {}   # vinger-index -> actie die die vinger nu indrukt
 var _press_count := {}    # actie -> aantal vingers dat hem indrukt
@@ -119,16 +120,11 @@ func refit() -> void:
 		return
 	var layer := get_parent() as CanvasLayer
 	var s := layer.scale if layer else Vector2.ONE
-	safe = SafeArea.insets(get_viewport()) / maxf(s.x, 0.01)
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	position = Vector2.ZERO
 	size = get_viewport_rect().size / s
+	safe_inset = UiTouchC.insets(get_viewport()) / s.x
 	queue_redraw()
-
-
-## Veilige randen (links, boven, rechts, onder) in deze laag-eenheden: notch, camera-gat, gebarenbalk.
-## Alles wat getekend/getikt wordt blijft erbinnen (scripts/ui/safe_area.gd). Op PC/headless is het 0.
-var safe := Vector4.ZERO
 
 
 ## Midden van de joystick (naam bewaard uit de D-pad-tijd): klein en hoog, midden-links.
@@ -141,9 +137,10 @@ var stick_low := false
 
 
 func stick_center() -> Vector2:
+	var x := edge_margin + safe_inset.x + 6.0 + joy_radius()
 	if stick_low:
-		return Vector2(safe.x + edge_margin + 6.0 + joy_radius(), size.y - safe.w - edge_margin - 6.0 - joy_radius())
-	return Vector2(safe.x + edge_margin + 6.0 + joy_radius(), roundf(size.y * SomDataC.JOY_CENTER_Y))
+		return Vector2(x, size.y - edge_margin - safe_inset.w - 6.0 - joy_radius())
+	return Vector2(x, roundf(size.y * SomDataC.JOY_CENTER_Y))
 
 
 ## Tikvlak van de joystick (vinger mag er ruim omheen).
@@ -166,11 +163,12 @@ func som_row_slot(i: int) -> Rect2:
 
 
 func a_center() -> Vector2:
-	return Vector2(size.x - safe.z - edge_margin - button_radius - 6.0, size.y - safe.w - edge_margin - button_radius - 10.0)
+	return Vector2(size.x - edge_margin - safe_inset.z - button_radius - 6.0,
+			size.y - edge_margin - safe_inset.w - button_radius - 10.0)
 
 
 func menu_rect() -> Rect2:
-	return Rect2(size.x - safe.z - edge_margin - 38.0, safe.y + edge_margin - 2.0, 38.0, 14.0)
+	return Rect2(size.x - edge_margin - safe_inset.z - 38.0, edge_margin - 2.0 + safe_inset.y, 38.0, 14.0)
 
 
 ## v0.16 KERN-knop: een paars 'pilletje' zoals MENU (vuurbal-icoon + "KERN"), recht boven de
@@ -212,27 +210,6 @@ func button_rects() -> Array[Rect2]:
 	return uit
 
 
-## Tikvlak van een knop in de bovenste rij: het plaatje, maar minstens 48dp hoog (UiTouch.MIN_UNITS).
-func hit_rect(r: Rect2) -> Rect2:
-	return UiTouch.hit_rect(r)
-
-
-## Tikvlakken (laag-eenheden) van alle knoppen; de test controleert dat ze minstens 48dp zijn.
-func hit_rects() -> Dictionary:
-	var out := {}
-	var rb := button_radius * 1.25
-	out["joy"] = Rect2(stick_center() - Vector2.ONE * stick_reach(), Vector2.ONE * stick_reach() * 2.0)
-	out["a"] = Rect2(a_center() - Vector2.ONE * rb, Vector2.ONE * rb * 2.0)
-	out["b"] = Rect2(b_center() - Vector2.ONE * rb, Vector2.ONE * rb * 2.0)
-	if show_menu:
-		out["menu"] = hit_rect(menu_rect())
-	if show_run:
-		out["run"] = hit_rect(run_rect())
-	if show_kern:
-		out["kern"] = hit_rect(kern_rect())
-	return out
-
-
 func run_on() -> bool:
 	var st := get_node_or_null("/root/Settings")
 	return st != null and bool(st.get_value("run"))
@@ -266,17 +243,17 @@ func _input(event: InputEvent) -> void:
 				_touch_owner[event.index] = "b"
 				_set_touch_action(event.index, "cancel")
 				get_viewport().set_input_as_handled()
-			elif show_kern and InputMap.has_action("kern") and hit_rect(kern_rect()).has_point(pos):
+			elif show_kern and InputMap.has_action("kern") and UiTouchC.hit_rect(kern_rect(), 4.0).has_point(pos):
 				_touch_owner[event.index] = "kern"
 				UiSfx.play(UiSfx.CLICK)
 				_set_touch_action(event.index, "kern")
 				get_viewport().set_input_as_handled()
-			elif show_run and InputMap.has_action("run") and hit_rect(run_rect()).has_point(pos):
+			elif show_run and InputMap.has_action("run") and UiTouchC.hit_rect(run_rect(), 2.0).has_point(pos):
 				_touch_owner[event.index] = "run"
 				UiSfx.play(UiSfx.CLICK)
 				_set_touch_action(event.index, "run")
 				get_viewport().set_input_as_handled()
-			elif show_menu and hit_rect(menu_rect()).has_point(pos):
+			elif show_menu and UiTouchC.hit_rect(menu_rect(), 4.0).has_point(pos):
 				_touch_owner[event.index] = "menu"
 				_set_touch_action(event.index, "menu")
 				get_viewport().set_input_as_handled()

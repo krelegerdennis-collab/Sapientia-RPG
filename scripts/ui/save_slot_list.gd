@@ -8,9 +8,8 @@ extends Control
 signal picked(slot: int)
 signal cancelled
 
-const UiMenu := preload("res://scripts/ui/ui_menu.gd")
-const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
+const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 
 var slot_buttons: Array[Button] = []
@@ -47,8 +46,9 @@ func _ready() -> void:
 		var rec := GameState.slot_record(i)
 		var b := UiMenu.button(_label(i, rec))
 		b.name = "Slot%d" % i
-		b.custom_minimum_size = Vector2(168, UiTouch.MIN_UNITS)
-		var off := rec.is_empty() and not is_new
+		b.custom_minimum_size = Vector2(168, UiTouch.TOUCH_MIN)
+		var unreadable := bool(rec.get("corrupt", false))
+		var off := (rec.is_empty() or unreadable) and not is_new
 		b.disabled = off
 		b.focus_mode = Control.FOCUS_NONE if off else Control.FOCUS_ALL
 		b.pressed.connect(picked.emit.bind(i))
@@ -57,26 +57,27 @@ func _ready() -> void:
 		if is_new:
 			if focus_btn == null and rec.is_empty():
 				focus_btn = b
-		elif not rec.is_empty() and float(rec.get("stamp", 0.0)) > best:
+		elif not off and float(rec.get("stamp", 0.0)) > best:
 			best = float(rec["stamp"])
 			focus_btn = b
 	if not is_new:
 		var arec := GameState.slot_record(GameState.AUTOSAVE_SLOT)
 		var ab := UiMenu.button(_label(GameState.AUTOSAVE_SLOT, arec))
 		ab.name = "Autosave"
-		ab.custom_minimum_size = Vector2(168, UiTouch.MIN_UNITS)
-		ab.disabled = arec.is_empty()
-		ab.focus_mode = Control.FOCUS_NONE if arec.is_empty() else Control.FOCUS_ALL
+		ab.custom_minimum_size = Vector2(168, UiTouch.TOUCH_MIN)
+		var a_off := arec.is_empty() or bool(arec.get("corrupt", false))
+		ab.disabled = a_off
+		ab.focus_mode = Control.FOCUS_NONE if a_off else Control.FOCUS_ALL
 		ab.pressed.connect(picked.emit.bind(GameState.AUTOSAVE_SLOT))
 		list.add_child(ab)
 		autosave_button = ab
-		if not arec.is_empty() and float(arec.get("stamp", 0.0)) > best:
+		if not a_off and float(arec.get("stamp", 0.0)) > best:
 			focus_btn = ab
 	elif focus_btn == null and not slot_buttons.is_empty():
 		focus_btn = slot_buttons[0]
 	var back := UiMenu.button("Back")
 	back.name = "Terug"
-	back.custom_minimum_size = Vector2(168, UiTouch.MIN_UNITS)
+	back.custom_minimum_size = Vector2(168, UiTouch.TOUCH_MIN)
 	UiSfx.tag(back, UiSfx.CANCEL)
 	back.pressed.connect(func() -> void: cancelled.emit())
 	list.add_child(back)
@@ -117,7 +118,8 @@ func _label(slot: int, rec: Dictionary) -> String:
 		return "%s: empty" % title
 	if bool(rec.get("corrupt", false)):
 		return "%s: unreadable save" % title
-	return "%s: %s" % [title, summary(rec.get("data", {}))]
+	var tail := " (backup)" if bool(rec.get("from_backup", false)) else ""
+	return "%s: %s%s" % [title, summary(rec.get("data", {})), tail]
 
 
 ## Korte samenvatting van een save: naam, Lv en speeltijd.

@@ -5,6 +5,7 @@ extends CanvasLayer
 
 signal dicht
 
+const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 
 var _status: Label
@@ -38,7 +39,7 @@ func _ready() -> void:
 	kolom.add_child(_status)
 	var terug := Button.new()
 	terug.text = "Back"
-	terug.custom_minimum_size = Vector2(0, 26)   # 48dp (UiTouch.MIN_UNITS)
+	terug.custom_minimum_size = Vector2(0, UiTouch.TOUCH_MIN)
 	terug.add_theme_font_override("font", FONT)
 	terug.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 	terug.pressed.connect(_sluit)
@@ -102,7 +103,7 @@ func _zeg(tekst: String) -> void:
 func _knop(tekst: String, actie: Callable) -> Button:
 	var knop := Button.new()
 	knop.text = tekst
-	knop.custom_minimum_size = Vector2(0, 26)   # 48dp (UiTouch.MIN_UNITS)
+	knop.custom_minimum_size = Vector2(0, UiTouch.TOUCH_MIN)
 	knop.add_theme_font_override("font", FONT)
 	knop.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 	knop.pressed.connect(actie)

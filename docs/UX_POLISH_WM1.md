@@ -1,22 +1,29 @@
 # UX-polish WM1 (release fase 6): audit en fixes
 
+> **Samengevoegd met PR #219** (`docs/ui/polish/README.md`, `--uipolishtest`). Er is één maatstok: `scripts/ui/ui_touch.gd`
+> van #219 (`TOUCH_MIN` = 25 eenheden = 47,6dp op 412dp) en zijn veilige gebied (`UiTouch.insets`, `insets_override`). Deze PR
+> heeft daar geen tweede helper naast. #219 beslist de tikmaat van HUD, veldmenu, Back, tekstvak-keuzes, winkels, Codex,
+> Opties, Uitrusting, gevechtslijsten en co-op lobby; deze PR houdt alleen over wat #219 niet doet (titelscherm,
+> slotlijst, opslag-prompt, kruis-tikvlak, Rustkamer, Action-knoppen), de Engelse tekst, het UI-geluid, de
+> instellingenbug en `--uxtest`.
+
 Scope: alleen WM1 (Wachtershuis-erf, Wilgendal, Esdoorn, Donker Woud, Archief 1, berggrot, Archief 2, World Warper-hub,
 Diepe Grot) en de gedeelde UI. `wacht/wm2/` is niet gelezen. Alleen game-code en -data; geen art, geen bestaande tests,
-geen workflow. Nieuwe suite: `--uxtest` (`scripts/tests/ux_tests.gd`, 175 checks, ~35 s).
+geen workflow. Nieuwe suite: `--uxtest` (`scripts/tests/ux_tests.gd`, 118 checks, ~30 s).
 
 ## Hoe er gemeten is
 
-- **48dp in eenheden.** Het venster is 216 eenheden hoog. Referentietoestel Galaxy S25 Ultra: 1440 px bij schaal 3,5 =
-  412dp korte zijde, dus 1 eenheid = 1,91dp en 48dp = 25,2 eenheden. Minimum = **26 eenheden** (`UiTouch.MIN_UNITS`).
-  Op een telefoon van 360dp is dat 29 (`UiTouch.min_units(360)`).
-- **Scherm-audit.** `UiTouch.small_targets(root)` loopt over alle zichtbare knoppen en schuifregelaars. De suite opent
-  titel, veldmenu met alle subschermen, opslaan, slotlijst, winkel, dialoogkeuzes, HUD, gevecht en meet ze.
+- **48dp in eenheden.** Het venster is 216 eenheden hoog. Referentietoestel Galaxy S25 Ultra: 412dp korte zijde, dus
+  1 eenheid = 1,9dp en 48dp = 25,2 eenheden. Minimum = **25 eenheden** (`UiTouch.TOUCH_MIN` uit #219).
+- **Scherm-audit.** `--uxtest` loopt over alle zichtbare knoppen van titel, veldmenu, opslaan, slotlijst, prompt,
+  dialoogkeuzes, HUD en gevecht (eigen `small_targets` in de test, tegen `UiTouch.TOUCH_MIN`). De volledige schermen-
+  en profielenmatrix (16:9, 19,5:9, notch, 21:9, 4:3) is `--uipolishtest` van #219.
 - **Tekst-audit.** Alle string-constanten van 36 data- en UI-scripts (5600 strings), alle `.tscn` (`map_name`,
   `npc_name`, `lines`) en een lijst met 12 Nederlandse spelersnamen. Daarnaast een lijst van verwijderde regels
   (regressiebewaking). Er is geen `namen_engels.md` in de repo (BACKLOG A5); gebruikt is de lijst in
   `docs/lore/CANON.md` ("Engelse spelersnamen").
 - **Ratio's.** De suite zet het venster op 1170x540 (19,5:9 = 468x216) en 1200x540 (20:9 = 480x216) en een
-  nep-notch (`SafeArea.override`, 30 eenheden links en rechts).
+  nep-notch (`UiTouch.insets_override`, 30 eenheden links en rechts).
 
 ## Bevindingen
 
@@ -36,31 +43,22 @@ geen workflow. Nieuwe suite: `--uxtest` (`scripts/tests/ux_tests.gd`, 175 checks
 | 1.10 | Titel van het Opties-scherm "Options" terwijl het menu en de tutorial "Settings" zeggen | gefixt (kop = "Settings") |
 | 1.11 | **Blijft Nederlands, vastgepind door bestaande tests:** "Dax leert geen magie." (`dungeon100_tests`, `todo_update_tests`), questtitel "Het Zingende Graan" (`woud_tests`), vaknamen "Benen"/"Laarzen" (`debug_menutest`), naam tijdelijke Codex-bondgenoot "Mosslijm" (`archief2_tests`), PvP-modi "Vroeg/Midden/Hoog" (`pvp_tests`) | **niet gefixt**: tekst en test moeten samen aangepast worden (RPG Forge). Voorstel: "Dax can't learn magic.", "The Singing Grain", "Legs"/"Boots", "Moss Slime", "Early/Mid/High". De suite bewaakt dat deze lijst niet groeit (`KNOWN_DUTCH_PINNED`). |
 
-### 2. Tikdoelen (48dp = 26 eenheden)
+### 2. Tikdoelen (48dp = 25 eenheden, `UiTouch.TOUCH_MIN`)
 
-| # | Plek | Voor | Na | Status |
+| # | Plek | Voor | Na | Door |
 |---|---|---|---|---|
-| 2.1 | HUD MENU / RUN / KERN (tikvlak) | 46x22 / 50x18 / 54x25 | 38x26 / 46x26 / 46x26 (plaatje blijft) | gefixt (`touch_controls.gd`) |
-| 2.2 | Action-knoppen Swap/Ring/Codex | 46x22 | 46x26 | gefixt (`SomData.TOP_BUTTON_SIZE`) |
-| 2.3 | Back-knop van elk menuscherm; pijlknoppen `<` `>` | 16 hoog, 20 breed | 26 / 26 breed | gefixt (`menu_screen.gd`, `TOUCH_H`) |
-| 2.4 | Veldmenu rechterkolom (Warp ... Load) | 20 hoog | 26 hoog (MENU-bord lager, melding/opdracht onder de linkerkolom) | gefixt |
-| 2.5 | Titelscherm: New Game, Co-op, PvP, SoM, Beta Test, End State | 10-16 hoog | 26 hoog (kaartje blijft y 148..201; save-info boven het kaartje) | gefixt |
-| 2.6 | Dialoogkeuzes (Yes/No, Next/Skip, acts) | ca. 11 hoog | 26 hoog; 2 keuzes naast elkaar, 3-6 in 2 kolommen, 7+ in 3 | gefixt (`dialog_box.gd`) |
-| 2.7 | Bestiarium (rijen, Back), Scenes/Music-tabs, Quest Log-tabs, Items/Magic/Codex/Party-rijen | 10-24 | 26 | gefixt |
-| 2.8 | Slotlijst (slots, autosave, Back), opslag-prompt, opslagscherm Yes/No | 10-18 | 26 (Yes/No naast elkaar) | gefixt |
-| 2.9 | Winkels (Willowdale, Exchange, Merchant), Werkplaats | ca. 13 | 26, lange lijst scrolt | gefixt |
-| 2.10 | Gevecht: kruisknoppen (24x24 art) | 24x24 | tikvlak 26x26 (plaatje en afstand 25 ongewijzigd) | gefixt (`cross_button.gd`) |
-| 2.11 | Gevecht: Codex-menu (Capture/Swap) | 16 hoog, 5 regels | 26 hoog, wissel-lijst 2 regels + ▲/▼ | gefixt (`battle.gd`) |
-| 2.11b | **Gevecht: Magic- en Item-lijstje** | 11 hoog | 11 hoog | **uitzondering**: de lijst staat boven het statusvak van de held; `debug_autotest` (`_check_submenu`) eist dat hij bij 3 regels niet over de helden valt. 3 regels van 26 (+ marge) zijn 90 hoog en raken de heldensprite. Voorstel: eigen volledig scherm of paginering. |
-| 2.12 | Rustkamer-wisselscherm (Back, knoppen) | 22 / 18 | 26 | gefixt |
-| 2.13 | Co-op lobby: minimum kwam uit het testvenster (16 eenheden = 34dp op een telefoon) | 16 | 26 | gefixt |
-| 2.14 | Opties > Music-tab (sliders, mute, tracks) | 48 eenheden (ca. 92dp, `muziek_tests` eist >= 48) | ongewijzigd | bewust (te groot, wel ruim 48dp) |
-| 2.15 | **Opties > General: 13 regels, `<` `>`** | 12 hoog | 12 hoog | **uitzondering**: `debug_menutest` ("alle regels in beeld") en `muziek_tests` eisen 13 regels tegelijk in 216 hoog; 13 x 26 past niet. De volumes staan ook op de Music-tab (26+). Voorstel: pagina's of scroll. |
-| 2.16 | **Uitrusting: 7 vakken, submenu, itemlijst** | 16 hoog | 16 hoog | **uitzondering**: `debug_menutest` eist dat alles van het scherm (`_inside_screen`) binnen 384x216 ligt. Voorstel: vaklijst in een scroll of twee stappen. |
-| 2.17 | PvP-lobby | n.v.t. | niet gemeten | buiten WM1 |
+| 2.1 | HUD MENU / RUN / CORE, A/B, joystick | 22 / 18 / 25 hoog | tikvlak >= 25 | #219 |
+| 2.2 | Back van elk menuscherm, veldmenu rechterkolom, tekstvak-keuzes, winkels, Codex, Opties, Uitrusting, gevechtslijsten, co-op lobby | 10-20 | 19-25 (lijstregels bewust 16, zie #219 README) | #219 |
+| 2.3 | Titelscherm: New Game, Co-op, PvP, SoM, Beta Test, End State | 10-16 hoog | 25 hoog (kaartje blijft y 148..201; save-info boven het kaartje) | deze PR |
+| 2.4 | Slotlijst (slots, autosave, Back), opslag-prompt Yes/No | 10-18 | 25 | deze PR |
+| 2.5 | Gevecht: kruisknoppen (24x24 art) | tikvlak 24x24 | tikvlak 26x26 (plaatje en afstand 25 ongewijzigd, `CrossButton._has_point`) | deze PR |
+| 2.6 | Action-knoppen Swap/Ring/Codex (`SomData.TOP_BUTTON_SIZE`) | 46x22 | 46x25 | deze PR |
+| 2.7 | Rustkamer-wisselscherm (Back, knoppen) | 22 / 18 | 25 | deze PR |
+| 2.8 | Opties > Music-tab (sliders, mute, tracks) | 48 eenheden (ca. 92dp; `muziek_tests` eist >= 48) | ongewijzigd | bewust |
+| 2.9 | PvP-lobby | n.v.t. | niet gemeten | buiten WM1 |
 
-De uitzonderingen 2.15 en 2.16 zijn gemarkeerd met `touch_exempt` (`MenuScreen.META_EXEMPT`); de suite telt ze
-(max 40 resp. 30) zodat er geen nieuwe bij kunnen komen zonder dat het opvalt.
+Wat #219 compact houdt (lijstregels van 16 eenheden = 30dp, kruisknoppen 24) is hun besluit; `--uipolishtest` bewaakt
+de rest in vijf viewportprofielen. `--uxtest` herhaalt dat niet.
 
 ### 3. Tutorials
 
@@ -75,10 +73,10 @@ De uitzonderingen 2.15 en 2.16 zijn gemarkeerd met `touch_exempt` (`MenuScreen.M
 
 | # | Vondst | Status |
 |---|---|---|
-| 4.1 | Niets las `DisplayServer.get_display_safe_area()`: HUD, menu's en dialoog liepen tot de schermrand (camera-gat) | gefixt: `SafeArea` (0 op PC/headless) in `touch_controls.gd`, `menu_screen.gd`, `field_menu.gd`, `dialog_box.gd` |
-| 4.2 | Titel (384-stage, gecentreerd), veldmenu, Items/Equipment/Quest Log/Scenes en dialoog binnen de veilige zone op 468x216 en 480x216 (nep-notch 30/30) | geen fout; getest |
-| 4.3 | Coop-/PvP-lobby (volle breedte met vaste marge) en de World Warper-schermen (vaste 384x216) houden geen rekening met de veilige zone | niet gefixt, niet in de WM1-hoofdroute |
-| 4.4 | Export: of Android de veilige zone aan de app geeft hangt af van de cutout-instelling van de export (`export_presets.cfg`, niet aangeraakt) | RPG Forge: controleren op de S25 Ultra |
+| 4.1 | Niets las `DisplayServer.get_display_safe_area()` | gefixt door #219 (`UiTouch.insets`) in HUD, menu's, veldmenu, tekstvak |
+| 4.2 | Titelscherm (384-stage, gecentreerd), HUD, veldmenu en tekstvak met twee keuzes binnen de veilige zone op 468x216 en 480x216 (nep-notch 30/30 via `UiTouch.insets_override`) | geen fout; `--uxtest` test het titelscherm, #219 de rest |
+| 4.3 | World Warper-schermen (vaste 384x216) en PvP-lobby houden geen rekening met de veilige zone | niet gefixt, niet in de WM1-hoofdroute |
+| 4.4 | Of Android de veilige zone aan de app geeft hangt af van de cutout-instelling van de export (`export_presets.cfg`, niet aangeraakt) | RPG Forge: controleren op de S25 Ultra |
 
 ### 5. Geluid
 
@@ -95,12 +93,11 @@ De uitzonderingen 2.15 en 2.16 zijn gemarkeerd met `touch_exempt` (`MenuScreen.M
 Alles werkt met de bestaande art. Optioneel, voor een nette 48dp-uitstraling:
 
 - `knop_<id>.png` (gevechtskruis): strook 78x26 (3 frames 26x26) i.p.v. 72x24, zodat het plaatje het hele tikvlak vult.
-- HUD-knoppen MENU / RUN / KERN: varianten van 38x26 / 46x26 / 46x26 (nu 38x14 / 46x14 / 46x17 met een groter onzichtbaar tikvlak).
-- Titelscherm: knopkader 118x26 (Continue/Load/New Game/Co-op/PvP/SoM/Beta); nu alleen tekst.
+- HUD-knoppen MENU / RUN / CORE: varianten van 38x25 / 46x25 / 46x25 (nu 38x14 / 46x14 / 46x17 met een groter onzichtbaar tikvlak).
+- Titelscherm: knopkader 118x25 (Continue/Load/New Game/Co-op/PvP/SoM/Beta); nu alleen tekst.
 
 ## Voor RPG Forge
 
 - Voeg `uxtest` toe aan de matrix van `.github/workflows/tests.yml` (agents mogen die niet aanpassen).
-- Besluit nodig over de vastgepinde Nederlandse regels (1.11) en de twee compacte schermen (2.15, 2.16): tekst en test
-  samen aanpassen.
-- Daarna `KNOWN_DUTCH_PINNED` en `EXEMPT_MAX` in `ux_tests.gd` bijwerken.
+- Besluit nodig over de vastgepinde Nederlandse regels (1.11): tekst en test samen aanpassen, daarna
+  `KNOWN_DUTCH_PINNED` in `ux_tests.gd` bijwerken.

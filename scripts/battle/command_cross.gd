@@ -125,7 +125,7 @@ func button_rect(i: int) -> Rect2:
 	return Rect2(buttons[i].position, buttons[i].size)
 
 
-## Tikvlak van een knop (plaatje + CrossButton.SLOP rondom): minstens 48dp (UiTouch.MIN_UNITS).
+## Tikvlak van een knop (plaatje + CrossButton.SLOP rondom): minstens UiTouch.TOUCH_MIN (25).
 func hit_rect(i: int) -> Rect2:
 	return button_rect(i).grow(CrossButton.SLOP)
 

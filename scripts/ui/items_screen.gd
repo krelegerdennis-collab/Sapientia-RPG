@@ -39,6 +39,7 @@ func _build() -> void:
 	scroll.custom_minimum_size = Vector2(LIST_W, 0)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.scroll_deadzone = 6
+	scroll.follow_focus = true
 	body.add_child(scroll)
 	list = VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -88,7 +89,7 @@ func rebuild(keep_id := "") -> void:
 		return ia < ib if ia != ib else str(a) < str(b))
 	for id in ids:
 		var b := UiMenu.button(entry_label(id))
-		b.custom_minimum_size = Vector2(LIST_W - 4, TOUCH_H)
+		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
 		b.focus_entered.connect(show_item.bind(id))
 		b.pressed.connect(choose_item.bind(id))
 		if not PartyActions.item_usable_in_field(id):

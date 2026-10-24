@@ -8,11 +8,10 @@ extends CanvasLayer
 
 signal closed
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
-const UiTouch := preload("res://scripts/ui/ui_touch.gd")
-const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const TERRAIN_NAMES := {
@@ -30,6 +29,10 @@ var name_label: Label
 var desc_label: Label
 var stats_label: Label
 var back_button: Button
+## Onzichtbaar tikvlak rond 'Back' (>= 25 eenheden hoog, tot aan de schermrand).
+var back_zone: Control
+var _bg: Panel
+var _outer: VBoxContainer
 var entries: Array[Button] = []
 var ids: Array = []
 var shown_id := ""
@@ -38,6 +41,32 @@ var shown_id := ""
 ## Frame waarin dit scherm (of een sub-scherm) open/dicht ging: in dat frame geen knoppen
 ## verwerken (anders sluit dezelfde druk op MENU/B hem meteen weer).
 var _quiet_frame := -1
+
+
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+const BACK_W := 56
+
+
+## Venster en inhoud binnen het veilige gebied + het tikvlak van 'Back' (zelfde maten als menu_screen.gd).
+func _apply_safe_area() -> void:
+	var ins := UiTouchC.insets(root.get_viewport())
+	_bg.offset_left = 6 + ins.x
+	_bg.offset_top = 6 + ins.y
+	_bg.offset_right = -(6 + ins.z)
+	_bg.offset_bottom = -(6 + ins.w)
+	_outer.offset_left = 12 + ins.x
+	_outer.offset_top = 9 + ins.y
+	_outer.offset_right = -(12 + ins.z)
+	_outer.offset_bottom = -(9 + ins.w)
+	var w := root.size.x if root.size.x > 0.0 else 384.0
+	back_zone.position = Vector2(w - ins.z - 12.0 - BACK_W, 0.0)
+	back_zone.size = Vector2(BACK_W + 12.0 + ins.z, maxf(UiTouchC.TOUCH_MIN, 9.0 + ins.y + 18.0))
+
+
+func _on_back_zone_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		back_zone.accept_event()
+		close()
 
 
 func _ready() -> void:
@@ -50,29 +79,30 @@ func _ready() -> void:
 	var bg := Panel.new()
 	bg.add_theme_stylebox_override("panel", UiMenu.window_style(MenuColors.BORDER_DARK, 0.97))
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.offset_left = 6
-	bg.offset_top = 6
-	bg.offset_right = -6
-	bg.offset_bottom = -6
 	root.add_child(bg)
+	_bg = bg
 	var outer := VBoxContainer.new()
 	outer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	outer.offset_left = 12
-	outer.offset_top = 9
-	outer.offset_right = -12
-	outer.offset_bottom = -9
 	outer.add_theme_constant_override("separation", 4)
 	root.add_child(outer)
+	_outer = outer
 	var top := HBoxContainer.new()
 	outer.add_child(top)
 	header = UiMenu.label("", MenuColors.TEXT)
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(header)
 	back_button = UiMenu.button("Back")
-	back_button.custom_minimum_size = Vector2(56, UiTouch.MIN_UNITS)
+	back_button.custom_minimum_size = Vector2(BACK_W, 16)
 	UiSfx.tag(back_button, UiSfx.CANCEL)
 	back_button.pressed.connect(close)
 	top.add_child(back_button)
+	back_zone = Control.new()
+	back_zone.name = "BackZone"
+	back_zone.mouse_filter = Control.MOUSE_FILTER_STOP
+	back_zone.gui_input.connect(_on_back_zone_input)
+	root.add_child(back_zone)
+	_apply_safe_area()
+	root.resized.connect(_apply_safe_area)
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 8)
@@ -81,6 +111,7 @@ func _ready() -> void:
 	scroll.custom_minimum_size = Vector2(112, 0)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.scroll_deadzone = 6   # vinger-scrollen zonder per ongeluk te tikken
+	scroll.follow_focus = true
 	body.add_child(scroll)
 	list = VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -124,7 +155,7 @@ func _ready() -> void:
 		seen += 1 if known else 0
 		beaten += 1 if GameState.defeated_count(id) > 0 else 0
 		var b := UiMenu.button("%03d %s" % [int(e.get("no", 0)), str(e["name"]) if known else "???"])
-		b.custom_minimum_size = Vector2(106, UiTouch.MIN_UNITS)
+		b.custom_minimum_size = Vector2(106, 15)
 		b.focus_entered.connect(show_entry.bind(id))
 		b.pressed.connect(show_entry.bind(id))
 		list.add_child(b)

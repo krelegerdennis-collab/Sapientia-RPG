@@ -1,75 +1,60 @@
+class_name UiTouch
 extends RefCounted
-## UX-polish (fase 6): tikdoelen van minstens 48dp (Android-richtlijn) in logische 384x216-eenheden.
+## Gedeelde afspraken voor touch en veilig scherm (WM1-schermen). Geen scene, geen autoload.
 ##
-## Het venster is 216 eenheden hoog (stretch viewport, aspect expand). Een eenheid is dus
-## korte_zijde_dp / 216 dp groot. Referentietoestel: Galaxy S25 Ultra, 1440 px bij schaal 3,5 =
-## 412dp korte zijde, dus 1 eenheid = 1,91dp en 48dp = 25,2 eenheden -> MIN_UNITS 26.
-## (Op een telefoon met 360dp korte zijde is 48dp 28,8 eenheden: units_for_dp() rekent dat uit.)
-## Gebruik: UiTouch.ensure(knop) in een lijst/menu; UiTouch.hit_rect(r) voor een getekende knop
-## (HUD) waarvan het tikvlak groter is dan het plaatje.
+## Tikmaat: het spel rendert 384x216 eenheden over de hoogte van het scherm. Een telefoon in
+## landschap is ~411 dp hoog (Galaxy S25 Ultra: 1080 px bij 2,625 px/dp, of 1440 px bij 3,5), dus
+## 1 eenheid = 411/216 = 1,9 dp. 48 dp = 25,2 eenheden. TOUCH_MIN = 25 (= 47,6 dp) is de ondergrens
+## voor knoppen die de speler moet raken; het tikvlak mag groter zijn dan wat je ziet.
+## Lijstregels (16 eenheden = 30 dp) blijven compact: die kiest de speler met cursor + A of tik,
+## en een scherm met veel regels moet nog scrollen. Zie docs/ui/polish/README.md.
+const TOUCH_MIN := 25.0
+## Hoogte van een lijstregel in schermen met weinig, grote keuzes (winkel, Codex, tekstvak-keuzes).
+const ROW_TOUCH := 25.0
+## Maximale inset per kant (eenheden): een rare waarde van het platform mag het scherm niet opeten.
+const INSET_MAX := 48.0
 
-const MIN_DP := 48.0
-const VIEW_H := 216.0
-const REF_SHORT_SIDE_DP := 412.0
-const MIN_UNITS := 26.0
-
-
-## 'dp' in logische eenheden bij een toestel met deze korte zijde (in dp).
-static func units_for_dp(dp: float, short_side_dp: float = REF_SHORT_SIDE_DP) -> float:
-	return dp * VIEW_H / maxf(short_side_dp, 1.0)
+## Test/screenshot-override: Vector4(links, boven, rechts, onder) in eenheden. null = platform.
+static var insets_override: Variant = null
 
 
-## Het minimum voor een toestel (naar boven afgerond op hele eenheden).
-static func min_units(short_side_dp: float = REF_SHORT_SIDE_DP) -> float:
-	return ceilf(units_for_dp(MIN_DP, short_side_dp))
+## Veilig gebied (notch/punch-hole, afgeronde hoeken, gebarenbalk) als marges in viewport-eenheden.
+## Op desktop en headless is dat nul. Android levert via DisplayServer de safe area in schermpixels.
+static func insets(vp: Viewport = null) -> Vector4:
+	if insets_override != null:
+		return _clamp_insets(insets_override as Vector4)
+	var safe := Rect2(DisplayServer.get_display_safe_area())
+	var screen := Vector2(DisplayServer.screen_get_size())
+	if safe.size.x <= 0.0 or safe.size.y <= 0.0 or screen.x <= 0.0 or screen.y <= 0.0:
+		return Vector4.ZERO
+	var px := Vector4(safe.position.x, safe.position.y, screen.x - safe.end.x, screen.y - safe.end.y)
+	var unit := 1.0
+	if vp != null:
+		var win_h := float(maxi(1, vp.get_window().size.y)) if vp.get_window() != null else screen.y
+		unit = vp.get_visible_rect().size.y / win_h
+	return _clamp_insets(px * unit)
 
 
-## Vergroot een Control (alleen als hij kleiner is) tot het tikminimum. w/h = welke kant.
-static func ensure(c: Control, width := false, height := true, min_size: float = MIN_UNITS) -> void:
-	var m := c.custom_minimum_size
-	if height:
-		m.y = maxf(m.y, min_size)
-	if width:
-		m.x = maxf(m.x, min_size)
-	c.custom_minimum_size = m
+static func _clamp_insets(v: Vector4) -> Vector4:
+	return Vector4(clampf(v.x, 0.0, INSET_MAX), clampf(v.y, 0.0, INSET_MAX),
+			clampf(v.z, 0.0, INSET_MAX), clampf(v.w, 0.0, INSET_MAX))
 
 
-## Tikvlak van een getekende knop: het plaatje, maar nooit kleiner dan min_size (om het midden).
-static func hit_rect(r: Rect2, min_size: float = MIN_UNITS) -> Rect2:
-	var w := maxf(r.size.x, min_size)
-	var h := maxf(r.size.y, min_size)
-	return Rect2(r.get_center() - Vector2(w, h) / 2.0, Vector2(w, h))
+## Het veilige gebied als rechthoek binnen een viewportgrootte.
+static func safe_rect(vp_size: Vector2, vp: Viewport = null) -> Rect2:
+	var i := insets(vp)
+	return Rect2(Vector2(i.x, i.y), vp_size - Vector2(i.x + i.z, i.y + i.w))
 
 
-## Is dit tikdoel groot genoeg? (Rect2 of Vector2 grootte)
-static func is_big_enough(size: Vector2, min_size: float = MIN_UNITS) -> bool:
-	return size.x >= min_size - 0.01 and size.y >= min_size - 0.01
+## Tikvlak voor een zichtbare rechthoek: minstens TOUCH_MIN hoog en breed, zelfde midden.
+## 'extra' groeit er aan alle kanten bovenop (de bestaande marge rond knoppen).
+static func hit_rect(visible: Rect2, extra := 0.0, min_size := TOUCH_MIN) -> Rect2:
+	var r := visible.grow(extra)
+	var gx := maxf(0.0, (min_size - r.size.x) / 2.0)
+	var gy := maxf(0.0, (min_size - r.size.y) / 2.0)
+	return r.grow_individual(gx, gy, gx, gy)
 
 
-## Alle zichtbare tikdoelen onder 'root' die te klein zijn: [{"node", "size", "path"}].
-## Meegerekend: knoppen, TextureButtons, schuifregelaars en Controls met de metadata "touch_target".
-## Overgeslagen: onzichtbare/uitgeschakelde knoppen en knoppen met de metadata "touch_exempt".
-## Een knop in een rij telt met zijn eigen hoogte; de breedte telt alleen onder width_min.
-static func small_targets(root: Node, min_size: float = MIN_UNITS, width_min: float = 0.0) -> Array:
-	var out: Array = []
-	_walk(root, min_size, width_min, out)
-	return out
-
-
-static func _walk(n: Node, min_size: float, width_min: float, out: Array) -> void:
-	if n is CanvasItem and not (n as CanvasItem).visible:
-		return
-	if _is_target(n):
-		var c := n as Control
-		if not bool(c.get_meta("touch_exempt", false)) and not (c is BaseButton and (c as BaseButton).disabled):
-			var s := c.size if c.size.y > 0.0 else c.get_combined_minimum_size()
-			if s.y < min_size - 0.01 or (width_min > 0.0 and s.x < width_min - 0.01):
-				out.append({"node": c, "size": s, "path": str(c.get_path()), "text": str(c.get("text")) if "text" in c else ""})
-	for ch in n.get_children():
-		_walk(ch, min_size, width_min, out)
-
-
-static func _is_target(n: Node) -> bool:
-	if n is BaseButton or n is Slider:
-		return (n as Control).mouse_filter != Control.MOUSE_FILTER_IGNORE
-	return n is Control and bool((n as Control).get_meta("touch_target", false))
+## Is dit tikvlak groot genoeg (>= TOUCH_MIN in beide richtingen)?
+static func big_enough(r: Rect2, min_size := TOUCH_MIN) -> bool:
+	return r.size.x >= min_size - 0.01 and r.size.y >= min_size - 0.01

@@ -24,18 +24,9 @@ extends CanvasLayer
 
 signal finished
 
-const UiStyleC := preload("res://scripts/ui/ui_style.gd")
-const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
-const SafeArea := preload("res://scripts/ui/safe_area.gd")
-
-## Keuzes zijn tikdoelen van minstens 48dp (UiTouch.MIN_UNITS hoog, CHOICE_MIN_W breed). Twee keuzes
-## (Yes/No, Next/Skip) staan naast elkaar, zodat het vak niet hoger wordt; drie of meer in twee kolommen
-## (vanaf CHOICE_THREE_COLS_FROM keuzes drie), kolom voor kolom: omhoog/omlaag loopt door de kolom.
-const CHOICE_H := UiTouch.MIN_UNITS
-const CHOICE_MIN_W := 34.0
-const CHOICE_SIDE_BY_SIDE_MAX := 2
-const CHOICE_THREE_COLS_FROM := 7
+const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 ## Letters per seconde voor het typemachine-effect.
 @export var chars_per_second := 40.0
@@ -49,7 +40,7 @@ var _blink := 0.0
 var choices: Array = []
 var choice_index := 0
 var choice_result := -1
-var _choice_box: Container
+var _choice_box: BoxContainer
 var _choice_labels: Array[Label] = []
 ## Plek van het tekstvak: true = onderin (standaard, v0.16), false = bovenin.
 var at_bottom := true
@@ -64,6 +55,8 @@ var tail_dir := ""
 var speaker_node: Node2D = null
 ## Bovenkant van het vak bovenin (y) en minimale hoogte (2 regels, zoals vroeger 48).
 const TOP_Y := 15.0
+## Hoogste y waar een vak mag beginnen: erboven valt het naamtabje (11 hoog) buiten beeld.
+const MIN_TOP := 12.0
 const MIN_H := 44.0
 const SIDE := 8.0
 ## Ruimte onder het onderste vak als er geen touch-knoppen zijn: 8 px (zoals de zijkanten).
@@ -76,6 +69,17 @@ const PAD_R := 12.0
 const PAD_T := 8.0
 const PAD_B := 4.0
 const LINE_SPACING := 4
+## Keuzes: tikmaat (25 hoog, ~48 dp). Korte keuzes (Yes/No, Next/Skip) staan rechtsonder onder elkaar, zoals altijd.
+## Langere keuzes (tot 3) staan op een rij onderin het vak, zodat het vak laag blijft en de speler niet bedekt;
+## bij 4+ keuzes staan ze onder elkaar met 20 hoog.
+const CHOICE_ROW_TOUCH := 25.0
+const CHOICE_ROW_MANY := 20.0
+const CHOICE_MIN_W := 60.0
+const CHOICE_GAP := 4.0
+## Zijn alle keuzes smaller dan dit (met '> '), dan blijven ze rechtsonder onder elkaar staan.
+const CHOICE_STACK_MAX_W := 84.0
+const CHOICE_ROW_BOTTOM := 3.0     # ruimte onder een rij keuzes (binnen de rand van het vak)
+const CHOICE_PAD_W := 12.0
 ## Staart (16x12 per frame): punt op (6,10) bij omlaag, (6,1) bij omhoog (LEESMIJ.txt).
 const TAIL_SIZE := Vector2(16, 12)
 const TAIL_TIP_X := 6.0
@@ -230,41 +234,33 @@ func candidates() -> Array:
 	var vs := get_viewport().get_visible_rect().size
 	var ctrl := _touch_rects()
 	var out := []
-	var safe := SafeArea.insets(get_viewport())   # notch/camera-gat: 0 op PC en headless
-	var x0 := SIDE + safe.x
-	var x1 := vs.x - SIDE - safe.z
-	out.append(_low_candidate("onder", x0, x1, ctrl, vs))
+	var ins := UiTouchC.insets(get_viewport())
+	var x0 := SIDE + ins.x
+	var x1 := vs.x - SIDE - ins.z
+	var min_y := MIN_TOP + ins.y
+	var low := _low_candidate("onder", x0, x1, ctrl, vs)
+	if (low["rect"] as Rect2).position.y >= min_y:
+		out.append(low)
 	if ctrl.has("dpad"):
 		var dx: float = (ctrl["dpad"] as Rect2).end.x + 4.0
 		if x1 - dx >= 200.0:
-			out.append(_low_candidate("onder_smal", dx, x1, ctrl, vs))
+			var narrow := _low_candidate("onder_smal", dx, x1, ctrl, vs)
+			if (narrow["rect"] as Rect2).position.y >= min_y:
+				out.append(narrow)
 	var w := x1 - x0
-	out.append({"name": "boven", "rect": Rect2(x0, TOP_Y + safe.y, w, needed_height(w)), "bottom": false})
+	out.append({"name": "boven", "rect": Rect2(x0, TOP_Y + ins.y, w, needed_height(w)), "bottom": false})
 	return out
 
 
 func _low_candidate(cname: String, x0: float, x1: float, ctrl: Dictionary, vs: Vector2) -> Dictionary:
 	var w := x1 - x0
 	var h := needed_height(w)
-	var bottom := vs.y - BOTTOM_MARGIN - SafeArea.insets(get_viewport()).w
+	var bottom := vs.y - BOTTOM_MARGIN - UiTouchC.insets(get_viewport()).w
 	for k in ctrl:
 		var r: Rect2 = ctrl[k]
 		if r.position.x < x1 and r.end.x > x0:
 			bottom = minf(bottom, r.position.y - 2.0)
 	return {"name": cname, "rect": Rect2(x0, roundf(bottom - h), w, h), "bottom": true}
-
-
-## Kolommen en rijen van een keuzelijst met n keuzes (n <= 2: één rij naast elkaar).
-static func choice_columns(n: int) -> int:
-	if n <= CHOICE_SIDE_BY_SIDE_MAX:
-		return n
-	return 3 if n >= CHOICE_THREE_COLS_FROM else 2
-
-
-static func choice_rows(n: int) -> int:
-	if n <= CHOICE_SIDE_BY_SIDE_MAX:
-		return 1
-	return ceili(float(n) / float(choice_columns(n)))
 
 
 ## Hoogte van het vak voor alle regels (en de keuzes) bij deze breedte; minstens MIN_H.
@@ -278,11 +274,14 @@ func needed_height(w: float) -> float:
 		var sz := font.get_multiline_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, tw, fs, -1,
 				TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE)
 		lines = maxi(lines, maxi(1, roundi(sz.y / lh)))
-	var h := PAD_T + lines * lh + (lines - 1) * LINE_SPACING + PAD_B + 2.0
-	if choices.size() > CHOICE_SIDE_BY_SIDE_MAX:
-		h = maxf(h, 4.0 + choice_rows(choices.size()) * (CHOICE_H + 1.0) + 4.0)
-	elif not choices.is_empty():
-		h = maxf(h, 4.0 + CHOICE_H + 4.0)
+	var text_h := lines * lh + (lines - 1) * LINE_SPACING
+	var h := PAD_T + text_h + PAD_B + 2.0
+	if not choices.is_empty():
+		var lay := choice_layout(w)
+		if bool(lay["horizontal"]):
+			h = maxf(h, PAD_T + text_h + float(lay["row_h"]) + CHOICE_ROW_BOTTOM)
+		else:
+			h = maxf(h, PAD_T + lh + choices.size() * (choice_row_h() + 1.0) + 4.0)
 	return ceilf(maxf(MIN_H, h))
 
 
@@ -405,6 +404,64 @@ func _focus_rects() -> Array[Rect2]:
 	return out
 
 
+## Hoogte van een keuzeregel (tikvlak).
+func choice_row_h() -> float:
+	return CHOICE_ROW_TOUCH if choices.size() <= 3 else CHOICE_ROW_MANY
+
+
+## Indeling van de keuzes in een vak van breedte w: {"horizontal", "widths", "row_h"}.
+## Korte keuzes en 4+ keuzes staan onder elkaar. Tot 3 langere keuzes staan op een rij (breedte naar tekst; past dat
+## niet dan krimpen ze en lopen ze over twee regels). Zo blijft het vak laag en de keuzes >= 25 hoog (CHOICE_ROW_TOUCH).
+func choice_layout(w: float) -> Dictionary:
+	var stacked := {"horizontal": false, "widths": [], "row_h": choice_row_h()}
+	var n := choices.size()
+	if n == 0 or n > 3:
+		return stacked
+	var font: Font = text_label.get_theme_font("font")
+	var fs: int = text_label.get_theme_font_size("font_size")
+	var lh := font.get_height(fs)
+	var avail := w - PAD_L - PAD_R - 8.0 - CHOICE_GAP * float(n - 1)
+	var natural: Array[float] = []
+	var sum := 0.0
+	for c in choices:
+		var nw := maxf(CHOICE_MIN_W, ceilf(font.get_string_size("> " + str(c), HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x) + CHOICE_PAD_W)
+		natural.append(nw)
+		sum += nw
+	var widest := 0.0
+	for nw in natural:
+		widest = maxf(widest, nw)
+	if widest <= CHOICE_STACK_MAX_W:
+		return stacked
+	if sum <= avail:
+		return {"horizontal": true, "widths": natural, "row_h": CHOICE_ROW_TOUCH}
+	var widths: Array[float] = []
+	var total := 0.0
+	var lines := 1
+	for i in n:
+		var wi := maxf(CHOICE_MIN_W, floorf(natural[i] * avail / sum))
+		widths.append(wi)
+		total += wi
+		var sz := font.get_multiline_string_size("> " + str(choices[i]), HORIZONTAL_ALIGNMENT_LEFT, wi - CHOICE_PAD_W, fs, -1,
+				TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE)
+		lines = maxi(lines, maxi(1, roundi(sz.y / lh)))
+	if total > avail + 0.5 or lines > 2:
+		return stacked
+	return {"horizontal": true, "widths": widths, "row_h": maxf(CHOICE_ROW_TOUCH, float(lines) * lh + 4.0)}
+
+
+## Passen de keuzes (max. 3) naast elkaar in een vak van breedte w?
+func choices_horizontal(w: float) -> bool:
+	return bool(choice_layout(w)["horizontal"])
+
+
+## Schermrechthoeken van de keuzeregels (voor de tests): leeg zolang er geen keuzes zijn.
+func choice_rects() -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	for l in _choice_labels:
+		out.append(l.get_global_rect())
+	return out
+
+
 func has_choices() -> bool:
 	return is_open and not choices.is_empty()
 
@@ -430,22 +487,22 @@ func cancel() -> void:
 
 func _build_choices() -> void:
 	_clear_choices()
-	_choice_box = HBoxContainer.new()
-	_choice_box.add_theme_constant_override("separation", 1)
+	var lay := choice_layout(panel.size.x)
+	var horizontal := bool(lay["horizontal"])
+	_choice_box = HBoxContainer.new() if horizontal else VBoxContainer.new()
+	_choice_box.add_theme_constant_override("separation", int(CHOICE_GAP) if horizontal else 1)
 	panel.add_child(_choice_box)
-	var per_col := choice_rows(choices.size())
-	var column: Container = _choice_box
+	var widths: Array = lay["widths"]
 	for i in choices.size():
-		if choices.size() > CHOICE_SIDE_BY_SIDE_MAX and i % per_col == 0:
-			column = VBoxContainer.new()
-			column.add_theme_constant_override("separation", 1)
-			_choice_box.add_child(column)
 		var l := Label.new()
-		l.custom_minimum_size = Vector2(CHOICE_MIN_W, CHOICE_H)
+		l.custom_minimum_size = Vector2(float(widths[i]) if horizontal else CHOICE_MIN_W, float(lay["row_h"]))
+		if horizontal:
+			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER if horizontal else HORIZONTAL_ALIGNMENT_LEFT
 		l.mouse_filter = Control.MOUSE_FILTER_STOP
 		l.gui_input.connect(_on_choice_input.bind(i))
-		column.add_child(l)
+		_choice_box.add_child(l)
 		_choice_labels.append(l)
 	_choice_box.visible = false
 	_update_choices()
@@ -473,7 +530,8 @@ func _update_choices() -> void:
 		_choice_labels[i].text = ("> " if sel else "  ") + str(choices[i])
 		_choice_labels[i].add_theme_color_override("font_color", UiStyleC.HILITE if sel else UiStyleC.TEXT)
 	_choice_box.reset_size()
-	_choice_box.position = Vector2(panel.size.x - _choice_box.size.x - 16, panel.size.y - _choice_box.size.y - 4)
+	var bottom := CHOICE_ROW_BOTTOM if _choice_box is HBoxContainer else 4.0
+	_choice_box.position = Vector2(panel.size.x - _choice_box.size.x - 16, panel.size.y - _choice_box.size.y - bottom)
 
 
 ## Volgende stap: eerst de hele regel tonen, daarna volgende regel, daarna sluiten.
@@ -528,11 +586,16 @@ func _process(delta: float) -> void:
 		if _choice_box and not _choice_box.visible:
 			_choice_box.visible = true
 			_update_choices()
-		if Input.is_action_just_pressed("move_up") or Input.is_action_just_pressed("ui_up"):
+		var horizontal := _choice_box is HBoxContainer
+		var prev := Input.is_action_just_pressed("move_up") or Input.is_action_just_pressed("ui_up") \
+				or (horizontal and (Input.is_action_just_pressed("move_left") or Input.is_action_just_pressed("ui_left")))
+		var next := Input.is_action_just_pressed("move_down") or Input.is_action_just_pressed("ui_down") \
+				or (horizontal and (Input.is_action_just_pressed("move_right") or Input.is_action_just_pressed("ui_right")))
+		if prev:
 			choice_index = (choice_index - 1 + choices.size()) % choices.size()
 			UiSfx.play(UiSfx.CURSOR)
 			_update_choices()
-		elif Input.is_action_just_pressed("move_down") or Input.is_action_just_pressed("ui_down"):
+		elif next:
 			choice_index = (choice_index + 1) % choices.size()
 			UiSfx.play(UiSfx.CURSOR)
 			_update_choices()

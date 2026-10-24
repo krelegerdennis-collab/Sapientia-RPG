@@ -88,7 +88,7 @@ func show_caster(i: int, keep_id := "") -> void:
 	for sid in spell_ids:
 		var sp := PartyActions.spell_data(str(sid))
 		var b := UiMenu.button("%s %2d MP" % [str(sp.get("name", sid)).rpad(NAME_COLS), int(sp.get("mp", 0))])
-		b.custom_minimum_size = Vector2(LIST_W - 4, TOUCH_H)
+		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
 		b.focus_entered.connect(show_spell.bind(str(sid)))
 		b.pressed.connect(choose_spell.bind(str(sid)))
 		if PartyActions.spell_block_reason(c, str(sid)) != "":

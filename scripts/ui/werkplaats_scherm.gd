@@ -31,7 +31,6 @@ func toon() -> void:
 		var b := UiMenu.button("%s: %s" % [Recepten.item_naam(str(rec["uit"])),
 				Recepten.ingredienten_tekst(rec, GameState.inventory)])
 		b.name = "Recept_" + id
-		b.custom_minimum_size.y = TOUCH_H
 		if not Recepten.kan_maken(rec, GameState.inventory):
 			_grey(b)
 		b.pressed.connect(_on_maak.bind(id))

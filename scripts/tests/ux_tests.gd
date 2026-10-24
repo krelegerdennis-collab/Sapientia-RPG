@@ -8,12 +8,11 @@ extends Node
 ##   Deel D: 19,5:9 en 20:9 + veilige zone (notch): alles binnen beeld en binnen de veilige rechthoek
 ##   Deel E: geluid: UI-cues in het manifest, knoppen klikken, menu open/dicht, dialoog, opslaan, en het
 ##           volume (muziek/effecten/mute) blijft bewaard na een herstart van Settings
+## De maatstok en de veilige zone komen uit scripts/ui/ui_touch.gd (PR #219); dit bestand test alleen wat --uipolishtest niet doet.
 ## Met --shots=map: ux_*.png (384x216 resp. 468x216/480x216 viewport-beelden).
 ## Zit niet in de export (scripts/tests/*).
 
-const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
-const SafeArea := preload("res://scripts/ui/safe_area.gd")
 const SD := preload("res://scripts/data/story_data.gd")
 const GD := preload("res://scripts/data/game_data.gd")
 const SomDataT := preload("res://scripts/data/som_data.gd")
@@ -22,12 +21,9 @@ const PartyActions := preload("res://scripts/party_actions.gd")
 const SaveScreenS := preload("res://scripts/ui/save_screen.gd")
 const SavePromptS := preload("res://scripts/ui/save_prompt.gd")
 const SaveSlotListS := preload("res://scripts/ui/save_slot_list.gd")
-const ShopScreenS := preload("res://scripts/ui/shop_screen.gd")
 const BattleS := preload("res://scripts/battle/battle.gd")
-const CommandCrossS := preload("res://scripts/battle/command_cross.gd")
 const FieldMenuS := preload("res://scripts/ui/field_menu.gd")
 const OptionsScreenS := preload("res://scripts/ui/options_screen.gd")
-const MenuScreenS := preload("res://scripts/ui/menu_screen.gd")
 const EquipmentS := preload("res://scripts/equipment.gd")
 const SettingsS := preload("res://scripts/settings.gd")
 
@@ -92,8 +88,6 @@ const KNOWN_DUTCH_PINNED := {
 	"res://scripts/data/archief2.gd": "page[\"name\"] = \"Mosslijm\"",
 	"res://pvp/data/modes.gd": "\"Vroeg\"",
 }
-## Knoppen die bewust compact blijven (zie docs/UX_POLISH_WM1.md): maximaal dit aantal per scherm.
-const EXEMPT_MAX := {"Equipment": 30, "Options": 40}
 
 var failures := 0
 var passes := 0
@@ -172,7 +166,6 @@ func _run() -> void:
 	_tutorial_data_tests()
 	await _tutorial_runtime_tests()
 	print("=== Deel D: 19,5:9 / 20:9 + veilige zone ===")
-	_safe_area_math_tests()
 	await _aspect_tests()
 	print("=== Deel E: geluid en volume ===")
 	await _audio_tests()
@@ -196,10 +189,6 @@ func open_map() -> Node:
 func _map_ready() -> bool:
 	var s := scene()
 	return s != null and s.name == "Wilgendal" and s.is_node_ready() and not GameState.changing_map
-
-
-func _choice_big(l) -> bool:
-	return (l as Control).size.y >= UiTouch.MIN_UNITS - 0.01 and (l as Control).size.x >= Dialog.CHOICE_MIN_W - 0.01
 
 
 func _choices_visible() -> bool:
@@ -285,19 +274,26 @@ func _outside(n: Node, area: Rect2, out: Array) -> void:
 		_outside(c, area, out)
 
 
-func exempt_count(root: Node) -> int:
-	var n := 0
-	var todo: Array = [root]
-	while not todo.is_empty():
-		var c: Node = todo.pop_back()
-		if c is Control and bool((c as Control).get_meta("touch_exempt", false)):
-			n += 1
-		todo.append_array(c.get_children())
-	return n
+## Zichtbare knoppen onder root die lager of smaller zijn dan min_size (UiTouch.TOUCH_MIN).
+func small_targets(root: Node, min_size: float = UiTouch.TOUCH_MIN) -> Array:
+	var out: Array = []
+	_small(root, min_size, out)
+	return out
+
+
+func _small(n: Node, min_size: float, out: Array) -> void:
+	if n is CanvasItem and not (n as CanvasItem).visible:
+		return
+	if n is BaseButton and (n as Control).mouse_filter != Control.MOUSE_FILTER_IGNORE and not (n as BaseButton).disabled:
+		var c := n as Control
+		if c.size.y < min_size - 0.01:
+			out.append(c)
+	for ch in n.get_children():
+		_small(ch, min_size, out)
 
 
 func small_names(root: Node) -> String:
-	return ", ".join(UiTouch.small_targets(root).map(func(d): return "%s '%s' %s" % [(d["node"] as Node).name, d["text"], d["size"]]))
+	return ", ".join(small_targets(root).map(func(c): return "%s '%s' %s" % [c.name, str(c.get("text")), c.size]))
 
 
 # ================================================================ deel A: tekst
@@ -432,35 +428,27 @@ func _files(dir: String, ext: String) -> Array:
 	return out
 
 
-# ================================================================ deel B: tikdoelen
+# ================================================================ deel B: tikdoelen (maatstok = UiTouch van #219)
 func _touch_math_tests() -> void:
-	check("48dp op S25 Ultra (412dp korte zijde) = %.1f eenheden, minimum 26" % UiTouch.units_for_dp(48.0),
-			absf(UiTouch.units_for_dp(48.0) - 25.17) < 0.05 and UiTouch.min_units() == 26.0 and UiTouch.MIN_UNITS == 26.0)
-	check("48dp op een telefoon van 360dp = 29 eenheden", UiTouch.min_units(360.0) == 29.0)
+	check("tikmaat: UiTouch.TOUCH_MIN = %s eenheden = %.1f dp op 412dp (S25 Ultra); ROW_TOUCH gelijk" % [UiTouch.TOUCH_MIN, UiTouch.TOUCH_MIN * 412.0 / 216.0],
+			UiTouch.TOUCH_MIN == 25.0 and UiTouch.TOUCH_MIN * 412.0 / 216.0 >= 47.5 and UiTouch.ROW_TOUCH == UiTouch.TOUCH_MIN)
 	var r := UiTouch.hit_rect(Rect2(10, 10, 38, 14))
-	check("hit_rect: 38x14 -> 38x26 om hetzelfde midden", r.size == Vector2(38, 26) and r.get_center() == Rect2(10, 10, 38, 14).get_center())
-	check("hit_rect: grotere knop blijft zoals hij is", UiTouch.hit_rect(Rect2(0, 0, 60, 40)).size == Vector2(60, 40))
-	check("is_big_enough: 26x26 ja, 24x26 nee", UiTouch.is_big_enough(Vector2(26, 26)) and not UiTouch.is_big_enough(Vector2(24, 26)))
-	var b := Button.new()
-	b.custom_minimum_size = Vector2(0, 10)
-	UiTouch.ensure(b)
-	check("ensure: hoogte 10 -> 26", b.custom_minimum_size.y == 26.0)
-	b.free()
-	check("MenuScreen.TOUCH_H = 26; ROW_H blijft 16 (bestaande suites toetsen eraan)", MenuScreenS.TOUCH_H == 26.0 and MenuScreenS.ROW_H == 16)
-	check("Action-knoppen (Swap/Ring/Codex) zijn %s hoog" % SomDataT.TOP_BUTTON_SIZE, SomDataT.TOP_BUTTON_SIZE.y >= UiTouch.MIN_UNITS)
-	check("Battle: Codex-menurijen 26 hoog, de wissel-lijst scrolt na 2 regels", BattleS.CODEX_ROW_H >= UiTouch.MIN_UNITS and BattleS.CODEX_ROWS_MAX == 2)
-	check("Dialoog: keuze-rij %s hoog" % Dialog.CHOICE_H, Dialog.CHOICE_H >= UiTouch.MIN_UNITS)
-	check("Dialoog: 2 keuzes naast elkaar, 3-6 in 2 kolommen, 7+ in 3", Dialog.choice_columns(2) == 2 and Dialog.choice_rows(2) == 1
-			and Dialog.choice_columns(4) == 2 and Dialog.choice_rows(4) == 2 and Dialog.choice_columns(7) == 3 and Dialog.choice_rows(7) == 3)
+	check("hit_rect: 38x14 -> 38x25 om hetzelfde midden", r.size == Vector2(38, 25) and r.get_center().is_equal_approx(Rect2(10, 10, 38, 14).get_center()))
+	check("big_enough: 25x25 ja, 24x25 nee", UiTouch.big_enough(Rect2(0, 0, 25, 25)) and not UiTouch.big_enough(Rect2(0, 0, 24, 25)))
+	check("Action-knoppen (Swap/Ring/Codex) %s hoog >= TOUCH_MIN" % SomDataT.TOP_BUTTON_SIZE, SomDataT.TOP_BUTTON_SIZE.y >= UiTouch.TOUCH_MIN)
+	UiTouch.insets_override = Vector4(99, 0, 3, 0)
+	check("insets: rare waarden worden begrensd op INSET_MAX", UiTouch.insets(get_viewport()) == Vector4(UiTouch.INSET_MAX, 0, 3, 0))
+	UiTouch.insets_override = null
+	check("insets: headless/PC zonder override = nul", UiTouch.insets(get_viewport()) == Vector4.ZERO)
 
 
 func _touch_screen_tests() -> void:
-	# ---- titelscherm
+	# ---- titelscherm (niet in uipolishtest)
 	get_tree().change_scene_to_file("res://scenes/ui/title.tscn")
 	await wait_until(_is_title, 10.0)
 	await pframes(12)
 	var t := scene()
-	check("titel: elke knop >= 48dp (%s)" % small_names(t), UiTouch.small_targets(t).is_empty())
+	check("titel: elke knop >= 25 hoog (%s)" % small_names(t), small_targets(t).is_empty())
 	var st: Rect2 = t.stage.get_global_rect()
 	var cr: Rect2 = t.card.get_global_rect()
 	cr.position -= st.position
@@ -470,14 +458,6 @@ func _touch_screen_tests() -> void:
 	check("titel: save-info staat boven het kaartje, binnen beeld", t.save_info.get_global_rect().end.y <= t.card.get_global_rect().position.y + 0.5
 			and vp_rect().encloses(t.beta_info.get_global_rect()))
 	await shot("ux_title")
-	# ---- co-op lobby (titel > Co-op): het minimum kwam uit het testvenster (16 eenheden = 34dp op een telefoon)
-	var coop: Node = (load("res://scenes/ui/coop_lobby.tscn") as PackedScene).instantiate()
-	add_child(coop)
-	await pframes(6)
-	check("co-op lobby: tikminimum = %d eenheden (48dp), elke knop >= 48dp (%s)" % [coop.touch_min_height_px(), small_names(coop)],
-			coop.touch_min_height_px() == int(UiTouch.MIN_UNITS) and UiTouch.small_targets(coop).is_empty() and coop.all_touch_buttons().size() >= 2)
-	coop.queue_free()
-	await pframes(3)
 	# ---- kaart, HUD en veldmenu
 	var map := await open_map()
 	check("kaart Wilgendal geladen", map != null)
@@ -490,107 +470,51 @@ func _touch_screen_tests() -> void:
 	check("veldmenu open", fm != null)
 	if fm == null:
 		return
-	check("veldmenu: alle 11 knoppen >= 48dp (%s)" % small_names(fm), UiTouch.small_targets(fm).is_empty())
-	check("veldmenu: knoppen binnen beeld %s" % [outside(fm, vp_rect())], outside(fm, vp_rect()).is_empty())
+	check("veldmenu: alle knoppen >= 25 hoog (%s)" % small_names(fm), small_targets(fm).is_empty())
 	await shot("ux_field_menu")
-	for id in ["equip", "codex", "items", "magic", "bestiary", "party", "quests", "scenes", "options", "load"]:
-		fm.choose(id)
-		await pframes(14)
-		if fm.sub == null:
-			check("subscherm %s opent" % id, false)
-			continue
-		var nm: String = fm.sub.name
-		var small := UiTouch.small_targets(fm.sub)
-		var ex := exempt_count(fm.sub)
-		var cap: int = int(EXEMPT_MAX.get(nm, 0))
-		check("%s: elke knop >= 48dp, uitzonderingen %d (max %d)%s" % [nm, ex, cap, "" if small.is_empty() else " " + small_names(fm.sub)],
-				small.is_empty() and ex <= cap)
-		check("%s: knoppen binnen beeld %s" % [nm, outside(fm.sub, vp_rect())], outside(fm.sub, vp_rect()).is_empty())
-		if id in ["equip", "options", "items", "quests"]:
-			await shot("ux_sub_" + id)
-		fm.sub.close()
-		await pframes(6)
-	# Options > Music-tab (sliders en tracks)
-	fm.choose("options")
-	await pframes(10)
-	var opt: Node = fm.sub
-	if opt != null:
-		opt.kies_tab("music")
-		await pframes(8)
-		check("Options/Music: sliders, mute en tracks >= 48dp (%s)" % small_names(opt.music_root), UiTouch.small_targets(opt.music_root).is_empty())
-		var all_tabs: bool = opt.tab_buttons.values().all(func(b): return (b as Control).size.y >= UiTouch.MIN_UNITS)
-		check("Options: tabs >= 48dp en in de koprij naast Back", all_tabs and opt.tab_buttons["general"].get_parent() == opt.header_row)
-		opt.close()
-		await pframes(6)
 	# opslaan, prompt, slotlijst
 	fm.open_save()
 	await pframes(12)
 	if fm.sub != null:
-		check("opslagscherm: knoppen >= 48dp (%s)" % small_names(fm.sub), UiTouch.small_targets(fm.sub).is_empty())
-		check("opslagscherm: alles binnen beeld, hint zichtbaar", outside(fm.sub, vp_rect()).is_empty()
-				and fm.sub.hint.get_global_rect().end.y <= 216.0 and fm.sub.hint.get_global_rect().position.y >= fm.sub.content.get_global_rect().end.y - 0.5)
+		check("opslagscherm: Yes/No >= 25 hoog (%s)" % small_names(fm.sub.content), small_targets(fm.sub.content.get_parent()).filter(
+				func(c): return c == fm.sub.yes_button or c == fm.sub.no_button).is_empty())
 		await shot("ux_save")
 		fm.sub.close()
 		await pframes(6)
 	var sp := SavePromptS.new()
 	fm.add_child(sp)
 	await pframes(8)
-	check("opslag-prompt: Yes/No >= 48dp (%s)" % small_names(sp), UiTouch.small_targets(sp).is_empty())
+	check("opslag-prompt: Yes/No >= 25 hoog (%s)" % small_names(sp), small_targets(sp).is_empty())
 	sp.queue_free()
 	await pframes(3)
 	var sl := SaveSlotListS.new()
 	fm.add_child(sl)
 	await pframes(10)
-	check("slotlijst: slots, autosave en Back >= 48dp (%s)" % small_names(sl), UiTouch.small_targets(sl).is_empty()
-			and outside(sl, vp_rect()).is_empty())
+	check("slotlijst: slots, autosave en Back >= 25 hoog (%s)" % small_names(sl), small_targets(sl).is_empty() and outside(sl, vp_rect()).is_empty())
 	sl.queue_free()
 	await pframes(3)
-	# winkel
-	var shop := ShopScreenS.new()
-	shop.shop_id = str(ShopData.SHOPS.keys()[0])
-	fm.add_child(shop)
-	await pframes(10)
-	check("winkel: kopen/verkopen-rijen >= 48dp (%s)" % small_names(shop), UiTouch.small_targets(shop).is_empty())
-	check("winkel: lange lijst scrolt (ContentScroll), niets buiten beeld %s" % [outside(shop, vp_rect())],
-			shop.find_child("ContentScroll", true, false) != null and outside(shop, vp_rect()).is_empty())
-	shop.close()
-	await pframes(4)
 	await close_field_menu(map)
-	# dialoogkeuzes
 	await _dialog_choice_tests()
-	# gevechtskruis en -menu
 	await _battle_tests(map)
 
 
 func _hud_tests(tc: Control) -> void:
+	var rects := {"MENU": UiTouch.hit_rect(tc.menu_rect(), 4.0), "RUN": UiTouch.hit_rect(tc.run_rect(), 2.0), "CORE": UiTouch.hit_rect(tc.kern_rect(), 4.0)}
+	tc.show_run = true
+	tc.show_kern = true
+	tc.show_menu = true
+	await pframes(2)
 	var ok := true
-	var detail := ""
-	for size_idx in [0, 1, 2]:
-		Settings.set_value("touch_size", size_idx)
-		tc.apply_settings()
-		tc.show_run = true
-		tc.show_kern = true
-		tc.show_menu = true
-		await pframes(2)
-		for k in tc.hit_rects():
-			var r: Rect2 = tc.hit_rects()[k]
-			if r.size.x < UiTouch.MIN_UNITS - 0.01 or r.size.y < UiTouch.MIN_UNITS - 0.01:
-				ok = false
-				detail += " %s@%d=%s" % [k, size_idx, r.size]
-	Settings.set_value("touch_size", 1)
-	tc.apply_settings()
-	check("HUD: A, B, joystick, MENU, RUN en KERN hebben een tikvlak >= 48dp bij elke knopgrootte%s" % detail, ok)
-	var hr: Dictionary = tc.hit_rects()
-	check("HUD: tikvlakken van MENU en RUN overlappen elkaar niet", not (hr["menu"] as Rect2).intersects(hr["run"]))
-	check("HUD: MENU-plaatje blijft 38x14 (art), tikvlak 38x26", tc.menu_rect().size == Vector2(38, 14) and (hr["menu"] as Rect2).size == Vector2(38, 26))
-	# een tik net boven het plaatje (binnen het tikvlak) drukt MENU in
+	for k in rects:
+		ok = ok and UiTouch.big_enough(rects[k])
+	check("HUD: tikvlak van MENU, RUN en CORE >= 25x25 (%s)" % [rects], ok)
 	var mr: Rect2 = tc.menu_rect()
 	var ev := InputEventScreenTouch.new()
 	ev.index = 7
 	ev.pressed = true
 	ev.position = tc.get_global_transform_with_canvas() * (mr.get_center() + Vector2(0, -10))
 	tc._input(ev)
-	check("HUD: tik 10 eenheden boven het MENU-plaatje (binnen 48dp) = MENU", tc._touch_owner.get(7, "") == "menu")
+	check("HUD: tik 10 eenheden boven het MENU-plaatje = MENU", tc._touch_owner.get(7, "") == "menu")
 	ev = ev.duplicate()
 	ev.pressed = false
 	tc._input(ev)
@@ -599,7 +523,7 @@ func _hud_tests(tc: Control) -> void:
 
 
 func _dialog_choice_tests() -> void:
-	for n in [2, 3, 4, 7]:
+	for n in [2, 3, 4]:
 		var opts: Array = []
 		for i in n:
 			opts.append("Choice %d" % (i + 1))
@@ -607,13 +531,12 @@ func _dialog_choice_tests() -> void:
 		await wait_until(_choices_visible, 3.0)
 		await pframes(3)
 		var labels: Array = Dialog._choice_labels
-		var big: bool = labels.size() == n and labels.all(_choice_big)
-		check("dialoog met %d keuzes: elke keuze >= 48dp hoog" % n, big)
-		var inside := vp_rect().encloses(Dialog.panel.get_global_rect()) and vp_rect().encloses(Dialog._choice_box.get_global_rect())
-		check("dialoog met %d keuzes: vak en keuzes binnen beeld (%s)" % [n, Dialog.panel.get_global_rect()], inside)
+		check("dialoog met %d keuzes: %d regels" % [n, labels.size()], labels.size() == n)
+		if n <= 3:
+			check("dialoog met %d keuzes: elke keuze >= 25 hoog" % n, labels.all(func(l): return (l as Control).size.y >= UiTouch.TOUCH_MIN - 0.01))
+		check("dialoog met %d keuzes: vak en keuzes binnen beeld (%s)" % [n, Dialog.panel.get_global_rect()],
+				vp_rect().encloses(Dialog.panel.get_global_rect()) and vp_rect().encloses(Dialog._choice_box.get_global_rect()))
 		if n == 2:
-			check("2 keuzes staan naast elkaar (zelfde y, andere x)", absf(labels[0].global_position.y - labels[1].global_position.y) < 0.5
-					and labels[1].global_position.x > labels[0].global_position.x)
 			await shot("ux_dialog_choices")
 		var tap_i: int = n - 1
 		var ev := InputEventScreenTouch.new()
@@ -642,9 +565,9 @@ func _battle_tests(map: Node) -> void:
 	var ok_art := true
 	for i in 5:
 		var hr: Rect2 = cross.hit_rect(i)
-		ok_hit = ok_hit and hr.size.x >= UiTouch.MIN_UNITS - 0.01 and hr.size.y >= UiTouch.MIN_UNITS - 0.01
+		ok_hit = ok_hit and UiTouch.big_enough(hr)
 		ok_art = ok_art and (cross.buttons[i] as Control).size == Vector2(24, 24)
-	check("gevecht: elk kruisknopje heeft een tikvlak >= 26x26 (48dp)", ok_hit)
+	check("gevecht: elk kruisknopje heeft een tikvlak >= 25x25", ok_hit)
 	check("gevecht: het plaatje (art van RPG ART) blijft 24x24, afstand 25", ok_art
 			and cross.button_rect(1).get_center().is_equal_approx(cross.button_rect(0).get_center() + Vector2(0, -25)))
 	var edge_ok := true
@@ -655,20 +578,6 @@ func _battle_tests(map: Node) -> void:
 	check("gevecht: tikvlak is 1 eenheid ruimer dan het plaatje (CrossButton)", edge_ok)
 	check("gevecht: kruis blijft binnen beeld", vp_rect().encloses(cross.cross_rect()))
 	await shot("ux_battle")
-	# Codex-wisselmenu met veel regels: 26 hoog, venster van 2 + pijlen, onder het statusvak-niveau
-	var entries: Array = []
-	for i in 6:
-		entries.append({"text": "Entry %d" % i, "enabled": true})
-	b.menu.open("Swap", entries, 0, true, BattleS.CODEX_ROW_H, BattleS.CODEX_ROWS_MAX)
-	await pframes(6)
-	var rows_ok: bool = b.menu._buttons.filter(func(x): return (x as Control).visible).size() == 2
-	var sizes_ok: bool = b.menu._buttons.all(func(x): return (x as Control).custom_minimum_size.y >= UiTouch.MIN_UNITS)
-	check("gevechtsmenu (Codex/Swap): 2 regels zichtbaar, elke regel en de ▲/▼-regels >= 48dp", rows_ok and sizes_ok
-			and b.menu._scroll_up.custom_minimum_size.y >= UiTouch.MIN_UNITS and b.menu._scroll_down.custom_minimum_size.y >= UiTouch.MIN_UNITS)
-	check("gevechtsmenu: binnen beeld (%s)" % b.menu.get_global_rect(), vp_rect().encloses(b.menu.get_global_rect()))
-	await shot("ux_battle_menu")
-	b.menu.close()
-	# het gevecht verlaten zoals de tests dat doen: via het titelscherm (herstelt ook de 2x-weergave van het gevecht)
 	GameState.in_battle = false
 	get_tree().change_scene_to_file("res://scenes/ui/title.tscn")
 	await wait_until(_is_title, 10.0)
@@ -799,7 +708,7 @@ func _tutorial_runtime_tests() -> void:
 	var open1 := await wait_until(_page_ready, 5.0)
 	await pframes(3)
 	check("tutorial pagina 1: keuzes Next/Skip, vlag meteen gezet", open1 and Dialog.choices == ["Next", "Skip"] and GameState.story_flags.has(FLAG))
-	check("tutorial pagina 1: Next en Skip zijn tikdoelen van 48dp", Dialog._choice_labels.all(func(l): return (l as Control).size.y >= UiTouch.MIN_UNITS - 0.01))
+	check("tutorial pagina 1: Next en Skip zijn tikdoelen >= 25", Dialog._choice_labels.all(func(l): return (l as Control).size.y >= UiTouch.TOUCH_MIN - 0.01))
 	Dialog.cancel()   # B = laatste keuze = Skip
 	var done := await wait_until(_tut_done, 4.0)
 	check("B op pagina 1 = Skip: tutorial stopt, speler vrij", done)
@@ -821,21 +730,7 @@ func _tutorial_runtime_tests() -> void:
 	GameState.new_game("Dax")
 
 
-# ================================================================ deel D: ratio's + veilige zone
-func _safe_area_math_tests() -> void:
-	check("SafeArea: geen notch = nul", SafeArea.insets_from(Rect2(0, 0, 3120, 1440), Vector2(3120, 1440), Vector2(468, 216)) == Vector4.ZERO)
-	var ins := SafeArea.insets_from(Rect2(200, 0, 2800, 1440), Vector2(3120, 1440), Vector2(468, 216))
-	check("SafeArea: camera-gat links 200 px (S25 Ultra 3120x1440, 468x216) = 30 / 0 / 18 / 0 eenheden: %s" % ins,
-			ins == Vector4(30, 0, 18, 0))
-	check("SafeArea: rare waarden worden begrensd (max %d)" % SafeArea.MAX_INSET,
-			SafeArea.insets_from(Rect2(2000, 0, 100, 100), Vector2(3000, 1000), Vector2(468, 216)).x == SafeArea.MAX_INSET)
-	check("SafeArea: lege rechthoek of venster = nul", SafeArea.insets_from(Rect2(), Vector2(1000, 500), Vector2(468, 216)) == Vector4.ZERO
-			and SafeArea.insets_from(Rect2(0, 0, 10, 10), Vector2.ZERO, Vector2(468, 216)) == Vector4.ZERO)
-	var sr := SafeArea.safe_rect(Vector2(480, 216), Vector4(30, 0, 30, 8))
-	check("SafeArea.safe_rect 480x216 met 30/0/30/8 = (30,0)-(450,208)", sr == Rect2(30, 0, 420, 208))
-	check("SafeArea.insets: headless/PC geeft nul", SafeArea.insets() == Vector4.ZERO or SafeArea.override is Vector4)
-
-
+# ================================================================ deel D: ratio's + veilige zone (UiTouch.insets_override)
 func _aspect_tests() -> void:
 	var win := get_window()
 	var old_size := win.size
@@ -848,20 +743,19 @@ func _aspect_tests() -> void:
 		check("%s: kijkvenster is %.0fx216 (is %s)" % [name, want_w, vs], absf(vs.x - want_w) < 1.0 and absf(vs.y - 216.0) < 0.5)
 		if absf(vs.x - want_w) >= 1.0:
 			continue
-		SafeArea.override = Vector4(30.0, 0.0, 30.0, 0.0)
-		var safe := SafeArea.safe_rect(vs, SafeArea.override)
-		# titel
+		UiTouch.insets_override = Vector4(30.0, 0.0, 30.0, 0.0)
+		var safe := UiTouch.safe_rect(vs, get_viewport())
+		check("%s: veilige zone = (30,0)-(%.0f,216)" % [name, vs.x - 30.0], safe == Rect2(30, 0, vs.x - 60.0, 216))
 		get_tree().change_scene_to_file("res://scenes/ui/title.tscn")
 		await wait_until(_is_title, 10.0)
 		await pframes(14)
 		var t := scene()
 		var st: Rect2 = t.stage.get_global_rect()
-		check("%s titel: stage 384x216 gecentreerd, kaartje en knoppen binnen de veilige zone" % name,
+		check("%s titel: stage 384x216 gecentreerd, kaartje en knoppen binnen de veilige zone, knoppen >= 25 hoog, niets afgekapt" % name,
 				st.size == Vector2(384, 216) and absf(st.get_center().x - vs.x / 2.0) <= 1.0
-				and safe.encloses(t.card.get_global_rect()) and outside(t, safe).is_empty())
-		check("%s titel: elke knop >= 48dp en geen afgekapte tekst" % name, UiTouch.small_targets(t).is_empty() and clipped_buttons(t).is_empty())
+				and safe.encloses(t.card.get_global_rect()) and outside(t, safe).is_empty()
+				and small_targets(t).is_empty() and clipped_buttons(t).is_empty())
 		await shot("ux_title_" + name.replace(":", "x").replace(".", "_"))
-		# kaart + HUD + menu
 		var map := await open_map()
 		if map == null:
 			check("%s: kaart geladen" % name, false)
@@ -873,34 +767,14 @@ func _aspect_tests() -> void:
 		tc.refit()
 		await pframes(2)
 		var rects: Array = tc.button_rects()
-		var inside_safe := rects.all(func(r): return safe.encloses(r))
-		check("%s HUD: joystick, A, B, MENU, RUN en KERN binnen de veilige zone (notch 30 links/rechts), %d vlakken" % [name, rects.size()],
-				inside_safe and rects.size() >= 5)
-		SafeArea.override = Vector4(30.0, 0.0, 30.0, 10.0)
-		tc.refit()
-		await pframes(1)
-		var safe_bar := SafeArea.safe_rect(vs, SafeArea.override)
-		check("%s HUD: ook met een gebarenbalk van 10 eenheden onder blijft alles erboven" % name, tc.button_rects().all(func(r): return safe_bar.encloses(r)))
-		SafeArea.override = Vector4(30.0, 0.0, 30.0, 0.0)
-		tc.refit()
-		await pframes(1)
-		check("%s HUD: A/B aan de rechterrand, joystick aan de linkerrand" % name, tc.a_center().x > vs.x * 0.7 and tc.stick_center().x < vs.x * 0.3)
+		check("%s HUD: joystick, A, B, MENU, RUN en CORE binnen de veilige zone (notch 30 links/rechts), %d vlakken" % [name, rects.size()],
+				rects.all(func(r): return safe.encloses(r)) and rects.size() >= 5)
 		var fm := await open_field_menu(map)
 		if fm != null:
-			check("%s veldmenu: elke knop >= 48dp, binnen de veilige zone (%s)" % [name, outside(fm, safe)],
-					UiTouch.small_targets(fm).is_empty() and outside(fm, safe).is_empty() and clipped_buttons(fm).is_empty())
+			check("%s veldmenu: knoppen >= 25 hoog, binnen de veilige zone (%s), niets afgekapt" % [name, outside(fm, safe)],
+					small_targets(fm).is_empty() and outside(fm, safe).is_empty() and clipped_buttons(fm).is_empty())
 			await shot("ux_menu_" + name.replace(":", "x").replace(".", "_"))
-			for id in ["items", "equip", "quests", "scenes"]:
-				fm.choose(id)
-				await pframes(12)
-				if fm.sub != null:
-					var frame: Control = fm.sub.root.get_child(0)
-					check("%s %s: venster binnen de veilige zone (%s), knoppen binnen, niets afgekapt" % [name, fm.sub.name, frame.get_global_rect()],
-							safe.encloses(frame.get_global_rect().grow(-0.5)) and outside(fm.sub, safe).is_empty() and clipped_buttons(fm.sub).is_empty())
-					fm.sub.close()
-					await pframes(5)
 			await close_field_menu(map)
-		# dialoog met twee keuzes
 		Dialog.ask("Ready for the next part?", ["Yes", "No"], "")
 		await wait_until(_choices_visible, 3.0)
 		await pframes(3)
@@ -909,9 +783,9 @@ func _aspect_tests() -> void:
 		await shot("ux_dialog_" + name.replace(":", "x").replace(".", "_"))
 		Dialog.choose(0)
 		await pframes(3)
-		SafeArea.override = null
+		UiTouch.insets_override = null
 		GameState.new_game("Dax")
-	SafeArea.override = null
+	UiTouch.insets_override = null
 	win.size = old_size
 	await pframes(6)
 

@@ -9,13 +9,10 @@ extends "res://scripts/ui/menu_screen.gd"
 const TargetList := preload("res://scripts/ui/target_list.gd")
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 
-## 13 regels moeten tegelijk op 216 px passen (debug_menutest.gd 'alle regels in beeld', muziek_tests.gd);
-## dat kan alleen met 13 hoge regels. Bekende uitzondering op de 48dp-regel, zie docs/UX_POLISH_WM1.md.
-## De volumes staan ook op de Music-tab (schuifregelaars van 26 hoog).
-const OPTION_ROW_H := 12
-const TAB_BAR_H := 26          # tabs: minstens 48dp
-const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks (muziek_tests: >= 48 logische px; ruim boven 48dp)
-const VALUE_W := 66            # breedte van de waarde tussen '<' en '>'
+const OPTION_ROW_H := 19       # 13 regels in twee kolommen (7 + 6) passen met tabbalk en hulpregel op 216 hoog
+const TAB_BAR_H := 24          # zelfde tikminimum als questlog-tab (ROW_H / RIJ_H-traditie: 24 logic px)
+const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks: mobiel tikdoel (logic pixels)
+const VALUE_W := 50            # breedte van de waarde tussen '<' en '>' (twee kolommen: elke kolom is ~178 breed)
 const RESET_KEY := "_reset"
 const EXPORT_KEY := "_export"      # playtest: logboek aanbieden (SessieLog)
 const TABS := ["general", "music"]
@@ -48,7 +45,9 @@ var keys: Array[String] = []
 var value_labels := {}         # sleutel -> Label
 var tab := "general"
 var tab_buttons := {}
-var general_box: VBoxContainer
+var general_box: HBoxContainer   # twee kolommen met regels (links 7, rechts 6)
+var _col_a: VBoxContainer
+var _col_b: VBoxContainer
 var music_root: Control
 var music_sliders := {}        # music_volume / sfx_volume -> HSlider
 var music_value_labels := {}   # sleutel -> Label (percentage)
@@ -60,13 +59,14 @@ var preview := ""
 
 func _build() -> void:
 	header.text = "Settings"
-	(content.get_parent() as Control).offset_top = FRAME_INSET   # 13 regels + koprij van 48dp + hint passen zo in het venster
 	settings = get_node_or_null("/root/Settings")
 	var outer := VBoxContainer.new()
 	outer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_theme_constant_override("separation", 2)
 	content.add_child(outer)
-	# De tabs staan in de koprij (naast 'Back'): elke knop is 48dp hoog en zo blijven alle 13 regels in beeld.
+	var bar := HBoxContainer.new()
+	bar.add_theme_constant_override("separation", 4)
+	outer.add_child(bar)
 	for t in TABS:
 		var tb := UiMenu.button(TAB_NAMES[t])
 		tb.name = "Tab_" + t
@@ -74,13 +74,19 @@ func _build() -> void:
 		tb.focus_mode = Control.FOCUS_NONE
 		UiSfx.tag(tb, UiSfx.TAB)
 		tb.pressed.connect(kies_tab.bind(t))
-		header_row.add_child(tb)
-		header_row.move_child(tb, header_row.get_child_count() - 2)   # vóór 'Back'
+		bar.add_child(tb)
 		tab_buttons[t] = tb
-	general_box = VBoxContainer.new()
+	general_box = HBoxContainer.new()
 	general_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	general_box.add_theme_constant_override("separation", 0)
+	general_box.add_theme_constant_override("separation", 8)
 	outer.add_child(general_box)
+	_col_a = VBoxContainer.new()
+	_col_b = VBoxContainer.new()
+	for col in [_col_a, _col_b]:
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		col.add_theme_constant_override("separation", 0)
+		general_box.add_child(col)
 	if settings == null:
 		general_box.add_child(UiMenu.label("Options are unavailable (Settings autoload is missing).", MenuColors.TEXT_DIM))
 		back_button.grab_focus()
@@ -95,18 +101,18 @@ func _build() -> void:
 
 
 func _build_general_rows() -> void:
-	for r in ROWS:
+	var shown: Array = ROWS.filter(func(r): return not (str(r[0]) == "crt" and get_node_or_null("/root/Crt") == null))
+	var split := (shown.size() + 1) / 2
+	for n in shown.size():
+		var r: Array = shown[n]
 		var key: String = r[0]
-		if key == "crt" and get_node_or_null("/root/Crt") == null:
-			continue
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 2)
-		general_box.add_child(line)
+		(_col_a if n < split else _col_b).add_child(line)
 		var b := UiMenu.button(str(r[1]))
 		b.custom_minimum_size = Vector2(0, OPTION_ROW_H)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.set_meta("key", key)
-		b.set_meta(META_EXEMPT, true)   # 13 regels moeten tegelijk op 216 hoog (zie UX_POLISH_WM1.md)
 		b.focus_entered.connect(_on_row_focus.bind(key, str(r[2])))
 		b.pressed.connect(activate.bind(key))
 		line.add_child(b)
@@ -116,7 +122,6 @@ func _build_general_rows() -> void:
 			continue
 		var minus := arrow_button("<")
 		minus.custom_minimum_size.y = OPTION_ROW_H
-		minus.set_meta(META_EXEMPT, true)
 		minus.pressed.connect(change.bind(key, -1))
 		line.add_child(minus)
 		var v := UiMenu.label("", MenuColors.TEXT)
@@ -127,7 +132,6 @@ func _build_general_rows() -> void:
 		value_labels[key] = v
 		var plus := arrow_button(">")
 		plus.custom_minimum_size.y = OPTION_ROW_H
-		plus.set_meta(META_EXEMPT, true)
 		plus.pressed.connect(change.bind(key, 1))
 		line.add_child(plus)
 	TargetList.link_ring(rows)

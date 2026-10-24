@@ -13,9 +13,8 @@ extends CanvasLayer
 
 signal closed
 
-const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
-const SafeArea := preload("res://scripts/ui/safe_area.gd")
+const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const TargetList := preload("res://scripts/ui/target_list.gd")
@@ -31,6 +30,7 @@ const PartyScreen := preload("res://scripts/ui/party_screen.gd")
 const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
 const QuestlogScreen := preload("res://scripts/ui/questlog_screen.gd")   # v0.24 Quest Log (zelfde data als ECHO)
 const QD := preload("res://scripts/data/quest_data.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const LoadScreen := preload("res://scripts/ui/load_screen.gd")   # v0.22 Load vanuit het veldmenu   # v0.22 partylimiet
 
 const LAYER := 20
@@ -38,18 +38,17 @@ const MARGIN := 8
 const GAP := 6
 const LEFT_W := 156
 const BUTTON_H := 30
-const MENU_H := 14
-## Ruimte tussen de knoppen van de rechterkolom (26 hoog = 48dp, zes stuks moeten op 216 passen).
-const RIGHT_GAP := 2
+const MENU_H := 15
 ## v0.22 compacte Warpen-/Party-knop (rechterkolom)
 const WARP_W := 112   # 21 okt 2026: ruimte voor "Scenes & Music"
-const WARP_H := 26   # 48dp (UiTouch.MIN_UNITS); 6 knoppen rechts onder het MENU-bord
+const WARP_H := 25   # tikmaat (UiTouch.TOUCH_MIN, ~48 dp); 6 knoppen rechts met RIGHT_GAP past boven de opdrachtregel
+const RIGHT_GAP := 2   # tussenruimte in de rechterkolom (de grote linkerknoppen houden GAP)
 ## v0.22 rechterkolom (compact, onder het MENU-bord), van boven naar beneden
 const RIGHT_COL := ["warp", "party", "quests", "scenes", "options", "load"]
 ## v0.22 linkerkolom (grote knoppen); 5 x 30 + tussenruimte eindigt op y=182, past op 216 hoog (telefoon)
 const LEFT_COL := ["equip", "codex", "items", "magic", "bestiary"]
 ## Minimale tikhoogte (de knoppen zelf zijn hoger). Tests leunen op deze naam.
-const ROW_H := 16   # oude naam (tests leunen erop); de knoppen zelf zijn BUTTON_H / WARP_H hoog
+const ROW_H := 16
 const MESSAGE_TIME := 2.5
 ## Spelertekst. TODO(design): deze zin tot er een hub-scène én een vlag is.
 const WARP_UNAVAILABLE := "The warp hub cannot be reached yet."
@@ -136,7 +135,7 @@ func _build_buttons() -> void:
 		b.custom_minimum_size = Vector2(LEFT_W, ROW_H)
 		_style_button(b, id == "warp")
 		if id in RIGHT_COL:
-			b.custom_minimum_size = Vector2(WARP_W, WARP_H)   # v0.22 compact
+			b.custom_minimum_size = Vector2(WARP_W, ROW_H)   # v0.22 compact
 		# v0.22 (Dennis): alle teksten gecentreerd (horizontaal; Button centreert verticaal zelf), zodat ze gelijk staan
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		UiMenu.set_label(b, str(c[1]))
@@ -210,11 +209,11 @@ func _link_focus() -> void:
 func _layout() -> void:
 	var w := root.size.x if root.size.x > 0.0 else 384.0
 	var h := root.size.y if root.size.y > 0.0 else 216.0
-	var safe := SafeArea.insets(get_viewport())   # notch/camera-gat: 0 op PC en headless
-	var left_x := float(MARGIN) + safe.x
-	var top := float(MARGIN) + safe.y
+	var ins := UiTouchC.insets(root.get_viewport())
+	var left_x := float(MARGIN) + ins.x
+	var top := float(MARGIN) + ins.y
 	var right_x := left_x + LEFT_W + GAP
-	var right_w := maxf(80.0, w - right_x - MARGIN - safe.z)
+	var right_w := maxf(80.0, w - right_x - MARGIN - ins.z)
 	var y := top
 	for id in LEFT_COL:
 		var b: Button = buttons[id]
@@ -224,9 +223,9 @@ func _layout() -> void:
 	var stack_bottom := y - GAP
 	menu_board.position = Vector2(right_x, top)
 	menu_board.size = Vector2(minf(right_w, float(WARP_W)), MENU_H)
-	var warp_y := top + MENU_H + 4.0
-	# v0.22 (Dennis): Warpen compact (was een groot vlak): vaste maat WARP_W x WARP_H, nog steeds
-	# ruim boven de minimale tikhoogte; Party eronder met dezelfde breedte.
+	var warp_y := top + MENU_H + RIGHT_GAP
+	# v0.22 (Dennis): Warpen compact (was een groot vlak): vaste maat WARP_W x WARP_H, nu op tikmaat
+	# (25 eenheden = ~48 dp); Party eronder met dezelfde breedte.
 	var col_w := minf(right_w, float(WARP_W))
 	var ry := warp_y
 	for id in RIGHT_COL:
@@ -234,12 +233,12 @@ func _layout() -> void:
 		rb.position = Vector2(right_x, ry)
 		rb.size = Vector2(col_w, float(WARP_H))
 		ry += WARP_H + RIGHT_GAP
-	var left_bottom := stack_bottom
-	message_label.position = Vector2(left_x, left_bottom + 4.0)
-	message_label.size = Vector2(LEFT_W, 24)
+	stack_bottom = maxf(stack_bottom, ry - RIGHT_GAP)
+	message_label.position = Vector2(left_x, stack_bottom + GAP)
+	message_label.size = Vector2(maxf(40.0, w - left_x - MARGIN - ins.z), 32)
 	if quest_label != null:
-		quest_label.position = Vector2(left_x, left_bottom + 4.0)
-		quest_label.size = Vector2(LEFT_W, 24)
+		quest_label.position = Vector2(left_x, maxf(h - MARGIN - ins.w - 16.0, stack_bottom + 1.0))
+		quest_label.size = Vector2(maxf(40.0, w - left_x - MARGIN - ins.z), 16)
 
 
 func _place_name() -> String:
@@ -257,8 +256,6 @@ func refresh_party() -> void:
 func show_message(text: String, sticky := false) -> void:
 	message_label.text = text
 	message_label.visible = true
-	if quest_label != null:
-		quest_label.visible = false   # de melding staat op dezelfde plek
 	_message_left = -1.0 if sticky else MESSAGE_TIME
 	_layout.call_deferred()
 
@@ -268,8 +265,6 @@ func _process(delta: float) -> void:
 		_message_left -= delta
 		if _message_left <= 0.0:
 			message_label.visible = false
-			if quest_label != null:
-				quest_label.visible = true
 	if sub != null or Engine.get_process_frames() <= _quiet_frame:
 		return
 	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):

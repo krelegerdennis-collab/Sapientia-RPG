@@ -59,7 +59,7 @@ func _kolom(ouder: Node, titel: String) -> VBoxContainer:
 
 func _knop(tekst: String, actie: Callable, ouder: Node) -> Button:
 	var b := UiMenu.button(tekst)
-	b.custom_minimum_size = Vector2(0, TOUCH_H)
+	b.custom_minimum_size = Vector2(0, ROW_H)
 	b.clip_text = true
 	b.pressed.connect(actie)
 	lock_horizontal_focus(b)

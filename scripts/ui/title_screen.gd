@@ -76,8 +76,8 @@ var stage: Control
 var backfill: TextureRect
 var version_label: Label
 const STAGE_SIZE := Vector2(384, 216)
-## Tikdoel van elke knop op het titelscherm: 48dp (UiTouch.MIN_UNITS). Twee rijen vullen het kaartje (y 148..201).
-const TOUCH_H := 26.0
+## Tikdoel van elke knop op het titelscherm: UiTouch.TOUCH_MIN (25 = ~48dp). Twee rijen vullen het kaartje (y 148..201).
+const TOUCH_H := 25.0
 const INFO_H := 10.0
 
 
@@ -413,7 +413,8 @@ func _open_slot_list() -> void:
 func _on_slot_picked(slot: int) -> void:
 	UiSfx.play(UiSfx.LOAD)
 	set_process(false)
-	await GameState.continue_slot(slot)
+	if not await GameState.continue_slot(slot):
+		set_process(true)
 
 
 func _on_slot_cancelled() -> void:

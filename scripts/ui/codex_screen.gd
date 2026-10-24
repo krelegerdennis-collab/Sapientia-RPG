@@ -75,6 +75,7 @@ func _build() -> void:
 	scroll.custom_minimum_size = Vector2(LIST_W, 0)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.scroll_deadzone = 6
+	scroll.follow_focus = true
 	body.add_child(scroll)
 	list = VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -110,11 +111,12 @@ func _build() -> void:
 	detail.add_child(state_label)
 	# v0.19 fusie: knop vóór 'Terug' (tikken; met de joystick: rechts)
 	fuse_button = UiMenu.button("Fusion")
-	fuse_button.custom_minimum_size = Vector2(FUSE_W, TOUCH_H)
+	fuse_button.custom_minimum_size = Vector2(FUSE_W, ROW_H)
 	fuse_button.focus_mode = Control.FOCUS_NONE
 	fuse_button.pressed.connect(start_fusion)
 	header_row.add_child(fuse_button)
 	header_row.move_child(fuse_button, header_row.get_child_count() - 2)
+	header_row.custom_minimum_size.y = UiTouchC.TOUCH_MIN   # 'Fusion' en 'Back' op tikmaat
 	parents_label = UiMenu.label("", MenuColors.TEXT_DIM)
 	parents_label.visible = false
 	list.add_child(parents_label)
@@ -151,7 +153,7 @@ func rebuild(keep_uid := "-") -> void:
 		uids.append(NONE_ID)
 	for uid in uids:
 		var b := UiMenu.button(entry_label(uid))
-		b.custom_minimum_size = Vector2(LIST_W - 4, TOUCH_H)
+		b.custom_minimum_size = Vector2(LIST_W - 4, UiTouchC.ROW_TOUCH)
 		b.focus_entered.connect(show_page.bind(uid))
 		b.pressed.connect(choose.bind(uid))
 		list.add_child(b)
@@ -352,7 +354,7 @@ func _build_preview_rows() -> void:
 	parents_label.text = "%s Lv%d\n+ %s Lv%d" % [_short(str(a["name"])), int(a["level"]), _short(str(b["name"])), int(b["level"])]
 	for t in [["Fuse!", confirm_fusion], ["Cancel", back]]:
 		var btn := UiMenu.button(t[0])
-		btn.custom_minimum_size = Vector2(LIST_W - 4, TOUCH_H)
+		btn.custom_minimum_size = Vector2(LIST_W - 4, UiTouchC.ROW_TOUCH)
 		btn.pressed.connect(t[1])
 		list.add_child(btn)
 		entries.append(btn)

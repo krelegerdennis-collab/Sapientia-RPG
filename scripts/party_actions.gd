@@ -320,7 +320,7 @@ static func spell_effect_text(caster: Dictionary, id: String) -> String:
 		"all_allies":
 			if str(sp.get("type", "")) == "heal":
 				what = "Heals the party"
-	return "%s (±%d)." % [what, roundi(spell_base(caster, id))]
+	return "%s (~%d)." % [what, roundi(spell_base(caster, id))]
 
 
 ## Spreuk buiten het gevecht: MP gaat eraf, doel geneest (geclampt op max_hp).

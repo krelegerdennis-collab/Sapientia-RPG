@@ -10,26 +10,18 @@ extends CanvasLayer
 
 signal closed
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const PartyCard := preload("res://scripts/ui/party_card.gd")
-const UiTouch := preload("res://scripts/ui/ui_touch.gd")
-const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
-const SafeArea := preload("res://scripts/ui/safe_area.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 const LAYER := 21
 const FRAME_INSET := 6         # afstand venster - schermrand
 const PAD_X := 12              # inhoud - schermrand (links/rechts)
 const PAD_Y := 9               # inhoud - schermrand (boven/onder)
-## Oude minimale tikhoogte. Bestaande suites toetsen hier tegenaan (alles >= ROW_H, en 'alles binnen het scherm')
-## en het uitrustingsscherm past alleen met regels van 16. Nieuwe en aangepaste knoppen gebruiken TOUCH_H.
-const ROW_H := 16
-## Tikdoel van 48dp (UiTouch.MIN_UNITS): minimale hoogte van een knop in een menu.
-const TOUCH_H := UiTouch.MIN_UNITS
-## Metadata op een knop die bewust compact blijft (te veel regels voor 216 hoog, bestaande suites toetsen de
-## indeling). De test telt ze en vergelijkt met docs/UX_POLISH_WM1.md; nieuwe knoppen horen hier niet bij.
-const META_EXEMPT := "touch_exempt"
+const ROW_H := 16              # hoogte van een menuregel (ook = minimale tikhoogte)
 const BACK_W := 56             # breedte van de 'Terug'-knop (groot genoeg voor een duim)
 const MESSAGE_TIME := 2.5      # zo lang blijft een melding staan (seconden)
 const DEFAULT_HINT := "A: choose   B: back"
@@ -38,6 +30,10 @@ var root: Control
 var header_row: HBoxContainer
 var header: Label
 var back_button: Button
+## Onzichtbaar tikvlak rond 'Back' (>= 25 eenheden hoog, tot aan de schermrand); doet hetzelfde als de knop.
+var back_zone: Control
+var _bg: Panel
+var _outer: VBoxContainer
 var content: VBoxContainer
 var hint: Label
 var hint_text := DEFAULT_HINT
@@ -54,24 +50,16 @@ func _ready() -> void:
 	root.theme = load(UiMenu.THEME_PATH)
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
-	# veilige zone (notch/camera-gat links of rechts, gebarenbalk onder): 0 op PC en headless
-	var safe := SafeArea.insets(get_viewport())
 	var bg := Panel.new()
 	bg.add_theme_stylebox_override("panel", UiMenu.window_style(MenuColors.BORDER_DARK, 0.97, true))
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.offset_left = FRAME_INSET + safe.x
-	bg.offset_top = FRAME_INSET + safe.y
-	bg.offset_right = -FRAME_INSET - safe.z
-	bg.offset_bottom = -FRAME_INSET - safe.w
 	root.add_child(bg)
+	_bg = bg
 	var outer := VBoxContainer.new()
 	outer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	outer.offset_left = PAD_X + safe.x
-	outer.offset_top = PAD_Y - 3.0 + safe.y   # de koprij is 48dp hoog (Back): 3 px terug zodat alles blijft passen
-	outer.offset_right = -PAD_X - safe.z
-	outer.offset_bottom = -PAD_Y + 2 - safe.w
 	outer.add_theme_constant_override("separation", 3)
 	root.add_child(outer)
+	_outer = outer
 	header_row = HBoxContainer.new()
 	header_row.add_theme_constant_override("separation", 4)
 	outer.add_child(header_row)
@@ -79,7 +67,7 @@ func _ready() -> void:
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_row.add_child(header)
 	back_button = UiMenu.button("Back")
-	back_button.custom_minimum_size = Vector2(BACK_W, TOUCH_H)
+	back_button.custom_minimum_size = Vector2(BACK_W, ROW_H)
 	UiSfx.tag(back_button, UiSfx.CANCEL)
 	back_button.pressed.connect(back)
 	header_row.add_child(back_button)
@@ -94,31 +82,44 @@ func _ready() -> void:
 	hint = UiMenu.label(hint_text, MenuColors.TEXT_DIM)
 	hint.clip_text = true
 	outer.add_child(hint)
+	back_zone = Control.new()
+	back_zone.name = "BackZone"
+	back_zone.mouse_filter = Control.MOUSE_FILTER_STOP
+	back_zone.gui_input.connect(_on_back_zone_input)
+	root.add_child(back_zone)
+	_apply_safe_area()
+	root.resized.connect(_apply_safe_area)
 	_build()
+	_apply_safe_area.call_deferred()
+
+
+## Venster en inhoud binnen het veilige gebied (notch, gebarenbalk) + het tikvlak van 'Back'.
+func _apply_safe_area() -> void:
+	var ins := UiTouchC.insets(root.get_viewport())
+	_bg.offset_left = FRAME_INSET + ins.x
+	_bg.offset_top = FRAME_INSET + ins.y
+	_bg.offset_right = -(FRAME_INSET + ins.z)
+	_bg.offset_bottom = -(FRAME_INSET + ins.w)
+	_outer.offset_left = PAD_X + ins.x
+	_outer.offset_top = PAD_Y + ins.y
+	_outer.offset_right = -(PAD_X + ins.z)
+	_outer.offset_bottom = -PAD_Y + 2 - ins.w
+	var w := root.size.x if root.size.x > 0.0 else 384.0
+	var header_h := maxf(float(ROW_H), header_row.get_combined_minimum_size().y)
+	var zone_h := maxf(UiTouchC.TOUCH_MIN, float(PAD_Y) + ins.y + header_h + 2.0)
+	back_zone.position = Vector2(w - ins.z - PAD_X - BACK_W, 0.0)
+	back_zone.size = Vector2(BACK_W + PAD_X + ins.z, zone_h)
+
+
+func _on_back_zone_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		back_zone.accept_event()
+		back()
 
 
 ## Inhoud opbouwen (in het scherm zelf).
 func _build() -> void:
 	pass
-
-
-## Zet 'content' in een ScrollContainer: een lange lijst met rijen van 48dp scrolt i.p.v. over de rand te lopen.
-## 'content' blijft dezelfde VBox (kinderen en namen ongewijzigd). Aanroepen aan het begin van _build().
-func scroll_content() -> ScrollContainer:
-	var outer := content.get_parent()
-	var at := content.get_index()
-	var scroll := ScrollContainer.new()
-	scroll.name = "ContentScroll"
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.follow_focus = true
-	scroll.scroll_deadzone = 6
-	outer.remove_child(content)
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(content)
-	outer.add_child(scroll)
-	outer.move_child(scroll, at)
-	return scroll
 
 
 ## Extra toetsen per frame (links/rechts e.d.), in het scherm zelf.
@@ -188,7 +189,7 @@ static func arrow_button(text: String) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.focus_mode = Control.FOCUS_NONE
-	b.custom_minimum_size = Vector2(TOUCH_H, ROW_H)   # breed genoeg; de hoogte rekt mee met de rij waar hij in staat
+	b.custom_minimum_size = Vector2(ROW_H + 4, ROW_H)
 	b.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	b.add_theme_color_override("font_color", MenuColors.ACCENT_SOFT)
 	b.add_theme_color_override("font_hover_color", MenuColors.ACCENT)
