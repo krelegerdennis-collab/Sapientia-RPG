@@ -4,6 +4,7 @@ extends Node
 ## en waar hij stond voordat een gevecht begon. Data komt uit scripts/data/game_data.gd.
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 ## v0.14 (menu L2): uitrusting en effectieve stats (basis + uitrusting).
 const Equipment := preload("res://scripts/equipment.gd")
@@ -513,6 +514,7 @@ func _ready() -> void:
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
@@ -1998,6 +2000,8 @@ func enter_map(path: String) -> void:
 ## op het spawnpunt met de naam spawn_name (een node onder "Spawns").
 func change_map(path: String, spawn_name: String) -> void:
 	if changing_map or in_battle:
+		return
+	if ReleaseFlags.dev_scene_blocked(path):
 		return
 	changing_map = true
 	var route := huis_route(current_map, path, spawn_name)
