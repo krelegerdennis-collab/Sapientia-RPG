@@ -1,6 +1,6 @@
 extends RefCounted
 ## Vang-tutorial (Codex) + Golemhal-uitgang op slot tot de Inktwurm in de Codex staat, binnen --autotest.
-## Alleen dit blok: godot --path . -- --autotest --test-codex-tutorial
+## Alleen dit blok: godot --path . -- --autotest --test-codex-tutorial [--codex-tutorial-shots=/pad/map]
 ## Zonder de vlag draait het blok aan het eind van de volledige --autotest mee.
 ## t = de autotest-node (check/pframes/wait_battle_state/choose_command/...).
 ## Delen: A data, B tutorial 1x (trigger-once), C uitgang op slot en weer open, D save/load van de vlag,
@@ -19,10 +19,20 @@ const F_TUT2 := SD.TUTORIAL_CODEX_FLAG
 const F_CODEX := SD.CODEX_INKTWURM_FLAG
 
 var t: Node
+var shots := ""
 
 
 func _init(p_t: Node) -> void:
 	t = p_t
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--codex-tutorial-shots="):
+			shots = arg.get_slice("=", 1)
+			DirAccess.make_dir_recursive_absolute(shots)
+
+
+func shot(naam: String) -> void:
+	if shots != "":
+		await t.screenshot(shots.path_join(naam + ".png"))
 
 
 func run() -> void:
@@ -83,12 +93,14 @@ func _trigger_tests() -> void:
 	t.check("vang-tutorial: vlag meteen gezet", GameState.story_flags.has(F_TUT2))
 	t.check("pagina 1 als systeemvak met Next/Skip, past op 384x216", await wait_page() and Dialog.choices == [SD.TUT_NEXT, SD.TUT_SKIP]
 			and Dialog.text_label.text == SD.TUT_CODEX_PAGES[0] and page_fits())
+	await shot("codex_tutorial_1")
 	await press()
 	t.check("A = Next: pagina 2 (Classic)", await wait_page() and Story.current_event == EV + "_2"
 			and Dialog.text_label.text == SD.TUT_CODEX_PAGES[1] and page_fits())
 	await press()
 	t.check("pagina 3 (Action: Codex-knop/Ring, zelfde regels)", await wait_page() and Story.current_event == EV + "_3"
 			and Dialog.text_label.text == SD.TUT_CODEX_PAGES[2] and page_fits())
+	await shot("codex_tutorial_3")
 	await press()
 	t.check("pagina 4: gewone tekst", await wait_page() and Dialog.choices.is_empty() and Story.current_event == EV + "_4"
 			and Dialog.text_label.text == SD.TUT_CODEX_PAGES[3] and page_fits())
@@ -169,6 +181,8 @@ func _lock_tests() -> void:
 			and not GameState.codex_full() and GameState.item_count(CD.BOOK_ITEM) == 0)
 	use_exit(room)
 	t.check("uitgang op slot: slot-event loopt", await wait_until(func(): return Story.running and Story.current_event == SD.GOLEMHAL_EXIT, 3.0))
+	await wait_page()
+	await shot("golemhal_uitgang_op_slot")
 	var tekst := await drain()
 	t.check("tekst: pagina's blokkeren de uitgang, nog geen kast open %s" % [tekst], tekst.size() == 3 and tekst[0].contains("Loose pages"))
 	t.check("slot: nog in de Golemhal, niet van kaart gewisseld", scene() == room and not GameState.changing_map)
