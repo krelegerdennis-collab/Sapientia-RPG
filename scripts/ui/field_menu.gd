@@ -29,6 +29,7 @@ const PartyScreen := preload("res://scripts/ui/party_screen.gd")
 const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
 const QuestlogScreen := preload("res://scripts/ui/questlog_screen.gd")   # v0.24 Quest Log (zelfde data als ECHO)
 const QD := preload("res://scripts/data/quest_data.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const LoadScreen := preload("res://scripts/ui/load_screen.gd")   # v0.22 Load vanuit het veldmenu   # v0.22 partylimiet
 
 const LAYER := 20
@@ -36,10 +37,11 @@ const MARGIN := 8
 const GAP := 6
 const LEFT_W := 156
 const BUTTON_H := 30
-const MENU_H := 20
+const MENU_H := 15
 ## v0.22 compacte Warpen-/Party-knop (rechterkolom)
 const WARP_W := 112   # 21 okt 2026: ruimte voor "Scenes & Music"
-const WARP_H := 20   # v0.24: 6 knoppen rechts (Quest Log erbij), past boven de opdrachtregel
+const WARP_H := 25   # tikmaat (UiTouch.TOUCH_MIN, ~48 dp); 6 knoppen rechts met RIGHT_GAP past boven de opdrachtregel
+const RIGHT_GAP := 2   # tussenruimte in de rechterkolom (de grote linkerknoppen houden GAP)
 ## v0.22 rechterkolom (compact, onder het MENU-bord), van boven naar beneden
 const RIGHT_COL := ["warp", "party", "quests", "scenes", "options", "load"]
 ## v0.22 linkerkolom (grote knoppen); 5 x 30 + tussenruimte eindigt op y=182, past op 216 hoog (telefoon)
@@ -204,10 +206,11 @@ func _link_focus() -> void:
 func _layout() -> void:
 	var w := root.size.x if root.size.x > 0.0 else 384.0
 	var h := root.size.y if root.size.y > 0.0 else 216.0
-	var left_x := float(MARGIN)
-	var top := float(MARGIN)
+	var ins := UiTouchC.insets(root.get_viewport())
+	var left_x := float(MARGIN) + ins.x
+	var top := float(MARGIN) + ins.y
 	var right_x := left_x + LEFT_W + GAP
-	var right_w := maxf(80.0, w - right_x - MARGIN)
+	var right_w := maxf(80.0, w - right_x - MARGIN - ins.z)
 	var y := top
 	for id in LEFT_COL:
 		var b: Button = buttons[id]
@@ -217,22 +220,22 @@ func _layout() -> void:
 	var stack_bottom := y - GAP
 	menu_board.position = Vector2(right_x, top)
 	menu_board.size = Vector2(minf(right_w, float(WARP_W)), MENU_H)
-	var warp_y := top + MENU_H + GAP
-	# v0.22 (Dennis): Warpen compact (was een groot vlak): vaste maat WARP_W x WARP_H, nog steeds
-	# ruim boven de minimale tikhoogte; Party eronder met dezelfde breedte.
+	var warp_y := top + MENU_H + RIGHT_GAP
+	# v0.22 (Dennis): Warpen compact (was een groot vlak): vaste maat WARP_W x WARP_H, nu op tikmaat
+	# (25 eenheden = ~48 dp); Party eronder met dezelfde breedte.
 	var col_w := minf(right_w, float(WARP_W))
 	var ry := warp_y
 	for id in RIGHT_COL:
 		var rb: Button = buttons[id]
 		rb.position = Vector2(right_x, ry)
 		rb.size = Vector2(col_w, float(WARP_H))
-		ry += WARP_H + GAP
-	stack_bottom = maxf(stack_bottom, ry - GAP)
-	message_label.position = Vector2(MARGIN, stack_bottom + GAP)
-	message_label.size = Vector2(w - MARGIN * 2.0, 32)
+		ry += WARP_H + RIGHT_GAP
+	stack_bottom = maxf(stack_bottom, ry - RIGHT_GAP)
+	message_label.position = Vector2(left_x, stack_bottom + GAP)
+	message_label.size = Vector2(maxf(40.0, w - left_x - MARGIN - ins.z), 32)
 	if quest_label != null:
-		quest_label.position = Vector2(MARGIN, h - MARGIN - 16.0)
-		quest_label.size = Vector2(w - MARGIN * 2.0, 16)
+		quest_label.position = Vector2(left_x, maxf(h - MARGIN - ins.w - 16.0, stack_bottom + 1.0))
+		quest_label.size = Vector2(maxf(40.0, w - left_x - MARGIN - ins.z), 16)
 
 
 func _place_name() -> String:

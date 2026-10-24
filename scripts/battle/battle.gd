@@ -46,8 +46,13 @@ const COMMANDS := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 ## v0.19 Codex-knop (index 5): submenu 'Vangen' (Leeg Boek op een vijand, met vangkans per doel)
 ## en 'Wissel bondgenoot' (niet-KO pagina's + 'Geen'; kost de beurt van de held). Verborgen in
 ## het oefengevecht en zolang de Codex 0 pagina's EN 0 Lege Boeken heeft. Regels: HANDOFF_FUSIE.md.
-const CODEX_ROW_H := 16           # regelhoogte van de Codex-menu's (tikken met een vinger)
+const CODEX_ROW_H := 16           # oude regelhoogte van de Codex-menu's (nu LIST_ROW_H; blijft voor oude verwijzingen)
 const CODEX_ROWS_MAX := 5         # wissel-lijst: zoveel regels tegelijk, daarna ▲/▼
+## Magie- en Item-lijst: tikmaat (25 eenheden = ~48 dp), met venster + ▲/▼ als er meer dan LIST_ROWS_MAX zijn.
+const LIST_ROW_H := 25
+const LIST_ROW_MIN := 16          # kleiner dan dit wordt een lijst nooit; liever over een held heen dan onbruikbaar klein
+const LIST_ROWS_MAX := 5
+const LIST_CHROME := 13.0         # marges van het lijstje (boven + onder) plus 1 eenheid lucht
 ## Hoe lang een gevechtsbericht in beeld blijft (A drukken = sneller).
 const MESSAGE_TIME := 0.8
 const HeroScript := preload("res://scripts/battle/battle_hero.gd")
@@ -113,7 +118,7 @@ const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: 
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
 const CORE_HIT_COLOR := Color("ff8ad8")
 const ARMOR_HIT_COLOR := Color("b5a78d")
-const SUBMENU_TOP := 24.0
+const SUBMENU_TOP := 14.0         # lijstje rechtsboven (het titeltabje valt er net boven); de bericht-strook is dan weg
 const CROSS_MARGIN := 4.0         # ruimte tot de rechterrand
 const BOX_GAP := 3.0
 ## v0.22 ruimte tussen het zijspeler-label van het monster en de B-knop
@@ -125,6 +130,7 @@ const DETAIL := 2
 ## intro, command, target_enemy, target_ally, busy, message_wait
 var state := "intro"
 var current_hero := -1
+var _hero_top_y := 0.0           # bovenkant van het heldenblok (voor de hoogte van de lijstjes)
 var heroes: Array = []     # combatanten (Dictionary) voor de party
 var enemies: Array = []    # combatanten voor de vijanden
 var _reserved := {}        # item-id -> aantal al gekozen deze ronde
@@ -298,6 +304,22 @@ func _make_cross() -> void:
 	add_child(target_name)
 	move_child(target_name, $TouchControls.get_index())
 	target_name.hide()
+
+
+## Regelhoogte voor een lijstje van n regels: zo hoog als de tikmaat (25), maar niet hoger dan er past boven
+## de helden (het lijstje staat rechtsboven en bedekt de helden liever niet), nooit onder LIST_ROW_MIN.
+func _list_row_h(n: int) -> int:
+	if _hero_top_y <= 0.0 or n <= 0:
+		return LIST_ROW_H
+	var free := _hero_top_y - (SUBMENU_TOP + _safe().y) - LIST_CHROME
+	return clampi(int(floorf(free / float(n))), LIST_ROW_MIN, LIST_ROW_H)
+
+
+## Veilig gebied (notch) in de eenheden van dit scherm; de touch-laag rekent het uit.
+func _safe() -> Vector4:
+	if touch != null and "safe_inset" in touch:
+		return touch.safe_inset
+	return Vector4.ZERO
 
 
 func _fit_to_screen() -> void:
@@ -569,8 +591,8 @@ func _layout() -> void:
 		right = touch.b_center().x - touch.button_radius * 1.25 - 4.0
 		menu_right = floorf(touch.a_center().x - touch.button_radius * 1.25 - 1.0)
 	# v0.13: lijstje (spreuken/items) rechtsboven; het kruis rechtsonder boven A/B
-	menu.right_edge = w - CROSS_MARGIN
-	menu.top_edge = SUBMENU_TOP
+	menu.right_edge = w - CROSS_MARGIN - _safe().z
+	menu.top_edge = SUBMENU_TOP + _safe().y
 	menu.bottom_edge = -1.0
 	_menu_left = left
 	_menu_right = right
@@ -638,6 +660,7 @@ func _place_cross(w: float, h: float) -> void:
 	var hero_l := w
 	var hero_top := h
 	var hero_bottom := 0.0
+	_hero_top_y = 0.0
 	for node in hero_nodes:
 		var rects: Array = [Rect2(node.home - node.FEET, node.SIZE),
 				Rect2(node.home + node.STEP - node.FEET, node.SIZE)]
@@ -651,8 +674,10 @@ func _place_cross(w: float, h: float) -> void:
 		hero_l = w * 0.45
 		hero_top = h * 0.45
 		hero_bottom = h - StatusBoxScript.HEIGHT - 6.0
+	else:
+		_hero_top_y = hero_top
 	var right := floorf(hero_l - CROSS_HERO_GAP)
-	var x0 := maxf(CROSS_EDGE, right - span)
+	var x0 := maxf(CROSS_EDGE + _safe().x, right - span)
 	var beside := x0 + span <= right + 0.5
 	var r_x := Rect2(x0, 0, span, h)
 	# onderkant: niet over een statusvak of (als het kruis erboven komt) de D-pad
@@ -959,7 +984,7 @@ func _choose_codex(hero: Dictionary):
 				wissel = "Swap: outside battle"   # v0.22 partylimiet: wisselen via het menu
 		show_message("Codex: capture or swap?")
 		menu.open("Codex", [{"text": vangen, "enabled": books > 0},
-				{"text": wissel, "enabled": codex.can_swap()}], last, true, CODEX_ROW_H)
+				{"text": wissel, "enabled": codex.can_swap()}], last, true, _list_row_h(2))
 		var k: int = await menu.finished
 		menu.close()
 		if k == -1:
@@ -991,7 +1016,7 @@ func _choose_swap(hero: Dictionary):
 		entries.append({"text": "%s Lv%d%s" % [p["name"], int(p["level"]), " now" if here else ""], "enabled": not here})
 	entries.append({"text": "None", "enabled": cur != ""})
 	show_message("Who fights with you?")
-	menu.open("Swap", entries, start, true, CODEX_ROW_H, CODEX_ROWS_MAX)
+	menu.open("Swap", entries, start, true, _list_row_h(mini(entries.size(), CODEX_ROWS_MAX)), CODEX_ROWS_MAX)
 	var k: int = await menu.finished
 	menu.close()
 	if k == -1:
@@ -1013,7 +1038,8 @@ func _choose_spell(hero: Dictionary):
 		for id in kern:
 			entries.append({"text": kern_entry_text(hero, id), "enabled": kern_ready(hero, id)})
 		show_message("Which spell?" if kern.is_empty() else ("Which skill?" if ids.is_empty() else "Which spell or skill?"))
-		menu.open("Magic" if kern.is_empty() else ("Core" if ids.is_empty() else "Magic/Core"), entries)
+		menu.open("Magic" if kern.is_empty() else ("Core" if ids.is_empty() else "Magic/Core"), entries,
+				0, true, _list_row_h(mini(entries.size(), LIST_ROWS_MAX)), LIST_ROWS_MAX)
 		var k: int = await menu.finished
 		menu.close()        # v0.13: lijstje weg, dan is het doel goed te zien
 		if k == -1:
@@ -1052,7 +1078,7 @@ func _choose_item(hero: Dictionary):
 		for id in ids:
 			entries.append({"text": "%s x%d" % [GameData.ITEMS[id].get("short", GameData.ITEMS[id]["name"]), _items_left(id)], "enabled": true})
 		show_message("Which item?")
-		menu.open("Item", entries)
+		menu.open("Item", entries, 0, true, _list_row_h(mini(entries.size(), LIST_ROWS_MAX)), LIST_ROWS_MAX)
 		var k: int = await menu.finished
 		menu.close()
 		if k == -1:
@@ -1129,7 +1155,7 @@ func _select_ko():
 		if int(h["s"]["hp"]) <= 0:
 			dead.append(h)
 	if dead.is_empty():
-		show_message("Niemand is bewusteloos.")
+		show_message("Nobody is knocked out.")
 		await _wait(MESSAGE_TIME)
 		return null
 	_set_state("target_ally")

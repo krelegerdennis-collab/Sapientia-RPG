@@ -28,6 +28,7 @@ Crt="*res://scripts/ui/crt_overlay.gd"
 Settings="*res://scripts/settings.gd"
 AudioManager="*res://scripts/audio_manager.gd"
 SessieLog="*res://scripts/core/sessie_log.gd"
+AppLifecycle="*res://scripts/core/app_lifecycle.gd"
 
 [display]
 

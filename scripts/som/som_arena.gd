@@ -27,6 +27,9 @@ signal spell_released(spell_id: String, caster_id: String)
 signal ring_opened
 signal ring_closed
 signal action_resolved(text: String)
+## Begin van elke vaste stap (vóór input en AI). Voor bots/AI-stoelen en tests: input die hier wordt gezet,
+## verbruikt dezelfde stap.
+signal sim_ticked(tick: int)
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
@@ -128,14 +131,10 @@ func setup(p_room: Node) -> void:
 	player = room.player
 	name = "SomArena"
 	_ensure_actions()
-	for id in SomData.SHEETS:
-		var path := str(SomData.SHEETS[id])
-		if id == "dennis":
-			path = dax_sheet_path()
-		if ResourceLoader.exists(path):
-			sheets[id] = load(path)
-	for id in SomData.ATTACK_ANIMS:
-		var sheet := str(SomData.ATTACK_ANIMS[id].get("sheet", ""))
+	# Geheugen: alleen de sheets van de party (en de reserve) vooraf; andere helden (bv. een co-op-peer) via sheet_for().
+	for id in _held_ids_nodig():
+		_laad_sheet(id)
+		var sheet := str(SomData.ATTACK_ANIMS.get(id, {}).get("sheet", ""))
 		if sheet != "" and ResourceLoader.exists(sheet):
 			attack_texs[id] = load(sheet)
 	# leider-behoud: de held die je met SWAP koos (GameState.leader_id), terugval Dax bij KO / niet in de party
@@ -220,7 +219,27 @@ func pose_tex(id: String, kind: String) -> Texture2D:
 
 
 func sheet_for(id: String) -> Texture2D:
+	if not sheets.has(id) and room != null and SomData.SHEETS.has(id):
+		_laad_sheet(id)
 	return sheets.get(id, null)
+
+
+## Held-id's waarvan deze arena kaart- en aanvalssheets nodig heeft: party + reserve, altijd Dax.
+func _held_ids_nodig() -> Array[String]:
+	var ids: Array[String] = ["dennis"]
+	for h in GameState.party + GameState.party_bench:
+		var id := str(h.get("id", ""))
+		if id != "" and SomData.SHEETS.has(id) and not ids.has(id):
+			ids.append(id)
+	return ids
+
+
+func _laad_sheet(id: String) -> void:
+	var path := str(SomData.SHEETS.get(id, ""))
+	if id == "dennis":
+		path = dax_sheet_path()
+	if path != "" and ResourceLoader.exists(path):
+		sheets[id] = load(path)
 
 
 func _apply_player_sheet() -> void:
@@ -340,6 +359,8 @@ func switch_hero(to := "") -> String:
 	var a := ally_of(nxt)
 	if a == null:
 		return ""
+	if a.in_wall():
+		a._teleport()      # anders belandt de bestuurde held in de muur en kan hij niet meer lopen
 	var old := active_id
 	var p_pos: Vector2 = player.position
 	var p_face: Vector2i = player.facing
@@ -386,6 +407,29 @@ func active() -> bool:
 	return not down and room != null and room.monsters_active() and not ring.is_open
 
 
+## --- vaste simulatiestap (roadmap stap 3, COMBAT_DESIGN.md §16) ---
+## De gevechtslogica (meters, iframes, wachtrij, bondgenoten, vijand-AI) loopt in vaste stappen van 1/60 s,
+## los van de framerate. _process leest alleen input (per frame, zoals voorheen) en tekent; advance() zet
+## frametijd om in stappen. Bij 60 fps is dat precies één stap per frame, dus gelijk aan het oude gedrag.
+const CombatSim := preload("res://scripts/som/combat_sim.gd")
+const TICK_HZ := CombatSim.TICK_HZ
+const TICK_DT := CombatSim.TICK_DT
+## Plafond per frame (geen "spiral of death" na een hapering); de rest van de achterstand vervalt.
+const MAX_TICKS_PER_FRAME := CombatSim.MAX_TICKS_PER_FRAME
+## Pure klok (stap 3b). sim_tick/_tick_acc blijven als namen voor tests en HUD.
+var clock := CombatSim.new()
+var sim_tick: int:
+	get:
+		return clock.tick
+var _tick_acc: float:
+	get:
+		return clock.acc
+## Animaties waarvan de arena de tijd stuurt (treffer/vrijgave op de vaste stap, niet op frametijd).
+var _sim_anims: Array = []
+## Input van dit frame, verbruikt door de eerstvolgende stap (zelfde volgorde als voorheen).
+var _pending := {"switch": false, "attack": false, "cast": false}
+
+
 func _process(delta: float) -> void:
 	if room == null or GameState.party.is_empty():
 		return
@@ -399,36 +443,94 @@ func _process(delta: float) -> void:
 		open_ring()
 		return
 	if not active():
+		_pending = {"switch": false, "attack": false, "cast": false}
+		if target_lock:
+			target_lock.tick(delta)      # wist alleen de markers (arena niet actief)
 		return
-	if target_lock:
-		target_lock.tick(delta)
-	swing_lock = maxf(0.0, swing_lock - delta)
-	if swing_lock <= 0.0 or not SomData.CHARGE_AFTER_ANIM:
-		charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
-	for k in iframes.keys():
-		iframes[k] = maxf(0.0, float(iframes[k]) - delta)
 	if Input.is_action_just_pressed(SWITCH_ACTION) and not coop_mode:
-		switch_hero()
-	b_cast_cd = maxf(0.0, b_cast_cd - delta)
+		_pending["switch"] = true
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
 			and not _attack_suppressed():
-		attack()
+		_pending["attack"] = true
 	if Input.is_action_just_pressed("cancel") and Engine.get_process_frames() != ring.closed_frame:
+		_pending["cast"] = true
+	advance(delta)
+
+
+## Frametijd -> vaste stappen. Geeft het aantal gedraaide stappen (tests: --combattick).
+func advance(delta: float) -> int:
+	var n := clock.frames_to_ticks(delta)
+	for i in n:
+		sim_step()
+	return n
+
+
+## Eén stap van 1/60 s. Zelfde volgorde als het oude _process.
+func sim_step() -> void:
+	var dt := TICK_DT
+	clock.tick += 1
+	sim_ticked.emit(clock.tick)
+	if target_lock:
+		target_lock.tick(dt)
+	swing_lock = maxf(0.0, swing_lock - dt)
+	charge = CombatSim.charge_after(charge, swing_lock, SomData.CHARGE_AFTER_ANIM, SomData.CHARGE_TIME, dt)
+	CombatSim.tick_down(iframes, dt)
+	if _pending["switch"]:
+		_pending["switch"] = false
+		switch_hero()
+	b_cast_cd = maxf(0.0, b_cast_cd - dt)
+	if _pending["attack"]:
+		_pending["attack"] = false
+		attack()
+	if _pending["cast"]:
+		_pending["cast"] = false
 		quick_cast()
 	if not queued.is_empty():
-		_queue_t -= delta
+		_queue_t -= dt
 		if _queue_t <= 0.0:
 			var q := queued
 			queued = {}
 			resolve(q)
 	if allies_enabled:
 		for a in allies:
-			a.tick(delta)
+			a.tick(dt)
 	for m in enemies.keys():
 		if is_instance_valid(m):
-			_enemy_ai(m, delta)
+			_enemy_ai(m, dt)
 		else:
 			enemies.erase(m)
+	_sim_world(dt)
+
+
+## Wereld op de vaste stap: tegelbeweging van de vijanden (MapMonster.sim_move) en de arena-animaties
+## (SomFx.Anim.step: treffer- en vrijgaveframe). Ook voor de co-op-host (coop_host_step).
+func _sim_world(dt: float) -> void:
+	for m in enemies.keys():
+		if is_instance_valid(m) and m.has_method("sim_move"):
+			m.sim_driven = true
+			if m.is_processing():        # pose/defeat zet set_process(false) = staat stil (zoals voorheen)
+				m.sim_move(dt)
+	var keep: Array = []
+	for a in _sim_anims:
+		if is_instance_valid(a) and not a.is_queued_for_deletion():
+			a.step(dt)
+			if is_instance_valid(a) and not a.is_queued_for_deletion():
+				keep.append(a)
+	_sim_anims = keep
+
+
+## Animatie op de vaste stap zetten (geen eigen _process-tijd meer).
+func _drive(anim: Node) -> Node:
+	if anim != null and "sim_driven" in anim:
+		anim.sim_driven = true
+		_sim_anims.append(anim)
+	return anim
+
+
+## Tests/sim: n stappen zonder frametijd.
+func step_ticks(n: int) -> void:
+	for i in n:
+		sim_step()
 
 
 ## B: de bestuurde held tovert zijn snelspreuk (SomData.B_MAGIC; alleen Seren/Vesper). Geeft de melding
@@ -496,8 +598,13 @@ func anim_seconds(id: String) -> float:
 ## pas op het hit-frame (SomFx.Anim 'hit'); dan geeft dit -1 terug en volgt swing_landed. Zonder art: meteen.
 func _swing(id: String, n: Node2D, mult: float) -> int:
 	if attack_texs.has(id):
-		var anim: Node = SomFx.attack_anim(n, attack_texs[id], SomData.ATTACK_ANIMS[id])
-		anim.hit.connect(func() -> void: _land(id, n, mult), CONNECT_ONE_SHOT)
+		var anim: Node = _drive(SomFx.attack_anim(n, attack_texs[id], SomData.ATTACK_ANIMS[id]))
+		# bondgenoot: de slag gaat de kant op waar hij begon (zijn AI kan tijdens de animatie al draaien)
+		var face0: Vector2i = n.facing
+		anim.hit.connect(func() -> void:
+			if id != active_id and is_instance_valid(n):
+				n.facing = face0
+			_land(id, n, mult), CONNECT_ONE_SHOT)
 		return -1
 	return _land(id, n, mult)
 
@@ -1055,10 +1162,10 @@ func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
 	match cast_kind(caster_id):
 		"map":
 			var mc: Dictionary = SomData.MAP_CAST[caster_id]
-			var anim0: Node = SomFx.map_cast_anim(n, SomFx.tex(str(mc["sheet"])), SomFx.tex(str(mc.get("fx", ""))), circle)
+			var anim0: Node = _drive(SomFx.map_cast_anim(n, SomFx.tex(str(mc["sheet"])), SomFx.tex(str(mc.get("fx", ""))), circle))
 			anim0.hit.connect(done, CONNECT_ONE_SHOT)
 		"cast6":
-			var anim: Node = SomFx.cast6_anim(n, pose_tex(caster_id, "cast"), circle)
+			var anim: Node = _drive(SomFx.cast6_anim(n, pose_tex(caster_id, "cast"), circle))
 			anim.hit.connect(done, CONNECT_ONE_SHOT)
 		_:
 			done.call()
@@ -1499,6 +1606,7 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 			_enemy_ai(m, dt)
 		else:
 			enemies.erase(m)
+	_sim_world(dt)
 	_rebuild_enemy_order()
 
 

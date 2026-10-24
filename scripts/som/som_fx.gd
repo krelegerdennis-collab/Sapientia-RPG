@@ -368,6 +368,8 @@ class Anim extends Sprite2D:
 	var _done := false
 	## Lus (castcirkel): na het laatste frame weer van voren.
 	var loop := false
+	## true = SomArena stuurt de tijd via step() op de vaste 60 Hz-stap (treffer niet op frametijd).
+	var sim_driven := false
 
 	func _ready() -> void:
 		frame = int(seq[0])
@@ -390,6 +392,10 @@ class Anim extends Sprite2D:
 		return t
 
 	func _process(delta: float) -> void:
+		if not sim_driven:
+			step(delta)
+
+	func step(delta: float) -> void:
 		elapsed_ms += delta * 1000.0
 		while index < seq.size() - 1 and elapsed_ms >= start_of(index + 1):
 			index += 1
