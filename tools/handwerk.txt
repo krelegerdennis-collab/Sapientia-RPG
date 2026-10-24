@@ -6,12 +6,10 @@ assets/sprites/battle/dennis.png
 assets/sprites/battle/dennis_rug.png
 assets/sprites/battle/noor.png
 assets/sprites/battle/lotte.png
-assets/sprites/enemies/kennis_beest.png
 assets/sprites/enemies/papiergeest.png
 assets/sprites/enemies/glitchmot.png
 assets/tiles/dorp.png
 assets/tiles/huis.png
-assets/tiles/wereld.png
 assets/sprites/player.png
 assets/sprites/npc.png
 assets/sprites/sign.png
@@ -81,12 +79,8 @@ assets/map_monsters/mech_wachter.png
 #        wachter_verslagen.png (64x40, overzicht/combinatie van RPG ART)
 assets/characters/wachter_liggend.png
 assets/characters/wachter_knielend.png
-assets/characters/wachter_verslagen.png
 # v0.13: Golem (baas, enemy-id kennis_beest) van RPG ART (art_golem_v14/out): still 156x182,
 #        idle-strook 4 frames (624x182, kern pulseert) en raak-plaatje 156x182 (zelfde anker)
-assets/sprites/enemies/golem_boss.png
-assets/sprites/enemies/golem_boss_idle.png
-assets/sprites/enemies/golem_boss_hit.png
 # v0.13: buiten-art van RPG ART (art_buiten_v14/out, lijst in docs/BUITEN_TILES.txt); vervangt in
 #        build_maps.gd de oude assets/sprites/story/{archief,zegel,kist,put}.png (die blijven bestaan):
 #        archief_ingang.png (2 frames 48x32: dicht/open, 3x2 tiles), archief_ingang_open_flikker.png
@@ -94,7 +88,6 @@ assets/sprites/enemies/golem_boss_hit.png
 #        kist.png (2 frames 16x16 dicht/open), put.png (32x32, 2x2 tiles), ruine.png (10 stukken 16x16)
 assets/sprites/buiten/archief_ingang.png
 assets/sprites/buiten/archief_ingang_open_flikker.png
-assets/sprites/buiten/zegelsteen.png
 assets/sprites/buiten/kist.png
 assets/sprites/buiten/put.png
 assets/sprites/buiten/ruine.png
@@ -127,7 +120,6 @@ assets/puzzle/drukplaat_rune.png
 assets/puzzle/kast_vast.png
 #        schatkist_3frames.png -> assets/sprites/dungeon/schatkist.png; schatkist.png -> schatkist_2frames.png
 assets/sprites/dungeon/schatkist.png
-assets/sprites/dungeon/schatkist_2frames.png
 #        losse stukken: onderrand_doorgang (16x16), staande_kast (2x 16x32), kandelaar (2 frames 16x32),
 #        leestafel (32x16), golemdeur (2 frames 32x32: dicht/open)
 assets/sprites/dungeon/onderrand_doorgang.png
@@ -195,10 +187,6 @@ assets/sprites/enemies/wortelkoning_hit.png
 # v0.17 Donker Woud van RPG ART (art_woud_v17/out): tegelset 256x112 (0-64 = dungeon_tiles_v14-nummering,
 #        65-111 bostegels, zie docs/WOUD_TILES.txt), 256x80-versie op het oude slot, gevechtsachtergrond
 #        (woud_achtergrond.png, 1280x432), Noor in de wortelcocon (dicht / puls 2 frames / open), anker (16,47)
-assets/tiles/dungeon/woud_tiles.png
-assets/tiles/dungeon/donker_woud_tiles.png
-assets/tiles/dungeon/woud_tiles_v8.png
-assets/tiles/dungeon/woud_tiles_v9.png
 assets/battle/donker_woud.png
 assets/sprites/woud/noor_cocon.png
 assets/sprites/woud/noor_cocon_open.png
@@ -227,7 +215,6 @@ assets/sprites/enemies/inktwurm.png
 assets/sprites/enemies/inktwurm_rug.png
 assets/sprites/enemies/inktwurm_idle.png
 assets/map_monsters/inktwurm.png
-assets/puzzle/inktwurm_kast.png
 # v0.20: RPG ART's Inktwurm (art_inktwurm_v19/out, gevecht/rug 108x86 voet (54,80), idle 216x86 = 2 frames,
 #        kaart 32x64) staat weer op de bestanden hierboven. De geheime kast gebruikt nu RPG ART's geheimkast
 #        (art_geheimkast_v19/out): geheimkast_2hoog.png 32x32 = 2 frames 16x32 (dicht | open) en
@@ -306,8 +293,6 @@ assets/sprites/archief2/plaat_scheut.png
 assets/sprites/archief2/plaat_volgroeid.png
 assets/puzzle/groei_plaat.png
 assets/tiles/dungeon/kas_tiles.png
-assets/tiles/dungeon/kas_bibliotheek.png
-assets/tiles/dungeon/archief2_kas_tiles.png
 assets/sprites/buiten/kas_ingang.png
 assets/sprites/enemies/de_rechter.png
 assets/sprites/enemies/de_rechter_rug.png
@@ -368,18 +353,10 @@ assets/tiles/dungeon/grot_kamers.png
 # v0.21: World Warper van RPG ART (art_batch5_v21 + art_batch6_v21/out). Grijs = Archief 1 (zonder achtervoegsel),
 #        <naam>_<accent>.png = groen/oranje/roze/blauw/rood (Archief 2-6), gekozen in world_warper/art/accent.gd.
 assets/sprites/archief2/echo.png
-assets/sprites/archief2/echo_blauw.png
 assets/sprites/archief2/echo_groen.png
-assets/sprites/archief2/echo_oranje.png
-assets/sprites/archief2/echo_rood.png
-assets/sprites/archief2/echo_roze.png
 assets/sprites/archief2/sapientia_glitch.png
 assets/sprites/archief2/world_warper.png
-assets/sprites/archief2/world_warper_blauw.png
 assets/sprites/archief2/world_warper_groen.png
-assets/sprites/archief2/world_warper_oranje.png
-assets/sprites/archief2/world_warper_rood.png
-assets/sprites/archief2/world_warper_roze.png
 world_warper/art/bord_hal.png
 world_warper/art/bord_hal_blauw.png
 world_warper/art/bord_hal_groen.png
@@ -516,7 +493,6 @@ world_warper/art/warp_icoon_wm2_dicht.png
 world_warper/art/warp_icoon_wm3.png
 world_warper/art/warp_icoon_wm3_dicht.png
 assets/ui/battlehud/balk_rand.png
-assets/ui/battlehud/boekstrook.png
 assets/ui/battlehud/hp_druppels.png
 assets/ui/battlehud/icoon_druppel.png
 assets/ui/battlehud/icoon_hart.png
@@ -649,7 +625,6 @@ assets/sprites/buiten/bouw_werker_c.png
 assets/tilesets/som/wachtershuis/grond_v8.png
 # 20 okt 2026: proloog-erfprops v8 van RPG ART (wilgendal.tscn); oude bestanden blijven (huis.png ook in dorp_wilgendal/esdoorn)
 assets/tiles/huis_v8.png
-assets/tiles/vijver_v8_teal.png
 assets/sprites/buiten/kist_v8.png
 assets/sprites/buiten/ruine_v8.png
 assets/sprites/buiten/archief_ingang_v8.png
@@ -711,11 +686,8 @@ assets/sprites/buiten/wilgendal/plein10/bloembed_10.png
 assets/sprites/buiten/wilgendal/plein10/bloembed_10_schaduw.png
 assets/sprites/buiten/wilgendal/plein10/bloembed_b_10.png
 assets/sprites/buiten/wilgendal/plein10/bloembed_b_10_schaduw.png
-assets/sprites/buiten/wilgendal/plein10/bloembed_c_10.png
-assets/sprites/buiten/wilgendal/plein10/bloembed_c_10_schaduw.png
 assets/sprites/buiten/wilgendal/plein10/bloemstrook_13.png
 assets/sprites/buiten/wilgendal/plein10/bloemstrook_b_13.png
-assets/sprites/buiten/wilgendal/plein10/bos_dak_13.png
 assets/sprites/buiten/wilgendal/plein10/dorpeling_blauw.png
 assets/sprites/buiten/wilgendal/plein10/dorpeling_groen.png
 assets/sprites/buiten/wilgendal/plein10/dorpeling_kind.png
@@ -729,8 +701,6 @@ assets/sprites/buiten/wilgendal/plein10/kar_10.png
 assets/sprites/buiten/wilgendal/plein10/kar_10_schaduw.png
 assets/sprites/buiten/wilgendal/plein10/krat_10.png
 assets/sprites/buiten/wilgendal/plein10/krat_10_schaduw.png
-assets/sprites/buiten/wilgendal/plein10/krat_klein_10.png
-assets/sprites/buiten/wilgendal/plein10/krat_klein_10_schaduw.png
 assets/sprites/buiten/wilgendal/plein10/lantaarnpaal_flikker_4f.png
 assets/sprites/buiten/wilgendal/plein10/plein_grond_tileset.png
 assets/sprites/buiten/wilgendal/plein10/rook_4f.png
