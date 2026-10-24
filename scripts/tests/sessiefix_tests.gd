@@ -81,6 +81,7 @@ func _run() -> void:
 	await _pingpong()
 	await _log()
 	print("SESSIEFIXTEST %d PASS, %d FAIL" % [passes, failures])
+	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures else 0)
 
 
