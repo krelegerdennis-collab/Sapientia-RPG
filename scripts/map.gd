@@ -346,6 +346,8 @@ func _use_exit(exit: Node) -> void:
 		return
 	if "event" in exit and exit.event != "" and Story.trigger(exit.event, exit):
 		return
+	if Story.exit_gate(scene_file_path, str(exit.name)):
+		return
 	# v0.13: doel-scène bestaat (nog) niet maar er is tekst -> alleen het bericht
 	# (bv. 'Wilgendal (komt later)' tot scenes/maps/dorp_wilgendal.tscn er is)
 	if exit.target_map != "" and not exit.lines.is_empty() and not ResourceLoader.exists(exit.target_map):

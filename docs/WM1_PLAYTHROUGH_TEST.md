@@ -12,7 +12,7 @@ GODOT=... .github/scripts/run_suite.sh wm1playthroughtest --menu-only
 ```
 
 Script: `scripts/tests/wm1_playthrough_tests.gd`. Registratie: één regel in `scripts/game_state.gd` (`_ready()`).
-Duur lokaal ongeveer 8 minuten (echte loop-, fade-, tekst- en gevechtstijden; `--speed=2` zet `Engine.time_scale` hoger en wint
+Duur lokaal ongeveer 10 minuten (echte loop-, fade-, tekst- en gevechtstijden; `--speed=2` zet `Engine.time_scale` hoger en wint
 maar ongeveer 10%). `run_suite.sh` geeft 20 minuten.
 
 ## Het pad
@@ -24,12 +24,12 @@ maar ongeveer 10%). `run_suite.sh` geeft 20 minuten.
 | 2 | Archief 1 | poorten dicht voor de Golem, 12 kamers echt lopen (BFS-pad met toetsen), puzzelkamer oplossen, Golem eerst verliezen (checkpoint) en dan winnen, uitgang-warper |
 | 3 | Esdoorn + Donker Woud | ontmoeting, herberg, opslagboek, Vesper-huis, 5 woudkamers, Wortelkoning, Vesper sluit aan, `menu_sweep` |
 | 4 | Het Zingende Graan | opdracht, zaad (gevecht), molen met opslaan |
-| 5 | Kas direct | wereldkaart -> kas -> Kasgang en terug |
+| 5 | Kas direct | na Vesper: wereldkaart -> kas -> Kasgang en terug (voor Vesper dicht, zie stap 2/3 en 10) |
 | 6 | Berggrot | bouwplaats (dicht zonder Vesper, open met), 5 kamers waarvan 2 puzzelkamers |
 | 7 | Archief 2 | platen, Seren (verlies = verhaal, ze sluit aan), Strangler, Mender, kern-absorptie, filmpje, canon-scène 1 |
 | 8 | Hub = einde WM1 | Hal, canon-scènes 2 en 3, veldmenu-sweep, opslaan, app gedood en doorgaan |
 | 9 | Action-stijl | de standaardstijl van een nieuw spel in een dungeon: pauze, opslaan/laden, lopen |
-| 10 | Volgordebreuk | direct na de Golem de kas in (zonder Vesper en berggrot) tot en met de hub |
+| 10 | Volgordebreuk | direct na de Golem blijft de kas dicht tot Vesper in de groep zit (hint, geen softlock); daarna Esdoorn, Woud, Vesper en de kas direct (zonder berggrot) tot en met de hub |
 
 ## Opslaan en pauze
 

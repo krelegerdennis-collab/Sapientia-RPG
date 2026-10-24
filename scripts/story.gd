@@ -122,6 +122,16 @@ func menu_closed() -> bool:
 	return false
 
 
+## Tweede voorwaarde van een uitgang (SD.EXIT_GATES). true = de uitgang blijft dicht en het event loopt.
+func exit_gate(map_path: String, exit_name: String) -> bool:
+	for g in SD.EXIT_GATES:
+		if str(g["map"]) == map_path and str(g["exit"]) == exit_name and check(g.get("if", {})):
+			if not running:
+				run(str(g["event"]))
+			return true
+	return false
+
+
 func _sub(v, arg: String):
 	if v is String:
 		return v.replace("{arg}", arg)

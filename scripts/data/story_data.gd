@@ -146,6 +146,13 @@ const TINT_RULES := [
 	{"if": {"step_ge": NACHT, "step_lt": KLAAR}, "tint": "night"},
 ]
 
+## Uitgangen met een tweede voorwaarde NA hun eigen event (map.gd _use_exit -> Story.exit_gate): is "if"
+## waar, dan loopt "event" en gaat de uitgang niet open. De kas: open na de Golem (event naar_leven) en
+## pas als Vesper in de groep zit (besluit Dennis, 24 okt 2026).
+const EXIT_GATES := [
+	{"map": "res://scenes/maps/wereldkaart.tscn", "exit": "NaarKas", "if": {"not_flags": ["noor_lid"]}, "event": "kas_wacht"},
+]
+
 ## Wat er gebeurt als je een map binnenkomt (in volgorde; alle passende worden gedaan).
 const MAP_ENTER := [
 	{"map": "huis", "if": {"step": AVOND}, "event": "catastrofe"},
@@ -443,6 +450,7 @@ const EVENTS := {
 	],
 	# TODO(verhaal): de kas gaat open op de bestaande golem-vlag van het Eerste Archief.
 	# Waarom die kern op een tweede signaal reageert, staat nog open. Geen nieuwe beat.
+	# Besluit Dennis (24 okt 2026): de kas blijft ook dicht tot Vesper in de groep zit (EXIT_GATES, kas_wacht).
 	"naar_leven": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
 			["say", "", ["An overgrown greenhouse. The vines are sealed shut.", "Clear the First Archive first."]],
@@ -450,6 +458,12 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+
+	# Tweede slot op de kas: Golem verslagen, maar Vesper nog niet in de groep.
+	"kas_wacht": [{"do": [
+		["say", "", ["The greenhouse doors will not budge.", "Pink sparks flicker behind the glass. Someone in Mapleton may know why."]],
+		["walk", "player", "down", 1],
+	]}],
 
 	# Bouwplaats voor de berggrot-tunnel. Dicht tot noor_lid (Noor in de party).
 	"bouwplaats_voorman": [

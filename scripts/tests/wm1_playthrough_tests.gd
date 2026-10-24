@@ -592,7 +592,7 @@ func quiet_room(s: Node) -> void:
 # ---------------------------------------------------------------- opslaan en laden
 func norm(d: Dictionary) -> String:
 	var c := d.duplicate(true)
-	for k in ["play_time", "saved_at", "saved_unix", "game_version"]:
+	for k in ["play_time", "saved_at", "saved_unix", "game_version", "inktwurm_codex_sync"]:
 		c.erase(k)
 	return JSON.stringify(JSON.parse_string(JSON.stringify(c)), "", true)
 
@@ -602,12 +602,12 @@ func diff_keys(a: Dictionary, b: Dictionary) -> Array:
 	var ja = JSON.parse_string(JSON.stringify(a))
 	var jb = JSON.parse_string(JSON.stringify(b))
 	for k in ja:
-		if str(k) in ["play_time", "saved_at", "saved_unix", "game_version"]:
+		if str(k) in ["play_time", "saved_at", "saved_unix", "game_version", "inktwurm_codex_sync"]:
 			continue
 		if JSON.stringify(ja[k], "", true) != JSON.stringify(jb.get(k), "", true):
 			out.append(k)
 	for k in jb:
-		if not ja.has(k) and not (str(k) in ["play_time", "saved_at", "saved_unix", "game_version"]):
+		if not ja.has(k) and not (str(k) in ["play_time", "saved_at", "saved_unix", "game_version", "inktwurm_codex_sync"]):
 			out.append(k)
 	return out
 
@@ -900,7 +900,7 @@ func room_data_audit() -> void:
 					elif DungeonRooms.EXIT_CHARS.has(ch):
 						keys[DungeonRooms.EXIT_CHARS[ch]] = true
 			for k in keys:
-				if exits.get(k, {}).is_empty() and (room.get("decor_exits", []) as Array).has(k):
+				if exits.get(k, {}).is_empty() and (room.get("decor_uitgangen", []) as Array).has(k):
 					continue
 				if exits.get(k, {}).is_empty():
 					bad.append("%s: uitgang '%s' heeft geen doel in \"exits\"" % [id, k])
@@ -1358,9 +1358,38 @@ func enter_door(door_name: String, expect_path: String) -> bool:
 	return ok
 
 
+## Besluit Dennis (24 okt 2026): de kas blijft ook na de Golem dicht tot Vesper in de groep zit. Dicht =
+## kort bericht, speler terug van de uitgang en gewoon verder te lopen (geen softlock).
+func check_kas_blocked(label: String) -> void:
+	var n0 := Story.history.filter(func(e): return e == "kas_wacht").size()
+	check("[STATE] %s: Vesper is nog niet in de groep" % label, not Story.has_flag("noor_lid") and not GameState.has_member("noor"))
+	check("[STATE] %s: de Golem is wel verslagen" % label, Story.has_flag(SD.GOLEM_FLAG))
+	await use_exit("NaarKas")
+	await settle("kas wacht op Vesper (%s)" % label, 45.0, true, 0.6)
+	check("[BLOCKER] %s: kas dicht zonder Vesper (blijft op de wereldkaart)" % label, scene().scene_file_path == WORLD)
+	check("[STATE] %s: hint 'kas_wacht' gespeeld" % label, Story.history.filter(func(e): return e == "kas_wacht").size() == n0 + 1)
+	var e: Node = scene().get_node("Exits/NaarKas")
+	check("[SOFTLOCK] %s: speler staat niet meer op de kas-uitgang en is vrij" % label,
+			not (e.tile_rect() as Rect2i).has_point(tile()) and not player().input_locked and not Dialog.is_open and not Story.running)
+	var s := scene()
+	var blocked := blocked_tiles(s)
+	var moved := false
+	for d in DIRS:
+		var n: Vector2i = tile() + d
+		var on_exit := false
+		for ex in s.get_node("Exits").get_children():
+			if ex.has_method("tile_rect") and (ex.tile_rect() as Rect2i).has_point(n):
+				on_exit = true
+		if is_free_tile(s, n, blocked) and not on_exit:
+			moved = await step_dir(d)
+			break
+	check("[SOFTLOCK] %s: na de dichte kas kan de speler gewoon verder lopen" % label, moved)
+
+
 func stage_esdoorn_woud() -> void:
 	print("=== 3 Esdoorn en Donker Woud ===")
 	# de poorten die nu nog dicht horen te zijn
+	await check_kas_blocked("na de Golem")
 	await use_exit("NaarWoud")
 	await settle("woud nog dicht", 45.0, true, 0.5)
 	check("[BLOCKER] Donker Woud dicht zonder opdracht (blijft op de wereldkaart)", scene().scene_file_path == WORLD)
@@ -1684,14 +1713,15 @@ func stage_action_mode() -> void:
 
 
 # ---------------------------------------------------------------- 10 volgordebreuk
-## De kas gaat open op de Golem-vlag alleen (naar_leven): wie direct na Archief 1 de kas in gaat, slaat
-## Esdoorn, het Woud en de berggrot over. Dat moet tot en met de hub werken (ook zonder Vesper).
+## Besluit Dennis (24 okt 2026): de kas gaat pas open als Vesper in de groep zit. Wie direct na de Golem
+## naar de kas loopt, wordt tegengehouden (hint, geen softlock), speelt Esdoorn en het Woud zoals bedoeld,
+## en gaat daarna rechtstreeks de kas in (zonder de berggrot) tot en met de hub.
 func stage_sequence_break() -> void:
-	print("=== 10 volgordebreuk: direct na de Golem de kas in, zonder Vesper ===")
+	print("=== 10 volgordebreuk: direct na de Golem de kas in (dicht), daarna via Vesper de kas direct ===")
 	if _snap_after_golem.is_empty():
 		check("[BLOCKER] geen save van na de Golem om de volgordebreuk mee te spelen", false)
 		return
-	_variant = "_zonder_vesper"
+	_variant = "_kas_direct"
 	var f := FileAccess.open(GameState.slot_path(4), FileAccess.WRITE)
 	f.store_buffer(_snap_after_golem)
 	f.close()
@@ -1705,9 +1735,12 @@ func stage_sequence_break() -> void:
 	check("[SAVE] save van na de Golem laadt", ok and await wait_path(GOLEMHAL))
 	await settle("volgordebreuk: start", 45.0, true, 0.8)
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
-	check("[STATE] volgordebreuk: Vesper is er niet bij", not GameState.has_member("noor") and not Story.has_flag("noor_lid"))
 	await use_warper("Golem-hal (volgordebreuk)")
-	check("kas direct na de Golem", await through("NaarKas", M + "leven_ingang.tscn"))
+	await check_kas_blocked("volgordebreuk: direct na de Golem")
+	# gewoon verder: Esdoorn, Woud, Vesper
+	await stage_esdoorn_woud()
+	check("[STATE] volgordebreuk: Vesper zit nu in de groep", GameState.has_member("noor") and Story.has_flag("noor_lid"))
+	check("kas direct (nu open)", await through("NaarKas", M + "leven_ingang.tscn"))
 	var route := exit_route(M + "leven_ingang.tscn", GENEZER)
 	check("[BLOCKER] route kas -> Mender bestaat zonder berggrot (%d kamers)" % route.size(), route.size() >= 8)
 	for i in range(1, route.size()):
