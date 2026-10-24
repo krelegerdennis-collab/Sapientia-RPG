@@ -602,6 +602,13 @@ func _run() -> void:
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
+	if "--test-wm1-stabiliteit" in OS.get_cmdline_user_args():
+		# Alleen de WM1-stabiliteitsregressies O-2/O-3 (scripts/tests/wm1_stabiliteit_autotest.gd); CI draait ze aan het eind mee.
+		check("titelscherm (wm1-stabiliteit)", await wait_scene("Title"))
+		await preload("res://scripts/tests/wm1_stabiliteit_autotest.gd").new(self).run()
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
+		get_tree().quit(1 if failures else 0)
+		return
 	if "--test-party-sprites" in OS.get_cmdline_user_args():
 		# Alleen de party-kaartsprites 24x32 (scripts/tests/party_sprites_autotest.gd); CI draait ze aan het eind mee.
 		check("titelscherm (party-sprites)", await wait_scene("Title"))
@@ -632,6 +639,8 @@ func _run() -> void:
 	await preload("res://scripts/tests/party_sprites_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/codex_tutorial_autotest.gd").new(self).run()
+	Engine.time_scale = 1.0
+	await preload("res://scripts/tests/wm1_stabiliteit_autotest.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
 

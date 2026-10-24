@@ -55,7 +55,7 @@ func raak(actie: String) -> void:
 	var nieuw := Archief2.volgende_staat(soort, staat, actie, magie)
 	if nieuw == staat:
 		if soort == "licht" and actie == "licht" and not magie and not Dialog.is_open:
-			Dialog.show_lines(["Alleen Seren's licht laat deze plaat groeien."])
+			Dialog.show_lines(["Only Seren's light makes this plate grow."])
 		return
 	pas_toe(nieuw)
 

@@ -368,6 +368,8 @@ func _build() -> void:
 		var tiles: Array = exit_cells[key]
 		var data: Dictionary = exits.get(key, {})
 		if data.is_empty():
+			if key in room.get("decor_uitgangen", []):
+				continue
 			push_error("Dungeonkamer '%s': uitgang '%s' heeft geen doel in \"exits\"" % [room_id, key])
 			continue
 		var r := Rect2i(tiles[0], Vector2i.ONE)
