@@ -30,15 +30,15 @@ func _ready() -> void:
 	rijen.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	rijen.add_theme_constant_override("separation", 8)
 	kolom.add_child(rijen)
-	_actief = _kolom(rijen, "Actief")
-	_bank = _kolom(rijen, "Bank")
+	_actief = _kolom(rijen, "Active")
+	_bank = _kolom(rijen, "Bench")
 	_status = _label("", 8)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.custom_minimum_size = Vector2(0, 20)
 	kolom.add_child(_status)
 	var terug := Button.new()
 	terug.text = "Back"
-	terug.custom_minimum_size = Vector2(0, 22)
+	terug.custom_minimum_size = Vector2(0, 26)   # 48dp (UiTouch.MIN_UNITS)
 	terug.add_theme_font_override("font", FONT)
 	terug.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 	terug.pressed.connect(_sluit)
@@ -68,17 +68,17 @@ func _vul() -> void:
 			var held := h as Dictionary
 			var naam := str(held.get("name", ""))
 			if PartyBench.is_dennis(held):
-				_actief.add_child(_knop(naam + " (blijft)", func() -> void: _zeg(PartyBench.DENNIS_BLIJFT)))
+				_actief.add_child(_knop(naam + " (stays)", func() -> void: _zeg(PartyBench.DENNIS_BLIJFT)))
 			elif PartyBench.is_codex_gast(held):
-				_actief.add_child(_knop(naam + " (gast)", func() -> void: _zeg(PartyBench.GAST_BLIJFT)))
+				_actief.add_child(_knop(naam + " (guest)", func() -> void: _zeg(PartyBench.GAST_BLIJFT)))
 			else:
-				_actief.add_child(_knop(naam + " → bank", _naar_bank.bind(i, pad)))
+				_actief.add_child(_knop(naam + " → bench", _naar_bank.bind(i, pad)))
 		i += 1
 	i = 0
 	for h in GameState.party_bench:
 		if h is Dictionary:
 			var held := h as Dictionary
-			_bank.add_child(_knop(str(held.get("name", "")) + " → groep", _naar_groep.bind(i, pad)))
+			_bank.add_child(_knop(str(held.get("name", "")) + " → party", _naar_groep.bind(i, pad)))
 		i += 1
 	if _bank.get_child_count() == 0:
 		_bank.add_child(_label("Nobody on the bench.", 8))
@@ -102,7 +102,7 @@ func _zeg(tekst: String) -> void:
 func _knop(tekst: String, actie: Callable) -> Button:
 	var knop := Button.new()
 	knop.text = tekst
-	knop.custom_minimum_size = Vector2(0, 18)
+	knop.custom_minimum_size = Vector2(0, 26)   # 48dp (UiTouch.MIN_UNITS)
 	knop.add_theme_font_override("font", FONT)
 	knop.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
 	knop.pressed.connect(actie)
