@@ -1,0 +1,34 @@
+# Voorbeeld voor Fly.io. Kopieer naar relay/fly.toml en kies een eigen app-naam.
+# Dit bestand deployt niets; zie relay/README.md voor de stappen.
+app = "sapientia-relay-CHANGE-ME"
+primary_region = "ams"
+
+[build]
+
+[env]
+  PORT = "8080"
+  # Fly zet de client-IP als rechtse hop in X-Forwarded-For (voor de limieten per IP).
+  TRUST_PROXY_HOPS = "1"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "connections"
+    soft_limit = 200
+    hard_limit = 250
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/healthz"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
