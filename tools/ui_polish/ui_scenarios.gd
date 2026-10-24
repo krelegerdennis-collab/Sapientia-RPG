@@ -274,6 +274,12 @@ func battle_back_to_cross() -> void:
 	await pframes(4)
 
 
+## Alleen als er een screenshotmap is (tests): zelfde als shot().
+func shot_if(file_name: String) -> void:
+	if shots_dir != "":
+		await shot(file_name)
+
+
 ## Screenshot van de huidige viewport, ~936 px breed (gevecht: al 2x fijn; rest 2x vergroot) (scherpe pixels). Geeft het pad terug.
 func shot(file_name: String) -> String:
 	if shots_dir == "":
