@@ -39,6 +39,7 @@ func run() -> void:
 	_o2_data()
 	await _o2_scene()
 	await _o3_camera()
+	await _o3_commandokruis()
 	Settings.set_value("battle_style", oude_stijl)
 	GameState.encounter_multiplier = oude_mult
 
@@ -172,6 +173,23 @@ func _o3_camera() -> void:
 	t.check("O-3: na Classic -> Action is de kamer opnieuw gebouwd met arena", nieuw != null and nieuw != room and nieuw.som != null)
 	t.check("O-3: de weggehaalde Classic-kamer kreeg geen camerabewerking meer", not lek)
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+
+
+## Zelfde fout aan de gevechtskant: het commandokruis (battle) plaatst zijn naamtabje via
+## get_viewport_rect, ook als het gevecht net uit de boom is.
+func _o3_commandokruis() -> void:
+	var kruis: Control = preload("res://scripts/battle/command_cross.gd").new()
+	t.get_tree().root.add_child(kruis)
+	var tab: Control = kruis.name_tab
+	var sentinel := Vector2(-999.0, -999.0)
+	tab.position = sentinel
+	kruis._place_name()
+	t.check("O-3: commandokruis in de boom plaatst zijn naamtabje", tab.position != sentinel)
+	t.get_tree().root.remove_child(kruis)
+	tab.position = sentinel
+	kruis._place_name()
+	t.check("O-3: commandokruis buiten de boom laat zijn naamtabje met rust", tab.position == sentinel)
+	kruis.free()
 
 
 func _grenzen(cam: Camera2D) -> Rect2i:
