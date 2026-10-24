@@ -192,6 +192,9 @@ func choose_command(index: int) -> void:
 			break
 		await get_tree().process_frame
 	await pframes(2)
+	if index == 4:
+		# Autotests verifiëren het vluchtpad, niet de willekeurige kans of een nederlaag.
+		b.flee_roll_override = 0.0
 	await cross_select(b, index)
 	await tap("interact")
 
@@ -959,9 +962,11 @@ func _encounter_and_battle_tests() -> void:
 	await check_bars(b, "start")
 	# idle-animatie: Noor (niet aan de beurt) ademt (wisselt tussen frame 8/0/9)
 	var seen_frames := {}
-	for i in 70:
+	var idle_wait := 0.0
+	while idle_wait < 1.0 and seen_frames.size() < 2:
 		seen_frames[b.hero_nodes[1]._sprite.frame] = true
 		await get_tree().process_frame
+		idle_wait += get_process_delta_time()
 	check("idle-animatie (ademen/cape/bol) bij Vesper: frames %s" % [seen_frames.keys()],
 			b.hero_nodes[1].has_idle_animation() and (seen_frames.has(8) or seen_frames.has(9)) and seen_frames.size() >= 2)
 	await battle_shot("_1_menu")
@@ -1324,6 +1329,7 @@ func _flee_test() -> void:
 	await tap("cancel")
 	check("B gaat terug naar de vorige held (Dax)", await wait_hero(0))
 	# Tik op 'Vluchten'
+	b.flee_roll_override = 0.0
 	await click_at(b.cross.buttons[4].get_global_rect().get_center())
 	await pframes(2)
 	check("tik op 'Vluchten' start de vluchtpoging",
