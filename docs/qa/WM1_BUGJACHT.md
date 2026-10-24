@@ -13,9 +13,9 @@ De nieuwe regressietests staan in de nieuwe suite `--wm1bugtest` (`scripts/tests
 | | |
 |---|---|
 | Gevonden en gefixt | 2 echte bugs (WM1-01, WM1-02), elk met regressietest |
-| Open | 4 punten (zie "Open"), geen daarvan blokkeert de voortgang |
+| Open | 5 punten (zie "Open"), geen daarvan blokkeert de voortgang |
 | Basislijn voor de fixes | 21 bestaande suites groen (1 timing-flake onder load, zie O-4) |
-| Na de fixes | alle 39 CI-suites + `wm1bugtest` groen, `warper-runner` groen, `algemene-sfx` groen |
+| Na de fixes en het samenvoegen met `main` (tot en met #224) | alle 49 CI-suites + `wm1bugtest` groen, `warper-runner` en `algemene-sfx` groen |
 
 ## Wat is geprobeerd
 
