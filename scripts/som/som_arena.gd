@@ -388,6 +388,20 @@ func active() -> bool:
 	return not down and room != null and room.monsters_active() and not ring.is_open
 
 
+## --- vaste simulatiestap (roadmap stap 3, COMBAT_DESIGN.md §16) ---
+## De gevechtslogica (meters, iframes, wachtrij, bondgenoten, vijand-AI) loopt in vaste stappen van 1/60 s,
+## los van de framerate. _process leest alleen input (per frame, zoals voorheen) en tekent; advance() zet
+## frametijd om in stappen. Bij 60 fps is dat precies één stap per frame, dus gelijk aan het oude gedrag.
+const TICK_HZ := 60
+const TICK_DT := 1.0 / float(TICK_HZ)
+## Plafond per frame (geen "spiral of death" na een hapering); de rest van de achterstand vervalt.
+const MAX_TICKS_PER_FRAME := 5
+var sim_tick := 0
+var _tick_acc := 0.0
+## Input van dit frame, verbruikt door de eerstvolgende stap (zelfde volgorde als voorheen).
+var _pending := {"switch": false, "attack": false, "cast": false}
+
+
 func _process(delta: float) -> void:
 	if room == null or GameState.party.is_empty():
 		return
@@ -401,36 +415,72 @@ func _process(delta: float) -> void:
 		open_ring()
 		return
 	if not active():
+		_pending = {"switch": false, "attack": false, "cast": false}
 		return
 	if target_lock:
 		target_lock.tick(delta)
-	swing_lock = maxf(0.0, swing_lock - delta)
-	if swing_lock <= 0.0 or not SomData.CHARGE_AFTER_ANIM:
-		charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
-	for k in iframes.keys():
-		iframes[k] = maxf(0.0, float(iframes[k]) - delta)
 	if Input.is_action_just_pressed(SWITCH_ACTION) and not coop_mode:
-		switch_hero()
-	b_cast_cd = maxf(0.0, b_cast_cd - delta)
+		_pending["switch"] = true
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
 			and not _attack_suppressed():
-		attack()
+		_pending["attack"] = true
 	if Input.is_action_just_pressed("cancel") and Engine.get_process_frames() != ring.closed_frame:
+		_pending["cast"] = true
+	advance(delta)
+
+
+## Frametijd -> vaste stappen. Geeft het aantal gedraaide stappen (tests: --combattick).
+func advance(delta: float) -> int:
+	_tick_acc += maxf(0.0, delta)
+	var n := 0
+	while _tick_acc >= TICK_DT - 0.000001 and n < MAX_TICKS_PER_FRAME:
+		_tick_acc -= TICK_DT
+		sim_step()
+		n += 1
+	if n == MAX_TICKS_PER_FRAME and _tick_acc >= TICK_DT:
+		_tick_acc = 0.0
+	return n
+
+
+## Eén stap van 1/60 s. Zelfde volgorde als het oude _process.
+func sim_step() -> void:
+	var dt := TICK_DT
+	sim_tick += 1
+	swing_lock = maxf(0.0, swing_lock - dt)
+	if swing_lock <= 0.0 or not SomData.CHARGE_AFTER_ANIM:
+		charge = minf(1.0, charge + dt / SomData.CHARGE_TIME)
+	for k in iframes.keys():
+		iframes[k] = maxf(0.0, float(iframes[k]) - dt)
+	if _pending["switch"]:
+		_pending["switch"] = false
+		switch_hero()
+	b_cast_cd = maxf(0.0, b_cast_cd - dt)
+	if _pending["attack"]:
+		_pending["attack"] = false
+		attack()
+	if _pending["cast"]:
+		_pending["cast"] = false
 		quick_cast()
 	if not queued.is_empty():
-		_queue_t -= delta
+		_queue_t -= dt
 		if _queue_t <= 0.0:
 			var q := queued
 			queued = {}
 			resolve(q)
 	if allies_enabled:
 		for a in allies:
-			a.tick(delta)
+			a.tick(dt)
 	for m in enemies.keys():
 		if is_instance_valid(m):
-			_enemy_ai(m, delta)
+			_enemy_ai(m, dt)
 		else:
 			enemies.erase(m)
+
+
+## Tests/sim: n stappen zonder frametijd.
+func step_ticks(n: int) -> void:
+	for i in n:
+		sim_step()
 
 
 ## B: de bestuurde held tovert zijn snelspreuk (SomData.B_MAGIC; alleen Seren/Vesper). Geeft de melding
