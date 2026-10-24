@@ -207,6 +207,11 @@ func _unreadable_slot_tests() -> void:
 	GameState.autosave(Vector2i(2, 2), Vector2i.DOWN, "achtergrond")
 	_write(GameState.slot_path(2), "{\"gold\":")
 	var good_auto := GameState.read_save(GameState.autosave_path)
+	# slot 1 oud (saved_unix ver in het verleden), zodat een kapot bestand met een nieuwe wijzigingstijd het 'wint' zonder de fix
+	var old_slot := GameState.read_save(GameState.slot_path(1))
+	old_slot["saved_unix"] = 100.0
+	_write(GameState.slot_path(1), JSON.stringify(old_slot))
+	_remove_file_if(GameState.slot_path(1) + ".bak")
 	_write(GameState.autosave_path, "")
 	check("onleesbare autosave (nieuwer dan slot 1) blokkeert 'Doorgaan' niet: newest = slot 1",
 			GameState.newest_save_path() == GameState.slot_path(1) and int(GameState.read_newest_save().get("gold", -1)) == 111)
