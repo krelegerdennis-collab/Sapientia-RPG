@@ -168,7 +168,6 @@ func _zeg(lines: Array, speaker: String) -> void:
 func _start_lotte(m: Node) -> void:
 	_touch_lock = true
 	last_touch_id = m.monster_id
-	var t := _prepare_battle(m.monster_id)
 	var pages: Array = []
 	for p in GameState.codex_pages:
 		if int(p.get("hp", 0)) > 0:
@@ -176,12 +175,11 @@ func _start_lotte(m: Node) -> void:
 	var keuze: Dictionary
 	if pages.is_empty():
 		keuze = Archief2.bondgenoot_voor([], GameState.member_level("dennis"))
+		# Geen await: het gevecht start meteen (zelfde pad als andere bazen); speler kan de regels nog lezen.
 		Dialog.show_lines(Archief2.GEEN_CODEX, "")
-		await Dialog.finished
 	elif pages.size() == 1:
 		keuze = Archief2.bondgenoot_voor(pages, GameState.member_level("dennis"))
 		Dialog.show_lines(["%s fights alongside you." % str(pages[0].get("name", "Monster"))], "")
-		await Dialog.finished
 	else:
 		var namen: Array = []
 		for p in pages:
@@ -193,4 +191,4 @@ func _start_lotte(m: Node) -> void:
 	Archief2.zet_bondgenoot(keuze)
 	GameState.pending_story_loss = true
 	GameState.archief2_party_filter = "dennis"
-	GameState.start_battle(m.group.duplicate(), t, player.facing, terrain_at(t), true, 0, true)
+	super.start_monster_battle(m)
