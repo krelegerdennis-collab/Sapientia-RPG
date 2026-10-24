@@ -723,8 +723,9 @@ func _archief_data_tests() -> void:
 	check("niveau 4: HP x2,3, ATK +10, DEF +7, EXP x3 (Mech. Warden %d/%d/%d/%d)" % [t4["max_hp"], t4["atk"], t4["def"], t4["exp"]],
 			t4["max_hp"] == GD.round_half_even(ms["max_hp"] * 2.3) and t4["atk"] == ms["atk"] + 10 and t4["def"] == ms["def"] + 7
 			and t4["exp"] == ms["exp"] * 3)
-	check("niveau 2: HP x1,5, ATK +4, DEF +3, EXP x2,5", t2["max_hp"] == GD.round_half_even(ms["max_hp"] * 1.5)
-			and t2["atk"] == ms["atk"] + 4 and t2["def"] == ms["def"] + 3 and t2["exp"] == GD.round_half_even(ms["exp"] * 2.5))
+	# power scaling v2: niveau 2 = ATK +9, DEF +3 (was +4 / +3)
+	check("niveau 2: HP x1,5, ATK +9, DEF +3, EXP x2,5", t2["max_hp"] == GD.round_half_even(ms["max_hp"] * 1.5)
+			and t2["atk"] == ms["atk"] + 9 and t2["def"] == ms["def"] + 3 and t2["exp"] == GD.round_half_even(ms["exp"] * 2.5))
 	check("niveau 0 = ongewijzigd; afronden half-even (12,5->12, 13,5->14)", GD.apply_tier(ms, 0) == ms
 			and GD.round_half_even(12.5) == 12 and GD.round_half_even(13.5) == 14)
 	check("wereldkaart-vijanden ongewijzigd (ENEMIES zelf niet aangepast)", int(GD.ENEMIES["mosslijm"]["max_hp"]) == int(GD.apply_tier(GD.ENEMIES["mosslijm"], 0)["max_hp"]))

@@ -477,6 +477,7 @@ func _ui2_tests() -> void:
 		if "vuur" in (h.get("spells", []) as Array):
 			caster = str(h["id"])
 			h["mp"] = h["max_mp"]
+			h["hp"] = maxi(int(h["hp"]), 1)       # power scaling v2: sterkere vijanden kunnen de caster eerder in de test neerleggen
 	var imp: Node = null
 	var e_feet: Array = []
 	if m and caster != "":
@@ -891,8 +892,10 @@ func _actionsim_tests() -> void:
 			and is_equal_approx(float(chosen["telegraph"]), SomData.TELEGRAPH))
 	var spam := p.duplicate()
 	spam["policy"] = "spam"
-	var rs: Dictionary = sim.run_iteration(spam, 6)
-	t.check("SoM-sim: spammen kost meer tijd per kamer (%.1f s vs %.1f s)" % [rs["time"], r1["time"]], rs["time"] > r1["time"])
+	# power scaling v2: met 6 gevechten per kamer was het verschil (~0,1 s) kleiner dan de ruis; 30 geeft een stabiele vergelijking
+	var rs: Dictionary = sim.run_iteration(spam, 30)
+	var rn: Dictionary = sim.run_iteration(p, 30)
+	t.check("SoM-sim: spammen kost meer tijd per kamer (%.1f s vs %.1f s)" % [rs["time"], rn["time"]], rs["time"] > rn["time"])
 	sim.queue_free()
 
 
