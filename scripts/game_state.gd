@@ -495,6 +495,7 @@ func _ready() -> void:
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
+			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
@@ -978,12 +979,12 @@ func defeated_count(id: String) -> int:
 # ---------------------------------------------------------------- opslaan / laden
 ## Is er een HANDMATIGE save (opslagboek of veldmenu)?
 func has_save() -> bool:
-	return FileAccess.file_exists(save_path)
+	return _save_file_exists(save_path)
 
 
 ## v0.11: is er een automatische save?
 func has_autosave() -> bool:
-	return FileAccess.file_exists(autosave_path)
+	return _save_file_exists(autosave_path)
 
 
 ## v0.11: handmatige save óf autosave aanwezig (titelscherm: 'Doorgaan' aan).
@@ -1019,22 +1020,24 @@ func slot_record(slot: int) -> Dictionary:
 	if slot == AUTOSAVE_SLOT:
 		return autosave_record()
 	var manual := slot_path(slot)
-	if manual == "" or not FileAccess.file_exists(manual):
+	if manual == "" or not _save_file_exists(manual):
 		return {}
 	var d := read_save(manual)
 	if d.is_empty():
-		return {}
+		return {"path": manual, "data": {}, "stamp": _save_modified_time(manual),
+				"slot": slot, "corrupt": true}
 	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot}
 
 
 ## De aparte autosave ({} = geen). Ook een oude autosave (v0.22, gestempeld met slot 1..4)
 ## komt hier: die wordt niet meer in een handmatig slot gemengd, maar gaat niet verloren.
 func autosave_record() -> Dictionary:
-	if not FileAccess.file_exists(autosave_path):
+	if not _save_file_exists(autosave_path):
 		return {}
 	var d := read_save(autosave_path)
 	if d.is_empty():
-		return {}
+		return {"path": autosave_path, "data": {}, "stamp": _save_modified_time(autosave_path),
+				"slot": AUTOSAVE_SLOT, "corrupt": true}
 	return {"path": autosave_path, "data": d, "stamp": _save_stamp(autosave_path), "slot": AUTOSAVE_SLOT}
 
 
@@ -1081,8 +1084,8 @@ func newest_save_path() -> String:
 
 
 func _newest_of(manual: String, auto: String) -> String:
-	var has_manual := FileAccess.file_exists(manual)
-	var has_auto := FileAccess.file_exists(auto)
+	var has_manual := _save_file_exists(manual)
+	var has_auto := _save_file_exists(auto)
 	if not has_auto:
 		return manual if has_manual else ""
 	if not has_manual:
@@ -1128,7 +1131,7 @@ func use_eind_saves() -> void:
 
 
 func has_eind_save() -> bool:
-	return FileAccess.file_exists(eind_save_path()) or FileAccess.file_exists(eind_autosave_path())
+	return _save_file_exists(eind_save_path()) or _save_file_exists(eind_autosave_path())
 
 
 func newest_eind_path() -> String:
@@ -1141,7 +1144,7 @@ func read_eind_save() -> Dictionary:
 
 
 func has_beta_save() -> bool:
-	return FileAccess.file_exists(beta_save_path()) or FileAccess.file_exists(beta_autosave_path())
+	return _save_file_exists(beta_save_path()) or _save_file_exists(beta_autosave_path())
 
 
 func newest_beta_path() -> String:
@@ -1157,7 +1160,16 @@ func _save_stamp(path: String) -> float:
 	var d := read_save(path)
 	if d.has("saved_unix"):
 		return float(d["saved_unix"])
-	return float(FileAccess.get_modified_time(path))
+	return _save_modified_time(path)
+
+
+func _save_modified_time(path: String) -> float:
+	var actual := path if FileAccess.file_exists(path) else path + ".bak"
+	return float(FileAccess.get_modified_time(actual)) if FileAccess.file_exists(actual) else 0.0
+
+
+func _save_file_exists(path: String) -> bool:
+	return FileAccess.file_exists(path) or FileAccess.file_exists(path + ".bak")
 
 
 ## v0.11: inhoud van de nieuwste save ({} = geen), bv. voor het titelscherm.
@@ -1251,15 +1263,79 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	# v0.19 kamer-checkpoint (met zijn eigen voortgangs-kopie) gaat mee; altijd de sleutel
 	# ({} = nog geen), zodat handmatige save en autosave hetzelfde formaat houden
 	data["checkpoint"] = checkpoint.duplicate(true)
-	var f := FileAccess.open(path, FileAccess.WRITE)
+	var text := JSON.stringify(data, "  ")
+	var tmp := path + ".tmp"
+	var saved := _write_save_atomic(path, tmp, text)
+	game_saved.emit(path, saved)
+	return saved
+
+
+## Schrijft eerst een volledig .tmp-bestand (flush + close), controleert het en vervangt
+## pas dan het doel via rename. De goede oude save blijft als .bak bewaard.
+func _write_save_atomic(path: String, tmp: String, text: String) -> bool:
+	_remove_file(tmp)
+	var f := FileAccess.open(tmp, FileAccess.WRITE)
 	if f == null:
 		push_warning("Opslaan mislukt: %s" % error_string(FileAccess.get_open_error()))
-		game_saved.emit(path, false)
 		return false
-	f.store_string(JSON.stringify(data, "  "))
+	f.store_string(text)
+	f.flush()
+	var write_error := f.get_error()
 	f.close()
-	game_saved.emit(path, true)
+	if write_error != OK:
+		push_warning("Opslaan mislukt bij schrijven: %s" % error_string(write_error))
+		_remove_file(tmp)
+		return false
+	if not _valid_save_data(_read_save_file(tmp)):
+		push_warning("Opslaan mislukt: tijdelijk bestand is niet geldig")
+		_remove_file(tmp)
+		return false
+	# Alleen een aantoonbaar goede hoofd-save wordt de reservekopie. Een corrupte
+	# hoofd-save mag een bestaande goede .bak nooit verdringen.
+	var old := _read_save_file(path)
+	if _valid_save_data(old) and not _write_backup(path, path + ".bak"):
+		_remove_file(tmp)
+		return false
+	var rename_error := DirAccess.rename_absolute(
+			ProjectSettings.globalize_path(tmp), ProjectSettings.globalize_path(path))
+	if rename_error != OK:
+		push_warning("Opslaan mislukt bij vervangen: %s" % error_string(rename_error))
+		_remove_file(tmp)
+		return false
 	return true
+
+
+func _write_backup(source: String, backup: String) -> bool:
+	var backup_tmp := backup + ".tmp"
+	_remove_file(backup_tmp)
+	var f := FileAccess.open(backup_tmp, FileAccess.WRITE)
+	if f == null:
+		push_warning("Reservekopie mislukt: %s" % error_string(FileAccess.get_open_error()))
+		return false
+	f.store_string(FileAccess.get_file_as_string(source))
+	f.flush()
+	var backup_error := f.get_error()
+	f.close()
+	if backup_error != OK:
+		push_warning("Reservekopie mislukt bij schrijven: %s" % error_string(backup_error))
+		_remove_file(backup_tmp)
+		return false
+	if not _valid_save_data(_read_save_file(backup_tmp)):
+		push_warning("Reservekopie mislukt: tijdelijk bestand is niet geldig")
+		_remove_file(backup_tmp)
+		return false
+	var rename_error := DirAccess.rename_absolute(
+			ProjectSettings.globalize_path(backup_tmp), ProjectSettings.globalize_path(backup))
+	if rename_error != OK:
+		push_warning("Reservekopie mislukt bij vervangen: %s" % error_string(rename_error))
+		_remove_file(backup_tmp)
+		return false
+	return true
+
+
+func _remove_file(path: String) -> void:
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 
 ## De party als lijst van Dictionaries voor een save (en de Archief-momentopname).
@@ -1376,10 +1452,26 @@ func _quests_save() -> Dictionary:
 func read_save(path := "") -> Dictionary:
 	if path == "":
 		path = save_path
+	var parsed := _read_save_file(path)
+	if _valid_save_data(parsed):
+		return parsed
+	var backup := _read_save_file(path + ".bak")
+	if _valid_save_data(backup):
+		push_warning("Save ontbreekt of is corrupt; reservekopie geladen: %s" % (path + ".bak"))
+		return backup
+	return {}
+
+
+func _read_save_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return parsed if parsed is Dictionary else {}
+
+
+func _valid_save_data(data: Dictionary) -> bool:
+	return not data.is_empty() and data.get("map") is String \
+			and data.get("party") is Array
 
 
 ## Laadt de save en zet alles terug (party, spullen, goud, speeltijd, bestiarium);
