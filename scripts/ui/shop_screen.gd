@@ -44,7 +44,7 @@ func _wrap_scroll() -> void:
 func _clear() -> void:
 	for c in content.get_children():
 		content.remove_child(c)
-		c.free()
+		c.queue_free()
 
 
 func _show_koop() -> void:
