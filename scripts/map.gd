@@ -45,6 +45,7 @@ func _ready() -> void:
 	GameState.enter_map(scene_file_path)
 	# SoM-stijl per gebied (scripts/data/kaart_stijl.gd); in de oude stijl verandert er niets.
 	KaartStijl.toepassen(self)
+	AtlasZuinig.toepassen(self)      # geen tweede (opgevulde) kopie van elke tegelatlas in het geheugen
 	_fit_camera()
 	get_viewport().size_changed.connect(_fit_camera)
 
