@@ -1,0 +1,6747 @@
+[
+  {
+    "avg_hp_loss": 0.196450000000001,
+    "avg_items": 0.0125,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 2.2705,
+    "groups": [
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm"
+        ],
+        "label": "Moss Slime",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0256666666666666,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "mosslijm",
+          "mosslijm"
+        ],
+        "label": "Moss Slime + Moss Slime",
+        "n": 200,
+        "p90_hp_loss": 0.0333333333333333,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0733333333333332,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit",
+        "n": 200,
+        "p90_hp_loss": 0.1,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.161416666666667,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "moskonijn",
+          "mosslijm"
+        ],
+        "label": "Moss Rabbit + Moss Slime",
+        "n": 200,
+        "p90_hp_loss": 0.2,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.02775,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.295,
+        "enemies": [
+          "papiergeest"
+        ],
+        "label": "Paper Wraith",
+        "n": 200,
+        "p90_hp_loss": 0.1,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.172583333333333,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.605,
+        "enemies": [
+          "papiergeest",
+          "papiergeest"
+        ],
+        "label": "Paper Wraith + Paper Wraith",
+        "n": 200,
+        "p90_hp_loss": 0.3,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.228999999999999,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.345,
+        "enemies": [
+          "glitchmot",
+          "papiergeest"
+        ],
+        "label": "Glitch Moth + Paper Wraith",
+        "n": 200,
+        "p90_hp_loss": 0.3,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.649416666666669,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "glitchmot",
+          "glitchmot",
+          "glitchmot"
+        ],
+        "label": "Glitch Moth + Glitch Moth + Glitch Moth",
+        "n": 200,
+        "p90_hp_loss": 0.666666666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.22675,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "kennis_beest"
+        ],
+        "label": "The Knowledge Beast",
+        "n": 200,
+        "p90_hp_loss": 0.316666666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.398583333333333,
+        "avg_items": 0.125,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 4.46,
+        "enemies": [
+          "kennis_beest",
+          "papiergeest"
+        ],
+        "label": "The Knowledge Beast + Paper Wraith",
+        "n": 200,
+        "p90_hp_loss": 0.55,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "wereldkaart1",
+    "inventory": {
+      "drankje": 3,
+      "kruid": 2,
+      "toverwater": 1
+    },
+    "n": 2000,
+    "name": "Worldmap 1 (grass, random encounters)",
+    "notes": "Random-encounter pool for terrain 'gras' (GameData.ENCOUNTER_GROUPS + weights). Dax solo, Lv 3.",
+    "p90_hp_loss": 0.6,
+    "party": "Dax Lv3 (HP 60 MP 0 ATK 23 DEF 17 AGI 11 MAG 2; Short Sword, Wooden Shield, Leather Hood, Apprentice Cloak; spells: -)",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.103427083333333,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 1.5,
+    "groups": [
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm"
+        ],
+        "label": "Moss Slime (tier 1)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0910000000000001,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit (tier 1)",
+        "n": 200,
+        "p90_hp_loss": 0.116666666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "papiergeest"
+        ],
+        "label": "Paper Wraith (tier 1)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0757500000000002,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "mosslijm",
+          "mosslijm"
+        ],
+        "label": "Moss Slime + Moss Slime (tier 1)",
+        "n": 200,
+        "p90_hp_loss": 0.0833333333333333,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.194583333333333,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "moskonijn",
+          "mosslijm"
+        ],
+        "label": "Moss Rabbit + Moss Slime (tier 1)",
+        "n": 200,
+        "p90_hp_loss": 0.233333333333333,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.12375,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "glitchmot"
+        ],
+        "label": "Glitch Moth (tier 1)",
+        "n": 200,
+        "p90_hp_loss": 0.133333333333333,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.108583333333333,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "papiergeest"
+        ],
+        "label": "Paper Wraith + Paper Wraith (tier 1)",
+        "n": 200,
+        "p90_hp_loss": 0.116666666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.23375,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "glitchmot"
+        ],
+        "label": "Paper Wraith + Glitch Moth (tier 1)",
+        "n": 200,
+        "p90_hp_loss": 0.25,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "archief1_v1",
+    "inventory": {
+      "drankje": 3,
+      "kruid": 2,
+      "toverwater": 1
+    },
+    "n": 1600,
+    "name": "First Archive floor 1",
+    "notes": "Map monsters of every floor-1 room (DungeonRooms.ROOMS), room tier, archief scaling (target Lv 7).",
+    "p90_hp_loss": 0.233333333333333,
+    "party": "Dax Lv3 (HP 60 MP 0 ATK 23 DEF 17 AGI 11 MAG 2; Short Sword, Wooden Shield, Leather Hood, Apprentice Cloak; spells: -)",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.108116987179488,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 2.143125,
+    "groups": [
+      {
+        "avg_hp_loss": 0.0576923076923075,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "papiergeest"
+        ],
+        "label": "Paper Wraith + Paper Wraith (tier 2)",
+        "n": 200,
+        "p90_hp_loss": 0.0641025641025641,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0512820512820511,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "glitchmot"
+        ],
+        "label": "Glitch Moth (tier 2)",
+        "n": 200,
+        "p90_hp_loss": 0.0769230769230769,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0445512820512819,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden (tier 2)",
+        "n": 200,
+        "p90_hp_loss": 0.102564102564103,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.113076923076923,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "papiergeest"
+        ],
+        "label": "Glitch Moth + Paper Wraith (tier 2)",
+        "n": 200,
+        "p90_hp_loss": 0.141025641025641,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.228846153846154,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "papiergeest",
+          "papiergeest",
+          "glitchmot"
+        ],
+        "label": "Paper Wraith + Paper Wraith + Glitch Moth (tier 2)",
+        "n": 200,
+        "p90_hp_loss": 0.256410256410256,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.18,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "glitchmot"
+        ],
+        "label": "Glitch Moth + Glitch Moth (tier 2)",
+        "n": 200,
+        "p90_hp_loss": 0.217948717948718,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0943589743589742,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "mech_wachter",
+          "papiergeest"
+        ],
+        "label": "Mech. Warden + Paper Wraith (tier 2)",
+        "n": 200,
+        "p90_hp_loss": 0.166666666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0951282051282049,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.145,
+        "enemies": [
+          "kennis_beest"
+        ],
+        "label": "The Knowledge Beast (tier 2)",
+        "n": 200,
+        "p90_hp_loss": 0.166666666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "archief1_v2",
+    "inventory": {
+      "drankje": 3,
+      "kruid": 2,
+      "toverwater": 1
+    },
+    "n": 1600,
+    "name": "First Archive floor 2",
+    "notes": "Map monsters of every floor-2 room (DungeonRooms.ROOMS), room tier, archief scaling (target Lv 7).",
+    "p90_hp_loss": 0.230769230769231,
+    "party": "Dax Lv5 (HP 78 MP 0 ATK 29 DEF 23 AGI 13 MAG 2; Short Sword, Wooden Shield, Leather Hood, Leather Armor; spells: -)",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.0810098522167493,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 2.59928571428571,
+    "groups": [
+      {
+        "avg_hp_loss": 0.0882183908045977,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "glitchmot"
+        ],
+        "label": "Glitch Moth + Glitch Moth (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.137931034482759,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0209770114942529,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.74,
+        "enemies": [
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.0229885057471264,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0719540229885057,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.825,
+        "enemies": [
+          "mech_wachter",
+          "glitchmot"
+        ],
+        "label": "Mech. Warden + Glitch Moth (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.126436781609195,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0577011494252873,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "kennis_beest"
+        ],
+        "label": "The Knowledge Beast (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.126436781609195,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.122701149425288,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "papiergeest",
+          "papiergeest",
+          "glitchmot"
+        ],
+        "label": "Paper Wraith + Paper Wraith + Glitch Moth (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.149425287356322,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0968390804597701,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3.63,
+        "enemies": [
+          "mech_wachter",
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden + Mech. Warden (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.172413793103448,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.10867816091954,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "kennis_beest",
+          "papiergeest"
+        ],
+        "label": "The Knowledge Beast + Paper Wraith (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.172413793103448,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "archief1_v3",
+    "inventory": {
+      "drankje": 5,
+      "kruid": 2,
+      "toverwater": 2
+    },
+    "n": 1400,
+    "name": "First Archive floor 3",
+    "notes": "Map monsters of every floor-3 room (DungeonRooms.ROOMS), room tier, archief scaling (target Lv 7).",
+    "p90_hp_loss": 0.149425287356322,
+    "party": "Dax Lv6 (HP 87 MP 0 ATK 41 DEF 26 AGI 14 MAG 2; Spark Sword, Cover Shield, Leather Hood, Leather Armor; spells: -)",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.088467261904762,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 3.195,
+    "groups": [
+      {
+        "avg_hp_loss": 0.01828125,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.0729166666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.153697916666667,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "glitchmot",
+          "glitchmot",
+          "glitchmot"
+        ],
+        "label": "Glitch Moth + Glitch Moth + Glitch Moth (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.208333333333333,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0433854166666667,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "mech_wachter",
+          "glitchmot"
+        ],
+        "label": "Mech. Warden + Glitch Moth (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.0833333333333333,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.06703125,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.175,
+        "enemies": [
+          "kennis_beest"
+        ],
+        "label": "The Knowledge Beast (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.135416666666667,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0636458333333333,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 4,
+        "enemies": [
+          "mech_wachter",
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden + Mech. Warden (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.114583333333333,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.181510416666667,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 4.19,
+        "enemies": [
+          "kennis_beest",
+          "mech_wachter"
+        ],
+        "label": "The Knowledge Beast + Mech. Warden (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.291666666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.09171875,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 4,
+        "enemies": [
+          "mech_wachter",
+          "papiergeest",
+          "glitchmot"
+        ],
+        "label": "Mech. Warden + Paper Wraith + Glitch Moth (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.145833333333333,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "archief1_v4",
+    "inventory": {
+      "drankje": 5,
+      "kruid": 2,
+      "toverwater": 2
+    },
+    "n": 1400,
+    "name": "First Archive floor 4",
+    "notes": "Map monsters of every floor-4 room (DungeonRooms.ROOMS), room tier, archief scaling (target Lv 7).",
+    "p90_hp_loss": 0.1875,
+    "party": "Dax Lv7 (HP 96 MP 0 ATK 44 DEF 28 AGI 15 MAG 2; Spark Sword, Cover Shield, Leather Hood, Leather Armor; spells: -)",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.654190476190476,
+    "avg_items": 5.01,
+    "avg_kos": 0.165,
+    "avg_mp": 0,
+    "avg_rounds": 15.44,
+    "groups": [
+      {
+        "avg_hp_loss": 0.654190476190476,
+        "avg_items": 5.01,
+        "avg_kos": 0.165,
+        "avg_mp": 0,
+        "avg_rounds": 15.44,
+        "enemies": [
+          "kennis_beest"
+        ],
+        "label": "The Knowledge Beast",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.835
+      }
+    ],
+    "id": "golem",
+    "inventory": {
+      "drankje": 5,
+      "kruid": 2,
+      "toverwater": 2
+    },
+    "n": 200,
+    "name": "BOSS Golem (First Archive)",
+    "notes": "Golem Hall boss (kennis_beest + pink core). Dax Lv 8 with Spark Sword.",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv8 (HP 105 MP 0 ATK 47 DEF 30 AGI 16 MAG 2; Spark Sword, Cover Shield, Leather Hood, Leather Armor; spells: -)",
+    "timeouts": 0,
+    "win_rate": 0.835
+  },
+  {
+    "avg_hp_loss": 0.288118686868688,
+    "avg_items": 0.986,
+    "avg_kos": 0.0356666666666667,
+    "avg_mp": 0,
+    "avg_rounds": 4.09433333333333,
+    "groups": [
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "wortelkruiper"
+        ],
+        "label": "Root Crawler (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "mistuil"
+        ],
+        "label": "Mist Owl (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0260606060606061,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.325,
+        "enemies": [
+          "sporenzwam"
+        ],
+        "label": "Spore Cap (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.0681818181818182,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.214280303030303,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "wortelkruiper",
+          "wortelkruiper"
+        ],
+        "label": "Root Crawler + Root Crawler (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.272727272727273,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.119848484848485,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.36,
+        "enemies": [
+          "mistuil",
+          "wortelkruiper"
+        ],
+        "label": "Mist Owl + Root Crawler (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.196969696969697,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.170265151515151,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.655,
+        "enemies": [
+          "sporenzwam",
+          "mistuil"
+        ],
+        "label": "Spore Cap + Mist Owl (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.318181818181818,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.274886363636363,
+        "avg_items": 0.005,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3.36,
+        "enemies": [
+          "wortelkruiper",
+          "sporenzwam"
+        ],
+        "label": "Root Crawler + Spore Cap (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.439393939393939,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.111060606060606,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.305,
+        "enemies": [
+          "mistuil",
+          "mistuil"
+        ],
+        "label": "Mist Owl + Mist Owl (tier 3)",
+        "n": 200,
+        "p90_hp_loss": 0.159090909090909,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.189242424242424,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3,
+        "enemies": [
+          "mistuil",
+          "mistuil"
+        ],
+        "label": "Mist Owl + Mist Owl (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.234848484848485,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.355643939393939,
+        "avg_items": 0.005,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 4.005,
+        "enemies": [
+          "sporenzwam",
+          "sporenzwam"
+        ],
+        "label": "Spore Cap + Spore Cap (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.454545454545455,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.61655303030303,
+        "avg_items": 2.515,
+        "avg_kos": 0.06,
+        "avg_mp": 0,
+        "avg_rounds": 7.14,
+        "enemies": [
+          "wortelkruiper",
+          "mistuil",
+          "wortelkruiper"
+        ],
+        "label": "Root Crawler + Mist Owl + Root Crawler (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.924242424242424,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.94
+      },
+      {
+        "avg_hp_loss": 0.418939393939393,
+        "avg_items": 0.005,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 4.005,
+        "enemies": [
+          "wortelkruiper",
+          "sporenzwam"
+        ],
+        "label": "Root Crawler + Spore Cap (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.515151515151515,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.645151515151516,
+        "avg_items": 5.72,
+        "avg_kos": 0.005,
+        "avg_mp": 0,
+        "avg_rounds": 11.685,
+        "enemies": [
+          "sporenzwam",
+          "sporenzwam",
+          "mistuil"
+        ],
+        "label": "Spore Cap + Spore Cap + Mist Owl (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.871212121212121,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.995
+      },
+      {
+        "avg_hp_loss": 0.897954545454545,
+        "avg_items": 6.54,
+        "avg_kos": 0.47,
+        "avg_mp": 0,
+        "avg_rounds": 11.105,
+        "enemies": [
+          "wortelkruiper",
+          "wortelkruiper",
+          "sporenzwam"
+        ],
+        "label": "Root Crawler + Root Crawler + Spore Cap (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.53
+      },
+      {
+        "avg_hp_loss": 0.281893939393939,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 3.47,
+        "enemies": [
+          "mistuil",
+          "wortelkruiper"
+        ],
+        "label": "Mist Owl + Root Crawler (tier 4)",
+        "n": 200,
+        "p90_hp_loss": 0.431818181818182,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "woud",
+    "inventory": {
+      "drankje": 5,
+      "kruid": 2,
+      "toverwater": 2
+    },
+    "n": 3000,
+    "name": "Dark Wood",
+    "notes": "All Dark Wood map monsters, room tier 3 (no archief scaling). Dax solo Lv 11 + Golem Core (Core Strike).",
+    "p90_hp_loss": 0.674242424242424,
+    "party": "Dax Lv11 (HP 132 MP 0 ATK 56 DEF 38 AGI 19 MAG 2; Spark Sword, Cover Shield, Iron Helm, Leather Armor; spells: -); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.964333333333333
+  },
+  {
+    "avg_hp_loss": 0.75854609929078,
+    "avg_items": 6.085,
+    "avg_kos": 0.24,
+    "avg_mp": 0,
+    "avg_rounds": 12.715,
+    "groups": [
+      {
+        "avg_hp_loss": 0.75854609929078,
+        "avg_items": 6.085,
+        "avg_kos": 0.24,
+        "avg_mp": 0,
+        "avg_rounds": 12.715,
+        "enemies": [
+          "wortelkoning"
+        ],
+        "label": "The Root King",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.76
+      }
+    ],
+    "id": "wortelkoning",
+    "inventory": {
+      "drankje": 5,
+      "kruid": 2,
+      "toverwater": 2
+    },
+    "n": 200,
+    "name": "BOSS Root King (Dark Wood)",
+    "notes": "Root King, Dax solo Lv 12 (Vesper joins after this fight).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv12 (HP 141 MP 0 ATK 59 DEF 40 AGI 20 MAG 2; Spark Sword, Cover Shield, Iron Helm, Leather Armor; spells: -); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.76
+  },
+  {
+    "avg_hp_loss": 0.13173104434907,
+    "avg_items": 0.0116666666666667,
+    "avg_kos": 0,
+    "avg_mp": 7.64,
+    "avg_rounds": 1.825,
+    "groups": [
+      {
+        "avg_hp_loss": 0.130064377682403,
+        "avg_items": 0.035,
+        "avg_kos": 0,
+        "avg_mp": 8.12,
+        "avg_rounds": 2.015,
+        "enemies": [
+          "steenluis"
+        ],
+        "label": "Stone Louse (tier 7)",
+        "n": 200,
+        "p90_hp_loss": 0.175965665236052,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0999356223175966,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 6.76,
+        "avg_rounds": 1.455,
+        "enemies": [
+          "adermot"
+        ],
+        "label": "Vein Moth (tier 7)",
+        "n": 200,
+        "p90_hp_loss": 0.180257510729614,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.16519313304721,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8.04,
+        "avg_rounds": 2.005,
+        "enemies": [
+          "druipslak"
+        ],
+        "label": "Drip Slug (tier 7)",
+        "n": 200,
+        "p90_hp_loss": 0.257510729613734,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "berggrot",
+    "inventory": {
+      "drankje": 5,
+      "kruid": 2,
+      "toverwater": 2
+    },
+    "n": 600,
+    "name": "Mountain Cave (Berggrot)",
+    "notes": "Berggrot map monsters (tier 0). Dax Lv 13 + Vesper Lv 12 (joined at Dax-1).",
+    "p90_hp_loss": 0.214592274678112,
+    "party": "Dax Lv13 (HP 150 MP 0 ATK 62 DEF 42 AGI 21 MAG 2; Spark Sword, Cover Shield, Iron Helm, Leather Armor; spells: -); Vesper Lv12 (HP 83 MP 62 ATK 20 DEF 20 AGI 33 MAG 36; Oak Staff, Leather Hood, Padded Jerkin; spells: Spark, Chain Lightning); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.0945242914979756,
+    "avg_items": 0,
+    "avg_kos": 0.0125,
+    "avg_mp": 11.79,
+    "avg_rounds": 2.005,
+    "groups": [
+      {
+        "avg_hp_loss": 0.0747773279352226,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 11.68,
+        "avg_rounds": 2.01,
+        "enemies": [
+          "rankje",
+          "rankje"
+        ],
+        "label": "Tendril + Tendril (tier 5)",
+        "n": 200,
+        "p90_hp_loss": 0.145748987854251,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.114271255060729,
+        "avg_items": 0,
+        "avg_kos": 0.025,
+        "avg_mp": 11.9,
+        "avg_rounds": 2,
+        "enemies": [
+          "doornige_loper",
+          "wortelkruiper"
+        ],
+        "label": "Thorn Runner + Root Crawler (tier 5)",
+        "n": 200,
+        "p90_hp_loss": 0.307692307692308,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "archief2_v1",
+    "inventory": {
+      "drankje": 6,
+      "kruid": 3,
+      "toverwater": 3
+    },
+    "n": 400,
+    "name": "Second Archive floor 1",
+    "notes": "Archief 2 map monsters floor 1 (tier from room, archief scaling). Dax Lv 14 + Vesper Lv 13.",
+    "p90_hp_loss": 0.17004048582996,
+    "party": "Dax Lv14 (HP 159 MP 0 ATK 65 DEF 44 AGI 22 MAG 2; Spark Sword, Cover Shield, Iron Helm, Leather Armor; spells: -); Vesper Lv13 (HP 88 MP 66 ATK 21 DEF 21 AGI 35 MAG 38; Oak Staff, Leather Hood, Padded Jerkin; spells: Spark, Chain Lightning); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.0892004048582996,
+    "avg_items": 0.025,
+    "avg_kos": 0.0025,
+    "avg_mp": 12.46,
+    "avg_rounds": 2.025,
+    "groups": [
+      {
+        "avg_hp_loss": 0.0730971659919028,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 11.76,
+        "avg_rounds": 2,
+        "enemies": [
+          "doornige_loper",
+          "rankje"
+        ],
+        "label": "Thorn Runner + Tendril (tier 5)",
+        "n": 200,
+        "p90_hp_loss": 0.149797570850202,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.105303643724696,
+        "avg_items": 0.05,
+        "avg_kos": 0.005,
+        "avg_mp": 13.16,
+        "avg_rounds": 2.05,
+        "enemies": [
+          "sporekop",
+          "sporenzwam"
+        ],
+        "label": "Sporehead + Spore Cap (tier 5)",
+        "n": 200,
+        "p90_hp_loss": 0.206477732793522,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "archief2_v2",
+    "inventory": {
+      "drankje": 6,
+      "kruid": 3,
+      "toverwater": 3
+    },
+    "n": 400,
+    "name": "Second Archive floor 2",
+    "notes": "Archief 2 map monsters floor 2 (tier from room, archief scaling). Dax Lv 14 + Vesper Lv 13.",
+    "p90_hp_loss": 0.153846153846154,
+    "party": "Dax Lv14 (HP 159 MP 0 ATK 65 DEF 44 AGI 22 MAG 2; Spark Sword, Cover Shield, Iron Helm, Leather Armor; spells: -); Vesper Lv13 (HP 88 MP 66 ATK 21 DEF 21 AGI 35 MAG 38; Oak Staff, Leather Hood, Padded Jerkin; spells: Spark, Chain Lightning); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.185952380952381,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 4,
+    "groups": [
+      {
+        "avg_hp_loss": 0.185952380952381,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 4,
+        "enemies": [
+          "lotte_glitch"
+        ],
+        "label": "Seren",
+        "n": 200,
+        "p90_hp_loss": 0.226190476190476,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "lotte",
+    "inventory": {
+      "drankje": 6,
+      "kruid": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "STORY Seren/Lotte (Second Archive, Dax alone)",
+    "notes": "Story fight: only Dax fights (archief2_party_filter = dennis), no Codex ally. Win or lose both continue the story.",
+    "p90_hp_loss": 0.226190476190476,
+    "party": "Dax Lv15 (HP 168 MP 0 ATK 68 DEF 46 AGI 23 MAG 2; Spark Sword, Cover Shield, Iron Helm, Leather Armor; spells: -); Vesper Lv14 (HP 93 MP 70 ATK 22 DEF 22 AGI 37 MAG 40; Oak Staff, Leather Hood, Padded Jerkin; spells: Spark, Chain Lightning); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.120478589420655,
+    "avg_items": 0.05,
+    "avg_kos": 0.015,
+    "avg_mp": 15.14,
+    "avg_rounds": 2.01,
+    "groups": [
+      {
+        "avg_hp_loss": 0.120478589420655,
+        "avg_items": 0.05,
+        "avg_kos": 0.015,
+        "avg_mp": 15.14,
+        "avg_rounds": 2.01,
+        "enemies": [
+          "bloeiende_schrik",
+          "sporekop"
+        ],
+        "label": "Blooming Dread + Sporehead (tier 6)",
+        "n": 200,
+        "p90_hp_loss": 0.214105793450882,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "archief2_v3",
+    "inventory": {
+      "drankje": 6,
+      "kruid": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "Second Archive floor 3",
+    "notes": "Archief 2 floor 3. Full party: Dax 16, Vesper 15, Seren 16 (joins at Dax's level), Act-2 forge gear.",
+    "p90_hp_loss": 0.214105793450882,
+    "party": "Dax Lv16 (HP 177 MP 0 ATK 77 DEF 65 AGI 23 MAG 2; Kettle Blade, Kettle Shield, Kettle Helm, Scrap Plate; spells: -); Vesper Lv15 (HP 98 MP 74 ATK 23 DEF 26 AGI 39 MAG 46; Oak Staff, Leather Hood, Work Cloak; spells: Spark, Chain Lightning); Seren Lv16 (HP 122 MP 59 ATK 42 DEF 23 AGI 23 MAG 51; Tuning Fork, Leather Hood, Travel Robe; spells: Minor Heal, Icicle); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.14331234256927,
+    "avg_items": 0.07,
+    "avg_kos": 0.025,
+    "avg_mp": 15.12,
+    "avg_rounds": 2.035,
+    "groups": [
+      {
+        "avg_hp_loss": 0.14331234256927,
+        "avg_items": 0.07,
+        "avg_kos": 0.025,
+        "avg_mp": 15.12,
+        "avg_rounds": 2.035,
+        "enemies": [
+          "wortelgeest",
+          "bloeiende_schrik"
+        ],
+        "label": "Rootghost + Blooming Dread (tier 6)",
+        "n": 200,
+        "p90_hp_loss": 0.244332493702771,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "archief2_v4",
+    "inventory": {
+      "drankje": 6,
+      "kruid": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "Second Archive floor 4",
+    "notes": "Archief 2 floor 4. Full party: Dax 16, Vesper 15, Seren 16 (joins at Dax's level), Act-2 forge gear.",
+    "p90_hp_loss": 0.244332493702771,
+    "party": "Dax Lv16 (HP 177 MP 0 ATK 77 DEF 65 AGI 23 MAG 2; Kettle Blade, Kettle Shield, Kettle Helm, Scrap Plate; spells: -); Vesper Lv15 (HP 98 MP 74 ATK 23 DEF 26 AGI 39 MAG 46; Oak Staff, Leather Hood, Work Cloak; spells: Spark, Chain Lightning); Seren Lv16 (HP 122 MP 59 ATK 42 DEF 23 AGI 23 MAG 51; Tuning Fork, Leather Hood, Travel Robe; spells: Minor Heal, Icicle); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.0757178841309823,
+    "avg_items": 0.015,
+    "avg_kos": 0,
+    "avg_mp": 23.98,
+    "avg_rounds": 3,
+    "groups": [
+      {
+        "avg_hp_loss": 0.0757178841309823,
+        "avg_items": 0.015,
+        "avg_kos": 0,
+        "avg_mp": 23.98,
+        "avg_rounds": 3,
+        "enemies": [
+          "wurger"
+        ],
+        "label": "The Strangler",
+        "n": 200,
+        "p90_hp_loss": 0.146095717884131,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "a2boss_wurger",
+    "inventory": {
+      "drankje": 6,
+      "kruid": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "BOSS The Strangler (Second Archive)",
+    "notes": "Archief 2 boss, same party as floors 3-4.",
+    "p90_hp_loss": 0.146095717884131,
+    "party": "Dax Lv16 (HP 177 MP 0 ATK 77 DEF 65 AGI 23 MAG 2; Kettle Blade, Kettle Shield, Kettle Helm, Scrap Plate; spells: -); Vesper Lv15 (HP 98 MP 74 ATK 23 DEF 26 AGI 39 MAG 46; Oak Staff, Leather Hood, Work Cloak; spells: Spark, Chain Lightning); Seren Lv16 (HP 122 MP 59 ATK 42 DEF 23 AGI 23 MAG 51; Tuning Fork, Leather Hood, Travel Robe; spells: Minor Heal, Icicle); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.225566750629723,
+    "avg_items": 0.075,
+    "avg_kos": 0,
+    "avg_mp": 29.8,
+    "avg_rounds": 3.995,
+    "groups": [
+      {
+        "avg_hp_loss": 0.225566750629723,
+        "avg_items": 0.075,
+        "avg_kos": 0,
+        "avg_mp": 29.8,
+        "avg_rounds": 3.995,
+        "enemies": [
+          "genezer"
+        ],
+        "label": "The Mender",
+        "n": 200,
+        "p90_hp_loss": 0.267002518891688,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "a2boss_genezer",
+    "inventory": {
+      "drankje": 6,
+      "kruid": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "BOSS The Mender (Second Archive)",
+    "notes": "Archief 2 boss, same party as floors 3-4.",
+    "p90_hp_loss": 0.267002518891688,
+    "party": "Dax Lv16 (HP 177 MP 0 ATK 77 DEF 65 AGI 23 MAG 2; Kettle Blade, Kettle Shield, Kettle Helm, Scrap Plate; spells: -); Vesper Lv15 (HP 98 MP 74 ATK 23 DEF 26 AGI 39 MAG 46; Oak Staff, Leather Hood, Work Cloak; spells: Spark, Chain Lightning); Seren Lv16 (HP 122 MP 59 ATK 42 DEF 23 AGI 23 MAG 51; Tuning Fork, Leather Hood, Travel Robe; spells: Minor Heal, Icicle); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.0578609625668453,
+    "avg_items": 0.00681818181818182,
+    "avg_kos": 0.000909090909090909,
+    "avg_mp": 0,
+    "avg_rounds": 1.38181818181818,
+    "groups": [
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "papiergeest"
+        ],
+        "label": "Paper Wraith (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 14,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm"
+        ],
+        "label": "Moss Slime (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 10,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0674509803921567,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0.107843137254902,
+        "timeouts": 0,
+        "weight": 15,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.183333333333333,
+        "avg_items": 0.075,
+        "avg_kos": 0.01,
+        "avg_mp": 0,
+        "avg_rounds": 1.965,
+        "enemies": [
+          "moskonijn",
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit + Moss Rabbit (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0.274509803921569,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.095441176470588,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.655,
+        "enemies": [
+          "moskonijn",
+          "papiergeest"
+        ],
+        "label": "Moss Rabbit + Paper Wraith (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0.147058823529412,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm",
+          "papiergeest"
+        ],
+        "label": "Moss Slime + Paper Wraith (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.039313725490196,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.875,
+        "enemies": [
+          "mosslijm",
+          "mosslijm"
+        ],
+        "label": "Moss Slime + Moss Slime (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0.0686274509803922,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0698039215686273,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "moskonijn",
+          "mosslijm"
+        ],
+        "label": "Moss Rabbit + Moss Slime (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0.107843137254902,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0828431372549018,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "papiergeest"
+        ],
+        "label": "Paper Wraith + Paper Wraith (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0.107843137254902,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "papiergeest",
+          "mosslijm"
+        ],
+        "label": "Paper Wraith + Moss Slime (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.09828431372549,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.705,
+        "enemies": [
+          "papiergeest",
+          "moskonijn"
+        ],
+        "label": "Paper Wraith + Moss Rabbit (floor 1)",
+        "n": 200,
+        "p90_hp_loss": 0.147058823529412,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_v1",
+    "inventory": {
+      "drankje": 3,
+      "toverwater": 3
+    },
+    "n": 2200,
+    "name": "Deep Cave (Dungeon100) floor 1",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 1, d100 gear tier 1, potions of loot tier 1 (3 each).",
+    "p90_hp_loss": 0.127450980392157,
+    "party": "Dax Lv1 (HP 42 MP 0 ATK 17 DEF 15 AGI 11 MAG 2; Short Sword, Wooden Shield, Leather Hood, Leather Armor, Silver Bookmark; spells: -); Vesper Lv1 (HP 28 MP 18 ATK 9 DEF 6 AGI 13 MAG 14; Oak Staff, Leather Hood, Silver Bookmark; spells: -); Seren Lv1 (HP 32 MP 14 ATK 11 DEF 11 AGI 9 MAG 11; Oak Staff, Leather Hood, Leather Armor, Silver Bookmark; spells: -); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.0104033579033579,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 1.285,
+    "groups": [
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm",
+          "papiergeest"
+        ],
+        "label": "Moss Slime + Paper Wraith (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "papiergeest",
+          "mosslijm"
+        ],
+        "label": "Paper Wraith + Moss Slime (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 4,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "papiergeest"
+        ],
+        "label": "Paper Wraith (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 17,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm"
+        ],
+        "label": "Moss Slime (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 7,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 18,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm",
+          "moskonijn"
+        ],
+        "label": "Moss Slime + Moss Rabbit (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0264189189189189,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.575,
+        "enemies": [
+          "moskonijn",
+          "papiergeest"
+        ],
+        "label": "Moss Rabbit + Paper Wraith (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0.0585585585585586,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.02,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.955,
+        "enemies": [
+          "mosslijm",
+          "mosslijm"
+        ],
+        "label": "Moss Slime + Moss Slime (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0.036036036036036,
+        "timeouts": 0,
+        "weight": 4,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0409009009009009,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.985,
+        "enemies": [
+          "moskonijn",
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit + Moss Rabbit (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0.0585585585585586,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0271171171171171,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.62,
+        "enemies": [
+          "papiergeest",
+          "moskonijn"
+        ],
+        "label": "Paper Wraith + Moss Rabbit (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0.0585585585585586,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1,
+        "enemies": [
+          "moskonijn",
+          "mosslijm"
+        ],
+        "label": "Moss Rabbit + Moss Slime (floor 5)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_v5",
+    "inventory": {
+      "drankje": 3,
+      "toverwater": 3
+    },
+    "n": 2200,
+    "name": "Deep Cave (Dungeon100) floor 5",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 7, d100 gear tier 1, potions of loot tier 1 (3 each).",
+    "p90_hp_loss": 0.045045045045045,
+    "party": "Dax Lv7 (HP 96 MP 0 ATK 35 DEF 27 AGI 17 MAG 2; Short Sword, Wooden Shield, Leather Hood, Leather Armor, Silver Bookmark; spells: -); Vesper Lv7 (HP 58 MP 42 ATK 15 DEF 12 AGI 25 MAG 26; Oak Staff, Leather Hood, Silver Bookmark; spells: -); Seren Lv7 (HP 68 MP 32 ATK 23 DEF 17 AGI 15 MAG 23; Oak Staff, Leather Hood, Leather Armor, Silver Bookmark; spells: -); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.0524238410596025,
+    "avg_items": 0.00125,
+    "avg_kos": 0,
+    "avg_mp": 7.122,
+    "avg_rounds": 1.7805,
+    "groups": [
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "glitchmot"
+        ],
+        "label": "Glitch Moth (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 13,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0765397350993378,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "mosslijm",
+          "mech_wachter"
+        ],
+        "label": "Moss Slime + Mech. Warden (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.125827814569536,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 9,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.087864238410596,
+        "avg_items": 0.005,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "mech_wachter",
+          "moskonijn"
+        ],
+        "label": "Mech. Warden + Moss Rabbit (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.132450331125828,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "papiergeest"
+        ],
+        "label": "Paper Wraith (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 10,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 9,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0635596026490064,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "moskonijn",
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit + Moss Rabbit (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.0794701986754967,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0829635761589404,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 10.4,
+        "avg_rounds": 2.6,
+        "enemies": [
+          "mech_wachter",
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden + Mech. Warden (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.132450331125828,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm"
+        ],
+        "label": "Moss Slime (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0782615894039736,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "mech_wachter",
+          "mosslijm"
+        ],
+        "label": "Mech. Warden + Moss Slime (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.122516556291391,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0668377483443706,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "glitchmot"
+        ],
+        "label": "Glitch Moth + Glitch Moth (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.0860927152317881,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0664238410596024,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "moskonijn",
+          "glitchmot"
+        ],
+        "label": "Moss Rabbit + Glitch Moth (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.0827814569536424,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0652649006622514,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "moskonijn"
+        ],
+        "label": "Glitch Moth + Moss Rabbit (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.0827814569536424,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0991059602649006,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8.02,
+        "avg_rounds": 2.005,
+        "enemies": [
+          "mech_wachter",
+          "papiergeest"
+        ],
+        "label": "Mech. Warden + Paper Wraith (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.142384105960265,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0684768211920527,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "papiergeest"
+        ],
+        "label": "Glitch Moth + Paper Wraith (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.0860927152317881,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0435761589403974,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "mosslijm",
+          "papiergeest"
+        ],
+        "label": "Moss Slime + Paper Wraith (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.0596026490066225,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0403807947019868,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "mosslijm",
+          "glitchmot"
+        ],
+        "label": "Moss Slime + Glitch Moth (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.0562913907284768,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0639403973509932,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "moskonijn",
+          "papiergeest"
+        ],
+        "label": "Moss Rabbit + Paper Wraith (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.076158940397351,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0437086092715233,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "mosslijm"
+        ],
+        "label": "Paper Wraith + Moss Slime (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.0596026490066225,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.101572847682119,
+        "avg_items": 0.02,
+        "avg_kos": 0,
+        "avg_mp": 8.02,
+        "avg_rounds": 2.005,
+        "enemies": [
+          "glitchmot",
+          "mech_wachter"
+        ],
+        "label": "Glitch Moth + Mech. Warden (floor 15)",
+        "n": 200,
+        "p90_hp_loss": 0.145695364238411,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_v15",
+    "inventory": {
+      "drankje": 3,
+      "toverwater": 3
+    },
+    "n": 4000,
+    "name": "Deep Cave (Dungeon100) floor 15",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 11, d100 gear tier 1, potions of loot tier 1 (3 each).",
+    "p90_hp_loss": 0.105960264900662,
+    "party": "Dax Lv11 (HP 132 MP 0 ATK 47 DEF 35 AGI 21 MAG 2; Short Sword, Wooden Shield, Leather Hood, Leather Armor, Silver Bookmark; spells: -); Vesper Lv11 (HP 78 MP 58 ATK 19 DEF 16 AGI 33 MAG 34; Oak Staff, Leather Hood, Silver Bookmark; spells: Spark); Seren Lv11 (HP 92 MP 44 ATK 31 DEF 21 AGI 19 MAG 31; Oak Staff, Leather Hood, Leather Armor, Silver Bookmark; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.0876308768750624,
+    "avg_items": 0.0493023255813953,
+    "avg_kos": 0.00313953488372093,
+    "avg_mp": 14.0358139534884,
+    "avg_rounds": 2.04011627906977,
+    "groups": [
+      {
+        "avg_hp_loss": 0.0746536796536797,
+        "avg_items": 0.015,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "mech_wachter",
+          "moskonijn"
+        ],
+        "label": "Mech. Warden + Moss Rabbit (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.142857142857143,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0519047619047619,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 9.68,
+        "avg_rounds": 2,
+        "enemies": [
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.0800865800865801,
+        "timeouts": 0,
+        "weight": 5,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0645670995670996,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 14.42,
+        "avg_rounds": 2,
+        "enemies": [
+          "mosslijm",
+          "papiergeest"
+        ],
+        "label": "Moss Slime + Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.134199134199134,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0799025974025974,
+        "avg_items": 0.015,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "mech_wachter"
+        ],
+        "label": "Paper Wraith + Mech. Warden (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.145021645021645,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.000422077922077922,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "papiergeest"
+        ],
+        "label": "Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 5,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.112651515151515,
+        "avg_items": 0.03,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "wortelkruiper"
+        ],
+        "label": "Root Crawler (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.151515151515152,
+        "timeouts": 0,
+        "weight": 6,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "moskonijn"
+        ],
+        "label": "Moss Rabbit (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0567965367965368,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 12,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "glitchmot"
+        ],
+        "label": "Glitch Moth + Glitch Moth (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.0930735930735931,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.051482683982684,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 14.26,
+        "avg_rounds": 2,
+        "enemies": [
+          "woudgeest",
+          "papiergeest"
+        ],
+        "label": "Wood Wraith + Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.114718614718615,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "glitchmot"
+        ],
+        "label": "Glitch Moth (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "woudgeest"
+        ],
+        "label": "Wood Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.100292207792208,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "woudgeest",
+          "mistuil"
+        ],
+        "label": "Wood Wraith + Mist Owl (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.162337662337662,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0957575757575757,
+        "avg_items": 0.06,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "sporenzwam"
+        ],
+        "label": "Spore Cap (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.142857142857143,
+        "timeouts": 0,
+        "weight": 5,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "mosslijm"
+        ],
+        "label": "Moss Slime (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 5,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.191071428571429,
+        "avg_items": 0.195,
+        "avg_kos": 0.035,
+        "avg_mp": 20.44,
+        "avg_rounds": 3.03,
+        "enemies": [
+          "sporenzwam",
+          "mistuil"
+        ],
+        "label": "Spore Cap + Mist Owl (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.311688311688312,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0956277056277057,
+        "avg_items": 0.07,
+        "avg_kos": 0,
+        "avg_mp": 16.32,
+        "avg_rounds": 2.075,
+        "enemies": [
+          "mech_wachter",
+          "mistuil"
+        ],
+        "label": "Mech. Warden + Mist Owl (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.170995670995671,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0722835497835498,
+        "avg_items": 0.01,
+        "avg_kos": 0,
+        "avg_mp": 14.2,
+        "avg_rounds": 2,
+        "enemies": [
+          "moskonijn",
+          "papiergeest"
+        ],
+        "label": "Moss Rabbit + Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.138528138528139,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.084512987012987,
+        "avg_items": 0.065,
+        "avg_kos": 0,
+        "avg_mp": 16.28,
+        "avg_rounds": 2.065,
+        "enemies": [
+          "sporenzwam",
+          "woudgeest"
+        ],
+        "label": "Spore Cap + Wood Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.151515151515152,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.190854978354978,
+        "avg_items": 0.33,
+        "avg_kos": 0.04,
+        "avg_mp": 20.72,
+        "avg_rounds": 3.085,
+        "enemies": [
+          "wortelkruiper",
+          "sporenzwam"
+        ],
+        "label": "Root Crawler + Spore Cap (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.329004329004329,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.174545454545455,
+        "avg_items": 0.085,
+        "avg_kos": 0.005,
+        "avg_mp": 20.34,
+        "avg_rounds": 2.99,
+        "enemies": [
+          "papiergeest",
+          "sporenzwam"
+        ],
+        "label": "Paper Wraith + Spore Cap (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.287878787878788,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.108430735930736,
+        "avg_items": 0.085,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "mistuil",
+          "papiergeest"
+        ],
+        "label": "Mist Owl + Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.188311688311688,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0900541125541126,
+        "avg_items": 0.12,
+        "avg_kos": 0,
+        "avg_mp": 16.2,
+        "avg_rounds": 2.03,
+        "enemies": [
+          "wortelkruiper",
+          "woudgeest"
+        ],
+        "label": "Root Crawler + Wood Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.166666666666667,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0864502164502164,
+        "avg_items": 0.02,
+        "avg_kos": 0,
+        "avg_mp": 16.04,
+        "avg_rounds": 2.005,
+        "enemies": [
+          "mech_wachter",
+          "papiergeest"
+        ],
+        "label": "Mech. Warden + Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.151515151515152,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.1075,
+        "avg_items": 0.075,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "mistuil",
+          "moskonijn"
+        ],
+        "label": "Mist Owl + Moss Rabbit (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.188311688311688,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0632142857142857,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 12.22,
+        "avg_rounds": 2,
+        "enemies": [
+          "moskonijn",
+          "glitchmot"
+        ],
+        "label": "Moss Rabbit + Glitch Moth (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.0952380952380952,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.107391774891775,
+        "avg_items": 0.07,
+        "avg_kos": 0.005,
+        "avg_mp": 16.24,
+        "avg_rounds": 2.075,
+        "enemies": [
+          "mistuil",
+          "mech_wachter"
+        ],
+        "label": "Mist Owl + Mech. Warden (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.170995670995671,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0480627705627706,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 14.18,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "woudgeest"
+        ],
+        "label": "Paper Wraith + Wood Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.106060606060606,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0335606060606061,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 12,
+        "avg_rounds": 2,
+        "enemies": [
+          "mosslijm",
+          "mosslijm"
+        ],
+        "label": "Moss Slime + Moss Slime (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.0670995670995671,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.204718614718615,
+        "avg_items": 0.17,
+        "avg_kos": 0.015,
+        "avg_mp": 20.64,
+        "avg_rounds": 3,
+        "enemies": [
+          "mistuil",
+          "sporenzwam"
+        ],
+        "label": "Mist Owl + Spore Cap (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.324675324675325,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.123073593073593,
+        "avg_items": 0.02,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "mistuil"
+        ],
+        "label": "Glitch Moth + Mist Owl (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.205627705627706,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0734848484848485,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "mosslijm",
+          "mech_wachter"
+        ],
+        "label": "Moss Slime + Mech. Warden (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.134199134199134,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.157294372294372,
+        "avg_items": 0.11,
+        "avg_kos": 0.01,
+        "avg_mp": 19.24,
+        "avg_rounds": 2.74,
+        "enemies": [
+          "moskonijn",
+          "sporenzwam"
+        ],
+        "label": "Moss Rabbit + Spore Cap (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.274891774891775,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.102132034632035,
+        "avg_items": 0.05,
+        "avg_kos": 0,
+        "avg_mp": 16.22,
+        "avg_rounds": 2.05,
+        "enemies": [
+          "mosslijm",
+          "sporenzwam"
+        ],
+        "label": "Moss Slime + Spore Cap (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.175324675324675,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0467748917748918,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 12,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "papiergeest"
+        ],
+        "label": "Paper Wraith + Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.0844155844155844,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0597294372294372,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "woudgeest",
+          "mech_wachter"
+        ],
+        "label": "Wood Wraith + Mech. Warden (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.119047619047619,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0811255411255411,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 7.3,
+        "avg_rounds": 1.52,
+        "enemies": [
+          "mistuil"
+        ],
+        "label": "Mist Owl (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.132034632034632,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0756385281385281,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "mech_wachter",
+          "mosslijm"
+        ],
+        "label": "Mech. Warden + Moss Slime (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.138528138528139,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.126049783549784,
+        "avg_items": 0.1,
+        "avg_kos": 0.005,
+        "avg_mp": 16.36,
+        "avg_rounds": 2.06,
+        "enemies": [
+          "glitchmot",
+          "wortelkruiper"
+        ],
+        "label": "Glitch Moth + Root Crawler (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.207792207792208,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.073495670995671,
+        "avg_items": 0.04,
+        "avg_kos": 0,
+        "avg_mp": 14.3,
+        "avg_rounds": 2,
+        "enemies": [
+          "papiergeest",
+          "moskonijn"
+        ],
+        "label": "Paper Wraith + Moss Rabbit (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.149350649350649,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0884415584415584,
+        "avg_items": 0.005,
+        "avg_kos": 0,
+        "avg_mp": 14.74,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "papiergeest"
+        ],
+        "label": "Glitch Moth + Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.162337662337662,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.134534632034632,
+        "avg_items": 0.11,
+        "avg_kos": 0,
+        "avg_mp": 20.22,
+        "avg_rounds": 2.935,
+        "enemies": [
+          "wortelkruiper",
+          "mech_wachter"
+        ],
+        "label": "Root Crawler + Mech. Warden (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.235930735930736,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.148214285714286,
+        "avg_items": 0.11,
+        "avg_kos": 0.005,
+        "avg_mp": 19.3,
+        "avg_rounds": 2.75,
+        "enemies": [
+          "sporenzwam",
+          "moskonijn"
+        ],
+        "label": "Spore Cap + Moss Rabbit (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.274891774891775,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.131428571428571,
+        "avg_items": 0.16,
+        "avg_kos": 0.015,
+        "avg_mp": 17.68,
+        "avg_rounds": 2.315,
+        "enemies": [
+          "wortelkruiper",
+          "papiergeest"
+        ],
+        "label": "Root Crawler + Paper Wraith (floor 35)",
+        "n": 200,
+        "p90_hp_loss": 0.229437229437229,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_v35",
+    "inventory": {
+      "drankje": 3,
+      "kruid": 3,
+      "sterk_drankje": 3
+    },
+    "n": 8600,
+    "name": "Deep Cave (Dungeon100) floor 35",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 19, d100 gear tier 2, potions of loot tier 2 (3 each).",
+    "p90_hp_loss": 0.183982683982684,
+    "party": "Dax Lv19 (HP 204 MP 0 ATK 88 DEF 63 AGI 30 MAG 2; Archive Sword, Archive Shield, Archive Helm, Archive Armor, Archive Ring; spells: -); Vesper Lv19 (HP 118 MP 90 ATK 30 DEF 36 AGI 50 MAG 56; Archive Staff, Archive Helm, Archive Armor, Archive Ring; spells: Spark, Chain Lightning); Seren Lv19 (HP 140 MP 68 ATK 50 DEF 37 AGI 28 MAG 53; Archive Staff, Archive Helm, Archive Armor, Archive Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.13766095358322,
+    "avg_items": 0.170131578947368,
+    "avg_kos": 0.0215789473684211,
+    "avg_mp": 17.4094736842105,
+    "avg_rounds": 2.59986842105263,
+    "groups": [
+      {
+        "avg_hp_loss": 0.055119926199262,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "woudgeest",
+          "mech_wachter"
+        ],
+        "label": "Wood Wraith + Mech. Warden (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.112546125461255,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0498800738007379,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 12,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "glitchmot"
+        ],
+        "label": "Glitch Moth + Glitch Moth (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.0904059040590406,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.052610701107011,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.0793357933579336,
+        "timeouts": 0,
+        "weight": 8,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.12919741697417,
+        "avg_items": 0.165,
+        "avg_kos": 0.005,
+        "avg_mp": 21.1,
+        "avg_rounds": 3.05,
+        "enemies": [
+          "sporenzwam",
+          "mech_wachter"
+        ],
+        "label": "Spore Cap + Mech. Warden (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.226937269372694,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0321494464944649,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 12.62,
+        "avg_rounds": 2,
+        "enemies": [
+          "woudgeest",
+          "glitchmot"
+        ],
+        "label": "Wood Wraith + Glitch Moth (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.0719557195571956,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "woudgeest"
+        ],
+        "label": "Wood Wraith (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 4,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.18580258302583,
+        "avg_items": 0.22,
+        "avg_kos": 0.025,
+        "avg_mp": 20.18,
+        "avg_rounds": 3.03,
+        "enemies": [
+          "wortelkruiper",
+          "mistuil"
+        ],
+        "label": "Root Crawler + Mist Owl (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.311808118081181,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.12380073800738,
+        "avg_items": 0.2,
+        "avg_kos": 0,
+        "avg_mp": 20.5,
+        "avg_rounds": 3,
+        "enemies": [
+          "mech_wachter",
+          "wortelkruiper"
+        ],
+        "label": "Mech. Warden + Root Crawler (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.217712177121771,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0950553505535056,
+        "avg_items": 0.065,
+        "avg_kos": 0,
+        "avg_mp": 8.24,
+        "avg_rounds": 2.035,
+        "enemies": [
+          "sporenzwam"
+        ],
+        "label": "Spore Cap (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.136531365313653,
+        "timeouts": 0,
+        "weight": 4,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0998985239852399,
+        "avg_items": 0.045,
+        "avg_kos": 0.005,
+        "avg_mp": 18.08,
+        "avg_rounds": 2.335,
+        "enemies": [
+          "woudgeest",
+          "sporenzwam"
+        ],
+        "label": "Wood Wraith + Spore Cap (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.182656826568266,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.106226937269373,
+        "avg_items": 0.04,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "wortelkruiper"
+        ],
+        "label": "Root Crawler (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.138376383763838,
+        "timeouts": 0,
+        "weight": 4,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.176190036900369,
+        "avg_items": 0.12,
+        "avg_kos": 0.02,
+        "avg_mp": 20.26,
+        "avg_rounds": 2.9,
+        "enemies": [
+          "mistuil",
+          "mistuil"
+        ],
+        "label": "Mist Owl + Mist Owl (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.298892988929889,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.330608856088561,
+        "avg_items": 0.875,
+        "avg_kos": 0.26,
+        "avg_mp": 26.78,
+        "avg_rounds": 4.21,
+        "enemies": [
+          "mistuil",
+          "wortelkruiper",
+          "wortelkruiper"
+        ],
+        "label": "Mist Owl + Root Crawler + Root Crawler (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.564575645756458,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.995
+      },
+      {
+        "avg_hp_loss": 0.103440959409594,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8.58,
+        "avg_rounds": 1.92,
+        "enemies": [
+          "mistuil"
+        ],
+        "label": "Mist Owl (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.132841328413284,
+        "timeouts": 0,
+        "weight": 5,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0916143911439115,
+        "avg_items": 0.03,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 2,
+        "enemies": [
+          "woudgeest",
+          "mistuil"
+        ],
+        "label": "Wood Wraith + Mist Owl (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.158671586715867,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "glitchmot"
+        ],
+        "label": "Glitch Moth (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 4,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.121337638376384,
+        "avg_items": 0.06,
+        "avg_kos": 0,
+        "avg_mp": 17.74,
+        "avg_rounds": 2.36,
+        "enemies": [
+          "mech_wachter",
+          "woudgeest",
+          "glitchmot"
+        ],
+        "label": "Mech. Warden + Wood Wraith + Glitch Moth (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.201107011070111,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.184289667896679,
+        "avg_items": 0.3,
+        "avg_kos": 0.01,
+        "avg_mp": 20.12,
+        "avg_rounds": 2.755,
+        "enemies": [
+          "glitchmot",
+          "mistuil",
+          "glitchmot"
+        ],
+        "label": "Glitch Moth + Mist Owl + Glitch Moth (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.300738007380074,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.251042435424354,
+        "avg_items": 0.32,
+        "avg_kos": 0.035,
+        "avg_mp": 24.62,
+        "avg_rounds": 4.005,
+        "enemies": [
+          "sporenzwam",
+          "sporenzwam"
+        ],
+        "label": "Spore Cap + Spore Cap (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.392988929889299,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.210147601476015,
+        "avg_items": 0.215,
+        "avg_kos": 0.035,
+        "avg_mp": 20.64,
+        "avg_rounds": 2.93,
+        "enemies": [
+          "mistuil",
+          "woudgeest",
+          "mistuil"
+        ],
+        "label": "Mist Owl + Wood Wraith + Mist Owl (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.348708487084871,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.143228782287823,
+        "avg_items": 0.175,
+        "avg_kos": 0.005,
+        "avg_mp": 21.34,
+        "avg_rounds": 3.085,
+        "enemies": [
+          "mech_wachter",
+          "sporenzwam"
+        ],
+        "label": "Mech. Warden + Spore Cap (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.238007380073801,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0312546125461255,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 12.7,
+        "avg_rounds": 2,
+        "enemies": [
+          "glitchmot",
+          "woudgeest"
+        ],
+        "label": "Glitch Moth + Wood Wraith (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.0535055350553506,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.13880073800738,
+        "avg_items": 0.08,
+        "avg_kos": 0,
+        "avg_mp": 18.34,
+        "avg_rounds": 2.575,
+        "enemies": [
+          "mech_wachter",
+          "mistuil"
+        ],
+        "label": "Mech. Warden + Mist Owl (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.243542435424354,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.172933579335793,
+        "avg_items": 0.11,
+        "avg_kos": 0.005,
+        "avg_mp": 20.6,
+        "avg_rounds": 2.775,
+        "enemies": [
+          "mech_wachter",
+          "glitchmot",
+          "glitchmot"
+        ],
+        "label": "Mech. Warden + Glitch Moth + Glitch Moth (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.265682656826568,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0820940959409594,
+        "avg_items": 0.035,
+        "avg_kos": 0,
+        "avg_mp": 16.32,
+        "avg_rounds": 2.045,
+        "enemies": [
+          "mech_wachter",
+          "glitchmot"
+        ],
+        "label": "Mech. Warden + Glitch Moth (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.151291512915129,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.195618081180812,
+        "avg_items": 0.35,
+        "avg_kos": 0.04,
+        "avg_mp": 22.04,
+        "avg_rounds": 3.28,
+        "enemies": [
+          "wortelkruiper",
+          "sporenzwam"
+        ],
+        "label": "Root Crawler + Spore Cap (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.333948339483395,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.183311808118081,
+        "avg_items": 0.165,
+        "avg_kos": 0.01,
+        "avg_mp": 20.88,
+        "avg_rounds": 2.96,
+        "enemies": [
+          "woudgeest",
+          "mistuil",
+          "mech_wachter"
+        ],
+        "label": "Wood Wraith + Mist Owl + Mech. Warden (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.287822878228782,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0894464944649447,
+        "avg_items": 0.08,
+        "avg_kos": 0,
+        "avg_mp": 16.4,
+        "avg_rounds": 2.09,
+        "enemies": [
+          "woudgeest",
+          "wortelkruiper"
+        ],
+        "label": "Wood Wraith + Root Crawler (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.153136531365314,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.146845018450184,
+        "avg_items": 0.215,
+        "avg_kos": 0.015,
+        "avg_mp": 19.94,
+        "avg_rounds": 2.995,
+        "enemies": [
+          "glitchmot",
+          "sporenzwam"
+        ],
+        "label": "Glitch Moth + Spore Cap (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.252767527675277,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.106263837638376,
+        "avg_items": 0.1,
+        "avg_kos": 0,
+        "avg_mp": 16.14,
+        "avg_rounds": 2.025,
+        "enemies": [
+          "glitchmot",
+          "mistuil"
+        ],
+        "label": "Glitch Moth + Mist Owl (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.191881918819188,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.209778597785978,
+        "avg_items": 0.34,
+        "avg_kos": 0.06,
+        "avg_mp": 20.86,
+        "avg_rounds": 3.295,
+        "enemies": [
+          "wortelkruiper",
+          "wortelkruiper"
+        ],
+        "label": "Root Crawler + Root Crawler (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.321033210332103,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0936715867158671,
+        "avg_items": 0.055,
+        "avg_kos": 0,
+        "avg_mp": 16.3,
+        "avg_rounds": 2.065,
+        "enemies": [
+          "wortelkruiper",
+          "woudgeest"
+        ],
+        "label": "Root Crawler + Wood Wraith (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.164206642066421,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.270525830258303,
+        "avg_items": 0.725,
+        "avg_kos": 0.125,
+        "avg_mp": 26.08,
+        "avg_rounds": 3.91,
+        "enemies": [
+          "mistuil",
+          "sporenzwam",
+          "glitchmot"
+        ],
+        "label": "Mist Owl + Spore Cap + Glitch Moth (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.416974169741697,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.174215867158672,
+        "avg_items": 0.15,
+        "avg_kos": 0.01,
+        "avg_mp": 19.98,
+        "avg_rounds": 2.875,
+        "enemies": [
+          "glitchmot",
+          "wortelkruiper"
+        ],
+        "label": "Glitch Moth + Root Crawler (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.293357933579336,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.232481549815498,
+        "avg_items": 0.37,
+        "avg_kos": 0.065,
+        "avg_mp": 21.6,
+        "avg_rounds": 3.125,
+        "enemies": [
+          "wortelkruiper",
+          "mistuil",
+          "woudgeest"
+        ],
+        "label": "Root Crawler + Mist Owl + Wood Wraith (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.387453874538745,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.188016605166052,
+        "avg_items": 0.2,
+        "avg_kos": 0.025,
+        "avg_mp": 21.38,
+        "avg_rounds": 3.015,
+        "enemies": [
+          "glitchmot",
+          "woudgeest",
+          "sporenzwam"
+        ],
+        "label": "Glitch Moth + Wood Wraith + Spore Cap (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.313653136531365,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.177610701107011,
+        "avg_items": 0.25,
+        "avg_kos": 0.02,
+        "avg_mp": 21.62,
+        "avg_rounds": 3.025,
+        "enemies": [
+          "sporenzwam",
+          "glitchmot",
+          "woudgeest"
+        ],
+        "label": "Spore Cap + Glitch Moth + Wood Wraith (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.297047970479705,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.196605166051661,
+        "avg_items": 0.41,
+        "avg_kos": 0.045,
+        "avg_mp": 21.58,
+        "avg_rounds": 3.125,
+        "enemies": [
+          "glitchmot",
+          "mech_wachter",
+          "mistuil"
+        ],
+        "label": "Glitch Moth + Mech. Warden + Mist Owl (floor 45)",
+        "n": 200,
+        "p90_hp_loss": 0.319188191881919,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_v45",
+    "inventory": {
+      "sterk_drankje": 3,
+      "toverbrouwsel": 3,
+      "toverwater": 3
+    },
+    "n": 7600,
+    "name": "Deep Cave (Dungeon100) floor 45",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 23, d100 gear tier 3, potions of loot tier 3 (3 each).",
+    "p90_hp_loss": 0.282287822878229,
+    "party": "Dax Lv23 (HP 240 MP 0 ATK 112 DEF 84 AGI 36 MAG 2; Rune Sword, Rune Shield, Rune Helm, Rune Armor, Rune Ring; spells: -); Vesper Lv23 (HP 138 MP 106 ATK 37 DEF 49 AGI 60 MAG 72; Rune Staff, Rune Helm, Rune Armor, Rune Ring; spells: Spark, Chain Lightning); Seren Lv23 (HP 164 MP 80 ATK 61 DEF 50 AGI 34 MAG 69; Rune Staff, Rune Helm, Rune Armor, Rune Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.999868421052632
+  },
+  {
+    "avg_hp_loss": 0.246887656887658,
+    "avg_items": 0.846216216216216,
+    "avg_kos": 0.131891891891892,
+    "avg_mp": 22.1054054054054,
+    "avg_rounds": 4.22621621621622,
+    "groups": [
+      {
+        "avg_hp_loss": 0.394693732193732,
+        "avg_items": 2.325,
+        "avg_kos": 0.48,
+        "avg_mp": 35.58,
+        "avg_rounds": 6.285,
+        "enemies": [
+          "sporenzwam",
+          "wortelkruiper",
+          "adermot"
+        ],
+        "label": "Spore Cap + Root Crawler + Vein Moth (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.750712250712251,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.945
+      },
+      {
+        "avg_hp_loss": 0.258034188034188,
+        "avg_items": 0.72,
+        "avg_kos": 0.11,
+        "avg_mp": 28.32,
+        "avg_rounds": 4.385,
+        "enemies": [
+          "sporenzwam",
+          "sporenzwam"
+        ],
+        "label": "Spore Cap + Spore Cap (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.403133903133903,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.139131054131054,
+        "avg_items": 0.07,
+        "avg_kos": 0.01,
+        "avg_mp": 19.92,
+        "avg_rounds": 2.775,
+        "enemies": [
+          "woudgeest",
+          "mistuil"
+        ],
+        "label": "Wood Wraith + Mist Owl (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.247863247863248,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.348831908831909,
+        "avg_items": 1.44,
+        "avg_kos": 0.32,
+        "avg_mp": 18.74,
+        "avg_rounds": 4.825,
+        "enemies": [
+          "steenluis",
+          "mistuil"
+        ],
+        "label": "Stone Louse + Mist Owl (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.515669515669516,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.342257834757835,
+        "avg_items": 1.435,
+        "avg_kos": 0.22,
+        "avg_mp": 25.52,
+        "avg_rounds": 5.435,
+        "enemies": [
+          "druipslak",
+          "adermot"
+        ],
+        "label": "Drip Slug + Vein Moth (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.528490028490028,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.157286324786325,
+        "avg_items": 0.01,
+        "avg_kos": 0.015,
+        "avg_mp": 8.16,
+        "avg_rounds": 2.025,
+        "enemies": [
+          "adermot"
+        ],
+        "label": "Vein Moth (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.225071225071225,
+        "timeouts": 0,
+        "weight": 6,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.143183760683761,
+        "avg_items": 0.25,
+        "avg_kos": 0.005,
+        "avg_mp": 20.2,
+        "avg_rounds": 3.03,
+        "enemies": [
+          "wortelkruiper",
+          "woudgeest"
+        ],
+        "label": "Root Crawler + Wood Wraith (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.262108262108262,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.22539886039886,
+        "avg_items": 0.4,
+        "avg_kos": 0.095,
+        "avg_mp": 23.46,
+        "avg_rounds": 3.46,
+        "enemies": [
+          "mistuil",
+          "wortelkruiper"
+        ],
+        "label": "Mist Owl + Root Crawler (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.364672364672365,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.339615384615385,
+        "avg_items": 1.465,
+        "avg_kos": 0.295,
+        "avg_mp": 23.38,
+        "avg_rounds": 5.185,
+        "enemies": [
+          "wortelkruiper",
+          "steenluis"
+        ],
+        "label": "Root Crawler + Stone Louse (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.532763532763533,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 0.995
+      },
+      {
+        "avg_hp_loss": 0.245826210826211,
+        "avg_items": 0.42,
+        "avg_kos": 0.015,
+        "avg_mp": 26.66,
+        "avg_rounds": 4.635,
+        "enemies": [
+          "woudgeest",
+          "druipslak",
+          "woudgeest"
+        ],
+        "label": "Wood Wraith + Drip Slug + Wood Wraith (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.35042735042735,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.110598290598291,
+        "avg_items": 0.05,
+        "avg_kos": 0,
+        "avg_mp": 8.14,
+        "avg_rounds": 2.03,
+        "enemies": [
+          "wortelkruiper"
+        ],
+        "label": "Root Crawler (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.131054131054131,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.19298433048433,
+        "avg_items": 0.04,
+        "avg_kos": 0.025,
+        "avg_mp": 9.36,
+        "avg_rounds": 2.215,
+        "enemies": [
+          "sporenzwam"
+        ],
+        "label": "Spore Cap (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.253561253561254,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.199935897435898,
+        "avg_items": 0.115,
+        "avg_kos": 0,
+        "avg_mp": 12.48,
+        "avg_rounds": 3.1,
+        "enemies": [
+          "druipslak"
+        ],
+        "label": "Drip Slug (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.259259259259259,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.40758547008547,
+        "avg_items": 2.715,
+        "avg_kos": 0.45,
+        "avg_mp": 35.7,
+        "avg_rounds": 7.22,
+        "enemies": [
+          "druipslak",
+          "wortelkruiper",
+          "mistuil"
+        ],
+        "label": "Drip Slug + Root Crawler + Mist Owl (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.611111111111111,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.97
+      },
+      {
+        "avg_hp_loss": 0.221801994301994,
+        "avg_items": 0.495,
+        "avg_kos": 0.045,
+        "avg_mp": 15.7,
+        "avg_rounds": 4,
+        "enemies": [
+          "steenluis",
+          "woudgeest"
+        ],
+        "label": "Stone Louse + Wood Wraith (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.34045584045584,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.288069800569801,
+        "avg_items": 1.075,
+        "avg_kos": 0.16,
+        "avg_mp": 32.2,
+        "avg_rounds": 5.015,
+        "enemies": [
+          "sporenzwam",
+          "woudgeest",
+          "sporenzwam"
+        ],
+        "label": "Spore Cap + Wood Wraith + Spore Cap (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.464387464387464,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.318425925925926,
+        "avg_items": 1.545,
+        "avg_kos": 0.175,
+        "avg_mp": 25.76,
+        "avg_rounds": 5.47,
+        "enemies": [
+          "adermot",
+          "druipslak"
+        ],
+        "label": "Vein Moth + Drip Slug (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.488603988603989,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 4,
+        "avg_rounds": 1,
+        "enemies": [
+          "woudgeest"
+        ],
+        "label": "Wood Wraith (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.266139601139601,
+        "avg_items": 0.58,
+        "avg_kos": 0.125,
+        "avg_mp": 27.1,
+        "avg_rounds": 4.19,
+        "enemies": [
+          "wortelkruiper",
+          "adermot"
+        ],
+        "label": "Root Crawler + Vein Moth (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.434472934472934,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.201509971509971,
+        "avg_items": 0.49,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 4,
+        "enemies": [
+          "druipslak",
+          "woudgeest"
+        ],
+        "label": "Drip Slug + Wood Wraith (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.289173789173789,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.317150997150997,
+        "avg_items": 0.8,
+        "avg_kos": 0.105,
+        "avg_mp": 28.84,
+        "avg_rounds": 5.07,
+        "enemies": [
+          "steenluis",
+          "adermot"
+        ],
+        "label": "Stone Louse + Vein Moth (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.461538461538462,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.14258547008547,
+        "avg_items": 0.155,
+        "avg_kos": 0,
+        "avg_mp": 12,
+        "avg_rounds": 3,
+        "enemies": [
+          "steenluis"
+        ],
+        "label": "Stone Louse (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.188034188034188,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.0988319088319089,
+        "avg_items": 0.015,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "mistuil"
+        ],
+        "label": "Mist Owl (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.126780626780627,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.240242165242165,
+        "avg_items": 0.58,
+        "avg_kos": 0.07,
+        "avg_mp": 27.72,
+        "avg_rounds": 4.12,
+        "enemies": [
+          "adermot",
+          "wortelkruiper"
+        ],
+        "label": "Vein Moth + Root Crawler (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.394586894586895,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.355306267806268,
+        "avg_items": 1.71,
+        "avg_kos": 0.36,
+        "avg_mp": 22.58,
+        "avg_rounds": 5.625,
+        "enemies": [
+          "druipslak",
+          "wortelkruiper"
+        ],
+        "label": "Drip Slug + Root Crawler (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.555555555555556,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.288525641025641,
+        "avg_items": 0.91,
+        "avg_kos": 0.065,
+        "avg_mp": 29.02,
+        "avg_rounds": 5.02,
+        "enemies": [
+          "adermot",
+          "steenluis"
+        ],
+        "label": "Vein Moth + Stone Louse (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.451566951566952,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.156866096866097,
+        "avg_items": 0.165,
+        "avg_kos": 0.02,
+        "avg_mp": 20.54,
+        "avg_rounds": 3.135,
+        "enemies": [
+          "sporenzwam",
+          "woudgeest"
+        ],
+        "label": "Spore Cap + Wood Wraith (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.272079772079772,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.346766381766382,
+        "avg_items": 1.525,
+        "avg_kos": 0.235,
+        "avg_mp": 20.34,
+        "avg_rounds": 5.1,
+        "enemies": [
+          "druipslak",
+          "mistuil"
+        ],
+        "label": "Drip Slug + Mist Owl (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.51994301994302,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.425470085470085,
+        "avg_items": 3.025,
+        "avg_kos": 0.51,
+        "avg_mp": 40.36,
+        "avg_rounds": 8.46,
+        "enemies": [
+          "steenluis",
+          "druipslak",
+          "wortelkruiper"
+        ],
+        "label": "Stone Louse + Drip Slug + Root Crawler (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.663817663817664,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.98
+      },
+      {
+        "avg_hp_loss": 0.215854700854701,
+        "avg_items": 0.61,
+        "avg_kos": 0.05,
+        "avg_mp": 27.02,
+        "avg_rounds": 3.79,
+        "enemies": [
+          "sporenzwam",
+          "mistuil"
+        ],
+        "label": "Spore Cap + Mist Owl (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.356125356125356,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.285883190883191,
+        "avg_items": 1.095,
+        "avg_kos": 0.225,
+        "avg_mp": 30.7,
+        "avg_rounds": 4.765,
+        "enemies": [
+          "sporenzwam",
+          "woudgeest",
+          "wortelkruiper"
+        ],
+        "label": "Spore Cap + Wood Wraith + Root Crawler (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.471509971509972,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.223646723646724,
+        "avg_items": 0.61,
+        "avg_kos": 0.045,
+        "avg_mp": 28.34,
+        "avg_rounds": 4.245,
+        "enemies": [
+          "sporenzwam",
+          "adermot"
+        ],
+        "label": "Spore Cap + Vein Moth (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.364672364672365,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.207001424501424,
+        "avg_items": 0.49,
+        "avg_kos": 0,
+        "avg_mp": 16.06,
+        "avg_rounds": 4.01,
+        "enemies": [
+          "woudgeest",
+          "druipslak"
+        ],
+        "label": "Wood Wraith + Drip Slug (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.293447293447293,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.366431623931624,
+        "avg_items": 1.775,
+        "avg_kos": 0.325,
+        "avg_mp": 23.44,
+        "avg_rounds": 5.62,
+        "enemies": [
+          "wortelkruiper",
+          "druipslak"
+        ],
+        "label": "Root Crawler + Drip Slug (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.565527065527066,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.151018518518519,
+        "avg_items": 0.225,
+        "avg_kos": 0.015,
+        "avg_mp": 20.74,
+        "avg_rounds": 3.2,
+        "enemies": [
+          "woudgeest",
+          "sporenzwam"
+        ],
+        "label": "Wood Wraith + Spore Cap (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.257834757834758,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.344864672364672,
+        "avg_items": 1.66,
+        "avg_kos": 0.295,
+        "avg_mp": 25.2,
+        "avg_rounds": 5.755,
+        "enemies": [
+          "sporenzwam",
+          "druipslak"
+        ],
+        "label": "Spore Cap + Drip Slug (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.566951566951567,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.167086894586895,
+        "avg_items": 0.32,
+        "avg_kos": 0.015,
+        "avg_mp": 20.62,
+        "avg_rounds": 3.175,
+        "enemies": [
+          "mistuil",
+          "mistuil"
+        ],
+        "label": "Mist Owl + Mist Owl (floor 65)",
+        "n": 200,
+        "p90_hp_loss": 0.279202279202279,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_v65",
+    "inventory": {
+      "elixer": 3,
+      "sterk_drankje": 3,
+      "toverbrouwsel": 3
+    },
+    "n": 7400,
+    "name": "Deep Cave (Dungeon100) floor 65",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 31, d100 gear tier 4, potions of loot tier 4 (3 each).",
+    "p90_hp_loss": 0.45014245014245,
+    "party": "Dax Lv31 (HP 312 MP 0 ATK 152 DEF 119 AGI 47 MAG 2; Glitch Sword, Glitch Shield, Glitch Helm, Glitch Armor, Glitch Ring; spells: -); Vesper Lv31 (HP 178 MP 138 ATK 49 DEF 70 AGI 79 MAG 100; Glitch Staff, Glitch Helm, Glitch Armor, Glitch Ring; spells: Spark, Chain Lightning); Seren Lv31 (HP 212 MP 104 ATK 81 DEF 71 AGI 45 MAG 97; Glitch Staff, Glitch Helm, Glitch Armor, Glitch Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.997027027027027
+  },
+  {
+    "avg_hp_loss": 0.382941523457464,
+    "avg_items": 1.69677966101695,
+    "avg_kos": 0.514491525423729,
+    "avg_mp": 23.4728813559322,
+    "avg_rounds": 5.76152542372881,
+    "groups": [
+      {
+        "avg_hp_loss": 0.336415313225058,
+        "avg_items": 1.55,
+        "avg_kos": 0.195,
+        "avg_mp": 25.2,
+        "avg_rounds": 5.415,
+        "enemies": [
+          "steenluis",
+          "sporekop"
+        ],
+        "label": "Stone Louse + Sporehead (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.504640371229698,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.270748259860789,
+        "avg_items": 0.115,
+        "avg_kos": 0.285,
+        "avg_mp": 10.56,
+        "avg_rounds": 2.825,
+        "enemies": [
+          "scanline_wolf"
+        ],
+        "label": "Scanline Wolf (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.39907192575406,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.376844547563805,
+        "avg_items": 2.29,
+        "avg_kos": 0.27,
+        "avg_mp": 26.04,
+        "avg_rounds": 7.52,
+        "enemies": [
+          "druipslak",
+          "druipslak"
+        ],
+        "label": "Drip Slug + Drip Slug (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.561484918793503,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.223764501160093,
+        "avg_items": 0.555,
+        "avg_kos": 0.015,
+        "avg_mp": 28.24,
+        "avg_rounds": 4.28,
+        "enemies": [
+          "sporekop",
+          "rankje"
+        ],
+        "label": "Sporehead + Tendril (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.342227378190255,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.188544083526682,
+        "avg_items": 0.08,
+        "avg_kos": 0.025,
+        "avg_mp": 9.5,
+        "avg_rounds": 2.4,
+        "enemies": [
+          "shard_codex"
+        ],
+        "label": "Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.256380510440835,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.430179814385151,
+        "avg_items": 3.96,
+        "avg_kos": 0.605,
+        "avg_mp": 48.38,
+        "avg_rounds": 10.42,
+        "enemies": [
+          "bloeiende_schrik",
+          "steenluis",
+          "druipslak"
+        ],
+        "label": "Blooming Dread + Stone Louse + Drip Slug (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.69953596287703,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.96
+      },
+      {
+        "avg_hp_loss": 0.362180974477958,
+        "avg_items": 1.34,
+        "avg_kos": 0.245,
+        "avg_mp": 19.12,
+        "avg_rounds": 5.225,
+        "enemies": [
+          "adermot",
+          "adermot"
+        ],
+        "label": "Vein Moth + Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.537122969837587,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.633677494199536,
+        "avg_items": 2.51,
+        "avg_kos": 1.475,
+        "avg_mp": 15.44,
+        "avg_rounds": 7.34,
+        "enemies": [
+          "scanline_wolf",
+          "shard_codex"
+        ],
+        "label": "Scanline Wolf + Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.785
+      },
+      {
+        "avg_hp_loss": 0.219547563805104,
+        "avg_items": 0.595,
+        "avg_kos": 0.025,
+        "avg_mp": 28.3,
+        "avg_rounds": 4.3,
+        "enemies": [
+          "rankje",
+          "sporekop"
+        ],
+        "label": "Tendril + Sporehead (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.341067285382831,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.396368909512761,
+        "avg_items": 2.135,
+        "avg_kos": 0.255,
+        "avg_mp": 24.62,
+        "avg_rounds": 6.825,
+        "enemies": [
+          "steenluis",
+          "steenluis"
+        ],
+        "label": "Stone Louse + Stone Louse (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.58584686774942,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.327470997679814,
+        "avg_items": 1.875,
+        "avg_kos": 0.18,
+        "avg_mp": 24.68,
+        "avg_rounds": 5.855,
+        "enemies": [
+          "sporekop",
+          "druipslak"
+        ],
+        "label": "Sporehead + Drip Slug (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.496519721577726,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.606554524361949,
+        "avg_items": 2.645,
+        "avg_kos": 1.415,
+        "avg_mp": 15.86,
+        "avg_rounds": 7.32,
+        "enemies": [
+          "bloeiende_schrik",
+          "scanline_wolf"
+        ],
+        "label": "Blooming Dread + Scanline Wolf (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.845
+      },
+      {
+        "avg_hp_loss": 0.196740139211137,
+        "avg_items": 0.125,
+        "avg_kos": 0,
+        "avg_mp": 12.2,
+        "avg_rounds": 3.04,
+        "enemies": [
+          "steenluis"
+        ],
+        "label": "Stone Louse (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.276102088167053,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.289976798143851,
+        "avg_items": 0.71,
+        "avg_kos": 0.26,
+        "avg_mp": 26.06,
+        "avg_rounds": 4.17,
+        "enemies": [
+          "doornige_loper",
+          "sporekop"
+        ],
+        "label": "Thorn Runner + Sporehead (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.509280742459397,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.362407192575406,
+        "avg_items": 1.89,
+        "avg_kos": 0.245,
+        "avg_mp": 21.6,
+        "avg_rounds": 5.97,
+        "enemies": [
+          "wortelgeest",
+          "druipslak"
+        ],
+        "label": "Rootghost + Drip Slug (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.544083526682135,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.426948955916473,
+        "avg_items": 2.195,
+        "avg_kos": 0.655,
+        "avg_mp": 16.22,
+        "avg_rounds": 6.39,
+        "enemies": [
+          "shard_codex",
+          "shard_codex"
+        ],
+        "label": "Shard Codex + Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.677494199535963,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 0.995
+      },
+      {
+        "avg_hp_loss": 0.686896751740139,
+        "avg_items": 3.22,
+        "avg_kos": 1.585,
+        "avg_mp": 32.68,
+        "avg_rounds": 8.51,
+        "enemies": [
+          "bloeiende_schrik",
+          "shard_codex",
+          "shard_codex"
+        ],
+        "label": "Blooming Dread + Shard Codex + Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.635
+      },
+      {
+        "avg_hp_loss": 0.298932714617169,
+        "avg_items": 1.01,
+        "avg_kos": 0.105,
+        "avg_mp": 25.9,
+        "avg_rounds": 4.935,
+        "enemies": [
+          "sporekop",
+          "shard_codex"
+        ],
+        "label": "Sporehead + Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.461716937354988,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.37350928074246,
+        "avg_items": 1.53,
+        "avg_kos": 0.24,
+        "avg_mp": 18.96,
+        "avg_rounds": 5.425,
+        "enemies": [
+          "adermot",
+          "bloeiende_schrik"
+        ],
+        "label": "Vein Moth + Blooming Dread (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.559164733178654,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.669361948955917,
+        "avg_items": 3.11,
+        "avg_kos": 1.61,
+        "avg_mp": 35.4,
+        "avg_rounds": 8.535,
+        "enemies": [
+          "druipslak",
+          "scanline_wolf",
+          "sporekop"
+        ],
+        "label": "Drip Slug + Scanline Wolf + Sporehead (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.65
+      },
+      {
+        "avg_hp_loss": 0.530986078886311,
+        "avg_items": 1.815,
+        "avg_kos": 1.07,
+        "avg_mp": 29.54,
+        "avg_rounds": 6.09,
+        "enemies": [
+          "rankje",
+          "sporekop",
+          "doornige_loper"
+        ],
+        "label": "Tendril + Sporehead + Thorn Runner (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.755
+      },
+      {
+        "avg_hp_loss": 0.373799303944316,
+        "avg_items": 2.015,
+        "avg_kos": 0.3,
+        "avg_mp": 22.62,
+        "avg_rounds": 6.27,
+        "enemies": [
+          "steenluis",
+          "adermot"
+        ],
+        "label": "Stone Louse + Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.561484918793503,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.610110208816705,
+        "avg_items": 3.58,
+        "avg_kos": 1.375,
+        "avg_mp": 38.22,
+        "avg_rounds": 8.91,
+        "enemies": [
+          "shard_codex",
+          "steenluis",
+          "shard_codex"
+        ],
+        "label": "Shard Codex + Stone Louse + Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.675
+      },
+      {
+        "avg_hp_loss": 0.597180974477958,
+        "avg_items": 2.69,
+        "avg_kos": 1.3,
+        "avg_mp": 16.96,
+        "avg_rounds": 7.295,
+        "enemies": [
+          "scanline_wolf",
+          "bloeiende_schrik"
+        ],
+        "label": "Scanline Wolf + Blooming Dread (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 0.86
+      },
+      {
+        "avg_hp_loss": 0.233613689095128,
+        "avg_items": 0.415,
+        "avg_kos": 0.105,
+        "avg_mp": 23.22,
+        "avg_rounds": 4.185,
+        "enemies": [
+          "rankje",
+          "doornige_loper"
+        ],
+        "label": "Tendril + Thorn Runner (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.367749419953596,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.357824825986079,
+        "avg_items": 1.35,
+        "avg_kos": 0.23,
+        "avg_mp": 18.86,
+        "avg_rounds": 5.035,
+        "enemies": [
+          "wortelgeest",
+          "adermot"
+        ],
+        "label": "Rootghost + Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.489559164733179,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.630864269141531,
+        "avg_items": 2.325,
+        "avg_kos": 1.44,
+        "avg_mp": 29.22,
+        "avg_rounds": 6.61,
+        "enemies": [
+          "scanline_wolf",
+          "scanline_wolf",
+          "sporekop"
+        ],
+        "label": "Scanline Wolf + Scanline Wolf + Sporehead (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.685
+      },
+      {
+        "avg_hp_loss": 0.177819025522042,
+        "avg_items": 0.01,
+        "avg_kos": 0.005,
+        "avg_mp": 11.92,
+        "avg_rounds": 2.84,
+        "enemies": [
+          "adermot"
+        ],
+        "label": "Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.22737819025522,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.428741299303944,
+        "avg_items": 2.325,
+        "avg_kos": 0.55,
+        "avg_mp": 18.12,
+        "avg_rounds": 6.45,
+        "enemies": [
+          "bloeiende_schrik",
+          "shard_codex"
+        ],
+        "label": "Blooming Dread + Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.669373549883991,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.995
+      },
+      {
+        "avg_hp_loss": 0.23572505800464,
+        "avg_items": 0.535,
+        "avg_kos": 0.17,
+        "avg_mp": 22.46,
+        "avg_rounds": 4.32,
+        "enemies": [
+          "doornige_loper",
+          "rankje"
+        ],
+        "label": "Thorn Runner + Tendril (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.445475638051044,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.686908352668213,
+        "avg_items": 2.99,
+        "avg_kos": 1.625,
+        "avg_mp": 30.98,
+        "avg_rounds": 8.035,
+        "enemies": [
+          "steenluis",
+          "scanline_wolf",
+          "shard_codex"
+        ],
+        "label": "Stone Louse + Scanline Wolf + Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.585
+      },
+      {
+        "avg_hp_loss": 0.100353828306264,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 2,
+        "enemies": [
+          "wortelgeest"
+        ],
+        "label": "Rootghost (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.132250580046404,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.437929234338747,
+        "avg_items": 1.89,
+        "avg_kos": 0.71,
+        "avg_mp": 21,
+        "avg_rounds": 6.09,
+        "enemies": [
+          "steenluis",
+          "doornige_loper"
+        ],
+        "label": "Stone Louse + Thorn Runner (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.722737819025522,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 0.965
+      },
+      {
+        "avg_hp_loss": 0.0842575406032483,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 7.62,
+        "avg_rounds": 2.015,
+        "enemies": [
+          "rankje"
+        ],
+        "label": "Tendril (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.109048723897912,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.346885150812065,
+        "avg_items": 1.54,
+        "avg_kos": 0.23,
+        "avg_mp": 22.42,
+        "avg_rounds": 6,
+        "enemies": [
+          "rankje",
+          "druipslak"
+        ],
+        "label": "Tendril + Drip Slug (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.517401392111369,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.519721577726218,
+        "avg_items": 2.25,
+        "avg_kos": 1.055,
+        "avg_mp": 16.44,
+        "avg_rounds": 6.555,
+        "enemies": [
+          "scanline_wolf",
+          "adermot"
+        ],
+        "label": "Scanline Wolf + Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.77030162412993,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.945
+      },
+      {
+        "avg_hp_loss": 0.393196055684455,
+        "avg_items": 2.055,
+        "avg_kos": 0.455,
+        "avg_mp": 18.36,
+        "avg_rounds": 6.15,
+        "enemies": [
+          "shard_codex",
+          "bloeiende_schrik"
+        ],
+        "label": "Shard Codex + Blooming Dread (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.582366589327146,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.380864269141532,
+        "avg_items": 2.45,
+        "avg_kos": 0.305,
+        "avg_mp": 23.92,
+        "avg_rounds": 6.765,
+        "enemies": [
+          "bloeiende_schrik",
+          "druipslak"
+        ],
+        "label": "Blooming Dread + Drip Slug (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.553364269141531,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.316600928074246,
+        "avg_items": 0.66,
+        "avg_kos": 0.41,
+        "avg_mp": 25.26,
+        "avg_rounds": 4.265,
+        "enemies": [
+          "sporekop",
+          "doornige_loper"
+        ],
+        "label": "Sporehead + Thorn Runner (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.526682134570766,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.98
+      },
+      {
+        "avg_hp_loss": 0.457633410672854,
+        "avg_items": 1.825,
+        "avg_kos": 0.74,
+        "avg_mp": 21.54,
+        "avg_rounds": 5.945,
+        "enemies": [
+          "doornige_loper",
+          "steenluis"
+        ],
+        "label": "Thorn Runner + Stone Louse (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.762180974477958,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.95
+      },
+      {
+        "avg_hp_loss": 0.372865429234339,
+        "avg_items": 1.97,
+        "avg_kos": 0.35,
+        "avg_mp": 21.8,
+        "avg_rounds": 6.345,
+        "enemies": [
+          "adermot",
+          "steenluis"
+        ],
+        "label": "Vein Moth + Stone Louse (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.582366589327146,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.374640371229698,
+        "avg_items": 1.825,
+        "avg_kos": 0.25,
+        "avg_mp": 21.22,
+        "avg_rounds": 5.985,
+        "enemies": [
+          "druipslak",
+          "wortelgeest"
+        ],
+        "label": "Drip Slug + Rootghost (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.537122969837587,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.415174013921114,
+        "avg_items": 3.1,
+        "avg_kos": 0.585,
+        "avg_mp": 37.26,
+        "avg_rounds": 8.195,
+        "enemies": [
+          "shard_codex",
+          "adermot",
+          "adermot"
+        ],
+        "label": "Shard Codex + Vein Moth + Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.703016241299304,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.97
+      },
+      {
+        "avg_hp_loss": 0.328863109048724,
+        "avg_items": 1.97,
+        "avg_kos": 0.165,
+        "avg_mp": 24.88,
+        "avg_rounds": 5.965,
+        "enemies": [
+          "druipslak",
+          "sporekop"
+        ],
+        "label": "Drip Slug + Sporehead (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.51508120649652,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.184187935034803,
+        "avg_items": 0.1,
+        "avg_kos": 0.025,
+        "avg_mp": 11.94,
+        "avg_rounds": 3,
+        "enemies": [
+          "bloeiende_schrik"
+        ],
+        "label": "Blooming Dread (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.247099767981439,
+        "timeouts": 0,
+        "weight": 4,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.390295823665893,
+        "avg_items": 2.29,
+        "avg_kos": 0.405,
+        "avg_mp": 24.84,
+        "avg_rounds": 7.375,
+        "enemies": [
+          "steenluis",
+          "druipslak"
+        ],
+        "label": "Stone Louse + Drip Slug (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.589327146171694,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.521160092807424,
+        "avg_items": 2.34,
+        "avg_kos": 0.98,
+        "avg_mp": 30.76,
+        "avg_rounds": 6.505,
+        "enemies": [
+          "wortelgeest",
+          "wortelgeest",
+          "doornige_loper"
+        ],
+        "label": "Rootghost + Rootghost + Thorn Runner (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.87
+      },
+      {
+        "avg_hp_loss": 0.503944315545244,
+        "avg_items": 2.56,
+        "avg_kos": 0.86,
+        "avg_mp": 33.56,
+        "avg_rounds": 7.465,
+        "enemies": [
+          "shard_codex",
+          "rankje",
+          "wortelgeest"
+        ],
+        "label": "Shard Codex + Tendril + Rootghost (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.82
+      },
+      {
+        "avg_hp_loss": 0.132755220417633,
+        "avg_items": 0.095,
+        "avg_kos": 0.08,
+        "avg_mp": 7.86,
+        "avg_rounds": 2.07,
+        "enemies": [
+          "doornige_loper"
+        ],
+        "label": "Thorn Runner (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.249419953596288,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.336838747099768,
+        "avg_items": 2.215,
+        "avg_kos": 0.27,
+        "avg_mp": 39.04,
+        "avg_rounds": 6.51,
+        "enemies": [
+          "sporekop",
+          "wortelgeest",
+          "rankje"
+        ],
+        "label": "Sporehead + Rootghost + Tendril (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.576566125290023,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.985
+      },
+      {
+        "avg_hp_loss": 0.311635730858469,
+        "avg_items": 1.11,
+        "avg_kos": 0.385,
+        "avg_mp": 22.76,
+        "avg_rounds": 4.715,
+        "enemies": [
+          "doornige_loper",
+          "adermot"
+        ],
+        "label": "Thorn Runner + Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.545243619489559,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.985
+      },
+      {
+        "avg_hp_loss": 0.438114849187935,
+        "avg_items": 2.25,
+        "avg_kos": 0.675,
+        "avg_mp": 35.2,
+        "avg_rounds": 6.73,
+        "enemies": [
+          "sporekop",
+          "doornige_loper",
+          "adermot"
+        ],
+        "label": "Sporehead + Thorn Runner + Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.853828306264501,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.91
+      },
+      {
+        "avg_hp_loss": 0.29165313225058,
+        "avg_items": 0.795,
+        "avg_kos": 0.02,
+        "avg_mp": 26.96,
+        "avg_rounds": 4.76,
+        "enemies": [
+          "adermot",
+          "sporekop"
+        ],
+        "label": "Vein Moth + Sporehead (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.444315545243619,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.162227378190255,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8.38,
+        "avg_rounds": 2.05,
+        "enemies": [
+          "sporekop"
+        ],
+        "label": "Sporehead (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.212296983758701,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.272291183294663,
+        "avg_items": 0.93,
+        "avg_kos": 0.145,
+        "avg_mp": 23.78,
+        "avg_rounds": 4.855,
+        "enemies": [
+          "rankje",
+          "shard_codex"
+        ],
+        "label": "Tendril + Shard Codex (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.440835266821346,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.709825986078886,
+        "avg_items": 2.865,
+        "avg_kos": 1.77,
+        "avg_mp": 30.5,
+        "avg_rounds": 7.615,
+        "enemies": [
+          "scanline_wolf",
+          "druipslak",
+          "scanline_wolf"
+        ],
+        "label": "Scanline Wolf + Drip Slug + Scanline Wolf (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.6
+      },
+      {
+        "avg_hp_loss": 0.410324825986079,
+        "avg_items": 1.94,
+        "avg_kos": 0.355,
+        "avg_mp": 20.86,
+        "avg_rounds": 5.815,
+        "enemies": [
+          "bloeiende_schrik",
+          "adermot"
+        ],
+        "label": "Blooming Dread + Vein Moth (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.607888631090487,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.423335266821346,
+        "avg_items": 2.03,
+        "avg_kos": 0.64,
+        "avg_mp": 33.32,
+        "avg_rounds": 6.69,
+        "enemies": [
+          "rankje",
+          "scanline_wolf",
+          "rankje"
+        ],
+        "label": "Tendril + Scanline Wolf + Tendril (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.885
+      },
+      {
+        "avg_hp_loss": 0.435330626450116,
+        "avg_items": 3.565,
+        "avg_kos": 0.63,
+        "avg_mp": 38.34,
+        "avg_rounds": 8.76,
+        "enemies": [
+          "bloeiende_schrik",
+          "adermot",
+          "bloeiende_schrik"
+        ],
+        "label": "Blooming Dread + Vein Moth + Blooming Dread (floor 85)",
+        "n": 200,
+        "p90_hp_loss": 0.769141531322506,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.96
+      }
+    ],
+    "id": "d100_v85",
+    "inventory": {
+      "elixer": 6,
+      "toverbrouwsel": 3
+    },
+    "n": 11800,
+    "name": "Deep Cave (Dungeon100) floor 85",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 39, d100 gear tier 5, potions of loot tier 5 (3 each).",
+    "p90_hp_loss": 0.716937354988399,
+    "party": "Dax Lv39 (HP 384 MP 0 ATK 198 DEF 160 AGI 59 MAG 2; Seal Sword, Seal Shield, Seal Helm, Seal Armor, Seal Ring; spells: -); Vesper Lv39 (HP 218 MP 170 ATK 63 DEF 95 AGI 99 MAG 132; Seal Staff, Seal Helm, Seal Armor, Seal Ring; spells: Spark, Chain Lightning); Seren Lv39 (HP 260 MP 128 ATK 103 DEF 96 AGI 57 MAG 129; Seal Staff, Seal Helm, Seal Armor, Seal Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.936440677966102
+  },
+  {
+    "avg_hp_loss": 0.453926313117327,
+    "avg_items": 2.32978260869565,
+    "avg_kos": 0.771630434782609,
+    "avg_mp": 24.1117391304348,
+    "avg_rounds": 6.715,
+    "groups": [
+      {
+        "avg_hp_loss": 0.593046709129512,
+        "avg_items": 2.6,
+        "avg_kos": 1.225,
+        "avg_mp": 32.36,
+        "avg_rounds": 6.805,
+        "enemies": [
+          "wortelgeest",
+          "doornige_loper",
+          "wortelgeest"
+        ],
+        "label": "Rootghost + Thorn Runner + Rootghost (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.775
+      },
+      {
+        "avg_hp_loss": 0.182154989384289,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 12.12,
+        "avg_rounds": 2.81,
+        "enemies": [
+          "sporekop"
+        ],
+        "label": "Sporehead (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.219745222929936,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.218736730360934,
+        "avg_items": 0.42,
+        "avg_kos": 0.08,
+        "avg_mp": 12.1,
+        "avg_rounds": 3.065,
+        "enemies": [
+          "aureate_watcher"
+        ],
+        "label": "Aureate Watcher (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.301486199575372,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.480387473460722,
+        "avg_items": 1.76,
+        "avg_kos": 0.76,
+        "avg_mp": 16.36,
+        "avg_rounds": 5.585,
+        "enemies": [
+          "doornige_loper",
+          "wortelgeest"
+        ],
+        "label": "Thorn Runner + Rootghost (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.747346072186836,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.95
+      },
+      {
+        "avg_hp_loss": 0.490429936305732,
+        "avg_items": 3.235,
+        "avg_kos": 0.905,
+        "avg_mp": 22.26,
+        "avg_rounds": 8.455,
+        "enemies": [
+          "druipslak",
+          "aureate_watcher"
+        ],
+        "label": "Drip Slug + Aureate Watcher (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.751592356687898,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 0.96
+      },
+      {
+        "avg_hp_loss": 0.15578025477707,
+        "avg_items": 0.08,
+        "avg_kos": 0.135,
+        "avg_mp": 8.06,
+        "avg_rounds": 2.135,
+        "enemies": [
+          "doornige_loper"
+        ],
+        "label": "Thorn Runner (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.321656050955414,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.648317409766454,
+        "avg_items": 4.81,
+        "avg_kos": 1.435,
+        "avg_mp": 34.72,
+        "avg_rounds": 11.41,
+        "enemies": [
+          "adermot",
+          "adermot",
+          "druipslak"
+        ],
+        "label": "Vein Moth + Vein Moth + Drip Slug (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.695
+      },
+      {
+        "avg_hp_loss": 0.500169851380042,
+        "avg_items": 3.22,
+        "avg_kos": 0.765,
+        "avg_mp": 39.68,
+        "avg_rounds": 7.735,
+        "enemies": [
+          "sporekop",
+          "sporekop",
+          "bloeiende_schrik"
+        ],
+        "label": "Sporehead + Sporehead + Blooming Dread (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.86
+      },
+      {
+        "avg_hp_loss": 0.516910828025478,
+        "avg_items": 3.055,
+        "avg_kos": 1.065,
+        "avg_mp": 19.54,
+        "avg_rounds": 8.425,
+        "enemies": [
+          "aureate_watcher",
+          "bloeiende_schrik"
+        ],
+        "label": "Aureate Watcher + Blooming Dread (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.791932059447983,
+        "timeouts": 0,
+        "weight": 3,
+        "win_rate": 0.955
+      },
+      {
+        "avg_hp_loss": 0.253057324840764,
+        "avg_items": 0.905,
+        "avg_kos": 0.04,
+        "avg_mp": 24.98,
+        "avg_rounds": 4.64,
+        "enemies": [
+          "wortelgeest",
+          "rankje"
+        ],
+        "label": "Rootghost + Tendril (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.374734607218684,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.606804670912951,
+        "avg_items": 2.71,
+        "avg_kos": 1.325,
+        "avg_mp": 17.5,
+        "avg_rounds": 7.18,
+        "enemies": [
+          "doornige_loper",
+          "aureate_watcher"
+        ],
+        "label": "Thorn Runner + Aureate Watcher (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.85
+      },
+      {
+        "avg_hp_loss": 0.772393842887473,
+        "avg_items": 3.8,
+        "avg_kos": 1.985,
+        "avg_mp": 38.02,
+        "avg_rounds": 9.265,
+        "enemies": [
+          "bloeiende_schrik",
+          "aureate_watcher",
+          "aureate_watcher"
+        ],
+        "label": "Blooming Dread + Aureate Watcher + Aureate Watcher (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.5
+      },
+      {
+        "avg_hp_loss": 0.754352441613588,
+        "avg_items": 3.25,
+        "avg_kos": 1.925,
+        "avg_mp": 34.4,
+        "avg_rounds": 8.19,
+        "enemies": [
+          "aureate_watcher",
+          "bloeiende_schrik",
+          "ledger_scarab"
+        ],
+        "label": "Aureate Watcher + Blooming Dread + Ledger Scarab (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.5
+      },
+      {
+        "avg_hp_loss": 0.251374734607219,
+        "avg_items": 0.895,
+        "avg_kos": 0.05,
+        "avg_mp": 24.6,
+        "avg_rounds": 4.645,
+        "enemies": [
+          "rankje",
+          "wortelgeest"
+        ],
+        "label": "Tendril + Rootghost (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.389596602972399,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.160684713375796,
+        "avg_items": 0.125,
+        "avg_kos": 0.015,
+        "avg_mp": 11.94,
+        "avg_rounds": 3,
+        "enemies": [
+          "adermot"
+        ],
+        "label": "Vein Moth (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.225053078556263,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.370180467091295,
+        "avg_items": 2.01,
+        "avg_kos": 0.36,
+        "avg_mp": 19.96,
+        "avg_rounds": 5.825,
+        "enemies": [
+          "adermot",
+          "adermot"
+        ],
+        "label": "Vein Moth + Vein Moth (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.570063694267516,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.702070063694267,
+        "avg_items": 3.03,
+        "avg_kos": 1.815,
+        "avg_mp": 16.84,
+        "avg_rounds": 8.365,
+        "enemies": [
+          "aureate_watcher",
+          "ledger_scarab"
+        ],
+        "label": "Aureate Watcher + Ledger Scarab (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.635
+      },
+      {
+        "avg_hp_loss": 0.417064755838641,
+        "avg_items": 3.135,
+        "avg_kos": 0.575,
+        "avg_mp": 22.2,
+        "avg_rounds": 7.84,
+        "enemies": [
+          "steenluis",
+          "bloeiende_schrik"
+        ],
+        "label": "Stone Louse + Blooming Dread (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.660297239915074,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.99
+      },
+      {
+        "avg_hp_loss": 0.880467091295117,
+        "avg_items": 4.14,
+        "avg_kos": 2.4,
+        "avg_mp": 29.7,
+        "avg_rounds": 9.22,
+        "enemies": [
+          "aureate_watcher",
+          "aureate_watcher",
+          "druipslak"
+        ],
+        "label": "Aureate Watcher + Aureate Watcher + Drip Slug (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.3
+      },
+      {
+        "avg_hp_loss": 0.615376857749469,
+        "avg_items": 2.865,
+        "avg_kos": 1.415,
+        "avg_mp": 18.76,
+        "avg_rounds": 8.34,
+        "enemies": [
+          "ledger_scarab",
+          "steenluis"
+        ],
+        "label": "Ledger Scarab + Stone Louse (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.8
+      },
+      {
+        "avg_hp_loss": 0.590918259023354,
+        "avg_items": 3.155,
+        "avg_kos": 1.28,
+        "avg_mp": 21.26,
+        "avg_rounds": 9.26,
+        "enemies": [
+          "druipslak",
+          "ledger_scarab"
+        ],
+        "label": "Drip Slug + Ledger Scarab (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.84
+      },
+      {
+        "avg_hp_loss": 0.0948566878980893,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8.22,
+        "avg_rounds": 2.09,
+        "enemies": [
+          "rankje"
+        ],
+        "label": "Tendril (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.134819532908705,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.39218152866242,
+        "avg_items": 2.56,
+        "avg_kos": 0.475,
+        "avg_mp": 20.84,
+        "avg_rounds": 6.525,
+        "enemies": [
+          "bloeiende_schrik",
+          "sporekop"
+        ],
+        "label": "Blooming Dread + Sporehead (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.656050955414013,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.401231422505308,
+        "avg_items": 2.495,
+        "avg_kos": 0.52,
+        "avg_mp": 20,
+        "avg_rounds": 6.67,
+        "enemies": [
+          "bloeiende_schrik",
+          "adermot"
+        ],
+        "label": "Blooming Dread + Vein Moth (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.614649681528662,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.604782377919321,
+        "avg_items": 3.05,
+        "avg_kos": 1.305,
+        "avg_mp": 32.6,
+        "avg_rounds": 8.23,
+        "enemies": [
+          "doornige_loper",
+          "bloeiende_schrik",
+          "adermot"
+        ],
+        "label": "Thorn Runner + Blooming Dread + Vein Moth (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.775
+      },
+      {
+        "avg_hp_loss": 0.217675159235669,
+        "avg_items": 0.17,
+        "avg_kos": 0.015,
+        "avg_mp": 12.68,
+        "avg_rounds": 3.17,
+        "enemies": [
+          "steenluis"
+        ],
+        "label": "Stone Louse (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.290870488322718,
+        "timeouts": 0,
+        "weight": 4,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.283789808917198,
+        "avg_items": 0.83,
+        "avg_kos": 0.065,
+        "avg_mp": 26.08,
+        "avg_rounds": 4.795,
+        "enemies": [
+          "rankje",
+          "adermot"
+        ],
+        "label": "Tendril + Vein Moth (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.421443736730361,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.417627388535032,
+        "avg_items": 2.28,
+        "avg_kos": 0.375,
+        "avg_mp": 21.98,
+        "avg_rounds": 6.385,
+        "enemies": [
+          "steenluis",
+          "sporekop"
+        ],
+        "label": "Stone Louse + Sporehead (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.590233545647558,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.664708067940552,
+        "avg_items": 4.26,
+        "avg_kos": 1.53,
+        "avg_mp": 46.9,
+        "avg_rounds": 10.47,
+        "enemies": [
+          "aureate_watcher",
+          "steenluis",
+          "steenluis"
+        ],
+        "label": "Aureate Watcher + Stone Louse + Stone Louse (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.66
+      },
+      {
+        "avg_hp_loss": 0.468200636942675,
+        "avg_items": 3.505,
+        "avg_kos": 0.66,
+        "avg_mp": 40.52,
+        "avg_rounds": 8.9,
+        "enemies": [
+          "rankje",
+          "steenluis",
+          "wortelgeest"
+        ],
+        "label": "Tendril + Stone Louse + Rootghost (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.767515923566879,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.93
+      },
+      {
+        "avg_hp_loss": 0.395536093418259,
+        "avg_items": 2.54,
+        "avg_kos": 0.49,
+        "avg_mp": 20.54,
+        "avg_rounds": 6.465,
+        "enemies": [
+          "sporekop",
+          "bloeiende_schrik"
+        ],
+        "label": "Sporehead + Blooming Dread (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.619957537154989,
+        "timeouts": 0,
+        "weight": 2,
+        "win_rate": 0.99
+      },
+      {
+        "avg_hp_loss": 0.365493630573248,
+        "avg_items": 2.365,
+        "avg_kos": 0.26,
+        "avg_mp": 23.5,
+        "avg_rounds": 6.495,
+        "enemies": [
+          "wortelgeest",
+          "druipslak"
+        ],
+        "label": "Rootghost + Drip Slug (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.54140127388535,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.47072186836518,
+        "avg_items": 3.065,
+        "avg_kos": 0.79,
+        "avg_mp": 22.74,
+        "avg_rounds": 8.01,
+        "enemies": [
+          "steenluis",
+          "aureate_watcher"
+        ],
+        "label": "Stone Louse + Aureate Watcher (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.773885350318471,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.955
+      },
+      {
+        "avg_hp_loss": 0.568747346072187,
+        "avg_items": 2.465,
+        "avg_kos": 1.13,
+        "avg_mp": 18.76,
+        "avg_rounds": 7.3,
+        "enemies": [
+          "doornige_loper",
+          "druipslak"
+        ],
+        "label": "Thorn Runner + Drip Slug (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.885
+      },
+      {
+        "avg_hp_loss": 0.509957537154989,
+        "avg_items": 1.715,
+        "avg_kos": 0.895,
+        "avg_mp": 17.32,
+        "avg_rounds": 5.67,
+        "enemies": [
+          "wortelgeest",
+          "doornige_loper"
+        ],
+        "label": "Rootghost + Thorn Runner (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.813163481953291,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.925
+      },
+      {
+        "avg_hp_loss": 0.379952229299363,
+        "avg_items": 2.39,
+        "avg_kos": 0.365,
+        "avg_mp": 19.82,
+        "avg_rounds": 6.25,
+        "enemies": [
+          "bloeiende_schrik",
+          "wortelgeest"
+        ],
+        "label": "Blooming Dread + Rootghost (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.544585987261146,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.451783439490446,
+        "avg_items": 2.515,
+        "avg_kos": 0.755,
+        "avg_mp": 18.76,
+        "avg_rounds": 6.89,
+        "enemies": [
+          "wortelgeest",
+          "aureate_watcher"
+        ],
+        "label": "Rootghost + Aureate Watcher (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.71656050955414,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.99
+      },
+      {
+        "avg_hp_loss": 0.277653927813163,
+        "avg_items": 1.09,
+        "avg_kos": 0.215,
+        "avg_mp": 20.82,
+        "avg_rounds": 4.86,
+        "enemies": [
+          "doornige_loper",
+          "rankje"
+        ],
+        "label": "Thorn Runner + Tendril (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.501061571125265,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.595132696390658,
+        "avg_items": 3.605,
+        "avg_kos": 1.275,
+        "avg_mp": 40.14,
+        "avg_rounds": 8.945,
+        "enemies": [
+          "sporekop",
+          "adermot",
+          "aureate_watcher"
+        ],
+        "label": "Sporehead + Vein Moth + Aureate Watcher (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.78
+      },
+      {
+        "avg_hp_loss": 0.45484076433121,
+        "avg_items": 3.775,
+        "avg_kos": 0.705,
+        "avg_mp": 40.04,
+        "avg_rounds": 9.43,
+        "enemies": [
+          "adermot",
+          "steenluis",
+          "rankje"
+        ],
+        "label": "Vein Moth + Stone Louse + Tendril (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.771762208067941,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.925
+      },
+      {
+        "avg_hp_loss": 0.410700636942675,
+        "avg_items": 2.215,
+        "avg_kos": 0.41,
+        "avg_mp": 21.24,
+        "avg_rounds": 6.48,
+        "enemies": [
+          "wortelgeest",
+          "steenluis"
+        ],
+        "label": "Rootghost + Stone Louse (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.658174097664543,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.378200636942675,
+        "avg_items": 2.335,
+        "avg_kos": 0.275,
+        "avg_mp": 23.34,
+        "avg_rounds": 6.51,
+        "enemies": [
+          "druipslak",
+          "sporekop"
+        ],
+        "label": "Drip Slug + Sporehead (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.589171974522293,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.260525477707006,
+        "avg_items": 0.93,
+        "avg_kos": 0.04,
+        "avg_mp": 25.64,
+        "avg_rounds": 4.715,
+        "enemies": [
+          "sporekop",
+          "rankje"
+        ],
+        "label": "Sporehead + Tendril (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.422505307855626,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      },
+      {
+        "avg_hp_loss": 0.528826963906582,
+        "avg_items": 2.415,
+        "avg_kos": 0.99,
+        "avg_mp": 18.92,
+        "avg_rounds": 6.81,
+        "enemies": [
+          "doornige_loper",
+          "steenluis"
+        ],
+        "label": "Thorn Runner + Stone Louse (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 0.85031847133758,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.905
+      },
+      {
+        "avg_hp_loss": 0.578014861995754,
+        "avg_items": 3.49,
+        "avg_kos": 1.235,
+        "avg_mp": 40.64,
+        "avg_rounds": 8.605,
+        "enemies": [
+          "aureate_watcher",
+          "adermot",
+          "wortelgeest"
+        ],
+        "label": "Aureate Watcher + Vein Moth + Rootghost (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.79
+      },
+      {
+        "avg_hp_loss": 0.548789808917198,
+        "avg_items": 1.91,
+        "avg_kos": 1.165,
+        "avg_mp": 29.74,
+        "avg_rounds": 6.025,
+        "enemies": [
+          "doornige_loper",
+          "rankje",
+          "doornige_loper"
+        ],
+        "label": "Thorn Runner + Tendril + Thorn Runner (floor 95)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.73
+      }
+    ],
+    "id": "d100_v95",
+    "inventory": {
+      "elixer": 6,
+      "toverbrouwsel": 3
+    },
+    "n": 9200,
+    "name": "Deep Cave (Dungeon100) floor 95",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 43, d100 gear tier 5, potions of loot tier 5 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv43 (HP 420 MP 0 ATK 210 DEF 168 AGI 63 MAG 2; Seal Sword, Seal Shield, Seal Helm, Seal Armor, Seal Ring; spells: -); Vesper Lv43 (HP 238 MP 186 ATK 67 DEF 99 AGI 107 MAG 140; Seal Staff, Seal Helm, Seal Armor, Seal Ring; spells: Spark, Chain Lightning); Seren Lv43 (HP 284 MP 140 ATK 111 DEF 100 AGI 61 MAG 137; Seal Staff, Seal Helm, Seal Armor, Seal Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.88804347826087
+  },
+  {
+    "avg_hp_loss": 0.684446564885496,
+    "avg_items": 1.815,
+    "avg_kos": 1.25,
+    "avg_mp": 17.86,
+    "avg_rounds": 5.86,
+    "groups": [
+      {
+        "avg_hp_loss": 0.684446564885496,
+        "avg_items": 1.815,
+        "avg_kos": 1.25,
+        "avg_mp": 17.86,
+        "avg_rounds": 5.86,
+        "enemies": [
+          "papiergeest"
+        ],
+        "label": "Paper Wraith (floor 10)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.86
+      }
+    ],
+    "id": "d100_boss_10",
+    "inventory": {
+      "drankje": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 10 (Page Warden)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 9, d100 gear tier 1, potions of loot tier 1 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv9 (HP 114 MP 0 ATK 41 DEF 31 AGI 19 MAG 2; Short Sword, Wooden Shield, Leather Hood, Leather Armor, Silver Bookmark; spells: -); Vesper Lv9 (HP 68 MP 50 ATK 17 DEF 14 AGI 29 MAG 30; Oak Staff, Leather Hood, Silver Bookmark; spells: Spark); Seren Lv9 (HP 80 MP 38 ATK 27 DEF 19 AGI 17 MAG 27; Oak Staff, Leather Hood, Leather Armor, Silver Bookmark; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.86
+  },
+  {
+    "avg_hp_loss": 0.855438596491228,
+    "avg_items": 2.53,
+    "avg_kos": 2.04,
+    "avg_mp": 19.5,
+    "avg_rounds": 6.85,
+    "groups": [
+      {
+        "avg_hp_loss": 0.855438596491228,
+        "avg_items": 2.53,
+        "avg_kos": 2.04,
+        "avg_mp": 19.5,
+        "avg_rounds": 6.85,
+        "enemies": [
+          "glitchmot"
+        ],
+        "label": "Glitch Moth (floor 20)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.58
+      }
+    ],
+    "id": "d100_boss_20",
+    "inventory": {
+      "drankje": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 20 (Glitch Queen)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 13, d100 gear tier 1, potions of loot tier 1 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv13 (HP 150 MP 0 ATK 53 DEF 39 AGI 23 MAG 2; Short Sword, Wooden Shield, Leather Hood, Leather Armor, Silver Bookmark; spells: -); Vesper Lv13 (HP 88 MP 66 ATK 21 DEF 18 AGI 37 MAG 38; Oak Staff, Leather Hood, Silver Bookmark; spells: Spark); Seren Lv13 (HP 104 MP 50 ATK 35 DEF 23 AGI 21 MAG 35; Oak Staff, Leather Hood, Leather Armor, Silver Bookmark; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.58
+  },
+  {
+    "avg_hp_loss": 0.189175392670157,
+    "avg_items": 0.255,
+    "avg_kos": 0.03,
+    "avg_mp": 15.82,
+    "avg_rounds": 4.01,
+    "groups": [
+      {
+        "avg_hp_loss": 0.189175392670157,
+        "avg_items": 0.255,
+        "avg_kos": 0.03,
+        "avg_mp": 15.82,
+        "avg_rounds": 4.01,
+        "enemies": [
+          "glitchmot"
+        ],
+        "label": "Glitch Moth (floor 25)",
+        "n": 200,
+        "p90_hp_loss": 0.285340314136126,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_boss_25",
+    "inventory": {
+      "drankje": 3,
+      "kruid": 3,
+      "sterk_drankje": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 25 (The Shadow of H-6)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 15, d100 gear tier 2, potions of loot tier 2 (3 each).",
+    "p90_hp_loss": 0.285340314136126,
+    "party": "Dax Lv15 (HP 168 MP 0 ATK 76 DEF 55 AGI 26 MAG 2; Archive Sword, Archive Shield, Archive Helm, Archive Armor, Archive Ring; spells: -); Vesper Lv15 (HP 98 MP 74 ATK 26 DEF 32 AGI 42 MAG 48; Archive Staff, Archive Helm, Archive Armor, Archive Ring; spells: Spark); Seren Lv15 (HP 116 MP 56 ATK 42 DEF 33 AGI 24 MAG 45; Archive Staff, Archive Helm, Archive Armor, Archive Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.594774881516588,
+    "avg_items": 3.145,
+    "avg_kos": 1.135,
+    "avg_mp": 21.04,
+    "avg_rounds": 6.99,
+    "groups": [
+      {
+        "avg_hp_loss": 0.594774881516588,
+        "avg_items": 3.145,
+        "avg_kos": 1.135,
+        "avg_mp": 21.04,
+        "avg_rounds": 6.99,
+        "enemies": [
+          "sporenzwam"
+        ],
+        "label": "Spore Cap (floor 30)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.8
+      }
+    ],
+    "id": "d100_boss_30",
+    "inventory": {
+      "drankje": 3,
+      "kruid": 3,
+      "sterk_drankje": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 30 (Spore Lord)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 17, d100 gear tier 2, potions of loot tier 2 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv17 (HP 186 MP 0 ATK 82 DEF 59 AGI 28 MAG 2; Archive Sword, Archive Shield, Archive Helm, Archive Armor, Archive Ring; spells: -); Vesper Lv17 (HP 108 MP 82 ATK 28 DEF 34 AGI 46 MAG 52; Archive Staff, Archive Helm, Archive Armor, Archive Ring; spells: Spark, Chain Lightning); Seren Lv17 (HP 128 MP 62 ATK 46 DEF 35 AGI 26 MAG 49; Archive Staff, Archive Helm, Archive Armor, Archive Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.8
+  },
+  {
+    "avg_hp_loss": 0.559262948207171,
+    "avg_items": 3.35,
+    "avg_kos": 0.85,
+    "avg_mp": 22.98,
+    "avg_rounds": 6.72,
+    "groups": [
+      {
+        "avg_hp_loss": 0.559262948207171,
+        "avg_items": 3.35,
+        "avg_kos": 0.85,
+        "avg_mp": 22.98,
+        "avg_rounds": 6.72,
+        "enemies": [
+          "wortelkruiper"
+        ],
+        "label": "Root Crawler (floor 40)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.875
+      }
+    ],
+    "id": "d100_boss_40",
+    "inventory": {
+      "drankje": 3,
+      "kruid": 3,
+      "sterk_drankje": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 40 (Root Mother)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 21, d100 gear tier 2, potions of loot tier 2 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv21 (HP 222 MP 0 ATK 94 DEF 67 AGI 32 MAG 2; Archive Sword, Archive Shield, Archive Helm, Archive Armor, Archive Ring; spells: -); Vesper Lv21 (HP 128 MP 98 ATK 32 DEF 38 AGI 54 MAG 60; Archive Staff, Archive Helm, Archive Armor, Archive Ring; spells: Spark, Chain Lightning); Seren Lv21 (HP 152 MP 74 ATK 54 DEF 39 AGI 30 MAG 57; Archive Staff, Archive Helm, Archive Armor, Archive Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.875
+  },
+  {
+    "avg_hp_loss": 0.173702749140893,
+    "avg_items": 0.31,
+    "avg_kos": 0.005,
+    "avg_mp": 16,
+    "avg_rounds": 4,
+    "groups": [
+      {
+        "avg_hp_loss": 0.173702749140893,
+        "avg_items": 0.31,
+        "avg_kos": 0.005,
+        "avg_mp": 16,
+        "avg_rounds": 4,
+        "enemies": [
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden (floor 50)",
+        "n": 200,
+        "p90_hp_loss": 0.257731958762887,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_boss_50",
+    "inventory": {
+      "sterk_drankje": 3,
+      "toverbrouwsel": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 50 (The Cycle)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 25, d100 gear tier 3, potions of loot tier 3 (3 each).",
+    "p90_hp_loss": 0.257731958762887,
+    "party": "Dax Lv25 (HP 258 MP 0 ATK 118 DEF 88 AGI 38 MAG 2; Rune Sword, Rune Shield, Rune Helm, Rune Armor, Rune Ring; spells: -); Vesper Lv25 (HP 148 MP 114 ATK 39 DEF 51 AGI 64 MAG 76; Rune Staff, Rune Helm, Rune Armor, Rune Ring; spells: Spark, Chain Lightning); Seren Lv25 (HP 176 MP 86 ATK 65 DEF 52 AGI 36 MAG 73; Rune Staff, Rune Helm, Rune Armor, Rune Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.584146525679759,
+    "avg_items": 2.945,
+    "avg_kos": 0.89,
+    "avg_mp": 28.42,
+    "avg_rounds": 7.62,
+    "groups": [
+      {
+        "avg_hp_loss": 0.584146525679759,
+        "avg_items": 2.945,
+        "avg_kos": 0.89,
+        "avg_mp": 28.42,
+        "avg_rounds": 7.62,
+        "enemies": [
+          "mistuil"
+        ],
+        "label": "Mist Owl (floor 60)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.85
+      }
+    ],
+    "id": "d100_boss_60",
+    "inventory": {
+      "sterk_drankje": 3,
+      "toverbrouwsel": 3,
+      "toverwater": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 60 (Mist Lord)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 29, d100 gear tier 3, potions of loot tier 3 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv29 (HP 294 MP 0 ATK 130 DEF 96 AGI 42 MAG 2; Rune Sword, Rune Shield, Rune Helm, Rune Armor, Rune Ring; spells: -); Vesper Lv29 (HP 168 MP 130 ATK 43 DEF 55 AGI 72 MAG 84; Rune Staff, Rune Helm, Rune Armor, Rune Ring; spells: Spark, Chain Lightning); Seren Lv29 (HP 200 MP 98 ATK 73 DEF 56 AGI 40 MAG 81; Rune Staff, Rune Helm, Rune Armor, Rune Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.85
+  },
+  {
+    "avg_hp_loss": 0.442156334231806,
+    "avg_items": 3.125,
+    "avg_kos": 0.8,
+    "avg_mp": 25.46,
+    "avg_rounds": 8.08,
+    "groups": [
+      {
+        "avg_hp_loss": 0.442156334231806,
+        "avg_items": 3.125,
+        "avg_kos": 0.8,
+        "avg_mp": 25.46,
+        "avg_rounds": 8.08,
+        "enemies": [
+          "mech_wachter"
+        ],
+        "label": "Mech. Warden (floor 70)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.885
+      }
+    ],
+    "id": "d100_boss_70",
+    "inventory": {
+      "elixer": 3,
+      "sterk_drankje": 3,
+      "toverbrouwsel": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 70 (Seal Warden)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 33, d100 gear tier 4, potions of loot tier 4 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv33 (HP 330 MP 0 ATK 158 DEF 123 AGI 49 MAG 2; Glitch Sword, Glitch Shield, Glitch Helm, Glitch Armor, Glitch Ring; spells: -); Vesper Lv33 (HP 188 MP 146 ATK 51 DEF 72 AGI 83 MAG 104; Glitch Staff, Glitch Helm, Glitch Armor, Glitch Ring; spells: Spark, Chain Lightning); Seren Lv33 (HP 224 MP 110 ATK 85 DEF 73 AGI 47 MAG 101; Glitch Staff, Glitch Helm, Glitch Armor, Glitch Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.885
+  },
+  {
+    "avg_hp_loss": 0.199578005115089,
+    "avg_items": 0.435,
+    "avg_kos": 0,
+    "avg_mp": 16,
+    "avg_rounds": 4,
+    "groups": [
+      {
+        "avg_hp_loss": 0.199578005115089,
+        "avg_items": 0.435,
+        "avg_kos": 0,
+        "avg_mp": 16,
+        "avg_rounds": 4,
+        "enemies": [
+          "mistuil"
+        ],
+        "label": "Mist Owl (floor 75)",
+        "n": 200,
+        "p90_hp_loss": 0.262148337595908,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_boss_75",
+    "inventory": {
+      "elixer": 3,
+      "sterk_drankje": 3,
+      "toverbrouwsel": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 75 (The Judge)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 35, d100 gear tier 4, potions of loot tier 4 (3 each).",
+    "p90_hp_loss": 0.262148337595908,
+    "party": "Dax Lv35 (HP 348 MP 0 ATK 164 DEF 127 AGI 51 MAG 2; Glitch Sword, Glitch Shield, Glitch Helm, Glitch Armor, Glitch Ring; spells: -); Vesper Lv35 (HP 198 MP 154 ATK 53 DEF 74 AGI 87 MAG 108; Glitch Staff, Glitch Helm, Glitch Armor, Glitch Ring; spells: Spark, Chain Lightning); Seren Lv35 (HP 236 MP 116 ATK 89 DEF 75 AGI 49 MAG 105; Glitch Staff, Glitch Helm, Glitch Armor, Glitch Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.676970802919708,
+    "avg_items": 4.145,
+    "avg_kos": 1.515,
+    "avg_mp": 22.84,
+    "avg_rounds": 8.565,
+    "groups": [
+      {
+        "avg_hp_loss": 0.676970802919708,
+        "avg_items": 4.145,
+        "avg_kos": 1.515,
+        "avg_mp": 22.84,
+        "avg_rounds": 8.565,
+        "enemies": [
+          "kennis_beest"
+        ],
+        "label": "The Knowledge Beast (floor 80)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.67
+      }
+    ],
+    "id": "d100_boss_80",
+    "inventory": {
+      "elixer": 3,
+      "sterk_drankje": 3,
+      "toverbrouwsel": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 80 (Great Book Golem)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 37, d100 gear tier 4, potions of loot tier 4 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv37 (HP 366 MP 0 ATK 170 DEF 131 AGI 53 MAG 2; Glitch Sword, Glitch Shield, Glitch Helm, Glitch Armor, Glitch Ring; spells: -); Vesper Lv37 (HP 208 MP 162 ATK 55 DEF 76 AGI 91 MAG 112; Glitch Staff, Glitch Helm, Glitch Armor, Glitch Ring; spells: Spark, Chain Lightning); Seren Lv37 (HP 248 MP 122 ATK 93 DEF 77 AGI 51 MAG 109; Glitch Staff, Glitch Helm, Glitch Armor, Glitch Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.67
+  },
+  {
+    "avg_hp_loss": 0.692544345898004,
+    "avg_items": 3.875,
+    "avg_kos": 1.68,
+    "avg_mp": 21.28,
+    "avg_rounds": 9.31,
+    "groups": [
+      {
+        "avg_hp_loss": 0.692544345898004,
+        "avg_items": 3.875,
+        "avg_kos": 1.68,
+        "avg_mp": 21.28,
+        "avg_rounds": 9.31,
+        "enemies": [
+          "wortelkoning"
+        ],
+        "label": "The Root King (floor 90)",
+        "n": 200,
+        "p90_hp_loss": 1,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 0.64
+      }
+    ],
+    "id": "d100_boss_90",
+    "inventory": {
+      "elixer": 6,
+      "toverbrouwsel": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 90 (Root Emperor)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 41, d100 gear tier 5, potions of loot tier 5 (3 each).",
+    "p90_hp_loss": 1,
+    "party": "Dax Lv41 (HP 402 MP 0 ATK 204 DEF 164 AGI 61 MAG 2; Seal Sword, Seal Shield, Seal Helm, Seal Armor, Seal Ring; spells: -); Vesper Lv41 (HP 228 MP 178 ATK 65 DEF 97 AGI 103 MAG 136; Seal Staff, Seal Helm, Seal Armor, Seal Ring; spells: Spark, Chain Lightning); Seren Lv41 (HP 272 MP 134 ATK 107 DEF 98 AGI 59 MAG 133; Seal Staff, Seal Helm, Seal Armor, Seal Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 0.64
+  },
+  {
+    "avg_hp_loss": 0.21107433808554,
+    "avg_items": 0.49,
+    "avg_kos": 0.01,
+    "avg_mp": 16.06,
+    "avg_rounds": 4.01,
+    "groups": [
+      {
+        "avg_hp_loss": 0.21107433808554,
+        "avg_items": 0.49,
+        "avg_kos": 0.01,
+        "avg_mp": 16.06,
+        "avg_rounds": 4.01,
+        "enemies": [
+          "papiergeest"
+        ],
+        "label": "Paper Wraith (floor 99)",
+        "n": 200,
+        "p90_hp_loss": 0.295315682281059,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "d100_boss_99",
+    "inventory": {
+      "elixer": 6,
+      "toverbrouwsel": 3
+    },
+    "n": 200,
+    "name": "BOSS Deep Cave floor 99 (The Voice)",
+    "notes": "Generated floor (Dungeon100Generator, 6 run seeds). Party Lv 45, d100 gear tier 5, potions of loot tier 5 (3 each).",
+    "p90_hp_loss": 0.295315682281059,
+    "party": "Dax Lv45 (HP 438 MP 0 ATK 216 DEF 172 AGI 65 MAG 2; Seal Sword, Seal Shield, Seal Helm, Seal Armor, Seal Ring; spells: -); Vesper Lv45 (HP 248 MP 194 ATK 69 DEF 101 AGI 111 MAG 144; Seal Staff, Seal Helm, Seal Armor, Seal Ring; spells: Spark, Chain Lightning); Seren Lv45 (HP 296 MP 146 ATK 115 DEF 102 AGI 63 MAG 141; Seal Staff, Seal Helm, Seal Armor, Seal Ring; spells: Minor Heal); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.130238095238095,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 2.085,
+    "groups": [
+      {
+        "avg_hp_loss": 0.130238095238095,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 2.085,
+        "enemies": [
+          "mosslijm"
+        ],
+        "label": "Moss Slime",
+        "n": 200,
+        "p90_hp_loss": 0.142857142857143,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "wm1extra_les",
+    "inventory": {
+
+    },
+    "n": 200,
+    "name": "PROLOGUE lesson (Moss Slime, scripted 30 HP)",
+    "notes": "story_data.gd les: Dax Lv 1, Short Sword just received, Apprentice Cloak, no bag. Moss Slime max HP forced to 30.",
+    "p90_hp_loss": 0.142857142857143,
+    "party": "Dax Lv1 (HP 42 MP 0 ATK 17 DEF 10 AGI 9 MAG 2; Short Sword, Apprentice Cloak; spells: -)",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0.50795238095238,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 0,
+    "avg_rounds": 1.85,
+    "groups": [
+      {
+        "avg_hp_loss": 0.50795238095238,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 0,
+        "avg_rounds": 1.85,
+        "enemies": [
+          "inktwurm"
+        ],
+        "label": "Ink Worm",
+        "n": 200,
+        "p90_hp_loss": 0.6,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "wm1extra_inktwurm",
+    "inventory": {
+      "drankje": 5,
+      "kruid": 2,
+      "toverwater": 2
+    },
+    "n": 200,
+    "name": "UNIQUE Ink Worm (Golem Hall, after the Golem)",
+    "notes": "Cabinet opens only with the Golem Core (inktwurm_kast.gd). Same party as the Golem fight: Dax Lv 8, Spark Sword. Unique: no tier scaling, stats from GameData.",
+    "p90_hp_loss": 0.6,
+    "party": "Dax Lv8 (HP 105 MP 0 ATK 47 DEF 30 AGI 16 MAG 2; Spark Sword, Cover Shield, Leather Hood, Leather Armor; spells: -); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  },
+  {
+    "avg_hp_loss": 0,
+    "avg_items": 0,
+    "avg_kos": 0,
+    "avg_mp": 8,
+    "avg_rounds": 1,
+    "groups": [
+      {
+        "avg_hp_loss": 0,
+        "avg_items": 0,
+        "avg_kos": 0,
+        "avg_mp": 8,
+        "avg_rounds": 1,
+        "enemies": [
+          "woudgeest",
+          "woudgeest"
+        ],
+        "label": "Wood Wraith + Wood Wraith",
+        "n": 200,
+        "p90_hp_loss": 0,
+        "timeouts": 0,
+        "weight": 1,
+        "win_rate": 1
+      }
+    ],
+    "id": "wm1extra_woudgeest",
+    "inventory": {
+      "drankje": 5,
+      "kruid": 2,
+      "toverwater": 2
+    },
+    "n": 200,
+    "name": "SIDE Singing Seed (two Wood Wraiths)",
+    "notes": "story_data.gd zingend_zaad, after Vesper joins (Dax-1) at the Root King party (Dax Lv 12). Base stats, no wood tier. Oak Staff and Travel Robe are her join gear.",
+    "p90_hp_loss": 0,
+    "party": "Dax Lv12 (HP 141 MP 0 ATK 59 DEF 40 AGI 20 MAG 2; Spark Sword, Cover Shield, Iron Helm, Leather Armor; spells: -); Vesper Lv11 (HP 78 MP 58 ATK 19 DEF 16 AGI 31 MAG 34; Oak Staff, Travel Robe; spells: Spark, Chain Lightning); Core: golemkern",
+    "timeouts": 0,
+    "win_rate": 1
+  }
+]
