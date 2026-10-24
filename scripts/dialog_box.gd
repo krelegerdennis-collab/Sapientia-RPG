@@ -39,7 +39,7 @@ var _blink := 0.0
 var choices: Array = []
 var choice_index := 0
 var choice_result := -1
-var _choice_box: VBoxContainer
+var _choice_box: BoxContainer
 var _choice_labels: Array[Label] = []
 ## Plek van het tekstvak: true = onderin (standaard, v0.16), false = bovenin.
 var at_bottom := true
@@ -68,10 +68,14 @@ const PAD_R := 12.0
 const PAD_T := 8.0
 const PAD_B := 4.0
 const LINE_SPACING := 4
-## Keuzeregels: tikmaat (~48 dp) tot 3 keuzes; bij meer keuzes krapper zodat het vak niet het halve scherm vult.
+## Keuzes: tikmaat (25 hoog, ~48 dp). Tot 3 keuzes die naast elkaar passen staan op een rij onderin het vak
+## (het vak blijft laag en bedekt de speler niet); anders onder elkaar, bij 4+ keuzes met 20 hoog.
 const CHOICE_ROW_TOUCH := 25.0
 const CHOICE_ROW_MANY := 20.0
 const CHOICE_MIN_W := 60.0
+const CHOICE_GAP := 4.0
+const CHOICE_ROW_BOTTOM := 3.0     # ruimte onder een rij keuzes (binnen de rand van het vak)
+const CHOICE_PAD_W := 12.0
 ## Staart (16x12 per frame): punt op (6,10) bij omlaag, (6,1) bij omhoog (LEESMIJ.txt).
 const TAIL_SIZE := Vector2(16, 12)
 const TAIL_TIP_X := 6.0
@@ -264,9 +268,14 @@ func needed_height(w: float) -> float:
 		var sz := font.get_multiline_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, tw, fs, -1,
 				TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE)
 		lines = maxi(lines, maxi(1, roundi(sz.y / lh)))
-	var h := PAD_T + lines * lh + (lines - 1) * LINE_SPACING + PAD_B + 2.0
+	var text_h := lines * lh + (lines - 1) * LINE_SPACING
+	var h := PAD_T + text_h + PAD_B + 2.0
 	if not choices.is_empty():
-		h = maxf(h, PAD_T + lh + choices.size() * (choice_row_h() + 1.0) + 4.0)
+		var lay := choice_layout(w)
+		if bool(lay["horizontal"]):
+			h = maxf(h, PAD_T + text_h + float(lay["row_h"]) + CHOICE_ROW_BOTTOM)
+		else:
+			h = maxf(h, PAD_T + lh + choices.size() * (choice_row_h() + 1.0) + 4.0)
 	return ceilf(maxf(MIN_H, h))
 
 
@@ -394,6 +403,46 @@ func choice_row_h() -> float:
 	return CHOICE_ROW_TOUCH if choices.size() <= 3 else CHOICE_ROW_MANY
 
 
+## Indeling van de keuzes in een vak van breedte w: {"horizontal", "widths", "row_h"}.
+## Tot 3 keuzes staan op een rij (breedte naar tekst; past dat niet dan krimpen ze en lopen ze over twee regels);
+## anders onder elkaar. Zo blijft het vak laag en de keuzes >= 25 hoog (CHOICE_ROW_TOUCH).
+func choice_layout(w: float) -> Dictionary:
+	var stacked := {"horizontal": false, "widths": [], "row_h": choice_row_h()}
+	var n := choices.size()
+	if n == 0 or n > 3:
+		return stacked
+	var font: Font = text_label.get_theme_font("font")
+	var fs: int = text_label.get_theme_font_size("font_size")
+	var lh := font.get_height(fs)
+	var avail := w - PAD_L - PAD_R - 8.0 - CHOICE_GAP * float(n - 1)
+	var natural: Array[float] = []
+	var sum := 0.0
+	for c in choices:
+		var nw := maxf(CHOICE_MIN_W, ceilf(font.get_string_size("> " + str(c), HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x) + CHOICE_PAD_W)
+		natural.append(nw)
+		sum += nw
+	if sum <= avail:
+		return {"horizontal": true, "widths": natural, "row_h": CHOICE_ROW_TOUCH}
+	var widths: Array[float] = []
+	var total := 0.0
+	var lines := 1
+	for i in n:
+		var wi := maxf(CHOICE_MIN_W, floorf(natural[i] * avail / sum))
+		widths.append(wi)
+		total += wi
+		var sz := font.get_multiline_string_size("> " + str(choices[i]), HORIZONTAL_ALIGNMENT_LEFT, wi - CHOICE_PAD_W, fs, -1,
+				TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE)
+		lines = maxi(lines, maxi(1, roundi(sz.y / lh)))
+	if total > avail + 0.5 or lines > 2:
+		return stacked
+	return {"horizontal": true, "widths": widths, "row_h": maxf(CHOICE_ROW_TOUCH, float(lines) * lh + 4.0)}
+
+
+## Passen de keuzes (max. 3) naast elkaar in een vak van breedte w?
+func choices_horizontal(w: float) -> bool:
+	return bool(choice_layout(w)["horizontal"])
+
+
 ## Schermrechthoeken van de keuzeregels (voor de tests): leeg zolang er geen keuzes zijn.
 func choice_rects() -> Array[Rect2]:
 	var out: Array[Rect2] = []
@@ -426,13 +475,19 @@ func cancel() -> void:
 
 func _build_choices() -> void:
 	_clear_choices()
-	_choice_box = VBoxContainer.new()
-	_choice_box.add_theme_constant_override("separation", 1)
+	var lay := choice_layout(panel.size.x)
+	var horizontal := bool(lay["horizontal"])
+	_choice_box = HBoxContainer.new() if horizontal else VBoxContainer.new()
+	_choice_box.add_theme_constant_override("separation", int(CHOICE_GAP) if horizontal else 1)
 	panel.add_child(_choice_box)
+	var widths: Array = lay["widths"]
 	for i in choices.size():
 		var l := Label.new()
-		l.custom_minimum_size = Vector2(CHOICE_MIN_W, choice_row_h())
+		l.custom_minimum_size = Vector2(float(widths[i]) if horizontal else CHOICE_MIN_W, float(lay["row_h"]))
+		if horizontal:
+			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER if horizontal else HORIZONTAL_ALIGNMENT_LEFT
 		l.mouse_filter = Control.MOUSE_FILTER_STOP
 		l.gui_input.connect(_on_choice_input.bind(i))
 		_choice_box.add_child(l)
@@ -463,7 +518,8 @@ func _update_choices() -> void:
 		_choice_labels[i].text = ("> " if sel else "  ") + str(choices[i])
 		_choice_labels[i].add_theme_color_override("font_color", UiStyleC.HILITE if sel else UiStyleC.TEXT)
 	_choice_box.reset_size()
-	_choice_box.position = Vector2(panel.size.x - _choice_box.size.x - 16, panel.size.y - _choice_box.size.y - 4)
+	var bottom := CHOICE_ROW_BOTTOM if _choice_box is HBoxContainer else 4.0
+	_choice_box.position = Vector2(panel.size.x - _choice_box.size.x - 16, panel.size.y - _choice_box.size.y - bottom)
 
 
 ## Volgende stap: eerst de hele regel tonen, daarna volgende regel, daarna sluiten.
@@ -512,10 +568,15 @@ func _process(delta: float) -> void:
 		if _choice_box and not _choice_box.visible:
 			_choice_box.visible = true
 			_update_choices()
-		if Input.is_action_just_pressed("move_up") or Input.is_action_just_pressed("ui_up"):
+		var horizontal := _choice_box is HBoxContainer
+		var prev := Input.is_action_just_pressed("move_up") or Input.is_action_just_pressed("ui_up") \
+				or (horizontal and (Input.is_action_just_pressed("move_left") or Input.is_action_just_pressed("ui_left")))
+		var next := Input.is_action_just_pressed("move_down") or Input.is_action_just_pressed("ui_down") \
+				or (horizontal and (Input.is_action_just_pressed("move_right") or Input.is_action_just_pressed("ui_right")))
+		if prev:
 			choice_index = (choice_index - 1 + choices.size()) % choices.size()
 			_update_choices()
-		elif Input.is_action_just_pressed("move_down") or Input.is_action_just_pressed("ui_down"):
+		elif next:
 			choice_index = (choice_index + 1) % choices.size()
 			_update_choices()
 	else:

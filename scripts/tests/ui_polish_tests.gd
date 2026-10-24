@@ -219,9 +219,24 @@ func _dialog_tests(tag: String) -> void:
 		inside = inside and Dialog.box_rect().grow(0.5).encloses(r)
 	check(tag + "tekstvak: keuzeregels binnen het vak", inside)
 	check(tag + "tekstvak: geen ontbrekende lettertekens", _missing_glyphs(Dialog.panel).is_empty())
+	var same_row := true
+	for r in rects:
+		same_row = same_row and is_equal_approx(r.position.y, rects[0].position.y)
+	check(tag + "tekstvak: 3 korte keuzes staan op een rij (vak blijft laag)", same_row and Dialog.choices_horizontal(Dialog.box_rect().size.x))
 	# tikken op de tweede keuze kiest hem
 	Dialog._choice_labels[1].gui_input.emit(_mouse())
 	check(tag + "tekstvak: tik op een keuze kiest die keuze", Dialog.choice_result == 1)
+	await sc.close_all()
+	Dialog.chars_per_second = 1000.0
+	Dialog.ask("Pick one.", ["Alpha", "Beta", "Gamma", "Delta"])
+	await sc.pframes(8)
+	var many: Array[Rect2] = Dialog.choice_rects()
+	var stacked := many.size() == 4 and many[1].position.y > many[0].position.y
+	var many_ok := stacked
+	for r in many:
+		many_ok = many_ok and r.size.y >= Dialog.CHOICE_ROW_MANY - 0.01
+	check(tag + "tekstvak: 4 keuzes staan onder elkaar, elk >= 20 hoog", many_ok)
+	check(tag + "tekstvak: 4 keuzes: vak binnen het veilige gebied", _within(Dialog.box_rect(), _safe()))
 	await sc.close_all()
 
 
@@ -413,6 +428,19 @@ func _battle_tests(tag: String) -> void:
 			rows_ok = rows_ok and rb.size.y >= UiTouchC.TOUCH_MIN - 0.01
 	check(tag + "gevecht: Magie-lijst, elke regel >= 25 hoog", rows_ok)
 	check(tag + "gevecht: Magie-lijst binnen het veilige gebied", _within(menu.get_global_rect(), _safe()))
+	var rows_n := 0
+	for i in menu._buttons.size():
+		if menu.row_button(i).visible:
+			rows_n += 1
+	var h_free: float = b._hero_top_y - (b.SUBMENU_TOP + b._safe().y) - b.LIST_CHROME
+	check(tag + "gevecht: lijstregel (%d) = tikmaat of zoveel als boven de helden past (vrij %.0f voor %d regels)" % [menu.row_height, h_free, rows_n],
+			menu.row_height == b._list_row_h(rows_n) and menu.row_height >= b.LIST_ROW_MIN and menu.row_height <= b.LIST_ROW_H)
+	check(tag + "gevecht: lijstje van 1 of 2 regels krijgt de volle tikmaat", b._list_row_h(2) == b.LIST_ROW_H or h_free < 2.0 * b.LIST_ROW_H)
+	var over_heroes := false
+	for node in b.hero_nodes:
+		if menu.get_global_rect().intersects(Rect2((node.home + node.STEP - node.FEET).round() * 2.0, node.SIZE * 2.0)):
+			over_heroes = true
+	check(tag + "gevecht: Magie-lijst valt niet over de helden", not over_heroes)
 	await sc.shot_if("battle_magic")
 	await _event_action("cancel")
 	await sc.pframes(6)

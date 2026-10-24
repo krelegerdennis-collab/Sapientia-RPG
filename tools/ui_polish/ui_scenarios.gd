@@ -93,6 +93,8 @@ func viewport_size() -> Vector2:
 
 
 func start_game() -> bool:
+	# scanlines uit: tekst en randen zijn zo goed te beoordelen (en de PNG's blijven klein)
+	Settings.set_value("crt", false)
 	GameState.start_new_game("Kees")
 	var sd: Script = load("res://scripts/data/story_data.gd")
 	GameState.set("story_step", int(sd.get_script_constant_map().get("KLAAR", 0)))
