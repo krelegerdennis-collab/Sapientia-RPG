@@ -58,7 +58,7 @@ var texts_seen := {}
 var milestones: Array = []
 var _dutch: RegEx
 var _walk_speed := 4.0
-var _base_scale := 2.0
+var _base_scale := 1.0
 var _t_start := Time.get_ticks_msec()
 var _snap_after_golem := PackedByteArray()
 var _variant := ""

@@ -12,8 +12,8 @@ GODOT=... .github/scripts/run_suite.sh wm1playthroughtest --menu-only
 ```
 
 Script: `scripts/tests/wm1_playthrough_tests.gd`. Registratie: één regel in `scripts/game_state.gd` (`_ready()`).
-De suite draait standaard op `Engine.time_scale` 2 (`--speed=1` voor echte snelheid, bij fouten zoeken handig). Duur lokaal
-ongeveer 6 tot 8 minuten (op snelheid 1 ongeveer 11). `run_suite.sh` geeft 20 minuten.
+Duur lokaal ongeveer 8 minuten (echte loop-, fade-, tekst- en gevechtstijden; `--speed=2` zet `Engine.time_scale` hoger en wint
+maar ongeveer 10%). `run_suite.sh` geeft 20 minuten.
 
 ## Het pad
 
