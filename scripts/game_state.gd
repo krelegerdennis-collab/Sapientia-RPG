@@ -602,8 +602,9 @@ func _preload_paths() -> Array[String]:
 	var out: Array[String] = [BATTLE_SCENE, START_MAP, TOWN_MAP, "res://scenes/maps/wereldkaart.tscn"]
 	for id in GameData.BACKDROPS_BOOT:
 		out.append(GameData.backdrop_path(str(id)))
-	for h in GameData.HEROES:
-		if str(h["battle_sprite"]) != "":
+	# alleen de gevechtssprites (2100x210, 1,7 MB per stuk) van de party; rekruten laden bij hun eerste gevecht
+	for h in party + party_bench:
+		if str(h.get("battle_sprite", "")) != "":
 			out.append(str(h["battle_sprite"]))
 	for e in GameData.ENEMIES.values():
 		out.append(GameData.enemy_sprite(e))
@@ -631,6 +632,15 @@ func _start_preload() -> void:
 		if ResourceLoader.load_threaded_request(p) == OK:
 			_preloading.append(p)
 	set_process(not _preloading.is_empty())
+
+
+## Vraagt een resource op de achtergrond te laden zonder te wachten (get_resource() levert hem later).
+func _vraag_voor(path: String) -> void:
+	if path == "" or _loaded.has(path) or _preloading.has(path) or not ResourceLoader.exists(path):
+		return
+	if ResourceLoader.load_threaded_request(path) == OK:
+		_preloading.append(path)
+		set_process(true)
 
 
 ## Gevechtsachtergrond die niet bij het opstarten is geladen: op de achtergrond laden terwijl de
@@ -2300,6 +2310,8 @@ func prepare_battle(enemies: Array, terrain := "", boss := false, tier := 0, arc
 	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
 	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
 	_prefetch_backdrop(pending_backdrop)
+	for h in party:
+		_vraag_voor(str(h.get("battle_sprite", "")))
 
 
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),
