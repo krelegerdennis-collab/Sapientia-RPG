@@ -812,3 +812,5 @@ assets/ui/lock/lock_wissel.png
 # 2026-10-24: assets/ui/icons/cat_goud.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
 # 2026-10-24: assets/ui/icon_monstervak.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
 # 2026-10-24: assets/ui/richtpijl.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
+# 2026-10-24: assets/ui/icons/reisgewaad.png vervangen door art-fix batch 6 (masterpalet 71); goedgekeurd door Dennis op 2026-10-24.
+# 2026-10-24: assets/map_monsters/sporekop.png vervangen door art-fix batch 6 (masterpalet 71); goedgekeurd door Dennis op 2026-10-24.
