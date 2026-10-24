@@ -679,13 +679,18 @@ func _battle_tests(map: Node) -> void:
 # ================================================================ deel C: tutorials
 func _tutorial_data_tests() -> void:
 	var tut_ids: Array = []
+	var roots: Array = []
 	for id in SD.EVENTS:
 		if str(id).begins_with("tutorial"):
 			tut_ids.append(str(id))
+			if not str(id).get_slice("_", str(id).count("_")).is_valid_int():
+				roots.append(str(id))
 	tut_ids.sort()
-	check("4 tutorial-events (1 + _2 + _3 + _4): %s" % [tut_ids], tut_ids.size() == 4 and tut_ids[0] == EV)
+	roots.sort()
+	check("tutorials: %d ketens (%s), elk 4 pagina's: %s" % [roots.size(), roots, tut_ids], roots.has(EV) and roots.size() >= 2 and tut_ids.size() == roots.size() * 4)
 	var chain_ok := true
 	var skip_ok := true
+	var once_ok := true
 	for id in tut_ids:
 		var cmds: Array = (SD.EVENTS[id][0]["do"] as Array)
 		for c in cmds:
@@ -696,22 +701,26 @@ func _tutorial_data_tests() -> void:
 				skip_ok = skip_ok and opts == ["Next", "Skip"] and str(targets[1]) == ""
 				chain_ok = chain_ok and SD.EVENTS.has(str(targets[0]))
 	check("elke tutorial-pagina met keuze heeft Next -> bestaande volgende pagina en Skip -> stoppen", chain_ok and skip_ok)
-	var first: Array = SD.EVENTS[EV][0]["do"]
-	check("tutorial zet zijn 'gezien'-vlag als eerste (ook bij Skip of afsluiten halverwege)", first[0] == ["flag", FLAG])
-	# eenmalig: met vlag gezet kiest Story geen enkel commando meer
 	GameState.new_game("Dax")
-	GameState.story_flags.erase(FLAG)
-	var v1: Dictionary = Story.pick(EV)
-	GameState.story_flags[FLAG] = true
-	var v2: Dictionary = Story.pick(EV)
-	check("Story.pick: zonder vlag speelt de tutorial, met vlag niets (eenmalig)", not (v1["do"] as Array).is_empty() and (v2["do"] as Array).is_empty())
+	for root_id in roots:
+		var variants: Array = SD.EVENTS[root_id]
+		var first: Array = variants[0]["do"]
+		var flag := str(first[0][1])
+		once_ok = once_ok and first[0][0] == "flag" and flag.ends_with("_gezien") and (variants[1]["do"] as Array).is_empty()
+		GameState.story_flags.erase(flag)
+		var v1: Dictionary = Story.pick(root_id)
+		GameState.story_flags[flag] = true
+		var v2: Dictionary = Story.pick(root_id)
+		once_ok = once_ok and not (v1["do"] as Array).is_empty() and (v2["do"] as Array).is_empty()
+		GameState.story_flags.erase(flag)
+	check("elke tutorial zet zijn 'gezien'-vlag als eerste (ook bij Skip of afsluiten halverwege); met vlag speelt Story.pick niets (eenmalig)", once_ok)
 	# menupaden in alle spelertekst: MENU > X > Y bestaat echt
 	var top: Array = FieldMenuS.COMMANDS.map(func(c): return str(c[1]))
 	var opt_names: Array = OptionsScreenS.ROWS.map(func(r): return str(r[1]))
 	var slot_names: Array = EquipmentS.slots().map(func(sl): return EquipmentS.slot_name(sl))
 	var paths := 0
 	var bad: Array = []
-	for line in _all_strings(SD.EVENTS) + _all_strings(SD.TUT_INKT_PAGES):
+	for line in _all_strings(SD.EVENTS) + _all_strings(SD.TUT_INKT_PAGES) + _all_strings(SD.TUT_CODEX_PAGES):
 		var rest: String = str(line)
 		while rest.contains("MENU > "):
 			rest = rest.substr(rest.find("MENU > ") + 7)
