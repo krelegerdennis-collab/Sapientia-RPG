@@ -4,6 +4,7 @@ extends Node
 ## en waar hij stond voordat een gevecht begon. Data komt uit scripts/data/game_data.gd.
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 ## v0.14 (menu L2): uitrusting en effectieve stats (basis + uitrusting).
 const Equipment := preload("res://scripts/equipment.gd")
@@ -165,6 +166,14 @@ const HERO_ID_ALIASES := {HERO_ID_LEGACY: HERO_ID, HERO_ID: HERO_ID_LEGACY}
 ## Een betatest-pad eindigt daar niet op: dan is er één bestand, zoals eerst.
 const SAVE_VERSION := 1
 const SLOT_COUNT := 4
+## Grenzen voor getallen uit een save (kapotte of met de hand aangepaste bestanden).
+const MAX_GOLD := 999999999
+const MAX_ITEM_STACK := 9999
+## Laatste melding van load_game ("" = alles goed). Engels, voor de speler.
+var last_load_notice := ""
+const NOTICE_RECOVERED := "Your save file was damaged. It was restored from the backup copy."
+const NOTICE_UNREADABLE := "This save file can't be read."
+const RECOVERED_LINES := ["Your save file was damaged.", "It was restored from the backup copy."]
 var save_path := "user://save_1.json"
 ## Welk slot de volgende handmatige save schrijft. Laden van een slot zet dit.
 var active_slot := 1
@@ -249,6 +258,8 @@ signal battle_ended(result: String)
 signal game_over(map_path: String)
 signal game_saved(path: String, ok: bool)
 signal game_loaded(path: String, ok: bool)
+## De hoofd-save was kapot en load_game gebruikte de reservekopie (.bak).
+signal save_recovered(path: String, backup_path: String)
 signal menu_opened(which: String)
 var codex_pages: Array = []
 var codex_active := ""
@@ -404,16 +415,11 @@ var ui_theme: Theme
 func _ready() -> void:
 	_koppel_muziek.call_deferred()
 	_koppel_quests.call_deferred()
-	# TIJDELIJK CI-DIAG (#141)
-	var _d := DirAccess.get_files_at("res://.godot/imported")
-	var _ww := Array(_d).filter(func(f): return f.begins_with("world_warper") or f.ends_with("_v8.png-") or "_v8" in f)
-	print("CIDIAG imported=", _d.size(), " ww/v8=", _ww)
-	print("CIDIAG ww_exists=", ResourceLoader.exists("res://assets/sprites/archief2/world_warper.png"))
 	ui_theme = load("res://assets/theme.tres")
 	preload("res://scripts/ui/ui_style.gd").apply_to_theme(ui_theme)
 	_ensure_input_actions()
 	new_game()
-	_start_preload()
+	_plan_preload()
 	add_child.call_deferred(preload("res://scripts/ui/dungeon100_hud.gd").new())   # 'Verdieping X/100' (alleen in de kerker)
 	# Alleen voor testen: start met  godot -- --autotest  (zie scripts/debug_autotest.gd).
 	# De tester hangt aan de root, zodat hij blijft bestaan als de scène wisselt.
@@ -445,9 +451,13 @@ func _ready() -> void:
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
 	# Actie-balans (SoM-proef): godot -- --actionsim [--fights=N] [--boss-fights=N] [--out=pad]  (tools/battlesim/action_sim.gd)
+	# UI-polijst WM1 (touch, veilig gebied, leesbaarheid): of  godot -- --uipolishtest [--shots=/pad/map]  (scripts/tests/ui_polish_tests.gd).
+	# Screenshots van alle WM1-schermen per aspectprofiel (geen test): godot -- --uishots --shots=/pad/map  (tools/ui_polish).
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
+	# WM1-bugjacht: of  godot -- --wm1bugtest [--shots=/pad/map]  (scripts/tests/wm1_bugjacht_tests.gd).
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
+	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
@@ -459,8 +469,13 @@ func _ready() -> void:
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
+	# Seeded gevecht-RNG (zelfde seed = zelfde gevecht): of  godot -- --combatrngtest  (scripts/tests/combat_rng_tests.gd).
+	# Vaste 60 Hz-gevechtsstap (framerate-onafhankelijk): of  godot -- --combattick  (scripts/tests/combat_tick_tests.gd).
+	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
+	# Laadtijden WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
+	# De tijden zelf meet tools/perf/run_perf_wm1.sh (losse scène, geen dispatch hier).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
@@ -496,6 +511,7 @@ func _ready() -> void:
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
+			["--savehardeningtest", "res://scripts/tests/save_hardening_tests.gd", "SaveHardeningTest", "savehardeningtest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
@@ -512,10 +528,19 @@ func _ready() -> void:
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
+			["--combatrngtest", "res://scripts/tests/combat_rng_tests.gd", "CombatRngTest", "combatrngtest"],
+			["--combattick", "res://scripts/tests/combat_tick_tests.gd", "CombatTickTest", "combattick"],
+			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
+			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
+			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
+			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
+			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
-			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
+			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
+			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -568,8 +593,8 @@ func _ensure_input_actions() -> void:
 
 func _preload_paths() -> Array[String]:
 	var out: Array[String] = [BATTLE_SCENE, START_MAP, TOWN_MAP, "res://scenes/maps/wereldkaart.tscn"]
-	for p in GameData.BACKDROPS.values():
-		out.append(str(p))
+	for id in GameData.BACKDROPS_BOOT:
+		out.append(GameData.backdrop_path(str(id)))
 	for h in GameData.HEROES:
 		if str(h["battle_sprite"]) != "":
 			out.append(str(h["battle_sprite"]))
@@ -601,8 +626,26 @@ func _start_preload() -> void:
 	set_process(not _preloading.is_empty())
 
 
+## Gevechtsachtergrond die niet bij het opstarten is geladen: op de achtergrond laden terwijl de
+## gevechtsflits loopt, en de vorige "late" achtergrond weer loslaten (er staat er hooguit één in het geheugen).
+func _prefetch_backdrop(path: String) -> void:
+	if path == "":
+		return
+	for id in GameData.BACKDROPS:
+		var p := str(GameData.BACKDROPS[id])
+		if p != path and not (id in GameData.BACKDROPS_BOOT):
+			_loaded.erase(p)
+	if _loaded.has(path) or _preloading.has(path) or not ResourceLoader.exists(path):
+		return
+	if ResourceLoader.load_threaded_request(path) == OK:
+		_preloading.append(path)
+		set_process(true)
+
+
 ## Kijkt elk frame (alleen zolang er nog iets laadt) of er iets klaar is.
 func _process(_delta: float) -> void:
+	if _preload_phase < 2 and not _fase_voorladen():
+		return
 	for i in range(_preloading.size() - 1, -1, -1):
 		var p := _preloading[i]
 		var status := ResourceLoader.load_threaded_get_status(p)
@@ -611,18 +654,98 @@ func _process(_delta: float) -> void:
 			_preloading.remove_at(i)
 		elif status != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 			_preloading.remove_at(i)
-	if _preloading.is_empty():
+	_prewarm_step(get_process_delta_time())
+	if _preloading.is_empty() and _prewarm_queue.is_empty():
 		set_process(false)
 
 
 ## Wacht tot alle achtergrond-loads klaar zijn (alleen voor de testmodi).
 func _finish_preload() -> void:
+	_prewarm_queue.clear()      # geen prewarm in de tests
+	_script_queue.clear()
+	if _preload_phase < 2:
+		_preload_phase = 2
+		_start_preload()
 	for p in _preloading.duplicate():
 		var r := ResourceLoader.load_threaded_get(p)
 		if r != null:
 			_loaded[p] = r
 	_preloading.clear()
 	set_process(false)
+
+
+## Opstart-voorladen in fasen (prestaties; _plan_preload() vanuit _ready, _fase_voorladen() vanuit _process):
+##  fase 0: het eerste beeld (titelscherm) laten tekenen,
+##  fase 1: de scripts uit MAIN_THREAD_SCRIPTS op de hoofdthread compileren, één per frame (samen ~0,4 s),
+##  fase 2: _start_preload() (de achtergrond-loads aanvragen; de scripts staan dan in de cache) en afwachten.
+## Daarna, alleen in rustige schermen (titel / naam invoeren): PREWARM_SCRIPTS compileren, zodat het eerste dorp /
+## woud / archief / veldmenu niet 0,1-0,3 s stilstaat op het moment van gebruik. Wie eerder iets nodig heeft laadt
+## gewoon synchroon (get_resource / load): zelfde resultaat, alleen later gecompileerd.
+const FRAMES_BEFORE_PRELOAD := 2
+const PREWARM_GAP := 0.05
+const PREWARM_SCENES: Array[String] = [TITLE_SCENE, NAME_SCENE]
+## Zware scripts die WM1 bij de eerste binnenkomst / het eerste gebruik compileert (gemeten onder xvfb, Godot 4.3:
+## field_menu.gd ~210 ms, dungeon_room.gd ~260 ms, puzzle_room.gd ~140 ms, archief2_room.gd ~100 ms, dorp ~80 ms,
+## pand_binnen.gd ~65 ms, kern_kracht_veld.gd ~40 ms, kern_absorption.gd ~35 ms). Volgorde = waarschijnlijke
+## speelvolgorde; scripts die een ander script preloadt staan er vóór, zodat elke stap klein blijft
+## (de titel hapert dan hooguit ~110 ms per stap i.p.v. ~270 ms in één keer).
+const PREWARM_SCRIPTS: Array[String] = ["res://scripts/kern/kern_kracht_veld.gd",
+	"res://scripts/village/pand_binnen.gd", "res://scripts/village/dorp_ground.gd",
+	"res://scripts/village/dorp_opbouw.gd", "res://scripts/village/molen_wieken.gd",
+	"res://scripts/ui/codex_screen.gd", "res://scripts/ui/equipment_screen.gd",
+	"res://scripts/ui/status_screen.gd", "res://scripts/ui/items_screen.gd",
+	"res://scripts/ui/magic_screen.gd", "res://scripts/ui/party_screen.gd",
+	"res://scripts/ui/bestiary_screen.gd", "res://scripts/ui/field_menu.gd",
+	"res://scripts/som/som_codex.gd", "res://scripts/som/som_ally.gd", "res://scripts/som/som_hud.gd",
+	"res://scripts/som/som_ring.gd", "res://scripts/som/som_arena.gd", "res://scripts/dungeon/map_monster.gd",
+	"res://scripts/dungeon/dungeon_chest.gd", "res://scripts/dungeon/dungeon_room.gd",
+	"res://scripts/dungeon/archief2_room.gd", "res://scripts/puzzle/puzzle_room.gd",
+	"res://scripts/kern/kern_absorption.gd"]
+var _preload_phase := 0            # 0 = wacht op het eerste beeld, 1 = scripts, 2 = loads lopen / prewarm
+var _preload_frames := 0
+var _script_queue: Array[String] = []
+var _prewarm_queue: Array[String] = []
+var _prewarm_wait := 0.0
+
+
+func _plan_preload() -> void:
+	_script_queue.assign(MAIN_THREAD_SCRIPTS)
+	_prewarm_queue.assign(PREWARM_SCRIPTS)
+	set_process(true)
+
+
+## Fase 0 en 1. true = fase 2 bereikt (en _process mag doorgaan met het poll-werk).
+func _fase_voorladen() -> bool:
+	if _preload_phase == 0:
+		_preload_frames += 1
+		if _preload_frames < FRAMES_BEFORE_PRELOAD:
+			return false
+		_preload_phase = 1
+	if not _script_queue.is_empty():
+		var sp: String = _script_queue.pop_front()
+		if ResourceLoader.exists(sp):
+			load(sp)
+		return false
+	_preload_phase = 2
+	_start_preload()
+	set_process(true)      # _start_preload zet het uit als er niets laadt; prewarm moet nog
+	return true
+
+
+## Eén zwaar script per PREWARM_GAP seconden, alleen als de speler niets aan het doen is (titelscherm).
+func _prewarm_step(delta: float) -> void:
+	if _prewarm_queue.is_empty() or not _preloading.is_empty():
+		return
+	var scene := get_tree().current_scene
+	if scene == null or not (scene.scene_file_path in PREWARM_SCENES) or changing_map or in_battle:
+		return
+	_prewarm_wait -= delta
+	if _prewarm_wait > 0.0:
+		return
+	_prewarm_wait = PREWARM_GAP
+	var sp: String = _prewarm_queue.pop_front()
+	if ResourceLoader.exists(sp) and not _loaded.has(sp):
+		_loaded[sp] = load(sp)
 
 
 ## Geeft een (voor)geladen resource; wacht zo nodig tot het laden klaar is.
@@ -1022,11 +1145,13 @@ func slot_record(slot: int) -> Dictionary:
 	var manual := slot_path(slot)
 	if manual == "" or not _save_file_exists(manual):
 		return {}
-	var d := read_save(manual)
+	var src := _read_save_source(manual)
+	var d: Dictionary = src["data"]
 	if d.is_empty():
 		return {"path": manual, "data": {}, "stamp": _save_modified_time(manual),
 				"slot": slot, "corrupt": true}
-	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot}
+	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot,
+			"from_backup": src["from_backup"]}
 
 
 ## De aparte autosave ({} = geen). Ook een oude autosave (v0.22, gestempeld met slot 1..4)
@@ -1034,11 +1159,13 @@ func slot_record(slot: int) -> Dictionary:
 func autosave_record() -> Dictionary:
 	if not _save_file_exists(autosave_path):
 		return {}
-	var d := read_save(autosave_path)
+	var src := _read_save_source(autosave_path)
+	var d: Dictionary = src["data"]
 	if d.is_empty():
 		return {"path": autosave_path, "data": {}, "stamp": _save_modified_time(autosave_path),
 				"slot": AUTOSAVE_SLOT, "corrupt": true}
-	return {"path": autosave_path, "data": d, "stamp": _save_stamp(autosave_path), "slot": AUTOSAVE_SLOT}
+	return {"path": autosave_path, "data": d, "stamp": _save_stamp(autosave_path), "slot": AUTOSAVE_SLOT,
+			"from_backup": src["from_backup"]}
 
 
 ## Bij welk handmatig slot hoort een autosave (voor het volgende handmatige opslaan)?
@@ -1065,13 +1192,17 @@ func newest_slot_record() -> Dictionary:
 	var best := {}
 	var stamp := -1.0
 	# handmatige slots eerst: bij gelijke stempel wint de handmatige save, niet de autosave
-	for i in [1, 2, 3, 4, AUTOSAVE_SLOT]:
-		var rec := slot_record(i)
-		if rec.is_empty():
-			continue
-		if float(rec["stamp"]) > stamp:
-			stamp = float(rec["stamp"])
-			best = rec
+	# een onleesbaar slot (geen goede .bak) mag 'Doorgaan' niet blokkeren zolang er een goed slot is
+	for pass_corrupt in [false, true]:
+		for i in [1, 2, 3, 4, AUTOSAVE_SLOT]:
+			var rec := slot_record(i)
+			if rec.is_empty() or bool(rec.get("corrupt", false)) != pass_corrupt:
+				continue
+			if float(rec["stamp"]) > stamp:
+				stamp = float(rec["stamp"])
+				best = rec
+		if not best.is_empty():
+			break
 	return best
 
 
@@ -1157,7 +1288,11 @@ func read_beta_save() -> Dictionary:
 
 
 func _save_stamp(path: String) -> float:
-	var d := read_save(path)
+	return _stamp_of(read_save(path), path)
+
+
+## Stempel van een al gelezen save (voorkomt een tweede JSON-parse van hetzelfde bestand).
+func _stamp_of(d: Dictionary, path: String) -> float:
 	if d.has("saved_unix"):
 		return float(d["saved_unix"])
 	return _save_modified_time(path)
@@ -1380,7 +1515,13 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 			h["spells"] = e["spells"].duplicate()
 		# v0.14 uitrusting + basis-stats; oude saves zonder die sleutels krijgen
 		# standaardwaarden (zie Equipment.load_hero). Ongeldige stukken -> terug in de tas.
+		h["level"] = maxi(1, int(h.get("level", 1)))
+		h["exp"] = maxi(0, int(h.get("exp", 0)))
 		Equipment.load_hero(h, e, _hero_data(str(h["id"])), stray_equipment)
+		h["max_hp"] = maxi(1, int(h["max_hp"]))
+		h["max_mp"] = maxi(0, int(h["max_mp"]))
+		h["hp"] = clampi(int(h["hp"]), 0, int(h["max_hp"]))
+		h["mp"] = clampi(int(h["mp"]), 0, int(h["max_mp"]))
 		out.append(h)
 	return out
 
@@ -1393,13 +1534,23 @@ static func migrate_name(n: String) -> String:
 	return str(OUDE_NAMEN.get(n, n))
 
 
+## Goud uit save-data: 0..MAX_GOLD (geen negatief of absurd getal).
+static func _gold_from(v) -> int:
+	if v is float or v is int:
+		return int(clampf(float(v), 0.0, float(MAX_GOLD)))
+	return 0
+
+
 ## Tas uit save-data: id -> aantal (kapotte waarden vallen weg).
 static func _inventory_from(raw) -> Dictionary:
 	var out := {}
 	if raw is Dictionary:
 		for k in raw:
-			if raw[k] is float or raw[k] is int:
-				out[k] = int(raw[k])
+			if (raw[k] is float or raw[k] is int) and str(k) != "":
+				# eerst als float begrenzen: int() van een absurd getal wordt anders negatief
+				var n := int(clampf(float(raw[k]), 0.0, float(MAX_ITEM_STACK)))
+				if n >= 1:
+					out[k] = n
 	return out
 
 
@@ -1450,23 +1601,31 @@ func _quests_save() -> Dictionary:
 
 ## Leest een save (standaard de handmatige; v0.11: of 'path', bv. autosave_path).
 func read_save(path := "") -> Dictionary:
+	return _read_save_source(path)["data"]
+
+
+## Zoals read_save, maar ook waar de data vandaan kwam: {"data": {}, "from_backup": bool}.
+func _read_save_source(path := "") -> Dictionary:
 	if path == "":
 		path = save_path
 	var parsed := _read_save_file(path)
 	if _valid_save_data(parsed):
-		return parsed
+		return {"data": parsed, "from_backup": false}
 	var backup := _read_save_file(path + ".bak")
 	if _valid_save_data(backup):
 		push_warning("Save ontbreekt of is corrupt; reservekopie geladen: %s" % (path + ".bak"))
-		return backup
-	return {}
+		return {"data": backup, "from_backup": true}
+	return {"data": {}, "from_backup": false}
 
 
 func _read_save_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
-	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if parsed is Dictionary else {}
+	# JSON.new().parse i.p.v. parse_string: een kapot bestand geeft hier een foutcode, geen ERROR-regel in het log
+	var json := JSON.new()
+	if json.parse(FileAccess.get_file_as_string(path)) != OK:
+		return {}
+	return json.data if json.data is Dictionary else {}
 
 
 func _valid_save_data(data: Dictionary) -> bool:
@@ -1477,18 +1636,33 @@ func _valid_save_data(data: Dictionary) -> bool:
 ## Laadt de save en zet alles terug (party, spullen, goud, speeltijd, bestiarium);
 ## geeft false als er geen (geldige) save is. Daarna: continue_game() gaat naar de map.
 ## v0.11: 'path' = welke save ("" = de handmatige).
-func load_game(path := "") -> bool:
+## 'gelezen' = de save die de aanroeper net al gelezen heeft (slotlijst/Doorgaan): dan geen derde parse.
+func load_game(path := "", gelezen: Dictionary = {}) -> bool:
 	som_mode = false      # SoM-proef: een geladen spel is altijd het gewone (turn-based) spel
-	var d := read_save(path)
+	var d: Dictionary
+	var src: Dictionary = {}
+	last_load_notice = ""
+	if not gelezen.is_empty():
+		d = gelezen
+	else:
+		src = _read_save_source(path)
+		d = src["data"]
 	if not apply_state(d):
+		last_load_notice = NOTICE_UNREADABLE
 		game_loaded.emit(path if path != "" else save_path, false)
 		return false
 	# Gevechtsstijl van deze save; oude saves zonder sleutel houden hun vroegere effectieve waarde: Classic.
-	Settings.set_value("battle_style", int(d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)))
+	var style = d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+	Settings.set_value("battle_style", int(style) if (style is int or style is float) else Settings.BATTLE_STYLE_CLASSIC)
 	# v0.19 kamer-checkpoint uit de save (oude saves: geen; dan zet de map hem bij binnenkomst)
 	checkpoint = _checkpoint_from(d.get("checkpoint", {}))
 	entry_kind = "load"
 	pending_respawn_msg = []
+	if bool(src.get("from_backup", false)):
+		var main_path := path if path != "" else save_path
+		last_load_notice = NOTICE_RECOVERED
+		pending_respawn_msg = RECOVERED_LINES.duplicate()
+		save_recovered.emit(main_path, main_path + ".bak")
 	game_loaded.emit(path if path != "" else save_path, true)
 	return true
 
@@ -1531,7 +1705,7 @@ func apply_state(d: Dictionary) -> bool:
 	inventory = _inventory_from(d.get("inventory", {}))
 	for id in stray_equipment:
 		inventory[id] = int(inventory.get(id, 0)) + 1
-	gold = int(d.get("gold", 0)) if (d.get("gold", 0) is float or d.get("gold", 0) is int) else 0
+	gold = _gold_from(d.get("gold", 0))
 	bestiary = {}
 	var best = d.get("bestiary", {})
 	if best is Dictionary:
@@ -1596,6 +1770,7 @@ func apply_state(d: Dictionary) -> bool:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	_unique_seen_flags()
+	_codex_inktwurm_sync()
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
 	var a2 = d.get("archief2", {})
@@ -1687,7 +1862,7 @@ func continue_slot(slot: int) -> bool:
 func _continue_record(rec: Dictionary) -> bool:
 	var rs := int(rec.get("slot", 1))
 	active_slot = home_slot_of(rec.get("data", {})) if rs == AUTOSAVE_SLOT else clampi(rs, 1, SLOT_COUNT)
-	if changing_map or not load_game(str(rec.get("path", ""))):
+	if changing_map or not load_game(str(rec.get("path", "")), rec.get("data", {})):
 		return false
 	changing_map = true
 	in_battle = false
@@ -1998,6 +2173,8 @@ func enter_map(path: String) -> void:
 func change_map(path: String, spawn_name: String) -> void:
 	if changing_map or in_battle:
 		return
+	if ReleaseFlags.dev_scene_blocked(path):
+		return
 	changing_map = true
 	var route := huis_route(current_map, path, spawn_name)
 	path = route[0]
@@ -2111,6 +2288,7 @@ func prepare_battle(enemies: Array, terrain := "", boss := false, tier := 0, arc
 	pending_archief = archief and not boss
 	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
 	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
+	_prefetch_backdrop(pending_backdrop)
 
 
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),
@@ -2207,6 +2385,8 @@ func respawn_at_checkpoint(boss := false) -> String:
 	var keep_koopman := koopman_save_data()      # bezoeken aan H-5 rollen niet terug
 	# Een al gezien eenmalige tutorial (na een uniek monster) rolt niet terug: nooit twee keer.
 	var keep_seen: Array = StoryData.UNIQUE_SEEN_FLAGS.values().filter(func(f): return story_flags.has(str(f)))
+	if story_flags.has(StoryData.TUTORIAL_CODEX_FLAG):
+		keep_seen.append(StoryData.TUTORIAL_CODEX_FLAG)
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
 	koopman_load(keep_koopman)
@@ -2216,6 +2396,7 @@ func respawn_at_checkpoint(boss := false) -> String:
 	_unique_seen_flags()
 	for f in keep_seen:
 		story_flags[str(f)] = true
+	_codex_inktwurm_sync()
 	dungeon100_permanent = keep_permanent
 	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
@@ -2450,8 +2631,7 @@ func dungeon100_end_run(deliver := true) -> bool:
 	inventory = _inventory_from(snap.get("inventory", {}))
 	for id in stray:
 		inventory[id] = int(inventory.get(id, 0)) + 1
-	var g = snap.get("gold", 0)
-	gold = int(g) if (g is int or g is float) else 0
+	gold = _gold_from(snap.get("gold", 0))
 	var behouden := _dungeon100_kept_pages(snap.get("codex", {}))
 	codex_load_data(snap.get("codex", {}))
 	_dungeon100_restore_kept(behouden)
@@ -2682,6 +2862,9 @@ func codex_add(species_id: String, level := 1, caught := {}) -> Dictionary:
 	codex_pages.append(page)
 	if codex_active == "":
 		codex_active = uid
+	var flag := str(StoryData.CODEX_SPECIES_FLAGS.get(species_id, ""))
+	if flag != "":
+		story_flags[flag] = true
 	codex_changed.emit()
 	return page
 
@@ -2816,6 +2999,28 @@ func _unique_seen_flags() -> void:
 	for id in StoryData.UNIQUE_SEEN_FLAGS:
 		if unique_done.has(str(id)):
 			story_flags[str(StoryData.UNIQUE_SEEN_FLAGS[id])] = true
+
+
+## Vlag 'Inktwurm in de Codex' bijhouden bij laden en bij een checkpoint. Staat er een Inktwurm-pagina, dan
+## is de vlag gezet. Oude saves die al voorbij de Inktwurm zijn (hij is verslagen of gevangen): de Golemhal
+## gaat pas open als hij in de Codex staat, dus die krijgen hem alsnog en de vang-tutorial telt als gezien.
+## 'Gevangen' en daarna gefuseerd: wel de vlag, geen nieuwe pagina. Codex vol: geen pagina (de uitgang gaat
+## dan al open, zie StoryData.GOLEMHAL_EXIT) en we proberen het bij de volgende load weer.
+func _codex_inktwurm_sync() -> void:
+	var flag := StoryData.CODEX_INKTWURM_FLAG
+	for page in codex_pages:
+		if str(page.get("species", "")) == "inktwurm":
+			story_flags[flag] = true
+	if not unique_done.has("inktwurm"):
+		return
+	story_flags[StoryData.TUTORIAL_CODEX_FLAG] = true
+	if story_flags.has(flag):
+		return
+	if unique_state("inktwurm") == "gevangen":
+		story_flags[flag] = true
+	elif not codex_full():
+		codex_add("inktwurm", CodexData.capture_level(0, "inktwurm"), {"play_time": int(play_time())})
+		mark_seen("inktwurm")
 
 
 # ---------------------------------------------------------------- world warper

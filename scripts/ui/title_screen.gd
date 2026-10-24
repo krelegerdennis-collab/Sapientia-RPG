@@ -28,6 +28,7 @@ const SaveSlotList := preload("res://scripts/ui/save_slot_list.gd")
 const SavePrompt := preload("res://scripts/ui/save_prompt.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const TitleGlitch := preload("res://scripts/ui/title_glitch.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const BACKDROP := "res://assets/battle/bibliotheek.png"
 const TITLE_MAIN := "res://assets/ui/title_main.png"   # hoofdpagina 384x216 (titel zit in de plaat)
 const TITLE_BG := "res://assets/ui/title_bg.png"
@@ -221,6 +222,7 @@ func _ready() -> void:
 	load_button.focus_neighbor_left = continue_button.get_path()
 	load_button.focus_neighbor_right = load_button.get_path()
 
+	apply_online_visibility()
 	version_label = UiMenu.label("v" + str(ProjectSettings.get_setting("application/config/version", "")), UiStyleC.TEXT_OFF)
 	version_label.name = "Version"
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -316,15 +318,34 @@ func _place_text_title() -> void:
 	subtitle_label.position = Vector2(roundf((STAGE_SIZE.x - subtitle_label.size.x) / 2.0), glitch.position.y + glitch.size.y)
 
 
+## WM1 (H11): PvP en Co-op blijven verborgen tot er een relay-URL is (ReleaseFlags.online_cut).
+## De knoppen blijven bestaan (positie, tests); ze zijn alleen onzichtbaar en niet focusbaar.
+func apply_online_visibility() -> void:
+	var zichtbaar := ReleaseFlags.online_buttons_visible()
+	for b in [pvp_button, coop_button]:
+		b.visible = zichtbaar
+		b.disabled = not zichtbaar
+		b.focus_mode = Control.FOCUS_ALL if zichtbaar else Control.FOCUS_NONE
+	if zichtbaar:
+		som_button.focus_neighbor_left = pvp_button.get_path()
+		new_button.focus_neighbor_top = pvp_button.get_path()
+		pvp_button.focus_neighbor_right = som_button.get_path()
+	else:
+		som_button.focus_neighbor_left = som_button.get_path()
+		new_button.focus_neighbor_top = som_button.get_path()
+
+
 ## Doorgaan aan/uit naar gelang er een save is.
 func refresh() -> void:
-	var has := GameState.has_any_save()
+	# één keer de nieuwste save zoeken (voorheen: twee keer alle slots lezen)
+	var rec := GameState.newest_slot_record()
+	var has := not rec.is_empty()
 	continue_button.disabled = not has
 	continue_button.focus_mode = Control.FOCUS_ALL if has else Control.FOCUS_NONE
 	load_button.disabled = not has
 	load_button.focus_mode = Control.FOCUS_ALL if has else Control.FOCUS_NONE
 	if has:
-		var d := GameState.read_newest_save()
+		var d: Dictionary = rec.get("data", {})
 		save_info.text = "  %s  %s%s" % [str(d.get("player_name", "")), UiMenu.format_time(float(d.get("play_time", 0.0))),
 				" (auto)" if bool(d.get("autosave", false)) else ""]
 		save_info.visible = true
@@ -373,7 +394,8 @@ func _open_slot_list() -> void:
 
 func _on_slot_picked(slot: int) -> void:
 	set_process(false)
-	await GameState.continue_slot(slot)
+	if not await GameState.continue_slot(slot):
+		set_process(true)
 
 
 func _on_slot_cancelled() -> void:

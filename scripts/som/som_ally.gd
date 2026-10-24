@@ -84,6 +84,14 @@ func formation_point() -> Vector2:
 	return p.position + side * f.x + back * f.y
 
 
+## Staat dit lichaam in een muur of buiten de kamer? Bij het binnenkomen starten de bondgenoten rond de
+## standaardplek van de speler in de scène (nog vóór die op zijn spawnpunt staat): in sommige kamers
+## (Mistpoel, Wortelpad, Wachtersgang, Bibliotheek) is dat massief.
+func in_wall() -> bool:
+	var room: Node = arena.room
+	return room != null and room.has_method("is_wall") and room.is_wall(Vector2i((position / 16.0).floor()))
+
+
 func tick(delta: float) -> void:
 	if not alive():
 		if state != "ko":
@@ -97,6 +105,8 @@ func tick(delta: float) -> void:
 		state = "follow"
 		SomFx.set_ko(self, arena.pose_tex(hero_id, "ko"), false)
 	sprite.modulate = Color.WHITE
+	if in_wall():
+		_teleport()
 	charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
 	spell_cd -= delta
 	var m: Dictionary = member()
@@ -165,6 +175,10 @@ func _teleport() -> void:
 
 
 func _think_spell() -> void:
+	# Staat de besturing op deze held (lichaam niet gewisseld), dan is node_of(hero_id) de speler: de AI mag
+	# daar geen cast-animatie (SomCastAnim/-Circle/-Fx) naast het loopframe leggen.
+	if hero_id == arena.active_id:
+		return
 	var m: Dictionary = member()
 	var spells: Array = m.get("spells", [])
 	# 1) genezen: partylid (levend) onder ALLY_HEAL_BELOW
@@ -176,7 +190,7 @@ func _think_spell() -> void:
 				arena.cast_spell(str(s), hero_id, low)
 				return
 	# 2) aanvallen met een spreuk
-	if randf() > SomData.ALLY_DAMAGE_SPELL_CHANCE or arena.nearest_enemy(arena.player.position, SomData.ALLY_ENGAGE_RANGE) == null:
+	if arena.rng.randf() > SomData.ALLY_DAMAGE_SPELL_CHANCE or arena.nearest_enemy(arena.player.position, SomData.ALLY_ENGAGE_RANGE) == null:
 		return
 	for s in spells:
 		var sp: Dictionary = GameData.SPELLS.get(str(s), {})
