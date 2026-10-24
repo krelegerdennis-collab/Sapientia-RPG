@@ -18,6 +18,7 @@ const StoryData := preload("res://scripts/data/story_data.gd")
 const ShopData := preload("res://scripts/data/shop_data.gd")
 const Unlock := preload("res://world_warper/flow/unlock.gd")
 const Recepten := preload("res://scripts/data/werkplaats_recepten.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 
 const FLAG_HUB := "warper_hub_open"
 ## Leeg tot Archief 2 een kern-vlag heeft. Geen verzonnen naam.
@@ -168,6 +169,14 @@ static func is_open(room_id: String, flags: Dictionary, party: Array) -> bool:
 	if not ROOMS.has(room_id):
 		return false
 	return huidige_act(party) >= int(ROOMS[room_id]["min_act"])
+
+
+## Mag de speler er echt door? is_open() blijft de level-regel; WM1 sluit er een paar hubkamers
+## bovenop (ReleaseFlags.hub_cut, H3). De deur gebruikt deze functie.
+static func release_open(room_id: String, flags: Dictionary, party: Array) -> bool:
+	if ReleaseFlags.hub_room_cut(room_id):
+		return false
+	return is_open(room_id, flags, party)
 
 
 static func naam(room_id: String) -> String:

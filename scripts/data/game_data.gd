@@ -109,7 +109,7 @@ const ENEMIES := {
 	"mosslijm": {
 		"name": "Moss Slime", "sprite": "res://art/enemies/mosslijm.png",
 		"sprite_back": "res://art/enemies/mosslijm_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
-		"max_hp": 10, "atk": 7, "def": 2, "agi": 3,
+		"max_hp": 13, "atk": 10, "def": 2, "agi": 3,
 		"exp": 3, "gold": 2, "y_offset": 0,
 		"skills": [],
 		"no": 1, "mp": 0, "weak": ["vuur"], "resist": [],
@@ -120,7 +120,7 @@ const ENEMIES := {
 	"moskonijn": {
 		"name": "Moss Rabbit", "sprite": "res://art/enemies/moskonijn.png",
 		"sprite_back": "res://art/enemies/moskonijn_rug.png",   # v0.18 rugaanzicht (Codex-bondgenoot; RPG ART art_rug_v18)
-		"max_hp": 14, "atk": 9, "def": 3, "agi": 12,
+		"max_hp": 18, "atk": 14, "def": 3, "agi": 12,
 		"exp": 4, "gold": 3, "y_offset": 0,
 		"skills": [],
 		"no": 2, "mp": 0, "weak": ["vuur"], "resist": [],
@@ -131,7 +131,7 @@ const ENEMIES := {
 	"papiergeest": {
 		"name": "Paper Wraith", "sprite": "res://assets/sprites/enemies/papiergeest.png",
 		"sprite_back": "res://assets/sprites/enemies/papiergeest_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
-		"max_hp": 16, "atk": 9, "def": 3, "agi": 4,
+		"max_hp": 21, "atk": 14, "def": 3, "agi": 4,
 		"exp": 5, "gold": 4, "y_offset": 0,
 		"skills": [],
 		"no": 3, "mp": 0, "weak": ["vuur"], "resist": [],
@@ -142,7 +142,7 @@ const ENEMIES := {
 	"glitchmot": {
 		"name": "Glitch Moth", "sprite": "res://assets/sprites/enemies/glitchmot.png",
 		"sprite_back": "res://assets/sprites/enemies/glitchmot_rug.png",   # v0.17 rugaanzicht (Codex-bondgenoot)
-		"max_hp": 12, "atk": 10, "def": 2, "agi": 14,
+		"max_hp": 16, "atk": 15, "def": 2, "agi": 14,
 		"exp": 6, "gold": 3, "y_offset": 0,
 		"skills": [],
 		"no": 4, "mp": 0, "weak": ["bliksem"], "resist": [],
@@ -279,7 +279,7 @@ const ENEMIES := {
 		"no": 10, "mp": 0, "weak": ["vuur"], "resist": ["bliksem"],
 		"drops": [{"item": "drankje", "chance": 1.0}, {"item": "toverwater", "chance": 1.0}],
 		"boss": {
-			"max_hp": 440, "atk": 34, "def": 20, "agi": 8, "mag": 14, "mdef": 16, "mp": 0,
+			"max_hp": 440, "atk": 38, "def": 20, "agi": 8, "mag": 14, "mdef": 16, "mp": 0,
 			"exp": 400, "gold": 150,
 			"skills": [{"name": "Root Grip", "chance": 0.25, "power": 1.6}],
 		},
@@ -321,7 +321,7 @@ const ENEMIES := {
 		"sprite_back": "res://assets/sprites/enemies/inktwurm_rug.png",
 		"idle": "res://assets/sprites/enemies/inktwurm_idle.png", "idle_frames": 2, "idle_time": 0.55,
 		"unique": true, "encounter_level": 5,
-		"max_hp": 68, "atk": 36, "def": 17, "agi": 26, "mag": 0, "mdef": 2,
+		"max_hp": 74, "atk": 44, "def": 17, "agi": 26, "mag": 0, "mdef": 2,  # power scaling v2: 2x de (opgeschaalde) normaal Lv 5
 		# TIJDELIJKE AANNAME: EXP/goud ongeveer 2x een Mech. Wachter op niveau 4 (unieke beloning)
 		"exp": 60, "gold": 40, "y_offset": 0,
 		"skills": [],
@@ -335,7 +335,7 @@ const ENEMIES := {
 	},
 	# ------------------------------------------------------------ ARCHIEF 2, HET LEVENDE ARCHIEF
 	# Plaatjes zijn PLACEHOLDERS (tools/art_archief2_placeholders.py).
-	# TODO(design): Lotte-glitch HP 90, ATK 14, DEF 5. Niet in de canon; onder de Golem (HP 360).
+	# TODO(design): Lotte-glitch (baas-blok) HP 270, ATK 32, DEF 5 (power scaling v2). Niet in de canon; onder de Golem (HP 360).
 	"lotte_glitch": {
 		"name": "Seren", "sprite": "res://assets/sprites/archief2/lotte_glitch.png",
 		"max_hp": 90, "atk": 14, "def": 5, "agi": 8, "mag": 8, "mdef": 6,
@@ -344,7 +344,7 @@ const ENEMIES := {
 		"no": 30, "mp": 12, "weak": [], "resist": [],
 		"drops": [],
 		"boss": {
-			"max_hp": 90, "atk": 14, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
+			"max_hp": 270, "atk": 32, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
 			"exp": 20, "gold": 0,
 			"skills": [{"name": "Silence", "chance": 0.25, "power": 1.2}],
 			"tint": [0.72, 0.40, 1.15],
@@ -1092,11 +1092,24 @@ const EERSTE_ARCHIEF_DOEL := 7
 ## Bevestigd: 0,7 op gevechtsstats en 0,50 op EXP, zodat 34 kamergevechten + het oefengevecht op level 7 landen.
 const ARCHIEF_STAT_SCHAAL := 0.7
 const ARCHIEF_EXP_SCHAAL := 0.50
+## POWER SCALING v2 (vervangt PR #126; docs/BATTLE_BALANCE_REPORT.md): een gedocumenteerde schaal per gebied,
+## gemeten met de battlesim (seed 20261020). Doel: gewone gevechten ~10-20% party-HP, bazen ~60-90% winst.
+##   Act-1 basismonsters (mosslijm, moskonijn, papiergeest, glitchmot): HP x1,3, ATK x1,5 (Mech. Warden blijft 30/12, golemtest).
+##   Tier 1-3 (Eerste Archief): ATK +8 / +9 / +9 (was 0 / 4 / 7), DEF +1 / +3 / +5.
+##   Tier 5-6 = Tweede Archief verdieping 1-2 / 3-4 (archief2_rooms.gd; was tier 2 / 3, gedeeld met Archief 1):
+##     de party is daar Lv 14-16, de archiefschaal 0,7 blijft (canon) en komt erna.
+##   Tier 7 = Berggrot (berggrot_data.gd; was tier 0).
+##   EXP/goud per tier blijven gelijk aan de oude tier (5 = oud 2, 6 = oud 3, 7 = basis).
+##   Seren (lotte_glitch baas-blok): HP x3, ATK x2,3. Wortelkoning baas-blok: ATK 34 -> 38 (~80-90% winst in de battlesim; in #126 was het 68%).
+##   Canon-bazen (Golem 360/27/15, Wurger, Genezer, Diepe Grot 25/50/75/99) NIET gewijzigd.
 const TIERS := {
-	1: {"hp": 1.0, "atk": 0, "def": 0, "exp": 2.0, "gold": 1.0},
-	2: {"hp": 1.5, "atk": 4, "def": 3, "exp": 2.5, "gold": 1.5},
-	3: {"hp": 1.9, "atk": 7, "def": 5, "exp": 3.0, "gold": 2.0},
+	1: {"hp": 1.0, "atk": 8, "def": 1, "exp": 2.0, "gold": 1.0},
+	2: {"hp": 1.5, "atk": 9, "def": 3, "exp": 2.5, "gold": 1.5},
+	3: {"hp": 1.9, "atk": 9, "def": 5, "exp": 3.0, "gold": 2.0},
 	4: {"hp": 2.3, "atk": 10, "def": 7, "exp": 3.0, "gold": 2.5},
+	5: {"hp": 5.0, "atk": 46, "def": 4, "exp": 2.5, "gold": 1.5},
+	6: {"hp": 6.5, "atk": 66, "def": 6, "exp": 3.0, "gold": 2.0},
+	7: {"hp": 3.5, "atk": 28, "def": 0, "exp": 1.0, "gold": 1.0},
 }
 
 
@@ -1199,6 +1212,10 @@ const TERRAIN_BACKDROP := {
 ## v0.23: baasgevecht in de kas (De Genezer) = kas_boss (RPG ART art_kas_battle).
 const BOSS_TERRAIN_BACKDROP := {"woud": "forest_dark", "kas": "kas_boss"}
 const DEFAULT_BACKDROP_ID := "grass"
+## Achtergronden die GameState bij het opstarten vooraf laadt (1280x432 = 2,1 MB textuurgeheugen per stuk):
+## alleen die van het begin van het spel. De rest (Diepe Grot-varianten, kas, overwoekerde bibliotheek)
+## wordt pas bij het gevecht geladen (GameState._prefetch_backdrop) en maar één tegelijk bewaard.
+const BACKDROPS_BOOT := ["grass", "sand", "boss", "library", "forest_dark", "cave_berg"]
 ## Achtergrond-id -> plaatje (1280x432, zie docs/ARTSTYLE.md 10g). gras/zand/boss zijn van
 ## de art director (RPG ART, staan in tools/handwerk.txt).
 ## "library" is bewaard voor een latere dungeon (nu niet op de wereldkaart).
