@@ -18,6 +18,7 @@ const FieldFollowerScript := preload("res://scripts/field_follower.gd")
 const WorldmapCutsceneScript := preload("res://scripts/worldmap_cutscene.gd")
 const GardenCreaturesScript := preload("res://scripts/village/garden_creatures.gd")
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const BerggrotHaak := preload("res://scripts/data/berggrot_data.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
 const AUTOSAVE_DELAY := 0.35
@@ -44,6 +45,7 @@ func _ready() -> void:
 	GameState.enter_map(scene_file_path)
 	# SoM-stijl per gebied (scripts/data/kaart_stijl.gd); in de oude stijl verandert er niets.
 	KaartStijl.toepassen(self)
+	AtlasZuinig.toepassen(self)      # geen tweede (opgevulde) kopie van elke tegelatlas in het geheugen
 	_fit_camera()
 	get_viewport().size_changed.connect(_fit_camera)
 
@@ -283,7 +285,7 @@ func _process(_delta: float) -> void:
 			start_boss_battle()
 	# TIJDELIJK (puzzels): F4 = naar de puzzel-testkamer (alleen debug-builds). Weghalen
 	# zodra De Vergeten Archieven een echte ingang heeft.
-	if OS.is_debug_build() and InputMap.has_action("debug_puzzle") and Input.is_action_just_pressed("debug_puzzle"):
+	if ReleaseFlags.dev_rooms_allowed() and InputMap.has_action("debug_puzzle") and Input.is_action_just_pressed("debug_puzzle"):
 		if not GameState.in_battle and not GameState.changing_map and not player.is_moving \
 				and not Dialog.is_open and not menu_open() and not Story.running:
 			player.input_locked = true

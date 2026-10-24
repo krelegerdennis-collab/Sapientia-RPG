@@ -100,6 +100,12 @@ pointing/emulate_touch_from_mouse=true
 ; browser (Godot 4.7, godot#119026). 0 = Stream.
 general/default_playback_type.web=0
 
+[sapientia]
+
+; Online co-op: WebSocket-URL van de relay (relay/README.md), bv. "wss://naam.fly.dev".
+; Leeg = alleen LAN. Omgevingsvariabele SAPIENTIA_RELAY_URL wint (dev/test).
+net/relay_url=""
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
