@@ -90,6 +90,10 @@ func check(c: Dictionary, arg := "") -> bool:
 		return false
 	if c.has("not_item") and GameState.item_count(str(c["not_item"])) > 0:
 		return false
+	if c.has("unique_open") and not GameState.unique_available(str(c["unique_open"])):
+		return false
+	if c.has("codex_room") and GameState.codex_full() == bool(c["codex_room"]):
+		return false
 	# v0.16 uitrusting-tutorial: draagt de hoofdheld dit stuk?
 	if c.has("equipped") and not wears(str(c["equipped"])):
 		return false
@@ -599,17 +603,27 @@ func player_free() -> bool:
 	return not (m.has_method("menu_open") and m.menu_open())
 
 
+## Eerste event uit SD.FREE_EVENTS voor de huidige kaart waarvan de voorwaarde klopt ("" = geen).
+func _free_event() -> String:
+	var m := _map()
+	if m == null:
+		return ""
+	for row in SD.FREE_EVENTS:
+		if str(row["map"]) == m.scene_file_path and check(row.get("if", {})):
+			return str(row["event"])
+	return ""
+
+
 func _process_pending(delta: float) -> void:
-	if pending_unique_event == "":
-		return
-	if not player_free():
+	var ev := pending_unique_event if pending_unique_event != "" else _free_event()
+	if ev == "" or not player_free():
 		_pending_free = 0.0
 		return
 	_pending_free += delta
 	if _pending_free < PENDING_FREE_SEC:
 		return
-	var ev := pending_unique_event
-	pending_unique_event = ""
+	if pending_unique_event == ev:
+		pending_unique_event = ""
 	_pending_free = 0.0
 	run(ev)
 

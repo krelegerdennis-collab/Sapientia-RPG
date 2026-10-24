@@ -1,6 +1,7 @@
 extends Control
 class_name CoopLobbyScreen
-## LAN co-op lobby (fase B). Engelse speler-tekst; gebruikt scripts/net/* API.
+## Co-op lobby (fase B): LAN, en online via de relay als er een relay-URL is ingesteld
+## (Protocol.relay_url(); leeg = alleen LAN). Engelse speler-tekst; gebruikt scripts/net/* API.
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
@@ -18,7 +19,7 @@ const TITLE_SIZE := 12
 
 signal leave_requested
 
-enum Screen { MENU, HOST, JOIN, MESSAGE }
+enum Screen { MENU, HOST, JOIN, JOIN_CODE, MESSAGE }
 
 var lobby: LanLobby
 var discovery: LanDiscovery
@@ -29,6 +30,8 @@ var _box: VBoxContainer
 var _hosts: Dictionary = {}
 var _message: String = ""
 var _joining_ip: String = ""
+var _joining_code: String = ""
+var _code_edit: LineEdit
 
 
 func _ready() -> void:
@@ -61,6 +64,7 @@ func _ready() -> void:
 	lobby.link_lost.connect(_on_link_lost)
 	lobby.start_game_received.connect(_on_start_game_received)
 	lobby.session_ended.connect(_on_session_ended)
+	lobby.room_ready.connect(_on_room_ready)
 	discovery.host_found.connect(_on_host_found)
 	GameState.coop_register_lobby(lobby, discovery)
 	_show_menu()
@@ -89,6 +93,11 @@ func cancel() -> void:
 		Screen.JOIN:
 			if _joining_ip != "":
 				_show_join_listen()
+			else:
+				_show_menu()
+		Screen.JOIN_CODE:
+			if _joining_code != "":
+				_show_join_code()
 			else:
 				_show_menu()
 		_:
@@ -120,6 +129,7 @@ func _show_menu() -> void:
 	_screen = Screen.MENU
 	_hosts.clear()
 	_joining_ip = ""
+	_joining_code = ""
 	_message = ""
 	_rebuild()
 
@@ -138,6 +148,40 @@ func _show_host() -> void:
 		return
 	GameState.coop_register_lobby(lobby, discovery)
 	_rebuild()
+
+
+func _show_host_online() -> void:
+	_teardown_net()
+	_screen = Screen.HOST
+	var err := lobby.host_relay(Protocol.relay_url(), _host_display_name())
+	if err != OK:
+		_show_message("Could not open an online room (%s)." % Protocol.error_name(err))
+		return
+	GameState.coop_register_lobby(lobby, null)
+	_rebuild()
+
+
+func _show_join_code() -> void:
+	_teardown_net()
+	_screen = Screen.JOIN_CODE
+	_joining_code = ""
+	_rebuild()
+
+
+func _join_online(code: String) -> void:
+	_joining_code = code
+	_rebuild()
+	var err := lobby.join_relay(Protocol.relay_url(), code, "", _guest_display_name())
+	if err != OK:
+		_joining_code = ""
+		_show_message("Could not join online (%s)." % Protocol.error_name(err))
+		return
+	GameState.coop_register_lobby(lobby, null)
+
+
+func _on_room_ready(_code: String) -> void:
+	if _screen == Screen.HOST:
+		_rebuild()
 
 
 func _show_join_listen() -> void:
@@ -167,12 +211,15 @@ func _rebuild() -> void:
 			_build_host()
 		Screen.JOIN:
 			_build_join()
+		Screen.JOIN_CODE:
+			_build_join_code()
 		Screen.MESSAGE:
 			_build_message()
 
 
 func _build_menu() -> void:
-	_box.add_child(UiMenu.label("Co-op (LAN)", UiStyleC.HILITE, TITLE_SIZE))
+	var online := Protocol.relay_url() != ""
+	_box.add_child(UiMenu.label("Co-op (LAN / Online)" if online else "Co-op (LAN)", UiStyleC.HILITE, TITLE_SIZE))
 	_box.add_child(UiMenu.label("Action sandbox, up to 4 players.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	var host := _touch_button("Host")
 	host.pressed.connect(func() -> void: _show_host())
@@ -180,6 +227,13 @@ func _build_menu() -> void:
 	var join := _touch_button("Join")
 	join.pressed.connect(func() -> void: _show_join_listen())
 	_box.add_child(join)
+	if online:
+		var host_online := _touch_button("Host online")
+		host_online.pressed.connect(func() -> void: _show_host_online())
+		_box.add_child(host_online)
+		var join_online := _touch_button("Join online")
+		join_online.pressed.connect(func() -> void: _show_join_code())
+		_box.add_child(join_online)
 	_box.add_child(UiMenu.label("Friend mode (PvP) is separate.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	var back := _touch_button("Back")
 	back.pressed.connect(_on_back)
@@ -187,11 +241,19 @@ func _build_menu() -> void:
 
 
 func _build_host() -> void:
-	_box.add_child(UiMenu.label("Hosting as Dax", UiStyleC.HILITE, TITLE_SIZE))
-	_box.add_child(UiMenu.label("Waiting for friends on Wi-Fi...", UiStyleC.TEXT_DIM, TEXT_SIZE))
+	var online := lobby.transport == LanLobby.Transport.RELAY
+	_box.add_child(UiMenu.label("Hosting online as Dax" if online else "Hosting as Dax", UiStyleC.HILITE, TITLE_SIZE))
+	if online:
+		if lobby.room_code == "":
+			_box.add_child(UiMenu.label("Connecting to the online server...", UiStyleC.TEXT_DIM, TEXT_SIZE))
+		else:
+			_box.add_child(UiMenu.label("Room code: %s" % lobby.room_code, UiStyleC.HILITE, TITLE_SIZE))
+			_box.add_child(UiMenu.label("Friends tap Join online and enter this code.", UiStyleC.TEXT_DIM, TEXT_SIZE))
+	else:
+		_box.add_child(UiMenu.label("Waiting for friends on Wi-Fi...", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	_add_roster_rows(true)
 	var start := _touch_button("Start Action sandbox")
-	start.disabled = not lobby.is_host
+	start.disabled = not lobby.is_host or (online and lobby.room_code == "")
 	start.pressed.connect(_on_host_start)
 	_box.add_child(start)
 	var cancel := _touch_button("Cancel")
@@ -220,6 +282,52 @@ func _build_join() -> void:
 	var back := _touch_button("Back")
 	back.pressed.connect(_show_menu)
 	_box.add_child(back)
+
+
+func _build_join_code() -> void:
+	if _joining_code != "":
+		_box.add_child(UiMenu.label("Joining room %s..." % _joining_code, UiStyleC.TEXT_DIM, TEXT_SIZE))
+		var cancel := _touch_button("Cancel")
+		cancel.pressed.connect(_show_join_code)
+		_box.add_child(cancel)
+		return
+	_box.add_child(UiMenu.label("Join online", UiStyleC.HILITE, TITLE_SIZE))
+	_box.add_child(UiMenu.label("Enter the %d-character room code." % Protocol.ROOM_CODE_LENGTH, UiStyleC.TEXT_DIM, TEXT_SIZE))
+	_code_edit = LineEdit.new()
+	_code_edit.max_length = Protocol.ROOM_CODE_LENGTH
+	_code_edit.placeholder_text = "ROOM CODE"
+	_code_edit.virtual_keyboard_enabled = true
+	_code_edit.custom_minimum_size = Vector2(0.0, float(touch_min_height_px()))
+	_code_edit.add_theme_stylebox_override("normal", UiMenu.window_style(UiStyleC.BORDER_DARK, 1.0))
+	_code_edit.add_theme_stylebox_override("focus", UiMenu.window_style(UiStyleC.MAGENTA, 1.0))
+	_code_edit.add_theme_color_override("font_color", UiStyleC.TEXT)
+	_code_edit.add_theme_color_override("caret_color", UiStyleC.MAGENTA)
+	_box.add_child(_code_edit)
+	var go := _touch_button("Join")
+	go.disabled = true
+	go.pressed.connect(func() -> void: _submit_code())
+	_box.add_child(go)
+	_code_edit.text_changed.connect(func(t: String) -> void: _on_code_changed(t, go))
+	_code_edit.text_submitted.connect(func(_t: String) -> void: _submit_code())
+	var back := _touch_button("Back")
+	back.pressed.connect(_show_menu)
+	_box.add_child(back)
+
+
+func _on_code_changed(raw: String, go: Button) -> void:
+	var clean := Protocol.filter_room_code(raw)
+	if clean != raw:
+		_code_edit.text = clean
+		_code_edit.caret_column = clean.length()
+	go.disabled = not Protocol.is_room_code(clean)
+
+
+func _submit_code() -> void:
+	if _code_edit == null:
+		return
+	var code := Protocol.filter_room_code(_code_edit.text)
+	if Protocol.is_room_code(code):
+		_join_online(code)
 
 
 func _build_message() -> void:
@@ -322,19 +430,24 @@ func _join_host(ip: String) -> void:
 
 
 func _on_assigned(_slot: int, _character_id: String) -> void:
-	if _screen == Screen.JOIN:
+	if _is_join_screen():
 		_joining_ip = ""
+		_joining_code = ""
 		_rebuild_join_guest()
 
 
+func _is_join_screen() -> bool:
+	return _screen == Screen.JOIN or _screen == Screen.JOIN_CODE
+
+
 func _on_roster_changed() -> void:
-	if lobby.is_host:
+	if lobby.is_host and lobby.transport == LanLobby.Transport.LAN:
 		discovery.set_player_count(lobby.player_count())
 		if lobby.player_count() >= Protocol.MAX_PLAYERS:
 			discovery.stop()
 	if _screen == Screen.HOST:
 		_rebuild()
-	if _screen == Screen.JOIN and lobby.phase == LanLobby.Phase.IN:
+	if _is_join_screen() and lobby.phase == LanLobby.Phase.IN:
 		_rebuild_join_guest()
 
 
@@ -350,11 +463,17 @@ func _rebuild_join_guest() -> void:
 
 func _on_refused(reason: int) -> void:
 	var text := str(Protocol.REFUSE_TEXT.get(reason, "Could not join."))
+	if lobby.transport == LanLobby.Transport.RELAY and reason == Protocol.Refuse.TIMEOUT:
+		text = Protocol.relay_error_text(lobby.relay_reason)
 	_joining_ip = ""
+	_joining_code = ""
 	_show_message(text)
 
 
 func _on_link_lost() -> void:
+	if lobby.transport == LanLobby.Transport.RELAY and lobby.relay_reason != "":
+		_show_message(Protocol.relay_error_text(lobby.relay_reason))
+		return
 	_show_message("Connection lost.")
 
 
