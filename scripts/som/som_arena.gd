@@ -109,14 +109,10 @@ func setup(p_room: Node) -> void:
 	player = room.player
 	name = "SomArena"
 	_ensure_actions()
-	for id in SomData.SHEETS:
-		var path := str(SomData.SHEETS[id])
-		if id == "dennis":
-			path = dax_sheet_path()
-		if ResourceLoader.exists(path):
-			sheets[id] = load(path)
-	for id in SomData.ATTACK_ANIMS:
-		var sheet := str(SomData.ATTACK_ANIMS[id].get("sheet", ""))
+	# Geheugen: alleen de sheets van de party (en de reserve) vooraf; andere helden (bv. een co-op-peer) via sheet_for().
+	for id in _held_ids_nodig():
+		_laad_sheet(id)
+		var sheet := str(SomData.ATTACK_ANIMS.get(id, {}).get("sheet", ""))
 		if sheet != "" and ResourceLoader.exists(sheet):
 			attack_texs[id] = load(sheet)
 	# leider-behoud: de held die je met SWAP koos (GameState.leader_id), terugval Dax bij KO / niet in de party
@@ -201,7 +197,27 @@ func pose_tex(id: String, kind: String) -> Texture2D:
 
 
 func sheet_for(id: String) -> Texture2D:
+	if not sheets.has(id) and room != null and SomData.SHEETS.has(id):
+		_laad_sheet(id)
 	return sheets.get(id, null)
+
+
+## Held-id's waarvan deze arena kaart- en aanvalssheets nodig heeft: party + reserve, altijd Dax.
+func _held_ids_nodig() -> Array[String]:
+	var ids: Array[String] = ["dennis"]
+	for h in GameState.party + GameState.party_bench:
+		var id := str(h.get("id", ""))
+		if id != "" and SomData.SHEETS.has(id) and not ids.has(id):
+			ids.append(id)
+	return ids
+
+
+func _laad_sheet(id: String) -> void:
+	var path := str(SomData.SHEETS.get(id, ""))
+	if id == "dennis":
+		path = dax_sheet_path()
+	if path != "" and ResourceLoader.exists(path):
+		sheets[id] = load(path)
 
 
 func _apply_player_sheet() -> void:
