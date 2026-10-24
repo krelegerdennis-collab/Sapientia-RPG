@@ -176,19 +176,16 @@ func _som() -> void:
 func _bomen(ouder: Node2D) -> void:
 	var groot: Texture2D = load(SOM_BOOM)
 	var klein: Texture2D = load(SOM_BOOM_KLEIN)
-	var r := _grond_raster()
-	var teken_t := "T".unicode_at(0)
-	# alle boomtegels hebben dezelfde botsvorm: één gedeelde shape i.p.v. honderden
-	var vorm := RectangleShape2D.new()
-	vorm.size = Vector2(16, 16)
 	for y in Data.H:
 		for x in Data.W:
-			if r[y * Data.W + x] != teken_t:
-				continue
 			var t := Vector2i(x, y)
+			if teken(t) != "T":
+				continue
 			var body := StaticBody2D.new()
 			body.name = "Boom_%d_%d" % [x, y]
 			body.position = Vector2(t) * 16.0 + Vector2(8, 8)
+			var vorm := RectangleShape2D.new()
+			vorm.size = Vector2(16, 16)
 			var bots := CollisionShape2D.new()
 			bots.shape = vorm
 			body.add_child(bots)

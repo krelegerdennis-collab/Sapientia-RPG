@@ -251,18 +251,7 @@ func _dorp() -> void:
 	check("v8-laag: bronnen 0, 1, 2 in vaste volgorde", v8.tile_set.get_source_count() == 3
 			and v8.tile_set.get_source_id(0) == 0 and v8.tile_set.get_source_id(1) == 1 and v8.tile_set.get_source_id(2) == 2)
 
-	# 3c. bomen delen één botsvorm; botsing per boom blijft 16x16
-	var bomen: Node = a.get_node("Objects/SomBomen")
-	var vorm_ok := true
-	var eerste: Shape2D = null
-	for b in bomen.get_children():
-		var s: Shape2D = (b.get_child(0) as CollisionShape2D).shape
-		if eerste == null:
-			eerste = s
-		vorm_ok = vorm_ok and s is RectangleShape2D and (s as RectangleShape2D).size == Vector2(16, 16) and s == eerste
-	check("bomen: %d bodies delen één 16x16-botsvorm" % bomen.get_child_count(), bomen.get_child_count() > 150 and vorm_ok)
-
-	# 3d. plein-tileset: tweede bezoek hergebruikt de gecachte set; v8-set wordt per bezoek vers opgebouwd
+	# 3c. plein-tileset: tweede bezoek hergebruikt de gecachte set; v8-set wordt per bezoek vers opgebouwd
 	var grond_a: TileMapLayer = a.get_node("Ground/Plein10/Grond/GrondTegels")
 	var ts_a := grond_a.tile_set
 	var cellen_a := grond_a.get_used_cells().size()

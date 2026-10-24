@@ -443,8 +443,6 @@ func _ready() -> void:
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
-	# Prestatiewerk WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
-	# De tijden meet tools/perf/run_perf_wm1.sh (geen dispatch hier: dat is een losse scène).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
@@ -459,6 +457,8 @@ func _ready() -> void:
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
+	# Laadtijden WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
+	# De tijden zelf meet tools/perf/run_perf_wm1.sh (losse scène, geen dispatch hier).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
@@ -512,10 +512,10 @@ func _ready() -> void:
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
-			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
-			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
+			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
+			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		# eigen bestanden: de tests raken je echte save/autosave niet
@@ -589,12 +589,57 @@ const MAIN_THREAD_SCRIPTS := ["res://scripts/map.gd", "res://scripts/player.gd",
 	"res://world_warper/art/flyover.gd"]   # preload()t een textuur: nooit in de laad-thread compileren
 
 
-## Opstart-voorladen (prestaties): eerst laten we het eerste beeld (titelscherm) zien, pas daarna
-##  fase 1: de scripts uit MAIN_THREAD_SCRIPTS op de hoofdthread compileren (één per frame; samen ~0,4 s),
-##  fase 2: de achtergrond-loads aanvragen (die hebben die gecompileerde scripts nodig) en afwachten,
-##  daarna, alleen in rustige schermen (titel / naam invoeren): PREWARM_SCRIPTS compileren, zodat het
-##  eerste dorp / woud / archief niet 0,1-0,3 s stilstaat op het moment van binnenkomen.
-## Wie eerder een scène nodig heeft, laadt gewoon synchroon via get_resource() (zelfde resultaat).
+func _start_preload() -> void:
+	for sp in MAIN_THREAD_SCRIPTS:
+		if ResourceLoader.exists(sp):
+			load(sp)
+	for p in _preload_paths():
+		if _preloading.has(p) or _loaded.has(p) or not ResourceLoader.exists(p):
+			continue
+		if ResourceLoader.load_threaded_request(p) == OK:
+			_preloading.append(p)
+	set_process(not _preloading.is_empty())
+
+
+## Kijkt elk frame (alleen zolang er nog iets laadt) of er iets klaar is.
+func _process(_delta: float) -> void:
+	if _preload_phase < 2 and not _fase_voorladen():
+		return
+	for i in range(_preloading.size() - 1, -1, -1):
+		var p := _preloading[i]
+		var status := ResourceLoader.load_threaded_get_status(p)
+		if status == ResourceLoader.THREAD_LOAD_LOADED:
+			_loaded[p] = ResourceLoader.load_threaded_get(p)
+			_preloading.remove_at(i)
+		elif status != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			_preloading.remove_at(i)
+	_prewarm_step(get_process_delta_time())
+	if _preloading.is_empty() and _prewarm_queue.is_empty():
+		set_process(false)
+
+
+## Wacht tot alle achtergrond-loads klaar zijn (alleen voor de testmodi).
+func _finish_preload() -> void:
+	_prewarm_queue.clear()      # geen prewarm in de tests
+	_script_queue.clear()
+	if _preload_phase < 2:
+		_preload_phase = 2
+		_start_preload()
+	for p in _preloading.duplicate():
+		var r := ResourceLoader.load_threaded_get(p)
+		if r != null:
+			_loaded[p] = r
+	_preloading.clear()
+	set_process(false)
+
+
+## Opstart-voorladen in fasen (prestaties; _plan_preload() vanuit _ready, _fase_voorladen() vanuit _process):
+##  fase 0: het eerste beeld (titelscherm) laten tekenen,
+##  fase 1: de scripts uit MAIN_THREAD_SCRIPTS op de hoofdthread compileren, één per frame (samen ~0,4 s),
+##  fase 2: _start_preload() (de achtergrond-loads aanvragen; de scripts staan dan in de cache) en afwachten.
+## Daarna, alleen in rustige schermen (titel / naam invoeren): PREWARM_SCRIPTS compileren, zodat het eerste dorp /
+## woud / archief / veldmenu niet 0,1-0,3 s stilstaat op het moment van gebruik. Wie eerder iets nodig heeft laadt
+## gewoon synchroon (get_resource / load): zelfde resultaat, alleen later gecompileerd.
 const FRAMES_BEFORE_PRELOAD := 2
 const PREWARM_GAP := 0.05
 const PREWARM_SCENES: Array[String] = [TITLE_SCENE, NAME_SCENE]
@@ -628,53 +673,22 @@ func _plan_preload() -> void:
 	set_process(true)
 
 
-## Alles in één keer, op de hoofdthread (testmodi en _finish_preload): scripts, dan de loads aanvragen.
-func _start_preload() -> void:
-	while not _script_queue.is_empty():
-		_compile_next_script()
-	_request_preloads()
-	_preload_phase = 2
-	set_process(not _preloading.is_empty() or not _prewarm_queue.is_empty())
-
-
-func _compile_next_script() -> void:
-	var sp: String = _script_queue.pop_front()
-	if ResourceLoader.exists(sp):
-		load(sp)
-
-
-func _request_preloads() -> void:
-	for p in _preload_paths():
-		if _preloading.has(p) or _loaded.has(p) or not ResourceLoader.exists(p):
-			continue
-		if ResourceLoader.load_threaded_request(p) == OK:
-			_preloading.append(p)
-
-
-## Kijkt elk frame (alleen zolang er nog iets te doen is) hoe ver het voorladen is.
-func _process(delta: float) -> void:
+## Fase 0 en 1. true = fase 2 bereikt (en _process mag doorgaan met het poll-werk).
+func _fase_voorladen() -> bool:
 	if _preload_phase == 0:
 		_preload_frames += 1
 		if _preload_frames < FRAMES_BEFORE_PRELOAD:
-			return
+			return false
 		_preload_phase = 1
-	if _preload_phase == 1:
-		if not _script_queue.is_empty():
-			_compile_next_script()
-			return
-		_request_preloads()
-		_preload_phase = 2
-	for i in range(_preloading.size() - 1, -1, -1):
-		var p := _preloading[i]
-		var status := ResourceLoader.load_threaded_get_status(p)
-		if status == ResourceLoader.THREAD_LOAD_LOADED:
-			_loaded[p] = ResourceLoader.load_threaded_get(p)
-			_preloading.remove_at(i)
-		elif status != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-			_preloading.remove_at(i)
-	_prewarm_step(delta)
-	if _preloading.is_empty() and _prewarm_queue.is_empty():
-		set_process(false)
+	if not _script_queue.is_empty():
+		var sp: String = _script_queue.pop_front()
+		if ResourceLoader.exists(sp):
+			load(sp)
+		return false
+	_preload_phase = 2
+	_start_preload()
+	set_process(true)      # _start_preload zet het uit als er niets laadt; prewarm moet nog
+	return true
 
 
 ## Eén zwaar script per PREWARM_GAP seconden, alleen als de speler niets aan het doen is (titelscherm).
@@ -691,19 +705,6 @@ func _prewarm_step(delta: float) -> void:
 	var sp: String = _prewarm_queue.pop_front()
 	if ResourceLoader.exists(sp) and not _loaded.has(sp):
 		_loaded[sp] = load(sp)
-
-
-## Wacht tot alle achtergrond-loads klaar zijn (alleen voor de testmodi); geen prewarm in tests.
-func _finish_preload() -> void:
-	_prewarm_queue.clear()
-	if _preload_phase < 2:
-		_start_preload()
-	for p in _preloading.duplicate():
-		var r := ResourceLoader.load_threaded_get(p)
-		if r != null:
-			_loaded[p] = r
-	_preloading.clear()
-	set_process(false)
 
 
 ## Geeft een (voor)geladen resource; wacht zo nodig tot het laden klaar is.
