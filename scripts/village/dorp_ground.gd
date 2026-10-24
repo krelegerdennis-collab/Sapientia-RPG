@@ -33,6 +33,46 @@ static func teken(t: Vector2i) -> String:
 	return Data.GROND[y][x]
 
 
+## GROND als vlak byte-raster (W*H): de buurcontroles in _som() en _v8() lezen hier i.p.v. 9x een
+## string-index per cel (prestaties: het dorp bouwt 5040 cellen per binnenkomst).
+static var _raster := PackedByteArray()
+
+
+static func _grond_raster() -> PackedByteArray:
+	if _raster.size() != Data.W * Data.H:
+		_raster.resize(Data.W * Data.H)
+		for y in Data.H:
+			var rij: String = Data.GROND[y]
+			for x in Data.W:
+				_raster[y * Data.W + x] = rij.unicode_at(x)
+	return _raster
+
+
+static func _set_van(tekens: String) -> PackedByteArray:
+	var out := PackedByteArray()
+	out.resize(256)
+	for i in tekens.length():
+		out[tekens.unicode_at(i)] = 1
+	return out
+
+
+## Zelfde uitkomst als masker(t, soort), met het raster en een opzoektabel (_set_van) voor 'soort'.
+static func _masker_r(r: PackedByteArray, x: int, y: int, soort: PackedByteArray) -> int:
+	var m := 0
+	for i in [0, 2, 4, 6]:
+		var d: Vector2i = BITS[i][0]
+		if soort[r[clampi(y + d.y, 0, Data.H - 1) * Data.W + clampi(x + d.x, 0, Data.W - 1)]] == 1:
+			m |= int(BITS[i][1])
+	for i in [1, 3, 5, 7]:
+		var a: int = BITS[i - 1][1]
+		var b: int = BITS[(i + 1) % 8][1]
+		if (m & a) and (m & b):
+			var d2: Vector2i = BITS[i][0]
+			if soort[r[clampi(y + d2.y, 0, Data.H - 1) * Data.W + clampi(x + d2.x, 0, Data.W - 1)]] == 1:
+				m |= int(BITS[i][1])
+	return m
+
+
 ## blob47-masker: buur hoort bij dezelfde soort; schuin telt alleen als beide rechte buren er zijn.
 static func masker(t: Vector2i, soort: String) -> int:
 	var m := 0
@@ -97,18 +137,20 @@ func _som() -> void:
 	get_parent().get_node("Objects").add_child(bomen)
 	var gras := ["gras_0", "gras_0", "gras_1", "gras_2", "gras_0", "gras_3", "gras_klaver", "gras_1",
 			"gras_0", "gras_bloem", "gras_2", "gras_kiezel"]
+	var r := _grond_raster()
+	var pad_set := _set_van(PAD)
+	var water_set := _set_van(WATER)
 	for y in Data.H:
 		for x in Data.W:
 			var t := Vector2i(x, y)
-			var c := teken(t)
 			var h := absi((x * 73856093) ^ (y * 19349663)) % gras.size()
-			match c:
+			match char(r[y * Data.W + x]):
 				"=", "#":
-					_zet(self, t, "pad_%03d" % masker(t, PAD))
+					_zet(self, t, "pad_%03d" % _masker_r(r, x, y, pad_set))
 				"~":
-					_zet(self, t, "water_%03d" % masker(t, WATER))
+					_zet(self, t, "water_%03d" % _masker_r(r, x, y, water_set))
 				"B":
-					_zet(self, t, "pad_%03d" % masker(t, PAD))
+					_zet(self, t, "pad_%03d" % _masker_r(r, x, y, pad_set))
 				"T":
 					_zet(self, t, "gras_hoog")
 				_:
@@ -197,60 +239,116 @@ static func gras_licht_hier(t: Vector2i, blok: Rect2i) -> bool:
 	return ".TFG".contains(Data.GROND[t.y][t.x]) and not blok.has_point(t)
 
 
+## grond_v8.json hoeft maar één keer per sessie geparsed (data, geen resources).
+static var _v8_json: Variant = null
+
+
 func _v8() -> void:
 	if not FileAccess.file_exists(V8_JSON) or not ResourceLoader.exists(V8_PNG):
 		return
-	var d = JSON.parse_string(FileAccess.get_file_as_string(V8_JSON))
+	if _v8_json == null:
+		_v8_json = JSON.parse_string(FileAccess.get_file_as_string(V8_JSON))
+	var d = _v8_json
 	if not (d is Dictionary) or int(d.get("w", 0)) != Data.W or int(d.get("h", 0)) != Data.H:
 		push_warning("grond_v8.json past niet bij de kaart (opnieuw bakken)")
 		return
+	var kol := int(d["kolommen"])
+	var uniek := int(d["uniek"])
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
 	var bron := TileSetAtlasSource.new()
 	bron.texture = load(V8_PNG)
 	bron.texture_region_size = Vector2i(16, 16)
-	var kol := int(d["kolommen"])
-	for i in int(d["uniek"]):
-		bron.create_tile(Vector2i(i % kol, i / kol))
-	ts.add_source(bron, 0)
 	# pass 3: licht gras (RPG ART gras_licht, 4 varianten) buiten het plein-blok: zelfde basis (74963e) als
 	# de gebakken plein-grond, dus geen naad meer tussen blok en dorp. Paden en hekken houden hun v8-tegel.
 	var licht: Texture2D = load(GRAS_LICHT) if ResourceLoader.exists(GRAS_LICHT) else null
+	var gb: TileSetAtlasSource = null
 	if licht != null:
-		var gb := TileSetAtlasSource.new()
+		gb = TileSetAtlasSource.new()
 		gb.texture = licht
 		gb.texture_region_size = Vector2i(16, 16)
 		for i in licht.get_width() / 16:
 			gb.create_tile(Vector2i(i, 0))
-		ts.add_source(gb, 1)
 	# pass 4: padcellen en hun graszoom in de omgekleurde v8-atlas (grasplukjes blijven, geen donkere rand)
 	var v8l: Texture2D = load(V8_LICHT) if ResourceLoader.exists(V8_LICHT) else null
+	var lb: TileSetAtlasSource = null
 	if v8l != null:
-		var lb := TileSetAtlasSource.new()
+		lb = TileSetAtlasSource.new()
 		lb.texture = v8l
 		lb.texture_region_size = Vector2i(16, 16)
-		for i in int(d["uniek"]):
-			lb.create_tile(Vector2i(i % kol, i / kol))
-		ts.add_source(lb, 2)
 	var blok := Rect2i()
 	var lay := Data.p10_layout()
 	if not lay.is_empty():
 		blok = Rect2i(int(lay["ox"]), int(lay["oy"]), int(lay["w"]), int(lay["h"]))
 	v8 = TileMapLayer.new()
 	v8.name = "SomV8"
-	v8.tile_set = ts
-	add_child(v8)
+	# Eerst per cel bepalen welke bron en tegel, dan alleen de tegels aanmaken die er echt gebruikt
+	# worden (create_tile kost ~20 us; het atlas heeft ~1300 tegels, het dorp gebruikt er ~380 + ~140).
 	var cellen: Array = d["cellen"]
+	var r := _grond_raster()
+	var pad_set := _set_van(PAD)
+	var gras_set := _set_van(".TFG")
+	var pad_zoom_set := _set_van(".TFG=#B")
+	var bron_van := PackedInt32Array()      # per cel: -1 = niets, anders bron-id
+	var atlas_van := PackedInt32Array()     # per cel: tegel-index (bron 0/2) of kolom (bron 1)
+	bron_van.resize(Data.W * Data.H)
+	atlas_van.resize(Data.W * Data.H)
+	var nodig0 := PackedByteArray()
+	var nodig2 := PackedByteArray()
+	nodig0.resize(uniek)
+	nodig2.resize(uniek)
+	var licht_kol := licht.get_width() / 16 if licht != null else 1
 	for y in Data.H:
 		for x in Data.W:
-			if Data.GROND[y][x] == "~":
+			var k := y * Data.W + x
+			bron_van[k] = -1
+			var c := r[k]
+			if char(c) == "~":
 				continue
-			if v8l != null and pad_zoom(Vector2i(x, y), blok):
-				var j := int(cellen[y * Data.W + x])
-				v8.set_cell(Vector2i(x, y), 2, Vector2i(j % kol, j / kol))
+			var t := Vector2i(x, y)
+			if lb != null and not blok.has_point(t) and pad_zoom_set[c] == 1 and _buur_is_pad(r, x, y, pad_set):
+				var j := int(cellen[k])
+				bron_van[k] = 2
+				atlas_van[k] = j
+				if j < uniek:
+					nodig2[j] = 1
 				continue
-			if licht != null and gras_licht_hier(Vector2i(x, y), blok):
-				v8.set_cell(Vector2i(x, y), 1, Vector2i(Data.p10_hash(Vector2i(x, y)) % (licht.get_width() / 16), 0))
+			if licht != null and gras_set[c] == 1 and not blok.has_point(t):
+				bron_van[k] = 1
+				atlas_van[k] = Data.p10_hash(t) % licht_kol
 				continue
-			var i := int(cellen[y * Data.W + x])
-			v8.set_cell(Vector2i(x, y), 0, Vector2i(i % kol, i / kol))
+			var i := int(cellen[k])
+			bron_van[k] = 0
+			atlas_van[k] = i
+			if i < uniek:
+				nodig0[i] = 1
+	for i in uniek:
+		if nodig0[i] == 1:
+			bron.create_tile(Vector2i(i % kol, i / kol))
+		if lb != null and nodig2[i] == 1:
+			lb.create_tile(Vector2i(i % kol, i / kol))
+	# bronnen pas toevoegen als de tegels er zijn (add_source op een gevuld atlas is goedkoper dan andersom)
+	ts.add_source(bron, 0)
+	if gb != null:
+		ts.add_source(gb, 1)
+	if lb != null:
+		ts.add_source(lb, 2)
+	v8.tile_set = ts
+	add_child(v8)
+	for y in Data.H:
+		for x in Data.W:
+			var k := y * Data.W + x
+			var b := bron_van[k]
+			if b == 1:
+				v8.set_cell(Vector2i(x, y), 1, Vector2i(atlas_van[k], 0))
+			elif b >= 0:
+				v8.set_cell(Vector2i(x, y), b, Vector2i(atlas_van[k] % kol, atlas_van[k] / kol))
+
+
+## Zelfde als de buurcontrole in pad_zoom() (3x3 rond de cel, alleen binnen de kaart), met het raster.
+static func _buur_is_pad(r: PackedByteArray, x: int, y: int, pad_set: PackedByteArray) -> bool:
+	for dy in range(maxi(0, y - 1), mini(Data.H - 1, y + 1) + 1):
+		for dx in range(maxi(0, x - 1), mini(Data.W - 1, x + 1) + 1):
+			if pad_set[r[dy * Data.W + dx]] == 1:
+				return true
+	return false
