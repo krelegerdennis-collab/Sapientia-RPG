@@ -82,6 +82,7 @@ enum Refuse {
 	VERSION = 2,
 	BAD_PACKET = 3,
 	TIMEOUT = 4,
+	ROOM_NOT_FOUND = 5,
 }
 
 ## Tekst voor later in de UI. Engels, zoals alle speler-tekst.
@@ -90,6 +91,34 @@ const REFUSE_TEXT := {
 	Refuse.VERSION: "Game versions do not match.",
 	Refuse.BAD_PACKET: "The join message was not understood.",
 	Refuse.TIMEOUT: "Could not join the host.",
+	Refuse.ROOM_NOT_FOUND: "Room not found. Check the code.",
+}
+
+## Relay (online co-op, stap 1). Leeg = alleen LAN. Zie relay/README.md.
+const RELAY_URL_SETTING := "sapientia/net/relay_url"
+const RELAY_URL_ENV := "SAPIENTIA_RELAY_URL"
+## Zelfde alfabet als relay/src/codes.js: geen 0/O en 1/I/L.
+const ROOM_CODE_ALPHABET := "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
+const ROOM_CODE_LENGTH := 6
+## De relay kan koud starten (gratis host slaapt); wachten we langer dan op LAN.
+const RELAY_JOIN_TIMEOUT_SEC := 60.0
+
+## Redenen uit RelayPeer.last_reason -> Engelse melding (speler-tekst).
+const RELAY_ERROR_TEXT := {
+	"unreachable": "Could not reach the online server.\nCheck your internet connection.",
+	"timeout": "The online server did not answer in time.",
+	"link_lost": "Connection to the online server lost.",
+	"host_left": "The host left. Room closed.",
+	"idle": "The room expired because nobody was active.",
+	"max_age": "The room expired.",
+	"shutdown": "The online server is restarting.",
+	"kicked": "You were removed from the room.",
+	"room_full": "The party is full.",
+	"no_room": "Room not found. Check the code.",
+	"bad_version": "Game versions do not match.",
+	"rate_limited": "Too many attempts. Wait a minute and try again.",
+	"too_many_rooms": "The online server is busy. Try again later.",
+	"busy": "The online server is busy. Try again later.",
 }
 
 const SESSION_END_HOST_PAUSED := "host_paused"
@@ -140,6 +169,38 @@ static func net_error_text(what: String, err: int, port: int, transport: String 
 	if err == ERR_CANT_CREATE or err == ERR_UNAUTHORIZED or err == ERR_FILE_NO_PERMISSION:
 		text += "\nCheck the app's network permission and that no other app uses this port."
 	return text
+
+
+## Relay-URL: omgevingsvariabele (dev/test) boven project-instelling. Alleen ws:// of wss://;
+## alles anders (ook leeg) = "" = alleen LAN.
+static func relay_url() -> String:
+	var url := OS.get_environment(RELAY_URL_ENV).strip_edges()
+	if url == "":
+		url = str(ProjectSettings.get_setting(RELAY_URL_SETTING, "")).strip_edges()
+	return url if is_valid_relay_url(url) else ""
+
+
+static func is_valid_relay_url(url: String) -> bool:
+	return url.length() > 6 and (url.begins_with("ws://") or url.begins_with("wss://"))
+
+
+## Hoofdletters, alleen toegestane tekens, hoogstens 6. Voor het invoervak en de join.
+static func filter_room_code(raw: String) -> String:
+	var out := ""
+	for ch in raw.to_upper():
+		if ROOM_CODE_ALPHABET.contains(ch):
+			out += ch
+		if out.length() >= ROOM_CODE_LENGTH:
+			break
+	return out
+
+
+static func is_room_code(code: String) -> bool:
+	return code.length() == ROOM_CODE_LENGTH and filter_room_code(code) == code
+
+
+static func relay_error_text(reason: String) -> String:
+	return str(RELAY_ERROR_TEXT.get(reason, "Online connection failed."))
 
 
 static func clean_name(raw: String) -> String:
