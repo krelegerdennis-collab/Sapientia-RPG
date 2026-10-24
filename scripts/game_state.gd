@@ -164,6 +164,9 @@ const HERO_ID_ALIASES := {HERO_ID_LEGACY: HERO_ID, HERO_ID: HERO_ID_LEGACY}
 ## Slots 2-4 bestaan alleen als save_path op save_1.json eindigt (tests en het echte spel).
 ## Een betatest-pad eindigt daar niet op: dan is er één bestand, zoals eerst.
 const SAVE_VERSION := 1
+## Marker in elke save en elk checkpoint van deze versie: wie hem mist komt van vóór de Codex-Inktwurm-regels
+## en wordt in _codex_inktwurm_sync gemigreerd. Zo telt een nieuwe save tussen de twee tutorials niet als oud.
+const CODEX_SYNC_KEY := "inktwurm_codex_sync"
 const SLOT_COUNT := 4
 var save_path := "user://save_1.json"
 ## Welk slot de volgende handmatige save schrijft. Laden van een slot zet dit.
@@ -1251,6 +1254,7 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 		var slot_file := slot_path(active_slot)
 		path = slot_file if slot_file != "" else save_path
 	var data := state_data(tile, facing)
+	data[CODEX_SYNC_KEY] = true
 	data["game_version"] = str(ProjectSettings.get_setting("application/config/version", ""))
 	data["saved_at"] = Time.get_datetime_string_from_system()
 	data["saved_unix"] = Time.get_unix_time_from_system()
@@ -1596,7 +1600,7 @@ func apply_state(d: Dictionary) -> bool:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	_unique_seen_flags()
-	_codex_inktwurm_sync()
+	_codex_inktwurm_sync(not d.has(CODEX_SYNC_KEY))
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
 	var a2 = d.get("archief2", {})
@@ -2190,8 +2194,9 @@ func has_checkpoint() -> bool:
 
 ## v0.19: leg het kamer-checkpoint vast (map.gd, bij binnenkomst): plek + kopie van de voortgang.
 func set_checkpoint(map: String, tile: Vector2i, facing: Vector2i) -> void:
-	checkpoint = {"map": map, "tile": [tile.x, tile.y], "facing": [facing.x, facing.y],
-			"state": state_data(tile, facing, map)}
+	var state := state_data(tile, facing, map)
+	state[CODEX_SYNC_KEY] = true
+	checkpoint = {"map": map, "tile": [tile.x, tile.y], "facing": [facing.x, facing.y], "state": state}
 
 
 ## v0.19 GAME OVER met checkpoint: voortgang terug zoals bij binnenkomst (party/EXP/spullen/goud/
@@ -2219,7 +2224,7 @@ func respawn_at_checkpoint(boss := false) -> String:
 	_unique_seen_flags()
 	for f in keep_seen:
 		story_flags[str(f)] = true
-	_codex_inktwurm_sync()
+	_codex_inktwurm_sync(not cp["state"].has(CODEX_SYNC_KEY))
 	dungeon100_permanent = keep_permanent
 	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
@@ -2825,17 +2830,18 @@ func _unique_seen_flags() -> void:
 			story_flags[str(StoryData.UNIQUE_SEEN_FLAGS[id])] = true
 
 
-## Vlag 'Inktwurm in de Codex' bijhouden bij laden en bij een checkpoint. Staat er een Inktwurm-pagina, dan
-## is de vlag gezet. Oude saves die al voorbij de Inktwurm zijn (hij is verslagen of gevangen): de Golemhal
-## gaat pas open als hij in de Codex staat, dus die krijgen hem alsnog en de vang-tutorial telt als gezien.
-## 'Gevangen' en daarna gefuseerd: wel de vlag, geen nieuwe pagina. Codex vol: geen pagina (de uitgang gaat
-## dan al open, zie StoryData.GOLEMHAL_EXIT) en we proberen het bij de volgende load weer.
-func _codex_inktwurm_sync() -> void:
+## Vlag 'Inktwurm in de Codex' bijhouden bij laden en bij een checkpoint: staat er een Inktwurm-pagina, dan
+## is de vlag gezet. 'oude_save' (de save of het checkpoint mist CODEX_SYNC_KEY) en de Inktwurm is al weg
+## (verslagen of gevangen): de Golemhal gaat pas open als hij in de Codex staat, dus die krijgt hem alsnog en
+## de vang-tutorial telt als gezien. 'Gevangen' en daarna gefuseerd: wel de vlag, geen nieuwe pagina. Codex
+## vol: geen pagina (de uitgang gaat dan al open, zie StoryData.GOLEMHAL_EXIT); volgende load probeert het weer.
+## Een nieuwe save (mét marker) wordt nooit gemigreerd: tussen tutorial 1 en 2 speelt de vang-tutorial gewoon.
+func _codex_inktwurm_sync(oude_save := false) -> void:
 	var flag := StoryData.CODEX_INKTWURM_FLAG
 	for page in codex_pages:
 		if str(page.get("species", "")) == "inktwurm":
 			story_flags[flag] = true
-	if not unique_done.has("inktwurm"):
+	if not oude_save or not unique_done.has("inktwurm"):
 		return
 	story_flags[StoryData.TUTORIAL_CODEX_FLAG] = true
 	if story_flags.has(flag):
