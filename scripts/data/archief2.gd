@@ -45,13 +45,13 @@ const MOSSLIJM_SOORT := "mosslijm"
 const KETEN := [
 	"The Old Humanity made the six Archives as a chain.",
 	"Each core activates the next. Not an invitation: a distress signal.",
-	"Archief 1 sent: Someone is inside. Archief 2 answered first.",
+	"Archive 1 sent: Someone is inside. Archive 2 answered first.",
 	"Sapientia manipulated that signal.",
 	"You think you are following. Sapientia is leading you.",
 ]
 const GEEN_CODEX := [
 	"You don't have a Codex monster yet.",
-	"Een Mosslijm vecht tijdelijk mee.",
+	"A Moss Slime fights alongside you for a while.",
 ]
 const LOTTE_AANSLUIT := [
 	"The glitch tears. Seren breaks it herself.",

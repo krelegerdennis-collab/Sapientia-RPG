@@ -85,6 +85,7 @@ func _on_buy(id: String, kind: String) -> void:
 		return
 	var r := ShopData.buy_item(shop_id, id)
 	show_message(str(r["text"]))
+	UiSfx.play(UiSfx.COINS if r["ok"] else UiSfx.ERROR)
 	if r["ok"]:
 		_show_koop()
 
@@ -98,6 +99,7 @@ func _on_hero(hero: Dictionary) -> void:
 func _on_sell(id: String) -> void:
 	var r := ShopData.sell(id)
 	show_message(str(r["text"]))
+	UiSfx.play(UiSfx.COINS if r["ok"] else UiSfx.ERROR)
 	_show_verkoop()
 
 

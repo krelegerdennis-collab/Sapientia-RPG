@@ -47,7 +47,7 @@ const ROOMS := {
 				"Pull the lever. Then the plate grows into a path.",
 				"The Old Humanity made the six Archives as a chain.",
 				"Each core activates the next. Not an invitation: a distress signal.",
-				"Archief 1 sent: Someone is inside. Archief 2 answered first.",
+				"Archive 1 sent: Someone is inside. Archive 2 answered first.",
 				"Sapientia manipulated that signal. You think you are following. Sapientia is leading you.",
 			],
 		}],
@@ -128,7 +128,7 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v2_gang"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [6, 7], "lines": [
-			"Een groei-plaat. Stap erop.",
+			"A growth plate. Step on it.",
 			"It grows into a path.",
 		]}],
 		"platen": [{"id": "p1", "soort": "groei", "tile": [13, 7], "start": 0}],

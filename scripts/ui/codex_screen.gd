@@ -110,7 +110,7 @@ func _build() -> void:
 	detail.add_child(state_label)
 	# v0.19 fusie: knop vóór 'Terug' (tikken; met de joystick: rechts)
 	fuse_button = UiMenu.button("Fusion")
-	fuse_button.custom_minimum_size = Vector2(FUSE_W, ROW_H)
+	fuse_button.custom_minimum_size = Vector2(FUSE_W, TOUCH_H)
 	fuse_button.focus_mode = Control.FOCUS_NONE
 	fuse_button.pressed.connect(start_fusion)
 	header_row.add_child(fuse_button)
@@ -151,7 +151,7 @@ func rebuild(keep_uid := "-") -> void:
 		uids.append(NONE_ID)
 	for uid in uids:
 		var b := UiMenu.button(entry_label(uid))
-		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
+		b.custom_minimum_size = Vector2(LIST_W - 4, TOUCH_H)
 		b.focus_entered.connect(show_page.bind(uid))
 		b.pressed.connect(choose.bind(uid))
 		list.add_child(b)
@@ -352,7 +352,7 @@ func _build_preview_rows() -> void:
 	parents_label.text = "%s Lv%d\n+ %s Lv%d" % [_short(str(a["name"])), int(a["level"]), _short(str(b["name"])), int(b["level"])]
 	for t in [["Fuse!", confirm_fusion], ["Cancel", back]]:
 		var btn := UiMenu.button(t[0])
-		btn.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
+		btn.custom_minimum_size = Vector2(LIST_W - 4, TOUCH_H)
 		btn.pressed.connect(t[1])
 		list.add_child(btn)
 		entries.append(btn)

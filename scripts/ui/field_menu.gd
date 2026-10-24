@@ -14,6 +14,7 @@ extends CanvasLayer
 signal closed
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const TargetList := preload("res://scripts/ui/target_list.gd")
@@ -36,16 +37,18 @@ const MARGIN := 8
 const GAP := 6
 const LEFT_W := 156
 const BUTTON_H := 30
-const MENU_H := 20
+const MENU_H := 14
+## Ruimte tussen de knoppen van de rechterkolom (26 hoog = 48dp, zes stuks moeten op 216 passen).
+const RIGHT_GAP := 2
 ## v0.22 compacte Warpen-/Party-knop (rechterkolom)
 const WARP_W := 112   # 21 okt 2026: ruimte voor "Scenes & Music"
-const WARP_H := 20   # v0.24: 6 knoppen rechts (Quest Log erbij), past boven de opdrachtregel
+const WARP_H := 26   # 48dp (UiTouch.MIN_UNITS); 6 knoppen rechts onder het MENU-bord
 ## v0.22 rechterkolom (compact, onder het MENU-bord), van boven naar beneden
 const RIGHT_COL := ["warp", "party", "quests", "scenes", "options", "load"]
 ## v0.22 linkerkolom (grote knoppen); 5 x 30 + tussenruimte eindigt op y=182, past op 216 hoog (telefoon)
 const LEFT_COL := ["equip", "codex", "items", "magic", "bestiary"]
 ## Minimale tikhoogte (de knoppen zelf zijn hoger). Tests leunen op deze naam.
-const ROW_H := 16
+const ROW_H := 16   # oude naam (tests leunen erop); de knoppen zelf zijn BUTTON_H / WARP_H hoog
 const MESSAGE_TIME := 2.5
 ## Spelertekst. TODO(design): deze zin tot er een hub-scène én een vlag is.
 const WARP_UNAVAILABLE := "The warp hub cannot be reached yet."
@@ -93,6 +96,7 @@ var _quiet_frame := -1
 func _ready() -> void:
 	_quiet_frame = Engine.get_process_frames()
 	layer = LAYER
+	UiSfx.play(UiSfx.OPEN)
 	root = Control.new()
 	root.theme = load(UiMenu.THEME_PATH)
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -102,6 +106,7 @@ func _ready() -> void:
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.gui_input.connect(func(e: InputEvent) -> void:
 		if e is InputEventMouseButton and e.pressed and sub == null:
+			UiSfx.play(UiSfx.CLOSE)
 			close())
 	root.add_child(dim)
 	_build_buttons()
@@ -130,7 +135,7 @@ func _build_buttons() -> void:
 		b.custom_minimum_size = Vector2(LEFT_W, ROW_H)
 		_style_button(b, id == "warp")
 		if id in RIGHT_COL:
-			b.custom_minimum_size = Vector2(WARP_W, ROW_H)   # v0.22 compact
+			b.custom_minimum_size = Vector2(WARP_W, WARP_H)   # v0.22 compact
 		# v0.22 (Dennis): alle teksten gecentreerd (horizontaal; Button centreert verticaal zelf), zodat ze gelijk staan
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		UiMenu.set_label(b, str(c[1]))
@@ -217,7 +222,7 @@ func _layout() -> void:
 	var stack_bottom := y - GAP
 	menu_board.position = Vector2(right_x, top)
 	menu_board.size = Vector2(minf(right_w, float(WARP_W)), MENU_H)
-	var warp_y := top + MENU_H + GAP
+	var warp_y := top + MENU_H + 4.0
 	# v0.22 (Dennis): Warpen compact (was een groot vlak): vaste maat WARP_W x WARP_H, nog steeds
 	# ruim boven de minimale tikhoogte; Party eronder met dezelfde breedte.
 	var col_w := minf(right_w, float(WARP_W))
@@ -226,13 +231,13 @@ func _layout() -> void:
 		var rb: Button = buttons[id]
 		rb.position = Vector2(right_x, ry)
 		rb.size = Vector2(col_w, float(WARP_H))
-		ry += WARP_H + GAP
-	stack_bottom = maxf(stack_bottom, ry - GAP)
-	message_label.position = Vector2(MARGIN, stack_bottom + GAP)
-	message_label.size = Vector2(w - MARGIN * 2.0, 32)
+		ry += WARP_H + RIGHT_GAP
+	var left_bottom := stack_bottom
+	message_label.position = Vector2(MARGIN, left_bottom + 4.0)
+	message_label.size = Vector2(LEFT_W, 24)
 	if quest_label != null:
-		quest_label.position = Vector2(MARGIN, h - MARGIN - 16.0)
-		quest_label.size = Vector2(w - MARGIN * 2.0, 16)
+		quest_label.position = Vector2(MARGIN, left_bottom + 4.0)
+		quest_label.size = Vector2(LEFT_W, 24)
 
 
 func _place_name() -> String:
@@ -250,6 +255,8 @@ func refresh_party() -> void:
 func show_message(text: String, sticky := false) -> void:
 	message_label.text = text
 	message_label.visible = true
+	if quest_label != null:
+		quest_label.visible = false   # de melding staat op dezelfde plek
 	_message_left = -1.0 if sticky else MESSAGE_TIME
 	_layout.call_deferred()
 
@@ -259,9 +266,12 @@ func _process(delta: float) -> void:
 		_message_left -= delta
 		if _message_left <= 0.0:
 			message_label.visible = false
+			if quest_label != null:
+				quest_label.visible = true
 	if sub != null or Engine.get_process_frames() <= _quiet_frame:
 		return
 	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
+		UiSfx.play(UiSfx.CLOSE)
 		close()
 		return
 	_horizontal_nav()
@@ -498,9 +508,11 @@ func save_now() -> bool:
 		return false
 	if GameState.save_game(player.get_tile(), player.facing):
 		last_save_result = "saved"
+		UiSfx.play(UiSfx.SAVE)
 		show_message("Saved.")
 		return true
 	last_save_result = "failed"
+	UiSfx.play(UiSfx.ERROR)
 	show_message("Save failed.")
 	return false
 

@@ -24,7 +24,7 @@ func _ready() -> void:
 	kolom.size = Vector2(352, 200)
 	kolom.add_theme_constant_override("separation", 2)
 	root.add_child(kolom)
-	var kop := _label("Rustkamer — wisselen is gratis", 8)
+	var kop := _label("Rest Room - swapping is free", 8)
 	kolom.add_child(kop)
 	var rijen := HBoxContainer.new()
 	rijen.size_flags_vertical = Control.SIZE_EXPAND_FILL

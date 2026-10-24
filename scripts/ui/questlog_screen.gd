@@ -10,8 +10,6 @@ const HINT := "Left/Right: tab   B: back"
 const TABS := ["actief", "klaar"]
 const TAB_W := 84
 const LIST_W := 172
-## Minimale tikhoogte (logische px); bij 2x viewport-schaal ≈ 48dp op telefoon.
-const TOUCH_H := 24
 
 var tab := "actief"
 var tab_buttons := {}

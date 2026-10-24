@@ -25,6 +25,16 @@ extends CanvasLayer
 signal finished
 
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const UiTouch := preload("res://scripts/ui/ui_touch.gd")
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
+
+## Keuzes zijn tikdoelen van minstens 48dp (UiTouch.MIN_UNITS hoog, CHOICE_MIN_W breed). Twee keuzes
+## (Yes/No, Next/Skip) staan naast elkaar, zodat het vak niet hoger wordt; drie of meer in twee kolommen
+## (vanaf CHOICE_THREE_COLS_FROM keuzes drie), kolom voor kolom: omhoog/omlaag loopt door de kolom.
+const CHOICE_H := UiTouch.MIN_UNITS
+const CHOICE_MIN_W := 34.0
+const CHOICE_SIDE_BY_SIDE_MAX := 2
+const CHOICE_THREE_COLS_FROM := 7
 
 ## Letters per seconde voor het typemachine-effect.
 @export var chars_per_second := 40.0
@@ -38,7 +48,7 @@ var _blink := 0.0
 var choices: Array = []
 var choice_index := 0
 var choice_result := -1
-var _choice_box: VBoxContainer
+var _choice_box: Container
 var _choice_labels: Array[Label] = []
 ## Plek van het tekstvak: true = onderin (standaard, v0.16), false = bovenin.
 var at_bottom := true
@@ -240,6 +250,19 @@ func _low_candidate(cname: String, x0: float, x1: float, ctrl: Dictionary, vs: V
 	return {"name": cname, "rect": Rect2(x0, roundf(bottom - h), w, h), "bottom": true}
 
 
+## Kolommen en rijen van een keuzelijst met n keuzes (n <= 2: één rij naast elkaar).
+static func choice_columns(n: int) -> int:
+	if n <= CHOICE_SIDE_BY_SIDE_MAX:
+		return n
+	return 3 if n >= CHOICE_THREE_COLS_FROM else 2
+
+
+static func choice_rows(n: int) -> int:
+	if n <= CHOICE_SIDE_BY_SIDE_MAX:
+		return 1
+	return ceili(float(n) / float(choice_columns(n)))
+
+
 ## Hoogte van het vak voor alle regels (en de keuzes) bij deze breedte; minstens MIN_H.
 func needed_height(w: float) -> float:
 	var font: Font = text_label.get_theme_font("font")
@@ -252,8 +275,10 @@ func needed_height(w: float) -> float:
 				TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE)
 		lines = maxi(lines, maxi(1, roundi(sz.y / lh)))
 	var h := PAD_T + lines * lh + (lines - 1) * LINE_SPACING + PAD_B + 2.0
-	if not choices.is_empty():
-		h = maxf(h, PAD_T + lh + choices.size() * (lh + 1.0) + 4.0)
+	if choices.size() > CHOICE_SIDE_BY_SIDE_MAX:
+		h = maxf(h, 4.0 + choice_rows(choices.size()) * (CHOICE_H + 1.0) + 4.0)
+	elif not choices.is_empty():
+		h = maxf(h, 4.0 + CHOICE_H + 4.0)
 	return ceilf(maxf(MIN_H, h))
 
 
@@ -385,6 +410,7 @@ func choose(i: int) -> void:
 	if not has_choices():
 		return
 	choice_result = clampi(i, 0, choices.size() - 1)
+	UiSfx.play(UiSfx.CONFIRM)
 	choices = []
 	_clear_choices()
 	close()
@@ -400,14 +426,22 @@ func cancel() -> void:
 
 func _build_choices() -> void:
 	_clear_choices()
-	_choice_box = VBoxContainer.new()
+	_choice_box = HBoxContainer.new()
 	_choice_box.add_theme_constant_override("separation", 1)
 	panel.add_child(_choice_box)
+	var per_col := choice_rows(choices.size())
+	var column: Container = _choice_box
 	for i in choices.size():
+		if choices.size() > CHOICE_SIDE_BY_SIDE_MAX and i % per_col == 0:
+			column = VBoxContainer.new()
+			column.add_theme_constant_override("separation", 1)
+			_choice_box.add_child(column)
 		var l := Label.new()
+		l.custom_minimum_size = Vector2(CHOICE_MIN_W, CHOICE_H)
+		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		l.mouse_filter = Control.MOUSE_FILTER_STOP
 		l.gui_input.connect(_on_choice_input.bind(i))
-		_choice_box.add_child(l)
+		column.add_child(l)
 		_choice_labels.append(l)
 	_choice_box.visible = false
 	_update_choices()
@@ -449,6 +483,7 @@ func advance() -> void:
 		choose(choice_index)
 		return
 	_index += 1
+	UiSfx.play(UiSfx.ADVANCE)
 	if _index >= _lines.size():
 		close()
 	else:

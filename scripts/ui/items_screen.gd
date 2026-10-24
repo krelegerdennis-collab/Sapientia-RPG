@@ -88,7 +88,7 @@ func rebuild(keep_id := "") -> void:
 		return ia < ib if ia != ib else str(a) < str(b))
 	for id in ids:
 		var b := UiMenu.button(entry_label(id))
-		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
+		b.custom_minimum_size = Vector2(LIST_W - 4, TOUCH_H)
 		b.focus_entered.connect(show_item.bind(id))
 		b.pressed.connect(choose_item.bind(id))
 		if not PartyActions.item_usable_in_field(id):
@@ -195,6 +195,7 @@ func _on_target_chosen(index: int) -> void:
 		return
 	var r := PartyActions.use_item(GameState.inventory, selected_id, GameState.party[index])
 	show_message(str(r["text"]), MenuColors.INFO if r["ok"] else MenuColors.TEXT_DIM)
+	UiSfx.play(UiSfx.USE_ITEM if r["ok"] else UiSfx.ERROR)
 	targets.refresh()
 	if GameState.item_count(selected_id) <= 0:
 		_stop_targeting()

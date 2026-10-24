@@ -179,12 +179,12 @@ func _start_lotte(m: Node) -> void:
 		await Dialog.show_lines(Archief2.GEEN_CODEX, "")
 	elif pages.size() == 1:
 		keuze = Archief2.bondgenoot_voor(pages, GameState.member_level("dennis"))
-		await Dialog.show_lines(["%s vecht mee." % str(pages[0].get("name", "Monster"))], "")
+		await Dialog.show_lines(["%s fights with you." % str(pages[0].get("name", "Monster"))], "")
 	else:
 		var namen: Array = []
 		for p in pages:
 			namen.append(str(p.get("name", "Monster")))
-		var i := await Dialog.ask("Welk Codex-monster vecht mee?", namen, "")
+		var i := await Dialog.ask("Which Codex monster fights with you?", namen, "")
 		if i < 0 or i >= pages.size():
 			i = 0
 		keuze = {"page": pages[i], "tijdelijk": false}

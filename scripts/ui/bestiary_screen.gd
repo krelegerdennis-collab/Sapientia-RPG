@@ -11,6 +11,8 @@ signal closed
 const GameData := preload("res://scripts/data/game_data.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
+const UiTouch := preload("res://scripts/ui/ui_touch.gd")
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const TERRAIN_NAMES := {
@@ -67,6 +69,8 @@ func _ready() -> void:
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(header)
 	back_button = UiMenu.button("Back")
+	back_button.custom_minimum_size = Vector2(56, UiTouch.MIN_UNITS)
+	UiSfx.tag(back_button, UiSfx.CANCEL)
 	back_button.pressed.connect(close)
 	top.add_child(back_button)
 	var body := HBoxContainer.new()
@@ -120,7 +124,7 @@ func _ready() -> void:
 		seen += 1 if known else 0
 		beaten += 1 if GameState.defeated_count(id) > 0 else 0
 		var b := UiMenu.button("%03d %s" % [int(e.get("no", 0)), str(e["name"]) if known else "???"])
-		b.custom_minimum_size = Vector2(106, 15)
+		b.custom_minimum_size = Vector2(106, UiTouch.MIN_UNITS)
 		b.focus_entered.connect(show_entry.bind(id))
 		b.pressed.connect(show_entry.bind(id))
 		list.add_child(b)
@@ -201,6 +205,7 @@ func _process(_delta: float) -> void:
 	if Engine.get_process_frames() <= _quiet_frame:
 		return
 	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
+		UiSfx.play(UiSfx.CANCEL)
 		close()
 		return
 	UiMenu.pad_nav(root.get_viewport())

@@ -9,9 +9,12 @@ extends "res://scripts/ui/menu_screen.gd"
 const TargetList := preload("res://scripts/ui/target_list.gd")
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 
-const OPTION_ROW_H := 13       # iets lager dan ROW_H: 12 regels moeten op 216 px passen
-const TAB_BAR_H := 24          # zelfde tikminimum als questlog-tab (ROW_H / RIJ_H-traditie: 24 logic px)
-const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks: mobiel tikdoel (logic pixels)
+## 13 regels moeten tegelijk op 216 px passen (debug_menutest.gd 'alle regels in beeld', muziek_tests.gd);
+## dat kan alleen met 13 hoge regels. Bekende uitzondering op de 48dp-regel, zie docs/UX_POLISH_WM1.md.
+## De volumes staan ook op de Music-tab (schuifregelaars van 26 hoog).
+const OPTION_ROW_H := 12
+const TAB_BAR_H := 26          # tabs: minstens 48dp
+const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks (muziek_tests: >= 48 logische px; ruim boven 48dp)
 const VALUE_W := 66            # breedte van de waarde tussen '<' en '>'
 const RESET_KEY := "_reset"
 const EXPORT_KEY := "_export"      # playtest: logboek aanbieden (SessieLog)
@@ -56,22 +59,23 @@ var preview := ""
 
 
 func _build() -> void:
-	header.text = "Options"
+	header.text = "Settings"
+	(content.get_parent() as Control).offset_top = FRAME_INSET   # 13 regels + koprij van 48dp + hint passen zo in het venster
 	settings = get_node_or_null("/root/Settings")
 	var outer := VBoxContainer.new()
 	outer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_theme_constant_override("separation", 2)
 	content.add_child(outer)
-	var bar := HBoxContainer.new()
-	bar.add_theme_constant_override("separation", 4)
-	outer.add_child(bar)
+	# De tabs staan in de koprij (naast 'Back'): elke knop is 48dp hoog en zo blijven alle 13 regels in beeld.
 	for t in TABS:
 		var tb := UiMenu.button(TAB_NAMES[t])
 		tb.name = "Tab_" + t
 		tb.custom_minimum_size = Vector2(64, TAB_BAR_H)
 		tb.focus_mode = Control.FOCUS_NONE
+		UiSfx.tag(tb, UiSfx.TAB)
 		tb.pressed.connect(kies_tab.bind(t))
-		bar.add_child(tb)
+		header_row.add_child(tb)
+		header_row.move_child(tb, header_row.get_child_count() - 2)   # vóór 'Back'
 		tab_buttons[t] = tb
 	general_box = VBoxContainer.new()
 	general_box.size_flags_vertical = Control.SIZE_EXPAND_FILL

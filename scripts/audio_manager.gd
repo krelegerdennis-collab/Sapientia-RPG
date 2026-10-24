@@ -53,12 +53,24 @@ const MIN_LINEAR := 0.0001
 
 const UI_SFX_CLICK := "menu_click"
 const UI_SFX_HOVER := "menu_hover"
+const UI_SFX_ERROR := "menu_error"
+## Metadata op een knop: eigen cue (bv. "menu_cancel" voor Back, "tab_switch" voor een tab).
+const UI_META_SOUND := "ui_sound"
+## Zoveel beelden na een stick-/pijltjesdruk telt een focuswissel als 'cursor verplaatst'.
+const NAV_WINDOW_FRAMES := 3
+const NAV_ACTIONS := ["ui_up", "ui_down", "ui_left", "ui_right", "move_up", "move_down", "move_left", "move_right"]
 
 ## Koppelt automatisch klik- en hovergeluiden aan elke knop (BaseButton).
 ## Zet op een knop `set_meta("no_ui_sound", true)` om hem over te slaan.
 ## v0.17: UIT. Pas aanzetten als menu_click/menu_hover bestaan en de focus-hover in de
 ## gevechts- en veldmenu's getest is (anders klinkt elke cursorstap).
 var auto_ui_sounds: bool = false
+## UX-polish (fase 6): een knop die ingedrukt wordt klikt (menu_click, of de cue uit de metadata
+## "ui_sound"; een grijze knop geeft menu_error), en de cursor verplaatsen in een menu geeft een
+## zacht tikje. Hover/focus bij het opbouwen van een scherm blijft stil (dat was de spam).
+var ui_press_sounds: bool = true
+var ui_cursor_sounds: bool = true
+var _nav_frame: int = -100
 
 var _bgm: Dictionary = {}
 var _sfx: Dictionary = {}
@@ -672,8 +684,15 @@ func _on_music_player_finished(player: AudioStreamPlayer) -> void:
 	music_finished.emit(finished_track)
 
 
+func _process(_delta: float) -> void:
+	for a in NAV_ACTIONS:
+		if Input.is_action_just_pressed(a):
+			_nav_frame = Engine.get_process_frames()
+			return
+
+
 func _on_node_added(node: Node) -> void:
-	if not auto_ui_sounds or not node is BaseButton:
+	if not node is BaseButton:
 		return
 	if node.has_meta("_ui_sound_hooked"):
 		return
@@ -685,12 +704,24 @@ func _on_node_added(node: Node) -> void:
 
 
 func _on_ui_button_pressed(button: BaseButton) -> void:
-	if auto_ui_sounds and not button.has_meta("no_ui_sound"):
-		play_sfx(UI_SFX_CLICK)
+	if not (auto_ui_sounds or ui_press_sounds) or button.has_meta("no_ui_sound"):
+		return
+	play_sfx(ui_cue_for(button))
+
+
+## Welke cue hoort bij een druk op deze knop? Grijs = error, anders de metadata of de klik.
+func ui_cue_for(button: BaseButton) -> String:
+	if bool(button.get_meta("greyed", false)):
+		return UI_SFX_ERROR
+	return str(button.get_meta(UI_META_SOUND, UI_SFX_CLICK))
 
 
 func _on_ui_button_hover(button: BaseButton) -> void:
-	if auto_ui_sounds and not button.disabled and not button.has_meta("no_ui_sound"):
+	if button.disabled or button.has_meta("no_ui_sound"):
+		return
+	if auto_ui_sounds:
+		play_sfx(UI_SFX_HOVER)
+	elif ui_cursor_sounds and Engine.get_process_frames() - _nav_frame <= NAV_WINDOW_FRAMES:
 		play_sfx(UI_SFX_HOVER)
 
 

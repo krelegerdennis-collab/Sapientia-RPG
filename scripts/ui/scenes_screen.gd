@@ -19,7 +19,7 @@ const MUSIC_HINT := "A: play/stop   Left/Right: tab   B: back"
 const MUSIC_LOCKED_MSG := "You haven't heard this track yet."
 const MUSIC_PLAYING := "Now playing: %s"
 const MUSIC_STOPPED := "Music stopped."
-const PLAY_ROW_H := 22         # muziekregels: ruim tikdoel
+const PLAY_ROW_H := 26         # muziekregels en tabs: minstens 48dp (UiTouch.MIN_UNITS)
 var tab := "scenes"
 var tab_buttons := {}
 ## Track-id (music_tracks.gd) die nu vanuit dit scherm speelt, "" = geen (mapmuziek).
@@ -80,7 +80,7 @@ func _fill() -> void:
 		var seen: bool = GameState.scene_seen(str(sc["id"]))
 		var b := UiMenu.button("%d. %s" % [i + 1, str(sc["title"]) if seen else ScenesData.LOCKED_TITLE])
 		b.name = "Scene_" + str(sc["id"])
-		b.custom_minimum_size = Vector2(0, ROW_H)
+		b.custom_minimum_size = Vector2(0, TOUCH_H)
 		b.pressed.connect(choose.bind(str(sc["id"])))
 		if not seen:
 			_grey(b)

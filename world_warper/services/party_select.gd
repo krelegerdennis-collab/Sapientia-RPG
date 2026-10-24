@@ -19,7 +19,7 @@ const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 const ANCHOR_GROUP := "ww_anchor_party"
 const PANEL_SIZE := Vector2(220, 180)
 const RIJ_HOOG := 40
-const LEEG := "Niemand in het gezelschap."
+const LEEG := "Nobody in the party."
 
 const COLOR_PANEL := Color("3d2158")
 const COLOR_BUTTON := Color("5c3484")
@@ -194,7 +194,7 @@ func _ensure_ui() -> void:
 
 	var sluiten := Button.new()
 	sluiten.name = "Sluiten"
-	sluiten.text = "Sluiten"
+	sluiten.text = "Close"
 	sluiten.focus_mode = Control.FOCUS_ALL
 	sluiten.custom_minimum_size = Vector2(0, RIJ_HOOG)
 	sluiten.size_flags_horizontal = Control.SIZE_EXPAND_FILL

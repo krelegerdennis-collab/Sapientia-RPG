@@ -14,12 +14,19 @@ const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const PartyCard := preload("res://scripts/ui/party_card.gd")
+const UiTouch := preload("res://scripts/ui/ui_touch.gd")
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
+const SafeArea := preload("res://scripts/ui/safe_area.gd")
 
 const LAYER := 21
 const FRAME_INSET := 6         # afstand venster - schermrand
 const PAD_X := 12              # inhoud - schermrand (links/rechts)
 const PAD_Y := 9               # inhoud - schermrand (boven/onder)
-const ROW_H := 16              # hoogte van een menuregel (ook = minimale tikhoogte)
+## Oude minimale tikhoogte. Bestaande suites toetsen hier tegenaan (alles >= ROW_H, en 'alles binnen het scherm')
+## en het uitrustingsscherm past alleen met regels van 16. Nieuwe en aangepaste knoppen gebruiken TOUCH_H.
+const ROW_H := 16
+## Tikdoel van 48dp (UiTouch.MIN_UNITS): minimale hoogte van een knop in een menu.
+const TOUCH_H := UiTouch.MIN_UNITS
 const BACK_W := 56             # breedte van de 'Terug'-knop (groot genoeg voor een duim)
 const MESSAGE_TIME := 2.5      # zo lang blijft een melding staan (seconden)
 const DEFAULT_HINT := "A: choose   B: back"
@@ -55,7 +62,7 @@ func _ready() -> void:
 	var outer := VBoxContainer.new()
 	outer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	outer.offset_left = PAD_X
-	outer.offset_top = PAD_Y
+	outer.offset_top = PAD_Y - 3.0   # de koprij is 48dp hoog (Back): 3 px terug zodat alles blijft passen
 	outer.offset_right = -PAD_X
 	outer.offset_bottom = -PAD_Y + 2
 	outer.add_theme_constant_override("separation", 3)
@@ -67,7 +74,8 @@ func _ready() -> void:
 	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_row.add_child(header)
 	back_button = UiMenu.button("Back")
-	back_button.custom_minimum_size = Vector2(BACK_W, ROW_H)
+	back_button.custom_minimum_size = Vector2(BACK_W, TOUCH_H)
+	UiSfx.tag(back_button, UiSfx.CANCEL)
 	back_button.pressed.connect(back)
 	header_row.add_child(back_button)
 	var line := ColorRect.new()
@@ -217,6 +225,7 @@ func _process(delta: float) -> void:
 	if Engine.get_process_frames() <= _quiet_frame:
 		return
 	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
+		UiSfx.play(UiSfx.CANCEL)
 		back()
 		return
 	_handle_input()

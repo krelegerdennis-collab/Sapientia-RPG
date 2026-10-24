@@ -13,8 +13,8 @@ const FLAG_GETELD := "echo_kisten_geteld"
 const SOORTEN: Array[String] = ["codex", "uitrusting", "accessoire"]
 const NAMEN := {
 	"codex": "Codex",
-	"uitrusting": "Uitrusting",
-	"accessoire": "Accessoire",
+	"uitrusting": "Equipment",
+	"accessoire": "Accessory",
 }
 const KLEUREN := {
 	"codex": Color("9b6dff"),

@@ -459,7 +459,7 @@ const EVENTS := {
 		["say", "", [
 			"The Old Humanity made the six Archives as a chain.",
 			"Each core activates the next. Not an invitation: a distress signal.",
-			"Archief 1 sent: Someone is inside. Archief 2 answered first.",
+			"Archive 1 sent: Someone is inside. Archive 2 answered first.",
 			"Sapientia manipulated that signal.",
 			"You think you are following. Sapientia is leading you.",
 		]],

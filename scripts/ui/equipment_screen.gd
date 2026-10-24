@@ -73,6 +73,7 @@ func hero() -> Dictionary:
 
 func _build() -> void:
 	header.text = "Equipment"
+	(content.get_parent() as VBoxContainer).add_theme_constant_override("separation", 1)   # koprij van 48dp: zo past de inhoud nog
 	prev_button = arrow_button("<")
 	prev_button.pressed.connect(switch.bind(-1))
 	page_label = UiMenu.label("", MenuColors.TEXT_DIM)

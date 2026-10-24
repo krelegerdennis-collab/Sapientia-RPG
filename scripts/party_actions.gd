@@ -307,9 +307,9 @@ static func spell_effect_text(caster: Dictionary, id: String) -> String:
 	var what := "Heals one ally" if str(sp.get("type", "")) == "heal" else "Damage"
 	match str(sp.get("type", "")):
 		"hot":
-			what = "Geneest over tijd"
+			what = "Heals over time"
 		"buff":
-			what = "Versterkt"
+			what = "Boosts an ally"
 		"revive":
 			what = "Revives a fallen ally"
 	match str(sp.get("target", "")):

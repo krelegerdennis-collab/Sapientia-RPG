@@ -456,6 +456,8 @@ func _ready() -> void:
 	# ECHO questlog (smoke): of  godot -- --echotest [--shots=/pad/map]  (scripts/tests/echo_tests.gd).
 	# Sessielog (SessieLog, scripts/core/sessie_log.gd): of  godot -- --sessielogcoretest  (scripts/tests/sessielog_core_tests.gd).
 	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
+	# UX-polish WM1 (tikdoelen 48dp, Engelse tekst, tutorials, 19,5:9/20:9 + notch, SFX, volume): of
+	#   godot -- --uxtest [--shots=/pad/map]  (scripts/tests/ux_tests.gd).
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
@@ -508,6 +510,7 @@ func _ready() -> void:
 			["--questtest", "res://scripts/tests/quest_tests.gd", "QuestTest", "questtest"],
 			["--echotest", "res://scripts/tests/echo_tests.gd", "EchoTest", "echotest"],
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
+			["--uxtest", "res://scripts/tests/ux_tests.gd", "UxTest", "uxtest"],
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
