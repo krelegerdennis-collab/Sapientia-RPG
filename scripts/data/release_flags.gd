@@ -18,7 +18,7 @@ const DEV_SCENES: Array[String] = [
 ]
 
 ## Waar een relay-URL vandaan komt (eerste die gevuld is): ProjectSettings, dan omgevingsvariabele.
-const RELAY_SETTING := "sapientia/online/relay_url"
+const RELAY_SETTING := "sapientia/net/relay_url"
 const RELAY_ENV := "SAPIENTIA_RELAY_URL"
 
 static var hub_cut := true

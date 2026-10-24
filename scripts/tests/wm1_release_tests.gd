@@ -119,12 +119,38 @@ func _vlaggen_tests() -> void:
 	Flags.relay_url_override = "  " + RELAY + " "
 	check("relay-override wordt getrimd", Flags.relay_url() == RELAY)
 	Flags.relay_url_override = null
+	_relay_instelling_tests()
 	Flags.debug_build_override = 0
 	check("override 0 = release-build", not Flags.is_debug_build())
 	Flags.debug_build_override = 1
 	check("override 1 = debug-build", Flags.is_debug_build())
 	Flags.debug_build_override = -1
 	check("zonder override = echte OS.is_debug_build()", Flags.is_debug_build() == OS.is_debug_build())
+
+
+## Zelfde sleutel als de relay-PR (#204): [sapientia] net/relay_url + SAPIENTIA_RELAY_URL.
+func _relay_instelling_tests() -> void:
+	check("H11: relay-instelling heet sapientia/net/relay_url", Flags.RELAY_SETTING == "sapientia/net/relay_url")
+	check("H11: relay-omgevingsvariabele heet SAPIENTIA_RELAY_URL", Flags.RELAY_ENV == "SAPIENTIA_RELAY_URL")
+	var had_nieuw := ProjectSettings.has_setting(Flags.RELAY_SETTING)
+	var oud_nieuw: Variant = ProjectSettings.get_setting(Flags.RELAY_SETTING, "")
+	var had_oud := ProjectSettings.has_setting("sapientia/online/relay_url")
+	ProjectSettings.set_setting(Flags.RELAY_SETTING, "")
+	if OS.get_environment(Flags.RELAY_ENV).strip_edges() == "":
+		check("H11: lege instelling en geen env -> geen relay, knoppen verborgen", Flags.relay_url() == ""
+				and not Flags.online_buttons_visible())
+	ProjectSettings.set_setting(Flags.RELAY_SETTING, " " + RELAY + " ")
+	check("H11: sapientia/net/relay_url wordt gelezen (getrimd)", Flags.relay_url() == RELAY)
+	check("H11: ingestelde relay-URL maakt de online-knoppen zichtbaar", Flags.online_buttons_visible())
+	ProjectSettings.set_setting(Flags.RELAY_SETTING, "")
+	if not had_oud and OS.get_environment(Flags.RELAY_ENV).strip_edges() == "":
+		ProjectSettings.set_setting("sapientia/online/relay_url", RELAY)
+		check("H11: de oude sleutel sapientia/online/relay_url telt niet meer", Flags.relay_url() == "")
+		ProjectSettings.set_setting("sapientia/online/relay_url", null)
+	if had_nieuw:
+		ProjectSettings.set_setting(Flags.RELAY_SETTING, oud_nieuw)
+	else:
+		ProjectSettings.set_setting(Flags.RELAY_SETTING, null)
 
 
 # ================================================================ H13
