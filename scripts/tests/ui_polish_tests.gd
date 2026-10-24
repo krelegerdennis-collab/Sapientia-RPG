@@ -238,6 +238,15 @@ func _dialog_tests(tag: String) -> void:
 	check(tag + "tekstvak: 4 keuzes staan onder elkaar, elk >= 20 hoog", many_ok)
 	check(tag + "tekstvak: 4 keuzes: vak binnen het veilige gebied", _within(Dialog.box_rect(), _safe()))
 	await sc.close_all()
+	Dialog.ask("Save your progress?", ["Yes", "No"])
+	await sc.pframes(8)
+	var short: Array[Rect2] = Dialog.choice_rects()
+	var short_ok := short.size() == 2 and short[1].position.y > short[0].position.y and not Dialog.choices_horizontal(Dialog.box_rect().size.x)
+	for r in short:
+		short_ok = short_ok and r.size.y >= UiTouchC.TOUCH_MIN - 0.01 and r.size.x >= UiTouchC.TOUCH_MIN
+	check(tag + "tekstvak: Yes/No blijven rechtsonder onder elkaar, elk >= 25 hoog", short_ok)
+	check(tag + "tekstvak: Yes/No: vak binnen het veilige gebied", _within(Dialog.box_rect(), _safe()))
+	await sc.close_all()
 
 
 # ---------------------------------------------------------------- veldmenu

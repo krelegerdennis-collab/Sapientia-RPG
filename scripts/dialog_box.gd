@@ -68,12 +68,15 @@ const PAD_R := 12.0
 const PAD_T := 8.0
 const PAD_B := 4.0
 const LINE_SPACING := 4
-## Keuzes: tikmaat (25 hoog, ~48 dp). Tot 3 keuzes die naast elkaar passen staan op een rij onderin het vak
-## (het vak blijft laag en bedekt de speler niet); anders onder elkaar, bij 4+ keuzes met 20 hoog.
+## Keuzes: tikmaat (25 hoog, ~48 dp). Korte keuzes (Yes/No, Next/Skip) staan rechtsonder onder elkaar, zoals altijd.
+## Langere keuzes (tot 3) staan op een rij onderin het vak, zodat het vak laag blijft en de speler niet bedekt;
+## bij 4+ keuzes staan ze onder elkaar met 20 hoog.
 const CHOICE_ROW_TOUCH := 25.0
 const CHOICE_ROW_MANY := 20.0
 const CHOICE_MIN_W := 60.0
 const CHOICE_GAP := 4.0
+## Zijn alle keuzes smaller dan dit (met '> '), dan blijven ze rechtsonder onder elkaar staan.
+const CHOICE_STACK_MAX_W := 84.0
 const CHOICE_ROW_BOTTOM := 3.0     # ruimte onder een rij keuzes (binnen de rand van het vak)
 const CHOICE_PAD_W := 12.0
 ## Staart (16x12 per frame): punt op (6,10) bij omlaag, (6,1) bij omhoog (LEESMIJ.txt).
@@ -404,8 +407,8 @@ func choice_row_h() -> float:
 
 
 ## Indeling van de keuzes in een vak van breedte w: {"horizontal", "widths", "row_h"}.
-## Tot 3 keuzes staan op een rij (breedte naar tekst; past dat niet dan krimpen ze en lopen ze over twee regels);
-## anders onder elkaar. Zo blijft het vak laag en de keuzes >= 25 hoog (CHOICE_ROW_TOUCH).
+## Korte keuzes en 4+ keuzes staan onder elkaar. Tot 3 langere keuzes staan op een rij (breedte naar tekst; past dat
+## niet dan krimpen ze en lopen ze over twee regels). Zo blijft het vak laag en de keuzes >= 25 hoog (CHOICE_ROW_TOUCH).
 func choice_layout(w: float) -> Dictionary:
 	var stacked := {"horizontal": false, "widths": [], "row_h": choice_row_h()}
 	var n := choices.size()
@@ -421,6 +424,11 @@ func choice_layout(w: float) -> Dictionary:
 		var nw := maxf(CHOICE_MIN_W, ceilf(font.get_string_size("> " + str(c), HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x) + CHOICE_PAD_W)
 		natural.append(nw)
 		sum += nw
+	var widest := 0.0
+	for nw in natural:
+		widest = maxf(widest, nw)
+	if widest <= CHOICE_STACK_MAX_W:
+		return stacked
 	if sum <= avail:
 		return {"horizontal": true, "widths": natural, "row_h": CHOICE_ROW_TOUCH}
 	var widths: Array[float] = []
