@@ -166,6 +166,14 @@ const HERO_ID_ALIASES := {HERO_ID_LEGACY: HERO_ID, HERO_ID: HERO_ID_LEGACY}
 ## Een betatest-pad eindigt daar niet op: dan is er één bestand, zoals eerst.
 const SAVE_VERSION := 1
 const SLOT_COUNT := 4
+## Grenzen voor getallen uit een save (kapotte of met de hand aangepaste bestanden).
+const MAX_GOLD := 999999999
+const MAX_ITEM_STACK := 9999
+## Laatste melding van load_game ("" = alles goed). Engels, voor de speler.
+var last_load_notice := ""
+const NOTICE_RECOVERED := "Your save file was damaged. It was restored from the backup copy."
+const NOTICE_UNREADABLE := "This save file can't be read."
+const RECOVERED_LINES := ["Your save file was damaged.", "It was restored from the backup copy."]
 var save_path := "user://save_1.json"
 ## Welk slot de volgende handmatige save schrijft. Laden van een slot zet dit.
 var active_slot := 1
@@ -250,6 +258,8 @@ signal battle_ended(result: String)
 signal game_over(map_path: String)
 signal game_saved(path: String, ok: bool)
 signal game_loaded(path: String, ok: bool)
+## De hoofd-save was kapot en load_game gebruikte de reservekopie (.bak).
+signal save_recovered(path: String, backup_path: String)
 signal menu_opened(which: String)
 var codex_pages: Array = []
 var codex_active := ""
@@ -498,6 +508,7 @@ func _ready() -> void:
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
+			["--savehardeningtest", "res://scripts/tests/save_hardening_tests.gd", "SaveHardeningTest", "savehardeningtest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
@@ -1026,11 +1037,13 @@ func slot_record(slot: int) -> Dictionary:
 	var manual := slot_path(slot)
 	if manual == "" or not _save_file_exists(manual):
 		return {}
-	var d := read_save(manual)
+	var src := _read_save_source(manual)
+	var d: Dictionary = src["data"]
 	if d.is_empty():
 		return {"path": manual, "data": {}, "stamp": _save_modified_time(manual),
 				"slot": slot, "corrupt": true}
-	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot}
+	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot,
+			"from_backup": src["from_backup"]}
 
 
 ## De aparte autosave ({} = geen). Ook een oude autosave (v0.22, gestempeld met slot 1..4)
@@ -1038,11 +1051,13 @@ func slot_record(slot: int) -> Dictionary:
 func autosave_record() -> Dictionary:
 	if not _save_file_exists(autosave_path):
 		return {}
-	var d := read_save(autosave_path)
+	var src := _read_save_source(autosave_path)
+	var d: Dictionary = src["data"]
 	if d.is_empty():
 		return {"path": autosave_path, "data": {}, "stamp": _save_modified_time(autosave_path),
 				"slot": AUTOSAVE_SLOT, "corrupt": true}
-	return {"path": autosave_path, "data": d, "stamp": _save_stamp(autosave_path), "slot": AUTOSAVE_SLOT}
+	return {"path": autosave_path, "data": d, "stamp": _save_stamp(autosave_path), "slot": AUTOSAVE_SLOT,
+			"from_backup": src["from_backup"]}
 
 
 ## Bij welk handmatig slot hoort een autosave (voor het volgende handmatige opslaan)?
@@ -1069,13 +1084,17 @@ func newest_slot_record() -> Dictionary:
 	var best := {}
 	var stamp := -1.0
 	# handmatige slots eerst: bij gelijke stempel wint de handmatige save, niet de autosave
-	for i in [1, 2, 3, 4, AUTOSAVE_SLOT]:
-		var rec := slot_record(i)
-		if rec.is_empty():
-			continue
-		if float(rec["stamp"]) > stamp:
-			stamp = float(rec["stamp"])
-			best = rec
+	# een onleesbaar slot (geen goede .bak) mag 'Doorgaan' niet blokkeren zolang er een goed slot is
+	for pass_corrupt in [false, true]:
+		for i in [1, 2, 3, 4, AUTOSAVE_SLOT]:
+			var rec := slot_record(i)
+			if rec.is_empty() or bool(rec.get("corrupt", false)) != pass_corrupt:
+				continue
+			if float(rec["stamp"]) > stamp:
+				stamp = float(rec["stamp"])
+				best = rec
+		if not best.is_empty():
+			break
 	return best
 
 
@@ -1384,7 +1403,13 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 			h["spells"] = e["spells"].duplicate()
 		# v0.14 uitrusting + basis-stats; oude saves zonder die sleutels krijgen
 		# standaardwaarden (zie Equipment.load_hero). Ongeldige stukken -> terug in de tas.
+		h["level"] = maxi(1, int(h.get("level", 1)))
+		h["exp"] = maxi(0, int(h.get("exp", 0)))
 		Equipment.load_hero(h, e, _hero_data(str(h["id"])), stray_equipment)
+		h["max_hp"] = maxi(1, int(h["max_hp"]))
+		h["max_mp"] = maxi(0, int(h["max_mp"]))
+		h["hp"] = clampi(int(h["hp"]), 0, int(h["max_hp"]))
+		h["mp"] = clampi(int(h["mp"]), 0, int(h["max_mp"]))
 		out.append(h)
 	return out
 
@@ -1397,13 +1422,23 @@ static func migrate_name(n: String) -> String:
 	return str(OUDE_NAMEN.get(n, n))
 
 
+## Goud uit save-data: 0..MAX_GOLD (geen negatief of absurd getal).
+static func _gold_from(v) -> int:
+	if v is float or v is int:
+		return int(clampf(float(v), 0.0, float(MAX_GOLD)))
+	return 0
+
+
 ## Tas uit save-data: id -> aantal (kapotte waarden vallen weg).
 static func _inventory_from(raw) -> Dictionary:
 	var out := {}
 	if raw is Dictionary:
 		for k in raw:
-			if raw[k] is float or raw[k] is int:
-				out[k] = int(raw[k])
+			if (raw[k] is float or raw[k] is int) and str(k) != "":
+				# eerst als float begrenzen: int() van een absurd getal wordt anders negatief
+				var n := int(clampf(float(raw[k]), 0.0, float(MAX_ITEM_STACK)))
+				if n >= 1:
+					out[k] = n
 	return out
 
 
@@ -1454,23 +1489,31 @@ func _quests_save() -> Dictionary:
 
 ## Leest een save (standaard de handmatige; v0.11: of 'path', bv. autosave_path).
 func read_save(path := "") -> Dictionary:
+	return _read_save_source(path)["data"]
+
+
+## Zoals read_save, maar ook waar de data vandaan kwam: {"data": {}, "from_backup": bool}.
+func _read_save_source(path := "") -> Dictionary:
 	if path == "":
 		path = save_path
 	var parsed := _read_save_file(path)
 	if _valid_save_data(parsed):
-		return parsed
+		return {"data": parsed, "from_backup": false}
 	var backup := _read_save_file(path + ".bak")
 	if _valid_save_data(backup):
 		push_warning("Save ontbreekt of is corrupt; reservekopie geladen: %s" % (path + ".bak"))
-		return backup
-	return {}
+		return {"data": backup, "from_backup": true}
+	return {"data": {}, "from_backup": false}
 
 
 func _read_save_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
-	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if parsed is Dictionary else {}
+	# JSON.new().parse i.p.v. parse_string: een kapot bestand geeft hier een foutcode, geen ERROR-regel in het log
+	var json := JSON.new()
+	if json.parse(FileAccess.get_file_as_string(path)) != OK:
+		return {}
+	return json.data if json.data is Dictionary else {}
 
 
 func _valid_save_data(data: Dictionary) -> bool:
@@ -1483,16 +1526,25 @@ func _valid_save_data(data: Dictionary) -> bool:
 ## v0.11: 'path' = welke save ("" = de handmatige).
 func load_game(path := "") -> bool:
 	som_mode = false      # SoM-proef: een geladen spel is altijd het gewone (turn-based) spel
-	var d := read_save(path)
+	var src := _read_save_source(path)
+	var d: Dictionary = src["data"]
+	last_load_notice = ""
 	if not apply_state(d):
+		last_load_notice = NOTICE_UNREADABLE
 		game_loaded.emit(path if path != "" else save_path, false)
 		return false
 	# Gevechtsstijl van deze save; oude saves zonder sleutel houden hun vroegere effectieve waarde: Classic.
-	Settings.set_value("battle_style", int(d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)))
+	var style = d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+	Settings.set_value("battle_style", int(style) if (style is int or style is float) else Settings.BATTLE_STYLE_CLASSIC)
 	# v0.19 kamer-checkpoint uit de save (oude saves: geen; dan zet de map hem bij binnenkomst)
 	checkpoint = _checkpoint_from(d.get("checkpoint", {}))
 	entry_kind = "load"
 	pending_respawn_msg = []
+	if bool(src["from_backup"]):
+		var main_path := path if path != "" else save_path
+		last_load_notice = NOTICE_RECOVERED
+		pending_respawn_msg = RECOVERED_LINES.duplicate()
+		save_recovered.emit(main_path, main_path + ".bak")
 	game_loaded.emit(path if path != "" else save_path, true)
 	return true
 
@@ -1535,7 +1587,7 @@ func apply_state(d: Dictionary) -> bool:
 	inventory = _inventory_from(d.get("inventory", {}))
 	for id in stray_equipment:
 		inventory[id] = int(inventory.get(id, 0)) + 1
-	gold = int(d.get("gold", 0)) if (d.get("gold", 0) is float or d.get("gold", 0) is int) else 0
+	gold = _gold_from(d.get("gold", 0))
 	bestiary = {}
 	var best = d.get("bestiary", {})
 	if best is Dictionary:
@@ -2460,8 +2512,7 @@ func dungeon100_end_run(deliver := true) -> bool:
 	inventory = _inventory_from(snap.get("inventory", {}))
 	for id in stray:
 		inventory[id] = int(inventory.get(id, 0)) + 1
-	var g = snap.get("gold", 0)
-	gold = int(g) if (g is int or g is float) else 0
+	gold = _gold_from(snap.get("gold", 0))
 	var behouden := _dungeon100_kept_pages(snap.get("codex", {}))
 	codex_load_data(snap.get("codex", {}))
 	_dungeon100_restore_kept(behouden)
