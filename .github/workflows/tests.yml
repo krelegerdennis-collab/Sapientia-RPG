@@ -32,7 +32,7 @@ jobs:
                 partytest, savetest, musictest, grotlayouttest, held24test,
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
                 koopmantest, wm1releasetest, savehardeningtest, combatrngtest, combattick,
-                berggrotdextest, uipolishtest]
+                berggrotdextest, uipolishtest, combatsimtest]
     steps:
       - uses: actions/checkout@v4
 
