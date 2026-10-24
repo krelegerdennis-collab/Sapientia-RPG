@@ -46,7 +46,8 @@ func _ready() -> void:
 		var b := UiMenu.button(_label(i, rec))
 		b.name = "Slot%d" % i
 		b.custom_minimum_size = Vector2(168, 18)
-		var off := rec.is_empty() and not is_new
+		var unreadable := bool(rec.get("corrupt", false))
+		var off := (rec.is_empty() or unreadable) and not is_new
 		b.disabled = off
 		b.focus_mode = Control.FOCUS_NONE if off else Control.FOCUS_ALL
 		b.pressed.connect(picked.emit.bind(i))
@@ -55,7 +56,7 @@ func _ready() -> void:
 		if is_new:
 			if focus_btn == null and rec.is_empty():
 				focus_btn = b
-		elif not rec.is_empty() and float(rec.get("stamp", 0.0)) > best:
+		elif not off and float(rec.get("stamp", 0.0)) > best:
 			best = float(rec["stamp"])
 			focus_btn = b
 	if not is_new:
@@ -63,12 +64,13 @@ func _ready() -> void:
 		var ab := UiMenu.button(_label(GameState.AUTOSAVE_SLOT, arec))
 		ab.name = "Autosave"
 		ab.custom_minimum_size = Vector2(168, 18)
-		ab.disabled = arec.is_empty()
-		ab.focus_mode = Control.FOCUS_NONE if arec.is_empty() else Control.FOCUS_ALL
+		var a_off := arec.is_empty() or bool(arec.get("corrupt", false))
+		ab.disabled = a_off
+		ab.focus_mode = Control.FOCUS_NONE if a_off else Control.FOCUS_ALL
 		ab.pressed.connect(picked.emit.bind(GameState.AUTOSAVE_SLOT))
 		list.add_child(ab)
 		autosave_button = ab
-		if not arec.is_empty() and float(arec.get("stamp", 0.0)) > best:
+		if not a_off and float(arec.get("stamp", 0.0)) > best:
 			focus_btn = ab
 	elif focus_btn == null and not slot_buttons.is_empty():
 		focus_btn = slot_buttons[0]
@@ -113,7 +115,8 @@ func _label(slot: int, rec: Dictionary) -> String:
 		return "%s: empty" % title
 	if bool(rec.get("corrupt", false)):
 		return "%s: unreadable save" % title
-	return "%s: %s" % [title, summary(rec.get("data", {}))]
+	var tail := " (backup)" if bool(rec.get("from_backup", false)) else ""
+	return "%s: %s%s" % [title, summary(rec.get("data", {})), tail]
 
 
 ## Korte samenvatting van een save: naam, Lv en speeltijd.

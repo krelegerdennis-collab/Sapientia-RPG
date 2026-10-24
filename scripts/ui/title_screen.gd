@@ -373,7 +373,8 @@ func _open_slot_list() -> void:
 
 func _on_slot_picked(slot: int) -> void:
 	set_process(false)
-	await GameState.continue_slot(slot)
+	if not await GameState.continue_slot(slot):
+		set_process(true)
 
 
 func _on_slot_cancelled() -> void:
