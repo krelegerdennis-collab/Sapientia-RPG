@@ -39,6 +39,7 @@ func _build() -> void:
 	scroll.custom_minimum_size = Vector2(LIST_W, 0)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.scroll_deadzone = 6
+	scroll.follow_focus = true
 	body.add_child(scroll)
 	list = VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL

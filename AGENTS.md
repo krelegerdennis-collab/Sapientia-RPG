@@ -80,6 +80,7 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--questtest` | `scripts/tests/quest_tests.gd` | 63 |
 | `--echotest` | `scripts/tests/echo_tests.gd` | 12 |
 | `--battlesimtest` | `scripts/tests/battlesim_tests.gd` | 57 |
+| `--berggrotdextest` | `scripts/tests/berggrot_dex_tests.gd` | 91 |
 | `--savehardeningtest` | `scripts/tests/save_hardening_tests.gd` | 127 |
 | `--relaytest` | `scripts/tests/relay_tests.gd` | 89 |
 | `--wm1bugtest` | `scripts/tests/wm1_bugjacht_tests.gd` | 14 |
