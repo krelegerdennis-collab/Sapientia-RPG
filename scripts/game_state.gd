@@ -555,12 +555,9 @@ func _ready() -> void:
 ## Testmodus (alleen bij een --...test-suite; O-4, flaky berggrottest onder load):
 ## - test_modus laat toevalsbronnen die alleen beeld sturen (World Warper-flyover) een vaste seed
 ##   gebruiken, zodat een suite niet van de klok afhangt.
-## - PHYSICS_GELIJK_SUITES: physics mag nooit sneller lopen dan beelden. Spelers lopen in _process,
-##   maar deze tests wachten op get_tree().physics_frame ("max. 8 physics-frames tot de speler
-##   beweegt"). Onder CPU-load haalt Godot achterstand in met tot 8 physics-stappen per beeld, zodat
-##   die wachttijd afloopt vóór _process één keer draaide. Met 1 stap per beeld is elk physics-frame
-##   ook minstens één beeld. Niet voor alle suites: menutest en woudtest hangen af van physics op
-##   wandkloktijd en gaan juist stuk als physics onder load langzamer loopt.
+## - PHYSICS_GELIJK_SUITES: extra net naast walk() die op process_frame wacht. Physics mag nooit
+##   sneller lopen dan beelden. Niet voor alle suites: menutest en woudtest hangen af van physics
+##   op wandkloktijd en gaan juist stuk als physics onder load langzamer loopt.
 const PHYSICS_GELIJK_SUITES: Array[String] = ["berggrottest"]
 
 

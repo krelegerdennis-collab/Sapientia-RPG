@@ -28,15 +28,14 @@ done; wait
 
 ### 1. Physics loopt voor op beelden (26 van de 29 fouten: "open: tunnel leidt de berggrot in")
 De speler loopt in `Player._process` (v7, zie commentaar bij `_process`). De testhelper `walk()` in
-`berggrot_tests.gd` houdt de toets in en wacht daarna **maximaal 8 `physics_frame`s** tot `is_moving` aan gaat.
+`berggrot_tests.gd` hield de toets in en wachtte daarna **maximaal 8 `physics_frame`s** tot `is_moving` aan gaat.
 Onder CPU-load haalt Godot de physics-achterstand in met tot `max_physics_steps_per_frame` (8) stappen per beeld:
 gemeten ongeveer 3 physics-frames per beeld (pf=672 bij prf=241). Die 8 physics-frames zijn dan al voorbij na
 2 tot 3 beelden, of zelfs vóór `_process` één keer met de ingedrukte toets draaide. De toets wordt losgelaten
 zonder dat de speler is gaan lopen; de test faalt (de tunnel-stap naar `berggrot_mond`).
 
-Fix: voor suites op `GameState.PHYSICS_GELIJK_SUITES` (alleen `berggrottest`) zet de testmodus
-`Engine.max_physics_steps_per_frame = 1`. Dan is elk physics-frame ook minstens één beeld.
-
+Fix (Dennis, 24 okt): `walk()` wacht nu op `process_frame` (zelfde max. 8). Extra net:
+`GameState.PHYSICS_GELIJK_SUITES` (alleen `berggrottest`) zet `Engine.max_physics_steps_per_frame = 1`.
 Bewust niet voor alle suites: gemeten op een gemengde load gingen `menutest` en `woudtest` dan juist stuk
 (hun wachttijden in wandkloktijd hangen af van physics die dan langzamer loopt).
 
@@ -65,19 +64,17 @@ In het spel zelf (geen testmodus) verandert er niets.
 
 ## Nieuwe check
 `--testmodustest` (`scripts/tests/testmodus_tests.gd`, 9 PASS): testmodus aan, physics-gelijk-lijst, geen
-physics-voorsprong op beelden, vaste warper-seed, `seed_override` blijft winnen. Niet in de CI-matrix
-(`tests.yml` is niet aangeraakt); RPG Forge kan hem toevoegen.
+physics-voorsprong op beelden, vaste warper-seed, `seed_override` blijft winnen. Staat in de CI-matrix
+(`tests.yml`, Dennis 24 okt).
 
-## Voor Dennis / Forge (niet gedaan)
+## Voor Dennis / Forge (open)
 - **Spelgedrag, niet in deze PR**: in het spel kan het schip door een waypoint achter de touch-knoppen een paar
   seconden tegen de D-pad blijven hangen en schokken (`hard_pushes` 8 tot 10 in 1,5 s bij seed 2 en 8; het
   veiligheidsnet is pas `t_state > 9`). Voorstel: waypoints weigeren waarvan de rechte lijn door een
   `avoid`-rechthoek gaat, of in CRUISE een nieuw waypoint kiezen na een noodduw. Raakt de vliegroute van een
   art-gerelateerd beeld, dus een keuze voor Forge.
-- `warper_kamer_tests.gd:763` heeft dezelfde `gewacht < 8`-helper als `berggrot_tests.gd`. Geen flake gemeten;
-  zet de suite op `PHYSICS_GELIJK_SUITES` als hij toch gaat flakken. Een aanpassing van de bestaande tests zelf
-  (bijv. wachten op `process_frame` in plaats van `physics_frame` in `walk()`) is de nettere oplossing, maar
-  bestaande tests zijn voor deze taak niet aangepast.
+- `warper_kamer_tests.gd:763` heeft dezelfde `gewacht < 8`-helper (nog op `physics_frame`). Geen flake gemeten;
+  zet de suite op `PHYSICS_GELIJK_SUITES` of dezelfde `process_frame`-wacht als hij toch gaat flakken.
 - Los van O-4: `menutest` faalt bij 16 tegelijk op 4 CPU's in ongeveer 28 procent van de runs, ook zonder deze
   wijziging (9 van 32 op `main`); bij 10 tegelijk 0 van 30. `codextest` faalde één keer in een gemengde load op `main`.
   Eén CPU-core per parallelle suite is de veilige verhouding.
