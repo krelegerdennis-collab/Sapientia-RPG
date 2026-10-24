@@ -286,11 +286,11 @@ func _lotte_en_genezer() -> void:
 	var voor := GameState.codex_pages.size()
 	var tijdelijk := Archief2.bondgenoot_voor([], GameState.member_level("dennis"))
 	check("zonder Codex: tijdelijke Mosslijm", bool(tijdelijk.get("tijdelijk", false))
-			and str(tijdelijk["page"].get("name", "")) == "Mosslijm"
+			and str(tijdelijk["page"].get("name", "")) == "Moss Slime"
 			and str(tijdelijk["page"].get("species", "")) == "mosslijm")
 	Archief2.zet_bondgenoot(tijdelijk)
 	check("tijdelijke bondgenoot komt niet in de Codex", GameState.codex_pages.size() == voor
-			and str(GameState.archief2_temp_ally.get("name", "")) == "Mosslijm")
+			and str(GameState.archief2_temp_ally.get("name", "")) == "Moss Slime")
 	GameState.archief2_temp_ally = {}
 	var pagina := GameState.codex_add("glitchmot", 3)
 	var gekozen := Archief2.bondgenoot_voor(GameState.codex_pages, 3)
@@ -423,7 +423,7 @@ func _spel() -> void:
 	var bondgenoot := false
 	if b != null:
 		for c in b.heroes:
-			if bool(c.get("ally", false)) and str(c.get("name", "")) == "Mosslijm":
+			if bool(c.get("ally", false)) and str(c.get("name", "")) == "Moss Slime":
 				bondgenoot = true
 	check("tijdelijke Mosslijm staat in het gevecht", bondgenoot and GameState.codex_pages.is_empty())
 	if b != null and not b.enemies.is_empty():

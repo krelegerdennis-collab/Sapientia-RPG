@@ -35,7 +35,7 @@ const ZIN_TWIJFEL := "Why I do it? Because it is my task. The Old Humanity built
 const ZIN_H6 := "I have let hundreds of candidates through. You are the sixth who stayed standing. The others... I don't know what happened to them."
 const ZIN_DATA := "I don't know. I deliver, she takes. It has always been that way."
 const ZIN_RESULTAAT := "Result: floor 100. A new run can start."
-const ZIN_WERELD := "The Deep Learning Simulation starts with ECHO, in ECHO's Room."
+const ZIN_WERELD := "The Deep Learning Simulation starts with ECHO, in ECHO's Chamber."
 const ZIN_LOOPT := "The simulation is already running."
 
 

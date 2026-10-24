@@ -760,7 +760,7 @@ const KEY_ITEMS := {
 ## Vakken (volgorde = volgorde op het scherm) en hun naam op het scherm.
 const EQUIP_SLOTS := ["wapen", "schild", "helm", "harnas", "benen", "laarzen", "accessoire"]
 const EQUIP_SLOT_NAMES := {"wapen": "Weapon", "schild": "Shield", "helm": "Helm", "harnas": "Armor",
-	"benen": "Benen", "laarzen": "Laarzen", "accessoire": "Accessory"}
+	"benen": "Legs", "laarzen": "Boots", "accessoire": "Accessory"}
 ## Stats die uitrusting kan veranderen (volgorde op het scherm) en hun korte naam.
 ## SPD = de bestaande sleutel "agi".
 const EQUIP_STATS := ["atk", "def", "mag", "mdef", "agi"]
@@ -1167,6 +1167,9 @@ const ELEMENT_NAMES := {
 	"neutraal": "neutral",
 	"water": "water",
 	"licht": "light",
+	"ijs": "ice",
+	"fysiek": "physical",
+	"zwaard": "sword",
 }
 
 

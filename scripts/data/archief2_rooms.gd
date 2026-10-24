@@ -47,7 +47,7 @@ const ROOMS := {
 				"Pull the lever. Then the plate grows into a path.",
 				"The Old Humanity made the six Archives as a chain.",
 				"Each core activates the next. Not an invitation: a distress signal.",
-				"Archief 1 sent: Someone is inside. Archief 2 answered first.",
+				"The First Archive sent: Someone is inside. The Second Archive answered first.",
 				"Sapientia manipulated that signal. You think you are following. Sapientia is leading you.",
 			],
 		}],
@@ -121,20 +121,20 @@ static func rooms() -> Dictionary:
 			{"id": "m2", "enemy": "doornige_loper", "group": ["doornige_loper", "wortelkruiper"], "tile": [18, 9], "moves": true},
 		],
 	})
-	var plaat := _met(_basis("Groei-plaat", 1, 5), {
+	var plaat := _met(_basis("Growth Plate", 1, 5), {
 		"layout": [_TOP, _WU, _WL, _F, _G, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v1_entree"], "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v2_gang"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [6, 7], "lines": [
-			"Een groei-plaat. Stap erop.",
+			"A growth plate. Step on it.",
 			"It grows into a path.",
 		]}],
 		"platen": [{"id": "p1", "soort": "groei", "tile": [13, 7], "start": 0}],
 		"bruggen": [{"plaat": "p1", "tiles": [[12, 4], [13, 4], [14, 4]]}],
 	})
-	var gang := _met(_basis("Kasgang", 2, 5), {
+	var gang := _met(_basis("Greenhouse Passage", 2, 5), {
 		"layout": [_TOP, _WU, _WL, _SH, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": "res://scenes/maps/leven_v1_plaat.tscn", "spawn": "noord"},
@@ -145,7 +145,7 @@ static func rooms() -> Dictionary:
 			{"id": "m2", "enemy": "sporekop", "group": ["sporekop", "sporenzwam"], "tile": [17, 9], "moves": true},
 		],
 	})
-	var lotte := _met(_basis("Seren", 2, 5), {
+	var lotte := _met(_basis("Seren's Room", 2, 5), {
 		"layout": [_TOP, _WU, _WL, _F, _F, _F, _B, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
 		"checkpoint": false,
 		"exits": {
@@ -159,7 +159,7 @@ static func rooms() -> Dictionary:
 			"tile": [13, 6], "moves": false, "boss": true, "guard": true,
 		}],
 	})
-	var ketting := _met(_basis("Ketting-platen", 3, 6), {
+	var ketting := _met(_basis("Chain Plates", 3, 6), {
 		"layout": [_TOP, _WU, _WL, _F, _G, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v2_lotte"], "spawn": "noord"},
@@ -179,7 +179,7 @@ static func rooms() -> Dictionary:
 			{"id": "m1", "enemy": "bloeiende_schrik", "group": ["bloeiende_schrik", "sporekop"], "tile": [19, 10], "moves": true},
 		],
 	})
-	var tegen := _met(_basis("Tegen-platen", 3, 6), {
+	var tegen := _met(_basis("Counter Plates", 3, 6), {
 		"layout": [_TOP, _WU, _WL, _F, _T, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v3_ketting"], "spawn": "noord"},
@@ -192,7 +192,7 @@ static func rooms() -> Dictionary:
 		"platen": [{"id": "t1", "soort": "tegen", "tile": [18, 7], "start": 2}],
 		"bruggen": [{"plaat": "t1", "tiles": [[16, 4], [17, 4], [18, 4]]}],
 	})
-	var licht := _met(_basis("Licht-platen", 3, 6), {
+	var licht := _met(_basis("Light Plates", 3, 6), {
 		"layout": [_TOP, _WU, _WL, _F, _G, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
 		"exits": {
 			"E": {"map": SCENES["archief_2_v3_tegen"], "spawn": "noord"},

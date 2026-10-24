@@ -39,19 +39,19 @@ const KERN_ZIN := "In silence lies peace. I correct what grows."
 const START_GEAR := ["eiken_staf", "reisgewaad"]
 const START_SPELLS := ["genees", "rijp"]
 ## TODO(design): het bestiarium noemt dit beest "Moss Slime". De soort-id is mosslijm.
-## Spelertekst gebruikt Mosslijm. Geen nieuw Codex-beest.
+## Spelertekst is "Moss Slime". Geen nieuw Codex-beest.
 const MOSSLIJM_SOORT := "mosslijm"
 
 const KETEN := [
 	"The Old Humanity made the six Archives as a chain.",
 	"Each core activates the next. Not an invitation: a distress signal.",
-	"Archief 1 sent: Someone is inside. Archief 2 answered first.",
+	"The First Archive sent: Someone is inside. The Second Archive answered first.",
 	"Sapientia manipulated that signal.",
 	"You think you are following. Sapientia is leading you.",
 ]
 const GEEN_CODEX := [
 	"You don't have a Codex monster yet.",
-	"Een Mosslijm vecht tijdelijk mee.",
+	"A Moss Slime fights with you for now.",
 ]
 const LOTTE_AANSLUIT := [
 	"The glitch tears. Seren breaks it herself.",
@@ -142,7 +142,7 @@ static func lotte_heeft_licht() -> bool:
 ## Het gekozen monster blijft de actieve bondgenoot. Geen vierde held forceren.
 static func tijdelijke_mosslijm(level: int) -> Dictionary:
 	var page := CodexData.make_page(MOSSLIJM_SOORT, maxi(1, level), "archief2_tijdelijk")
-	page["name"] = "Mosslijm"
+	page["name"] = "Moss Slime"
 	page["tijdelijk"] = true
 	return page
 
