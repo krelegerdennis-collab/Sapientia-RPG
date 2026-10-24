@@ -267,6 +267,12 @@ class Interactievlak extends Area2D:
 			l.add_theme_constant_override("shadow_offset_x", 1)
 			l.add_theme_constant_override("shadow_offset_y", 1)
 		var bord: Sprite2D = await WarperBakedLabel.maak_sprite(self, Vector2(144, 12), Vector2(-72, -22), setup)
+		if not is_instance_valid(self) or not is_inside_tree():
+			if bord != null and is_instance_valid(bord):
+				bord.queue_free()
+			return
+		if bord == null:
+			return
 		bord.name = "Tekst"
 		add_child(bord)
 
