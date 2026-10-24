@@ -260,6 +260,8 @@ static func rooms() -> Dictionary:
 		"exits": {
 			"E": {"map": SCENES["archief_2_v4_genezer"], "spawn": "noord"},
 		},
+		# de boog (n) in de noordmuur is hier alleen beeld: geen uitgang, dus geen doel nodig
+		"decor_uitgangen": ["n"],
 		"warp": [13, 7],
 		"signs": [{"tile": [8, 6], "lines": [
 			"ECHO operates the hub. Step onto the path and choose.",

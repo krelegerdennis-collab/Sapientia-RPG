@@ -165,6 +165,9 @@ const HERO_ID_ALIASES := {HERO_ID_LEGACY: HERO_ID, HERO_ID: HERO_ID_LEGACY}
 ## Slots 2-4 bestaan alleen als save_path op save_1.json eindigt (tests en het echte spel).
 ## Een betatest-pad eindigt daar niet op: dan is er één bestand, zoals eerst.
 const SAVE_VERSION := 1
+## Marker in elke save en elk checkpoint van deze versie: wie hem mist komt van vóór de Codex-Inktwurm-regels
+## en wordt in _codex_inktwurm_sync gemigreerd. Zo telt een nieuwe save tussen de twee tutorials niet als oud.
+const CODEX_SYNC_KEY := "inktwurm_codex_sync"
 const SLOT_COUNT := 4
 ## Grenzen voor getallen uit een save (kapotte of met de hand aangepaste bestanden).
 const MAX_GOLD := 999999999
@@ -457,6 +460,7 @@ func _ready() -> void:
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
 	# WM1-bugjacht: of  godot -- --wm1bugtest [--shots=/pad/map]  (scripts/tests/wm1_bugjacht_tests.gd).
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
+	# WM1-playthrough (nieuw spel t/m de hub, save/load, pauze): of  godot -- --wm1playthroughtest [--speed=N] [--static-only]  (scripts/tests/wm1_playthrough_tests.gd).
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
@@ -471,7 +475,9 @@ func _ready() -> void:
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
 	# Seeded gevecht-RNG (zelfde seed = zelfde gevecht): of  godot -- --combatrngtest  (scripts/tests/combat_rng_tests.gd).
 	# Vaste 60 Hz-gevechtsstap (framerate-onafhankelijk): of  godot -- --combattick  (scripts/tests/combat_tick_tests.gd).
+	# Pure gevechtskern + beweging/treffers/lock op de stap: of  godot -- --combatsimtest  (scripts/tests/combat_sim_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
+	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	# Laadtijden WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
@@ -506,6 +512,7 @@ func _ready() -> void:
 			["--koopmantest", "res://scripts/tests/koopman_tests.gd", "KoopmanTest", "koopmantest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
+			["--berggrotdextest", "res://scripts/tests/berggrot_dex_tests.gd", "BerggrotDexTest", "berggrotdextest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
@@ -530,13 +537,18 @@ func _ready() -> void:
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
 			["--combatrngtest", "res://scripts/tests/combat_rng_tests.gd", "CombatRngTest", "combatrngtest"],
 			["--combattick", "res://scripts/tests/combat_tick_tests.gd", "CombatTickTest", "combattick"],
+			["--combatsimtest", "res://scripts/tests/combat_sim_tests.gd", "CombatSimTest", "combatsimtest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
 			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
 			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
+			["--aabtest", "res://scripts/tests/aab_tests.gd", "AabTest", "aabtest"],
+			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
+			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
@@ -595,8 +607,9 @@ func _preload_paths() -> Array[String]:
 	var out: Array[String] = [BATTLE_SCENE, START_MAP, TOWN_MAP, "res://scenes/maps/wereldkaart.tscn"]
 	for id in GameData.BACKDROPS_BOOT:
 		out.append(GameData.backdrop_path(str(id)))
-	for h in GameData.HEROES:
-		if str(h["battle_sprite"]) != "":
+	# alleen de gevechtssprites (2100x210, 1,7 MB per stuk) van de party; rekruten laden bij hun eerste gevecht
+	for h in party + party_bench:
+		if str(h.get("battle_sprite", "")) != "":
 			out.append(str(h["battle_sprite"]))
 	for e in GameData.ENEMIES.values():
 		out.append(GameData.enemy_sprite(e))
@@ -624,6 +637,15 @@ func _start_preload() -> void:
 		if ResourceLoader.load_threaded_request(p) == OK:
 			_preloading.append(p)
 	set_process(not _preloading.is_empty())
+
+
+## Vraagt een resource op de achtergrond te laden zonder te wachten (get_resource() levert hem later).
+func _vraag_voor(path: String) -> void:
+	if path == "" or _loaded.has(path) or _preloading.has(path) or not ResourceLoader.exists(path):
+		return
+	if ResourceLoader.load_threaded_request(path) == OK:
+		_preloading.append(path)
+		set_process(true)
 
 
 ## Gevechtsachtergrond die niet bij het opstarten is geladen: op de achtergrond laden terwijl de
@@ -1079,13 +1101,13 @@ func _beast(id: String) -> Dictionary:
 
 
 func mark_seen(id: String) -> void:
-	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id):
+	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id) or BerggrotData.has_enemy(id):
 		_beast(id)["seen"] = true
 
 
 func mark_defeated(id: String) -> void:
 	unique_mark(id, "verslagen")      # v0.19: uniek monster verslagen = nooit meer
-	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id):
+	if GameData.ENEMIES.has(id) or EndgameBestiary.has(id) or BerggrotData.has_enemy(id):
 		var b := _beast(id)
 		b["seen"] = true
 		b["defeated"] = int(b["defeated"]) + 1
@@ -1386,6 +1408,7 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 		var slot_file := slot_path(active_slot)
 		path = slot_file if slot_file != "" else save_path
 	var data := state_data(tile, facing)
+	data[CODEX_SYNC_KEY] = true
 	data["game_version"] = str(ProjectSettings.get_setting("application/config/version", ""))
 	data["saved_at"] = Time.get_datetime_string_from_system()
 	data["saved_unix"] = Time.get_unix_time_from_system()
@@ -1770,7 +1793,7 @@ func apply_state(d: Dictionary) -> bool:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	_unique_seen_flags()
-	_codex_inktwurm_sync()
+	_codex_inktwurm_sync(not d.has(CODEX_SYNC_KEY))
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
 	var a2 = d.get("archief2", {})
@@ -2097,6 +2120,9 @@ func _fill_eind_codex() -> void:
 	# Diepe Grot-soorten (alleen in de grot te vangen) niet in de eind-Codex.
 	for dg in CodexData.GROT_BEHOUD:
 		ids.erase(dg)
+	# Berggrot-soorten (Hollow Mountain) ook niet: de eindstaat houdt zijn vaste Codex-samenstelling.
+	for bg in BerggrotData.MONSTERS:
+		ids.erase(bg)
 	for raw_id in ids:
 		if codex_full():
 			break
@@ -2289,6 +2315,8 @@ func prepare_battle(enemies: Array, terrain := "", boss := false, tier := 0, arc
 	pending_backdrop_id = GameData.backdrop_id_for(terrain, boss, dungeon100_floor if terrain == "dungeon100" else 0)
 	pending_backdrop = GameData.backdrop_path(pending_backdrop_id)
 	_prefetch_backdrop(pending_backdrop)
+	for h in party:
+		_vraag_voor(str(h.get("battle_sprite", "")))
 
 
 ## Terug naar de map waar het gevecht begon (na winnen of vluchten),
@@ -2367,8 +2395,9 @@ func has_checkpoint() -> bool:
 
 ## v0.19: leg het kamer-checkpoint vast (map.gd, bij binnenkomst): plek + kopie van de voortgang.
 func set_checkpoint(map: String, tile: Vector2i, facing: Vector2i) -> void:
-	checkpoint = {"map": map, "tile": [tile.x, tile.y], "facing": [facing.x, facing.y],
-			"state": state_data(tile, facing, map)}
+	var state := state_data(tile, facing, map)
+	state[CODEX_SYNC_KEY] = true
+	checkpoint = {"map": map, "tile": [tile.x, tile.y], "facing": [facing.x, facing.y], "state": state}
 
 
 ## v0.19 GAME OVER met checkpoint: voortgang terug zoals bij binnenkomst (party/EXP/spullen/goud/
@@ -2396,7 +2425,7 @@ func respawn_at_checkpoint(boss := false) -> String:
 	_unique_seen_flags()
 	for f in keep_seen:
 		story_flags[str(f)] = true
-	_codex_inktwurm_sync()
+	_codex_inktwurm_sync(not cp["state"].has(CODEX_SYNC_KEY))
 	dungeon100_permanent = keep_permanent
 	dungeon100_best = maxi(dungeon100_best, keep_floor_best)
 	bestiary = keep_best
@@ -3001,17 +3030,18 @@ func _unique_seen_flags() -> void:
 			story_flags[str(StoryData.UNIQUE_SEEN_FLAGS[id])] = true
 
 
-## Vlag 'Inktwurm in de Codex' bijhouden bij laden en bij een checkpoint. Staat er een Inktwurm-pagina, dan
-## is de vlag gezet. Oude saves die al voorbij de Inktwurm zijn (hij is verslagen of gevangen): de Golemhal
-## gaat pas open als hij in de Codex staat, dus die krijgen hem alsnog en de vang-tutorial telt als gezien.
-## 'Gevangen' en daarna gefuseerd: wel de vlag, geen nieuwe pagina. Codex vol: geen pagina (de uitgang gaat
-## dan al open, zie StoryData.GOLEMHAL_EXIT) en we proberen het bij de volgende load weer.
-func _codex_inktwurm_sync() -> void:
+## Vlag 'Inktwurm in de Codex' bijhouden bij laden en bij een checkpoint: staat er een Inktwurm-pagina, dan
+## is de vlag gezet. 'oude_save' (de save of het checkpoint mist CODEX_SYNC_KEY) en de Inktwurm is al weg
+## (verslagen of gevangen): de Golemhal gaat pas open als hij in de Codex staat, dus die krijgt hem alsnog en
+## de vang-tutorial telt als gezien. 'Gevangen' en daarna gefuseerd: wel de vlag, geen nieuwe pagina. Codex
+## vol: geen pagina (de uitgang gaat dan al open, zie StoryData.GOLEMHAL_EXIT); volgende load probeert het weer.
+## Een nieuwe save (mét marker) wordt nooit gemigreerd: tussen tutorial 1 en 2 speelt de vang-tutorial gewoon.
+func _codex_inktwurm_sync(oude_save := false) -> void:
 	var flag := StoryData.CODEX_INKTWURM_FLAG
 	for page in codex_pages:
 		if str(page.get("species", "")) == "inktwurm":
 			story_flags[flag] = true
-	if not unique_done.has("inktwurm"):
+	if not oude_save or not unique_done.has("inktwurm"):
 		return
 	story_flags[StoryData.TUTORIAL_CODEX_FLAG] = true
 	if story_flags.has(flag):

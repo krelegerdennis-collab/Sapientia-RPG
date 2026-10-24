@@ -176,10 +176,12 @@ func _start_lotte(m: Node) -> void:
 	var keuze: Dictionary
 	if pages.is_empty():
 		keuze = Archief2.bondgenoot_voor([], GameState.member_level("dennis"))
-		await Dialog.show_lines(Archief2.GEEN_CODEX, "")
+		Dialog.show_lines(Archief2.GEEN_CODEX, "")
+		await Dialog.finished
 	elif pages.size() == 1:
 		keuze = Archief2.bondgenoot_voor(pages, GameState.member_level("dennis"))
-		await Dialog.show_lines(["%s fights with you." % str(pages[0].get("name", "Monster"))], "")
+		Dialog.show_lines(["%s fights with you." % str(pages[0].get("name", "Monster"))], "")
+		await Dialog.finished
 	else:
 		var namen: Array = []
 		for p in pages:

@@ -55,6 +55,9 @@ var _lopers: Array[Dictionary] = []
 var _anker_node: CanvasItem
 ## Na de eerste _process niet meer zoeken: dan is de boom compleet.
 var _anker_bevroren := false
+## Vaste hal-naambordjes (groep NAAM_GROEP, geen ww_loper): één keer per refresh().
+var _vaste_naam_rects: Array[Rect2] = []
+var _bezet_werk: Array[Rect2] = []
 
 
 func _ready() -> void:
@@ -100,6 +103,7 @@ func refresh() -> void:
 	for spec in wezens:
 		_maak(spec, false, gebied, str(sheets.get(str(spec.get("id", "")), "")))
 	set_process(not _lopers.is_empty())
+	_cache_vaste_naam_rects()
 	schik_labels()
 
 
@@ -117,13 +121,19 @@ func _process(delta: float) -> void:
 ## verbergen we het tot er weer ruimte is.
 const NAAM_GROEP := "hub_naambord"
 const LABEL_STAP := 10.0
+func _cache_vaste_naam_rects() -> void:
+	_vaste_naam_rects.clear()
+	if not is_inside_tree():
+		return
+	for n in get_tree().get_nodes_in_group(NAAM_GROEP):
+		var c := n as Control
+		if c and c.is_visible_in_tree() and not c.has_meta("ww_loper"):
+			_vaste_naam_rects.append(c.get_global_rect())
+
+
 func schik_labels() -> void:
-	var bezet: Array[Rect2] = []
-	if is_inside_tree():
-		for n in get_tree().get_nodes_in_group(NAAM_GROEP):
-			var c := n as Control
-			if c and c.is_visible_in_tree() and not c.has_meta("ww_loper"):
-				bezet.append(c.get_global_rect())
+	_bezet_werk.clear()
+	_bezet_werk.append_array(_vaste_naam_rects)
 	for loper in _lopers:
 		var node: Node2D = loper["node"]
 		if not is_instance_valid(node):
@@ -138,13 +148,13 @@ func schik_labels() -> void:
 			l.position = basis - Vector2(0, LABEL_STAP * i)
 			var r := Rect2(node.global_position + l.position * node.global_scale, l.size * node.global_scale)
 			var vrij := true
-			for b in bezet:
+			for b in _bezet_werk:
 				if r.intersects(b):
 					vrij = false
 					break
 			if vrij:
 				l.visible = true
-				bezet.append(r)
+				_bezet_werk.append(r)
 				break
 
 

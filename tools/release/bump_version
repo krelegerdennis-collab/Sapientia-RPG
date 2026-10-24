@@ -1,0 +1,238 @@
+#!/usr/bin/env python3
+"""Versiebeheer van SAPIENTIA vanuit één bron: tools/release/version.json.
+
+De bron bevat versienaam (version_name) en Android versionCode (version_code).
+Dit script schrijft die waarden naar de plekken die ze nodig hebben:
+  - project.godot            config/version="<naam>"   (titelscherm, savebestanden, sessielog)
+  - export_presets.cfg       version/name + version/code in ELKE Android-preset
+  - CHANGELOG.md             bij een bump komt er een kopje "## [<naam>] - <datum>" onder [Unreleased]
+
+Gebruik (vanuit de projectmap):
+  tools/release/bump_version                 toon de bron en of alles gelijk loopt
+  tools/release/bump_version --check         exit 1 als een doel afwijkt van de bron (of het changelog-kopje mist)
+  tools/release/bump_version --sync          zet de bron in alle doelen (bron zelf blijft staan)
+  tools/release/bump_version minor           0.20 -> 0.21, versionCode +1
+  tools/release/bump_version patch           0.20 -> 0.20.1, versionCode +1
+  tools/release/bump_version major           0.20 -> 1.0, versionCode +1
+  tools/release/bump_version set 0.25 --code 40
+Opties: --dry-run (niets schrijven), --root PAD (andere projectmap, voor tests), --date JJJJ-MM-DD.
+
+Dit script leest of schrijft geen signing-gegevens; het raakt alleen de regels hierboven.
+"""
+import argparse
+import datetime
+import json
+import re
+import sys
+from pathlib import Path
+
+NAAM_RE = re.compile(r"^\d+\.\d+(\.\d+)?$")
+MAX_CODE = 2100000000  # Google Play: versionCode maximaal 2.100.000.000
+
+
+class Fout(Exception):
+    pass
+
+
+def lees(pad: Path) -> str:
+    with open(pad, "r", encoding="utf-8", newline="") as f:
+        return f.read()
+
+
+def schrijf(pad: Path, tekst: str) -> None:
+    with open(pad, "w", encoding="utf-8", newline="") as f:
+        f.write(tekst)
+
+
+def lees_bron(root: Path) -> dict:
+    pad = root / "tools" / "release" / "version.json"
+    try:
+        data = json.loads(lees(pad))
+    except (OSError, ValueError) as e:
+        raise Fout("kan %s niet lezen: %s" % (pad, e))
+    naam = data.get("version_name")
+    code = data.get("version_code")
+    if not isinstance(naam, str) or not NAAM_RE.match(naam):
+        raise Fout("version_name moet 'X.Y' of 'X.Y.Z' zijn (nu %r)" % (naam,))
+    if not isinstance(code, int) or isinstance(code, bool) or not 1 <= code <= MAX_CODE:
+        raise Fout("version_code moet een geheel getal 1..%d zijn (nu %r)" % (MAX_CODE, code))
+    return {"version_name": naam, "version_code": code}
+
+
+def schrijf_bron(root: Path, bron: dict) -> str:
+    return json.dumps(bron, indent="\t") + "\n"
+
+
+def nieuwe_naam(naam: str, soort: str) -> str:
+    delen = [int(x) for x in naam.split(".")]
+    while len(delen) < 3:
+        delen.append(0)
+    major, minor, patch = delen
+    if soort == "major":
+        return "%d.0" % (major + 1)
+    if soort == "minor":
+        return "%d.%d" % (major, minor + 1)
+    return "%d.%d.%d" % (major, minor, patch + 1)
+
+
+def project_godot(tekst: str, naam: str) -> str:
+    patroon = re.compile(r'^(config/version=")[^"\r\n]*(")', re.MULTILINE)
+    if len(patroon.findall(tekst)) != 1:
+        raise Fout('project.godot: verwacht precies één regel config/version="..."')
+    return patroon.sub(lambda m: m.group(1) + naam + m.group(2), tekst, count=1)
+
+
+def presets(tekst: str, naam: str, code: int) -> tuple:
+    """Zet naam/code in alle Android-presets; geeft (nieuwe tekst, aantal presets)."""
+    regels = tekst.splitlines(keepends=True)
+    android = set()
+    huidig = None
+    for r in regels:
+        m = re.match(r"^\[(preset\.\d+)(\.options)?\]\s*$", r)
+        if m:
+            huidig = m.group(1) if not m.group(2) else None
+            continue
+        if huidig and re.match(r'^platform="Android"\s*$', r):
+            android.add(huidig)
+    if not android:
+        raise Fout("export_presets.cfg: geen Android-preset gevonden")
+    gezien = {p: set() for p in android}
+    sectie = None
+    for i, r in enumerate(regels):
+        m = re.match(r"^\[(preset\.\d+)(\.options)?\]\s*$", r)
+        if m:
+            sectie = m.group(1) if m.group(2) and m.group(1) in android else None
+            continue
+        if sectie is None:
+            continue
+        eol = r[len(r.rstrip("\r\n")):]
+        if re.match(r"^version/name=", r):
+            regels[i] = 'version/name="%s"%s' % (naam, eol)
+            gezien[sectie].add("name")
+        elif re.match(r"^version/code=", r):
+            regels[i] = "version/code=%d%s" % (code, eol)
+            gezien[sectie].add("code")
+    for p, s in sorted(gezien.items()):
+        if s != {"name", "code"}:
+            raise Fout("export_presets.cfg: [%s.options] mist version/name of version/code" % p)
+    return "".join(regels), len(android)
+
+
+def changelog_kopje(tekst: str, naam: str) -> bool:
+    return re.search(r"^## \[%s\]" % re.escape(naam), tekst, re.MULTILINE) is not None
+
+
+def changelog_toevoegen(tekst: str, naam: str, datum: str) -> str:
+    if changelog_kopje(tekst, naam):
+        raise Fout("CHANGELOG.md heeft al een kopje voor [%s]" % naam)
+    m = re.search(r"^## \[Unreleased\][^\n]*\n", tekst, re.MULTILINE)
+    if not m:
+        raise Fout("CHANGELOG.md: kopje '## [Unreleased]' ontbreekt")
+    return tekst[: m.end()] + "\n## [%s] - %s\n" % (naam, datum) + tekst[m.end():]
+
+
+def controleer(root: Path, bron: dict) -> list:
+    """Geeft een lijst afwijkingen (leeg = alles gelijk)."""
+    fouten = []
+    naam, code = bron["version_name"], bron["version_code"]
+    try:
+        pg = lees(root / "project.godot")
+        if project_godot(pg, naam) != pg:
+            fouten.append("project.godot: config/version wijkt af van %s" % naam)
+    except (OSError, Fout) as e:
+        fouten.append(str(e))
+    try:
+        ep = lees(root / "export_presets.cfg")
+        if presets(ep, naam, code)[0] != ep:
+            fouten.append("export_presets.cfg: version/name of version/code wijkt af van %s (%d)" % (naam, code))
+    except (OSError, Fout) as e:
+        fouten.append(str(e))
+    try:
+        if not changelog_kopje(lees(root / "CHANGELOG.md"), naam):
+            fouten.append("CHANGELOG.md: kopje '## [%s]' ontbreekt" % naam)
+    except OSError as e:
+        fouten.append("CHANGELOG.md: %s" % e)
+    return fouten
+
+
+def main(argv: list) -> int:
+    ap = argparse.ArgumentParser(description="SAPIENTIA versiebeheer (één bron: tools/release/version.json)")
+    ap.add_argument("commando", nargs="?", default="show", choices=["show", "major", "minor", "patch", "set"])
+    ap.add_argument("waarde", nargs="?", help="alleen bij 'set': de nieuwe versienaam")
+    ap.add_argument("--check", action="store_true", help="controleer of alle doelen gelijk zijn aan de bron")
+    ap.add_argument("--sync", action="store_true", help="schrijf de bron naar alle doelen")
+    ap.add_argument("--code", type=int, help="versionCode (standaard huidige + 1)")
+    ap.add_argument("--dry-run", action="store_true", help="toon wat er zou gebeuren, schrijf niets")
+    ap.add_argument("--root", default=str(Path(__file__).resolve().parents[2]), help="projectmap")
+    ap.add_argument("--date", default=datetime.date.today().isoformat(), help="datum voor het changelog-kopje")
+    a = ap.parse_args(argv)
+    root = Path(a.root)
+    try:
+        bron = lees_bron(root)
+        if a.check or a.sync:
+            if a.commando != "show":
+                raise Fout("--check/--sync kan niet samen met '%s'" % a.commando)
+            if a.check and a.sync:
+                raise Fout("kies --check of --sync")
+        if a.check:
+            fouten = controleer(root, bron)
+            for f in fouten:
+                print("FOUT  " + f)
+            if fouten:
+                return 1
+            print("OK  versie %s (code %d) is overal gelijk" % (bron["version_name"], bron["version_code"]))
+            return 0
+        if a.commando == "show" and not a.sync:
+            print("version_name=%s" % bron["version_name"])
+            print("version_code=%d" % bron["version_code"])
+            fouten = controleer(root, bron)
+            for f in fouten:
+                print("AFWIJKING  " + f)
+            return 1 if fouten else 0
+
+        nieuw = dict(bron)
+        changelog = False
+        if a.commando in ("major", "minor", "patch"):
+            nieuw["version_name"] = nieuwe_naam(bron["version_name"], a.commando)
+            nieuw["version_code"] = a.code if a.code is not None else bron["version_code"] + 1
+            changelog = True
+        elif a.commando == "set":
+            if not a.waarde or not NAAM_RE.match(a.waarde):
+                raise Fout("'set' vraagt een versienaam als X.Y of X.Y.Z")
+            nieuw["version_name"] = a.waarde
+            nieuw["version_code"] = a.code if a.code is not None else bron["version_code"] + 1
+            changelog = a.waarde != bron["version_name"]
+        elif a.code is not None:
+            raise Fout("--code hoort bij major/minor/patch/set")
+        if nieuw["version_code"] > MAX_CODE:
+            raise Fout("versionCode %d is te hoog" % nieuw["version_code"])
+        if a.commando != "show" and nieuw["version_code"] <= bron["version_code"]:
+            raise Fout("versionCode moet stijgen (nu %d, gevraagd %d); Play accepteert geen lagere of gelijke code"
+                       % (bron["version_code"], nieuw["version_code"]))
+
+        naam, code = nieuw["version_name"], nieuw["version_code"]
+        uit = {}
+        uit[root / "project.godot"] = project_godot(lees(root / "project.godot"), naam)
+        ep, n = presets(lees(root / "export_presets.cfg"), naam, code)
+        uit[root / "export_presets.cfg"] = ep
+        if changelog:
+            uit[root / "CHANGELOG.md"] = changelog_toevoegen(lees(root / "CHANGELOG.md"), naam, a.date)
+        if a.commando != "show":
+            uit[root / "tools" / "release" / "version.json"] = schrijf_bron(root, nieuw)
+
+        prefix = "[dry-run] " if a.dry_run else ""
+        print("%sversie %s (code %d) -> %s (code %d), %d Android-preset(s)"
+              % (prefix, bron["version_name"], bron["version_code"], naam, code, n))
+        for pad in uit:
+            print("%s  schrijf %s" % (prefix, pad.relative_to(root)))
+        if not a.dry_run:
+            for pad, tekst in uit.items():
+                schrijf(pad, tekst)
+        return 0
+    except Fout as e:
+        print("FOUT  %s" % e, file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

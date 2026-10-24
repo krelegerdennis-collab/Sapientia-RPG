@@ -41,6 +41,9 @@ var _grond: TileMapLayer
 var _squash_t := 0.0
 var _squash_sign := 1.0
 var _prev_state := -1
+var _touch_control: Control
+var _speler: Node2D
+var _button_avoid: Array[Rect2] = []
 
 
 func _ready() -> void:
@@ -92,6 +95,15 @@ func _ready() -> void:
 	brain.setup(s, kaart, start)
 	brain.landable = _mag_landen
 	_set_visible(false)
+	call_deferred("_cache_map_refs")
+
+
+func _cache_map_refs() -> void:
+	var map := get_parent()
+	if map == null:
+		return
+	_touch_control = map.get_node_or_null("TouchControls/Control") as Control
+	_speler = map.get_node_or_null("Objects/Player") as Node2D
 
 
 static func actief() -> bool:
@@ -114,20 +126,18 @@ func _feed_context() -> void:
 		var size := get_viewport_rect().size / cam.zoom
 		brain.view = Rect2(cam.get_screen_center_position() - size * 0.5, size)
 	_feed_buttons()
-	var speler := get_parent().get_node_or_null("Objects/Player") as Node2D
-	if speler != null:
-		brain.player_pos = speler.position
+	if _speler != null:
+		brain.player_pos = _speler.position
 
 
 ## Touch-knoppen (scherm) -> wereld, zodat het schip er nooit achter verdwijnt.
 func _feed_buttons() -> void:
-	var tc := get_parent().get_node_or_null("TouchControls/Control")
-	var uit: Array[Rect2] = []
-	if tc != null and tc.has_method("button_rects") and brain.view.has_area():
-		var schaal: Vector2 = brain.view.size / (tc as Control).size
-		for r: Rect2 in tc.button_rects():
-			uit.append(Rect2(brain.view.position + r.position * schaal, r.size * schaal))
-	brain.set_avoid_from_buttons(uit)
+	_button_avoid.clear()
+	if _touch_control != null and _touch_control.has_method("button_rects") and brain.view.has_area():
+		var schaal: Vector2 = brain.view.size / _touch_control.size
+		for r: Rect2 in _touch_control.button_rects():
+			_button_avoid.append(Rect2(brain.view.position + r.position * schaal, r.size * schaal))
+	brain.set_avoid_from_buttons(_button_avoid)
 
 
 func _render(delta: float) -> void:
