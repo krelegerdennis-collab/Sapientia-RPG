@@ -537,6 +537,12 @@ func _start_music_playback(incoming: AudioStreamPlayer, outgoing: AudioStreamPla
 ## Eerste tik, muisklik, toets of gamepad. De knoppen op het titelscherm krijgen
 ## dezelfde tik daarna nog gewoon (we markeren het event niet als afgehandeld).
 func _input(event: InputEvent) -> void:
+	# toets/pad/pijltje: de cursor beweegt in dit beeld (de GUI-focus volgt ná _input); zie ui_cursor_sounds
+	if event.is_pressed() and not event is InputEventMouse:
+		for a in NAV_ACTIONS:
+			if event.is_action_pressed(a):
+				_nav_frame = Engine.get_process_frames()
+				break
 	if not _web_locked or not event.is_pressed() or event.is_echo():
 		return
 	if event is InputEventMouseButton or event is InputEventScreenTouch or event is InputEventKey or event is InputEventJoypadButton:

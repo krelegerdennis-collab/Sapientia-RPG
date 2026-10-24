@@ -9,8 +9,10 @@ const Protocol := preload("res://scripts/net/net_protocol.gd")
 const LobbyScript := preload("res://scripts/net/lan_lobby.gd")
 const DiscoveryScript := preload("res://scripts/net/lan_discovery.gd")
 
-## Android 48dp minimum; bij viewport 384 en window override 1152 is dat 16 logische px.
+## Android 48dp minimum. Eerder gerekend met het testvenster (window override 1152 = 3x): 16 eenheden, op een
+## telefoon van 1440 px hoog (6,7 px per eenheid) maar 34dp. Nu UiTouch.MIN_UNITS (26 eenheden = 48dp op 412dp).
 const TOUCH_TARGET_DP := 48
+const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 
 signal leave_requested
 
@@ -202,10 +204,7 @@ func _build_message() -> void:
 
 
 static func touch_min_height_px() -> int:
-	var vw := int(ProjectSettings.get_setting("display/window/size/viewport_width", 384))
-	var ow := int(ProjectSettings.get_setting("display/window/size/window_width_override", vw))
-	var scale := maxf(1.0, float(ow) / float(vw))
-	return int(ceil(float(TOUCH_TARGET_DP) / scale))
+	return int(UiTouch.MIN_UNITS)
 
 
 func _touch_button(text: String) -> Button:

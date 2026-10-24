@@ -34,6 +34,7 @@ signal damage_shown(target_name: String, amount: int)
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const KoopmanData := preload("res://scripts/data/koopman_data.gd")
 const PartyLimiet := preload("res://scripts/party_limiet.gd")   # v0.22 max 4 helden + 1 monster
 const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
@@ -46,8 +47,11 @@ const COMMANDS := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 ## v0.19 Codex-knop (index 5): submenu 'Vangen' (Leeg Boek op een vijand, met vangkans per doel)
 ## en 'Wissel bondgenoot' (niet-KO pagina's + 'Geen'; kost de beurt van de held). Verborgen in
 ## het oefengevecht en zolang de Codex 0 pagina's EN 0 Lege Boeken heeft. Regels: HANDOFF_FUSIE.md.
-const CODEX_ROW_H := 16           # regelhoogte van de Codex-menu's (tikken met een vinger)
-const CODEX_ROWS_MAX := 5         # wissel-lijst: zoveel regels tegelijk, daarna ▲/▼
+## Regelhoogte van de Codex-menu's (Capture/Swap) = 48dp (UiTouch.MIN_UNITS); een lange wissel-lijst toont
+## CODEX_ROWS_MAX regels tegelijk met een ▲/▼-regel (ook 48dp). De Magic- en Item-lijsten blijven 11 hoog:
+## de autotest eist dat dat lijstje bij 3 regels niet over de helden valt (zie docs/UX_POLISH_WM1.md).
+const CODEX_ROW_H := 26
+const CODEX_ROWS_MAX := 2
 ## Hoe lang een gevechtsbericht in beeld blijft (A drukken = sneller).
 const MESSAGE_TIME := 0.8
 const HeroScript := preload("res://scripts/battle/battle_hero.gd")
@@ -1133,7 +1137,7 @@ func _select_ko():
 		await _wait(MESSAGE_TIME)
 		return null
 	_set_state("target_ally")
-	return await _pick_target(dead, "Wie?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
+	return await _pick_target(dead, "Who?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
 
 
 ## v0.13: geen namenlijst meer. Een pijltje (richtpijl.png) wijst het doel aan, met de naam
@@ -1168,16 +1172,21 @@ func _pick_target(living: Array, _title: String, point: Callable, heroes_side: b
 		await get_tree().process_frame
 		if _tapped != null and _tapped["is_hero"] == heroes_side and _tapped["s"]["hp"] > 0:
 			result = _tapped
+			UiSfx.play(UiSfx.TARGET)
 			break
 		if Input.is_action_just_pressed("interact"):
 			result = living[idx]
+			UiSfx.play(UiSfx.TARGET)
 			break
 		if Input.is_action_just_pressed("cancel"):
+			UiSfx.play(UiSfx.CANCEL)
 			break
 		if Input.is_action_just_pressed("move_left") or Input.is_action_just_pressed("move_up"):
 			idx = posmod(idx - 1, living.size())
+			UiSfx.play(UiSfx.CURSOR)
 		elif Input.is_action_just_pressed("move_right") or Input.is_action_just_pressed("move_down"):
 			idx = posmod(idx + 1, living.size())
+			UiSfx.play(UiSfx.CURSOR)
 	target_cursor.hide()
 	target_name.hide()
 	target_index = -1
@@ -1753,7 +1762,7 @@ func _archief2_leech(actor: Dictionary) -> void:
 		return
 	var t: Dictionary = pool[0]
 	var n := Archief2.leech_hoeveelheid(randf(), int(t["s"]["max_hp"]))
-	show_message("%s corrigeert %s." % [actor["name"], t["name"]])
+	show_message("%s corrects %s." % [actor["name"], t["name"]])
 	await _damage(t, n)
 	var voor := int(actor["s"]["hp"])
 	actor["s"]["hp"] = mini(int(actor["s"]["max_hp"]), voor + n)

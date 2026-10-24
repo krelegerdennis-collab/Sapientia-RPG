@@ -27,6 +27,7 @@ signal finished
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
+const SafeArea := preload("res://scripts/ui/safe_area.gd")
 
 ## Keuzes zijn tikdoelen van minstens 48dp (UiTouch.MIN_UNITS hoog, CHOICE_MIN_W breed). Twee keuzes
 ## (Yes/No, Next/Skip) staan naast elkaar, zodat het vak niet hoger wordt; drie of meer in twee kolommen
@@ -149,6 +150,8 @@ func show_lines(lines: Array, speaker := "", source: Node = null) -> void:
 
 
 var _asking := false
+var _blip_at := 0
+const BLIP_EVERY := 3
 
 
 ## Toon een vraag met keuzes en wacht tot er gekozen is. Geeft de index terug.
@@ -227,22 +230,23 @@ func candidates() -> Array:
 	var vs := get_viewport().get_visible_rect().size
 	var ctrl := _touch_rects()
 	var out := []
-	var x0 := SIDE
-	var x1 := vs.x - SIDE
+	var safe := SafeArea.insets(get_viewport())   # notch/camera-gat: 0 op PC en headless
+	var x0 := SIDE + safe.x
+	var x1 := vs.x - SIDE - safe.z
 	out.append(_low_candidate("onder", x0, x1, ctrl, vs))
 	if ctrl.has("dpad"):
 		var dx: float = (ctrl["dpad"] as Rect2).end.x + 4.0
 		if x1 - dx >= 200.0:
 			out.append(_low_candidate("onder_smal", dx, x1, ctrl, vs))
 	var w := x1 - x0
-	out.append({"name": "boven", "rect": Rect2(x0, TOP_Y, w, needed_height(w)), "bottom": false})
+	out.append({"name": "boven", "rect": Rect2(x0, TOP_Y + safe.y, w, needed_height(w)), "bottom": false})
 	return out
 
 
 func _low_candidate(cname: String, x0: float, x1: float, ctrl: Dictionary, vs: Vector2) -> Dictionary:
 	var w := x1 - x0
 	var h := needed_height(w)
-	var bottom := vs.y - BOTTOM_MARGIN
+	var bottom := vs.y - BOTTOM_MARGIN - SafeArea.insets(get_viewport()).w
 	for k in ctrl:
 		var r: Rect2 = ctrl[k]
 		if r.position.x < x1 and r.end.x > x0:
@@ -500,6 +504,7 @@ func _show_current() -> void:
 	text_label.text = str(_lines[_index])
 	text_label.visible_characters = 0
 	_shown = 0.0
+	_blip_at = 0
 
 
 func _is_typing() -> bool:
@@ -511,6 +516,10 @@ func _process(delta: float) -> void:
 		return
 	if _is_typing():
 		_shown += chars_per_second * delta
+		# zacht tikje om de BLIP_EVERY letters bij een sprekend personage (niet bij 'Instant' en niet bij de verteller)
+		if style_kind == "ballon" and chars_per_second < 1000.0 and int(_shown) - _blip_at >= BLIP_EVERY:
+			_blip_at = int(_shown)
+			UiSfx.play(UiSfx.BLIP)
 		var total := text_label.get_total_character_count()
 		text_label.visible_characters = -1 if int(_shown) >= total else int(_shown)
 		arrow.visible = false
@@ -521,9 +530,11 @@ func _process(delta: float) -> void:
 			_update_choices()
 		if Input.is_action_just_pressed("move_up") or Input.is_action_just_pressed("ui_up"):
 			choice_index = (choice_index - 1 + choices.size()) % choices.size()
+			UiSfx.play(UiSfx.CURSOR)
 			_update_choices()
 		elif Input.is_action_just_pressed("move_down") or Input.is_action_just_pressed("ui_down"):
 			choice_index = (choice_index + 1) % choices.size()
+			UiSfx.play(UiSfx.CURSOR)
 			_update_choices()
 	else:
 		# Knipperend pijltje: "druk op A om verder te gaan"

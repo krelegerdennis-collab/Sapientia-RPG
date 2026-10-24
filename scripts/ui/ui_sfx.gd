@@ -13,6 +13,7 @@ const OPEN := "menu_open"
 const CLOSE := "menu_close"
 const TAB := "tab_switch"
 const ADVANCE := "dialogue_advance"
+const BLIP := "dialogue_blip"
 const SAVE := "save_game"
 const LOAD := "load_game"
 const EQUIP := "item_equip"
@@ -23,7 +24,7 @@ const COMMAND := "command_select"
 const TARGET := "target_select"
 
 ## Alle cues die dit spel zelf afspeelt (de test controleert dat ze in het manifest staan).
-const ALL := [CLICK, CURSOR, CONFIRM, CANCEL, ERROR, OPEN, CLOSE, TAB, ADVANCE, SAVE, LOAD,
+const ALL := [CLICK, CURSOR, CONFIRM, CANCEL, ERROR, OPEN, CLOSE, TAB, ADVANCE, BLIP, SAVE, LOAD,
 		EQUIP, UNEQUIP, USE_ITEM, COINS, COMMAND, TARGET]
 
 

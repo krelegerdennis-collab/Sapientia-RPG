@@ -10,6 +10,7 @@ var _pending_spell := ""
 
 
 func _build() -> void:
+	scroll_content()
 	header.text = ShopData.shop_name(shop_id)
 	set_hint("A: choose   B: back")
 	_show_koop()
@@ -26,6 +27,7 @@ func _show_koop() -> void:
 	_pending_spell = ""
 	_clear()
 	var switch := UiMenu.button("Sell")
+	switch.custom_minimum_size.y = TOUCH_H
 	switch.pressed.connect(_show_verkoop)
 	content.add_child(switch)
 	var rows: Array = ShopData.stock(shop_id)
@@ -35,6 +37,7 @@ func _show_koop() -> void:
 	for row in rows:
 		var id := str(row["id"])
 		var b := UiMenu.button("%s  %dg" % [str(row["name"]), int(row["price"])])
+		b.custom_minimum_size.y = TOUCH_H
 		b.pressed.connect(_on_buy.bind(id, str(row.get("kind", "item"))))
 		content.add_child(b)
 	if content.get_child_count() > 1:
@@ -45,6 +48,7 @@ func _show_verkoop() -> void:
 	mode = "verkoop"
 	_clear()
 	var back := UiMenu.button("Buy")
+	back.custom_minimum_size.y = TOUCH_H
 	back.pressed.connect(_show_koop)
 	content.add_child(back)
 	var rows: Array = ShopData.sellable()
@@ -55,6 +59,7 @@ func _show_verkoop() -> void:
 	for row in rows:
 		var id := str(row["id"])
 		var b := UiMenu.button("%s x%d  %dg" % [str(row["name"]), int(row["n"]), int(row["price"])])
+		b.custom_minimum_size.y = TOUCH_H
 		b.pressed.connect(_on_sell.bind(id))
 		content.add_child(b)
 
@@ -70,6 +75,7 @@ func _show_held(spell_id: String) -> void:
 			continue
 		var hero: Dictionary = h
 		var b := UiMenu.button(str(hero.get("name", "?")))
+		b.custom_minimum_size.y = TOUCH_H
 		b.pressed.connect(_on_hero.bind(hero))
 		content.add_child(b)
 		if not any:

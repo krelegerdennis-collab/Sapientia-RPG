@@ -15,6 +15,7 @@ signal closed
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
+const SafeArea := preload("res://scripts/ui/safe_area.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const TargetList := preload("res://scripts/ui/target_list.gd")
@@ -209,10 +210,11 @@ func _link_focus() -> void:
 func _layout() -> void:
 	var w := root.size.x if root.size.x > 0.0 else 384.0
 	var h := root.size.y if root.size.y > 0.0 else 216.0
-	var left_x := float(MARGIN)
-	var top := float(MARGIN)
+	var safe := SafeArea.insets(get_viewport())   # notch/camera-gat: 0 op PC en headless
+	var left_x := float(MARGIN) + safe.x
+	var top := float(MARGIN) + safe.y
 	var right_x := left_x + LEFT_W + GAP
-	var right_w := maxf(80.0, w - right_x - MARGIN)
+	var right_w := maxf(80.0, w - right_x - MARGIN - safe.z)
 	var y := top
 	for id in LEFT_COL:
 		var b: Button = buttons[id]
@@ -233,10 +235,10 @@ func _layout() -> void:
 		rb.size = Vector2(col_w, float(WARP_H))
 		ry += WARP_H + RIGHT_GAP
 	var left_bottom := stack_bottom
-	message_label.position = Vector2(MARGIN, left_bottom + 4.0)
+	message_label.position = Vector2(left_x, left_bottom + 4.0)
 	message_label.size = Vector2(LEFT_W, 24)
 	if quest_label != null:
-		quest_label.position = Vector2(MARGIN, left_bottom + 4.0)
+		quest_label.position = Vector2(left_x, left_bottom + 4.0)
 		quest_label.size = Vector2(LEFT_W, 24)
 
 

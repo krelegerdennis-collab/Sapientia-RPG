@@ -27,6 +27,9 @@ const PAD_Y := 9               # inhoud - schermrand (boven/onder)
 const ROW_H := 16
 ## Tikdoel van 48dp (UiTouch.MIN_UNITS): minimale hoogte van een knop in een menu.
 const TOUCH_H := UiTouch.MIN_UNITS
+## Metadata op een knop die bewust compact blijft (te veel regels voor 216 hoog, bestaande suites toetsen de
+## indeling). De test telt ze en vergelijkt met docs/UX_POLISH_WM1.md; nieuwe knoppen horen hier niet bij.
+const META_EXEMPT := "touch_exempt"
 const BACK_W := 56             # breedte van de 'Terug'-knop (groot genoeg voor een duim)
 const MESSAGE_TIME := 2.5      # zo lang blijft een melding staan (seconden)
 const DEFAULT_HINT := "A: choose   B: back"
@@ -51,20 +54,22 @@ func _ready() -> void:
 	root.theme = load(UiMenu.THEME_PATH)
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
+	# veilige zone (notch/camera-gat links of rechts, gebarenbalk onder): 0 op PC en headless
+	var safe := SafeArea.insets(get_viewport())
 	var bg := Panel.new()
 	bg.add_theme_stylebox_override("panel", UiMenu.window_style(MenuColors.BORDER_DARK, 0.97, true))
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.offset_left = FRAME_INSET
-	bg.offset_top = FRAME_INSET
-	bg.offset_right = -FRAME_INSET
-	bg.offset_bottom = -FRAME_INSET
+	bg.offset_left = FRAME_INSET + safe.x
+	bg.offset_top = FRAME_INSET + safe.y
+	bg.offset_right = -FRAME_INSET - safe.z
+	bg.offset_bottom = -FRAME_INSET - safe.w
 	root.add_child(bg)
 	var outer := VBoxContainer.new()
 	outer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	outer.offset_left = PAD_X
-	outer.offset_top = PAD_Y - 3.0   # de koprij is 48dp hoog (Back): 3 px terug zodat alles blijft passen
-	outer.offset_right = -PAD_X
-	outer.offset_bottom = -PAD_Y + 2
+	outer.offset_left = PAD_X + safe.x
+	outer.offset_top = PAD_Y - 3.0 + safe.y   # de koprij is 48dp hoog (Back): 3 px terug zodat alles blijft passen
+	outer.offset_right = -PAD_X - safe.z
+	outer.offset_bottom = -PAD_Y + 2 - safe.w
 	outer.add_theme_constant_override("separation", 3)
 	root.add_child(outer)
 	header_row = HBoxContainer.new()
@@ -95,6 +100,25 @@ func _ready() -> void:
 ## Inhoud opbouwen (in het scherm zelf).
 func _build() -> void:
 	pass
+
+
+## Zet 'content' in een ScrollContainer: een lange lijst met rijen van 48dp scrolt i.p.v. over de rand te lopen.
+## 'content' blijft dezelfde VBox (kinderen en namen ongewijzigd). Aanroepen aan het begin van _build().
+func scroll_content() -> ScrollContainer:
+	var outer := content.get_parent()
+	var at := content.get_index()
+	var scroll := ScrollContainer.new()
+	scroll.name = "ContentScroll"
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	scroll.scroll_deadzone = 6
+	outer.remove_child(content)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(content)
+	outer.add_child(scroll)
+	outer.move_child(scroll, at)
+	return scroll
 
 
 ## Extra toetsen per frame (links/rechts e.d.), in het scherm zelf.
@@ -164,7 +188,7 @@ static func arrow_button(text: String) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.focus_mode = Control.FOCUS_NONE
-	b.custom_minimum_size = Vector2(ROW_H + 4, ROW_H)
+	b.custom_minimum_size = Vector2(TOUCH_H, ROW_H)   # breed genoeg; de hoogte rekt mee met de rij waar hij in staat
 	b.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	b.add_theme_color_override("font_color", MenuColors.ACCENT_SOFT)
 	b.add_theme_color_override("font_hover_color", MenuColors.ACCENT)

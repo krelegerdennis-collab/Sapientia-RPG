@@ -106,6 +106,7 @@ func _build_general_rows() -> void:
 		b.custom_minimum_size = Vector2(0, OPTION_ROW_H)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.set_meta("key", key)
+		b.set_meta(META_EXEMPT, true)   # 13 regels moeten tegelijk op 216 hoog (zie UX_POLISH_WM1.md)
 		b.focus_entered.connect(_on_row_focus.bind(key, str(r[2])))
 		b.pressed.connect(activate.bind(key))
 		line.add_child(b)
@@ -115,6 +116,7 @@ func _build_general_rows() -> void:
 			continue
 		var minus := arrow_button("<")
 		minus.custom_minimum_size.y = OPTION_ROW_H
+		minus.set_meta(META_EXEMPT, true)
 		minus.pressed.connect(change.bind(key, -1))
 		line.add_child(minus)
 		var v := UiMenu.label("", MenuColors.TEXT)
@@ -125,6 +127,7 @@ func _build_general_rows() -> void:
 		value_labels[key] = v
 		var plus := arrow_button(">")
 		plus.custom_minimum_size.y = OPTION_ROW_H
+		plus.set_meta(META_EXEMPT, true)
 		plus.pressed.connect(change.bind(key, 1))
 		line.add_child(plus)
 	TargetList.link_ring(rows)

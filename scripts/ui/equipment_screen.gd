@@ -163,6 +163,7 @@ func _build_right(body: HBoxContainer) -> void:
 	for s in Equipment.slots():
 		var b := UiMenu.button("")
 		b.custom_minimum_size = Vector2(0, ROW_H)
+		b.set_meta(META_EXEMPT, true)   # 7 vakken + submenu moeten tegelijk op 216 hoog (zie UX_POLISH_WM1.md)
 		b.clip_text = true
 		b.pressed.connect(choose_slot.bind(str(s)))
 		lock_horizontal_focus(b)
@@ -188,6 +189,7 @@ func _build_right(body: HBoxContainer) -> void:
 		var id := str(COMMANDS[i][0])
 		var b := UiMenu.button(str(COMMANDS[i][1]))
 		b.custom_minimum_size = Vector2(CMD_W, ROW_H)
+		b.set_meta(META_EXEMPT, true)
 		b.pressed.connect(do_command.bind(id))
 		lock_horizontal_focus(b)
 		(c1 if i < 3 else c2).add_child(b)
@@ -363,6 +365,7 @@ func choose_slot(slot: String) -> void:
 			open_list(slot)
 		"unequip":
 			var r := Equipment.unequip(h, GameState.inventory, slot)
+			UiSfx.play(UiSfx.UNEQUIP if r["ok"] else UiSfx.ERROR)
 			refresh_slots()
 			show_stats()
 			show_message(str(r["text"]), MenuColors.INFO if r["ok"] else MenuColors.TEXT_DIM)
@@ -390,6 +393,7 @@ func open_list(slot: String) -> void:
 	for id in ids:
 		var b := UiMenu.button("%s x%d" % [Equipment.item_name(id).rpad(NAME_COLS), GameState.item_count(id)])
 		b.custom_minimum_size = Vector2(0, ROW_H)
+		b.set_meta(META_EXEMPT, true)
 		b.clip_text = true
 		if GameState.is_permanent_item(str(id)):
 			tint_permanent(b)
@@ -422,6 +426,7 @@ func choose_item(id: String) -> void:
 		return
 	var slot := current_slot
 	var r := Equipment.equip(hero(), GameState.inventory, slot, id)
+	UiSfx.play(UiSfx.EQUIP if r["ok"] else UiSfx.ERROR)
 	_close_list()
 	to_slot_mode("equip", slot)
 	refresh_slots()

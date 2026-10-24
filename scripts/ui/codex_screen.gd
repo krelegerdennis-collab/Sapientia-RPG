@@ -361,7 +361,7 @@ func _build_preview_rows() -> void:
 	var rule: Array = preview["fusion"].get("rule", [])
 	var how := "Glitch variant of %s." % _short(str(a["name"])) if rule.is_empty() else "Fusion table: %s + %s." % rule
 	var inh: Array = (preview["fusion"].get("inherited", []) as Array).map(func(x): return str(CodexData.skill(str(x)).get("name", x)))
-	state_label.text = how + ("" if inh.is_empty() else " Erft: " + ", ".join(inh) + ".")
+	state_label.text = how + ("" if inh.is_empty() else " Inherits: " + ", ".join(inh) + ".")
 	state_label.add_theme_color_override("font_color", UiStyle.GLITCH)
 	entries[0].grab_focus()
 
