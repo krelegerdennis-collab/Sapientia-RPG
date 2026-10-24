@@ -327,6 +327,8 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 var current_map := ""
 var pending_spawn := ""
 var changing_map := false
+## true zolang een --...test-suite draait (zie _zet_testmodus).
+var test_modus := false
 ## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
 ## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
 var huis_herkomst := ""
@@ -493,6 +495,7 @@ func _ready() -> void:
 			["--koopmantest", "res://scripts/tests/koopman_tests.gd", "KoopmanTest", "koopmantest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
+			["--testmodustest", "res://scripts/tests/testmodus_tests.gd", "TestmodusTest", "testmodustest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
@@ -522,6 +525,8 @@ func _ready() -> void:
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
+		if str(t[3]).ends_with("test"):
+			_zet_testmodus(str(t[3]))
 		# eigen bestanden: de tests raken je echte save/autosave niet
 		save_path = "user://%s_save_1.json" % t[3]
 		autosave_path = "user://%s_autosave.json" % t[3]
@@ -545,6 +550,24 @@ func _ready() -> void:
 		call_deferred("_start_berggrot")
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
+
+
+## Testmodus (alleen bij een --...test-suite; O-4, flaky berggrottest onder load):
+## - test_modus laat toevalsbronnen die alleen beeld sturen (World Warper-flyover) een vaste seed
+##   gebruiken, zodat een suite niet van de klok afhangt.
+## - PHYSICS_GELIJK_SUITES: physics mag nooit sneller lopen dan beelden. Spelers lopen in _process,
+##   maar deze tests wachten op get_tree().physics_frame ("max. 8 physics-frames tot de speler
+##   beweegt"). Onder CPU-load haalt Godot achterstand in met tot 8 physics-stappen per beeld, zodat
+##   die wachttijd afloopt vóór _process één keer draaide. Met 1 stap per beeld is elk physics-frame
+##   ook minstens één beeld. Niet voor alle suites: menutest en woudtest hangen af van physics op
+##   wandkloktijd en gaan juist stuk als physics onder load langzamer loopt.
+const PHYSICS_GELIJK_SUITES: Array[String] = ["berggrottest"]
+
+
+func _zet_testmodus(suite: String) -> void:
+	test_modus = true
+	if suite in PHYSICS_GELIJK_SUITES:
+		Engine.max_physics_steps_per_frame = 1
 
 
 ## Debug-ingang van de berggrot. Zelfde haakje als de mond op de kaart.
