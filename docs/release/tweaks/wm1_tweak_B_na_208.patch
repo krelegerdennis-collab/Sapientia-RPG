@@ -1,0 +1,31 @@
+diff --git a/scripts/data/game_data.gd b/scripts/data/game_data.gd
+index cb54ab6..6ad782c 100644
+--- a/scripts/data/game_data.gd
++++ b/scripts/data/game_data.gd
+@@ -344,7 +344,7 @@ const ENEMIES := {
+ 		"no": 30, "mp": 12, "weak": [], "resist": [],
+ 		"drops": [],
+ 		"boss": {
+-			"max_hp": 270, "atk": 32, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
++			"max_hp": 540, "atk": 40, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
+ 			"exp": 20, "gold": 0,
+ 			"skills": [{"name": "Silence", "chance": 0.25, "power": 1.2}],
+ 			"tint": [0.72, 0.40, 1.15],
+@@ -1109,7 +1109,7 @@ const TIERS := {
+ 	4: {"hp": 2.3, "atk": 10, "def": 7, "exp": 3.0, "gold": 2.5},
+ 	5: {"hp": 5.0, "atk": 46, "def": 4, "exp": 2.5, "gold": 1.5},
+ 	6: {"hp": 6.5, "atk": 66, "def": 6, "exp": 3.0, "gold": 2.0},
+-	7: {"hp": 3.5, "atk": 28, "def": 0, "exp": 1.0, "gold": 1.0},
++	7: {"hp": 3.5, "atk": 28, "def": 0, "exp": 2.5, "gold": 2.0},
+ }
+ 
+ 
+@@ -1279,7 +1279,7 @@ const ENCOUNTER_GROUPS := [
+ 	{"enemies": ["papiergeest"], "weight": 3},
+ 	{"enemies": ["papiergeest", "papiergeest"], "weight": 3},
+ 	{"enemies": ["glitchmot", "papiergeest"], "weight": 3},
+-	{"enemies": ["glitchmot", "glitchmot", "glitchmot"], "weight": 1},
++	{"enemies": ["glitchmot", "glitchmot", "glitchmot"], "weight": 0},
+ 	{"enemies": ["kennis_beest"], "weight": 1},
+ 	{"enemies": ["kennis_beest", "papiergeest"], "weight": 1},
+ 	# v0.13: De Vergeten Archieven. Daar zijn GEEN random encounters (zichtbare map-monsters,
