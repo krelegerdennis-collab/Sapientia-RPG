@@ -45,6 +45,11 @@ var frames := 300
 ## Echte tijd (ms) die de speler op het titelscherm doorbrengt voordat hij Doorgaan kiest; lege-tijd-werk
 ## (prewarm) mag dan afronden. Voor/na gebruiken dezelfde waarde.
 var dwell_ms := 4000
+## Echte tijd (ms) tussen de start van het harnas en het eerste titelscherm: laat de opstart-compile eerst
+## afronden (alleen voor 'titelscherm cold' zonder overlap met achtergrondwerk). 0 = meteen (standaard).
+var boot_wait_ms := 0
+## Alleen deze onderdelen meten (komma-lijst: startup,title,route,battle,save,frames); leeg = alles.
+var only: PackedStringArray = []
 var out_path := ""
 var probe_on := true
 var result := {}
@@ -68,6 +73,10 @@ func _ready() -> void:
 			frames = maxi(30, int(a.get_slice("=", 1)))
 		elif a.begins_with("--out="):
 			out_path = a.get_slice("=", 1)
+		elif a.begins_with("--boot-wait="):
+			boot_wait_ms = maxi(0, int(a.get_slice("=", 1)))
+		elif a.begins_with("--only="):
+			only = a.get_slice("=", 1).split(",")
 		elif a.begins_with("--dwell="):
 			dwell_ms = maxi(0, int(a.get_slice("=", 1)))
 		elif a == "--noprobe":
@@ -198,13 +207,19 @@ func _run() -> void:
 	if FileAccess.file_exists(GameState.autosave_path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(GameState.autosave_path))
 
-	await _bench_startup()
+	if _wil("startup"):
+		await _bench_startup()
 	_write_saves()
-	await _bench_title_to_wm1()
-	await _bench_route()
-	await _bench_battle()
-	await _bench_save_load()
-	await _bench_frames()
+	if _wil("title"):
+		await _bench_title_to_wm1()
+	if _wil("route"):
+		await _bench_route()
+	if _wil("battle"):
+		await _bench_battle()
+	if _wil("save"):
+		await _bench_save_load()
+	if _wil("frames"):
+		await _bench_frames()
 
 	var txt := JSON.stringify(result, "  ")
 	if out_path != "":
@@ -217,10 +232,17 @@ func _run() -> void:
 	get_tree().quit(0)
 
 
+func _wil(naam: String) -> bool:
+	return only.is_empty() or naam in only
+
+
 # ---------------------------------------------------------------- stappen
 func _bench_startup() -> void:
 	# Eerste titelscherm na de start (cold), daarna 'dwell_ms' echte tijd (speler leest het scherm).
 	# De autoloads zijn dan al klaar; 'engine_start_to_harness_ms' is de tijd tot daar.
+	var b0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - b0 < boot_wait_ms:
+		await get_tree().process_frame
 	Engine.time_scale = TIME_SCALE
 	_start_hitch()
 	var t0 := _now_us()
