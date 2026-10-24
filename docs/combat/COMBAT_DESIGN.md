@@ -222,8 +222,8 @@ Generaliseert de huidige telegraaf (`_enemy_ai`, `som_arena.gd:751-786`).
   - Basis is het `ActionSandboxSim`-patroon (`scripts/net/action_sandbox_sim.gd`, seeded RNG).
   - Dit is fase B stap 4 "Arena splitsen".
 - **RNG:** één `RandomNumberGenerator` per sim met een seed per gevecht, plus afgeleide stromen (`combat`, `ai`, `loot[slot]`). Daarmee vervalt de globale `randf()` in:
-  - `som_arena.gd:236`, `:450`, `:609`;
-  - `som_ally.gd:179`;
+  - `som_arena.gd:236`, `:449`, `:609`, `:983`;
+  - `som_ally.gd:183`;
   - `som_codex.gd:115`.
   Dit gebeurt achter een injecteerbare RNG, en de formules (`physical_damage`) blijven gelijk.
 - **Beweging:** de sim rekent posities in fixed-point px (int, ×16) en lost botsingen op tegels zelf op. Tweens zijn alleen nog presentatie.
