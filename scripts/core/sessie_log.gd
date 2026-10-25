@@ -9,7 +9,14 @@ extends Node
 ## - Aan/uit: Settings "sessie_log" (-1 auto, 0 uit, 1 aan). Opties > Session Log.
 ## - Export: Opties > Export Log (web = download, anders Downloads/Documenten).
 ##
-## Samenvatten: python3 tools/sessielog/samenvat.py <bestand of map>.
+## Samenvatten: python3 tools/sessielog/samenvat.py <bestand of map>  (algemeen), of
+## python3 tools/sessielog/playtest_rapport.py <bestand of map>  (WM1-playtest: gebieden, gevechten, doden, crashes).
+##
+## Alleen in debug-builds (playtest-kit, docs/release/WM1_PLAYTEST.md): in een release-build doet de
+## autoload niets (geen signals, geen bestand, geen export), ook niet als de instelling aan staat.
+## Crash = vorige sessie zonder sessie_stop: start() meldt dat als "crash_vorige" in de nieuwe sessie.
+
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 
 const MAP := "user://logs"
 const PREFIX := "sessie_"
@@ -20,7 +27,9 @@ const FLUSH_LINES := 48
 const MAX_BESTANDEN := 5
 const MAX_BYTES := 2 * 1024 * 1024
 const RESERVE_BYTES := 4096
-const RESERVE_TYPES := ["log_vol", "sessie_stop", "afgekapt"]
+const RESERVE_TYPES := ["log_vol", "sessie_stop", "afgekapt", "crash_vorige"]
+const CRASH_STAART_BYTES := 8192
+const SAMENVATTING_MAX_KAARTEN := 24
 const STILSTAND_MIN := 20.0
 const POS_SECS := 0.5
 const IDLE_SECS := 5.0
@@ -44,6 +53,7 @@ var regels := 0
 var schrijf_aantal := 0
 var vol := false
 var afgekapt := false
+var stats := {}
 
 var _bestand: FileAccess
 var _t0_ms := 0
@@ -77,6 +87,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process(false)
 	set_process_input(false)
+	if not debug_build():
+		return
 	for a in OS.get_cmdline_user_args():
 		var s := str(a)
 		if s.begins_with("--") and (s.ends_with("test") or s.ends_with("sim") or s.ends_with("balans")):
@@ -93,8 +105,13 @@ func _ready() -> void:
 		pas_toe()
 
 
+## Alleen debug-builds loggen (ReleaseFlags.debug_build_override is de testhaak).
+func debug_build() -> bool:
+	return ReleaseFlags.is_debug_build()
+
+
 func pas_toe() -> void:
-	var aan: bool = Settings.sessie_log_enabled()
+	var aan: bool = debug_build() and Settings.sessie_log_enabled()
 	if aan and not actief:
 		start()
 	elif not aan and actief:
@@ -108,11 +125,14 @@ func _on_setting(key: String) -> void:
 
 # ---------------------------------------------------------------- start / stop
 func start(map_pad_arg := "") -> bool:
+	if not debug_build():
+		return false
 	if map_pad_arg != "":
 		map_pad = map_pad_arg
 	if actief:
 		stop()
 	DirAccess.make_dir_recursive_absolute(map_pad)
+	var vorige_crash := _vorige_onbeeindigd()
 	_opruimen()
 	sessie_id = _nieuw_id()
 	pad = _nieuw_pad()
@@ -127,6 +147,7 @@ func start(map_pad_arg := "") -> bool:
 	schrijf_aantal = 0
 	vol = false
 	afgekapt = false
+	stats = _lege_stats()
 	_gevecht = {}
 	_pauze_sinds = -1.0
 	_t0_ms = Time.get_ticks_msec()
@@ -151,6 +172,9 @@ func start(map_pad_arg := "") -> bool:
 	var start_data := _sessie_info()
 	start_data.merge(_sessie_start_extra())
 	noteer("sessie_start", start_data)
+	if not vorige_crash.is_empty():
+		stats["crashes"] = 1
+		noteer("crash_vorige", vorige_crash)
 	flush()
 	_meld_scherm(true)
 	if GameState != null and GameState.current_map != "":
@@ -168,6 +192,7 @@ func stop() -> void:
 	_sluit_stilstand(_nu())
 	var info := _sessie_info()
 	info["duur"] = snappedf(_nu(), 0.1)
+	info["samenvatting"] = _stats_compact()
 	noteer("sessie_stop", info)
 	flush()
 	if _bestand != null:
@@ -228,6 +253,73 @@ func _sessie_start_extra() -> Dictionary:
 		"utc": "%04d-%02d-%02dT%02d:%02d:%02dZ" % [now["year"], now["month"], now["day"], now["hour"], now["minute"], now["second"]],
 		"unix": int(Time.get_unix_time_from_system()),
 	}
+
+
+# ---------------------------------------------------------------- samenvatting + crash
+func _lege_stats() -> Dictionary:
+	return {"kaart_secs": {}, "gebied_secs": {}, "gevechten": {}, "doden": {}, "game_overs": {}, "crashes": 0}
+
+
+func _stats_tel(groep: String, sleutel: String, waarde: float) -> void:
+	if not actief or not stats.has(groep):
+		return
+	var g: Dictionary = stats[groep]
+	g[sleutel] = float(g.get(sleutel, 0.0)) + waarde
+
+
+## Compacte totalen voor de laatste regel (sessie_stop): blijft kloppen ook als oudste regels getrimd zijn.
+func _stats_compact() -> Dictionary:
+	var uit := {"crashes": int(stats.get("crashes", 0))}
+	for groep in ["gebied_secs", "kaart_secs"]:
+		var g: Dictionary = stats.get(groep, {})
+		var rond := {}
+		var sleutels := g.keys()
+		sleutels.sort_custom(func(a, b): return float(g[a]) > float(g[b]))
+		for k in sleutels.slice(0, SAMENVATTING_MAX_KAARTEN):
+			rond[k] = snappedf(float(g[k]), 0.1)
+		uit[groep] = rond
+	for groep in ["gevechten", "doden", "game_overs"]:
+		var g2: Dictionary = stats.get(groep, {})
+		var ints := {}
+		for k in g2:
+			ints[k] = int(g2[k])
+		uit[groep] = ints
+	return uit
+
+
+## Laatste sessiebestand zonder sessie_stop = vorige sessie is niet netjes afgesloten (crash, kill of
+## app weggeveegd). Leest alleen de staart van het bestand. Leeg = vorige sessie was netjes (of er is geen).
+func _vorige_onbeeindigd() -> Dictionary:
+	var lijst := bestanden()
+	if lijst.is_empty():
+		return {}
+	var p: String = lijst[-1]
+	var f := FileAccess.open(p, FileAccess.READ)
+	if f == null:
+		return {}
+	var lengte := f.get_length()
+	f.seek(maxi(0, lengte - CRASH_STAART_BYTES))
+	var tekst := f.get_buffer(lengte - f.get_position()).get_string_from_utf8()
+	f.close()
+	var laatste := {}
+	var kaart := ""
+	for regel in tekst.split("\n", false):
+		var parser := JSON.new()
+		if parser.parse(regel) != OK or not (parser.data is Dictionary):
+			continue
+		var d: Dictionary = parser.data
+		if str(d.get("type", "")) == "sessie_stop":
+			return {}
+		laatste = d
+		var dd: Variant = d.get("data", {})
+		if dd is Dictionary and dd.has("kaart"):
+			kaart = str(dd["kaart"])
+	var uit := {"bestand": p.get_file(), "bytes": lengte, "kaart": kaart}
+	if not laatste.is_empty():
+		uit["laatste_type"] = str(laatste.get("type", ""))
+		uit["laatste_t"] = laatste.get("t", 0)
+		uit["scene"] = str(laatste.get("scene", ""))
+	return uit
 
 
 func _build_id() -> String:
@@ -500,7 +592,7 @@ func kaart(p: String) -> void:
 	var w := Vector2i(DisplayServer.window_get_size())
 	var vp := get_viewport()
 	var v := Vector2i(vp.get_visible_rect().size) if vp != null else Vector2i.ZERO
-	var info := {"kaart": _kaart_id(p), "hoe": GameState.entry_kind,
+	var info := {"kaart": _kaart_id(p), "gebied_wm1": PlaytestGebieden.gebied_van(_kaart_id(p)), "hoe": GameState.entry_kind,
 			"spawn": GameState.pending_spawn, "vp": [v.x, v.y], "venster": [w.x, w.y]}
 	info.merge(_art(p))
 	info.merge(_held_info())
@@ -519,7 +611,11 @@ func _sluit_kaart() -> void:
 	if _laatste_kaart == "":
 		return
 	var secs := (Time.get_ticks_msec() - _kaart_sinds_ms) / 1000.0
-	noteer("kaart_tijd", {"kaart": _kaart_id(_laatste_kaart), "secs": snappedf(secs, 0.1)})
+	var kid := _kaart_id(_laatste_kaart)
+	var gebied := PlaytestGebieden.gebied_van(kid)
+	_stats_tel("kaart_secs", kid, secs)
+	_stats_tel("gebied_secs", gebied, secs)
+	noteer("kaart_tijd", {"kaart": kid, "gebied_wm1": gebied, "secs": snappedf(secs, 0.1)})
 	_laatste_kaart = ""
 
 
@@ -742,6 +838,7 @@ func gevecht_eind(resultaat: String) -> void:
 	noteer("gevecht_einde", {"vijanden": _gevecht["vijanden"], "baas": _gevecht["baas"], "uitkomst": resultaat,
 			"duur": duur, "beurten": beurten, "party_hp_pct_start": int(_gevecht.get("hp_start", 0)),
 			"party_hp_pct": _party_hp_pct_from(eind)})
+	_stats_tel("gevechten", resultaat, 1.0)
 	_gevecht = {}
 	flush()
 
@@ -770,7 +867,9 @@ func actie_treffer(held: String, schade: int, hp: int) -> void:
 
 
 func dood(reden: String) -> void:
-	noteer("dood", {"kaart": _kaart_id(), "reden": reden})
+	if actief:
+		_stats_tel("doden", _kaart_id(), 1.0)
+	noteer("dood", {"kaart": _kaart_id(), "gebied_wm1": PlaytestGebieden.gebied_van(_kaart_id()), "reden": reden})
 	flush()
 
 
@@ -781,6 +880,7 @@ func respawn(naar: String, soort: String) -> void:
 func _on_game_over(map_path: String) -> void:
 	if not actief:
 		return
+	_stats_tel("game_overs", map_path.get_file().get_basename(), 1.0)
 	noteer("game_over", {"plek": map_path.get_file().get_basename()})
 	flush()
 
@@ -841,6 +941,8 @@ func export_tekst(max_sessies := EXPORT_SESSIES) -> String:
 
 
 func exporteer() -> Dictionary:
+	if not debug_build():
+		return {"ok": false, "bericht": "The session log only works in debug builds.", "pad": ""}
 	flush()
 	var tekst := export_tekst()
 	if tekst == "":

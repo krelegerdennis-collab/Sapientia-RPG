@@ -1212,6 +1212,10 @@ const TERRAIN_BACKDROP := {
 ## v0.23: baasgevecht in de kas (De Genezer) = kas_boss (RPG ART art_kas_battle).
 const BOSS_TERRAIN_BACKDROP := {"woud": "forest_dark", "kas": "kas_boss"}
 const DEFAULT_BACKDROP_ID := "grass"
+## Achtergronden die GameState bij het opstarten vooraf laadt (1280x432 = 2,1 MB textuurgeheugen per stuk):
+## alleen de standaard (gras: het eerste gevecht, en debug_autotest eist hem). Alle andere worden pas bij het
+## gevecht geladen (GameState._prefetch_backdrop, tijdens de gevechtsflits) en maar één tegelijk bewaard.
+const BACKDROPS_BOOT := ["grass"]
 ## Achtergrond-id -> plaatje (1280x432, zie docs/ARTSTYLE.md 10g). gras/zand/boss zijn van
 ## de art director (RPG ART, staan in tools/handwerk.txt).
 ## "library" is bewaard voor een latere dungeon (nu niet op de wereldkaart).

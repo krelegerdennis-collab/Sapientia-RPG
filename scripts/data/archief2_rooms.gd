@@ -3,7 +3,7 @@ extends RefCounted
 ## Aparte lijst, zodat de tellingen van het Eerste Archief (ORDER, gevechten, thema
 ## archief_grijs) blijven staan. DungeonRooms.room() zoekt hier ná de Archieven.
 ##
-## De ingang gebruikt de bestaande golem-vlag (naar_leven). Verdieping 2-4 staan in rooms().
+## Wereldkaart-ingang: event naar_leven (Golem verslagen + Vesper in de groep). Verdieping 2-4 in rooms().
 
 const THEME := "kas"
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
@@ -128,7 +128,7 @@ static func rooms() -> Dictionary:
 			"n": {"map": SCENES["archief_2_v2_gang"], "spawn": "zuid"},
 		},
 		"signs": [{"tile": [6, 7], "lines": [
-			"Een groei-plaat. Stap erop.",
+			"A growth plate. Step on it.",
 			"It grows into a path.",
 		]}],
 		"platen": [{"id": "p1", "soort": "groei", "tile": [13, 7], "start": 0}],
@@ -260,6 +260,8 @@ static func rooms() -> Dictionary:
 		"exits": {
 			"E": {"map": SCENES["archief_2_v4_genezer"], "spawn": "noord"},
 		},
+		# de boog (n) in de noordmuur is hier alleen beeld: geen uitgang, dus geen doel nodig
+		"decor_uitgangen": ["n"],
 		"warp": [13, 7],
 		"signs": [{"tile": [8, 6], "lines": [
 			"ECHO operates the hub. Step onto the path and choose.",

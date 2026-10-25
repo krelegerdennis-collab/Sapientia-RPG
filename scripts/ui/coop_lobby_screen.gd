@@ -9,9 +9,13 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const LobbyScript := preload("res://scripts/net/lan_lobby.gd")
 const DiscoveryScript := preload("res://scripts/net/lan_discovery.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
-## Android 48dp minimum; bij viewport 384 en window override 1152 is dat 16 logische px.
+## Android 48dp minimum. 1 eenheid = ~1,9 dp op een telefoon in landschap (zie UiTouch), dus 25 eenheden.
 const TOUCH_TARGET_DP := 48
+## Kleinste leesbare tekst (het pixelfont is voor 10 gemaakt; 8 geeft "Enpty"). Ook de titels blijven >= 10.
+const TEXT_SIZE := 10
+const TITLE_SIZE := 12
 
 signal leave_requested
 
@@ -42,11 +46,9 @@ func _ready() -> void:
 	add_child(bg)
 	_panel = UiMenu.panel()
 	_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_panel.offset_left = 12.0
-	_panel.offset_top = 10.0
-	_panel.offset_right = -12.0
-	_panel.offset_bottom = -10.0
 	add_child(_panel)
+	_apply_safe_area()
+	resized.connect(_apply_safe_area)
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 4)
 	_panel.add_child(_box)
@@ -66,6 +68,40 @@ func _ready() -> void:
 	discovery.host_found.connect(_on_host_found)
 	GameState.coop_register_lobby(lobby, discovery)
 	_show_menu()
+
+
+## Paneel binnen het veilige gebied (notch, gebarenbalk).
+func _apply_safe_area() -> void:
+	var ins := UiTouchC.insets(get_viewport())
+	_panel.offset_left = 12.0 + ins.x
+	_panel.offset_top = 10.0 + ins.y
+	_panel.offset_right = -(12.0 + ins.z)
+	_panel.offset_bottom = -(10.0 + ins.w)
+
+
+## B / Esc: één stap terug, zoals de 'Back'/'Cancel'-knop van het huidige scherm.
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("cancel"):
+		get_viewport().set_input_as_handled()
+		cancel()
+
+
+func cancel() -> void:
+	match _screen:
+		Screen.MENU, Screen.MESSAGE:
+			_leave_to_title()
+		Screen.JOIN:
+			if _joining_ip != "":
+				_show_join_listen()
+			else:
+				_show_menu()
+		Screen.JOIN_CODE:
+			if _joining_code != "":
+				_show_join_code()
+			else:
+				_show_menu()
+		_:
+			_show_menu()
 
 
 func _exit_tree() -> void:
@@ -183,8 +219,8 @@ func _rebuild() -> void:
 
 func _build_menu() -> void:
 	var online := Protocol.relay_url() != ""
-	_box.add_child(UiMenu.label("Co-op (LAN / Online)" if online else "Co-op (LAN)", UiStyleC.HILITE, 12))
-	_box.add_child(UiMenu.label("Action sandbox, up to 4 players.", UiStyleC.TEXT_DIM, 8))
+	_box.add_child(UiMenu.label("Co-op (LAN / Online)" if online else "Co-op (LAN)", UiStyleC.HILITE, TITLE_SIZE))
+	_box.add_child(UiMenu.label("Action sandbox, up to 4 players.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	var host := _touch_button("Host")
 	host.pressed.connect(func() -> void: _show_host())
 	_box.add_child(host)
@@ -198,7 +234,7 @@ func _build_menu() -> void:
 		var join_online := _touch_button("Join online")
 		join_online.pressed.connect(func() -> void: _show_join_code())
 		_box.add_child(join_online)
-	_box.add_child(UiMenu.label("Friend mode (PvP) is separate.", UiStyleC.TEXT_DIM, 8))
+	_box.add_child(UiMenu.label("Friend mode (PvP) is separate.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	var back := _touch_button("Back")
 	back.pressed.connect(_on_back)
 	_box.add_child(back)
@@ -206,15 +242,15 @@ func _build_menu() -> void:
 
 func _build_host() -> void:
 	var online := lobby.transport == LanLobby.Transport.RELAY
-	_box.add_child(UiMenu.label("Hosting online as Dax" if online else "Hosting as Dax", UiStyleC.HILITE, 10))
+	_box.add_child(UiMenu.label("Hosting online as Dax" if online else "Hosting as Dax", UiStyleC.HILITE, TITLE_SIZE))
 	if online:
 		if lobby.room_code == "":
-			_box.add_child(UiMenu.label("Connecting to the online server…", UiStyleC.TEXT_DIM, 8))
+			_box.add_child(UiMenu.label("Connecting to the online server...", UiStyleC.TEXT_DIM, TEXT_SIZE))
 		else:
-			_box.add_child(UiMenu.label("Room code: %s" % lobby.room_code, UiStyleC.HILITE, 12))
-			_box.add_child(UiMenu.label("Friends tap Join online and enter this code.", UiStyleC.TEXT_DIM, 8))
+			_box.add_child(UiMenu.label("Room code: %s" % lobby.room_code, UiStyleC.HILITE, TITLE_SIZE))
+			_box.add_child(UiMenu.label("Friends tap Join online and enter this code.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	else:
-		_box.add_child(UiMenu.label("Waiting for friends on Wi‑Fi…", UiStyleC.TEXT_DIM, 8))
+		_box.add_child(UiMenu.label("Waiting for friends on Wi-Fi...", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	_add_roster_rows(true)
 	var start := _touch_button("Start Action sandbox")
 	start.disabled = not lobby.is_host or (online and lobby.room_code == "")
@@ -227,15 +263,15 @@ func _build_host() -> void:
 
 func _build_join() -> void:
 	if _joining_ip != "":
-		_box.add_child(UiMenu.label("Joining %s…" % _joining_ip, UiStyleC.TEXT_DIM, 8))
+		_box.add_child(UiMenu.label("Joining %s..." % _joining_ip, UiStyleC.TEXT_DIM, TEXT_SIZE))
 		var cancel := _touch_button("Cancel")
 		cancel.pressed.connect(_show_join_listen)
 		_box.add_child(cancel)
 		return
-	_box.add_child(UiMenu.label("Nearby hosts", UiStyleC.HILITE, 10))
-	_box.add_child(UiMenu.label("Tap a host to join.", UiStyleC.TEXT_DIM, 8))
+	_box.add_child(UiMenu.label("Nearby hosts", UiStyleC.HILITE, TITLE_SIZE))
+	_box.add_child(UiMenu.label("Tap a host to join.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	if _hosts.is_empty():
-		_box.add_child(UiMenu.label("Searching…", UiStyleC.TEXT_DIM, 8))
+		_box.add_child(UiMenu.label("Searching...", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	else:
 		for ip in _hosts.keys():
 			var info: Dictionary = _hosts[ip]
@@ -250,13 +286,13 @@ func _build_join() -> void:
 
 func _build_join_code() -> void:
 	if _joining_code != "":
-		_box.add_child(UiMenu.label("Joining room %s…" % _joining_code, UiStyleC.TEXT_DIM, 8))
+		_box.add_child(UiMenu.label("Joining room %s..." % _joining_code, UiStyleC.TEXT_DIM, TEXT_SIZE))
 		var cancel := _touch_button("Cancel")
 		cancel.pressed.connect(_show_join_code)
 		_box.add_child(cancel)
 		return
-	_box.add_child(UiMenu.label("Join online", UiStyleC.HILITE, 10))
-	_box.add_child(UiMenu.label("Enter the %d-character room code." % Protocol.ROOM_CODE_LENGTH, UiStyleC.TEXT_DIM, 8))
+	_box.add_child(UiMenu.label("Join online", UiStyleC.HILITE, TITLE_SIZE))
+	_box.add_child(UiMenu.label("Enter the %d-character room code." % Protocol.ROOM_CODE_LENGTH, UiStyleC.TEXT_DIM, TEXT_SIZE))
 	_code_edit = LineEdit.new()
 	_code_edit.max_length = Protocol.ROOM_CODE_LENGTH
 	_code_edit.placeholder_text = "ROOM CODE"
@@ -295,7 +331,7 @@ func _submit_code() -> void:
 
 
 func _build_message() -> void:
-	var msg := UiMenu.label(_message, UiStyleC.TEXT, 9)
+	var msg := UiMenu.label(_message, UiStyleC.TEXT, TEXT_SIZE)
 	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	msg.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_box.add_child(msg)
@@ -305,14 +341,17 @@ func _build_message() -> void:
 
 
 static func touch_min_height_px() -> int:
-	var vw := int(ProjectSettings.get_setting("display/window/size/viewport_width", 384))
-	var ow := int(ProjectSettings.get_setting("display/window/size/window_width_override", vw))
-	var scale := maxf(1.0, float(ow) / float(vw))
-	return int(ceil(float(TOUCH_TARGET_DP) / scale))
+	return int(ceil(UiTouchC.TOUCH_MIN))
 
 
 func _touch_button(text: String) -> Button:
 	var btn := UiMenu.button(text)
+	var normal: StyleBoxFlat = UiStyleC.panel("button")
+	var focus: StyleBoxFlat = UiStyleC.panel("button", UiStyleC.BORDER)
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_stylebox_override("hover", normal)
+	btn.add_theme_stylebox_override("pressed", focus)
+	btn.add_theme_stylebox_override("focus", focus)
 	var h := float(touch_min_height_px())
 	btn.custom_minimum_size = Vector2(0.0, maxf(btn.custom_minimum_size.y, h))
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -341,7 +380,7 @@ func _add_roster_rows(host_view: bool) -> void:
 		var prefix := "Seat %d: " % slot
 		if host_view and slot == Protocol.HOST_SLOT:
 			prefix = "Host: "
-		_box.add_child(UiMenu.label(prefix + who, UiStyleC.TEXT_DIM if who == "Empty" else UiStyleC.TEXT, 8))
+		_box.add_child(UiMenu.label(prefix + who, UiStyleC.TEXT_DIM if who == "Empty" else UiStyleC.TEXT, TEXT_SIZE))
 
 
 func _seat_label(slot: int) -> String:
@@ -414,10 +453,10 @@ func _on_roster_changed() -> void:
 
 func _rebuild_join_guest() -> void:
 	_clear_box()
-	_box.add_child(UiMenu.label("Joined %s" % _hero_name(lobby.local_character), UiStyleC.HILITE, 10))
+	_box.add_child(UiMenu.label("Joined %s" % _hero_name(lobby.local_character), UiStyleC.HILITE, TITLE_SIZE))
 	_add_roster_rows(false)
-	_box.add_child(UiMenu.label("Waiting for the host to start…", UiStyleC.TEXT_DIM, 8))
-	var leave := UiMenu.button("Leave")
+	_box.add_child(UiMenu.label("Waiting for the host to start...", UiStyleC.TEXT_DIM, TEXT_SIZE))
+	var leave := _touch_button("Leave")
 	leave.pressed.connect(_show_menu)
 	_box.add_child(leave)
 

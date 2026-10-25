@@ -337,13 +337,15 @@ func apply_online_visibility() -> void:
 
 ## Doorgaan aan/uit naar gelang er een save is.
 func refresh() -> void:
-	var has := GameState.has_any_save()
+	# één keer de nieuwste save zoeken (voorheen: twee keer alle slots lezen)
+	var rec := GameState.newest_slot_record()
+	var has := not rec.is_empty()
 	continue_button.disabled = not has
 	continue_button.focus_mode = Control.FOCUS_ALL if has else Control.FOCUS_NONE
 	load_button.disabled = not has
 	load_button.focus_mode = Control.FOCUS_ALL if has else Control.FOCUS_NONE
 	if has:
-		var d := GameState.read_newest_save()
+		var d: Dictionary = rec.get("data", {})
 		save_info.text = "  %s  %s%s" % [str(d.get("player_name", "")), UiMenu.format_time(float(d.get("play_time", 0.0))),
 				" (auto)" if bool(d.get("autosave", false)) else ""]
 		save_info.visible = true
@@ -392,7 +394,8 @@ func _open_slot_list() -> void:
 
 func _on_slot_picked(slot: int) -> void:
 	set_process(false)
-	await GameState.continue_slot(slot)
+	if not await GameState.continue_slot(slot):
+		set_process(true)
 
 
 func _on_slot_cancelled() -> void:

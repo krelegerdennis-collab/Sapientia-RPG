@@ -4,7 +4,7 @@ extends RefCounted
 ## Zonder de vlag draait het blok aan het eind van de volledige --autotest mee.
 ## t = de autotest-node (check/pframes/wait_battle_state/choose_command/...).
 ## Delen: A data, B tutorial 1x (trigger-once), C uitgang op slot en weer open, D save/load van de vlag,
-## E migratie van oude saves.
+## E migratie van oude saves, F marker (een nieuwe save is nooit 'oud').
 
 const SD := preload("res://scripts/data/story_data.gd")
 const CD := preload("res://scripts/data/codex_data.gd")
@@ -43,6 +43,7 @@ func run() -> void:
 	await _lock_tests()
 	await _save_tests()
 	await _migration_tests()
+	await _marker_tests()
 	Settings.set_value("battle_style", oude_stijl)
 	GameState.new_game("Dax")
 
@@ -353,6 +354,58 @@ func _migration_tests() -> void:
 	t.check("oude save in de Golemhal: geen tutorial", not Story.history.slice(hist).has(EV) and not Story.running)
 	use_exit(room)
 	t.check("oude save: de uitgang werkt direct (Bibliotheek)", await wait_scene_path(BIBLIOTHEEK))
+	GameState.take_autosave_request()
+
+
+# ================================================================ deel F: marker (nieuwe save is nooit 'oud')
+## Een nieuwe save tussen tutorial 1 en de vang-tutorial (tutorial 1 gezien, Inktwurm weg, vlag 2 nog niet)
+## mag niet als oude save gemigreerd worden; een echte oude save (zonder marker) wel.
+func _marker_tests() -> void:
+	setup()
+	GameState.story_flags[F_TUT1] = true
+	GameState.unique_done["inktwurm"] = "verslagen"
+	t.check("nieuwe save schrijven", GameState.save_game(Vector2i(9, 9), Vector2i.UP))
+	var raw := GameState.read_save(GameState.save_path)
+	t.check("nieuwe save bevat de marker '%s'" % GameState.CODEX_SYNC_KEY, raw.get(GameState.CODEX_SYNC_KEY, false) == true)
+	t.check("nieuwe save: tutorial 1 gezien, vang-tutorial nog niet", (raw["story"]["flags"] as Array).has(F_TUT1)
+			and not (raw["story"]["flags"] as Array).has(F_TUT2))
+	GameState.new_game("Dax")
+	t.check("laden van die nieuwe save: niet gemigreerd (geen vlag 2, geen pagina, geen vlag Codex)", GameState.load_game()
+			and not GameState.story_flags.has(F_TUT2) and GameState.codex_pages.is_empty() and not GameState.story_flags.has(F_CODEX))
+	var hist := Story.history.size()
+	var room := await enter(GOLEM, "zuid")
+	t.check("na laden speelt de vang-tutorial gewoon (1x)", room != null
+			and await wait_until(func(): return Story.current_event == EV, 5.0))
+	await wait_page()
+	await press_cancel()
+	await wait_until(func(): return not Story.running and not Dialog.is_open, 3.0)
+	await t.pframes(80)
+	t.check("en daarna niet opnieuw", Story.history.slice(hist).count(EV) == 1 and GameState.story_flags.has(F_TUT2))
+
+	# Dezelfde save zonder marker = echt oud: wel gemigreerd.
+	raw.erase(GameState.CODEX_SYNC_KEY)
+	t.check("zelfde save zonder marker (oud): gemigreerd (vlag 2, pagina, vlag Codex)", _load(raw)
+			and GameState.story_flags.has(F_TUT2) and GameState.codex_pages.size() == 1 and GameState.story_flags.has(F_CODEX))
+	t.check("oude save na migratie opnieuw opgeslagen: krijgt de marker", GameState.save_game(Vector2i(9, 9), Vector2i.UP)
+			and GameState.read_save(GameState.save_path).get(GameState.CODEX_SYNC_KEY, false) == true)
+
+	# Checkpoint: nieuw checkpoint heeft de marker en migreert niet; een checkpoint zonder marker wel.
+	setup()
+	GameState.set_checkpoint(INGANG, Vector2i(2, 2), Vector2i.DOWN)
+	t.check("nieuw checkpoint bevat de marker", GameState.checkpoint["state"].get(GameState.CODEX_SYNC_KEY, false) == true)
+	GameState.story_flags[F_TUT1] = true
+	GameState.unique_done["inktwurm"] = "verslagen"
+	GameState.respawn_at_checkpoint(false)
+	t.check("game over met nieuw checkpoint: vang-tutorial nog niet 'gezien', geen gratis pagina",
+			not GameState.story_flags.has(F_TUT2) and GameState.codex_pages.is_empty() and GameState.story_flags.has(F_TUT1))
+	GameState.take_autosave_request()
+	setup()
+	GameState.set_checkpoint(INGANG, Vector2i(2, 2), Vector2i.DOWN)
+	GameState.checkpoint["state"].erase(GameState.CODEX_SYNC_KEY)
+	GameState.unique_done["inktwurm"] = "verslagen"
+	GameState.respawn_at_checkpoint(false)
+	t.check("game over met oud checkpoint (zonder marker): gemigreerd",
+			GameState.story_flags.has(F_TUT2) and GameState.codex_pages.size() == 1 and GameState.story_flags.has(F_CODEX))
 	GameState.take_autosave_request()
 
 

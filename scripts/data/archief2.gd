@@ -51,7 +51,7 @@ const KETEN := [
 ]
 const GEEN_CODEX := [
 	"You don't have a Codex monster yet.",
-	"Een Mosslijm vecht tijdelijk mee.",
+	"A Moss Slime fights alongside you for this battle.",
 ]
 const LOTTE_AANSLUIT := [
 	"The glitch tears. Seren breaks it herself.",

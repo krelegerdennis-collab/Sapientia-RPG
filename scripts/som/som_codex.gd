@@ -112,7 +112,7 @@ func _capture(target) -> String:
 	# het boek wordt gebruikt (zoals Classic: Leeg Boek -1)
 	GameState.inventory[CodexData.BOOK_ITEM] = GameState.item_count(CodexData.BOOK_ITEM) - 1
 	var chance := chance_for(m)
-	var roll := force_roll if force_roll >= 0.0 else randf()
+	var roll: float = force_roll if force_roll >= 0.0 else arena.rng.randf()
 	var ok := roll < chance
 	last_capture = {"result": "mislukt", "chance": chance, "roll": roll, "species": sid}
 	var center: Vector2 = arena.center_of(m)
