@@ -28,6 +28,9 @@ const SQUASH_TIME := 0.28         ## touchdown/lift-off veer
 const SQUASH_AMT := 0.12
 ## <0 = willekeurig; tests zetten een vaste seed vóór _ready.
 var seed_override := -1
+## Vaste seed in een test-suite (GameState.test_modus): de route hangt anders van de klok af en een
+## waypoint achter de touch-knoppen kan het schip een tijdje tegen de D-pad laten hangen.
+const TEST_SEED := 3
 
 var sprite: Sprite2D
 var shadow: Sprite2D
@@ -87,7 +90,9 @@ func _ready() -> void:
 	sprite.scale = Vector2(SCHAAL, SCHAAL)
 	sprite.modulate = Color(1, 1, 1, SPRITE_ALPHA)
 	add_child(sprite)
-	var s := seed_override if seed_override >= 0 else int(Time.get_ticks_usec())
+	var s := seed_override
+	if s < 0:
+		s = TEST_SEED if GameState.test_modus else int(Time.get_ticks_usec())
 	var start := kaart.get_center()
 	var cam := get_viewport().get_camera_2d()
 	if cam != null:
