@@ -589,6 +589,7 @@ func _ready() -> void:
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
+			["--coopguestsavetest", "res://scripts/tests/coop_guest_save_tests.gd", "CoopGuestSaveTest", "coopguestsavetest"],
 			["--combatrngtest", "res://scripts/tests/combat_rng_tests.gd", "CombatRngTest", "combatrngtest"],
 			["--combattick", "res://scripts/tests/combat_tick_tests.gd", "CombatTickTest", "combattick"],
 			["--combatsimtest", "res://scripts/tests/combat_sim_tests.gd", "CombatSimTest", "combatsimtest"],
