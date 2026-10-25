@@ -29,6 +29,7 @@ func run() -> void:
 		GameState.encounter_multiplier = oude_mult
 		return
 	await t.frames(8)
+	t.check("binnen: geen gevechten", huis.encounters == false)
 	if "shot_path" in t and t.shot_path != "" and t.has_method("map_overview"):
 		await t.map_overview(t.shot_path.get_basename() + "_overview.png")
 	var layout: Dictionary = Build.laad()
@@ -43,6 +44,7 @@ func run() -> void:
 	_alles_bereikbaar(huis)
 	if t.has_method("overworld_shot"):
 		await t.overworld_shot("_huis_kamers")
+	await _muren_en_boek(huis)
 	await _loop_naar_deur(huis)
 	Settings.set_value("battle_style", oude_stijl)
 	GameState.encounter_multiplier = oude_mult
@@ -250,6 +252,24 @@ func _bereikbaar(huis: Node, van: Vector2i, naar: Vector2i) -> bool:
 			gezien[volg] = true
 			rij.append(volg)
 	return false
+
+
+func _muren_en_boek(_huis: Node) -> void:
+	t.check("wandelingen starten op spawn (8,18): %s" % t.tile(),
+			t.map_name() == "Huis" and t.tile() == Build.SPAWN_TEGEL and t.player().facing == Vector2i.UP)
+	await t.walk("move_left", 7)
+	t.check("zijmuur blokkeert, staat op (1,18): %s" % t.tile(), t.tile() == Vector2i(1, 18))
+	await t.walk("move_right", 6)
+	await t.walk("move_up", 6)
+	await t.walk("move_left", 4)
+	await t.walk("move_up", 8)
+	t.check("nachtkastje blokkeert, staat op (3,4): %s" % t.tile(), t.tile() == Vector2i(3, 4))
+	await t.walk("move_right", 5)
+	await t.walk("move_up", 1)
+	t.check("voor het boek (8,4), kijkt omhoog (boek blokkeert): %s" % t.tile(),
+			t.tile() == Vector2i(8, 4) and t.player().facing == Vector2i.UP)
+	await t.walk("move_down", 14)
+	t.check("terug bij spawn voor uitgangstest: %s" % t.tile(), t.tile() == Build.SPAWN_TEGEL)
 
 
 func _loop_naar_deur(huis: Node) -> void:
