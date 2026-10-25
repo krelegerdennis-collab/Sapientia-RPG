@@ -112,7 +112,7 @@ func _shop_tests() -> void:
 			and int(GameState.inventory.get("kort_zwaard", 0)) == 0)
 	var dennis: Dictionary = GameState.party[0]
 	var no_magic := Shop.buy_spell("wilgendal_magie", "vuur", dennis)
-	check("Dax koopt geen magie", not no_magic["ok"] and str(no_magic["text"]) == "Dax leert geen magie."
+	check("Dax koopt geen magie", not no_magic["ok"] and str(no_magic["text"]) == "Dax cannot learn magic."
 			and (dennis["spells"] as Array).is_empty() and GameState.gold == 440)
 	var noor: Dictionary = GameState.party[1]
 	(noor["spells"] as Array).clear()
