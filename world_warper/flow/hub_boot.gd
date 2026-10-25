@@ -20,6 +20,7 @@ const AmbienceScript := preload("res://world_warper/audio/ambience.gd")
 ## Warp naar de Deep Learning Simulation: rechts van het Warp-vlak (fallback zonder anker).
 const SIMULATIE_OFFSET := Vector2(80, 0)
 const EchoGrotData := preload("res://scripts/data/echo_grot.gd")
+const WarperBakedLabel := preload("res://world_warper/art/baked_label.gd")
 const SIMULATIE_VRAAG := "Enter the Deep Learning Simulation?"
 const SIMULATIE_JA := "Yes, start a new run"
 const SIMULATIE_NEE := "No"
@@ -251,20 +252,29 @@ class Interactievlak extends Area2D:
 		if titel == "Simulatie":
 			sprite.modulate = Color(0.55, 0.95, 1.0)    # placeholder: het warp-vlak, cyaan getint
 		add_child(sprite)
-		var label := Label.new()
-		label.text = {"Gezelschap": "Party", "Simulatie": "Deep Learning Simulation"}.get(titel, titel)
-		label.position = Vector2(-72, -22)
-		label.size = Vector2(144, 12)
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		label.add_theme_font_override("font", FONT)
-		label.add_theme_font_size_override("font_size", 10)  # Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V)
-		label.add_theme_color_override("font_color", Color("f2e9d8"))
-		label.add_theme_color_override("font_shadow_color", Color("07060a"))
-		label.add_theme_constant_override("shadow_offset_x", 1)
-		label.add_theme_constant_override("shadow_offset_y", 1)
-		add_child(label)
+		_voltooi_tekst()
+
+	func _voltooi_tekst() -> void:
+		var tekst: String = str({"Gezelschap": "Party", "Simulatie": "Deep Learning Simulation"}.get(titel, titel))
+		var setup := func(l: Label) -> void:
+			l.text = tekst
+			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			l.add_theme_font_override("font", FONT)
+			l.add_theme_font_size_override("font_size", 10)
+			l.add_theme_color_override("font_color", Color("f2e9d8"))
+			l.add_theme_color_override("font_shadow_color", Color("07060a"))
+			l.add_theme_constant_override("shadow_offset_x", 1)
+			l.add_theme_constant_override("shadow_offset_y", 1)
+		var bord: Sprite2D = await WarperBakedLabel.maak_sprite(self, Vector2(144, 12), Vector2(-72, -22), setup)
+		if not is_instance_valid(self) or not is_inside_tree():
+			if bord != null and is_instance_valid(bord):
+				bord.queue_free()
+			return
+		if bord == null:
+			return
+		bord.name = "Tekst"
+		add_child(bord)
 
 	func interact(_by: Node = null) -> void:
 		_kies()
