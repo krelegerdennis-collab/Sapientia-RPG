@@ -813,12 +813,35 @@ assets/ui/lock/lock_wissel.png
 # 2026-10-24: assets/ui/icons/cat_goud.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
 # 2026-10-24: assets/ui/icon_monstervak.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
 # 2026-10-24: assets/ui/richtpijl.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
-# Wachtershuis-interieur, 4 props 24x32 (tools/art_huis_keuken_placeholder.py). Echte art van RPG ART erover.
-assets/sprites/binnen/keuken_fornuis_PLACEHOLDER.png
-assets/sprites/binnen/deurkozijn_PLACEHOLDER.png
-assets/sprites/binnen/keuken_kast_PLACEHOLDER.png
-assets/sprites/binnen/slaapkamer_kast_PLACEHOLDER.png
-# Wachtershuis-interieur (ART huis_interieur_art), 32x21. Geen placeholders.
+# Monster pack v4 (art_monsterpack/v4/out): storm_harpy, cursed_knight, moonfang_wolf (96x96)
+assets/sprites/enemies/storm_harpy_96_sheet.png
+assets/sprites/enemies/storm_harpy_96_sheet_left.png
+assets/sprites/enemies/storm_harpy_96.png
+assets/sprites/enemies/cursed_knight_96_sheet.png
+assets/sprites/enemies/cursed_knight_96_sheet_left.png
+assets/sprites/enemies/cursed_knight_96.png
+assets/sprites/enemies/moonfang_wolf_96_sheet.png
+assets/sprites/enemies/moonfang_wolf_96_sheet_left.png
+assets/sprites/enemies/moonfang_wolf_96.png
+assets/sprites/enemies/stone_gargoyle_96_sheet.png
+assets/sprites/enemies/stone_gargoyle_96_sheet_left.png
+assets/sprites/enemies/stone_gargoyle_96.png
+assets/sprites/enemies/void_spider_96_sheet.png
+assets/sprites/enemies/void_spider_96_sheet_left.png
+assets/sprites/enemies/void_spider_96.png
+assets/sprites/enemies/treant_stump_96_sheet.png
+assets/sprites/enemies/treant_stump_96_sheet_left.png
+assets/sprites/enemies/treant_stump_96.png
+assets/sprites/enemies/hooded_wraith_96_sheet.png
+assets/sprites/enemies/hooded_wraith_96_sheet_left.png
+assets/sprites/enemies/hooded_wraith_96.png
+assets/sprites/enemies/crystal_scorpion_96_sheet.png
+assets/sprites/enemies/crystal_scorpion_96_sheet_left.png
+assets/sprites/enemies/crystal_scorpion_96.png
+assets/sprites/enemies/gloom_bat_96_sheet.png
+assets/sprites/enemies/gloom_bat_96_sheet_left.png
+assets/sprites/enemies/gloom_bat_96.png
+# Wachtershuis-interieur (ART huis_interieur_art), 32x21.
 assets/tiles/huis_interieur/detail_crumbs.png
 assets/tiles/huis_interieur/detail_knot.png
 assets/tiles/huis_interieur/detail_scuff.png
@@ -832,6 +855,11 @@ assets/tiles/huis_interieur/wall_face_bottom.png
 assets/tiles/huis_interieur/wall_face_top.png
 assets/tiles/huis_interieur/wall_post_bottom.png
 assets/tiles/huis_interieur/wall_post_top.png
+assets/sprites/binnen/keuken_fornuis.png
+assets/sprites/binnen/keuken_fornuis_gloed.png
+assets/sprites/binnen/deurkozijn.png
+assets/sprites/binnen/keukenkast.png
+assets/sprites/binnen/doorframe_32.png
 assets/sprites/binnen/huis_props/armchair.png
 assets/sprites/binnen/huis_props/armchair_groen.png
 assets/sprites/binnen/huis_props/barrel.png
@@ -844,15 +872,10 @@ assets/sprites/binnen/huis_props/cat.png
 assets/sprites/binnen/huis_props/chair_back.png
 assets/sprites/binnen/huis_props/chair_front.png
 assets/sprites/binnen/huis_props/chest.png
-assets/sprites/binnen/huis_props/deurkozijn.png
 assets/sprites/binnen/huis_props/door_leaf.png
-assets/sprites/binnen/huis_props/doorframe_32.png
 assets/sprites/binnen/huis_props/doormat.png
 assets/sprites/binnen/huis_props/front_door.png
 assets/sprites/binnen/huis_props/hearth.png
-assets/sprites/binnen/huis_props/keuken_fornuis.png
-assets/sprites/binnen/huis_props/keuken_fornuis_gloed.png
-assets/sprites/binnen/huis_props/keukenkast.png
 assets/sprites/binnen/huis_props/lantern.png
 assets/sprites/binnen/huis_props/low_table.png
 assets/sprites/binnen/huis_props/nightstand.png
@@ -870,8 +893,3 @@ assets/sprites/binnen/huis_props/stool.png
 assets/sprites/binnen/huis_props/table.png
 assets/sprites/binnen/huis_props/wardrobe.png
 assets/sprites/binnen/huis_props/window.png
-assets/sprites/binnen/keuken_fornuis.png
-assets/sprites/binnen/keuken_fornuis_gloed.png
-assets/sprites/binnen/deurkozijn.png
-assets/sprites/binnen/keukenkast.png
-assets/sprites/binnen/doorframe_32.png

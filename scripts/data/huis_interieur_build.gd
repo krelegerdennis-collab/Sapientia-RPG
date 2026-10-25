@@ -3,7 +3,11 @@ extends RefCounted
 
 const LAYOUT_PATH := "res://scripts/data/huis_interieur_layout.json"
 const TILE_DIR := "res://assets/tiles/huis_interieur/"
+const BINNEN_DIR := "res://assets/sprites/binnen/"
 const PROP_DIR := "res://assets/sprites/binnen/huis_props/"
+
+const PUZZLE_BINNEN_SPAWN := Vector2i(4, 7)
+const ARCHIEF_TEST_MAP := "res://scenes/maps/archief_test.tscn"
 
 const MAP_SIZE := Vector2i(32, 21)
 const ROOM_PX := Vector2i(512, 336)
@@ -25,9 +29,10 @@ static func laad() -> Dictionary:
 
 
 static func prop_texture(naam: String) -> Texture2D:
-	var pad := PROP_DIR + naam + ".png"
-	if ResourceLoader.exists(pad):
-		return load(pad) as Texture2D
+	for root in [BINNEN_DIR, PROP_DIR]:
+		var pad := root + naam + ".png"
+		if ResourceLoader.exists(pad):
+			return load(pad) as Texture2D
 	return null
 
 

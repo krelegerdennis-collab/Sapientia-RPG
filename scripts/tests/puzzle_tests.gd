@@ -810,7 +810,7 @@ func _integration() -> void:
 	# --- weg via E en terug = herstel (vergrendelde poort blijft open) ---
 	await moves("DDDDDDDDD LLL D")
 	check("via E naar het huis", await wait_scene("Huis"))
-	check("in het huis op spawn 'binnen' (8,18): %s" % tile(), tile() == Vector2i(8, 18))
+	check("in het huis op spawn 'binnen' (4,7): %s" % tile(), tile() == Vector2i(4, 7))
 	await wait_fade()
 	await tap("debug_puzzle")
 	check("F4 (tijdelijk): terug naar de Test Room", await wait_scene("ArchiefTest"))

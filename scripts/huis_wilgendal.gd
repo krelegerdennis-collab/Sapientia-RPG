@@ -42,7 +42,10 @@ func _story_objecten() -> void:
 
 
 func _spawns() -> void:
-	_spawn("binnen", Build.SPAWN_TEGEL, Vector2i.UP)
+	var binnen_tegel := Build.SPAWN_TEGEL
+	if GameState.pending_spawn == "binnen" and GameState.warp_from_map == Build.ARCHIEF_TEST_MAP:
+		binnen_tegel = Build.PUZZLE_BINNEN_SPAWN
+	_spawn("binnen", binnen_tegel, Vector2i.UP)
 	_spawn("bed", Vector2i(2, 3), Vector2i.DOWN)
 	_spawn("lezen", Vector2i(9, 5), Vector2i.LEFT)
 
