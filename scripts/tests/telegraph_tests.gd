@@ -8,6 +8,7 @@ extends Node
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphStateTests := preload("res://scripts/tests/telegraph_state_tests.gd")
 const TelegraphInktspuwTests := preload("res://scripts/tests/telegraph_inktspuw_tests.gd")
+const TelegraphLayerTests := preload("res://scripts/tests/telegraph_layer_tests.gd")
 
 const O := Vector2i(100, 100)
 
@@ -44,6 +45,7 @@ func _run() -> void:
 	_from_data_tests()
 	TelegraphStateTests.new().run_all(self)
 	TelegraphInktspuwTests.new().run_all(self)
+	TelegraphLayerTests.new().run_all(self)
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
 

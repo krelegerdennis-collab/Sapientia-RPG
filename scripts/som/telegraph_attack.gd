@@ -53,6 +53,10 @@ func ticks_left_in_phase() -> int:
 	return _state.ticks_left
 
 
+func windup_duration_ticks() -> int:
+	return _state.windup_duration_ticks
+
+
 ## Origin en richting vastgezet bij start (WINDUP); shape gebouwd met from_data.
 func start(origin: Vector2i, direction: Vector2i, shape_id: String) -> bool:
 	if not _state.start():

@@ -64,6 +64,15 @@ var entered_state: int:
 	get:
 		return _entered_state
 
+## Totale tickduur per fase (alleen lezen; voor presentatie zoals TelegraphLayer).
+var windup_duration_ticks: int:
+	get:
+		return _windup_ticks
+
+var active_duration_ticks: int:
+	get:
+		return _active_ticks
+
 
 ## Zet faseduren in ticks. Negatieve waarde => `valid = false` (bestaande reden blijft staan).
 func set_phase_ticks(windup: int, active: int, recovery: int, cooldown: int) -> void:
