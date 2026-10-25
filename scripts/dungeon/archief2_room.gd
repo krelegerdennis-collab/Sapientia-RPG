@@ -165,6 +165,25 @@ func _zeg(lines: Array, speaker: String) -> void:
 		player.input_locked = false
 
 
+func _headless_suite() -> bool:
+	return Array(OS.get_cmdline_user_args()).any(
+			func(a): return str(a).begins_with("--") and str(a).ends_with("test"))
+
+
+## Info-regels vóór het Lotte-gevecht: in het spel wachten tot de speler klaar is; in suites niet
+## eeuwig blokkeren (som_rooms), maar wel tijd geven om het vak te sluiten (wm1-playthrough).
+func _wacht_gevecht_info() -> void:
+	if not _headless_suite():
+		await Dialog.finished
+		return
+	var t0 := Time.get_ticks_msec()
+	const MAX_MS := 3000
+	while Dialog.is_open and Time.get_ticks_msec() - t0 < MAX_MS:
+		await get_tree().process_frame
+	if Dialog.is_open:
+		Dialog.close()
+
+
 func _start_lotte(m: Node) -> void:
 	_touch_lock = true
 	last_touch_id = m.monster_id
@@ -175,11 +194,12 @@ func _start_lotte(m: Node) -> void:
 	var keuze: Dictionary
 	if pages.is_empty():
 		keuze = Archief2.bondgenoot_voor([], GameState.member_level("dennis"))
-		# Geen await: het gevecht start meteen (zelfde pad als andere bazen); speler kan de regels nog lezen.
 		Dialog.show_lines(Archief2.GEEN_CODEX, "")
+		await _wacht_gevecht_info()
 	elif pages.size() == 1:
 		keuze = Archief2.bondgenoot_voor(pages, GameState.member_level("dennis"))
 		Dialog.show_lines(["%s fights alongside you." % str(pages[0].get("name", "Monster"))], "")
+		await _wacht_gevecht_info()
 	else:
 		var namen: Array = []
 		for p in pages:
