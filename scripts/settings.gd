@@ -20,6 +20,7 @@ extends Node
 signal changed(key: String)
 
 const GameData := preload("res://scripts/data/game_data.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const DEFAULT_PATH := "user://settings.cfg"
 const TEST_PATH := "user://autotest_settings.cfg"
 const SECTION := "instellingen"
@@ -212,10 +213,13 @@ func autosave_enabled() -> bool:
 	return bool(get_value("autosave"))
 
 
-## Sessielog (SessieLog): -1 volgt de build (debug aan, release uit).
+## Sessielog (SessieLog): -1 volgt de build (debug aan, release uit). Release-builds loggen nooit,
+## ook niet met de instelling op 1 (playtest-kit: alleen debug).
 func sessie_log_enabled() -> bool:
+	if not ReleaseFlags.is_debug_build():
+		return false
 	var v := int(get_value("sessie_log"))
-	return OS.is_debug_build() if v < 0 else v == 1
+	return true if v < 0 else v == 1
 
 
 ## Hoogste busvolume (lineair) bij de schuif op 100%. Het spel was veel te luid: wat vroeger

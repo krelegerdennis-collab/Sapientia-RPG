@@ -39,12 +39,14 @@ const DEBUG_PUZZLE_ROOM := "res://scenes/maps/archief_test.tscn"
 
 @onready var ground: TileMapLayer = $Ground
 @onready var player: CharacterBody2D = $Objects/Player
+var _touch_control: Control
 
 
 func _ready() -> void:
 	GameState.enter_map(scene_file_path)
 	# SoM-stijl per gebied (scripts/data/kaart_stijl.gd); in de oude stijl verandert er niets.
 	KaartStijl.toepassen(self)
+	AtlasZuinig.toepassen(self)      # geen tweede (opgevulde) kopie van elke tegelatlas in het geheugen
 	_fit_camera()
 	var vp := get_viewport()
 	if vp != null and not vp.size_changed.is_connected(_fit_camera):
@@ -76,9 +78,9 @@ func _ready() -> void:
 	player.stepped.connect(_on_player_stepped)
 	player.bumped.connect(_on_player_bumped)
 	# v0.10: MENU-knop op het touchscherm (veldmenu met o.a. het bestiarium)
-	var touch := get_node_or_null("TouchControls/Control")
-	if touch and "show_menu" in touch:
-		touch.show_menu = true
+	_touch_control = get_node_or_null("TouchControls/Control") as Control
+	if _touch_control and "show_menu" in _touch_control:
+		_touch_control.show_menu = true
 	# v0.11 automatisch opslaan na een mapwissel of een gewonnen gevecht (GameState zet
 	# het verzoek klaar); pas als het beeld er weer is, nooit tijdens de overgang zelf.
 	# (timer i.p.v. await: wordt de map intussen weer verlaten, dan vervalt hij vanzelf)
@@ -205,8 +207,18 @@ func menu_closed_hook() -> void:
 	pass
 
 
+## Touch-laag: cache alleen zolang de node in de boom zit (kaartwissel / test
+## die TouchControls vervangt zou anders een stale Control houden).
+func _touch() -> Control:
+	if _touch_control != null and (not is_instance_valid(_touch_control) or not _touch_control.is_inside_tree()):
+		_touch_control = null
+	if _touch_control == null:
+		_touch_control = get_node_or_null("TouchControls/Control") as Control
+	return _touch_control
+
+
 func _set_touch_visible(on: bool) -> void:
-	var touch := get_node_or_null("TouchControls/Control")
+	var touch := _touch()
 	if touch == null:
 		return
 	if not on and touch.has_method("release_all"):
@@ -264,7 +276,7 @@ func screen_open() -> bool:
 
 func _process(_delta: float) -> void:
 	# MENU-knop verbergen zolang er een tekstvak of menu open is (anders valt hij erover)
-	var touch := get_node_or_null("TouchControls/Control")
+	var touch := _touch()
 	if touch and not menu_open():
 		var vis := not screen_open()
 		if touch.visible != vis:

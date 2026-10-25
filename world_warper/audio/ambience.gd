@@ -50,4 +50,8 @@ func _play_sfx(sound_name: String) -> void:
 	var audio := _audio_manager()
 	if audio == null or not audio.has_method("play_sfx"):
 		return
+	# Cue zonder manifest-regel blijft stil. AudioManager.play_sfx meldt een onbekende naam als push_error
+	# (elke hub-binnenkomst, hum/warp/glitch), terwijl deze klasse juist stil hoort te blijven.
+	if audio.has_method("has_sfx") and not audio.call("has_sfx", sound_name):
+		return
 	audio.call("play_sfx", sound_name)

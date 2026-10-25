@@ -418,17 +418,8 @@ func _plein10(kaart: Node, objects: Node) -> void:
 	# beekoevers zitten erin gebakken, dus dan geen keien-autotile erover (die blijft de terugval).
 	var bake := Data.p10_bake()
 	var gm = JSON.parse_string(FileAccess.get_file_as_string(Data.P10 + bake + "_map.json"))
-	var ts := TileSet.new()
-	ts.tile_size = Vector2i(16, 16)
-	var bron := TileSetAtlasSource.new()
-	bron.texture = load(Data.P10 + bake + "_tileset.png")
-	bron.texture_region_size = Vector2i(16, 16)
 	var kol := int(gm["cols"])
-	var rijen := bron.texture.get_height() / 16
-	for y in rijen:
-		for x in kol:
-			bron.create_tile(Vector2i(x, y))
-	ts.add_source(bron, 0)
+	var ts := _p10_tileset(bake, kol)
 	var grond := TileMapLayer.new()
 	grond.name = "GrondTegels"
 	grond.tile_set = ts
@@ -455,9 +446,9 @@ func _plein10(kaart: Node, objects: Node) -> void:
 		for x in Data.W:
 			if Data.GROND[y][x] == "W":
 				tegels.append(Vector2i(x, y))
+	var vorm := RectangleShape2D.new()      # alle vaste tegels delen dezelfde 16x16-botsvorm
+	vorm.size = Vector2(16, 16)
 	for t in tegels:
-		var vorm := RectangleShape2D.new()
-		vorm.size = Vector2(16, 16)
 		var bots := CollisionShape2D.new()
 		bots.shape = vorm
 		bots.position = Vector2(t) * 16.0 + Vector2(8, 8)
@@ -504,6 +495,32 @@ func _plein10(kaart: Node, objects: Node) -> void:
 		npc.sheet = load(Data.P10 + str(rij["sheet"]) + ".png")
 		objects.add_child(npc)
 		npc.place_at(rij["tegel"], rij["kijk"])
+
+
+## De plein-tileset (~1300 tegels, create_tile ~20 us per stuk = ~26 ms) is statisch voor de sessie: één keer
+## bouwen. De atlas is klein (~1 MB), dus de cache houdt geen grote textuur vast (de v8-grond doet dat wel en
+## wordt daarom per bezoek opgebouwd, zie dorp_ground.gd).
+static var _p10_ts: TileSet = null
+static var _p10_ts_sleutel := ""
+
+
+static func _p10_tileset(bake: String, kol: int) -> TileSet:
+	var sleutel := "%s|%d" % [bake, kol]
+	if _p10_ts != null and _p10_ts_sleutel == sleutel:
+		return _p10_ts
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(16, 16)
+	var bron := TileSetAtlasSource.new()
+	bron.texture = load(Data.P10 + bake + "_tileset.png")
+	bron.texture_region_size = Vector2i(16, 16)
+	var rijen := bron.texture.get_height() / 16
+	for y in rijen:
+		for x in kol:
+			bron.create_tile(Vector2i(x, y))
+	ts.add_source(bron, 0)
+	_p10_ts = ts
+	_p10_ts_sleutel = sleutel
+	return ts
 
 
 ## Plein 10 pass 3: het keienplein als autotile (RPG ART rand10/rand11) boven de gebakken grond.
