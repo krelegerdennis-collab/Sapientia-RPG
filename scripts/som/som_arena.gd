@@ -878,6 +878,13 @@ func _pose_tick(m: Node, e: Dictionary, delta: float) -> void:
 
 
 ## Dichtstbijzijnde levende held (id) voor een vijand.
+func _slot_for_hero(hero_id: String) -> int:
+	for slot in _coop_slots.keys():
+		if str(_coop_slots[slot]) == hero_id:
+			return int(slot)
+	return Protocol.NO_SLOT
+
+
 func _target_for(m: Node) -> String:
 	if coop_mode:
 		var hid: String = str(_coop_slots.get(0, "dennis"))
@@ -1402,6 +1409,7 @@ func _say(text: String) -> void:
 const CoopAvatar := preload("res://scripts/coop/coop_avatar.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
+const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
 
 
 func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
@@ -1764,14 +1772,20 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 		if not is_instance_valid(m) or not enemies.has(m):
 			continue
 		var e: Dictionary = enemies[m]
-		elist.append({
+		var tid := str(e.get("target", ""))
+		var tslot := _slot_for_hero(tid)
+		if tslot == Protocol.NO_SLOT:
+			tslot = Protocol.HOST_SLOT
+		var base := {
 			"idx": i,
 			"x": int(center_of(m).x),
 			"y": int(center_of(m).y),
 			"hp": int(e.get("hp", 0)),
 			"pose": 0,
-			"target_slot": Protocol.HOST_SLOT,
-		})
+			"target_slot": tslot,
+		}
+		var tg: TelegraphAttack = e.get("tg", null)
+		elist.append(TelegraphSnapshot.merge_enemy_row(base, tg, tslot))
 	return Codec.pack_snapshot(tick, players, elist)
 
 
@@ -1810,6 +1824,10 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 		var cx := float(row.get("x", 0))
 		var cy := float(row.get("y", 0))
 		m.position = Vector2(cx, cy) - Vector2(0, center_of(m).y - m.position.y)
+		if not coop_sim_host and room != null:
+			TelegraphSnapshot.apply_row_to_enemy(e, row, room.room_id, room.tier())
+	if not coop_sim_host:
+		_sync_telegraph_draw()
 
 
 func coop_snapshot() -> Dictionary:

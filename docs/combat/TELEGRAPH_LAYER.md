@@ -26,5 +26,10 @@ Eén `Node2D` in de Action-arena (`SomArena`) tekent **alle** grond-telegrafen i
 
 ## Volgende stappen (niet T3)
 
-- T5: co-op snapshot stuurt telegraaf-state; gast tekent alleen snapshot.
+## T5 — co-op sync (Combat T5)
+
+- **Host** stuurt per vijand in het snapshot (codec v1, `net_codec.gd`): `atk_id`, `phase`, `t` (tick in fase), `ox`/`oy`, `dir_x`/`dir_y`, `target_slot` (echte doelstoel), plus `zones` (nu leeg; T4b).
+- **Gast** past alleen `TelegraphAttack.mirror_from_network()` aan en tekent via `TelegraphLayer`; geen AI/RNG.
+- Helpers: `scripts/net/telegraph_snapshot.gd`. Tests: `--telegraphcooptest`.
+- PR-stack: bouwt op TelegraphLayer (T3); merge na #265.
 - Echte art via RPG Forge (COMBAT_DESIGN §11 / voorstel sectie E).

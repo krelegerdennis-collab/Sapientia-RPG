@@ -130,6 +130,16 @@ func interrupt() -> bool:
 	return true
 
 
+## Gast-only: spiegel host-fase zonder sim (co-op snapshot T5).
+func mirror(phase: int, ticks_left: int) -> void:
+	_clear_phase_flags()
+	if phase == State.IDLE:
+		_go_idle()
+		return
+	_state = phase
+	_ticks_left = maxi(0, ticks_left)
+
+
 func _revalidate() -> void:
 	_invalid_reason = ""
 	for label in ["windup", "active", "recovery", "cooldown"]:
