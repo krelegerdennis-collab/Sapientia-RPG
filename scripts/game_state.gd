@@ -463,6 +463,8 @@ func _ready() -> void:
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
 	# WM1-bugjacht: of  godot -- --wm1bugtest [--shots=/pad/map]  (scripts/tests/wm1_bugjacht_tests.gd).
 	# WM1-bugjacht open O-2/O-3 (standalone): of  godot -- --wm1openbugtest  (scripts/tests/wm1_bugjacht_open_tests.gd).
+	# WM1-balansrapport (alle encounters/bazen, EXP/goud-curve): godot -- --wm1balans [--fights=N] [--out=pad]  (tools/battlesim/wm1_balans.gd);
+	# de bijbehorende suite: godot -- --wm1balanstest  (scripts/tests/wm1_balans_tests.gd)
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
 	# WM1-playthrough (nieuw spel t/m de hub, save/load, pauze): of  godot -- --wm1playthroughtest [--speed=N] [--static-only]  (scripts/tests/wm1_playthrough_tests.gd).
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
@@ -548,6 +550,7 @@ func _ready() -> void:
 			["--telegraphtest", "res://scripts/tests/telegraph_tests.gd", "TelegraphTest", "telegraphtest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--wm1balanstest", "res://scripts/tests/wm1_balans_tests.gd", "Wm1BalansTest", "wm1balanstest"],
 			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
 			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
@@ -561,7 +564,8 @@ func _ready() -> void:
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
-			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"]]:
+			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
+			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
