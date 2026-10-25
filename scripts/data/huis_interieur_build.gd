@@ -15,6 +15,7 @@ const EXIT_RECT := Rect2i(8, 19, 2, 2)
 
 var _tile_ids: Dictionary = {}
 var _prop_blocks: Dictionary = {}
+var _solid_tiles: Dictionary = {}
 var _props_geplaatst: Array = []
 
 
@@ -34,6 +35,7 @@ func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
 	var data: Dictionary = laad()
 	_tile_ids.clear()
 	_prop_blocks.clear()
+	_solid_tiles.clear()
 	_props_geplaatst.clear()
 	ground.tile_set = _maak_tileset()
 	ground.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -44,7 +46,10 @@ func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
 
 func _maak_tileset() -> TileSet:
 	var ts := TileSet.new()
+	ts.tile_size = Vector2i(16, 16)
 	ts.add_physics_layer(0)
+	ts.set_physics_layer_collision_layer(0, 1)
+	ts.set_physics_layer_collision_mask(0, 1)
 	var defs := {
 		"wall_cap": {"file": "wall_cap.png", "solid": true},
 		"wall_face_top": {"file": "wall_face_top.png", "solid": true},
@@ -60,6 +65,7 @@ func _maak_tileset() -> TileSet:
 		var tex: Texture2D = load(TILE_DIR + str(defs[sleutel]["file"]))
 		var src := TileSetAtlasSource.new()
 		src.texture = tex
+		src.texture_region_size = Vector2i(16, 16)
 		src.create_tile(Vector2i.ZERO)
 		if defs[sleutel]["solid"]:
 			var td: TileData = src.get_tile_data(Vector2i.ZERO, 0)
@@ -67,13 +73,13 @@ func _maak_tileset() -> TileSet:
 			td.set_collision_polygon_points(0, 0, PackedVector2Array([
 				Vector2(-8, -8), Vector2(8, -8), Vector2(8, 8), Vector2(-8, 8),
 			]))
-		var sid := ts.add_source(src)
-		_tile_ids[sleutel] = Vector2i(sid, Vector2i.ZERO)
+		var sid: int = ts.add_source(src)
+		_tile_ids[sleutel] = sid
 	return ts
 
 
-func _atlas(sleutel: String) -> Vector2i:
-	return _tile_ids.get(sleutel, Vector2i.ZERO)
+func _source_id(sleutel: String) -> int:
+	return int(_tile_ids.get(sleutel, -1))
 
 
 func _teken_grid(ground: TileMapLayer, rijen: Array) -> void:
@@ -84,8 +90,17 @@ func _teken_grid(ground: TileMapLayer, rijen: Array) -> void:
 			var sleutel := _tegel_sleutel(ch, x, y, rijen)
 			if sleutel == "":
 				continue
-			var atlas: Vector2i = _atlas(sleutel)
-			ground.set_cell(Vector2i(x, y), atlas.x, atlas.y)
+			var sid: int = _source_id(sleutel)
+			if sid < 0:
+				continue
+			var tegel := Vector2i(x, y)
+			ground.set_cell(tegel, sid, Vector2i.ZERO)
+			if _tegel_is_solid(ch):
+				_solid_tiles[tegel] = true
+
+
+func _tegel_is_solid(ch: String) -> bool:
+	return ch in ["#", "F", "J"]
 
 
 func _tegel_sleutel(ch: String, x: int, y: int, rijen: Array) -> String:
@@ -98,7 +113,7 @@ func _tegel_sleutel(ch: String, x: int, y: int, rijen: Array) -> String:
 			return "wall_face_bottom"
 		"J":
 			return "wall_post"
-		"d", "E", "S", ".":
+		"d", "E", "S", "X", ".":
 			var variant := ["floor_a", "floor_b", "floor_c", "floor_d", "floor_e"]
 			return variant[(x + y * 3) % variant.size()]
 		_:
@@ -175,8 +190,15 @@ func props_geplaatst() -> Array:
 	return _props_geplaatst
 
 
-static func tegel_geblokkeerd(ground: TileMapLayer, tegel: Vector2i, blocks: Dictionary) -> bool:
+static func tegel_geblokkeerd(
+		ground: TileMapLayer,
+		tegel: Vector2i,
+		blocks: Dictionary,
+		solid: Dictionary = {},
+) -> bool:
 	if blocks.has(tegel):
+		return true
+	if solid.has(tegel):
 		return true
 	var data: TileData = ground.get_cell_tile_data(tegel)
 	if data == null:
@@ -184,12 +206,21 @@ static func tegel_geblokkeerd(ground: TileMapLayer, tegel: Vector2i, blocks: Dic
 	return data.get_collision_polygons_count(0) > 0
 
 
-static func tegel_vrij(ground: TileMapLayer, tegel: Vector2i, blocks: Dictionary) -> bool:
+static func tegel_vrij(
+		ground: TileMapLayer,
+		tegel: Vector2i,
+		blocks: Dictionary,
+		solid: Dictionary = {},
+) -> bool:
 	if tegel.x < 0 or tegel.y < 0 or tegel.x >= MAP_SIZE.x or tegel.y >= MAP_SIZE.y:
 		return false
 	if ground.get_cell_source_id(tegel) == -1:
 		return false
-	return not tegel_geblokkeerd(ground, tegel, blocks)
+	return not tegel_geblokkeerd(ground, tegel, blocks, solid)
+
+
+func solid_tiles() -> Dictionary:
+	return _solid_tiles
 
 
 static func dek_camera(ground: TileMapLayer, vp: Vector2i) -> bool:

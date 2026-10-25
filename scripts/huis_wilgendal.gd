@@ -70,7 +70,7 @@ func tegel_heeft_cel(tegel: Vector2i) -> bool:
 
 
 func tegel_vrij(tegel: Vector2i) -> bool:
-	return Build.tegel_vrij(ground, tegel, _build.prop_blocks())
+	return Build.tegel_vrij(ground, tegel, _build.prop_blocks(), _build.solid_tiles())
 
 
 func vrije_tegels() -> Array[Vector2i]:
