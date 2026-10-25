@@ -6,6 +6,7 @@ extends Node
 ## Start: godot --headless --path . -- --telegraphtest
 
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
+const TelegraphStateTests := preload("res://scripts/tests/telegraph_state_tests.gd")
 
 const O := Vector2i(100, 100)
 
@@ -40,6 +41,7 @@ func _run() -> void:
 	_input_tests()
 	_lock_and_determinism_tests()
 	_from_data_tests()
+	TelegraphStateTests.new().run_all(self)
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
 
