@@ -85,6 +85,7 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--relaytest` | `scripts/tests/relay_tests.gd` | 89 |
 | `--testmodustest` | `scripts/tests/testmodus_tests.gd` | 9 |
 | `--wm1bugtest` | `scripts/tests/wm1_bugjacht_tests.gd` | 14 |
+| `--wm1openbugtest` | `scripts/tests/wm1_bugjacht_open_tests.gd` | 24 |
 | `--aabtest` | `scripts/tests/aab_tests.gd` | 70 |
 
 Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`
