@@ -29,6 +29,8 @@ func run() -> void:
 		GameState.encounter_multiplier = oude_mult
 		return
 	await t.frames(8)
+	if "shot_path" in t and t.shot_path != "" and t.has_method("map_overview"):
+		await t.map_overview(t.shot_path.get_basename() + "_overview.png")
 	var layout: Dictionary = Build.laad()
 	_kaart(huis, layout)
 	_spawn_vrij(huis)
