@@ -59,6 +59,11 @@ const SLAAP_DAX := Rect2i(Vector2i(-8, 2), Vector2i(7, 6))
 const SLAAP_OPA := Rect2i(Vector2i(13, 2), Vector2i(7, 6))
 const KEUKEN_ZONE := Rect2i(Vector2i(7, 4), Vector2i(4, 3))
 const KOZIJN_MAAT := Vector2i(24, 32)
+## Voordeur naar buiten: minstens 2 tegels, originele (4,8) blijft staan.
+const VOORDEUR: Array[Vector2i] = [Vector2i(4, 8), Vector2i(5, 8)]
+const VOORDEUR_MAT: Array[Vector2i] = [Vector2i(4, 7), Vector2i(5, 7)]
+const KOZIJN_VOOR_L := Vector2i(3, 8)
+const KOZIJN_VOOR_R := Vector2i(6, 8)
 
 const VP_16_9 := Vector2i(384, 216)
 const VP_195_9 := Vector2i(468, 216)
@@ -95,6 +100,11 @@ static func verf(annex: TileMapLayer, ground: TileMapLayer) -> void:
 	ground.set_cell(Vector2i(8, 4), 0, Vector2i(atlas("P"), 0))
 	ground.set_cell(Vector2i(9, 4), 0, Vector2i(atlas("c"), 0))
 	ground.set_cell(Vector2i(9, 6), 0, Vector2i(atlas("f"), 0))
+	for tegel in VOORDEUR:
+		ground.set_cell(tegel, 0, Vector2i(atlas("D"), 0))
+	# Mat/drempel direct voor de 2-tegel-deur; (4,7) blijft het spawnpunt.
+	ground.set_cell(VOORDEUR_MAT[0], 0, Vector2i(atlas("z"), 0))
+	ground.set_cell(VOORDEUR_MAT[1], 0, Vector2i(atlas("c"), 0))
 
 
 static func laag_blokkeert(laag: TileMapLayer, tegel: Vector2i) -> bool:

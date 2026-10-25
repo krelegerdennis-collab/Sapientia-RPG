@@ -5,10 +5,12 @@ extends "res://scripts/map.gd"
 const Kamers := preload("res://scripts/data/huis_wilgendal_kamers.gd")
 const FornuisTex := preload("res://assets/sprites/binnen/keuken_fornuis_PLACEHOLDER.png")
 const KozijnTex := preload("res://assets/sprites/binnen/deurkozijn_PLACEHOLDER.png")
-const KastTex := preload("res://assets/sprites/dungeon/staande_kast.png")
+const KeukenKastTex := preload("res://assets/sprites/binnen/keuken_kast_PLACEHOLDER.png")
+const SlaapKastTex := preload("res://assets/sprites/binnen/slaapkamer_kast_PLACEHOLDER.png")
 
 const PROP_NAMEN: Array[String] = [
-	"Kitchen", "KitchenShelf", "CupboardDax", "CupboardOpa", "DoorFrameDax", "DoorFrameOpa",
+	"Kitchen", "KitchenShelf", "CupboardDax", "CupboardOpa",
+	"DoorFrameDax", "DoorFrameOpa", "DoorFrameVoorL", "DoorFrameVoorR",
 ]
 
 var annex: TileMapLayer
@@ -28,16 +30,36 @@ func _bouw_vleugels() -> void:
 	move_child(annex, ground.get_index() + 1)
 	Kamers.verf(annex, ground)
 	_zet_prop("Kitchen", Kamers.KEUKEN_FORNUIS, FornuisTex, Vector2(24, 32), true)
-	_zet_prop("KitchenShelf", Kamers.KEUKEN_KAST, KastTex, Vector2(16, 32), true)
-	_zet_prop("CupboardDax", Kamers.KAST_DAX, KastTex, Vector2(16, 32), true)
-	_zet_prop("CupboardOpa", Kamers.KAST_OPA, KastTex, Vector2(16, 32), true)
+	_zet_prop("KitchenShelf", Kamers.KEUKEN_KAST, KeukenKastTex, Vector2(24, 32), true)
+	_zet_prop("CupboardDax", Kamers.KAST_DAX, SlaapKastTex, Vector2(24, 32), true)
+	_zet_prop("CupboardOpa", Kamers.KAST_OPA, SlaapKastTex, Vector2(24, 32), true)
 	_zet_prop("DoorFrameDax", Kamers.KOZIJN_DAX, KozijnTex, Vector2(24, 32), true)
 	_zet_prop("DoorFrameOpa", Kamers.KOZIJN_OPA, KozijnTex, Vector2(24, 32), true)
+	_zet_prop("DoorFrameVoorL", Kamers.KOZIJN_VOOR_L, KozijnTex, Vector2(24, 32), true)
+	_zet_prop("DoorFrameVoorR", Kamers.KOZIJN_VOOR_R, KozijnTex, Vector2(24, 32), true)
+	_zet_voordeur_uitgang()
 	_marker("BedDax", Kamers.BED_DAX)
 	_marker("BedOpa", Kamers.BED_OPA)
 	_marker("DoorDax", Kamers.DEUR_DAX)
 	_marker("DoorOpa", Kamers.DEUR_OPA)
 	_marker("Chair2", Kamers.STOEL_2)
+
+
+func _zet_voordeur_uitgang() -> void:
+	var uit: Node = get_node_or_null("Exits/NaarDorp")
+	if uit == null:
+		return
+	uit.position = Vector2(Kamers.VOORDEUR[0]) * TILE
+	uit.size_tiles = Vector2i(Kamers.VOORDEUR.size(), 1)
+	uit.target_spawn = "voor_huis"
+
+
+func voordeur_tegels() -> Array[Vector2i]:
+	var uit: Array[Vector2i] = []
+	for x in range(0, 12):
+		if atlas_van(Vector2i(x, 8)) == Vector2i(5, 0):
+			uit.append(Vector2i(x, 8))
+	return uit
 
 
 func _midden(tegel: Vector2i) -> Vector2:

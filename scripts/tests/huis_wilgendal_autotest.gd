@@ -37,6 +37,7 @@ func run() -> void:
 	_spawn_vrij(huis)
 	_meubels(huis)
 	_deuren(huis)
+	_voordeur(huis)
 	_inrichting(huis)
 	_camera(huis)
 	_props(huis)
@@ -133,6 +134,24 @@ func _deuren(huis: Node) -> void:
 	t.check("annex-drempel sluit aan op de woonkamer-deur",
 			huis.atlas_van(Vector2i(-1, 6)) == Vector2i(5, 0)
 			and huis.atlas_van(Vector2i(12, 6)) == Vector2i(5, 0))
+
+
+func _voordeur(huis: Node) -> void:
+	var deur: Array[Vector2i] = huis.voordeur_tegels()
+	t.check("voordeur minstens 2 tegels breed (%s)" % [deur], deur.size() >= 2
+			and Vector2i(4, 8) in deur and Vector2i(5, 8) in deur)
+	var uit := huis.get_node_or_null("Exits/NaarDorp")
+	t.check("uitgang dekt de hele voordeur en blijft voor_huis", uit != null
+			and uit.size_tiles.x >= 2 and str(uit.target_spawn) == "voor_huis"
+			and deur.all(func(d): return uit.contains(d)))
+	t.check("mat/drempel voor de voordeur",
+			huis.atlas_van(Kamers.VOORDEUR_MAT[0]).x in [12, 13, 14, 15, 16, 17, 18, 19, 20]
+			and huis.atlas_van(Kamers.VOORDEUR_MAT[1]).x in [12, 13, 14, 15, 16, 17, 18, 19, 20])
+	t.check("ART-props fornuis/kozijn/kasten 24x32",
+			huis.prop_maat("Kitchen") == Kamers.KOZIJN_MAAT
+			and huis.prop_maat("KitchenShelf") == Kamers.KOZIJN_MAAT
+			and huis.prop_maat("CupboardDax") == Kamers.KOZIJN_MAAT
+			and huis.prop_maat("DoorFrameDax") == Kamers.KOZIJN_MAAT)
 
 
 func _inrichting(huis: Node) -> void:
