@@ -20,7 +20,7 @@ const IN_GROEP := "%s joins the party."
 const GEWISSELD := "%s swaps with %s."
 const MONSTER_ACTIEF := "%s will fight with you."
 const MONSTER_KO := "%s can't fight right now."
-const GEEN_MONSTER := "No monster fights with you."
+const GEEN_MONSTER := "No monster fights alongside you."
 
 
 ## Wisselen mag alleen buiten een gevecht.

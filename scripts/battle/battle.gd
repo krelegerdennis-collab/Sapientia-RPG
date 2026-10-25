@@ -1015,7 +1015,7 @@ func _choose_swap(hero: Dictionary):
 		var here := str(p["uid"]) == cur
 		entries.append({"text": "%s Lv%d%s" % [p["name"], int(p["level"]), " now" if here else ""], "enabled": not here})
 	entries.append({"text": "None", "enabled": cur != ""})
-	show_message("Who fights with you?")
+	show_message("Who fights alongside you?")
 	menu.open("Swap", entries, start, true, _list_row_h(mini(entries.size(), CODEX_ROWS_MAX)), CODEX_ROWS_MAX)
 	var k: int = await menu.finished
 	menu.close()
@@ -1137,7 +1137,7 @@ func _select_enemy(label := Callable(), prefix := ""):
 	# v9.1: vijanden staan bovenin; het pijltje blijft onder de bericht-strook (dan wijst het
 	# iets in het plaatje, op het hoofd)
 	var above := func(c): return Vector2(c["node"].position.x + roundf(c["node"].size.x / 2.0), maxf(c["node"].position.y + float(c.get("top", 0)) - 2.0, CURSOR_MIN_Y))
-	return await _pick_target(living, "Doel", above, false, label, prefix)
+	return await _pick_target(living, "Target", above, false, label, prefix)
 
 
 func _select_ally():
@@ -1159,7 +1159,7 @@ func _select_ko():
 		await _wait(MESSAGE_TIME)
 		return null
 	_set_state("target_ally")
-	return await _pick_target(dead, "Wie?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
+	return await _pick_target(dead, "Who?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
 
 
 ## v0.13: geen namenlijst meer. Een pijltje (richtpijl.png) wijst het doel aan, met de naam
@@ -1537,7 +1537,7 @@ func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> vo
 			"pct": float(row.get("pct", 0.0)) * mult,
 			"turns": int(row.get("turns", 3)),
 		})
-	show_message("%s is versterkt." % ally["name"])
+	show_message("%s is strengthened." % ally["name"])
 
 
 func _add_hot(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
@@ -1545,7 +1545,7 @@ func _add_hot(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
 		ally["hots"] = []
 	var turns := int(spell.get("hot_turns", 3))
 	(ally["hots"] as Array).append({"amount": _spell_amount(caster, spell, {}), "turns": turns})
-	show_message("%s herstelt langzaam." % ally["name"])
+	show_message("%s recovers slowly." % ally["name"])
 
 
 func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
@@ -1779,12 +1779,12 @@ func _archief2_leech(actor: Dictionary) -> void:
 		return
 	var t: Dictionary = pool[0]
 	var n := Archief2.leech_hoeveelheid(randf(), int(t["s"]["max_hp"]))
-	show_message("%s corrigeert %s." % [actor["name"], t["name"]])
+	show_message("%s corrects %s." % [actor["name"], t["name"]])
 	await _damage(t, n)
 	var voor := int(actor["s"]["hp"])
 	actor["s"]["hp"] = mini(int(actor["s"]["max_hp"]), voor + n)
 	GameState.archief2_last_leech = {"schade": n, "heal": n, "bij": int(actor["s"]["hp"]) - voor}
-	show_message("%s herstelt %d." % [actor["name"], n])
+	show_message("%s recovers %d." % [actor["name"], n])
 	await _wait(MESSAGE_TIME)
 
 

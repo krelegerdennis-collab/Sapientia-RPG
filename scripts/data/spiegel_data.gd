@@ -18,7 +18,7 @@ const FEIT_HANGER := "The Pendant belongs to him, and he belongs to the Pendant.
 const FEIT_TERUG := "Sapientia wants him back, not defeated."
 const WEIGERING := "I am Dax. And that is enough."
 const LAATSTE := "You are stronger than the last five. Maybe... you will be the first to make it."
-const KERN := "The core of Archief 4 has been absorbed."
+const KERN := "The core of Archive 4 has been absorbed."
 
 ## Geen vijand. Bewust geen hp en geen max_hp.
 const SPIEGEL := {
