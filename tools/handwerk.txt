@@ -813,3 +813,31 @@ assets/ui/lock/lock_wissel.png
 # 2026-10-24: assets/ui/icons/cat_goud.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
 # 2026-10-24: assets/ui/icon_monstervak.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
 # 2026-10-24: assets/ui/richtpijl.png vervangen door art-fix batch 5B (masterpalet 68); goedgekeurd door Dennis op 2026-10-24 19:45.
+# Monster pack v4 (art_monsterpack/v4/out): storm_harpy, cursed_knight, moonfang_wolf (96x96)
+assets/sprites/enemies/storm_harpy_96_sheet.png
+assets/sprites/enemies/storm_harpy_96_sheet_left.png
+assets/sprites/enemies/storm_harpy_96.png
+assets/sprites/enemies/cursed_knight_96_sheet.png
+assets/sprites/enemies/cursed_knight_96_sheet_left.png
+assets/sprites/enemies/cursed_knight_96.png
+assets/sprites/enemies/moonfang_wolf_96_sheet.png
+assets/sprites/enemies/moonfang_wolf_96_sheet_left.png
+assets/sprites/enemies/moonfang_wolf_96.png
+assets/sprites/enemies/stone_gargoyle_96_sheet.png
+assets/sprites/enemies/stone_gargoyle_96_sheet_left.png
+assets/sprites/enemies/stone_gargoyle_96.png
+assets/sprites/enemies/void_spider_96_sheet.png
+assets/sprites/enemies/void_spider_96_sheet_left.png
+assets/sprites/enemies/void_spider_96.png
+assets/sprites/enemies/treant_stump_96_sheet.png
+assets/sprites/enemies/treant_stump_96_sheet_left.png
+assets/sprites/enemies/treant_stump_96.png
+assets/sprites/enemies/hooded_wraith_96_sheet.png
+assets/sprites/enemies/hooded_wraith_96_sheet_left.png
+assets/sprites/enemies/hooded_wraith_96.png
+assets/sprites/enemies/crystal_scorpion_96_sheet.png
+assets/sprites/enemies/crystal_scorpion_96_sheet_left.png
+assets/sprites/enemies/crystal_scorpion_96.png
+assets/sprites/enemies/gloom_bat_96_sheet.png
+assets/sprites/enemies/gloom_bat_96_sheet_left.png
+assets/sprites/enemies/gloom_bat_96.png
