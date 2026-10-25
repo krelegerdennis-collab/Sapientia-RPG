@@ -592,6 +592,7 @@ func _run() -> void:
 		# SoM-proef: alleen de SoM-tests (snel ontwikkelen); CI draait de hele suite.
 		check("titelscherm (som-only)", await wait_scene("Title"))
 		await preload("res://scripts/tests/som_autotest.gd").new(self).run()
+		await preload("res://scripts/tests/som_wall_slide_tests.gd").new(self).run()
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
@@ -635,6 +636,7 @@ func _run() -> void:
 	await _battlesim_sample_test()
 	# SoM-proef: realtime gevecht + pauzering + baas-overdracht (scripts/tests/som_autotest.gd)
 	await preload("res://scripts/tests/som_autotest.gd").new(self).run()
+	await preload("res://scripts/tests/som_wall_slide_tests.gd").new(self).run()
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/party_sprites_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
