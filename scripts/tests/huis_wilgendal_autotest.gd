@@ -1,14 +1,9 @@
 extends RefCounted
-## Wachtershuis multi-kamer (scenes/maps/huis_wilgendal.tscn) binnen --autotest.
+## Wachtershuis ART-interieur (32x21, layout.json) binnen --autotest.
 ## Alleen dit blok: godot --path . -- --autotest --test-huis-wilgendal
-## Zonder de vlag draait het blok aan het eind van de volledige --autotest mee.
-## t = de autotest-node (check/frames/walk/...).
-## Controleert: scène laadt, spawn niet in botsing, uitgang bereikbaar, beide bedden
-## en de keuken bestaan, proloog-markers staan er, deurkozijnen 24x32, camera
-## 16:9/19,5:9 zonder zwart, elke vrije tegel via BFS, elke prop heeft collision.
 
 const SD := preload("res://scripts/data/story_data.gd")
-const Kamers := preload("res://scripts/data/huis_wilgendal_kamers.gd")
+const Build := preload("res://scripts/data/huis_interieur_build.gd")
 const HUIS := "res://scenes/maps/huis_wilgendal.tscn"
 
 var t: Node
@@ -34,13 +29,13 @@ func run() -> void:
 		GameState.encounter_multiplier = oude_mult
 		return
 	await t.frames(8)
+	var layout: Dictionary = Build.laad()
+	_kaart(huis, layout)
 	_spawn_vrij(huis)
-	_meubels(huis)
-	_deuren(huis)
 	_voordeur(huis)
-	_inrichting(huis)
+	_deurpalen(huis)
+	_props_volgens_layout(huis, layout)
 	_camera(huis)
-	_props(huis)
 	_markers(huis)
 	_uitgang_bereikbaar(huis)
 	_alles_bereikbaar(huis)
@@ -80,109 +75,107 @@ func _blokkers(p: CharacterBody2D, tegel: Vector2i) -> Array:
 			func(h): return str(h["collider"].name) if h["collider"] else "?")
 
 
+func _kaart(huis: Node, layout: Dictionary) -> void:
+	var used: Rect2i = huis.ground.get_used_rect()
+	t.check("interieur-Ground 32x21 (%s)" % used, used.size == Build.MAP_SIZE)
+	var rijen: Array = layout.get("grid", [])
+	t.check("layout.json grid 21 rijen", rijen.size() == Build.MAP_SIZE.y)
+
+
 func _spawn_vrij(huis: Node) -> void:
-	var p: CharacterBody2D = huis.get_node("Objects/Player")
 	var spawn: Node2D = huis.get_node_or_null("Spawns/binnen")
 	t.check("spawnpunt 'binnen' bestaat", spawn != null)
 	if spawn == null:
 		return
 	var tegel: Vector2i = spawn.get_tile() if spawn.has_method("get_tile") else Vector2i((spawn.position / 16.0).floor())
+	t.check("spawn 'binnen' op (8,18) omhoog", tegel == Build.SPAWN_TEGEL and spawn.facing == Vector2i.UP)
+	var p: CharacterBody2D = huis.get_node("Objects/Player")
 	var hit: Array = _blokkers(p, tegel)
 	t.check("spawn 'binnen' niet in botsing (%s op %s)" % [hit, tegel], hit.is_empty())
 	if huis.has_method("tegel_vrij"):
 		t.check("spawn-tegel is vrij volgens de kaart", huis.tegel_vrij(tegel))
 
 
-func _meubels(huis: Node) -> void:
-	var tops: Array[Vector2i] = []
-	for laag in [huis.ground, huis.annex]:
-		if laag == null:
-			continue
-		for tegel in laag.get_used_cells():
-			if laag.get_cell_atlas_coords(tegel) == Vector2i(10, 0):
-				tops.append(tegel)
-	t.check("beide slaapkamers hebben een bed (bed-tegels %s)" % [tops], tops.size() >= 2
-			and huis.get_node_or_null("Objects/BedDax") != null
-			and huis.get_node_or_null("Objects/BedOpa") != null)
-	t.check("keuken bestaat (fornuis + aanrecht)", huis.get_node_or_null("Objects/Kitchen") != null
-			and huis.ground.get_cell_atlas_coords(Kamers.KEUKEN_FORNUIS) == Vector2i(8, 0)
-			and huis.ground.get_cell_atlas_coords(Kamers.KEUKEN_AANRECHT) == Vector2i(8, 0))
-	t.check("twee stoelen in de woonkamer (tafelstoel + extra)", 
-			huis.ground.get_cell_atlas_coords(Vector2i(9, 5)) == Vector2i(9, 0)
-			and huis.ground.get_cell_atlas_coords(Kamers.STOEL_2) == Vector2i(9, 0))
-	t.check("kasten in beide slaapkamers", huis.get_node_or_null("Objects/CupboardDax") != null
-			and huis.get_node_or_null("Objects/CupboardOpa") != null)
-	t.check("binnendeuren tussen de kamers", huis.get_node_or_null("Objects/DoorDax") != null
-			and huis.get_node_or_null("Objects/DoorOpa") != null
-			and huis.ground.get_cell_atlas_coords(Kamers.DEUR_DAX) == Vector2i(5, 0)
-			and huis.ground.get_cell_atlas_coords(Kamers.DEUR_OPA) == Vector2i(5, 0))
-	var used: Rect2i = huis.ground.get_used_rect()
-	t.check("woonkamer-Ground blijft 12x9 (%s)" % used, used.size == Vector2i(12, 9))
-
-
-func _deuren(huis: Node) -> void:
-	t.check("deuropening is drempel D, geen platte vloer",
-			huis.ground.get_cell_atlas_coords(Kamers.DEUR_DAX) == Vector2i(5, 0)
-			and huis.ground.get_cell_atlas_coords(Kamers.DEUR_OPA) == Vector2i(5, 0)
-			and huis.atlas_van(Kamers.DEUR_DAX) != Vector2i(0, 0)
-			and huis.atlas_van(Kamers.DEUR_OPA) != Vector2i(0, 0))
-	t.check("deurkozijn-placeholders 24x32 staan op de opening",
-			huis.get_node_or_null("Objects/DoorFrameDax") != null
-			and huis.get_node_or_null("Objects/DoorFrameOpa") != null
-			and huis.prop_maat("DoorFrameDax") == Kamers.KOZIJN_MAAT
-			and huis.prop_maat("DoorFrameOpa") == Kamers.KOZIJN_MAAT)
-	t.check("annex-drempel sluit aan op de woonkamer-deur",
-			huis.atlas_van(Vector2i(-1, 6)) == Vector2i(5, 0)
-			and huis.atlas_van(Vector2i(12, 6)) == Vector2i(5, 0))
-
-
 func _voordeur(huis: Node) -> void:
 	var deur: Array[Vector2i] = huis.voordeur_tegels()
-	t.check("voordeur minstens 2 tegels breed (%s)" % [deur], deur.size() >= 2
-			and Vector2i(4, 8) in deur and Vector2i(5, 8) in deur)
+	t.check("voordeur 2x2 op (8-9,19-20) (%s)" % [deur], deur.size() == 4
+			and Vector2i(8, 19) in deur and Vector2i(9, 20) in deur)
 	var uit := huis.get_node_or_null("Exits/NaarDorp")
-	t.check("uitgang dekt de hele voordeur en blijft voor_huis", uit != null
-			and uit.size_tiles.x >= 2 and str(uit.target_spawn) == "voor_huis"
-			and deur.all(func(d): return uit.contains(d)))
-	t.check("mat/drempel voor de voordeur",
-			huis.atlas_van(Kamers.VOORDEUR_MAT[0]).x in [12, 13, 14, 15, 16, 17, 18, 19, 20]
-			and huis.atlas_van(Kamers.VOORDEUR_MAT[1]).x in [12, 13, 14, 15, 16, 17, 18, 19, 20])
-	t.check("ART-props fornuis/kozijn/kasten 24x32",
-			huis.prop_maat("Kitchen") == Kamers.KOZIJN_MAAT
-			and huis.prop_maat("KitchenShelf") == Kamers.KOZIJN_MAAT
-			and huis.prop_maat("CupboardDax") == Kamers.KOZIJN_MAAT
-			and huis.prop_maat("DoorFrameDax") == Kamers.KOZIJN_MAAT)
+	t.check("uitgang dekt de voordeur en blijft voor_huis", uit != null
+			and uit.size_tiles == Build.EXIT_RECT.size and str(uit.target_spawn) == "voor_huis"
+			and uit.tile_rect() == Build.EXIT_RECT)
+	t.check("doormat-prop geplaatst", _prop_gevonden(huis, "doormat") != null)
+	t.check("front_door-prop geplaatst", _prop_gevonden(huis, "front_door") != null)
 
 
-func _inrichting(huis: Node) -> void:
-	var leeg: Array[Vector2i] = huis.lege_vloeren()
-	t.check("geen lege vloeren in slaapkamers en keuken %s" % [leeg], leeg.is_empty())
-	t.check("slaapkamer Dax heeft kleed + tafel + kast",
-			huis.atlas_van(Vector2i(-6, 2)) == Vector2i(12, 0)
-			and huis.atlas_van(Vector2i(-2, 4)) == Vector2i(8, 0)
-			and huis.get_node_or_null("Objects/CupboardDax") != null)
-	t.check("slaapkamer Opa heeft kleed + tafel + kast",
-			huis.atlas_van(Vector2i(17, 2)) == Vector2i(12, 0)
-			and huis.atlas_van(Vector2i(13, 4)) == Vector2i(8, 0)
-			and huis.get_node_or_null("Objects/CupboardOpa") != null)
-	t.check("keuken heeft kleed bij tafel en fornuis",
-			huis.atlas_van(Kamers.KEUKEN_KLEED) == Vector2i(16, 0)
-			and huis.atlas_van(Vector2i(9, 6)) == Vector2i(17, 0)
-			and huis.atlas_van(Vector2i(8, 4)) == Vector2i(19, 0))
+func _deurpalen(huis: Node) -> void:
+	for x in [7, 10]:
+		for y in [19, 20]:
+			var tegel := Vector2i(x, y)
+			t.check("stenen deurpaal %s geblokkeerd" % tegel, not huis.tegel_vrij(tegel))
+	for x in [8, 9]:
+		for y in [19, 20]:
+			t.check("uitgang-tegel %s vrij" % Vector2i(x, y), huis.tegel_vrij(Vector2i(x, y)))
+
+
+func _prop_gevonden(huis: Node, naam: String) -> Dictionary:
+	for p in huis.layout_props():
+		if str(p["name"]) == naam:
+			return p
+	return {}
+
+
+func _prop_op_tegel(huis: Node, naam: String, tegel: Vector2i) -> Dictionary:
+	for p in huis.layout_props():
+		if str(p["name"]) == naam and p["tile"] == tegel:
+			return p
+	return {}
+
+
+func _props_volgens_layout(huis: Node, layout: Dictionary) -> void:
+	var verwacht: Array = layout.get("props", [])
+	var geplaatst: Array = huis.layout_props()
+	t.check("alle layout-props geplaatst (%d/%d)" % [geplaatst.size(), verwacht.size()],
+			geplaatst.size() == verwacht.size())
+	for raw in verwacht:
+		if not (raw is Array) or raw.size() < 8:
+			continue
+		var naam: String = str(raw[0])
+		var tx: int = int(raw[1])
+		var ty: int = int(raw[2])
+		var w: int = int(raw[3])
+		var h: int = int(raw[4])
+		var dx: int = int(raw[5])
+		var dy: int = int(raw[6])
+		var coll: Variant = raw[7]
+		var gev := _prop_op_tegel(huis, naam, Vector2i(tx, ty))
+		if gev.is_empty():
+			t.check("prop %s op (%d,%d) ontbreekt" % [naam, tx, ty], false)
+			continue
+		t.check("prop %s op tegel (%d,%d)" % [naam, tx, ty],
+				gev["tile"] == Vector2i(tx, ty) and gev["offset"] == Vector2i(dx, dy)
+				and gev["size"] == Vector2i(w, h))
+		if naam == "doorframe_32":
+			t.check("doorframe_32 is 32x32", gev["size"] == Vector2i(32, 32))
+		if coll is Array and not coll.is_empty():
+			for c in coll:
+				if c is Array and c.size() >= 2:
+					var tegel := Vector2i(int(c[0]), int(c[1]))
+					t.check("prop %s blokkeert %s" % [naam, tegel], not huis.tegel_vrij(tegel))
 
 
 func _camera(huis: Node) -> void:
-	t.check("camera 16:9 (384x216) zonder zwart vlak", huis.dek_camera(Kamers.VP_16_9))
-	t.check("camera 19,5:9 (468x216) zonder zwart vlak", huis.dek_camera(Kamers.VP_195_9))
-
-
-func _props(huis: Node) -> void:
-	for naam in huis.PROP_NAMEN:
-		t.check("prop %s heeft collision" % naam, huis.prop_heeft_botsing(naam))
+	t.check("camera 16:9 (384x216) zonder zwart vlak", huis.dek_camera(Build.VP_16_9))
+	t.check("camera 19,5:9 (468x216) zonder zwart vlak", huis.dek_camera(Build.VP_195_9))
+	var p: CharacterBody2D = huis.get_node("Objects/Player")
+	var cam: Camera2D = p.camera
+	t.check("camera-limieten 0..512 x 0..336",
+			cam.limit_left == 0 and cam.limit_top == 0
+			and cam.limit_right == Build.ROOM_PX.x and cam.limit_bottom == Build.ROOM_PX.y)
 
 
 func _alles_bereikbaar(huis: Node) -> void:
-	var start := Vector2i(4, 7)
+	var start := Build.SPAWN_TEGEL
 	var bereik: Dictionary = huis.bereik_van(start)
 	var vrij: Array[Vector2i] = huis.vrije_tegels()
 	var gemist: Array[Vector2i] = []
@@ -191,7 +184,7 @@ func _alles_bereikbaar(huis: Node) -> void:
 			gemist.append(tegel)
 	t.check("elke vrije tegel bereikbaar vanaf spawn (BFS %d vrij, %d bereik, gemist %s)" % [
 			vrij.size(), bereik.size(), gemist],
-			gemist.is_empty() and vrij.size() == bereik.size() and vrij.size() > 20)
+			gemist.is_empty() and vrij.size() == bereik.size() and vrij.size() > 80)
 
 
 func _markers(huis: Node) -> void:
@@ -201,11 +194,24 @@ func _markers(huis: Node) -> void:
 	t.check("opslagboek-marker aanwezig", huis.get_node_or_null("Objects/SaveBook") != null)
 	t.check("Opa-marker aanwezig", huis.get_node_or_null("Objects/OudeMan") != null)
 	var boek: Node = huis.get_node_or_null("Objects/SaveBook")
-	t.check("opslagboek nog op (8,3)", boek != null and boek.position == Vector2(8 * 16 + 8, 3 * 16 + 8))
+	t.check("opslagboek op (8,3)", boek != null and boek.position == Vector2(8 * 16 + 8, 3 * 16 + 8))
 	var bed: Node2D = huis.get_node_or_null("Spawns/bed")
-	t.check("spawn 'bed' nog op (2,3)", bed != null and bed.has_method("get_tile") and bed.get_tile() == Vector2i(2, 3))
+	t.check("spawn 'bed' op (2,3)", bed != null and bed.has_method("get_tile") and bed.get_tile() == Vector2i(2, 3))
 	var lezen: Node2D = huis.get_node_or_null("Spawns/lezen")
-	t.check("spawn 'lezen' nog op (9,5)", lezen != null and lezen.has_method("get_tile") and lezen.get_tile() == Vector2i(9, 5))
+	t.check("spawn 'lezen' op (9,5)", lezen != null and lezen.has_method("get_tile") and lezen.get_tile() == Vector2i(9, 5))
+	t.check("twee bedden (bed_rood + bed_blauw)",
+			_prop_gevonden(huis, "bed_rood") != {} and _prop_gevonden(huis, "bed_blauw") != {})
+	t.check("keuken (fornuis + kast)",
+			_prop_gevonden(huis, "keuken_fornuis") != {} and _prop_gevonden(huis, "keukenkast") != {})
+	t.check("twee deurframe_32 in gang", _telt_props(huis, "doorframe_32") == 2)
+
+
+func _telt_props(huis: Node, naam: String) -> int:
+	var n := 0
+	for p in huis.layout_props():
+		if str(p["name"]) == naam:
+			n += 1
+	return n
 
 
 func _uitgang_bereikbaar(huis: Node) -> void:
@@ -215,12 +221,12 @@ func _uitgang_bereikbaar(huis: Node) -> void:
 			and str(uit.event) == "huis_uit")
 	if uit == null or not huis.has_method("tegel_vrij"):
 		return
-	var start := Vector2i(4, 7)
+	var start := Build.SPAWN_TEGEL
 	var doel: Vector2i = uit.tile_rect().position
 	t.check("uitgang bereikbaar vanaf spawn (BFS %s -> %s)" % [start, doel], _bereikbaar(huis, start, doel))
-	t.check("slaapkamer Dax bereikbaar", _bereikbaar(huis, start, Vector2i(-3, 6)))
-	t.check("slaapkamer Opa bereikbaar", _bereikbaar(huis, start, Vector2i(14, 6)))
-	t.check("keukenhoek bereikbaar", _bereikbaar(huis, start, Vector2i(10, 6)))
+	t.check("slaapkamer links bereikbaar", _bereikbaar(huis, start, Vector2i(2, 5)))
+	t.check("slaapkamer rechts bereikbaar", _bereikbaar(huis, start, Vector2i(28, 5)))
+	t.check("keuken bereikbaar", _bereikbaar(huis, start, Vector2i(14, 5)))
 
 
 func _bereikbaar(huis: Node, van: Vector2i, naar: Vector2i) -> bool:
@@ -247,12 +253,12 @@ func _bereikbaar(huis: Node, van: Vector2i, naar: Vector2i) -> bool:
 func _loop_naar_deur(huis: Node) -> void:
 	if t.player() == null:
 		return
-	# Vanuit (4,7) dezelfde route als de bestaande huis-test: naar de voordeur.
-	await t.walk("move_down", 1)
+	await t.walk("move_up", 1)
+	t.check("vanaf spawn één stap omhoog vrij", t.map_name() == "Huis" and t.tile() == Vector2i(8, 17))
+	await t.walk("move_down", 2)
 	t.check("voordeur-tegel bereikt te voet", t.map_name() == "Wilgendal" or (
-			t.map_name() == "Huis" and t.tile() == Vector2i(4, 8)))
+			t.map_name() == "Huis" and t.tile().y >= 19))
 	if t.map_name() == "Huis":
-		# Nog één stap als de uitgang nog niet afging (fade).
 		await t.walk("move_down", 1)
-	t.check("uitgang werkt: terug naar buiten of op de drempel", 
-			t.map_name() == "Wilgendal" or (huis.is_inside_tree() and t.tile().y >= 7))
+	t.check("uitgang werkt: terug naar buiten of op de drempel",
+			t.map_name() == "Wilgendal" or (huis.is_inside_tree() and t.tile().y >= 19))
