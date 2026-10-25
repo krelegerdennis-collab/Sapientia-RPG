@@ -93,7 +93,9 @@ func tegel_vrij(tegel: Vector2i) -> bool:
 	if objects == null:
 		return true
 	for kind in objects.get_children():
-		if kind is StaticBody2D and kind.position.distance_to(_midden(tegel)) < 8.1:
+		# Verborgen story-NPC's (collision_layer 0) tellen niet; de speler loopt erdoor.
+		if kind is StaticBody2D and kind.collision_layer != 0 \
+				and kind.position.distance_to(_midden(tegel)) < 8.1:
 			return false
 	return true
 
