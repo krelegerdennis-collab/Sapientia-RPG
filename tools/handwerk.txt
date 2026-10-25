@@ -829,3 +829,6 @@ assets/sprites/enemies/stone_gargoyle_96.png
 assets/sprites/enemies/void_spider_96_sheet.png
 assets/sprites/enemies/void_spider_96_sheet_left.png
 assets/sprites/enemies/void_spider_96.png
+assets/sprites/enemies/treant_stump_96_sheet.png
+assets/sprites/enemies/treant_stump_96_sheet_left.png
+assets/sprites/enemies/treant_stump_96.png
