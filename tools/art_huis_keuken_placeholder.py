@@ -46,10 +46,27 @@ def deurkozijn() -> Image.Image:
     return img
 
 
+def kast(keuken: bool) -> Image.Image:
+    img = Image.new("RGBA", (24, 32), (0, 0, 0, 0))
+    drw = ImageDraw.Draw(img)
+    romp = (64, 72, 48, 255) if keuken else HOUT
+    drw.rectangle([3, 4, 20, 31], fill=romp, outline=DONKER)
+    drw.rectangle([5, 7, 18, 14], fill=DONKER)
+    drw.rectangle([5, 17, 18, 28], fill=DONKER)
+    drw.rectangle([6, 8, 17, 13], fill=LICHT)
+    knop = (220, 96, 40, 255) if keuken else INK
+    drw.rectangle([11, 21, 13, 24], fill=knop)
+    drw.text((7, 0), "PH", fill=INK)
+    corners(img)
+    return img
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     fornuis().save(OUT / "keuken_fornuis_PLACEHOLDER.png")
     deurkozijn().save(OUT / "deurkozijn_PLACEHOLDER.png")
+    kast(True).save(OUT / "keuken_kast_PLACEHOLDER.png")
+    kast(False).save(OUT / "slaapkamer_kast_PLACEHOLDER.png")
 
 
 if __name__ == "__main__":
