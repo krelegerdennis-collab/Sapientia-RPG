@@ -48,7 +48,9 @@ func _ready() -> void:
 	KaartStijl.toepassen(self)
 	AtlasZuinig.toepassen(self)      # geen tweede (opgevulde) kopie van elke tegelatlas in het geheugen
 	_fit_camera()
-	get_viewport().size_changed.connect(_fit_camera)
+	var vp := get_viewport()
+	if vp != null and not vp.size_changed.is_connected(_fit_camera):
+		vp.size_changed.connect(_fit_camera)
 
 	if GameState.has_return_point and GameState.return_map == scene_file_path:
 		# Terug uit een gevecht: zelfde tile en kijkrichting.

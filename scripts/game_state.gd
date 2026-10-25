@@ -3061,8 +3061,10 @@ func _unique_seen_flags() -> void:
 ## (verslagen of gevangen): de Golemhal gaat pas open als hij in de Codex staat, dus die krijgt hem alsnog en
 ## de vang-tutorial telt als gezien. 'Gevangen' en daarna gefuseerd: wel de vlag, geen nieuwe pagina. Codex
 ## vol: geen pagina (de uitgang gaat dan al open, zie StoryData.GOLEMHAL_EXIT); volgende load probeert het weer.
-## Een nieuwe save (mét marker) wordt nooit gemigreerd: tussen tutorial 1 en 2 speelt de vang-tutorial gewoon.
-func _codex_inktwurm_sync(oude_save := false) -> void:
+## Default oude_save=true: een directe aanroep (na unique_done) zet de pagina/vlag, zodat uid-volgorde
+## (codex_0001..) en codex_next_id kloppen bij save/load. apply_state / respawn geven de marker expliciet
+## door: een nieuwe save (mét marker) wordt nooit gemigreerd, tussen tutorial 1 en 2 speelt de vang-tutorial.
+func _codex_inktwurm_sync(oude_save := true) -> void:
 	var flag := StoryData.CODEX_INKTWURM_FLAG
 	for page in codex_pages:
 		if str(page.get("species", "")) == "inktwurm":
