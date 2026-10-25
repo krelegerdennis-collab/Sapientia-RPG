@@ -47,6 +47,7 @@ const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
 const SomActionAttacks := preload("res://scripts/data/som_action_attacks.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
+const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
 
@@ -69,6 +70,7 @@ var codex: Node
 ## Doel-lock (tap + auto-lock in bereik)
 var target_lock: Node2D
 var gauge: Node2D
+var telegraph_layer: TelegraphLayer
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
 var queued := {}
 var _queue_t := 0.0
@@ -189,6 +191,9 @@ func setup(p_room: Node) -> void:
 	target_lock.name = "SomTargetLock"
 	target_lock.setup(self)
 	objects.add_child(target_lock)
+	telegraph_layer = TelegraphLayer.new()
+	objects.add_child(telegraph_layer)
+	objects.move_child(telegraph_layer, 0)
 
 
 ## Kaartsheet van Dax via KaartStijl (#169): speler_sheet() van het gebied van deze kamer als Dax leidt
@@ -527,6 +532,7 @@ func _sim_world(dt: float) -> void:
 			if is_instance_valid(a) and not a.is_queued_for_deletion():
 				keep.append(a)
 	_sim_anims = keep
+	_sync_telegraph_draw()
 
 
 ## Animatie op de vaste stap zetten (geen eigen _process-tijd meer).
@@ -872,6 +878,13 @@ func _pose_tick(m: Node, e: Dictionary, delta: float) -> void:
 
 
 ## Dichtstbijzijnde levende held (id) voor een vijand.
+func _slot_for_hero(hero_id: String) -> int:
+	for slot in _coop_slots.keys():
+		if str(_coop_slots[slot]) == hero_id:
+			return int(slot)
+	return Protocol.NO_SLOT
+
+
 func _target_for(m: Node) -> String:
 	if coop_mode:
 		var hid: String = str(_coop_slots.get(0, "dennis"))
@@ -977,6 +990,17 @@ func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
 			e["chase"] = SomData.CHASE_INTERVAL
 			_step_toward(m, body_of(tid))
 	_tint(m, e)
+
+
+func _sync_telegraph_draw() -> void:
+	if telegraph_layer == null:
+		return
+	telegraph_layer.sync_from_enemies(enemies, Callable(self, "_telegraph_interruptible"))
+
+
+func _telegraph_interruptible(attack_id: String) -> bool:
+	var def: Dictionary = SomActionAttacks.attack(attack_id)
+	return bool(def.get("interruptible", false))
 
 
 func _sync_telegraph_meters(e: Dictionary, tg: TelegraphAttack) -> void:
@@ -1385,6 +1409,7 @@ func _say(text: String) -> void:
 const CoopAvatar := preload("res://scripts/coop/coop_avatar.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
+const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
 
 
 func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
@@ -1747,14 +1772,20 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 		if not is_instance_valid(m) or not enemies.has(m):
 			continue
 		var e: Dictionary = enemies[m]
-		elist.append({
+		var tid := str(e.get("target", ""))
+		var tslot := _slot_for_hero(tid)
+		if tslot == Protocol.NO_SLOT:
+			tslot = Protocol.HOST_SLOT
+		var base := {
 			"idx": i,
 			"x": int(center_of(m).x),
 			"y": int(center_of(m).y),
 			"hp": int(e.get("hp", 0)),
 			"pose": 0,
-			"target_slot": Protocol.HOST_SLOT,
-		})
+			"target_slot": tslot,
+		}
+		var tg: TelegraphAttack = e.get("tg", null)
+		elist.append(TelegraphSnapshot.merge_enemy_row(base, tg, tslot))
 	return Codec.pack_snapshot(tick, players, elist)
 
 
@@ -1793,6 +1824,10 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 		var cx := float(row.get("x", 0))
 		var cy := float(row.get("y", 0))
 		m.position = Vector2(cx, cy) - Vector2(0, center_of(m).y - m.position.y)
+		if not coop_sim_host and room != null:
+			TelegraphSnapshot.apply_row_to_enemy(e, row, room.room_id, room.tier())
+	if not coop_sim_host:
+		_sync_telegraph_draw()
 
 
 func coop_snapshot() -> Dictionary:
