@@ -47,6 +47,7 @@ const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
 const SomActionAttacks := preload("res://scripts/data/som_action_attacks.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
+const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
 
@@ -69,6 +70,7 @@ var codex: Node
 ## Doel-lock (tap + auto-lock in bereik)
 var target_lock: Node2D
 var gauge: Node2D
+var telegraph_layer: TelegraphLayer
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
 var queued := {}
 var _queue_t := 0.0
@@ -189,6 +191,9 @@ func setup(p_room: Node) -> void:
 	target_lock.name = "SomTargetLock"
 	target_lock.setup(self)
 	objects.add_child(target_lock)
+	telegraph_layer = TelegraphLayer.new()
+	objects.add_child(telegraph_layer)
+	objects.move_child(telegraph_layer, 0)
 
 
 ## Kaartsheet van Dax via KaartStijl (#169): speler_sheet() van het gebied van deze kamer als Dax leidt
@@ -527,6 +532,7 @@ func _sim_world(dt: float) -> void:
 			if is_instance_valid(a) and not a.is_queued_for_deletion():
 				keep.append(a)
 	_sim_anims = keep
+	_sync_telegraph_draw()
 
 
 ## Animatie op de vaste stap zetten (geen eigen _process-tijd meer).
@@ -977,6 +983,17 @@ func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
 			e["chase"] = SomData.CHASE_INTERVAL
 			_step_toward(m, body_of(tid))
 	_tint(m, e)
+
+
+func _sync_telegraph_draw() -> void:
+	if telegraph_layer == null:
+		return
+	telegraph_layer.sync_from_enemies(enemies, Callable(self, "_telegraph_interruptible"))
+
+
+func _telegraph_interruptible(attack_id: String) -> bool:
+	var def: Dictionary = SomActionAttacks.attack(attack_id)
+	return bool(def.get("interruptible", false))
 
 
 func _sync_telegraph_meters(e: Dictionary, tg: TelegraphAttack) -> void:
