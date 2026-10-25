@@ -13,6 +13,7 @@ signal bumped(tile: Vector2i)
 
 const TILE_SIZE := 16
 const SomMove := preload("res://scripts/som/som_move.gd")
+const SomSlide := preload("res://scripts/som/som_slide.gd")
 
 ## TODO.md "run feature" (CANON): RUN aan = 2 tegels per zet, sprite 2x zo snel. Toggle via de
 ## RUN-knop (touch, boven CORE) of toets R (actie "run"); de stand staat in Settings ("run").
@@ -189,9 +190,9 @@ func set_analog(provider: Callable, speed := 80.0) -> void:
 	var cs := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if cs and provider.is_valid():
 		var r := RectangleShape2D.new()
-		r.size = Vector2(10, 8)
+		r.size = SomSlide.HIT_SIZE
 		cs.shape = r
-		cs.position = Vector2(0, 3)
+		cs.position = SomSlide.HIT_OFF
 
 
 func _action_pose_active() -> bool:
@@ -216,7 +217,22 @@ func _process_analog(delta: float) -> void:
 	var old_tile := get_tile()
 	velocity = v * analog_speed
 	if velocity != Vector2.ZERO:
-		move_and_slide()
+		# Logische tegels (is_wall) gaan voor op TileSet-physics: die cache deelt
+		# kamers en kan na AtlasZuinig/grote frames 1–2 px in een muur tunnelllen.
+		var wall := Callable(self, "_tegel_is_muur")
+		var left := delta
+		var speed := velocity.length()
+		while left > 0.0001:
+			var dt := left
+			if speed > 0.0 and speed * dt > SomSlide.MAX_STAP_PX:
+				dt = SomSlide.MAX_STAP_PX / speed
+			var voor := position
+			var want := SomSlide.corrigeer(voor, voor + velocity * dt, wall)
+			var motion := want - position
+			if motion != Vector2.ZERO:
+				move_and_collide(motion)
+			position = SomSlide.corrigeer(voor, position, wall)
+			left -= dt
 	var moved := position.distance_to(before)
 	if moved > 0.001:
 		_walk_distance += moved
@@ -231,6 +247,17 @@ func _process_analog(delta: float) -> void:
 			_bump_tile = get_tile() + facing
 			_try_bump()
 	_update_sprite()
+
+
+## Kamer-`is_wall` (data), niet de TileSet-physics. Geen node-cache: bij een
+## kaartwissel zou een vastgehouden kamer-ref anders stale botsing geven.
+func _tegel_is_muur(t: Vector2i) -> bool:
+	var n: Node = get_parent()
+	while n != null:
+		if n.has_method("is_wall"):
+			return n.is_wall(t)
+		n = n.get_parent()
+	return false
 
 
 ## Beweeg richting het doel; geeft terug hoeveel beweging er "over" is.

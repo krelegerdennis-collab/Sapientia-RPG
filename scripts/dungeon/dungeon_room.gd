@@ -19,6 +19,7 @@ extends "res://scripts/map.gd"
 ## De monsters staan stil zolang er een tekstvak, het veldmenu, een cutscene of een overgang is.
 
 const Archief2Ground := preload("res://scripts/data/archief2_ground.gd")
+const AtlasZuinig := preload("res://scripts/core/atlas_zuinig.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
 const BOOK_SCENE := "res://scenes/book_point.tscn"
@@ -592,6 +593,9 @@ static func tileset(collide := true, theme := "") -> TileSet:
 			if collide and DungeonRooms.is_solid(num, theme):
 				td.add_collision_polygon(0)
 				td.set_collision_polygon_points(0, 0, PackedVector2Array([Vector2(-8, -8), Vector2(8, -8), Vector2(8, 8), Vector2(-8, 8)]))
+	# Padding uit ZONDER later de gedeelde cache te muteren (map.gd AtlasZuinig
+	# op een live TileSet liet physics 1 frame/px verschuiven → muur-glijden flake).
+	AtlasZuinig.tileset_zuinig(ts)
 	_tilesets[key] = ts
 	return ts
 
