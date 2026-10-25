@@ -1479,6 +1479,7 @@ func stage_graan() -> void:
 # ---------------------------------------------------------------- 5 de kas via de directe ingang
 func stage_greenhouse_route() -> void:
 	print("=== 5 kas: directe route (wereldkaart -> kas -> Kasgang) ===")
+	check("[STATE] kas-route: Vesper in de groep", Story.has_flag("noor_lid") and GameState.has_member("noor"))
 	check("wereldkaart -> kas", await through("NaarKas", M + "leven_ingang.tscn"))
 	var route := dungeon_route(M + "leven_ingang.tscn", M + "archief_2_v2_gang.tscn", "leven")
 	check("[BLOCKER] kas -> Kasgang bestaat (%s)" % [route.map(func(x): return str(x).get_file())], route.size() == 3)
@@ -1684,10 +1685,9 @@ func stage_action_mode() -> void:
 
 
 # ---------------------------------------------------------------- 10 volgordebreuk
-## De kas gaat open op de Golem-vlag alleen (naar_leven): wie direct na Archief 1 de kas in gaat, slaat
-## Esdoorn, het Woud en de berggrot over. Dat moet tot en met de hub werken (ook zonder Vesper).
+## Na de Golem zou route A (kas) Esdoorn, woud en berggrot overslaan; zonder Vesper blijft naar_leven dicht.
 func stage_sequence_break() -> void:
-	print("=== 10 volgordebreuk: direct na de Golem de kas in, zonder Vesper ===")
+	print("=== 10 volgordebreuk: kas-poort dicht zonder Vesper na de Golem ===")
 	if _snap_after_golem.is_empty():
 		check("[BLOCKER] geen save van na de Golem om de volgordebreuk mee te spelen", false)
 		return
@@ -1707,11 +1707,6 @@ func stage_sequence_break() -> void:
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	check("[STATE] volgordebreuk: Vesper is er niet bij", not GameState.has_member("noor") and not Story.has_flag("noor_lid"))
 	await use_warper("Golem-hal (volgordebreuk)")
-	check("kas direct na de Golem", await through("NaarKas", M + "leven_ingang.tscn"))
-	var route := exit_route(M + "leven_ingang.tscn", GENEZER)
-	check("[BLOCKER] route kas -> Mender bestaat zonder berggrot (%d kamers)" % route.size(), route.size() >= 8)
-	for i in range(1, route.size()):
-		if not await traverse(route[i], "volgordebreuk"):
-			return
-	await mender_fight()
-	await stage_hub()
+	await use_exit("NaarKas")
+	await settle("kas dicht zonder Vesper")
+	check("[BLOCKER] kas dicht zonder Vesper na de Golem", scene().scene_file_path == WORLD)

@@ -9,9 +9,9 @@
 		{"id": "vergeten_archieven", "ids": ["vergeten_archieven"], "name": "Dust and Forgotten Words", "where": "Forgotten Archives"},
 		{"id": "gevecht_normaal", "ids": ["gevecht_normaal"], "name": "Clockwork in Motion", "where": "Battle"},
 		{"id": "gevecht_miniboss", "ids": ["gevecht_miniboss"], "name": "The Weight of Steel", "where": "Boss battle"},
-		{"id": "berggrot", "ids": ["berggrot"], "name": "Echoes in the Collapse", "where": "Cave / tunnel"},
-		{"id": "levend_archief", "ids": ["levend_archief"], "name": "Shelves of Glass and Root", "where": "Archive 2"},
-		{"id": "baas_archief2", "ids": ["baas_archief2"], "name": "The Overgrown Index", "where": "Archive 2 boss"},
-		{"id": "diepe_grot", "ids": ["diepe_grot", "ww_ambient"], "name": "Epoch 100", "where": "DLS"}
+		{"id": "berggrot", "ids": ["berggrot"], "name": "Echoes in the Collapse", "where": "Hollow Mountain"},
+		{"id": "levend_archief", "ids": ["levend_archief"], "name": "Shelves of Glass and Root", "where": "The Living Archive"},
+		{"id": "baas_archief2", "ids": ["baas_archief2"], "name": "The Overgrown Index", "where": "The Mender"},
+		{"id": "diepe_grot", "ids": ["diepe_grot", "ww_ambient"], "name": "Epoch 100", "where": "Deep Learning Simulation"}
 	]
 }

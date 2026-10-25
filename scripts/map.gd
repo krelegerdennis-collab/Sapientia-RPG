@@ -48,7 +48,9 @@ func _ready() -> void:
 	KaartStijl.toepassen(self)
 	AtlasZuinig.toepassen(self)      # geen tweede (opgevulde) kopie van elke tegelatlas in het geheugen
 	_fit_camera()
-	get_viewport().size_changed.connect(_fit_camera)
+	var vp := get_viewport()
+	if vp != null and not vp.size_changed.is_connected(_fit_camera):
+		vp.size_changed.connect(_fit_camera)
 
 	if GameState.has_return_point and GameState.return_map == scene_file_path:
 		# Terug uit een gevecht: zelfde tile en kijkrichting.
@@ -205,12 +207,23 @@ func menu_closed_hook() -> void:
 	pass
 
 
-func _set_touch_visible(on: bool) -> void:
+## Touch-laag: cache alleen zolang de node in de boom zit (kaartwissel / test
+## die TouchControls vervangt zou anders een stale Control houden).
+func _touch() -> Control:
+	if _touch_control != null and (not is_instance_valid(_touch_control) or not _touch_control.is_inside_tree()):
+		_touch_control = null
 	if _touch_control == null:
+		_touch_control = get_node_or_null("TouchControls/Control") as Control
+	return _touch_control
+
+
+func _set_touch_visible(on: bool) -> void:
+	var touch := _touch()
+	if touch == null:
 		return
-	if not on and _touch_control.has_method("release_all"):
-		_touch_control.release_all()
-	_touch_control.visible = on
+	if not on and touch.has_method("release_all"):
+		touch.release_all()
+	touch.visible = on
 
 
 ## v0.11 Automatisch opslaan vanaf deze map (op de tile van de speler), alleen als het
@@ -263,20 +276,21 @@ func screen_open() -> bool:
 
 func _process(_delta: float) -> void:
 	# MENU-knop verbergen zolang er een tekstvak of menu open is (anders valt hij erover)
-	if _touch_control and not menu_open():
+	var touch := _touch()
+	if touch and not menu_open():
 		var vis := not screen_open()
-		if _touch_control.visible != vis:
+		if touch.visible != vis:
 			_set_touch_visible(vis)
-	if _touch_control and "show_menu" in _touch_control:
+	if touch and "show_menu" in touch:
 		var want: bool = not Dialog.is_open and not menu_open() and not Story.running
-		if _touch_control.show_menu != want:
-			_touch_control.show_menu = want
-		if "show_run" in _touch_control:
-			if _touch_control.show_run != want:
-				_touch_control.show_run = want
-			elif want and _touch_control.run_on() != _run_drawn:
-				_touch_control.queue_redraw()
-			_run_drawn = _touch_control.run_on()
+		if touch.show_menu != want:
+			touch.show_menu = want
+		if "show_run" in touch:
+			if touch.show_run != want:
+				touch.show_run = want
+			elif want and touch.run_on() != _run_drawn:
+				touch.queue_redraw()
+			_run_drawn = touch.run_on()
 	# Veldmenu (Esc/M/Tab of de MENU-knop): alleen als de speler stil staat
 	if Input.is_action_just_pressed("menu") and not menu_open() and not player.is_moving \
 			and not player.input_locked and not Dialog.is_open and not GameState.changing_map and not Story.running \

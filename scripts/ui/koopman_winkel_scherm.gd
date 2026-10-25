@@ -30,7 +30,7 @@ func _show_koop() -> void:
 		var label := "%s  %dg" % [str(row["name"]), int(row["price"])]
 		if int(row.get("grade", 0)) > 0:
 			label = "[G%d] %s" % [int(row["grade"]), label]
-		var b := _row(label)
+		var b := _row(label, str(row["id"]))
 		b.pressed.connect(_on_buy.bind(str(row["id"]), "item"))
 		content.add_child(b)
 	if content.get_child_count() > 1:
@@ -50,7 +50,7 @@ func _show_verkoop() -> void:
 		back_b.grab_focus()
 		return
 	for row in rows:
-		var b := _row("%s x%d  %dg" % [str(row["name"]), int(row["n"]), int(row["price"])])
+		var b := _row("%s x%d  %dg" % [str(row["name"]), int(row["n"]), int(row["price"])], str(row["id"]))
 		b.pressed.connect(_on_sell.bind(str(row["id"])))
 		content.add_child(b)
 	(content.get_child(1) as Control).grab_focus()

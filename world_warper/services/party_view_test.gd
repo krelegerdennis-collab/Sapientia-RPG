@@ -2,14 +2,14 @@ extends RefCounted
 ## Zuivere regels voor het kijk-scherm Gezelschap. Geen node, geen GameState, geen load().
 ##
 ## lines(members) leest alleen de meegegeven Array.
-## Elke Dictionary wordt "Naam, niveau N".
+## Elke Dictionary wordt "Naam, Lv N".
 ## Lege array -> lege lijst.
-## Ontbrekend naamveld, null of lege tekst -> "Onbekend".
+## Ontbrekend naamveld, null of lege tekst -> "Unknown".
 ## Ontbrekend niveau of geen getal -> 1 (startniveau van een nieuwe held).
 ## Alles wat geen Dictionary is, slaat de functie over.
 
 
-const ONBEKEND := "Onbekend"
+const ONBEKEND := "Unknown"
 
 
 static func lines(members: Array) -> Array[String]:
@@ -17,7 +17,7 @@ static func lines(members: Array) -> Array[String]:
 	for entry in members:
 		if entry is Dictionary:
 			var row: Dictionary = entry
-			out.append("%s, niveau %d" % [_naam(row), _niveau(row)])
+			out.append("%s, Lv %d" % [_naam(row), _niveau(row)])
 	return out
 
 

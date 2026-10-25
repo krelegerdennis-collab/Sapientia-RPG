@@ -24,12 +24,12 @@ maar ongeveer 10%). `run_suite.sh` geeft 20 minuten.
 | 2 | Archief 1 | poorten dicht voor de Golem, 12 kamers echt lopen (BFS-pad met toetsen), puzzelkamer oplossen, Golem eerst verliezen (checkpoint) en dan winnen, uitgang-warper |
 | 3 | Esdoorn + Donker Woud | ontmoeting, herberg, opslagboek, Vesper-huis, 5 woudkamers, Wortelkoning, Vesper sluit aan, `menu_sweep` |
 | 4 | Het Zingende Graan | opdracht, zaad (gevecht), molen met opslaan |
-| 5 | Kas direct | wereldkaart -> kas -> Kasgang en terug |
+| 5 | Kas direct | wereldkaart -> kas (poort open: Golem verslagen **en** Vesper in de groep) -> Kasgang en terug |
 | 6 | Berggrot | bouwplaats (dicht zonder Vesper, open met), 5 kamers waarvan 2 puzzelkamers |
 | 7 | Archief 2 | platen, Seren (verlies = verhaal, ze sluit aan), Strangler, Mender, kern-absorptie, filmpje, canon-scène 1 |
 | 8 | Hub = einde WM1 | Hal, canon-scènes 2 en 3, veldmenu-sweep, opslaan, app gedood en doorgaan |
 | 9 | Action-stijl | de standaardstijl van een nieuw spel in een dungeon: pauze, opslaan/laden, lopen |
-| 10 | Volgordebreuk | direct na de Golem de kas in (zonder Vesper en berggrot) tot en met de hub |
+| 10 | Volgordebreuk | save direct na de Golem (zonder Vesper): kas-poort blijft dicht (hint op de wereldkaart); geen route kas -> hub zonder Vesper |
 
 ## Opslaan en pauze
 

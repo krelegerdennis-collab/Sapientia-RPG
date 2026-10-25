@@ -578,12 +578,15 @@ func walk(action: String, n: int) -> void:
 			return
 		Input.action_press(action)
 		var gewacht := 0
+		# process_frame, niet physics_frame: de speler loopt in _process (O-4). Onder load
+		# draait Godot tot 8 physics-stappen per beeld, zodat "wacht max. 8 physics-frames"
+		# afloopt vóór _process één keer met de toets draaide.
 		while is_instance_valid(p) and not p.is_moving and gewacht < 8:
-			await get_tree().physics_frame
+			await get_tree().process_frame
 			gewacht += 1
 		Input.action_release(action)
 		while is_instance_valid(p) and p.is_moving:
-			await get_tree().physics_frame
+			await get_tree().process_frame
 		if GameState.changing_map or Dialog.is_open or GameState.in_battle:
 			return
 

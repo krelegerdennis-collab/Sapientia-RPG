@@ -12,8 +12,15 @@ export XDG_DATA_HOME="$LOGDIR/xdg_$S"     # eigen user://-map per suite
 rm -rf "$XDG_DATA_HOME"; mkdir -p "$XDG_DATA_HOME"
 LOG="$LOGDIR/$S.log"
 START=$(date +%s)
-timeout 1200 xvfb-run -a "$GODOT" --rendering-driver opengl3 --path . -- --$S --shots="$LOGDIR/shots_$S" "$@" > "$LOG" 2>&1
-CODE=$?
+# xvfb-run -a kiest het displaynummer zonder lock: bij veel suites tegelijk pakken er twee hetzelfde en
+# start Godot niet ("X11 Display is not available", nog vóór de eerste testregel). Dan opnieuw (max. 3x).
+for POGING in 1 2 3; do
+  timeout 1200 xvfb-run -a "$GODOT" --rendering-driver opengl3 --path . -- --$S --shots="$LOGDIR/shots_$S" "$@" > "$LOG" 2>&1
+  CODE=$?
+  [ "$CODE" -ne 0 ] && grep -q 'X11 Display is not available' "$LOG" || break
+  rm -rf "$XDG_DATA_HOME"; mkdir -p "$XDG_DATA_HOME"
+  sleep $(( RANDOM % 4 + 1 ))
+done
 DUR=$(( $(date +%s) - START ))
 P=$(grep -c '^PASS' "$LOG"); F=$(grep -c '^FAIL' "$LOG"); E=$(grep -c 'SCRIPT ERROR' "$LOG")
 R=$(grep -E '^RESULT' "$LOG" | tail -1)
