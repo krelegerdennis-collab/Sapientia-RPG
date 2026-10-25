@@ -54,6 +54,11 @@ var _coop_lobby: Node = null
 var _coop_discovery: Node = null
 var _coop_session: Node = null
 var _coop_pending_message := ""
+## Fase B: solo-voortgang van een gast vóór co-op (geheugen); terug bij vertrek, geen duplicaat op eigen save.
+const COOP_GUEST_SAVE_PATH := "user://coop_guest_session.json"
+const COOP_GUEST_AUTOSAVE_PATH := "user://coop_guest_autosave.json"
+var _coop_guest_solo_snapshot: Dictionary = {}
+var _coop_guest_solo_paths: Dictionary = {}
 
 
 func coop_is_host() -> bool:
@@ -102,6 +107,7 @@ func coop_shutdown_session() -> void:
 
 
 func coop_end_session(reason: String = "") -> void:
+	var was_guest := coop_is_guest()
 	coop_shutdown_session()
 	if coop_is_host() and _coop_lobby != null and _coop_lobby.has_method("broadcast_session_end"):
 		if reason != "":
@@ -112,6 +118,47 @@ func coop_end_session(reason: String = "") -> void:
 		_coop_discovery.stop()
 	coop_role = ""
 	coop_clear_lobby_refs()
+	if was_guest:
+		_coop_restore_guest_solo()
+
+
+func _coop_snapshot_guest_solo() -> void:
+	if not _coop_guest_solo_snapshot.is_empty():
+		return
+	var map := return_map if return_map != "" else current_map
+	_coop_guest_solo_snapshot = state_data(return_tile, return_facing, map)
+	_coop_guest_solo_snapshot[CODEX_SYNC_KEY] = true
+	_coop_guest_solo_paths = {
+		"save_path": save_path,
+		"autosave_path": autosave_path,
+		"active_slot": active_slot,
+		"som_mode": som_mode,
+	}
+
+
+func _coop_restore_guest_solo() -> void:
+	if _coop_guest_solo_snapshot.is_empty():
+		_coop_purge_guest_save_files()
+		return
+	var snap := _coop_guest_solo_snapshot
+	var paths := _coop_guest_solo_paths
+	_coop_guest_solo_snapshot = {}
+	_coop_guest_solo_paths = {}
+	apply_state(snap)
+	save_path = str(paths.get("save_path", "user://save_1.json"))
+	autosave_path = str(paths.get("autosave_path", AUTOSAVE_PATH))
+	active_slot = int(paths.get("active_slot", 1))
+	som_mode = bool(paths.get("som_mode", false))
+	in_battle = false
+	changing_map = false
+	_coop_purge_guest_save_files()
+
+
+func _coop_purge_guest_save_files() -> void:
+	for p in [COOP_GUEST_SAVE_PATH, COOP_GUEST_AUTOSAVE_PATH]:
+		_remove_file(p)
+		_remove_file(p + ".tmp")
+		_remove_file(p + ".bak")
 
 
 func _on_coop_link_lost() -> void:
@@ -119,7 +166,7 @@ func _on_coop_link_lost() -> void:
 		return
 	var msg := "Connection lost."
 	coop_end_session("")
-	go_to_title()
+	go_to_title(true)
 	Dialog.show_lines([msg])
 
 
@@ -138,10 +185,8 @@ func _on_coop_session_ended(reason: String) -> void:
 		if path.ends_with("coop_lobby_screen.gd"):
 			return
 	var msg := coop_session_end_message(reason)
-	coop_shutdown_session()
-	coop_role = ""
-	coop_clear_lobby_refs()
-	go_to_title()
+	coop_end_session("")
+	go_to_title(true)
 	Dialog.show_lines([msg])
 
 
@@ -1414,8 +1459,7 @@ func _notification(what: int) -> void:
 		if _coop_pending_message != "":
 			var pending := _coop_pending_message
 			_coop_pending_message = ""
-			coop_role = ""
-			go_to_title()
+			go_to_title(true)
 			Dialog.show_lines([pending])
 	if what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
@@ -1960,11 +2004,12 @@ func start_som_coop_guest(character_id: String) -> void:
 	const SomData := preload("res://scripts/data/som_data.gd")
 	if changing_map or in_battle or not SomData.ENABLED or character_id == "":
 		return
+	_coop_snapshot_guest_solo()
 	coop_role = "guest"
 	_build_som_state()
 	leader_id = character_id if character_id != "" else MAIN_HERO
-	save_path = "user://coop_guest_session.json"
-	autosave_path = "user://coop_guest_autosave.json"
+	save_path = COOP_GUEST_SAVE_PATH
+	autosave_path = COOP_GUEST_AUTOSAVE_PATH
 	current_map = SomData.START_MAP
 	changing_map = false
 	await Transition.fade_out()
@@ -2191,9 +2236,14 @@ func start_new_game(hero_name: String) -> void:
 
 
 ## Terug naar het titelscherm (bv. vanuit het veldmenu, en in de autotest).
-func go_to_title() -> void:
-	if changing_map or in_battle:
+func go_to_title(force := false) -> void:
+	if not force and (changing_map or in_battle):
 		return
+	if force:
+		in_battle = false
+		changing_map = false
+	if coop_in_session():
+		coop_end_session("")
 	use_story_saves()
 	som_mode = false
 	if dungeon100_run_active():
