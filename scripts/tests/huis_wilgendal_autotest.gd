@@ -37,9 +37,9 @@ func run() -> void:
 	_meubels(huis)
 	_markers(huis)
 	_uitgang_bereikbaar(huis)
-	await _loop_naar_deur(huis)
 	if t.has_method("overworld_shot"):
 		await t.overworld_shot("_huis_kamers")
+	await _loop_naar_deur(huis)
 	Settings.set_value("battle_style", oude_stijl)
 	GameState.encounter_multiplier = oude_mult
 
@@ -137,6 +137,9 @@ func _uitgang_bereikbaar(huis: Node) -> void:
 	var start := Vector2i(4, 7)
 	var doel: Vector2i = uit.tile_rect().position
 	t.check("uitgang bereikbaar vanaf spawn (BFS %s -> %s)" % [start, doel], _bereikbaar(huis, start, doel))
+	t.check("slaapkamer Dax bereikbaar", _bereikbaar(huis, start, Vector2i(-3, 6)))
+	t.check("slaapkamer Opa bereikbaar", _bereikbaar(huis, start, Vector2i(14, 6)))
+	t.check("keukenhoek bereikbaar", _bereikbaar(huis, start, Vector2i(10, 6)))
 
 
 func _bereikbaar(huis: Node, van: Vector2i, naar: Vector2i) -> bool:

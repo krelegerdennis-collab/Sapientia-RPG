@@ -21,12 +21,12 @@ const ANNEX_MAP := [
 	"CCCCCCCCCCCCCCCCCCCCCCCC",
 	"CCCCCC            CCCCCC",
 	"USSWWU            UWSSUU",
-	"Lss..R            L..ssR",
-	"Lb...R            L...bR",
-	"Ld.h.R            L.h.dR",
-	"L....R            L....R",
+	"Lss..U            U..ssR",
+	"Lb...U            U...bR",
+	"Ld.h.U            U.h.dR",
+	"L....U            U....R",
 	"L....D            D....R",
-	"Lk...R            L...kR",
+	"Lk...U            U...kR",
 	"CCCCCC            CCCCCC",
 	"CCCCCCCCCCCCCCCCCCCCCCCC",
 	"CCCCCCCCCCCCCCCCCCCCCCCC",
@@ -63,6 +63,10 @@ static func verf(annex: TileMapLayer, ground: TileMapLayer) -> void:
 			annex.set_cell(tegel, 0, Vector2i(atlas(teken), 0))
 	for deur in WOON_DEUREN:
 		ground.set_cell(deur, 0, Vector2i(atlas("D"), 0))
+	# Scheidingswanden in de woonkamer: paneel i.p.v. dunne L/R-rand, deuropening blijft D.
+	for y in [2, 3, 4, 5, 7]:
+		ground.set_cell(Vector2i(0, y), 0, Vector2i(atlas("U"), 0))
+		ground.set_cell(Vector2i(11, y), 0, Vector2i(atlas("U"), 0))
 	ground.set_cell(STOEL_2, 0, Vector2i(atlas("h"), 0))
 	ground.set_cell(KEUKEN_AANRECHT, 0, Vector2i(atlas("t"), 0))
 	ground.set_cell(KEUKEN_FORNUIS, 0, Vector2i(atlas("t"), 0))
