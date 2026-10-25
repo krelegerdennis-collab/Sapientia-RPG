@@ -174,15 +174,14 @@ func _start_lotte(m: Node) -> void:
 		if int(p.get("hp", 0)) > 0:
 			pages.append(p)
 	var keuze: Dictionary
-	# Informatieve regels niet awaiten: start_monster_battle is fire-and-forget
-	# (somroomstest, aanraken). await Dialog.finished liet het TURN-BASED gevecht
-	# nooit starten als niemand de tekst doorklikte (CI op main: HP/ATK/DEF [] = []).
 	if pages.is_empty():
 		keuze = Archief2.bondgenoot_voor([], GameState.member_level("dennis"))
 		Dialog.show_lines(Archief2.GEEN_CODEX, "")
+		await Dialog.finished
 	elif pages.size() == 1:
 		keuze = Archief2.bondgenoot_voor(pages, GameState.member_level("dennis"))
 		Dialog.show_lines(["%s fights alongside you." % str(pages[0].get("name", "Monster"))], "")
+		await Dialog.finished
 	else:
 		var namen: Array = []
 		for p in pages:
