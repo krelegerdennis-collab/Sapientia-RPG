@@ -80,12 +80,21 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--questtest` | `scripts/tests/quest_tests.gd` | 63 |
 | `--echotest` | `scripts/tests/echo_tests.gd` | 12 |
 | `--battlesimtest` | `scripts/tests/battlesim_tests.gd` | 57 |
+| `--berggrotdextest` | `scripts/tests/berggrot_dex_tests.gd` | 91 |
+| `--savehardeningtest` | `scripts/tests/save_hardening_tests.gd` | 127 |
+| `--relaytest` | `scripts/tests/relay_tests.gd` | 89 |
+| `--testmodustest` | `scripts/tests/testmodus_tests.gd` | 9 |
+| `--wm1bugtest` | `scripts/tests/wm1_bugjacht_tests.gd` | 14 |
+| `--wm1openbugtest` | `scripts/tests/wm1_bugjacht_open_tests.gd` | 24 |
+| `--aabtest` | `scripts/tests/aab_tests.gd` | 70 |
 
 Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`
 schrijft `user://sim/battlesim_<policy>_s<seed>.csv`; `python3 tools/battlesim/rapport.py [csv|map]` geeft winrate, mediaan beurten en de zwaarste groepen.
 
 Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest archieftest kerntest kernkrachttest woudtest codextest checkpointtest dungeon100gentest dungeon100schaaltest dungeon100regelstest dungeon100integratietest dungeon100blauwtest actorsfxtest; do .github/scripts/run_suite.sh $s; done`
 (samen ~12 min; CI draait ze parallel). Een eigen `XDG_DATA_HOME` per suite houdt `user://` (saves/instellingen) gescheiden.
+
+`--relaytest` (online co-op via `relay/`) start zelf `node relay/server.js` en heeft Node >= 20 nodig; hij zit nog niet in de CI-matrix, draai hem lokaal (`relay/README.md`). Relay-unittests: `cd relay && npm ci && npm test`.
 
 **Nieuwe suite toevoegen:** script in `scripts/tests/<naam>_tests.gd` (zelfde PASS/FAIL/RESULT-format,
 `get_tree().quit(1 if failures else 0)`), een regel in de lijst in `scripts/game_state.gd` `_ready()`,

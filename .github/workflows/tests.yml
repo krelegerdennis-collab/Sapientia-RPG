@@ -28,7 +28,10 @@ jobs:
                 actorsfxtest, fusietest, catalogustest, updatetest, archief2test,
                 warperkamertest, hangertest, spiegeltest, berggrottest, pvptest,
                 wilgendaltest, questtest, tutorialtest, battlesimtest, echotest,
-                muziektest, sessielogtest, sessielogcoretest, locktest, nettest, netsynctest, coope2etest]
+                muziektest, sessielogtest, sessielogcoretest, locktest, nettest, netsynctest, coope2etest,
+                partytest, savetest, musictest, grotlayouttest, held24test,
+                rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
+                koopmantest, testmodustest, telegraphtest]
     steps:
       - uses: actions/checkout@v4
 

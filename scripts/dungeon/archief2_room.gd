@@ -165,10 +165,28 @@ func _zeg(lines: Array, speaker: String) -> void:
 		player.input_locked = false
 
 
+func _headless_suite() -> bool:
+	return Array(OS.get_cmdline_user_args()).any(
+			func(a): return str(a).begins_with("--") and str(a).ends_with("test"))
+
+
+## Info-regels vóór het Lotte-gevecht: in het spel wachten tot de speler klaar is; in suites niet
+## eeuwig blokkeren (som_rooms), maar wel tijd geven om het vak te sluiten (wm1-playthrough).
+func _wacht_gevecht_info() -> void:
+	if not _headless_suite():
+		await Dialog.finished
+		return
+	var t0 := Time.get_ticks_msec()
+	const MAX_MS := 3000
+	while Dialog.is_open and Time.get_ticks_msec() - t0 < MAX_MS:
+		await get_tree().process_frame
+	if Dialog.is_open:
+		Dialog.close()
+
+
 func _start_lotte(m: Node) -> void:
 	_touch_lock = true
 	last_touch_id = m.monster_id
-	var t := _prepare_battle(m.monster_id)
 	var pages: Array = []
 	for p in GameState.codex_pages:
 		if int(p.get("hp", 0)) > 0:
@@ -176,19 +194,21 @@ func _start_lotte(m: Node) -> void:
 	var keuze: Dictionary
 	if pages.is_empty():
 		keuze = Archief2.bondgenoot_voor([], GameState.member_level("dennis"))
-		await Dialog.show_lines(Archief2.GEEN_CODEX, "")
+		Dialog.show_lines(Archief2.GEEN_CODEX, "")
+		await _wacht_gevecht_info()
 	elif pages.size() == 1:
 		keuze = Archief2.bondgenoot_voor(pages, GameState.member_level("dennis"))
-		await Dialog.show_lines(["%s vecht mee." % str(pages[0].get("name", "Monster"))], "")
+		Dialog.show_lines(["%s fights alongside you." % str(pages[0].get("name", "Monster"))], "")
+		await _wacht_gevecht_info()
 	else:
 		var namen: Array = []
 		for p in pages:
 			namen.append(str(p.get("name", "Monster")))
-		var i := await Dialog.ask("Welk Codex-monster vecht mee?", namen, "")
+		var i := await Dialog.ask("Which Codex monster fights alongside you?", namen, "")
 		if i < 0 or i >= pages.size():
 			i = 0
 		keuze = {"page": pages[i], "tijdelijk": false}
 	Archief2.zet_bondgenoot(keuze)
 	GameState.pending_story_loss = true
 	GameState.archief2_party_filter = "dennis"
-	GameState.start_battle(m.group.duplicate(), t, player.facing, terrain_at(t), true, 0, true)
+	super.start_monster_battle(m)

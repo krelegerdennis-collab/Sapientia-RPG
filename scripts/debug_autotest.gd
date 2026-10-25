@@ -592,6 +592,7 @@ func _run() -> void:
 		# SoM-proef: alleen de SoM-tests (snel ontwikkelen); CI draait de hele suite.
 		check("titelscherm (som-only)", await wait_scene("Title"))
 		await preload("res://scripts/tests/som_autotest.gd").new(self).run()
+		await preload("res://scripts/tests/som_wall_slide_tests.gd").new(self).run()
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
@@ -599,6 +600,13 @@ func _run() -> void:
 		# Alleen de vang-tutorial + Golemhal-slot (scripts/tests/codex_tutorial_autotest.gd); CI draait ze aan het eind mee.
 		check("titelscherm (codex-tutorial)", await wait_scene("Title"))
 		await preload("res://scripts/tests/codex_tutorial_autotest.gd").new(self).run()
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
+		get_tree().quit(1 if failures else 0)
+		return
+	if "--test-wm1-stabiliteit" in OS.get_cmdline_user_args():
+		# Alleen de WM1-stabiliteitsregressies O-2/O-3 (scripts/tests/wm1_stabiliteit_autotest.gd); CI draait ze aan het eind mee.
+		check("titelscherm (wm1-stabiliteit)", await wait_scene("Title"))
+		await preload("res://scripts/tests/wm1_stabiliteit_autotest.gd").new(self).run()
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
@@ -628,10 +636,13 @@ func _run() -> void:
 	await _battlesim_sample_test()
 	# SoM-proef: realtime gevecht + pauzering + baas-overdracht (scripts/tests/som_autotest.gd)
 	await preload("res://scripts/tests/som_autotest.gd").new(self).run()
+	await preload("res://scripts/tests/som_wall_slide_tests.gd").new(self).run()
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/party_sprites_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/codex_tutorial_autotest.gd").new(self).run()
+	Engine.time_scale = 1.0
+	await preload("res://scripts/tests/wm1_stabiliteit_autotest.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
 

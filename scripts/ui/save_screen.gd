@@ -20,8 +20,8 @@ const MINI_BOX := Vector2(44, 44)      # vak voor het kleine plaatje (loopframe 
 const HERO_W := 110                    # breedte van één held in de groepsrij
 const ASK_W := 120                     # breedte van het vraagvak
 const BUTTON_W := 64
-const Q_OVERWRITE := "Overschrijven?"
-const Q_NEW := "Hier opslaan?"
+const Q_OVERWRITE := "Overwrite?"
+const Q_NEW := "Save here?"
 
 ## Naam van de plek (field_menu.gd zet dit: map_name van de huidige map).
 var place := ""
@@ -90,7 +90,7 @@ func _build() -> void:
 	grid.add_child(UiMenu.label("Time", MenuColors.TEXT_DIM))
 	time_label = UiMenu.label(UiMenu.format_time(GameState.play_time()))
 	grid.add_child(time_label)
-	grid.add_child(UiMenu.label("Goud", MenuColors.TEXT_DIM))
+	grid.add_child(UiMenu.label("Gold", MenuColors.TEXT_DIM))
 	gold_label = UiMenu.label(str(GameState.gold))
 	grid.add_child(gold_label)
 	var ask := PanelContainer.new()
@@ -103,15 +103,15 @@ func _build() -> void:
 	question_label = UiMenu.label("")
 	acol.add_child(question_label)
 	yes_button = UiMenu.button("Yes")
-	yes_button.custom_minimum_size = Vector2(BUTTON_W, ROW_H)
+	yes_button.custom_minimum_size = Vector2(BUTTON_W, UiTouchC.TOUCH_MIN)   # Ja/Nee op tikmaat
 	yes_button.pressed.connect(answer.bind(true))
 	acol.add_child(yes_button)
 	no_button = UiMenu.button("No")
-	no_button.custom_minimum_size = Vector2(BUTTON_W, ROW_H)
+	no_button.custom_minimum_size = Vector2(BUTTON_W, UiTouchC.TOUCH_MIN)
 	no_button.pressed.connect(answer.bind(false))
 	acol.add_child(no_button)
 	TargetList.link_ring([yes_button, no_button])
-	set_hint("A: kies   B: terug")
+	set_hint("A: choose   B: back")
 	_refresh_question()
 	yes_button.grab_focus()
 

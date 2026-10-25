@@ -12,6 +12,7 @@ extends Node2D
 ## dichte deur niet de leegte in loopt. De speler wisselt vanaf de deurtegel.
 
 const Rooms := preload("res://world_warper/data/rooms.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const TILE := 16
 const GESLOTEN := "This room is still closed."
 
@@ -56,7 +57,7 @@ func _on_player_stepped(tile: Vector2i) -> void:
 		return
 	if GameState.changing_map or GameState.in_battle:
 		return
-	if not Rooms.is_open(room_id, GameState.story_flags):
+	if ReleaseFlags.hub_niche_cut(room_id) or not Rooms.is_open(room_id, GameState.story_flags):
 		if not Dialog.is_open:
 			Dialog.show_lines([GESLOTEN], "")
 		return

@@ -23,7 +23,7 @@ const MONSTER_RAND := Color("8fc56a")
 const MONSTER_VAK := Color(0.30, 0.48, 0.22, 0.28)
 const ICON_W := 7.0
 ## v0.22 maat van het zijspeler-label van het monster
-const SIDE_SIZE := Vector2(52, 11)
+const SIDE_SIZE := Vector2(76, 11)   # breed genoeg voor de langste soortnaam (Wortelkruiper) zonder afkappen
 
 var hero: Dictionary = {}      # verwijst naar GameState.party[i]
 var active := false            # kiest nu een commando
