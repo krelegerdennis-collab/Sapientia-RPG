@@ -27,13 +27,15 @@ Runtime: kaartcode zet waar nodig expliciet `TEXTURE_FILTER_NEAREST` (o.a. `Kaar
 | `scenes/maps/wilgendal.tscn` | 5.566 → 6.233* | 41.0 | 2322.0 | 5300.0 |
 | `scenes/maps/wereldkaart.tscn` | 13.080 → 12.848* | 7.0 | 935.0 | 1870.0 |
 | `scenes/maps/woud_open_plek.tscn` | 5.505 → 6.257* | 42.0 | 575.0 | 1806.0 |
-| `world_warper/maps/hal.tscn` | 6.009 → 6.705* | **174.0** | 621.0 | 2108.0 |
+| `world_warper/maps/hal.tscn` | 6.009 → 6.705* | **174.0** → **108.0**† | 621.0 → 525.0† | 2108.0 → 1916.0† |
 
 \*Twee runs op dezelfde VM (vóór en na de micro-optimalisaties in deze PR). Verschil valt binnen normale ruis van headless rendering; draw/object/primitive-tellers zijn **identiek** tussen runs.
 
+†Hal Atrium draw-call fix (#260–#269): zelfde SubViewport-probe (30 warmup + 180 frames, Godot 4.3, 384×216); **174.0** vóór, **108.0** na (drie runs identiek).
+
 Interpretatie (geen extra metingen):
 
-- **Hal** heeft veel draw calls door veel losse hub-sprites/varianten; batchen zou art/scène-indeling raken → niet aangepast.
+- **Hal** had veel draw calls door Dauwpixel-Labels op de hub-vlakken (vooral “Deep Learning Simulation”, ~1 draw per glyph). Opgelost door die tekst één keer naar een nearest `ImageTexture` te bakken (`world_warper/art/baked_label.gd`, `hub_boot.gd`); headless SHA-256 van drie camerastanden ongewijzigd (`tools/perf/hal_atrium_shots.gd`).
 - **Wilgendal** heeft veel “objects” door tile layers + y-sort props; verwacht voor een grote 1.4x-kaart.
 
 ## `_process` / allocaties
@@ -66,7 +68,6 @@ Visueel gedrag ongewijzigd; geen asset- of tileset-wijzigingen.
 ## Niet gedaan (bewust)
 
 - WM2/WM3/wacht-content.
-- Draw-call-reductie in de hal (scène/art).
 - TileMap-layer merge op Wilgendal/Esdoorn.
 - CI/workflows of bestaande testsuites wijzigen.
 - Samsung S25 on-device profiling (geen hardware in CI/VM).
