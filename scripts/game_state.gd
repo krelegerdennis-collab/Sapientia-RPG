@@ -166,7 +166,7 @@ func _on_coop_link_lost() -> void:
 		return
 	var msg := "Connection lost."
 	coop_end_session("")
-	go_to_title()
+	go_to_title(true)
 	Dialog.show_lines([msg])
 
 
@@ -185,10 +185,8 @@ func _on_coop_session_ended(reason: String) -> void:
 		if path.ends_with("coop_lobby_screen.gd"):
 			return
 	var msg := coop_session_end_message(reason)
-	coop_shutdown_session()
-	coop_role = ""
-	coop_clear_lobby_refs()
-	go_to_title()
+	coop_end_session("")
+	go_to_title(true)
 	Dialog.show_lines([msg])
 
 
@@ -1461,8 +1459,7 @@ func _notification(what: int) -> void:
 		if _coop_pending_message != "":
 			var pending := _coop_pending_message
 			_coop_pending_message = ""
-			coop_role = ""
-			go_to_title()
+			go_to_title(true)
 			Dialog.show_lines([pending])
 	if what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
@@ -2239,9 +2236,14 @@ func start_new_game(hero_name: String) -> void:
 
 
 ## Terug naar het titelscherm (bv. vanuit het veldmenu, en in de autotest).
-func go_to_title() -> void:
-	if changing_map or in_battle:
+func go_to_title(force := false) -> void:
+	if not force and (changing_map or in_battle):
 		return
+	if force:
+		in_battle = false
+		changing_map = false
+	if coop_in_session():
+		coop_end_session("")
 	use_story_saves()
 	som_mode = false
 	if dungeon100_run_active():
