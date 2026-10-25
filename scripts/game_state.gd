@@ -477,6 +477,7 @@ func _ready() -> void:
 	# Seeded gevecht-RNG (zelfde seed = zelfde gevecht): of  godot -- --combatrngtest  (scripts/tests/combat_rng_tests.gd).
 	# Vaste 60 Hz-gevechtsstap (framerate-onafhankelijk): of  godot -- --combattick  (scripts/tests/combat_tick_tests.gd).
 	# Pure gevechtskern + beweging/treffers/lock op de stap: of  godot -- --combatsimtest  (scripts/tests/combat_sim_tests.gd).
+	# Telegraafvormen (pure klasse, Combat T1): of  godot -- --telegraphtest  (scripts/tests/telegraph_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -540,6 +541,7 @@ func _ready() -> void:
 			["--combatrngtest", "res://scripts/tests/combat_rng_tests.gd", "CombatRngTest", "combatrngtest"],
 			["--combattick", "res://scripts/tests/combat_tick_tests.gd", "CombatTickTest", "combattick"],
 			["--combatsimtest", "res://scripts/tests/combat_sim_tests.gd", "CombatSimTest", "combatsimtest"],
+			["--telegraphtest", "res://scripts/tests/telegraph_tests.gd", "TelegraphTest", "telegraphtest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
