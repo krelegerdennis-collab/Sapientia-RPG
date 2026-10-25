@@ -2315,9 +2315,7 @@ func _prologue_tests() -> void:
 	await walk("move_up", 1)
 	check("naar binnen om op te slaan", await wait_scene("Huis"))
 	await frames(10)
-	await walk("move_up", 3)
-	await walk("move_right", 4)
-	await walk("move_up", 1)
+	await walk("move_up", 14)
 	await press_interact()
 	await _wait_typed()
 	await press_interact()   # 'Een warme gloed herstelt je krachten en je geest.'

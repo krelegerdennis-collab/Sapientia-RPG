@@ -47,7 +47,7 @@ func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
 func _maak_tileset() -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
-	ts.add_physics_layer(0)
+	ts.add_physics_layer()
 	ts.set_physics_layer_collision_layer(0, 1)
 	ts.set_physics_layer_collision_mask(0, 1)
 	var defs := {
@@ -69,10 +69,11 @@ func _maak_tileset() -> TileSet:
 		src.create_tile(Vector2i.ZERO)
 		if defs[sleutel]["solid"]:
 			var td: TileData = src.get_tile_data(Vector2i.ZERO, 0)
-			td.add_collision_polygon(0)
-			td.set_collision_polygon_points(0, 0, PackedVector2Array([
-				Vector2(-8, -8), Vector2(8, -8), Vector2(8, 8), Vector2(-8, 8),
-			]))
+			if td != null:
+				td.add_collision_polygon(0)
+				td.set_collision_polygon_points(0, 0, PackedVector2Array([
+					Vector2(-8, -8), Vector2(8, -8), Vector2(8, 8), Vector2(-8, 8),
+				]))
 		var sid: int = ts.add_source(src)
 		_tile_ids[sleutel] = sid
 	return ts
