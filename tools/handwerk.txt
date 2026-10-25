@@ -838,3 +838,6 @@ assets/sprites/enemies/hooded_wraith_96.png
 assets/sprites/enemies/crystal_scorpion_96_sheet.png
 assets/sprites/enemies/crystal_scorpion_96_sheet_left.png
 assets/sprites/enemies/crystal_scorpion_96.png
+assets/sprites/enemies/gloom_bat_96_sheet.png
+assets/sprites/enemies/gloom_bat_96_sheet_left.png
+assets/sprites/enemies/gloom_bat_96.png
