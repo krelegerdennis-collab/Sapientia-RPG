@@ -340,6 +340,8 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 var current_map := ""
 var pending_spawn := ""
 var changing_map := false
+## true zolang een --...test-suite draait (zie _zet_testmodus).
+var test_modus := false
 ## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
 ## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
 var huis_herkomst := ""
@@ -453,6 +455,7 @@ func _ready() -> void:
 	# Vriendenmodus: of  godot -- --pvptest  (pvp/tests/pvp_tests.gd).
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
+	# Kas-poort wereldkaart (Vesper + Golem): godot -- --kasdeurtest  (scripts/tests/kas_deur_tests.gd).
 	# Actie-balans (SoM-proef): godot -- --actionsim [--fights=N] [--boss-fights=N] [--out=pad]  (tools/battlesim/action_sim.gd)
 	# UI-polijst WM1 (touch, veilig gebied, leesbaarheid): of  godot -- --uipolishtest [--shots=/pad/map]  (scripts/tests/ui_polish_tests.gd).
 	# Screenshots van alle WM1-schermen per aspectprofiel (geen test): godot -- --uishots --shots=/pad/map  (tools/ui_polish).
@@ -477,6 +480,7 @@ func _ready() -> void:
 	# Seeded gevecht-RNG (zelfde seed = zelfde gevecht): of  godot -- --combatrngtest  (scripts/tests/combat_rng_tests.gd).
 	# Vaste 60 Hz-gevechtsstap (framerate-onafhankelijk): of  godot -- --combattick  (scripts/tests/combat_tick_tests.gd).
 	# Pure gevechtskern + beweging/treffers/lock op de stap: of  godot -- --combatsimtest  (scripts/tests/combat_sim_tests.gd).
+	# Telegraafvormen (pure klasse, Combat T1): of  godot -- --telegraphtest  (scripts/tests/telegraph_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -513,6 +517,8 @@ func _ready() -> void:
 			["--koopmantest", "res://scripts/tests/koopman_tests.gd", "KoopmanTest", "koopmantest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
+			["--testmodustest", "res://scripts/tests/testmodus_tests.gd", "TestmodusTest", "testmodustest"],
+			["--kasdeurtest", "res://scripts/tests/kas_deur_tests.gd", "KasDeurTest", "kasdeurtest"],
 			["--berggrotdextest", "res://scripts/tests/berggrot_dex_tests.gd", "BerggrotDexTest", "berggrotdextest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
@@ -539,6 +545,7 @@ func _ready() -> void:
 			["--combatrngtest", "res://scripts/tests/combat_rng_tests.gd", "CombatRngTest", "combatrngtest"],
 			["--combattick", "res://scripts/tests/combat_tick_tests.gd", "CombatTickTest", "combattick"],
 			["--combatsimtest", "res://scripts/tests/combat_sim_tests.gd", "CombatSimTest", "combatsimtest"],
+			["--telegraphtest", "res://scripts/tests/telegraph_tests.gd", "TelegraphTest", "telegraphtest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
@@ -557,6 +564,8 @@ func _ready() -> void:
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
+		if str(t[3]).ends_with("test"):
+			_zet_testmodus(str(t[3]))
 		# eigen bestanden: de tests raken je echte save/autosave niet
 		save_path = "user://%s_save_1.json" % t[3]
 		autosave_path = "user://%s_autosave.json" % t[3]
@@ -580,6 +589,21 @@ func _ready() -> void:
 		call_deferred("_start_berggrot")
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
+
+
+## Testmodus (alleen bij een --...test-suite; O-4, flaky berggrottest onder load):
+## - test_modus laat toevalsbronnen die alleen beeld sturen (World Warper-flyover) een vaste seed
+##   gebruiken, zodat een suite niet van de klok afhangt.
+## - PHYSICS_GELIJK_SUITES: extra net naast walk() die op process_frame wacht. Physics mag nooit
+##   sneller lopen dan beelden. Niet voor alle suites: menutest en woudtest hangen af van physics
+##   op wandkloktijd en gaan juist stuk als physics onder load langzamer loopt.
+const PHYSICS_GELIJK_SUITES: Array[String] = ["berggrottest"]
+
+
+func _zet_testmodus(suite: String) -> void:
+	test_modus = true
+	if suite in PHYSICS_GELIJK_SUITES:
+		Engine.max_physics_steps_per_frame = 1
 
 
 ## Debug-ingang van de berggrot. Zelfde haakje als de mond op de kaart.
