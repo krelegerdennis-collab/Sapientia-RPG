@@ -53,6 +53,10 @@ func ticks_left_in_phase() -> int:
 	return _state.ticks_left
 
 
+func windup_duration_ticks() -> int:
+	return _state.windup_duration_ticks
+
+
 ## Origin en richting vastgezet bij start (WINDUP); shape gebouwd met from_data.
 func start(origin: Vector2i, direction: Vector2i, shape_id: String) -> bool:
 	if not _state.start():
@@ -99,6 +103,31 @@ func cancel() -> bool:
 
 func interrupt() -> bool:
 	return _state.interrupt()
+
+
+## Gast-only: telegraaf uit snapshot (geen gameplay, alleen tekenen).
+func mirror_idle() -> void:
+	_state.mirror(TelegraphState.State.IDLE, 0)
+	_shape = TelegraphShape.make_circle(Vector2i.ZERO, 1)
+
+
+func mirror_from_network(
+	def: Dictionary,
+	cooldown_ms: int,
+	phase: int,
+	ticks_left: int,
+	origin: Vector2i,
+	dir: Vector2i,
+	shape_id: String,
+) -> void:
+	configure(def, cooldown_ms)
+	_origin = origin
+	_dir = dir
+	if phase != TelegraphState.State.IDLE:
+		_shape = TelegraphShape.from_data(shape_id, origin, dir, _shape_data)
+	else:
+		_shape = TelegraphShape.make_circle(Vector2i.ZERO, 1)
+	_state.mirror(phase, ticks_left)
 
 
 static func _shape_params(def: Dictionary) -> Dictionary:
