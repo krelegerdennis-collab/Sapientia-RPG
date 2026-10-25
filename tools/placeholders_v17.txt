@@ -108,3 +108,4 @@ assets/sprites/buiten/bouw_balken.png          16x16    stapel stutbalken   [KLA
 #   Nodig van RPG ART: zie HANDOFF_SOM.md "Art voor de volledige versie".
 # Wachtershuis-interieur, keuken (tools/art_huis_keuken_placeholder.py). Magenta hoekjes, letters PH. Geen definitieve art.
 assets/sprites/binnen/keuken_fornuis_PLACEHOLDER.png   24x32   fornuis in de woonkamer/keuken van Dax & Opa (huis_wilgendal)
+assets/sprites/binnen/deurkozijn_PLACEHOLDER.png       24x32   binnendeur-kozijn tussen woonkamer en slaapkamers (huis_wilgendal)

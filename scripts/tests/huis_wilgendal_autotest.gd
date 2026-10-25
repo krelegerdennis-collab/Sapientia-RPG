@@ -4,7 +4,8 @@ extends RefCounted
 ## Zonder de vlag draait het blok aan het eind van de volledige --autotest mee.
 ## t = de autotest-node (check/frames/walk/...).
 ## Controleert: scène laadt, spawn niet in botsing, uitgang bereikbaar, beide bedden
-## en de keuken bestaan, proloog-markers staan er.
+## en de keuken bestaan, proloog-markers staan er, deurkozijnen 24x32, camera
+## 16:9/19,5:9 zonder zwart, elke vrije tegel via BFS, elke prop heeft collision.
 
 const SD := preload("res://scripts/data/story_data.gd")
 const Kamers := preload("res://scripts/data/huis_wilgendal_kamers.gd")
@@ -35,8 +36,13 @@ func run() -> void:
 	await t.frames(8)
 	_spawn_vrij(huis)
 	_meubels(huis)
+	_deuren(huis)
+	_inrichting(huis)
+	_camera(huis)
+	_props(huis)
 	_markers(huis)
 	_uitgang_bereikbaar(huis)
+	_alles_bereikbaar(huis)
 	if t.has_method("overworld_shot"):
 		await t.overworld_shot("_huis_kamers")
 	await _loop_naar_deur(huis)
@@ -111,6 +117,62 @@ func _meubels(huis: Node) -> void:
 			and huis.ground.get_cell_atlas_coords(Kamers.DEUR_OPA) == Vector2i(5, 0))
 	var used: Rect2i = huis.ground.get_used_rect()
 	t.check("woonkamer-Ground blijft 12x9 (%s)" % used, used.size == Vector2i(12, 9))
+
+
+func _deuren(huis: Node) -> void:
+	t.check("deuropening is drempel D, geen platte vloer",
+			huis.ground.get_cell_atlas_coords(Kamers.DEUR_DAX) == Vector2i(5, 0)
+			and huis.ground.get_cell_atlas_coords(Kamers.DEUR_OPA) == Vector2i(5, 0)
+			and huis.atlas_van(Kamers.DEUR_DAX) != Vector2i(0, 0)
+			and huis.atlas_van(Kamers.DEUR_OPA) != Vector2i(0, 0))
+	t.check("deurkozijn-placeholders 24x32 staan op de opening",
+			huis.get_node_or_null("Objects/DoorFrameDax") != null
+			and huis.get_node_or_null("Objects/DoorFrameOpa") != null
+			and huis.prop_maat("DoorFrameDax") == Kamers.KOZIJN_MAAT
+			and huis.prop_maat("DoorFrameOpa") == Kamers.KOZIJN_MAAT)
+	t.check("annex-drempel sluit aan op de woonkamer-deur",
+			huis.atlas_van(Vector2i(-1, 6)) == Vector2i(5, 0)
+			and huis.atlas_van(Vector2i(12, 6)) == Vector2i(5, 0))
+
+
+func _inrichting(huis: Node) -> void:
+	var leeg: Array[Vector2i] = huis.lege_vloeren()
+	t.check("geen lege vloeren in slaapkamers en keuken %s" % [leeg], leeg.is_empty())
+	t.check("slaapkamer Dax heeft kleed + tafel + kast",
+			huis.atlas_van(Vector2i(-6, 2)) == Vector2i(12, 0)
+			and huis.atlas_van(Vector2i(-2, 4)) == Vector2i(8, 0)
+			and huis.get_node_or_null("Objects/CupboardDax") != null)
+	t.check("slaapkamer Opa heeft kleed + tafel + kast",
+			huis.atlas_van(Vector2i(17, 2)) == Vector2i(12, 0)
+			and huis.atlas_van(Vector2i(13, 4)) == Vector2i(8, 0)
+			and huis.get_node_or_null("Objects/CupboardOpa") != null)
+	t.check("keuken heeft kleed bij tafel en fornuis",
+			huis.atlas_van(Kamers.KEUKEN_KLEED) == Vector2i(16, 0)
+			and huis.atlas_van(Vector2i(9, 6)) == Vector2i(17, 0)
+			and huis.atlas_van(Vector2i(8, 4)) == Vector2i(19, 0))
+
+
+func _camera(huis: Node) -> void:
+	t.check("camera 16:9 (384x216) zonder zwart vlak", huis.dek_camera(Kamers.VP_16_9))
+	t.check("camera 19,5:9 (468x216) zonder zwart vlak", huis.dek_camera(Kamers.VP_195_9))
+
+
+func _props(huis: Node) -> void:
+	for naam in huis.PROP_NAMEN:
+		t.check("prop %s heeft collision" % naam, huis.prop_heeft_botsing(naam))
+
+
+func _alles_bereikbaar(huis: Node) -> void:
+	var start := Vector2i(4, 7)
+	var bereik: Dictionary = huis.bereik_van(start)
+	var vrij: Array[Vector2i] = huis.vrije_tegels()
+	var gemist: Array[Vector2i] = []
+	for tegel in vrij:
+		if not bereik.has(tegel):
+			gemist.append(tegel)
+	t.check("elke vrije tegel bereikbaar vanaf spawn (BFS %d vrij, %d bereik, gemist %s)" % [
+			vrij.size(), bereik.size(), gemist],
+			gemist.is_empty() and vrij.size() == bereik.size() and vrij.size() > 20)
 
 
 func _markers(huis: Node) -> void:
