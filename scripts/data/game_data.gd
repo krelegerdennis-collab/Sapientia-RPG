@@ -325,6 +325,8 @@ const ENEMIES := {
 		# TIJDELIJKE AANNAME: EXP/goud ongeveer 2x een Mech. Wachter op niveau 4 (unieke beloning)
 		"exp": 60, "gold": 40, "y_offset": 0,
 		"skills": [],
+		## Action (SoM): telegraaf-aanval Inktspuw — volledige vorm/fasen in som_action_attacks.gd.
+		"attacks": [{"id": "inktspuw"}],
 		# lore: bestand tegen water; 'water' is (nog) geen element in de game, dus leeg (open vraag)
 		"no": 12, "mp": 0, "weak": ["vuur"], "resist": [],
 		# Bestiarium noemt de Gloeiende Inktfles (kans-drops worden nog niet uitgedeeld).

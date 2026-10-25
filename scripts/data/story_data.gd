@@ -441,11 +441,17 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
-	# TODO(verhaal): de kas gaat open op de bestaande golem-vlag van het Eerste Archief.
-	# Waarom die kern op een tweede signaal reageert, staat nog open. Geen nieuwe beat.
+	# Kas (route A): open na de Golem én zodra Vesper in de groep zit (zelfde vlag als de berggrot-tunnel).
 	"naar_leven": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
 			["say", "", ["An overgrown greenhouse. The vines are sealed shut.", "Clear the First Archive first."]],
+			["walk", "player", "up", 1],
+		]},
+		{"if": {"not_flags": ["noor_lid"]}, "do": [
+			["say", "", [
+				"The greenhouse hums behind the vines, but the door will not open.",
+				"You need Vesper with you. Free her from the Dark Wood first.",
+			]],
 			["walk", "player", "up", 1],
 		]},
 		{"do": "default"},
