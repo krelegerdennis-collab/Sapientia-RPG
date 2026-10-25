@@ -835,3 +835,6 @@ assets/sprites/enemies/treant_stump_96.png
 assets/sprites/enemies/hooded_wraith_96_sheet.png
 assets/sprites/enemies/hooded_wraith_96_sheet_left.png
 assets/sprites/enemies/hooded_wraith_96.png
+assets/sprites/enemies/crystal_scorpion_96_sheet.png
+assets/sprites/enemies/crystal_scorpion_96_sheet_left.png
+assets/sprites/enemies/crystal_scorpion_96.png
