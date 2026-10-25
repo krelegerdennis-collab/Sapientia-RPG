@@ -35,7 +35,7 @@ const KERNFRAGMENTEN := {
 	# Archief 2. Geen gevechts- of wereldvaardigheid: de zin is het fragment.
 	"levenskern": {
 		"id": "levenskern",
-		"naam": "Levenskern",
+		"naam": "Life Core",
 		"beschrijving": "In silence lies peace. I correct what grows.",
 		"icon": "res://assets/ui/icons/levenskern.png",
 		"source_boss": "genezer",

@@ -88,10 +88,10 @@ func _party() -> void:
 		{"name": "Bo", "level": 2.9},
 		12,
 	])
-	_check("party naam en niveau", regels.size() == 4 and regels[0] == "Mira, niveau 4")
-	_check("party lege naam is Onbekend", regels[1] == "Onbekend, niveau 1")
-	_check("party niveau uit tekst", regels[2] == "Onbekend, niveau 3")
-	_check("party niveau uit float", regels[3] == "Bo, niveau 2")
+	_check("party naam en niveau", regels.size() == 4 and regels[0] == "Mira, Lv 4")
+	_check("party lege naam is Onbekend", regels[1] == "Unknown, Lv 1")
+	_check("party niveau uit tekst", regels[2] == "Unknown, Lv 3")
+	_check("party niveau uit float", regels[3] == "Bo, Lv 2")
 
 
 func _smoke() -> void:
