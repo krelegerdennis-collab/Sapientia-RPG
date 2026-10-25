@@ -1,0 +1,163 @@
+# SAPIENTIA item-iconen – finale mapping (v1, 2026-10-25)
+
+Bron: Item Icons v1.5 (eazyd), geremapt naar **SAP75** (master 73 + 2; gem_ruby en ring_ruby een stap helderder binnen de rode ramp). Repo `/tmp/b2r` @ 0839ad9 alleen gelezen; 141/141 item-ids gedekt (ITEMS, KEY_ITEMS, EQUIPMENT, kern_data).
+
+- Bestanden: `icons16/<item_id>.png` (lijsten, kist, gevecht) en `icons32/<item_id>.png` (alleen detailvak). Alpha 0/255, alles ok op `tools/check75.py`.
+- Sheets: `sapientia_items_16x16.png` / `_32x32.png` (16 kolommen, volgorde = deze tabel), `pack_sprite_sheet_*_sap75.png` (volledig pack, 240), overzicht `overview_sheet_2x.png`.
+- Soorten: 57 pack (geremapt), 74 varianten, 10 nieuw getekend.
+- Spreukrollen: elke grade-4-rol en elke oude rol heeft een eigen motief (vorm + kleur) op de rol van zijn element; op 16px per pixel getekend (5x5 vorm + omlijning; helingsrollen linksboven, zodat de punt vrij blijft). Alleen dezelfde spreuk onder twee ids deelt het beeld: spreuk_donderslag = spreuk_g4_donderslag, spreuk_aureool = spreuk_g4_aureool, spreuk_ijskern = spreuk_g4_ijskern.
+- d100-tiers: Archive = koper, Rune = blauw, Glitch = magenta, Seal = licht goud.
+- Geel en roze krijgen bij de remap extra gewicht op verzadiging (helderder binnen SAP75).
+
+## Paletuitbreiding master 73 -> 75 (`tools/sap75.gpl`)
+
+| hex | naam | waarom |
+|---|---|---|
+| `#1f9c52` | smaragd_mid | gem_emerald en andere blauwgroene iconen; alleen voor bronkleuren met tint >135° |
+| `#4fd77d` | smaragd_licht | lichte kant van dezelfde ramp |
+
+Jade/geelgroen blijft op de bestaande olijfgroen-ramp (4a7038/74963e/a8c060). Zo zijn gem_emerald (fel) en gem_jade (olijf) uit elkaar te houden. De nieuwe kleuren staan in 33 pack-iconen, onder meer smaragd, slijm, heling, groene drankjes en het herb-icoon.
+
+| item_id | 16px | 32px | bron | soort | opmerking |
+|---|---|---|---|---|---|
+| `drankje` | icons16/drankje.png | icons32/drankje.png | potion_red | pack (geremapt) |  |
+| `toverwater` | icons16/toverwater.png | icons32/toverwater.png | potion_cyan | pack (geremapt) |  |
+| `kruid` | icons16/kruid.png | icons32/kruid.png | mat_herb | pack (geremapt) |  |
+| `sterk_drankje` | icons16/sterk_drankje.png | icons32/sterk_drankje.png | potion_orange | pack (geremapt) |  |
+| `toverbrouwsel` | icons16/toverbrouwsel.png | icons32/toverbrouwsel.png | potion_blue | pack (geremapt) |  |
+| `elixer` | icons16/elixer.png | icons32/elixer.png | potion_elixir | pack (geremapt) |  |
+| `tegengif` | icons16/tegengif.png | icons32/tegengif.png | potion_antidote | pack (geremapt) |  |
+| `spreuk_vuur` | icons16/spreuk_vuur.png | icons32/spreuk_vuur.png | scroll_fire | pack (geremapt) |  |
+| `spreuk_bliksem` | icons16/spreuk_bliksem.png | icons32/spreuk_bliksem.png | scroll_spell | pack (geremapt) |  |
+| `spreuk_genees` | icons16/spreuk_genees.png | icons32/spreuk_genees.png | scroll_heal | pack (geremapt) |  |
+| `kruidenthee` | icons16/kruidenthee.png | icons32/kruidenthee.png | potion_green | pack (geremapt) |  |
+| `gloeiende_inktfles` | icons16/gloeiende_inktfles.png | icons32/gloeiende_inktfles.png | potion_black | pack (geremapt) |  |
+| `smeerolie` | icons16/smeerolie.png | icons32/smeerolie.png | potion_yellow | pack (geremapt) |  |
+| `windwater` | icons16/windwater.png | icons32/windwater.png | potion_white | pack (geremapt) |  |
+| `antiserum_nul` | icons16/antiserum_nul.png | icons32/antiserum_nul.png | potion_empty | pack (geremapt) |  |
+| `regeneratie` | icons16/regeneratie.png | icons32/regeneratie.png | potion_pink | pack (geremapt) |  |
+| `sterrenelixer` | icons16/sterrenelixer.png | icons32/sterrenelixer.png | potion_rainbow | pack (geremapt) |  |
+| `warp` | icons16/warp.png | icons32/warp.png | mat_crystal_shard | pack (geremapt) |  |
+| `hanger` | icons16/hanger.png | icons32/hanger.png | amulet_heart | pack (geremapt) |  |
+| `kort_zwaard` | icons16/kort_zwaard.png | icons32/kort_zwaard.png | sword_iron | pack (geremapt) |  |
+| `vonkzwaard` | icons16/vonkzwaard.png | icons32/vonkzwaard.png | sword_flame | pack (geremapt) |  |
+| `eiken_staf` | icons16/eiken_staf.png | icons32/eiken_staf.png | staff_wood | pack (geremapt) |  |
+| `dolk` | icons16/dolk.png | icons32/dolk.png | sword_dagger | pack (geremapt) |  |
+| `houten_schild` | icons16/houten_schild.png | icons32/houten_schild.png | shield_wood | pack (geremapt) |  |
+| `kaftschild` | icons16/kaftschild.png | icons32/kaftschild.png | shield_rune | pack (geremapt) |  |
+| `leren_kap` | icons16/leren_kap.png | icons32/leren_kap.png | helm_hood | pack (geremapt) |  |
+| `ijzeren_helm` | icons16/ijzeren_helm.png | icons32/ijzeren_helm.png | helm_iron | pack (geremapt) |  |
+| `reisgewaad` | icons16/reisgewaad.png | icons32/reisgewaad.png | armor_cloth | pack (geremapt) |  |
+| `leren_harnas` | icons16/leren_harnas.png | icons32/leren_harnas.png | armor_leather | pack (geremapt) |  |
+| `leerling_mantel` | icons16/leerling_mantel.png | icons32/leerling_mantel.png | armor_mage | pack (geremapt) |  |
+| `malienkolder` | icons16/malienkolder.png | icons32/malienkolder.png | armor_chain | pack (geremapt) |  |
+| `groenring` | icons16/groenring.png | icons32/groenring.png | ring_emerald | pack (geremapt) |  |
+| `ketelkling` | icons16/ketelkling.png | icons32/ketelkling.png | sword_cutlass | pack (geremapt) |  |
+| `rookstaf` | icons16/rookstaf.png | icons32/rookstaf.png | staff_shadow | pack (geremapt) |  |
+| `ketelschild` | icons16/ketelschild.png | icons32/ketelschild.png | shield_iron | pack (geremapt) |  |
+| `ketelhelm` | icons16/ketelhelm.png | icons32/ketelhelm.png | helm_visored | pack (geremapt) |  |
+| `schrootplaat` | icons16/schrootplaat.png | icons32/schrootplaat.png | armor_plate | pack (geremapt) |  |
+| `werkmantel` | icons16/werkmantel.png | icons32/werkmantel.png | armor_ranger | pack (geremapt) |  |
+| `ankerkling` | icons16/ankerkling.png | icons32/ankerkling.png | sword_claymore | pack (geremapt) |  |
+| `zweefstaf` | icons16/zweefstaf.png | icons32/zweefstaf.png | staff_lightning | pack (geremapt) |  |
+| `gebedsstaf` | icons16/gebedsstaf.png | icons32/gebedsstaf.png | staff_holy | pack (geremapt) |  |
+| `ankerschild` | icons16/ankerschild.png | icons32/ankerschild.png | shield_tower | pack (geremapt) |  |
+| `tempelhelm` | icons16/tempelhelm.png | icons32/tempelhelm.png | helm_knight | pack (geremapt) |  |
+| `windkap` | icons16/windkap.png | icons32/windkap.png | helm_mage | pack (geremapt) |  |
+| `tempelplaat` | icons16/tempelplaat.png | icons32/tempelplaat.png | armor_holy | pack (geremapt) |  |
+| `stroomring` | icons16/stroomring.png | icons32/stroomring.png | ring_aquamarine | pack (geremapt) |  |
+| `glazenstaf` | icons16/glazenstaf.png | icons32/glazenstaf.png | staff_crystal | pack (geremapt) |  |
+| `levensstaf` | icons16/levensstaf.png | icons32/levensstaf.png | staff_nature | pack (geremapt) |  |
+| `kweekschild` | icons16/kweekschild.png | icons32/kweekschild.png | shield_nature | pack (geremapt) |  |
+| `chitineharnas` | icons16/chitineharnas.png | icons32/chitineharnas.png | armor_scale | pack (geremapt) |  |
+| `levensring` | icons16/levensring.png | icons32/levensring.png | ring_rose | pack (geremapt) |  |
+| `perihelium` | icons16/perihelium.png | icons32/perihelium.png | sword_gold | pack (geremapt) |  |
+| `lichtstaf` | icons16/lichtstaf.png | icons32/lichtstaf.png | staff_sun | pack (geremapt) |  |
+| `sterrenring` | icons16/sterrenring.png | icons32/sterrenring.png | ring_diamond | pack (geremapt) |  |
+| `memoria` | icons16/memoria.png | icons32/memoria.png | sword_crystal | pack (geremapt) |  |
+| `hartschild` | icons16/hartschild.png | icons32/hartschild.png | shield_royal | pack (geremapt) |  |
+| `hartring` | icons16/hartring.png | icons32/hartring.png | ring_ruby | pack (geremapt) |  |
+| `leeg_boek` | icons16/leeg_boek.png | icons32/leeg_boek.png | — | nieuw getekend |  |
+| `zingend_meel` | icons16/zingend_meel.png | icons32/zingend_meel.png | — | nieuw getekend |  |
+| `bladwijzer` | icons16/bladwijzer.png | icons32/bladwijzer.png | — | nieuw getekend |  |
+| `stunbom` | icons16/stunbom.png | icons32/stunbom.png | — | nieuw getekend |  |
+| `harttraan` | icons16/harttraan.png | icons32/harttraan.png | — | nieuw getekend |  |
+| `emmer_water` | icons16/emmer_water.png | icons32/emmer_water.png | — | nieuw getekend |  |
+| `zingend_zaad` | icons16/zingend_zaad.png | icons32/zingend_zaad.png | — | nieuw getekend |  |
+| `stemvork` | icons16/stemvork.png | icons32/stemvork.png | — | nieuw getekend |  |
+| `glashelm` | icons16/glashelm.png | icons32/glashelm.png | — | nieuw getekend |  |
+| `labmantel` | icons16/labmantel.png | icons32/labmantel.png | — | nieuw getekend |  |
+| `wambuis` | icons16/wambuis.png | icons32/wambuis.png | armor_leather | variant | gevoerd wambuis, koper/okergetint |
+| `rookkap` | icons16/rookkap.png | icons32/rookkap.png | helm_hood | variant | grijze rookkap |
+| `traankap` | icons16/traankap.png | icons32/traankap.png | helm_hood | variant | blauwe kap + traan |
+| `wolkgewaad` | icons16/wolkgewaad.png | icons32/wolkgewaad.png | armor_mage | variant | wit wolkgewaad |
+| `sterrenkap` | icons16/sterrenkap.png | icons32/sterrenkap.png | helm_mage | variant | nachtblauwe kap + ster |
+| `tranenpantser` | icons16/tranenpantser.png | icons32/tranenpantser.png | armor_plate | variant | blauw pantser + traan |
+| `hartmantel` | icons16/hartmantel.png | icons32/hartmantel.png | armor_holy | variant | rode mantel + hart |
+| `stroomdrank` | icons16/stroomdrank.png | icons32/stroomdrank.png | potion_cyan | variant | paars drankje + bliksem |
+| `herinnering` | icons16/herinnering.png | icons32/herinnering.png | potion_white | variant | roze-wit drankje + hart |
+| `koperring` | icons16/koperring.png | icons32/koperring.png | ring_plain | variant | koperen ring |
+| `kweekhelm` | icons16/kweekhelm.png | icons32/kweekhelm.png | helm_horn | variant | groene helm + blad |
+| `sterrenhelm` | icons16/sterrenhelm.png | icons32/sterrenhelm.png | helm_crown | variant | sterrenkroonhelm |
+| `maanschild` | icons16/maanschild.png | icons32/maanschild.png | shield_ice | variant | zilver schild + maan |
+| `maanharnas` | icons16/maanharnas.png | icons32/maanharnas.png | armor_gold | variant | zilver harnas + maan |
+| `sterrenmantel` | icons16/sterrenmantel.png | icons32/sterrenmantel.png | armor_dark | variant | sterrenmantel |
+| `hartpsalm` | icons16/hartpsalm.png | icons32/hartpsalm.png | staff_moon | variant | rode staf + hart |
+| `zouthelm` | icons16/zouthelm.png | icons32/zouthelm.png | helm_dragon | variant | zoutwitte helm |
+| `incisie` | icons16/incisie.png | icons32/incisie.png | sword_dagger | variant | scalpel-kling + bloeddruppel |
+| `feniksveer` | icons16/feniksveer.png | icons32/feniksveer.png | mat_feather | variant | vuurveer |
+| `h5_notitie` | icons16/h5_notitie.png | icons32/h5_notitie.png | scroll_map | variant | vergeelde notitie + rode stip |
+| `astrostaf` | icons16/astrostaf.png | icons32/astrostaf.png | staff_moon | variant | nachtstaf + ster (astrolabium) |
+| `hartvuurstaf` | icons16/hartvuurstaf.png | icons32/hartvuurstaf.png | staff_fire | variant | vuurstaf + hart |
+| `simulatie_ring` | icons16/simulatie_ring.png | icons32/simulatie_ring.png | ring_gold | variant | glitch-ring + bliksem |
+| `golemkern` | icons16/golemkern.png | icons32/golemkern.png | gem_onyx | variant | donkere kern met gloed |
+| `levenskern` | icons16/levenskern.png | icons32/levenskern.png | mat_essence_earth | variant | groene levenskern |
+| `d100_zwaard_2` | icons16/d100_zwaard_2.png | icons32/d100_zwaard_2.png | sword_steel | variant | tier 2: archive-materiaal |
+| `d100_staf_2` | icons16/d100_staf_2.png | icons32/d100_staf_2.png | staff_arcane | variant | tier 2: archive-materiaal |
+| `d100_schild_2` | icons16/d100_schild_2.png | icons32/d100_schild_2.png | shield_kite | variant | tier 2: archive-materiaal |
+| `d100_helm_2` | icons16/d100_helm_2.png | icons32/d100_helm_2.png | helm_knight | variant | tier 2: archive-materiaal |
+| `d100_harnas_2` | icons16/d100_harnas_2.png | icons32/d100_harnas_2.png | armor_chain | variant | tier 2: archive-materiaal |
+| `d100_ring_2` | icons16/d100_ring_2.png | icons32/d100_ring_2.png | ring_plain | variant | tier 2: archive-materiaal |
+| `d100_zwaard_3` | icons16/d100_zwaard_3.png | icons32/d100_zwaard_3.png | sword_steel | variant | tier 3: blue-materiaal |
+| `d100_staf_3` | icons16/d100_staf_3.png | icons32/d100_staf_3.png | staff_arcane | variant | tier 3: blue-materiaal |
+| `d100_schild_3` | icons16/d100_schild_3.png | icons32/d100_schild_3.png | shield_kite | variant | tier 3: blue-materiaal |
+| `d100_helm_3` | icons16/d100_helm_3.png | icons32/d100_helm_3.png | helm_knight | variant | tier 3: blue-materiaal |
+| `d100_harnas_3` | icons16/d100_harnas_3.png | icons32/d100_harnas_3.png | armor_chain | variant | tier 3: blue-materiaal |
+| `d100_ring_3` | icons16/d100_ring_3.png | icons32/d100_ring_3.png | ring_plain | variant | tier 3: blue-materiaal |
+| `d100_zwaard_4` | icons16/d100_zwaard_4.png | icons32/d100_zwaard_4.png | sword_steel | variant | tier 4: magenta-materiaal |
+| `d100_staf_4` | icons16/d100_staf_4.png | icons32/d100_staf_4.png | staff_arcane | variant | tier 4: magenta-materiaal |
+| `d100_schild_4` | icons16/d100_schild_4.png | icons32/d100_schild_4.png | shield_kite | variant | tier 4: magenta-materiaal |
+| `d100_helm_4` | icons16/d100_helm_4.png | icons32/d100_helm_4.png | helm_knight | variant | tier 4: magenta-materiaal |
+| `d100_harnas_4` | icons16/d100_harnas_4.png | icons32/d100_harnas_4.png | armor_chain | variant | tier 4: magenta-materiaal |
+| `d100_ring_4` | icons16/d100_ring_4.png | icons32/d100_ring_4.png | ring_plain | variant | tier 4: magenta-materiaal |
+| `d100_zwaard_5` | icons16/d100_zwaard_5.png | icons32/d100_zwaard_5.png | sword_steel | variant | tier 5: seal-materiaal |
+| `d100_staf_5` | icons16/d100_staf_5.png | icons32/d100_staf_5.png | staff_arcane | variant | tier 5: seal-materiaal |
+| `d100_schild_5` | icons16/d100_schild_5.png | icons32/d100_schild_5.png | shield_kite | variant | tier 5: seal-materiaal |
+| `d100_helm_5` | icons16/d100_helm_5.png | icons32/d100_helm_5.png | helm_knight | variant | tier 5: seal-materiaal |
+| `d100_harnas_5` | icons16/d100_harnas_5.png | icons32/d100_harnas_5.png | armor_chain | variant | tier 5: seal-materiaal |
+| `d100_ring_5` | icons16/d100_ring_5.png | icons32/d100_ring_5.png | ring_plain | variant | tier 5: seal-materiaal |
+| `spreuk_inferno` | icons16/spreuk_inferno.png | icons32/spreuk_inferno.png | scroll_fire | variant | oude rol: eigen motief (orange) |
+| `spreuk_oerwoud` | icons16/spreuk_oerwoud.png | icons32/spreuk_oerwoud.png | scroll_ancient | variant | oude rol: eigen motief (green) |
+| `spreuk_donderslag` | icons16/spreuk_donderslag.png | icons32/spreuk_donderslag.png | scroll_spell | variant | oude rol: eigen motief (gold) |
+| `spreuk_aureool` | icons16/spreuk_aureool.png | icons32/spreuk_aureool.png | scroll_heal | variant | oude rol: eigen motief (orange) |
+| `spreuk_ijskern` | icons16/spreuk_ijskern.png | icons32/spreuk_ijskern.png | scroll_ice | variant | oude rol: eigen motief (blue) |
+| `spreuk_g4_zonneslag` | icons16/spreuk_g4_zonneslag.png | icons32/spreuk_g4_zonneslag.png | scroll_fire | variant | grade-4: eigen motief (gold) |
+| `spreuk_g4_apocalyps` | icons16/spreuk_g4_apocalyps.png | icons32/spreuk_g4_apocalyps.png | scroll_fire | variant | grade-4: eigen motief (purple) |
+| `spreuk_g4_dageraad` | icons16/spreuk_g4_dageraad.png | icons32/spreuk_g4_dageraad.png | scroll_fire | variant | grade-4: eigen motief (white) |
+| `spreuk_g4_zuiverende_vlam` | icons16/spreuk_g4_zuiverende_vlam.png | icons32/spreuk_g4_zuiverende_vlam.png | scroll_fire | variant | grade-4: eigen motief (gold) |
+| `spreuk_g4_zielenbloei` | icons16/spreuk_g4_zielenbloei.png | icons32/spreuk_g4_zielenbloei.png | scroll_ancient | variant | grade-4: eigen motief (pink) |
+| `spreuk_g4_oerbos` | icons16/spreuk_g4_oerbos.png | icons32/spreuk_g4_oerbos.png | scroll_ancient | variant | grade-4: eigen motief (emerald) |
+| `spreuk_g4_moeder_aarde` | icons16/spreuk_g4_moeder_aarde.png | icons32/spreuk_g4_moeder_aarde.png | scroll_ancient | variant | grade-4: eigen motief (brown) |
+| `spreuk_g4_wildgroei` | icons16/spreuk_g4_wildgroei.png | icons32/spreuk_g4_wildgroei.png | scroll_ancient | variant | grade-4: eigen motief (green) |
+| `spreuk_g4_hemelval` | icons16/spreuk_g4_hemelval.png | icons32/spreuk_g4_hemelval.png | scroll_spell | variant | grade-4: eigen motief (cyan) |
+| `spreuk_g4_donderslag` | icons16/spreuk_g4_donderslag.png | icons32/spreuk_g4_donderslag.png | scroll_spell | variant | grade-4: eigen motief (gold) |
+| `spreuk_g4_stormheer` | icons16/spreuk_g4_stormheer.png | icons32/spreuk_g4_stormheer.png | scroll_spell | variant | grade-4: eigen motief (purple) |
+| `spreuk_g4_zuiverende_donder` | icons16/spreuk_g4_zuiverende_donder.png | icons32/spreuk_g4_zuiverende_donder.png | scroll_spell | variant | grade-4: eigen motief (white) |
+| `spreuk_g4_wederopstanding` | icons16/spreuk_g4_wederopstanding.png | icons32/spreuk_g4_wederopstanding.png | scroll_heal | variant | grade-4: eigen motief (red) |
+| `spreuk_g4_heilige_straal` | icons16/spreuk_g4_heilige_straal.png | icons32/spreuk_g4_heilige_straal.png | scroll_heal | variant | grade-4: eigen motief (gold) |
+| `spreuk_g4_aureool` | icons16/spreuk_g4_aureool.png | icons32/spreuk_g4_aureool.png | scroll_heal | variant | grade-4: eigen motief (orange) |
+| `spreuk_g4_zegen_der_goden` | icons16/spreuk_g4_zegen_der_goden.png | icons32/spreuk_g4_zegen_der_goden.png | scroll_heal | variant | grade-4: eigen motief (white) |
+| `spreuk_g4_eeuwige_winter` | icons16/spreuk_g4_eeuwige_winter.png | icons32/spreuk_g4_eeuwige_winter.png | scroll_ice | variant | grade-4: eigen motief (cyan) |
+| `spreuk_g4_absolute_nul` | icons16/spreuk_g4_absolute_nul.png | icons32/spreuk_g4_absolute_nul.png | scroll_ice | variant | grade-4: eigen motief (cyan) |
+| `spreuk_g4_ijskern` | icons16/spreuk_g4_ijskern.png | icons32/spreuk_g4_ijskern.png | scroll_ice | variant | grade-4: eigen motief (blue) |
+| `spreuk_g4_sneeuwkoningin` | icons16/spreuk_g4_sneeuwkoningin.png | icons32/spreuk_g4_sneeuwkoningin.png | scroll_ice | variant | grade-4: eigen motief (silver) |
