@@ -621,7 +621,7 @@ func _run() -> void:
 		# Alleen het Wachtershuis-interieur (scripts/tests/huis_wilgendal_autotest.gd); CI draait ze aan het eind mee.
 		check("titelscherm (huis-wilgendal)", await wait_scene("Title"))
 		await preload("res://scripts/tests/huis_wilgendal_autotest.gd").new(self).run()
-		print("RESULT %s (%d fouten)" % ("OK" if failures == 0 else "FAILED", failures))
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
 	if "--test-item-icons" in OS.get_cmdline_user_args():
