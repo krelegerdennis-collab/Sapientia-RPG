@@ -29,8 +29,8 @@ static func laad() -> Dictionary:
 
 
 static func prop_texture(naam: String) -> Texture2D:
-	for root in [BINNEN_DIR, PROP_DIR]:
-		var pad := root + naam + ".png"
+	for root: String in [BINNEN_DIR, PROP_DIR]:
+		var pad: String = root + naam + ".png"
 		if ResourceLoader.exists(pad):
 			return load(pad) as Texture2D
 	return null
