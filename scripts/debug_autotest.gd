@@ -617,6 +617,13 @@ func _run() -> void:
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
+	if "--test-huis-wilgendal" in OS.get_cmdline_user_args():
+		# Alleen het Wachtershuis-interieur (scripts/tests/huis_wilgendal_autotest.gd); CI draait ze aan het eind mee.
+		check("titelscherm (huis-wilgendal)", await wait_scene("Title"))
+		await preload("res://scripts/tests/huis_wilgendal_autotest.gd").new(self).run()
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
+		get_tree().quit(1 if failures else 0)
+		return
 	await _title_and_name_tests()
 	await _prologue_tests()
 	await _end_prologue()
@@ -643,6 +650,8 @@ func _run() -> void:
 	await preload("res://scripts/tests/codex_tutorial_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/wm1_stabiliteit_autotest.gd").new(self).run()
+	Engine.time_scale = 1.0
+	await preload("res://scripts/tests/huis_wilgendal_autotest.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
 

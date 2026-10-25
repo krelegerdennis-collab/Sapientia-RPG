@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=4]
 
-[ext_resource type="Script" path="res://scripts/map.gd" id="1_n5ctt"]
+[ext_resource type="Script" path="res://scripts/huis_wilgendal.gd" id="1_n5ctt"]
 [ext_resource type="TileSet" path="res://assets/tiles/binnen.tres" id="2_ijppc"]
 [ext_resource type="PackedScene" path="res://scenes/story_object.tscn" id="3_4xtlb"]
 [ext_resource type="PackedScene" path="res://scenes/npc.tscn" id="4_743jt"]
