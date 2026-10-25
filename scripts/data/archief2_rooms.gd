@@ -3,7 +3,7 @@ extends RefCounted
 ## Aparte lijst, zodat de tellingen van het Eerste Archief (ORDER, gevechten, thema
 ## archief_grijs) blijven staan. DungeonRooms.room() zoekt hier ná de Archieven.
 ##
-## De ingang gebruikt de bestaande golem-vlag (naar_leven). Verdieping 2-4 staan in rooms().
+## Wereldkaart-ingang: event naar_leven (Golem verslagen + Vesper in de groep). Verdieping 2-4 in rooms().
 
 const THEME := "kas"
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
