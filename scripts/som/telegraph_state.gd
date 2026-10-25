@@ -64,6 +64,15 @@ var entered_state: int:
 	get:
 		return _entered_state
 
+## Totale tickduur per fase (alleen lezen; voor presentatie zoals TelegraphLayer).
+var windup_duration_ticks: int:
+	get:
+		return _windup_ticks
+
+var active_duration_ticks: int:
+	get:
+		return _active_ticks
+
 
 ## Zet faseduren in ticks. Negatieve waarde => `valid = false` (bestaande reden blijft staan).
 func set_phase_ticks(windup: int, active: int, recovery: int, cooldown: int) -> void:
@@ -119,6 +128,16 @@ func interrupt() -> bool:
 		return false
 	_go_idle()
 	return true
+
+
+## Gast-only: spiegel host-fase zonder sim (co-op snapshot T5).
+func mirror(phase: int, ticks_left: int) -> void:
+	_clear_phase_flags()
+	if phase == State.IDLE:
+		_go_idle()
+		return
+	_state = phase
+	_ticks_left = maxi(0, ticks_left)
 
 
 func _revalidate() -> void:
