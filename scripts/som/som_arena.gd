@@ -485,7 +485,9 @@ func _process(delta: float) -> void:
 		_pending = {"switch": false, "attack": false, "cast": false}
 		if target_lock:
 			target_lock.tick(delta)      # wist alleen de markers (arena niet actief)
-		return
+		# Lopende slag/cast-animaties op de vaste stap (anders hangt swing_landed / treffer soms vast).
+		if not _combat_sim_busy():
+			return
 	if Input.is_action_just_pressed(SWITCH_ACTION) and not coop_mode:
 		_pending["switch"] = true
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
@@ -688,16 +690,19 @@ func _enemy_in_attack_reach(id: String, n: Node2D, m: Node) -> bool:
 
 
 func _swing_facing(id: String, n: Node2D) -> Vector2i:
-	if id == active_id and target_lock:
+	# Alleen een handmatige lock stuurt de slagrichting; auto-lock is alleen marker + strafe-facing.
+	if id == active_id and target_lock and target_lock.manual:
 		var m: Node = target_lock.locked_enemy()
-		if m != null:
-			var aim_lock: bool = bool(target_lock.manual) or _enemy_in_attack_reach(id, n, m)
-			if aim_lock:
-				var lf: Vector2i = target_lock.facing_for_player()
-				if lf != Vector2i.ZERO:
-					n.facing = lf
-					return lf
+		if m != null and _enemy_in_attack_reach(id, n, m):
+			var lf: Vector2i = target_lock.facing_for_player()
+			if lf != Vector2i.ZERO:
+				n.facing = lf
+				return lf
 	return n.facing
+
+
+func _combat_sim_busy() -> bool:
+	return swing_lock > 0.0 or not _sim_anims.is_empty() or not queued.is_empty()
 
 
 ## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
