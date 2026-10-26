@@ -485,6 +485,9 @@ func _process(delta: float) -> void:
 		_pending = {"switch": false, "attack": false, "cast": false}
 		if target_lock:
 			target_lock.tick(delta)      # wist alleen de markers (arena niet actief)
+		# Alleen lopende slag/cast-animaties (geen stick/A/B-input, geen vijand-AI).
+		if _combat_sim_busy():
+			advance_busy_anims(delta)
 		return
 	if Input.is_action_just_pressed(SWITCH_ACTION) and not coop_mode:
 		_pending["switch"] = true
@@ -502,6 +505,30 @@ func advance(delta: float) -> int:
 	for i in n:
 		sim_step()
 	return n
+
+
+## Arena niet actief (menu/dialog): alleen animaties en wachtrij-spreuken afronden, geen input/AI.
+func advance_busy_anims(delta: float) -> int:
+	var n := clock.frames_to_ticks(delta)
+	for i in n:
+		_busy_anim_step()
+	return n
+
+
+func _busy_anim_step() -> void:
+	var dt := TICK_DT
+	clock.tick += 1
+	sim_ticked.emit(clock.tick)
+	swing_lock = maxf(0.0, swing_lock - dt)
+	charge = CombatSim.charge_after(charge, swing_lock, SomData.CHARGE_AFTER_ANIM, SomData.CHARGE_TIME, dt)
+	CombatSim.tick_down(iframes, dt)
+	if not queued.is_empty():
+		_queue_t -= dt
+		if _queue_t <= 0.0:
+			var q := queued
+			queued = {}
+			resolve(q)
+	_sim_world(dt)
 
 
 ## Eén stap van 1/60 s. Zelfde volgorde als het oude _process.
@@ -688,16 +715,19 @@ func _enemy_in_attack_reach(id: String, n: Node2D, m: Node) -> bool:
 
 
 func _swing_facing(id: String, n: Node2D) -> Vector2i:
-	if id == active_id and target_lock:
+	# Alleen een handmatige lock stuurt de slagrichting; auto-lock is alleen marker + strafe-facing.
+	if id == active_id and target_lock and target_lock.manual:
 		var m: Node = target_lock.locked_enemy()
 		if m != null:
-			var aim_lock: bool = bool(target_lock.manual) or _enemy_in_attack_reach(id, n, m)
-			if aim_lock:
-				var lf: Vector2i = target_lock.facing_for_player()
-				if lf != Vector2i.ZERO:
-					n.facing = lf
-					return lf
+			var lf: Vector2i = target_lock.facing_for_player()
+			if lf != Vector2i.ZERO:
+				n.facing = lf
+				return lf
 	return n.facing
+
+
+func _combat_sim_busy() -> bool:
+	return swing_lock > 0.0 or not _sim_anims.is_empty() or not queued.is_empty()
 
 
 ## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
