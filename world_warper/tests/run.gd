@@ -11,23 +11,35 @@ const DialoogTest := preload("res://world_warper/guide/dialoog_test.gd")
 const DreigingTest := preload("res://world_warper/cutscene/dreiging_test.gd")
 const SpawnTest := preload("res://world_warper/wander/spawn_test.gd")
 const PartyTest := preload("res://world_warper/services/party_view_test.gd")
+const BakedLabelTestScene := preload("res://world_warper/art/baked_label_test.gd")
 
 var _failures := 0
 var _gestart := false
+var _klaar := false
 
 
 func _process(_delta: float) -> bool:
-	if _gestart:
+	if _klaar:
 		return true
-	_gestart = true
+	if not _gestart:
+		_gestart = true
+		var runner: Node = BakedLabelTestScene.new()
+		root.add_child(runner)
+		runner.klaar.connect(_na_baked_label)
+		return false
+	return false
+
+
+func _na_baked_label(extra: int) -> void:
+	_failures += extra
 	_draai()
+	_klaar = true
 	if _failures == 0:
 		print("RESULT OK")
 		quit(0)
 	else:
 		print("RESULT FAIL")
 		quit(1)
-	return true
 
 
 func _draai() -> void:
@@ -88,10 +100,10 @@ func _party() -> void:
 		{"name": "Bo", "level": 2.9},
 		12,
 	])
-	_check("party naam en niveau", regels.size() == 4 and regels[0] == "Mira, niveau 4")
-	_check("party lege naam is Onbekend", regels[1] == "Onbekend, niveau 1")
-	_check("party niveau uit tekst", regels[2] == "Onbekend, niveau 3")
-	_check("party niveau uit float", regels[3] == "Bo, niveau 2")
+	_check("party naam en niveau", regels.size() == 4 and regels[0] == "Mira, Lv 4")
+	_check("party lege naam is Onbekend", regels[1] == "Unknown, Lv 1")
+	_check("party niveau uit tekst", regels[2] == "Unknown, Lv 3")
+	_check("party niveau uit float", regels[3] == "Bo, Lv 2")
 
 
 func _smoke() -> void:

@@ -15,6 +15,7 @@ const HeroPortrait := preload("res://scripts/ui/hero_portrait.gd")
 const StatArrow := preload("res://scripts/ui/stat_arrow.gd")
 const TargetList := preload("res://scripts/ui/target_list.gd")
 const SavePrompt := preload("res://scripts/ui/save_prompt.gd")
+const ItemIcons := preload("res://scripts/data/item_icons.gd")
 
 const LEFT_W := 150            # linkerkolom (portret + stats)
 const PORTRAIT_BOX := Vector2(64, 80)
@@ -65,6 +66,7 @@ var list_buttons: Array[Button] = []
 var list_ids: Array = []
 var confirm: CanvasLayer = null
 var _last_cmd := "equip"
+var detail_icon: TextureRect
 
 
 func hero() -> Dictionary:
@@ -110,8 +112,18 @@ func _build_left(body: HBoxContainer) -> void:
 	fs.set_content_margin_all(1)
 	frame.add_theme_stylebox_override("panel", fs)
 	top.add_child(frame)
+	var holder := Control.new()
+	holder.custom_minimum_size = PORTRAIT_BOX
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait_view = HeroPortrait.make_view(PORTRAIT_BOX)
-	frame.add_child(portrait_view)
+	portrait_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.add_child(portrait_view)
+	detail_icon = ItemIcons.make_rect(ItemIcons.SIZE32)
+	detail_icon.name = "DetailIcon"
+	detail_icon.visible = false
+	detail_icon.position = Vector2(PORTRAIT_BOX.x - ItemIcons.SIZE32, PORTRAIT_BOX.y - ItemIcons.SIZE32)
+	holder.add_child(detail_icon)
+	frame.add_child(holder)
 	var info := VBoxContainer.new()
 	info.add_theme_constant_override("separation", 1)
 	top.add_child(info)
@@ -244,6 +256,7 @@ func refresh_slots() -> void:
 		var id := Equipment.equipped(h, s)
 		var nm := Equipment.item_name(id) if id != "" else "-"
 		UiMenu.set_label(slot_buttons[s], "%s%s" % [Equipment.slot_name(s).rpad(SLOT_COLS), nm])
+		ItemIcons.apply16(slot_buttons[s], id)
 
 
 ## Stats zonder vergelijking (alleen de huidige waarde).
@@ -400,6 +413,7 @@ func open_list(slot: String) -> void:
 		var b := UiMenu.button("%s x%d" % [Equipment.item_name(id).rpad(NAME_COLS), GameState.item_count(id)])
 		b.custom_minimum_size = Vector2(0, ROW_H)
 		b.clip_text = true
+		ItemIcons.apply16(b, str(id))
 		if GameState.is_permanent_item(str(id)):
 			tint_permanent(b)
 		b.focus_entered.connect(preview_item.bind(str(id)))
@@ -422,6 +436,7 @@ func preview_item(id: String) -> void:
 	if mode != "item":
 		return
 	var h := hero()
+	ItemIcons.show32(detail_icon, id)
 	show_compare(Equipment.effective_stats(h), Equipment.preview(h, current_slot, id))
 	set_hint("%s: %s" % [Equipment.item_name(id), Equipment.bonus_text(id)])
 
@@ -446,6 +461,7 @@ func _close_list() -> void:
 	list_ids = []
 	list_panel.visible = false
 	cmd_panel.visible = true
+	ItemIcons.show32(detail_icon, "")
 
 
 func ask_drop(slot: String, id: String) -> void:

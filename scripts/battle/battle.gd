@@ -1016,7 +1016,7 @@ func _choose_swap(hero: Dictionary):
 		var here := str(p["uid"]) == cur
 		entries.append({"text": "%s Lv%d%s" % [p["name"], int(p["level"]), " now" if here else ""], "enabled": not here})
 	entries.append({"text": "None", "enabled": cur != ""})
-	show_message("Who fights with you?")
+	show_message("Who fights alongside you?")
 	menu.open("Swap", entries, start, true, _list_row_h(mini(entries.size(), CODEX_ROWS_MAX)), CODEX_ROWS_MAX)
 	var k: int = await menu.finished
 	menu.close()

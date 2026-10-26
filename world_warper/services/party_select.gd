@@ -1,7 +1,7 @@
 class_name WorldWarperPartySelect
 extends Control
-## Kijk-scherm Gezelschap. Toont iedereen in GameState.party, met Nederlandse
-## naam en niveau. Geen reservebank.
+## Kijk-scherm Gezelschap. Toont iedereen in GameState.party als "Naam, Lv N".
+## Lege party: "Nobody in the party." Geen reservebank.
 ##
 ## TODO(design): wisselen wacht op een bestaande publieke API die de volgorde
 ## of samenstelling veilig zet. add_member en join_member voegen een held toe;

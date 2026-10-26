@@ -39,7 +39,7 @@ const KERN_ZIN := "In silence lies peace. I correct what grows."
 const START_GEAR := ["eiken_staf", "reisgewaad"]
 const START_SPELLS := ["genees", "rijp"]
 ## TODO(design): het bestiarium noemt dit beest "Moss Slime". De soort-id is mosslijm.
-## Spelertekst gebruikt Mosslijm. Geen nieuw Codex-beest.
+## Spelertekst is "Moss Slime". Geen nieuw Codex-beest.
 const MOSSLIJM_SOORT := "mosslijm"
 
 const KETEN := [
@@ -142,7 +142,7 @@ static func lotte_heeft_licht() -> bool:
 ## Het gekozen monster blijft de actieve bondgenoot. Geen vierde held forceren.
 static func tijdelijke_mosslijm(level: int) -> Dictionary:
 	var page := CodexData.make_page(MOSSLIJM_SOORT, maxi(1, level), "archief2_tijdelijk")
-	page["name"] = "Mosslijm"
+	page["name"] = "Moss Slime"
 	page["tijdelijk"] = true
 	return page
 

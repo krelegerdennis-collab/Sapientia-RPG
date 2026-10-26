@@ -819,6 +819,7 @@ func build_inside_tileset() -> TileSet:
 
 func build_inside(tileset: TileSet) -> Node2D:
 	var root := new_map_root("Huis", "The House", false)   # binnen: geen monsters
+	root.set_script(load("res://scripts/huis_wilgendal.gd"))  # vleugels + keuken op Annex, Ground blijft 12x9
 	# zwart rondom de kamer (de kamer is kleiner dan het scherm)
 	var void_rect := ColorRect.new()
 	void_rect.color = Color(0.02, 0.02, 0.025)

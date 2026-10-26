@@ -128,7 +128,7 @@ func _build() -> void:
 	prev_button.visible = multi
 	next_button.visible = multi
 	page_label.visible = multi
-	set_hint("<  >: other hero   B: back" if multi else DEFAULT_HINT)
+	set_hint("<  >: other hero   B: back" if multi else DEFAULT_HINT.replace("A: choose   ", ""))
 	back_button.grab_focus()
 	show_member(index)
 

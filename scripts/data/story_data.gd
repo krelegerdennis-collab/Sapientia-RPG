@@ -80,7 +80,7 @@ const ITEM_MEEL := "zingend_meel"
 const QUOTE_GRAAN_BEZOEK := "Oh, a visitor. Sit down, lad. Or stay standing — doesn't matter. The mill doesn't turn anymore anyway."
 const QUOTE_GRAAN_WIND := "It used to sing. When I ground grain, it sang. Now I only hear the wind. And the wind doesn't sing, it whispers."
 const QUOTE_GRAAN_VRAAG := "What happened?"
-const QUOTE_GRAAN_OP := "The grain is gone. Not the ordinary grain — I still have that. The SINGING grain. It only grows where light and shadow touch. In the Dark Forest, at the edge of the mist."
+const QUOTE_GRAAN_OP := "The grain is gone. Not the ordinary grain — I still have that. The SINGING grain. It only grows where light and shadow touch. In the Dark Wood, at the edge of the mist."
 const QUOTE_GRAAN_OUD := "I'm too old to go. My legs won't carry me anymore. But you... you look like someone who still goes places."
 const QUOTE_GRAAN_ZOEK := "Find the Singing Seed. It grows where the mist lifts and the first sun breaks through. Bring it back, and my mill will sing again."
 const QUOTE_GRAAN_VOORZICHTIG := "And lad — be careful. The forest doesn't like haste."
@@ -126,7 +126,7 @@ const STEP_NAMES := {0: "start", 10: "wakker", 15: "uitrusting", 20: "taken", 30
 ## gezet is). Story.active_quest() geeft de titel.
 const QUESTS := [
 	{"id": "noor", "title": "Save Vesper from the Dark Wood", "start_flag": "quest_noor", "done_flag": "noor_gered"},
-	{"id": "zingend_graan", "title": "Het Zingende Graan", "start_flag": FLAG_GRAAN, "done_flag": FLAG_GRAAN_KLAAR},
+	{"id": "zingend_graan", "title": "The Singing Grain", "start_flag": FLAG_GRAAN, "done_flag": FLAG_GRAAN_KLAAR},
 ]
 ## v0.17 TODO(verhaal): deze events hebben PLACEHOLDER-tekst (kort, Nederlands). Dennis schrijft het
 ## echte verhaal; de opbouw (wie loopt waar, vlaggen, ballonnen) kan blijven.
@@ -441,11 +441,17 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
-	# TODO(verhaal): de kas gaat open op de bestaande golem-vlag van het Eerste Archief.
-	# Waarom die kern op een tweede signaal reageert, staat nog open. Geen nieuwe beat.
+	# Kas (route A): open na de Golem én zodra Vesper in de groep zit (zelfde vlag als de berggrot-tunnel).
 	"naar_leven": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
 			["say", "", ["An overgrown greenhouse. The vines are sealed shut.", "Clear the First Archive first."]],
+			["walk", "player", "up", 1],
+		]},
+		{"if": {"not_flags": ["noor_lid"]}, "do": [
+			["say", "", [
+				"The greenhouse hums behind the vines, but the door will not open.",
+				"You need Vesper with you. Free her from the Dark Wood first.",
+			]],
 			["walk", "player", "up", 1],
 		]},
 		{"do": "default"},

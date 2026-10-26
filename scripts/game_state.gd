@@ -54,6 +54,11 @@ var _coop_lobby: Node = null
 var _coop_discovery: Node = null
 var _coop_session: Node = null
 var _coop_pending_message := ""
+## Fase B: solo-voortgang van een gast vóór co-op (geheugen); terug bij vertrek, geen duplicaat op eigen save.
+const COOP_GUEST_SAVE_PATH := "user://coop_guest_session.json"
+const COOP_GUEST_AUTOSAVE_PATH := "user://coop_guest_autosave.json"
+var _coop_guest_solo_snapshot: Dictionary = {}
+var _coop_guest_solo_paths: Dictionary = {}
 
 
 func coop_is_host() -> bool:
@@ -102,6 +107,7 @@ func coop_shutdown_session() -> void:
 
 
 func coop_end_session(reason: String = "") -> void:
+	var was_guest := coop_is_guest()
 	coop_shutdown_session()
 	if coop_is_host() and _coop_lobby != null and _coop_lobby.has_method("broadcast_session_end"):
 		if reason != "":
@@ -112,6 +118,47 @@ func coop_end_session(reason: String = "") -> void:
 		_coop_discovery.stop()
 	coop_role = ""
 	coop_clear_lobby_refs()
+	if was_guest:
+		_coop_restore_guest_solo()
+
+
+func _coop_snapshot_guest_solo() -> void:
+	if not _coop_guest_solo_snapshot.is_empty():
+		return
+	var map := return_map if return_map != "" else current_map
+	_coop_guest_solo_snapshot = state_data(return_tile, return_facing, map)
+	_coop_guest_solo_snapshot[CODEX_SYNC_KEY] = true
+	_coop_guest_solo_paths = {
+		"save_path": save_path,
+		"autosave_path": autosave_path,
+		"active_slot": active_slot,
+		"som_mode": som_mode,
+	}
+
+
+func _coop_restore_guest_solo() -> void:
+	if _coop_guest_solo_snapshot.is_empty():
+		_coop_purge_guest_save_files()
+		return
+	var snap := _coop_guest_solo_snapshot
+	var paths := _coop_guest_solo_paths
+	_coop_guest_solo_snapshot = {}
+	_coop_guest_solo_paths = {}
+	apply_state(snap)
+	save_path = str(paths.get("save_path", "user://save_1.json"))
+	autosave_path = str(paths.get("autosave_path", AUTOSAVE_PATH))
+	active_slot = int(paths.get("active_slot", 1))
+	som_mode = bool(paths.get("som_mode", false))
+	in_battle = false
+	changing_map = false
+	_coop_purge_guest_save_files()
+
+
+func _coop_purge_guest_save_files() -> void:
+	for p in [COOP_GUEST_SAVE_PATH, COOP_GUEST_AUTOSAVE_PATH]:
+		_remove_file(p)
+		_remove_file(p + ".tmp")
+		_remove_file(p + ".bak")
 
 
 func _on_coop_link_lost() -> void:
@@ -119,7 +166,7 @@ func _on_coop_link_lost() -> void:
 		return
 	var msg := "Connection lost."
 	coop_end_session("")
-	go_to_title()
+	go_to_title(true)
 	Dialog.show_lines([msg])
 
 
@@ -138,10 +185,8 @@ func _on_coop_session_ended(reason: String) -> void:
 		if path.ends_with("coop_lobby_screen.gd"):
 			return
 	var msg := coop_session_end_message(reason)
-	coop_shutdown_session()
-	coop_role = ""
-	coop_clear_lobby_refs()
-	go_to_title()
+	coop_end_session("")
+	go_to_title(true)
 	Dialog.show_lines([msg])
 
 
@@ -339,7 +384,11 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 ## Huidige map (pad naar de .tscn) en het spawnpunt voor de volgende map.
 var current_map := ""
 var pending_spawn := ""
+## Laatste warp-bron (pad naar .tscn), gezet in change_map vóór de scènewissel.
+var warp_from_map := ""
 var changing_map := false
+## true zolang een --...test-suite draait (zie _zet_testmodus).
+var test_modus := false
 ## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
 ## (intro, nieuw spel, wilgendal.tscn, oude save zonder sleutel) -> uitgang zoals vroeger.
 var huis_herkomst := ""
@@ -453,15 +502,20 @@ func _ready() -> void:
 	# Vriendenmodus: of  godot -- --pvptest  (pvp/tests/pvp_tests.gd).
 	# Debug-ingang (geen test, geen verhaalvlag): godot -- --spiegel
 	# Berggrot: of  godot -- --berggrottest [--shots=/pad/map]
+	# Kas-poort wereldkaart (Vesper + Golem): godot -- --kasdeurtest  (scripts/tests/kas_deur_tests.gd).
 	# Actie-balans (SoM-proef): godot -- --actionsim [--fights=N] [--boss-fights=N] [--out=pad]  (tools/battlesim/action_sim.gd)
 	# UI-polijst WM1 (touch, veilig gebied, leesbaarheid): of  godot -- --uipolishtest [--shots=/pad/map]  (scripts/tests/ui_polish_tests.gd).
 	# Screenshots van alle WM1-schermen per aspectprofiel (geen test): godot -- --uishots --shots=/pad/map  (tools/ui_polish).
 	# Balans: of  godot -- --battlesim [--seed=N] [--fights=N] [--only=a,b] [--out=pad]  (tools/battlesim, geen test)
 	# Balans per run (CSV in user://sim/): godot -- --battlesim --party=dennis:5 --enemy=all --runs=N --seed=S --policy=simpel
 	# WM1-bugjacht: of  godot -- --wm1bugtest [--shots=/pad/map]  (scripts/tests/wm1_bugjacht_tests.gd).
+	# WM1-bugjacht open O-2/O-3 (standalone): of  godot -- --wm1openbugtest  (scripts/tests/wm1_bugjacht_open_tests.gd).
+	# WM1-balansrapport (alle encounters/bazen, EXP/goud-curve): godot -- --wm1balans [--fights=N] [--out=pad]  (tools/battlesim/wm1_balans.gd);
+	# de bijbehorende suite: godot -- --wm1balanstest  (scripts/tests/wm1_balans_tests.gd)
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
 	# WM1-playthrough (nieuw spel t/m de hub, save/load, pauze): of  godot -- --wm1playthroughtest [--speed=N] [--static-only]  (scripts/tests/wm1_playthrough_tests.gd).
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
+	# WM1 frametime-log (alle kamers, WM1FRAME op stdout): of  godot -- --wm1frametest  (scripts/tests/wm1_frametime_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
@@ -478,6 +532,9 @@ func _ready() -> void:
 	# Seeded gevecht-RNG (zelfde seed = zelfde gevecht): of  godot -- --combatrngtest  (scripts/tests/combat_rng_tests.gd).
 	# Vaste 60 Hz-gevechtsstap (framerate-onafhankelijk): of  godot -- --combattick  (scripts/tests/combat_tick_tests.gd).
 	# Pure gevechtskern + beweging/treffers/lock op de stap: of  godot -- --combatsimtest  (scripts/tests/combat_sim_tests.gd).
+	# Telegraafvormen (pure klasse, Combat T1): of  godot -- --telegraphtest  (scripts/tests/telegraph_tests.gd).
+	# Co-op telegraaf-snapshot (Combat T5): of  godot -- --telegraphcooptest  (scripts/tests/telegraph_coop_sync_tests.gd).
+	# Grondzones / Inktplas (Combat T4b): of  godot -- --zonetest  (scripts/tests/zone_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -514,6 +571,8 @@ func _ready() -> void:
 			["--koopmantest", "res://scripts/tests/koopman_tests.gd", "KoopmanTest", "koopmantest"],
 			["--spiegeltest", "res://scripts/tests/spiegel_tests.gd", "SpiegelTest", "spiegeltest"],
 			["--berggrottest", "res://scripts/tests/berggrot_tests.gd", "BerggrotTest", "berggrottest"],
+			["--testmodustest", "res://scripts/tests/testmodus_tests.gd", "TestmodusTest", "testmodustest"],
+			["--kasdeurtest", "res://scripts/tests/kas_deur_tests.gd", "KasDeurTest", "kasdeurtest"],
 			["--berggrotdextest", "res://scripts/tests/berggrot_dex_tests.gd", "BerggrotDexTest", "berggrotdextest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
@@ -538,16 +597,23 @@ func _ready() -> void:
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
+			["--coopguestsavetest", "res://scripts/tests/coop_guest_save_tests.gd", "CoopGuestSaveTest", "coopguestsavetest"],
 			["--combatrngtest", "res://scripts/tests/combat_rng_tests.gd", "CombatRngTest", "combatrngtest"],
 			["--combattick", "res://scripts/tests/combat_tick_tests.gd", "CombatTickTest", "combattick"],
 			["--combatsimtest", "res://scripts/tests/combat_sim_tests.gd", "CombatSimTest", "combatsimtest"],
+			["--telegraphtest", "res://scripts/tests/telegraph_tests.gd", "TelegraphTest", "telegraphtest"],
+			["--telegraphcooptest", "res://scripts/tests/telegraph_coop_sync_tests.gd", "TelegraphCoopSyncTest", "telegraphcooptest"],
+			["--zonetest", "res://scripts/tests/zone_tests.gd", "ZoneTest", "zonetest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--wm1balanstest", "res://scripts/tests/wm1_balans_tests.gd", "Wm1BalansTest", "wm1balanstest"],
 			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
 			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
+			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
 			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
+			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
 			["--aabtest", "res://scripts/tests/aab_tests.gd", "AabTest", "aabtest"],
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
@@ -555,9 +621,12 @@ func _ready() -> void:
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
-			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"]]:
+			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
+			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
+		if str(t[3]).ends_with("test"):
+			_zet_testmodus(str(t[3]))
 		# eigen bestanden: de tests raken je echte save/autosave niet
 		save_path = "user://%s_save_1.json" % t[3]
 		autosave_path = "user://%s_autosave.json" % t[3]
@@ -581,6 +650,21 @@ func _ready() -> void:
 		call_deferred("_start_berggrot")
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
+
+
+## Testmodus (alleen bij een --...test-suite; O-4, flaky berggrottest onder load):
+## - test_modus laat toevalsbronnen die alleen beeld sturen (World Warper-flyover) een vaste seed
+##   gebruiken, zodat een suite niet van de klok afhangt.
+## - PHYSICS_GELIJK_SUITES: extra net naast walk() die op process_frame wacht. Physics mag nooit
+##   sneller lopen dan beelden. Niet voor alle suites: menutest en woudtest hangen af van physics
+##   op wandkloktijd en gaan juist stuk als physics onder load langzamer loopt.
+const PHYSICS_GELIJK_SUITES: Array[String] = ["berggrottest"]
+
+
+func _zet_testmodus(suite: String) -> void:
+	test_modus = true
+	if suite in PHYSICS_GELIJK_SUITES:
+		Engine.max_physics_steps_per_frame = 1
 
 
 ## Debug-ingang van de berggrot. Zelfde haakje als de mond op de kaart.
@@ -1387,8 +1471,7 @@ func _notification(what: int) -> void:
 		if _coop_pending_message != "":
 			var pending := _coop_pending_message
 			_coop_pending_message = ""
-			coop_role = ""
-			go_to_title()
+			go_to_title(true)
 			Dialog.show_lines([pending])
 	if what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
@@ -1933,11 +2016,12 @@ func start_som_coop_guest(character_id: String) -> void:
 	const SomData := preload("res://scripts/data/som_data.gd")
 	if changing_map or in_battle or not SomData.ENABLED or character_id == "":
 		return
+	_coop_snapshot_guest_solo()
 	coop_role = "guest"
 	_build_som_state()
 	leader_id = character_id if character_id != "" else MAIN_HERO
-	save_path = "user://coop_guest_session.json"
-	autosave_path = "user://coop_guest_autosave.json"
+	save_path = COOP_GUEST_SAVE_PATH
+	autosave_path = COOP_GUEST_AUTOSAVE_PATH
 	current_map = SomData.START_MAP
 	changing_map = false
 	await Transition.fade_out()
@@ -2164,9 +2248,14 @@ func start_new_game(hero_name: String) -> void:
 
 
 ## Terug naar het titelscherm (bv. vanuit het veldmenu, en in de autotest).
-func go_to_title() -> void:
-	if changing_map or in_battle:
+func go_to_title(force := false) -> void:
+	if not force and (changing_map or in_battle):
 		return
+	if force:
+		in_battle = false
+		changing_map = false
+	if coop_in_session():
+		coop_end_session("")
 	use_story_saves()
 	som_mode = false
 	if dungeon100_run_active():
@@ -2205,6 +2294,7 @@ func change_map(path: String, spawn_name: String) -> void:
 	if ReleaseFlags.dev_scene_blocked(path):
 		return
 	changing_map = true
+	warp_from_map = current_map
 	var route := huis_route(current_map, path, spawn_name)
 	path = route[0]
 	spawn_name = route[1]
@@ -3038,8 +3128,10 @@ func _unique_seen_flags() -> void:
 ## (verslagen of gevangen): de Golemhal gaat pas open als hij in de Codex staat, dus die krijgt hem alsnog en
 ## de vang-tutorial telt als gezien. 'Gevangen' en daarna gefuseerd: wel de vlag, geen nieuwe pagina. Codex
 ## vol: geen pagina (de uitgang gaat dan al open, zie StoryData.GOLEMHAL_EXIT); volgende load probeert het weer.
-## Een nieuwe save (mét marker) wordt nooit gemigreerd: tussen tutorial 1 en 2 speelt de vang-tutorial gewoon.
-func _codex_inktwurm_sync(oude_save := false) -> void:
+## Default oude_save=true: een directe aanroep (na unique_done) zet de pagina/vlag, zodat uid-volgorde
+## (codex_0001..) en codex_next_id kloppen bij save/load. apply_state / respawn geven de marker expliciet
+## door: een nieuwe save (mét marker) wordt nooit gemigreerd, tussen tutorial 1 en 2 speelt de vang-tutorial.
+func _codex_inktwurm_sync(oude_save := true) -> void:
 	var flag := StoryData.CODEX_INKTWURM_FLAG
 	for page in codex_pages:
 		if str(page.get("species", "")) == "inktwurm":

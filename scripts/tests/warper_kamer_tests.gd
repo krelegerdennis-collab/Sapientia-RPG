@@ -818,6 +818,32 @@ func _screenshot(name: String) -> void:
 	print("INFO  screenshot: ", shots.path_join(name + ".png"), " ", img.get_size())
 
 
+const _HAL_BORD_TEKST := {"Gezelschap": "Party", "Simulatie": "Deep Learning Simulation"}
+
+
+func _hal_bord_zichtbaar(vlak: Node, verwacht: String) -> bool:
+	if vlak == null:
+		return false
+	for c in vlak.get_children():
+		if c is Label and str(c.text) == verwacht:
+			return true
+	var titel := str(vlak.get("titel"))
+	if str(_HAL_BORD_TEKST.get(titel, titel)) != verwacht:
+		return false
+	var bord := vlak.get_node_or_null("Tekst")
+	return bord is Sprite2D and (bord as Sprite2D).texture != null
+
+
+func _hal_warp_bord_ok(vlak: Node) -> bool:
+	if vlak == null:
+		return false
+	for c in vlak.get_children():
+		if c is Label and c.text == "Warp" and c.get_theme_font_size("font_size") == 10:
+			return true
+	var bord := vlak.get_node_or_null("Tekst")
+	return bord is Sprite2D and (bord as Sprite2D).texture != null and str(vlak.get("titel")) == "Warp"
+
+
 ## Dennis (14 okt 2026): warp-vlak naar de Deep Learning Simulation in de hal.
 func _hal_simulatie() -> void:
 	if GameState.dungeon100_run_active():
@@ -828,22 +854,17 @@ func _hal_simulatie() -> void:
 	GameState.change_map(HUBHAL, "ingang")
 	var ok := await _wacht_pad(HUBHAL)
 	await _wacht_fade()
-	await _pframes(6)
+	if ok:
+		await _wacht(func() -> bool:
+			var sim := scene().get_node_or_null("HubBoot/VlakSimulatie")
+			var warp := scene().get_node_or_null("HubBoot/VlakWarp")
+			return _hal_bord_zichtbaar(sim, "Deep Learning Simulation") and _hal_warp_bord_ok(warp)
+		, 4.0)
+	await _pframes(2)
 	var vlak: Node = scene().get_node_or_null("HubBoot/VlakSimulatie") if ok else null
-	var label_ok := false
-	if vlak != null:
-		for c in vlak.get_children():
-			if c is Label and c.text == "Deep Learning Simulation":
-				label_ok = true
-	check("hal: warp-vlak 'Deep Learning Simulation'", vlak != null and label_ok)
-	var wl: Label = null
+	check("hal: warp-vlak 'Deep Learning Simulation'", _hal_bord_zichtbaar(vlak, "Deep Learning Simulation"))
 	var wv: Node = scene().get_node_or_null("HubBoot/VlakWarp") if ok else null
-	if wv != null:
-		for c in wv.get_children():
-			if c is Label:
-				wl = c
-	check("hal: label 'Warp' op Dauwpixel 10 (1:1, de W blijft een W)", wl != null and wl.text == "Warp"
-			and wl.get_theme_font_size("font_size") == 10)
+	check("hal: label 'Warp' op Dauwpixel 10 (1:1, de W blijft een W)", _hal_warp_bord_ok(wv))
 	if vlak == null:
 		return
 	var p := _player()

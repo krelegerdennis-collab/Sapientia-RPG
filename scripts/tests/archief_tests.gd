@@ -585,12 +585,23 @@ func _leven_tests() -> void:
 			and closed_txt.contains("First Archive") and closed_do.size() > 1
 			and closed_do[1][0] == "walk")
 	GameState.story_flags[SD.GOLEM_FLAG] = true
+	var golem_only: Dictionary = Story.pick("naar_leven")
+	var golem_only_do: Array = golem_only.get("do", [])
+	var vesper_txt := ""
+	if golem_only_do.size() > 0 and golem_only_do[0] is Array and golem_only_do[0].size() > 2:
+		vesper_txt = " ".join(golem_only_do[0][2])
+	check("dicht met Golem maar zonder Vesper", golem_only_do is Array and vesper_txt.contains("Vesper")
+			and vesper_txt.contains("Dark Wood") and golem_only_do.size() > 1 and golem_only_do[1][0] == "walk")
+	var had_lid: bool = GameState.story_flags.has("noor_lid")
+	GameState.story_flags["noor_lid"] = true
 	var opened: Dictionary = Story.pick("naar_leven")
-	check("open na de golem-vlag", str(opened.get("do", "")) == "default")
+	check("open na de golem-vlag en Vesper", str(opened.get("do", "")) == "default")
+	if not had_lid:
+		GameState.story_flags.erase("noor_lid")
 	if not had:
 		GameState.story_flags.erase(SD.GOLEM_FLAG)
 	var exit_lines: Array = PuzzleRooms.ROOMS[PLAAT_ID]["exit"].get("lines", [])
-	var lore := closed_txt + " " + " ".join(exit_lines)
+	var lore := closed_txt + " " + vesper_txt + " " + " ".join(exit_lines)
 	check("geen verzonnen lore in de nieuwe zinnen", not lore.contains("H-6") and not lore.contains("Genezer")
 			and not lore.contains("Wurger") and not lore.contains("Stille Vlam") and not lore.contains("ECHO"))
 	var wereld: Node = (load("res://scenes/maps/wereldkaart.tscn") as PackedScene).instantiate()

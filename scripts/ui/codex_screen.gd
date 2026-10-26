@@ -279,7 +279,7 @@ func choose(uid: String) -> void:
 	if uid == NONE_ID:
 		show_message("No ally.")
 	else:
-		show_message("%s fights with you!" % GameState.codex_page(uid)["name"])
+		show_message("%s fights alongside you!" % GameState.codex_page(uid)["name"])
 
 
 # ---------------------------------------------------------------- glitch-fusie (v0.19)
