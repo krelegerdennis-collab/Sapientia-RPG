@@ -9,10 +9,12 @@ const SomActionAttacks := preload("res://scripts/data/som_action_attacks.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 
 ## Vaste volgorde; index 0 in wire = geen telegraaf (IDLE).
-const ATTACK_IDS: Array[String] = ["inktspuw", "inktplas"]
+const ATTACK_IDS: Array[String] = ["inktspuw", "inktplas", "root_test"]
 
 ## Bytes per zone-record in snapshots (T4b).
 const ZONE_WIRE_BYTES := 8
+## Bytes per root-status record (T6).
+const ROOT_WIRE_BYTES := 3
 
 
 static func attack_index(attack_id: String) -> int:

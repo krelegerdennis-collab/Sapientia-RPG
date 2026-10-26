@@ -49,6 +49,7 @@ const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const CombatZones := preload("res://scripts/som/combat_zones.gd")
+const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
 
@@ -73,6 +74,7 @@ var target_lock: Node2D
 var gauge: Node2D
 var telegraph_layer: TelegraphLayer
 var combat_zones := CombatZones.new()
+var combat_roots := CombatRoots.new()
 ## Tests: geforceerde aanval-id voor de volgende telegraaf-windup ("" = RNG).
 var forced_enemy_attack := ""
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
@@ -397,6 +399,7 @@ func switch_hero(to := "") -> String:
 		return ""
 	if a.in_wall():
 		a._teleport()      # anders belandt de bestuurde held in de muur en kan hij niet meer lopen
+	combat_roots.clear_member(active_id)
 	var old := active_id
 	var p_pos: Vector2 = player.position
 	var p_face: Vector2i = player.facing
@@ -426,6 +429,8 @@ func analog_dir() -> Vector2:
 		base = SomMove.joy_to_dir(touch.joy_raw)
 	else:
 		base = SomMove.keys_to_dir()
+	if combat_roots.blocks_movement(active_id):
+		return Vector2.ZERO
 	return base * _zone_slow_mult_for_id(active_id)
 
 
@@ -566,6 +571,7 @@ func sim_step() -> void:
 		else:
 			enemies.erase(m)
 	_tick_zones()
+	_tick_roots()
 	_sim_world(dt)
 
 
@@ -800,6 +806,8 @@ func _defeat_enemy(m: Node) -> void:
 	if e.has("tg"):
 		(e["tg"] as TelegraphAttack).cancel()
 	enemies.erase(m)
+	if enemies.is_empty():
+		_clear_transient_combat()
 	if target_lock:
 		target_lock.on_target_gone(m)
 	GameState.mark_defeated(m.enemy_id)
@@ -1042,7 +1050,8 @@ func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
 				var power := float(def.get("power", 1.0))
 				var hit_pt := TelegraphShape.to_px(body_of(tid))
 				if tg.hits_point_i(hit_pt):
-					hit_member(tid, int(e["atk"]), power)
+					var root_ticks := int(def.get("root_ticks", CombatRoots.MAX_ROOT_TICKS)) if bool(def.get("applies_root", false)) else 0
+					hit_member(tid, int(e["atk"]), power, root_ticks)
 				if bool(def.get("spawns_zone", false)) and _zones_authority():
 					combat_zones.try_spawn(
 							_enemy_index(m),
@@ -1085,6 +1094,7 @@ func _sync_telegraph_draw() -> void:
 		return
 	telegraph_layer.sync_from_enemies(enemies, Callable(self, "_telegraph_interruptible"))
 	telegraph_layer.sync_from_zones(combat_zones)
+	telegraph_layer.sync_from_roots(combat_roots, _root_icon_positions())
 
 
 func _zones_authority() -> bool:
@@ -1095,6 +1105,37 @@ func _zone_slow_mult_for_id(id: String) -> float:
 	if id == "" or not is_alive(id):
 		return 1.0
 	return combat_zones.slow_mult_at(TelegraphShape.to_px(body_of(id)))
+
+
+func _tick_roots() -> void:
+	if not _roots_authority():
+		return
+	combat_roots.tick()
+
+
+func _roots_authority() -> bool:
+	return not coop_mode or coop_sim_host
+
+
+func _root_icon_positions() -> Dictionary:
+	var out: Dictionary = {}
+	for hid in party_ids():
+		if not is_alive(hid):
+			continue
+		out[hid] = TelegraphShape.to_px(body_of(hid))
+	return out
+
+
+## Dodge-hook (Combat T6): breekt root onmiddellijk en start immuniteit.
+func break_root(id: String) -> void:
+	if not _roots_authority():
+		return
+	combat_roots.break_root(id)
+
+
+func _clear_transient_combat() -> void:
+	combat_zones.clear_all()
+	combat_roots.clear_all()
 
 
 func _tick_zones() -> void:
@@ -1161,7 +1202,7 @@ func hit_player(atk: int, _from := Vector2.ZERO) -> void:
 	hit_member(active_id, atk)
 
 
-func hit_member(id: String, atk: int, power: float = 1.0) -> void:
+func hit_member(id: String, atk: int, power: float = 1.0, root_ticks: int = 0) -> void:
 	if down or not is_alive(id):
 		return
 	if float(iframes.get(id, 0.0)) > 0.0:
@@ -1182,6 +1223,8 @@ func hit_member(id: String, atk: int, power: float = 1.0) -> void:
 	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(1, 0.4, 0.4))
 	player_hit.emit(dmg)
 	SessieLog.actie_treffer(id, dmg, int(h["hp"]))
+	if root_ticks > 0 and _roots_authority():
+		combat_roots.try_apply_root(id, root_ticks)
 	if int(h["hp"]) <= 0:
 		_member_ko(id)
 
@@ -1218,6 +1261,7 @@ func _dodge(id: String) -> void:
 ## Held KO: bondgenoot blijft liggen (som_ally.gd); bestuurde held -> wissel naar de volgende levende.
 ## Niemand meer over = game over.
 func _member_ko(id: String) -> void:
+	combat_roots.clear_member(id)
 	_say(SomData.TXT_KO % str(member(id).get("name", id)))
 	member_down.emit(id)
 	if GameState.alive_heroes().is_empty():
@@ -1229,7 +1273,7 @@ func _member_ko(id: String) -> void:
 
 ## Iedereen KO: zelfde afloop als een verloren gevecht (checkpoint/respawn via GameState.end_battle).
 func _party_down() -> void:
-	combat_zones.clear_all()
+	_clear_transient_combat()
 	down = true
 	player.input_locked = true
 	SomFx.set_ko(player, pose_tex(active_id, "ko"), true)
@@ -1603,6 +1647,8 @@ func _prune_coop_avatar_orphans(seated: Dictionary) -> void:
 
 
 func coop_deactivate_slot(slot: int) -> void:
+	var hid := str(_coop_slots.get(slot, ""))
+	combat_roots.clear_member(hid)
 	_coop_slots.erase(slot)
 	if not _coop_avatars.has(slot):
 		return
@@ -1842,6 +1888,7 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 		else:
 			enemies.erase(m)
 	_tick_zones()
+	_tick_roots()
 	_sim_world(dt)
 	_rebuild_enemy_order()
 
@@ -1857,8 +1904,11 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 	if stick.length_squared() > 0.01:
 		var dir := stick.normalized()
 		var hid := str(_coop_slots.get(slot, ""))
+		if hid != "" and combat_roots.blocks_movement(hid):
+			stick = Vector2.ZERO
 		var slow := _zone_slow_mult_for_id(hid) if hid != "" else 1.0
-		body.position += dir * SomData.MOVE_SPEED * slow * dt
+		if stick.length_squared() > 0.01:
+			body.position += dir * SomData.MOVE_SPEED * slow * dt
 		if body == player:
 			body.facing = SomMove.facing_for(dir, body.facing)
 	var lock_i := int(inp.get("lock_idx", -1))
@@ -1922,7 +1972,7 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 		}
 		var tg: TelegraphAttack = e.get("tg", null)
 		elist.append(TelegraphSnapshot.merge_enemy_row(base, tg, tslot))
-	return Codec.pack_snapshot(tick, players, elist, combat_zones.wire_rows())
+	return Codec.pack_snapshot(tick, players, elist, combat_zones.wire_rows(), combat_roots.wire_rows(_coop_slots))
 
 
 func apply_coop_snapshot(snap: Dictionary) -> void:
@@ -1964,6 +2014,7 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 			TelegraphSnapshot.apply_row_to_enemy(e, row, room.room_id, room.tier())
 	if not coop_sim_host:
 		combat_zones.apply_wire_rows(snap.get("zones", []))
+		combat_roots.apply_wire_rows(snap.get("roots", []), _coop_slots)
 		_sync_telegraph_draw()
 
 

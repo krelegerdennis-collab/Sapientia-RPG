@@ -32,6 +32,19 @@ const ATTACKS := {
 		"zone_dot_power": 0.3,
 		"zone_slow_mult": 0.6,
 	},
+	## Alleen voor --roottest (Wortelgreep-mechaniek); geen vijand-pool op main.
+	"root_test": {
+		"id": "root_test",
+		"shape": "circle",
+		"reach": 16,
+		"windup_ms": 900,
+		"active_ms": 1,
+		"recovery_ms": 0,
+		"power": 1.0,
+		"aim": "target",
+		"applies_root": true,
+		"root_ticks": 60,
+	},
 }
 
 ## Gewogen pool per vijand-id (uniform; host-RNG in SomArena).
