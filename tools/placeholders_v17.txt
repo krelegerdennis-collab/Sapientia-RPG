@@ -106,3 +106,9 @@ assets/sprites/buiten/bouw_balken.png          16x16    stapel stutbalken   [KLA
 #   schadegetallen / telegraaf-"!" (som_fx.gd number), ringmenu = gewone knoppen op een cirkel (som_ring.gd),
 #   vijand-treffer = witte flits, telegraaf = rood knipperen (modulate op de bestaande map-sprite).
 #   Nodig van RPG ART: zie HANDOFF_SOM.md "Art voor de volledige versie".
+# Wachtershuis-interieur, keuken (tools/art_huis_keuken_placeholder.py). Magenta hoekjes, letters PH. Geen definitieve art.
+assets/sprites/binnen/keuken_fornuis.png               24x32   fornuis (huis_wilgendal ART-interieur)   [KLAAR]
+assets/sprites/binnen/deurkozijn.png                   24x32   deurkozijn (huis_wilgendal ART-interieur)   [KLAAR]
+assets/sprites/binnen/keukenkast.png                   24x32   keukenkast (huis_wilgendal ART-interieur)   [KLAAR]
+assets/sprites/binnen/doorframe_32.png                 32x32   binnendeur frame (huis_wilgendal ART-interieur)   [KLAAR]
+assets/sprites/binnen/slaapkamer_kast_PLACEHOLDER.png  24x32   slaapkamerkast Dax/Opa (huis_wilgendal)   [KLAAR: wardrobe in huis_props]

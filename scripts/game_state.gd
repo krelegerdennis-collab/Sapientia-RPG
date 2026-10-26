@@ -384,6 +384,8 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 ## Huidige map (pad naar de .tscn) en het spawnpunt voor de volgende map.
 var current_map := ""
 var pending_spawn := ""
+## Laatste warp-bron (pad naar .tscn), gezet in change_map vóór de scènewissel.
+var warp_from_map := ""
 var changing_map := false
 ## true zolang een --...test-suite draait (zie _zet_testmodus).
 var test_modus := false
@@ -2287,6 +2289,7 @@ func change_map(path: String, spawn_name: String) -> void:
 	if ReleaseFlags.dev_scene_blocked(path):
 		return
 	changing_map = true
+	warp_from_map = current_map
 	var route := huis_route(current_map, path, spawn_name)
 	path = route[0]
 	spawn_name = route[1]

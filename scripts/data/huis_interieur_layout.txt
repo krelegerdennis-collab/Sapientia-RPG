@@ -1,0 +1,91 @@
+SAPIENTIA - Player house interior (huis_dax_binnen)  32 x 21 tiles = 512 x 336 px, 16px grid
+Viewport 384x216 (16:9) .. 468x216 (19.5:9): room is larger in both axes -> no black borders; camera limits = room rect (0,0)-(512,336).
+
+Legend:  # wall top/cap (solid)   F wall face (solid)   . floor (walk)   d interior doorway (walk, deurkozijn frame)
+         X floor tile blocked by a prop   S spawn (front door, facing up)   E exit trigger (front door)   J stone door jamb (solid)
+
+     00000000001111111111222222222233
+     01234567890123456789012345678901
+  0  ################################
+  1  #FFFFFFFFFF#FFFFFFFF#FFFFFFFFFF#
+  2  #FFFFFFFFFF#FFFFFFFF#FFFFFFFFFF#
+  3  #XXX....XX.#XXXX...X#XX.....XXX#
+  4  #XX........#........#........XX#
+  5  #..........#...XX...#..........#
+  6  #..........#..XXXX..#..........#
+  7  #..........#..XXXX..#..........#
+  8  #.........X#...XX...#X.........#
+  9  #####dd#####X......X#####dd#####
+ 10  #FFFFddFFFFF........FFFFFddFFFF#
+ 11  #FFFFddFFFFF........FFFFFddFFFF#
+ 12  #XXX..................XX....XXX#
+ 13  #..............................#
+ 14  #..............................#
+ 15  #............XXXXX...XX........#
+ 16  #.XXX.....................XXXX.#
+ 17  #..............................#
+ 18  #......XS.X....................#
+ 19  #######JEEJ#####################
+ 20  #######JEEJ#####################
+
+Spawn: tile (8,18) [player stands between (8,18)-(9,18), pixel pos x=144,y=300 feet], facing up.
+Exit trigger: tiles (8,19),(9,19),(8,20),(9,20) = the 2-tile-wide front door in the 2-row front wall -> outside, house_big door tile (2,6). Stone jambs (7,19-20),(10,19-20) solid.
+Interior doorways (2 tiles wide, walkable rows 9-11): bedroom W cols 5-6, bedroom E cols 25-26.
+Rooms: bedroom W cols1-10 rows3-8 | kitchen cols12-19 rows3-11 (open to living) | bedroom E cols21-30 rows3-8 | living cols1-30 rows12-18.
+
+Props (name: tile x,y of top-left | pixel offset dx,dy | size px | collision tiles | note). Draw order: decals first, then y-sort by bottom.
+  window                 tile ( 5, 1) +(0,0)px  32x32  coll=- window on back wall
+  bed_rood               tile ( 1, 2) +(0,0)px  32x48  coll=[[1, 3], [2, 3], [1, 4], [2, 4]] 
+  nightstand             tile ( 3, 2) +(0,8)px  16x24  coll=[[3, 3]] 
+  wardrobe               tile ( 8, 1) +(0,0)px  32x48  coll=[[8, 3], [9, 3]] 
+  rug_bed                tile ( 4, 5) +(0,0)px  48x32  coll=- decal, walkable
+  plant                  tile (10, 7) +(0,0)px  16x32  coll=[[10, 8]] 
+  window                 tile (25, 1) +(0,0)px  32x32  coll=- 
+  bed_blauw              tile (29, 2) +(0,0)px  32x48  coll=[[29, 3], [30, 3], [29, 4], [30, 4]] 
+  nightstand             tile (28, 2) +(0,8)px  16x24  coll=[[28, 3]] 
+  bookshelf              tile (21, 1) +(0,0)px  32x48  coll=[[21, 3], [22, 3]] 
+  rug_bed_e              tile (24, 5) +(0,0)px  48x32  coll=- decal, walkable
+  plant                  tile (21, 7) +(0,0)px  16x32  coll=[[21, 8]] 
+  keukenkast             tile (12, 2) +(4,0)px  24x32  coll=[[12, 3], [13, 3]] 
+  keuken_fornuis         tile (14, 2) +(8,0)px  24x32  coll=[[14, 3], [15, 3]] 
+  keuken_fornuis_gloed   tile (14, 4) +(8,0)px  24x16  coll=- decal under stove, walkable
+  window                 tile (17, 1) +(0,0)px  32x32  coll=- 
+  sconce                 tile (19, 1) +(0,4)px  16x16  coll=- 
+  barrel                 tile (19, 2) +(0,0)px  16x24  coll=[[19, 3]] 
+  barrel                 tile (12, 8) +(0,0)px  16x24  coll=[[12, 9]] 
+  chair_front            tile (15, 5) +(0,-4)px  16x24  coll=[[15, 5]] 
+  chair_front            tile (16, 5) +(0,-4)px  16x24  coll=[[16, 5]] 
+  table                  tile (14, 6) +(0,0)px  64x32  coll=[[14, 6], [15, 6], [16, 6], [17, 6], [14, 7], [15, 7], [16, 7], [17, 7]] 
+  chair_back             tile (15, 7) +(0,4)px  16x24  coll=[[15, 8]] 
+  chair_back             tile (16, 7) +(0,4)px  16x24  coll=[[16, 8]] 
+  hearth                 tile ( 1,10) +(0,0)px  48x48  coll=[[1, 12], [2, 12], [3, 12]] 
+  rug_living             tile ( 1,13) +(8,4)px  64x48  coll=- decal, walkable
+  armchair               tile ( 2,15) +(0,8)px  32x32  coll=[[2, 16], [3, 16]] 
+  sconce                 tile ( 8,10) +(0,2)px  16x16  coll=- 
+  sconce                 tile (23,10) +(0,2)px  16x16  coll=- 
+  chest                  tile (22,11) +(0,0)px  32x24  coll=[[22, 12], [23, 12]] 
+  bookshelf_b            tile (28,10) +(0,0)px  32x48  coll=[[28, 12], [29, 12]] 
+  plant                  tile (30,11) +(0,0)px  16x32  coll=[[30, 12]] 
+  rug_living_e           tile (25,13) +(8,4)px  64x48  coll=- decal, walkable
+  armchair_groen         tile (27,15) +(0,8)px  32x32  coll=[[27, 16], [28, 16]] 
+  side_table             tile ( 4,15) +(0,0)px  16x16  coll=[[4, 16]] 
+  side_table             tile (26,15) +(0,0)px  16x16  coll=[[26, 16]] 
+  barrel                 tile (19, 9) +(0,-6)px  16x24  coll=[[19, 9]] 
+  plant                  tile ( 7,17) +(0,0)px  16x32  coll=[[7, 18]] 
+  rug_runner             tile ( 8,13) +(0,0)px  32x64  coll=- decal, walkable
+  plant                  tile (10,17) +(0,0)px  16x32  coll=[[10, 18]] 
+  doormat                tile ( 8,17) +(0,8)px  32x16  coll=- decal, walkable
+  doorframe_32           tile ( 5,10) +(0,0)px  32x32  coll=- custom 32px interior doorway frame, walkable
+  doorframe_32           tile (25,10) +(0,0)px  32x32  coll=- custom 32px interior doorway frame, walkable
+  front_door             tile ( 7,19) +(0,0)px  64x32  coll=- front door in 2-row front wall; door tiles (8-9,19-20) = exit trigger, jambs solid
+  rug_centre             tile (13,13) +(8,4)px  64x48  coll=- decal, walkable
+  low_table              tile (14,14) +(0,0)px  48x32  coll=[[14, 15], [15, 15], [16, 15]] living centrepiece
+  stool                  tile (13,14) +(0,4)px  16x16  coll=[[13, 15]] 
+  stool                  tile (17,14) +(0,4)px  16x16  coll=[[17, 15]] 
+  cat                    tile ( 2,13) +(0,2)px  16x16  coll=- sleeping cat on rug, decor, walkable
+  potted_tree            tile (21,13) +(0,0)px  32x48  coll=[[21, 15], [22, 15]] potted lemon tree, hand-drawn
+  basket                 tile (29,16) +(0,2)px  16x16  coll=[[29, 16]] yarn basket
+  lantern                tile (19, 9) +(0,-7)px  16x16  coll=- lantern standing on the barrel (draw after barrel)
+
+Hand-placed floor details (detail tile @ tile): detail_knot@(4,7), detail_scuff@(13,10), detail_crumbs@(16,9), detail_knot@(23,4), detail_scuff@(9,16), detail_knot@(20,13), detail_crumbs@(15,16), detail_scuff@(27,7), detail_knot@(11,17), detail_scuff@(5,12), detail_knot@(18,5), detail_crumbs@(2,5)
+Light: top-left. Cast shadows: 4px east of wall caps, 3-4px under caps/faces, 3px contact shadow under standing props. Window light patches on floor below the 3 windows.
