@@ -357,7 +357,11 @@ static func parse_announce(raw: PackedByteArray) -> Dictionary:
 
 static func snapshot_payload_bytes(codec_version: int = SNAPSHOT_CODEC_VERSION) -> int:
 	var enemy_sz := SNAPSHOT_ENEMY_BYTES_V0 if codec_version <= 0 else SNAPSHOT_ENEMY_BYTES_V1
-	return SNAPSHOT_HEADER_BYTES + SNAPSHOT_PLAYER_BYTES * MAX_PLAYERS + enemy_sz * SNAPSHOT_ENEMY_BUDGET
+	var base := SNAPSHOT_HEADER_BYTES + SNAPSHOT_PLAYER_BYTES * MAX_PLAYERS + enemy_sz * SNAPSHOT_ENEMY_BUDGET
+	if codec_version <= 0:
+		return base
+	# T4b: zone_count-byte (records alleen wanneer er zones zijn; bandbreedte-schatting = leeg).
+	return base + 1
 
 
 ## Bytes per seconde die de host uitzendt als elk snapshot een eigen datagram is.

@@ -3,6 +3,9 @@ extends RefCounted
 ## Binair inpakken voor Action-co-op (docs/fase_b/ARCHITECTUUR.md, net_protocol.gd).
 
 const Protocol := preload("res://scripts/net/net_protocol.gd")
+const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
+const ZONE_WIRE_BYTES := TelegraphSnapshot.ZONE_WIRE_BYTES
+const MAX_ZONES_WIRE := 6
 const INPUT_SIZE := Protocol.INPUT_BYTES
 const PLAYER_SIZE := Protocol.SNAPSHOT_PLAYER_BYTES
 const ENEMY_SIZE := Protocol.SNAPSHOT_ENEMY_BYTES_V1
@@ -51,20 +54,22 @@ static func unpack_input(raw: PackedByteArray) -> Dictionary:
 	}
 
 
-static func pack_snapshot(tick: int, players: Array, enemies: Array) -> PackedByteArray:
-	return _pack_snapshot_version(tick, players, enemies, CODEC_VERSION)
+static func pack_snapshot(tick: int, players: Array, enemies: Array, zones: Array = []) -> PackedByteArray:
+	return _pack_snapshot_version(tick, players, enemies, CODEC_VERSION, zones)
 
 
 static func pack_snapshot_v0(tick: int, players: Array, enemies: Array) -> PackedByteArray:
-	return _pack_snapshot_version(tick, players, enemies, 0)
+	return _pack_snapshot_version(tick, players, enemies, 0, [])
 
 
-static func _pack_snapshot_version(tick: int, players: Array, enemies: Array, codec_version: int) -> PackedByteArray:
+static func _pack_snapshot_version(tick: int, players: Array, enemies: Array, codec_version: int, zones: Array) -> PackedByteArray:
 	var buf := PackedByteArray()
 	var pc := mini(players.size(), Protocol.MAX_PLAYERS)
 	var ec := mini(enemies.size(), Protocol.SNAPSHOT_ENEMY_BUDGET)
 	var enemy_sz := _enemy_wire_bytes(codec_version)
-	buf.resize(HEADER_SIZE + pc * PLAYER_SIZE + ec * enemy_sz)
+	var zc := mini(zones.size(), MAX_ZONES_WIRE) if codec_version > 0 else 0
+	var zone_tail := (1 + zc * ZONE_WIRE_BYTES) if codec_version > 0 else 0
+	buf.resize(HEADER_SIZE + pc * PLAYER_SIZE + ec * enemy_sz + zone_tail)
 	buf[0] = Protocol.BinKind.SNAPSHOT
 	buf[1] = tick & 0xFF
 	buf[2] = (tick >> 8) & 0xFF
@@ -75,6 +80,11 @@ static func _pack_snapshot_version(tick: int, players: Array, enemies: Array, co
 		off = _pack_player(buf, off, players[i])
 	for i in ec:
 		off = _pack_enemy(buf, off, enemies[i], codec_version)
+	if codec_version > 0:
+		buf[off] = zc
+		off += 1
+		for i in zc:
+			off = _pack_zone(buf, off, zones[i])
 	return buf
 
 
@@ -102,7 +112,17 @@ static func unpack_snapshot(raw: PackedByteArray) -> Dictionary:
 		var row: Dictionary = {}
 		off = _unpack_enemy(raw, off, row, codec_version)
 		enemies.append(row)
-	return {"tick": tick, "codec_version": codec_version, "players": players, "enemies": enemies}
+	var zones: Array = []
+	if codec_version > 0 and raw.size() > off:
+		var zc := int(raw[off])
+		off += 1
+		for i in mini(zc, MAX_ZONES_WIRE):
+			if raw.size() < off + ZONE_WIRE_BYTES:
+				break
+			var zrow: Dictionary = {}
+			off = _unpack_zone(raw, off, zrow)
+			zones.append(zrow)
+	return {"tick": tick, "codec_version": codec_version, "players": players, "enemies": enemies, "zones": zones}
 
 
 static func _enemy_wire_bytes(codec_version: int) -> int:
@@ -209,3 +229,23 @@ static func _write_u16(buf: PackedByteArray, off: int, v: int) -> void:
 
 static func _read_u16(buf: PackedByteArray, off: int) -> int:
 	return int(buf[off]) | (int(buf[off + 1]) << 8)
+
+
+static func _pack_zone(buf: PackedByteArray, off: int, z: Dictionary) -> int:
+	buf[off] = clampi(int(z.get("owner_idx", 0)), 0, 255)
+	_write_i16(buf, off + 1, int(z.get("ox", 0)))
+	_write_i16(buf, off + 3, int(z.get("oy", 0)))
+	buf[off + 5] = clampi(int(z.get("r", 0)), 0, 255)
+	buf[off + 6] = clampi(int(z.get("ticks_left", 0)), 0, 255)
+	buf[off + 7] = clampi(int(z.get("shape", 1)), 0, 255)
+	return off + ZONE_WIRE_BYTES
+
+
+static func _unpack_zone(raw: PackedByteArray, off: int, out: Dictionary) -> int:
+	out["owner_idx"] = int(raw[off])
+	out["ox"] = _read_i16(raw, off + 1)
+	out["oy"] = _read_i16(raw, off + 3)
+	out["r"] = int(raw[off + 5])
+	out["ticks_left"] = int(raw[off + 6])
+	out["shape"] = int(raw[off + 7])
+	return off + ZONE_WIRE_BYTES

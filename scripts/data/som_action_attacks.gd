@@ -1,43 +1,25 @@
-## Action-telegraafaanvallen (Combat T4a). Data voor TelegraphShape.from_data + TelegraphState-fasen.
-## Schade en globale cooldown blijven in SomData / enemy_stats; hier alleen vorm en fase-ms.
-## windup/active/recovery zijn milliseconden (omgezet via TelegraphState.ms_to_ticks).
+## Action-telegraafaanvallen (Combat T4a/T4b). Data voor TelegraphShape.from_data + TelegraphState-fasen.
+## Definities staan in `scripts/som/enemy_attacks.gd`; hier alleen helpers + cooldown uit SomData.
 
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
+const EnemyAttacks := preload("res://scripts/som/enemy_attacks.gd")
 const _SomData := preload("res://scripts/data/som_data.gd")
-
-## Volledige aanvalsdefinitie per id (COMBAT_DESIGN.md §11).
-const ATTACKS := {
-	"inktspuw": {
-		"id": "inktspuw",
-		"shape": "line",
-		## Lengte/breedte in pixels: benader de oude ENEMY_REACH-check (22 px middelpunt-middelpunt,
-		## size 1x1). Breedte 44 = ±22 om de as (gesloten band), gelijk aan een schijf met straal 22.
-		"reach": 22,
-		"width": 44,
-		## Fasen (ms): windup = SomData.TELEGRAPH; active = 1 tick treffer; recovery = 0 (animatie
-		## loopt los van de sim, zoals voorheen). Cooldown-ms komt per kamer uit attack_cooldown().
-		"windup_ms": 450,
-		"active_ms": 1,
-		"recovery_ms": 0,
-	},
-}
-
-## Standaard Action-aanval per vijand-id (eerste telegraaf-gedreven vijand: Inktwurm).
-const ENEMY_DEFAULT_ATTACK := {
-	"inktwurm": "inktspuw",
-}
 
 
 static func attack(id: String) -> Dictionary:
-	return (ATTACKS.get(id, {}) as Dictionary).duplicate(true)
+	return EnemyAttacks.attack(id)
 
 
 static func default_attack_for_enemy(enemy_id: String) -> String:
-	return str(ENEMY_DEFAULT_ATTACK.get(enemy_id, ""))
+	return EnemyAttacks.default_attack_for_enemy(enemy_id)
 
 
 static func has_telegraph_attack(enemy_id: String) -> bool:
-	return default_attack_for_enemy(enemy_id) != "" and ATTACKS.has(default_attack_for_enemy(enemy_id))
+	return EnemyAttacks.has_telegraph_attack(enemy_id)
+
+
+static func pick_attack(enemy_id: String, rng: RandomNumberGenerator) -> String:
+	return EnemyAttacks.pick_attack(enemy_id, rng)
 
 
 ## Cooldown in ms voor deze kamer/tier (SomData.attack_cooldown, geen stats-wijziging).
