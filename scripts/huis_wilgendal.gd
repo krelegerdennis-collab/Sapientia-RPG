@@ -7,23 +7,16 @@ var _build := Build.new()
 
 
 func _ready() -> void:
-	var decor: TileMapLayer = get_node_or_null("Decor") as TileMapLayer
-	if decor == null:
-		decor = TileMapLayer.new()
-		decor.name = "Decor"
-		add_child(decor)
-		move_child(decor, ground.get_index())
-	var objects: Node2D = get_node("Objects")
-	var props_layer: TileMapLayer = get_node_or_null("PropsTiles") as TileMapLayer
-	if props_layer == null:
-		props_layer = TileMapLayer.new()
-		props_layer.name = "PropsTiles"
-		add_child(props_layer)
-		move_child(props_layer, objects.get_index())
+	var details: Node2D = get_node_or_null("Details") as Node2D
+	if details == null:
+		details = Node2D.new()
+		details.name = "Details"
+		add_child(details)
+		move_child(details, ground.get_index())
+	for c in details.get_children():
+		c.queue_free()
 	ground.clear()
-	decor.clear()
-	props_layer.clear()
-	_build.bouw(ground, decor, props_layer, objects)
+	_build.bouw(ground, details, get_node("Objects"))
 	_story_objecten()
 	_spawns()
 	_uitgang()
