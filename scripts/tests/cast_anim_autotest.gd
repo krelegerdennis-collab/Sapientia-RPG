@@ -57,7 +57,7 @@ func _cast_kind_for(hero_id: String) -> String:
 
 
 func arena() -> Node:
-	var r := t.scene()
+	var r: Node = t.scene()
 	return r.som if r != null and "som" in r else null
 
 
@@ -79,7 +79,7 @@ func _goto_archief(action_battles: bool, som_mode: bool) -> bool:
 
 func _close_dialogs() -> void:
 	for i in 8:
-		if Dialog.is_open():
+		if Dialog.is_open:
 			await t.tap("ui_accept")
 			await t.frames(3)
 		else:
