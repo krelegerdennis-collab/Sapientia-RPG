@@ -279,6 +279,8 @@ func join_party_hero(id: String) -> void:
 	_laad_held_cast(id)
 	if coop_mode or not allies_enabled or id == active_id or ally_of(id) != null:
 		return
+	if not GameState.party.any(func(h): return str(h.get("id", "")) == id):
+		return
 	var objects: Node = room.get_node_or_null("Objects")
 	if objects == null:
 		return
