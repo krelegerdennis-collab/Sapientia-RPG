@@ -6,7 +6,7 @@ const CombatSim := preload("res://scripts/som/combat_sim.gd")
 const EnemyAttacks := preload("res://scripts/som/enemy_attacks.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
-const SomActionAttacks := preload("res://scripts/data/som_action_attacks.gd")
+const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 
 var failures := 0
@@ -36,6 +36,7 @@ func _run() -> void:
 	_cancel_windup_no_root_tests()
 	_determinism_frame_times_tests()
 	_coop_root_wire_tests()
+	_codec_v1_roots_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
 
@@ -103,17 +104,38 @@ func _clear_member_tests() -> void:
 
 
 func _cancel_windup_no_root_tests() -> void:
-	var def: Dictionary = SomActionAttacks.attack("root_test")
+	var def: Dictionary = EnemyAttacks.attack("root_test")
+	check("root_test data: applies_root + windup", bool(def.get("applies_root", false)) and int(def.get("windup_ms", 0)) > 0)
 	var tg := TelegraphAttack.new()
 	var roots := CombatRoots.new()
 	tg.configure(def, 1200)
-	tg.start(Vector2i(10, 10), Vector2i(256, 0), "circle")
-	for _i in 12:
+	tg.start(Vector2i(10, 10), Vector2i(256, 0), str(def.get("shape", "circle")))
+	var half := maxi(1, tg.windup_duration_ticks() / 2)
+	for _i in half:
 		tg.tick()
+	check("windup actief vóór cancel", tg.in_windup())
 	tg.cancel()
-	for _i in 60:
+	check("na cancel terug naar IDLE", tg.state() == TelegraphState.State.IDLE)
+	var saw_active := false
+	for _i in 120:
+		if tg.entered_active_this_tick():
+			saw_active = true
+			var rt := int(def.get("root_ticks", CombatRoots.MAX_ROOT_TICKS))
+			if bool(def.get("applies_root", false)) and rt > 0:
+				roots.try_apply_root("victim", rt)
 		tg.tick()
-	check("cancel windup: geen root state", roots.rooted_ids().is_empty())
+	check("cancel: ACTIVE nooit bereikt", not saw_active)
+	check("cancel windup: geen root (SomArena-pad)", roots.rooted_ids().is_empty())
+	var tg_ok := TelegraphAttack.new()
+	tg_ok.configure(def, 1200)
+	tg_ok.start(Vector2i(20, 20), Vector2i(256, 0), str(def.get("shape", "circle")))
+	var reached_active := false
+	for _i in tg_ok.windup_duration_ticks() + 4:
+		if tg_ok.entered_active_this_tick():
+			reached_active = true
+			break
+		tg_ok.tick()
+	check("root_test bereikt ACTIVE zonder cancel", reached_active)
 
 
 func _determinism_frame_times_tests() -> void:
@@ -168,3 +190,29 @@ func _coop_root_wire_tests() -> void:
 	guest.apply_wire_rows(rows, slots)
 	var got := guest.ticks_rooted("dennis")
 	check("gast spiegelt host root", got == 44)
+
+
+func _codec_v1_roots_tests() -> void:
+	var roots_rows: Array = [
+		{"slot": 0, "root_ticks": 55, "immune_ticks": 0},
+		{"slot": 2, "root_ticks": 0, "immune_ticks": 77},
+	]
+	var wire := Codec.pack_snapshot(11, [], [], [], roots_rows)
+	var snap := Codec.unpack_snapshot(wire)
+	var unpacked: Array = snap.get("roots", [])
+	check("codec v1 roots trailer count", unpacked.size() == 2)
+	var r0: Dictionary = unpacked[0]
+	check(
+		"codec v1 root record velden",
+		int(r0.get("slot", -1)) == 0
+		and int(r0.get("root_ticks", 0)) == 55
+		and int(r0.get("immune_ticks", 0)) == 0,
+	)
+	var r1: Dictionary = unpacked[1]
+	check("codec v1 immune record", int(r1.get("slot", -1)) == 2 and int(r1.get("immune_ticks", 0)) == 77)
+	var legacy := Codec.pack_snapshot(5, [], [], [])
+	if legacy.size() > 0:
+		legacy = legacy.slice(0, legacy.size() - 1)
+	var leg := Codec.unpack_snapshot(legacy)
+	check("legacy snapshot zonder root-trailer: tick", int(leg.get("tick", -1)) == 5)
+	check("legacy snapshot zonder root-trailer: roots leeg", (leg.get("roots", []) as Array).is_empty())
