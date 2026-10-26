@@ -522,6 +522,7 @@ func _ready() -> void:
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
 	# ECHO questlog (smoke): of  godot -- --echotest [--shots=/pad/map]  (scripts/tests/echo_tests.gd).
+	# SoM MAP_CAST na late join: of  godot -- --castjointest  (scripts/tests/cast_join_tests.gd).
 	# Sessielog (SessieLog, scripts/core/sessie_log.gd): of  godot -- --sessielogcoretest  (scripts/tests/sessielog_core_tests.gd).
 	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
 	# UX-polish WM1 (tikdoelen 48dp, Engelse tekst, tutorials, 19,5:9/20:9 + notch, SFX, volume): of
@@ -592,6 +593,7 @@ func _ready() -> void:
 			["--balansarchief1test", "res://scripts/tests/balans_archief1_tests.gd", "BalansArchief1Test", "balansarchief1test"],
 			["--questtest", "res://scripts/tests/quest_tests.gd", "QuestTest", "questtest"],
 			["--echotest", "res://scripts/tests/echo_tests.gd", "EchoTest", "echotest"],
+			["--castjointest", "res://scripts/tests/cast_join_tests.gd", "CastJoinTest", "castjointest"],
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
 			["--uxtest", "res://scripts/tests/ux_tests.gd", "UxTest", "uxtest"],
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],

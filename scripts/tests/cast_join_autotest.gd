@@ -1,5 +1,5 @@
 extends RefCounted
-## WM1-bugfix: kaart-cast sheets na arena-setup (held joint later). Hook in debug_autotest.gd.
+## WM1-bugfix: kaart-cast sheets na arena-setup (held joint later). Draait via --castjointest.
 
 const SomData := preload("res://scripts/data/som_data.gd")
 

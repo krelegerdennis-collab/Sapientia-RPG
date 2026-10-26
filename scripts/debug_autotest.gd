@@ -661,7 +661,6 @@ func _run() -> void:
 	await preload("res://scripts/tests/huis_wilgendal_autotest.gd").new(self).run()
 	await preload("res://scripts/tests/item_icon_autotest.gd").new(self).run()
 	await preload("res://scripts/tests/cast_anim_autotest.gd").new(self).run()
-	await preload("res://scripts/tests/cast_join_autotest.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
 
