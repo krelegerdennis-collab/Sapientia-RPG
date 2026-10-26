@@ -995,7 +995,20 @@ func add_member(id: String) -> bool:
 	if party.size() > PartyLimiet.MAX_HELDEN and PartyLimiet.mag_naar_reserve(h):
 		party.pop_back()
 		party_bench.append(h)
+	_som_party_hero_joined(id)
 	return true
+
+
+## Action-arena op de huidige map: cast-sheets (en bondgenoot) bij latere party-leden.
+func _som_party_hero_joined(id: String) -> void:
+	if not is_inside_tree():
+		return
+	var scene := get_tree().current_scene
+	if scene == null or not ("som" in scene):
+		return
+	var som: Node = scene.som
+	if som != null and som.has_method("join_party_hero"):
+		som.join_party_hero(id)
 
 
 ## v0.22 Is cutscene 'id' al bekeken? (eigen lijst, of de vlag die de cutscene zelf zet)
