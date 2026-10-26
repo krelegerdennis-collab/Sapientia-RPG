@@ -24,11 +24,17 @@ Eén `Node2D` in de Action-arena (`SomArena`) tekent **alle** grond-telegrafen i
 
 `--telegraphtest` → `scripts/tests/telegraph_layer_tests.gd` (outline circle/line/cone, fill-stappen, zichtbaarheid per fase, leeg na einde).
 
-## Volgende stappen (niet T3)
+## T4b — zones (Inktplas)
+
+- **Data:** `scripts/som/enemy_attacks.gd` (`inktplas`: windup 42 ticks, cirkel r 1,5 tegel op doelpositie bij start, inslag `power` 0,8, daarna zone 120 ticks).
+- **Sim:** `scripts/som/combat_zones.gd` — max 2 zones per vijand, 6 per arena, DoT elke 30 ticks (`zone_dot_power` 0,3), beweging ×`zone_slow_mult` (0,6). DoT respecteert `iframes`, zet geen nieuwe hit-invuln. Weg bij KO eigenaar, party down, `clear_all`.
+- **Host** tickt zones; **gast** tekent uit snapshot (`zones` trailer in codec v1, 8 bytes/record via `net_codec.gd`).
+- **Tekenen:** `TelegraphLayer.sync_from_zones()` — inkt-placeholder, 3 px rand (zelfde laag als telegrafen).
+- **Tests:** `--zonetest` → `scripts/tests/zone_tests.gd`.
 
 ## T5 — co-op sync (Combat T5)
 
-- **Host** stuurt per vijand in het snapshot (codec v1, `net_codec.gd`): `atk_id`, `phase`, `t` (tick in fase), `ox`/`oy`, `dir_x`/`dir_y`, `target_slot` (echte doelstoel), plus `zones` (nu leeg; T4b).
+- **Host** stuurt per vijand in het snapshot (codec v1, `net_codec.gd`): `atk_id`, `phase`, `t` (tick in fase), `ox`/`oy`, `dir_x`/`dir_y`, `target_slot` (echte doelstoel), plus snapshot-trailer `zones` (T4b).
 - **Gast** past alleen `TelegraphAttack.mirror_from_network()` aan en tekent via `TelegraphLayer`; geen AI/RNG.
 - Helpers: `scripts/net/telegraph_snapshot.gd`. Tests: `--telegraphcooptest`.
 - PR-stack: bouwt op TelegraphLayer (T3); merge na #265.

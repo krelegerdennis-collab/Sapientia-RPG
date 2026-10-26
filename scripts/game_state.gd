@@ -384,6 +384,8 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 ## Huidige map (pad naar de .tscn) en het spawnpunt voor de volgende map.
 var current_map := ""
 var pending_spawn := ""
+## Laatste warp-bron (pad naar .tscn), gezet in change_map vóór de scènewissel.
+var warp_from_map := ""
 var changing_map := false
 ## true zolang een --...test-suite draait (zie _zet_testmodus).
 var test_modus := false
@@ -530,6 +532,7 @@ func _ready() -> void:
 	# Pure gevechtskern + beweging/treffers/lock op de stap: of  godot -- --combatsimtest  (scripts/tests/combat_sim_tests.gd).
 	# Telegraafvormen (pure klasse, Combat T1): of  godot -- --telegraphtest  (scripts/tests/telegraph_tests.gd).
 	# Co-op telegraaf-snapshot (Combat T5): of  godot -- --telegraphcooptest  (scripts/tests/telegraph_coop_sync_tests.gd).
+	# Grondzones / Inktplas (Combat T4b): of  godot -- --zonetest  (scripts/tests/zone_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -597,6 +600,7 @@ func _ready() -> void:
 			["--combatsimtest", "res://scripts/tests/combat_sim_tests.gd", "CombatSimTest", "combatsimtest"],
 			["--telegraphtest", "res://scripts/tests/telegraph_tests.gd", "TelegraphTest", "telegraphtest"],
 			["--telegraphcooptest", "res://scripts/tests/telegraph_coop_sync_tests.gd", "TelegraphCoopSyncTest", "telegraphcooptest"],
+			["--zonetest", "res://scripts/tests/zone_tests.gd", "ZoneTest", "zonetest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--wm1balanstest", "res://scripts/tests/wm1_balans_tests.gd", "Wm1BalansTest", "wm1balanstest"],
@@ -2287,6 +2291,7 @@ func change_map(path: String, spawn_name: String) -> void:
 	if ReleaseFlags.dev_scene_blocked(path):
 		return
 	changing_map = true
+	warp_from_map = current_map
 	var route := huis_route(current_map, path, spawn_name)
 	path = route[0]
 	spawn_name = route[1]
