@@ -1,104 +1,70 @@
 class_name HuisInterieurAtlas
 extends RefCounted
-## Runtime-atlas voor Wachtershuis-tegels en props (één textuur → minder draw calls).
+## Horizontale grond-atlas (16×16 tegels) voor Wachtershuis — één textuur, minder draw calls.
 
+const TILE_DIR := "res://assets/tiles/huis_interieur/"
 const TILE_PX := 16
 
-var _image: Image
-var _w := 0
-var _h := 0
-var _cursor_x := 0
-var _cursor_y := 0
-var _row_h := 0
-var _regions: Dictionary = {}  # sleutel -> Rect2i in atlas
+const GROND_BESTANDEN := {
+	"wall_cap": "wall_cap.png",
+	"wall_face_top": "wall_face_top.png",
+	"wall_face_bottom": "wall_face_bottom.png",
+	"wall_post": "wall_post_bottom.png",
+	"floor_a": "floor_a.png",
+	"floor_b": "floor_b.png",
+	"floor_c": "floor_c.png",
+	"floor_d": "floor_d.png",
+	"floor_e": "floor_e.png",
+}
+
+const WALL_SLEUTELS := ["wall_cap", "wall_face_top", "wall_face_bottom", "wall_post"]
 
 
-func _init(pad: int = 1) -> void:
-	_pad = pad
-
-
-var _pad: int = 1
-
-
-func pack_texture(sleutel: String, tex: Texture2D, region: Rect2i = Rect2i()) -> Rect2i:
-	if _regions.has(sleutel):
-		return _regions[sleutel]
-	if tex == null:
-		return Rect2i()
-	var img: Image = tex.get_image()
-	if img == null or img.is_empty():
-		return Rect2i()
-	var w: int = region.size.x if region.size.x > 0 else img.get_width()
-	var h: int = region.size.y if region.size.y > 0 else img.get_height()
-	var ox: int = region.position.x
-	var oy: int = region.position.y
-	if _cursor_x + w + _pad > _w:
-		_cursor_x = 0
-		_cursor_y += _row_h + _pad
-		_row_h = 0
-	if _image == null:
-		_groeien(_cursor_x + w + _pad, _cursor_y + h + _pad)
-	elif _cursor_y + h + _pad > _h:
-		_groeien(_w, _cursor_y + h + _pad)
-	_image.blit_rect(img, Rect2i(ox, oy, w, h), Vector2i(_cursor_x, _cursor_y))
-	var reg := Rect2i(_cursor_x, _cursor_y, w, h)
-	_regions[sleutel] = reg
-	_cursor_x += w + _pad
-	_row_h = maxi(_row_h, h)
-	return reg
-
-
-func _groeien(min_w: int, min_h: int) -> void:
-	var nw: int = maxi(_w, min_w)
-	var nh: int = maxi(_h, min_h)
-	if _image == null:
-		_image = Image.create(nw, nh, false, Image.FORMAT_RGBA8)
-		_image.fill(Color(0, 0, 0, 0))
-		_w = nw
-		_h = nh
-		return
-	var nieuw := Image.create(nw, nh, false, Image.FORMAT_RGBA8)
-	nieuw.fill(Color(0, 0, 0, 0))
-	nieuw.blit_rect(_image, Rect2i(0, 0, _w, _h), Vector2i.ZERO)
-	_image = nieuw
-	_w = nw
-	_h = nh
-
-
-func maak_texture() -> Texture2D:
-	if _image == null or _image.is_empty():
-		return null
-	_trim_transparant()
-	return ImageTexture.create_from_image(_image)
-
-
-func region(sleutel: String) -> Rect2i:
-	return _regions.get(sleutel, Rect2i()) as Rect2i
-
-
-func _trim_transparant() -> void:
-	# Atlas blijft rechthoekig; geen trim nodig voor correctheid.
-	pass
-
-
-static func bouw_grond_tegels() -> Dictionary:
-	## sleutel -> Texture2D (16x16) voor vloer/muur
-	var dir := "res://assets/tiles/huis_interieur/"
-	var defs := {
-		"wall_cap": "wall_cap.png",
-		"wall_face_top": "wall_face_top.png",
-		"wall_face_bottom": "wall_face_bottom.png",
-		"wall_post": "wall_post_bottom.png",
-		"floor_a": "floor_a.png",
-		"floor_b": "floor_b.png",
-		"floor_c": "floor_c.png",
-		"floor_d": "floor_d.png",
-		"floor_e": "floor_e.png",
-		"detail_knot": "detail_knot.png",
-		"detail_scuff": "detail_scuff.png",
-		"detail_crumbs": "detail_crumbs.png",
+static func maak_grond_atlas(volgorde: Array) -> Dictionary:
+	## texture: ImageTexture, coords: sleutel -> Vector2i atlas-coördinaten
+	var atlas_w: int = volgorde.size() * TILE_PX
+	var img := Image.create(atlas_w, TILE_PX, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var coords: Dictionary = {}
+	var idx := 0
+	for sleutel in volgorde:
+		var fname: String = str(GROND_BESTANDEN.get(sleutel, ""))
+		if not fname.is_empty():
+			var tex: Texture2D = load(TILE_DIR + fname) as Texture2D
+			var ti: Image = _rgba8_van_texture(tex)
+			if ti != null:
+				img.blit_rect(ti, Rect2i(0, 0, TILE_PX, TILE_PX), Vector2i(idx * TILE_PX, 0))
+		coords[sleutel] = Vector2i(idx, 0)
+		idx += 1
+	return {
+		"texture": ImageTexture.create_from_image(img),
+		"coords": coords,
 	}
-	var uit: Dictionary = {}
-	for k in defs:
-		uit[k] = load(dir + defs[k]) as Texture2D
-	return uit
+
+
+static func _rgba8_van_texture(tex: Texture2D) -> Image:
+	if tex == null:
+		return null
+	var ti: Image = tex.get_image()
+	if ti == null or ti.is_empty():
+		return null
+	if ti.get_format() != Image.FORMAT_RGBA8:
+		ti = ti.duplicate()
+		ti.convert(Image.FORMAT_RGBA8)
+	return ti
+
+
+static func blit_texture_16(canvas: Image, tex: Texture2D, at: Vector2i) -> void:
+	var ti: Image = _rgba8_van_texture(tex)
+	if ti == null:
+		return
+	canvas.blit_rect(ti, Rect2i(0, 0, TILE_PX, TILE_PX), at)
+
+
+static func voeg_wand_fysiek(td: TileData) -> void:
+	if td == null:
+		return
+	td.add_collision_polygon(0)
+	td.set_collision_polygon_points(0, 0, PackedVector2Array([
+		Vector2(-8, -8), Vector2(8, -8), Vector2(8, 8), Vector2(-8, 8),
+	]))

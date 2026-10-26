@@ -58,31 +58,24 @@ func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
 
 
 func _maak_grond_tileset() -> TileSet:
-	var tegels: Dictionary = Atlas.bouw_grond_tegels()
 	var volgorde: Array = GROND_SLEUTELS
-	var atlas_w: int = volgorde.size() * 16
-	var img := Image.create(atlas_w, 16, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0, 0, 0, 0))
-	var idx := 0
-	for sleutel in volgorde:
-		var t: Texture2D = tegels[sleutel] as Texture2D
-		if t != null:
-			var ti: Image = t.get_image()
-			if ti != null and not ti.is_empty():
-				img.blit_rect(ti, Rect2i(0, 0, 16, 16), Vector2i(idx * 16, 0))
-		_tile_ids[sleutel] = Vector2i(idx, 0)
-		idx += 1
-	var tex := ImageTexture.create_from_image(img)
+	var atlas: Dictionary = Atlas.maak_grond_atlas(volgorde)
+	_tile_ids = atlas["coords"] as Dictionary
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
+	ts.add_physics_layer()
+	ts.set_physics_layer_collision_layer(0, 1)
+	ts.set_physics_layer_collision_mask(0, 1)
 	var src := TileSetAtlasSource.new()
-	src.texture = tex
+	src.texture = atlas["texture"] as Texture2D
 	src.texture_region_size = Vector2i(16, 16)
 	src.use_texture_padding = false
 	_ground_source_id = ts.add_source(src)
 	for sleutel in volgorde:
 		var ac: Vector2i = _atlas_coords(sleutel)
 		src.create_tile(ac)
+		if sleutel in Atlas.WALL_SLEUTELS:
+			Atlas.voeg_wand_fysiek(src.get_tile_data(ac, 0))
 	return ts
 
 
@@ -139,35 +132,15 @@ func _teken_details_gebakken(details: Node2D, lijst: Array) -> void:
 		var tex: Texture2D = load(TILE_DIR + naam + ".png")
 		if tex == null:
 			continue
-		var ti: Image = tex.get_image()
-		if ti == null or ti.is_empty():
-			continue
-		canvas.blit_rect(ti, Rect2i(0, 0, 16, 16), tegel * 16)
+		Atlas.blit_texture_16(canvas, tex, tegel * 16)
 	var spr := Sprite2D.new()
 	spr.texture = ImageTexture.create_from_image(canvas)
 	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	spr.centered = false
 	spr.position = Vector2.ZERO
+	# -1 = main (losse detail-Sprite2D); -2 was alleen TileMap-decor experiment.
 	spr.z_index = -1
 	details.add_child(spr)
-
-
-func _teken_details_sprites(details: Node2D, lijst: Array) -> void:
-	for item in lijst:
-		if not (item is Array) or item.size() < 3:
-			continue
-		var naam: String = str(item[0])
-		var tegel := Vector2i(int(item[1]), int(item[2]))
-		var tex: Texture2D = load(TILE_DIR + naam + ".png")
-		if tex == null:
-			continue
-		var spr := Sprite2D.new()
-		spr.texture = tex
-		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		spr.centered = false
-		spr.position = Vector2(tegel) * 16.0
-		spr.z_index = -1
-		details.add_child(spr)
 
 
 func _plaats_props(objects: Node2D, props: Array) -> void:
