@@ -1,10 +1,12 @@
 extends RefCounted
 ## Bouwt het Wachtershuis uit scripts/data/huis_interieur_layout.json (ART, 32x21).
+## Eén gedeelde atlas voor grond/decor/props → weinig draw calls (TileMap-batching).
 
 const LAYOUT_PATH := "res://scripts/data/huis_interieur_layout.json"
 const TILE_DIR := "res://assets/tiles/huis_interieur/"
 const BINNEN_DIR := "res://assets/sprites/binnen/"
 const PROP_DIR := "res://assets/sprites/binnen/huis_props/"
+const Atlas := preload("res://scripts/data/huis_interieur_atlas.gd")
 
 const PUZZLE_BINNEN_SPAWN := Vector2i(4, 7)
 const ARCHIEF_TEST_MAP := "res://scenes/maps/archief_test.tscn"
@@ -17,10 +19,21 @@ const VP_195_9 := Vector2i(468, 216)
 const SPAWN_TEGEL := Vector2i(8, 18)
 const EXIT_RECT := Rect2i(8, 19, 2, 2)
 
-var _tile_ids: Dictionary = {}
+const GROND_SLEUTELS := [
+	"wall_cap", "wall_face_top", "wall_face_bottom", "wall_post",
+	"floor_a", "floor_b", "floor_c", "floor_d", "floor_e",
+]
+const DETAIL_SLEUTELS := ["detail_knot", "detail_scuff", "detail_crumbs"]
+
+var _tile_ids: Dictionary = {}  # sleutel -> atlas_coords Vector2i
+var _prop_tile: Dictionary = {}  # prop instance key -> atlas_coords
 var _prop_blocks: Dictionary = {}
 var _solid_tiles: Dictionary = {}
 var _props_geplaatst: Array = []
+var _ground_ts: TileSet
+var _ground_source_id: int = -1
+var _props_ts: TileSet
+var _props_source_id: int = -1
 
 
 static func laad() -> Dictionary:
@@ -36,56 +49,127 @@ static func prop_texture(naam: String) -> Texture2D:
 	return null
 
 
-func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
+func bouw(ground: TileMapLayer, decor: TileMapLayer, props_layer: TileMapLayer, objects: Node2D) -> void:
 	var data: Dictionary = laad()
 	_tile_ids.clear()
+	_prop_tile.clear()
 	_prop_blocks.clear()
 	_solid_tiles.clear()
 	_props_geplaatst.clear()
-	ground.tile_set = _maak_tileset()
+	_ground_ts = _maak_grond_tileset()
+	ground.tile_set = _ground_ts
 	ground.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	decor.tile_set = _ground_ts
+	decor.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	decor.z_index = -2
 	_teken_grid(ground, data.get("grid", []) as Array)
-	_teken_details(details, data.get("details", []) as Array)
-	_plaats_props(objects, data.get("props", []) as Array)
+	_teken_details(decor, data.get("details", []) as Array)
+	_props_ts = _maak_props_tileset(data.get("props", []) as Array)
+	props_layer.tile_set = _props_ts
+	props_layer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	props_layer.collision_enabled = false
+	props_layer.y_sort_enabled = true
+	props_layer.z_index = 0
+	_plaats_props(props_layer, objects, data.get("props", []) as Array)
 
 
-func _maak_tileset() -> TileSet:
+func _maak_grond_tileset() -> TileSet:
+	var tegels: Dictionary = Atlas.bouw_grond_tegels()
+	var volgorde: Array = GROND_SLEUTELS + DETAIL_SLEUTELS
+	var atlas_w: int = volgorde.size() * 16
+	var img := Image.create(atlas_w, 16, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var idx := 0
+	for sleutel in volgorde:
+		var t: Texture2D = tegels[sleutel] as Texture2D
+		if t != null:
+			var ti: Image = t.get_image()
+			if ti != null and not ti.is_empty():
+				img.blit_rect(ti, Rect2i(0, 0, 16, 16), Vector2i(idx * 16, 0))
+		_tile_ids[sleutel] = Vector2i(idx, 0)
+		idx += 1
+	var tex := ImageTexture.create_from_image(img)
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
 	ts.add_physics_layer()
 	ts.set_physics_layer_collision_layer(0, 1)
 	ts.set_physics_layer_collision_mask(0, 1)
-	var defs := {
-		"wall_cap": {"file": "wall_cap.png", "solid": true},
-		"wall_face_top": {"file": "wall_face_top.png", "solid": true},
-		"wall_face_bottom": {"file": "wall_face_bottom.png", "solid": true},
-		"wall_post": {"file": "wall_post_bottom.png", "solid": true},
-		"floor_a": {"file": "floor_a.png", "solid": false},
-		"floor_b": {"file": "floor_b.png", "solid": false},
-		"floor_c": {"file": "floor_c.png", "solid": false},
-		"floor_d": {"file": "floor_d.png", "solid": false},
-		"floor_e": {"file": "floor_e.png", "solid": false},
-	}
-	for sleutel in defs.keys():
-		var tex: Texture2D = load(TILE_DIR + str(defs[sleutel]["file"]))
-		var src := TileSetAtlasSource.new()
-		src.texture = tex
-		src.texture_region_size = Vector2i(16, 16)
-		src.create_tile(Vector2i.ZERO)
-		if defs[sleutel]["solid"]:
-			var td: TileData = src.get_tile_data(Vector2i.ZERO, 0)
+	var src := TileSetAtlasSource.new()
+	src.texture = tex
+	src.texture_region_size = Vector2i(16, 16)
+	src.use_texture_padding = false
+	_ground_source_id = ts.add_source(src)
+	for sleutel in volgorde:
+		var ac: Vector2i = _atlas_coords(sleutel)
+		src.create_tile(ac)
+		if sleutel in GROND_SLEUTELS and sleutel.begins_with("wall"):
+			var td: TileData = src.get_tile_data(ac, 0)
 			if td != null:
 				td.add_collision_polygon(0)
 				td.set_collision_polygon_points(0, 0, PackedVector2Array([
 					Vector2(-8, -8), Vector2(8, -8), Vector2(8, 8), Vector2(-8, 8),
 				]))
-		var sid: int = ts.add_source(src)
-		_tile_ids[sleutel] = sid
 	return ts
 
 
-func _source_id(sleutel: String) -> int:
-	return int(_tile_ids.get(sleutel, -1))
+func _maak_props_tileset(props: Array) -> TileSet:
+	const SLOT := 64
+	var entries: Array = []
+	for raw in props:
+		if not (raw is Array) or raw.size() < 7:
+			continue
+		var naam: String = str(raw[0])
+		var tex := prop_texture(naam)
+		if tex == null:
+			continue
+		var key := "%s_%d_%d" % [naam, int(raw[1]), int(raw[2])]
+		entries.append({"key": key, "naam": naam, "tex": tex, "w": int(raw[3]), "h": int(raw[4])})
+	if entries.is_empty():
+		return TileSet.new()
+	var cols: int = int(ceil(sqrt(float(entries.size()))))
+	var rows: int = int(ceil(float(entries.size()) / float(cols)))
+	var atlas_w: int = cols * SLOT
+	var atlas_h: int = rows * SLOT
+	var img := Image.create(atlas_w, atlas_h, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var idx := 0
+	for e in entries:
+		var t: Texture2D = e["tex"] as Texture2D
+		var ti: Image = t.get_image()
+		if ti == null or ti.is_empty():
+			idx += 1
+			continue
+		var sub := Rect2i(0, 0, ti.get_width(), ti.get_height())
+		if str(e["naam"]) == "keuken_fornuis_gloed":
+			sub = Rect2i(0, 0, 24, 8)
+		var col: int = idx % cols
+		var row: int = idx / cols
+		var ox: int = col * SLOT
+		var oy: int = row * SLOT
+		img.blit_rect(ti, sub, Vector2i(ox, oy))
+		_prop_tile[str(e["key"])] = Vector2i(col, row)
+		idx += 1
+	var tex := ImageTexture.create_from_image(img)
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(16, 16)
+	var src := TileSetAtlasSource.new()
+	src.texture = tex
+	src.texture_region_size = Vector2i(SLOT, SLOT)
+	src.use_texture_padding = false
+	_props_source_id = ts.add_source(src)
+	for e in entries:
+		var ac: Vector2i = _prop_tile.get(str(e["key"]), Vector2i(-1, -1)) as Vector2i
+		if ac.x < 0:
+			continue
+		src.create_tile(ac)
+		var td: TileData = src.get_tile_data(ac, 0)
+		if td != null:
+			td.set_y_sort_origin(int(e["h"]))
+	return ts
+
+
+func _atlas_coords(sleutel: String) -> Vector2i:
+	return _tile_ids.get(sleutel, Vector2i(-1, -1)) as Vector2i
 
 
 func _teken_grid(ground: TileMapLayer, rijen: Array) -> void:
@@ -96,11 +180,11 @@ func _teken_grid(ground: TileMapLayer, rijen: Array) -> void:
 			var sleutel := _tegel_sleutel(ch, x, y, rijen)
 			if sleutel == "":
 				continue
-			var sid: int = _source_id(sleutel)
-			if sid < 0:
+			var ac: Vector2i = _atlas_coords(sleutel)
+			if ac.x < 0:
 				continue
 			var tegel := Vector2i(x, y)
-			ground.set_cell(tegel, sid, Vector2i.ZERO)
+			ground.set_cell(tegel, _ground_source_id, ac)
 			if _tegel_is_solid(ch):
 				_solid_tiles[tegel] = true
 
@@ -126,25 +210,19 @@ func _tegel_sleutel(ch: String, x: int, y: int, rijen: Array) -> String:
 			return ""
 
 
-func _teken_details(details: Node2D, lijst: Array) -> void:
+func _teken_details(decor: TileMapLayer, lijst: Array) -> void:
 	for item in lijst:
 		if not (item is Array) or item.size() < 3:
 			continue
 		var naam: String = str(item[0])
 		var tegel := Vector2i(int(item[1]), int(item[2]))
-		var tex: Texture2D = load(TILE_DIR + naam + ".png")
-		if tex == null:
+		var ac: Vector2i = _atlas_coords(naam)
+		if ac.x < 0:
 			continue
-		var spr := Sprite2D.new()
-		spr.texture = tex
-		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		spr.centered = false
-		spr.position = Vector2(tegel) * 16.0
-		spr.z_index = -1
-		details.add_child(spr)
+		decor.set_cell(tegel, _ground_source_id, ac)
 
 
-func _plaats_props(objects: Node2D, props: Array) -> void:
+func _plaats_props(props_layer: TileMapLayer, objects: Node2D, props: Array) -> void:
 	for raw in props:
 		if not (raw is Array) or raw.size() < 7:
 			continue
@@ -156,22 +234,20 @@ func _plaats_props(objects: Node2D, props: Array) -> void:
 		var dx: int = int(raw[5])
 		var dy: int = int(raw[6])
 		var coll: Variant = raw[7]
-		var tex := prop_texture(naam)
-		if tex == null:
+		var key := "%s_%d_%d" % [naam, tx, ty]
+		var ac: Vector2i = _prop_tile.get(key, Vector2i(-1, -1)) as Vector2i
+		if ac.x < 0:
 			continue
+		var anchor := Vector2i(tx, ty)
+		props_layer.set_cell(anchor, _props_source_id, ac)
+		var td: TileData = props_layer.get_cell_tile_data(anchor)
+		if td != null:
+			td.texture_origin = Vector2i(dx, dy)
+			td.set_y_sort_origin(h)
 		var top_left := Vector2(tx, ty) * 16.0 + Vector2(dx, dy)
 		var node := Node2D.new()
 		node.name = "%s_%d_%d" % [naam, tx, ty]
 		node.position = top_left
-		var spr := Sprite2D.new()
-		spr.texture = tex
-		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		spr.centered = false
-		spr.position = Vector2.ZERO
-		if naam == "keuken_fornuis_gloed":
-			spr.region_enabled = true
-			spr.region_rect = Rect2(0, 0, 24, 8)
-		node.add_child(spr)
 		objects.add_child(node)
 		var entry := {
 			"name": naam,

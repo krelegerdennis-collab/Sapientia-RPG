@@ -24,7 +24,7 @@ offset_bottom = 624.0
 mouse_filter = 2
 color = Color(0.02, 0.02, 0.025, 1)
 
-[node name="Details" type="Node2D" parent="."]
+[node name="Decor" type="TileMapLayer" parent="."]
 
 [node name="Ground" type="TileMapLayer" parent="."]
 
