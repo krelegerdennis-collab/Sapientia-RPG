@@ -95,6 +95,8 @@ var _coop_snap: Dictionary = {}
 ## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
 var sheets := {}
 var attack_texs := {}
+## Kaart-cast sheets (SomData.MAP_CAST), één keer geladen in setup() — geen load() tijdens cast.
+var map_cast_texs := {}
 ## Voor de autotest: laatste schade, laatste melding, tellers.
 var last_enemy_damage := 0
 var last_player_damage := 0
@@ -146,6 +148,7 @@ func setup(p_room: Node) -> void:
 		var sheet := str(SomData.ATTACK_ANIMS.get(id, {}).get("sheet", ""))
 		if sheet != "" and ResourceLoader.exists(sheet):
 			attack_texs[id] = load(sheet)
+		_laad_map_cast(id)
 	# leider-behoud: de held die je met SWAP koos (GameState.leader_id), terugval Dax bij KO / niet in de party
 	active_id = GameState.active_leader()
 	if member(active_id).is_empty():
@@ -252,6 +255,20 @@ func _laad_sheet(id: String) -> void:
 		path = dax_sheet_path()
 	if path != "" and ResourceLoader.exists(path):
 		sheets[id] = load(path)
+
+
+func _laad_map_cast(id: String) -> void:
+	if map_cast_texs.has(id) or not SomData.MAP_CAST.has(id):
+		return
+	var mc: Dictionary = SomData.MAP_CAST[id]
+	var sheet_path := str(mc.get("sheet", ""))
+	if sheet_path == "" or not ResourceLoader.exists(sheet_path):
+		return
+	var fx_path := str(mc.get("fx", ""))
+	map_cast_texs[id] = {
+		"sheet": load(sheet_path),
+		"fx": load(fx_path) if fx_path != "" and ResourceLoader.exists(fx_path) else null,
+	}
 
 
 func _apply_player_sheet() -> void:
@@ -1347,8 +1364,10 @@ func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
 	var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
 	match cast_kind(caster_id):
 		"map":
-			var mc: Dictionary = SomData.MAP_CAST[caster_id]
-			var anim0: Node = _drive(SomFx.map_cast_anim(n, SomFx.tex(str(mc["sheet"])), SomFx.tex(str(mc.get("fx", ""))), circle))
+			var mc_tex: Dictionary = map_cast_texs.get(caster_id, {})
+			var sheet: Texture2D = mc_tex.get("sheet", null) as Texture2D
+			var fx_tex: Texture2D = mc_tex.get("fx", null) as Texture2D
+			var anim0: Node = _drive(SomFx.map_cast_anim(n, sheet, fx_tex, circle))
 			anim0.hit.connect(done, CONNECT_ONE_SHOT)
 		"cast6":
 			var anim: Node = _drive(SomFx.cast6_anim(n, pose_tex(caster_id, "cast"), circle))
@@ -1362,8 +1381,7 @@ func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
 func cast_kind(caster_id: String) -> String:
 	if node_of(caster_id) == null:
 		return "direct"
-	var mc: Dictionary = SomData.MAP_CAST.get(caster_id, {})
-	if not map_cast_uit.has(caster_id) and SomFx.tex(str(mc.get("sheet", ""))) != null:
+	if not map_cast_uit.has(caster_id) and map_cast_texs.has(caster_id):
 		return "map"
 	var t := pose_tex(caster_id, "cast")
 	if t and t.get_width() == int(SomData.CAST6["frames"]) * int(SomData.CAST6["frame"][0]):
