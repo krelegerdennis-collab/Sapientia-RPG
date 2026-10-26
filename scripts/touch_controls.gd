@@ -9,6 +9,7 @@ extends Control
 ## Op PC kun je met de muis klikken (emulate_touch_from_mouse staat aan).
 
 ## (preload i.p.v. class_name: dit script wordt al door een autoload geladen)
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const SomDataC := preload("res://scripts/data/som_data.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
@@ -244,10 +245,12 @@ func _input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 			elif show_kern and InputMap.has_action("kern") and UiTouchC.hit_rect(kern_rect(), 4.0).has_point(pos):
 				_touch_owner[event.index] = "kern"
+				UiSfx.play(UiSfx.CLICK)
 				_set_touch_action(event.index, "kern")
 				get_viewport().set_input_as_handled()
 			elif show_run and InputMap.has_action("run") and UiTouchC.hit_rect(run_rect(), 2.0).has_point(pos):
 				_touch_owner[event.index] = "run"
+				UiSfx.play(UiSfx.CLICK)
 				_set_touch_action(event.index, "run")
 				get_viewport().set_input_as_handled()
 			elif show_menu and UiTouchC.hit_rect(menu_rect(), 4.0).has_point(pos):

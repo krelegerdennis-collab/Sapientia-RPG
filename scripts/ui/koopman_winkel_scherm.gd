@@ -60,6 +60,7 @@ func _on_buy(id: String, _kind: String) -> void:
 	var r := Winkel.koop(run_seed, bezoek, GameState.koopman_gekocht, id, verdieping)
 	last_text = str(r["text"])
 	show_message(last_text)
+	UiSfx.play(UiSfx.COINS if r["ok"] else UiSfx.ERROR)
 	if r["ok"]:
 		_show_koop()
 
@@ -68,4 +69,5 @@ func _on_sell(id: String) -> void:
 	var r := Winkel.verkoop(id)
 	last_text = str(r["text"])
 	show_message(last_text)
+	UiSfx.play(UiSfx.COINS if r["ok"] else UiSfx.ERROR)
 	_show_verkoop()

@@ -59,7 +59,7 @@ var preview := ""
 
 
 func _build() -> void:
-	header.text = "Options"
+	header.text = "Settings"
 	settings = get_node_or_null("/root/Settings")
 	var outer := VBoxContainer.new()
 	outer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -73,6 +73,7 @@ func _build() -> void:
 		tb.name = "Tab_" + t
 		tb.custom_minimum_size = Vector2(64, TAB_BAR_H)
 		tb.focus_mode = Control.FOCUS_NONE
+		UiSfx.tag(tb, UiSfx.TAB)
 		tb.pressed.connect(kies_tab.bind(t))
 		bar.add_child(tb)
 		tab_buttons[t] = tb

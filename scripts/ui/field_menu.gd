@@ -13,6 +13,7 @@ extends CanvasLayer
 
 signal closed
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
@@ -95,6 +96,7 @@ var _quiet_frame := -1
 func _ready() -> void:
 	_quiet_frame = Engine.get_process_frames()
 	layer = LAYER
+	UiSfx.play(UiSfx.OPEN)
 	root = Control.new()
 	root.theme = load(UiMenu.THEME_PATH)
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -104,6 +106,7 @@ func _ready() -> void:
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.gui_input.connect(func(e: InputEvent) -> void:
 		if e is InputEventMouseButton and e.pressed and sub == null:
+			UiSfx.play(UiSfx.CLOSE)
 			close())
 	root.add_child(dim)
 	_build_buttons()
@@ -265,6 +268,7 @@ func _process(delta: float) -> void:
 	if sub != null or Engine.get_process_frames() <= _quiet_frame:
 		return
 	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
+		UiSfx.play(UiSfx.CLOSE)
 		close()
 		return
 	_horizontal_nav()
@@ -501,9 +505,11 @@ func save_now() -> bool:
 		return false
 	if GameState.save_game(player.get_tile(), player.facing):
 		last_save_result = "saved"
+		UiSfx.play(UiSfx.SAVE)
 		show_message("Saved.")
 		return true
 	last_save_result = "failed"
+	UiSfx.play(UiSfx.ERROR)
 	show_message("Save failed.")
 	return false
 

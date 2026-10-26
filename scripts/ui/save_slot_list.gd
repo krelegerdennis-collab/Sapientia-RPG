@@ -8,6 +8,7 @@ extends Control
 signal picked(slot: int)
 signal cancelled
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 
@@ -45,7 +46,7 @@ func _ready() -> void:
 		var rec := GameState.slot_record(i)
 		var b := UiMenu.button(_label(i, rec))
 		b.name = "Slot%d" % i
-		b.custom_minimum_size = Vector2(168, 18)
+		b.custom_minimum_size = Vector2(168, UiTouch.TOUCH_MIN)
 		var unreadable := bool(rec.get("corrupt", false))
 		var off := (rec.is_empty() or unreadable) and not is_new
 		b.disabled = off
@@ -63,7 +64,7 @@ func _ready() -> void:
 		var arec := GameState.slot_record(GameState.AUTOSAVE_SLOT)
 		var ab := UiMenu.button(_label(GameState.AUTOSAVE_SLOT, arec))
 		ab.name = "Autosave"
-		ab.custom_minimum_size = Vector2(168, 18)
+		ab.custom_minimum_size = Vector2(168, UiTouch.TOUCH_MIN)
 		var a_off := arec.is_empty() or bool(arec.get("corrupt", false))
 		ab.disabled = a_off
 		ab.focus_mode = Control.FOCUS_NONE if a_off else Control.FOCUS_ALL
@@ -76,6 +77,8 @@ func _ready() -> void:
 		focus_btn = slot_buttons[0]
 	var back := UiMenu.button("Back")
 	back.name = "Terug"
+	back.custom_minimum_size = Vector2(168, UiTouch.TOUCH_MIN)
+	UiSfx.tag(back, UiSfx.CANCEL)
 	back.pressed.connect(func() -> void: cancelled.emit())
 	list.add_child(back)
 	if focus_btn != null:

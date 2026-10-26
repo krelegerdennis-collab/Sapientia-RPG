@@ -10,6 +10,7 @@ extends CanvasLayer
 
 signal closed
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 ## v0.14: menukleuren uit één bestand (menu_colors.gd), niet meer de neon van ui_style.gd
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
@@ -67,6 +68,7 @@ func _ready() -> void:
 	header_row.add_child(header)
 	back_button = UiMenu.button("Back")
 	back_button.custom_minimum_size = Vector2(BACK_W, ROW_H)
+	UiSfx.tag(back_button, UiSfx.CANCEL)
 	back_button.pressed.connect(back)
 	header_row.add_child(back_button)
 	var line := ColorRect.new()
@@ -248,6 +250,7 @@ func _process(delta: float) -> void:
 	if Engine.get_process_frames() <= _quiet_frame:
 		return
 	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
+		UiSfx.play(UiSfx.CANCEL)
 		back()
 		return
 	_handle_input()
