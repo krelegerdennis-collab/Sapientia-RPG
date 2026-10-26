@@ -106,7 +106,7 @@
 			"id": "zingend_graan", "act": "akte_2", "type": "side",
 			"npc": "Garrett the Miller", "spoken_flag": "gesproken_gerrit",
 			"title": "The Singing Grain",
-			"description": "Garrett's mill no longer sings. The Singing Seed grows in the Dark Forest, at the edge of the mist.",
+			"description": "Garrett's mill no longer sings. The Singing Seed grows in the Dark Wood, at the edge of the mist.",
 			"start_flag": "quest_zingend_graan",
 			"steps": [
 				{"id": "aannemen", "text": "Help Garrett the Miller", "event": "gerrit_ja", "flag": "quest_zingend_graan"},

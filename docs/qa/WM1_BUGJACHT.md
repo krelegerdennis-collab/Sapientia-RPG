@@ -6,14 +6,16 @@ Kas, gevechten, menu's, winkels, Codex), elke echte bug minimaal fixen met een N
 eerlijk open laten staan.
 
 Alles draaide op Godot 4.3-stable (zoals CI), headless met `xvfb-run`. Bestaande tests zijn niet aangepast.
-De nieuwe regressietests staan in de nieuwe suite `--wm1bugtest` (`scripts/tests/wm1_bugjacht_tests.gd`).
+De regressietests voor WM1-01/WM1-02 staan in `--wm1bugtest` (`scripts/tests/wm1_bugjacht_tests.gd`).
+O-2 en O-3 (gefixt in #234) draaien standalone via `--wm1openbugtest` (`scripts/tests/wm1_bugjacht_open_tests.gd`)
+en blijven ook aan het eind van `--autotest` hangen (`wm1_stabiliteit_autotest.gd`).
 
 ## Samenvatting
 
 | | |
 |---|---|
-| Gevonden en gefixt | 2 echte bugs (WM1-01, WM1-02), elk met regressietest |
-| Open | 5 punten (zie "Open"), geen daarvan blokkeert de voortgang |
+| Gevonden en gefixt | 4 punten (WM1-01, WM1-02, O-2, O-3), elk met regressietest |
+| Open | 3 punten (O-1, O-4, O-5; zie "Open"), geen daarvan blokkeert de voortgang |
 | Basislijn voor de fixes | 21 bestaande suites groen (1 timing-flake onder load, zie O-4) |
 | Na de fixes en het samenvoegen met `main` (tot en met #224) | alle 49 CI-suites + `wm1bugtest` groen, `warper-runner` en `algemene-sfx` groen |
 
@@ -104,15 +106,27 @@ goud- of voorwerp-duplicatie gevonden.
   bondgenoten in een muur), wisselt direct (de bestuurde held staat niet in een muur en kan bewegen) en wacht tot de
   bondgenoten zonder wisselen uit de muur zijn. Zonder de fix 3 FAIL, met de fix groen.
 
+### O-2 Warper: decoratieve noordboog `n` gaf bij elke bouw `push_error`
+- Waar: `scripts/dungeon/dungeon_room.gd`, `scripts/data/archief2_rooms.gd` (`archief_2_warper`).
+- Wat: de boog `n` in de noordmuur is alleen beeld (de kamer heeft alleen uitgang `E`), maar de builder
+  behandelde elk uitgangsteken in de layout als echte deur en logde `uitgang 'n' heeft geen doel in "exits"`.
+- Fix (main #234): `"decor_uitgangen": ["n"]` op de warper-kamer; `dungeon_room.gd` slaat zo'n teken over (geen MapExit, geen error). Layout en grondlaag ongewijzigd.
+- Regressietest: `--wm1openbugtest` (deel O-2) en `--autotest` (wm1_stabiliteit_autotest).
+
+### O-3 Viewport-callbacks op kaarten buiten de scene tree
+- Waar: `scripts/map.gd` (`_fit_camera` op `viewport.size_changed`), `scripts/battle/command_cross.gd` (`_place_name`).
+- Wat: bij Classic ↔ Action of na een gevecht kon een kaart of het commandokruis al uit de boom zijn terwijl
+  `get_viewport_rect` nog werd aangeroepen → `ERROR: Condition "!is_inside_tree()"`. Alleen logspam, geen speler-effect.
+- Fix (main #234): `is_inside_tree()`-guard; `size_changed` niet dubbel koppelen op `map.gd`.
+- Regressietest: `--wm1openbugtest` (deel O-3) en `--autotest` (wm1_stabiliteit_autotest).
+
 ## Open
 
 | id | wat | waarom open |
 |---|---|---|
-| O-1 | `SomArena._enemy_ai` (`som_arena.gd:752`): `Invalid access to property or key 'Monster_m3...' on a base object of type 'Dictionary'`, dus een vijand in de lus is intussen uit `enemies` gehaald. | Eenmalig gezien (`archief_v2_trapzaal`, Action, onder zware load), daarna niet meer te reproduceren in ruim 90 gerichte runs op alle zes Action-kamers. De oorzaak is niet gevonden en een blind vangnet zou het mechanisme verbergen. Gevolg als het gebeurt: één frame zonder vijand-AI, geen blijvende schade. Als het terugkomt: `enemies.has(m)` loggen met `get_stack()` in `_enemy_ai`. |
-| O-2 | Elke keer dat `archief_2_warper` (World Warper-kamer) gebouwd wordt, logt `dungeon_room.gd` `ERROR: uitgang 'n' heeft geen doel in "exits"`. | De boog `n` in de noordmuur is een decoratie zonder doel (de kamer heeft alleen een uitgang `E`). Wegnemen verandert het beeld van die muur (art/design), een leeg doel is een datakeuze. Spelers merken niets. Keuze aan Forge of ART. |
-| O-3 | `ERROR: Condition "!is_inside_tree()" ... get_viewport_rect` bij het wisselen Classic naar Action in een kamer (zichtbaar in `autotest.log`). | `map._fit_camera` hangt permanent aan `size_changed` en draait nog voor een kaart die net uit de boom is maar nog niet vrij. Alleen een logregel, geen effect. Een `is_inside_tree()`-regel is genoeg, maar er is geen speler-effect om tegen te testen. |
+| O-1 | `SomArena._enemy_ai` (`som_arena.gd`): `Invalid access` op `enemies[m]` als het monster in dezelfde sim-stap al uit `enemies` is gehaald. | Zeldzaam (eenmalig onder load in `archief_v2_trapzaal`). Fix met `enemies.has(m)` staat in open PR #242 (niet dubbel doen). Gevolg zonder fix: één frame zonder vijand-AI, geen blijvende schade. |
 | O-4 | `berggrottest` "warper beweegt op de kaart en blijft erbinnen" faalde één keer toen drie suites tegelijk draaiden. | Bestaande test (1,5 s wachttijd, beweging > 20 px), geslaagd bij elke losse run en in de eindrun. Een flake onder CPU-load, geen spelfout. Niet aangepast, want bestaande tests blijven staan. |
-| O-5 | `wm1bugtest` staat nog niet in de matrix van `.github/workflows/tests.yml`. | Opdracht: niet aan `.github/workflows` komen. RPG Forge moet `wm1bugtest` aan de matrix toevoegen. Tot dan draait de suite niet in CI, maar wel lokaal met `.github/scripts/run_suite.sh wm1bugtest` (14 PASS). |
+| O-5 | `wm1bugtest` en `wm1openbugtest` staan nog niet in de matrix van `.github/workflows/tests.yml`. | Opdracht: niet aan `.github/workflows` komen. RPG Forge moet de suites aan de matrix toevoegen. Lokaal: `.github/scripts/run_suite.sh wm1bugtest` (14 PASS) en `wm1openbugtest`. |
 
 ## Bewust zo ontworpen (geen bug)
 

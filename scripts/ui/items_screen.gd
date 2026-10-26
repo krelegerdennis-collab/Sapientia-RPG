@@ -9,6 +9,7 @@ const PartyActions := preload("res://scripts/party_actions.gd")
 const TargetList := preload("res://scripts/ui/target_list.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
+const ItemIcons := preload("res://scripts/data/item_icons.gd")
 
 const LIST_W := 132            # breedte van de itemlijst
 const NAME_COLS := PartyActions.LIST_NAME_COLS   # tekens voor de naam, daarna 'x3'
@@ -23,6 +24,7 @@ var ids: Array = []
 var name_label: Label
 var desc_label: Label
 var effect_label: Label
+var detail_icon: TextureRect
 var targets: TargetList
 var empty_label: Label
 var selected_id := ""
@@ -51,8 +53,16 @@ func _build() -> void:
 	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	detail.add_theme_constant_override("separation", 2)
 	body.add_child(detail)
+	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 4)
+	detail.add_child(title_row)
+	detail_icon = ItemIcons.make_rect(ItemIcons.SIZE32)
+	detail_icon.name = "DetailIcon"
+	title_row.add_child(detail_icon)
 	name_label = UiMenu.label("", MenuColors.TITLE)
-	detail.add_child(name_label)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	title_row.add_child(name_label)
 	desc_label = UiMenu.label("", MenuColors.TEXT)
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.custom_minimum_size = Vector2(100, 0)
@@ -90,6 +100,7 @@ func rebuild(keep_id := "") -> void:
 	for id in ids:
 		var b := UiMenu.button(entry_label(id))
 		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
+		ItemIcons.apply16(b, str(id))
 		b.focus_entered.connect(show_item.bind(id))
 		b.pressed.connect(choose_item.bind(id))
 		if not PartyActions.item_usable_in_field(id):
@@ -105,6 +116,7 @@ func rebuild(keep_id := "") -> void:
 		name_label.text = ""
 		desc_label.text = ""
 		effect_label.text = ""
+		ItemIcons.show32(detail_icon, "")
 		back_button.grab_focus()
 		return
 	var i := maxi(0, ids.find(keep_id))
@@ -130,6 +142,7 @@ func show_item(id: String) -> void:
 		return
 	selected_id = id
 	var it := PartyActions.item_data(id)
+	ItemIcons.show32(detail_icon, id)
 	name_label.text = PartyActions.item_name(id)
 	desc_label.text = str(it.get("desc", ""))
 	var reason := PartyActions.item_block_reason(id)

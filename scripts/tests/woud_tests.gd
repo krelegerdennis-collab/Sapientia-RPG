@@ -1057,7 +1057,7 @@ func lines_until_choice(timeout := 20.0) -> Array:
 func _graan_data() -> void:
 	var q: Array = SD.QUESTS.filter(func(x): return x["id"] == "zingend_graan")
 	check("opdracht Het Zingende Graan (start na het gesprek, klaar als de molen maalt)", q.size() == 1
-			and q[0]["title"] == "Het Zingende Graan" and q[0]["start_flag"] == SD.FLAG_GRAAN
+			and q[0]["title"] == "The Singing Grain" and q[0]["start_flag"] == SD.FLAG_GRAAN
 			and q[0]["done_flag"] == SD.FLAG_GRAAN_KLAAR)
 	var quotes := _gerrit_citaten()
 	var canon := [SD.QUOTE_GRAAN_BEZOEK, SD.QUOTE_GRAAN_WIND, SD.QUOTE_GRAAN_OP, SD.QUOTE_GRAAN_OUD,
@@ -1189,13 +1189,13 @@ func _graan_tests() -> void:
 	var ja: Array = await run_story(15.0)
 	check("aannemen: zoek het Zingend Zaad", ja.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZOEK))
 			and ja.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_VOORZICHTIG))
-			and Story.has_flag(SD.FLAG_GRAAN) and Story.active_quest() == "Het Zingende Graan"
+			and Story.has_flag(SD.FLAG_GRAAN) and Story.active_quest() == "The Singing Grain"
 			and not Story.has_flag(SD.FLAG_ZAAD))
 	Story.trigger("gerrit", g)
 	var zonder: Array = await run_story(8.0)
 	check("terug zonder zaad", zonder.any(func(l): return str(l).ends_with(SD.QUOTE_GRAAN_ZONDER))
 			and Story.has_flag(SD.FLAG_GRAAN) and not Story.has_flag(SD.FLAG_ZAAD)
-			and Story.active_quest() == "Het Zingende Graan"
+			and Story.active_quest() == "The Singing Grain"
 			and not zonder.any(func(l): return Molen.REGEL_RUST in str(l) or SD.QUOTE_GRAAN_ZAAD in str(l)))
 	GameState.story_flags["noor_gered"] = true
 	GameState.story_flags[SD.WORTELKONING_FLAG] = true

@@ -1015,7 +1015,7 @@ func _equipment_logic_tests() -> void:
 				data_ok = data_ok and (it[k] is int)
 	check("uitrustingsdata: %d stukken, elk een geldig vak" % GameData.EQUIPMENT.size(), data_ok and GameData.EQUIPMENT.size() == 85)   # 38 bestaande + 46 verhaalstukken t/m Act 6 + Simulatie-ring
 	check("vakken Wapen/Schild/Helm/Harnas/Benen/Laarzen/Accessoire", GameData.EQUIP_SLOTS.map(func(x): return Equipment.slot_name(x))
-			== ["Weapon", "Shield", "Helm", "Armor", "Benen", "Laarzen", "Accessory"])
+			== ["Weapon", "Shield", "Helm", "Armor", "Legs", "Boots", "Accessory"])
 	check("stats ATK/DEF/MAG/MDEF/SPD (SPD = agi)", GameData.EQUIP_STATS.map(func(x): return Equipment.stat_label(x))
 			== ["ATK", "DEF", "MAG", "MDEF", "SPD"] and GameData.EQUIP_STATS[4] == "agi")
 	var mag_ok := true
@@ -1153,7 +1153,7 @@ func _equipment_screen_tests() -> void:
 	var slot_texts: Array = Equipment.slots().map(func(x): return str(s.slot_buttons[x].get_meta("label")))
 	check("vakken %s" % [slot_texts], slot_texts[0].begins_with("Weapon") and slot_texts[1].begins_with("Shield")
 			and slot_texts[2].begins_with("Helm") and slot_texts[3].begins_with("Armor")
-			and slot_texts[4].begins_with("Benen") and slot_texts[5].begins_with("Laarzen")
+			and slot_texts[4].begins_with("Legs") and slot_texts[5].begins_with("Boots")
 			and slot_texts[6].begins_with("Accessory")
 			and slot_texts.all(func(t): return t.ends_with("-")))
 	var cmds: Array = s.COMMANDS.map(func(c): return str(s.cmd_buttons[c[0]].get_meta("label")))

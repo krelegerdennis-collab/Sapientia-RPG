@@ -19,7 +19,7 @@ func setup(t: Vector2i) -> void:
 func interact(speler: Node2D) -> void:
 	if Dialog.is_open:
 		return
-	var i := await Dialog.ask("ECHO: Waarheen?", ["Opslaan", "Wilgendal", "Archief-ingang", "Andere eilanden"], "ECHO")
+	var i := await Dialog.ask("ECHO: Where to?", ["Save", "Willowdale", "Archive entrance", "Other islands"], "ECHO")
 	if i < 0 or Dialog.is_open:
 		return
 	match i:
