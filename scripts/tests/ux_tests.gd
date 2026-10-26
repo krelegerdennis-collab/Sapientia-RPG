@@ -82,10 +82,8 @@ const REMOVED_DUTCH := {
 ## Bekende Nederlandse spelertekst die BLIJFT: een bestaande suite toetst de exacte tekst (en die mag deze
 ## taak niet aanpassen). Lijst en reden: docs/UX_POLISH_WM1.md. Deze test bewaakt dat de lijst niet groeit.
 const KNOWN_DUTCH_PINNED := {
-	"res://scripts/data/spell_rules.gd": "Dax leert geen magie.",
 	"res://scripts/data/story_data.gd": "Het Zingende Graan",
 	"res://scripts/data/game_data.gd": "\"benen\": \"Benen\"",
-	"res://scripts/data/archief2.gd": "page[\"name\"] = \"Mosslijm\"",
 	"res://pvp/data/modes.gd": "\"Vroeg\"",
 }
 
