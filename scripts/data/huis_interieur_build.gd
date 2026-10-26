@@ -28,7 +28,6 @@ var _tile_ids: Dictionary = {}
 var _prop_blocks: Dictionary = {}
 var _solid_tiles: Dictionary = {}
 var _props_geplaatst: Array = []
-var _ground_source_id: int = -1
 
 
 static func laad() -> Dictionary:
@@ -58,29 +57,35 @@ func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
 
 
 func _maak_grond_tileset() -> TileSet:
+	## Eén runtime-atlas-textuur, maar per tegeltype een bron (zoals main) voor correcte fysiek.
 	var volgorde: Array = GROND_SLEUTELS
 	var atlas: Dictionary = Atlas.maak_grond_atlas(volgorde)
-	_tile_ids = atlas["coords"] as Dictionary
+	var coords: Dictionary = atlas["coords"] as Dictionary
+	var basis: Texture2D = atlas["texture"] as Texture2D
+	_tile_ids.clear()
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
 	ts.add_physics_layer()
 	ts.set_physics_layer_collision_layer(0, 1)
 	ts.set_physics_layer_collision_mask(0, 1)
-	var src := TileSetAtlasSource.new()
-	src.texture = atlas["texture"] as Texture2D
-	src.texture_region_size = Vector2i(16, 16)
-	src.use_texture_padding = false
-	_ground_source_id = ts.add_source(src)
 	for sleutel in volgorde:
-		var ac: Vector2i = _atlas_coords(sleutel)
-		src.create_tile(ac)
+		var ac: Vector2i = coords[sleutel] as Vector2i
+		var reg := AtlasTexture.new()
+		reg.atlas = basis
+		reg.region = Rect2(ac.x * 16, ac.y * 16, 16, 16)
+		reg.filter_clip = true
+		var src := TileSetAtlasSource.new()
+		src.texture = reg
+		src.texture_region_size = Vector2i(16, 16)
+		src.create_tile(Vector2i.ZERO)
 		if sleutel in Atlas.WALL_SLEUTELS:
-			Atlas.voeg_wand_fysiek(src.get_tile_data(ac, 0))
+			Atlas.voeg_wand_fysiek(src.get_tile_data(Vector2i.ZERO, 0))
+		_tile_ids[sleutel] = ts.add_source(src)
 	return ts
 
 
-func _atlas_coords(sleutel: String) -> Vector2i:
-	return _tile_ids.get(sleutel, Vector2i(-1, -1)) as Vector2i
+func _source_id(sleutel: String) -> int:
+	return int(_tile_ids.get(sleutel, -1))
 
 
 func _teken_grid(ground: TileMapLayer, rijen: Array) -> void:
@@ -91,11 +96,11 @@ func _teken_grid(ground: TileMapLayer, rijen: Array) -> void:
 			var sleutel := _tegel_sleutel(ch, x, y, rijen)
 			if sleutel == "":
 				continue
-			var ac: Vector2i = _atlas_coords(sleutel)
-			if ac.x < 0:
+			var sid: int = _source_id(sleutel)
+			if sid < 0:
 				continue
 			var tegel := Vector2i(x, y)
-			ground.set_cell(tegel, _ground_source_id, ac)
+			ground.set_cell(tegel, sid, Vector2i.ZERO)
 			if _tegel_is_solid(ch):
 				_solid_tiles[tegel] = true
 
