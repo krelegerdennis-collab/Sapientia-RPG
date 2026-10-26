@@ -693,7 +693,7 @@ func _swing_facing(id: String, n: Node2D) -> Vector2i:
 	# Alleen een handmatige lock stuurt de slagrichting; auto-lock is alleen marker + strafe-facing.
 	if id == active_id and target_lock and target_lock.manual:
 		var m: Node = target_lock.locked_enemy()
-		if m != null and _enemy_in_attack_reach(id, n, m):
+		if m != null:
 			var lf: Vector2i = target_lock.facing_for_player()
 			if lf != Vector2i.ZERO:
 				n.facing = lf
