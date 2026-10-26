@@ -617,17 +617,17 @@ func _run() -> void:
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
+	if "--test-huis-wilgendal" in OS.get_cmdline_user_args():
+		# Alleen het Wachtershuis-interieur (scripts/tests/huis_wilgendal_autotest.gd); CI draait ze aan het eind mee.
+		check("titelscherm (huis-wilgendal)", await wait_scene("Title"))
+		await preload("res://scripts/tests/huis_wilgendal_autotest.gd").new(self).run()
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
+		get_tree().quit(1 if failures else 0)
+		return
 	if "--test-item-icons" in OS.get_cmdline_user_args():
 		# Alleen de item-iconen v1.5 (scripts/tests/item_icon_autotest.gd); CI draait ze aan het eind mee.
 		check("titelscherm (item-icons)", await wait_scene("Title"))
 		await preload("res://scripts/tests/item_icon_autotest.gd").new(self).run()
-		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
-		get_tree().quit(1 if failures else 0)
-		return
-	if "--test-cast-anim" in OS.get_cmdline_user_args():
-		# Alleen Seren/Vesper kaart-cast (scripts/tests/cast_anim_autotest.gd); CI draait ze aan het eind mee.
-		check("titelscherm (cast-anim)", await wait_scene("Title"))
-		await preload("res://scripts/tests/cast_anim_autotest.gd").new(self).run()
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
@@ -658,8 +658,8 @@ func _run() -> void:
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/wm1_stabiliteit_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
+	await preload("res://scripts/tests/huis_wilgendal_autotest.gd").new(self).run()
 	await preload("res://scripts/tests/item_icon_autotest.gd").new(self).run()
-	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/cast_anim_autotest.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
@@ -1666,13 +1666,13 @@ func _title_and_name_tests() -> void:
 func _house_tests() -> void:
 	var p := player()
 	check("map = huis_wilgendal.tscn (%s)" % GameState.current_map, GameState.current_map.ends_with("huis_wilgendal.tscn"))
-	check("binnen op het spawnpunt (4,7), kijkt omhoog: %s" % tile(), tile() == Vector2i(4, 7) and p.facing == Vector2i.UP)
+	check("binnen op het spawnpunt (8,18), kijkt omhoog: %s" % tile(), tile() == Vector2i(8, 18) and p.facing == Vector2i.UP)
 	check("binnen: geen gevechten", scene().encounters == false)
 	var used: Rect2i = scene().get_node("Ground").get_used_rect()
-	check("kamer van 12x9 tiles (%s)" % used, used.size == Vector2i(12, 9))
+	check("kamer van 32x21 tiles (%s)" % used, used.size == Vector2i(32, 21))
 	var cam: Camera2D = p.camera
-	check("kleine kamer staat midden in beeld (camera %d..%d)" % [cam.limit_left, cam.limit_right],
-			cam.limit_left + cam.limit_right == used.size.x * 16 and cam.limit_top + cam.limit_bottom == used.size.y * 16)
+	check("interieur vult camera 512x336 (limieten %d..%d, %d..%d)" % [cam.limit_left, cam.limit_right, cam.limit_top, cam.limit_bottom],
+			cam.limit_left == 0 and cam.limit_top == 0 and cam.limit_right == 512 and cam.limit_bottom == 336)
 	check("opslagboek staat op (8,3)", scene().get_node("Objects/SaveBook").position == Vector2(8 * 16 + 8, 3 * 16 + 8))
 	var book: Node = scene().get_node("Objects/SaveBook")
 	var f0: int = book.sprite.frame
@@ -1702,13 +1702,14 @@ func _house_tests() -> void:
 				a_lo >= 0.24 and a_hi <= 0.61 and a_hi - a_lo > 0.2 and s_hi - s_lo > 0.1
 				and book.AURA_PERIOD >= 1.6 and book.AURA_PERIOD <= 2.0)
 	check("na de proloog staat de Oude Man niet meer binnen", not scene().get_node("Objects/OudeMan").visible)
-	await walk("move_left", 5)
-	check("zijmuur blokkeert, staat op (1,7): %s" % tile(), tile() == Vector2i(1, 7))
-	await walk("move_right", 3)
-	await walk("move_up", 5)
-	check("boekenkast/raam blokkeert, staat op (4,3): %s" % tile(), tile() == Vector2i(4, 3))
-	await walk("move_down", 1)
-	await walk("move_right", 4)
+	await walk("move_left", 7)
+	check("zijmuur blokkeert, staat op (1,18): %s" % tile(), tile() == Vector2i(1, 18))
+	await walk("move_right", 6)
+	await walk("move_up", 6)
+	await walk("move_left", 4)
+	await walk("move_up", 8)
+	check("nachtkastje blokkeert, staat op (3,4): %s" % tile(), tile() == Vector2i(3, 4))
+	await walk("move_right", 5)
 	await walk("move_up", 1)
 	check("voor het boek (8,4), kijkt omhoog (boek blokkeert): %s" % tile(), tile() == Vector2i(8, 4) and player().facing == Vector2i.UP)
 	await frames(20)
@@ -1758,9 +1759,8 @@ func _house_tests() -> void:
 			and d["party"][0].has("hp") and d["party"][0].has("mp") and d["party"][0].has("level") and d["party"][0].has("exp")
 			and d.has("gold") and d["inventory"].has("drankje") and float(d.get("play_time", -1)) >= 0.0 and d.has("bestiary"))
 	await close_dialog()
-	# Naar buiten: deur onderin op (4,8)
-	await walk("move_left", 4)
-	await walk("move_down", 4)
+	# Naar buiten: voordeur (8-9, 19-20)
+	await walk("move_down", 15)
 	check("deur onderin -> terug in Willowdale", await wait_scene("Wilgendal"))
 	await frames(5)
 	check("net onder de huisdeur (24,9), kijkt omlaag: %s" % tile(), tile() == Vector2i(24, 9) and player().facing == Vector2i.DOWN)
@@ -1842,8 +1842,7 @@ func _load_restore_test() -> void:
 			and GameState.party[0]["max_hp"] == int(d["party"][0]["max_hp"]) and GameState.party[0]["level"] == int(d["party"][0]["level"]))
 	check("goud hersteld (%d)" % GameState.gold, GameState.gold == saved_gold)
 	check("speeltijd loopt door vanaf de save", GameState.play_time() >= float(d["play_time"]))
-	await walk("move_left", 4)
-	await walk("move_down", 4)
+	await walk("move_down", 15)
 	check("weer naar buiten -> Willowdale", await wait_scene("Wilgendal"))
 	await frames(5)
 	check("weer op (24,9): %s" % tile(), tile() == Vector2i(24, 9))
@@ -2181,9 +2180,11 @@ func _prologue_tests() -> void:
 			tile() == Vector2i(2, 3) and not player().input_locked and not Story.running and not Dialog.is_open
 			and not Story.history.has("wakker_worden") and GameState.story_step == SD.START)
 	check("Oude Man 's ochtends niet binnen", _obj("OudeMan") != null and not _obj("OudeMan").visible)
-	# naar buiten (spawn staat al op (2,3); de bed-tile zelf is niet beloopbaar)
-	await walk("move_right", 2)
-	await walk("move_down", 5)
+	# naar buiten (spawn staat al op (2,3); voordeur onderaan 8-9,19-20)
+	await walk("move_right", 3)
+	await walk("move_down", 15)
+	await walk("move_right", 3)
+	await walk("move_down", 2)
 	check("deur -> naar buiten (Willowdale = huis aan de bosrand)", await wait_scene("Wilgendal"))
 	await frames(10)
 	var opa := _obj("OudeMan")
@@ -2323,9 +2324,7 @@ func _prologue_tests() -> void:
 	await walk("move_up", 1)
 	check("naar binnen om op te slaan", await wait_scene("Huis"))
 	await frames(10)
-	await walk("move_up", 3)
-	await walk("move_right", 4)
-	await walk("move_up", 1)
+	await walk("move_up", 14)
 	await press_interact()
 	await _wait_typed()
 	await press_interact()   # 'Een warme gloed herstelt je krachten en je geest.'
@@ -2352,8 +2351,7 @@ func _prologue_tests() -> void:
 			GameState.story_step == SD.TAKEN and Story.has_flag("kist_open") and Story.wears(ARMOR)
 			and GameState.item_count("emmer_water") == 1 and tile() == Vector2i(8, 4))
 	check("na laden geen wakker-cutscene", not Story.running and not Dialog.is_open)
-	await walk("move_left", 4)
-	await walk("move_down", 4)
+	await walk("move_down", 15)
 	check("weer naar buiten", await wait_scene("Wilgendal"))
 	await frames(10)
 	check("na laden: kist nog open, geen zegelstenen", _obj("Kist").sprite.frame == 1 and _obj("Zegel1") == null)
@@ -2434,13 +2432,13 @@ func _prologue_tests() -> void:
 			and Story.has_flag("locked:HuisDeur") and GameState.story_step == SD.OPGESLOTEN)
 	check("schreeuw-timer loopt", Story.scheduled.get("event", "") == "schreeuw")
 	# deur zit op slot
-	await walk("move_down", 2)
-	await walk("move_left", 5)
+	await walk("move_down", 13)
+	await walk("move_left", 1)
 	await walk("move_down", 1)
 	await frames(5)
 	check("deur: '%s'" % LOCKED_LINE, Dialog.is_open and Dialog._lines == [LOCKED_LINE])
 	await _story_drain()
-	check("teruggestapt, nog binnen (4,7): %s" % tile(), map_name() == "Huis" and tile() == Vector2i(4, 7))
+	check("teruggestapt, nog binnen (8,18): %s" % tile(), map_name() == "Huis" and tile() == Vector2i(8, 18))
 	# wachten op de schok + schreeuw
 	for i in 900:
 		if Dialog.is_open:

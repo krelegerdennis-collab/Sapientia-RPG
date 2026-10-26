@@ -1,7 +1,7 @@
 extends RefCounted
 ## Seren/Vesper kaart-cast (ringmenu + SomData.MAP_CAST), binnen --autotest.
-## Alleen dit blok: godot --path . -- --autotest --test-cast-anim [--shots=/pad]
-## Zonder de vlag draait het blok aan het eind van de volledige --autotest mee.
+## Draait aan het eind van de volledige --autotest (één hook in debug_autotest.gd).
+## Screenshots: [--shots=/pad] of [--cast-anim-shots=/pad]
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
@@ -23,6 +23,7 @@ func _init(p_t: Node) -> void:
 
 
 func run() -> void:
+	Engine.time_scale = 1.0
 	print("=== Cast-animaties Seren/Vesper (ringmenu, MAP_CAST) ===")
 	_art_checks()
 	await _ring_cast_action()
