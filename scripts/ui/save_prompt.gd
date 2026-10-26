@@ -13,7 +13,7 @@ const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const TargetList := preload("res://scripts/ui/target_list.gd")
 
 const LAYER := 22
-const BUTTON_SIZE := Vector2(72, 16)
+const BUTTON_SIZE := Vector2(72, 25)   # tikmaat UiTouch.TOUCH_MIN (~48 dp)
 const DIM_ALPHA := 0.4
 
 var question := "Save progress?"

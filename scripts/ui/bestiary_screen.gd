@@ -8,6 +8,7 @@ extends CanvasLayer
 
 signal closed
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const EndgameBestiary := preload("res://scripts/data/endgame_bestiary.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
@@ -93,6 +94,7 @@ func _ready() -> void:
 	top.add_child(header)
 	back_button = UiMenu.button("Back")
 	back_button.custom_minimum_size = Vector2(BACK_W, 16)
+	UiSfx.tag(back_button, UiSfx.CANCEL)
 	back_button.pressed.connect(close)
 	top.add_child(back_button)
 	back_zone = Control.new()
@@ -242,6 +244,7 @@ func _process(_delta: float) -> void:
 	if Engine.get_process_frames() <= _quiet_frame:
 		return
 	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
+		UiSfx.play(UiSfx.CANCEL)
 		close()
 		return
 	UiMenu.pad_nav(root.get_viewport())

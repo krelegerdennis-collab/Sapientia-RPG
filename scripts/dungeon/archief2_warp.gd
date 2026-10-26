@@ -2,6 +2,7 @@ extends Area2D
 ## Warp-pad in de eerste hub van de World Warper. Opslaan, of terug naar de kaart.
 ## TODO(design): WM2 en WM3 hebben nog geen eiland. Die keuze doet niets.
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 
 
@@ -30,6 +31,7 @@ func interact(speler: Node2D) -> void:
 				tile = speler.get_tile()
 				facing = speler.facing
 			if GameState.save_game(tile, facing):
+				UiSfx.play(UiSfx.SAVE)
 				Dialog.show_lines(["Saved."], "ECHO")
 			else:
 				Dialog.show_lines(["Saving failed."], "ECHO")

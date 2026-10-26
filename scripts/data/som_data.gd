@@ -170,7 +170,7 @@ const JOY_CENTER_Y := 0.6
 ## Vinger telt binnen zoveel x de joystickstraal (ruim touch-doel, ook als de ring klein is).
 const JOY_TOUCH_REACH := 2.2
 ## Bovenste rij rechts: [RUN][Swap][Ring][MENU]. Knop-art is 38x14; het touch-vak is groter (de art staat erin gecentreerd).
-const TOP_BUTTON_SIZE := Vector2(46, 22)
+const TOP_BUTTON_SIZE := Vector2(46, 25)   # tikmaat UiTouch.TOUCH_MIN (~48dp): minimaal tikvlak
 const TOP_BUTTON_GAP := 3.0
 ## Icoon-index in ring_icons.png per item/spreuk-id.
 const RING_ICON := {"drankje": 0, "kruid": 1, "toverwater": 2, "genees": 4, "vuur": 5, "bliksem": 6, "feniksveer": 7, "codex": 8}

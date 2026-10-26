@@ -3,6 +3,7 @@ extends RefCounted
 ## Eén bezoek: rusten, één Zingend Meel, daarna opslaan of de party wisselen.
 ## Het meel zit op de map (meta). Een nieuw bezoek is een nieuwe scène.
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const META := "zingend_meel_gegeven"
 const REGEL_RUST := "HP and MP restored."
 const REGEL_MEEL := "You receive Singing Flour."
@@ -74,6 +75,7 @@ static func _opslaan() -> void:
 		if "facing" in p:
 			facing = p.facing
 	if GameState.save_game(tile, facing):
+		UiSfx.play(UiSfx.SAVE)
 		Dialog.show_lines([REGEL_OPGESLAGEN])
 	else:
 		Dialog.show_lines([REGEL_MISLUKT])

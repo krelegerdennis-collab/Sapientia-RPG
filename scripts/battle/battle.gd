@@ -31,6 +31,7 @@ extends Control
 signal state_changed(new_state: String)
 signal damage_shown(target_name: String, amount: int)
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
@@ -1194,16 +1195,21 @@ func _pick_target(living: Array, _title: String, point: Callable, heroes_side: b
 		await get_tree().process_frame
 		if _tapped != null and _tapped["is_hero"] == heroes_side and _tapped["s"]["hp"] > 0:
 			result = _tapped
+			UiSfx.play(UiSfx.TARGET)
 			break
 		if Input.is_action_just_pressed("interact"):
 			result = living[idx]
+			UiSfx.play(UiSfx.TARGET)
 			break
 		if Input.is_action_just_pressed("cancel"):
+			UiSfx.play(UiSfx.CANCEL)
 			break
 		if Input.is_action_just_pressed("move_left") or Input.is_action_just_pressed("move_up"):
 			idx = posmod(idx - 1, living.size())
+			UiSfx.play(UiSfx.CURSOR)
 		elif Input.is_action_just_pressed("move_right") or Input.is_action_just_pressed("move_down"):
 			idx = posmod(idx + 1, living.size())
+			UiSfx.play(UiSfx.CURSOR)
 	target_cursor.hide()
 	target_name.hide()
 	target_index = -1

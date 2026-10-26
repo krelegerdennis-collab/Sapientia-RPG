@@ -24,6 +24,7 @@ extends CanvasLayer
 
 signal finished
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
@@ -153,6 +154,8 @@ func show_lines(lines: Array, speaker := "", source: Node = null) -> void:
 
 
 var _asking := false
+var _blip_at := 0
+const BLIP_EVERY := 3
 
 
 ## Toon een vraag met keuzes en wacht tot er gekozen is. Geeft de index terug.
@@ -468,6 +471,7 @@ func choose(i: int) -> void:
 	if not has_choices():
 		return
 	choice_result = clampi(i, 0, choices.size() - 1)
+	UiSfx.play(UiSfx.CONFIRM)
 	choices = []
 	_clear_choices()
 	close()
@@ -541,6 +545,7 @@ func advance() -> void:
 		choose(choice_index)
 		return
 	_index += 1
+	UiSfx.play(UiSfx.ADVANCE)
 	if _index >= _lines.size():
 		close()
 	else:
@@ -557,6 +562,7 @@ func _show_current() -> void:
 	text_label.text = str(_lines[_index])
 	text_label.visible_characters = 0
 	_shown = 0.0
+	_blip_at = 0
 
 
 func _is_typing() -> bool:
@@ -568,6 +574,10 @@ func _process(delta: float) -> void:
 		return
 	if _is_typing():
 		_shown += chars_per_second * delta
+		# zacht tikje om de BLIP_EVERY letters bij een sprekend personage (niet bij 'Instant' en niet bij de verteller)
+		if style_kind == "ballon" and chars_per_second < 1000.0 and int(_shown) - _blip_at >= BLIP_EVERY:
+			_blip_at = int(_shown)
+			UiSfx.play(UiSfx.BLIP)
 		var total := text_label.get_total_character_count()
 		text_label.visible_characters = -1 if int(_shown) >= total else int(_shown)
 		arrow.visible = false
@@ -583,9 +593,11 @@ func _process(delta: float) -> void:
 				or (horizontal and (Input.is_action_just_pressed("move_right") or Input.is_action_just_pressed("ui_right")))
 		if prev:
 			choice_index = (choice_index - 1 + choices.size()) % choices.size()
+			UiSfx.play(UiSfx.CURSOR)
 			_update_choices()
 		elif next:
 			choice_index = (choice_index + 1) % choices.size()
+			UiSfx.play(UiSfx.CURSOR)
 			_update_choices()
 	else:
 		# Knipperend pijltje: "druk op A om verder te gaan"

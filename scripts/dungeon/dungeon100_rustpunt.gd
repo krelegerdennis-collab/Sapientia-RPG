@@ -74,6 +74,7 @@ func interact(player: Node2D) -> void:
 	if choice == 0:
 		if GameState.save_game(player.get_tile(), player.facing):
 			last_result = "saved"
+			UiSfx.play(UiSfx.SAVE)
 			Dialog.show_lines(["Saved."])
 		else:
 			last_result = "failed"

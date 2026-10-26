@@ -7,6 +7,7 @@ extends Node2D
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
+const CombatZones := preload("res://scripts/som/combat_zones.gd")
 
 const BORDER_PX := 3
 const FILL_STEPS := 4
@@ -17,6 +18,9 @@ const PLACEHOLDER_RED_FILL := Color(0.92, 0.18, 0.18, 0.42)
 const PLACEHOLDER_RED_EDGE := Color(0.95, 0.12, 0.12, 0.92)
 const PLACEHOLDER_YELLOW_FILL := Color(0.95, 0.82, 0.12, 0.38)
 const PLACEHOLDER_YELLOW_EDGE := Color(0.9, 0.75, 0.08, 0.9)
+## Inktplas-loop (T4b placeholder).
+const PLACEHOLDER_INK_FILL := Color(0.18, 0.1, 0.42, 0.48)
+const PLACEHOLDER_INK_EDGE := Color(0.28, 0.14, 0.62, 0.92)
 
 enum Style { RED_DODGE, YELLOW_INTERRUPT }
 
@@ -27,6 +31,7 @@ class DrawEntry:
 
 
 var _entries: Array[DrawEntry] = []
+var _zone_shapes: Array[TelegraphShape] = []
 
 
 func entry_count() -> int:
@@ -56,6 +61,28 @@ func sync_from_enemies(enemies: Dictionary, interruptible_for_attack: Callable =
 	if _entries_changed(next):
 		_entries = next
 		queue_redraw()
+
+
+## Actieve grondzones (Combat T4b); alleen tekenen.
+func sync_from_zones(zones: CombatZones) -> void:
+	var next: Array[TelegraphShape] = []
+	if zones != null:
+		for z in zones.zones_for_draw():
+			var sh := TelegraphShape.make_circle(z.get("origin", Vector2i.ZERO), int(z.get("r", 0)))
+			if sh.valid:
+				next.append(sh)
+	if _zone_shapes_changed(next):
+		_zone_shapes = next
+		queue_redraw()
+
+
+func _zone_shapes_changed(next: Array[TelegraphShape]) -> bool:
+	if next.size() != _zone_shapes.size():
+		return true
+	for i in next.size():
+		if next[i].origin != _zone_shapes[i].origin or next[i].reach != _zone_shapes[i].reach:
+			return true
+	return false
 
 
 func _entries_changed(next: Array[DrawEntry]) -> bool:
@@ -180,6 +207,16 @@ static func _wedge_poly(shape: TelegraphShape, scale: float) -> PackedVector2Arr
 func _draw() -> void:
 	for ent in _entries:
 		_draw_entry(ent)
+	for sh in _zone_shapes:
+		_draw_zone(sh)
+
+
+func _draw_zone(shape: TelegraphShape) -> void:
+	var outer := outline_polygon(shape, 1.0)
+	if outer.is_empty():
+		return
+	draw_colored_polygon(outer, PLACEHOLDER_INK_FILL)
+	draw_polyline(outer, PLACEHOLDER_INK_EDGE, float(BORDER_PX), true)
 
 
 func _draw_entry(ent: DrawEntry) -> void:
