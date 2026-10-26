@@ -9,9 +9,9 @@ const SomActionAttacks := preload("res://scripts/data/som_action_attacks.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 
 ## Vaste volgorde; index 0 in wire = geen telegraaf (IDLE).
-const ATTACK_IDS: Array[String] = ["inktspuw"]
+const ATTACK_IDS: Array[String] = ["inktspuw", "inktplas"]
 
-## Bytes per zone-record in snapshots (T4b); nu altijd zone_count = 0.
+## Bytes per zone-record in snapshots (T4b).
 const ZONE_WIRE_BYTES := 8
 
 
@@ -36,7 +36,6 @@ static func telegraph_fields_from_attack(tg: TelegraphAttack, target_slot: int) 
 		"oy": 0,
 		"dir_x": 0,
 		"dir_y": 0,
-		"zones": [],
 	}
 	if tg == null or not tg.is_busy():
 		return out
@@ -57,6 +56,12 @@ static func merge_enemy_row(base: Dictionary, tg: TelegraphAttack, target_slot: 
 	var tg_row := telegraph_fields_from_attack(tg, target_slot)
 	for k in tg_row.keys():
 		row[k] = tg_row[k]
+	return row
+
+
+static func attach_zones(snap_row: Dictionary, zones: Array) -> Dictionary:
+	var row: Dictionary = snap_row.duplicate(true)
+	row["zones"] = zones
 	return row
 
 
