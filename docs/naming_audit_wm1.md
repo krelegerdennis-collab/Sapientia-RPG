@@ -13,7 +13,7 @@ Alleen Worldmap 1. Niets uit `wacht/`, niets van WM2, niets van De Spiegel (Arch
 | `scripts/data/story_data.gd` keten-zin | Archief 1 … Archief 2 … | The First Archive … The Second Archive … | — |
 | `data/quests.json` zijquest | Dark Forest | Dark Wood | titel was al The Singing Grain |
 | `scripts/data/archief2.gd` `KETEN` | dezelfde Archief-zin | The First Archive / The Second Archive | — |
-| `scripts/data/archief2.gd` `GEEN_CODEX` | Een Mosslijm vecht tijdelijk mee. | A Moss Slime fights with you for now. | soort `mosslijm` |
+| `scripts/data/archief2.gd` `GEEN_CODEX` | Een Mosslijm vecht tijdelijk mee. | A Moss Slime fights alongside you for this battle. | soort `mosslijm` |
 | `scripts/data/archief2.gd` tijdelijke pagina | Mosslijm | Moss Slime | `mosslijm` |
 | `scripts/data/archief2_rooms.gd` bord | dezelfde Archief-zin | The First Archive / The Second Archive | — |
 | `scripts/data/archief2_rooms.gd` bord | Een groei-plaat. Stap erop. | A growth plate. Step on it. | — |
@@ -24,8 +24,8 @@ Alleen Worldmap 1. Niets uit `wacht/`, niets van WM2, niets van De Spiegel (Arch
 | `scripts/data/archief2_rooms.gd` kamernaam | Tegen-platen | Counter Plates | `archief_2_v3_tegen` |
 | `scripts/data/archief2_rooms.gd` kamernaam | Licht-platen | Light Plates | `archief_2_v3_licht` |
 | `scripts/dungeon/groei_plaat.gd` | Alleen Seren's licht laat deze plaat groeien. | This plate only grows in Seren's light. | — |
-| `scripts/dungeon/archief2_room.gd` | %s vecht mee. | %s fights with you. | — |
-| `scripts/dungeon/archief2_room.gd` | Welk Codex-monster vecht mee? | Which Codex monster fights with you? | — |
+| `scripts/dungeon/archief2_room.gd` | %s vecht mee. | %s fights alongside you. | — |
+| `scripts/dungeon/archief2_room.gd` | Welk Codex-monster vecht mee? | Which Codex monster fights alongside you? | — |
 | `scripts/dungeon/archief2_warp.gd` | ECHO: Waarheen? / Opslaan, Wilgendal, Archief-ingang, Andere eilanden | ECHO: Where to? / Save, Willowdale, Archive entrance, Other islands | keuze-index 0–3 |
 | `scripts/data/kern_data.gd` | Levenskern | Life Core | `levenskern` |
 | `scripts/data/game_data.gd` `EQUIP_SLOT_NAMES` | Benen / Laarzen | Legs / Boots | slot-ids `benen`, `laarzen` |

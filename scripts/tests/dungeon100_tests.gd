@@ -364,7 +364,7 @@ func _strip_and_scroll_tests() -> void:
 	var inv := {"spreuk_vuur": 1}
 	var refused := PA.use_item(inv, "spreuk_vuur", dennis)
 	check("Dax leert geen magie van een rol", not refused["ok"] and inv.has("spreuk_vuur")
-			and (dennis["spells"] as Array).is_empty() and str(refused["text"]) == "Dax leert geen magie.")
+			and (dennis["spells"] as Array).is_empty() and str(refused["text"]) == "Dax cannot learn magic.")
 	var noor: Dictionary = GameState.party[1]
 	noor["max_mp"] = 0
 	noor["mp"] = 0
