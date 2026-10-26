@@ -485,9 +485,10 @@ func _process(delta: float) -> void:
 		_pending = {"switch": false, "attack": false, "cast": false}
 		if target_lock:
 			target_lock.tick(delta)      # wist alleen de markers (arena niet actief)
-		# Lopende slag/cast-animaties op de vaste stap (anders hangt swing_landed / treffer soms vast).
-		if not _combat_sim_busy():
-			return
+		# Alleen lopende slag/cast-animaties (geen stick/A/B-input, geen vijand-AI).
+		if _combat_sim_busy():
+			advance_busy_anims(delta)
+		return
 	if Input.is_action_just_pressed(SWITCH_ACTION) and not coop_mode:
 		_pending["switch"] = true
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
@@ -504,6 +505,30 @@ func advance(delta: float) -> int:
 	for i in n:
 		sim_step()
 	return n
+
+
+## Arena niet actief (menu/dialog): alleen animaties en wachtrij-spreuken afronden, geen input/AI.
+func advance_busy_anims(delta: float) -> int:
+	var n := clock.frames_to_ticks(delta)
+	for i in n:
+		_busy_anim_step()
+	return n
+
+
+func _busy_anim_step() -> void:
+	var dt := TICK_DT
+	clock.tick += 1
+	sim_ticked.emit(clock.tick)
+	swing_lock = maxf(0.0, swing_lock - dt)
+	charge = CombatSim.charge_after(charge, swing_lock, SomData.CHARGE_AFTER_ANIM, SomData.CHARGE_TIME, dt)
+	CombatSim.tick_down(iframes, dt)
+	if not queued.is_empty():
+		_queue_t -= dt
+		if _queue_t <= 0.0:
+			var q := queued
+			queued = {}
+			resolve(q)
+	_sim_world(dt)
 
 
 ## Eén stap van 1/60 s. Zelfde volgorde als het oude _process.

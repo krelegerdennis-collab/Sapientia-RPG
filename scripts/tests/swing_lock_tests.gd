@@ -52,6 +52,7 @@ func _run() -> void:
 		return
 	arena().allies_enabled = false
 	await _wait_room_active()
+	await _inactive_input_ignored_test()
 	await _auto_lock_swing_tests()
 	await _manual_lock_swing_tests()
 	_finish()
@@ -140,6 +141,33 @@ func _await_swing_finish() -> void:
 	for i in 60:
 		a.advance(1.0 / 60.0)
 	a.set_process(true)
+
+
+func _inactive_input_ignored_test() -> void:
+	var pair: Dictionary = await _prep_lock_only()
+	var a := arena()
+	var p: CharacterBody2D = pair["player"]
+	p.input_locked = true
+	check("inactief: arena niet actief tijdens input-lock", not a.active() and room().monsters_active() == false)
+	a.set_process(true)
+	a.charge = 1.0
+	var attacks0: int = a.attacks
+	a.attack()
+	check("inactief: slag-anim loopt (sim bezig)", a._combat_sim_busy())
+	Input.action_press("interact")
+	Input.action_press("cancel")
+	for i in 20:
+		await get_tree().process_frame
+	Input.action_release("interact")
+	Input.action_release("cancel")
+	check("inactief: stick/A/B leest geen extra aanval (attacks %d -> %d)" % [attacks0, a.attacks],
+			a.attacks == attacks0 + 1)
+	for i in 120:
+		if not a._combat_sim_busy():
+			break
+		await get_tree().process_frame
+	p.input_locked = false
+	a.set_process(false)
 
 
 func _auto_lock_swing_tests() -> void:
