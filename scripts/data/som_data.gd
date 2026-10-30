@@ -84,8 +84,20 @@ const HERO_POSES := {
 }
 const HURT_TIME := 0.25
 ## Ontwijk-pose (<held>_dodge.png 192x48, 4 richtingen zoals hurt): een vijandelijke klap die tijdens de
-## onkwetsbaarheid (iframes) binnenkomt, wordt zichtbaar ontweken in plaats van stil genegeerd.
+## onkwetsbaarheid (iframes) binnenkomt, wordt zichtbaar ontweken in plaats of stil genegeerd.
 const DODGE_TIME := 0.22
+## Actieve dodge + stamina (Dennis 2026-10-24, tijdelijke tuning in som_data).
+const DODGE_DURATION_TICKS := 13
+const DODGE_IFRAME_TICKS := 15
+const DODGE_COOLDOWN_TICKS := 9
+const DODGE_DISTANCE_PX := 28.0
+const STAMINA_MAX := 100
+const STAMINA_DODGE_COST := 30
+const STAMINA_REGEN_DELAY_TICKS := 30
+const STAMINA_REGEN_EVERY_TICKS := 2
+const STAMINA_REGEN_AMOUNT := 1
+const STAMINA_SPRINT_COST := 1
+const STAMINA_SPRINT_EVERY_TICKS := 2
 const CAST_MS: Array[int] = [200, 120, 120, 120, 120]      # oude 3-frame cast-sheet (fallback)
 ## Magiër-cast (RPG ART pass 7): <held>_cast6.png 288x192, cellen 48x48, 6 frames x 4 richtingen.
 ## De spreuk komt vrij aan het begin van frame 4 (hit_frame): dan pas schade/genezing + effect.

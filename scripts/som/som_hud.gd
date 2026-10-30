@@ -168,4 +168,7 @@ func _draw_bars() -> void:
 		if act:
 			var c: float = arena.charge
 			bars.draw_rect(Rect2(4, y + 15, 64.0 * c, 2), Color(0.3, 0.9, 1.0) if c >= 1.0 else Color(1.0, 0.8, 0.2))
+			var st := float(arena.combat_stamina.current(id)) / float(SomData.STAMINA_MAX)
+			bars.draw_rect(Rect2(4, y + 18, 64, 2), Color(0.05, 0.08, 0.15))
+			bars.draw_rect(Rect2(4, y + 18, 64.0 * st, 2), Color(0.45, 0.75, 1.0))
 		y += 21.0
