@@ -49,6 +49,7 @@ const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const CombatZones := preload("res://scripts/som/combat_zones.gd")
+const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
 
@@ -73,6 +74,7 @@ var target_lock: Node2D
 var gauge: Node2D
 var telegraph_layer: TelegraphLayer
 var combat_zones := CombatZones.new()
+var combat_roots := CombatRoots.new()
 ## Tests: geforceerde aanval-id voor de volgende telegraaf-windup ("" = RNG).
 var forced_enemy_attack := ""
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
@@ -95,6 +97,8 @@ var _coop_snap: Dictionary = {}
 ## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
 var sheets := {}
 var attack_texs := {}
+## Kaart-cast sheets (SomData.MAP_CAST), één keer geladen in setup() — geen load() tijdens cast.
+var map_cast_texs := {}
 ## Voor de autotest: laatste schade, laatste melding, tellers.
 var last_enemy_damage := 0
 var last_player_damage := 0
@@ -146,6 +150,7 @@ func setup(p_room: Node) -> void:
 		var sheet := str(SomData.ATTACK_ANIMS.get(id, {}).get("sheet", ""))
 		if sheet != "" and ResourceLoader.exists(sheet):
 			attack_texs[id] = load(sheet)
+		_laad_held_cast(id)
 	# leider-behoud: de held die je met SWAP koos (GameState.leader_id), terugval Dax bij KO / niet in de party
 	active_id = GameState.active_leader()
 	if member(active_id).is_empty():
@@ -252,6 +257,39 @@ func _laad_sheet(id: String) -> void:
 		path = dax_sheet_path()
 	if path != "" and ResourceLoader.exists(path):
 		sheets[id] = load(path)
+
+
+## Kaart-cast (+ fx) voor een held; setup() en join_party_hero() — geen load() tijdens cast.
+func _laad_held_cast(id: String) -> void:
+	if map_cast_texs.has(id) or not SomData.MAP_CAST.has(id):
+		return
+	var mc: Dictionary = SomData.MAP_CAST[id]
+	var sheet_path := str(mc.get("sheet", ""))
+	if sheet_path == "" or not ResourceLoader.exists(sheet_path):
+		return
+	var fx_path := str(mc.get("fx", ""))
+	map_cast_texs[id] = {
+		"sheet": load(sheet_path),
+		"fx": load(fx_path) if fx_path != "" and ResourceLoader.exists(fx_path) else null,
+	}
+
+
+## Held sluit aan terwijl deze arena al draait (rekruut, story join): cast-sheets + bondgenoot-body.
+func join_party_hero(id: String) -> void:
+	if room == null or id == "" or not GameState.has_member(id):
+		return
+	_laad_held_cast(id)
+	if coop_mode or not allies_enabled or id == active_id or ally_of(id) != null:
+		return
+	if not GameState.party.any(func(h): return str(h.get("id", "")) == id):
+		return
+	var objects: Node = room.get_node_or_null("Objects")
+	if objects == null:
+		return
+	var a: CharacterBody2D = SomAlly.new()
+	objects.add_child(a)
+	a.setup(self, id, allies.size())
+	allies.append(a)
 
 
 func _apply_player_sheet() -> void:
@@ -380,6 +418,7 @@ func switch_hero(to := "") -> String:
 		return ""
 	if a.in_wall():
 		a._teleport()      # anders belandt de bestuurde held in de muur en kan hij niet meer lopen
+	combat_roots.clear_member(active_id)
 	var old := active_id
 	var p_pos: Vector2 = player.position
 	var p_face: Vector2i = player.facing
@@ -409,6 +448,8 @@ func analog_dir() -> Vector2:
 		base = SomMove.joy_to_dir(touch.joy_raw)
 	else:
 		base = SomMove.keys_to_dir()
+	if combat_roots.blocks_movement(active_id):
+		return Vector2.ZERO
 	return base * _zone_slow_mult_for_id(active_id)
 
 
@@ -468,6 +509,9 @@ func _process(delta: float) -> void:
 		_pending = {"switch": false, "attack": false, "cast": false}
 		if target_lock:
 			target_lock.tick(delta)      # wist alleen de markers (arena niet actief)
+		# Alleen lopende slag/cast-animaties (geen stick/A/B-input, geen vijand-AI).
+		if _combat_sim_busy():
+			advance_busy_anims(delta)
 		return
 	if Input.is_action_just_pressed(SWITCH_ACTION) and not coop_mode:
 		_pending["switch"] = true
@@ -485,6 +529,30 @@ func advance(delta: float) -> int:
 	for i in n:
 		sim_step()
 	return n
+
+
+## Arena niet actief (menu/dialog): alleen animaties en wachtrij-spreuken afronden, geen input/AI.
+func advance_busy_anims(delta: float) -> int:
+	var n := clock.frames_to_ticks(delta)
+	for i in n:
+		_busy_anim_step()
+	return n
+
+
+func _busy_anim_step() -> void:
+	var dt := TICK_DT
+	clock.tick += 1
+	sim_ticked.emit(clock.tick)
+	swing_lock = maxf(0.0, swing_lock - dt)
+	charge = CombatSim.charge_after(charge, swing_lock, SomData.CHARGE_AFTER_ANIM, SomData.CHARGE_TIME, dt)
+	CombatSim.tick_down(iframes, dt)
+	if not queued.is_empty():
+		_queue_t -= dt
+		if _queue_t <= 0.0:
+			var q := queued
+			queued = {}
+			resolve(q)
+	_sim_world(dt)
 
 
 ## Eén stap van 1/60 s. Zelfde volgorde als het oude _process.
@@ -522,6 +590,7 @@ func sim_step() -> void:
 		else:
 			enemies.erase(m)
 	_tick_zones()
+	_tick_roots()
 	_sim_world(dt)
 
 
@@ -671,16 +740,19 @@ func _enemy_in_attack_reach(id: String, n: Node2D, m: Node) -> bool:
 
 
 func _swing_facing(id: String, n: Node2D) -> Vector2i:
-	if id == active_id and target_lock:
+	# Alleen een handmatige lock stuurt de slagrichting; auto-lock is alleen marker + strafe-facing.
+	if id == active_id and target_lock and target_lock.manual:
 		var m: Node = target_lock.locked_enemy()
 		if m != null:
-			var aim_lock: bool = bool(target_lock.manual) or _enemy_in_attack_reach(id, n, m)
-			if aim_lock:
-				var lf: Vector2i = target_lock.facing_for_player()
-				if lf != Vector2i.ZERO:
-					n.facing = lf
-					return lf
+			var lf: Vector2i = target_lock.facing_for_player()
+			if lf != Vector2i.ZERO:
+				n.facing = lf
+				return lf
 	return n.facing
+
+
+func _combat_sim_busy() -> bool:
+	return swing_lock > 0.0 or not _sim_anims.is_empty() or not queued.is_empty()
 
 
 ## Dichtstbijzijnde (levende) vijand binnen 'within' px van 'from' (null = geen).
@@ -753,6 +825,8 @@ func _defeat_enemy(m: Node) -> void:
 	if e.has("tg"):
 		(e["tg"] as TelegraphAttack).cancel()
 	enemies.erase(m)
+	if enemies.is_empty():
+		_clear_transient_combat()
 	if target_lock:
 		target_lock.on_target_gone(m)
 	GameState.mark_defeated(m.enemy_id)
@@ -995,7 +1069,8 @@ func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
 				var power := float(def.get("power", 1.0))
 				var hit_pt := TelegraphShape.to_px(body_of(tid))
 				if tg.hits_point_i(hit_pt):
-					hit_member(tid, int(e["atk"]), power)
+					var root_ticks := int(def.get("root_ticks", CombatRoots.MAX_ROOT_TICKS)) if bool(def.get("applies_root", false)) else 0
+					hit_member(tid, int(e["atk"]), power, root_ticks)
 				if bool(def.get("spawns_zone", false)) and _zones_authority():
 					combat_zones.try_spawn(
 							_enemy_index(m),
@@ -1038,6 +1113,7 @@ func _sync_telegraph_draw() -> void:
 		return
 	telegraph_layer.sync_from_enemies(enemies, Callable(self, "_telegraph_interruptible"))
 	telegraph_layer.sync_from_zones(combat_zones)
+	telegraph_layer.sync_from_roots(combat_roots, _root_icon_positions())
 
 
 func _zones_authority() -> bool:
@@ -1048,6 +1124,37 @@ func _zone_slow_mult_for_id(id: String) -> float:
 	if id == "" or not is_alive(id):
 		return 1.0
 	return combat_zones.slow_mult_at(TelegraphShape.to_px(body_of(id)))
+
+
+func _tick_roots() -> void:
+	if not _roots_authority():
+		return
+	combat_roots.tick()
+
+
+func _roots_authority() -> bool:
+	return not coop_mode or coop_sim_host
+
+
+func _root_icon_positions() -> Dictionary:
+	var out: Dictionary = {}
+	for hid in party_ids():
+		if not is_alive(hid):
+			continue
+		out[hid] = TelegraphShape.to_px(body_of(hid))
+	return out
+
+
+## Dodge-hook (Combat T6): breekt root onmiddellijk en start immuniteit.
+func break_root(id: String) -> void:
+	if not _roots_authority():
+		return
+	combat_roots.break_root(id)
+
+
+func _clear_transient_combat() -> void:
+	combat_zones.clear_all()
+	combat_roots.clear_all()
 
 
 func _tick_zones() -> void:
@@ -1114,7 +1221,7 @@ func hit_player(atk: int, _from := Vector2.ZERO) -> void:
 	hit_member(active_id, atk)
 
 
-func hit_member(id: String, atk: int, power: float = 1.0) -> void:
+func hit_member(id: String, atk: int, power: float = 1.0, root_ticks: int = 0) -> void:
 	if down or not is_alive(id):
 		return
 	if float(iframes.get(id, 0.0)) > 0.0:
@@ -1135,6 +1242,8 @@ func hit_member(id: String, atk: int, power: float = 1.0) -> void:
 	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(1, 0.4, 0.4))
 	player_hit.emit(dmg)
 	SessieLog.actie_treffer(id, dmg, int(h["hp"]))
+	if root_ticks > 0 and _roots_authority():
+		combat_roots.try_apply_root(id, root_ticks)
 	if int(h["hp"]) <= 0:
 		_member_ko(id)
 
@@ -1171,6 +1280,7 @@ func _dodge(id: String) -> void:
 ## Held KO: bondgenoot blijft liggen (som_ally.gd); bestuurde held -> wissel naar de volgende levende.
 ## Niemand meer over = game over.
 func _member_ko(id: String) -> void:
+	combat_roots.clear_member(id)
 	_say(SomData.TXT_KO % str(member(id).get("name", id)))
 	member_down.emit(id)
 	if GameState.alive_heroes().is_empty():
@@ -1182,7 +1292,7 @@ func _member_ko(id: String) -> void:
 
 ## Iedereen KO: zelfde afloop als een verloren gevecht (checkpoint/respawn via GameState.end_battle).
 func _party_down() -> void:
-	combat_zones.clear_all()
+	_clear_transient_combat()
 	down = true
 	player.input_locked = true
 	SomFx.set_ko(player, pose_tex(active_id, "ko"), true)
@@ -1347,8 +1457,10 @@ func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
 	var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
 	match cast_kind(caster_id):
 		"map":
-			var mc: Dictionary = SomData.MAP_CAST[caster_id]
-			var anim0: Node = _drive(SomFx.map_cast_anim(n, SomFx.tex(str(mc["sheet"])), SomFx.tex(str(mc.get("fx", ""))), circle))
+			var mc_tex: Dictionary = map_cast_texs.get(caster_id, {})
+			var sheet: Texture2D = mc_tex.get("sheet", null) as Texture2D
+			var fx_tex: Texture2D = mc_tex.get("fx", null) as Texture2D
+			var anim0: Node = _drive(SomFx.map_cast_anim(n, sheet, fx_tex, circle))
 			anim0.hit.connect(done, CONNECT_ONE_SHOT)
 		"cast6":
 			var anim: Node = _drive(SomFx.cast6_anim(n, pose_tex(caster_id, "cast"), circle))
@@ -1362,8 +1474,7 @@ func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
 func cast_kind(caster_id: String) -> String:
 	if node_of(caster_id) == null:
 		return "direct"
-	var mc: Dictionary = SomData.MAP_CAST.get(caster_id, {})
-	if not map_cast_uit.has(caster_id) and SomFx.tex(str(mc.get("sheet", ""))) != null:
+	if not map_cast_uit.has(caster_id) and map_cast_texs.has(caster_id):
 		return "map"
 	var t := pose_tex(caster_id, "cast")
 	if t and t.get_width() == int(SomData.CAST6["frames"]) * int(SomData.CAST6["frame"][0]):
@@ -1555,6 +1666,8 @@ func _prune_coop_avatar_orphans(seated: Dictionary) -> void:
 
 
 func coop_deactivate_slot(slot: int) -> void:
+	var hid := str(_coop_slots.get(slot, ""))
+	combat_roots.clear_member(hid)
 	_coop_slots.erase(slot)
 	if not _coop_avatars.has(slot):
 		return
@@ -1593,6 +1706,7 @@ func _clear_coop_avatars() -> void:
 
 
 func _ensure_coop_avatar(slot: int, hero_id: String) -> void:
+	_laad_held_cast(hero_id)
 	if _coop_avatars.has(slot):
 		var existing: CoopAvatar = _coop_avatars[slot] as CoopAvatar
 		if is_instance_valid(existing):
@@ -1794,6 +1908,7 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 		else:
 			enemies.erase(m)
 	_tick_zones()
+	_tick_roots()
 	_sim_world(dt)
 	_rebuild_enemy_order()
 
@@ -1809,8 +1924,11 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 	if stick.length_squared() > 0.01:
 		var dir := stick.normalized()
 		var hid := str(_coop_slots.get(slot, ""))
+		if hid != "" and combat_roots.blocks_movement(hid):
+			stick = Vector2.ZERO
 		var slow := _zone_slow_mult_for_id(hid) if hid != "" else 1.0
-		body.position += dir * SomData.MOVE_SPEED * slow * dt
+		if stick.length_squared() > 0.01:
+			body.position += dir * SomData.MOVE_SPEED * slow * dt
 		if body == player:
 			body.facing = SomMove.facing_for(dir, body.facing)
 	var lock_i := int(inp.get("lock_idx", -1))
@@ -1874,7 +1992,7 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 		}
 		var tg: TelegraphAttack = e.get("tg", null)
 		elist.append(TelegraphSnapshot.merge_enemy_row(base, tg, tslot))
-	return Codec.pack_snapshot(tick, players, elist, combat_zones.wire_rows())
+	return Codec.pack_snapshot(tick, players, elist, combat_zones.wire_rows(), combat_roots.wire_rows(_coop_slots))
 
 
 func apply_coop_snapshot(snap: Dictionary) -> void:
@@ -1916,6 +2034,7 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 			TelegraphSnapshot.apply_row_to_enemy(e, row, room.room_id, room.tier())
 	if not coop_sim_host:
 		combat_zones.apply_wire_rows(snap.get("zones", []))
+		combat_roots.apply_wire_rows(snap.get("roots", []), _coop_slots)
 		_sync_telegraph_draw()
 
 

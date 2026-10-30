@@ -11,6 +11,7 @@ extends StaticBody2D
 ## additieve blending achter/rond het boek. Alpha en grootte gaan zacht op en neer
 ## (AURA_PERIOD). Eén sprite, geen Light2D: goedkoop op telefoons (gl_compatibility).
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const BookData := preload("res://scripts/data/book_data.gd")
 const SaveSlotListC := preload("res://scripts/ui/save_slot_list.gd")
 
@@ -140,6 +141,7 @@ func interact(player: Node2D) -> void:
 			GameState.active_slot = slot
 			if GameState.save_game(player.get_tile(), player.facing):
 				last_result = "saved"
+				UiSfx.play(UiSfx.SAVE)
 				Dialog.show_lines(["Saved to slot %d." % slot])
 			else:
 				last_result = "failed"

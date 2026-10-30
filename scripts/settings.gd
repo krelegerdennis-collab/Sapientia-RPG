@@ -124,13 +124,13 @@ func save_settings() -> bool:
 func _sanitize(key: String, v):
 	var def = DEFAULTS[key]
 	if def is bool:
-		return bool(v)
+		return _to_bool(v, def)
 	var n := int(v) if (v is int or v is float or v is bool) else int(def)
 	match key:
 		"music_volume", "sfx_volume":
 			return clampi(n, 0, VOLUME_STEPS)
 		"audio_mute":
-			return bool(v)
+			return _to_bool(v, false)
 		"text_speed":
 			return clampi(n, 0, TEXT_SPEED_CPS.size() - 1)
 		"battle_speed":
@@ -144,6 +144,22 @@ func _sanitize(key: String, v):
 		"sessie_log":
 			return clampi(n, -1, 1)
 	return n
+
+
+## Een bool uit een bestand dat met de hand is aangepast of kapot is: bool("ja") is in GDScript een fout en
+## liet het laden halverwege stoppen (latere instellingen vielen terug op de standaard).
+static func _to_bool(v, fallback: bool) -> bool:
+	if v is bool:
+		return v
+	if v is int or v is float:
+		return v != 0
+	if v is String:
+		var t := (v as String).strip_edges().to_lower()
+		if t in ["true", "1", "yes", "on", "aan", "ja"]:
+			return true
+		if t in ["false", "0", "no", "off", "uit", "nee"]:
+			return false
+	return fallback
 
 
 func get_value(key: String):

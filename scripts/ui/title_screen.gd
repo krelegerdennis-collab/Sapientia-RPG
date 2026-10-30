@@ -24,6 +24,7 @@ extends Control
 ## (GameState.has_any_save / read_newest_save / continue_game).
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const SaveSlotList := preload("res://scripts/ui/save_slot_list.gd")
 const SavePrompt := preload("res://scripts/ui/save_prompt.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
@@ -75,6 +76,9 @@ var stage: Control
 var backfill: TextureRect
 var version_label: Label
 const STAGE_SIZE := Vector2(384, 216)
+## Tikdoel van elke knop op het titelscherm: UiTouch.TOUCH_MIN (25 = ~48dp). Twee rijen vullen het kaartje (y 148..201).
+const TOUCH_H := 25.0
+const INFO_H := 10.0
 
 
 func _ready() -> void:
@@ -138,7 +142,7 @@ func _ready() -> void:
 	# --- menu rechtsonder (de held in het midden blijft vrij)
 	var box := PanelContainer.new()
 	box.name = "Card"
-	box.add_theme_stylebox_override("panel", UiStyleC.panel("window"))   # v0.13: palet
+	box.add_theme_stylebox_override("panel", _card_style())   # v0.13: palet
 	card = box
 	add_child(box)
 	var list := VBoxContainer.new()
@@ -149,12 +153,12 @@ func _ready() -> void:
 	row.add_theme_constant_override("separation", 2)
 	list.add_child(row)
 	continue_button = UiMenu.button("Continue")
-	continue_button.custom_minimum_size = Vector2(0, 16)
+	continue_button.custom_minimum_size = Vector2(0, TOUCH_H)
 	continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(continue_button)
 	load_button = UiMenu.button("Load")
 	load_button.name = "LoadButton"
-	load_button.custom_minimum_size = Vector2(0, 16)
+	load_button.custom_minimum_size = Vector2(0, TOUCH_H)
 	load_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(load_button)
 	save_info = UiMenu.label("", UiStyleC.TEXT_DIM)
@@ -162,18 +166,20 @@ func _ready() -> void:
 	# beeld): afkappen met '...' binnen de vaste breedte van het menu
 	save_info.clip_text = true
 	save_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	list.add_child(save_info)
+	save_info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(save_info)   # boven het kaartje (de twee 48dp-rijen vullen het kaartje helemaal)
 	new_button = UiMenu.button("New Game")
+	new_button.custom_minimum_size = Vector2(0, TOUCH_H)
 	list.add_child(new_button)
 	# Buiten het kaartje: het menu moet in y 148..200 blijven (titeltests).
 	coop_button = UiMenu.button("Co-op (LAN)")
 	coop_button.name = "CoopButton"
-	coop_button.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 16)
+	coop_button.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, TOUCH_H)
 	add_child(coop_button)
 	coop_button.pressed.connect(_on_coop)
 	pvp_button = UiMenu.button("PvP")
 	pvp_button.name = "PvpButton"
-	pvp_button.custom_minimum_size = Vector2((CARD_RIGHT - CARD_LEFT - 2.0) / 2.0, 16)
+	pvp_button.custom_minimum_size = Vector2((CARD_RIGHT - CARD_LEFT - 2.0) / 2.0, TOUCH_H)
 	add_child(pvp_button)
 	som_button = UiMenu.button("SoM")
 	som_button.name = "SomButton"
@@ -192,24 +198,25 @@ func _ready() -> void:
 	# Links onder, buiten het kaartje rechts: anders past het menu niet meer in y 148..200.
 	var beta_box := PanelContainer.new()
 	beta_box.name = "BetaCard"
-	beta_box.add_theme_stylebox_override("panel", UiStyleC.panel("window"))
+	beta_box.add_theme_stylebox_override("panel", _card_style())
 	beta_card = beta_box
 	add_child(beta_box)
 	var beta_list := VBoxContainer.new()
 	beta_list.add_theme_constant_override("separation", 0)
 	beta_box.add_child(beta_list)
 	beta_button = UiMenu.button("Beta Test")
-	beta_button.custom_minimum_size = Vector2(116, 16)
+	beta_button.custom_minimum_size = Vector2(116, TOUCH_H)
 	beta_list.add_child(beta_button)
 	eind_button = UiMenu.button("End State")
 	eind_button.name = "EindButton"
-	eind_button.custom_minimum_size = Vector2(116, 16)
+	eind_button.custom_minimum_size = Vector2(116, TOUCH_H)
 	beta_list.add_child(eind_button)
 	beta_info = UiMenu.label("", UiStyleC.TEXT_DIM)
 	beta_info.clip_text = true
 	beta_info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	beta_info.custom_minimum_size = Vector2(116, 0)
-	beta_list.add_child(beta_info)
+	beta_info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(beta_info)   # boven het Beta-kaartje, om dezelfde reden
 	beta_button.pressed.connect(_on_beta)
 	eind_button.pressed.connect(_on_eind)
 	beta_button.focus_neighbor_right = new_button.get_path()
@@ -233,6 +240,14 @@ func _ready() -> void:
 	# Eigen track. Op web start play() pas na de eerste tik (AudioManager).
 	AudioManager.play_music("main_menu", 0.6)
 	Transition.fade_in()
+
+
+## Kaartje zonder verticale binnenmarge: de knoppen van 48dp vullen het.
+func _card_style() -> StyleBoxFlat:
+	var sb: StyleBoxFlat = UiStyleC.panel("window")
+	sb.content_margin_top = 0
+	sb.content_margin_bottom = 0
+	return sb
 
 
 ## Oude titel (logo, ondertitel, kern, glitch) als title_main.png er niet is.
@@ -299,14 +314,19 @@ func _place_card() -> void:
 	card.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 0)
 	card.reset_size()
 	card.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - card.size.y)).round()
+	save_info.size = Vector2(card.size.x - 14.0, INFO_H)
+	save_info.position = (card.position + Vector2(7.0, -INFO_H - 1.0)).round()
+	var above := -INFO_H - 2.0
 	pvp_button.reset_size()
-	pvp_button.position = (card.position + Vector2(0, -pvp_button.size.y - 1.0)).round()
+	pvp_button.position = (card.position + Vector2(0, above - pvp_button.size.y)).round()
 	coop_button.reset_size()
-	coop_button.position = (card.position + Vector2(0, -pvp_button.size.y - 1.0 - coop_button.size.y - 1.0)).round()
+	coop_button.position = (card.position + Vector2(0, above - pvp_button.size.y - 1.0 - coop_button.size.y)).round()
 	som_button.reset_size()
-	som_button.position = (card.position + Vector2(card.size.x - som_button.size.x, -som_button.size.y - 1.0)).round()
+	som_button.position = (card.position + Vector2(card.size.x - som_button.size.x, above - som_button.size.y)).round()
 	beta_card.reset_size()
 	beta_card.position = (stage.position + Vector2(8, CARD_BOTTOM - beta_card.size.y)).round()
+	beta_info.size = Vector2(beta_card.size.x - 14.0, INFO_H)
+	beta_info.position = (beta_card.position + Vector2(7.0, -INFO_H - 1.0)).round()
 	version_label.reset_size()
 	version_label.position = (size - version_label.size - Vector2(4, 1)).round()
 
@@ -393,6 +413,7 @@ func _open_slot_list() -> void:
 
 
 func _on_slot_picked(slot: int) -> void:
+	UiSfx.play(UiSfx.LOAD)
 	set_process(false)
 	if not await GameState.continue_slot(slot):
 		set_process(true)

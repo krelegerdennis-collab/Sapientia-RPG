@@ -1,6 +1,7 @@
 extends StaticBody2D
 ## Interactie in een extra kamer: tekst, poort, diensten of een bestaand scherm.
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const Kamers := preload("res://world_warper/kamers/kamers.gd")
 const Gesprek := preload("res://world_warper/kamers/echo_gesprek.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
@@ -192,6 +193,8 @@ func _opslaan(player: Node) -> void:
 	if "facing" in player:
 		facing = player.facing
 	var ok := GameState.save_game(tile, facing)
+	if ok:
+		UiSfx.play(UiSfx.SAVE)
 	_zeg([Kamers.OPGESLAGEN if ok else Kamers.OPSLAAN_MISLUKT], "")
 
 

@@ -24,6 +24,8 @@ signal finished(index: int)
 signal denied(index: int)          # A/tik op een uitgeschakeld commando
 
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const CrossButton := preload("res://scripts/battle/cross_button.gd")
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const IDS := ["aanval", "magie", "item", "verdedig", "vluchten", "codex"]
 const NAMES := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 const CODEX := 5
@@ -54,7 +56,7 @@ func _ready() -> void:
 	for i in IDS.size():
 		var id: String = IDS[i]
 		_frames[id] = _load_frames(ART_DIR + "knop_%s.png" % id)
-		var b := TextureRect.new()
+		var b := CrossButton.new()
 		b.name = "Knop_" + NAMES[i]
 		b.size = Vector2(BUTTON, BUTTON)
 		b.custom_minimum_size = b.size
@@ -123,6 +125,11 @@ func button_rect(i: int) -> Rect2:
 	return Rect2(buttons[i].position, buttons[i].size)
 
 
+## Tikvlak van een knop (plaatje + CrossButton.SLOP rondom): minstens UiTouch.TOUCH_MIN (25).
+func hit_rect(i: int) -> Rect2:
+	return button_rect(i).grow(CrossButton.SLOP)
+
+
 func open(who: String, enabled_list: Array, start_index := 0, can_cancel := true, hidden_list := []) -> void:
 	hero_name = who
 	enabled = enabled_list.duplicate()
@@ -182,7 +189,10 @@ static func neighbour(from: int, dir: Vector2i, codex_shown := false) -> int:
 func select(i: int) -> void:
 	if not is_shown(i):
 		return
+	var changed := i != selected
 	selected = clampi(i, 0, IDS.size() - 1)
+	if changed and active:
+		UiSfx.play(UiSfx.CURSOR)
 	_refresh()
 
 
@@ -203,6 +213,7 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("interact"):
 		_choose(selected)
 	elif Input.is_action_just_pressed("cancel") and allow_cancel:
+		UiSfx.play(UiSfx.CANCEL)
 		active = false
 		last_result = -1
 		_refresh()
@@ -212,8 +223,10 @@ func _process(delta: float) -> void:
 func _choose(i: int) -> void:
 	if not is_enabled(i):
 		_shake_t = 0.2
+		UiSfx.play(UiSfx.ERROR)
 		denied.emit(i)
 		return
+	UiSfx.play(UiSfx.COMMAND)
 	active = false
 	last_result = i
 	_refresh()

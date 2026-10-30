@@ -18,6 +18,7 @@ extends PanelContainer
 
 signal finished(index: int)
 
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const ROW_HEIGHT := 11
 const ARROW_W := 10.0            # ruimte voor het pijltje vóór de tekst (eenheden)
 
@@ -243,6 +244,7 @@ func _process(_delta: float) -> void:
 	elif Input.is_action_just_pressed("interact"):
 		_choose(selected)
 	elif Input.is_action_just_pressed("cancel") and allow_cancel:
+		UiSfx.play(UiSfx.CANCEL)
 		active = false
 		last_result = -1
 		finished.emit(-1)
@@ -262,11 +264,14 @@ func select(i: int) -> void:
 
 func _move(step: int) -> void:
 	var n := _entries.size()
+	var before := selected
 	for k in n:
 		var i := posmod(selected + step * (k + 1), n)
 		if _is_enabled(i):
 			selected = i
 			break
+	if selected != before:
+		UiSfx.play(UiSfx.CURSOR)
 	_apply_window()
 	_refresh()
 

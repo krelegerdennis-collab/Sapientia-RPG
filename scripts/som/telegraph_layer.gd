@@ -8,6 +8,7 @@ const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const CombatZones := preload("res://scripts/som/combat_zones.gd")
+const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 
 const BORDER_PX := 3
 const FILL_STEPS := 4
@@ -21,6 +22,9 @@ const PLACEHOLDER_YELLOW_EDGE := Color(0.9, 0.75, 0.08, 0.9)
 ## Inktplas-loop (T4b placeholder).
 const PLACEHOLDER_INK_FILL := Color(0.18, 0.1, 0.42, 0.48)
 const PLACEHOLDER_INK_EDGE := Color(0.28, 0.14, 0.62, 0.92)
+## Wortelgreep-icoon om de voeten (T6 placeholder).
+const PLACEHOLDER_ROOT_FILL := Color(0.45, 0.28, 0.08, 0.55)
+const PLACEHOLDER_ROOT_EDGE := Color(0.35, 0.2, 0.05, 0.95)
 
 enum Style { RED_DODGE, YELLOW_INTERRUPT }
 
@@ -32,6 +36,7 @@ class DrawEntry:
 
 var _entries: Array[DrawEntry] = []
 var _zone_shapes: Array[TelegraphShape] = []
+var _root_icons: Array[Vector2] = []
 
 
 func entry_count() -> int:
@@ -64,6 +69,27 @@ func sync_from_enemies(enemies: Dictionary, interruptible_for_attack: Callable =
 
 
 ## Actieve grondzones (Combat T4b); alleen tekenen.
+## Rooted helden: kleine cirkels op voetpositie (alleen tekenen).
+func sync_from_roots(roots: CombatRoots, positions: Dictionary) -> void:
+	var next: Array[Vector2] = []
+	if roots != null:
+		for hid in roots.rooted_ids():
+			if positions.has(hid):
+				next.append(Vector2(positions[hid]))
+	if _root_icons_changed(next):
+		_root_icons = next
+		queue_redraw()
+
+
+func _root_icons_changed(next: Array[Vector2]) -> bool:
+	if next.size() != _root_icons.size():
+		return true
+	for i in next.size():
+		if next[i] != _root_icons[i]:
+			return true
+	return false
+
+
 func sync_from_zones(zones: CombatZones) -> void:
 	var next: Array[TelegraphShape] = []
 	if zones != null:
@@ -209,6 +235,19 @@ func _draw() -> void:
 		_draw_entry(ent)
 	for sh in _zone_shapes:
 		_draw_zone(sh)
+	for p in _root_icons:
+		_draw_root_icon(p)
+
+
+func _draw_root_icon(center: Vector2) -> void:
+	var r := 7.0
+	var pts := PackedVector2Array()
+	pts.resize(12)
+	for i in 12:
+		var a := TAU * float(i) / 12.0
+		pts[i] = center + Vector2(cos(a), sin(a)) * r
+	draw_colored_polygon(pts, PLACEHOLDER_ROOT_FILL)
+	draw_polyline(pts, PLACEHOLDER_ROOT_EDGE, 2.0, true)
 
 
 func _draw_zone(shape: TelegraphShape) -> void:

@@ -209,6 +209,7 @@ func _on_target_chosen(index: int) -> void:
 		return
 	var r := PartyActions.use_item(GameState.inventory, selected_id, GameState.party[index])
 	show_message(str(r["text"]), MenuColors.INFO if r["ok"] else MenuColors.TEXT_DIM)
+	UiSfx.play(UiSfx.USE_ITEM if r["ok"] else UiSfx.ERROR)
 	targets.refresh()
 	if GameState.item_count(selected_id) <= 0:
 		_stop_targeting()

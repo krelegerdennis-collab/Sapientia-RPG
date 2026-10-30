@@ -384,6 +384,7 @@ func choose_slot(slot: String) -> void:
 			open_list(slot)
 		"unequip":
 			var r := Equipment.unequip(h, GameState.inventory, slot)
+			UiSfx.play(UiSfx.UNEQUIP if r["ok"] else UiSfx.ERROR)
 			refresh_slots()
 			show_stats()
 			show_message(str(r["text"]), MenuColors.INFO if r["ok"] else MenuColors.TEXT_DIM)
@@ -445,6 +446,7 @@ func choose_item(id: String) -> void:
 		return
 	var slot := current_slot
 	var r := Equipment.equip(hero(), GameState.inventory, slot, id)
+	UiSfx.play(UiSfx.EQUIP if r["ok"] else UiSfx.ERROR)
 	_close_list()
 	to_slot_mode("equip", slot)
 	refresh_slots()

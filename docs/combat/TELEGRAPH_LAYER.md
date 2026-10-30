@@ -39,3 +39,11 @@ Eén `Node2D` in de Action-arena (`SomArena`) tekent **alle** grond-telegrafen i
 - Helpers: `scripts/net/telegraph_snapshot.gd`. Tests: `--telegraphcooptest`.
 - PR-stack: bouwt op TelegraphLayer (T3); merge na #265.
 - Echte art via RPG Forge (COMBAT_DESIGN §11 / voorstel sectie E).
+
+## T6 — root (Wortelgreep)
+
+- **Data:** `scripts/som/enemy_attacks.gd` (`root_test` alleen voor `--roottest`; Wortelkoning later).
+- **Sim:** `scripts/som/combat_roots.gd` — `rooted[id]` max **60 ticks** (niet stapelbaar = max), daarna **90 ticks** immuniteit. Bewegen geblokkeerd; slaan mag; `SomArena.break_root(id)` voor dodge (stap 5). Root alleen na echte klap (`hit_member`, niet tijdens `iframes`). Eindigt bij KO/down, held wissel, co-op stoel uit, party down, arena leeg (laatste vijand).
+- **Host** tickt roots; **gast** spiegelt snapshot-trailer `roots` (3 bytes/record na zones, `net_codec.gd`).
+- **Tekenen:** `TelegraphLayer.sync_from_roots()` — placeholder-cirkel om de voeten.
+- **Tests:** `--roottest` → `scripts/tests/root_tests.gd`.

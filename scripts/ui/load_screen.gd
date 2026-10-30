@@ -9,6 +9,7 @@ signal closed
 const SaveSlotList := preload("res://scripts/ui/save_slot_list.gd")
 const SavePrompt := preload("res://scripts/ui/save_prompt.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
+const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 
 const LAYER := 21
 const QUESTION := "Load slot %d?"
@@ -56,6 +57,7 @@ func _on_answer(yes: bool) -> void:
 		result = "declined"
 		return
 	result = "loading"
+	UiSfx.play(UiSfx.LOAD)
 	await GameState.continue_slot(_slot)
 
 

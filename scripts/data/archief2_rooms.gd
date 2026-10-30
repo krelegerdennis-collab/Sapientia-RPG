@@ -47,7 +47,7 @@ const ROOMS := {
 				"Pull the lever. Then the plate grows into a path.",
 				"The Old Humanity made the six Archives as a chain.",
 				"Each core activates the next. Not an invitation: a distress signal.",
-				"The First Archive sent: Someone is inside. The Second Archive answered first.",
+				"Archive 1 sent: Someone is inside. Archive 2 answered first.",
 				"Sapientia manipulated that signal. You think you are following. Sapientia is leading you.",
 			],
 		}],
