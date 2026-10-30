@@ -628,6 +628,7 @@ func _run() -> void:
 		# Alleen de item-iconen v1.5 (scripts/tests/item_icon_autotest.gd); CI draait ze aan het eind mee.
 		check("titelscherm (item-icons)", await wait_scene("Title"))
 		await preload("res://scripts/tests/item_icon_autotest.gd").new(self).run()
+		await preload("res://scripts/tests/item_icon_hookup_autotest.gd").new(self).run()
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
@@ -660,6 +661,7 @@ func _run() -> void:
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/huis_wilgendal_autotest.gd").new(self).run()
 	await preload("res://scripts/tests/item_icon_autotest.gd").new(self).run()
+	await preload("res://scripts/tests/item_icon_hookup_autotest.gd").new(self).run()
 	await preload("res://scripts/tests/cast_anim_autotest.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
