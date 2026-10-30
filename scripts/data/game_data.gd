@@ -699,7 +699,7 @@ const ITEMS := {
 	# Act 1, te vinden: Ilse in Esdoorn, eenmalig nadat Noor gered is. Later ook Tante Mien
 	# in Wilgendal; die winkel is er nog niet.
 	"kruidenthee": {"name": "Herbal Tea", "target": "ally", "heal_hp": 40, "heal_mp": 0,
-		"act": 1, "lijn": "drank", "orde": 4, "price": 0,
+		"act": 1, "lijn": "drank", "orde": 4, "price": 20,
 		"desc": "Mint and thyme in a warm bottle. Elise's recipe from Mapleton."},
 	# Act 1, te vinden: de kast van de Inktwurm in de Golemhal.
 	"gloeiende_inktfles": {"name": "Glowing Ink", "target": "ally",
