@@ -55,6 +55,8 @@ func _data_tests() -> void:
 	check("data: finisher meer schade", SomChainData.damage_mult(2) > SomChainData.damage_mult(1) and SomChainData.damage_mult(1) >= SomChainData.damage_mult(0))
 	check("data: finisher meer hitstop", SomChainData.hitstop_ticks(2) > SomChainData.hitstop_ticks(0) and SomChainData.hitstop_ticks(2) > SomChainData.hitstop_ticks(1))
 	check("data: finisher meer knockback", SomChainData.knockback_tiles(2) > SomChainData.knockback_tiles(0) and SomChainData.knockback_tiles(2) > SomChainData.knockback_tiles(1))
+	check("data: AI tapt binnen het spelervenster (Dennis 16:03)", SomChainData.ALLY_FOLLOWUP_TICKS > 0 and SomChainData.ALLY_FOLLOWUP_TICKS < SomChainData.CHAIN_WINDOW_TICKS
+			and not ("ALLY_WINDOW_EXTRA_TICKS" in SomChainData.new()))
 	check("data: hit1 = gewone slag (1 tegel, geen hitstop)", SomChainData.knockback_tiles(0) == 1 and SomChainData.hitstop_ticks(0) == 0)
 
 
@@ -280,6 +282,7 @@ func _ally_ai_tests() -> void:
 	ally.charge = 1.0
 	var seq: Array = []
 	var last_state := ""
+	var max_win := 0
 	var peak_hs := 0
 	for _t in 600:
 		arena.player.position = m.position + Vector2(-20, 6)   # leider dichtbij, ally blijft vechten
@@ -291,9 +294,13 @@ func _ally_ai_tests() -> void:
 			last_state = key
 		if arena.enemies.has(m):
 			peak_hs = maxi(peak_hs, int(arena.enemies[m].get("hitstop", 0)))
+		if seq.size() == 1 and int(c["window"]) > max_win:
+			max_win = int(c["window"])
 		if seq.size() >= 3:
 			break
 	print("  ally-AI keten: %s" % str(seq))
+	var spelervenster := ceili(arena._anim_seconds_def("lotte", arena._attack_def("lotte", 0)) / CombatSim.TICK_DT - 0.0001) + SomChainData.CHAIN_WINDOW_TICKS
+	check("ally-AI: zelfde venster als een speler (%d <= %d)" % [max_win, spelervenster], max_win > 0 and max_win <= spelervenster)
 	check("ally-AI: Seren ketent hit1 -> hit2 -> finisher", seq.size() >= 3 and seq[0] == 0 and seq[1] == 1 and seq[2] == 2)
 	check("ally-AI: Dax-keten onaangeroerd", int(arena.chain_of("dennis")["last"]) == -1)
 	for _t in 200:

@@ -129,7 +129,8 @@ func tick(delta: float) -> void:
 		# Kael/Orion (lang bereik) houden afstand; de rest gaat er vlak naast staan
 		var stand := maxf(14.0, SomData.attack_offset(hero_id))
 		target = c + side * stand - Vector2(0, SomData.BODY_Y)
-		if body().distance_to(c) <= SomData.attack_offset(hero_id) + SomData.attack_reach(hero_id) - 2.0 and charge >= 1.0:
+		if body().distance_to(c) <= SomData.attack_offset(hero_id) + SomData.attack_reach(hero_id) - 2.0 \
+				and (charge >= 1.0 or arena.chain_wants_followup(hero_id)):   # keten: net zo snel als een speler
 			facing = SomMove.facing_for(c - body(), facing)
 			charge = 0.0
 			attacks += 1

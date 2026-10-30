@@ -852,6 +852,14 @@ func _tick_ally_heavy() -> void:
 		heavy_tick(str(id), held, a, 1.0)
 
 
+## Bondgenoot-AI: tijd voor de volgende ketenslag? Venster open, eigen animatie klaar en
+## SomChainData.ALLY_FOLLOWUP_TICKS in het venster gewacht (deterministisch, geen toeval).
+func chain_wants_followup(id: String) -> bool:
+	var c: Dictionary = chain_of(id)
+	var w := int(c["window"])
+	return int(c["next"]) > 0 and w > 0 and w <= SomChainData.CHAIN_WINDOW_TICKS - SomChainData.ALLY_FOLLOWUP_TICKS
+
+
 ## Keten terug naar hit1 (venster verlopen, dodge, held gewisseld, gevecht klaar).
 ## id "" = de bestuurde held; "*" = alle actors.
 func chain_reset(id := "") -> void:
@@ -958,7 +966,7 @@ func ally_attack(a: Node2D, _enemy: Node) -> int:
 		_ai_heavy[hid] = SomHeavyData.ALLY_LEVEL
 		heavy_hold[hid] = 0
 		return 0
-	return chain_swing(hid, a, 1.0, SomChainData.ALLY_WINDOW_EXTRA_TICKS)
+	return chain_swing(hid, a, 1.0)
 
 
 func center_of(m: Node) -> Vector2:
