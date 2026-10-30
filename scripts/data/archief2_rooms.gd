@@ -136,6 +136,13 @@ static func rooms() -> Dictionary:
 	})
 	var gang := _met(_basis("Greenhouse Passage", 2, 5), {
 		"layout": [_TOP, _WU, _WL, _SH, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _F, _BOT],
+		# WM1 T3: zijkamer leven_v2_leeszaal (puzzle_rooms.gd) via een kast op een kier tegen de westmuur.
+		# PLACEHOLDER-ART: kast_vast.png staat in voor de echte kier-kast.
+		"spawns": {"zuid": [13, 15, "up"], "noord": [13, 3, "down"], "ingang": [13, 15, "up"], "leeszaal": [2, 9, "right"]},
+		"objects": [
+			{"name": "LeeszaalKast", "tile": [1, 9], "texture": "res://assets/puzzle/kast_vast.png",
+				"event": "archief2_leeszaal"},
+		],
 		"exits": {
 			"E": {"map": "res://scenes/maps/leven_v1_plaat.tscn", "spawn": "noord"},
 			"n": {"map": SCENES["archief_2_v2_lotte"], "spawn": "zuid"},

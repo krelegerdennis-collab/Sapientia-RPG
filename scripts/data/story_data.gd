@@ -203,6 +203,8 @@ const CODEX_INKTWURM_FLAG := "inktwurm_in_codex"
 ## Soort (CodexData) -> vlag die GameState.codex_add zet zodra die soort in de Codex komt.
 const CODEX_SPECIES_FLAGS := {"inktwurm": CODEX_INKTWURM_FLAG}
 const GOLEMHAL := "res://scenes/maps/archief_golemhal.tscn"
+## WM1 T3: optionele puzzelkamer van Archief 2 (vanaf de Kasgang).
+const LEESZAAL := "res://scenes/maps/leven_v2_leeszaal.tscn"
 const GOLEMHAL_EXIT := "golemhal_uitgang"
 ## Events die starten zodra de speler op die kaart vrij is (Story._free_event), zonder opslag: de vlaggen
 ## bepalen alles. Rij: {"map": scènepad, "if": voorwaarde, "event": id}.
@@ -486,6 +488,11 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+	# WM1 T3: de kier-kast in de Kasgang -> optionele puzzelkamer leven_v2_leeszaal.
+	"archief2_leeszaal": [{"do": [
+		["say", "", ["This bookcase stands slightly ajar.", "Behind it lies a narrow reading room."]],
+		["map", LEESZAAL, "ingang", ""],
+	]}],
 	# Waarom Archief 1 naar Archief 2 wijst. Eenmalig, bij de kas-ingang.
 	"archief2_keten": [{"do": [
 		["say", "", [
