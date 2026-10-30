@@ -88,6 +88,9 @@ const QUOTE_GRAAN_WACHT := "No hurry. The mill will wait. So will I."
 const QUOTE_GRAAN_ZONDER := "Not found yet? No worries. The forest can't be forced."
 const QUOTE_GRAAN_ZAAD := "Let me see it. ...Yes. Yes, this is it. It's already singing, hear that? Softly. It's waiting for the mill."
 const QUOTE_GRAAN_DANK := "Thank you, lad. The mill sings again. Take some flour for the road — and if you ever come back, the door is always open."
+## WM1 T1: vóór Vesper in de groep zit (geen opdracht nog).
+const QUOTE_GRAAN_LATER := "The mill hasn't turned in a long while, lad."
+const QUOTE_GRAAN_LATER_2 := "Come back when you're not travelling alone. Then I'll tell you why."
 ## Ja neemt de opdracht aan. Nee (ook de B-knop) is weglopen: de opdracht blijft uit.
 const KEUZE_GRAAN_JA := "Yes"
 const KEUZE_GRAAN_NEE := "No"
@@ -616,12 +619,16 @@ const EVENTS := {
 	]}],
 	"noor_woud": [{"do": [["say", "Vesper", ["Let's go, {naam}."]]]}],
 
-	# Het Zingende Graan. Canon-dialoog. Dicht zonder noor_lid.
+	# Het Zingende Graan. Canon-dialoog. Zonder noor_lid nog geen opdracht: Gerrit zegt alleen dat de
+	# molen stilstaat (WM1 T1: was een lege variant, dan zei hij niets).
 	# Eerste keer: bezoek, de vraag, dan Ja (opdracht aan) of Nee (weglopen, later nog mogelijk).
 	# Zonder zaad: één zin. Met zaad: herkenning, de molen draait en zingt zacht, daarna de molen.
 	# Daarna de afsluitende zin en opnieuw de molen.
 	"gerrit": [
-		{"if": {"not_flags": ["noor_lid"]}, "do": []},
+		{"if": {"not_flags": ["noor_lid"]}, "do": [
+			["flag", "gesproken_gerrit"],   # Quest Log > Side: naam wordt opdracht
+			["say", GERRIT, [QUOTE_GRAAN_LATER, QUOTE_GRAAN_LATER_2]],
+		]},
 		{"if": {"flags": [FLAG_GRAAN_KLAAR]}, "do": [
 			["flag", "gesproken_gerrit"],   # Quest Log > Side: naam wordt opdracht
 			["say", GERRIT, [QUOTE_GRAAN_DANK]],
