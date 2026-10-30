@@ -78,9 +78,10 @@ func _maak_grond_tileset() -> TileSet:
 		src.texture = reg
 		src.texture_region_size = Vector2i(16, 16)
 		src.create_tile(Vector2i.ZERO)
+		var sid: int = ts.add_source(src)
 		if sleutel in Atlas.WALL_SLEUTELS:
-			Atlas.voeg_wand_fysiek(src.get_tile_data(Vector2i.ZERO, 0))
-		_tile_ids[sleutel] = ts.add_source(src)
+			Atlas.voeg_wand_fysiek(ts.get_source(sid).get_tile_data(Vector2i.ZERO, 0))
+		_tile_ids[sleutel] = sid
 	return ts
 
 
