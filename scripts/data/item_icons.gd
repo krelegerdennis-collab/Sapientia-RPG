@@ -75,15 +75,26 @@ static func has_mapping(id: String) -> bool:
 
 
 static func path16(id: String) -> String:
-	_ensure()
-	var p := _mapped(id, true)
-	return p if p != "" else _category_path(id)
+	return _resolve(id, true)
 
 
 static func path32(id: String) -> String:
+	return _resolve(id, false)
+
+
+## Eén ingang: icoon voor item_id op maat 16 of 32 (andere maten -> 16). Gecachet;
+## ontbrekend bestand -> categorie-icoon; ook dat weg -> null (aanroepers verbergen dan het vak).
+static func icon_for(id: String, size: int = SIZE16) -> Texture2D:
+	return tex32(id) if size == SIZE32 else tex16(id)
+
+
+## Gemapt pad als het bestand echt bestaat, anders het categorie-icoon (nooit een leeg gat).
+static func _resolve(id: String, use16: bool) -> String:
 	_ensure()
-	var p := _mapped(id, false)
-	return p if p != "" else _category_path(id)
+	var p := _mapped(id, use16)
+	if p != "" and ResourceLoader.exists(p):
+		return p
+	return _category_path(id)
 
 
 static func tex16(id: String) -> Texture2D:
@@ -100,7 +111,12 @@ static func apply16(b: Button, id: String) -> void:
 	if id == "":
 		clear16(b)
 		return
-	b.icon = tex16(id)
+	var tex := tex16(id)
+	if tex == null:
+		# geen enkel icoon te vinden: rij zonder icoon (geen leeg 16px-vak), tekst blijft
+		clear16(b)
+		return
+	b.icon = tex
 	b.expand_icon = false
 	b.add_theme_constant_override("icon_max_width", SIZE16)
 	b.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -137,7 +153,15 @@ static func show32(r: TextureRect, id: String) -> void:
 		r.set_meta("item_icon_id", "")
 		r.set_meta("item_icon_size", 0)
 		return
-	r.texture = tex32(id)
+	var tex := tex32(id)
+	if tex == null:
+		# geen 32px- en geen categorie-icoon: vak verbergen in plaats van een leeg gat
+		r.texture = null
+		r.visible = false
+		r.set_meta("item_icon_id", "")
+		r.set_meta("item_icon_size", 0)
+		return
+	r.texture = tex
 	r.visible = true
 	r.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	r.set_meta("item_icon_id", id)
