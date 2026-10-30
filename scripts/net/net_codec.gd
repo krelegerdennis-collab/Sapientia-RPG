@@ -5,7 +5,9 @@ extends RefCounted
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
 const ZONE_WIRE_BYTES := TelegraphSnapshot.ZONE_WIRE_BYTES
+const ROOT_WIRE_BYTES := TelegraphSnapshot.ROOT_WIRE_BYTES
 const MAX_ZONES_WIRE := 6
+const MAX_ROOTS_WIRE := 4
 const INPUT_SIZE := Protocol.INPUT_BYTES
 const PLAYER_SIZE := Protocol.SNAPSHOT_PLAYER_BYTES
 const ENEMY_SIZE := Protocol.SNAPSHOT_ENEMY_BYTES_V1
@@ -54,22 +56,24 @@ static func unpack_input(raw: PackedByteArray) -> Dictionary:
 	}
 
 
-static func pack_snapshot(tick: int, players: Array, enemies: Array, zones: Array = []) -> PackedByteArray:
-	return _pack_snapshot_version(tick, players, enemies, CODEC_VERSION, zones)
+static func pack_snapshot(tick: int, players: Array, enemies: Array, zones: Array = [], roots: Array = []) -> PackedByteArray:
+	return _pack_snapshot_version(tick, players, enemies, CODEC_VERSION, zones, roots)
 
 
 static func pack_snapshot_v0(tick: int, players: Array, enemies: Array) -> PackedByteArray:
-	return _pack_snapshot_version(tick, players, enemies, 0, [])
+	return _pack_snapshot_version(tick, players, enemies, 0, [], [])
 
 
-static func _pack_snapshot_version(tick: int, players: Array, enemies: Array, codec_version: int, zones: Array) -> PackedByteArray:
+static func _pack_snapshot_version(tick: int, players: Array, enemies: Array, codec_version: int, zones: Array, roots: Array) -> PackedByteArray:
 	var buf := PackedByteArray()
 	var pc := mini(players.size(), Protocol.MAX_PLAYERS)
 	var ec := mini(enemies.size(), Protocol.SNAPSHOT_ENEMY_BUDGET)
 	var enemy_sz := _enemy_wire_bytes(codec_version)
 	var zc := mini(zones.size(), MAX_ZONES_WIRE) if codec_version > 0 else 0
+	var rc := mini(roots.size(), MAX_ROOTS_WIRE) if codec_version > 0 else 0
 	var zone_tail := (1 + zc * ZONE_WIRE_BYTES) if codec_version > 0 else 0
-	buf.resize(HEADER_SIZE + pc * PLAYER_SIZE + ec * enemy_sz + zone_tail)
+	var root_tail := (1 + rc * ROOT_WIRE_BYTES) if codec_version > 0 else 0
+	buf.resize(HEADER_SIZE + pc * PLAYER_SIZE + ec * enemy_sz + zone_tail + root_tail)
 	buf[0] = Protocol.BinKind.SNAPSHOT
 	buf[1] = tick & 0xFF
 	buf[2] = (tick >> 8) & 0xFF
@@ -85,6 +89,10 @@ static func _pack_snapshot_version(tick: int, players: Array, enemies: Array, co
 		off += 1
 		for i in zc:
 			off = _pack_zone(buf, off, zones[i])
+		buf[off] = rc
+		off += 1
+		for i in rc:
+			off = _pack_root(buf, off, roots[i])
 	return buf
 
 
@@ -113,6 +121,7 @@ static func unpack_snapshot(raw: PackedByteArray) -> Dictionary:
 		off = _unpack_enemy(raw, off, row, codec_version)
 		enemies.append(row)
 	var zones: Array = []
+	var roots: Array = []
 	if codec_version > 0 and raw.size() > off:
 		var zc := int(raw[off])
 		off += 1
@@ -122,7 +131,16 @@ static func unpack_snapshot(raw: PackedByteArray) -> Dictionary:
 			var zrow: Dictionary = {}
 			off = _unpack_zone(raw, off, zrow)
 			zones.append(zrow)
-	return {"tick": tick, "codec_version": codec_version, "players": players, "enemies": enemies, "zones": zones}
+	if codec_version > 0 and raw.size() > off:
+		var rc := int(raw[off])
+		off += 1
+		for i in mini(rc, MAX_ROOTS_WIRE):
+			if raw.size() < off + ROOT_WIRE_BYTES:
+				break
+			var rrow: Dictionary = {}
+			off = _unpack_root(raw, off, rrow)
+			roots.append(rrow)
+	return {"tick": tick, "codec_version": codec_version, "players": players, "enemies": enemies, "zones": zones, "roots": roots}
 
 
 static func _enemy_wire_bytes(codec_version: int) -> int:
@@ -249,3 +267,17 @@ static func _unpack_zone(raw: PackedByteArray, off: int, out: Dictionary) -> int
 	out["ticks_left"] = int(raw[off + 6])
 	out["shape"] = int(raw[off + 7])
 	return off + ZONE_WIRE_BYTES
+
+
+static func _pack_root(buf: PackedByteArray, off: int, r: Dictionary) -> int:
+	buf[off] = clampi(int(r.get("slot", 0)), 0, Protocol.MAX_PLAYERS - 1)
+	buf[off + 1] = clampi(int(r.get("root_ticks", 0)), 0, 255)
+	buf[off + 2] = clampi(int(r.get("immune_ticks", 0)), 0, 255)
+	return off + ROOT_WIRE_BYTES
+
+
+static func _unpack_root(raw: PackedByteArray, off: int, out: Dictionary) -> int:
+	out["slot"] = int(raw[off])
+	out["root_ticks"] = int(raw[off + 1])
+	out["immune_ticks"] = int(raw[off + 2])
+	return off + ROOT_WIRE_BYTES
