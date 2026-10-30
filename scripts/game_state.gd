@@ -638,6 +638,7 @@ func _ready() -> void:
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
+			["--f5sim", "res://tools/battlesim/f5_sim.gd", "F5Sim", "f5sim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:

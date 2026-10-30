@@ -26,6 +26,10 @@ const FINISHER_ALWAYS_STAGGERS := true
 ## Bondgenoot-AI ketent net zo snel als een speler (Dennis 2026-10-30 16:03): zelfde CHAIN_WINDOW_TICKS, en de
 ## AI "tapt" de volgende ketenslag zoveel ticks na het einde van zijn slag-animatie (< CHAIN_WINDOW_TICKS).
 const ALLY_FOLLOWUP_TICKS := 6
+## F5 (Dennis 2026-10-31): hit2/finisher binnen het venster slaan minimaal op deze meter (aan: 1.0 = volle meter).
+const FOLLOWUP_MIN_METER := 1.0
+## F5 (Dennis 2026-10-31): tik tijdens de eigen slag-animatie negeren (aan).
+const TAP_GATE := true
 
 ## TODO RPG ART: placeholder-animaties. hit2 en finisher hergebruiken de bestaande <held>_attack.png
 ## (zelfde frames), alleen met een ander tempo, zodat de staat wel verschilt. Echte frames: zie PR
