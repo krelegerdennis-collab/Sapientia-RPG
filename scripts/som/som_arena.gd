@@ -123,13 +123,28 @@ var b_cast_cd := 0.0
 var swing_lock := 0.0
 ## Laatste slag was vol (stagger: telegraaf afbreken + knockback alleen bij 100%).
 var _full_swing := true
-## 3-slag aanvalsketen (SomChainData, alleen Action): volgende stap (0 hit1, 1 hit2, 2 finisher),
-## resterende venster-ticks (0 = geen open venster), de held van de keten en de staat van de laatste slag.
-var chain_next := 0
-var chain_window_ticks := 0
-var chain_owner := ""
-var chain_state := ""
-var chain_last_step := -1
+## 3-slag aanvalsketen (SomChainData, alleen Action), per actor (held-id: speler, bondgenoot-AI, co-op-peer):
+## {"next": 0 hit1 / 1 hit2 / 2 finisher, "window": venster-ticks (0 = dicht), "state": laatste staat, "last": laatste stap}.
+## Elke actor heeft een eigen keten; host-autoritatief (alleen sim_step / coop_host_step tellen).
+var chains: Dictionary = {}
+## Snelkoppelingen naar de keten van de bestuurde held (tests/HUD).
+var chain_next: int:
+	get:
+		return chain_of(active_id)["next"]
+var chain_window_ticks: int:
+	get:
+		return chain_of(active_id)["window"]
+var chain_state: String:
+	get:
+		return chain_of(active_id)["state"]
+var chain_last_step: int:
+	get:
+		return chain_of(active_id)["last"]
+## Held waarvan de keten loopt (bestuurde held), "" = geen open keten.
+var chain_owner: String:
+	get:
+		var c: Dictionary = chain_of(active_id)
+		return active_id if int(c["next"]) != 0 or int(c["window"]) != 0 else ""
 ## Tests: aantal resets (venster verlopen / dodge / held gewisseld) en de laatste hitstop/knockback.
 var chain_resets := 0
 var last_hitstop_ticks := 0
@@ -441,6 +456,8 @@ func switch_hero(to := "") -> String:
 		a._teleport()      # anders belandt de bestuurde held in de muur en kan hij niet meer lopen
 	combat_roots.clear_member(active_id)
 	combat_stamina.clear_member(active_id)
+	chain_reset(active_id)       # wissel: venster en keten van beide helden meteen dicht
+	chain_reset(nxt)
 	var old := active_id
 	var p_pos: Vector2 = player.position
 	var p_face: Vector2i = player.facing
@@ -704,55 +721,72 @@ func attack() -> int:
 	if not is_alive(active_id):
 		return 0
 	attacks += 1
-	var step := _chain_begin_hit()
+	var step := _chain_begin_hit(active_id)
 	var mult := charge_mult(charge)
 	if step >= 0:
 		mult *= SomChainData.damage_mult(step)
 	_full_swing = charge >= 1.0
 	charge = 0.0
 	swing_lock = _anim_seconds_def(active_id, _attack_def(active_id, step))
-	if step >= 0:
-		# venster telt na het einde van de slag-animatie; na de finisher begint de keten opnieuw
-		chain_window_ticks = 0 if SomChainData.is_finisher(step) \
-				else ceili(swing_lock / TICK_DT - 0.0001) + SomChainData.CHAIN_WINDOW_TICKS
 	return _swing(active_id, player, mult, step)
+
+
+## Slag van elke actor via de keten (bondgenoot-AI, co-op-peer). base_mult = meter/vaste multiplier.
+func chain_swing(id: String, n: Node2D, base_mult: float, extra_window := 0) -> int:
+	var step := _chain_begin_hit(id, extra_window)
+	var mult := base_mult * (SomChainData.damage_mult(step) if step >= 0 else 1.0)
+	return _swing(id, n, mult, step)
 
 
 # ---------------------------------------------------------------- aanvalsketen (SomChainData)
 ## Keten-stap voor de slag die nu begint (-1 = geen keten: Classic-stijl).
-func _chain_begin_hit() -> int:
+## Ketenstaat van één actor (alleen-lezen kopie als hij nog geen keten heeft).
+func chain_of(id: String) -> Dictionary:
+	return chains.get(id, {"next": 0, "window": 0, "state": "", "last": -1})
+
+
+func _chain_begin_hit(id: String, extra_window := 0) -> int:
 	if not Settings.action_battles():
-		if chain_next != 0 or chain_state != "":
-			chain_reset()
+		chains.erase(id)
 		return -1
-	if chain_owner != active_id:
-		if chain_owner != "":
-			chain_reset()
-		chain_owner = active_id
-	var step := SomChainData.clamp_step(chain_next)
-	chain_last_step = step
-	chain_state = SomChainData.state_for(step)
-	chain_next = 0 if SomChainData.is_finisher(step) else step + 1
+	var c: Dictionary = chain_of(id)
+	var step := SomChainData.clamp_step(int(c["next"]))
+	c["last"] = step
+	c["state"] = SomChainData.state_for(step)
+	c["next"] = 0 if SomChainData.is_finisher(step) else step + 1
+	# venster telt na het einde van de slag-animatie; na de finisher begint de keten opnieuw
+	c["window"] = 0 if SomChainData.is_finisher(step) \
+			else ceili(_anim_seconds_def(id, _attack_def(id, step)) / TICK_DT - 0.0001) + SomChainData.CHAIN_WINDOW_TICKS + extra_window
+	chains[id] = c
 	return step
 
 
-## Venster aftellen op de vaste stap; verlopen = terug naar hit1.
+## Venster van elke actor aftellen op de vaste stap (vaste volgorde: gesorteerde ids); verlopen = hit1.
 func _tick_chain() -> void:
-	if chain_window_ticks <= 0:
-		return
-	chain_window_ticks -= 1
-	if chain_window_ticks == 0:
-		chain_reset()
+	var ids: Array = chains.keys()
+	ids.sort()
+	for id in ids:
+		var c: Dictionary = chains[id]
+		if int(c["window"]) <= 0:
+			continue
+		c["window"] = int(c["window"]) - 1
+		if int(c["window"]) == 0:
+			chain_reset(str(id))
 
 
 ## Keten terug naar hit1 (venster verlopen, dodge, held gewisseld, gevecht klaar).
-func chain_reset() -> void:
-	if chain_next != 0 or chain_window_ticks != 0:
+## id "" = de bestuurde held; "*" = alle actors.
+func chain_reset(id := "") -> void:
+	if id == "*":
+		var ids: Array = chains.keys()
+		for k in ids:
+			chain_reset(str(k))
+		return
+	var hid := active_id if id == "" else id
+	var c: Dictionary = chain_of(hid)
+	if int(c["next"]) != 0 or int(c["window"]) != 0:
 		chain_resets += 1
-	chain_next = 0
-	chain_window_ticks = 0
-	chain_state = ""
-	chain_owner = ""
+	chains.erase(hid)
 
 
 ## Animatie-definitie van een slag (step -1 = de gewone slag, ongewijzigd).
@@ -830,7 +864,7 @@ func _land(id: String, n: Node2D, mult: float, step := -1) -> int:
 
 ## Bondgenoot slaat (volle meter; som_ally.gd heeft hem al naar de vijand gedraaid).
 func ally_attack(a: Node2D, _enemy: Node) -> int:
-	return _swing(a.hero_id, a, 1.0)
+	return chain_swing(a.hero_id, a, 1.0, SomChainData.ALLY_WINDOW_EXTRA_TICKS)
 
 
 func center_of(m: Node) -> Vector2:
@@ -1276,7 +1310,7 @@ func _clear_transient_combat() -> void:
 	_dodge_roll_ticks.clear()
 	_dodge_cd_ticks.clear()
 	_dodge_dir.clear()
-	chain_reset()
+	chain_reset("*")
 
 
 func _tick_zones() -> void:
@@ -1442,8 +1476,7 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 	_dodge_dir[id] = d
 	_dodge_roll_ticks[id] = SomData.DODGE_DURATION_TICKS
 	_dodge_cd_ticks[id] = SomData.DODGE_COOLDOWN_TICKS
-	if id == chain_owner or id == active_id:
-		chain_reset()          # dodge annuleert de aanvalsketen
+	chain_reset(id)            # dodge annuleert de aanvalsketen van deze actor
 	iframes[id] = float(SomData.DODGE_IFRAME_TICKS) * TICK_DT
 	if id == active_id and room != null and room.has_method("start_invuln"):
 		room.start_invuln(float(SomData.DODGE_IFRAME_TICKS) * TICK_DT)
@@ -2161,6 +2194,7 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 	for inp in inputs:
 		_apply_coop_input(inp, dt)
 	swing_lock = maxf(0.0, swing_lock - dt)
+	_tick_chain()
 	for m in enemies.keys():
 		if is_instance_valid(m):
 			_enemy_ai(m, dt)
@@ -2203,7 +2237,7 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 	if buttons & Codec.BTN_ATTACK and cd <= 0.0:
 		var hid := str(_coop_slots[slot])
 		if is_alive(hid):
-			_swing(hid, body, charge_mult(charge if slot == coop_local_slot else 1.0))
+			chain_swing(hid, body, charge_mult(charge if slot == coop_local_slot else 1.0))
 			_coop_attack_cd[slot] = 0.35
 	if buttons & Codec.BTN_DODGE:
 		var hid2 := str(_coop_slots.get(slot, ""))

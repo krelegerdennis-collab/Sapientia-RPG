@@ -23,6 +23,10 @@ const KNOCKBACK_TILES: Array[int] = [1, 1, 2]
 ## De finisher staggert altijd (telegraaf breken + knockback), ook met een niet-volle meter:
 ## snel tap-tap-tap laat de meter nooit vollopen, anders zou de finisher-knockback nooit vallen.
 const FINISHER_ALWAYS_STAGGERS := true
+## Bondgenoot-AI slaat in zijn bestaande ritme (volle wapenmeter, SomData.CHARGE_TIME = 60 ticks; vastgelegd
+## in --rekruuttest). Zijn venster krijgt daarom deze extra ticks, zodat hit2/finisher binnen het venster valt.
+## Spelers en co-op-peers houden CHAIN_WINDOW_TICKS.
+const ALLY_WINDOW_EXTRA_TICKS := 60
 
 ## TODO RPG ART: placeholder-animaties. hit2 en finisher hergebruiken de bestaande <held>_attack.png
 ## (zelfde frames), alleen met een ander tempo, zodat de staat wel verschilt. Echte frames: zie PR
