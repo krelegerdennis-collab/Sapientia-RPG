@@ -48,6 +48,7 @@ const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
 const SomActionAttacks := preload("res://scripts/data/som_action_attacks.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const SomChainData := preload("res://scripts/data/som_chain_data.gd")
+const SomHeavyData := preload("res://scripts/data/som_heavy_data.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const CombatZones := preload("res://scripts/som/combat_zones.gd")
@@ -127,6 +128,13 @@ var _full_swing := true
 ## {"next": 0 hit1 / 1 hit2 / 2 finisher, "window": venster-ticks (0 = dicht), "state": laatste staat, "last": laatste stap}.
 ## Elke actor heeft een eigen keten; host-autoritatief (alleen sim_step / coop_host_step tellen).
 var chains: Dictionary = {}
+## Opgeladen zware slag (SomHeavyData, alleen Action), per actor: held-id -> vastgehouden ticks sinds het indrukken.
+var heavy_hold: Dictionary = {}
+## Bondgenoot-AI die nu oplaadt: held-id -> doelniveau.
+var _ai_heavy: Dictionary = {}
+## Tests: aantal zware slagen en het niveau/de staat van de laatste.
+var heavy_releases := 0
+var last_heavy_level := 0
 ## Snelkoppelingen naar de keten van de bestuurde held (tests/HUD).
 var chain_next: int:
 	get:
@@ -559,6 +567,7 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
 			and not _attack_suppressed():
 		_pending["attack"] = true
+	_pending["hold"] = Input.is_action_pressed("interact")      # vasthouden = opladen (SomHeavyData)
 	if Input.is_action_just_pressed(DODGE_ACTION):
 		_pending["dodge"] = true
 	if Input.is_action_just_pressed("cancel") and Engine.get_process_frames() != ring.closed_frame:
@@ -621,6 +630,9 @@ func sim_step() -> void:
 	if _pending["attack"]:
 		_pending["attack"] = false
 		attack()
+		if Settings.action_battles() and is_alive(active_id):
+			heavy_hold[active_id] = 0          # indrukken start de vasthoud-teller
+	heavy_tick(active_id, bool(_pending.get("hold", false)), player, 1.0)
 	if _pending["cast"]:
 		_pending["cast"] = false
 		quick_cast()
@@ -634,6 +646,7 @@ func sim_step() -> void:
 		for a in allies:
 			a.tick(dt)
 			_tick_ally_dodge_ai(a)
+		_tick_ally_heavy()
 	_tick_stamina_and_dodge()
 	for m in enemies.keys():
 		if is_instance_valid(m):
@@ -774,6 +787,71 @@ func _tick_chain() -> void:
 			chain_reset(str(id))
 
 
+# ---------------------------------------------------------------- zware slag (SomHeavyData)
+## Eén tick vasthouden/loslaten voor actor 'id' (alleen als het indrukken een teller startte).
+## Loslaten op niveau >= 1 = zware slag. Geeft het niveau van een losgelaten zware slag (0 = geen).
+func heavy_tick(id: String, held: bool, n: Node2D, base_mult: float) -> int:
+	if not heavy_hold.has(id):
+		return 0
+	if not Settings.action_battles() or not is_alive(id) or n == null:
+		heavy_hold.erase(id)
+		return 0
+	if held:
+		heavy_hold[id] = mini(int(heavy_hold[id]) + 1, SomHeavyData.LEVEL_TICKS[SomHeavyData.MAX_LEVEL - 1])
+		return 0
+	var lv := SomHeavyData.level_for(int(heavy_hold[id]))
+	heavy_hold.erase(id)
+	if lv < 1:
+		return 0
+	_heavy_release(id, n, base_mult, lv)
+	return lv
+
+
+func _heavy_release(id: String, n: Node2D, base_mult: float, lv: int) -> void:
+	chain_reset(id)              # na een zware slag begint de keten weer bij hit1
+	heavy_releases += 1
+	last_heavy_level = lv
+	var mult := base_mult * SomHeavyData.damage_mult(lv)
+	if id == active_id:
+		swing_lock = _anim_seconds_def(id, _attack_def(id, SomChainData.STEP_FINISHER))
+	_swing(id, n, mult, -1, lv)
+
+
+## Laadt actor 'id' nu op (vastgehouden voorbij HOLD_START_TICKS)?
+func heavy_charging(id: String) -> bool:
+	return heavy_hold.has(id) and SomHeavyData.charging(int(heavy_hold[id]))
+
+
+func heavy_level(id: String) -> int:
+	return SomHeavyData.level_for(int(heavy_hold.get(id, 0))) if heavy_hold.has(id) else 0
+
+
+## Loopsnelheid-factor (1.0, of SomHeavyData.MOVE_MULT tijdens het opladen).
+func heavy_move_mult(id: String) -> float:
+	return SomHeavyData.MOVE_MULT if heavy_charging(id) else 1.0
+
+
+func heavy_cancel(id: String) -> void:
+	heavy_hold.erase(id)
+	_ai_heavy.erase(id)
+
+
+## Bondgenoot-AI: houdt vast tot het doelniveau en laat dan los (vaste volgorde: gesorteerde ids).
+func _tick_ally_heavy() -> void:
+	var ids: Array = _ai_heavy.keys()
+	ids.sort()
+	for id in ids:
+		var a: Node2D = ally_of(str(id))
+		if a == null or not heavy_hold.has(id):
+			_ai_heavy.erase(id)
+			heavy_hold.erase(id)
+			continue
+		var held := SomHeavyData.level_for(int(heavy_hold[id])) < int(_ai_heavy[id])
+		if not held:
+			_ai_heavy.erase(id)
+		heavy_tick(str(id), held, a, 1.0)
+
+
 ## Keten terug naar hit1 (venster verlopen, dodge, held gewisseld, gevecht klaar).
 ## id "" = de bestuurde held; "*" = alle actors.
 func chain_reset(id := "") -> void:
@@ -818,22 +896,26 @@ func anim_seconds(id: String) -> float:
 
 ## Slag van een held-node (speler of bondgenoot) in zijn kijkrichting. Met een aanvalssheet valt de treffer
 ## pas op het hit-frame (SomFx.Anim 'hit'); dan geeft dit -1 terug en volgt swing_landed. Zonder art: meteen.
-func _swing(id: String, n: Node2D, mult: float, step := -1) -> int:
+func _swing(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 	if attack_texs.has(id):
-		var anim: Node = _drive(SomFx.attack_anim(n, attack_texs[id], _attack_def(id, step)))
-		if step >= 0:
+		# zware slag: placeholder = de finisher-placeholder (TODO RPG ART: <held>_heavy.png)
+		var def := _attack_def(id, SomChainData.STEP_FINISHER if heavy > 0 else step)
+		var anim: Node = _drive(SomFx.attack_anim(n, attack_texs[id], def))
+		if heavy > 0:
+			anim.set_meta("chain_state", SomHeavyData.state_for(heavy))
+		elif step >= 0:
 			anim.set_meta("chain_state", SomChainData.state_for(step))   # TODO RPG ART: eigen hit2/finisher-sheet
 		# bondgenoot: de slag gaat de kant op waar hij begon (zijn AI kan tijdens de animatie al draaien)
 		var face0: Vector2i = n.facing
 		anim.hit.connect(func() -> void:
 			if id != active_id and is_instance_valid(n):
 				n.facing = face0
-			_land(id, n, mult, step), CONNECT_ONE_SHOT)
+			_land(id, n, mult, step, heavy), CONNECT_ONE_SHOT)
 		return -1
-	return _land(id, n, mult, step)
+	return _land(id, n, mult, step, heavy)
 
 
-func _land(id: String, n: Node2D, mult: float, step := -1) -> int:
+func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 	if not is_instance_valid(n) or not is_alive(id):
 		swing_landed.emit(id, 0)
 		return 0
@@ -855,6 +937,10 @@ func _land(id: String, n: Node2D, mult: float, step := -1) -> int:
 				stagger = stagger or (SomChainData.is_finisher(step) and SomChainData.FINISHER_ALWAYS_STAGGERS)
 				tiles = SomChainData.knockback_tiles(step)
 				stop = SomChainData.hitstop_ticks(step)
+			if heavy > 0:
+				stagger = stagger or SomHeavyData.ALWAYS_STAGGERS
+				tiles = SomHeavyData.knockback_tiles(heavy)
+				stop = SomHeavyData.hitstop_ticks(heavy)
 			damage_enemy(m, physical_damage(atk, float(e["def"]), mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop)
 			hits += 1
 	swing_landed.emit(id, hits)
@@ -864,7 +950,15 @@ func _land(id: String, n: Node2D, mult: float, step := -1) -> int:
 
 ## Bondgenoot slaat (volle meter; som_ally.gd heeft hem al naar de vijand gedraaid).
 func ally_attack(a: Node2D, _enemy: Node) -> int:
-	return chain_swing(a.hero_id, a, 1.0, SomChainData.ALLY_WINDOW_EXTRA_TICKS)
+	var hid: String = a.hero_id
+	if Settings.action_battles() and int(chain_of(hid)["last"]) == SomChainData.STEP_FINISHER \
+			and int(chain_of(hid)["next"]) == 0 and not _ai_heavy.has(hid):
+		# na de finisher laadt de AI de volgende slag op (SomHeavyData.ALLY_LEVEL); keten markeren als gebruikt
+		chains.erase(hid)
+		_ai_heavy[hid] = SomHeavyData.ALLY_LEVEL
+		heavy_hold[hid] = 0
+		return 0
+	return chain_swing(hid, a, 1.0, SomChainData.ALLY_WINDOW_EXTRA_TICKS)
 
 
 func center_of(m: Node) -> Vector2:
@@ -1311,6 +1405,8 @@ func _clear_transient_combat() -> void:
 	_dodge_cd_ticks.clear()
 	_dodge_dir.clear()
 	chain_reset("*")
+	heavy_hold.clear()
+	_ai_heavy.clear()
 
 
 func _tick_zones() -> void:
@@ -1435,8 +1531,8 @@ func _dodge(id: String) -> void:
 
 
 func _analog_speed() -> float:
-	var s := SomData.MOVE_SPEED
-	if touch and touch.run_on() and combat_stamina.can_sprint(active_id):
+	var s := SomData.MOVE_SPEED * heavy_move_mult(active_id)
+	if touch and touch.run_on() and combat_stamina.can_sprint(active_id) and not heavy_charging(active_id):
 		return s * 1.5
 	return s
 
@@ -1477,6 +1573,7 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 	_dodge_roll_ticks[id] = SomData.DODGE_DURATION_TICKS
 	_dodge_cd_ticks[id] = SomData.DODGE_COOLDOWN_TICKS
 	chain_reset(id)            # dodge annuleert de aanvalsketen van deze actor
+	heavy_cancel(id)           # en het opladen (geen zware slag)
 	iframes[id] = float(SomData.DODGE_IFRAME_TICKS) * TICK_DT
 	if id == active_id and room != null and room.has_method("start_invuln"):
 		room.start_invuln(float(SomData.DODGE_IFRAME_TICKS) * TICK_DT)
@@ -2176,6 +2273,8 @@ func coop_poll_local_input() -> Dictionary:
 	var buttons := 0
 	if Input.is_action_just_pressed("interact") and not _attack_suppressed():
 		buttons |= Codec.BTN_ATTACK
+	if Input.is_action_pressed("interact"):
+		buttons |= Codec.BTN_ATTACK_HELD
 	if Input.is_action_just_pressed(RING_ACTION):
 		buttons |= Codec.BTN_RING
 	if Input.is_action_just_pressed(DODGE_ACTION):
@@ -2222,7 +2321,7 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 			stick = Vector2.ZERO
 		var slow := _zone_slow_mult_for_id(hid) if hid != "" else 1.0
 		if stick.length_squared() > 0.01:
-			body.position += dir * SomData.MOVE_SPEED * slow * dt
+			body.position += dir * SomData.MOVE_SPEED * slow * heavy_move_mult(hid) * dt
 		if body == player:
 			body.facing = SomMove.facing_for(dir, body.facing)
 	var lock_i := int(inp.get("lock_idx", -1))
@@ -2239,6 +2338,11 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 		if is_alive(hid):
 			chain_swing(hid, body, charge_mult(charge if slot == coop_local_slot else 1.0))
 			_coop_attack_cd[slot] = 0.35
+			if Settings.action_battles():
+				heavy_hold[hid] = 0          # indrukken start de vasthoud-teller (SomHeavyData)
+	var hid_h := str(_coop_slots.get(slot, ""))
+	if hid_h != "":
+		heavy_tick(hid_h, bool(buttons & Codec.BTN_ATTACK_HELD), body, 1.0)
 	if buttons & Codec.BTN_DODGE:
 		var hid2 := str(_coop_slots.get(slot, ""))
 		if hid2 != "":

@@ -152,6 +152,7 @@ func _move_to(target: Vector2, delta: float) -> void:
 		_frame()
 		return
 	var speed := SomData.ALLY_SPEED * clampf(d.length() / 24.0, 0.4, 1.0)
+	speed *= arena.heavy_move_mult(hero_id)       # opladen (zware slag) = langzamer
 	velocity = d.normalized() * speed
 	var before := position
 	move_and_slide()
