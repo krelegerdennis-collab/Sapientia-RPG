@@ -1321,9 +1321,9 @@ func _equipment_save_tests() -> void:
 	_write_json(path, bad)
 	ok = GameState.load_game(path)
 	k = GameState.party[0] if ok else {}
-	check("kapotte uitrusting in de save: lege vakken, ongeldige stukken in de tas, basis-standaard",
+	check("kapotte uitrusting in de save: lege vakken, echte stukken in de tas, onbekende ids weg, basis-standaard",
 			ok and k["equip"] == Equipment.empty_equip() and GameState.item_count("eiken_staf") == 1
-			and GameState.item_count("leren_kap") == 1 and GameState.item_count("bestaat_niet") == 1
+			and GameState.item_count("leren_kap") == 1 and GameState.item_count("bestaat_niet") == 0
 			and k["base"]["def"] == 9 and k["base"]["atk"] == 14 and k["atk"] == 14)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	GameState.party = keep_party
