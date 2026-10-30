@@ -148,7 +148,7 @@ func setup(p_room: Node) -> void:
 		var sheet := str(SomData.ATTACK_ANIMS.get(id, {}).get("sheet", ""))
 		if sheet != "" and ResourceLoader.exists(sheet):
 			attack_texs[id] = load(sheet)
-		_laad_map_cast(id)
+		_laad_held_cast(id)
 	# leider-behoud: de held die je met SWAP koos (GameState.leader_id), terugval Dax bij KO / niet in de party
 	active_id = GameState.active_leader()
 	if member(active_id).is_empty():
@@ -257,7 +257,8 @@ func _laad_sheet(id: String) -> void:
 		sheets[id] = load(path)
 
 
-func _laad_map_cast(id: String) -> void:
+## Kaart-cast (+ fx) voor een held; setup() en join_party_hero() — geen load() tijdens cast.
+func _laad_held_cast(id: String) -> void:
 	if map_cast_texs.has(id) or not SomData.MAP_CAST.has(id):
 		return
 	var mc: Dictionary = SomData.MAP_CAST[id]
@@ -269,6 +270,24 @@ func _laad_map_cast(id: String) -> void:
 		"sheet": load(sheet_path),
 		"fx": load(fx_path) if fx_path != "" and ResourceLoader.exists(fx_path) else null,
 	}
+
+
+## Held sluit aan terwijl deze arena al draait (rekruut, story join): cast-sheets + bondgenoot-body.
+func join_party_hero(id: String) -> void:
+	if room == null or id == "" or not GameState.has_member(id):
+		return
+	_laad_held_cast(id)
+	if coop_mode or not allies_enabled or id == active_id or ally_of(id) != null:
+		return
+	if not GameState.party.any(func(h): return str(h.get("id", "")) == id):
+		return
+	var objects: Node = room.get_node_or_null("Objects")
+	if objects == null:
+		return
+	var a: CharacterBody2D = SomAlly.new()
+	objects.add_child(a)
+	a.setup(self, id, allies.size())
+	allies.append(a)
 
 
 func _apply_player_sheet() -> void:
@@ -1641,6 +1660,7 @@ func _clear_coop_avatars() -> void:
 
 
 func _ensure_coop_avatar(slot: int, hero_id: String) -> void:
+	_laad_held_cast(hero_id)
 	if _coop_avatars.has(slot):
 		var existing: CoopAvatar = _coop_avatars[slot] as CoopAvatar
 		if is_instance_valid(existing):
