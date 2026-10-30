@@ -113,3 +113,8 @@ assets/sprites/binnen/keukenkast.png                   24x32   keukenkast (huis_
 assets/sprites/binnen/doorframe_32.png                 32x32   binnendeur frame (huis_wilgendal ART-interieur)   [KLAAR]
 assets/sprites/binnen/slaapkamer_kast_PLACEHOLDER.png  24x32   slaapkamerkast Dax/Opa (huis_wilgendal)   [KLAAR: wardrobe in huis_props]
 # Action Combat T6: root-icoon om de voeten — PLACEHOLDER in code (TelegraphLayer._draw_root_icon), geen bestand.
+# T21 item-audit: Berggrot WM1-beloningen (magenta hoekjes, geen definitieve art).
+assets/ui/icons/items/icons16/bergnerfstaf.png   16x16   Mountain Vein Staff item-icoon (lijst/kist)   [PH]
+assets/ui/icons/items/icons32/bergnerfstaf.png   32x32   Mountain Vein Staff item-icoon (detail)   [PH]
+assets/ui/icons/items/icons16/adersteen.png   16x16   Veinstone item-icoon (lijst/kist)   [PH]
+assets/ui/icons/items/icons32/adersteen.png   32x32   Veinstone item-icoon (detail)   [PH]
