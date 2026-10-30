@@ -12,6 +12,9 @@ const MAP := "res://assets/tilesets/som/"
 
 static var _cfg: Dictionary = {}
 static var _geladen := false
+## Cache van stijl() per gebied: stijl() zit op het hot path (beloopbaar() per tegel) en ontbreekt()
+## doet anders telkens ResourceLoader.exists() voor alle tilesets. zet_config() leegt de cache.
+static var _stijl_cache: Dictionary = {}
 
 
 static func config() -> Dictionary:
@@ -29,6 +32,7 @@ static func config() -> Dictionary:
 static func zet_config(cfg: Dictionary) -> void:
 	_cfg = cfg
 	_geladen = not cfg.is_empty()
+	_stijl_cache.clear()
 
 
 static func gebieden() -> Dictionary:
@@ -86,9 +90,13 @@ static func gevraagd(gebied: String) -> String:
 
 ## Echte stijl: "som" alleen als het gebied het vraagt én alles er is; anders het hele gebied "oud".
 static func stijl(gebied: String) -> String:
-	if gevraagd(gebied) != SOM:
-		return OUD
-	return SOM if ontbreekt(gebied).is_empty() else OUD
+	if _stijl_cache.has(gebied):
+		return _stijl_cache[gebied]
+	var s := OUD
+	if gevraagd(gebied) == SOM and ontbreekt(gebied).is_empty():
+		s = SOM
+	_stijl_cache[gebied] = s
+	return s
 
 
 static func stijl_van_map(pad: String) -> String:
