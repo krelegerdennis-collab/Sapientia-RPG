@@ -36,10 +36,15 @@ func fade_in(duration := 0.3) -> void:
 	await _fade_to(Color(0, 0, 0, 0), duration)
 
 
-func _fade_to(target: Color, duration: float) -> void:
+## Start de fade en geeft het `finished`-signaal terug (geen coroutine, geen Tween).
+## Een Signal verwijst zwak naar de tween; wacht de aanroeper op de tween zelf, dan houden
+## coroutine en tween elkaar vast. Sluit het spel af terwijl de fade nog loopt (bv. de
+## fade_in van het titelscherm in een snelle testsuite), dan gaf dat
+## "ObjectDB instances leaked at exit".
+func _fade_to(target: Color, duration: float) -> Signal:
 	var tween := create_tween()
 	tween.tween_property(_rect, "color", target, duration)
-	await tween.finished
+	return tween.finished
 
 
 func flash(color: Color, duration := 0.6) -> void:

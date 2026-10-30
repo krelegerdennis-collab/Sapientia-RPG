@@ -49,6 +49,8 @@ const BUS_SFX := "SFX"
 const SFX_POOL_SIZE := 16
 const DEFAULT_FADE := 1.5
 const SILENT_DB := -80.0
+## Maximale wachttijd bij afsluiten tot de audiothread gestopte streams heeft opgeruimd.
+const EXIT_MIX_WAIT_MS := 400
 const MIN_LINEAR := 0.0001
 
 const UI_SFX_CLICK := "menu_click"
@@ -708,6 +710,36 @@ func _on_music_player_finished(player: AudioStreamPlayer) -> void:
 	var finished_track := _current_track
 	_current_track = ""
 	music_finished.emit(finished_track)
+
+
+## Afsluiten (autoload: alleen bij quit). Een stream die nog speelt staat in de afspeellijst
+## van de AudioServer; die ruimt hem pas op na een mix-stap van de audiothread. Na quit() komt
+## die stap vaak niet meer -> "ObjectDB instances leaked" / "resources still in use" (bv. de
+## titelmuziek in snelle testsuites). Daarom: alles stoppen en kort wachten op twee mix-stappen.
+## De spelers (kinderen) verlaten de boom eerder en stoppen dan zelf al, dus `playing` is hier
+## al false; "heeft een stream gehad" is de enige betrouwbare aanwijzing.
+func _exit_tree() -> void:
+	_kill_music_tween()
+	var had_stream := false
+	for player: AudioStreamPlayer in _music_players + _sfx_pool:
+		if player.stream != null:
+			had_stream = true
+			player.stop()
+	if had_stream:
+		_wacht_op_mix(2, EXIT_MIX_WAIT_MS)
+
+
+## Blokkeert tot de audiothread `stappen` keer gemixt heeft (of `max_ms` voorbij is).
+## get_time_since_last_mix() valt terug naar ~0 bij elke mix-stap.
+func _wacht_op_mix(stappen: int, max_ms: int) -> void:
+	var einde := Time.get_ticks_msec() + max_ms
+	var vorige := AudioServer.get_time_since_last_mix()
+	while stappen > 0 and Time.get_ticks_msec() < einde:
+		OS.delay_msec(2)
+		var nu := AudioServer.get_time_since_last_mix()
+		if nu < vorige:
+			stappen -= 1
+		vorige = nu
 
 
 func _process(_delta: float) -> void:
