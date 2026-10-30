@@ -482,6 +482,11 @@ const EVENTS := {
 		]},
 		{"do": "default"},
 	],
+	# WM1 T2: struik-opening op het Wortelpad -> zijkamer de Beek (scripts/data/woud_beek.gd).
+	"woud_beek": [{"do": [
+		["say", "", ["The bushes part. You hear running water."]],
+		["map", "res://scenes/maps/woud_beek.tscn", "pad", ""],
+	]}],
 	"woud_ingang": [
 		{"if": {"not_flags": ["quest_noor"]}, "do": [
 			["say", "", ["The Dark Wood. Between the black trunks hangs mist that flickers like a broken screen.", "You don't go in there without a reason."]],
