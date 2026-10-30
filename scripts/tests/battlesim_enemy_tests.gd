@@ -123,7 +123,8 @@ func _summary_tests() -> void:
 	check("zelfde seed: per-vijand-CSV gelijk", c1 == c2)
 	check("andere seed: MD anders", md3 != "" and md3 != md1)
 	check("elke vijand uit de groepen staat erin", _all_enemies_listed(r1.enemy_stats))
-	check("MD noemt seed en aantal gevechten", md1.contains("seed: `11`") and md1.contains("fights: %d" % r1.rows.size()))
+	check("MD noemt seed en aantal gevechten", md1.contains("seed: `11`")
+			and md1.contains("fights (regular pool): %d" % r1.rows.size()))
 	for r in [r1, r2, r3]:
 		r.queue_free()
 
