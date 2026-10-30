@@ -4,6 +4,11 @@ extends Node
 ##   xvfb-run -a godot --rendering-driver opengl3 --path . -- --battlesim --party=dennis:5,noor:5
 ##            --enemy=all --runs=100 --seed=1 --policy=simpel [--tier=N] [--items=drankje:3,kruid:2] [--out=pad.csv]
 ## Rapport: python3 tools/battlesim/rapport.py [csv ...]
+## WM1-overzicht (bv. 1000 gevechten verdeeld over alle WM1-groepen, winrate per vijand):
+##   ... -- --battlesim --party=dennis:5,noor:5 --enemy=all --total=1000 --seed=7 --out=pad.csv
+## --total=N verdeelt precies N gevechten om de beurt over de groepen (gaat boven --runs). Alleen met
+## --total of --summary komen naast de CSV ook <pad>_per_enemy.csv en <pad>_per_enemy.md (winrate per vijand en per groep);
+## met --summary=pad (zonder extensie) kies je die bestandsnaam zelf.
 ##
 ## Elk gevecht is de echte scenes/battle/battle.tscn. GameState.prepare_battle zet de vijanden
 ## (hetzelfde deel van start_battle dat het spel gebruikt); alleen het menu, wachten en het einde
@@ -16,10 +21,11 @@ const POLICIES := {
 	"simpel": "res://tools/battlesim/policy_simpel.gd",
 	"standaard": "res://tools/battlesim/sim_battle.gd",
 }
-const RUN_ARGS := ["--party=", "--enemy=", "--runs=", "--policy="]
+const RUN_ARGS := ["--party=", "--enemy=", "--runs=", "--policy=", "--total="]
 const SIM_DIR := "user://sim"
 const CSV_HEADER := ["seed", "policy", "party", "group_id", "enemies", "tier", "run", "result", "win",
 	"turns", "hero_actions", "hp_left", "hp_max", "hp_left_pct", "kos", "mp_used", "items_used", "items_detail"]
+const ENEMY_HEADER := ["enemy", "fights", "wins", "losses", "winrate_pct", "avg_turns", "avg_hp_left_pct", "groups"]
 
 var party_spec := "dennis:5"
 var enemy_spec := "all"
@@ -29,12 +35,17 @@ var policy := "simpel"
 var tier := 0
 var items_spec := ""
 var out_path := ""
+var total := 0                  # > 0: precies zoveel gevechten, om de beurt over de groepen verdeeld
+var summary_path := ""          # zonder extensie; leeg = <csv-pad zonder .csv>_per_enemy
+var total_given := false        # --total meegegeven (dan moet het >= 1 zijn)
 var standalone := true          # false = aangeroepen door een test (geen quit)
 var quiet := false
 
 var errors: Array[String] = []
 var rows: Array[Dictionary] = []
 var written_path := ""
+var written_summary := ""
+var enemy_stats: Array[Dictionary] = []   # per vijand, gesorteerd op winrate (laagste eerst)
 var _battle_scene: PackedScene
 var _policy_script: Script
 var _holder: Node
@@ -75,6 +86,11 @@ func configure(args: PackedStringArray) -> void:
 			items_spec = v
 		elif arg.begins_with("--out="):
 			out_path = v
+		elif arg.begins_with("--total="):
+			total = int(v)
+			total_given = true
+		elif arg.begins_with("--summary="):
+			summary_path = v
 
 
 func _main() -> void:
@@ -89,6 +105,8 @@ func _main() -> void:
 			ProjectSettings.globalize_path(written_path), rows.size(), base_seed, policy, (Time.get_ticks_msec() - t0) / 1000.0])
 	if not quiet:
 		print("\n".join(csv.split("\n").slice(0, 6)))
+	if written_summary != "":
+		print("BATTLESIM per enemy: %s(.csv|.md)" % ProjectSettings.globalize_path(written_summary))
 	print("RESULT OK (battlesim)")
 	get_tree().quit(0)
 
@@ -188,6 +206,8 @@ func run() -> String:
 	var bag := parse_items(items_spec)
 	if runs < 1:
 		errors.append("--runs must be >= 1")
+	if total_given and total <= 0:
+		errors.append("--total must be >= 1")
 	if not POLICIES.has(policy):
 		errors.append("unknown policy '%s' (known: %s)" % [policy, ", ".join(POLICIES.keys())])
 	if not errors.is_empty():
@@ -200,8 +220,11 @@ func run() -> String:
 	var snap := _build_party(party, bag)
 	var party_label := ";".join(party.map(func(p): return "%s:%d" % [p[0], p[1]]))
 	var n := 0
-	for g in groups:
-		for i in runs:
+	for g_idx in groups.size():
+		var g: Dictionary = groups[g_idx]
+		# --total: groep k krijgt de gevechten k, k+G, k+2G, ... (samen precies total)
+		var count := runs if total <= 0 else int(total / groups.size()) + (1 if g_idx < total % groups.size() else 0)
+		for i in count:
 			_restore(snap)
 			seed(hash([base_seed, str(g["id"]), i]))
 			var r := await _fight(g)
@@ -216,6 +239,11 @@ func run() -> String:
 	var csv := to_csv(rows)
 	written_path = out_path if out_path != "" else "%s/battlesim_%s_s%d.csv" % [SIM_DIR, policy, base_seed]
 	_write(written_path, csv)
+	enemy_stats = per_enemy(rows)
+	if total_given or summary_path != "":   # extra bestanden alleen op verzoek
+		written_summary = summary_path if summary_path != "" else written_path.trim_suffix(".csv") + "_per_enemy"
+		_write(written_summary + ".csv", to_csv(enemy_stats, ENEMY_HEADER))
+		_write(written_summary + ".md", to_markdown(enemy_stats, rows, party_label))
 	return csv
 
 
@@ -292,12 +320,74 @@ func _fight(g: Dictionary) -> Dictionary:
 	return r
 
 
+# =============================================================== per vijand
+## Winrate per vijand-id: een gevecht telt één keer voor elke vijand die in de groep zit
+## (dubbele vijanden in een groep tellen niet dubbel). Gesorteerd: laagste winrate eerst, dan id.
+static func per_enemy(list: Array) -> Array[Dictionary]:
+	var acc := {}
+	for r in list:
+		var seen := {}
+		for e in str(r["enemies"]).split("+", false):
+			if seen.has(e):
+				continue
+			seen[e] = true
+			if not acc.has(e):
+				acc[e] = {"enemy": e, "fights": 0, "wins": 0, "turns": 0, "hp": 0.0, "groups": {}}
+			var a: Dictionary = acc[e]
+			a["fights"] += 1
+			a["wins"] += int(r["win"])
+			a["turns"] += int(r["turns"])
+			a["hp"] += float(r["hp_left_pct"])
+			a["groups"][str(r["group_id"])] = true
+	var out: Array[Dictionary] = []
+	for e in acc:
+		var a: Dictionary = acc[e]
+		var f := float(a["fights"])
+		var gids: Array = a["groups"].keys()
+		gids.sort()
+		out.append({"enemy": e, "fights": a["fights"], "wins": a["wins"], "losses": a["fights"] - a["wins"],
+				"winrate_pct": snappedf(100.0 * a["wins"] / f, 0.1), "avg_turns": snappedf(a["turns"] / f, 0.1),
+				"avg_hp_left_pct": snappedf(a["hp"] / f, 0.1), "groups": ";".join(gids)})
+	out.sort_custom(func(x, y): return x["winrate_pct"] < y["winrate_pct"] \
+			or (x["winrate_pct"] == y["winrate_pct"] and str(x["enemy"]) < str(y["enemy"])))
+	return out
+
+
+## Markdown-rapport: per vijand en per groep (zelfde getallen als de CSV's; geen tijdstempel,
+## zodat dezelfde seed byte-voor-byte hetzelfde bestand geeft).
+func to_markdown(stats: Array, list: Array, party_label: String) -> String:
+	var wins := 0
+	for r in list:
+		wins += int(r["win"])
+	var md: Array[String] = ["# Battle simulator — winrate per enemy", "",
+		"- seed: `%d`, policy: `%s`, party: `%s`, tier: %d" % [base_seed, policy, party_label, tier],
+		"- enemy groups: `%s`, fights: %d, total winrate: %.1f%%" % [enemy_spec, list.size(),
+				100.0 * wins / float(maxi(1, list.size()))], "",
+		"## Per enemy", "", "| enemy | fights | wins | winrate | avg turns | avg HP left |", "|---|---:|---:|---:|---:|---:|"]
+	for s in stats:
+		md.append("| %s | %d | %d | %.1f%% | %.1f | %.1f%% |" % [s["enemy"], s["fights"], s["wins"],
+				s["winrate_pct"], s["avg_turns"], s["avg_hp_left_pct"]])
+	md += ["", "## Per group", "", "| group | enemies | fights | winrate |", "|---|---|---:|---:|"]
+	var order: Array = []
+	var g := {}
+	for r in list:
+		var id := str(r["group_id"])
+		if not g.has(id):
+			g[id] = [str(r["enemies"]), 0, 0]
+			order.append(id)
+		g[id][1] += 1
+		g[id][2] += int(r["win"])
+	for id in order:
+		md.append("| %s | %s | %d | %.1f%% |" % [id, g[id][0], g[id][1], 100.0 * g[id][2] / float(g[id][1])])
+	return "\n".join(md) + "\n"
+
+
 # =============================================================== CSV
-static func to_csv(list: Array) -> String:
-	var lines: Array[String] = [",".join(CSV_HEADER)]
+static func to_csv(list: Array, header: Array = CSV_HEADER) -> String:
+	var lines: Array[String] = [",".join(header)]
 	for r in list:
 		var cells: Array[String] = []
-		for col in CSV_HEADER:
+		for col in header:
 			cells.append(csv_cell(r.get(col, "")))
 		lines.append(",".join(cells))
 	return "\n".join(lines) + "\n"
