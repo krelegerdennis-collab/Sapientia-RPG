@@ -18,6 +18,8 @@ const BTN_ATTACK := 1
 const BTN_RING := 2
 const BTN_LOCK_TAP := 4
 const BTN_DODGE := 8
+## Aanvalsknop wordt vastgehouden (zware slag opladen, SomHeavyData).
+const BTN_ATTACK_HELD := 16
 
 
 static func pack_wire_input(slot: int, stick: Vector2, buttons: int, lock_idx: int) -> PackedByteArray:

@@ -285,6 +285,7 @@ func _action(id: String) -> void:
 	var t_tweede := -1.0
 	var start := Time.get_ticks_msec()
 	var cd_ok := true
+	var ketent := false      # aanvalsketen (Dennis 2026-10-30 16:03): AI ketent net zo snel als een speler
 	for k in 600:
 		await get_tree().physics_frame
 		if al.attacks > n0 and t_eerst < 0.0:
@@ -292,10 +293,12 @@ func _action(id: String) -> void:
 			cd_ok = al.charge < 1.0
 		if al.attacks > n0 + 1:
 			t_tweede = (Time.get_ticks_msec() - start) / 1000.0
+			ketent = int(a.chain_of(id)["last"]) >= 1     # 2e slag = hit2 binnen het ketenvenster
 			break
 	check("%s: AI valt zelf aan (staat %s, %d aanvallen)" % [id, al.state, al.attacks - n0], t_eerst >= 0.0)
-	check("%s: cooldown: meter leeg na de slag, volgende pas na >= %.1f s (%.2f s)" % [id, SomData.CHARGE_TIME, t_tweede - t_eerst],
-			cd_ok and t_tweede > 0.0 and t_tweede - t_eerst >= SomData.CHARGE_TIME * 0.9)
+	# >= CHARGE_TIME geldt voor een nieuwe slag; een ketenslag (hit2/finisher) mag sneller, zoals bij een speler.
+	check("%s: cooldown: meter leeg na de slag, volgende pas na >= %.1f s of als ketenslag (%.2f s, keten %s)" % [id, SomData.CHARGE_TIME, t_tweede - t_eerst, str(ketent)],
+			cd_ok and t_tweede > 0.0 and (t_tweede - t_eerst >= SomData.CHARGE_TIME * 0.9 or ketent))
 	await _shot("action_%s_ai" % id)
 	a.swing_landed.disconnect(cb)
 	# 3) zelf besturen (SWITCH) en slaan

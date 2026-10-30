@@ -31,7 +31,8 @@ jobs:
                 muziektest, sessielogtest, sessielogcoretest, locktest, swinglocktest, dodgetest, chaintest, nettest, netsynctest, coope2etest,
                 partytest, savetest, saveroundtriptest, musictest, grotlayouttest, held24test,
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
-                koopmantest, testmodustest, telegraphtest, roottest]
+                koopmantest, testmodustest, telegraphtest, roottest,
+                formuletest, battlesimenemytest, combatbugstest]
     steps:
       - uses: actions/checkout@v4
 

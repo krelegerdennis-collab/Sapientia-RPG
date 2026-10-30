@@ -1087,6 +1087,8 @@ func _choose_item(hero: Dictionary):
 		var t = null
 		if str(GameData.ITEMS[ids[k]].get("target", "ally")) == "enemy":
 			t = await _select_enemy()      # Codex: Leeg Boek op een vijand
+		elif float(GameData.ITEMS[ids[k]].get("revive", 0.0)) > 0.0:
+			t = await _select_ko()         # Feniksveer: een KO-held aanwijzen (H3)
 		else:
 			t = await _select_ally()
 		if t != null:
@@ -1368,6 +1370,18 @@ func _execute(a: Dictionary) -> void:
 				await _wait(MESSAGE_TIME)
 				_hero_rest(actor)
 				return
+			# H3: eerst bepalen of het item effect heeft; pas dan afschrijven
+			var dood: Dictionary = {}
+			if float(it.get("revive", 0.0)) > 0.0:
+				dood = _ko_target(a["target"])
+			var cure_t: Dictionary = {}
+			if bool(it.get("cure", false)):
+				cure_t = _valid_ally(a["target"])
+			if (float(it.get("revive", 0.0)) > 0.0 and dood.is_empty()) \
+					or (bool(it.get("cure", false)) and not _has_curable(cure_t)):
+				show_message(PartyActions.MSG_NO_EFFECT)
+				await _wait(MESSAGE_TIME)
+				return
 			GameState.inventory[id] -= 1
 			show_message("%s uses %s!" % [actor["name"], it["name"]])
 			await _hero_wind_up(actor, false)
@@ -1375,24 +1389,15 @@ func _execute(a: Dictionary) -> void:
 				await codex.capture(actor, a["target"])   # Codex: Leeg Boek
 				_hero_rest(actor)
 				return
-			if float(it.get("revive", 0.0)) > 0.0:     # Feniksveer (Koopman)
-				var dood = a["target"] if a["target"] != null and int(a["target"]["s"]["hp"]) <= 0 else null
-				if dood == null:
-					for h in heroes:
-						if int(h["s"]["hp"]) <= 0:
-							dood = h
-							break
-				if dood == null:
-					show_message(PartyActions.MSG_NO_EFFECT)
-				else:
-					var back := PartyActions.revive(dood["s"], float(it["revive"]))
-					show_message("%s gets back up! (%d HP)" % [dood["name"], back])
-					_refresh_party()
+			if not dood.is_empty():                  # Feniksveer (Koopman)
+				var back := PartyActions.revive(dood["s"], float(it["revive"]))
+				_revive_combatant(dood, back)
+				show_message("%s gets back up! (%d HP)" % [dood["name"], back])
 				await _wait(MESSAGE_TIME)
 				_hero_rest(actor)
 				return
-			if bool(it.get("cure", false)):          # Tegengif (Koopman): gif en binden weg
-				var t := _valid_ally(a["target"])
+			if not cure_t.is_empty():                # Tegengif (Koopman): gif en binden weg
+				var t := cure_t
 				if t.has("dots"):
 					t["dots"] = (t["dots"] as Array).filter(func(d): return not bool(d.get("gif", false)))
 				if str(t.get("skip_reden", "")) == Archief2Vijanden.SKIP_REDEN_BIND:
@@ -1615,24 +1620,45 @@ func _tick_ailments(c: Dictionary) -> void:
 
 
 func _revive(t, amount: int) -> void:
-	var ally: Dictionary = {}
-	if t is Dictionary and int((t as Dictionary)["s"]["hp"]) <= 0 and in_battle(t):
-		ally = t
-	else:
-		for h in heroes:
-			if int(h["s"]["hp"]) <= 0:
-				ally = h
-				break
+	var ally := _ko_target(t)
 	if ally.is_empty():
 		show_message("That has no effect right now.")
 		await _wait(MESSAGE_TIME)
 		return
-	ally["s"]["hp"] = mini(maxi(1, amount), int(ally["s"]["max_hp"]))
-	if ally.get("node") != null:
-		ally["node"].set_ko(false)
-	_refresh_party()
+	_revive_combatant(ally, amount)
 	show_message("%s gets back up." % ally["name"])
 	await _wait(MESSAGE_TIME)
+
+
+## Wie staat er op? Het gekozen doel als dat KO is en nog meedoet, anders de eerste KO-held.
+## Leeg = niemand is KO. Gedeeld door de revive-spreuk en de Feniksveer.
+func _ko_target(t) -> Dictionary:
+	if t is Dictionary and int((t as Dictionary)["s"]["hp"]) <= 0 and in_battle(t):
+		return t
+	for h in heroes:
+		if int(h["s"]["hp"]) <= 0:
+			return h
+	return {}
+
+
+## Gedeelde revive (spreuk + item): HP terug, KO-pose weg (H1) en reported_ko gewist,
+## zodat een volgende KO weer gemeld wordt (H2).
+func _revive_combatant(c: Dictionary, hp: int) -> void:
+	c["s"]["hp"] = mini(maxi(1, hp), int(c["s"]["max_hp"]))
+	c.erase("reported_ko")
+	if c.get("node") != null:
+		c["node"].set_ko(false)
+	_refresh_party()
+
+
+## Tegengif: valt er iets te genezen (gif-DoT of gebonden door een Rankje)?
+func _has_curable(t: Dictionary) -> bool:
+	if t.is_empty():
+		return false
+	for d in t.get("dots", []):
+		if bool(d.get("gif", false)):
+			return true
+	return str(t.get("skip_reden", "")) == Archief2Vijanden.SKIP_REDEN_BIND and int(t.get("skip", 0)) > 0
 
 
 ## v0.19: doet deze combatant nog mee? (een weggewisselde bondgenoot niet meer)

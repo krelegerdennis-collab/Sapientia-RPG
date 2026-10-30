@@ -539,6 +539,7 @@ func _ready() -> void:
 	# Wortelgreep-status (Combat T6): of  godot -- --roottest  (scripts/tests/root_tests.gd).
 	# Actieve dodge + stamina (Combat D5): of  godot -- --dodgetest  (scripts/tests/dodge_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
+	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -614,6 +615,7 @@ func _ready() -> void:
 			["--roottest", "res://scripts/tests/root_tests.gd", "RootTest", "roottest"],
 			["--dodgetest", "res://scripts/tests/dodge_tests.gd", "DodgeTest", "dodgetest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
+			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--formuletest", "res://scripts/tests/formule_tests.gd", "FormuleTest", "formuletest"],
@@ -621,6 +623,7 @@ func _ready() -> void:
 			["--wm1balanstest", "res://scripts/tests/wm1_balans_tests.gd", "Wm1BalansTest", "wm1balanstest"],
 			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
 			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
+			["--combatbugstest", "res://scripts/tests/combat_bugs_tests.gd", "CombatBugsTest", "combatbugstest"],
 			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
 			["--wm1budgettest", "res://scripts/tests/wm1_budget_tests.gd", "Wm1BudgetTest", "wm1budgettest"],
 			["--huisdrawtest", "res://scripts/tests/huis_draw_calls_tests.gd", "HuisDrawCallsTest", "huisdrawtest"],
