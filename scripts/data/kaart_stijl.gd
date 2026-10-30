@@ -15,6 +15,9 @@ static var _geladen := false
 ## Cache van stijl() per gebied: stijl() zit op het hot path (beloopbaar() per tegel) en ontbreekt()
 ## doet anders telkens ResourceLoader.exists() voor alle tilesets. zet_config() leegt de cache.
 static var _stijl_cache: Dictionary = {}
+## Cache van gebied_van_map() op de map-bestandsnaam. som()/is_som() roept dit per beloopbaar()-tegel
+## aan; zonder cache loopt elke aanroep opnieuw over gebieden[].
+static var _gebied_cache: Dictionary = {}
 
 
 static func config() -> Dictionary:
@@ -33,6 +36,7 @@ static func zet_config(cfg: Dictionary) -> void:
 	_cfg = cfg
 	_geladen = not cfg.is_empty()
 	_stijl_cache.clear()
+	_gebied_cache.clear()
 
 
 static func gebieden() -> Dictionary:
@@ -57,10 +61,15 @@ static func npc_sheet_pad(pad: String) -> String:
 ## Gebied van een map (bestandsnaam zonder .tscn), of "" als de map bij geen gebied hoort.
 static func gebied_van_map(pad: String) -> String:
 	var naam := pad.get_file().get_basename()
+	if _gebied_cache.has(naam):
+		return _gebied_cache[naam]
+	var gevonden := ""
 	for id in gebieden():
 		if (gebieden()[id].get("maps", []) as Array).has(naam):
-			return str(id)
-	return ""
+			gevonden = str(id)
+			break
+	_gebied_cache[naam] = gevonden
+	return gevonden
 
 
 static func tileset_pad(gebied: String, set_naam: String) -> String:

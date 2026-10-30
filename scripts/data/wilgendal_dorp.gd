@@ -453,9 +453,22 @@ static func som() -> bool:
 	return KaartStijl.is_som(DORP)
 
 
-## Alleen voor tests: huizen.json opnieuw lezen.
+## Cache van beloopbaar() (90x56). BFS/tests roepen dit per tegel aan; zonder grid is elke
+## aanroep O(props+panden). Ongeldig bij stijlwissel (som) of poortstand. som_herladen() leegt hem.
+static var _beloop: PackedByteArray = PackedByteArray()
+static var _beloop_som := false
+static var _beloop_poort_hash := 0
+
+
+static func _leeg_beloop() -> void:
+	_beloop = PackedByteArray()
+	_beloop_poort_hash = 0
+
+
+## Alleen voor tests: huizen.json opnieuw lezen en de beloop-cache legen.
 static func som_herladen() -> void:
 	_som_huizen = null
+	_leeg_beloop()
 
 
 static func som_huizen() -> Dictionary:
@@ -563,22 +576,59 @@ static func grond_ok() -> bool:
 	return true
 
 
-static func beloopbaar(t: Vector2i) -> bool:
-	if t.x < 0 or t.y < 0 or t.x >= W or t.y >= H:
-		return false
+static func _poort_hash() -> int:
+	var s := 0
+	for t in poorten_open:
+		if bool(poorten_open[t]):
+			var v: Vector2i = t
+			s = s * 10007 + v.x * 131 + v.y + 1
+	return s
+
+
+static func _zorg_beloop() -> void:
+	var som_nu := som()
+	var ph := _poort_hash()
+	if _beloop.size() == W * H and _beloop_som == som_nu and _beloop_poort_hash == ph:
+		return
+	var props: Array[Rect2i] = []
+	for ruw in PROPS:
+		if hek_prop(ruw) and som_nu:
+			continue
+		props.append(prop_blok(ruw))
+	var panden: Array[Rect2i] = []
+	for ruw in PANDEN:
+		panden.append(pand_blok(ruw))
+	_beloop.resize(W * H)
+	_beloop_som = som_nu
+	_beloop_poort_hash = ph
+	for y in H:
+		for x in W:
+			_beloop[y * W + x] = 1 if _beloopbaar_kern(Vector2i(x, y), props, panden) else 0
+
+
+static func _beloopbaar_kern(t: Vector2i, props: Array[Rect2i], panden: Array[Rect2i]) -> bool:
 	if GROND[t.y][t.x] == "T" or GROND[t.y][t.x] == "W":
 		return false
 	if MOLEN.has_point(t):
 		return false
 	if beek(t):
 		return false
-	if prop_op(t) or hek_blok(t) or boom_op(t):
+	if hek_blok(t) or boom_op(t):
 		return false
-	for ruw in PANDEN:
-		var rij: Dictionary = ruw
-		if pand_blok(rij).has_point(t):
+	for r in props:
+		if r.has_point(t):
+			return false
+	for r in panden:
+		if r.has_point(t):
 			return false
 	return true
+
+
+static func beloopbaar(t: Vector2i) -> bool:
+	if t.x < 0 or t.y < 0 or t.x >= W or t.y >= H:
+		return false
+	_zorg_beloop()
+	return _beloop[t.y * W + t.x] != 0
 
 
 static func bereikbaar(van: Vector2i, naar: Vector2i) -> bool:
