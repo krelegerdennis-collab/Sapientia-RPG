@@ -4,6 +4,12 @@ extends Node
 ##   xvfb-run -a godot --rendering-driver opengl3 --path . -- --battlesim --party=dennis:5,noor:5
 ##            --enemy=all --runs=100 --seed=1 --policy=simpel [--tier=N] [--items=drankje:3,kruid:2] [--out=pad.csv]
 ## Rapport: python3 tools/battlesim/rapport.py [csv ...]
+## WM1-overzicht (1000 gevechten verdeeld over WM1-groepen, winrate per vijand):
+##   ... -- --battlesim --party=dennis:5,noor:5 --enemy=all --total=1000 --seed=7 --out=pad.csv
+## --total=N verdeelt precies N gevechten om de beurt over de (niet-baas) groepen. Baasgroepen uit
+## ENCOUNTER_GROUPS (nu baas_kennis_beest) vallen buiten die pool en worden apart gemeten met het
+## bedoelde scenario (zelfde party als battlesim.gd `golem`: Dax solo Lv 8, Vonkzwaard). Alleen met
+## --total of --summary komen ook <pad>_per_enemy.csv en <pad>_per_enemy.md.
 ##
 ## Elk gevecht is de echte scenes/battle/battle.tscn. GameState.prepare_battle zet de vijanden
 ## (hetzelfde deel van start_battle dat het spel gebruikt); alleen het menu, wachten en het einde
@@ -11,15 +17,21 @@ extends Node
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
+const Equipment := preload("res://scripts/equipment.gd")
+## Zelfde aannames als battlesim.gd scenario `golem` (Golem Hall / kennis_beest baas).
+const GOLEM_BOSS_GEAR := ["vonkzwaard", "kaftschild", "leren_kap", "leren_harnas"]
+const GOLEM_BOSS_INV := {"drankje": 5, "toverwater": 2, "kruid": 2}
+const GOLEM_BOSS_LEVEL := 8
 const BATTLE_SCENE_PATH := "res://scenes/battle/battle.tscn"
 const POLICIES := {
 	"simpel": "res://tools/battlesim/policy_simpel.gd",
 	"standaard": "res://tools/battlesim/sim_battle.gd",
 }
-const RUN_ARGS := ["--party=", "--enemy=", "--runs=", "--policy="]
+const RUN_ARGS := ["--party=", "--enemy=", "--runs=", "--policy=", "--total="]
 const SIM_DIR := "user://sim"
 const CSV_HEADER := ["seed", "policy", "party", "group_id", "enemies", "tier", "run", "result", "win",
 	"turns", "hero_actions", "hp_left", "hp_max", "hp_left_pct", "kos", "mp_used", "items_used", "items_detail"]
+const ENEMY_HEADER := ["enemy", "fights", "wins", "losses", "winrate_pct", "avg_turns", "avg_hp_left_pct", "groups"]
 
 var party_spec := "dennis:5"
 var enemy_spec := "all"
@@ -29,12 +41,18 @@ var policy := "simpel"
 var tier := 0
 var items_spec := ""
 var out_path := ""
+var total := 0                  # > 0: precies zoveel gevechten verdeeld (--total gaat boven --runs)
+var summary_path := ""          # zonder extensie; leeg = <csv-pad zonder .csv>_per_enemy
+var total_given := false
 var standalone := true          # false = aangeroepen door een test (geen quit)
 var quiet := false
 
 var errors: Array[String] = []
 var rows: Array[Dictionary] = []
+var boss_rows: Array[Dictionary] = []   # baasgevechten met bedoeld scenario (niet in per_enemy-pool)
 var written_path := ""
+var written_summary := ""
+var enemy_stats: Array[Dictionary] = []
 var _battle_scene: PackedScene
 var _policy_script: Script
 var _holder: Node
@@ -75,6 +93,11 @@ func configure(args: PackedStringArray) -> void:
 			items_spec = v
 		elif arg.begins_with("--out="):
 			out_path = v
+		elif arg.begins_with("--total="):
+			total = int(v)
+			total_given = true
+		elif arg.begins_with("--summary="):
+			summary_path = v
 
 
 func _main() -> void:
@@ -89,6 +112,8 @@ func _main() -> void:
 			ProjectSettings.globalize_path(written_path), rows.size(), base_seed, policy, (Time.get_ticks_msec() - t0) / 1000.0])
 	if not quiet:
 		print("\n".join(csv.split("\n").slice(0, 6)))
+	if written_summary != "":
+		print("BATTLESIM per enemy: %s(.csv|.md)" % ProjectSettings.globalize_path(written_summary))
 	print("RESULT OK (battlesim)")
 	get_tree().quit(0)
 
@@ -183,11 +208,16 @@ func parse_items(spec: String) -> Dictionary:
 func run() -> String:
 	errors.clear()
 	rows.clear()
+	boss_rows.clear()
+	enemy_stats.clear()
+	written_summary = ""
 	var party := parse_party(party_spec)
 	var groups := parse_groups(enemy_spec)
 	var bag := parse_items(items_spec)
 	if runs < 1:
 		errors.append("--runs must be >= 1")
+	if total_given and total <= 0:
+		errors.append("--total must be >= 1")
 	if not POLICIES.has(policy):
 		errors.append("unknown policy '%s' (known: %s)" % [policy, ", ".join(POLICIES.keys())])
 	if not errors.is_empty():
@@ -199,9 +229,18 @@ func run() -> String:
 	add_child(_holder)
 	var snap := _build_party(party, bag)
 	var party_label := ";".join(party.map(func(p): return "%s:%d" % [p[0], p[1]]))
+	var wm1_overview := enemy_spec.strip_edges() == "all" and (total_given or summary_path != "")
+	var regular: Array = groups
+	var bosses: Array = []
+	if wm1_overview:
+		regular = groups.filter(func(g): return not bool(g.get("boss", false)))
+		bosses = groups.filter(func(g): return bool(g.get("boss", false)))
 	var n := 0
-	for g in groups:
-		for i in runs:
+	var full_n := groups.size()
+	for g_idx in regular.size():
+		var g: Dictionary = regular[g_idx]
+		var count := runs if total <= 0 else _split_total(total, regular.size(), g_idx)
+		for i in count:
 			_restore(snap)
 			seed(hash([base_seed, str(g["id"]), i]))
 			var r := await _fight(g)
@@ -210,27 +249,85 @@ func run() -> String:
 			rows.append(r)
 			n += 1
 			if n % 64 == 0:
-				await get_tree().process_frame     # vrijgegeven gevechten echt opruimen
+				await get_tree().process_frame
+	if wm1_overview and not bosses.is_empty() and total > 0:
+		var boss_snap := _build_golem_boss_snap()
+		var boss_party_label := "dennis:%d (golem scenario)" % GOLEM_BOSS_LEVEL
+		for g in bosses:
+			var orig_idx := _group_index(groups, g)
+			var count := _split_total(total, full_n, orig_idx)
+			for i in count:
+				_restore(boss_snap)
+				seed(hash([base_seed, "boss_scenario", str(g["id"]), i]))
+				var r := await _fight(g)
+				r.merge({"seed": base_seed, "policy": policy, "party": boss_party_label, "group_id": g["id"],
+						"enemies": "+".join(g["enemies"]), "tier": 0, "run": i})
+				boss_rows.append(r)
+				n += 1
+				if n % 64 == 0:
+					await get_tree().process_frame
 	_restore(snap)
 	_holder.queue_free()
 	var csv := to_csv(rows)
 	written_path = out_path if out_path != "" else "%s/battlesim_%s_s%d.csv" % [SIM_DIR, policy, base_seed]
 	_write(written_path, csv)
+	enemy_stats = per_enemy(rows)
+	if total_given or summary_path != "":
+		written_summary = summary_path if summary_path != "" else written_path.trim_suffix(".csv") + "_per_enemy"
+		_write(written_summary + ".csv", to_csv(enemy_stats, ENEMY_HEADER))
+		_write(written_summary + ".md", to_markdown(enemy_stats, rows, party_label))
 	return csv
+
+
+## Verdeelt total gevechten over n groepen (groep k krijgt k, k+n, k+2n, ...).
+static func _split_total(total_fights: int, n: int, index: int) -> int:
+	if n <= 0:
+		return 0
+	return int(total_fights / n) + (1 if index < total_fights % n else 0)
+
+
+static func _group_index(groups: Array, target: Dictionary) -> int:
+	var tid := str(target.get("id", ""))
+	for i in groups.size():
+		if str(groups[i].get("id", "")) == tid:
+			return i
+	return 0
+
+
+static func _use_golem_party_for_boss(group_id: String) -> bool:
+	return group_id == "baas_kennis_beest"
+
+
+func _build_golem_boss_snap() -> Dictionary:
+	return _build_party_geared([["dennis", GOLEM_BOSS_LEVEL, GOLEM_BOSS_GEAR]], GOLEM_BOSS_INV)
 
 
 ## Party via de echte GameState-code (new_game, join_member -> give_exp = normale groei).
 func _build_party(party: Array, bag: Dictionary) -> Dictionary:
+	var specs: Array = []
+	for p in party:
+		specs.append([p[0], p[1], []])
+	return _build_party_geared(specs, bag)
+
+
+func _build_party_geared(party: Array, bag: Dictionary) -> Dictionary:
 	GameState.new_game(GameState.DEFAULT_NAME)
 	GameState.codex_reset(false)
-	for p in party:
-		var id := str(p[0])
-		var lv := int(p[1])
+	for spec in party:
+		var id := str(spec[0])
+		var lv := int(spec[1])
+		var gear: Array = spec[2] if spec.size() > 2 else []
 		if not GameState.has_member(id):
 			GameState.join_member(id, lv, [])
 		var h: Dictionary = GameState.member(id)
 		if lv > int(h["level"]):
 			GameState.give_exp(h, GameData.exp_for_level(lv) - int(h["exp"]))
+		for gid in gear:
+			var slot := Equipment.slot_of(str(gid))
+			if slot == "" or not Equipment.can_wear(h, str(gid)):
+				continue
+			GameState.inventory[gid] = GameState.item_count(str(gid)) + 1
+			Equipment.equip(h, GameState.inventory, slot, str(gid))
 		h["hp"] = h["max_hp"]
 		h["mp"] = h["max_mp"]
 	GameState.inventory = bag.duplicate(true)
@@ -292,12 +389,109 @@ func _fight(g: Dictionary) -> Dictionary:
 	return r
 
 
+# =============================================================== per vijand
+static func per_enemy(list: Array) -> Array[Dictionary]:
+	var acc := {}
+	for r in list:
+		var seen := {}
+		for e in str(r["enemies"]).split("+", false):
+			if seen.has(e):
+				continue
+			seen[e] = true
+			if not acc.has(e):
+				acc[e] = {"enemy": e, "fights": 0, "wins": 0, "turns": 0, "hp": 0.0, "groups": {}}
+			var a: Dictionary = acc[e]
+			a["fights"] += 1
+			a["wins"] += int(r["win"])
+			a["turns"] += int(r["turns"])
+			a["hp"] += float(r["hp_left_pct"])
+			a["groups"][str(r["group_id"])] = true
+	var out: Array[Dictionary] = []
+	for e in acc:
+		var a: Dictionary = acc[e]
+		var f := float(a["fights"])
+		var gids: Array = a["groups"].keys()
+		gids.sort()
+		out.append({"enemy": e, "fights": a["fights"], "wins": a["wins"], "losses": a["fights"] - a["wins"],
+				"winrate_pct": snappedf(100.0 * a["wins"] / f, 0.1), "avg_turns": snappedf(a["turns"] / f, 0.1),
+				"avg_hp_left_pct": snappedf(a["hp"] / f, 0.1), "groups": ";".join(gids)})
+	out.sort_custom(func(x, y): return x["winrate_pct"] < y["winrate_pct"] \
+			or (x["winrate_pct"] == y["winrate_pct"] and str(x["enemy"]) < str(y["enemy"])))
+	return out
+
+
+static func _summarize_fights(list: Array) -> Dictionary:
+	var n := list.size()
+	if n == 0:
+		return {"n": 0, "winrate_pct": 0.0, "avg_turns": 0.0, "avg_hp_left_pct": 0.0, "avg_items": 0.0}
+	var wins := 0
+	var turns := 0.0
+	var hp := 0.0
+	var items := 0.0
+	for r in list:
+		wins += int(r["win"])
+		turns += float(r["turns"])
+		hp += float(r["hp_left_pct"])
+		items += float(r["items_used"])
+	var f := float(n)
+	return {"n": n, "winrate_pct": snappedf(100.0 * wins / f, 0.1), "avg_turns": snappedf(turns / f, 0.1),
+			"avg_hp_left_pct": snappedf(hp / f, 0.1), "avg_items": snappedf(items / f, 0.2)}
+
+
+func to_markdown(stats: Array, list: Array, party_label: String) -> String:
+	var wins := 0
+	for r in list:
+		wins += int(r["win"])
+	var md: Array[String] = ["# Battle simulator — winrate per enemy", "",
+		"- seed: `%d`, policy: `%s`, party: `%s`, tier: %d" % [base_seed, policy, party_label, tier],
+		"- enemy groups: `%s`, fights (regular pool): %d, total winrate: %.1f%%" % [enemy_spec, list.size(),
+				100.0 * wins / float(maxi(1, list.size()))], ""]
+	if enemy_spec.strip_edges() == "all" and (total_given or summary_path != ""):
+		md.append("- WM1 pool: encounter groups **without** boss rows (`boss: true` in `ENCOUNTER_GROUPS`).")
+		md.append("- `kennis_beest` averages here are **only** random/map groups; the Golem boss is listed below.")
+		md.append("")
+	md += ["## Per enemy", "", "| enemy | fights | wins | winrate | avg turns | avg HP left |", "|---|---:|---:|---:|---:|---:|"]
+	for s in stats:
+		md.append("| %s | %d | %d | %.1f%% | %.1f | %.1f%% |" % [s["enemy"], s["fights"], s["wins"],
+				s["winrate_pct"], s["avg_turns"], s["avg_hp_left_pct"]])
+	md += ["", "## Per group (regular pool)", "", "| group | enemies | fights | winrate |", "|---|---|---:|---:|"]
+	var order: Array = []
+	var g := {}
+	for r in list:
+		var id := str(r["group_id"])
+		if not g.has(id):
+			g[id] = [str(r["enemies"]), 0, 0]
+			order.append(id)
+		g[id][1] += 1
+		g[id][2] += int(r["win"])
+	for id in order:
+		md.append("| %s | %s | %d | %.1f%% |" % [id, g[id][0], g[id][1], 100.0 * g[id][2] / float(g[id][1])])
+	if not boss_rows.is_empty():
+		md += ["", "## Boss (intended party, matches `battlesim.gd` golem scenario)", "",
+				"Dax solo Lv %d, Spark Sword + late Act-1 gear, bag %s." % [GOLEM_BOSS_LEVEL, str(GOLEM_BOSS_INV)], "",
+				"| group | enemies | fights | winrate | avg turns | avg HP left | avg items |", "|---|---|---:|---:|---:|---:|---:|"]
+		var by_group := {}
+		var boss_order: Array = []
+		for r in boss_rows:
+			var id := str(r["group_id"])
+			if not by_group.has(id):
+				by_group[id] = []
+				boss_order.append(id)
+			by_group[id].append(r)
+		for id in boss_order:
+			var s: Dictionary = _summarize_fights(by_group[id])
+			var enemies := str(by_group[id][0]["enemies"])
+			md.append("| %s | %s | %d | %.1f%% | %.1f | %.1f%% | %.2f |" % [
+					id, enemies, s["n"], s["winrate_pct"], s["avg_turns"], s["avg_hp_left_pct"], s["avg_items"]])
+	return "\n".join(md) + "\n"
+
+
 # =============================================================== CSV
-static func to_csv(list: Array) -> String:
-	var lines: Array[String] = [",".join(CSV_HEADER)]
+static func to_csv(list: Array, header: Array = CSV_HEADER) -> String:
+	var lines: Array[String] = [",".join(header)]
 	for r in list:
 		var cells: Array[String] = []
-		for col in CSV_HEADER:
+		for col in header:
 			cells.append(csv_cell(r.get(col, "")))
 		lines.append(",".join(cells))
 	return "\n".join(lines) + "\n"
