@@ -1,10 +1,12 @@
 extends RefCounted
 ## Bouwt het Wachtershuis uit scripts/data/huis_interieur_layout.json (ART, 32x21).
+## Grond: één tile-atlas (batching). Details/props: Sprite2D zoals main (pixel-identiek).
 
 const LAYOUT_PATH := "res://scripts/data/huis_interieur_layout.json"
 const TILE_DIR := "res://assets/tiles/huis_interieur/"
 const BINNEN_DIR := "res://assets/sprites/binnen/"
 const PROP_DIR := "res://assets/sprites/binnen/huis_props/"
+const Atlas := preload("res://scripts/data/huis_interieur_atlas.gd")
 
 const PUZZLE_BINNEN_SPAWN := Vector2i(4, 7)
 const ARCHIEF_TEST_MAP := "res://scenes/maps/archief_test.tscn"
@@ -16,6 +18,11 @@ const VP_195_9 := Vector2i(468, 216)
 
 const SPAWN_TEGEL := Vector2i(8, 18)
 const EXIT_RECT := Rect2i(8, 19, 2, 2)
+
+const GROND_SLEUTELS := [
+	"wall_cap", "wall_face_top", "wall_face_bottom", "wall_post",
+	"floor_a", "floor_b", "floor_c", "floor_d", "floor_e",
+]
 
 var _tile_ids: Dictionary = {}
 var _prop_blocks: Dictionary = {}
@@ -42,45 +49,38 @@ func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
 	_prop_blocks.clear()
 	_solid_tiles.clear()
 	_props_geplaatst.clear()
-	ground.tile_set = _maak_tileset()
+	ground.tile_set = _maak_grond_tileset()
 	ground.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_teken_grid(ground, data.get("grid", []) as Array)
-	_teken_details(details, data.get("details", []) as Array)
+	_teken_details_gebakken(details, data.get("details", []) as Array)
 	_plaats_props(objects, data.get("props", []) as Array)
 
 
-func _maak_tileset() -> TileSet:
+func _maak_grond_tileset() -> TileSet:
+	## Eén runtime-atlas-textuur, maar per tegeltype een bron (zoals main) voor correcte fysiek.
+	var volgorde: Array = GROND_SLEUTELS
+	var atlas: Dictionary = Atlas.maak_grond_atlas(volgorde)
+	var coords: Dictionary = atlas["coords"] as Dictionary
+	var basis: Texture2D = atlas["texture"] as Texture2D
+	_tile_ids.clear()
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
 	ts.add_physics_layer()
 	ts.set_physics_layer_collision_layer(0, 1)
 	ts.set_physics_layer_collision_mask(0, 1)
-	var defs := {
-		"wall_cap": {"file": "wall_cap.png", "solid": true},
-		"wall_face_top": {"file": "wall_face_top.png", "solid": true},
-		"wall_face_bottom": {"file": "wall_face_bottom.png", "solid": true},
-		"wall_post": {"file": "wall_post_bottom.png", "solid": true},
-		"floor_a": {"file": "floor_a.png", "solid": false},
-		"floor_b": {"file": "floor_b.png", "solid": false},
-		"floor_c": {"file": "floor_c.png", "solid": false},
-		"floor_d": {"file": "floor_d.png", "solid": false},
-		"floor_e": {"file": "floor_e.png", "solid": false},
-	}
-	for sleutel in defs.keys():
-		var tex: Texture2D = load(TILE_DIR + str(defs[sleutel]["file"]))
+	for sleutel in volgorde:
+		var ac: Vector2i = coords[sleutel] as Vector2i
+		var reg := AtlasTexture.new()
+		reg.atlas = basis
+		reg.region = Rect2(ac.x * 16, ac.y * 16, 16, 16)
+		reg.filter_clip = true
 		var src := TileSetAtlasSource.new()
-		src.texture = tex
+		src.texture = reg
 		src.texture_region_size = Vector2i(16, 16)
 		src.create_tile(Vector2i.ZERO)
-		if defs[sleutel]["solid"]:
-			var td: TileData = src.get_tile_data(Vector2i.ZERO, 0)
-			if td != null:
-				td.add_collision_polygon(0)
-				td.set_collision_polygon_points(0, 0, PackedVector2Array([
-					Vector2(-8, -8), Vector2(8, -8), Vector2(8, 8), Vector2(-8, 8),
-				]))
-		var sid: int = ts.add_source(src)
-		_tile_ids[sleutel] = sid
+		if sleutel in Atlas.WALL_SLEUTELS:
+			Atlas.voeg_wand_fysiek(src.get_tile_data(Vector2i.ZERO, 0))
+		_tile_ids[sleutel] = ts.add_source(src)
 	return ts
 
 
@@ -126,7 +126,9 @@ func _tegel_sleutel(ch: String, x: int, y: int, rijen: Array) -> String:
 			return ""
 
 
-func _teken_details(details: Node2D, lijst: Array) -> void:
+func _teken_details_gebakken(details: Node2D, lijst: Array) -> void:
+	var canvas := Image.create(ROOM_PX.x, ROOM_PX.y, false, Image.FORMAT_RGBA8)
+	canvas.fill(Color(0, 0, 0, 0))
 	for item in lijst:
 		if not (item is Array) or item.size() < 3:
 			continue
@@ -135,13 +137,15 @@ func _teken_details(details: Node2D, lijst: Array) -> void:
 		var tex: Texture2D = load(TILE_DIR + naam + ".png")
 		if tex == null:
 			continue
-		var spr := Sprite2D.new()
-		spr.texture = tex
-		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		spr.centered = false
-		spr.position = Vector2(tegel) * 16.0
-		spr.z_index = -1
-		details.add_child(spr)
+		Atlas.blit_texture_16(canvas, tex, tegel * 16)
+	var spr := Sprite2D.new()
+	spr.texture = ImageTexture.create_from_image(canvas)
+	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	spr.centered = false
+	spr.position = Vector2.ZERO
+	# -1 = main (losse detail-Sprite2D); -2 was alleen TileMap-decor experiment.
+	spr.z_index = -1
+	details.add_child(spr)
 
 
 func _plaats_props(objects: Node2D, props: Array) -> void:

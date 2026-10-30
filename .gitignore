@@ -21,6 +21,9 @@ export_credentials.cfg
 .env
 *.env
 
+# Lokale CI/test-runner output (run_suite.sh)
+testlogs/
+
 # Temp / OS junk
 *.tmp
 *.log

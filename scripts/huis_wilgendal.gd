@@ -4,16 +4,17 @@ extends "res://scripts/map.gd"
 const Build := preload("res://scripts/data/huis_interieur_build.gd")
 
 var _build := Build.new()
-var details: Node2D
 
 
 func _ready() -> void:
-	details = get_node_or_null("Details") as Node2D
+	var details: Node2D = get_node_or_null("Details") as Node2D
 	if details == null:
 		details = Node2D.new()
 		details.name = "Details"
 		add_child(details)
 		move_child(details, ground.get_index())
+	for c in details.get_children():
+		c.queue_free()
 	ground.clear()
 	_build.bouw(ground, details, get_node("Objects"))
 	_story_objecten()
@@ -119,8 +120,6 @@ func layout_props() -> Array:
 
 func prop_maat(naam: String) -> Vector2i:
 	for p in _build.props_geplaatst():
-		if str(p["name"]) == naam and p["node"] is Node2D:
-			var spr: Sprite2D = (p["node"] as Node2D).get_child(0) as Sprite2D
-			if spr and spr.texture:
-				return Vector2i(spr.texture.get_width(), spr.texture.get_height())
+		if str(p["name"]) == naam:
+			return p["size"] as Vector2i
 	return Vector2i.ZERO
