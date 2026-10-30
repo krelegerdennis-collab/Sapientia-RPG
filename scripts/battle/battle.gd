@@ -116,6 +116,7 @@ const Archief2Vijanden := preload("res://scripts/data/archief2_vijanden.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
+const BattleRules := preload("res://scripts/battle/battle_rules.gd")   # pure hulplogica (refactor)
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
 const CORE_HIT_COLOR := Color("ff8ad8")
 const ARMOR_HIT_COLOR := Color("b5a78d")
@@ -1253,162 +1254,15 @@ func _on_message_gui_input(event: InputEvent) -> void:
 func _execute(a: Dictionary) -> void:
 	var actor: Dictionary = a["actor"]
 	if int(actor.get("skip", 0)) > 0:
-		actor["skip"] = int(actor["skip"]) - 1
-		var reden := str(actor.get("skip_reden", "bevriezing"))
-		var zin := "%s is paralyzed and skips a turn." if reden == "verlamming" else "%s is frozen and skips a turn."
-		if reden == Archief2Vijanden.SKIP_REDEN_BIND:
-			zin = "%s is bound and skips a turn."
-		show_message(zin % actor["name"])
-		await _wait(MESSAGE_TIME)
+		await _execute_skip(actor)
 		return
 	match a["type"]:
 		"attack":
-			var t = _valid_target(a["target"], not actor["is_hero"])
-			var getrokken = Archief2Vijanden.pulled_target(actor)   # v0.21: Wortelgeest trok hem aan
-			if getrokken != null and in_battle(getrokken):
-				t = getrokken
-			if t == null:
-				return
-			var mult := 1.0
-			var text := "%s attacks!" % actor["name"]
-			var gekozen: Dictionary = {}
-			for skill in actor["s"].get("skills", []):
-				if randf() < float(skill["chance"]):
-					if str(skill.get("type", "")) == "guard":   # v0.15: schild omhoog i.p.v. aanvallen
-						if int(actor.get("guard", 0)) > 0:
-							continue
-						await _guard_up(actor, skill)
-						return
-					mult = float(skill["power"])
-					text = "%s: %s!" % [actor["name"], skill["name"]]
-					gekozen = skill
-					break
-			show_message(text)
-			ActorSfx.play(actor, "vaardigheid" if not gekozen.is_empty() else "aanval")
-			if actor["is_hero"]:
-				await _hero_wind_up(actor, true)
-			else:
-				await _enemy_lunge(actor, t)
-			var dmg := _physical_damage(actor, t, mult)
-			await _damage(t, dmg)
-			await _skill_effect(actor, t, gekozen, dmg)
-			await _counter(t, actor)
-			_hero_rest(actor)
+			await _execute_attack(a, actor)
 		"spell":
-			var sp: Dictionary = GameData.SPELLS[a["spell"]]
-			if actor["s"]["mp"] < sp["mp"]:
-				show_message("%s doesn't have enough MP!" % actor["name"])
-				await _wait(MESSAGE_TIME)
-				return
-			actor["s"]["mp"] -= sp["mp"]
-			_refresh_party()
-			show_message("%s casts %s!" % [actor["name"], sp["name"]])
-			ActorSfx.play(actor, "vaardigheid")
-			await _hero_wind_up(actor, false)
-			var stype := str(sp.get("type", "damage"))
-			match sp["target"]:
-				"enemy":
-					var t = _valid_target(a["target"], false)
-					if t != null:
-						await _damage(t, Archief2.schaal_element(_spell_amount(actor, sp, t), t, str(sp.get("element", ""))))
-						_apply_spell_status(t, sp)
-				"all_enemies":
-					var targets := _alive(enemies)
-					for t in targets:
-						_hit(t, Archief2.schaal_element(_spell_amount(actor, sp, t), t, str(sp.get("element", ""))))
-						_apply_spell_status(t, sp)
-					await _wait(0.7)
-					await _report_kos(targets)
-				"ally", "ko":
-					if stype == "revive":
-						await _revive(a["target"], _spell_amount(actor, sp, {}))
-					elif stype == "buff":
-						var ally := _valid_ally(a["target"])
-						if not ally.is_empty():
-							_apply_buffs(ally, sp, actor)
-							await _wait(MESSAGE_TIME)
-					elif stype == "hot":
-						var ally_hot := _valid_ally(a["target"])
-						if not ally_hot.is_empty():
-							_add_hot(ally_hot, sp, actor)
-							await _wait(MESSAGE_TIME)
-					else:
-						await _heal(_valid_ally(a["target"]), _spell_amount(actor, sp, {}), 0)
-				"all_allies":
-					for ally_all in _alive(heroes):
-						if stype == "buff":
-							_apply_buffs(ally_all, sp, actor)
-						elif stype == "hot":
-							_add_hot(ally_all, sp, actor)
-						else:
-							await _heal(ally_all, _spell_amount(actor, sp, {}), 0)
-					if stype == "buff" or stype == "hot":
-						await _wait(MESSAGE_TIME)
-			_hero_rest(actor)
+			await _execute_spell(a, actor)
 		"item":
-			var id: String = a["item"]
-			_reserved[id] = maxi(0, _reserved.get(id, 0) - 1)
-			if GameState.item_count(id) <= 0:
-				show_message("No %s left!" % GameData.ITEMS[id]["name"])
-				await _wait(MESSAGE_TIME)
-				return
-			var it: Dictionary = GameData.ITEMS[id]
-			if str(it.get("teach", "")) != "":
-				var ally := _valid_ally(a["target"])
-				var spell_id := str(it["teach"])
-				if ally.is_empty() or not PartyActions.teach_spell(ally["s"], spell_id):
-					show_message(PartyActions.MSG_NO_EFFECT)
-					await _wait(MESSAGE_TIME)
-					return
-				GameState.inventory[id] -= 1
-				show_message("%s uses %s!" % [actor["name"], it["name"]])
-				await _hero_wind_up(actor, false)
-				show_message("%s learns %s!" % [ally["name"], GameData.SPELLS[spell_id]["name"]])
-				_refresh_party()
-				await _wait(MESSAGE_TIME)
-				_hero_rest(actor)
-				return
-			GameState.inventory[id] -= 1
-			show_message("%s uses %s!" % [actor["name"], it["name"]])
-			await _hero_wind_up(actor, false)
-			if it.get("capture", false):
-				await codex.capture(actor, a["target"])   # Codex: Leeg Boek
-				_hero_rest(actor)
-				return
-			if float(it.get("revive", 0.0)) > 0.0:     # Feniksveer (Koopman)
-				var dood = a["target"] if a["target"] != null and int(a["target"]["s"]["hp"]) <= 0 else null
-				if dood == null:
-					for h in heroes:
-						if int(h["s"]["hp"]) <= 0:
-							dood = h
-							break
-				if dood == null:
-					show_message(PartyActions.MSG_NO_EFFECT)
-				else:
-					var back := PartyActions.revive(dood["s"], float(it["revive"]))
-					show_message("%s gets back up! (%d HP)" % [dood["name"], back])
-					_refresh_party()
-				await _wait(MESSAGE_TIME)
-				_hero_rest(actor)
-				return
-			if bool(it.get("cure", false)):          # Tegengif (Koopman): gif en binden weg
-				var t := _valid_ally(a["target"])
-				if t.has("dots"):
-					t["dots"] = (t["dots"] as Array).filter(func(d): return not bool(d.get("gif", false)))
-				if str(t.get("skip_reden", "")) == Archief2Vijanden.SKIP_REDEN_BIND:
-					t["skip"] = 0
-				show_message("%s is cured." % t["name"])
-				await _wait(MESSAGE_TIME)
-				_hero_rest(actor)
-				return
-			if bool(it.get("stun_room", false)):     # alleen in het veld: niet verbruiken
-				GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
-				show_message(PartyActions.MSG_NO_EFFECT)
-				await _wait(MESSAGE_TIME)
-				_hero_rest(actor)
-				return
-			await _heal(_valid_ally(a["target"]), int(it["heal_hp"]), int(it["heal_mp"]))
-			_hero_rest(actor)
+			await _execute_item(a, actor)
 		"defend":
 			show_message("%s defends." % actor["name"])
 			await _wait(MESSAGE_TIME)
@@ -1426,6 +1280,174 @@ func _execute(a: Dictionary) -> void:
 			await _hero_wind_up(actor, false)
 			await codex.swap_ally(a)
 			_hero_rest(actor)
+
+
+## Bevroren/verlamd/gebonden: beurt overslaan.
+func _execute_skip(actor: Dictionary) -> void:
+	actor["skip"] = int(actor["skip"]) - 1
+	var reden := str(actor.get("skip_reden", "bevriezing"))
+	show_message(BattleRules.skip_text(reden) % actor["name"])
+	await _wait(MESSAGE_TIME)
+
+
+func _execute_attack(a: Dictionary, actor: Dictionary) -> void:
+	var t = _valid_target(a["target"], not actor["is_hero"])
+	var getrokken = Archief2Vijanden.pulled_target(actor)   # v0.21: Wortelgeest trok hem aan
+	if getrokken != null and in_battle(getrokken):
+		t = getrokken
+	if t == null:
+		return
+	var mult := 1.0
+	var text := "%s attacks!" % actor["name"]
+	var gekozen: Dictionary = {}
+	for skill in actor["s"].get("skills", []):
+		if randf() < float(skill["chance"]):
+			if str(skill.get("type", "")) == "guard":   # v0.15: schild omhoog i.p.v. aanvallen
+				if int(actor.get("guard", 0)) > 0:
+					continue
+				await _guard_up(actor, skill)
+				return
+			mult = float(skill["power"])
+			text = "%s: %s!" % [actor["name"], skill["name"]]
+			gekozen = skill
+			break
+	show_message(text)
+	ActorSfx.play(actor, "vaardigheid" if not gekozen.is_empty() else "aanval")
+	if actor["is_hero"]:
+		await _hero_wind_up(actor, true)
+	else:
+		await _enemy_lunge(actor, t)
+	var dmg := _physical_damage(actor, t, mult)
+	await _damage(t, dmg)
+	await _skill_effect(actor, t, gekozen, dmg)
+	await _counter(t, actor)
+	_hero_rest(actor)
+
+
+func _execute_spell(a: Dictionary, actor: Dictionary) -> void:
+	var sp: Dictionary = GameData.SPELLS[a["spell"]]
+	if actor["s"]["mp"] < sp["mp"]:
+		show_message("%s doesn't have enough MP!" % actor["name"])
+		await _wait(MESSAGE_TIME)
+		return
+	actor["s"]["mp"] -= sp["mp"]
+	_refresh_party()
+	show_message("%s casts %s!" % [actor["name"], sp["name"]])
+	ActorSfx.play(actor, "vaardigheid")
+	await _hero_wind_up(actor, false)
+	match sp["target"]:
+		"enemy":
+			var t = _valid_target(a["target"], false)
+			if t != null:
+				await _damage(t, Archief2.schaal_element(_spell_amount(actor, sp, t), t, str(sp.get("element", ""))))
+				_apply_spell_status(t, sp)
+		"all_enemies":
+			var targets := _alive(enemies)
+			for t in targets:
+				_hit(t, Archief2.schaal_element(_spell_amount(actor, sp, t), t, str(sp.get("element", ""))))
+				_apply_spell_status(t, sp)
+			await _wait(0.7)
+			await _report_kos(targets)
+		"ally", "ko":
+			await _spell_on_ally(a, actor, sp)
+		"all_allies":
+			await _spell_on_all_allies(actor, sp)
+	_hero_rest(actor)
+
+
+## Spreuk op een held (of KO-held): herleven, buff, HoT of genezen.
+func _spell_on_ally(a: Dictionary, actor: Dictionary, sp: Dictionary) -> void:
+	var stype := str(sp.get("type", "damage"))
+	if stype == "revive":
+		await _revive(a["target"], _spell_amount(actor, sp, {}))
+	elif stype == "buff":
+		var ally := _valid_ally(a["target"])
+		if not ally.is_empty():
+			_apply_buffs(ally, sp, actor)
+			await _wait(MESSAGE_TIME)
+	elif stype == "hot":
+		var ally_hot := _valid_ally(a["target"])
+		if not ally_hot.is_empty():
+			_add_hot(ally_hot, sp, actor)
+			await _wait(MESSAGE_TIME)
+	else:
+		await _heal(_valid_ally(a["target"]), _spell_amount(actor, sp, {}), 0)
+
+
+func _spell_on_all_allies(actor: Dictionary, sp: Dictionary) -> void:
+	var stype := str(sp.get("type", "damage"))
+	for ally_all in _alive(heroes):
+		if stype == "buff":
+			_apply_buffs(ally_all, sp, actor)
+		elif stype == "hot":
+			_add_hot(ally_all, sp, actor)
+		else:
+			await _heal(ally_all, _spell_amount(actor, sp, {}), 0)
+	if stype == "buff" or stype == "hot":
+		await _wait(MESSAGE_TIME)
+
+
+func _execute_item(a: Dictionary, actor: Dictionary) -> void:
+	var id: String = a["item"]
+	_reserved[id] = maxi(0, _reserved.get(id, 0) - 1)
+	if GameState.item_count(id) <= 0:
+		show_message("No %s left!" % GameData.ITEMS[id]["name"])
+		await _wait(MESSAGE_TIME)
+		return
+	var it: Dictionary = GameData.ITEMS[id]
+	if str(it.get("teach", "")) != "":
+		await _use_teach_item(a, actor, id, it)
+		return
+	GameState.inventory[id] -= 1
+	show_message("%s uses %s!" % [actor["name"], it["name"]])
+	await _hero_wind_up(actor, false)
+	if it.get("capture", false):
+		await codex.capture(actor, a["target"])   # Codex: Leeg Boek
+		_hero_rest(actor)
+		return
+	if float(it.get("revive", 0.0)) > 0.0:     # Feniksveer (Koopman)
+		var dood = BattleRules.revive_target(a["target"], heroes)
+		if dood == null:
+			show_message(PartyActions.MSG_NO_EFFECT)
+		else:
+			var back := PartyActions.revive(dood["s"], float(it["revive"]))
+			show_message("%s gets back up! (%d HP)" % [dood["name"], back])
+			_refresh_party()
+		await _wait(MESSAGE_TIME)
+		_hero_rest(actor)
+		return
+	if bool(it.get("cure", false)):          # Tegengif (Koopman): gif en binden weg
+		var t := _valid_ally(a["target"])
+		BattleRules.cure_ailments(t)
+		show_message("%s is cured." % t["name"])
+		await _wait(MESSAGE_TIME)
+		_hero_rest(actor)
+		return
+	if bool(it.get("stun_room", false)):     # alleen in het veld: niet verbruiken
+		GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
+		show_message(PartyActions.MSG_NO_EFFECT)
+		await _wait(MESSAGE_TIME)
+		_hero_rest(actor)
+		return
+	await _heal(_valid_ally(a["target"]), int(it["heal_hp"]), int(it["heal_mp"]))
+	_hero_rest(actor)
+
+
+## Leerboek-item: de held leert een spreuk (verbruikt alleen als het lukt).
+func _use_teach_item(a: Dictionary, actor: Dictionary, id: String, it: Dictionary) -> void:
+	var ally := _valid_ally(a["target"])
+	var spell_id := str(it["teach"])
+	if ally.is_empty() or not PartyActions.teach_spell(ally["s"], spell_id):
+		show_message(PartyActions.MSG_NO_EFFECT)
+		await _wait(MESSAGE_TIME)
+		return
+	GameState.inventory[id] -= 1
+	show_message("%s uses %s!" % [actor["name"], it["name"]])
+	await _hero_wind_up(actor, false)
+	show_message("%s learns %s!" % [ally["name"], GameData.SPELLS[spell_id]["name"]])
+	_refresh_party()
+	await _wait(MESSAGE_TIME)
+	_hero_rest(actor)
 
 
 ## Held stapt naar voren en haalt uit (aanval) of heft de staf (spreuk/item).
