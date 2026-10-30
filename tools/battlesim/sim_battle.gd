@@ -30,7 +30,13 @@ func _enter_detail_mode() -> void:
 	pass
 
 func _exit_tree() -> void:
-	pass
+	if get_viewport() != null and get_viewport().size_changed.is_connected(_fit_to_screen):
+		get_viewport().size_changed.disconnect(_fit_to_screen)
+	if touch and is_instance_valid(touch) and get_viewport() != null \
+			and get_viewport().size_changed.is_connected(touch.refit):
+		get_viewport().size_changed.disconnect(touch.refit)
+	if _previous_scale_size != Vector2i.ZERO:
+		get_window().content_scale_size = _previous_scale_size
 
 func _start_battle_music() -> void:
 	pass
@@ -86,6 +92,7 @@ func _finish(result: String) -> void:
 		return
 	sim_result = result
 	sim_rounds = round_no
+	headless_sim = false
 	sim_done.emit()
 
 
@@ -95,6 +102,7 @@ func _run() -> void:
 	if sim_started:
 		return
 	sim_started = true
+	headless_sim = true
 	await _core_hint()
 	if await _archief2_opening():
 		return
