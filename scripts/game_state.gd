@@ -583,6 +583,7 @@ func _ready() -> void:
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
 			["--savehardeningtest", "res://scripts/tests/save_hardening_tests.gd", "SaveHardeningTest", "savehardeningtest"],
+			["--saveroundtriptest", "res://scripts/tests/save_roundtrip_tests.gd", "SaveRoundtripTest", "saveroundtriptest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
@@ -1834,7 +1835,9 @@ func apply_state(d: Dictionary) -> bool:
 	PartyLimiet.normaliseer()
 	inventory = _inventory_from(d.get("inventory", {}))
 	for id in stray_equipment:
-		inventory[id] = int(inventory.get(id, 0)) + 1
+		# alleen echte uitrusting terug in de tas; een onbekend id uit een kapotte save valt weg
+		if Equipment.is_equipment(str(id)):
+			inventory[id] = int(inventory.get(id, 0)) + 1
 	gold = _gold_from(d.get("gold", 0))
 	bestiary = {}
 	var best = d.get("bestiary", {})
