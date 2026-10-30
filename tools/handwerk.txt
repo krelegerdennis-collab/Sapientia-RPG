@@ -1176,3 +1176,8 @@ assets/ui/icons/items/icons32/zingend_meel.png
 assets/ui/icons/items/icons32/zingend_zaad.png
 assets/ui/icons/items/icons32/zouthelm.png
 assets/ui/icons/items/icons32/zweefstaf.png
+assets/sprites/enemies/goblin_raider_96_sheet.png
+assets/sprites/enemies/goblin_raider_96_sheet_left.png
+assets/sprites/enemies/goblin_raider_96.png
+assets/sprites/enemies/goblin_raider_96.tres
+assets/sprites/enemies/goblin_raider_96_left.tres
