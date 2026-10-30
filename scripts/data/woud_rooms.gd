@@ -90,7 +90,11 @@ const ROOMS := {
 			"c_(UU)______________________________________d",
 		],
 		"path": {"width": 3, "lines": [[[4, 15], [4, 11], [41, 11], [41, 3]]]},   # v0.24 bospad ingang -> uitgangen
-		"spawns": {"zuid": [3, 15, "up"], "boog": [42, 3, "down"]},
+		# WM1 T2: "beek" = terug uit de zijkamer woud_beek (scripts/data/woud_beek.gd), naast de struik-opening.
+		"spawns": {"zuid": [3, 15, "up"], "boog": [42, 3, "down"], "beek": [42, 15, "right"]},
+		# WM1 T2: PLACEHOLDER-struik (assets/placeholder/woud/struik.png) = opening naar de Beek.
+		"objects": [{"name": "BeekOpening", "tile": [43, 15], "texture": "res://assets/placeholder/woud/struik.png",
+			"event": "woud_beek"}],
 		"exits": {
 			"U": {"map": M + "woud_rand.tscn", "spawn": "boog"},
 			"n": {"map": M + "woud_mistpoel.tscn", "spawn": "zuid"},
