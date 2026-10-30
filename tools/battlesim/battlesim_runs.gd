@@ -6,10 +6,11 @@ extends Node
 ## Rapport: python3 tools/battlesim/rapport.py [csv ...]
 ## WM1-overzicht (1000 gevechten verdeeld over WM1-groepen, winrate per vijand):
 ##   ... -- --battlesim --party=dennis:5,noor:5 --enemy=all --total=1000 --seed=7 --out=pad.csv
-## --total=N verdeelt precies N gevechten om de beurt over de (niet-baas) groepen. Baasgroepen uit
-## ENCOUNTER_GROUPS (nu baas_kennis_beest) vallen buiten die pool en worden apart gemeten met het
-## bedoelde scenario (zelfde party als battlesim.gd `golem`: Dax solo Lv 8, Vonkzwaard). Alleen met
-## --total of --summary komen ook <pad>_per_enemy.csv en <pad>_per_enemy.md.
+## --total=N verdeelt precies N gevechten om de beurt over de (niet-baas) groepen (gaat boven --runs).
+## Baasgroepen uit ENCOUNTER_GROUPS (nu baas_kennis_beest) vallen buiten die pool en worden apart
+## gemeten met het bedoelde scenario (zelfde party als battlesim.gd `golem`: Dax solo Lv 8, Vonkzwaard).
+## Alleen met --total of --summary komen naast de CSV ook <pad>_per_enemy.csv en <pad>_per_enemy.md
+## (winrate per vijand en per groep); met --summary=pad (zonder extensie) kies je die bestandsnaam zelf.
 ##
 ## Elk gevecht is de echte scenes/battle/battle.tscn. GameState.prepare_battle zet de vijanden
 ## (hetzelfde deel van start_battle dat het spel gebruikt); alleen het menu, wachten en het einde
@@ -43,7 +44,7 @@ var items_spec := ""
 var out_path := ""
 var total := 0                  # > 0: precies zoveel gevechten verdeeld (--total gaat boven --runs)
 var summary_path := ""          # zonder extensie; leeg = <csv-pad zonder .csv>_per_enemy
-var total_given := false
+var total_given := false        # --total meegegeven (dan moet het >= 1 zijn)
 var standalone := true          # false = aangeroepen door een test (geen quit)
 var quiet := false
 
@@ -52,7 +53,7 @@ var rows: Array[Dictionary] = []
 var boss_rows: Array[Dictionary] = []   # baasgevechten met bedoeld scenario (niet in per_enemy-pool)
 var written_path := ""
 var written_summary := ""
-var enemy_stats: Array[Dictionary] = []
+var enemy_stats: Array[Dictionary] = []   # per vijand, gesorteerd op winrate (laagste eerst)
 var _battle_scene: PackedScene
 var _policy_script: Script
 var _holder: Node
@@ -390,6 +391,8 @@ func _fight(g: Dictionary) -> Dictionary:
 
 
 # =============================================================== per vijand
+## Winrate per vijand-id: een gevecht telt één keer voor elke vijand die in de groep zit
+## (dubbele vijanden in een groep tellen niet dubbel). Gesorteerd: laagste winrate eerst, dan id.
 static func per_enemy(list: Array) -> Array[Dictionary]:
 	var acc := {}
 	for r in list:
