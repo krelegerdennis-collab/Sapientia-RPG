@@ -241,7 +241,7 @@ func _input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 			elif pos.distance_to(b_center()) <= button_radius * 1.25:
 				_touch_owner[event.index] = "b"
-				_set_touch_action(event.index, "cancel")
+				_set_touch_action(event.index, "som_dodge" if analog_only else "cancel")
 				get_viewport().set_input_as_handled()
 			elif show_kern and InputMap.has_action("kern") and UiTouchC.hit_rect(kern_rect(), 4.0).has_point(pos):
 				_touch_owner[event.index] = "kern"

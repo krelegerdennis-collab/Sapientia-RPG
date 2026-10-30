@@ -50,8 +50,10 @@ const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const CombatZones := preload("res://scripts/som/combat_zones.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
+const CombatStamina := preload("res://scripts/som/combat_stamina.gd")
 const RING_ACTION := "som_ring"
 const SWITCH_ACTION := "som_switch"
+const DODGE_ACTION := "som_dodge"
 
 var room: Node
 var player: CharacterBody2D
@@ -75,6 +77,10 @@ var gauge: Node2D
 var telegraph_layer: TelegraphLayer
 var combat_zones := CombatZones.new()
 var combat_roots := CombatRoots.new()
+var combat_stamina := CombatStamina.new()
+var _dodge_roll_ticks: Dictionary = {}
+var _dodge_cd_ticks: Dictionary = {}
+var _dodge_dir: Dictionary = {}
 ## Tests: geforceerde aanval-id voor de volgende telegraaf-windup ("" = RNG).
 var forced_enemy_attack := ""
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
@@ -203,6 +209,8 @@ func setup(p_room: Node) -> void:
 	telegraph_layer = TelegraphLayer.new()
 	objects.add_child(telegraph_layer)
 	objects.move_child(telegraph_layer, 0)
+	for h in GameState.party:
+		combat_stamina.init_member(str(h.get("id", "")))
 
 
 ## Kaartsheet van Dax via KaartStijl (#169): speler_sheet() van het gebied van deze kamer als Dax leidt
@@ -221,7 +229,7 @@ func dax_sheet_path() -> String:
 
 
 static func _ensure_actions() -> void:
-	for pair in [[RING_ACTION, KEY_TAB], [SWITCH_ACTION, KEY_C]]:
+	for pair in [[RING_ACTION, KEY_TAB], [SWITCH_ACTION, KEY_C], [DODGE_ACTION, KEY_X]]:
 		if InputMap.has_action(pair[0]):
 			continue
 		InputMap.add_action(pair[0])
@@ -419,6 +427,7 @@ func switch_hero(to := "") -> String:
 	if a.in_wall():
 		a._teleport()      # anders belandt de bestuurde held in de muur en kan hij niet meer lopen
 	combat_roots.clear_member(active_id)
+	combat_stamina.clear_member(active_id)
 	var old := active_id
 	var p_pos: Vector2 = player.position
 	var p_face: Vector2i = player.facing
@@ -441,6 +450,8 @@ func switch_hero(to := "") -> String:
 
 
 func analog_dir() -> Vector2:
+	if _dodge_roll_ticks.get(active_id, 0) > 0:
+		return _dodge_dir.get(active_id, Vector2.ZERO)
 	var base := Vector2.ZERO
 	if forced_joy != Vector2.ZERO:
 		base = SomMove.joy_to_dir(forced_joy)
@@ -490,7 +501,7 @@ var _tick_acc: float:
 ## Animaties waarvan de arena de tijd stuurt (treffer/vrijgave op de vaste stap, niet op frametijd).
 var _sim_anims: Array = []
 ## Input van dit frame, verbruikt door de eerstvolgende stap (zelfde volgorde als voorheen).
-var _pending := {"switch": false, "attack": false, "cast": false}
+var _pending := {"switch": false, "attack": false, "cast": false, "dodge": false}
 
 
 func _process(delta: float) -> void:
@@ -506,7 +517,7 @@ func _process(delta: float) -> void:
 		open_ring()
 		return
 	if not active():
-		_pending = {"switch": false, "attack": false, "cast": false}
+		_pending = {"switch": false, "attack": false, "cast": false, "dodge": false}
 		if target_lock:
 			target_lock.tick(delta)      # wist alleen de markers (arena niet actief)
 		# Alleen lopende slag/cast-animaties (geen stick/A/B-input, geen vijand-AI).
@@ -518,8 +529,12 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("interact") and Engine.get_process_frames() != ring.closed_frame \
 			and not _attack_suppressed():
 		_pending["attack"] = true
+	if Input.is_action_just_pressed(DODGE_ACTION):
+		_pending["dodge"] = true
 	if Input.is_action_just_pressed("cancel") and Engine.get_process_frames() != ring.closed_frame:
 		_pending["cast"] = true
+	if player:
+		player.analog_speed = _analog_speed()
 	advance(delta)
 
 
@@ -568,6 +583,9 @@ func sim_step() -> void:
 	if _pending["switch"]:
 		_pending["switch"] = false
 		switch_hero()
+	if _pending["dodge"]:
+		_pending["dodge"] = false
+		try_active_dodge(active_id, _dodge_facing_dir(active_id))
 	b_cast_cd = maxf(0.0, b_cast_cd - dt)
 	if _pending["attack"]:
 		_pending["attack"] = false
@@ -584,6 +602,8 @@ func sim_step() -> void:
 	if allies_enabled:
 		for a in allies:
 			a.tick(dt)
+			_tick_ally_dodge_ai(a)
+	_tick_stamina_and_dodge()
 	for m in enemies.keys():
 		if is_instance_valid(m):
 			_enemy_ai(m, dt)
@@ -1155,6 +1175,10 @@ func break_root(id: String) -> void:
 func _clear_transient_combat() -> void:
 	combat_zones.clear_all()
 	combat_roots.clear_all()
+	combat_stamina.clear_all()
+	_dodge_roll_ticks.clear()
+	_dodge_cd_ticks.clear()
+	_dodge_dir.clear()
 
 
 func _tick_zones() -> void:
@@ -1269,6 +1293,7 @@ func hit_member_zone_dot(id: String, atk: int, power: float) -> void:
 ## Klap tijdens iframes: ontwijk-pose (geen schade). Telt mee in dodges (tests).
 var dodges := 0
 func _dodge(id: String) -> void:
+	break_root(id)
 	var t := pose_tex(id, "dodge")
 	var n := node_of(id)
 	if t == null or n == null or n.get_node_or_null("SomHurtAnim") != null or n.get_node_or_null("SomDodgeAnim") != null:
@@ -1277,10 +1302,123 @@ func _dodge(id: String) -> void:
 	SomFx.dodge_pose(n, t, SomData.DODGE_TIME)
 
 
+func _analog_speed() -> float:
+	var s := SomData.MOVE_SPEED
+	if touch and touch.run_on() and combat_stamina.can_sprint(active_id):
+		return s * 1.5
+	return s
+
+
+func _dodge_facing_dir(id: String) -> Vector2:
+	var raw := Vector2.ZERO
+	if id == active_id:
+		raw = analog_dir() if _dodge_roll_ticks.get(id, 0) <= 0 else _dodge_dir.get(id, Vector2.ZERO)
+		if raw.length_squared() <= 0.01 and touch and "joy_raw" in touch:
+			raw = SomMove.joy_to_dir(touch.joy_raw)
+		if raw.length_squared() <= 0.01:
+			raw = SomMove.keys_to_dir()
+	var n := node_of(id)
+	if raw.length_squared() > 0.01:
+		return raw.normalized()
+	if target_lock and target_lock.locked_enemy() != null:
+		var away: Vector2 = body_of(id) - center_of(target_lock.locked_enemy())
+		if away.length_squared() > 1.0:
+			return away.normalized()
+	if n != null:
+		return Vector2(n.facing)
+	return Vector2.DOWN
+
+
+func try_active_dodge(id: String, dir: Vector2) -> bool:
+	if not _roots_authority() or down or not is_alive(id):
+		return false
+	if int(_dodge_roll_ticks.get(id, 0)) > 0 or int(_dodge_cd_ticks.get(id, 0)) > 0:
+		return false
+	if swing_lock > 0.0 and id == active_id:
+		return false
+	if not combat_stamina.spend(id, SomData.STAMINA_DODGE_COST):
+		return false
+	var d := dir.normalized() if dir.length_squared() > 0.01 else _dodge_facing_dir(id)
+	if d.length_squared() <= 0.01:
+		d = Vector2.DOWN
+	_dodge_dir[id] = d
+	_dodge_roll_ticks[id] = SomData.DODGE_DURATION_TICKS
+	_dodge_cd_ticks[id] = SomData.DODGE_COOLDOWN_TICKS
+	iframes[id] = float(SomData.DODGE_IFRAME_TICKS) * TICK_DT
+	if id == active_id and room != null and room.has_method("start_invuln"):
+		room.start_invuln(float(SomData.DODGE_IFRAME_TICKS) * TICK_DT)
+	_dodge(id)
+	return true
+
+
+func _tick_stamina_and_dodge() -> void:
+	if not _roots_authority():
+		return
+	for id in party_ids():
+		if not is_alive(id):
+			continue
+		var sprint: bool = id == active_id and touch != null and touch.run_on() and analog_dir().length_squared() > 0.01
+		combat_stamina.tick_member(id, sprint)
+	for id in _dodge_cd_ticks.keys():
+		var cd := int(_dodge_cd_ticks[id]) - 1
+		if cd <= 0:
+			_dodge_cd_ticks.erase(id)
+		else:
+			_dodge_cd_ticks[id] = cd
+	for id in _dodge_roll_ticks.keys():
+		var left := int(_dodge_roll_ticks[id])
+		if left <= 0:
+			continue
+		var step := SomData.DODGE_DISTANCE_PX / float(SomData.DODGE_DURATION_TICKS)
+		var n := node_of(id)
+		if n != null:
+			n.position += _dodge_dir.get(id, Vector2.ZERO) * step
+			if n == player:
+				player.set("_target", n.position)
+		left -= 1
+		if left <= 0:
+			_dodge_roll_ticks.erase(id)
+		else:
+			_dodge_roll_ticks[id] = left
+
+
+func _tick_ally_dodge_ai(ally: Node) -> void:
+	if not _roots_authority() or ally == null:
+		return
+	var hid := str(ally.hero_id)
+	if hid == "" or not is_alive(hid):
+		return
+	if int(_dodge_roll_ticks.get(hid, 0)) > 0:
+		return
+	if not combat_stamina.can_pay(hid, SomData.STAMINA_DODGE_COST):
+		return
+	for m in enemies.keys():
+		if not is_instance_valid(m) or not enemies.has(m):
+			continue
+		var e: Dictionary = enemies[m]
+		if not e.has("tg"):
+			continue
+		var tg: TelegraphAttack = e["tg"]
+		if tg == null or not tg.in_windup() or tg.ticks_left_in_phase() > 8:
+			continue
+		var aid := str(e.get("tg_attack", ""))
+		if aid == "":
+			continue
+		var px := TelegraphShape.to_px(ally.body())
+		if not tg.hits_point_i(px):
+			continue
+		if rng.randf() > 0.55:
+			continue
+		var away: Vector2 = ally.body() - center_of(m)
+		try_active_dodge(hid, away)
+		return
+
+
 ## Held KO: bondgenoot blijft liggen (som_ally.gd); bestuurde held -> wissel naar de volgende levende.
 ## Niemand meer over = game over.
 func _member_ko(id: String) -> void:
 	combat_roots.clear_member(id)
+	combat_stamina.clear_member(id)
 	_say(SomData.TXT_KO % str(member(id).get("name", id)))
 	member_down.emit(id)
 	if GameState.alive_heroes().is_empty():
@@ -1888,6 +2026,8 @@ func coop_poll_local_input() -> Dictionary:
 		buttons |= Codec.BTN_ATTACK
 	if Input.is_action_just_pressed(RING_ACTION):
 		buttons |= Codec.BTN_RING
+	if Input.is_action_just_pressed(DODGE_ACTION):
+		buttons |= Codec.BTN_DODGE
 	var lock_idx := -1
 	if target_lock and target_lock.locked_enemy() != null:
 		lock_idx = _enemy_index(target_lock.locked_enemy())
@@ -1909,6 +2049,7 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 			enemies.erase(m)
 	_tick_zones()
 	_tick_roots()
+	_tick_stamina_and_dodge()
 	_sim_world(dt)
 	_rebuild_enemy_order()
 
@@ -1945,6 +2086,11 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 		if is_alive(hid):
 			_swing(hid, body, charge_mult(charge if slot == coop_local_slot else 1.0))
 			_coop_attack_cd[slot] = 0.35
+	if buttons & Codec.BTN_DODGE:
+		var hid2 := str(_coop_slots.get(slot, ""))
+		if hid2 != "":
+			var d := stick if stick.length_squared() > 0.01 else _dodge_facing_dir(hid2)
+			try_active_dodge(hid2, d)
 
 
 func _enemy_index(m: Node) -> int:
@@ -1968,7 +2114,7 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 			"face": _coop_face_bits(body.facing),
 			"frame": 0,
 			"hp": int(h.get("hp", 0)),
-			"mp": int(h.get("mp", 0)),
+			"mp": combat_stamina.wire_stamina(hid),
 			"flags": Protocol.FLAG_RING_OPEN if ring.is_open and int(slot) == coop_local_slot else 0,
 		})
 	var elist: Array = []
@@ -2017,7 +2163,7 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 			var h := member(hid)
 			if not h.is_empty():
 				h["hp"] = int(row.get("hp", h["hp"]))
-				h["mp"] = int(row.get("mp", h["mp"]))
+				combat_stamina.set_current(hid, int(row.get("mp", combat_stamina.current(hid))))
 	for row in snap.get("enemies", []):
 		var idx := int(row.get("idx", -1))
 		if idx < 0 or idx >= _enemy_order.size():

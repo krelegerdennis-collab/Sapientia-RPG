@@ -537,6 +537,7 @@ func _ready() -> void:
 	# Co-op telegraaf-snapshot (Combat T5): of  godot -- --telegraphcooptest  (scripts/tests/telegraph_coop_sync_tests.gd).
 	# Grondzones / Inktplas (Combat T4b): of  godot -- --zonetest  (scripts/tests/zone_tests.gd).
 	# Wortelgreep-status (Combat T6): of  godot -- --roottest  (scripts/tests/root_tests.gd).
+	# Actieve dodge + stamina (Combat D5): of  godot -- --dodgetest  (scripts/tests/dodge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -609,6 +610,7 @@ func _ready() -> void:
 			["--telegraphcooptest", "res://scripts/tests/telegraph_coop_sync_tests.gd", "TelegraphCoopSyncTest", "telegraphcooptest"],
 			["--zonetest", "res://scripts/tests/zone_tests.gd", "ZoneTest", "zonetest"],
 			["--roottest", "res://scripts/tests/root_tests.gd", "RootTest", "roottest"],
+			["--dodgetest", "res://scripts/tests/dodge_tests.gd", "DodgeTest", "dodgetest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--wm1balanstest", "res://scripts/tests/wm1_balans_tests.gd", "Wm1BalansTest", "wm1balanstest"],
