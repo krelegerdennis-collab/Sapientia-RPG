@@ -255,6 +255,59 @@ const ROOMS := {
 		"spawns": {"noord": [10, 1, "down"]},
 		"exit": {"map": "res://scenes/maps/archief_2_v2_gang.tscn", "spawn": "zuid"},
 	},
+	# WM1 T3 "Archief 2 puzzelkamer": optionele zijkamer van de Kasgang (archief_2_v2_gang, verdieping 2).
+	# Geen spec gevonden (docs/PUZZELS.md, TODO.md, issues): bescheiden kamer in de stijl van de bestaande
+	# archiefpuzzels, alleen met bestaande stukken: twee duwbare kasten op twee ZWARE platen + een hendel
+	# -> grendelpoort naar de leesnis met een kist; herstelsteen voor als een kast vastzit.
+	# Oplossing: kast_l 1x links + 2x omhoog (plaat_l), kast_r 1x rechts + 2x omhoog (plaat_r), hendel om.
+	# PLACEHOLDER-ART: geen eigen plaatjes; kasten/platen/hendel/poort/steen/kist = bestaande puzzel-art,
+	# muren/vloer = kas-tegels (look). Echte art: zie de PR (RPG ART).
+	"leven_v2_leeszaal": {
+		"name": "The Living Archive - Reading Room",
+		"style": "dungeon",
+		"theme": "kas",
+		"dungeon_set": "leven",
+		"layout": [
+			"###############",
+			"#.....T.......#",
+			"#######1#######",
+			"#.............#",
+			"#..p.......q..#",
+			"#.............#",
+			"#...a.....b...#",
+			"#.............#",
+			"#.h.........r.#",
+			"#.............#",
+			"#######E#######",
+		],
+		"look": [
+			"a-------------b",
+			"<S............>",
+			"<------.------>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"<S............>",
+			"c_____(E)_____d",
+		],
+		"objects": {
+			"a": {"type": "block", "id": "kast_l"},
+			"b": {"type": "block", "id": "kast_r"},
+			"p": {"type": "plate", "id": "plaat_l", "heavy": true},
+			"q": {"type": "plate", "id": "plaat_r", "heavy": true},
+			"h": {"type": "lever", "id": "hendel_leeszaal", "on": false},
+			"1": {"type": "gate", "id": "poort_leeszaal", "needs": ["plaat_l", "plaat_r", "hendel_leeszaal"],
+					"mode": "all", "latch": true},
+			"r": {"type": "reset", "id": "herstelsteen"},
+			"T": {"type": "chest", "id": "kist_leeszaal", "solid": true, "item": "sterk_drankje", "n": 2,
+					"flag": "kist_leeszaal",
+					"lines": ["{naam} opens the chest...", "{naam} finds 2x Strong Potion!"]},
+		},
+		"entrance": {"map": "res://scenes/maps/archief_2_v2_gang.tscn", "spawn": "leeszaal"},
+	},
 	# Verdieping 3. Kast uit Archief 1, hendel, en pas dan de groei-plaat.
 	# Heenweg vanaf de ketting-platen. Terug vanaf de tegen-platen slaat deze kamer over.
 	"leven_v3_combi": {
