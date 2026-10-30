@@ -1,8 +1,8 @@
-extends RefCounted
+extends Node
 ## WM1 F6 UX-polish: plaatsing van ballon, schat-vak en tutorial-tip is onafhankelijk van
-## venstergrootte/DPI/Windows-taakbalk. Alleen dit blok: godot --path . -- --autotest --test-ux-polish
-## Zonder de vlag draait het blok aan het eind van de volledige --autotest mee.
-## t = de autotest-node (check/frames/...).
+## venstergrootte/DPI/Windows-taakbalk.
+## Start: godot --path . -- --uxpolishtest [--shots=/pad/map]
+## Zit niet in de export (scripts/tests/*).
 
 const SD := preload("res://scripts/data/story_data.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
@@ -19,21 +19,57 @@ const SIZES := [
 	["768x432", Vector2i(768, 432)],
 ]
 
-var t: Node
+var failures := 0
+var passes := 0
+var shots := ""
 var _win0 := Vector2i.ZERO
 var _cps0 := 40.0
 
 
-func _init(p_t: Node) -> void:
-	t = p_t
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--shots="):
+			shots = arg.get_slice("=", 1)
+	_run.call_deferred()
 
 
-func run() -> void:
+func check(label: String, ok: bool) -> void:
+	print(("PASS  " if ok else "FAIL  ") + label)
+	if ok:
+		passes += 1
+	else:
+		failures += 1
+
+
+func frames(n: int) -> void:
+	for i in n:
+		await get_tree().physics_frame
+
+
+func pframes(n: int) -> void:
+	for i in n:
+		await get_tree().process_frame
+
+
+func player() -> Node2D:
+	var s := get_tree().current_scene
+	if s == null:
+		return null
+	return s.get_node_or_null("Objects/Player")
+
+
+func _rect_hits_circle(r: Rect2, c: Vector2, radius: float) -> bool:
+	var p := Vector2(clampf(c.x, r.position.x, r.end.x), clampf(c.y, r.position.y, r.end.y))
+	return p.distance_to(c) < radius
+
+
+func _run() -> void:
 	var oude_stijl: int = int(Settings.get_value("battle_style"))
 	var oude_mult: float = GameState.encounter_multiplier
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	GameState.encounter_multiplier = 0.0
-	_win0 = t.get_window().size
+	_win0 = get_window().size
 	_cps0 = Dialog.chars_per_second
 	Dialog.chars_per_second = 1000.0
 	UiTouchC.insets_override = null
@@ -45,6 +81,10 @@ func run() -> void:
 	_restore()
 	Settings.set_value("battle_style", oude_stijl)
 	GameState.encounter_multiplier = oude_mult
+	print("UXPOLISHTEST %d PASS, %d FAIL" % [passes, failures])
+	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
+	await get_tree().process_frame
+	get_tree().quit(1 if failures else 0)
 
 
 func _restore() -> void:
@@ -54,19 +94,19 @@ func _restore() -> void:
 	if Dialog.is_open:
 		Dialog.close()
 	if _win0 != Vector2i.ZERO:
-		t.get_window().size = _win0
+		get_window().size = _win0
 
 
 # ---------------------------------------------------------------- insets
 func _inset_unit() -> void:
-	t.check("F6: desktop/CI is geen mobile-feature", not OS.has_feature("mobile"))
-	t.check("F6: zonder override is insets nul (geen taakbalk)", UiTouchC.insets(t.get_viewport()) == Vector4.ZERO)
+	check("F6: desktop/CI is geen mobile-feature", not OS.has_feature("mobile"))
+	check("F6: zonder override is insets nul (geen taakbalk)", UiTouchC.insets(get_viewport()) == Vector4.ZERO)
 	UiTouchC.test_display_insets = TASKBAR
-	t.check("F6: gesimuleerde desktop-inset 16 px onder wordt genegeerd",
-			UiTouchC.insets(t.get_viewport()) == Vector4.ZERO)
+	check("F6: gesimuleerde desktop-inset 16 px onder wordt genegeerd",
+			UiTouchC.insets(get_viewport()) == Vector4.ZERO)
 	UiTouchC.test_display_insets = null
 	UiTouchC.insets_override = TASKBAR
-	t.check("F6: insets_override (notch-test) blijft wél gelden", UiTouchC.insets(t.get_viewport()) == TASKBAR)
+	check("F6: insets_override (notch-test) blijft wél gelden", UiTouchC.insets(get_viewport()) == TASKBAR)
 	UiTouchC.insets_override = null
 
 
@@ -76,62 +116,62 @@ func _placement_windows() -> void:
 	GameState.story_step = SD.KLAAR
 	GameState.pending_spawn = ""
 	var map: Node = await _laad(WILGENDAL)
-	t.check("F6: Wilgendal laadt voor plaatsingstests", map != null)
+	check("F6: Wilgendal laadt voor plaatsingstests", map != null)
 	if map == null:
 		return
-	var p: Node2D = t.player() if t.has_method("player") else map.get_node_or_null("Objects/Player")
-	t.check("F6: speler op de kaart", p != null)
+	var p: Node2D = player()
+	check("F6: speler op de kaart", p != null)
 	if p == null:
 		return
 	if p.has_method("place_at"):
 		# Omhoog kijken: de tegel vóór de speler ligt boven het midden, zodat 'onder'/'onder_smal'
 		# vrij blijft. Omlaag kijken overlapte het smalle vak (y 118) op 16:9.
 		p.place_at(Vector2i(20, 10), Vector2i.UP)
-	await t.frames(6)
+	await frames(6)
 	var touch: Control = map.get_node_or_null("TouchControls/Control")
 	for pair in SIZES:
 		var label: String = pair[0]
 		var sz: Vector2i = pair[1]
-		t.get_window().size = sz
-		await t.frames(8)
+		get_window().size = sz
+		await frames(8)
 		if touch != null and touch.has_method("refit"):
 			touch.refit()
-		await t.pframes(2)
+		await pframes(2)
 		UiTouchC.test_display_insets = TASKBAR
-		t.check("F6: %s insets blijven nul met taakbalk-simulatie" % label,
-				UiTouchC.insets(t.get_viewport()) == Vector4.ZERO)
+		check("F6: %s insets blijven nul met taakbalk-simulatie" % label,
+				UiTouchC.insets(get_viewport()) == Vector4.ZERO)
 		await _check_vak(label)
 		await _check_ballon(label, p, label == "1536x864")
 		UiTouchC.test_display_insets = null
-	t.get_window().size = _win0
-	await t.frames(4)
+	get_window().size = _win0
+	await frames(4)
 
 
 func _check_vak(tag: String) -> void:
 	Dialog.show_lines(["Kees receives 3x Healing Herb!"], "")
-	await t.pframes(4)
+	await pframes(4)
 	var r: Rect2 = Dialog.box_rect()
-	var vs: Vector2 = t.get_viewport().get_visible_rect().size
-	t.check("F6: schat (%s) in het blauwe vak, laag en niet bovenin (%s, plek %s)" % [tag, r, Dialog.placement],
+	var vs: Vector2 = get_viewport().get_visible_rect().size
+	check("F6: schat (%s) in het blauwe vak, laag en niet bovenin (%s, plek %s)" % [tag, r, Dialog.placement],
 			Dialog.is_open and Dialog.style_kind == "vak" and UiStyleC.is_blue_box(Dialog.box_style(), "vak")
 			and not Dialog.tail.visible and Dialog.at_bottom and Dialog.placement != "boven"
 			and r.position.y > vs.y * 0.4)
 	Dialog.close()
-	await t.pframes(2)
+	await pframes(2)
 
 
 func _check_ballon(tag: String, speaker: Node2D, shot := false) -> void:
 	Dialog.show_lines(["The Archives wait."], "Old Man", speaker)
-	await t.pframes(4)
+	await pframes(4)
 	var r: Rect2 = Dialog.box_rect()
-	var vs: Vector2 = t.get_viewport().get_visible_rect().size
-	t.check("F6: ballon (%s) niet bovenin maar laag, boven de knoppen (plek '%s', y %.0f)" % [tag, Dialog.placement, r.position.y],
+	var vs: Vector2 = get_viewport().get_visible_rect().size
+	check("F6: ballon (%s) niet bovenin maar laag, boven de knoppen (plek '%s', y %.0f)" % [tag, Dialog.placement, r.position.y],
 			Dialog.is_open and Dialog.style_kind == "ballon" and Dialog.at_bottom
 			and Dialog.placement != "boven" and r.position.y > vs.y * 0.4)
 	if shot:
 		await _shot("f6_dialog_1536x864")
 	Dialog.close()
-	await t.pframes(2)
+	await pframes(2)
 
 
 # ---------------------------------------------------------------- tutorial-tip
@@ -143,36 +183,36 @@ func _battle_tip() -> void:
 	GameState.pending_tier = 0
 	GameState.pending_backdrop = ""
 	var b: Node = load(GameState.BATTLE_SCENE).instantiate()
-	t.get_tree().root.add_child(b)
+	get_tree().root.add_child(b)
 	var ready := false
 	for i in 240:
 		if is_instance_valid(b) and str(b.state) == "command" and b.tip_panel != null and b.tip_panel.visible:
 			ready = true
 			break
-		await t.pframes(1)
-	t.check("F6: oefengevecht toont het tip-venster", ready)
+		await pframes(1)
+	check("F6: oefengevecht toont het tip-venster", ready)
 	if ready:
 		var want: Vector2 = b.tip_origin()
-		t.check("F6: tip-oorsprong op desktop is (6, 22)", want.is_equal_approx(Vector2(6, 22)))
-		t.check("F6: tip-venster staat op de oorsprong %s" % b.tip_panel.position,
+		check("F6: tip-oorsprong op desktop is (6, 22)", want.is_equal_approx(Vector2(6, 22)))
+		check("F6: tip-venster staat op de oorsprong %s" % b.tip_panel.position,
 				b.tip_panel.position.is_equal_approx(want))
 		var tip_r: Rect2 = _lrect(b, b.tip_panel)
 		var ok_tip := _tip_clear(b, tip_r)
-		t.check("F6: tip-venster valt nergens over (vijand, kruis, held, vak, strook, D-pad, A/B) %s" % tip_r, ok_tip)
+		check("F6: tip-venster valt nergens over (vijand, kruis, held, vak, strook, D-pad, A/B) %s" % tip_r, ok_tip)
 		await _shot("f6_tip_desktop")
 		# notch-simulatie: top-inset schuift de tip mee (gevecht is 2x, dus /2)
 		UiTouchC.insets_override = Vector4(0, 10, 0, 0)
 		if b.touch != null and b.touch.has_method("refit"):
 			b.touch.refit()
 		b._show_tip(b.heroes[0])
-		await t.pframes(2)
+		await pframes(2)
 		var shifted: Vector2 = b.tip_origin()
-		t.check("F6: tip is inset-aware (y %.1f >= 26 bij boven-inset 10)" % shifted.y,
+		check("F6: tip is inset-aware (y %.1f >= 26 bij boven-inset 10)" % shifted.y,
 				shifted.y >= 26.0 - 0.05 and b.tip_panel.position.is_equal_approx(shifted))
 		UiTouchC.insets_override = null
 	if is_instance_valid(b):
 		b.queue_free()
-	await t.pframes(4)
+	await pframes(4)
 	GameState.in_battle = false
 	GameState.pending_tutorial = {}
 	GameState.pending_enemies = []
@@ -197,7 +237,7 @@ func _tip_clear(b: Node, tip_r: Rect2) -> bool:
 	if tc != null and tc.has_method("dpad_center"):
 		for c in [[tc.dpad_center(), tc.joy_radius() * 1.2], [tc.a_center(), tc.button_radius * 1.25],
 				[tc.b_center(), tc.button_radius * 1.25]]:
-			if t._rect_hits_circle(tip_r, c[0], c[1]):
+			if _rect_hits_circle(tip_r, c[0], c[1]):
 				return false
 	return true
 
@@ -207,28 +247,24 @@ func _lrect(b: Node, c: Control) -> Rect2:
 
 
 func _shot(name: String) -> void:
-	var dir := ""
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--shots="):
-			dir = arg.get_slice("=", 1)
-	if dir == "":
+	if shots == "":
 		return
-	DirAccess.make_dir_recursive_absolute(dir)
-	await t.get_tree().process_frame
+	DirAccess.make_dir_recursive_absolute(shots)
+	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	var img := t.get_viewport().get_texture().get_image()
+	var img := get_viewport().get_texture().get_image()
 	if img:
-		img.save_png("%s/%s.png" % [dir, name])
+		img.save_png("%s/%s.png" % [shots, name])
 
 
 func _laad(pad: String) -> Node:
 	GameState.in_battle = false
 	GameState.changing_map = false
 	GameState.has_return_point = false
-	t.get_tree().change_scene_to_file(pad)
+	get_tree().change_scene_to_file(pad)
 	for i in 180:
-		await t.get_tree().process_frame
-		var s: Node = t.get_tree().current_scene
+		await get_tree().process_frame
+		var s: Node = get_tree().current_scene
 		if s != null and str(s.scene_file_path) == pad and s.is_node_ready() and i > 4 \
 				and s.get_node_or_null("Objects/Player") != null:
 			return s
