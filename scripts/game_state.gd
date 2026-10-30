@@ -665,7 +665,8 @@ func _ready() -> void:
 ## - PHYSICS_GELIJK_SUITES: extra net naast walk() die op process_frame wacht. Physics mag nooit
 ##   sneller lopen dan beelden. Niet voor alle suites: menutest en woudtest hangen af van physics
 ##   op wandkloktijd en gaan juist stuk als physics onder load langzamer loopt.
-const PHYSICS_GELIJK_SUITES: Array[String] = ["berggrottest"]
+##   dungeon100gentest: walk() wacht max. 6 physics_frames (zie docs/qa/DIAG_dungeon100.md).
+const PHYSICS_GELIJK_SUITES: Array[String] = ["berggrottest", "dungeon100gentest"]
 
 
 func _zet_testmodus(suite: String) -> void:
