@@ -522,6 +522,7 @@ func _ready() -> void:
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
 	# ECHO questlog (smoke): of  godot -- --echotest [--shots=/pad/map]  (scripts/tests/echo_tests.gd).
+	# SoM MAP_CAST na late join: of  godot -- --castjointest  (scripts/tests/cast_join_tests.gd).
 	# Sessielog (SessieLog, scripts/core/sessie_log.gd): of  godot -- --sessielogcoretest  (scripts/tests/sessielog_core_tests.gd).
 	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
 	# UX-polish WM1 (tikdoelen 48dp, Engelse tekst, tutorials, 19,5:9/20:9 + notch, SFX, volume): of
@@ -593,6 +594,7 @@ func _ready() -> void:
 			["--balansarchief1test", "res://scripts/tests/balans_archief1_tests.gd", "BalansArchief1Test", "balansarchief1test"],
 			["--questtest", "res://scripts/tests/quest_tests.gd", "QuestTest", "questtest"],
 			["--echotest", "res://scripts/tests/echo_tests.gd", "EchoTest", "echotest"],
+			["--castjointest", "res://scripts/tests/cast_join_tests.gd", "CastJoinTest", "castjointest"],
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
 			["--uxtest", "res://scripts/tests/ux_tests.gd", "UxTest", "uxtest"],
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
@@ -613,6 +615,8 @@ func _ready() -> void:
 			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
 			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
 			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
+			["--huisdrawtest", "res://scripts/tests/huis_draw_calls_tests.gd", "HuisDrawCallsTest", "huisdrawtest"],
+			["--huispixeltest", "res://scripts/tests/huis_pixel_tests.gd", "HuisPixelTest", "huispixeltest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
 			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
@@ -997,7 +1001,20 @@ func add_member(id: String) -> bool:
 	if party.size() > PartyLimiet.MAX_HELDEN and PartyLimiet.mag_naar_reserve(h):
 		party.pop_back()
 		party_bench.append(h)
+	_som_party_hero_joined(id)
 	return true
+
+
+## Action-arena op de huidige map: cast-sheets (en bondgenoot) bij latere party-leden.
+func _som_party_hero_joined(id: String) -> void:
+	if not is_inside_tree():
+		return
+	var scene := get_tree().current_scene
+	if scene == null or not ("som" in scene):
+		return
+	var som: Node = scene.som
+	if som != null and som.has_method("join_party_hero"):
+		som.join_party_hero(id)
 
 
 ## v0.22 Is cutscene 'id' al bekeken? (eigen lijst, of de vlag die de cutscene zelf zet)
