@@ -42,6 +42,14 @@ func run() -> void:
 		# Gerrit + 5 sfeer-NPC's + 3 vaste dorpelingen
 		t.check("wilgendal-dialoog (%s): minstens 9 NPC's in het dorp (%d)" % [stand["naam"], npcs.size()], npcs.size() >= 9)
 		for npc in npcs:
+			if str(npc.name) == "Gerrit" and not GameState.story_flags.has("noor_lid"):
+				# Bewust: Gerrit praat pas met Vesper in de groep; zijn tekst is canon (woud_tests: precies de
+				# canon-zinnen). Hier alleen vastleggen dat dat de enige stille variant is.
+				var v: Dictionary = Story.pick("gerrit")
+				t.check("wilgendal-dialoog: Gerrit zwijgt vóór Vesper alleen via de lege canon-variant",
+						not v.is_empty() and v.get("do") is Array and (v["do"] as Array).is_empty()
+						and v.get("if", {}).get("not_flags", []) == ["noor_lid"])
+				continue
 			_controleer(npc, "dorp/%s (%s)" % [npc.name, stand["naam"]])
 	# winkeliers en bewoners binnen (wilgendal_binnen.tscn, spawn = pand-id)
 	GameState.new_game("Dax")
