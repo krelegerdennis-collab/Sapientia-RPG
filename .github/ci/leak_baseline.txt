@@ -1,0 +1,3 @@
+formuletest 0 0
+battlesimenemytest 1 0
+combatbugstest 1 0

@@ -1,0 +1,202 @@
+name: proef-suites
+
+# Suites uit de proeven (formule, battlesim per vijand, gevechtsbugs) + determinisme van de battlesim
+# + lekcontrole. Los van tests.yml; die en run_suite.sh blijven ongewijzigd.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      leak_strict:
+        description: "1 = falen bij nieuwe ObjectDB-/resource-lekken (standaard 0 = alleen waarschuwen)"
+        required: false
+        default: "0"
+
+concurrency:
+  group: proef-suites-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.3-stable
+  GODOT: ${{ github.workspace }}/.godot-bin/Godot_v4.3-stable_linux.x86_64
+  # Lekcontrole: 0 = waarschuwen, 1 = falen bij een lek dat niet in .github/ci/leak_baseline.txt staat.
+  LEAK_STRICT: ${{ github.event.inputs.leak_strict || vars.LEAK_STRICT || '0' }}
+
+jobs:
+  suites:
+    name: proef-suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: .godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      - name: Download Godot 4.3-stable
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .godot-bin
+          curl -fsSL -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d .godot-bin
+          chmod +x "$GODOT"
+
+      - name: Install xvfb + Mesa (gl_compatibility / opengl3)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 libegl1 > /dev/null
+
+      - name: Import pass
+        id: import
+        run: |
+          "$GODOT" --version
+          timeout 600 "$GODOT" --headless --path . --import > import.log 2>&1 || { tail -50 import.log; exit 1; }
+          if grep -q 'SCRIPT ERROR' import.log; then grep -n 'SCRIPT ERROR' -A3 import.log; exit 1; fi
+
+      - name: Summary-kop
+        run: |
+          echo "| suite | PASS | FAIL | ERR | tijd | resultaat |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run formuletest
+        id: formuletest
+        run: .github/scripts/run_suite.sh formuletest
+
+      - name: Run battlesimenemytest
+        id: battlesimenemytest
+        if: ${{ !cancelled() && steps.import.outcome == 'success' }}
+        run: .github/scripts/run_suite.sh battlesimenemytest
+
+      - name: Run combatbugstest
+        id: combatbugstest
+        if: ${{ !cancelled() && steps.import.outcome == 'success' }}
+        run: .github/scripts/run_suite.sh combatbugstest
+
+      # Godot meldt bij afsluiten "WARNING: ObjectDB instances leaked at exit" en/of
+      # "ERROR: N resources still in use at exit". Er zijn bestaande lekken: die staan per suite in
+      # .github/ci/leak_baseline.txt ("<suite> <objectdb 0|1> <resources N>"). Alleen méér dan de
+      # baseline telt als nieuw. LEAK_STRICT=1 -> falen, anders alleen een ::warning::.
+      - name: Lekcontrole (LEAK_STRICT=${{ env.LEAK_STRICT }})
+        if: ${{ !cancelled() && steps.import.outcome == 'success' }}
+        run: |
+          BASE=.github/ci/leak_baseline.txt
+          NEW=0
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| suite | ObjectDB-lek | resources in use | baseline | nieuw |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          for S in formuletest battlesimenemytest combatbugstest; do
+            LOG="testlogs/$S.log"
+            if [ ! -f "$LOG" ]; then echo "::warning::$S: geen log ($LOG)"; continue; fi
+            OBJ=0; grep -q 'ObjectDB instances leaked' "$LOG" && OBJ=1
+            RES=$(grep -oE '[0-9]+ resources still in use' "$LOG" | tail -1 | grep -oE '^[0-9]+' || true)
+            RES=${RES:-0}
+            B_OBJ=0; B_RES=0
+            if [ -f "$BASE" ]; then
+              read -r _ B_OBJ B_RES <<< "$(grep -E "^$S " "$BASE" || echo "$S 0 0")"
+            fi
+            IS_NEW=nee
+            if [ "$OBJ" -gt "${B_OBJ:-0}" ] || [ "$RES" -gt "${B_RES:-0}" ]; then
+              IS_NEW=ja; NEW=1
+              MSG="$S: nieuw lek (ObjectDB=$OBJ resources=$RES; baseline ObjectDB=$B_OBJ resources=$B_RES)"
+              if [ "$LEAK_STRICT" = "1" ]; then echo "::error::$MSG"; else echo "::warning::$MSG"; fi
+              grep -nE 'ObjectDB instances leaked|resources still in use|Leaked instance' "$LOG" | head -20
+            fi
+            echo "$S ObjectDB=$OBJ resources=$RES (baseline $B_OBJ/$B_RES) nieuw=$IS_NEW"
+            echo "| $S | $OBJ | $RES | $B_OBJ/$B_RES | $IS_NEW |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          if [ "$NEW" -ne 0 ] && [ "$LEAK_STRICT" = "1" ]; then exit 1; fi
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-proef-suites
+          path: |
+            testlogs/formuletest.log
+            testlogs/battlesimenemytest.log
+            testlogs/combatbugstest.log
+          retention-days: 7
+
+  determinisme:
+    name: battlesim-determinisme
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: .godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      - name: Download Godot 4.3-stable
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .godot-bin
+          curl -fsSL -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d .godot-bin
+          chmod +x "$GODOT"
+
+      - name: Install xvfb + Mesa (gl_compatibility / opengl3)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 libegl1 > /dev/null
+
+      - name: Import pass
+        id: import
+        run: |
+          "$GODOT" --version
+          timeout 600 "$GODOT" --headless --path . --import > import.log 2>&1 || { tail -50 import.log; exit 1; }
+          if grep -q 'SCRIPT ERROR' import.log; then grep -n 'SCRIPT ERROR' -A3 import.log; exit 1; fi
+
+      # Zelfde seed twee keer, elk met een eigen user://-map; de CSV's (runs + per vijand) moeten
+      # byte-gelijk zijn.
+      - name: Battlesim seed 7 twee keer + byte-vergelijking
+        run: |
+          mkdir -p testlogs/sim
+          for RUN in a b; do
+            export XDG_DATA_HOME="$PWD/testlogs/xdg_sim_$RUN"
+            rm -rf "$XDG_DATA_HOME"; mkdir -p "$XDG_DATA_HOME"
+            # run: is 'bash -e': exitcode via || vangen, anders stopt de stap vóór de foutmelding.
+            CODE=0
+            timeout 1200 xvfb-run -a "$GODOT" --rendering-driver opengl3 --path . -- --battlesim \
+              --party=dennis:5,noor:5 --enemy=all --total=1000 --seed=7 --policy=simpel \
+              --out="$PWD/testlogs/sim/seed7_$RUN.csv" > "testlogs/battlesim_$RUN.log" 2>&1 || CODE=$?
+            tail -5 "testlogs/battlesim_$RUN.log"
+            if [ "$CODE" -ne 0 ] || ! grep -q 'RESULT OK' "testlogs/battlesim_$RUN.log"; then
+              echo "::error::battlesim run $RUN faalde (exit=$CODE)"; exit 1
+            fi
+          done
+          FAIL=0
+          for F in seed7 seed7_per_enemy; do
+            A="testlogs/sim/${F/seed7/seed7_a}.csv"; B="testlogs/sim/${F/seed7/seed7_b}.csv"
+            if cmp "$A" "$B"; then
+              echo "OK  $A == $B ($(wc -l < "$A") regels, $(sha256sum < "$A" | cut -c1-16))"
+            else
+              echo "::error::battlesim seed 7 niet deterministisch: $A != $B"
+              diff "$A" "$B" | head -20
+              FAIL=1
+            fi
+          done
+          echo "battlesim seed 7: $([ $FAIL -eq 0 ] && echo deterministisch || echo NIET deterministisch)" >> "$GITHUB_STEP_SUMMARY"
+          exit $FAIL
+
+      - name: Upload CSV's + logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: battlesim-seed7
+          path: |
+            testlogs/sim/
+            testlogs/battlesim_*.log
+          retention-days: 7
