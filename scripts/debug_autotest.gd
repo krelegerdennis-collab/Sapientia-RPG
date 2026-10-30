@@ -624,6 +624,13 @@ func _run() -> void:
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
+	if "--test-wilgendal-dialoog" in OS.get_cmdline_user_args():
+		# Alleen de Wilgendal-NPC-dialogen (scripts/tests/wilgendal_dialoog_autotest.gd); CI draait ze aan het eind mee.
+		check("titelscherm (wilgendal-dialoog)", await wait_scene("Title"))
+		await preload("res://scripts/tests/wilgendal_dialoog_autotest.gd").new(self).run()
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
+		get_tree().quit(1 if failures else 0)
+		return
 	if "--test-archief2-leeszaal" in OS.get_cmdline_user_args():
 		# Alleen de puzzelkamer van Archief 2 (scripts/tests/archief2_leeszaal_autotest.gd); CI draait ze aan het eind mee.
 		check("titelscherm (archief2-leeszaal)", await wait_scene("Title"))
@@ -670,6 +677,8 @@ func _run() -> void:
 	await preload("res://scripts/tests/item_icon_autotest.gd").new(self).run()
 	await preload("res://scripts/tests/item_icon_hookup_autotest.gd").new(self).run()
 	await preload("res://scripts/tests/cast_anim_autotest.gd").new(self).run()
+	Engine.time_scale = 1.0
+	await preload("res://scripts/tests/wilgendal_dialoog_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/archief2_leeszaal_autotest.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])

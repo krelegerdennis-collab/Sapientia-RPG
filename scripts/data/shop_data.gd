@@ -64,7 +64,7 @@ const SHOPS := {
 
 
 static func shop_name(shop_id: String) -> String:
-	return str(SHOPS.get(shop_id, {}).get("name", "Winkel"))
+	return str(SHOPS.get(shop_id, {}).get("name", "Shop"))
 
 
 static func is_magic(shop_id: String) -> bool:
