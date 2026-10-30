@@ -46,6 +46,9 @@ func check(label: String, ok: bool) -> void:
 
 
 func _run() -> void:
+	# Zelfde asserts, sneller lopen/fades/animaties (zoals woudtest/archief2). Geen lossere checks.
+	var prev_scale := Engine.time_scale
+	Engine.time_scale = 3.0
 	_data()
 	_art()
 	_wereld()
@@ -55,6 +58,7 @@ func _run() -> void:
 	await _panden()
 	await _som()
 	await _huis_herkomst()
+	Engine.time_scale = prev_scale
 	print("WILGENDALTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -747,6 +751,7 @@ func _som() -> void:
 	# proef-config: som met complete art -> som; één tileset kwijt -> het HELE gebied oud
 	KaartStijl.zet_config({"map": PROEF, "gebieden": {"proef_herfst": {"stijl": "som", "maps": ["dorp_wilgendal"],
 			"tilesets": ["proef"], "speler": DAX}}})
+	Data.som_herladen()
 	check("som-gebied met alle art -> som", KaartStijl.stijl_van_map(DORP) == KaartStijl.SOM
 			and KaartStijl.ontbreekt("proef_herfst").is_empty())
 	var kaart := Node2D.new()
@@ -779,9 +784,11 @@ func _som() -> void:
 			!= herfst.get_image().get_pixel(8, 8) and normaal.get_image().get_pixel(0, 0) == herfst.get_image().get_pixel(0, 0))
 	KaartStijl.zet_config({"map": PROEF, "gebieden": {"proef_herfst": {"stijl": "som", "maps": ["dorp_wilgendal"],
 			"tilesets": ["proef", "bestaat_niet"], "speler": DAX}}})
+	Data.som_herladen()
 	check("som-gebied met ontbrekende tileset -> hele gebied oud", KaartStijl.stijl_van_map(DORP) == KaartStijl.OUD
 			and KaartStijl.ontbreekt("proef_herfst").size() == 1 and not KaartStijl.toepassen(kaart))
 	KaartStijl.zet_config({})
+	Data.som_herladen()
 	kaart.queue_free()
 	await get_tree().process_frame
 
@@ -1037,21 +1044,33 @@ func _loop(p: Node2D, naar: Vector2i) -> bool:
 		print("INFO  geen pad naar ", naar)
 		return false
 	var acties := {Vector2i.UP: "move_up", Vector2i.DOWN: "move_down", Vector2i.LEFT: "move_left", Vector2i.RIGHT: "move_right"}
-	for stap in pad:
-		var dir: Vector2i = stap - p.get_tile()
+	var i := 0
+	while i < pad.size():
+		if p.get_tile() == naar:
+			return true
+		# time_scale kan een tegel overslaan: stappen die we al op/voorbij zijn, overslaan.
+		while i < pad.size() and p.get_tile() == pad[i]:
+			i += 1
+		if i >= pad.size():
+			break
+		var stap: Vector2i = pad[i]
+		var van: Vector2i = p.get_tile()
+		var dir: Vector2i = stap - van
 		if not acties.has(dir):
+			print("INFO  vast op ", van, " richting ", stap)
 			return false
 		var actie: String = acties[dir]
 		Input.action_press(actie)
 		var t0 := Time.get_ticks_msec()
-		while p.get_tile() != stap and Time.get_ticks_msec() - t0 < 2000:
+		while p.get_tile() == van and Time.get_ticks_msec() - t0 < 2000:
 			await get_tree().process_frame
 		Input.action_release(actie)
 		while p.is_moving and Time.get_ticks_msec() - t0 < 2500:
 			await get_tree().process_frame
-		if p.get_tile() != stap:
+		if p.get_tile() == van:
 			print("INFO  vast op ", p.get_tile(), " richting ", stap)
 			return false
+		i += 1
 	return p.get_tile() == naar
 
 
