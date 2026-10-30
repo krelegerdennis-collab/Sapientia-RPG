@@ -2,10 +2,11 @@ extends CanvasLayer
 ## Autoload "Transition": flits- en fade-effecten tussen scènes.
 ##   await Transition.encounter_out()   (flits + naar zwart, begin gevecht)
 ##   await Transition.fade_out()        (naar zwart)
-##   await Transition.fade_in()         (van zwart naar beeld)
+##   await Transition.fade_in_wait()    (van zwart naar beeld, wachtend)
 ##   await Transition.flash(Color.WHITE, 0.6)   (v0.11: verblindende flits die wegebt)
 
 var _rect: ColorRect
+var _fade_tween: Tween
 
 
 func _ready() -> void:
@@ -16,6 +17,16 @@ func _ready() -> void:
 	_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rect.color = Color(0, 0, 0, 0)
 	add_child(_rect)
+
+
+func _exit_tree() -> void:
+	_kill_fade_tween()
+
+
+func _kill_fade_tween() -> void:
+	if _fade_tween != null and _fade_tween.is_valid():
+		_fade_tween.kill()
+	_fade_tween = null
 
 
 func encounter_out() -> void:
@@ -32,8 +43,23 @@ func fade_out(duration := 0.3) -> void:
 	await _fade_to(Color(0, 0, 0, 1), duration)
 
 
+## Titelscherm / kaart: geen await (anders blijft een GDScriptFunctionState hangen bij snelle quit).
 func fade_in(duration := 0.3) -> void:
+	_start_fade(Color(0, 0, 0, 0), duration)
+
+
+## Zelfde als fade_in(), maar wacht tot de fade klaar is (gevecht, scènewissel).
+func fade_in_wait(duration := 0.3) -> void:
 	await _fade_to(Color(0, 0, 0, 0), duration)
+
+
+func _start_fade(target: Color, duration: float) -> void:
+	_kill_fade_tween()
+	if duration <= 0.0:
+		_rect.color = target
+		return
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(_rect, "color", target, duration)
 
 
 ## Start de fade en geeft het `finished`-signaal terug (geen coroutine, geen Tween).
@@ -42,9 +68,10 @@ func fade_in(duration := 0.3) -> void:
 ## fade_in van het titelscherm in een snelle testsuite), dan gaf dat
 ## "ObjectDB instances leaked at exit".
 func _fade_to(target: Color, duration: float) -> Signal:
-	var tween := create_tween()
-	tween.tween_property(_rect, "color", target, duration)
-	return tween.finished
+	_start_fade(target, duration)
+	if _fade_tween == null:
+		return get_tree().process_frame
+	return _fade_tween.finished
 
 
 func flash(color: Color, duration := 0.6) -> void:

@@ -57,6 +57,8 @@ const LIST_CHROME := 13.0         # marges van het lijstje (boven + onder) plus 
 ## Hoe lang een gevechtsbericht in beeld blijft (A drukken = sneller).
 const MESSAGE_TIME := 0.8
 const HeroScript := preload("res://scripts/battle/battle_hero.gd")
+## true tijdens tools/battlesim (headless): geen SceneTreeTimer/Tween op helden die bij queue_free lekken.
+static var headless_sim := false
 const StatusBoxScript := preload("res://scripts/battle/hero_status_box.gd")
 ## Voeten van de helden (bij 384 breed): op een rij links, licht verspringend (zoals de
 ## mockup). Een 4e held staat in de achterste rij ertussen.
@@ -812,7 +814,7 @@ func _sort_by_feet(layer: Control) -> void:
 
 # ================================================================ hoofdlus
 func _run() -> void:
-	await Transition.fade_in()
+	await Transition.fade_in_wait()
 	var names: Array = enemies.map(func(e): return e["name"])
 	var intro := "Monsters appear!"
 	if names.size() == 1:
@@ -1736,9 +1738,12 @@ func _report_kos(targets: Array) -> void:
 				var end_id := EndgameBestiary.id_for_floor(GameState.dungeon100_floor)
 				if end_id != "":
 					GameState.mark_defeated(end_id)
-			var tw := create_tween()
-			tw.tween_property(t["node"], "modulate:a", 0.0, 0.3)
-			tw.tween_callback(t["node"].hide)
+			if headless_sim:
+				t["node"].hide()
+			else:
+				var tw := create_tween()
+				tw.tween_property(t["node"], "modulate:a", 0.0, 0.3)
+				tw.tween_callback(t["node"].hide)
 			show_message("%s is defeated!" % t["name"])
 		await _wait(MESSAGE_TIME)
 
@@ -2167,6 +2172,8 @@ func _wait(seconds: float) -> void:
 
 
 func _popup_number(t: Dictionary, text: String, color: Color) -> void:
+	if headless_sim:
+		return
 	var label := Label.new()
 	label.text = text
 	label.add_theme_color_override("font_color", color)
@@ -2188,6 +2195,8 @@ func _popup_number(t: Dictionary, text: String, color: Color) -> void:
 
 
 func _blink(node: CanvasItem) -> void:
+	if headless_sim:
+		return
 	var tw := create_tween()
 	for i in 3:
 		tw.tween_callback(node.hide)
