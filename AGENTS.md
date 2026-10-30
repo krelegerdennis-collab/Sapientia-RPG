@@ -65,6 +65,7 @@ Suites (v0.18, aantallen PASS ter referentie):
 | `--kerntest` | `scripts/tests/kern_tests.gd` | 72 |
 | `--kernkrachttest` | `scripts/tests/kernkracht_tests.gd` | 102 |
 | `--woudtest` | `scripts/tests/woud_tests.gd` | 91 |
+| `--woud16test` | `scripts/tests/woud16_tests.gd` | 4+ |
 | `--codextest` | `scripts/tests/codex_tests.gd` | 90 |
 | `--checkpointtest` | `scripts/tests/checkpoint_tests.gd` | 65 |
 | `--dungeon100gentest` | `scripts/tests/dungeon100_generator_tests.gd` | 58 |

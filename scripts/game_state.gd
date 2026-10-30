@@ -484,6 +484,7 @@ func _ready() -> void:
 	# v0.15: of  godot -- --kerntest [--shots=/pad/map]  (scripts/tests/kern_tests.gd, kernfragmenten).
 	# v0.16: of  godot -- --kernkrachttest [--shots=/pad/map]  (scripts/tests/kernkracht_tests.gd, vuurbal).
 	# v0.17: of  godot -- --woudtest [--shots=/pad/map]  (scripts/tests/woud_tests.gd, Esdoorn + Donker Woud + Noor).
+	# WM1 T2 Woud 16px + STAM_VAR: of  godot -- --woud16test [--shots=/pad/map]  (scripts/tests/woud16_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100gentest [--shots=/pad/map]  (scripts/tests/dungeon100_generator_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100schaaltest [--shots=/pad/map]  (scripts/tests/dungeon100_schaal_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100regelstest [--shots=/pad/map]  (scripts/tests/dungeon100_tests.gd).
@@ -559,6 +560,7 @@ func _ready() -> void:
 			["--kerntest", "res://scripts/tests/kern_tests.gd", "KernTest", "kerntest"],
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
 			["--woudtest", "res://scripts/tests/woud_tests.gd", "WoudTest", "woudtest"],
+			["--woud16test", "res://scripts/tests/woud16_tests.gd", "Woud16Test", "woud16test"],
 			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
 			["--fusietest", "res://scripts/tests/fusie_tests.gd", "FusieTest", "fusietest"],
 			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"],
