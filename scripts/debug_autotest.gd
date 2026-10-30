@@ -646,6 +646,13 @@ func _run() -> void:
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
+	if "--test-ux-polish" in OS.get_cmdline_user_args():
+		# Alleen F6 UX-plaatsing (scripts/tests/ux_polish_autotest.gd); CI draait ze aan het eind mee.
+		check("titelscherm (ux-polish)", await wait_scene("Title"))
+		await preload("res://scripts/tests/ux_polish_autotest.gd").new(self).run()
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
+		get_tree().quit(1 if failures else 0)
+		return
 	await _title_and_name_tests()
 	await _prologue_tests()
 	await _end_prologue()
@@ -681,6 +688,8 @@ func _run() -> void:
 	await preload("res://scripts/tests/wilgendal_dialoog_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/archief2_leeszaal_autotest.gd").new(self).run()
+	Engine.time_scale = 1.0
+	await preload("res://scripts/tests/ux_polish_autotest.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
 

@@ -32,6 +32,7 @@ signal state_changed(new_state: String)
 signal damage_shown(target_name: String, amount: int)
 
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
@@ -2271,8 +2272,16 @@ func _show_tip(hero: Dictionary) -> void:
 	tip_label.size = Vector2(w - 14, th)
 	var h := ceilf(th) + 10.0
 	tip_panel.size = Vector2(w, h)
-	tip_panel.position = Vector2(6, 22)   # linksboven, onder de strook, ver boven de D-pad
+	tip_panel.position = tip_origin()   # linksboven, onder de strook; notch schuift mee
 	tip_panel.show()
+
+
+## Plek van het tip-venster in gevechtseenheden (384x216). Desktop: (6, 22).
+## Op mobiel telt de veilige zone (notch); het gevecht is 2x geschaald, insets staan in viewport-px.
+func tip_origin() -> Vector2:
+	var ins := UiTouchC.insets(get_viewport())
+	var s := maxf(get_global_transform().get_scale().x, 0.001)
+	return Vector2(6.0 + ins.x / s, 22.0 + ins.y / s)
 
 
 func _hide_tip() -> void:
