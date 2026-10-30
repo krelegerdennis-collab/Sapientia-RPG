@@ -41,6 +41,7 @@ const SomHud := preload("res://scripts/som/som_hud.gd")
 const SomRing := preload("res://scripts/som/som_ring.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const SomMove := preload("res://scripts/som/som_move.gd")
+const SomSlide := preload("res://scripts/som/som_slide.gd")
 const SomAlly := preload("res://scripts/som/som_ally.gd")
 const SomCodex := preload("res://scripts/som/som_codex.gd")
 const SomTargetLock := preload("res://scripts/som/som_target_lock.gd")
@@ -1351,6 +1352,25 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 	return true
 
 
+func _room_is_wall(t: Vector2i) -> bool:
+	if room != null and room.has_method("is_wall"):
+		return bool(room.is_wall(t))
+	return false
+
+
+## Dodge-stap: zelfde logische tegel-clamp als player._process_analog (SomSlide + move_and_collide).
+func _apply_dodge_motion(n: Node2D, motion: Vector2) -> void:
+	if motion == Vector2.ZERO:
+		return
+	var wall := Callable(self, "_room_is_wall")
+	var voor := n.position
+	var want := SomSlide.corrigeer(voor, voor + motion, wall)
+	var delta := want - n.position
+	if n is CharacterBody2D and delta != Vector2.ZERO:
+		(n as CharacterBody2D).move_and_collide(delta)
+	n.position = SomSlide.corrigeer(voor, n.position, wall)
+
+
 func _tick_stamina_and_dodge() -> void:
 	if not _roots_authority():
 		return
@@ -1372,7 +1392,7 @@ func _tick_stamina_and_dodge() -> void:
 		var step := SomData.DODGE_DISTANCE_PX / float(SomData.DODGE_DURATION_TICKS)
 		var n := node_of(id)
 		if n != null:
-			n.position += _dodge_dir.get(id, Vector2.ZERO) * step
+			_apply_dodge_motion(n, _dodge_dir.get(id, Vector2.ZERO) * step)
 			if n == player:
 				player.set("_target", n.position)
 		left -= 1

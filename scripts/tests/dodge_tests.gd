@@ -10,6 +10,7 @@ const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const EnemyAttacks := preload("res://scripts/som/enemy_attacks.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
+const SomSlide := preload("res://scripts/som/som_slide.gd")
 const ROOM := "res://scenes/maps/archief_v1_gang.tscn"
 
 var failures := 0
@@ -36,6 +37,7 @@ func _run() -> void:
 	_dodge_break_root_tests()
 	_arena_hit_root_tests()
 	_codec_stamina_tests()
+	await _dodge_wall_tests()
 	await _determinism_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -103,6 +105,49 @@ func _codec_stamina_tests() -> void:
 	var wire := Codec.pack_snapshot(1, [{"slot": 0, "x": 0, "y": 0, "face": 0, "frame": 0, "hp": 10, "mp": s.wire_stamina("dennis"), "flags": 0}], [])
 	var snap := Codec.unpack_snapshot(wire)
 	check("snapshot mp = stamina wire", int(snap["players"][0]["mp"]) == 88)
+
+
+func _dodge_wall_tests() -> void:
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	GameState.new_game("Dax")
+	GameState.in_battle = false
+	get_tree().change_scene_to_file(ROOM)
+	var room: Node = null
+	for i in 240:
+		await get_tree().process_frame
+		var s := get_tree().current_scene
+		if s != null and str(s.scene_file_path) == ROOM and s.is_node_ready() and i > 4 and s.get("som") != null:
+			room = s
+			break
+	if room == null:
+		check("dodge muur: kamer geladen", false)
+		return
+	var arena: SomArena = room.som
+	arena.set_process(false)
+	arena.allies_enabled = false
+	arena.combat_stamina.init_member("dennis")
+	var wt := Vector2i(-1, -1)
+	for y in range(2, 24):
+		for x in range(2, 48):
+			var c := Vector2i(x, y)
+			if not room.is_wall(c) and room.is_wall(c + Vector2i.RIGHT):
+				wt = c
+				break
+		if wt.x >= 0:
+			break
+	if wt.x < 0:
+		check("dodge muur: tegel naast muur gevonden", false)
+		return
+	var p: CharacterBody2D = arena.player
+	p.place_at(wt, Vector2i.RIGHT)
+	var wall_cb := func(t: Vector2i) -> bool: return room.is_wall(t)
+	check("dodge muur: start begaanbaar", not room.is_wall(p.get_tile()))
+	check("dodge muur: dodge gestart", arena.try_active_dodge("dennis", Vector2.RIGHT))
+	for _i in SomData.DODGE_DURATION_TICKS + 4:
+		arena.step_ticks(1)
+	check("dodge muur: tegel nog begaanbaar", not room.is_wall(p.get_tile()))
+	check("dodge muur: hitbox niet in muur", not SomSlide.in_muur(p.position, wall_cb))
+	check("dodge muur: niet op muurtegel", p.get_tile() != wt + Vector2i.RIGHT)
 
 
 func _determinism_tests() -> void:
