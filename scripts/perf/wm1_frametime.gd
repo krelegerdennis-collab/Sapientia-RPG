@@ -2,7 +2,7 @@ class_name Wm1Frametime
 extends RefCounted
 ## Gedeelde WM1-frametijdmeting (headless, gl_compatibility): script-tijd per frame (process_frame →
 ## frame_pre_draw), gemiddelde draw calls en node-tellers. Zie docs/perf_wm1.md.
-## Gebruikt door --wm1frametest (loggen); budget-regressie volgt in een aparte PR (#246).
+## Gebruikt door --wm1frametest (loggen) en --wm1budgettest (regressie).
 
 const Kamers := preload("res://world_warper/kamers/kamers.gd")
 

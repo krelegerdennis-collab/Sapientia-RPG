@@ -515,7 +515,7 @@ func _ready() -> void:
 	# Battle simulator CSV-modus: of  godot -- --battlesimtest  (scripts/tests/battlesim_tests.gd).
 	# WM1-playthrough (nieuw spel t/m de hub, save/load, pauze): of  godot -- --wm1playthroughtest [--speed=N] [--static-only]  (scripts/tests/wm1_playthrough_tests.gd).
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
-	# WM1 frametime-log (alle kamers, WM1FRAME op stdout): of  godot -- --wm1frametest  (scripts/tests/wm1_frametime_tests.gd).
+	# WM1 frametime-log + budget: of  godot -- --wm1frametest / --wm1budgettest  (scripts/tests/wm1_frametime_tests.gd, wm1_budget_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# SoM slag vs lock: of  godot -- --swinglocktest  (scripts/tests/swing_lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
@@ -615,6 +615,7 @@ func _ready() -> void:
 			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
 			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],
 			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
+			["--wm1budgettest", "res://scripts/tests/wm1_budget_tests.gd", "Wm1BudgetTest", "wm1budgettest"],
 			["--huisdrawtest", "res://scripts/tests/huis_draw_calls_tests.gd", "HuisDrawCallsTest", "huisdrawtest"],
 			["--huispixeltest", "res://scripts/tests/huis_pixel_tests.gd", "HuisPixelTest", "huispixeltest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
