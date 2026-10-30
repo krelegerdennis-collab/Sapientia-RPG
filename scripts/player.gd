@@ -397,7 +397,12 @@ func script_walk(dir: Vector2i, n: int, speed := 56.0) -> void:
 		var t := 0.0
 		var dur := TILE_SIZE / speed
 		while t < dur:
+			# Node kan tijdens de cutscene de boom verlaten (mapwissel): dan netjes stoppen.
+			if not is_inside_tree():
+				return
 			await get_tree().process_frame
+			if not is_inside_tree():
+				return
 			var dt := get_process_delta_time()
 			t += dt
 			_walk_distance += speed * dt
