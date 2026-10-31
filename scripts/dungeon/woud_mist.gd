@@ -83,6 +83,9 @@ static func _texture() -> Texture2D:
 
 
 func _process(delta: float) -> void:
+	# T27: s25_check — Donker Woud mist/overlay (docs/perf/s25_check.md)
+	if PerfProbe.enabled:
+		PerfProbe.begin("woud_mist")
 	var pl: Node2D = _player
 	if _lantern != null and pl != null:
 		_lantern.global_position = pl.global_position + Vector2(0, -4)
@@ -100,3 +103,5 @@ func _process(delta: float) -> void:
 			var d := (pl.global_position + Vector2(0, -8) - s.global_position) / (Vector2(32, 32) * s.scale)
 			a *= lerpf(CLEAR_MIN, 1.0, clampf(d.length(), 0.0, 1.0))
 		s.modulate.a = a
+	if PerfProbe.enabled:
+		PerfProbe.end("woud_mist")

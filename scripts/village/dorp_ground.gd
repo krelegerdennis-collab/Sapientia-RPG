@@ -17,14 +17,21 @@ var namen: Dictionary = {}
 
 
 func _ready() -> void:
+	# T27: s25_check RISK dorp_wilgendal — tegelopbouw (docs/perf/s25_check.md)
+	if PerfProbe.enabled:
+		PerfProbe.begin("dorp_wilgendal")
 	if Data.som():
 		_som()
+		if PerfProbe.enabled:
+			PerfProbe.end("dorp_wilgendal")
 		return
 	for y in Data.H:
 		var rij: String = Data.GROND[y]
 		for x in rij.length():
 			var kol: int = int(Data.TEGEL.get(rij[x], 0))
 			set_cell(Vector2i(x, y), 0, Vector2i(kol, 0))
+	if PerfProbe.enabled:
+		PerfProbe.end("dorp_wilgendal")
 
 
 static func teken(t: Vector2i) -> String:

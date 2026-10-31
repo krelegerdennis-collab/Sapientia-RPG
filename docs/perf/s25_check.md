@@ -68,3 +68,12 @@ Als headless **RISK** maar S25 groen blijft: noteer in issue/PR als geaccepteerd
 ## Rapportage
 
 Vul een korte tabel (scène | 99th ms | mem PSS | opmerking) en plak in het release-issue of `docs/release/WM1_RELEASE_CHECKLIST.md` Fase 4.
+
+## Profiler-haken (T27)
+
+Op elke **RISK**-plek (en de mist/overlay van het Donker Woud) staan `PerfProbe.begin`/`end`-haken (`scripts/perf/perf_probe.gd`). Standaard uit (alleen een bool-check). Aan:
+
+- command-line: `--perfprobe` (niet `--perfprobetest`; die suite test de helper)
+- debug-instelling: in `user://settings.cfg` onder `[instellingen]` `perf_probe=true`
+
+Dump: Godot-log `PERFPROBE {…}` en `user://perf_probe.json` (count / min / avg / max µs per label). Labels: `dorp_wilgendal`, `warper_hal`, `woud_beek`, `battle_gras`, `battle_woud`, `battle_archief`, `battle_baas_golem`, `battle_kas`, plus `woud_mist`.

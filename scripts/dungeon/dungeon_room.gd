@@ -454,8 +454,14 @@ func _build_pit_edges() -> void:
 
 
 func _build_overlay() -> void:
+	# T27: s25_check — Donker Woud mist/overlay (docs/perf/s25_check.md)
+	var _pp_on := PerfProbe.enabled and str(DungeonRooms.current_theme) == "donker_woud"
+	if _pp_on:
+		PerfProbe.begin("woud_mist")
 	var td: Dictionary = DungeonRooms.theme_data(DungeonRooms.current_theme)
 	if not (room.has("trees") or room.has("mist") or room.has("overlay")):
+		if _pp_on:
+			PerfProbe.end("woud_mist")
 		return
 	overlay = TileMapLayer.new()
 	overlay.name = "Overlay"
@@ -492,6 +498,8 @@ func _build_overlay() -> void:
 			_set_overlay_tile(Vector2i(int(m[0]) + i, int(m[1])), tile)
 	for o in room.get("overlay", []):
 		_set_overlay_tile(Vector2i(int(o[0]), int(o[1])), int(o[2]))
+	if _pp_on:
+		PerfProbe.end("woud_mist")
 
 
 ## v0.24 overlay-tegel; mist (MIST_TILES) gaat naar de eigen laag "MistLaag" (modulate alpha MIST_ALPHA).

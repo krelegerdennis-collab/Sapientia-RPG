@@ -28,6 +28,7 @@ const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const WorldWarperUnlock := preload("res://world_warper/flow/unlock.gd")
+const PerfProbeScript := preload("res://scripts/perf/perf_probe.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
@@ -465,6 +466,7 @@ var ui_theme: Theme
 
 
 func _ready() -> void:
+	PerfProbeScript.bootstrap()
 	_koppel_muziek.call_deferred()
 	_koppel_quests.call_deferred()
 	ui_theme = load("res://assets/theme.tres")
@@ -550,6 +552,8 @@ func _ready() -> void:
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	# Laadtijden WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
 	# De tijden zelf meet tools/perf/run_perf_wm1.sh (losse scène, geen dispatch hier).
+	# T27 S25-profiler: godot -- --perfprobe  (haken aan, dump user://perf_probe.json).
+	# T27 suite: of  godot -- --perfprobetest  (scripts/tests/perf_probe_tests.gd).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
@@ -650,6 +654,7 @@ func _ready() -> void:
 			["--f5sim", "res://tools/battlesim/f5_sim.gd", "F5Sim", "f5sim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
+			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
@@ -902,11 +907,22 @@ func get_resource(path: String) -> Resource:
 
 
 func _go_to_scene(path: String) -> void:
+	# T27: s25_check RISK — scènewissel (map-load / battle-load; docs/perf/s25_check.md)
+	var _pp_on := PerfProbe.enabled
+	var _pp_lbl := ""
+	if _pp_on:
+		if path == BATTLE_SCENE:
+			_pp_lbl = PerfProbe.battle_label(pending_backdrop_id, pending_boss, pending_enemies)
+		else:
+			_pp_lbl = PerfProbe.map_label(path)
+		PerfProbe.begin(_pp_lbl)
 	var packed := get_resource(path) as PackedScene
 	if packed:
 		get_tree().change_scene_to_packed(packed)
 	else:
 		get_tree().change_scene_to_file(path)
+	if _pp_on:
+		PerfProbe.end(_pp_lbl)
 
 
 ## #166: kies de echte bestemming van een warp en onthoud de herkomst bij het binnengaan van het huis.

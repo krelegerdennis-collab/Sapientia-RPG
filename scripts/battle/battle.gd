@@ -188,9 +188,16 @@ var last_plan: Array = []
 var _previous_scale_size := Vector2i.ZERO
 ## push_music in _ready, pop in _exit_tree. Alleen poppen als we zelf gepusht hebben.
 var _battle_music_pushed := false
+## T27: s25_check RISK-label van dit gevecht (leeg = geen RISK / probe uit).
+var _pp_lbl := ""
 
 
 func _ready() -> void:
+	# T27: s25_check RISK — gevecht-enter (battle_gras/woud/archief/baas_golem/kas)
+	var _pp_on := PerfProbe.enabled
+	if _pp_on:
+		_pp_lbl = PerfProbe.battle_label(GameState.pending_backdrop_id, GameState.pending_boss, GameState.pending_enemies)
+		PerfProbe.begin(_pp_lbl)
 	tutorial = GameState.pending_tutorial.duplicate(true)
 	if touch and "stick_low" in touch:
 		touch.stick_low = true      # Action-HUD overal: joystick linksonder, kruis past naast de helden
@@ -251,6 +258,8 @@ func _ready() -> void:
 	resized.connect(_layout)
 	_start_battle_music()
 	_run.call_deferred()
+	if _pp_on:
+		PerfProbe.end(_pp_lbl)
 
 
 # ================================================================ fijn raster (768x432)
@@ -2172,13 +2181,21 @@ func _fit_caption() -> void:
 
 
 func _process(delta: float) -> void:
+	# T27: s25_check RISK — gevecht-frame (battle_gras/woud/archief/baas_golem/kas)
+	var _pp_on := PerfProbe.enabled
+	if _pp_on:
+		PerfProbe.begin(_pp_lbl)
 	if not caption.visible or state in ["command", "target_enemy", "target_ally", "message_wait"]:
+		if _pp_on:
+			PerfProbe.end(_pp_lbl)
 		return
 	_caption_left -= delta
 	if _caption_left <= 0.0:
 		caption.modulate.a = clampf(1.0 + _caption_left / CAPTION_FADE, 0.0, 1.0)
 		if caption.modulate.a <= 0.0:
 			caption.hide()
+	if _pp_on:
+		PerfProbe.end(_pp_lbl)
 
 
 ## Tik ergens op het scherm = verder (als er op een tik gewacht wordt).
