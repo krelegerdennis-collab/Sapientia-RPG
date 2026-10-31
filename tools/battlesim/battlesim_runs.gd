@@ -2,7 +2,12 @@ extends Node
 ## Battle simulator per run (CSV). Eén regel per gevecht in user://sim/, om de balans te meten.
 ## Gestart via --battlesim zodra een van de run-argumenten erbij staat (zie battlesim.gd _ready):
 ##   xvfb-run -a godot --rendering-driver opengl3 --path . -- --battlesim --party=dennis:5,noor:5
-##            --enemy=all --runs=100 --seed=1 --policy=simpel [--tier=N] [--items=drankje:3,kruid:2] [--out=pad.csv]
+##            --enemy=all --runs=100 --seed=1 --policy=simpel [--tier=N] [--items=drankje:3,kruid:2|none]
+##            [--gear=dennis:vonkzwaard+kaftschild;noor:eiken_staf] [--out=pad.csv]
+## Golem-baas (kennis_beest, optie A): --scenario=golem zet de bedoelde opzet als standaard
+## (Dax solo Lv 8, GOLEM_BOSS_GEAR, tas GOLEM_BOSS_INV, groep baas_kennis_beest); --party/--enemy/
+## --gear/--items gaan erboven. Meting Lv 7/8 met en zonder items (docs/voorstellen/METING_KENNIS_BEEST_R5.md):
+##   ... -- --battlesim --scenario=golem --party=dennis:7 --runs=1000 --seed=7 [--items=none]
 ## Rapport: python3 tools/battlesim/rapport.py [csv ...]
 ## WM1-overzicht (1000 gevechten verdeeld over WM1-groepen, winrate per vijand):
 ##   ... -- --battlesim --party=dennis:5,noor:5 --enemy=all --total=1000 --seed=7 --out=pad.csv
@@ -23,12 +28,14 @@ const Equipment := preload("res://scripts/equipment.gd")
 const GOLEM_BOSS_GEAR := ["vonkzwaard", "kaftschild", "leren_kap", "leren_harnas"]
 const GOLEM_BOSS_INV := {"drankje": 5, "toverwater": 2, "kruid": 2}
 const GOLEM_BOSS_LEVEL := 8
+const GOLEM_BOSS_GROUP := "baas_kennis_beest"
+const SCENARIOS := ["golem"]
 const BATTLE_SCENE_PATH := "res://scenes/battle/battle.tscn"
 const POLICIES := {
 	"simpel": "res://tools/battlesim/policy_simpel.gd",
 	"standaard": "res://tools/battlesim/sim_battle.gd",
 }
-const RUN_ARGS := ["--party=", "--enemy=", "--runs=", "--policy=", "--total="]
+const RUN_ARGS := ["--party=", "--enemy=", "--runs=", "--policy=", "--total=", "--scenario=", "--gear="]
 const SIM_DIR := "user://sim"
 const CSV_HEADER := ["seed", "policy", "party", "group_id", "enemies", "tier", "run", "result", "win",
 	"turns", "hero_actions", "hp_left", "hp_max", "hp_left_pct", "kos", "mp_used", "items_used", "items_detail"]
@@ -41,6 +48,9 @@ var base_seed := 1
 var policy := "simpel"
 var tier := 0
 var items_spec := ""
+var gear_spec := ""             # "dennis:vonkzwaard+kaftschild;noor:eiken_staf" (leeg = geen uitrusting)
+var scenario := ""              # "golem" = standaardwaarden voor de Golem-baas (zie apply_scenario)
+var _given := {}                # welke argumenten expliciet zijn meegegeven (scenario overschrijft die niet)
 var out_path := ""
 var total := 0                  # > 0: precies zoveel gevechten verdeeld (--total gaat boven --runs)
 var summary_path := ""          # zonder extensie; leeg = <csv-pad zonder .csv>_per_enemy
@@ -92,6 +102,10 @@ func configure(args: PackedStringArray) -> void:
 			tier = int(v)
 		elif arg.begins_with("--items="):
 			items_spec = v
+		elif arg.begins_with("--gear="):
+			gear_spec = v
+		elif arg.begins_with("--scenario="):
+			scenario = v
 		elif arg.begins_with("--out="):
 			out_path = v
 		elif arg.begins_with("--total="):
@@ -99,6 +113,22 @@ func configure(args: PackedStringArray) -> void:
 			total_given = true
 		elif arg.begins_with("--summary="):
 			summary_path = v
+		_given[arg.get_slice("=", 0)] = true
+	apply_scenario()
+
+
+## --scenario=golem: party/vijand/uitrusting/tas van de Golem-baas, tenzij expliciet meegegeven.
+func apply_scenario() -> void:
+	if scenario != "golem":
+		return
+	if not _given.has("--party"):
+		party_spec = "%s:%d" % [GameState.MAIN_HERO, GOLEM_BOSS_LEVEL]
+	if not _given.has("--enemy"):
+		enemy_spec = GOLEM_BOSS_GROUP
+	if not _given.has("--gear"):
+		gear_spec = "%s:%s" % [GameState.MAIN_HERO, "+".join(GOLEM_BOSS_GEAR)]
+	if not _given.has("--items"):
+		items_spec = ",".join(GOLEM_BOSS_INV.keys().map(func(k): return "%s:%d" % [k, GOLEM_BOSS_INV[k]]))
 
 
 func _main() -> void:
@@ -190,10 +220,12 @@ static func _enemy_known(id: String) -> bool:
 	return GameData.ENEMIES.has(id) or BerggrotData.has_enemy(id)
 
 
-## "drankje:3,kruid:2" -> {"drankje": 3, "kruid": 2}; leeg = GameData.START_INVENTORY.
+## "drankje:3,kruid:2" -> {"drankje": 3, "kruid": 2}; leeg = GameData.START_INVENTORY; "none" = lege tas.
 func parse_items(spec: String) -> Dictionary:
 	if spec == "":
 		return GameData.START_INVENTORY.duplicate(true)
+	if spec == "none":
+		return {}
 	var out := {}
 	for part in spec.split(",", false):
 		var id := part.get_slice(":", 0).strip_edges()
@@ -201,6 +233,27 @@ func parse_items(spec: String) -> Dictionary:
 			errors.append("unknown item '%s'" % id)
 			continue
 		out[id] = maxi(0, int(part.get_slice(":", 1)) if part.contains(":") else 1)
+	return out
+
+
+## "dennis:vonkzwaard+kaftschild;noor:eiken_staf" -> {"dennis": ["vonkzwaard", "kaftschild"], "noor": [...]}.
+## Held niet in de party of onbekend stuk = errors (niet kunnen dragen meldt _build_party_geared).
+func parse_gear(spec: String, party: Array) -> Dictionary:
+	var out := {}
+	var ids: Array = party.map(func(p): return str(p[0]))
+	for part in spec.split(";", false):
+		var id := part.get_slice(":", 0).strip_edges()
+		if not ids.has(id):
+			errors.append("--gear: hero '%s' is not in --party" % id)
+			continue
+		var pieces: Array = []
+		for gid in part.get_slice(":", 1).split("+", false):
+			gid = gid.strip_edges()
+			if Equipment.slot_of(gid) == "":
+				errors.append("--gear: unknown equipment '%s'" % gid)
+				continue
+			pieces.append(gid)
+		out[id] = pieces
 	return out
 
 
@@ -215,6 +268,9 @@ func run() -> String:
 	var party := parse_party(party_spec)
 	var groups := parse_groups(enemy_spec)
 	var bag := parse_items(items_spec)
+	var gear := parse_gear(gear_spec, party)
+	if scenario != "" and not SCENARIOS.has(scenario):
+		errors.append("unknown scenario '%s' (known: %s)" % [scenario, ", ".join(SCENARIOS)])
 	if runs < 1:
 		errors.append("--runs must be >= 1")
 	if total_given and total <= 0:
@@ -228,7 +284,10 @@ func run() -> String:
 	_holder = Node.new()
 	_holder.name = "BattlesimRunsHolder"
 	add_child(_holder)
-	var snap := _build_party(party, bag)
+	var snap := _build_party(party, bag, gear)
+	if not errors.is_empty():
+		_holder.queue_free()
+		return ""
 	var party_label := ";".join(party.map(func(p): return "%s:%d" % [p[0], p[1]]))
 	var wm1_overview := enemy_spec.strip_edges() == "all" and (total_given or summary_path != "")
 	var regular: Array = groups
@@ -296,7 +355,7 @@ static func _group_index(groups: Array, target: Dictionary) -> int:
 
 
 static func _use_golem_party_for_boss(group_id: String) -> bool:
-	return group_id == "baas_kennis_beest"
+	return group_id == GOLEM_BOSS_GROUP
 
 
 func _build_golem_boss_snap() -> Dictionary:
@@ -304,14 +363,15 @@ func _build_golem_boss_snap() -> Dictionary:
 
 
 ## Party via de echte GameState-code (new_game, join_member -> give_exp = normale groei).
-func _build_party(party: Array, bag: Dictionary) -> Dictionary:
+## Uitrusting (--gear) via Equipment.equip; een stuk dat de held niet kan dragen = error.
+func _build_party(party: Array, bag: Dictionary, gear: Dictionary = {}) -> Dictionary:
 	var specs: Array = []
 	for p in party:
-		specs.append([p[0], p[1], []])
-	return _build_party_geared(specs, bag)
+		specs.append([p[0], p[1], gear.get(p[0], [])])
+	return _build_party_geared(specs, bag, not gear.is_empty())
 
 
-func _build_party_geared(party: Array, bag: Dictionary) -> Dictionary:
+func _build_party_geared(party: Array, bag: Dictionary, strict := false) -> Dictionary:
 	GameState.new_game(GameState.DEFAULT_NAME)
 	GameState.codex_reset(false)
 	for spec in party:
@@ -326,6 +386,8 @@ func _build_party_geared(party: Array, bag: Dictionary) -> Dictionary:
 		for gid in gear:
 			var slot := Equipment.slot_of(str(gid))
 			if slot == "" or not Equipment.can_wear(h, str(gid)):
+				if strict:
+					errors.append("--gear: '%s' cannot wear '%s'" % [id, gid])
 				continue
 			GameState.inventory[gid] = GameState.item_count(str(gid)) + 1
 			Equipment.equip(h, GameState.inventory, slot, str(gid))
