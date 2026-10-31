@@ -52,6 +52,7 @@ const ROW_H := 16
 const MESSAGE_TIME := 2.5
 ## Spelertekst. TODO(design): deze zin tot er een hub-scène én een vlag is.
 const WARP_UNAVAILABLE := "The warp hub cannot be reached yet."
+const WARP_IN_RUN := "You cannot warp out of the Deep Cave."
 const HUB_ENTER := "res://world_warper/flow/enter.gd"
 
 ## [id, tekst] in de volgorde van de indeling (links van boven naar beneden, dan Warpen).
@@ -453,6 +454,10 @@ func open_warp() -> void:
 		return
 	if buttons.has("warp"):
 		_last_focus = buttons["warp"]
+	# r7-3 #5: niet midden in een Diepe Grot-run; anders breekt enter_map de run stil af.
+	if GameState.dungeon100_run_active() or GameState.dungeon100_floor > 0:
+		show_message(WARP_IN_RUN, true)
+		return
 	if not hub_present():
 		# TODO(design): deze zin tot de hub-scène en de vlag er zijn.
 		show_message(WARP_UNAVAILABLE, true)
