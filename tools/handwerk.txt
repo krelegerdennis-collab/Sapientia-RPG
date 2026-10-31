@@ -1275,3 +1275,8 @@ assets/tiles/woud16/water_oever_z.png
 assets/tiles/woud16/water_oever_zo.png
 assets/tiles/woud16/water_oever_zw.png
 assets/tiles/woud16/wegwijzer.png
+assets/sprites/enemies/goblin_raider_96_sheet.png
+assets/sprites/enemies/goblin_raider_96_sheet_left.png
+assets/sprites/enemies/goblin_raider_96.png
+assets/sprites/enemies/goblin_raider_96.tres
+assets/sprites/enemies/goblin_raider_96_left.tres
