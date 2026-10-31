@@ -1,5 +1,7 @@
 extends "res://scripts/map.gd"
 ## Wachtershuis: ART-interieur 32x21 (layout.json), camera 512x336.
+## Classic lopen: layout solid_tiles/props (tegel_vrij) + player test_move; geen wand-polygonen
+## op de runtime-TileSet (zie huis_interieur_build.bouw / _maak_grond_tileset(false)).
 
 const Build := preload("res://scripts/data/huis_interieur_build.gd")
 
