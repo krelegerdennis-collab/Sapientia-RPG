@@ -31,13 +31,18 @@ const FOLLOWUP_MIN_METER := 1.0
 ## F5 (Dennis 2026-10-31): tik tijdens de eigen slag-animatie negeren (aan).
 const TAP_GATE := true
 
-## TODO RPG ART: placeholder-animaties. hit2 en finisher hergebruiken de bestaande <held>_attack.png
-## (zelfde frames), alleen met een ander tempo, zodat de staat wel verschilt. Echte frames: zie PR
-## "Nodig van RPG ART" en tools/placeholders_v17.txt.
+## Eigen sheets per stap (T26, RPG ART): 288x192, 6x4 frames van 48x48, rijen onder/links/rechts/boven
+## (zoals SomData.ATTACK_ANIMS), treffer aan het begin van frame 4 (SomData.ATTACK_HIT_FRAME).
+## Helden zonder eigen sheet (of als het bestand ontbreekt) spelen hit2/finisher als placeholder van
+## <held>_attack.png met het tempo uit STEP_MS.
+const STEP_SHEETS := {
+	"dennis": {"hit2": "res://assets/sprites/som/combat/dax_attack2.png", "finisher": "res://assets/sprites/som/combat/dax_finisher.png"},
+	"lotte": {"hit2": "res://assets/sprites/som/combat/seren_attack2.png", "finisher": "res://assets/sprites/som/combat/seren_finisher.png"},
+}
 const STEP_MS := {
 	"hit1": [],   # leeg = SomData.ATTACK_ANIMS[id]["ms"] (bestaande slag)
-	"hit2": [80, 120, 40, 90, 70, 120],      # TODO RPG ART: <held>_attack2.png
-	"finisher": [140, 220, 60, 140, 110, 220],   # TODO RPG ART: <held>_finisher.png
+	"hit2": [80, 120, 40, 90, 70, 120],      # eigen sheet: STEP_SHEETS
+	"finisher": [140, 220, 60, 140, 110, 220],   # eigen sheet: STEP_SHEETS
 }
 
 
@@ -65,15 +70,29 @@ static func is_finisher(step: int) -> bool:
 	return clamp_step(step) == STEP_FINISHER
 
 
-## Animatie-definitie voor stap 'step' van held 'base' (= SomData.ATTACK_ANIMS[id]); placeholder = zelfde
-## sheet met eigen tempo (TODO RPG ART).
-static func anim_def(base: Dictionary, step: int) -> Dictionary:
+## Pad van de eigen sheet voor stap 'step' van held 'id', of "" (geen sheet / bestand ontbreekt = terugval).
+static func step_sheet(id: String, step: int) -> String:
+	if clamp_step(step) == STEP_HIT1:
+		return ""
+	var path := str(STEP_SHEETS.get(id, {}).get(state_for(step), ""))
+	if path == "" or not ResourceLoader.exists(path):
+		return ""
+	return path
+
+
+## Animatie-definitie voor stap 'step' van held 'base' (= SomData.ATTACK_ANIMS[id]). Met een eigen sheet
+## (step_sheet) staat die in "sheet" en is "placeholder" false; anders = zelfde sheet met eigen tempo.
+## De treffer blijft op base["hit_frame"] (frame 4).
+static func anim_def(base: Dictionary, step: int, id := "") -> Dictionary:
 	var d := base.duplicate()
 	var ms: Array = STEP_MS.get(state_for(step), [])
 	if not ms.is_empty():
 		d["ms"] = ms
 	d["chain_state"] = state_for(step)
-	d["placeholder"] = step != STEP_HIT1
+	var own := step_sheet(id, step) if id != "" else ""
+	if own != "":
+		d["sheet"] = own
+	d["placeholder"] = step != STEP_HIT1 and own == ""
 	return d
 
 
