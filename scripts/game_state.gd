@@ -596,6 +596,7 @@ func _ready() -> void:
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
 			["--savehardeningtest", "res://scripts/tests/save_hardening_tests.gd", "SaveHardeningTest", "savehardeningtest"],
+			["--saverobusttest", "res://scripts/tests/save_robust_tests.gd", "SaveRobustTest", "saverobusttest"],
 			["--saveroundtriptest", "res://scripts/tests/save_roundtrip_tests.gd", "SaveRoundtripTest", "saveroundtriptest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
@@ -1535,7 +1536,8 @@ func _notification(what: int) -> void:
 			_coop_pending_message = ""
 			go_to_title(true)
 			Dialog.show_lines([pending])
-	if what == NOTIFICATION_APPLICATION_PAUSED \
+	if what == NOTIFICATION_WM_CLOSE_REQUEST \
+			or what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
 		autosave_on_background()
 
@@ -1834,6 +1836,9 @@ func load_game(path := "", gelezen: Dictionary = {}) -> bool:
 		last_load_notice = NOTICE_RECOVERED
 		pending_respawn_msg = RECOVERED_LINES.duplicate()
 		save_recovered.emit(main_path, main_path + ".bak")
+	var loaded_path := path if path != "" else save_path
+	_remove_file(loaded_path + ".tmp")
+	_remove_file(loaded_path + ".bak.tmp")
 	game_loaded.emit(path if path != "" else save_path, true)
 	return true
 
