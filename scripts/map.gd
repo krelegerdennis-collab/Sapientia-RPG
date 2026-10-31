@@ -40,12 +40,14 @@ const DEBUG_PUZZLE_ROOM := "res://scenes/maps/archief_test.tscn"
 @onready var ground: TileMapLayer = $Ground
 @onready var player: CharacterBody2D = $Objects/Player
 var _touch_control: Control
+## T27: s25_check — `enabled` één keer in _ready, niet elke frame in _process.
+var _pp_on := false
+var _pp_lbl := ""
 
 
 func _ready() -> void:
 	# T27: s25_check RISK — map-enter (dorp_wilgendal / warper_hal / woud_beek)
-	var _pp_on := PerfProbe.enabled
-	var _pp_lbl := ""
+	_pp_on = PerfProbe.enabled
 	if _pp_on:
 		_pp_lbl = PerfProbe.map_label(scene_file_path)
 		PerfProbe.begin(_pp_lbl)
@@ -283,11 +285,8 @@ func screen_open() -> bool:
 
 
 func _process(_delta: float) -> void:
-	# T27: s25_check RISK — map-frame (dorp_wilgendal / warper_hal / woud_beek)
-	var _pp_on := PerfProbe.enabled
-	var _pp_lbl := ""
+	# T27: s25_check RISK — map-frame; `_pp_on` uit _ready, geen PerfProbe.enabled per frame
 	if _pp_on:
-		_pp_lbl = PerfProbe.map_label(scene_file_path)
 		PerfProbe.begin(_pp_lbl)
 	# MENU-knop verbergen zolang er een tekstvak of menu open is (anders valt hij erover)
 	var touch := _touch()

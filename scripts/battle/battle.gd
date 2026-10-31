@@ -188,13 +188,14 @@ var last_plan: Array = []
 var _previous_scale_size := Vector2i.ZERO
 ## push_music in _ready, pop in _exit_tree. Alleen poppen als we zelf gepusht hebben.
 var _battle_music_pushed := false
-## T27: s25_check RISK-label van dit gevecht (leeg = geen RISK / probe uit).
+## T27: s25_check — `enabled` één keer in _ready, niet elke frame in _process.
+var _pp_on := false
 var _pp_lbl := ""
 
 
 func _ready() -> void:
 	# T27: s25_check RISK — gevecht-enter (battle_gras/woud/archief/baas_golem/kas)
-	var _pp_on := PerfProbe.enabled
+	_pp_on = PerfProbe.enabled
 	if _pp_on:
 		_pp_lbl = PerfProbe.battle_label(GameState.pending_backdrop_id, GameState.pending_boss, GameState.pending_enemies)
 		PerfProbe.begin(_pp_lbl)
@@ -2181,8 +2182,7 @@ func _fit_caption() -> void:
 
 
 func _process(delta: float) -> void:
-	# T27: s25_check RISK — gevecht-frame (battle_gras/woud/archief/baas_golem/kas)
-	var _pp_on := PerfProbe.enabled
+	# T27: s25_check RISK — gevecht-frame; `_pp_on` uit _ready, geen PerfProbe.enabled per frame
 	if _pp_on:
 		PerfProbe.begin(_pp_lbl)
 	if not caption.visible or state in ["command", "target_enemy", "target_ally", "message_wait"]:

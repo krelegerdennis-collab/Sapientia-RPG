@@ -4,11 +4,11 @@ extends RefCounted
 ## (baseline: docs/perf/wm1_baseline.md). begin/end met Time.get_ticks_usec();
 ## per label een rollend min/avg/max. dump() print en schrijft user://perf_probe.json.
 ##
-## Uit standaard. Aan via:
+## Uit standaard. Aan alleen in een debug-build, via:
 ##   - command-line `--perfprobe` (exact; `--perfprobetest` zet hem níet aan)
 ##   - debug-instelling `perf_probe=true` in user://settings.cfg [instellingen]
-##   - `PerfProbe.enabled = true` (tests / adb-debug)
-## Uit: alleen een bool-check, geen allocaties.
+##   - `PerfProbe.enabled = true` (tests / adb-debug; ook alleen zinvol in debug)
+## Release-APK: blijft uit, ook met flag of setting. Uit: alleen een bool-check, geen allocaties.
 
 const FLAG := "--perfprobe"
 const DUMP_PATH := "user://perf_probe.json"
@@ -40,12 +40,18 @@ static func bootstrap() -> void:
 	if _bootstrapped:
 		return
 	_bootstrapped = true
-	if _flag_aan(OS.get_cmdline_user_args()) or _debug_setting_aan():
+	# Flag en setting mogen de probe alleen in een debug-build aanzetten (release blijft uit).
+	if mag_aan(OS.is_debug_build(), _flag_aan(OS.get_cmdline_user_args()), _debug_setting_aan()):
 		enabled = true
 	if enabled:
 		var tree := Engine.get_main_loop() as SceneTree
 		if tree != null and not tree.root.tree_exiting.is_connected(_dump_bij_einde):
 			tree.root.tree_exiting.connect(_dump_bij_einde)
+
+
+## Flag/setting zetten `enabled` alleen als dit een debug-build is. Release: altijd uit.
+static func mag_aan(debug_build: bool, flag: bool, setting: bool) -> bool:
+	return debug_build and (flag or setting)
 
 
 static func _dump_bij_einde() -> void:

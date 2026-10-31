@@ -22,9 +22,12 @@ var _player: Node2D
 var _blobs: Array = []      # [Sprite2D, snelheid]
 var _rect := Rect2()
 static var _tex: Texture2D
+## T27: s25_check — `enabled` één keer in _ready, niet elke frame in _process.
+var _pp_on := false
 
 
 func _ready() -> void:
+	_pp_on = PerfProbe.enabled
 	name = "WoudMist"
 	z_index = 20
 	var map := get_parent()
@@ -83,8 +86,8 @@ static func _texture() -> Texture2D:
 
 
 func _process(delta: float) -> void:
-	# T27: s25_check — Donker Woud mist/overlay (docs/perf/s25_check.md)
-	if PerfProbe.enabled:
+	# T27: s25_check — Donker Woud mist/overlay; `_pp_on` uit _ready
+	if _pp_on:
 		PerfProbe.begin("woud_mist")
 	var pl: Node2D = _player
 	if _lantern != null and pl != null:
@@ -103,5 +106,5 @@ func _process(delta: float) -> void:
 			var d := (pl.global_position + Vector2(0, -8) - s.global_position) / (Vector2(32, 32) * s.scale)
 			a *= lerpf(CLEAR_MIN, 1.0, clampf(d.length(), 0.0, 1.0))
 		s.modulate.a = a
-	if PerfProbe.enabled:
+	if _pp_on:
 		PerfProbe.end("woud_mist")

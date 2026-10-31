@@ -28,6 +28,7 @@ func check(label: String, ok: bool) -> void:
 
 func _run() -> void:
 	_uit_tests()
+	_gate_tests()
 	_aan_tests()
 	_dump_tests()
 	_label_tests()
@@ -50,6 +51,18 @@ func _uit_tests() -> void:
 	var leeg := Probe.dump()
 	check("uit: dump is leeg object", leeg == "{}")
 	check("uit: snapshot blijft leeg na dump", Probe.snapshot().is_empty())
+
+
+func _gate_tests() -> void:
+	check("release + --perfprobe: blijft uit", not Probe.mag_aan(false, true, false))
+	check("release + perf_probe=true: blijft uit", not Probe.mag_aan(false, false, true))
+	check("release + flag en setting: blijft uit", not Probe.mag_aan(false, true, true))
+	check("debug zonder flag/setting: uit", not Probe.mag_aan(true, false, false))
+	check("debug + --perfprobe: aan", Probe.mag_aan(true, true, false))
+	check("debug + perf_probe=true: aan", Probe.mag_aan(true, false, true))
+	check("deze suite draait in een debug-build (headless Godot)", OS.is_debug_build())
+	check("bootstrap zonder --perfprobe: enabled blijft uit",
+			not Probe.mag_aan(OS.is_debug_build(), Probe._flag_aan(OS.get_cmdline_user_args()), false))
 
 
 func _aan_tests() -> void:
@@ -144,3 +157,15 @@ func _hook_bron_tests() -> void:
 		var tekst := FileAccess.get_file_as_string(pad)
 		check("hook %s noemt %s" % [pad.get_file(), naald], tekst.contains(naald) and tekst.contains("PerfProbe"))
 		check("hook %s verwijst naar %s" % [pad.get_file(), doc], tekst.contains(doc))
+	for pad in ["res://scripts/map.gd", "res://scripts/battle/battle.gd", "res://scripts/dungeon/woud_mist.gd"]:
+		var tekst := FileAccess.get_file_as_string(pad)
+		var i := tekst.find("func _process")
+		var j := tekst.find("\nfunc ", i + 1) if i >= 0 else -1
+		var stuk := ""
+		if i >= 0:
+			stuk = tekst.substr(i, j - i) if j > i else tekst.substr(i)
+		var leest := stuk.contains("= PerfProbe.enabled") or stuk.contains("if PerfProbe.enabled")
+		check("%s _process leest enabled niet per frame" % pad.get_file(),
+				stuk != "" and stuk.contains("_pp_on") and not leest)
+		check("%s cached enabled in _ready (_pp_on =)" % pad.get_file(),
+				tekst.contains("_pp_on = PerfProbe.enabled"))
