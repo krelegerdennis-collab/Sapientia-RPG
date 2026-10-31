@@ -96,9 +96,17 @@ func _attack_rule_tests() -> void:
 
 
 func _core_rt_tests() -> void:
+	var gd: Dictionary = GameData.ENEMIES["kennis_beest"]["boss"]["core"]
+	var cc := GolemBoss.core_config()
+	check("kern-factoren uit game_data (closed %.1f, open %.1f, slam %.1f), niet gedupliceerd in CORE" % [cc["closed_mult"], cc["open_mult"], cc["slam_power"]],
+		is_equal_approx(float(cc["closed_mult"]), float(gd["closed_mult"])) and is_equal_approx(float(cc["open_mult"]), float(gd["open_mult"]))
+		and is_equal_approx(float(cc["slam_power"]), float(gd["slam_power"])) and not GolemBoss.CORE.has("closed_mult")
+		and not GolemBoss.CORE.has("open_mult") and not GolemBoss.CORE.has("slam_power"))
+	check("Hamerslag-power = game_data slam_power", is_equal_approx(float(GolemBoss.attack("golem_hammer_blow")["power"]), float(gd["slam_power"]))
+		and is_equal_approx(float(GolemBoss.attack("golem_hammer_blow_p3")["power"]), float(gd["slam_power"])))
 	check("kern: 8 s cyclus, 2 s open, break 45", int(GolemBoss.CORE["cycle_ticks"]) == 480 and int(GolemBoss.CORE["open_ticks"]) == 120
 		and int(GolemBoss.CORE["break_damage"]) == 45)
-	var c := BossCoreRt.new(GolemBoss.CORE)
+	var c := BossCoreRt.new(GolemBoss.core_config())
 	var opens: Array = []
 	var slams: Array = []
 	for t in range(1, 1441):
@@ -109,7 +117,7 @@ func _core_rt_tests() -> void:
 			slams.append(t)
 	check("kern open op tick 360/840/1320 (%s)" % str(opens), opens == [360, 840, 1320])
 	check("zonder break: slam op tick 480/960/1440 (%s)" % str(slams), slams == [480, 960, 1440])
-	c = BossCoreRt.new(GolemBoss.CORE)
+	c = BossCoreRt.new(GolemBoss.core_config())
 	for t in 360:
 		c.tick()
 	check("dicht: x0.4, open: x2.0", c.open and is_equal_approx(c.damage_mult(), 2.0))
@@ -124,7 +132,7 @@ func _core_rt_tests() -> void:
 		if e == "slam" and t < 840:
 			slam_after_break = true
 	check("na break: geen slam en vaste cyclus (volgende opening tick %d = 840)" % next_open, next_open == 840 and not slam_after_break)
-	check("dicht venster: schade x0.4 (10 -> 4)", BossCoreRt.new(GolemBoss.CORE).scale_damage(10) == 4)
+	check("dicht venster: schade x0.4 (10 -> 4)", BossCoreRt.new(GolemBoss.core_config()).scale_damage(10) == 4)
 
 
 ## Damage tot net onder een drempel, met tikken ertussen.
