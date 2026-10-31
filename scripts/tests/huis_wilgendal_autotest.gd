@@ -261,14 +261,17 @@ func _muren_en_boek(_huis: Node) -> void:
 	t.check("zijmuur blokkeert, staat op (1,18): %s" % t.tile(), t.tile() == Vector2i(1, 18))
 	await t.walk("move_right", 6)
 	await t.walk("move_up", 6)
-	await t.walk("move_left", 4)
+	await t.walk("move_left", 2)
 	await t.walk("move_up", 8)
+	await t.walk("move_left", 2)
 	t.check("nachtkastje blokkeert, staat op (3,4): %s" % t.tile(), t.tile() == Vector2i(3, 4))
 	await t.walk("move_right", 5)
 	await t.walk("move_up", 1)
 	t.check("voor het boek (8,4), kijkt omhoog (boek blokkeert): %s" % t.tile(),
 			t.tile() == Vector2i(8, 4) and t.player().facing == Vector2i.UP)
+	await t.walk("move_left", 3)
 	await t.walk("move_down", 14)
+	await t.walk("move_right", 3)
 	t.check("terug bij spawn voor uitgangstest: %s" % t.tile(), t.tile() == Build.SPAWN_TEGEL)
 
 
