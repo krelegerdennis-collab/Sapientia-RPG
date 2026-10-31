@@ -1184,3 +1184,8 @@ assets/sprites/enemies/goblin_raider_96_sheet_left.png
 assets/sprites/enemies/goblin_raider_96.png
 assets/sprites/enemies/goblin_raider_96.tres
 assets/sprites/enemies/goblin_raider_96_left.tres
+assets/sprites/enemies/arcane_slime_96_sheet.png
+assets/sprites/enemies/arcane_slime_96_sheet_left.png
+assets/sprites/enemies/arcane_slime_96.png
+assets/sprites/enemies/arcane_slime_96.tres
+assets/sprites/enemies/arcane_slime_96_left.tres
