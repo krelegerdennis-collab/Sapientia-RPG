@@ -100,8 +100,20 @@ Afspraken:
 | 81 | `uitgang_pad` | bospad uit de kamer (beloopbaar, uitgangstegel) | Uitgang | grond | nee | 1 | 16x16 | 1 | - |
 | 82 | `uitgang_rand_l` | bosrand links van de uitgang (massief) | Uitgang | grond | ja | 1 | 16x16 | 1 | - |
 | 83 | `uitgang_rand_r` | bosrand rechts van de uitgang (massief) | Uitgang | grond | ja | 1 | 16x16 | 1 | - |
+| 84 | `rand_stam_boven_links_b` | stammen onder het bladerdak, bovenste rij, links, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 85 | `rand_stam_boven_links_c` | stammen onder het bladerdak, bovenste rij, links, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 86 | `rand_stam_onder_links_b` | stamvoeten, onderste rij, links, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 87 | `rand_stam_onder_links_c` | stamvoeten, onderste rij, links, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 88 | `rand_stam_boven_midden_b` | stammen onder het bladerdak, bovenste rij, midden, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 89 | `rand_stam_boven_midden_c` | stammen onder het bladerdak, bovenste rij, midden, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 90 | `rand_stam_onder_midden_b` | stamvoeten, onderste rij, midden, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 91 | `rand_stam_onder_midden_c` | stamvoeten, onderste rij, midden, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 92 | `rand_stam_boven_rechts_b` | stammen onder het bladerdak, bovenste rij, rechts, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 93 | `rand_stam_boven_rechts_c` | stammen onder het bladerdak, bovenste rij, rechts, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 94 | `rand_stam_onder_rechts_b` | stamvoeten, onderste rij, rechts, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 95 | `rand_stam_onder_rechts_c` | stamvoeten, onderste rij, rechts, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
 
-Totaal: 84 tegels.
+Totaal: 96 tegels.
 
 Open vragen / TEMPORARY ASSUMPTIONS:
 - Twee boomsoorten (`eik`, `den`); meer soorten = nieuwe namen in de JSON (en in deze lijst).
