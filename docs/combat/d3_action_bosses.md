@@ -18,7 +18,7 @@ Legenda: **[V]** = geverifieerd in code (bestand:regel), **[NV]** = niet geverif
   - basis: HP 46, ATK 14, DEF 7, AGI 6;
   - `boss` (:206): HP 360, ATK 27, DEF 15, AGI 6, MAG 11, MDEF 13, EXP 210, GOLD 84; skill Book Hammer (0.2, power 1.5);
   - `core`: cycle 3, closed 0.4, open 2.0, break_damage 45, slam_power 2.2, rect [82,52,30,30].
-  - Let op: commentaar zegt doel-level Eerste Archief = 7 (`EERSTE_ARCHIEF_DOEL`); de opdracht vraagt 60-80% op Lv 3 → zie Keuze 1.
+  - Let op: commentaar zegt doel-level Eerste Archief = 7 (`EERSTE_ARCHIEF_DOEL`); besluit: doel 60-80% win op Lv 7, Lv 3 alleen als rapport → zie §7 Besluit 1.
 - **Dodge** [V] `som_data.gd:88-95`: `DODGE_DURATION_TICKS` 13, `DODGE_IFRAME_TICKS` 15, `DODGE_COOLDOWN_TICKS` 9, `DODGE_DISTANCE_PX` 28, `STAMINA_DODGE_COST` 30; `PLAYER_IFRAMES` 0.8 s (:299). Toepassing `som_arena.gd:1604-1619`.
 - **Ticks** [V] `scripts/som/combat_sim.gd:9-10`: `TICK_HZ = 60`, vaste stap.
 - **Telegrafen** [V]: `telegraph_attack.gd` (`TelegraphAttack`), `telegraph_layer.gd:29` `Style {RED_DODGE, YELLOW_INTERRUPT}`, `enemy_attacks.gd` (`EnemyAttacks`), `SomActionAttacks` in `register()`.
@@ -35,16 +35,16 @@ Alle tijden in ticks @60 Hz. Windup ≥ 24 ticks (0.4 s); AoE > 3 tegels ≥ 36 
 | `golem_sweep` (melee_arc 120°, 2 tegels) | rood boog | 30 | 4 | 30 | dodge uit de boog of erachter |
 | `golem_book_hammer` (cirkel r=1.5 tegel op doel) | rood cirkel | 36 | 4 | 40 | dodge zijwaarts |
 | `golem_core_charge` (kern open, zie onder) | roze gloed + gele ring | 120 | — | — | onderbreekbaar met schade |
-Kern open (`core_charge`): 2 s venster, schade ×`open_mult`; daarbuiten ×`closed_mult`. ≥ `break_damage` (45) in het venster → stagger 60 ticks; anders `golem_hammer_blow` (AoE r=3, 42 ticks windup, ATK×`slam_power`). Elke ~8 s een venster (realtime-vertaling van `cycle` 3).
+Kern open (`core_charge`): 2 s venster, schade ×`open_mult`; daarbuiten ×`closed_mult`. ≥ `break_damage` (45) in het venster → stagger 60 ticks; anders `golem_hammer_blow` (AoE r=3, 42 ticks windup, ATK×`slam_power`). Vaste cyclus van 8 s met 2 s open in **elke** fase (realtime-vertaling van `cycle` 3), break 45 (§7 Besluit 2).
 
 ### Fase 2 — "Ontwaakt" (60% → 25%)
 - Overgang: 90 ticks (1.5 s) onkwetsbaar + knielanimatie; lopende telegrafen vervallen; spelers krijgen niets.
-- Aanvallen: `golem_sweep` (windup 26), `golem_shockwave` (lijn 5 tegels, 3 parallel, windup 36), `golem_core_charge` (venster 1.7 s), plus 2 `papiergeest`-adds bij binnenkomst (bestaande vijand, encounter-groep `game_data.gd:1293`).
+- Aanvallen: `golem_sweep` (windup 26), `golem_shockwave` (lijn 5 tegels, 3 parallel, windup 36), `golem_core_charge` (zelfde vaste cyclus: 8 s, 2 s open), plus 2 `papiergeest`-adds bij binnenkomst (bestaande vijand, encounter-groep `game_data.gd:1293`).
 
 ### Fase 3 — "Overbelast" (25% → 0)
 - Overgang: 90 ticks onkwetsbaar; vloer krijgt 2 vaste rune-vlakken (rood, permanent zichtbaar).
-- Aanvallen: `golem_sweep`, `golem_book_hammer` ×2 achter elkaar (36 + 24), `golem_hammer_blow` zonder kernvenster bij hp<10% één keer (rood, 48 ticks windup), `golem_core_charge` venster 1.5 s. Geen nieuwe adds.
-- Optionele enrage: na 240 s zelfde patronen met herstel −25% [NV, uit voor v1].
+- Aanvallen: `golem_sweep`, `golem_book_hammer` ×2 achter elkaar (36 + 24), `golem_hammer_blow` zonder kernvenster bij hp<10% één keer (rood, 48 ticks windup), `golem_core_charge` (zelfde vaste cyclus: 8 s, 2 s open). Geen nieuwe adds.
+- Geen enrage in v1 (§7 Besluit 5).
 
 Mobiel leesbaar: telegraaf-vormen ≥ 1 tegel, contrast-rand, geen fijne tekst; maximaal 2 gelijktijdige telegrafen van de baas.
 
@@ -54,24 +54,25 @@ Mobiel leesbaar: telegraaf-vormen ≥ 1 tegel, contrast-rand, geen fijne tekst; 
 1. `som_arena.gd:366`: `m.boss` alleen uitsluiten als geen `BossScript` voor `m.enemy_id` bestaat (Classic onveranderd: daar komt `register` niet).
 2. Nieuw `scripts/som/boss_script.gd` (data-loader) + `scripts/som/boss_phase_machine.gd` (pure RefCounted, tick-gedreven: `tick()`, `on_damage()`, fase-index, invuln-ticks, events).
 3. Baas-stats in Action = `BossCore.apply_boss(data)` zonder vermenigvuldiger; `boss_party_scale(n)` hook (return 1.0).
-4. `som_data.gd:4-5`-commentaar + `ACTION_BOSS_MULT` markeren als vervallen (niet verwijderen in deze PR).
+4. `som_data.gd:4-5`-commentaar + `ACTION_BOSS_MULT` markeren als vervallen (niet verwijderen in PR A; verwijderen pas in PR B, §7 Besluit 4).
 5. Headless test, met een dummy-baas met 2 fases.
 
 **PR B — COMBAT (Golem):**
 1. `BossScript` data voor `kennis_beest` (fases hierboven), nieuwe aanval-ids in `enemy_attacks.gd`/`SomActionAttacks`.
 2. Realtime kern (`boss_core.gd` uitbreiden met tick-variant óf aparte `boss_core_rt.gd`; ronde-API blijft voor Classic).
 3. `action_sim.gd`: realtime baasmodus (`--actionsim --boss-rt`), vervangt `_bosses()` niet maar staat ernaast.
-4. Golem-tests + simrapport in `docs/ACTION_BALANCE_REPORT.md`.
+4. `ACTION_BOSS_MULT` verwijderen (zie §7 Besluit 4).
+5. Golem-tests + simrapport in `docs/ACTION_BALANCE_REPORT.md`.
 
 ## 4. Battle-sim (`--actionsim`)
 
-200 runs per scenario (`--boss-fights=200`), seeded. Party = WM1-party op Lv 3 (en ter referentie Lv 5, Lv 7).
-Meten: win% (doel 60-80% op Lv 3), party-HP-verlies % (gemiddelde + p90), gevechtsduur (s; doel 90-180 s [NV]), doden per fase (F1/F2/F3), dodge-succes (= ontweken treffers / telegrafen gericht op held), kern-breaks per venster. Sim-beleid gebruikt bestaande `dodge_player` 0.35 / `dodge_ally` 0.15 (`action_sim.gd:86`) plus een "goede speler"-profiel (0.7).
+200 runs per scenario (`--boss-fights=200`), seeded. Party = WM1-party op Lv 7 (doel); Lv 3 en Lv 5 alleen als rapport.
+Meten: win% (doel 60-80% op Lv 7; Lv 3 alleen gerapporteerd), party-HP-verlies % (gemiddelde + p90), gevechtsduur (s; doel 90-180 s [NV]), doden per fase (F1/F2/F3), dodge-succes (= ontweken treffers / telegrafen gericht op held), kern-breaks per venster. Sim-beleid gebruikt bestaande `dodge_player` 0.35 / `dodge_ally` 0.15 (`action_sim.gd:86`) plus een "goede speler"-profiel (0.7).
 
 ## 5. Geplande tests (alleen nieuwe bestanden)
 
 - `scripts/tests/boss_phase_tests.gd` (PR A): drempels, 90-ticks invuln, geen dubbele fasewissel bij overkill, determinisme (zelfde seed → zelfde event-log), Classic-pad ongewijzigd (`register` weigert baas zonder BossScript).
-- `scripts/tests/golem_action_tests.gd` (PR B): windups ≥ 24/36 ticks, dodge-iframes (15) dekken elke actieve fase, kern-venster en break 45, adds alleen bij fase 2, stats gelijk aan `game_data.gd:206`.
+- `scripts/tests/golem_action_tests.gd` (PR B): windups ≥ 24/36 ticks, dodge-iframes (15) dekken elke actieve fase, kern-venster 8 s cyclus / 2 s open in alle fases en break 45, adds alleen bij fase 2, stats gelijk aan `game_data.gd:206`.
 - `scripts/tests/golem_actionsim_tests.gd` (PR B): kleine sim (20 runs) binnen ruime band als rookproef.
 - `tests.yml` en bestaande tests (`golem_tests.gd`, `som_autotest.gd`, `kern_tests.gd`) **onaangeroerd** tenzij Dennis akkoord geeft. Let op: `som_autotest.gd:1046,1077` testen `action_boss()`; die blijven geldig zolang de functie blijft.
 
