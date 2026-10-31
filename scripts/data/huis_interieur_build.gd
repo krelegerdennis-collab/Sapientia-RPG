@@ -49,15 +49,16 @@ func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
 	_prop_blocks.clear()
 	_solid_tiles.clear()
 	_props_geplaatst.clear()
-	ground.tile_set = _maak_grond_tileset()
+	ground.tile_set = _maak_grond_tileset(false)
 	ground.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_teken_grid(ground, data.get("grid", []) as Array)
 	_teken_details_gebakken(details, data.get("details", []) as Array)
 	_plaats_props(objects, data.get("props", []) as Array)
 
 
-func _maak_grond_tileset() -> TileSet:
-	## Eén runtime-atlas-textuur, maar per tegeltype een bron (zoals main) voor correcte fysiek.
+func _maak_grond_tileset(met_wand_fysiek: bool = false) -> TileSet:
+	## Per tegeltype een bron (add_source vóór tile-data). Wand-polygonen alleen als
+	## met_wand_fysiek: Classic Wachtershuis gebruikt layout solid_tiles + test_move (geen TileSet-botsing).
 	var volgorde: Array = GROND_SLEUTELS
 	var atlas: Dictionary = Atlas.maak_grond_atlas(volgorde)
 	var coords: Dictionary = atlas["coords"] as Dictionary
@@ -79,7 +80,7 @@ func _maak_grond_tileset() -> TileSet:
 		src.texture_region_size = Vector2i(16, 16)
 		src.create_tile(Vector2i.ZERO)
 		var sid: int = ts.add_source(src)
-		if sleutel in Atlas.WALL_SLEUTELS:
+		if met_wand_fysiek and sleutel in Atlas.WALL_SLEUTELS:
 			Atlas.voeg_wand_fysiek(ts.get_source(sid).get_tile_data(Vector2i.ZERO, 0))
 		_tile_ids[sleutel] = sid
 	return ts
@@ -214,9 +215,7 @@ static func tegel_geblokkeerd(
 	var data: TileData = ground.get_cell_tile_data(tegel)
 	if data == null:
 		return true
-	# Botsing komt uit solid_tiles (#/F/J) en prop_blocks; tile-fysiek is voor
-	# Action/physics-queries, niet dubbel blokkeren in Classic-grid (anders breken oude routes).
-	return false
+	return data.get_collision_polygons_count(0) > 0
 
 
 static func tegel_vrij(

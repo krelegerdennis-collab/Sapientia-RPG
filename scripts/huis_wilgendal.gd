@@ -1,5 +1,7 @@
 extends "res://scripts/map.gd"
 ## Wachtershuis: ART-interieur 32x21 (layout.json), camera 512x336.
+## Classic lopen: layout solid_tiles/props (tegel_vrij) + player test_move; geen wand-polygonen
+## op de runtime-TileSet (zie huis_interieur_build.bouw / _maak_grond_tileset(false)).
 
 const Build := preload("res://scripts/data/huis_interieur_build.gd")
 
@@ -17,8 +19,6 @@ func _ready() -> void:
 		c.queue_free()
 	ground.clear()
 	_build.bouw(ground, details, get_node("Objects"))
-	# Classic grid: geen TileSet-fysiek op de speler (vóór de tileset-fix blokkeerde dat niet; nu wel).
-	ground.set_collision_enabled(false)
 	_story_objecten()
 	_spawns()
 	_uitgang()

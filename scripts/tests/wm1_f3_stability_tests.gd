@@ -25,7 +25,7 @@ func check(label: String, ok: bool) -> void:
 
 func _run() -> void:
 	var b := Build.new()
-	var ts: TileSet = b._maak_grond_tileset()
+	var ts: TileSet = b._maak_grond_tileset(true)
 	for sleutel in Atlas.WALL_SLEUTELS:
 		var sid: int = b._source_id(sleutel)
 		var td: TileData = ts.get_source(sid).get_tile_data(Vector2i.ZERO, 0)
