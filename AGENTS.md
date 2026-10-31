@@ -90,6 +90,7 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--wm1budgettest` | `scripts/tests/wm1_budget_tests.gd` | 286 |
 | `--wm1openbugtest` | `scripts/tests/wm1_bugjacht_open_tests.gd` | 24 |
 | `--aabtest` | `scripts/tests/aab_tests.gd` | 70 |
+| `--perfprobetest` | `scripts/tests/perf_probe_tests.gd` | 62 |
 
 Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`
 schrijft `user://sim/battlesim_<policy>_s<seed>.csv`; `python3 tools/battlesim/rapport.py [csv|map]` geeft winrate, mediaan beurten en de zwaarste groepen.
@@ -111,6 +112,7 @@ en de suite in de matrix van `.github/workflows/tests.yml` (zie `.github/ci/READ
 - `scripts/battle/` — gevechten (`battle.gd`, menu, helden, baas-kern, `codex_battle.gd`/`codex_ally.gd` voor de Codex).
 - `scripts/ui/` — menu's, titelscherm, Codex-scherm (`codex_screen.gd`), bestiarium, stijl (`ui_style.gd`, `menu_colors.gd`).
 - `scripts/dungeon/`, `scripts/puzzle/`, `scripts/kern/` — kerkers, puzzel-elementen, kernkrachten.
+- `scripts/perf/` — lichte profiler (`perf_probe.gd`, T27 / s25_check RISK-haken; `--perfprobe` / `--perfprobetest`) en WM1-frametijd (`wm1_frametime.gd`).
 - `scripts/tests/` — testsuites; `scripts/debug_autotest.gd`, `scripts/debug_menutest.gd` — de twee oudste suites.
 - `scenes/` — .tscn-scènes. `assets/` — sprites, tiles, fonts, ui, shaders, audio. `art/` — art van RPG ART.
 - `tools/` — Python art-generators (placeholders), `handwerk.txt`, `placeholders_*.txt`.

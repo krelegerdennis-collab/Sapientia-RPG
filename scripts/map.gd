@@ -40,9 +40,17 @@ const DEBUG_PUZZLE_ROOM := "res://scenes/maps/archief_test.tscn"
 @onready var ground: TileMapLayer = $Ground
 @onready var player: CharacterBody2D = $Objects/Player
 var _touch_control: Control
+## T27: s25_check — `enabled` één keer in _ready, niet elke frame in _process.
+var _pp_on := false
+var _pp_lbl := ""
 
 
 func _ready() -> void:
+	# T27: s25_check RISK — map-enter (dorp_wilgendal / warper_hal / woud_beek)
+	_pp_on = PerfProbe.enabled
+	if _pp_on:
+		_pp_lbl = PerfProbe.map_label(scene_file_path)
+		PerfProbe.begin(_pp_lbl)
 	GameState.enter_map(scene_file_path)
 	# SoM-stijl per gebied (scripts/data/kaart_stijl.gd); in de oude stijl verandert er niets.
 	KaartStijl.toepassen(self)
@@ -108,6 +116,8 @@ func _ready() -> void:
 		WorldmapCutsceneScript.start_on(self)
 	_spawn_garden_creatures()
 	# (de autotest wordt sinds v0.10 door GameState gestart, zie game_state.gd)
+	if _pp_on:
+		PerfProbe.end(_pp_lbl)
 
 
 ## Start de BGM van deze map. Zonder sleutel stopt een track die nog speelde
@@ -275,6 +285,9 @@ func screen_open() -> bool:
 
 
 func _process(_delta: float) -> void:
+	# T27: s25_check RISK — map-frame; `_pp_on` uit _ready, geen PerfProbe.enabled per frame
+	if _pp_on:
+		PerfProbe.begin(_pp_lbl)
 	# MENU-knop verbergen zolang er een tekstvak of menu open is (anders valt hij erover)
 	var touch := _touch()
 	if touch and not menu_open():
@@ -311,6 +324,8 @@ func _process(_delta: float) -> void:
 	if OS.is_debug_build() and encounters and Input.is_action_just_pressed("debug_battle"):
 		if not GameState.in_battle and not GameState.changing_map and not player.is_moving and not Dialog.is_open:
 			start_battle(GameState.pick_encounter_group(terrain_at(player.get_tile())))
+	if _pp_on:
+		PerfProbe.end(_pp_lbl)
 
 
 ## Terrein-naam van een tile ("" als er niets ligt).

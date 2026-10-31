@@ -66,6 +66,9 @@ func _speel_hal() -> void:
 
 
 func _bouw_hal() -> void:
+	# T27: s25_check RISK warper_hal — hub-opbouw (docs/perf/s25_check.md)
+	if PerfProbe.enabled:
+		PerfProbe.begin("warper_hal")
 	var warp_pos := _anker_positie("ww_anchor_warp")
 	var party_pos := _anker_positie("ww_anchor_party")
 	_ontkoppel_wereldankers("ww_anchor_warp")
@@ -113,6 +116,8 @@ func _bouw_hal() -> void:
 
 	_wanderers.call("refresh")
 	_hanger.call("maybe_play")
+	if PerfProbe.enabled:
+		PerfProbe.end("warper_hal")
 
 
 func _on_canon_klaar() -> void:
