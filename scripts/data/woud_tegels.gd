@@ -1,12 +1,12 @@
 extends RefCounted
 class_name WoudTegelsData
 ## WM1 T2: tegels van het Donker Woud als DATA (16x16, besluit Dennis). data/woud_tegels.json = de mapping
-## tegel-id -> bestand (+ naam, groep, functie, solid, laag, frames). Nu PLACEHOLDERS uit
-## assets/placeholder/woud/ (tools/woud_tegels_placeholders.py); RPG ART vervangt een tegel door alleen
-## het "file" in de JSON aan te passen (zelfde maat 16x16, frames naast elkaar). Geen code-wijziging nodig.
+## tegel-id -> bestand (+ naam, groep, functie, solid, laag, frames). Echte art staat in
+## assets/tiles/woud16/ via het veld "file"; placeholders blijven in assets/placeholder/woud/ als reserve.
+## RPG ART wisselt een tegel in door alleen "file" aan te passen (zelfde maat 16x16, frames naast elkaar).
 ## De bestaande vijf woudkamers (woud_rooms.gd, atlas woud_tiles_v9b.png van RPG ART) blijven zoals ze zijn;
 ## deze mapping bouwt de nieuwe kamer woud_beek (scripts/data/woud_beek.gd).
-## TEMPORARY ASSUMPTION: animaties (water, gloed) draaien op 4 fps; frames staan horizontaal in één png.
+## Animaties (water, gloed, stapsteen): horizontale strip, breedte = frames x 16, atlas-animatie 4 fps.
 
 const JSON_PAD := "res://data/woud_tegels.json"
 const TEGEL := 16
@@ -65,6 +65,7 @@ static func tileset() -> TileSet:
 		src.create_tile(Vector2i.ZERO)
 		var frames := maxi(1, int(r.get("frames", 1)))
 		if frames > 1:
+			# horizontale strip: breedte = frames x 16, één atlas-tegel met frames naast elkaar
 			src.set_tile_animation_frames_count(Vector2i.ZERO, frames)
 			for f in frames:
 				src.set_tile_animation_frame_duration(Vector2i.ZERO, f, 1.0 / FPS)
