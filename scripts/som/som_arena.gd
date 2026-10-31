@@ -102,6 +102,9 @@ var _coop_avatars: Dictionary = {}
 var _coop_lock_idx: Dictionary = {}
 var _enemy_order: Array = []
 var _coop_attack_cd: Dictionary = {}
+## T29: per co-op-slot swing-lock (s), host-autoritatief; zelfde gate als swing_lock in single-player.
+var _coop_swing_lock: Dictionary = {}
+const COOP_MIN_SWING_LOCK := 0.35
 var _coop_snap: Dictionary = {}
 ## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
 var sheets := {}
@@ -909,10 +912,12 @@ func attack_tex_for(id: String, def: Dictionary) -> Texture2D:
 
 
 func _anim_seconds_def(id: String, def: Dictionary) -> float:
-	if not attack_texs.has(id):
-		return 0.0
+	# T29: zonder attack-sheet niet 0 teruggeven (dan valt de gate weg): def["ms"], anders SomData.ATTACK_MS.
+	var ms: Array = def.get("ms", [])
+	if ms.is_empty() and not attack_texs.has(id):
+		ms = SomData.ATTACK_MS
 	var tot := 0.0
-	for v in def.get("ms", []):
+	for v in ms:
 		tot += float(v)
 	return tot / 1000.0
 
@@ -2041,6 +2046,7 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 	_coop_slots.clear()
 	_coop_lock_idx.clear()
 	_coop_attack_cd.clear()
+	_coop_swing_lock.clear()
 	_rebuild_enemy_order()
 	_clear_coop_avatars()
 	coop_sync_roster(roster)
@@ -2326,6 +2332,8 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 	for inp in inputs:
 		_apply_coop_input(inp, dt)
 	swing_lock = maxf(0.0, swing_lock - dt)
+	for sl in _coop_swing_lock.keys():
+		_coop_swing_lock[sl] = maxf(0.0, float(_coop_swing_lock[sl]) - dt)
 	_tick_chain()
 	for m in enemies.keys():
 		if is_instance_valid(m):
@@ -2366,11 +2374,13 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 	var cd := float(_coop_attack_cd.get(slot, 0.0))
 	cd = maxf(0.0, cd - dt)
 	_coop_attack_cd[slot] = cd
-	if buttons & Codec.BTN_ATTACK and cd <= 0.0:
+	if buttons & Codec.BTN_ATTACK and cd <= 0.0 and float(_coop_swing_lock.get(slot, 0.0)) <= 0.0:
 		var hid := str(_coop_slots[slot])
 		if is_alive(hid):
 			chain_swing(hid, body, charge_mult(charge if slot == coop_local_slot else 1.0))
+			var step := int(chain_of(hid).get("last", -1)) if Settings.action_battles() else -1
 			_coop_attack_cd[slot] = 0.35
+			_coop_swing_lock[slot] = maxf(COOP_MIN_SWING_LOCK, _anim_seconds_def(hid, _attack_def(hid, step)))
 			if Settings.action_battles():
 				heavy_hold[hid] = 0          # indrukken start de vasthoud-teller (SomHeavyData)
 	var hid_h := str(_coop_slots.get(slot, ""))

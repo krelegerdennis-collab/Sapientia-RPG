@@ -628,6 +628,7 @@ func _ready() -> void:
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
+			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--formuletest", "res://scripts/tests/formule_tests.gd", "FormuleTest", "formuletest"],
