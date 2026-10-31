@@ -6,6 +6,7 @@ class_name GolemBoss
 ## Alle tijden in ticks @ 60 Hz. BALANS = VOORSTEL voor Dennis (niet afgestemd op de sim).
 
 const BossScript := preload("res://scripts/som/boss_script.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 
 const ENEMY_ID := "kennis_beest"
 const TICK_HZ := 60
@@ -21,10 +22,12 @@ const CORE := {
 	"open_ticks": 120,        # 2 s (= golem_core_charge windup)
 	"break_damage": 45,
 	"stagger_ticks": 60,
-	"closed_mult": 0.4,       # uit game_data core (ongewijzigd)
-	"open_mult": 2.0,         # uit game_data core (ongewijzigd)
-	"slam_power": 2.2,        # uit game_data core (ongewijzigd)
+	# closed_mult / open_mult / slam_power: NIET hier, maar uit game_data (kennis_beest.boss.core), zie core_config().
 }
+## Kern-velden die uit game_data komen (één bron met de Classic BossCore).
+const CORE_FROM_GAME_DATA := ["closed_mult", "open_mult", "slam_power"]
+## Aanvallen waarvan power = game_data slam_power (Hamerslag).
+const SLAM_ATTACKS := ["golem_hammer_blow", "golem_hammer_blow_p3"]
 
 ## Aanvallen. shape/reach in tegels (16 px). large_aoe = AoE > 3 tegels -> windup >= 36.
 ## power = factor op de realtime klap (ATK-formule), zoals EnemyAttacks.power.
@@ -41,11 +44,9 @@ const ATTACKS := {
 	"golem_shockwave": {"shape": "line", "reach_tiles": 5.0, "lines": 3, "windup": 36, "active": 4, "recovery": 36,
 		"power": 1.2, "large_aoe": true, "style": "red"},
 	## Kern-mislukt: AoE r=3 tegels (ATK x slam_power). Na het open venster.
-	"golem_hammer_blow": {"shape": "circle", "reach_tiles": 3.0, "windup": 42, "active": 6, "recovery": 40,
-		"power": 2.2, "large_aoe": true, "style": "red"},
+	"golem_hammer_blow": {"shape": "circle", "reach_tiles": 3.0, "windup": 42, "active": 6, "recovery": 40, "large_aoe": true, "style": "red"},
 	## Fase 3: eenmalig bij hp < 10%, zonder kernvenster.
-	"golem_hammer_blow_p3": {"shape": "circle", "reach_tiles": 3.0, "windup": 48, "active": 6, "recovery": 40,
-		"power": 2.2, "large_aoe": true, "style": "red"},
+	"golem_hammer_blow_p3": {"shape": "circle", "reach_tiles": 3.0, "windup": 48, "active": 6, "recovery": 40, "large_aoe": true, "style": "red"},
 }
 
 ## Fases (BossScript-formaat, PR A). hp_until = einde van de fase (fractie max HP).
@@ -75,8 +76,27 @@ const SPRITE_DAMAGED := "res://assets/sprites/enemies/golem_boss_v2_damaged.png"
 const SPRITE_NORMAL := "res://assets/sprites/enemies/golem_boss_v2.png"
 
 
+## game_data kennis_beest.boss.core (Classic-bron, ongewijzigd).
+static func game_data_core() -> Dictionary:
+	return ((GameData.ENEMIES[ENEMY_ID]["boss"] as Dictionary)["core"] as Dictionary)
+
+
+## Realtime kern-config: CORE (ticks, break) + closed_mult/open_mult/slam_power uit game_data.
+static func core_config() -> Dictionary:
+	var c: Dictionary = CORE.duplicate()
+	var gd := game_data_core()
+	for k in CORE_FROM_GAME_DATA:
+		c[k] = float(gd[k])
+	return c
+
+
+## Aanval-data; Hamerslag-power = game_data slam_power.
 static func attack(id: String) -> Dictionary:
-	return (ATTACKS.get(id, {}) as Dictionary)
+	var a: Dictionary = ATTACKS.get(id, {})
+	if id in SLAM_ATTACKS:
+		a = a.duplicate()
+		a["power"] = float(game_data_core()["slam_power"])
+	return a
 
 
 ## Registreer de Golem in BossScript.REGISTRY (idempotent). Zie PR-body: wie dit aanroept.

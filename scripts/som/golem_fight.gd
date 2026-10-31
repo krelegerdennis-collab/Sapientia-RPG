@@ -33,7 +33,7 @@ var _script: Dictionary
 func _init(max_hp: int, seed: int = 0, script: Dictionary = GolemBoss.SCRIPT) -> void:
 	_script = script
 	pm = BossPhaseMachine.new(script, max_hp, seed)
-	core = BossCoreRt.new(script.get("core", GolemBoss.CORE))
+	core = BossCoreRt.new(GolemBoss.core_config() if script == GolemBoss.SCRIPT else script.get("core", GolemBoss.CORE))
 
 
 ## Alle events sinds de vorige aanroep (tick() en damage()), daarna leeg.

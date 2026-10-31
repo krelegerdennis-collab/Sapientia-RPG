@@ -1,6 +1,6 @@
 # D3 — Golem als realtime Action-baas (ontwerp, besluiten genomen)
 
-Status: **ontwerp, niet gebouwd; besluiten van Dennis vastgelegd (31 okt 2026 20:38, "go" op alle 5 aanbevelingen, zie §7).** Basis: verse clone `origin/main` @ `571a93e` (31 okt 2026). Alleen WM1; `wacht/wm2/` niet gelezen.
+Status: **gebouwd (PR B)**; besluiten van Dennis vastgelegd (31 okt 2026 20:38, "go" op alle 5 aanbevelingen, zie §7). Basis: verse clone `origin/main` @ `571a93e` (31 okt 2026). Alleen WM1; `wacht/wm2/` niet gelezen.
 Legenda: **[V]** = geverifieerd in code (bestand:regel), **[NV]** = niet geverifieerd / voorstel.
 
 ## 1. Huidige stand (geverifieerd)
