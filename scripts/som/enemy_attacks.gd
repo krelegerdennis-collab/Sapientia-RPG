@@ -3,6 +3,8 @@ extends RefCounted
 ## Action-telegraafaanvallen (Combat T4a/T4b). Data voor TelegraphShape + zone-spawn.
 ## Schade-multipliers (`power`, `zone_dot_power`) zijn relatief t.o.v. de huidige Action-klap (hit_member).
 
+const GolemBoss := preload("res://scripts/som/golem_boss.gd")
+
 const TILE_PX := 16
 ## Inktplas: cirkel r 1,5 tegel (vast bij windup-start op doelpositie).
 const INKPLAS_RADIUS_PX := 24
@@ -58,7 +60,27 @@ const ENEMY_DEFAULT_ATTACK := {
 
 
 static func attack(id: String) -> Dictionary:
+	if not ATTACKS.has(id) and GolemBoss.ATTACKS.has(id):
+		return golem_attack(id)
 	return (ATTACKS.get(id, {}) as Dictionary).duplicate(true)
+
+
+## D3 PR B: Golem-aanvallen (golem_boss.gd, ticks + tegels) in EnemyAttacks-vorm (ms + px) voor
+## TelegraphShape/TelegraphState. Geen vijand-pool: alleen GolemFight start ze (host).
+static func golem_attack(id: String) -> Dictionary:
+	var g: Dictionary = GolemBoss.attack(id)
+	if g.is_empty():
+		return {}
+	var out := {"id": id, "shape": str(g["shape"]), "reach": roundi(float(g["reach_tiles"]) * TILE_PX),
+		"windup_ms": GolemBoss.ticks_to_ms(int(g["windup"])), "active_ms": GolemBoss.ticks_to_ms(int(g["active"])),
+		"recovery_ms": GolemBoss.ticks_to_ms(int(g["recovery"])), "power": float(g["power"]), "boss": true}
+	if g.has("angle"):
+		out["angle"] = int(g["angle"])
+	if str(g["shape"]) == "line":
+		out["width"] = TILE_PX
+	if g.has("aim"):
+		out["aim"] = str(g["aim"])
+	return out
 
 
 static func default_attack_for_enemy(enemy_id: String) -> String:

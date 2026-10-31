@@ -3,7 +3,7 @@
 ## GameState.som_mode uit staat (het gewone spel), blijven de turn-based gevechten precies zoals ze waren.
 ## Bazen zonder BossScript (scripts/som/boss_script.gd) blijven turn-based, ook in Action/SoM.
 ## Met BossScript (D3) kunnen ze realtime in de arena; Classic turn-based is ongewijzigd.
-## DEPRECATED: ACTION_BOSS_MULT (hieronder) — alleen nog simulator/legacy; Action-bazen gebruiken BossCore.apply_boss.
+## ACTION_BOSS_MULT is verwijderd (D3 PR B); Action-bazen gebruiken BossCore.apply_boss (action_boss_stats).
 extends RefCounted
 
 const BossCore := preload("res://scripts/battle/boss_core.gd")
@@ -356,14 +356,6 @@ const SPELL_RANGE := 160.0
 const TXT_RING := "Ring"
 const TXT_ITEMS := "Items"
 const TXT_SKILLS := "Skills"
-## DEPRECATED (D3 PR A): alleen --actionsim / som_autotest; vervangen door action_boss_stats + BossCore.apply_boss.
-## Oud: ACTION-MODUS BAZEN-vermenigvuldigers (docs/ACTION_BALANCE_REPORT.md).
-const ACTION_BOSS_MULT := {"max_hp": 2.3, "atk": 1.6}
-const ACTION_BOSS_PER_LEVEL := {"atk": 0.35}
-## Alleen voor de simulator: andere waarden proberen ({"mult": {...}, "per_level": {...}}; {} = de consts).
-static var action_boss_override: Dictionary = {}
-
-
 ## Hook: schaal baas-HP/adds naar aantal party-stoelen (COMBAT_DESIGN §12). Balans in PR B.
 static func boss_party_scale(party_count: int) -> float:
 	return 1.0
@@ -382,7 +374,12 @@ static func action_boss_stats(data: Dictionary, party_count: int = 1) -> Diction
 	return scaled
 
 
-## Baas-data voor Action-modus; on == false (Classic) = exact dezelfde data terug.
+## D3 PR B: ACTION_BOSS_MULT / ACTION_BOSS_PER_LEVEL / action_boss_override zijn VERWIJDERD (§7 Besluit 4).
+## Action-bazen: action_boss_stats() hierboven (BossCore.apply_boss, geen vermenigvuldiger).
+## LEGACY, ALLEEN VOOR BESTAANDE TESTS: som_autotest.gd:1046-1049,1077 en boss_phase_tests.gd:131-132 roepen
+## action_boss()/action_boss_mult() nog aan en verwachten de oude curve (> 1.0). Die tests mogen in deze PR niet
+## gewijzigd worden; de bevroren waarden staan daarom hier, door geen productiecode of sim gebruikt.
+## Voorstel: na akkoord van Dennis die testregels aanpassen en deze twee functies schrappen.
 static func action_boss(data: Dictionary, on: bool, party_level: float = START_LEVEL) -> Dictionary:
 	if not on:
 		return data
@@ -394,15 +391,10 @@ static func action_boss(data: Dictionary, on: bool, party_level: float = START_L
 	return out
 
 
-## Vermenigvuldigers bij een gemiddeld partylevel.
+## LEGACY (zie hierboven): bevroren historische curve HP x2.3, ATK x1.6 +0.35/lv boven START_LEVEL.
 static func action_boss_mult(party_level: float) -> Dictionary:
-	var base: Dictionary = action_boss_override.get("mult", ACTION_BOSS_MULT)
-	var per: Dictionary = action_boss_override.get("per_level", ACTION_BOSS_PER_LEVEL)
 	var extra := maxf(0.0, party_level - float(START_LEVEL))
-	var m := base.duplicate()
-	for k in per:
-		m[k] = float(m.get(k, 1.0)) + float(per[k]) * extra
-	return m
+	return {"max_hp": 2.3, "atk": 1.6 + 0.35 * extra}
 
 
 ## Ring-opmaak: max. lengte kort label (zonder icoon) en ruimte tussen ring, kop en naamregel.

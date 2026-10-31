@@ -92,3 +92,12 @@ Besluit Dennis, 31 okt 2026 20:38: **"go" op alle 5 aanbevelingen.**
 3. **Adds in fase 2:** **2 `papiergeest`**.
 4. **ACTION_BOSS_MULT:** blijft staan (ongebruikt) en wordt **pas in PR B** verwijderd, niet in PR A.
 5. **Enrage:** **geen enrage** in v1.
+
+## 8. PR B — status (gebouwd, balans = voorstel)
+
+- Data: `scripts/som/golem_boss.gd` (fases, aanvallen in ticks, kern, sprites #341); registratie via `GolemBoss.ensure_registered()`.
+- Logica: `scripts/som/golem_fight.gd` (host, deterministisch) + `scripts/som/boss_core_rt.gd` (8 s cyclus, 2 s open, break 45; klok pauzeert tijdens de 90 onkwetsbare ticks, fasewissel reset de cyclus).
+- Beeld: `scripts/som/golem_boss_view.gd`. Golem-aanvallen ook via `EnemyAttacks.attack()` (ms/px-vorm), zonder vijand-pool.
+- `ACTION_BOSS_MULT`/`ACTION_BOSS_PER_LEVEL`/`action_boss_override` verwijderd; `action_boss()`/`action_boss_mult()` alleen nog als bevroren legacy voor bestaande tests (zie som_data.gd).
+- Sim: `-- --actionsim --boss-rt [--boss-fights=200] [--boss-levels=7,3]` → `docs/combat/d3_golem_sim_report.md`.
+- Tests: `--golemactiontest`, `--golemactionsimtest` (nieuw; `--golemtest` bestond al voor golem_tests.gd).
