@@ -1,6 +1,6 @@
 # D3 — Golem als realtime Action-baas (ontwerp, besluiten genomen)
 
-Status: **ontwerp, niet gebouwd; besluiten van Dennis vastgelegd (31 okt 2026 20:38, "go" op alle 5 aanbevelingen, zie §7).** Basis: verse clone `origin/main` @ `571a93e` (31 okt 2026). Alleen WM1; `wacht/wm2/` niet gelezen.
+Status: **gebouwd (PR B)**; besluiten van Dennis vastgelegd (31 okt 2026 20:38, "go" op alle 5 aanbevelingen, zie §7). Basis: verse clone `origin/main` @ `571a93e` (31 okt 2026). Alleen WM1; `wacht/wm2/` niet gelezen.
 Legenda: **[V]** = geverifieerd in code (bestand:regel), **[NV]** = niet geverifieerd / voorstel.
 
 ## 1. Huidige stand (geverifieerd)
@@ -92,3 +92,17 @@ Besluit Dennis, 31 okt 2026 20:38: **"go" op alle 5 aanbevelingen.**
 3. **Adds in fase 2:** **2 `papiergeest`**.
 4. **ACTION_BOSS_MULT:** blijft staan (ongebruikt) en wordt **pas in PR B** verwijderd, niet in PR A.
 5. **Enrage:** **geen enrage** in v1.
+
+Besluit Dennis, 31 okt 2026 22:16 (PR B, geen stat-wijzigingen):
+6. **Schadeplafond per fase:** schade wordt afgekapt op de fasedrempel; overschot vervalt.
+7. **Kern-cyclus reset niet** bij een fasewissel: de 8 s/2 s-klok loopt door de overgang heen.
+
+## 8. PR B — status (gebouwd, balans = voorstel)
+
+- Data: `scripts/som/golem_boss.gd` (fases, aanvallen in ticks, kern, sprites #341); registratie via `GolemBoss.ensure_registered()`.
+- Logica: `scripts/som/golem_fight.gd` (host, deterministisch) + `scripts/som/boss_core_rt.gd` (8 s cyclus, 2 s open, break 45; vaste klok die ook tijdens de 90 onkwetsbare ticks doorloopt; een fasewissel reset de cyclus NIET).
+- Schadeplafond: schade op de Golem wordt afgekapt op de drempel van de huidige fase (overschot vervalt), zodat één kernvenster-burst nooit voorbij een drempel gaat (Dennis, 31 okt 2026 22:16).
+- Beeld: `scripts/som/golem_boss_view.gd`. Golem-aanvallen ook via `EnemyAttacks.attack()` (ms/px-vorm), zonder vijand-pool.
+- `ACTION_BOSS_MULT`/`ACTION_BOSS_PER_LEVEL`/`action_boss_override` verwijderd; `action_boss()`/`action_boss_mult()` alleen nog als bevroren legacy voor bestaande tests (zie som_data.gd).
+- Sim: `-- --actionsim --boss-rt [--boss-fights=200] [--boss-levels=7,3]` → `docs/combat/d3_golem_sim_report.md`.
+- Tests: `--golemactiontest`, `--golemactionsimtest` (nieuw; `--golemtest` bestond al voor golem_tests.gd).

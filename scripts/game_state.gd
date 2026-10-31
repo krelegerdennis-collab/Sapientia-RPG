@@ -546,6 +546,8 @@ func _ready() -> void:
 	# Wortelgreep-status (Combat T6): of  godot -- --roottest  (scripts/tests/root_tests.gd).
 	# Actieve dodge + stamina (Combat D5): of  godot -- --dodgetest  (scripts/tests/dodge_tests.gd).
 	# D3 bazen fase-machine (PR A): of  godot -- --bossphasetest  (scripts/tests/boss_phase_tests.gd).
+	# D3 realtime Golem (PR B): of  godot -- --golemactiontest  (scripts/tests/golem_action_tests.gd)
+	#   en  godot -- --golemactionsimtest  (scripts/tests/golem_actionsim_tests.gd, kleine sim als rookproef).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
@@ -628,6 +630,8 @@ func _ready() -> void:
 			["--roottest", "res://scripts/tests/root_tests.gd", "RootTest", "roottest"],
 			["--dodgetest", "res://scripts/tests/dodge_tests.gd", "DodgeTest", "dodgetest"],
 			["--bossphasetest", "res://scripts/tests/boss_phase_tests.gd", "BossPhaseTest", "bossphasetest"],
+			["--golemactiontest", "res://scripts/tests/golem_action_tests.gd", "GolemActionTest", "golemactiontest"],
+			["--golemactionsimtest", "res://scripts/tests/golem_actionsim_tests.gd", "GolemActionsimTest", "golemactionsimtest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
