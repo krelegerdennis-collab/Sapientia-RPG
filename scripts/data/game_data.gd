@@ -203,6 +203,11 @@ const ENEMIES := {
 			# Bevestigd: HP 360 en ATK 27, zodat Lv 7 slim wint met meerdere items
 			# en domweg aanvallen meestal verliest.
 			# DEF blijft 15 (de kern-drempel 45 hoort bij Dennis Lv 7, niet bij een zwakke klap).
+			# Balans optie A (voorstel/meting kennis_beest r3-r6): stats bewust ongewijzigd 360/27/15.
+			# Meten met het bedoelde scenario (Dax solo, Vonkzwaard-set, tas inv_mid), niet met een duo:
+			#   -- --battlesim --scenario=golem --party=dennis:7 --runs=1000 --seed=7 [--items=none]
+			# Seed 7, policy simpel: Lv 7 63% winst met ~5 items, 0,5% zonder items; Lv 8 82% / 49%.
+			# ATK 24 (optie B) maakt items op Lv 7-8 overbodig; niet verlagen zonder nieuwe meting.
 			"max_hp": 360, "atk": 27, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "mp": 0,
 			"exp": 210, "gold": 84,
 			"skills": [{"name": "Book Hammer", "chance": 0.2, "power": 1.5}],
