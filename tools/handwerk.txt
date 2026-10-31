@@ -1285,3 +1285,7 @@ assets/sprites/enemies/arcane_slime_96_sheet_left.png
 assets/sprites/enemies/arcane_slime_96.png
 assets/sprites/enemies/arcane_slime_96.tres
 assets/sprites/enemies/arcane_slime_96_left.tres
+assets/sprites/som/combat/dax_attack2.png
+assets/sprites/som/combat/dax_finisher.png
+assets/sprites/som/combat/seren_attack2.png
+assets/sprites/som/combat/seren_finisher.png
