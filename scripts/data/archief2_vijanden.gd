@@ -28,6 +28,18 @@ const COUNTER_POWER := 1.0
 const COUNTER_TURNS := 1
 
 
+## Verversen i.p.v. stapelen (#5/#6): bestaat er al een rij met dezelfde waarde voor 'key'
+## (buff: "stat", gif: "gif"), dan blijft er één rij over met de hoogste pct en de hoogste
+## resterende beurten. Anders komt 'row' erbij.
+static func refresh_row(rows: Array, row: Dictionary, key: String) -> void:
+	for r in rows:
+		if typeof(r) == TYPE_DICTIONARY and r.get(key) == row.get(key):
+			r["pct"] = maxf(float(r.get("pct", 0.0)), float(row.get("pct", 0.0)))
+			r["turns"] = maxi(int(r.get("turns", 0)), int(row.get("turns", 0)))
+			return
+	rows.append(row)
+
+
 ## Zet het effect van vaardigheid 'skill' (na de schade 'dmg') op doel 't'. Geeft de melding
 ## terug ("" = geen melding). 'actor' = wie de vaardigheid gebruikt.
 static func apply(actor: Dictionary, t: Dictionary, skill: Dictionary, dmg: int) -> String:
@@ -43,8 +55,8 @@ static func apply(actor: Dictionary, t: Dictionary, skill: Dictionary, dmg: int)
 				return ""
 			if not t.has("dots"):
 				t["dots"] = []
-			(t["dots"] as Array).append({"pct": float(skill.get("dot_pct", POISON_PCT)),
-					"turns": int(skill.get("dot_turns", POISON_TURNS)), "gif": true})
+			refresh_row(t["dots"], {"pct": float(skill.get("dot_pct", POISON_PCT)),
+					"turns": int(skill.get("dot_turns", POISON_TURNS)), "gif": true}, "gif")
 			return "%s is poisoned!" % t["name"]
 		"drain":
 			if int(actor["s"]["hp"]) <= 0:

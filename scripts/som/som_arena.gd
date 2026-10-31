@@ -106,6 +106,8 @@ var _coop_snap: Dictionary = {}
 ## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
 var sheets := {}
 var attack_texs := {}
+## T26: eigen hit2/finisher-sheets per held: id -> {"hit2": Texture2D, "finisher": Texture2D}.
+var step_texs := {}
 ## Kaart-cast sheets (SomData.MAP_CAST), één keer geladen in setup() — geen load() tijdens cast.
 var map_cast_texs := {}
 ## Voor de autotest: laatste schade, laatste melding, tellers.
@@ -192,6 +194,7 @@ func setup(p_room: Node) -> void:
 		var sheet := str(SomData.ATTACK_ANIMS.get(id, {}).get("sheet", ""))
 		if sheet != "" and ResourceLoader.exists(sheet):
 			attack_texs[id] = load(sheet)
+		_laad_step_sheets(id)
 		_laad_held_cast(id)
 	# leider-behoud: de held die je met SWAP koos (GameState.leader_id), terugval Dax bij KO / niet in de party
 	active_id = GameState.active_leader()
@@ -627,6 +630,8 @@ func sim_step() -> void:
 		_pending["dodge"] = false
 		try_active_dodge(active_id, _dodge_facing_dir(active_id))
 	b_cast_cd = maxf(0.0, b_cast_cd - dt)
+	if _pending["attack"] and SomChainData.TAP_GATE and swing_lock > 0.0:
+		_pending["attack"] = false      # F5: tik tijdens eigen slag-animatie telt niet
 	if _pending["attack"]:
 		_pending["attack"] = false
 		attack()
@@ -736,6 +741,8 @@ func attack() -> int:
 	attacks += 1
 	var step := _chain_begin_hit(active_id)
 	var mult := charge_mult(charge)
+	if step > 0:
+		mult = maxf(mult, SomChainData.FOLLOWUP_MIN_METER)   # F5: vervolgslag binnen venster
 	if step >= 0:
 		mult *= SomChainData.damage_mult(step)
 	_full_swing = charge >= 1.0
@@ -880,7 +887,25 @@ func _attack_def(id: String, step: int) -> Dictionary:
 	var base: Dictionary = SomData.ATTACK_ANIMS.get(id, {})
 	if step < 0 or base.is_empty():
 		return base
-	return SomChainData.anim_def(base, step)
+	return SomChainData.anim_def(base, step, id)
+
+
+## T26: laad de eigen hit2/finisher-sheets van held 'id' (SomChainData.STEP_SHEETS); ontbreekt er een: terugval.
+func _laad_step_sheets(id: String) -> void:
+	for step in [SomChainData.STEP_HIT2, SomChainData.STEP_FINISHER]:
+		var path := SomChainData.step_sheet(id, step)
+		if path != "":
+			if not step_texs.has(id):
+				step_texs[id] = {}
+			step_texs[id][SomChainData.state_for(step)] = load(path)
+
+
+## Textuur voor de slag van held 'id' met animatie-definitie 'def' (eigen stap-sheet of <held>_attack.png).
+func attack_tex_for(id: String, def: Dictionary) -> Texture2D:
+	var st := str(def.get("chain_state", ""))
+	if def.has("sheet") and step_texs.get(id, {}).has(st):
+		return step_texs[id][st]
+	return attack_texs.get(id)
 
 
 func _anim_seconds_def(id: String, def: Dictionary) -> float:
@@ -908,11 +933,11 @@ func _swing(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 	if attack_texs.has(id):
 		# zware slag: placeholder = de finisher-placeholder (TODO RPG ART: <held>_heavy.png)
 		var def := _attack_def(id, SomChainData.STEP_FINISHER if heavy > 0 else step)
-		var anim: Node = _drive(SomFx.attack_anim(n, attack_texs[id], def))
+		var anim: Node = _drive(SomFx.attack_anim(n, attack_tex_for(id, def), def))
 		if heavy > 0:
 			anim.set_meta("chain_state", SomHeavyData.state_for(heavy))
 		elif step >= 0:
-			anim.set_meta("chain_state", SomChainData.state_for(step))   # TODO RPG ART: eigen hit2/finisher-sheet
+			anim.set_meta("chain_state", SomChainData.state_for(step))
 		# bondgenoot: de slag gaat de kant op waar hij begon (zijn AI kan tijdens de animatie al draaien)
 		var face0: Vector2i = n.facing
 		anim.hit.connect(func() -> void:
