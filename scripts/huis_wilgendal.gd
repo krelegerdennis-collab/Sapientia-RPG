@@ -17,6 +17,8 @@ func _ready() -> void:
 		c.queue_free()
 	ground.clear()
 	_build.bouw(ground, details, get_node("Objects"))
+	# Classic grid: geen TileSet-fysiek op de speler (vóór de tileset-fix blokkeerde dat niet; nu wel).
+	ground.set_collision_enabled(false)
 	_story_objecten()
 	_spawns()
 	_uitgang()

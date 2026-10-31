@@ -214,7 +214,9 @@ static func tegel_geblokkeerd(
 	var data: TileData = ground.get_cell_tile_data(tegel)
 	if data == null:
 		return true
-	return data.get_collision_polygons_count(0) > 0
+	# Botsing komt uit solid_tiles (#/F/J) en prop_blocks; tile-fysiek is voor
+	# Action/physics-queries, niet dubbel blokkeren in Classic-grid (anders breken oude routes).
+	return false
 
 
 static func tegel_vrij(

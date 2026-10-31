@@ -15,7 +15,6 @@ signal tapped
 
 const FRAME := {"stil": 0, "klaar": 1, "aanval_a": 2, "aanval_b": 3,
 		"spreuk_a": 4, "spreuk_b": 5, "geraakt": 6, "ko": 7}
-const BattleScript := preload("res://scripts/battle/battle.gd")
 ## Tik-vak van de held (ongeveer het lijf; het plaatje zelf is groter, want het wapen
 ## en de zwaaiboog steken uit).
 const SIZE := Vector2(40, 78)
@@ -77,8 +76,6 @@ func has_idle_animation() -> bool:
 
 
 func _setup_idle_timer(aan: bool) -> void:
-	if BattleScript.headless_sim:
-		aan = false
 	if _idle_timer != null:
 		_idle_timer.stop()
 		_idle_timer.queue_free()
@@ -163,12 +160,6 @@ func step(forward: bool) -> void:
 	stepped_forward = forward
 	if _move_tween:
 		_move_tween.kill()
-		_move_tween = null
-	if BattleScript.headless_sim:
-		position = _target_position()
-		if not is_ko:
-			set_pose("klaar" if forward else "stil")
-		return
 	_move_tween = create_tween()
 	_move_tween.tween_property(self, "position", _target_position(), 0.12)
 	if not is_ko:
@@ -183,9 +174,6 @@ func _target_position() -> Vector2:
 ## Aanval: uithalen -> slaan. Blijft in de 'slaan'-pose tot rest() wordt aangeroepen.
 func play_attack() -> void:
 	set_pose("aanval_a")
-	if BattleScript.headless_sim:
-		set_pose("aanval_b")
-		return
 	await get_tree().create_timer(0.14).timeout
 	set_pose("aanval_b")
 
@@ -193,9 +181,6 @@ func play_attack() -> void:
 ## Spreuk / item: arm omhoog -> glinstering.
 func play_cast() -> void:
 	set_pose("spreuk_a")
-	if BattleScript.headless_sim:
-		set_pose("spreuk_b")
-		return
 	await get_tree().create_timer(0.16).timeout
 	set_pose("spreuk_b")
 
@@ -208,10 +193,6 @@ func rest() -> void:
 ## Geraakt: wit flitsen, schudden en even de 'geraakt'-pose.
 func hurt() -> void:
 	set_pose("geraakt")
-	if BattleScript.headless_sim:
-		if not is_ko:
-			set_pose("klaar" if stepped_forward else "stil")
-		return
 	flash(Color(2.2, 2.2, 2.2))
 	var origin := _target_position()
 	var tw := create_tween()
@@ -227,8 +208,6 @@ func hurt() -> void:
 
 ## Kleur even veranderen (wit = geraakt, groen = genezen) en terug.
 func flash(color: Color) -> void:
-	if BattleScript.headless_sim:
-		return
 	if _flash_tween:
 		_flash_tween.kill()
 	_flash_tween = create_tween()

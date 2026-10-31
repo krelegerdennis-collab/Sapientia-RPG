@@ -175,7 +175,7 @@ func play_music(track_name: String, fade_in: float = DEFAULT_FADE, restart: bool
 
 
 ## Stopt de muziek met een fade-out (in seconden, 0 = direct).
-func stop_music(fade_seconds: float = DEFAULT_FADE) -> void:
+func stop_music(fade_out: float = DEFAULT_FADE) -> void:
 	_kill_music_tween()
 	var was_playing := _active_player != null and _active_player.playing
 	_current_track = ""
@@ -183,13 +183,13 @@ func stop_music(fade_seconds: float = DEFAULT_FADE) -> void:
 		_stop_all_music_players()
 		return
 
-	if fade_seconds <= 0.0:
+	if fade_out <= 0.0:
 		_stop_all_music_players()
 	else:
 		var outgoing := _active_player
 		var out_db := outgoing.volume_db
 		_music_tween = create_tween()
-		_music_tween.tween_method(_apply_crossfade.bind(null, 0.0, outgoing, out_db), 0.0, 1.0, fade_seconds)
+		_music_tween.tween_method(_apply_crossfade.bind(null, 0.0, outgoing, out_db), 0.0, 1.0, fade_out)
 		_music_tween.tween_callback(_on_fade_finished.bind(outgoing))
 	music_stopped.emit()
 
@@ -720,14 +720,11 @@ func _on_music_player_finished(player: AudioStreamPlayer) -> void:
 ## al false; "heeft een stream gehad" is de enige betrouwbare aanwijzing.
 func _exit_tree() -> void:
 	_kill_music_tween()
-	_music_stack.clear()
-	_current_track = ""
 	var had_stream := false
 	for player: AudioStreamPlayer in _music_players + _sfx_pool:
 		if player.stream != null:
 			had_stream = true
-		player.stop()
-		player.stream = null
+			player.stop()
 	if had_stream:
 		_wacht_op_mix(2, EXIT_MIX_WAIT_MS)
 

@@ -386,8 +386,6 @@ func _fight(g: Dictionary) -> Dictionary:
 		"items_detail": ";".join(ids.map(func(id): return "%s:%d" % [id, used[id]]))}
 	_holder.remove_child(b)
 	b.queue_free()
-	for i in 3:
-		await get_tree().process_frame
 	return r
 
 

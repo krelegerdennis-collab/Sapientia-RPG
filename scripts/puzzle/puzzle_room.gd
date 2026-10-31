@@ -466,7 +466,7 @@ func request_reset(p: Node2D) -> void:
 		await Transition.fade_out()
 		reset_room()
 		puzzle_sound.emit("herstel")
-		await Transition.fade_in_wait()
+		await Transition.fade_in()
 		player.input_locked = false
 		last_reset_result = "reset"
 	else:
