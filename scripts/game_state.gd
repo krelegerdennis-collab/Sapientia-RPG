@@ -564,6 +564,7 @@ func _ready() -> void:
 			["--puzzletest", "res://scripts/tests/puzzle_tests.gd", "PuzzleTest", "puzzletest"],
 			["--dungeontest", "res://scripts/tests/dungeon_tests.gd", "DungeonTest", "dungeontest"],
 			["--golemtest", "res://scripts/tests/golem_tests.gd", "GolemTest", "golemtest"],
+			["--demofixtest", "res://scripts/tests/demofix_tests.gd", "DemoFixTest", "demofixtest"],
 			["--archieftest", "res://scripts/tests/archief_tests.gd", "GeheimTest", "archieftest"],
 			["--kerntest", "res://scripts/tests/kern_tests.gd", "KernTest", "kerntest"],
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
