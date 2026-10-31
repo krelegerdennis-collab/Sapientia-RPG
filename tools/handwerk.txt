@@ -1179,3 +1179,8 @@ assets/ui/icons/items/icons32/zweefstaf.png
 # v12.2: gloom_bat geanimeerd (SpriteFrames 96x96, zelfde opzet als storm_harpy_96)
 assets/sprites/enemies/gloom_bat_96.tres
 assets/sprites/enemies/gloom_bat_96_left.tres
+assets/sprites/enemies/goblin_raider_96_sheet.png
+assets/sprites/enemies/goblin_raider_96_sheet_left.png
+assets/sprites/enemies/goblin_raider_96.png
+assets/sprites/enemies/goblin_raider_96.tres
+assets/sprites/enemies/goblin_raider_96_left.tres
