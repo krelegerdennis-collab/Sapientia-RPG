@@ -32,7 +32,7 @@ jobs:
                 partytest, savetest, saveroundtriptest, musictest, grotlayouttest, held24test,
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
                 koopmantest, testmodustest, telegraphtest, roottest,
-                formuletest, battlesimenemytest, combatbugstest]
+                formuletest, battlesimenemytest, combatbugstest, perfprobetest, huiscollisiontest]
     steps:
       - uses: actions/checkout@v4
 
