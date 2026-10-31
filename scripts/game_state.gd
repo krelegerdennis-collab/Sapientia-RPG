@@ -1664,7 +1664,7 @@ func _party_save_from(groep: Array) -> Array:
 
 ## Party uit save-data terug (kapotte velden krijgen de standaardwaarde); uitrusting die niet meer past
 ## komt in 'stray_equipment'.
-func _party_from(raw: Array, stray_equipment: Array) -> Array:
+func _party_from(raw: Array, stray_equipment: Array, oude_namen := true) -> Array:
 	var out := []
 	for e in raw:
 		if not (e is Dictionary):
@@ -1679,7 +1679,7 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 			if h.has(k) and h[k] is int and not (v is float or v is int):
 				continue      # kapot getal: standaardwaarde van de held houden
 			h[k] = int(v) if v is float else v
-		if h.get("name") is String:
+		if oude_namen and h.get("name") is String:
 			h["name"] = migrate_name(str(h["name"]))
 		if e.has("spells") and e["spells"] is Array:
 			h["spells"] = e["spells"].duplicate()
@@ -1699,6 +1699,9 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 ## v0.23 namen-migratie (besluit Dennis 13 okt 2026): oude saves bewaren de weergavenamen.
 ## Dennis -> Dax, Lotte -> Seren, Noor -> Vesper. Ids (dennis/lotte/noor) blijven gelijk.
 const OUDE_NAMEN := {"Dennis": "Dax", "Lotte": "Seren", "Noor": "Vesper"}
+## r7-3 #3: saves vanaf deze sleutel hebben al nieuwe namen; alleen saves zonder sleutel migreren,
+## anders verliest een speler die zichzelf "Dennis" noemt zijn naam bij laden/game over.
+const NAMES_KEY := "names_v23"
 
 static func migrate_name(n: String) -> String:
 	return str(OUDE_NAMEN.get(n, n))
@@ -1730,6 +1733,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	var data := {
 		"battle_style": int(Settings.get_value("battle_style")),   # 21 okt 2026: gevechtsstijl reist mee met de save
 		"version": SAVE_VERSION,
+		NAMES_KEY: true,
 		"map": map if map != "" else current_map,
 		"tile": [tile.x, tile.y],
 		"facing": [facing.x, facing.y],
@@ -1858,15 +1862,18 @@ func apply_state(d: Dictionary) -> bool:
 	# of nieuwere saves) laten het spel nooit vastlopen.
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
-	player_name = migrate_name(clean_name(str(d.get("player_name", DEFAULT_NAME))))
+	var oude_namen := not d.has(NAMES_KEY)
+	player_name = clean_name(str(d.get("player_name", DEFAULT_NAME)))
+	if oude_namen:
+		player_name = migrate_name(player_name)
 	# #166: ontbrekende sleutel (oude save) = "" = uitgang naar wilgendal.tscn zoals vroeger
 	huis_herkomst = "dorp" if str(d.get("huis_herkomst", "")) == "dorp" else ""
 	party.clear()
 	var stray_equipment: Array = []
-	party = _party_from(d["party"], stray_equipment)
+	party = _party_from(d["party"], stray_equipment, oude_namen)
 	party_bench = []
 	if d.get("party_bank") is Array:
-		party_bench = _party_from(d["party_bank"], stray_equipment)
+		party_bench = _party_from(d["party_bank"], stray_equipment, oude_namen)
 	if party.is_empty():
 		add_member(MAIN_HERO)
 	leader_id = str(d.get("leader", MAIN_HERO)) if d.get("leader", MAIN_HERO) is String else MAIN_HERO
