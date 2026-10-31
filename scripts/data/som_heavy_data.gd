@@ -10,10 +10,10 @@ extends RefCounted
 ## (en het vertragen), zodat een gewone tap niets merkt.
 const HOLD_START_TICKS := 12
 ## Vastgehouden ticks (vanaf het indrukken) voor niveau 1 en 2.
-const LEVEL_TICKS: Array[int] = [40, 90]
+const LEVEL_TICKS: Array[int] = [45, 100]
 const MAX_LEVEL := 2
 ## Schade-multiplier per niveau (index 0 = niveau 1). Bovenop de wapenmeter (SomArena.charge_mult).
-const DAMAGE_MULT: Array[float] = [2.0, 3.0]
+const DAMAGE_MULT: Array[float] = [1.7, 2.4]
 ## Hitstop (ticks dat de vijand bevriest) en knockback (tegels) per niveau.
 const HITSTOP_TICKS: Array[int] = [8, 12]
 const KNOCKBACK_TILES: Array[int] = [2, 3]
