@@ -36,6 +36,7 @@ func _run() -> void:
 	else:
 		_coop_spam_tests(r[1])
 		_no_sheet_tests(r[1])
+		_dodge_cancel_tests(r[1])
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -156,6 +157,38 @@ func _no_sheet_tests(arena: SomArena) -> void:
 		arena.attack_texs["dennis"] = saved_d
 	if saved != null:
 		arena.attack_texs["lotte"] = saved
+	arena.coop_sim_host = false
+	arena._coop_slots = {}
+	arena._coop_avatars = {}
+
+
+## T29 (Dennis 13:09): actieve dodge annuleert een lopende slag en zet de keten terug op hit1.
+func _dodge_cancel_tests(arena: SomArena) -> void:
+	var id := arena.active_id
+	arena.chains.erase(id)
+	arena.swing_lock = 0.0
+	arena._dodge_cd_ticks.clear()
+	arena._dodge_roll_ticks.clear()
+	arena.attack()
+	check("dodge: swing_lock > 0 na slag", arena.swing_lock > 0.0)
+	var ok := arena.try_active_dodge(id, Vector2.RIGHT)
+	check("dodge: start tijdens swing_lock", ok)
+	check("dodge: swing_lock gewist", arena.swing_lock == 0.0)
+	check("dodge: keten terug op hit1", int(arena.chain_of(id).get("next", -1)) == 0)
+	# co-op slot
+	var peer: Node2D = arena.ally_of("lotte")
+	arena.coop_sim_host = true
+	arena._coop_slots = {0: id, 1: "lotte"}
+	arena._coop_avatars = {1: peer}
+	arena._coop_swing_lock.clear()
+	arena._coop_attack_cd.clear()
+	arena.chains.erase("lotte")
+	arena.coop_host_step([_inp(1, Codec.BTN_ATTACK)], CombatSim.TICK_DT)
+	check("dodge co-op: slot-lock > 0 na slag", float(arena._coop_swing_lock.get(1, 0.0)) > 0.0)
+	var ok2 := arena.try_active_dodge("lotte", Vector2.RIGHT)
+	check("dodge co-op: start tijdens slot-lock", ok2)
+	check("dodge co-op: slot-lock gewist", float(arena._coop_swing_lock.get(1, 0.0)) == 0.0)
+	check("dodge co-op: keten terug op hit1", int(arena.chain_of("lotte").get("next", -1)) == 0)
 	arena.coop_sim_host = false
 	arena._coop_slots = {}
 	arena._coop_avatars = {}

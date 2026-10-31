@@ -1600,8 +1600,7 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 		return false
 	if int(_dodge_roll_ticks.get(id, 0)) > 0 or int(_dodge_cd_ticks.get(id, 0)) > 0:
 		return false
-	if swing_lock > 0.0 and id == active_id:
-		return false
+	# T29 (Dennis 13:09): een actieve dodge mag een lopende slag annuleren (swing_lock blokkeert niet meer).
 	if not combat_stamina.spend(id, SomData.STAMINA_DODGE_COST):
 		return false
 	var d := dir.normalized() if dir.length_squared() > 0.01 else _dodge_facing_dir(id)
@@ -1611,6 +1610,11 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 	_dodge_roll_ticks[id] = SomData.DODGE_DURATION_TICKS
 	_dodge_cd_ticks[id] = SomData.DODGE_COOLDOWN_TICKS
 	chain_reset(id)            # dodge annuleert de aanvalsketen van deze actor
+	if id == active_id:
+		swing_lock = 0.0       # T29: dodge annuleert de lopende slag
+	for sl in _coop_slots.keys():
+		if str(_coop_slots[sl]) == id:
+			_coop_swing_lock[sl] = 0.0
 	heavy_cancel(id)           # en het opladen (geen zware slag)
 	iframes[id] = float(SomData.DODGE_IFRAME_TICKS) * TICK_DT
 	if id == active_id and room != null and room.has_method("start_invuln"):
