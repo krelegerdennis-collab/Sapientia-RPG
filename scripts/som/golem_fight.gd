@@ -2,6 +2,7 @@ extends RefCounted
 class_name GolemFight
 ## D3 PR B: host-authoritatieve, deterministische Golem-baas @ 60 Hz (docs/combat/d3_action_bosses.md §2, §6).
 ## Combineert BossPhaseMachine (fases, 90 ticks onkwetsbaar) + BossCoreRt (8 s cyclus, 2 s open, break 45)
+## Fasedrempel = schadeplafond (overschot vervalt); kern-klok loopt door fasewissels heen.
 ## + aanvalsplanner (één baas-aanval tegelijk + kern-gloed = max 2 baas-telegrafen).
 ## Geen nodes, geen allocaties per tick behalve de event-lijst. Gasten krijgen alleen de events.
 ##
@@ -73,16 +74,17 @@ func tick() -> void:
 	tick_no += 1
 	var was_invuln := pm.is_invulnerable()
 	pm.tick()
-	if was_invuln:
-		if not pm.is_invulnerable():
-			_events.append({"type": "invuln_end"})
-		return        # fasewissel (precies INVULN_TICKS ticks): niets loopt, kern-klok staat stil
+	# Dennis 31 okt 22:16: kern-klok (8 s / 2 s) loopt OOK door tijdens de fasewissel (geen reset).
 	var ce := core.tick()
 	if ce == "open":
 		_events.append({"type": "core_open", "windup": core.open_ticks})
 	elif ce == "slam":
 		_events.append({"type": "core_slam"})
 		_forced.append("golem_hammer_blow")
+	if was_invuln:
+		if not pm.is_invulnerable():
+			_events.append({"type": "invuln_end"})
+		return        # fasewissel (precies INVULN_TICKS ticks): geen aanvallen; slam wacht in de wachtrij
 	# fase 3: eenmalige klap onder 10% HP, zonder kernvenster
 	if pm.phase_index() == 2 and not _p3_blow_done and float(pm.current_hp()) < float(pm.max_hp()) * float(_script.get("p3_low_hp_blow_below", 0.1)):
 		_p3_blow_done = true
@@ -140,6 +142,11 @@ func damage(raw: int) -> int:
 	if is_dead() or pm.is_invulnerable() or raw <= 0:
 		return 0
 	var scaled := core.scale_damage(raw)
+	# Dennis 31 okt 22:16: schade afgekapt op de fasedrempel (overschot vervalt; geen fase overslaan).
+	if pm.phase_index() < (_script.get("phases", []) as Array).size() - 1:
+		scaled = mini(scaled, pm.current_hp() - pm.threshold_hp(pm.phase_index()))
+		if scaled <= 0:
+			return 0
 	var was_open := core.open
 	var before_phase := pm.phase_index()
 	var dealt := pm.on_damage(scaled)
@@ -164,8 +171,7 @@ func _cancel_attack() -> void:
 
 func _enter_phase(idx: int) -> void:
 	_cancel_attack()
-	_forced.clear()
-	core.reset()
+	_forced.clear()     # lopende aanval/slam vervalt; de kern-klok loopt door (geen core.reset)
 	_events.append({"type": "phase", "index": idx})
 	var phases: Array = _script.get("phases", [])
 	if idx < phases.size():

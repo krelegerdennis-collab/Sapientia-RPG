@@ -35,6 +35,7 @@ func _run() -> void:
 	_core_rt_tests()
 	_fight_phase_tests()
 	_fight_core_every_phase_tests()
+	_cap_tests()
 	_fight_misc_tests()
 	_determinism_tests()
 	_view_tests()
@@ -186,38 +187,73 @@ func _fight_phase_tests() -> void:
 	check("overkill: hoogstens één fasewissel per klap", g.phase_index() == 1)
 
 
-## Kern in ELKE fase: opening precies 360 ticks na einde fasewissel (klok pauzeert tijdens invuln).
+## Kern in ELKE fase, vaste klok die NIET reset bij een fasewissel (Dennis 31 okt 22:16):
+## elke opening op tick_no % 480 == 360, elke slam op tick_no % 480 == 0, ook in/na de 90 onkwetsbare ticks.
 func _fight_core_every_phase_tests() -> void:
 	for target_phase in [0, 1, 2]:
 		var f := GolemFight.new(360, 11)
+		var bad: Array = []
+		var opens := 0
 		if target_phase >= 1:
 			_hit_to(f, 217)
 			f.damage(10)
 		if target_phase >= 2:
 			while f.is_invulnerable():
 				f.tick()
+				for e in f.take_events():
+					if str(e["type"]) == "core_open" and f.tick_no % 480 != 360:
+						bad.append(f.tick_no)
 			_hit_to(f, 91)
 			f.damage(5)
 		f.take_events()
-		while f.is_invulnerable():
-			f.tick()
-			f.take_events()
-		var opened_at := -1
-		var closed_at := -1
 		var normal_start_while_open := false
-		var start := f.tick_no
-		for i in 700:
+		for i in 1000:
 			f.tick()
 			for e in f.take_events():
-				if str(e["type"]) == "core_open" and opened_at < 0:
-					opened_at = f.tick_no - start
-				if str(e["type"]) == "core_slam" and closed_at < 0:
-					closed_at = f.tick_no - start
+				if str(e["type"]) == "core_open":
+					opens += 1
+					if f.tick_no % 480 != 360:
+						bad.append(f.tick_no)
+				if str(e["type"]) == "core_slam" and f.tick_no % 480 != 0:
+					bad.append(f.tick_no)
 				if str(e["type"]) == "telegraph_start" and f.core.open and not str(e["id"]).begins_with("golem_hammer_blow"):
 					normal_start_while_open = true
-		check("fase %d: kern open na 6 s (tick %d), 2 s open (dicht op %d)" % [target_phase + 1, opened_at, closed_at],
-			f.phase_index() == target_phase and opened_at == 360 and closed_at == 480)
+		check("fase %d: kern op vaste 8 s-klok (open tick%%480=360, %d openingen, afwijkingen %s)" % [target_phase + 1, opens, str(bad)],
+			f.phase_index() == target_phase and opens >= 2 and bad.is_empty())
 		check("fase %d: geen gewone aanval starten in het open venster" % [target_phase + 1], not normal_start_while_open)
+	# klok loopt door de fasewissel heen: positie direct na de wissel = positie ervoor + 1 per tick
+	var g := GolemFight.new(360, 2)
+	for i in 100:
+		g.tick()
+	var pos_before := g.core.cycle_pos()
+	g.damage(int(ceil(150.0 / 0.4)))
+	check("fasewissel reset de kern-cyclus niet (pos %d blijft)" % pos_before, g.phase_index() == 1 and g.core.cycle_pos() == pos_before)
+	for i in 90:
+		g.tick()
+	check("kern-klok liep 90 ticks door tijdens onkwetsbaarheid (%d -> %d)" % [pos_before, g.core.cycle_pos()], g.core.cycle_pos() == pos_before + 90)
+
+
+## Schadeplafond op de fasedrempel (Dennis 31 okt 22:16): overschot vervalt, nooit een fase overslaan.
+func _cap_tests() -> void:
+	var f := GolemFight.new(360, 4)
+	var dealt := f.damage(5000)
+	check("1e klap 5000: afgekapt op drempel 216 (dealt %d, hp %d)" % [dealt, f.hp()], dealt == 144 and f.hp() == 216 and f.phase_index() == 1)
+	while f.is_invulnerable():
+		f.tick()
+	dealt = f.damage(5000)
+	check("fase 2 -> 3: afgekapt op 90 (dealt %d, hp %d)" % [dealt, f.hp()], dealt == 126 and f.hp() == 90 and f.phase_index() == 2)
+	while f.is_invulnerable():
+		f.tick()
+	dealt = f.damage(5000)
+	check("laatste fase: geen plafond, Golem verslagen (hp %d)" % f.hp(), f.hp() == 0 and f.is_dead())
+	# open kernvenster: 2x-burst kapt ook af
+	var g := GolemFight.new(360, 4)
+	_hit_to(g, 230)
+	while not g.core.open:
+		g.tick()
+		g.take_events()
+	g.damage(100)
+	check("kernvenster-burst (100 x2) stopt op 216 (hp %d, fase %d)" % [g.hp(), g.phase_index()], g.hp() == 216 and g.phase_index() == 1)
 
 
 func _fight_misc_tests() -> void:
