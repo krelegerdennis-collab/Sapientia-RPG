@@ -82,7 +82,9 @@ func enter_room(tree: SceneTree, room: Dictionary) -> bool:
 		await tree.process_frame
 		var nu := tree.current_scene
 		if nu != null and str(nu.scene_file_path) == path:
-			await RenderingServer.frame_post_draw
+			# --headless (dummy-renderer) tekent niet: frame_post_draw komt dan nooit
+			if DisplayServer.get_name() != "headless":
+				await RenderingServer.frame_post_draw
 			return true
 	return false
 
