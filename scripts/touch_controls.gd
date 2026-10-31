@@ -224,14 +224,51 @@ func b_center() -> Vector2:
 	return a_center() + Vector2(-button_radius * 2.3, button_radius * 0.8)
 
 
+## Demo-fix 4: joystick + A/B alleen tonen bij touch. Gedeeld door alle scènes (static). Start: zichtbaar
+## alleen als het apparaat een touchscreen heeft; daarna volgt het de laatste ECHTE invoer (geëmuleerde
+## muis/touch heeft device DEVICE_ID_EMULATION en telt niet).
+static var touch_mode := DisplayServer.is_touchscreen_available()
+
+
+## Laatste invoer bijhouden; true als de stand veranderde.
+static func note_input(event: InputEvent) -> bool:
+	var was := touch_mode
+	if event.device == InputEvent.DEVICE_ID_EMULATION:
+		return false
+	if event is InputEventScreenTouch and event.pressed:
+		touch_mode = true
+	elif (event is InputEventKey and event.pressed) or (event is InputEventMouseButton and event.pressed) \
+			or (event is InputEventJoypadButton and event.pressed):
+		touch_mode = false
+	return touch_mode != was
+
+
+## Neemt een ander scherm-element (bv. het commando-kruis) deze tik voor zijn rekening?
+func _claimed_elsewhere(viewport_pos: Vector2) -> bool:
+	for n in get_tree().get_nodes_in_group("touch_priority"):
+		if n.has_method("claims_touch") and n.claims_touch(viewport_pos):
+			return true
+	return false
+
+
 func _input(event: InputEvent) -> void:
+	if note_input(event):
+		if not touch_mode:
+			release_all()
+		queue_redraw()
 	# v0.11: verborgen (bv. tijdens het veldmenu) = knoppen doen niets
 	if not is_visible_in_tree():
 		return
 	if event is InputEventScreenTouch:
 		var pos := _local(event.position)
 		if event.pressed:
-			if pos.distance_to(stick_center()) <= stick_reach():
+			if not touch_mode or _claimed_elsewhere(event.position):
+				# joystick/A/B verborgen, of een knop van het kruis ligt hier: alleen de knoppenrij
+				if show_menu and UiTouchC.hit_rect(menu_rect(), 4.0).has_point(pos):
+					_touch_owner[event.index] = "menu"
+					_set_touch_action(event.index, "menu")
+					get_viewport().set_input_as_handled()
+			elif pos.distance_to(stick_center()) <= stick_reach():
 				_touch_owner[event.index] = "joy"
 				_set_joy(pos, event.index)
 				get_viewport().set_input_as_handled()
@@ -404,8 +441,9 @@ func _draw() -> void:
 	var line := 0.5 if _fine() else 1.0
 	var c := stick_center()
 	var r := joy_radius()
-	draw_circle(c, r, Color(0, 0, 0, 0.28))
-	_draw_joystick(c, r, line)
+	if touch_mode:
+		draw_circle(c, r, Color(0, 0, 0, 0.28))
+		_draw_joystick(c, r, line)
 	_draw_rest(line)
 
 
@@ -457,9 +495,10 @@ func _draw_joystick_placeholder(c: Vector2, r: float, line: float) -> void:
 
 func _draw_rest(line: float) -> void:
 	var mag := UiStyleC.MAGENTA
-	# A- en B-knop
-	_draw_button(a_center(), "A", "interact", UiStyleC.CYAN, line)
-	_draw_button(b_center(), "B", "cancel", UiStyleC.MAGENTA, line)
+	# A- en B-knop (demo-fix 4: alleen bij touch-invoer)
+	if touch_mode:
+		_draw_button(a_center(), "A", "interact", UiStyleC.CYAN, line)
+		_draw_button(b_center(), "B", "cancel", UiStyleC.MAGENTA, line)
 	if show_kern:
 		_draw_kern_button(line)
 	if show_run:
