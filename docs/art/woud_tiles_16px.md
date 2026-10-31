@@ -1,8 +1,9 @@
 # Donker Woud: tegels 16x16 voor RPG ART (WM1 T2)
 
-Besluit Dennis: tegels zijn **16x16**. Alles hieronder is nu **PLACEHOLDER** (`assets/placeholder/woud/`, gemaakt door
-`tools/woud_tegels_placeholders.py`). De mapping tegel-id -> bestand staat in `data/woud_tegels.json`; de code
-(`scripts/data/woud_tegels.gd`) leest alleen die JSON. **Echte art inwisselen = alleen `"file"` aanpassen** (zelfde maat).
+Besluit Dennis: tegels zijn **16x16**. RPG ART heeft de set geleverd in `assets/tiles/woud16/` (art-PR #310).
+De mapping tegel-id -> bestand staat in `data/woud_tegels.json` (`"file"` wijst naar `res://assets/tiles/woud16/...`);
+de code (`scripts/data/woud_tegels.gd`) leest alleen die JSON. **Inwisselen = alleen `"file"` aanpassen** (zelfde maat).
+Placeholders blijven in `assets/placeholder/woud/` als reserve.
 
 Afspraken:
 - Maat: 16x16 per frame. Meer frames = horizontaal naast elkaar (4 frames = 64x16). Animatie 4 fps (TEMPORARY ASSUMPTION).
@@ -100,8 +101,36 @@ Afspraken:
 | 81 | `uitgang_pad` | bospad uit de kamer (beloopbaar, uitgangstegel) | Uitgang | grond | nee | 1 | 16x16 | 1 | - |
 | 82 | `uitgang_rand_l` | bosrand links van de uitgang (massief) | Uitgang | grond | ja | 1 | 16x16 | 1 | - |
 | 83 | `uitgang_rand_r` | bosrand rechts van de uitgang (massief) | Uitgang | grond | ja | 1 | 16x16 | 1 | - |
+| 84 | `rand_stam_boven_links_b` | stammen onder het bladerdak, bovenste rij, links, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 85 | `rand_stam_boven_links_c` | stammen onder het bladerdak, bovenste rij, links, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 86 | `rand_stam_onder_links_b` | stamvoeten, onderste rij, links, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 87 | `rand_stam_onder_links_c` | stamvoeten, onderste rij, links, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 88 | `rand_stam_boven_midden_b` | stammen onder het bladerdak, bovenste rij, midden, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 89 | `rand_stam_boven_midden_c` | stammen onder het bladerdak, bovenste rij, midden, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 90 | `rand_stam_onder_midden_b` | stamvoeten, onderste rij, midden, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 91 | `rand_stam_onder_midden_c` | stamvoeten, onderste rij, midden, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 92 | `rand_stam_boven_rechts_b` | stammen onder het bladerdak, bovenste rij, rechts, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 93 | `rand_stam_boven_rechts_c` | stammen onder het bladerdak, bovenste rij, rechts, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 94 | `rand_stam_onder_rechts_b` | stamvoeten, onderste rij, rechts, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 95 | `rand_stam_onder_rechts_c` | stamvoeten, onderste rij, rechts, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
 
-Totaal: 84 tegels.
+Totaal: 96 tegels.
+
+## Spec-antwoorden (RPG CODE)
+
+Gecontroleerd in `scripts/data/woud_beek.gd` (`grond_naam`, `_brug_water`) en `scripts/data/woud_tegels.gd` (`stuk`).
+
+a) **Open kant van het bladerdak.** De letter in `rand_top_*` is de kant waar het *andere* terrein ligt (de open zijde, weg van meer bladerdak). Zelfde afspraak als pad/oever: `rand_top_n` = open naar het noorden (loopbaar/buiten boven, bladerdak onder). In `woud_beek` staan deze tegels vast in de layout (cijfers 1-9), niet via `stuk()`.
+
+b) **`varianten` vs JSON-regels.** `varianten` is het aantal looks per *basistegel* (3 voor `rand_stam_*`: basis + `_b` + `_c`, gekozen door `STAM_VAR`). De JSON heeft 1 regel per bestand: de basis (`rand_stam_boven_midden`) en de extra looks (`..._b`, `..._c`) zijn aparte ids. Het veld `varianten` op elke regel blijft 1.
+
+c) **Stapsteen naast gras.** Ja. `grond_naam` zet `o` altijd op `stapsteen`. Water-autotegels tellen `o` mee als water (`teken(q) in ["~", "o"]`), dus een oever naast een stapsteen gedraagt zich als oever naast water. De Beek-layout zet `ooo` al tussen gras (`.`).
+
+d) **Uitgang `U` is geen pad.** Pad-autotegels kijken alleen naar teken `"p"` (`stuk(func(q): return teken(q) == "p", t)`). `U` is `uitgang_pad` en telt niet als pad-buur.
+
+e) **Strook van 1 tegel: `n` wint van `z`.** `stuk()` bouwt de rand als `("n" if not n else ("z" if not z else "")) + ("w" if not w else ("o" if not o else ""))`. Als noord én zuid allebei buiten het gebied vallen (smalle horizontale strook), is `not n` waar en komt `z` niet aan de beurt. Zelfde voor `w` boven `o` op een verticale strook van 1.
+
+f) **Geen geanimeerd water onder de brug.** `=` wordt alleen `brug_links` / `brug_midden` / `brug_rechts` (ondoorzichtig, grondlaag). Er komt geen `water_*` onder die cellen. `_brug_water` laat naburige oevers de brug wél als water zien, zodat de oever sluit; de brugtegel zelf blijft dekkend.
 
 Open vragen / TEMPORARY ASSUMPTIONS:
 - Twee boomsoorten (`eik`, `den`); meer soorten = nieuwe namen in de JSON (en in deze lijst).

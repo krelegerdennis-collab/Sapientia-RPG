@@ -484,6 +484,7 @@ func _ready() -> void:
 	# v0.15: of  godot -- --kerntest [--shots=/pad/map]  (scripts/tests/kern_tests.gd, kernfragmenten).
 	# v0.16: of  godot -- --kernkrachttest [--shots=/pad/map]  (scripts/tests/kernkracht_tests.gd, vuurbal).
 	# v0.17: of  godot -- --woudtest [--shots=/pad/map]  (scripts/tests/woud_tests.gd, Esdoorn + Donker Woud + Noor).
+	# WM1 T2 Woud 16px + STAM_VAR: of  godot -- --woud16test [--shots=/pad/map]  (scripts/tests/woud16_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100gentest [--shots=/pad/map]  (scripts/tests/dungeon100_generator_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100schaaltest [--shots=/pad/map]  (scripts/tests/dungeon100_schaal_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100regelstest [--shots=/pad/map]  (scripts/tests/dungeon100_tests.gd).
@@ -516,6 +517,8 @@ func _ready() -> void:
 	# WM1-playthrough (nieuw spel t/m de hub, save/load, pauze): of  godot -- --wm1playthroughtest [--speed=N] [--static-only]  (scripts/tests/wm1_playthrough_tests.gd).
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
 	# WM1 frametime-log + budget: of  godot -- --wm1frametest / --wm1budgettest  (scripts/tests/wm1_frametime_tests.gd, wm1_budget_tests.gd).
+	# WM1 F3 stabiliteit (lokaal, geen CI): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
+	# Wachtershuis classic-muur (geen TileSet-polygonen): godot -- --huiscollisiontest  (scripts/tests/huis_collision_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# SoM slag vs lock: of  godot -- --swinglocktest  (scripts/tests/swing_lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
@@ -527,6 +530,8 @@ func _ready() -> void:
 	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
 	# UX-polish WM1 (tikdoelen 48dp, Engelse tekst, tutorials, 19,5:9/20:9 + notch, SFX, volume): of
 	#   godot -- --uxtest [--shots=/pad/map]  (scripts/tests/ux_tests.gd).
+	# F6 UX-polish (desktop-insets / plaatsing ballon+schat+tip): of
+	#   godot -- --uxpolishtest [--shots=/pad/map]  (scripts/tests/ux_polish_autotest.gd).
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
@@ -559,6 +564,7 @@ func _ready() -> void:
 			["--kerntest", "res://scripts/tests/kern_tests.gd", "KernTest", "kerntest"],
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
 			["--woudtest", "res://scripts/tests/woud_tests.gd", "WoudTest", "woudtest"],
+			["--woud16test", "res://scripts/tests/woud16_tests.gd", "Woud16Test", "woud16test"],
 			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
 			["--fusietest", "res://scripts/tests/fusie_tests.gd", "FusieTest", "fusietest"],
 			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"],
@@ -601,6 +607,7 @@ func _ready() -> void:
 			["--castjointest", "res://scripts/tests/cast_join_tests.gd", "CastJoinTest", "castjointest"],
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
 			["--uxtest", "res://scripts/tests/ux_tests.gd", "UxTest", "uxtest"],
+			["--uxpolishtest", "res://scripts/tests/ux_polish_autotest.gd", "UxPolishTest", "uxpolishtest"],
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
@@ -615,6 +622,7 @@ func _ready() -> void:
 			["--roottest", "res://scripts/tests/root_tests.gd", "RootTest", "roottest"],
 			["--dodgetest", "res://scripts/tests/dodge_tests.gd", "DodgeTest", "dodgetest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
+			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
@@ -626,8 +634,11 @@ func _ready() -> void:
 			["--combatbugstest", "res://scripts/tests/combat_bugs_tests.gd", "CombatBugsTest", "combatbugstest"],
 			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
 			["--wm1budgettest", "res://scripts/tests/wm1_budget_tests.gd", "Wm1BudgetTest", "wm1budgettest"],
+			["--wm1f3stabilitytest", "res://scripts/tests/wm1_f3_stability_tests.gd", "Wm1F3StabilityTest", "wm1f3stabilitytest"],
+			["--wm1baselinebenchtest", "res://scripts/tests/wm1_baseline_benchmark.gd", "Wm1BaselineBenchmark", "wm1baselinebenchtest"],
 			["--huisdrawtest", "res://scripts/tests/huis_draw_calls_tests.gd", "HuisDrawCallsTest", "huisdrawtest"],
 			["--huispixeltest", "res://scripts/tests/huis_pixel_tests.gd", "HuisPixelTest", "huispixeltest"],
+			["--huiscollisiontest", "res://scripts/tests/huis_collision_tests.gd", "HuisCollisionTest", "huiscollisiontest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
 			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
@@ -638,6 +649,7 @@ func _ready() -> void:
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
+			["--f5sim", "res://tools/battlesim/f5_sim.gd", "F5Sim", "f5sim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:

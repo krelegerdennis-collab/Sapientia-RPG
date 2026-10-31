@@ -1,6 +1,6 @@
 extends RefCounted
 ## WM1 T2: Donker Woud - de Beek (woud_beek). Optionele zijkamer van het Wortelpad (woud_pad), gebouwd uit
-## data/woud_tegels.json (16x16 PLACEHOLDERS, scripts/data/woud_tegels.gd). Geen monsters, geen kist.
+## data/woud_tegels.json (16x16 via `"file"`, scripts/data/woud_tegels.gd). Geen monsters, geen kist.
 ## TEMPORARY ASSUMPTION: er is geen spec voor een extra woudkamer; dit is een rustige zijkamer die alle
 ## tegelgroepen laat zien (grond, pad, bosrand, bomen, water, brug, props, uitgang) voor RPG ART.
 ##
@@ -40,6 +40,7 @@ const LEGEND := {
 	"m": "paddenstoel", "M": "paddenstoel_gloed", "Y": "wegwijzer", "b": "struik", "o": "stapsteen",
 	"(": "uitgang_rand_l", "U": "uitgang_pad", ")": "uitgang_rand_r",
 }
+const STAM_VAR := ["", "_b", "_c"]
 const GROND := ["grond_a", "grond_b", "grond_c", "grond_d"]
 const BLAD := ["grond_blad_a", "grond_blad_b"]
 
@@ -80,7 +81,12 @@ static func grond_naam(t: Vector2i) -> String:
 			var l := teken(t + Vector2i.LEFT) == "="
 			var r := teken(t + Vector2i.RIGHT) == "="
 			return "brug_midden" if l and r else ("brug_links" if r else "brug_rechts")
-	return str(LEGEND.get(c, ""))
+	var naam := str(LEGEND.get(c, ""))
+	if naam.begins_with("rand_stam_"):
+		# variant per column (x only), so the top and bottom rows stay aligned
+		var hv := absi(((t.x * 73856093) ^ 19349663) * 83492791)
+		naam += STAM_VAR[hv % STAM_VAR.size()]
+	return naam
 
 
 ## Brugdelen die boven water liggen tellen voor het oever-stuk mee als water.

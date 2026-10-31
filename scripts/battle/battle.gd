@@ -32,6 +32,7 @@ signal state_changed(new_state: String)
 signal damage_shown(target_name: String, amount: int)
 
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
@@ -1100,9 +1101,26 @@ func _choose_item(hero: Dictionary):
 func _available_items() -> Array:
 	var ids := []
 	for id in GameData.ITEMS:
-		if _items_left(id) > 0:
+		if _items_left(id) > 0 and battle_usable(GameData.ITEMS[id]):
 			ids.append(id)
 	return ids
+
+
+## Heeft dit item een effect in het gevecht? (genezen, revive, tegengif, vangen, spreuk leren)
+## Lore-voorwerpen (Faded Note), sleutels en veld-items (Stun Bomb, Warp) dus niet (#1/#12).
+static func battle_usable(it: Dictionary) -> bool:
+	return int(it.get("heal_hp", 0)) > 0 or int(it.get("heal_mp", 0)) > 0 \
+			or float(it.get("revive", 0.0)) > 0.0 or bool(it.get("cure", false)) \
+			or bool(it.get("capture", false)) or str(it.get("teach", "")) != ""
+
+
+## Zou een genees-item (heal_hp/heal_mp) dit doel helpen? Zelfde regel als het veld (#2).
+static func heal_would_help(t: Dictionary, it: Dictionary) -> bool:
+	if t.is_empty():
+		return false
+	var s: Dictionary = t["s"]
+	return (int(it.get("heal_hp", 0)) > 0 and int(s["hp"]) < int(s["max_hp"])) \
+			or (int(it.get("heal_mp", 0)) > 0 and int(s["mp"]) < int(s["max_mp"]))
 
 
 func _items_left(id: String) -> int:
@@ -1302,6 +1320,11 @@ func _execute(a: Dictionary) -> void:
 				show_message("%s doesn't have enough MP!" % actor["name"])
 				await _wait(MESSAGE_TIME)
 				return
+			# #7: revive-spreuk zonder KO-doel kost geen MP (zelfde regel als de Feniksveer, H3)
+			if str(sp.get("type", "")) == "revive" and _ko_target(a["target"]).is_empty():
+				show_message(PartyActions.MSG_NO_EFFECT)
+				await _wait(MESSAGE_TIME)
+				return
 			actor["s"]["mp"] -= sp["mp"]
 			_refresh_party()
 			show_message("%s casts %s!" % [actor["name"], sp["name"]])
@@ -1355,6 +1378,10 @@ func _execute(a: Dictionary) -> void:
 				await _wait(MESSAGE_TIME)
 				return
 			var it: Dictionary = GameData.ITEMS[id]
+			if not battle_usable(it):              # #1/#12: geen gevechtseffect = nooit verbruiken
+				show_message(PartyActions.MSG_NO_EFFECT)
+				await _wait(MESSAGE_TIME)
+				return
 			if str(it.get("teach", "")) != "":
 				var ally := _valid_ally(a["target"])
 				var spell_id := str(it["teach"])
@@ -1377,8 +1404,15 @@ func _execute(a: Dictionary) -> void:
 			var cure_t: Dictionary = {}
 			if bool(it.get("cure", false)):
 				cure_t = _valid_ally(a["target"])
+			# #2: genees-item pas verbruiken als het doel (bij uitvoeren) HP/MP tekort komt
+			var heal_t: Dictionary = {}
+			var is_heal := float(it.get("revive", 0.0)) <= 0.0 and not bool(it.get("cure", false)) \
+					and not bool(it.get("capture", false))
+			if is_heal:
+				heal_t = _valid_ally(a["target"])
 			if (float(it.get("revive", 0.0)) > 0.0 and dood.is_empty()) \
-					or (bool(it.get("cure", false)) and not _has_curable(cure_t)):
+					or (bool(it.get("cure", false)) and not _has_curable(cure_t)) \
+					or (is_heal and not heal_would_help(heal_t, it)):
 				show_message(PartyActions.MSG_NO_EFFECT)
 				await _wait(MESSAGE_TIME)
 				return
@@ -1406,13 +1440,7 @@ func _execute(a: Dictionary) -> void:
 				await _wait(MESSAGE_TIME)
 				_hero_rest(actor)
 				return
-			if bool(it.get("stun_room", false)):     # alleen in het veld: niet verbruiken
-				GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
-				show_message(PartyActions.MSG_NO_EFFECT)
-				await _wait(MESSAGE_TIME)
-				_hero_rest(actor)
-				return
-			await _heal(_valid_ally(a["target"]), int(it["heal_hp"]), int(it["heal_mp"]))
+			await _heal(heal_t, int(it["heal_hp"]), int(it["heal_mp"]))
 			_hero_rest(actor)
 		"defend":
 			show_message("%s defends." % actor["name"])
@@ -1543,11 +1571,11 @@ func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> vo
 	for row in rows:
 		if typeof(row) != TYPE_DICTIONARY:
 			continue
-		(ally["buffs"] as Array).append({
+		Archief2Vijanden.refresh_row(ally["buffs"], {
 			"stat": str(row.get("stat", "def")),
 			"pct": float(row.get("pct", 0.0)) * mult,
 			"turns": int(row.get("turns", 3)),
-		})
+		}, "stat")
 	show_message("%s is strengthened." % ally["name"])
 
 
@@ -1659,9 +1687,21 @@ func _ko_target(t) -> Dictionary:
 func _revive_combatant(c: Dictionary, hp: int) -> void:
 	c["s"]["hp"] = mini(maxi(1, hp), int(c["s"]["max_hp"]))
 	c.erase("reported_ko")
+	clear_ko_status(c)
 	if c.get("node") != null:
 		c["node"].set_ko(false)
 	_refresh_party()
+
+
+## #3/#4/#17: wie opstaat begint schoon. Binden/bevriezing (skip), gif/brand, HoT en buffs van
+## voor de KO vervallen, ongeacht in welke ronde de revive valt.
+static func clear_ko_status(c: Dictionary) -> void:
+	c["skip"] = 0
+	c.erase("skip_reden")
+	c["dots"] = []
+	c["hots"] = []
+	c["buffs"] = []
+	c["defending"] = false
 
 
 ## Tegengif: valt er iets te genezen (gif-DoT of gebonden door een Rankje)?
@@ -2284,8 +2324,16 @@ func _show_tip(hero: Dictionary) -> void:
 	tip_label.size = Vector2(w - 14, th)
 	var h := ceilf(th) + 10.0
 	tip_panel.size = Vector2(w, h)
-	tip_panel.position = Vector2(6, 22)   # linksboven, onder de strook, ver boven de D-pad
+	tip_panel.position = tip_origin()   # linksboven, onder de strook; notch schuift mee
 	tip_panel.show()
+
+
+## Plek van het tip-venster in gevechtseenheden (384x216). Desktop: (6, 22).
+## Op mobiel telt de veilige zone (notch); het gevecht is 2x geschaald, insets staan in viewport-px.
+func tip_origin() -> Vector2:
+	var ins := UiTouchC.insets(get_viewport())
+	var s := maxf(get_global_transform().get_scale().x, 0.001)
+	return Vector2(6.0 + ins.x / s, 22.0 + ins.y / s)
 
 
 func _hide_tip() -> void:

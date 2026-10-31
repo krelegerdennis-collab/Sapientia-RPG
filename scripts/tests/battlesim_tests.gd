@@ -12,6 +12,7 @@ extends Node
 
 const GD := preload("res://scripts/data/game_data.gd")
 const Runs := preload("res://tools/battlesim/battlesim_runs.gd")
+const Equipment := preload("res://scripts/equipment.gd")
 const POLICY := "res://tools/battlesim/policy_simpel.gd"
 const BATTLE := "res://scenes/battle/battle.tscn"
 
@@ -96,6 +97,61 @@ func _arg_tests() -> void:
 	check("CSV-cel: komma/quote gequote, float met 1 decimaal", Runs.csv_cell("a,b") == "\"a,b\""
 			and Runs.csv_cell("x\"y") == "\"x\"\"y\"" and Runs.csv_cell(12.5) == "12.5" and Runs.csv_cell(7) == "7")
 	r.queue_free()
+	await _gear_tests()
+	await _golem_scenario_tests()
+
+
+## --gear: uitrusting per held (bv. Golem-meting: Dax met Vonkzwaard).
+func _gear_tests() -> void:
+	var r := _runner(["--party=dennis:8", "--gear=dennis:vonkzwaard+kaftschild"])
+	var gear: Dictionary = r.parse_gear(r.gear_spec, r.parse_party(r.party_spec))
+	check("gear: held:stuk+stuk", gear == {"dennis": ["vonkzwaard", "kaftschild"]} and r.errors.is_empty())
+	var snap: Dictionary = r._build_party([["dennis", 8]], {"drankje": 2}, gear)
+	var h: Dictionary = snap["party"][0]
+	check("gear: uitgerust (wapen + schild, ATK-bonus), tas = alleen --items",
+			Equipment.equipped(h, "wapen") == "vonkzwaard" and Equipment.equipped(h, "schild") == "kaftschild"
+			and Equipment.equip_bonus(h, "atk") > 0 and snap["inventory"] == {"drankje": 2} and r.errors.is_empty())
+	check("items: none = lege tas", r.parse_items("none") == {})
+	r.queue_free()
+	for bad in [["--party=dennis:8", "--gear=noor:eiken_staf"], ["--party=dennis:8", "--gear=dennis:geen_zwaard"],
+			["--scenario=onbekend"]]:
+		var rb := _runner(bad)
+		rb.out_path = "user://sim/mag_niet_bestaan.csv"
+		var csv: String = await rb.run()
+		check("gear/scenario-fout gemeld, niets geschreven: %s" % bad[-1], csv == "" and not rb.errors.is_empty()
+				and not FileAccess.file_exists("user://sim/mag_niet_bestaan.csv"))
+		rb.queue_free()
+
+
+## --scenario=golem (kennis_beest optie A): Dax solo, Vonkzwaard-set, inv_mid-tas, baasgroep;
+## --party/--items gaan erboven (meting Lv 7/8 met en zonder items).
+func _golem_scenario_tests() -> void:
+	check("CSV-modus ook met alleen --scenario", Runs.wants_runs(PackedStringArray(["--battlesim", "--scenario=golem"])))
+	var r := _runner(["--scenario=golem"])
+	check("golem-scenario: standaard Dax Lv %d, baas_kennis_beest, GOLEM_BOSS_GEAR, GOLEM_BOSS_INV" % Runs.GOLEM_BOSS_LEVEL,
+			r.parse_party(r.party_spec) == [["dennis", Runs.GOLEM_BOSS_LEVEL]] and r.enemy_spec == Runs.GOLEM_BOSS_GROUP
+			and r.parse_gear(r.gear_spec, [["dennis", 8]]) == {"dennis": Runs.GOLEM_BOSS_GEAR}
+			and r.parse_items(r.items_spec) == Runs.GOLEM_BOSS_INV and r.errors.is_empty())
+	r.queue_free()
+	for cell in [["7", "", 1], ["7", "none", 0], ["8", "", 1]]:
+		var args := ["--scenario=golem", "--party=dennis:%s" % cell[0], "--runs=4", "--seed=7"]
+		if cell[1] != "":
+			args.append("--items=" + cell[1])
+		var rc := _runner(args)
+		var csv: String = await rc.run()
+		var ok: bool = csv != "" and rc.errors.is_empty() and rc.rows.size() == 4
+		var used := 0
+		for row in rc.rows:
+			ok = ok and row["group_id"] == "baas_kennis_beest" and row["party"] == "dennis:" + cell[0] \
+					and int(row["hp_max"]) == int(GameState.party[0]["max_hp"]) and row["result"] != "timeout"
+			used += int(row["items_used"])
+		var h: Dictionary = GameState.party[0]
+		ok = ok and GameState.party.size() == 1 and int(h["level"]) == int(cell[0]) \
+				and Equipment.equipped(h, "wapen") == "vonkzwaard"
+		check("golem-scenario Lv %s %s: 4 baasgevechten, solo Dax met Vonkzwaard, %s" % [cell[0],
+				"zonder items" if cell[1] == "none" else "met tas", "0 items" if cell[2] == 0 else "tas beschikbaar"],
+				ok and (used == 0 if cell[2] == 0 else true))
+		rc.queue_free()
 
 
 # ================================================================ battle met policy (zonder rondelus)

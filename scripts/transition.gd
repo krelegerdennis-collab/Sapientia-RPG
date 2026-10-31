@@ -18,6 +18,11 @@ func _ready() -> void:
 	add_child(_rect)
 
 
+func _exit_tree() -> void:
+	# Snelle testsuite quit tijdens fade: geen hangende tween/ColorRect-leak.
+	_rect.color = Color(0, 0, 0, 0)
+
+
 func encounter_out() -> void:
 	# Twee keer wit flitsen (zoals op de SNES), daarna naar zwart.
 	for i in 2:
