@@ -4,6 +4,9 @@ extends Node
 
 const Wm1Config := preload("res://scripts/data/wm1_config.gd")
 
+const VIEW_WIDTHS := [384, 432, 468]
+const VIEW_H := 216
+
 var failures := 0
 var passes := 0
 var shots := ""
@@ -39,11 +42,37 @@ func _run() -> void:
 	check("studio-label 10px grid", t.studio_label.get_theme_font_size("font_size") == 10)
 	var ver: Rect2 = t.version_label.get_global_rect()
 	var st: Rect2 = t.studio_label.get_global_rect()
-	check("studio boven versie (y)", st.end.y <= ver.position.y + 0.5)
-	check("studio rechts uitgelijnd met versie", absf(st.end.x - ver.end.x) <= 1.0)
-	check("footer binnen beeld", st.end.x <= t.size.x and ver.end.y <= t.size.y)
+	check("studio links van versie (x)", st.end.x <= ver.position.x - 3.0)
+	check("studio op dezelfde regel als versie (y)", absf(st.position.y - ver.position.y) <= 0.5)
+	check("footer binnen beeld", st.position.x >= 0.0 and ver.end.x <= t.size.x and ver.end.y <= t.size.y)
+	for w in VIEW_WIDTHS:
+		await _set_viewport(w)
+		await _pframes(6)
+		var tag := "%dx%d" % [w, VIEW_H]
+		check("%s: geen overlap studio vs menukaart" % tag, _studio_clear_of(t, t.card.get_global_rect()))
+		check("%s: geen overlap studio vs save-info" % tag, _studio_clear_of(t, t.save_info.get_global_rect()) if t.save_info.visible else true)
+		for btn_name in ["CoopButton", "PvpButton", "SomButton"]:
+			var btn: Control = t.get_node_or_null(btn_name) as Control
+			if btn != null and btn.visible:
+				check("%s: geen overlap studio vs %s" % [tag, btn_name], _studio_clear_of(t, btn.get_global_rect()))
+		check("%s: geen overlap studio vs betakaart" % tag, _studio_clear_of(t, t.beta_card.get_global_rect()))
+		check("%s: geen overlap studio vs beta-info" % tag, _studio_clear_of(t, t.beta_info.get_global_rect()) if t.beta_info.visible else true)
 	await _screenshot("title_studio_url")
 	_finish()
+
+
+func _studio_clear_of(t: Node, other: Rect2) -> bool:
+	if not other.has_area():
+		return true
+	return not t.studio_label.get_global_rect().intersects(other)
+
+
+func _set_viewport(w: int) -> void:
+	var win := get_window()
+	win.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
+	win.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
+	win.size = Vector2i(w, VIEW_H)
+	await get_tree().process_frame
 
 
 func _finish() -> void:

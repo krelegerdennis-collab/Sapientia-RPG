@@ -79,7 +79,7 @@ var version_label: Label
 var studio_label: Label
 const STAGE_SIZE := Vector2(384, 216)
 const FOOTER_MARGIN := Vector2(4, 1)
-const FOOTER_LINE_GAP := 1
+const FOOTER_LABEL_GAP := 4
 ## Tikdoel van elke knop op het titelscherm: UiTouch.TOUCH_MIN (25 = ~48dp). Twee rijen vullen het kaartje (y 148..201).
 const TOUCH_H := 25.0
 const INFO_H := 10.0
@@ -238,7 +238,7 @@ func _ready() -> void:
 	studio_label.name = "StudioUrl"
 	studio_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(studio_label)
-	version_label = UiMenu.label("v" + str(ProjectSettings.get_setting("application/config/version", "")), UiStyleC.TEXT_OFF, 10)
+	version_label = UiMenu.label("v" + str(ProjectSettings.get_setting("application/config/version", "")), UiStyleC.TEXT_OFF)
 	version_label.name = "Version"
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(version_label)
@@ -339,7 +339,9 @@ func _place_card() -> void:
 	studio_label.reset_size()
 	var footer_right := (size - FOOTER_MARGIN).round()
 	version_label.position = (footer_right - version_label.size).round()
-	studio_label.position = (Vector2(footer_right.x - studio_label.size.x, version_label.position.y - studio_label.size.y - FOOTER_LINE_GAP)).round()
+	studio_label.position = (Vector2(
+			version_label.position.x - FOOTER_LABEL_GAP - studio_label.size.x,
+			version_label.position.y)).round()
 
 
 func _place_text_title() -> void:
