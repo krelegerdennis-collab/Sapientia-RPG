@@ -627,6 +627,8 @@ func sim_step() -> void:
 		_pending["dodge"] = false
 		try_active_dodge(active_id, _dodge_facing_dir(active_id))
 	b_cast_cd = maxf(0.0, b_cast_cd - dt)
+	if _pending["attack"] and SomChainData.TAP_GATE and swing_lock > 0.0:
+		_pending["attack"] = false      # F5: tik tijdens eigen slag-animatie telt niet
 	if _pending["attack"]:
 		_pending["attack"] = false
 		attack()
@@ -736,6 +738,8 @@ func attack() -> int:
 	attacks += 1
 	var step := _chain_begin_hit(active_id)
 	var mult := charge_mult(charge)
+	if step > 0:
+		mult = maxf(mult, SomChainData.FOLLOWUP_MIN_METER)   # F5: vervolgslag binnen venster
 	if step >= 0:
 		mult *= SomChainData.damage_mult(step)
 	_full_swing = charge >= 1.0

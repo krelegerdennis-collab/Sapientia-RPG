@@ -527,6 +527,8 @@ func _ready() -> void:
 	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
 	# UX-polish WM1 (tikdoelen 48dp, Engelse tekst, tutorials, 19,5:9/20:9 + notch, SFX, volume): of
 	#   godot -- --uxtest [--shots=/pad/map]  (scripts/tests/ux_tests.gd).
+	# F6 UX-polish (desktop-insets / plaatsing ballon+schat+tip): of
+	#   godot -- --uxpolishtest [--shots=/pad/map]  (scripts/tests/ux_polish_autotest.gd).
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
@@ -601,6 +603,7 @@ func _ready() -> void:
 			["--castjointest", "res://scripts/tests/cast_join_tests.gd", "CastJoinTest", "castjointest"],
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
 			["--uxtest", "res://scripts/tests/ux_tests.gd", "UxTest", "uxtest"],
+			["--uxpolishtest", "res://scripts/tests/ux_polish_autotest.gd", "UxPolishTest", "uxpolishtest"],
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
@@ -639,6 +642,7 @@ func _ready() -> void:
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
+			["--f5sim", "res://tools/battlesim/f5_sim.gd", "F5Sim", "f5sim"],
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:

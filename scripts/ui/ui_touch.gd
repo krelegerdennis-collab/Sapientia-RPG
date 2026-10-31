@@ -16,13 +16,22 @@ const INSET_MAX := 48.0
 
 ## Test/screenshot-override: Vector4(links, boven, rechts, onder) in eenheden. null = platform.
 static var insets_override: Variant = null
+## Test-hook: nep-DisplayServer-insets (Windows-taakbalk). insets() gebruikt dit alleen op mobiel;
+## op desktop/headless blijft het resultaat nul, ook als dit gezet is.
+static var test_display_insets: Variant = null
 
 
 ## Veilig gebied (notch/punch-hole, afgeronde hoeken, gebarenbalk) als marges in viewport-eenheden.
-## Op desktop en headless is dat nul. Android levert via DisplayServer de safe area in schermpixels.
+## Alleen op mobiel (Android/iOS) leest dit DisplayServer.get_display_safe_area(). Op desktop en
+## headless altijd nul: Windows geeft anders de taakbalk als 'safe area' (~16 viewport-px onder),
+## waardoor tekstvak/ballon naar 'boven' valt. Tests en screenshots zetten insets_override.
 static func insets(vp: Viewport = null) -> Vector4:
 	if insets_override != null:
 		return _clamp_insets(insets_override as Vector4)
+	if not OS.has_feature("mobile"):
+		return Vector4.ZERO
+	if test_display_insets != null:
+		return _clamp_insets(test_display_insets as Vector4)
 	var safe := Rect2(DisplayServer.get_display_safe_area())
 	var screen := Vector2(DisplayServer.screen_get_size())
 	if safe.size.x <= 0.0 or safe.size.y <= 0.0 or screen.x <= 0.0 or screen.y <= 0.0:
