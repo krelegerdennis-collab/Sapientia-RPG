@@ -115,6 +115,7 @@ const KernData := preload("res://scripts/data/kern_data.gd")   # v0.15 kernvaard
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const Archief2Vijanden := preload("res://scripts/data/archief2_vijanden.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const DamageCalc := preload("res://scripts/battle/damage_calc.gd")   # schadeformules (static)
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
@@ -1527,47 +1528,31 @@ func _enemy_lunge(actor: Dictionary, target: Dictionary) -> void:
 	await _wait(0.1)
 
 
-## Schadeformule: ATK - DEF/2, +/- 15% geluk, verdedigen = halve schade.
-## Zwakte telt alleen als het doel weak_matters heeft (Archief 2). Andere vijanden blijven gelijk.
+## Schadeberekening staat in DamageCalc (scripts/battle/damage_calc.gd); dit zijn dunne wrappers
+## met de oude namen, zodat aanroepers (tests, tools/battlesim) ongewijzigd blijven.
 func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> int:
-	var dmg := maxi(1, roundi(physical_base(attacker, target, mult) * randf_range(0.85, 1.15)))
-	if target["defending"]:
-		dmg = maxi(1, int(dmg / 2.0))
-	dmg = maxi(1, roundi(float(dmg) * Archief2.zwakte_fysiek(attacker, target)))
-	return dmg
+	return DamageCalc.physical_damage(attacker, target, mult)
 
 
-## Spreuken: power op level 1 + power_per_level per level erboven, maal het element, +/- 10%.
 func _spell_amount(caster: Dictionary, spell: Dictionary, target: Dictionary) -> int:
-	return maxi(1, roundi(spell_base(caster, spell, target) * randf_range(0.9, 1.1)))
+	return DamageCalc.spell_amount(caster, spell, target)
 
 
-## Basis van de formules hierboven, zonder geluk en zonder randf(): de simulator-AI
-## (tools/battlesim) schat er schade mee zonder de RNG-volgorde van het gevecht te verschuiven.
+## Basis zonder geluk en zonder randf(): de simulator-AI schat er schade mee.
 func physical_base(attacker: Dictionary, target: Dictionary, mult: float) -> float:
-	return float(attacker["s"]["atk"]) * _buff_mult(attacker, "atk") * mult - _defense_of(target) / 2.0
+	return DamageCalc.physical_base(attacker, target, mult)
 
 
 func spell_base(caster: Dictionary, spell: Dictionary, target: Dictionary) -> float:
-	var lvl := int(caster["s"].get("level", 1))
-	return SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target) * _token_mult(caster)
+	return DamageCalc.spell_base(caster, spell, target)
 
 
 func _buff_mult(c: Dictionary, stat: String) -> float:
-	var m := _token_mult(c)
-	for b in c.get("buffs", []):
-		if typeof(b) != TYPE_DICTIONARY:
-			continue
-		if str(b.get("stat", "")) == stat and int(b.get("turns", 0)) > 0:
-			m *= 1.0 + float(b.get("pct", 0.0))
-	return m
+	return DamageCalc.buff_mult(c, stat)
 
 
-## "H-5's Token" van de Koopman (CANON §12): +10% stats voor de helden tegen dienaren van Sapientia.
 func _token_mult(c: Dictionary) -> float:
-	if not bool(c.get("is_hero", false)):
-		return 1.0
-	return KoopmanData.token_factor(GameState.koopman_token, not GameState.practice_battle)
+	return DamageCalc.token_mult(c)
 
 
 func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
@@ -1926,10 +1911,7 @@ func _guard_tick(c: Dictionary) -> void:
 
 ## DEF van een doelwit, met schild omhoog (x guard_mult).
 func _defense_of(t: Dictionary) -> float:
-	var d := float(t["s"]["def"]) * _buff_mult(t, "def") + float(t.get("buff_def", 0))
-	if int(t.get("guard", 0)) > 0:
-		d *= float(t.get("guard_mult", 2.0))
-	return d
+	return DamageCalc.defense_of(t)
 
 
 ## Eén keer aan het begin: uitleg in één regel.
@@ -2388,15 +2370,11 @@ func kern_entry_text(hero: Dictionary, id: String) -> String:
 ## Schade van een fysieke kernvaardigheid: ATK x atk_mult - DEF x def_factor, +/- 15%,
 ## verdedigen = helft (zoals _physical_damage, maar met minder pantser).
 func kern_damage(attacker: Dictionary, target: Dictionary, skill: Dictionary) -> int:
-	var dmg := maxi(1, roundi(kern_base(attacker, target, skill) * randf_range(0.85, 1.15)))
-	if target["defending"]:
-		dmg = maxi(1, int(dmg / 2.0))
-	return dmg
+	return DamageCalc.kern_damage(attacker, target, skill)
 
 
 func kern_base(attacker: Dictionary, target: Dictionary, skill: Dictionary) -> float:
-	return float(attacker["s"]["atk"]) * float(skill.get("atk_mult", 1.5)) \
-			- _defense_of(target) * float(skill.get("def_factor", 0.25))
+	return DamageCalc.kern_base(attacker, target, skill)
 
 
 func _kern_strike(a: Dictionary) -> void:
