@@ -1296,3 +1296,7 @@ assets/sprites/enemies/goblin_raider_96.png
 assets/sprites/enemies/goblin_raider_96_sheet.png
 assets/sprites/enemies/goblin_raider_96_sheet_left.png
 assets/tiles/vijver_v8_teal_erf.png
+assets/sprites/bosses/telegraph_marker.png
+assets/sprites/bosses/phase_flash.png
+assets/sprites/bosses/golem_core_open.png
+assets/sprites/enemies/golem_boss_v2_damaged.png
