@@ -616,6 +616,8 @@ func _ready() -> void:
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
+			["--formuletest", "res://scripts/tests/formule_tests.gd", "FormuleTest", "formuletest"],
+			["--battlesimenemytest", "res://scripts/tests/battlesim_enemy_tests.gd", "BattlesimEnemyTest", "battlesimenemytest"],
 			["--wm1balanstest", "res://scripts/tests/wm1_balans_tests.gd", "Wm1BalansTest", "wm1balanstest"],
 			["--wm1playthroughtest", "res://scripts/tests/wm1_playthrough_tests.gd", "Wm1PlaythroughTest", "wm1playthroughtest"],
 			["--perftest", "res://scripts/tests/perf_wm1.gd", "PerfWm1", "perftest"],

@@ -1,7 +1,8 @@
 name: proef-suites
 
 # Suites uit de proeven (formule, battlesim per vijand, gevechtsbugs) + determinisme van de battlesim
-# + lekcontrole. Los van tests.yml; die en run_suite.sh blijven ongewijzigd.
+# + lekcontrole. Los van tests.yml. run_suite.sh: SUITE_TIMEOUT (standaard 1200, hier 300) en een
+# check dat de suite in de tester-lijst van game_state.gd staat; tests.yml merkt daar niets van.
 
 on:
   pull_request:
@@ -28,7 +29,7 @@ jobs:
   suites:
     name: proef-suites
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -65,18 +66,29 @@ jobs:
           echo "| suite | PASS | FAIL | ERR | tijd | resultaat |" >> "$GITHUB_STEP_SUMMARY"
           echo "|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
 
+      # Elke suite een eigen strakke timeout: SUITE_TIMEOUT (s) per Godot-poging in run_suite.sh,
+      # timeout-minutes als vangnet voor de hele stap. Een hang faalt zo binnen ~5 min met een melding.
       - name: Run formuletest
         id: formuletest
+        timeout-minutes: 8
+        env:
+          SUITE_TIMEOUT: 300
         run: .github/scripts/run_suite.sh formuletest
 
       - name: Run battlesimenemytest
         id: battlesimenemytest
         if: ${{ !cancelled() && steps.import.outcome == 'success' }}
+        timeout-minutes: 8
+        env:
+          SUITE_TIMEOUT: 300
         run: .github/scripts/run_suite.sh battlesimenemytest
 
       - name: Run combatbugstest
         id: combatbugstest
         if: ${{ !cancelled() && steps.import.outcome == 'success' }}
+        timeout-minutes: 8
+        env:
+          SUITE_TIMEOUT: 300
         run: .github/scripts/run_suite.sh combatbugstest
 
       # Godot meldt bij afsluiten "WARNING: ObjectDB instances leaked at exit" en/of
@@ -127,7 +139,7 @@ jobs:
   determinisme:
     name: battlesim-determinisme
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -159,9 +171,10 @@ jobs:
           timeout 600 "$GODOT" --headless --path . --import > import.log 2>&1 || { tail -50 import.log; exit 1; }
           if grep -q 'SCRIPT ERROR' import.log; then grep -n 'SCRIPT ERROR' -A3 import.log; exit 1; fi
 
-      # Zelfde seed twee keer, elk met een eigen user://-map; de CSV's (runs + per vijand) moeten
-      # byte-gelijk zijn.
+      # Zelfde seed twee keer, elk met een eigen user://-map; de CSV's (runs + per vijand) en het
+      # per-vijand-rapport (.md) moeten byte-gelijk zijn. --total zorgt dat de _per_enemy-bestanden er komen.
       - name: Battlesim seed 7 twee keer + byte-vergelijking
+        timeout-minutes: 15
         run: |
           mkdir -p testlogs/sim
           for RUN in a b; do
@@ -169,22 +182,34 @@ jobs:
             rm -rf "$XDG_DATA_HOME"; mkdir -p "$XDG_DATA_HOME"
             # run: is 'bash -e': exitcode via || vangen, anders stopt de stap vóór de foutmelding.
             CODE=0
-            timeout 1200 xvfb-run -a "$GODOT" --rendering-driver opengl3 --path . -- --battlesim \
+            timeout -k 10 300 xvfb-run -a "$GODOT" --rendering-driver opengl3 --path . -- --battlesim \
               --party=dennis:5,noor:5 --enemy=all --total=1000 --seed=7 --policy=simpel \
               --out="$PWD/testlogs/sim/seed7_$RUN.csv" > "testlogs/battlesim_$RUN.log" 2>&1 || CODE=$?
             tail -5 "testlogs/battlesim_$RUN.log"
+            if [ "$CODE" -eq 124 ] || [ "$CODE" -eq 137 ]; then
+              echo "::error::battlesim run $RUN: timeout na 300s (hangt)"; exit 1
+            fi
             if [ "$CODE" -ne 0 ] || ! grep -q 'RESULT OK' "testlogs/battlesim_$RUN.log"; then
               echo "::error::battlesim run $RUN faalde (exit=$CODE)"; exit 1
             fi
           done
           FAIL=0
-          for F in seed7 seed7_per_enemy; do
-            A="testlogs/sim/${F/seed7/seed7_a}.csv"; B="testlogs/sim/${F/seed7/seed7_b}.csv"
-            if cmp "$A" "$B"; then
+          for F in seed7.csv seed7_per_enemy.csv seed7_per_enemy.md; do
+            A="testlogs/sim/${F/seed7/seed7_a}"; B="testlogs/sim/${F/seed7/seed7_b}"
+            if [ ! -f "$A" ] || [ ! -f "$B" ]; then
+              echo "::error::battlesim seed 7: bestand ontbreekt ($( [ -f "$A" ] || echo "$A ")$( [ -f "$B" ] || echo "$B"))"
+              FAIL=1; continue
+            fi
+            if cmp -s "$A" "$B"; then
               echo "OK  $A == $B ($(wc -l < "$A") regels, $(sha256sum < "$A" | cut -c1-16))"
             else
               echo "::error::battlesim seed 7 niet deterministisch: $A != $B"
-              diff "$A" "$B" | head -20
+              cmp "$A" "$B" || true
+              echo "---- diff -u (eerste 60 regels) ----"
+              diff -u "$A" "$B" | head -60 || true
+              { echo ""; echo "<details><summary>diff $F</summary>"; echo ""; echo '```diff'
+                diff -u "$A" "$B" | head -60 || true
+                echo '```'; echo "</details>"; } >> "$GITHUB_STEP_SUMMARY"
               FAIL=1
             fi
           done
@@ -197,6 +222,8 @@ jobs:
         with:
           name: battlesim-seed7
           path: |
-            testlogs/sim/
+            testlogs/sim/seed7_*.csv
+            testlogs/sim/seed7_*_per_enemy.md
             testlogs/battlesim_*.log
+          if-no-files-found: warn
           retention-days: 7
