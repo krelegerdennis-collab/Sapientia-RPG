@@ -648,6 +648,7 @@ func _ready() -> void:
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
 			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
+			["--studiourltest", "res://scripts/tests/studio_url_tests.gd", "StudioUrlTest", "studiourltest"],
 			["--aabtest", "res://scripts/tests/aab_tests.gd", "AabTest", "aabtest"],
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
