@@ -2,8 +2,8 @@ class_name SomArena
 extends Node
 ## SoM-PROEF: realtime gevecht (Secret of Mana-stijl) in één DungeonRoom. Wordt door
 ## dungeon_room.gd aangemaakt als SomData.room_enabled(...) waar is; anders bestaat hij niet en
-## loopt alles turn-based zoals altijd. Bazen ("boss": true) doen hier NIET aan mee: die starten
-## gewoon het bestaande turn-based gevecht (DungeonRoom.start_monster_battle).
+## loopt alles turn-based zoals altijd. Bazen zonder BossScript starten turn-based; met BossScript (D3)
+## kunnen ze in Action via register().
 ##
 ## Party: de held die je bestuurt zit in de speler-node (camera, deuren, praten); de anderen zijn
 ## AI-bondgenoten (som_ally.gd). SWITCH (knop/toets C) wisselt: het lichaam van de speler en dat van de
@@ -32,6 +32,7 @@ signal action_resolved(text: String)
 signal sim_ticked(tick: int)
 
 const SomData := preload("res://scripts/data/som_data.gd")
+const BossScript := preload("res://scripts/som/boss_script.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
@@ -359,11 +360,17 @@ func enemy_stats(m: Node) -> Dictionary:
 	if t > 0 and not bool(d.get("unique", false)) and d.has("max_hp"):
 		var in_archief: bool = DungeonRooms.ROOMS.has(room.room_id)
 		d = GameData.apply_archief_tier(d, t) if in_archief else GameData.apply_tier(d, t)
+	if m.boss and BossScript.has_script(id):
+		var n: int = GameState.party.size() if GameState.party.size() > 0 else 1
+		return SomData.action_boss_stats(d, n)
 	return SomData.apply_action_area(d, room.room_id, t)      # alleen Action; bazen/uniek ongewijzigd
 
 
 func register(m: Node) -> void:
-	if m == null or m.boss or enemies.has(m):
+	if m == null or enemies.has(m):
+		return
+	var eid := str(m.enemy_id)
+	if m.boss and not BossScript.has_script(eid):
 		return
 	var d := enemy_stats(m)
 	if d.is_empty():
@@ -373,7 +380,6 @@ func register(m: Node) -> void:
 			"def": int(d.get("def", 0)), "exp": int(d.get("exp", 0)), "gold": int(d.get("gold", 0)),
 			"drops": d.get("drops", []), "data": d, "cd": 0.6, "tele": 0.0, "chase": rng.randf() * SomData.CHASE_INTERVAL,
 			"flash": 0.0, "target": ""}
-	var eid := str(m.enemy_id)
 	if SomActionAttacks.has_telegraph_attack(eid):
 		var aid := SomActionAttacks.default_attack_for_enemy(eid)
 		var tg := TelegraphAttack.new()
