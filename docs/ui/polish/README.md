@@ -19,9 +19,10 @@ Het spel rendert 384x216 eenheden over de hoogte van het scherm. Een telefoon in
 Het tikvlak mag groter zijn dan wat je ziet (`UiTouch.hit_rect`): de MENU/RUN/CORE-knoppen in de HUD hebben dezelfde
 zichtbare art als eerst, maar tikken net erboven of eronder telt nu ook.
 
-Veilig gebied: `UiTouch.insets()` geeft links/boven/rechts/onder in eenheden, uit `DisplayServer.get_display_safe_area()`
-(Android: punch-hole, afgeronde hoeken, gebarenbalk; desktop/headless: nul, begrensd op 48). Tests en screenshots zetten
-`UiTouch.insets_override`.
+Veilig gebied: `UiTouch.insets()` geeft links/boven/rechts/onder in eenheden. Alleen op mobiel komt dat uit
+`DisplayServer.get_display_safe_area()` (punch-hole, hoeken, gebarenbalk). Op desktop/headless is het altijd nul:
+Windows telt anders de taakbalk mee (~16 viewport-px onder) en duwt tekstvak/ballon naar boven. Tests en screenshots
+zetten `UiTouch.insets_override`.
 
 ## Wat is er veranderd
 
