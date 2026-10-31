@@ -30,6 +30,7 @@ const SavePrompt := preload("res://scripts/ui/save_prompt.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const TitleGlitch := preload("res://scripts/ui/title_glitch.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
+const Wm1Config := preload("res://scripts/data/wm1_config.gd")
 const BACKDROP := "res://assets/battle/bibliotheek.png"
 const TITLE_MAIN := "res://assets/ui/title_main.png"   # hoofdpagina 384x216 (titel zit in de plaat)
 const TITLE_BG := "res://assets/ui/title_bg.png"
@@ -75,7 +76,10 @@ var _kern_t := 0.0
 var stage: Control
 var backfill: TextureRect
 var version_label: Label
+var studio_label: Label
 const STAGE_SIZE := Vector2(384, 216)
+const FOOTER_MARGIN := Vector2(4, 1)
+const FOOTER_LABEL_GAP := 4
 ## Tikdoel van elke knop op het titelscherm: UiTouch.TOUCH_MIN (25 = ~48dp). Twee rijen vullen het kaartje (y 148..201).
 const TOUCH_H := 25.0
 const INFO_H := 10.0
@@ -230,6 +234,10 @@ func _ready() -> void:
 	load_button.focus_neighbor_right = load_button.get_path()
 
 	apply_online_visibility()
+	studio_label = UiMenu.label(Wm1Config.STUDIO_URL, UiStyleC.TEXT_OFF, 10)
+	studio_label.name = "StudioUrl"
+	studio_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	add_child(studio_label)
 	version_label = UiMenu.label("v" + str(ProjectSettings.get_setting("application/config/version", "")), UiStyleC.TEXT_OFF)
 	version_label.name = "Version"
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -328,7 +336,12 @@ func _place_card() -> void:
 	beta_info.size = Vector2(beta_card.size.x - 14.0, INFO_H)
 	beta_info.position = (beta_card.position + Vector2(7.0, -INFO_H - 1.0)).round()
 	version_label.reset_size()
-	version_label.position = (size - version_label.size - Vector2(4, 1)).round()
+	studio_label.reset_size()
+	var footer_right := (size - FOOTER_MARGIN).round()
+	version_label.position = (footer_right - version_label.size).round()
+	studio_label.position = (Vector2(
+			version_label.position.x - FOOTER_LABEL_GAP - studio_label.size.x,
+			version_label.position.y)).round()
 
 
 func _place_text_title() -> void:
