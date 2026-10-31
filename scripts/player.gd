@@ -304,8 +304,11 @@ func _read_direction() -> Vector2i:
 	return pressed[0]
 
 
-## test_move kijkt of onze collision shape iets zou raken als we 1 tile verschuiven.
+## Classic stap: logische muur (kaart.is_wall) én TileSet-physics (test_move).
+## is_wall alleen als de huidige kaart die methode heeft (_tegel_is_muur).
 func _can_move(dir: Vector2i) -> bool:
+	if _tegel_is_muur(get_tile() + dir):
+		return false
 	return not test_move(global_transform, Vector2(dir) * TILE_SIZE)
 
 

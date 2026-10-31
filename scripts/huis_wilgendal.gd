@@ -1,7 +1,7 @@
 extends "res://scripts/map.gd"
 ## Wachtershuis: ART-interieur 32x21 (layout.json), camera 512x336.
-## Classic lopen: layout solid_tiles/props (tegel_vrij) + player test_move; geen wand-polygonen
-## op de runtime-TileSet (zie huis_interieur_build.bouw / _maak_grond_tileset(false)).
+## Classic lopen: layout solid_tiles/props via tegel_vrij / is_wall (player._can_move).
+## Geen wand-polygonen op de runtime-TileSet (bouw / _maak_grond_tileset(false)).
 
 const Build := preload("res://scripts/data/huis_interieur_build.gd")
 
@@ -77,6 +77,13 @@ func tegel_heeft_cel(tegel: Vector2i) -> bool:
 
 func tegel_vrij(tegel: Vector2i) -> bool:
 	return Build.tegel_vrij(ground, tegel, _build.prop_blocks(), _build.solid_tiles())
+
+
+## Classic-muur voor player._can_move: grid-wanden + buiten de kamer.
+## Gelijk aan `not tegel_vrij` zonder prop-blokken: bestaande autotest-routes
+## (spawn 'bed' op (2,3), plant op (7,18)) lopen door meubels; die blijven tegel_vrij.
+func is_wall(t: Vector2i) -> bool:
+	return not Build.tegel_vrij(ground, t, {}, _build.solid_tiles())
 
 
 func vrije_tegels() -> Array[Vector2i]:

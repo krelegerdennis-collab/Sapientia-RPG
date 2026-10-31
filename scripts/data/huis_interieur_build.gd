@@ -58,7 +58,8 @@ func bouw(ground: TileMapLayer, details: Node2D, objects: Node2D) -> void:
 
 func _maak_grond_tileset(met_wand_fysiek: bool = false) -> TileSet:
 	## Per tegeltype een bron (add_source vóór tile-data). Wand-polygonen alleen als
-	## met_wand_fysiek: Classic Wachtershuis gebruikt layout solid_tiles + test_move (geen TileSet-botsing).
+	## met_wand_fysiek. Classic Wachtershuis: geen TileSet-botsing; player._can_move
+	## gebruikt kaart-is_wall (grid-wanden / buiten de kamer). Props blijven tegel_vrij.
 	var volgorde: Array = GROND_SLEUTELS
 	var atlas: Dictionary = Atlas.maak_grond_atlas(volgorde)
 	var coords: Dictionary = atlas["coords"] as Dictionary
