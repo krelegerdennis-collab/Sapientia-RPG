@@ -29,7 +29,7 @@ jobs:
                 warperkamertest, hangertest, spiegeltest, berggrottest, pvptest,
                 wilgendaltest, huisdrawtest, huispixeltest, questtest, tutorialtest, battlesimtest, echotest, castjointest,
                 muziektest, sessielogtest, sessielogcoretest, locktest, swinglocktest, dodgetest, chaintest, t26sheettest, chargetest, nettest, netsynctest, coope2etest,
-                partytest, savetest, saveroundtriptest, musictest, grotlayouttest, held24test,
+                partytest, savetest, saveroundtriptest, saverobusttest, musictest, grotlayouttest, held24test,
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
                 koopmantest, testmodustest, telegraphtest, roottest,
                 formuletest, battlesimenemytest, combatbugstest, perfprobetest, huiscollisiontest,
