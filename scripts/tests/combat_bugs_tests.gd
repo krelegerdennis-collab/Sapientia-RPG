@@ -10,6 +10,7 @@ extends Node
 
 const Runs := preload("res://tools/battlesim/battlesim_runs.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 const BATTLE := "res://scenes/battle/battle.tscn"
 
 
@@ -48,6 +49,8 @@ func _run() -> void:
 	await _h2_tests()
 	print("=== H3: item pas verbruiken bij effect ===")
 	await _h3_tests()
+	print("=== Brand ververst in plaats van stapelen ===")
+	await _brand_tests()
 	print("COMBATBUGSTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	for i in 10:
@@ -151,4 +154,56 @@ func _h3_tests() -> void:
 	dax["dots"] = [{"gif": true, "amount": 3, "turns": 2}]
 	await _item(b, noor, "tegengif", dax)
 	check("Tegengif met gif: gif weg en verbruikt", (dax["dots"] as Array).is_empty() and GameState.item_count("tegengif") == 0)
+	b.queue_free()
+
+
+# ================================================================ Brand
+func _brand_burns(dots: Array) -> Array:
+	return dots.filter(func(d): return typeof(d) == TYPE_DICTIONARY and not bool(d.get("gif", false)))
+
+
+func _brand_tests() -> void:
+	var b := _battle({})
+	var foe: Dictionary = b.enemies[0]
+	var vuur: Dictionary = GameData.SPELLS["vuur"]
+	foe["s"]["max_hp"] = 1000
+	foe["s"]["hp"] = 1000
+	foe["dots"] = []
+	b._apply_spell_status(foe, vuur)
+	var burns := _brand_burns(foe["dots"])
+	check("eerste brand: 1 entry (5%, 3 beurten)", burns.size() == 1
+			and is_equal_approx(float(burns[0]["pct"]), 0.05) and int(burns[0]["turns"]) == 3)
+	b._tick_ailments(foe)
+	check("na 1 tick: brand nog 2 beurten", int(_brand_burns(foe["dots"])[0]["turns"]) == 2)
+	b._apply_spell_status(foe, vuur)
+	burns = _brand_burns(foe["dots"])
+	check("tweede brand stapelt niet (nog steeds 1 entry)", burns.size() == 1)
+	check("tweede brand ververst de duur naar 3", int(burns[0]["turns"]) == 3)
+	# pct en duur gaan naar de hoogste waarde, nooit omlaag
+	burns[0]["pct"] = 0.2
+	burns[0]["turns"] = 5
+	b._apply_spell_status(foe, vuur)
+	burns = _brand_burns(foe["dots"])
+	check("verversen houdt hoogste pct en duur (20%, 5)", burns.size() == 1
+			and is_equal_approx(float(burns[0]["pct"]), 0.2) and int(burns[0]["turns"]) == 5)
+	burns[0]["pct"] = 0.01
+	burns[0]["turns"] = 1
+	b._apply_spell_status(foe, vuur)
+	burns = _brand_burns(foe["dots"])
+	check("verversen tilt lagere pct en duur op naar de nieuwe (5%, 3)", burns.size() == 1
+			and is_equal_approx(float(burns[0]["pct"]), 0.05) and int(burns[0]["turns"]) == 3)
+	# gif blijft een eigen entry naast de brand
+	foe["dots"] = [{"pct": 0.08, "turns": 3, "gif": true}]
+	b._apply_spell_status(foe, vuur)
+	check("brand naast gif: gif blijft, brand komt erbij (2 entries)", (foe["dots"] as Array).size() == 2
+			and _brand_burns(foe["dots"]).size() == 1 and bool(foe["dots"][0].get("gif", false)))
+	b._apply_spell_status(foe, vuur)
+	check("tweede brand naast gif: nog steeds 2 entries", (foe["dots"] as Array).size() == 2)
+	# schade per tick: 1 brand (5% van 1000 = 50), niet dubbel
+	foe["dots"] = []
+	foe["s"]["hp"] = 1000
+	b._apply_spell_status(foe, vuur)
+	b._apply_spell_status(foe, vuur)
+	b._tick_ailments(foe)
+	check("dubbele brand doet 1x schade per tick (50)", int(foe["s"]["hp"]) == 950)
 	b.queue_free()

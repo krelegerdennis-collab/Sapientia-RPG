@@ -1566,7 +1566,20 @@ func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
 	if float(fx.get("dot_pct", 0.0)) > 0.0:
 		if not target.has("dots"):
 			target["dots"] = []
-		(target["dots"] as Array).append({"pct": float(fx["dot_pct"]), "turns": int(fx.get("dot_turns", 3))})
+		var pct := float(fx["dot_pct"])
+		var turns := int(fx.get("dot_turns", 3))
+		# Brand (de niet-gif DoT) stapelt niet: een nieuwe brand ververst de bestaande entry
+		# (duur en pct naar de hoogste waarde), zodat er per doel maar een brand loopt.
+		var burn: Dictionary = {}
+		for d in target["dots"]:
+			if typeof(d) == TYPE_DICTIONARY and not bool(d.get("gif", false)):
+				burn = d
+				break
+		if burn.is_empty():
+			(target["dots"] as Array).append({"pct": pct, "turns": turns})
+		else:
+			burn["pct"] = maxf(float(burn.get("pct", 0.0)), pct)
+			burn["turns"] = maxi(int(burn.get("turns", 0)), turns)
 	# Verlamming/bevriezing: kans (SpellRules.STUN_CHANCE), met de randf() van het gevecht.
 	if int(fx.get("skip", 0)) > 0 and SpellRules.stun_lands(fx, is_boss_target(target), randf(), stun_boss_immune, stun_chance):
 		target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
