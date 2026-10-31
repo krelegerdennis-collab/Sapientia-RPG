@@ -586,11 +586,11 @@ const ROOMS := {
 		"books": [{"type": "hp", "tile": [27, 3]}],
 		"chests": [{"id": "kist_3a", "tile": [2, 10], "item": "kaftschild", "n": 1}],
 		"monsters": [
-			{"id": "m1", "enemy": "glitchmot", "group": ["glitchmot", "glitchmot"], "tile": [8, 5], "moves": true},
+			{"id": "m1", "enemy": "glitchmot", "group": ["glitchmot"], "tile": [8, 5], "moves": true},
 			{"id": "m2", "enemy": "mech_wachter", "group": ["mech_wachter"], "tile": [6, 7], "moves": true},
-			{"id": "m3", "enemy": "mech_wachter", "group": ["mech_wachter", "glitchmot"], "tile": [15, 5], "moves": true},
+			{"id": "m3", "enemy": "mech_wachter", "group": ["mech_wachter"], "tile": [15, 5], "moves": true},
 			{"id": "m4", "enemy": "kennis_beest", "group": ["kennis_beest"], "tile": [16, 7], "moves": true},
-			{"id": "m5", "enemy": "papiergeest", "group": ["papiergeest", "papiergeest", "glitchmot"], "tile": [26, 7], "moves": true},
+			{"id": "m5", "enemy": "papiergeest", "group": ["papiergeest", "papiergeest"], "tile": [26, 7], "moves": true},
 		],
 	},
 	# 3C Gang na de puzzel (20x12), verdieping 3
@@ -646,10 +646,10 @@ const ROOMS := {
 		"books": [{"type": "hp", "tile": [4, 3]}],
 		"monsters": [
 			{"id": "m1", "enemy": "mech_wachter", "group": ["mech_wachter"], "tile": [4, 5], "moves": true},
-			{"id": "m2", "enemy": "glitchmot", "group": ["glitchmot", "glitchmot", "glitchmot"], "tile": [13, 5], "moves": true},
-			{"id": "m3", "enemy": "mech_wachter", "group": ["mech_wachter", "glitchmot"], "tile": [11, 7], "moves": true},
+			{"id": "m2", "enemy": "glitchmot", "group": ["glitchmot", "glitchmot"], "tile": [13, 5], "moves": true},
+			{"id": "m3", "enemy": "mech_wachter", "group": ["mech_wachter"], "tile": [11, 7], "moves": true},
 			{"id": "m4", "enemy": "kennis_beest", "group": ["kennis_beest"], "tile": [22, 5], "moves": true},
-			{"id": "m5", "enemy": "mech_wachter", "group": ["mech_wachter", "mech_wachter"], "tile": [26, 7], "moves": true},
+			{"id": "m5", "enemy": "mech_wachter", "group": ["mech_wachter"], "tile": [26, 7], "moves": true},
 		],
 	},
 	# 4B Voorhal (20x12), verdieping 4
@@ -676,8 +676,8 @@ const ROOMS := {
 		},
 		"chests": [{"id": "kist_4b", "tile": [17, 9], "item": "drankje", "n": 2}],
 		"monsters": [
-			{"id": "m1", "enemy": "kennis_beest", "group": ["kennis_beest", "mech_wachter"], "tile": [8, 5], "moves": true},
-			{"id": "m2", "enemy": "mech_wachter", "group": ["mech_wachter", "papiergeest", "glitchmot"], "tile": [13, 7], "moves": true},
+			{"id": "m1", "enemy": "kennis_beest", "group": ["kennis_beest"], "tile": [8, 5], "moves": true},
+			{"id": "m2", "enemy": "mech_wachter", "group": ["mech_wachter", "papiergeest"], "tile": [13, 7], "moves": true},
 			{"id": "m3", "enemy": "kennis_beest", "group": ["kennis_beest"], "tile": [10, 4], "moves": false, "guard": true},
 		],
 	},
