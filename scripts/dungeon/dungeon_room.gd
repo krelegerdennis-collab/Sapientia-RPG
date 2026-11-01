@@ -699,8 +699,8 @@ func monster_touch(m: Node) -> void:
 		return
 	if m.is_stunned():
 		return       # v0.16: verlamd door Kernkracht: geen gevecht
-	if som and not m.boss:
-		return       # SoM-proef: realtime; aanraken is geen gevecht (bazen blijven turn-based)
+	if som and (not m.boss or som.enemies.has(m)):
+		return       # SoM-proef: realtime; aanraken is geen gevecht (bazen blijven turn-based, behalve D3 realtime-baas)
 	start_monster_battle(m)
 
 
