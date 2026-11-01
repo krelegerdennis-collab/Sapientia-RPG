@@ -214,6 +214,8 @@ const SAVE_VERSION := 1
 ## Marker in elke save en elk checkpoint van deze versie: wie hem mist komt van vóór de Codex-Inktwurm-regels
 ## en wordt in _codex_inktwurm_sync gemigreerd. Zo telt een nieuwe save tussen de twee tutorials niet als oud.
 const CODEX_SYNC_KEY := "inktwurm_codex_sync"
+## In-memory: staat gelijk met de marker in save/checkpoint (niet elke achtergrond-autosave schrijft hem).
+var _codex_sync_marked := false
 const SLOT_COUNT := 4
 ## Grenzen voor getallen uit een save (kapotte of met de hand aangepaste bestanden).
 const MAX_GOLD := 999999999
@@ -995,6 +997,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	_play_time_base = 0.0
 	_clock_start_ms = Time.get_ticks_msec()
 	active_slot = clampi(pending_new_slot, 1, SLOT_COUNT)
+	_codex_sync_marked = false
 
 
 ## Naam opschonen: spaties eraf, max. NAME_MAX tekens, leeg = DEFAULT_NAME.
@@ -1498,7 +1501,7 @@ func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
 		return false
 	if not can_autosave(reason == "achtergrond"):
 		return false
-	if not save_game(tile, facing, autosave_path):
+	if not save_game(tile, facing, autosave_path, reason):
 		return false
 	last_autosave_reason = reason
 	autosave_count += 1
@@ -1557,14 +1560,16 @@ func autosave_on_background() -> bool:
 
 ## Schrijft de voortgang naar save_path (JSON), of naar 'path' (v0.11: de autosave).
 ## Geeft true als het gelukt is.
-func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
+func save_game(tile: Vector2i, facing: Vector2i, path := "", autosave_reason := "") -> bool:
 	if coop_is_guest():
 		return false
 	if path == "":
 		var slot_file := slot_path(active_slot)
 		path = slot_file if slot_file != "" else save_path
 	var data := state_data(tile, facing)
-	data[CODEX_SYNC_KEY] = true
+	var stamp_sync := _codex_sync_marked or not (path == autosave_path and autosave_reason == "achtergrond")
+	if stamp_sync:
+		data[CODEX_SYNC_KEY] = true
 	data["game_version"] = str(ProjectSettings.get_setting("application/config/version", ""))
 	data["saved_at"] = Time.get_datetime_string_from_system()
 	data["saved_unix"] = Time.get_unix_time_from_system()
@@ -1580,6 +1585,8 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	var text := JSON.stringify(data, "  ")
 	var tmp := path + ".tmp"
 	var saved := _write_save_atomic(path, tmp, text)
+	if saved and stamp_sync:
+		_codex_sync_marked = true
 	game_saved.emit(path, saved)
 	return saved
 
@@ -1770,6 +1777,8 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	data["party"] = _party_save()
 	data["party_bank"] = _party_save_from(party_bench)
 	data["leader"] = leader_id
+	if _codex_sync_marked:
+		data[CODEX_SYNC_KEY] = true
 	return data
 
 
@@ -1954,6 +1963,7 @@ func apply_state(d: Dictionary) -> bool:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	_unique_seen_flags()
+	_codex_sync_marked = d.has(CODEX_SYNC_KEY)
 	_codex_inktwurm_sync(not d.has(CODEX_SYNC_KEY))
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
@@ -2563,6 +2573,7 @@ func has_checkpoint() -> bool:
 
 ## v0.19: leg het kamer-checkpoint vast (map.gd, bij binnenkomst): plek + kopie van de voortgang.
 func set_checkpoint(map: String, tile: Vector2i, facing: Vector2i) -> void:
+	_codex_sync_marked = true
 	var state := state_data(tile, facing, map)
 	state[CODEX_SYNC_KEY] = true
 	checkpoint = {"map": map, "tile": [tile.x, tile.y], "facing": [facing.x, facing.y], "state": state}
@@ -3215,12 +3226,14 @@ func _codex_inktwurm_sync(oude_save := true) -> void:
 		return
 	story_flags[StoryData.TUTORIAL_CODEX_FLAG] = true
 	if story_flags.has(flag):
+		_codex_sync_marked = true
 		return
 	if unique_state("inktwurm") == "gevangen":
 		story_flags[flag] = true
 	elif not codex_full():
 		codex_add("inktwurm", CodexData.capture_level(0, "inktwurm"), {"play_time": int(play_time())})
 		mark_seen("inktwurm")
+	_codex_sync_marked = true
 
 
 # ---------------------------------------------------------------- world warper

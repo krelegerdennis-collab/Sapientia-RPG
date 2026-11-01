@@ -269,6 +269,7 @@ static func rooms() -> Dictionary:
 		},
 		# de boog (n) in de noordmuur is hier alleen beeld: geen uitgang, dus geen doel nodig
 		"decor_uitgangen": ["n"],
+		"decor_exits": ["n"],  # alias voor room_data_audit (--wm1playthroughtest)
 		"warp": [13, 7],
 		"signs": [{"tile": [8, 6], "lines": [
 			"ECHO operates the hub. Step onto the path and choose.",
