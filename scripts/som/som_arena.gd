@@ -33,6 +33,8 @@ signal sim_ticked(tick: int)
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const BossScript := preload("res://scripts/som/boss_script.gd")
+const GolemBoss := preload("res://scripts/som/golem_boss.gd")
+const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
@@ -172,6 +174,16 @@ var map_cast_uit: Array = []
 ## gevecht reproduceerbaar (--combatrngtest, COMBAT_DESIGN.md §16).
 var rng := RandomNumberGenerator.new()
 var rng_seed := 0
+
+## D3 PR C: arena-hook voor de realtime Golem (kennis_beest, WM1). Standaard UIT: zolang dit false is blijft
+## de Golem turn-based (somroomstest/balansarchief1test bewaken dat). Aanzetten (tests, of later live na akkoord
+## Dennis): SomArena.golem_rt_enabled = true VOOR de kamer laadt. Alleen in GOLEM_RT_ROOMS.
+static var golem_rt_enabled := false
+const GOLEM_RT_ROOMS := ["archief_golemhal"]
+## Wij registreerden GolemBoss in BossScript.REGISTRY (ensure_registered) -> bij _exit_tree weer weg.
+var _golem_registered_here := false
+## Event-log van de Golem-hook (tests/HUD): {tick, type, ...} uit GolemFight.take_events().
+var golem_events: Array = []
 
 
 func _init() -> void:
@@ -366,10 +378,33 @@ func enemy_stats(m: Node) -> Dictionary:
 	return SomData.apply_action_area(d, room.room_id, t)      # alleen Action; bazen/uniek ongewijzigd
 
 
+## D3 PR C: geldt de realtime Golem-hook voor dit monster in deze kamer?
+func golem_rt_applies(m: Node) -> bool:
+	return golem_rt_enabled and m != null and bool(m.boss) and str(m.enemy_id) == GolemBoss.ENEMY_ID \
+			and room != null and "room_id" in room and GOLEM_RT_ROOMS.has(str(room.room_id))
+
+
+## GolemFight van een geregistreerde Golem (of null).
+func golem_fight_of(m: Node) -> GolemFight:
+	if not enemies.has(m):
+		return null
+	return enemies[m].get("golem", null)
+
+
+func _exit_tree() -> void:
+	if _golem_registered_here:
+		GolemBoss.unregister()
+		_golem_registered_here = false
+
+
 func register(m: Node) -> void:
 	if m == null or enemies.has(m):
 		return
 	var eid := str(m.enemy_id)
+	var golem_rt := golem_rt_applies(m)
+	if golem_rt and not BossScript.has_script(eid):
+		GolemBoss.ensure_registered()
+		_golem_registered_here = true
 	if m.boss and not BossScript.has_script(eid):
 		return
 	var d := enemy_stats(m)
@@ -380,6 +415,14 @@ func register(m: Node) -> void:
 			"def": int(d.get("def", 0)), "exp": int(d.get("exp", 0)), "gold": int(d.get("gold", 0)),
 			"drops": d.get("drops", []), "data": d, "cd": 0.6, "tele": 0.0, "chase": rng.randf() * SomData.CHASE_INTERVAL,
 			"flash": 0.0, "target": ""}
+	if golem_rt:
+		# Fases, kern-venster, schadeplafond per fasedrempel en 90 ticks fasewissel: GolemFight (PR B).
+		var fseed := rng_seed if rng_seed != 0 else hash(str(room.room_id))
+		var fight := GolemFight.new(int(entry["max_hp"]), fseed)
+		entry["golem"] = fight
+		entry["hp"] = fight.hp()
+		enemies[m] = entry
+		return
 	if SomActionAttacks.has_telegraph_attack(eid):
 		var aid := SomActionAttacks.default_attack_for_enemy(eid)
 		var tg := TelegraphAttack.new()
@@ -1060,7 +1103,17 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
-	e["hp"] = int(e["hp"]) - dmg
+	var golem: GolemFight = e.get("golem", null)
+	if golem:
+		# kern-factor, schadeplafond op de fasedrempel en onkwetsbare fasewissel zitten in GolemFight.damage()
+		dmg = golem.damage(dmg)
+		_golem_events(m, e, golem.take_events())
+		e["hp"] = golem.hp()
+		if dmg <= 0:
+			last_enemy_damage = 0
+			return
+	else:
+		e["hp"] = int(e["hp"]) - dmg
 	e["flash"] = SomData.HIT_FLASH
 	last_enemy_damage = dmg
 	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), Color(1, 1, 1))
@@ -1072,8 +1125,8 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	last_hitstop_ticks = hitstop
 	if hitstop > 0:
 		e["hitstop"] = maxi(int(e.get("hitstop", 0)), hitstop)
-	if not stagger:
-		return
+	if not stagger or golem:
+		return       # Golem: geen knockback/afgebroken telegraaf door gewone slagen (alleen kern-break)
 	if e.has("tg"):
 		(e["tg"] as TelegraphAttack).interrupt()
 	e["tele"] = 0.0          # volle treffer = telegraaf afgebroken
@@ -1281,6 +1334,9 @@ func _enemy_ai(m: Node, delta: float) -> void:
 	if int(e.get("hitstop", 0)) > 0:       # hitstop (finisher): vijand bevriest een paar ticks
 		e["hitstop"] = int(e["hitstop"]) - 1
 		return
+	if e.has("golem"):
+		_golem_ai(m, e, delta)
+		return
 	if e.has("tg"):
 		_enemy_ai_telegraph(m, e, delta)
 		return
@@ -1318,6 +1374,67 @@ func _enemy_ai(m: Node, delta: float) -> void:
 			e["chase"] = SomData.CHASE_INTERVAL
 			_step_toward(m, body_of(tid))
 	_tint(m, e)
+
+
+## D3 PR C: realtime Golem. Host-authoritatief: GolemFight.tick() kiest aanvallen (seeded), de arena zet
+## de events om in treffers op de party (dodge-iframes gelden via hit_member), adds en beeld.
+func _golem_ai(m: Node, e: Dictionary, delta: float) -> void:
+	var fight: GolemFight = e["golem"]
+	if float(e["flash"]) > 0.0:
+		e["flash"] = float(e["flash"]) - delta
+	_pose_tick(m, e, delta)
+	fight.tick()
+	_golem_events(m, e, fight.take_events())
+	_tint(m, e)
+
+
+func _golem_events(m: Node, e: Dictionary, evs: Array) -> void:
+	for ev in evs:
+		var d: Dictionary = (ev as Dictionary).duplicate()
+		d["tick"] = sim_tick
+		golem_events.append(d)
+		match str(d.get("type", "")):
+			"telegraph_start":
+				var a := GolemBoss.attack(str(d["id"]))
+				var tid := _target_for(m)
+				e["target"] = tid
+				e["golem_attack"] = str(d["id"])
+				var origin := center_of(m)
+				if str(a.get("aim", "")) == "target" and tid != "":
+					origin = body_of(tid)
+				e["golem_origin"] = origin
+				_monster_pose(m, e, "attack", 0, float(d["windup"]) / float(TICK_HZ) + 0.05)
+				if room and room.has_node("Objects"):
+					SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), float(d["windup"]) / float(TICK_HZ))
+			"attack_hit":
+				_monster_pose(m, e, "attack", 1, SomData.MONSTER_STRIKE_MS / 1000.0)
+				_golem_strike(m, e, str(d["id"]), float(d["power"]))
+			"phase":
+				e["golem_phase"] = int(d["index"])
+			"adds":
+				_golem_spawn_adds(m, d.get("ids", []))
+
+
+## Aanval landt: elke levende held binnen het bereik (tegels uit GolemBoss.ATTACKS) wordt geraakt.
+func _golem_strike(m: Node, e: Dictionary, attack_id: String, power: float) -> void:
+	var a := GolemBoss.attack(attack_id)
+	var origin: Vector2 = e.get("golem_origin", center_of(m))
+	var reach := float(a.get("reach_tiles", 1.0)) * 16.0
+	if str(a.get("aim", "")) != "target":
+		reach += 8.0 * (maxf(m.size.x, m.size.y) - 1.0)     # 2x2-baas: bereik vanaf de rand
+	for id in party_ids():
+		if is_alive(id) and node_of(id) != null and origin.distance_to(body_of(id)) <= reach:
+			hit_member(id, int(e["atk"]), power)
+
+
+func _golem_spawn_adds(m: Node, ids: Array) -> void:
+	if room == null or not room.has_method("add_monster"):
+		return
+	var i := 0
+	for id in ids:
+		var off := Vector2i(-2 if i % 2 == 0 else 3, 2)
+		room.add_monster({"id": "golem_add_%d_%d" % [sim_tick, i], "enemy": str(id), "tile": [m.tile.x + off.x, m.tile.y + off.y], "moves": true})
+		i += 1
 
 
 ## Inktwurm / Inktspuw: TelegraphState + vaste shape (T4a). Zelfde cadans als de float-telegraaf.
