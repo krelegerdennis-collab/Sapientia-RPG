@@ -1221,7 +1221,7 @@ func _tier_battle_tests() -> void:
 	await walk("move_down", 1)
 	await pframes(2)
 	check("4A: gevecht op niveau 4 (groep %s)" % [GameState.pending_enemies], GameState.in_battle and GameState.pending_tier == 4
-			and GameState.pending_enemies == ["mech_wachter", "glitchmot"])
+			and GameState.pending_enemies == ["mech_wachter"])
 	if await wait_scene("Battle"):
 		await wait_battle_state(["command"])
 		var s: Dictionary = battle().enemies[0]["s"]

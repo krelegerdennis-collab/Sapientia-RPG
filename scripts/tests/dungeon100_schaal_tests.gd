@@ -603,8 +603,8 @@ func _battle_tests() -> void:
 	b = _make_battle(["kennis_beest"], 0, true)
 	await get_tree().process_frame
 	var g: Dictionary = b.enemies[0]["s"]
-	check("baasgevecht verdieping 0: Golem-baas ongewijzigd (HP 360, kern aanwezig), geen baasbuit",
-			int(g["max_hp"]) == 360 and b.enemies[0].has("core") and b._dungeon100_boss_loot() == "")
+	check("baasgevecht verdieping 0: Golem-baas ongewijzigd (HP 520, kern aanwezig), geen baasbuit",
+			int(g["max_hp"]) == 520 and b.enemies[0].has("core") and b._dungeon100_boss_loot() == "")
 	_free_battle(b)
 	await get_tree().process_frame
 	# gewoon gevecht in de dungeon: geen baasbuit
