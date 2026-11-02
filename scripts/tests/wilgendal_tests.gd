@@ -602,7 +602,7 @@ func _som_pilot(dorp: Node) -> void:
 	var sp: Sprite2D = dorp.get_node("Objects/Player/Sprite2D")
 	check("som: speler = fase-2 heldsheet 24x32 (%s)" % sp.texture.resource_path,
 			sp.texture.resource_path.begins_with("res://assets/sprites/som/kaart/")
-			and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
+			and sp.hframes == 5 and sp.vframes == 4 and sp.offset == Vector2(0, -8))
 	check("som: Dax/Seren in WM1 (Dax final_trio dax_wm1.png 23 okt), WM2 in de wacht", sp.texture.resource_path.ends_with("dax_wm1.png")
 			and KaartStijl.gebieden()["wilgendal"]["held_variant"] == "wm1_slim"
 			and ResourceLoader.exists("res://assets/sprites/som/kaart/seren_wm1_slim.png")
@@ -680,13 +680,13 @@ func _som() -> void:
 	# Dax WM1 (24x32-sheet 72x128) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
 	speler.zet_sheet(load(DAX))
 	var vorm := (speler.get_node("CollisionShape2D") as CollisionShape2D).shape as RectangleShape2D
-	check("Dax WM1 24x32: 3x4 frames, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 3 and spr.vframes == 4
+	check("Dax WM1 24x32: 5x4 frames, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 5 and spr.vframes == 4
 			and is_equal_approx(spr.offset.y + 16.0, 8.0) and vorm.size == Vector2(14, 14)
 			and (speler.get_node("CollisionShape2D") as Node2D).position == Vector2.ZERO
 			and MapSprite.frame_maat(spr.texture) == MapSprite.NIEUW)
 	speler.facing = Vector2i.UP
 	speler._update_sprite()
-	check("richting omhoog kiest rij 3 van de sheet", spr.frame >= 9 and spr.frame <= 11)
+	check("richting omhoog kiest rij 3 van de sheet", spr.frame >= 15 and spr.frame <= 19)
 	# één los frame (24x32, in het geheugen): geen loop- of richtingsanimatie
 	speler.zet_sheet(ImageTexture.create_from_image(Image.create(24, 32, false, Image.FORMAT_RGBA8)))
 	speler._update_sprite()
