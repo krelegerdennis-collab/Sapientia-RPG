@@ -4,7 +4,7 @@ extends Node
 ##    3.0-3.5 volle slagen (SomData.ACTION_AREAS.archief1 "hits"), via de echte schadeformule;
 ##  - vijanden slaan in Action harder dan in Classic (atk-factor > 1) en de arena gebruikt de gebiedsregels;
 ##  - Classic (turn-based) krijgt exact de oude stats; unieke vijanden en kamers buiten het gebied ongewijzigd.
-##    (Bazen: turn-based met Classic-stats in Action, behalve Golem realtime in archief_golemhal — somroomstest.)
+##    (Bazen: altijd turn-based met Classic-stats, bewaakt in --somroomstest.)
 ## Start: godot --path . -- --balansarchief1test [--shots=/pad/map]
 
 const SomData := preload("res://scripts/data/som_data.gd")
@@ -12,9 +12,6 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const Balans := preload("res://tools/battlesim/archief1_balans.gd")
 const GANG := "res://scenes/maps/archief_v1_gang.tscn"
-const GOLEMHAL := "res://scenes/maps/archief_golemhal.tscn"
-const SomArena := preload("res://scripts/som/som_arena.gd")
-const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 
 var failures := 0
 var passes := 0
@@ -43,7 +40,6 @@ func _run() -> void:
 	_winst()
 	await _herstelpunt()
 	_bazen()
-	await _golem_rt_golemhal()
 	await _arena_en_classic()
 	await _baas_classic()
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
@@ -162,9 +158,8 @@ func _herstelpunt() -> void:
 
 
 ## Bazen blijven Classic: elk baas-monster (boss: true) staat buiten een Action-gebied, dus geen HP-, schade- of
-## cooldownregels; de arena neemt een baas nooit op (som_arena.register), behalve kennis_beest in archief_golemhal
-## (realtime, D3). kennis_beest elders is hier een gewone vijand; zijn "boss"-sleutel in GameData is de config
-## van het Golem-baasgevecht (turn-based).
+## cooldownregels; de arena neemt een baas nooit op (som_arena.register). kennis_beest is hier een gewone vijand;
+## zijn "boss"-sleutel in GameData is de config van het Golem-baasgevecht (turn-based).
 func _bazen() -> void:
 	var n := 0
 	for rid in DR.ROOMS:
@@ -180,32 +175,6 @@ func _bazen() -> void:
 					and is_equal_approx(SomData.enemy_damage_mult(str(rid), t), SomData.ENEMY_DAMAGE_MULT)
 					and is_equal_approx(SomData.attack_cooldown(str(rid), t), SomData.ATTACK_COOLDOWN))
 	check("bazen gevonden in de kamers (%d)" % n, n >= 1)
-
-
-## Golemhal (Action): enige baas in realtime; stats = Classic baasconfig, aanraken opent geen turn-based gevecht.
-func _golem_rt_golemhal() -> void:
-	check("golem_rt standaard aan", SomArena.golem_rt_enabled)
-	GameState.new_game("Dax")
-	GameState.encounter_multiplier = 0.0
-	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
-	var s := await _laad(GOLEMHAL)
-	if s == null:
-		check("Golemhal geladen", false)
-		return
-	var arena: Node = s.get("som")
-	var m: Node = null
-	for x in s.monsters:
-		if is_instance_valid(x) and x.boss and str(x.enemy_id) == GolemBoss.ENEMY_ID:
-			m = x
-	check("Golemhal: Golem in Action-arena", arena != null and m != null and arena.enemies.has(m))
-	if arena != null and m != null and arena.enemies.has(m):
-		var e: Dictionary = arena.enemies[m]
-		var g: Dictionary = GameData.ENEMIES["kennis_beest"].get("boss", GameData.ENEMIES["kennis_beest"])
-		check("Golemhal: realtime HP/ATK/DEF = GameData-baasconfig %d/%d/%d" % [int(g["max_hp"]), int(g["atk"]), int(g["def"])],
-				int(e.get("max_hp", -1)) == int(g["max_hp"]) and int(e.get("atk", -1)) == int(g["atk"]) and int(e.get("def", -1)) == int(g["def"]))
-		s.monster_touch(m)
-		await get_tree().process_frame
-		check("Golemhal: aanraken start geen turn-based gevecht", not GameState.in_battle)
 
 
 ## Echt Golem-baasgevecht (Classic, turn-based): stats exact uit GameData.ENEMIES.kennis_beest.
