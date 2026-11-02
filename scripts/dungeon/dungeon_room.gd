@@ -176,6 +176,15 @@ static func is_boss_room(r: Dictionary) -> bool:
 	return r.get("monsters", []).any(func(m): return m.get("boss", false))
 
 
+static func _decor_only_exits(room: Dictionary) -> Array:
+	var out: Array = []
+	for key in ["decor_uitgangen", "decor_exits"]:
+		for x in room.get(key, []):
+			if not out.has(x):
+				out.append(x)
+	return out
+
+
 # ---------------------------------------------------------------- bouwen
 func _build() -> void:
 	# v0.17: ook de kamers van het Donker Woud (scripts/data/woud_rooms.gd)
@@ -369,7 +378,7 @@ func _build() -> void:
 		var tiles: Array = exit_cells[key]
 		var data: Dictionary = exits.get(key, {})
 		if data.is_empty():
-			if key in room.get("decor_uitgangen", []):
+			if key in _decor_only_exits(room):
 				continue
 			push_error("Dungeonkamer '%s': uitgang '%s' heeft geen doel in \"exits\"" % [room_id, key])
 			continue
