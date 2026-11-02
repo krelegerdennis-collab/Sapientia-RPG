@@ -105,7 +105,7 @@ func _hook_on() -> void:
 	if f == null:
 		return
 	var e: Dictionary = a.enemies[m]
-	check("aan: stats ongewijzigd (HP 360, ATK 27)", f.max_hp() == 360 and int(e["hp"]) == 360 and int(e["atk"]) == 27)
+	check("aan: stats ongewijzigd (HP 520, ATK 23)", f.max_hp() == 520 and int(e["hp"]) == 520 and int(e["atk"]) == 23)
 	check("aan: start fase 0, niet onkwetsbaar", f.phase_index() == 0 and not f.is_invulnerable())
 
 	# aanraken = geen turn-based gevecht meer
@@ -117,7 +117,7 @@ func _hook_on() -> void:
 	var closed := f.core.closed_mult
 	a.damage_enemy(m, 50, Vector2i.ZERO)
 	var exp1 := maxi(1, roundi(50.0 * closed))
-	check("aan: kern dicht: 50 ruw -> %d (x%.1f) [%d]" % [exp1, closed, a.last_enemy_damage], a.last_enemy_damage == exp1 and int(e["hp"]) == 360 - exp1)
+	check("aan: kern dicht: 50 ruw -> %d (x%.1f) [%d]" % [exp1, closed, a.last_enemy_damage], a.last_enemy_damage == exp1 and int(e["hp"]) == 520 - exp1)
 	check("aan: arena-hp = GolemFight-hp", int(e["hp"]) == f.hp())
 
 	# schadeplafond op de fasedrempel (60% = 216)
