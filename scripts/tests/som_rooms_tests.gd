@@ -3,6 +3,7 @@ extends Node
 ##  - elke WM1-dungeonkamer (Archief 1, Donker Woud, Archief 2/Leven, Berggrot) krijgt bij Battle Style = Action de
 ##    realtime arena; in Classic niet;
 ##  - ALLE bazen starten het turn-based gevecht, ook in Action, zonder Action-baasvermenigvuldiger;
+##    uitzondering: kennis_beest in archief_golemhal vecht realtime (SomArena.golem_rt_enabled);
 ##  - Action is de standaard voor een vers spel; oude instellingen/saves zonder sleutel blijven Classic;
 ##    de keuze reist mee met save/load;
 ##  - kaart- en gevechtssprites van elke vijand in de WM1-kamers bestaan (audit).
@@ -14,6 +15,8 @@ const DR := preload("res://scripts/data/dungeon_rooms.gd")
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const SAVE := "user://somrooms_test.json"
 const GameData := preload("res://scripts/data/game_data.gd")
+const SomArena := preload("res://scripts/som/som_arena.gd")
+const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 
 var failures := 0
 var passes := 0
@@ -65,6 +68,11 @@ func _nieuw() -> void:
 	for id in ["noor", "lotte"]:
 		if not GameState.has_member(id):
 			GameState.add_member(id)
+
+
+## Golem-baas in de Golemhal: realtime in Action (D3), niet turn-based via aanraken.
+func _golem_rt_boss(m: Node, rid: String) -> bool:
+	return rid == "archief_golemhal" and m.boss and str(m.enemy_id) == GolemBoss.ENEMY_ID and SomArena.golem_rt_enabled
 
 
 ## Alle dungeonkamer-scènes: [pad, room_id].
@@ -197,7 +205,10 @@ func _kamers() -> void:
 			if not is_instance_valid(m):
 				continue
 			if m.boss and a.enemies.has(m):
-				fout.append("%s: baas %s in de realtime arena" % [rid, m.monster_id])
+				if not _golem_rt_boss(m, rid):
+					fout.append("%s: baas %s in de realtime arena" % [rid, m.monster_id])
+			elif m.boss and _golem_rt_boss(m, rid) and not a.enemies.has(m):
+				fout.append("%s: Golem realtime ontbreekt in de arena" % rid)
 			elif not m.boss and not a.enemies.has(m):
 				fout.append("%s: monster %s niet realtime" % [rid, m.monster_id])
 		var gebied := rid.get_slice("_", 0) + ("_2" if rid.begins_with("archief_2") else "")
@@ -212,7 +223,7 @@ func _kamers() -> void:
 			classic_fout.append(rid)
 	var zonder_scene := wm1.filter(func(r): return not gedekt.has(r))
 	print("INFO  WM1-kamers: %d, met scène + arena: %d, zonder eigen scène (gedeeld/gegenereerd): %s" % [wm1.size(), gedekt.size(), zonder_scene])
-	check("Action: elke WM1-kamerscène heeft de realtime arena, monsters realtime, bazen niet (%d kamers; %s)" % [gedekt.size(), fout if not fout.is_empty() else "ok"],
+	check("Action: elke WM1-kamerscène heeft de realtime arena, monsters realtime, bazen niet (Golemhal-Golem wel) (%d kamers; %s)" % [gedekt.size(), fout if not fout.is_empty() else "ok"],
 			fout.is_empty() and gedekt.size() >= 20)
 	for want in ["archief_ingang", "archief_golemhal", "archief_v1_gang", "archief_v4_wachtersgang", "woud_rand", "woud_sporenkring",
 			"archief_2_v1_entree", "archief_2_v4_genezer", "berggrot_mond", "berggrot_nerf"]:
@@ -226,7 +237,7 @@ func _kamers() -> void:
 	check("dungeon van 100 doet niet mee", not SomData.is_wm1_room("dungeon100_1") and not SomData.room_enabled("dungeon100_3", true))
 
 
-# ---------------------------------------------------------------- bazen: altijd turn-based
+# ---------------------------------------------------------------- bazen: turn-based (Golemhal-Golem realtime in Action)
 func _bazen() -> void:
 	var lijst := _kamer_scenes()
 	var gevonden := []
@@ -240,6 +251,7 @@ func _bazen() -> void:
 		for bd in bazen:
 			var stats := {}
 			var geopend := {}
+			var is_golem_rt := rid == "archief_golemhal" and str(bd.get("enemy", "")) == GolemBoss.ENEMY_ID
 			for stijl in [Settings.BATTLE_STYLE_CLASSIC, Settings.BATTLE_STYLE_ACTION]:
 				_nieuw()
 				Settings.set_value("battle_style", stijl)
@@ -254,32 +266,64 @@ func _bazen() -> void:
 					m = s.add_monster(bd.duplicate(true))     # verborgen tot een verhaalvlag: zelf neerzetten
 					await get_tree().process_frame
 				var a: Node = s.get("som")
-				if stijl == Settings.BATTLE_STYLE_ACTION:
-					check("baas %s (%s): Action-arena actief, baas NIET realtime" % [bd.get("enemy", ""), rid], a != null and not a.enemies.has(m))
-				s.start_monster_battle(m)
-				var bt: Node = null
-				for i in 240:
+				if stijl == Settings.BATTLE_STYLE_ACTION and is_golem_rt:
+					check("baas %s (%s): Action realtime Golem in arena" % [bd.get("enemy", ""), rid], a != null and a.enemies.has(m))
+					if a != null and a.enemies.has(m):
+						var e: Dictionary = a.enemies[m]
+						var g: Dictionary = GameData.ENEMIES["kennis_beest"].get("boss", GameData.ENEMIES["kennis_beest"])
+						check("baas %s (%s): realtime stats = Classic baasconfig (HP/ATK/DEF %d/%d/%d)" % [bd.get("enemy", ""), rid, int(g["max_hp"]), int(g["atk"]), int(g["def"])],
+								int(e.get("max_hp", -1)) == int(g["max_hp"]) and int(e.get("atk", -1)) == int(g["atk"]) and int(e.get("def", -1)) == int(g["def"]))
+						stats[stijl] = [int(e.get("max_hp", -1)), int(e.get("atk", -1)), int(e.get("def", -1))]
+					s.monster_touch(m)
 					await get_tree().process_frame
-					if Dialog.has_choices():
-						Dialog.choose(0)
-					var cs := get_tree().current_scene
-					if cs != null and cs.name == "Battle" and "enemies" in cs and not (cs.enemies as Array).is_empty():
-						bt = cs
-						break
-				geopend[stijl] = bt != null and GameState.pending_boss
-				if bt != null:
-					var st: Dictionary = bt.enemies[0].get("s", {})
-					stats[stijl] = [int(st.get("max_hp", -1)), int(st.get("atk", -1)), int(st.get("def", -1))]
-					if stijl == Settings.BATTLE_STYLE_ACTION and not gevonden.has(rid):
-						await _shot("baas_turnbased_" + rid)
+					geopend[stijl] = not GameState.in_battle
+					if not gevonden.has(rid):
+						await _shot("golem_rt_" + rid)
+				elif stijl == Settings.BATTLE_STYLE_ACTION:
+					check("baas %s (%s): Action-arena actief, baas NIET realtime" % [bd.get("enemy", ""), rid], a != null and not a.enemies.has(m))
+					s.start_monster_battle(m)
+					var bt: Node = null
+					for i in 240:
+						await get_tree().process_frame
+						if Dialog.has_choices():
+							Dialog.choose(0)
+						var cs := get_tree().current_scene
+						if cs != null and cs.name == "Battle" and "enemies" in cs and not (cs.enemies as Array).is_empty():
+							bt = cs
+							break
+					geopend[stijl] = bt != null and GameState.pending_boss
+					if bt != null:
+						var st: Dictionary = bt.enemies[0].get("s", {})
+						stats[stijl] = [int(st.get("max_hp", -1)), int(st.get("atk", -1)), int(st.get("def", -1))]
+						if not gevonden.has(rid):
+							await _shot("baas_turnbased_" + rid)
+				else:
+					s.start_monster_battle(m)
+					var bt: Node = null
+					for i in 240:
+						await get_tree().process_frame
+						if Dialog.has_choices():
+							Dialog.choose(0)
+						var cs := get_tree().current_scene
+						if cs != null and cs.name == "Battle" and "enemies" in cs and not (cs.enemies as Array).is_empty():
+							bt = cs
+							break
+					geopend[stijl] = bt != null and GameState.pending_boss
+					if bt != null:
+						var st: Dictionary = bt.enemies[0].get("s", {})
+						stats[stijl] = [int(st.get("max_hp", -1)), int(st.get("atk", -1)), int(st.get("def", -1))]
 				GameState.pending_boss = false
 				GameState.in_battle = false
 				GameState.pending_story_loss = false
 				GameState.archief2_party_filter = ""
 			var ca: Array = stats.get(Settings.BATTLE_STYLE_ACTION, [])
 			var cc: Array = stats.get(Settings.BATTLE_STYLE_CLASSIC, [])
-			check("baas %s (%s): opent het TURN-BASED gevecht in Action, stats = Classic (HP/ATK/DEF %s = %s, geen Action-vermenigvuldiger)" % [bd.get("enemy", ""), rid, ca, cc],
-					bool(geopend.get(Settings.BATTLE_STYLE_ACTION, false)) and not ca.is_empty() and ca == cc)
+			if is_golem_rt:
+				check("baas %s (%s): Action realtime, geen turn-based via aanraken; stats = Classic (HP/ATK/DEF %s = %s)" % [bd.get("enemy", ""), rid, ca, cc],
+						bool(geopend.get(Settings.BATTLE_STYLE_ACTION, false)) and not ca.is_empty() and ca == cc)
+			else:
+				check("baas %s (%s): opent het TURN-BASED gevecht in Action, stats = Classic (HP/ATK/DEF %s = %s, geen Action-vermenigvuldiger)" % [bd.get("enemy", ""), rid, ca, cc],
+						bool(geopend.get(Settings.BATTLE_STYLE_ACTION, false)) and not ca.is_empty() and ca == cc)
 			gevonden.append(rid)
 	print("INFO  baaskamers: ", gevonden)
 	check("alle WM1-bazen gecontroleerd (Golem, Wortelkoning, Archief 2: Lotte/Wurger/Genezer)", gevonden.size() >= 5)
