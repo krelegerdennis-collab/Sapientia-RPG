@@ -1397,7 +1397,9 @@ func _flee_test() -> void:
 	check("B gaat terug naar de vorige held (Dax)", await wait_hero(0))
 	# Tik op 'Vluchten'
 	b.flee_roll_override = 0.0
-	await click_at(b.cross.buttons[4].get_global_rect().get_center())
+	await click_at(b.cross.buttons[4].get_global_rect().get_center())   # demo-fix 2: 1e tik kiest
+	await pframes(2)
+	await click_at(b.cross.buttons[4].get_global_rect().get_center())   # 2e tik bevestigt
 	await pframes(2)
 	check("tik op 'Vluchten' start de vluchtpoging",
 			battle() != null and battle().message_label.text.begins_with("The party tries"))
