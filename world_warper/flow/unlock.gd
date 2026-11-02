@@ -12,7 +12,7 @@ const UNLOCK_VLAG := "world_warper_unlocked"
 
 
 ## Zelfde regel als GameState.try_unlock_world_warper, zonder te schrijven:
-## al open, of De Genezer is verslagen. Anders dicht.
+## al open, of De Genezer is verslagen (Archief 2 klaar).
 static func should_unlock(flags: Dictionary) -> bool:
 	if flags.has(UNLOCK_VLAG):
 		return true

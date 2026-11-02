@@ -200,18 +200,39 @@ func _shot(naam: String, scale_3x := false) -> void:
 	print("INFO  party-screenshot (%dx%d): %s" % [img.get_width(), img.get_height(), shots.path_join(naam + ".png")])
 
 
+const WALK5_HELDEN := ["Dax", "Seren", "Vesper"]
+
+
+func _is_walk5(naam: String) -> bool:
+	return naam in WALK5_HELDEN
+
+
+func _sheet_kolommen(naam: String) -> int:
+	return 5 if _is_walk5(naam) else 3
+
+
+func _sheet_grootte(naam: String) -> Vector2i:
+	return Vector2i(120, 128) if _is_walk5(naam) else Vector2i(72, 128)
+
+
 # ---------------------------------------------------------------- 1) sheets
 func _sheet_checks() -> void:
 	for naam in HELDEN:
 		var pad: String = KAART + HELDEN[naam][1]
 		var bron: String = BRON + HELDEN[naam][2]
 		var tex: Texture2D = load(pad) if ResourceLoader.exists(pad) else null
-		t.check("party-sprites: %s = %s, 72x128, frames 24x32 (3x4)" % [naam, pad.get_file()],
-				tex != null and tex.get_size() == Vector2(72, 128) and MapSprite.frame_maat(tex) == MapSprite.NIEUW
+		var groot := _sheet_grootte(naam)
+		t.check("party-sprites: %s = %s, %dx%d, frames 24x32 (%dx4)" % [naam, pad.get_file(), groot.x, groot.y, _sheet_kolommen(naam)],
+				tex != null and tex.get_size() == Vector2(groot) and MapSprite.frame_maat(tex) == MapSprite.NIEUW
 				and MapSprite.is_nieuw(tex))
-		t.check("party-sprites: %s is de RPG ART-sheet uit party_24x32/%s (bytes gelijk), .import aanwezig" % [pad.get_file(), bron.get_file()],
-				FileAccess.file_exists(bron) and FileAccess.get_file_as_bytes(pad) == FileAccess.get_file_as_bytes(bron)
-				and FileAccess.file_exists(pad + ".import"))
+		if _is_walk5(naam):
+			t.check("party-sprites: %s walk5-sheet in som/kaart (120x128, niet byte-gelijk aan party_24x32/%s)" % [naam, bron.get_file()],
+					FileAccess.file_exists(bron) and FileAccess.get_file_as_bytes(pad) != FileAccess.get_file_as_bytes(bron)
+					and FileAccess.file_exists(pad + ".import"))
+		else:
+			t.check("party-sprites: %s is de RPG ART-sheet uit party_24x32/%s (bytes gelijk), .import aanwezig" % [pad.get_file(), bron.get_file()],
+					FileAccess.file_exists(bron) and FileAccess.get_file_as_bytes(pad) == FileAccess.get_file_as_bytes(bron)
+					and FileAccess.file_exists(pad + ".import"))
 
 
 # ---------------------------------------------------------------- 2) anker onder-midden
@@ -230,19 +251,20 @@ func _anker_checks() -> void:
 		speler.zet_sheet(load(pad))
 		var sp: Sprite2D = speler.sprite
 		var rect := sp.get_rect()
+		var kolommen := _sheet_kolommen(naam)
 		t.check("party-sprites: %s in de speler: centered, rect (-12,-24) 24x32 -> voeten op +8, midden x=0, botsing %s op (0,0)" % [naam, vorm_oud],
-				sp.centered and sp.hframes == 3 and sp.vframes == 4 and sp.offset == Vector2(0, -8)
+				sp.centered and sp.hframes == kolommen and sp.vframes == 4 and sp.offset == Vector2(0, -8)
 				and rect == Rect2(-12, -24, 24, 32) and rect.end.y == oud_rect.end.y and rect.get_center().x == 0.0
 				and (cs.shape as RectangleShape2D).size == vorm_oud and vorm_oud == Vector2(14, 14) and cs.position == Vector2.ZERO)
 		# In de art zelf: elk frame staat met de voeten onderaan en ongeveer in het midden.
 		var img := Image.load_from_file(ProjectSettings.globalize_path(pad))
 		var fout := ""
 		for rij in 4:
-			for kol in 3:
+			for kol in kolommen:
 				var used := img.get_region(Rect2i(kol * 24, rij * 32, 24, 32)).get_used_rect()
 				if used.size == Vector2i.ZERO or used.end.y < 30 or absf(used.get_center().x - 12.0) > 4.0:
 					fout += "r%dk%d %s; " % [rij, kol, used]
-		t.check("party-sprites: %s alle 12 frames: voeten in de onderste 3 px, horizontaal gecentreerd (%s)" % [naam, fout if fout != "" else "ok"], fout == "")
+		t.check("party-sprites: %s alle %d frames: voeten in de onderste 3 px, horizontaal gecentreerd (%s)" % [naam, kolommen * 4, fout if fout != "" else "ok"], fout == "")
 	speler.queue_free()
 
 

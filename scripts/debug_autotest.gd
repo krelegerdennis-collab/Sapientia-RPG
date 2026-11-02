@@ -1397,7 +1397,9 @@ func _flee_test() -> void:
 	check("B gaat terug naar de vorige held (Dax)", await wait_hero(0))
 	# Tik op 'Vluchten'
 	b.flee_roll_override = 0.0
-	await click_at(b.cross.buttons[4].get_global_rect().get_center())
+	await click_at(b.cross.buttons[4].get_global_rect().get_center())   # demo-fix 2: 1e tik kiest
+	await pframes(2)
+	await click_at(b.cross.buttons[4].get_global_rect().get_center())   # 2e tik bevestigt
 	await pframes(2)
 	check("tik op 'Vluchten' start de vluchtpoging",
 			battle() != null and battle().message_label.text.begins_with("The party tries"))
@@ -1735,8 +1737,9 @@ func _house_tests() -> void:
 	check("zijmuur blokkeert, staat op (1,18): %s" % tile(), tile() == Vector2i(1, 18))
 	await walk("move_right", 6)
 	await walk("move_up", 6)
-	await walk("move_left", 4)
+	await walk("move_left", 2)
 	await walk("move_up", 8)
+	await walk("move_left", 2)
 	check("nachtkastje blokkeert, staat op (3,4): %s" % tile(), tile() == Vector2i(3, 4))
 	await walk("move_right", 5)
 	await walk("move_up", 1)
@@ -1788,8 +1791,11 @@ func _house_tests() -> void:
 			and d["party"][0].has("hp") and d["party"][0].has("mp") and d["party"][0].has("level") and d["party"][0].has("exp")
 			and d.has("gold") and d["inventory"].has("drankje") and float(d.get("play_time", -1)) >= 0.0 and d.has("bestiary"))
 	await close_dialog()
-	# Naar buiten: voordeur (8-9, 19-20)
-	await walk("move_down", 15)
+	# Naar buiten: voordeur (8-9, 19-20). Via de deuropening (niet door de muur op x=8,y=9).
+	await walk("move_left", 3)
+	await walk("move_down", 14)
+	await walk("move_right", 3)
+	await walk("move_down", 2)
 	check("deur onderin -> terug in Willowdale", await wait_scene("Wilgendal"))
 	await frames(5)
 	check("net onder de huisdeur (24,9), kijkt omlaag: %s" % tile(), tile() == Vector2i(24, 9) and player().facing == Vector2i.DOWN)
@@ -1871,7 +1877,11 @@ func _load_restore_test() -> void:
 			and GameState.party[0]["max_hp"] == int(d["party"][0]["max_hp"]) and GameState.party[0]["level"] == int(d["party"][0]["level"]))
 	check("goud hersteld (%d)" % GameState.gold, GameState.gold == saved_gold)
 	check("speeltijd loopt door vanaf de save", GameState.play_time() >= float(d["play_time"]))
-	await walk("move_down", 15)
+	# Via de deuropening (niet door de muur op x=8,y=9).
+	await walk("move_left", 3)
+	await walk("move_down", 14)
+	await walk("move_right", 3)
+	await walk("move_down", 2)
 	check("weer naar buiten -> Willowdale", await wait_scene("Wilgendal"))
 	await frames(5)
 	check("weer op (24,9): %s" % tile(), tile() == Vector2i(24, 9))
@@ -2165,10 +2175,10 @@ func _opaque_pixels(path: String) -> int:
 
 func _dorpsprite_checks() -> void:
 	var tex: Texture2D = player().sprite.texture
-	# Held 24x32 (21 okt 2026): buiten wereldkaart/bouwplaats de WM1-sheet van de leider (72x128 = 3x4 van 24x32; Dax final_trio 23 okt)
-	check("speler-sprite = dax_wm1.png 72x128, 3x4 frames van 24x32, voeten op +8 (%s)" % tex.resource_path,
-			tex.resource_path.ends_with("som/kaart/dax_wm1.png") and tex.get_size() == Vector2(72, 128)
-			and player().sprite.hframes == 3 and player().sprite.vframes == 4 and player().sprite.offset == Vector2(0, -8))
+	# Held 24x32 (21 okt 2026): buiten wereldkaart/bouwplaats de WM1-sheet van de leider (Dax 120x128 = 5x4 van 24x32 walk v2)
+	check("speler-sprite = dax_wm1.png 120x128, 5x4 frames van 24x32, voeten op +8 (%s)" % tex.resource_path,
+			tex.resource_path.ends_with("som/kaart/dax_wm1.png") and tex.get_size() == Vector2(120, 128)
+			and player().sprite.hframes == 5 and player().sprite.vframes == 4 and player().sprite.offset == Vector2(0, -8))
 	for path in DORP_SPRITES:
 		var n := _opaque_pixels(path)
 		if n < 0:
@@ -2353,7 +2363,10 @@ func _prologue_tests() -> void:
 	await walk("move_up", 1)
 	check("naar binnen om op te slaan", await wait_scene("Huis"))
 	await frames(10)
+	await walk("move_left", 3)
 	await walk("move_up", 14)
+	await walk("move_right", 3)
+	await walk("move_up", 1)
 	await press_interact()
 	await _wait_typed()
 	await press_interact()   # 'Een warme gloed herstelt je krachten en je geest.'
@@ -2380,7 +2393,10 @@ func _prologue_tests() -> void:
 			GameState.story_step == SD.TAKEN and Story.has_flag("kist_open") and Story.wears(ARMOR)
 			and GameState.item_count("emmer_water") == 1 and tile() == Vector2i(8, 4))
 	check("na laden geen wakker-cutscene", not Story.running and not Dialog.is_open)
-	await walk("move_down", 15)
+	await walk("move_left", 3)
+	await walk("move_down", 14)
+	await walk("move_right", 3)
+	await walk("move_down", 2)
 	check("weer naar buiten", await wait_scene("Wilgendal"))
 	await frames(10)
 	check("na laden: kist nog open, geen zegelstenen", _obj("Kist").sprite.frame == 1 and _obj("Zegel1") == null)
@@ -2460,9 +2476,10 @@ func _prologue_tests() -> void:
 			not _obj("OudeMan").visible and _obj("Schilderij").sprite.frame == 1
 			and Story.has_flag("locked:HuisDeur") and GameState.story_step == SD.OPGESLOTEN)
 	check("schreeuw-timer loopt", Story.scheduled.get("event", "") == "schreeuw")
-	# deur zit op slot
+	# deur zit op slot: van lees-stoel (9,5) via deuropening (x=5), niet door de muur op (9,9)
+	await walk("move_left", 4)
 	await walk("move_down", 13)
-	await walk("move_left", 1)
+	await walk("move_right", 3)
 	await walk("move_down", 1)
 	await frames(5)
 	check("deur: '%s'" % LOCKED_LINE, Dialog.is_open and Dialog._lines == [LOCKED_LINE])

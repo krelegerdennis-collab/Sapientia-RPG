@@ -27,6 +27,9 @@ const TEX := {
 
 
 func _ready() -> void:
+	# T27: s25_check RISK dorp_wilgendal — panden/props (docs/perf/s25_check.md)
+	if PerfProbe.enabled:
+		PerfProbe.begin("dorp_wilgendal")
 	var kaart := get_parent()
 	var objects := kaart.get_node("Objects")
 	_beek_en_brug(kaart)
@@ -40,6 +43,8 @@ func _ready() -> void:
 	_uitgang(kaart)
 	_spawn_zuid(kaart)
 	_plein10(kaart, objects)
+	if PerfProbe.enabled:
+		PerfProbe.end("dorp_wilgendal")
 
 
 ## v2: beek (1 tegel, 3 frames) + brug op een eigen laag tussen de grond en de objecten.
