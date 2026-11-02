@@ -374,7 +374,7 @@ static func action_boss_stats(data: Dictionary, party_count: int = 1) -> Diction
 	return scaled
 
 
-## Baas-stats voor Action (D3): zie action_boss_stats(); realtime Golem in archief_golemhal (SomArena.golem_rt_enabled). max. lengte kort label (zonder icoon) en ruimte tussen ring, kop en naamregel.
+## Ring-opmaak: max. lengte kort label (zonder icoon) en ruimte tussen ring, kop en naamregel.
 const RING_SHORT_MAX := 7
 const RING_LABEL_GAP := 4.0
 ## Halve dikte van de ringband (ring_bg.png): binnenrand = ringstraal - dit.
