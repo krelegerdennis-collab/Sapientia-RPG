@@ -200,10 +200,10 @@ const ENEMIES := {
 			# 'alleen aanvallen' op Lv 10 anders 18-39% (simulatie golem_tests.gd, HANDOFF_ARCHIEF1.md).
 			# Niet vluchten (battle.gd).
 			# Doel-level van het Eerste Archief is 7 (EERSTE_ARCHIEF_DOEL).
-			# Bevestigd: HP 360 en ATK 27, zodat Lv 7 slim wint met meerdere items
-			# en domweg aanvallen meestal verliest.
+			# Was HP 360 / ATK 27. Nov 2026 (PR #353, akkoord Dennis): HP 520 / ATK 23 voor een langer realtime-gevecht
+			# (--boss-rt Lv 7: standaard 91,5% winst, 28,1 s, p90 HP-verlies 86%; zie docs/combat/gevechtsduur_balans_sim.md).
 			# DEF blijft 15 (de kern-drempel 45 hoort bij Dennis Lv 7, niet bij een zwakke klap).
-			"max_hp": 360, "atk": 27, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "mp": 0,
+			"max_hp": 520, "atk": 23, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "mp": 0,
 			"exp": 210, "gold": 84,
 			"skills": [{"name": "Book Hammer", "chance": 0.2, "power": 1.5}],
 			# Vaste buit van de Golem in het Eerste Archief: 3 Lege Boeken. "chance" blijft alleen info.

@@ -26,7 +26,7 @@ func _run() -> void:
 	var party := GolemRtSim.party_at_level(7)
 	check("party Lv 7: %d helden, allemaal Lv 7" % party.size(), party.size() >= 3 and party.all(func(h): return int(h["level"]) == 7))
 	var sim := GolemRtSim.new()
-	check("sim-baas = ongewijzigde stats (360/27/15)", int(sim.boss_data["max_hp"]) == 360 and int(sim.boss_data["atk"]) == 27 and int(sim.boss_data["def"]) == 15)
+	check("sim-baas = ongewijzigde stats (520/23/15)", int(sim.boss_data["max_hp"]) == 520 and int(sim.boss_data["atk"]) == 23 and int(sim.boss_data["def"]) == 15)
 	var a: Dictionary = sim.run(7, 20, "default", 777)
 	var b: Dictionary = sim.run(7, 20, "default", 777)
 	check("vaste seed = zelfde uitkomst", JSON.stringify(a) == JSON.stringify(b))
