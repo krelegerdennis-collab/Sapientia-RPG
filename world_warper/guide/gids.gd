@@ -67,7 +67,12 @@ func snap_to_anchor() -> bool:
 	return false
 
 
+const StoryMode := preload("res://world_warper/opening/story_mode.gd")
+
+
 func interact(_by: Node = null) -> void:
+	if StoryMode.actief():
+		return
 	if _dialog_open():
 		return
 	var frame := Engine.get_process_frames()

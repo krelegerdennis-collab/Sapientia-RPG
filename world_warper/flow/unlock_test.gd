@@ -18,10 +18,18 @@ static func lege_flags() -> PackedStringArray:
 static func alleen_bewaker() -> PackedStringArray:
 	var flags := {Unlock.BEWAKER_VLAG: true}
 	var fouten: PackedStringArray = PackedStringArray()
-	if not Unlock.should_unlock(flags):
-		fouten.append("alleen de bewaker-vlag moet unlocken")
+	if Unlock.should_unlock(flags):
+		fouten.append("alleen de bewaker-vlag mag pas unlocken na canon-scène 3")
 	if flags.has(Unlock.UNLOCK_VLAG):
 		fouten.append("de pure check mag world_warper_unlocked niet zelf zetten")
+	return fouten
+
+
+static func bewaker_en_canon() -> PackedStringArray:
+	var flags := {Unlock.BEWAKER_VLAG: true, Unlock.CANON_DREIGING: true}
+	var fouten: PackedStringArray = PackedStringArray()
+	if not Unlock.should_unlock(flags):
+		fouten.append("bewaker + dreiging moet unlocken")
 	return fouten
 
 

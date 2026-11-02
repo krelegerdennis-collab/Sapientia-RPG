@@ -244,7 +244,10 @@ func _kaart() -> void:
 	check("geen kaart-event naar de World Warper", not SD.EVENTS.has("naar_world_warper"))
 	GameState.story_flags.erase(TRAPZAAL_VLAG)
 	GameState.story_flags[GENEZER_VLAG] = true
-	check("warper-vlag na The Mender", GameState.try_unlock_world_warper()
+	check("warper nog dicht zonder canon 3", not GameState.try_unlock_world_warper()
+			and not GameState.world_warper_is_unlocked())
+	GameState.story_flags[Unlock.CANON_DREIGING] = true
+	check("warper-vlag na The Mender en canon", GameState.try_unlock_world_warper()
 			and GameState.world_warper_is_unlocked())
 	# Enige ingang: de Warp-knop in het menu (field_menu.open_warp) -> hub van Enter.
 	var menu_bron := FileAccess.get_file_as_string("res://scripts/ui/field_menu.gd")

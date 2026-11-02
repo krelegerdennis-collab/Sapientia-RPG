@@ -20,6 +20,7 @@ const GardenCreaturesScript := preload("res://scripts/village/garden_creatures.g
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const BerggrotHaak := preload("res://scripts/data/berggrot_data.gd")
+const OpeningStory := preload("res://world_warper/opening/story_mode.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
 const AUTOSAVE_DELAY := 0.35
 
@@ -366,6 +367,9 @@ func _on_player_bumped(tile: Vector2i) -> void:
 
 
 func _use_exit(exit: Node) -> void:
+	if OpeningStory.blocks_map_exit(scene_file_path, str(exit.name)):
+		OpeningStory.toon_geblokkeerd(self)
+		return
 	if str(exit.name) == "NaarBerggrot":
 		# Bouwplaats: de tunnel is dicht tot noor_lid (event bouwplaats_hek).
 		if "event" in exit and exit.event != "" and Story.trigger(exit.event, exit):

@@ -28,6 +28,7 @@ const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const WorldWarperUnlock := preload("res://world_warper/flow/unlock.gd")
+const OpeningFlow := preload("res://world_warper/opening/flow.gd")
 const PerfProbeScript := preload("res://scripts/perf/perf_probe.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
@@ -660,6 +661,7 @@ func _ready() -> void:
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
 			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
+			["--openingtest", "res://scripts/tests/opening_tests.gd", "OpeningTest", "openingtest"],
 			["--studiourltest", "res://scripts/tests/studio_url_tests.gd", "StudioUrlTest", "studiourltest"],
 			["--aabtest", "res://scripts/tests/aab_tests.gd", "AabTest", "aabtest"],
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
@@ -1918,6 +1920,7 @@ func apply_state(d: Dictionary) -> bool:
 	if flags is Array:
 		for f in flags:
 			story_flags[str(f)] = true
+	OpeningFlow.migrate(story_flags, story_step)
 	# v0.22 bekeken cutscenes (oude saves: geen veld -> afgeleid van de vlaggen)
 	scenes_seen = []
 	var seen_raw = d.get("scenes_seen", [])
@@ -2328,7 +2331,10 @@ func start_new_game(hero_name: String) -> void:
 	# Geladen saves houden hun eigen keuze (load_game; zonder sleutel = Classic).
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	changing_map = false
-	change_map(START_MAP, START_SPAWN)
+	if OpeningFlow.should_play(story_flags):
+		OpeningFlow.start()
+	else:
+		change_map(START_MAP, START_SPAWN)
 	# v0.11: niet meteen automatisch opslaan bij een nieuw spel (anders is de autosave van
 	# het vorige spel direct weg); dat gebeurt pas bij de eerste echte mapwissel.
 	_autosave_request = ""
@@ -3239,7 +3245,7 @@ func _codex_inktwurm_sync(oude_save := true) -> void:
 
 
 # ---------------------------------------------------------------- world warper
-## De hub gaat open na De Genezer (einde Archief 2). Zelfde vlag als
+## De hub gaat open na De Genezer én canon-scène 3 (dreiging gezien). Zelfde vlag als
 ## WorldWarperUnlock.BEWAKER_VLAG. De bewaker van verdieping 2 van het Eerste
 ## Archief opent de hub niet. Geen Worldmap 2 of 3.
 func world_warper_is_unlocked() -> bool:
