@@ -176,6 +176,15 @@ static func is_boss_room(r: Dictionary) -> bool:
 	return r.get("monsters", []).any(func(m): return m.get("boss", false))
 
 
+static func _decor_only_exits(room: Dictionary) -> Array:
+	var out: Array = []
+	for key in ["decor_uitgangen", "decor_exits"]:
+		for x in room.get(key, []):
+			if not out.has(x):
+				out.append(x)
+	return out
+
+
 # ---------------------------------------------------------------- bouwen
 func _build() -> void:
 	# v0.17: ook de kamers van het Donker Woud (scripts/data/woud_rooms.gd)
@@ -369,7 +378,7 @@ func _build() -> void:
 		var tiles: Array = exit_cells[key]
 		var data: Dictionary = exits.get(key, {})
 		if data.is_empty():
-			if key in room.get("decor_uitgangen", []):
+			if key in _decor_only_exits(room):
 				continue
 			push_error("Dungeonkamer '%s': uitgang '%s' heeft geen doel in \"exits\"" % [room_id, key])
 			continue
@@ -454,8 +463,14 @@ func _build_pit_edges() -> void:
 
 
 func _build_overlay() -> void:
+	# T27: s25_check — Donker Woud mist/overlay (docs/perf/s25_check.md)
+	var _pp_on := PerfProbe.enabled and str(DungeonRooms.current_theme) == "donker_woud"
+	if _pp_on:
+		PerfProbe.begin("woud_mist")
 	var td: Dictionary = DungeonRooms.theme_data(DungeonRooms.current_theme)
 	if not (room.has("trees") or room.has("mist") or room.has("overlay")):
+		if _pp_on:
+			PerfProbe.end("woud_mist")
 		return
 	overlay = TileMapLayer.new()
 	overlay.name = "Overlay"
@@ -492,6 +507,8 @@ func _build_overlay() -> void:
 			_set_overlay_tile(Vector2i(int(m[0]) + i, int(m[1])), tile)
 	for o in room.get("overlay", []):
 		_set_overlay_tile(Vector2i(int(o[0]), int(o[1])), int(o[2]))
+	if _pp_on:
+		PerfProbe.end("woud_mist")
 
 
 ## v0.24 overlay-tegel; mist (MIST_TILES) gaat naar de eigen laag "MistLaag" (modulate alpha MIST_ALPHA).
@@ -691,8 +708,8 @@ func monster_touch(m: Node) -> void:
 		return
 	if m.is_stunned():
 		return       # v0.16: verlamd door Kernkracht: geen gevecht
-	if som and not m.boss:
-		return       # SoM-proef: realtime; aanraken is geen gevecht (bazen blijven turn-based)
+	if som and (not m.boss or som.enemies.has(m)):
+		return       # SoM-proef: realtime; aanraken is geen gevecht (bazen blijven turn-based, behalve D3 realtime-baas)
 	start_monster_battle(m)
 
 

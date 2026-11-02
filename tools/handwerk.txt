@@ -1285,3 +1285,25 @@ assets/sprites/enemies/arcane_slime_96_sheet_left.png
 assets/sprites/enemies/arcane_slime_96.png
 assets/sprites/enemies/arcane_slime_96.tres
 assets/sprites/enemies/arcane_slime_96_left.tres
+assets/sprites/som/combat/dax_attack2.png
+assets/sprites/som/combat/dax_finisher.png
+assets/sprites/som/combat/seren_attack2.png
+assets/sprites/som/combat/seren_finisher.png
+assets/sprites/enemies/arcane_slime_96.png
+assets/sprites/enemies/arcane_slime_96_sheet.png
+assets/sprites/enemies/arcane_slime_96_sheet_left.png
+assets/sprites/enemies/goblin_raider_96.png
+assets/sprites/enemies/goblin_raider_96_sheet.png
+assets/sprites/enemies/goblin_raider_96_sheet_left.png
+assets/tiles/vijver_v8_teal_erf.png
+assets/sprites/bosses/telegraph_marker.png
+assets/sprites/bosses/phase_flash.png
+assets/sprites/bosses/golem_core_open.png
+assets/sprites/enemies/golem_boss_v2_damaged.png
+# 2026-11-02: WM1-opening Drift + story-Hal (RPG ART, 384×216 parallax + strips)
+assets/sprites/opening/drift_bg_far.png
+assets/sprites/opening/drift_bg_nebula.png
+assets/sprites/opening/drift_bg_near.png
+assets/sprites/opening/wormhole_ring_cycle_strip.png
+assets/sprites/opening/world_warper_drift_strip.png
+assets/sprites/opening/echo_glitch_strip.png

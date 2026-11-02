@@ -11,7 +11,7 @@ const SomMove := preload("res://scripts/som/som_move.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const DIR_ROW := {Vector2i.DOWN: 0, Vector2i.LEFT: 1, Vector2i.RIGHT: 2, Vector2i.UP: 3}
-const WALK_CYCLE := [1, 0, 2, 0]
+const WALK_CYCLE := [1, 0, 2, 0]  # 3-koloms; 5-koloms via MapSprite.walk_cycle(hframes)
 
 var arena: Node
 var hero_id := ""
@@ -206,5 +206,6 @@ func _frame() -> void:
 		return
 	var col := 0
 	if velocity.length() > 1.0:
-		col = WALK_CYCLE[int(_walk / 8.0) % WALK_CYCLE.size()]
+		var cycle: Array = MapSprite.walk_cycle(sprite.hframes)
+		col = cycle[int(_walk / 8.0) % cycle.size()]
 	MapSprite.zet_frame(sprite, DIR_ROW[facing], col)

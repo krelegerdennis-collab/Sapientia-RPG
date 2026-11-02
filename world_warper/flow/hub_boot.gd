@@ -19,6 +19,7 @@ const AmbienceScript := preload("res://world_warper/audio/ambience.gd")
 
 ## Warp naar de Deep Learning Simulation: rechts van het Warp-vlak (fallback zonder anker).
 const SIMULATIE_OFFSET := Vector2(80, 0)
+const StoryMode := preload("res://world_warper/opening/story_mode.gd")
 const EchoGrotData := preload("res://scripts/data/echo_grot.gd")
 const WarperBakedLabel := preload("res://world_warper/art/baked_label.gd")
 const SIMULATIE_VRAAG := "Enter the Deep Learning Simulation?"
@@ -66,6 +67,10 @@ func _speel_hal() -> void:
 
 
 func _bouw_hal() -> void:
+	# T27: s25_check RISK warper_hal — hub-opbouw (docs/perf/s25_check.md)
+	if PerfProbe.enabled:
+		PerfProbe.begin("warper_hal")
+	var opening := StoryMode.actief()
 	var warp_pos := _anker_positie("ww_anchor_warp")
 	var party_pos := _anker_positie("ww_anchor_party")
 	_ontkoppel_wereldankers("ww_anchor_warp")
@@ -75,9 +80,10 @@ func _bouw_hal() -> void:
 	_gids.name = "Gids"
 	add_child(_gids)
 
-	_wanderers = WANDER_SCENE.instantiate() as Node2D
-	_wanderers.name = "Wanderers"
-	add_child(_wanderers)
+	if not opening:
+		_wanderers = WANDER_SCENE.instantiate() as Node2D
+		_wanderers.name = "Wanderers"
+		add_child(_wanderers)
 
 	_hanger = HANGER_SCENE.instantiate() as Node2D
 	_hanger.name = "HangerScene"
@@ -88,31 +94,37 @@ func _bouw_hal() -> void:
 	scherm.layer = SCHERM_LAAG
 	add_child(scherm)
 
-	_warp = WARP_SCENE.instantiate() as Control
-	_warp.name = "WarpView"
-	scherm.add_child(_warp)
+	if not opening:
+		_warp = WARP_SCENE.instantiate() as Control
+		_warp.name = "WarpView"
+		scherm.add_child(_warp)
 
-	_party = PARTY_SCENE.instantiate() as Control
-	_party.name = "PartySelect"
-	scherm.add_child(_party)
+		_party = PARTY_SCENE.instantiate() as Control
+		_party.name = "PartySelect"
+		scherm.add_child(_party)
 
-	_maak_vlak(warp_pos, "Warp", _open_warp)
-	_maak_vlak(party_pos, "Gezelschap", _open_party)
-	# Dennis (14 okt 2026): warp naar de Deep Learning Simulation (de Diepe Grot) direct vanuit de hal.
-	# ECHO's gesprek in ECHO's Kamer blijft ook werken.
-	_maak_vlak(_anker_positie("ww_anchor_simulatie") if _heeft_anker("ww_anchor_simulatie") else warp_pos + SIMULATIE_OFFSET,
-			"Simulatie", _open_simulatie)
+		_maak_vlak(warp_pos, "Warp", _open_warp)
+		_maak_vlak(party_pos, "Gezelschap", _open_party)
+		_maak_vlak(_anker_positie("ww_anchor_simulatie") if _heeft_anker("ww_anchor_simulatie") else warp_pos + SIMULATIE_OFFSET,
+				"Simulatie", _open_simulatie)
 
-	if not _warp.is_connected("warp_requested", _on_warp_requested):
-		_warp.connect("warp_requested", _on_warp_requested)
+		if not _warp.is_connected("warp_requested", _on_warp_requested):
+			_warp.connect("warp_requested", _on_warp_requested)
+	else:
+		StoryMode.prep_hal(get_parent())
+
 	if not _hanger.is_connected("hanger_activated", _on_hanger_activated):
 		_hanger.connect("hanger_activated", _on_hanger_activated)
 	# Canon-scène 3 eindigt met: het warp-platform licht op, de wereldkaart verschijnt.
 	if not _hanger.is_connected("threat_finished", _on_canon_klaar):
 		_hanger.connect("threat_finished", _on_canon_klaar)
 
-	_wanderers.call("refresh")
-	_hanger.call("maybe_play")
+	if _wanderers != null:
+		_wanderers.call("refresh")
+	if not opening:
+		_hanger.call("maybe_play")
+	if PerfProbe.enabled:
+		PerfProbe.end("warper_hal")
 
 
 func _on_canon_klaar() -> void:
@@ -175,6 +187,8 @@ func _heeft_anker(groep: String) -> bool:
 
 
 func _geblokkeerd() -> bool:
+	if StoryMode.actief():
+		return true
 	if _dialoog_open():
 		return true
 	if _hanger == null:
