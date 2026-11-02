@@ -35,7 +35,7 @@ const DIR_ROW := {
 	Vector2i.RIGHT: 2,
 	Vector2i.UP: 3,
 }
-## Kolommen tijdens het lopen: stap A, stil, stap B, stil, ...
+## Kolommen tijdens het lopen: 3-koloms = stap A, stil, stap B, stil; 5-koloms = contact/pass (zie MapSprite.walk_cycle).
 const WALK_CYCLE := [1, 0, 2, 0]
 
 var facing := Vector2i.DOWN
@@ -342,10 +342,17 @@ func _objects_in_front() -> Array:
 	return out
 
 
+func _walk_cycle() -> Array:
+	if sprite != null:
+		return MapSprite.walk_cycle(sprite.hframes)
+	return WALK_CYCLE
+
+
 func _update_sprite() -> void:
 	var col := 0
 	if is_moving or _walk_distance > 0.0:
-		col = WALK_CYCLE[int(_walk_distance / (TILE_SIZE / 2.0)) % WALK_CYCLE.size()]
+		var cycle: Array = _walk_cycle()
+		col = cycle[int(_walk_distance / (TILE_SIZE / 2.0)) % cycle.size()]
 	MapSprite.zet_frame(sprite, DIR_ROW[facing], col)
 
 
