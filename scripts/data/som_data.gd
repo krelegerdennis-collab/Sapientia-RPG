@@ -1,9 +1,12 @@
 ## SoM-PROEF (Secret of Mana-stijl realtime gevecht) — alle instellingen/content op één plek.
 ## Schakelaar: ENABLED (hoofdschakelaar) + ROOMS (alleen deze WM1-kamers). Daarbuiten, en als
 ## GameState.som_mode uit staat (het gewone spel), blijven de turn-based gevechten precies zoals ze waren.
-## Bazen (monster met "boss": true) blijven ALTIJD turn-based, ook in een SoM-kamer en ook bij Battle Style = Action
-## (Dennis, 21 okt 2026). De Action-baasvermenigvuldiger (ACTION_BOSS_MULT) wordt daarom NIET meer gebruikt.
+## Bazen zonder BossScript (scripts/som/boss_script.gd) blijven turn-based, ook in Action/SoM.
+## Met BossScript (D3) kunnen ze realtime in de arena; Classic turn-based is ongewijzigd.
+## ACTION_BOSS_MULT is verwijderd (D3 PR B); Action-bazen gebruiken BossCore.apply_boss (action_boss_stats).
 extends RefCounted
+
+const BossCore := preload("res://scripts/battle/boss_core.gd")
 
 ## Hoofdschakelaar. false = de proef bestaat niet (geen realtime, knop op het titelscherm doet niets).
 const ENABLED := true
@@ -353,19 +356,30 @@ const SPELL_RANGE := 160.0
 const TXT_RING := "Ring"
 const TXT_ITEMS := "Items"
 const TXT_SKILLS := "Skills"
-## ONGEBRUIKT sinds 21 okt 2026 (alle bazen turn-based, ook in Action): data blijft voor de simulator/historie,
-## battle.gd past hem niet meer toe. Oud: ACTION-MODUS BAZEN: in Action/SoM-modus (GameState.som_mode of Settings Battle Style = Action) krijgt een
-## baasgevecht (niet de dungeon van 100) deze vermenigvuldigers bovenop de baas-stats. Classic blijft ongewijzigd.
-## Getuned met -- --actionsim (docs/ACTION_BALANCE_REPORT.md): doel 60-80% winst op Lv 3 en Lv 5.
-## Eén vaste vermenigvuldiger haalde nooit Lv 3 EN Lv 5 tegelijk (zie rapport): daarom basis (op START_LEVEL)
-## plus een toename per gemiddeld partylevel boven START_LEVEL (ACTION_BOSS_PER_LEVEL, nooit onder de basis).
-const ACTION_BOSS_MULT := {"max_hp": 2.3, "atk": 1.6}
-const ACTION_BOSS_PER_LEVEL := {"atk": 0.35}
-## Alleen voor de simulator: andere waarden proberen ({"mult": {...}, "per_level": {...}}; {} = de consts).
-static var action_boss_override: Dictionary = {}
+## Hook: schaal baas-HP/adds naar aantal party-stoelen (COMBAT_DESIGN §12). Balans in PR B.
+static func boss_party_scale(party_count: int) -> float:
+	return 1.0
 
 
-## Baas-data voor Action-modus; on == false (Classic) = exact dezelfde data terug.
+## Baas-stats voor Action (D3): BossCore.apply_boss, geen ACTION_BOSS_MULT.
+static func action_boss_stats(data: Dictionary, party_count: int = 1) -> Dictionary:
+	var out := BossCore.apply_boss(data)
+	var scale := boss_party_scale(party_count)
+	if is_equal_approx(scale, 1.0):
+		return out
+	var scaled := out.duplicate(true)
+	for k in ["max_hp", "atk", "def", "mag", "mdef"]:
+		if scaled.has(k):
+			scaled[k] = maxi(1, roundi(float(scaled[k]) * scale))
+	return scaled
+
+
+## D3 PR B: ACTION_BOSS_MULT / ACTION_BOSS_PER_LEVEL / action_boss_override zijn VERWIJDERD (§7 Besluit 4).
+## Action-bazen: action_boss_stats() hierboven (BossCore.apply_boss, geen vermenigvuldiger).
+## LEGACY, ALLEEN VOOR BESTAANDE TESTS: som_autotest.gd:1046-1049,1077 en boss_phase_tests.gd:131-132 roepen
+## action_boss()/action_boss_mult() nog aan en verwachten de oude curve (> 1.0). Die tests mogen in deze PR niet
+## gewijzigd worden; de bevroren waarden staan daarom hier, door geen productiecode of sim gebruikt.
+## Voorstel: na akkoord van Dennis die testregels aanpassen en deze twee functies schrappen.
 static func action_boss(data: Dictionary, on: bool, party_level: float = START_LEVEL) -> Dictionary:
 	if not on:
 		return data
@@ -377,15 +391,10 @@ static func action_boss(data: Dictionary, on: bool, party_level: float = START_L
 	return out
 
 
-## Vermenigvuldigers bij een gemiddeld partylevel.
+## LEGACY (zie hierboven): bevroren historische curve HP x2.3, ATK x1.6 +0.35/lv boven START_LEVEL.
 static func action_boss_mult(party_level: float) -> Dictionary:
-	var base: Dictionary = action_boss_override.get("mult", ACTION_BOSS_MULT)
-	var per: Dictionary = action_boss_override.get("per_level", ACTION_BOSS_PER_LEVEL)
 	var extra := maxf(0.0, party_level - float(START_LEVEL))
-	var m := base.duplicate()
-	for k in per:
-		m[k] = float(m.get(k, 1.0)) + float(per[k]) * extra
-	return m
+	return {"max_hp": 2.3, "atk": 1.6 + 0.35 * extra}
 
 
 ## Ring-opmaak: max. lengte kort label (zonder icoon) en ruimte tussen ring, kop en naamregel.

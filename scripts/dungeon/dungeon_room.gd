@@ -176,6 +176,15 @@ static func is_boss_room(r: Dictionary) -> bool:
 	return r.get("monsters", []).any(func(m): return m.get("boss", false))
 
 
+static func _decor_only_exits(room: Dictionary) -> Array:
+	var out: Array = []
+	for key in ["decor_uitgangen", "decor_exits"]:
+		for x in room.get(key, []):
+			if not out.has(x):
+				out.append(x)
+	return out
+
+
 # ---------------------------------------------------------------- bouwen
 func _build() -> void:
 	# v0.17: ook de kamers van het Donker Woud (scripts/data/woud_rooms.gd)
@@ -369,7 +378,7 @@ func _build() -> void:
 		var tiles: Array = exit_cells[key]
 		var data: Dictionary = exits.get(key, {})
 		if data.is_empty():
-			if key in room.get("decor_uitgangen", []):
+			if key in _decor_only_exits(room):
 				continue
 			push_error("Dungeonkamer '%s': uitgang '%s' heeft geen doel in \"exits\"" % [room_id, key])
 			continue
@@ -699,8 +708,8 @@ func monster_touch(m: Node) -> void:
 		return
 	if m.is_stunned():
 		return       # v0.16: verlamd door Kernkracht: geen gevecht
-	if som and not m.boss:
-		return       # SoM-proef: realtime; aanraken is geen gevecht (bazen blijven turn-based)
+	if som and (not m.boss or som.enemies.has(m)):
+		return       # SoM-proef: realtime; aanraken is geen gevecht (bazen blijven turn-based, behalve D3 realtime-baas)
 	start_monster_battle(m)
 
 

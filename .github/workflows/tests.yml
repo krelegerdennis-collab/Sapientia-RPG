@@ -22,6 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         suite: [autotest, menutest, hudtest, puzzletest, dungeontest, golemtest,
+                bossphasetest, golemactiontest, golemactionsimtest, golemarenatest,
                 archieftest, kerntest, kernkrachttest, woudtest, woud16test, codextest,
                 checkpointtest, dungeon100gentest, dungeon100schaaltest,
                 dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
@@ -29,10 +30,11 @@ jobs:
                 warperkamertest, hangertest, spiegeltest, berggrottest, pvptest,
                 wilgendaltest, huisdrawtest, huispixeltest, questtest, tutorialtest, battlesimtest, echotest, castjointest,
                 muziektest, sessielogtest, sessielogcoretest, locktest, swinglocktest, dodgetest, chaintest, t26sheettest, chargetest, nettest, netsynctest, coope2etest,
-                partytest, savetest, saveroundtriptest, musictest, grotlayouttest, held24test,
+                openingtest, partytest, savetest, saveroundtriptest, saverobusttest, musictest, grotlayouttest, held24test,
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
                 koopmantest, testmodustest, telegraphtest, roottest,
-                formuletest, battlesimenemytest, combatbugstest, perfprobetest, huiscollisiontest]
+                formuletest, battlesimenemytest, combatbugstest, perfprobetest, huiscollisiontest,
+                studiourltest, gategaptest]
     steps:
       - uses: actions/checkout@v4
 
