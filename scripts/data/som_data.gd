@@ -225,12 +225,15 @@ const ENEMY_DAMAGE_MULT := 2.2     # v3: --actionsim iteratie 7
 ##   dodge_skill = ontwijkkans van een speler die de telegraaf leest (alleen meting, --archief1balans)
 const ACTION_AREAS := {
 	"archief1": {"rooms": ["archief_v1_", "archief_v2_", "archief_v3_", "archief_v4_"],
-			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 3.5], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
+			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [3.7, 4.4], "hits": [3.7, 4.9], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
 			# Power scaling v2 (#208) verhoogde de vijand-ATK in tier 1-3 (+8/+9/+9) en van de Act-1-basismonsters
 			# (x1.5); dit zijn Action-factoren op de schade, dus herijkt (cooldowns ongewijzigd): 1.1/1.0/0.7/0.7 -> 0.21/0.53/0.50/0.65.
 			# Classic (turn-based) en de HP/ATK-stats in GameData blijven de #208-waarden. Meting: --archief1balans --tune.
-			"tiers": {1: {"atk": 0.21, "cooldown": 3.0}, 2: {"atk": 0.53, "cooldown": 2.8},
-					3: {"atk": 0.50, "cooldown": 2.8}, 4: {"atk": 0.65, "cooldown": 2.8}},
+			# Gevechtsduur (Dennis 2 nov 2026: "de gevechten mogen langer duren"): hp_hits 2.5-3.0 -> 3.7-4.4 (hits mee
+			# 3.0-3.5 -> 3.7-4.9), schade 0.21/0.53/0.50/0.65 -> 0.14/0.36/0.35/0.43, tier-1-cooldown 3.0 -> 3.15, zodat de
+			# targets hieronder blijven gelden. Zie docs/combat/gevechtsduur_balans_sim.md.
+			"tiers": {1: {"atk": 0.14, "cooldown": 3.15}, 2: {"atk": 0.36, "cooldown": 2.8},
+					3: {"atk": 0.35, "cooldown": 2.8}, 4: {"atk": 0.43, "cooldown": 2.8}},
 			# loss tier 1: Forge (21 okt): 89% winst / 77% verlies geaccepteerd, grens = gemiddeld verlies <= 80%.
 			# Herstel: het opslagboek in archief_ingang (vlak voor archief_v1_gang) geneest de party vol.
 			"targets": {1: {"win": [0.80, 0.90], "loss": [0.0, 0.80]}, 2: {"win": [0.70, 0.85]},
