@@ -371,3 +371,5 @@ func _view_tests() -> void:
 func _mult_removed_tests() -> void:
 	var consts: Dictionary = (load("res://scripts/data/som_data.gd") as Script).get_script_constant_map()
 	check("ACTION_BOSS_MULT verwijderd", not consts.has("ACTION_BOSS_MULT") and not consts.has("ACTION_BOSS_PER_LEVEL"))
+	var src: String = FileAccess.get_file_as_string("res://scripts/data/som_data.gd")
+	check("action_boss()/action_boss_mult() verwijderd", not src.contains("func action_boss(") and not src.contains("func action_boss_mult("))

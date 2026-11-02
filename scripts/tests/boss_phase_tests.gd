@@ -128,8 +128,6 @@ func _action_boss_stats_tests() -> void:
 	var expected := BossCore.apply_boss(base)
 	check("action_boss_stats = apply_boss (scale 1.0)", applied["max_hp"] == expected["max_hp"] and applied["atk"] == expected["atk"])
 	check("boss_party_scale(4) = 1.0", is_equal_approx(SomData.boss_party_scale(4), 1.0))
-	var mult := SomData.action_boss(expected.duplicate(true), true, SomData.START_LEVEL)
-	check("legacy action_boss mult actief", int(mult["max_hp"]) > int(expected["max_hp"]))
 
 
 func _register_tests() -> void:

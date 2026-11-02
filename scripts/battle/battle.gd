@@ -412,19 +412,6 @@ func _enemy_base(id: String) -> Dictionary:
 	return BerggrotData.enemy(id)
 
 
-## SoM-proef: geldt de Action-modus baas-vermenigvuldiger in dit gevecht?
-static func action_boss_on() -> bool:
-	return GameState.dungeon100_floor <= 0 and (GameState.som_mode or Settings.action_battles())
-
-
-## Gemiddeld level van de party (voor de Action-baas-schaal).
-static func action_party_level() -> float:
-	var s := 0.0
-	for h in GameState.party:
-		s += float(h.get("level", 1))
-	return s / float(maxi(1, GameState.party.size()))
-
-
 func _spawn_enemies(ids: Array) -> void:
 	# onbekende id's (bv. een oude naam) overslaan; nooit een gevecht zonder vijanden
 	ids = ids.filter(func(i): return _enemy_known(str(i)))

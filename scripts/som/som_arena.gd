@@ -175,10 +175,9 @@ var map_cast_uit: Array = []
 var rng := RandomNumberGenerator.new()
 var rng_seed := 0
 
-## D3 PR C: arena-hook voor de realtime Golem (kennis_beest, WM1). Standaard UIT: zolang dit false is blijft
-## de Golem turn-based (somroomstest/balansarchief1test bewaken dat). Aanzetten (tests, of later live na akkoord
-## Dennis): SomArena.golem_rt_enabled = true VOOR de kamer laadt. Alleen in GOLEM_RT_ROOMS.
-static var golem_rt_enabled := false
+## D3 PR C: arena-hook voor de realtime Golem (kennis_beest, WM1). Standaard AAN (Dennis): in GOLEM_RT_ROOMS
+## vecht de Golem realtime; zet false om turn-based te forceren (tests). Alleen GOLEM_RT_ROOMS.
+static var golem_rt_enabled := true
 const GOLEM_RT_ROOMS := ["archief_golemhal"]
 ## Wij registreerden GolemBoss in BossScript.REGISTRY (ensure_registered) -> bij _exit_tree weer weg.
 var _golem_registered_here := false

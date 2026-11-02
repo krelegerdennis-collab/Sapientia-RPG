@@ -32,10 +32,12 @@ func check(label: String, ok: bool) -> void:
 
 func _run() -> void:
 	print("=== D3 PR C: Golem arena-hook ===")
+	var saved_rt := SomArena.golem_rt_enabled
+	check("standaard: golem_rt_enabled true (live)", SomArena.golem_rt_enabled)
 	await _hook_off()
 	await _hook_on()
 	await _other_room()
-	SomArena.golem_rt_enabled = false
+	SomArena.golem_rt_enabled = saved_rt
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
 
@@ -79,7 +81,7 @@ func _hook_off() -> void:
 	check("uit: Golemhal geladen met Action-arena", a != null and m != null)
 	if a == null or m == null:
 		return
-	check("uit: golem_rt_enabled standaard false", not SomArena.golem_rt_enabled)
+	check("uit: hook expliciet false", not SomArena.golem_rt_enabled)
 	check("uit: Golem NIET in de realtime arena", not a.enemies.has(m))
 	check("uit: geen BossScript voor kennis_beest", not BossScript.has_script(GolemBoss.ENEMY_ID))
 

@@ -374,29 +374,6 @@ static func action_boss_stats(data: Dictionary, party_count: int = 1) -> Diction
 	return scaled
 
 
-## D3 PR B: ACTION_BOSS_MULT / ACTION_BOSS_PER_LEVEL / action_boss_override zijn VERWIJDERD (§7 Besluit 4).
-## Action-bazen: action_boss_stats() hierboven (BossCore.apply_boss, geen vermenigvuldiger).
-## LEGACY, ALLEEN VOOR BESTAANDE TESTS: som_autotest.gd:1046-1049,1077 en boss_phase_tests.gd:131-132 roepen
-## action_boss()/action_boss_mult() nog aan en verwachten de oude curve (> 1.0). Die tests mogen in deze PR niet
-## gewijzigd worden; de bevroren waarden staan daarom hier, door geen productiecode of sim gebruikt.
-## Voorstel: na akkoord van Dennis die testregels aanpassen en deze twee functies schrappen.
-static func action_boss(data: Dictionary, on: bool, party_level: float = START_LEVEL) -> Dictionary:
-	if not on:
-		return data
-	var m := action_boss_mult(party_level)
-	var out := data.duplicate(true)
-	for k in m:
-		if out.has(k):
-			out[k] = maxi(1, roundi(float(out[k]) * float(m[k])))
-	return out
-
-
-## LEGACY (zie hierboven): bevroren historische curve HP x2.3, ATK x1.6 +0.35/lv boven START_LEVEL.
-static func action_boss_mult(party_level: float) -> Dictionary:
-	var extra := maxf(0.0, party_level - float(START_LEVEL))
-	return {"max_hp": 2.3, "atk": 1.6 + 0.35 * extra}
-
-
 ## Ring-opmaak: max. lengte kort label (zonder icoon) en ruimte tussen ring, kop en naamregel.
 const RING_SHORT_MAX := 7
 const RING_LABEL_GAP := 4.0
