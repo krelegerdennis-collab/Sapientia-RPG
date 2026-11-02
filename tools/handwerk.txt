@@ -1300,3 +1300,10 @@ assets/sprites/bosses/telegraph_marker.png
 assets/sprites/bosses/phase_flash.png
 assets/sprites/bosses/golem_core_open.png
 assets/sprites/enemies/golem_boss_v2_damaged.png
+# 2026-11-02: WM1-opening Drift + story-Hal (RPG ART, 384×216 parallax + strips)
+assets/sprites/opening/drift_bg_far.png
+assets/sprites/opening/drift_bg_nebula.png
+assets/sprites/opening/drift_bg_near.png
+assets/sprites/opening/wormhole_ring_cycle_strip.png
+assets/sprites/opening/world_warper_drift_strip.png
+assets/sprites/opening/echo_glitch_strip.png
