@@ -973,8 +973,9 @@ func _choose_for_hero(hero: Dictionary, can_go_back: bool):
 		]
 		cross.open(hero["name"], allowed, last, can_go_back, [] if codex_command_shown() else [COMMANDS.size() - 1])
 		var cmd: int = await cross.finished
-		if cmd == 1 and not has_usable_magic(hero):
-			# Demo-fix 1: geen bruikbare spreuk -> kort bericht, kruis blijft bedienbaar (geen soft-lock)
+		if cmd == 1 and not has_usable_magic(hero) and _kern_skills(hero).is_empty():
+			# Demo-fix 1: spreuken maar geen MP / niets te kiezen — geen submenu (soft-lock voorkomen).
+			# Met kernvaardigheden altijd _choose_spell: laad-regels staan uitgegrijsd (kerntest).
 			show_notice("No spells yet")
 			last = 0
 			continue
