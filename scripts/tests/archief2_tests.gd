@@ -895,7 +895,7 @@ func _na_genezer_hub() -> void:
 	check("geen H-6 in scène 1", not tekst.contains("H-6") and not tekst.contains("Proefpersoon"))
 	check("party in de Hal", hub and str(GameState.current_map).ends_with("world_warper/maps/hal.tscn")
 			and str(GameState.current_map) != Archief2.WARPER_SCENE)
-	check("warper nog dicht vóór canon 2+3", not GameState.world_warper_is_unlocked()
+	check("world_warper_unlocked na The Mender", GameState.world_warper_is_unlocked()
 			and GameState.story_flags.has("archief2_naar_warper"))
 	var ex := _scène()
 	var spawn := ex.get_node_or_null("Spawns/ingang") if ex != null else null
@@ -920,8 +920,6 @@ func _na_genezer_hub() -> void:
 	check("na scène 3: vlaggen gezet en de wereldkaart (warp-view) open", hs != null and not bool(hs.get("_playing"))
 			and bool(GameState.story_flags.get(WarperCanon.FLAG_DREIGING, false))
 			and warp != null and warp.visible)
-	check("world_warper_unlocked na canon 3", GameState.world_warper_is_unlocked()
-			and GameState.story_flags.has("archief2_naar_warper"))
 	await _shot("archief2_hal_warpview")
 	if warp != null and warp.has_method("close"):
 		warp.call("close")

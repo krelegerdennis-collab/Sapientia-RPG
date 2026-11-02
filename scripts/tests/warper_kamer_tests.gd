@@ -482,8 +482,6 @@ func _genezer_warp() -> void:
 	NaGenezer.on_guard_flag(Unlock.BEWAKER_VLAG, true)
 	check("de warp wacht op de kern", NaGenezer.pending and not NaGenezer.probeer())
 	GameState.pending_kern_absorb = ""
-	check("zonder canon-scène 3 geen hub-warp", not NaGenezer.probeer())
-	GameState.story_flags[Unlock.CANON_DREIGING] = true
 	var ging := NaGenezer.probeer()
 	var buiten := await _wacht_pad(Enter.HUB_SCENE, 20.0)
 	await _wacht_fade()

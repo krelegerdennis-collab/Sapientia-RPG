@@ -5,7 +5,7 @@ extends CanvasLayer
 signal finished
 
 const Art := preload("res://world_warper/opening/art.gd")
-const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
+const FONT_PATH := "res://assets/fonts/Dauwpixel-Regular.ttf"
 
 const REGELS: Array[String] = [
 	"Something ancient still moves between the Archives.",
@@ -77,7 +77,7 @@ func _build() -> void:
 	_label.custom_minimum_size = Vector2(340, 0)
 	_label.position = Vector2(22, 168)
 	_label.z_index = 10
-	_label.add_theme_font_override("font", FONT)
+	_label.add_theme_font_override("font", _font())
 	_label.add_theme_font_size_override("font_size", 10)
 	_label.add_theme_color_override("font_color", Color("f2e9d8"))
 	_root.add_child(_label)
@@ -85,11 +85,15 @@ func _build() -> void:
 	_hint.text = "Tap to skip"
 	_hint.position = Vector2(22, 200)
 	_hint.z_index = 10
-	_hint.add_theme_font_override("font", FONT)
+	_hint.add_theme_font_override("font", _font())
 	_hint.add_theme_font_size_override("font_size", 8)
 	_hint.add_theme_color_override("font_color", Color(0.7, 0.65, 0.8, 0.9))
 	_root.add_child(_hint)
 	_toon_regel()
+
+
+func _font() -> Font:
+	return load(FONT_PATH) as Font
 
 
 class _ParallaxPair:

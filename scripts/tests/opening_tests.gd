@@ -51,9 +51,7 @@ func _statisch() -> void:
 	check("story mode melding", StoryMode.MSG == "Not yet.")
 	check("canon memory restore bij drift_done", Canon.MEMORY_RESTORE.size() >= 2)
 	var flags := {Unlock.BEWAKER_VLAG: true}
-	check("bewaker alleen unlockt nog niet", not Unlock.should_unlock(flags))
-	flags[Unlock.CANON_DREIGING] = true
-	check("bewaker + dreiging unlockt", Unlock.should_unlock(flags))
+	check("bewaker alleen unlockt", Unlock.should_unlock(flags))
 
 
 func _nieuw_spel_opening() -> void:
@@ -96,9 +94,7 @@ func _unlock_regels() -> void:
 	GameState.new_game("Dax")
 	check("vers warper dicht", not GameState.world_warper_is_unlocked())
 	GameState.story_flags[Unlock.BEWAKER_VLAG] = true
-	check("genezer zonder canon: nog dicht", not GameState.try_unlock_world_warper())
-	GameState.story_flags[Unlock.CANON_DREIGING] = true
-	check("na canon dreiging open", GameState.try_unlock_world_warper() and GameState.world_warper_is_unlocked())
+	check("genezer: warper open", GameState.try_unlock_world_warper() and GameState.world_warper_is_unlocked())
 
 
 func _migratie() -> void:

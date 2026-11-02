@@ -45,7 +45,6 @@ func _na_baked_label(extra: int) -> void:
 func _draai() -> void:
 	_rapport("unlock lege flags", UnlockTest.lege_flags())
 	_rapport("unlock alleen bewaker", UnlockTest.alleen_bewaker())
-	_rapport("unlock bewaker en canon", UnlockTest.bewaker_en_canon())
 	_rapport("unlock al open", UnlockTest.al_open())
 	_rapport("unlock andere bewaker", UnlockTest.andere_bewaker())
 	# Pas hier laden: destinations.gd noemt GameState, en dat script noemt Transition.

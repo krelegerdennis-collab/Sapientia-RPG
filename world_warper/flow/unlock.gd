@@ -12,13 +12,8 @@ const UNLOCK_VLAG := "world_warper_unlocked"
 
 
 ## Zelfde regel als GameState.try_unlock_world_warper, zonder te schrijven:
-## al open, of De Genezer én canon-scène 3 (dreiging) gezien.
+## al open, of De Genezer is verslagen (Archief 2 klaar).
 static func should_unlock(flags: Dictionary) -> bool:
 	if flags.has(UNLOCK_VLAG):
 		return true
-	if not flags.has(BEWAKER_VLAG):
-		return false
-	return flags.has(CANON_DREIGING)
-
-
-const CANON_DREIGING := "ww_canon_dreiging_gezien"
+	return flags.has(BEWAKER_VLAG)

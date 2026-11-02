@@ -262,6 +262,7 @@ func _einde() -> void:
 		return
 	GameState.story_flags[Canon.FLAG_GENEZER] = true
 	GameState.story_flags["archief2_naar_warper"] = true
+	GameState.try_unlock_world_warper()
 	var NaGenezer := load("res://world_warper/flow/na_genezer.gd")
 	NaGenezer.set("pending", false)
 	bezig = false

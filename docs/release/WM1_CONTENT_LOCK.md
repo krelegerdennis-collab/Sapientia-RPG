@@ -51,12 +51,13 @@ Gemeten op `61986e9`. Een afwijking na de freeze zonder lock-wijziging is een re
 WM1 is het speelbare eerste eiland met alles wat eraan hangt, in speelvolgorde:
 
 0. **Goedgekeurde lock-uitzondering (Dennis 2026-11-02):** opening *Drift* vóór de proloog
-   (`world_warper/opening/`, vlag `warper_drift_done`); hub-unlock blijft na De Genezer + canon 1–3.
+   (`world_warper/opening/`, vlag `warper_drift_done`); hub-unlock blijft na De Genezer (Archief 2 klaar),
+   canon-scène 2 = geheugen-terugkeer in de Hal.
 1. Proloog bij het Wachtershuis (Dax, Opa, de mantel, de zwaardles, de nacht).
 2. Wereldkaart en Willowdale (winkels), Het Eerste Archief (4 verdiepingen, baas de Golem).
 3. Na de Golem: Mapleton, het Donker Woud (baas de Root King, Vesper komt in de groep) en de bouwplaats met de berggrot.
 4. Het Levende Archief (Archief 2, via de kas of via de berggrot): Seren komt in de groep, bazen De Wurger en De Genezer.
-5. De World Warper-hub (opent na De Genezer **en** canon-scène 3): ECHO, rustkamer, rekruten (Kael Voss, Orion), de Diepe Grot als simulatie.
+5. De World Warper-hub (opent na De Genezer / Archief 2 klaar): ECHO, rustkamer, rekruten (Kael Voss, Orion), de Diepe Grot als simulatie.
 
 Routes naar Archief 2 (beide blijven):
 

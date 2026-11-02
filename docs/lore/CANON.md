@@ -100,8 +100,8 @@ Taalregel: tekst in de game is Engels; tekst in de documenten is Nederlands.
 18. **Opening Drift (Dennis 2026-11-02, WM1).** Nieuw spel begint met een korte drift-cutscene
     (World Warper tussen werelden), daarna story-only in de Hal: ECHO met beschadigd geheugen
     legt de missie uit (geen H-6, geen proefpersoon, geen Hanger-sleutel). Warp naar het
-    Wachtershuis; vlag `warper_drift_done`. De hub (`world_warper_unlocked`) opent pas na
-    Archief 2 compleet én canon-scènes 1–3; bij terugkeer herstelt ECHO's geheugen bij de Hanger
+    Wachtershuis; vlag `warper_drift_done`. De hub (`world_warper_unlocked`) opent wanneer
+    Archief 2 klaar is (De Genezer); canon-scène 2 in de Hal is het geheugen-terugkeermoment
     (extra regels in `canon_scenes.gd`). Oude saves met voortgang of open warper krijgen de opening niet.
 
 ### Scène 1 – Na De Genezer: De World Warper verschijnt

@@ -429,8 +429,6 @@ func _mark_intro_seen() -> void:
 		_set_flag(_source, f)
 		_set_flag(_game_state(), f)
 	var gs := _game_state()
-	if gs != null and gs.has_method("try_unlock_world_warper"):
-		gs.try_unlock_world_warper()
 	if gs != null and gs.has_method("mark_scene_seen"):
 		gs.mark_scene_seen("hanger")    # v0.22 veldmenu > Scenes
 
