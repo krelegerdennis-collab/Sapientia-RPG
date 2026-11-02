@@ -342,6 +342,9 @@ func _coop_peer_tests() -> void:
 			dax_after = arena.chain_of("dennis").duplicate()
 		for _t in cd_ticks:
 			arena.coop_host_step([_idle(1)], CombatSim.TICK_DT)   # peer stuurt elke tick input (zoals echt)
+		# T29: wacht tot de per-slot swing-lock verlopen is (Dennis 13:09)
+		while float(arena._coop_swing_lock.get(1, 0.0)) > 0.0:
+			arena.coop_host_step([_idle(1)], CombatSim.TICK_DT)
 	print("  co-op peer keten: %s" % str(steps))
 	check("co-op: peer ketent hit1 -> hit2 -> finisher", steps == [0, 1, 2])
 	check("co-op: host-keten apart (Dax op hit1 -> volgende hit2)", int(dax_after.get("last", -1)) == 0 and int(dax_after.get("next", 0)) == 1)

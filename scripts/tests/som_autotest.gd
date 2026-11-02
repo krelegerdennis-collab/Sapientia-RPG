@@ -1039,15 +1039,13 @@ func _ring_layout_tests() -> void:
 	await t.frames(3)
 
 
-## Action-modus bazen: SomData-vermenigvuldiger; Classic-baas exact ongewijzigd (echt battle.tscn).
+## Action-modus bazen: action_boss_stats / BossCore; turn-based bazen = Classic (echt battle.tscn).
 func _action_boss_tests() -> void:
 	const BossCore := preload("res://scripts/battle/boss_core.gd")
 	var base: Dictionary = BossCore.apply_boss(GameData.ENEMIES["kennis_beest"].duplicate(true))
-	t.check("SoM-baas: action_boss(..., Classic) = dezelfde data", SomData.action_boss(base, false) == base)
-	var m3 := SomData.action_boss_mult(SomData.START_LEVEL)
-	var m5 := SomData.action_boss_mult(SomData.START_LEVEL + 2)
-	t.check("SoM-baas: Lv 3 HP x%.2f ATK x%.2f, Lv 5 ATK x%.2f (data-gedreven)" % [m3["max_hp"], m3["atk"], m5["atk"]],
-			float(m3["max_hp"]) > 1.0 and float(m5["atk"]) > float(m3["atk"]))
+	var scaled := SomData.action_boss_stats(base, 1)
+	t.check("SoM-baas: action_boss_stats = apply_boss (geen party-schaal v1)", scaled["max_hp"] == base["max_hp"] and scaled["atk"] == base["atk"])
+	t.check("SoM-baas: boss_party_scale(4) = 1.0", is_equal_approx(SomData.boss_party_scale(4), 1.0))
 	var was_som: bool = GameState.som_mode
 	var was_style = Settings.get_value("battle_style")
 	var got := {}
@@ -1073,10 +1071,7 @@ func _action_boss_tests() -> void:
 	t.check("SoM-baas: Classic Golem ongewijzigd (HP %d ATK %d DEF %d = %d/%d/%d)" % [c["max_hp"], c["atk"], c["def"], base["max_hp"], base["atk"], base["def"]],
 			c["max_hp"] == int(base["max_hp"]) and c["atk"] == int(base["atk"]) and c["def"] == int(base["def"]))
 	var ac: Dictionary = got["action"]
-	var lvl: float = load("res://scripts/battle/battle.gd").action_party_level()
-	var expd := SomData.action_boss(base, true, lvl)
-	# 21 okt 2026: bazen altijd turn-based, ook in Action -> de Action-vermenigvuldiger geldt niet meer
-	t.check("SoM-baas: Action Golem = Classic Golem, geen Action-vermenigvuldiger (HP %d ATK %d; oud zou %d/%d zijn bij Lv %.1f)" % [ac["max_hp"], ac["atk"], int(expd["max_hp"]), int(expd["atk"]), lvl],
+	t.check("SoM-baas: Action turn-based Golem = Classic stats (HP %d ATK %d DEF %d)" % [ac["max_hp"], ac["atk"], ac["def"]],
 			ac["max_hp"] == c["max_hp"] and ac["atk"] == c["atk"] and ac["def"] == c["def"])
 
 
