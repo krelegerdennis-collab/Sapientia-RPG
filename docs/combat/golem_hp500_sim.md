@@ -32,3 +32,9 @@ Per fase (520/23, default): F1 8.8 s / 47.0%, F2 11.8 s / 80.4%, F3 7.5 s / 49.2
 
 Geen combinatie binnen de bandbreedte haalt tegelijk win 60-90% en p90 < 100%: ATK 24 houdt p90 op 100%,
 ATK 23 duwt de winst net boven 90%. Gekozen: 520/23 (langste gevecht, p90 onder 100%, winst 1.5 pp boven doel).
+
+## Akkoord
+
+- 02-11-2026 22:53 (1:1 Dennis): richting HP ~500 / ATK ~24, 4 Golem-tests mogen alleen op stat-waarden.
+- 02-11-2026 23:42 (1:1 Dennis): 520/23 behouden (winst 91,5% vs doel 60-90% geaccepteerd);
+  dungeon100schaaltest mag alleen de Golem-HP 360 -> 520 (dungeon100_schaal_tests.gd:606-607).
