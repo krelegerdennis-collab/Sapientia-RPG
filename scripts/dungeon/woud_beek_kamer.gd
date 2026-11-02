@@ -13,6 +13,9 @@ func _ready() -> void:
 
 
 func _bouw() -> void:
+	# T27: s25_check RISK woud_beek — tegelopbouw (docs/perf/s25_check.md)
+	if PerfProbe.enabled:
+		PerfProbe.begin("woud_beek")
 	encounters = false
 	sets_checkpoint = false
 	map_name = Beek.NAAM
@@ -69,6 +72,8 @@ func _bouw() -> void:
 	if spr != null:
 		spr.visible = false     # de wegwijzer-tegel ligt al in de grondlaag
 	get_node("Objects").add_child(bord)
+	if PerfProbe.enabled:
+		PerfProbe.end("woud_beek")
 
 
 func _zet(laag: TileMapLayer, t: Vector2i, naam: String) -> void:

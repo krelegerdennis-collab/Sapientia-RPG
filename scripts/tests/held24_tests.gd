@@ -7,6 +7,7 @@ extends Node
 const MAPS := "res://scenes/maps/"
 const OUD := "res://assets/sprites/player.png"
 const SomData := preload("res://scripts/data/som_data.gd")
+const WALK5_LEIDERS := ["Dax", "Seren", "Vesper"]
 
 var failures := 0
 var passes := 0
@@ -75,8 +76,8 @@ func _run() -> void:
 		var col := p.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		var col_ok := col == null or not (col.shape is RectangleShape2D) or (col.shape as RectangleShape2D).size == Vector2(14, 14)
 		if KaartStijl.held_nieuw_op(pad):
-			if not (sp.texture.resource_path.ends_with("dax_wm1.png") and sp.hframes == 3 and sp.vframes == 4
-					and sp.offset == Vector2(0, -8) and col_ok):
+			var dax_ok := sp.texture.resource_path.ends_with("dax_wm1.png") and sp.hframes == 5 and sp.vframes == 4
+			if not (dax_ok and sp.offset == Vector2(0, -8) and col_ok):
 				fout += "%s (%s, %dx%d, %s); " % [f, sp.texture.resource_path.get_file(), sp.hframes, sp.vframes, sp.offset]
 		elif not (sp.texture.resource_path == OUD and sp.offset == Vector2(0, -4) and col_ok):
 			fout += "%s oud verwacht (%s); " % [f, sp.texture.resource_path.get_file()]
@@ -96,23 +97,32 @@ func _run() -> void:
 	var p3 := _speler(s3)
 	GameState.party = []
 	for naam in ["Dax", "Seren", "Vesper", "Kael", "Orion"]:
-		GameState.party.append({"id": naam.to_lower(), "name": naam, "level": 1})
+		GameState.party.append({"id": {"Dax": "dennis", "Seren": "lotte", "Vesper": "noor", "Kael": "kael", "Orion": "orion"}[naam], "name": naam, "level": 1})
 	var wissel_fout := ""
 	for i in range(GameState.party.size() - 1, -1, -1):
 		var naam := str(GameState.party[i]["name"])
 		GameState.move_member_to_front(i)
+		KaartStijl.held_toepassen(s3)
 		var verwacht := KaartStijl.held_sheet(naam)
 		var slank: String = KaartStijl.HELD_VAST.get(naam.to_lower(), "res://assets/sprites/som/kaart/%s_wm1_slim.png" % naam.to_lower())
 		if not ResourceLoader.exists(slank):
 			print("INFO  %s: %s ontbreekt nog (RPG ART), terugval = %s" % [naam, slank.get_file(), verwacht if verwacht != "" else "oude sheet"])
 		var tex: String = p3.sprite.texture.resource_path
-		var ok: bool = tex == slank and verwacht == slank and p3.sprite.offset == Vector2(0, -8) and p3.sprite.hframes == 3 and p3.sprite.vframes == 4
+		var ok: bool = tex == slank and verwacht == slank and p3.sprite.offset == Vector2(0, -8) and p3.sprite.vframes == 4
+		if naam in WALK5_LEIDERS:
+			ok = ok and p3.sprite.hframes == 5
+		else:
+			ok = ok and p3.sprite.hframes == 3
 		if not ok:
 			wissel_fout += "%s -> %s (verwacht %s); " % [naam, tex.get_file(), verwacht.get_file()]
 	check("leiderwissel: alle 5 helden (Dax/Seren/Vesper/Kael/Orion) krijgen hun sheet (Kael/Orion _wm1_slim, Dax/Seren/Vesper final_trio) (%s)" % (wissel_fout if wissel_fout != "" else "ok"), wissel_fout == "")
-	check("alle 5 heldsheets bestaan en zijn 72x128 (3x4 van 24x32)", ["Dax", "Seren", "Vesper", "Kael", "Orion"].all(func(h):
+	check("alle 5 heldsheets bestaan (Dax/Seren/Vesper 120x128 5x4, Kael/Orion 72x128 3x4)", ["Dax", "Seren", "Vesper", "Kael", "Orion"].all(func(h):
 			var t: Texture2D = load(KaartStijl.held_sheet(h))
-			return t != null and t.get_size() == Vector2(72, 128)))
+			if t == null:
+				return false
+			if h in WALK5_LEIDERS:
+				return t.get_size() == Vector2(120, 128)
+			return t.get_size() == Vector2(72, 128)))
 	check("veld-NPC's Noor/Lotte/koopman: slanke varianten naast de oude sheets", KaartStijl.npc_sheet_pad("res://assets/sprites/noor_dorp.png").ends_with("noor_dorp_wm1_slim.png")
 			and KaartStijl.npc_sheet_pad("res://assets/sprites/archief2/lotte_veld.png").ends_with("lotte_veld_wm1_slim.png")
 			and KaartStijl.npc_sheet_pad("res://assets/sprites/npc/koopman_veld.png").ends_with("koopman_veld_wm1_slim.png")

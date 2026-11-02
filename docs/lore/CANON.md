@@ -97,6 +97,13 @@ Taalregel: tekst in de game is Engels; tekst in de documenten is Nederlands.
     Na scène 1 blijft hij niet bij de kas staan. Hij vliegt alleen af en toe over de kaart
     (puur beeld). De enige weg naar binnen is **Warp** in het menu.
 
+18. **Opening Drift (Dennis 2026-11-02, WM1).** Nieuw spel begint met een korte drift-cutscene
+    (World Warper tussen werelden), daarna story-only in de Hal: ECHO met beschadigd geheugen
+    legt de missie uit (geen H-6, geen proefpersoon, geen Hanger-sleutel). Warp naar het
+    Wachtershuis; vlag `warper_drift_done`. De hub (`world_warper_unlocked`) opent wanneer
+    Archief 2 klaar is (De Genezer); canon-scène 2 in de Hal is het geheugen-terugkeermoment
+    (extra regels in `canon_scenes.gd`). Oude saves met voortgang of open warper krijgen de opening niet.
+
 ### Scène 1 – Na De Genezer: De World Warper verschijnt
 Setting: De kas lost op in paars licht. De Genezer is verslagen. De kern van Archief 2 stijgt op.
 

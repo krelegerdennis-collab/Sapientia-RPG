@@ -30,6 +30,7 @@ const WarperCanon := preload("res://world_warper/cutscene/canon_scenes.gd")
 const PuzzleLogic := preload("res://scripts/puzzle/puzzle_logic.gd")
 const GenezerScene := preload("res://world_warper/cutscene/genezer_scene.gd")
 const NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
+const OpeningFlow := preload("res://world_warper/opening/flow.gd")
 
 const M := "res://scenes/maps/"
 const WORLD := M + "wereldkaart.tscn"
@@ -957,9 +958,23 @@ func _run() -> void:
 
 
 # ---------------------------------------------------------------- 1 proloog
+func _wacht_opening_klaar() -> void:
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 120000:
+		if GameState.story_flags.has(OpeningFlow.FLAG_DRIFT_DONE) and not GameState.changing_map:
+			return
+		if Dialog.is_open:
+			if Dialog.has_method("_is_typing") and Dialog._is_typing():
+				Dialog.advance()
+			else:
+				Dialog.advance()
+		await get_tree().process_frame
+
+
 func stage_prologue() -> void:
 	print("=== 1 proloog: nieuw spel tot de nacht ===")
 	GameState.start_new_game("Dax")
+	await _wacht_opening_klaar()
 	check("nieuw spel: start in het huis", await wait_path(HUIS))
 	await settle("start nieuw spel")
 	check("[STATE] nieuw spel begint in Action-stijl (besluit 21 okt)", Settings.action_battles())

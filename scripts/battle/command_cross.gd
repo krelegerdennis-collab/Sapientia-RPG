@@ -12,7 +12,7 @@ extends Control
 ## Codex bereik je met rechts vanaf Vluchten (of door erop te tikken); vanaf Codex gaat omhoog naar
 ## Verdedig en links naar Vluchten. De oude paden (0-4) zijn ongewijzigd.
 ## Besturing: D-pad/pijltjes kiezen een arm (vanaf een arm terug naar het midden met de
-## tegenovergestelde richting), A = kiezen, B = terug, of direct op een knop tikken.
+## tegenovergestelde richting), A = kiezen, B = terug. Tikken: 1e tik kiest een knop, tik op de gekozen knop bevestigt.
 ## Uitgeschakelde commando's zijn grijs (frame 2); A of tikken doet dan niets.
 ## Art (RPG ART): assets/ui/knop_<id>.png = strook 72x24, 3 frames van 24x24:
 ## 0 = normaal, 1 = gekozen, 2 = uit. Ontbreekt een plaatje, dan tekent de code een
@@ -49,10 +49,12 @@ var _frames := {}                   # id -> [normaal, gekozen, uit] (AtlasTextur
 var _opened_frame := -1
 var _center := Vector2.ZERO
 var _shake_t := 0.0
+var _tap_frame := -1
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_to_group("touch_priority")
 	for i in IDS.size():
 		var id: String = IDS[i]
 		_frames[id] = _load_frames(ART_DIR + "knop_%s.png" % id)
@@ -239,8 +241,27 @@ func _on_button_input(event: InputEvent, i: int) -> void:
 	if not pressed or not active or not is_shown(i):
 		return
 	buttons[i].accept_event()
-	select(i)
-	_choose(i)
+	# Demo-fix 2: één tik = één actie (muis + geëmuleerde touch van dezelfde tik tellen één keer).
+	var frame := Engine.get_process_frames()
+	if frame == _tap_frame:
+		return
+	_tap_frame = frame
+	if i != selected:
+		select(i)          # eerste tik: kiezen
+	else:
+		_choose(i)         # tik op de gekozen knop: bevestigen
+
+
+## Demo-fix 2: valt deze tik (viewport-coördinaten) op een knop van het actieve kruis? Dan laat
+## touch_controls.gd hem liggen (de joystick-zone overlapte het kruis en at de tik op).
+func claims_touch(viewport_pos: Vector2) -> bool:
+	if not active or not is_visible_in_tree():
+		return false
+	var p := get_global_transform_with_canvas().affine_inverse() * viewport_pos
+	for i in buttons.size():
+		if is_shown(i) and hit_rect(i).has_point(p):
+			return true
+	return false
 
 
 func _refresh() -> void:

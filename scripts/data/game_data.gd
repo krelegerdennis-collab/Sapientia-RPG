@@ -761,6 +761,7 @@ const KEY_ITEMS := {
 ##
 ## Vakken (volgorde = volgorde op het scherm) en hun naam op het scherm.
 const EQUIP_SLOTS := ["wapen", "schild", "helm", "harnas", "benen", "laarzen", "accessoire"]
+# uxtest KNOWN_DUTCH_PINNED: display was "benen": "Benen" (Engels sinds v0.21).
 const EQUIP_SLOT_NAMES := {"wapen": "Weapon", "schild": "Shield", "helm": "Helm", "harnas": "Armor",
 	"benen": "Legs", "laarzen": "Boots", "accessoire": "Accessory"}
 ## Stats die uitrusting kan veranderen (volgorde op het scherm) en hun korte naam.
