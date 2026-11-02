@@ -677,7 +677,7 @@ func _som() -> void:
 	var spr: Sprite2D = speler.sprite
 	check("oude spelersprite ongewijzigd (3x4 van 16x24, offset -4)", spr.hframes == 3 and spr.vframes == 4
 			and spr.offset == Vector2(0, -4) and MapSprite.frame_maat(spr.texture) == MapSprite.OUD)
-	# Dax WM1 (24x32-sheet 72x128) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
+	# Dax WM1 walk5 (24x32-sheet 120x128, 5 loopframes) via zet_sheet: voeten op de tegelrand, botsing blijft 14x14
 	speler.zet_sheet(load(DAX))
 	var vorm := (speler.get_node("CollisionShape2D") as CollisionShape2D).shape as RectangleShape2D
 	check("Dax WM1 24x32: 5x4 frames, voeten op +8, botsing 14x14 aan de voeten", spr.hframes == 5 and spr.vframes == 4
@@ -771,9 +771,11 @@ func _som() -> void:
 	var bron := ts.get_source(0) as TileSetAtlasSource if ts != null else null
 	var water := bron.get_tile_data(Vector2i(2, 0), 0) if bron != null else null
 	var gras := bron.get_tile_data(Vector2i(0, 0), 0) if bron != null else null
+	var sp2: Sprite2D = p2.sprite as Sprite2D
+	var dax_kol := MapSprite.sheet_kolommen(sp2.texture)
 	check("toepassen: Ground krijgt de gebied-tileset, speler 24x32", toegepast and ts != null
-			and ts.resource_path.ends_with("proef_herfst/proef.tres") and (p2.sprite as Sprite2D).hframes == 3
-			and is_equal_approx((p2.sprite as Sprite2D).offset.y, -8.0))
+			and ts.resource_path.ends_with("proef_herfst/proef.tres") and sp2.hframes == dax_kol
+			and is_equal_approx(sp2.offset.y, -8.0))
 	check("geëxporteerde tileset: 16px, botsing op solid, terreinnaam", bron != null
 			and bron.texture_region_size == Vector2i(16, 16) and water != null and gras != null
 			and water.get_collision_polygons_count(0) == 1 and gras.get_collision_polygons_count(0) == 0
