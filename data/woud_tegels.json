@@ -1153,6 +1153,42 @@
    "rand": "",
    "id": 95,
    "file": "res://assets/tiles/woud16/rand_stam_onder_rechts_c.png"
+  },
+  {
+   "naam": "grond_e",
+   "groep": "grond",
+   "functie": "bosvloer, variant e (mospolletje, varenspruit, blad)",
+   "solid": false,
+   "laag": "grond",
+   "frames": 1,
+   "varianten": 7,
+   "rand": "",
+   "id": 96,
+   "file": "res://assets/tiles/woud16/grond_e.png"
+  },
+  {
+   "naam": "grond_f",
+   "groep": "grond",
+   "functie": "bosvloer, variant f (kleine wortel + graspol)",
+   "solid": false,
+   "laag": "grond",
+   "frames": 1,
+   "varianten": 7,
+   "rand": "",
+   "id": 97,
+   "file": "res://assets/tiles/woud16/grond_f.png"
+  },
+  {
+   "naam": "grond_g",
+   "groep": "grond",
+   "functie": "bosvloer, variant g (twee mosplekken, wit bloemetje)",
+   "solid": false,
+   "laag": "grond",
+   "frames": 1,
+   "varianten": 7,
+   "rand": "",
+   "id": 98,
+   "file": "res://assets/tiles/woud16/grond_g.png"
   }
  ]
 }
