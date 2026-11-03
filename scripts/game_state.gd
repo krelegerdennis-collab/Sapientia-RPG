@@ -605,6 +605,7 @@ func _ready() -> void:
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
 			["--savehardeningtest", "res://scripts/tests/save_hardening_tests.gd", "SaveHardeningTest", "savehardeningtest"],
+			["--savefuzztest", "res://scripts/tests/save_fuzz_tests.gd", "SaveFuzzTest", "savefuzztest"],
 			["--saverobusttest", "res://scripts/tests/save_robust_tests.gd", "SaveRobustTest", "saverobusttest"],
 			["--saveroundtriptest", "res://scripts/tests/save_roundtrip_tests.gd", "SaveRoundtripTest", "saveroundtriptest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
