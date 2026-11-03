@@ -9,7 +9,7 @@
    "solid": false,
    "laag": "grond",
    "frames": 1,
-   "varianten": 4,
+   "varianten": 7,
    "rand": "",
    "id": 0,
    "file": "res://assets/tiles/woud16/grond_a.png"
@@ -21,7 +21,7 @@
    "solid": false,
    "laag": "grond",
    "frames": 1,
-   "varianten": 4,
+   "varianten": 7,
    "rand": "",
    "id": 1,
    "file": "res://assets/tiles/woud16/grond_b.png"
@@ -33,7 +33,7 @@
    "solid": false,
    "laag": "grond",
    "frames": 1,
-   "varianten": 4,
+   "varianten": 7,
    "rand": "",
    "id": 2,
    "file": "res://assets/tiles/woud16/grond_c.png"
@@ -45,7 +45,7 @@
    "solid": false,
    "laag": "grond",
    "frames": 1,
-   "varianten": 4,
+   "varianten": 7,
    "rand": "",
    "id": 3,
    "file": "res://assets/tiles/woud16/grond_d.png"
