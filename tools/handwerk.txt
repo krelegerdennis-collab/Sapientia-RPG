@@ -1404,3 +1404,6 @@ assets/tiles/woud16/water_oever_z.png
 assets/tiles/woud16/water_oever_zo.png
 assets/tiles/woud16/water_oever_zw.png
 assets/tiles/woud16/wegwijzer.png
+assets/tiles/woud16/grond_e.png
+assets/tiles/woud16/grond_f.png
+assets/tiles/woud16/grond_g.png
