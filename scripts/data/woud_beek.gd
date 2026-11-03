@@ -41,7 +41,7 @@ const LEGEND := {
 	"(": "uitgang_rand_l", "U": "uitgang_pad", ")": "uitgang_rand_r",
 }
 const STAM_VAR := ["", "_b", "_c"]
-const GROND := ["grond_a", "grond_b", "grond_c", "grond_d"]
+const GROND := ["grond_a", "grond_b", "grond_c", "grond_d", "grond_e", "grond_f", "grond_g"]
 const BLAD := ["grond_blad_a", "grond_blad_b"]
 
 ## Bomen 2x3: [x, y van de linker stamvoet, soort]; kruin (2 rijen erboven) op de overlay-laag.
