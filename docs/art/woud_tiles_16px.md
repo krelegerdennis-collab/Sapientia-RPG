@@ -113,8 +113,11 @@ Afspraken:
 | 93 | `rand_stam_boven_rechts_c` | stammen onder het bladerdak, bovenste rij, rechts, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
 | 94 | `rand_stam_onder_rechts_b` | stamvoeten, onderste rij, rechts, variant b | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
 | 95 | `rand_stam_onder_rechts_c` | stamvoeten, onderste rij, rechts, variant c | Bosrand (randen/muur van bomen) | grond | ja | 1 | 16x16 | 1 | - |
+| 96 | `grond_e` | bosvloer, variant e (mospolletje, varenspruit, blad) | Grond | grond | nee | 1 | 16x16 | 7 | - |
+| 97 | `grond_f` | bosvloer, variant f (kleine wortel + graspol) | Grond | grond | nee | 1 | 16x16 | 7 | - |
+| 98 | `grond_g` | bosvloer, variant g (twee mosplekken, wit bloemetje) | Grond | grond | nee | 1 | 16x16 | 7 | - |
 
-Totaal: 96 tegels.
+Totaal: 99 tegels.
 
 ## Spec-antwoorden (RPG CODE)
 
