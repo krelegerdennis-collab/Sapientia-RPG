@@ -234,10 +234,16 @@ const ACTION_AREAS := {
 			# targets hieronder blijven gelden. Zie docs/combat/gevechtsduur_balans_sim.md.
 			"tiers": {1: {"atk": 0.14, "cooldown": 3.15}, 2: {"atk": 0.36, "cooldown": 2.8},
 					3: {"atk": 0.35, "cooldown": 2.8}, 4: {"atk": 0.43, "cooldown": 2.8}},
+			# Party-moeilijkheid WM1 (lv-3-party won 100%): per kamer een factor bovenop de tierregel.
+			# Zie docs/combat/wm1_party_moeilijkheid_sim.md.
+			"room_rules": {"archief_v4_wachtersgang": {"atk": 2.7}, "archief_v4_voorhal": {"atk": 2.8},
+					"archief_v3_zuilenhal": {"atk": 3.2}},
 			# loss tier 1: Forge (21 okt): 89% winst / 77% verlies geaccepteerd, grens = gemiddeld verlies <= 80%.
 			# Herstel: het opslagboek in archief_ingang (vlak voor archief_v1_gang) geneest de party vol.
 			"targets": {1: {"win": [0.80, 0.90], "loss": [0.0, 0.80]}, 2: {"win": [0.70, 0.85]},
-					3: {"win": [0.65, 0.80]}, 4: {"win": [0.60, 0.75]}}},
+					3: {"win": [0.40, 0.60]}, 4: {"win": [0.00, 0.15]}}},
+			# targets tier 3-4 verlaagd (Dennis 3 nov 2026 00:50): de room_rules maken zuilenhal/wachtersgang/voorhal
+			# zwaar voor een lv-3-party (60-90% winst); Dax solo meet daar nu ~50% (tier 3) en ~3% (tier 4).
 }
 
 
@@ -271,7 +277,8 @@ static func area_rule(room_id: String, tier: int, key: String) -> float:
 		return 1.0
 	var a: Dictionary = ACTION_AREAS[k]
 	var t: Dictionary = a.get("tiers", {}).get(tier, {})
-	return float(t.get(key, a.get(key, 1.0)))
+	var f := float(a.get("room_rules", {}).get(room_id, {}).get(key, 1.0))
+	return float(t.get(key, a.get(key, 1.0))) * f
 
 
 ## Wachttijd tussen vijandaanvallen in deze kamer (ATTACK_COOLDOWN x gebieds-/tierfactor).
