@@ -43,6 +43,14 @@ var card_label: Label
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	GameState.unique_marked.connect(_on_unique_marked)
+	GameState.battle_ended.connect(_on_battle_ended)
+
+
+## r7-3 #1/#2: het "after"-event hoort alleen bij winst; vluchten of verliezen (ook zonder checkpoint)
+## mag de beloning/vlag niet geven.
+func _on_battle_ended(result: String) -> void:
+	if result != "win":
+		after_battle_event = ""
 
 
 ## Bij een nieuw spel (keep_history = false) en bij laden (geschiedenis blijft, voor debuggen).

@@ -503,6 +503,13 @@ func _menu_tests() -> void:
 	if m == null:
 		return
 	await pframes(3)
+	# r7-3 #5: Warp in een Diepe Grot-run weigert met een melding en wisselt niet van map.
+	GameState.dungeon100_floor = 1
+	m.open_warp()
+	check("Warp geweigerd in Diepe Grot-run (melding '%s')" % m.message_label.text,
+		m.message_label.text == m.WARP_IN_RUN and not GameState.changing_map and scene().scene_file_path == GOLEM_SCENE)
+	GameState.dungeon100_floor = 0
+	m.message_label.visible = false
 	check("Warpen compact (%s), Party eronder, tikhoogte >= 16" % m.buttons["warp"].size, m.buttons["warp"].size.y >= 16.0
 			and m.buttons["warp"].size.y < m.buttons["equip"].size.y and m.buttons["party"].position.y > m.buttons["warp"].position.y)
 	await screenshot("party_veldmenu")
@@ -830,3 +837,22 @@ func _namen_migratie_tests() -> void:
 	check("namen-migratie: losse namen", GameState.migrate_name("Dennis") == "Dax" and GameState.migrate_name("Noor") == "Vesper"
 		and GameState.migrate_name("Lotte") == "Seren" and GameState.migrate_name("Dax") == "Dax")
 	check("nieuw spel: standaardnaam is Dax", GameState.DEFAULT_NAME == "Dax")
+	# r7-3 #3: een nieuwe save (met NAMES_KEY) houdt de gekozen naam "Dennis", ook bij herladen.
+	check("namen-migratie: state_data schrijft %s" % GameState.NAMES_KEY,
+		GameState.state_data(Vector2i.ZERO, Vector2i.DOWN).get(GameState.NAMES_KEY, false) == true)
+	var nieuw := oud.duplicate(true)
+	nieuw[GameState.NAMES_KEY] = true
+	check("namen-migratie: nieuwe save laadt", GameState.apply_state(nieuw))
+	check("namen-migratie: nieuwe save houdt 'Dennis' (%s)" % GameState.player_name, GameState.player_name == "Dennis"
+		and GameState.party[0]["name"] == "Dennis" and GameState.party[1]["name"] == "Noor")
+	var terug := GameState.state_data(Vector2i.ZERO, Vector2i.DOWN)
+	check("namen-migratie: save -> load blijft 'Dennis'", GameState.apply_state(terug) and GameState.player_name == "Dennis")
+	# r7-3 #1/#2: vluchten of verliezen wist het "after"-event; alleen winst houdt het.
+	for r in ["flee", "lose"]:
+		Story.after_battle_event = "zingend_zaad_na"
+		GameState.battle_ended.emit(r)
+		check("after-event gewist na '%s'" % r, Story.after_battle_event == "")
+	Story.after_battle_event = "zingend_zaad_na"
+	GameState.battle_ended.emit("win")
+	check("after-event blijft na 'win'", Story.after_battle_event == "zingend_zaad_na")
+	Story.after_battle_event = ""
