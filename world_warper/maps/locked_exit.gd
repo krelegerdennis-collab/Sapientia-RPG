@@ -13,6 +13,7 @@ extends Node2D
 
 const Rooms := preload("res://world_warper/data/rooms.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
+const StoryMode := preload("res://world_warper/opening/story_mode.gd")
 const TILE := 16
 const GESLOTEN := "This room is still closed."
 
@@ -56,6 +57,10 @@ func _on_player_stepped(tile: Vector2i) -> void:
 	if not contains(tile):
 		return
 	if GameState.changing_map or GameState.in_battle:
+		return
+	if StoryMode.actief():
+		if not Dialog.is_open:
+			Dialog.show_lines([StoryMode.MSG], "")
 		return
 	if ReleaseFlags.hub_niche_cut(room_id) or not Rooms.is_open(room_id, GameState.story_flags):
 		if not Dialog.is_open:

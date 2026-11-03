@@ -1,9 +1,12 @@
 ## SoM-PROEF (Secret of Mana-stijl realtime gevecht) — alle instellingen/content op één plek.
 ## Schakelaar: ENABLED (hoofdschakelaar) + ROOMS (alleen deze WM1-kamers). Daarbuiten, en als
 ## GameState.som_mode uit staat (het gewone spel), blijven de turn-based gevechten precies zoals ze waren.
-## Bazen (monster met "boss": true) blijven ALTIJD turn-based, ook in een SoM-kamer en ook bij Battle Style = Action
-## (Dennis, 21 okt 2026). De Action-baasvermenigvuldiger (ACTION_BOSS_MULT) wordt daarom NIET meer gebruikt.
+## Bazen zonder BossScript (scripts/som/boss_script.gd) blijven turn-based, ook in Action/SoM.
+## Met BossScript (D3) kunnen ze realtime in de arena; Classic turn-based is ongewijzigd.
+## ACTION_BOSS_MULT is verwijderd (D3 PR B); Action-bazen gebruiken BossCore.apply_boss (action_boss_stats).
 extends RefCounted
+
+const BossCore := preload("res://scripts/battle/boss_core.gd")
 
 ## Hoofdschakelaar. false = de proef bestaat niet (geen realtime, knop op het titelscherm doet niets).
 const ENABLED := true
@@ -222,16 +225,25 @@ const ENEMY_DAMAGE_MULT := 2.2     # v3: --actionsim iteratie 7
 ##   dodge_skill = ontwijkkans van een speler die de telegraaf leest (alleen meting, --archief1balans)
 const ACTION_AREAS := {
 	"archief1": {"rooms": ["archief_v1_", "archief_v2_", "archief_v3_", "archief_v4_"],
-			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [2.5, 3.0], "hits": [3.0, 3.5], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
+			"tier_level": {0: 1, 1: 1, 2: 2, 3: 3, 4: 4}, "hp_hits": [3.7, 4.4], "hits": [3.7, 4.9], "atk": 1.15, "cooldown": 1.6, "dodge_skill": 0.6,
 			# Power scaling v2 (#208) verhoogde de vijand-ATK in tier 1-3 (+8/+9/+9) en van de Act-1-basismonsters
 			# (x1.5); dit zijn Action-factoren op de schade, dus herijkt (cooldowns ongewijzigd): 1.1/1.0/0.7/0.7 -> 0.21/0.53/0.50/0.65.
 			# Classic (turn-based) en de HP/ATK-stats in GameData blijven de #208-waarden. Meting: --archief1balans --tune.
-			"tiers": {1: {"atk": 0.21, "cooldown": 3.0}, 2: {"atk": 0.53, "cooldown": 2.8},
-					3: {"atk": 0.50, "cooldown": 2.8}, 4: {"atk": 0.65, "cooldown": 2.8}},
+			# Gevechtsduur (Dennis 2 nov 2026: "de gevechten mogen langer duren"): hp_hits 2.5-3.0 -> 3.7-4.4 (hits mee
+			# 3.0-3.5 -> 3.7-4.9), schade 0.21/0.53/0.50/0.65 -> 0.14/0.36/0.35/0.43, tier-1-cooldown 3.0 -> 3.15, zodat de
+			# targets hieronder blijven gelden. Zie docs/combat/gevechtsduur_balans_sim.md.
+			"tiers": {1: {"atk": 0.14, "cooldown": 3.15}, 2: {"atk": 0.36, "cooldown": 2.8},
+					3: {"atk": 0.35, "cooldown": 2.8}, 4: {"atk": 0.43, "cooldown": 2.8}},
+			# Party-moeilijkheid WM1 (lv-3-party won 100%): per kamer een factor bovenop de tierregel.
+			# Zie docs/combat/wm1_party_moeilijkheid_sim.md.
+			"room_rules": {"archief_v4_wachtersgang": {"atk": 2.7}, "archief_v4_voorhal": {"atk": 2.8},
+					"archief_v3_zuilenhal": {"atk": 3.2}},
 			# loss tier 1: Forge (21 okt): 89% winst / 77% verlies geaccepteerd, grens = gemiddeld verlies <= 80%.
 			# Herstel: het opslagboek in archief_ingang (vlak voor archief_v1_gang) geneest de party vol.
 			"targets": {1: {"win": [0.80, 0.90], "loss": [0.0, 0.80]}, 2: {"win": [0.70, 0.85]},
-					3: {"win": [0.65, 0.80]}, 4: {"win": [0.60, 0.75]}}},
+					3: {"win": [0.40, 0.60]}, 4: {"win": [0.00, 0.15]}}},
+			# targets tier 3-4 verlaagd (Dennis 3 nov 2026 00:50): de room_rules maken zuilenhal/wachtersgang/voorhal
+			# zwaar voor een lv-3-party (60-90% winst); Dax solo meet daar nu ~50% (tier 3) en ~3% (tier 4).
 }
 
 
@@ -265,7 +277,8 @@ static func area_rule(room_id: String, tier: int, key: String) -> float:
 		return 1.0
 	var a: Dictionary = ACTION_AREAS[k]
 	var t: Dictionary = a.get("tiers", {}).get(tier, {})
-	return float(t.get(key, a.get(key, 1.0)))
+	var f := float(a.get("room_rules", {}).get(room_id, {}).get(key, 1.0))
+	return float(t.get(key, a.get(key, 1.0))) * f
 
 
 ## Wachttijd tussen vijandaanvallen in deze kamer (ATTACK_COOLDOWN x gebieds-/tierfactor).
@@ -353,39 +366,22 @@ const SPELL_RANGE := 160.0
 const TXT_RING := "Ring"
 const TXT_ITEMS := "Items"
 const TXT_SKILLS := "Skills"
-## ONGEBRUIKT sinds 21 okt 2026 (alle bazen turn-based, ook in Action): data blijft voor de simulator/historie,
-## battle.gd past hem niet meer toe. Oud: ACTION-MODUS BAZEN: in Action/SoM-modus (GameState.som_mode of Settings Battle Style = Action) krijgt een
-## baasgevecht (niet de dungeon van 100) deze vermenigvuldigers bovenop de baas-stats. Classic blijft ongewijzigd.
-## Getuned met -- --actionsim (docs/ACTION_BALANCE_REPORT.md): doel 60-80% winst op Lv 3 en Lv 5.
-## Eén vaste vermenigvuldiger haalde nooit Lv 3 EN Lv 5 tegelijk (zie rapport): daarom basis (op START_LEVEL)
-## plus een toename per gemiddeld partylevel boven START_LEVEL (ACTION_BOSS_PER_LEVEL, nooit onder de basis).
-const ACTION_BOSS_MULT := {"max_hp": 2.3, "atk": 1.6}
-const ACTION_BOSS_PER_LEVEL := {"atk": 0.35}
-## Alleen voor de simulator: andere waarden proberen ({"mult": {...}, "per_level": {...}}; {} = de consts).
-static var action_boss_override: Dictionary = {}
+## Hook: schaal baas-HP/adds naar aantal party-stoelen (COMBAT_DESIGN §12). Balans in PR B.
+static func boss_party_scale(party_count: int) -> float:
+	return 1.0
 
 
-## Baas-data voor Action-modus; on == false (Classic) = exact dezelfde data terug.
-static func action_boss(data: Dictionary, on: bool, party_level: float = START_LEVEL) -> Dictionary:
-	if not on:
-		return data
-	var m := action_boss_mult(party_level)
-	var out := data.duplicate(true)
-	for k in m:
-		if out.has(k):
-			out[k] = maxi(1, roundi(float(out[k]) * float(m[k])))
-	return out
-
-
-## Vermenigvuldigers bij een gemiddeld partylevel.
-static func action_boss_mult(party_level: float) -> Dictionary:
-	var base: Dictionary = action_boss_override.get("mult", ACTION_BOSS_MULT)
-	var per: Dictionary = action_boss_override.get("per_level", ACTION_BOSS_PER_LEVEL)
-	var extra := maxf(0.0, party_level - float(START_LEVEL))
-	var m := base.duplicate()
-	for k in per:
-		m[k] = float(m.get(k, 1.0)) + float(per[k]) * extra
-	return m
+## Baas-stats voor Action (D3): BossCore.apply_boss, geen ACTION_BOSS_MULT.
+static func action_boss_stats(data: Dictionary, party_count: int = 1) -> Dictionary:
+	var out := BossCore.apply_boss(data)
+	var scale := boss_party_scale(party_count)
+	if is_equal_approx(scale, 1.0):
+		return out
+	var scaled := out.duplicate(true)
+	for k in ["max_hp", "atk", "def", "mag", "mdef"]:
+		if scaled.has(k):
+			scaled[k] = maxi(1, roundi(float(scaled[k]) * scale))
+	return scaled
 
 
 ## Ring-opmaak: max. lengte kort label (zonder icoon) en ruimte tussen ring, kop en naamregel.

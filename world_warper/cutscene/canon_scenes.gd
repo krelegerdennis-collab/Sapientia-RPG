@@ -14,6 +14,9 @@ const FLAG_DREIGING := "ww_canon_dreiging_gezien"
 const HAL_SCENE := "res://world_warper/maps/hal.tscn"
 const HAL_SPAWN := "ingang"
 
+## Gezet na de opening-Drift (nieuw spel); ECHO's geheugen herstelt bij terugkeer na Archief 2.
+const FLAG_DRIFT_DONE := "warper_drift_done"
+
 const SPREKERS := ["", "Dax", "Vesper", "Seren", "ECHO", "Sapientia"]
 
 ## Scène 1 – Na De Genezer: de World Warper verschijnt.
@@ -35,6 +38,11 @@ const GENEZER := [
 ]
 
 ## Scène 2 – De Hanger. Eerste binnenkomst in de Hal.
+const MEMORY_RESTORE := [
+	{"who": "ECHO", "text": "The static is fading. I remember this chamber.", "cue": 1},
+	{"who": "ECHO", "text": "The Hanger. My memory is whole again.", "cue": 1},
+]
+
 const HANGER := [
 	{"who": "Vesper", "text": "We're... inside?", "cue": 1},
 	{"who": "Seren", "text": "It doesn't feel evil. Just... empty.", "cue": 1},
@@ -94,6 +102,8 @@ static func hal_speelt(flags: Dictionary) -> bool:
 static func hal_regels(flags: Dictionary) -> Array:
 	var out: Array = []
 	if not bool(flags.get(FLAG_HANGER, false)):
+		if bool(flags.get(FLAG_DRIFT_DONE, false)):
+			out.append_array(MEMORY_RESTORE)
 		out.append_array(HANGER)
 	if not bool(flags.get(FLAG_DREIGING, false)):
 		out.append_array(DREIGING)

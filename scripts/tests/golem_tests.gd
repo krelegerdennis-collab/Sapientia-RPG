@@ -117,11 +117,11 @@ func _core_rule_tests() -> void:
 # ================================================================ deel B
 func _data_tests() -> void:
 	var g := _boss_data()
-	var want_g := {"max_hp": 360, "atk": 27, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "exp": 210, "gold": 84}
+	var want_g := {"max_hp": 520, "atk": 23, "def": 15, "agi": 6, "mag": 11, "mdef": 13, "exp": 210, "gold": 84}
 	var ok := true
 	for k in want_g:
 		ok = ok and int(g.get(k, -1)) == int(want_g[k])
-	check("Golem-baas voor Dax Lv 7 + Spark Sword: HP 360, ATK 27, DEF 15, SPD 6, MAG 11, MDEF 13, EXP 210, Goud 84", ok)
+	check("Golem-baas voor Dax Lv 7 + Spark Sword: HP 520, ATK 23, DEF 15, SPD 6, MAG 11, MDEF 13, EXP 210, Goud 84", ok)
 	check("First Archive mikt op level 7", GD.EERSTE_ARCHIEF_DOEL == 7)
 	check("kern blijft: elke 3e ronde, x0,4 / x2, Hamerslag x2,2; drempel nu 45",
 			int(g["core"]["cycle"]) == 3 and is_equal_approx(float(g["core"]["closed_mult"]), 0.4)

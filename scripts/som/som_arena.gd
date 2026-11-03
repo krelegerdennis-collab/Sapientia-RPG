@@ -2,8 +2,8 @@ class_name SomArena
 extends Node
 ## SoM-PROEF: realtime gevecht (Secret of Mana-stijl) in één DungeonRoom. Wordt door
 ## dungeon_room.gd aangemaakt als SomData.room_enabled(...) waar is; anders bestaat hij niet en
-## loopt alles turn-based zoals altijd. Bazen ("boss": true) doen hier NIET aan mee: die starten
-## gewoon het bestaande turn-based gevecht (DungeonRoom.start_monster_battle).
+## loopt alles turn-based zoals altijd. Bazen zonder BossScript starten turn-based; met BossScript (D3)
+## kunnen ze in Action via register().
 ##
 ## Party: de held die je bestuurt zit in de speler-node (camera, deuren, praten); de anderen zijn
 ## AI-bondgenoten (som_ally.gd). SWITCH (knop/toets C) wisselt: het lichaam van de speler en dat van de
@@ -32,6 +32,9 @@ signal action_resolved(text: String)
 signal sim_ticked(tick: int)
 
 const SomData := preload("res://scripts/data/som_data.gd")
+const BossScript := preload("res://scripts/som/boss_script.gd")
+const GolemBoss := preload("res://scripts/som/golem_boss.gd")
+const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
@@ -102,6 +105,9 @@ var _coop_avatars: Dictionary = {}
 var _coop_lock_idx: Dictionary = {}
 var _enemy_order: Array = []
 var _coop_attack_cd: Dictionary = {}
+## T29: per co-op-slot swing-lock (s), host-autoritatief; zelfde gate als swing_lock in single-player.
+var _coop_swing_lock: Dictionary = {}
+const COOP_MIN_SWING_LOCK := 0.35
 var _coop_snap: Dictionary = {}
 ## Kaartsprites en aanvalsanimaties per held-id (geladen in setup; ontbreekt = placeholder).
 var sheets := {}
@@ -168,6 +174,15 @@ var map_cast_uit: Array = []
 ## gevecht reproduceerbaar (--combatrngtest, COMBAT_DESIGN.md §16).
 var rng := RandomNumberGenerator.new()
 var rng_seed := 0
+
+## D3 PR C: arena-hook voor de realtime Golem (kennis_beest, WM1). Standaard AAN (Dennis): in GOLEM_RT_ROOMS
+## vecht de Golem realtime; zet false om turn-based te forceren (tests). Alleen GOLEM_RT_ROOMS.
+static var golem_rt_enabled := true
+const GOLEM_RT_ROOMS := ["archief_golemhal"]
+## Wij registreerden GolemBoss in BossScript.REGISTRY (ensure_registered) -> bij _exit_tree weer weg.
+var _golem_registered_here := false
+## Event-log van de Golem-hook (tests/HUD): {tick, type, ...} uit GolemFight.take_events().
+var golem_events: Array = []
 
 
 func _init() -> void:
@@ -356,11 +371,40 @@ func enemy_stats(m: Node) -> Dictionary:
 	if t > 0 and not bool(d.get("unique", false)) and d.has("max_hp"):
 		var in_archief: bool = DungeonRooms.ROOMS.has(room.room_id)
 		d = GameData.apply_archief_tier(d, t) if in_archief else GameData.apply_tier(d, t)
+	if m.boss and BossScript.has_script(id):
+		var n: int = GameState.party.size() if GameState.party.size() > 0 else 1
+		return SomData.action_boss_stats(d, n)
 	return SomData.apply_action_area(d, room.room_id, t)      # alleen Action; bazen/uniek ongewijzigd
 
 
+## D3 PR C: geldt de realtime Golem-hook voor dit monster in deze kamer?
+func golem_rt_applies(m: Node) -> bool:
+	return golem_rt_enabled and m != null and bool(m.boss) and str(m.enemy_id) == GolemBoss.ENEMY_ID \
+			and room != null and "room_id" in room and GOLEM_RT_ROOMS.has(str(room.room_id))
+
+
+## GolemFight van een geregistreerde Golem (of null).
+func golem_fight_of(m: Node) -> GolemFight:
+	if not enemies.has(m):
+		return null
+	return enemies[m].get("golem", null)
+
+
+func _exit_tree() -> void:
+	if _golem_registered_here:
+		GolemBoss.unregister()
+		_golem_registered_here = false
+
+
 func register(m: Node) -> void:
-	if m == null or m.boss or enemies.has(m):
+	if m == null or enemies.has(m):
+		return
+	var eid := str(m.enemy_id)
+	var golem_rt := golem_rt_applies(m)
+	if golem_rt and not BossScript.has_script(eid):
+		GolemBoss.ensure_registered()
+		_golem_registered_here = true
+	if m.boss and not BossScript.has_script(eid):
 		return
 	var d := enemy_stats(m)
 	if d.is_empty():
@@ -370,7 +414,14 @@ func register(m: Node) -> void:
 			"def": int(d.get("def", 0)), "exp": int(d.get("exp", 0)), "gold": int(d.get("gold", 0)),
 			"drops": d.get("drops", []), "data": d, "cd": 0.6, "tele": 0.0, "chase": rng.randf() * SomData.CHASE_INTERVAL,
 			"flash": 0.0, "target": ""}
-	var eid := str(m.enemy_id)
+	if golem_rt:
+		# Fases, kern-venster, schadeplafond per fasedrempel en 90 ticks fasewissel: GolemFight (PR B).
+		var fseed := rng_seed if rng_seed != 0 else hash(str(room.room_id))
+		var fight := GolemFight.new(int(entry["max_hp"]), fseed)
+		entry["golem"] = fight
+		entry["hp"] = fight.hp()
+		enemies[m] = entry
+		return
 	if SomActionAttacks.has_telegraph_attack(eid):
 		var aid := SomActionAttacks.default_attack_for_enemy(eid)
 		var tg := TelegraphAttack.new()
@@ -909,10 +960,12 @@ func attack_tex_for(id: String, def: Dictionary) -> Texture2D:
 
 
 func _anim_seconds_def(id: String, def: Dictionary) -> float:
-	if not attack_texs.has(id):
-		return 0.0
+	# T29: zonder attack-sheet niet 0 teruggeven (dan valt de gate weg): def["ms"], anders SomData.ATTACK_MS.
+	var ms: Array = def.get("ms", [])
+	if ms.is_empty() and not attack_texs.has(id):
+		ms = SomData.ATTACK_MS
 	var tot := 0.0
-	for v in def.get("ms", []):
+	for v in ms:
 		tot += float(v)
 	return tot / 1000.0
 
@@ -1049,7 +1102,17 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
-	e["hp"] = int(e["hp"]) - dmg
+	var golem: GolemFight = e.get("golem", null)
+	if golem:
+		# kern-factor, schadeplafond op de fasedrempel en onkwetsbare fasewissel zitten in GolemFight.damage()
+		dmg = golem.damage(dmg)
+		_golem_events(m, e, golem.take_events())
+		e["hp"] = golem.hp()
+		if dmg <= 0:
+			last_enemy_damage = 0
+			return
+	else:
+		e["hp"] = int(e["hp"]) - dmg
 	e["flash"] = SomData.HIT_FLASH
 	last_enemy_damage = dmg
 	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), Color(1, 1, 1))
@@ -1061,8 +1124,8 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	last_hitstop_ticks = hitstop
 	if hitstop > 0:
 		e["hitstop"] = maxi(int(e.get("hitstop", 0)), hitstop)
-	if not stagger:
-		return
+	if not stagger or golem:
+		return       # Golem: geen knockback/afgebroken telegraaf door gewone slagen (alleen kern-break)
 	if e.has("tg"):
 		(e["tg"] as TelegraphAttack).interrupt()
 	e["tele"] = 0.0          # volle treffer = telegraaf afgebroken
@@ -1270,6 +1333,9 @@ func _enemy_ai(m: Node, delta: float) -> void:
 	if int(e.get("hitstop", 0)) > 0:       # hitstop (finisher): vijand bevriest een paar ticks
 		e["hitstop"] = int(e["hitstop"]) - 1
 		return
+	if e.has("golem"):
+		_golem_ai(m, e, delta)
+		return
 	if e.has("tg"):
 		_enemy_ai_telegraph(m, e, delta)
 		return
@@ -1307,6 +1373,67 @@ func _enemy_ai(m: Node, delta: float) -> void:
 			e["chase"] = SomData.CHASE_INTERVAL
 			_step_toward(m, body_of(tid))
 	_tint(m, e)
+
+
+## D3 PR C: realtime Golem. Host-authoritatief: GolemFight.tick() kiest aanvallen (seeded), de arena zet
+## de events om in treffers op de party (dodge-iframes gelden via hit_member), adds en beeld.
+func _golem_ai(m: Node, e: Dictionary, delta: float) -> void:
+	var fight: GolemFight = e["golem"]
+	if float(e["flash"]) > 0.0:
+		e["flash"] = float(e["flash"]) - delta
+	_pose_tick(m, e, delta)
+	fight.tick()
+	_golem_events(m, e, fight.take_events())
+	_tint(m, e)
+
+
+func _golem_events(m: Node, e: Dictionary, evs: Array) -> void:
+	for ev in evs:
+		var d: Dictionary = (ev as Dictionary).duplicate()
+		d["tick"] = sim_tick
+		golem_events.append(d)
+		match str(d.get("type", "")):
+			"telegraph_start":
+				var a := GolemBoss.attack(str(d["id"]))
+				var tid := _target_for(m)
+				e["target"] = tid
+				e["golem_attack"] = str(d["id"])
+				var origin := center_of(m)
+				if str(a.get("aim", "")) == "target" and tid != "":
+					origin = body_of(tid)
+				e["golem_origin"] = origin
+				_monster_pose(m, e, "attack", 0, float(d["windup"]) / float(TICK_HZ) + 0.05)
+				if room and room.has_node("Objects"):
+					SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), float(d["windup"]) / float(TICK_HZ))
+			"attack_hit":
+				_monster_pose(m, e, "attack", 1, SomData.MONSTER_STRIKE_MS / 1000.0)
+				_golem_strike(m, e, str(d["id"]), float(d["power"]))
+			"phase":
+				e["golem_phase"] = int(d["index"])
+			"adds":
+				_golem_spawn_adds(m, d.get("ids", []))
+
+
+## Aanval landt: elke levende held binnen het bereik (tegels uit GolemBoss.ATTACKS) wordt geraakt.
+func _golem_strike(m: Node, e: Dictionary, attack_id: String, power: float) -> void:
+	var a := GolemBoss.attack(attack_id)
+	var origin: Vector2 = e.get("golem_origin", center_of(m))
+	var reach := float(a.get("reach_tiles", 1.0)) * 16.0
+	if str(a.get("aim", "")) != "target":
+		reach += 8.0 * (maxf(m.size.x, m.size.y) - 1.0)     # 2x2-baas: bereik vanaf de rand
+	for id in party_ids():
+		if is_alive(id) and node_of(id) != null and origin.distance_to(body_of(id)) <= reach:
+			hit_member(id, int(e["atk"]), power)
+
+
+func _golem_spawn_adds(m: Node, ids: Array) -> void:
+	if room == null or not room.has_method("add_monster"):
+		return
+	var i := 0
+	for id in ids:
+		var off := Vector2i(-2 if i % 2 == 0 else 3, 2)
+		room.add_monster({"id": "golem_add_%d_%d" % [sim_tick, i], "enemy": str(id), "tile": [m.tile.x + off.x, m.tile.y + off.y], "moves": true})
+		i += 1
 
 
 ## Inktwurm / Inktspuw: TelegraphState + vaste shape (T4a). Zelfde cadans als de float-telegraaf.
@@ -1595,8 +1722,7 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 		return false
 	if int(_dodge_roll_ticks.get(id, 0)) > 0 or int(_dodge_cd_ticks.get(id, 0)) > 0:
 		return false
-	if swing_lock > 0.0 and id == active_id:
-		return false
+	# T29 (Dennis 13:09): een actieve dodge mag een lopende slag annuleren (swing_lock blokkeert niet meer).
 	if not combat_stamina.spend(id, SomData.STAMINA_DODGE_COST):
 		return false
 	var d := dir.normalized() if dir.length_squared() > 0.01 else _dodge_facing_dir(id)
@@ -1606,6 +1732,11 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 	_dodge_roll_ticks[id] = SomData.DODGE_DURATION_TICKS
 	_dodge_cd_ticks[id] = SomData.DODGE_COOLDOWN_TICKS
 	chain_reset(id)            # dodge annuleert de aanvalsketen van deze actor
+	if id == active_id:
+		swing_lock = 0.0       # T29: dodge annuleert de lopende slag
+	for sl in _coop_slots.keys():
+		if str(_coop_slots[sl]) == id:
+			_coop_swing_lock[sl] = 0.0
 	heavy_cancel(id)           # en het opladen (geen zware slag)
 	iframes[id] = float(SomData.DODGE_IFRAME_TICKS) * TICK_DT
 	if id == active_id and room != null and room.has_method("start_invuln"):
@@ -2041,6 +2172,7 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 	_coop_slots.clear()
 	_coop_lock_idx.clear()
 	_coop_attack_cd.clear()
+	_coop_swing_lock.clear()
 	_rebuild_enemy_order()
 	_clear_coop_avatars()
 	coop_sync_roster(roster)
@@ -2326,6 +2458,8 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 	for inp in inputs:
 		_apply_coop_input(inp, dt)
 	swing_lock = maxf(0.0, swing_lock - dt)
+	for sl in _coop_swing_lock.keys():
+		_coop_swing_lock[sl] = maxf(0.0, float(_coop_swing_lock[sl]) - dt)
 	_tick_chain()
 	for m in enemies.keys():
 		if is_instance_valid(m):
@@ -2366,11 +2500,13 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 	var cd := float(_coop_attack_cd.get(slot, 0.0))
 	cd = maxf(0.0, cd - dt)
 	_coop_attack_cd[slot] = cd
-	if buttons & Codec.BTN_ATTACK and cd <= 0.0:
+	if buttons & Codec.BTN_ATTACK and cd <= 0.0 and float(_coop_swing_lock.get(slot, 0.0)) <= 0.0:
 		var hid := str(_coop_slots[slot])
 		if is_alive(hid):
 			chain_swing(hid, body, charge_mult(charge if slot == coop_local_slot else 1.0))
+			var step := int(chain_of(hid).get("last", -1)) if Settings.action_battles() else -1
 			_coop_attack_cd[slot] = 0.35
+			_coop_swing_lock[slot] = maxf(COOP_MIN_SWING_LOCK, _anim_seconds_def(hid, _attack_def(hid, step)))
 			if Settings.action_battles():
 				heavy_hold[hid] = 0          # indrukken start de vasthoud-teller (SomHeavyData)
 	var hid_h := str(_coop_slots.get(slot, ""))

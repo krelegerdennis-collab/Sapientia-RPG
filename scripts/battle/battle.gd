@@ -111,10 +111,12 @@ const CommandCrossScript := preload("res://scripts/battle/command_cross.gd")
 const CodexDataScript := preload("res://scripts/data/codex_data.gd")   # v0.19 Codex-knop
 ## v0.14 (RPG CODE) roze kern van de Golem-baas: regels + beeld (zie boss_core.gd)
 const BossCore := preload("res://scripts/battle/boss_core.gd")
+const BossHpBarScript := preload("res://scripts/battle/boss_hp_bar.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")   # v0.15 kernvaardigheden
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const Archief2Vijanden := preload("res://scripts/data/archief2_vijanden.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const DamageCalc := preload("res://scripts/battle/damage_calc.gd")   # schadeformules (static)
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
@@ -254,6 +256,7 @@ func _ready() -> void:
 	_spawn_enemies(ids)
 	if not tutorial.is_empty():
 		_make_tip()
+	_make_boss_bar()
 	_refresh_party()
 	_layout()
 	resized.connect(_layout)
@@ -261,6 +264,30 @@ func _ready() -> void:
 	_run.call_deferred()
 	if _pp_on:
 		PerfProbe.end(_pp_lbl)
+
+
+## Demo-fix 3: zichtbare HP-balk voor de baas (eerste vijand met een kern / in een baasgevecht).
+var boss_bar: Control = null
+
+
+func _make_boss_bar() -> void:
+	if not GameState.pending_boss or enemies.is_empty():
+		return
+	var t: Dictionary = enemies[0]
+	for e in enemies:
+		if e.has("core"):
+			t = e
+			break
+	boss_bar = BossHpBarScript.new()
+	boss_bar.name = "BossHpBar"
+	add_child(boss_bar)
+	move_child(boss_bar, $TouchControls.get_index())
+	boss_bar.setup(t)
+
+
+func _place_boss_bar(w: float) -> void:
+	if boss_bar:
+		boss_bar.position = Vector2(roundf(w - boss_bar.size.x - 6.0 - _safe().z), 18.0 + _safe().y)
 
 
 # ================================================================ fijn raster (768x432)
@@ -306,6 +333,7 @@ func _make_cross() -> void:
 	cross.name = "CommandCross"
 	add_child(cross)
 	move_child(cross, $TouchControls.get_index())     # onder de touch-knoppen
+	cross.denied.connect(func(i: int): if i == 1: show_notice("No spells yet"))
 	target_name = PanelContainer.new()
 	target_name.name = "TargetName"
 	target_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -383,19 +411,6 @@ func _enemy_base(id: String) -> Dictionary:
 	if GameData.ENEMIES.has(id):
 		return GameData.ENEMIES[id]
 	return BerggrotData.enemy(id)
-
-
-## SoM-proef: geldt de Action-modus baas-vermenigvuldiger in dit gevecht?
-static func action_boss_on() -> bool:
-	return GameState.dungeon100_floor <= 0 and (GameState.som_mode or Settings.action_battles())
-
-
-## Gemiddeld level van de party (voor de Action-baas-schaal).
-static func action_party_level() -> float:
-	var s := 0.0
-	for h in GameState.party:
-		s += float(h.get("level", 1))
-	return s / float(maxi(1, GameState.party.size()))
 
 
 func _spawn_enemies(ids: Array) -> void:
@@ -609,6 +624,7 @@ func _layout() -> void:
 	_menu_left = left
 	_menu_right = right
 	_fit_caption()
+	_place_boss_bar(w)
 	# Statusvakken: onderaan. v0.22 (Dennis): het Codex-monster heeft GEEN vak in de rij meer;
 	# zijn vak is een klein 'zijspeler'-label (icoon + naam, geen balken) boven de B-knop en de
 	# sprite staat daar vlak boven. De lijst status_boxes blijft gelijk aan heroes (indexen).
@@ -945,6 +961,12 @@ func _choose_for_hero(hero: Dictionary, can_go_back: bool):
 		]
 		cross.open(hero["name"], allowed, last, can_go_back, [] if codex_command_shown() else [COMMANDS.size() - 1])
 		var cmd: int = await cross.finished
+		if cmd == 1 and not has_usable_magic(hero) and _kern_skills(hero).is_empty():
+			# Demo-fix 1: spreuken maar geen MP / niets te kiezen — geen submenu (soft-lock voorkomen).
+			# Met kernvaardigheden altijd _choose_spell: laad-regels staan uitgegrijsd (kerntest).
+			show_notice("No spells yet")
+			last = 0
+			continue
 		cross.deactivate()
 		last = maxi(cmd, 0)
 		match cmd:
@@ -971,6 +993,26 @@ func _choose_for_hero(hero: Dictionary, can_go_back: bool):
 				if c != null:
 					return c
 	return null
+
+
+## Demo-fix 1: heeft de held een spreuk met genoeg MP of een geladen kernvaardigheid?
+func has_usable_magic(hero: Dictionary) -> bool:
+	for id in hero["s"]["spells"]:
+		if int(hero["s"]["mp"]) >= int(GameData.SPELLS[id]["mp"]):
+			return true
+	for id in _kern_skills(hero):
+		if kern_ready(hero, id):
+			return true
+	return false
+
+
+## Bericht dat ook tijdens het kiezen in de strook verschijnt (show_message verbergt die dan).
+func show_notice(text: String) -> void:
+	show_message(text)
+	message_label.text = text
+	message_label.modulate = Color.WHITE
+	caption.visible = true
+	_fit_caption()
 
 
 ## v0.19: staat de Codex-knop in het kruis? Niet in het oefengevecht, en niet zolang er nog
@@ -1527,47 +1569,31 @@ func _enemy_lunge(actor: Dictionary, target: Dictionary) -> void:
 	await _wait(0.1)
 
 
-## Schadeformule: ATK - DEF/2, +/- 15% geluk, verdedigen = halve schade.
-## Zwakte telt alleen als het doel weak_matters heeft (Archief 2). Andere vijanden blijven gelijk.
+## Schadeberekening staat in DamageCalc (scripts/battle/damage_calc.gd); dit zijn dunne wrappers
+## met de oude namen, zodat aanroepers (tests, tools/battlesim) ongewijzigd blijven.
 func _physical_damage(attacker: Dictionary, target: Dictionary, mult: float) -> int:
-	var dmg := maxi(1, roundi(physical_base(attacker, target, mult) * randf_range(0.85, 1.15)))
-	if target["defending"]:
-		dmg = maxi(1, int(dmg / 2.0))
-	dmg = maxi(1, roundi(float(dmg) * Archief2.zwakte_fysiek(attacker, target)))
-	return dmg
+	return DamageCalc.physical_damage(attacker, target, mult)
 
 
-## Spreuken: power op level 1 + power_per_level per level erboven, maal het element, +/- 10%.
 func _spell_amount(caster: Dictionary, spell: Dictionary, target: Dictionary) -> int:
-	return maxi(1, roundi(spell_base(caster, spell, target) * randf_range(0.9, 1.1)))
+	return DamageCalc.spell_amount(caster, spell, target)
 
 
-## Basis van de formules hierboven, zonder geluk en zonder randf(): de simulator-AI
-## (tools/battlesim) schat er schade mee zonder de RNG-volgorde van het gevecht te verschuiven.
+## Basis zonder geluk en zonder randf(): de simulator-AI schat er schade mee.
 func physical_base(attacker: Dictionary, target: Dictionary, mult: float) -> float:
-	return float(attacker["s"]["atk"]) * _buff_mult(attacker, "atk") * mult - _defense_of(target) / 2.0
+	return DamageCalc.physical_base(attacker, target, mult)
 
 
 func spell_base(caster: Dictionary, spell: Dictionary, target: Dictionary) -> float:
-	var lvl := int(caster["s"].get("level", 1))
-	return SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target) * _token_mult(caster)
+	return DamageCalc.spell_base(caster, spell, target)
 
 
 func _buff_mult(c: Dictionary, stat: String) -> float:
-	var m := _token_mult(c)
-	for b in c.get("buffs", []):
-		if typeof(b) != TYPE_DICTIONARY:
-			continue
-		if str(b.get("stat", "")) == stat and int(b.get("turns", 0)) > 0:
-			m *= 1.0 + float(b.get("pct", 0.0))
-	return m
+	return DamageCalc.buff_mult(c, stat)
 
 
-## "H-5's Token" van de Koopman (CANON §12): +10% stats voor de helden tegen dienaren van Sapientia.
 func _token_mult(c: Dictionary) -> float:
-	if not bool(c.get("is_hero", false)):
-		return 1.0
-	return KoopmanData.token_factor(GameState.koopman_token, not GameState.practice_battle)
+	return DamageCalc.token_mult(c)
 
 
 func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
@@ -1604,7 +1630,20 @@ func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
 	if float(fx.get("dot_pct", 0.0)) > 0.0:
 		if not target.has("dots"):
 			target["dots"] = []
-		(target["dots"] as Array).append({"pct": float(fx["dot_pct"]), "turns": int(fx.get("dot_turns", 3))})
+		var pct := float(fx["dot_pct"])
+		var turns := int(fx.get("dot_turns", 3))
+		# Brand (de niet-gif DoT) stapelt niet: een nieuwe brand ververst de bestaande entry
+		# (duur en pct naar de hoogste waarde), zodat er per doel maar een brand loopt.
+		var burn: Dictionary = {}
+		for d in target["dots"]:
+			if typeof(d) == TYPE_DICTIONARY and not bool(d.get("gif", false)):
+				burn = d
+				break
+		if burn.is_empty():
+			(target["dots"] as Array).append({"pct": pct, "turns": turns})
+		else:
+			burn["pct"] = maxf(float(burn.get("pct", 0.0)), pct)
+			burn["turns"] = maxi(int(burn.get("turns", 0)), turns)
 	# Verlamming/bevriezing: kans (SpellRules.STUN_CHANCE), met de randf() van het gevecht.
 	if int(fx.get("skip", 0)) > 0 and SpellRules.stun_lands(fx, is_boss_target(target), randf(), stun_boss_immune, stun_chance):
 		target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
@@ -1926,10 +1965,7 @@ func _guard_tick(c: Dictionary) -> void:
 
 ## DEF van een doelwit, met schild omhoog (x guard_mult).
 func _defense_of(t: Dictionary) -> float:
-	var d := float(t["s"]["def"]) * _buff_mult(t, "def") + float(t.get("buff_def", 0))
-	if int(t.get("guard", 0)) > 0:
-		d *= float(t.get("guard_mult", 2.0))
-	return d
+	return DamageCalc.defense_of(t)
 
 
 ## Eén keer aan het begin: uitleg in één regel.
@@ -2388,15 +2424,11 @@ func kern_entry_text(hero: Dictionary, id: String) -> String:
 ## Schade van een fysieke kernvaardigheid: ATK x atk_mult - DEF x def_factor, +/- 15%,
 ## verdedigen = helft (zoals _physical_damage, maar met minder pantser).
 func kern_damage(attacker: Dictionary, target: Dictionary, skill: Dictionary) -> int:
-	var dmg := maxi(1, roundi(kern_base(attacker, target, skill) * randf_range(0.85, 1.15)))
-	if target["defending"]:
-		dmg = maxi(1, int(dmg / 2.0))
-	return dmg
+	return DamageCalc.kern_damage(attacker, target, skill)
 
 
 func kern_base(attacker: Dictionary, target: Dictionary, skill: Dictionary) -> float:
-	return float(attacker["s"]["atk"]) * float(skill.get("atk_mult", 1.5)) \
-			- _defense_of(target) * float(skill.get("def_factor", 0.25))
+	return DamageCalc.kern_base(attacker, target, skill)
 
 
 func _kern_strike(a: Dictionary) -> void:

@@ -28,6 +28,8 @@ const StoryData := preload("res://scripts/data/story_data.gd")
 const SpiegelData := preload("res://scripts/data/spiegel_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const WorldWarperUnlock := preload("res://world_warper/flow/unlock.gd")
+## Geen preload: flow → drift → font breekt --import (autoload parse-keten).
+const OPENING_FLOW_PATH := "res://world_warper/opening/flow.gd"
 const PerfProbeScript := preload("res://scripts/perf/perf_probe.gd")
 const LevelScale := preload("res://scripts/data/level_scale.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
@@ -214,6 +216,8 @@ const SAVE_VERSION := 1
 ## Marker in elke save en elk checkpoint van deze versie: wie hem mist komt van vóór de Codex-Inktwurm-regels
 ## en wordt in _codex_inktwurm_sync gemigreerd. Zo telt een nieuwe save tussen de twee tutorials niet als oud.
 const CODEX_SYNC_KEY := "inktwurm_codex_sync"
+## In-memory: staat gelijk met de marker in save/checkpoint (niet elke achtergrond-autosave schrijft hem).
+var _codex_sync_marked := false
 const SLOT_COUNT := 4
 ## Grenzen voor getallen uit een save (kapotte of met de hand aangepaste bestanden).
 const MAX_GOLD := 999999999
@@ -545,6 +549,10 @@ func _ready() -> void:
 	# Grondzones / Inktplas (Combat T4b): of  godot -- --zonetest  (scripts/tests/zone_tests.gd).
 	# Wortelgreep-status (Combat T6): of  godot -- --roottest  (scripts/tests/root_tests.gd).
 	# Actieve dodge + stamina (Combat D5): of  godot -- --dodgetest  (scripts/tests/dodge_tests.gd).
+	# D3 bazen fase-machine (PR A): of  godot -- --bossphasetest  (scripts/tests/boss_phase_tests.gd).
+	# D3 realtime Golem (PR B): of  godot -- --golemactiontest  (scripts/tests/golem_action_tests.gd)
+	#   en  godot -- --golemactionsimtest  (scripts/tests/golem_actionsim_tests.gd, kleine sim als rookproef).
+	# D3 arena-hook realtime Golem (PR C): of  godot -- --golemarenatest  (scripts/tests/golem_arena_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
@@ -564,6 +572,7 @@ func _ready() -> void:
 			["--puzzletest", "res://scripts/tests/puzzle_tests.gd", "PuzzleTest", "puzzletest"],
 			["--dungeontest", "res://scripts/tests/dungeon_tests.gd", "DungeonTest", "dungeontest"],
 			["--golemtest", "res://scripts/tests/golem_tests.gd", "GolemTest", "golemtest"],
+			["--demofixtest", "res://scripts/tests/demofix_tests.gd", "DemoFixTest", "demofixtest"],
 			["--archieftest", "res://scripts/tests/archief_tests.gd", "GeheimTest", "archieftest"],
 			["--kerntest", "res://scripts/tests/kern_tests.gd", "KernTest", "kerntest"],
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
@@ -597,7 +606,8 @@ func _ready() -> void:
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
 			["--savehardeningtest", "res://scripts/tests/save_hardening_tests.gd", "SaveHardeningTest", "savehardeningtest"],
 			["--savefuzztest", "res://scripts/tests/save_fuzz_tests.gd", "SaveFuzzTest", "savefuzztest"],
-			["--saveroundtriptest","res://scripts/tests/save_roundtrip_tests.gd", "SaveRoundtripTest", "saveroundtriptest"],
+			["--saverobusttest", "res://scripts/tests/save_robust_tests.gd", "SaveRobustTest", "saverobusttest"],
+			["--saveroundtriptest", "res://scripts/tests/save_roundtrip_tests.gd", "SaveRoundtripTest", "saveroundtriptest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
@@ -626,9 +636,14 @@ func _ready() -> void:
 			["--zonetest", "res://scripts/tests/zone_tests.gd", "ZoneTest", "zonetest"],
 			["--roottest", "res://scripts/tests/root_tests.gd", "RootTest", "roottest"],
 			["--dodgetest", "res://scripts/tests/dodge_tests.gd", "DodgeTest", "dodgetest"],
+			["--bossphasetest", "res://scripts/tests/boss_phase_tests.gd", "BossPhaseTest", "bossphasetest"],
+			["--golemactiontest", "res://scripts/tests/golem_action_tests.gd", "GolemActionTest", "golemactiontest"],
+			["--golemactionsimtest", "res://scripts/tests/golem_actionsim_tests.gd", "GolemActionsimTest", "golemactionsimtest"],
+			["--golemarenatest", "res://scripts/tests/golem_arena_tests.gd", "GolemArenaTest", "golemarenatest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
+			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--formuletest", "res://scripts/tests/formule_tests.gd", "FormuleTest", "formuletest"],
@@ -649,8 +664,11 @@ func _ready() -> void:
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
 			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
+			["--openingtest", "res://scripts/tests/opening_tests.gd", "OpeningTest", "openingtest"],
+			["--studiourltest", "res://scripts/tests/studio_url_tests.gd", "StudioUrlTest", "studiourltest"],
 			["--aabtest", "res://scripts/tests/aab_tests.gd", "AabTest", "aabtest"],
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
+			["--wm1dekkingtest", "res://scripts/tests/wm1_dekking_tests.gd", "Wm1DekkingTest", "wm1dekkingtest"],
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
@@ -987,6 +1005,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	_play_time_base = 0.0
 	_clock_start_ms = Time.get_ticks_msec()
 	active_slot = clampi(pending_new_slot, 1, SLOT_COUNT)
+	_codex_sync_marked = false
 
 
 ## Naam opschonen: spaties eraf, max. NAME_MAX tekens, leeg = DEFAULT_NAME.
@@ -1490,7 +1509,7 @@ func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
 		return false
 	if not can_autosave(reason == "achtergrond"):
 		return false
-	if not save_game(tile, facing, autosave_path):
+	if not save_game(tile, facing, autosave_path, reason):
 		return false
 	last_autosave_reason = reason
 	autosave_count += 1
@@ -1534,7 +1553,8 @@ func _notification(what: int) -> void:
 			_coop_pending_message = ""
 			go_to_title(true)
 			Dialog.show_lines([pending])
-	if what == NOTIFICATION_APPLICATION_PAUSED \
+	if what == NOTIFICATION_WM_CLOSE_REQUEST \
+			or what == NOTIFICATION_APPLICATION_PAUSED \
 			or (what == NOTIFICATION_APPLICATION_FOCUS_OUT and OS.has_feature("mobile")):
 		autosave_on_background()
 
@@ -1548,14 +1568,16 @@ func autosave_on_background() -> bool:
 
 ## Schrijft de voortgang naar save_path (JSON), of naar 'path' (v0.11: de autosave).
 ## Geeft true als het gelukt is.
-func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
+func save_game(tile: Vector2i, facing: Vector2i, path := "", autosave_reason := "") -> bool:
 	if coop_is_guest():
 		return false
 	if path == "":
 		var slot_file := slot_path(active_slot)
 		path = slot_file if slot_file != "" else save_path
 	var data := state_data(tile, facing)
-	data[CODEX_SYNC_KEY] = true
+	var stamp_sync := _codex_sync_marked or not (path == autosave_path and autosave_reason == "achtergrond")
+	if stamp_sync:
+		data[CODEX_SYNC_KEY] = true
 	data["game_version"] = str(ProjectSettings.get_setting("application/config/version", ""))
 	data["saved_at"] = Time.get_datetime_string_from_system()
 	data["saved_unix"] = Time.get_unix_time_from_system()
@@ -1571,6 +1593,8 @@ func save_game(tile: Vector2i, facing: Vector2i, path := "") -> bool:
 	var text := JSON.stringify(data, "  ")
 	var tmp := path + ".tmp"
 	var saved := _write_save_atomic(path, tmp, text)
+	if saved and stamp_sync:
+		_codex_sync_marked = true
 	game_saved.emit(path, saved)
 	return saved
 
@@ -1664,7 +1688,7 @@ func _party_save_from(groep: Array) -> Array:
 
 ## Party uit save-data terug (kapotte velden krijgen de standaardwaarde); uitrusting die niet meer past
 ## komt in 'stray_equipment'.
-func _party_from(raw: Array, stray_equipment: Array) -> Array:
+func _party_from(raw: Array, stray_equipment: Array, oude_namen := true) -> Array:
 	var out := []
 	for e in raw:
 		if not (e is Dictionary):
@@ -1679,7 +1703,7 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 			if h.has(k) and h[k] is int and not (v is float or v is int):
 				continue      # kapot getal: standaardwaarde van de held houden
 			h[k] = int(v) if v is float else v
-		if h.get("name") is String:
+		if oude_namen and h.get("name") is String:
 			h["name"] = migrate_name(str(h["name"]))
 		if e.has("spells") and e["spells"] is Array:
 			h["spells"] = e["spells"].duplicate()
@@ -1699,6 +1723,9 @@ func _party_from(raw: Array, stray_equipment: Array) -> Array:
 ## v0.23 namen-migratie (besluit Dennis 13 okt 2026): oude saves bewaren de weergavenamen.
 ## Dennis -> Dax, Lotte -> Seren, Noor -> Vesper. Ids (dennis/lotte/noor) blijven gelijk.
 const OUDE_NAMEN := {"Dennis": "Dax", "Lotte": "Seren", "Noor": "Vesper"}
+## r7-3 #3: saves vanaf deze sleutel hebben al nieuwe namen; alleen saves zonder sleutel migreren,
+## anders verliest een speler die zichzelf "Dennis" noemt zijn naam bij laden/game over.
+const NAMES_KEY := "names_v23"
 
 static func migrate_name(n: String) -> String:
 	return str(OUDE_NAMEN.get(n, n))
@@ -1730,6 +1757,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	var data := {
 		"battle_style": int(Settings.get_value("battle_style")),   # 21 okt 2026: gevechtsstijl reist mee met de save
 		"version": SAVE_VERSION,
+		NAMES_KEY: true,
 		"map": map if map != "" else current_map,
 		"tile": [tile.x, tile.y],
 		"facing": [facing.x, facing.y],
@@ -1761,6 +1789,8 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 	data["party"] = _party_save()
 	data["party_bank"] = _party_save_from(party_bench)
 	data["leader"] = leader_id
+	if _codex_sync_marked:
+		data[CODEX_SYNC_KEY] = true
 	return data
 
 
@@ -1833,6 +1863,9 @@ func load_game(path := "", gelezen: Dictionary = {}) -> bool:
 		last_load_notice = NOTICE_RECOVERED
 		pending_respawn_msg = RECOVERED_LINES.duplicate()
 		save_recovered.emit(main_path, main_path + ".bak")
+	var loaded_path := path if path != "" else save_path
+	_remove_file(loaded_path + ".tmp")
+	_remove_file(loaded_path + ".bak.tmp")
 	game_loaded.emit(path if path != "" else save_path, true)
 	return true
 
@@ -1858,15 +1891,18 @@ func apply_state(d: Dictionary) -> bool:
 	# of nieuwere saves) laten het spel nooit vastlopen.
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
-	player_name = migrate_name(clean_name(str(d.get("player_name", DEFAULT_NAME))))
+	var oude_namen := not d.has(NAMES_KEY)
+	player_name = clean_name(str(d.get("player_name", DEFAULT_NAME)))
+	if oude_namen:
+		player_name = migrate_name(player_name)
 	# #166: ontbrekende sleutel (oude save) = "" = uitgang naar wilgendal.tscn zoals vroeger
 	huis_herkomst = "dorp" if str(d.get("huis_herkomst", "")) == "dorp" else ""
 	party.clear()
 	var stray_equipment: Array = []
-	party = _party_from(d["party"], stray_equipment)
+	party = _party_from(d["party"], stray_equipment, oude_namen)
 	party_bench = []
 	if d.get("party_bank") is Array:
-		party_bench = _party_from(d["party_bank"], stray_equipment)
+		party_bench = _party_from(d["party_bank"], stray_equipment, oude_namen)
 	if party.is_empty():
 		add_member(MAIN_HERO)
 	leader_id = str(d.get("leader", MAIN_HERO)) if d.get("leader", MAIN_HERO) is String else MAIN_HERO
@@ -1895,6 +1931,7 @@ func apply_state(d: Dictionary) -> bool:
 	if flags is Array:
 		for f in flags:
 			story_flags[str(f)] = true
+	_call_opening_flow("migrate", story_flags, story_step)
 	# v0.22 bekeken cutscenes (oude saves: geen veld -> afgeleid van de vlaggen)
 	scenes_seen = []
 	var seen_raw = d.get("scenes_seen", [])
@@ -1942,6 +1979,7 @@ func apply_state(d: Dictionary) -> bool:
 			if is_unique(str(k)):
 				unique_done[str(k)] = "gevangen" if str(un[k]) == "gevangen" else "verslagen"
 	_unique_seen_flags()
+	_codex_sync_marked = d.has(CODEX_SYNC_KEY)
 	_codex_inktwurm_sync(not d.has(CODEX_SYNC_KEY))
 	puzzle_latched = {}
 	archief2 = {"platen": {}}
@@ -2304,7 +2342,10 @@ func start_new_game(hero_name: String) -> void:
 	# Geladen saves houden hun eigen keuze (load_game; zonder sleutel = Classic).
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	changing_map = false
-	change_map(START_MAP, START_SPAWN)
+	if bool(_call_opening_flow("should_play", story_flags)):
+		_call_opening_flow("start")
+	else:
+		change_map(START_MAP, START_SPAWN)
 	# v0.11: niet meteen automatisch opslaan bij een nieuw spel (anders is de autosave van
 	# het vorige spel direct weg); dat gebeurt pas bij de eerste echte mapwissel.
 	_autosave_request = ""
@@ -2551,6 +2592,7 @@ func has_checkpoint() -> bool:
 
 ## v0.19: leg het kamer-checkpoint vast (map.gd, bij binnenkomst): plek + kopie van de voortgang.
 func set_checkpoint(map: String, tile: Vector2i, facing: Vector2i) -> void:
+	_codex_sync_marked = true
 	var state := state_data(tile, facing, map)
 	state[CODEX_SYNC_KEY] = true
 	checkpoint = {"map": map, "tile": [tile.x, tile.y], "facing": [facing.x, facing.y], "state": state}
@@ -3203,15 +3245,33 @@ func _codex_inktwurm_sync(oude_save := true) -> void:
 		return
 	story_flags[StoryData.TUTORIAL_CODEX_FLAG] = true
 	if story_flags.has(flag):
+		_codex_sync_marked = true
 		return
 	if unique_state("inktwurm") == "gevangen":
 		story_flags[flag] = true
 	elif not codex_full():
 		codex_add("inktwurm", CodexData.capture_level(0, "inktwurm"), {"play_time": int(play_time())})
 		mark_seen("inktwurm")
+	_codex_sync_marked = true
 
 
 # ---------------------------------------------------------------- world warper
+## Lazy load opening-flow (geen preload op autoload: --import).
+static func _opening_flow_script() -> Script:
+	return load(OPENING_FLOW_PATH) as Script
+
+
+static func _call_opening_flow(method: String, arg1 = null, arg2 = null):
+	var scr := _opening_flow_script()
+	if scr == null:
+		return null
+	if arg2 != null:
+		return scr.call(method, arg1, arg2)
+	if arg1 != null:
+		return scr.call(method, arg1)
+	return scr.call(method)
+
+
 ## De hub gaat open na De Genezer (einde Archief 2). Zelfde vlag als
 ## WorldWarperUnlock.BEWAKER_VLAG. De bewaker van verdieping 2 van het Eerste
 ## Archief opent de hub niet. Geen Worldmap 2 of 3.
@@ -3225,3 +3285,4 @@ func try_unlock_world_warper() -> bool:
 	if not story_flags.has(WorldWarperUnlock.UNLOCK_VLAG):
 		story_flags[WorldWarperUnlock.UNLOCK_VLAG] = true
 	return true
+
