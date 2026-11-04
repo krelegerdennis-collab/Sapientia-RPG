@@ -642,6 +642,7 @@ func _ready() -> void:
 			["--golemactiontest", "res://scripts/tests/golem_action_tests.gd", "GolemActionTest", "golemactiontest"],
 			["--golemactionsimtest", "res://scripts/tests/golem_actionsim_tests.gd", "GolemActionsimTest", "golemactionsimtest"],
 			["--golemarenatest", "res://scripts/tests/golem_arena_tests.gd", "GolemArenaTest", "golemarenatest"],
+			["--golemstorytest", "res://scripts/tests/golem_story_tests.gd", "GolemStoryTest", "golemstorytest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
