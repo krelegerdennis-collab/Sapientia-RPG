@@ -35,6 +35,7 @@ const SomData := preload("res://scripts/data/som_data.gd")
 const BossScript := preload("res://scripts/som/boss_script.gd")
 const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 const GolemFight := preload("res://scripts/som/golem_fight.gd")
+const GolemStoryWin := preload("res://scripts/som/golem_story_win.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
@@ -183,6 +184,8 @@ const GOLEM_RT_ROOMS := ["archief_golemhal"]
 var _golem_registered_here := false
 ## Event-log van de Golem-hook (tests/HUD): {tick, type, ...} uit GolemFight.take_events().
 var golem_events: Array = []
+## Tests: zette de laatste Golem-winst in deze arena de verhaal-beat (true) of was hij al gedaan (false)?
+var golem_story_fired := false
 
 
 func _init() -> void:
@@ -1187,6 +1190,9 @@ func _defeat_enemy(m: Node) -> void:
 	GameState.defeated_map_monsters[room.room_id][m.monster_id] = true
 	room.monsters.erase(m)
 	_say("\n".join(lines))
+	if e.has("golem") and _story_authority():
+		# realtime Golem verslagen: dezelfde verhaal-beat als de turn-based winst (eenmalig, host)
+		golem_story_fired = GolemStoryWin.apply(str(room.room_id), str(m.monster_id), str(m.enemy_id), room)
 	enemy_defeated.emit(m, gained_exp, gained_gold, got)
 	m.set_process(false)
 	m.collision_layer = 0
@@ -1519,6 +1525,11 @@ func _sync_telegraph_draw() -> void:
 	telegraph_layer.sync_from_enemies(enemies, Callable(self, "_telegraph_interruptible"))
 	telegraph_layer.sync_from_zones(combat_zones)
 	telegraph_layer.sync_from_roots(combat_roots, _root_icon_positions())
+
+
+## Verhaal-beats (vlaggen, kern) alleen op de host / solo: clients krijgen ze niet zelf.
+func _story_authority() -> bool:
+	return not coop_mode or coop_sim_host
 
 
 func _zones_authority() -> bool:
