@@ -896,6 +896,8 @@ func _run() -> void:
 			_kern_tick(c)    # v0.15: kernvaardigheden laden op
 			_tick_ailments(c)
 		_refresh_party()
+		# #8 (EDGECASES_ITEMS_STATUS): KO door gif/brand melden zoals elke andere KO (bericht, geluid, fade).
+		await _report_kos(heroes + enemies)
 		if _alive(enemies).is_empty():
 			await _victory()
 			return
