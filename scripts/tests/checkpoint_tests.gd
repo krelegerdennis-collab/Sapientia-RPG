@@ -505,8 +505,8 @@ func _data_tests() -> void:
 		if e[0] != "" and DungeonRoomScript.is_boss_room(DR.room(e[0])):
 			bosses.append(e[0])
 	check("alle baaskamers in de data: %s (alleen deze twee)" % [bosses], bosses == ["archief_golemhal", WR.BOSS_ROOM])
-	check("tekst Nederlands: 'Je ontwaakt voor de deur...' / 'Je ontwaakt waar je binnenkwam...'",
-			GameState.RESPAWN_LINES_BOSS[0] == "You wake before the door..." and GameState.RESPAWN_LINES[0] == "You wake where you came in...")
+	check("respawn-tekst (R1): 'The Current pulls you back...' (deur / ingang)",
+			GameState.RESPAWN_LINES_BOSS[0] == "The Current pulls you back before the door." and GameState.RESPAWN_LINES[0] == "The Current pulls you back to where you came in.")
 	GameState.new_game("Dax")
 	check("nieuw spel: geen checkpoint; game over-tekst = de oude ('wakker bij het begin')",
 			GameState.checkpoint.is_empty() and not GameState.has_checkpoint()
@@ -538,7 +538,7 @@ func _room_tests() -> void:
 	r.start_monster_battle(r.monsters[0])
 	check("gevecht in de Gang gestart (geen baas)", await wait_scene("Battle") and not GameState.pending_boss)
 	var over := await lose_battle()
-	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nYou wake where you came in...")
+	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nThe Current pulls you back to where you came in.")
 	check("na game over terug in de Gang (niet Willowdale)", await wait_scene("ArchiefV1Gang"))
 	await pframes(3)
 	check("uitslag = lose", GameState.last_battle_result == "lose")
@@ -551,7 +551,7 @@ func _room_tests() -> void:
 			and int(GameState.party[0]["exp"]) == exp0 and not GameState.story_flags.has("test_na_checkpoint"))
 	check("alle monsters van de kamer staan er weer (%d)" % scene().monsters.size(), scene().monsters.size() == n_mon)
 	var line := await respawn_line()
-	check("bericht: '%s'" % line, line == "You wake where you came in...")
+	check("bericht: '%s'" % line, line == "The Current pulls you back to where you came in.")
 	check("save-slots: GEEN autosave na het ontwaken", GameState.last_autosave_reason != "respawn")
 	check("checkpoint blijft dezelfde (Gang, ingang)", GameState.checkpoint.get("map") == GANG and cp_tile() == sp[0])
 	await close_dialog()
@@ -613,7 +613,7 @@ func _world_tests() -> void:
 	check("op de plek waar je de kaart binnenkwam %s (nu %s)" % [start, tile()], tile() == start)
 	check("vol HP/MP, goud van toen (%d, geen helft kwijt)" % GameState.gold, full_hp_mp() and GameState.gold == gold0)
 	var line := await respawn_line()
-	check("bericht: '%s'" % line, line.begins_with("You wake"))
+	check("bericht: '%s'" % line, line.begins_with("The Current pulls you back"))
 	await close_dialog()
 
 
@@ -660,7 +660,7 @@ func _golem_tests() -> void:
 	scene().start_monster_battle(golem)
 	check("baasgevecht tegen de Golem", await wait_scene("Battle") and GameState.pending_boss)
 	var over := await lose_battle()
-	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nYou wake before the door...")
+	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nThe Current pulls you back before the door.")
 	check("na game over: in de Library (kamer voor de baas)", await wait_scene("ArchiefBibliotheek"))
 	await pframes(3)
 	check("op de ingang van de Library %s (nu %s), kijkt naar de deur" % [sp[0], tile()], tile() == sp[0]
@@ -670,7 +670,7 @@ func _golem_tests() -> void:
 	check("Golem niet als verslagen gemarkeerd", not GameState.story_flags.has(SD.GOLEM_FLAG) and not GameState.has_kern("golemkern"))
 	check("last_respawn: baas = true, Library", GameState.last_respawn.get("boss") == true and GameState.last_respawn.get("map") == BIEB)
 	var line := await respawn_line()
-	check("bericht: '%s'" % line, line == "You wake before the door...")
+	check("bericht: '%s'" % line, line == "The Current pulls you back before the door.")
 	await wait_until(func(): return not Dialog._is_typing(), 4.0)
 	await pframes(4)
 	var shot_path := v19_dir.path_join("v19_respawn.png") if v19_dir != "" else (shots.path_join("v19_respawn.png") if shots != "" else "")
@@ -703,7 +703,7 @@ func _woud_tests() -> void:
 	r.start_monster_battle(boss)
 	check("baasgevecht tegen The Root King", await wait_scene("Battle") and GameState.pending_boss)
 	var over := await lose_battle()
-	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nYou wake before the door...")
+	check("GAME OVER-tekst: '%s'" % over.replace("\n", " / "), over == "GAME OVER\nThe Current pulls you back before the door.")
 	check("na game over: in de Spore Ring", await wait_scene("WoudSporenkring"))
 	await pframes(3)
 	check("op de ingang %s (nu %s), vol HP/MP" % [sp[0], tile()], tile() == sp[0] and full_hp_mp())

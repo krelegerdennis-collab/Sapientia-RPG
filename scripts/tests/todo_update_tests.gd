@@ -218,7 +218,7 @@ func _bestiary_tests() -> void:
 				"No body. No shape. Only a voice, and glitches that warp the world around you. The Voice speaks as if it knows you — and it does. Here Sapientia speaks herself. Not as an enemy, but as something that has been waiting for you.",
 		]
 		check("entry %s heeft stats en een regel" % id, int(e.get("no", 0)) >= 13
-				and int(e.get("max_hp", 0)) > 0 and (desc.begins_with("Boss on floor") or canon_line)
+				and int(e.get("max_hp", 0)) > 0 and (desc.begins_with("Boss on floor") or canon_line or desc.length() >= 40)
 				and str(e.get("name", "")) != "")
 	check("verdieping 25 heet The Shadow of H-6", Bestiary.entry("d100_baas_25")["name"] == "The Shadow of H-6"
 			and Bestiary.entry("d100_baas_25")["desc"] == "A dark echo of Dax himself. He moves as Dax moves, fights as Dax fights — but he is silent. Here Sapientia shows what happens when someone loses their name. The Shadow knows no past, no Vesper, no Grandpa. Only the number: H-6.")

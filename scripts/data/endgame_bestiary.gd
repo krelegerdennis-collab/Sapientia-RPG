@@ -1,6 +1,6 @@
 extends RefCounted
 ## Bazen van de Diepe Grot. Ze hergebruiken een bestaand monster (sprite, elementen).
-## Canon-bazen (25, 50, 75, 99) hebben het canon-citaat in BOSSES["desc"]. De rest blijft feitelijk.
+## Bazen hebben hun tekst in BOSSES["desc"] (canon-citaat bij 25, 50, 75, 99; de rest R1 5 nov 2026). Zonder desc: feitelijke regel.
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
