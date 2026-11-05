@@ -38,7 +38,7 @@ Een fase mag pas dicht als de gate gehaald is; een fout in een eerdere fase hero
 **Doel:** vastleggen wat WM1 is en alles daarbuiten dichtzetten.
 
 - [ ] Dennis en RPG Forge reviewen `docs/release/WM1_CONTENT_LOCK.md` en mergen de PR (de merge is het begin van de freeze).
-- [ ] Dennis beantwoordt de BESLIS-punten uit lock sectie 3: H3 (hubkamers Training Hall tot Core), H11 (PvP en Co-op
+- [x] Dennis beantwoordt de BESLIS-punten uit lock sectie 3: H3 (hubkamers Training Hall tot Core), H11 (PvP en Co-op
   op het titelscherm), H13 (Koopman-fases) en keurt de overige SHIP/CUT-aanbevelingen goed of past ze aan.
 - [ ] RPG Forge maakt de labels `wm1-bugfix`, `wm1-polish`, `wm1-cut`, `wm1-vervanging`, `wm1-lock` en vraagt ze
   bij elke PR (`.github/pull_request_template.md` uitbreiden mag alleen RPG Forge).
@@ -344,7 +344,7 @@ de release-commit, Dennis geeft go.
 
 | Fase | Status | Datum | Akkoord |
 |---:|---|---|---|
-| 1 Freeze | open | | |
+| 1 Freeze | in uitvoering: cuts H3/H11/H13 doorgevoerd (CHANGELOG, 24 okt); tag `wm1-freeze` en baseline nog open. Volgorde en scope: `docs/release/LAUNCH_PLAN.md` (5 nov) | 2026-11-05 | Dennis: go op LAUNCH_PLAN |
 | 2 Art op palet | open | | |
 | 3 Stabiliteit | open | | |
 | 4 S25-performance | open | | |
