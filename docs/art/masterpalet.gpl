@@ -1,0 +1,95 @@
+GIMP Palette
+Name: Sapientia masterpalet
+Columns: 6
+# Gegenereerd door tools/art_audit/maak_gpl.py uit tools/som/sapientia_palette.json.
+# Niet met de hand bewerken: pas de JSON aan en draai het script opnieuw.
+# 73 kleuren in 16 ramps (donker naar licht).
+# Ink/Dark
+  0   0   0	Ink/Dark 1
+ 10  10  18	Ink/Dark 2
+ 16  16  24	Ink/Dark 3
+ 28  26  38	Ink/Dark 4
+# Skin
+ 74  36  24	Skin 1
+122  62  40	Skin 2
+176 104  62	Skin 3
+208 144  94	Skin 4
+234 184 138	Skin 5
+248 224 192	Skin 6
+# Hair
+ 20  20  32	Hair 1
+ 38  40  56	Hair 2
+ 58  64  88	Hair 3
+ 90 100 128	Hair 4
+# Brown/Wood
+ 32  20  16	Brown/Wood 1
+ 60  36  24	Brown/Wood 2
+ 94  58  34	Brown/Wood 3
+134  86  46	Brown/Wood 4
+174 124  68	Brown/Wood 5
+212 168 104	Brown/Wood 6
+# Green/Moss
+ 16  28  24	Green/Moss 1
+ 28  52  36	Green/Moss 2
+ 46  80  48	Green/Moss 3
+ 74 112  56	Green/Moss 4
+116 150  62	Green/Moss 5
+168 192  96	Green/Moss 6
+# Stone/Slate
+ 24  24  32	Stone/Slate 1
+ 40  48  52	Stone/Slate 2
+ 60  74  74	Stone/Slate 3
+ 92 104 102	Stone/Slate 4
+134 140 136	Stone/Slate 5
+184 180 172	Stone/Slate 6
+# Gold -- FX bliksem (kern), schadegetal
+ 58  28   8	Gold 1
+110  62  16	Gold 2
+168 112  32	Gold 3
+224 176  64	Gold 4
+248 232 144	Gold 5
+# Glitch Purple -- FX arcane paars
+ 20  10  52	Glitch Purple 1
+ 52  20 104	Glitch Purple 2
+106  40 176	Glitch Purple 3
+164 102 240	Glitch Purple 4
+232 184 255	Glitch Purple 5
+# Glitch Magenta -- FX glitch-magenta (SAPIENTIA-titel, codex_capture_fx)
+ 44   8  56	Glitch Magenta 1
+112  28 112	Glitch Magenta 2
+192  48 152	Glitch Magenta 3
+224  64 192	Glitch Magenta 4
+255 200 232	Glitch Magenta 5
+# Blue (Lotte/UI) -- FX bliksem (rand) + glitch-cyaan 40e0e8/c8f4ff
+ 12  20  48	Blue (Lotte/UI) 1
+ 28  44  96	Blue (Lotte/UI) 2
+ 44  76 152	Blue (Lotte/UI) 3
+ 64 120 200	Blue (Lotte/UI) 4
+ 64 224 232	Blue (Lotte/UI) 5
+200 244 255	Blue (Lotte/UI) 6
+# Red/Danger -- FX vuur (spell_vuur)
+ 40   8   8	Red/Danger 1
+ 88  16  16	Red/Danger 2
+152  32  28	Red/Danger 3
+208  64  32	Red/Danger 4
+240 120  56	Red/Danger 5
+248 192 112	Red/Danger 6
+# White/Paper
+112 108 116	White/Paper 1
+168 162 148	White/Paper 2
+214 204 176	White/Paper 3
+236 228 204	White/Paper 4
+255 250 240	White/Paper 5
+# Periwinkle
+122 124 200	Periwinkle 1
+168 168 224	Periwinkle 2
+# Mint -- FX heal (licht)
+140 200 160	Mint 1
+200 236 212	Mint 2
+# Teal -- FX heal (schaduw), vijver
+ 16  38  44	Teal 1
+ 29  74  82	Teal 2
+ 47 112 118	Teal 3
+# Earth
+ 66  60  51	Earth 1
+103  94  79	Earth 2
