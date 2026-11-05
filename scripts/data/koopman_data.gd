@@ -47,7 +47,7 @@ const REGELS := {
 }
 ## R1c (5 nov 2026): variatie per bezoek binnen een fase. Bezoek 1, 4 en 8 houden de canon-regels
 ## hierboven; de tussenliggende bezoeken krijgen eigen zinnen in dezelfde stem (geen nieuwe feiten,
-## geen H-6 vóór fase 3). Ontbreekt een bezoek hier, dan gelden de fase-regels.
+## geen H-6 vóór fase 3). Fase 2 eindigt altijd met de filter-regel (H13, wm1_release_tests). Ontbreekt een bezoek hier, dan gelden de fase-regels.
 const VARIATIE := {
 	2: [
 		"Back already? The Cave doesn't usually return people. Take that as a compliment, or a warning.",
@@ -60,14 +60,17 @@ const VARIATIE := {
 	5: [
 		"That pendant again. It hums when you stand close. Did you know? It never did that for me.",
 		"The deeper floors change shape when nobody is watching. I watched. That was my mistake.",
+		"The Cave is not a dungeon. It's a filter. Keep that to yourself... she listens.",
 	],
 	6: [
 		"Four before me. I said that. I didn't say they left. The Cave keeps what it finishes with.",
 		"She counts the floors with you. Every step. Don't make the mistake of thinking the silence is empty.",
+		"The Cave is not a dungeon. It's a filter. Keep that to yourself... she listens.",
 	],
 	7: [
 		"You're close to something. I can see it in how the walls lean toward you.",
 		"If I knew the way out, I wouldn't be selling. Remember that when you think I'm holding back.",
+		"The Cave is not a dungeon. It's a filter. Keep that to yourself... she listens.",
 	],
 }
 ## Fase 3 na de token (bezoek 9+): korte nabespreking in plaats van de hele waarheid nog eens.
