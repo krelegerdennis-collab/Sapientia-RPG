@@ -37,7 +37,7 @@ const ROWS := [
 	[RESET_KEY, "Default", "Set every option back to the default (A)."],
 	["sessie_log", "Session Log", "Notes where you walk and fight so the game can be improved. No personal data."],
 	[EXPORT_KEY, "Export Log", "Save or share the session log (A) so you can send it."],
-	["battle_style", "Battle Style", "Classic: turn-based. Action: real time (bosses stay turn-based)."],
+	["battle_style", "Battle Style", "Classic: turn-based. Action: real time, bosses included."],
 ]
 
 var settings: Node

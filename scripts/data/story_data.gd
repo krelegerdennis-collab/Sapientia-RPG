@@ -178,7 +178,7 @@ const TUT_SKIP := "Skip"
 const TUT_INKT_PAGES := [
 	"The Ink Worm is dealt with!\nTwo quick tips before you go on.",
 	"MENU > Settings > Battle Style:\nClassic is turn-based, Action is real time.",
-	"The switch works at once, even mid-room.\nBosses always stay turn-based.",
+	"The switch works at once, even mid-room.\nIn Action, even the Golem fights in real time.",
 	"MENU > Quest Log lists your quests and steps.\nLost? Check the Active tab.",
 ]
 ## Uniek monster weg (GameState.unique_mark: verslagen of gevangen) -> dit event, één keer.
