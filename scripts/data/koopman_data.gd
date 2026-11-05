@@ -45,6 +45,36 @@ const REGELS := {
 		"I'm ashamed I failed. But here, selling, I found something like peace.",
 	],
 }
+## R1c (5 nov 2026): variatie per bezoek binnen een fase. Bezoek 1, 4 en 8 houden de canon-regels
+## hierboven; de tussenliggende bezoeken krijgen eigen zinnen in dezelfde stem (geen nieuwe feiten,
+## geen H-6 vóór fase 3). Ontbreekt een bezoek hier, dan gelden de fase-regels.
+const VARIATIE := {
+	2: [
+		"Back already? The Cave doesn't usually return people. Take that as a compliment, or a warning.",
+		"I don't do credit. Memories, maybe. You'd be surprised what they fetch down here.",
+	],
+	3: [
+		"Third time. I keep a tally on the counter. Most lines stop at two.",
+		"You keep looking at me like you've seen me somewhere. You haven't. I'd remember. I think.",
+	],
+	5: [
+		"That pendant again. It hums when you stand close. Did you know? It never did that for me.",
+		"The deeper floors change shape when nobody is watching. I watched. That was my mistake.",
+	],
+	6: [
+		"Four before me. I said that. I didn't say they left. The Cave keeps what it finishes with.",
+		"She counts the floors with you. Every step. Don't make the mistake of thinking the silence is empty.",
+	],
+	7: [
+		"You're close to something. I can see it in how the walls lean toward you.",
+		"If I knew the way out, I wouldn't be selling. Remember that when you think I'm holding back.",
+	],
+}
+## Fase 3 na de token (bezoek 9+): korte nabespreking in plaats van de hele waarheid nog eens.
+const NA_WAARHEID: Array[String] = [
+	"You still come by. Good. I'd forgotten what company sounds like.",
+	"Go on, H-6. Whatever is at the bottom, it has waited longer than I have.",
+]
 const TOKEN_REGELS: Array[String] = [
 	"Take this. It's all that's left of who I was.",
 	"Received H-5's Token! (+10% stats against Sapientia's servants)",
@@ -73,7 +103,12 @@ static func fase(bezoeken: int, na_archief5 := false) -> int:
 static func gesprek(bezoeken: int, heeft_token: bool, na_archief5 := false) -> Array[String]:
 	var f := fase(bezoeken, na_archief5)
 	var uit: Array[String] = []
-	for r in REGELS[f]:
+	var bron: Array = REGELS[f]
+	if f == FASE_WAARHEID and heeft_token:
+		bron = NA_WAARHEID
+	elif f != FASE_WAARHEID and VARIATIE.has(bezoeken):
+		bron = VARIATIE[bezoeken]
+	for r in bron:
 		uit.append(str(r))
 	if f == FASE_WAARHEID and not heeft_token:
 		uit.append_array(TOKEN_REGELS)
