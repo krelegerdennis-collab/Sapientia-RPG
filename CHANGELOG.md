@@ -25,6 +25,9 @@ Alles op `main` na tag `v0.20`.
 - Lokale sessielog (JSON Lines, `user://`, max. 2 MiB) met `tools/sessielog/samenvat.py`.
 - Battle simulator per run (`--battlesim --party --enemy --runs --seed --policy`, CSV + `rapport.py`) en Action-simulator.
 - Release-voorbereiding Play Store: AAB-preset, `tools/release/` (versiebron, `bump_version`, `build_aab.sh`), `docs/release/PLAY_STORE.md`, suite `--aabtest`.
+- Realtime Golem-baas in Action (fases, kernvenster, telegraph) met story-events na de arenawinst; opening Drift + story-Hal met ECHO.
+- Tekst en lore (`finish/wm1`, 5 nov): unieke beschrijvingen voor alle Diepe Grot-uitrusting, bestiarium-tekst voor alle twaalf grotbazen, 20 lege-kamer-briefjes, ECHO-hubregels in zijn eigen stem, namen en tweede zinnen voor de Wilgendal-winkeliers en -dorpelingen, Koopman-variatie per bezoek.
+- Release-docs: `LAUNCH_PLAN.md`, `FINISH_LOG.md` (scorekaart), `STORE_LISTING.md`; `tools/sfx/` (SFX-generatie via ComfyUI + Stable Audio Open).
 
 ### Gewijzigd
 - Wilgendal plein 10 en binnen-tilesets v8 van RPG ART; Archief 2 geschaald (1.4x), Berggrot-geheim, Wilgendal-panden.
@@ -32,11 +35,20 @@ Alles op `main` na tag `v0.20`.
 - Art-batches 1 en 3 en nieuw titelscherm naar het masterpalet (RPG ART).
 - Power scaling v2 (data-only monster/baas-stats; Wortelkoning ~82% winst) en Action-balans Archief 1.
 - Framerate begrensd op 60 fps; opties met 24px tikhoogte en layouttests op drie viewports.
+- CI-matrix van 79 naar 102 suites (alle geregistreerde suites behalve perf/benchmark, relay en de lange playthrough).
 
 ### Opgelost
 - Saves zijn atomair en herstelbaar; verplichte pauze-save hersteld; suspend-save alleen op mobiel.
 - Huis-uitgang Wilgendal hangt af van de herkomst (`huis_herkomst` in de save).
 - Warp-pingpong met een vinger op de D-pad (`spawn_hold`); diverse flaky CI-tests deterministisch gemaakt.
+- KO door gif of brand wordt gemeld als gewone KO (bericht, geluid, wegfade).
+- Zingend Meel van de molen is per bezoek en niet meer per save: laden geeft geen tweede meel.
+- Respawn-tekst definitief ("The Current pulls you back...").
+
+### Bekend (WM1-release)
+- PvP en co-op zijn verborgen zonder relay-URL (content-lock H11); hubkamers Training Hall tot en met The Core zitten achter de Diepe Grot-levels (H3).
+- Geluidseffecten zijn nog synthetische placeholders (`tools/placeholders_algemene_sfx.txt`); vervanging loopt via `tools/sfx/`.
+- Een deel van de art in Archief 2 en de World Warper is placeholder (`docs/PLAN.md`).
 
 ## [0.20] - 2026-10-13
 
