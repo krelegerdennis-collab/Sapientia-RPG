@@ -1,4 +1,5 @@
 extends Node2D
+const Molen := preload("res://scripts/village/molen.gd")
 ## Eén map (dorp, wereldkaart, later dungeons...). Elke map-scène heeft dezelfde opbouw:
 ##   Ground   (TileMapLayer)  de grond. Elke tile heeft custom data "terrain"
 ##                            (gras, bos, zand, kassei, ...). Daarmee bepaalt
@@ -148,6 +149,8 @@ func _resolved_music_track() -> String:
 func _update_checkpoint() -> void:
 	var kind := GameState.entry_kind
 	GameState.entry_kind = ""
+	if kind != "battle" and kind != "respawn":
+		Molen.nieuw_bezoek(kind)   # R4b: Zingend Meel is per bezoek, niet per save
 	if kind == "battle" or kind == "respawn":
 		return
 	if kind == "load" and str(GameState.checkpoint.get("map", "")) == scene_file_path:
