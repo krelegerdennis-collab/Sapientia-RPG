@@ -449,9 +449,9 @@ var entry_kind := ""
 var pending_respawn_msg: Array = []
 ## Voor de tests/info: de laatste respawn ({"map", "tile", "facing", "boss"}).
 var last_respawn := {}
-# TODO(verhaal): definitieve tekst van het ontwaken (nu placeholder).
-const RESPAWN_LINES_BOSS := ["You wake before the door...", "You are fully rested again."]
-const RESPAWN_LINES := ["You wake where you came in...", "You are fully rested again."]
+# Ontwaken na een nederlaag (R1, 5 nov 2026): de Stroom zet je terug, niet de dood.
+const RESPAWN_LINES_BOSS := ["The Current pulls you back before the door.", "Your wounds close. Your breath returns. The guardian is still waiting."]
+const RESPAWN_LINES := ["The Current pulls you back to where you came in.", "Your wounds close. Nothing here remembers that you fell."]
 ## Het Gesimuleerde Archief: nederlaag in de kerker (gevechtsscherm) en het bericht na het opnieuw laden.
 const DUNGEON100_DEFEAT_TEXT := "GAME OVER\nDeath means out of the Archive. You stand before the entrance again."
 const DUNGEON100_RESET_LINES := ["The simulation lets you go.", "You stand before the Archive entrance again. Blue databanks remain."]

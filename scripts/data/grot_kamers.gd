@@ -214,6 +214,18 @@ const NOTITIES := [
 	"A crumpled note: \"I heard someone laugh below. Who sells things down here?\"",
 	"A worn card: \"Candidate log, page 12. The numbers do not add up. Keep walking.\"",
 	"Ink, half washed away: \"Someone walked this cave before me. His footprints only go down.\"",
+	"A page folded into a boat: \"The water on floor 30 is not water. Do not drink it. I did.\"",
+	"Charcoal, in a child's hand: \"Mom said the Voice is kind. The Voice is not kind.\"",
+	"A ledger strip: \"Floor 44. Three left. Two argue about going back. There is no back.\"",
+	"A note pinned under a stone: \"The merchant knows my name. I don't. Should that frighten me?\"",
+	"Dry ink, careful letters: \"The traps repeat. The dreams repeat. I am starting to repeat.\"",
+	"A map, mostly blank: \"I stopped drawing after floor 20. The cave draws itself.\"",
+	"A receipt, burnt at the edge: \"Paid in memories. I do not remember what I bought.\"",
+	"Scratched over and over: \"It is a test. It is a test. It is a test.\"",
+	"A clean note, almost new: \"Whoever you are: the pink light is not the exit. Keep your own light.\"",
+	"A single line: \"My name was on my sleeve. The sleeve is gone now.\"",
+	"On the back of a spell scroll: \"I cast it at the dark. The dark learned it.\"",
+	"A wet page: \"Floor 70. Something below sings in my voice. I have not sung in years.\"",
 ]
 
 

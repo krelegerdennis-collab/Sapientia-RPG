@@ -27,38 +27,38 @@ static func flag_for(index: int) -> String:
 
 
 static func steps() -> Array:
-	# TODO(design): zinnen zelf geformuleerd; Dennis bepaalt de definitieve tekst.
+	# R1 (5 nov 2026): stem van ECHO: droog, moe, half-herinnerd; nooit H-6 of de proefpersoon.
 	return [
 		{
 			"id": "welkom",
 			"flag": flag_for(0),
 			"lines": [
-				"I am ECHO. I am the guide of this hub.",
-				"Ask me if you don't know the way.",
+				"ECHO again. Still your guide, still mostly here.",
+				"Lost? Ask. I keep the map, if little else.",
 			],
 		},
 		{
 			"id": "warp",
 			"flag": flag_for(1),
 			"lines": [
-				"The ring takes you to the open world map.",
-				"Then you arrive at a place.",
+				"The warp ring opens the world map.",
+				"Pick a place. The Warper folds, and you are there.",
 			],
 		},
 		{
 			"id": "gesloten",
 			"flag": flag_for(2),
 			"lines": [
-				"ECHO's Chamber is open. The Deep Learning Simulation begins there.",
-				"The story opens the other rooms.",
+				"ECHO's Chamber is open. The Deep Learning Simulation starts there.",
+				"The other rooms stay shut. The story will open them, one by one.",
 			],
 		},
 		{
 			"id": "hanger",
 			"flag": flag_for(3),
 			"lines": [
-				"The Key reacted when you arrived.",
-				"The Pendant is the Key.",
+				"The Key woke when you stepped aboard. I felt it.",
+				"The Pendant is the Key. Keep it close. Keep it yours.",
 			],
 		},
 	]
@@ -90,28 +90,28 @@ static func _vlag_aan(flags: Dictionary, sleutel: String) -> bool:
 static func hint_lines(flags: Dictionary, bezocht: Array = []) -> Array:
 	if not _vlag_aan(flags, FLAG_NOOR_LID):
 		return [
-			"Vesper hasn't joined yet.",
-			"Look for her in the Dark Wood.",
+			"Vesper is not with you yet.",
+			"The Dark Wood took her. Bring her back.",
 		]
 	if not _vlag_aan(flags, FLAG_GOLEM):
 		return [
 			"The Golem of the First Archive still stands.",
-			"Go to the First Archive.",
+			"Its core is yours only when it kneels. Go to the First Archive.",
 		]
 	if not _vlag_aan(flags, FLAG_GENEZER):
 		return [
-			"The Mender still stands in the greenhouse of the Living Archive.",
-			"Go through the Hollow Mountain.",
+			"The Mender still waits in the greenhouse of the Living Archive.",
+			"The way runs through the Hollow Mountain.",
 		]
 	var plek := _wm1_plek(bezocht)
 	if plek == "":
 		return [
 			"The warp ring takes you to world 1.",
-			"Choose a place you have already visited.",
+			"Choose a place you have already visited. New ground you find on foot.",
 		]
 	return [
 		"The warp ring takes you to %s." % plek,
-		"You have already visited that place on world 1.",
+		"You have visited it before, on world 1. The Warper remembers.",
 	]
 
 

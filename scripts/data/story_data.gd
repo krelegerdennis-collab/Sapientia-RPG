@@ -128,8 +128,8 @@ const QUESTS := [
 	{"id": "noor", "title": "Save Vesper from the Dark Wood", "start_flag": "quest_noor", "done_flag": "noor_gered"},
 	{"id": "zingend_graan", "title": "The Singing Grain", "start_flag": FLAG_GRAAN, "done_flag": FLAG_GRAAN_KLAAR},
 ]
-## v0.17 TODO(verhaal): deze events hebben PLACEHOLDER-tekst (kort, Nederlands). Dennis schrijft het
-## echte verhaal; de opbouw (wie loopt waar, vlaggen, ballonnen) kan blijven.
+## v0.17: deze events kregen eerst placeholder-tekst. R1 (5 nov 2026, akkoord Dennis): tekst Engels en
+## nagelopen op stem en canon; de opbouw (wie loopt waar, vlaggen, ballonnen) is niet veranderd.
 const TODO_STORY := ["noor_ontmoeting", "noor_bevrijd", "noor_woud", "marit", "bram", "jens", "tobias",
 	"ilse", "herbergier", "naar_esdoorn", "woud_ingang", "marit_boeken", "naar_leven"]
 
@@ -435,7 +435,7 @@ const EVENTS := {
 	]}],
 
 	# ============================================================ v0.17 ESDOORN + DONKER WOUD
-	# TODO(verhaal): tekst hieronder is placeholder (zie TODO_STORY), behalve Het Zingende Graan.
+	# Tekst nagelopen in R1 (5 nov 2026); Het Zingende Graan is canon-dialoog.
 	# --- poorten op de wereldkaart
 	"naar_esdoorn": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
@@ -562,7 +562,7 @@ const EVENTS := {
 		{"if": {"flags": ["noor_ontmoet"], "not_flags": ["marit_boeken"]}, "do": [["run", "marit_boeken"]]},
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Marigold", ["You really brought her back! Mapleton will never forget this."]]]},
 		{"if": {"flags": ["quest_noor"]}, "do": [["say", "Marigold", ["The Dark Wood lies west of the village. Bring Vesper back, please!"]]]},
-		{"do": [["say", "Marigold", ["Good day, traveler."]]]},
+		{"do": [["say", "Marigold", ["Good day, traveler. Mind the roots on the square.", "They weren't there last spring. Nobody planted them."]]]},
 	],
 	"bram": [
 		{"if": {"flags": ["noor_gered"]}, "do": [["say", "Old Bramwell", ["The mist is lifting. For the first time in months I hear birds again."]]]},
@@ -626,7 +626,7 @@ const EVENTS := {
 		["refresh"],
 		["say", "", ["Vesper joins the party!", "She gives you a Padded Jerkin from Mapleton.", "Quest complete: Save Vesper from the Dark Wood"]],
 	]}],
-	"noor_woud": [{"do": [["say", "Vesper", ["Let's go, {naam}."]]]}],
+	"noor_woud": [{"do": [["say", "Vesper", ["I don't want to stay here, {naam}.", "The roots are quiet now. Let's keep it that way."]]]}],
 
 	# Het Zingende Graan. Canon-dialoog. Dicht zonder noor_lid.
 	# Eerste keer: bezoek, de vraag, dan Ja (opdracht aan) of Nee (weglopen, later nog mogelijk).
