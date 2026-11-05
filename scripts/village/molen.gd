@@ -1,10 +1,13 @@
 extends RefCounted
 ## Molen van Gerrit in Wilgendal, na Het Zingende Graan.
 ## Eén bezoek: rusten, één Zingend Meel, daarna opslaan of de party wisselen.
-## Het meel zit op de map (meta). Een nieuw bezoek is een nieuwe scène.
+## Het meel zit op de map (meta) én in story_flags (R4b, SAVE_HARDENING "Molen: Zingend Meel is per bezoek"):
+## save -> laden bouwt een nieuwe scène, maar de vlag reist mee, dus laden geeft geen tweede meel.
+## map.gd wist de vlag bij elke binnenkomst die geen laden is: een nieuw bezoek is een nieuwe scène.
 
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const META := "zingend_meel_gegeven"
+const FLAG_MEEL := "molen_meel_bezoek"
 const REGEL_RUST := "HP and MP restored."
 const REGEL_MEEL := "You receive Singing Flour."
 const REGEL_ZANG := "The mill turns again."
@@ -57,10 +60,19 @@ static func _rust() -> void:
 static func _meel(map: Node) -> bool:
 	if map != null and bool(map.get_meta(META, false)):
 		return false
+	if GameState.story_flags.has(FLAG_MEEL):
+		return false
 	GameState.inventory["zingend_meel"] = GameState.item_count("zingend_meel") + 1
 	if map != null:
 		map.set_meta(META, true)
+	GameState.story_flags[FLAG_MEEL] = true
 	return true
+
+
+## Nieuw bezoek (binnenkomst zonder laden): het meel mag weer.
+static func nieuw_bezoek(entry_kind: String) -> void:
+	if entry_kind != "load":
+		GameState.story_flags.erase(FLAG_MEEL)
 
 
 static func _opslaan() -> void:

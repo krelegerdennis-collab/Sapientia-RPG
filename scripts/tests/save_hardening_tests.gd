@@ -175,6 +175,7 @@ func _run() -> void:
 	await _scene_tests()
 	print("=== Deel E: geen dubbele spullen of goud ===")
 	_duplication_tests()
+	_molen_tests()
 	_remove_save(SAVE)
 	print("SAVEHARDENINGTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -911,3 +912,23 @@ func _duplication_tests() -> void:
 	GameState.dungeon100_deliver()
 	check("Dungeon100: na opslaan/laden na de run wordt er niets nogmaals afgeleverd", _total_of("kort_zwaard") == swords_after)
 	_remove_save(SAVE)
+
+
+# ---------------------------------------------------------------- F: molen (R4b)
+## Zingend Meel is per bezoek, niet per save: save -> laden geeft geen tweede meel; een nieuwe
+## binnenkomst (niet "load") wel.
+func _molen_tests() -> void:
+	var Molen: GDScript = load("res://scripts/village/molen.gd")
+	GameState.new_game("Dax")
+	GameState.story_flags.erase(Molen.FLAG_MEEL)
+	GameState.inventory.erase("zingend_meel")
+	check("molen: eerste meel van het bezoek", Molen._meel(null) and GameState.item_count("zingend_meel") == 1)
+	check("molen: tweede keer in hetzelfde bezoek niets", not Molen._meel(null) and GameState.item_count("zingend_meel") == 1)
+	_remove_save(SAVE)
+	check("molen: opslaan", GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, SAVE))
+	GameState.new_game("Zed")
+	check("molen: laden", GameState.load_game(SAVE))
+	Molen.nieuw_bezoek("load")
+	check("molen: na laden geen tweede meel (vlag reist mee)", not Molen._meel(null) and GameState.item_count("zingend_meel") == 1)
+	Molen.nieuw_bezoek("door")
+	check("molen: nieuw bezoek geeft weer meel", Molen._meel(null) and GameState.item_count("zingend_meel") == 2)
