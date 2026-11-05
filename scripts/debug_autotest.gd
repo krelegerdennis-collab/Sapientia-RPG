@@ -1458,7 +1458,7 @@ func _game_over_test() -> void:
 		if Dialog.is_open:
 			break
 		await frames(1)
-	check("v0.19: 'You wake...' (verteller)", Dialog.is_open and "wake" in str(Dialog._lines[0]))
+	check("R1: respawn-bericht 'The Current pulls you back...' (verteller)", Dialog.is_open and "pulls you back" in str(Dialog._lines[0]))
 	await close_dialog()
 
 
