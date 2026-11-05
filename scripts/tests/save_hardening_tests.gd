@@ -109,7 +109,8 @@ func _rich_state() -> void:
 	GameState.new_game("Dax")
 	GameState.current_map = TOWN
 	GameState.story_step = StoryData.KLAAR
-	GameState.story_flags = {"kist_open": true, "water_klaar": true, "proloog_gezien": true}
+	GameState.story_flags = {"kist_open": true, "water_klaar": true, "proloog_gezien": true,
+			"warper_drift_done": true}   # een save met voortgang heeft de drift-vlag (opening/flow.gd migrate)
 	GameState.join_member("lotte", 4, ["leren_kap"])
 	GameState.join_member("noor", 5, ["eiken_staf"])
 	GameState.join_member("kael", 6)
