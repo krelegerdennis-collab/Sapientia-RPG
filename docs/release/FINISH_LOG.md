@@ -47,9 +47,36 @@ Verwacht effect: #1 7→8, #2 8→9, #4 6→8.
 Open voor R1b (als Dennis meer tekst wil): Codex-vaardigheidsteksten, winkeliers-dialoog Wilgendal, ECHO-grot-hints per
 puzzel, Koopman fase 1 (bezoek 1-3) variatie.
 
+### R1b (5 nov, PR #362)
+- `scripts/data/wilgendal_dorp.gd`: pantser-, accessoire- en magiewinkel kregen namen (Mara Hammond, Pell, Ysolde; de
+  pantsersmid heette dubbel Jack Hammond) en elke winkelier en sfeer-NPC een tweede zin in dezelfde stem.
+
 ## R2 — audio
-Wacht op de eerste run van `tools/sfx/gen_sfx.py` op de laptop (ComfyUI). Daarna: bgm-manifest snoeien.
+- BGM: de 11 ontbrekende tracks uit het manifest (industriestad, eindbaas, rustplek, overwinning, game_over, ...) worden
+  nergens in WM1-code aangeroepen; geen stille kaart. Stap 4 van LAUNCH_PLAN is daarmee klaar zonder wijziging.
+- SFX: wacht op de eerste run van `tools/sfx/gen_sfx.py` op de laptop (ComfyUI, Stable Audio Open).
 
 ## R3 — art-polish (binnen regels)
-## R4 — UX en bugs
+- Audit (5 nov, ONVERIFIED palet): met `Art/claude-trial/goblin_raider/sap75.gpl` van de laptop (75 kleuren) zijn 239 van
+  1175 PNG's buiten palet, maar ook `assets/tiles/dorp.png` (RPG ART v8, 118 kleuren). Dat palet is dus waarschijnlijk
+  niet het masterpalet. Blocker fase 2: het masterpalet-bestand in de repo zetten (`docs/release/WM1_RELEASE_CHECKLIST.md`).
+- Grootste afwijkers (zonder placeholders): `bg/spiegel_kamer*.png` (1500+ kleuren, WM2-content, niet in de route),
+  `tiles/dungeon/dungeon_tiles.png` (234), `puzzle/geheime_deur_archief.png` (201), `sprites/archief2/genezer*.png` (102).
+
+## R4 — UX en bugs (5 nov, PR #361)
+- `EDGECASES_ITEMS_STATUS.md`: 18 van 19 punten bleken al gefixt (r8-3); #8 (KO door gif/brand niet gemeld) gefixt in
+  `battle.gd` (`_report_kos` na de status-ticks).
+- `WM1_BUGJACHT.md` O-1 was al gefixt (`enemies.has(m)`); O-5 gedaan: 23 geregistreerde suites in de CI-matrix
+  (79 → 102). Buiten de matrix gelaten: perf/benchmark-suites, relaytest (Node), wm1playthroughtest (lang).
+- Tests bijgewerkt: `savehardeningtest` (drift-vlag van de opening), `sessiefixtest` (RESULT-regel), checkpoint/autotest/
+  updatetest (R1-tekst).
+
 ## R5 — balans en perf
+- `wm1balanstest` en `balansarchief1test` groen op de huidige room_rules.
+- `wm1budgettest` (headless draw-calls, niet in de matrix): 7 kamers boven het budget van de vorige meting, vooral
+  `archief_2_v1_entree` (draw_avg 83 vs 52.8) en `archief_bibliotheek` (164 vs 140). ONVERIFIED of dit de walk5-sheets of
+  de 1.4x-kas is; meten op de S25 (fase 4) beslist. Geen actie in code.
+
+## Launch-docs
+- `docs/release/STORE_LISTING.md`: concept store-teksten (EN, spoilervrij), benodigde graphics, privacy/data-safety-regels,
+  voorstel pakketnaam `com.eazydstudio.sapientia` (BESLIS Dennis).

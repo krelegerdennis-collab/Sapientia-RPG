@@ -42,8 +42,8 @@ Een fase mag pas dicht als de gate gehaald is; een fout in een eerdere fase hero
   op het titelscherm), H13 (Koopman-fases) en keurt de overige SHIP/CUT-aanbevelingen goed of past ze aan.
 - [ ] RPG Forge maakt de labels `wm1-bugfix`, `wm1-polish`, `wm1-cut`, `wm1-vervanging`, `wm1-lock` en vraagt ze
   bij elke PR (`.github/pull_request_template.md` uitbreiden mag alleen RPG Forge).
-- [ ] RPG Forge zet de CI-matrix gelijk met `scripts/game_state.gd`: `sessiefixtest` ontbreekt nog (lokaal 30 PASS,
-  0 FAIL op Godot 4.7.2). Agents wijzigen `.github/workflows/` niet.
+- [x] CI-matrix gelijkgetrokken met `scripts/game_state.gd` (5 nov, #361 op `finish/wm1`): 102 suites, alleen perf/
+  benchmark-suites, `relaytest` en `wm1playthroughtest` bewust erbuiten.
 - [ ] Baseline vastleggen: PASS-aantallen per suite uit de CI-samenvatting van de freeze-commit in een issue of in
   dit bestand (de tabel in `AGENTS.md` is verouderd).
 - [ ] Lock-cijfers (lock sectie 0) nog eens tellen op de freeze-commit en zo nodig corrigeren met een `wm1-lock`-PR.
