@@ -568,6 +568,7 @@ func _ready() -> void:
 	# T27 S25-profiler: godot -- --perfprobe  (haken aan, dump user://perf_probe.json).
 	# T27 suite: of  godot -- --perfprobetest  (scripts/tests/perf_probe_tests.gd).
 	# Drift-achtergrond op een breed landschap: of  godot -- --driftbgtest  (scripts/tests/drift_bg_tests.gd).
+	# TC-P proloog-titelkaart: of  godot -- --tcptest [--shots=/pad]  (scripts/tests/tc_p_autotest.gd; geen CI-matrix).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
@@ -676,6 +677,7 @@ func _ready() -> void:
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
 			["--openingtest", "res://scripts/tests/opening_tests.gd", "OpeningTest", "openingtest"],
 			["--driftbgtest", "res://scripts/tests/drift_bg_tests.gd", "DriftBgTest", "driftbgtest"],
+			["--tcptest", "res://scripts/tests/tc_p_autotest.gd", "TcPTest", "tcptest"],
 			["--studiourltest", "res://scripts/tests/studio_url_tests.gd", "StudioUrlTest", "studiourltest"],
 			["--aabtest", "res://scripts/tests/aab_tests.gd", "AabTest", "aabtest"],
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
