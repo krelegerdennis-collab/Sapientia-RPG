@@ -12,6 +12,8 @@ var passes := 0
 var shots := ""
 
 var _tc_p_active_frames := 0
+## Zichtbaar-duur tc_p_card_visible_start → tc_p_card_visible_end (normale run, voor assert skip < normaal).
+var _normaal_tc_p_duur_ms := -1
 
 
 func _ready() -> void:
@@ -76,7 +78,9 @@ func _suite_normaal() -> void:
 	Story.run("catastrofe")
 	await _advance_dialog_while_story()
 	var tr_normaal: Array = Story.tc_p_order_log.duplicate()
+	_normaal_tc_p_duur_ms = _trace_tc_p_visible_duur_ms(tr_normaal)
 	_print_proof_lines("normaal", tr_normaal)
+	check("normaal: TC-P duur gemeten (start→einde zichtbaar)", _normaal_tc_p_duur_ms >= 3000)
 	check("TC-P signaal/minstens één actief-frame", _tc_p_active_frames > 0)
 	check("TC-P vlag gezet", GameState.story_flags.has(SD.TC_P_SHOWN))
 	check("tc_p_card_active uit", not Story.tc_p_card_active)
@@ -112,10 +116,11 @@ func _suite_skip() -> void:
 	while not Story.tc_p_card_active and Story.running and Time.get_ticks_msec() < deadline:
 		await get_tree().process_frame
 	check("kaart actief voor skip", Story.tc_p_card_active)
-	var ev := InputEventMouseButton.new()
-	ev.button_index = MOUSE_BUTTON_LEFT
-	ev.pressed = true
-	Input.parse_input_event(ev)
+	# ~0,5 s ná het moment dat de titelkaart actief is (_tc_p active), daarna echte touch+muis in viewport-midden.
+	var t0_wait := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0_wait < 500:
+		await get_tree().process_frame
+	_inject_skip_center_viewport()
 	deadline = Time.get_ticks_msec() + 120000
 	while (Story.running or Story.tc_p_card_active) and Time.get_ticks_msec() < deadline:
 		await get_tree().process_frame
@@ -126,7 +131,60 @@ func _suite_skip() -> void:
 		check("input hersteld na skip", not bool(p.get("input_locked")))
 	var tr_skip: Array = Story.tc_p_order_log.duplicate()
 	_print_proof_lines("skip", tr_skip)
+	var skip_duur := _trace_tc_p_visible_duur_ms(tr_skip)
+	check("skip TC-P duur < normaal (overslaan verkort)", skip_duur >= 0 and _normaal_tc_p_duur_ms > 0 and skip_duur < _normaal_tc_p_duur_ms)
 	_check_story_run_order(tr_skip)
+
+
+func _inject_skip_center_viewport() -> void:
+	var vp := get_viewport()
+	if vp == null:
+		check("viewport voor skip-input", false)
+		return
+	# parse_input_event verwacht venster-coördinaten (zie debug_autotest _touch_test).
+	var center_vp: Vector2 = Vector2(vp.get_visible_rect().size) * 0.5
+	var pos: Vector2 = get_tree().root.get_final_transform() * center_vp
+	var st := InputEventScreenTouch.new()
+	st.index = 0
+	st.position = pos
+	st.pressed = true
+	print("TC-P-SKIP-INJECT parse_input_event ScreenTouch pressed=true pos=%s (center_vp=%s)" % [pos, center_vp])
+	Input.parse_input_event(st)
+	var mb := InputEventMouseButton.new()
+	mb.button_index = MOUSE_BUTTON_LEFT
+	mb.position = pos
+	mb.pressed = true
+	print("TC-P-SKIP-INJECT parse_input_event MouseButton LEFT pressed=true pos=%s" % pos)
+	Input.parse_input_event(mb)
+
+
+## t_ms uit één TC-P-ORDER regel met gegeven stap-label (token na frame=…).
+func _trace_t_ms_for_label(lines: Array, label: String) -> int:
+	var needle := " %s " % label
+	for ln in lines:
+		if not (ln is String):
+			continue
+		var s: String = str(ln)
+		if not s.begins_with("TC-P-ORDER ") or needle not in s:
+			continue
+		var key := "t_ms="
+		var i := s.find(key)
+		if i < 0:
+			continue
+		var rest: String = s.substr(i + key.length())
+		var sp := rest.find(" ")
+		if sp < 0:
+			sp = rest.length()
+		return int(rest.substr(0, sp))
+	return -1
+
+
+func _trace_tc_p_visible_duur_ms(lines: Array) -> int:
+	var a := _trace_t_ms_for_label(lines, "tc_p_card_visible_start")
+	var b := _trace_t_ms_for_label(lines, "tc_p_card_visible_end")
+	if a < 0 or b < 0:
+		return -1
+	return b - a
 
 
 func _suite_geen_dubbel_logica() -> void:

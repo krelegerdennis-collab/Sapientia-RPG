@@ -99,12 +99,7 @@ func _build_ui() -> void:
 
 
 func _on_gui_input(ev: InputEvent) -> void:
-	if _finished:
-		return
-	if ev is InputEventScreenTouch and ev.pressed:
-		_skipped = true
-	elif ev is InputEventMouseButton and ev.pressed:
-		_skipped = true
+	_try_skip_from_event(ev, "gui_input")
 
 
 func _input(ev: InputEvent) -> void:
@@ -113,4 +108,20 @@ func _input(ev: InputEvent) -> void:
 	if ev is InputEventKey and ev.pressed:
 		_skipped = true
 	elif ev is InputEventJoypadButton and ev.pressed:
+		_skipped = true
+	else:
+		# parse_input_event (--tcptest) gaat door de normale input-pipeline, niet altijd naar gui_input.
+		_try_skip_from_event(ev, "_input")
+
+
+func _try_skip_from_event(ev: InputEvent, bron: String) -> void:
+	if _finished:
+		return
+	if ev is InputEventScreenTouch and ev.pressed:
+		if OS.get_cmdline_user_args().has("--tcptest"):
+			print("TC-P-SKIP-RECEIPT [%s] ScreenTouch pressed=true index=%d pos=%s" % [bron, ev.index, ev.position])
+		_skipped = true
+	elif ev is InputEventMouseButton and ev.pressed:
+		if OS.get_cmdline_user_args().has("--tcptest"):
+			print("TC-P-SKIP-RECEIPT [%s] MouseButton button=%s pressed=true pos=%s" % [bron, ev.button_index, ev.position])
 		_skipped = true
