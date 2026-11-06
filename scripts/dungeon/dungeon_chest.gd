@@ -5,9 +5,12 @@ extends StaticBody2D
 ## je daarna aantrekken in Menu > Uitrusting). EENMALIG per spel: de vlag "kist:<id>" staat in
 ## GameState.story_flags en gaat mee in de save. Open kist = frame 1 (blijft open).
 ## Plaatje: assets/sprites/buiten/kist.png (RPG ART, 2 frames 16x16: dicht/open).
+## Blauwe Kist: assets/sprites/buiten/kist_blauw.png (zelfde maat, eigen art, geen tint).
 ## (De speciale schatkist met het zwaard in de puzzelkamer is van RPG CODE, zie HANDOFF_ARCHIEF1.md.)
 
 const TEX := "res://assets/sprites/buiten/kist.png"
+## 32x16, 2 frames van 16x16: frame 0 dicht, frame 1 open.
+const BLUE_TEX := preload("res://assets/sprites/buiten/kist_blauw.png")
 ## v0.15: plaatje in het thema van de kamer (DungeonRooms.THEMES), zie dungeon_rooms.gd.
 const DungeonRoomsTheme := preload("res://scripts/data/dungeon_rooms.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
@@ -64,13 +67,14 @@ func setup(d: Dictionary) -> void:
 	add_child(cs)
 	sprite = Sprite2D.new()
 	sprite.name = "Sprite2D"
-	sprite.texture = load(DungeonRoomsTheme.themed(TEX))
+	if kind == Blue.KIND_BLUE:
+		sprite.texture = BLUE_TEX
+	else:
+		sprite.texture = load(DungeonRoomsTheme.themed(TEX))
 	sprite.hframes = 2
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(sprite)
 	sprite.frame = 1 if is_open() else 0
-	if kind == Blue.KIND_BLUE:
-		sprite.modulate = Blue.BLUE_TINT      # placeholder: de gewone kist, blauw getint
 
 
 ## Task #4: op een verdieping > 0 (eigen "floor" of GameState.dungeon100_floor) heeft de kist schaalbuit:
