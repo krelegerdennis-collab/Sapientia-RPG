@@ -36,6 +36,8 @@ const BossScript := preload("res://scripts/som/boss_script.gd")
 const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const GolemStoryWin := preload("res://scripts/som/golem_story_win.gd")
+const GolemBossView := preload("res://scripts/som/golem_boss_view.gd")
+const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
@@ -186,6 +188,10 @@ var _golem_registered_here := false
 var golem_events: Array = []
 ## Tests: zette de laatste Golem-winst in deze arena de verhaal-beat (true) of was hij al gedaan (false)?
 var golem_story_fired := false
+## Tests: aantal keer dat _golem_strike draaide (één per attack_hit).
+var golem_strike_count := 0
+## Tests: aantal hit_member-aanroepen vanuit _golem_strike (schade alleen daar).
+var golem_strike_hit_member_count := 0
 
 
 func _init() -> void:
@@ -394,6 +400,9 @@ func golem_fight_of(m: Node) -> GolemFight:
 
 
 func _exit_tree() -> void:
+	for m in enemies.keys():
+		if enemies[m].get("golem", null) != null:
+			_golem_clear_visuals(m, enemies[m])
 	if _golem_registered_here:
 		GolemBoss.unregister()
 		_golem_registered_here = false
@@ -423,7 +432,10 @@ func register(m: Node) -> void:
 		var fight := GolemFight.new(int(entry["max_hp"]), fseed)
 		entry["golem"] = fight
 		entry["hp"] = fight.hp()
+		# Visuele telegraaf alleen (TelegraphLayer). Schade blijft uitsluitend in _golem_strike.
+		entry["tg"] = TelegraphAttack.new()
 		enemies[m] = entry
+		_ensure_golem_view(m, entry)
 		return
 	if SomActionAttacks.has_telegraph_attack(eid):
 		var aid := SomActionAttacks.default_attack_for_enemy(eid)
@@ -1163,7 +1175,9 @@ func _defeat_enemy(m: Node) -> void:
 		return
 	combat_zones.clear_owner(_enemy_index(m))
 	var e: Dictionary = enemies[m]
-	if e.has("tg"):
+	if e.has("golem"):
+		_golem_clear_visuals(m, e)
+	elif e.has("tg"):
 		(e["tg"] as TelegraphAttack).cancel()
 	enemies.erase(m)
 	if enemies.is_empty():
@@ -1383,6 +1397,7 @@ func _enemy_ai(m: Node, delta: float) -> void:
 
 ## D3 PR C: realtime Golem. Host-authoritatief: GolemFight.tick() kiest aanvallen (seeded), de arena zet
 ## de events om in treffers op de party (dodge-iframes gelden via hit_member), adds en beeld.
+## Telegraaf/GolemBossView = alleen zichtbaar; schade uitsluitend via _golem_strike (geen tweede pad).
 func _golem_ai(m: Node, e: Dictionary, delta: float) -> void:
 	var fight: GolemFight = e["golem"]
 	if float(e["flash"]) > 0.0:
@@ -1390,6 +1405,7 @@ func _golem_ai(m: Node, e: Dictionary, delta: float) -> void:
 	_pose_tick(m, e, delta)
 	fight.tick()
 	_golem_events(m, e, fight.take_events())
+	_golem_sync_visual(m, e, fight)
 	_tint(m, e)
 
 
@@ -1408,27 +1424,157 @@ func _golem_events(m: Node, e: Dictionary, evs: Array) -> void:
 				if str(a.get("aim", "")) == "target" and tid != "":
 					origin = body_of(tid)
 				e["golem_origin"] = origin
+				var to := (body_of(tid) if tid != "" else origin) - center_of(m)
+				var dir: Vector2i = TelegraphShape.dir_from_vector(to)
+				if tid != "":
+					m.facing = Vector2i(signi(roundi(to.x)), 0) if absf(to.x) >= absf(to.y) else Vector2i(0, signi(roundi(to.y)))
+				_golem_start_visual_telegraph(m, e, str(d["id"]), a, origin, dir, int(d["windup"]))
 				_monster_pose(m, e, "attack", 0, float(d["windup"]) / float(TICK_HZ) + 0.05)
 				if room and room.has_node("Objects"):
 					SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), float(d["windup"]) / float(TICK_HZ))
 			"attack_hit":
+				_golem_clear_telegraph(e)
+				_golem_temp_hit_flash(m)
 				_monster_pose(m, e, "attack", 1, SomData.MONSTER_STRIKE_MS / 1000.0)
 				_golem_strike(m, e, str(d["id"]), float(d["power"]))
+			"telegraphs_cancelled":
+				_golem_clear_telegraph(e)
 			"phase":
 				e["golem_phase"] = int(d["index"])
 			"adds":
 				_golem_spawn_adds(m, d.get("ids", []))
 
 
-## Aanval landt: elke levende held binnen het bereik (tegels uit GolemBoss.ATTACKS) wordt geraakt.
-func _golem_strike(m: Node, e: Dictionary, attack_id: String, power: float) -> void:
-	var a := GolemBoss.attack(attack_id)
-	var origin: Vector2 = e.get("golem_origin", center_of(m))
+## Visuele telegraaf = exact de _golem_strike-cirkel (distance_to <= reach_px rond strike-origin).
+## Geen arc/line: de schade is radiaal; de tekening volgt die zone. Geen extra windup.
+func _golem_start_visual_telegraph(m: Node, e: Dictionary, attack_id: String, a: Dictionary, origin: Vector2, dir: Vector2i, windup_ticks: int) -> void:
+	var reach_px := _golem_strike_reach_px(m, a)
+	# Minimale def voor TelegraphAttack/Layer: altijd cirkel met strike-reach.
+	var def := {
+		"id": attack_id,
+		"shape": "circle",
+		"reach": reach_px,
+		"windup_ms": GolemBoss.ticks_to_ms(windup_ticks),
+		"active_ms": GolemBoss.ticks_to_ms(int(a.get("active", 1))),
+		"recovery_ms": 0,
+		"power": float(a.get("power", 1.0)),
+		"boss": true,
+	}
+	var tg: TelegraphAttack = e.get("tg", null)
+	if tg == null:
+		tg = TelegraphAttack.new()
+		e["tg"] = tg
+	else:
+		tg.cancel()
+	var origin_i := TelegraphShape.to_px(origin)
+	const SHAPE_ID := "circle"
+	e["golem_tg_def"] = def
+	e["golem_tg_origin"] = origin_i
+	e["golem_tg_dir"] = dir
+	e["golem_tg_shape"] = SHAPE_ID
+	e["golem_tg_reach"] = reach_px
+	tg.mirror_from_network(def, 0, TelegraphState.State.WINDUP, windup_ticks, origin_i, dir, SHAPE_ID)
+	e["tele"] = float(windup_ticks) * TICK_DT
+
+
+func _golem_strike_reach_px(m: Node, a: Dictionary) -> int:
 	var reach := float(a.get("reach_tiles", 1.0)) * 16.0
 	if str(a.get("aim", "")) != "target":
-		reach += 8.0 * (maxf(m.size.x, m.size.y) - 1.0)     # 2x2-baas: bereik vanaf de rand
+		reach += 8.0 * (maxf(m.size.x, m.size.y) - 1.0)
+	return roundi(reach)
+
+
+func _golem_clear_telegraph(e: Dictionary) -> void:
+	if e.has("tg"):
+		(e["tg"] as TelegraphAttack).cancel()
+	e["tele"] = 0.0
+	e.erase("golem_tg_def")
+	e.erase("golem_tg_origin")
+	e.erase("golem_tg_dir")
+	e.erase("golem_tg_shape")
+	e.erase("golem_tg_reach")
+
+
+func _golem_clear_visuals(m: Node, e: Dictionary) -> void:
+	_golem_clear_telegraph(e)
+	var view: Node = e.get("golem_view", null)
+	if view != null and is_instance_valid(view):
+		view.queue_free()
+	e.erase("golem_view")
+	var flash: Node = m.get_node_or_null("GolemHitFlashTemp") if m != null else null
+	if flash != null:
+		flash.queue_free()
+
+
+func _ensure_golem_view(m: Node, e: Dictionary) -> GolemBossView:
+	var existing: Node = e.get("golem_view", null)
+	if existing != null and is_instance_valid(existing):
+		return existing as GolemBossView
+	var view := GolemBossView.new()
+	view.name = "GolemBossView"
+	# Geen dubbele body: map-sprite blijft; battle-body van de view uit (marker/kern/flash wel).
+	view.body.visible = false
+	m.add_child(view)
+	e["golem_view"] = view
+	return view
+
+
+func _golem_sync_visual(m: Node, e: Dictionary, fight: GolemFight) -> void:
+	var view := _ensure_golem_view(m, e)
+	var target_local := Vector2.ZERO
+	if e.has("golem_origin"):
+		target_local = (e["golem_origin"] as Vector2) - m.position
+	view.sync(fight, target_local)
+	# Windup-ticks exact uit GolemFight (geen eigen klok, geen extra waarschuwingstijd).
+	if fight.step == GolemFight.Step.WINDUP and e.has("golem_tg_def") and e.has("tg"):
+		var def: Dictionary = e["golem_tg_def"]
+		(e["tg"] as TelegraphAttack).mirror_from_network(
+				def, 0, TelegraphState.State.WINDUP, int(fight.step_left),
+				e.get("golem_tg_origin", Vector2i.ZERO), e.get("golem_tg_dir", Vector2i.DOWN),
+				str(e.get("golem_tg_shape", "circle")))
+		e["tele"] = float(fight.step_left) * TICK_DT
+	elif fight.step != GolemFight.Step.WINDUP and e.has("golem_tg_def"):
+		# Strike/recovery/stagger: telegraaf weg (attack_hit/cancel doen dit al; vang netjes af).
+		if fight.step != GolemFight.Step.ACTIVE:
+			_golem_clear_telegraph(e)
+
+
+## Tijdelijke feedback (geen permanente attack-sheet): golem_boss_v2_hit.png als korte flash.
+func _golem_temp_hit_flash(m: Node) -> void:
+	const HIT_PATH := "res://assets/sprites/enemies/golem_boss_v2_hit.png"
+	if m == null or not ResourceLoader.exists(HIT_PATH):
+		return
+	var old := m.get_node_or_null("GolemHitFlashTemp")
+	if old != null:
+		old.queue_free()
+	var tex := load(HIT_PATH) as Texture2D
+	if tex == null:
+		return
+	var s := Sprite2D.new()
+	s.name = "GolemHitFlashTemp"
+	s.texture = tex
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# ~2 tegels breed t.o.v. 196 px bron
+	var sc := 32.0 / float(maxi(1, tex.get_width()))
+	s.scale = Vector2(sc, sc)
+	if m.sprite != null:
+		s.position = m.sprite.position
+	m.add_child(s)
+	var tw := m.create_tween()
+	tw.tween_interval(float(SomData.MONSTER_STRIKE_MS) / 1000.0)
+	tw.tween_callback(s.queue_free)
+
+
+## Aanval landt: elke levende held binnen het bereik (tegels uit GolemBoss.ATTACKS) wordt geraakt.
+## Enige schade-pad voor Golem-aanvallen (telegraaf is visual-only).
+func _golem_strike(m: Node, e: Dictionary, attack_id: String, power: float) -> void:
+	golem_strike_count += 1
+	var a := GolemBoss.attack(attack_id)
+	var origin: Vector2 = e.get("golem_origin", center_of(m))
+	var reach := float(_golem_strike_reach_px(m, a))
 	for id in party_ids():
 		if is_alive(id) and node_of(id) != null and origin.distance_to(body_of(id)) <= reach:
+			golem_strike_hit_member_count += 1
 			hit_member(id, int(e["atk"]), power)
 
 
