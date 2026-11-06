@@ -4,7 +4,7 @@ extends Node
 ##   Deel A: data: fases 1-3 / 4-7 / 8+ (CANON §12), token +10%, kamersoorten, plekken, valschade.
 ##   Deel B: save/load + nederlaag: bezoekteller en token blijven.
 ##   Deel C: echte scène: Koopman + kraam op een koopmanverdieping, gesprek, bezoek telt 1x per verdieping.
-##   Deel D: valkamer (vallen zichtbaar/verborgen, stap = schade) en rustkamer (kampvuur-animatie).
+##   Deel D: valkamer (vallen zichtbaar/verborgen, stap = schade) en rustkamer.
 ##   Deel E: hub: rondlopers zijn AnimatedSprite2D met 16x24-frames uit de batch 9-sheets.
 ## Zit niet in de export (scripts/tests/*).
 
@@ -311,10 +311,6 @@ func _val_rust_scene() -> void:
 	# rustkamer
 	r = await _start_floor(10)
 	var rp: Node = r.get_node_or_null("Objects/Rustpunt")
-	var vuur: AnimatedSprite2D = rp.get("vuur") if rp else null
-	check("rustpunt heeft kampvuur (4 frames, speelt)", vuur != null and vuur.sprite_frames.get_frame_count("default") == 4 and vuur.is_playing())
-	check("kampvuur-frames komen uit grot_kamers.png rij 1",
-			vuur != null and (vuur.sprite_frames.get_frame_texture("default", 0) as AtlasTexture).region == Rect2(0, 16, 16, 16))
 	pl = r.get_node("Objects/Player")
 	var rt := Vector2i((rp.position / 16.0).floor())
 	pl.place_at(rt + Vector2i.DOWN, Vector2i.UP)
