@@ -1,11 +1,11 @@
 extends Node
-## T26: eigen hit2/finisher-sheets voor Dax (dennis) en Seren (lotte), met terugval op <held>_attack.png.
+## T26: eigen hit2/finisher-sheets voor alle party-leden (Dax/Seren/Vesper/Kael/Orion).
 ## Start: godot --headless --path . -- --t26sheettest
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomChainData := preload("res://scripts/data/som_chain_data.gd")
-const HEROES: Array[String] = ["dennis", "lotte"]
-const FALLBACK: Array[String] = ["noor", "kael", "orion"]
+const HEROES: Array[String] = ["dennis", "lotte", "noor", "kael", "orion"]
+const FALLBACK: Array[String] = []
 const STEPS: Array[int] = [SomChainData.STEP_HIT2, SomChainData.STEP_FINISHER]
 
 var failures := 0

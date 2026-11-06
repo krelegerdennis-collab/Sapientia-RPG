@@ -38,6 +38,9 @@ const TAP_GATE := true
 const STEP_SHEETS := {
 	"dennis": {"hit2": "res://assets/sprites/som/combat/dax_attack2.png", "finisher": "res://assets/sprites/som/combat/dax_finisher.png"},
 	"lotte": {"hit2": "res://assets/sprites/som/combat/seren_attack2.png", "finisher": "res://assets/sprites/som/combat/seren_finisher.png"},
+	"noor": {"hit2": "res://assets/sprites/som/combat/vesper_attack2.png", "finisher": "res://assets/sprites/som/combat/vesper_finisher.png"},
+	"kael": {"hit2": "res://assets/sprites/som/combat/kael_attack2.png", "finisher": "res://assets/sprites/som/combat/kael_finisher.png"},
+	"orion": {"hit2": "res://assets/sprites/som/combat/orion_attack2.png", "finisher": "res://assets/sprites/som/combat/orion_finisher.png"},
 }
 const STEP_MS := {
 	"hit1": [],   # leeg = SomData.ATTACK_ANIMS[id]["ms"] (bestaande slag)
