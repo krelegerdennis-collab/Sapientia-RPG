@@ -135,6 +135,9 @@ const TODO_STORY := ["noor_ontmoeting", "noor_bevrijd", "noor_woud", "marit", "b
 
 const SPEAKER := "Old Man"
 
+## TC-P (prototype): eenmalige titelkaart na proloog-zegel-scène (`catastrofe`).
+const TC_P_SHOWN := "tc_p_title_card_seen"
+
 ## Kleur van het licht per stap (CanvasModulate op de proloog-maps).
 const TINTS := {
 	"day": Color(1, 1, 1),

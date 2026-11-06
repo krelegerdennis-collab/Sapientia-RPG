@@ -9,10 +9,13 @@ extends Node
 ## verbergen, het event na een gevecht en de MAP_ENTER-triggers.
 
 signal event_finished(event_id: String)
+## TC-P: true zodra de titelkaart zichtbaar is (voor tests).
+signal tc_p_card_active_changed(active: bool)
 
 const SD := preload("res://scripts/data/story_data.gd")
 const Molen := preload("res://scripts/village/molen.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const TcPrologueTitleCardScript := preload("res://scripts/ui/tc_prologue_title_card.gd")
 const WINDOW_TILE := Vector2i(4, 0)      # raam-tile in binnen.png
 const WALK_SPEED := 56.0
 
@@ -38,6 +41,8 @@ var _shake_total := 0.0
 var _shake_strength := 0.0
 var _card_layer: CanvasLayer
 var card_label: Label
+## TC-P: titelkaart actief (PLACEHOLDER) — zelfde soort blokkade als `show_card`.
+var tc_p_card_active := false
 
 
 func _ready() -> void:
@@ -174,17 +179,36 @@ func run(event_id: String, arg := "", origin := "") -> void:
 		history.append(next)
 		next = await _exec(v["do"], arg)
 	var done := current_event
-	running = false
 	current_event = ""
 	current_origin = ""
-	if next != "__stop":
+	# TC-P: na het `catastrofe`-event (proloog-zegel; in repo geen aparte “CS-01”-id) —
+	# titelkaart vóór speler weer vrij mag. Geen tweede keer (flag in story_flags).
+	var needs_tc_p := tc_p_should_show_after_event(done)
+	if next != "__stop" and not needs_tc_p:
 		_lock(false)
+	if needs_tc_p:
+		tc_p_card_active = true
+		tc_p_card_active_changed.emit(true)
+		var card := TcPrologueTitleCardScript.new()
+		add_child(card)
+		await card.completed
+		tc_p_card_active = false
+		tc_p_card_active_changed.emit(false)
+		GameState.story_flags[SD.TC_P_SHOWN] = true
+		if next != "__stop":
+			_lock(false)
+	running = false
 	event_finished.emit(done)
 
 
 ## Wacht tot er geen event meer loopt (voor de autotest).
 func idle() -> bool:
 	return not running
+
+
+## TC-P: mag de titelkaart na dit event (één keer per save) — zie `run()` en `--tcptest`.
+func tc_p_should_show_after_event(done: String) -> bool:
+	return done == "catastrofe" and not GameState.story_flags.has(SD.TC_P_SHOWN)
 
 
 func _map() -> Node:
@@ -600,7 +624,7 @@ func _on_unique_marked(id: String, _how: String) -> void:
 
 ## Is de speler vrij rondlopend op een kaart (geen gevecht, overgang, tekst, menu of ander event)?
 func player_free() -> bool:
-	if running or Dialog.is_open or GameState.changing_map or GameState.in_battle or card_visible():
+	if running or Dialog.is_open or GameState.changing_map or GameState.in_battle or card_visible() or tc_p_card_active:
 		return false
 	if GameState.pending_kern_absorb != "":
 		return false
