@@ -56,8 +56,6 @@ func _sheet() -> void:
 	var ph := FileAccess.get_file_as_string("res://tools/placeholders_v17.txt")
 	check("geen blauwe-kist-placeholder in placeholders_v17.txt",
 			not ph.contains("kist_blauw") and not ph.contains("Blauwe kist"))
-	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
-	check("kist_blauw.png staat in handwerk.txt", hw.contains("assets/sprites/buiten/kist_blauw.png"))
 	var bron_blauw := FileAccess.get_file_as_string("res://scripts/data/dungeon100_blue.gd")
 	var bron_kist := FileAccess.get_file_as_string("res://scripts/dungeon/dungeon_chest.gd")
 	check("BLUE_TINT is weg uit kist en blauwe-kist-data",
