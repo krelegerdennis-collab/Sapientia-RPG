@@ -12,19 +12,27 @@ extends "res://scripts/book_point.gd"
 ## groep, dan is de run voorbij en sta je in ECHO's Kamer. Daarna de vraag
 ## 'Voortgang opslaan?'. Staat het rustpunt op een verdieping zonder rustpunt-regel (niet 10, 20, ...)
 ## of buiten de kerker, dan herstelt en bewaart het wel, maar het checkpoint verandert niet.
-## Plaatje: kampvuur van RPG ART (batch 10, grot_kamers.png rij 1, kol 0-3, ~0,15 s per frame) met een
-## boomstam ernaast; het opslagboek blijft als (onzichtbare) basis voor de botsing en BookPoint.
+## Plaatje: assets/sprites/dungeon100_rustpunt.png (64x16, 4 frames van 16x16, zachte lus).
+## Het opslagboek blijft de onzichtbare basis voor de botsing en BookPoint, zonder tint.
+## `vuur` blijft het kampvuur uit grot_kamers.png (koopmantest); dat wordt niet getekend.
 
 const SCENE := "res://scenes/dungeon100_rustpunt.tscn"
 const RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const TINT := Color(1.0, 0.86, 0.62)
 const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
+const SHEET := preload("res://assets/sprites/dungeon100_rustpunt.png")
+const FRAME_COUNT := 4
+const FRAME_PX := 16
+## Zachte lus, binnen 6-8 fps.
+const ANIM_FPS := 7.0
 const ACTIVATED_LINE := "The party is restored. This is not a return point: falling means out of the Archive."
 
 ## Voor de tests: de laatste keer dat het rustpunt een NIEUW checkpoint werd.
 var last_activated := false
-## Het kampvuur (AnimatedSprite2D, 4 frames).
+## Het kampvuur (AnimatedSprite2D, 4 frames uit grot_kamers). Blijft voor de koopmantest.
 var vuur: AnimatedSprite2D
+## Zichtbare rustpunt-animatie (4 frames uit SHEET).
+var art: AnimatedSprite2D
 
 
 func _init() -> void:
@@ -39,8 +47,15 @@ static func create(tile: Vector2i) -> Node2D:
 
 func _ready() -> void:
 	super._ready()
-	sprite.modulate = TINT
+	# Boek (save_book.png) blijft de basis, maar wordt niet getint en niet getekend.
+	sprite.modulate = Color.WHITE
 	sprite.visible = false
+	_plaats_kampvuur()
+	_plaats_art()
+
+
+## Kampvuur-node zoals de koopmantest die leest. Niet zichtbaar: de sheet is het plaatje.
+func _plaats_kampvuur() -> void:
 	var frames := SpriteFrames.new()
 	frames.set_animation_speed("default", GrotKamers.VUUR_FPS)
 	frames.set_animation_loop("default", true)
@@ -50,8 +65,30 @@ func _ready() -> void:
 	vuur.name = "Kampvuur"
 	vuur.sprite_frames = frames
 	vuur.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	vuur.visible = false
 	add_child(vuur)
 	vuur.play("default")
+
+
+func _plaats_art() -> void:
+	var frames := SpriteFrames.new()
+	frames.set_animation_speed("default", ANIM_FPS)
+	frames.set_animation_loop("default", true)
+	for i in FRAME_COUNT:
+		frames.add_frame("default", _frame(i))
+	art = AnimatedSprite2D.new()
+	art.name = "RustpuntArt"
+	art.sprite_frames = frames
+	art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(art)
+	art.play("default")
+
+
+static func _frame(index: int) -> AtlasTexture:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = SHEET
+	atlas.region = Rect2(index * FRAME_PX, 0, FRAME_PX, FRAME_PX)
+	return atlas
 
 
 func interact(player: Node2D) -> void:
