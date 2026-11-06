@@ -37,7 +37,6 @@ const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const GolemStoryWin := preload("res://scripts/som/golem_story_win.gd")
 const GolemBossView := preload("res://scripts/som/golem_boss_view.gd")
-const EnemyAttacks := preload("res://scripts/som/enemy_attacks.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
@@ -1446,17 +1445,21 @@ func _golem_events(m: Node, e: Dictionary, evs: Array) -> void:
 				_golem_spawn_adds(m, d.get("ids", []))
 
 
-## Visuele telegraaf uit GolemFight-windup + dezelfde reach/shape als _golem_strike. Geen extra windup.
+## Visuele telegraaf = exact de _golem_strike-cirkel (distance_to <= reach_px rond strike-origin).
+## Geen arc/line: de schade is radiaal; de tekening volgt die zone. Geen extra windup.
 func _golem_start_visual_telegraph(m: Node, e: Dictionary, attack_id: String, a: Dictionary, origin: Vector2, dir: Vector2i, windup_ticks: int) -> void:
-	var def: Dictionary = EnemyAttacks.golem_attack(attack_id)
-	if def.is_empty():
-		return
-	# Reach gelijk aan _golem_strike (2x2-baas: +8 px per extra tegel).
-	def["reach"] = _golem_strike_reach_px(m, a)
-	# Timing uit GolemBoss-ticks (ticks_to_ms + ms_to_ticks = zelfde ticks; geen extra waarschuwing).
-	def["windup_ms"] = GolemBoss.ticks_to_ms(windup_ticks)
-	def["active_ms"] = GolemBoss.ticks_to_ms(int(a.get("active", 1)))
-	def["recovery_ms"] = 0
+	var reach_px := _golem_strike_reach_px(m, a)
+	# Minimale def voor TelegraphAttack/Layer: altijd cirkel met strike-reach.
+	var def := {
+		"id": attack_id,
+		"shape": "circle",
+		"reach": reach_px,
+		"windup_ms": GolemBoss.ticks_to_ms(windup_ticks),
+		"active_ms": GolemBoss.ticks_to_ms(int(a.get("active", 1))),
+		"recovery_ms": 0,
+		"power": float(a.get("power", 1.0)),
+		"boss": true,
+	}
 	var tg: TelegraphAttack = e.get("tg", null)
 	if tg == null:
 		tg = TelegraphAttack.new()
@@ -1464,12 +1467,13 @@ func _golem_start_visual_telegraph(m: Node, e: Dictionary, attack_id: String, a:
 	else:
 		tg.cancel()
 	var origin_i := TelegraphShape.to_px(origin)
-	var shape_id := str(a.get("shape", "circle"))
+	const SHAPE_ID := "circle"
 	e["golem_tg_def"] = def
 	e["golem_tg_origin"] = origin_i
 	e["golem_tg_dir"] = dir
-	e["golem_tg_shape"] = shape_id
-	tg.mirror_from_network(def, 0, TelegraphState.State.WINDUP, windup_ticks, origin_i, dir, shape_id)
+	e["golem_tg_shape"] = SHAPE_ID
+	e["golem_tg_reach"] = reach_px
+	tg.mirror_from_network(def, 0, TelegraphState.State.WINDUP, windup_ticks, origin_i, dir, SHAPE_ID)
 	e["tele"] = float(windup_ticks) * TICK_DT
 
 
@@ -1488,6 +1492,7 @@ func _golem_clear_telegraph(e: Dictionary) -> void:
 	e.erase("golem_tg_origin")
 	e.erase("golem_tg_dir")
 	e.erase("golem_tg_shape")
+	e.erase("golem_tg_reach")
 
 
 func _golem_clear_visuals(m: Node, e: Dictionary) -> void:

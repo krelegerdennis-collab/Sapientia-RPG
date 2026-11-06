@@ -1,8 +1,7 @@
 extends Node
-## Golem zichtbare telegraaf + tijdelijke hit-flash (Action, archief_golemhal).
-## Los van golem_arena_tests.gd. Start: godot --path . -- --golemzichtbaartest [--shots=/pad]
-## Bewaakt: telegraaf vóór elke schadelijke slag, één schade-event per strike, hit-zone dekt echte reach,
-## buiten bereik / dodge = geen schade, interrupt wist telegraaf. Schade alleen via _golem_strike.
+## Golem zichtbare telegraaf = exacte strike-cirkel + hit-flash. Start:
+##   xvfb-run -a godot --rendering-driver opengl3 --path . -- --golemzichtbaartest --shots=/workspace/golem_fix
+## Of headless (geen echte viewport-shots). Schade alleen via _golem_strike.
 
 const SomArena := preload("res://scripts/som/som_arena.gd")
 const GolemBoss := preload("res://scripts/som/golem_boss.gd")
@@ -10,7 +9,17 @@ const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
+const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
+const StoryData := preload("res://scripts/data/story_data.gd")
+const BossPhaseMachine := preload("res://scripts/som/boss_phase_machine.gd")
 const ROOM_SCENE := "res://scenes/maps/archief_golemhal.tscn"
+const OTHER_SCENE := "res://scenes/maps/archief_v1_gang.tscn"
+
+## Alle schadelijke Golem-aanval-ids (GolemBoss.ATTACKS).
+const ALL_ATTACK_IDS := [
+	"golem_sweep", "golem_sweep_p2", "golem_book_hammer", "golem_book_hammer_x2",
+	"golem_shockwave", "golem_hammer_blow", "golem_hammer_blow_p3",
+]
 
 var failures := 0
 var passes := 0
@@ -34,7 +43,7 @@ func check(label: String, ok: bool) -> void:
 
 
 func _run() -> void:
-	print("=== Golem zichtbare aanval (telegraaf + anim feedback) ===")
+	print("=== Golem zichtbare aanval v2 (cirkel-hitzone) ===")
 	_wm1_first_boss_evidence()
 	var saved_rt := SomArena.golem_rt_enabled
 	SomArena.golem_rt_enabled = true
@@ -45,15 +54,29 @@ func _run() -> void:
 
 
 func _wm1_first_boss_evidence() -> void:
-	# Route: enige GOLEM_RT_ROOMS-kamer is archief_golemhal; spawn kennis_beest als baas.
-	check("WM1: GOLEM_RT_ROOMS = archief_golemhal (enige Action-baas-kamer)",
+	# Route: DungeonRooms.ORDER eindigt met archief_golemhal als enige baaskamer van Archief 1.
+	var order_ids: Array = []
+	for e in DungeonRooms.ORDER:
+		order_ids.append(str(e[0]))
+	check("WM1 ORDER bevat archief_golemhal (dungeon_rooms.gd:775)", order_ids.has("archief_golemhal"))
+	var idx := order_ids.find("archief_golemhal")
+	var earlier_boss := false
+	for i in idx:
+		var rid := str(order_ids[i])
+		if rid == "":
+			continue
+		var room: Dictionary = DungeonRooms.ROOMS.get(rid, {})
+		for m in room.get("monsters", []):
+			if bool(m.get("boss", false)):
+				earlier_boss = true
+	check("WM1: geen baas vóór archief_golemhal in ORDER", not earlier_boss and idx >= 0)
+	check("WM1: enige Action-RT baaskamer = archief_golemhal (som_arena GOLEM_RT_ROOMS)",
 			SomArena.GOLEM_RT_ROOMS == ["archief_golemhal"])
-	var rooms := load("res://scripts/data/dungeon_rooms.gd")
-	var golem_room: Dictionary = rooms.ROOMS["archief_golemhal"]
-	var monsters: Array = golem_room.get("monsters", [])
-	check("WM1: archief_golemhal spawnt kennis_beest als baas",
+	check("WM1 story: GOLEM_FLAG = bewaker:archief_golemhal/golem (story_data.gd:70)",
+			StoryData.GOLEM_FLAG == "bewaker:archief_golemhal/golem")
+	var monsters: Array = DungeonRooms.ROOMS["archief_golemhal"].get("monsters", [])
+	check("WM1: golemhal spawnt kennis_beest boss",
 			monsters.any(func(m): return str(m.get("enemy", "")) == "kennis_beest" and bool(m.get("boss", false))))
-	check("WM1: GolemBoss.ENEMY_ID = kennis_beest", GolemBoss.ENEMY_ID == "kennis_beest")
 
 
 func _laad(pad: String) -> Node:
@@ -79,6 +102,74 @@ func _events_of(a: Node, type: String) -> Array:
 	return (a.golem_events as Array).filter(func(ev): return str(ev.get("type", "")) == type)
 
 
+func _wait_idle(a: Node, f: GolemFight, max_ticks := 1200) -> bool:
+	var g := 0
+	while g < max_ticks:
+		if f.is_invulnerable():
+			a.step_ticks(1)
+			g += 1
+			continue
+		if f.step == GolemFight.Step.IDLE and not f.core.open:
+			return true
+		# forced mag ook bij core.open; voor idle wachten we tot recovery klaar is
+		if f.step == GolemFight.Step.IDLE:
+			return true
+		a.step_ticks(1)
+		g += 1
+	return f.step == GolemFight.Step.IDLE
+
+
+func _force_windup(a: Node, f: GolemFight, attack_id: String, max_ticks := 180) -> bool:
+	f.queue_forced_attack(attack_id)
+	var g := 0
+	while g < max_ticks:
+		a.step_ticks(1)
+		g += 1
+		if f.step == GolemFight.Step.WINDUP and str(f.attack_id) == attack_id:
+			return true
+	return false
+
+
+func _strike_hits(origin: Vector2, reach: float, point: Vector2) -> bool:
+	return origin.distance_to(point) <= reach
+
+
+func _tg_hits(tg: TelegraphAttack, point: Vector2) -> bool:
+	return tg.hits_point_i(TelegraphShape.to_px(point))
+
+
+func _assert_circle_matches_strike(a: Node, m: Node, e: Dictionary, label: String) -> void:
+	var tg: TelegraphAttack = e["tg"]
+	var origin: Vector2 = e.get("golem_origin", a.center_of(m)) as Vector2
+	var reach: float = float(e.get("golem_tg_reach", a._golem_strike_reach_px(m, GolemBoss.attack(str(e.get("golem_attack", ""))))))
+	check("%s: tg shape=circle" % label, tg.shape() != null and tg.shape().kind == TelegraphShape.Kind.CIRCLE)
+	check("%s: tg.reach == strike-reach (%s)" % [label, str(int(reach))], tg.shape().reach == int(reach))
+	# Sample: binnen/grens/buiten — strike en telegraaf moeten overeenstemmen (geen OR-mask).
+	# Duidelijk binnen / duidelijk buiten (1.5 px band rond de rand overgeslagen i.v.m. float↔int).
+	var samples: Array = [
+		origin,
+		origin + Vector2(maxi(0.0, reach - 2.0), 0),
+		origin + Vector2(0, -maxi(0.0, reach - 2.0)),
+		origin + Vector2(reach + 2.0, 0),
+		origin + Vector2(0, reach + 2.0),
+		origin + Vector2(-(reach + 2.0), 0),
+		origin + Vector2(reach * 0.5, reach * 0.5),
+	]
+	var ok := true
+	var checked := 0
+	for p in samples:
+		var dist := origin.distance_to(p)
+		if absf(dist - reach) <= 1.5:
+			continue
+		checked += 1
+		var sh: bool = _strike_hits(origin, reach, p)
+		var th: bool = _tg_hits(tg, p)
+		if sh != th:
+			ok = false
+			print("  MISMATCH point=%s dist=%s strike=%s tg=%s reach=%s" % [str(p), str(dist), str(sh), str(th), str(reach)])
+	check("%s: samplepunten strike↔telegraaf identiek (n=%d)" % [label, checked], ok and checked >= 4)
+
+
 func _suite() -> void:
 	GameState.new_game("Dax")
 	GameState.encounter_multiplier = 0.0
@@ -95,223 +186,264 @@ func _suite() -> void:
 		h["max_hp"] = 99999
 	var e: Dictionary = a.enemies[m]
 	var f: GolemFight = a.golem_fight_of(m)
-	check("entry heeft tg (visual-only) + GolemBossView", e.has("tg") and e.has("golem_view") and is_instance_valid(e["golem_view"]))
-	check("GolemBossView.body verborgen (geen dubbele sprite)", e["golem_view"].body.visible == false)
+	check("tg + GolemBossView aanwezig", e.has("tg") and e.has("golem_view"))
 
-	# Wacht op eerste windup (kern-open kan aanvallen uitstellen)
-	var guard := 0
-	while f.step != GolemFight.Step.WINDUP and guard < 900:
-		a.step_ticks(1)
-		guard += 1
-	check("windup bereikt binnen 15 s", f.step == GolemFight.Step.WINDUP)
-	if f.step != GolemFight.Step.WINDUP:
-		return
-
-	var tg: TelegraphAttack = e["tg"]
-	a._sync_telegraph_draw()
-	check("telegraaf in WINDUP vóór schade", tg.in_windup())
-	check("TelegraphLayer toont ≥1 vorm tijdens windup", a.telegraph_layer != null and a.telegraph_layer.entry_count() >= 1)
-	check("GolemBossView.marker zichtbaar in windup", e["golem_view"].marker.visible)
-
-	# Screenshot van telegraaf
-	if shots != "":
-		await get_tree().process_frame
-		await get_tree().process_frame
-		_shot("golem_telegraph_windup")
-
-	# Hit-zone dekt echte strike-reach (zelfde origin/reach als _golem_strike)
-	var attack_id := str(e.get("golem_attack", ""))
-	var atk_def := GolemBoss.attack(attack_id)
-	var reach_px: int = a._golem_strike_reach_px(m, atk_def)
-	var origin: Vector2 = e.get("golem_origin", a.center_of(m)) as Vector2
-	check("tg.shape.reach == strike-reach (%d)" % reach_px, tg.shape() != null and int(tg.shape().reach) == reach_px)
-	var hit_pt := TelegraphShape.to_px(origin)  # origin zelf moet in cirkel/vorm-centrum of nabij
-	# Voor circle op origin: punt op origin zit erin; voor arc/line: check locked origin distance
-	var shape_ok := tg.shape().valid and (tg.hits_point_i(TelegraphShape.to_px(origin)) \
-			or origin.distance_to(a.center_of(m)) <= float(reach_px) + 1.0)
-	check("telegraaf-vorm dekt strike-origin/reach", shape_ok)
-
-	# Eén schade-event per strike: speeler in bereik, tel strike + hit_member
+	# --- Per aanval-id: cirkel + exact 1 player_hit + HP-verlies in bereik ---
+	var shot_windup_done := false
+	var shot_strike_done := false
 	var b: Node2D = a.player
-	if b:
-		b.position = origin  # in de hit-zone
-	for id in a.iframes.keys():
-		a.iframes[id] = 0.0
-	var strikes0: int = a.golem_strike_count
-	var hits0: int = a.golem_strike_hit_member_count
-	var hp0 := int(GameState.party[0]["hp"])
-	var player_hits := [0]
-	var cb := func(dmg: int) -> void:
-		player_hits[0] = int(player_hits[0]) + 1
-	a.player_hit.connect(cb)
-	guard = 0
-	while f.step == GolemFight.Step.WINDUP and guard < 120:
-		a.step_ticks(1)
-		guard += 1
-	# ACTIVE tick(s) waarin attack_hit landt
-	guard = 0
-	while a.golem_strike_count == strikes0 and guard < 30:
-		a.step_ticks(1)
-		guard += 1
-	a.player_hit.disconnect(cb)
-	check("precies één _golem_strike na windup", a.golem_strike_count == strikes0 + 1)
-	check("hit_member alleen via strike (≤ party, hier 1)", a.golem_strike_hit_member_count - hits0 <= 1 and a.golem_strike_hit_member_count >= hits0)
-	check("player_hit ≤ 1 per strike (geen dubbele schade-pad)", int(player_hits[0]) <= 1)
-	check("telegraaf gewist na strike", not tg.is_busy() and a.telegraph_layer.entry_count() == 0)
+	var cb_hits := [0]
+	var cb := func(_dmg: int) -> void:
+		cb_hits[0] = int(cb_hits[0]) + 1
 
-	# Buiten bereik: ver weg, volgende strike geen HP-verlies
-	if b:
-		b.position = a.center_of(m) + Vector2(400, 400)
-	for id in a.iframes.keys():
-		a.iframes[id] = 0.0
-	hp0 = int(GameState.party[0]["hp"])
-	strikes0 = a.golem_strike_count
-	guard = 0
-	while a.golem_strike_count == strikes0 and guard < 900:
-		# kern-open blokkeert; doorsteppen
-		a.step_ticks(1)
-		guard += 1
-	check("volgende strike buiten bereik gebeurde", a.golem_strike_count >= strikes0 + 1)
-	check("buiten bereik: geen HP-verlies", int(GameState.party[0]["hp"]) == hp0)
+	for attack_id in ALL_ATTACK_IDS:
+		check("attack-id bestaat in GolemBoss.ATTACKS: %s" % attack_id, GolemBoss.ATTACKS.has(attack_id))
+		if not _wait_idle(a, f):
+			check("idle vóór %s" % attack_id, false)
+			continue
 
-	# Dodge/iframes: in bereik maar iframes aan → geen schade
-	guard = 0
-	while f.step != GolemFight.Step.WINDUP and guard < 900:
-		a.step_ticks(1)
-		guard += 1
-	if b:
-		b.position = e.get("golem_origin", a.center_of(m))
-	for id in a.party_ids():
-		a.iframes[id] = 5.0
-	hp0 = int(GameState.party[0]["hp"])
-	strikes0 = a.golem_strike_count
-	guard = 0
-	while a.golem_strike_count == strikes0 and guard < 120:
-		# houd iframes hoog tijdens de windup→hit
+		# IN BEREIK: speler op golem-centrum vóór windup (aim=target locked origin bij start)
+		if b:
+			b.position = a.center_of(m)
 		for id in a.party_ids():
-			a.iframes[id] = 5.0
-		a.step_ticks(1)
-		guard += 1
-	check("strike met iframes/dodge: geen HP-verlies", a.golem_strike_count >= strikes0 + 1 and int(GameState.party[0]["hp"]) == hp0)
+			a.iframes[id] = 0.0
+		if not _force_windup(a, f, attack_id):
+			check("windup %s geforceerd" % attack_id, false)
+			continue
+		# Voor aim=target: blijf op de gelockte origin
+		var origin: Vector2 = e.get("golem_origin", a.center_of(m)) as Vector2
+		if b:
+			b.position = origin
+		check("windup %s actief" % attack_id, f.step == GolemFight.Step.WINDUP and e["tg"].in_windup())
+		a._sync_telegraph_draw()
+		check("TelegraphLayer ≥1 tijdens %s" % attack_id, a.telegraph_layer.entry_count() >= 1)
+		_assert_circle_matches_strike(a, m, e, attack_id)
 
-	# Interrupt wist telegraaf: start windup, forceer telegraphs_cancelled via core-break
-	for id in a.iframes.keys():
-		a.iframes[id] = 0.0
-	guard = 0
-	while f.step != GolemFight.Step.WINDUP and guard < 900:
-		a.step_ticks(1)
-		guard += 1
-	check("interrupt-setup: opnieuw in windup", f.step == GolemFight.Step.WINDUP and e["tg"].in_windup())
-	# Core-break: open venster + break_damage; als kern dicht, wacht op open tijdens windup of forceer clear
-	if f.core.open:
-		var need := int(f.core.break_damage)
-		a.damage_enemy(m, maxi(need * 3, 200), Vector2i.ZERO)
+		if shots != "" and not shot_windup_done:
+			await _shot_real("windup")
+			shot_windup_done = true
+
+		var hp0 := int(GameState.party[0]["hp"])
+		var strikes0: int = a.golem_strike_count
+		cb_hits[0] = 0
+		a.player_hit.connect(cb)
+		var g := 0
+		while a.golem_strike_count == strikes0 and g < 90:
+			if b:
+				b.position = e.get("golem_origin", origin)
+			for id in a.party_ids():
+				a.iframes[id] = 0.0
+			a.step_ticks(1)
+			g += 1
+		var flash: Node = m.get_node_or_null("GolemHitFlashTemp")
+		check("hit-flash node tijdens/na strike %s" % attack_id, flash != null and is_instance_valid(flash) and flash.visible)
+		if shots != "" and not shot_strike_done:
+			await _shot_real("strike")
+			shot_strike_done = true
+		a.player_hit.disconnect(cb)
+		var hp1 := int(GameState.party[0]["hp"])
+		check("in bereik %s: precies 1 _golem_strike" % attack_id, a.golem_strike_count == strikes0 + 1)
+		check("in bereik %s: EXACT 1 player_hit" % attack_id, int(cb_hits[0]) == 1)
+		check("in bereik %s: HP-verlies" % attack_id, hp1 < hp0)
+		check("telegraaf weg na strike %s" % attack_id, not e["tg"].is_busy())
+
+		# x2 tweede slag
+		if attack_id == "golem_book_hammer_x2" and f.step == GolemFight.Step.WINDUP:
+			if b:
+				b.position = e.get("golem_origin", origin)
+			for id in a.party_ids():
+				a.iframes[id] = 0.0
+			hp0 = int(GameState.party[0]["hp"])
+			strikes0 = a.golem_strike_count
+			cb_hits[0] = 0
+			a.player_hit.connect(cb)
+			g = 0
+			while a.golem_strike_count == strikes0 and g < 90:
+				a.step_ticks(1)
+				g += 1
+			a.player_hit.disconnect(cb)
+			check("x2 tweede strike: EXACT 1 player_hit + HP-verlies", int(cb_hits[0]) == 1 and int(GameState.party[0]["hp"]) < hp0)
+
+		_wait_idle(a, f)
+
+		# BUITEN BEREIK:
+		# - niet-target: speler ver vóór windup (origin = golem)
+		# - aim=target: windup lockt origin op speler, daarna weglopen vóór de strike
+		var aim_target := str(GolemBoss.attack(attack_id).get("aim", "")) == "target"
+		for id in a.party_ids():
+			a.iframes[id] = 0.0
+		if aim_target:
+			if b:
+				b.position = a.center_of(m)
+			if not _force_windup(a, f, attack_id):
+				check("windup (oor) %s" % attack_id, false)
+				continue
+			var lock_o: Vector2 = e.get("golem_origin", a.center_of(m)) as Vector2
+			if b:
+				b.position = lock_o + Vector2(500, 500)
+		else:
+			if b:
+				b.position = a.center_of(m) + Vector2(500, 500)
+			if not _force_windup(a, f, attack_id):
+				check("windup (oor) %s" % attack_id, false)
+				continue
+			if b:
+				b.position = a.center_of(m) + Vector2(500, 500)
+		hp0 = int(GameState.party[0]["hp"])
+		strikes0 = a.golem_strike_count
+		cb_hits[0] = 0
+		a.player_hit.connect(cb)
+		g = 0
+		while a.golem_strike_count < strikes0 + 1 and g < 120:
+			if b and aim_target:
+				b.position = (e.get("golem_origin", a.center_of(m)) as Vector2) + Vector2(500, 500)
+			elif b:
+				b.position = a.center_of(m) + Vector2(500, 500)
+			a.step_ticks(1)
+			g += 1
+		g = 0
+		while f.step != GolemFight.Step.IDLE and g < 120:
+			if b:
+				b.position = a.center_of(m) + Vector2(500, 500)
+			a.step_ticks(1)
+			g += 1
+		a.player_hit.disconnect(cb)
+		check("buiten bereik %s: 0 player_hit, geen HP-verlies" % attack_id,
+				int(cb_hits[0]) == 0 and int(GameState.party[0]["hp"]) == hp0)
+		_wait_idle(a, f)
+
+		# DODGE: dichtbij vóór windup, i-frames tijdens hele windup→hit
+		if b:
+			b.position = a.center_of(m)
+		if not _force_windup(a, f, attack_id):
+			check("windup (dodge) %s" % attack_id, false)
+			continue
+		if b:
+			b.position = e.get("golem_origin", a.center_of(m))
+		hp0 = int(GameState.party[0]["hp"])
+		strikes0 = a.golem_strike_count
+		cb_hits[0] = 0
+		a.player_hit.connect(cb)
+		g = 0
+		while a.golem_strike_count < strikes0 + 1 and g < 120:
+			for id in a.party_ids():
+				a.iframes[id] = 5.0
+			a.step_ticks(1)
+			g += 1
+		g = 0
+		while f.step != GolemFight.Step.IDLE and g < 120:
+			for id in a.party_ids():
+				a.iframes[id] = 5.0
+			a.step_ticks(1)
+			g += 1
+		a.player_hit.disconnect(cb)
+		check("dodge/i-frames %s: 0 player_hit, geen HP-verlies" % attack_id,
+				int(cb_hits[0]) == 0 and int(GameState.party[0]["hp"]) == hp0)
+		_wait_idle(a, f)
+
+	# --- Echte interrupt via GolemFight fasewissel (telegraphs_cancelled) ---
+	if not _wait_idle(a, f):
+		check("idle vóór interrupt", false)
 	else:
-		# Simuleer cancel-pad (zelfde als telegraphs_cancelled-handler)
-		a._golem_clear_telegraph(e)
+		# Herstel HP baas genoeg onder fase-0 drempel-ruimte
+		# Forceer windup, daarna overkill → fase → cancel
+		if _force_windup(a, f, "golem_sweep"):
+			check("interrupt: windup + tg actief", e["tg"].in_windup())
+			var strikes_before: int = a.golem_strike_count
+			var cancels_before := _events_of(a, "telegraphs_cancelled").size()
+			# Schade tot fasedrempel → _enter_phase → _cancel_attack
+			a.damage_enemy(m, 50000, Vector2i.ZERO)
+			a._sync_telegraph_draw()
+			var cancels_after := _events_of(a, "telegraphs_cancelled").size()
+			check("interrupt: telegraphs_cancelled via GolemFight", cancels_after > cancels_before)
+			check("interrupt: telegraaf gewist", not e["tg"].is_busy() and a.telegraph_layer.entry_count() == 0)
+			# Geen strike van de geannuleerde windup
+			a.step_ticks(5)
+			check("interrupt: geen strike van geannuleerde aanval", a.golem_strike_count == strikes_before)
+			# Wacht invuln af
+			a.step_ticks(BossPhaseMachine.INVULN_TICKS + 2)
+
+	# --- Death wist telegraaf ---
+	_reset_golem_presence()
+	s = await _laad(ROOM_SCENE)
+	a = s.get("som") if s else null
+	m = _golem(s) if s else null
+	check("herlaad voor death/exit", a != null and m != null)
+	if a == null or m == null:
+		return
+	a.allies_enabled = false
+	for h in GameState.party:
+		h["hp"] = 99999
+		h["max_hp"] = 99999
+	e = a.enemies[m]
+	f = a.golem_fight_of(m)
+	_force_windup(a, f, "golem_sweep")
+	check("death-setup: tg actief", e["tg"].in_windup())
+	# Versla door fases heen
+	var safety := 0
+	while a.enemies.has(m) and safety < 200:
+		safety += 1
+		if f.is_invulnerable():
+			a.step_ticks(BossPhaseMachine.INVULN_TICKS)
+		a.damage_enemy(m, 50000, Vector2i.ZERO)
+	check("death: Golem weg uit arena", not a.enemies.has(m))
+	# View/tg op monster: monster wordt gefreed; check dat layer leeg is
 	a._sync_telegraph_draw()
-	check("interrupt/clear: telegraaf weg", not e["tg"].is_busy() and a.telegraph_layer.entry_count() == 0)
+	check("death: TelegraphLayer leeg", a.telegraph_layer.entry_count() == 0)
 
-	# Hit-flash bestand bestaat (tijdelijke feedback)
-	check("tijdelijke hit-flash art aanwezig (golem_boss_v2_hit.png)",
-			ResourceLoader.exists("res://assets/sprites/enemies/golem_boss_v2_hit.png"))
+	# --- Arena exit wist telegraaf ---
+	_reset_golem_presence()
+	s = await _laad(ROOM_SCENE)
+	a = s.get("som") if s else null
+	m = _golem(s) if s else null
+	if a == null or m == null:
+		# één retry
+		await get_tree().create_timer(0.2).timeout
+		s = await _laad(ROOM_SCENE)
+		a = s.get("som") if s else null
+		m = _golem(s) if s else null
+	check("herlaad voor exit", a != null and m != null)
+	if a == null or m == null:
+		return
+	a.allies_enabled = false
+	e = a.enemies[m]
+	f = a.golem_fight_of(m)
+	_force_windup(a, f, "golem_book_hammer")
+	check("exit-setup: tg actief", e.has("tg") and e["tg"].in_windup())
+	var view_before: Node = e.get("golem_view", null)
+	# Verlaat kamer → _exit_tree cleared visuals + unregister
+	await _laad(OTHER_SCENE)
+	await get_tree().process_frame
+	const BossScript := preload("res://scripts/som/boss_script.gd")
+	check("exit: BossScript kennis_beest unregistered", not BossScript.has_script(GolemBoss.ENEMY_ID))
+	check("exit: oude GolemBossView vrijgegeven of ongeldig",
+			view_before == null or not is_instance_valid(view_before))
 
 
-func _shot(name: String) -> void:
+func _reset_golem_presence() -> void:
+	GameState.in_battle = false
+	GameState.changing_map = false
+	GameState.encounter_multiplier = 0.0
+	GameState.story_flags.erase(StoryData.GOLEM_FLAG)
+	if GameState.defeated_map_monsters.has("archief_golemhal"):
+		GameState.defeated_map_monsters["archief_golemhal"].erase("golem")
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+
+
+func _shot_real(name: String) -> void:
 	if shots == "":
 		return
 	DirAccess.make_dir_recursive_absolute(shots)
+	# Laat een paar frames renderen (opengl3/xvfb)
+	for i in 4:
+		await get_tree().process_frame
 	var path := shots.path_join(name + ".png")
 	var img: Image = null
 	var tex := get_viewport().get_texture()
 	if tex != null:
 		img = tex.get_image()
 	if img == null:
-		# Headless/dummy renderer: rasteriseer de telegraaf-outline naar een PNG.
-		img = _render_telegraph_fallback()
-	if img == null:
-		print("SHOT skip: ", name)
+		print("SHOT FAIL (geen viewport-image, draai met xvfb-run --rendering-driver opengl3): ", name)
 		return
 	img.save_png(path)
-	print("SHOT ", path)
-
-
-func _render_telegraph_fallback() -> Image:
-	var s := get_tree().current_scene
-	if s == null or s.get("som") == null:
-		return null
-	var a: Node = s.som
-	var m = null
-	for x in a.enemies.keys():
-		if a.enemies[x].get("golem", null) != null:
-			m = x
-			break
-	if m == null or not a.enemies[m].has("tg"):
-		return null
-	var tg: TelegraphAttack = a.enemies[m]["tg"]
-	if tg == null or not tg.is_busy():
-		return null
-	var layer = a.telegraph_layer
-	var poly: PackedVector2Array = layer.outline_polygon(tg.shape(), 1.0)
-	var img := Image.create(384, 216, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0.08, 0.08, 0.12, 1))
-	_fill_poly(img, poly, Color(0.92, 0.18, 0.18, 0.85))
-	# Marker-stip op doel
-	if a.enemies[m].has("golem_origin"):
-		var origin: Vector2 = a.enemies[m]["golem_origin"]
-		var mid := Vector2(192, 108)
-		var c := mid  # origin relatief gecentreerd via _fill_poly off; zet kruis in midden-ish
-		for d in range(-3, 4):
-			var x := clampi(int(c.x) + d, 0, 383)
-			var y := clampi(int(c.y), 0, 215)
-			img.set_pixel(x, y, Color(1, 1, 0.2, 1))
-			img.set_pixel(clampi(int(c.x), 0, 383), clampi(int(c.y) + d, 0, 215), Color(1, 1, 0.2, 1))
-	return img
-
-
-func _fill_poly(img: Image, poly: PackedVector2Array, col: Color) -> void:
-	if poly.size() < 3:
-		return
-	var min_x := 0
-	var max_x := img.get_width() - 1
-	var min_y := 0
-	var max_y := img.get_height() - 1
-	# Eenvoudige scanline in bounding box
-	var bb_min := poly[0]
-	var bb_max := poly[0]
-	for p in poly:
-		bb_min = Vector2(minf(bb_min.x, p.x), minf(bb_min.y, p.y))
-		bb_max = Vector2(maxf(bb_max.x, p.x), maxf(bb_max.y, p.y))
-	# Centreer in beeld
-	var off := Vector2(img.get_width(), img.get_height()) * 0.5 - (bb_min + bb_max) * 0.5
-	for y in range(maxi(0, int(bb_min.y + off.y) - 1), mini(img.get_height(), int(bb_max.y + off.y) + 2)):
-		for x in range(maxi(0, int(bb_min.x + off.x) - 1), mini(img.get_width(), int(bb_max.x + off.x) + 2)):
-			if _point_in_poly(Vector2(x, y) - off, poly):
-				img.set_pixel(x, y, col)
-	# Rand
-	for i in poly.size():
-		var a2: Vector2 = poly[i] + off
-		var b2: Vector2 = poly[(i + 1) % poly.size()] + off
-		_line(img, a2, b2, Color(1, 0.3, 0.3, 1))
-
-
-func _point_in_poly(pt: Vector2, poly: PackedVector2Array) -> bool:
-	var inside := false
-	var j := poly.size() - 1
-	for i in poly.size():
-		var pi: Vector2 = poly[i]
-		var pj: Vector2 = poly[j]
-		if ((pi.y > pt.y) != (pj.y > pt.y)) and (pt.x < (pj.x - pi.x) * (pt.y - pi.y) / (pj.y - pi.y + 0.0001) + pi.x):
-			inside = not inside
-		j = i
-	return inside
-
-
-func _line(img: Image, a: Vector2, b: Vector2, col: Color) -> void:
-	var steps := maxi(1, int(a.distance_to(b)))
-	for i in steps + 1:
-		var p := a.lerp(b, float(i) / float(steps))
-		var x := int(p.x)
-		var y := int(p.y)
-		if x >= 0 and y >= 0 and x < img.get_width() and y < img.get_height():
-			img.set_pixel(x, y, col)
+	print("SHOT ", path, " ", img.get_width(), "x", img.get_height())

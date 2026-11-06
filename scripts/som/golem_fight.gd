@@ -37,6 +37,12 @@ func _init(max_hp: int, seed: int = 0, script: Dictionary = GolemBoss.SCRIPT) ->
 
 
 ## Alle events sinds de vorige aanroep (tick() en damage()), daarna leeg.
+## Tests/debug: zet een aanval vooraan in de forced-wachtrij (o.a. hammer na slam).
+func queue_forced_attack(id: String) -> void:
+	if id != "":
+		_forced.append(id)
+
+
 func take_events() -> Array:
 	var out := _events
 	_events = []
