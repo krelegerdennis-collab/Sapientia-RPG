@@ -92,6 +92,24 @@ jobs:
       - name: Check algemene placeholder-sfx
         run: python3 tools/check_algemene_sfx.py
 
+  palet-check:
+    # Ronde 1 art: meet kleuren buiten docs/art/masterpalet.gpl. Waarschuwing, niet blokkerend.
+    # De pytest-stap (maak_gpl/palet_check/meet) blokkeert wel.
+    name: palet-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Pillow + pytest
+        run: python3 -m pip install -q pillow pytest
+      - name: Tests art_audit
+        run: python3 -m pytest -q tools/art_audit
+      - name: Masterpalet gelijk met sapientia_palette.json
+        run: python3 tools/art_audit/maak_gpl.py --check
+      - name: Paletcheck (waarschuwing)
+        continue-on-error: true
+        run: python3 tools/art_audit/palet_check.py --top 20
+
   warper-runner:
     name: warper-runner
     runs-on: ubuntu-latest

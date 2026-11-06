@@ -64,6 +64,10 @@ staat er vanzelf vóór.
 
 ## 4. Palet
 
+> **Masterpalet (sinds 5 nov 2026):** `docs/art/masterpalet.gpl` (73 kleuren), gegenereerd uit
+> `tools/som/sapientia_palette.json` met `tools/art_audit/maak_gpl.py`. Meten: `python3 tools/art_audit/palet_check.py`.
+> De ramps in §4b en §13 hieronder zijn historisch (v3 en v7/v8) en dekken de huidige art niet; nieuwe art volgt het masterpalet.
+
 Algemeen karakter: **gedempt en warm**. Het gras is geel-olijfgroen in plaats van felgroen. Steen is
 leisteenblauw-grijs, zand is okergeel en het bos is heel donker olijf. De kleuren zijn rijk in de
 middentinten en er is weinig puur wit of zwart. Contrast komt vooral van donkere schaduwen.

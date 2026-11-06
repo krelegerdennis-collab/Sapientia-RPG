@@ -63,6 +63,13 @@ puzzel, Koopman fase 1 (bezoek 1-3) variatie.
 - Grootste afwijkers (zonder placeholders): `bg/spiegel_kamer*.png` (1500+ kleuren, WM2-content, niet in de route),
   `tiles/dungeon/dungeon_tiles.png` (234), `puzzle/geheime_deur_archief.png` (201), `sprites/archief2/genezer*.png` (102).
 
+## Art-polish A1 — masterpalet (5 nov)
+- `docs/art/masterpalet.gpl` (73 kleuren) uit `tools/som/sapientia_palette.json`; ARTSTYLE §4b/§13 bleken historisch
+  (0,0% / 0,1% van de pixels). `tools/art_audit/palet_check.py` + CI-job `palet-check` (waarschuwing, niet blokkerend).
+- Nulmeting `assets/`: 818/1175 PNG's schoon, 95,6% van de pixels op palet; 357 afwijkers (122 item-iconen, 84 woud-
+  placeholders). Details: `docs/art/polish/r1/`.
+- `tools/handwerk.txt`: 54 dode paden weg (bestand bestond niet).
+
 ## R4 — UX en bugs (5 nov, PR #361)
 - `EDGECASES_ITEMS_STATUS.md`: 18 van 19 punten bleken al gefixt (r8-3); #8 (KO door gif/brand niet gemeld) gefixt in
   `battle.gd` (`_report_kos` na de status-ticks).

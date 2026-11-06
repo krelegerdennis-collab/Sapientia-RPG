@@ -62,8 +62,9 @@ Een fase mag pas dicht als de gate gehaald is; een fout in een eerdere fase hero
 Achtergrond: batch 1 (PR #203, 24 okt 2026) bracht 13 bestanden naar het masterpalet, goedgekeurd door Dennis. Het
 masterpalet-bestand zelf staat niet in de repo (`docs/palette.png` is de paletkaart van `docs/ARTSTYLE.md`).
 
-- [ ] Dennis of RPG ART legt het masterpalet vast als `.gpl` of `.png` (pad in dit bestand noteren). Zonder dat
-  bestand is "op palet" niet meetbaar.
+- [x] Masterpalet vastgelegd: `docs/art/masterpalet.gpl` (73 kleuren, uit `tools/som/sapientia_palette.json` via
+  `tools/art_audit/maak_gpl.py`; 5 nov 2026, akkoord Dennis). Snelle check: `python3 tools/art_audit/palet_check.py`
+  (CI-job `palet-check`, waarschuwing). Nulmeting: `docs/art/polish/r1/`.
 - [ ] Meet alle PNG's (alleen lezen, schrijft nooit een asset):
   `python3 tools/art_audit/meet.py --palet <masterpalet> --assets assets --uit art_meting.csv`
   (kolommen: `buiten_palet`, `unieke_kleuren`, `alpha_alleen_0_255`, `semi_transparant`, `deelbaar_door_16`).
