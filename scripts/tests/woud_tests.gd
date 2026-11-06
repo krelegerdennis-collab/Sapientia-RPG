@@ -1343,8 +1343,9 @@ func _warper_tests() -> void:
 	var wp: DungeonExitWarper = _warper_van(ingang)
 	check("begin-warper in de Woudrand op %s" % [WW.BEGIN_TILE], wp != null and wp.role == "begin"
 			and _warper_tile(wp) == WW.BEGIN_TILE and not wp.waarschuwt()
-			and wp.sprite.texture.resource_path.ends_with("save_book.png")
-			and wp.sprite.modulate == ExitWarper.TINT
+			and wp.sprite.texture.resource_path.ends_with("dungeon_exit_warper.png")
+			and wp.sprite.texture.get_size() == Vector2(64, 16) and wp.sprite.hframes == 4
+			and wp.sprite.modulate == Color.WHITE
 			and wp.world_scene == WORLD and wp.world_spawn == "van_woud")
 	if wp == null or player() == null:
 		return
@@ -1369,8 +1370,10 @@ func _warper_kamer(pad: String, spawn: String, role: String, tegel: Vector2i, we
 	await _weg_monsters(kamer)
 	var wp: DungeonExitWarper = _warper_van(kamer)
 	check("%s-warper op %s" % [role, tegel], wp != null and wp.role == role and wp.waarschuwt()
-			and _warper_tile(wp) == tegel and wp.sprite.texture.resource_path.ends_with("save_book.png")
-			and wp.sprite.modulate == ExitWarper.TINT)
+			and _warper_tile(wp) == tegel
+			and wp.sprite.texture.resource_path.ends_with("dungeon_exit_warper.png")
+			and wp.sprite.texture.get_size() == Vector2(64, 16) and wp.sprite.hframes == 4
+			and wp.sprite.modulate == Color.WHITE)
 	if wp == null or player() == null:
 		return
 	var stay := tile()

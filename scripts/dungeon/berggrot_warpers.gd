@@ -2,7 +2,7 @@ extends RefCounted
 class_name BerggrotWarpers
 ## Uitgang-warpers van de berggrot (begin, midden, eind).
 ## Geen baas en geen mini-baas. Geen Archief 3 tot en met 6. Geen Diepe Grot.
-## Plaatje: het bestaande opslagboek, violet getint (dungeon_exit_warper.gd). Geen nieuw bestand.
+## Plaatje: dungeon_exit_warper.png, zonder tint (dungeon_exit_warper.gd).
 ##
 ## Alle grotkamers staan op floor 1. De Archief-regel (middelste verdieping) zou de
 ## midden-warper dan op de ingang zetten. Zonder mini-baas staat hij op een duidelijke

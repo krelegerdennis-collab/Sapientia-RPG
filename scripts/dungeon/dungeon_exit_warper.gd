@@ -6,12 +6,14 @@ class_name DungeonExitWarper
 ## De Diepe Grot heeft een eigen warper (dungeon100_warper.gd) op verdieping 1, 25, 50, 75 en 99.
 ## Die verlaat de grot. Dit script roept hem niet aan. De uitgangen van het Eerste Archief blijven hier.
 ##
-## PLAATJE PLACEHOLDER: het opslagboek, violet getint, hetzelfde als de grot-warper.
-## Geen nieuw bestand. Echte art is nog open (universeel of per archief, TODO in de takenlijst).
+## Plaatje: assets/sprites/dungeon_exit_warper.png (64x16, 4 frames van 16x16).
+## Geen tint: de art is zelf de uitgang-warper. BookPoint speelt de frames in een lus.
 
 const SCENE := "res://scenes/dungeon_exit_warper.tscn"
+const SHEET := "res://assets/sprites/dungeon_exit_warper.png"
+## Oude violette tint van het opslagboek. Het sprite gebruikt hem niet meer.
+## Bestaande suites noemen deze constante nog; die bestanden blijven onaangeroerd.
 const TINT := Color(0.78, 0.62, 1.0)
-const BOOK_TEX := "res://assets/sprites/save_book.png"
 const WARNING := "Are you sure you want to leave the dungeon?"
 const YES := "Yes, warp to the world map"
 const NO := "No, stay in the dungeon"
@@ -39,10 +41,12 @@ static func create(tile: Vector2i) -> Node2D:
 func _ready() -> void:
 	type = "warper"
 	super._ready()
-	# v0.21: BookData "warper" is nu de eigen art van de Diepe Grot-warper; deze uitgang-warper
-	# blijft (tot hij eigen art heeft) het violet getinte opslagboek.
-	sprite.texture = load(BOOK_TEX)
-	sprite.modulate = TINT
+	# BookData "warper" is de Diepe Grot. Deze uitgang-warper heeft een eigen sheet.
+	var sheet := load(SHEET) as Texture2D
+	sprite.texture = sheet
+	sprite.hframes = 4
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	sprite.modulate = Color.WHITE
 
 
 func waarschuwt() -> bool:

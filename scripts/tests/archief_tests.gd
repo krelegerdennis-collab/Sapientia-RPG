@@ -736,8 +736,10 @@ func _warper_tests() -> void:
 	if ingang != null:
 		wp = ingang.get_node_or_null("Objects/ExitWarper") as DungeonExitWarper
 	check("begin-warper in de ingang op %s" % [AW.BEGIN_TILE], wp != null and wp.role == "begin"
-			and _warper_tile(wp) == AW.BEGIN_TILE and wp.sprite.texture.resource_path.ends_with("save_book.png")
-			and wp.sprite.modulate == ExitWarper.TINT)
+			and _warper_tile(wp) == AW.BEGIN_TILE
+			and wp.sprite.texture.resource_path.ends_with("dungeon_exit_warper.png")
+			and wp.sprite.texture.get_size() == Vector2(64, 16) and wp.sprite.hframes == 4
+			and wp.sprite.modulate == Color.WHITE)
 	if wp == null or player() == null:
 		return
 	var stay := tile()

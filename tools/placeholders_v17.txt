@@ -5,7 +5,7 @@
 assets/sprites/enemies/mimic.png   80x64   Mimic (gevechtsplaatje; kist met tanden, magenta hoekjes)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x16, magenta hoekjes)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # Diepe Grot, warpers (verdieping 1, 25, 50, 75, 99): PLACEHOLDER, geen eigen bestand.
-# Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint   [KLAAR v0.21: Diepe Grot-warper heeft eigen art (dungeon100_warper.png); uitgang-warpers houden het getinte boek]
+# Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint   [KLAAR v0.21: Diepe Grot-warper heeft eigen art (dungeon100_warper.png)]
 # in scripts/dungeon/dungeon100_warper.gd.
 # Echte art later: assets/sprites/dungeon100_warper.png  64x16  (4 frames van 16x16).   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 # Het Levende Archief, verdieping 1 (tools/art_kas_placeholder.py). Magenta hoekjes, geen definitieve art.
