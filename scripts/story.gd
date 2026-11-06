@@ -43,6 +43,19 @@ var _card_layer: CanvasLayer
 var card_label: Label
 ## TC-P: titelkaart actief (PLACEHOLDER) — zelfde soort blokkade als `show_card`.
 var tc_p_card_active := false
+## Alleen bij --tcptest: chronologische regels (t_ms + frame) voor volgorde-bewijs.
+var tc_p_order_log: Array[String] = []
+
+
+func _tc_p_order_trace(lbl: String) -> void:
+	if not OS.get_cmdline_user_args().has("--tcptest"):
+		return
+	var p := _player()
+	var locked: Variant = p.get("input_locked") if p != null and "input_locked" in p else null
+	var line := "TC-P-ORDER t_ms=%d frame=%d %s story_running=%s tc_p_active=%s input_locked=%s" \
+			% [Time.get_ticks_msec(), Engine.get_process_frames(), lbl, running, tc_p_card_active, locked]
+	print(line)
+	tc_p_order_log.append(line)
 
 
 func _ready() -> void:
@@ -170,6 +183,9 @@ func run(event_id: String, arg := "", origin := "") -> void:
 	current_origin = origin
 	running = true
 	_lock(true)
+	if event_id == "catastrofe" and OS.get_cmdline_user_args().has("--tcptest"):
+		tc_p_order_log.clear()
+		_tc_p_order_trace("after_story_lock_true")
 	var next := event_id
 	while next != "" and next != "__stop":
 		var v := pick(next, arg)
@@ -184,20 +200,27 @@ func run(event_id: String, arg := "", origin := "") -> void:
 	# TC-P: na het `catastrofe`-event (proloog-zegel; in repo geen aparte “CS-01”-id) —
 	# titelkaart vóór speler weer vrij mag. Geen tweede keer (flag in story_flags).
 	var needs_tc_p := tc_p_should_show_after_event(done)
-	if next != "__stop" and not needs_tc_p:
-		_lock(false)
+	if needs_tc_p:
+		_lock(true)
+		_tc_p_order_trace("tc_p_card_about_to_show")
 	if needs_tc_p:
 		tc_p_card_active = true
 		tc_p_card_active_changed.emit(true)
+		_tc_p_order_trace("tc_p_card_visible_start")
 		var card := TcPrologueTitleCardScript.new()
 		add_child(card)
 		await card.completed
 		tc_p_card_active = false
 		tc_p_card_active_changed.emit(false)
+		_tc_p_order_trace("tc_p_card_visible_end")
 		GameState.story_flags[SD.TC_P_SHOWN] = true
-		if next != "__stop":
-			_lock(false)
 	running = false
+	if needs_tc_p:
+		_tc_p_order_trace("story_running_cleared")
+	if next != "__stop":
+		_lock(false)
+		if needs_tc_p:
+			_tc_p_order_trace("field_input_unlock_after_tc_p")
 	event_finished.emit(done)
 
 
