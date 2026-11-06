@@ -166,6 +166,7 @@ var target_list: Array = []        # v0.13 kiesbare doelwitten (links -> rechts)
 @onready var victory_panel: PanelContainer = $VictoryWindow
 @onready var victory_label: Label = $VictoryWindow/VictoryLabel
 @onready var touch: Control = $TouchControls/Control
+@onready var juice: BattleJuice = get_node_or_null("Juice")   # HANDOFF_JUICE: game-feel; null in de battlesim (script zonder scène)
 ## v0.11 oefengevecht (proloog): {"tutorial": true, "enemy_hp": n, ...} of {} = gewoon
 var tutorial: Dictionary = {}
 ## v0.15: vluchten mag niet in een baasgevecht (zoals Lufia 2). Tests mogen dit uitzetten.
@@ -180,6 +181,10 @@ var last_skill_effect: Dictionary = {}
 var counters_done := 0
 ## Alleen voor tests: >= 0 forceert de eerstvolgende vluchtworp (0.0 = succes).
 var flee_roll_override := -1.0
+## HANDOFF_JUICE: soort van de treffer die _hit() nu verwerkt ("attack" | "skill" | "spell" | "kern" | "boss").
+## Wordt door de aanroeper gezet en door _hit() teruggezet op "attack".
+var _hit_kind := "attack"
+
 ## Welke tips er getoond zijn (voor de autotest): "aanval", "item"
 var tips_shown := {}
 var hero_nodes: Array = []    # battle_hero.gd per held
@@ -1364,6 +1369,7 @@ func _execute(a: Dictionary) -> void:
 			else:
 				await _enemy_lunge(actor, t)
 			var dmg := _physical_damage(actor, t, mult)
+			_hit_kind = "skill" if not gekozen.is_empty() else "attack"
 			await _damage(t, dmg)
 			await _skill_effect(actor, t, gekozen, dmg)
 			await _counter(t, actor)
@@ -1389,11 +1395,13 @@ func _execute(a: Dictionary) -> void:
 				"enemy":
 					var t = _valid_target(a["target"], false)
 					if t != null:
+						_hit_kind = "spell"
 						await _damage(t, Archief2.schaal_element(_spell_amount(actor, sp, t), t, str(sp.get("element", ""))))
 						_apply_spell_status(t, sp)
 				"all_enemies":
 					var targets := _alive(enemies)
 					for t in targets:
+						_hit_kind = "spell"
 						_hit(t, Archief2.schaal_element(_spell_amount(actor, sp, t), t, str(sp.get("element", ""))))
 						_apply_spell_status(t, sp)
 					await _wait(0.7)
@@ -1795,8 +1803,12 @@ func _hit(t: Dictionary, amount: int) -> void:
 		number_color = CORE_HIT_COLOR if t["core"].open else ARMOR_HIT_COLOR
 		amount = t["core"].scale_damage(amount)
 	t["s"]["hp"] = maxi(0, int(t["s"]["hp"]) - amount)
+	var tier := _juice_tier(t, amount)
+	_hit_kind = "attack"
 	_popup_number(t, str(amount), number_color)
 	ActorSfx.play(t, "raak")
+	if juice:
+		juice.feedback(tier, _juice_pos(t))
 	if t["is_hero"]:
 		show_message("%s takes %d damage." % [t["name"], amount])
 		var node: Control = t["node"]
@@ -1813,12 +1825,37 @@ func _hit(t: Dictionary, amount: int) -> void:
 	damage_shown.emit(t["name"], amount)
 
 
+## HANDOFF_JUICE stap 1: tier van een treffer.
+## large: open boss-kern · medium: vaardigheid/spreuk/Kernkracht/baas-slag of >= 25 % max-HP · small: de rest.
+func _juice_tier(t: Dictionary, amount: int) -> String:
+	if t.has("core") and t["core"].open:
+		return "large"
+	if _hit_kind != "attack":
+		return "medium"
+	var max_hp := maxi(1, int(t["s"].get("max_hp", 1)))
+	if float(amount) >= 0.25 * float(max_hp):
+		return "medium"
+	return "small"
+
+
+## Positie van een combatant in de gevechtsscène (voor particles/pop in latere stappen).
+func _juice_pos(t: Dictionary) -> Vector2:
+	var node: Control = t["node"]
+	if node == null:
+		return Vector2.ZERO
+	if t["is_hero"]:
+		return node.head_position()
+	return node.position + node.size / 2.0
+
+
 func _report_kos(targets: Array) -> void:
 	for t in targets:
 		if t["s"]["hp"] > 0 or t.get("reported_ko", false):
 			continue
 		t["reported_ko"] = true
 		ActorSfx.play(t, "dood")
+		if juice:
+			juice.feedback("large", _juice_pos(t))
 		if t["is_hero"]:
 			show_message("%s is down!" % t["name"])
 		else:
@@ -1882,6 +1919,7 @@ func _archief2_opening() -> bool:
 		var dmg := Archief2.openingslag(int(t["s"]["max_hp"]))
 		var zin := str(e["s"].get("archief2_zin", Archief2.KERN_ZIN))
 		await say(zin)
+		_hit_kind = "boss"
 		await _damage(t, dmg)
 		GameState.archief2_last_open = {"schade": dmg, "max": int(t["s"]["max_hp"]), "id": str(t["s"].get("id", ""))}
 		if codex.party_down():
@@ -1999,6 +2037,7 @@ func _core_resolve(a: Dictionary) -> void:
 		show_message(BossCore.MSG_SLAM % [actor["name"], core.slam_name])
 		ActorSfx.play(actor, "vaardigheid")
 		await _enemy_lunge(actor, t)
+		_hit_kind = "boss"
 		await _damage(t, _physical_damage(actor, t, core.slam_power))
 	if _alive(heroes).size() > 0:
 		show_message(BossCore.MSG_CLOSE)
@@ -2459,6 +2498,7 @@ func _kern_strike(a: Dictionary) -> void:
 		var tw2 := create_tween()
 		tw2.tween_property(t["node"], "modulate", KERN_TINT, 0.08)
 		tw2.tween_property(t["node"], "modulate", GUARD_TINT if int(t.get("guard", 0)) > 0 else Color.WHITE, 0.3)
+	_hit_kind = "kern"
 	await _damage(t, kern_damage(actor, t, skill))
 	_hero_rest(actor)
 

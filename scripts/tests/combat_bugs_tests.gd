@@ -63,6 +63,8 @@ func _run() -> void:
 	await _e5_tests()
 	print("=== Brand ververst in plaats van stapelen ===")
 	await _brand_tests()
+	print("=== J1: juice-tiers (HANDOFF_JUICE stap 1) ===")
+	await _juice_tier_tests()
 	print("COMBATBUGSTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	for i in 10:
@@ -332,4 +334,34 @@ func _brand_tests() -> void:
 	b._apply_spell_status(foe, vuur)
 	b._tick_ailments(foe)
 	check("dubbele brand doet 1x schade per tick (50)", int(foe["s"]["hp"]) == 950)
+	b.queue_free()
+
+
+## HANDOFF_JUICE stap 1: $Juice bestaat, tiers kloppen, headless = no-op (alleen tellen).
+func _juice_tier_tests() -> void:
+	var b := _battle({})
+	var j = b.get_node_or_null("Juice")
+	check("J1: battle.tscn heeft $Juice (BattleJuice)", j != null and j is BattleJuice)
+	if j == null:
+		b.queue_free()
+		return
+	check("J1: headless/test_modus = gedempt", j.is_muted())
+	var foe: Dictionary = b.enemies[0]
+	foe["s"]["max_hp"] = 1000
+	foe["s"]["hp"] = 1000
+	b._hit(foe, 10)
+	check("J1: gewone aanval 1% = small", j.last_tier == "small" and int(j.counts["small"]) == 1)
+	b._hit(foe, 250)
+	check("J1: schade >= 25% max-HP = medium", j.last_tier == "medium")
+	b._hit_kind = "spell"
+	b._hit(foe, 10)
+	check("J1: spreuk = medium, en _hit_kind terug op attack", j.last_tier == "medium" and b._hit_kind == "attack")
+	b._hit_kind = "kern"
+	b._hit(foe, 10)
+	check("J1: Kernkracht = medium", j.last_tier == "medium")
+	foe["s"]["hp"] = 1
+	var before_large := int(j.counts["large"])
+	await b._damage(foe, 999)
+	check("J1: KO via _report_kos = large", j.last_tier == "large" and int(j.counts["large"]) == before_large + 1)
+	check("J1: juice-positie van een vijand ligt in de scène", j.last_pos != Vector2.ZERO)
 	b.queue_free()

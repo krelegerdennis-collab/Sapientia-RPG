@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/battle/battle.gd" id="1_battle"]
 [ext_resource type="Theme" path="res://assets/theme.tres" id="2_theme"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/window_glass.png" id="6_glass"]
 [ext_resource type="Script" path="res://scripts/battle/target_cursor.gd" id="7_cursor"]
 [ext_resource type="Script" path="res://scripts/ui/title_tab.gd" id="9_tab"]
+[ext_resource type="Script" path="res://scripts/battle/juice.gd" id="10_juice"]
 [ext_resource type="Script" path="res://scripts/ui/blink_arrow.gd" id="10_arrow"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_glass"]
@@ -204,5 +205,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="Juice" type="Node" parent="."]
+script = ExtResource("10_juice")
 
 [node name="TouchControls" parent="." instance=ExtResource("5_touch")]
