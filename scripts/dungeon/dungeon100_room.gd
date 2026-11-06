@@ -78,7 +78,7 @@ var vallen: Dictionary = {}     # Vector2i -> Dungeon100Val
 
 
 ## Valkamer: vallen op de vloer (stap = trigger). Koopmankamer: kraam + H-5.
-## Rustkamer: het rustpunt zelf toont het kampvuur (dungeon100_rustpunt.gd).
+## Rustkamer: het rustpunt toont de 4-frame-sheet (dungeon100_rustpunt.gd).
 func _place_grot_kamer() -> void:
 	kamer_soort = GrotKamers.kamer_soort(GameState.dungeon100_seed, floor_no)
 	if kamer_soort == GrotKamers.SOORT_KOOPMAN and KoopmanData.verdwenen(GameState.story_flags):

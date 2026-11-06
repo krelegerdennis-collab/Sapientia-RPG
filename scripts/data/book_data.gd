@@ -28,7 +28,8 @@ const TYPES := {
 		"question": "The book glows softly. Save progress?",
 	},
 	# 100-verdiepingen-kerker: het rustpunt (scripts/dungeon/dungeon100_rustpunt.gd) is een boekpunt
-	# met een gouden gloed. Voorlopig het plaatje van het opslagboek (warm getint in code).
+	# met een gouden gloed. Zichtbare art is dungeon100_rustpunt.png. Dit texture-veld blijft
+	# het opslagboek: onzichtbare basis, zonder tint.
 	"rustpunt": {
 		"texture": "res://assets/sprites/save_book.png",
 		"aura": Color("f0c674"),
