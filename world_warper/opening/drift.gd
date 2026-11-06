@@ -1,6 +1,8 @@
 class_name WorldWarperOpeningDrift
 extends CanvasLayer
 ## Korte drift-cutscene vóór de story-Hal (CANON Drift). Parallax + wormhole + warper-loop.
+## Stretch-aspect expand (brede telefoon): de achtergrond vult het hele viewport, zoals het
+## titelscherm. Tekst, wormhole en schip blijven in een 384×216-stage in het midden.
 
 signal finished
 
@@ -16,8 +18,14 @@ const REGELS: Array[String] = [
 
 const SKIP_GRACE := 0.35
 const MAX_SECONDS := 45.0
+## Tegel i=-1..2: bij gecentreerde stage dekt de scroll ook de randen links en rechts
+## (viewport tot ~3×384 breed; een 20:9-telefoon is ~480).
+const _TILE_START := -1
+const _TILE_COUNT := 4
 
 var _root: Control
+var _backfill: TextureRect
+var _stage_host: Control
 var _scroll_far := 0.0
 var _scroll_nebula := 0.0
 var _scroll_near := 0.0
@@ -54,14 +62,28 @@ func _ready() -> void:
 
 func _build() -> void:
 	_root = Control.new()
-	_root.custom_minimum_size = Vector2(Art.VIEW_W, Art.VIEW_H)
-	_root.size = Vector2(Art.VIEW_W, Art.VIEW_H)
-	_root.clip_contents = true
+	_root.name = "Root"
 	_root.mouse_filter = Control.MOUSE_FILTER_STOP
+	_root.clip_contents = true
+	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	_backfill = TextureRect.new()
+	_backfill.name = "Backfill"
+	_backfill.texture = load(Art.BG_FAR) as Texture2D
+	_backfill.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_backfill.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_backfill.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_backfill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_backfill.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_root.add_child(_backfill)
+	_stage_host = Control.new()
+	_stage_host.name = "Stage"
+	_stage_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stage_host.size = Vector2(Art.VIEW_W, Art.VIEW_H)
+	_root.add_child(_stage_host)
 	var stage := Node2D.new()
-	stage.name = "Stage"
-	_root.add_child(stage)
+	stage.name = "Parallax"
+	_stage_host.add_child(stage)
 	_layers.append(_parallax(stage, Art.BG_FAR, 1.0))
 	var nebula := _parallax(stage, Art.BG_NEBULA, 2.0)
 	_layers.append(nebula)
@@ -80,7 +102,7 @@ func _build() -> void:
 	_label.add_theme_font_override("font", _font())
 	_label.add_theme_font_size_override("font_size", 10)
 	_label.add_theme_color_override("font_color", Color("f2e9d8"))
-	_root.add_child(_label)
+	_stage_host.add_child(_label)
 	_hint = Label.new()
 	_hint.text = "Tap to skip"
 	_hint.position = Vector2(22, 200)
@@ -88,8 +110,26 @@ func _build() -> void:
 	_hint.add_theme_font_override("font", _font())
 	_hint.add_theme_font_size_override("font_size", 8)
 	_hint.add_theme_color_override("font_color", Color(0.7, 0.65, 0.8, 0.9))
-	_root.add_child(_hint)
+	_stage_host.add_child(_hint)
 	_toon_regel()
+	_root.resized.connect(_plaats_stage)
+	if not get_viewport().size_changed.is_connected(_plaats_stage):
+		get_viewport().size_changed.connect(_plaats_stage)
+	_plaats_stage()
+	_plaats_stage.call_deferred()
+
+
+## 384×216-stage in het midden van het (mogelijk bredere) viewport. Zelfde idee als het titelscherm.
+func _plaats_stage() -> void:
+	if _root == null or _stage_host == null:
+		return
+	var vs := _root.size
+	if (vs.x < 1.0 or vs.y < 1.0) and is_inside_tree():
+		vs = get_viewport().get_visible_rect().size
+	if vs.x < 1.0 or vs.y < 1.0:
+		return
+	_stage_host.size = Vector2(Art.VIEW_W, Art.VIEW_H)
+	_stage_host.position = ((vs - _stage_host.size) * 0.5).floor()
 
 
 func _font() -> Font:
@@ -98,8 +138,7 @@ func _font() -> Font:
 
 class _ParallaxPair:
 	var node: Node2D
-	var a: Sprite2D
-	var b: Sprite2D
+	var tiles: Array[Sprite2D] = []
 	var speed := 1.0
 
 
@@ -110,11 +149,11 @@ func _parallax(parent: Node2D, pad: String, speed: float) -> _ParallaxPair:
 	pair.node.name = pad.get_file().get_basename()
 	parent.add_child(pair.node)
 	var tex := load(pad) as Texture2D
-	pair.a = _tile_sprite(tex)
-	pair.b = _tile_sprite(tex)
-	pair.b.position.x = Art.VIEW_W
-	pair.node.add_child(pair.a)
-	pair.node.add_child(pair.b)
+	for i in _TILE_COUNT:
+		var s := _tile_sprite(tex)
+		s.position.x = float((_TILE_START + i) * Art.VIEW_W)
+		pair.node.add_child(s)
+		pair.tiles.append(s)
 	return pair
 
 
@@ -162,8 +201,8 @@ func _process(delta: float) -> void:
 
 func _apply_scroll(pair: _ParallaxPair, scroll: float) -> void:
 	var x := -fmod(scroll, float(Art.VIEW_W))
-	pair.a.position.x = x
-	pair.b.position.x = x + Art.VIEW_W
+	for i in pair.tiles.size():
+		pair.tiles[i].position.x = x + float((_TILE_START + i) * Art.VIEW_W)
 
 
 func _toon_regel() -> void:
