@@ -1,8 +1,8 @@
 extends Node
 ## ALLEEN VOOR TESTEN - Blauwe Kist-sprite (assets/sprites/buiten/kist_blauw.png).
 ## Start:  godot --path . -- --blauwekisttest [--shots=/pad/map]
-##   De sheet laadt als 32x16 met 2 frames (Nearest). Dicht = frame 0, open = frame 1.
-##   Gewone kisten en Mimics blijven de gewone kist. Geen blauwe tint meer.
+##   De placeholder-sheet laadt als 32x16 met 2 frames (Nearest). Dicht = frame 0, open = frame 1.
+##   De blauwe kist houdt BLUE_TINT (oude dungeon100blauwtest). Gewone kisten en Mimics niet.
 ## Niet in de CI-matrix (tests.yml blijft onaangeroerd). Zit niet in de export (scripts/tests/*).
 
 const ChestScript := preload("res://scripts/dungeon/dungeon_chest.gd")
@@ -54,12 +54,14 @@ func _sheet() -> void:
 	var sha := FileAccess.get_sha256(ProjectSettings.globalize_path("res://assets/sprites/buiten/kist_blauw.png"))
 	check("sha256 van kist_blauw.png", sha == VERWACHT_SHA)
 	var ph := FileAccess.get_file_as_string("res://tools/placeholders_v17.txt")
-	check("geen blauwe-kist-placeholder in placeholders_v17.txt",
-			not ph.contains("kist_blauw") and not ph.contains("Blauwe kist"))
-	var bron_blauw := FileAccess.get_file_as_string("res://scripts/data/dungeon100_blue.gd")
-	var bron_kist := FileAccess.get_file_as_string("res://scripts/dungeon/dungeon_chest.gd")
-	check("BLUE_TINT is weg uit kist en blauwe-kist-data",
-			not bron_blauw.contains("BLUE_TINT") and not bron_kist.contains("BLUE_TINT"))
+	var ph_regel := false
+	for l in ph.split("\n"):
+		if l.contains("assets/sprites/buiten/kist_blauw.png"):
+			ph_regel = "PLACEHOLDER" in l
+	check("kist_blauw.png staat als PLACEHOLDER in placeholders_v17.txt", ph_regel)
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	check("kist_blauw.png staat niet in handwerk.txt", not hw.contains("kist_blauw.png"))
+	check("BLUE_TINT blijft de oude kleur", Blue.BLUE_TINT == Color(0.45, 0.7, 1.35))
 
 
 func _maak(kind: String, id: String) -> DungeonChest:
@@ -110,7 +112,7 @@ func _sheet_ok(ch: DungeonChest, frame: int) -> bool:
 	var spr := ch.sprite
 	return spr != null and spr.texture == ChestScript.BLUE_TEX and spr.hframes == 2 \
 			and spr.frame == frame and spr.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST \
-			and spr.modulate == Color.WHITE
+			and spr.modulate == Blue.BLUE_TINT
 
 
 func _shots() -> void:

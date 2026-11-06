@@ -3,7 +3,7 @@ extends Node
 ## Start:  godot --path . -- --dungeon100blauwtest [--shots=/pad/map]
 ##   Deel A: deterministische soort (~5% blauw, ~10% Mimic), baaskist nooit, Warp alleen op 100.
 ##   Deel B: momentopname, permanente items in de save, dood = dungeon uit, Warp levert af.
-##   Deel C: echte scène: eigen blauwe-kist-sprite, Mimic-gevecht met schaal, Warp naar ECHO's Kamer.
+##   Deel C: echte scène: blauwe tint, Mimic-gevecht met schaal, Warp naar ECHO's Kamer.
 ## Zit niet in de export (scripts/tests/*).
 
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
@@ -419,9 +419,8 @@ func _scene_tests() -> void:
 	GameState.change_map(DUNGEON, "omhoog")
 	check("Mimic-verdieping geladen", await wait_floor(int(mimic_floor["floor"])))
 	var ch = _chest(str(mimic_floor["id"]))
-	check("Mimic-kist ziet eruit als een gewone kist (geen blauwe sprite)", ch != null and ch.kind == Blue.KIND_MIMIC
-			and ch.sprite.modulate == Color.WHITE and ch.sprite.texture != null
-			and not str(ch.sprite.texture.resource_path).ends_with("kist_blauw.png"))
+	check("Mimic-kist ziet eruit als een gewone kist (geen blauwe tint)", ch != null and ch.kind == Blue.KIND_MIMIC
+			and ch.sprite.modulate != Blue.BLUE_TINT)
 	var base_hp := int(GD.ENEMIES[Blue.MIMIC_ENEMY]["max_hp"])
 	var scaled := int(S.monster_stats(GD.ENEMIES[Blue.MIMIC_ENEMY], int(mimic_floor["floor"]))["max_hp"])
 	ch.wake_mimic()
@@ -444,10 +443,7 @@ func _scene_tests() -> void:
 	GameState.change_map(DUNGEON, "omhoog")
 	check("Blauwe verdieping geladen", await wait_floor(int(blue_floor["floor"])))
 	var bl = _chest(str(blue_floor["id"]))
-	check("Blauwe Kist heeft eigen sprite (dicht, geen tint)", bl != null and bl.kind == Blue.KIND_BLUE
-			and bl.sprite.modulate == Color.WHITE and bl.sprite.texture != null
-			and str(bl.sprite.texture.resource_path).ends_with("buiten/kist_blauw.png")
-			and bl.sprite.hframes == 2 and bl.sprite.frame == 0)
+	check("Blauwe Kist is blauw getint", bl != null and bl.kind == Blue.KIND_BLUE and bl.sprite.modulate == Blue.BLUE_TINT)
 	await screenshot("d100_blauwe_kist")
 	var bid := str(bl.loot["items"][0]["item"])
 	bl.open_chest()

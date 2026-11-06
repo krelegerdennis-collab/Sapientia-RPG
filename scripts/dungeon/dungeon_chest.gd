@@ -5,7 +5,7 @@ extends StaticBody2D
 ## je daarna aantrekken in Menu > Uitrusting). EENMALIG per spel: de vlag "kist:<id>" staat in
 ## GameState.story_flags en gaat mee in de save. Open kist = frame 1 (blijft open).
 ## Plaatje: assets/sprites/buiten/kist.png (RPG ART, 2 frames 16x16: dicht/open).
-## Blauwe Kist: assets/sprites/buiten/kist_blauw.png (zelfde maat, eigen art, geen tint).
+## Blauwe Kist: placeholder assets/sprites/buiten/kist_blauw.png (zelfde maat) plus BLUE_TINT.
 ## (De speciale schatkist met het zwaard in de puzzelkamer is van RPG CODE, zie HANDOFF_ARCHIEF1.md.)
 
 const TEX := "res://assets/sprites/buiten/kist.png"
@@ -69,6 +69,7 @@ func setup(d: Dictionary) -> void:
 	sprite.name = "Sprite2D"
 	if kind == Blue.KIND_BLUE:
 		sprite.texture = BLUE_TEX
+		sprite.modulate = Blue.BLUE_TINT
 	else:
 		sprite.texture = load(DungeonRoomsTheme.themed(TEX))
 	sprite.hframes = 2

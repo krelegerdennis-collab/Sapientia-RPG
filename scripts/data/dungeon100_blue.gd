@@ -35,6 +35,8 @@ const MIMIC_ENEMY := "mimic"
 ## De beloning is een keuze (Codex, Grade 4-wapens of Simulatie-ring): dungeon100_reward.gd.
 const WARP_ITEM := "warp"
 const WARP_FLOOR := 100
+## Blauwe tint voor de kist (placeholder-sheet kist_blauw.png, zie tools/placeholders_v17.txt).
+const BLUE_TINT := Color(0.45, 0.7, 1.35)
 
 
 static func _rng(run_seed: int, floor_nr: int, chest_id: String, salt: String) -> RandomNumberGenerator:
