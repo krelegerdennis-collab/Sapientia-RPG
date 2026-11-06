@@ -4,7 +4,6 @@
 # Het Gesimuleerde Archief (Blauwe Kisten, tools/art_mimic_placeholder.py + tools/art_map_monsters.py):
 assets/sprites/enemies/mimic.png   80x64   Mimic (gevechtsplaatje; kist met tanden, magenta hoekjes)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
 assets/map_monsters/mimic.png      32x64   Mimic op de kaart (2x4 frames van 16x16, magenta hoekjes)   [KLAAR v0.21: echte art van RPG ART, zie tools/handwerk.txt]
-# (Blauwe kist PLACEHOLDER: assets/sprites/buiten/kist_blauw.png 32x16, 2 frames 16x16 dicht/open, met blauwe tint in code. Geen definitieve art.)
 # Diepe Grot, warpers (verdieping 1, 25, 50, 75, 99): PLACEHOLDER, geen eigen bestand.
 # Hergebruikt assets/sprites/save_book.png (64x16, 4 frames van 16x16) met een violette tint   [KLAAR v0.21: Diepe Grot-warper heeft eigen art (dungeon100_warper.png); uitgang-warpers houden het getinte boek]
 # in scripts/dungeon/dungeon100_warper.gd.
