@@ -1262,3 +1262,7 @@ assets/sprites/som/combat/kael_attack2.png
 assets/sprites/som/combat/kael_finisher.png
 assets/sprites/som/combat/orion_attack2.png
 assets/sprites/som/combat/orion_finisher.png
+assets/ui/icons/items/icons16/bergnerfstaf.png
+assets/ui/icons/items/icons32/bergnerfstaf.png
+assets/ui/icons/items/icons16/adersteen.png
+assets/ui/icons/items/icons32/adersteen.png
