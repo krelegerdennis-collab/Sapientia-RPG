@@ -2,7 +2,7 @@ extends Node
 ## ALLEEN VOOR TESTEN - rustpunt-sheet (assets/sprites/dungeon100_rustpunt.png).
 ## Start:  godot --path . -- --dungeon100rustpunttest [--shots=/pad/map]
 ##   De sheet laadt als 64x16, de zichtbare animatie heeft 4 frames (Nearest, lus 6-8 fps)
-##   en het boek is niet meer getint. `vuur` blijft de grot-kampvuur-node voor de koopmantest.
+##   en het boek is niet meer getint. De verborgen grot-kampvuur-node (`vuur`) is weg.
 ## Niet in de CI-matrix (tests.yml blijft onaangeroerd). Zit niet in de export (scripts/tests/*).
 
 const Rust := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
@@ -80,13 +80,8 @@ func _node() -> void:
 			slices_ok = slices_ok and atlas != null and atlas.region == verwacht \
 					and atlas.atlas != null and atlas.atlas.resource_path.ends_with("dungeon100_rustpunt.png")
 	check("frames 0-3 zijn 16x16-slices van de sheet", slices_ok)
-	var vuur: AnimatedSprite2D = rp.get("vuur")
-	var vuur_tex: AtlasTexture = null
-	if vuur != null:
-		vuur_tex = vuur.sprite_frames.get_frame_texture("default", 0) as AtlasTexture
-	check("vuur-API blijft: 4 grot-frames, speelt, niet getekend", vuur != null
-			and vuur.sprite_frames.get_frame_count("default") == 4 and vuur.is_playing()
-			and not vuur.visible and vuur_tex != null and vuur_tex.region == Rect2(0, 16, 16, 16))
+	check("geen verborgen kampvuur-node (vuur en Kampvuur weg)", not ("vuur" in rp)
+			and rp.get_node_or_null("Kampvuur") == null)
 	if shots != "":
 		await _shot(rp)
 
