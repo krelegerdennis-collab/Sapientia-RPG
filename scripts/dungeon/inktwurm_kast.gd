@@ -9,6 +9,7 @@ extends StaticBody2D
 const TEX := "res://assets/puzzle/geheimkast_2hoog.png"
 const SCHEUR_TEX := "res://assets/puzzle/kernscheur.png"
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
+const StoryData := preload("res://scripts/data/story_data.gd")
 const FRAME_TIME := 0.08
 const FLAG := "inktwurm_kast_open"
 const INKT_FLAG := "gloeiende_inktfles"
@@ -69,7 +70,9 @@ func covered_tiles() -> Array[Vector2i]:
 
 
 func on_kernkracht_hit() -> void:
-	if is_open or _anim or not GameState.has_kern("golemkern"):
+	if is_open or _anim:
+		return
+	if not GameState.story_flags.has(StoryData.GOLEM_FLAG):
 		return
 	_anim = true
 	_t = 0.0
@@ -80,6 +83,9 @@ func on_kernkracht_hit() -> void:
 
 func interact(_player: Node2D) -> void:
 	if is_open or _anim:
+		return
+	if GameState.story_flags.has(StoryData.GOLEM_FLAG):
+		on_kernkracht_hit()
 		return
 	Dialog.show_lines(["The parchment in this cabinet is torn. Something moves behind it."])
 

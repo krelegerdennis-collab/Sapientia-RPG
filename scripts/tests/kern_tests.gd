@@ -414,26 +414,11 @@ func _golem_tests() -> void:
 	if ka == null:
 		return
 	check("speler staat stil tijdens het moment", await wait_until(func(): return player().input_locked, 2.0))
-	await wait_until(func(): return ka.phase == "effect", 3.0)
-	var fx: Sprite2D = ka.fx
-	check("effect: kind van Dax, op de borst (0,-4), 4 frames, midden (24,24), additieve gloed",
-			fx != null and fx.get_parent() == player() and fx.position == Vector2(0, -4) and fx.hframes == 4
-			and fx.centered and fx.texture.get_size() == Vector2(192, 48) and ka.glow != null
-			and (ka.glow.material as CanvasItemMaterial).blend_mode == CanvasItemMaterial.BLEND_MODE_ADD)
-	var t0 := Time.get_ticks_msec()
-	while ka.phase == "effect" and Time.get_ticks_msec() - t0 < 3000:
-		if is_instance_valid(fx) and fx.frame == 2:
-			await screenshot("kern_absorptie")
-			break
-		await get_tree().process_frame
-	await wait_until(func(): return ka.phase != "effect", 3.0)
-	check("effect speelt frames 0..3 eenmalig (niet loopen), %.2f s speltijd (4 x 0,12 s + 0,25 s vervagen) %s" % [ka.effect_time, ka.frames_shown],
-			ka.frames_shown == [0, 1, 2, 3] and ka.effect_time >= 0.68 and ka.effect_time < 1.2 and fx.frame == 3)
-	check("daarna het bericht", await wait_until(func(): return Dialog.is_open, 3.0) and ka.phase == "bericht")
+	check("golemkern: geen borst-effect, direct bericht (CS-02)", await wait_until(
+			func(): return Dialog.is_open, 3.0) and ka.phase == "bericht")
 	var lines: Array = Dialog._lines
-	check("'Dax absorbeert de Golemkern!' + Kernkracht + Zware blokken duwen + vuurbal in het veld %s" % [lines], lines.size() == 4
-			and lines[0] == "Dax absorbs the Golem Core!" and "Core Power" in str(lines[1]) and "Push Heavy Blocks" in str(lines[2])
-			and "Core Power" in str(lines[3]))
+	check("Sapientia-drain bericht %s" % [lines], lines.size() == 1
+			and str(lines[0]) == "Sapientia drank the Golem Core dry.")
 	await get_tree().create_timer(1.6).timeout       # tekst helemaal uitgetypt
 	await screenshot("kern_absorptie_bericht")
 	var count_before := GameState.autosave_count

@@ -1174,7 +1174,7 @@ func _library_and_golem_tests() -> void:
 		await win_battle()
 	check("terug in de Golem Hall", await wait_scene("ArchiefGolemhal"))
 	await wait_fade()
-	# v0.15 (KERN): na de Golem absorbeert Dennis de Golemkern (moment + tekst); wegklikken als een speler
+	# v0.15 (KERN): na de Golem Sapientia-drain + gedraind fragment in save (zie --kerntest)
 	var absorbed: bool = await wait_until(func(): return Dialog.is_open and GameState.has_kern("golemkern"), 5.0)
 	await close_dialog()
 	check("Golemkern geabsorbeerd, tekst weggeklikt (zie --kerntest)", absorbed and await wait_until(

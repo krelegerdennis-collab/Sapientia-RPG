@@ -1,6 +1,6 @@
 extends Node
 ## WM1 goedgekeurde storytext: gating, canon-scène 1 volgorde, Atrium-teksten (headless).
-## Nog niet in tests.yml — Forge moet --wm1storytexttest toevoegen aan CI.
+## CI: --wm1storytexttest (tests.yml).
 
 const SD := preload("res://scripts/data/story_data.gd")
 const WR := preload("res://scripts/data/woud_rooms.gd")
@@ -8,6 +8,7 @@ const Canon := preload("res://world_warper/cutscene/canon_scenes.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
 const KernAbsorption := preload("res://scripts/kern/kern_absorption.gd")
+const KernData := preload("res://scripts/data/kern_data.gd")
 
 var passes := 0
 var failures := 0
@@ -37,6 +38,7 @@ func _run() -> void:
 	_save_cocon_flag()
 	_dormant_video_slots()
 	_golem_core_sapientia()
+	_golem_drained_fragment()
 
 
 func _cocon_gating_data() -> void:
@@ -154,3 +156,14 @@ func _golem_core_sapientia() -> void:
 	var lines: Array = KernAbsorption.lines_for("golemkern")
 	check("CS-02: exacte Sapientia-regel", lines.size() == 1 and str(lines[0]) == "Sapientia drank the Golem Core dry.")
 	check("CS-02: geen Dax absorbs-tekst", not " ".join(lines).contains("absorbs"))
+
+
+func _golem_drained_fragment() -> void:
+	var f := KernData.fragment("golemkern")
+	check("golemkern: beschrijving power of matter", str(f.get("beschrijving", "")).contains("the power of matter"))
+	check("golemkern: geen battle/world power", str(f.get("battle_skill", "x")) == "" and KernData.abilities_of(f).is_empty())
+	GameState.new_game("Dax")
+	GameState.grant_kern("golemkern", "kennis_beest")
+	check("grant_kern: fragment in save, geen vaardigheden", GameState.has_kern("golemkern")
+			and GameState.kern_skills_of(GameState.MAIN_HERO).is_empty()
+			and not GameState.has_world_ability("zware_blokken"))
