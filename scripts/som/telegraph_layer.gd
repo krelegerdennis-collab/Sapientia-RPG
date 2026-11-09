@@ -65,6 +65,11 @@ func root_icon_count() -> int:
 	return _root_icons.size()
 
 
+## Onderkant van de root-sprite bij teken-anker `draw_pos` (FX_ROOT anker 8,16).
+static func fx_bottom_y(draw_pos: Vector2) -> float:
+	return draw_pos.y
+
+
 static func root_frame_for_elapsed(elapsed_ms: int, ms_per_frame: int = 100) -> int:
 	var ms: int = maxi(1, ms_per_frame)
 	var step: int = maxi(0, elapsed_ms / ms)

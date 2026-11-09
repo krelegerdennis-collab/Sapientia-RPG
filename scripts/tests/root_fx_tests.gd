@@ -3,10 +3,14 @@ extends Node
 ## Ook via --autotest (debug_autotest.gd): run_embedded().
 
 const SomData := preload("res://scripts/data/som_data.gd")
+const SomArena := preload("res://scripts/som/som_arena.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const MapSprite := preload("res://scripts/map_sprite.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
+const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
+const ARENA_ROOM := "res://scenes/maps/archief_v1_gang.tscn"
 
 var failures := 0
 var passes := 0
@@ -62,6 +66,7 @@ func _run_sync_tests() -> void:
 	_layer_two_heroes_tests()
 	_layer_missing_position_tests()
 	_snapshot_guest_path_tests()
+	_foot_line_alignment_tests()
 	_frame_timing_tests()
 	_fallback_texture_tests()
 
@@ -156,6 +161,20 @@ func _snapshot_guest_path_tests() -> void:
 	layer.free()
 
 
+func _foot_line_alignment_tests() -> void:
+	var node := Vector2(120, 98)
+	var body := node + Vector2(0, SomData.BODY_Y)
+	var draw_pos := body + Vector2(0, SomArena.ROOT_FOOT_OFFSET_PX)
+	check(
+		"gemeten: body_of→voetlijn %.0f px (ROOT_FOOT_OFFSET_PX)" % SomArena.ROOT_FOOT_OFFSET_PX,
+		is_equal_approx(SomArena.ROOT_FOOT_OFFSET_PX, 6.0),
+	)
+	check("arena: draw-anker = node.position (zelfde als heal_glow)", draw_pos == node)
+	check("FX onderkant op draw-anker (voetlijn FX)", TelegraphLayer.fx_bottom_y(draw_pos) == node.y)
+	var visual_foot_y: float = node.y - MapSprite.voet_offset(MapSprite.NIEUW).y
+	check("visuele 24x32-voet op node+8 (MapSprite, los van FX-anker)", is_equal_approx(visual_foot_y, node.y + 8.0))
+
+
 func _frame_timing_tests() -> void:
 	var layer := TelegraphLayer.new()
 	layer._ready()
@@ -206,40 +225,48 @@ func _screenshot_rooted_hero() -> void:  # await in _run_flow
 	if not DirAccess.dir_exists_absolute(out):
 		DirAccess.make_dir_recursive_absolute(out)
 	var vp := SubViewport.new()
-	vp.size = Vector2i(192, 128)
-	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	vp.size = Vector2i(384, 216)
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	vp.transparent_bg = false
-	var bg := ColorRect.new()
-	bg.color = Color(0.06, 0.05, 0.08)
-	bg.size = Vector2(192, 128)
-	vp.add_child(bg)
-	var foot := Vector2(96, 96)
-	var body := Sprite2D.new()
-	body.texture = SomFx.tex("res://assets/sprites/som/combat/dax_attack.png")
-	body.hframes = 6
-	body.vframes = 4
-	body.frame = 0
-	body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	body.position = foot + Vector2(0, -20)
-	vp.add_child(body)
-	var layer := TelegraphLayer.new()
-	layer.z_index = 2
-	vp.add_child(layer)
 	get_tree().root.add_child(vp)
+	var room: Node2D = load(ARENA_ROOM).instantiate()
+	vp.add_child(room)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var p: CharacterBody2D = room.get_node_or_null("Objects/Player") as CharacterBody2D
+	if p == null:
+		check("arena screenshot: Player in archief_v1_gang", false)
+		get_tree().root.remove_child(vp)
+		vp.queue_free()
+		return
+	p.sprite.texture = SomFx.tex(str(SomData.SHEETS["dennis"]))
+	MapSprite.pas_toe(p.sprite, MapSprite.NIEUW)
+	if p.has_method("place_at"):
+		p.place_at(Vector2i(12, 10), Vector2i.DOWN)
+	var cam := p.get_node_or_null("Camera2D") as Camera2D
+	if cam:
+		cam.make_current()
+	var root_pos: Vector2 = Vector2(p.position) + Vector2(0, SomData.BODY_Y + SomArena.ROOT_FOOT_OFFSET_PX)
+	var layer := TelegraphLayer.new()
+	layer.z_index = 12
+	room.get_node("Objects").add_child(layer)
 	layer._ready()
 	var roots := CombatRoots.new()
 	roots.try_apply_root("solo", 60)
-	layer.sync_from_roots(roots, {"solo": foot})
+	layer.sync_from_roots(roots, {"solo": root_pos})
 	layer.set_root_anim_start_for_test("solo", Time.get_ticks_msec() - 350)
-	layer.position = Vector2.ZERO
-	for _i in 3:
+	for _i in 8:
 		await get_tree().process_frame
-	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	await get_tree().process_frame
 	var tex: ViewportTexture = vp.get_texture()
 	var img: Image = tex.get_image()
 	var path := out.path_join("root_fx_solo.png")
+	# Crop rond held + FX
+	var cx := int(p.position.x)
+	var cy := int(p.position.y)
+	var crop := Rect2i(maxi(0, cx - 48), maxi(0, cy - 56), mini(128, img.get_width()), mini(128, img.get_height()))
+	if crop.size.x > 0 and crop.size.y > 0:
+		img = img.get_region(crop)
 	var err := img.save_png(path)
-	check("screenshot rooted held (%s)" % path, err == OK and img.get_width() > 0)
+	check("screenshot arena Dax rooted (%s)" % path, err == OK and img.get_width() > 0)
 	get_tree().root.remove_child(vp)
 	vp.queue_free()

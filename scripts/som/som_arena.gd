@@ -1698,12 +1698,16 @@ func _roots_authority() -> bool:
 	return not coop_mode or coop_sim_host
 
 
+## Visueel: fx_root-anker op voetlijn (node.position), niet op body_of — zelfde als heal_glow (regel ~2142).
+const ROOT_FOOT_OFFSET_PX := -SomData.BODY_Y
+
+
 func _root_icon_positions() -> Dictionary:
 	var out: Dictionary = {}
 	for hid in party_ids():
 		if not is_alive(hid):
 			continue
-		out[hid] = TelegraphShape.to_px(body_of(hid))
+		out[hid] = body_of(hid) + Vector2(0, ROOT_FOOT_OFFSET_PX)
 	return out
 
 
