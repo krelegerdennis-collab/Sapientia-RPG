@@ -1,8 +1,7 @@
 extends StaticBody2D
 ## Geheime kast in de Golemhal (Archief 1). Eén tegel breed, twee hoog (16x32, art_geheimkast_v19).
-## Dicht = boekenkast. A ervoor = een hint. Gaat alleen open als de veld-vuurbal
-## (Kernkracht, pas na de Golem) hem raakt: on_kernkracht_hit(). Daarna kronkelt
-## de unieke Inktwurm eruit, als die nog niet verslagen of gevangen is.
+## Dicht = boekenkast. Ervoor: hint. Na de Golem: open via interact (on_kernkracht_hit voor tests/compat).
+## Daarna kronkelt de unieke Inktwurm eruit, als die nog niet verslagen of gevangen is.
 ## Blijft open (story_flags "inktwurm_kast_open").
 
 ## v0.20: RPG ART's geheimkast (frame 0 = dicht, 1 = open) + kernscheur-overlay (4 frames, 0.08 s, niet loopen).

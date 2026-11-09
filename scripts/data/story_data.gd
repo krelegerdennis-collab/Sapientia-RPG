@@ -397,7 +397,7 @@ const EVENTS := {
 			["face", "OudeMan", "down"],
 			["say", SPEAKER, ["No… the seal. It's too soon."]],
 			["say", "{naam}", ["Grandpa? Your hands are shaking."]],
-			["say", SPEAKER, ["Stay here, Dax."]],
+			["say", SPEAKER, ["Stay here, {naam}."]],
 			["say", "{naam}", ["What are you doing with that sword?"]],
 			["say", SPEAKER, ["What I hoped you'd never have to see."]],
 			["say", "{naam}", ["Let me come with you."]],

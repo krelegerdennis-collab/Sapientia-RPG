@@ -2121,7 +2121,7 @@ const LESSON_LINE := "Sometimes you have to defend yourself, boy, even if I hope
 ## Goedgekeurde catastrofe-regels (Old Man), v0.21 storytext — niet de oude ene PANIC_LINE.
 const CATASTROPHE_OPA_LINES := [
 	"No… the seal. It's too soon.",
-	"Stay here, Dax.",
+	"Stay here, {naam}.",
 	"What I hoped you'd never have to see.",
 	"No. Stay inside. Don't follow me, no matter what you hear.",
 ]
