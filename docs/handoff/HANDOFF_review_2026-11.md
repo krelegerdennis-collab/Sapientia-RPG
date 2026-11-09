@@ -280,7 +280,7 @@ Inspanning: S < 2 uur, M = 1-2 dagen, L = week+.
 | F-1 suites in CI | Forge/Cursor | P0 | S | open |
 | F-2 relay in CI | Forge/Cursor | P0 | S | open |
 | F-3 presets + export/ | Forge | P0 | S | open |
-| F-4 docs opruimen | Cursor | P2 | S | PR pending |
+| F-4 docs opruimen | Cursor | P2 | S | #397 |
 | F-5 perf-pakket | Forge/CODE | P1 | M | open |
 | F-6 LFS | Forge | P2 | S-M | wacht op §5.9 |
 | F-7 engine 4.5+ | Forge | P0 (store) | L | wacht op §5.2 |
