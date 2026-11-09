@@ -14,12 +14,10 @@ extends "res://scripts/book_point.gd"
 ## of buiten de kerker, dan herstelt en bewaart het wel, maar het checkpoint verandert niet.
 ## Plaatje: assets/sprites/dungeon100_rustpunt.png (64x16, 4 frames van 16x16, zachte lus).
 ## Het opslagboek blijft de onzichtbare basis voor de botsing en BookPoint, zonder tint.
-## `vuur` blijft het kampvuur uit grot_kamers.png (koopmantest); dat wordt niet getekend.
 
 const SCENE := "res://scenes/dungeon100_rustpunt.tscn"
 const RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const TINT := Color(1.0, 0.86, 0.62)
-const GrotKamers := preload("res://scripts/data/grot_kamers.gd")
 const SHEET := preload("res://assets/sprites/dungeon100_rustpunt.png")
 const FRAME_COUNT := 4
 const FRAME_PX := 16
@@ -29,8 +27,6 @@ const ACTIVATED_LINE := "The party is restored. This is not a return point: fall
 
 ## Voor de tests: de laatste keer dat het rustpunt een NIEUW checkpoint werd.
 var last_activated := false
-## Het kampvuur (AnimatedSprite2D, 4 frames uit grot_kamers). Blijft voor de koopmantest.
-var vuur: AnimatedSprite2D
 ## Zichtbare rustpunt-animatie (4 frames uit SHEET).
 var art: AnimatedSprite2D
 
@@ -50,24 +46,7 @@ func _ready() -> void:
 	# Boek (save_book.png) blijft de basis, maar wordt niet getint en niet getekend.
 	sprite.modulate = Color.WHITE
 	sprite.visible = false
-	_plaats_kampvuur()
 	_plaats_art()
-
-
-## Kampvuur-node zoals de koopmantest die leest. Niet zichtbaar: de sheet is het plaatje.
-func _plaats_kampvuur() -> void:
-	var frames := SpriteFrames.new()
-	frames.set_animation_speed("default", GrotKamers.VUUR_FPS)
-	frames.set_animation_loop("default", true)
-	for c in GrotKamers.VUUR_FRAMES:
-		frames.add_frame("default", GrotKamers.tegel(c, 1))
-	vuur = AnimatedSprite2D.new()
-	vuur.name = "Kampvuur"
-	vuur.sprite_frames = frames
-	vuur.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	vuur.visible = false
-	add_child(vuur)
-	vuur.play("default")
 
 
 func _plaats_art() -> void:
