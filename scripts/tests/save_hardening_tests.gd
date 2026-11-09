@@ -482,6 +482,23 @@ func _migration_tests() -> void:
 	fut["version"] = 999
 	fut["nieuw_veld_uit_de_toekomst"] = {"a": [1, 2, 3]}
 	check("save uit een nieuwere versie (onbekende velden) laadt", _load_dict(fut))
+	check("nieuwere versie: save_readonly na laden", GameState.save_readonly)
+	var newer_text := _read(SAVE)
+	GameState.gold = 1
+	check("nieuwere versie: save_game weigert", not GameState.save_game(Vector2i(0, 0), Vector2i.DOWN, SAVE))
+	check("nieuwere versie: bestand onaangeroerd", _read(SAVE) == newer_text)
+	var lst := SaveSlotList.new()
+	add_child(lst)
+	await _frames(2)
+	var slot1_rec := GameState.slot_record(1)
+	if GameState.slot_path(1) != SAVE:
+		_write(GameState.slot_path(1), newer_text)
+		slot1_rec = GameState.slot_record(1)
+	check("slotlijst: nieuwere versie toont '(newer version)'",
+			lst._label(1, slot1_rec).contains("(newer version)"))
+	lst.queue_free()
+	GameState.new_game("Dax")
+	check("new_game wist save_readonly", not GameState.save_readonly)
 
 	# te veel helden in party -> reserve
 	var many: Dictionary = {"map": TOWN, "party": []}
@@ -673,6 +690,9 @@ func _blocked_state_tests() -> void:
 	GameState.inventory["drankje"] = 3
 	GameState.party[0]["hp"] = 1
 	GameState.gold += 500
+	var battle_file_before := _read(save_path)
+	check("save_game tijdens gevecht geeft false", not GameState.save_game(tile, Vector2i.DOWN, save_path))
+	check("save_game tijdens gevecht wijzigt het bestand niet", _read(save_path) == battle_file_before)
 	GameState.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
 	check("app naar de achtergrond tijdens het gevecht: geen autosave en de oude save blijft ongewijzigd",
 			not FileAccess.file_exists(GameState.autosave_path) and JSON.stringify(GameState._read_save_file(save_path)).contains("4321"))
@@ -682,6 +702,22 @@ func _blocked_state_tests() -> void:
 	check("laden na een proces-kill tijdens het gevecht: terug naar de toestand van vóór het gevecht",
 			_sig(tile, Vector2i.DOWN) == pre_battle and GameState.item_count("drankje") == 7 and GameState.gold == 4321)
 	check("na laden is in_battle onwaar (nooit midden in een gevecht hervatten)", not GameState.in_battle)
+
+	var prev_scene := get_tree().current_scene
+	GameState.save_game(tile, Vector2i.DOWN, save_path)
+	var guard_sig := _read(save_path)
+	GameState.in_battle = true
+	Story.pending_unique_event = "sh_midfight_unique"
+	var battle_root: Node = (load(GameState.BATTLE_SCENE) as PackedScene).instantiate()
+	get_tree().root.add_child(battle_root)
+	get_tree().current_scene = battle_root
+	check("gevechtsscène + pending event: save_game weigert",
+			not GameState.save_game(tile, Vector2i.DOWN, save_path))
+	check("gevechtsscène + pending event: bestand onaangeroerd", _read(save_path) == guard_sig)
+	battle_root.queue_free()
+	get_tree().current_scene = prev_scene
+	Story.pending_unique_event = ""
+	GameState.in_battle = false
 
 	# een (verkeerde) handmatige save tijdens een gevecht slaat geen halve gevechtstoestand op als 'in gevecht'
 	check("save_game schrijft geen gevechtsvlaggen in het bestand",

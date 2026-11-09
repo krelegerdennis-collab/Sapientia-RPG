@@ -225,6 +225,8 @@ const MAX_GOLD := 999999999
 const MAX_ITEM_STACK := 9999
 ## Laatste melding van load_game ("" = alles goed). Engels, voor de speler.
 var last_load_notice := ""
+## true na laden van een save met version > SAVE_VERSION: geen overschrijven tot new_game.
+var save_readonly := false
 const NOTICE_RECOVERED := "Your save file was damaged. It was restored from the backup copy."
 const NOTICE_UNREADABLE := "This save file can't be read."
 const RECOVERED_LINES := ["Your save file was damaged.", "It was restored from the backup copy."]
@@ -1054,6 +1056,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	_clock_start_ms = Time.get_ticks_msec()
 	active_slot = clampi(pending_new_slot, 1, SLOT_COUNT)
 	_codex_sync_marked = false
+	save_readonly = false
 
 
 ## Naam opschonen: spaties eraf, max. NAME_MAX tekens, leeg = DEFAULT_NAME.
@@ -1480,7 +1483,7 @@ func _manual_slot_record(slot: int) -> Dictionary:
 		return {"path": manual, "data": {}, "stamp": _save_modified_time(manual),
 				"slot": slot, "corrupt": true}
 	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot,
-			"from_backup": src["from_backup"]}
+			"from_backup": src["from_backup"], "newer_version": save_file_is_newer(d)}
 
 
 func _slot_autosave_record(slot: int) -> Dictionary:
@@ -1493,7 +1496,7 @@ func _slot_autosave_record(slot: int) -> Dictionary:
 		return {"path": path, "data": {}, "stamp": _save_modified_time(path),
 				"slot": AUTOSAVE_SLOT, "corrupt": true, "home_slot": slot}
 	return {"path": path, "data": d, "stamp": _save_stamp(path), "slot": AUTOSAVE_SLOT,
-			"from_backup": src["from_backup"], "home_slot": slot}
+			"from_backup": src["from_backup"], "home_slot": slot, "newer_version": save_file_is_newer(d)}
 
 
 ## De nieuwste autosave over alle slots (slot 0 in de slotlijst). Het oude gedeelde
@@ -1517,7 +1520,7 @@ func autosave_record() -> Dictionary:
 		elif not ignore_legacy:
 			stamp = _save_stamp(legacy)
 			best = {"path": legacy, "data": dl, "stamp": stamp, "slot": AUTOSAVE_SLOT,
-					"from_backup": src_l["from_backup"]}
+					"from_backup": src_l["from_backup"], "newer_version": save_file_is_newer(dl)}
 	for i in range(1, SLOT_COUNT + 1):
 		var rec := _slot_autosave_record(i)
 		if rec.is_empty() or bool(rec.get("corrupt", false)):
@@ -1766,10 +1769,29 @@ func autosave_on_background() -> bool:
 	return false
 
 
+## save_game zelf blokkeert hier (niet via can_autosave). Volgorde telt: battle.tscn
+## wint altijd (ook midden-gevecht met pending_unique_event na unique_mark).
+func _save_game_scene_blocked() -> bool:
+	if changing_map:
+		return true
+	if is_inside_tree():
+		var sc: Node = get_tree().current_scene
+		if sc != null and sc.scene_file_path == BATTLE_SCENE:
+			return true
+	if not in_battle:
+		return false
+	var story := get_node_or_null("/root/Story")
+	if story != null and str(story.get("pending_unique_event")) != "":
+		return false
+	return true
+
+
 ## Schrijft de voortgang naar save_path (JSON), of naar 'path' (v0.11: de autosave).
 ## Geeft true als het gelukt is.
 func save_game(tile: Vector2i, facing: Vector2i, path := "", autosave_reason := "") -> bool:
 	if coop_is_guest():
+		return false
+	if _save_game_scene_blocked() or save_readonly:
 		return false
 	if path == "":
 		var slot_file := slot_path(active_slot)
@@ -2033,6 +2055,16 @@ func _valid_save_data(data: Dictionary) -> bool:
 			and data.get("party") is Array
 
 
+## Save-bestand met een hogere version dan deze build (nooit overschrijven).
+static func save_file_is_newer(d: Dictionary) -> bool:
+	if not d.has("version"):
+		return false
+	var v = d.get("version")
+	if v is int or v is float:
+		return int(v) > SAVE_VERSION
+	return false
+
+
 ## Laadt de save en zet alles terug (party, spullen, goud, speeltijd, bestiarium);
 ## geeft false als er geen (geldige) save is. Daarna: continue_game() gaat naar de map.
 ## v0.11: 'path' = welke save ("" = de handmatige).
@@ -2051,6 +2083,12 @@ func load_game(path := "", gelezen: Dictionary = {}) -> bool:
 		last_load_notice = NOTICE_UNREADABLE
 		game_loaded.emit(path if path != "" else save_path, false)
 		return false
+	if save_file_is_newer(d):
+		push_warning("Save-bestand is nieuwer dan deze client (version %d > %d); overschrijven geblokkeerd." \
+				% [int(d.get("version", 0)), SAVE_VERSION])
+		save_readonly = true
+	else:
+		save_readonly = false
 	# Gevechtsstijl van deze save; oude saves zonder sleutel houden hun vroegere effectieve waarde: Classic.
 	var style = d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	Settings.set_value("battle_style", int(style) if (style is int or style is float) else Settings.BATTLE_STYLE_CLASSIC)
