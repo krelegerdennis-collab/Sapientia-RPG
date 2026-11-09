@@ -1960,6 +1960,13 @@ static func _gold_from(v) -> int:
 	return 0
 
 
+## Geheel getal uit save-data; strings/arrays/etc. -> default (geen int()-crash).
+static func _int_of(v, default: int = 0) -> int:
+	if v is float or v is int:
+		return int(v)
+	return default
+
+
 ## Tas uit save-data: id -> aantal (kapotte waarden vallen weg).
 static func _inventory_from(raw) -> Dictionary:
 	var out := {}
@@ -2157,7 +2164,8 @@ func apply_state(d: Dictionary) -> bool:
 	if best is Dictionary:
 		for k in best:
 			if best[k] is Dictionary:
-				bestiary[k] = {"seen": bool(best[k].get("seen", false)), "defeated": int(best[k].get("defeated", 0))}
+				bestiary[k] = {"seen": bool(best[k].get("seen", false)),
+						"defeated": _int_of(best[k].get("defeated", 0))}
 	# v0.11 verhaal; een save van vóór v0.11 heeft geen proloog -> die is dan 'klaar'
 	var st = d.get("story", {})
 	if not (st is Dictionary):
@@ -2225,7 +2233,9 @@ func apply_state(d: Dictionary) -> bool:
 	if a2 is Dictionary and a2.get("platen") is Dictionary:
 		var platen := {}
 		for k in a2["platen"]:
-			platen[str(k)] = int(a2["platen"][k])
+			var pv = a2["platen"][k]
+			if pv is float or pv is int:
+				platen[str(k)] = int(pv)
 		archief2 = {"platen": platen}
 	bezochte_kaarten = []
 	if d.has("bezocht") and d["bezocht"] is Array:
