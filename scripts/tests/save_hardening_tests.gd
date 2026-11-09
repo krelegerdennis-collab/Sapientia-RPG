@@ -703,6 +703,22 @@ func _blocked_state_tests() -> void:
 			_sig(tile, Vector2i.DOWN) == pre_battle and GameState.item_count("drankje") == 7 and GameState.gold == 4321)
 	check("na laden is in_battle onwaar (nooit midden in een gevecht hervatten)", not GameState.in_battle)
 
+	var prev_scene := get_tree().current_scene
+	GameState.save_game(tile, Vector2i.DOWN, save_path)
+	var guard_sig := _read(save_path)
+	GameState.in_battle = true
+	Story.pending_unique_event = "sh_midfight_unique"
+	var battle_root: Node = (load(GameState.BATTLE_SCENE) as PackedScene).instantiate()
+	get_tree().root.add_child(battle_root)
+	get_tree().current_scene = battle_root
+	check("gevechtsscène + pending event: save_game weigert",
+			not GameState.save_game(tile, Vector2i.DOWN, save_path))
+	check("gevechtsscène + pending event: bestand onaangeroerd", _read(save_path) == guard_sig)
+	battle_root.queue_free()
+	get_tree().current_scene = prev_scene
+	Story.pending_unique_event = ""
+	GameState.in_battle = false
+
 	# een (verkeerde) handmatige save tijdens een gevecht slaat geen halve gevechtstoestand op als 'in gevecht'
 	check("save_game schrijft geen gevechtsvlaggen in het bestand",
 			not GameState.state_data(tile, Vector2i.DOWN).has("in_battle") and not GameState.state_data(tile, Vector2i.DOWN).has("pending_enemies"))
