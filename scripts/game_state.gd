@@ -230,7 +230,14 @@ const NOTICE_UNREADABLE := "This save file can't be read."
 const RECOVERED_LINES := ["Your save file was damaged.", "It was restored from the backup copy."]
 var save_path := "user://save_1.json"
 ## Welk slot de volgende handmatige save schrijft. Laden van een slot zet dit.
-var active_slot := 1
+## Setter houdt autosave_path in sync (C-11: book_point / save_screen wisselen van slot).
+var _active_slot: int = 1
+var active_slot: int:
+	get:
+		return _active_slot
+	set(v):
+		_active_slot = clampi(v, 1, SLOT_COUNT)
+		sync_autosave_path()
 ## Slot 0 = de aparte autosave (Laden: 'Autosave'). Die overschrijft nooit slot 1..4.
 const AUTOSAVE_SLOT := 0
 ## Redenen waarvoor automatisch wordt opgeslagen (Dennis).
@@ -1046,7 +1053,6 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	_play_time_base = 0.0
 	_clock_start_ms = Time.get_ticks_msec()
 	active_slot = clampi(pending_new_slot, 1, SLOT_COUNT)
-	sync_autosave_path()
 	_codex_sync_marked = false
 
 
@@ -1490,8 +1496,8 @@ func _slot_autosave_record(slot: int) -> Dictionary:
 			"from_backup": src["from_backup"], "home_slot": slot}
 
 
-## De nieuwste autosave over alle slots (slot 0 in de slotlijst). Ook het oude gedeelde
-## autosave.json telt mee tot het gemigreerd is.
+## De nieuwste autosave over alle slots (slot 0 in de slotlijst). Het oude gedeelde
+## autosave.json telt alleen mee zolang er nog geen per-slot bestand voor die home_slot is.
 func autosave_record() -> Dictionary:
 	var best := {}
 	var stamp := -1.0
@@ -1499,11 +1505,16 @@ func autosave_record() -> Dictionary:
 	if _save_file_exists(legacy):
 		var src_l := _read_save_source(legacy)
 		var dl: Dictionary = src_l["data"]
-		if dl.is_empty():
+		var ignore_legacy := false
+		if not dl.is_empty():
+			var migrated := autosave_slot_path(home_slot_of(dl))
+			if migrated != legacy and migrated != "" and _save_file_exists(migrated):
+				ignore_legacy = true
+		if not ignore_legacy and dl.is_empty():
 			best = {"path": legacy, "data": {}, "stamp": _save_modified_time(legacy),
 					"slot": AUTOSAVE_SLOT, "corrupt": true}
 			stamp = float(best["stamp"])
-		else:
+		elif not ignore_legacy:
 			stamp = _save_stamp(legacy)
 			best = {"path": legacy, "data": dl, "stamp": stamp, "slot": AUTOSAVE_SLOT,
 					"from_backup": src_l["from_backup"]}
@@ -1665,6 +1676,7 @@ func read_newest_save() -> Dictionary:
 ## v0.11 Automatisch opslaan in autosave_path. De pauze-save ("achtergrond") gaat ook door
 ## als autosave uit staat; alle veiligheidsblokkades blijven gelden.
 func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
+	sync_autosave_path()
 	if not AUTOSAVE_REASONS.has(reason):
 		return false
 	if not can_autosave(reason == "achtergrond"):
@@ -2212,7 +2224,6 @@ func apply_state(d: Dictionary) -> bool:
 		active_slot = home_slot_of(d)
 	elif d.has("slot") and (d["slot"] is int or d["slot"] is float):
 		active_slot = clampi(int(d["slot"]), 1, SLOT_COUNT)
-	sync_autosave_path()
 	return true
 
 

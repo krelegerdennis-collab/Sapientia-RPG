@@ -964,6 +964,24 @@ func _per_slot_autosave_tests() -> void:
 	var a3 := GameState.autosave_slot_path(3)
 	check("slot 1 autosave niet overschreven door slot 3", _read(a1) == a1_text and int(GameState.read_save(a3).get("gold", 0)) == 333)
 	check("slot_record(1) leest eigen autosave", int(GameState.slot_record(1).get("data", {}).get("gold", -1)) == 111)
+	# cross-slot: sessie van slot 1, handmatig opslaan naar slot 2, daarna autosave
+	GameState.pending_new_slot = 1
+	GameState.active_slot = 1
+	GameState.new_game("CrossA")
+	GameState.current_map = TOWN
+	GameState.gold = 501
+	GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, GameState.autosave_path)
+	a1_text = _read(a1)
+	GameState.gold = 502
+	GameState.active_slot = 2
+	GameState.save_game(Vector2i(2, 2), Vector2i.DOWN)
+	var auto_b := GameState.autosave_slot_path(2)
+	check("active_slot=wissel: autosave_path wijst naar slot 2", GameState.autosave_path == auto_b)
+	GameState.gold = 503
+	check("cross-slot: autosave schrijft slot 2", GameState.save_game(Vector2i(3, 3), Vector2i.DOWN, GameState.autosave_path))
+	check("cross-slot: autosave_2 gold", int(GameState.read_save(auto_b).get("gold", 0)) == 503
+			and int(GameState.read_save(auto_b).get("home_slot", 0)) == 2)
+	check("cross-slot: autosave_1 ongewijzigd", _read(a1) == a1_text)
 	# migratie: legacy autosave.json -> autosave_2.json (met .bak)
 	GameState.active_slot = 2
 	GameState.pending_new_slot = 2
