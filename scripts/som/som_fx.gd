@@ -327,9 +327,10 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 		# F4 finisher/heavy: witte rij + modulate (laat rood/groen _digit_row ongemoeid).
 		if color.is_equal_approx(Color("FF8A3D")) or color.is_equal_approx(Color("FFD24A")):
 			d.row = 0
-		n = d
-		if d.row == 0 and not color.is_equal_approx(Color.WHITE):
+			n = d
 			n.modulate = color
+		else:
+			n = d
 	else:
 		var holder := Node2D.new()
 		var l := Label.new()
