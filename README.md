@@ -27,7 +27,7 @@ Getest met **Godot 4.3** en **Godot 4.7.2** (standaardversie, *niet* de .NET/C#-
   de oude regel (Wilgendal, helft goud).
 - Nieuwe test `--checkpointtest` (`scripts/tests/checkpoint_tests.gd`): gewone kamer, wereldkaart, Golem met
   opslaan/laden ertussen, Wortelkoning, oude/kapotte save, verslagen baas. `--autotest`: game over nu terug op de
-  wereldkaart (14,31) zonder goudverlies; versielabel v0.19. Arm64-preset: `../rpg_prototype_v0.19_arm64.apk`.
+  wereldkaart (14,31) zonder goudverlies; versielabel v0.19. Arm64-preset: `../rpg_prototype_arm64.apk`.
 
 **Nieuw in v0.18 (versie 0.18, code 20): rugaanzichten Moskonijn + Mech. Wachter, Codex-namen, audio-basis, design/lore + CANON.**
 - Rug-sprites van RPG ART (`/workspace/art_rug_v18/out`): `res://art/enemies/moskonijn_rug.png` (106x110, voeten
@@ -875,7 +875,7 @@ vensters op 384x216.
 6. Voor de Google Play Store heb je later een *release*-keystore en een `.aab` (Gradle build) nodig.
 
 **Klaar in dit project (v0.10):** `export_presets.cfg` bevat een preset **"Android"** en een preset
-**"Android arm64"** (alleen arm64-v8a, kleiner; export naar `../rpg_prototype_v0.11_arm64.apk`):
+**"Android arm64"** (alleen arm64-v8a, kleiner; export naar `../rpg_prototype_arm64.apk`):
 - pakket `com.dennis.rpgprototype`, app-naam *SAPIENTIA* (tot v0.12: *RPG Prototype*), versie 0.13 (code 15)
 - arm64-v8a + armeabi-v7a, liggend (`window/handheld/orientation` = sensor landscape), immersive
 - officiële sjabloon-APK (geen Gradle): min SDK 21, target SDK 34. Een eigen min SDK (bv. 24) kan

@@ -7,13 +7,13 @@ class_name PvpModes
 
 const MODES := {
 	"early": {
-		"name": "Vroeg", "level": 8, "band_min": 5, "band_max": 10, "pace": "kort",
+		"name": "Early", "level": 8, "band_min": 5, "band_max": 10, "pace": "kort",
 	},
 	"mid": {
-		"name": "Midden", "level": 18, "band_min": 15, "band_max": 20, "pace": "middel",
+		"name": "Mid", "level": 18, "band_min": 15, "band_max": 20, "pace": "middel",
 	},
 	"high": {
-		"name": "Hoog", "level": 25, "band_min": 20, "band_max": -1, "pace": "lang",
+		"name": "High", "level": 25, "band_min": 20, "band_max": -1, "pace": "lang",
 	},
 }
 

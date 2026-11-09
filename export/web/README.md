@@ -16,3 +16,5 @@ De eerste tik ergens op het scherm (ook Doorgaan of Nieuw spel) zet het geluid a
 Tot die tik staat er **Tik voor geluid**. Houd de telefoon liggend.
 
 Grote binaries (`index.pck`, `index.wasm`) worden niet in git gecommit; CI exporteert ze per run.
+
+Na een verse clone werkt de redirect in de root-`index.html` pas na een lokale Web-export (`preset Web`) of met het artifact uit workflow **build-web**.
