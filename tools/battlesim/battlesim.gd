@@ -311,7 +311,7 @@ func _build_party(sc: Dictionary) -> void:
 			var slot := Equipment.slot_of(str(gid))
 			if slot == "" or not Equipment.can_wear(h, str(gid)):
 				continue
-			GameState.inventory[gid] = GameState.item_count(str(gid)) + 1
+			GameState.set_item_count(gid, GameState.item_count(str(gid)) + 1)
 			Equipment.equip(h, GameState.inventory, slot, str(gid))
 		if bool(sc.get("d100", false)):
 			h["spells"] = (sc["d100_spells"].get(id, []) as Array).duplicate()

@@ -255,7 +255,7 @@ func _echo_grot() -> void:
 	var wereld_dicht := await _wereld_weigert()
 	GameState.party[0]["level"] = 8
 	GameState.party[0]["spells"] = ["test_spreuk"]
-	GameState.inventory["kort_zwaard"] = 1
+	GameState.set_item_count("kort_zwaard", 1)
 	var aan := Gear.equip(GameState.party[0], GameState.inventory, "wapen", "kort_zwaard")
 	check("zwaard om voor de run", bool(aan.get("ok", false)) and str(GameState.party[0]["equip"]["wapen"]) == "kort_zwaard")
 	GameState.change_map(EchoGrot.KAMER, EchoGrot.KAMER_SPAWN)
@@ -340,7 +340,7 @@ func _echo_grot() -> void:
 	if not grot:
 		return
 
-	GameState.inventory["warp"] = 1
+	GameState.set_item_count("warp", 1)
 	GameState.dungeon100_floor = 100
 	var terug := GameState.dungeon100_warp("ring")
 	var kamer2 := await _wacht_pad(EchoGrot.KAMER)

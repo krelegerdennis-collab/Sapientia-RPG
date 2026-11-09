@@ -419,7 +419,7 @@ func _codex_lock_tests() -> void:
 		return
 	var m: Node = list[0]
 	lock()._set_target(m, true)
-	GameState.inventory[CodexData.BOOK_ITEM] = 5
+	GameState.set_item_count(CodexData.BOOK_ITEM, 5)
 	arena().codex.force_roll = 0.0
 	var before: int = arena().enemies.size()
 	arena().codex.capture(m)

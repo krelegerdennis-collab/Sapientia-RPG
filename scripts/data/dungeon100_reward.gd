@@ -43,7 +43,7 @@ static func draagt_ring(party: Array) -> bool:
 static func _bewaar(id: String) -> void:
 	GameState.dungeon100_permanent[id] = int(GameState.dungeon100_permanent.get(id, 0)) + 1
 	GameState.dungeon100_delivered[id] = int(GameState.dungeon100_permanent[id])
-	GameState.inventory[id] = GameState.item_count(id) + 1
+	GameState.add_item(id, 1)
 
 
 static func _equip_passend(id: String) -> void:

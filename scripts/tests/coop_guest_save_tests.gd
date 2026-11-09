@@ -123,7 +123,7 @@ func _dupe_tests() -> void:
 	GameState.coop_role = "guest"
 	GameState._build_som_state()
 	GameState.gold += 9000
-	GameState.inventory["drankje"] = GameState.item_count("drankje") + 50
+	GameState.add_item("drankje", 50)
 	GameState.give_exp(GameState.party[0], 500)
 	check("gast mag niet naar som_save schrijven", not GameState.save_game(Vector2i.ZERO, Vector2i.ZERO, SomData.SAVE_PATH))
 	check("echte user:// saves ongewijzigd na co-op", _real_user_saves_unchanged())

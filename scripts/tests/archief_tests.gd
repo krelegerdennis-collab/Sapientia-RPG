@@ -434,7 +434,7 @@ func _equip_screen_tests() -> void:
 	# Dennis met het Kort zwaard + het Vonkzwaard in de tas
 	var h: Dictionary = GameState.party[0]
 	GameState.equip_weapon(GameState.MAIN_HERO, "kort_zwaard")
-	GameState.inventory[SWORD] = 1
+	GameState.set_item_count(SWORD, 1)
 	var atk0: int = h["atk"]
 	await tap("menu")
 	await pframes(4)

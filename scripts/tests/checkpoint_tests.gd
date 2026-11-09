@@ -549,7 +549,7 @@ func _room_tests() -> void:
 	var n_mon: int = r.monsters.size()
 	# na de checkpoint verandert er van alles
 	GameState.gold += 777
-	GameState.inventory["drankje"] = drank0 + 5
+	GameState.set_item_count("drankje", drank0 + 5)
 	GameState.party[0]["exp"] = exp0 + 3
 	GameState.story_flags["test_na_checkpoint"] = true
 	player().place_at(sp[0] + Vector2i(1, -2), Vector2i.RIGHT)

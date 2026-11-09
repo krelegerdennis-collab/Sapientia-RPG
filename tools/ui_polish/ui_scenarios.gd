@@ -181,7 +181,7 @@ func open(name: String) -> bool:
 			scene().add_child(shop)
 			await pframes(3)
 			if name == "shop_sell":
-				GameState.inventory["drankje"] = 3
+				GameState.set_item_count("drankje", 3)
 				shop._show_verkoop()
 		"shop_merchant":
 			var k := KoopmanScherm.new()

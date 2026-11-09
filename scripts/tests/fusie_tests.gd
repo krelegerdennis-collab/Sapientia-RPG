@@ -690,7 +690,7 @@ func setup() -> void:
 	GameState.give_exp(h, GD.exp_for_level(5))
 	h["hp"] = h["max_hp"]
 	GameState.pending_kern_absorb = ""
-	GameState.inventory[CD.BOOK_ITEM] = 3      # v0.17: geen startvoorraad meer; zoals de 3 van Marit (Esdoorn)
+	GameState.set_item_count(CD.BOOK_ITEM, 3)      # v0.17: geen startvoorraad meer; zoals de 3 van Marit (Esdoorn)
 
 
 func screenshot(name: String) -> void:
@@ -956,7 +956,7 @@ func _codex_button_tests() -> void:
 		check("Golem Hall geladen", false)
 		return
 	# --- 1. geen pagina's en geen boeken: knop weg
-	GameState.inventory[CD.BOOK_ITEM] = 0
+	GameState.set_item_count(CD.BOOK_ITEM, 0)
 	var bt := await start_battle(["mosslijm"])
 	if bt == null or await wait_battle_state(["command"]) != "command":
 		check("gevecht gestart", false)
@@ -969,11 +969,11 @@ func _codex_button_tests() -> void:
 	await click(bt.cross.buttons[CODEX])
 	check("verborgen: tik op die plek doet niets", bt.state == "command" and not bt.menu.visible)
 	bt.tutorial = {"x": 1}
-	GameState.inventory[CD.BOOK_ITEM] = 2
+	GameState.set_item_count(CD.BOOK_ITEM, 2)
 	check("oefengevecht: geen Codex-knop en niet wisselen (ook met boeken)", not bt.codex_command_shown() and not bt.codex.can_swap())
 	bt.tutorial = {}
 	check("met 1 Blank Book (0 pagina's) zou de knop er wel zijn", bt.codex_command_shown())
-	GameState.inventory[CD.BOOK_ITEM] = 0
+	GameState.set_item_count(CD.BOOK_ITEM, 0)
 	await flee(bt)
 	# --- 2. Codex met pagina's: knop, menu, vangen, wisselen
 	var p1 := GameState.codex_add("mosslijm", 3)
@@ -981,7 +981,7 @@ func _codex_button_tests() -> void:
 	var p3 := GameState.codex_add("moskonijn", 3)
 	GameState.codex_page(p3["uid"])["hp"] = 0          # KO-pagina: niet in de wissel-lijst
 	GameState.codex_set_active(p1["uid"])
-	GameState.inventory[CD.BOOK_ITEM] = 2
+	GameState.set_item_count(CD.BOOK_ITEM, 2)
 	bt = await start_battle(["mosslijm", "papiergeest"])
 	if bt == null or await wait_battle_state(["command"]) != "command":
 		check("gevecht 2 gestart", false)
@@ -1155,7 +1155,7 @@ func _codex_button_tests() -> void:
 	check("Item > Blank Book werkt nog (zelfde regels: vol -> boek blijft)", ok and bt.codex.last_capture.get("result", "") == "vol"
 			and GameState.item_count(CD.BOOK_ITEM) == 1)
 	# 0 boeken: Vangen grijs met reden
-	GameState.inventory[CD.BOOK_ITEM] = 0
+	GameState.set_item_count(CD.BOOK_ITEM, 0)
 	if not await open_codex(bt):
 		check("Codex-submenu (0 boeken)", false)
 		return
