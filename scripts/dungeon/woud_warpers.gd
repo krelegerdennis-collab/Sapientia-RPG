@@ -2,7 +2,7 @@ extends RefCounted
 class_name WoudWarpers
 ## Uitgang-warpers van het Donker Woud (begin, midden, eind).
 ## Alleen kamers uit woud_rooms.gd. Geen Archief 3 tot en met 6. Geen Diepe Grot.
-## Plaatje: het bestaande opslagboek, violet getint (dungeon_exit_warper.gd). Geen nieuw bestand.
+## Plaatje: dungeon_exit_warper.png, zonder tint (dungeon_exit_warper.gd).
 
 const WoudRooms := preload("res://scripts/data/woud_rooms.gd")
 const ArchiefWarpers := preload("res://scripts/dungeon/archief_warpers.gd")

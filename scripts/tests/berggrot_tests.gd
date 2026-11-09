@@ -411,8 +411,9 @@ func _warper_tests() -> void:
 	var wp: DungeonExitWarper = _warper_van(ingang)
 	check("begin-warper in de grotmond op %s" % [BW.BEGIN_TILE], wp != null and wp.role == "begin"
 			and _warper_tile(wp) == BW.BEGIN_TILE and not wp.waarschuwt()
-			and wp.sprite.texture.resource_path.ends_with("save_book.png")
-			and wp.sprite.modulate == ExitWarper.TINT
+			and wp.sprite.texture.resource_path.ends_with("dungeon_exit_warper.png")
+			and wp.sprite.texture.get_size() == Vector2(64, 16) and wp.sprite.hframes == 4
+			and wp.sprite.modulate == Color.WHITE
 			and wp.world_scene == BG.WERELD_MAP and wp.world_spawn == BG.WERELD_SPAWN)
 	if wp == null or player() == null:
 		return
@@ -438,8 +439,10 @@ func _warper_kamer(pad: String, spawn: String, scene_name: String, role: String,
 	await _weg_monsters(kamer)
 	var wp: DungeonExitWarper = _warper_van(kamer)
 	check("%s-warper op %s" % [role, tegel], wp != null and wp.role == role and wp.waarschuwt()
-			and _warper_tile(wp) == tegel and wp.sprite.texture.resource_path.ends_with("save_book.png")
-			and wp.sprite.modulate == ExitWarper.TINT)
+			and _warper_tile(wp) == tegel
+			and wp.sprite.texture.resource_path.ends_with("dungeon_exit_warper.png")
+			and wp.sprite.texture.get_size() == Vector2(64, 16) and wp.sprite.hframes == 4
+			and wp.sprite.modulate == Color.WHITE)
 	if wp == null or player() == null:
 		return
 	var stay := tile()
