@@ -55,7 +55,9 @@ const TEXT_SCRIPTS := [
 	"res://scripts/data/grot_kamers.gd", "res://scripts/data/level_scale.gd", "res://scripts/data/endgame_bestiary.gd",
 	"res://scripts/data/spells.gd", "res://scripts/data/grade_gear.gd", "res://scripts/party_bench.gd",
 	"res://scripts/party_limiet.gd", "res://world_warper/kamers/kamers.gd", "res://world_warper/services/rekruut.gd",
-	"res://world_warper/data/echo_questlog.gd", "res://pvp/data/teams.gd", "res://scripts/ui/save_screen.gd",
+	"res://world_warper/data/echo_questlog.gd", "res://pvp/data/teams.gd", "res://pvp/data/modes.gd",
+	"res://pvp/data/characters.gd", "res://pvp/data/items.gd", "res://pvp/data/spells.gd", "res://pvp/data/loadouts.gd",
+	"res://scripts/ui/save_screen.gd",
 	"res://scripts/ui/field_menu.gd", "res://scripts/ui/options_screen.gd", "res://scripts/ui/items_screen.gd",
 ]
 ## Nederlandse regels die in deze fase zijn vervangen: ze mogen niet terugkomen (bestand -> teksten).
@@ -79,14 +81,6 @@ const REMOVED_DUTCH := {
 	"res://pvp/data/teams.gd": ["Gebalanceerd", "Hoog risico", "Traag, dubbele"],
 	"res://scenes/maps/berggrot_bouwplaats.tscn": ["Hendrik says"],
 }
-## Bekende Nederlandse spelertekst die BLIJFT: een bestaande suite toetst de exacte tekst (en die mag deze
-## taak niet aanpassen). Lijst en reden: docs/UX_POLISH_WM1.md. Deze test bewaakt dat de lijst niet groeit.
-const KNOWN_DUTCH_PINNED := {
-	"res://scripts/data/story_data.gd": "Het Zingende Graan",
-	"res://scripts/data/game_data.gd": "\"benen\": \"Benen\"",
-	"res://pvp/data/modes.gd": "\"Vroeg\"",
-}
-
 var failures := 0
 var passes := 0
 var _scanned := 0
@@ -324,13 +318,11 @@ func _text_tests() -> void:
 			if src.contains(str(lit)):
 				back.append("%s: %s" % [path.get_file(), lit])
 	check("gerepareerde Nederlandse regels zijn niet teruggekomen %s" % [back], back.is_empty())
-	var pinned_ok := true
-	for path in KNOWN_DUTCH_PINNED:
-		var still := FileAccess.get_file_as_string(path).contains(str(KNOWN_DUTCH_PINNED[path]))
-		if not still:
-			print("INFO  bekende uitzondering is opgelost, haal hem uit KNOWN_DUTCH_PINNED: %s" % path)
-		pinned_ok = pinned_ok and still
-	check("bekende vastgepinde Nederlandse regels: lijst klopt (%d) en groeit niet" % KNOWN_DUTCH_PINNED.size(), pinned_ok)
+	var pvp_hits: Array = _scan_pvp_code_only()
+	for h in pvp_hits:
+		print("INFO  Nederlands (pvp code-only): %s" % h)
+	check("pvp/: geen Nederlandse spelertekst in code-only scan (%d .gd, %d treffers) %s"
+			% [_pvp_code_file_count(), pvp_hits.size(), pvp_hits], pvp_hits.is_empty())
 	check("SaveScreen: vragen zijn Engels", SaveScreenS.Q_NEW == "Save here?" and SaveScreenS.Q_OVERWRITE == "Overwrite?")
 	var effect_texts: Array = []
 	for sid in GD.SPELLS:
@@ -355,6 +347,49 @@ func _code_only(src: String) -> String:
 			l = l.substr(0, at)
 		out.append(l)
 	return "\n".join(out)
+
+
+func _pvp_code_file_count() -> int:
+	var n := 0
+	for f in _files("res://pvp", ".gd"):
+		if f.contains("/tests/"):
+			continue
+		n += 1
+	return n
+
+
+## Letterlijke strings in _code_only-bron; id/paden overslaan.
+func _scan_pvp_code_only() -> Array:
+	var hits: Array = []
+	var rl := RegEx.new()
+	rl.compile("\"((?:[^\"\\\\]|\\\\.)*)\"")
+	for f in _files("res://pvp", ".gd"):
+		if f.contains("/tests/"):
+			continue
+		var src := _code_only(FileAccess.get_file_as_string(f))
+		if src == "":
+			continue
+		for m in rl.search_all(src):
+			var s: String = m.get_string(1)
+			if s == "" or s.begins_with("res://") or s.begins_with("%") or ("/" in s and not s.contains(" ")):
+				continue
+			if not s.contains(" ") and s.length() < 4:
+				continue
+			if _nl_score(s) >= 2 or _has_nl_name(s):
+				hits.append("%s = '%s'" % [f.get_file(), s.substr(0, 80)])
+			elif not s.contains(" ") and _nl_single_word(s):
+				hits.append("%s = '%s'" % [f.get_file(), s.substr(0, 80)])
+	return hits
+
+
+func _nl_single_word(s: String) -> bool:
+	var w := s.to_lower().strip_edges()
+	if w.length() < 3:
+		return false
+	if NL_STOP.has(w):
+		return true
+	# Losse NL-woordvormen die geen Engelse stopwoorden zijn (modusnamen, interne pace-keys, etc.).
+	return w in ["vroeg", "midden", "hoog"]
 
 
 ## Recursief: strings in data. Alleen zinnen (spatie) of naamvelden tellen; id-sleutels worden overgeslagen.
