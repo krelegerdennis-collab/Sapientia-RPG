@@ -308,9 +308,17 @@ func _shot(file_name: String) -> void:
 
 
 func _clear_slots() -> void:
-	for p in [GameState.slot_path(1), GameState.slot_path(2), GameState.slot_path(3), GameState.slot_path(4), GameState.autosave_path]:
+	var paths: Array[String] = []
+	for s in range(1, GameState.SLOT_COUNT + 1):
+		paths.append(GameState.slot_path(s))
+		paths.append(GameState.autosave_slot_path(s))
+	paths.append(GameState._legacy_shared_autosave_path())
+	for p in paths:
 		if p != "" and FileAccess.file_exists(p):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+		var bak := p + ".bak"
+		if p != "" and FileAccess.file_exists(bak):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(bak))
 
 
 ## Save-slots (Dennis): nieuw spel kiest slot 1..4, handmatig opslaan gaat naar dat slot,
@@ -339,24 +347,35 @@ func _newgame_slot_tests() -> void:
 	check("autosave: slot 0, home_slot 3", int(a.get("slot", -1)) == GameState.AUTOSAVE_SLOT and int(a.get("home_slot", 0)) == 3)
 	check("autosave overschrijft slot 1 en 3 niet", FileAccess.get_file_as_string(GameState.slot_path(1)) == slot1_text
 			and int(GameState.read_save(GameState.slot_path(3)).get("gold", 0)) == 33)
-	check("slot_record(3) is de handmatige save, niet de autosave",
-			GameState.slot_record(3).get("path", "") == GameState.slot_path(3))
-	check("slot_record(0) = Autosave", GameState.slot_record(GameState.AUTOSAVE_SLOT).get("path", "") == GameState.autosave_path)
-	# 3) migratie: oude autosave gestempeld met slot 1 blijft bestaan als 'Autosave'
-	var old := GameState.read_save(GameState.autosave_path)
-	old["slot"] = 1
-	old.erase("home_slot")
-	old["saved_unix"] = float(old.get("saved_unix", 0)) + 100.0
-	var f := FileAccess.open(GameState.autosave_path, FileAccess.WRITE)
-	f.store_string(JSON.stringify(old))
-	f.close()
-	check("migratie: slot 1 toont de handmatige save (niet de oude autosave)",
-			GameState.slot_record(1).get("path", "") == GameState.slot_path(1))
-	check("migratie: oude autosave staat onder 'Autosave'",
-			GameState.slot_record(GameState.AUTOSAVE_SLOT).get("path", "") == GameState.autosave_path
-			and int(GameState.slot_record(GameState.AUTOSAVE_SLOT)["data"].get("gold", 0)) == 44)
-	check("migratie: nieuwste save = oude autosave (Doorgaan)", GameState.newest_save_path() == GameState.autosave_path)
-	check("migratie: oude autosave laden -> actief slot 1", GameState.load_game(GameState.autosave_path) and GameState.active_slot == 1)
+	var auto3 := GameState.autosave_slot_path(3)
+	check("slot_record(3) kiest de nieuwere autosave",
+			GameState.slot_record(3).get("path", "") == auto3)
+	check("autosave staat in slot-3-bestand", GameState.autosave_path == auto3)
+	check("slot_record(0) = Autosave", GameState.slot_record(GameState.AUTOSAVE_SLOT).get("path", "") == auto3)
+	# 3) migratie: oude gedeelde autosave.json -> autosave_1.json
+	var legacy := GameState._legacy_shared_autosave_path()
+	var old := GameState.read_save(auto3)
+	var slot1_manual := GameState.read_save(GameState.slot_path(1))
+	old["party"] = slot1_manual.get("party", old.get("party", []))
+	old["player_name"] = slot1_manual.get("player_name", "Kees")
+	old["slot"] = GameState.AUTOSAVE_SLOT
+	old["home_slot"] = 1
+	old["saved_unix"] = Time.get_unix_time_from_system() + 100.0
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(auto3))
+	var lf := FileAccess.open(legacy, FileAccess.WRITE)
+	lf.store_string(JSON.stringify(old))
+	lf.close()
+	GameState._migrate_legacy_autosave()
+	var auto1 := GameState.autosave_slot_path(1)
+	check("migratie: legacy weg", not FileAccess.file_exists(legacy))
+	check("migratie: autosave_1.json bevat de data", FileAccess.file_exists(auto1)
+			and int(GameState.read_save(auto1).get("gold", 0)) == 44)
+	check("migratie: slot 1 kiest de gemigreerde autosave (eigen bestand)",
+			GameState.slot_record(1).get("path", "") == auto1)
+	check("migratie: autosave-rij wijst naar slot-1-autosave",
+			GameState.slot_record(GameState.AUTOSAVE_SLOT).get("path", "") == auto1)
+	check("migratie: nieuwste save = gemigreerde autosave (Doorgaan)", GameState.newest_save_path() == auto1)
+	check("migratie: autosave laden -> actief slot 1", GameState.load_game(auto1) and GameState.active_slot == 1)
 	# 4) wanneer autosaven bij een mapwissel
 	var dorp := "res://scenes/maps/wilgendal.tscn"
 	check("wereldkaart -> kerker: autosave", GameState.is_dungeon_transition(WORLD, GANG))
