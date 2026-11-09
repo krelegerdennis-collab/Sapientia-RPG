@@ -11,6 +11,9 @@ const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 const ARENA_ROOM := "res://scenes/maps/archief_v1_gang.tscn"
+const ROOT_GREEN_A := Color(74 / 255.0, 112 / 255.0, 56 / 255.0)
+const ROOT_GREEN_B := Color(116 / 255.0, 150 / 255.0, 62 / 255.0)
+const GREEN_TOL := 4
 
 var failures := 0
 var passes := 0
@@ -220,6 +223,44 @@ func _fallback_texture_tests() -> void:
 	layer.free()
 
 
+func _arena_root_draw_pos(player: Node2D) -> Vector2:
+	return player.position + Vector2(0, SomData.BODY_Y + SomArena.ROOT_FOOT_OFFSET_PX)
+
+
+func _color_near_root_green(c: Color) -> bool:
+	return (_px_near(c.r8, 74) and _px_near(c.g8, 112) and _px_near(c.b8, 56)) \
+			or (_px_near(c.r8, 116) and _px_near(c.g8, 150) and _px_near(c.b8, 62))
+
+
+func _px_near(v: int, target: int) -> bool:
+	return absi(v - target) <= GREEN_TOL
+
+
+func _find_root_green_rows(img: Image, cx: int, y0: int, y1: int) -> Vector2i:
+	var min_y := 99999
+	var max_y := -1
+	var hits := 0
+	for y in range(maxi(0, y0), mini(img.get_height(), y1)):
+		for x in range(maxi(0, cx - 14), mini(img.get_width(), cx + 14)):
+			var c: Color = img.get_pixel(x, y)
+			if c.a8 < 16:
+				continue
+			if not _color_near_root_green(c):
+				continue
+			hits += 1
+			min_y = mini(min_y, y)
+			max_y = maxi(max_y, y)
+	if hits < 4:
+		return Vector2i(-1, -1)
+	return Vector2i(min_y, max_y)
+
+
+func _world_to_viewport_px(world: Vector2, cam: Camera2D, vp_size: Vector2i) -> Vector2i:
+	var xform: Transform2D = cam.get_canvas_transform()
+	var p: Vector2 = xform * world
+	return Vector2i(roundi(p.x), roundi(p.y))
+
+
 func _screenshot_rooted_hero() -> void:  # await in _run_flow
 	var out := _shots if _shots != "" else "/opt/cursor/artifacts"
 	if not DirAccess.dir_exists_absolute(out):
@@ -231,8 +272,10 @@ func _screenshot_rooted_hero() -> void:  # await in _run_flow
 	get_tree().root.add_child(vp)
 	var room: Node2D = load(ARENA_ROOM).instantiate()
 	vp.add_child(room)
-	await get_tree().process_frame
-	await get_tree().process_frame
+	for _w in 20:
+		await get_tree().process_frame
+		if room.is_node_ready():
+			break
 	var p: CharacterBody2D = room.get_node_or_null("Objects/Player") as CharacterBody2D
 	if p == null:
 		check("arena screenshot: Player in archief_v1_gang", false)
@@ -241,32 +284,60 @@ func _screenshot_rooted_hero() -> void:  # await in _run_flow
 		return
 	p.sprite.texture = SomFx.tex(str(SomData.SHEETS["dennis"]))
 	MapSprite.pas_toe(p.sprite, MapSprite.NIEUW)
+	p.sprite.frame = 0
 	if p.has_method("place_at"):
 		p.place_at(Vector2i(12, 10), Vector2i.DOWN)
 	var cam := p.get_node_or_null("Camera2D") as Camera2D
 	if cam:
 		cam.make_current()
-	var root_pos: Vector2 = Vector2(p.position) + Vector2(0, SomData.BODY_Y + SomArena.ROOT_FOOT_OFFSET_PX)
+	var objects: Node2D = room.get_node("Objects") as Node2D
 	var layer := TelegraphLayer.new()
-	layer.z_index = 12
-	room.get_node("Objects").add_child(layer)
+	objects.add_child(layer)
 	layer._ready()
+	await get_tree().process_frame
 	var roots := CombatRoots.new()
-	roots.try_apply_root("solo", 60)
-	layer.sync_from_roots(roots, {"solo": root_pos})
-	layer.set_root_anim_start_for_test("solo", Time.get_ticks_msec() - 350)
-	for _i in 8:
+	roots.try_apply_root("dennis", 60)
+	var positions: Dictionary = {"dennis": _arena_root_draw_pos(p)}
+	layer.sync_from_roots(roots, positions)
+	check("screenshot: dennis rooted in CombatRoots", roots.is_rooted("dennis"))
+	check("screenshot: TelegraphLayer root-entry voor dennis", layer.root_icon_count() == 1)
+	var now: int = Time.get_ticks_msec()
+	layer.set_root_anim_start_for_test("dennis", now - 250)
+	var fi: int = layer.root_anim_frame_for("dennis")
+	check("screenshot: loop-frame 2 of 3 (nu %d)" % fi, fi == 2 or fi == 3)
+	layer.queue_redraw()
+	for _i in 4:
 		await get_tree().process_frame
 	var tex: ViewportTexture = vp.get_texture()
 	var img: Image = tex.get_image()
+	var foot_world: Vector2 = _arena_root_draw_pos(p)
+	var foot_px: Vector2i = _world_to_viewport_px(foot_world, cam, vp.size)
+	var rows: Vector2i = _find_root_green_rows(img, foot_px.x, foot_px.y - 18, foot_px.y + 6)
+	check(
+		"screenshot: fx_root groentinten bij voet (hits, rij %d..%d vs voet_px.y=%d)"
+		% [rows.x, rows.y, foot_px.y],
+		rows.x >= 0 and rows.y >= rows.x,
+	)
+	if rows.x >= 0:
+		check(
+			"screenshot: groen vs node.y (node=%.1f top=%d bot=%d Δtop=%.0f Δbot=%.0f)"
+			% [p.position.y, rows.x, rows.y, float(rows.x) - p.position.y, float(rows.y) - p.position.y],
+			rows.y >= foot_px.y - 18 and rows.x <= foot_px.y + 2,
+		)
 	var path := out.path_join("root_fx_solo.png")
-	# Crop rond held + FX
-	var cx := int(p.position.x)
-	var cy := int(p.position.y)
-	var crop := Rect2i(maxi(0, cx - 48), maxi(0, cy - 56), mini(128, img.get_width()), mini(128, img.get_height()))
-	if crop.size.x > 0 and crop.size.y > 0:
-		img = img.get_region(crop)
-	var err := img.save_png(path)
-	check("screenshot arena Dax rooted (%s)" % path, err == OK and img.get_width() > 0)
+	var crop := Rect2i(
+		maxi(0, foot_px.x - 40),
+		maxi(0, foot_px.y - 48),
+		mini(96, img.get_width()),
+		mini(72, img.get_height()),
+	)
+	if crop.position.x + crop.size.x > img.get_width():
+		crop.size.x = img.get_width() - crop.position.x
+	if crop.position.y + crop.size.y > img.get_height():
+		crop.size.y = img.get_height() - crop.position.y
+	var shot: Image = img.get_region(crop) if crop.size.x > 0 and crop.size.y > 0 else img
+	var err := shot.save_png(path)
+	check("screenshot arena Dax rooted (%s)" % path, err == OK and shot.get_width() > 0 and rows.x >= 0)
+	layer.queue_free()
 	get_tree().root.remove_child(vp)
 	vp.queue_free()

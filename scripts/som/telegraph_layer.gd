@@ -37,11 +37,34 @@ class RootIconEntry:
 	var pos: Vector2 = Vector2.ZERO
 
 
+## Root-FX boven held-sprites (y_sort op Objects); telegraaf-vormen blijven op laag z_index 4.
+class RootFxOverlay extends Node2D:
+	var host: TelegraphLayer
+
+	func _ready() -> void:
+		z_as_relative = false
+		z_index = 22
+		y_sort_enabled = false
+		name = "RootFxOverlay"
+
+	func _process(_delta: float) -> void:
+		if host != null and host.root_icon_count() > 0:
+			queue_redraw()
+
+	func _draw() -> void:
+		if host == null:
+			return
+		for entry in host._root_icons:
+			var ent: RootIconEntry = entry
+			host._draw_root_icon_on(self, ent.pos, ent.hid)
+
+
 var _entries: Array[DrawEntry] = []
 var _zone_shapes: Array[TelegraphShape] = []
 var _root_icons: Array = []
 var _root_anim_start_ms: Dictionary = {}
 var _root_tex: Texture2D = null
+var _root_overlay: RootFxOverlay = null
 
 
 func entry_count() -> int:
@@ -54,11 +77,31 @@ func _ready() -> void:
 	y_sort_enabled = false
 	name = "TelegraphLayer"
 	_root_tex = SomFx.tex(str(SomData.FX_ROOT.get("sheet", "")))
+	call_deferred("_attach_root_overlay")
+
+
+func _attach_root_overlay() -> void:
+	if _root_overlay != null:
+		return
+	var objects: Node = get_parent()
+	if objects == null:
+		return
+	_root_overlay = RootFxOverlay.new()
+	_root_overlay.host = self
+	objects.add_child(_root_overlay)
+
+
+func _exit_tree() -> void:
+	if _root_overlay != null and is_instance_valid(_root_overlay):
+		_root_overlay.queue_free()
+		_root_overlay = null
 
 
 func _process(_delta: float) -> void:
 	if not _root_icons.is_empty():
 		queue_redraw()
+		if _root_overlay != null:
+			_root_overlay.queue_redraw()
 
 
 func root_icon_count() -> int:
@@ -144,6 +187,8 @@ func sync_from_roots(roots: CombatRoots, positions: Dictionary) -> void:
 	if _root_icons_changed(next):
 		_root_icons = next
 		queue_redraw()
+		if _root_overlay != null:
+			_root_overlay.queue_redraw()
 
 
 func _root_icons_changed(next: Array) -> bool:
@@ -302,14 +347,11 @@ func _draw() -> void:
 		_draw_entry(ent)
 	for sh in _zone_shapes:
 		_draw_zone(sh)
-	for entry in _root_icons:
-		var ent: RootIconEntry = entry
-		_draw_root_icon(ent.pos, ent.hid)
 
 
-func _draw_root_icon(center: Vector2, hid: String) -> void:
+func _draw_root_icon_on(canvas: CanvasItem, center: Vector2, hid: String) -> void:
 	if _root_tex == null:
-		_draw_root_icon_fallback(center)
+		_draw_root_icon_fallback_on(canvas, center)
 		return
 	var d: Dictionary = SomData.FX_ROOT
 	var cw: float = float(d["cell"][0])
@@ -318,10 +360,14 @@ func _draw_root_icon(center: Vector2, hid: String) -> void:
 	var fi: int = root_anim_frame_for(hid)
 	var src := Rect2(fi * cw, 0.0, cw, ch)
 	var dest := Rect2(center - anchor, Vector2(cw, ch))
-	draw_texture_rect_region(_root_tex, dest, src)
+	canvas.draw_texture_rect_region(_root_tex, dest, src)
 
 
-func _draw_root_icon_fallback(center: Vector2) -> void:
+func _draw_root_icon(center: Vector2, hid: String) -> void:
+	_draw_root_icon_on(self, center, hid)
+
+
+func _draw_root_icon_fallback_on(canvas: CanvasItem, center: Vector2) -> void:
 	var r := 7.0
 	var fill := Color(0.45, 0.28, 0.08, 0.55)
 	var edge := Color(0.35, 0.2, 0.05, 0.95)
@@ -330,8 +376,12 @@ func _draw_root_icon_fallback(center: Vector2) -> void:
 	for i in 12:
 		var a := TAU * float(i) / 12.0
 		pts[i] = center + Vector2(cos(a), sin(a)) * r
-	draw_colored_polygon(pts, fill)
-	draw_polyline(pts, edge, 2.0, true)
+	canvas.draw_colored_polygon(pts, fill)
+	canvas.draw_polyline(pts, edge, 2.0, true)
+
+
+func _draw_root_icon_fallback(center: Vector2) -> void:
+	_draw_root_icon_fallback_on(self, center)
 
 
 func _draw_zone(shape: TelegraphShape) -> void:
