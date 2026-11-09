@@ -654,7 +654,7 @@ func _scenes_tests() -> void:
 	for cf in [ScenesDataT.CANON_GENEZER_FLAG, ScenesDataT.CANON_HANGER_FLAG, ScenesDataT.CANON_DREIGING_FLAG]:
 		GameState.story_flags.erase(cf)
 	GameState.scenes_seen = []
-	check("scenes: lijst = alleen de video-cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "ww_warper"]
+	check("scenes: lijst = alleen de video-cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08"]
 			and GameState.seen_scenes().is_empty())
 	GameState.mark_scene_seen("ww_warper")
 	GameState.mark_scene_seen("hanger")         # v0.24 niet meer in de lijst: telt niet
@@ -712,7 +712,7 @@ func _scenes_tests() -> void:
 	await click(m.buttons["scenes"])
 	await pframes(4)
 	var sc: Node = m.sub
-	check("Scenes opent het scenes-scherm", sc != null and sc.name == "Scenes" and sc.buttons.size() == 2)
+	check("Scenes opent het scenes-scherm", sc != null and sc.name == "Scenes" and sc.buttons.size() == ScenesDataT.SCENES.size())
 	if sc == null:
 		return
 	check("niet bekeken: '???' en op slot", sc.buttons[0].text.ends_with("???") and sc.is_locked(0) and sc.is_locked(1))
@@ -746,9 +746,13 @@ func _scenes_tests() -> void:
 	await pframes(2)
 	var titels_ok := true
 	for i in ScenesDataT.SCENES.size():
-		titels_ok = titels_ok and sc.buttons[i].text.ends_with(ScenesDataT.SCENES[i]["title"]) and not sc.is_locked(i)
+		var sid := str(ScenesDataT.SCENES[i]["id"])
+		if sid == "wereldkaart" or sid == "ww_warper":
+			titels_ok = titels_ok and sc.buttons[i].text.ends_with(ScenesDataT.SCENES[i]["title"]) and not sc.is_locked(i)
+		else:
+			titels_ok = titels_ok and sc.buttons[i].text.ends_with("???") and sc.is_locked(i)
 	check("lijst toont nu de titels (Into the Wide World / The World Warper), geen Hanger/Sapientia", titels_ok
-			and sc.buttons.size() == 2 and ScenesDataT.scene("ww_warper")["title"] == "The World Warper"
+			and sc.buttons.size() == ScenesDataT.SCENES.size() and ScenesDataT.scene("ww_warper")["title"] == "The World Warper"
 			and ScenesDataT.scene("hanger").is_empty() and ScenesDataT.scene("ww_hanger").is_empty() and ScenesDataT.scene("ww_sapientia").is_empty())
 	var flags_voor: Dictionary = GameState.story_flags.duplicate()
 	var map_voor := scene().scene_file_path
@@ -763,7 +767,7 @@ func _scenes_tests() -> void:
 			var gz: Node = get_tree().root.get_node_or_null("SceneReplay/CanonGenezer")
 			var vs: Node = gz.video_speler if gz != null else null
 			check("ww_warper: herhaling start met Dax' filmpje (ook als het al gezien is)", vs != null and is_instance_valid(vs)
-					and str(vs.video_path).ends_with("genezer_warper.ogv"))
+					and str(vs.video_path).ends_with("genezer_warper_v3.ogv"))
 			await get_tree().create_timer(1.5).timeout
 			await screenshot("scenes_herhaling_warper_video")
 			if vs != null and is_instance_valid(vs):

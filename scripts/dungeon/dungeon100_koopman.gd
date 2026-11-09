@@ -5,6 +5,7 @@ extends StaticBody2D
 ## gesprek op deze verdieping in deze run telt als bezoek; bij fase 3 eenmalig H-5's Token.
 
 const Data := preload("res://scripts/data/koopman_data.gd")
+const Videos := preload("res://scripts/data/cutscene_videos.gd")
 const Kamers := preload("res://scripts/data/grot_kamers.gd")
 const Winkel := preload("res://scripts/data/koopman_winkel.gd")
 const WinkelScherm := preload("res://scripts/ui/koopman_winkel_scherm.gd")
@@ -102,7 +103,13 @@ func interact(player: Node2D) -> void:
 	if "facing" in player:
 		facing = -player.facing
 		_update_sprite()
-	Dialog.show_lines(praat(), Data.NAAM, self)
+	# CS-08: eerste herkenning is bezoek 4. praat() telt dit bezoek; het filmpje telt er geen bij.
+	var voor := GameState.koopman_bezoeken
+	var regels := praat()
+	if GameState.koopman_bezoeken == Data.FRAGMENT_VANAF and GameState.koopman_bezoeken != voor and Videos.will_play("cs08"):
+		var map := get_tree().current_scene if is_inside_tree() else self
+		await Videos.play_await("cs08", self, {"map": map})
+	Dialog.show_lines(regels, Data.NAAM, self)
 	await Dialog.finished
 	var keuze: int = await Dialog.ask(Winkel.VRAAG, Winkel.KEUZES, Data.NAAM)
 	if keuze == 0:

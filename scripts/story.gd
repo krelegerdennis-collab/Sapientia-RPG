@@ -13,6 +13,7 @@ signal event_finished(event_id: String)
 signal tc_p_card_active_changed(active: bool)
 
 const SD := preload("res://scripts/data/story_data.gd")
+const Videos := preload("res://scripts/data/cutscene_videos.gd")
 const Molen := preload("res://scripts/village/molen.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const TcPrologueTitleCardScript := preload("res://scripts/ui/tc_prologue_title_card.gd")
@@ -406,6 +407,15 @@ func _exec(cmds: Array, arg: String) -> String:
 				# v0.17 ["glitch", sec]: één glitch-flits van de CRT-laag (ook buiten de dungeons)
 				if Crt.has_method("start_glitch"):
 					Crt.start_glitch(float(c[1]))
+			"video":
+				# ["video", id] uit CutsceneVideos. Wacht tot het filmpje klaar is.
+				# Poort / al gezien / ontbrekend bestand: meteen verder (geen softlock).
+				var host: Node = _map()
+				if host == null:
+					host = self
+				var vid := str(c[1])
+				if Videos.will_play(vid):
+					await Videos.play_await(vid, host)
 			_:
 				push_warning("Story: onbekend commando '%s'" % op)
 	return ""

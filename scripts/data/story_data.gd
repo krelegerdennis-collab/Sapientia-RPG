@@ -48,6 +48,7 @@ extends RefCounted
 ##   ["join", held, {"level": n | "level_from": held, "level_delta": d, "gear": [stukken]}]
 ##                                       held sluit zich aan (GameState.join_member), bv. Noor
 ##   ["glitch", sec]                     één glitch-flits van de CRT-laag (ook buiten de dungeons)
+##   ["video", id]                       filmpje uit scripts/data/cutscene_videos.gd (wacht; poort in tests)
 ##   ["heal"]                            HP en MP van de hele groep vol (herberg)
 ##   ["molen_zang"]                      scène: de molen draait en zingt zacht (geen extra dialoog)
 ##   ["molen"]                           molen van Gerrit: rusten, meel (1x per bezoek), opslaan, party wisselen
@@ -191,6 +192,10 @@ const TUT_INKT_PAGES := [
 const AFTER_UNIQUE := {"inktwurm": TUTORIAL_INKTWURM}
 ## Oude saves waarin dit unieke monster al weg is: de vlag meteen als 'gezien' zetten (GameState.apply_state).
 const UNIQUE_SEEN_FLAGS := {"inktwurm": TUTORIAL_INKTWURM_FLAG}
+
+## C-4: eenmalige uitleg bij het eerste interactie met een save-boek (opslaan alleen via boeken).
+const SAVE_UITLEG_FLAG := "save_uitleg_gezien"
+const SAVE_UITLEG_LINE := "Glowing books save and heal. There is no saving from the menu."
 
 ## Vang-tutorial (Codex), direct na de Inktwurm-tutorial. Speelt eenmalig zodra de speler in de Golemhal
 ## vrij is (FREE_EVENTS), ook als de eerste tutorial overgeslagen is. Max. 2 korte regels per pagina.
@@ -376,38 +381,52 @@ const EVENTS := {
 	]}],
 
 	# ------------------------------------------------------------ scène 2: de catastrofe
+	# CS-01 vervangt de zegel-beelden (schudden, flits, zwaard, deur) zodra het filmpje start.
+	# Zonder filmpje (testpoort of bestand weg) blijft het oude pad, zodat de suites gelijk blijven.
+	# Lock, stap en de schreeuw-timer blijven in allebei de takken.
 	"catastrofe": [{"do": [
 		["say", "", ["It's evening. {naam} is reading one of Grandpa's old books.", "\"...and the Wardens sealed the Archives, so that no one would ever wake again...\""]],
-		["shake", 2.2, 4.0],
-		["flash", "#ffffff", 0.7],
-		["window_glow", 5.0],
-		["face", "player", "up"],
-		["say", "", ["The ground shakes! A deafening bang, and a blinding flash from the direction of the Archives.", "Pink and blue light pours through the windows."]],
-		["face", "OudeMan", "up"],
-		["face", "OudeMan", "down"],
-		["say", SPEAKER, ["No… the seal. It's too soon."]],
-		["say", "{naam}", ["Grandpa? Your hands are shaking."]],
-		["say", SPEAKER, ["Stay here, Dax."]],
-		["say", "{naam}", ["What are you doing with that sword?"]],
-		["say", SPEAKER, ["What I hoped you'd never have to see."]],
-		["say", "{naam}", ["Let me come with you."]],
-		["say", SPEAKER, ["No. Stay inside. Don't follow me, no matter what you hear."]],
-		["say", "{naam}", ["Then come back."]],
-		["walk", "OudeMan", "up", 1],
-		["walk", "OudeMan", "left", 3],
-		["face", "OudeMan", "up"],
-		["flag", "schilderij_weg"],
-		["refresh"],
-		["say", "", ["Grandpa pulls an old, rusted sword out from behind the painting!"]],
-		["walk", "OudeMan", "down", 5],
-		["walk", "OudeMan", "left", 2],
-		["walk", "OudeMan", "down", 1],
-		["hide", "OudeMan"],
-		["lock", "HuisDeur"],
-		["say", "", ["The door slams shut. A key turns in the lock."]],
-		["step", OPGESLOTEN],
-		["refresh"],
-		["after", 2.0, "schreeuw"],
+		["video", "cs01"],
+		["if", {"not_flags": ["cutscene_cs01_gezien"]}, [
+			["shake", 2.2, 4.0],
+			["flash", "#ffffff", 0.7],
+			["window_glow", 5.0],
+			["face", "player", "up"],
+			["say", "", ["The ground shakes! A deafening bang, and a blinding flash from the direction of the Archives.", "Pink and blue light pours through the windows."]],
+			["face", "OudeMan", "up"],
+			["face", "OudeMan", "down"],
+			["say", SPEAKER, ["No… the seal. It's too soon."]],
+			["say", "{naam}", ["Grandpa? Your hands are shaking."]],
+			["say", SPEAKER, ["Stay here, Dax."]],
+			["say", "{naam}", ["What are you doing with that sword?"]],
+			["say", SPEAKER, ["What I hoped you'd never have to see."]],
+			["say", "{naam}", ["Let me come with you."]],
+			["say", SPEAKER, ["No. Stay inside. Don't follow me, no matter what you hear."]],
+			["say", "{naam}", ["Then come back."]],
+			["walk", "OudeMan", "up", 1],
+			["walk", "OudeMan", "left", 3],
+			["face", "OudeMan", "up"],
+			["flag", "schilderij_weg"],
+			["refresh"],
+			["say", "", ["Grandpa pulls an old, rusted sword out from behind the painting!"]],
+			["walk", "OudeMan", "down", 5],
+			["walk", "OudeMan", "left", 2],
+			["walk", "OudeMan", "down", 1],
+			["hide", "OudeMan"],
+			["lock", "HuisDeur"],
+			["say", "", ["The door slams shut. A key turns in the lock."]],
+			["step", OPGESLOTEN],
+			["refresh"],
+			["after", 2.0, "schreeuw"],
+		]],
+		["if", {"flags": ["cutscene_cs01_gezien"]}, [
+			["flag", "schilderij_weg"],
+			["hide", "OudeMan"],
+			["lock", "HuisDeur"],
+			["step", OPGESLOTEN],
+			["refresh"],
+			["after", 2.0, "schreeuw"],
+		]],
 	]}],
 
 	"opgesloten_timer": [{"do": [["after", 2.0, "schreeuw"]]}],
@@ -420,11 +439,16 @@ const EVENTS := {
 		{"do": "default"},
 	],
 
-	"schreeuw": [{"do": [
-		["shake", 1.6, 3.0],
-		["say", "", ["The earth shakes again...", "A shout in the distance. Grandpa!"]],
-		["jump", "keuze"],
-	]}],
+	# CS-01 eindigt met 'Dax luisterde niet': na het filmpje meteen het bestaande volg-pad.
+	# Zonder vlag (tests) blijft de keuze Blijven / Grandpa achterna.
+	"schreeuw": [
+		{"if": {"flags": ["cutscene_cs01_gezien"]}, "do": [["jump", "achterna"]]},
+		{"do": [
+			["shake", 1.6, 3.0],
+			["say", "", ["The earth shakes again...", "A shout in the distance. Grandpa!"]],
+			["jump", "keuze"],
+		]},
+	],
 
 	"keuze": [{"do": [
 		["choice", "What do you do?", ["Stay", "Follow Grandpa"], ["blijven", "achterna"], ""],
@@ -654,10 +678,13 @@ const EVENTS := {
 	"noor_bevrijd": [{"do": [
 		["place", "player", [13, 6], "up"],
 		["wait", 0.4],
-		["shake", 0.8, 2.0],
-		["glitch", 0.3],
-		["flash", "#ff3ad0", 0.4],
-		["say", "", ["The Root King collapses. His roots shrivel into grey dust...", "...and the cocoon tears open!"]],
+		["video", "cs03"],
+		["if", {"not_flags": ["cutscene_cs03_gezien"]}, [
+			["shake", 0.8, 2.0],
+			["glitch", 0.3],
+			["flash", "#ff3ad0", 0.4],
+			["say", "", ["The Root King collapses. His roots shrivel into grey dust...", "...and the cocoon tears open!"]],
+		]],
 		["flag", "noor_gered"],
 		["refresh"],
 		["walk", "Vesper", "down", 1],

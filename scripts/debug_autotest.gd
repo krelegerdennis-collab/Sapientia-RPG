@@ -645,6 +645,13 @@ func _run() -> void:
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
+	if "--test-cutscenes-wm1" in OS.get_cmdline_user_args():
+		# Alleen de WM1-filmpjes (scripts/tests/cutscenes_wm1_tests.gd); CI draait ze aan het eind mee.
+		check("titelscherm (cutscenes-wm1)", await wait_scene("Title"))
+		await preload("res://scripts/tests/cutscenes_wm1_tests.gd").new(self).run()
+		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
+		get_tree().quit(1 if failures else 0)
+		return
 	if "--test-item-icons" in OS.get_cmdline_user_args():
 		# Alleen de item-iconen v1.5 (scripts/tests/item_icon_autotest.gd); CI draait ze aan het eind mee.
 		check("titelscherm (item-icons)", await wait_scene("Title"))
@@ -690,6 +697,8 @@ func _run() -> void:
 	await preload("res://scripts/tests/archief2_leeszaal_autotest.gd").new(self).run()
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/woud_tegels_autotest.gd").new(self).run()
+	Engine.time_scale = 1.0
+	await preload("res://scripts/tests/cutscenes_wm1_tests.gd").new(self).run()
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
 

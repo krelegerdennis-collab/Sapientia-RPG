@@ -3,6 +3,7 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 ## (via DungeonRooms.room). Platen, de Lotte-ontmoeting en de hub horen hier.
 
 const CanonGenezer := preload("res://world_warper/cutscene/genezer_scene.gd")
+const Videos := preload("res://scripts/data/cutscene_videos.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const Wm1VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
 const PlaatScript := preload("res://scripts/dungeon/groei_plaat.gd")
@@ -27,6 +28,9 @@ func start_monster_battle(m: Node) -> void:
 	if str(m.data.get("enemy", "")) == "lotte_glitch":
 		_start_lotte(m)
 		return
+	# CS-04: vóór het baasgevecht tegen de Mender. Poort: in tests meteen het gevecht.
+	if str(m.data.get("enemy", "")) == "genezer" and Videos.will_play("cs04"):
+		await Videos.play_await("cs04", self, {"map": self})
 	super.start_monster_battle(m)
 
 

@@ -331,7 +331,7 @@ Alle items staan in `scripts/data/game_data.gd` (`ITEMS`, `KEY_ITEMS`, `EQUIPMEN
 |---|---|---|
 | Proloog: ochtend, toonkeuze, mantel, taken, zwaardles (`opa`, `intro_keuze`, `opa_mantel`, `mantel_aan`, `les`, `na_les`) | `scripts/data/story_data.gd` | nee |
 | Proloog: avond, de flits, opgesloten, Opa achterna (`catastrofe`, `opgesloten_timer`, `huis_uit`, `schreeuw`, `keuze`, `blijven`, `achterna`) | `story_data.gd` | nee |
-| "Into the Wide World" (video bij de eerste keer op de wereldkaart) | `scripts/worldmap_cutscene.gd`, `assets/video/worldmap_intro.ogv` | ja, Scenes |
+| "Into the Wide World" (video bij de eerste keer op de wereldkaart) | `scripts/worldmap_cutscene.gd`, `assets/video/worldmap_intro_v2.ogv` (18,0 s, 768×432, 2,72 MB) | ja, Scenes |
 | Eerste Archief binnen (`archief_ingang`, `archief_binnen`) | `story_data.gd` | nee |
 | Inktwurm-tutorial en Codex-vang-tutorial (4 pagina's elk) | `story_data.gd` (`TUT_INKT_PAGES`, `TUT_CODEX_PAGES`, `FREE_EVENTS`) | nee |
 | Golem Hall-uitgang op slot tot de Inktwurm in de Codex staat (`golemhal_uitgang`) | `story_data.gd` | n.v.t. |
@@ -340,7 +340,7 @@ Alle items staan in `scripts/data/game_data.gd` (`ITEMS`, `KEY_ITEMS`, `EQUIPMEN
 | Bouwplaats-poort (`bouwplaats_*`), poorten naar kas en Mapleton (`naar_leven`, `naar_esdoorn`, `woud_ingang`) | `story_data.gd` | n.v.t. |
 | Zingend Graan: Garrett, zaad, molen zingt (`gerrit*`, `zingend_zaad*`, `MOLEN_ZANG`) | `story_data.gd`, `scripts/village/molen.gd` | nee |
 | Archief 2 binnen: de keten (`archief2_keten`) en Seren sluit aan (`LOTTE_AANSLUIT`) | `story_data.gd`, `scripts/data/archief2.gd` | nee |
-| Na De Genezer: video, canonscène 1 "The World Warper" | `world_warper/cutscene/genezer_scene.gd`, `assets/video/genezer_warper.ogv`, `canon_scenes.gd` | ja, Scenes |
+| Na De Genezer: video, canonscène 1 "The World Warper" | `world_warper/cutscene/genezer_scene.gd`, `assets/video/genezer_warper_v3.ogv` (30,0 s, 768×432, 9,27 MB), `canon_scenes.gd` | ja, Scenes |
 | Hal: canonscène 2 (De Hanger) en 3 (Sapientia's dreiging) | `world_warper/cutscene/hanger_scene.gd`, `hanger_scene.tscn`, `dreiging.gd`, `canon_scenes.gd` | nee (bewust niet in `scenes_data.gd`) |
 | ECHO eerste Diepe Grot-gesprek en Koopman-fases | `scripts/data/echo_grot.gd`, `koopman_data.gd` | nee |
 
@@ -366,7 +366,7 @@ standaard uit in release), instellingen (General en Music, `scripts/ui/options_s
   synthetische placeholders (`tools/placeholders_algemene_sfx.txt`, `tools/placeholders_sfx.txt`).
 - **Art:** definitieve art van RPG ART staat in `tools/handwerk.txt` (610 paden; niet aanraken). Open placeholders:
   zie H10.
-- **Video:** `assets/video/worldmap_intro.ogv` en `assets/video/genezer_warper.ogv` (samen ca. 30 MB).
+- **Video:** `assets/video/worldmap_intro_v2.ogv` (2.724.184 bytes, 18,0 s, 768×432, 16:9) en `assets/video/genezer_warper_v3.ogv` (9.265.650 bytes, 30,0 s, 768×432, 16:9), samen 11.989.834 bytes (11,99 MB, 11,43 MiB). De map `assets/video/` heeft daarnaast CS-01..CS-08; alle 9 `.ogv` samen zijn 30.462.852 bytes (30,46 MB, 29,05 MiB).
 
 ### 2.10 Testdekking per onderdeel (CI, `.github/workflows/tests.yml`)
 

@@ -72,8 +72,10 @@ func _cutscene() -> void:
 	check("speler op slot tijdens filmpje", p != null and p.input_locked)
 	if c != null:
 		await get_tree().create_timer(1.5).timeout
-		check("panelen links/rechts naast de video", c.left_panel.size.x > 0 and c.right_panel.position.x >= c.video.position.x + c.video.size.x - 0.5)
-		check("video portret gecentreerd", absf(c.video.size.x / c.video.size.y - 9.0 / 16.0) < 0.01)
+		check("video 16:9", absf(c.video.size.x / maxf(c.video.size.y, 0.001) - 16.0 / 9.0) < 0.02)
+		check("video letterbox binnen het beeld", c.video.position.x >= -0.5 and c.video.position.y >= -0.5 \
+				and c.video.position.x + c.video.size.x <= c._root.size.x + 1.0 \
+				and c.video.position.y + c.video.size.y <= c._root.size.y + 1.0)
 		check("video lineair gefilterd", c.video.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR)
 		check("root op schermresolutie tijdens filmpje", get_tree().root.content_scale_mode == Window.CONTENT_SCALE_MODE_CANVAS_ITEMS)
 		await screenshot("cutscene_panels")
