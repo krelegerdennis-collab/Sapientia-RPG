@@ -6,7 +6,7 @@ extends Node2D
 ##   2. effect assets/fx/kern_absorptie.png (192x48 = 4 frames van 48x48, 0,12 s per frame, niet
 ##      loopen), midden (24,24) op de borst van de held (12 px boven zijn voeten), plus een zachte
 ##      roze gloed in code (zoals het savepunt) en een roze flits op de held
-##   3. bericht: '{naam} absorbeert de Golemkern!' + wat hij vrijspeelt
+##   3. bericht: levenskern e.d. '{naam} absorbs …'; golemkern = Sapientia-drain (CS-02)
 ##   4. alles weg, speler weer vrij, autosave ("kern")
 
 const FX := "res://assets/fx/kern_absorptie.png"
@@ -17,6 +17,10 @@ const CHEST := Vector2(0, -4)             # borst: tile-midden + 8 = voeten, 12 
 const GLOW_RADIUS := 28.0
 const KernData := preload("res://scripts/data/kern_data.gd")
 const BookPoint := preload("res://scripts/book_point.gd")
+const Wm1VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
+
+const GOLEM_FRAGMENT := "golemkern"
+const GOLEM_SAPENTIA_LINE := "Sapientia drank the Golem Core dry."
 
 signal done
 
@@ -58,6 +62,19 @@ func start(p_map: Node, id: String) -> void:
 	if not _alive():
 		return
 	player.input_locked = true
+	if fragment_id == GOLEM_FRAGMENT:
+		Wm1VideoSlot.before_dialogue(Wm1VideoSlot.CS02_GOLEM_CORE)
+		phase = PHASE_BERICHT
+		Dialog.show_lines(lines_for(fragment_id))
+		await Dialog.finished
+		if GameState.pending_kern_absorb == fragment_id:
+			GameState.pending_kern_absorb = ""
+		if is_instance_valid(player):
+			player.input_locked = false
+		phase = PHASE_KLAAR
+		done.emit()
+		queue_free()
+		return
 	# gloed (achter het effect) + effect, als kind van de held: loopt dus mee met de camera
 	glow = Sprite2D.new()
 	glow.name = "KernGloed"
@@ -149,6 +166,8 @@ func _process(delta: float) -> void:
 
 ## De tekst van het moment (uit de data, dus ook goed voor latere kernen).
 static func lines_for(id: String) -> Array:
+	if id == GOLEM_FRAGMENT:
+		return [GOLEM_SAPENTIA_LINE]
 	var f := KernData.fragment(id)
 	var lines: Array = ["{naam} absorbs the %s!" % f.get("naam", id)]
 	var sk := str(f.get("battle_skill", ""))

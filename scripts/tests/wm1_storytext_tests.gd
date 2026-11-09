@@ -7,6 +7,7 @@ const WR := preload("res://scripts/data/woud_rooms.gd")
 const Canon := preload("res://world_warper/cutscene/canon_scenes.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
+const KernAbsorption := preload("res://scripts/kern/kern_absorption.gd")
 
 var passes := 0
 var failures := 0
@@ -35,6 +36,7 @@ func _run() -> void:
 	_atrium_exact()
 	_save_cocon_flag()
 	_dormant_video_slots()
+	_golem_core_sapientia()
 
 
 func _cocon_gating_data() -> void:
@@ -145,3 +147,10 @@ func _dormant_video_slots() -> void:
 		check("dormant slot id '%s'" % id, id.begins_with("dialogue_"))
 	VideoSlot.before_dialogue(VideoSlot.MAPLETON_VESPER)
 	check("dormant poort crasht niet", true)
+	check("dormant CS02 id", VideoSlot.CS02_GOLEM_CORE.begins_with("dialogue_"))
+
+
+func _golem_core_sapientia() -> void:
+	var lines: Array = KernAbsorption.lines_for("golemkern")
+	check("CS-02: exacte Sapientia-regel", lines.size() == 1 and str(lines[0]) == "Sapientia drank the Golem Core dry.")
+	check("CS-02: geen Dax absorbs-tekst", not " ".join(lines).contains("absorbs"))
