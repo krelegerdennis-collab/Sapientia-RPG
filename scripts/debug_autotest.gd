@@ -660,6 +660,7 @@ func _run() -> void:
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
+	if "--wm1roombaselinetest" in OS.get_cmdline_user_args(): get_tree().root.add_child(preload("res://scripts/tests/wm1_room_baseline_tests.gd").new()); return
 	await preload("res://scripts/tests/title_testmenu_autotest.gd").new(self).run()
 	await _title_and_name_tests()
 	await _prologue_tests()

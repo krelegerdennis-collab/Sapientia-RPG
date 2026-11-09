@@ -556,6 +556,7 @@ func _ready() -> void:
 	# WM1-playthrough (nieuw spel t/m de hub, save/load, pauze): of  godot -- --wm1playthroughtest [--speed=N] [--static-only]  (scripts/tests/wm1_playthrough_tests.gd).
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
 	# WM1 frametime-log + budget: of  godot -- --wm1frametest / --wm1budgettest  (scripts/tests/wm1_frametime_tests.gd, wm1_budget_tests.gd).
+	# F-5 nulmeting per kamer, geïsoleerd (geen CI, faalt niet op budget): of  godot -- --wm1roombaselinetest  (scripts/tests/wm1_room_baseline_tests.gd).
 	# WM1 F3 stabiliteit (lokaal, geen CI): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
 	# Wachtershuis classic-muur (geen TileSet-polygonen): godot -- --huiscollisiontest  (scripts/tests/huis_collision_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
@@ -700,6 +701,7 @@ func _ready() -> void:
 			["--wm1storytexttest", "res://scripts/tests/wm1_storytext_tests.gd", "Wm1StorytextTest", "wm1storytexttest"],
 			["--wm1f3stabilitytest", "res://scripts/tests/wm1_f3_stability_tests.gd", "Wm1F3StabilityTest", "wm1f3stabilitytest"],
 			["--wm1baselinebenchtest", "res://scripts/tests/wm1_baseline_benchmark.gd", "Wm1BaselineBenchmark", "wm1baselinebenchtest"],
+			["--wm1roombaselinetest", "res://scripts/tests/wm1_room_baseline_tests.gd", "Wm1RoomBaselineTest", "wm1roombaselinetest"],
 			["--huisdrawtest", "res://scripts/tests/huis_draw_calls_tests.gd", "HuisDrawCallsTest", "huisdrawtest"],
 			["--huispixeltest", "res://scripts/tests/huis_pixel_tests.gd", "HuisPixelTest", "huispixeltest"],
 			["--huiscollisiontest", "res://scripts/tests/huis_collision_tests.gd", "HuisCollisionTest", "huiscollisiontest"],
