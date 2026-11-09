@@ -128,7 +128,7 @@ func _finish() -> void:
 	GameState.story_flags[FLAG] = true
 	if not GameState.story_flags.has(INKT_FLAG):
 		GameState.story_flags[INKT_FLAG] = true
-		GameState.inventory["gloeiende_inktfles"] = GameState.item_count("gloeiende_inktfles") + 1
+		GameState.add_item("gloeiende_inktfles", 1)
 		_flask = true
 	_set_open_now()
 	_say = true

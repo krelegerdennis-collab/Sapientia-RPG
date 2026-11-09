@@ -538,7 +538,7 @@ func request_chest(chest: Node, p: Node2D) -> void:
 	_busy = true
 	GameState.story_flags[str(c["flag"])] = true
 	var item := str(c["item"])
-	GameState.inventory[item] = GameState.item_count(item) + int(c["n"])
+	GameState.add_item(item, int(c["n"]))
 	chest.set_open(true)
 	chest.show_icon(true)
 	puzzle_sound.emit("kist")

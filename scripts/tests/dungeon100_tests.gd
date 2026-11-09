@@ -279,12 +279,12 @@ func _state_tests() -> void:
 	R.dungeon_scene = STAND_IN
 	GameState.new_game("Dax")
 	GameState.gold = 101
-	GameState.inventory["kruid"] = 2
+	GameState.set_item_count("kruid", 2)
 	GameState.party[0]["level"] = 6
 	GameState.dungeon100_begin_run()
 	GameState.dungeon100_floor = 6
 	GameState.gold = 40
-	GameState.inventory["sterk_drankje"] = 4
+	GameState.set_item_count("sterk_drankje", 4)
 	GameState.party[0]["level"] = 9
 	GameState.party[0]["hp"] = 0
 	GameState.dungeon100_permanent["d100_zwaard_2"] = 1

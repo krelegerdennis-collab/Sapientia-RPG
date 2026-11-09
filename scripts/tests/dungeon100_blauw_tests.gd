@@ -300,7 +300,7 @@ func _rng(s: int) -> RandomNumberGenerator:
 func _run_tests() -> void:
 	GameState.new_game("Dax")
 	GameState.gold = 80
-	GameState.inventory["kruid"] = 2
+	GameState.set_item_count("kruid", 2)
 	GameState.party[0]["level"] = 8
 	var gear_before := str(GameState.party[0].get("equip", {}).get("wapen", ""))
 	check("begin_run maakt een momentopname en zet de party op level 1 zonder goud", GameState.dungeon100_begin_run()
@@ -309,11 +309,11 @@ func _run_tests() -> void:
 	check("tweede begin_run doet niets", not GameState.dungeon100_begin_run() and GameState.party[0]["level"] == 1)
 	check("tijdens de run zit de startvoorraad niet in de tas", GameState.item_count("kruid") == 0)
 	GameState.dungeon100_floor = 4
-	GameState.inventory["sterk_drankje"] = 2
+	GameState.set_item_count("sterk_drankje", 2)
 	GameState.party[0]["level"] = 3
 	var item_id := Blue.blue_gear(5, 4, "testkist")
 	GameState.dungeon100_permanent[item_id] = 1
-	GameState.inventory[item_id] = 1
+	GameState.set_item_count(item_id, 1)
 	var path := "user://dungeon100_blauw.json"
 	check("opslaan tijdens de run", GameState.save_game(Vector2i(2, 2), Vector2i.DOWN, path))
 	var raw := GameState.read_save(path)
@@ -354,7 +354,7 @@ func _run_tests() -> void:
 	check("nieuwe run: level 1, blauw item beschikbaar, geen tijdelijk drankje", GameState.party[0]["level"] == 1
 			and GameState.item_count(item_id) >= 1 and GameState.item_count("sterk_drankje") == 0 and GameState.dungeon100_floor >= 1)
 	GameState.dungeon100_floor = 99
-	GameState.inventory[Blue.WARP_ITEM] = 1
+	GameState.set_item_count(Blue.WARP_ITEM, 1)
 	check("Warp werkt niet op verdieping 99", not GameState.dungeon100_can_warp() and not GameState.dungeon100_warp())
 	GameState.dungeon100_floor = 100
 	check("Warp mag op verdieping 100", GameState.dungeon100_can_warp())
@@ -371,13 +371,13 @@ func _ring_tests() -> void:
 	GameState.new_game("Dax")
 	check("ring-run start", GameState.dungeon100_begin_run() and GameState.dungeon100_run_active())
 	GameState.dungeon100_floor = 100
-	GameState.inventory[Blue.WARP_ITEM] = 1
+	GameState.set_item_count(Blue.WARP_ITEM, 1)
 	check("warp zonder keuze laat de run lopen", not GameState.dungeon100_warp()
 			and GameState.dungeon100_can_warp() and GameState.dungeon100_run_active()
 			and GameState.dungeon100_floor == 100)
 	GameState.inventory.erase(Blue.WARP_ITEM)
 	GameState.dungeon100_floor = 12
-	GameState.inventory["simulatie_ring"] = 1
+	GameState.set_item_count("simulatie_ring", 1)
 	var held: Dictionary = GameState.party[0]
 	var kaal := int(held["atk"])
 	var hp0 := int(held["max_hp"])
@@ -457,7 +457,7 @@ func _scene_tests() -> void:
 	await _close_dialog()
 
 	# Warp: verdieping 100, kristal gebruiken, echte party terug + blauw item afgeleverd
-	GameState.inventory[Blue.WARP_ITEM] = 1
+	GameState.set_item_count(Blue.WARP_ITEM, 1)
 	GameState.dungeon100_floor = 100
 	check("Warp zonder keuze doet niets", not GameState.dungeon100_warp()
 			and GameState.dungeon100_can_warp() and GameState.dungeon100_run_active())

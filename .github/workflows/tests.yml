@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [autotest, menutest, hudtest, puzzletest, dungeontest, golemtest,
+        suite: [autotest, menutest, hudtest, inventorytest, puzzletest, dungeontest, golemtest,
                 bossphasetest, golemactiontest, golemactionsimtest, golemarenatest, golemzichtbaartest,
                 archieftest, kerntest, kernkrachttest, woudtest, woud16test, codextest,
                 checkpointtest, dungeon100gentest, dungeon100schaaltest,

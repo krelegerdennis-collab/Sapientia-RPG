@@ -30,8 +30,8 @@ func run() -> void:
 	_shared_spell_check()
 	GameState.new_game("Dax")
 	GameState.gold = 200
-	GameState.inventory["kort_zwaard"] = 1
-	GameState.inventory["dolk"] = 1
+	GameState.set_item_count("kort_zwaard", 1)
+	GameState.set_item_count("dolk", 1)
 	await _items_ui()
 	await _equipment_ui()
 	await _shop_ui()

@@ -165,8 +165,9 @@ static func buy_item(shop_id: String, id: String) -> Dictionary:
 	var price := int(row["price"])
 	if GameState.gold < price:
 		return {"ok": false, "text": "Not enough gold."}
-	GameState.gold -= price
-	GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
+	if not GameState.spend_gold(price):
+		return {"ok": false, "text": "Not enough gold."}
+	GameState.add_item(id, 1)
 	return {"ok": true, "text": "Bought."}
 
 
@@ -186,7 +187,8 @@ static func buy_spell(shop_id: String, spell_id: String, hero: Dictionary) -> Di
 		return {"ok": false, "text": "Not enough gold."}
 	if not PartyActions.teach_spell(hero, spell_id):
 		return {"ok": false, "text": why if why != "" else "Nobody can learn this."}
-	GameState.gold -= price
+	if not GameState.spend_gold(price):
+		return {"ok": false, "text": "Not enough gold."}
 	return {"ok": true, "text": "Bought."}
 
 
@@ -196,10 +198,9 @@ static func sell(id: String) -> Dictionary:
 	var price := sell_price(id)
 	if price <= 0:
 		return {"ok": false, "text": "I don't buy that."}
-	GameState.inventory[id] = int(GameState.inventory[id]) - 1
-	if int(GameState.inventory[id]) <= 0:
-		GameState.inventory.erase(id)
-	GameState.gold += price
+	if not GameState.remove_item(id, 1):
+		return {"ok": false, "text": "You don't have that."}
+	GameState.add_gold(price)
 	return {"ok": true, "text": "Sold.", "gold": price}
 
 
@@ -207,7 +208,7 @@ static func sell(id: String) -> Dictionary:
 static func sellable() -> Array:
 	var out: Array = []
 	for id in GameState.inventory:
-		if int(GameState.inventory[id]) <= 0:
+		if GameState.item_count(str(id)) <= 0:
 			continue
 		var price := sell_price(str(id))
 		if price <= 0:
@@ -219,5 +220,5 @@ static func sellable() -> Array:
 			naam = str(GameData.EQUIPMENT[id].get("name", id))
 		elif GradeGear.has_item(str(id)):
 			naam = str(GradeGear.item(str(id)).get("name", id))
-		out.append({"id": str(id), "name": naam, "price": price, "n": int(GameState.inventory[id])})
+		out.append({"id": str(id), "name": naam, "price": price, "n": GameState.item_count(str(id))})
 	return out

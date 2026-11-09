@@ -315,6 +315,8 @@ var archief2_last_leech := {}
 ## de actieve bondgenoot ("" = geen) en de teller voor unieke ids (nooit hergebruikt).
 ## codex_changed: de actieve bondgenoot (of de lijst) is veranderd. De volger op de kaart luistert.
 signal codex_changed
+## Tas-inhoud gewijzigd (item-id en nieuw aantal na de wijziging; 0 = niet meer in de tas).
+signal inventory_changed(id: String, count: int)
 ## Sessielog (scripts/core/sessie_log.gd) luistert hiernaar; ze sturen niets aan.
 signal battle_started(enemies: Array, boss: bool)
 signal battle_ended(result: String)
@@ -603,6 +605,7 @@ func _ready() -> void:
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
 			["--hudtest", "res://scripts/tests/hud_tests.gd", "HudTest", "hudtest"],
+			["--inventorytest", "res://scripts/tests/inventory_tests.gd", "InventoryTest", "inventorytest"],
 			["--locktest", "res://scripts/tests/lock_tests.gd", "LockTest", "locktest"],
 			["--swinglocktest", "res://scripts/tests/swing_lock_tests.gd", "SwingLockTest", "swinglocktest"],
 			["--puzzletest", "res://scripts/tests/puzzle_tests.gd", "PuzzleTest", "puzzletest"],
@@ -3316,6 +3319,76 @@ func give_exp(hero: Dictionary, amount: int) -> Array[String]:
 
 func item_count(item_id: String) -> int:
 	return int(inventory.get(item_id, 0))
+
+
+func add_item(id: String, n: int) -> void:
+	if n <= 0 or str(id) == "":
+		return
+	var item_id := str(id)
+	var next := mini(MAX_ITEM_STACK, item_count(item_id) + n)
+	_set_inventory_count(item_id, next)
+
+
+func remove_item(id: String, n: int) -> bool:
+	if n <= 0 or str(id) == "":
+		return false
+	var item_id := str(id)
+	var cur := item_count(item_id)
+	if cur < n:
+		return false
+	_set_inventory_count(item_id, cur - n)
+	return true
+
+
+## Exact aantal zetten (zelfde semantiek als inventory[id] = n vóór de API-migratie).
+func set_item_count(id: String, count: int) -> void:
+	_set_inventory_count(str(id), int(count))
+
+
+## Verbruik tot n stuks (story 'take': ook als er minder in de tas zit).
+func consume_item(id: String, n: int) -> void:
+	if n <= 0 or str(id) == "":
+		return
+	var item_id := str(id)
+	var cur := item_count(item_id)
+	if cur <= 0:
+		return
+	_set_inventory_count(item_id, maxi(0, cur - n))
+
+
+func add_gold(n: int) -> void:
+	if n <= 0:
+		return
+	gold = mini(MAX_GOLD, gold + n)
+
+
+func spend_gold(n: int) -> bool:
+	if n <= 0:
+		return true
+	if gold < n:
+		return false
+	gold -= n
+	return true
+
+
+## Leg loot-items in de tas (clamps). Geeft het goud uit de loot-dict (nog niet opgeteld).
+func grant_loot_items(loot: Dictionary) -> int:
+	for it in loot.get("items", []):
+		if typeof(it) != TYPE_DICTIONARY:
+			continue
+		add_item(str(it["item"]), int(it.get("n", 1)))
+	return int(loot.get("gold", 0))
+
+
+func _set_inventory_count(item_id: String, count: int) -> void:
+	var n := count
+	if n <= 0:
+		if inventory.has(item_id):
+			inventory.erase(item_id)
+			inventory_changed.emit(item_id, 0)
+		return
+	inventory[item_id] = n
+	inventory_changed.emit(item_id, n)
 
 
 # ---------------------------------------------------------------- Codex (Kernfragment stap 2)

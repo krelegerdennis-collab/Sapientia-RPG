@@ -575,7 +575,7 @@ func _battle_tests() -> void:
 	var page: String = b._dungeon100_boss_loot()
 	var gained := false
 	for id in GameState.inventory:
-		if int(GameState.inventory[id]) > int(inv_before.get(id, 0)):
+		if GameState.item_count(id) > int(inv_before.get(id, 0)):
 			gained = true
 	check("baasbuit na de overwinning: voorwerpen + goud erbij, pagina 'Buit van de baas!' met gear", gained and GameState.gold > gold_before
 			and page.begins_with("Boss loot!") and page.contains("\n") and page.contains("gold"))

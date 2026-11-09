@@ -144,7 +144,7 @@ func _fight(seed: int) -> String:
 	var inv: Array = GameState.inventory.keys()
 	inv.sort()
 	for k in inv:
-		log.append("inv %s=%d" % [k, int(GameState.inventory[k])])
+		log.append("inv %s=%d" % [k, GameState.item_count(k)])
 	log.append("next %.9f" % arena.rng.randf())
 	return "\n".join(log)
 

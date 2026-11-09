@@ -116,7 +116,7 @@ func _rich_state() -> void:
 	GameState.join_member("kael", 6)
 	GameState.join_member("orion", 3)
 	GameState.inventory = {"drankje": 7, "toverwater": 2, "kort_zwaard": 1, "dolk": 2}
-	GameState.inventory["kort_zwaard"] = 2
+	GameState.set_item_count("kort_zwaard", 2)
 	Equipment.equip(GameState.party[0], GameState.inventory, "wapen", "kort_zwaard")
 	GameState.gold = 4321
 	GameState.party[0]["hp"] = maxi(1, int(GameState.party[0]["max_hp"]) - 3)
@@ -391,7 +391,7 @@ func _sane_after_load(label: String) -> void:
 				and int(h["mp"]) >= 0 and int(h["mp"]) <= int(h["max_mp"])
 	ok = ok and GameState.gold >= 0 and GameState.leader_id is String
 	for id in GameState.inventory:
-		ok = ok and int(GameState.inventory[id]) >= 1
+		ok = ok and GameState.item_count(id) >= 1
 	check(label, ok)
 
 
@@ -631,7 +631,7 @@ func _roundtrip_tests() -> void:
 	_rich_state()
 	GameState.dungeon100_begin_run()
 	GameState.dungeon100_floor = 3
-	GameState.inventory["drankje"] = 2
+	GameState.set_item_count("drankje", 2)
 	GameState.gold = 15
 	var in_run := _sig(tile, facing)
 	GameState.save_game(tile, facing, SAVE)
@@ -687,7 +687,7 @@ func _blocked_state_tests() -> void:
 	GameState.save_game(tile, Vector2i.DOWN, save_path)
 	var pre_battle := _sig(tile, Vector2i.DOWN)
 	GameState.in_battle = true
-	GameState.inventory["drankje"] = 3
+	GameState.set_item_count("drankje", 3)
 	GameState.party[0]["hp"] = 1
 	GameState.gold += 500
 	var battle_file_before := _read(save_path)
@@ -750,7 +750,7 @@ func _scene_tests() -> void:
 	var menu: Node = map.get_node_or_null("FieldMenu")
 	check("veldmenu is open", menu != null)
 	if menu != null:
-		GameState.inventory["drankje"] = 5
+		GameState.set_item_count("drankje", 5)
 		var gold_before := GameState.gold
 		var count := GameState.autosave_count
 		GameState.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
@@ -830,14 +830,14 @@ func _duplication_tests() -> void:
 			and GameState.party.size() == 4)
 
 	# 2) spullen weggeven/gebruiken en terug laden geeft de oude toestand, geen extra
-	GameState.inventory["drankje"] = 1
+	GameState.set_item_count("drankje", 1)
 	GameState.gold = 3
 	GameState.load_game(SAVE)
 	check("verbruik + laden: precies de oude hoeveelheid (geen extra)", GameState.item_count("drankje") == potions and GameState.gold == gold)
-	GameState.inventory["drankje"] = 50
+	GameState.set_item_count("drankje", 50)
 	GameState.gold = 99999
 	GameState.save_game(tile, Vector2i.DOWN, SAVE)
-	GameState.inventory["drankje"] = 0
+	GameState.set_item_count("drankje", 0)
 	GameState.load_game(SAVE)
 	check("oogsten + laden telt niet dubbel", GameState.item_count("drankje") == 50 and GameState.gold == 99999)
 
@@ -848,7 +848,7 @@ func _duplication_tests() -> void:
 	_remove_save(a)
 	_remove_save(b)
 	GameState.save_game(tile, Vector2i.DOWN, a)
-	GameState.inventory["drankje"] = 1
+	GameState.set_item_count("drankje", 1)
 	GameState.gold = 5
 	GameState.save_game(tile, Vector2i.DOWN, b)
 	GameState.load_game(a)
@@ -898,7 +898,7 @@ func _duplication_tests() -> void:
 	check("kist na save+load: blijft open, geen tweede buit", chest2.is_open() and GameState.item_count("toverwater") == tw + 3)
 	# de truc: opslaan VOOR het openen, openen, laden = buit weg (geen kopie)
 	GameState.story_flags.erase("kist:sh_testkist")
-	GameState.inventory["toverwater"] = tw
+	GameState.set_item_count("toverwater", tw)
 	GameState.save_game(tile, Vector2i.DOWN, SAVE)
 	var chest3 := DungeonChestScript.new() as DungeonChest
 	chest3.setup({"id": "sh_testkist", "item": "toverwater", "n": 3, "tile": [2, 2]})
@@ -937,7 +937,7 @@ func _duplication_tests() -> void:
 	GameState.set_checkpoint(TOWN, Vector2i(3, 3), Vector2i.RIGHT)
 	var cp_potions := GameState.item_count("drankje")
 	var cp_gold := GameState.gold
-	GameState.inventory["drankje"] = cp_potions + 10
+	GameState.set_item_count("drankje", cp_potions + 10)
 	GameState.gold += 1000
 	GameState.respawn_at_checkpoint(false)
 	check("checkpoint-respawn: tas en goud terug naar het checkpoint (geen buit meegenomen)",

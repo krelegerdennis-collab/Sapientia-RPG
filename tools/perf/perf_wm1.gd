@@ -164,7 +164,7 @@ func _fill_state() -> void:
 	for id in GameData.ENEMIES:
 		GameState.bestiary[id] = {"seen": true, "defeated": 12}
 	for id in GameData.ITEMS:
-		GameState.inventory[id] = 9
+		GameState.set_item_count(id, 9)
 	GameState.gold = 12345
 	GameState.story_step = StoryData.KLAAR
 	for k in StoryData.UNIQUE_SEEN_FLAGS.values():
