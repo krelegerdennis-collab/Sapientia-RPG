@@ -1187,7 +1187,7 @@ func _defeat_enemy(m: Node) -> void:
 	GameState.mark_defeated(m.enemy_id)
 	var gained_exp := int(e["exp"])
 	var gained_gold := int(e["gold"])
-	GameState.gold += gained_gold
+	GameState.add_gold(gained_gold)
 	var lines: Array[String] = [SomData.TXT_EXP % [gained_exp, gained_gold]]
 	for h in GameState.alive_heroes():
 		var msgs := GameState.give_exp(h, gained_exp)
@@ -1196,7 +1196,7 @@ func _defeat_enemy(m: Node) -> void:
 	for d in e["drops"]:
 		if typeof(d) == TYPE_DICTIONARY and GameData.ITEMS.has(str(d.get("item", ""))) and rng.randf() < float(d.get("chance", 0.0)):
 			var id := str(d["item"])
-			GameState.inventory[id] = GameState.item_count(id) + 1
+			GameState.add_item(id, 1)
 			got.append(id)
 			lines.append(SomData.TXT_GOT % PartyActions.item_name(id))
 	if not GameState.defeated_map_monsters.has(room.room_id):

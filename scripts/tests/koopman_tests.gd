@@ -503,7 +503,7 @@ func _winkel_data() -> void:
 	# Feniksveer
 	var h: Dictionary = GameState.party[0]
 	h["hp"] = 0
-	GameState.inventory["feniksveer"] = 1
+	GameState.set_item_count("feniksveer", 1)
 	var rv := PA.use_item(GameState.inventory, "feniksveer", h)
 	check("Phoenix Feather: gevallen held staat op met 50%% HP (%d)" % int(h["hp"]), rv["ok"] and int(h["hp"]) == roundi(int(h["max_hp"]) * 0.5))
 	check("Phoenix Feather werkt niet op een levende held", not PA.use_item({"feniksveer": 1}, "feniksveer", h)["ok"])
@@ -516,8 +516,8 @@ func GameData_has(id: String) -> bool:
 
 func _winkel_scene(k, pl) -> void:
 	GameState.gold = 3000
-	GameState.inventory["elixer"] = 2
-	GameState.inventory["kort_zwaard"] = 1
+	GameState.set_item_count("elixer", 2)
+	GameState.set_item_count("kort_zwaard", 1)
 	var shop = k.open_winkel(pl)
 	await pframes(20)
 	check("winkelraam open (zelfde shop_screen als Willowdale)", shop != null and shop.is_inside_tree() and shop.mode == "koop")
@@ -542,7 +542,7 @@ func _winkel_scene(k, pl) -> void:
 	# Stun Bomb in de kamer
 	var r := scene()
 	var levend := (r.get("monsters") as Array).filter(func(m): return is_instance_valid(m) and not m.boss and not m.disguised)
-	GameState.inventory["stunbom"] = 1
+	GameState.set_item_count("stunbom", 1)
 	var su := PA.use_item(GameState.inventory, "stunbom", GameState.party[0])
 	check("Stun Bomb: %d monster(s) verlamd" % levend.size(), levend.is_empty() or (su["ok"] and levend.all(func(m): return m.is_stunned())))
 

@@ -402,7 +402,7 @@ func _items_tests() -> void:
 			and s.effect_label.text == "Restores 30 HP.")
 	await shot("menu_items")
 	# v0.14: uitrusting in de tas staat grijs in Items, met vak + bonus en een eigen melding
-	GameState.inventory["kort_zwaard"] = 1
+	GameState.set_item_count("kort_zwaard", 1)
 	s.rebuild()
 	await frames(2)
 	var ki: int = s.ids.find("kort_zwaard")
@@ -447,7 +447,7 @@ func _items_tests() -> void:
 	check("Magic Water: Vesper 2 -> %d MP, op = weg uit de lijst" % noor["mp"],
 			noor["mp"] == 12 and not GameState.inventory.has("toverwater") and s.entries.size() == 1 and not s.targeting)
 	# onbruikbaar item (onbekend / alleen in gevecht): grijs + melding, niets verbruikt
-	GameState.inventory["oude_sleutel"] = 1
+	GameState.set_item_count("oude_sleutel", 1)
 	s.rebuild()
 	await frames(2)
 	var k: int = s.ids.find("oude_sleutel")
@@ -1151,7 +1151,7 @@ func _equipment_screen_tests() -> void:
 	var kees: Dictionary = GameState.party[0]
 	for id in ["kort_zwaard", "dolk", "houten_schild", "kaftschild", "leren_kap", "ijzeren_helm",
 			"leren_harnas", "malienkolder", "bladwijzer", "eiken_staf", "reisgewaad"]:
-		GameState.inventory[id] = 1
+		GameState.set_item_count(id, 1)
 	var start := _equip_totals()
 	await pick_command(m, "equip")
 	var s: Node = m.get_node_or_null("Equipment")

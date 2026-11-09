@@ -86,7 +86,7 @@ func rebuild(keep_id := "") -> void:
 	entries.clear()
 	ids = []
 	for id in GameState.inventory:
-		if int(GameState.inventory[id]) > 0:
+		if GameState.item_count(str(id)) > 0:
 			ids.append(id)
 	# vaste volgorde: zoals in game_data.gd ITEMS, dan de uitrusting (v0.14, EQUIPMENT),
 	# onbekende id's achteraan

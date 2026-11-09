@@ -447,7 +447,7 @@ func _defeat_tests() -> void:
 	GameState.story_step = SD.NACHT
 	GameState.encounter_multiplier = 0.0
 	GameState.gold = 200
-	GameState.inventory["kruid"] = 2
+	GameState.set_item_count("kruid", 2)
 	GameState.party[0]["level"] = 5
 	GameState.dungeon100_seed = 4242
 	GameState.dungeon100_floor = 15

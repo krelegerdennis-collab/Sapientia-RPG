@@ -1456,7 +1456,7 @@ func _execute(a: Dictionary) -> void:
 					show_message(PartyActions.MSG_NO_EFFECT)
 					await _wait(MESSAGE_TIME)
 					return
-				GameState.inventory[id] -= 1
+				GameState.remove_item(id, 1)
 				show_message("%s uses %s!" % [actor["name"], it["name"]])
 				await _hero_wind_up(actor, false)
 				show_message("%s learns %s!" % [ally["name"], GameData.SPELLS[spell_id]["name"]])
@@ -1483,7 +1483,7 @@ func _execute(a: Dictionary) -> void:
 				show_message(PartyActions.MSG_NO_EFFECT)
 				await _wait(MESSAGE_TIME)
 				return
-			GameState.inventory[id] -= 1
+			GameState.remove_item(id, 1)
 			show_message("%s uses %s!" % [actor["name"], it["name"]])
 			await _hero_wind_up(actor, false)
 			if it.get("capture", false):
@@ -2053,7 +2053,7 @@ func _victory() -> void:
 				continue   # Codex: ingeschreven monsters geven geen EXP/goud
 			exp_total += int(e["s"]["exp"])
 			gold_total += int(e["s"]["gold"])
-		GameState.gold += gold_total
+		GameState.add_gold(gold_total)
 		book_lines = grant_fixed_boss_drops()
 		loot_page = _dungeon100_boss_loot()
 	await _wait(0.3)
@@ -2108,7 +2108,7 @@ func grant_fixed_boss_drops() -> Array:
 			names[id] = str(d["name"])
 	var lines: Array = []
 	for id in totals:
-		GameState.inventory[id] = GameState.item_count(id) + int(totals[id])
+		GameState.add_item(id, int(totals[id]))
 		lines.append("Got %dx %s." % [int(totals[id]), names[id]])
 	return lines
 
@@ -2122,7 +2122,7 @@ func _dungeon100_boss_loot() -> String:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	var loot := Dungeon100Blue.with_warp(Dungeon100Scaling.boss_loot(floor_nr, rng), floor_nr)    # eindbaas: + Warp-kristal
-	GameState.gold += Dungeon100Scaling.grant_loot(loot, GameState.inventory)
+	GameState.add_gold(GameState.grant_loot_items(loot))
 	GameState.story_flags[Dungeon100Scaling.boss_flag(floor_nr)] = true
 	return "Boss loot!\n" + "\n".join(Dungeon100Scaling.loot_lines(loot))
 

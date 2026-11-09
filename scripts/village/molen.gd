@@ -57,7 +57,7 @@ static func _rust() -> void:
 static func _meel() -> bool:
 	if GameState.story_flags.has(FLAG_MEEL):
 		return false
-	GameState.inventory["zingend_meel"] = GameState.item_count("zingend_meel") + 1
+	GameState.add_item("zingend_meel", 1)
 	GameState.story_flags[FLAG_MEEL] = true
 	return true
 

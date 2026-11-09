@@ -389,7 +389,7 @@ func _build_party_geared(party: Array, bag: Dictionary, strict := false) -> Dict
 				if strict:
 					errors.append("--gear: '%s' cannot wear '%s'" % [id, gid])
 				continue
-			GameState.inventory[gid] = GameState.item_count(str(gid)) + 1
+			GameState.set_item_count(gid, GameState.item_count(str(gid)) + 1)
 			Equipment.equip(h, GameState.inventory, slot, str(gid))
 		h["hp"] = h["max_hp"]
 		h["mp"] = h["max_mp"]

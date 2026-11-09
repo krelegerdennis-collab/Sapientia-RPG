@@ -293,7 +293,7 @@ func _balance_tests() -> void:
 	for L in [5, 7]:
 		var hg := _dennis(L)
 		for arm in ["kaftschild", "leren_kap"]:
-			GameState.inventory[arm] = 1
+			GameState.set_item_count(arm, 1)
 			Equipment.give_and_equip(GameState.party[0], GameState.inventory, arm)
 		hg = GameState.party[0].duplicate(true)
 		var wins := 0
@@ -502,7 +502,7 @@ func _start_boss(level: int) -> Node:
 	var h: Dictionary = GameState.party[0]
 	GameState.give_exp(h, GD.exp_for_level(level))
 	GameState.equip_weapon(GameState.MAIN_HERO, "vonkzwaard")
-	GameState.inventory["drankje"] = 6      # ~ 3 Drankjes + 3 kruiden (de bot gebruikt alleen Drankjes)
+	GameState.set_item_count("drankje", 6)      # ~ 3 Drankjes + 3 kruiden (de bot gebruikt alleen Drankjes)
 	h["hp"] = h["max_hp"]
 	GameState.change_map(ROOM_SCENE, "zuid")
 	if not await wait_scene("ArchiefGolemhal"):

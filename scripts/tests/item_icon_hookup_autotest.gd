@@ -26,9 +26,9 @@ func run() -> void:
 	_nothing_fallback()
 	GameState.new_game("Dax")
 	GameState.gold = 500
-	GameState.inventory["kort_zwaard"] = 1
-	GameState.inventory["dolk"] = 1
-	GameState.inventory["leren_harnas"] = 1
+	GameState.set_item_count("kort_zwaard", 1)
+	GameState.set_item_count("dolk", 1)
+	GameState.set_item_count("leren_harnas", 1)
 	await _items_ui()
 	await _equipment_ui()
 	await _shop_ui()

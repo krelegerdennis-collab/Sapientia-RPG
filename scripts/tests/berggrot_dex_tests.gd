@@ -69,7 +69,7 @@ func setup() -> void:
 	GameState.give_exp(h, GD.exp_for_level(5))
 	h["hp"] = h["max_hp"]
 	GameState.pending_kern_absorb = ""
-	GameState.inventory[CD.BOOK_ITEM] = 3
+	GameState.set_item_count(CD.BOOK_ITEM, 3)
 
 
 func screenshot(name: String) -> void:
@@ -514,7 +514,7 @@ func _battle_tests() -> void:
 	# 3) baas-regel geldt niet; Diepe Grot (verdieping 60): gescaled monster, vangbaar
 	setup()
 	GameState.dungeon100_begin_run()
-	GameState.inventory[CD.BOOK_ITEM] = 2
+	GameState.set_item_count(CD.BOOK_ITEM, 2)
 	b = await start_battle(["druipslak"], 60)
 	if b == null:
 		check("grotgevecht met Drip Slug gestart", false)
