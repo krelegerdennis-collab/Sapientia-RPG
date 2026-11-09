@@ -11,15 +11,21 @@ extends CanvasLayer
 signal finished
 
 const FLAG := "cutscene_wereldkaart_gezien"
-const VIDEO_PATH := "res://assets/video/worldmap_intro.ogv"
+const Videos := preload("res://scripts/data/cutscene_videos.gd")
+const VIDEO_PATH := "res://assets/video/worldmap_intro_v2.ogv"
 ## Drop-in voor RPG ART (portret-paneel, bv. 96x216; wordt uitgerekt tot de randbreedte).
 const PANEL_TEXTURE := "res://art/cutscene/glitch_panel.png"
+## Default blijft 9:16. Per filmpje (video_aspect) kan dat 16:9 zijn; dan letterbox.
 const VIDEO_ASPECT := 9.0 / 16.0
 ## Vangnet: video ~15 s; na deze tijd sowieso klaar (bv. als de browser niets afspeelt).
 const MAX_SECONDS := 20.0
 ## v0.23: dezelfde speler voor andere filmpjes (bv. na De Genezer): pad + vangnet per exemplaar.
 var video_path := VIDEO_PATH
 var max_seconds := MAX_SECONDS
+## Breedte/hoogte van dit filmpje. 9/16 = portret (default), 16/9 = de nieuwe WM1-filmpjes.
+var video_aspect := VIDEO_ASPECT
+## true = Nearest (pixel-perfect). De wereldkaart- en Genezer-tests eisen Linear, dus die blijven uit.
+var pixel_perfect := false
 ## Even geen skip direct na binnenkomst (de stap-toets die je nog vasthoudt).
 const SKIP_GRACE := 0.4
 
@@ -58,6 +64,7 @@ static func start_on(map: Node) -> WorldmapCutscene:
 	GameState.mark_scene_seen("wereldkaart")   # v0.22 veldmenu > Scenes
 	var c := WorldmapCutscene.new()
 	c.name = "WorldmapCutscene"
+	Videos.apply(c, "worldmap")
 	map.add_child(c)
 	c.begin(map)
 	return c
@@ -104,7 +111,7 @@ func _build() -> void:
 	right_panel = _panel(tex, true)
 	video = VideoStreamPlayer.new()
 	video.expand = true
-	video.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	video.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if pixel_perfect else CanvasItem.TEXTURE_FILTER_LINEAR
 	video.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var bus := AudioServer.get_bus_index("Music")
 	if bus >= 0:
@@ -162,14 +169,20 @@ func _layout() -> void:
 	var s := _root.size
 	if s.x <= 0 or s.y <= 0:
 		s = _root.get_viewport_rect().size
-	var vw := s.y * VIDEO_ASPECT
+	var aspect := video_aspect if video_aspect > 0.0 else VIDEO_ASPECT
+	var vw := s.x
+	var vh := vw / aspect
+	if vh > s.y:
+		vh = s.y
+		vw = vh * aspect
 	var vx := (s.x - vw) * 0.5
-	video.position = Vector2(vx, 0)
-	video.size = Vector2(vw, s.y)
+	var vy := (s.y - vh) * 0.5
+	video.position = Vector2(vx, vy)
+	video.size = Vector2(vw, vh)
 	left_panel.position = Vector2.ZERO
-	left_panel.size = Vector2(max(vx, 0.0), s.y)
-	right_panel.position = Vector2(vx + vw, 0)
-	right_panel.size = Vector2(max(vx, 0.0), s.y)
+	left_panel.size = Vector2(maxf(vx, 0.0), s.y)
+	right_panel.position = Vector2(vx + vw, 0.0)
+	right_panel.size = Vector2(maxf(s.x - (vx + vw), 0.0), s.y)
 
 
 func _process(delta: float) -> void:

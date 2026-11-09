@@ -21,8 +21,10 @@ const LAAG := 4
 ## en altijd in de herhaling (veldmenu > Scenes > The World Warper).
 const VIDEO := "res://assets/video/genezer_warper.ogv"
 const VIDEO_FLAG := "cutscene_genezer_video_gezien"
-const VIDEO_MAX := 26.0
+const VIDEO_MAX := 34.0
 const CutsceneSpeler := preload("res://scripts/worldmap_cutscene.gd")
+const Videos := preload("res://scripts/data/cutscene_videos.gd")
+const Rekruut := preload("res://world_warper/services/rekruut.gd")
 var video_speler: CanvasLayer = null
 
 ## Eén scène tegelijk (kern-signaal en kamer-fallback mogen niet dubbel starten).
@@ -153,6 +155,12 @@ func _speel() -> void:
 			klaar.emit()
 			queue_free()
 		return
+	# CS-07: meteen na CS-05, vóór de dialoog. Niet in de herhaling (hierboven) en niet in --*test
+	# (de archief2-suite geeft deze scène 40 s). Orion sluit aan via dezelfde weg als de rekruut.
+	if Videos.will_play("cs07"):
+		var gezien: bool = await Videos.play_await("cs07", self, {"map": _kamer if _kamer != null else self})
+		if gezien:
+			_orion_erbij()
 	var speler: Node = _kamer.get("player") if _kamer != null and "player" in _kamer else null
 	if is_instance_valid(speler):
 		speler.set("input_locked", true)
@@ -183,6 +191,10 @@ func _speel_video() -> void:
 	c.name = "GenezerVideo"
 	c.video_path = VIDEO
 	c.max_seconds = VIDEO_MAX
+	Videos.apply(c, "cs05")
+	c.video_path = VIDEO
+	c.max_seconds = VIDEO_MAX
+	c.pixel_perfect = false
 	c.layer = 127          # boven het veldmenu én de herhalingsachtergrond (125/124); CRT-filter = 128
 	add_child(c)
 	video_speler = c
@@ -190,6 +202,14 @@ func _speel_video() -> void:
 	if not c.is_done():
 		await c.finished
 	video_speler = null
+
+
+## Zelfde pad als Rekruut.sluit_aan (join_member + gemiddeld level). Zit hij er al in, dan geen tweede keer.
+func _orion_erbij() -> void:
+	var r: Node = Rekruut.new()
+	r.set("hero_id", "orion")
+	r.call("sluit_aan")
+	r.free()
 
 
 func _tween() -> Tween:

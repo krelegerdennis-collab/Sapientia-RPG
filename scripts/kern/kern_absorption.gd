@@ -17,6 +17,7 @@ const CHEST := Vector2(0, -4)             # borst: tile-midden + 8 = voeten, 12 
 const GLOW_RADIUS := 28.0
 const KernData := preload("res://scripts/data/kern_data.gd")
 const BookPoint := preload("res://scripts/book_point.gd")
+const Videos := preload("res://scripts/data/cutscene_videos.gd")
 
 signal done
 
@@ -57,6 +58,12 @@ func start(p_map: Node, id: String) -> void:
 			return
 	if not _alive():
 		return
+	# CS-02: vóór het effect, voor turn-based én realtime (allebei komen hier langs).
+	# De testpoort slaat het filmpje over; de vlag (en dus de Sapientia-zin) gaat alleen aan als het start.
+	if fragment_id == "golemkern" and Videos.will_play("cs02"):
+		await Videos.play_await("cs02", map, {"map": map})
+		if not _alive():
+			return
 	player.input_locked = true
 	# gloed (achter het effect) + effect, als kind van de held: loopt dus mee met de camera
 	glow = Sprite2D.new()
@@ -150,7 +157,11 @@ func _process(delta: float) -> void:
 ## De tekst van het moment (uit de data, dus ook goed voor latere kernen).
 static func lines_for(id: String) -> Array:
 	var f := KernData.fragment(id)
-	var lines: Array = ["{naam} absorbs the %s!" % f.get("naam", id)]
+	var lead := "{naam} absorbs the %s!" % f.get("naam", id)
+	# CS-02: Sapientia drinkt de golemkern leeg. Ids en beloningen blijven gelijk.
+	if id == "golemkern" and GameState.story_flags.has("cutscene_cs02_gezien"):
+		lead = "Sapientia drank the Golem Core dry."
+	var lines: Array = [lead]
 	var sk := str(f.get("battle_skill", ""))
 	if KernData.KERN_SKILLS.has(sk):
 		lines.append("New skill: %s. (In battle: Magic > %s)" % [KernData.KERN_SKILLS[sk]["name"], KernData.KERN_SKILLS[sk]["name"]])

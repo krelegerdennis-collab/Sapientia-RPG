@@ -5,6 +5,7 @@ extends "res://scripts/ui/menu_screen.gd"
 ## Hanger-scène krijgt een eigen (lege) vlaggenbron.
 
 const ScenesData := preload("res://scripts/data/scenes_data.gd")
+const Videos := preload("res://scripts/data/cutscene_videos.gd")
 const WorldmapCutsceneScript := preload("res://scripts/worldmap_cutscene.gd")
 const HANGER_SCENE := preload("res://world_warper/cutscene/hanger_scene.tscn")
 const GenezerScene := preload("res://world_warper/cutscene/genezer_scene.gd")
@@ -112,16 +113,32 @@ func choose(id: String) -> void:
 			_play_hanger({ScenesData.CANON_HANGER_FLAG: true})   # alleen scène 3 (de dreiging)
 		"genezer":
 			_play_genezer()
+		"film":
+			_play_film(id)
 
 
 func _play_worldmap() -> void:
 	var c: CanvasLayer = WorldmapCutsceneScript.new()
 	c.name = "SceneReplay"
 	c.layer = REPLAY_LAYER
+	Videos.apply(c, "worldmap")
 	get_tree().root.add_child(c)
 	playing = c
 	c.finished.connect(_replay_done)
 	# Bewust niet de echte map meegeven: dan zou de film de speler-input vrijgeven terwijl dit menu open is.
+	c.begin(c)
+
+
+## Herhaling van CS-01..CS-08: alleen het filmpje, geen vlag en geen verhaal.
+func _play_film(id: String) -> void:
+	var c: CanvasLayer = WorldmapCutsceneScript.new()
+	c.name = "SceneReplay"
+	c.layer = REPLAY_LAYER
+	Videos.apply(c, id)
+	get_tree().root.add_child(c)
+	playing = c
+	c.finished.connect(_replay_done)
+	# Niet de echte map: anders ontgrendelt de film de speler terwijl het menu open is.
 	c.begin(c)
 
 

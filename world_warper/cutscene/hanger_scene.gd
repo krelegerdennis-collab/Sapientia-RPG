@@ -9,6 +9,7 @@ signal threat_finished
 
 const Dreiging := preload("res://world_warper/cutscene/dreiging.gd")
 const Canon := preload("res://world_warper/cutscene/canon_scenes.gd")
+const Videos := preload("res://scripts/data/cutscene_videos.gd")
 ## Bestaande glitch-art (RPG ART), roze getint als silhouet van licht en ruis.
 const SAPIENTIA_TEX := preload("res://assets/sprites/archief2/sapientia_glitch.png")
 const SAPIENTIA_ROZE := Color(1.0, 0.45, 0.85, 0.9)
@@ -214,7 +215,20 @@ func _enter(line_index: int) -> void:
 	if beat != _beat:
 		_beat = beat
 		_apply_beat(beat)
+	# CS-06: vlak vóór Sapientia's eerste regel in de dreiging. Poort: tests zien de zin meteen.
+	if _sapientia_opent() and Videos.will_play("cs06"):
+		var map := get_tree().current_scene if is_inside_tree() else self
+		await Videos.play_await("cs06", self, {"map": map})
 	_show_line()
+
+
+func _sapientia_opent() -> bool:
+	if _line_i < 0 or _line_i >= _lines.size():
+		return false
+	var regel := str(_lines[_line_i])
+	if not regel.begins_with("Sapientia:"):
+		return false
+	return _line_i == 0 or not str(_lines[_line_i - 1]).begins_with("Sapientia:")
 
 
 func _show_line() -> void:
