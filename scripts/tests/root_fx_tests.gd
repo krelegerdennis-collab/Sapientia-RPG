@@ -11,9 +11,9 @@ const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 const ARENA_ROOM := "res://scenes/maps/archief_v1_gang.tscn"
-const ROOT_GREEN_A := Color(74 / 255.0, 112 / 255.0, 56 / 255.0)
-const ROOT_GREEN_B := Color(116 / 255.0, 150 / 255.0, 62 / 255.0)
-const GREEN_TOL := 4
+const DIFF_MIN_PIXELS := 150
+const DIFF_MIN_ART_MASK := 90
+const DIFF_COLOR_TOL := 3
 
 var failures := 0
 var passes := 0
@@ -168,14 +168,13 @@ func _foot_line_alignment_tests() -> void:
 	var node := Vector2(120, 98)
 	var body := node + Vector2(0, SomData.BODY_Y)
 	var draw_pos := body + Vector2(0, SomArena.ROOT_FOOT_OFFSET_PX)
+	var map_foot_y: float = node.y - MapSprite.voet_offset(MapSprite.NIEUW).y
 	check(
-		"gemeten: body_of→voetlijn %.0f px (ROOT_FOOT_OFFSET_PX)" % SomArena.ROOT_FOOT_OFFSET_PX,
-		is_equal_approx(SomArena.ROOT_FOOT_OFFSET_PX, 6.0),
+		"gemeten: body_of→MapSprite-voet %.0f px (ROOT_FOOT_OFFSET_PX)" % SomArena.ROOT_FOOT_OFFSET_PX,
+		is_equal_approx(SomArena.ROOT_FOOT_OFFSET_PX, 14.0),
 	)
-	check("arena: draw-anker = node.position (zelfde als heal_glow)", draw_pos == node)
-	check("FX onderkant op draw-anker (voetlijn FX)", TelegraphLayer.fx_bottom_y(draw_pos) == node.y)
-	var visual_foot_y: float = node.y - MapSprite.voet_offset(MapSprite.NIEUW).y
-	check("visuele 24x32-voet op node+8 (MapSprite, los van FX-anker)", is_equal_approx(visual_foot_y, node.y + 8.0))
+	check("arena: draw-anker op node+8 (MapSprite zool)", is_equal_approx(draw_pos.y, map_foot_y))
+	check("FX onderkant op MapSprite-voetlijn", TelegraphLayer.fx_bottom_y(draw_pos) == map_foot_y)
 
 
 func _frame_timing_tests() -> void:
@@ -227,32 +226,112 @@ func _arena_root_draw_pos(player: Node2D) -> Vector2:
 	return player.position + Vector2(0, SomData.BODY_Y + SomArena.ROOT_FOOT_OFFSET_PX)
 
 
-func _color_near_root_green(c: Color) -> bool:
-	return (_px_near(c.r8, 74) and _px_near(c.g8, 112) and _px_near(c.b8, 56)) \
-			or (_px_near(c.r8, 116) and _px_near(c.g8, 150) and _px_near(c.b8, 62))
+func _pixels_differ(a: Color, b: Color) -> bool:
+	if absi(int(a.a8) - int(b.a8)) > DIFF_COLOR_TOL:
+		return true
+	return absi(int(a.r8) - int(b.r8)) > DIFF_COLOR_TOL \
+			or absi(int(a.g8) - int(b.g8)) > DIFF_COLOR_TOL \
+			or absi(int(a.b8) - int(b.b8)) > DIFF_COLOR_TOL
 
 
-func _px_near(v: int, target: int) -> bool:
-	return absi(v - target) <= GREEN_TOL
+func _is_fx_diff_pixel(with_c: Color, without_c: Color) -> bool:
+	if absi(int(with_c.a8) - int(without_c.a8)) >= 8:
+		return true
+	return _pixels_differ(with_c, without_c)
 
 
-func _find_root_green_rows(img: Image, cx: int, y0: int, y1: int) -> Vector2i:
+func _art_mask_diff_count(
+	with_root: Image,
+	without_root: Image,
+	anchor_in_crop: Vector2i,
+	frame_idx: int,
+) -> int:
+	var d: Dictionary = SomData.FX_ROOT
+	var cw: int = int(d["cell"][0])
+	var ch: int = int(d["cell"][1])
+	var ax: int = int(d["anchor"][0])
+	var ay: int = int(d["anchor"][1])
+	var tex: Texture2D = SomFx.tex(str(d.get("sheet", "")))
+	if tex == null:
+		return 0
+	var art: Image = tex.get_image()
+	var count := 0
+	for ly in ch:
+		for lx in cw:
+			if art.get_pixel(frame_idx * cw + lx, ly).a8 < 16:
+				continue
+			var sx: int = anchor_in_crop.x + lx - ax
+			var sy: int = anchor_in_crop.y + ly - ay
+			if sx < 0 or sy < 0 or sx >= with_root.get_width() or sy >= with_root.get_height():
+				continue
+			var ca: Color = with_root.get_pixel(sx, sy)
+			var cb: Color = without_root.get_pixel(sx, sy)
+			if _is_fx_diff_pixel(ca, cb):
+				count += 1
+	return count
+
+
+func _image_diff_stats(with_root: Image, without_root: Image) -> Dictionary:
+	var w: int = mini(with_root.get_width(), without_root.get_width())
+	var h: int = mini(with_root.get_height(), without_root.get_height())
+	var count := 0
+	var min_x := 99999
+	var max_x := -1
 	var min_y := 99999
 	var max_y := -1
-	var hits := 0
-	for y in range(maxi(0, y0), mini(img.get_height(), y1)):
-		for x in range(maxi(0, cx - 14), mini(img.get_width(), cx + 14)):
-			var c: Color = img.get_pixel(x, y)
-			if c.a8 < 16:
+	for y in h:
+		for x in w:
+			var ca: Color = with_root.get_pixel(x, y)
+			var cb: Color = without_root.get_pixel(x, y)
+			if not _is_fx_diff_pixel(ca, cb):
 				continue
-			if not _color_near_root_green(c):
-				continue
-			hits += 1
+			count += 1
+			min_x = mini(min_x, x)
+			max_x = maxi(max_x, x)
 			min_y = mini(min_y, y)
 			max_y = maxi(max_y, y)
-	if hits < 4:
-		return Vector2i(-1, -1)
-	return Vector2i(min_y, max_y)
+	if count == 0:
+		return {"count": 0, "top": -1, "bot": -1, "left": -1, "right": -1}
+	return {"count": count, "top": min_y, "bot": max_y, "left": min_x, "right": max_x}
+
+
+func _make_diff_image(with_root: Image, without_root: Image) -> Image:
+	var w: int = mini(with_root.get_width(), without_root.get_width())
+	var h: int = mini(with_root.get_height(), without_root.get_height())
+	var out: Image = Image.create(w, h, false, Image.FORMAT_RGBA8)
+	out.fill(Color(0, 0, 0, 1))
+	for y in h:
+		for x in w:
+			var a: Color = with_root.get_pixel(x, y)
+			var b: Color = without_root.get_pixel(x, y)
+			if _pixels_differ(a, b):
+				out.set_pixel(x, y, Color(1, 0.35, 0.7, 1))
+			else:
+				out.set_pixel(x, y, Color(a.r * 0.35, a.g * 0.35, a.b * 0.35, 1))
+	return out
+
+
+func _find_sole_bottom_y(img: Image, cx: int, y0: int, y1: int) -> int:
+	var best := -1
+	for y in range(maxi(0, y0), mini(img.get_height(), y1)):
+		for x in range(maxi(0, cx - 12), mini(img.get_width(), cx + 13)):
+			var c: Color = img.get_pixel(x, y)
+			if c.a8 < 48:
+				continue
+			best = maxi(best, y)
+	return best
+
+
+func _viewport_crop(vp: SubViewport, crop_r: Rect2i) -> Image:
+	var full: Image = vp.get_texture().get_image()
+	var r := crop_r
+	if r.position.x + r.size.x > full.get_width():
+		r.size.x = full.get_width() - r.position.x
+	if r.position.y + r.size.y > full.get_height():
+		r.size.y = full.get_height() - r.position.y
+	if r.size.x <= 0 or r.size.y <= 0:
+		return full
+	return full.get_region(r)
 
 
 func _world_to_viewport_px(world: Vector2, cam: Camera2D, vp_size: Vector2i) -> Vector2i:
@@ -301,43 +380,93 @@ func _screenshot_rooted_hero() -> void:  # await in _run_flow
 	layer.sync_from_roots(roots, positions)
 	check("screenshot: dennis rooted in CombatRoots", roots.is_rooted("dennis"))
 	check("screenshot: TelegraphLayer root-entry voor dennis", layer.root_icon_count() == 1)
-	var now: int = Time.get_ticks_msec()
-	layer.set_root_anim_start_for_test("dennis", now - 250)
+	layer.set_root_anim_frame_override(2)
 	var fi: int = layer.root_anim_frame_for("dennis")
 	check("screenshot: loop-frame 2 of 3 (nu %d)" % fi, fi == 2 or fi == 3)
-	layer.queue_redraw()
+	for _i in 12:
+		await get_tree().process_frame
+		if objects.get_node_or_null("RootFxOverlay") != null:
+			break
+	var ovl: CanvasItem = objects.get_node_or_null("RootFxOverlay") as CanvasItem
+	check("screenshot: RootFxOverlay aanwezig", ovl != null)
+	var pin_frame: int = fi if fi == 2 or fi == 3 else 2
+	layer.set_root_anim_frame_override(pin_frame)
+	p.sprite.frame = 0
+	layer.set_root_fx_visible(true)
+	check("screenshot: overlay zichtbaar, Dax rooted", ovl != null and ovl.visible and roots.is_rooted("dennis"))
 	for _i in 4:
 		await get_tree().process_frame
-	var tex: ViewportTexture = vp.get_texture()
-	var img: Image = tex.get_image()
 	var foot_world: Vector2 = _arena_root_draw_pos(p)
 	var foot_px: Vector2i = _world_to_viewport_px(foot_world, cam, vp.size)
-	var rows: Vector2i = _find_root_green_rows(img, foot_px.x, foot_px.y - 18, foot_px.y + 6)
+	var map_sole_world: float = p.position.y - MapSprite.voet_offset(MapSprite.NIEUW).y
+	var sole_px_y: int = _world_to_viewport_px(Vector2(p.position.x, map_sole_world), cam, vp.size).y
+	var crop_r := Rect2i(
+		maxi(0, foot_px.x - 48),
+		maxi(0, foot_px.y - 20),
+		mini(128, vp.size.x),
+		mini(64, vp.size.y),
+	)
+
+	var with_img: Image = _viewport_crop(vp, crop_r)
+	var path_with := out.path_join("root_fx_with.png")
+	with_img.save_png(path_with)
+	layer.set_root_anim_frame_override(pin_frame)
+	check("screenshot: frametijd vast vóór zonder-capture", layer.root_anim_frame_for("dennis") == pin_frame)
+	layer.set_root_fx_visible(false)
 	check(
-		"screenshot: fx_root groentinten bij voet (hits, rij %d..%d vs voet_px.y=%d)"
-		% [rows.x, rows.y, foot_px.y],
-		rows.x >= 0 and rows.y >= rows.x,
+		"screenshot: alleen RootFxOverlay uit, CombatRoots ongewijzigd",
+		ovl != null and not ovl.visible and roots.is_rooted("dennis") and layer.root_icon_count() == 1,
 	)
-	if rows.x >= 0:
-		check(
-			"screenshot: groen vs node.y (node=%.1f top=%d bot=%d Δtop=%.0f Δbot=%.0f)"
-			% [p.position.y, rows.x, rows.y, float(rows.x) - p.position.y, float(rows.y) - p.position.y],
-			rows.y >= foot_px.y - 18 and rows.x <= foot_px.y + 2,
-		)
+	for _i in 4:
+		await get_tree().process_frame
+	check("screenshot: overlay uit, root nog actief", roots.is_rooted("dennis") and layer.root_icon_count() == 1)
+	check("screenshot: anim-frame gelijk na overlay-toggle", layer.root_anim_frame_for("dennis") == pin_frame)
+	p.sprite.frame = 0
+	var without_img: Image = _viewport_crop(vp, crop_r)
+	var path_without := out.path_join("root_fx_without.png")
+	without_img.save_png(path_without)
+	var cx_crop: int = foot_px.x - crop_r.position.x
+	var anchor_crop := Vector2i(cx_crop, foot_px.y - crop_r.position.y)
+	var diff_stats: Dictionary = _image_diff_stats(with_img, without_img)
+	var diff_count: int = int(diff_stats.get("count", 0))
+	var art_mask_diff: int = _art_mask_diff_count(with_img, without_img, anchor_crop, pin_frame)
+	var diff_ok: bool = diff_count >= DIFF_MIN_PIXELS or art_mask_diff >= DIFF_MIN_ART_MASK
+	check(
+		"diff-test: %d crop / %d art-mask pixels (min %d of %d), bbox y=%d..%d"
+		% [
+			diff_count,
+			art_mask_diff,
+			DIFF_MIN_PIXELS,
+			DIFF_MIN_ART_MASK,
+			diff_stats.get("top", -1),
+			diff_stats.get("bot", -1),
+		],
+		diff_ok and int(diff_stats.get("bot", -1)) >= 0,
+	)
+	var diff_img: Image = _make_diff_image(with_img, without_img)
+	var path_diff := out.path_join("root_fx_diff.png")
+	diff_img.save_png(path_diff)
+	var sole_crop_y: int = sole_px_y - crop_r.position.y
+	var sole_scan: int = _find_sole_bottom_y(with_img, cx_crop, maxi(0, sole_crop_y - 28), sole_crop_y + 2)
+	if sole_scan < 0:
+		sole_scan = sole_crop_y
+	var diff_bot: int = int(diff_stats.get("bot", -1))
+	check(
+		"diff-test: zool y=%d, diff_bbox bot=%d (Δ=%d px)"
+		% [sole_scan, diff_bot, absi(diff_bot - sole_scan)],
+		absi(diff_bot - sole_scan) <= 2,
+	)
+	check(
+		"screenshot: node.y=%.1f map_sole=%.1f draw_y=%.1f offset=%.0f"
+		% [p.position.y, map_sole_world, foot_world.y, SomArena.ROOT_FOOT_OFFSET_PX],
+		is_equal_approx(foot_world.y, map_sole_world),
+	)
 	var path := out.path_join("root_fx_solo.png")
-	var crop := Rect2i(
-		maxi(0, foot_px.x - 40),
-		maxi(0, foot_px.y - 48),
-		mini(96, img.get_width()),
-		mini(72, img.get_height()),
+	var err := with_img.save_png(path)
+	check(
+		"screenshot artifacts with/without/diff (%s)" % path,
+		err == OK and diff_ok and absi(diff_bot - sole_scan) <= 2,
 	)
-	if crop.position.x + crop.size.x > img.get_width():
-		crop.size.x = img.get_width() - crop.position.x
-	if crop.position.y + crop.size.y > img.get_height():
-		crop.size.y = img.get_height() - crop.position.y
-	var shot: Image = img.get_region(crop) if crop.size.x > 0 and crop.size.y > 0 else img
-	var err := shot.save_png(path)
-	check("screenshot arena Dax rooted (%s)" % path, err == OK and shot.get_width() > 0 and rows.x >= 0)
 	layer.queue_free()
 	get_tree().root.remove_child(vp)
 	vp.queue_free()

@@ -65,6 +65,7 @@ var _root_icons: Array = []
 var _root_anim_start_ms: Dictionary = {}
 var _root_tex: Texture2D = null
 var _root_overlay: RootFxOverlay = null
+var _test_frame_override: int = -1
 
 
 func entry_count() -> int:
@@ -122,15 +123,30 @@ static func root_frame_for_elapsed(elapsed_ms: int, ms_per_frame: int = 100) -> 
 
 
 func root_anim_frame_for(hid: String) -> int:
+	if _test_frame_override >= 0:
+		return _test_frame_override
 	if not _root_anim_start_ms.has(hid):
 		return 0
 	var elapsed: int = Time.get_ticks_msec() - int(_root_anim_start_ms[hid])
 	return root_frame_for_elapsed(elapsed, int(SomData.FX_ROOT.get("ms", 100)))
 
 
+## Alleen voor tests: vast anim-frame (loop 2 of 3) tijdens diff-captures.
+func set_root_anim_frame_override(frame: int) -> void:
+	_test_frame_override = frame
+
+
 ## Alleen voor tests: terugval zonder texture / geforceerde starttijd.
 func set_root_texture(tex: Texture2D) -> void:
 	_root_tex = tex
+
+
+## Alleen voor tests: FX tekenen aan/uit zonder root-status te wijzigen.
+func set_root_fx_visible(on: bool) -> void:
+	if _root_overlay != null:
+		_root_overlay.visible = on
+		if on:
+			_root_overlay.queue_redraw()
 
 
 func set_root_anim_start_for_test(hid: String, start_ms: int) -> void:

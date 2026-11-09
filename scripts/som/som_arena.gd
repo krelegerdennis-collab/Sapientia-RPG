@@ -57,6 +57,7 @@ const SomChainData := preload("res://scripts/data/som_chain_data.gd")
 const SomHeavyData := preload("res://scripts/data/som_heavy_data.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
+const MapSprite := preload("res://scripts/map_sprite.gd")
 const CombatZones := preload("res://scripts/som/combat_zones.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const CombatStamina := preload("res://scripts/som/combat_stamina.gd")
@@ -1698,8 +1699,8 @@ func _roots_authority() -> bool:
 	return not coop_mode or coop_sim_host
 
 
-## Visueel: fx_root-anker op voetlijn (node.position), niet op body_of — zelfde als heal_glow (regel ~2142).
-const ROOT_FOOT_OFFSET_PX := -SomData.BODY_Y
+## Visueel: FX_ROOT-onderkant op MapSprite-voetlijn (node.y + 8): body (BODY_Y -6) + 14 = +8.
+const ROOT_FOOT_OFFSET_PX := 14.0
 
 
 func _root_icon_positions() -> Dictionary:
