@@ -1,5 +1,5 @@
 # Botsingen: Worldbuilder vs game (v0.17 = canon)
-*8 okt 2026. Bronnen: PROLOOG/ACT1_LORE, README, HANDOFF_WOUD, game_data/story_data.*
+*8 okt 2026. Bronnen: PROLOOG/ACT1_LORE, README, `docs/handoff/HANDOFF_WOUD.md`, game_data/story_data.*
 
 1. **Noor: herkomst.** Game nu: dorpsmeisje uit Esdoorn (bij Marit), kent Dennis en de Oude Man niet.
    Worldbuilder: Noor Zeldenrust, wees uit Huize Zeldenrust in Brandwijk, leerling van Ewout.

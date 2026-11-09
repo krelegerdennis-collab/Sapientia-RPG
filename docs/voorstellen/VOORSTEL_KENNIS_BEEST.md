@@ -30,7 +30,7 @@ Wat dat betekent:
 - `game_data.gd`, commentaar bij `kennis_beest.boss`: "Doel-level van het Eerste Archief is 7
   (`EERSTE_ARCHIEF_DOEL`). Bevestigd: HP 360 en ATK 27, zodat **Lv 7 slim wint met meerdere items en
   domweg aanvallen meestal verliest**." Daarvoor: "baas voor Dennis ~Lv 10 **MET het Vonkzwaard** (+12)".
-- `HANDOFF_GOLEM.md`: gebalanceerd voor **Dennis solo**; de kern (x0,4 dicht / x2 open, Hamerslag) moet
+- `docs/handoff/HANDOFF_GOLEM.md`: gebalanceerd voor **Dennis solo**; de kern (x0,4 dicht / x2 open, Hamerslag) moet
   de sleutel zijn, items gebruiken moet lonen. (De getallen in die handoff, 140/15/10 voor Lv 3, zijn
   verouderd; de huidige waarden komen uit v0.15.)
 - `tools/battlesim/battlesim.gd`, gebied `golem`: **Dax solo Lv 8, met Vonkzwaard + latere uitrusting,

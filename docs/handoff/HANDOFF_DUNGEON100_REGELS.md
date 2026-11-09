@@ -26,7 +26,7 @@ kapotte saves laden met 0. `new_game()` en `go_to_title()` zetten de verdieping 
   wordt het **checkpoint** (gaat alleen omhoog); daarna de vraag *Voortgang opslaan?* (Ja/Nee, zoals een boekpunt).
 - **Verlies (hele party KO) in de kerker** is sinds de Blauwe Kisten niet meer een respawn op het rustpunt.
   **Dood is dungeon uit**: wereldkaart bij de ingang (`van_dungeon100`), tijdelijke run weg, echte party terug,
-  Blauwe Kist-items blijven. Het rustpunt geneest alleen. Zie `HANDOFF_DUNGEON100_BLUECHEST.md`.
+  Blauwe Kist-items blijven. Het rustpunt geneest alleen. Zie `docs/handoff/HANDOFF_DUNGEON100_BLUECHEST.md`.
   Buiten de kerker (verdieping 0) werkt game over zoals altijd.
 - Winnen of vluchten verandert de verdieping niet.
 - Een rustpunt wordt pas een checkpoint als je het **aanraakt**, niet als je de verdieping alleen binnenloopt.

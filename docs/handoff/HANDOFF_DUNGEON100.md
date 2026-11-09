@@ -121,9 +121,9 @@ De drie takken zijn in `main` samengevoegd en op elkaar aangesloten. Overzicht:
 
 | onderdeel | waar |
 |---|---|
-| generator (vloeren, trappen, ingang) | `HANDOFF_DUNGEON100.md` (dit bestand) |
-| monsterschaal, buit, 10 bazen | `HANDOFF_DUNGEON100_SCHAAL.md` |
-| rustpunten, checkpoint, HUD, nederlaag-regels | `HANDOFF_DUNGEON100_REGELS.md` |
+| generator (vloeren, trappen, ingang) | `docs/handoff/HANDOFF_DUNGEON100.md` (dit bestand) |
+| monsterschaal, buit, 10 bazen | `docs/handoff/HANDOFF_DUNGEON100_SCHAAL.md` |
+| rustpunten, checkpoint, HUD, nederlaag-regels | `docs/handoff/HANDOFF_DUNGEON100_REGELS.md` |
 
 - **GameState**: één `var dungeon100_floor`, plus `dungeon100_seed`, `dungeon100_checkpoint`, `dungeon100_best`,
   en sinds de Blauwe Kisten `dungeon100_permanent`, `dungeon100_delivered`, `dungeon100_snapshot`.
@@ -141,7 +141,7 @@ De drie takken zijn in `main` samengevoegd en op elkaar aangesloten. Overzicht:
   `leave: true` (wereldkaart, spawn `van_dungeon100`). Het rustpunt is geen respawn. Tijdelijke run weg, echte
   party uit de momentopname terug, Blauwe Kist-items blijven. Het kamer-checkpoint van v0.19 wordt in de kerker niet
   gezet (`Dungeon100Room.allows_checkpoint() == false`). `Dungeon100Rules.dungeon_scene` is
-  `res://scenes/maps/dungeon100.tscn`. Zie `HANDOFF_DUNGEON100_BLUECHEST.md`.
+  `res://scenes/maps/dungeon100.tscn`. Zie `docs/handoff/HANDOFF_DUNGEON100_BLUECHEST.md`.
 - **Tests**: `--dungeon100gentest`, `--dungeon100schaaltest`, `--dungeon100regelstest`,
   `--dungeon100integratietest` (verdieping 10: baas + rustpunt + HUD + geschaalde monsters, echt baasgevecht)
   en `--dungeon100blauwtest`.

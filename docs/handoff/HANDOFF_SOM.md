@@ -40,7 +40,7 @@ Proef, geen definitieve feature. Turn-based blijft het standaard en is nergens w
   `title_screen.gd` (knop), `settings.gd` + `options_screen.gd` (Battle Style).
 - Tests: `scripts/tests/som_autotest.gd`, draait aan het eind van `--autotest`.
   Snel alleen SoM: `-- --## Art (RPG ART, aangesloten in v2.1) — `assets/sprites/som/{combat,fx,ui,monsters}/`
-Ongewijzigd gekopieerd uit `/workspace/art_mapsprites_v4/out/combat_som/` (alleen de PNG's; `.import` wordt lokaal
+Ongewijzigd gekopieerd uit `(scratch-map, niet in repo) art_mapsprites_v4/out/combat_som/` (alleen de PNG's; `.import` wordt lokaal
 gemaakt met `--import`). Monster-sheets staan in `som/monsters/` en niet in `assets/map_monsters/`, omdat bestaande
 tests die map tellen. Ontbreekt een bestand, dan valt alles terug op de placeholder.
 - **Aanval** (`SomData.ATTACK_ANIMS`): `<held>_attack.png` **288x192**, cellen 48x48, 6 frames x 4 rijen

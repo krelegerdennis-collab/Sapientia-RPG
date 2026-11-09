@@ -49,13 +49,13 @@
 
 ## Tests
 `--import` met 4.7.2, daarna alle 28 suites (27 bestaand + cutscenetest), 6 parallel; 4.3 in een aparte kopie
-(`/workspace/code_cutscene/repo43`, eigen import), 4 parallel.
+(`(scratch-map, niet in repo) code_cutscene/repo43`, eigen import), 4 parallel.
 - 4.7.2: 25/28 groen in parallel; puzzletest, kernkrachttest, dungeon100gentest faalden onder parallelle
   belasting en zijn serieel opnieuw gedraaid: 156 / 116 / 59 PASS, 0 FAIL.
 - 4.3: 26/28 groen in parallel; puzzletest, dungeon100gentest serieel opnieuw: 156 / 59 PASS, 0 FAIL.
 - cutscenetest: 34 PASS op beide versies.
-Logs: `/workspace/code_cutscene/logs/{t472,t472_rerun,t43,t43_rerun}`, samenvattingen `summary_472.txt`, `summary_43.txt`.
+Logs: `(scratch-map, niet in repo) code_cutscene/logs/{t472,t472_rerun,t43,t43_rerun}`, samenvattingen `summary_472.txt`, `summary_43.txt`.
 De .import/.uid-churn van de 4.7.2-import is teruggedraaid/verwijderd; alleen .import voor de nieuwe PNG's (4.3-formaat).
 
 ## Screenshots
-`/workspace/code_cutscene/shots/cutscene_panels.png`, `garden_creatures.png`, `garden_following.png` (+ `ogv_frame_check.png`).
+`(scratch-map, niet in repo) code_cutscene/shots/cutscene_panels.png`, `garden_creatures.png`, `garden_following.png` (+ `ogv_frame_check.png`).
