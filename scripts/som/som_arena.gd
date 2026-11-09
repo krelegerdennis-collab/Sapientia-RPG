@@ -55,6 +55,8 @@ const SomActionAttacks := preload("res://scripts/data/som_action_attacks.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const SomChainData := preload("res://scripts/data/som_chain_data.gd")
 const SomHeavyData := preload("res://scripts/data/som_heavy_data.gd")
+const SomFeelData := preload("res://scripts/data/som_feel_data.gd")
+const SomShakeScript := preload("res://scripts/som/som_shake.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const MapSprite := preload("res://scripts/map_sprite.gd")
@@ -84,6 +86,8 @@ var codex: Node
 ## Doel-lock (tap + auto-lock in bereik)
 var target_lock: Node2D
 var gauge: Node2D
+## Client-only screenshake (F4).
+var shake: Node
 var telegraph_layer: TelegraphLayer
 var combat_zones := CombatZones.new()
 var combat_roots := CombatRoots.new()
@@ -240,6 +244,10 @@ func setup(p_room: Node) -> void:
 	if cam:
 		cam.position_smoothing_enabled = true
 		cam.position_smoothing_speed = SomData.CAMERA_SMOOTH
+		shake = SomShakeScript.new()
+		shake.name = "SomShake"
+		shake.setup(cam)
+		add_child(shake)
 	var objects := room.get_node("Objects")
 	# Co-op: geen solo SomAlly-bondgenoten; alleen CoopAvatar per stoel.
 	if not GameState.coop_in_session():
@@ -524,6 +532,8 @@ func next_alive(from: String) -> String:
 ## SWITCH: besturing naar de volgende levende held. Speler-lichaam en bondgenoot-lichaam ruilen van held
 ## (sprite + plek); de camera glijdt mee. Geeft de nieuwe held-id ("" = niets gewisseld).
 func switch_hero(to := "") -> String:
+	if shake != null:
+		shake.stop()
 	var nxt := to if to != "" else next_alive(active_id)
 	if nxt == "" or nxt == active_id or not is_alive(nxt):
 		return ""
@@ -1043,7 +1053,21 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				stagger = stagger or SomHeavyData.ALWAYS_STAGGERS
 				tiles = SomHeavyData.knockback_tiles(heavy)
 				stop = SomHeavyData.hitstop_ticks(heavy)
-			damage_enemy(m, physical_damage(atk, float(e["def"]), mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop)
+			var num_color := SomFeelData.COL_NORMAL
+			var num_scale := 1.0
+			var shake_kind := ""
+			if SomFeelData.ENABLED:
+				if heavy > 0:
+					num_color = SomFeelData.COL_HEAVY
+					num_scale = SomFeelData.SCALE_HEAVY2 if heavy >= 2 else 1.0
+					shake_kind = "heavy2" if heavy >= 2 else "heavy1"
+				elif step >= 0 and SomChainData.is_finisher(step):
+					num_color = SomFeelData.COL_FINISHER
+					shake_kind = "finisher"
+			damage_enemy(m, physical_damage(atk, float(e["def"]), mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
+					num_color, num_scale)
+			if shake_kind != "" and _feel_local_hero(id) and shake != null:
+				shake.kick(shake_kind)
 			hits += 1
 	swing_landed.emit(id, hits)
 	SessieLog.actie_slag(id, hits)
@@ -1114,7 +1138,8 @@ func _aim_caster_at(caster_id: String, m: Node) -> void:
 
 ## stagger = false (slag onder 100%): wel schade, maar geen afgebroken telegraaf en geen knockback.
 ## knock_tiles / hitstop: aanvalsketen (SomChainData); standaard 1 tegel en geen hitstop (zoals voorheen).
-func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles := 1, hitstop := 0) -> void:
+func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles := 1, hitstop := 0,
+		num_color := Color(1, 1, 1), num_scale := 1.0) -> void:
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
@@ -1131,7 +1156,10 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 		e["hp"] = int(e["hp"]) - dmg
 	e["flash"] = SomData.HIT_FLASH
 	last_enemy_damage = dmg
-	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), Color(1, 1, 1))
+	if not SomFeelData.ENABLED:
+		num_color = Color(1, 1, 1)
+		num_scale = 1.0
+	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), num_color, 0.6, num_scale)
 	SomFx.spark(room.get_node("Objects"), center_of(m))
 	enemy_hit.emit(m, dmg)
 	if int(e["hp"]) <= 0:
@@ -1573,10 +1601,15 @@ func _golem_strike(m: Node, e: Dictionary, attack_id: String, power: float) -> v
 	var a := GolemBoss.attack(attack_id)
 	var origin: Vector2 = e.get("golem_origin", center_of(m))
 	var reach := float(_golem_strike_reach_px(m, a))
+	var slam := attack_id in GolemBoss.SLAM_ATTACKS
+	var shook := false
 	for id in party_ids():
 		if is_alive(id) and node_of(id) != null and origin.distance_to(body_of(id)) <= reach:
 			golem_strike_hit_member_count += 1
 			hit_member(id, int(e["atk"]), power)
+			if slam and not shook and _feel_local_hero(id) and shake != null and SomFeelData.ENABLED:
+				shake.kick("boss_slam")
+				shook = true
 
 
 func _golem_spawn_adds(m: Node, ids: Array) -> void:
@@ -1720,6 +1753,8 @@ func break_root(id: String) -> void:
 
 
 func _clear_transient_combat() -> void:
+	if shake != null:
+		shake.stop()
 	combat_zones.clear_all()
 	combat_roots.clear_all()
 	combat_stamina.clear_all()
@@ -1991,7 +2026,15 @@ func _tick_ally_dodge_ai(ally: Node) -> void:
 
 ## Held KO: bondgenoot blijft liggen (som_ally.gd); bestuurde held -> wissel naar de volgende levende.
 ## Niemand meer over = game over.
+func _feel_local_hero(id: String) -> bool:
+	if coop_mode and not coop_sim_host and coop_local_slot >= 0:
+		return str(_coop_slots.get(coop_local_slot, "")) == id
+	return id == active_id
+
+
 func _member_ko(id: String) -> void:
+	if shake != null and _feel_local_hero(id):
+		shake.stop()
 	combat_roots.clear_member(id)
 	combat_stamina.clear_member(id)
 	_say(SomData.TXT_KO % str(member(id).get("name", id)))
@@ -2750,7 +2793,14 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 		if not hid.is_empty():
 			var h := member(hid)
 			if not h.is_empty():
-				h["hp"] = int(row.get("hp", h["hp"]))
+				var old_hp := int(h.get("hp", 0))
+				var max_hp := int(h.get("max_hp", old_hp))
+				var new_hp := int(row.get("hp", old_hp))
+				if slot == coop_local_slot and shake != null and SomFeelData.ENABLED:
+					var thresh := maxi(1, int(ceil(float(max_hp) * 0.1)))
+					if old_hp - new_hp >= thresh:
+						shake.kick("heavy1")
+				h["hp"] = new_hp
 				combat_stamina.set_current(hid, int(row.get("mp", combat_stamina.current(hid))))
 	for row in snap.get("enemies", []):
 		var idx := int(row.get("idx", -1))

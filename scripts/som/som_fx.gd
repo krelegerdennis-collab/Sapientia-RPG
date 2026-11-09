@@ -304,13 +304,13 @@ class Ring extends Node2D:
 static func _digit_row(color: Color) -> int:
 	if color.g > color.r + 0.2:
 		return 2
-	if color.r > 0.9 and color.g < 0.6:
+	if color.r > 0.9 and color.g < 0.5:
 		return 1
 	return 0
 
 
 ## Zwevend getal ("12", "+30") of "!" (telegraaf). Met art: pixel-cijfers / fx_telegraph; anders een Label.
-static func number(parent: Node, at: Vector2, text: String, color: Color, life := 0.6) -> Node2D:
+static func number(parent: Node, at: Vector2, text: String, color: Color, life := 0.6, scale := 1.0) -> Node2D:
 	var digits := tex(SomData.UI_DIGITS)
 	var bang := tex(SomData.FX_TELEGRAPH)
 	var n: Node2D
@@ -325,6 +325,8 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 		d.text = text.trim_prefix("+")
 		d.row = _digit_row(color)
 		n = d
+		if d.row == 0 and not color.is_equal_approx(Color.WHITE):
+			n.modulate = color
 	else:
 		var holder := Node2D.new()
 		var l := Label.new()
@@ -343,6 +345,8 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 	n.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	n.z_index = 30
 	n.position = at.round()
+	if scale != 1.0:
+		n.scale = Vector2(scale, scale)
 	parent.add_child(n)
 	var tw := n.create_tween()
 	tw.tween_property(n, "position:y", n.position.y - 8.0, life)
