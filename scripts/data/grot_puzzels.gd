@@ -29,7 +29,7 @@ const PUZZELS := {
 		"objects": {
 			"r": {"type": "reset", "id": "herstelsteen"},
 			"a": {"type": "block", "id": "kast_a"},
-			"p": {"type": "plate", "id": "plaat_p", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_p"},
 			"1": {"type": "gate", "id": "poort", "needs": ["plaat_p"], "mode": "all", "latch": true},
 		},
 		"hint": "Weight opens what hands cannot. Find the plate.",
@@ -47,8 +47,8 @@ const PUZZELS := {
 			"r": {"type": "reset", "id": "herstelsteen"},
 			"a": {"type": "block", "id": "kast_a"},
 			"b": {"type": "block", "id": "kast_b"},
-			"p": {"type": "plate", "id": "plaat_l", "heavy": true},
-			"q": {"type": "plate", "id": "plaat_r", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_l"},
+			"q": {"type": "plate", "id": "plaat_r"},
 			"1": {"type": "gate", "id": "poort", "needs": ["plaat_l", "plaat_r"], "mode": "all", "latch": true},
 		},
 		"hint": "Two plates, two cabinets. The gate counts both.",
@@ -81,7 +81,7 @@ const PUZZELS := {
 		"objects": {
 			"r": {"type": "reset", "id": "herstelsteen"},
 			"a": {"type": "block", "id": "kast_a"},
-			"p": {"type": "plate", "id": "plaat_p", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_p"},
 			"g": {"type": "grow", "id": "groei", "needs": ["plaat_p"], "stages": 3, "gap": true},
 		},
 		"hint": "Press the plate first. Then let it grow.",

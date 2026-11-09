@@ -296,7 +296,8 @@ func _test_solution() -> void:
 	l = PuzzleLogic.from_room(room, "archief_test")
 	_sim(l, l.spawn_tile, "UUUURRRRRRDD R UU R UU A DD")
 	l.set_player_tile(Vector2i(5, 3))
-	check("speler op zware plaat p (hendel aan, kast op q): poort_1 blijft dicht", not l.gate_open("poort_1"))
+	# Zonder Core Power zijn platen niet meer 'heavy' (puzzle_rooms.gd); de speler drukt p in.
+	check("speler op plaat p (hendel aan, kast op q): poort_1 open (platen niet zwaar)", l.plate_pressed("plaat_p") and l.gate_open("poort_1"))
 	# Doodlopend: kast_a tegen de linkermuur
 	l = PuzzleLogic.from_room(room, "archief_test")
 	p = _sim(l, l.spawn_tile, DEAD_END)

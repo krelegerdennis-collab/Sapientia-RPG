@@ -121,7 +121,7 @@ func _logic_tests() -> void:
 	l.changed.connect(func(ids): got.append_array(ids))
 	check("{type: gate, style: geheim} = geheime deur; runeplaat verborgen; kist", l.types["geheime_deur"] == "secret"
 			and l.gates["geheime_deur"]["secret"] and l.gates["geheime_deur"]["latch"] and l.plates["plaat_s"]["hidden"]
-			and l.plates["plaat_s"]["heavy"] and l.types["kist_vonkzwaard"] == "chest")
+			and not l.plates["plaat_s"]["heavy"] and l.types["kist_vonkzwaard"] == "chest")
 	check("deur op (16,8) + bovenste tegel (16,7), plaat s (15,9), kist (13,3)", l.gates["geheime_deur"]["tile"] == DOOR
 			and l.door_tops.get(DOOR_TOP, "") == "geheime_deur" and l.plates["plaat_s"]["tile"] == PLATE_S
 			and l.chests["kist_vonkzwaard"]["tile"] == CHEST)

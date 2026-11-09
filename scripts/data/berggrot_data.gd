@@ -215,7 +215,7 @@ const PUZZLES := {
 		],
 		"objects": {
 			"k": {"type": "block", "id": "kast_grendel"},
-			"p": {"type": "plate", "id": "plaat_grendel", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_grendel"},
 			"h": {"type": "lever", "id": "hendel_grendel", "on": false},
 			"1": {"type": "gate", "id": "poort_uit", "needs": ["plaat_grendel", "hendel_grendel"],
 					"mode": "all", "latch": true},
@@ -265,7 +265,7 @@ const PUZZLES := {
 		],
 		"objects": {
 			"k": {"type": "block", "id": "kast_ader"},
-			"p": {"type": "plate", "id": "plaat_ader", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_ader"},
 			"h": {"type": "lever", "id": "hendel_uit", "on": false},
 			"1": {"type": "gate", "id": "poort_uit", "needs": ["hendel_uit"], "mode": "all", "latch": true},
 			"r": {"type": "reset", "id": "herstel_geheim"},

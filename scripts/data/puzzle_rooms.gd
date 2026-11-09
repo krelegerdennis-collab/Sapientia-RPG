@@ -76,8 +76,8 @@ const ROOMS := {
 			"####E####",
 		],
 		"objects": {
-			"z": {"type": "block", "id": "kast_zwaar", "heavy": true},
-			"p": {"type": "plate", "id": "plaat_p", "heavy": true},
+			"z": {"type": "block", "id": "kast_zwaar"},
+			"p": {"type": "plate", "id": "plaat_p"},
 			"1": {"type": "gate", "id": "poort_1", "needs": ["plaat_p"], "mode": "all", "latch": true},
 			"r": {"type": "reset", "id": "herstelsteen"},
 		},
@@ -102,8 +102,8 @@ const ROOMS := {
 		"objects": {
 			"a": {"type": "block", "id": "kast_a"},
 			"b": {"type": "block", "id": "kast_b"},
-			"p": {"type": "plate", "id": "plaat_p", "heavy": true},
-			"q": {"type": "plate", "id": "plaat_q", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_p"},
+			"q": {"type": "plate", "id": "plaat_q"},
 			"h": {"type": "lever", "id": "hendel_h", "on": false},
 			"1": {"type": "gate", "id": "poort_1", "needs": ["plaat_p", "plaat_q", "hendel_h"],
 					"mode": "all", "latch": true},
@@ -173,8 +173,8 @@ const ROOMS := {
 			"a": {"type": "block", "id": "kast_a"},
 			"b": {"type": "block", "id": "kast_b"},
 			"c": {"type": "block", "id": "kast_c"},
-			"p": {"type": "plate", "id": "plaat_p", "heavy": true},
-			"q": {"type": "plate", "id": "plaat_q", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_p"},
+			"q": {"type": "plate", "id": "plaat_q"},
 			"h": {"type": "lever", "id": "hendel_h", "on": false},
 			"1": {"type": "gate", "id": "poort_1", "needs": ["plaat_p", "plaat_q", "hendel_h"],
 					"mode": "all", "latch": true},
@@ -188,7 +188,7 @@ const ROOMS := {
 					"hint": ["A thin pink crack sits in the wall...", "Something drafts behind the stones."],
 					"open_lines": ["A heavy scrape sounds behind the wall..."]},
 			# verborgen zware drukplaat (ziet eruit als runentegel 11); placeholder = alleen het plaatje
-			"s": {"type": "plate", "hook": "runeplaat", "id": "plaat_s", "solid": false, "heavy": true, "hidden": true},
+			"s": {"type": "plate", "hook": "runeplaat", "id": "plaat_s", "solid": false, "hidden": true},
 			# schatkist met het Vonkzwaard (eenmalig); placeholder = dichte kist, massief
 			"T": {"type": "chest", "hook": "schatkist", "id": "kist_vonkzwaard", "solid": true,
 					"item": "vonkzwaard", "n": 1, "flag": "kist_vonkzwaard",
@@ -296,8 +296,8 @@ const ROOMS := {
 		"objects": {
 			"a": {"type": "block", "id": "kast_l"},
 			"b": {"type": "block", "id": "kast_r"},
-			"p": {"type": "plate", "id": "plaat_l", "heavy": true},
-			"q": {"type": "plate", "id": "plaat_r", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_l"},
+			"q": {"type": "plate", "id": "plaat_r"},
 			"h": {"type": "lever", "id": "hendel_leeszaal", "on": false},
 			"1": {"type": "gate", "id": "poort_leeszaal", "needs": ["plaat_l", "plaat_r", "hendel_leeszaal"],
 					"mode": "all", "latch": true},
@@ -345,7 +345,7 @@ const ROOMS := {
 		"objects": {
 			"h": {"type": "lever", "id": "hendel_combi", "on": false},
 			"a": {"type": "block", "id": "kast_combi"},
-			"p": {"type": "plate", "id": "plaat_kast", "heavy": true},
+			"p": {"type": "plate", "id": "plaat_kast"},
 			"g": {"type": "grow", "id": "groei_combi", "needs": ["hendel_combi", "plaat_kast"], "stages": 3, "gap": true,
 					"wait_lines": ["The plate does nothing.", "Pull the lever and push the cabinet onto the plate."],
 					"lines": ["The plate grows."],
