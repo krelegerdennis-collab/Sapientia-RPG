@@ -1769,12 +1769,29 @@ func autosave_on_background() -> bool:
 	return false
 
 
+## save_game zelf blokkeert hier (niet via can_autosave): mapwissel, gevechtsscène, of
+## in_battle zonder uitgesteld uniek event (post-gevecht mag wél: pending_unique_event).
+func _save_game_scene_blocked() -> bool:
+	if changing_map:
+		return true
+	if not in_battle:
+		return false
+	var story := get_node_or_null("/root/Story")
+	if story != null and str(story.get("pending_unique_event")) != "":
+		return false
+	if is_inside_tree():
+		var sc: Node = get_tree().current_scene
+		if sc != null and sc.scene_file_path == BATTLE_SCENE:
+			return true
+	return true
+
+
 ## Schrijft de voortgang naar save_path (JSON), of naar 'path' (v0.11: de autosave).
 ## Geeft true als het gelukt is.
 func save_game(tile: Vector2i, facing: Vector2i, path := "", autosave_reason := "") -> bool:
 	if coop_is_guest():
 		return false
-	if scene_busy() or save_readonly:
+	if _save_game_scene_blocked() or save_readonly:
 		return false
 	if path == "":
 		var slot_file := slot_path(active_slot)
