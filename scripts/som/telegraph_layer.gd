@@ -9,6 +9,8 @@ const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const CombatZones := preload("res://scripts/som/combat_zones.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
+const SomData := preload("res://scripts/data/som_data.gd")
+const SomFx := preload("res://scripts/som/som_fx.gd")
 
 const BORDER_PX := 3
 const FILL_STEPS := 4
@@ -22,10 +24,6 @@ const PLACEHOLDER_YELLOW_EDGE := Color(0.9, 0.75, 0.08, 0.9)
 ## Inktplas-loop (T4b placeholder).
 const PLACEHOLDER_INK_FILL := Color(0.18, 0.1, 0.42, 0.48)
 const PLACEHOLDER_INK_EDGE := Color(0.28, 0.14, 0.62, 0.92)
-## Wortelgreep-icoon om de voeten (T6 placeholder).
-const PLACEHOLDER_ROOT_FILL := Color(0.45, 0.28, 0.08, 0.55)
-const PLACEHOLDER_ROOT_EDGE := Color(0.35, 0.2, 0.05, 0.95)
-
 enum Style { RED_DODGE, YELLOW_INTERRUPT }
 
 class DrawEntry:
@@ -34,9 +32,16 @@ class DrawEntry:
 	var style: int = Style.RED_DODGE
 
 
+class RootIconEntry:
+	var hid: String = ""
+	var pos: Vector2 = Vector2.ZERO
+
+
 var _entries: Array[DrawEntry] = []
 var _zone_shapes: Array[TelegraphShape] = []
-var _root_icons: Array[Vector2] = []
+var _root_icons: Array = []
+var _root_anim_start_ms: Dictionary = {}
+var _root_tex: Texture2D = null
 
 
 func entry_count() -> int:
@@ -48,6 +53,40 @@ func _ready() -> void:
 	z_index = 4
 	y_sort_enabled = false
 	name = "TelegraphLayer"
+	_root_tex = SomFx.tex(str(SomData.FX_ROOT.get("sheet", "")))
+
+
+func _process(_delta: float) -> void:
+	if not _root_icons.is_empty():
+		queue_redraw()
+
+
+func root_icon_count() -> int:
+	return _root_icons.size()
+
+
+static func root_frame_for_elapsed(elapsed_ms: int, ms_per_frame: int = 100) -> int:
+	var ms: int = maxi(1, ms_per_frame)
+	var step: int = maxi(0, elapsed_ms / ms)
+	if step < 3:
+		return step
+	return 2 + ((step - 3) % 2)
+
+
+func root_anim_frame_for(hid: String) -> int:
+	if not _root_anim_start_ms.has(hid):
+		return 0
+	var elapsed: int = Time.get_ticks_msec() - int(_root_anim_start_ms[hid])
+	return root_frame_for_elapsed(elapsed, int(SomData.FX_ROOT.get("ms", 100)))
+
+
+## Alleen voor tests: terugval zonder texture / geforceerde starttijd.
+func set_root_texture(tex: Texture2D) -> void:
+	_root_tex = tex
+
+
+func set_root_anim_start_for_test(hid: String, start_ms: int) -> void:
+	_root_anim_start_ms[hid] = start_ms
 
 
 ## Bouwt de tekenlijst uit arena-vijanden (`SomArena.enemies`); roept `queue_redraw()` bij wijziging.
@@ -69,23 +108,46 @@ func sync_from_enemies(enemies: Dictionary, interruptible_for_attack: Callable =
 
 
 ## Actieve grondzones (Combat T4b); alleen tekenen.
-## Rooted helden: kleine cirkels op voetpositie (alleen tekenen).
+## Rooted helden: fx_root op voetpositie (alleen tekenen); per hid eigen anim-starttijd.
 func sync_from_roots(roots: CombatRoots, positions: Dictionary) -> void:
-	var next: Array[Vector2] = []
+	var now: int = Time.get_ticks_msec()
+	var active: Dictionary = {}
 	if roots != null:
 		for hid in roots.rooted_ids():
+			var key := str(hid)
 			if positions.has(hid):
-				next.append(Vector2(positions[hid]))
+				active[key] = Vector2(positions[hid])
+			elif positions.has(key):
+				active[key] = Vector2(positions[key])
+	for hid in active.keys():
+		if not _root_anim_start_ms.has(hid):
+			_root_anim_start_ms[hid] = now
+	var stale: Array = _root_anim_start_ms.keys()
+	for hid in stale:
+		if not active.has(hid):
+			_root_anim_start_ms.erase(hid)
+	var next: Array = []
+	if roots != null:
+		for hid in roots.rooted_ids():
+			var key := str(hid)
+			if not active.has(key):
+				continue
+			var ent := RootIconEntry.new()
+			ent.hid = key
+			ent.pos = active[key]
+			next.append(ent)
 	if _root_icons_changed(next):
 		_root_icons = next
 		queue_redraw()
 
 
-func _root_icons_changed(next: Array[Vector2]) -> bool:
+func _root_icons_changed(next: Array) -> bool:
 	if next.size() != _root_icons.size():
 		return true
 	for i in next.size():
-		if next[i] != _root_icons[i]:
+		var a: RootIconEntry = next[i]
+		var b: RootIconEntry = _root_icons[i]
+		if a.hid != b.hid or a.pos != b.pos:
 			return true
 	return false
 
@@ -235,19 +297,36 @@ func _draw() -> void:
 		_draw_entry(ent)
 	for sh in _zone_shapes:
 		_draw_zone(sh)
-	for p in _root_icons:
-		_draw_root_icon(p)
+	for entry in _root_icons:
+		var ent: RootIconEntry = entry
+		_draw_root_icon(ent.pos, ent.hid)
 
 
-func _draw_root_icon(center: Vector2) -> void:
+func _draw_root_icon(center: Vector2, hid: String) -> void:
+	if _root_tex == null:
+		_draw_root_icon_fallback(center)
+		return
+	var d: Dictionary = SomData.FX_ROOT
+	var cw: float = float(d["cell"][0])
+	var ch: float = float(d["cell"][1])
+	var anchor := Vector2(float(d["anchor"][0]), float(d["anchor"][1]))
+	var fi: int = root_anim_frame_for(hid)
+	var src := Rect2(fi * cw, 0.0, cw, ch)
+	var dest := Rect2(center - anchor, Vector2(cw, ch))
+	draw_texture_rect_region(_root_tex, dest, src)
+
+
+func _draw_root_icon_fallback(center: Vector2) -> void:
 	var r := 7.0
+	var fill := Color(0.45, 0.28, 0.08, 0.55)
+	var edge := Color(0.35, 0.2, 0.05, 0.95)
 	var pts := PackedVector2Array()
 	pts.resize(12)
 	for i in 12:
 		var a := TAU * float(i) / 12.0
 		pts[i] = center + Vector2(cos(a), sin(a)) * r
-	draw_colored_polygon(pts, PLACEHOLDER_ROOT_FILL)
-	draw_polyline(pts, PLACEHOLDER_ROOT_EDGE, 2.0, true)
+	draw_colored_polygon(pts, fill)
+	draw_polyline(pts, edge, 2.0, true)
 
 
 func _draw_zone(shape: TelegraphShape) -> void:

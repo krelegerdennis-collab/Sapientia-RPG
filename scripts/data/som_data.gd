@@ -158,6 +158,7 @@ const FX_SLASH := "res://assets/sprites/som/fx/fx_slash.png"          # 128x32, 
 const FX_SPARK := "res://assets/sprites/som/fx/fx_hit_spark.png"      # 64x16, 4 frames 16x16
 ## Eenmalige effecten: sheet, celgrootte, frames, ms per frame, anker (voeten) in de cel.
 const FX_HEAL_GLOW := {"sheet": "res://assets/sprites/som/fx/fx_heal_glow.png", "cell": [16, 16], "frames": 4, "ms": 100, "anchor": [8, 16]}
+const FX_ROOT := {"sheet": "res://assets/sprites/som/fx/fx_root.png", "cell": [16, 16], "frames": 4, "ms": 100, "anchor": [8, 16]}
 const FX_SPELL_IMPACT := {"sheet": "res://assets/sprites/som/fx/fx_spell_impact.png", "cell": [24, 24], "frames": 4, "ms": 70, "anchor": [12, 24]}
 const FX_TELEGRAPH := "res://assets/sprites/som/fx/fx_telegraph.png"  # 8x8
 const UI_DIGITS := "res://assets/sprites/som/ui/dmg_digits.png"       # 50x21: rijen wit, rood, groen; cijfers 5x7
