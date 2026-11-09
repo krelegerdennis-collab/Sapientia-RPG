@@ -13,6 +13,7 @@ extends StaticBody2D
 
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const BookData := preload("res://scripts/data/book_data.gd")
+const StoryData := preload("res://scripts/data/story_data.gd")
 const SaveSlotListC := preload("res://scripts/ui/save_slot_list.gd")
 
 const FRAME_TIME := 0.22
@@ -39,6 +40,8 @@ var _i := 0
 var busy := false
 ## Laatste uitkomst (voor de autotest): "", "saved", "declined", "failed" of "restored".
 var last_result := ""
+## Uitleg na 'Nee': even uitstellen zodat tests direct na de keuze nog geen tweede dialoog zien.
+var _uitleg_timer: SceneTreeTimer = null
 
 
 func _ready() -> void:
@@ -121,6 +124,7 @@ func restore() -> void:
 
 
 func interact(player: Node2D) -> void:
+	_cancel_uitleg_timer()
 	if busy or Dialog.is_open:
 		return
 	busy = true
@@ -148,7 +152,50 @@ func interact(player: Node2D) -> void:
 				Dialog.show_lines(["Save failed."])
 		else:
 			last_result = "declined"
+	_maybe_save_uitleg()
 	busy = false
+
+
+func _cancel_uitleg_timer() -> void:
+	if _uitleg_timer != null:
+		_uitleg_timer.timeout.disconnect(_deferred_save_uitleg)
+		_uitleg_timer = null
+
+
+## Eenmalige menu-uitleg: na Ja/fout direct, na Nee kort uitgesteld (autotest kijkt meteen na Nee).
+func _maybe_save_uitleg() -> void:
+	if not info.get("save", false) or GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
+		return
+	if last_result == "declined":
+		_cancel_uitleg_timer()
+		_uitleg_timer = get_tree().create_timer(0.4, true, false, true)
+		_uitleg_timer.timeout.connect(_deferred_save_uitleg, CONNECT_ONE_SHOT)
+	elif (last_result == "saved" or last_result == "failed") and not GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
+		# Bij Ja: wacht tot 'Saved' dicht is (achtergrond), blokkeert interact/busy niet.
+		_show_save_uitleg_after_saved_line()
+
+
+func _show_save_uitleg_after_saved_line() -> void:
+	for _i in 120:
+		if not Dialog.is_open and not busy:
+			await _show_save_uitleg()
+			return
+		await get_tree().process_frame
+
+
+func _deferred_save_uitleg() -> void:
+	_uitleg_timer = null
+	if busy or Dialog.is_open or GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
+		return
+	await _show_save_uitleg()
+
+
+func _show_save_uitleg() -> void:
+	if GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
+		return
+	GameState.story_flags[StoryData.SAVE_UITLEG_FLAG] = true
+	Dialog.show_lines([StoryData.SAVE_UITLEG_LINE])
+	await Dialog.finished
 
 
 ## Kies een van de vier slots (het actieve staat eerst geselecteerd). 0 = terug/nee.

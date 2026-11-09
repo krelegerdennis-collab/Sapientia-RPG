@@ -191,6 +191,10 @@ const AFTER_UNIQUE := {"inktwurm": TUTORIAL_INKTWURM}
 ## Oude saves waarin dit unieke monster al weg is: de vlag meteen als 'gezien' zetten (GameState.apply_state).
 const UNIQUE_SEEN_FLAGS := {"inktwurm": TUTORIAL_INKTWURM_FLAG}
 
+## C-4: eenmalige uitleg bij het eerste interactie met een save-boek (opslaan alleen via boeken).
+const SAVE_UITLEG_FLAG := "save_uitleg_gezien"
+const SAVE_UITLEG_LINE := "Glowing books save and heal. There is no saving from the menu."
+
 ## Vang-tutorial (Codex), direct na de Inktwurm-tutorial. Speelt eenmalig zodra de speler in de Golemhal
 ## vrij is (FREE_EVENTS), ook als de eerste tutorial overgeslagen is. Max. 2 korte regels per pagina.
 const TUTORIAL_CODEX := "tutorial_codex_vangen"
