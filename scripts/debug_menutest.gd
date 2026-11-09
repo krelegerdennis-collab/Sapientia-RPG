@@ -28,6 +28,7 @@ const Equipment := preload("res://scripts/equipment.gd")
 const HeroPortrait := preload("res://scripts/ui/hero_portrait.gd")
 const StatArrow := preload("res://scripts/ui/stat_arrow.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
+const MenuScreenC := preload("res://scripts/ui/menu_screen.gd")
 const StatusScreenS := preload("res://scripts/ui/status_screen.gd")
 const QuestData := preload("res://scripts/data/quest_data.gd")
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
@@ -274,7 +275,14 @@ func _main_menu_tests() -> void:
 		labels.append(str(m.buttons[c[0]].get_meta("label")))
 	# v0.22 partylimiet: vijfde knop 'Party' (rechts onder Warpen)
 	# v0.24: 'Quest Log' rechts onder Party
-	check("elf knoppen %s" % [labels], labels == ["Equipment", "Codex", "Items", "Magic", "Bestiary", "Warp", "Party", "Quest Log", "Scenes & Music", "Settings", "Load"] and m.buttons.size() == 11)
+	var want_labels := ["Equipment", "Codex", "Items", "Magic", "Bestiary", "Warp", "Party", "Quest Log", "Scenes & Music", "Settings", "Load", "Save: Find a glowing book"]
+	check("twaalf knoppen %s" % [labels], labels == want_labels and m.buttons.size() == 12)
+	var save_btn: Button = m.buttons["save"]
+	check("Save grijs en leesbaar (Codex-stijl)", MenuScreenC.is_button_greyed(save_btn) and save_btn.text.contains("Save")
+			and save_btn.text.contains("Find a glowing book"))
+	m.choose("save")
+	await frames(2)
+	check("Save-knop opent geen opslagscherm", m.get_node_or_null("SaveScreen") == null and m.message_label.text == "Find a glowing book")
 	check("label MENU boven Warpen", m.menu_label.text == "MENU"
 			and m.menu_label.get_global_rect().end.y <= m.buttons["warp"].get_global_rect().position.y + 1.0)
 	check("'Uitrusting' heeft de focus", m.buttons["equip"].has_focus())
