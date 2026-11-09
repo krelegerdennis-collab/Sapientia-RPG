@@ -655,7 +655,7 @@ func _vind_speler() -> Node:
 
 
 func _meet_positie() -> void:
-	if GameState.in_battle or GameState.changing_map:
+	if GameState.scene_busy():
 		return
 	var p := _vind_speler()
 	if p == null or not p.has_method("get_tile"):

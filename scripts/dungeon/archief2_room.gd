@@ -161,7 +161,7 @@ func _zeg(lines: Array, speaker: String) -> void:
 	await get_tree().create_timer(0.35).timeout
 	Dialog.show_lines(lines, speaker)
 	await Dialog.finished
-	if is_instance_valid(player) and not GameState.changing_map and not GameState.in_battle:
+	if is_instance_valid(player) and not GameState.scene_busy():
 		player.input_locked = false
 
 

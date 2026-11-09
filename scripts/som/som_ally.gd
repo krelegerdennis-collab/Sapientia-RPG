@@ -19,8 +19,14 @@ var slot := 0
 var facing := Vector2i.DOWN
 var charge := 1.0
 var sprite: Sprite2D
-## "follow", "engage", "flee", "ko" (voor tests/debug)
-var state := "follow"
+## AI-toestand (docs/STATE_MACHINES.md §3), strings voor tests/debug. Per tick opnieuw bepaald:
+## niet alive -> KO; anders laag HP + vijand -> FLEE; vijand -> ENGAGE; anders FOLLOW.
+const ST_FOLLOW := "follow"
+const ST_ENGAGE := "engage"
+const ST_FLEE := "flee"
+const ST_KO := "ko"
+const STATES: Array[String] = [ST_FOLLOW, ST_ENGAGE, ST_FLEE, ST_KO]
+var state := ST_FOLLOW
 var stuck_t := 0.0
 var spell_cd := 1.0
 var teleports := 0
@@ -51,7 +57,7 @@ func setup(p_arena: Node, id: String, p_slot: int) -> void:
 ## Andere held in dit lichaam (bij wisselen van besturing).
 func set_hero(id: String) -> void:
 	SomFx.set_ko(self, arena.pose_tex(hero_id, "ko"), false)
-	state = "follow"
+	state = ST_FOLLOW
 	hero_id = id
 	name = "Ally_" + id
 	var tex: Texture2D = arena.sheet_for(id)
@@ -94,15 +100,15 @@ func in_wall() -> bool:
 
 func tick(delta: float) -> void:
 	if not alive():
-		if state != "ko":
+		if state != ST_KO:
 			var ko: Texture2D = arena.pose_tex(hero_id, "ko")
 			SomFx.set_ko(self, ko, true)
 			if ko == null:
 				sprite.modulate = Color(0.45, 0.45, 0.5, 0.8)
-		state = "ko"
+		state = ST_KO
 		return
-	if state == "ko":
-		state = "follow"
+	if state == ST_KO:
+		state = ST_FOLLOW
 		SomFx.set_ko(self, arena.pose_tex(hero_id, "ko"), false)
 	sprite.modulate = Color.WHITE
 	if in_wall():
@@ -117,11 +123,11 @@ func tick(delta: float) -> void:
 	var enemy: Node = arena.nearest_enemy(arena.player.position, SomData.ALLY_ENGAGE_RANGE)
 	var low := float(m["hp"]) / maxf(1.0, float(m["max_hp"])) < SomData.ALLY_LOW_HP
 	if low and enemy:
-		state = "flee"
+		state = ST_FLEE
 		var away: Vector2 = (position - arena.center_of(enemy)).normalized()
 		target = arena.center_of(enemy) + away * SomData.ALLY_FLEE_DIST
 	elif enemy:
-		state = "engage"
+		state = ST_ENGAGE
 		var c: Vector2 = arena.center_of(enemy)
 		var side := Vector2(signf(position.x - c.x), 0)
 		if side == Vector2.ZERO:
@@ -136,7 +142,7 @@ func tick(delta: float) -> void:
 			attacks += 1
 			arena.ally_attack(self, enemy)
 	else:
-		state = "follow"
+		state = ST_FOLLOW
 	_move_to(target, delta)
 
 

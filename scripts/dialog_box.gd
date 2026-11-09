@@ -32,6 +32,13 @@ const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 @export var chars_per_second := 40.0
 
 var is_open := false
+## Fase van het tekstvak (docs/STATE_MACHINES.md §7), afgeleid; alleen lezen via phase():
+##   CLOSED -> TYPING (letters verschijnen) -> WAITING (pijltje: A/tik) of CHOOSING (vraag) -> ...
+const PHASE_CLOSED := "closed"
+const PHASE_TYPING := "typing"
+const PHASE_WAITING := "waiting"
+const PHASE_CHOOSING := "choosing"
+const PHASES: Array[String] = [PHASE_CLOSED, PHASE_TYPING, PHASE_WAITING, PHASE_CHOOSING]
 var _lines: Array = []
 var _index := 0
 var _shown := 0.0
@@ -550,6 +557,17 @@ func advance() -> void:
 		close()
 	else:
 		_show_current()
+
+
+## De huidige fase (zie PHASES). Vervangt het met de hand combineren van is_open / _is_typing() / has_choices().
+func phase() -> String:
+	if not is_open:
+		return PHASE_CLOSED
+	if _is_typing():
+		return PHASE_TYPING
+	if has_choices():
+		return PHASE_CHOOSING
+	return PHASE_WAITING
 
 
 func close() -> void:

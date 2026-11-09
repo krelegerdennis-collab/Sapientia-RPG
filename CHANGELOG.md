@@ -30,6 +30,11 @@ Alles op `main` na tag `v0.20`.
 - Release-docs: `LAUNCH_PLAN.md`, `FINISH_LOG.md` (scorekaart), `STORE_LISTING.md`; `tools/sfx/` (SFX-generatie via ComfyUI + Stable Audio Open).
 
 ### Gewijzigd
+- Toestandsmachines expliciet gemaakt zonder de buitenkant te veranderen (`docs/STATE_MACHINES.md`): veldflow via
+  `FlowState` (`GameState.flow_state()/scene_busy()/field_free()` + signaal `flow_changed`) in plaats van ~20 herhaalde
+  guards; benoemde constanten + sets voor `battle.state`, `som_ally.state`, `kern_absorption.phase` en de `mode` van
+  winkel/uitrusting/slotlijst/Codex; alleen-lezen `player.movement_state()` en `Dialog.phase()`. Nieuwe suite
+  `--statemachinetest` (75) bewaakt dat elke toestand een constante in de set is.
 - Wilgendal plein 10 en binnen-tilesets v8 van RPG ART; Archief 2 geschaald (1.4x), Berggrot-geheim, Wilgendal-panden.
 - WM1-cuts (content-lock Dennis, 24 okt): hubkamers H3, nissen H2, dev-kamers H1, PvP/Co-op-knoppen H11 (verborgen zonder relay-URL), Koopman H13.
 - Art-batches 1 en 3 en nieuw titelscherm naar het masterpalet (RPG ART).
