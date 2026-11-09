@@ -767,7 +767,7 @@ func _scenes_tests() -> void:
 			var gz: Node = get_tree().root.get_node_or_null("SceneReplay/CanonGenezer")
 			var vs: Node = gz.video_speler if gz != null else null
 			check("ww_warper: herhaling start met Dax' filmpje (ook als het al gezien is)", vs != null and is_instance_valid(vs)
-					and str(vs.video_path).ends_with("genezer_warper.ogv"))
+					and str(vs.video_path).ends_with("genezer_warper_v3.ogv"))
 			await get_tree().create_timer(1.5).timeout
 			await screenshot("scenes_herhaling_warper_video")
 			if vs != null and is_instance_valid(vs):

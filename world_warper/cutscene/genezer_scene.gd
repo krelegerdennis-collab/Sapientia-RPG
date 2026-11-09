@@ -19,7 +19,7 @@ const LAAG := 4
 ## v0.23 filmpje van Dennis (~21 s, 720x1280): de kern, de Hanger licht op, straal door de kas,
 ## de lucht scheurt open en de World Warper verschijnt. Speelt vóór de dialoog, één keer (vlag),
 ## en altijd in de herhaling (veldmenu > Scenes > The World Warper).
-const VIDEO := "res://assets/video/genezer_warper.ogv"
+const VIDEO := "res://assets/video/genezer_warper_v3.ogv"
 const VIDEO_FLAG := "cutscene_genezer_video_gezien"
 const VIDEO_MAX := 34.0
 const CutsceneSpeler := preload("res://scripts/worldmap_cutscene.gd")

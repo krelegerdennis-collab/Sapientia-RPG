@@ -158,8 +158,8 @@ func _process(delta: float) -> void:
 static func lines_for(id: String) -> Array:
 	var f := KernData.fragment(id)
 	var lead := "{naam} absorbs the %s!" % f.get("naam", id)
-	# CS-02: Sapientia drinkt de golemkern leeg, ook zonder filmpje. Ids en beloningen blijven gelijk.
-	if id == "golemkern":
+	# CS-02: Sapientia drinkt de golemkern leeg. Ids en beloningen blijven gelijk.
+	if id == "golemkern" and GameState.story_flags.has("cutscene_cs02_gezien"):
 		lead = "Sapientia drank the Golem Core dry."
 	var lines: Array = [lead]
 	var sk := str(f.get("battle_skill", ""))

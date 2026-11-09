@@ -49,7 +49,7 @@ const VIDEOS := {
 		"title": "The Mender",
 	},
 	"cs05": {
-		"path": "res://assets/video/genezer_warper.ogv",
+		"path": "res://assets/video/genezer_warper_v3.ogv",
 		"flag": "cutscene_genezer_video_gezien",
 		"aspect": WIDE,
 		"max_seconds": 34.0,
