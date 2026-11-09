@@ -141,7 +141,7 @@ func _on_setting(key: String) -> void:
 ## Klopt de kamer niet (meer) met de gekozen stijl? Dan op deze plek opnieuw opbouwen.
 func apply_battle_style() -> void:
 	_style_pending = false
-	if not is_inside_tree() or get_tree().current_scene != self or GameState.changing_map or GameState.in_battle:
+	if not is_inside_tree() or get_tree().current_scene != self or GameState.scene_busy():
 		return
 	if (som != null) == wants_som():
 		return
@@ -655,7 +655,7 @@ func is_wall(t: Vector2i) -> bool:
 # ---------------------------------------------------------------- monsters
 ## Mogen de monsters bewegen/aanraken? Niet tijdens tekst, menu, cutscene, overgang of gevecht.
 func monsters_active() -> bool:
-	return is_node_ready() and _grace_left <= 0.0 and not GameState.in_battle and not GameState.changing_map \
+	return is_node_ready() and _grace_left <= 0.0 and not GameState.scene_busy() \
 			and not Dialog.is_open and not menu_open() and not Story.running and not _touch_lock \
 			and is_instance_valid(player) and not player.input_locked
 
@@ -834,7 +834,7 @@ func push_blocked(_t: Vector2i) -> bool:
 ## Alle monsters schuiven tegelijk en vloeiend (MapMonster beweegt naar target_tile). true = geduwd.
 func push_monster(m: Node, dir: Vector2i) -> bool:
 	# zoals monsters_active(), maar zonder de korte rustpauze na binnenkomen (een duw is geen aanval)
-	if not is_node_ready() or GameState.in_battle or GameState.changing_map or Dialog.is_open or menu_open() \
+	if not is_node_ready() or GameState.scene_busy() or Dialog.is_open or menu_open() \
 			or Story.running or _touch_lock or not is_instance_valid(player) or player.input_locked or not m.is_stunned():
 		return false
 	var chain := push_chain(m, dir)

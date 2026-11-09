@@ -34,7 +34,7 @@ jobs:
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
                 koopmantest, testmodustest, telegraphtest, roottest,
                 formuletest, battlesimenemytest, combatbugstest, perfprobetest, huiscollisiontest,
-                studiourltest, gategaptest, woudgrondtest, golemstorytest]
+                studiourltest, gategaptest, woudgrondtest, golemstorytest, statemachinetest]
     steps:
       - uses: actions/checkout@v4
 

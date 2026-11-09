@@ -62,6 +62,28 @@ var hold_until_release := false
 ## tot alle richtingen zijn losgelaten (geen warp-pingpong tussen twee kaarten).
 var spawn_hold := false
 
+## Bewegingstoestand (docs/STATE_MACHINES.md §6), afgeleid van de vlaggen hierboven; alleen lezen.
+## Prioriteit: SCRIPTED > LOCKED > ANALOG > STEPPING > IDLE. Voor debug, sessielog en tests; de
+## vlaggen zelf blijven leidend (Story zet _scripted/input_locked, SomArena zet analog_input).
+const MOVE_IDLE := "idle"            ## staat stil, luistert naar de richting
+const MOVE_STEPPING := "stepping"    ## schuift naar de volgende tegel (grid)
+const MOVE_ANALOG := "analog"        ## vrije pixelbeweging (Action/SoM)
+const MOVE_LOCKED := "locked"        ## input_locked: gevecht/wissel/cutscene/absorptie
+const MOVE_SCRIPTED := "scripted"    ## cutscene laat de speler lopen (script_walk)
+const MOVE_STATES: Array[String] = [MOVE_IDLE, MOVE_STEPPING, MOVE_ANALOG, MOVE_LOCKED, MOVE_SCRIPTED]
+
+
+func movement_state() -> String:
+	if _scripted:
+		return MOVE_SCRIPTED
+	if input_locked:
+		return MOVE_LOCKED
+	if analog_input.is_valid():
+		return MOVE_ANALOG
+	if is_moving:
+		return MOVE_STEPPING
+	return MOVE_IDLE
+
 
 func richting_ingedrukt() -> bool:
 	for a in ["move_up", "move_down", "move_left", "move_right"]:
@@ -201,7 +223,7 @@ func _action_pose_active() -> bool:
 
 func _process_analog(delta: float) -> void:
 	var v := Vector2.ZERO
-	if not input_locked and not GameState.changing_map and not GameState.in_battle:
+	if not input_locked and not GameState.scene_busy():
 		v = analog_input.call()
 	if _spawn_hold_actief():
 		v = Vector2.ZERO

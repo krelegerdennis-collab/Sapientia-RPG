@@ -130,9 +130,22 @@ const SIDE_GAP := 3.0
 ## Hoeveel art-pixels per scherm-eenheid (2 = "16-bit plus", 768x432).
 const DETAIL := 2
 
-## Huidige toestand (handig voor debuggen en de autotest):
-## intro, command, target_enemy, target_ally, busy, message_wait
-var state := "intro"
+## Toestand van het gevecht (docs/STATE_MACHINES.md §2). Strings, zodat tests en logs ze direct lezen:
+##   intro -> command <-> target_enemy / target_ally ; command -> busy <-> message_wait
+## Alleen via _set_state() zetten; nieuwe toestand = constante erbij + in STATES (de suite
+## --statemachinetest controleert dat elke toestand die dit bestand zet een bekende is).
+const ST_INTRO := "intro"                 ## vóór de eerste ronde
+const ST_COMMAND := "command"             ## kruis/lijstje open: de speler kiest een commando
+const ST_TARGET_ENEMY := "target_enemy"   ## pijltje op een vijand
+const ST_TARGET_ALLY := "target_ally"     ## pijltje op een held
+const ST_BUSY := "busy"                   ## acties spelen af, geen invoer
+const ST_MESSAGE_WAIT := "message_wait"   ## wacht op A/tik bij een bericht of de winstpagina
+const STATES: Array[String] = [ST_INTRO, ST_COMMAND, ST_TARGET_ENEMY, ST_TARGET_ALLY, ST_BUSY, ST_MESSAGE_WAIT]
+## Toestanden waarin de speler iets kiest (zie choosing()).
+const CHOOSING_STATES: Array[String] = [ST_COMMAND, ST_TARGET_ENEMY, ST_TARGET_ALLY]
+var state := ST_INTRO
+## Vorige toestand (debug/tests): wat er vóór de laatste _set_state stond.
+var prev_state := ""
 var current_hero := -1
 var _hero_top_y := 0.0           # bovenkant van het heldenblok (voor de hoogte van de lijstjes)
 var heroes: Array = []     # combatanten (Dictionary) voor de party
@@ -855,7 +868,7 @@ func _run() -> void:
 		menu.close()
 		cross.close()
 		_hide_tip()
-		_set_state("busy")
+		_set_state(ST_BUSY)
 		if plan.size() == 1 and plan[0]["type"] == "flee":
 			if await _try_flee():
 				await GameState.end_battle("flee")
@@ -948,7 +961,7 @@ func _set_active_hero(i: int) -> void:
 func _choose_for_hero(hero: Dictionary, can_go_back: bool):
 	var last := 0          # na 'terug' uit een submenu/doelkeuze staat het kruis weer daar
 	while true:
-		_set_state("command")
+		_set_state(ST_COMMAND)
 		show_message("What will %s do?" % hero["name"])
 		_show_tip(hero)
 		var allowed := [
@@ -1028,7 +1041,7 @@ func _choose_codex(hero: Dictionary):
 	var book: String = CodexDataScript.BOOK_ITEM
 	var last := 0
 	while true:
-		_set_state("command")
+		_set_state(ST_COMMAND)
 		var books := _items_left(book)
 		var vangen := "Capture  Book x%d" % books if books > 0 else "Capture: no Blank Book"
 		var wissel := "Swap ally"
@@ -1081,7 +1094,7 @@ func _choose_swap(hero: Dictionary):
 
 func _choose_spell(hero: Dictionary):
 	while true:
-		_set_state("command")
+		_set_state(ST_COMMAND)
 		var ids: Array = hero["s"]["spells"]
 		var entries := []
 		for id in ids:
@@ -1124,7 +1137,7 @@ func _choose_spell(hero: Dictionary):
 
 func _choose_item(hero: Dictionary):
 	while true:
-		_set_state("command")
+		_set_state(ST_COMMAND)
 		var ids := _available_items()
 		if ids.is_empty():
 			return null
@@ -1205,7 +1218,7 @@ func _prev_alive_hero(from: int) -> int:
 ## v0.19: label (optioneel) = tekst bij het pijltje (bv. 'Mosslijm 35%' bij Vangen); prefix komt
 ## ervoor in de berichtstrook.
 func _select_enemy(label := Callable(), prefix := ""):
-	_set_state("target_enemy")
+	_set_state(ST_TARGET_ENEMY)
 	var living := _alive(enemies)
 	# v9.1: vijanden staan bovenin; het pijltje blijft onder de bericht-strook (dan wijst het
 	# iets in het plaatje, op het hoofd)
@@ -1214,7 +1227,7 @@ func _select_enemy(label := Callable(), prefix := ""):
 
 
 func _select_ally():
-	_set_state("target_ally")
+	_set_state(ST_TARGET_ALLY)
 	var living := _alive(heroes)
 	var result = await _pick_target(living, "On whom?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
 	if result != null:
@@ -1231,7 +1244,7 @@ func _select_ko():
 		show_message("Nobody is knocked out.")
 		await _wait(MESSAGE_TIME)
 		return null
-	_set_state("target_ally")
+	_set_state(ST_TARGET_ALLY)
 	return await _pick_target(dead, "Who?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
 
 
@@ -1306,13 +1319,13 @@ func _place_target_name(tip: Vector2) -> void:
 
 
 func _on_enemy_pressed(c: Dictionary) -> void:
-	if state == "target_enemy":
+	if state == ST_TARGET_ENEMY:
 		_tapped = c
 
 
 ## Tik op een heldensprite of op zijn statusvak.
 func _on_hero_tapped(row: int) -> void:
-	if state == "target_ally":
+	if state == ST_TARGET_ALLY:
 		_tapped = heroes[row]
 
 
@@ -2131,7 +2144,7 @@ func victory_text(exp_total: int, gold_total: int, loot_lines: Array = []) -> St
 
 func _victory_page(text: String) -> void:
 	victory_label.text = text
-	_set_state("message_wait")
+	_set_state(ST_MESSAGE_WAIT)
 	_message_tapped = false
 	await get_tree().process_frame      # de tik die het vorige venster sloot telt niet mee
 	_message_tapped = false
@@ -2144,7 +2157,7 @@ func _victory_page(text: String) -> void:
 		if Input.is_action_just_pressed("interact") or _message_tapped:
 			break
 	arrow.hide()
-	_set_state("busy")
+	_set_state(ST_BUSY)
 
 
 func _defeat() -> void:
@@ -2167,7 +2180,7 @@ func _defeat() -> void:
 func say(text: String, wait_for_input := false) -> void:
 	show_message(text)
 	if wait_for_input:
-		_set_state("message_wait")
+		_set_state(ST_MESSAGE_WAIT)
 		_message_tapped = false
 		var t := 0.0
 		while true:
@@ -2177,7 +2190,7 @@ func say(text: String, wait_for_input := false) -> void:
 			if Input.is_action_just_pressed("interact") or _message_tapped:
 				break
 		message_arrow.hide()
-		_set_state("busy")
+		_set_state(ST_BUSY)
 	else:
 		await _wait(MESSAGE_TIME)
 
@@ -2199,7 +2212,7 @@ func show_message(text: String) -> void:
 
 ## Kiest de speler nu (kruis, lijstje of doelwit)?
 func choosing() -> bool:
-	return state in ["command", "target_enemy", "target_ally"]
+	return state in CHOOSING_STATES
 
 
 ## Strook precies zo groot als de tekst, horizontaal gecentreerd bovenin.
@@ -2221,7 +2234,7 @@ func _process(delta: float) -> void:
 	# T27: s25_check RISK — gevecht-frame; `_pp_on` uit _ready, geen PerfProbe.enabled per frame
 	if _pp_on:
 		PerfProbe.begin(_pp_lbl)
-	if not caption.visible or state in ["command", "target_enemy", "target_ally", "message_wait"]:
+	if not caption.visible or choosing() or state == ST_MESSAGE_WAIT:
 		if _pp_on:
 			PerfProbe.end(_pp_lbl)
 		return
@@ -2236,7 +2249,7 @@ func _process(delta: float) -> void:
 
 ## Tik ergens op het scherm = verder (als er op een tik gewacht wordt).
 func _unhandled_input(event: InputEvent) -> void:
-	if state != "message_wait":
+	if state != ST_MESSAGE_WAIT:
 		return
 	if (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed):
 		_message_tapped = true
@@ -2306,12 +2319,15 @@ func _shake(node: Control, strength: float) -> void:
 func _refresh_party() -> void:
 	for i in status_boxes.size():
 		var box: Control = status_boxes[i]
-		box.active = i == current_hero and state in ["command", "target_enemy", "target_ally"]
+		box.active = i == current_hero and choosing()
 		box.targeted = i == _target_row
 		box.queue_redraw()
 
 
 func _set_state(s: String) -> void:
+	if not (s in STATES):
+		push_error("battle: onbekende toestand '%s' (zie STATES)" % s)
+	prev_state = state
 	state = s
 	_refresh_party()
 	state_changed.emit(s)

@@ -17,7 +17,12 @@ var venster: PanelContainer
 var dim: ColorRect
 var _placing := false
 ## "load" (standaard) of "new"
-var mode := "load"
+## Waarvoor staat de lijst open (docs/STATE_MACHINES.md §5): LOAD (Continue, standaard) | NEW (New Game).
+## title_screen.gd zet hem vóór het vullen.
+const MODE_LOAD := "load"
+const MODE_NEW := "new"
+const MODES: Array[String] = [MODE_LOAD, MODE_NEW]
+var mode := MODE_LOAD
 var autosave_button: Button = null
 
 
@@ -38,7 +43,7 @@ func _ready() -> void:
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 0)
 	box.add_child(list)
-	var is_new := mode == "new"
+	var is_new := mode == MODE_NEW
 	list.add_child(UiMenu.label("New game: choose a slot" if is_new else "Choose a slot", UiStyleC.TEXT))
 	var focus_btn: Button = null
 	var best := -1.0

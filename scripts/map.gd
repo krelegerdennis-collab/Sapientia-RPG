@@ -163,7 +163,7 @@ func allows_checkpoint() -> bool:
 
 
 func _show_respawn_msg(lines: Array) -> void:
-	if not is_inside_tree() or GameState.in_battle or GameState.changing_map:
+	if not is_inside_tree() or GameState.scene_busy():
 		return
 	Dialog.show_lines(lines, "")
 
@@ -312,18 +312,18 @@ func _process(_delta: float) -> void:
 		open_field_menu()
 	# F3 = baasgevecht (alleen debug-builds, alleen op maps met monsters)
 	if OS.is_debug_build() and encounters and Input.is_action_just_pressed("debug_boss"):
-		if not GameState.in_battle and not GameState.changing_map and not player.is_moving and not Dialog.is_open:
+		if not GameState.scene_busy() and not player.is_moving and not Dialog.is_open:
 			start_boss_battle()
 	# TIJDELIJK (puzzels): F4 = naar de puzzel-testkamer (alleen debug-builds). Weghalen
 	# zodra De Vergeten Archieven een echte ingang heeft.
 	if ReleaseFlags.dev_rooms_allowed() and InputMap.has_action("debug_puzzle") and Input.is_action_just_pressed("debug_puzzle"):
-		if not GameState.in_battle and not GameState.changing_map and not player.is_moving \
+		if not GameState.scene_busy() and not player.is_moving \
 				and not Dialog.is_open and not menu_open() and not Story.running:
 			player.input_locked = true
 			GameState.change_map(DEBUG_PUZZLE_ROOM, "ingang")
 	# F2 = forceer een gevecht (alleen in debug-builds en alleen op maps met monsters).
 	if OS.is_debug_build() and encounters and Input.is_action_just_pressed("debug_battle"):
-		if not GameState.in_battle and not GameState.changing_map and not player.is_moving and not Dialog.is_open:
+		if not GameState.scene_busy() and not player.is_moving and not Dialog.is_open:
 			start_battle(GameState.pick_encounter_group(terrain_at(player.get_tile())))
 	if _pp_on:
 		PerfProbe.end(_pp_lbl)
@@ -356,7 +356,7 @@ func _on_player_stepped(tile: Vector2i) -> void:
 ## tegenaan loopt, gaat de berggrot in (Dennis 2026-10-13, tegel 21,17).
 func _on_player_bumped(tile: Vector2i) -> void:
 	SessieLog.bump(tile)
-	if GameState.changing_map or GameState.in_battle or Dialog.is_open:
+	if GameState.scene_busy() or Dialog.is_open:
 		return
 	# Wereldkaart: NaarBouwplaats in de bergtegel. Bouwplaats: NaarBerggrot (de tunnel zelf).
 	for naam in ["NaarBouwplaats", "NaarBerggrot"]:

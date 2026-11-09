@@ -117,7 +117,7 @@ func _place_puzzel() -> void:
 
 func _puzzel_hint() -> void:
 	await get_tree().create_timer(PUZZEL_HINT_WACHT).timeout
-	if not is_instance_valid(puzzel) or not is_inside_tree() or GameState.changing_map or GameState.in_battle:
+	if not is_instance_valid(puzzel) or not is_inside_tree() or GameState.scene_busy():
 		return
 	if Dialog.is_open:
 		await Dialog.finished

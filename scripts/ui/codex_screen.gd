@@ -37,9 +37,12 @@ const NAME_W := 13         # tekens voor de naam in de lijst; langste soort is "
 const NONE_ID := ""
 const HINT := "A: ally   >: fusion   B: back"
 ## v0.19 fusie: stappen ("" = gewoon Codex-scherm)
+## Fusie-stappen van het Codex-scherm (docs/STATE_MACHINES.md §5): BROWSE ("") -> A -> B -> PREVIEW -> BROWSE.
+const MODE_BROWSE := ""
 const MODE_A := "kies_a"
 const MODE_B := "kies_b"
 const MODE_PREVIEW := "voorbeeld"
+const MODES: Array[String] = [MODE_BROWSE, MODE_A, MODE_B, MODE_PREVIEW]
 const FUSE_W := 44
 const HINT_A := "Fusion: pick page 1   B: back"
 const HINT_B := "Fusion: pick page 2   B: back"
@@ -57,7 +60,7 @@ var state_label: Label
 var empty_label: Label
 var shown_uid := "-"
 ## v0.19 fusie
-var mode := ""
+var mode := MODE_BROWSE
 var pick_a := ""
 var pick_b := ""
 var preview := {}
@@ -149,7 +152,7 @@ func rebuild(keep_uid := "-") -> void:
 	_update_fuse_button()
 	for p in GameState.codex_pages:
 		uids.append(str(p["uid"]))
-	if not uids.is_empty() and mode == "":
+	if not uids.is_empty() and mode == MODE_BROWSE:
 		uids.append(NONE_ID)
 	for uid in uids:
 		var b := UiMenu.button(entry_label(uid))
@@ -284,13 +287,13 @@ func choose(uid: String) -> void:
 
 # ---------------------------------------------------------------- glitch-fusie (v0.19)
 func _handle_input() -> void:
-	if mode == "" and horizontal_pressed() == 1:
+	if mode == MODE_BROWSE and horizontal_pressed() == 1:
 		start_fusion()
 
 
 ## 'Fusie' / rechts: begin met pagina 1 kiezen (minstens 2 pagina's nodig).
 func start_fusion() -> void:
-	if mode != "":
+	if mode != MODE_BROWSE:
 		return
 	if GameState.codex_pages.size() < 2:
 		show_message("A fusion needs two pages.", MenuColors.TEXT_DIM)
@@ -317,13 +320,13 @@ func back() -> void:
 		MODE_B:
 			_set_mode(MODE_A, pick_a)
 		MODE_A:
-			_set_mode("", pick_a)
+			_set_mode(MODE_BROWSE, pick_a)
 		_:
 			close()
 
 
 func _update_fuse_button() -> void:
-	fuse_button.visible = mode == "" and not GameState.codex_pages.is_empty()
+	fuse_button.visible = mode == MODE_BROWSE and not GameState.codex_pages.is_empty()
 	if GameState.codex_pages.size() < 2:
 		_set_button_color(fuse_button, MenuColors.TEXT_OFF)
 	else:
@@ -380,13 +383,13 @@ func confirm_fusion() -> void:
 	var page := GameState.codex_fuse(pick_a, pick_b)
 	if page.is_empty():
 		show_message(GameState.codex_fusion_reason(pick_a, pick_b), MenuColors.TEXT_DIM)
-		_set_mode("")
+		_set_mode(MODE_BROWSE)
 		return
 	pick_a = ""
 	pick_b = ""
 	preview = {}
 	state_label.add_theme_color_override("font_color", MenuColors.INFO)
-	_set_mode("", str(page["uid"]))
+	_set_mode(MODE_BROWSE, str(page["uid"]))
 	if Engine.has_singleton("Crt") or get_node_or_null("/root/Crt") != null:
 		get_node("/root/Crt").start_glitch(0.18)
 	show_message("Fusion succeeded: %s, Lv %d!" % [page["name"], int(page["level"])], UiStyle.GLITCH)

@@ -8,7 +8,12 @@ const PartyActions := preload("res://scripts/party_actions.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 
 var shop_id := ""
-var mode := "koop"
+## Tabblad van de winkel (docs/STATE_MACHINES.md §5): KOOP | VERKOOP | HELD (uitrusting per held).
+const MODE_KOOP := "koop"
+const MODE_VERKOOP := "verkoop"
+const MODE_HELD := "held"
+const MODES: Array[String] = [MODE_KOOP, MODE_VERKOOP, MODE_HELD]
+var mode := MODE_KOOP
 var _pending_spell := ""
 var detail_row: HBoxContainer
 var detail_icon: TextureRect
@@ -112,7 +117,7 @@ func _detail_desc(id: String) -> String:
 
 
 func _show_koop() -> void:
-	mode = "koop"
+	mode = MODE_KOOP
 	_pending_spell = ""
 	_clear()
 	var switch := _row("Sell")
@@ -132,7 +137,7 @@ func _show_koop() -> void:
 
 
 func _show_verkoop() -> void:
-	mode = "verkoop"
+	mode = MODE_VERKOOP
 	_clear()
 	var back := _row("Buy")
 	back.pressed.connect(_show_koop)
@@ -150,7 +155,7 @@ func _show_verkoop() -> void:
 
 
 func _show_held(spell_id: String) -> void:
-	mode = "held"
+	mode = MODE_HELD
 	_pending_spell = spell_id
 	_clear()
 	content.add_child(UiMenu.label("Who learns this?", MenuColors.TEXT))
@@ -194,7 +199,7 @@ func _on_sell(id: String) -> void:
 
 
 func back() -> void:
-	if mode == "held" or mode == "verkoop":
+	if mode == MODE_HELD or mode == MODE_VERKOOP:
 		_show_koop()
 		return
 	close()
