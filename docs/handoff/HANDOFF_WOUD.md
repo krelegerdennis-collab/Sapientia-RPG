@@ -20,7 +20,7 @@
 | Esdoorn + interieurs + wereldkaart | `tools/build_maps.gd` (`--only=v17`) |
 | Test | `scripts/tests/woud_tests.gd` (`--woudtest`, delen A-E) |
 
-## Codex (v0.17 samengevoegd, patch RPG CODE, zie `HANDOFF_CODEX.md`)
+## Codex (v0.17 samengevoegd, patch RPG CODE, zie `docs/handoff/HANDOFF_CODEX.md`)
 - Lege Boeken: NIET in `START_INVENTORY`. Event `marit_boeken` (story_data.gd): 3 stuks aan het eind van
   `noor_ontmoeting`, of bij een gesprek met Marit als de ontmoeting al gezien is (oude save). Kisten
   `kist_w4` (Woudpad, 30,4) en `kist_w5` (Sporenkring, 17,4): elk 1.

@@ -340,7 +340,7 @@ func capture(actor: Dictionary, target) -> void:
 
 
 func _refund(item: String) -> void:
-	GameState.inventory[item] = GameState.item_count(item) + 1
+	GameState.add_item(item, 1)
 
 
 ## Boek vliegt naar het monster, dan het inschrijf-effect (RPG ART: 4 frames van 48x48, 0,1 s per

@@ -187,8 +187,8 @@ func _gear_tests() -> void:
 			and not Equipment.can_wear(dennis, "bg_g4_staf_noor") and not Equipment.can_wear(lotte, "bg_g4_staf_noor"))
 	check("staf van Seren alleen voor de priester", Equipment.can_wear(lotte, "bg_g4_staf_lotte")
 			and not Equipment.can_wear(noor, "bg_g4_staf_lotte"))
-	GameState.inventory["bg_g4_plated_helm"] = 1
-	GameState.inventory["bg_g4_plated_harnas"] = 1
+	GameState.set_item_count("bg_g4_plated_helm", 1)
+	GameState.set_item_count("bg_g4_plated_harnas", 1)
 	var on := Equipment.equip(dennis, GameState.inventory, "helm", "bg_g4_plated_helm")
 	check("platenhelm om", on["ok"] and Equipment.item_bonus("bg_g4_plated_helm", "def") == 16 + 6)
 	dennis["equip"]["harnas"] = "bg_g4_natuur_harnas"

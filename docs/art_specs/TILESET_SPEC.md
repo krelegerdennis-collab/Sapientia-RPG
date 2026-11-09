@@ -10,7 +10,7 @@ die blijven gelijk. Je hoeft dus geen code of Godot-instellingen aan te raken.
 Sjablonen (huidige placeholder-tiles, 4x vergroot, met nummer, positie en solid-markering) in
 deze map: `template_dorp.png`, `template_huis.png`, `template_wereld.png`,
 `template_player.png`, `template_npc.png`, `template_sign.png`. Opnieuw maken (na wijzigingen):
-`python3 tools/make_tile_templates.py /workspace/art_specs_v8`.
+`python3 tools/make_tile_templates.py (scratch-map, niet in repo) art_specs_v8`.
 
 ## 0. Algemene regels
 
@@ -48,7 +48,7 @@ deze map: `template_dorp.png`, `template_huis.png`, `template_wereld.png`,
 | `assets/sprites/npc.png` | **48x96** | Oude Wijze, zelfde indeling |
 | `assets/sprites/sign.png` | **16x16** | bordje (staat op een gras-tile) |
 
-(Project-map: `/workspace/lufia_v8/`.) Daarna: Godot-editor openen (importeert vanzelf) of
+(Project-map: `(scratch-map, niet in repo) lufia_v8/`.) Daarna: Godot-editor openen (importeert vanzelf) of
 `godot --headless --path . --import`. Zet je bestand ook in `tools/handwerk.txt`, dan
 overschrijft `tools/generate_art.py` het niet meer.
 

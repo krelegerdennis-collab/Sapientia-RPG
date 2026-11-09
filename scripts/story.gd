@@ -346,11 +346,9 @@ func _exec(cmds: Array, arg: String) -> String:
 			"step":
 				GameState.story_step = int(c[1])
 			"give":
-				GameState.inventory[str(c[1])] = GameState.item_count(str(c[1])) + int(c[2])
+				GameState.add_item(str(c[1]), int(c[2]))
 			"take":
-				GameState.inventory[str(c[1])] = maxi(0, GameState.item_count(str(c[1])) - int(c[2]))
-				if GameState.inventory[str(c[1])] == 0:
-					GameState.inventory.erase(str(c[1]))
+				GameState.consume_item(str(c[1]), int(c[2]))
 			"weapon":
 				GameState.equip_weapon(GameState.MAIN_HERO, str(c[1]))
 			"refresh":

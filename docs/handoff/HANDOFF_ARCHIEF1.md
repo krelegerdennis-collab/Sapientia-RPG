@@ -1,8 +1,8 @@
 # HANDOFF – Eerste Archief: Golem-baas Lv 10, Mech. Wachter, geheime deur + runeplaat + schatkist, Vonkzwaard (RPG CODE)
 
-Patch: `/workspace/code_archief1/code_archief1.patch` (op `/workspace/lufia_v14`, snapshot wo 7 okt 2026
-19:05:53 CEST; eerste v14-kopie 18:46:52, daarna opnieuw gelijkgetrokken). Werkkopie: `/workspace/code_archief1/`
-(= v14 + deze patch). `lufia_v9..v14` zijn NIET aangeraakt. Forge's eigen overdracht: `docs/HANDOFF_ARCHIEF1.md`.
+Patch: `(scratch-map, niet in repo) code_archief1/code_archief1.patch` (op `(scratch-map, niet in repo) lufia_v14`, snapshot wo 7 okt 2026
+19:05:53 CEST; eerste v14-kopie 18:46:52, daarna opnieuw gelijkgetrokken). Werkkopie: `(scratch-map, niet in repo) code_archief1/`
+(= v14 + deze patch). `lufia_v9..v14` zijn NIET aangeraakt. Forge's eigen overdracht: `docs/handoff/HANDOFF_ARCHIEF1_FORGE.md`.
 Alle tekst en commentaar Nederlands; geen 'ruben' hardgecodeerd (held = `GameState.MAIN_HERO`); `hd_ui.gd` ongewijzigd.
 
 ## 1. Besluiten
@@ -30,7 +30,7 @@ Alle tekst en commentaar Nederlands; geen 'ruben' hardgecodeerd (held = `GameSta
    `item: vonkzwaard`, `flag: kist_vonkzwaard`). `hook`/`solid` mogen blijven staan (worden genegeerd).
 2. Art: deur `assets/puzzle/geheime_deur_archief.png` (64x32, 4 frames dicht/rune/glitch/open), runeplaat
    `assets/puzzle/drukplaat_rune.png` (32x16), kist `assets/sprites/dungeon/schatkist.png` (48x16: 0 dicht, 1 open,
-   2 open+gloed), icoon `assets/ui/icons/vonkzwaard.png`. Bytes gelijk aan `/workspace/art_archief1_v14/out/`.
+   2 open+gloed), icoon `assets/ui/icons/vonkzwaard.png`. Bytes gelijk aan `(scratch-map, niet in repo) art_archief1_v14/out/`.
 3. Gedrag in het spel: na poort 1 kast c 1x rechts + 6x omhoog op de runeplaat -> geluid `geheime_deur`, animatie 0->3,
    *'Er klinkt een zwaar schrapen achter de muur...'*, `dek` vervaagt (0,4 s), beide deurtegels beloopbaar, deur
    vergrendeld (`GameState.puzzle_latched`). Dicht + A = Forge's hint. Kist + A: eerst vlag, dan 1x Vonkzwaard,
@@ -52,7 +52,7 @@ Alle tekst en commentaar Nederlands; geen 'ruben' hardgecodeerd (held = `GameSta
 
 ## 5. Simulatie (Golem, Dennis solo, 3 drankjes + 3 kruiden)
 Twee onafhankelijke simulaties met dezelfde regels als battle.gd (`ATK x mult - DEF/2`, ±15%, verdedigen = /2):
-`golem_tests.gd` (GDScript, 1500 per rij, seed 2026) en `/workspace/.scratch/a1/sim.py` (3000 per rij). Tabel = sim.py,
+`golem_tests.gd` (GDScript, 1500 per rij, seed 2026) en `(scratch-map, niet in repo) .scratch/a1/sim.py` (3000 per rij). Tabel = sim.py,
 Vonkzwaard +12. 'slim' = aanvallen, in het open venster altijd raak, genezen bij gevaar; 'domweg' = altijd aanvallen,
 nooit genezen; 'nooit_kern' = in het open venster verdedigen.
 
@@ -72,7 +72,7 @@ Klappen Lv 10: open kern 71-97 (altijd >= 45), dicht 17; Golem 20, Hamerslag 60 
 overslaat komt op Lv 8-9 aan: dan zwaar maar te doen (74-90%). De Golem geeft 300 EXP -> Lv 11 erna. Alleen als
 spelers structureel onder Lv 9 aankomen: tier-EXP van verdieping 4 x3 -> x3,5 (niet de curve aanpassen).
 
-## 7. Tests (Godot 4.3 en 4.7.2, `/workspace/run_tests_iso.sh`, eigen user://-map)
+## 7. Tests (Godot 4.3 en 4.7.2, `(scratch-map, niet in repo) run_tests_iso.sh`, eigen user://-map)
 Gedraaid wo 7 okt 2026 19:07-20:05 CEST op de werkkopie (= v14 + patch), elke suite met eigen user://-map.
 `archieftest` daarna opnieuw (20:10, beide versies) na een kleine test-aanpassing (A-druk opnieuw als het tekstvak
 niet opengaat; nodig met beeld onder xvfb).
@@ -87,14 +87,14 @@ niet opengaat; nodig met beeld onder xvfb).
 | `--archieftest` (nieuw) | 89 / 0 | 89 / 0 |
 
 Geen SCRIPT ERRORs. Met beeld (xvfb, OpenGL, Godot 4.3) ook groen: archieftest 89/0, golemtest 62/0.
-De patch is getest op een verse kopie van `/workspace/lufia_v14` (`git apply --check`, daarna identiek aan de werkkopie).
+De patch is getest op een verse kopie van `(scratch-map, niet in repo) lufia_v14` (`git apply --check`, daarna identiek aan de werkkopie).
 `archieftest` dekt: logica (2-tegel-deur, vergrendeling, herstelsteen, set_state, validatie), de echte route in de
 kamer (hint, kast c op de runeplaat, deur open, door beide deurtegels, kist), zwaard precies 1x, vlag in save +
 autosave, opnieuw binnenkomen, laden, oude save (save-scum) -> nooit 2 zwaarden, Sterkste, uitrustingsscherm
 (pijl ATK +9 t.o.v. Kort zwaard, uitgerust basis +12), 'Schild omhoog' in een echt gevecht.
 
-## 8. Screenshots (`/workspace/code_archief1_shots/`, elk + `_3x` 1152x648)
-Gemaakt onder xvfb (OpenGL, Godot 4.3) met `--archieftest` / `--golemtest` `--shots=/workspace/code_archief1_shots`,
+## 8. Screenshots (`(scratch-map, niet in repo) code_archief1_shots/`, elk + `_3x` 1152x648)
+Gemaakt onder xvfb (OpenGL, Godot 4.3) met `--archieftest` / `--golemtest` `--shots=(scratch-map, niet in repo) code_archief1_shots`,
 op een verse v14-kopie + patch. Alle bekeken.
 
 | Bestand | Wat je ziet |

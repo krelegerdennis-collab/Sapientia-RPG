@@ -1,8 +1,8 @@
 # F5 Balans: combat, realtime Action-modus (keten, zware slag, Golem)
 
 **Status: VOORSTEL. Er is niets gecommit naar main, niets gepusht en geen PR geopend.** Dennis beslist.
-Basis: `main` @ `354e7cd` (31-10-2026 00:11 CET). Gemeten op de lokale scratch-branch `scratch/f5-balans` in `/workspace/combat/f5`.
-Ruwe uitvoer: `/workspace/combat/f5_sim/` (JSON + logs per run, `variant.sh`, `scratch_branch.diff`).
+Basis: `main` @ `354e7cd` (31-10-2026 00:11 CET). Gemeten op de lokale scratch-branch `scratch/f5-balans` in `(scratch-map, niet in repo) combat/f5`.
+Ruwe uitvoer: `(scratch-map, niet in repo) combat/f5_sim/` (JSON + logs per run, `variant.sh`, `scratch_branch.diff`).
 
 ## Kort
 1. **De keten loont nu niet voor de speler.** Snel doortikken (hit1→hit2→finisher) levert Dax **5,9 DPS** op, tegen **17,9** als je gewoon op een volle meter wacht. Oorzaak: elke slag zet de wapenmeter op 0, en het ketenvenster (20 ticks) sluit lang voordat de meter (1,0 s) weer vol is. hit2 en de finisher slaan daardoor altijd op de bodem van 10%.
@@ -163,8 +163,8 @@ Wil je L2 exact gelijk aan de keten, dan is ×2,3 het logische volgende punt. **
 
 ## Reproduceren
 ```
-cd /workspace/combat/f5            # branch scratch/f5-balans (lokaal, commit 1f8d5bc, niet gepusht)
-/workspace/combat/f5_sim/variant.sh voorstel 1.0 true "1.0, 1.1, 1.6" "45, 100" "1.4, 2.4"
-/workspace/combat/f5_sim/variant.sh baseline 0.0 false "1.0, 1.1, 1.6" "40, 90" "2.0, 3.0"
+cd (scratch-map, niet in repo) combat/f5            # branch scratch/f5-balans (lokaal, commit 1f8d5bc, niet gepusht)
+(scratch-map, niet in repo) combat/f5_sim/variant.sh voorstel 1.0 true "1.0, 1.1, 1.6" "45, 100" "1.4, 2.4"
+(scratch-map, niet in repo) combat/f5_sim/variant.sh baseline 0.0 false "1.0, 1.1, 1.6" "40, 90" "2.0, 3.0"
 ```
 Grafieken: `f5_sim/f5_dps_dax.png`, `f5_sim/f5_ttk_kennisbeest.png`.

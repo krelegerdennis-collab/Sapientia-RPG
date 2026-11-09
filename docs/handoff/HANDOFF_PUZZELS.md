@@ -1,6 +1,6 @@
 # HANDOFF: puzzelsysteem De Vergeten Archieven (RPG CODE -> RPG Forge)
 
-Werkmap: `/workspace/code_puzzles` (kopie van `lufia_v9`, v0.10). Niets aangeraakt in
+Werkmap: `(scratch-map, niet in repo) code_puzzles` (kopie van `lufia_v9`, v0.10). Niets aangeraakt in
 `lufia_v9`, `lufia_v10`, `lufia_v11` of `code_menu`. Getest met Godot **4.3** (hoofdversie) en
 **4.7.2** (op een tijdelijke kopie, zodat 4.7.2 geen .uid-bestanden in deze map schrijft).
 Uitleg voor level-ontwerp en regels: [`docs/PUZZELS.md`](docs/PUZZELS.md).
@@ -21,7 +21,7 @@ Uitleg voor level-ontwerp en regels: [`docs/PUZZELS.md`](docs/PUZZELS.md).
 | `scripts/data/puzzle_rooms.gd` | `ROOMS` met kamer `archief_test` (14x11) | - | A |
 | `scenes/maps/archief_test.tscn` | Testkamer (root met puzzle_room.gd, Void, lege Ground met binnen.tres, Objects+Player, Spawns, Exits, TouchControls) | bovenstaande | B |
 | `scripts/tests/puzzle_tests.gd` | Tests deel A (logica, data, BFS-oplosser) + B (echte scène met gesimuleerde toetsen) | alles | `-- --puzzletest` |
-| `assets/puzzle/hendel.png`, `drukplaat.png`, `poort.png`, `herstelsteen.png`, `kast_duwbaar.png` (+ `.import`) | **Echte art van RPG ART** (uit `/workspace/art_puzzle_v11/out/`), geïntegreerd en gecontroleerd met PIL (maten/frames kloppen, zie §5) | - | screenshots |
+| `assets/puzzle/hendel.png`, `drukplaat.png`, `poort.png`, `herstelsteen.png`, `kast_duwbaar.png` (+ `.import`) | **Echte art van RPG ART** (uit `(scratch-map, niet in repo) art_puzzle_v11/out/`), geïntegreerd en gecontroleerd met PIL (maten/frames kloppen, zie §5) | - | screenshots |
 | `tools/art_puzzle_placeholders.py` | Placeholder-generator, ALLEEN terugval: schrijft alleen ontbrekende bestanden (`--force`, `--out=`) | PIL | handmatig |
 | `docs/PUZZELS.md` | Handleiding (NL) | - | - |
 | `HANDOFF_PUZZELS.md` | dit bestand | - | - |
@@ -125,7 +125,7 @@ Als je die in v0.11 hernoemt, moet `puzzle_room.gd` mee. Er staan geen preloads 
   Draaien er tegelijk autotests van andere werkmappen, dan kan de save-test
   ('Nee': niets opgeslagen) toevallig falen (gebeurde 1x op 4.7.2). Gebruik dan een eigen
   `XDG_DATA_HOME=/tmp/iets godot ...`; zo geïsoleerd was het weer 264/0.
-- Screenshots (echte rendering, xvfb + opengl3, 3x nearest): `/workspace/code_puzzles_shots/`
+- Screenshots (echte rendering, xvfb + opengl3, 3x nearest): `(scratch-map, niet in repo) code_puzzles_shots/`
   `01_start`, `02_doodlopend`, `03_herstelvraag`, `03b_achter_kast`, `04_opgelost`,
   `05_uitgang_bericht`. Zelf bekeken: muren/zijmuren kloppen met het huis, vaste kasten in de
   muur, duwbare kasten (koper + cyaan rune) duidelijk anders, poorten met donkere doorgang,
@@ -171,7 +171,7 @@ Als je die in v0.11 hernoemt, moet `puzzle_room.gd` mee. Er staan geen preloads 
 
 ## 5. Art (RPG ART) - GEÏNTEGREERD
 
-De echte art uit `/workspace/art_puzzle_v11/out/` zit erin (`assets/puzzle/`). Met PIL
+De echte art uit `(scratch-map, niet in repo) art_puzzle_v11/out/` zit erin (`assets/puzzle/`). Met PIL
 gecontroleerd: RGBA, maten kloppen. Vervangen = zelfde naam en maat, geen code nodig.
 
 | Bestand | Maat | Frames | Gebruik in code |

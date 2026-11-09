@@ -4,7 +4,7 @@
 (`Lore_basis.md`, `Personages_Dossiers.md`, `Wereld_Geografie.md`, `Locaties_Dorpen.md`,
 `Verhaal_Act2_tot_6.md`, `Dialoog_Samples.md`, `data/*.json`). Botst iets daarmee, dan geldt
 wat hier staat. Wat hier niet staat: dan geldt wat er in de game staat (`scripts/data/*.gd`,
-`README.md`, `docs/HANDOFF_*.md`). De achtergrond van elke keuze staat in `BOTSINGEN.md`.*
+`README.md`, `docs/handoff/HANDOFF_*.md`). De achtergrond van elke keuze staat in `BOTSINGEN.md`.*
 
 ## Beslissingen
 

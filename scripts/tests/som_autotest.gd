@@ -969,7 +969,7 @@ func _ring_layout_tests() -> void:
 	while not a.active() and w < 180:
 		await t.frames(1)
 		w += 1
-	GameState.inventory["feniksveer"] = 1
+	GameState.set_item_count("feniksveer", 1)
 	a.open_ring()
 	await t.pframes(2)
 	var vs: Vector2 = ring.root.get_viewport_rect().size

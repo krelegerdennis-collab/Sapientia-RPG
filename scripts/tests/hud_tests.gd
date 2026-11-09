@@ -559,7 +559,7 @@ func _codex_tests() -> void:
 	GameState.new_game("Dax")
 	GameState.encounter_multiplier = 0.0
 	var boek: String = CodexDataT.BOOK_ITEM
-	GameState.inventory[boek] = 5
+	GameState.set_item_count(boek, 5)
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	var a: Node = await _naar(V1, "zuid")
 	check("G: Action-arena met Codex-module", a != null and a.codex != null)
@@ -680,7 +680,7 @@ func _codex_tests() -> void:
 				and bt.contains("is too strong! A boss won't be written in.") and GameState.item_count(boek) == bb and GameState.codex_pages.size() == pp)
 		check("G: baas-hint = too strong", a.codex.hint(bm) == "too strong")
 	# --- geen boek
-	GameState.inventory[boek] = 0
+	GameState.set_item_count(boek, 0)
 	check("G: zonder Leeg Boek: melding, niets gevangen", a.codex.capture() == "No Blank Book left.")
 	# --- opslaan en laden: de gevangen pagina's
 	var pages_voor: Array = GameState.codex_pages.map(func(p): return [str(p["uid"]), str(p["species"]), int(p["level"])])
@@ -713,7 +713,7 @@ func _codex_extra_tests() -> void:
 	GameState.add_member("noor")
 	GameState.encounter_multiplier = 0.0
 	var boek: String = CodexDataT.BOOK_ITEM
-	GameState.inventory[boek] = 9
+	GameState.set_item_count(boek, 9)
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	var a: Node = await _naar(V1, "zuid")
 	await _close_dialogs()
@@ -857,7 +857,7 @@ func _x0_tests() -> void:
 	GameState.new_game("Dax")
 	GameState.encounter_multiplier = 0.0
 	var boek: String = CodexDataT.BOOK_ITEM
-	GameState.inventory[boek] = 1
+	GameState.set_item_count(boek, 1)
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	var a: Node = await _naar(V1, "zuid")
 	await _close_dialogs()
@@ -891,7 +891,7 @@ func _x0_tests() -> void:
 	await pframes(3)
 	check("H: met pagina's maar 0 boeken: knop zichtbaar, tik meldt 'No Blank Book left.'",
 			a.hud.codex_button.visible and a.codex.capture() == "No Blank Book left." and _codex_in_ring(a).is_empty())
-	GameState.inventory[boek] = 2
+	GameState.set_item_count(boek, 2)
 	check("H: weer boeken: ingang terug ('Capture Book x2')", str(_codex_in_ring(a).get("label", "")) == "Capture Book x2")
 	a.codex.force_roll = -1.0
 	Settings.set_value("battle_style", stijl)

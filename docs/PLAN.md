@@ -5,7 +5,7 @@ Bron: `TODO.md` (main, 13 okt 2026). Spelteksten Engels; dit plan Nederlands.
 ## Rollen
 | Wie | Doet |
 |---|---|
-| RPG ART | enige maker van echte pixel-art. Levert losse PNG's + `HANDOFF` (maat, frames) in `/workspace/art_<naam>/out`. |
+| RPG ART | enige maker van echte pixel-art. Levert losse PNG's + `HANDOFF` (maat, frames) in `(scratch-map, niet in repo) art_<naam>/out`. |
 | RPG Forge | main-dev: art integreren, PR's reviewen/mergen, 27 testsuites lokaal, webbuild handmatig (`cursor/web-build-29ec`). Geen APK's, geen GitHub Actions-minuten. |
 | RPG CODE | kleinere gameplay-taken in eigen clone, levert `HANDOFF`. |
 | Cursor cloud-agents | grote systemen via branch `cursor/<taak>` + PR. **Geen definitieve art**: alleen placeholders, gemarkeerd (`PLACEHOLDER` + regel in `tools/placeholders_v17.txt`). |

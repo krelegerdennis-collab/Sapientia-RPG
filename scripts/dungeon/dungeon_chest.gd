@@ -140,8 +140,8 @@ func _give_loot(intro: Array) -> void:
 	# eerst de vlag, dan het voorwerp: nooit dubbel
 	GameState.story_flags[flag_of(chest_id)] = true
 	if not loot.is_empty():
-		var gold := Dungeon100Scaling.grant_loot(loot, GameState.inventory)
-		GameState.gold += gold
+		var gold := GameState.grant_loot_items(loot)
+		GameState.add_gold(gold)
 		sprite.frame = 1
 		last_result = "gekregen"
 		var lines := intro.duplicate()
@@ -166,7 +166,7 @@ func _give_loot(intro: Array) -> void:
 			await Dialog.finished
 			blue_secured.emit(self)
 		return
-	GameState.inventory[item] = GameState.item_count(item) + count
+	GameState.add_item(item, count)
 	sprite.frame = 1
 	last_result = "gekregen"
 	var nm := item_name(item)

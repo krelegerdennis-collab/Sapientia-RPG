@@ -199,8 +199,9 @@ static func koop(run_seed: int, bezoek: int, gekocht: Array, id: String, floor_n
 		return {"ok": false, "text": "That's not for sale."}
 	if GameState.gold < int(rij["price"]):
 		return {"ok": false, "text": "Not enough gold."}
-	GameState.gold -= int(rij["price"])
-	GameState.inventory[id] = int(GameState.inventory.get(id, 0)) + 1
+	if not GameState.spend_gold(int(rij["price"])):
+		return {"ok": false, "text": "Not enough gold."}
+	GameState.add_item(id, 1)
 	if bool(rij["uniek"]):
 		gekocht.append(id)
 	return {"ok": true, "text": REGEL_KOOP}
@@ -212,10 +213,9 @@ static func verkoop(id: String) -> Dictionary:
 	var p := inkoop_prijs(id)
 	if p <= 0:
 		return {"ok": false, "text": "I can't use that."}
-	GameState.inventory[id] = int(GameState.inventory[id]) - 1
-	if int(GameState.inventory[id]) <= 0:
-		GameState.inventory.erase(id)
-	GameState.gold += p
+	if not GameState.remove_item(id, 1):
+		return {"ok": false, "text": "You don't have that."}
+	GameState.add_gold(p)
 	return {"ok": true, "text": REGEL_VERKOOP, "gold": p}
 
 
@@ -223,7 +223,7 @@ static func verkoop(id: String) -> Dictionary:
 static func verkoopbaar() -> Array:
 	var uit: Array = []
 	for id in GameState.inventory:
-		var n := int(GameState.inventory[id])
+		var n := GameState.item_count(str(id))
 		var p := inkoop_prijs(str(id))
 		if n > 0 and p > 0:
 			uit.append({"id": str(id), "name": naam(str(id)), "price": p, "n": n})

@@ -201,7 +201,7 @@ func setup() -> void:
 	GameState.give_exp(h, GD.exp_for_level(5))
 	h["hp"] = h["max_hp"]
 	GameState.pending_kern_absorb = ""
-	GameState.inventory[CD.BOOK_ITEM] = 3      # v0.17: geen startvoorraad meer; zoals de 3 van Marit (Esdoorn)
+	GameState.set_item_count(CD.BOOK_ITEM, 3)      # v0.17: geen startvoorraad meer; zoals de 3 van Marit (Esdoorn)
 
 
 func screenshot(name: String) -> void:
@@ -1207,7 +1207,7 @@ func _grot_monster_tests() -> void:
 	GameState.codex_set_active("")
 	check("run begint", GameState.dungeon100_begin_run())
 	GameState.dungeon100_floor = 80
-	GameState.inventory[CD.BOOK_ITEM] = 2      # de run-tas heeft alleen permanente items; boeken komen uit grotkisten
+	GameState.set_item_count(CD.BOOK_ITEM, 2)      # de run-tas heeft alleen permanente items; boeken komen uit grotkisten
 	var buiten := GameState.codex_add("mosslijm")      # gewone vangst tijdens de run: verdwijnt straks
 	var p := player()
 	GameState.start_battle(["scanline_wolf", "scanline_wolf"], p.get_tile(), p.facing, "dungeon100", false, Content.tier_for_floor(80))

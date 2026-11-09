@@ -1,7 +1,7 @@
 # HANDOFF – Kernkracht (revamp van Kernslag) – RPG CODE
 
-Basis: `/workspace/lufia_v15` (met de Kernfragment-patch van Forge, thema archief_grijs).
-Werkkopie: `/workspace/code_kernkracht/`, patch: `code_kernkracht.patch` (tegen v15, `git apply`).
+Basis: `(scratch-map, niet in repo) lufia_v15` (met de Kernfragment-patch van Forge, thema archief_grijs).
+Werkkopie: `(scratch-map, niet in repo) code_kernkracht/`, patch: `code_kernkracht.patch` (tegen v15, `git apply`).
 lufia_v9..v16 zijn niet aangeraakt. Tutorial, blauwe Lufia-tekstballonnen, glitch per archief en de
 stijl van het tekstvak (Forge, v16) zijn NIET aangeraakt; hd_ui.gd ook niet.
 
@@ -70,7 +70,7 @@ stijl van het tekstvak (Forge, v16) zijn NIET aangeraakt; hd_ui.gd ook niet.
   - **Baas** (`boss = true`, bv. de Golem): geen stun, geen effect (alleen de inslag); ook een directe
     `stun()` doet niets.
 
-## 5. Art (RPG ART, `/workspace/art_kernkracht_v15/out/`, zie LEESMIJ daar)
+## 5. Art (RPG ART, `(scratch-map, niet in repo) art_kernkracht_v15/out/`, zie LEESMIJ daar)
 | pad | maat | frames | gebruik |
 |---|---|---|---|
 | `res://assets/fx/kern_vuurbal.png` | 64x16 | 4 x 16x16, wijst naar RECHTS, kern (10,8) | loop 0,08 s/frame; `rotation` = vliegrichting |
@@ -110,7 +110,7 @@ stijl van het tekstvak (Forge, v16) zijn NIET aangeraakt; hd_ui.gd ook niet.
 
 TESTTABEL: zie onder (ingevuld na de volledige run).
 
-## 8. Screenshots (`/workspace/code_kernkracht_shots/`, elk + `_3x` = 1152x648)
+## 8. Screenshots (`(scratch-map, niet in repo) code_kernkracht_shots/`, elk + `_3x` = 1152x648)
 - `kk_gevecht_vlucht.png` (768x432) – vuurbal in de boog van de hand naar de Papiergeest
 - `kk_gevecht_inslag.png` (768x432) – inslag op de Papiergeest
 - `kk_veld_vlucht.png` (384x216) – vuurbal + spoor onderweg (archief_ingang)

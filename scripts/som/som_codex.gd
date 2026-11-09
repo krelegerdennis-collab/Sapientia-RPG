@@ -110,7 +110,7 @@ func _capture(target) -> String:
 		last_capture = {"result": "vol", "chance": 0.0, "species": sid}
 		return "The Codex is full (%d pages). (The book stays whole.)" % CodexData.MAX_PAGES
 	# het boek wordt gebruikt (zoals Classic: Leeg Boek -1)
-	GameState.inventory[CodexData.BOOK_ITEM] = GameState.item_count(CodexData.BOOK_ITEM) - 1
+	GameState.remove_item(CodexData.BOOK_ITEM, 1)
 	var chance := chance_for(m)
 	var roll: float = force_roll if force_roll >= 0.0 else arena.rng.randf()
 	var ok := roll < chance

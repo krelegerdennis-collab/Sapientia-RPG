@@ -121,5 +121,9 @@ en de suite in de matrix van `.github/workflows/tests.yml` (zie `.github/ci/READ
 - `tools/` — Python art-generators (placeholders), `handwerk.txt`, `placeholders_*.txt`.
 - `docs/` — ontwerp, handoffs, `docs/lore/CANON.md`, `docs/ARTSTYLE.md`.
 
-**Audio:** er is nog géén audio. `scripts/audio_manager.gd` + `assets/audio/audio_manifest.json` staan klaar;
-`assets/audio/bgm|sfx/` bevatten alleen een README. Code moet blijven werken zonder geluidsbestanden.
+**Audio:** manifest-gedreven via autoload `AudioManager` (`scripts/audio_manager.gd`,
+`assets/audio/audio_manifest.json`). In de repo staan nu ~298 `.ogg`-bestanden (BGM + SFX); ontbrekende
+manifest-paden spelen stil af zonder errors. **11 BGM-tracks** hebben nog geen bestand (zie ticket A-2 in
+`docs/handoff/HANDOFF_review_2026-11.md`): o.a. `eindbaas_fase1`, `eindbaas_fase2`, `game_over`, `overwinning`,
+`aftiteling`, `sapientia_thema`, `rustplek`, `industriestad`, `zwevende_tempel`, `ondergronds_lab`,
+`sterrenobservatorium`.

@@ -4,8 +4,8 @@
 > `BOTSINGEN.md` = de lijst met botsingen waar die beslissingen op antwoorden.
 
 > **v0.17 is canon.** Alles in deze map is voorstel/inspiratie. Bij twijfel geldt wat er in
-> de game staat (`scripts/data/*.gd`, `README.md`, `docs/HANDOFF_*.md`) en in
-> `/workspace/story/PROLOOG.md` + `ACT1_LORE.md`. Zie `/workspace/merge_staging/BOTSINGEN.md`
+> de game staat (`scripts/data/*.gd`, `README.md`, `docs/handoff/HANDOFF_*.md`) en in
+> `(scratch-map, niet in repo) story/PROLOOG.md` + `ACT1_LORE.md`. Zie `(scratch-map, niet in repo) merge_staging/BOTSINGEN.md`
 > voor de lijst met botsingen.
 
 Bron: `Sapientia-worldbuilder` (main, commit e69b273), AI-gegenereerd (Cursor Agent, 4 okt 2026).

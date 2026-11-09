@@ -1,6 +1,6 @@
 # Puzzels in De Vergeten Archieven
 
-Scène 3 van de proloog (`/workspace/story/PROLOOG.md`): geen magie, dus **boekenkasten
+Scène 3 van de proloog (`(scratch-map, niet in repo) story/PROLOOG.md`): geen magie, dus **boekenkasten
 duwen** en **mechanische hendels**. Dit document legt uit hoe het puzzelsysteem werkt en hoe je
 een nieuwe puzzelkamer maakt, **alleen met data**.
 

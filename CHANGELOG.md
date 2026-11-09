@@ -5,8 +5,8 @@ versies volgen `tools/release/version.json` (de enige bron, zie `docs/release/PL
 Een kopje `## [X.Y]` per versie is verplicht: `tools/release/bump_version --check` (en `--aabtest`) controleert dat.
 `tools/release/bump_version minor` zet bij een bump zelf het nieuwe kopje onder `[Unreleased]`.
 
-Data van oudere versies komt uit de git-tags (`v0.18`, `v0.19`, `v0.20`); de teksten hieronder zijn een samenvatting,
-de details staan in README.md en in de commitgeschiedenis. Alle speler-tekst in het spel is Engels, dit bestand blijft Nederlands.
+Data van oudere versies komt uit de git-tags (`v0.18`, `v0.19`, `v0.20`); de teksten hieronder zijn een samenvatting;
+oudere versieparagrafen stonden vroeger in `README.md` (nu alleen nog technische setup). Alle speler-tekst in het spel is Engels, dit bestand blijft Nederlands.
 
 ## [Unreleased]
 
