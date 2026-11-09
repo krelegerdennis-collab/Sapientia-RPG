@@ -22,6 +22,7 @@ const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const BerggrotHaak := preload("res://scripts/data/berggrot_data.gd")
 const OpeningStory := preload("res://world_warper/opening/story_mode.gd")
+const FieldMenu := preload("res://scripts/ui/field_menu.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
 const AUTOSAVE_DELAY := 0.35
 
@@ -204,7 +205,7 @@ func open_field_menu() -> void:
 	# v0.11: touch-joystick/A/B weg zolang het menu open is (je tikt direct op het menu;
 	# anders zou een tik op een menuregel bij de joystick als lopen tellen)
 	_set_touch_visible(false)
-	var m: CanvasLayer = load("res://scripts/ui/field_menu.gd").new()
+	var m: CanvasLayer = FieldMenu.new()
 	m.name = "FieldMenu"
 	m.player = player
 	m.closed.connect(func():
