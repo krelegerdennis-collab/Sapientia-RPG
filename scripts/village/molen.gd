@@ -1,12 +1,11 @@
 extends RefCounted
 ## Molen van Gerrit in Wilgendal, na Het Zingende Graan.
 ## Eén bezoek: rusten, één Zingend Meel, daarna opslaan of de party wisselen.
-## Het meel zit op de map (meta) én in story_flags (R4b, SAVE_HARDENING "Molen: Zingend Meel is per bezoek"):
-## save -> laden bouwt een nieuwe scène, maar de vlag reist mee, dus laden geeft geen tweede meel.
-## map.gd wist de vlag bij elke binnenkomst die geen laden is: een nieuw bezoek is een nieuwe scène.
+## Zingend Meel per bezoek: vlag `molen_meel_bezoek` in story_flags (C-7: geen scene-meta meer).
+## Save -> laden behoudt de vlag, dus geen tweede meel in hetzelfde bezoek.
+## map.gd wist de vlag bij elke binnenkomst die geen laden is (nieuw bezoek).
 
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
-const META := "zingend_meel_gegeven"
 const FLAG_MEEL := "molen_meel_bezoek"
 const REGEL_RUST := "HP and MP restored."
 const REGEL_MEEL := "You receive Singing Flour."
@@ -34,9 +33,7 @@ static func bezoek() -> void:
 	_rust()
 	Dialog.show_lines([REGEL_RUST])
 	await Dialog.finished
-	var tree := Engine.get_main_loop() as SceneTree
-	var map: Node = tree.current_scene if tree != null else null
-	if _meel(map):
+	if _meel():
 		Dialog.show_lines([REGEL_MEEL])
 		await Dialog.finished
 	var keuze: int = await Dialog.ask(VRAAG, KEUZES)
@@ -57,14 +54,10 @@ static func _rust() -> void:
 		p["mp"] = p["max_mp"]
 
 
-static func _meel(map: Node) -> bool:
-	if map != null and bool(map.get_meta(META, false)):
-		return false
+static func _meel() -> bool:
 	if GameState.story_flags.has(FLAG_MEEL):
 		return false
 	GameState.inventory["zingend_meel"] = GameState.item_count("zingend_meel") + 1
-	if map != null:
-		map.set_meta(META, true)
 	GameState.story_flags[FLAG_MEEL] = true
 	return true
 
