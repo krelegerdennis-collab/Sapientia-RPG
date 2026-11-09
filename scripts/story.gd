@@ -121,7 +121,7 @@ func wears(id: String) -> bool:
 ## v0.16 Het veldmenu is net dicht (map.gd): de 'gedwongen' uitrusting-check van de tutorial.
 ## Loopt de eerste regel uit SD.MENU_CLOSED waarvan de voorwaarde klopt. true = er loopt iets.
 func menu_closed() -> bool:
-	if running or GameState.in_battle or GameState.changing_map:
+	if running or GameState.scene_busy():
 		return false
 	for t in SD.MENU_CLOSED:
 		if check(t.get("if", {})):
@@ -203,7 +203,7 @@ func _lock(on: bool) -> void:
 		return
 	if on:
 		p.input_locked = true
-	elif not GameState.changing_map and not GameState.in_battle:
+	elif not GameState.scene_busy():
 		p.input_locked = false
 
 
@@ -600,7 +600,7 @@ func _on_unique_marked(id: String, _how: String) -> void:
 
 ## Is de speler vrij rondlopend op een kaart (geen gevecht, overgang, tekst, menu of ander event)?
 func player_free() -> bool:
-	if running or Dialog.is_open or GameState.changing_map or GameState.in_battle or card_visible():
+	if running or Dialog.is_open or GameState.scene_busy() or card_visible():
 		return false
 	if GameState.pending_kern_absorb != "":
 		return false
@@ -649,7 +649,7 @@ func _process(delta: float) -> void:
 				var k := _shake_strength * (_shake_left / _shake_total)
 				p.camera.offset = Vector2(randf_range(-k, k), randf_range(-k, k)).round()
 	# getimed event: telt alleen af als de speler vrij rondloopt
-	if scheduled.is_empty() or running or Dialog.is_open or GameState.changing_map or GameState.in_battle:
+	if scheduled.is_empty() or running or Dialog.is_open or GameState.scene_busy():
 		return
 	var m := _map()
 	if m == null or m.scene_file_path != scheduled.get("map", ""):

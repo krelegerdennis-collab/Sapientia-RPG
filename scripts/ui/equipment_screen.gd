@@ -42,7 +42,14 @@ const MSG_NOTHING_FITS := "Nothing in the bag fits here."
 
 var index := 0
 ## "command" (submenu), "slot" (vak kiezen), "item" (stuk kiezen), "confirm" (weggooien?)
-var mode := "command"
+## Stap van het uitrustingsscherm (docs/STATE_MACHINES.md §5):
+##   COMMAND (menu) -> SLOT (kies slot) -> ITEM (kies voorwerp) -> CONFIRM (bevestig) -> SLOT
+const MODE_COMMAND := "command"
+const MODE_SLOT := "slot"
+const MODE_ITEM := "item"
+const MODE_CONFIRM := "confirm"
+const MODES: Array[String] = [MODE_COMMAND, MODE_SLOT, MODE_ITEM, MODE_CONFIRM]
+var mode := MODE_COMMAND
 ## Wat er met een gekozen vak gebeurt: "equip", "unequip" of "drop".
 var action := "equip"
 var current_slot := ""
@@ -317,7 +324,7 @@ func _set_focusable(buttons: Array, on: bool) -> void:
 
 
 func to_command_mode(focus_id := "") -> void:
-	mode = "command"
+	mode = MODE_COMMAND
 	quiet()
 	current_slot = ""
 	list_panel.visible = false
@@ -331,7 +338,7 @@ func to_command_mode(focus_id := "") -> void:
 
 
 func to_slot_mode(act: String, focus_slot := "") -> void:
-	mode = "slot"
+	mode = MODE_SLOT
 	action = act
 	quiet()
 	list_panel.visible = false
@@ -349,7 +356,7 @@ func to_slot_mode(act: String, focus_slot := "") -> void:
 
 ## Submenu-keuze (A of tik).
 func do_command(id: String) -> void:
-	if mode == "confirm":
+	if mode == MODE_CONFIRM:
 		return
 	_last_cmd = id
 	clear_message()
@@ -373,9 +380,9 @@ func do_command(id: String) -> void:
 
 ## Vak gekozen (A of tik). Tik op een vak vanuit het submenu = Uitrusten in dat vak.
 func choose_slot(slot: String) -> void:
-	if mode == "confirm" or mode == "item":
+	if mode == MODE_CONFIRM or mode == MODE_ITEM:
 		return
-	if mode == "command":
+	if mode == MODE_COMMAND:
 		to_slot_mode("equip", slot)
 	current_slot = slot
 	var h := hero()
@@ -402,7 +409,7 @@ func open_list(slot: String) -> void:
 	if ids.is_empty():
 		show_message(MSG_NOTHING_FITS, MenuColors.TEXT_DIM)
 		return
-	mode = "item"
+	mode = MODE_ITEM
 	current_slot = slot
 	quiet()
 	for b in list_buttons:
@@ -433,7 +440,7 @@ func open_list(slot: String) -> void:
 
 ## Stuk in de lijst heeft focus: pijlen 'oud > nieuw' en de bonus in de hulpregel.
 func preview_item(id: String) -> void:
-	if mode != "item":
+	if mode != MODE_ITEM:
 		return
 	var h := hero()
 	ItemIcons.show32(detail_icon, id)
@@ -442,7 +449,7 @@ func preview_item(id: String) -> void:
 
 
 func choose_item(id: String) -> void:
-	if mode != "item":
+	if mode != MODE_ITEM:
 		return
 	var slot := current_slot
 	var r := Equipment.equip(hero(), GameState.inventory, slot, id)
@@ -465,7 +472,7 @@ func _close_list() -> void:
 
 
 func ask_drop(slot: String, id: String) -> void:
-	mode = "confirm"
+	mode = MODE_CONFIRM
 	var p := SavePrompt.new()
 	p.question = "Drop %s?" % Equipment.item_name(id)
 	p.detail = "It will really be gone."
@@ -477,7 +484,7 @@ func ask_drop(slot: String, id: String) -> void:
 
 func _on_drop_answer(yes: bool, slot: String) -> void:
 	confirm = null
-	mode = "slot"
+	mode = MODE_SLOT
 	quiet()
 	var h := hero()
 	if yes:
@@ -489,10 +496,10 @@ func _on_drop_answer(yes: bool, slot: String) -> void:
 
 
 func switch(dir: int) -> void:
-	if GameState.party.size() <= 1 or mode == "item" or mode == "confirm":
+	if GameState.party.size() <= 1 or mode == MODE_ITEM or mode == MODE_CONFIRM:
 		return
 	show_member(index + dir)
-	if mode == "slot":
+	if mode == MODE_SLOT:
 		to_slot_mode(action, current_slot)
 
 
@@ -511,7 +518,7 @@ func back() -> void:
 
 
 func _handle_input() -> void:
-	if mode == "confirm":
+	if mode == MODE_CONFIRM:
 		return
 	var d := horizontal_pressed()
 	if d != 0:
@@ -519,7 +526,7 @@ func _handle_input() -> void:
 
 
 func _process(delta: float) -> void:
-	if mode == "confirm":
+	if mode == MODE_CONFIRM:
 		# de vraag (save_prompt.gd) regelt zelf A/B; hier alleen de melding laten aflopen
 		if _message_left > 0.0:
 			_message_left -= delta

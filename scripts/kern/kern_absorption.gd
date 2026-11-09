@@ -24,8 +24,14 @@ var map: Node = null
 var fragment_id := ""
 var fx: Sprite2D
 var glow: Sprite2D
-## voor de tests: "", "effect", "bericht", "klaar"
-var phase := ""
+## Fase van het moment (docs/STATE_MACHINES.md §4), lineair: WACHT -> EFFECT -> BERICHT -> KLAAR.
+## Strings voor de tests; "" = nog aan het wachten (op de start-vertraging, Story of Dialog).
+const PHASE_WACHT := ""
+const PHASE_EFFECT := "effect"
+const PHASE_BERICHT := "bericht"
+const PHASE_KLAAR := "klaar"
+const PHASES: Array[String] = [PHASE_WACHT, PHASE_EFFECT, PHASE_BERICHT, PHASE_KLAAR]
+var phase := PHASE_WACHT
 ## voor de tests: welke frames er getoond zijn en hoe lang het effect duurde (s, speltijd,
 ## inclusief het vervagen van 0,25 s)
 var frames_shown: Array = []
@@ -75,7 +81,7 @@ func start(p_map: Node, id: String) -> void:
 	fx.position = CHEST
 	fx.z_index = 6
 	player.add_child(fx)
-	phase = "effect"
+	phase = PHASE_EFFECT
 	var tw := create_tween()
 	tw.tween_property(glow, "modulate:a", 0.85, FRAME_TIME * 2.0)
 	for i in FRAMES:
@@ -92,7 +98,7 @@ func start(p_map: Node, id: String) -> void:
 	out.tween_property(fx, "modulate:a", 0.0, 0.25)
 	if not await _wait(0.25):
 		return
-	phase = "bericht"
+	phase = PHASE_BERICHT
 	Dialog.show_lines(lines_for(id))
 	await Dialog.finished
 	# gezien = klaar (ook als de kaart hierna meteen wisselt)
@@ -108,7 +114,7 @@ func start(p_map: Node, id: String) -> void:
 		glow.queue_free()
 	if is_instance_valid(player):
 		player.input_locked = false
-	phase = "klaar"
+	phase = PHASE_KLAAR
 	if is_instance_valid(map) and map.has_method("try_autosave"):
 		pass      # save-slots: geen autosave na de absorptie
 	done.emit()
@@ -134,9 +140,9 @@ func _alive() -> bool:
 
 
 func _process(delta: float) -> void:
-	if phase == "effect":
+	if phase == PHASE_EFFECT:
 		effect_time += delta      # speltijd (zelfde klok als de timers)
-	if phase == "bericht" and is_instance_valid(glow):
+	if phase == PHASE_BERICHT and is_instance_valid(glow):
 		_t += delta
 		glow.modulate.a = 0.55 + 0.25 * sin(_t * TAU / 1.6)
 

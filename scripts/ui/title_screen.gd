@@ -444,7 +444,7 @@ func _on_new() -> void:
 	if get_node_or_null("SaveSlotList") != null:
 		return
 	var list := SaveSlotList.new()
-	list.mode = "new"
+	list.mode = list.MODE_NEW
 	list.picked.connect(_on_new_slot_picked)
 	list.cancelled.connect(_on_slot_cancelled)
 	add_child(list)

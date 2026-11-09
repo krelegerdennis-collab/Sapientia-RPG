@@ -216,7 +216,7 @@ func _finish() -> void:
 	if video != null and video.is_playing():
 		video.stop()
 	if _player != null and is_instance_valid(_player) and "input_locked" in _player:
-		if Story.idle() and not Dialog.is_open and not GameState.changing_map and not GameState.in_battle:
+		if Story.idle() and not Dialog.is_open and not GameState.scene_busy():
 			_player.input_locked = false
 	if _map != null and is_instance_valid(_map) and _map.has_method("_play_map_music"):
 		_map._play_map_music()

@@ -11,6 +11,7 @@ const Equipment := preload("res://scripts/equipment.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")   # Kernfragment stap 2: de Codex
 const Dungeon100RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")   # 100-verdiepingen-kerker
+const FlowStateC := preload("res://scripts/core/flow_state.gd")   # veldflow (docs/STATE_MACHINES.md)
 const EchoGrot := preload("res://scripts/data/echo_grot.gd")
 ## Hier begint een nieuw spel (v0.11: wakker worden in bed, in het huis).
 const START_MAP := "res://scenes/maps/huis_wilgendal.tscn"
@@ -309,6 +310,10 @@ signal codex_changed
 signal battle_started(enemies: Array, boss: bool)
 signal battle_ended(result: String)
 signal game_over(map_path: String)
+## Veldflow (FlowState, docs/STATE_MACHINES.md): "field" | "dialog" | "cutscene" | "map_change" | "battle".
+## Komt bij elke verandering van in_battle / changing_map; Story.running en Dialog.is_open wisselen
+## buiten GameState om en lees je via flow_state().
+signal flow_changed(from_state: String, to_state: String)
 signal game_saved(path: String, ok: bool)
 signal game_loaded(path: String, ok: bool)
 ## De hoofd-save was kapot en load_game gebruikte de reservekopie (.bak).
@@ -391,7 +396,14 @@ var current_map := ""
 var pending_spawn := ""
 ## Laatste warp-bron (pad naar .tscn), gezet in change_map vóór de scènewissel.
 var warp_from_map := ""
-var changing_map := false
+## true tijdens fade + scènewissel. Setter: meldt flow_changed (FlowState.MAP_CHANGE).
+var changing_map := false:
+	set(v):
+		if v == changing_map:
+			return
+		var van := flow_state()
+		changing_map = v
+		_meld_flow(van)
 ## true zolang een --...test-suite draait (zie _zet_testmodus).
 var test_modus := false
 ## #166: waar kwam je het huis van Dax binnen? "dorp" = via DORP_MAP; "" = al het andere
@@ -423,7 +435,14 @@ var debug_force_group: Array = []
 ## Laatste gevechtsuitslag: "win", "flee" of "lose".
 var last_battle_result := ""
 
-var in_battle := false
+## true vanaf start_battle tot end_battle. Setter: meldt flow_changed (FlowState.BATTLE).
+var in_battle := false:
+	set(v):
+		if v == in_battle:
+			return
+		var van := flow_state()
+		in_battle = v
+		_meld_flow(van)
 
 ## v0.13 map-monsters (dungeons, scripts/dungeon/): het gevecht dat een map-monster startte
 ## ({} = geen; {"map", "room", "id", "positions"}) en per kamer de verslagen monsters
@@ -533,6 +552,7 @@ func _ready() -> void:
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
 	# ECHO questlog (smoke): of  godot -- --echotest [--shots=/pad/map]  (scripts/tests/echo_tests.gd).
 	# SoM MAP_CAST na late join: of  godot -- --castjointest  (scripts/tests/cast_join_tests.gd).
+	# Toestandsmachines (FlowState, battle/state, modes; docs/STATE_MACHINES.md): of  godot -- --statemachinetest  (scripts/tests/state_machine_tests.gd).
 	# Sessielog (SessieLog, scripts/core/sessie_log.gd): of  godot -- --sessielogcoretest  (scripts/tests/sessielog_core_tests.gd).
 	# Tutorial na de Inktwurm: of  godot -- --tutorialtest [--shots=/pad/map]  (scripts/tests/tutorial_tests.gd).
 	# UX-polish WM1 (tikdoelen 48dp, Engelse tekst, tutorials, 19,5:9/20:9 + notch, SFX, volume): of
@@ -673,6 +693,7 @@ func _ready() -> void:
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
 			["--wm1dekkingtest", "res://scripts/tests/wm1_dekking_tests.gd", "Wm1DekkingTest", "wm1dekkingtest"],
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
+			["--statemachinetest", "res://scripts/tests/state_machine_tests.gd", "StateMachineTest", "statemachinetest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
 			["--f5sim", "res://tools/battlesim/f5_sim.gd", "F5Sim", "f5sim"],
@@ -904,7 +925,7 @@ func _prewarm_step(delta: float) -> void:
 	if _prewarm_queue.is_empty() or not _preloading.is_empty():
 		return
 	var scene := get_tree().current_scene
-	if scene == null or not (scene.scene_file_path in PREWARM_SCENES) or changing_map or in_battle:
+	if scene == null or not (scene.scene_file_path in PREWARM_SCENES) or scene_busy():
 		return
 	_prewarm_wait -= delta
 	if _prewarm_wait > 0.0:
@@ -1532,7 +1553,35 @@ func can_autosave(ignore_setting: bool = false) -> bool:
 	var story := get_node_or_null("/root/Story")
 	if story != null and story.get("running") == true:
 		return false
-	return not in_battle and not changing_map
+	return not scene_busy()
+
+
+# ---------------------------------------------------------------- veldflow (FlowState)
+## De ene afgeleide toestand van de kaart: FlowState.FIELD/DIALOG/CUTSCENE/MAP_CHANGE/BATTLE.
+## Vervangt het met de hand herhalen van `in_battle or changing_map or Story.running or Dialog.is_open`.
+func flow_state() -> String:
+	var story := get_node_or_null("/root/Story")
+	var dialog := get_node_or_null("/root/Dialog")
+	return FlowStateC.of(in_battle, changing_map,
+			story != null and story.get("running") == true,
+			dialog != null and dialog.get("is_open") == true)
+
+
+## true = scène wisselt of er loopt een gevecht: geen nieuwe wissel/gevecht/cutscene starten.
+## Precies de oude guard `changing_map or in_battle`.
+func scene_busy() -> bool:
+	return in_battle or changing_map
+
+
+## true = de speler mag vrij handelen op de kaart (ook geen cutscene en geen tekstvak).
+func field_free() -> bool:
+	return flow_state() == FlowStateC.FIELD
+
+
+func _meld_flow(van: String) -> void:
+	var naar := flow_state()
+	if naar != van:
+		flow_changed.emit(van, naar)
 
 
 ## map.gd: moet deze map na binnenkomst automatisch opslaan? (en wis het verzoek)
@@ -2090,7 +2139,7 @@ func _continue_record(rec: Dictionary) -> bool:
 ## SoM-proef: verse standaard-party (data: som_data.gd), eigen save-bestand, meteen de proefkerker in.
 func start_som_prototype() -> void:
 	const SomData := preload("res://scripts/data/som_data.gd")
-	if changing_map or in_battle or not SomData.ENABLED:
+	if scene_busy() or not SomData.ENABLED:
 		return
 	_build_som_state()
 	save_path = SomData.SAVE_PATH
@@ -2103,7 +2152,7 @@ func start_som_prototype() -> void:
 ## Co-op host: Action-sandbox; alleen deze save telt (som_save_1.json).
 func start_som_coop_host() -> void:
 	const SomData := preload("res://scripts/data/som_data.gd")
-	if changing_map or in_battle or not SomData.ENABLED:
+	if scene_busy() or not SomData.ENABLED:
 		return
 	coop_role = "host"
 	_build_som_state()
@@ -2118,7 +2167,7 @@ func start_som_coop_host() -> void:
 ## Co-op gast: zelfde sandbox om te spelen, maar nooit som_save_1.json schrijven.
 func start_som_coop_guest(character_id: String) -> void:
 	const SomData := preload("res://scripts/data/som_data.gd")
-	if changing_map or in_battle or not SomData.ENABLED or character_id == "":
+	if scene_busy() or not SomData.ENABLED or character_id == "":
 		return
 	_coop_snapshot_guest_solo()
 	coop_role = "guest"
@@ -2157,7 +2206,7 @@ func _build_som_state() -> void:
 
 
 func start_beta_game() -> void:
-	if changing_map or in_battle:
+	if scene_busy():
 		return
 	use_beta_saves()
 	var p := newest_beta_path()
@@ -2219,7 +2268,7 @@ func _grant_beta_inktwurm() -> bool:
 ## Het bestand is save_eindstaat.json. Slot 1-4 en de betatest blijven onaangeroerd,
 ## ook als de speler daarna zelf opslaat (die save gaat naar het eindstaat-bestand).
 func start_eind_game() -> void:
-	if changing_map or in_battle:
+	if scene_busy():
 		return
 	use_eind_saves()
 	var p := newest_eind_path()
@@ -2356,7 +2405,7 @@ func start_new_game(hero_name: String) -> void:
 
 ## Terug naar het titelscherm (bv. vanuit het veldmenu, en in de autotest).
 func go_to_title(force := false) -> void:
-	if not force and (changing_map or in_battle):
+	if not force and scene_busy():
 		return
 	if force:
 		in_battle = false
@@ -2396,7 +2445,7 @@ func enter_map(path: String) -> void:
 ## Ga naar een andere map: fade uit, wissel van scène, en zet de speler
 ## op het spawnpunt met de naam spawn_name (een node onder "Spawns").
 func change_map(path: String, spawn_name: String) -> void:
-	if changing_map or in_battle:
+	if scene_busy():
 		return
 	if ReleaseFlags.dev_scene_blocked(path):
 		return
@@ -2420,7 +2469,7 @@ var reload_in_place := false
 
 
 func reload_room(tile: Vector2i, facing: Vector2i) -> void:
-	if changing_map or in_battle or current_map == "":
+	if scene_busy() or current_map == "":
 		return
 	changing_map = true
 	return_map = current_map
@@ -2444,7 +2493,7 @@ func encounter_rate_for(terrain: String) -> float:
 ## Wordt per stap aangeroepen door map.gd (alleen op maps met monsters).
 ## Geeft true als er een gevecht begint.
 func on_player_step(terrain: String) -> bool:
-	if in_battle or changing_map:
+	if scene_busy():
 		return false
 	var rate := encounter_rate_for(terrain)
 	if rate <= 0.0:
@@ -2489,7 +2538,7 @@ func boss_group() -> Dictionary:
 ## Start een gevecht: onthoud map + positie, flits, en wissel naar de gevechtsscène.
 ## v0.14: tier = monsterniveau (0 = gewoon; dungeonkamers geven hun "tier" mee, nooit voor een baas).
 func start_battle(enemies: Array, from_tile: Vector2i, facing: Vector2i, terrain := "", boss := false, tier := 0, archief := false, practice := false) -> void:
-	if in_battle or changing_map:
+	if scene_busy():
 		return
 	in_battle = true
 	SessieLog.gevecht_start(enemies, boss, terrain, from_tile)
@@ -2913,7 +2962,7 @@ func dungeon100_reach_floor(floor_nr: int) -> void:
 ## false = geen run, of de kaart wisselt al. Annuleren roept dit niet aan.
 ## Zet echo_grot_resultaat niet: dat doet alleen het Warp-kristal op verdieping 100.
 func dungeon100_warper_exit() -> bool:
-	if not dungeon100_run_active() or changing_map or in_battle:
+	if not dungeon100_run_active() or scene_busy():
 		return false
 	dungeon100_leave()
 	change_map(Dungeon100RulesC.WORLD_SCENE, Dungeon100RulesC.WORLD_SPAWN)
@@ -2941,7 +2990,7 @@ func dungeon100_warp(keuze := "") -> bool:
 
 ## ECHO start een nieuwe run: verdieping 1, level 1, zonder uitrusting. De kamer kiest de seed.
 func dungeon100_echo_start() -> bool:
-	if changing_map or in_battle or dungeon100_run_active():
+	if scene_busy() or dungeon100_run_active():
 		return false
 	if not dungeon100_begin_run():
 		return false

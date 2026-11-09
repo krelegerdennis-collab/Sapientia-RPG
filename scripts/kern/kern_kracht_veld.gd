@@ -79,7 +79,7 @@ func can_fire() -> String:
 		return "afkoelen"
 	var p = map.get("player") if map else null
 	if p == null or not is_instance_valid(p) or p.is_moving or p.input_locked or Dialog.is_open \
-			or GameState.in_battle or GameState.changing_map or Story.running \
+			or GameState.scene_busy() or Story.running \
 			or (map.has_method("menu_open") and map.menu_open()):
 		return "niet nu"
 	return ""
@@ -241,7 +241,7 @@ func fire() -> void:
 	await get_tree().create_timer(KernVuurbal.impact_time()).timeout
 	if not _alive(p):
 		return
-	if p.input_locked and not GameState.in_battle and not GameState.changing_map and not Story.running \
+	if p.input_locked and not GameState.scene_busy() and not Story.running \
 			and not Dialog.is_open:
 		p.input_locked = false
 	busy = false
