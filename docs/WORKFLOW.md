@@ -26,3 +26,7 @@
 Handwerk-art aanraken · echte art tekenen · secrets/APK committen · signing of versie aanpassen · zelf mergen.
 
 Details voor agents: `AGENTS.md`.
+
+## Handoffs
+Overdrachten van RPG CODE en RPG ART (patches, testlogs, screenshots) staan in **`docs/handoff/`**
+(`HANDOFF_*.md`). Nieuw review- of sprint-handoff daar neerzetten, niet in de repository-root.

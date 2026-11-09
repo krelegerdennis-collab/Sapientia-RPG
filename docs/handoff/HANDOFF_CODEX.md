@@ -1,6 +1,6 @@
 # HANDOFF – De Codex (Kernfragment stap 2) – RPG CODE
 
-Basis: `/workspace/lufia_v16`. Werkkopie: `/workspace/code_codex/`, patch: `code_codex.patch`
+Basis: `(scratch-map, niet in repo) lufia_v16`. Werkkopie: `(scratch-map, niet in repo) code_codex/`, patch: `code_codex.patch`
 (tegen v16, `git apply`, ook de PNG's van RPG ART zitten erin; .import-bestanden niet, die maakt Godot).
 lufia_v9..v16 zijn niet aangeraakt. hd_ui.gd, tutorial, tekstballonnen, glitch en dialoogstijl van
 Forge zijn NIET aangeraakt. battle.gd heeft alleen kleine haakjes; de logica zit in eigen bestanden.
@@ -113,7 +113,7 @@ Forge zijn NIET aangeraakt. battle.gd heeft alleen kleine haakjes; de logica zit
    `"capturable": false` als hij ook als gewone vijand voorkomt maar niet te vangen mag zijn.
 4. `--codextest` deel A controleert alles (`CodexData.validate()`).
 
-## 7. Art (RPG ART, `/workspace/art_codex_v16/out/`, zie LEESMIJ.txt daar)
+## 7. Art (RPG ART, `(scratch-map, niet in repo) art_codex_v16/out/`, zie LEESMIJ.txt daar)
 | pad | maat | gebruik |
 |---|---|---|
 | `res://assets/ui/icons/leeg_boek.png` | 16x16 | boekje dat naar het monster vliegt (+ item `icon`) |
@@ -163,12 +163,12 @@ TESTTABEL (verse kopie van v16 + patch, run_tests_iso.sh, eigen save-map, niet t
 | kernkrachttest | 102/0 | 102/0 |
 | codextest | 76/0 | 76/0 |
 
-(PASS/FAIL; run 8 okt 01:43-02:17 CEST, logs in `/workspace/.scratch/codex/full/`.)
+(PASS/FAIL; run 8 okt 01:43-02:17 CEST, logs in `(scratch-map, niet in repo) .scratch/codex/full/`.)
 \* dungeontest: op de ONGEWIJZIGDE v16 precies dezelfde 124/27 op 4.3 en 4.7.2 (regel voor regel
 gelijk, alleen een gemeten tijd verschilt): kamers laden niet in deel D, daarna volgfouten in E/F/G.
 Bestaand probleem in v16, niet door de Codex.
 
-## 10. Screenshots (`/workspace/code_codex_shots/`, elk + `_3x` = 1152x648)
+## 10. Screenshots (`(scratch-map, niet in repo) code_codex_shots/`, elk + `_3x` = 1152x648)
 - `codex_boek_inschrijven.png` – Leeg Boek op de Mosslijm, inschrijf-effect (frame 3)
 - `codex_gevangen.png` – "Mosslijm is ingeschreven in de Codex! Pagina 1: Lv 1, Slijmklodder."
 - `codex_bondgenoot.png` – Mosslijm (rugaanzicht) naast Dennis, eigen statusvak
@@ -189,7 +189,7 @@ Bestaand probleem in v16, niet door de Codex.
   (zelfde 124/27); niet door de Codex.
 
 ## 12. v0.17-versie (`code_codex_v17.patch`)
-Voor v0.17 geldt `code_codex_v17.patch` (gebaseerd op een verse kopie van `/workspace/lufia_v17`).
+Voor v0.17 geldt `code_codex_v17.patch` (gebaseerd op een verse kopie van `(scratch-map, niet in repo) lufia_v17`).
 `code_codex.patch` (v0.16) past niet op v0.17. Verschillen met de v0.16-patch:
 - **Weggelaten:** de art-PNG's (`leeg_boek.png`, `inschrijf.png`, `*_rug.png`) en de `sprite_back`-regels
   in `game_data.gd`. Die staan al in v0.17. Mosslijm gebruikt in v0.17 `res://art/enemies/mosslijm_rug.png`;

@@ -1,16 +1,16 @@
 # HANDOFF – veldmenu in Lufia 2-stijl (pakket 'menu L2', RPG CODE)
 
-Basis: **`/workspace/lufia_v13` zoals die was op 6 okt 2026 12:25 (Europe/Amsterdam); laatste
+Basis: **`(scratch-map, niet in repo) lufia_v13` zoals die was op 6 okt 2026 12:25 (Europe/Amsterdam); laatste
 wijziging van Forge daarin: `README.md` om 12:21** (kopie van die stand:
-`/workspace/.code_menu_l2_base2_v13`). Gewerkt alleen in `/workspace/code_menu_l2/`.
+`(scratch-map, niet in repo) .code_menu_l2_base2_v13`). Gewerkt alleen in `(scratch-map, niet in repo) code_menu_l2/`.
 Niet aangeraakt: `lufia_v9` t/m `lufia_v13`, `scripts/battle/*`, `hd_ui.gd`, `ui_style.gd`,
 `debug_autotest.gd`, de puzzel- en kerkertest, het verhaal en de autosave-regels.
-Patch: `/workspace/code_menu_l2/code_menu_l2.patch` = `git diff --binary` tegen die v13-stand
+Patch: `(scratch-map, niet in repo) code_menu_l2/code_menu_l2.patch` = `git diff --binary` tegen die v13-stand
 (zonder `.godot/` en zonder `*.uid`). De vier portretten (PNG) zitten er **binair** in; zie §8
 voor de lijst als je ze liever met de hand kopieert. Toepassen in een kopie van v13:
 `git apply code_menu_l2.patch` (werkt ook buiten een git-repo).
 
-**Rebase (6 okt):** ik begon op v13 van 4 okt ~00:16 (`/workspace/.code_menu_l2_pristine_v13`).
+**Rebase (6 okt):** ik begon op v13 van 4 okt ~00:16 (`(scratch-map, niet in repo) .code_menu_l2_pristine_v13`).
 Twee keer bijgewerkt: eerst naar de stand van 4 okt 00:57 (palet 'Inkt & Perkament' in
 `ui_style.gd`, thema laden in `game_state.gd`, `command_cross.gd`, gevechtsknoppen, titel
 'SAPIENTIA' + glitch, nieuwe `player.png`/`wachter.png`), daarna naar 6 okt 12:25 (Forge's
@@ -59,7 +59,7 @@ Nieuw:
 | `scripts/ui/hero_portrait.gd` | Eén hulpje voor het plaatje van een held (portret / vooraanzicht / reserve) |
 | `scripts/ui/stat_arrow.gd` | Het pijltje oud > nieuw (pixel-getekend; het font heeft geen pijl omhoog) |
 | `scripts/ui/menu_colors.gd` | ALLE menukleuren (zie §6) |
-| `assets/ui/portrait_dennis.png`, `portrait_noor.png`, `portrait_lotte.png`, `portrait_wachter.png` (+ `.import`) | Portretten van RPG ART (64x80), gekopieerd uit `/workspace/art_ui_v13/portraits/out/` |
+| `assets/ui/portrait_dennis.png`, `portrait_noor.png`, `portrait_lotte.png`, `portrait_wachter.png` (+ `.import`) | Portretten van RPG ART (64x80), gekopieerd uit `(scratch-map, niet in repo) art_ui_v13/portraits/out/` |
 | `HANDOFF_MENU_L2.md`, `code_menu_l2.patch` | dit bestand en de patch |
 
 Aangepast:
@@ -158,7 +158,7 @@ palet, dan alleen die regels omzetten.
 godot --headless --path . -- --menutest
 godot --headless --path . -- --autotest
 godot --headless --path . -- --puzzletest
-xvfb-run -a godot --path . --rendering-driver opengl3 -- --menutest --shots=/workspace/code_menu_l2_shots
+xvfb-run -a godot --path . --rendering-driver opengl3 -- --menutest --shots=(scratch-map, niet in repo) code_menu_l2_shots
 ```
 Nieuw in `--menutest` (o.a.): data (vakken, stats, MAG/MDEF), uitrusten/afdoen/sterkste/alles
 afdoen/weggooien op data én via het scherm (D-pad, A, B, tikken), wie wat mag dragen, 'niets
@@ -185,13 +185,13 @@ gezien/verslagen 3/5'). Dat bestand is van Forge; ik heb het niet aangepast.
 titelscherm in headless; onder xvfb was het toen 399/0 op beide versies. Die check slaagt nu.)
 (Vóór dit werk: menutest 130, autotest 356, puzzletest 127 – op de oude v13-stand.)
 
-Screenshots (native 384x216 + `_3x`): `/workspace/code_menu_l2_shots/` – `menu_main`,
+Screenshots (native 384x216 + `_3x`): `(scratch-map, niet in repo) code_menu_l2_shots/` – `menu_main`,
 `menu_equip`, `menu_equip_list`, `menu_equip_list_worse`, `menu_equip_strongest`, `menu_save`,
 `menu_save_overwrite`, `menu_status`, `menu_status_noor`, `menu_items`, `menu_items_uitrusting`,
 `menu_items_target`, `menu_magic`, `menu_options`, `title_autosave`.
 
 ## 8. Portret
-Bestanden (van RPG ART, `/workspace/art_ui_v13/portraits/out/`, **gekopieerd**, niet verplaatst)
+Bestanden (van RPG ART, `(scratch-map, niet in repo) art_ui_v13/portraits/out/`, **gekopieerd**, niet verplaatst)
 naar `assets/ui/`: `portrait_dennis.png`, `portrait_noor.png`, `portrait_lotte.png`,
 `portrait_wachter.png` (alle 64x80 RGBA), elk met een `.import` (Godot 4.3, standaard 2D:
 geen mipmaps). `portrait_wachter.png` wordt (nog) door geen scherm gebruikt; staat klaar.

@@ -1,11 +1,11 @@
 # HANDOFF – Golem-baas 'roze kern' + definitieve stats (pakket 'golem', RPG CODE)
 
-Basis: `/workspace/lufia_v13` zoals die was op **6 okt 2026 12:49 (Europe/Amsterdam)**; laatste
+Basis: `(scratch-map, niet in repo) lufia_v13` zoals die was op **6 okt 2026 12:49 (Europe/Amsterdam)**; laatste
 wijziging van Forge daarin: `scripts/tests/dungeon_tests.gd` om 12:47. Dat is ná de merge van het
 menu-pakket (`save_screen.gd`, `hero_portrait.gd`, `equipment.gd` staan erin) en mét Forge's fix
-in `debug_autotest.gd` (bestiarium 3/6). Kopie van die stand: `/workspace/.code_golem_base_v13`.
-Gewerkt alleen in `/workspace/code_golem/`; geen enkele `lufia_v*`-map aangeraakt.
-Patch: `/workspace/code_golem/code_golem.patch` (git-diff tegen die stand, zonder `.godot/`/`*.uid`).
+in `debug_autotest.gd` (bestiarium 3/6). Kopie van die stand: `(scratch-map, niet in repo) .code_golem_base_v13`.
+Gewerkt alleen in `(scratch-map, niet in repo) code_golem/`; geen enkele `lufia_v*`-map aangeraakt.
+Patch: `(scratch-map, niet in repo) code_golem/code_golem.patch` (git-diff tegen die stand, zonder `.godot/`/`*.uid`).
 Toepassen in een kopie van v13: `git apply code_golem.patch`. Gecontroleerd: op een verse kopie
 van de 12:49-stand geeft dat precies `code_golem`; `git apply --check` op de live v13 van 13:22
 (Forge had toen alleen map-monster-art, `export_presets.cfg` en `handwerk.txt` veranderd) lukt ook.
@@ -46,7 +46,7 @@ op de kaart rondloopt en op de wereldkaart kan opduiken) houdt Forge's waarden.
 | `scripts/data/game_data.gd` | `kennis_beest.boss` (baas-stats + `core`), `mech_wachter` definitief |
 | `scripts/game_state.gd` | Eén regel: `--golemtest` in de lijst met testers |
 | `scripts/tests/golem_tests.gd` (nieuw) | De tests (§5) |
-| `HANDOFF_GOLEM.md`, `code_golem.patch` | dit bestand en de patch |
+| `docs/handoff/HANDOFF_GOLEM.md`, `code_golem.patch` | dit bestand en de patch |
 `hd_ui.gd` is niet aangeraakt. Geen nieuwe art nodig (de platen worden in code getekend in de
 steenkleuren van `golem_boss_v2.py`).
 
@@ -109,7 +109,7 @@ eist dat ook).
 ## 5. Testen
 ```
 godot --headless --path . -- --golemtest
-xvfb-run -a godot --path . --rendering-driver opengl3 -- --golemtest --shots=/workspace/code_golem_shots
+xvfb-run -a godot --path . --rendering-driver opengl3 -- --golemtest --shots=(scratch-map, niet in repo) code_golem_shots
 ```
 `--golemtest`: A) regels van de kern (open in ronde 3/6/9/12, x0,4 en x2, min. 1, alleen open
 schade telt, lading kapot / Hamerslag, close(), standaardwaarden, berichten <= 60 tekens);
@@ -132,7 +132,7 @@ Uitslag op 6 okt 2026 (headless, elk met een eigen user://-map):
 (Het echte gevecht in deel D won op 4.3 met 1 Drankje, op 4.7.2 met 2; beide keren 3x 'lading
 kapot' en 1 Hamerslag – de verdedigde in ronde 6.)
 
-Screenshots (`/workspace/code_golem_shots/`, gevecht = fijn raster 768x432 + `_3x` = 1152x648):
+Screenshots (`(scratch-map, niet in repo) code_golem_shots/`, gevecht = fijn raster 768x432 + `_3x` = 1152x648):
 - `golem_kern_dicht` – ronde 1, pantserplaten over de kern
 - `golem_kern_open` – ronde 3, kern open (roze gloed), strook 'Roze kern open! Val nu aan!'
 - `golem_kern_raak` – Dennis raakt de open kern (roze getal 32)

@@ -1,8 +1,8 @@
 # HANDOFF – Kernfragmenten stap 1 van 3 (RPG CODE, v0.15)
 
-Basis: `/workspace/lufia_v14` (met de gemergde Archief-patch; archieftest 91, golemtest 62 bij Forge).
-Kopie gemaakt wo 7 okt 2026 21:01:52 CEST. (Stap 1 patch-check 21:52: past schoon op een verse kopie van v14; v14 ongewijzigd.) Werkkopie `/workspace/code_kern/`, patch
-`/workspace/code_kern/code_kern.patch` (tegen v14). lufia_v9..v15 zijn niet aangeraakt.
+Basis: `(scratch-map, niet in repo) lufia_v14` (met de gemergde Archief-patch; archieftest 91, golemtest 62 bij Forge).
+Kopie gemaakt wo 7 okt 2026 21:01:52 CEST. (Stap 1 patch-check 21:52: past schoon op een verse kopie van v14; v14 ongewijzigd.) Werkkopie `(scratch-map, niet in repo) code_kern/`, patch
+`(scratch-map, niet in repo) code_kern/code_kern.patch` (tegen v14). lufia_v9..v15 zijn niet aangeraakt.
 
 Stap 2 (archiveren/temmen) en stap 3 (glitch-fusie) zijn NIET gebouwd; het datamodel laat er ruimte voor
 (zie §2).
@@ -23,7 +23,7 @@ Stap 2 (archiveren/temmen) en stap 3 (glitch-fusie) zijn NIET gebouwd; het datam
 | `scripts/ui/status_screen.gd` | regel `Kernen: Golemkern (Kernslag)` (alleen bij de hoofdheld, alleen als hij een kern heeft) |
 | `scripts/tests/kern_tests.gd` (nieuw) | `--kerntest` |
 | `scripts/tests/dungeon_tests.gd` | na de echte Golem-winst (deel F) het absorptie-moment wegklikken zoals een speler (+1 check); anders bleef de speler op slot en faalden de gevechten van deel G |
-| `assets/ui/icons/golemkern.png`, `assets/fx/kern_absorptie.png` | art van RPG ART (`/workspace/art_kern_v15/out/`), alleen gekopieerd. **Forge levert deze bestanden in v15**; de patch bevat ze ook, zodat hij los werkt. Hun `.import` zit er niet in (Godot maakt die zelf). |
+| `assets/ui/icons/golemkern.png`, `assets/fx/kern_absorptie.png` | art van RPG ART (`(scratch-map, niet in repo) art_kern_v15/out/`), alleen gekopieerd. **Forge levert deze bestanden in v15**; de patch bevat ze ook, zodat hij los werkt. Hun `.import` zit er niet in (Godot maakt die zelf). |
 
 `hd_ui.gd` is niet aangeraakt.
 
@@ -125,9 +125,9 @@ Je krijgt hem pas na de Golem, dus de Golem-balans (golemtest) verandert niet. G
 
 ## 6. Tests
 
-`/workspace/run_tests_iso.sh` (eigen user://), headless, Godot 4.3 en 4.7.2:
+`(scratch-map, niet in repo) run_tests_iso.sh` (eigen user://), headless, Godot 4.3 en 4.7.2:
 
-Laatste volledige run wo 7 okt 21:49-22:15 CEST (`/workspace/.scratch/kern/t3_*`), PASS/FAIL:
+Laatste volledige run wo 7 okt 21:49-22:15 CEST (`(scratch-map, niet in repo) .scratch/kern/t3_*`), PASS/FAIL:
 
 | Suite | 4.3 | 4.7.2 | v14 (Forge) |
 |---|---|---|---|
@@ -153,10 +153,10 @@ Geen SCRIPT ERRORs in alle logs.
 - E zware kast: logica, hint + blijft staan zonder kern, duwbaar met kern, op de plaat -> poort open.
 - F statusscherm `Kernen`.
 
-## 7. Screenshots (`/workspace/code_kern_shots/`, elk ook `_3x` = 1152x648)
+## 7. Screenshots (`(scratch-map, niet in repo) code_kern_shots/`, elk ook `_3x` = 1152x648)
 
 Gemaakt wo 7 okt 21:48-21:49 CEST met
-`xvfb-run ... Godot 4.3 --rendering-driver opengl3 -- --kerntest --shots=/workspace/code_kern_shots`
+`xvfb-run ... Godot 4.3 --rendering-driver opengl3 -- --kerntest --shots=(scratch-map, niet in repo) code_kern_shots`
 (veld 384x216, gevecht 768x432). Allemaal zelf bekeken.
 
 | Bestand | Wat je ziet |

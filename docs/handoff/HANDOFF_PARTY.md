@@ -45,7 +45,7 @@ monstervak anders en apart, reserve-opslag, wisselen buiten het gevecht (regels 
 tikken), wisselen geblokkeerd in het gevecht (regels, Codex-knop, veldmenu), beurtvolgorde alleen actieve
 combatanten, oude save zonder `party_bank`, oude save met 6 helden in `party` → 4 + 2 reserve.
 
-Alle 28 suites serieel (logs: `/workspace/code_party/logs/final43`, `final472`, `rerun43`).
+Alle 28 suites serieel (logs: `(scratch-map, niet in repo) code_party/logs/final43`, `final472`, `rerun43`).
 
 **Godot 4.7.2**: 28/28 OK.
 ```
@@ -114,7 +114,7 @@ Extra aangepaste bestaande tests: `codex_tests.gd` (5 menuknoppen), `fusie_tests
 
 
 ## 4. Screenshots
-`/workspace/code_party/shots/`: `party_gevecht_5_plekken.png` (gevecht, 4 helden + groen monstervak),
+`(scratch-map, niet in repo) code_party/shots/`: `party_gevecht_5_plekken.png` (gevecht, 4 helden + groen monstervak),
 `party_menu.png`, `party_menu_gewisseld.png` (+ `_3x`-versies 1152x648).
 
 ## 5. Nodig van RPG ART
@@ -166,13 +166,13 @@ Port van de nieuwe stukken uit #66 bovenop #69 (al op main). Het icoon van RPG A
 - **Tests (eerder)**: partytest (52, nieuw: zijspeler klein/boven B/geen balken/sprite erboven, icoon 7x6, Warp compact,
   Magic opent het scherm en Lotte geneest Dennis in het veld), menutest (6 knoppen, Magic in de ring,
   Warp "compact" i.p.v. "groter") en codextest (6 knoppen, monster rechts van Dennis en iets hoger).
-- **Screenshots** (`/workspace/code_party/shots/`): `party_gevecht_5_plekken.png`, `party_veldmenu.png`,
+- **Screenshots** (`(scratch-map, niet in repo) code_party/shots/`): `party_gevecht_5_plekken.png`, `party_veldmenu.png`,
   `veldmenu_magic.png`, `veldmenu_knoppen.png`, `veldmenu_laden_bevestigen.png`, `veldmenu_scenes_knop.png`,
   `scenes_op_slot.png`, `scenes_scherm.png`, `scenes_herhaling_hanger.png` (alle ook `_3x`).
 - **Testresultaten (commit met Bestiary/Scenes)**: alle 30 suites serieel op 4.7.2 en 4.3. Op beide versies zijn
   er 29 groen. kernkrachttest faalde onder load 1 check (4.7.2: "door"; 4.3: "inslag") en is daarna los
   groen (116/0 op beide). partytest: 77/0 op beide versies, menutest 230/0, codextest 137/0.
-  Logs: `/workspace/code_party/logs/full472_scenes`, `full43_scenes`, `rerun472_scenes`, `rerun43_scenes`.
+  Logs: `(scratch-map, niet in repo) code_party/logs/full472_scenes`, `full43_scenes`, `rerun472_scenes`, `rerun43_scenes`.
 - **Knopteksten gecentreerd** (Dennis): alle veldmenu-knoppen centreren hun tekst. Een gecentreerde `UiMenu`-knop
   krijgt rechts dezelfde opvulling als de focuspijl links, dus de tekst verspringt niet bij focus. Menutest controleert
   dit. menutest/partytest/codextest zijn groen op 4.7.2 en 4.3 (231/77/137).

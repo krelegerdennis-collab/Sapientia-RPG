@@ -603,7 +603,7 @@ Nieuw in `assets/sprites/story/` (nu placeholders uit `tools/art_v11.py`, besche
 Licht en tijd van de dag doet de engine: zachte additieve gloed (zegels cyaan, open ingang
 magenta), avond/nacht via een tint (CanvasModulate) en in scène 2 lichtbundels door de ramen
 (binnen-tile 4). De art hoeft dus geen gloed of nachtversie te hebben. Gewenst van RPG ART (zie
-`/workspace/art_specs_v11/ART_SPEC_V11.md`): een eigen Oude Man (48x96, ook met zwaard),
+`(scratch-map, niet in repo) art_specs_v11/ART_SPEC_V11.md`): een eigen Oude Man (48x96, ook met zwaard),
 Dennis liggend in bed (16x32) en lezend op de stoel (16x24), en optioneel een huis met
 verlichte ramen voor de nacht.
 

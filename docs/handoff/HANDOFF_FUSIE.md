@@ -1,9 +1,9 @@
 # HANDOFF – Glitch-fusie (Kernfragment stap 3) + de Inktwurm – RPG CODE (v0.19)
 
-Basis: `/workspace/lufia_v18` (niet aangeraakt). Werkkopie `/workspace/code_fusie/` (kopie vr 9 okt 2026 17:18,
-`.godot` verwijderd). Patch: `/workspace/code_fusie/code_fusie.patch` (unified diff, `a/` `b/`, gecontroleerd met
-`cd /workspace/lufia_v18 && patch -p1 --dry-run < code_fusie.patch`; v18 is geen git-repo). Er zit GEEN art in de
-patch (ook geen `.import`/`.uid`). Screenshots: `/workspace/code_fusie_shots/`. Testlogs: `/workspace/code_fusie_logs/`.
+Basis: `(scratch-map, niet in repo) lufia_v18` (niet aangeraakt). Werkkopie `(scratch-map, niet in repo) code_fusie/` (kopie vr 9 okt 2026 17:18,
+`.godot` verwijderd). Patch: `(scratch-map, niet in repo) code_fusie/code_fusie.patch` (unified diff, `a/` `b/`, gecontroleerd met
+`cd (scratch-map, niet in repo) lufia_v18 && patch -p1 --dry-run < code_fusie.patch`; v18 is geen git-repo). Er zit GEEN art in de
+patch (ook geen `.import`/`.uid`). Screenshots: `(scratch-map, niet in repo) code_fusie_shots/`. Testlogs: `(scratch-map, niet in repo) code_fusie_logs/`.
 
 ## 1. Bestanden
 
@@ -147,7 +147,7 @@ binnen 384x216 en niet over andere knoppen. De oude knoppen 0-4 en hun D-pad-pad
 
 ## 4. Art-paden voor ART (Inktwurm)
 
-ART heeft geleverd in `/workspace/art_inktwurm_v19/out/` (LEESMIJ.txt). **Forge zet ze in het project** (niet in de patch):
+ART heeft geleverd in `(scratch-map, niet in repo) art_inktwurm_v19/out/` (LEESMIJ.txt). **Forge zet ze in het project** (niet in de patch):
 
 | Bron (out/) | Doel in het project | Maat / anker |
 |---|---|---|
@@ -159,7 +159,7 @@ ART heeft geleverd in `/workspace/art_inktwurm_v19/out/` (LEESMIJ.txt). **Forge 
 Daarna: de 4 paden in `tools/handwerk.txt`, `"art_pending": true` (en eventueel `"sprite_placeholder"`) bij de Inktwurm in
 `game_data.gd` weghalen, `--import`. Zolang de bestanden er niet zijn: gevecht/bestiarium/Codex tonen de Mosslijm als
 plaatsvervanger, de kaart het verkleinde gevechtsplaatje met magenta hoekjes, de bondgenoot het gespiegelde vooraanzicht.
-De screenshots zijn gemaakt MET de art (aparte kopie `/workspace/code_fusie_artcheck`, fusietest daar ook groen).
+De screenshots zijn gemaakt MET de art (aparte kopie `(scratch-map, niet in repo) code_fusie_artcheck`, fusietest daar ook groen).
 
 ## 5. TIJDELIJKE AANNAMES
 
@@ -179,7 +179,7 @@ De screenshots zijn gemaakt MET de art (aparte kopie `/workspace/code_fusie_artc
 
 ## 6. Tests
 
-Runner: `/workspace/run_tests_iso.sh <project> <prefix> <suites>` (Godot 4.3 en 4.7.2 headless, sequentieel).
+Runner: `(scratch-map, niet in repo) run_tests_iso.sh <project> <prefix> <suites>` (Godot 4.3 en 4.7.2 headless, sequentieel).
 `--fusietest` (`scripts/tests/fusie_tests.gd`, `--alleen=ABCDEF`, `--shots=map`):
 A data + regels, B randgevallen GameState (zelfde pagina 2x, maar 1 pagina, onbekende uid, vol, ouders weg, nieuwe uid,
 bondgenoot A/B/geen, voorbeeld verandert niets, geen dubbele fusie, niet in gevecht), C save/load, D Codex-scherm
@@ -193,13 +193,13 @@ blijft, Item > Leeg Boek werkt nog, 0 boeken → Vangen grijs, labels baas/niet-
 
 TESTTABEL
 
-## 7. Screenshots (`/workspace/code_fusie_shots/`, 384x216 + `_3x`)
+## 7. Screenshots (`(scratch-map, niet in repo) code_fusie_shots/`, 384x216 + `_3x`)
 
 `fusie_kies2`, `fusie_voorbeeld`, `fusie_resultaat`, `fusie_codex` (Glitchkruiper), `fusie_bondgenoot` / `inktwurm_gevecht`
 (Glitchwurm als paarse bondgenoot tegen Inktwurm + Papiergeest), `inktwurm_codex`, `codex_knop_menu` (kruis met Codex-knop +
 submenu), `codex_knop_vangen` (doel-label `Mosslijm 45% (2 boeken)`), `codex_knop_wissel` (wissel-lijst).
 Gevechts-shots zijn 768x432 (het gevecht rendert op een 2x-raster, = 384x216 spel-eenheden), Codex-scherm-shots 384x216.
-Gemaakt met `xvfb-run -a Godot_v4.3 --rendering-driver opengl3 --path . -- --fusietest --shots=/workspace/code_fusie_shots`.
+Gemaakt met `xvfb-run -a Godot_v4.3 --rendering-driver opengl3 --path . -- --fusietest --shots=(scratch-map, niet in repo) code_fusie_shots`.
 Bekeken: geen afgekapte tekst of overlap; de lange vaardighedenregel loopt netjes door op de volgende regel.
 
 ## 8. Open vragen voor Dennis

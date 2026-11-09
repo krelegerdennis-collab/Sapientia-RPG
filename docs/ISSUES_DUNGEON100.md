@@ -24,7 +24,7 @@ Alleen wat op die stand nog ontbreekt of stuk is. Geen GitHub-issue: `gh` mag di
 
 - Waarom: curves, baasvermenigvuldigers en buitkansen in `scripts/data/dungeon100_scaling.gd` zijn voorlopig. Er is geen simulatie die nagaat of verdieping 1–100 haalbaar is met een party op level 1 zonder uitrusting.
 - Volgende stap: verdieping 1, 10, 50 en 100 spelen of headless narekenen, daarna `HP_LIN`, `BOSS_MULT`, `GEAR` en `gear_chance` bijstellen. `--dungeon100schaaltest` en `--dungeon100blauwtest` blijven groen.
-- Zie: `HANDOFF_DUNGEON100_SCHAAL.md`, `scripts/data/dungeon100_scaling.gd`.
+- Zie: `docs/handoff/HANDOFF_DUNGEON100_SCHAAL.md`, `scripts/data/dungeon100_scaling.gd`.
 
 ### [ ] Geüploade muziek speelt niet
 
@@ -40,13 +40,13 @@ Nodig van RPG ART. Tot die bestanden er zijn blijven de placeholders staan.
 
 - Waarom: `Dungeon100Rustpunt` tint `assets/sprites/save_book.png` met `Color(1.0, 0.86, 0.62)`. Er is geen eigen bestand, dus ook geen regel in `tools/placeholders_v17.txt`.
 - Volgende stap: eigen sprite, 64×16, 4 frames van 16×16, palet van de Archieven. Pad in `tools/handwerk.txt` zodra het echte art is.
-- Zie: `scripts/dungeon/dungeon100_rustpunt.gd`, `HANDOFF_DUNGEON100_REGELS.md`.
+- Zie: `scripts/dungeon/dungeon100_rustpunt.gd`, `docs/handoff/HANDOFF_DUNGEON100_REGELS.md`.
 
 ### [ ] Ingang op de wereldkaart is het grot-icoon van het Donker Woud
 
 - Waarom: `Exits/NaarDiepeGrot` staat op tegel (9, 26) en de grondtegel is atlas `(4, 0)` van `wereld_v17_iconen.png`. De generator-test eist dat icoon.
 - Volgende stap: eigen icoon 16×16 voor de Diepe Grot, en de atlas-check in `scripts/tests/dungeon100_generator_tests.gd` mee aanpassen.
-- Zie: `scenes/maps/wereldkaart.tscn`, `HANDOFF_DUNGEON100.md`.
+- Zie: `scenes/maps/wereldkaart.tscn`, `docs/handoff/HANDOFF_DUNGEON100.md`.
 
 ### [ ] Tien bazen zonder eigen art of lore
 
@@ -84,17 +84,17 @@ Nodig van RPG ART. Tot die bestanden er zijn blijven de placeholders staan.
 
 ### [ ] Project staat op Godot 4.3, de machine op 4.7.2
 
-- Waarom: `project.godot` heeft feature `4.3`. Deze omgeving heeft Godot 4.7.2. `scripts/party_actions.gd` vermijdt `load()` omdat Godot 4.7 bij afsluiten lekte. `docs/HANDOFF_PUZZELS.md`: suites die dezelfde `user://` delen kunnen de save-test laten falen (gezien op 4.7.2). Een aparte flake van `--kernkrachttest` staat niet in de repo.
+- Waarom: `project.godot` heeft feature `4.3`. Deze omgeving heeft Godot 4.7.2. `scripts/party_actions.gd` vermijdt `load()` omdat Godot 4.7 bij afsluiten lekte. `docs/handoff/HANDOFF_PUZZELS.md`: suites die dezelfde `user://` delen kunnen de save-test laten falen (gezien op 4.7.2). Een aparte flake van `--kernkrachttest` staat niet in de repo.
 - Volgende stap: suites alleen via `.github/scripts/run_suite.sh` (eigen `XDG_DATA_HOME` per suite). Het project blijft op 4.3 tot RPG Forge de feature-vlag zet.
-- Zie: `project.godot`, `README.md`, `.github/scripts/run_suite.sh`, `docs/HANDOFF_PUZZELS.md`.
+- Zie: `project.godot`, `README.md`, `.github/scripts/run_suite.sh`, `docs/handoff/HANDOFF_PUZZELS.md`.
 
 ## Documentatie
 
 ### [ ] Lore van Het Gesimuleerde Archief staat niet in de canon
 
-- Waarom: `scripts/data/dungeon100_blue.gd` en `HANDOFF_DUNGEON100_BLUECHEST.md` noemen de Diepe Grot een simulatie van de Oude Mensheid, aangetast door de Zwarte Stroom. Dat is een voorstel. `docs/lore/CANON.md` heeft het niet. Spelertekst noemt de simulatie al (`MSG_WARP_USED`, de beschrijving van de Mimic).
+- Waarom: `scripts/data/dungeon100_blue.gd` en `docs/handoff/HANDOFF_DUNGEON100_BLUECHEST.md` noemen de Diepe Grot een simulatie van de Oude Mensheid, aangetast door de Zwarte Stroom. Dat is een voorstel. `docs/lore/CANON.md` heeft het niet. Spelertekst noemt de simulatie al (`MSG_WARP_USED`, de beschrijving van de Mimic).
 - Volgende stap: Dennis zet het voorstel in `docs/lore/CANON.md`, of de zinnen die de grot zo noemen gaan eruit.
-- Zie: `HANDOFF_DUNGEON100_BLUECHEST.md`, `docs/lore/CANON.md`.
+- Zie: `docs/handoff/HANDOFF_DUNGEON100_BLUECHEST.md`, `docs/lore/CANON.md`.
 
 ### [ ] Vijf teksten lopen achter op de code
 
@@ -102,7 +102,7 @@ Nodig van RPG ART. Tot die bestanden er zijn blijven de placeholders staan.
   - `export/web/README.md` zegt dat Pages uit staat, dat de build de huidige `main` is, en dat dungeon100 nog op losse branches staat.
   - `assets/audio/bgm/README.md` zegt dat de map leeg is.
   - `AGENTS.md` zegt dat er nog geen audio is en dat `bgm/` alleen een README bevat.
-  - `HANDOFF_DUNGEON100_REGELS.md` §7 zegt 74 PASS; `AGENTS.md` zegt 72 voor `--dungeon100regelstest`.
-  - `HANDOFF_DUNGEON100.md` (bovenaan) zegt dat de seed vast blijft. Na `dungeon100_end_run` is de seed 0 en krijgt de volgende run een nieuwe (`scripts/dungeon/dungeon100_room.gd`).
+  - `docs/handoff/HANDOFF_DUNGEON100_REGELS.md` §7 zegt 74 PASS; `AGENTS.md` zegt 72 voor `--dungeon100regelstest`.
+  - `docs/handoff/HANDOFF_DUNGEON100.md` (bovenaan) zegt dat de seed vast blijft. Na `dungeon100_end_run` is de seed 0 en krijgt de volgende run een nieuwe (`scripts/dungeon/dungeon100_room.gd`).
 - Volgende stap: die passages gelijk trekken met `main` `9cbb1de`.
 - Zie: de vijf bestanden hierboven.

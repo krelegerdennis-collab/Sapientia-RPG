@@ -1,6 +1,6 @@
 # HANDOFF – Eerste Archief v0.14 (Forge -> RPG CODE)
 
-Project: `/workspace/lufia_v14` (versie 0.14, code 16, geen APK). Plan: `story/ARCHIEF1_PLATTEGROND.md`.
+Project: `(scratch-map, niet in repo) lufia_v14` (versie 0.14, code 16, geen APK). Plan: `story/ARCHIEF1_PLATTEGROND.md`.
 Alle 5 testsuites groen op Godot 4.3. Geheime deur, runeplaat en schatkist van de puzzelkamer zijn
 PLACEHOLDERS (met de echte art van RPG ART); de deur gaat in het spel NIET open. Boss-stats en het
 Vonkzwaard-item zitten er niet in (RPG CODE).
