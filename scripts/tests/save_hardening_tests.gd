@@ -175,6 +175,8 @@ func _run() -> void:
 	await _scene_tests()
 	print("=== Deel E: geen dubbele spullen of goud ===")
 	_duplication_tests()
+	print("=== Deel F: autosave per slot (C-11) ===")
+	_per_slot_autosave_tests()
 	_molen_tests()
 	_remove_save(SAVE)
 	print("SAVEHARDENINGTEST %d PASS, %d FAIL" % [passes, failures])
@@ -197,25 +199,30 @@ func _two_good_saves() -> void:
 func _unreadable_slot_tests() -> void:
 	var old_path := GameState.save_path
 	var old_auto := GameState.autosave_path
-	GameState.save_path = "user://sh_slots_save_1.json"
-	GameState.autosave_path = "user://sh_slots_autosave.json"
+	var old_story := GameState._story_autosave_path
+	GameState._story_save_path = "user://sh_slots_save_1.json"
+	GameState._story_autosave_path = "user://sh_slots_autosave.json"
+	GameState.save_path = GameState._story_save_path
+	GameState.sync_autosave_path()
 	for s in range(1, GameState.SLOT_COUNT + 1):
 		_remove_save(GameState.slot_path(s))
-	_remove_save(GameState.autosave_path)
+		_remove_save(GameState.autosave_slot_path(s))
+	_remove_save(GameState._legacy_shared_autosave_path())
 	GameState.new_game("Dax")
+	var sh_auto := GameState.autosave_slot_path(1)
 	GameState.current_map = TOWN
 	GameState.gold = 111
 	GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, GameState.slot_path(1))
 	GameState.gold = 222
 	GameState.autosave(Vector2i(2, 2), Vector2i.DOWN, "achtergrond")
 	_write(GameState.slot_path(2), "{\"gold\":")
-	var good_auto := GameState.read_save(GameState.autosave_path)
+	var good_auto := GameState.read_save(sh_auto)
 	# slot 1 oud (saved_unix ver in het verleden), zodat een kapot bestand met een nieuwe wijzigingstijd het 'wint' zonder de fix
 	var old_slot := GameState.read_save(GameState.slot_path(1))
-	old_slot["saved_unix"] = 100.0
+	old_slot["saved_unix"] = Time.get_unix_time_from_system() + 5000.0
 	_write(GameState.slot_path(1), JSON.stringify(old_slot))
 	_remove_file_if(GameState.slot_path(1) + ".bak")
-	_write(GameState.autosave_path, "")
+	_write(sh_auto, "")
 	check("onleesbare autosave (nieuwer dan slot 1) blokkeert 'Doorgaan' niet: newest = slot 1",
 			GameState.newest_save_path() == GameState.slot_path(1) and int(GameState.read_newest_save().get("gold", -1)) == 111)
 	check("onleesbaar slot 2 telt als corrupt, niet als leeg", bool(GameState.slot_record(2).get("corrupt", false)))
@@ -226,18 +233,23 @@ func _unreadable_slot_tests() -> void:
 			lst.slot_buttons[1].disabled and lst.autosave_button.disabled and not lst.slot_buttons[0].disabled)
 	check("slotlijst: label zegt 'unreadable save' (%s)" % lst.slot_buttons[1].text, lst.slot_buttons[1].text.contains("unreadable save"))
 	lst.queue_free()
-	_write(GameState.autosave_path, JSON.stringify(good_auto))
-	check("goede autosave is weer het nieuwste", GameState.newest_save_path() == GameState.autosave_path)
-	_remove_save(GameState.autosave_path)
+	good_auto["saved_unix"] = Time.get_unix_time_from_system() + 6000.0
+	_write(sh_auto, JSON.stringify(good_auto))
+	check("goede autosave is weer het nieuwste", GameState.newest_save_path() == sh_auto)
+	_remove_save(sh_auto)
 	_write(GameState.slot_path(1), "{\"gold\":")
 	check("alles onleesbaar: newest verwijst nog naar een bestand (laden meldt de fout)",
 			GameState.has_any_save() and not GameState.load_game(GameState.newest_save_path())
 			and GameState.last_load_notice == GameState.NOTICE_UNREADABLE)
 	for s in range(1, GameState.SLOT_COUNT + 1):
 		_remove_save(GameState.slot_path(s))
-	_remove_save(GameState.autosave_path)
+		_remove_save(GameState.autosave_slot_path(s))
+	_remove_save(GameState._legacy_shared_autosave_path())
 	GameState.save_path = old_path
+	GameState._story_save_path = old_path
+	GameState._story_autosave_path = old_story if old_story != "" else GameState.AUTOSAVE_PATH
 	GameState.autosave_path = old_auto
+	GameState.sync_autosave_path()
 
 
 func _corruption_tests() -> void:
@@ -470,6 +482,23 @@ func _migration_tests() -> void:
 	fut["version"] = 999
 	fut["nieuw_veld_uit_de_toekomst"] = {"a": [1, 2, 3]}
 	check("save uit een nieuwere versie (onbekende velden) laadt", _load_dict(fut))
+	check("nieuwere versie: save_readonly na laden", GameState.save_readonly)
+	var newer_text := _read(SAVE)
+	GameState.gold = 1
+	check("nieuwere versie: save_game weigert", not GameState.save_game(Vector2i(0, 0), Vector2i.DOWN, SAVE))
+	check("nieuwere versie: bestand onaangeroerd", _read(SAVE) == newer_text)
+	var lst := SaveSlotList.new()
+	add_child(lst)
+	await _frames(2)
+	var slot1_rec := GameState.slot_record(1)
+	if GameState.slot_path(1) != SAVE:
+		_write(GameState.slot_path(1), newer_text)
+		slot1_rec = GameState.slot_record(1)
+	check("slotlijst: nieuwere versie toont '(newer version)'",
+			lst._label(1, slot1_rec).contains("(newer version)"))
+	lst.queue_free()
+	GameState.new_game("Dax")
+	check("new_game wist save_readonly", not GameState.save_readonly)
 
 	# te veel helden in party -> reserve
 	var many: Dictionary = {"map": TOWN, "party": []}
@@ -567,11 +596,18 @@ func _roundtrip_tests() -> void:
 
 	# dezelfde ronde via de slots 1..4 en de autosave
 	var old_path := GameState.save_path
-	GameState.save_path = "user://sh_slots_save_1.json"
+	var old_story_auto := GameState._story_autosave_path
+	GameState._story_save_path = "user://sh_slots_save_1.json"
+	GameState._story_autosave_path = "user://sh_slots_autosave.json"
+	GameState.save_path = GameState._story_save_path
 	for s in range(1, GameState.SLOT_COUNT + 1):
 		_remove_save(GameState.slot_path(s))
+		_remove_save(GameState.autosave_slot_path(s))
 		GameState.active_slot = s
+		GameState.sync_autosave_path()
 		GameState.save_game(tile, facing)
+	GameState.active_slot = 1
+	GameState.sync_autosave_path()
 	_remove_save(GameState.autosave_path)
 	check("autosave-pad (pauze-save) schrijft de volledige toestand", GameState.autosave(tile, facing, "achtergrond"))
 	var all_same := true
@@ -584,8 +620,12 @@ func _roundtrip_tests() -> void:
 	check("autosave laden geeft dezelfde toestand terug", GameState.load_game(GameState.autosave_path) and _sig(tile, facing) == before)
 	for s in range(1, GameState.SLOT_COUNT + 1):
 		_remove_save(GameState.slot_path(s))
-	_remove_save(GameState.autosave_path)
+		_remove_save(GameState.autosave_slot_path(s))
+	_remove_save(GameState._legacy_shared_autosave_path())
 	GameState.save_path = old_path
+	GameState._story_save_path = old_path
+	GameState._story_autosave_path = old_story_auto if old_story_auto != "" else GameState.AUTOSAVE_PATH
+	GameState.sync_autosave_path()
 
 	# een round-trip tijdens een Dungeon100-run (momentopname van de echte party/tas)
 	_rich_state()
@@ -650,6 +690,9 @@ func _blocked_state_tests() -> void:
 	GameState.inventory["drankje"] = 3
 	GameState.party[0]["hp"] = 1
 	GameState.gold += 500
+	var battle_file_before := _read(save_path)
+	check("save_game tijdens gevecht geeft false", not GameState.save_game(tile, Vector2i.DOWN, save_path))
+	check("save_game tijdens gevecht wijzigt het bestand niet", _read(save_path) == battle_file_before)
 	GameState.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
 	check("app naar de achtergrond tijdens het gevecht: geen autosave en de oude save blijft ongewijzigd",
 			not FileAccess.file_exists(GameState.autosave_path) and JSON.stringify(GameState._read_save_file(save_path)).contains("4321"))
@@ -659,6 +702,22 @@ func _blocked_state_tests() -> void:
 	check("laden na een proces-kill tijdens het gevecht: terug naar de toestand van vóór het gevecht",
 			_sig(tile, Vector2i.DOWN) == pre_battle and GameState.item_count("drankje") == 7 and GameState.gold == 4321)
 	check("na laden is in_battle onwaar (nooit midden in een gevecht hervatten)", not GameState.in_battle)
+
+	var prev_scene := get_tree().current_scene
+	GameState.save_game(tile, Vector2i.DOWN, save_path)
+	var guard_sig := _read(save_path)
+	GameState.in_battle = true
+	Story.pending_unique_event = "sh_midfight_unique"
+	var battle_root: Node = (load(GameState.BATTLE_SCENE) as PackedScene).instantiate()
+	get_tree().root.add_child(battle_root)
+	get_tree().current_scene = battle_root
+	check("gevechtsscène + pending event: save_game weigert",
+			not GameState.save_game(tile, Vector2i.DOWN, save_path))
+	check("gevechtsscène + pending event: bestand onaangeroerd", _read(save_path) == guard_sig)
+	battle_root.queue_free()
+	get_tree().current_scene = prev_scene
+	Story.pending_unique_event = ""
+	GameState.in_battle = false
 
 	# een (verkeerde) handmatige save tijdens een gevecht slaat geen halve gevechtstoestand op als 'in gevecht'
 	check("save_game schrijft geen gevechtsvlaggen in het bestand",
@@ -914,7 +973,76 @@ func _duplication_tests() -> void:
 	_remove_save(SAVE)
 
 
-# ---------------------------------------------------------------- F: molen (R4b)
+# ---------------------------------------------------------------- F: autosave per slot (C-11)
+func _per_slot_autosave_tests() -> void:
+	for s in range(1, GameState.SLOT_COUNT + 1):
+		_remove_save(GameState.slot_path(s))
+		_remove_save(GameState.autosave_slot_path(s))
+	_remove_save(GameState._legacy_shared_autosave_path())
+	GameState.use_story_saves()
+	GameState.active_slot = 1
+	GameState.pending_new_slot = 1
+	GameState.new_game("OnlyAuto")
+	GameState.current_map = TOWN
+	GameState.gold = 111
+	check("slot 1: alleen autosave schrijft naar autosave_1",
+			GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, GameState.autosave_path))
+	var a1 := GameState.autosave_slot_path(1)
+	var a1_text := _read(a1)
+	check("slot 1: handmatige slot leeg", not FileAccess.file_exists(GameState.slot_path(1)))
+	check("slot 1: autosave gold", int(GameState.read_save(a1).get("gold", 0)) == 111)
+	GameState.pending_new_slot = 3
+	GameState.new_game("SlotThree")
+	GameState.current_map = TOWN
+	GameState.gold = 333
+	check("slot 3: map-autosave in eigen bestand",
+			GameState.save_game(Vector2i(2, 2), Vector2i.DOWN, GameState.autosave_path))
+	var a3 := GameState.autosave_slot_path(3)
+	check("slot 1 autosave niet overschreven door slot 3", _read(a1) == a1_text and int(GameState.read_save(a3).get("gold", 0)) == 333)
+	check("slot_record(1) leest eigen autosave", int(GameState.slot_record(1).get("data", {}).get("gold", -1)) == 111)
+	# cross-slot: sessie van slot 1, handmatig opslaan naar slot 2, daarna autosave
+	GameState.pending_new_slot = 1
+	GameState.active_slot = 1
+	GameState.new_game("CrossA")
+	GameState.current_map = TOWN
+	GameState.gold = 501
+	GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, GameState.autosave_path)
+	a1_text = _read(a1)
+	GameState.gold = 502
+	GameState.active_slot = 2
+	GameState.save_game(Vector2i(2, 2), Vector2i.DOWN)
+	var auto_b := GameState.autosave_slot_path(2)
+	check("active_slot=wissel: autosave_path wijst naar slot 2", GameState.autosave_path == auto_b)
+	GameState.gold = 503
+	check("cross-slot: autosave schrijft slot 2", GameState.save_game(Vector2i(3, 3), Vector2i.DOWN, GameState.autosave_path))
+	check("cross-slot: autosave_2 gold", int(GameState.read_save(auto_b).get("gold", 0)) == 503
+			and int(GameState.read_save(auto_b).get("home_slot", 0)) == 2)
+	check("cross-slot: autosave_1 ongewijzigd", _read(a1) == a1_text)
+	# migratie: legacy autosave.json -> autosave_2.json (met .bak)
+	GameState.active_slot = 2
+	GameState.pending_new_slot = 2
+	GameState.new_game("MigTwo")
+	GameState.gold = 222
+	GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, GameState.slot_path(2))
+	var legacy := GameState._legacy_shared_autosave_path()
+	var leg_data := GameState.read_save(GameState.slot_path(2))
+	leg_data["autosave"] = true
+	leg_data["slot"] = GameState.AUTOSAVE_SLOT
+	leg_data["home_slot"] = 2
+	leg_data["saved_unix"] = Time.get_unix_time_from_system() + 50.0
+	_write(legacy, JSON.stringify(leg_data))
+	var bak := legacy + ".bak"
+	_write(bak, JSON.stringify(leg_data))
+	_remove_save(GameState.autosave_slot_path(2))
+	GameState._migrate_legacy_autosave()
+	var a2 := GameState.autosave_slot_path(2)
+	check("migratie: legacy autosave.json weg", not FileAccess.file_exists(legacy))
+	check("migratie: autosave_2.json aanwezig", FileAccess.file_exists(a2))
+	check("migratie: .bak mee verplaatst", FileAccess.file_exists(a2 + ".bak"))
+	check("migratie: inhoud klopt", int(GameState.read_save(a2).get("gold", 0)) == 222)
+
+
+# ---------------------------------------------------------------- G: molen (R4b)
 ## Zingend Meel is per bezoek, niet per save: save -> laden geeft geen tweede meel; een nieuwe
 ## binnenkomst (niet "load") wel.
 func _molen_tests() -> void:

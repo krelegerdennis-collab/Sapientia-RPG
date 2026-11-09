@@ -225,12 +225,21 @@ const MAX_GOLD := 999999999
 const MAX_ITEM_STACK := 9999
 ## Laatste melding van load_game ("" = alles goed). Engels, voor de speler.
 var last_load_notice := ""
+## true na laden van een save met version > SAVE_VERSION: geen overschrijven tot new_game.
+var save_readonly := false
 const NOTICE_RECOVERED := "Your save file was damaged. It was restored from the backup copy."
 const NOTICE_UNREADABLE := "This save file can't be read."
 const RECOVERED_LINES := ["Your save file was damaged.", "It was restored from the backup copy."]
 var save_path := "user://save_1.json"
 ## Welk slot de volgende handmatige save schrijft. Laden van een slot zet dit.
-var active_slot := 1
+## Setter houdt autosave_path in sync (C-11: book_point / save_screen wisselen van slot).
+var _active_slot: int = 1
+var active_slot: int:
+	get:
+		return _active_slot
+	set(v):
+		_active_slot = clampi(v, 1, SLOT_COUNT)
+		sync_autosave_path()
 ## Slot 0 = de aparte autosave (Laden: 'Autosave'). Die overschrijft nooit slot 1..4.
 const AUTOSAVE_SLOT := 0
 ## Redenen waarvoor automatisch wordt opgeslagen (Dennis).
@@ -241,7 +250,7 @@ var pending_new_slot := 1
 ## Autosave alleen bij een overgang wereldkaart <-> kerker (niet bij elke kamer of een dorp).
 const NON_DUNGEON_MAPS := ["wilgendal", "dorp_wilgendal", "esdoorn", "wilgendal_binnen",
 		"huis_wilgendal", "esdoorn_herberg", "esdoorn_huis_noor"]
-## v0.11 Automatisch opslaan: een EIGEN bestand (overschrijft de handmatige save nooit).
+## v0.11 Automatisch opslaan: een EIGEN bestand per handmatig slot (C-11: autosave_N.json).
 ## Wordt geschreven bij een kerker-overgang en als de app naar de achtergrond gaat (Android).
 ## De optie schakelt alleen de gewone autosave uit; de pauze-save blijft verplicht.
 ## Nooit tijdens een gevecht, een mapwissel of een tekstvak.
@@ -718,10 +727,15 @@ func _ready() -> void:
 		# eigen bestanden: de tests raken je echte save/autosave niet
 		save_path = "user://%s_save_1.json" % t[3]
 		autosave_path = "user://%s_autosave.json" % t[3]
+		_story_save_path = save_path
+		_story_autosave_path = autosave_path
 		for s in range(1, SLOT_COUNT + 1):
 			var sp := slot_path(s)
 			if sp != "" and FileAccess.file_exists(sp):
 				DirAccess.remove_absolute(ProjectSettings.globalize_path(sp))
+			var ap := autosave_slot_path(s)
+			if ap != "" and FileAccess.file_exists(ap):
+				DirAccess.remove_absolute(ProjectSettings.globalize_path(ap))
 		if FileAccess.file_exists(autosave_path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(autosave_path))
 		_finish_preload()   # tests: achtergrond-laden eerst afmaken (geen race/deadlock met load() in de suite)
@@ -738,6 +752,8 @@ func _ready() -> void:
 		call_deferred("_start_berggrot")
 	_story_save_path = save_path
 	_story_autosave_path = autosave_path
+	_migrate_legacy_autosave()
+	sync_autosave_path()
 
 
 ## Testmodus (alleen bij een --...test-suite; O-4, flaky berggrottest onder load):
@@ -1040,6 +1056,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	_clock_start_ms = Time.get_ticks_msec()
 	active_slot = clampi(pending_new_slot, 1, SLOT_COUNT)
 	_codex_sync_marked = false
+	save_readonly = false
 
 
 ## Naam opschonen: spaties eraf, max. NAME_MAX tekens, leeg = DEFAULT_NAME.
@@ -1350,6 +1367,86 @@ func slot_path(slot: int) -> String:
 	return save_path.trim_suffix("save_1.json") + "save_%d.json" % slot
 
 
+## Pad van de autosave die bij handmatig slot hoort (C-11: niet meer één gedeeld bestand).
+func autosave_slot_path(slot: int) -> String:
+	if slot < 1 or slot > SLOT_COUNT:
+		return ""
+	var base := _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	if base.ends_with("autosave.json"):
+		return base.trim_suffix("autosave.json") + "autosave_%d.json" % slot
+	if base.ends_with(".json"):
+		return base.trim_suffix(".json") + "_%d.json" % slot
+	return base + "_%d.json" % slot
+
+
+## Oud gedeeld autosave-bestand (vóór C-11); gebruikt voor migratie.
+func _legacy_shared_autosave_path() -> String:
+	var base := _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	if base.ends_with("autosave.json"):
+		return base
+	return AUTOSAVE_PATH
+
+
+## Zet autosave_path op het bestand van active_slot (alleen story-modus).
+func sync_autosave_path() -> void:
+	if playing_beta or playing_eind or som_mode or coop_is_guest():
+		return
+	var p := autosave_slot_path(active_slot)
+	if p != "":
+		autosave_path = p
+
+
+func is_autosave_path(path: String) -> bool:
+	if path == "":
+		return false
+	if path == COOP_GUEST_AUTOSAVE_PATH:
+		return true
+	const SomData := preload("res://scripts/data/som_data.gd")
+	if path == SomData.AUTOSAVE_PATH:
+		return true
+	if path == beta_autosave_path() or path == eind_autosave_path():
+		return true
+	if path == _legacy_shared_autosave_path():
+		return true
+	for i in range(1, SLOT_COUNT + 1):
+		if path == autosave_slot_path(i):
+			return true
+	return false
+
+
+## Verplaats autosave.json (en .bak) naar autosave_<home_slot>.json bij eerste start.
+func _migrate_legacy_autosave() -> void:
+	var legacy := _legacy_shared_autosave_path()
+	if not _save_file_exists(legacy):
+		return
+	var src := _read_save_source(legacy)
+	var d: Dictionary = src["data"]
+	if d.is_empty():
+		return
+	var hs := home_slot_of(d)
+	var target := autosave_slot_path(hs)
+	if target == "" or target == legacy:
+		return
+	if _save_file_exists(target):
+		return
+	if not _move_save_files(legacy, target):
+		push_warning("Autosave-migratie mislukt: %s -> %s" % [legacy, target])
+
+
+func _move_save_files(from: String, to: String) -> bool:
+	var err := DirAccess.rename_absolute(
+			ProjectSettings.globalize_path(from), ProjectSettings.globalize_path(to))
+	if err != OK:
+		return false
+	var bak_from := from + ".bak"
+	if FileAccess.file_exists(bak_from):
+		var bak_err := DirAccess.rename_absolute(
+				ProjectSettings.globalize_path(bak_from), ProjectSettings.globalize_path(to + ".bak"))
+		if bak_err != OK:
+			push_warning("Autosave-migratie: .bak niet verplaatst: %s" % error_string(bak_err))
+	return true
+
+
 ## Oude saves zonder sleutel "slot" horen bij slot 1.
 func _slot_of_data(d: Dictionary) -> int:
 	if not d.has("slot"):
@@ -1360,11 +1457,23 @@ func _slot_of_data(d: Dictionary) -> int:
 	return clampi(int(s), 1, SLOT_COUNT)
 
 
-## Nieuwste bestand van één slot: handmatig, of de autosave als die bij dit slot hoort en nieuwer is.
+## Nieuwste bestand van één slot: handmatig, of de autosave van dat slot als die nieuwer is.
 ## {} = leeg. Even oud = de handmatige save.
 func slot_record(slot: int) -> Dictionary:
 	if slot == AUTOSAVE_SLOT:
 		return autosave_record()
+	var manual_rec := _manual_slot_record(slot)
+	var auto_rec := _slot_autosave_record(slot)
+	if manual_rec.is_empty():
+		return auto_rec
+	if auto_rec.is_empty():
+		return manual_rec
+	if float(auto_rec["stamp"]) > float(manual_rec["stamp"]):
+		return auto_rec
+	return manual_rec
+
+
+func _manual_slot_record(slot: int) -> Dictionary:
 	var manual := slot_path(slot)
 	if manual == "" or not _save_file_exists(manual):
 		return {}
@@ -1374,21 +1483,52 @@ func slot_record(slot: int) -> Dictionary:
 		return {"path": manual, "data": {}, "stamp": _save_modified_time(manual),
 				"slot": slot, "corrupt": true}
 	return {"path": manual, "data": d, "stamp": _save_stamp(manual), "slot": slot,
-			"from_backup": src["from_backup"]}
+			"from_backup": src["from_backup"], "newer_version": save_file_is_newer(d)}
 
 
-## De aparte autosave ({} = geen). Ook een oude autosave (v0.22, gestempeld met slot 1..4)
-## komt hier: die wordt niet meer in een handmatig slot gemengd, maar gaat niet verloren.
-func autosave_record() -> Dictionary:
-	if not _save_file_exists(autosave_path):
+func _slot_autosave_record(slot: int) -> Dictionary:
+	var path := autosave_slot_path(slot)
+	if path == "" or not _save_file_exists(path):
 		return {}
-	var src := _read_save_source(autosave_path)
+	var src := _read_save_source(path)
 	var d: Dictionary = src["data"]
 	if d.is_empty():
-		return {"path": autosave_path, "data": {}, "stamp": _save_modified_time(autosave_path),
-				"slot": AUTOSAVE_SLOT, "corrupt": true}
-	return {"path": autosave_path, "data": d, "stamp": _save_stamp(autosave_path), "slot": AUTOSAVE_SLOT,
-			"from_backup": src["from_backup"]}
+		return {"path": path, "data": {}, "stamp": _save_modified_time(path),
+				"slot": AUTOSAVE_SLOT, "corrupt": true, "home_slot": slot}
+	return {"path": path, "data": d, "stamp": _save_stamp(path), "slot": AUTOSAVE_SLOT,
+			"from_backup": src["from_backup"], "home_slot": slot, "newer_version": save_file_is_newer(d)}
+
+
+## De nieuwste autosave over alle slots (slot 0 in de slotlijst). Het oude gedeelde
+## autosave.json telt alleen mee zolang er nog geen per-slot bestand voor die home_slot is.
+func autosave_record() -> Dictionary:
+	var best := {}
+	var stamp := -1.0
+	var legacy := _legacy_shared_autosave_path()
+	if _save_file_exists(legacy):
+		var src_l := _read_save_source(legacy)
+		var dl: Dictionary = src_l["data"]
+		var ignore_legacy := false
+		if not dl.is_empty():
+			var migrated := autosave_slot_path(home_slot_of(dl))
+			if migrated != legacy and migrated != "" and _save_file_exists(migrated):
+				ignore_legacy = true
+		if not ignore_legacy and dl.is_empty():
+			best = {"path": legacy, "data": {}, "stamp": _save_modified_time(legacy),
+					"slot": AUTOSAVE_SLOT, "corrupt": true}
+			stamp = float(best["stamp"])
+		elif not ignore_legacy:
+			stamp = _save_stamp(legacy)
+			best = {"path": legacy, "data": dl, "stamp": stamp, "slot": AUTOSAVE_SLOT,
+					"from_backup": src_l["from_backup"], "newer_version": save_file_is_newer(dl)}
+	for i in range(1, SLOT_COUNT + 1):
+		var rec := _slot_autosave_record(i)
+		if rec.is_empty() or bool(rec.get("corrupt", false)):
+			continue
+		if float(rec["stamp"]) > stamp:
+			stamp = float(rec["stamp"])
+			best = rec
+	return best
 
 
 ## Bij welk handmatig slot hoort een autosave (voor het volgende handmatige opslaan)?
@@ -1457,9 +1597,9 @@ func beta_autosave_path() -> String:
 
 func use_story_saves() -> void:
 	save_path = _story_save_path
-	autosave_path = _story_autosave_path
 	playing_beta = false
 	playing_eind = false
+	sync_autosave_path()
 
 
 func use_beta_saves() -> void:
@@ -1539,6 +1679,7 @@ func read_newest_save() -> Dictionary:
 ## v0.11 Automatisch opslaan in autosave_path. De pauze-save ("achtergrond") gaat ook door
 ## als autosave uit staat; alle veiligheidsblokkades blijven gelden.
 func autosave(tile: Vector2i, facing: Vector2i, reason := "") -> bool:
+	sync_autosave_path()
 	if not AUTOSAVE_REASONS.has(reason):
 		return false
 	if not can_autosave(reason == "achtergrond"):
@@ -1628,23 +1769,42 @@ func autosave_on_background() -> bool:
 	return false
 
 
+## save_game zelf blokkeert hier (niet via can_autosave). Volgorde telt: battle.tscn
+## wint altijd (ook midden-gevecht met pending_unique_event na unique_mark).
+func _save_game_scene_blocked() -> bool:
+	if changing_map:
+		return true
+	if is_inside_tree():
+		var sc: Node = get_tree().current_scene
+		if sc != null and sc.scene_file_path == BATTLE_SCENE:
+			return true
+	if not in_battle:
+		return false
+	var story := get_node_or_null("/root/Story")
+	if story != null and str(story.get("pending_unique_event")) != "":
+		return false
+	return true
+
+
 ## Schrijft de voortgang naar save_path (JSON), of naar 'path' (v0.11: de autosave).
 ## Geeft true als het gelukt is.
 func save_game(tile: Vector2i, facing: Vector2i, path := "", autosave_reason := "") -> bool:
 	if coop_is_guest():
 		return false
+	if _save_game_scene_blocked() or save_readonly:
+		return false
 	if path == "":
 		var slot_file := slot_path(active_slot)
 		path = slot_file if slot_file != "" else save_path
 	var data := state_data(tile, facing)
-	var stamp_sync := _codex_sync_marked or not (path == autosave_path and autosave_reason == "achtergrond")
+	var stamp_sync := _codex_sync_marked or not (is_autosave_path(path) and autosave_reason == "achtergrond")
 	if stamp_sync:
 		data[CODEX_SYNC_KEY] = true
 	data["game_version"] = str(ProjectSettings.get_setting("application/config/version", ""))
 	data["saved_at"] = Time.get_datetime_string_from_system()
 	data["saved_unix"] = Time.get_unix_time_from_system()
-	data["autosave"] = path == autosave_path
-	if path == autosave_path:
+	data["autosave"] = is_autosave_path(path)
+	if is_autosave_path(path):
 		data["slot"] = AUTOSAVE_SLOT
 		data["home_slot"] = active_slot
 	else:
@@ -1800,6 +1960,13 @@ static func _gold_from(v) -> int:
 	return 0
 
 
+## Geheel getal uit save-data; strings/arrays/etc. -> default (geen int()-crash).
+static func _int_of(v, default: int = 0) -> int:
+	if v is float or v is int:
+		return int(v)
+	return default
+
+
 ## Tas uit save-data: id -> aantal (kapotte waarden vallen weg).
 static func _inventory_from(raw) -> Dictionary:
 	var out := {}
@@ -1895,6 +2062,16 @@ func _valid_save_data(data: Dictionary) -> bool:
 			and data.get("party") is Array
 
 
+## Save-bestand met een hogere version dan deze build (nooit overschrijven).
+static func save_file_is_newer(d: Dictionary) -> bool:
+	if not d.has("version"):
+		return false
+	var v = d.get("version")
+	if v is int or v is float:
+		return int(v) > SAVE_VERSION
+	return false
+
+
 ## Laadt de save en zet alles terug (party, spullen, goud, speeltijd, bestiarium);
 ## geeft false als er geen (geldige) save is. Daarna: continue_game() gaat naar de map.
 ## v0.11: 'path' = welke save ("" = de handmatige).
@@ -1913,6 +2090,12 @@ func load_game(path := "", gelezen: Dictionary = {}) -> bool:
 		last_load_notice = NOTICE_UNREADABLE
 		game_loaded.emit(path if path != "" else save_path, false)
 		return false
+	if save_file_is_newer(d):
+		push_warning("Save-bestand is nieuwer dan deze client (version %d > %d); overschrijven geblokkeerd." \
+				% [int(d.get("version", 0)), SAVE_VERSION])
+		save_readonly = true
+	else:
+		save_readonly = false
 	# Gevechtsstijl van deze save; oude saves zonder sleutel houden hun vroegere effectieve waarde: Classic.
 	var style = d.get("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	Settings.set_value("battle_style", int(style) if (style is int or style is float) else Settings.BATTLE_STYLE_CLASSIC)
@@ -1981,7 +2164,8 @@ func apply_state(d: Dictionary) -> bool:
 	if best is Dictionary:
 		for k in best:
 			if best[k] is Dictionary:
-				bestiary[k] = {"seen": bool(best[k].get("seen", false)), "defeated": int(best[k].get("defeated", 0))}
+				bestiary[k] = {"seen": bool(best[k].get("seen", false)),
+						"defeated": _int_of(best[k].get("defeated", 0))}
 	# v0.11 verhaal; een save van vóór v0.11 heeft geen proloog -> die is dan 'klaar'
 	var st = d.get("story", {})
 	if not (st is Dictionary):
@@ -2049,7 +2233,9 @@ func apply_state(d: Dictionary) -> bool:
 	if a2 is Dictionary and a2.get("platen") is Dictionary:
 		var platen := {}
 		for k in a2["platen"]:
-			platen[str(k)] = int(a2["platen"][k])
+			var pv = a2["platen"][k]
+			if pv is float or pv is int:
+				platen[str(k)] = int(pv)
 		archief2 = {"platen": platen}
 	bezochte_kaarten = []
 	if d.has("bezocht") and d["bezocht"] is Array:
