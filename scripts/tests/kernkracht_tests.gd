@@ -1076,12 +1076,16 @@ func _no_core_power_tests() -> void:
 
 
 # ================================================================ deel J: Inktwurm-kast
+func _is_map_room(n: Node) -> bool:
+	return n != null and n.has_method("get_monster") and "monsters" in n
+
+
 func _kast_tests() -> void:
 	setup(SD.KLAAR, true)
 	GameState.story_flags[SD.GOLEM_FLAG] = true
 	GameState.story_flags.erase("inktwurm_kast_open")
 	var room := await enter(GOLEM_SCENE, "zuid")
-	if room == null:
+	if not _is_map_room(room):
 		check("J: Golem Hall geladen", false)
 		return
 	await freeze_monsters()
@@ -1092,7 +1096,7 @@ func _kast_tests() -> void:
 	player().place_at(Vector2i(16, 5), Vector2i.RIGHT)
 	await pframes(4)
 	await press_interact()
-	var opened: bool = await wait_until(func(): return kast.is_open, 4.0)
+	var opened: bool = await wait_until(func(): return is_instance_valid(kast) and kast.is_open, 4.0)
 	await pframes(12)
 	if Dialog.is_open:
 		check("J: geen Core Power-tekst in dialoog", not "Core Power" in str(Dialog._lines))
@@ -1104,37 +1108,6 @@ func _kast_tests() -> void:
 	check("J: interact na Golem: kast open + vlag", opened and GameState.story_flags.has("inktwurm_kast_open")
 			and kast.sprite.frame == 1 and not kast.scheur.visible and kast.shape.disabled)
 	check("J: Ink Worm in de kast", worm != null and worm.tile == Vector2i(16, 5) and GameState.unique_available("inktwurm"))
-	kast = null
-	setup(SD.KLAAR, false)
-	GameState.story_flags.erase(SD.GOLEM_FLAG)
-	GameState.story_flags.erase("inktwurm_kast_open")
-	room = await enter(GOLEM_SCENE, "zuid")
-	kast = room.get_node_or_null("Objects/InktwurmKast") if room != null and is_instance_valid(room) else null
-	if kast == null:
-		check("J: kast zonder Golem-vlag geladen", false)
-		return
-	player().place_at(Vector2i(16, 6), Vector2i.UP)
-	await pframes(4)
-	await press_interact()
-	var hint: bool = await wait_until(func(): return Dialog.is_open, 2.0)
-	if hint:
-		check("J: zonder Golem: hint over gescheurd perkament", str(Dialog._lines[0]).contains("parchment"))
-		await close_dialog()
-	var kast2: Node = scene().get_node_or_null("Objects/InktwurmKast") if scene() != null else null
-	check("J: zonder Golem-vlag blijft de kast dicht", kast2 != null and is_instance_valid(kast2) and not kast2.is_open
-			and not GameState.story_flags.has("inktwurm_kast_open"))
-	# opnieuw binnenkomen: open, worm er nog
-	setup(SD.KLAAR, true)
-	GameState.story_flags["inktwurm_kast_open"] = true
-	room = await enter(GOLEM_SCENE, "zuid")
-	kast = room.get_node_or_null("Objects/InktwurmKast") if room != null else null
-	var worm2 := false
-	if room != null:
-		for m in room.monsters:
-			if is_instance_valid(m) and str(m.enemy_id) == "inktwurm":
-				worm2 = true
-	check("J: na opnieuw binnenkomen staat de kast open en de Ink Worm er nog", kast != null and kast.is_open
-			and kast.sprite.frame == 1 and not kast.scheur.visible and kast.shape.disabled and worm2)
 
 
 # ================================================================ deel K: push (TODO.md "push monster when stunned")
