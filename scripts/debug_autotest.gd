@@ -660,6 +660,7 @@ func _run() -> void:
 		print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 		get_tree().quit(1 if failures else 0)
 		return
+	await preload("res://scripts/tests/title_testmenu_autotest.gd").new(self).run()
 	await _title_and_name_tests()
 	await _prologue_tests()
 	await _end_prologue()

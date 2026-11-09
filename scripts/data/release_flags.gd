@@ -71,3 +71,22 @@ static func online_buttons_visible() -> bool:
 	if not online_cut:
 		return true
 	return relay_url() != ""
+
+
+## Testhaak voor Beta Test, End State en SoM op het titelscherm.
+## -1 = standaard, 0 = verborgen, 1 = zichtbaar. Een testsuite zet hem tijdelijk om.
+static var test_menu_override := -1
+
+
+## Standaard uit. Aan tijdens een testsuite (GameState.test_modus), zodat bestaande
+## tests de knoppen houden, of in een debug-build met --testmenu.
+static func test_menu_buttons_visible() -> bool:
+	return test_menu_from(test_menu_override, GameState.test_modus, OS.get_cmdline_user_args(), is_debug_build())
+
+
+static func test_menu_from(override: int, in_test: bool, args: PackedStringArray, debug: bool) -> bool:
+	if override >= 0:
+		return override == 1
+	if in_test:
+		return true
+	return args.has("--testmenu") and debug

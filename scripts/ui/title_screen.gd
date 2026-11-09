@@ -54,7 +54,8 @@ var load_button: Button
 var new_button: Button
 var pvp_button: Button
 var coop_button: Button
-## SoM-proef: knop naast PvP die meteen de realtime-gevechtsproef start (scripts/som/).
+## Debugknoppen. Standaard verborgen (ReleaseFlags.test_menu_buttons_visible): geen plek in het menu.
+## SoM-proef: naast PvP, start de realtime-gevechtsproef (scripts/som/).
 var som_button: Button
 var beta_button: Button
 var eind_button: Button
@@ -234,6 +235,7 @@ func _ready() -> void:
 	load_button.focus_neighbor_right = load_button.get_path()
 
 	apply_online_visibility()
+	apply_test_menu_visibility()
 	studio_label = UiMenu.label(Wm1Config.STUDIO_URL, UiStyleC.TEXT_OFF, 10)
 	studio_label.name = "StudioUrl"
 	studio_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -325,16 +327,43 @@ func _place_card() -> void:
 	save_info.size = Vector2(card.size.x - 14.0, INFO_H)
 	save_info.position = (card.position + Vector2(7.0, -INFO_H - 1.0)).round()
 	var above := -INFO_H - 2.0
+	var test_aan := ReleaseFlags.test_menu_buttons_visible()
+	var row_w := CARD_RIGHT - CARD_LEFT
+	if test_aan:
+		var half := (row_w - 2.0) / 2.0
+		pvp_button.custom_minimum_size = Vector2(half, TOUCH_H)
+		som_button.custom_minimum_size = Vector2(half, TOUCH_H)
+	else:
+		# SoM deelt de rij niet: de overige knop blijft over de volle kaartbreedte.
+		pvp_button.custom_minimum_size = Vector2(row_w, TOUCH_H)
+		som_button.custom_minimum_size = Vector2.ZERO
 	pvp_button.reset_size()
 	pvp_button.position = (card.position + Vector2(0, above - pvp_button.size.y)).round()
 	coop_button.reset_size()
 	coop_button.position = (card.position + Vector2(0, above - pvp_button.size.y - 1.0 - coop_button.size.y)).round()
-	som_button.reset_size()
-	som_button.position = (card.position + Vector2(card.size.x - som_button.size.x, above - som_button.size.y)).round()
-	beta_card.reset_size()
-	beta_card.position = (stage.position + Vector2(8, CARD_BOTTOM - beta_card.size.y)).round()
-	beta_info.size = Vector2(beta_card.size.x - 14.0, INFO_H)
-	beta_info.position = (beta_card.position + Vector2(7.0, -INFO_H - 1.0)).round()
+	if test_aan:
+		som_button.reset_size()
+		som_button.position = (card.position + Vector2(card.size.x - som_button.size.x, above - som_button.size.y)).round()
+		beta_button.custom_minimum_size = Vector2(116, TOUCH_H)
+		eind_button.custom_minimum_size = Vector2(116, TOUCH_H)
+		beta_card.custom_minimum_size = Vector2.ZERO
+		beta_card.reset_size()
+		beta_card.position = (stage.position + Vector2(8, CARD_BOTTOM - beta_card.size.y)).round()
+		beta_info.size = Vector2(beta_card.size.x - 14.0, INFO_H)
+		beta_info.position = (beta_card.position + Vector2(7.0, -INFO_H - 1.0)).round()
+	else:
+		som_button.size = Vector2.ZERO
+		som_button.position = pvp_button.position
+		beta_button.custom_minimum_size = Vector2.ZERO
+		eind_button.custom_minimum_size = Vector2.ZERO
+		beta_card.custom_minimum_size = Vector2.ZERO
+		beta_card.size = Vector2.ZERO
+		beta_card.position = stage.position
+		beta_info.size = Vector2.ZERO
+		beta_info.position = stage.position
+	# apply_test_menu_visibility loopt nog in _ready, vóór de footer-labels bestaan.
+	if version_label == null or studio_label == null:
+		return
 	version_label.reset_size()
 	studio_label.reset_size()
 	var footer_right := (size - FOOTER_MARGIN).round()
@@ -359,13 +388,57 @@ func apply_online_visibility() -> void:
 		b.visible = zichtbaar
 		b.disabled = not zichtbaar
 		b.focus_mode = Control.FOCUS_ALL if zichtbaar else Control.FOCUS_NONE
-	if zichtbaar:
-		som_button.focus_neighbor_left = pvp_button.get_path()
+	_wire_title_focus()
+
+
+## Beta Test, End State en SoM. Uit: onzichtbaar, niet focusbaar, maat 0 (geen plek in het menu).
+func apply_test_menu_visibility() -> void:
+	var aan := ReleaseFlags.test_menu_buttons_visible()
+	_zet_testknop(som_button, aan)
+	_zet_testknop(beta_button, aan)
+	_zet_testknop(eind_button, aan)
+	beta_card.visible = aan
+	beta_card.mouse_filter = Control.MOUSE_FILTER_STOP if aan else Control.MOUSE_FILTER_IGNORE
+	if not aan:
+		beta_info.visible = false
+		beta_info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_wire_title_focus()
+	if is_node_ready():
+		_place_card()
+		if aan:
+			_toon_beta_info()
+
+
+func _zet_testknop(b: Button, aan: bool) -> void:
+	b.visible = aan
+	b.disabled = not aan
+	b.focus_mode = Control.FOCUS_ALL if aan else Control.FOCUS_NONE
+	b.mouse_filter = Control.MOUSE_FILTER_STOP if aan else Control.MOUSE_FILTER_IGNORE
+
+
+## Focus wijst nooit naar een verborgen knop. Met de testvlag aan blijft de oude keten.
+func _wire_title_focus() -> void:
+	var online := ReleaseFlags.online_buttons_visible()
+	var test_aan := ReleaseFlags.test_menu_buttons_visible()
+	if online:
 		new_button.focus_neighbor_top = pvp_button.get_path()
+		if test_aan:
+			pvp_button.focus_neighbor_right = som_button.get_path()
+			som_button.focus_neighbor_left = pvp_button.get_path()
+		else:
+			pvp_button.focus_neighbor_right = pvp_button.get_path()
+	elif test_aan:
+		new_button.focus_neighbor_top = som_button.get_path()
+		som_button.focus_neighbor_left = som_button.get_path()
 		pvp_button.focus_neighbor_right = som_button.get_path()
 	else:
-		som_button.focus_neighbor_left = som_button.get_path()
-		new_button.focus_neighbor_top = som_button.get_path()
+		new_button.focus_neighbor_top = new_button.get_path()
+	if test_aan:
+		new_button.focus_neighbor_left = beta_button.get_path()
+		continue_button.focus_neighbor_left = beta_button.get_path()
+	else:
+		new_button.focus_neighbor_left = new_button.get_path()
+		continue_button.focus_neighbor_left = continue_button.get_path()
 
 
 ## Doorgaan aan/uit naar gelang er een save is.
@@ -386,6 +459,13 @@ func refresh() -> void:
 	else:
 		save_info.visible = false
 		new_button.grab_focus()
+	_toon_beta_info()
+
+
+func _toon_beta_info() -> void:
+	if not ReleaseFlags.test_menu_buttons_visible():
+		beta_info.visible = false
+		return
 	var beta := GameState.read_beta_save()
 	if beta.is_empty():
 		beta_info.text = "  separate progress"
