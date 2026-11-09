@@ -1,11 +1,12 @@
 # HANDOFF — Wereldkaart-cutscene + moswezens in de tuin van opa (branch `rpgcode/worldmap-cutscene`)
 
 ## Wat
-1. **Eenmalige cutscene** bij de eerste keer op de wereldkaart: Dennis in het woud bij de moswezens
-   (bron-mp4 720x1280, 15 s) → `assets/video/worldmap_intro.ogv` (Theora+Vorbis, 360x640, 24 fps, ~2,8 MB).
-   Portret gecentreerd in het liggende beeld, links/rechts donkere glitch-panelen (placeholder in code).
-   Tik / klik / `interact` / `ui_accept` slaat over (0,4 s grace). Vangnet: na 20 s altijd klaar (geen soft-lock,
-   ook als de browser niets afspeelt). Speler-input weer vrij (alleen als er geen verhaal/dialoog/mapwissel loopt),
+1. **Eenmalige cutscene** bij de eerste keer op de wereldkaart: Dennis in het woud bij de moswezens.
+   Bestand: `assets/video/worldmap_intro_v2.ogv` (Theora+Vorbis, 768×432, 16:9, 24 fps, 18,0 s,
+   2.724.184 bytes = 2,72 MB / 2,60 MiB). Letterbox in het liggende beeld; de klasse-default van de
+   speler blijft 9:16. Donkere glitch-panelen vullen de randen (placeholder in code).
+   Tik / klik / `interact` / `ui_accept` slaat over (0,4 s grace). Vangnet voor dit filmpje: na 24 s altijd klaar
+   (geen soft-lock, ook als de browser niets afspeelt). Speler-input weer vrij (alleen als er geen verhaal/dialoog/mapwissel loopt),
    map-muziek start opnieuw via `map._play_map_music()`. Video-audio op bus `Music` als die bestaat.
 2. **Tuin van opa** (`scenes/maps/wilgendal.tscn`, "House at the Wood's Edge"): moslijm + moskonijn spelen
    samen (rondje om elkaar met de speel-sprong) bij (312,184). Loopt Dennis zuidelijker dan y=232 (richting
@@ -16,7 +17,7 @@
 - nieuw `scripts/worldmap_cutscene.gd` (class_name WorldmapCutscene)
 - nieuw `scripts/village/garden_creatures.gd`
 - nieuw `scripts/tests/worldmap_cutscene_tests.gd` (suite `--cutscenetest`, 34 PASS)
-- nieuw `assets/video/worldmap_intro.ogv`
+- nieuw `assets/video/worldmap_intro_v2.ogv`
 - nieuw `art/map_creatures/{mosslijm,moskonijn}_{volg,speel}.png` (+ .import) — RPG ART batch 14 (v0.21)
 - `scripts/map.gd` (preloads, cutscene-start na `_play_map_music()`, tuin-spawn)
 - `scripts/game_state.gd` (suite-registratie) (`.github/workflows/tests.yml` NIET aangepast: token mist workflow-scope → RPG Forge: `cutscenetest` aan de matrix toevoegen)

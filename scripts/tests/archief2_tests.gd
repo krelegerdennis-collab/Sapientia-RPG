@@ -864,7 +864,7 @@ func _na_genezer_hub() -> void:
 					video_eerst = false
 			await get_tree().create_timer(2.5).timeout
 			check("filmpje: scherp (canvas_items, lineair), 720x1280", get_tree().root.content_scale_mode == Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
-					and vid.video.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and vid.video_path.ends_with("genezer_warper.ogv"))
+					and vid.video.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR and vid.video_path.ends_with("genezer_warper_v3.ogv"))
 			await _shot("genezer_video_frame")
 			vid.skip_now()
 			await get_tree().process_frame
@@ -958,7 +958,7 @@ func _scenes_warper_herhaling() -> void:
 	await _pframes(10)
 	var gz: Node = get_tree().root.get_node_or_null("SceneReplay/CanonGenezer")
 	var vs: Node = gz.video_speler if gz != null else null
-	check("scenes: herhaling speelt Dax' filmpje", vs != null and is_instance_valid(vs) and str(vs.video_path).ends_with("genezer_warper.ogv"))
+	check("scenes: herhaling speelt Dax' filmpje", vs != null and is_instance_valid(vs) and str(vs.video_path).ends_with("genezer_warper_v3.ogv"))
 	if vs != null and is_instance_valid(vs):
 		vs.skip_now()
 	var ok: bool = await _wacht_tot(func(): return sc.playing == null, 5.0)

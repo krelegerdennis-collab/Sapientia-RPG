@@ -20,9 +20,17 @@ const LOCKED_TITLE := "???"
 ## v0.24 (Dennis): alleen zijn video-cutscenes staan in de lijst. 'The Hanger Awakens', 'The Hanger' en
 ## 'Sapientia' zijn eruit (alleen uit deze lijst; in het verhaal spelen ze gewoon). Hun vlaggen blijven
 ## hierboven staan omdat de tests en oude saves ze nog gebruiken.
+## CS-05 is de bestaande regel "ww_warper" (zelfde filmpje, niet twee keer in de lijst).
 const SCENES := [
 	{"id": "wereldkaart", "title": "Into the Wide World", "flag": WORLDMAP_FLAG, "kind": "worldmap"},
 	{"id": "ww_warper", "title": "The World Warper", "flag": CANON_GENEZER_FLAG, "kind": "genezer"},
+	{"id": "cs01", "title": "The Breaking Seal", "flag": "cutscene_cs01_gezien", "kind": "film"},
+	{"id": "cs02", "title": "The Dry Core", "flag": "cutscene_cs02_gezien", "kind": "film"},
+	{"id": "cs03", "title": "Vesper Freed", "flag": "cutscene_cs03_gezien", "kind": "film"},
+	{"id": "cs04", "title": "The Mender", "flag": "cutscene_cs04_gezien", "kind": "film"},
+	{"id": "cs06", "title": "The Atrium", "flag": "cutscene_cs06_gezien", "kind": "film"},
+	{"id": "cs07", "title": "Orion", "flag": "cutscene_cs07_gezien", "kind": "film"},
+	{"id": "cs08", "title": "The Merchant", "flag": "cutscene_cs08_gezien", "kind": "film"},
 ]
 
 

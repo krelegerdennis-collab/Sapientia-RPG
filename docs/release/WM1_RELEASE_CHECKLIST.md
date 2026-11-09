@@ -141,11 +141,11 @@ Meetopstelling (RPG Forge of Dennis, op het echte toestel; geen emulator)
   `adb shell dumpsys meminfo com.dennis.rpgprototype`, `adb logcat -s godot`.
 - [ ] Meetscènes: wereldkaart, Willowdale (90x56 tegels met molen, beek en veel props), Mapleton, elk Donker Woud-type
   (mist en overlay), Archief 1 (glitch-effect), berggrot, Archief 2, hub-hal, Diepe Grot (rustverdieping en een
-  drukke verdieping), Classic- en Action-gevecht, de twee video's (`assets/video/*.ogv`, ca. 30 MB), menu's en
+  drukke verdieping), Classic- en Action-gevecht, de cutscene-video's (`assets/video/*.ogv`, 9 bestanden, 30.462.852 bytes = 30,46 MB / 29,05 MiB), menu's en
   Scenes & Music.
 - [ ] 30 minuten achter elkaar spelen: temperatuur, throttling, batterijverbruik per uur.
 - [ ] Opstarttijd (koude start tot titelscherm), laadtijd bij Continue, en grootte van de APK (assets 85 MB, waarvan
-  audio 48 MB en video 30 MB).
+  audio 48 MB en video 30,46 MB: de 9 `.ogv` in `assets/video/`, 30.462.852 bytes).
 - [ ] Bij Co-op of PvP als die meeleveren (lock H11): idle-verbruik van netwerk en discovery.
 
 Voorgestelde doelen (Dennis en RPG Forge bevestigen)
