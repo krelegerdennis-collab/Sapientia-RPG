@@ -13,6 +13,7 @@ extends StaticBody2D
 
 const UiSfx := preload("res://scripts/ui/ui_sfx.gd")
 const BookData := preload("res://scripts/data/book_data.gd")
+const StoryData := preload("res://scripts/data/story_data.gd")
 const SaveSlotListC := preload("res://scripts/ui/save_slot_list.gd")
 
 const FRAME_TIME := 0.22
@@ -124,6 +125,10 @@ func interact(player: Node2D) -> void:
 	if busy or Dialog.is_open:
 		return
 	busy = true
+	if info.get("save", false) and not GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
+		GameState.story_flags[StoryData.SAVE_UITLEG_FLAG] = true
+		Dialog.show_lines([StoryData.SAVE_UITLEG_LINE])
+		await Dialog.finished
 	restore()
 	last_result = "restored"
 	var line: String = info.get("line", "")

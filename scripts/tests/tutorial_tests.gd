@@ -10,6 +10,7 @@ extends Node
 ##   Deel F: oude save die de Inktwurm al had (verslagen of gevangen): vlag gezet, niets gedwongen.
 ##   Deel G: Action-modus: Inktwurm realtime verslagen in de kamer -> tutorial in de kamer.
 ##   Deel H: game over na de tutorial: de vlag rolt niet terug met het checkpoint.
+##   Deel I: save-uitleg: eerste save-boek toont de regel eenmalig (C-4).
 ## Met --shots=map: tutorial_inktwurm_1, tutorial_inktwurm_2 (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
 
@@ -60,6 +61,8 @@ func _run() -> void:
 	await _action_tests()
 	print("=== Deel H: checkpoint ===")
 	_checkpoint_tests()
+	print("=== Deel I: save-uitleg ===")
+	await _save_uitleg_tests()
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
 	print("TUTORIALTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -268,6 +271,59 @@ func _action_tests() -> void:
 			and GameState.story_flags.has(FLAG) and await wait_until(func(): return not player().input_locked, 2.0))
 	check("Action: 1x", Story.history.slice(hist).count(EV) == 1)
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_CLASSIC)
+
+
+# ================================================================ deel I: save-uitleg (C-4)
+func _save_uitleg_tests() -> void:
+	GameState.new_game("Dax")
+	GameState.story_step = SD.NACHT
+	check("nieuw spel: save-uitleg-vlag niet gezet", not GameState.story_flags.has(SD.SAVE_UITLEG_FLAG))
+	GameState.change_map("res://scenes/maps/huis_wilgendal.tscn", "bed")
+	var ok := await wait_scene_named("Huis", 12.0)
+	await wait_fade()
+	check("huis met opslagboek", ok)
+	var book: Node = scene().get_node_or_null("Objects/SaveBook") if ok else null
+	check("SaveBook gevonden", book != null)
+	if book == null:
+		return
+	book.interact(player())
+	var seen_uitleg := await wait_until(func(): return Dialog.is_open and not Dialog._is_typing(), 5.0)
+	var first_line := str(Dialog._lines[0]) if Dialog._lines.size() > 0 else ""
+	check("eerste boek: eenmalige uitlegregel", seen_uitleg and first_line == SD.SAVE_UITLEG_LINE
+			and GameState.story_flags.has(SD.SAVE_UITLEG_FLAG))
+	await _advance_dialog_until_choice()
+	if Dialog.has_choices():
+		Dialog.choose(1)
+		await wait_until(func(): return not Dialog.is_open, 5.0)
+	book.interact(player())
+	seen_uitleg = await wait_until(func(): return Dialog.is_open and not Dialog._is_typing(), 5.0)
+	first_line = str(Dialog._lines[0]) if Dialog._lines.size() > 0 else ""
+	check("tweede keer: geen uitlegregel meer", seen_uitleg and first_line != SD.SAVE_UITLEG_LINE)
+	await _dismiss_dialog()
+
+
+func _advance_dialog_until_choice() -> void:
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 8000:
+		if Dialog.has_choices():
+			return
+		if Dialog.is_open and not Dialog._is_typing():
+			await press_interact()
+		await pframes(2)
+
+
+func _dismiss_dialog() -> void:
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 8000:
+		if not Dialog.is_open:
+			return
+		if Dialog._is_typing():
+			await pframes(2)
+			continue
+		if Dialog.has_choices():
+			Dialog.choose(1)
+			continue
+		await press_interact()
 
 
 # ================================================================ deel H: checkpoint

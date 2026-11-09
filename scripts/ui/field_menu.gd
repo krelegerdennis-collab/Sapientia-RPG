@@ -7,9 +7,9 @@ extends CanvasLayer
 ##   v0.22: links onder Items de knop Magic (genezen buiten gevechten, meteen het Magie-scherm)
 ##   v0.22: rechts onder Warpen de knop Party (wie vecht mee, wie zit in de reserve)
 ##   v0.22: rechts daaronder Settings (het Opties-scherm) en Load (slotlijst + bevestiging)
+##   C-4: Save rechtsonder, uitgeschakeld (grijs) met reden; opslaan via gloeiende boeken.
 ## Openen: MENU-knop, of Esc / M / Tab (map.gd). B of MENU of een tik ernaast sluit.
-## Status, Bestiarium en Opslaan hebben geen knop meer; choose()
-## opent die schermen nog wel (tests en bestaand gedrag van die schermen).
+## Status heeft geen knop; choose("save") opent het opslagscherm nog (tests), de Save-knop niet.
 
 signal closed
 
@@ -29,6 +29,7 @@ const CodexScreen := preload("res://scripts/ui/codex_screen.gd")
 const PartyScreen := preload("res://scripts/ui/party_screen.gd")
 const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
 const QuestlogScreen := preload("res://scripts/ui/questlog_screen.gd")   # v0.24 Quest Log (zelfde data als ECHO)
+const MenuScreenC := preload("res://scripts/ui/menu_screen.gd")
 const QD := preload("res://scripts/data/quest_data.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const LoadScreen := preload("res://scripts/ui/load_screen.gd")   # v0.22 Load vanuit het veldmenu   # v0.22 partylimiet
@@ -44,7 +45,7 @@ const WARP_W := 112   # 21 okt 2026: ruimte voor "Scenes & Music"
 const WARP_H := 25   # tikmaat (UiTouch.TOUCH_MIN, ~48 dp); 6 knoppen rechts met RIGHT_GAP past boven de opdrachtregel
 const RIGHT_GAP := 2   # tussenruimte in de rechterkolom (de grote linkerknoppen houden GAP)
 ## v0.22 rechterkolom (compact, onder het MENU-bord), van boven naar beneden
-const RIGHT_COL := ["warp", "party", "quests", "scenes", "options", "load"]
+const RIGHT_COL := ["warp", "party", "quests", "scenes", "options", "load", "save"]
 ## v0.22 linkerkolom (grote knoppen); 5 x 30 + tussenruimte eindigt op y=182, past op 216 hoog (telefoon)
 const LEFT_COL := ["equip", "codex", "items", "magic", "bestiary"]
 ## Minimale tikhoogte (de knoppen zelf zijn hoger). Tests leunen op deze naam.
@@ -54,6 +55,8 @@ const MESSAGE_TIME := 2.5
 const WARP_UNAVAILABLE := "The warp hub cannot be reached yet."
 const WARP_IN_RUN := "You cannot warp out of the Deep Cave."
 const HUB_ENTER := "res://world_warper/flow/enter.gd"
+const SAVE_MENU_LABEL := "Save"
+const SAVE_MENU_REASON := "Find a glowing book"
 
 ## [id, tekst] in de volgorde van de indeling (links van boven naar beneden, dan Warpen).
 const COMMANDS := [
@@ -68,6 +71,7 @@ const COMMANDS := [
 	["scenes", "Scenes & Music"],
 	["options", "Settings"],
 	["load", "Load"],
+	["save", SAVE_MENU_LABEL],
 ]
 
 ## De speler op de map (voor Opslaan: tile + kijkrichting). map.gd zet dit.
@@ -139,7 +143,11 @@ func _build_buttons() -> void:
 			b.custom_minimum_size = Vector2(WARP_W, ROW_H)   # v0.22 compact
 		# v0.22 (Dennis): alle teksten gecentreerd (horizontaal; Button centreert verticaal zelf), zodat ze gelijk staan
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		UiMenu.set_label(b, str(c[1]))
+		var label := str(c[1])
+		if id == "save":
+			label = "%s: %s" % [SAVE_MENU_LABEL, SAVE_MENU_REASON]
+			MenuScreenC._grey(b)
+		UiMenu.set_label(b, label)
 		b.pressed.connect(choose.bind(id))
 		b.focus_entered.connect(_remember_focus.bind(b))
 		root.add_child(b)
@@ -316,6 +324,9 @@ func choose(id: String) -> void:
 		"options":
 			_open_sub(OptionsScreen.new(), "Options")
 		"save":
+			if buttons.has("save") and MenuScreenC.is_button_greyed(buttons["save"]):
+				show_message(SAVE_MENU_REASON)
+				return
 			open_save()
 		"warp":
 			open_warp()
