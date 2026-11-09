@@ -538,7 +538,7 @@ const EVENTS := {
 		["walk", "Vesper", "down", 1],
 		["say", "Vesper", ["You came over the hills? I didn't think anyone lived out there."]],
 		["walk", "player", "up", 1],
-		["say", "{naam}", ["I'm Dax. I live by the Archives."]],
+		["say", "{naam}", ["I'm {naam}. I live by the Archives."]],
 		["say", "Vesper", ["I'm Vesper. You look like you're looking for someone."]],
 		["say", "{naam}", ["Two mages. That's all I have to go on."]],
 		["say", "Vesper", ["People here call me the girl with the sparks."]],
