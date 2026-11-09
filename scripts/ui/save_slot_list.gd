@@ -124,6 +124,8 @@ func _label(slot: int, rec: Dictionary) -> String:
 	if bool(rec.get("corrupt", false)):
 		return "%s: unreadable save" % title
 	var tail := " (backup)" if bool(rec.get("from_backup", false)) else ""
+	if bool(rec.get("newer_version", false)):
+		tail += " (newer version)"
 	return "%s: %s%s" % [title, summary(rec.get("data", {})), tail]
 
 
