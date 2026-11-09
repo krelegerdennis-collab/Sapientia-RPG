@@ -42,6 +42,7 @@ func _run() -> void:
 		print("INFO  python3/Linux niet beschikbaar: script-tests worden overgeslagen")
 	_bron_tests()
 	_preset_tests()
+	_export_filter_tests()
 	_geheimen_tests()
 	_docs_tests()
 	if can_run_scripts:
@@ -128,6 +129,49 @@ func _preset_tests() -> void:
 			and str(cfg.get_value(aab, "exclude_filter", "")).contains("tools/*"))
 	check("AAB: *.json-filter voor het audio-manifest", str(cfg.get_value(aab, "include_filter", "")).contains("*.json"))
 	check("AAB: package/name SAPIENTIA", str(cfg.get_value(o, "package/name", "")) == "SAPIENTIA")
+
+
+func _exclude_filter_tokens(raw: String) -> Array[String]:
+	var out: Array[String] = []
+	for part in raw.split(","):
+		var t := part.strip_edges()
+		if t != "":
+			out.append(t)
+	out.sort()
+	return out
+
+
+func _all_presets(cfg: ConfigFile) -> Array[String]:
+	var found: Array[String] = []
+	for sec in cfg.get_sections():
+		var name := str(sec)
+		if not name.ends_with(".options") and name.begins_with("preset."):
+			found.append(name)
+	found.sort()
+	return found
+
+
+func _export_filter_tests() -> void:
+	check("export/.gdignore bestaat", FileAccess.file_exists("res://export/.gdignore"))
+	var cfg := ConfigFile.new()
+	check("export_presets.cfg laadt (exclude)", cfg.load("res://export_presets.cfg") == OK)
+	var presets := _all_presets(cfg)
+	check("minstens vier export-presets (nu %d)" % presets.size(), presets.size() >= 4)
+	if presets.is_empty():
+		return
+	var ref := _exclude_filter_tokens(str(cfg.get_value(presets[0], "exclude_filter", "")))
+	check("referentie exclude_filter niet leeg (%d regels)" % ref.size(), ref.size() >= 10)
+	for token in ["wacht/*", "export/*", "pvp/tests/*", "world_warper/tests/*", "scripts/tests/*"]:
+		check("referentie bevat %s" % token, ref.has(token))
+	for sec in presets:
+		var label := str(cfg.get_value(sec, "name", sec))
+		var tok := _exclude_filter_tokens(str(cfg.get_value(sec, "exclude_filter", "")))
+		check("preset '%s': zelfde exclude_filter-set als referentie" % label, tok == ref)
+	var arm64 := ""
+	for sec in presets:
+		if str(cfg.get_value(sec, "name", "")) == "Android arm64":
+			arm64 = str(cfg.get_value(sec, "export_path", ""))
+	check("Android arm64: export_path zonder oude v0.19 in de bestandsnaam", arm64 != "" and not arm64.contains("v0.19"))
 
 
 func _geheimen_tests() -> void:
