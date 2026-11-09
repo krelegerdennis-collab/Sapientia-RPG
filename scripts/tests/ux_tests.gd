@@ -81,6 +81,11 @@ const REMOVED_DUTCH := {
 	"res://pvp/data/teams.gd": ["Gebalanceerd", "Hoog risico", "Traag, dubbele"],
 	"res://scenes/maps/berggrot_bouwplaats.tscn": ["Hendrik says"],
 }
+## Vroeger KNOWN_DUTCH_PINNED (story/game_data): in _code_only() mag deze spelertekst niet terugkomen.
+const BANNED_WM1_PLAYER := {
+	"res://scripts/data/story_data.gd": ["Het Zingende Graan"],
+	"res://scripts/data/game_data.gd": ["\"Benen\""],
+}
 var failures := 0
 var passes := 0
 var _scanned := 0
@@ -318,6 +323,14 @@ func _text_tests() -> void:
 			if src.contains(str(lit)):
 				back.append("%s: %s" % [path.get_file(), lit])
 	check("gerepareerde Nederlandse regels zijn niet teruggekomen %s" % [back], back.is_empty())
+	var wm1_back: Array = []
+	for path in BANNED_WM1_PLAYER:
+		var src := _code_only(FileAccess.get_file_as_string(path))
+		check("wm1-guard: %s gelezen" % path.get_file(), src != "")
+		for lit in BANNED_WM1_PLAYER[path]:
+			if src.contains(str(lit)):
+				wm1_back.append("%s: %s" % [path.get_file(), lit])
+	check("wm1: bekende Nederlandse spelertekst niet in code-only bron %s" % [wm1_back], wm1_back.is_empty())
 	var pvp_hits: Array = _scan_pvp_code_only()
 	for h in pvp_hits:
 		print("INFO  Nederlands (pvp code-only): %s" % h)
@@ -349,22 +362,29 @@ func _code_only(src: String) -> String:
 	return "\n".join(out)
 
 
+func _is_pvp_code_scan_path(f: String) -> bool:
+	if f.contains("/tests/"):
+		return false
+	if TEXT_SCRIPTS.has(f):
+		return false
+	return f.begins_with("res://pvp/")
+
+
 func _pvp_code_file_count() -> int:
 	var n := 0
 	for f in _files("res://pvp", ".gd"):
-		if f.contains("/tests/"):
-			continue
-		n += 1
+		if _is_pvp_code_scan_path(f):
+			n += 1
 	return n
 
 
-## Letterlijke strings in _code_only-bron; id/paden overslaan.
+## Letterlijke strings in _code_only-bron; pvp/data zit al in TEXT_SCRIPTS (geen dubbele scan).
 func _scan_pvp_code_only() -> Array:
 	var hits: Array = []
 	var rl := RegEx.new()
 	rl.compile("\"((?:[^\"\\\\]|\\\\.)*)\"")
 	for f in _files("res://pvp", ".gd"):
-		if f.contains("/tests/"):
+		if not _is_pvp_code_scan_path(f):
 			continue
 		var src := _code_only(FileAccess.get_file_as_string(f))
 		if src == "":
@@ -384,12 +404,7 @@ func _scan_pvp_code_only() -> Array:
 
 func _nl_single_word(s: String) -> bool:
 	var w := s.to_lower().strip_edges()
-	if w.length() < 3:
-		return false
-	if NL_STOP.has(w):
-		return true
-	# Losse NL-woordvormen die geen Engelse stopwoorden zijn (modusnamen, interne pace-keys, etc.).
-	return w in ["vroeg", "midden", "hoog"]
+	return w.length() >= 3 and NL_STOP.has(w)
 
 
 ## Recursief: strings in data. Alleen zinnen (spatie) of naamvelden tellen; id-sleutels worden overgeslagen.
