@@ -12,6 +12,7 @@ const DORP := "res://scenes/maps/dorp_wilgendal.tscn"
 const BINNEN := "res://scenes/maps/wilgendal_binnen.tscn"
 const WERELD := "res://scenes/maps/wereldkaart.tscn"
 const BIEB := "res://scenes/maps/archief_bibliotheek.tscn"
+const Molen := preload("res://scripts/village/molen.gd")
 
 const ART := {
 	"res://assets/sprites/buiten/wilgendal_pantser.png": Vector2i(48, 48),
@@ -58,6 +59,7 @@ func _run() -> void:
 	await _panden()
 	await _som()
 	await _huis_herkomst()
+	_molen_meel_save()
 	Engine.time_scale = prev_scale
 	print("WILGENDALTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -1461,3 +1463,20 @@ func _huis_herkomst() -> void:
 	var uit5 := await _huis_uit()
 	check("oude save na laden: uitgang -> Wilgendal %s (%s, %s)" % [str(OUDE_DEUR), uit5[0], str(uit5[1])], uit5[0] == "Wilgendal" and uit5[1] == OUDE_DEUR)
 	GameState.story_step = keep_step
+
+
+## C-7: Zingend Meel alleen via story_flags (geen scene-meta); save/load in hetzelfde bezoek.
+func _molen_meel_save() -> void:
+	const path := "user://wilgendal_molen_c7.json"
+	GameState.new_game("Dax")
+	GameState.story_flags.erase(Molen.FLAG_MEEL)
+	GameState.inventory.erase("zingend_meel")
+	check("molen: meel eerste keer (story_flags)", Molen._meel() and GameState.item_count("zingend_meel") == 1)
+	check("molen: tweede poging zelfde bezoek", not Molen._meel() and GameState.item_count("zingend_meel") == 1)
+	check("molen: save na meel", GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, path))
+	GameState.new_game("Zed")
+	check("molen: load na save", GameState.load_game(path))
+	Molen.nieuw_bezoek("load")
+	check("molen: na save/load geen tweede meel", not Molen._meel() and GameState.item_count("zingend_meel") == 1)
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
