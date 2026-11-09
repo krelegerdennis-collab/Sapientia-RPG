@@ -6,7 +6,7 @@ extends Node2D
 ##   2. effect assets/fx/kern_absorptie.png (192x48 = 4 frames van 48x48, 0,12 s per frame, niet
 ##      loopen), midden (24,24) op de borst van de held (12 px boven zijn voeten), plus een zachte
 ##      roze gloed in code (zoals het savepunt) en een roze flits op de held
-##   3. bericht: '{naam} absorbeert de Golemkern!' + wat hij vrijspeelt
+##   3. bericht: levenskern e.d. '{naam} absorbs …'; golemkern = Sapientia-drain (CS-02)
 ##   4. alles weg, speler weer vrij, autosave ("kern")
 
 const FX := "res://assets/fx/kern_absorptie.png"
@@ -18,6 +18,9 @@ const GLOW_RADIUS := 28.0
 const KernData := preload("res://scripts/data/kern_data.gd")
 const BookPoint := preload("res://scripts/book_point.gd")
 const Videos := preload("res://scripts/data/cutscene_videos.gd")
+
+const GOLEM_FRAGMENT := "golemkern"
+const GOLEM_SAPENTIA_LINE := "Sapientia drank the Golem Core dry."
 
 signal done
 
@@ -65,6 +68,20 @@ func start(p_map: Node, id: String) -> void:
 		if not _alive():
 			return
 	player.input_locked = true
+	if fragment_id == GOLEM_FRAGMENT:
+		var lines: Array = lines_for(fragment_id)
+		phase = PHASE_BERICHT
+		if not lines.is_empty():
+			Dialog.show_lines(lines)
+			await Dialog.finished
+		if GameState.pending_kern_absorb == fragment_id:
+			GameState.pending_kern_absorb = ""
+		if is_instance_valid(player):
+			player.input_locked = false
+		phase = PHASE_KLAAR
+		done.emit()
+		queue_free()
+		return
 	# gloed (achter het effect) + effect, als kind van de held: loopt dus mee met de camera
 	glow = Sprite2D.new()
 	glow.name = "KernGloed"
@@ -156,11 +173,13 @@ func _process(delta: float) -> void:
 
 ## De tekst van het moment (uit de data, dus ook goed voor latere kernen).
 static func lines_for(id: String) -> Array:
+	# CS-02: na het filmpje geen dubbele zin; zonder filmpje (testpoort) alleen de Sapientia-regel.
+	if id == GOLEM_FRAGMENT:
+		if GameState.story_flags.has("cutscene_cs02_gezien"):
+			return []
+		return [GOLEM_SAPENTIA_LINE]
 	var f := KernData.fragment(id)
 	var lead := "{naam} absorbs the %s!" % f.get("naam", id)
-	# CS-02: Sapientia drinkt de golemkern leeg. Ids en beloningen blijven gelijk.
-	if id == "golemkern" and GameState.story_flags.has("cutscene_cs02_gezien"):
-		lead = "Sapientia drank the Golem Core dry."
 	var lines: Array = [lead]
 	var sk := str(f.get("battle_skill", ""))
 	if KernData.KERN_SKILLS.has(sk):

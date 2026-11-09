@@ -694,6 +694,7 @@ func _ready() -> void:
 			["--combatbugstest", "res://scripts/tests/combat_bugs_tests.gd", "CombatBugsTest", "combatbugstest"],
 			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
 			["--wm1budgettest", "res://scripts/tests/wm1_budget_tests.gd", "Wm1BudgetTest", "wm1budgettest"],
+			["--wm1storytexttest", "res://scripts/tests/wm1_storytext_tests.gd", "Wm1StorytextTest", "wm1storytexttest"],
 			["--wm1f3stabilitytest", "res://scripts/tests/wm1_f3_stability_tests.gd", "Wm1F3StabilityTest", "wm1f3stabilitytest"],
 			["--wm1baselinebenchtest", "res://scripts/tests/wm1_baseline_benchmark.gd", "Wm1BaselineBenchmark", "wm1baselinebenchtest"],
 			["--huisdrawtest", "res://scripts/tests/huis_draw_calls_tests.gd", "HuisDrawCallsTest", "huisdrawtest"],
@@ -1050,6 +1051,10 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	koopman_load({})
 	if has_node("/root/Story"):
 		get_node("/root/Story").reset()
+	if has_node("/root/Dialog"):
+		var dlg: Node = get_node("/root/Dialog")
+		if dlg.has_method("close") and bool(dlg.get("is_open")):
+			dlg.close()
 	has_return_point = false
 	pending_spawn = ""
 	_play_time_base = 0.0

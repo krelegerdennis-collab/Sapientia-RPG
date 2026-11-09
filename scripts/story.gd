@@ -178,9 +178,13 @@ func trigger(event_id: String, _source: Node = null, arg := "", origin := "") ->
 	return true
 
 
+const Wm1VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
+
 func run(event_id: String, arg := "", origin := "") -> void:
 	if running:
 		return
+	if event_id == "noor_ontmoeting":
+		Wm1VideoSlot.before_dialogue(Wm1VideoSlot.MAPLETON_VESPER)
 	current_origin = origin
 	running = true
 	_lock(true)

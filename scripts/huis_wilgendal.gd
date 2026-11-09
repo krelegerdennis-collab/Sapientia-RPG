@@ -4,6 +4,7 @@ extends "res://scripts/map.gd"
 ## Geen wand-polygonen op de runtime-TileSet (bouw / _maak_grond_tileset(false)).
 
 const Build := preload("res://scripts/data/huis_interieur_build.gd")
+const StoryData := preload("res://scripts/data/story_data.gd")
 
 var _build := Build.new()
 
@@ -38,7 +39,16 @@ func _story_objecten() -> void:
 		boek.position = Vector2(8, 3) * TILE + Vector2(8, 8)
 	var opa: Node2D = get_node_or_null("Objects/OudeMan") as Node2D
 	if opa:
-		opa.position = Vector2(9, 3) * TILE + Vector2(8, 8)
+		if GameState.story_flags.has(StoryData.GOLEM_FLAG) and not GameState.story_flags.has("opa_willowdale_afscheid"):
+			opa.position = Vector2(2, 3) * TILE + Vector2(8, 8)
+			if "facing" in opa:
+				opa.facing = Vector2i.DOWN
+			opa.event = "opa_willowdale_vertrek"
+			opa.visible = true
+		elif GameState.story_step >= StoryData.AVOND and GameState.story_step < StoryData.KLAAR:
+			opa.position = Vector2(9, 3) * TILE + Vector2(8, 8)
+		else:
+			opa.visible = GameState.story_step >= StoryData.AVOND and GameState.story_step < StoryData.KLAAR
 	var sch: Node2D = get_node_or_null("Objects/Schilderij") as Node2D
 	if sch:
 		sch.position = Vector2(6, 1) * TILE + Vector2(8, 8)

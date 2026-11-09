@@ -1,14 +1,14 @@
 extends StaticBody2D
 ## Geheime kast in de Golemhal (Archief 1). Eén tegel breed, twee hoog (16x32, art_geheimkast_v19).
-## Dicht = boekenkast. A ervoor = een hint. Gaat alleen open als de veld-vuurbal
-## (Kernkracht, pas na de Golem) hem raakt: on_kernkracht_hit(). Daarna kronkelt
-## de unieke Inktwurm eruit, als die nog niet verslagen of gevangen is.
+## Dicht = boekenkast. Ervoor: hint. Na de Golem: open via interact (on_kernkracht_hit voor tests/compat).
+## Daarna kronkelt de unieke Inktwurm eruit, als die nog niet verslagen of gevangen is.
 ## Blijft open (story_flags "inktwurm_kast_open").
 
 ## v0.20: RPG ART's geheimkast (frame 0 = dicht, 1 = open) + kernscheur-overlay (4 frames, 0.08 s, niet loopen).
 const TEX := "res://assets/puzzle/geheimkast_2hoog.png"
 const SCHEUR_TEX := "res://assets/puzzle/kernscheur.png"
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
+const StoryData := preload("res://scripts/data/story_data.gd")
 const FRAME_TIME := 0.08
 const FLAG := "inktwurm_kast_open"
 const INKT_FLAG := "gloeiende_inktfles"
@@ -69,7 +69,9 @@ func covered_tiles() -> Array[Vector2i]:
 
 
 func on_kernkracht_hit() -> void:
-	if is_open or _anim or not GameState.has_kern("golemkern"):
+	if is_open or _anim:
+		return
+	if not GameState.story_flags.has(StoryData.GOLEM_FLAG):
 		return
 	_anim = true
 	_t = 0.0
@@ -80,6 +82,9 @@ func on_kernkracht_hit() -> void:
 
 func interact(_player: Node2D) -> void:
 	if is_open or _anim:
+		return
+	if GameState.story_flags.has(StoryData.GOLEM_FLAG):
+		on_kernkracht_hit()
 		return
 	Dialog.show_lines(["The parchment in this cabinet is torn. Something moves behind it."])
 
@@ -112,14 +117,10 @@ func _process(delta: float) -> void:
 	if veld != null and is_instance_valid(veld) and bool(veld.get("busy")):
 		return
 	_say = false
-	var lines: Array = []
-	if _worm != null:
-		lines.append("Core Power tears the parchment. An Ink Worm writhes out of the cabinet.")
-	else:
-		lines.append("Core Power tears the parchment. The cabinet is empty.")
-	if _flask:
-		lines.append("A glowing ink bottle lies among the scraps.")
-		_flask = false
+	if not _flask:
+		return
+	var lines: Array = ["A glowing ink bottle lies among the scraps."]
+	_flask = false
 	Dialog.show_lines(lines)
 
 

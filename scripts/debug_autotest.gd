@@ -2118,7 +2118,13 @@ const REMIND_LINE := "Put that cloak on first, {naam}. MENU > Equipment > Armor.
 const INTRO_CHOICES := ["Good morning, Grandpa.", "Why do the Archives stay closed?"]
 const ARMOR := "leerling_mantel"
 const LESSON_LINE := "Sometimes you have to defend yourself, boy, even if I hope you never need to."
-const PANIC_LINE := "No... the seal! It's too soon! {naam}, stay here! Lock the doors behind me and don't follow, no matter what you hear!"
+## Goedgekeurde catastrofe-regels (Old Man), v0.21 storytext — niet de oude ene PANIC_LINE.
+const CATASTROPHE_OPA_LINES := [
+	"No… the seal. It's too soon.",
+	"Stay here, {naam}.",
+	"What I hoped you'd never have to see.",
+	"No. Stay inside. Don't follow me, no matter what you hear.",
+]
 const LOCKED_LINE := "The door is locked. Grandpa said I had to stay here."
 
 var _drain_shot_done := {}
@@ -2462,7 +2468,7 @@ func _prologue_tests() -> void:
 	check("avond-cutscene start vanzelf", Story.current_event == "catastrofe")
 	var shake_seen := false
 	var glow_seen := false
-	var panic_ok := false
+	var opa_seen := {}
 	for i in 4000:
 		if Story.shaking():
 			shake_seen = true
@@ -2472,15 +2478,17 @@ func _prologue_tests() -> void:
 			if "flash" in _lines_text() and not _drain_shot_done.has("_v11_flash"):
 				_drain_shot_done["_v11_flash"] = true
 				await overworld_shot("_v11_flash")
-			if _named(PANIC_LINE) in Dialog._lines and Dialog.name_label.text == "Old Man":
-				panic_ok = true
+			if Dialog.name_label.text == "Old Man":
+				for line in CATASTROPHE_OPA_LINES:
+					if line in Dialog._lines or _named(line) in Dialog._lines:
+						opa_seen[line] = true
 			await press_interact()
 		if not Story.running and not Dialog.is_open:
 			break
 		await frames(1)
 	check("aardbeving (scherm schudt)", shake_seen)
 	check("flits + magisch licht door de ramen", glow_seen)
-	check("Oude Man in paniek: tekst precies uit het verhaal", panic_ok)
+	check("Oude Man in paniek: goedgekeurde gesprekregels", opa_seen.size() == CATASTROPHE_OPA_LINES.size())
 	check("Grandpa weg, schilderij scheef, deur op slot, stap OPGESLOTEN",
 			not _obj("OudeMan").visible and _obj("Schilderij").sprite.frame == 1
 			and Story.has_flag("locked:HuisDeur") and GameState.story_step == SD.OPGESLOTEN)

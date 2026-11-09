@@ -25,11 +25,11 @@ const KERNFRAGMENTEN := {
 	"golemkern": {
 		"id": "golemkern",
 		"naam": "Golem Core",
-		"beschrijving": "The pink heart of the Golem. Heavy and warm; it gives you the strength of stone.",
+		"beschrijving": "The pink heart of the Golem. Heavy and warm; it gives you the power of matter.",
 		"icon": "res://assets/ui/icons/golemkern.png",
 		"source_boss": "kennis_beest",
-		"battle_skill": "kernslag",
-		"world_ability": ["zware_blokken", "kernvuur"],   # v0.16: + de vuurbal in het veld
+		"battle_skill": "",
+		"world_ability": [],
 		"kleur": Color(1.0, 0.36, 0.78),
 	},
 	# Archief 2. Geen gevechts- of wereldvaardigheid: de zin is het fragment.

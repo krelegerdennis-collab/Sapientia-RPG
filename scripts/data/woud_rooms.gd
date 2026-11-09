@@ -247,6 +247,8 @@ const ROOMS := {
 				"event": "zingend_zaad", "lines": [],
 				"show_if": {"flags": ["quest_zingend_graan"], "not_flags": ["zingend_zaad"]}},
 		],
+		"blokkades": {"tot_vlag": "cocon_gezien",
+			"tiles": [[12, 7], [13, 7], [14, 7], [12, 8], [13, 8], [14, 8]]},
 		"monsters": [
 			{"id": "baas", "enemy": "wortelkoning", "tile": [13, 4], "moves": false, "boss": true, "guard": true,
 				"sprite": "wortelkoning", "size": [2, 2], "frame": [32, 32], "fps": 1.5},

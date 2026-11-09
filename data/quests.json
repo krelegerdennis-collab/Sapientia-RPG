@@ -3,7 +3,7 @@
 	"acts": [
 		{
 			"id": "akte_1", "number": 1, "archive": "The First Archive", "theme": "Knowledge",
-			"echo_done": "The first Archive. The Golem has fallen and its core is yours.",
+			"echo_done": "The first Archive. The Golem has fallen.",
 			"echo_open": "The first Archive. Its guardian still stands.",
 			"echo_dialogue": ["The first Archive. Its guardian still stands."],
 			"todo": "ECHO is in Act 1 nog niet ontmoet; de zin is de bestaande questlog-zin."

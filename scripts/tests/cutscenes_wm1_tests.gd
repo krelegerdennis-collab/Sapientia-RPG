@@ -114,13 +114,11 @@ func _ontbrekend() -> void:
 func _kernzin() -> void:
 	GameState.story_flags.erase("cutscene_cs02_gezien")
 	var oud: Array = Kern.lines_for("golemkern")
-	t.check("zonder CS-02 blijft de oude kernzin", oud.size() == 4 and str(oud[0]) == "{naam} absorbs the Golem Core!"
-			and "Core Power" in str(oud[1]))
+	t.check("zonder filmpje: één Sapientia-regel (geen Dax absorbs)", oud.size() == 1
+			and str(oud[0]) == "Sapientia drank the Golem Core dry." and not "absorbs" in " ".join(oud))
 	GameState.story_flags["cutscene_cs02_gezien"] = true
 	var nieuw: Array = Kern.lines_for("golemkern")
-	t.check("CS-02: Sapientia drinkt de kern leeg, beloningen blijven", nieuw.size() == 4
-			and str(nieuw[0]) == "Sapientia drank the Golem Core dry." and "Core Power" in str(nieuw[1])
-			and "Push Heavy Blocks" in str(nieuw[2]))
+	t.check("na CS-02-filmpje: geen dubbele dialoogregel", nieuw.is_empty())
 	GameState.story_flags.erase("cutscene_cs02_gezien")
 
 

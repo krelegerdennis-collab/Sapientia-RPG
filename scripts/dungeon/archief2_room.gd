@@ -5,6 +5,7 @@ extends "res://scripts/dungeon/dungeon_room.gd"
 const CanonGenezer := preload("res://world_warper/cutscene/genezer_scene.gd")
 const Videos := preload("res://scripts/data/cutscene_videos.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
+const Wm1VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
 const PlaatScript := preload("res://scripts/dungeon/groei_plaat.gd")
 const WarpScript := preload("res://scripts/dungeon/archief2_warp.gd")
 
@@ -145,9 +146,13 @@ func _verhaal() -> void:
 	if GameState.archief2_lotte_join:
 		GameState.archief2_lotte_join = false
 		Archief2.sluit_lotte_aan()
-		await _zeg(Archief2.LOTTE_AANSLUIT, "Seren")
+		Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ARCHIEF2_CORRUPTED_SEREN)
+		await _zeg([Archief2.LOTTE_GLITCH_GEDACHTE], GameState.player_name)
+		await _zeg(Archief2.LOTTE_AANSLUIT.slice(1, -1), "Seren")
+		await _toon_seren_join()
 	if room_id == Archief2.ENTREE and not GameState.story_flags.has("archief2_keten"):
-		await _zeg(Archief2.KETEN, "")
+		await _zeg(["Another Archive. I hope we're not too late.", "What if this is where Sapientia wants us to go?"], GameState.player_name)
+		await _zeg(Archief2.KETEN, "ECHO")
 		GameState.story_flags["archief2_keten"] = true
 	# Save-veilig: kern al binnen maar scène 1 nooit afgemaakt (afgesloten tijdens de scène).
 	if room_id == "archief_2_v4_genezer" and GameState.kernfragmenten.has(Archief2.KERN_ID) \
@@ -157,6 +162,16 @@ func _verhaal() -> void:
 	if room_id == Archief2.WARPER and not GameState.story_flags.has("archief2_echo"):
 		await _zeg(Archief2.ECHO_REGELS, "")
 		GameState.story_flags["archief2_echo"] = true
+
+
+func _toon_seren_join() -> void:
+	await _zeg(["I'm Seren."], "Seren")
+	await _zeg(["Dax. This is Vesper."], GameState.player_name)
+	await _zeg(["What brought you here?"], "Seren")
+	await _zeg(["I'm looking for two mages. I've found one."], GameState.player_name)
+	await _zeg(["I'm a healer. Let me come with you."], "Seren")
+	await _zeg(["All right. We go together."], GameState.player_name)
+	await _zeg([Archief2.LOTTE_AANSLUIT[Archief2.LOTTE_AANSLUIT.size() - 1]], "")
 
 
 func _zeg(lines: Array, speaker: String) -> void:
