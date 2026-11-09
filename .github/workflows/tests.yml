@@ -34,7 +34,7 @@ jobs:
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
                 koopmantest, testmodustest, telegraphtest, roottest,
                 formuletest, battlesimenemytest, combatbugstest, perfprobetest, huiscollisiontest,
-                studiourltest, gategaptest, woudgrondtest, golemstorytest, driftbgtest,
+                studiourltest, gategaptest, woudgrondtest, golemstorytest, statemachinetest, driftbgtest,
                 wm1bugtest, wm1openbugtest, sessiefixtest, savehardeningtest, lifecycletest, zonetest, kasdeurtest,
                 berggrotdextest, demofixtest, combatrngtest, combatsimtest, aabtest, uxtest, uipolishtest, uxpolishtest,
                 wm1dekkingtest, wm1releasetest, wm1f3stabilitytest, wm1balanstest, playtestkittest, telegraphcooptest,
