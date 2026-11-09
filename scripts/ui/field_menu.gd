@@ -43,7 +43,7 @@ const MENU_H := 15
 ## v0.22 compacte Warpen-/Party-knop (rechterkolom)
 const WARP_W := 112   # 21 okt 2026: ruimte voor "Scenes & Music"
 const WARP_H := 25   # tikmaat (UiTouch.TOUCH_MIN, ~48 dp); 6 knoppen rechts met RIGHT_GAP past boven de opdrachtregel
-const RIGHT_GAP := 2   # tussenruimte in de rechterkolom (de grote linkerknoppen houden GAP)
+const RIGHT_GAP := 0   # 7 rechterknoppen incl. Save passen in safe area (uipolishtest notch)
 ## v0.22 rechterkolom (compact, onder het MENU-bord), van boven naar beneden
 const RIGHT_COL := ["warp", "party", "quests", "scenes", "options", "load", "save"]
 ## v0.22 linkerkolom (grote knoppen); 5 x 30 + tussenruimte eindigt op y=182, past op 216 hoog (telefoon)
@@ -152,7 +152,8 @@ func _build_buttons() -> void:
 		b.focus_entered.connect(_remember_focus.bind(b))
 		root.add_child(b)
 		buttons[id] = b
-		ring.append(b)
+		if id != "save":
+			ring.append(b)
 	TargetList.link_ring(ring)
 	var q: String = Story.active_quest()
 	if q != "":
@@ -187,7 +188,7 @@ func _style_button(b: Button, gold: bool) -> void:
 
 
 func _link_focus() -> void:
-	# v0.22: linkerkolom LEFT_COL (ring), rechterkolom RIGHT_COL
+	# v0.22: linkerkolom LEFT_COL (ring), rechterkolom RIGHT_COL; Save onder Load, niet in de focusring.
 	var col: Array = LEFT_COL.map(func(id): return buttons[id])
 	var wp: Button = buttons["warp"]
 	var pt: Button = buttons["party"]
@@ -212,6 +213,12 @@ func _link_focus() -> void:
 		b.focus_neighbor_bottom = b.focus_next
 		b.focus_neighbor_top = b.focus_previous
 		b.focus_neighbor_left = b.get_path_to(eq)
+	if buttons.has("save"):
+		var sv: Button = buttons["save"]
+		var loadb: Button = buttons["load"]
+		sv.focus_neighbor_top = sv.get_path_to(loadb)
+		sv.focus_neighbor_bottom = sv.get_path_to(sv)
+		loadb.focus_neighbor_bottom = loadb.get_path_to(sv)
 
 
 ## TODO(design): zelfde voorlopige indeling als hierboven. Rechts groeit mee op bredere telefoons.

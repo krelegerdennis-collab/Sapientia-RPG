@@ -16,6 +16,7 @@ extends Node
 
 const GD := preload("res://scripts/data/game_data.gd")
 const SD := preload("res://scripts/data/story_data.gd")
+const BookData := preload("res://scripts/data/book_data.gd")
 const INGANG := "res://scenes/maps/archief_ingang.tscn"
 const FLAG := "tutorial_na_inktwurm_gezien"
 const EV := "tutorial_na_inktwurm"
@@ -287,18 +288,19 @@ func _save_uitleg_tests() -> void:
 	if book == null:
 		return
 	book.interact(player())
-	var seen_uitleg := await wait_until(func(): return Dialog.is_open and not Dialog._is_typing(), 5.0)
-	var first_line := str(Dialog._lines[0]) if Dialog._lines.size() > 0 else ""
-	check("eerste boek: eenmalige uitlegregel", seen_uitleg and first_line == SD.SAVE_UITLEG_LINE
-			and GameState.story_flags.has(SD.SAVE_UITLEG_FLAG))
+	await wait_until(func(): return Dialog.is_open and not Dialog._is_typing(), 5.0)
+	check("eerste boek: eerst de gloed-regel", str(Dialog._lines[0]) == BookData.TYPES["save"]["line"])
 	await _advance_dialog_until_choice()
 	if Dialog.has_choices():
 		Dialog.choose(1)
-		await wait_until(func(): return not Dialog.is_open, 5.0)
+	await wait_until(func(): return not Dialog.is_open, 5.0)
+	await wait_until(func(): return Dialog.is_open and not Dialog._is_typing(), 6.0)
+	check("na Nee: eenmalige uitlegregel", str(Dialog._lines[0]) == SD.SAVE_UITLEG_LINE)
+	await press_interact()
+	await wait_until(func(): return not Dialog.is_open, 5.0)
 	book.interact(player())
-	seen_uitleg = await wait_until(func(): return Dialog.is_open and not Dialog._is_typing(), 5.0)
-	first_line = str(Dialog._lines[0]) if Dialog._lines.size() > 0 else ""
-	check("tweede keer: geen uitlegregel meer", seen_uitleg and first_line != SD.SAVE_UITLEG_LINE)
+	await wait_until(func(): return Dialog.is_open and not Dialog._is_typing(), 5.0)
+	check("tweede keer: geen uitlegregel meer", str(Dialog._lines[0]) != SD.SAVE_UITLEG_LINE)
 	await _dismiss_dialog()
 
 
