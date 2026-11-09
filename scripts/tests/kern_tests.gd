@@ -6,10 +6,9 @@ extends Node
 ##           de hoofdheld (MAIN_HERO) heeft de kernvaardigheden.
 ##   Deel C: echt Golem-baasgevecht winnen -> Golemkern + absorptie-moment op de kaart + autosave;
 ##           een tweede overwinning geeft niets dubbel.
-##   Deel D: Kernkracht in het gevechtsmenu (Magie > Kernkracht): zichtbaar, schade volgens de formule,
-##           daarna 3 rondes opladen.
-##   Deel E: zware kast (kern_demo): zonder kern hint + blijft staan, met kern duwbaar.
-##   Deel F: statusscherm toont 'Kernen' bij de hoofdheld (alleen als hij er een heeft).
+##   Deel D: geen Core Power meer: met Golemkern blijft Magie uit in gevechten.
+##   Deel E: kern_demo-kast is normaal duwbaar (geen zware_blokken meer).
+##   Deel F: statusscherm toont 'Golem Core' zonder vaardigheidsnaam tussen haakjes.
 ## Met --shots=map: kern_absorptie, kern_absorptie_bericht, kernslag_menu, kernslag_raak,
 ## kernslag_opladen, zware_kast_hint, zware_kast_geduwd, status_kernen (+ _3x = 1152x648).
 ## Zit niet in de export (scripts/tests/*).
@@ -59,7 +58,7 @@ func _run() -> void:
 	_rule_tests()
 	print("=== Deel C: Golem verslaan -> Golemkern ===")
 	await _golem_tests()
-	print("=== Deel D: Kernkracht in het gevecht ===")
+	print("=== Deel D: geen Core Power in gevechten ===")
 	await _kernslag_tests()
 	print("=== Deel E: zware kast ===")
 	await _heavy_tests()
@@ -80,9 +79,9 @@ func _data_tests() -> void:
 			KernData.fragment_for_boss("kennis_beest") == "golemkern" and KernData.fragment_for_boss("papiergeest") == ""
 			and KernData.fragment_for_boss("") == "")
 	var f := KernData.fragment("golemkern")
-	check("golemkern: naam/beschrijving/icoon/baas/vaardigheden ingevuld", f.get("naam") == "Golem Core"
-			and str(f.get("beschrijving", "")).length() > 10 and f.get("source_boss") == "kennis_beest"
-			and f.get("battle_skill") == "kernslag" and KernData.abilities_of(f) == [KernData.HEAVY_BLOCK_ABILITY, KernData.FIELD_FIREBALL_ABILITY])   # v0.16: + kernvuur
+	check("golemkern: fragment zonder battle/world power (WM1)", f.get("naam") == "Golem Core"
+			and str(f.get("beschrijving", "")).contains("the power of matter") and f.get("source_boss") == "kennis_beest"
+			and str(f.get("battle_skill", "")) == "" and KernData.abilities_of(f).is_empty())
 	var icon: Texture2D = load(str(f["icon"]))
 	check("icoon assets/ui/icons/golemkern.png 16x16", icon != null and icon.get_size() == Vector2(16, 16))
 	var fx: Texture2D = load(KernAbsorption.FX)
@@ -102,26 +101,25 @@ func _data_tests() -> void:
 	# de demo-kamer en alle zware kasten in de puzzels
 	var e := PuzzleLogic.validate(PuzzleRooms.ROOMS["kern_demo"])
 	check("puzzelkamer kern_demo geldig %s" % [e], e.is_empty() and ResourceLoader.exists(DEMO_SCENE))
-	var unknown := []
+	var heavy_found := []
 	for rid in PuzzleRooms.ROOMS:
 		var l := PuzzleLogic.from_room(PuzzleRooms.ROOMS[rid], rid)
 		for b in l.heavy_blocks:
-			if not KernData.WORLD_ABILITIES.has(l.heavy_blocks[b]):
-				unknown.append("%s/%s" % [rid, b])
-	check("elke zware kast vraagt een bestaande wereldvaardigheid %s" % [unknown], unknown.is_empty())
+			heavy_found.append("%s/%s" % [rid, b])
+	check("puzzelkamers: geen zware kasten meer (Core Power weg) %s" % [heavy_found], heavy_found.is_empty())
 
 
 # ================================================================ deel B
 func _rule_tests() -> void:
 	GameState.new_game("Dax")
 	check("nieuw spel: geen kernen, geen vaardigheden", GameState.kernfragmenten.is_empty()
-			and GameState.kern_skills_of(GameState.MAIN_HERO).is_empty() and not GameState.has_world_ability("zware_blokken"))
+			and GameState.kern_skills_of(GameState.MAIN_HERO).is_empty() and not GameState.has_world_ability("kernvuur"))
 	check("grant_kern('golemkern') = true", GameState.grant_kern("golemkern", "kennis_beest"))
 	check("tweede keer = false, nog steeds 1 kern", not GameState.grant_kern("golemkern") and GameState.kernfragmenten.size() == 1)
 	check("onbekende kern = false", not GameState.grant_kern("bestaat_niet") and GameState.kernfragmenten.size() == 1)
-	check("hoofdheld (%s) heeft Kernkracht + 'Zware blokken duwen'" % GameState.MAIN_HERO,
-			GameState.kern_skills_of(GameState.MAIN_HERO) == ["kernslag"] and GameState.has_world_ability("zware_blokken")
-			and GameState.world_abilities().has("zware_blokken"))
+	check("hoofdheld (%s): Golemkern in save, geen gevechts/wereldvaardigheden" % GameState.MAIN_HERO,
+			GameState.has_kern("golemkern") and GameState.kern_skills_of(GameState.MAIN_HERO).is_empty()
+			and GameState.world_abilities().is_empty())
 	check("Vesper (en ieder ander) heeft geen kernvaardigheden", GameState.kern_skills_of("noor").is_empty()
 			and GameState.kern_skills_of("") .is_empty())
 	# save / load
@@ -454,92 +452,24 @@ func _golem_tests() -> void:
 # ================================================================ deel D
 func _kernslag_tests() -> void:
 	GameState.new_game("Dax")
-	check("Golem Hall (zonder kern) geladen", await _golem_setup())
-	# zonder kern: Magie uit voor Dennis (hij heeft geen spreuken)
+	check("Golem Hall geladen", await _golem_setup())
+	GameState.grant_kern("golemkern", "kennis_beest")
+	GameState.pending_kern_absorb = ""
 	var b := await _start_battle(["papiergeest"], false)
 	if b == null:
-		check("gevecht gestart", false)
+		check("gevecht met Golemkern gestart", false)
 		return
 	await wait_battle_state(["command"])
 	await pframes(4)
-	check("zonder kern: 'Magie' staat uit voor Dax", not b.cross.enabled[MAGIE])
+	check("met Golemkern: geen kernvaardigheid, 'Magie' uit", GameState.kern_skills_of(GameState.MAIN_HERO).is_empty()
+			and not b.cross.enabled[MAGIE])
 	b.can_flee = true
 	b.cross.enabled[4] = true
 	await cross_to(b, 4)
 	await tap("interact")
 	await wait_until(func(): return battle() == null and not GameState.in_battle, 15.0)
 	await wait_scene("ArchiefGolemhal")
-	await pframes(10)
-	# met kern
-	GameState.grant_kern("golemkern")
-	b = await _start_battle(["papiergeest"], false)
-	if b == null:
-		check("gevecht met kern gestart", false)
-		return
-	var e: Dictionary = b.enemies[0]
-	e["s"]["hp"] = 9999
-	e["s"]["max_hp"] = 9999
-	await wait_battle_state(["command"])
-	await pframes(4)
-	check("met kern: 'Magie' aan voor Dax", b.cross.enabled[MAGIE])
-	await cross_to(b, MAGIE)
-	await tap("interact")
-	check("menu open met titel 'Kern'", await wait_until(func(): return b.menu.visible, 3.0) and b.menu.title_label.text == "Core")
-	var entries: Array = b.menu._entries
-	check("menu: 'Kernkracht KERN' staat erin en is te kiezen %s" % [entries], entries.size() == 1
-			and str(entries[0]["text"]).begins_with("Core Power") and "CORE" in str(entries[0]["text"]) and entries[0]["enabled"])
-	await get_tree().create_timer(0.3).timeout
-	await screenshot("kernslag_menu")
-	var hero: Dictionary = GameState.party[0]
-	var sk: Dictionary = KernData.KERN_SKILLS["kernslag"]
-	var dfn: float = b._defense_of(e) if b.has_method("_defense_of") else float(e["s"]["def"])
-	var base := float(hero["atk"]) * float(sk["atk_mult"]) - dfn * float(sk["def_factor"])
-	var lo := maxi(1, floori(base * 0.85) - 1)
-	var hi := ceili(base * 1.15) + 1
-	await tap("interact")
-	check("doel kiezen", await wait_battle_state(["target_enemy"], 5) == "target_enemy")
-	await tap("interact")
-	await wait_until(func(): return seen_message("Core Power"), 5.0)
-	check("bericht '%s: Core Power!'" % hero["name"], seen_message("%s: Core Power!" % hero["name"]))
-	await wait_until(func(): return not enemy_hits.is_empty(), 5.0)
-	if shots != "":   # schadegetal in beeld, vijand niet net weg door het knipperen
-		await wait_until(func(): return e["node"].visible, 1.0)
-		await screenshot("kernslag_raak")
-	check("Kernkracht-schade %s binnen %d..%d (ATK %d x1,5 - DEF %.0f x0,25, +/-15%%)" % [enemy_hits, lo, hi, hero["atk"], dfn],
-			enemy_hits.size() >= 1 and enemy_hits[0] >= lo and enemy_hits[0] <= hi)
-	var normal := float(hero["atk"]) - dfn / 2.0
-	check("Kernkracht sterker dan een gewone aanval (gem. %.0f vs %.0f)" % [base, normal], base > normal * 1.4)
-	# opladen: ronde 2 (2), ronde 3 (1), ronde 4 weer klaar
-	for want in [2, 1]:
-		await wait_battle_state(["command"], 40)
-		await pframes(4)
-		var h := _hero_c(b)
-		check("ronde %d: Kernkracht laadt op (%d), menu-regel '%s', niet te kiezen" % [b.round_no, want, b.kern_entry_text(h, "kernslag")],
-				b.kern_charge(h, "kernslag") == want and b.kern_entry_text(h, "kernslag").ends_with("(%d)" % want)
-				and not b.kern_ready(h, "kernslag"))
-		if want == 2:
-			await cross_to(b, MAGIE)
-			await tap("interact")
-			await wait_until(func(): return b.menu.visible, 3.0)
-			await get_tree().create_timer(0.25).timeout
-			check("menu toont de regel uitgegrijsd", not b.menu._entries[0]["enabled"])
-			await screenshot("kernslag_opladen")
-			await tap("cancel")
-			await wait_battle_state(["command"], 5)
-		await cross_to(b, 3)   # verdedigen
-		await tap("interact")
-		await wait_battle_state(["busy", "message_wait"], 5)
-	await wait_battle_state(["command"], 40)
-	await pframes(4)
-	check("ronde %d: Kernkracht weer klaar" % b.round_no, b.kern_ready(_hero_c(b), "kernslag")
-			and b.kern_entry_text(_hero_c(b), "kernslag").ends_with("CORE"))
-	b.can_flee = true
-	b.cross.enabled[4] = true
-	await cross_to(b, 4)
-	await tap("interact")
-	await wait_until(func(): return battle() == null and not GameState.in_battle, 15.0)
-	await wait_scene("ArchiefGolemhal")
-	check("kernslag-gevecht: geen nieuwe kern of absorptie", GameState.kernfragmenten.size() == 1 and GameState.pending_kern_absorb == "")
+	check("gevecht: golemkern blijft, geen absorptie", GameState.has_kern("golemkern") and GameState.pending_kern_absorb == "")
 
 
 func _hero_c(b: Node) -> Dictionary:
@@ -561,14 +491,10 @@ func _enter_demo() -> Node:
 
 
 func _heavy_tests() -> void:
-	# pure logica
 	var l := PuzzleLogic.from_room(PuzzleRooms.ROOMS["kern_demo"], "kern_demo")
-	check("logica: kast_zwaar is zwaar (vraagt 'zware_blokken')", l.heavy_blocks.get("kast_zwaar", "") == "zware_blokken")
+	check("logica: kern_demo-kast is normaal (geen zware_blokken)", l.heavy_blocks.get("kast_zwaar", "") == "")
 	l.set_player_tile(Vector2i(2, 3))
-	check("logica: zonder vaardigheid 'te zwaar'", l.push_block_reason("kast_zwaar", Vector2i.RIGHT) == "te zwaar"
-			and not l.try_push("kast_zwaar", Vector2i.RIGHT) and l.blocks["kast_zwaar"] == Vector2i(3, 3))
-	l.abilities = {"zware_blokken": true}
-	check("logica: met vaardigheid duwbaar", l.push_block_reason("kast_zwaar", Vector2i.RIGHT) == ""
+	check("logica: zonder vaardigheid gewoon duwbaar", l.push_block_reason("kast_zwaar", Vector2i.RIGHT) == ""
 			and l.try_push("kast_zwaar", Vector2i.RIGHT) and l.blocks["kast_zwaar"] == Vector2i(4, 3))
 	var a := PuzzleLogic.from_room(PuzzleRooms.ROOMS["archief_test"], "archief_test")
 	check("gewone kasten (archief_test) blijven gewoon: geen zware", a.heavy_blocks.is_empty())
@@ -583,29 +509,12 @@ func _heavy_tests() -> void:
 	var blk: Node = room.nodes.get("kast_zwaar")
 	# v0.15 (Forge): RPG ART leverde assets/puzzle/kast_zwaar.png -> eigen plaatje, geen code-tint meer;
 	# zonder dat bestand blijft de runen-tint de terugval
-	var own_art := false
-	if blk != null:
-		for c in blk.visual.get_children():
-			if c is Sprite2D and c.texture and str(c.texture.resource_path).ends_with("kast_zwaar.png"):
-				own_art = true
-	check("zware kast in beeld (kast_zwaar.png van RPG ART, of anders de runen-tint)", blk != null and blk.heavy
-			and (own_art and blk.visual.modulate == Color.WHITE if ResourceLoader.exists("res://assets/puzzle/kast_zwaar.png")
-			else blk.visual.modulate.r < 0.9))
+	check("demo-kast in beeld", blk != null)
 	await walk("move_left", 2)
 	await walk("move_up", 2)
 	check("naast de kast (2,3): %s" % tile(), tile() == Vector2i(2, 3))
 	await push("move_right", room, "kast_zwaar")
-	check("zonder kern: hint '%s'" % [Dialog._lines], await wait_until(func(): return Dialog.is_open, 2.0)
-			and room.last_heavy_hint == "kast_zwaar" and str(Dialog._lines[0]).begins_with("This cabinet is full of runes"))
-	check("kast bleef staan (3,3), speler ook", room.logic.blocks["kast_zwaar"] == Vector2i(3, 3) and tile() == Vector2i(2, 3))
-	await get_tree().create_timer(1.6).timeout       # tekst helemaal uitgetypt
-	await screenshot("zware_kast_hint")
-	await close_dialog()
-	# nu met de Golemkern
-	GameState.grant_kern("golemkern")
-	room.last_heavy_hint = ""
-	await push("move_right", room, "kast_zwaar")
-	check("met kern: kast 1 tegel opgeschoven (4,3), geen hint", await wait_until(func(): return room.logic.blocks["kast_zwaar"] == Vector2i(4, 3), 2.0)
+	check("zonder kern: kast duwt mee (4,3), geen zware-hint", await wait_until(func(): return room.logic.blocks["kast_zwaar"] == Vector2i(4, 3), 2.0)
 			and room.last_heavy_hint == "" and not Dialog.is_open)
 	await wait_until(func(): return not blk.is_sliding(), 2.0)
 	await push("move_right", room, "kast_zwaar")     # 1 stap lopen + duwen, zoals een speler
@@ -619,8 +528,10 @@ func _heavy_tests() -> void:
 
 # ================================================================ deel F
 func _status_tests() -> void:
+	GameState.grant_kern("golemkern", "kennis_beest")
+	GameState.pending_kern_absorb = ""
 	var dennis: Dictionary = GameState.party[0]
-	check("kern_text: Dax met Golemkern = 'Golemkern (Kernkracht)'", StatusScreenS.kern_text(dennis) == "Golem Core (Core Power)")
+	check("kern_text: Dax met Golemkern = alleen fragmentnaam", StatusScreenS.kern_text(dennis) == "Golem Core")
 	check("kern_text: Vesper = '' (alleen de hoofdheld)", StatusScreenS.kern_text({"id": "noor"}) == "")
 	if player() == null or Dialog.is_open:
 		await close_dialog()
@@ -634,7 +545,7 @@ func _status_tests() -> void:
 	await frames(4)
 	var st: Node = m.get_node_or_null("Status")
 	check("statusscherm open, regel 'Kernen: %s' zichtbaar" % (st.kern_label.text if st else "?"), st != null
-			and st.kern_label.visible and st.kern_key.visible and st.kern_label.text == "Golem Core (Core Power)")
+			and st.kern_label.visible and st.kern_key.visible and st.kern_label.text == "Golem Core")
 	if st != null:
 		await get_tree().create_timer(0.3).timeout
 		var r: Rect2 = st.kern_label.get_global_rect()

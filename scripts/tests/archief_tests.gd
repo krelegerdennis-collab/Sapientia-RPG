@@ -876,6 +876,18 @@ func _enter_map(path: String, spawn_name: String, scene_name: String) -> Node:
 		check("kamer geladen: %s" % scene_name, false)
 		return null
 	await wait_fade()
+	await wait_until(func(): return not Story.running, 8.0)
+	for _i in 40:
+		if not Dialog.is_open:
+			break
+		if Dialog.choices.is_empty():
+			Dialog.advance()
+		else:
+			break
+		await pframes(2)
+	if Dialog.is_open and Dialog.has_method("close"):
+		Dialog.close()
+	await pframes(4)
 	return scene()
 
 

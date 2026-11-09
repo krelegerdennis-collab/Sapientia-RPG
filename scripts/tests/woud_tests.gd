@@ -744,33 +744,12 @@ func _forest_tests() -> void:
 			if s == null or sp == null or tile() != Vector2i((sp.position / 16.0).floor()):
 				conn_bad.append("%s/%s" % [e[0], k])
 	check("alle uitgangen van de 5 woudkamers werken (%s)" % [conn_bad], conn_bad.is_empty())
-	# Kernkracht: verlamt een woudmonster
 	GameState.grant_kern("golemkern", "kennis_beest")
 	GameState.pending_kern_absorb = ""
 	r = await enter("res://scenes/maps/woud_pad.tscn", "zuid")
 	await freeze_monsters(r)
-	var stunned := false
 	var v: Node = r.get_node("KernKracht")
-	for m in r.monsters:
-		for d in DIRS:
-			var start: Vector2i = m.tile - d * 2
-			if r.is_wall(start) or not v.blocker_at(start).is_empty() or start == m.tile:
-				continue
-			var tr: Dictionary = v.trace(start, d)
-			if tr["kind"] != "monster" or tr["node"] != m:
-				continue
-			player().place_at(start, d)
-			await frames(3)
-			await wait_until(func(): return v.can_fire() == "", 3.0)
-			Input.action_press("kern")
-			await wait_until(func(): return v.busy, 1.0)
-			Input.action_release("kern")
-			await wait_until(func(): return not v.busy, 4.0)
-			stunned = m.is_stunned()
-			break
-		if stunned:
-			break
-	check("Kernkracht-stun werkt op een woudmonster", stunned)
+	check("Golemkern: veld-Core Power uit (geen stun meer)", not KernVeld.unlocked() and v.can_fire() == "dicht")
 	# kamer-screenshot (overlay + mist) in de Mistpoel
 	r = await enter("res://scenes/maps/woud_mistpoel.tscn", "zuid")
 	await freeze_monsters(r)

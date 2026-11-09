@@ -1049,6 +1049,10 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	koopman_load({})
 	if has_node("/root/Story"):
 		get_node("/root/Story").reset()
+	if has_node("/root/Dialog"):
+		var dlg: Node = get_node("/root/Dialog")
+		if dlg.has_method("close") and bool(dlg.get("is_open")):
+			dlg.close()
 	has_return_point = false
 	pending_spawn = ""
 	_play_time_base = 0.0

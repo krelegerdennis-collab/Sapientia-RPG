@@ -118,14 +118,10 @@ func _process(delta: float) -> void:
 	if veld != null and is_instance_valid(veld) and bool(veld.get("busy")):
 		return
 	_say = false
-	var lines: Array = []
-	if _worm != null:
-		lines.append("Core Power tears the parchment. An Ink Worm writhes out of the cabinet.")
-	else:
-		lines.append("Core Power tears the parchment. The cabinet is empty.")
-	if _flask:
-		lines.append("A glowing ink bottle lies among the scraps.")
-		_flask = false
+	if not _flask:
+		return
+	var lines: Array = ["A glowing ink bottle lies among the scraps."]
+	_flask = false
 	Dialog.show_lines(lines)
 
 
