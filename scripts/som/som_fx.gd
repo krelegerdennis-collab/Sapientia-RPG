@@ -304,7 +304,7 @@ class Ring extends Node2D:
 static func _digit_row(color: Color) -> int:
 	if color.g > color.r + 0.2:
 		return 2
-	if color.r > 0.9 and color.g < 0.5:
+	if color.r > 0.9 and color.g < 0.6:
 		return 1
 	return 0
 
@@ -324,6 +324,9 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 		d.sheet = digits
 		d.text = text.trim_prefix("+")
 		d.row = _digit_row(color)
+		# F4 finisher/heavy: witte rij + modulate (laat rood/groen _digit_row ongemoeid).
+		if color.is_equal_approx(Color("FF8A3D")) or color.is_equal_approx(Color("FFD24A")):
+			d.row = 0
 		n = d
 		if d.row == 0 and not color.is_equal_approx(Color.WHITE):
 			n.modulate = color

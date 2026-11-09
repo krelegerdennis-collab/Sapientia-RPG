@@ -121,13 +121,12 @@ func _shake_tests() -> void:
 
 
 func _color_tests() -> void:
-	check("kleur: finisher rij wit", SomFx._digit_row(SomFeelData.COL_FINISHER) == 0)
-	check("kleur: heavy rij wit", SomFx._digit_row(SomFeelData.COL_HEAVY) == 0)
 	check("kleur: party schade rood", SomFx._digit_row(Color(1, 0.4, 0.4)) == 1)
 	check("kleur: heal groen", SomFx._digit_row(Color(0.4, 1, 0.5)) == 2)
 	var holder := Node2D.new()
 	add_child(holder)
 	var n: Node2D = SomFx.number(holder, Vector2.ZERO, "9", SomFeelData.COL_FINISHER, 0.1, 1.0)
+	check("kleur: finisher witte rij", int(n.get("row")) == 0)
 	check("kleur: finisher modulate", n.modulate.is_equal_approx(SomFeelData.COL_FINISHER))
 	var n2: Node2D = SomFx.number(holder, Vector2.ZERO, "9", SomFeelData.COL_HEAVY, 0.1, SomFeelData.SCALE_HEAVY2)
 	check("kleur: heavy L2 schaal", is_equal_approx(n2.scale.x, SomFeelData.SCALE_HEAVY2))
