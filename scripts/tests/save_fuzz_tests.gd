@@ -4,6 +4,7 @@ extends Node
 ##   Deel A: ontbrekend bestand, leeg bestand, rommel-bytes, kapotte JSON, geen object
 ##   Deel B: afgekapt bestand (halverwege en op meerdere plekken)
 ##   Deel C: oude/verouderde saves: ontbrekende velden, verkeerde types per veld
+##   Deel D: geneste velden (archief2.platen, bestiarium.*.defeated) met verkeerde types (C-6)
 ## Werkt alleen op tijdelijke paden (user://savefuzz_*); echte saves worden niet aangeraakt.
 ## Zit niet in de export (scripts/tests/*).
 
@@ -155,6 +156,45 @@ func _run() -> void:
 				h[hk] = "fout"
 	_write(SAVE, JSON.stringify(hero_wrong))
 	_expect_load("heldvelden allemaal String")
+	# ---- Deel D
+	print("--- Deel D: geneste verkeerde types")
+	var nested_wrong: Array = [null, "x", [], {"a": 1}]
+	var nested_crashed := 0
+	var nested_total := 0
+	for w in nested_wrong:
+		var d_a2 := good.duplicate(true)
+		d_a2["archief2"] = {"platen": {"fuzz:kamer": w}}
+		_write(SAVE, JSON.stringify(d_a2))
+		nested_total += 1
+		var r_a2 = GameState.load_game(SAVE)
+		var platen: Dictionary = GameState.archief2.get("platen", {})
+		if not (r_a2 is bool and r_a2 == true):
+			nested_crashed += 1
+			print("  mislukt: archief2.platen = %s (load)" % JSON.stringify(w))
+		elif w is float or w is int:
+			if GameState.archief2_plaat("fuzz", "kamer", -1) != int(w):
+				nested_crashed += 1
+		elif platen.has("fuzz:kamer"):
+			nested_crashed += 1
+			print("  mislukt: archief2.platen = %s (sleutel had moeten wegvallen)" % JSON.stringify(w))
+		elif GameState.archief2_plaat("fuzz", "kamer", 7) != 7:
+			nested_crashed += 1
+	for w in nested_wrong:
+		var d_best := good.duplicate(true)
+		d_best["bestiary"] = {"mosslijm": {"seen": true, "defeated": w}}
+		_write(SAVE, JSON.stringify(d_best))
+		nested_total += 1
+		var r_best = GameState.load_game(SAVE)
+		if not (r_best is bool and r_best == true):
+			nested_crashed += 1
+			print("  mislukt: bestiary.defeated = %s (load)" % JSON.stringify(w))
+		elif w is float or w is int:
+			if GameState.defeated_count("mosslijm") != int(w) or not GameState.is_seen("mosslijm"):
+				nested_crashed += 1
+		elif GameState.defeated_count("mosslijm") != 0 or not GameState.is_seen("mosslijm"):
+			nested_crashed += 1
+			print("  mislukt: bestiary.defeated = %s (default)" % JSON.stringify(w))
+	check("geneste types: %d varianten, geen crash en defaults" % nested_total, nested_crashed == 0)
 	# na al die rommel: een goede save laadt nog gewoon
 	_write(SAVE, good_text)
 	_expect_load("goede save na fuzz")
