@@ -506,7 +506,7 @@ func _ui_tests() -> void:
 		edit.text = lobby.host_session.code
 	check("tweede speler verbindt", _press(lobby, "Connect", true))
 	await get_tree().process_frame
-	check("host kiest Vroeg", _press(lobby, "Vroeg", false))
+	check("host kiest Early", _press(lobby, "Early", false))
 	await get_tree().process_frame
 	check("speler 1 kiest Klassiek", _press(lobby, "The Classic Three", true))
 	check("apparaat gaat naar speler 2", _label_has(lobby, "Pass the device on"))

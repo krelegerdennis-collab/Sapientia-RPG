@@ -21,6 +21,10 @@ export_credentials.cfg
 .env
 *.env
 
+# Godot web-export (workflow build-web bouwt export/web per run)
+export/web/*
+!export/web/README.md
+
 # Lokale CI/test-runner output (run_suite.sh)
 testlogs/
 
