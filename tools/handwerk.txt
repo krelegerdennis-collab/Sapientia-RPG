@@ -1269,3 +1269,4 @@ assets/ui/icons/items/icons32/adersteen.png
 assets/sprites/buiten/kist_blauw.png
 assets/sprites/dungeon100_rustpunt.png
 assets/sprites/dungeon_exit_warper.png
+assets/sprites/som/fx/fx_root.png

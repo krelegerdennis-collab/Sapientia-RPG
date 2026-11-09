@@ -583,6 +583,7 @@ func _ready() -> void:
 	# Co-op telegraaf-snapshot (Combat T5): of  godot -- --telegraphcooptest  (scripts/tests/telegraph_coop_sync_tests.gd).
 	# Grondzones / Inktplas (Combat T4b): of  godot -- --zonetest  (scripts/tests/zone_tests.gd).
 	# Wortelgreep-status (Combat T6): of  godot -- --roottest  (scripts/tests/root_tests.gd).
+	# Root-FX sprite (fx_root.png): of  godot -- --rootfxtest  (scripts/tests/root_fx_tests.gd).
 	# Actieve dodge + stamina (Combat D5): of  godot -- --dodgetest  (scripts/tests/dodge_tests.gd).
 	# D3 bazen fase-machine (PR A): of  godot -- --bossphasetest  (scripts/tests/boss_phase_tests.gd).
 	# D3 realtime Golem (PR B): of  godot -- --golemactiontest  (scripts/tests/golem_action_tests.gd)
@@ -677,6 +678,7 @@ func _ready() -> void:
 			["--telegraphcooptest", "res://scripts/tests/telegraph_coop_sync_tests.gd", "TelegraphCoopSyncTest", "telegraphcooptest"],
 			["--zonetest", "res://scripts/tests/zone_tests.gd", "ZoneTest", "zonetest"],
 			["--roottest", "res://scripts/tests/root_tests.gd", "RootTest", "roottest"],
+			["--rootfxtest", "res://scripts/tests/root_fx_tests.gd", "RootFxTest", "rootfxtest"],
 			["--dodgetest", "res://scripts/tests/dodge_tests.gd", "DodgeTest", "dodgetest"],
 			["--bossphasetest", "res://scripts/tests/boss_phase_tests.gd", "BossPhaseTest", "bossphasetest"],
 			["--golemactiontest", "res://scripts/tests/golem_action_tests.gd", "GolemActionTest", "golemactiontest"],
