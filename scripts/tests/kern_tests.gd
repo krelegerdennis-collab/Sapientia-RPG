@@ -432,7 +432,7 @@ func _golem_tests() -> void:
 	check("daarna het bericht", await wait_until(func(): return Dialog.is_open, 3.0) and ka.phase == "bericht")
 	var lines: Array = Dialog._lines
 	check("'Dax absorbeert de Golemkern!' + Kernkracht + Zware blokken duwen + vuurbal in het veld %s" % [lines], lines.size() == 4
-			and lines[0] == "Dax absorbs the Golem Core!" and "Core Power" in str(lines[1]) and "Push Heavy Blocks" in str(lines[2])
+			and lines[0] == "Sapientia drank the Golem Core dry." and "Core Power" in str(lines[1]) and "Push Heavy Blocks" in str(lines[2])
 			and "Core Power" in str(lines[3]))
 	await get_tree().create_timer(1.6).timeout       # tekst helemaal uitgetypt
 	await screenshot("kern_absorptie_bericht")

@@ -47,7 +47,8 @@ func _bestanden() -> void:
 			verwacht = "cutscene_wereldkaart_gezien"
 		t.check("tabel %s vlag %s" % [id, vlag], vlag == verwacht)
 	t.check("oude wereldkaart-intro is weg", not FileAccess.file_exists("res://assets/video/worldmap_intro.ogv"))
-	t.check("genezer_warper_v3-duplicaat is weg", not FileAccess.file_exists("res://assets/video/genezer_warper_v3.ogv"))
+	t.check("genezer_warper_v3 ligt klaar en speelt nog niet", FileAccess.file_exists("res://assets/video/genezer_warper_v3.ogv")
+			and str(Videos.spec("cs05").get("path", "")).ends_with("genezer_warper.ogv"))
 	var ids: Array = ScenesData.ids()
 	t.check("scenes-lijst houdt wereldkaart + warper en voegt CS-01..08 toe (CS-05 = ww_warper)",
 			ids == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08"])
@@ -111,15 +112,10 @@ func _ontbrekend() -> void:
 
 func _kernzin() -> void:
 	GameState.story_flags.erase("cutscene_cs02_gezien")
-	var oud: Array = Kern.lines_for("golemkern")
-	t.check("zonder CS-02 blijft de oude kernzin", oud.size() == 4 and str(oud[0]) == "{naam} absorbs the Golem Core!"
-			and "Core Power" in str(oud[1]))
-	GameState.story_flags["cutscene_cs02_gezien"] = true
-	var nieuw: Array = Kern.lines_for("golemkern")
-	t.check("CS-02: Sapientia drinkt de kern leeg, beloningen blijven", nieuw.size() == 4
-			and str(nieuw[0]) == "Sapientia drank the Golem Core dry." and "Core Power" in str(nieuw[1])
-			and "Push Heavy Blocks" in str(nieuw[2]))
-	GameState.story_flags.erase("cutscene_cs02_gezien")
+	var regels: Array = Kern.lines_for("golemkern")
+	t.check("CS-02: Sapientia drinkt de kern leeg, ook zonder vlag", regels.size() == 4
+			and str(regels[0]) == "Sapientia drank the Golem Core dry." and "Core Power" in str(regels[1])
+			and "Push Heavy Blocks" in str(regels[2]))
 
 
 func _orion() -> void:
