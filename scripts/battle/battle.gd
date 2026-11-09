@@ -1895,6 +1895,8 @@ func _archief2_opening() -> bool:
 		var dmg := Archief2.openingslag(int(t["s"]["max_hp"]))
 		var zin := str(e["s"].get("archief2_zin", Archief2.KERN_ZIN))
 		await say(zin)
+		if str(e["s"].get("id", "")) == "genezer" and GameState.has_member("lotte"):
+			await say("Seren: You call that healing?")
 		await _damage(t, dmg)
 		GameState.archief2_last_open = {"schade": dmg, "max": int(t["s"]["max_hp"]), "id": str(t["s"].get("id", ""))}
 		if codex.party_down():

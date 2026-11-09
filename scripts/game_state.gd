@@ -692,6 +692,7 @@ func _ready() -> void:
 			["--combatbugstest", "res://scripts/tests/combat_bugs_tests.gd", "CombatBugsTest", "combatbugstest"],
 			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
 			["--wm1budgettest", "res://scripts/tests/wm1_budget_tests.gd", "Wm1BudgetTest", "wm1budgettest"],
+			["--wm1storytexttest", "res://scripts/tests/wm1_storytext_tests.gd", "Wm1StorytextTest", "wm1storytexttest"],
 			["--wm1f3stabilitytest", "res://scripts/tests/wm1_f3_stability_tests.gd", "Wm1F3StabilityTest", "wm1f3stabilitytest"],
 			["--wm1baselinebenchtest", "res://scripts/tests/wm1_baseline_benchmark.gd", "Wm1BaselineBenchmark", "wm1baselinebenchtest"],
 			["--huisdrawtest", "res://scripts/tests/huis_draw_calls_tests.gd", "HuisDrawCallsTest", "huisdrawtest"],

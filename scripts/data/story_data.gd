@@ -156,6 +156,8 @@ const MAP_ENTER := [
 	# v0.17 eerste keer in Esdoorn (na de Golem): Noor ontmoeten, ze wordt het woud in gesleurd
 	{"map": ESDOORN, "if": {"flags": [GOLEM_FLAG], "not_flags": ["noor_ontmoet"]}, "event": "noor_ontmoeting"},
 	{"map": "res://scenes/maps/leven_ingang.tscn", "if": {"not_flags": ["archief2_keten"]}, "event": "archief2_keten"},
+	{"map": "res://scenes/maps/archief_2_v4_hal.tscn",
+			"if": {"flags": ["bewaker:archief_2_v3_wurger/wurger"], "not_flags": ["mender_hal_moment"]}, "event": "mender_hal_moment"},
 	# v0.17 terug op de open plek na de winst op de Wortelkoning: Noor is vrij en sluit zich aan
 	{"map": WOUD_BAAS, "if": {"flags": [WORTELKONING_FLAG], "not_flags": ["noor_gered"]}, "event": "noor_bevrijd"},
 ]
@@ -383,7 +385,14 @@ const EVENTS := {
 		["say", "", ["The ground shakes! A deafening bang, and a blinding flash from the direction of the Archives.", "Pink and blue light pours through the windows."]],
 		["face", "OudeMan", "up"],
 		["face", "OudeMan", "down"],
-		["say", SPEAKER, ["No... the seal! It's too soon! {naam}, stay here! Lock the doors behind me and don't follow, no matter what you hear!"]],
+		["say", SPEAKER, ["No… the seal. It's too soon."]],
+		["say", "{naam}", ["Grandpa? Your hands are shaking."]],
+		["say", SPEAKER, ["Stay here, Dax."]],
+		["say", "{naam}", ["What are you doing with that sword?"]],
+		["say", SPEAKER, ["What I hoped you'd never have to see."]],
+		["say", "{naam}", ["Let me come with you."]],
+		["say", SPEAKER, ["No. Stay inside. Don't follow me, no matter what you hear."]],
+		["say", "{naam}", ["Then come back."]],
 		["walk", "OudeMan", "up", 1],
 		["walk", "OudeMan", "left", 3],
 		["face", "OudeMan", "up"],
@@ -442,7 +451,7 @@ const EVENTS := {
 	# --- poorten op de wereldkaart
 	"naar_esdoorn": [
 		{"if": {"not_flags": [GOLEM_FLAG]}, "do": [
-			["say", "", ["Beyond the hills lies a village: Mapleton.", "But first you have to find out what is happening in the Forgotten Archives."]],
+			["say", "{naam}", ["Beyond the hills lies a village: Mapleton.", "But first you have to find out what is happening in the Forgotten Archives."]],
 		]},
 		{"do": "default"},
 	],
@@ -503,7 +512,9 @@ const EVENTS := {
 	]}],
 	# Waarom Archief 1 naar Archief 2 wijst. Eenmalig, bij de kas-ingang.
 	"archief2_keten": [{"do": [
-		["say", "", [
+		["say", "{naam}", ["Another Archive. I hope we're not too late."]],
+		["say", "{naam}", ["What if this is where Sapientia wants us to go?"]],
+		["say", "ECHO", [
 			"The Old Humanity made the six Archives as a chain.",
 			"Each core activates the next. Not an invitation: a distress signal.",
 			"Archive 1 sent: Someone is inside. Archive 2 answered first.",
@@ -514,21 +525,31 @@ const EVENTS := {
 	]}],
 
 	# --- de ontmoeting (eenmalig, MAP_ENTER; vlag noor_ontmoet)
+	"mender_hal_moment": [{"do": [
+		["say", "{naam}", ["Seren? Stay close."]],
+		["say", "Seren", ["I'm here, Dax."]],
+		["flag", "mender_hal_moment"],
+	]}],
+
 	"noor_ontmoeting": [{"do": [
 		["place", "player", [24, 30], "up"],   # 1.4x-kaart (48x34): zuidpad, Vesper op (24,19)
 		["wait", 0.3],
 		["walk", "player", "up", 8],
 		["walk", "Vesper", "down", 1],
-		["say", "Vesper", ["Hey! I don't know you. Did you come from over the hills? Nobody lives out there."]],
+		["say", "Vesper", ["You came over the hills? I didn't think anyone lived out there."]],
 		["walk", "player", "up", 1],
-		["say", "{naam}", ["I'm {naam}. I live with the Old Man, by the Archives. He sent me here."]],
-		["say", "Vesper", ["I'm Vesper. The village calls me 'that girl with the sparks'.", "Watch."]],
+		["say", "{naam}", ["I'm Dax. I live by the Archives."]],
+		["say", "Vesper", ["I'm Vesper. You look like you're looking for someone."]],
+		["say", "{naam}", ["Two mages. That's all I have to go on."]],
+		["say", "Vesper", ["People here call me the girl with the sparks."]],
+		["say", "{naam}", ["Sparks?"]],
+		["say", "Vesper", ["Watch."]],
 		["flash", "#ff3ad0", 0.25],
-		["say", "", ["Pink sparks dance between her fingers... and hitch, like a picture that sticks."]],
+		["say", "{naam}", ["Pink sparks dance between her fingers... and hitch, like a picture that sticks."]],
 		["say", "Vesper", ["They've done that lately. And at night the woods whisper my name."]],
 		["shake", 1.2, 2.5],
 		["glitch", 0.4],
-		["say", "", ["The ground splits open! Black roots full of flickering pink marks shoot up."]],
+		["say", "{naam}", ["The ground splits open! Black roots full of flickering pink marks shoot up."]],
 		["show", "WortelGreep"],
 		["hide", "Vesper"],
 		["say", "Vesper", ["They're... they're pulling me! {naam}!"]],
@@ -536,7 +557,7 @@ const EVENTS := {
 		["flash", "#ff3ad0", 0.5],
 		["hide", "WortelGreep"],
 		["shake", 0.8, 1.5],
-		["say", "", ["When the light pulls away, Vesper is gone.", "A trail of torn earth runs west... toward the Dark Wood."]],
+		["say", "{naam}", ["When the light pulls away, Vesper is gone.", "A trail of torn earth runs west... toward the Dark Wood."]],
 		["walk", "Marit", "down", 3],
 		["walk", "Marit", "left", 2],
 		["face", "Marit", "left"],
@@ -580,6 +601,21 @@ const EVENTS := {
 		{"do": [["say", "Tobias", ["Since the roots crawl under the village, I only catch black fish.", "Those fish hitch. They swim... and then jump a little bit back."]]]},
 	],
 	"esdoorn_put": [{"do": [["say", "", ["An old well. Deep down, something pink flickers in the water."]]]}],
+	"opa_willowdale_vertrek": [
+		{"if": {"flags": ["opa_willowdale_afscheid"]}, "do": [
+			["say", SPEAKER, ["I need rest. You've done what you can for me."]],
+		]},
+		{"do": [
+			["say", "{naam}", ["I should go. I just don't like leaving you."]],
+			["say", SPEAKER, ["I know."]],
+			["say", "{naam}", ["Two mages. No names. I don't know where to start."]],
+			["say", SPEAKER, ["Start by asking. You don't have to know everything before you leave."]],
+			["say", "{naam}", ["Will you be all right?"]],
+			["say", SPEAKER, ["I need rest. You've done what you can for me."]],
+			["flag", "opa_willowdale_afscheid"],
+		]},
+	],
+
 	"ilse": [
 		{"if": {"flags": ["noor_gered"], "not_flags": ["ilse_thee"]}, "do": [
 			["say", "Elise", ["You saved my Vesper. She wants to go with you. I can see it on her.", "Take good care of her. And take this tea, for the road."]],
@@ -606,8 +642,14 @@ const EVENTS := {
 
 	# --- het Donker Woud
 	"cocon": [
-		{"if": {"flags": ["noor_gered"]}, "do": [["say", "", ["The empty cocoon. The roots are grey and withered."]]]},
-		{"do": [["say", "", ["Vesper! She hangs unconscious in a cocoon of roots.", "The Root King has to go first."]]]},
+		{"if": {"flags": ["noor_gered"]}, "do": [["say", "{naam}", ["The empty cocoon. The roots are grey and withered."]]]},
+		{"do": [
+			["say", "{naam}", ["Vesper! She hangs unconscious in a cocoon of roots."]],
+			["say", "{naam}", ["Vesper…"]],
+			["say", "{naam}", ["Hang on. I'll get you out."]],
+			["say", "{naam}", ["The Root King has to go first."]],
+			["flag", "cocon_gezien"],
+		]},
 	],
 	"noor_bevrijd": [{"do": [
 		["place", "player", [13, 6], "up"],

@@ -53,8 +53,17 @@ const GEEN_CODEX := [
 	"You don't have a Codex monster yet.",
 	"A Moss Slime fights alongside you for this battle.",
 ]
+const LOTTE_GLITCH_GEDACHTE := "The glitch tears. Seren breaks it herself."
+const SEREN_JOIN := [
+	"I'm Seren.",
+	"Dax. This is Vesper.",
+	"What brought you here?",
+	"I'm looking for two mages. I've found one.",
+	"I'm a healer. Let me come with you.",
+	"All right. We go together.",
+]
 const LOTTE_AANSLUIT := [
-	"The glitch tears. Seren breaks it herself.",
+	LOTTE_GLITCH_GEDACHTE,
 	"I can hear the Order of the Silent Flame again.",
 	"Silence is what Sapientia wants: to erase emotion.",
 	"The Flame is life, warmth, emotion. That is why they sent me.",

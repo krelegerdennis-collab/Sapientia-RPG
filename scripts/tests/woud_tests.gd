@@ -793,6 +793,13 @@ func _forest_tests() -> void:
 	player().place_at(Vector2i(13, 8), Vector2i.UP)
 	await get_tree().create_timer(0.6).timeout
 	await v17_shot("noor_cocon")
+	check("cocon inspectie vereist vóór de baas (blokkade zonder cocon_gezien)",
+			r.get_node("Objects").get_children().any(func(n): return str(n.name).begins_with("Blokkade_")))
+	cocon = r.get_node_or_null("Objects/Cocon")
+	if cocon:
+		Story.trigger("cocon", cocon)
+		await run_story(20.0, "Root King", "Hang on")
+	check("cocon_gezien na inspectie", Story.has_flag("cocon_gezien"))
 	var lv := int(GameState.party[0]["level"])
 	r.start_monster_battle(boss)
 	check("baasgevecht gestart", await wait_scene("Battle"))

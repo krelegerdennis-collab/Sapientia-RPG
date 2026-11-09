@@ -17,23 +17,31 @@ const HAL_SPAWN := "ingang"
 ## Gezet na de opening-Drift (nieuw spel); ECHO's geheugen herstelt bij terugkeer na Archief 2.
 const FLAG_DRIFT_DONE := "warper_drift_done"
 
-const SPREKERS := ["", "Dax", "Vesper", "Seren", "ECHO", "Sapientia"]
+const SPREKERS := ["", "Dax", "Vesper", "Seren", "Orion", "ECHO", "Sapientia"]
 
 ## Scène 1 – Na De Genezer: de World Warper verschijnt.
 const GENEZER := [
-	{"who": "", "text": "The core of the second Archive floats in the middle of the room.", "cue": "kern"},
-	{"who": "", "text": "The greenhouse glitches. Green turns grey. The plants fade.", "cue": "glitch"},
+	{"who": "Dax", "text": "The core of the second Archive floats in the middle of the room.", "cue": "kern"},
+	{"who": "Dax", "text": "The greenhouse glitches. Green turns grey. The plants fade.", "cue": "glitch"},
 	{"who": "Seren", "text": "What's happening...?", "cue": "glitch"},
-	{"who": "Vesper", "text": "The simulation. It's pulling back.", "cue": "glitch"},
-	{"who": "", "text": "Silence. Then a deep, droning tone, as if something huge is waking up.", "cue": "dreun"},
-	{"who": "", "text": "A beam of light breaks through the roof. Purple. Blinding.", "cue": "straal"},
+	{"who": "Vesper", "text": "The plants. They're fading.", "cue": "glitch"},
+	{"who": "Dax", "text": "Silence. Then a deep, droning tone, as if something huge is waking up.", "cue": "dreun"},
+	{"who": "Dax", "text": "A beam of light breaks through the roof. Purple. Blinding.", "cue": "straal"},
 	{"who": "Dax", "text": "What is that...?", "cue": "straal"},
-	{"who": "", "text": "The roof is gone. Above them hangs a floating building: dark metal, seams of purple light, quieter than anything should be.", "cue": "warper"},
+	{"who": "Dax", "text": "The roof is gone. Above them hangs a floating building: dark metal, seams of purple light, quieter than anything should be.", "cue": "warper"},
 	{"who": "Vesper", "text": "That's... that's no Archive.", "cue": "warper"},
 	{"who": "Seren", "text": "It's old. Older than the Archives, maybe.", "cue": "warper"},
 	{"who": "Dax", "text": "It's reacting to the core. Look, the core is pulsing in the same color.", "cue": "puls"},
+	{"who": "Orion", "text": "Hold. Bow first.", "cue": "orion"},
+	{"who": "Dax", "text": "Who are you?", "cue": "orion"},
+	{"who": "Orion", "text": "Orion. I tracked the purple echo you just woke.", "cue": "orion"},
+	{"who": "Dax", "text": "We're looking for mages. Not archers.", "cue": "orion"},
+	{"who": "Orion", "text": "I'm looking for that Warper. Which way are you taking it?", "cue": "orion"},
+	{"who": "Dax", "text": "We don't know yet.", "cue": "orion"},
+	{"who": "Orion", "text": "Then I'm coming until you do.", "cue": "orion"},
+	{"who": "Dax", "text": "All right. We go together.", "cue": "orion_join"},
 	{"who": "ECHO", "text": "Candidate detected. Two Archives active. World Warper online.", "cue": "puls"},
-	{"who": "", "text": "The ground lights up beneath their feet. A purple circle spreads outward.", "cue": "cirkel"},
+	{"who": "Dax", "text": "The ground lights up beneath their feet. A purple circle spreads outward.", "cue": "cirkel"},
 	{"who": "Seren", "text": "Dax—!", "cue": "flits"},
 ]
 

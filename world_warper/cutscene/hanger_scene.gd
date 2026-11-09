@@ -9,6 +9,7 @@ signal threat_finished
 
 const Dreiging := preload("res://world_warper/cutscene/dreiging.gd")
 const Canon := preload("res://world_warper/cutscene/canon_scenes.gd")
+const Wm1VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
 ## Bestaande glitch-art (RPG ART), roze getint als silhouet van licht en ruis.
 const SAPIENTIA_TEX := preload("res://assets/sprites/archief2/sapientia_glitch.png")
 const SAPIENTIA_ROZE := Color(1.0, 0.45, 0.85, 0.9)
@@ -248,8 +249,10 @@ func _apply_beat(beat: int) -> void:
 		1:
 			_beat_purple()
 		2:
+			Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ATRIUM_PENDANT)
 			_beat_gloed()
 		3:
+			Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ATRIUM_THREAT)
 			_beat_threat()
 		4:
 			_beat_restore()
