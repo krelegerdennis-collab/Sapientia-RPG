@@ -11,7 +11,8 @@ const Session := preload("res://scripts/net/action_coop_session.gd")
 const SomArena := preload("res://scripts/som/som_arena.gd")
 const SomAlly := preload("res://scripts/som/som_ally.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
-const Ring := preload("res://scripts/coop/coop_revive_ring.gd")
+const RingScript: GDScript = preload("res://scripts/coop/coop_revive_ring.gd")
+const SeatCtrl := preload("res://scripts/coop/seat_controller.gd")
 
 ## Dax in de SomAlly-test heeft een facing; de kale CharacterBody2D niet.
 class _FaceBody extends CharacterBody2D:
@@ -41,21 +42,42 @@ func check(label: String, ok: bool) -> void:
 
 
 func _run() -> void:
-	_constant_tests()
-	_down_instead_of_wipe_tests()
-	_channel_tick_tests()
-	_break_and_phoenix_tests()
-	_wipe_tests()
-	_snapshot_tests()
-	_input_tests()
-	_ai_priority_tests()
-	_revive_limit_tests()
-	_solo_ko_tests()
-	await _som_ally_tests()
-	await _ring_tests()
-	_session_signal_tests()
+	# Een scriptfout in een blok (zoals Ring.new() dat niet bestaat) telt geen FAIL
+	# en liet de suite toch op OK eindigen. Elk blok moet zijn checks dus halen.
+	_block("constanten", 8, _constant_tests)
+	_block("down", 4, _down_instead_of_wipe_tests)
+	_block("kanaal", 6, _channel_tick_tests)
+	_block("veer", 11, _break_and_phoenix_tests)
+	_block("wipe", 4, _wipe_tests)
+	_block("snapshot", 6, _snapshot_tests)
+	_block("input", 2, _input_tests)
+	_block("ai", 17, _ai_priority_tests)
+	_block("limiet", 10, _revive_limit_tests)
+	_block("solo", 10, _solo_ko_tests)
+	_block("behoud", 3, _keep_tests)
+	await _block_async("somally", 3, _som_ally_tests)
+	await _block_async("ring", 15, _ring_tests)
+	_block("sessie", 1, _session_signal_tests)
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
+
+
+func _block(label: String, expected: int, body: Callable) -> void:
+	var before := passes + failures
+	body.call()
+	_block_done(label, expected, before)
+
+
+func _block_async(label: String, expected: int, body: Callable) -> void:
+	var before := passes + failures
+	await body.call()
+	_block_done(label, expected, before)
+
+
+func _block_done(label: String, expected: int, before: int) -> void:
+	var got := passes + failures - before
+	if got != expected:
+		check("blok %s draaide %d van %d checks" % [label, got, expected], false)
 
 
 func _roster() -> Array:
@@ -387,6 +409,109 @@ func _solo_ko_tests() -> void:
 	check("Feniksveer-pad wist down meteen", not bool((arena._coop_down[0] as Dictionary).get("down", false)))
 
 
+func _host_arena() -> SomArena:
+	GameState.new_game("Dax")
+	GameState.join_member("kael")
+	var arena := SomArena.new()
+	arena.coop_mode = true
+	arena.coop_sim_host = true
+	arena.coop_local_slot = 0
+	var sc: SeatCtrl = SeatCtrl.new()
+	sc.configure("KAMER", true, 0)
+	sc.assign([
+		{"slot": 0, "uid": "host", "hero_id": "dennis", "controller": "local", "room_code": "KAMER"},
+		{"slot": 1, "uid": "guest", "hero_id": "kael", "controller": "remote", "room_code": "KAMER"},
+	])
+	arena.seat_controller = sc
+	arena._coop_slots[0] = "dennis"
+	arena._coop_slots[1] = "kael"
+	arena._coop_sync_down_rows()
+	arena._coop_begin_revive_run()
+	return arena
+
+
+func _feather_up(arena: SomArena) -> void:
+	var row: Dictionary = arena._coop_down[1]
+	row["down"] = true
+	row["hp"] = 0
+	row["max_hp"] = 100
+	var hero := GameState.member("kael")
+	hero["max_hp"] = 100
+	hero["hp"] = 50
+	arena._coop_clear_down_hero("kael")
+
+
+func _put_down(arena: SomArena) -> void:
+	var row: Dictionary = arena._coop_down[1]
+	row["down"] = true
+	row["hp"] = 0
+	row["max_hp"] = 100
+	row["active"] = true
+	row["participate"] = true
+	row["x"] = 16
+	row["y"] = 16
+	GameState.member("kael")["hp"] = 0
+
+
+func _helper_row(arena: SomArena) -> Dictionary:
+	var helper: Dictionary = arena._coop_down[0]
+	helper["down"] = false
+	helper["hp"] = 40
+	helper["max_hp"] = 40
+	helper["active"] = true
+	helper["participate"] = true
+	helper["x"] = 16
+	helper["y"] = 16
+	helper["hero_id"] = "dennis"
+	helper["base_hero"] = "dennis"
+	helper["controller"] = Seat.CONTROLLER_HUMAN
+	return helper
+
+
+func _keep_tests() -> void:
+	var feather := _host_arena()
+	_feather_up(feather)
+	_put_down(feather)
+	GameState.member("kael")["hp"] = 50
+	feather._coop_clear_down_hero("kael")
+	var refused: Dictionary = feather._coop_down[1]
+	check("tweede Feniksveer op dezelfde stoel wordt geweigerd",
+			bool(refused.get("down", false)) and int(refused.get("hp", 1)) == 0
+			and int(refused.get("revives", 0)) == 1 and int(GameState.member("kael").get("hp", 1)) == 0)
+	feather.free()
+	var rejoined := _host_arena()
+	_feather_up(rejoined)
+	rejoined.coop_guest_lost(1, "timeout")
+	var back: int = int(rejoined.seat_controller.try_rejoin("guest", "KAMER"))
+	rejoined._coop_down.erase(1)
+	rejoined._coop_sync_down_rows()
+	_put_down(rejoined)
+	var helper := _helper_row(rejoined)
+	var q := Revive.query_revive(rejoined.coop_down_rows(), helper)
+	check("na een gebruikte revive plus rejoin blijft revive geweigerd",
+			back == 1 and int((rejoined._coop_down[1] as Dictionary).get("revives", 0)) == 1
+			and not bool(q.get("ok", true))
+			and not Revive.begin_channel(rejoined.coop_down_rows(), helper, 1))
+	rejoined.free()
+	var handed := _host_arena()
+	_feather_up(handed)
+	var took: bool = handed.coop_guest_lost(1, "timeout")
+	handed._coop_down.erase(1)
+	var body := Node2D.new()
+	body.position = Vector2(16, 16)
+	handed._coop_apply_guest_down(1, "kael", body, Protocol.FLAG_DOWN)
+	_put_down(handed)
+	var helper2 := _helper_row(handed)
+	var q2 := Revive.query_revive(handed.coop_down_rows(), helper2)
+	check("na een gebruikte revive plus AI-handback blijft revive geweigerd",
+			took and handed.seat_controller.controller_of(1) == SeatCtrl.CTRL_AI
+			and int((handed._coop_down[1] as Dictionary).get("revives", 0)) == 1
+			and not bool(q2.get("ok", true))
+			and not Revive.begin_channel(handed.coop_down_rows(), helper2, 1))
+	body.free()
+	handed.free()
+
+
 func _som_ally_tests() -> void:
 	GameState.new_game("Dax")
 	GameState.join_member("lotte")
@@ -428,7 +553,16 @@ func _ring_tests() -> void:
 	var mod := CanvasModulate.new()
 	mod.name = "WorldTint"
 	root.add_child(mod)
-	var ring: CanvasLayer = Ring.new()
+	var ring: CanvasLayer = null
+	if RingScript != null and RingScript.can_instantiate():
+		var made: Variant = RingScript.new()
+		if made is CanvasLayer:
+			ring = made
+	if ring == null:
+		check("ring-script is instantieerbaar", false)
+		root.queue_free()
+		return
+	check("ring-script is instantieerbaar", true)
 	root.add_child(ring)
 	await get_tree().process_frame
 	var under_mod := false

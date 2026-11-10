@@ -122,7 +122,10 @@ var coop_wiped := false
 var coop_wipe_tick := -1
 var _coop_tick := 0
 var _coop_down: Dictionary = {}
-var coop_ring: CoopReviveRing
+## Zelfde `revives` als op het stoel-record, geparkeerd zolang dat record weg is.
+## Alleen _coop_begin_revive_run wist dit. Geen aparte teller.
+var _coop_revive_keep: Dictionary = {}
+var coop_ring: CanvasLayer = null
 var _coop_slots: Dictionary = {}
 var _coop_avatars: Dictionary = {}
 ## Online stoelen (M6). Null = LAN/solo; dan blijft allies_enabled zoals het was.
@@ -2452,7 +2455,7 @@ func _coop_sync_down_rows() -> void:
 		var s := int(slot)
 		var hid := str(_coop_slots[slot])
 		if not _coop_down.has(s):
-			_coop_down[s] = CoopSeat.make(s, hid, CoopSeat.CONTROLLER_HUMAN)
+			_coop_make_down_row(s, hid, CoopSeat.CONTROLLER_HUMAN)
 		var row: Dictionary = _coop_down[s]
 		row["active"] = true
 		row["participate"] = true
@@ -2477,6 +2480,24 @@ func _coop_sync_down_rows() -> void:
 				row["hp"] = int(h["hp"])
 			elif not bool(row.get("down", false)):
 				row["hp"] = int(h.get("hp", 0))
+		_coop_park_revives(s, row)
+
+
+func _coop_park_revives(slot: int, row: Dictionary) -> void:
+	_coop_revive_keep[slot] = int(row.get("revives", 0))
+
+
+func _coop_make_down_row(slot: int, hero_id: String, controller: String) -> Dictionary:
+	var row := CoopSeat.make(slot, hero_id, controller)
+	row["revives"] = int(_coop_revive_keep.get(slot, 0))
+	_coop_down[slot] = row
+	return row
+
+
+## Enige reset van de revive-teller. Rooft een nieuwe rij daarna niet alsnog terug naar 0.
+func _coop_begin_revive_run() -> void:
+	CoopRevive.begin_run(coop_down_rows())
+	_coop_revive_keep.clear()
 
 
 func _coop_append_ally_rows(rows: Array) -> void:
@@ -2530,6 +2551,10 @@ func _coop_revive_host_tick() -> void:
 		_coop_show_ko(int(row.get("slot", -1)), hid, bool(row.get("down", false)))
 	_coop_stamp_flags()
 	_coop_update_ring(rows)
+	for row in rows:
+		var slot := int(row.get("slot", -1))
+		if slot >= 0 and slot < Protocol.MAX_PLAYERS:
+			_coop_park_revives(slot, row)
 	if all_down:
 		_coop_finish_wipe_check()
 
@@ -2544,9 +2569,6 @@ func _coop_stamp_flags() -> void:
 
 
 func _coop_update_ring(rows: Array) -> void:
-	_ensure_coop_ring()
-	if coop_ring == null:
-		return
 	var best := 0
 	var pos := Vector2.ZERO
 	for row in rows:
@@ -2556,7 +2578,7 @@ func _coop_update_ring(rows: Array) -> void:
 		if pct >= best:
 			best = pct
 			pos = Vector2(float(row.get("x", 0)), float(row.get("y", 0)))
-	coop_ring.show_channel(pos, best)
+	_coop_show_revive_ring(pos, best)
 
 
 func _coop_finish_wipe_check() -> void:
@@ -2597,30 +2619,36 @@ func _coop_clear_down_hero(id: String) -> void:
 	if not h.is_empty():
 		row["hp"] = int(h.get("hp", 0))
 		row["max_hp"] = maxi(1, int(h.get("max_hp", 1)))
-	if int(row.get("hp", 0)) <= 0:
+	if int(row.get("hp", 0)) <= 0 or not bool(row.get("down", false)):
 		return
+	if not CoopRevive._spend_revive(row):
+		row["hp"] = 0
+		if not h.is_empty():
+			h["hp"] = 0
+		CoopRevive.enter_down(row)
+		_coop_park_revives(slot, row)
+		_coop_show_ko(slot, id, true)
+		return
+	_coop_park_revives(slot, row)
 	CoopRevive.clear_down(row)
 	_coop_show_ko(slot, id, false)
-	if coop_ring != null:
-		coop_ring.show_channel(Vector2.ZERO, 0)
+	_coop_show_revive_ring(Vector2.ZERO, 0)
 
 
 func _coop_apply_guest_down(slot: int, hero_id: String, body: Node2D, flags: int) -> void:
 	var is_down := CoopRevive.flag_is_down(flags)
 	SomFx.set_ko(body, pose_tex(hero_id, "ko"), is_down)
 	if not _coop_down.has(slot):
-		_coop_down[slot] = CoopSeat.make(slot, hero_id, CoopSeat.CONTROLLER_HUMAN)
+		_coop_make_down_row(slot, hero_id, CoopSeat.CONTROLLER_HUMAN)
 	var row: Dictionary = _coop_down[slot]
 	row["down"] = is_down
 	row["flags"] = flags
 	row["x"] = int(body.position.x)
 	row["y"] = int(body.position.y)
+	_coop_park_revives(slot, row)
 
 
 func _coop_guest_ring() -> void:
-	_ensure_coop_ring()
-	if coop_ring == null:
-		return
 	var best := 0
 	var pos := Vector2.ZERO
 	for slot in _coop_down.keys():
@@ -2631,14 +2659,27 @@ func _coop_guest_ring() -> void:
 		if pct >= best:
 			best = pct
 			pos = Vector2(float(row.get("x", 0)), float(row.get("y", 0)))
-	coop_ring.show_channel(pos, best)
+	_coop_show_revive_ring(pos, best)
 
 
 func _ensure_coop_ring() -> void:
 	if coop_ring != null and is_instance_valid(coop_ring):
 		return
-	coop_ring = CoopReviveRing.new()
+	if ReviveRingScript == null or not ReviveRingScript.can_instantiate():
+		return
+	var made: Variant = ReviveRingScript.new()
+	if not (made is CanvasLayer):
+		return
+	coop_ring = made as CanvasLayer
 	add_child(coop_ring)
+
+
+func _coop_show_revive_ring(pos: Vector2, pct: int) -> void:
+	_ensure_coop_ring()
+	if coop_ring == null or not is_instance_valid(coop_ring):
+		return
+	if coop_ring.has_method("show_channel"):
+		coop_ring.call("show_channel", pos, pct)
 
 
 ## Held KO: bondgenoot blijft liggen (som_ally.gd); bestuurde held -> wissel naar de volgende levende.
@@ -2988,7 +3029,7 @@ const Codec := preload("res://scripts/net/net_codec.gd")
 const AvatarBlob := preload("res://scripts/net/avatar_blob.gd")
 const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
 const CoopRevive := preload("res://scripts/coop/coop_revive.gd")
-const CoopReviveRing := preload("res://scripts/coop/coop_revive_ring.gd")
+const ReviveRingScript: GDScript = preload("res://scripts/coop/coop_revive_ring.gd")
 const CoopSeat := preload("res://scripts/coop/coop_seat.gd")
 
 
@@ -3021,7 +3062,7 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 	_ensure_coop_ring()
 	_coop_sync_down_rows()
 	if coop_sim_host:
-		CoopRevive.begin_run(coop_down_rows())
+		_coop_begin_revive_run()
 	if not coop_sim_host:
 		player.set_analog(func() -> Vector2: return Vector2.ZERO, SomData.MOVE_SPEED)
 

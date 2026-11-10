@@ -18,10 +18,12 @@ extends RefCounted
 ## De Feniksveer gaat via phoenix() meteen, met de bestaande item-fractie.
 ##
 ## Eén revive per stoel per run (besluit Dennis). Het getal `revives` staat
-## alleen op het stoel-record dat de host tikt. Geen tweede lijst, niet in de
-## snapshot. begin_run() zet het terug op 0. Een stoel die al een keer is
-## opgestaan en weer valt, blijft liggen: query_revive wijst haar niet aan,
-## dus het kanaal en de ring starten niet. AI gebruikt dezelfde query.
+## alleen op het stoel-record dat de host tikt. Geen tweede teller, niet in de
+## snapshot. begin_run() is de enige reset. Maakt de arena het record opnieuw
+## (disconnect, rejoin, AI-handback), dan kopieert ze datzelfde getal terug.
+## Een stoel die al een keer is opgestaan en weer valt, blijft liggen:
+## query_revive wijst haar niet aan, dus het kanaal en de ring starten niet.
+## AI gebruikt dezelfde query.
 ##
 ## Haak voor M6 (seat_controller.gd). Die file bouwt deze klasse niet.
 ## De controller vraagt query_revive (welke down-stoel ligt binnen bereik en

@@ -1,8 +1,9 @@
-class_name CoopReviveRing
 extends CanvasLayer
 ## Voortgangsring om een liggende co-op-stoel (M8a).
 ## Art van RPG ART, 32x32: revive_ring_under onder, revive_ring als vulling.
 ## Eigen CanvasLayer (laag 20), dus niet meegekleurd door een CanvasModulate.
+## Geen class_name: een globale klasse plus preload vanuit som_arena laat het
+## script headless half-gecompileerd, en dan bestaat new() niet.
 
 const TEX_UNDER := preload("res://assets/sprites/coop/revive_ring_under.png")
 const TEX_RING := preload("res://assets/sprites/coop/revive_ring.png")
