@@ -142,3 +142,6 @@ spreuk_g4_ijskern,icons16/spreuk_g4_ijskern.png,icons32/spreuk_g4_ijskern.png,sc
 spreuk_g4_sneeuwkoningin,icons16/spreuk_g4_sneeuwkoningin.png,icons32/spreuk_g4_sneeuwkoningin.png,scroll_ice,variant,grade-4: eigen motief (silver)
 bergnerfstaf,icons16/bergnerfstaf.png,icons32/bergnerfstaf.png,—,placeholder,WM1 Berggrot geheime kamer (PH)
 adersteen,icons16/adersteen.png,icons32/adersteen.png,—,placeholder,WM1 Berggrot geheime kamer (PH)
+spreuk_vuurbal,icons16/spreuk_vuurbal.png,icons32/spreuk_vuurbal.png,scroll_fire,variant,grade-2: eigen motief (oranje vuurbal)
+spreuk_grote_genezing,icons16/spreuk_grote_genezing.png,icons32/spreuk_grote_genezing.png,scroll_heal,variant,grade-2: eigen motief (groen/goud; groter dan spreuk_genees)
+spreuk_zonnevlam,icons16/spreuk_zonnevlam.png,icons32/spreuk_zonnevlam.png,scroll_fire,variant,grade-3: eigen motief (gouden zon met stralen)
