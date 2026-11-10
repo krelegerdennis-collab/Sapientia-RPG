@@ -42,6 +42,7 @@ func check(label: String, ok: bool) -> void:
 
 func _run() -> void:
 	_role_tests()
+	_lobby_fill_tests()
 	_hud_tests()
 	_hook_tests()
 	_input_determinism_tests()
@@ -93,6 +94,29 @@ func _role_tests() -> void:
 	check("rollen tank/heal/control/dps", SeatController.role_of("dennis") == "tank"
 			and SeatController.role_of("lotte") == "heal" and SeatController.role_of("noor") == "control"
 			and SeatController.role_of("orion") == "dps" and SeatController.role_of("kael") == "dps")
+
+
+func _lobby_fill_tests() -> void:
+	const AiSeats := preload("res://scripts/coop/online_ai_seats.gd")
+	AiSeats.clear()
+	check("hal zonder filler tekent geen AI", AiSeats.fill([{"class": "priest", "seat": 0}]).is_empty())
+	SeatController.ensure_lobby_filler()
+	var rows: Array = AiSeats.fill([{
+		"class": "priest", "seat": 0, "character_id": "lotte", "controller": "local",
+	}])
+	check("hal-filler volgt fill_heroes", rows.size() == 3
+			and str(rows[0].get("class", "")) == "warrior" and str(rows[0].get("name", "")) == "AI 1"
+			and int(rows[0].get("seat", -1)) == 1 and str(rows[1].get("class", "")) == "mage"
+			and str(rows[2].get("class", "")) == "archer")
+	check("hal-filler zet controller ai", rows.size() == 3 and str(rows[0].get("controller", "")) == "ai"
+			and str(rows[0].get("wire_controller", "")) == "ai")
+	AiSeats.filler = func(_human: Array) -> Array:
+		return [{"class": "psytech"}]
+	SeatController.ensure_lobby_filler()
+	var custom: Array = AiSeats.fill([{"class": "priest", "seat": 0}])
+	check("eigen hal-haak blijft staan", custom.size() == 1 and str(custom[0].get("class", "")) == "psytech"
+			and str(custom[0].get("controller", "")) == "ai")
+	AiSeats.clear()
 
 
 func _hud_tests() -> void:

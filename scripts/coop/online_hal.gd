@@ -15,6 +15,7 @@ const Baker := preload("res://scripts/online/paper_doll_baker.gd")
 const CoopAvatarScript := preload("res://scripts/coop/coop_avatar.gd")
 const Icons := preload("res://scripts/coop/online_icon_paths.gd")
 const AiSeats := preload("res://scripts/coop/online_ai_seats.gd")
+const SeatController := preload("res://scripts/coop/seat_controller.gd")
 const LobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
@@ -229,6 +230,8 @@ func show_rows(rows: Array) -> void:
 
 
 func refresh_actors() -> void:
+	# M6 vult lege stoelen. Een al gezette filler (test of latere override) blijft.
+	SeatController.ensure_lobby_filler()
 	var human: Array = []
 	if lobby != null:
 		for row in lobby.slots:

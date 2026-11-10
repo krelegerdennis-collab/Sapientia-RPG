@@ -7,6 +7,8 @@ extends RefCounted
 const Codec := preload("res://scripts/net/net_codec.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
+const Profile := preload("res://scripts/online/online_profile.gd")
+const OnlineAiSeatsScript := preload("res://scripts/coop/online_ai_seats.gd")
 
 ## Tune-waarde. Start: 180 s (een paar minuten). Na afloop blijft de stoel AI tot het einde van de run.
 const GRACE_SEC := 180.0
@@ -97,6 +99,59 @@ static func fill_heroes(present: Array, empty_slots: int) -> Array[String]:
 		out.append(id)
 		have[id] = true
 	return out
+
+
+## Zelfde klasse-tabel als het online profiel (base_hero), geen tweede lijst.
+static func class_for_hero(hero_id: String) -> String:
+	for key in Profile.CLASS_INFO.keys():
+		var info: Dictionary = Profile.CLASS_INFO[key]
+		if str(info.get("base_hero", "")) == hero_id:
+			return str(key)
+	return ""
+
+
+## Haak voor de online hal (OnlineAiSeats.filler). Menselijke stoelen in, AI-rijen uit.
+## De rolvolgorde is fill_heroes; de hal zet er zelf geen tweede vulling naast.
+static func lobby_rows(human_seats: Array) -> Array:
+	var present: Array = []
+	var taken: Array[int] = []
+	for raw in human_seats:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		var wire := str(row.get("wire_controller", row.get("controller", "")))
+		if wire == CTRL_AI:
+			continue
+		var hero := str(row.get("hero_id", row.get("character_id", "")))
+		if hero == "":
+			hero = Profile.base_hero_for(str(row.get("class", row.get("class_id", ""))))
+		if hero != "":
+			present.append(hero)
+		var seat := int(row.get("seat", row.get("slot", -1)))
+		if seat >= 0 and seat < MAX_SEATS and not taken.has(seat):
+			taken.append(seat)
+	var empty: Array[int] = []
+	for i in MAX_SEATS:
+		if not taken.has(i):
+			empty.append(i)
+	var heroes := fill_heroes(present, empty.size())
+	var out: Array = []
+	for i in heroes.size():
+		var class_id := class_for_hero(heroes[i])
+		if class_id == "":
+			continue
+		out.append({
+			"class": class_id,
+			"seat": empty[i],
+			"name": "AI %d" % (i + 1),
+		})
+	return out
+
+
+## Zet de hal-haak alleen als er nog geen filler staat, zodat een test-haak blijft.
+static func ensure_lobby_filler() -> void:
+	if not OnlineAiSeatsScript.filler.is_valid():
+		OnlineAiSeatsScript.filler = lobby_rows
 
 
 ## rows: slot, hero_id of character_id, controller, uid, hp, mp, x, y, room_code.
