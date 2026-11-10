@@ -1,0 +1,6 @@
+# M9a Page Warden (Action). Placeholders, geen definitieve art.
+# Magenta hoekpixels (#ff1ee6) en het label PH. Generator: tools/art_page_warden_placeholders.py
+# Echte art: zelfde pad + maat, daarna deze regel weg en het bestand in tools/handwerk.txt.
+# page_warden.png, page_warden_rug.png en assets/map_monsters/page_warden.png zijn al handwerk
+# en worden hier niet vervangen.
+# (M9a boss-sprites overgezet naar handwerk.txt, nov 2026.)

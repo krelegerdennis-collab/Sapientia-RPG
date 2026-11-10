@@ -38,7 +38,7 @@ mapwissel start (UX).
 | 11 | Overgang | `scripts/transition.gd` | geen eigen toestand (tweens) | — | **gelaten**; de "bezig"-toestand is `changing_map` (#1) |
 
 Al expliciet vóór deze audit (ter referentie, niet aangeraakt): `TelegraphState.State` (`scripts/som/telegraph_state.gd`),
-`BossPhaseMachine` (`scripts/som/boss_phase_machine.gd`), `GolemFight.Step`, `LanLobby.Phase`/`Transport`,
+`BossPhaseMachine` (`scripts/som/boss_phase_machine.gd`), `GolemFight.Step`, `PageWardenFight.Step`, `LanLobby.Phase`/`Transport`,
 `RelayPeer.Role`, `CoopLobbyScreen.Screen`, `GardenCreatures.Mode`, `WarperBrain.State` (world_warper).
 
 ## §1 Veldflow — `FlowState`
