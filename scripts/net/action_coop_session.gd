@@ -202,9 +202,11 @@ func poll_result() -> void:
 	if _result_sent:
 		return
 	var wiped := false
-	if arena_drive and arena != null and bool(arena.get("coop_wiped")):
+	# OnlineHal heeft geen coop_wiped. Object.get geeft dan null, en bool(null)
+	# is in Godot 4.3 geen constructor. null == true blijft false.
+	if arena_drive and arena != null and arena.get("coop_wiped") == true:
 		wiped = true
-	elif sim != null and bool(sim.get("wiped")):
+	elif sim != null and sim.get("wiped") == true:
 		wiped = true
 	if not wiped:
 		return
