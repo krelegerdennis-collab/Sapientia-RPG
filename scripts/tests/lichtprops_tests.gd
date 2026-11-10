@@ -61,6 +61,7 @@ func _run() -> void:
 	_collision_report_tests()
 	_scene_placement_tests()
 	_busy_budget_reference_tests()
+	_glow_pointlight_guard_tests()
 	await _runtime_busy_budget_tests()
 	print("LICHTPROPSTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -206,18 +207,41 @@ func _kind_is_point_light(prop: String) -> bool:
 
 
 func _light_budget_tests_static() -> void:
-	# Bovenste limiet: geen map heeft meer PointLight-kandidaten dan wereldslots + helden.
+	var txt := FileAccess.get_file_as_string("res://data/hd2d/reference/render_report_lichtprops_busy.json")
+	var parsed: Variant = JSON.parse_string(txt)
+	check("static budget: busy report JSON", parsed is Dictionary)
+	if not parsed is Dictionary:
+		return
 	for mid in LICHTPROP_MAPS:
 		if mid in EXCLUDE_MAPS:
 			continue
-		var n_point := 0
-		for p in _collect_scene_placements():
-			if p["map_id"] != mid:
-				continue
-			if _kind_is_point_light(p["prop"]):
-				n_point += 1
+		var key := "%s|night" % mid
+		if not parsed.has(key):
+			check("static budget: %s in busy report" % key, false)
+			continue
+		var v: Dictionary = parsed[key]
 		var max_l := int(MapLightingC.preset_record(mid).get("night", {}).get("max_point_lights", 8))
-		check("%s point-prop teller <= max (%d)" % [mid, max_l], n_point + COOP_HERO_LIGHTS <= max_l + 4)
+		var scan_props := int(v.get("scan_max_props", 99))
+		var pl := int(v.get("point_lights", 99))
+		check("%s scan_max_props+heroes <= max (%d)" % [mid, max_l], scan_props + COOP_HERO_LIGHTS <= max_l)
+		check("%s busiest night point_lights <= max (%d)" % [mid, max_l], pl <= max_l)
+
+
+func _glow_pointlight_guard_tests() -> void:
+	for pid in PROP_IDS:
+		var r := MapLightingC.rule_for_path("assets/sprites/lichtprops/%s.png" % pid)
+		if r.is_empty():
+			continue
+		var kind: String = str(r.get("kind", ""))
+		if kind != "glow" and not bool(r.get("glow_only", false)):
+			continue
+		check("lights.json %s glow_only" % pid, bool(r.get("glow_only", false)) and kind == "glow")
+		check("rule %s geen PointLight-kandidaat" % pid, not _kind_is_point_light(pid))
+	for mid in LICHTPROP_MAPS:
+		if mid in EXCLUDE_MAPS:
+			continue
+		var lights: Dictionary = MapLightingC.preset_record(mid).get("night", {}).get("lights", {})
+		check("%s night lights.glow uit (PointLight)" % mid, float(lights.get("glow", 0.0)) <= 0.0)
 
 
 func _runtime_busy_budget_tests() -> void:

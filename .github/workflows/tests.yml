@@ -38,7 +38,7 @@ jobs:
                 wm1bugtest, wm1openbugtest, wm1storytexttest, sessiefixtest, savehardeningtest, lifecycletest, zonetest, kasdeurtest,
                 berggrotdextest, demofixtest, combatrngtest, combatsimtest, aabtest, uxtest, uipolishtest, uxpolishtest,
                 wm1dekkingtest, wm1releasetest, wm1f3stabilitytest, wm1balanstest, playtestkittest, telegraphcooptest,
-                coopguestsavetest, hd2dtest]
+                coopguestsavetest, hd2dtest, lichtpropstest]
     steps:
       - uses: actions/checkout@v4
 

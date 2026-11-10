@@ -1328,3 +1328,7 @@ assets/sprites/lichtprops/binnen_kandelaar.png
 assets/sprites/lichtprops/wk_kampvuur.png
 assets/sprites/lichtprops/wk_baken.png
 assets/sprites/lichtprops/wk_kristal.png
+assets/sprites/lichtprops/archief_leeslamp_glow.png
+assets/sprites/lichtprops/archief_wandblaker_glow.png
+assets/sprites/lichtprops/kas_gloeipot_glow.png
+assets/sprites/lichtprops/bouw_stormlamp_glow.png

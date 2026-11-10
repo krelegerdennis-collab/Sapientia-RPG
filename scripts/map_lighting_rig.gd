@@ -449,7 +449,12 @@ func _rebuild_point_lights(first: bool) -> void:
 	var view := _view_rect()
 	var pick: Array = []
 	for c: Dictionary in _cands:
-		var e := float(lights.get(c["kind"], 0.0))
+		var kind: String = str(c.get("kind", ""))
+		var rule: Dictionary = c.get("rule", {})
+		if kind == "glow" or bool(rule.get("glow_only", false)):
+			if float(lights.get("glow", 0.0)) <= 0.0:
+				continue
+		var e := float(lights.get(kind, 0.0))
 		if e <= 0.0 or not view.grow(48).has_point(c["pos"]):
 			continue
 		pick.append(c)
