@@ -3,6 +3,7 @@ extends Node
 ## Start: godot --path . -- --coope2etest [--shots=/pad]
 
 const Protocol := preload("res://scripts/net/net_protocol.gd")
+const Codec := preload("res://scripts/net/net_codec.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
 const Lobby := preload("res://scripts/net/lan_lobby.gd")
 const Session := preload("res://scripts/net/action_coop_session.gd")
@@ -44,9 +45,30 @@ func wait_until(pred: Callable, seconds: float) -> bool:
 
 
 func _run() -> void:
+	_guest_input_bind_smoke()
 	await _full_flow()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
+
+
+func _guest_input_bind_smoke() -> void:
+	var host: LanLobby = Lobby.new()
+	host.name = "BindHost"
+	add_child(host)
+	check("bind-smoke host", host.host_session("Dax") == OK)
+	var g1: LanLobby = _client([host], "BindG1")
+	check("bind-smoke join", g1.join_session(Protocol.LOOPBACK, "lotte", "Seren") == OK)
+	var roster: Array = [
+		{"slot": 0, "character_id": Protocol.HOST_CHARACTER, "peer_id": 1, "display_name": "Dax"},
+		{"slot": 1, "character_id": "lotte", "peer_id": 2, "display_name": "Seren"},
+	]
+	var host_sess: ActionCoopSession = Session.start_session(get_tree(), host.enet_peer(), roster, 0, false, host)
+	host_sess.ingest_packet(2, Codec.pack_wire_input(0, Vector2(1, 0), 0, -1))
+	check("e2e spoof aan afzender gebonden", host_sess._inputs.size() == 1
+		and int(host_sess._inputs[0].get("slot", -1)) == 1)
+	host_sess.shutdown(true)
+	g1.close()
+	host.close()
 
 
 func _assert_arena_avatars(label: String, som: SomArena, roster: Array) -> void:
