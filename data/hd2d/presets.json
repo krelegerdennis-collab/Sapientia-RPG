@@ -1,0 +1,10119 @@
+{
+ "_schema": "see HANDOFF_SPEC.md section 3. Colours sRGB 0..1. ambient = CanvasModulate colour BEFORE multiplying with an existing ThemaTint/StoryTint.",
+ "_time_of_day": [
+  "day",
+  "night"
+ ],
+ "groups": {
+  "village": [
+   "berggrot_bouwplaats",
+   "dorp_wilgendal",
+   "esdoorn",
+   "wilgendal"
+  ],
+  "worldmap": [
+   "wereldkaart"
+  ],
+  "forest": [
+   "woud_beek",
+   "woud_mistpoel",
+   "woud_open_plek",
+   "woud_pad",
+   "woud_rand",
+   "woud_sporenkring"
+  ],
+  "interior": [
+   "esdoorn_herberg",
+   "esdoorn_huis_noor",
+   "huis_wilgendal",
+   "wilgendal_binnen"
+  ],
+  "archief1": [
+   "archief_bibliotheek",
+   "archief_golemhal",
+   "archief_ingang",
+   "archief_puzzel",
+   "archief_v1_gang",
+   "archief_v2_kastenzaal",
+   "archief_v2_leeszaal",
+   "archief_v2_trapzaal",
+   "archief_v3_gang",
+   "archief_v3_zuilenhal",
+   "archief_v4_voorhal",
+   "archief_v4_wachtersgang"
+  ],
+  "archief2": [
+   "archief_2_v1_entree",
+   "archief_2_v1_plaat",
+   "archief_2_v2_gang",
+   "archief_2_v2_lotte",
+   "archief_2_v3_ketting",
+   "archief_2_v3_licht",
+   "archief_2_v3_tegen",
+   "archief_2_v3_wurger",
+   "archief_2_v4_genezer",
+   "archief_2_v4_hal",
+   "archief_2_warper",
+   "leven_ingang",
+   "leven_v1_plaat",
+   "leven_v2_leeszaal",
+   "leven_v3_combi"
+  ],
+  "cave": [
+   "berggrot_geheim",
+   "berggrot_grendel",
+   "berggrot_mond",
+   "berggrot_nerf",
+   "berggrot_uitmond"
+  ],
+  "deepcave": [
+   "dungeon100"
+  ],
+  "hub": [
+   "kamer_beeldkamer",
+   "kamer_echo_kamer",
+   "kamer_hal",
+   "kamer_handelskamer",
+   "kamer_kern",
+   "kamer_rustkamer",
+   "kamer_trainingshal",
+   "kamer_werkplaats",
+   "warper_hal",
+   "warper_hanger_nis",
+   "warper_warp_ring"
+  ],
+  "hub_out": [
+   "warper_exterieur"
+  ]
+ },
+ "maps": {
+  "archief_2_v1_entree": {
+   "scene": "res://scenes/maps/archief_2_v1_entree.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v1_plaat": {
+   "scene": "res://scenes/maps/archief_2_v1_plaat.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v2_gang": {
+   "scene": "res://scenes/maps/archief_2_v2_gang.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v2_lotte": {
+   "scene": "res://scenes/maps/archief_2_v2_lotte.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v3_ketting": {
+   "scene": "res://scenes/maps/archief_2_v3_ketting.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v3_licht": {
+   "scene": "res://scenes/maps/archief_2_v3_licht.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v3_tegen": {
+   "scene": "res://scenes/maps/archief_2_v3_tegen.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v3_wurger": {
+   "scene": "res://scenes/maps/archief_2_v3_wurger.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v4_genezer": {
+   "scene": "res://scenes/maps/archief_2_v4_genezer.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_v4_hal": {
+   "scene": "res://scenes/maps/archief_2_v4_hal.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_2_warper": {
+   "scene": "res://scenes/maps/archief_2_warper.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_bibliotheek": {
+   "scene": "res://scenes/maps/archief_bibliotheek.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_golemhal": {
+   "scene": "res://scenes/maps/archief_golemhal.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_ingang": {
+   "scene": "res://scenes/maps/archief_ingang.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_puzzel": {
+   "scene": "res://scenes/maps/archief_puzzel.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_v1_gang": {
+   "scene": "res://scenes/maps/archief_v1_gang.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_v2_kastenzaal": {
+   "scene": "res://scenes/maps/archief_v2_kastenzaal.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_v2_leeszaal": {
+   "scene": "res://scenes/maps/archief_v2_leeszaal.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_v2_trapzaal": {
+   "scene": "res://scenes/maps/archief_v2_trapzaal.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_v3_gang": {
+   "scene": "res://scenes/maps/archief_v3_gang.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_v3_zuilenhal": {
+   "scene": "res://scenes/maps/archief_v3_zuilenhal.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_v4_voorhal": {
+   "scene": "res://scenes/maps/archief_v4_voorhal.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "archief_v4_wachtersgang": {
+   "scene": "res://scenes/maps/archief_v4_wachtersgang.tscn",
+   "group": "archief1",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.34,
+     0.36,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.86,
+      0.9,
+      1.0
+     ],
+     "energy": 0.18,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.5,
+     "candle": 1.5,
+     "tile": 1.3,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.0,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.32,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "warm",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.62,
+      0.68,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "berggrot_bouwplaats": {
+   "scene": "res://scenes/maps/berggrot_bouwplaats.tscn",
+   "group": "village",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.36,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.1,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.19,
+     0.23,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.16,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 0.9,
+     "magic": 1.0,
+     "magic_small": 0.8,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.35,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.55,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "berggrot_geheim": {
+   "scene": "res://scenes/maps/berggrot_geheim.tscn",
+   "group": "cave",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "berggrot_grendel": {
+   "scene": "res://scenes/maps/berggrot_grendel.tscn",
+   "group": "cave",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "berggrot_mond": {
+   "scene": "res://scenes/maps/berggrot_mond.tscn",
+   "group": "cave",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "berggrot_nerf": {
+   "scene": "res://scenes/maps/berggrot_nerf.tscn",
+   "group": "cave",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "berggrot_uitmond": {
+   "scene": "res://scenes/maps/berggrot_uitmond.tscn",
+   "group": "cave",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.28,
+     0.3,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.8,
+      0.86,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.36,
+    "haze": null,
+    "motes": {
+     "count": 4,
+     "family": "cyan",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.52,
+      0.74,
+      1.0
+     ],
+     "energy": 0.45,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "dorp_wilgendal": {
+   "scene": "res://scenes/maps/dorp_wilgendal.tscn",
+   "group": "village",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.36,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.1,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.19,
+     0.23,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.16,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 0.9,
+     "magic": 1.0,
+     "magic_small": 0.8,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.35,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.55,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "dungeon100": {
+   "scene": "res://scenes/maps/dungeon100.tscn",
+   "group": "deepcave",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.27,
+     0.29,
+     0.41
+    ],
+    "sun": {
+     "color": [
+      0.82,
+      0.84,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.38,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "violet",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      0.62,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.27,
+     0.29,
+     0.41
+    ],
+    "sun": {
+     "color": [
+      0.82,
+      0.84,
+      1.0
+     ],
+     "energy": 0.14,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.6,
+     "candle": 1.5,
+     "tile": 1.7,
+     "magic": 1.5,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 1.0,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 1.05,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.38,
+    "haze": null,
+    "motes": {
+     "count": 5,
+     "family": "violet",
+     "alpha": 0.6
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      0.62,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "esdoorn": {
+   "scene": "res://scenes/maps/esdoorn.tscn",
+   "group": "village",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.36,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.1,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.19,
+     0.23,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.16,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 0.9,
+     "magic": 1.0,
+     "magic_small": 0.8,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.35,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.55,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "esdoorn_herberg": {
+   "scene": "res://scenes/maps/esdoorn_herberg.tscn",
+   "group": "interior",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.86,
+     0.84,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.0,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.55,
+     "fire": 0.7,
+     "candle": 0.35,
+     "tile": 0.3,
+     "magic": 0.4,
+     "magic_small": 0.0,
+     "book": 0.4,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.0,
+     "book": 0.8,
+     "screen": 0.0,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.14,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    },
+    "window_in_color": [
+     1.0,
+     0.92,
+     0.74
+    ]
+   },
+   "night": {
+    "ambient": [
+     0.24,
+     0.23,
+     0.36
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.0,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.16,
+     "fire": 1.4,
+     "candle": 1.2,
+     "tile": 1.4,
+     "magic": 1.0,
+     "magic_small": 0.7,
+     "book": 0.8,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0,
+     "hero": 0.9,
+     "eyes": 0.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.2,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.5,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "window_in_color": [
+     0.62,
+     0.72,
+     1.0
+    ]
+   }
+  },
+  "esdoorn_huis_noor": {
+   "scene": "res://scenes/maps/esdoorn_huis_noor.tscn",
+   "group": "interior",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.86,
+     0.84,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.0,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.55,
+     "fire": 0.7,
+     "candle": 0.35,
+     "tile": 0.3,
+     "magic": 0.4,
+     "magic_small": 0.0,
+     "book": 0.4,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.0,
+     "book": 0.8,
+     "screen": 0.0,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.14,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    },
+    "window_in_color": [
+     1.0,
+     0.92,
+     0.74
+    ]
+   },
+   "night": {
+    "ambient": [
+     0.24,
+     0.23,
+     0.36
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.0,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.16,
+     "fire": 1.4,
+     "candle": 1.2,
+     "tile": 1.4,
+     "magic": 1.0,
+     "magic_small": 0.7,
+     "book": 0.8,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0,
+     "hero": 0.9,
+     "eyes": 0.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.2,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.5,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "window_in_color": [
+     0.62,
+     0.72,
+     1.0
+    ]
+   }
+  },
+  "huis_wilgendal": {
+   "scene": "res://scenes/maps/huis_wilgendal.tscn",
+   "group": "interior",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.86,
+     0.84,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.0,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.55,
+     "fire": 0.7,
+     "candle": 0.35,
+     "tile": 0.3,
+     "magic": 0.4,
+     "magic_small": 0.0,
+     "book": 0.4,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.0,
+     "book": 0.8,
+     "screen": 0.0,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.14,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    },
+    "window_in_color": [
+     1.0,
+     0.92,
+     0.74
+    ]
+   },
+   "night": {
+    "ambient": [
+     0.24,
+     0.23,
+     0.36
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.0,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.16,
+     "fire": 1.4,
+     "candle": 1.2,
+     "tile": 1.4,
+     "magic": 1.0,
+     "magic_small": 0.7,
+     "book": 0.8,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0,
+     "hero": 0.9,
+     "eyes": 0.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.2,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.5,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "window_in_color": [
+     0.62,
+     0.72,
+     1.0
+    ]
+   }
+  },
+  "kamer_beeldkamer": {
+   "scene": "res://world_warper/kamers/beeldkamer.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "kamer_echo_kamer": {
+   "scene": "res://world_warper/kamers/echo_kamer.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "kamer_hal": {
+   "scene": "res://world_warper/kamers/hal.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "kamer_handelskamer": {
+   "scene": "res://world_warper/kamers/handelskamer.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "kamer_kern": {
+   "scene": "res://world_warper/kamers/kern.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "kamer_rustkamer": {
+   "scene": "res://world_warper/kamers/rustkamer.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "kamer_trainingshal": {
+   "scene": "res://world_warper/kamers/trainingshal.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "kamer_werkplaats": {
+   "scene": "res://world_warper/kamers/werkplaats.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "leven_ingang": {
+   "scene": "res://scenes/maps/leven_ingang.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "leven_v1_plaat": {
+   "scene": "res://scenes/maps/leven_v1_plaat.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "leven_v2_leeszaal": {
+   "scene": "res://scenes/maps/leven_v2_leeszaal.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "leven_v3_combi": {
+   "scene": "res://scenes/maps/leven_v3_combi.tscn",
+   "group": "archief2",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.38,
+     0.47,
+     0.42
+    ],
+    "sun": {
+     "color": [
+      0.88,
+      1.0,
+      0.86
+     ],
+     "energy": 0.22,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 1.4,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.1,
+     "book": 1.0,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.9,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.95,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.28,
+    "haze": {
+     "alpha": 0.05,
+     "color": [
+      0.78,
+      0.92,
+      0.8
+     ]
+    },
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.7
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.66,
+      1.0,
+      0.78
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "warper_exterieur": {
+   "scene": "res://world_warper/maps/exterieur.tscn",
+   "group": "hub_out",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.36,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.6,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.1,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.19,
+     0.23,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.16,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 0.9,
+     "magic": 1.2,
+     "magic_small": 0.8,
+     "book": 0.7,
+     "screen": 1.0
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.35,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.55,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "warper_hal": {
+   "scene": "res://world_warper/maps/hal.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "warper_hanger_nis": {
+   "scene": "res://world_warper/maps/hanger_nis.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "warper_warp_ring": {
+   "scene": "res://world_warper/maps/warp_ring.tscn",
+   "group": "hub",
+   "fixed": true,
+   "day": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   },
+   "night": {
+    "ambient": [
+     0.42,
+     0.4,
+     0.55
+    ],
+    "sun": {
+     "color": [
+      0.92,
+      0.86,
+      1.0
+     ],
+     "energy": 0.2,
+     "height": 0.7,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.0,
+     "candle": 0.0,
+     "tile": 1.4,
+     "magic": 1.4,
+     "magic_small": 1.0,
+     "book": 0.8,
+     "screen": 1.5
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 1.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 1.0,
+     "eyes": 1.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.6,
+     "color": [
+      1.0,
+      0.86,
+      0.66
+     ],
+     "scale": 0.8,
+     "height": 28
+    },
+    "shadow_alpha": 0.8,
+    "vignette": 0.26,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "fixed": true,
+    "fill": {
+     "color": [
+      0.78,
+      0.6,
+      1.0
+     ],
+     "energy": 0.4,
+     "scale": 1.7,
+     "height": 60,
+     "grid": 112,
+     "clear": 72,
+     "max_in_view": 3
+    }
+   }
+  },
+  "wereldkaart": {
+   "scene": "res://scenes/maps/wereldkaart.tscn",
+   "group": "worldmap",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.36,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.08,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.24,
+     0.28,
+     0.52
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.22,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 0.9,
+     "magic": 1.0,
+     "magic_small": 0.8,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.25,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.5,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "wilgendal": {
+   "scene": "res://scenes/maps/wilgendal.tscn",
+   "group": "village",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.36,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.1,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.19,
+     0.23,
+     0.47
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.16,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 0.9,
+     "magic": 1.0,
+     "magic_small": 0.8,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.35,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.55,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": {
+     "count": 6,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "wilgendal_binnen": {
+   "scene": "res://scenes/maps/wilgendal_binnen.tscn",
+   "group": "interior",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.86,
+     0.84,
+     0.8
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.94,
+      0.8
+     ],
+     "energy": 0.0,
+     "height": 0.5,
+     "rotation_deg": -40
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.55,
+     "fire": 0.7,
+     "candle": 0.35,
+     "tile": 0.3,
+     "magic": 0.4,
+     "magic_small": 0.0,
+     "book": 0.4,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.0,
+     "book": 0.8,
+     "screen": 0.0,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.14,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    },
+    "window_in_color": [
+     1.0,
+     0.92,
+     0.74
+    ]
+   },
+   "night": {
+    "ambient": [
+     0.24,
+     0.23,
+     0.36
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.0,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.16,
+     "fire": 1.4,
+     "candle": 1.2,
+     "tile": 1.4,
+     "magic": 1.0,
+     "magic_small": 0.7,
+     "book": 0.8,
+     "screen": 0.0
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 0.0,
+     "hero": 0.9,
+     "eyes": 0.0
+    },
+    "halo": 0.8,
+    "player_light": {
+     "energy": 0.2,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.5,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.3,
+    "haze": null,
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    },
+    "window_in_color": [
+     0.62,
+     0.72,
+     1.0
+    ]
+   }
+  },
+  "woud_beek": {
+   "scene": "res://scenes/maps/woud_beek.tscn",
+   "group": "forest",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.78,
+     0.82,
+     0.74
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.96,
+      0.78
+     ],
+     "energy": 0.3,
+     "height": 0.55,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.16,
+    "haze": {
+     "alpha": 0.1,
+     "color": [
+      0.8,
+      0.92,
+      0.82
+     ]
+    },
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.16,
+     0.22,
+     0.4
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.12,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.45,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.65,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.34,
+    "haze": null,
+    "motes": {
+     "count": 8,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "woud_mistpoel": {
+   "scene": "res://scenes/maps/woud_mistpoel.tscn",
+   "group": "forest",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.78,
+     0.82,
+     0.74
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.96,
+      0.78
+     ],
+     "energy": 0.3,
+     "height": 0.55,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.16,
+    "haze": {
+     "alpha": 0.1,
+     "color": [
+      0.8,
+      0.92,
+      0.82
+     ]
+    },
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.16,
+     0.22,
+     0.4
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.12,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.45,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.65,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.34,
+    "haze": null,
+    "motes": {
+     "count": 8,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "woud_open_plek": {
+   "scene": "res://scenes/maps/woud_open_plek.tscn",
+   "group": "forest",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.78,
+     0.82,
+     0.74
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.96,
+      0.78
+     ],
+     "energy": 0.3,
+     "height": 0.55,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.16,
+    "haze": {
+     "alpha": 0.1,
+     "color": [
+      0.8,
+      0.92,
+      0.82
+     ]
+    },
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.16,
+     0.22,
+     0.4
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.12,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.45,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.65,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.34,
+    "haze": null,
+    "motes": {
+     "count": 8,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "woud_pad": {
+   "scene": "res://scenes/maps/woud_pad.tscn",
+   "group": "forest",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.78,
+     0.82,
+     0.74
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.96,
+      0.78
+     ],
+     "energy": 0.3,
+     "height": 0.55,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.16,
+    "haze": {
+     "alpha": 0.1,
+     "color": [
+      0.8,
+      0.92,
+      0.82
+     ]
+    },
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.16,
+     0.22,
+     0.4
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.12,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.45,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.65,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.34,
+    "haze": null,
+    "motes": {
+     "count": 8,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "woud_rand": {
+   "scene": "res://scenes/maps/woud_rand.tscn",
+   "group": "forest",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.78,
+     0.82,
+     0.74
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.96,
+      0.78
+     ],
+     "energy": 0.3,
+     "height": 0.55,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.16,
+    "haze": {
+     "alpha": 0.1,
+     "color": [
+      0.8,
+      0.92,
+      0.82
+     ]
+    },
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.16,
+     0.22,
+     0.4
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.12,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.45,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.65,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.34,
+    "haze": null,
+    "motes": {
+     "count": 8,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  },
+  "woud_sporenkring": {
+   "scene": "res://scenes/maps/woud_sporenkring.tscn",
+   "group": "forest",
+   "fixed": false,
+   "day": {
+    "ambient": [
+     0.78,
+     0.82,
+     0.74
+    ],
+    "sun": {
+     "color": [
+      1.0,
+      0.96,
+      0.78
+     ],
+     "energy": 0.3,
+     "height": 0.55,
+     "rotation_deg": -30
+    },
+    "lights": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 0.6,
+     "candle": 0.0,
+     "tile": 0.4,
+     "magic": 0.5,
+     "magic_small": 0.4,
+     "book": 0.4,
+     "screen": 0.4
+    },
+    "emissive": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "window_tile": 0.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 0.8,
+     "tile": 0.8,
+     "magic": 0.8,
+     "magic_small": 0.8,
+     "book": 0.8,
+     "screen": 0.8,
+     "hero": 0.0,
+     "eyes": 0.0
+    },
+    "halo": 0.0,
+    "player_light": null,
+    "shadow_alpha": 1.0,
+    "vignette": 0.16,
+    "haze": {
+     "alpha": 0.1,
+     "color": [
+      0.8,
+      0.92,
+      0.82
+     ]
+    },
+    "motes": null,
+    "max_point_lights": 6,
+    "flicker": {
+     "lantern": 0.0,
+     "window": 0.0,
+     "fire": 0.08,
+     "candle": 0.05
+    }
+   },
+   "night": {
+    "ambient": [
+     0.16,
+     0.22,
+     0.4
+    ],
+    "sun": {
+     "color": [
+      0.62,
+      0.72,
+      1.0
+     ],
+     "energy": 0.12,
+     "height": 0.6,
+     "rotation_deg": 25
+    },
+    "lights": {
+     "lantern": 1.6,
+     "window": 0.42,
+     "window_tile": 0.5,
+     "window_in": 0.0,
+     "fire": 1.4,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 0.7,
+     "screen": 0.8
+    },
+    "emissive": {
+     "lantern": 1.0,
+     "window": 1.0,
+     "window_tile": 1.0,
+     "window_in": 0.0,
+     "fire": 1.0,
+     "candle": 1.0,
+     "tile": 1.0,
+     "magic": 1.0,
+     "magic_small": 1.0,
+     "book": 1.0,
+     "screen": 1.0,
+     "hero": 0.9,
+     "eyes": 1.0
+    },
+    "halo": 0.9,
+    "player_light": {
+     "energy": 0.45,
+     "color": [
+      0.95,
+      0.88,
+      0.75
+     ],
+     "scale": 0.65,
+     "height": 28
+    },
+    "shadow_alpha": 0.55,
+    "vignette": 0.34,
+    "haze": null,
+    "motes": {
+     "count": 8,
+     "family": "mint",
+     "alpha": 0.8
+    },
+    "max_point_lights": 8,
+    "flicker": {
+     "lantern": 0.08,
+     "window": 0.02,
+     "fire": 0.1,
+     "candle": 0.06
+    }
+   }
+  }
+ }
+}

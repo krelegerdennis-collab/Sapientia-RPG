@@ -1,0 +1,9759 @@
+{
+ "_note": "Per albedo (repo path): light rule. anchors offset = px from the TOP-LEFT of one frame cell (sprites, frame 0 layout). tile_cells = atlas coords whose 16x16 tile glows (spawn per placed tile, then cluster, see HANDOFF_SPEC 4).",
+ "assets": {
+  "assets/map_monsters/adermot.png": {
+   "kind": "eyes",
+   "family": "violet",
+   "color": [
+    0.5929999947547913,
+    0.7409999966621399,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      3.5
+     ],
+     "px": 6,
+     "bbox": [
+      1,
+      1,
+      15,
+      6
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/map_monsters/glitchmot.png": {
+   "kind": "eyes",
+   "family": "cyan",
+   "color": [
+    0.42100000381469727,
+    0.8619999885559082,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      6.2
+     ],
+     "px": 8,
+     "bbox": [
+      1,
+      4,
+      15,
+      10
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/map_monsters/lotte_glitch.png": {
+   "kind": "eyes",
+   "family": "violet",
+   "color": [
+    0.8309999704360962,
+    0.5709999799728394,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      10.5,
+      7.0
+     ],
+     "px": 4,
+     "bbox": [
+      6,
+      4,
+      14,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/map_monsters/mech_wachter.png": {
+   "kind": "eyes",
+   "family": "violet",
+   "color": [
+    0.6460000276565552,
+    0.703000009059906,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.5,
+      4.5
+     ],
+     "px": 4,
+     "bbox": [
+      6,
+      2,
+      11,
+      6
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/map_monsters/mistuil.png": {
+   "kind": "eyes",
+   "family": "cyan",
+   "color": [
+    0.2759999930858612,
+    0.9660000205039978,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      5.0
+     ],
+     "px": 4,
+     "bbox": [
+      4,
+      4,
+      12,
+      6
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/map_monsters/shard_codex.png": {
+   "kind": "eyes",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.28600001335144043,
+    0.8569999933242798
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.5,
+      8.5
+     ],
+     "px": 1,
+     "bbox": [
+      7,
+      8,
+      8,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/map_monsters/sporenzwam.png": {
+   "kind": "eyes",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.35499998927116394,
+    0.8650000095367432
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.1,
+      5.7
+     ],
+     "px": 9,
+     "bbox": [
+      3,
+      2,
+      13,
+      8
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/puzzle/drukplaat_rune.png": {
+   "kind": "magic_small",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.45500001311302185,
+    0.9120000004768372
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      19.6,
+      8.5
+     ],
+     "px": 76,
+     "bbox": [
+      1,
+      2,
+      32,
+      14
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/puzzle/herstelsteen.png": {
+   "kind": "magic_small",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.28600001335144043,
+    0.8569999933242798
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.1,
+      7.3
+     ],
+     "px": 13,
+     "bbox": [
+      3,
+      1,
+      13,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/puzzle/kernscheur.png": {
+   "kind": "magic_small",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.5450000166893005,
+    0.9139999747276306
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/archief2/echo.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.9100000262260437,
+    0.722000002861023,
+    1.0
+   ],
+   "cell": [
+    32,
+    48
+   ],
+   "anchors": [
+    {
+     "offset": [
+      18.0,
+      9.0
+     ],
+     "px": 8,
+     "bbox": [
+      14,
+      8,
+      22,
+      10
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/archief2/echo_groen.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.9100000262260437,
+    0.722000002861023,
+    1.0
+   ],
+   "cell": [
+    32,
+    48
+   ],
+   "anchors": [
+    {
+     "offset": [
+      18.0,
+      9.0
+     ],
+     "px": 8,
+     "bbox": [
+      14,
+      8,
+      22,
+      10
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/archief2/lotte_glitch.png": {
+   "kind": "eyes",
+   "family": "magenta",
+   "color": [
+    0.9169999957084656,
+    0.5260000228881836,
+    1.0
+   ],
+   "cell": [
+    64,
+    80
+   ],
+   "anchors": [
+    {
+     "offset": [
+      49.2,
+      10.7
+     ],
+     "px": 84,
+     "bbox": [
+      44,
+      2,
+      54,
+      26
+     ]
+    },
+    {
+     "offset": [
+      33.0,
+      23.0
+     ],
+     "px": 16,
+     "bbox": [
+      26,
+      22,
+      40,
+      24
+     ]
+    },
+    {
+     "offset": [
+      31.0,
+      37.0
+     ],
+     "px": 8,
+     "bbox": [
+      28,
+      36,
+      34,
+      38
+     ]
+    },
+    {
+     "offset": [
+      9.0,
+      41.0
+     ],
+     "px": 4,
+     "bbox": [
+      8,
+      40,
+      10,
+      42
+     ]
+    },
+    {
+     "offset": [
+      19.0,
+      49.0
+     ],
+     "px": 4,
+     "bbox": [
+      18,
+      48,
+      20,
+      50
+     ]
+    },
+    {
+     "offset": [
+      56.0,
+      57.0
+     ],
+     "px": 8,
+     "bbox": [
+      54,
+      56,
+      58,
+      58
+     ]
+    },
+    {
+     "offset": [
+      7.0,
+      63.0
+     ],
+     "px": 4,
+     "bbox": [
+      6,
+      62,
+      8,
+      64
+     ]
+    },
+    {
+     "offset": [
+      33.0,
+      71.0
+     ],
+     "px": 20,
+     "bbox": [
+      16,
+      70,
+      50,
+      72
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/archief2/plaat_scheut.png": {
+   "kind": "magic_small",
+   "family": "mint",
+   "color": [
+    0.699999988079071,
+    1.0,
+    0.800000011920929
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      4.6,
+      5.6
+     ],
+     "px": 25,
+     "bbox": [
+      1,
+      2,
+      14,
+      15
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/archief2/plaat_volgroeid.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.7229999899864197,
+    1.0,
+    0.8240000009536743
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      4.3,
+      5.8
+     ],
+     "px": 23,
+     "bbox": [
+      1,
+      1,
+      14,
+      15
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/archief2/plaat_zaad.png": {
+   "kind": "magic_small",
+   "family": "mint",
+   "color": [
+    0.699999988079071,
+    1.0,
+    0.800000011920929
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      4.6,
+      5.6
+     ],
+     "px": 25,
+     "bbox": [
+      1,
+      2,
+      14,
+      15
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/archief2/sapientia_glitch.png": {
+   "kind": "magic",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.4519999921321869,
+    0.9649999737739563
+   ],
+   "cell": [
+    48,
+    48
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.0,
+      7.0
+     ],
+     "px": 4,
+     "bbox": [
+      6,
+      6,
+      8,
+      8
+     ]
+    },
+    {
+     "offset": [
+      43.0,
+      13.0
+     ],
+     "px": 4,
+     "bbox": [
+      42,
+      12,
+      44,
+      14
+     ]
+    },
+    {
+     "offset": [
+      1.0,
+      17.0
+     ],
+     "px": 4,
+     "bbox": [
+      0,
+      16,
+      2,
+      18
+     ]
+    },
+    {
+     "offset": [
+      24.6,
+      23.8
+     ],
+     "px": 148,
+     "bbox": [
+      16,
+      16,
+      36,
+      34
+     ]
+    },
+    {
+     "offset": [
+      3.0,
+      29.0
+     ],
+     "px": 4,
+     "bbox": [
+      2,
+      28,
+      4,
+      30
+     ]
+    },
+    {
+     "offset": [
+      45.0,
+      29.0
+     ],
+     "px": 4,
+     "bbox": [
+      44,
+      28,
+      46,
+      30
+     ]
+    },
+    {
+     "offset": [
+      9.0,
+      39.0
+     ],
+     "px": 4,
+     "bbox": [
+      6,
+      38,
+      12,
+      40
+     ]
+    },
+    {
+     "offset": [
+      31.0,
+      43.8
+     ],
+     "px": 20,
+     "bbox": [
+      22,
+      40,
+      38,
+      46
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/archief2/world_warper.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.8320000171661377,
+    0.6200000047683716,
+    1.0
+   ],
+   "cell": [
+    128,
+    64
+   ],
+   "anchors": [
+    {
+     "offset": [
+      63.0,
+      12.0
+     ],
+     "px": 156,
+     "bbox": [
+      44,
+      6,
+      84,
+      20
+     ]
+    },
+    {
+     "offset": [
+      64.0,
+      28.0
+     ],
+     "px": 16,
+     "bbox": [
+      62,
+      26,
+      66,
+      30
+     ]
+    },
+    {
+     "offset": [
+      64.0,
+      55.0
+     ],
+     "px": 8,
+     "bbox": [
+      62,
+      54,
+      66,
+      56
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/archief2/world_warper_groen.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.8379999995231628,
+    0.6470000147819519,
+    1.0
+   ],
+   "cell": [
+    128,
+    64
+   ],
+   "anchors": [
+    {
+     "offset": [
+      63.0,
+      11.8
+     ],
+     "px": 160,
+     "bbox": [
+      44,
+      0,
+      84,
+      20
+     ]
+    },
+    {
+     "offset": [
+      25.0,
+      27.0
+     ],
+     "px": 4,
+     "bbox": [
+      24,
+      26,
+      26,
+      28
+     ]
+    },
+    {
+     "offset": [
+      64.0,
+      28.0
+     ],
+     "px": 16,
+     "bbox": [
+      62,
+      26,
+      66,
+      30
+     ]
+    },
+    {
+     "offset": [
+      103.0,
+      27.0
+     ],
+     "px": 4,
+     "bbox": [
+      102,
+      26,
+      104,
+      28
+     ]
+    },
+    {
+     "offset": [
+      64.0,
+      55.0
+     ],
+     "px": 8,
+     "bbox": [
+      62,
+      54,
+      66,
+      56
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/binnen/huis_props/hearth.png": {
+   "kind": "fire",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.5350000262260437,
+    0.28200000524520874
+   ],
+   "cell": [
+    48,
+    48
+   ],
+   "anchors": [
+    {
+     "offset": [
+      23.1,
+      29.4
+     ],
+     "px": 128,
+     "bbox": [
+      9,
+      22,
+      38,
+      36
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.2,
+   "scale": 1.1,
+   "height": 24,
+   "flicker": 1.2,
+   "halo": "warm",
+   "halo_size": 48
+  },
+  "assets/sprites/binnen/huis_props/lantern.png": {
+   "kind": "candle",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.7580000162124634,
+    0.35499998927116394
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      6.3,
+      4.8
+     ],
+     "px": 10,
+     "bbox": [
+      5,
+      3,
+      8,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.8,
+   "scale": 0.75,
+   "height": 20,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/sprites/binnen/huis_props/sconce.png": {
+   "kind": "candle",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8009999990463257,
+    0.40700000524520874
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      6.6,
+      5.7
+     ],
+     "px": 10,
+     "bbox": [
+      4,
+      1,
+      8,
+      12
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.8,
+   "scale": 0.75,
+   "height": 20,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/sprites/binnen/huis_props/window.png": {
+   "kind": "window_in",
+   "family": "moon",
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      42
+     ],
+     "px": 0,
+     "bbox": [
+      0,
+      0,
+      32,
+      32
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 1.3,
+   "height": 40,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/binnen/keuken_fornuis.png": {
+   "kind": "fire",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.593999981880188,
+    0.33000001311302185
+   ],
+   "cell": [
+    24,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      12.0,
+      23.5
+     ],
+     "px": 60,
+     "bbox": [
+      6,
+      20,
+      18,
+      28
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.2,
+   "scale": 1.1,
+   "height": 24,
+   "flicker": 1.2,
+   "halo": "warm",
+   "halo_size": 48
+  },
+  "assets/sprites/binnen/keuken_fornuis_gloed.png": {
+   "kind": "fire",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.4580000042915344,
+    0.2329999953508377
+   ],
+   "cell": [
+    24,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      12.0,
+      2.7
+     ],
+     "px": 57,
+     "bbox": [
+      4,
+      0,
+      19,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.2,
+   "scale": 1.1,
+   "height": 24,
+   "flicker": 1.2,
+   "halo": "warm",
+   "halo_size": 48
+  },
+  "assets/sprites/buiten/archief_ingang_open_flikker_v8.png": {
+   "kind": "magic",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.5870000123977661,
+    0.968999981880188
+   ],
+   "cell": [
+    96,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.0,
+      28.1
+     ],
+     "px": 35,
+     "bbox": [
+      19,
+      15,
+      29,
+      31
+     ]
+    },
+    {
+     "offset": [
+      69.5,
+      20.5
+     ],
+     "px": 1,
+     "bbox": [
+      69,
+      20,
+      70,
+      21
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/buiten/archief_ingang_v8.png": {
+   "kind": "magic",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.41200000047683716,
+    0.9660000205039978
+   ],
+   "cell": [
+    48,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.0,
+      19.5
+     ],
+     "px": 13,
+     "bbox": [
+      20,
+      16,
+      28,
+      23
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/buiten/wilgendal/burgemeestershuis.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8050000071525574,
+    0.34200000762939453
+   ],
+   "cell": [
+    112,
+    96
+   ],
+   "anchors": [
+    {
+     "offset": [
+      56.0,
+      94
+     ],
+     "px": 788,
+     "bbox": [
+      0,
+      0,
+      112,
+      96
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/sprites/buiten/wilgendal/plein10/huis_dax_11.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6439999938011169,
+    0.18400000035762787
+   ],
+   "cell": [
+    128,
+    160
+   ],
+   "anchors": [
+    {
+     "offset": [
+      64.0,
+      158
+     ],
+     "px": 910,
+     "bbox": [
+      0,
+      0,
+      128,
+      160
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/sprites/buiten/wilgendal/plein10/huis_riet_11.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6399999856948853,
+    0.18400000035762787
+   ],
+   "cell": [
+    112,
+    160
+   ],
+   "anchors": [
+    {
+     "offset": [
+      56.0,
+      158
+     ],
+     "px": 694,
+     "bbox": [
+      0,
+      0,
+      112,
+      160
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/sprites/buiten/wilgendal/plein10/huis_smal_11.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6460000276565552,
+    0.18799999356269836
+   ],
+   "cell": [
+    96,
+    160
+   ],
+   "anchors": [
+    {
+     "offset": [
+      48.0,
+      158
+     ],
+     "px": 687,
+     "bbox": [
+      0,
+      0,
+      96,
+      160
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/sprites/buiten/wilgendal/plein10/huis_vleugel_11.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6399999856948853,
+    0.18299999833106995
+   ],
+   "cell": [
+    192,
+    160
+   ],
+   "anchors": [
+    {
+     "offset": [
+      96.0,
+      158
+     ],
+     "px": 1344,
+     "bbox": [
+      0,
+      0,
+      192,
+      160
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/sprites/buiten/wilgendal/plein10/lantaarnpaal_flikker_4f.png": {
+   "kind": "lantern",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.7699999809265137,
+    0.3059999942779541
+   ],
+   "cell": [
+    16,
+    48
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8,
+      34
+     ],
+     "px": 41,
+     "bbox": [
+      0,
+      0,
+      16,
+      14
+     ],
+     "halo_at": [
+      8,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 1.0,
+   "height": 22,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 48
+  },
+  "assets/sprites/buiten/wilgendal/plein10/wilgendal_magie_11.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    0.6069999933242798,
+    0.24699999392032623,
+    1.0
+   ],
+   "cell": [
+    128,
+    160
+   ],
+   "anchors": [
+    {
+     "offset": [
+      64.0,
+      158
+     ],
+     "px": 1027,
+     "bbox": [
+      0,
+      0,
+      128,
+      160
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/sprites/buiten/wilgendal/plein10/wilgendal_wapen_11.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6420000195503235,
+    0.18400000035762787
+   ],
+   "cell": [
+    128,
+    160
+   ],
+   "anchors": [
+    {
+     "offset": [
+      64.0,
+      158
+     ],
+     "px": 748,
+     "bbox": [
+      0,
+      0,
+      128,
+      160
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/sprites/buiten/wilgendal/windmolen_basis_v2.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.7789999842643738,
+    0.3149999976158142
+   ],
+   "cell": [
+    224,
+    320
+   ],
+   "anchors": [
+    {
+     "offset": [
+      112.0,
+      318
+     ],
+     "px": 535,
+     "bbox": [
+      0,
+      0,
+      224,
+      320
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/sprites/dungeon/grijs/drukplaat_rune.png": {
+   "kind": "magic_small",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.4320000112056732,
+    0.9829999804496765
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.1,
+      8.7
+     ],
+     "px": 19,
+     "bbox": [
+      1,
+      3,
+      15,
+      14
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/dungeon/grijs/herstelsteen.png": {
+   "kind": "magic_small",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.28600001335144043,
+    0.8569999933242798
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.1,
+      7.3
+     ],
+     "px": 13,
+     "bbox": [
+      3,
+      1,
+      13,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/dungeon/kandelaar.png": {
+   "kind": "candle",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8019999861717224,
+    0.31700000166893005
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      15.3,
+      14.1
+     ],
+     "px": 61,
+     "bbox": [
+      1,
+      1,
+      30,
+      29
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.8,
+   "scale": 0.75,
+   "height": 20,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/sprites/dungeon100_rustpunt.png": {
+   "kind": "magic",
+   "family": "mint",
+   "color": [
+    0.8999999761581421,
+    1.0,
+    0.7609999775886536
+   ],
+   "cell": [
+    64,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      28.8,
+      2.5
+     ],
+     "px": 24,
+     "bbox": [
+      3,
+      0,
+      61,
+      6
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/dungeon100_warper.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.699999988079071,
+    0.6510000228881836,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      5.5,
+      3.0
+     ],
+     "px": 2,
+     "bbox": [
+      3,
+      2,
+      8,
+      4
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/dungeon_exit_warper.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.7049999833106995,
+    0.6790000200271606,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.9,
+      3.0
+     ],
+     "px": 12,
+     "bbox": [
+      3,
+      0,
+      14,
+      6
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/hp_book.png": {
+   "kind": "book",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6340000033378601,
+    0.3400000035762787
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.9,
+      5.1
+     ],
+     "px": 12,
+     "bbox": [
+      2,
+      2,
+      14,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/mp_book.png": {
+   "kind": "book",
+   "family": "mint",
+   "color": [
+    0.699999988079071,
+    1.0,
+    0.800000011920929
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      6.0,
+      5.3
+     ],
+     "px": 6,
+     "bbox": [
+      2,
+      3,
+      13,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/save_book.png": {
+   "kind": "book",
+   "family": "violet",
+   "color": [
+    0.6620000004768372,
+    0.6909999847412109,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.9,
+      5.1
+     ],
+     "px": 12,
+     "bbox": [
+      2,
+      2,
+      14,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/savepunt_bibliotheek.png": {
+   "kind": "tile",
+   "family": "violet",
+   "color": [
+    0.7820000052452087,
+    0.6740000247955322,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.1,
+      4.2
+     ],
+     "px": 7,
+     "bbox": [
+      3,
+      2,
+      13,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/som/kaart/dax_wm1.png": {
+   "kind": "hero",
+   "family": "violet",
+   "color": [
+    0.800000011920929,
+    0.578000009059906,
+    1.0
+   ],
+   "cell": [
+    24,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      12.0,
+      16.5
+     ],
+     "px": 2,
+     "bbox": [
+      11,
+      16,
+      13,
+      17
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/som/kaart/dax_wm1_slim.png": {
+   "kind": "hero",
+   "family": "violet",
+   "color": [
+    0.800000011920929,
+    0.578000009059906,
+    1.0
+   ],
+   "cell": [
+    24,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      12.0,
+      15.5
+     ],
+     "px": 2,
+     "bbox": [
+      11,
+      15,
+      13,
+      16
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/som/kaart/seren_wm1.png": {
+   "kind": "hero",
+   "family": "cyan",
+   "color": [
+    0.2759999930858612,
+    0.9660000205039978,
+    1.0
+   ],
+   "cell": [
+    24,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      19.5,
+      2.5
+     ],
+     "px": 5,
+     "bbox": [
+      18,
+      1,
+      21,
+      4
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/som/kaart/vesper.png": {
+   "kind": "hero",
+   "family": "violet",
+   "color": [
+    0.7250000238418579,
+    0.47999998927116394,
+    1.0
+   ],
+   "cell": [
+    24,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      19.0,
+      4.0
+     ],
+     "px": 18,
+     "bbox": [
+      6,
+      2,
+      23,
+      6
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null
+  },
+  "assets/sprites/woud/noor_cocon.png": {
+   "kind": "magic_small",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.335999995470047,
+    0.8999999761581421
+   ],
+   "cell": [
+    32,
+    48
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.8,
+      28.6
+     ],
+     "px": 18,
+     "bbox": [
+      4,
+      9,
+      28,
+      46
+     ]
+    },
+    {
+     "offset": [
+      27.5,
+      23.5
+     ],
+     "px": 1,
+     "bbox": [
+      27,
+      23,
+      28,
+      24
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/woud/noor_cocon_puls.png": {
+   "kind": "magic_small",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.3269999921321869,
+    0.8849999904632568
+   ],
+   "cell": [
+    32,
+    48
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.8,
+      28.6
+     ],
+     "px": 18,
+     "bbox": [
+      4,
+      9,
+      28,
+      46
+     ]
+    },
+    {
+     "offset": [
+      27.5,
+      23.5
+     ],
+     "px": 1,
+     "bbox": [
+      27,
+      23,
+      28,
+      24
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/binnen.png": {
+   "kind": "tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.7739999890327454,
+    0.4519999921321869
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/binnen_v8.png": {
+   "kind": "tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.7940000295639038,
+    0.30300000309944153
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 14,
+     "offset": [
+      5.9,
+      8.1
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      21,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      7.5,
+      4.0
+     ],
+     "color": [
+      1.0,
+      0.8640000224113464,
+      0.4410000145435333
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      22,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/archief_grijs_bibliotheek.png": {
+   "kind": "tile",
+   "family": "violet",
+   "color": [
+    0.9010000228881836,
+    0.7409999966621399,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 7,
+     "offset": [
+      7.6,
+      12.4
+     ],
+     "color": [
+      0.6169999837875366,
+      0.7229999899864197,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 7,
+     "offset": [
+      8.2,
+      11.6
+     ],
+     "color": [
+      0.8759999871253967,
+      0.5389999747276306,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 3,
+     "offset": [
+      7.8,
+      2.5
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      3
+     ],
+     "px": 8,
+     "offset": [
+      8.0,
+      10.5
+     ],
+     "color": [
+      0.9110000133514404,
+      0.5149999856948853,
+      1.0
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/archief_grijs_tiles.png": {
+   "kind": "tile",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.3580000102519989,
+    0.9190000295639038
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      11,
+      0
+     ],
+     "px": 19,
+     "offset": [
+      8.1,
+      8.7
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 10,
+     "offset": [
+      8.6,
+      8.8
+     ],
+     "color": [
+      1.0,
+      0.38499999046325684,
+      0.9419999718666077
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 7,
+     "offset": [
+      7.6,
+      12.4
+     ],
+     "color": [
+      0.6169999837875366,
+      0.7229999899864197,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 25,
+     "offset": [
+      9.2,
+      8.6
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 30,
+     "offset": [
+      7.2,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/berggrot_bibliotheek.png": {
+   "kind": "tile",
+   "family": "violet",
+   "color": [
+    0.625,
+    0.7179999947547913,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      7.8,
+      12.2
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      8.5,
+      11.0
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      5,
+      2
+     ],
+     "px": 2,
+     "offset": [
+      9.5,
+      10.0
+     ],
+     "color": [
+      0.6790000200271606,
+      0.6790000200271606,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      9,
+      3
+     ],
+     "px": 8,
+     "offset": [
+      8.0,
+      10.5
+     ],
+     "color": [
+      0.9110000133514404,
+      0.5149999856948853,
+      1.0
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/berggrot_tiles_v8.png": {
+   "kind": "tile",
+   "family": "magenta",
+   "color": [
+    0.9079999923706055,
+    0.5479999780654907,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      11,
+      0
+     ],
+     "px": 16,
+     "offset": [
+      8.0,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 4,
+     "offset": [
+      7.8,
+      11.0
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 4,
+     "offset": [
+      13.2,
+      7.0
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      14,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      6.8,
+      10.2
+     ],
+     "color": [
+      0.41200000047683716,
+      0.9629999995231628,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      15,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      12.2,
+      6.2
+     ],
+     "color": [
+      0.41200000047683716,
+      0.9629999995231628,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 25,
+     "offset": [
+      9.2,
+      8.6
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 30,
+     "offset": [
+      7.2,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/bibliotheek_tiles.png": {
+   "kind": "tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8029999732971191,
+    0.703000009059906
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      0,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      1.5,
+      10.5
+     ],
+     "color": [
+      1.0,
+      0.7739999890327454,
+      0.4519999921321869
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      1.5,
+      10.5
+     ],
+     "color": [
+      1.0,
+      0.7739999890327454,
+      0.4519999921321869
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 8,
+     "offset": [
+      7.6,
+      12.0
+     ],
+     "color": [
+      0.6809999942779541,
+      0.7419999837875366,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 11,
+     "offset": [
+      7.9,
+      11.7
+     ],
+     "color": [
+      0.8690000176429749,
+      0.7020000219345093,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 7,
+     "offset": [
+      7.2,
+      11.5
+     ],
+     "color": [
+      1.0,
+      0.8199999928474426,
+      0.4880000054836273
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      5.0,
+      10.0
+     ],
+     "color": [
+      1.0,
+      0.7739999890327454,
+      0.4519999921321869
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      5.0,
+      10.0
+     ],
+     "color": [
+      1.0,
+      0.7739999890327454,
+      0.4519999921321869
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      5,
+      2
+     ],
+     "px": 2,
+     "offset": [
+      9.5,
+      10.0
+     ],
+     "color": [
+      0.6790000200271606,
+      0.6790000200271606,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 5,
+     "offset": [
+      8.7,
+      6.1
+     ],
+     "color": [
+      1.0,
+      0.8059999942779541,
+      0.47699999809265137
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      7.1,
+      6.1
+     ],
+     "color": [
+      1.0,
+      0.8040000200271606,
+      0.47600001096725464
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      11.5
+     ],
+     "color": [
+      1.0,
+      0.7739999890327454,
+      0.4519999921321869
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      10,
+      2
+     ],
+     "px": 3,
+     "offset": [
+      11.5,
+      4.2
+     ],
+     "color": [
+      1.0,
+      0.828000009059906,
+      0.4950000047683716
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      3
+     ],
+     "px": 8,
+     "offset": [
+      8.0,
+      10.5
+     ],
+     "color": [
+      0.9110000133514404,
+      0.5149999856948853,
+      1.0
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/diepe_grot_tiles.png": {
+   "kind": "tile",
+   "family": "violet",
+   "color": [
+    0.6930000185966492,
+    0.843999981880188,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      10.0
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      12,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      3.5,
+      12.0
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 13,
+     "offset": [
+      7.3,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.32899999618530273,
+      0.8619999885559082
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      12.5,
+      4.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      3.5,
+      4.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      11.9
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      8.9
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      11,
+      3
+     ],
+     "px": 7,
+     "offset": [
+      9.1,
+      8.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 28,
+     "offset": [
+      9.1,
+      9.0
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 30,
+     "offset": [
+      7.4,
+      9.0
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      2,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      7.0,
+      7.5
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.2,
+      9.2
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      8,
+      4
+     ],
+     "px": 20,
+     "offset": [
+      8.2,
+      10.2
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/diepe_grot_tiles_v1.png": {
+   "kind": "tile",
+   "family": "violet",
+   "color": [
+    0.6930000185966492,
+    0.843999981880188,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      10.0
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      12,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      3.5,
+      12.0
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 13,
+     "offset": [
+      7.3,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.32899999618530273,
+      0.8619999885559082
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      12.5,
+      4.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      3.5,
+      4.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      11.9
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      8.9
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      11,
+      3
+     ],
+     "px": 7,
+     "offset": [
+      9.1,
+      8.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 28,
+     "offset": [
+      9.1,
+      9.0
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 30,
+     "offset": [
+      7.4,
+      9.0
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      2,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      7.0,
+      7.5
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.2,
+      9.2
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      8,
+      4
+     ],
+     "px": 20,
+     "offset": [
+      8.2,
+      10.2
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/diepe_grot_tiles_v2.png": {
+   "kind": "tile",
+   "family": "moon",
+   "color": [
+    0.8629999756813049,
+    0.9390000104904175,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 8,
+     "offset": [
+      6.2,
+      9.2
+     ],
+     "color": [
+      0.7770000100135803,
+      0.9459999799728394,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      11,
+      0
+     ],
+     "px": 41,
+     "offset": [
+      8.0,
+      8.0
+     ],
+     "color": [
+      0.7910000085830688,
+      0.9589999914169312,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      12,
+      0
+     ],
+     "px": 7,
+     "offset": [
+      3.5,
+      12.8
+     ],
+     "color": [
+      0.8600000143051147,
+      0.9800000190734863,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 13,
+     "offset": [
+      7.3,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.32899999618530273,
+      0.8619999885559082
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      12.5,
+      5.5
+     ],
+     "color": [
+      0.8849999904632568,
+      0.9869999885559082,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      3.5,
+      5.5
+     ],
+     "color": [
+      0.8849999904632568,
+      0.9869999885559082,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 42,
+     "offset": [
+      8.4,
+      13.3
+     ],
+     "color": [
+      0.8930000066757202,
+      0.9900000095367432,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 42,
+     "offset": [
+      8.4,
+      10.3
+     ],
+     "color": [
+      0.8930000066757202,
+      0.9900000095367432,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      14,
+      2
+     ],
+     "px": 23,
+     "offset": [
+      6.6,
+      5.7
+     ],
+     "color": [
+      0.4749999940395355,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      15,
+      2
+     ],
+     "px": 23,
+     "offset": [
+      6.6,
+      6.9
+     ],
+     "color": [
+      0.4749999940395355,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      11,
+      3
+     ],
+     "px": 19,
+     "offset": [
+      8.7,
+      9.9
+     ],
+     "color": [
+      0.8830000162124634,
+      0.9869999885559082,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 56,
+     "offset": [
+      11.0,
+      9.2
+     ],
+     "color": [
+      0.9190000295639038,
+      0.9980000257492065,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 65,
+     "offset": [
+      5.2,
+      9.3
+     ],
+     "color": [
+      0.9089999794960022,
+      0.9950000047683716,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      1,
+      4
+     ],
+     "px": 29,
+     "offset": [
+      9.0,
+      13.8
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      2,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      7.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.2,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      5,
+      4
+     ],
+     "px": 2,
+     "offset": [
+      8.5,
+      6.0
+     ],
+     "color": [
+      0.9190000295639038,
+      0.9980000257492065,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      8,
+      4
+     ],
+     "px": 58,
+     "offset": [
+      8.3,
+      11.4
+     ],
+     "color": [
+      0.8759999871253967,
+      0.9850000143051147,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      9,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      12.8,
+      6.2
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      11,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      14.8,
+      8.8
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      13,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      6.2
+     ],
+     "color": [
+      0.8510000109672546,
+      0.9769999980926514,
+      1.0
+     ],
+     "family": "moon"
+    },
+    {
+     "cell": [
+      15,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.8,
+      9.2
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/diepe_grot_tiles_v3.png": {
+   "kind": "tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6740000247955322,
+    0.8309999704360962
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 9,
+     "offset": [
+      6.2,
+      10.1
+     ],
+     "color": [
+      1.0,
+      0.3869999945163727,
+      0.8939999938011169
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      12,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      3.5,
+      12.0
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 13,
+     "offset": [
+      7.3,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.32899999618530273,
+      0.8619999885559082
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      12.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      0.875,
+      1.0,
+      0.5
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      3.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      11.9
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      8.9
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      2
+     ],
+     "px": 8,
+     "offset": [
+      4.4,
+      6.1
+     ],
+     "color": [
+      1.0,
+      0.35499998927116394,
+      0.8650000095367432
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      2
+     ],
+     "px": 8,
+     "offset": [
+      4.4,
+      7.9
+     ],
+     "color": [
+      1.0,
+      0.35499998927116394,
+      0.8650000095367432
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      11,
+      3
+     ],
+     "px": 16,
+     "offset": [
+      7.7,
+      7.1
+     ],
+     "color": [
+      1.0,
+      0.46700000762939453,
+      0.8769999742507935
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      13,
+      3
+     ],
+     "px": 5,
+     "offset": [
+      13.7,
+      11.1
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 45,
+     "offset": [
+      10.1,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.7590000033378601,
+      0.6990000009536743
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 49,
+     "offset": [
+      6.4,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.75,
+      0.7020000219345093
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      4
+     ],
+     "px": 16,
+     "offset": [
+      5.6,
+      10.5
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      2,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      7.0,
+      7.5
+     ],
+     "color": [
+      0.875,
+      1.0,
+      0.5
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 8,
+     "offset": [
+      7.2,
+      8.9
+     ],
+     "color": [
+      1.0,
+      0.8510000109672546,
+      0.9330000281333923
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      8,
+      4
+     ],
+     "px": 20,
+     "offset": [
+      8.2,
+      10.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/diepe_grot_tiles_v4.png": {
+   "kind": "tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8149999976158142,
+    0.7879999876022339
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      10.0
+     ],
+     "color": [
+      1.0,
+      0.6100000143051147,
+      0.39800000190734863
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      12,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      3.5,
+      12.0
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 13,
+     "offset": [
+      7.3,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.32899999618530273,
+      0.8619999885559082
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      12.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      3.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      11.9
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      8.9
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      11,
+      3
+     ],
+     "px": 7,
+     "offset": [
+      9.1,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 28,
+     "offset": [
+      9.1,
+      9.0
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 30,
+     "offset": [
+      7.4,
+      9.0
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      2,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      7.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.2,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      8,
+      4
+     ],
+     "px": 20,
+     "offset": [
+      8.2,
+      10.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/diepe_grot_tiles_v5.png": {
+   "kind": "tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8259999752044678,
+    0.7379999756813049
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      10.0
+     ],
+     "color": [
+      1.0,
+      0.5879999995231628,
+      0.6759999990463257
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      12,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      3.5,
+      12.0
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 13,
+     "offset": [
+      7.3,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.5350000262260437,
+      0.26100000739097595
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      12.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      3.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      11.9
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      8.9
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      11,
+      3
+     ],
+     "px": 7,
+     "offset": [
+      9.1,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 28,
+     "offset": [
+      9.1,
+      9.0
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 30,
+     "offset": [
+      7.4,
+      9.0
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      2,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      7.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.8289999961853027,
+      0.4959999918937683
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.2,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7289999723434448,
+      0.3019999861717224
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      8,
+      4
+     ],
+     "px": 20,
+     "offset": [
+      8.2,
+      10.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/diepe_grot_tiles_v6.png": {
+   "kind": "tile",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.5210000276565552,
+    0.8870000243186951
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      0,
+      0
+     ],
+     "px": 5,
+     "offset": [
+      6.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      1,
+      0
+     ],
+     "px": 9,
+     "offset": [
+      8.4,
+      3.4
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      2,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      9.2,
+      4.2
+     ],
+     "color": [
+      1.0,
+      0.4230000078678131,
+      0.871999979019165
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 12,
+     "offset": [
+      8.2,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.7710000276565552,
+      0.9919999837875366
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      11,
+      0
+     ],
+     "px": 41,
+     "offset": [
+      8.0,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.3050000071525574,
+      0.859000027179718
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      12,
+      0
+     ],
+     "px": 7,
+     "offset": [
+      3.5,
+      12.8
+     ],
+     "color": [
+      1.0,
+      0.503000020980835,
+      0.8830000162124634
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 13,
+     "offset": [
+      7.3,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.32899999618530273,
+      0.8619999885559082
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      12.5,
+      5.5
+     ],
+     "color": [
+      1.0,
+      0.5680000185966492,
+      0.890999972820282
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      3.5,
+      5.5
+     ],
+     "color": [
+      1.0,
+      0.5680000185966492,
+      0.890999972820282
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 42,
+     "offset": [
+      8.4,
+      13.3
+     ],
+     "color": [
+      1.0,
+      0.5889999866485596,
+      0.8939999938011169
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 42,
+     "offset": [
+      8.4,
+      10.3
+     ],
+     "color": [
+      1.0,
+      0.5889999866485596,
+      0.8939999938011169
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      11,
+      3
+     ],
+     "px": 19,
+     "offset": [
+      8.7,
+      9.9
+     ],
+     "color": [
+      1.0,
+      0.5630000233650208,
+      0.890999972820282
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      12,
+      3
+     ],
+     "px": 16,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 39,
+     "offset": [
+      10.7,
+      9.1
+     ],
+     "color": [
+      1.0,
+      0.656000018119812,
+      0.8960000276565552
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 46,
+     "offset": [
+      5.5,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.625,
+      0.8930000066757202
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      2,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      7.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.2,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      5,
+      4
+     ],
+     "px": 2,
+     "offset": [
+      8.5,
+      6.0
+     ],
+     "color": [
+      1.0,
+      0.5509999990463257,
+      0.8849999904632568
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      8,
+      4
+     ],
+     "px": 58,
+     "offset": [
+      8.3,
+      11.4
+     ],
+     "color": [
+      1.0,
+      0.5460000038146973,
+      0.8889999985694885
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      9,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      12.8,
+      6.2
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      11,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      14.8,
+      8.8
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      13,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      6.2
+     ],
+     "color": [
+      1.0,
+      0.4230000078678131,
+      0.871999979019165
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.8,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/diepe_grot_tiles_v7.png": {
+   "kind": "tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8289999961853027,
+    0.9020000100135803
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      10.0
+     ],
+     "color": [
+      1.0,
+      0.5920000076293945,
+      0.16099999845027924
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      12,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      3.5,
+      12.0
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 13,
+     "offset": [
+      7.3,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.2529999911785126,
+      0.796999990940094
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      12.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 3,
+     "offset": [
+      3.5,
+      4.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 16,
+     "offset": [
+      11.8,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.32100000977516174,
+      0.8610000014305115
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      11.9
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      2
+     ],
+     "px": 17,
+     "offset": [
+      8.3,
+      8.9
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      11,
+      3
+     ],
+     "px": 7,
+     "offset": [
+      9.1,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 28,
+     "offset": [
+      9.1,
+      9.0
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 30,
+     "offset": [
+      7.4,
+      9.0
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      2,
+      4
+     ],
+     "px": 4,
+     "offset": [
+      7.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 3,
+     "offset": [
+      7.2,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.6050000190734863,
+      0.16599999368190765
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      8,
+      4
+     ],
+     "px": 20,
+     "offset": [
+      8.2,
+      10.2
+     ],
+     "color": [
+      1.0,
+      0.9800000190734863,
+      0.9409999847412109
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/dungeon_tiles_v14.png": {
+   "kind": "tile",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.33799999952316284,
+    0.8870000243186951
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      11,
+      0
+     ],
+     "px": 20,
+     "offset": [
+      8.1,
+      8.7
+     ],
+     "color": [
+      1.0,
+      0.3140000104904175,
+      0.8600000143051147
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      0
+     ],
+     "px": 11,
+     "offset": [
+      8.5,
+      8.8
+     ],
+     "color": [
+      1.0,
+      0.42800000309944153,
+      0.9390000104904175
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 11,
+     "offset": [
+      8.7,
+      9.2
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 12,
+     "offset": [
+      7.8,
+      5.4
+     ],
+     "color": [
+      1.0,
+      0.367000013589859,
+      0.9269999861717224
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 26,
+     "offset": [
+      9.5,
+      8.6
+     ],
+     "color": [
+      1.0,
+      0.3070000112056732,
+      0.859000027179718
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 31,
+     "offset": [
+      7.0,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.30399999022483826,
+      0.859000027179718
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/grot_kamers.png": {
+   "kind": "tile",
+   "family": "violet",
+   "color": [
+    0.7879999876022339,
+    0.8119999766349792,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 46,
+     "offset": [
+      8.1,
+      8.1
+     ],
+     "color": [
+      1.0,
+      0.38199999928474426,
+      0.8669999837875366
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 51,
+     "offset": [
+      8.1,
+      8.0
+     ],
+     "color": [
+      0.41499999165534973,
+      0.9629999995231628,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      6.5,
+      7.5
+     ],
+     "color": [
+      0.9900000095367432,
+      1.0,
+      0.7129999995231628
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      1,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      10.0,
+      7.5
+     ],
+     "color": [
+      0.9900000095367432,
+      1.0,
+      0.7129999995231628
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      2,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      7.5,
+      6.8
+     ],
+     "color": [
+      0.9900000095367432,
+      1.0,
+      0.7129999995231628
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      3,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      9.0,
+      8.0
+     ],
+     "color": [
+      0.9900000095367432,
+      1.0,
+      0.7129999995231628
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      1,
+      2
+     ],
+     "px": 2,
+     "offset": [
+      10.0,
+      9.5
+     ],
+     "color": [
+      0.6790000200271606,
+      0.6790000200271606,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      2,
+      2
+     ],
+     "px": 2,
+     "offset": [
+      0.5,
+      7.0
+     ],
+     "color": [
+      0.5419999957084656,
+      0.9610000252723694,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 3,
+     "offset": [
+      13.2,
+      7.2
+     ],
+     "color": [
+      0.4560000002384186,
+      0.9620000123977661,
+      1.0
+     ],
+     "family": "cyan"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/kas_bibliotheek_v8.png": {
+   "kind": "tile",
+   "family": "mint",
+   "color": [
+    0.6190000176429749,
+    1.0,
+    0.859000027179718
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      13.0
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 2,
+     "offset": [
+      8.5,
+      11.0
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    },
+    {
+     "cell": [
+      8,
+      2
+     ],
+     "px": 3,
+     "offset": [
+      7.8,
+      2.5
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      9,
+      3
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      10.5
+     ],
+     "color": [
+      0.2759999930858612,
+      0.9660000205039978,
+      1.0
+     ],
+     "family": "cyan"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/kas_tiles_v8c.png": {
+   "kind": "tile",
+   "family": "violet",
+   "color": [
+    0.9679999947547913,
+    0.6570000052452087,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 8,
+     "offset": [
+      5.8,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      10,
+      4
+     ],
+     "px": 13,
+     "offset": [
+      9.0,
+      8.7
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/dungeon/woud_tiles_v9b.png": {
+   "kind": "tile",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.41999998688697815,
+    0.8709999918937683
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      6,
+      2
+     ],
+     "px": 12,
+     "offset": [
+      7.5,
+      10.0
+     ],
+     "color": [
+      1.0,
+      0.46700000762939453,
+      0.8759999871253967
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      7,
+      2
+     ],
+     "px": 15,
+     "offset": [
+      8.1,
+      6.8
+     ],
+     "color": [
+      1.0,
+      0.4320000112056732,
+      0.8730000257492065
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      14,
+      3
+     ],
+     "px": 13,
+     "offset": [
+      11.8,
+      8.1
+     ],
+     "color": [
+      1.0,
+      0.453000009059906,
+      0.875
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      15,
+      3
+     ],
+     "px": 15,
+     "offset": [
+      6.4,
+      8.6
+     ],
+     "color": [
+      1.0,
+      0.4320000112056732,
+      0.8730000257492065
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      5,
+      5
+     ],
+     "px": 21,
+     "offset": [
+      6.5,
+      8.3
+     ],
+     "color": [
+      1.0,
+      0.36500000953674316,
+      0.8659999966621399
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      9,
+      5
+     ],
+     "px": 2,
+     "offset": [
+      8.0,
+      2.5
+     ],
+     "color": [
+      1.0,
+      0.5509999990463257,
+      0.8849999904632568
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      0,
+      6
+     ],
+     "px": 2,
+     "offset": [
+      15.5,
+      3.5
+     ],
+     "color": [
+      1.0,
+      0.5509999990463257,
+      0.8849999904632568
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      6
+     ],
+     "px": 3,
+     "offset": [
+      0.5,
+      4.2
+     ],
+     "color": [
+      1.0,
+      0.28600001335144043,
+      0.8569999933242798
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      12,
+      6
+     ],
+     "px": 2,
+     "offset": [
+      8.5,
+      8.0
+     ],
+     "color": [
+      1.0,
+      0.5509999990463257,
+      0.8849999904632568
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      15,
+      6
+     ],
+     "px": 10,
+     "offset": [
+      8.2,
+      6.9
+     ],
+     "color": [
+      1.0,
+      0.3959999978542328,
+      0.8690000176429749
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tiles/huis_v8.png": {
+   "kind": "window_tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.7860000133514404,
+    0.28600001335144043
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      0,
+      3
+     ],
+     "px": 6,
+     "offset": [
+      10.0,
+      2.5
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      3
+     ],
+     "px": 6,
+     "offset": [
+      11.0,
+      2.5
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      3,
+      3
+     ],
+     "px": 6,
+     "offset": [
+      1.0,
+      2.5
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      3
+     ],
+     "px": 6,
+     "offset": [
+      2.0,
+      2.5
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      10.0,
+      1.5
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      3,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      3.0,
+      1.5
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      4
+     ],
+     "px": 6,
+     "offset": [
+      3.0,
+      1.5
+     ],
+     "color": [
+      1.0,
+      0.7860000133514404,
+      0.28600001335144043
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.8,
+   "scale": 0.7,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/tiles/woud16/paddenstoel_gloed.png": {
+   "kind": "tile",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.4189999997615814,
+    0.8709999918937683
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      0,
+      0
+     ],
+     "px": 38,
+     "offset": [
+      8.6,
+      10.2
+     ],
+     "color": [
+      1.0,
+      0.41600000858306885,
+      0.8709999918937683
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      1,
+      0
+     ],
+     "px": 36,
+     "offset": [
+      8.7,
+      10.1
+     ],
+     "color": [
+      1.0,
+      0.4230000078678131,
+      0.871999979019165
+     ],
+     "family": "magenta"
+    }
+   ],
+   "energy": 0.7,
+   "scale": 0.6,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/tilesets/som/wilgendal/huizen/dicht_west.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.7950000166893005,
+    0.32499998807907104
+   ],
+   "cell": [
+    96,
+    128
+   ],
+   "anchors": [
+    {
+     "offset": [
+      48.0,
+      126
+     ],
+     "px": 25,
+     "bbox": [
+      0,
+      0,
+      96,
+      128
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "assets/tilesets/som/wilgendal/huizen/echtpaar.png": {
+   "kind": "window",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.7950000166893005,
+    0.32499998807907104
+   ],
+   "cell": [
+    96,
+    128
+   ],
+   "anchors": [
+    {
+     "offset": [
+      48.0,
+      126
+     ],
+     "px": 25,
+     "bbox": [
+      0,
+      0,
+      96,
+      128
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 0.95,
+   "height": 30,
+   "flicker": 0.25,
+   "halo": "house_g"
+  },
+  "world_warper/art/bord_hal.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6980000138282776,
+    0.4449999928474426,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      19.3,
+      6.5
+     ],
+     "px": 32,
+     "bbox": [
+      8,
+      4,
+      25,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_hal_blauw.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6980000138282776,
+    0.4449999928474426,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      19.3,
+      6.5
+     ],
+     "px": 32,
+     "bbox": [
+      8,
+      4,
+      25,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_hal_groen.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6980000138282776,
+    0.4449999928474426,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      19.3,
+      6.5
+     ],
+     "px": 32,
+     "bbox": [
+      8,
+      4,
+      25,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_hal_oranje.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6980000138282776,
+    0.4449999928474426,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      19.3,
+      6.5
+     ],
+     "px": 32,
+     "bbox": [
+      8,
+      4,
+      25,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_hal_rood.png": {
+   "kind": "screen",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.5580000281333923,
+    0.7459999918937683
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      17.7,
+      4.1
+     ],
+     "px": 62,
+     "bbox": [
+      1,
+      1,
+      31,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_hal_roze.png": {
+   "kind": "screen",
+   "family": "magenta",
+   "color": [
+    0.8989999890327454,
+    0.3970000147819519,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      17.7,
+      4.1
+     ],
+     "px": 62,
+     "bbox": [
+      1,
+      1,
+      31,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_kamers.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.699999988079071,
+    0.44999998807907104,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      20.5,
+      6.3
+     ],
+     "px": 24,
+     "bbox": [
+      17,
+      4,
+      24,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_kamers_blauw.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6880000233650208,
+    0.4480000138282776,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      20.5,
+      6.3
+     ],
+     "px": 24,
+     "bbox": [
+      17,
+      4,
+      24,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_kamers_groen.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6930000185966492,
+    0.44999998807907104,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      20.5,
+      6.3
+     ],
+     "px": 24,
+     "bbox": [
+      17,
+      4,
+      24,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_kamers_oranje.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.7099999785423279,
+    0.45500001311302185,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      20.5,
+      6.3
+     ],
+     "px": 24,
+     "bbox": [
+      17,
+      4,
+      24,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_kamers_rood.png": {
+   "kind": "screen",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.5419999957084656,
+    0.656000018119812
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      18.0,
+      3.6
+     ],
+     "px": 53,
+     "bbox": [
+      1,
+      1,
+      31,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_kamers_roze.png": {
+   "kind": "screen",
+   "family": "magenta",
+   "color": [
+    0.9340000152587891,
+    0.3880000114440918,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      18.0,
+      3.6
+     ],
+     "px": 54,
+     "bbox": [
+      1,
+      1,
+      31,
+      9
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_warp.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.7940000295639038,
+    0.578000009059906,
+    1.0
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.4,
+      6.5
+     ],
+     "px": 16,
+     "bbox": [
+      5,
+      6,
+      43,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_warp_blauw.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.7549999952316284,
+    0.5709999799728394,
+    1.0
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.4,
+      6.5
+     ],
+     "px": 16,
+     "bbox": [
+      5,
+      6,
+      43,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_warp_groen.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.7720000147819519,
+    0.5799999833106995,
+    1.0
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.4,
+      6.5
+     ],
+     "px": 16,
+     "bbox": [
+      5,
+      6,
+      43,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_warp_oranje.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.8259999752044678,
+    0.5989999771118164,
+    1.0
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.4,
+      6.5
+     ],
+     "px": 16,
+     "bbox": [
+      5,
+      6,
+      43,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_warp_rood.png": {
+   "kind": "screen",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.5350000262260437,
+    0.4410000145435333
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.1,
+      2.7
+     ],
+     "px": 60,
+     "bbox": [
+      1,
+      1,
+      47,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/bord_warp_roze.png": {
+   "kind": "screen",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.38100001215934753,
+    0.949999988079071
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.1,
+      2.8
+     ],
+     "px": 62,
+     "bbox": [
+      1,
+      1,
+      47,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/echo.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.9100000262260437,
+    0.722000002861023,
+    1.0
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      9.0,
+      4.5
+     ],
+     "px": 2,
+     "bbox": [
+      7,
+      4,
+      11,
+      5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/echo_blauw.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.9100000262260437,
+    0.722000002861023,
+    1.0
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      9.0,
+      4.5
+     ],
+     "px": 2,
+     "bbox": [
+      7,
+      4,
+      11,
+      5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/echo_groen.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.9100000262260437,
+    0.722000002861023,
+    1.0
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      9.0,
+      4.5
+     ],
+     "px": 2,
+     "bbox": [
+      7,
+      4,
+      11,
+      5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/echo_oranje.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.9100000262260437,
+    0.722000002861023,
+    1.0
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      9.0,
+      4.5
+     ],
+     "px": 2,
+     "bbox": [
+      7,
+      4,
+      11,
+      5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/echo_rood.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.9100000262260437,
+    0.722000002861023,
+    1.0
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      9.0,
+      4.5
+     ],
+     "px": 2,
+     "bbox": [
+      7,
+      4,
+      11,
+      5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/echo_roze.png": {
+   "kind": "magic_small",
+   "family": "violet",
+   "color": [
+    0.9100000262260437,
+    0.722000002861023,
+    1.0
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      9.0,
+      4.5
+     ],
+     "px": 2,
+     "bbox": [
+      7,
+      4,
+      11,
+      5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/pc.png": {
+   "kind": "screen",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8960000276565552,
+    0.968999981880188
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      17.2,
+      8.3
+     ],
+     "px": 10,
+     "bbox": [
+      10,
+      4,
+      26,
+      13
+     ]
+    },
+    {
+     "offset": [
+      23.5,
+      28.5
+     ],
+     "px": 1,
+     "bbox": [
+      23,
+      28,
+      24,
+      29
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/pc_blauw.png": {
+   "kind": "screen",
+   "family": "moon",
+   "color": [
+    0.8100000023841858,
+    0.847000002861023,
+    1.0
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      17.2,
+      8.3
+     ],
+     "px": 10,
+     "bbox": [
+      10,
+      4,
+      26,
+      13
+     ]
+    },
+    {
+     "offset": [
+      23.5,
+      28.5
+     ],
+     "px": 1,
+     "bbox": [
+      23,
+      28,
+      24,
+      29
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/pc_groen.png": {
+   "kind": "screen",
+   "family": "moon",
+   "color": [
+    0.9079999923706055,
+    0.9259999990463257,
+    1.0
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      17.2,
+      8.3
+     ],
+     "px": 10,
+     "bbox": [
+      10,
+      4,
+      26,
+      13
+     ]
+    },
+    {
+     "offset": [
+      23.5,
+      28.5
+     ],
+     "px": 1,
+     "bbox": [
+      23,
+      28,
+      24,
+      29
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/pc_oranje.png": {
+   "kind": "screen",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.878000020980835,
+    0.7749999761581421
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      17.2,
+      8.3
+     ],
+     "px": 10,
+     "bbox": [
+      10,
+      4,
+      26,
+      13
+     ]
+    },
+    {
+     "offset": [
+      23.5,
+      28.5
+     ],
+     "px": 1,
+     "bbox": [
+      23,
+      28,
+      24,
+      29
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/pc_rood.png": {
+   "kind": "screen",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.5320000052452087,
+    0.34700000286102295
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      15.7,
+      3.3
+     ],
+     "px": 27,
+     "bbox": [
+      5,
+      2,
+      28,
+      9
+     ]
+    },
+    {
+     "offset": [
+      16.5,
+      24.5
+     ],
+     "px": 3,
+     "bbox": [
+      10,
+      24,
+      23,
+      25
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/pc_roze.png": {
+   "kind": "screen",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.4390000104904175,
+    0.8999999761581421
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.7,
+      4.3
+     ],
+     "px": 33,
+     "bbox": [
+      5,
+      2,
+      28,
+      13
+     ]
+    },
+    {
+     "offset": [
+      18.2,
+      25.5
+     ],
+     "px": 4,
+     "bbox": [
+      10,
+      24,
+      24,
+      29
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tafel.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6830000281333923,
+    0.42500001192092896,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      6.5
+     ],
+     "px": 2,
+     "bbox": [
+      15,
+      6,
+      17,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tafel_blauw.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6830000281333923,
+    0.42500001192092896,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      6.5
+     ],
+     "px": 2,
+     "bbox": [
+      15,
+      6,
+      17,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tafel_groen.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6830000281333923,
+    0.42500001192092896,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      6.5
+     ],
+     "px": 2,
+     "bbox": [
+      15,
+      6,
+      17,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tafel_oranje.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6830000281333923,
+    0.42500001192092896,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      6.5
+     ],
+     "px": 2,
+     "bbox": [
+      15,
+      6,
+      17,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tafel_rood.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6830000281333923,
+    0.42500001192092896,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      6.5
+     ],
+     "px": 2,
+     "bbox": [
+      15,
+      6,
+      17,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tafel_roze.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6830000281333923,
+    0.42500001192092896,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      6.5
+     ],
+     "px": 2,
+     "bbox": [
+      15,
+      6,
+      17,
+      7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tiles.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.7080000042915344,
+    0.460999995470047,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      7.5,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.9660000205039978,
+      0.8640000224113464
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "px": 70,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 3,
+     "offset": [
+      7.5,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9660000205039978,
+      0.8640000224113464
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 48,
+     "offset": [
+      8.0,
+      11.3
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 84,
+     "offset": [
+      8.2,
+      7.8
+     ],
+     "color": [
+      0.6859999895095825,
+      0.42899999022483826,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.5,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9660000205039978,
+      0.8640000224113464
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      4,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      9.0
+     ],
+     "color": [
+      0.8560000061988831,
+      0.6510000228881836,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    }
+   ],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tiles_blauw.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6930000185966492,
+    0.45899999141693115,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      7.5,
+      7.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "px": 70,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 3,
+     "offset": [
+      7.5,
+      8.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 48,
+     "offset": [
+      8.0,
+      11.3
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 84,
+     "offset": [
+      8.2,
+      7.8
+     ],
+     "color": [
+      0.6859999895095825,
+      0.42899999022483826,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.5,
+      8.5
+     ],
+     "color": [
+      0.7839999794960022,
+      0.9570000171661377,
+      1.0
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      4,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      9.0
+     ],
+     "color": [
+      0.8560000061988831,
+      0.6510000228881836,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    }
+   ],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tiles_groen.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.6990000009536743,
+    0.4620000123977661,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      7.5,
+      7.5
+     ],
+     "color": [
+      0.847000002861023,
+      1.0,
+      0.8980000019073486
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "px": 70,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 3,
+     "offset": [
+      7.5,
+      8.5
+     ],
+     "color": [
+      0.847000002861023,
+      1.0,
+      0.8980000019073486
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 48,
+     "offset": [
+      8.0,
+      11.3
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 84,
+     "offset": [
+      8.2,
+      7.8
+     ],
+     "color": [
+      0.6859999895095825,
+      0.42899999022483826,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.5,
+      8.5
+     ],
+     "color": [
+      0.847000002861023,
+      1.0,
+      0.8980000019073486
+     ],
+     "family": "mint"
+    },
+    {
+     "cell": [
+      1,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      4,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      9.0
+     ],
+     "color": [
+      0.8560000061988831,
+      0.6510000228881836,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    }
+   ],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tiles_oranje.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.7200000286102295,
+    0.46799999475479126,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      7.5,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "px": 70,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 3,
+     "offset": [
+      7.5,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 48,
+     "offset": [
+      8.0,
+      11.3
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 84,
+     "offset": [
+      8.2,
+      7.8
+     ],
+     "color": [
+      0.6859999895095825,
+      0.42899999022483826,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.5,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.9350000023841858,
+      0.5809999704360962
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      4,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      9.0
+     ],
+     "color": [
+      0.8560000061988831,
+      0.6510000228881836,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    }
+   ],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tiles_rood.png": {
+   "kind": "screen",
+   "family": "magenta",
+   "color": [
+    0.9010000228881836,
+    0.5320000052452087,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "px": 94,
+     "offset": [
+      8.0,
+      6.6
+     ],
+     "color": [
+      0.949999988079071,
+      0.5519999861717224,
+      1.0
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 3,
+     "offset": [
+      8.5,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.5,
+      0.2329999953508377
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 48,
+     "offset": [
+      8.0,
+      11.3
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 116,
+     "offset": [
+      8.2,
+      7.9
+     ],
+     "color": [
+      0.9800000190734863,
+      0.5690000057220459,
+      1.0
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      1,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      4,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      9.0
+     ],
+     "color": [
+      0.8560000061988831,
+      0.6510000228881836,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    }
+   ],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/tiles_roze.png": {
+   "kind": "screen",
+   "family": "magenta",
+   "color": [
+    0.7860000133514404,
+    0.4320000112056732,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "px": 4,
+     "offset": [
+      7.5,
+      7.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "px": 94,
+     "offset": [
+      8.0,
+      6.6
+     ],
+     "color": [
+      0.7870000004768372,
+      0.4050000011920929,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      5,
+      0
+     ],
+     "px": 6,
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.5509999990463257,
+      0.8849999904632568
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      6,
+      0
+     ],
+     "px": 48,
+     "offset": [
+      8.0,
+      11.3
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      0
+     ],
+     "px": 116,
+     "offset": [
+      8.2,
+      7.9
+     ],
+     "color": [
+      0.7979999780654907,
+      0.4059999883174896,
+      1.0
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.5,
+      8.5
+     ],
+     "color": [
+      1.0,
+      0.7839999794960022,
+      0.9100000262260437
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      4,
+      1
+     ],
+     "px": 4,
+     "offset": [
+      8.0,
+      9.0
+     ],
+     "color": [
+      0.8560000061988831,
+      0.6510000228881836,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      7,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      7.5,
+      9.0
+     ],
+     "color": [
+      0.6830000281333923,
+      0.42500001192092896,
+      1.0
+     ],
+     "family": "violet"
+    }
+   ],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/toonbank.png": {
+   "kind": "screen",
+   "family": "violet",
+   "color": [
+    0.9800000190734863,
+    0.8349999785423279,
+    1.0
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      4.5,
+      4.5
+     ],
+     "px": 1,
+     "bbox": [
+      4,
+      4,
+      5,
+      5
+     ]
+    },
+    {
+     "offset": [
+      24.0,
+      10.5
+     ],
+     "px": 2,
+     "bbox": [
+      23,
+      10,
+      25,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/toonbank_blauw.png": {
+   "kind": "screen",
+   "family": "moon",
+   "color": [
+    0.8679999709129333,
+    0.800000011920929,
+    1.0
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      4.5,
+      4.5
+     ],
+     "px": 1,
+     "bbox": [
+      4,
+      4,
+      5,
+      5
+     ]
+    },
+    {
+     "offset": [
+      24.0,
+      10.5
+     ],
+     "px": 2,
+     "bbox": [
+      23,
+      10,
+      25,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/toonbank_groen.png": {
+   "kind": "screen",
+   "family": "moon",
+   "color": [
+    0.9200000166893005,
+    0.8370000123977661,
+    1.0
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      4.5,
+      4.5
+     ],
+     "px": 1,
+     "bbox": [
+      4,
+      4,
+      5,
+      5
+     ]
+    },
+    {
+     "offset": [
+      24.0,
+      10.5
+     ],
+     "px": 2,
+     "bbox": [
+      23,
+      10,
+      25,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/toonbank_oranje.png": {
+   "kind": "screen",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8429999947547913,
+    0.9190000295639038
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      4.5,
+      4.5
+     ],
+     "px": 1,
+     "bbox": [
+      4,
+      4,
+      5,
+      5
+     ]
+    },
+    {
+     "offset": [
+      24.0,
+      10.5
+     ],
+     "px": 2,
+     "bbox": [
+      23,
+      10,
+      25,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/toonbank_rood.png": {
+   "kind": "screen",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.5120000243186951,
+    0.2680000066757202
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.0,
+      5.7
+     ],
+     "px": 48,
+     "bbox": [
+      1,
+      5,
+      47,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/toonbank_roze.png": {
+   "kind": "screen",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.3190000057220459,
+    0.8690000176429749
+   ],
+   "cell": [
+    48,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      23.6,
+      5.7
+     ],
+     "px": 49,
+     "bbox": [
+      1,
+      4,
+      47,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "world_warper/art/vlak_gezelschap_oranje.png": {
+   "kind": "magic",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.5,
+    0.2329999953508377
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.1,
+      8.6
+     ],
+     "px": 45,
+     "bbox": [
+      1,
+      3,
+      15,
+      13
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/vlak_gezelschap_roze.png": {
+   "kind": "magic",
+   "family": "magenta",
+   "color": [
+    1.0,
+    0.28600001335144043,
+    0.8569999933242798
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.1,
+      8.6
+     ],
+     "px": 45,
+     "bbox": [
+      1,
+      3,
+      15,
+      13
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/vlak_warp.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.7699999809265137,
+    0.5379999876022339,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      7.4
+     ],
+     "px": 30,
+     "bbox": [
+      3,
+      1,
+      13,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/vlak_warp_blauw.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.7400000095367432,
+    0.5630000233650208,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      7.2
+     ],
+     "px": 32,
+     "bbox": [
+      3,
+      1,
+      13,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/vlak_warp_groen.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.7699999809265137,
+    0.5379999876022339,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      7.4
+     ],
+     "px": 30,
+     "bbox": [
+      3,
+      1,
+      13,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/vlak_warp_oranje.png": {
+   "kind": "magic",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.5950000286102295,
+    0.6940000057220459
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      7.7
+     ],
+     "px": 62,
+     "bbox": [
+      1,
+      1,
+      15,
+      13
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/vlak_warp_rood.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.7699999809265137,
+    0.5379999876022339,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      7.4
+     ],
+     "px": 30,
+     "bbox": [
+      3,
+      1,
+      13,
+      11
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/vlak_warp_roze.png": {
+   "kind": "magic",
+   "family": "magenta",
+   "color": [
+    0.9490000009536743,
+    0.4620000123977661,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      7.7
+     ],
+     "px": 62,
+     "bbox": [
+      1,
+      1,
+      15,
+      13
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/warp_platform.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.6970000267028809,
+    0.4429999887943268,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      10.7
+     ],
+     "px": 34,
+     "bbox": [
+      4,
+      7,
+      28,
+      13
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/warp_platform_blauw.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.6970000267028809,
+    0.4429999887943268,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      10.7
+     ],
+     "px": 34,
+     "bbox": [
+      4,
+      7,
+      28,
+      13
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/warp_platform_groen.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.6970000267028809,
+    0.4429999887943268,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      10.7
+     ],
+     "px": 34,
+     "bbox": [
+      4,
+      7,
+      28,
+      13
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/warp_platform_oranje.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.6970000267028809,
+    0.4429999887943268,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      10.7
+     ],
+     "px": 34,
+     "bbox": [
+      4,
+      7,
+      28,
+      13
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/warp_platform_rood.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.7699999809265137,
+    0.4779999852180481,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      10.8
+     ],
+     "px": 37,
+     "bbox": [
+      3,
+      7,
+      30,
+      15
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "world_warper/art/warp_platform_roze.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.7279999852180481,
+    0.4359999895095825,
+    1.0
+   ],
+   "cell": [
+    32,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.0,
+      10.8
+     ],
+     "px": 37,
+     "bbox": [
+      3,
+      7,
+      30,
+      15
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 0.8,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  }
+ }
+}

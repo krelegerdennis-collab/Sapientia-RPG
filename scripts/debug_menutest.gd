@@ -254,6 +254,7 @@ func _settings_basics() -> void:
 	check("Settings: eigen testbestand (%s)" % Settings.path, Settings.path == Settings.TEST_PATH)
 	var verwacht := Settings.DEFAULTS.duplicate()
 	verwacht["battle_style"] = Settings.BATTLE_STYLE_CLASSIC     # testruns starten in Classic; vers spel = Action (somroomstest)
+	verwacht["hd2d_light"] = false     # testruns: HD-2D uit (pixel suites); --hd2dtest zet aan
 	check("Settings: standaardwaarden", Settings.values == verwacht)
 	check("audiobussen Music en SFX bestaan",
 			AudioServer.get_bus_index("Music") != -1 and AudioServer.get_bus_index("SFX") != -1)
@@ -585,8 +586,8 @@ func _bestiary_and_options_tests() -> void:
 	check("'Opties' opent het optiescherm", s != null)
 	if s == null:
 		return
-	check("13 regels %s" % [s.keys], s.keys.size() == 13 and s.keys[12] == "battle_style" and s.keys[0] == "music_volume" and s.keys[9] == "_reset"
-			and s.keys[10] == "sessie_log" and s.keys[11] == "_export")
+	check("14 regels %s" % [s.keys], s.keys.size() == 14 and s.keys[13] == "battle_style" and s.keys[0] == "music_volume" and s.keys[10] == "_reset"
+			and s.keys[11] == "sessie_log" and s.keys[12] == "_export" and s.keys[7] == "hd2d_light")
 	check("alle regels in beeld", s.rows[-1].get_global_rect().end.y <= s.hint.get_global_rect().position.y)
 	await shot("menu_options")
 	# Muziek: links = 7
@@ -644,7 +645,8 @@ func _bestiary_and_options_tests() -> void:
 	check("Scanlines uit -> Crt onzichtbaar", Settings.get_value("crt") == false and not Crt.visible)
 	await tap("interact")
 	check("Scanlines weer aan", Settings.get_value("crt") == true and Crt.visible)
-	# Autom. opslaan uit
+	# Autom. opslaan uit (Scanlines -> HD-2D -> Schudden -> Autom. opslaan)
+	await tap("move_down")
 	await tap("move_down")
 	await tap("move_down")
 	check("focus op Autom. opslaan", s.focused_key() == "autosave")

@@ -61,6 +61,7 @@ const DEFAULTS := {
 	"sessie_log": -1,    # SessieLog: -1 = aan in debug-builds, uit in release; 0 uit; 1 aan
 	"run": false,      # TODO.md "run feature": RUN-toggle (blijft aan tot de speler hem uitzet)
 	"battle_style": 1,   # 0 = Classic (turn-based), 1 = Action (realtime in de WM1-dungeons). Dennis 21 okt 2026: Action is de standaard
+	"hd2d_light": true,   # HD-2D mapverlichting (normals + lichten); uit voor zwakke telefoons
 }
 
 var path := DEFAULT_PATH
@@ -79,6 +80,9 @@ func _ready() -> void:
 	# (Een vers spel begint in Action: DEFAULTS, zie som_rooms_tests.gd.)
 	if Array(args).any(func(a): return str(a).begins_with("--") and str(a).ends_with("test")):
 		values["battle_style"] = BATTLE_STYLE_CLASSIC
+		# Bestaande suites: vaste pixels/tints (HD-2D apart via --hd2dtest).
+		if not args.has("--hd2dtest"):
+			values["hd2d_light"] = false
 	# Dialog en Crt zijn eerder geladen autoloads; voor de zekerheid pas na _ready toepassen.
 	apply_all.call_deferred()
 
@@ -143,6 +147,8 @@ func _sanitize(key: String, v):
 			return clampi(n, 0, BATTLE_STYLE_NAMES.size() - 1)
 		"sessie_log":
 			return clampi(n, -1, 1)
+		"hd2d_light":
+			return _to_bool(v, true)
 	return n
 
 
@@ -227,6 +233,10 @@ func shake_enabled() -> bool:
 
 func autosave_enabled() -> bool:
 	return bool(get_value("autosave"))
+
+
+func hd2d_light_enabled() -> bool:
+	return bool(get_value("hd2d_light"))
 
 
 ## Sessielog (SessieLog): -1 volgt de build (debug aan, release uit). Release-builds loggen nooit,
