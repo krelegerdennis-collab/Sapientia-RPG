@@ -30,8 +30,8 @@ extends RefCounted
 ## mag ik die reviven) en roept daarna begin_channel of end_channel.
 ## De host telt het kanaal in step(). Mensen starten vanzelf door nabijheid.
 ## Een AI-stoel start niet vanzelf: zonder begin_channel blijft de teller 0.
-## Zolang seat_controller.gd ontbreekt, doet SomAlly die twee calls zelf
-## (alleen als allies_enabled aan staat). Zodra het bestand er is, stopt SomAlly.
+## SomAlly doet die calls zolang SeatController.DRIVES_REVIVE uit staat.
+## seat_controller_present() zegt alleen of het bestand er is, niet of het revive rijdt.
 
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
@@ -148,8 +148,8 @@ static func ai_should_revive(hero_id: String, heal_alive: bool, someone_down: bo
 	return true
 
 
-## True zodra M6 scripts/coop/seat_controller.gd heeft toegevoegd.
-## SomAlly doet de haak zelf tot dat bestand er is, en stopt dan.
+## True zodra scripts/coop/seat_controller.gd er is.
+## Dit zegt niet dat die klasse revive rijdt; dat is SeatController.DRIVES_REVIVE.
 static func seat_controller_present() -> bool:
 	if _seat_hook < 0:
 		_seat_hook = 1 if ResourceLoader.exists("res://scripts/coop/seat_controller.gd") else 0
@@ -378,6 +378,7 @@ static func phoenix(rows: Array, helper_slot: int, target_slot: int) -> bool:
 
 
 ## Rustpunt: down-stoelen staan op, volle HP. Levende stoelen blijven zoals ze zijn.
+## De revive-teller (`revives`) verandert hier niet. Alleen begin_run() zet hem terug op 0.
 static func apply_rest(rows: Array) -> void:
 	for row in rows:
 		if not row_active(row) or not row_down(row):

@@ -222,19 +222,29 @@ func _think_spell() -> void:
 
 func _coop_revive_drive(delta: float) -> bool:
 	# Geen nieuwe state: kanaliseren blijft ST_FOLLOW. --statemachinetest eist die set.
-	# M6 zet de prioriteit in seat_controller.gd. Tot dat bestand er is, roept
-	# deze bondgenoot query_revive / begin_channel / end_channel zelf aan.
+	# SeatController.try_revive is een stub (DRIVES_REVIVE uit). Deze bondgenoot
+	# blijft query_revive / begin_channel / end_channel aanroepen, ook als het bestand er is.
 	if arena == null or not ("coop_mode" in arena) or not bool(arena.coop_mode):
 		return false
-	if not ("allies_enabled" in arena) or not bool(arena.allies_enabled):
-		return false
-	if CoopRevive.seat_controller_present():
+	var seat_drive := seat_ai and seat_slot >= 0
+	if not seat_drive:
+		if not ("allies_enabled" in arena) or not bool(arena.allies_enabled):
+			return false
+	if SeatCtrl.DRIVES_REVIVE:
 		return false
 	if not arena.has_method("coop_down_rows"):
 		return false
+	# Een AI-stoel hangt al aan slot 0..3. Een losse SomAlly zonder rij blijft staan:
+	# coop_down_rows() zou die rij anders zelf aanmaken en hem laten lopen.
+	if seat_drive and arena.has_method("coop_bind_seat_row"):
+		arena.coop_bind_seat_row(self)
+	if coop_row.is_empty():
+		return false
 	var rows: Array = arena.coop_down_rows()
 	var mine: Dictionary = coop_row
-	if mine.is_empty():
+	if not CoopRevive.row_alive(mine):
+		if not mine.is_empty():
+			CoopRevive.end_channel(mine)
 		return false
 	var q := CoopRevive.query_revive(rows, mine)
 	if bool(q.get("ok", false)):

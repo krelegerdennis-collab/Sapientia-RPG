@@ -53,6 +53,7 @@ func _run() -> void:
 	_block("input", 2, _input_tests)
 	_block("ai", 17, _ai_priority_tests)
 	_block("limiet", 10, _revive_limit_tests)
+	_block("ai-spel", 3, _ai_ingame_revive_tests)
 	_block("solo", 10, _solo_ko_tests)
 	_block("behoud", 3, _keep_tests)
 	await _block_async("somally", 3, _som_ally_tests)
@@ -367,6 +368,83 @@ func _revive_limit_tests() -> void:
 			bool(ai.players[2]["down"]) and int(ai.players[2]["hp"]) == 0
 			and int(ai.players[1]["channel_ticks"]) == 0
 			and Revive.flag_progress(int(ai.players[2]["flags"])) == 0)
+
+
+func _ai_step(arena: SomArena) -> void:
+	var inputs: Array = []
+	arena._merge_ai_inputs(inputs, 1.0 / 60.0)
+	arena._coop_revive_host_tick()
+
+
+## In-game: allies_enabled uit, seat_ai aan, seat_controller.gd bestaat. SomAlly start en maakt het kanaal af.
+func _ai_ingame_revive_tests() -> void:
+	GameState.new_game("Dax")
+	GameState.join_member("lotte")
+	var arena := SomArena.new()
+	arena.coop_mode = true
+	arena.coop_sim_host = true
+	arena.coop_local_slot = 0
+	arena.allies_enabled = false
+	var body := _FaceBody.new()
+	body.position = Vector2(80, 80)
+	body.facing = Vector2i.DOWN
+	arena.player = body
+	add_child(arena)
+	arena.add_child(body)
+	var sc := SeatCtrl.new()
+	sc.configure("KAMER", true, 0)
+	sc.assign([
+		{"slot": 0, "uid": "host", "hero_id": "dennis", "controller": "local", "hp": 40, "mp": 0, "max_hp": 100},
+		{"slot": 1, "uid": "ai", "hero_id": "lotte", "controller": "ai", "hp": 32, "mp": 14, "max_hp": 32, "max_mp": 14},
+	])
+	arena.seat_controller = sc
+	arena._coop_slots[0] = "dennis"
+	arena._coop_slots[1] = "lotte"
+	var ally: SomAlly = SomAlly.new()
+	arena.add_child(ally)
+	ally.setup(arena, "lotte", 1)
+	ally.position = Vector2(80, 80)
+	ally.seat_slot = 1
+	ally.apply_ai_placeholder_look()
+	arena._ai_bodies[1] = ally
+	GameState.member("dennis")["max_hp"] = 100
+	GameState.member("dennis")["hp"] = 0
+	arena._coop_sync_down_rows()
+	var down: Dictionary = arena._coop_down[0]
+	down["down"] = true
+	down["hp"] = 0
+	down["max_hp"] = 100
+	down["revives"] = 0
+	down["x"] = 80
+	down["y"] = 80
+	var helper: Dictionary = arena._coop_down[1]
+	helper["controller"] = Seat.CONTROLLER_AI
+	helper["base_hero"] = "lotte"
+	helper["down"] = false
+	helper["hp"] = 32
+	helper["x"] = 80
+	helper["y"] = 80
+	ally.coop_row = helper
+	_ai_step(arena)
+	check("AI-stoel start een revive-kanaal hoewel seat_controller.gd er is",
+			Revive.seat_controller_present() and ally.seat_ai and not arena.allies_enabled
+			and int(helper.get("channel_ticks", 0)) == 1 and int(helper.get("channel_target", -2)) == 0
+			and bool(down.get("down", false)))
+	for _i in Revive.CHANNEL_HEAL_TICKS - 1:
+		_ai_step(arena)
+	check("AI-revive maakt het kanaal af op 30% HP",
+			not bool(down.get("down", true)) and int(down.get("hp", 0)) == 30 and int(down.get("revives", 0)) == 1)
+	down["hp"] = 0
+	down["down"] = true
+	down["iframes"] = 0
+	GameState.member("dennis")["hp"] = 0
+	for _i in 8:
+		_ai_step(arena)
+	var q := Revive.query_revive(arena.coop_down_rows(), helper)
+	check("AI-revive op een al gerevide stoel wordt geweigerd",
+			not bool(q.get("ok", true)) and bool(down.get("down", false)) and int(down.get("hp", 1)) == 0
+			and int(down.get("revives", 0)) == 1 and int(helper.get("channel_ticks", 1)) == 0)
+	arena.queue_free()
 
 
 func _solo_ko_tests() -> void:

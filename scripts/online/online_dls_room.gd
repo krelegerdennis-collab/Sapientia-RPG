@@ -6,6 +6,7 @@ extends DungeonRoom
 
 const Floor := preload("res://scripts/online/online_dls_floor.gd")
 const Run := preload("res://scripts/online/online_dls_run.gd")
+const Rust := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
 
 var online_dls := false
 var floor_data: Dictionary = {}
@@ -45,6 +46,20 @@ func _ready() -> void:
 	map_name = str(room.get("name", "Verdieping"))
 	super._ready()
 	_restore_solo(snap)
+	_place_online_rest()
+
+
+## Zelfde prop als solo (Dungeon100Rustpunt). interact() slaat online af zolang de run loopt.
+func _place_online_rest() -> void:
+	if not room.has("rustpunt"):
+		return
+	var objects := get_node_or_null("Objects")
+	if objects == null or objects.get_node_or_null("Rustpunt") != null:
+		return
+	var t: Array = room["rustpunt"]
+	var rp: Node2D = Rust.create(Vector2i(int(t[0]), int(t[1])))
+	rp.name = "Rustpunt"
+	objects.add_child(rp)
 
 
 func _use_exit(exit: Node) -> void:

@@ -2500,12 +2500,110 @@ func _coop_begin_revive_run() -> void:
 	_coop_revive_keep.clear()
 
 
+## AI-stoel deelt het stoel-record. SomAlly schrijft daar channel_target op.
+func coop_bind_seat_row(ally: SomAlly) -> void:
+	if ally == null or not ally.seat_ai or ally.seat_slot < 0:
+		return
+	_coop_sync_down_rows()
+	var slot := ally.seat_slot
+	if not _coop_down.has(slot):
+		_coop_make_down_row(slot, str(ally.hero_id), CoopSeat.CONTROLLER_AI)
+	var row: Dictionary = _coop_down[slot]
+	row["controller"] = CoopSeat.CONTROLLER_AI
+	row["active"] = true
+	row["participate"] = true
+	row["hero_id"] = str(ally.hero_id)
+	row["character_id"] = str(ally.hero_id)
+	if str(row.get("base_hero", "")) == "":
+		row["base_hero"] = str(ally.hero_id)
+	row["x"] = int(ally.position.x)
+	row["y"] = int(ally.position.y)
+	ally.coop_row = row
+
+
+## Host past het online rustpunt toe. Gasten schrijven niets; de snapshot volgt.
+func coop_apply_online_rest() -> bool:
+	if not _online_rest_authoritative():
+		return false
+	_coop_sync_down_rows()
+	var rows := coop_down_rows()
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY or not CoopRevive.row_active(row):
+			continue
+		_rest_fill_seat(row)
+	# De revive-teller blijft staan. Alleen begin_run() zet `revives` terug op 0.
+	CoopRevive.apply_rest(rows)
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var hid := str(row.get("hero_id", ""))
+		var h := member(hid)
+		if not h.is_empty():
+			h["hp"] = int(row.get("hp", h.get("hp", 0)))
+			if row.has("mp") and h.has("mp"):
+				h["mp"] = int(row["mp"])
+		var slot := int(row.get("slot", -1))
+		if slot < 0 or slot >= Protocol.MAX_PLAYERS:
+			continue
+		_coop_park_revives(slot, row)
+		_coop_show_ko(slot, hid, bool(row.get("down", false)))
+		if seat_controller != null and seat_controller.tracks(slot):
+			var mp := int(row.get("mp", seat_controller.mp_of(slot)))
+			seat_controller.set_hp_mp(slot, int(row.get("hp", 0)), mp)
+	_coop_stamp_flags()
+	_coop_update_ring(rows)
+	return true
+
+
+func _online_rest_authoritative() -> bool:
+	if not coop_mode:
+		return false
+	if GameState.coop_is_guest():
+		return false
+	if coop_sim_host:
+		return true
+	# Online DLS zonder sessie: deze arena is de enige sim.
+	return not GameState.coop_in_session()
+
+
+func _rest_fill_seat(row: Dictionary) -> void:
+	var hid := CoopRevive.hero_of(row)
+	var h := member(hid)
+	var max_hp := maxi(1, int(row.get("max_hp", 1)))
+	if not h.is_empty():
+		max_hp = maxi(max_hp, int(h.get("max_hp", max_hp)))
+		h["hp"] = max_hp
+	row["max_hp"] = max_hp
+	row["hp"] = max_hp
+	var max_mp := -1
+	if not h.is_empty() and (h.has("mp") or h.has("max_mp")):
+		max_mp = int(h.get("max_mp", 0))
+		h["mp"] = max_mp
+	var slot := int(row.get("slot", -1))
+	if seat_controller != null and slot >= 0 and slot < Protocol.MAX_PLAYERS and seat_controller.tracks(slot):
+		var seat: Dictionary = seat_controller.seats[slot]
+		if seat.has("mp") or seat.has("max_mp"):
+			var seat_max := int(seat.get("max_mp", 0))
+			if max_mp >= 0:
+				seat_max = max_mp
+			elif not h.is_empty() and h.has("max_mp"):
+				seat_max = int(h["max_mp"])
+			max_mp = seat_max
+			seat_controller.set_hp_mp(slot, max_hp, seat_max)
+	if max_mp >= 0:
+		row["mp"] = max_mp
+		row["max_mp"] = max_mp
+
+
 func _coop_append_ally_rows(rows: Array) -> void:
 	# M6: een AI-stoel hoort op slot 0..3 met controller "ai" (CoopSeat).
 	# Deze tak is de bestaande SomAlly, testbaar met allies_enabled, tot M6 hem op een roster-slot zet.
 	var n := 0
 	for ally in allies:
 		if not is_instance_valid(ally):
+			continue
+		# AI-stoel staat al op slot 0..3. Niet nog een rij op MAX_PLAYERS+n.
+		if ally.seat_ai:
 			continue
 		var hid := str(ally.hero_id)
 		var stored: Dictionary = ally.coop_row if ally.get("coop_row") is Dictionary else {}
@@ -3345,6 +3443,10 @@ func _ai_virtual_inputs(dt: float) -> Array:
 		var ally: SomAlly = _ai_bodies[slot]
 		ally.spell_cd = float(ally.spell_cd) - dt
 		ally.charge = minf(1.0, float(ally.charge) + dt / SomData.CHARGE_TIME)
+		# Revive hoort niet bij de stub-prioriteit. SomAlly start het kanaal zelf.
+		if ally._coop_revive_drive(dt):
+			seat_controller.remember_pos(slot, ally.position)
+			continue
 		var senses := _ai_senses(ally, slot)
 		var inp: Dictionary = ally.coop_virtual_input(senses, rng)
 		if inp.is_empty():

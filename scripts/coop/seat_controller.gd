@@ -27,6 +27,8 @@ const AI_TINT := Color(0.62, 0.78, 0.80, 1.0)
 ## Nog geen gameplay: taunt, guard, revive, interrupt, debuff, buff.
 ## Revive zelf bouwt RPG COMBAT in M8; hier alleen de prioriteit-haak.
 const STUB_ACTIONS: Array[String] = ["taunt", "guard", "revive", "interrupt", "debuff", "buff"]
+## try_revive blijft een stub. Zolang dit uit staat, start SomAlly het kanaal.
+const DRIVES_REVIVE := false
 
 const MAX_SEATS := 4
 
