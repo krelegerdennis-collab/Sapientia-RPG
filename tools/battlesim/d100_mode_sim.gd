@@ -20,8 +20,9 @@ class_name D100ModeSim
 ##    Keten zoals het spel: hit1/hit2/finisher, vervolg 6 ticks na de animatie.
 ##    AI na de finisher: zware slag niveau 1. Doel = een vijand die al aangekomen is.
 ##  - EXP per verslagen vijand, meteen, aan elke levende held (give_exp, level-up vult HP bij).
-##  - Vloer 10: die troep, daarna Page Warden. Doel, klap, spreuk en adds komen uit
-##    page_warden_rt_sim.gd. De slag blijft de keten (die sim laadt nog een volle meter).
+##  - Vloer 10: die troep, daarna Page Warden. Doel, klap, spreuk en adds staan hier,
+##    dezelfde regels als page_warden_rt_sim.gd, zonder die file aan te roepen.
+##    De slag blijft de keten (die sim laadt nog een volle meter).
 ##  - --easy_enemy_dmg vervangt ENEMY_DAMAGE_MULT alleen hier (troep en Page Warden-adds).
 ##  - --floor_heal is procent van max HP/MP erbij voor levenden, tussen vloeren.
 ##    Neergegane helden blijven liggen. 0 = basis (alleen het rustpunt).
@@ -38,7 +39,6 @@ const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 const PageWardenBoss := preload("res://scripts/som/page_warden_boss.gd")
 const PageWardenFight := preload("res://scripts/som/page_warden_fight.gd")
-const PageWardenRt := preload("res://tools/battlesim/page_warden_rt_sim.gd")
 const ThreatTableSc := preload("res://scripts/som/threat_table.gd")
 const Chain := preload("res://scripts/data/som_chain_data.gd")
 const Heavy := preload("res://scripts/data/som_heavy_data.gd")
@@ -54,6 +54,7 @@ const DODGE_PLAYER := 0.35
 const DODGE_ALLY := 0.15
 const APPROACH := 1.2
 const ANIM := 0.71
+const FAN_SPLASH := 0.45
 const RUN_SEED_STEP := 10007
 const DEFAULT_SEED := 20261110
 const DEFAULT_RUNS := 24
@@ -571,25 +572,6 @@ static func _trash_target(heroes: Array, rng: RandomNumberGenerator) -> int:
 	return int(alive[rng.randi() % alive.size()])
 
 
-## Zelfde parameters als page_warden_rt_sim.gd `_run`, zodat de gedeelde functies dezelfde tijden zien.
-## enemy_dmg vervangt alleen de add-schade. De klap van de baas blijft zonder die factor.
-static func _warden_rt(add_data: Dictionary, enemy_dmg: float) -> Object:
-	var sim: Object = PageWardenRt.new()
-	sim.set("_add_data", add_data)
-	sim.set("_params", {
-		"charge_time": SomData.CHARGE_TIME,
-		"anim": ANIM,
-		"approach": APPROACH,
-		"ally_spell_cd": SomData.ALLY_SPELL_CD,
-		"ally_heal_below": SomData.ALLY_HEAL_BELOW,
-		"ally_dmg_chance": SomData.ALLY_DAMAGE_SPELL_CHANCE,
-		"enemy_cd": SomData.ATTACK_COOLDOWN,
-		"telegraph": SomData.TELEGRAPH,
-		"enemy_dmg": _enemy_mult(enemy_dmg),
-	})
-	return sim
-
-
 static func _enemy_mult(enemy_dmg: float) -> float:
 	if enemy_dmg <= 0.0:
 		return SomData.ENEMY_DAMAGE_MULT
@@ -604,7 +586,7 @@ static func _boss_fight(party: Array, seats: int, seed_val: int, enemy_dmg: floa
 	var threat: ThreatTable = ThreatTableSc.new()
 	var heroes := _runtime(party)
 	var add_data: Dictionary = Scaling.monster_stats((GameData.ENEMIES["papiergeest"] as Dictionary).duplicate(true), PageWardenBoss.BOSS_KEY)
-	var warden := _warden_rt(add_data, enemy_dmg)
+	var mult := _enemy_mult(enemy_dmg)
 	var adds: Array = []
 	var target := -1
 	var events: Array = []
@@ -621,15 +603,15 @@ static func _boss_fight(party: Array, seats: int, seed_val: int, enemy_dmg: floa
 		for ev in gf.take_events():
 			match str(ev.get("type", "")):
 				"telegraph_start":
-					target = int(warden.call("_choose", threat, heroes, bool(ev.get("ranged", false)), ticks))
+					target = _boss_choose(threat, heroes, bool(ev.get("ranged", false)), ticks)
 				"attack_hit":
-					warden.call("_boss_hit", heroes, boss, target, str(ev.get("id", "")), float(ev.get("power", 1.0)), rng)
+					_boss_hit(heroes, boss, target, str(ev.get("id", "")), float(ev.get("power", 1.0)), rng)
 				"adds":
-					warden.call("_spawn_adds", adds, ev.get("ids", []))
+					_spawn_adds(adds, ev.get("ids", []), add_data)
 				"stagger_break":
 					target = -1
-		_boss_heroes(warden, gf, heroes, adds, boss, rng, threat)
-		warden.call("_adds_tick", heroes, adds, target, rng)
+		_boss_heroes(gf, heroes, adds, boss, rng, threat)
+		_boss_adds(heroes, adds, target, rng, mult)
 		for hr in heroes:
 			if not bool(hr["downed"]) and int(hr["h"]["hp"]) <= 0:
 				hr["downed"] = true
@@ -644,12 +626,63 @@ static func _boss_fight(party: Array, seats: int, seed_val: int, enemy_dmg: floa
 		swings = _swing_total(heroes)
 	var alive_end := not _runtime_alive(heroes).is_empty()
 	var pools := _pool_hp(heroes)
-	(warden as Node).free()
 	return _fight_result(gf.is_dead(), alive_end, ticks, swings, quiet, pools.x, pools.y, _tail_log(events, ticks))
 
 
-## De slag is de keten. Doel, klap, spreuk en adds blijven in page_warden_rt_sim.gd.
-static func _boss_heroes(warden: Object, gf: PageWardenFight, heroes: Array, adds: Array, boss: Dictionary, rng: RandomNumberGenerator, threat: ThreatTable) -> void:
+## Zelfde opstelling als page_warden_rt_sim.gd. Lokaal, zodat die file niet aangeroepen wordt.
+static func _boss_choose(threat: ThreatTable, heroes: Array, ranged: bool, tick: int) -> int:
+	var rows: Array = []
+	for hr in heroes:
+		if int(hr["h"]["hp"]) <= 0:
+			continue
+		var dist := 40.0
+		match int(hr["slot"]):
+			1:
+				dist = 18.0
+			2:
+				dist = 28.0
+			3:
+				dist = 36.0
+		rows.append({"slot": int(hr["slot"]), "dist": dist})
+	rows.sort_custom(func(a, b):
+		if is_equal_approx(float(a["dist"]), float(b["dist"])):
+			return int(a["slot"]) < int(b["slot"])
+		return float(a["dist"]) < float(b["dist"]))
+	var ids: Array = []
+	var near: Array = []
+	for row in rows:
+		ids.append(int(row["slot"]))
+		if float(row["dist"]) <= 32.0:
+			near.append(int(row["slot"]))
+	return threat.choose(ids, near, ranged, tick)
+
+
+static func _boss_hit(heroes: Array, boss: Dictionary, target: int, id: String, power: float, rng: RandomNumberGenerator) -> void:
+	var victims: Array = []
+	for hr in heroes:
+		if int(hr["h"]["hp"]) <= 0:
+			continue
+		var slot := int(hr["slot"])
+		if id == "page_circle":
+			victims.append(hr)
+		elif id == "page_fan":
+			if slot == target or rng.randf() < FAN_SPLASH:
+				victims.append(hr)
+		elif slot == target:
+			victims.append(hr)
+	for hr in victims:
+		if float(hr["iframes"]) > 0.0:
+			continue
+		var dodge := DODGE_PLAYER if int(hr["slot"]) == 0 else DODGE_ALLY
+		if rng.randf() < dodge:
+			hr["iframes"] = float(SomData.DODGE_IFRAME_TICKS) * DT
+			continue
+		var dmg := SomArena.physical_damage(float(boss["atk"]), float(hr["def"]), power, rng)
+		_hurt(hr, dmg)
+
+
+## De slag is de keten. Doel, klap, spreuk en adds staan hier, niet in page_warden_rt_sim.gd.
+static func _boss_heroes(gf: PageWardenFight, heroes: Array, adds: Array, boss: Dictionary, rng: RandomNumberGenerator, threat: ThreatTable) -> void:
 	for hr in heroes:
 		if int(hr["h"]["hp"]) <= 0:
 			continue
@@ -659,7 +692,7 @@ static func _boss_heroes(warden: Object, gf: PageWardenFight, heroes: Array, add
 			continue
 		if int(hr["slot"]) > 0:
 			hr["spell_cd"] = float(hr["spell_cd"]) - DT
-			if float(hr["spell_cd"]) <= 0.0 and bool(warden.call("_ally_spell", gf, hr, heroes, boss, rng, threat)):
+			if float(hr["spell_cd"]) <= 0.0 and _boss_spell(gf, hr, heroes, boss, rng, threat):
 				hr["spell_cd"] = SomData.ALLY_SPELL_CD
 				hr["lock"] = ANIM
 				continue
@@ -686,6 +719,77 @@ static func _boss_heroes(warden: Object, gf: PageWardenFight, heroes: Array, add
 		else:
 			live[0]["hp"] = int(live[0]["hp"]) - dmg
 		_commit_swing(hr, plan)
+
+
+static func _boss_spell(gf: PageWardenFight, hr: Dictionary, heroes: Array, boss: Dictionary, rng: RandomNumberGenerator, threat: ThreatTable) -> bool:
+	var h: Dictionary = hr["h"]
+	for s in h.get("spells", []):
+		var sp: Dictionary = GameData.SPELLS.get(str(s), {})
+		if sp.is_empty() or int(h["mp"]) < int(sp.get("mp", 0)):
+			continue
+		if str(sp.get("type", "")) == "heal":
+			var low: Dictionary = {}
+			var lr := SomData.ALLY_HEAL_BELOW
+			for o in heroes:
+				var ratio := float(o["h"]["hp"]) / maxf(1.0, float(o["h"]["max_hp"]))
+				if int(o["h"]["hp"]) > 0 and ratio < lr:
+					lr = ratio
+					low = o["h"]
+			if low.is_empty():
+				continue
+			h["mp"] = int(h["mp"]) - int(sp["mp"])
+			var gain := roundi(DamageCalc.spell_base({"s": h, "is_hero": true, "buffs": []}, sp, {}))
+			var before := int(low["hp"])
+			low["hp"] = mini(int(low["max_hp"]), before + gain)
+			threat.note_heal(int(hr["slot"]), int(low["hp"]) - before, PageWardenBoss.is_tank(str(h["id"])))
+			return true
+		if str(sp.get("type", "")) == "damage" and rng.randf() < SomData.ALLY_DAMAGE_SPELL_CHANCE and not gf.is_invulnerable():
+			h["mp"] = int(h["mp"]) - int(sp["mp"])
+			var amt := DamageCalc.spell_base({"s": h, "is_hero": true, "buffs": []}, sp, {"s": boss})
+			var dealt := gf.damage(maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))))
+			if dealt > 0:
+				threat.note_damage(int(hr["slot"]), dealt, PageWardenBoss.is_tank(str(h["id"])))
+			return true
+	return false
+
+
+static func _spawn_adds(adds: Array, ids: Array, add_data: Dictionary) -> void:
+	var living := 1
+	for a in adds:
+		if int(a["hp"]) > 0:
+			living += 1
+	var kept: Array = PageWardenBoss.clamp_adds(living, ids, PageWardenBoss.SNAPSHOT_ENEMY_BUDGET)
+	for id in kept:
+		if str(id) != "papiergeest":
+			continue
+		adds.append({
+			"d": add_data, "hp": int(add_data["max_hp"]), "approach": APPROACH, "tele": 0.0, "cd": 0.4,
+		})
+
+
+static func _boss_adds(heroes: Array, adds: Array, target: int, rng: RandomNumberGenerator, enemy_dmg: float) -> void:
+	for e in adds:
+		if int(e["hp"]) <= 0:
+			continue
+		if float(e["approach"]) > 0.0:
+			e["approach"] = float(e["approach"]) - DT
+			continue
+		if float(e["tele"]) > 0.0:
+			e["tele"] = float(e["tele"]) - DT
+			if float(e["tele"]) <= 0.0:
+				e["cd"] = SomData.ATTACK_COOLDOWN
+				var hr := _runtime_slot(heroes, target if target >= 0 else 0)
+				if hr.is_empty() or int(hr["h"]["hp"]) <= 0 or float(hr["iframes"]) > 0.0:
+					continue
+				var dodge := DODGE_PLAYER if int(hr["slot"]) == 0 else DODGE_ALLY
+				if rng.randf() >= dodge:
+					var dmg := roundi(SomArena.physical_damage(float(e["d"]["atk"]), float(hr["def"]), 1.0, rng) * enemy_dmg)
+					_hurt(hr, dmg)
+			continue
+		if float(e["cd"]) > 0.0:
+			e["cd"] = float(e["cd"]) - DT
+			continue
+		e["tele"] = SomData.TELEGRAPH
 
 
 static func _hurt(hr: Dictionary, dmg: int) -> void:
@@ -1208,7 +1312,7 @@ static func markdown(result: Dictionary, cfg: Dictionary, classic: Dictionary, m
 	s += "- EXP valt per verslagen vijand, vol, aan elke levende held, meteen (`give_exp`). Een level-up vult HP bij met de groei.\n"
 	s += "- Aanvalsketen zoals `som_ally.gd`: hit1 ×1.0, hit2 ×1.1, finisher ×1.6, vervolg %d ticks na de animatie (venster %d). " % [Chain.ALLY_FOLLOWUP_TICKS, Chain.CHAIN_WINDOW_TICKS]
 	s += "De host ketent hetzelfde. Na de finisher laadt een AI-bondgenoot een zware slag niveau %d (%d ticks, ×%.1f).\n" % [Heavy.ALLY_LEVEL, int(Heavy.LEVEL_TICKS[0]), Heavy.damage_mult(Heavy.ALLY_LEVEL)]
-	s += "- Page Warden: doelkeuze, klapvorm, bondgenoot-spreuk en adds komen uit `page_warden_rt_sim.gd`. De slag zelf blijft de keten; die sim laadt nog een volle meter.\n"
+	s += "- Page Warden: doelkeuze, klapvorm, bondgenoot-spreuk en adds staan in deze sim, dezelfde regels als `page_warden_rt_sim.gd`, zonder die file aan te roepen. De slag zelf blijft de keten; die sim laadt nog een volle meter.\n"
 	s += "- Doel is een vijand die al aangekomen is. Een nog lopende vijand verspilt de slag niet.\n"
 	s += "- Vijandschade in deze sim × %.1f. Het spel blijft `ENEMY_DAMAGE_MULT` %.1f. De klap van de Page Warden zelf gebruikt die factor niet; de adds wel.\n" % [float(result.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT)), SomData.ENEMY_DAMAGE_MULT]
 	s += "- Tussen vloeren: levenden krijgen %d%% van max HP en max MP erbij (0 = niets extra). Neergegane helden blijven liggen. Rustvloer 5 vult daarna alsnog bij.\n\n" % int(result.get("floor_heal", 0))

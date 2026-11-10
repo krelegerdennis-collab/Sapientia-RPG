@@ -1,6 +1,6 @@
-# M9b — schade en herstel (voorstel)
+# M9b-2 — schade en herstel (voorstel)
 
-Alleen in de sim. `SomData.ENEMY_DAMAGE_MULT` blijft 2.2. `mode_exp_factor` blijft 10. Geen speldata.
+Alleen in de sim. `SomData.ENEMY_DAMAGE_MULT` blijft 2.2. `mode_exp_factor` blijft 10. Geen speldata. De Page Warden-regels staan in `d100_mode_sim.gd`. `page_warden_rt_sim.gd` wordt niet aangeroepen en is niet gewijzigd.
 
 Factor 10, 24 runs, seed `20261110`, vloeren 1–10, stoelen 1–4. `--no-hypo --no-classic`.
 
