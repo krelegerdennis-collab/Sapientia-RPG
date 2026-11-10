@@ -171,6 +171,10 @@ static func _enemy_wire_bytes(codec_version: int) -> int:
 	return Protocol.SNAPSHOT_ENEMY_BYTES_V0 if codec_version <= 0 else Protocol.SNAPSHOT_ENEMY_BYTES_V1
 
 
+## Down-staat zit in het bestaande flags-woord (11 bytes per speler, offset 9).
+## Zie NetProtocol.FLAG_DOWN / FLAG_CHANNEL / FLAG_BLEED_DONE.
+## Hoge byte = voortgang 0..100 voor de gast-boog. Geen los veld, geen RUN_RESULT:
+## dat pakket is van M3 en hoort niet in deze snapshot.
 static func _pack_player(buf: PackedByteArray, off: int, p: Dictionary) -> int:
 	buf[off] = int(p.get("slot", 0)) & 0xFF
 	_write_i16(buf, off + 1, int(p.get("x", 0)))

@@ -10,6 +10,7 @@ const SomData := preload("res://scripts/data/som_data.gd")
 const SomMove := preload("res://scripts/som/som_move.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const CoopRevive := preload("res://scripts/coop/coop_revive.gd")
 const SeatCtrl := preload("res://scripts/coop/seat_controller.gd")
 const DIR_ROW := {Vector2i.DOWN: 0, Vector2i.LEFT: 1, Vector2i.RIGHT: 2, Vector2i.UP: 3}
 const WALK_CYCLE := [1, 0, 2, 0]  # 3-koloms; 5-koloms via MapSprite.walk_cycle(hframes)
@@ -33,6 +34,9 @@ var spell_cd := 1.0
 var teleports := 0
 var attacks := 0
 var _walk := 0.0
+## Zelfde record als CoopSeat, gevuld door de arena zolang deze bondgenoot meedoet in co-op.
+## M6 zet de stoel op slot 0..3; tot die tijd blijft dit leeg in de normale co-op (allies_enabled uit).
+var coop_row: Dictionary = {}
 ## Co-op-stoel (alleen host). Solo/WM1 laat dit uit: tick() blijft het oude pad.
 var seat_ai := false
 var seat_slot := -1
@@ -120,6 +124,8 @@ func tick(delta: float) -> void:
 	sprite.modulate = Color.WHITE
 	if in_wall():
 		_teleport()
+	if _coop_revive_drive(delta):
+		return
 	charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
 	spell_cd -= delta
 	var m: Dictionary = member()
@@ -212,6 +218,41 @@ func _think_spell() -> void:
 		if str(sp.get("type", "")) == "damage" and int(m["mp"]) >= int(sp.get("mp", 0)):
 			arena.cast_spell(str(s), hero_id, {})
 			return
+
+
+func _coop_revive_drive(delta: float) -> bool:
+	# Geen nieuwe state: kanaliseren blijft ST_FOLLOW. --statemachinetest eist die set.
+	# M6 zet de prioriteit in seat_controller.gd. Tot dat bestand er is, roept
+	# deze bondgenoot query_revive / begin_channel / end_channel zelf aan.
+	if arena == null or not ("coop_mode" in arena) or not bool(arena.coop_mode):
+		return false
+	if not ("allies_enabled" in arena) or not bool(arena.allies_enabled):
+		return false
+	if CoopRevive.seat_controller_present():
+		return false
+	if not arena.has_method("coop_down_rows"):
+		return false
+	var rows: Array = arena.coop_down_rows()
+	var mine: Dictionary = coop_row
+	if mine.is_empty():
+		return false
+	var q := CoopRevive.query_revive(rows, mine)
+	if bool(q.get("ok", false)):
+		CoopRevive.begin_channel(rows, mine, int(q.get("slot", -1)))
+		state = ST_FOLLOW
+		return true
+	var heal_alive := CoopRevive.heal_seat_alive(rows)
+	var someone_down := CoopRevive.any_down(rows)
+	if not CoopRevive.ai_should_revive(hero_id, heal_alive, someone_down):
+		CoopRevive.end_channel(mine)
+		return false
+	var tgt := CoopRevive.nearest_down_row(rows, position)
+	if tgt.is_empty():
+		CoopRevive.end_channel(mine)
+		return false
+	state = ST_FOLLOW
+	_move_to(Vector2(float(tgt.get("x", 0)), float(tgt.get("y", 0))), delta)
+	return true
 
 
 ## Virtuele stick + knoppen, zelfde vorm als een speler. rng = arena.rng.
