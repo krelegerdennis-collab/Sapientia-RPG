@@ -383,7 +383,8 @@ func _apply_player_sheet() -> void:
 ## Bestaande vijand-data (game_data.gd / berggrot_data.gd) met hetzelfde kamerniveau als het gevecht.
 func enemy_stats(m: Node) -> Dictionary:
 	# Online DLS: schaal op het "floor"-veld (eff). Solo en de WM1-sandbox gaan hier niet langs.
-	if coop_mode and room != null and bool(room.get("online_dls")):
+	# Godot 4.3: bool(null) bestaat niet; een ontbrekende sleutel is dus false, geen cast.
+	if coop_mode and room != null and room.get("online_dls", false) == true:
 		return OnlineDlsFloor.action_stats(m, self)
 	var id: String = m.enemy_id
 	var base: Dictionary = GameData.ENEMIES.get(id, {})
