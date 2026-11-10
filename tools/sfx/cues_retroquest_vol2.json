@@ -1,0 +1,466 @@
+{
+ "_doc": "Retro Quest Vol. 2: Combat & Magic (itch.io) en tegelijk SAPIENTIA-ticket A-3. Sleutel = pack-naam (bestand sfx_<sleutel>_NN.wav). prompt = Engels voor Stable Audio Open 1.0; seconds = lengte om te genereren; max_s = lengte na trimmen; varianten = aantal bestanden in de pack; manifest = sfx-id in assets/audio/audio_manifest.json dat dezelfde gekozen bestanden ook in het spel installeert (--install; die worden op 0.60 s getrimd voor check_algemene_sfx.py). Groepen: melee, ranged, hitmiss, element (8 x cast + hit), support, charge, status, extra.",
+ "_style": "16-bit SNES RPG sound effect, short, punchy, retro, clean, dry, mono, no music, no reverb tail",
+ "_negative": "music, melody, song, speech, voice, vocals, reverb, echo, room tone, noise floor, hum, low quality, long tail",
+ "_pack": {
+  "naam": "Retro Quest Vol. 2 - Combat & Magic",
+  "prefix": "sfx",
+  "sr": 22050,
+  "crush_bits": 12,
+  "model": "Stable Audio Open 1.0 (ComfyUI)",
+  "licentie_note": "Stability AI Community License; herkomst per bestand in SOURCES.csv"
+ },
+ "sword_swing": {
+  "prompt": "sharp steel sword whoosh slicing through air",
+  "seconds": 1.0,
+  "max_s": 0.35,
+  "varianten": 3,
+  "groep": "melee",
+  "manifest": "sword_swing"
+ },
+ "sword_hit_flesh": {
+  "prompt": "sword blade striking flesh, wet thud with a short cut",
+  "seconds": 1.0,
+  "max_s": 0.4,
+  "varianten": 3,
+  "groep": "melee",
+  "manifest": "sword_hit_flesh"
+ },
+ "sword_hit_armor": {
+  "prompt": "sword clanging against metal armor plate, bright metallic ring",
+  "seconds": 1.0,
+  "max_s": 0.5,
+  "varianten": 3,
+  "groep": "melee",
+  "manifest": "sword_hit_armor"
+ },
+ "axe_swing": {
+  "prompt": "heavy axe whoosh, low and wide",
+  "seconds": 1.0,
+  "max_s": 0.4,
+  "varianten": 2,
+  "groep": "melee"
+ },
+ "axe_hit": {
+  "prompt": "heavy axe chop impact, deep crunchy thud",
+  "seconds": 1.0,
+  "max_s": 0.45,
+  "varianten": 2,
+  "groep": "melee"
+ },
+ "dagger_stab": {
+  "prompt": "quick dagger stab, thin sharp jab with a tiny metallic tick",
+  "seconds": 1.0,
+  "max_s": 0.3,
+  "varianten": 2,
+  "groep": "melee"
+ },
+ "spear_thrust": {
+  "prompt": "spear thrust whoosh with a pointed impact",
+  "seconds": 1.0,
+  "max_s": 0.4,
+  "varianten": 2,
+  "groep": "melee"
+ },
+ "blunt_hit": {
+  "prompt": "wooden club or mace blunt impact, dull heavy thump",
+  "seconds": 1.0,
+  "max_s": 0.4,
+  "varianten": 2,
+  "groep": "melee"
+ },
+ "shield_block": {
+  "prompt": "attack blocked by a wooden and metal shield, solid knock",
+  "seconds": 1.0,
+  "max_s": 0.45,
+  "varianten": 2,
+  "groep": "melee",
+  "manifest": "block"
+ },
+ "parry_clang": {
+  "prompt": "two swords clashing, bright steel parry clang",
+  "seconds": 1.0,
+  "max_s": 0.5,
+  "varianten": 2,
+  "groep": "melee"
+ },
+ "critical_hit": {
+  "prompt": "critical hit impact, heavy strike with an extra bright crack layer",
+  "seconds": 1.2,
+  "max_s": 0.55,
+  "varianten": 2,
+  "groep": "melee",
+  "manifest": "critical_hit"
+ },
+ "weapon_draw": {
+  "prompt": "sword drawn from a scabbard, quick metallic slide",
+  "seconds": 1.0,
+  "max_s": 0.45,
+  "varianten": 2,
+  "groep": "melee"
+ },
+ "bow_draw": {
+  "prompt": "bowstring being drawn taut, creaking wood and string tension",
+  "seconds": 1.2,
+  "max_s": 0.5,
+  "varianten": 2,
+  "groep": "ranged"
+ },
+ "arrow_release": {
+  "prompt": "bowstring snap and arrow release, sharp twang",
+  "seconds": 1.0,
+  "max_s": 0.35,
+  "varianten": 3,
+  "groep": "ranged"
+ },
+ "arrow_hit_flesh": {
+  "prompt": "arrow striking a body, soft thud with a short whistle before it",
+  "seconds": 1.0,
+  "max_s": 0.4,
+  "varianten": 2,
+  "groep": "ranged"
+ },
+ "arrow_hit_wood": {
+  "prompt": "arrow hitting a wooden target, thock with a brief wobble",
+  "seconds": 1.0,
+  "max_s": 0.45,
+  "varianten": 2,
+  "groep": "ranged"
+ },
+ "arrow_miss": {
+  "prompt": "arrow whistling past and fading, quick airy whoosh",
+  "seconds": 1.0,
+  "max_s": 0.45,
+  "varianten": 2,
+  "groep": "ranged"
+ },
+ "throw_knife": {
+  "prompt": "throwing knife spinning through the air, rapid whirring whoosh",
+  "seconds": 1.0,
+  "max_s": 0.4,
+  "varianten": 2,
+  "groep": "ranged"
+ },
+ "miss": {
+  "prompt": "attack missing, light empty whoosh with no impact",
+  "seconds": 1.0,
+  "max_s": 0.35,
+  "varianten": 2,
+  "groep": "hitmiss",
+  "manifest": "miss"
+ },
+ "dodge": {
+  "prompt": "quick sidestep dodge, fast cloth whoosh",
+  "seconds": 1.0,
+  "max_s": 0.35,
+  "varianten": 2,
+  "groep": "hitmiss",
+  "manifest": "dodge"
+ },
+ "punch_hit": {
+  "prompt": "bare fist punch impact, compact meaty thud",
+  "seconds": 1.0,
+  "max_s": 0.3,
+  "varianten": 2,
+  "groep": "hitmiss"
+ },
+ "kick_hit": {
+  "prompt": "kick impact, heavier thump with a short snap",
+  "seconds": 1.0,
+  "max_s": 0.35,
+  "varianten": 2,
+  "groep": "hitmiss"
+ },
+ "magic_fire_cast": {
+  "prompt": "fireball whoosh igniting with a crackle",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element",
+  "manifest": "spell_fire"
+ },
+ "magic_fire_hit": {
+  "prompt": "fire explosion burst hitting a target, crackling and hot",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_ice_cast": {
+  "prompt": "ice spell forming, crystalline shimmer and frosty whoosh",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element",
+  "manifest": "spell_ice"
+ },
+ "magic_ice_hit": {
+  "prompt": "ice shattering on impact, glassy crystal crack",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_lightning_cast": {
+  "prompt": "lightning bolt charging and cracking, electric zap",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element",
+  "manifest": "spell_lightning"
+ },
+ "magic_lightning_hit": {
+  "prompt": "thunder strike impact, sharp electric crack with a bass thump",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_water_cast": {
+  "prompt": "water spell gathering, bubbling surge and splash",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_water_hit": {
+  "prompt": "water wave crashing into a target, heavy splash",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_earth_cast": {
+  "prompt": "earth spell rumbling, stones grinding and lifting",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_earth_hit": {
+  "prompt": "rock slab slamming down, deep stony impact with gravel",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_wind_cast": {
+  "prompt": "wind spell gust rising, airy whoosh with a whistle",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_wind_hit": {
+  "prompt": "wind blade slash impact, cutting air whoosh",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_light_cast": {
+  "prompt": "holy light spell, bright rising chime and sparkle",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_light_hit": {
+  "prompt": "light burst impact, bright radiant pop with a shimmer",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_dark_cast": {
+  "prompt": "dark magic gathering, low ominous hum and hiss",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "magic_dark_hit": {
+  "prompt": "shadow bolt impact, muffled dark thump with a hiss",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "element"
+ },
+ "heal_small": {
+  "prompt": "soft healing chime, gentle rising bell sparkle",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "support",
+  "manifest": "heal"
+ },
+ "heal_large": {
+  "prompt": "big healing spell, warm swelling chord with sparkles",
+  "seconds": 2.0,
+  "max_s": 1.0,
+  "varianten": 2,
+  "groep": "support"
+ },
+ "revive": {
+  "prompt": "revive spell, rising glow with a bright final bell",
+  "seconds": 2.0,
+  "max_s": 1.2,
+  "varianten": 2,
+  "groep": "support"
+ },
+ "cure_status": {
+  "prompt": "cleansing spell, clear bubbly shimmer washing away",
+  "seconds": 1.5,
+  "max_s": 0.7,
+  "varianten": 2,
+  "groep": "support"
+ },
+ "mana_restore": {
+  "prompt": "mana restore, cool crystalline rising arpeggio",
+  "seconds": 1.5,
+  "max_s": 0.7,
+  "varianten": 2,
+  "groep": "support"
+ },
+ "buff_apply": {
+  "prompt": "stat buff applied, upward power-up swell with a bright accent",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "support",
+  "manifest": "buff_apply"
+ },
+ "debuff_apply": {
+  "prompt": "stat debuff applied, downward sour sweep with a dull thud",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "support",
+  "manifest": "debuff_apply"
+ },
+ "dispel": {
+  "prompt": "dispel magic, short reverse shimmer snapping off",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "support"
+ },
+ "spell_charge_short": {
+  "prompt": "spell charging up, fast rising magical hum",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "charge",
+  "manifest": "spell_charge"
+ },
+ "spell_charge_long": {
+  "prompt": "long spell charge, magical energy building and swelling",
+  "seconds": 2.5,
+  "max_s": 1.2,
+  "varianten": 2,
+  "groep": "charge"
+ },
+ "spell_release": {
+  "prompt": "generic spell release, magical burst whoosh",
+  "seconds": 1.2,
+  "max_s": 0.5,
+  "varianten": 3,
+  "groep": "charge"
+ },
+ "spell_fizzle": {
+  "prompt": "spell fizzling out, weak sputter and a sad descending tone",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "charge"
+ },
+ "spell_shield": {
+  "prompt": "magic barrier forming, resonant shimmering shield hum",
+  "seconds": 1.5,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "charge",
+  "manifest": "spell_shield"
+ },
+ "spell_summon": {
+  "prompt": "summoning spell, deep swell with a bright arrival chime",
+  "seconds": 2.0,
+  "max_s": 0.6,
+  "varianten": 2,
+  "groep": "charge",
+  "manifest": "spell_summon"
+ },
+ "status_poison": {
+  "prompt": "poison damage tick, bubbly sickly blip",
+  "seconds": 1.0,
+  "max_s": 0.4,
+  "varianten": 2,
+  "groep": "status",
+  "manifest": "status_poison"
+ },
+ "status_burn": {
+  "prompt": "burn damage tick, short fiery sizzle",
+  "seconds": 1.0,
+  "max_s": 0.4,
+  "varianten": 2,
+  "groep": "status"
+ },
+ "status_freeze": {
+  "prompt": "frozen status breaking, icy crackle and shatter",
+  "seconds": 1.2,
+  "max_s": 0.55,
+  "varianten": 2,
+  "groep": "status"
+ },
+ "status_stun": {
+  "prompt": "stun hit, electric buzz with a wobble",
+  "seconds": 1.0,
+  "max_s": 0.45,
+  "varianten": 2,
+  "groep": "status"
+ },
+ "status_sleep": {
+  "prompt": "sleep spell, soft descending lullaby tone",
+  "seconds": 1.5,
+  "max_s": 0.7,
+  "varianten": 2,
+  "groep": "status"
+ },
+ "status_silence": {
+  "prompt": "silence spell, muffled snap as if sound is sucked away",
+  "seconds": 1.2,
+  "max_s": 0.5,
+  "varianten": 2,
+  "groep": "status"
+ },
+ "player_hurt": {
+  "prompt": "hero taking damage, short grunt-free impact thud with a flinch",
+  "seconds": 1.0,
+  "max_s": 0.35,
+  "varianten": 3,
+  "groep": "extra",
+  "manifest": "player_hurt"
+ },
+ "enemy_hurt": {
+  "prompt": "monster taking damage, meaty impact thud",
+  "seconds": 1.0,
+  "max_s": 0.35,
+  "varianten": 3,
+  "groep": "extra",
+  "manifest": "enemy_hurt"
+ },
+ "guard_break": {
+  "prompt": "guard broken, cracking shield splinter with a stagger thud",
+  "seconds": 1.2,
+  "max_s": 0.55,
+  "varianten": 2,
+  "groep": "extra"
+ },
+ "counter_attack": {
+  "prompt": "counter attack trigger, quick reverse whoosh into a sharp strike",
+  "seconds": 1.2,
+  "max_s": 0.5,
+  "varianten": 2,
+  "groep": "extra"
+ }
+}
