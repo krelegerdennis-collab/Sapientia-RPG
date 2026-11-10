@@ -26,3 +26,20 @@ function shutdown() {
 }
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
+
+function logCrash(kind, err) {
+  const line = JSON.stringify({
+    ts: new Date().toISOString(),
+    event: kind,
+    err: err && err.message ? err.message : String(err),
+  });
+  process.stderr.write(`${line}\n`);
+}
+
+process.on('uncaughtException', (err) => {
+  logCrash('uncaughtException', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  logCrash('unhandledRejection', reason instanceof Error ? reason : new Error(String(reason)));
+});
