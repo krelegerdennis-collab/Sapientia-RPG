@@ -31,7 +31,15 @@ static func physical_base(attacker: Dictionary, target: Dictionary, mult: float)
 
 static func spell_base(caster: Dictionary, spell: Dictionary, target: Dictionary) -> float:
 	var lvl := int(caster["s"].get("level", 1))
-	return SpellRules.power_at(spell, lvl) * SpellRules.factor(spell, str(caster["s"].get("id", "")), target) * token_mult(caster)
+	var mag := float(caster["s"].get("mag", 0))
+	var power := SpellRules.power_at(spell, lvl) * SpellRules.spell_mag_scale(mag)
+	if not SpellRules.spell_is_heal_kind(spell):
+		var stats: Dictionary = target.get("s", {}) if target.get("s") is Dictionary else {}
+		power -= float(stats.get("mdef", 0)) / SpellRules.SPELL_MDEF_DIV
+	var mult := SpellRules.factor(spell, str(caster["s"].get("id", "")), target)
+	if not SpellRules.spell_is_heal_kind(spell):
+		mult *= SpellRules.element_affinity_mult(spell, target)
+	return power * mult * token_mult(caster)
 
 
 static func buff_mult(c: Dictionary, stat: String) -> float:

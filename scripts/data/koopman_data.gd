@@ -13,7 +13,18 @@ extends RefCounted
 ## Tekst in de game is Engels; ids en commentaar Nederlands.
 
 const NAAM := "the Merchant"
-const SPRITE := preload("res://assets/sprites/npc/koopman_veld.png")
+const SPRITE_PATH := "res://assets/sprites/npc/koopman_veld.png"
+static var _sprite_tex: Texture2D
+
+## Veld-sprite. Geen parse-time preload: bij `--import` herlaadt Godot gewijzigde scripts (bv. damage_calc)
+## vóórdat texture-.ctex bestaat; dan faalt preload en valt game_state om.
+static var SPRITE: Texture2D:
+	get: return sprite()
+
+static func sprite() -> Texture2D:
+	if _sprite_tex == null:
+		_sprite_tex = load(SPRITE_PATH) as Texture2D
+	return _sprite_tex
 const TOKEN_ID := "h5_token"
 const TOKEN_NAAM := "H-5's Token"
 const TOKEN_BONUS := 0.10

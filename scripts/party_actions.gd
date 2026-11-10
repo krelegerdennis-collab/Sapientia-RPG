@@ -8,6 +8,7 @@ extends RefCounted
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const DamageCalc := preload("res://scripts/battle/damage_calc.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 ## Spreuk-effect buiten gevechten: zelfde formule als in battle.gd (_spell_amount):
 ## power + SPELL_LEVEL_BONUS x level, +/- SPELL_SPREAD.
@@ -298,8 +299,7 @@ static func spell_block_reason(caster: Dictionary, id: String) -> String:
 ## Basis-effect (zonder geluk) en de spreiding, voor de uitleg en de autotest.
 static func spell_base(caster: Dictionary, id: String) -> float:
 	var sp := spell_data(id)
-	var raw := SpellRules.power_at(sp, int(caster.get("level", 1)))
-	return raw * SpellRules.factor(sp, str(caster.get("id", "")), {})
+	return DamageCalc.spell_base({"s": caster, "is_hero": true, "buffs": []}, sp, {})
 
 
 static func spell_effect_text(caster: Dictionary, id: String) -> String:

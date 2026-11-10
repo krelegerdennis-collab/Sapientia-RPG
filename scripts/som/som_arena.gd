@@ -43,6 +43,7 @@ const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const DamageCalc := preload("res://scripts/battle/damage_calc.gd")
 const SomHud := preload("res://scripts/som/som_hud.gd")
 const SomRing := preload("res://scripts/som/som_ring.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
@@ -2156,7 +2157,8 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 			for m in targets:
 				if not is_instance_valid(m) or not enemies.has(m):
 					continue
-				var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {"s": enemies[m]["data"]})
+				var amt := DamageCalc.spell_base(
+						{"s": caster, "is_hero": true, "buffs": []}, sp, {"s": enemies[m]["data"]})
 				last_attacker = caster_id
 				spell_effect(spell_id, feet_of_enemy(m))
 				SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
@@ -2169,7 +2171,7 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 		if t.is_empty():
 			t = caster
 		caster["mp"] = int(caster["mp"]) - cost
-		var amt := roundi(SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, caster_id, {}))
+		var amt := roundi(DamageCalc.spell_base({"s": caster, "is_hero": true, "buffs": []}, sp, {}))
 		var expect := mini(amt, int(t["max_hp"]) - int(t["hp"]))
 		var tid := str(t.get("id", ""))
 		_cast_then(caster_id, spell_id, func() -> void:

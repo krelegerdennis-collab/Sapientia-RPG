@@ -1299,6 +1299,13 @@ assets/map_monsters/de_rechter.png
 assets/map_monsters/great_book_golem.png
 assets/map_monsters/root_emperor.png
 assets/map_monsters/de_stem.png
+# 10 nov 2026: C-12 rol-iconen (RPG ART art_c12_rollen/out), 16x16 + 32x32, 73-kleuren palet, alpha 0/255
+assets/ui/icons/items/icons16/spreuk_vuurbal.png
+assets/ui/icons/items/icons32/spreuk_vuurbal.png
+assets/ui/icons/items/icons16/spreuk_grote_genezing.png
+assets/ui/icons/items/icons32/spreuk_grote_genezing.png
+assets/ui/icons/items/icons16/spreuk_zonnevlam.png
+assets/ui/icons/items/icons32/spreuk_zonnevlam.png
 # 10 nov 2026: palette-fix RPG ART (art_title_palfix/out) van de vijf titelbestanden,
 #        73-kleuren masterpalet, alpha 0/255. Paden stonden al in dit bestand (v0.13):
 #        assets/ui/title_bg.png

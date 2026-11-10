@@ -10,7 +10,10 @@ extends Node
 
 const GD := preload("res://scripts/data/game_data.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
+const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const DamageCalc := preload("res://scripts/battle/damage_calc.gd")
 const BATTLE_SCRIPT := "res://scripts/battle/battle.gd"
+const D100 := preload("res://scripts/data/dungeon100_scaling.gd")
 
 var failures := 0
 var passes := 0
@@ -36,6 +39,9 @@ func _run() -> void:
 	_exp_curve_tests()
 	print("=== Deel C: level-ups ===")
 	_level_up_tests()
+	print("=== Deel D: spreuken (C-12 mag/mdef/zwak-resist) ===")
+	_spell_formula_tests()
+	_v3_scroll_floor_tests()
 	print("FORMULETEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	for i in 10:
@@ -149,3 +155,46 @@ func _level_up_tests() -> void:
 	GameState.give_exp(h, 104)          # 239: net onder level 5 (240)
 	check("239 EXP: nog level 4", int(h["level"]) == 4)
 	check("exp_to_next na 239 EXP = 1", PartyActions.exp_to_next(h) == 1)
+
+
+# ================================================================ deel D (C-12)
+func _spell_caster(id: String, level: int, mag: int) -> Dictionary:
+	return {"s": {"id": id, "level": level, "mag": mag, "mdef": 0, "atk": 1, "def": 1}, "is_hero": true, "buffs": []}
+
+
+func _spell_target(mdef: int, weak: Array = [], resist: Array = []) -> Dictionary:
+	return {"s": {"mdef": mdef, "weak": weak, "resist": resist, "hp": 50, "max_hp": 50, "def": 0}, "defending": false}
+
+
+func _spell_formula_tests() -> void:
+	var sp: Dictionary = GD.SPELLS["vuur"]
+	var caster := _spell_caster("noor", 10, 10)
+	var tgt := _spell_target(8)
+	var base := DamageCalc.spell_base(caster, sp, tgt)
+	# power 33, x1.2 mag, -4 mdef, x1.1 vuur
+	check("spell_base Spark Lv10 mag10 mdef8", is_equal_approx(base, 39.16))
+	var weak_tgt := _spell_target(8, ["vuur"], [])
+	check("spell_base zwak x1.5", is_equal_approx(DamageCalc.spell_base(caster, sp, weak_tgt), 58.74))
+	var resist_tgt := _spell_target(8, [], ["vuur"])
+	check("spell_base resist x0.5", is_equal_approx(DamageCalc.spell_base(caster, sp, resist_tgt), 19.58))
+	var hi_mag := _spell_caster("noor", 10, 50)
+	check("hogere mag geeft meer schade", DamageCalc.spell_base(hi_mag, sp, tgt) > base)
+	var heal := GD.SPELLS["genees"]
+	var lotte_lo := _spell_caster("lotte", 5, 7)
+	var lotte_hi := _spell_caster("lotte", 5, 47)  # +40 Life Staff
+	check("Life Staff (+40 mag) verhoogt heal", DamageCalc.spell_base(lotte_hi, heal, {}) > DamageCalc.spell_base(lotte_lo, heal, {}))
+	check("heal negeert mdef doel", is_equal_approx(
+			DamageCalc.spell_base(lotte_lo, heal, _spell_target(99)),
+			DamageCalc.spell_base(lotte_lo, heal, {})))
+	var b: Object = (load(BATTLE_SCRIPT) as GDScript).new()
+	check("battle.spell_base = DamageCalc", is_equal_approx(b.spell_base(caster, sp, tgt), base))
+	b.free()
+
+
+func _v3_scroll_floor_tests() -> void:
+	var p19 := D100.spell_scrolls_for_floor(19)
+	var p20 := D100.spell_scrolls_for_floor(20)
+	check("V3 floor 19: geen vuurbal in kist-pool", not p19.has("spreuk_vuurbal"))
+	check("V3 floor 20: vuurbal in kist-pool", p20.has("spreuk_vuurbal"))
+	check("V3 floor 79: geen zonneslag in kist-pool", not D100.spell_scrolls_for_floor(79).has("spreuk_g4_zonneslag"))
+	check("V3 floor 80: zonneslag in kist-pool", D100.spell_scrolls_for_floor(80).has("spreuk_g4_zonneslag"))

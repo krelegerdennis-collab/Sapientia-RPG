@@ -642,6 +642,13 @@ const ITEMS := {
 		"desc": "A scroll with Chain Lightning. Someone in the party can learn the spell."},
 	"spreuk_genees": {"name": "Scroll: Minor Heal", "short": "Minor Heal", "target": "ally", "teach": "genees", "heal_hp": 0, "heal_mp": 0,
 		"desc": "A scroll with Minor Heal. Someone in the party can learn the spell."},
+	# C-12 / V3: hogere rollen per buitniveau van de Diepe Grot (vervanger Kernkracht).
+	"spreuk_vuurbal": {"name": "Scroll: Fireball", "short": "Fireball", "target": "ally", "teach": "vuurbal", "heal_hp": 0, "heal_mp": 0,
+		"desc": "A scroll with Fireball. Someone in the party can learn the spell."},
+	"spreuk_grote_genezing": {"name": "Scroll: Major Heal", "short": "Major Heal", "target": "ally", "teach": "grote_genezing", "heal_hp": 0, "heal_mp": 0,
+		"desc": "A scroll with Major Heal. Someone in the party can learn the spell."},
+	"spreuk_zonnevlam": {"name": "Scroll: Solar Flare", "short": "Solar Flare", "target": "ally", "teach": "zonnevlam", "heal_hp": 0, "heal_mp": 0,
+		"desc": "A scroll with Solar Flare. Someone in the party can learn the spell."},
 	# Oude rollen. Blijven staan zodat een save of test ze nog opzoekt. Niet de grade-4-pool.
 	"spreuk_inferno": {"name": "Scroll: Inferno", "short": "Inferno", "target": "ally", "teach": "inferno", "heal_hp": 0, "heal_mp": 0,
 		"desc": "A scroll with Inferno. Only from a deep blue chest."},
