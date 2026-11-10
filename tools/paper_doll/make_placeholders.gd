@@ -114,7 +114,7 @@ func _generate() -> bool:
 	var header := PackedStringArray([
 		"# PLACEHOLDER paper-doll (online co-op M2). Geen definitieve art.",
 		"# Vervang het bestand door RPG ART (zelfde pad + maat) en haal de regel hier weg.",
-		"# Sleutel-ramp uit data/paperdoll/recolor_v1.json: 5 tonen rand, donker, schaduw, basis, licht.",
+		"# Sleutel-ramp uit assets/sprites/paperdoll/recolor_v2.json: 5 tonen rand, donker, schaduw, basis, licht.",
 		"# Huid-sleutel = huid/licht. Kleding- en haar-sleutel = key_ramp_kleding_haar.",
 		"# Index 0 is transparant. Vaste kleuren (laarzen, ogen, goud) zijn extra indices en worden niet herschikt.",
 		"# Schaduw en wapen zijn RGBA, zonder sleutel-ramp.",
