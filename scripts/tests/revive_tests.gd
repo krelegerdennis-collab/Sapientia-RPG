@@ -237,7 +237,7 @@ func _ai_priority_tests() -> void:
 	check("Heal-AI revivet niet als niemand ligt", not Revive.ai_should_revive("lotte", true, false))
 	check("andere AI revivet niet zolang Heal leeft", not Revive.ai_should_revive("dennis", true, true))
 	check("andere AI revivet als er geen Heal leeft", Revive.ai_should_revive("noor", false, true))
-	check("seat_controller.gd is er nog niet; SomAlly doet de haak", not Revive.seat_controller_present())
+	check("seat_controller.gd is er; SomAlly stopt de eigen haak", Revive.seat_controller_present())
 	var sim := _sim()
 	sim.enemies.clear()
 	sim.players[0]["controller"] = Seat.CONTROLLER_AI
@@ -347,9 +347,9 @@ func _som_ally_tests() -> void:
 	for _i in 12:
 		ally.tick(1.0 / 60.0)
 		await get_tree().physics_frame
-	check("SomAlly Heal (allies_enabled) loopt naar de down-stoel", ally.position.x > x0 + 4.0)
+	check("SomAlly loopt niet zelf nu seat_controller.gd er is", ally.position.x <= x0 + 4.0)
 	check("SomAlly blijft in follow, geen extra state", ally.state == SomAlly.ST_FOLLOW)
-	check("SomAlly slaat niet terwijl revive prio 1 is", ally.attacks == 0)
+	check("SomAlly slaat niet terwijl de haak bij M6 ligt", ally.attacks == 0)
 	arena.queue_free()
 
 
@@ -362,20 +362,35 @@ func _ring_tests() -> void:
 	var ring: CanvasLayer = Ring.new()
 	root.add_child(ring)
 	await get_tree().process_frame
-	var under := false
+	var under_mod := false
 	var cursor: Node = ring
 	while cursor != null:
 		if cursor is CanvasModulate:
-			under = true
+			under_mod = true
 		cursor = cursor.get_parent()
 	check("ring is een CanvasLayer", ring is CanvasLayer)
-	check("ring staat niet onder CanvasModulate", not under and ring.get_parent() == root)
+	check("ring staat niet onder CanvasModulate", not under_mod and ring.get_parent() == root)
+	check("ring-laag is 20", ring.layer == 20)
+	var bar := ring.get_node_or_null("Ring") as TextureProgressBar
+	check("ring is een TextureProgressBar", bar != null)
+	var tex_under: Texture2D = bar.texture_under if bar != null else null
+	var tex_ring: Texture2D = bar.texture_progress if bar != null else null
+	check("textures geladen", tex_under != null and tex_ring != null)
+	check("ring-art is 32x32",
+			tex_under != null and tex_ring != null
+			and tex_under.get_width() == 32 and tex_under.get_height() == 32
+			and tex_ring.get_width() == 32 and tex_ring.get_height() == 32)
+	check("fill_mode is 4", bar != null and bar.fill_mode == 4)
+	check("range is 0-100", bar != null and bar.min_value == 0.0 and bar.max_value == 100.0)
+	check("texture_filter is nearest", bar != null and bar.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
+	ring.show_channel(Vector2(48, 40), 0)
+	await get_tree().process_frame
+	check("ring verborgen bij 0%", bar != null and not bar.visible and ring.progress == 0 and not ring.shown)
 	ring.show_channel(Vector2(48, 40), 60)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	var mark := ring.get_node_or_null("PlaceholderMark") as Label
-	check("placeholder-markering PH", mark != null and mark.visible and mark.text == Ring.PLACEHOLDER_MARK)
-	check("ring toont 60%", ring.progress == 60 and ring.shown)
+	check("ring zichtbaar boven 0%", bar != null and bar.visible and ring.progress == 60 and ring.shown and bar.value == 60.0)
+	check("positie is world_pos min (16, 16)", bar != null and bar.position == Vector2(32, 24))
 	await _shot_ring(ring)
 	root.queue_free()
 
@@ -391,16 +406,23 @@ func _shot_ring(ring: CanvasLayer) -> void:
 		return
 	var full := tex.get_image()
 	var crop := full.get_region(Rect2i(0, 0, mini(96, full.get_width()), mini(72, full.get_height())))
-	var magenta := false
-	for y in crop.get_height():
-		for x in crop.get_width():
-			var c := crop.get_pixel(x, y)
-			if c.r > 0.7 and c.b > 0.7 and c.g < 0.35:
-				magenta = true
+	var drawn := false
+	var bar := ring.get_node_or_null("Ring") as TextureProgressBar
+	if bar != null:
+		var origin := Vector2i(int(bar.position.x), int(bar.position.y))
+		for y in 32:
+			for x in 32:
+				var px := origin.x + x
+				var py := origin.y + y
+				if px < 0 or py < 0 or px >= crop.get_width() or py >= crop.get_height():
+					continue
+				var c := crop.get_pixel(px, py)
+				if c.a > 0.2 and (c.r > 0.15 or c.g > 0.15 or c.b > 0.15):
+					drawn = true
+					break
+			if drawn:
 				break
-		if magenta:
-			break
-	check("placeholder-boog is magenta in beeld", magenta)
+	check("ring-art staat in beeld", drawn)
 	var out := "/opt/cursor/artifacts/revive_ring.png"
 	DirAccess.make_dir_recursive_absolute("/opt/cursor/artifacts")
 	var err := crop.save_png(out)

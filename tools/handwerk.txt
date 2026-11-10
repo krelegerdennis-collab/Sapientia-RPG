@@ -1444,3 +1444,5 @@ assets/ui/icons/emotes/icons32/emote_0_help.png
 assets/ui/icons/emotes/icons32/emote_1_hier_heen.png
 assets/ui/icons/emotes/icons32/emote_2_goed_gedaan.png
 assets/ui/icons/emotes/icons32/emote_3_bedankt.png
+assets/sprites/coop/revive_ring.png
+assets/sprites/coop/revive_ring_under.png
