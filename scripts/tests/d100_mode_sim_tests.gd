@@ -4,6 +4,7 @@ extends Node
 ## Niet in CI (tests.yml) en niet in debug_autotest.gd. Vraag aan Dennis staat in de PR.
 
 const Sim := preload("res://tools/battlesim/d100_mode_sim.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 const Modes := preload("res://scripts/online/online_dls_modes.gd")
 const Floor := preload("res://scripts/online/online_dls_floor.gd")
 const Finger := preload("res://scripts/online/solo_d100_fingerprint.gd")
@@ -212,10 +213,14 @@ func _party_sig() -> String:
 	return "|".join(parts)
 
 
+## Tas via de publieke item_count, over de catalogus.
 func _inv_sig() -> String:
-	var keys: Array = GameState.inventory.keys()
-	keys.sort()
 	var parts: PackedStringArray = PackedStringArray()
-	for k in keys:
-		parts.append("%s=%d" % [str(k), int(GameState.inventory[k])])
+	for bag in [GameData.ITEMS, GameData.KEY_ITEMS, GameData.EQUIPMENT]:
+		var keys: Array = bag.keys()
+		keys.sort()
+		for k in keys:
+			var n := GameState.item_count(str(k))
+			if n > 0:
+				parts.append("%s=%d" % [str(k), n])
 	return "|".join(parts)
