@@ -287,7 +287,7 @@ Inspanning: S < 2 uur, M = 1-2 dagen, L = week+.
 | F-8 GameState splitsen | CODE | P2 | L | open |
 | F-9 CI-kosten | Forge | P2 | M | open |
 | C-1 dev-knoppen gaten | Cursor | P0 | S | wacht op §5.5 |
-| C-2 stun-lock | CODE/Cursor | P1 | S | open |
+| C-2 stun-lock | CODE/Cursor | P1 | S | PR (cursor/c-2-stunlock) |
 | C-3 veldmenu preload | Cursor | P1 | S | open |
 | C-4 opslaan uitleggen | Cursor | P1 | S | open |
 | C-5 save-version + save_game guard | Cursor | P0 | S | open |
