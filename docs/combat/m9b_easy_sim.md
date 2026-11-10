@@ -269,7 +269,7 @@ HP in (tabel hierboven) is de partij-HP bij binnenkomst. HP uit is de partij-HP 
 - Feniksveer en drankjes zijn een handmatige ring-actie (`PartyActions.use_item`). De bondgenoot-AI gebruikt ze niet. Deze sim ook niet. M8a ontbreekt, dus geen automatische revive.
 - EXP valt per verslagen vijand, vol, aan elke levende held, meteen (`give_exp`). Een level-up vult HP bij met de groei.
 - Aanvalsketen zoals `som_ally.gd`: hit1 ×1.0, hit2 ×1.1, finisher ×1.6, vervolg 6 ticks na de animatie (venster 20). De host ketent hetzelfde. Na de finisher laadt een AI-bondgenoot een zware slag niveau 1 (45 ticks, ×1.7).
-- Page Warden: doelkeuze, klapvorm, bondgenoot-spreuk en adds komen uit `page_warden_rt_sim.gd`. De slag zelf blijft de keten; die sim laadt nog een volle meter.
+- Page Warden: doelkeuze, klapvorm, bondgenoot-spreuk en adds staan in deze sim, dezelfde regels als `page_warden_rt_sim.gd`, zonder die file aan te roepen. De slag zelf blijft de keten; die sim laadt nog een volle meter.
 - Doel is een vijand die al aangekomen is. Een nog lopende vijand verspilt de slag niet.
 - Vijandschade × `ENEMY_DAMAGE_MULT` 2.2, dezelfde factor als `enemy_damage_mult` op een kamer zonder gebiedsregel.
 
