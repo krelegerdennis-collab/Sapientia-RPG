@@ -3,12 +3,12 @@ extends RefCounted
 ## CPU-bakker voor de co-op paper doll (M2).
 ##
 ## Eén ImageTexture per sheet, nearest, cache op de look-hash.
-## Recolorkleuren komen uit data/paperdoll/recolor_v1.json (RPG ART, proef):
+## Recolorkleuren komen uit assets/sprites/paperdoll/recolor_v2.json (RPG ART):
 ## per laag worden de 5 sleuteltonen vervangen, de lagen gestapeld, daarna
 ## wordt de donkere buitencontour #3a4058, en de schaduw gaat eronder.
 ## De baker spiegelt nooit: de rechts-rij komt uit de sheet zelf.
 
-const RECOLOR_PATH := "res://data/paperdoll/recolor_v1.json"
+const RECOLOR_PATH := "res://assets/sprites/paperdoll/recolor_v2.json"
 const PALETTE_PATH := "res://docs/art/masterpalet.gpl"
 const LAYERS_PATH := "res://data/online/paper_doll_layers.json"
 
@@ -18,8 +18,10 @@ const ORDER: PackedStringArray = [
 	"haar_achter", "gezicht", "haar_voor", "hoofd", "wapen",
 ]
 
+const ART_SHEETS: PackedStringArray = ["walk", "ko"]
+
 const SHEETS: Dictionary = {
-	"walk": {"w": 72, "h": 128, "cw": 24, "ch": 32, "cols": 3, "rows": 4},
+	"walk": {"w": 120, "h": 128, "cw": 24, "ch": 32, "cols": 5, "rows": 4},
 	"attack": {"w": 288, "h": 192, "cw": 48, "ch": 48, "cols": 6, "rows": 4},
 	"hurt": {"w": 192, "h": 48, "cw": 48, "ch": 48, "cols": 4, "rows": 1},
 	"dodge": {"w": 192, "h": 48, "cw": 48, "ch": 48, "cols": 4, "rows": 1},
@@ -36,6 +38,12 @@ const HAIR_ORDER: PackedStringArray = [
 	"zwart", "bruin", "blond", "rood", "zilver", "blauw", "paars", "groen",
 ]
 const CLOTH_ORDER: PackedStringArray = ["nacht", "rood", "mos", "leer", "papier", "paars"]
+const HEAD_ORDER: PackedStringArray = ["nacht", "rood", "mos", "leer"]
+
+const CLASS_WEAPON: Dictionary = {
+	"warrior": "zwaard", "mage": "staf", "priest": "scepter",
+	"psytech": "psy", "archer": "boog",
+}
 
 const CLASS_OF: Dictionary = {
 	"warrior": "warrior", "mage": "mage", "priest": "priest",
@@ -115,6 +123,8 @@ static func color_names(group: String) -> PackedStringArray:
 		return HAIR_ORDER.duplicate()
 	if group == "kleding":
 		return CLOTH_ORDER.duplicate()
+	if group == "hoofddeksel":
+		return HEAD_ORDER.duplicate()
 	return PackedStringArray()
 
 
@@ -292,8 +302,8 @@ static func validate() -> PackedStringArray:
 		errors.append("sleutelramp is geen 5 tonen")
 	if _outline != Color8(58, 64, 88):
 		errors.append("buitenrand is niet #3a4058")
-	var groups: PackedStringArray = PackedStringArray(["huid", "haar", "kleding"])
-	var expected: PackedInt32Array = PackedInt32Array([4, 8, 6])
+	var groups: PackedStringArray = PackedStringArray(["huid", "haar", "kleding", "hoofddeksel"])
+	var expected: PackedInt32Array = PackedInt32Array([4, 8, 6, 4])
 	for i in groups.size():
 		var list: Array = _ramps.get(groups[i], [])
 		if list.size() != expected[i]:
@@ -308,19 +318,14 @@ static func validate() -> PackedStringArray:
 	for layer in ORDER:
 		if not _layers.has(layer):
 			errors.append("laag %s ontbreekt in het manifest" % layer)
-	var root := ProjectSettings.globalize_path("res://assets/placeholder/coop/paperdoll")
-	var dir := DirAccess.open(root)
-	if dir == null:
-		errors.append("placeholder-map ontbreekt")
-	else:
-		for layer in ORDER:
-			var spec: Dictionary = _layers.get(layer, {})
-			var options: Dictionary = spec.get("options", {})
-			for id in options.keys():
-				for sheet in SHEET_LIST:
-					var rel := _option_path(options[id], sheet)
-					if rel == "" or not FileAccess.file_exists(rel):
-						errors.append("mist %s/%s/%s" % [layer, str(id), sheet])
+	for layer in ORDER:
+		var spec: Dictionary = _layers.get(layer, {})
+		var options: Dictionary = spec.get("options", {})
+		for id in options.keys():
+			for sheet in ART_SHEETS:
+				var rel := _option_path(options[id], sheet)
+				if rel == "" or not FileAccess.file_exists(rel):
+					errors.append("mist %s/%s/%s" % [layer, str(id), sheet])
 	return errors
 
 
@@ -361,10 +366,12 @@ static func _load_recolor() -> void:
 		return
 	_doc = parsed
 	_key_huid = _parse_ramp(_doc.get("key_ramp_huid", []))
-	_key_cloth = _parse_ramp(_doc.get("key_ramp_kleding_haar", []))
+	var cloth_keys: Variant = _doc.get("key_ramp_kleding_haar_hoofd_cape", _doc.get("key_ramp_kleding_haar", []))
+	_key_cloth = _parse_ramp(cloth_keys)
 	_ramps["huid"] = _named_ramps(_doc.get("huid", {}), SKIN_ORDER)
 	_ramps["haar"] = _named_ramps(_doc.get("haar", {}), HAIR_ORDER)
 	_ramps["kleding"] = _named_ramps(_doc.get("kleding", {}), CLOTH_ORDER)
+	_ramps["hoofddeksel"] = _named_ramps(_doc.get("hoofddeksel", {}), HEAD_ORDER)
 	var fixed: Variant = _doc.get("vaste_kleuren_niet_kleuren", {})
 	if fixed is Dictionary:
 		_fixed = fixed
@@ -535,9 +542,24 @@ static func _resolve_id(look: Dictionary, spec: Dictionary) -> String:
 	var optional := bool(spec.get("optional", false))
 	if bool(spec.get("class_map", false)):
 		var mapped := class_id(look.get(key, ""))
-		if names.find(mapped) >= 0:
-			return mapped
+		var weapon := str(CLASS_WEAPON.get(mapped, ""))
+		if names.find(weapon) >= 0:
+			return weapon
 		return ""
+	if key == "cape":
+		if not look.has("cape"):
+			return ""
+		var cape_val: Variant = look["cape"]
+		if cape_val == null:
+			return ""
+		if cape_val is String:
+			var cape_text := str(cape_val).strip_edges().to_lower()
+			if cape_text == "" or cape_text == "none" or cape_text == "geen":
+				return ""
+			return "cape"
+		if cape_val is int and int(cape_val) <= 0:
+			return ""
+		return "cape"
 	if key == "" or not look.has(key) or look[key] == null:
 		if optional:
 			return ""
@@ -573,6 +595,10 @@ static func _color_name(look: Dictionary, key: String, group: String) -> String:
 	var names := color_names(group)
 	if names.is_empty():
 		return ""
+	if key == "cape" and look.has("cape") and look["cape"] is String:
+		var cape_color := str(look["cape"]).strip_edges().to_lower()
+		if names.find(cape_color) >= 0:
+			return cape_color
 	if key == "" or not look.has(key) or look[key] == null:
 		return names[0]
 	var value: Variant = look[key]
