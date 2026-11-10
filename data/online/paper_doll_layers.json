@@ -1,0 +1,414 @@
+{
+  "anchor": [
+    12,
+    16
+  ],
+  "directions": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "draw_order": [
+    "schaduw",
+    "lichaam",
+    "onder",
+    "boven",
+    "cape",
+    "haar_achter",
+    "gezicht",
+    "haar_voor",
+    "hoofd",
+    "wapen"
+  ],
+  "generator": "tools/paper_doll/make_placeholders.gd",
+  "layers": {
+    "boven": {
+      "color_key": "top_color",
+      "id_key": "top",
+      "key_ramp": "kleding",
+      "names": [
+        "tuniek",
+        "mantel",
+        "hemd",
+        "jas"
+      ],
+      "none_below": 0,
+      "options": {
+        "hemd": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_hemd_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_hemd_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_hemd_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_hemd_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_hemd_walk.png"
+        },
+        "jas": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_jas_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_jas_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_jas_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_jas_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_jas_walk.png"
+        },
+        "mantel": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_mantel_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_mantel_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_mantel_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_mantel_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_mantel_walk.png"
+        },
+        "tuniek": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_tuniek_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_tuniek_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_tuniek_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_tuniek_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_boven_tuniek_walk.png"
+        }
+      },
+      "recolor": "kleding"
+    },
+    "cape": {
+      "color_key": "top_color",
+      "id_key": "cape",
+      "key_ramp": "kleding",
+      "names": [],
+      "optional": true,
+      "options": {},
+      "recolor": "kleding"
+    },
+    "gezicht": {
+      "color_key": "skin",
+      "fixed_id": "0",
+      "key_ramp": "huid",
+      "names": [
+        "0"
+      ],
+      "options": {
+        "0": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_gezicht_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_gezicht_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_gezicht_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_gezicht_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_gezicht_walk.png"
+        }
+      },
+      "recolor": "huid"
+    },
+    "haar_achter": {
+      "color_key": "hair_color",
+      "id_key": "hair",
+      "key_ramp": "kleding",
+      "names": [
+        "kort",
+        "lang",
+        "stekel",
+        "bob",
+        "knot",
+        "zij"
+      ],
+      "none_below": 0,
+      "options": {
+        "bob": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_achter_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_achter_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_achter_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_achter_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_achter_walk.png"
+        },
+        "knot": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_achter_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_achter_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_achter_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_achter_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_achter_walk.png"
+        },
+        "kort": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_achter_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_achter_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_achter_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_achter_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_achter_walk.png"
+        },
+        "lang": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_achter_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_achter_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_achter_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_achter_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_achter_walk.png"
+        },
+        "stekel": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_achter_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_achter_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_achter_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_achter_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_achter_walk.png"
+        },
+        "zij": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_achter_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_achter_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_achter_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_achter_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_achter_walk.png"
+        }
+      },
+      "recolor": "haar"
+    },
+    "haar_voor": {
+      "color_key": "hair_color",
+      "id_key": "hair",
+      "key_ramp": "kleding",
+      "names": [
+        "kort",
+        "lang",
+        "stekel",
+        "bob",
+        "knot",
+        "zij"
+      ],
+      "none_below": 0,
+      "options": {
+        "bob": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_voor_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_voor_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_voor_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_voor_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_bob_voor_walk.png"
+        },
+        "knot": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_voor_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_voor_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_voor_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_voor_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_knot_voor_walk.png"
+        },
+        "kort": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_voor_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_voor_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_voor_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_voor_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_kort_voor_walk.png"
+        },
+        "lang": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_voor_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_voor_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_voor_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_voor_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_lang_voor_walk.png"
+        },
+        "stekel": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_voor_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_voor_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_voor_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_voor_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_stekel_voor_walk.png"
+        },
+        "zij": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_voor_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_voor_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_voor_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_voor_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_haar_zij_voor_walk.png"
+        }
+      },
+      "recolor": "haar"
+    },
+    "hoofd": {
+      "color_key": "head_color",
+      "id_key": "head",
+      "key_ramp": "kleding",
+      "names": [
+        "kap",
+        "hoed"
+      ],
+      "none_at": 0,
+      "optional": true,
+      "options": {
+        "hoed": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_hoed_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_hoed_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_hoed_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_hoed_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_hoed_walk.png"
+        },
+        "kap": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_kap_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_kap_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_kap_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_kap_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_hoofd_kap_walk.png"
+        }
+      },
+      "recolor": "kleding"
+    },
+    "lichaam": {
+      "color_key": "skin",
+      "fixed_id": "0",
+      "key_ramp": "huid",
+      "names": [
+        "0"
+      ],
+      "options": {
+        "0": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_lichaam_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_lichaam_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_lichaam_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_lichaam_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_lichaam_walk.png"
+        }
+      },
+      "recolor": "huid"
+    },
+    "onder": {
+      "color_key": "bottom_color",
+      "id_key": "bottom",
+      "key_ramp": "kleding",
+      "names": [
+        "broek",
+        "rok",
+        "kort"
+      ],
+      "none_below": 0,
+      "options": {
+        "broek": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_broek_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_broek_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_broek_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_broek_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_broek_walk.png"
+        },
+        "kort": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_kort_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_kort_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_kort_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_kort_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_kort_walk.png"
+        },
+        "rok": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_rok_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_rok_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_rok_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_rok_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_onder_rok_walk.png"
+        }
+      },
+      "recolor": "kleding"
+    },
+    "schaduw": {
+      "fixed_id": "0",
+      "names": [
+        "0"
+      ],
+      "options": {
+        "0": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_schaduw_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_schaduw_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_schaduw_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_schaduw_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_schaduw_walk.png"
+        }
+      },
+      "recolor": "",
+      "under": true
+    },
+    "wapen": {
+      "class_map": true,
+      "id_key": "class",
+      "names": [
+        "warrior",
+        "mage",
+        "priest",
+        "psytech",
+        "archer"
+      ],
+      "optional": true,
+      "options": {
+        "archer": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_archer_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_archer_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_archer_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_archer_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_archer_walk.png"
+        },
+        "mage": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_mage_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_mage_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_mage_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_mage_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_mage_walk.png"
+        },
+        "priest": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_priest_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_priest_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_priest_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_priest_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_priest_walk.png"
+        },
+        "psytech": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_psytech_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_psytech_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_psytech_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_psytech_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_psytech_walk.png"
+        },
+        "warrior": {
+          "attack": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_warrior_attack.png",
+          "dodge": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_warrior_dodge.png",
+          "hurt": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_warrior_hurt.png",
+          "ko": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_warrior_ko.png",
+          "walk": "res://assets/placeholder/coop/paperdoll/PLACEHOLDER_wapen_warrior_walk.png"
+        }
+      },
+      "recolor": ""
+    }
+  },
+  "mirrors_right": false,
+  "outline": {
+    "color": "#3a4058",
+    "max_rgb_sum": 156,
+    "shadow_under": true
+  },
+  "placeholder": true,
+  "recolor": "res://data/paperdoll/recolor_v1.json",
+  "sheets": {
+    "attack": {
+      "ch": 48,
+      "cols": 6,
+      "cw": 48,
+      "h": 192,
+      "rows": 4,
+      "w": 288
+    },
+    "dodge": {
+      "ch": 48,
+      "cols": 4,
+      "cw": 48,
+      "h": 48,
+      "rows": 1,
+      "w": 192
+    },
+    "hurt": {
+      "ch": 48,
+      "cols": 4,
+      "cw": 48,
+      "h": 48,
+      "rows": 1,
+      "w": 192
+    },
+    "ko": {
+      "ch": 48,
+      "cols": 1,
+      "cw": 48,
+      "h": 48,
+      "rows": 1,
+      "w": 48
+    },
+    "walk": {
+      "ch": 32,
+      "cols": 3,
+      "cw": 24,
+      "h": 128,
+      "rows": 4,
+      "w": 72
+    }
+  },
+  "version": 1
+}
