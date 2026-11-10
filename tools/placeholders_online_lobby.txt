@@ -1,0 +1,29 @@
+# Online lobby M5. PLACEHOLDER, magenta rand en hoekjes, 16x16. Geen definitieve art.
+# RPG ART levert later dezelfde motieven op de FINAL-paden. De code leest die paden
+# en valt terug op deze bestanden zolang de FINAL-png er niet is.
+# Rol (Tank / Heal / Control / Dps), 16 en 32:
+#   assets/ui/icons/rollen/icons16/rol_tank.png
+#   assets/ui/icons/rollen/icons32/rol_tank.png
+#   assets/ui/icons/rollen/icons16/rol_heal.png
+#   assets/ui/icons/rollen/icons32/rol_heal.png
+#   assets/ui/icons/rollen/icons16/rol_control.png
+#   assets/ui/icons/rollen/icons32/rol_control.png
+#   assets/ui/icons/rollen/icons16/rol_dps.png
+#   assets/ui/icons/rollen/icons32/rol_dps.png
+# Emote (0 help, 1 hier heen, 2 goed gedaan, 3 bedankt), 16 en 32:
+#   assets/ui/icons/emotes/icons16/emote_0_help.png
+#   assets/ui/icons/emotes/icons32/emote_0_help.png
+#   assets/ui/icons/emotes/icons16/emote_1_hier_heen.png
+#   assets/ui/icons/emotes/icons32/emote_1_hier_heen.png
+#   assets/ui/icons/emotes/icons16/emote_2_goed_gedaan.png
+#   assets/ui/icons/emotes/icons32/emote_2_goed_gedaan.png
+#   assets/ui/icons/emotes/icons16/emote_3_bedankt.png
+#   assets/ui/icons/emotes/icons32/emote_3_bedankt.png
+assets/placeholder/online/rol_tank.png            16x16  rol Tank, placeholder
+assets/placeholder/online/rol_heal.png            16x16  rol Heal, placeholder
+assets/placeholder/online/rol_control.png         16x16  rol Control, placeholder
+assets/placeholder/online/rol_dps.png             16x16  rol Dps, placeholder
+assets/placeholder/online/emote_0_help.png        16x16  emote 0 help, placeholder
+assets/placeholder/online/emote_1_hier_heen.png   16x16  emote 1 hier heen, placeholder
+assets/placeholder/online/emote_2_goed_gedaan.png 16x16  emote 2 goed gedaan, placeholder
+assets/placeholder/online/emote_3_bedankt.png     16x16  emote 3 bedankt, placeholder

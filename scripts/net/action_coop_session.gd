@@ -125,9 +125,10 @@ func shutdown(keep_peer: bool = true) -> void:
 		_lobby.unbind_gameplay()
 		_lobby = null
 		lobby_feed = false
-	var mp := get_tree().get_multiplayer()
-	if mp != null and mp.multiplayer_peer == _peer:
-		mp.multiplayer_peer = null
+	if is_inside_tree():
+		var mp := get_tree().get_multiplayer()
+		if mp != null and mp.multiplayer_peer == _peer:
+			mp.multiplayer_peer = null
 	if _peer != null and own_peer and not keep_peer:
 		_peer.close()
 	_peer = null

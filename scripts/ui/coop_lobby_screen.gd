@@ -21,6 +21,12 @@ signal leave_requested
 
 enum Screen { MENU, HOST, JOIN, JOIN_CODE, MESSAGE }
 
+## Online hal (M5): Host/Join via protocol v2 en het M1-profiel.
+## Het gewone LAN-menu laat dit uit, zodat bestaande lobby-tests gelijk blijven.
+var hall_mode := false
+var hall_profile: Dictionary = {}
+var folded := false
+
 var lobby: LanLobby
 var discovery: LanDiscovery
 
@@ -86,7 +92,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		cancel()
 
 
+func fold_for_hall() -> void:
+	folded = true
+	visible = false
+
+
 func cancel() -> void:
+	if folded:
+		return
 	match _screen:
 		Screen.MENU, Screen.MESSAGE:
 			_leave_to_title()
@@ -153,7 +166,11 @@ func _show_host() -> void:
 func _show_host_online() -> void:
 	_teardown_net()
 	_screen = Screen.HOST
-	var err := lobby.host_relay(Protocol.relay_url(), _host_display_name())
+	var err := OK
+	if hall_mode:
+		err = lobby.host_relay_v2(Protocol.relay_url(), hall_profile)
+	else:
+		err = lobby.host_relay(Protocol.relay_url(), _host_display_name())
 	if err != OK:
 		_show_message("Could not open an online room (%s)." % Protocol.error_name(err))
 		return
@@ -171,7 +188,11 @@ func _show_join_code() -> void:
 func _join_online(code: String) -> void:
 	_joining_code = code
 	_rebuild()
-	var err := lobby.join_relay(Protocol.relay_url(), code, "", _guest_display_name())
+	var err := OK
+	if hall_mode:
+		err = lobby.join_relay_v2(Protocol.relay_url(), code, hall_profile)
+	else:
+		err = lobby.join_relay(Protocol.relay_url(), code, "", _guest_display_name())
 	if err != OK:
 		_joining_code = ""
 		_show_message("Could not join online (%s)." % Protocol.error_name(err))
@@ -242,7 +263,10 @@ func _build_menu() -> void:
 
 func _build_host() -> void:
 	var online := lobby.transport == LanLobby.Transport.RELAY
-	_box.add_child(UiMenu.label("Hosting online as Dax" if online else "Hosting as Dax", UiStyleC.HILITE, TITLE_SIZE))
+	var title := "Hosting online as Dax" if online else "Hosting as Dax"
+	if online and lobby.protocol_version == Protocol.VERSION_ONLINE:
+		title = "Hosting online"
+	_box.add_child(UiMenu.label(title, UiStyleC.HILITE, TITLE_SIZE))
 	if online:
 		if lobby.room_code == "":
 			_box.add_child(UiMenu.label("Connecting to the online server...", UiStyleC.TEXT_DIM, TEXT_SIZE))
@@ -484,6 +508,8 @@ func _on_session_ended(reason: String) -> void:
 
 
 func _on_host_start() -> void:
+	if hall_mode or folded:
+		return
 	if not lobby.is_host:
 		return
 	discovery.stop()
@@ -493,6 +519,8 @@ func _on_host_start() -> void:
 
 
 func _on_start_game_received() -> void:
+	if hall_mode or folded:
+		return
 	discovery.stop()
 	_persist_net_nodes()
 	await GameState.start_som_coop_guest(lobby.local_character)

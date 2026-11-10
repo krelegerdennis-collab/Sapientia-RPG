@@ -747,6 +747,7 @@ func _ready() -> void:
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
 			["--onlineprofiletest", "res://scripts/tests/online_profile_tests.gd", "OnlineProfileTest", "onlineprofiletest"],
 			["--paperdolltest", "res://scripts/tests/paper_doll_tests.gd", "PaperDollTest", "paperdolltest"],
+			["--onlinelobbytest", "res://scripts/tests/online_lobby_tests.gd", "OnlineLobbyTest", "onlinelobbytest"],
 			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
 			["--solod100guardtest", "res://scripts/tests/solo_d100_guard_tests.gd", "SoloD100GuardTest", "solod100guardtest"],
 			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"],
