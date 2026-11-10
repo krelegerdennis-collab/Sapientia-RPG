@@ -1,8 +1,7 @@
 extends Node2D
 class_name PageWardenView
 ## Beeld voor de realtime Page Warden. Alleen tekenen.
-## Lichaam = bestaande page_warden.png. Aanval, fase 2, treffer en pagina-projectiel
-## zijn placeholders (magenta hoek + PH) tot RPG ART ze vervangt.
+## Lichaam = page_warden.png; aanval, fase 2, treffer en pagina uit assets/sprites/bosses/.
 ## Telegraafvorm zelf tekent TelegraphLayer vanuit TelegraphAttack; hier alleen lichaam,
 ## faseflits en de pagina's tijdens het stagger-venster.
 
@@ -35,6 +34,8 @@ func _init() -> void:
 	flash.visible = false
 	for i in 3:
 		var p := _sprite(TEX_PAGE, 1)
+		# Ouder schaalt lichaam 0.25×; pagina blijft ~16×16 schermpixels.
+		p.scale = Vector2(4.0, 4.0)
 		p.visible = false
 		add_child(p)
 		_pages.append(p)
@@ -59,15 +60,7 @@ static func textures_ok() -> bool:
 		return false
 	if TEX_PAGE == null or TEX_PAGE.get_width() != 16 or TEX_PAGE.get_height() != 16:
 		return false
-	return _corner_marked(TEX_HIT) and _corner_marked(TEX_PHASE2) and _corner_marked(TEX_PAGE) and _corner_marked(TEX_ATTACK)
-
-
-static func _corner_marked(tex: Texture2D) -> bool:
-	var img := tex.get_image()
-	if img == null:
-		return false
-	var c := img.get_pixel(0, 0)
-	return is_equal_approx(c.r, 1.0) and c.g < 0.2 and c.b > 0.8
+	return true
 
 
 ## Host: beeld uit het gevecht. Geen allocatie; de pagina-sprites zijn een vaste pool van 3.
@@ -84,7 +77,7 @@ func sync(fight: PageWardenFight) -> void:
 		body.texture = TEX_PHASE2 if ph >= 1 else TEX_BODY
 		body.hframes = 1
 		body.frame = 0
-	hit.visible = fight.step == PageWardenFight.Step.ACTIVE or fight.step == PageWardenFight.Step.STAGGER
+	hit.visible = fight.step == PageWardenFight.Step.STAGGER
 	flash.visible = fight.is_invulnerable()
 	if flash.visible:
 		var left := int(fight.pm._invuln_ticks)

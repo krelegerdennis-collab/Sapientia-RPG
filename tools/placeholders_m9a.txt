@@ -3,7 +3,4 @@
 # Echte art: zelfde pad + maat, daarna deze regel weg en het bestand in tools/handwerk.txt.
 # page_warden.png, page_warden_rug.png en assets/map_monsters/page_warden.png zijn al handwerk
 # en worden hier niet vervangen.
-assets/sprites/bosses/page_warden_attack_ph.png    512x200  2 frames van 256x200 (windup, treffer). Voeten zoals page_warden.png (256x200, voeten rond 128,194).
-assets/sprites/bosses/page_warden_hit_ph.png       256x200  1 frame trefferflits, zelfde canvas als page_warden.png.
-assets/sprites/bosses/page_warden_phase2_ph.png    256x200  1 frame fase 2 (onder 50% HP), zelfde canvas.
-assets/sprites/bosses/page_warden_page_ph.png       16x16   1 frame vliegende pagina (waaier + stagger-venster).
+# (M9a boss-sprites overgezet naar handwerk.txt, nov 2026.)

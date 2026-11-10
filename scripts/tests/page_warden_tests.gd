@@ -50,7 +50,7 @@ func _run() -> void:
 	_classic_unchanged()
 	_coop_gate()
 	_snapshot_ids()
-	check("placeholder-art gemarkeerd (magenta hoek)", PageWardenView.textures_ok())
+	check("boss-sprites maten en preload", PageWardenView.textures_ok())
 	PageWardenBoss.unregister()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
