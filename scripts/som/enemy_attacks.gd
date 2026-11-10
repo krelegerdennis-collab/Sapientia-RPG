@@ -4,6 +4,7 @@ extends RefCounted
 ## Schade-multipliers (`power`, `zone_dot_power`) zijn relatief t.o.v. de huidige Action-klap (hit_member).
 
 const GolemBoss := preload("res://scripts/som/golem_boss.gd")
+const PageWardenBoss := preload("res://scripts/som/page_warden_boss.gd")
 
 const TILE_PX := 16
 ## Inktplas: cirkel r 1,5 tegel (vast bij windup-start op doelpositie).
@@ -62,6 +63,8 @@ const ENEMY_DEFAULT_ATTACK := {
 static func attack(id: String) -> Dictionary:
 	if not ATTACKS.has(id) and GolemBoss.ATTACKS.has(id):
 		return golem_attack(id)
+	if not ATTACKS.has(id) and PageWardenBoss.ATTACKS.has(id):
+		return PageWardenBoss.attack_px(id)
 	return (ATTACKS.get(id, {}) as Dictionary).duplicate(true)
 
 
