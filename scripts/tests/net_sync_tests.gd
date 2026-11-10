@@ -43,6 +43,7 @@ func _run() -> void:
 	_codec_tests()
 	_sim_input_tests()
 	_lock_per_player_tests()
+	_guest_input_bind_tests()
 	await _enet_roundtrip_tests()
 	await _ring_no_pause_tests()
 	await _despawn_tests()
@@ -92,6 +93,34 @@ func _lock_per_player_tests() -> void:
 		])
 	check("slot0 lock", int(sim.players[0]["lock_idx"]) == 0)
 	check("slot1 eigen lock", int(sim.players[1]["lock_idx"]) == 0)
+
+
+func _guest_input_bind_tests() -> void:
+	var host_peer := ENetMultiplayerPeer.new()
+	host_peer.create_server(Protocol.SYNC_TEST_PORT + 1, 1)
+	var host_sess: Node = Session.start_session(get_tree(), host_peer, _roster(), Protocol.HOST_SLOT, false)
+	var guest_peer_id := 2
+	var spoof := Codec.pack_wire_input(Protocol.HOST_SLOT, Vector2(1, 0), 0, -1)
+	host_sess.ingest_packet(guest_peer_id, spoof)
+	check("spoof host slot → guest stoel", host_sess._inputs.size() == 1
+		and int(host_sess._inputs[0].get("slot", -1)) == 1)
+	check("spoof: pakketslot genegeerd", int(host_sess._inputs[0].get("stick", Vector2.ZERO).x) > 0.9)
+	var sticks: Array = [0.1, 0.3, 0.6, 1.0]
+	for s in sticks:
+		host_sess.ingest_packet(guest_peer_id, Codec.pack_wire_input(1, Vector2(s, 0), 0, -1))
+	check("4 inputs zelfde tick → één", host_sess._inputs.size() == 1)
+	check("laatste stick wint", host_sess._inputs[0].get("stick", Vector2.ZERO).x > 0.95)
+	var evil := Codec.pack_wire_input(1, Vector2.ZERO, Codec.BTN_LOCK_TAP, 0)
+	evil[5] = 200
+	host_sess._inputs.clear()
+	host_sess.ingest_packet(guest_peer_id, evil)
+	check("lock_idx wire geklemd", int(host_sess._inputs[0].get("lock_idx", 999)) < Protocol.SNAPSHOT_ENEMY_BUDGET)
+	host_sess._inputs.clear()
+	host_sess.ingest_packet(424242, spoof)
+	check("onbekende peer genegeerd", host_sess._inputs.is_empty())
+	check("onbekende peer teller", host_sess.unknown_input_peer_drops >= 1)
+	host_sess.shutdown(true)
+	host_peer.close()
 
 
 func _roster() -> Array:

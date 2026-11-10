@@ -34,6 +34,8 @@ var _lock_idx := -1
 var _peer_to_slot: Dictionary = {}
 var _tick := 0
 var _skip_arena_poll := false
+## Teller voor INPUT van peers buiten de roster (anti-spoof / join-race).
+var unknown_input_peer_drops := 0
 
 
 func _ready() -> void:
@@ -63,8 +65,8 @@ func attach_lobby_feed(lobby: LanLobby) -> void:
 	lobby.bind_gameplay(self)
 
 
-func ingest_packet(_from_peer: int, raw: PackedByteArray) -> void:
-	_handle_raw_packet(raw)
+func ingest_packet(from_peer: int, raw: PackedByteArray) -> void:
+	_handle_raw_packet(from_peer, raw)
 
 
 func _begin(peer: MultiplayerPeer, roster: Array, local_slot_in: int, use_tree_mp: bool) -> void:
@@ -208,17 +210,19 @@ func _drain_packets() -> void:
 	if _peer == null:
 		return
 	while _peer.get_available_packet_count() > 0:
-		_handle_raw_packet(_peer.get_packet())
+		var from_peer := _peer.get_packet_peer()
+		var raw := _peer.get_packet()
+		_handle_raw_packet(from_peer, raw)
 
 
-func _handle_raw_packet(raw: PackedByteArray) -> void:
+func _handle_raw_packet(from_peer: int, raw: PackedByteArray) -> void:
 	if raw.is_empty():
 		return
 	var kind := int(raw[0])
 	if kind == Protocol.BinKind.INPUT and is_host:
 		var body := Codec.unpack_wire_input(raw)
 		if not body.is_empty():
-			_inputs.append(body)
+			_accept_remote_input(from_peer, body)
 	elif kind == Protocol.BinKind.SNAPSHOT and not is_host:
 		var snap := Codec.unpack_snapshot(raw)
 		if not snap.is_empty():
@@ -262,6 +266,34 @@ func _build_peer_map(roster: Array) -> void:
 	_peer_to_slot.clear()
 	for row in roster:
 		_peer_to_slot[int(row.get("peer_id", 0))] = int(row.get("slot", Protocol.NO_SLOT))
+
+
+func _accept_remote_input(from_peer: int, body: Dictionary) -> void:
+	var slot := int(_peer_to_slot.get(from_peer, Protocol.NO_SLOT))
+	if slot == Protocol.NO_SLOT:
+		unknown_input_peer_drops += 1
+		return
+	body["slot"] = slot
+	body["lock_idx"] = _clamp_lock_idx(int(body.get("lock_idx", -1)))
+	_upsert_input(body)
+
+
+func _upsert_input(body: Dictionary) -> void:
+	var slot := int(body.get("slot", Protocol.NO_SLOT))
+	for i in _inputs.size():
+		if int(_inputs[i].get("slot", Protocol.NO_SLOT)) == slot:
+			_inputs[i] = body
+			return
+	_inputs.append(body)
+
+
+func _clamp_lock_idx(lock_idx: int) -> int:
+	if lock_idx < 0:
+		return -1
+	var cap := Protocol.SNAPSHOT_ENEMY_BUDGET
+	if sim != null:
+		cap = mini(cap, maxi(sim.enemies.size(), 1))
+	return clampi(lock_idx, 0, cap - 1)
 
 
 func _on_peer_connected(_id: int) -> void:
