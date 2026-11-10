@@ -702,6 +702,7 @@ func _run() -> void:
 	Engine.time_scale = 1.0
 	await preload("res://scripts/tests/cutscenes_wm1_tests.gd").new(self).run()
 	preload("res://scripts/tests/root_fx_tests.gd").new().run_embedded(self)
+	preload("res://scripts/tests/gamefeel_tests.gd").new().run_embedded(self)
 	print("RESULT %s (%d fouten)" % ["OK" if failures == 0 else "FAILED", failures])
 	get_tree().quit(1 if failures else 0)
 

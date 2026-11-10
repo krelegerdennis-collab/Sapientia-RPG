@@ -310,7 +310,7 @@ static func _digit_row(color: Color) -> int:
 
 
 ## Zwevend getal ("12", "+30") of "!" (telegraaf). Met art: pixel-cijfers / fx_telegraph; anders een Label.
-static func number(parent: Node, at: Vector2, text: String, color: Color, life := 0.6) -> Node2D:
+static func number(parent: Node, at: Vector2, text: String, color: Color, life := 0.6, scale := 1.0) -> Node2D:
 	var digits := tex(SomData.UI_DIGITS)
 	var bang := tex(SomData.FX_TELEGRAPH)
 	var n: Node2D
@@ -324,7 +324,13 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 		d.sheet = digits
 		d.text = text.trim_prefix("+")
 		d.row = _digit_row(color)
-		n = d
+		# F4 finisher/heavy: witte rij + modulate (laat rood/groen _digit_row ongemoeid).
+		if color.is_equal_approx(Color("FF8A3D")) or color.is_equal_approx(Color("FFD24A")):
+			d.row = 0
+			n = d
+			n.modulate = color
+		else:
+			n = d
 	else:
 		var holder := Node2D.new()
 		var l := Label.new()
@@ -343,6 +349,8 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 	n.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	n.z_index = 30
 	n.position = at.round()
+	if scale != 1.0:
+		n.scale = Vector2(scale, scale)
 	parent.add_child(n)
 	var tw := n.create_tween()
 	tw.tween_property(n, "position:y", n.position.y - 8.0, life)
