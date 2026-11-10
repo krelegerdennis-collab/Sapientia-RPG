@@ -117,6 +117,9 @@ var coop_sim_host := false
 var coop_local_slot := -1
 var _coop_slots: Dictionary = {}
 var _coop_avatars: Dictionary = {}
+## Online stoelen (M6). Null = LAN/solo; dan blijft allies_enabled zoals het was.
+var seat_controller = null
+var _ai_bodies: Dictionary = {}
 var _coop_lock_idx: Dictionary = {}
 var _enemy_order: Array = []
 var _coop_attack_cd: Dictionary = {}
@@ -2749,6 +2752,7 @@ func _say(text: String) -> void:
 
 
 const CoopAvatar := preload("res://scripts/coop/coop_avatar.gd")
+const SeatCtrl := preload("res://scripts/coop/seat_controller.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 const AvatarBlob := preload("res://scripts/net/avatar_blob.gd")
@@ -2769,12 +2773,417 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 	_coop_lock_idx.clear()
 	_coop_attack_cd.clear()
 	_coop_swing_lock.clear()
+	_free_ai_bodies()
+	seat_controller = null
 	_rebuild_enemy_order()
 	_clear_coop_avatars()
+	if _roster_opts_seats(roster):
+		_install_seats(session, roster)
 	coop_sync_roster(roster)
-	_page_adopt_bosses()
+	_sync_seat_visuals()
+	if session != null and seat_controller != null and session.has_method("bind_seats"):
+		session.bind_seats(seat_controller)
+	if room != null and "monsters" in room:
+		_page_adopt_bosses()
 	if not coop_sim_host:
 		player.set_analog(func() -> Vector2: return Vector2.ZERO, SomData.MOVE_SPEED)
+
+
+func _roster_opts_seats(roster: Array) -> bool:
+	for row in roster:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		if (row as Dictionary).has("uid") or (row as Dictionary).has("controller"):
+			return true
+	return false
+
+
+func _roster_room(roster: Array) -> String:
+	for row in roster:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var code := str((row as Dictionary).get("room_code", ""))
+		if code != "":
+			return code
+	return ""
+
+
+func _install_seats(session: Node, roster: Array) -> void:
+	var sc := SeatCtrl.new()
+	sc.configure(_roster_room(roster), coop_sim_host, coop_local_slot)
+	if session != null and "room_code" in session and str(session.room_code) != "":
+		sc.room_code = str(session.room_code)
+	sc.assign(roster)
+	if not sc.controller_changed.is_connected(_on_seat_controller_changed):
+		sc.controller_changed.connect(_on_seat_controller_changed)
+	if player != null:
+		var face := Vector2(player.facing) if "facing" in player else Vector2(0, 1)
+		for slot in sc.occupied_slots():
+			if sc.controller_of(slot) == SeatCtrl.CTRL_LOCAL:
+				sc.remember_pos(slot, player.position)
+			elif not _row_has_pos(roster, slot):
+				sc.remember_pos(slot, SeatCtrl.formation_around(player.position, face, slot))
+	seat_controller = sc
+	for slot in sc.occupied_slots():
+		_coop_slots[slot] = sc.hero_of(slot)
+		if sc.controller_of(slot) == SeatCtrl.CTRL_AI and coop_sim_host:
+			_spawn_seat_ally(slot, sc.hero_of(slot), sc.pos_of(slot))
+		elif slot == coop_local_slot:
+			active_id = sc.hero_of(slot)
+			_apply_player_sheet()
+
+
+func _row_has_pos(roster: Array, slot: int) -> bool:
+	for row in roster:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		if int((row as Dictionary).get("slot", -2)) != slot:
+			continue
+		return (row as Dictionary).has("x") and (row as Dictionary).has("y")
+	return false
+
+
+func _seat_hold(slot: int) -> bool:
+	return seat_controller != null and seat_controller.holds(slot)
+
+
+func _seat_is_ai(slot: int) -> bool:
+	return seat_controller != null and seat_controller.controller_of(slot) == SeatCtrl.CTRL_AI
+
+
+func _ai_body_locked(slot: int) -> bool:
+	return _ai_bodies.has(slot) and is_instance_valid(_ai_bodies[slot])
+
+
+func _seat_spawn_pos(slot: int) -> Vector2:
+	if seat_controller != null:
+		return seat_controller.pos_of(slot)
+	if player != null:
+		return player.position
+	return Vector2.ZERO
+
+
+func _spawn_seat_ally(slot: int, hero_id: String, pos: Vector2) -> void:
+	if room == null:
+		return
+	var objects: Node = room.get_node_or_null("Objects")
+	if objects == null:
+		return
+	_laad_held_cast(hero_id)
+	var ally: CharacterBody2D = SomAlly.new()
+	ally.name = "SeatAlly_%d" % slot
+	objects.add_child(ally)
+	ally.setup(self, hero_id, slot)
+	ally.position = pos
+	ally.seat_slot = slot
+	ally.apply_ai_placeholder_look()
+	allies.append(ally)
+	_ai_bodies[slot] = ally
+	if seat_controller != null:
+		seat_controller.remember_pos(slot, pos)
+
+
+func _free_ai_body(slot: int) -> void:
+	if not _ai_bodies.has(slot):
+		return
+	var n: Node = _ai_bodies[slot]
+	_ai_bodies.erase(slot)
+	allies.erase(n)
+	if is_instance_valid(n):
+		n.queue_free()
+
+
+func _free_ai_bodies() -> void:
+	for slot in _ai_bodies.keys():
+		_free_ai_body(int(slot))
+	_ai_bodies.clear()
+
+
+func _sync_seat_visuals() -> void:
+	if seat_controller == null:
+		return
+	for slot in seat_controller.occupied_slots():
+		_coop_slots[slot] = seat_controller.hero_of(slot)
+		if slot == coop_local_slot:
+			continue
+		if coop_sim_host and seat_controller.controller_of(slot) == SeatCtrl.CTRL_AI:
+			if not _ai_body_locked(slot):
+				_spawn_seat_ally(slot, seat_controller.hero_of(slot), seat_controller.pos_of(slot))
+			continue
+		if _ai_body_locked(slot):
+			continue
+		_ensure_coop_avatar(slot, seat_controller.hero_of(slot))
+		_tint_ai_avatar(slot)
+
+
+func _tint_ai_avatar(slot: int) -> void:
+	if not _seat_is_ai(slot) or not _coop_avatars.has(slot):
+		return
+	var av: CoopAvatar = _coop_avatars[slot] as CoopAvatar
+	if av != null and av.sprite != null:
+		av.sprite.modulate = SeatCtrl.AI_TINT
+
+
+## Gast valt weg: stoel wordt AI op deze tick, zelfde HP/MP/positie.
+func coop_guest_lost(slot: int, reason: String) -> bool:
+	if seat_controller == null or not seat_controller.can_take_over(slot):
+		return false
+	var body := _coop_body(slot)
+	var pos: Vector2 = seat_controller.pos_of(slot)
+	if body != null:
+		pos = body.position
+	_pull_seat_vitals(slot)
+	seat_controller.remember_pos(slot, pos)
+	if not seat_controller.guest_lost(slot, reason):
+		return false
+	if coop_sim_host:
+		_ensure_ai_body_at(slot, pos)
+	return true
+
+
+func _pull_seat_vitals(slot: int) -> void:
+	if seat_controller == null:
+		return
+	var hid: String = str(seat_controller.hero_of(slot))
+	var h := member(hid)
+	if h.is_empty():
+		return
+	seat_controller.set_hp_mp(slot, int(h.get("hp", seat_controller.hp_of(slot))), int(h.get("mp", seat_controller.mp_of(slot))))
+
+
+## member() is de bron. Snapshot en AI lezen daarna dezelfde stoelkopie.
+func _refresh_tracked_vitals() -> void:
+	if seat_controller == null:
+		return
+	for slot in seat_controller.occupied_slots():
+		_pull_seat_vitals(int(slot))
+
+
+## Rejoin of claim: AI-lichaam weg, menselijke avatar terug op dezelfde plek.
+func _on_seat_controller_changed(slot: int, controller: String) -> void:
+	if seat_controller == null or not coop_sim_host:
+		return
+	if controller == SeatCtrl.CTRL_AI or not _ai_body_locked(slot):
+		return
+	var pos: Vector2 = (_ai_bodies[slot] as Node2D).position
+	var hero := str(seat_controller.hero_of(slot))
+	_free_ai_body(slot)
+	if slot == coop_local_slot:
+		if player != null:
+			player.position = pos
+		seat_controller.remember_pos(slot, pos)
+		return
+	_ensure_coop_avatar(slot, hero)
+	var av: Node2D = _coop_avatars.get(slot) as Node2D
+	if av != null and is_instance_valid(av):
+		av.position = pos
+	seat_controller.remember_pos(slot, pos)
+
+
+func _ensure_ai_body_at(slot: int, pos: Vector2) -> void:
+	if seat_controller == null:
+		return
+	if _ai_body_locked(slot):
+		var ally: Node2D = _ai_bodies[slot] as Node2D
+		ally.position = pos
+		if ally.has_method("apply_ai_placeholder_look"):
+			ally.apply_ai_placeholder_look()
+		seat_controller.remember_pos(slot, pos)
+	else:
+		_spawn_seat_ally(slot, seat_controller.hero_of(slot), pos)
+	if _coop_avatars.has(slot):
+		var av: Node = _coop_avatars[slot]
+		_coop_avatars.erase(slot)
+		if is_instance_valid(av):
+			av.queue_free()
+
+
+func nearest_living_player_pos(from: Vector2) -> Vector2:
+	var fallback := player.position if player != null else from
+	if seat_controller == null:
+		return fallback
+	var best := fallback
+	var best_d := INF
+	var found := false
+	for slot in seat_controller.human_slots():
+		if seat_controller.hp_of(slot) <= 0:
+			continue
+		var body := _human_body(slot)
+		if body == null:
+			continue
+		var d := from.distance_to(body.position)
+		if d < best_d:
+			best_d = d
+			best = body.position
+			found = true
+	return best if found else fallback
+
+
+func _human_body(slot: int) -> Node2D:
+	if slot == coop_local_slot and player != null:
+		return player
+	if _coop_avatars.has(slot) and is_instance_valid(_coop_avatars[slot]):
+		return _coop_avatars[slot] as Node2D
+	if _ai_body_locked(slot) and seat_controller != null and seat_controller.controller_of(slot) != SeatCtrl.CTRL_AI:
+		return _ai_bodies[slot] as Node2D
+	return null
+
+
+func coop_hud_name(hero_id: String) -> String:
+	if seat_controller == null:
+		return ""
+	for slot in seat_controller.ai_slots():
+		if seat_controller.hero_of(slot) == hero_id:
+			return seat_controller.hud_name(slot)
+	return ""
+
+
+func coop_hud_rows() -> Array:
+	if seat_controller == null:
+		return []
+	return seat_controller.hud_rows()
+
+
+func _merge_ai_inputs(inputs: Array, dt: float) -> void:
+	for extra in _ai_virtual_inputs(dt):
+		var slot := int(extra.get("slot", -1))
+		var replaced := false
+		for i in inputs.size():
+			if int(inputs[i].get("slot", -1)) == slot:
+				inputs[i] = extra
+				replaced = true
+				break
+		if not replaced:
+			inputs.append(extra)
+
+
+func _ai_virtual_inputs(dt: float) -> Array:
+	var out: Array = []
+	if seat_controller == null or not coop_sim_host or not seat_controller.runs_ai():
+		return out
+	for slot in seat_controller.ai_slots():
+		if not _ai_body_locked(slot):
+			continue
+		var ally: SomAlly = _ai_bodies[slot]
+		ally.spell_cd = float(ally.spell_cd) - dt
+		ally.charge = minf(1.0, float(ally.charge) + dt / SomData.CHARGE_TIME)
+		var senses := _ai_senses(ally, slot)
+		var inp: Dictionary = ally.coop_virtual_input(senses, rng)
+		if inp.is_empty():
+			continue
+		inp["slot"] = slot
+		if int(inp.get("buttons", 0)) & Codec.BTN_ATTACK:
+			ally.charge = 0.0
+		var intent := str(inp.get("intent", ""))
+		if intent == "heal":
+			_ai_try_heal(ally)
+			ally.spell_cd = SomData.ALLY_SPELL_CD
+		elif intent == "damage_spell":
+			ally.spell_cd = SomData.ALLY_SPELL_CD
+		seat_controller.remember_pos(slot, ally.position)
+		out.append(inp)
+	return out
+
+
+func _ai_senses(ally: CharacterBody2D, slot: int) -> Dictionary:
+	_refresh_tracked_vitals()
+	var anchor := nearest_living_player_pos(ally.position)
+	var face := Vector2(player.facing) if player != null and "facing" in player else Vector2(0, 1)
+	var enemy: Node = nearest_enemy(anchor, SomData.ALLY_ENGAGE_RANGE)
+	var has_enemy := enemy != null
+	var enemy_pos := center_of(enemy) if has_enemy else Vector2.ZERO
+	var in_reach := false
+	if has_enemy:
+		in_reach = ally.body().distance_to(enemy_pos) <= SomData.attack_offset(ally.hero_id) + SomData.attack_reach(ally.hero_id) - 2.0
+	var ratio := float(seat_controller.hp_of(slot)) / float(seat_controller.max_hp_of(slot))
+	var low_pos := anchor
+	var ally_low := false
+	var downed := false
+	for other in seat_controller.occupied_slots():
+		if other == slot:
+			continue
+		var hp: int = int(seat_controller.hp_of(other))
+		if hp <= 0:
+			downed = true
+			continue
+		var part := float(hp) / float(seat_controller.max_hp_of(other))
+		if part < SomData.ALLY_HEAL_BELOW:
+			ally_low = true
+			var b := _coop_body(other)
+			if b != null:
+				low_pos = b.position
+	var chain := chain_wants_followup(ally.hero_id)
+	return {
+		"self_pos": ally.position,
+		"anchor_pos": anchor,
+		"anchor_facing": face,
+		"slot": slot,
+		"has_enemy": has_enemy,
+		"enemy_pos": enemy_pos,
+		"in_reach": in_reach,
+		"charge_ready": ally.charge >= 1.0 or chain,
+		"spell_ready": ally.spell_cd <= 0.0 and _hero_has_damage_spell(ally.hero_id),
+		"chain_ready": chain,
+		"hp_ratio": ratio,
+		"ally_low": ally_low,
+		"downed_ally": downed,
+		"heal_pos": low_pos,
+		"telegraph": has_enemy and _enemy_telegraphing(enemy),
+		"non_tank_targeted": has_enemy and _enemy_target_is_non_tank(enemy),
+		"lock_idx": _enemy_index(enemy) if has_enemy else -1,
+	}
+
+
+func _hero_has_damage_spell(hero_id: String) -> bool:
+	var h := member(hero_id)
+	var spells: Array = h.get("spells", [])
+	if spells.is_empty():
+		for row in GameData.HEROES:
+			if str(row.get("id", "")) == hero_id:
+				spells = row.get("spells", [])
+				break
+	for s in spells:
+		var sp: Dictionary = GameData.SPELLS.get(str(s), {})
+		if str(sp.get("type", "")) == "damage":
+			return true
+	return false
+
+
+func _enemy_telegraphing(m: Node) -> bool:
+	if m == null or not enemies.has(m):
+		return false
+	var e: Dictionary = enemies[m]
+	if float(e.get("tele", 0.0)) > 0.0:
+		return true
+	var tg: Variant = e.get("tg", null)
+	return tg != null and tg.has_method("in_windup") and bool(tg.in_windup())
+
+
+func _enemy_target_is_non_tank(m: Node) -> bool:
+	if m == null or not enemies.has(m):
+		return false
+	var tid := str(enemies[m].get("target", ""))
+	if tid == "":
+		return false
+	return SeatCtrl.role_of(tid) != "tank"
+
+
+## Bestaande genees-spreuk op de host. Geen revive: een liggende stoel blijft liggen (M8).
+func _ai_try_heal(ally: CharacterBody2D) -> void:
+	if ally == null:
+		return
+	var m := member(ally.hero_id)
+	if m.is_empty():
+		return
+	var low := lowest_member(SomData.ALLY_HEAL_BELOW)
+	if low.is_empty():
+		return
+	var spells: Array = m.get("spells", [])
+	for s in spells:
+		var sp: Dictionary = GameData.SPELLS.get(str(s), {})
+		if str(sp.get("type", "")) == "heal" and int(m.get("mp", 0)) >= int(sp.get("mp", 0)):
+			cast_spell(str(s), ally.hero_id, low)
+			return
 
 
 func coop_sync_roster(roster: Array) -> void:
@@ -2795,6 +3204,8 @@ func coop_sync_roster(roster: Array) -> void:
 			looks[slot] = look_v
 	for slot in _coop_avatars.keys():
 		if not seated.has(int(slot)):
+			if _seat_hold(int(slot)):
+				continue
 			coop_deactivate_slot(int(slot))
 	for slot in seated.keys():
 		var cid: String = str(seated[slot])
@@ -2804,9 +3215,15 @@ func coop_sync_roster(roster: Array) -> void:
 			active_id = cid
 			_apply_player_sheet()
 			_apply_online_look_player(look)
+		elif _ai_body_locked(int(slot)):
+			pass
+		elif _seat_is_ai(int(slot)) and coop_sim_host:
+			if not _ai_bodies.has(int(slot)):
+				_spawn_seat_ally(int(slot), cid, _seat_spawn_pos(int(slot)))
 		else:
 			_ensure_coop_avatar(int(slot), cid)
 			_apply_online_look_avatar(int(slot), look)
+			_tint_ai_avatar(int(slot))
 	_prune_coop_avatar_orphans(seated)
 
 
@@ -2846,8 +3263,11 @@ func _prune_coop_avatar_orphans(seated: Dictionary) -> void:
 
 
 func coop_deactivate_slot(slot: int) -> void:
+	if _seat_hold(slot):
+		return
 	var hid := str(_coop_slots.get(slot, ""))
 	combat_roots.clear_member(hid)
+	_free_ai_body(slot)
 	_coop_slots.erase(slot)
 	if not _coop_avatars.has(slot):
 		return
@@ -2899,10 +3319,13 @@ func _ensure_coop_avatar(slot: int, hero_id: String) -> void:
 	var named := objects.get_node_or_null("CoopAvatar_%d" % slot)
 	if named is CoopAvatar:
 		var reuse: CoopAvatar = named as CoopAvatar
-		var tex := sheet_for(hero_id)
-		reuse.setup(slot, hero_id, tex)
-		_coop_avatars[slot] = reuse
-		return
+		if reuse.is_queued_for_deletion():
+			reuse.name = "CoopAvatarFreed_%d" % slot
+		else:
+			var tex := sheet_for(hero_id)
+			reuse.setup(slot, hero_id, tex)
+			_coop_avatars[slot] = reuse
+			return
 	_spawn_coop_avatar(slot, hero_id)
 
 
@@ -3048,6 +3471,8 @@ func _rebuild_enemy_order() -> void:
 
 
 func _coop_body(slot: int) -> Node2D:
+	if _ai_body_locked(slot):
+		return _ai_bodies[slot] as Node2D
 	if slot == coop_local_slot:
 		return player
 	if _coop_avatars.has(slot):
@@ -3081,6 +3506,10 @@ func coop_poll_local_input() -> Dictionary:
 func coop_host_step(inputs: Array, dt: float) -> void:
 	if not coop_sim_host:
 		return
+	if seat_controller != null:
+		seat_controller.begin_tick(dt)
+		if seat_controller.runs_ai():
+			_merge_ai_inputs(inputs, dt)
 	if target_lock:
 		target_lock.tick(dt)
 	for inp in inputs:
@@ -3154,6 +3583,7 @@ func _enemy_index(m: Node) -> int:
 
 
 func coop_encode_snapshot(tick: int) -> PackedByteArray:
+	_refresh_tracked_vitals()
 	var players: Array = []
 	for slot in _coop_slots.keys():
 		var body: Node2D = _coop_body(int(slot))
@@ -3161,13 +3591,16 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 			continue
 		var hid := str(_coop_slots[slot])
 		var h := member(hid)
+		var hp := int(h.get("hp", 0))
+		if seat_controller != null and seat_controller.tracks(int(slot)):
+			hp = seat_controller.hp_of(int(slot))
 		players.append({
 			"slot": int(slot),
 			"x": int(body.position.x),
 			"y": int(body.position.y),
 			"face": _coop_face_bits(body.facing),
 			"frame": 0,
-			"hp": int(h.get("hp", 0)),
+			"hp": hp,
 			"mp": combat_stamina.wire_stamina(hid),
 			"flags": Protocol.FLAG_RING_OPEN if ring.is_open and int(slot) == coop_local_slot else 0,
 		})

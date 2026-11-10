@@ -115,3 +115,5 @@ assets/sprites/binnen/slaapkamer_kast_PLACEHOLDER.png  24x32   slaapkamerkast Da
 # T18 aanvalsketen (combat T15): hit2 + finisher hergebruiken <held>_attack.png met ander tempo (SomChainData.STEP_MS). TODO RPG ART.
 # WM1 T2 Donker Woud 16x16 tegels (tools/woud_tegels_placeholders.py). Magenta hoekjes, geen definitieve art.
 # Vervangen: zie docs/art/woud_tiles_16px.md en data/woud_tegels.json (alleen "file").
+# M6 co-op AI-stoel: geen PNG. PLACEHOLDER-tint grijs-cyaan (SeatController.AI_TINT) op de standaard held-sheet 24x32.
+# Final art RPG ART: paper-doll lagen, lopen 24x32 (72x128), zie ONLINE_COOP §5.3. Code: scripts/coop/seat_controller.gd.
