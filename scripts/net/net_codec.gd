@@ -15,6 +15,9 @@ const KIND_REWARD_BUNDLE := 12
 const KIND_HOST_PAUSED := 13
 const KIND_EMOTE := 14
 const KIND_VOTE := 15
+const KIND_REWARD_ACK := 16
+## 'g' + 15 hex. Past in M1 applied_grants (max 16 tekens).
+const GRANT_KEY_LEN := 16
 
 const SIM_ID := "dls"
 const MODES: Array[String] = ["easy", "normal", "hard"]
@@ -307,7 +310,7 @@ static func _unpack_root(raw: PackedByteArray, off: int, out: Dictionary) -> int
 # --- protocol v2 (online). LAN-decode in NetProtocol blijft versie 1. -----------------
 
 static func encode_v2(kind: int, body: Dictionary) -> PackedByteArray:
-	if kind < Protocol.Kind.HELLO or kind > Protocol.Kind.VOTE:
+	if kind < Protocol.Kind.HELLO or kind > Protocol.Kind.REWARD_ACK:
 		return PackedByteArray()
 	var raw := Protocol.encode(kind, body, Protocol.VERSION_ONLINE)
 	if raw.is_empty() or raw.size() >= Protocol.MAX_ONLINE_PACKET_BYTES:
@@ -350,7 +353,7 @@ static func decode_v2(raw: PackedByteArray) -> Dictionary:
 			"body": body,
 			"reason": Protocol.Refuse.VERSION,
 		}
-	if kind < Protocol.Kind.HELLO or kind > Protocol.Kind.VOTE or not (body_v is Dictionary):
+	if kind < Protocol.Kind.HELLO or kind > Protocol.Kind.REWARD_ACK or not (body_v is Dictionary):
 		return fail
 	return {
 		"ok": true,
@@ -537,10 +540,12 @@ static func read_run_result(body: Dictionary) -> Dictionary:
 	}
 
 
-static func encode_reward_bundle(uid: String, session_id: int, host_tick: int, profile_exp: int, unlocks: Array) -> PackedByteArray:
+static func encode_reward_bundle(uid: String, session_id: int, host_tick: int, profile_exp: int, unlocks: Array, grant_key: String = "") -> PackedByteArray:
 	if not _valid_uid(uid.to_lower()) or session_id < 0 or host_tick < 0 or profile_exp < 0:
 		return PackedByteArray()
 	if unlocks.size() > UNLOCK_MAX:
+		return PackedByteArray()
+	if grant_key != "" and not valid_grant_key(grant_key):
 		return PackedByteArray()
 	var clean: Array = []
 	for item in unlocks:
@@ -548,13 +553,16 @@ static func encode_reward_bundle(uid: String, session_id: int, host_tick: int, p
 		if not _token(token):
 			return PackedByteArray()
 		clean.append(token)
-	return encode_v2(KIND_REWARD_BUNDLE, {
+	var body := {
 		"uid": uid.to_lower(),
 		"session_id": session_id,
 		"host_tick": host_tick,
 		"profile_exp": profile_exp,
 		"unlocks": clean,
-	})
+	}
+	if grant_key != "":
+		body["grant_key"] = grant_key
+	return encode_v2(KIND_REWARD_BUNDLE, body)
 
 
 static func read_reward_bundle(body: Dictionary) -> Dictionary:
@@ -574,6 +582,11 @@ static func read_reward_bundle(body: Dictionary) -> Dictionary:
 		if not (item is String) or not _token(str(item)):
 			return {"ok": false}
 		clean.append(str(item))
+	var grant_key := ""
+	if body.has("grant_key"):
+		grant_key = str(body.get("grant_key", ""))
+		if not valid_grant_key(grant_key):
+			return {"ok": false}
 	return {
 		"ok": true,
 		"uid": uid,
@@ -581,7 +594,32 @@ static func read_reward_bundle(body: Dictionary) -> Dictionary:
 		"host_tick": int(body["host_tick"]),
 		"profile_exp": int(body["profile_exp"]),
 		"unlocks": clean,
+		"grant_key": grant_key,
 	}
+
+
+static func valid_grant_key(key: String) -> bool:
+	if key.length() != GRANT_KEY_LEN or not key.begins_with("g"):
+		return false
+	for i in range(1, GRANT_KEY_LEN):
+		var c := key.unicode_at(i)
+		var hex := (c >= 48 and c <= 57) or (c >= 97 and c <= 102)
+		if not hex:
+			return false
+	return true
+
+
+static func encode_reward_ack(grant_key: String) -> PackedByteArray:
+	if not valid_grant_key(grant_key):
+		return PackedByteArray()
+	return encode_v2(KIND_REWARD_ACK, {"grant_key": grant_key})
+
+
+static func read_reward_ack(body: Dictionary) -> Dictionary:
+	var key := str(body.get("grant_key", ""))
+	if not valid_grant_key(key):
+		return {"ok": false}
+	return {"ok": true, "grant_key": key}
 
 
 static func encode_host_paused(paused: bool) -> PackedByteArray:
