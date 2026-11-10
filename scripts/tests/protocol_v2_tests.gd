@@ -13,7 +13,7 @@ const SomData := preload("res://scripts/data/som_data.gd")
 const STEP := 8.0
 const VIEWPORT := Vector2i(384, 216)
 const RELAY_DIR := "res://relay"
-const LABELS: Array[String] = ["Help!", "Hier heen", "Goed gedaan", "Wacht", "Klaar", "Pas op"]
+const LABELS: Array[String] = ["Help!", "Hier heen", "Goed gedaan", "Bedankt", "Klaar", "Pas op"]
 
 var failures := 0
 var passes := 0
