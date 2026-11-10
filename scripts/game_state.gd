@@ -739,6 +739,7 @@ func _ready() -> void:
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
+			["--onlineprofiletest", "res://scripts/tests/online_profile_tests.gd", "OnlineProfileTest", "onlineprofiletest"],
 			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
 			["--solod100guardtest", "res://scripts/tests/solo_d100_guard_tests.gd", "SoloD100GuardTest", "solod100guardtest"],
 			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"]]:
