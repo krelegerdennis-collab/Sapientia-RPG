@@ -50,6 +50,8 @@ func _run() -> void:
 	_host_lost_tests()
 	_ai_host_only_and_follow_tests()
 	_disconnect_arena_tests()
+	_snapshot_hp_tests()
+	_handback_tests()
 	await _solo_guard_tests()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -309,6 +311,68 @@ func _disconnect_arena_tests() -> void:
 			and rejoined != null and rejoined.position == Vector2(64, 48) and arena.seat_controller.hp_of(1) == 11)
 
 
+## Treffer schrijft GameState.member(); de snapshot moet die HP tonen, niet de stoelkopie.
+func _snapshot_hp_tests() -> void:
+	if not GameState.has_member("kael"):
+		GameState.add_member("kael")
+	var hero: Dictionary = GameState.member("kael")
+	hero["hp"] = 19
+	hero["max_hp"] = 40
+	var pack := _boot(true)
+	var arena: SomArena = pack["arena"]
+	var seat_hp := int(arena.seat_controller.hp_of(1))
+	var member_hp := int(GameState.member("kael").get("hp", -1))
+	check("treffer zet member-HP los van de stoelkopie", seat_hp != member_hp and member_hp == 19)
+	arena.ring = _RingStub.new()
+	var snap := Codec.unpack_snapshot(arena.coop_encode_snapshot(1))
+	var seen := -1
+	for row in snap.get("players", []):
+		if int(row.get("slot", -1)) == 1:
+			seen = int(row.get("hp", -1))
+	check("snapshot-HP volgt member na een treffer", seen == member_hp)
+
+
+## Na rejoin of claim is het lichaam weer een CoopAvatar en is de SomAlly weg.
+func _handback_tests() -> void:
+	var pack := _boot_roster(true, [
+		{"slot": 0, "uid": "host", "hero_id": "dennis", "controller": "local", "room_code": "KAMER", "x": 10, "y": 20},
+		{"slot": 1, "uid": "guest", "hero_id": "kael", "controller": "remote", "room_code": "KAMER", "hp": 11, "mp": 7, "x": 64, "y": 48},
+	])
+	var arena: SomArena = pack["arena"]
+	var sess: Session = pack["session"]
+	var before := arena._coop_body(1)
+	if before != null:
+		before.position = Vector2(64, 48)
+		arena.seat_controller.remember_pos(1, before.position)
+	sess.attach_arena(arena)
+	sess._peer_to_slot[8] = 1
+	sess.note_ping_timeout(8)
+	var ally: Node2D = arena._coop_body(1)
+	var pos := Vector2(64, 48)
+	if ally != null:
+		pos = ally.position
+	var slot: int = int(arena.seat_controller.try_rejoin("guest", "KAMER"))
+	var body: Node2D = arena._coop_body(1)
+	var freed := ally != null and ally.is_queued_for_deletion() and not arena._ai_bodies.has(1) and not arena.allies.has(ally)
+	check("rejoin geeft de stoel een CoopAvatar terug", slot == 1 and body is CoopAvatar and not (body is SomAlly) and body.position == pos)
+	check("rejoin geeft de oude SomAlly vrij", ally is SomAlly and freed)
+	var claim := _boot_roster(true, [
+		{"slot": 0, "uid": "host", "hero_id": "dennis", "controller": "local", "room_code": "KAMER", "x": 0, "y": 0},
+		{"slot": 1, "hero_id": "lotte", "controller": "ai", "room_code": "KAMER", "x": 40, "y": 24},
+	])
+	var ca: SomArena = claim["arena"]
+	var old: Node2D = ca._coop_body(1)
+	var cpos := Vector2(40, 24)
+	if old != null:
+		cpos = old.position
+	ca.seat_controller.request_claim("nieuw", "lotte")
+	ca.seat_controller.begin_tick_one()
+	var taken: Node2D = ca._coop_body(1)
+	var claim_freed := old != null and old.is_queued_for_deletion() and not ca._ai_bodies.has(1)
+	check("claim geeft de stoel een CoopAvatar terug", ca.seat_controller.controller_of(1) == "remote"
+			and taken is CoopAvatar and taken.position == cpos and claim_freed)
+
+
 func _solo_guard_tests() -> void:
 	for c in get_children():
 		c.queue_free()
@@ -461,6 +525,10 @@ func _same(a: Array, b: Array) -> bool:
 		if str(a[i]) != str(b[i]):
 			return false
 	return true
+
+
+class _RingStub extends Node:
+	var is_open: bool = false
 
 
 func _boot(host: bool) -> Dictionary:

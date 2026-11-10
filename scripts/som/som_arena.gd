@@ -2814,6 +2814,8 @@ func _install_seats(session: Node, roster: Array) -> void:
 	if session != null and "room_code" in session and str(session.room_code) != "":
 		sc.room_code = str(session.room_code)
 	sc.assign(roster)
+	if not sc.controller_changed.is_connected(_on_seat_controller_changed):
+		sc.controller_changed.connect(_on_seat_controller_changed)
 	if player != null:
 		var face := Vector2(player.facing) if "facing" in player else Vector2(0, 1)
 		for slot in sc.occupied_slots():
@@ -2949,6 +2951,35 @@ func _pull_seat_vitals(slot: int) -> void:
 	seat_controller.set_hp_mp(slot, int(h.get("hp", seat_controller.hp_of(slot))), int(h.get("mp", seat_controller.mp_of(slot))))
 
 
+## member() is de bron. Snapshot en AI lezen daarna dezelfde stoelkopie.
+func _refresh_tracked_vitals() -> void:
+	if seat_controller == null:
+		return
+	for slot in seat_controller.occupied_slots():
+		_pull_seat_vitals(int(slot))
+
+
+## Rejoin of claim: AI-lichaam weg, menselijke avatar terug op dezelfde plek.
+func _on_seat_controller_changed(slot: int, controller: String) -> void:
+	if seat_controller == null or not coop_sim_host:
+		return
+	if controller == SeatCtrl.CTRL_AI or not _ai_body_locked(slot):
+		return
+	var pos: Vector2 = (_ai_bodies[slot] as Node2D).position
+	var hero := str(seat_controller.hero_of(slot))
+	_free_ai_body(slot)
+	if slot == coop_local_slot:
+		if player != null:
+			player.position = pos
+		seat_controller.remember_pos(slot, pos)
+		return
+	_ensure_coop_avatar(slot, hero)
+	var av: Node2D = _coop_avatars.get(slot) as Node2D
+	if av != null and is_instance_valid(av):
+		av.position = pos
+	seat_controller.remember_pos(slot, pos)
+
+
 func _ensure_ai_body_at(slot: int, pos: Vector2) -> void:
 	if seat_controller == null:
 		return
@@ -3055,6 +3086,7 @@ func _ai_virtual_inputs(dt: float) -> Array:
 
 
 func _ai_senses(ally: CharacterBody2D, slot: int) -> Dictionary:
+	_refresh_tracked_vitals()
 	var anchor := nearest_living_player_pos(ally.position)
 	var face := Vector2(player.facing) if player != null and "facing" in player else Vector2(0, 1)
 	var enemy: Node = nearest_enemy(anchor, SomData.ALLY_ENGAGE_RANGE)
@@ -3287,10 +3319,13 @@ func _ensure_coop_avatar(slot: int, hero_id: String) -> void:
 	var named := objects.get_node_or_null("CoopAvatar_%d" % slot)
 	if named is CoopAvatar:
 		var reuse: CoopAvatar = named as CoopAvatar
-		var tex := sheet_for(hero_id)
-		reuse.setup(slot, hero_id, tex)
-		_coop_avatars[slot] = reuse
-		return
+		if reuse.is_queued_for_deletion():
+			reuse.name = "CoopAvatarFreed_%d" % slot
+		else:
+			var tex := sheet_for(hero_id)
+			reuse.setup(slot, hero_id, tex)
+			_coop_avatars[slot] = reuse
+			return
 	_spawn_coop_avatar(slot, hero_id)
 
 
@@ -3548,6 +3583,7 @@ func _enemy_index(m: Node) -> int:
 
 
 func coop_encode_snapshot(tick: int) -> PackedByteArray:
+	_refresh_tracked_vitals()
 	var players: Array = []
 	for slot in _coop_slots.keys():
 		var body: Node2D = _coop_body(int(slot))
