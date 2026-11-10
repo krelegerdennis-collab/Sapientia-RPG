@@ -278,7 +278,7 @@ Inspanning: S < 2 uur, M = 1-2 dagen, L = week+.
 | Ticket | Rol | Prio | Inspanning | Status |
 |---|---|---|---|---|
 | F-1 suites in CI | Forge/Cursor | P0 | S | #406 |
-| F-2 relay in CI | Forge/Cursor | P0 | S | open |
+| F-2 relay in CI | Forge/Cursor | P0 | S | #409 |
 | F-3 presets + export/ | Forge | P0 | S | open |
 | F-4 docs opruimen | Cursor | P2 | S | #397 |
 | F-5 perf-pakket | Forge/CODE | P1 | M | open |
@@ -287,7 +287,7 @@ Inspanning: S < 2 uur, M = 1-2 dagen, L = week+.
 | F-8 GameState splitsen | CODE | P2 | L | open |
 | F-9 CI-kosten | Forge | P2 | M | open |
 | C-1 dev-knoppen gaten | Cursor | P0 | S | wacht op §5.5 |
-| C-2 stun-lock | CODE/Cursor | P1 | S | open |
+| C-2 stun-lock | CODE/Cursor | P1 | S | PR (cursor/c-2-stunlock) |
 | C-3 veldmenu preload | Cursor | P1 | S | open |
 | C-4 opslaan uitleggen | Cursor | P1 | S | open |
 | C-5 save-version + save_game guard | Cursor | P0 | S | open |

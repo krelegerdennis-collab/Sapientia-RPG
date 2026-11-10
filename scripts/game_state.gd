@@ -529,6 +529,7 @@ func _ready() -> void:
 	# Dungeon100: of  godot -- --dungeon100blauwtest [--shots=/pad/map]  (scripts/tests/dungeon100_blauw_tests.gd).
 	# Blauwe Kist-sprite: of  godot -- --blauwekisttest  (scripts/tests/blauwe_kist_tests.gd).
 	# Dungeon100 rustpunt-sheet: of  godot -- --dungeon100rustpunttest  (scripts/tests/dungeon100_rustpunt_tests.gd).
+	# Dungeon100 baas-kaartsprites: of  godot -- --dungeon100bossmaptest  (scripts/tests/dungeon100_bossmap_tests.gd).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
 	# v0.19: of  godot -- --fusietest [--shots=/pad/map]  (scripts/tests/fusie_tests.gd, glitch-fusie + Inktwurm).
 	# v0.19: of  godot -- --checkpointtest [--shots=/pad/map] [--v19=/workspace]  (kamer-checkpoint / respawn).
@@ -631,6 +632,7 @@ func _ready() -> void:
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
 			["--blauwekisttest", "res://scripts/tests/blauwe_kist_tests.gd", "BlauweKistTest", "blauwekisttest"],
 			["--dungeon100rustpunttest", "res://scripts/tests/dungeon100_rustpunt_tests.gd", "Dungeon100RustpuntTest", "dungeon100rustpunttest"],
+			["--dungeon100bossmaptest", "res://scripts/tests/dungeon100_bossmap_tests.gd", "Dungeon100BossMapTest", "dungeon100bossmaptest"],
 			["--grotlayouttest", "res://scripts/tests/grot_layout_tests.gd", "GrotLayoutTest", "grotlayouttest"],
 			["--actorsfxtest", "res://scripts/tests/actor_sfx_tests.gd", "ActorSfxTest", "actorsfxtest"],
 			["--catalogustest", "res://scripts/tests/catalogus_tests.gd", "CatalogusTest", "catalogustest"],
