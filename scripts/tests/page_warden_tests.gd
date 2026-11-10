@@ -12,6 +12,8 @@ const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
+const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
+const NetCodec := preload("res://scripts/net/net_codec.gd")
 const EnemyAttacks := preload("res://scripts/som/enemy_attacks.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
@@ -51,6 +53,12 @@ func _run() -> void:
 	_coop_gate()
 	_snapshot_ids()
 	check("boss-sprites maten en preload", PageWardenView.textures_ok())
+	_view_art()
+	_tex_heights()
+	_no_placeholder_generator()
+	_guest_view()
+	_events_cap()
+	_host_guest_frames()
 	PageWardenBoss.unregister()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -288,9 +296,240 @@ func _snapshot_ids() -> void:
 	check("page_line heeft px-vorm voor de gast", int(px.get("reach", 0)) > 0 and str(px.get("shape", "")) == "line")
 
 
+func _view_art() -> void:
+	var view := PageWardenView.new()
+	var fight := PageWardenFight.new(1000, 4)
+	fight.attack_id = "page_line"
+	fight.step = PageWardenFight.Step.WINDUP
+	view.sync(fight)
+	check("windup: slagframe 0, geen trefferflits", view.body.frame == 0 and not view.hit.visible)
+	check("windup: voeten op (128, 194)", view.frame_feet_local(view.body).is_equal_approx(Vector2.ZERO))
+	fight.step = PageWardenFight.Step.ACTIVE
+	view.sync(fight)
+	check("active: slagframe zichtbaar, flits uit", view.body.frame == 1 and view.body.texture == PageWardenView.TEX_ATTACK and not view.hit.visible)
+	check("active: voeten blijven op het anker", view.frame_feet_local(view.body).is_equal_approx(Vector2.ZERO))
+	fight.step = PageWardenFight.Step.RECOVERY
+	view.sync(fight)
+	check("recovery toont de trefferflits", view.hit.visible)
+	fight.step = PageWardenFight.Step.STAGGER
+	view.sync(fight)
+	check("stagger toont de trefferflits", view.hit.visible)
+	check("stagger: voeten van lijf en flits op hetzelfde anker",
+			view.frame_feet_local(view.body).is_equal_approx(Vector2.ZERO)
+			and view.frame_feet_local(view.hit).is_equal_approx(Vector2.ZERO))
+	fight.damage(500)
+	fight.step = PageWardenFight.Step.IDLE
+	view.sync(fight)
+	check("fase 2: phase2-plaat, voeten nog op het anker",
+			view.body.texture == PageWardenView.TEX_PHASE2 and view.frame_feet_local(view.body).is_equal_approx(Vector2.ZERO))
+	var page: Sprite2D = view._pages[0]
+	var world_scale := view.scale * view.projectiles.scale * page.scale
+	check("pagina is een eigen node op 16×16 (schaal 1)", page.get_parent() == view.projectiles
+			and world_scale.is_equal_approx(Vector2.ONE)
+			and page.texture.get_width() == 16 and page.texture.get_height() == 16)
+	fight.attack_id = "page_fan"
+	fight.step = PageWardenFight.Step.WINDUP
+	fight.tick_no = 0
+	view.sync(fight)
+	check("waaier toont de pagina buiten de lichaamsschaal", page.visible
+			and is_equal_approx(page.position.length(), PageWardenView.PAGE_RADIUS))
+	view.free()
+
+
+func _tex_heights() -> void:
+	check("HIT en PHASE2 zijn 256×200",
+			PageWardenView.TEX_HIT.get_width() == 256 and PageWardenView.TEX_HIT.get_height() == 200
+			and PageWardenView.TEX_PHASE2.get_width() == 256 and PageWardenView.TEX_PHASE2.get_height() == 200)
+
+
+func _no_placeholder_generator() -> void:
+	check("placeholder-generator is weg", not FileAccess.file_exists("res://tools/art_page_warden_placeholders.py"))
+	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
+	var protected := true
+	for path in ["assets/sprites/bosses/page_warden_attack_ph.png", "assets/sprites/bosses/page_warden_hit_ph.png",
+			"assets/sprites/bosses/page_warden_phase2_ph.png", "assets/sprites/bosses/page_warden_page_ph.png"]:
+		if not hw.contains(path):
+			protected = false
+	check("definitieve *_ph.png-platen staan in handwerk", protected)
+
+
+func _guest_view() -> void:
+	var arena := SomArena.new()
+	var room := StubRoom.new()
+	arena.room = room
+	arena.coop_mode = true
+	arena.coop_sim_host = false
+	arena.seed_rng(99)
+	var probe := RandomNumberGenerator.new()
+	probe.seed = 99
+	probe.randf()
+	var after_one: int = probe.state
+	var m := GuestMonster.new()
+	m.boss = true
+	m.enemy_id = "papiergeest"
+	m.floor_nr = 10
+	arena.register(m)
+	var e: Dictionary = arena.enemies[m]
+	var view: PageWardenView = e.get("page_view", null)
+	check("gast: view zonder gevecht of threat", view != null and not e.has("page_warden") and arena.page_threat == null)
+	check("gast: register verbruikt geen fight-RNG", arena.rng.state == after_one)
+	check("gast: idle op de lichaamplaat", view.body.texture == PageWardenView.TEX_BODY)
+	arena._enemy_order = [m]
+	var row := {
+		"idx": 0, "x": 0, "y": 0, "hp": int(e["max_hp"]), "pose": 0, "target_slot": 0,
+		"atk_id": TelegraphSnapshot.attack_index("page_fan"),
+		"phase": TelegraphState.State.WINDUP, "t": 30,
+		"ox": 0, "oy": 0, "dir_x": 0, "dir_y": 1,
+	}
+	arena.apply_coop_snapshot({"tick": 12, "players": [], "enemies": [row], "zones": [], "roots": []})
+	var page: Sprite2D = view._pages[0]
+	var tg: TelegraphAttack = e["tg"]
+	check("gast: windup-plaat uit de snapshot, flits uit",
+			view.body.texture == PageWardenView.TEX_ATTACK and view.body.frame == 0 and not view.hit.visible)
+	check("gast: waaier-pagina uit de snapshot", page.visible and is_equal_approx(page.position.length(), PageWardenView.PAGE_RADIUS))
+	check("gast: telegraaf is de snapshot, nog steeds geen fight",
+			tg.state() == TelegraphState.State.WINDUP and tg.attack_id() == "page_fan"
+			and not e.has("page_warden") and arena.page_threat == null)
+	row["phase"] = TelegraphState.State.ACTIVE
+	row["atk_id"] = TelegraphSnapshot.attack_index("page_line")
+	arena.apply_coop_snapshot({"tick": 13, "players": [], "enemies": [row], "zones": [], "roots": []})
+	check("gast: slagframe uit ACTIVE, flits uit", view.body.frame == 1 and not view.hit.visible)
+	row["hp"] = int(floor(float(e["max_hp"]) * 0.5))
+	row["atk_id"] = 0
+	row["phase"] = TelegraphState.State.IDLE
+	arena.apply_coop_snapshot({"tick": 14, "players": [], "enemies": [row], "zones": [], "roots": []})
+	check("gast: fase 2 uit HP in de snapshot", view.body.texture == PageWardenView.TEX_PHASE2 and not page.visible)
+	m.free()
+	room.free()
+	arena.free()
+
+
+func _events_cap() -> void:
+	var arena := SomArena.new()
+	var m := FloorMonster.new()
+	var e := {}
+	var short: Array = []
+	for i in 3:
+		short.append({"type": "phase", "index": i})
+	arena._page_events(m, e, short)
+	var order_ok := arena.page_events.size() == 3
+	for i in 3:
+		if int(arena.page_events[i].get("index", -1)) != i:
+			order_ok = false
+	check("korte eventlog blijft in volgorde", order_ok and int(e.get("page_phase", -1)) == 2)
+	arena.page_events.clear()
+	var many: Array = []
+	for i in SomArena.PAGE_EVENT_CAP + 6:
+		many.append({"type": "phase", "index": i})
+	arena._page_events(m, e, many)
+	var cap: int = SomArena.PAGE_EVENT_CAP
+	var capped := arena.page_events.size() == cap
+	if capped:
+		capped = int(arena.page_events[0].get("index", -1)) == 6
+		capped = capped and int(arena.page_events[cap - 1].get("index", -1)) == cap + 5
+	check("page_events blijft op 64 en verwerkt ook de weggevallen entries", capped and int(e.get("page_phase", -1)) == cap + 5)
+	m.free()
+	arena.free()
+
+
+## Echt host-gevecht → ingepakte snapshot → gast-view. Geen zelf verzonnen ACTIVE-rij.
+func _host_guest_frames() -> void:
+	var host := SomArena.new()
+	var guest := SomArena.new()
+	var host_room := StubRoom.new()
+	var guest_room := StubRoom.new()
+	host.room = host_room
+	guest.room = guest_room
+	host.coop_mode = true
+	host.coop_sim_host = true
+	guest.coop_mode = true
+	guest.coop_sim_host = false
+	host.seed_rng(7)
+	guest.seed_rng(7)
+	var hm := _guest_monster()
+	var gm := _guest_monster()
+	host.register(hm)
+	guest.register(gm)
+	var fight: PageWardenFight = host.enemies[hm]["page_warden"]
+	var view: PageWardenView = guest.enemies[gm]["page_view"]
+	var saw_strike := false
+	var saw_hit := false
+	var saw_orbit := false
+	var saw_stagger := false
+	var broke := false
+	for _i in 1200:
+		host._page_ai(hm, host.enemies[hm], 1.0 / 60.0)
+		var snap := NetCodec.unpack_snapshot(host.coop_encode_snapshot(host.sim_tick))
+		_feed_guest(guest, gm, snap)
+		var row: Dictionary = (snap.get("enemies", []) as Array)[0]
+		if int(row.get("phase", 0)) == TelegraphState.State.ACTIVE and int(row.get("atk_id", 0)) != 0:
+			if view.body.frame == 1 and view.body.texture == PageWardenView.TEX_ATTACK and not view.hit.visible:
+				saw_strike = true
+		if int(row.get("phase", 0)) == TelegraphState.State.RECOVERY and view.hit.visible and view.body.frame == 0:
+			saw_hit = true
+		if fight.core.open and (int(row.get("pose", 0)) & PageWardenView.POSE_ORBIT) != 0:
+			var page: Sprite2D = view._pages[0]
+			if page.visible and is_equal_approx(page.position.length(), PageWardenView.PAGE_RADIUS):
+				saw_orbit = true
+		if not broke and fight.core.open and fight.step == PageWardenFight.Step.WINDUP:
+			fight.damage(int(PageWardenBoss.STAGGER["break_damage"]))
+			host._page_events(hm, host.enemies[hm], fight.take_events())
+			var snap_s := NetCodec.unpack_snapshot(host.coop_encode_snapshot(host.sim_tick))
+			_feed_guest(guest, gm, snap_s)
+			var row_s: Dictionary = (snap_s.get("enemies", []) as Array)[0]
+			if fight.step == PageWardenFight.Step.STAGGER and view.hit.visible \
+					and int(row_s.get("phase", -1)) == TelegraphState.State.IDLE \
+					and (int(row_s.get("pose", 0)) & PageWardenView.POSE_HIT) != 0 \
+					and view.body.texture != PageWardenView.TEX_ATTACK:
+				saw_stagger = true
+			broke = true
+	check("gast ziet het slagframe uit een echte host-snapshot", saw_strike)
+	check("gast ziet TEX_HIT tijdens recovery uit een echte host-snapshot", saw_hit)
+	check("gast ziet de kern-pagina's uit een echte host-snapshot", saw_orbit)
+	check("gast ziet TEX_HIT tijdens stagger uit een echte host-snapshot", saw_stagger)
+	hm.free()
+	gm.free()
+	host_room.free()
+	guest_room.free()
+	host.free()
+	guest.free()
+
+
+func _guest_monster() -> GuestMonster:
+	var m := GuestMonster.new()
+	m.boss = true
+	m.enemy_id = "papiergeest"
+	m.floor_nr = 10
+	m.placeholder = true
+	return m
+
+
+func _feed_guest(guest: SomArena, m: Node, snap: Dictionary) -> void:
+	guest._enemy_order = [m]
+	guest.apply_coop_snapshot(snap)
+
+
 ## Genoeg velden voor page_warden_rt_applies. Geen MapMonster: die class_name botst met een preload.
 class FloorMonster:
 	extends Node
 	var boss := false
 	var enemy_id := ""
 	var floor_nr := 0
+
+
+class GuestMonster:
+	extends Node2D
+	var boss := false
+	var enemy_id := ""
+	var floor_nr := 0
+	var moves := true
+	var size := Vector2i.ONE
+	var sprite = null
+	var placeholder := false
+
+
+class StubRoom:
+	extends Node
+	var room_id := "pw_guest"
+	func tier() -> int:
+		return 0
