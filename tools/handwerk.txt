@@ -1299,3 +1299,23 @@ assets/map_monsters/de_rechter.png
 assets/map_monsters/great_book_golem.png
 assets/map_monsters/root_emperor.png
 assets/map_monsters/de_stem.png
+# 2026-11-10: HD-2D lichtprops WM1 (RPG ART, 19 props, akkoord Dennis 10-11 11:36)
+assets/sprites/lichtprops/archief_kandelaber.png
+assets/sprites/lichtprops/archief_wandblaker.png
+assets/sprites/lichtprops/archief_leeslamp.png
+assets/sprites/lichtprops/kas_gloeipot.png
+assets/sprites/lichtprops/kas_gloeiplant.png
+assets/sprites/lichtprops/kas_gloeiknoppen.png
+assets/sprites/lichtprops/warper_wandlamp.png
+assets/sprites/lichtprops/warper_wandlamp_violet.png
+assets/sprites/lichtprops/warper_kristalzuil.png
+assets/sprites/lichtprops/woud_gloeizwammen.png
+assets/sprites/lichtprops/woud_lantaarnpaal.png
+assets/sprites/lichtprops/woud_waterlelie.png
+assets/sprites/lichtprops/bouw_stormlamp.png
+assets/sprites/lichtprops/bouw_vuurkorf.png
+assets/sprites/lichtprops/binnen_wandlamp.png
+assets/sprites/lichtprops/binnen_kandelaar.png
+assets/sprites/lichtprops/wk_kampvuur.png
+assets/sprites/lichtprops/wk_baken.png
+assets/sprites/lichtprops/wk_kristal.png
