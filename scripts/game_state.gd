@@ -738,7 +738,10 @@ func _ready() -> void:
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
-			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:
+			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
+			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
+			["--solod100guardtest", "res://scripts/tests/solo_d100_guard_tests.gd", "SoloD100GuardTest", "solod100guardtest"],
+			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):

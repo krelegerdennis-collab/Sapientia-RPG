@@ -186,9 +186,15 @@ static func _decor_only_exits(room: Dictionary) -> Array:
 
 
 # ---------------------------------------------------------------- bouwen
+## Online DLS zet de kamerdata zelf (OnlineDlsRoom). Solo blijft DungeonRooms.room().
+func _online_room_injected() -> bool:
+	return false
+
+
 func _build() -> void:
 	# v0.17: ook de kamers van het Donker Woud (scripts/data/woud_rooms.gd)
-	room = DungeonRooms.room(room_id)
+	if not _online_room_injected():
+		room = DungeonRooms.room(room_id)
 	if room.is_empty():
 		push_error("Dungeonkamer '%s' bestaat niet in dungeon_rooms.gd / woud_rooms.gd / archief2_rooms.gd / berggrot_data.gd" % room_id)
 		return
