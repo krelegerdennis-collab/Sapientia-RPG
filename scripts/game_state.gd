@@ -593,6 +593,8 @@ func _ready() -> void:
 	# D3 bazen fase-machine (PR A): of  godot -- --bossphasetest  (scripts/tests/boss_phase_tests.gd).
 	# D3 realtime Golem (PR B): of  godot -- --golemactiontest  (scripts/tests/golem_action_tests.gd)
 	#   en  godot -- --golemactionsimtest  (scripts/tests/golem_actionsim_tests.gd, kleine sim als rookproef).
+	# M9a Page Warden (Action, alleen co-op): of  godot -- --pagewardentest  (scripts/tests/page_warden_tests.gd)
+	#   en  godot -- --pagewardensim [--fights=N] [--seats=1..4] [--seed=N]  (tools/battlesim/page_warden_rt_sim.gd).
 	# D3 arena-hook realtime Golem (PR C): of  godot -- --golemarenatest  (scripts/tests/golem_arena_tests.gd).
 	# Golem zichtbare telegraaf/aanval (Action): of  godot -- --golemzichtbaartest  (scripts/tests/golem_zichtbaar_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
@@ -691,6 +693,8 @@ func _ready() -> void:
 			["--bossphasetest", "res://scripts/tests/boss_phase_tests.gd", "BossPhaseTest", "bossphasetest"],
 			["--golemactiontest", "res://scripts/tests/golem_action_tests.gd", "GolemActionTest", "golemactiontest"],
 			["--golemactionsimtest", "res://scripts/tests/golem_actionsim_tests.gd", "GolemActionsimTest", "golemactionsimtest"],
+			["--pagewardentest", "res://scripts/tests/page_warden_tests.gd", "PageWardenTest", "pagewardentest"],
+			["--pagewardensim", "res://tools/battlesim/page_warden_rt_sim.gd", "PageWardenSim", "pagewardensim"],
 			["--golemarenatest", "res://scripts/tests/golem_arena_tests.gd", "GolemArenaTest", "golemarenatest"],
 			["--golemzichtbaartest", "res://scripts/tests/golem_zichtbaar_tests.gd", "GolemZichtbaarTest", "golemzichtbaartest"],
 			["--golemstorytest", "res://scripts/tests/golem_story_tests.gd", "GolemStoryTest", "golemstorytest"],
