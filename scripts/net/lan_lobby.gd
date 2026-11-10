@@ -10,6 +10,7 @@ const RelayPeerScript := preload("res://scripts/net/relay_peer.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 const AvatarBlob := preload("res://scripts/net/avatar_blob.gd")
 const EmoteGateScript := preload("res://scripts/net/emote_gate.gd")
+const RewardAckScript := preload("res://scripts/net/reward_ack.gd")
 
 signal assigned(slot: int, character_id: String)
 signal refused(reason: int)
@@ -50,6 +51,8 @@ var protocol_version := Protocol.VERSION
 var sim_id := ""
 var sim_mode := ""
 var _ready_by_seat: Dictionary = {}
+## Leeg = de client leest applied_grants van het M1-profiel. Vervangt die lezing.
+var is_grant_applied: Callable = Callable()
 
 var _peer: MultiplayerPeer
 var _join_timeout := Protocol.JOIN_TIMEOUT_SEC
@@ -65,6 +68,8 @@ var _drop_ids: Array[int] = []
 var _gameplay: Node = null
 var _online_profile: Dictionary = {}
 var _emote_gate: EmoteGate = null
+var _rewards: RewardAck = null
+var _inbox: RewardAck = null
 
 
 func _ready() -> void:
@@ -190,6 +195,7 @@ func host_relay_v2(url: String, profile: Dictionary) -> Error:
 	protocol_version = Protocol.VERSION_ONLINE
 	_online_profile = norm
 	_emote_gate = EmoteGateScript.new()
+	_rewards = RewardAckScript.new()
 	peer.room_ready.connect(_on_relay_room_ready)
 	_bind(peer)
 	is_host = true
@@ -572,6 +578,8 @@ func _on_host_v2(from_id: int, msg: Dictionary) -> void:
 			_on_emote_packet(from_id, msg["body"])
 		Protocol.Kind.READY:
 			_on_ready_packet(from_id, msg["body"])
+		Protocol.Kind.REWARD_ACK:
+			_on_reward_ack(from_id, msg["body"])
 
 
 func _on_hello_v2(from_id: int, body: Dictionary) -> void:
@@ -598,6 +606,7 @@ func _on_hello_v2(from_id: int, body: Dictionary) -> void:
 	_add_online_slot(from_id, slot, norm, Protocol.CTRL_REMOTE)
 	_send_to(from_id, Protocol.Kind.WELCOME, {"slot": slot, "uid": uid}, Protocol.VERSION_ONLINE)
 	_emit_roster()
+	_resend_unacked(from_id, uid)
 
 
 func _on_ready_packet(from_id: int, body: Dictionary) -> void:
@@ -665,6 +674,63 @@ func _seat_of_peer(peer_id: int) -> int:
 	return Protocol.NO_SLOT
 
 
+func _uid_of_peer(peer_id: int) -> String:
+	for row in slots:
+		if int(row.get("peer_id", 0)) == peer_id:
+			return str(row.get("uid", ""))
+	return ""
+
+
+## Online v2. Bewaart de bundle tot REWARD_ACK. Leeg als dit geen v2-host is.
+func send_reward(peer_id: int, bundle: Dictionary) -> String:
+	if protocol_version != Protocol.VERSION_ONLINE or not is_host or _rewards == null:
+		return ""
+	var uid := _uid_of_peer(peer_id)
+	if uid == "":
+		return ""
+	var offered: Dictionary = _rewards.offer(uid, bundle)
+	if not bool(offered.get("ok", false)):
+		return ""
+	var body: Dictionary = offered.get("body", {})
+	_send_to(peer_id, Protocol.Kind.REWARD_BUNDLE, body, Protocol.VERSION_ONLINE)
+	return str(offered.get("grant_key", ""))
+
+
+func _resend_unacked(peer_id: int, uid: String) -> void:
+	if _rewards == null:
+		return
+	for item in _rewards.unacked(uid):
+		if item is Dictionary:
+			_send_to(peer_id, Protocol.Kind.REWARD_BUNDLE, item, Protocol.VERSION_ONLINE)
+
+
+func _on_reward_ack(from_id: int, body: Dictionary) -> void:
+	if _rewards == null:
+		return
+	var parsed := Codec.read_reward_ack(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	var uid := _uid_of_peer(from_id)
+	if uid == "":
+		return
+	_rewards.ack(uid, str(parsed.get("grant_key", "")))
+
+
+func _on_reward_bundle(body: Dictionary) -> void:
+	if phase != Phase.IN or protocol_version != Protocol.VERSION_ONLINE:
+		return
+	if _inbox == null:
+		_inbox = RewardAckScript.new()
+	if is_grant_applied.is_valid():
+		_inbox.is_grant_applied = is_grant_applied
+	var result: Dictionary = _inbox.receive(body)
+	if not bool(result.get("ok", false)):
+		return
+	_send_to(Protocol.HOST_PEER_ID, Protocol.Kind.REWARD_ACK, {
+		"grant_key": str(result.get("grant_key", "")),
+	}, Protocol.VERSION_ONLINE)
+
+
 func _on_client_v2(msg: Dictionary) -> void:
 	if not bool(msg.get("ok", false)):
 		_set_refused(Protocol.Refuse.BAD_PACKET)
@@ -690,6 +756,8 @@ func _on_client_v2(msg: Dictionary) -> void:
 			_on_ready_remote(body)
 		Protocol.Kind.SIM_SELECT:
 			_on_sim_remote(body)
+		Protocol.Kind.REWARD_BUNDLE:
+			_on_reward_bundle(body)
 		Protocol.Kind.SESSION_END:
 			_on_session_end(body)
 		Protocol.Kind.START_GAME:

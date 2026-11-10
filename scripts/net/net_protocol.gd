@@ -86,6 +86,8 @@ enum Kind {
 	HOST_PAUSED = 13,
 	EMOTE = 14,
 	VOTE = 15,
+	## Client bevestigt een ontvangen bundle. VERSION_ONLINE blijft 2.
+	REWARD_ACK = 16,
 }
 
 ## Binaire gameplay-berichten (zelfde ENet-peer als de lobby; geen JSON).

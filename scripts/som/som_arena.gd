@@ -32,11 +32,16 @@ signal action_resolved(text: String)
 signal sim_ticked(tick: int)
 
 const SomData := preload("res://scripts/data/som_data.gd")
+const OnlineDlsFloor := preload("res://scripts/online/online_dls_floor.gd")
 const BossScript := preload("res://scripts/som/boss_script.gd")
 const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const GolemStoryWin := preload("res://scripts/som/golem_story_win.gd")
 const GolemBossView := preload("res://scripts/som/golem_boss_view.gd")
+const PageWardenBoss := preload("res://scripts/som/page_warden_boss.gd")
+const PageWardenFight := preload("res://scripts/som/page_warden_fight.gd")
+const PageWardenView := preload("res://scripts/som/page_warden_view.gd")
+const ThreatTable := preload("res://scripts/som/threat_table.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
@@ -198,6 +203,13 @@ var golem_story_fired := false
 var golem_strike_count := 0
 ## Tests: aantal hit_member-aanroepen vanuit _golem_strike (schade alleen daar).
 var golem_strike_hit_member_count := 0
+## M9a: Page Warden alleen in online co-op (coop_mode + baas-sleutel 10). Solo blijft turn-based.
+var _page_registered_here := false
+var page_events: Array = []
+var page_threat: ThreatTable = null
+var page_strike_count := 0
+var page_strike_hits := 0
+var _page_range_scratch: Array = []
 
 
 func _init() -> void:
@@ -381,6 +393,10 @@ func _apply_player_sheet() -> void:
 
 ## Bestaande vijand-data (game_data.gd / berggrot_data.gd) met hetzelfde kamerniveau als het gevecht.
 func enemy_stats(m: Node) -> Dictionary:
+	# Online DLS: schaal op het "floor"-veld (eff). Solo en de WM1-sandbox gaan hier niet langs.
+	# room is een Node: Object.get heeft één argument. null == true is false, zonder bool(null).
+	if coop_mode and room != null and room.get("online_dls") == true:
+		return OnlineDlsFloor.action_stats(m, self)
 	var id: String = m.enemy_id
 	var base: Dictionary = GameData.ENEMIES.get(id, {})
 	if base.is_empty():
@@ -402,6 +418,18 @@ func golem_rt_applies(m: Node) -> bool:
 			and room != null and "room_id" in room and GOLEM_RT_ROOMS.has(str(room.room_id))
 
 
+## M9a: Page Warden realtime alleen in online co-op, baas-sleutel 10 (niet The Voice op 99).
+## Zonder coop_mode blijft de Classic-baas turn-based (geen script op "papiergeest").
+func page_warden_rt_applies(m: Node) -> bool:
+	if not coop_mode or m == null or not is_instance_valid(m):
+		return false
+	if not bool(m.get("boss")):
+		return false
+	if str(m.get("enemy_id")) != PageWardenBoss.ENEMY_ID:
+		return false
+	return int(m.get("floor_nr")) == PageWardenBoss.BOSS_KEY
+
+
 ## GolemFight van een geregistreerde Golem (of null).
 func golem_fight_of(m: Node) -> GolemFight:
 	if not enemies.has(m):
@@ -413,9 +441,15 @@ func _exit_tree() -> void:
 	for m in enemies.keys():
 		if enemies[m].get("golem", null) != null:
 			_golem_clear_visuals(m, enemies[m])
+		if enemies[m].get("page_warden", null) != null:
+			_page_clear_visuals(m, enemies[m])
 	if _golem_registered_here:
 		GolemBoss.unregister()
 		_golem_registered_here = false
+	if _page_registered_here:
+		PageWardenBoss.unregister()
+		_page_registered_here = false
+		page_threat = null
 
 
 func register(m: Node) -> void:
@@ -426,7 +460,13 @@ func register(m: Node) -> void:
 	if golem_rt and not BossScript.has_script(eid):
 		GolemBoss.ensure_registered()
 		_golem_registered_here = true
-	if m.boss and not BossScript.has_script(eid):
+	# Page Warden: alleen co-op + sleutel 10. Zonder die tak blijft de voorwaarde hieronder
+	# byte-gelijk aan de oude baas-check (geen script → niet in Action).
+	var page_rt := page_warden_rt_applies(m)
+	if page_rt and not BossScript.has_script(PageWardenBoss.SCRIPT_ID):
+		PageWardenBoss.ensure_registered()
+		_page_registered_here = true
+	if m.boss and not page_rt and not BossScript.has_script(eid):
 		return
 	var d := enemy_stats(m)
 	if d.is_empty():
@@ -446,6 +486,27 @@ func register(m: Node) -> void:
 		entry["tg"] = TelegraphAttack.new()
 		enemies[m] = entry
 		_ensure_golem_view(m, entry)
+		return
+	if page_rt:
+		# Stats uit baas-sleutel 10, niet uit de kamertier of de effectieve verdieping.
+		var st := PageWardenBoss.stats_for_seats(_page_seat_count())
+		entry["hp"] = int(st["max_hp"])
+		entry["max_hp"] = int(st["max_hp"])
+		entry["atk"] = int(st["atk"])
+		entry["def"] = int(st["def"])
+		entry["exp"] = int(st.get("exp", entry["exp"]))
+		entry["gold"] = int(st.get("gold", entry["gold"]))
+		entry["data"] = st
+		entry["tg"] = TelegraphAttack.new()
+		enemies[m] = entry
+		if coop_sim_host:
+			if page_threat == null:
+				page_threat = ThreatTable.new()
+			# Seed uit de arena-RNG (geen globale randi). Zelfde arena-seed → zelfde baas.
+			var fight := PageWardenFight.new(int(entry["max_hp"]), rng.randi())
+			entry["page_warden"] = fight
+			entry["hp"] = fight.hp()
+			_ensure_page_view(m, entry)
 		return
 	if SomActionAttacks.has_telegraph_attack(eid):
 		var aid := SomActionAttacks.default_attack_for_enemy(eid)
@@ -1145,6 +1206,7 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 		return
 	var e: Dictionary = enemies[m]
 	var golem: GolemFight = e.get("golem", null)
+	var page: PageWardenFight = e.get("page_warden", null)
 	if golem:
 		# kern-factor, schadeplafond op de fasedrempel en onkwetsbare fasewissel zitten in GolemFight.damage()
 		dmg = golem.damage(dmg)
@@ -1153,6 +1215,14 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 		if dmg <= 0:
 			last_enemy_damage = 0
 			return
+	elif page:
+		dmg = page.damage(dmg)
+		_page_events(m, e, page.take_events())
+		e["hp"] = page.hp()
+		if dmg <= 0:
+			last_enemy_damage = 0
+			return
+		_page_note_damage(last_attacker, dmg)
 	else:
 		e["hp"] = int(e["hp"]) - dmg
 	e["flash"] = SomData.HIT_FLASH
@@ -1169,8 +1239,8 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	last_hitstop_ticks = hitstop
 	if hitstop > 0:
 		e["hitstop"] = maxi(int(e.get("hitstop", 0)), hitstop)
-	if not stagger or golem:
-		return       # Golem: geen knockback/afgebroken telegraaf door gewone slagen (alleen kern-break)
+	if not stagger or golem or page:
+		return       # Golem / Page Warden: geen knockback/afgebroken telegraaf door gewone slagen (alleen kern-break)
 	if e.has("tg"):
 		(e["tg"] as TelegraphAttack).interrupt()
 	e["tele"] = 0.0          # volle treffer = telegraaf afgebroken
@@ -1207,6 +1277,8 @@ func _defeat_enemy(m: Node) -> void:
 	var e: Dictionary = enemies[m]
 	if e.has("golem"):
 		_golem_clear_visuals(m, e)
+	elif e.has("page_warden"):
+		_page_clear_visuals(m, e)
 	elif e.has("tg"):
 		(e["tg"] as TelegraphAttack).cancel()
 	enemies.erase(m)
@@ -1385,6 +1457,9 @@ func _enemy_ai(m: Node, delta: float) -> void:
 		return
 	if e.has("golem"):
 		_golem_ai(m, e, delta)
+		return
+	if e.has("page_warden"):
+		_page_ai(m, e, delta)
 		return
 	if e.has("tg"):
 		_enemy_ai_telegraph(m, e, delta)
@@ -1621,6 +1696,254 @@ func _golem_spawn_adds(m: Node, ids: Array) -> void:
 		var off := Vector2i(-2 if i % 2 == 0 else 3, 2)
 		room.add_monster({"id": "golem_add_%d_%d" % [sim_tick, i], "enemy": str(id), "tile": [m.tile.x + off.x, m.tile.y + off.y], "moves": true})
 		i += 1
+
+
+## Page Warden: host tikt het gevecht. Doelkeuze alleen bij telegraph_start (threat blijft plakken
+## tijdens de windup). Hitstop hierboven bevriest de baas, net als de Golem.
+func _page_ai(m: Node, e: Dictionary, delta: float) -> void:
+	var fight: PageWardenFight = e["page_warden"]
+	if float(e["flash"]) > 0.0:
+		e["flash"] = float(e["flash"]) - delta
+	_pose_tick(m, e, delta)
+	fight.tick()
+	_page_events(m, e, fight.take_events())
+	if sim_tick % 60 == 0:
+		_page_decay_range(m)
+	_page_sync_visual(m, e, fight)
+	_tint(m, e)
+
+
+func _page_events(m: Node, e: Dictionary, evs: Array) -> void:
+	for ev in evs:
+		var d: Dictionary = (ev as Dictionary).duplicate()
+		d["tick"] = sim_tick
+		page_events.append(d)
+		match str(d.get("type", "")):
+			"telegraph_start":
+				var aid := str(d["id"])
+				var def := PageWardenBoss.attack_px(aid)
+				var ranged := bool(d.get("ranged", false))
+				_page_choose_target(m, e, ranged)
+				var origin := TelegraphShape.to_px(center_of(m))
+				var dir := _page_aim_dir(e, origin)
+				e["page_attack"] = aid
+				e["page_def"] = def
+				e["page_origin"] = origin
+				e["page_dir"] = dir
+				_page_show_telegraph(e, def, origin, dir, int(d["windup"]))
+				_monster_pose(m, e, "attack", 0, float(d["windup"]) / float(TICK_HZ) + 0.05)
+				if room and room.has_node("Objects"):
+					SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), float(d["windup"]) / float(TICK_HZ))
+			"attack_hit":
+				_page_strike(e, str(d["id"]), float(d["power"]))
+				_page_clear_telegraph(e)
+				_monster_pose(m, e, "attack", 1, SomData.MONSTER_STRIKE_MS / 1000.0)
+			"telegraphs_cancelled", "stagger_break":
+				_page_clear_telegraph(e)
+			"phase":
+				e["page_phase"] = int(d["index"])
+			"adds":
+				_page_spawn_adds(m, d.get("ids", []))
+
+
+func _page_show_telegraph(e: Dictionary, def: Dictionary, origin: Vector2i, dir: Vector2i, windup_ticks: int) -> void:
+	var tg: TelegraphAttack = e.get("tg", null)
+	if tg == null:
+		return
+	tg.mirror_from_network(def, 0, TelegraphState.State.WINDUP, windup_ticks, origin, dir, str(def.get("shape", "line")))
+	e["tele"] = float(windup_ticks) * TICK_DT
+
+
+func _page_sync_visual(m: Node, e: Dictionary, fight: PageWardenFight) -> void:
+	var view := _ensure_page_view(m, e)
+	if view != null:
+		view.sync(fight)
+	if fight.step == PageWardenFight.Step.WINDUP and e.has("page_def") and e.has("tg"):
+		var def: Dictionary = e["page_def"]
+		(e["tg"] as TelegraphAttack).mirror_from_network(
+				def, 0, TelegraphState.State.WINDUP, int(fight.step_left),
+				e.get("page_origin", Vector2i.ZERO), e.get("page_dir", Vector2i.DOWN),
+				str(def.get("shape", "line")))
+		e["tele"] = float(fight.step_left) * TICK_DT
+	elif fight.step != PageWardenFight.Step.WINDUP and e.has("page_def"):
+		if fight.step != PageWardenFight.Step.ACTIVE:
+			_page_clear_telegraph(e)
+
+
+## Treffer op de echte vorm (lijn / cirkel / kegel), niet op een vervangende cirkel.
+## Iframes en perfect-dodge lopen via hit_member, net als bij de Golem.
+func _page_strike(e: Dictionary, attack_id: String, power: float) -> void:
+	page_strike_count += 1
+	var def: Dictionary = e.get("page_def", PageWardenBoss.attack_px(attack_id))
+	if def.is_empty():
+		return
+	var origin: Vector2i = e.get("page_origin", Vector2i.ZERO)
+	var dir: Vector2i = e.get("page_dir", Vector2i.DOWN)
+	var shape := TelegraphShape.from_data(str(def.get("shape", "line")), origin, dir, def)
+	for slot in _coop_slots.keys():
+		var id := str(_coop_slots[slot])
+		var body := _page_body(int(slot))
+		if body == Vector2.INF or not is_alive(id):
+			continue
+		if not shape.contains_i(TelegraphShape.to_px(body)):
+			continue
+		page_strike_hits += 1
+		hit_member(id, int(e["atk"]), power)
+
+
+func _page_spawn_adds(m: Node, ids: Array) -> void:
+	if room == null or not room.has_method("add_monster"):
+		return
+	var kept: Array = PageWardenBoss.clamp_adds(enemies.size(), ids, Protocol.SNAPSHOT_ENEMY_BUDGET)
+	var i := 0
+	for id in kept:
+		var off := Vector2i(2 if i % 2 == 0 else -2, 2)
+		room.add_monster({
+			"id": "page_add_%d_%d" % [sim_tick, i],
+			"enemy": str(id),
+			"tile": [m.tile.x + off.x, m.tile.y + off.y],
+			"moves": true,
+		})
+		i += 1
+
+
+func _page_clear_telegraph(e: Dictionary) -> void:
+	if e.has("tg"):
+		(e["tg"] as TelegraphAttack).cancel()
+	e["tele"] = 0.0
+	e.erase("page_def")
+
+
+func _page_clear_visuals(m: Node, e: Dictionary) -> void:
+	_page_clear_telegraph(e)
+	var view: Node = e.get("page_view", null)
+	if view != null and is_instance_valid(view):
+		view.queue_free()
+	e.erase("page_view")
+	if m != null and m.sprite:
+		m.sprite.visible = true
+
+
+func _ensure_page_view(m: Node, e: Dictionary) -> PageWardenView:
+	if not coop_sim_host:
+		return null
+	var existing: Node = e.get("page_view", null)
+	if existing != null and is_instance_valid(existing):
+		return existing as PageWardenView
+	var view := PageWardenView.new()
+	view.name = "PageWardenView"
+	# Voeten van de 256×200-plaat (pixel ~194) op de onderkant van het blok.
+	view.position = Vector2(0, -16)
+	m.add_child(view)
+	if m.sprite:
+		m.sprite.visible = false
+	e["page_view"] = view
+	return view
+
+
+func _page_seat_count() -> int:
+	return clampi(_coop_slots.size(), 1, 4)
+
+
+func _page_body(slot: int) -> Vector2:
+	var n := _coop_body(slot)
+	if n == null:
+		return Vector2.INF
+	return n.position + Vector2(0, SomData.BODY_Y)
+
+
+func _page_aim_dir(e: Dictionary, origin: Vector2i) -> Vector2i:
+	var slot := int(e.get("page_slot", Protocol.NO_SLOT))
+	if slot < 0:
+		return Vector2i.DOWN
+	var body := _page_body(slot)
+	if body == Vector2.INF:
+		return Vector2i.DOWN
+	var aim := TelegraphShape.to_px(body)
+	var dir := TelegraphShape.dir_from_vector(Vector2(aim - origin))
+	if dir == Vector2i.ZERO:
+		return Vector2i.DOWN
+	return dir
+
+
+func _page_choose_target(m: Node, e: Dictionary, ranged: bool) -> void:
+	if page_threat == null:
+		page_threat = ThreatTable.new()
+	var ranked := _page_living_nearest(m)
+	var ids: Array = []
+	var near: Array = []
+	for row in ranked:
+		var slot := int(row["slot"])
+		ids.append(slot)
+		if float(row["dist"]) <= 32.0:
+			near.append(slot)
+	var slot := page_threat.choose(ids, near, ranged, sim_tick)
+	e["page_slot"] = slot
+	e["target"] = str(_coop_slots.get(slot, "")) if slot >= 0 else ""
+
+
+func _page_living_nearest(m: Node) -> Array:
+	var rows: Array = []
+	for slot in _coop_slots.keys():
+		var hid := str(_coop_slots[slot])
+		if not is_alive(hid):
+			continue
+		var body := _page_body(int(slot))
+		if body == Vector2.INF:
+			continue
+		rows.append({"slot": int(slot), "dist": center_of(m).distance_to(body)})
+	rows.sort_custom(func(a, b):
+		if is_equal_approx(float(a["dist"]), float(b["dist"])):
+			return int(a["slot"]) < int(b["slot"])
+		return float(a["dist"]) < float(b["dist"]))
+	return rows
+
+
+func _page_decay_range(m: Node) -> void:
+	if page_threat == null:
+		return
+	_page_range_scratch.clear()
+	var limit := float(SomData.CHASE_RANGE) * 16.0
+	for slot in _coop_slots.keys():
+		var hid := str(_coop_slots[slot])
+		if not is_alive(hid):
+			continue
+		var body := _page_body(int(slot))
+		if body == Vector2.INF:
+			continue
+		if center_of(m).distance_to(body) <= limit:
+			_page_range_scratch.append(int(slot))
+	page_threat.decay_out_of_range(_page_range_scratch)
+
+
+func _page_note_damage(hero_id: String, amount: int) -> void:
+	if page_threat == null or amount <= 0 or hero_id == "":
+		return
+	page_threat.note_damage(_slot_for_hero(hero_id), amount, PageWardenBoss.is_tank(hero_id))
+
+
+func _page_note_heal(hero_id: String, amount: int) -> void:
+	if page_threat == null or amount <= 0 or hero_id == "":
+		return
+	page_threat.note_heal(_slot_for_hero(hero_id), amount, PageWardenBoss.is_tank(hero_id))
+
+
+func _page_clear_hero(hero_id: String) -> void:
+	if page_threat == null or hero_id == "":
+		return
+	page_threat.clear_slot(_slot_for_hero(hero_id))
+
+
+## Bazen die bij het laden van de kamer nog geen co-op zagen (register liep vóór setup_coop).
+func _page_adopt_bosses() -> void:
+	if room == null:
+		return
+	var pending: Array = []
+	for m in room.monsters:
+		if is_instance_valid(m) and page_warden_rt_applies(m) and not enemies.has(m):
+			pending.append(m)
+	for m in pending:
+		register(m)
 
 
 ## Inktwurm / Inktspuw: TelegraphState + vaste shape (T4a). Zelfde cadans als de float-telegraaf.
@@ -2034,6 +2357,7 @@ func _feel_local_hero(id: String) -> bool:
 
 
 func _member_ko(id: String) -> void:
+	_page_clear_hero(id)
 	if shake != null and _feel_local_hero(id):
 		shake.stop()
 	combat_roots.clear_member(id)
@@ -2104,6 +2428,7 @@ func resolve(q: Dictionary) -> String:
 		if int(r.get("hp", 0)) > 0:
 			SomFx.number(room.get_node("Objects"), body_of(str(target.get("id", ""))) + Vector2(0, -22), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
 			heal_glow(str(target.get("id", "")))
+			_page_note_heal(active_id, int(r["hp"]))
 	elif str(q.get("kind", "")) == "codex":
 		var ct: Variant = q.get("target", null)
 		text = codex.capture(ct if typeof(ct) == TYPE_OBJECT else null)   # ook een intussen vrijgegeven doel (boek terug)
@@ -2178,6 +2503,7 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 			if int(t.get("hp", 0)) <= 0:
 				return             # intussen KO: genezen wekt niet
 			var got := PartyActions.restore(t, amt, 0)
+			_page_note_heal(caster_id, int(got.x))
 			var n := node_of(tid)
 			spell_effect(spell_id, n.position if n else player.position)
 			SomFx.number(room.get_node("Objects"), body_of(tid) + Vector2(0, -22), "+%d" % got.x, Color(0.4, 1, 0.5))
@@ -2384,6 +2710,7 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 	_rebuild_enemy_order()
 	_clear_coop_avatars()
 	coop_sync_roster(roster)
+	_page_adopt_bosses()
 	if not coop_sim_host:
 		player.set_analog(func() -> Vector2: return Vector2.ZERO, SomData.MOVE_SPEED)
 
