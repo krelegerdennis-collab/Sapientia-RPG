@@ -1339,6 +1339,12 @@ assets/sprites/lichtprops/archief_leeslamp_glow.png
 assets/sprites/lichtprops/archief_wandblaker_glow.png
 assets/sprites/lichtprops/kas_gloeipot_glow.png
 assets/sprites/lichtprops/bouw_stormlamp_glow.png
+# 10 nov 2026: M9a Page Warden Action-sprites (RPG ART), 512x200 + 256x200 + 16x16
+assets/sprites/bosses/page_warden_attack_ph.png
+assets/sprites/bosses/page_warden_hit_ph.png
+assets/sprites/bosses/page_warden_phase2_ph.png
+assets/sprites/bosses/page_warden_page_ph.png
+
 # online co-op: paper-doll volledige set (v2-stijl) + rol-iconen + emotes van RPG ART
 # (art_coop/proef/out_full; goedgekeurd door Dennis 10 nov 2026 16:23, "Ja, maak de volledige set")
 assets/sprites/paperdoll/kaart/boven_gewaad.png
