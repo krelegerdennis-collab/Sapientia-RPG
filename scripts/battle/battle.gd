@@ -1347,6 +1347,8 @@ func _execute(a: Dictionary) -> void:
 			zin = "%s is bound and skips a turn."
 		show_message(zin % actor["name"])
 		await _wait(MESSAGE_TIME)
+		if int(actor.get("skip", 0)) <= 0:
+			actor.erase("stun_immune")
 		return
 	match a["type"]:
 		"attack":
@@ -1659,10 +1661,12 @@ func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
 		else:
 			burn["pct"] = maxf(float(burn.get("pct", 0.0)), pct)
 			burn["turns"] = maxi(int(burn.get("turns", 0)), turns)
-	# Verlamming/bevriezing: kans (SpellRules.STUN_CHANCE), met de randf() van het gevecht.
-	if int(fx.get("skip", 0)) > 0 and SpellRules.stun_lands(fx, is_boss_target(target), randf(), stun_boss_immune, stun_chance):
-		target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
-		target["skip_reden"] = str(fx.get("skip_reden", "bevriezing"))
+	# Verlamming/bevriezing: kans uit SpellRules (enkel/AoE, baas-halve kans), anti stun-lock.
+	if int(fx.get("skip", 0)) > 0 and not SpellRules.target_blocks_stun(target):
+		if SpellRules.stun_lands(fx, spell, is_boss_target(target), randf(), stun_boss_immune, stun_chance):
+			target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
+			target["skip_reden"] = str(fx.get("skip_reden", "bevriezing"))
+			target["stun_immune"] = true
 
 
 ## Telt als baas voor verlamming/bevriezing: een vijand in een baasgevecht of met "is_boss".
@@ -1749,6 +1753,7 @@ func _revive_combatant(c: Dictionary, hp: int) -> void:
 static func clear_ko_status(c: Dictionary) -> void:
 	c["skip"] = 0
 	c.erase("skip_reden")
+	c.erase("stun_immune")
 	c["dots"] = []
 	c["hots"] = []
 	c["buffs"] = []
