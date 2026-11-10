@@ -58,12 +58,7 @@ func _run() -> void:
 		elif s.begins_with("--seed="):
 			seed_val = int(s.trim_prefix("--seed="))
 	_add_data = Scaling.monster_stats((GameData.ENEMIES["papiergeest"] as Dictionary).duplicate(true), PageWardenBoss.BOSS_KEY)
-	_params = {
-		"charge_time": SomData.CHARGE_TIME, "anim": 0.71, "approach": 1.2,
-		"ally_spell_cd": SomData.ALLY_SPELL_CD, "ally_heal_below": SomData.ALLY_HEAL_BELOW,
-		"ally_dmg_chance": SomData.ALLY_DAMAGE_SPELL_CHANCE, "enemy_cd": SomData.ATTACK_COOLDOWN,
-		"telegraph": SomData.TELEGRAPH, "enemy_dmg": SomData.ENEMY_DAMAGE_MULT,
-	}
+	_params = fight_params()
 	var easy_exp := _exp_over_floors(true)
 	var classic_exp := _exp_over_floors(false)
 	var easy_lv := _level_for_exp(easy_exp)
@@ -451,3 +446,39 @@ func _mean(a: Array) -> float:
 	for v in a:
 		s += float(v)
 	return s / float(maxi(1, a.size()))
+
+
+## Zelfde dictionary als het gevecht. Eén bron, zodat de paritytest de sim-parameters meeneemt.
+func fight_params() -> Dictionary:
+	return {
+		"charge_time": SomData.CHARGE_TIME, "anim": 0.71, "approach": 1.2,
+		"ally_spell_cd": SomData.ALLY_SPELL_CD, "ally_heal_below": SomData.ALLY_HEAL_BELOW,
+		"ally_dmg_chance": SomData.ALLY_DAMAGE_SPELL_CHANCE, "enemy_cd": SomData.ATTACK_COOLDOWN,
+		"telegraph": SomData.TELEGRAPH, "enemy_dmg": SomData.ENEMY_DAMAGE_MULT,
+	}
+
+
+## Zet de add en de gevechtsparameters. Geen ander gedrag dan `_run`.
+func parity_bind(add_data: Dictionary) -> void:
+	_add_data = add_data
+	_params = fight_params()
+
+
+func parity_choose(threat: ThreatTable, heroes: Array, ranged: bool, tick: int) -> int:
+	return _choose(threat, heroes, ranged, tick)
+
+
+func parity_boss_hit(heroes: Array, boss: Dictionary, target: int, id: String, power: float, rng: RandomNumberGenerator) -> void:
+	_boss_hit(heroes, boss, target, id, power, rng)
+
+
+func parity_ally_spell(gf: PageWardenFight, hr: Dictionary, heroes: Array, boss: Dictionary, rng: RandomNumberGenerator, threat: ThreatTable) -> bool:
+	return _ally_spell(gf, hr, heroes, boss, rng, threat)
+
+
+func parity_spawn_adds(adds: Array, ids: Array) -> void:
+	_spawn_adds(adds, ids)
+
+
+func parity_adds_tick(heroes: Array, adds: Array, target: int, rng: RandomNumberGenerator) -> void:
+	_adds_tick(heroes, adds, target, rng)

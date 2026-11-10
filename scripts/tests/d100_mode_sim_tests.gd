@@ -10,6 +10,11 @@ const Floor := preload("res://scripts/online/online_dls_floor.gd")
 const Finger := preload("res://scripts/online/solo_d100_fingerprint.gd")
 const PageWardenBoss := preload("res://scripts/som/page_warden_boss.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
+const PageWardenRt := preload("res://tools/battlesim/page_warden_rt_sim.gd")
+const PageWardenFight := preload("res://scripts/som/page_warden_fight.gd")
+const ThreatTableSc := preload("res://scripts/som/threat_table.gd")
+const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
+const Equipment := preload("res://scripts/equipment.gd")
 
 const SENTINEL := "M9B-SENTINEL-DO-NOT-SAVE\n"
 const SAVE_PATHS: Array[String] = [
@@ -48,6 +53,8 @@ func _run() -> void:
 	_chain()
 	_seeds()
 	_param_determinisme()
+	_parity_lock()
+	_baseline_428()
 	var solo_before := _solo_sig()
 	var party_before := _party_sig()
 	var gold_before := int(GameState.gold)
@@ -268,3 +275,184 @@ func _inv_sig() -> String:
 			if n > 0:
 				parts.append("%s=%d" % [str(k), n])
 	return "|".join(parts)
+
+
+## Vaste seed. Faalt als page_warden_rt_sim.gd of de ingelinede kopie uit elkaar loopt.
+func _parity_lock() -> void:
+	var rt = PageWardenRt.new()
+	var add_data: Dictionary = Scaling.monster_stats((GameData.ENEMIES["papiergeest"] as Dictionary).duplicate(true), PageWardenBoss.BOSS_KEY)
+	rt.parity_bind(add_data)
+	var boss: Dictionary = PageWardenBoss.stats_for_seats(4)
+	_parity_choose(rt)
+	_parity_hits(rt, boss)
+	_parity_spells(rt, boss)
+	_parity_adds(rt, add_data)
+	rt.free()
+
+
+func _parity_rows() -> Array:
+	var party := Sim.make_party(["dennis", "lotte", "noor", "kael"], 0)
+	party[0]["hp"] = maxi(1, int(round(float(party[0]["max_hp"]) * 0.2)))
+	var rows: Array = []
+	var i := 0
+	for h in party:
+		rows.append({
+			"h": h,
+			"slot": i,
+			"iframes": 0.0,
+			"atk": float(Equipment.effective_stat(h, "atk")),
+			"def": float(Equipment.effective_stat(h, "def")),
+		})
+		i += 1
+	return rows
+
+
+func _parity_choose(rt) -> void:
+	var ok := true
+	for tick in [1, 17, 40, 90, 240]:
+		for ranged in [false, true]:
+			var left := _parity_rows()
+			var right: Array = left.duplicate(true)
+			right[1]["h"]["hp"] = 0
+			left[1]["h"]["hp"] = 0
+			var ta := ThreatTableSc.new()
+			var tb := ThreatTableSc.new()
+			ta.note_damage(2, 40, false)
+			tb.note_damage(2, 40, false)
+			if Sim._boss_choose(ta, left, ranged, tick) != rt.parity_choose(tb, right, ranged, tick):
+				ok = false
+	check("doelkeuze gelijk aan rt-sim (seed 20261110)", ok)
+
+
+func _parity_hits(rt, boss: Dictionary) -> void:
+	var left := _parity_rows()
+	var right: Array = left.duplicate(true)
+	var apart := int(right[0]["h"]["hp"])
+	left[0]["h"]["hp"] = 1
+	check("parity-kopieën delen geen held", int(right[0]["h"]["hp"]) == apart and apart != 1)
+	left[0]["h"]["hp"] = apart
+	var ra := RandomNumberGenerator.new()
+	var rb := RandomNumberGenerator.new()
+	ra.seed = 20261110
+	rb.seed = 20261110
+	var shapes := ["page_line", "page_volley", "page_circle", "page_fan", "page_fan"]
+	var targets := [0, 1, 2, 3, 1]
+	var powers := [1.0, 1.4, 0.6, 1.0, 1.2]
+	for i in shapes.size():
+		Sim._boss_hit(left, boss, targets[i], shapes[i], powers[i], ra)
+		rt.parity_boss_hit(right, boss, targets[i], shapes[i], powers[i], rb)
+	left[0]["iframes"] = 0.5
+	right[0]["iframes"] = 0.5
+	Sim._boss_hit(left, boss, 0, "page_line", 1.0, ra)
+	rt.parity_boss_hit(right, boss, 0, "page_line", 1.0, rb)
+	check("klapvorm en baas-treffer gelijk aan rt-sim", _same_heroes(left, right))
+
+
+func _parity_spells(rt, boss: Dictionary) -> void:
+	var left := _parity_rows()
+	var right: Array = left.duplicate(true)
+	var gf_a := PageWardenFight.new(int(boss["max_hp"]), 20261110)
+	var gf_b := PageWardenFight.new(int(boss["max_hp"]), 20261110)
+	var ta := ThreatTableSc.new()
+	var tb := ThreatTableSc.new()
+	var ra := RandomNumberGenerator.new()
+	var rb := RandomNumberGenerator.new()
+	ra.seed = 20261110
+	rb.seed = 20261110
+	var heal_a: bool = Sim._boss_spell(gf_a, left[1], left, boss, ra, ta)
+	var heal_b: bool = rt.parity_ally_spell(gf_b, right[1], right, boss, rb, tb)
+	var dmg_ok := true
+	for _i in 6:
+		var ca: bool = Sim._boss_spell(gf_a, left[2], left, boss, ra, ta)
+		var cb: bool = rt.parity_ally_spell(gf_b, right[2], right, boss, rb, tb)
+		if ca != cb:
+			dmg_ok = false
+	check("bondgenoot-spreuk gelijk aan rt-sim", heal_a == heal_b and heal_a and dmg_ok and _same_heroes(left, right))
+
+
+func _parity_adds(rt, add_data: Dictionary) -> void:
+	var left := _parity_rows()
+	var right: Array = left.duplicate(true)
+	var la: Array = []
+	var ra_adds: Array = []
+	var ids := ["papiergeest", "mist", "papiergeest"]
+	Sim._spawn_adds(la, ids, add_data)
+	rt.parity_spawn_adds(ra_adds, ids)
+	var spawn_ok := la.size() == ra_adds.size() and la.size() > 0
+	for i in mini(la.size(), ra_adds.size()):
+		if int(la[i]["hp"]) != int(ra_adds[i]["hp"]):
+			spawn_ok = false
+		if not is_equal_approx(float(la[i]["approach"]), float(ra_adds[i]["approach"])):
+			spawn_ok = false
+	var rng_a := RandomNumberGenerator.new()
+	var rng_b := RandomNumberGenerator.new()
+	rng_a.seed = 20261110
+	rng_b.seed = 20261110
+	for _t in 90:
+		Sim._boss_adds(left, la, 1, rng_a, SomData.ENEMY_DAMAGE_MULT)
+		rt.parity_adds_tick(right, ra_adds, 1, rng_b)
+	check("add-spawn en add-ticks gelijk aan rt-sim", spawn_ok and _same_heroes(left, right) and _same_adds(la, ra_adds))
+
+
+func _same_heroes(a: Array, b: Array) -> bool:
+	if a.size() != b.size():
+		return false
+	for i in a.size():
+		var ha: Dictionary = a[i]["h"]
+		var hb: Dictionary = b[i]["h"]
+		if int(ha["hp"]) != int(hb["hp"]) or int(ha["mp"]) != int(hb["mp"]):
+			return false
+		if not is_equal_approx(float(a[i]["iframes"]), float(b[i]["iframes"])):
+			return false
+	return true
+
+
+func _same_adds(a: Array, b: Array) -> bool:
+	if a.size() != b.size():
+		return false
+	for i in a.size():
+		if int(a[i]["hp"]) != int(b[i]["hp"]):
+			return false
+		if not is_equal_approx(float(a[i]["approach"]), float(b[i]["approach"])):
+			return false
+		if not is_equal_approx(float(a[i]["tele"]), float(b[i]["tele"])):
+			return false
+		if not is_equal_approx(float(a[i]["cd"]), float(b[i]["cd"])):
+			return false
+	return true
+
+
+## Defaults (geen vlaggen) moeten de #428-klim van factor 10 teruggeven.
+func _baseline_428() -> void:
+	var result := Sim.run_cfg({
+		"mode": "easy",
+		"runs": 24,
+		"floors": 10,
+		"factors": [10],
+		"seats": [1, 2, 3, 4],
+		"hypothetical": false,
+		"base_seed": 20261110,
+		"verbose": false,
+	})
+	check("baseline default dmg is 2.2", is_equal_approx(float(result["enemy_dmg"]), 2.2))
+	check("baseline default herstel is 0", int(result["floor_heal"]) == 0)
+	var want := {
+		1: {"in": 0, "wins": 0, "level": ""},
+		2: {"in": 0, "wins": 0, "level": ""},
+		3: {"in": 4, "wins": 4, "level": "106.2"},
+		4: {"in": 14, "wins": 14, "level": "109.4"},
+	}
+	for row in result["rows"]:
+		var seats := int(row["seats"])
+		var fl: Dictionary = {}
+		for candidate in row["floors"]:
+			if int(candidate["boss_key"]) == PageWardenBoss.BOSS_KEY:
+				fl = candidate
+		var spec: Dictionary = want[seats]
+		var entered := int(fl["boss_entered"])
+		var wins := int(fl["boss_wins"])
+		var level := ""
+		if entered > 0:
+			level = "%.1f" % (float(fl["boss_level_sum"]) / float(entered))
+		check("baseline #428 stoel %d bereikt %d wint %d level %s" % [seats, entered, wins, level if level != "" else "—"],
+			entered == int(spec["in"]) and wins == int(spec["wins"]) and level == str(spec["level"]))
