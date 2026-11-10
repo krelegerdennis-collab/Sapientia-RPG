@@ -206,9 +206,6 @@ jobs:
         run: |
           echo "| suite | PASS | FAIL | ERR | tijd | resultaat |" >> "$GITHUB_STEP_SUMMARY"
           echo "|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
-          # De check "npm ci in relay/" telt alleen als node_modules/ws er nog niet is.
-          # De unittests hierboven hebben die map net gevuld; anders blijft de suite op 89.
-          rm -rf relay/node_modules
           .github/scripts/run_suite.sh relaytest
 
       - name: Upload log
