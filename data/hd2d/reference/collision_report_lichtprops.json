@@ -1,0 +1,2489 @@
+{
+ "archief_2_v1_plaat": {
+  "arena": true,
+  "grid": [
+   "  0 ###########################",
+   "  1 #############E#############",
+   "  2 ###k##K###k##.#k##K##k#####",
+   "  3 #............S............#",
+   "  4 #.######k##################",
+   "  5 #.........................#",
+   "  6 #.........................#",
+   "  7 #.....E......E............#",
+   "  8 #.........................#",
+   "  9 #.........................#",
+   " 10 #.........................#",
+   " 11 #.........................#",
+   " 12 #.........................#",
+   " 13 #.........................#",
+   " 14 #.........................#",
+   " 15 #.#..........E............#",
+   " 16 #############..############"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@216,248",
+   "Lees_6_7(dungeon_sign.gd)@104,120",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@216,248",
+   "Plaat_p1(groei_plaat.gd)@216,120",
+   "zuid(map_spawn.gd)@216,248",
+   "noord(map_spawn.gd)@216,56",
+   "ingang(map_spawn.gd)@216,248",
+   "Uitgang_n(map_exit.gd)@208,32",
+   "Uitgang_E(map_exit.gd)@208,256",
+   "Rand_13_17(StaticBody2D)@216,280",
+   "Rand_14_17(StaticBody2D)@232,280"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     99,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "6,2#47"
+    ],
+    "x": 104,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     291,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "18,2#33"
+    ],
+    "x": 296,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_2_v1_plaat",
+  "script": "res://scripts/dungeon/archief2_room.gd",
+  "som": true
+ },
+ "archief_2_v2_gang": {
+  "arena": true,
+  "grid": [
+   "  0 ###########################",
+   "  1 #############E#############",
+   "  2 ###k##K#k#k##.#k##K##k#####",
+   "  3 #............S............#",
+   "  4 #........................##",
+   "  5 #.........................#",
+   "  6 #.........................#",
+   "  7 #........M................#",
+   "  8 #.........................#",
+   "  9 #OS..............M........#",
+   " 10 #.........................#",
+   " 11 #.........................#",
+   " 12 #.#.......................#",
+   " 13 #.#.......................#",
+   " 14 #.........................#",
+   " 15 #............E.........#..#",
+   " 16 #############..############"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@216,248",
+   "LeeszaalKast(story_object.gd)@24,152",
+   "Monster_m1(map_monster.gd)@152,120",
+   "Monster_m2(map_monster.gd)@280,152",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@216,248",
+   "zuid(map_spawn.gd)@216,248",
+   "noord(map_spawn.gd)@216,56",
+   "ingang(map_spawn.gd)@216,248",
+   "leeszaal(map_spawn.gd)@40,152",
+   "Uitgang_n(map_exit.gd)@208,32",
+   "Uitgang_E(map_exit.gd)@208,256",
+   "Rand_13_17(StaticBody2D)@216,280",
+   "Rand_14_17(StaticBody2D)@232,280"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     99,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "6,2#47"
+    ],
+    "x": 104,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     291,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "18,2#33"
+    ],
+    "x": 296,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_2_v2_gang",
+  "script": "res://scripts/dungeon/archief2_room.gd",
+  "som": true
+ },
+ "archief_2_v2_lotte": {
+  "arena": true,
+  "grid": [
+   "  0 ###########################",
+   "  1 #############E#############",
+   "  2 ###k##K###k##.#k##K##k#####",
+   "  3 #............S............#",
+   "  4 #.......k................##",
+   "  5 #.........................#",
+   "  6 #.###########MO############",
+   "  7 #.........................#",
+   "  8 #.........................#",
+   "  9 #.........................#",
+   " 10 #.........................#",
+   " 11 #.#.......................#",
+   " 12 #.#.......................#",
+   " 13 #.........................#",
+   " 14 #.........................#",
+   " 15 #.#..........E............#",
+   " 16 #############..############"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@216,248",
+   "Blokkade_14_6(StaticBody2D)@232,104",
+   "Monster_lotte(map_monster.gd)@216,104",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@216,248",
+   "zuid(map_spawn.gd)@216,248",
+   "noord(map_spawn.gd)@216,56",
+   "ingang(map_spawn.gd)@216,248",
+   "Uitgang_n(map_exit.gd)@208,32",
+   "Uitgang_E(map_exit.gd)@208,256",
+   "Rand_13_17(StaticBody2D)@216,280",
+   "Rand_14_17(StaticBody2D)@232,280"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     99,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "6,2#47"
+    ],
+    "x": 104,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     291,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "18,2#33"
+    ],
+    "x": 296,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_2_v2_lotte",
+  "script": "res://scripts/dungeon/archief2_room.gd",
+  "som": true
+ },
+ "archief_2_v3_licht": {
+  "arena": true,
+  "grid": [
+   "  0 ###########################",
+   "  1 #############E#############",
+   "  2 ###k##K###k##.#k##K##k#####",
+   "  3 #............S............#",
+   "  4 #.######k##################",
+   "  5 #.........................#",
+   "  6 #.........................#",
+   "  7 #............E............#",
+   "  8 #.........................#",
+   "  9 #.....E...................#",
+   " 10 #.........................#",
+   " 11 #.........................#",
+   " 12 #.........................#",
+   " 13 #.........................#",
+   " 14 #...#.....................#",
+   " 15 #.#.#........E............#",
+   " 16 #############..############"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@216,248",
+   "Lees_6_9(dungeon_sign.gd)@104,152",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@216,248",
+   "Plaat_l1(groei_plaat.gd)@216,120",
+   "zuid(map_spawn.gd)@216,248",
+   "noord(map_spawn.gd)@216,56",
+   "ingang(map_spawn.gd)@216,248",
+   "Uitgang_n(map_exit.gd)@208,32",
+   "Uitgang_E(map_exit.gd)@208,256",
+   "Rand_13_17(StaticBody2D)@216,280",
+   "Rand_14_17(StaticBody2D)@232,280"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     99,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "6,2#47"
+    ],
+    "x": 104,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     291,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "18,2#33"
+    ],
+    "x": 296,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_2_v3_licht",
+  "script": "res://scripts/dungeon/archief2_room.gd",
+  "som": true
+ },
+ "archief_2_v3_wurger": {
+  "arena": true,
+  "grid": [
+   "  0 ###########################",
+   "  1 #############E#############",
+   "  2 ###k##K###k##.#k##K##k#####",
+   "  3 #............S............#",
+   "  4 #.#.....k.................#",
+   "  5 #............O............#",
+   "  6 #.###########MO############",
+   "  7 #.........................#",
+   "  8 #.........................#",
+   "  9 #.........................#",
+   " 10 #.....E...................#",
+   " 11 #........................##",
+   " 12 #.#......................##",
+   " 13 #.........................#",
+   " 14 #.........................#",
+   " 15 #............E...........##",
+   " 16 #############..############"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@216,248",
+   "Blokkade_14_6(StaticBody2D)@232,104",
+   "Lees_6_10(dungeon_sign.gd)@104,168",
+   "ExitWarper(dungeon_exit_warper.gd)@216,88",
+   "Monster_wurger(map_monster.gd)@216,104",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@216,248",
+   "zuid(map_spawn.gd)@216,248",
+   "noord(map_spawn.gd)@216,56",
+   "ingang(map_spawn.gd)@216,248",
+   "Uitgang_n(map_exit.gd)@208,32",
+   "Uitgang_E(map_exit.gd)@208,256",
+   "Rand_13_17(StaticBody2D)@216,280",
+   "Rand_14_17(StaticBody2D)@232,280"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     99,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "6,2#47"
+    ],
+    "x": 104,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     291,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "18,2#33"
+    ],
+    "x": 296,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_2_v3_wurger",
+  "script": "res://scripts/dungeon/archief2_room.gd",
+  "som": true
+ },
+ "archief_2_v4_hal": {
+  "arena": true,
+  "grid": [
+   "  0 ###########################",
+   "  1 #############E#############",
+   "  2 ###k##K#k#k##.#k##K##k#####",
+   "  3 #............S............#",
+   "  4 #.#......................##",
+   "  5 #.........................#",
+   "  6 #.........................#",
+   "  7 #.....E...................#",
+   "  8 #.........................#",
+   "  9 #................M........#",
+   " 10 #.........................#",
+   " 11 #.........................#",
+   " 12 #.........................#",
+   " 13 #........................##",
+   " 14 #.........................#",
+   " 15 #............E.........#..#",
+   " 16 #############..############"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@216,248",
+   "Lees_6_7(dungeon_sign.gd)@104,120",
+   "Monster_m1(map_monster.gd)@280,152",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@216,248",
+   "zuid(map_spawn.gd)@216,248",
+   "noord(map_spawn.gd)@216,56",
+   "ingang(map_spawn.gd)@216,248",
+   "Uitgang_n(map_exit.gd)@208,32",
+   "Uitgang_E(map_exit.gd)@208,256",
+   "Rand_13_17(StaticBody2D)@216,280",
+   "Rand_14_17(StaticBody2D)@232,280"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     99,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "6,2#47"
+    ],
+    "x": 104,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     291,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "18,2#33"
+    ],
+    "x": 296,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_2_v4_hal",
+  "script": "res://scripts/dungeon/archief2_room.gd",
+  "som": true
+ },
+ "archief_v1_gang": {
+  "arena": true,
+  "grid": [
+   "  0 ################################",
+   "  1 ################################",
+   "  2 ###K########K#####K#########E###",
+   "  3 #......##k#..............##S...#",
+   "  4 #..M...####....M.........##....#",
+   "  5 #.......#...........#k#........#",
+   "  6 #............###....###...M....#",
+   "  7 #......M.....###...........#...#",
+   "  8 #k.......#.......M.....O.......#",
+   "  9 #.......M.................##...#",
+   " 10 #..E......................##...#",
+   " 11 ###..###########################"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@56,168",
+   "Kist_kist_1b(dungeon_chest.gd)@376,136",
+   "Monster_m1(map_monster.gd)@56,72",
+   "Monster_m2(map_monster.gd)@120,120",
+   "Monster_m3(map_monster.gd)@136,152",
+   "Monster_m4(map_monster.gd)@248,72",
+   "Monster_m5(map_monster.gd)@280,136",
+   "Monster_m6(map_monster.gd)@424,104",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@56,168",
+   "zuid(map_spawn.gd)@56,168",
+   "trap(map_spawn.gd)@440,56",
+   "Uitgang_v(map_exit.gd)@448,48",
+   "Uitgang_U(map_exit.gd)@48,176",
+   "Rand_3_12(StaticBody2D)@56,200",
+   "Rand_4_12(StaticBody2D)@72,200"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [
+     "Monster_m1(StaticBody2D,map_monster.gd)@56,72 d27"
+    ],
+    "phys": [
+     "Ground:TileMapLayer",
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     44,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "2,2#33",
+     "3,2#33"
+    ],
+    "x": 48,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     196,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "12,2#33"
+    ],
+    "x": 200,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     292,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "18,2#33"
+    ],
+    "x": 296,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_v1_gang",
+  "script": "res://scripts/dungeon/dungeon_room.gd",
+  "som": true
+ },
+ "archief_v2_kastenzaal": {
+  "arena": true,
+  "grid": [
+   "  0 ###E####################",
+   "  1 ###.################E###",
+   "  2 ###.#####K######K###.###",
+   "  3 #..S................S..#",
+   "  4 #..###k....####........#",
+   "  5 #..............M.......#",
+   "  6 #..####....###k..####..#",
+   "  7 #......M...............#",
+   "  8 #..#k##....####..##k#..#",
+   "  9 #...............M......#",
+   " 10 #......................#",
+   " 11 #......................#",
+   " 12 ########################"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@56,56",
+   "Monster_m1(map_monster.gd)@248,88",
+   "Monster_m2(map_monster.gd)@120,120",
+   "Monster_m3(map_monster.gd)@264,152",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@56,56",
+   "ladder(map_spawn.gd)@56,56",
+   "boog(map_spawn.gd)@328,56",
+   "Uitgang_h(map_exit.gd)@48,16",
+   "Uitgang_n(map_exit.gd)@320,32"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer",
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     140,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "8,2#33",
+     "9,2#33"
+    ],
+    "x": 144,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer",
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     252,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "15,2#33",
+     "16,2#33"
+    ],
+    "x": 256,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_v2_kastenzaal",
+  "script": "res://scripts/dungeon/dungeon_room.gd",
+  "som": true
+ },
+ "archief_v2_leeszaal": {
+  "arena": true,
+  "grid": [
+   "  0 ####################",
+   "  1 ##########E#########",
+   "  2 ##########.#########",
+   "  3 #.........S........#",
+   "  4 #..####......####..#",
+   "  5 #.........M........#",
+   "  6 #..####......####..#",
+   "  7 #..................#",
+   "  8 #.....##....##.....#",
+   "  9 #.....##.M..##.....#",
+   " 10 #..................#",
+   " 11 #..##k#......##k#..#",
+   " 12 #.O......M.........#",
+   " 13 #..####......####..#",
+   " 14 #k................k#",
+   " 15 #.....#k....#k.....#",
+   " 16 #.....##.M..##.....#",
+   " 17 #..................#",
+   " 18 #..####......###k..#",
+   " 19 #..................#",
+   " 20 #..................#",
+   " 21 #..................#",
+   " 22 #........E.........#",
+   " 23 #########..#########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@152,360",
+   "Kist_kist_2b(dungeon_chest.gd)@40,200",
+   "Monster_m1(map_monster.gd)@152,264",
+   "Monster_m2(map_monster.gd)@152,200",
+   "Monster_m3(map_monster.gd)@152,152",
+   "Monster_m4(map_monster.gd)@168,88",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@152,360",
+   "zuid(map_spawn.gd)@152,360",
+   "boog(map_spawn.gd)@168,56",
+   "Uitgang_n(map_exit.gd)@160,32",
+   "Uitgang_U(map_exit.gd)@144,368",
+   "Rand_9_24(StaticBody2D)@152,392",
+   "Rand_10_24(StaticBody2D)@168,392"
+  ],
+  "props": [],
+  "room_id": "archief_v2_leeszaal",
+  "script": "res://scripts/dungeon/dungeon_room.gd",
+  "som": true
+ },
+ "archief_v2_trapzaal": {
+  "arena": true,
+  "grid": [
+   "  0 ####################",
+   "  1 ####################",
+   "  2 #######K###K###E####",
+   "  3 #.O...........#.#..#",
+   "  4 #.............#S#..#",
+   "  5 #.............#M#..#",
+   "  6 #....M.............#",
+   "  7 #k.#.........#....k#",
+   "  8 #..............O...#",
+   "  9 #..................#",
+   " 10 #........E.........#",
+   " 11 #########..#########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@152,168",
+   "Boek_hp_2_3(book_point.gd)@40,56",
+   "Kist_kist_2c(dungeon_chest.gd)@248,136",
+   "Monster_m1(map_monster.gd)@88,104",
+   "Monster_m2(map_monster.gd)@248,88",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@152,168",
+   "zuid(map_spawn.gd)@152,168",
+   "trap(map_spawn.gd)@248,72",
+   "Uitgang_v(map_exit.gd)@240,48",
+   "Uitgang_U(map_exit.gd)@144,176",
+   "Rand_9_12(StaticBody2D)@152,200",
+   "Rand_10_12(StaticBody2D)@168,200"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     116,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "7,2#33"
+    ],
+    "x": 120,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     180,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "11,2#33"
+    ],
+    "x": 184,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_v2_trapzaal",
+  "script": "res://scripts/dungeon/dungeon_room.gd",
+  "som": true
+ },
+ "archief_v3_gang": {
+  "arena": true,
+  "grid": [
+   "  0 ####################",
+   "  1 ####################",
+   "  2 #######K######K##E##",
+   "  3 #...........#k..S..#",
+   "  4 #...M.......##.....#",
+   "  5 #........#.........#",
+   "  6 #..#k..........M...#",
+   "  7 #..##.............k#",
+   "  8 #.........M........#",
+   "  9 #k.#...........#...#",
+   " 10 #.......E..........#",
+   " 11 ########..##########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@136,168",
+   "Monster_m1(map_monster.gd)@72,72",
+   "Monster_m2(map_monster.gd)@248,104",
+   "Monster_m3(map_monster.gd)@168,136",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@136,168",
+   "zuid(map_spawn.gd)@136,168",
+   "trap(map_spawn.gd)@264,56",
+   "Uitgang_v(map_exit.gd)@272,48",
+   "Uitgang_U(map_exit.gd)@128,176",
+   "Rand_8_12(StaticBody2D)@136,200",
+   "Rand_9_12(StaticBody2D)@152,200"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer",
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     108,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "6,2#33",
+     "7,2#47"
+    ],
+    "x": 112,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     228,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "14,2#33"
+    ],
+    "x": 232,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_v3_gang",
+  "script": "res://scripts/dungeon/dungeon_room.gd",
+  "som": true
+ },
+ "archief_v4_voorhal": {
+  "arena": true,
+  "grid": [
+   "  0 ####################",
+   "  1 ##########E#########",
+   "  2 ########K#.#K#######",
+   "  3 #.........S........#",
+   "  4 #..#k.....M....#k..#",
+   "  5 #..##...M......##..#",
+   "  6 #..................#",
+   "  7 #..#.........M..#..#",
+   "  8 #..#k..........#k..#",
+   "  9 #..##..........##O.#",
+   " 10 #........E.........#",
+   " 11 #########..#########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@152,168",
+   "Kist_kist_4b(dungeon_chest.gd)@280,152",
+   "Monster_m1(map_monster.gd)@136,88",
+   "Monster_m2(map_monster.gd)@216,120",
+   "Monster_m3(map_monster.gd)@168,72",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@152,168",
+   "zuid(map_spawn.gd)@152,168",
+   "boog(map_spawn.gd)@168,56",
+   "Uitgang_n(map_exit.gd)@160,32",
+   "Uitgang_U(map_exit.gd)@144,176",
+   "Rand_9_12(StaticBody2D)@152,200",
+   "Rand_10_12(StaticBody2D)@168,200"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [
+     "Uitgang_n(Node2D,map_exit.gd)@160,32 d27"
+    ],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     132,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "8,2#33"
+    ],
+    "x": 136,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "archief_kandelaber",
+    "rect": [
+     196,
+     44,
+     8,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "12,2#33"
+    ],
+    "x": 200,
+    "y": 48
+   }
+  ],
+  "room_id": "archief_v4_voorhal",
+  "script": "res://scripts/dungeon/dungeon_room.gd",
+  "som": true
+ },
+ "berggrot_bouwplaats": {
+  "arena": false,
+  "grid": [
+   "  0 ########################",
+   "  1 ########################",
+   "  2 ############E###########",
+   "  3 ########################",
+   "  4 ........O.K.S.KO........",
+   "  5 ..........O.............",
+   "  6 .......O.......O.O...K..",
+   "  7 ...K..O.................",
+   "  8 ..................O.....",
+   "  9 ........................",
+   " 10 ........................",
+   " 11 ........K..ES...........",
+   " 12 ........................"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Player(player.gd)@200,184",
+   "Hek(story_object.gd)@200,72",
+   "Karretje(story_object.gd)@248,72",
+   "Gereedschap(story_object.gd)@136,72",
+   "Balken(story_object.gd)@280,104",
+   "Balken2(story_object.gd)@104,120",
+   "Voorman(npc.gd)@168,88",
+   "Werker(npc.gd)@248,104",
+   "Werker2(npc.gd)@120,104",
+   "Werker3(npc.gd)@296,136",
+   "zuid(map_spawn.gd)@200,184",
+   "van_tunnel(map_spawn.gd)@200,72",
+   "NaarWereld(map_exit.gd)@176,192",
+   "NaarBerggrot(map_exit.gd)@192,48"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [
+     "Voorman(StaticBody2D,npc.gd)@168,88 d12"
+    ],
+    "phys": [],
+    "prop": "bouw_stormlamp",
+    "rect": [
+     161,
+     74,
+     6,
+     4
+    ],
+    "walk_tiles": [
+     "10,4#"
+    ],
+    "wall_tiles": [],
+    "x": 164,
+    "y": 78
+   },
+   {
+    "areas": [],
+    "near": [
+     "Karretje(StaticBody2D,story_object.gd)@248,72 d12"
+    ],
+    "phys": [],
+    "prop": "bouw_stormlamp_glow",
+    "rect": [
+     233,
+     74,
+     6,
+     4
+    ],
+    "walk_tiles": [
+     "14,4#"
+    ],
+    "wall_tiles": [],
+    "x": 236,
+    "y": 78
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "bouw_vuurkorf",
+    "rect": [
+     51,
+     124,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "3,7#"
+    ],
+    "wall_tiles": [],
+    "x": 56,
+    "y": 128
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "bouw_vuurkorf",
+    "rect": [
+     331,
+     100,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "20,6#",
+     "21,6#"
+    ],
+    "wall_tiles": [],
+    "x": 336,
+    "y": 104
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "bouw_stormlamp",
+    "rect": [
+     133,
+     186,
+     6,
+     4
+    ],
+    "walk_tiles": [
+     "8,11#"
+    ],
+    "wall_tiles": [],
+    "x": 136,
+    "y": 190
+   }
+  ],
+  "room_id": "berggrot_bouwplaats",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "kamer_beeldkamer": {
+  "arena": false,
+  "grid": [
+   "  0 ##k####k##",
+   "  1 #........#",
+   "  2 #........#",
+   "  3 #..O..O..#",
+   "  4 #........#",
+   "  5 #........#",
+   "  6 #K..O...K#",
+   "  7 ####.#####"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Bestiarium(prop.gd)@56,56",
+   "Codex(prop.gd)@104,56",
+   "Player(player.gd)@72,104",
+   "ingang(map_spawn.gd)@72,104",
+   "NaarHal(deur.gd)@64,112",
+   "Blokkade(StaticBody2D)@72,136"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     23,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,6#",
+     "2,6#"
+    ],
+    "wall_tiles": [],
+    "x": 28,
+    "y": 108
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     127,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "7,6#",
+     "8,6#"
+    ],
+    "wall_tiles": [],
+    "x": 132,
+    "y": 108
+   }
+  ],
+  "room_id": "kamer_beeldkamer",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "kamer_echo_kamer": {
+  "arena": false,
+  "grid": [
+   "  0 ##k####k##",
+   "  1 #........#",
+   "  2 O...O....#",
+   "  3 .S...O...#",
+   "  4 #...O....#",
+   "  5 #........#",
+   "  6 #K......K#",
+   "  7 ##########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Voortgang(prop.gd)@88,56",
+   "Echo(prop.gd)@72,40",
+   "Grot(prop.gd)@72,72",
+   "Kisten(echo_kisten.gd)@0,0",
+   "Player(player.gd)@24,56",
+   "ingang(map_spawn.gd)@24,56",
+   "NaarHal(deur.gd)@0,48",
+   "Blokkade(StaticBody2D)@-8,56"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     23,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,6#",
+     "2,6#"
+    ],
+    "wall_tiles": [],
+    "x": 28,
+    "y": 108
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     127,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "7,6#",
+     "8,6#"
+    ],
+    "wall_tiles": [],
+    "x": 132,
+    "y": 108
+   }
+  ],
+  "room_id": "kamer_echo_kamer",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "kamer_handelskamer": {
+  "arena": false,
+  "grid": [
+   "  0 ##k#.##k##",
+   "  1 #...S....#",
+   "  2 #........#",
+   "  3 #........#",
+   "  4 #....O...#",
+   "  5 #........#",
+   "  6 #K......K#",
+   "  7 ##########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Toonbank(prop.gd)@88,72",
+   "Player(player.gd)@72,24",
+   "ingang(map_spawn.gd)@72,24",
+   "NaarHal(deur.gd)@64,0",
+   "Blokkade(StaticBody2D)@72,-8"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     23,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,6#",
+     "2,6#"
+    ],
+    "wall_tiles": [],
+    "x": 28,
+    "y": 108
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     127,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "7,6#",
+     "8,6#"
+    ],
+    "wall_tiles": [],
+    "x": 132,
+    "y": 108
+   }
+  ],
+  "room_id": "kamer_handelskamer",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "kamer_kern": {
+  "arena": false,
+  "grid": [
+   "  0 ##k#.##k##",
+   "  1 #...S....#",
+   "  2 #........#",
+   "  3 #........#",
+   "  4 #....O...#",
+   "  5 #........#",
+   "  6 #K......K#",
+   "  7 ##########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Kernbord(prop.gd)@88,72",
+   "Player(player.gd)@72,24",
+   "ingang(map_spawn.gd)@72,24",
+   "NaarHal(deur.gd)@64,0",
+   "Blokkade(StaticBody2D)@72,-8"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     23,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,6#",
+     "2,6#"
+    ],
+    "wall_tiles": [],
+    "x": 28,
+    "y": 108
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     127,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "7,6#",
+     "8,6#"
+    ],
+    "wall_tiles": [],
+    "x": 132,
+    "y": 108
+   }
+  ],
+  "room_id": "kamer_kern",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "kamer_rustkamer": {
+  "arena": false,
+  "grid": [
+   "  0 ##k####k##",
+   "  1 #........#",
+   "  2 #..O.....O",
+   "  3 #.....O.S.",
+   "  4 #..O.....#",
+   "  5 #........#",
+   "  6 #K......K#",
+   "  7 ##########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Opslaan(prop.gd)@56,40",
+   "Helen(prop.gd)@56,72",
+   "Wisselen(prop.gd)@104,56",
+   "Player(player.gd)@136,56",
+   "ingang(map_spawn.gd)@136,56",
+   "NaarHal(deur.gd)@144,48",
+   "Blokkade(StaticBody2D)@168,56"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     23,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,6#",
+     "2,6#"
+    ],
+    "wall_tiles": [],
+    "x": 28,
+    "y": 108
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     127,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "7,6#",
+     "8,6#"
+    ],
+    "wall_tiles": [],
+    "x": 132,
+    "y": 108
+   }
+  ],
+  "room_id": "kamer_rustkamer",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "kamer_trainingshal": {
+  "arena": false,
+  "grid": [
+   "  0 ##k####k##",
+   "  1 #........#",
+   "  2 #........#",
+   "  3 #....O...#",
+   "  4 #........#",
+   "  5 #........#",
+   "  6 #K..O...K#",
+   "  7 ####.#####"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Oefening(prop.gd)@88,56",
+   "Player(player.gd)@72,104",
+   "ingang(map_spawn.gd)@72,104",
+   "NaarHal(deur.gd)@64,112",
+   "Blokkade(StaticBody2D)@72,136"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     23,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,6#",
+     "2,6#"
+    ],
+    "wall_tiles": [],
+    "x": 28,
+    "y": 108
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     127,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "7,6#",
+     "8,6#"
+    ],
+    "wall_tiles": [],
+    "x": 132,
+    "y": 108
+   }
+  ],
+  "room_id": "kamer_trainingshal",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "kamer_werkplaats": {
+  "arena": false,
+  "grid": [
+   "  0 ##k#.##k##",
+   "  1 #...S....#",
+   "  2 #........#",
+   "  3 #........#",
+   "  4 #....O...#",
+   "  5 #........#",
+   "  6 #K......K#",
+   "  7 ##########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Tafel(prop.gd)@88,72",
+   "Player(player.gd)@72,24",
+   "ingang(map_spawn.gd)@72,24",
+   "NaarHal(deur.gd)@64,0",
+   "Blokkade(StaticBody2D)@72,-8"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     23,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,6#",
+     "2,6#"
+    ],
+    "wall_tiles": [],
+    "x": 28,
+    "y": 108
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     127,
+     104,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "7,6#",
+     "8,6#"
+    ],
+    "wall_tiles": [],
+    "x": 132,
+    "y": 108
+   }
+  ],
+  "room_id": "kamer_werkplaats",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "leven_ingang": {
+  "arena": true,
+  "grid": [
+   "  0 ######################",
+   "  1 ############E#########",
+   "  2 ###k#K##k###.##k#K#k##",
+   "  3 #...........S........#",
+   "  4 #....................#",
+   "  5 #....................#",
+   "  6 #...............E....#",
+   "  7 #.....M..............#",
+   "  8 #....................#",
+   "  9 #...............M....#",
+   " 10 #....................#",
+   " 11 #...O................#",
+   " 12 #....................#",
+   " 13 #.........E..........#",
+   " 14 ##########..##########"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@168,216",
+   "SaveBook(book_point.gd)@72,184",
+   "Lees_16_6(dungeon_sign.gd)@264,104",
+   "Monster_m1(map_monster.gd)@104,120",
+   "Monster_m2(map_monster.gd)@264,152",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@168,216",
+   "ingang(map_spawn.gd)@168,216",
+   "boog(map_spawn.gd)@200,56",
+   "Uitgang_n(map_exit.gd)@192,32",
+   "Uitgang_E(map_exit.gd)@160,224",
+   "Rand_10_15(StaticBody2D)@168,248",
+   "Rand_11_15(StaticBody2D)@184,248"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer",
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     87,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "5,2#33",
+     "6,2#47"
+    ],
+    "x": 92,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     275,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "17,2#33"
+    ],
+    "x": 280,
+    "y": 48
+   }
+  ],
+  "room_id": "leven_ingang",
+  "script": "res://scripts/dungeon/dungeon_room.gd",
+  "som": true
+ },
+ "leven_v1_plaat": {
+  "arena": false,
+  "grid": [
+   "  0 .#########.#########.",
+   "  1 #.........S.........#",
+   "  2 #####################",
+   "  3 #...k.....O.....k...#",
+   "  4 #.....O.............#",
+   "  5 #K.................K#",
+   "  6 #...................#",
+   "  7 #...................#",
+   "  8 #...................#",
+   "  9 #...................#",
+   " 10 #K.................K#",
+   " 11 #...................#",
+   " 12 #...................#",
+   " 13 #.........E.........#",
+   " 14 .#########.#########."
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "groei_brug_pad(StaticBody2D)@0,0",
+   "Player(player.gd)@168,216",
+   "hendel_kas(lever.gd)@104,72",
+   "groei_brug(grow_plate.gd)@168,56",
+   "CodexFollower(field_follower.gd)@168,216",
+   "ingang(map_spawn.gd)@168,216",
+   "noord(map_spawn.gd)@168,24",
+   "Uitgang(map_exit.gd)@160,0",
+   "Ingang(map_exit.gd)@160,224",
+   "Muren(StaticBody2D)@0,0",
+   "Rand_10_-1(StaticBody2D)@168,-8",
+   "Rand_10_15(StaticBody2D)@168,248"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     21,
+     92,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,5#"
+    ],
+    "wall_tiles": [],
+    "x": 26,
+    "y": 96
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     305,
+     92,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "19,5#"
+    ],
+    "wall_tiles": [],
+    "x": 310,
+    "y": 96
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     21,
+     172,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,10#"
+    ],
+    "wall_tiles": [],
+    "x": 26,
+    "y": 176
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     305,
+     172,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "19,10#"
+    ],
+    "wall_tiles": [],
+    "x": 310,
+    "y": 176
+   }
+  ],
+  "room_id": "leven_v1_plaat",
+  "script": "res://scripts/puzzle/puzzle_room.gd",
+  "som": false
+ },
+ "leven_v2_leeszaal": {
+  "arena": false,
+  "grid": [
+   "  0 .#############.",
+   "  1 #.....O.......#",
+   "  2 .k#k#K#O#K##kk.",
+   "  3 #.............#",
+   "  4 #..O.......O..#",
+   "  5 #.............#",
+   "  6 #...O.....O...#",
+   "  7 #.............#",
+   "  8 #.O.........O.#",
+   "  9 #......E......#",
+   " 10 .######.######."
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "plaat_l(pressure_plate.gd)@56,72",
+   "plaat_r(pressure_plate.gd)@184,72",
+   "poort_leeszaal(gate.gd)@120,40",
+   "Player(player.gd)@120,152",
+   "kast_l(push_block.gd)@72,104",
+   "kast_r(push_block.gd)@168,104",
+   "hendel_leeszaal(lever.gd)@40,136",
+   "herstelsteen(reset_stone.gd)@200,136",
+   "kist_leeszaal(treasure_chest.gd)@104,24",
+   "CodexFollower(field_follower.gd)@120,152",
+   "ingang(map_spawn.gd)@120,152",
+   "Ingang(map_exit.gd)@112,160",
+   "Muren(StaticBody2D)@0,0",
+   "Rand_7_11(StaticBody2D)@120,184"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [
+     "kist_leeszaal(StaticBody2D,treasure_chest.gd)@104,24 d27"
+    ],
+    "phys": [
+     "Muren:StaticBody2D"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     83,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "5,2#"
+    ],
+    "x": 88,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Muren:StaticBody2D"
+    ],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     147,
+     44,
+     10,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "9,2#"
+    ],
+    "x": 152,
+    "y": 48
+   }
+  ],
+  "room_id": "leven_v2_leeszaal",
+  "script": "res://scripts/puzzle/puzzle_room.gd",
+  "som": false
+ },
+ "leven_v3_combi": {
+  "arena": false,
+  "grid": [
+   "  0 .######.######.",
+   "  1 #.............#",
+   "  2 ###k########k##",
+   "  3 #......O......#",
+   "  4 #.............#",
+   "  5 #...O..O.O....#",
+   "  6 #.............#",
+   "  7 #...k.........#",
+   "  8 #.............#",
+   "  9 #.K....E....K.#",
+   " 10 .######.######."
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "plaat_kast(pressure_plate.gd)@152,88",
+   "groei_combi_pad(StaticBody2D)@0,0",
+   "Player(player.gd)@120,152",
+   "kast_combi(push_block.gd)@120,88",
+   "hendel_combi(lever.gd)@72,88",
+   "groei_combi(grow_plate.gd)@120,56",
+   "CodexFollower(field_follower.gd)@120,152",
+   "ingang(map_spawn.gd)@120,152",
+   "Uitgang(map_exit.gd)@112,0",
+   "Ingang(map_exit.gd)@112,160",
+   "Muren(StaticBody2D)@0,0",
+   "Rand_7_-1(StaticBody2D)@120,-8",
+   "Rand_7_11(StaticBody2D)@120,184"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     35,
+     146,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "2,9#"
+    ],
+    "wall_tiles": [],
+    "x": 40,
+    "y": 150
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "kas_gloeiplant",
+    "rect": [
+     195,
+     146,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "12,9#"
+    ],
+    "wall_tiles": [],
+    "x": 200,
+    "y": 150
+   }
+  ],
+  "room_id": "leven_v3_combi",
+  "script": "res://scripts/puzzle/puzzle_room.gd",
+  "som": false
+ },
+ "warper_hanger_nis": {
+  "arena": false,
+  "grid": [
+   "  0 #k########k#",
+   "  1 #..........#",
+   "  2 #..........#",
+   "  3 #.K..##....E",
+   "  4 #.........S.",
+   "  5 #..........#",
+   "  6 #..........#",
+   "  7 #.K......K.#",
+   "  8 ############"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Player(player.gd)@168,72",
+   "ingang(map_spawn.gd)@168,72",
+   "NaarHal(map_exit.gd)@176,64"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     35,
+     56,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "2,3#"
+    ],
+    "wall_tiles": [],
+    "x": 40,
+    "y": 60
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     35,
+     120,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "2,7#"
+    ],
+    "wall_tiles": [],
+    "x": 40,
+    "y": 124
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     147,
+     120,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "9,7#"
+    ],
+    "wall_tiles": [],
+    "x": 152,
+    "y": 124
+   }
+  ],
+  "room_id": "warper_hanger_nis",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "warper_warp_ring": {
+  "arena": false,
+  "grid": [
+   "  0 #k############k#",
+   "  1 #..............#",
+   "  2 #.O............#",
+   "  3 #..............#",
+   "  4 #..............#",
+   "  5 #.K...........K#",
+   "  6 #..............#",
+   "  7 #..............#",
+   "  8 #..............#",
+   "  9 #..............#",
+   " 10 #..............#",
+   " 11 #.K....E......K#",
+   " 12 #######..#######"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "BordWarp(StaticBody2D)@40,40",
+   "Player(player.gd)@120,184",
+   "ingang(map_spawn.gd)@120,184",
+   "NaarHal(map_exit.gd)@112,192"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     27,
+     82,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,5#",
+     "2,5#"
+    ],
+    "wall_tiles": [],
+    "x": 32,
+    "y": 86
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     219,
+     82,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "13,5#",
+     "14,5#"
+    ],
+    "wall_tiles": [],
+    "x": 224,
+    "y": 86
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     27,
+     186,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "1,11#",
+     "2,11#"
+    ],
+    "wall_tiles": [],
+    "x": 32,
+    "y": 190
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "warper_kristalzuil",
+    "rect": [
+     219,
+     186,
+     10,
+     4
+    ],
+    "walk_tiles": [
+     "13,11#",
+     "14,11#"
+    ],
+    "wall_tiles": [],
+    "x": 224,
+    "y": 190
+   }
+  ],
+  "room_id": "warper_warp_ring",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "wereldkaart": {
+  "arena": false,
+  "grid": [
+   "  0 ############################################################",
+   "  1 ############################################################",
+   "  2 ############################################################",
+   "  3 ############################################################",
+   "  4 ###########################....######################...####",
+   "  5 ########################........#################.......####",
+   "  6 ###############.....#####........################.......####",
+   "  7 ##########....E.....#####.........################......####",
+   "  8 ##########.........######.........#########..#######..######",
+   "  9 ##########....S....#######.....##.######......##############",
+   " 10 ###########.......########......##.#####...........#########",
+   " 11 ###########......#########.........###.............#########",
+   " 12 ##########################.........#...............#########",
+   " 13 ##########################.........#...............#########",
+   " 14 ##########.###############..........#.............##########",
+   " 15 ###############.##########..........#.............##########",
+   " 16 #####################E###............##...........##########",
+   " 17 ##.################.###...............###..###....##########",
+   " 18 ##...###########.....S..................####......##########",
+   " 19 ##...#########.#................................############",
+   " 20 ###..########...........................####....###.########",
+   " 21 ############...........................#####....##..########",
+   " 22 ############..................E........#####.........#######",
+   " 23 #######.................................####...E.....#######",
+   " 24 #######..................................##..........#######",
+   " 25 #########..............####...S...........E..........#######",
+   " 26 #########...............###................S...S....########",
+   " 27 ########.S...............#####.....................#########",
+   " 28 ########.................######...................##########",
+   " 29 ########......E.....k....#####.....###............##########",
+   " 30 ########.......k.........#####.....#####..........##########",
+   " 31 ########......S.........###........######..........#########",
+   " 32 #########...............###.........######.........#########",
+   " 33 #########...........E..####..........#######......##########",
+   " 34 ##########...........######............#####################",
+   " 35 ###########.........##k####.............####################",
+   " 36 ############.......######................###################",
+   " 37 ############.##################............#################",
+   " 38 ###############################.............################",
+   " 39 #############################..............#################",
+   " 40 ############################.............###################",
+   " 41 ###################################....#####################",
+   " 42 ############################################################",
+   " 43 ############################################################",
+   " 44 ############################################################"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Player(player.gd)@232,504",
+   "CodexFollower(field_follower.gd)@232,504",
+   "WorldWarperFlyover(flyover.gd)@0,0",
+   "van_archief(map_spawn.gd)@328,536",
+   "van_kas(map_spawn.gd)@232,152",
+   "van_berggrot(map_spawn.gd)@344,296",
+   "van_dorp(map_spawn.gd)@232,504",
+   "van_wilgendal(map_spawn.gd)@488,408",
+   "van_esdoorn(map_spawn.gd)@760,424",
+   "van_woud(map_spawn.gd)@696,424",
+   "van_dungeon100(map_spawn.gd)@152,440",
+   "Trap(map_exit.gd)@320,544",
+   "NaarWachtershuis(map_exit.gd)@224,480",
+   "NaarWilgendal(map_exit.gd)@480,368",
+   "NaarEsdoorn(map_exit.gd)@752,384",
+   "NaarWoud(map_exit.gd)@672,416",
+   "NaarKas(map_exit.gd)@224,128",
+   "NaarBouwplaats(map_exit.gd)@336,272"
+  ],
+  "props": [],
+  "room_id": "wereldkaart",
+  "script": "res://scripts/map.gd",
+  "som": false
+ },
+ "wilgendal_binnen": {
+  "arena": false,
+  "grid": [
+   "  0 #########",
+   "  1 ##k...k##",
+   "  2 #...O...#",
+   "  3 #.k#O##.#",
+   "  4 #.......#",
+   "  5 #.......#",
+   "  6 #...E...#",
+   "  7 ####.####"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Player(player.gd)@72,104",
+   "Winkelier(npc.gd)@72,40",
+   "Toonbank(toonbank.gd)@72,56",
+   "wapen(map_spawn.gd)@72,104",
+   "NaarDorp(map_exit.gd)@64,112"
+  ],
+  "props": [],
+  "room_id": "wilgendal_binnen",
+  "script": "res://scripts/village/pand_binnen.gd",
+  "som": false
+ },
+ "woud_beek": {
+  "arena": false,
+  "grid": [
+   "  0 ##########################",
+   "  1 ##########################",
+   "  2 ##########################",
+   "  3 #...........###..........#",
+   "  4 #...........###..........#",
+   "  5 #.......#...#k#.....##...#",
+   "  6 #.#....k#...###..........#",
+   "  7 #...........###........O.#",
+   "  8 #.........K.....K........#",
+   "  9 #...........###..........#",
+   " 10 #...........###..........#",
+   " 11 #...........###..........#",
+   " 12 #................k#......#",
+   " 13 #.##........###..........#",
+   " 14 #...E.......###....##....#",
+   " 15 ####..####################"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": false,
+  "objects": [
+   "Player(player.gd)@72,232",
+   "Rand_4_16(StaticBody2D)@72,264",
+   "Rand_5_16(StaticBody2D)@88,264",
+   "Wegwijzer(sign.gd)@376,120",
+   "CodexFollower(field_follower.gd)@72,232",
+   "pad(map_spawn.gd)@72,232",
+   "NaarWortelpad(map_exit.gd)@64,240"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "woud_lantaarnpaal",
+    "rect": [
+     167,
+     126,
+     6,
+     4
+    ],
+    "walk_tiles": [
+     "10,7#",
+     "10,8#"
+    ],
+    "wall_tiles": [],
+    "x": 170,
+    "y": 130
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [],
+    "prop": "woud_lantaarnpaal",
+    "rect": [
+     259,
+     126,
+     6,
+     4
+    ],
+    "walk_tiles": [
+     "16,7#",
+     "16,8#"
+    ],
+    "wall_tiles": [],
+    "x": 262,
+    "y": 130
+   }
+  ],
+  "room_id": "woud_beek",
+  "script": "res://scripts/dungeon/woud_beek_kamer.gd",
+  "som": false
+ },
+ "woud_pad": {
+  "arena": true,
+  "grid": [
+   "  0 #############################################",
+   "  1 ##########################################E##",
+   "  2 ########################K##########K######.##",
+   "  3 #.........##..................##..........S.#",
+   "  4 #....M....##..................##.......M...O#",
+   "  5 #...........................................#",
+   "  6 #..................#...................#....#",
+   "  7 #...........................................#",
+   "  8 #.......##....M...............##..M.........#",
+   "  9 #.......##......#.............k#............#",
+   " 10 #...........................................#",
+   " 11 #..........................................O#",
+   " 12 #...........................................#",
+   " 13 #......#...##............M..........##.##...#",
+   " 14 #................................##.........#",
+   " 15 #..E.......##........#k................k#.SO#",
+   " 16 ###..########################################"
+  ],
+  "grid_origin": [
+   0,
+   0
+  ],
+  "has_is_wall": true,
+  "objects": [
+   "TelegraphLayer(telegraph_layer.gd)@0,0",
+   "Player(player.gd)@56,248",
+   "Kist_kist_w2(dungeon_chest.gd)@696,184",
+   "Kist_kist_w4(dungeon_chest.gd)@696,72",
+   "BeekOpening(story_object.gd)@696,248",
+   "Monster_m1(map_monster.gd)@88,72",
+   "Monster_m2(map_monster.gd)@232,136",
+   "Monster_m3(map_monster.gd)@408,216",
+   "Monster_m4(map_monster.gd)@552,136",
+   "Monster_m5(map_monster.gd)@632,72",
+   "SomTargetLock(som_target_lock.gd)@0,0",
+   "CodexFollower(field_follower.gd)@56,248",
+   "zuid(map_spawn.gd)@56,248",
+   "boog(map_spawn.gd)@680,56",
+   "beek(map_spawn.gd)@680,248",
+   "Uitgang_n(map_exit.gd)@672,32",
+   "Uitgang_U(map_exit.gd)@48,256",
+   "WoudMist(woud_mist.gd)@0,0",
+   "Rand_3_17(StaticBody2D)@56,280",
+   "Rand_4_17(StaticBody2D)@72,280"
+  ],
+  "props": [
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "woud_lantaarnpaal",
+    "rect": [
+     389,
+     44,
+     6,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "24,2#33"
+    ],
+    "x": 392,
+    "y": 48
+   },
+   {
+    "areas": [],
+    "near": [],
+    "phys": [
+     "Ground:TileMapLayer"
+    ],
+    "prop": "woud_lantaarnpaal",
+    "rect": [
+     565,
+     44,
+     6,
+     4
+    ],
+    "walk_tiles": [],
+    "wall_tiles": [
+     "35,2#33"
+    ],
+    "x": 568,
+    "y": 48
+   }
+  ],
+  "room_id": "woud_pad",
+  "script": "res://scripts/dungeon/dungeon_room.gd",
+  "som": true
+ }
+}

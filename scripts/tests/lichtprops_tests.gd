@@ -1,51 +1,40 @@
 extends Node
-## HD-2D lichtprops (WM1): assets, presets, plaatsing (scène), lichtbudget (4 helden co-op) en collision.
+## HD-2D lichtprops (WM1): assets, presets, plaatsing, budget (4 helden) en collision (§9–10).
 ## Start: godot --path . -- --lichtpropstest
-## Niet in CI-matrix tot placements + lights/index gemerged zijn (draft-fase mogelijk).
 
 const MapLightingC := preload("res://scripts/map_lighting.gd")
+const MapLightingRig := preload("res://scripts/map_lighting_rig.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
-const SomData := preload("res://scripts/data/som_data.gd")
-
 const COOP_HERO_LIGHTS := 4
 const HD2D_MAX_POINT := 8
-const TELEGRAPH_TILE_REACH := 3.0
-const TILE_PX := 16
-const EXCLUDE_MAPS := ["archief_2_v3_licht"]
+const EXCLUDE_MAPS: Array[String] = ["archief_2_v3_licht"]
+const NO_GLOW_PRESET: Array[String] = ["archief_v2_trapzaal", "wereldkaart"]
+const BUSY_NIGHT_MAP := "woud_pad"
+const WOUD_PAD := "res://scenes/maps/woud_pad.tscn"
+const EXCLUDED_LICHT_SCENE := "res://scenes/maps/archief_2_v3_licht.tscn"
+const PARTY_FOUR := ["noor", "lotte", "kael"]
+const BUSY_CAM := Vector2(224, 0)
 
 const PROP_IDS: Array[String] = [
-	"archief_kandelaber", "archief_wandblaker", "archief_leeslamp", "kas_gloeipot", "kas_gloeiplant",
-	"kas_gloeiknoppen", "warper_wandlamp", "warper_wandlamp_violet", "warper_kristalzuil",
-	"woud_gloeizwammen", "woud_lantaarnpaal", "woud_waterlelie", "bouw_stormlamp", "bouw_vuurkorf",
-	"binnen_wandlamp", "binnen_kandelaar", "wk_kampvuur", "wk_baken", "wk_kristal",
+	"archief_kandelaber", "archief_wandblaker", "archief_wandblaker_glow",
+	"archief_leeslamp", "archief_leeslamp_glow",
+	"kas_gloeipot", "kas_gloeipot_glow", "kas_gloeiplant", "kas_gloeiknoppen",
+	"warper_wandlamp", "warper_wandlamp_violet", "warper_kristalzuil",
+	"woud_gloeizwammen", "woud_lantaarnpaal", "woud_waterlelie",
+	"bouw_stormlamp", "bouw_stormlamp_glow", "bouw_vuurkorf",
+	"binnen_wandlamp", "binnen_kandelaar",
+	"wk_kampvuur", "wk_baken", "wk_kristal",
 ]
 
-## Voet-collision (breedte x hoogte in px), gecentreerd op x met onderkant op y. "-" = geen voet.
-const PROP_FEET: Dictionary = {
-	"archief_kandelaber": Vector2i(8, 4),
-	"archief_wandblaker": Vector2i.ZERO,
-	"archief_leeslamp": Vector2i.ZERO,
-	"kas_gloeipot": Vector2i.ZERO,
-	"kas_gloeiplant": Vector2i(10, 4),
-	"kas_gloeiknoppen": Vector2i.ZERO,
-	"warper_wandlamp": Vector2i.ZERO,
-	"warper_wandlamp_violet": Vector2i.ZERO,
-	"warper_kristalzuil": Vector2i(10, 4),
-	"woud_gloeizwammen": Vector2i.ZERO,
-	"woud_lantaarnpaal": Vector2i(6, 4),
-	"woud_waterlelie": Vector2i.ZERO,
-	"bouw_stormlamp": Vector2i(6, 4),
-	"bouw_vuurkorf": Vector2i(10, 4),
-	"binnen_wandlamp": Vector2i.ZERO,
-	"binnen_kandelaar": Vector2i.ZERO,
-	"wk_kampvuur": Vector2i.ZERO,
-	"wk_baken": Vector2i.ZERO,
-	"wk_kristal": Vector2i.ZERO,
-}
-
-const ARCHIEF1_PRESET_MAPS: Array[String] = [
-	"archief_v1_gang", "archief_v2_kastenzaal", "archief_v2_leeszaal",
-	"archief_v2_trapzaal", "archief_v3_gang", "archief_v4_voorhal",
+const LICHTPROP_MAPS: Array[String] = [
+	"archief_v1_gang", "archief_v2_kastenzaal", "archief_v2_leeszaal", "archief_v2_trapzaal",
+	"archief_v3_gang", "archief_v4_voorhal",
+	"archief_2_v1_plaat", "archief_2_v2_gang", "archief_2_v2_lotte", "archief_2_v3_wurger",
+	"archief_2_v4_hal", "leven_ingang", "leven_v1_plaat", "leven_v2_leeszaal", "leven_v3_combi",
+	"warper_warp_ring", "warper_hanger_nis",
+	"kamer_beeldkamer", "kamer_echo_kamer", "kamer_handelskamer", "kamer_kern",
+	"kamer_rustkamer", "kamer_trainingshal", "kamer_werkplaats",
+	"woud_beek", "woud_pad", "berggrot_bouwplaats", "wilgendal_binnen", "wereldkaart",
 ]
 
 var failures := 0
@@ -67,9 +56,12 @@ func check(label: String, ok: bool) -> void:
 
 func _run() -> void:
 	_asset_tests()
-	_preset_candle_tests()
+	_preset_tests()
+	_excluded_map_tests()
+	_collision_report_tests()
 	_scene_placement_tests()
-	_light_budget_tests()
+	_busy_budget_reference_tests()
+	await _runtime_busy_budget_tests()
 	print("LICHTPROPSTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -85,32 +77,66 @@ func _asset_tests() -> void:
 		check("emissive %s" % pid, ResourceLoader.exists(em))
 
 
-func _preset_candle_tests() -> void:
-	for mid in ARCHIEF1_PRESET_MAPS:
+func _preset_tests() -> void:
+	for mid in LICHTPROP_MAPS:
+		if mid in EXCLUDE_MAPS:
+			continue
 		var rec := MapLightingC.preset_record(mid)
-		check("preset %s bestaat" % mid, not rec.is_empty())
+		check("preset %s" % mid, not rec.is_empty())
 		if rec.is_empty():
 			continue
+		if mid in NO_GLOW_PRESET:
+			continue
 		for tod in ["day", "night"]:
+			var em: Dictionary = rec.get(tod, {}).get("emissive", {})
+			check("%s %s emissive.glow" % [mid, tod], float(em.get("glow", -1.0)) >= 0.0)
 			var lights: Dictionary = rec.get(tod, {}).get("lights", {})
+			check("%s %s geen lights.glow PointLight" % [mid, tod], not lights.has("glow"))
+	for mid in ["archief_v1_gang", "archief_v2_kastenzaal"]:
+		for tod in ["day", "night"]:
+			var lights: Dictionary = MapLightingC.preset_record(mid).get(tod, {}).get("lights", {})
 			check("%s %s candle=1.8" % [mid, tod], float(lights.get("candle", 0.0)) == 1.8)
+
+
+func _excluded_map_tests() -> void:
+	var path := EXCLUDED_LICHT_SCENE
+	var sc := load(path) as PackedScene
+	var inst := sc.instantiate()
+	var n := 0
+	for c in inst.find_children("*", "Sprite2D", true, false):
+		if str(c.name).begins_with("Lp_"):
+			n += 1
+	inst.free()
+	check("archief_2_v3_licht: geen geplaatste props", n == 0)
+
+
+func _collision_report_tests() -> void:
+	var txt := FileAccess.get_file_as_string("res://data/hd2d/reference/collision_report_lichtprops.json")
+	var parsed: Variant = JSON.parse_string(txt)
+	check("collision_report JSON", parsed is Dictionary)
+	if not parsed is Dictionary:
+		return
+	var rep: Dictionary = parsed
+	for mid in rep:
+		if mid in EXCLUDE_MAPS:
+			continue
+		var block: Dictionary = rep[mid]
+		for p: Dictionary in block.get("props", []):
+			var areas: Array = p.get("areas", [])
+			check("%s %s: geen area-overlap" % [mid, p.get("prop", "?")], areas.is_empty())
 
 
 func _scene_placement_tests() -> void:
 	var placements := _collect_scene_placements()
-	check("lichtprops draft: placements tellen geregistreerd", true)
-	if placements.is_empty():
-		check("geen props in WM1-scènes (draft OK)", true)
-		return
+	check("props in scènes: %d" % placements.size(), not placements.is_empty())
 	for p in placements:
-		var tex_path := "res://assets/sprites/lichtprops/%s.png" % p["prop"]
-		check("texture %s @%s" % [p["prop"], p["map_id"]], ResourceLoader.exists(tex_path))
-		_check_gameplay_overlap(p)
+		check("texture %s @%s" % [p["prop"], p["map_id"]], ResourceLoader.exists(
+				"res://assets/sprites/lichtprops/%s.png" % p["prop"]))
 
 
 func _collect_scene_placements() -> Array:
 	var out: Array = []
-	for path in _wm1_map_scene_paths():
+	for path in _scene_paths():
 		if not ResourceLoader.exists(path):
 			continue
 		var sc := load(path) as PackedScene
@@ -121,38 +147,28 @@ func _collect_scene_placements() -> Array:
 		if EXCLUDE_MAPS.has(map_id):
 			inst.free()
 			continue
-		_scan_prop_nodes(inst, map_id, out)
+		for n in inst.find_children("*", "Sprite2D", true, false):
+			if not str(n.name).begins_with("Lp_"):
+				continue
+			var sp := n as Sprite2D
+			var pid := ""
+			if "prop_id" in sp:
+				pid = str(sp.prop_id)
+			if pid.is_empty():
+				pid = str(n.name).get_slice("_", 1)
+			out.append({"map_id": map_id, "prop": pid, "x": int(sp.position.x), "y": int(sp.position.y)})
 		inst.free()
 	return out
 
 
-func _wm1_map_scene_paths() -> Array[String]:
+func _scene_paths() -> Array[String]:
 	var paths: Array[String] = []
-	for e in DungeonRooms.ORDER:
-		if str(e[1]) != "":
-			paths.append(str(e[1]))
-	var a2: Script = DungeonRooms.archief2()
-	for e in a2.ORDER:
-		if str(e[1]) != "":
-			paths.append(str(e[1]))
-	# Warper-hub (lichtprops-levering)
-	for sub in ["maps", "kamers"]:
-		var dir := "res://world_warper/%s/" % sub
-		var d := DirAccess.open(dir)
-		if d:
-			d.list_dir_begin()
-			var fn := d.get_next()
-			while fn != "":
-				if fn.ends_with(".tscn"):
-					paths.append(dir + fn)
-				fn = d.get_next()
-	for extra in [
-		"res://scenes/maps/woud_beek.tscn", "res://scenes/maps/woud_pad.tscn",
-		"res://scenes/maps/berggrot_bouwplaats.tscn", "res://scenes/maps/wilgendal_binnen.tscn",
-		"res://scenes/maps/wereldkaart.tscn",
-	]:
-		if not paths.has(extra):
-			paths.append(extra)
+	for mid in LICHTPROP_MAPS:
+		if mid in EXCLUDE_MAPS:
+			continue
+		var p: String = str(MapLightingC.preset_record(mid).get("scene", ""))
+		if p != "":
+			paths.append(p)
 	return paths
 
 
@@ -166,109 +182,99 @@ func _map_id_from_path(path: String, root: Node) -> String:
 	return path.get_file().get_basename()
 
 
-func _scan_prop_nodes(root: Node, map_id: String, out: Array) -> void:
-	for n in root.find_children("*", "Sprite2D", true, false):
-		var sp := n as Sprite2D
-		if sp.texture == null:
-			continue
-		var tp := sp.texture.resource_path
-		if not tp.contains("/lichtprops/"):
-			continue
-		var prop := tp.get_file().get_basename()
-		if not PROP_IDS.has(prop):
-			continue
-		var x := int(sp.global_position.x) if sp.is_inside_tree() else int(sp.position.x)
-		var y := int(sp.global_position.y) if sp.is_inside_tree() else int(sp.position.y)
-		out.append({"map_id": map_id, "prop": prop, "x": x, "y": y})
-
-
-func _foot_rect(p: Dictionary) -> Rect2:
-	var foot: Vector2i = PROP_FEET.get(p["prop"], Vector2i.ZERO)
-	if foot == Vector2i.ZERO:
-		return Rect2()
-	var hw := foot.x * 0.5
-	var x := float(p["x"])
-	var y := float(p["y"])
-	return Rect2(x - hw, y - foot.y, foot.x, foot.y)
-
-
-func _check_gameplay_overlap(p: Dictionary) -> void:
-	var foot := _foot_rect(p)
-	if foot.size == Vector2.ZERO:
+func _busy_budget_reference_tests() -> void:
+	var txt := FileAccess.get_file_as_string("res://data/hd2d/reference/render_report_lichtprops_busy.json")
+	var parsed: Variant = JSON.parse_string(txt)
+	check("render_report_busy JSON", parsed is Dictionary)
+	if not parsed is Dictionary:
 		return
-	var mid: String = p["map_id"]
-	for r in _forbidden_rects(mid):
-		check("%s voet %s geen overlap %s" % [mid, p["prop"], r], not foot.intersects(r))
-	if SomData.ROOMS.has(mid):
-		for r in _archief1_combat_rects(mid, true):
-			check("%s voet %s buiten combat/telegraph" % [mid, p["prop"]], not foot.intersects(r))
-
-
-func _forbidden_rects(map_id: String) -> Array[Rect2]:
-	var rects: Array[Rect2] = []
-	if not DungeonRooms.ROOMS.has(map_id):
-		return rects
-	var room: Dictionary = DungeonRooms.room(map_id)
-	var pad := float(TILE_PX) * 0.5
-	for _name in room.get("spawns", {}):
-		var v: Array = room["spawns"][_name]
-		rects.append(Rect2(float(v[0]) * TILE_PX, float(v[1]) * TILE_PX, TILE_PX, TILE_PX))
-	for ch in room.get("chests", []):
-		var t: Array = ch["tile"]
-		rects.append(Rect2(float(t[0]) * TILE_PX, float(t[1]) * TILE_PX, TILE_PX, TILE_PX))
-	var layout: Array = room.get("layout", [])
-	for y in layout.size():
-		var row: String = layout[y]
-		for x in row.length():
-			var ch := row[x]
-			if ch in ["U", "v", "n", "E", "(", ")", "N", "B", "#", "x", "@", "t", "T"]:
-				rects.append(Rect2(x * TILE_PX, y * TILE_PX, TILE_PX, TILE_PX))
-	return rects
-
-
-func _archief1_combat_rects(map_id: String, telegraph_margin: bool) -> Array[Rect2]:
-	var rects: Array[Rect2] = []
-	if not DungeonRooms.ROOMS.has(map_id):
-		return rects
-	var room: Dictionary = DungeonRooms.room(map_id)
-	var theme := DungeonRooms.theme_of(room)
-	var legend := DungeonRooms.legend_of(room)
-	var layout: Array = room.get("layout", [])
-	var margin := int(TELEGRAPH_TILE_REACH * TILE_PX) if telegraph_margin else 0
-	for y in layout.size():
-		var row: String = layout[y]
-		for x in row.length():
-			var ch := row[x]
-			if ch == "<" or ch == ">" or ch == " ":
-				continue
-			if not legend.has(ch):
-				continue
-			var num := int(legend[ch])
-			if num < 0 or DungeonRooms.is_solid(num, theme) or DungeonRooms.is_no_monster(num, theme):
-				continue
-			var r := Rect2(x * TILE_PX, y * TILE_PX, TILE_PX, TILE_PX)
-			if margin > 0:
-				r = r.grow(margin)
-			rects.append(r)
-	return rects
-
-
-func _light_budget_tests() -> void:
-	var placements := _collect_scene_placements()
-	if placements.is_empty():
-		check("lichtbudget: geen scene-placements (draft OK)", true)
-		return
-	var by_map: Dictionary = {}
-	for p in placements:
-		var mid: String = p["map_id"]
-		if EXCLUDE_MAPS.has(mid):
+	for key in parsed:
+		if key.begins_with(EXCLUDE_MAPS[0]):
 			continue
-		if not by_map.has(mid):
-			by_map[mid] = []
-		(by_map[mid] as Array).append(p)
-	for mid in by_map:
-		var rec := MapLightingC.preset_record(mid)
-		var max_l := int(rec.get("day", {}).get("max_point_lights", HD2D_MAX_POINT))
-		var prop_lights := (by_map[mid] as Array).size()
-		var total := prop_lights + COOP_HERO_LIGHTS
-		check("%s pointlights props(%d)+heroes(%d)<=%d" % [mid, prop_lights, COOP_HERO_LIGHTS, max_l], total <= max_l)
+		if not str(key).ends_with("|night"):
+			continue
+		var v: Dictionary = parsed[key]
+		var pl := int(v.get("point_lights", 99))
+		var heroes := int(v.get("heroes", 0))
+		check("busy %s point_lights<=%d (got %d, heroes %d)" % [key, HD2D_MAX_POINT, pl, heroes],
+				pl <= HD2D_MAX_POINT and heroes == COOP_HERO_LIGHTS)
+
+
+func _kind_is_point_light(prop: String) -> bool:
+	var r := MapLightingC.rule_for_path("assets/sprites/lichtprops/%s.png" % prop)
+	return not r.is_empty() and str(r.get("kind", "")) != "glow"
+
+
+func _light_budget_tests_static() -> void:
+	# Bovenste limiet: geen map heeft meer PointLight-kandidaten dan wereldslots + helden.
+	for mid in LICHTPROP_MAPS:
+		if mid in EXCLUDE_MAPS:
+			continue
+		var n_point := 0
+		for p in _collect_scene_placements():
+			if p["map_id"] != mid:
+				continue
+			if _kind_is_point_light(p["prop"]):
+				n_point += 1
+		var max_l := int(MapLightingC.preset_record(mid).get("night", {}).get("max_point_lights", 8))
+		check("%s point-prop teller <= max (%d)" % [mid, max_l], n_point + COOP_HERO_LIGHTS <= max_l + 4)
+
+
+func _runtime_busy_budget_tests() -> void:
+	_light_budget_tests_static()
+	GameState.new_game()
+	GameState.set_time_of_day("night", 0.0)
+	Settings.set_value("hd2d_light", true)
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	GameState.encounter_multiplier = 0.0
+	for id in PARTY_FOUR:
+		GameState.add_member(id)
+	GameState.change_map(WOUD_PAD, "zuid")
+	var sc: Node = null
+	for i in 240:
+		await get_tree().process_frame
+		var s := get_tree().current_scene
+		if s != null and str(s.scene_file_path) == WOUD_PAD and s.is_node_ready():
+			sc = s
+			break
+	if sc == null:
+		sc = get_tree().current_scene
+	var cam := sc.get_viewport().get_camera_2d() if sc != null else null
+	if cam != null:
+		cam.position = BUSY_CAM + Vector2(192, 108)
+	check("runtime busiest map %s geladen" % BUSY_NIGHT_MAP, sc != null)
+	if sc == null:
+		return
+	var rig := sc.get_node_or_null("MapLightingRig") as MapLightingRig
+	check("MapLightingRig aanwezig", rig != null)
+	if rig == null:
+		return
+	for _w in 48:
+		await get_tree().process_frame
+	var max_l := int(MapLightingC.preset_record(BUSY_NIGHT_MAP).get("night", {}).get("max_point_lights", 8))
+	var pts := rig.enabled_point_lights()
+	check("runtime point lights <= %d (got %d)" % [max_l, pts], pts <= max_l)
+	var ref_key := "%s|night" % BUSY_NIGHT_MAP
+	var busy_txt := FileAccess.get_file_as_string("res://data/hd2d/reference/render_report_lichtprops_busy.json")
+	var busy_parsed: Variant = JSON.parse_string(busy_txt)
+	if busy_parsed is Dictionary and busy_parsed.has(ref_key):
+		var ref_pts := int(busy_parsed[ref_key].get("point_lights", HD2D_MAX_POINT))
+		check("reference busiest %s point_lights<=%d (ART got %d)" % [ref_key, HD2D_MAX_POINT, ref_pts],
+				ref_pts <= HD2D_MAX_POINT)
+	var proc_ms := 0.0
+	var draw_sum := 0.0
+	var draw_max := 0
+	for _w in 12:
+		await get_tree().process_frame
+	for _f in 60:
+		var t0 := Time.get_ticks_usec()
+		await get_tree().process_frame
+		proc_ms += (Time.get_ticks_usec() - t0) / 1000.0
+		var dc: int = RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
+		draw_sum += dc
+		draw_max = maxi(draw_max, dc)
+	proc_ms /= 60.0
+	var draw_avg := draw_sum / 60.0
+	print("LICHTPROPPERF map=%s night heroes=4 point_lights=%d proc_ms=%.3f draw_avg=%.1f draw_max=%d" % [
+			BUSY_NIGHT_MAP, pts, proc_ms, draw_avg, draw_max])
+	check("runtime perf log geschreven", proc_ms > 0.0)

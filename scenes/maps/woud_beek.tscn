@@ -1,5 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=8 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/woud_lantaarnpaal.png" id="lp_tex_woud_lantaarnpaal"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/woud_waterlelie.png" id="lp_tex_woud_waterlelie"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/woud_gloeizwammen.png" id="lp_tex_woud_gloeizwammen"]
 [ext_resource type="Script" path="res://scripts/dungeon/woud_beek_kamer.gd" id="1_room"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="3_touch"]
@@ -32,3 +36,38 @@ position = Vector2(72, 232)
 [node name="Exits" type="Node2D" parent="."]
 
 [node name="TouchControls" parent="." instance=ExtResource("3_touch")]
+[node name="Lp_woud_lantaarnpaal_170_130" type="Sprite2D" parent="Objects"]
+position = Vector2(170, 130)
+texture = ExtResource("lp_tex_woud_lantaarnpaal")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "woud_lantaarnpaal"
+[node name="Lp_woud_lantaarnpaal_262_130" type="Sprite2D" parent="Objects"]
+position = Vector2(262, 130)
+texture = ExtResource("lp_tex_woud_lantaarnpaal")
+hframes = 4
+flip_h = true
+script = ExtResource("lp_script")
+prop_id = "woud_lantaarnpaal"
+[node name="Lp_woud_waterlelie_208_92" type="Sprite2D" parent="Objects"]
+position = Vector2(208, 92)
+texture = ExtResource("lp_tex_woud_waterlelie")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "woud_waterlelie"
+[node name="Lp_woud_gloeizwammen_124_110" type="Sprite2D" parent="Objects"]
+position = Vector2(124, 110)
+texture = ExtResource("lp_tex_woud_gloeizwammen")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "woud_gloeizwammen"
+[node name="Lp_woud_gloeizwammen_276_196" type="Sprite2D" parent="Objects"]
+position = Vector2(276, 196)
+texture = ExtResource("lp_tex_woud_gloeizwammen")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "woud_gloeizwammen"

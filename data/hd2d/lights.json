@@ -9754,6 +9754,923 @@
    "flicker": 0.0,
    "halo": "auto",
    "halo_size": 48
+  },
+  "assets/sprites/lichtprops/archief_kandelaber.png": {
+   "kind": "candle",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8029999732971191,
+    0.48500001430511475
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.9,
+      30.7
+     ],
+     "px": 25,
+     "bbox": [
+      1,
+      0,
+      14,
+      8
+     ],
+     "halo_at": [
+      7.9,
+      4.7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 1.75,
+   "height": 22,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/sprites/lichtprops/archief_wandblaker.png": {
+   "kind": "candle",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8029999732971191,
+    0.48500001430511475
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.5,
+      10.7
+     ],
+     "px": 9,
+     "bbox": [
+      6,
+      2,
+      9,
+      7
+     ],
+     "halo_at": [
+      7.5,
+      4.7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.95,
+   "scale": 1.25,
+   "height": 20,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/sprites/lichtprops/archief_leeslamp.png": {
+   "kind": "candle",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8230000138282776,
+    0.4569999873638153
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.5,
+      9.5
+     ],
+     "px": 15,
+     "bbox": [
+      6,
+      3,
+      9,
+      8
+     ],
+     "halo_at": [
+      7.5,
+      5.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.85,
+   "scale": 1.15,
+   "height": 18,
+   "flicker": 0.6,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/sprites/lichtprops/kas_gloeipot.png": {
+   "kind": "magic",
+   "family": "mint",
+   "color": [
+    0.7310000061988831,
+    1.0,
+    0.8119999766349792
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.9,
+      37.5
+     ],
+     "px": 44,
+     "bbox": [
+      4,
+      8,
+      12,
+      15
+     ],
+     "halo_at": [
+      7.9,
+      11.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 1.6,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/lichtprops/kas_gloeiplant.png": {
+   "kind": "magic",
+   "family": "mint",
+   "color": [
+    0.734000027179718,
+    1.0,
+    0.8220000267028809
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.1,
+      30.8
+     ],
+     "px": 30,
+     "bbox": [
+      1,
+      2,
+      14,
+      13
+     ],
+     "halo_at": [
+      7.1,
+      6.8
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.95,
+   "scale": 1.75,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/lichtprops/kas_gloeiknoppen.png": {
+   "kind": "glow",
+   "family": "mint",
+   "color": [
+    0.7440000176429749,
+    1.0,
+    0.8289999961853027
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.7,
+      5.7
+     ],
+     "px": 19,
+     "bbox": [
+      3,
+      3,
+      12,
+      10
+     ],
+     "halo_at": [
+      7.7,
+      5.7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.7,
+   "scale": 0.9,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "magic_small"
+  },
+  "assets/sprites/lichtprops/warper_wandlamp.png": {
+   "kind": "glow",
+   "family": "cyan",
+   "color": [
+    0.5759999752044678,
+    0.9660000205039978,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      14.5
+     ],
+     "px": 30,
+     "bbox": [
+      5,
+      4,
+      11,
+      9
+     ],
+     "halo_at": [
+      8.0,
+      6.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.85,
+   "scale": 1.2,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "magic"
+  },
+  "assets/sprites/lichtprops/warper_wandlamp_violet.png": {
+   "kind": "glow",
+   "family": "violet",
+   "color": [
+    0.8169999718666077,
+    0.6079999804496765,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      14.5
+     ],
+     "px": 30,
+     "bbox": [
+      5,
+      4,
+      11,
+      9
+     ],
+     "halo_at": [
+      8.0,
+      6.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.85,
+   "scale": 1.2,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "magic"
+  },
+  "assets/sprites/lichtprops/warper_kristalzuil.png": {
+   "kind": "magic",
+   "family": "violet",
+   "color": [
+    0.777999997138977,
+    0.5490000247955322,
+    1.0
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.4,
+      19.2
+     ],
+     "px": 42,
+     "bbox": [
+      5,
+      2,
+      11,
+      22
+     ],
+     "halo_at": [
+      7.4,
+      9.2
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.95,
+   "scale": 1.3,
+   "height": 22,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 48
+  },
+  "assets/sprites/lichtprops/woud_gloeizwammen.png": {
+   "kind": "glow",
+   "family": "cyan",
+   "color": [
+    0.4560000002384186,
+    0.9620000123977661,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      8.5
+     ],
+     "px": 21,
+     "bbox": [
+      1,
+      5,
+      14,
+      11
+     ],
+     "halo_at": [
+      8.0,
+      8.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.85,
+   "scale": 1.1,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "magic"
+  },
+  "assets/sprites/lichtprops/woud_lantaarnpaal.png": {
+   "kind": "lantern",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8169999718666077,
+    0.4359999895095825
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      10.5,
+      33.5
+     ],
+     "px": 9,
+     "bbox": [
+      9,
+      10,
+      12,
+      13
+     ],
+     "halo_at": [
+      10.5,
+      11.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.05,
+   "scale": 1.8,
+   "height": 24,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/sprites/lichtprops/woud_waterlelie.png": {
+   "kind": "glow",
+   "family": "mint",
+   "color": [
+    0.8579999804496765,
+    1.0,
+    0.8949999809265137
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      6.2,
+      8.1
+     ],
+     "px": 16,
+     "bbox": [
+      2,
+      5,
+      13,
+      11
+     ],
+     "halo_at": [
+      6.2,
+      8.1
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.75,
+   "scale": 1.0,
+   "height": 16,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "magic"
+  },
+  "assets/sprites/lichtprops/bouw_stormlamp.png": {
+   "kind": "lantern",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8240000009536743,
+    0.4749999940395355
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.0,
+      20.0
+     ],
+     "px": 16,
+     "bbox": [
+      5,
+      6,
+      9,
+      10
+     ],
+     "halo_at": [
+      7.0,
+      8.0
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 1.5,
+   "height": 24,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 48
+  },
+  "assets/sprites/lichtprops/bouw_vuurkorf.png": {
+   "kind": "fire",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6610000133514404,
+    0.39500001072883606
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.8,
+      16.0
+     ],
+     "px": 42,
+     "bbox": [
+      4,
+      5,
+      12,
+      15
+     ],
+     "halo_at": [
+      7.8,
+      10.0
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.2,
+   "scale": 1.6,
+   "height": 26,
+   "flicker": 1.2,
+   "halo": "warm",
+   "halo_size": 48
+  },
+  "assets/sprites/lichtprops/binnen_wandlamp.png": {
+   "kind": "candle",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8029999732971191,
+    0.48500001430511475
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.5,
+      12.7
+     ],
+     "px": 9,
+     "bbox": [
+      6,
+      2,
+      9,
+      7
+     ],
+     "halo_at": [
+      7.5,
+      4.7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 1.2,
+   "height": 20,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/sprites/lichtprops/binnen_kandelaar.png": {
+   "kind": "glow",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8029999732971191,
+    0.48500001430511475
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.0,
+      5.2
+     ],
+     "px": 18,
+     "bbox": [
+      4,
+      1,
+      12,
+      9
+     ],
+     "halo_at": [
+      8.0,
+      5.2
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.85,
+   "scale": 1.1,
+   "height": 18,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "candle"
+  },
+  "assets/sprites/lichtprops/wk_kampvuur.png": {
+   "kind": "fire",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6290000081062317,
+    0.37299999594688416
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.6,
+      9.5
+     ],
+     "px": 21,
+     "bbox": [
+      5,
+      6,
+      10,
+      13
+     ],
+     "halo_at": [
+      7.6,
+      9.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 1.3,
+   "height": 22,
+   "flicker": 1.2,
+   "halo": "warm",
+   "halo_size": 48
+  },
+  "assets/sprites/lichtprops/wk_baken.png": {
+   "kind": "fire",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6600000262260437,
+    0.39399999380111694
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.6,
+      9.2
+     ],
+     "px": 19,
+     "bbox": [
+      5,
+      2,
+      10,
+      9
+     ],
+     "halo_at": [
+      7.6,
+      5.2
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.1,
+   "scale": 1.4,
+   "height": 24,
+   "flicker": 1.2,
+   "halo": "warm",
+   "halo_size": 48
+  },
+  "assets/sprites/lichtprops/wk_kristal.png": {
+   "kind": "magic",
+   "family": "cyan",
+   "color": [
+    0.5059999823570251,
+    0.9620000123977661,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.3,
+      7.0
+     ],
+     "px": 21,
+     "bbox": [
+      3,
+      3,
+      13,
+      10
+     ],
+     "halo_at": [
+      7.3,
+      7.0
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.8,
+   "scale": 1.0,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/lichtprops/archief_leeslamp_glow.png": {
+   "kind": "glow",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8230000138282776,
+    0.4569999873638153
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.5,
+      9.5
+     ],
+     "px": 15,
+     "bbox": [
+      6,
+      3,
+      9,
+      8
+     ],
+     "halo_at": [
+      7.5,
+      5.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.85,
+   "scale": 1.15,
+   "height": 18,
+   "flicker": 0.6,
+   "halo": "warm",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "candle"
+  },
+  "assets/sprites/lichtprops/archief_wandblaker_glow.png": {
+   "kind": "glow",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8029999732971191,
+    0.48500001430511475
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.5,
+      10.7
+     ],
+     "px": 9,
+     "bbox": [
+      6,
+      2,
+      9,
+      7
+     ],
+     "halo_at": [
+      7.5,
+      4.7
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.95,
+   "scale": 1.25,
+   "height": 20,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "candle"
+  },
+  "assets/sprites/lichtprops/kas_gloeipot_glow.png": {
+   "kind": "glow",
+   "family": "mint",
+   "color": [
+    0.7310000061988831,
+    1.0,
+    0.8119999766349792
+   ],
+   "cell": [
+    16,
+    24
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.9,
+      37.5
+     ],
+     "px": 44,
+     "bbox": [
+      4,
+      8,
+      12,
+      15
+     ],
+     "halo_at": [
+      7.9,
+      11.5
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.9,
+   "scale": 1.6,
+   "height": 20,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24,
+   "glow_only": true,
+   "orig_kind": "magic"
+  },
+  "assets/sprites/lichtprops/bouw_stormlamp_glow.png": {
+   "kind": "glow",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.8240000009536743,
+    0.4749999940395355
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      7.0,
+      20.0
+     ],
+     "px": 16,
+     "bbox": [
+      5,
+      6,
+      9,
+      10
+     ],
+     "halo_at": [
+      7.0,
+      8.0
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.0,
+   "scale": 1.5,
+   "height": 24,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 48,
+   "glow_only": true,
+   "orig_kind": "lantern"
   }
  }
 }

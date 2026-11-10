@@ -1,5 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=8 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/kas_gloeipot_glow.png" id="lp_tex_kas_gloeipot_glow"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/kas_gloeipot.png" id="lp_tex_kas_gloeipot"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/kas_gloeiplant.png" id="lp_tex_kas_gloeiplant"]
 [ext_resource type="Script" path="res://scripts/dungeon/dungeon_room.gd" id="1_room"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="3_touch"]
@@ -32,3 +36,45 @@ position = Vector2(120, 152)
 [node name="Exits" type="Node2D" parent="."]
 
 [node name="TouchControls" parent="." instance=ExtResource("3_touch")]
+[node name="Lp_kas_gloeipot_glow_48_44" type="Sprite2D" parent="Objects"]
+position = Vector2(48, 44)
+texture = ExtResource("lp_tex_kas_gloeipot_glow")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "kas_gloeipot_glow"
+[node name="Lp_kas_gloeipot_136_44" type="Sprite2D" parent="Objects"]
+position = Vector2(136, 44)
+texture = ExtResource("lp_tex_kas_gloeipot")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "kas_gloeipot"
+[node name="Lp_kas_gloeipot_248_44" type="Sprite2D" parent="Objects"]
+position = Vector2(248, 44)
+texture = ExtResource("lp_tex_kas_gloeipot")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "kas_gloeipot"
+[node name="Lp_kas_gloeipot_glow_312_44" type="Sprite2D" parent="Objects"]
+position = Vector2(312, 44)
+texture = ExtResource("lp_tex_kas_gloeipot_glow")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "kas_gloeipot_glow"
+[node name="Lp_kas_gloeiplant_92_48" type="Sprite2D" parent="Objects"]
+position = Vector2(92, 48)
+texture = ExtResource("lp_tex_kas_gloeiplant")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "kas_gloeiplant"
+[node name="Lp_kas_gloeiplant_280_48" type="Sprite2D" parent="Objects"]
+position = Vector2(280, 48)
+texture = ExtResource("lp_tex_kas_gloeiplant")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "kas_gloeiplant"

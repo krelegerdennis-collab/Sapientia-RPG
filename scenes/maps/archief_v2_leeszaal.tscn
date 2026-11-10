@@ -1,5 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=8 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/archief_wandblaker_glow.png" id="lp_tex_archief_wandblaker_glow"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/archief_leeslamp.png" id="lp_tex_archief_leeslamp"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/archief_leeslamp_glow.png" id="lp_tex_archief_leeslamp_glow"]
 [ext_resource type="Script" path="res://scripts/dungeon/dungeon_room.gd" id="1_room"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="3_touch"]
@@ -31,3 +35,52 @@ position = Vector2(152, 168)
 [node name="Exits" type="Node2D" parent="."]
 
 [node name="TouchControls" parent="." instance=ExtResource("3_touch")]
+[node name="Lp_archief_wandblaker_glow_24_232" type="Sprite2D" parent="Objects"]
+position = Vector2(24, 232)
+texture = ExtResource("lp_tex_archief_wandblaker_glow")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_wandblaker_glow"
+[node name="Lp_archief_wandblaker_glow_296_232" type="Sprite2D" parent="Objects"]
+position = Vector2(296, 232)
+texture = ExtResource("lp_tex_archief_wandblaker_glow")
+hframes = 4
+flip_h = true
+script = ExtResource("lp_script")
+prop_id = "archief_wandblaker_glow"
+[node name="Lp_archief_leeslamp_112_254" type="Sprite2D" parent="Objects"]
+position = Vector2(112, 254)
+texture = ExtResource("lp_tex_archief_leeslamp")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_leeslamp"
+[node name="Lp_archief_leeslamp_208_254" type="Sprite2D" parent="Objects"]
+position = Vector2(208, 254)
+texture = ExtResource("lp_tex_archief_leeslamp")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_leeslamp"
+[node name="Lp_archief_leeslamp_80_185" type="Sprite2D" parent="Objects"]
+position = Vector2(80, 185)
+texture = ExtResource("lp_tex_archief_leeslamp")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_leeslamp"
+[node name="Lp_archief_leeslamp_240_185" type="Sprite2D" parent="Objects"]
+position = Vector2(240, 185)
+texture = ExtResource("lp_tex_archief_leeslamp")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_leeslamp"
+[node name="Lp_archief_leeslamp_glow_256_297" type="Sprite2D" parent="Objects"]
+position = Vector2(256, 297)
+texture = ExtResource("lp_tex_archief_leeslamp_glow")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_leeslamp_glow"
