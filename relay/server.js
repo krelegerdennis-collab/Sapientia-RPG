@@ -38,6 +38,7 @@ function logCrash(kind, err) {
 
 process.on('uncaughtException', (err) => {
   logCrash('uncaughtException', err);
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
