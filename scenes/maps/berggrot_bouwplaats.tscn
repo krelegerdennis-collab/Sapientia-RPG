@@ -1,5 +1,9 @@
-[gd_scene load_steps=21 format=4]
+[gd_scene load_steps=25 format=4]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/bouw_stormlamp.png" id="lp_tex_bouw_stormlamp"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/bouw_stormlamp_glow.png" id="lp_tex_bouw_stormlamp_glow"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/bouw_vuurkorf.png" id="lp_tex_bouw_vuurkorf"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_2270x"]
 [ext_resource type="TileSet" path="res://assets/tiles/wereld.tres" id="2_uoeba"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_8p1i3"]
@@ -221,3 +225,38 @@ event = "bouwplaats_hek"
 
 [node name="TouchControls" type="CanvasLayer" parent="." instance=ExtResource("16_kwuv0")]
 layer = 10
+[node name="Lp_bouw_stormlamp_164_78" type="Sprite2D" parent="Objects"]
+position = Vector2(164, 78)
+texture = ExtResource("lp_tex_bouw_stormlamp")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "bouw_stormlamp"
+[node name="Lp_bouw_stormlamp_glow_236_78" type="Sprite2D" parent="Objects"]
+position = Vector2(236, 78)
+texture = ExtResource("lp_tex_bouw_stormlamp_glow")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "bouw_stormlamp_glow"
+[node name="Lp_bouw_vuurkorf_56_128" type="Sprite2D" parent="Objects"]
+position = Vector2(56, 128)
+texture = ExtResource("lp_tex_bouw_vuurkorf")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "bouw_vuurkorf"
+[node name="Lp_bouw_vuurkorf_336_104" type="Sprite2D" parent="Objects"]
+position = Vector2(336, 104)
+texture = ExtResource("lp_tex_bouw_vuurkorf")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "bouw_vuurkorf"
+[node name="Lp_bouw_stormlamp_136_190" type="Sprite2D" parent="Objects"]
+position = Vector2(136, 190)
+texture = ExtResource("lp_tex_bouw_stormlamp")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "bouw_stormlamp"

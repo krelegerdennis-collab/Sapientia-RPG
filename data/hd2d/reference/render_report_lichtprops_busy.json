@@ -1,0 +1,1888 @@
+{
+ "archief_2_v1_plaat|day": {
+  "candidates": 9,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 8,
+  "dropped": [
+   "tile@150,31",
+   "magic_small@212,117"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 8,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31",
+   "B:magic_small@212,117"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "archief_2_v1_plaat|night": {
+  "candidates": 9,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@150,31",
+   "magic_small@212,117"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 8,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31",
+   "B:magic_small@212,117"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "archief_2_v2_gang|day": {
+  "candidates": 9,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 3,
+  "dropped": [
+   "tile@150,31",
+   "tile@281,248"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31",
+   "B:tile@281,248"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "archief_2_v2_gang|night": {
+  "candidates": 9,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@150,31",
+   "tile@281,248"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31",
+   "B:tile@281,248"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "archief_2_v2_lotte|day": {
+  "candidates": 8,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 1,
+  "dropped": [
+   "tile@150,31"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_2_v2_lotte|night": {
+  "candidates": 8,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@150,31"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_2_v3_licht|day": {
+  "candidates": 9,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@150,31",
+   "magic_small@212,117"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 8,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31",
+   "B:magic_small@212,117"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "archief_2_v3_licht|night": {
+  "candidates": 9,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@150,31",
+   "magic_small@212,117"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 8,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31",
+   "B:magic_small@212,117"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "archief_2_v3_wurger|day": {
+  "candidates": 9,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 2,
+  "dropped": [
+   "tile@150,31"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 8,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 3,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 3,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "B:magic@215,83",
+   "P:magic@159,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_2_v3_wurger|night": {
+  "candidates": 9,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@150,31"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 8,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 3,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 3,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "B:magic@215,83",
+   "P:magic@159,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_2_v4_hal|day": {
+  "candidates": 8,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 1,
+  "dropped": [
+   "tile@150,31"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_2_v4_hal|night": {
+  "candidates": 8,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@150,31"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "party_moved_to": [
+   216,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@159,59",
+   "P:magic@247,59",
+   "P:magic@103,46",
+   "P:magic@295,46",
+   "B:tile@150,31"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_v1_gang|day": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 10,
+  "dropped": [],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 3,
+  "scan_cam": [
+   0,
+   -12
+  ],
+  "scan_max_props": 3,
+  "scan_max_world": 4,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@199,46",
+   "P:candle@295,46",
+   "P:candle@47,46",
+   "B:tile@264,152"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "archief_v1_gang|night": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 3,
+  "scan_cam": [
+   0,
+   -12
+  ],
+  "scan_max_props": 3,
+  "scan_max_world": 4,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@199,46",
+   "P:candle@295,46",
+   "P:candle@47,46",
+   "B:tile@264,152"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "archief_v2_kastenzaal|day": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 2,
+  "dropped": [],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   -4
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 4,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:candle@143,46",
+   "P:candle@255,46",
+   "P:candle@311,131",
+   "P:candle@71,131"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "archief_v2_kastenzaal|night": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   -4
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 4,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:candle@143,46",
+   "P:candle@255,46",
+   "P:candle@311,131",
+   "P:candle@71,131"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "archief_v2_leeszaal|day": {
+  "candidates": 9,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@247,28"
+  ],
+  "emissive": 10,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "party_moved_to": [
+   152,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -32,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@239,178",
+   "P:candle@79,178",
+   "P:candle@207,247",
+   "P:candle@111,247",
+   "B:tile@247,28"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_v2_leeszaal|night": {
+  "candidates": 9,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@247,28"
+  ],
+  "emissive": 10,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "party_moved_to": [
+   152,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -32,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@239,178",
+   "P:candle@79,178",
+   "P:candle@207,247",
+   "P:candle@111,247",
+   "B:tile@247,28"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_v2_trapzaal|day": {
+  "candidates": 5,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 3,
+  "dropped": [
+   "book@39,53"
+  ],
+  "emissive": 7,
+  "fill": 0,
+  "halos": 4,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -32,
+   -12
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:candle@183,46",
+   "P:candle@119,46",
+   "P:candle@23,114",
+   "P:candle@296,114",
+   "B:book@39,53"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_v2_trapzaal|night": {
+  "candidates": 5,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "book@39,53"
+  ],
+  "emissive": 7,
+  "fill": 0,
+  "halos": 4,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -32,
+   -12
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:candle@183,46",
+   "P:candle@119,46",
+   "P:candle@23,114",
+   "P:candle@296,114",
+   "B:book@39,53"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_v3_gang|day": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@71,28"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -32,
+   -12
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@111,46",
+   "P:candle@231,46",
+   "P:candle@296,114",
+   "P:candle@23,144",
+   "B:tile@71,28"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_v3_gang|night": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@71,28"
+  ],
+  "emissive": 9,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -32,
+   -12
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@111,46",
+   "P:candle@231,46",
+   "P:candle@296,114",
+   "P:candle@23,144",
+   "B:tile@71,28"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_v4_voorhal|day": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@71,28"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -32,
+   -12
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@135,46",
+   "P:candle@199,46",
+   "P:candle@255,135",
+   "P:candle@63,135",
+   "B:tile@71,28"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "archief_v4_voorhal|night": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@71,28"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -32,
+   -12
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@135,46",
+   "P:candle@199,46",
+   "P:candle@255,135",
+   "P:candle@63,135",
+   "B:tile@71,28"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "berggrot_bouwplaats|day": {
+  "candidates": 5,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 15,
+  "dropped": [],
+  "emissive": 2,
+  "halos": 0,
+  "heroes": 0,
+  "party_moved_to": [
+   200,
+   152
+  ],
+  "point_lights": 2,
+  "props_wanted": 2,
+  "scan_cam": [
+   0,
+   -4
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 2,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:fire@55,120",
+   "P:fire@335,96"
+  ],
+  "world_lit": 2,
+  "world_wanted": 2
+ },
+ "berggrot_bouwplaats|night": {
+  "candidates": 5,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 5,
+  "halos": 5,
+  "heroes": 4,
+  "party_moved_to": [
+   200,
+   152
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   0,
+   -4
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 4,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:lantern@163,66",
+   "P:lantern@135,178",
+   "P:fire@55,120",
+   "P:fire@335,96"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "kamer_beeldkamer|day": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 4,
+  "dropped": [
+   "screen@72,120"
+  ],
+  "emissive": 7,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@60,48",
+   "B:screen@108,48",
+   "B:screen@72,120"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "kamer_beeldkamer|night": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "screen@72,120"
+  ],
+  "emissive": 7,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@60,48",
+   "B:screen@108,48",
+   "B:screen@72,120"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "kamer_echo_kamer|day": {
+  "candidates": 9,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 4,
+  "dropped": [
+   "screen@89,40",
+   "screen@8,56",
+   "magic_small@73,22"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 7,
+  "tile_overlays": 1,
+  "wanted": [
+   "B:magic@72,74",
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@95,60",
+   "B:screen@89,40",
+   "B:screen@8,56",
+   "B:magic_small@73,22"
+  ],
+  "world_lit": 4,
+  "world_wanted": 7
+ },
+ "kamer_echo_kamer|night": {
+  "candidates": 9,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "screen@89,40",
+   "screen@8,56",
+   "magic_small@73,22"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 7,
+  "tile_overlays": 1,
+  "wanted": [
+   "B:magic@72,74",
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@95,60",
+   "B:screen@89,40",
+   "B:screen@8,56",
+   "B:magic_small@73,22"
+  ],
+  "world_lit": 4,
+  "world_wanted": 7
+ },
+ "kamer_handelskamer|day": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 1,
+  "dropped": [
+   "screen@72,8"
+  ],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@68,68",
+   "B:screen@88,74",
+   "B:screen@72,8"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "kamer_handelskamer|night": {
+  "candidates": 7,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "screen@72,8"
+  ],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 5,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@68,68",
+   "B:screen@88,74",
+   "B:screen@72,8"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "kamer_kern|day": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 4,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@92,64",
+   "B:screen@72,8"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "kamer_kern|night": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 4,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@92,64",
+   "B:screen@72,8"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "kamer_rustkamer|day": {
+  "candidates": 8,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "screen@60,32",
+   "screen@152,56"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@60,64",
+   "B:screen@108,48",
+   "B:screen@60,32",
+   "B:screen@152,56"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "kamer_rustkamer|night": {
+  "candidates": 8,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "screen@60,32",
+   "screen@152,56"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@60,64",
+   "B:screen@108,48",
+   "B:screen@60,32",
+   "B:screen@152,56"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "kamer_trainingshal|day": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 4,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@92,48",
+   "B:screen@72,120"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "kamer_trainingshal|night": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 4,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@92,48",
+   "B:screen@72,120"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "kamer_werkplaats|day": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 1,
+  "dropped": [],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 4,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@88,70",
+   "B:screen@72,8"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "kamer_werkplaats|night": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   -112,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 4,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@131,95",
+   "P:magic@27,95",
+   "B:screen@88,70",
+   "B:screen@72,8"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "leven_ingang|day": {
+  "candidates": 8,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 1,
+  "dropped": [
+   "tile@199,23",
+   "book@71,177"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "party_moved_to": [
+   168,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -16,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@135,57",
+   "P:magic@247,57",
+   "P:magic@91,46",
+   "P:magic@279,46",
+   "B:tile@199,23",
+   "B:book@71,177"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "leven_ingang|night": {
+  "candidates": 8,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@199,23",
+   "book@71,177"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "party_moved_to": [
+   168,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -16,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 6,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@135,57",
+   "P:magic@247,57",
+   "P:magic@91,46",
+   "P:magic@279,46",
+   "B:tile@199,23",
+   "B:book@71,177"
+  ],
+  "world_lit": 4,
+  "world_wanted": 6
+ },
+ "leven_v1_plaat|day": {
+  "candidates": 6,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 2,
+  "dropped": [],
+  "emissive": 7,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "party_moved_to": [
+   168,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -24,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 4,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:magic@309,94",
+   "P:magic@25,94",
+   "P:magic@309,174",
+   "P:magic@25,174"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "leven_v1_plaat|night": {
+  "candidates": 6,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 7,
+  "fill": 0,
+  "halos": 6,
+  "heroes": 4,
+  "party_moved_to": [
+   168,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -24,
+   0
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 4,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:magic@309,94",
+   "P:magic@25,94",
+   "P:magic@309,174",
+   "P:magic@25,174"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "leven_v2_leeszaal|day": {
+  "candidates": 7,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 5,
+  "dropped": [
+   "magic_small@200,135"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -72,
+   -20
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:magic@151,46",
+   "P:magic@87,46",
+   "P:magic@191,59",
+   "P:magic@47,59",
+   "B:magic_small@200,135"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "leven_v2_leeszaal|night": {
+  "candidates": 7,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "magic_small@200,135"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -72,
+   -20
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 5,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:magic@151,46",
+   "P:magic@87,46",
+   "P:magic@191,59",
+   "P:magic@47,59",
+   "B:magic_small@200,135"
+  ],
+  "world_lit": 4,
+  "world_wanted": 5
+ },
+ "leven_v3_combi|day": {
+  "candidates": 5,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -72,
+   -20
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 4,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:magic@191,59",
+   "P:magic@47,59",
+   "P:magic@199,148",
+   "P:magic@39,148"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "leven_v3_combi|night": {
+  "candidates": 5,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -72,
+   -20
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 4,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:magic@191,59",
+   "P:magic@47,59",
+   "P:magic@199,148",
+   "P:magic@39,148"
+  ],
+  "world_lit": 4,
+  "world_wanted": 4
+ },
+ "warper_hanger_nis|day": {
+  "candidates": 10,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "screen@104,9",
+   "screen@50,8",
+   "screen@151,9",
+   "screen@184,72"
+  ],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 3,
+  "scan_cam": [
+   -96,
+   -36
+  ],
+  "scan_max_props": 3,
+  "scan_max_world": 8,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@39,47",
+   "P:magic@151,111",
+   "P:magic@39,111",
+   "B:screen@95,56",
+   "B:screen@104,9",
+   "B:screen@50,8",
+   "B:screen@151,9",
+   "B:screen@184,72"
+  ],
+  "world_lit": 4,
+  "world_wanted": 8
+ },
+ "warper_hanger_nis|night": {
+  "candidates": 10,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "screen@104,9",
+   "screen@50,8",
+   "screen@151,9",
+   "screen@184,72"
+  ],
+  "emissive": 6,
+  "fill": 0,
+  "halos": 5,
+  "heroes": 4,
+  "point_lights": 8,
+  "props_wanted": 3,
+  "scan_cam": [
+   -96,
+   -36
+  ],
+  "scan_max_props": 3,
+  "scan_max_world": 8,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@39,47",
+   "P:magic@151,111",
+   "P:magic@39,111",
+   "B:screen@95,56",
+   "B:screen@104,9",
+   "B:screen@50,8",
+   "B:screen@151,9",
+   "B:screen@184,72"
+  ],
+  "world_lit": 4,
+  "world_wanted": 8
+ },
+ "warper_warp_ring|day": {
+  "candidates": 12,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 1,
+  "dropped": [
+   "screen@136,9",
+   "screen@128,200",
+   "screen@40,38",
+   "screen@183,9",
+   "screen@72,8"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "party_moved_to": [
+   120,
+   152
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -64,
+   -4
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 9,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@223,73",
+   "P:magic@31,73",
+   "P:magic@223,177",
+   "P:magic@31,177",
+   "B:screen@136,9",
+   "B:screen@128,200",
+   "B:screen@40,38",
+   "B:screen@183,9",
+   "B:screen@72,8"
+  ],
+  "world_lit": 4,
+  "world_wanted": 9
+ },
+ "warper_warp_ring|night": {
+  "candidates": 12,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "screen@136,9",
+   "screen@128,200",
+   "screen@40,38",
+   "screen@183,9",
+   "screen@72,8"
+  ],
+  "emissive": 8,
+  "fill": 0,
+  "halos": 7,
+  "heroes": 4,
+  "party_moved_to": [
+   120,
+   152
+  ],
+  "point_lights": 8,
+  "props_wanted": 4,
+  "scan_cam": [
+   -64,
+   -4
+  ],
+  "scan_max_props": 4,
+  "scan_max_world": 9,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:magic@223,73",
+   "P:magic@31,73",
+   "P:magic@223,177",
+   "P:magic@31,177",
+   "B:screen@136,9",
+   "B:screen@128,200",
+   "B:screen@40,38",
+   "B:screen@183,9",
+   "B:screen@72,8"
+  ],
+  "world_lit": 4,
+  "world_wanted": 9
+ },
+ "wereldkaart|day": {
+  "candidates": 3,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 5,
+  "dropped": [],
+  "emissive": 3,
+  "halos": 0,
+  "heroes": 0,
+  "party_moved_to": [
+   232,
+   472
+  ],
+  "point_lights": 3,
+  "props_wanted": 3,
+  "scan_cam": [
+   0,
+   304
+  ],
+  "scan_max_props": 3,
+  "scan_max_world": 3,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:fire@251,481",
+   "P:fire@325,463",
+   "P:magic@351,553"
+  ],
+  "world_lit": 3,
+  "world_wanted": 3
+ },
+ "wereldkaart|night": {
+  "candidates": 3,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 3,
+  "halos": 3,
+  "heroes": 4,
+  "party_moved_to": [
+   232,
+   472
+  ],
+  "point_lights": 7,
+  "props_wanted": 3,
+  "scan_cam": [
+   0,
+   304
+  ],
+  "scan_max_props": 3,
+  "scan_max_world": 3,
+  "tile_overlays": 0,
+  "wanted": [
+   "P:fire@251,481",
+   "P:fire@325,463",
+   "P:magic@351,553"
+  ],
+  "world_lit": 3,
+  "world_wanted": 3
+ },
+ "wilgendal_binnen|day": {
+  "candidates": 4,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 6,
+  "dropped": [],
+  "emissive": 3,
+  "halos": 0,
+  "heroes": 0,
+  "point_lights": 3,
+  "props_wanted": 2,
+  "scan_cam": [
+   -120,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 3,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@103,24",
+   "P:candle@38,24",
+   "B:tile@117,24"
+  ],
+  "world_lit": 3,
+  "world_wanted": 3
+ },
+ "wilgendal_binnen|night": {
+  "candidates": 4,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@117,24"
+  ],
+  "emissive": 4,
+  "halos": 3,
+  "heroes": 4,
+  "point_lights": 6,
+  "props_wanted": 2,
+  "scan_cam": [
+   -120,
+   -44
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 3,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:candle@103,24",
+   "P:candle@38,24",
+   "B:tile@117,24"
+  ],
+  "world_lit": 2,
+  "world_wanted": 3
+ },
+ "woud_beek|day": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 78,
+  "dropped": [],
+  "emissive": 3,
+  "halos": 0,
+  "heroes": 0,
+  "party_moved_to": [
+   72,
+   168
+  ],
+  "point_lights": 1,
+  "props_wanted": 0,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 0,
+  "scan_max_world": 1,
+  "tile_overlays": 1,
+  "wanted": [
+   "B:tile@376,186"
+  ],
+  "world_lit": 1,
+  "world_wanted": 1
+ },
+ "woud_beek|night": {
+  "candidates": 6,
+  "canvas_modulates_before": 0,
+  "canvas_textures": 0,
+  "dropped": [],
+  "emissive": 6,
+  "halos": 5,
+  "heroes": 4,
+  "party_moved_to": [
+   72,
+   168
+  ],
+  "point_lights": 7,
+  "props_wanted": 2,
+  "scan_cam": [
+   0,
+   0
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 3,
+  "tile_overlays": 1,
+  "wanted": [
+   "P:lantern@172,131",
+   "P:lantern@259,131",
+   "B:tile@376,186"
+  ],
+  "world_lit": 3,
+  "world_wanted": 3
+ },
+ "woud_pad|day": {
+  "candidates": 10,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 6,
+  "dropped": [],
+  "emissive": 3,
+  "halos": 0,
+  "heroes": 0,
+  "party_moved_to": [
+   280,
+   168
+  ],
+  "point_lights": 5,
+  "props_wanted": 0,
+  "scan_cam": [
+   224,
+   0
+  ],
+  "scan_max_props": 0,
+  "scan_max_world": 5,
+  "tile_overlays": 2,
+  "wanted": [
+   "B:tile@486,104",
+   "B:tile@503,33",
+   "B:tile@592,211",
+   "B:tile@232,216",
+   "B:tile@648,136"
+  ],
+  "world_lit": 5,
+  "world_wanted": 5
+ },
+ "woud_pad|night": {
+  "candidates": 10,
+  "canvas_modulates_before": 1,
+  "canvas_textures": 0,
+  "dropped": [
+   "tile@592,211",
+   "tile@232,216",
+   "tile@648,136"
+  ],
+  "emissive": 9,
+  "halos": 5,
+  "heroes": 4,
+  "party_moved_to": [
+   280,
+   168
+  ],
+  "point_lights": 8,
+  "props_wanted": 2,
+  "scan_cam": [
+   224,
+   0
+  ],
+  "scan_max_props": 2,
+  "scan_max_world": 7,
+  "tile_overlays": 2,
+  "wanted": [
+   "P:lantern@394,49",
+   "P:lantern@565,49",
+   "B:tile@486,104",
+   "B:tile@503,33",
+   "B:tile@592,211",
+   "B:tile@232,216",
+   "B:tile@648,136"
+  ],
+  "world_lit": 4,
+  "world_wanted": 7
+ }
+}

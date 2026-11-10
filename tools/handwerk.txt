@@ -1308,4 +1308,27 @@ assets/map_monsters/de_stem.png
 #        assets/ui/title_kern.png
 #        Niet overschrijven met art_ui_v13/titel/titel.py of art_ondertitel_v20/make.py
 #        (die zitten buiten de repo en buiten het palet; make.py zet ook alpha 220 op de outline).
-
+# 2026-11-10: HD-2D lichtprops WM1 (RPG ART, 19 props, akkoord Dennis 10-11 11:36)
+assets/sprites/lichtprops/archief_kandelaber.png
+assets/sprites/lichtprops/archief_wandblaker.png
+assets/sprites/lichtprops/archief_leeslamp.png
+assets/sprites/lichtprops/kas_gloeipot.png
+assets/sprites/lichtprops/kas_gloeiplant.png
+assets/sprites/lichtprops/kas_gloeiknoppen.png
+assets/sprites/lichtprops/warper_wandlamp.png
+assets/sprites/lichtprops/warper_wandlamp_violet.png
+assets/sprites/lichtprops/warper_kristalzuil.png
+assets/sprites/lichtprops/woud_gloeizwammen.png
+assets/sprites/lichtprops/woud_lantaarnpaal.png
+assets/sprites/lichtprops/woud_waterlelie.png
+assets/sprites/lichtprops/bouw_stormlamp.png
+assets/sprites/lichtprops/bouw_vuurkorf.png
+assets/sprites/lichtprops/binnen_wandlamp.png
+assets/sprites/lichtprops/binnen_kandelaar.png
+assets/sprites/lichtprops/wk_kampvuur.png
+assets/sprites/lichtprops/wk_baken.png
+assets/sprites/lichtprops/wk_kristal.png
+assets/sprites/lichtprops/archief_leeslamp_glow.png
+assets/sprites/lichtprops/archief_wandblaker_glow.png
+assets/sprites/lichtprops/kas_gloeipot_glow.png
+assets/sprites/lichtprops/bouw_stormlamp_glow.png

@@ -1,5 +1,8 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=11 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/warper_wandlamp.png" id="lp_tex_warper_wandlamp"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/warper_kristalzuil.png" id="lp_tex_warper_kristalzuil"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://scripts/map_spawn.gd" id="3_spawn"]
@@ -69,3 +72,31 @@ blokkeer = Vector2i(1, 0)
 
 
 [node name="TouchControls" parent="." instance=ExtResource("4_touch")]
+[node name="Lp_warper_wandlamp_40_16" type="Sprite2D" parent="Objects"]
+position = Vector2(40, 16)
+texture = ExtResource("lp_tex_warper_wandlamp")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_wandlamp"
+[node name="Lp_warper_wandlamp_120_16" type="Sprite2D" parent="Objects"]
+position = Vector2(120, 16)
+texture = ExtResource("lp_tex_warper_wandlamp")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_wandlamp"
+[node name="Lp_warper_kristalzuil_28_108" type="Sprite2D" parent="Objects"]
+position = Vector2(28, 108)
+texture = ExtResource("lp_tex_warper_kristalzuil")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_kristalzuil"
+[node name="Lp_warper_kristalzuil_132_108" type="Sprite2D" parent="Objects"]
+position = Vector2(132, 108)
+texture = ExtResource("lp_tex_warper_kristalzuil")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_kristalzuil"

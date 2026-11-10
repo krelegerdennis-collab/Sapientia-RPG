@@ -7,6 +7,7 @@ const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const W := 384
 const H := 216
 const PRIO := {"lantern": 9, "fire": 9, "window": 8, "window_in": 8, "candle": 7, "magic": 6,
+		"glow": 2,
 		"window_tile": 5, "screen": 5, "tile": 4, "magic_small": 3, "book": 3}
 const LIGHT_TEX_PATH := "res://assets/hd2d/fx_data/light_soft_128.png"
 var _light_tex: Texture2D
@@ -448,7 +449,12 @@ func _rebuild_point_lights(first: bool) -> void:
 	var view := _view_rect()
 	var pick: Array = []
 	for c: Dictionary in _cands:
-		var e := float(lights.get(c["kind"], 0.0))
+		var kind: String = str(c.get("kind", ""))
+		var rule: Dictionary = c.get("rule", {})
+		if kind == "glow" or bool(rule.get("glow_only", false)):
+			if float(lights.get("glow", 0.0)) <= 0.0:
+				continue
+		var e := float(lights.get(kind, 0.0))
 		if e <= 0.0 or not view.grow(48).has_point(c["pos"]):
 			continue
 		pick.append(c)

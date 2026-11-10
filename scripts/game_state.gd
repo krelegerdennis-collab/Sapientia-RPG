@@ -710,6 +710,7 @@ func _ready() -> void:
 			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
 			["--wm1budgettest", "res://scripts/tests/wm1_budget_tests.gd", "Wm1BudgetTest", "wm1budgettest"],
 			["--hd2dtest", "res://scripts/tests/hd2d_tests.gd", "Hd2dTest", "hd2dtest"],
+			["--lichtpropstest", "res://scripts/tests/lichtprops_tests.gd", "LichtpropsTest", "lichtpropstest"],
 			["--wm1storytexttest", "res://scripts/tests/wm1_storytext_tests.gd", "Wm1StorytextTest", "wm1storytexttest"],
 			["--wm1f3stabilitytest", "res://scripts/tests/wm1_f3_stability_tests.gd", "Wm1F3StabilityTest", "wm1f3stabilitytest"],
 			["--wm1baselinebenchtest", "res://scripts/tests/wm1_baseline_benchmark.gd", "Wm1BaselineBenchmark", "wm1baselinebenchtest"],
