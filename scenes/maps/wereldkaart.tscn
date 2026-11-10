@@ -1,5 +1,9 @@
-[gd_scene load_steps=10 format=4]
+[gd_scene load_steps=14 format=4]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/wk_kampvuur.png" id="lp_tex_wk_kampvuur"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/wk_baken.png" id="lp_tex_wk_baken"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/wk_kristal.png" id="lp_tex_wk_kristal"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_i0cqu"]
 [ext_resource type="TileSet" path="res://assets/tiles/wereld.tres" id="2_gwldh"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_yv00g"]
@@ -148,3 +152,24 @@ lines = Array[String]([])
 event = ""
 
 [node name="TouchControls" parent="." instance=ExtResource("6_vhjf7")]
+[node name="Lp_wk_kampvuur_252_488" type="Sprite2D" parent="Objects"]
+position = Vector2(252, 488)
+texture = ExtResource("lp_tex_wk_kampvuur")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "wk_kampvuur"
+[node name="Lp_wk_baken_326_470" type="Sprite2D" parent="Objects"]
+position = Vector2(326, 470)
+texture = ExtResource("lp_tex_wk_baken")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "wk_baken"
+[node name="Lp_wk_kristal_352_562" type="Sprite2D" parent="Objects"]
+position = Vector2(352, 562)
+texture = ExtResource("lp_tex_wk_kristal")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "wk_kristal"

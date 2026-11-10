@@ -1,5 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/archief_kandelaber.png" id="lp_tex_archief_kandelaber"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/archief_wandblaker.png" id="lp_tex_archief_wandblaker"]
 [ext_resource type="Script" path="res://scripts/dungeon/dungeon_room.gd" id="1_room"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/ui/touch_controls.tscn" id="3_touch"]
@@ -31,3 +34,31 @@ position = Vector2(152, 168)
 [node name="Exits" type="Node2D" parent="."]
 
 [node name="TouchControls" parent="." instance=ExtResource("3_touch")]
+[node name="Lp_archief_kandelaber_120_48" type="Sprite2D" parent="Objects"]
+position = Vector2(120, 48)
+texture = ExtResource("lp_tex_archief_kandelaber")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_kandelaber"
+[node name="Lp_archief_kandelaber_184_48" type="Sprite2D" parent="Objects"]
+position = Vector2(184, 48)
+texture = ExtResource("lp_tex_archief_kandelaber")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_kandelaber"
+[node name="Lp_archief_wandblaker_24_120" type="Sprite2D" parent="Objects"]
+position = Vector2(24, 120)
+texture = ExtResource("lp_tex_archief_wandblaker")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "archief_wandblaker"
+[node name="Lp_archief_wandblaker_296_120" type="Sprite2D" parent="Objects"]
+position = Vector2(296, 120)
+texture = ExtResource("lp_tex_archief_wandblaker")
+hframes = 4
+flip_h = true
+script = ExtResource("lp_script")
+prop_id = "archief_wandblaker"

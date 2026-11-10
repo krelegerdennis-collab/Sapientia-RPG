@@ -1,5 +1,8 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=10 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/warper_wandlamp_violet.png" id="lp_tex_warper_wandlamp_violet"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/warper_kristalzuil.png" id="lp_tex_warper_kristalzuil"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="1_map"]
 [ext_resource type="TileSet" path="res://world_warper/art/tiles.tres" id="2_tiles"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
@@ -51,3 +54,38 @@ lines = Array[String]([])
 event = ""
 
 [node name="TouchControls" parent="." instance=ExtResource("5_touch")]
+[node name="Lp_warper_wandlamp_violet_24_16" type="Sprite2D" parent="Objects"]
+position = Vector2(24, 16)
+texture = ExtResource("lp_tex_warper_wandlamp_violet")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_wandlamp_violet"
+[node name="Lp_warper_wandlamp_violet_168_16" type="Sprite2D" parent="Objects"]
+position = Vector2(168, 16)
+texture = ExtResource("lp_tex_warper_wandlamp_violet")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_wandlamp_violet"
+[node name="Lp_warper_kristalzuil_40_60" type="Sprite2D" parent="Objects"]
+position = Vector2(40, 60)
+texture = ExtResource("lp_tex_warper_kristalzuil")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_kristalzuil"
+[node name="Lp_warper_kristalzuil_40_124" type="Sprite2D" parent="Objects"]
+position = Vector2(40, 124)
+texture = ExtResource("lp_tex_warper_kristalzuil")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_kristalzuil"
+[node name="Lp_warper_kristalzuil_152_124" type="Sprite2D" parent="Objects"]
+position = Vector2(152, 124)
+texture = ExtResource("lp_tex_warper_kristalzuil")
+hframes = 1
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "warper_kristalzuil"

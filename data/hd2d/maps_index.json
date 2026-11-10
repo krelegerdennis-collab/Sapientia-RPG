@@ -11604,5 +11604,755 @@
   "emissive_sha256": "960dc7a0515b969c30ca7efa6744fb406a12a2afe52b905d3655614ad1a7d90e",
   "glow_file": "assets/hd2d/world_warper/art/warp_platform_roze_g.png",
   "glow_sha256": "f6ce5326d81bb707d9fa456def79d6bd318fb0868621e42c28f7edac73e70a35"
+ },
+ "assets/sprites/lichtprops/archief_kandelaber.png": {
+  "size": [
+   64,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 96,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_v1_gang",
+   "archief_v2_kastenzaal",
+   "archief_v2_trapzaal",
+   "archief_v3_gang",
+   "archief_v4_voorhal"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/archief_kandelaber.png",
+  "new_art": true,
+  "albedo_sha256": "732824a5d475cd94e6aee12daead56cdfb11b89236f8b523b0b640221e3dbd77",
+  "normal_file": "assets/hd2d/sprites/lichtprops/archief_kandelaber_n.png",
+  "normal_sha256": "e1897674a84885a3bd567a70a3ac6c14081c2d2b275ca9d66e504f9a6d0608ca",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/archief_kandelaber_e.png",
+  "emissive_sha256": "16eee0c1d50fc01571c22087b5e7fa6a976801fe12db6df93f3fbb2819d2091d",
+  "desc": "staande ijzeren kandelaber, 3 kaarsen, 16x32, 4f"
+ },
+ "assets/sprites/lichtprops/archief_wandblaker.png": {
+  "size": [
+   64,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 32,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_v2_trapzaal",
+   "archief_v3_gang"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/archief_wandblaker.png",
+  "new_art": true,
+  "albedo_sha256": "234e31829f40a198389e32761dfb2d49d06709d444ad908042de39f04fe8ec92",
+  "normal_file": "assets/hd2d/sprites/lichtprops/archief_wandblaker_n.png",
+  "normal_sha256": "ec7bdff9c0d264d1c8c1f1da749d83c37dfb480e1412c89ad20499428a8da616",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/archief_wandblaker_e.png",
+  "emissive_sha256": "a21acbe362ee4544b319cba93867ae3f9b76845c1c650f2b60c5091229858606",
+  "desc": "wandblaker voor zijmuur (links; flip_h voor rechts), 16x16, 4f"
+ },
+ "assets/sprites/lichtprops/archief_leeslamp.png": {
+  "size": [
+   64,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 60,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_v2_kastenzaal",
+   "archief_v2_leeszaal",
+   "archief_v4_voorhal"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/archief_leeslamp.png",
+  "new_art": true,
+  "albedo_sha256": "16e818cbf869d608e8826331bd990104da4677dd22436bc64849f2393930e141",
+  "normal_file": "assets/hd2d/sprites/lichtprops/archief_leeslamp_n.png",
+  "normal_sha256": "7e36459431514bd1ab46b20516ea60c479adaf3f1d55930fa1d341c0549b6947",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/archief_leeslamp_e.png",
+  "emissive_sha256": "44f28ef5d585f9da13a5f1202eddd58215f04f604b144c882569453876be1747",
+  "desc": "messing olielamp met glazen schoorsteen (op kastkap/lessenaar), 16x16, 4f"
+ },
+ "assets/sprites/lichtprops/kas_gloeipot.png": {
+  "size": [
+   16,
+   24
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   24
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 44,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_2_v1_plaat",
+   "archief_2_v2_gang",
+   "archief_2_v2_lotte",
+   "archief_2_v3_licht",
+   "archief_2_v3_wurger",
+   "archief_2_v4_hal",
+   "leven_ingang",
+   "leven_v2_leeszaal",
+   "leven_v3_combi"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/kas_gloeipot.png",
+  "new_art": true,
+  "albedo_sha256": "52f6969a4d4aadf27850db56a7d4bfc903a80f3529779232b50465d121688f82",
+  "normal_file": "assets/hd2d/sprites/lichtprops/kas_gloeipot_n.png",
+  "normal_sha256": "d7b7dc6ddb25e6692d5b9ee3608b3a90e5d61303da8d6fc7b15eae25d5fa539f",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/kas_gloeipot_e.png",
+  "emissive_sha256": "67aa8ab175ccfc8b27e8537f4a482aa7ce01b21ead906ee74d2ac1ada5d80296",
+  "desc": "hangende glazen pot met gloeimos aan de kasmuur, 16x24"
+ },
+ "assets/sprites/lichtprops/kas_gloeiplant.png": {
+  "size": [
+   16,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 30,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_2_v1_plaat",
+   "archief_2_v2_gang",
+   "archief_2_v2_lotte",
+   "archief_2_v3_licht",
+   "archief_2_v3_wurger",
+   "archief_2_v4_hal",
+   "leven_ingang",
+   "leven_v1_plaat",
+   "leven_v2_leeszaal",
+   "leven_v3_combi"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/kas_gloeiplant.png",
+  "new_art": true,
+  "albedo_sha256": "a2d5ba7bbd9dcb288199ee94d158cb42fffd558b4697e94a9a2e40e33d88c6ca",
+  "normal_file": "assets/hd2d/sprites/lichtprops/kas_gloeiplant_n.png",
+  "normal_sha256": "59259f25dfb01888ef0b4dbcce091b1d6fa5adf0659968929f93aef846f46f8a",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/kas_gloeiplant_e.png",
+  "emissive_sha256": "7ac4a0399744d43f1cccbb7c61a15d87588c69fb1e6a5d7e5c7348b108844ca1",
+  "desc": "gloeiplant in terracotta pot (3 lichtbessen), 16x32"
+ },
+ "assets/sprites/lichtprops/kas_gloeiknoppen.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 19,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_2_v1_plaat",
+   "archief_2_v2_gang",
+   "archief_2_v2_lotte",
+   "archief_2_v3_licht",
+   "archief_2_v3_wurger",
+   "archief_2_v4_hal",
+   "leven_v1_plaat",
+   "leven_v2_leeszaal",
+   "leven_v3_combi"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/kas_gloeiknoppen.png",
+  "new_art": true,
+  "albedo_sha256": "ee7099fcab1f5de77cd2cff16decc6e5bbfb045078068d40b6adfd4f306f715d",
+  "normal_file": "assets/hd2d/sprites/lichtprops/kas_gloeiknoppen_n.png",
+  "normal_sha256": "c8fdbd9a243342aad2bba98f9fd76101fc0da4fc11ed3f087cd329354dcd24aa",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/kas_gloeiknoppen_e.png",
+  "emissive_sha256": "ecd6dcc661229e95930078a478f72f7acf43805cd2668337ac1b5b0c9872b218",
+  "desc": "gloeiende knoppen uit de plantenbak/vloerrand, 16x16"
+ },
+ "assets/sprites/lichtprops/warper_wandlamp.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 30,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "kamer_echo_kamer",
+   "kamer_handelskamer",
+   "kamer_rustkamer",
+   "kamer_werkplaats",
+   "warper_warp_ring"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/warper_wandlamp.png",
+  "new_art": true,
+  "albedo_sha256": "43c7c5b74defeda1ba8578dfd390ebd87edeb1a4b0b51408ad19ba5181ced265",
+  "normal_file": "assets/hd2d/sprites/lichtprops/warper_wandlamp_n.png",
+  "normal_sha256": "3170a4d47ccae530de0dbf677829b76e5d8f9aef4ea5622343deb77c54c49444",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/warper_wandlamp_e.png",
+  "emissive_sha256": "df36999c02e6d087fe90d207cb958104695926c8467cdba77525db8fd255b720",
+  "desc": "neon-wandlamp (cyaan) voor de bovenmuur, 16x16"
+ },
+ "assets/sprites/lichtprops/warper_wandlamp_violet.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 30,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "kamer_beeldkamer",
+   "kamer_kern",
+   "kamer_trainingshal",
+   "warper_hanger_nis"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/warper_wandlamp_violet.png",
+  "new_art": true,
+  "albedo_sha256": "2493b18acb7ea85a69423c74ff0d038146e3837ec6d3163d1e0863837b9a7eae",
+  "normal_file": "assets/hd2d/sprites/lichtprops/warper_wandlamp_violet_n.png",
+  "normal_sha256": "38d2e6ee969194d95d219182b23264dd6101628d0fac90d0e618b86286d6ba9c",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/warper_wandlamp_violet_e.png",
+  "emissive_sha256": "9ba12641fd4745d9ea65771531236d539289801e9f76a7665847ef2c8a9ab528",
+  "desc": "neon-wandlamp (violet) voor de bovenmuur, 16x16"
+ },
+ "assets/sprites/lichtprops/warper_kristalzuil.png": {
+  "size": [
+   16,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 42,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "kamer_beeldkamer",
+   "kamer_echo_kamer",
+   "kamer_handelskamer",
+   "kamer_kern",
+   "kamer_rustkamer",
+   "kamer_trainingshal",
+   "kamer_werkplaats",
+   "warper_hanger_nis",
+   "warper_warp_ring"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/warper_kristalzuil.png",
+  "new_art": true,
+  "albedo_sha256": "2ef158b26591be6c763ffe7cc4cecb00186b74185b06c690a276eba67d298ce4",
+  "normal_file": "assets/hd2d/sprites/lichtprops/warper_kristalzuil_n.png",
+  "normal_sha256": "c9ae7a3bb45bb6e3f072c48a27819dfca5fbf62736c2ef18719c98b1b29ae295",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/warper_kristalzuil_e.png",
+  "emissive_sha256": "47689e1c003296a73ab2cc6125dbc8c0cade32faa329ddd48f3cefedb7eac20d",
+  "desc": "zwevend kristal op metalen zuil, 16x32"
+ },
+ "assets/sprites/lichtprops/woud_gloeizwammen.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 21,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "woud_beek",
+   "woud_pad"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/woud_gloeizwammen.png",
+  "new_art": true,
+  "albedo_sha256": "8ebca8f09bf30d428df6e6b5781614e22d503e72921c179f30b5afc7bcb3b031",
+  "normal_file": "assets/hd2d/sprites/lichtprops/woud_gloeizwammen_n.png",
+  "normal_sha256": "d62702e60db8e19a67eaf6c6aaec25b6cc65a3dd9f04b8e92ca5d94cf026916d",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/woud_gloeizwammen_e.png",
+  "emissive_sha256": "2ece7015c45cd8d27b660d583a1cd842fc2fcc320b3ddd11ac7ab8c36ddee4a9",
+  "desc": "cluster gloeizwammen (cyaan), 16x16"
+ },
+ "assets/sprites/lichtprops/woud_lantaarnpaal.png": {
+  "size": [
+   64,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 36,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "woud_beek",
+   "woud_pad"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/woud_lantaarnpaal.png",
+  "new_art": true,
+  "albedo_sha256": "8a054e86047401e10726d7492b1c2479db13d5b146842774255d0c0aa1bf73d0",
+  "normal_file": "assets/hd2d/sprites/lichtprops/woud_lantaarnpaal_n.png",
+  "normal_sha256": "054db8f80f6806da2c7e31ec1513582de300e37a41f5f1603a32266eea4ad2f7",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/woud_lantaarnpaal_e.png",
+  "emissive_sha256": "d70a0329507cabc5f52f4b1ca587486c0afdf78621f98c9baf6c6a6708402228",
+  "desc": "houten paal met hangende lantaarn, 16x32, 4f"
+ },
+ "assets/sprites/lichtprops/woud_waterlelie.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 16,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "woud_beek"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/woud_waterlelie.png",
+  "new_art": true,
+  "albedo_sha256": "5d71d3d257f6f3b5cf96fd0105cbaef5996ab1095e057f4253821865d9b0713b",
+  "normal_file": "assets/hd2d/sprites/lichtprops/woud_waterlelie_n.png",
+  "normal_sha256": "fd89dbfeea1bb9c8dee3fcffc1e6e52bb2ab64f2b1c4461a0b8e55e39836c703",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/woud_waterlelie_e.png",
+  "emissive_sha256": "c16df0e3acdf731a2dd98a1a69307714f8a4f659945ec464f39366256b578371",
+  "desc": "drijvende waterlelies met gloeiende bloem (op de beek), 16x16"
+ },
+ "assets/sprites/lichtprops/bouw_stormlamp.png": {
+  "size": [
+   64,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 64,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "berggrot_bouwplaats"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/bouw_stormlamp.png",
+  "new_art": true,
+  "albedo_sha256": "0c2384ab868c24f7f5a575167a61fa4a41438d5475c4ed480217771321edf596",
+  "normal_file": "assets/hd2d/sprites/lichtprops/bouw_stormlamp_n.png",
+  "normal_sha256": "2f7531b4d04dab872f2f719dc68b8e9a04557e8ba0b80110360f62c45c9d3cd1",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/bouw_stormlamp_e.png",
+  "emissive_sha256": "131d1b89fbb50cdb1d661f9fef4221a0774696bec18b50b7b076bdcea23547c8",
+  "desc": "rode stormlamp op bouwpaal met waarschuwingsbanden, 16x32, 4f"
+ },
+ "assets/sprites/lichtprops/bouw_vuurkorf.png": {
+  "size": [
+   64,
+   24
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   24
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 167,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "berggrot_bouwplaats"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/bouw_vuurkorf.png",
+  "new_art": true,
+  "albedo_sha256": "39378f3fd92bda8340b6f8c51e274608ed9efa8f05807483a8914b2197bbcb43",
+  "normal_file": "assets/hd2d/sprites/lichtprops/bouw_vuurkorf_n.png",
+  "normal_sha256": "6405e39118d0fefeebef177d36a5aba976566803d6a2358219ff9cc1fcf0ee59",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/bouw_vuurkorf_e.png",
+  "emissive_sha256": "77cb0b54eeaf6ca3f690c1c6977b7b453c7fdfe17551824af1da5794d19653ab",
+  "desc": "ijzeren vuurkorf op drie poten, 16x24, 4f"
+ },
+ "assets/sprites/lichtprops/binnen_wandlamp.png": {
+  "size": [
+   64,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 32,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "wilgendal_binnen"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/binnen_wandlamp.png",
+  "new_art": true,
+  "albedo_sha256": "18181523ad19cdb8e62323220df69449f7f0917ce27f6a83e39be85f616fa553",
+  "normal_file": "assets/hd2d/sprites/lichtprops/binnen_wandlamp_n.png",
+  "normal_sha256": "bedf7de2f253433afddb6dd8d2672f7de196adc489e33d929b3ac31403ef6973",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/binnen_wandlamp_e.png",
+  "emissive_sha256": "a21acbe362ee4544b319cba93867ae3f9b76845c1c650f2b60c5091229858606",
+  "desc": "messing wandblaker met reflector en kaars, 16x16, 4f"
+ },
+ "assets/sprites/lichtprops/binnen_kandelaar.png": {
+  "size": [
+   64,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 64,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "wilgendal_binnen"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/binnen_kandelaar.png",
+  "new_art": true,
+  "albedo_sha256": "81dca52168ce7b537509bab4b22df91b0edbc475c2cd36d54c8be8e21f09b78c",
+  "normal_file": "assets/hd2d/sprites/lichtprops/binnen_kandelaar_n.png",
+  "normal_sha256": "819775829db86f44eca88a434b53416ad70d1b4b9d1a75e8d84b12c53f85d821",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/binnen_kandelaar_e.png",
+  "emissive_sha256": "f407071df71d093e74ff9e751be71e3d65a720b664cd0170229b064cd9d5736d",
+  "desc": "messing blaker met 2 kaarsen (toonbank/tafel), 16x16, 4f"
+ },
+ "assets/sprites/lichtprops/wk_kampvuur.png": {
+  "size": [
+   64,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 81,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "wereldkaart"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/wk_kampvuur.png",
+  "new_art": true,
+  "albedo_sha256": "723f86785455c42d56414952988896bdcfd69e2e374d539d9352966d81a147c1",
+  "normal_file": "assets/hd2d/sprites/lichtprops/wk_kampvuur_n.png",
+  "normal_sha256": "0d1f85635963d6ed50b2d70b717f853e5f82eda6b094aac084c0c1fe0b21b00c",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/wk_kampvuur_e.png",
+  "emissive_sha256": "ac2c1caba19e04c560b448459ee7e7a17db4f24680526162a9b09dad5d9e7b56",
+  "desc": "kampvuur met stenenkring (wereldkaart), 16x16, 4f"
+ },
+ "assets/sprites/lichtprops/wk_baken.png": {
+  "size": [
+   64,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 73,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "wereldkaart"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/wk_baken.png",
+  "new_art": true,
+  "albedo_sha256": "b5315667ba2bd87a568afdf4ed90e64aba9643a34878a707c45dc58242265827",
+  "normal_file": "assets/hd2d/sprites/lichtprops/wk_baken_n.png",
+  "normal_sha256": "e7e136151bfac1bd1cfd88d2edfc31f754f352e43e39d336bf42c934064d35e9",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/wk_baken_e.png",
+  "emissive_sha256": "db7a666a9ca203e0492a4235c81f31ab6979186fbdc99d196e96e50adf558665",
+  "desc": "bakenvuur op stenen zuil (bij de ru\u00efne, wereldkaart), 16x16, 4f"
+ },
+ "assets/sprites/lichtprops/wk_kristal.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 21,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "wereldkaart"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/wk_kristal.png",
+  "new_art": true,
+  "albedo_sha256": "59628d1622bdcdb9c8750366d993012ca3472c6258966370588feef099ac120d",
+  "normal_file": "assets/hd2d/sprites/lichtprops/wk_kristal_n.png",
+  "normal_sha256": "22e730f683ec33388402cc695d2e41244884d70de3566e51b10c3e974bb75242",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/wk_kristal_e.png",
+  "emissive_sha256": "7f2c9d6ee04e3c2cbd407ad1dc0d5c39c095e2804d14d29515f581c8c217fe90",
+  "desc": "kristalader met glinstering (bij de grot, wereldkaart), 16x16"
+ },
+ "assets/sprites/lichtprops/archief_leeslamp_glow.png": {
+  "size": [
+   64,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 60,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_v1_gang",
+   "archief_v2_kastenzaal",
+   "archief_v2_leeszaal",
+   "archief_v3_gang",
+   "archief_v4_voorhal"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/archief_leeslamp_glow.png",
+  "new_art": true,
+  "albedo_sha256": "16e818cbf869d608e8826331bd990104da4677dd22436bc64849f2393930e141",
+  "normal_file": "assets/hd2d/sprites/lichtprops/archief_leeslamp_glow_n.png",
+  "normal_sha256": "7e36459431514bd1ab46b20516ea60c479adaf3f1d55930fa1d341c0549b6947",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/archief_leeslamp_glow_e.png",
+  "emissive_sha256": "44f28ef5d585f9da13a5f1202eddd58215f04f604b144c882569453876be1747",
+  "desc": "messing olielamp met glazen schoorsteen (op kastkap/lessenaar), 16x16, 4f | GLOW-variant: zelfde pixels, alleen emissive + halo, geen PointLight2D"
+ },
+ "assets/sprites/lichtprops/archief_wandblaker_glow.png": {
+  "size": [
+   64,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 32,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_v1_gang",
+   "archief_v2_leeszaal"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/archief_wandblaker_glow.png",
+  "new_art": true,
+  "albedo_sha256": "234e31829f40a198389e32761dfb2d49d06709d444ad908042de39f04fe8ec92",
+  "normal_file": "assets/hd2d/sprites/lichtprops/archief_wandblaker_glow_n.png",
+  "normal_sha256": "ec7bdff9c0d264d1c8c1f1da749d83c37dfb480e1412c89ad20499428a8da616",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/archief_wandblaker_glow_e.png",
+  "emissive_sha256": "a21acbe362ee4544b319cba93867ae3f9b76845c1c650f2b60c5091229858606",
+  "desc": "wandblaker voor zijmuur (links; flip_h voor rechts), 16x16, 4f | GLOW-variant: zelfde pixels, alleen emissive + halo, geen PointLight2D"
+ },
+ "assets/sprites/lichtprops/kas_gloeipot_glow.png": {
+  "size": [
+   16,
+   24
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   24
+  ],
+  "hframes": 1,
+  "normal": true,
+  "emissive_px": 44,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "archief_2_v1_plaat",
+   "archief_2_v2_gang",
+   "archief_2_v2_lotte",
+   "archief_2_v3_licht",
+   "archief_2_v3_wurger",
+   "archief_2_v4_hal",
+   "leven_ingang"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/kas_gloeipot_glow.png",
+  "new_art": true,
+  "albedo_sha256": "52f6969a4d4aadf27850db56a7d4bfc903a80f3529779232b50465d121688f82",
+  "normal_file": "assets/hd2d/sprites/lichtprops/kas_gloeipot_glow_n.png",
+  "normal_sha256": "d7b7dc6ddb25e6692d5b9ee3608b3a90e5d61303da8d6fc7b15eae25d5fa539f",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/kas_gloeipot_glow_e.png",
+  "emissive_sha256": "67aa8ab175ccfc8b27e8537f4a482aa7ce01b21ead906ee74d2ac1ada5d80296",
+  "desc": "hangende glazen pot met gloeimos aan de kasmuur, 16x24 | GLOW-variant: zelfde pixels, alleen emissive + halo, geen PointLight2D"
+ },
+ "assets/sprites/lichtprops/bouw_stormlamp_glow.png": {
+  "size": [
+   64,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 4,
+  "normal": true,
+  "emissive_px": 64,
+  "emissive_snapped_px": 0,
+  "glow": false,
+  "rooms": [
+   "berggrot_bouwplaats"
+  ],
+  "found_by": [
+   "lichtprops"
+  ],
+  "repo_albedo": "assets/sprites/lichtprops/bouw_stormlamp_glow.png",
+  "new_art": true,
+  "albedo_sha256": "0c2384ab868c24f7f5a575167a61fa4a41438d5475c4ed480217771321edf596",
+  "normal_file": "assets/hd2d/sprites/lichtprops/bouw_stormlamp_glow_n.png",
+  "normal_sha256": "2f7531b4d04dab872f2f719dc68b8e9a04557e8ba0b80110360f62c45c9d3cd1",
+  "emissive_file": "assets/hd2d/sprites/lichtprops/bouw_stormlamp_glow_e.png",
+  "emissive_sha256": "131d1b89fbb50cdb1d661f9fef4221a0774696bec18b50b7b076bdcea23547c8",
+  "desc": "rode stormlamp op bouwpaal met waarschuwingsbanden, 16x32, 4f | GLOW-variant: zelfde pixels, alleen emissive + halo, geen PointLight2D"
  }
 }

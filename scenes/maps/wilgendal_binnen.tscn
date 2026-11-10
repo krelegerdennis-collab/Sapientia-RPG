@@ -1,5 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/binnen_wandlamp.png" id="lp_tex_binnen_wandlamp"]
+[ext_resource type="Script" path="res://scripts/hd2d/lichtprop_decor.gd" id="lp_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/lichtprops/binnen_kandelaar.png" id="lp_tex_binnen_kandelaar"]
 [ext_resource type="Script" path="res://scripts/village/pand_binnen.gd" id="1_pand"]
 [ext_resource type="TileSet" path="res://assets/tiles/binnen.tres" id="2_tiles"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
@@ -34,3 +37,24 @@ position = Vector2(72, 104)
 [node name="Exits" type="Node2D" parent="."]
 
 [node name="TouchControls" parent="." instance=ExtResource("4_touch")]
+[node name="Lp_binnen_wandlamp_39_28" type="Sprite2D" parent="Objects"]
+position = Vector2(39, 28)
+texture = ExtResource("lp_tex_binnen_wandlamp")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "binnen_wandlamp"
+[node name="Lp_binnen_wandlamp_104_28" type="Sprite2D" parent="Objects"]
+position = Vector2(104, 28)
+texture = ExtResource("lp_tex_binnen_wandlamp")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "binnen_wandlamp"
+[node name="Lp_binnen_kandelaar_40_56" type="Sprite2D" parent="Objects"]
+position = Vector2(40, 56)
+texture = ExtResource("lp_tex_binnen_kandelaar")
+hframes = 4
+flip_h = false
+script = ExtResource("lp_script")
+prop_id = "binnen_kandelaar"
