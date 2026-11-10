@@ -101,7 +101,24 @@ static func chests(data: Dictionary) -> Array:
 	return out
 
 
-## De baas van een baasverdieping op boss_slot (2x2 tegels, past de Golem-sprite). Verdieping 100 niet.
+## Kaart-sprite voor een baasverdieping (bestandsnaam in assets/map_monsters/, zonder .png).
+## map_sprite in BOSSES wint; anders de basename van het gevechts-sprite; anders de vijand-id als die
+## kaartart heeft; anders golem (legacy placeholder).
+static func boss_map_sprite(floor_nr: int) -> String:
+	if not Scaling.BOSSES.has(floor_nr):
+		return "golem"
+	var bd: Dictionary = Scaling.BOSSES[floor_nr]
+	if bd.has("map_sprite"):
+		return str(bd["map_sprite"])
+	if bd.has("sprite"):
+		return str(bd["sprite"]).get_file().get_basename()
+	var enemy_id := str(bd.get("enemy", ""))
+	if enemy_id != "" and ResourceLoader.exists("res://assets/map_monsters/%s.png" % enemy_id):
+		return enemy_id
+	return "golem"
+
+
+## De baas van een baasverdieping op boss_slot (2x2 tegels, 64x32 kaart-sprite). Verdieping 100 niet.
 ## "guard": een verslagen baas blijft weg (vlag in de save, kamer-id bevat de run-seed).
 static func boss(data: Dictionary) -> Dictionary:
 	var f: int = data["floor"]
@@ -110,7 +127,7 @@ static func boss(data: Dictionary) -> Dictionary:
 		return {}
 	var b := Scaling.boss_entry(f, t)
 	b["guard"] = true
-	b["sprite"] = "golem"
+	b["sprite"] = boss_map_sprite(f)
 	b["size"] = [2, 2]
 	b["frame"] = [32, 32]
 	b["fps"] = 1.2

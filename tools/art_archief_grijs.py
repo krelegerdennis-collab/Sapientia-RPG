@@ -25,11 +25,13 @@ Werkwijze:
     bogen, ladder en pilaren blijven grijze steen (pilaren tussen de kasten).
   - Al het andere: omgekleurd naar het palet (vorm/pixels van RPG ART blijven gelijk, zodat
     alles naadloos past en botsing/indeling identiek blijven).
-Gebruik:  python3 tools/art_archief_grijs.py   (overschrijft alleen de bestanden hierboven)
+Gebruik:  python3 tools/art_archief_grijs.py [--force]
+Paden in tools/handwerk.txt worden standaard overgeslagen (handgemaakte art); --force om toch te schrijven.
 """
 import colorsys
 import os
 import random
+import sys
 
 from PIL import Image
 
@@ -209,7 +211,34 @@ def shelf_pair(lib_rec, top_n, bot_n, cobweb=False, seed=0):
     return top, bot
 
 
+def _handwerk_lijst() -> list:
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "handwerk.txt")
+    if not os.path.exists(path):
+        return []
+    out = []
+    for line in open(path, encoding="utf-8"):
+        line = line.strip()
+        if line and not line.startswith("#"):
+            out.append(line)
+    return out
+
+
+def _handwerk_skip(rel: str, handwerk: set, force: bool) -> bool:
+    if force or rel not in handwerk:
+        return False
+    print("overgeslagen (handwerk, zie tools/handwerk.txt):", rel)
+    return True
+
+
+def _save_guarded(img: Image.Image, rel: str, handwerk: set, force: bool) -> None:
+    if _handwerk_skip(rel, handwerk, force):
+        return
+    img.save(P(rel))
+
+
 def main():
+    force = "--force" in sys.argv
+    handwerk = set(_handwerk_lijst())
     src = Image.open(P("assets/tiles/dungeon/dungeon_tiles_v14.png")).convert("RGBA")
     lib = Image.open(P("assets/tiles/dungeon/bibliotheek_tiles.png")).convert("RGBA")
     out = recolor(src)
@@ -243,7 +272,7 @@ def main():
     # kapotte kast 40/41: omgekleurd, iets donkerder
     for n in (40, 41):
         put(out, n, shade(tile(out, n), lambda x, y: 0.9))
-    out.save(P("assets/tiles/dungeon/archief_grijs_tiles.png"))
+    _save_guarded(out, "assets/tiles/dungeon/archief_grijs_tiles.png", handwerk, force)
 
     # ---------------- bibliotheek-atlas: zelfde nummering, grijze steenvloer
     lo = lib_rec.copy()
@@ -262,7 +291,7 @@ def main():
     put(lo, 36, shade(FLOORS[2], lambda x, y: min(topl[y], leftl[x])))
     for n in [37, 38, 39, 40, 41, 42] + list(range(48, 58)):
         put(lo, n, overlay_decor(tile(lib, n), wood, FLOORS[n % 3]))
-    lo.save(P("assets/tiles/dungeon/archief_grijs_bibliotheek.png"))
+    _save_guarded(lo, "assets/tiles/dungeon/archief_grijs_bibliotheek.png", handwerk, force)
 
     # ---------------- losse sprites (zelfde maat/frames)
     sprites = {
@@ -283,6 +312,9 @@ def main():
         "herstelsteen": "assets/puzzle/herstelsteen.png",
     }
     for name, path in sprites.items():
+        rel = "assets/sprites/dungeon/grijs/%s.png" % name
+        if _handwerk_skip(rel, handwerk, force):
+            continue
         recolor(Image.open(P(path)), dim=0.95).save(P("assets/sprites/dungeon/grijs", name + ".png"))
     print("klaar:", len(sprites), "sprites + 2 atlassen")
 
