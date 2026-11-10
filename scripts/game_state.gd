@@ -739,6 +739,7 @@ func _ready() -> void:
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
+			["--onlineprofiletest", "res://scripts/tests/online_profile_tests.gd", "OnlineProfileTest", "onlineprofiletest"],
 			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
