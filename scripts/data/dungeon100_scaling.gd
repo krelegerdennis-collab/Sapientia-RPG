@@ -115,7 +115,8 @@ const BOOK_ID := "leeg_boek"
 const SPELL_CHANCE := 0.12
 const SPELL_SCROLLS := ["spreuk_vuur", "spreuk_bliksem", "spreuk_genees"]
 ## V3: extra rollen vanaf een buitniveau (vervanger Kernkracht).
-const SPELL_SCROLLS_FROM_TIER := {2: ["spreuk_vuurbal", "spreuk_grote_genezing"], 3: ["spreuk_zonnevlam"], 4: ["spreuk_g4_zonneslag"]}
+## V3-pool per buitniveau. Optie (a): één tier eerder dan de COMBAT-standaard (2/3/4 → 1/2/3).
+const SPELL_SCROLLS_FROM_TIER := {1: ["spreuk_vuurbal", "spreuk_grote_genezing"], 2: ["spreuk_zonnevlam"], 3: ["spreuk_g4_zonneslag"]}
 
 
 static func spell_scrolls_for_tier(tier: int) -> Array:
@@ -398,11 +399,6 @@ static func boss_loot(floor_nr: int, rng) -> Dictionary:
 		gold_mult_boss *= 5.0
 	else:
 		items.append({"item": gear_id(GEAR_KINDS[rng.randi_range(0, GEAR_KINDS.size() - 1)], gear_tier), "n": 1})
-	# V3: na een baas een gegarandeerde rol van het volgende buitniveau (hulp vóór de volgende diepte).
-	var scroll_tier := tier + 1
-	if not is_final_floor(f) and SPELL_SCROLLS_FROM_TIER.has(scroll_tier):
-		var scroll_pool: Array = SPELL_SCROLLS_FROM_TIER[scroll_tier]
-		items.append({"item": str(scroll_pool[rng.randi_range(0, scroll_pool.size() - 1)]), "n": 1})
 	var gold := GameData.round_half_even(chest_gold_base(f) * rng.randf_range(0.9, 1.1) * gold_mult_boss)
 	return {"tier": gear_tier, "items": items, "gold": gold, "boss": true}
 

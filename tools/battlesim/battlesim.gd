@@ -227,13 +227,13 @@ func _d100_scenario(f: int, boss: bool) -> Dictionary:
 		spells["lotte"] = ["genees"]
 	if f >= 30:
 		spells["noor"] = ["vuur", "bliksem"]
-	# V3-rollenladder (zelfde aannames als RPG COMBAT-meetopzet).
-	if f >= 20:
+	# V3-rollenladder optie (a): één tier eerder (vuurbal@10, zonnevlam@21, zonneslag@41).
+	if f >= 10:
 		spells["noor"].append("vuurbal")
 		spells["lotte"].append("grote_genezing")
-	if f >= 40:
+	if f >= 21:
 		spells["noor"].append("zonnevlam")
-	if f >= 80:
+	if f >= 41:
 		spells["noor"].append("zonneslag")
 	return {"id": ("d100_boss_%d" if boss else "d100_v%d") % f,
 		"name": ("BOSS Deep Cave floor %d (%s)" % [f, Dungeon100Scaling.boss_for_floor(f).get("name", "?")]) if boss \
