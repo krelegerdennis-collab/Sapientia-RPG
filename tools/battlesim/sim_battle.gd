@@ -252,7 +252,8 @@ func _ai_action(h: Dictionary, planned_heal: Dictionary) -> Dictionary:
 		if sim_ban_elements.has(str(sp.get("element", ""))):
 			continue
 		var tgt: Dictionary = strongest if sp["target"] == "enemy" else weakest
-		var one := SpellRules.power_at(sp, int(s.get("level", 1))) * SpellRules.factor(sp, str(s.get("id", "")), tgt)
+		var caster := {"s": s, "is_hero": true, "defending": false, "buffs": h.get("buffs", [])}
+		var one := spell_base(caster, sp, tgt)
 		var fx := SpellRules.on_hit(sp)
 		var hit_list: Array = foes if sp["target"] == "all_enemies" else [tgt]
 		var val := 0.0

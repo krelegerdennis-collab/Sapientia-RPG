@@ -16,6 +16,7 @@ const SomArena := preload("res://scripts/som/som_arena.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const DamageCalc := preload("res://scripts/battle/damage_calc.gd")
 const BATTLESIM_PATH := "res://tools/battlesim/battlesim.gd"
 
 const DT := 1.0 / 30.0
@@ -363,14 +364,16 @@ func _ally_spell(hr: Dictionary, heroes: Array, active: Array, p: Dictionary) ->
 			if low.is_empty():
 				continue
 			h["mp"] = int(h["mp"]) - int(sp["mp"])
-			var amt := roundi(SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, str(h["id"]), {}))
+			var caster := {"s": h, "is_hero": true, "buffs": []}
+			var amt := roundi(DamageCalc.spell_base(caster, sp, {}))
 			low["hp"] = mini(int(low["max_hp"]), int(low["hp"]) + amt)
 			return
 		if str(sp.get("type", "")) == "damage" and randf() < float(p["ally_dmg_chance"]) and not active.is_empty():
 			h["mp"] = int(h["mp"]) - int(sp["mp"])
+			var caster_d := {"s": h, "is_hero": true, "buffs": []}
 			var targets: Array = active if str(sp.get("target", "")) == "all_enemies" else [active[0]]
 			for e in targets:
-				var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, str(h["id"]), {"s": e["d"]})
+				var amt := DamageCalc.spell_base(caster_d, sp, {"s": e["d"]})
 				e["hp"] = int(e["hp"]) - maxi(1, roundi(amt * randf_range(0.9, 1.1)))
 			return
 

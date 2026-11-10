@@ -17,6 +17,7 @@ const SomData := preload("res://scripts/data/som_data.gd")
 const SomArena := preload("res://scripts/som/som_arena.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
+const DamageCalc := preload("res://scripts/battle/damage_calc.gd")
 const BossCore := preload("res://scripts/battle/boss_core.gd")
 const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 const GolemFight := preload("res://scripts/som/golem_fight.gd")
@@ -234,11 +235,13 @@ func _ally_spell(gf, hr: Dictionary, heroes: Array, adds: Array, rng: RandomNumb
 			if low.is_empty():
 				continue
 			h["mp"] = int(h["mp"]) - int(sp["mp"])
-			low["hp"] = mini(int(low["max_hp"]), int(low["hp"]) + roundi(SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, str(h["id"]), {})))
+			var caster := {"s": h, "is_hero": true, "buffs": []}
+			low["hp"] = mini(int(low["max_hp"]), int(low["hp"]) + roundi(DamageCalc.spell_base(caster, sp, {})))
 			return true
 		if str(sp.get("type", "")) == "damage" and rng.randf() < float(params["ally_dmg_chance"]):
 			h["mp"] = int(h["mp"]) - int(sp["mp"])
-			var amt := SpellRules.power_at(sp, lvl) * SpellRules.factor(sp, str(h["id"]), {"s": boss_data})
+			var caster_b := {"s": h, "is_hero": true, "buffs": []}
+			var amt := DamageCalc.spell_base(caster_b, sp, {"s": boss_data})
 			gf.damage(maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))))
 			return true
 	return false

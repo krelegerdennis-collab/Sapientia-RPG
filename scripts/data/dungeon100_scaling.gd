@@ -114,6 +114,16 @@ const BOOK_ID := "leeg_boek"
 ## Een spreukrol (Vuur, Bliksem of Genees) ligt soms in een gewone kist. De party gaat de grot in zonder magie.
 const SPELL_CHANCE := 0.12
 const SPELL_SCROLLS := ["spreuk_vuur", "spreuk_bliksem", "spreuk_genees"]
+## V3: extra rollen vanaf een buitniveau (vervanger Kernkracht).
+const SPELL_SCROLLS_FROM_TIER := {2: ["spreuk_vuurbal", "spreuk_grote_genezing"], 3: ["spreuk_zonnevlam"], 4: ["spreuk_g4_zonneslag"]}
+
+
+static func spell_scrolls_for_tier(tier: int) -> Array:
+	var out: Array = SPELL_SCROLLS.duplicate()
+	for t in SPELL_SCROLLS_FROM_TIER:
+		if tier >= int(t):
+			out.append_array(SPELL_SCROLLS_FROM_TIER[t])
+	return out
 
 
 # ---------------------------------------------------------------- verdiepingen
@@ -349,7 +359,8 @@ static func chest_loot(floor_nr: int, rng, boss := false) -> Dictionary:
 		if tier >= 2 and rng.randf() < BOOK_CHANCE:
 			items.append({"item": BOOK_ID, "n": 1})
 		if rng.randf() < SPELL_CHANCE:
-			items.append({"item": str(SPELL_SCROLLS[rng.randi_range(0, SPELL_SCROLLS.size() - 1)]), "n": 1})
+			var pool := spell_scrolls_for_tier(tier)
+			items.append({"item": str(pool[rng.randi_range(0, pool.size() - 1)]), "n": 1})
 	return {"tier": tier, "items": items, "gold": gold, "boss": false, "kind": kind}
 
 
@@ -387,6 +398,11 @@ static func boss_loot(floor_nr: int, rng) -> Dictionary:
 		gold_mult_boss *= 5.0
 	else:
 		items.append({"item": gear_id(GEAR_KINDS[rng.randi_range(0, GEAR_KINDS.size() - 1)], gear_tier), "n": 1})
+	# V3: na een baas een gegarandeerde rol van het volgende buitniveau (hulp vóór de volgende diepte).
+	var scroll_tier := tier + 1
+	if not is_final_floor(f) and SPELL_SCROLLS_FROM_TIER.has(scroll_tier):
+		var scroll_pool: Array = SPELL_SCROLLS_FROM_TIER[scroll_tier]
+		items.append({"item": str(scroll_pool[rng.randi_range(0, scroll_pool.size() - 1)]), "n": 1})
 	var gold := GameData.round_half_even(chest_gold_base(f) * rng.randf_range(0.9, 1.1) * gold_mult_boss)
 	return {"tier": gear_tier, "items": items, "gold": gold, "boss": true}
 

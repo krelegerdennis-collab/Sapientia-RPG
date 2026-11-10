@@ -6,6 +6,12 @@ extends RefCounted
 const GameData := preload("res://scripts/data/game_data.gd")
 const CodexData := preload("res://scripts/data/codex_data.gd")
 
+## C-12: mag/mdef in spreukschade; heals gebruiken alleen mag (geen mdef van het doel).
+const SPELL_MAG_DIV := 50.0
+const SPELL_MDEF_DIV := 2.0
+const SPELL_WEAK_MULT := 1.5
+const SPELL_RESIST_MULT := 0.5
+
 ## Hoogste grade per element. Ontbreekt het element, dan is de spreuk verboden.
 const CAP := {
 	"dennis": {},
@@ -53,6 +59,31 @@ static func power_at(spell: Dictionary, level: int) -> float:
 	if not spell.has("power_per_level"):
 		return power + 2.0 * float(level)
 	return power + float(spell["power_per_level"]) * float(maxi(0, level - 1))
+
+
+static func spell_mag_scale(mag: float) -> float:
+	return 1.0 + mag / SPELL_MAG_DIV
+
+
+static func spell_is_heal_kind(spell: Dictionary) -> bool:
+	return str(spell.get("type", "")) in ["heal", "hot", "revive"]
+
+
+## Zwak/resist op basis van het element van de spreuk en de weak/resist-lijst van het doel.
+static func element_affinity_mult(spell: Dictionary, target: Dictionary) -> float:
+	if target.is_empty():
+		return 1.0
+	var el := str(spell.get("element", ""))
+	if el == "":
+		return 1.0
+	var stats: Dictionary = target.get("s", {}) if target.get("s") is Dictionary else target
+	var weak: Array = stats.get("weak", [])
+	var resist: Array = stats.get("resist", [])
+	if el in weak:
+		return SPELL_WEAK_MULT
+	if el in resist:
+		return SPELL_RESIST_MULT
+	return 1.0
 
 
 ## Schade- of heal-factor van het element. Zonder doel telt bliksem-tegen-metaal niet mee.
