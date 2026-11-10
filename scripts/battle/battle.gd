@@ -300,6 +300,9 @@ func _make_boss_bar() -> void:
 
 func _place_boss_bar(w: float) -> void:
 	if boss_bar:
+		var max_w := w - 8.0 - 6.0 - _safe().z
+		if boss_bar.has_method("relayout"):
+			boss_bar.relayout(max_w)
 		boss_bar.position = Vector2(roundf(w - boss_bar.size.x - 6.0 - _safe().z), 18.0 + _safe().y)
 
 

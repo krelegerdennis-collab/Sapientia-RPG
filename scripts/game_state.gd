@@ -338,6 +338,8 @@ var codex_next_id := 1
 var unique_done := {}
 ## Uniek monster net voor het eerst weg (verslagen of gevangen). Story luistert (StoryData.AFTER_UNIQUE).
 signal unique_marked(id: String, how: String)
+## HD-2D: dag/nacht (alleen "day" / "night"; wanneer het wisselt is nog designwerk).
+signal time_of_day_changed(phase: String)
 
 ## 100-verdiepingen-kerker (de Diepe Grot): alles gaat mee in de save, blok "dungeon100"
 ## (Dungeon100Rules.save_data/load_data). Zie HANDOFF_DUNGEON100*.md.
@@ -369,6 +371,8 @@ var koopman_gekocht: Array = []
 ## v0.11 verhaal: stap (zie scripts/data/story_data.gd) en flags (naam -> true)
 var story_step := 0
 var story_flags := {}
+## HD-2D mapverlichting: opgeslagen in de save; oude saves zonder veld = dag.
+var time_of_day := "day"
 ## v0.22 Veldmenu > Scenes: ids van bekeken cutscenes (scripts/data/scenes_data.gd). Gaat mee in de save
 ## als "scenes_seen"; oude saves worden gemigreerd via de vlaggen die de cutscenes zelf zetten.
 var scenes_seen: Array = []
@@ -615,6 +619,7 @@ func _ready() -> void:
 			["--dungeontest", "res://scripts/tests/dungeon_tests.gd", "DungeonTest", "dungeontest"],
 			["--golemtest", "res://scripts/tests/golem_tests.gd", "GolemTest", "golemtest"],
 			["--demofixtest", "res://scripts/tests/demofix_tests.gd", "DemoFixTest", "demofixtest"],
+			["--bossnametest", "res://scripts/tests/bossname_tests.gd", "BossNameTest", "bossnametest"],
 			["--archieftest", "res://scripts/tests/archief_tests.gd", "GeheimTest", "archieftest"],
 			["--kerntest", "res://scripts/tests/kern_tests.gd", "KernTest", "kerntest"],
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
@@ -704,6 +709,7 @@ func _ready() -> void:
 			["--combatbugstest", "res://scripts/tests/combat_bugs_tests.gd", "CombatBugsTest", "combatbugstest"],
 			["--wm1frametest", "res://scripts/tests/wm1_frametime_tests.gd", "Wm1FrametimeTest", "wm1frametest"],
 			["--wm1budgettest", "res://scripts/tests/wm1_budget_tests.gd", "Wm1BudgetTest", "wm1budgettest"],
+			["--hd2dtest", "res://scripts/tests/hd2d_tests.gd", "Hd2dTest", "hd2dtest"],
 			["--wm1storytexttest", "res://scripts/tests/wm1_storytext_tests.gd", "Wm1StorytextTest", "wm1storytexttest"],
 			["--wm1f3stabilitytest", "res://scripts/tests/wm1_f3_stability_tests.gd", "Wm1F3StabilityTest", "wm1f3stabilitytest"],
 			["--wm1baselinebenchtest", "res://scripts/tests/wm1_baseline_benchmark.gd", "Wm1BaselineBenchmark", "wm1baselinebenchtest"],
@@ -1046,6 +1052,7 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	last_respawn = {}
 	story_step = StoryData.START
 	story_flags = {}
+	time_of_day = "day"
 	scenes_seen = []
 	heard_music = []
 	quest_progress = {}
@@ -2030,6 +2037,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"quests": _quests_save(),
 		"archief2": archief2.duplicate(true),
 		"koopman": koopman_save_data(),
+		"time_of_day": time_of_day if time_of_day in ["day", "night"] else "day",
 	}
 	data["party"] = _party_save()
 	data["party_bank"] = _party_save_from(party_bench)
@@ -2193,6 +2201,8 @@ func apply_state(d: Dictionary) -> bool:
 	if flags is Array:
 		for f in flags:
 			story_flags[str(f)] = true
+	var tod := str(d.get("time_of_day", "day"))
+	time_of_day = "night" if tod == "night" else "day"
 	_call_opening_flow("migrate", story_flags, story_step)
 	# v0.22 bekeken cutscenes (oude saves: geen veld -> afgeleid van de vlaggen)
 	scenes_seen = []
@@ -3587,6 +3597,19 @@ func _codex_inktwurm_sync(oude_save := true) -> void:
 		codex_add("inktwurm", CodexData.capture_level(0, "inktwurm"), {"play_time": int(play_time())})
 		mark_seen("inktwurm")
 	_codex_sync_marked = true
+
+
+# ---------------------------------------------------------------- HD-2D: tijd van de dag
+## API voor gameplay/story: wissel dag/nacht (geen automatische cyclus in deze levering).
+## Hook: roep aan vanuit rust, verhaalvlaggen, of later een echte klok.
+func set_time_of_day(phase: String, tween_sec := 1.5) -> void:
+	var p := "night" if phase == "night" else "day"
+	if time_of_day == p:
+		return
+	time_of_day = p
+	time_of_day_changed.emit(p)
+	const MapLightingC := preload("res://scripts/map_lighting.gd")
+	MapLightingC.set_time(p, tween_sec)
 
 
 # ---------------------------------------------------------------- world warper

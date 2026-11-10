@@ -120,7 +120,7 @@ func _run() -> void:
 	o.name = "Options"
 	get_tree().root.add_child(o)
 	await _frames(4)
-	check("opties opent op General-tab", o.tab == "general" and o.keys.size() == 13)
+	check("opties opent op General-tab", o.tab == "general" and o.keys.size() == 14)
 	o.kies_tab("music")
 	await _frames(4)
 	check("Music-tab zichtbaar", o.tab == "music" and o.music_root.visible)

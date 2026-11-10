@@ -8,6 +8,7 @@ extends RefCounted
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const THEME := preload("res://assets/theme.tres")
+const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const PLACEHOLDER_COLOR := Color("ff1ee6")
 const DIR_INDEX := {Vector2i.DOWN: 0, Vector2i.LEFT: 1, Vector2i.RIGHT: 2, Vector2i.UP: 3}
 
@@ -348,6 +349,7 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 	n.name = "SomNumber"
 	n.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	n.z_index = 30
+	Hd2dUnmodulated.mark(n)
 	n.position = at.round()
 	if scale != 1.0:
 		n.scale = Vector2(scale, scale)

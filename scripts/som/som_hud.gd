@@ -6,6 +6,7 @@ const SomData := preload("res://scripts/data/som_data.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const THEME := preload("res://assets/theme.tres")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 
 var arena: Node
 var root: Control
@@ -67,6 +68,7 @@ func _ready() -> void:
 	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(toast_label)
 	_place()
+	Hd2dUnmodulated.mark_descendants(root)
 
 
 ## Knop-art (38x14, normaal/ingedrukt) van RPG ART; de tekst zit in de art. Zonder art: tekstknop.
