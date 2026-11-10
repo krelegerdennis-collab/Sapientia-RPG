@@ -32,6 +32,7 @@ signal action_resolved(text: String)
 signal sim_ticked(tick: int)
 
 const SomData := preload("res://scripts/data/som_data.gd")
+const OnlineDlsFloor := preload("res://scripts/online/online_dls_floor.gd")
 const BossScript := preload("res://scripts/som/boss_script.gd")
 const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 const GolemFight := preload("res://scripts/som/golem_fight.gd")
@@ -395,6 +396,10 @@ func _apply_player_sheet() -> void:
 
 ## Bestaande vijand-data (game_data.gd / berggrot_data.gd) met hetzelfde kamerniveau als het gevecht.
 func enemy_stats(m: Node) -> Dictionary:
+	# Online DLS: schaal op het "floor"-veld (eff). Solo en de WM1-sandbox gaan hier niet langs.
+	# room is een Node: Object.get heeft één argument. null == true is false, zonder bool(null).
+	if coop_mode and room != null and room.get("online_dls") == true:
+		return OnlineDlsFloor.action_stats(m, self)
 	var id: String = m.enemy_id
 	var base: Dictionary = GameData.ENEMIES.get(id, {})
 	if base.is_empty():
