@@ -3020,6 +3020,8 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 		_page_adopt_bosses()
 	_ensure_coop_ring()
 	_coop_sync_down_rows()
+	if coop_sim_host:
+		CoopRevive.begin_run(coop_down_rows())
 	if not coop_sim_host:
 		player.set_analog(func() -> Vector2: return Vector2.ZERO, SomData.MOVE_SPEED)
 

@@ -38,6 +38,7 @@ static func make(slot: int, hero_id: String, controller: String = CONTROLLER_HUM
 		"channel_seen": 0,
 		"hit_seq": 0,
 		"iframes": 0,
+		"revives": 0,
 		"flags": 0,
 		"hp_ready": false,
 	}

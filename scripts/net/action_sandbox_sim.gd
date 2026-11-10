@@ -47,6 +47,7 @@ func reset(seats: Array, seed: int = 0) -> void:
 				row["y"] = 96
 				break
 		players.append(row)
+	Revive.begin_run(players)
 	# Eén oefen-vijand voor sync-tests.
 	enemies.append({
 		"idx": 0,
@@ -86,6 +87,7 @@ func _empty_player(slot: int) -> Dictionary:
 		"channel_seen": 0,
 		"hit_seq": 0,
 		"iframes": 0,
+		"revives": 0,
 		"hp_ready": true,
 	}
 

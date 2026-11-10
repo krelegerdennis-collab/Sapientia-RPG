@@ -17,6 +17,12 @@ extends RefCounted
 ## niet verplicht: binnen 1 tegel blijven telt, ook als de stick nog beweegt.
 ## De Feniksveer gaat via phoenix() meteen, met de bestaande item-fractie.
 ##
+## Eén revive per stoel per run (besluit Dennis). Het getal `revives` staat
+## alleen op het stoel-record dat de host tikt. Geen tweede lijst, niet in de
+## snapshot. begin_run() zet het terug op 0. Een stoel die al een keer is
+## opgestaan en weer valt, blijft liggen: query_revive wijst haar niet aan,
+## dus het kanaal en de ring starten niet. AI gebruikt dezelfde query.
+##
 ## Haak voor M6 (seat_controller.gd). Die file bouwt deze klasse niet.
 ## De controller vraagt query_revive (welke down-stoel ligt binnen bereik en
 ## mag ik die reviven) en roept daarna begin_channel of end_channel.
@@ -45,6 +51,8 @@ const BLEED_SEC := 15.0
 const BLEED_TICKS := 900
 ## D6: 1 s i-frames na een kanaal-revive. Niet de solo PLAYER_IFRAMES.
 const IFRAME_TICKS := 60
+## Eén geslaagde revive (kanaal of Feniksveer) per stoel per run.
+const REVIVES_PER_RUN := 1
 
 ## VOORSTEL: bleed afgelopen -> blijven liggen.
 const BLEED_END_STAY_DOWN := true
@@ -63,6 +71,29 @@ static func channel_ticks_for(hero_id: String) -> int:
 
 static func revive_hp(max_hp: int) -> int:
 	return maxi(1, roundi(float(maxi(1, max_hp)) * (float(HP_PERCENT) / 100.0)))
+
+
+static func revives_used(row: Dictionary) -> int:
+	return int(row.get("revives", 0))
+
+
+static func can_be_revived(row: Dictionary) -> bool:
+	return revives_used(row) < REVIVES_PER_RUN
+
+
+## Nieuwe run: de enige plek die de teller wist. De host roept dit aan bij reset.
+static func begin_run(rows: Array) -> void:
+	for row in rows:
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		row["revives"] = 0
+
+
+static func _spend_revive(row: Dictionary) -> bool:
+	if not can_be_revived(row):
+		return false
+	row["revives"] = revives_used(row) + 1
+	return true
 
 
 static func hero_of(row: Dictionary) -> String:
@@ -177,7 +208,7 @@ static func nearest_down_row(rows: Array, from: Vector2) -> Dictionary:
 	var fx := int(round(from.x))
 	var fy := int(round(from.y))
 	for row in rows:
-		if not row_active(row) or not row_down(row):
+		if not row_active(row) or not row_down(row) or not can_be_revived(row):
 			continue
 		var dx := fx - int(row.get("x", 0))
 		var dy := fy - int(row.get("y", 0))
@@ -298,6 +329,8 @@ static func _nearest_in_range(rows: Array, helper_slot: int, hx: int, hy: int) -
 	for row in rows:
 		if int(row.get("slot", -2)) == helper_slot or not row_active(row) or not row_down(row):
 			continue
+		if not can_be_revived(row):
+			continue
 		var dx := hx - int(row.get("x", 0))
 		var dy := hy - int(row.get("y", 0))
 		var d := dx * dx + dy * dy
@@ -312,11 +345,13 @@ static func _nearest_in_range(rows: Array, helper_slot: int, hx: int, hy: int) -
 
 
 static func _finish_channel(helper: Dictionary, target: Dictionary) -> void:
+	helper["channel_ticks"] = 0
+	helper["channel_target"] = -1
+	if not row_down(target) or not _spend_revive(target):
+		return
 	target["hp"] = revive_hp(int(target.get("max_hp", 1)))
 	target["iframes"] = IFRAME_TICKS
 	clear_down(target)
-	helper["channel_ticks"] = 0
-	helper["channel_target"] = -1
 
 
 ## Feniksveer: meteen, fractie uit game_data (nu 0.5). Geen kanaal.
@@ -325,12 +360,14 @@ static func phoenix(rows: Array, helper_slot: int, target_slot: int) -> bool:
 	var target := _by_slot(rows, target_slot)
 	if helper.is_empty() or target.is_empty():
 		return false
-	if not row_alive(helper) or not row_down(target):
+	if not row_alive(helper) or not row_down(target) or not can_be_revived(target):
 		return false
 	var frac := float(GameData.ITEMS.get("feniksveer", {}).get("revive", 0.0))
 	if frac <= 0.0:
 		return false
 	var hero := {"max_hp": int(target.get("max_hp", 1)), "hp": 0, "name": "Ally"}
+	if not _spend_revive(target):
+		return false
 	var hp := PartyActions.revive(hero, frac)
 	target["hp"] = hp
 	target["iframes"] = IFRAME_TICKS

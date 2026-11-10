@@ -49,6 +49,7 @@ func _run() -> void:
 	_snapshot_tests()
 	_input_tests()
 	_ai_priority_tests()
+	_revive_limit_tests()
 	_solo_ko_tests()
 	await _som_ally_tests()
 	await _ring_tests()
@@ -276,6 +277,74 @@ func _ai_priority_tests() -> void:
 	check("niet-Heal-AI staat op 119 na de herstart", int(sim.players[0]["channel_ticks"]) == Revive.CHANNEL_TICKS - 1)
 	sim.host_tick([])
 	check("niet-Heal-AI op tick 120: 30% HP", not bool(sim.players[2]["down"]) and int(sim.players[2]["hp"]) == 30)
+
+
+func _revive_limit_tests() -> void:
+	var sim := _sim()
+	sim.enemies.clear()
+	sim.players[0]["hp"] = 0
+	_stand_together(sim, 1, 0)
+	for _i in Revive.CHANNEL_HEAL_TICKS:
+		sim.host_tick([])
+	check("eerste revive van de stoel lukt",
+			not bool(sim.players[0]["down"]) and int(sim.players[0]["hp"]) == 30 and int(sim.players[0]["revives"]) == 1)
+	sim.players[0]["hp"] = 0
+	sim.players[0]["iframes"] = 0
+	_stand_together(sim, 1, 0)
+	for _i in 40:
+		sim.host_tick([])
+	check("tweede revive van dezelfde speler wordt geweigerd",
+			bool(sim.players[0]["down"]) and int(sim.players[0]["hp"]) == 0 and int(sim.players[1]["channel_ticks"]) == 0)
+	check("ring start niet voor een geweigerde stoel",
+			Revive.flag_progress(int(sim.players[0]["flags"])) == 0
+			and (int(sim.players[1]["flags"]) & Protocol.FLAG_CHANNEL) == 0)
+	sim.players[2]["hp"] = 0
+	sim.players[2]["iframes"] = 0
+	sim.players[2]["x"] = int(sim.players[1]["x"])
+	sim.players[2]["y"] = int(sim.players[1]["y"])
+	for _i in Revive.CHANNEL_HEAL_TICKS:
+		sim.host_tick([])
+	check("een andere speler kan nog gerevived worden",
+			not bool(sim.players[2]["down"]) and int(sim.players[2]["hp"]) == 30
+			and int(sim.players[2]["revives"]) == 1 and bool(sim.players[0]["down"]))
+	sim.reset(_roster(), 7)
+	sim.enemies.clear()
+	check("teller staat op 0 na een nieuwe run",
+			int(sim.players[0]["revives"]) == 0 and int(sim.players[1]["revives"]) == 0 and int(sim.players[2]["revives"]) == 0)
+	sim.players[0]["hp"] = 0
+	_stand_together(sim, 1, 0)
+	for _i in Revive.CHANNEL_HEAL_TICKS:
+		sim.host_tick([])
+	check("na een nieuwe run mag dezelfde stoel weer",
+			not bool(sim.players[0]["down"]) and int(sim.players[0]["hp"]) == 30 and int(sim.players[0]["revives"]) == 1)
+	var ai := _sim()
+	ai.enemies.clear()
+	ai.players[1]["controller"] = Seat.CONTROLLER_AI
+	ai.players[0]["x"] = 0
+	ai.players[0]["y"] = 0
+	ai.players[2]["hp"] = 0
+	ai.players[2]["x"] = 200
+	ai.players[2]["y"] = 96
+	ai.players[1]["x"] = 200
+	ai.players[1]["y"] = 96
+	ai.host_tick([])
+	check("AI begin_channel start de eerste revive", Revive.begin_channel(ai.players, ai.players[1], 2))
+	for _i in Revive.CHANNEL_HEAL_TICKS - 1:
+		ai.host_tick([])
+	ai.host_tick([])
+	check("AI-revive telt mee voor de limiet",
+			not bool(ai.players[2]["down"]) and int(ai.players[2]["revives"]) == 1)
+	ai.players[2]["hp"] = 0
+	ai.players[2]["iframes"] = 0
+	_stand_together(ai, 1, 2)
+	ai.host_tick([])
+	check("AI weigert de tweede revive van dezelfde stoel", not Revive.begin_channel(ai.players, ai.players[1], 2))
+	for _i in 20:
+		ai.host_tick([])
+	check("AI-kanaal vult de ring niet na de limiet",
+			bool(ai.players[2]["down"]) and int(ai.players[2]["hp"]) == 0
+			and int(ai.players[1]["channel_ticks"]) == 0
+			and Revive.flag_progress(int(ai.players[2]["flags"])) == 0)
 
 
 func _solo_ko_tests() -> void:
