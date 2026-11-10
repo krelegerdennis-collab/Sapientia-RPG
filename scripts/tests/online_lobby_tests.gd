@@ -161,12 +161,13 @@ func _icon_table() -> void:
 		paths_ok = paths_ok and paths.size() == 2
 		paths_ok = paths_ok and paths[0] == "res://assets/ui/icons/rollen/icons16/%s.png" % slugs[i]
 		paths_ok = paths_ok and paths[1] == "res://assets/ui/icons/rollen/icons32/%s.png" % slugs[i]
-		paths_ok = paths_ok and not ResourceLoader.exists(paths[0]) and not ResourceLoader.exists(paths[1])
-		paths_ok = paths_ok and Icons.using_placeholder(paths)
+		# Echte icoon als het er is, anders de placeholder (Dennis, 10-11).
+		var has_final := ResourceLoader.exists(paths[0]) or ResourceLoader.exists(paths[1])
+		paths_ok = paths_ok and Icons.using_placeholder(paths) == (not has_final)
 		var tex := Icons.role_texture(roles[i])
-		paths_ok = paths_ok and tex == Icons.role_placeholder(roles[i])
+		paths_ok = paths_ok and (tex != Icons.role_placeholder(roles[i]) if has_final else tex == Icons.role_placeholder(roles[i]))
 		paths_ok = paths_ok and tex != null and tex.get_width() == 16 and tex.get_height() == 16
-	check("rol-paden wijzen naar icons16|icons32 en vallen terug op placeholder", paths_ok)
+	check("rol-paden wijzen naar icons16|icons32: echte icoon, anders placeholder", paths_ok)
 	var emote_slugs: PackedStringArray = ["0_help", "1_hier_heen", "2_goed_gedaan", "3_bedankt"]
 	var emote_ok := true
 	for i in emote_slugs.size():
@@ -174,10 +175,12 @@ func _icon_table() -> void:
 		emote_ok = emote_ok and paths.size() == 2
 		emote_ok = emote_ok and paths[0] == "res://assets/ui/icons/emotes/icons16/emote_%s.png" % emote_slugs[i]
 		emote_ok = emote_ok and paths[1] == "res://assets/ui/icons/emotes/icons32/emote_%s.png" % emote_slugs[i]
-		emote_ok = emote_ok and Icons.using_placeholder(paths)
+		var has_final := ResourceLoader.exists(paths[0]) or ResourceLoader.exists(paths[1])
+		emote_ok = emote_ok and Icons.using_placeholder(paths) == (not has_final)
 		var tex := Icons.emote_texture(i)
-		emote_ok = emote_ok and tex == Icons.emote_placeholder(i) and tex.get_width() == 16
-	check("emote-paden 0..3 vallen terug op placeholder", emote_ok and Icons.emote_texture(4) == null)
+		emote_ok = emote_ok and (tex != Icons.emote_placeholder(i) if has_final else tex == Icons.emote_placeholder(i))
+		emote_ok = emote_ok and tex != null and tex.get_width() == 16
+	check("emote-paden 0..3 gebruiken echte icoon, anders placeholder", emote_ok and Icons.emote_texture(4) == null)
 	check("onbekende rol heeft geen pad", Icons.role_final_paths("Bard").is_empty() and Icons.role_texture("Bard") == null)
 
 
@@ -201,7 +204,7 @@ func _role_rows() -> void:
 			bake_ok = false
 			continue
 		var icon := body.get_node_or_null("RoleIcon") as Sprite2D
-		icons_ok = icons_ok and icon != null and icon.visible and icon.texture == Icons.role_placeholder(role)
+		icons_ok = icons_ok and icon != null and icon.visible and icon.texture == Icons.role_texture(role)
 		var want: Texture2D = Baker.bake(_profiles[i]["look"], "walk")
 		bake_ok = bake_ok and body.sprite != null and body.sprite.texture == want
 		bake_ok = bake_ok and body.modulate == Color.WHITE
