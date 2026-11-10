@@ -205,6 +205,8 @@ var golem_strike_hit_member_count := 0
 ## M9a: Page Warden alleen in online co-op (coop_mode + baas-sleutel 10). Solo blijft turn-based.
 var _page_registered_here := false
 var page_events: Array = []
+## Log voor tests. Oudere entries vallen weg; de verwerking zelf blijft voor elke event.
+const PAGE_EVENT_CAP := 64
 var page_threat: ThreatTable = null
 var page_strike_count := 0
 var page_strike_hits := 0
@@ -436,7 +438,7 @@ func _exit_tree() -> void:
 	for m in enemies.keys():
 		if enemies[m].get("golem", null) != null:
 			_golem_clear_visuals(m, enemies[m])
-		if enemies[m].get("page_warden", null) != null:
+		if enemies[m].get("page_warden", null) != null or enemies[m].get("page_view", null) != null:
 			_page_clear_visuals(m, enemies[m])
 	if _golem_registered_here:
 		GolemBoss.unregister()
@@ -494,6 +496,8 @@ func register(m: Node) -> void:
 		entry["data"] = st
 		entry["tg"] = TelegraphAttack.new()
 		enemies[m] = entry
+		# Beeld op host én gast. Alleen de host maakt het gevecht (en verbruikt daar rng.randi).
+		_ensure_page_view(m, entry)
 		if coop_sim_host:
 			if page_threat == null:
 				page_threat = ThreatTable.new()
@@ -501,7 +505,6 @@ func register(m: Node) -> void:
 			var fight := PageWardenFight.new(int(entry["max_hp"]), rng.randi())
 			entry["page_warden"] = fight
 			entry["hp"] = fight.hp()
-			_ensure_page_view(m, entry)
 		return
 	if SomActionAttacks.has_telegraph_attack(eid):
 		var aid := SomActionAttacks.default_attack_for_enemy(eid)
@@ -1713,6 +1716,8 @@ func _page_events(m: Node, e: Dictionary, evs: Array) -> void:
 		var d: Dictionary = (ev as Dictionary).duplicate()
 		d["tick"] = sim_tick
 		page_events.append(d)
+		while page_events.size() > PAGE_EVENT_CAP:
+			page_events.pop_front()
 		match str(d.get("type", "")):
 			"telegraph_start":
 				var aid := str(d["id"])
@@ -1820,8 +1825,6 @@ func _page_clear_visuals(m: Node, e: Dictionary) -> void:
 
 
 func _ensure_page_view(m: Node, e: Dictionary) -> PageWardenView:
-	if not coop_sim_host:
-		return null
 	var existing: Node = e.get("page_view", null)
 	if existing != null and is_instance_valid(existing):
 		return existing as PageWardenView
@@ -1834,6 +1837,32 @@ func _ensure_page_view(m: Node, e: Dictionary) -> PageWardenView:
 		m.sprite.visible = false
 	e["page_view"] = view
 	return view
+
+
+## Gast tekent de platen uit de al gemirrorde snapshot-telegraaf. Geen tick, geen threat, geen RNG.
+func _page_sync_guest_visual(e: Dictionary, orbit_tick: int) -> void:
+	if e.get("page_warden", null) != null:
+		return
+	var view: PageWardenView = e.get("page_view", null)
+	if view == null or not is_instance_valid(view):
+		return
+	var tg: TelegraphAttack = e.get("tg", null)
+	var tele_phase := TelegraphState.State.IDLE
+	var aid := ""
+	if tg != null and tg.is_busy():
+		tele_phase = tg.state()
+		aid = tg.attack_id()
+	view.sync_guest(_page_guest_phase(e), tele_phase, aid, orbit_tick)
+
+
+## Zelfde drempel als fase 0 van het script (hp_until 0,50). Volle HP blijft fase 1-plaat.
+func _page_guest_phase(e: Dictionary) -> int:
+	var max_hp := maxi(1, int(e.get("max_hp", 1)))
+	var hp := int(e.get("hp", max_hp))
+	if hp >= max_hp:
+		return 0
+	var limit := clampi(roundi(float(max_hp) * 0.50), 0, max_hp)
+	return 1 if hp <= limit else 0
 
 
 func _page_seat_count() -> int:
@@ -1921,6 +1950,11 @@ func _page_note_heal(hero_id: String, amount: int) -> void:
 	if page_threat == null or amount <= 0 or hero_id == "":
 		return
 	page_threat.note_heal(_slot_for_hero(hero_id), amount, PageWardenBoss.is_tank(hero_id))
+
+
+## TODO(M6): taunt-hook. Uitdaging (Dax) roept hier later
+## page_threat.taunt(_slot_for_hero(hero_id), sim_tick) aan.
+## Nu niet aankoppelen: geen aanroep vanuit schade, heal of de AI.
 
 
 func _page_clear_hero(hero_id: String) -> void:
@@ -3172,6 +3206,7 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 		m.position = Vector2(cx, cy) - Vector2(0, center_of(m).y - m.position.y)
 		if not coop_sim_host and room != null:
 			TelegraphSnapshot.apply_row_to_enemy(e, row, room.room_id, room.tier())
+			_page_sync_guest_visual(e, int(snap.get("tick", 0)))
 	if not coop_sim_host:
 		combat_zones.apply_wire_rows(snap.get("zones", []))
 		combat_roots.apply_wire_rows(snap.get("roots", []), _coop_slots)

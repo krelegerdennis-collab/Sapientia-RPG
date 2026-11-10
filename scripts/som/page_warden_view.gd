@@ -1,7 +1,8 @@
 extends Node2D
 class_name PageWardenView
 ## Beeld voor de realtime Page Warden. Alleen tekenen.
-## Lichaam = page_warden.png; aanval, fase 2, treffer en pagina uit assets/sprites/bosses/.
+## Lichaam, aanval, fase 2, treffer en pagina: definitieve art van RPG ART.
+## De *_ph.png-namen zijn historisch; de paden blijven (handwerk).
 ## Voetenanker (128, 194) ligt op de oorsprong, zodat een framewissel niet verspringt.
 ## De vliegende pagina zit op een eigen node die de 0,25-lichaamsschaal opheft (16×16).
 ## Telegraafvorm tekent TelegraphLayer; hier alleen lichaam, faseflits en pagina's.
@@ -9,8 +10,10 @@ class_name PageWardenView
 const PageWardenBoss := preload("res://scripts/som/page_warden_boss.gd")
 const PageWardenFight := preload("res://scripts/som/page_warden_fight.gd")
 const BossPhaseMachine := preload("res://scripts/som/boss_phase_machine.gd")
+const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 
 const TEX_BODY := preload("res://assets/sprites/enemies/page_warden.png")
+## *_ph.png is historisch; dit is definitieve art van RPG ART.
 const TEX_ATTACK := preload("res://assets/sprites/bosses/page_warden_attack_ph.png")
 const TEX_HIT := preload("res://assets/sprites/bosses/page_warden_hit_ph.png")
 const TEX_PHASE2 := preload("res://assets/sprites/bosses/page_warden_phase2_ph.png")
@@ -66,7 +69,7 @@ static func _sprite(tex: Texture2D, frames: int) -> Sprite2D:
 	return s
 
 
-## Laden + maten. Geen kleurcheck: de platen komen binnen op deze bestandsnamen.
+## Laden + maten, inclusief de hoogte van hit en fase 2. Geen kleurcheck.
 static func textures_ok() -> bool:
 	if TEX_BODY == null or TEX_BODY.get_width() != 256 or TEX_BODY.get_height() != 200:
 		return false
@@ -100,32 +103,49 @@ static func _anchor_feet(s: Sprite2D) -> void:
 
 ## Host: beeld uit het gevecht. Geen allocatie; de pagina-sprites zijn een vaste pool van 3.
 func sync(fight: PageWardenFight) -> void:
-	var ph := fight.phase_index()
-	if ph != _phase:
-		_phase = ph
 	var attacking := fight.step == PageWardenFight.Step.WINDUP or fight.step == PageWardenFight.Step.ACTIVE
+	var show_hit := fight.step == PageWardenFight.Step.STAGGER or fight.step == PageWardenFight.Step.RECOVERY
+	var show_pages := fight.core.open or (str(fight.attack_id) == "page_fan" and fight.step == PageWardenFight.Step.WINDUP)
+	var flash_on := fight.is_invulnerable()
+	var flash_t := 0.0
+	if flash_on:
+		var left := int(fight.pm._invuln_ticks)
+		flash_t = 1.0 - float(left) / float(BossPhaseMachine.INVULN_TICKS)
+	_paint(fight.phase_index(), attacking, 1 if fight.step == PageWardenFight.Step.ACTIVE else 0,
+			show_hit, show_pages, fight.tick_no, flash_on, flash_t)
+
+
+## Gast: zelfde platen, afgeleid van de snapshot-telegraaf. Geen fight, geen RNG, geen faseflits
+## (de snapshot draagt de invuln-ticks niet).
+func sync_guest(boss_phase: int, tele_phase: int, attack_id: String, orbit_tick: int) -> void:
+	var windup := tele_phase == TelegraphState.State.WINDUP
+	var active := tele_phase == TelegraphState.State.ACTIVE
+	var recovery := tele_phase == TelegraphState.State.RECOVERY
+	var show_pages := attack_id == "page_fan" and windup
+	_paint(boss_phase, windup or active, 1 if active else 0, recovery, show_pages, orbit_tick, false, 0.0)
+
+
+func _paint(boss_phase: int, attacking: bool, strike_frame: int, show_hit: bool, show_pages: bool, orbit_tick: int, flash_on: bool, flash_t: float) -> void:
+	_phase = boss_phase
 	if attacking:
 		body.texture = TEX_ATTACK
 		body.hframes = PageWardenBoss.SPRITE_ATTACK_FRAMES
-		body.frame = 1 if fight.step == PageWardenFight.Step.ACTIVE else 0
+		body.frame = strike_frame
 	else:
-		body.texture = TEX_PHASE2 if ph >= 1 else TEX_BODY
+		body.texture = TEX_PHASE2 if boss_phase >= 1 else TEX_BODY
 		body.hframes = 1
 		body.frame = 0
 	_anchor_feet(body)
-	# Trefferflits alleen bij stagger en recovery. Tijdens ACTIVE blijft het slagframe zichtbaar.
-	hit.visible = fight.step == PageWardenFight.Step.STAGGER or fight.step == PageWardenFight.Step.RECOVERY
-	flash.visible = fight.is_invulnerable()
-	if flash.visible:
-		var left := int(fight.pm._invuln_ticks)
-		var t := 1.0 - float(left) / float(BossPhaseMachine.INVULN_TICKS)
-		flash.frame = clampi(int(t * PageWardenBoss.SPRITE_PHASE_FLASH_FRAMES), 0, PageWardenBoss.SPRITE_PHASE_FLASH_FRAMES - 1)
-	var show_pages := fight.core.open or (str(fight.attack_id) == "page_fan" and fight.step == PageWardenFight.Step.WINDUP)
+	# Trefferflits bij stagger (host) en recovery. Tijdens ACTIVE blijft het slagframe zichtbaar.
+	hit.visible = show_hit
+	flash.visible = flash_on
+	if flash_on:
+		flash.frame = clampi(int(flash_t * PageWardenBoss.SPRITE_PHASE_FLASH_FRAMES), 0, PageWardenBoss.SPRITE_PHASE_FLASH_FRAMES - 1)
 	var i := 0
 	for p in _pages:
 		var s: Sprite2D = p
 		s.visible = show_pages
 		if show_pages:
-			var ang := float(i) * TAU / 3.0 + float(fight.tick_no) * 0.08
+			var ang := float(i) * TAU / 3.0 + float(orbit_tick) * 0.08
 			s.position = Vector2(cos(ang), sin(ang)) * PAGE_RADIUS
 		i += 1
