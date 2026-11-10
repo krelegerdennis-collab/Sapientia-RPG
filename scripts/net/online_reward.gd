@@ -10,18 +10,44 @@ extends RefCounted
 ## Gewichten zijn een balans-VOORSTEL (§7.0): Easy 1, Normal 1,5, Hard 2.
 ## Geen akkoord van Dennis; niet gebruikt door de solo-DLS.
 ##
-## --- Haak voor M1 (online profiel, nog niet op coop/easy) ---
-## M1 bezit user://online_profile.json (laden, schrijven, export). Deze module
-## schrijft dat bestand niet. Na een ontvangen bundle:
-##   var next := OnlineReward.apply_bundle(profile, bundle)
-##   # next is een nieuw dict; profile blijft onaangeroerd
-##   # schrijf next alleen als de grant-sleutel nieuw was
-## Sleutel in slot.applied_grants: grant_key(session_id, host_tick)
-##   formaat "<session_id>+<host_tick>"  (stoel zit er niet in; het profiel is van één speler)
-## Slotkeuze: slot.uid == bundle.seat_uid. Geen slot = no-op.
-## Tweede apply met dezelfde sleutel = no-op (het dict is gelijk aan de eerste uitkomst).
-## profile_exp is een float (Normal × 1,5). M1 moet het getal niet naar int afronden.
-## stats_seen.best_floor = max(oud, bundle.best_floor). stats_seen.runs laat M1 zelf.
+## --- Haak voor M1 (online profiel, PR #417, schema ongewijzigd) ---
+## M1 bezit user://online_profile.json. Deze module schrijft dat bestand niet en
+## voegt geen veld toe. Schema blijft: uid, name, class, look, profile_exp,
+## unlocks, stats_seen, applied_grants. Geen sessie, tick, epoch of pending erin.
+##
+## Client (één instantie per proces; de runtime-set zit alleen in het geheugen):
+##   var next := rewards.apply_bundle(profile, bundle)
+##   # next = {status, grant_key, profile}; het invoerdict blijft onaangeroerd
+##   # status "applied":  sla next.profile op, stuur daarna ACK(grant_key)
+##   # status "duplicate": profiel ongewijzigd (0 extra), stuur óók ACK(grant_key)
+##   # status "rejected": geen ACK (bundle ongeldig of geen slot)
+## Apply telt als de sleutel niet in slot.applied_grants staat en niet in de
+## runtime-set van deze instantie. Een andere session_id is geen weigering:
+## na kill, crash of rejoin past een resend gewoon als de grant nieuw is.
+## Nieuwe instantie = lege runtime-set. Staat de sleutel al in het opgeslagen
+## profiel, dan is de resend duplicate en 0 extra.
+##
+## Grant-sleutel (max 8 in het profiel, FIFO, hash heeft geen volgorde):
+##   "g" + 15 kleine hex van SHA256("session_id|host_tick") via HashingContext.
+##   Geen Godot-hash(), geen "+". 16 tekens [a-z0-9], passend bij M1.
+## De runtime-set vangt een replay in hetzelfde proces nadat FIFO de oudste
+## van meer dan 8 runs uit applied_grants heeft gezet. Ze gaat niet mee naar schijf.
+##
+## profile_exp is een int 0..999999: int(round(verdiepingen × gewicht)), som geklemd.
+## Normal × 1,5 rondt oneven verdiepingen af (1 → 2, 3 → 5, 7 → 11). Gewichten
+## blijven het voorstel Easy 1 / Normal 1,5 / Hard 2. stats_seen.runs laat M1 zelf.
+## stats_seen.best_floor = max(oud, bundle), geklemd op 0..100.
+## Unlocks: [a-z0-9_]{1,16}, max 16, geen dubbelen. Een volle lijst neemt niets nieuws op.
+##
+## --- Host, wachtend op REWARD_ACK (bericht zelf: aparte PR bovenop #419) ---
+## Deze module bouwt geen protocol en wijzigt NetProtocol.VERSION niet.
+## De host houdt per stoel-uid een pending-lijst van onbevestigde bundles,
+## hoogstens 8 (nooit meer dan M1's applied_grants). FIFO: de oudste valt weg.
+##   host.note_pending(bundle)   # na verzenden; een al ACK'te sleutel wordt niet gezet
+##   host.ack(grant_key)         # haalt de bundle van de lijst; nooit opnieuw sturen
+##   host.pending_for(uid)       # bij rejoin opnieuw sturen
+## Pending en de ACK-set zijn runtime van de host-instantie, niet van het profiel.
+## Gebruik voor de host een andere instantie dan voor de client.
 ##
 ## --- Haak voor M3 (protocol v2, nog niet op coop/easy) ---
 ## VERSION blijft 1 tot M3 hem zelf verhoogt. Nieuwe kinds horen in NetProtocol.Kind:
@@ -73,6 +99,24 @@ const SEAT_KEYS: Array[String] = [
 ]
 const LOOT_KEYS: Array[String] = ["gold", "exp", "items"]
 
+## Zelfde plafonds als M1 (PR #417). Hier nagebootst; OnlineProfile wordt niet aangeroepen.
+const MAX_PROFILE_EXP := 999999
+const MAX_GRANTS := 8
+const MAX_UNLOCKS := 16
+const MAX_ID_LEN := 16
+const MAX_BEST_FLOOR := 100
+
+const STATUS_APPLIED := "applied"
+const STATUS_DUPLICATE := "duplicate"
+const STATUS_REJECTED := "rejected"
+
+## Client: sleutels die dit proces al toepaste. Niet in het profiel.
+var _live_grant_keys: Dictionary = {}
+## Host: uid -> bundles die nog geen ACK hebben. Nooit meer dan MAX_GRANTS.
+var _pending: Dictionary = {}
+## Host: ACK'te sleutels. Die bundle gaat deze instantie niet opnieuw de deur uit.
+var _acked: Dictionary = {}
+
 
 static func floors_for_mode(mode: String) -> int:
 	match mode:
@@ -111,15 +155,23 @@ static func unlock_for_mode(mode: String) -> String:
 			return ""
 
 
-## Verslagen verdiepingen × modusgewicht. Onbekende modus (ook Classic) = 0.
-static func profile_exp_for(floors_cleared: int, mode: String) -> float:
+## Verslagen verdiepingen × modusgewicht, afgerond naar int en geklemd op 0..999999.
+## Onbekende modus (ook Classic) = 0. Normal × 1,5: oneven aantallen ronden af
+## (round half van nul weg; 1,5 → 2).
+static func profile_exp_for(floors_cleared: int, mode: String) -> int:
 	if floors_cleared <= 0:
-		return 0.0
-	return float(floors_cleared) * weight_for_mode(mode)
+		return 0
+	var raw := int(round(float(floors_cleared) * weight_for_mode(mode)))
+	return clampi(raw, 0, MAX_PROFILE_EXP)
 
 
+## 16 tekens [a-z0-9]: "g" + 15 hex van SHA256("session_id|host_tick").
+## HashingContext, niet Godot hash() (dat verschilt per platform).
 static func grant_key(session_id: String, host_tick: int) -> String:
-	return "%s+%d" % [session_id, host_tick]
+	var ctx := HashingContext.new()
+	ctx.start(HashingContext.HASH_SHA256)
+	ctx.update(("%s|%d" % [session_id, host_tick]).to_utf8_buffer())
+	return "g" + ctx.finish().hex_encode().substr(0, 15)
 
 
 ## seats: rapporten uit OnlineLoot.reports() (of hetzelfde dict-formaat).
@@ -192,20 +244,26 @@ static func bundle_clean(bundle: Dictionary) -> bool:
 		return false
 	if int(bundle["host_tick"]) < 0 or int(bundle["best_floor"]) < 0:
 		return false
-	if float(bundle["profile_exp"]) < 0.0:
+	# JSON levert een heel getal soms als float. In het profiel schrijven we int.
+	if _exp_value(bundle["profile_exp"]) < 0:
 		return false
 	return true
 
 
-## Pure apply. profile en bundle blijven onaangeroerd. Geen bestand.
-## Tweede keer met dezelfde grant-sleutel: zelfde inhoud als de eerste uitkomst.
-static func apply_bundle(profile: Dictionary, bundle: Dictionary) -> Dictionary:
+## profile en bundle blijven onaangeroerd. Geen bestand, geen extra profielveld.
+## {status, grant_key, profile}. status is applied, duplicate of rejected.
+## applied en duplicate: de caller stuurt een ACK met grant_key (na het opslaan).
+## Een andere session_id weigert niet; alleen de sleutel telt.
+func apply_bundle(profile: Dictionary, bundle: Dictionary) -> Dictionary:
 	var out := profile.duplicate(true)
 	if not bundle_clean(bundle):
-		return out
+		return _verdict(out, STATUS_REJECTED, "")
+	var key := grant_key(str(bundle["session_id"]), int(bundle["host_tick"]))
+	if _live_grant_keys.has(key):
+		return _verdict(out, STATUS_DUPLICATE, key)
 	var slots_v: Variant = out.get("slots", [])
 	if not (slots_v is Array):
-		return out
+		return _verdict(out, STATUS_REJECTED, key)
 	var slots: Array = slots_v
 	var uid := str(bundle["seat_uid"])
 	var idx := -1
@@ -215,30 +273,86 @@ static func apply_bundle(profile: Dictionary, bundle: Dictionary) -> Dictionary:
 			idx = i
 			break
 	if idx < 0:
-		return out
+		return _verdict(out, STATUS_REJECTED, key)
 	var slot: Dictionary = slots[idx]
-	var key := grant_key(str(bundle["session_id"]), int(bundle["host_tick"]))
-	var grants_v: Variant = slot.get("applied_grants", [])
-	var grants: Array = (grants_v as Array).duplicate() if grants_v is Array else []
+	var grants := _valid_ids(slot.get("applied_grants", []))
 	if grants.has(key):
-		return out
-	slot["profile_exp"] = float(slot.get("profile_exp", 0)) + float(bundle["profile_exp"])
+		_live_grant_keys[key] = true
+		return _verdict(out, STATUS_DUPLICATE, key)
+	var exp := _stored_int(slot.get("profile_exp", 0), 0, MAX_PROFILE_EXP)
+	exp = mini(MAX_PROFILE_EXP, exp + _exp_value(bundle["profile_exp"]))
+	slot["profile_exp"] = exp
 	var seen_v: Variant = slot.get("stats_seen", {})
 	var seen: Dictionary = (seen_v as Dictionary).duplicate(true) if seen_v is Dictionary else {}
-	seen["best_floor"] = maxi(int(seen.get("best_floor", 0)), int(bundle["best_floor"]))
+	var floor_now := _stored_int(seen.get("best_floor", 0), 0, MAX_BEST_FLOOR)
+	var floor_add := clampi(int(bundle["best_floor"]), 0, MAX_BEST_FLOOR)
+	seen["best_floor"] = maxi(floor_now, floor_add)
 	slot["stats_seen"] = seen
-	var un_v: Variant = slot.get("unlocks", [])
-	var unlocks: Array = (un_v as Array).duplicate() if un_v is Array else []
+	var unlocks := _valid_ids(slot.get("unlocks", []))
+	while unlocks.size() > MAX_UNLOCKS:
+		unlocks.pop_back()
 	for u in bundle["unlocks"]:
 		var id := str(u)
-		if not unlocks.has(id):
-			unlocks.append(id)
+		if unlocks.has(id) or unlocks.size() >= MAX_UNLOCKS:
+			continue
+		unlocks.append(id)
 	slot["unlocks"] = unlocks
+	while grants.size() >= MAX_GRANTS:
+		grants.pop_front()
 	grants.append(key)
 	slot["applied_grants"] = grants
+	_live_grant_keys[key] = true
 	slots[idx] = slot
 	out["slots"] = slots
-	return out
+	return _verdict(out, STATUS_APPLIED, key)
+
+
+## Host zette deze bundle op de lijn en wacht op ACK. Al ACK'te sleutels blijven weg.
+## Per uid hoogstens MAX_GRANTS; de oudste onbevestigde valt weg. Niet in het profiel.
+func note_pending(bundle: Dictionary) -> bool:
+	if not bundle_clean(bundle):
+		return false
+	var key := grant_key(str(bundle["session_id"]), int(bundle["host_tick"]))
+	if _acked.has(key):
+		return false
+	var uid := str(bundle["seat_uid"])
+	var raw: Variant = _pending.get(uid, [])
+	var list: Array = (raw as Array).duplicate(true) if raw is Array else []
+	for existing in list:
+		if existing is Dictionary and grant_key(str(existing.get("session_id", "")), int(existing.get("host_tick", 0))) == key:
+			return true
+	list.append(bundle.duplicate(true))
+	while list.size() > MAX_GRANTS:
+		list.pop_front()
+	_pending[uid] = list
+	return true
+
+
+## ACK binnen. De bundle gaat van de pending-lijst en wordt niet opnieuw verstuurd.
+func ack(key: String) -> void:
+	if key == "":
+		return
+	_acked[key] = true
+	for uid in _pending.keys():
+		var raw: Variant = _pending[uid]
+		if not (raw is Array):
+			continue
+		var kept: Array = []
+		for existing in raw:
+			if not (existing is Dictionary):
+				continue
+			var existing_key := grant_key(str(existing.get("session_id", "")), int(existing.get("host_tick", 0)))
+			if existing_key != key:
+				kept.append(existing)
+		_pending[uid] = kept
+
+
+## Bundles die deze host bij een rejoin opnieuw mag sturen. Kopie; de lijst zelf blijft hier.
+func pending_for(uid: String) -> Array:
+	var raw: Variant = _pending.get(uid, [])
+	if not (raw is Array):
+		return []
+	return (raw as Array).duplicate(true)
 
 
 static func run_result_body(result: Dictionary) -> Dictionary:
@@ -258,7 +372,7 @@ static func reward_bundle_body(bundle: Dictionary) -> Dictionary:
 		"session_id": str(bundle.get("session_id", "")),
 		"host_tick": int(bundle.get("host_tick", 0)),
 		"seat_uid": str(bundle.get("seat_uid", "")),
-		"profile_exp": float(bundle.get("profile_exp", 0.0)),
+		"profile_exp": int(bundle.get("profile_exp", 0)),
 		"best_floor": int(bundle.get("best_floor", 0)),
 		"unlocks": _norm_unlocks(bundle.get("unlocks", [])),
 	}
@@ -386,8 +500,54 @@ static func _norm_unlocks(raw: Variant) -> Array:
 	return out
 
 
+static func _verdict(profile: Dictionary, status: String, key: String) -> Dictionary:
+	return {"profile": profile, "status": status, "grant_key": key}
+
+
+## -1 als het geen heel getal in 0..MAX_PROFILE_EXP is. Bool telt niet.
+static func _exp_value(v: Variant) -> int:
+	if v is bool or typeof(v) == TYPE_BOOL:
+		return -1
+	var n := -1
+	if v is int:
+		n = int(v)
+	elif v is float and v == floor(v):
+		n = int(v)
+	else:
+		return -1
+	if n < 0 or n > MAX_PROFILE_EXP:
+		return -1
+	return n
+
+
+static func _stored_int(v: Variant, lo: int, hi: int) -> int:
+	if v is bool or typeof(v) == TYPE_BOOL:
+		return lo
+	var n := lo
+	if v is int:
+		n = int(v)
+	elif v is float and v == floor(v):
+		n = int(v)
+	else:
+		return lo
+	return clampi(n, lo, hi)
+
+
+static func _valid_ids(raw: Variant) -> Array:
+	var out: Array = []
+	if not (raw is Array):
+		return out
+	for item in raw:
+		if typeof(item) != TYPE_STRING and typeof(item) != TYPE_STRING_NAME:
+			continue
+		var id := str(item)
+		if _unlock_id_ok(id) and not out.has(id):
+			out.append(id)
+	return out
+
+
 static func _unlock_id_ok(id: String) -> bool:
-	if id == "" or id.length() > 32:
+	if id.length() < 1 or id.length() > MAX_ID_LEN:
 		return false
 	for i in id.length():
 		var c := id.unicode_at(i)
