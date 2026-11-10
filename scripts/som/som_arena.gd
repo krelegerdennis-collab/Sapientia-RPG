@@ -2368,6 +2368,7 @@ func _say(text: String) -> void:
 const CoopAvatar := preload("res://scripts/coop/coop_avatar.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
+const AvatarBlob := preload("res://scripts/net/avatar_blob.gd")
 const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
 
 
@@ -2394,24 +2395,55 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 
 func coop_sync_roster(roster: Array) -> void:
 	var seated: Dictionary = {}
+	var looks: Dictionary = {}
 	for row in roster:
-		var slot := int(row.get("slot", Protocol.NO_SLOT))
+		if not (row is Dictionary):
+			continue
+		var slot := int(row.get("slot", row.get("seat", Protocol.NO_SLOT)))
 		var cid := str(row.get("character_id", ""))
+		if cid == "" and str(row.get("class", "")) != "":
+			cid = AvatarBlob.base_hero(str(row.get("class", "")))
 		if slot == Protocol.NO_SLOT or cid == "":
 			continue
 		seated[slot] = cid
+		var look_v: Variant = row.get("look", PackedByteArray())
+		if look_v is PackedByteArray and (look_v as PackedByteArray).size() == AvatarBlob.BYTE_COUNT:
+			looks[slot] = look_v
 	for slot in _coop_avatars.keys():
 		if not seated.has(int(slot)):
 			coop_deactivate_slot(int(slot))
 	for slot in seated.keys():
 		var cid: String = str(seated[slot])
 		_coop_slots[int(slot)] = cid
+		var look: PackedByteArray = looks.get(int(slot), PackedByteArray())
 		if int(slot) == coop_local_slot:
 			active_id = cid
 			_apply_player_sheet()
+			_apply_online_look_player(look)
 		else:
 			_ensure_coop_avatar(int(slot), cid)
+			_apply_online_look_avatar(int(slot), look)
 	_prune_coop_avatar_orphans(seated)
+
+
+## Placeholder-tint tot paper-doll (M2). Zonder look blijft de sheet onaangeroerd.
+func _apply_online_look_player(look: PackedByteArray) -> void:
+	if look.size() != AvatarBlob.BYTE_COUNT or player == null:
+		return
+	var decoded := AvatarBlob.decode(look)
+	if not bool(decoded.get("ok", false)):
+		return
+	if player.sprite != null:
+		player.sprite.modulate = AvatarBlob.placeholder_tint(decoded)
+	player.set_meta("online_look", look)
+
+
+func _apply_online_look_avatar(slot: int, look: PackedByteArray) -> void:
+	if look.size() != AvatarBlob.BYTE_COUNT or not _coop_avatars.has(slot):
+		return
+	var av: CoopAvatar = _coop_avatars[slot] as CoopAvatar
+	if av != null and is_instance_valid(av):
+		av.apply_look(look)
 
 
 func _prune_coop_avatar_orphans(seated: Dictionary) -> void:
