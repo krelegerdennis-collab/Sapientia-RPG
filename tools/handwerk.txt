@@ -1270,3 +1270,32 @@ assets/sprites/buiten/kist_blauw.png
 assets/sprites/dungeon100_rustpunt.png
 assets/sprites/dungeon_exit_warper.png
 assets/sprites/som/fx/fx_root.png
+# 10 nov 2026: Archief 1 SoM-polish ronde 2 (RPG ART archief1_polish); art_archief_grijs.py niet meer draaien
+assets/tiles/dungeon/archief_grijs_tiles.png
+assets/tiles/dungeon/archief_grijs_bibliotheek.png
+assets/sprites/dungeon/grijs/geheime_deur_archief.png
+assets/sprites/dungeon/grijs/golemdeur.png
+assets/sprites/dungeon/grijs/hendel.png
+assets/sprites/dungeon/grijs/herstelsteen.png
+assets/sprites/dungeon/grijs/kandelaar.png
+assets/sprites/dungeon/grijs/kast_duwbaar.png
+assets/sprites/dungeon/grijs/kast_vast.png
+assets/sprites/dungeon/grijs/kast_zwaar.png
+assets/sprites/dungeon/grijs/kist.png
+assets/sprites/dungeon/grijs/leestafel.png
+assets/sprites/dungeon/grijs/poort.png
+assets/sprites/dungeon/grijs/schatkist.png
+assets/sprites/dungeon/grijs/staande_kast.png
+# 10 nov 2026: Diepe Grot baas-kaartsprites (RPG ART grot_bossmaps, ronde 2), 64x32, 2 frames
+assets/map_monsters/page_warden.png
+assets/map_monsters/glitch_queen.png
+assets/map_monsters/schaduw_h6.png
+assets/map_monsters/spore_lord.png
+assets/map_monsters/root_mother.png
+assets/map_monsters/de_cyclus.png
+assets/map_monsters/mist_lord.png
+assets/map_monsters/seal_warden.png
+assets/map_monsters/de_rechter.png
+assets/map_monsters/great_book_golem.png
+assets/map_monsters/root_emperor.png
+assets/map_monsters/de_stem.png
