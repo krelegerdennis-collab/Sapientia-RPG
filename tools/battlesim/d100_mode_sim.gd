@@ -3,9 +3,11 @@ class_name D100ModeSim
 ## M9b: headless sim van een online co-op Easy-run door de DLS.
 ##
 ##   godot --path . -- --d100modesim --mode=easy [--factors=4,7,10,25] [--runs=N] [--seed=N]
-##        [--floors=10] [--seats=1,2,3,4] [--out=res://docs/combat/m9b_easy_sim.md]
+##        [--floors=10] [--seats=1,2,3,4] [--easy_enemy_dmg=2.2] [--floor_heal=0]
+##        [--out=res://docs/combat/m9b_easy_sim.md]
 ##
-## De factor is alleen een sim-parameter. OnlineDlsModes.mode_exp_factor blijft 100/N.
+## De factor, easy_enemy_dmg en floor_heal zijn alleen sim-parameters.
+## OnlineDlsModes.mode_exp_factor blijft 100/N. SomData.ENEMY_DAMAGE_MULT blijft 2.2.
 ## Host-autoritatief: één RNG per gevecht (mix_seed), nooit globale randf()/randi().
 ## Schrijft geen user:// saves. --out weigert user://.
 ##
@@ -18,8 +20,12 @@ class_name D100ModeSim
 ##    Keten zoals het spel: hit1/hit2/finisher, vervolg 6 ticks na de animatie.
 ##    AI na de finisher: zware slag niveau 1. Doel = een vijand die al aangekomen is.
 ##  - EXP per verslagen vijand, meteen, aan elke levende held (give_exp, level-up vult HP bij).
-##  - Vloer 10: die troep, daarna Page Warden. Doel, klap, spreuk en adds komen uit
-##    page_warden_rt_sim.gd. De slag blijft de keten (die sim laadt nog een volle meter).
+##  - Vloer 10: die troep, daarna Page Warden. Doel, klap, spreuk en adds staan hier,
+##    dezelfde regels als page_warden_rt_sim.gd, zonder die file aan te roepen.
+##    De slag blijft de keten (die sim laadt nog een volle meter).
+##  - --easy_enemy_dmg vervangt ENEMY_DAMAGE_MULT alleen hier (troep en Page Warden-adds).
+##  - --floor_heal is procent van max HP/MP erbij voor levenden, tussen vloeren.
+##    Neergegane helden blijven liggen. 0 = basis (alleen het rustpunt).
 ##  - Rust (Easy vloer 5) heelt levenden vóór het gevecht. Geen drankjes, geen feniksveer:
 ##    die zijn in het spel een handmatige ring-actie, en de bondgenoot-AI gebruikt ze niet.
 ##  - M8a (down/revive) zit niet in de code. Eén down is geen verlies; de vloer stopt
@@ -33,7 +39,6 @@ const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 const PageWardenBoss := preload("res://scripts/som/page_warden_boss.gd")
 const PageWardenFight := preload("res://scripts/som/page_warden_fight.gd")
-const PageWardenRt := preload("res://tools/battlesim/page_warden_rt_sim.gd")
 const ThreatTableSc := preload("res://scripts/som/threat_table.gd")
 const Chain := preload("res://scripts/data/som_chain_data.gd")
 const Heavy := preload("res://scripts/data/som_heavy_data.gd")
@@ -49,6 +54,7 @@ const DODGE_PLAYER := 0.35
 const DODGE_ALLY := 0.15
 const APPROACH := 1.2
 const ANIM := 0.71
+const FAN_SPLASH := 0.45
 const RUN_SEED_STEP := 10007
 const DEFAULT_SEED := 20261110
 const DEFAULT_RUNS := 24
@@ -109,6 +115,8 @@ static func _cfg_from_args() -> Dictionary:
 	var hypo := true
 	var classic_ref := true
 	var out := ""
+	var enemy_dmg := -1.0
+	var floor_heal := 0
 	for a in OS.get_cmdline_user_args():
 		var s := str(a)
 		if s.begins_with("--mode="):
@@ -131,6 +139,10 @@ static func _cfg_from_args() -> Dictionary:
 			classic_ref = false
 		elif s.begins_with("--out="):
 			out = s.trim_prefix("--out=")
+		elif s.begins_with("--easy_enemy_dmg="):
+			enemy_dmg = float(s.trim_prefix("--easy_enemy_dmg="))
+		elif s.begins_with("--floor_heal="):
+			floor_heal = int(s.trim_prefix("--floor_heal="))
 	if mode != "easy":
 		return {"error": "M9b simuleert alleen --mode=easy. Normal/Hard hebben nog geen realtime baas."}
 	if out.begins_with("user://"):
@@ -157,6 +169,8 @@ static func _cfg_from_args() -> Dictionary:
 		"classic_ref": classic_ref,
 		"out": out,
 		"verbose": true,
+		"enemy_dmg": enemy_dmg if enemy_dmg > 0.0 else SomData.ENEMY_DAMAGE_MULT,
+		"floor_heal": clampi(floor_heal, 0, 100),
 	}
 
 
@@ -190,6 +204,10 @@ static func run_cfg(cfg: Dictionary) -> Dictionary:
 	var seats: Array = _clean_seats(cfg.get("seats", [1, 2, 3, 4]))
 	var hypo := bool(cfg.get("hypothetical", true))
 	var verbose := bool(cfg.get("verbose", false))
+	var enemy_dmg := float(cfg.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT))
+	if enemy_dmg <= 0.0:
+		enemy_dmg = SomData.ENEMY_DAMAGE_MULT
+	var floor_heal := clampi(int(cfg.get("floor_heal", 0)), 0, 100)
 	var maps: Array = []
 	var run_seeds: Array = []
 	var fp_parts: PackedStringArray = PackedStringArray()
@@ -210,7 +228,7 @@ static func run_cfg(cfg: Dictionary) -> Dictionary:
 		var fac := maxi(1, int(factor))
 		for seat_n in seats:
 			var t0 := Time.get_ticks_msec()
-			rows.append(_simulate_cell(maps, run_seeds, fac, int(seat_n), hypo, examples, caps))
+			rows.append(_simulate_cell(maps, run_seeds, fac, int(seat_n), hypo, examples, caps, enemy_dmg, floor_heal))
 			if verbose:
 				print("SIM factor %d stoelen %d klaar (%d ms)" % [fac, int(seat_n), Time.get_ticks_msec() - t0])
 	return {
@@ -223,6 +241,8 @@ static func run_cfg(cfg: Dictionary) -> Dictionary:
 		"rows": rows,
 		"hypothetical": hypo,
 		"examples": examples,
+		"enemy_dmg": enemy_dmg,
+		"floor_heal": floor_heal,
 	}
 
 
@@ -264,7 +284,7 @@ static func _empty_floor(floor_no: int, eff: int, boss_key: int) -> Dictionary:
 	}
 
 
-static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: int, hypo: bool, examples: Array, caps: Dictionary) -> Dictionary:
+static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: int, hypo: bool, examples: Array, caps: Dictionary, enemy_dmg: float, floor_heal: int) -> Dictionary:
 	var ids := party_ids_for(seats)
 	var floor_rows: Array = []
 	var proto: Array = maps[0]
@@ -297,10 +317,10 @@ static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: in
 			for e in fl["enemies"]:
 				clear += scaled_exp(int(e["exp_base"]), factor)
 		exp_clear_sum += clear
-		_climb(built, rs, factor, seats, ids, floor_rows, examples, caps)
+		_climb(built, rs, factor, seats, ids, floor_rows, examples, caps, enemy_dmg, floor_heal)
 		if hypo and boss_floor > 0:
 			var party := make_party(ids, clear)
-			var bf: Dictionary = _boss_fight(party, seats, combat_seed(rs, boss_floor, seats, factor, KIND_HYPO))
+			var bf: Dictionary = _boss_fight(party, seats, combat_seed(rs, boss_floor, seats, factor, KIND_HYPO), enemy_dmg)
 			hypo_n += 1
 			hypo_ticks += int(bf["ticks"])
 			hypo_level_sum += level_of(party)
@@ -308,7 +328,7 @@ static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: in
 				hypo_wins += 1
 			if seats == 4:
 				var orion := make_party(ORION_IDS, clear)
-				var bo: Dictionary = _boss_fight(orion, 4, combat_seed(rs, boss_floor, 4, factor, KIND_HYPO_ORION))
+				var bo: Dictionary = _boss_fight(orion, 4, combat_seed(rs, boss_floor, 4, factor, KIND_HYPO_ORION), enemy_dmg)
 				hypo_orion_ticks += int(bo["ticks"])
 				if bool(bo["win"]):
 					hypo_orion_wins += 1
@@ -327,7 +347,7 @@ static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: in
 	}
 
 
-static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Array, floor_rows: Array, examples: Array, caps: Dictionary) -> void:
+static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Array, floor_rows: Array, examples: Array, caps: Dictionary, enemy_dmg: float, floor_heal: int) -> void:
 	var party := make_party(ids, 0)
 	for i in built.size():
 		if not any_alive(party):
@@ -344,10 +364,12 @@ static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Ar
 			hp_max += int(h["max_hp"])
 		row["hp_sum"] = int(row["hp_sum"]) + hp_now
 		row["hp_max_sum"] = int(row["hp_max_sum"]) + hp_max
+		if floor_no > 1:
+			floor_heal_living(party, floor_heal)
 		if bool(fl["rest"]):
 			rest_heal(party)
 		var meta := {"factor": factor, "seats": seats, "floor": floor_no, "seed": run_seed, "hp_in": hp_now, "hp_in_max": hp_max}
-		var trash: Dictionary = _trash_fight(party, fl["enemies"], combat_seed(run_seed, floor_no, seats, factor, KIND_TRASH), factor)
+		var trash: Dictionary = _trash_fight(party, fl["enemies"], combat_seed(run_seed, floor_no, seats, factor, KIND_TRASH), factor, enemy_dmg)
 		row["ticks"] = int(row["ticks"]) + int(trash["ticks"])
 		if not bool(trash["win"]):
 			_note_loss(row, trash, examples, caps, meta)
@@ -361,7 +383,7 @@ static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Ar
 			break
 		row["boss_entered"] = int(row["boss_entered"]) + 1
 		row["boss_level_sum"] = int(row["boss_level_sum"]) + level_of(party)
-		var bf: Dictionary = _boss_fight(party, seats, combat_seed(run_seed, floor_no, seats, factor, KIND_BOSS))
+		var bf: Dictionary = _boss_fight(party, seats, combat_seed(run_seed, floor_no, seats, factor, KIND_BOSS), enemy_dmg)
 		row["ticks"] = int(row["ticks"]) + int(bf["ticks"])
 		row["boss_ticks"] = int(row["boss_ticks"]) + int(bf["ticks"])
 		if bool(bf["win"]):
@@ -374,7 +396,7 @@ static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Ar
 			break
 
 
-static func _trash_fight(party: Array, enemies: Array, seed_val: int, factor: int) -> Dictionary:
+static func _trash_fight(party: Array, enemies: Array, seed_val: int, factor: int, enemy_dmg: float = -1.0) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_val
 	var heroes := _runtime(party)
@@ -404,7 +426,7 @@ static func _trash_fight(party: Array, enemies: Array, seed_val: int, factor: in
 			break
 		ticks += 1
 		var acted := _trash_heroes(heroes, active, rng, events, ticks)
-		var hurt := _trash_enemies(heroes, active, rng, events, ticks)
+		var hurt := _trash_enemies(heroes, active, rng, events, ticks, enemy_dmg)
 		if acted or hurt:
 			quiet = 0
 		else:
@@ -494,7 +516,7 @@ static func _trash_spell(hr: Dictionary, heroes: Array, active: Array, rng: Rand
 			return
 
 
-static func _trash_enemies(heroes: Array, active: Array, rng: RandomNumberGenerator, events: Array, tick: int) -> bool:
+static func _trash_enemies(heroes: Array, active: Array, rng: RandomNumberGenerator, events: Array, tick: int, enemy_dmg: float = -1.0) -> bool:
 	var hurt := false
 	var i := active.size() - 1
 	while i >= 0:
@@ -520,7 +542,7 @@ static func _trash_enemies(heroes: Array, active: Array, rng: RandomNumberGenera
 				if not hr.is_empty() and int(hr["h"]["hp"]) > 0 and float(hr["iframes"]) <= 0.0:
 					var dodge := DODGE_PLAYER if int(hr["slot"]) == 0 else DODGE_ALLY
 					if rng.randf() >= dodge:
-						var dmg := roundi(SomArena.physical_damage(float(e["d"]["atk"]), float(hr["def"]), 1.0, rng) * SomData.ENEMY_DAMAGE_MULT)
+						var dmg := roundi(SomArena.physical_damage(float(e["d"]["atk"]), float(hr["def"]), 1.0, rng) * _enemy_mult(enemy_dmg))
 						_hurt(hr, dmg)
 						hurt = true
 						_push_log(events, tick, "raak %s %d → %d/%d" % [
@@ -550,25 +572,13 @@ static func _trash_target(heroes: Array, rng: RandomNumberGenerator) -> int:
 	return int(alive[rng.randi() % alive.size()])
 
 
-## Zelfde parameters als page_warden_rt_sim.gd `_run`, zodat de gedeelde functies dezelfde tijden zien.
-static func _warden_rt(add_data: Dictionary) -> Object:
-	var sim: Object = PageWardenRt.new()
-	sim.set("_add_data", add_data)
-	sim.set("_params", {
-		"charge_time": SomData.CHARGE_TIME,
-		"anim": ANIM,
-		"approach": APPROACH,
-		"ally_spell_cd": SomData.ALLY_SPELL_CD,
-		"ally_heal_below": SomData.ALLY_HEAL_BELOW,
-		"ally_dmg_chance": SomData.ALLY_DAMAGE_SPELL_CHANCE,
-		"enemy_cd": SomData.ATTACK_COOLDOWN,
-		"telegraph": SomData.TELEGRAPH,
-		"enemy_dmg": SomData.ENEMY_DAMAGE_MULT,
-	})
-	return sim
+static func _enemy_mult(enemy_dmg: float) -> float:
+	if enemy_dmg <= 0.0:
+		return SomData.ENEMY_DAMAGE_MULT
+	return enemy_dmg
 
 
-static func _boss_fight(party: Array, seats: int, seed_val: int) -> Dictionary:
+static func _boss_fight(party: Array, seats: int, seed_val: int, enemy_dmg: float = -1.0) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_val
 	var boss: Dictionary = PageWardenBoss.stats_for_seats(seats)
@@ -576,7 +586,7 @@ static func _boss_fight(party: Array, seats: int, seed_val: int) -> Dictionary:
 	var threat: ThreatTable = ThreatTableSc.new()
 	var heroes := _runtime(party)
 	var add_data: Dictionary = Scaling.monster_stats((GameData.ENEMIES["papiergeest"] as Dictionary).duplicate(true), PageWardenBoss.BOSS_KEY)
-	var warden := _warden_rt(add_data)
+	var mult := _enemy_mult(enemy_dmg)
 	var adds: Array = []
 	var target := -1
 	var events: Array = []
@@ -593,15 +603,15 @@ static func _boss_fight(party: Array, seats: int, seed_val: int) -> Dictionary:
 		for ev in gf.take_events():
 			match str(ev.get("type", "")):
 				"telegraph_start":
-					target = int(warden.call("_choose", threat, heroes, bool(ev.get("ranged", false)), ticks))
+					target = _boss_choose(threat, heroes, bool(ev.get("ranged", false)), ticks)
 				"attack_hit":
-					warden.call("_boss_hit", heroes, boss, target, str(ev.get("id", "")), float(ev.get("power", 1.0)), rng)
+					_boss_hit(heroes, boss, target, str(ev.get("id", "")), float(ev.get("power", 1.0)), rng)
 				"adds":
-					warden.call("_spawn_adds", adds, ev.get("ids", []))
+					_spawn_adds(adds, ev.get("ids", []), add_data)
 				"stagger_break":
 					target = -1
-		_boss_heroes(warden, gf, heroes, adds, boss, rng, threat)
-		warden.call("_adds_tick", heroes, adds, target, rng)
+		_boss_heroes(gf, heroes, adds, boss, rng, threat)
+		_boss_adds(heroes, adds, target, rng, mult)
 		for hr in heroes:
 			if not bool(hr["downed"]) and int(hr["h"]["hp"]) <= 0:
 				hr["downed"] = true
@@ -616,12 +626,63 @@ static func _boss_fight(party: Array, seats: int, seed_val: int) -> Dictionary:
 		swings = _swing_total(heroes)
 	var alive_end := not _runtime_alive(heroes).is_empty()
 	var pools := _pool_hp(heroes)
-	(warden as Node).free()
 	return _fight_result(gf.is_dead(), alive_end, ticks, swings, quiet, pools.x, pools.y, _tail_log(events, ticks))
 
 
-## De slag is de keten. Doel, klap, spreuk en adds blijven in page_warden_rt_sim.gd.
-static func _boss_heroes(warden: Object, gf: PageWardenFight, heroes: Array, adds: Array, boss: Dictionary, rng: RandomNumberGenerator, threat: ThreatTable) -> void:
+## Zelfde opstelling als page_warden_rt_sim.gd. Lokaal, zodat die file niet aangeroepen wordt.
+static func _boss_choose(threat: ThreatTable, heroes: Array, ranged: bool, tick: int) -> int:
+	var rows: Array = []
+	for hr in heroes:
+		if int(hr["h"]["hp"]) <= 0:
+			continue
+		var dist := 40.0
+		match int(hr["slot"]):
+			1:
+				dist = 18.0
+			2:
+				dist = 28.0
+			3:
+				dist = 36.0
+		rows.append({"slot": int(hr["slot"]), "dist": dist})
+	rows.sort_custom(func(a, b):
+		if is_equal_approx(float(a["dist"]), float(b["dist"])):
+			return int(a["slot"]) < int(b["slot"])
+		return float(a["dist"]) < float(b["dist"]))
+	var ids: Array = []
+	var near: Array = []
+	for row in rows:
+		ids.append(int(row["slot"]))
+		if float(row["dist"]) <= 32.0:
+			near.append(int(row["slot"]))
+	return threat.choose(ids, near, ranged, tick)
+
+
+static func _boss_hit(heroes: Array, boss: Dictionary, target: int, id: String, power: float, rng: RandomNumberGenerator) -> void:
+	var victims: Array = []
+	for hr in heroes:
+		if int(hr["h"]["hp"]) <= 0:
+			continue
+		var slot := int(hr["slot"])
+		if id == "page_circle":
+			victims.append(hr)
+		elif id == "page_fan":
+			if slot == target or rng.randf() < FAN_SPLASH:
+				victims.append(hr)
+		elif slot == target:
+			victims.append(hr)
+	for hr in victims:
+		if float(hr["iframes"]) > 0.0:
+			continue
+		var dodge := DODGE_PLAYER if int(hr["slot"]) == 0 else DODGE_ALLY
+		if rng.randf() < dodge:
+			hr["iframes"] = float(SomData.DODGE_IFRAME_TICKS) * DT
+			continue
+		var dmg := SomArena.physical_damage(float(boss["atk"]), float(hr["def"]), power, rng)
+		_hurt(hr, dmg)
+
+
+## De slag is de keten. Doel, klap, spreuk en adds staan hier, niet in page_warden_rt_sim.gd.
+static func _boss_heroes(gf: PageWardenFight, heroes: Array, adds: Array, boss: Dictionary, rng: RandomNumberGenerator, threat: ThreatTable) -> void:
 	for hr in heroes:
 		if int(hr["h"]["hp"]) <= 0:
 			continue
@@ -631,7 +692,7 @@ static func _boss_heroes(warden: Object, gf: PageWardenFight, heroes: Array, add
 			continue
 		if int(hr["slot"]) > 0:
 			hr["spell_cd"] = float(hr["spell_cd"]) - DT
-			if float(hr["spell_cd"]) <= 0.0 and bool(warden.call("_ally_spell", gf, hr, heroes, boss, rng, threat)):
+			if float(hr["spell_cd"]) <= 0.0 and _boss_spell(gf, hr, heroes, boss, rng, threat):
 				hr["spell_cd"] = SomData.ALLY_SPELL_CD
 				hr["lock"] = ANIM
 				continue
@@ -658,6 +719,77 @@ static func _boss_heroes(warden: Object, gf: PageWardenFight, heroes: Array, add
 		else:
 			live[0]["hp"] = int(live[0]["hp"]) - dmg
 		_commit_swing(hr, plan)
+
+
+static func _boss_spell(gf: PageWardenFight, hr: Dictionary, heroes: Array, boss: Dictionary, rng: RandomNumberGenerator, threat: ThreatTable) -> bool:
+	var h: Dictionary = hr["h"]
+	for s in h.get("spells", []):
+		var sp: Dictionary = GameData.SPELLS.get(str(s), {})
+		if sp.is_empty() or int(h["mp"]) < int(sp.get("mp", 0)):
+			continue
+		if str(sp.get("type", "")) == "heal":
+			var low: Dictionary = {}
+			var lr := SomData.ALLY_HEAL_BELOW
+			for o in heroes:
+				var ratio := float(o["h"]["hp"]) / maxf(1.0, float(o["h"]["max_hp"]))
+				if int(o["h"]["hp"]) > 0 and ratio < lr:
+					lr = ratio
+					low = o["h"]
+			if low.is_empty():
+				continue
+			h["mp"] = int(h["mp"]) - int(sp["mp"])
+			var gain := roundi(DamageCalc.spell_base({"s": h, "is_hero": true, "buffs": []}, sp, {}))
+			var before := int(low["hp"])
+			low["hp"] = mini(int(low["max_hp"]), before + gain)
+			threat.note_heal(int(hr["slot"]), int(low["hp"]) - before, PageWardenBoss.is_tank(str(h["id"])))
+			return true
+		if str(sp.get("type", "")) == "damage" and rng.randf() < SomData.ALLY_DAMAGE_SPELL_CHANCE and not gf.is_invulnerable():
+			h["mp"] = int(h["mp"]) - int(sp["mp"])
+			var amt := DamageCalc.spell_base({"s": h, "is_hero": true, "buffs": []}, sp, {"s": boss})
+			var dealt := gf.damage(maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))))
+			if dealt > 0:
+				threat.note_damage(int(hr["slot"]), dealt, PageWardenBoss.is_tank(str(h["id"])))
+			return true
+	return false
+
+
+static func _spawn_adds(adds: Array, ids: Array, add_data: Dictionary) -> void:
+	var living := 1
+	for a in adds:
+		if int(a["hp"]) > 0:
+			living += 1
+	var kept: Array = PageWardenBoss.clamp_adds(living, ids, PageWardenBoss.SNAPSHOT_ENEMY_BUDGET)
+	for id in kept:
+		if str(id) != "papiergeest":
+			continue
+		adds.append({
+			"d": add_data, "hp": int(add_data["max_hp"]), "approach": APPROACH, "tele": 0.0, "cd": 0.4,
+		})
+
+
+static func _boss_adds(heroes: Array, adds: Array, target: int, rng: RandomNumberGenerator, enemy_dmg: float) -> void:
+	for e in adds:
+		if int(e["hp"]) <= 0:
+			continue
+		if float(e["approach"]) > 0.0:
+			e["approach"] = float(e["approach"]) - DT
+			continue
+		if float(e["tele"]) > 0.0:
+			e["tele"] = float(e["tele"]) - DT
+			if float(e["tele"]) <= 0.0:
+				e["cd"] = SomData.ATTACK_COOLDOWN
+				var hr := _runtime_slot(heroes, target if target >= 0 else 0)
+				if hr.is_empty() or int(hr["h"]["hp"]) <= 0 or float(hr["iframes"]) > 0.0:
+					continue
+				var dodge := DODGE_PLAYER if int(hr["slot"]) == 0 else DODGE_ALLY
+				if rng.randf() >= dodge:
+					var dmg := roundi(SomArena.physical_damage(float(e["d"]["atk"]), float(hr["def"]), 1.0, rng) * enemy_dmg)
+					_hurt(hr, dmg)
+			continue
+		if float(e["cd"]) > 0.0:
+			e["cd"] = float(e["cd"]) - DT
+			continue
+		e["tele"] = SomData.TELEGRAPH
 
 
 static func _hurt(hr: Dictionary, dmg: int) -> void:
@@ -977,12 +1109,22 @@ static func grant_exp(party: Array, amount: int) -> void:
 
 
 static func rest_heal(party: Array) -> void:
+	floor_heal_living(party, 100)
+
+
+## Procent van max HP en max MP erbij, alleen voor levenden. 0 doet niets. 100 vult bij.
+static func floor_heal_living(party: Array, pct: int) -> void:
+	var p := clampi(pct, 0, 100)
+	if p <= 0:
+		return
 	for h in party:
 		var hero: Dictionary = h
 		if int(hero["hp"]) <= 0:
 			continue
-		hero["hp"] = int(hero["max_hp"])
-		hero["mp"] = int(hero["max_mp"])
+		var add_hp := int(round(float(hero["max_hp"]) * float(p) / 100.0))
+		var add_mp := int(round(float(hero["max_mp"]) * float(p) / 100.0))
+		hero["hp"] = mini(int(hero["max_hp"]), int(hero["hp"]) + add_hp)
+		hero["mp"] = mini(int(hero["max_mp"]), int(hero["mp"]) + add_mp)
 
 
 static func level_of(party: Array) -> int:
@@ -1071,6 +1213,8 @@ static func _level_for_exp(exp: int) -> int:
 static func signature(result: Dictionary) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append("m=%s" % str(result.get("mode", "")))
+	parts.append("dmg=%d" % int(round(float(result.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT)) * 1000.0)))
+	parts.append("heal=%d" % int(result.get("floor_heal", 0)))
 	parts.append("b=%d" % int(result.get("base_seed", 0)))
 	parts.append("r=%d" % int(result.get("runs", 0)))
 	parts.append("f=%d" % int(result.get("floors", 0)))
@@ -1162,15 +1306,16 @@ static func markdown(result: Dictionary, cfg: Dictionary, classic: Dictionary, m
 				_pct_plain(int(fl["hp_end_sum"]), int(fl["hp_end_max"])),
 			]
 	s += "\n## Wat de sim gelijk doet aan de online Easy-run\n\n"
-	s += "- Tussen vloeren blijven HP en MP staan. Alleen rustvloer 5 (BookPoint.restore) vult levenden bij. Wie op 0 staat, blijft liggen.\n"
+	s += "- Zonder `--floor_heal` blijven HP en MP staan tussen vloeren. Rustvloer 5 (BookPoint.restore) vult levenden bij. Wie op 0 staat, blijft liggen.\n"
 	s += "- Eén down is geen verlies. De vloer eindigt als de vijanden dood zijn, als iedereen op 0 ligt, of op de tick-cap.\n"
 	s += "- Feniksveer en drankjes zijn een handmatige ring-actie (`PartyActions.use_item`). De bondgenoot-AI gebruikt ze niet. Deze sim ook niet. M8a ontbreekt, dus geen automatische revive.\n"
 	s += "- EXP valt per verslagen vijand, vol, aan elke levende held, meteen (`give_exp`). Een level-up vult HP bij met de groei.\n"
 	s += "- Aanvalsketen zoals `som_ally.gd`: hit1 ×1.0, hit2 ×1.1, finisher ×1.6, vervolg %d ticks na de animatie (venster %d). " % [Chain.ALLY_FOLLOWUP_TICKS, Chain.CHAIN_WINDOW_TICKS]
 	s += "De host ketent hetzelfde. Na de finisher laadt een AI-bondgenoot een zware slag niveau %d (%d ticks, ×%.1f).\n" % [Heavy.ALLY_LEVEL, int(Heavy.LEVEL_TICKS[0]), Heavy.damage_mult(Heavy.ALLY_LEVEL)]
-	s += "- Page Warden: doelkeuze, klapvorm, bondgenoot-spreuk en adds komen uit `page_warden_rt_sim.gd`. De slag zelf blijft de keten; die sim laadt nog een volle meter.\n"
+	s += "- Page Warden: doelkeuze, klapvorm, bondgenoot-spreuk en adds staan in deze sim, dezelfde regels als `page_warden_rt_sim.gd`, zonder die file aan te roepen. De slag zelf blijft de keten; die sim laadt nog een volle meter.\n"
 	s += "- Doel is een vijand die al aangekomen is. Een nog lopende vijand verspilt de slag niet.\n"
-	s += "- Vijandschade × `ENEMY_DAMAGE_MULT` %.1f, dezelfde factor als `enemy_damage_mult` op een kamer zonder gebiedsregel.\n\n" % SomData.ENEMY_DAMAGE_MULT
+	s += "- Vijandschade in deze sim × %.1f. Het spel blijft `ENEMY_DAMAGE_MULT` %.1f. De klap van de Page Warden zelf gebruikt die factor niet; de adds wel.\n" % [float(result.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT)), SomData.ENEMY_DAMAGE_MULT]
+	s += "- Tussen vloeren: levenden krijgen %d%% van max HP en max MP erbij (0 = niets extra). Neergegane helden blijven liggen. Rustvloer 5 vult daarna alsnog bij.\n\n" % int(result.get("floor_heal", 0))
 	s += _example_section(result)
 	s += "\n## Page Warden (klim)\n\n"
 	s += "Alleen wie de troep op de baasvloer overleeft, vecht de baas. Level is dán (na de EXP van die troep). Winst-alle-runs telt een run die de baas niet haalt als verlies.\n\n"
@@ -1224,6 +1369,7 @@ static func markdown(result: Dictionary, cfg: Dictionary, classic: Dictionary, m
 	for fac in factors:
 		s += " %d" % int(fac)
 	s += ". Voor Easy is 100/N hetzelfde getal als 10; de andere waarden zijn extra kandidaten, geen nieuwe standaard.\n\n"
+	s += _pw_summary(result)
 	s += "## Aanbeveling (voorstel)\n\n"
 	s += "<!-- AANBEVELING -->\n"
 	s += "In te vullen bij deze run. Geen getal in dit bestand is canon.\n"
@@ -1275,12 +1421,59 @@ static func _command(cfg: Dictionary) -> String:
 		extra += " --no-hypo"
 	if not bool(cfg.get("classic_ref", true)):
 		extra += " --no-classic"
+	extra += " --easy_enemy_dmg=%s --floor_heal=%d" % [
+		_fmt_mult(float(cfg.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT))),
+		clampi(int(cfg.get("floor_heal", 0)), 0, 100),
+	]
 	var out := str(cfg.get("out", ""))
 	if out != "":
 		extra += " --out=%s" % out
 	return "xvfb-run -a godot --rendering-driver opengl3 --path . -- --d100modesim --mode=%s --factors=%s --seats=%s --runs=%d --seed=%d --floors=%d%s" % [
 		str(cfg.get("mode", "easy")), ",".join(bits), ",".join(sb), int(cfg.get("runs", DEFAULT_RUNS)),
 		int(cfg.get("base_seed", DEFAULT_SEED)), int(cfg.get("floors", 10)), extra]
+
+
+static func _pw_summary(result: Dictionary) -> String:
+	var runs := int(result.get("runs", 0))
+	var s := "## PW per stoel\n\n"
+	s += "Sim-only. `easy_enemy_dmg` %.1f vervangt hier `ENEMY_DAMAGE_MULT` %.1f. " % [
+		float(result.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT)), SomData.ENEMY_DAMAGE_MULT]
+	s += "`floor_heal` %d is procent van max HP/MP erbij voor levenden, tussen vloeren, vóór het rustpunt. " % int(result.get("floor_heal", 0))
+	s += "Neergegane helden blijven liggen. Verste wipe is de hoogste vloer met een wipe. Winst-alle telt een gemiste baas als verlies.\n\n"
+	s += "| dmg | heal | stoelen | PW bereikt | winst aankomst | winst alle | level | duur s | verste wipe |\n"
+	s += "|---|---|---|---|---|---|---|---|---|\n"
+	for row in result.get("rows", []):
+		var fl := _boss_floor(row)
+		if fl.is_empty():
+			continue
+		var far := _furthest_wipe(row)
+		s += "| %s | %d | %d | %d/%d | %s | %s | %s | %s | %s |\n" % [
+			_fmt_mult(float(result.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT))),
+			int(result.get("floor_heal", 0)),
+			int(row["seats"]),
+			int(fl["boss_entered"]), runs,
+			_pct(int(fl["boss_wins"]), int(fl["boss_entered"])),
+			_pct(int(fl["boss_wins"]), runs),
+			_lvl(int(fl["boss_level_sum"]), int(fl["boss_entered"])),
+			_sec(int(fl["boss_ticks"]), int(fl["boss_entered"])),
+			str(far) if far > 0 else "—",
+		]
+	s += "\n"
+	return s
+
+
+static func _furthest_wipe(row: Dictionary) -> int:
+	var far := 0
+	for fl in row.get("floors", []):
+		if int(fl.get("cause_wipe", 0)) > 0:
+			far = maxi(far, int(fl["floor"]))
+	return far
+
+
+static func _fmt_mult(v: float) -> String:
+	if v <= 0.0:
+		v = SomData.ENEMY_DAMAGE_MULT
+	return "%.1f" % v
 
 
 static func _lvl(sum: int, n: int) -> String:
