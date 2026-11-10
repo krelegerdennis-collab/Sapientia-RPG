@@ -75,10 +75,18 @@ enum BinKind {
 ## Losse poort voor headless sync-tests (geen botsing met een lopende lobby).
 const SYNC_TEST_PORT := 38424
 
-## Vlaggen per speler in snapshots (u16).
+## Vlaggen per speler in de snapshot (u16 op offset 9, geen extra byte).
+## M3 leest dit als hij RUN_RESULT / REWARD_BUNDLE in net_codec bouwt.
+## Dit bestand voegt dat pakket niet toe.
+## Lage byte: RING_OPEN=1, ATTACK=2, DOWN=4, CHANNEL=8, BLEED_DONE=16.
+## Hoge byte: kanaal-voortgang 0..100, alleen gezet op de liggende stoel.
 const FLAG_RING_OPEN := 1
 const FLAG_ATTACK := 2
 const FLAG_DOWN := 4
+## Hulp-stoel die een revive kanaliseert (M8a). Lage byte, naast DOWN.
+const FLAG_CHANNEL := 8
+## Bleed-timer is afgelopen; de stoel blijft liggen (VOORSTEL, geen permadeath).
+const FLAG_BLEED_DONE := 16
 
 enum Refuse {
 	NONE = 0,

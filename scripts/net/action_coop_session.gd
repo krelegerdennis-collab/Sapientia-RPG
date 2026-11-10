@@ -5,10 +5,13 @@ extends Node
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 const Sim := preload("res://scripts/net/action_sandbox_sim.gd")
+const Revive := preload("res://scripts/coop/coop_revive.gd")
 
 signal slot_removed(slot: int)
 signal snapshot_applied(tick: int)
 signal link_lost
+## Run voorbij: "wipe" als elke stoel tegelijk down is. Het resultaatscherm komt later.
+signal run_result(kind: String)
 
 var is_host := false
 var local_slot := Protocol.NO_SLOT
@@ -34,6 +37,7 @@ var _lock_idx := -1
 var _peer_to_slot: Dictionary = {}
 var _tick := 0
 var _skip_arena_poll := false
+var _result_sent := false
 ## Teller voor INPUT van peers buiten de roster (anti-spoof / join-race).
 var unknown_input_peer_drops := 0
 
@@ -169,6 +173,7 @@ func _host_frame(delta: float) -> void:
 			if sim.tick % (Protocol.SIM_HZ / Protocol.SNAPSHOT_HZ) == 0:
 				_broadcast_snapshot(sim.encode_snapshot())
 		_inputs.clear()
+		poll_result()
 
 
 func _guest_frame(delta: float) -> void:
@@ -178,6 +183,20 @@ func _guest_frame(delta: float) -> void:
 		_input_send_acc -= input_dt
 		_send_input_packet()
 	_apply_interpolation(delta)
+
+
+func poll_result() -> void:
+	if _result_sent:
+		return
+	var wiped := false
+	if arena_drive and arena != null and bool(arena.get("coop_wiped")):
+		wiped = true
+	elif sim != null and bool(sim.get("wiped")):
+		wiped = true
+	if not wiped:
+		return
+	_result_sent = true
+	run_result.emit(Revive.RESULT_WIPE)
 
 
 func _collect_local_input() -> void:

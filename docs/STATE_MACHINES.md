@@ -81,6 +81,8 @@ Bekende losse eindjes (bewust niet veranderd): `"win"`/`"lose"` zijn **geen** ba
 
 Per tick opnieuw bepaald (geen geheugen behalve KO): `niet alive → ko`; `laag HP én vijand → flee`;
 `vijand → engage`; anders `follow`. KO is de enige toestand met in/uit-werk (grijs/plat zetten).
+Online co-op revive is geen extra toestand: een levende SomAlly blijft `follow` terwijl hij naar een
+down-stoel loopt (`CoopRevive`). De set `follow/engage/flee/ko` blijft dus gelijk.
 
 ## §4 Kern-absorptie — `kern_absorption.gd`
 

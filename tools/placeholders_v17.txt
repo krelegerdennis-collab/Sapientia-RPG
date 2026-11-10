@@ -115,3 +115,7 @@ assets/sprites/binnen/slaapkamer_kast_PLACEHOLDER.png  24x32   slaapkamerkast Da
 # T18 aanvalsketen (combat T15): hit2 + finisher hergebruiken <held>_attack.png met ander tempo (SomChainData.STEP_MS). TODO RPG ART.
 # WM1 T2 Donker Woud 16x16 tegels (tools/woud_tegels_placeholders.py). Magenta hoekjes, geen definitieve art.
 # Vervangen: zie docs/art/woud_tiles_16px.md en data/woud_tegels.json (alleen "file").
+# Online co-op revive-kanaal (M8a): PLACEHOLDER, in code getekend.
+# scripts/coop/coop_revive_ring.gd — magenta boog + letters PH, eigen CanvasLayer (buiten CanvasModulate).
+# Geen bestand. Geen definitieve art.
+# Echte art later: assets/sprites/coop/revive_ring.png  32x32  voortgangsboog om een liggende stoel.

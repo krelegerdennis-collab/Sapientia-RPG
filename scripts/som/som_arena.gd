@@ -30,6 +30,8 @@ signal action_resolved(text: String)
 ## Begin van elke vaste stap (vóór input en AI). Voor bots/AI-stoelen en tests: input die hier wordt gezet,
 ## verbruikt dezelfde stap.
 signal sim_ticked(tick: int)
+## Online co-op: de run eindigt pas als elke stoel down is. "wipe" gaat later naar het resultaatscherm.
+signal coop_run_result(kind: String)
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const BossScript := preload("res://scripts/som/boss_script.gd")
@@ -109,6 +111,12 @@ var coop_ring_no_pause := false
 var coop_mode := false
 var coop_sim_host := false
 var coop_local_slot := -1
+## Wipe alleen als elke meewerkende stoel down is. Solo blijft arena.down + _party_down.
+var coop_wiped := false
+var coop_wipe_tick := -1
+var _coop_tick := 0
+var _coop_down: Dictionary = {}
+var coop_ring: CoopReviveRing
 var _coop_slots: Dictionary = {}
 var _coop_avatars: Dictionary = {}
 var _coop_lock_idx: Dictionary = {}
@@ -1855,7 +1863,7 @@ func hit_member(id: String, atk: int, power: float = 1.0, root_ticks: int = 0) -
 	if root_ticks > 0 and _roots_authority():
 		combat_roots.try_apply_root(id, root_ticks)
 	if int(h["hp"]) <= 0:
-		_member_ko(id)
+		on_member_hp_zero(id)
 
 
 ## Zone-DoT (T4b): respecteert iframes, zet geen nieuwe hit-invuln.
@@ -1873,7 +1881,7 @@ func hit_member_zone_dot(id: String, atk: int, power: float) -> void:
 	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(0.55, 0.45, 0.95))
 	player_hit.emit(dmg)
 	if int(h["hp"]) <= 0:
-		_member_ko(id)
+		on_member_hp_zero(id)
 
 
 ## Klap tijdens iframes: ontwijk-pose (geen schade). Telt mee in dodges (tests).
@@ -2025,6 +2033,226 @@ func _tick_ally_dodge_ai(ally: Node) -> void:
 		return
 
 
+func on_member_hp_zero(id: String) -> void:
+	if coop_mode:
+		_coop_sync_down_rows()
+		var slot := _slot_for_hero(id)
+		if slot == Protocol.NO_SLOT:
+			return
+		var row: Dictionary = _coop_down[slot]
+		row["hp"] = 0
+		if not bool(row.get("down", false)):
+			CoopRevive.enter_down(row)
+			_coop_show_ko(slot, id, true)
+			member_down.emit(id)
+		_coop_finish_wipe_check()
+		return
+	_member_ko(id)
+
+
+func coop_down_rows() -> Array:
+	var out: Array = []
+	for slot in _coop_down.keys():
+		out.append(_coop_down[slot])
+	if allies_enabled:
+		_coop_append_ally_rows(out)
+	return out
+
+
+func _coop_sync_down_rows() -> void:
+	for slot in _coop_slots.keys():
+		var s := int(slot)
+		var hid := str(_coop_slots[slot])
+		if not _coop_down.has(s):
+			_coop_down[s] = CoopSeat.make(s, hid, CoopSeat.CONTROLLER_HUMAN)
+		var row: Dictionary = _coop_down[s]
+		row["active"] = true
+		row["participate"] = true
+		row["hero_id"] = hid
+		row["character_id"] = hid
+		if str(row.get("base_hero", "")) == "":
+			row["base_hero"] = hid
+		var body := _coop_body(s)
+		if body != null:
+			row["x"] = int(body.position.x)
+			row["y"] = int(body.position.y)
+		var h := member(hid)
+		if h.is_empty():
+			if not bool(row.get("hp_ready", false)):
+				row["hp"] = 1
+				row["max_hp"] = 1
+				row["hp_ready"] = true
+		else:
+			row["max_hp"] = maxi(1, int(h.get("max_hp", 1)))
+			row["hp_ready"] = true
+			if bool(row.get("down", false)) and int(h.get("hp", 0)) > 0:
+				row["hp"] = int(h["hp"])
+			elif not bool(row.get("down", false)):
+				row["hp"] = int(h.get("hp", 0))
+
+
+func _coop_append_ally_rows(rows: Array) -> void:
+	# M6: een AI-stoel hoort op slot 0..3 met controller "ai" (CoopSeat).
+	# Deze tak is de bestaande SomAlly, testbaar met allies_enabled, tot M6 hem op een roster-slot zet.
+	var n := 0
+	for ally in allies:
+		if not is_instance_valid(ally):
+			continue
+		var hid := str(ally.hero_id)
+		var stored: Dictionary = ally.coop_row if ally.get("coop_row") is Dictionary else {}
+		if stored.is_empty():
+			stored = CoopSeat.make(Protocol.MAX_PLAYERS + n, hid, CoopSeat.CONTROLLER_ALLY)
+			ally.coop_row = stored
+		stored["slot"] = Protocol.MAX_PLAYERS + n
+		stored["active"] = true
+		stored["participate"] = true
+		stored["hero_id"] = hid
+		stored["character_id"] = hid
+		stored["base_hero"] = hid
+		stored["x"] = int(ally.position.x)
+		stored["y"] = int(ally.position.y)
+		var h := member(hid)
+		if not h.is_empty():
+			stored["max_hp"] = maxi(1, int(h.get("max_hp", 1)))
+			if bool(stored.get("down", false)) and int(h.get("hp", 0)) > 0:
+				stored["hp"] = int(h["hp"])
+			elif not bool(stored.get("down", false)):
+				stored["hp"] = int(h.get("hp", 0))
+		rows.append(stored)
+		n += 1
+
+
+func _coop_revive_host_tick() -> void:
+	if not coop_mode or not coop_sim_host or coop_wiped:
+		return
+	_coop_tick += 1
+	_coop_sync_down_rows()
+	var rows := coop_down_rows()
+	var all_down := CoopRevive.step(rows, coop_wiped)
+	for row in rows:
+		if int(row.get("slot", 99)) >= Protocol.MAX_PLAYERS:
+			var h := member(str(row.get("hero_id", "")))
+			if not h.is_empty():
+				h["hp"] = int(row.get("hp", 0))
+			continue
+		var hid := str(row.get("hero_id", ""))
+		var h2 := member(hid)
+		if not h2.is_empty():
+			h2["hp"] = int(row.get("hp", 0))
+		_coop_show_ko(int(row.get("slot", -1)), hid, bool(row.get("down", false)))
+	_coop_stamp_flags()
+	_coop_update_ring(rows)
+	if all_down:
+		_coop_finish_wipe_check()
+
+
+func _coop_stamp_flags() -> void:
+	for slot in _coop_down.keys():
+		var row: Dictionary = _coop_down[slot]
+		var low := Protocol.FLAG_RING_OPEN if ring != null and ring.is_open and int(slot) == coop_local_slot else 0
+		row["flags"] = low
+	var rows := coop_down_rows()
+	CoopRevive.write_flags(rows)
+
+
+func _coop_update_ring(rows: Array) -> void:
+	_ensure_coop_ring()
+	if coop_ring == null:
+		return
+	var best := 0
+	var pos := Vector2.ZERO
+	for row in rows:
+		if not bool(row.get("down", false)):
+			continue
+		var pct := CoopRevive.flag_progress(int(row.get("flags", 0)))
+		if pct >= best:
+			best = pct
+			pos = Vector2(float(row.get("x", 0)), float(row.get("y", 0)))
+	coop_ring.show_channel(pos, best)
+
+
+func _coop_finish_wipe_check() -> void:
+	if coop_wiped:
+		return
+	if not CoopRevive.everyone_down(coop_down_rows()):
+		return
+	coop_wiped = true
+	coop_wipe_tick = _coop_tick
+	coop_run_result.emit(CoopRevive.RESULT_WIPE)
+
+
+func _coop_input_blocked(slot: int) -> bool:
+	if not _coop_down.has(slot):
+		return false
+	var row: Dictionary = _coop_down[slot]
+	if not bool(row.get("hp_ready", false)):
+		return false
+	return bool(row.get("down", false)) or int(row.get("hp", 1)) <= 0
+
+
+func _coop_show_ko(slot: int, hero_id: String, on: bool) -> void:
+	var body := _coop_body(slot)
+	if body == null:
+		return
+	SomFx.set_ko(body, pose_tex(hero_id, "ko"), on)
+
+
+func _coop_clear_down_hero(id: String) -> void:
+	if not coop_mode:
+		return
+	_coop_sync_down_rows()
+	var slot := _slot_for_hero(id)
+	if slot == Protocol.NO_SLOT or not _coop_down.has(slot):
+		return
+	var row: Dictionary = _coop_down[slot]
+	var h := member(id)
+	if not h.is_empty():
+		row["hp"] = int(h.get("hp", 0))
+		row["max_hp"] = maxi(1, int(h.get("max_hp", 1)))
+	if int(row.get("hp", 0)) <= 0:
+		return
+	CoopRevive.clear_down(row)
+	_coop_show_ko(slot, id, false)
+	if coop_ring != null:
+		coop_ring.show_channel(Vector2.ZERO, 0)
+
+
+func _coop_apply_guest_down(slot: int, hero_id: String, body: Node2D, flags: int) -> void:
+	var is_down := CoopRevive.flag_is_down(flags)
+	SomFx.set_ko(body, pose_tex(hero_id, "ko"), is_down)
+	if not _coop_down.has(slot):
+		_coop_down[slot] = CoopSeat.make(slot, hero_id, CoopSeat.CONTROLLER_HUMAN)
+	var row: Dictionary = _coop_down[slot]
+	row["down"] = is_down
+	row["flags"] = flags
+	row["x"] = int(body.position.x)
+	row["y"] = int(body.position.y)
+
+
+func _coop_guest_ring() -> void:
+	_ensure_coop_ring()
+	if coop_ring == null:
+		return
+	var best := 0
+	var pos := Vector2.ZERO
+	for slot in _coop_down.keys():
+		var row: Dictionary = _coop_down[slot]
+		if not bool(row.get("down", false)):
+			continue
+		var pct := CoopRevive.flag_progress(int(row.get("flags", 0)))
+		if pct >= best:
+			best = pct
+			pos = Vector2(float(row.get("x", 0)), float(row.get("y", 0)))
+	coop_ring.show_channel(pos, best)
+
+
+func _ensure_coop_ring() -> void:
+	if coop_ring != null and is_instance_valid(coop_ring):
+		return
+	coop_ring = CoopReviveRing.new()
+	add_child(coop_ring)
+
+
 ## Held KO: bondgenoot blijft liggen (som_ally.gd); bestuurde held -> wissel naar de volgende levende.
 ## Niemand meer over = game over.
 func _feel_local_hero(id: String) -> bool:
@@ -2102,6 +2330,8 @@ func resolve(q: Dictionary) -> String:
 		var r: Dictionary = PartyActions.use_item(GameState.inventory, str(q["id"]), target)
 		text = str(r.get("text", ""))
 		if int(r.get("hp", 0)) > 0:
+			if coop_mode:
+				_coop_clear_down_hero(str(target.get("id", "")))
 			SomFx.number(room.get_node("Objects"), body_of(str(target.get("id", ""))) + Vector2(0, -22), "+%d" % int(r["hp"]), Color(0.4, 1, 0.5))
 			heal_glow(str(target.get("id", "")))
 	elif str(q.get("kind", "")) == "codex":
@@ -2364,6 +2594,9 @@ const CoopAvatar := preload("res://scripts/coop/coop_avatar.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
+const CoopRevive := preload("res://scripts/coop/coop_revive.gd")
+const CoopReviveRing := preload("res://scripts/coop/coop_revive_ring.gd")
+const CoopSeat := preload("res://scripts/coop/coop_seat.gd")
 
 
 func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
@@ -2383,6 +2616,8 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 	_rebuild_enemy_order()
 	_clear_coop_avatars()
 	coop_sync_roster(roster)
+	_ensure_coop_ring()
+	_coop_sync_down_rows()
 	if not coop_sim_host:
 		player.set_analog(func() -> Vector2: return Vector2.ZERO, SomData.MOVE_SPEED)
 
@@ -2678,6 +2913,7 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 	_tick_stamina_and_dodge()
 	_sim_world(dt)
 	_rebuild_enemy_order()
+	_coop_revive_host_tick()
 
 
 func _apply_coop_input(inp: Dictionary, dt: float) -> void:
@@ -2686,6 +2922,8 @@ func _apply_coop_input(inp: Dictionary, dt: float) -> void:
 		return
 	var body: Node2D = _coop_body(slot)
 	if body == null:
+		return
+	if _coop_input_blocked(slot):
 		return
 	var stick: Vector2 = inp.get("stick", Vector2.ZERO)
 	if stick.length_squared() > 0.01:
@@ -2733,6 +2971,8 @@ func _enemy_index(m: Node) -> int:
 
 
 func coop_encode_snapshot(tick: int) -> PackedByteArray:
+	_coop_sync_down_rows()
+	_coop_stamp_flags()
 	var players: Array = []
 	for slot in _coop_slots.keys():
 		var body: Node2D = _coop_body(int(slot))
@@ -2740,6 +2980,11 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 			continue
 		var hid := str(_coop_slots[slot])
 		var h := member(hid)
+		var flags := 0
+		if _coop_down.has(int(slot)):
+			flags = int((_coop_down[int(slot)] as Dictionary).get("flags", 0))
+		elif ring.is_open and int(slot) == coop_local_slot:
+			flags = Protocol.FLAG_RING_OPEN
 		players.append({
 			"slot": int(slot),
 			"x": int(body.position.x),
@@ -2748,7 +2993,7 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 			"frame": 0,
 			"hp": int(h.get("hp", 0)),
 			"mp": combat_stamina.wire_stamina(hid),
-			"flags": Protocol.FLAG_RING_OPEN if ring.is_open and int(slot) == coop_local_slot else 0,
+			"flags": flags,
 		})
 	var elist: Array = []
 	_rebuild_enemy_order()
@@ -2804,6 +3049,10 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 						shake.kick("heavy1")
 				h["hp"] = new_hp
 				combat_stamina.set_current(hid, int(row.get("mp", combat_stamina.current(hid))))
+			if not coop_sim_host:
+				_coop_apply_guest_down(slot, hid, body, int(row.get("flags", 0)))
+	if not coop_sim_host:
+		_coop_guest_ring()
 	for row in snap.get("enemies", []):
 		var idx := int(row.get("idx", -1))
 		if idx < 0 or idx >= _enemy_order.size():

@@ -4,6 +4,8 @@ extends RefCounted
 
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
+const Revive := preload("res://scripts/coop/coop_revive.gd")
+const Seat := preload("res://scripts/coop/coop_seat.gd")
 
 const TICK_DT := 1.0 / float(Protocol.SIM_HZ)
 const MOVE_SPEED := 48.0
@@ -20,10 +22,15 @@ var tick: int = 0
 var players: Array[Dictionary] = []
 var enemies: Array[Dictionary] = []
 var _rng := RandomNumberGenerator.new()
+## Eerste tick waarop elke actieve stoel down is. -1 = de run loopt nog.
+var wiped := false
+var wipe_tick := -1
 
 
 func reset(seats: Array, seed: int = 0) -> void:
 	tick = 0
+	wiped = false
+	wipe_tick = -1
 	players.clear()
 	enemies.clear()
 	_rng.seed = seed if seed != 0 else 1337
@@ -33,6 +40,9 @@ func reset(seats: Array, seed: int = 0) -> void:
 			if int(s.get("slot", Protocol.NO_SLOT)) == slot:
 				row["active"] = true
 				row["character_id"] = str(s.get("character_id", ""))
+				row["hero_id"] = row["character_id"]
+				row["base_hero"] = str(s.get("base_hero", row["character_id"]))
+				row["controller"] = str(s.get("controller", Seat.CONTROLLER_HUMAN))
 				row["x"] = 80 + slot * 24
 				row["y"] = 96
 				break
@@ -60,10 +70,23 @@ func _empty_player(slot: int) -> Dictionary:
 		"face": 0,
 		"frame": 0,
 		"hp": PLAYER_HP,
+		"max_hp": PLAYER_HP,
 		"mp": 30,
 		"flags": 0,
 		"lock_idx": -1,
 		"attack_cd": 0.0,
+		"base_hero": "",
+		"controller": Seat.CONTROLLER_HUMAN,
+		"participate": true,
+		"down": false,
+		"bleed_ticks": 0,
+		"bleed_expired": false,
+		"channel_ticks": 0,
+		"channel_target": -1,
+		"channel_seen": 0,
+		"hit_seq": 0,
+		"iframes": 0,
+		"hp_ready": true,
 	}
 
 
@@ -85,6 +108,10 @@ func host_tick(inputs: Array) -> void:
 			p["attack_cd"] = maxf(0.0, float(p["attack_cd"]) - TICK_DT)
 			_auto_lock(p)
 	_enemy_step()
+	var all_down := Revive.step(players, wiped)
+	if all_down and not wiped:
+		wiped = true
+		wipe_tick = tick
 	_pack_flags()
 
 
@@ -94,6 +121,8 @@ func _apply_input(inp: Dictionary) -> void:
 		return
 	var p: Dictionary = players[slot]
 	if not bool(p["active"]):
+		return
+	if bool(p.get("down", false)) or int(p.get("hp", 0)) <= 0:
 		return
 	var stick: Vector2 = inp.get("stick", Vector2.ZERO)
 	if stick.length_squared() > 0.01:
@@ -143,11 +172,17 @@ func _enemy_step() -> void:
 	var host := players[Protocol.HOST_SLOT]
 	if not bool(host.get("active", false)):
 		return
-	var target := Vector2(float(host["x"]), float(host["y"]))
+	var victim: Dictionary = host
+	if int(host.get("hp", 0)) <= 0 or bool(host.get("down", false)):
+		var alt := _first_living_other(Protocol.HOST_SLOT)
+		if alt.is_empty():
+			return
+		victim = alt
+	var target := Vector2(float(victim["x"]), float(victim["y"]))
 	for e in enemies:
 		if int(e["hp"]) <= 0:
 			continue
-		e["target_slot"] = Protocol.HOST_SLOT
+		e["target_slot"] = int(victim.get("slot", Protocol.HOST_SLOT))
 		var pos := Vector2(float(e["x"]), float(e["y"]))
 		var d := pos.distance_to(target)
 		if d > 4.0:
@@ -156,7 +191,8 @@ func _enemy_step() -> void:
 			e["y"] = int(round(float(e["y"]) + step.y))
 		e["cd"] = maxf(0.0, float(e.get("cd", 0.0)) - TICK_DT)
 		if d <= ATTACK_RANGE and float(e["cd"]) <= 0.0:
-			host["hp"] = maxi(0, int(host["hp"]) - ENEMY_DMG)
+			if int(victim.get("iframes", 0)) <= 0:
+				_damage_row(victim, ENEMY_DMG)
 			e["cd"] = 0.8
 
 
@@ -197,9 +233,39 @@ func _face_from_dir(dir: Vector2) -> int:
 
 
 func _pack_flags() -> void:
+	Revive.write_flags(players)
+
+
+func hurt_seat(slot: int, amount: int) -> void:
+	if slot < 0 or slot >= players.size():
+		return
+	_damage_row(players[slot], amount)
+
+
+func use_phoenix(helper_slot: int, target_slot: int) -> bool:
+	return Revive.phoenix(players, helper_slot, target_slot)
+
+
+func apply_rest() -> void:
+	Revive.apply_rest(players)
+
+
+func _damage_row(row: Dictionary, amount: int) -> void:
+	if int(row.get("iframes", 0)) > 0 or amount <= 0:
+		return
+	var before := int(row.get("hp", 0))
+	row["hp"] = maxi(0, before - amount)
+	if int(row["hp"]) < before:
+		row["hit_seq"] = int(row.get("hit_seq", 0)) + 1
+
+
+func _first_living_other(skip: int) -> Dictionary:
 	for p in players:
-		if int(p["hp"]) <= 0:
-			p["flags"] = int(p["flags"]) | Protocol.FLAG_DOWN
+		if int(p.get("slot", -1)) == skip:
+			continue
+		if Revive.row_alive(p):
+			return p
+	return {}
 
 
 func snapshot_rows() -> Dictionary:
@@ -252,6 +318,9 @@ func apply_snapshot(snap: Dictionary) -> void:
 		p["hp"] = int(row.get("hp", p["hp"]))
 		p["mp"] = int(row.get("mp", p["mp"]))
 		p["flags"] = int(row.get("flags", 0))
+		p["down"] = Revive.flag_is_down(int(p["flags"]))
+		p["bleed_expired"] = (int(p["flags"]) & Protocol.FLAG_BLEED_DONE) != 0
+		p["channel_pct"] = Revive.flag_progress(int(p["flags"]))
 	for row in snap.get("enemies", []):
 		var idx := int(row.get("idx", -1))
 		for e in enemies:
