@@ -3,6 +3,7 @@ extends Node
 ## Runtime HD-2D verlichting op één map (data uit res://data/hd2d/). Wordt door MapLighting.apply aangemaakt.
 
 const MapLightingC := preload("res://scripts/map_lighting.gd")
+const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const W := 384
 const H := 216
 const PRIO := {"lantern": 9, "fire": 9, "window": 8, "window_in": 8, "candle": 7, "magic": 6,
@@ -18,6 +19,8 @@ var _map_rec: Dictionary = {}
 var _fixed := false
 var _cands: Array = []
 var _light_pool: Array[PointLight2D] = []
+var _party_lights: Array[PointLight2D] = []
+var _active_hero_lights := -1
 var _picked: Array = []
 var _cam_center := Vector2.ZERO
 var _last_cam := Vector2(-99999, -99999)
@@ -35,9 +38,14 @@ func _light_texture() -> Texture2D:
 	return _light_tex
 
 
+func _exit_tree() -> void:
+	Hd2dUnmodulated.reset_compensation()
+
+
 func setup(map_root: Node, map_id: String, phase: String) -> void:
 	_map = map_root
 	_map_id = map_id
+	set_process(true)
 	_map_rec = MapLightingC.preset_record(map_id)
 	if _map_rec.is_empty():
 		return
@@ -87,6 +95,7 @@ func _apply_full() -> void:
 	_apply_overlays()
 	_spawn_motes()
 	_connect_camera()
+	_register_combat_layers()
 
 
 func _wrap_normals() -> void:
@@ -133,7 +142,17 @@ func _setup_sun() -> void:
 	_sun.energy = float(sun_d["energy"])
 	_sun.height = float(sun_d["height"])
 	_sun.rotation_degrees = float(sun_d["rotation_deg"])
+	_sun.range_item_cull_mask = Hd2dUnmodulated.WORLD_LIGHT_MASK
 	_map.add_child(_sun)
+
+
+func _register_combat_layers() -> void:
+	for n in _map.find_children("TelegraphLayer", "TelegraphLayer", true, false):
+		Hd2dUnmodulated.mark(n)
+	for n in _map.find_children("RootFxOverlay", "Node2D", true, false):
+		Hd2dUnmodulated.mark(n)
+	for n in _map.find_children("SomHud", "CanvasLayer", true, false):
+		Hd2dUnmodulated.mark_descendants(n)
 
 
 func _tweak_existing_glows() -> void:
@@ -416,6 +435,12 @@ func _process(_delta: float) -> void:
 		var amp := float(flick.get(cnd["kind"], 0.0))
 		var base_e: float = cnd.get("base_energy", l.energy)
 		l.energy = base_e * (1.0 + amp * (0.6 * sin(t * 1.7 + cnd["pos"].x) + 0.4 * sin(t * 3.1 + cnd["pos"].y)))
+	Hd2dUnmodulated.apply_compensation(Hd2dUnmodulated.canvas_tint_on_map(_map))
+	var hero_live := mini(_party_light_budget(), _party_light_bodies().size())
+	if hero_live != _active_hero_lights and _preset.get("player_light") != null:
+		_active_hero_lights = hero_live
+		_sync_party_lights(false)
+		_rebuild_point_lights(false)
 
 
 func _rebuild_point_lights(first: bool) -> void:
@@ -428,7 +453,8 @@ func _rebuild_point_lights(first: bool) -> void:
 			continue
 		pick.append(c)
 	pick = MapLightingC.dedupe_lights(pick)
-	pick = MapLightingC.add_fill_lights(pick, _preset, view, _room_bounds(), _player())
+	var hero_n := _party_light_budget()
+	pick = MapLightingC.add_fill_lights(pick, _preset, view, _room_bounds(), _player(), hero_n)
 	var centre := view.get_center()
 	pick.sort_custom(func(a, b):
 		var pa: int = PRIO.get(a["kind"], 1)
@@ -436,7 +462,7 @@ func _rebuild_point_lights(first: bool) -> void:
 		if pa != pb:
 			return pa > pb
 		return a["pos"].distance_to(centre) < b["pos"].distance_to(centre))
-	var budget := int(_preset["max_point_lights"]) - (1 if _preset.get("player_light") != null else 0)
+	var budget := int(_preset["max_point_lights"]) - hero_n
 	_picked = pick.slice(0, budget) as Array
 	if first:
 		for l in _light_pool:
@@ -446,7 +472,8 @@ func _rebuild_point_lights(first: bool) -> void:
 			old.queue_free()
 		for cnd: Dictionary in _picked:
 			_light_pool.append(_spawn_point_light(cnd))
-		_attach_player_light()
+		_sync_party_lights(true)
+		_active_hero_lights = mini(_party_light_budget(), _party_light_bodies().size())
 	else:
 		while _light_pool.size() < _picked.size():
 			_light_pool.append(_make_point_light())
@@ -457,6 +484,7 @@ func _rebuild_point_lights(first: bool) -> void:
 				l.enabled = true
 			else:
 				l.enabled = false
+		_sync_party_lights(false)
 
 
 func _spawn_point_light(cnd: Dictionary) -> PointLight2D:
@@ -472,6 +500,7 @@ func _make_point_light() -> PointLight2D:
 	l.texture = _light_texture()
 	l.shadow_enabled = false
 	l.blend_mode = Light2D.BLEND_MODE_ADD
+	l.range_item_cull_mask = Hd2dUnmodulated.WORLD_LIGHT_MASK
 	return l
 
 
@@ -498,26 +527,80 @@ func _configure_point_light(l: PointLight2D, cnd: Dictionary) -> void:
 	cnd["base_energy"] = e
 
 
-func _attach_player_light() -> void:
-	var pl_d: Variant = _preset.get("player_light")
+func _party_light_budget() -> int:
+	if _preset.get("player_light") == null:
+		return 0
+	return mini(4, GameState.party.size())
+
+
+func _party_light_bodies() -> Array[Node2D]:
+	var out: Array[Node2D] = []
+	var objects := _map.get_node_or_null("Objects") as Node2D
+	if objects == null:
+		var p := _player()
+		return [p] if p else []
 	var p := _player()
-	if pl_d == null or p == null:
-		return
-	var old := p.get_node_or_null("Hd2dPlayerLight")
-	if old:
-		old.queue_free()
-	var l := PointLight2D.new()
-	l.name = "Hd2dPlayerLight"
+	if p:
+		out.append(p)
+	var allies: Array[Node2D] = []
+	for c in objects.get_children():
+		if not (c is Node2D) or c == p:
+			continue
+		var n := c as Node2D
+		if c.name.begins_with("Ally_") or c.name.begins_with("SomAlly") or c.name.begins_with("CoopAvatar"):
+			allies.append(n)
+	allies.sort_custom(func(a, b): return str(a.name) < str(b.name))
+	out.append_array(allies)
+	return out
+
+
+func _clear_party_lights() -> void:
+	for n in _map.find_children("Hd2dPlayerLight", "PointLight2D", true, false):
+		n.queue_free()
+	for l in _party_lights:
+		if is_instance_valid(l):
+			l.queue_free()
+	_party_lights.clear()
+
+
+func _configure_party_light(l: PointLight2D) -> void:
+	var pl: Dictionary = _preset["player_light"]
 	l.texture = _light_texture()
 	l.shadow_enabled = false
 	l.blend_mode = Light2D.BLEND_MODE_ADD
-	var pl: Dictionary = pl_d
+	l.range_item_cull_mask = Hd2dUnmodulated.WORLD_LIGHT_MASK
 	l.color = MapLightingC.col(pl["color"])
 	l.energy = float(pl["energy"])
 	l.height = float(pl["height"])
 	l.texture_scale = float(pl["scale"])
-	p.add_child(l)
-	l.position = Vector2(0, -6)
+
+
+func _sync_party_lights(first: bool) -> void:
+	if _preset.get("player_light") == null:
+		if first:
+			_clear_party_lights()
+		return
+	var want := mini(_party_light_budget(), _party_light_bodies().size())
+	if first:
+		_clear_party_lights()
+	while _party_lights.size() < want:
+		var l := PointLight2D.new()
+		l.name = "Hd2dPartyLight"
+		_configure_party_light(l)
+		_party_lights.append(l)
+	var bodies := _party_light_bodies()
+	for i in want:
+		var body := bodies[i]
+		var l := _party_lights[i]
+		if l.get_parent() != body:
+			if l.get_parent():
+				l.reparent(body)
+			else:
+				body.add_child(l)
+		l.position = Vector2(0, -6)
+		l.enabled = true
+	for j in range(want, _party_lights.size()):
+		_party_lights[j].enabled = false
 
 
 func _apply_shadows() -> void:
@@ -636,7 +719,16 @@ func enabled_point_lights() -> int:
 	for l in _light_pool:
 		if l.enabled:
 			n += 1
-	var p := _player()
-	if p and p.get_node_or_null("Hd2dPlayerLight"):
-		n += 1
+	for l in _party_lights:
+		if is_instance_valid(l) and l.enabled:
+			n += 1
+	return n
+
+
+func count_enabled_directional_lights() -> int:
+	var n := 0
+	for l in _map.find_children("*", "DirectionalLight2D", true, false):
+		var d := l as DirectionalLight2D
+		if d.enabled and d.energy > 0.001:
+			n += 1
 	return n

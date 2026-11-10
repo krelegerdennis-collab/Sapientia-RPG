@@ -3,6 +3,7 @@ extends RefCounted
 ## HD-2D mapverlichting (WM1): data uit res://data/hd2d/, recept uit RPG ART HANDOFF_SPEC.
 
 const RigScript := preload("res://scripts/map_lighting_rig.gd")
+const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const StoryData := preload("res://scripts/data/story_data.gd")
 const PRESETS_PATH := "res://data/hd2d/presets.json"
 const LIGHTS_PATH := "res://data/hd2d/lights.json"
@@ -169,11 +170,14 @@ static func strip_map(map_root: Node) -> void:
 		n.queue_free()
 	for n in map_root.find_children("_hd2d_halo", "Sprite2D", true, false):
 		n.queue_free()
+	for n in map_root.find_children("Hd2dPartyLight", "PointLight2D", true, false):
+		n.queue_free()
 	var p := map_root.get_node_or_null("Objects/Player")
 	if p:
 		var pl := p.get_node_or_null("Hd2dPlayerLight")
 		if pl:
 			pl.queue_free()
+	Hd2dUnmodulated.reset_compensation()
 
 
 static func col(a: Array, k := 1.0) -> Color:
@@ -354,7 +358,7 @@ static func dedupe_lights(pick: Array) -> Array:
 
 
 static func add_fill_lights(pick: Array, preset: Dictionary, view: Rect2, bounds: Rect2,
-		player: Node2D) -> Array:
+		player: Node2D, hero_light_count := -1) -> Array:
 	var fill: Variant = preset.get("fill")
 	if fill == null:
 		return pick
@@ -366,7 +370,10 @@ static func add_fill_lights(pick: Array, preset: Dictionary, view: Rect2, bounds
 	if inset.size.x < grid or inset.size.y < grid:
 		return pick
 	var ppos := player.global_position if player else view.get_center()
-	var remaining := int(preset["max_point_lights"]) - pick.size() - (1 if preset.get("player_light") != null else 0)
+	var hero_n := hero_light_count
+	if hero_n < 0:
+		hero_n = 1 if preset.get("player_light") != null else 0
+	var remaining := int(preset["max_point_lights"]) - pick.size() - hero_n
 	remaining = mini(remaining, max_v)
 	if remaining <= 0:
 		return pick
