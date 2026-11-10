@@ -5,6 +5,8 @@ extends Node
 const MapLightingC := preload("res://scripts/map_lighting.gd")
 const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const PERF_WARMUP := 12
+const PERF_FRAMES := 60
 const DORP := "res://scenes/maps/dorp_wilgendal.tscn"
 const HUIS := "res://scenes/maps/huis_wilgendal.tscn"
 const GANG := "res://scenes/maps/archief_v1_gang.tscn"
@@ -35,6 +37,8 @@ func _run() -> void:
 	await _toggle_tests()
 	await _unmodulated_night_tests()
 	await _party_light_budget_tests()
+	await _overlay_hud_outside_modulate_tests()
+	await _perf_arena_night_four_heroes()
 	print("HD2DTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -229,6 +233,116 @@ func _party_light_budget_tests() -> void:
 	check("party: 4 Hd2dPartyLight nodes", party_n == 4)
 	check("point lights totaal <= budget (%d)" % max_l, rig.enabled_point_lights() <= max_l)
 	check("directional lights <= 1", rig.count_enabled_directional_lights() <= 1)
+
+
+func _under_canvas_modulate(n: Node) -> bool:
+	var cur := n
+	while cur != null:
+		if cur is CanvasModulate:
+			return true
+		cur = cur.get_parent()
+	return false
+
+
+func _arena_scene_ready() -> Node:
+	var sc := get_tree().current_scene
+	if sc == null or str(sc.scene_file_path) != GANG:
+		return null
+	if sc.get("som") == null:
+		return null
+	var rig := sc.get_node_or_null("MapLightingRig") as MapLightingRig
+	if rig == null or sc.find_children("Hd2dPartyLight", "PointLight2D", true, false).size() < 4:
+		return null
+	return sc
+
+
+func _setup_arena_night_four() -> Node:
+	var ready := _arena_scene_ready()
+	if ready != null:
+		return ready
+	GameState.new_game()
+	GameState.set_time_of_day("night", 0.0)
+	Settings.set_value("hd2d_light", true)
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	GameState.encounter_multiplier = 0.0
+	for id in PARTY_FOUR:
+		GameState.add_member(id)
+	var sc := await _await_map(GANG, "ingang")
+	if sc == null:
+		return null
+	for i in 150:
+		await get_tree().process_frame
+		if _arena_scene_ready() != null:
+			return sc
+	return sc
+
+
+func _overlay_hud_outside_modulate_tests() -> void:
+	var sc := _arena_scene_ready()
+	if sc == null:
+		sc = await _setup_arena_night_four()
+	check("overlay/HUD: arena geladen", sc != null)
+	if sc == null:
+		return
+	var som_n: Node = sc.som if "som" in sc else sc.get("som")
+	var hud_node := som_n.get_node_or_null("SomHud") if som_n else null
+	var tg := sc.find_child("TelegraphLayer", true, false)
+	var hd2d_overlay := sc.find_child("Hd2dOverlay", true, false)
+	check("SomHud is CanvasLayer", hud_node is CanvasLayer)
+	check("SomHud geen afstammeling van CanvasModulate", hud_node != null and not _under_canvas_modulate(hud_node))
+	check("Hd2dOverlay is CanvasLayer", hd2d_overlay is CanvasLayer)
+	check("Hd2dOverlay geen afstammeling van CanvasModulate", hd2d_overlay != null and not _under_canvas_modulate(hd2d_overlay))
+	check("TelegraphLayer geen afstammeling van CanvasModulate", tg != null and not _under_canvas_modulate(tg))
+	if hud_node is CanvasLayer and hd2d_overlay is CanvasLayer:
+		check("SomHud layer >= Hd2dOverlay", (hud_node as CanvasLayer).layer >= (hd2d_overlay as CanvasLayer).layer)
+	if tg is CanvasItem:
+		check("TelegraphLayer in hd2d_unmodulated groep", tg.is_in_group(Hd2dUnmodulated.GROUP))
+
+
+func _perf_arena_night_four_heroes() -> void:
+	var sc := _arena_scene_ready()
+	if sc == null:
+		sc = await _setup_arena_night_four()
+	if sc == null:
+		check("HD2D perf: arena setup", false)
+		return
+	var rig := sc.get_node_or_null("MapLightingRig") as MapLightingRig
+	if rig == null:
+		check("HD2D perf: rig", false)
+		return
+	var max_l := int(MapLightingC.preset_record("archief_v1_gang").get("day", {}).get("max_point_lights", 8))
+	var pts := rig.enabled_point_lights()
+	check("HD2D perf: point lights <= %d" % max_l, pts <= max_l)
+	for _w in PERF_WARMUP:
+		await get_tree().process_frame
+	var proc_samples: Array[float] = []
+	var draw_sum := 0.0
+	var draw_max := 0
+	for _f in PERF_FRAMES:
+		var t0 := Time.get_ticks_usec()
+		await get_tree().process_frame
+		proc_samples.append((Time.get_ticks_usec() - t0) / 1000.0)
+		var dc: int = RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
+		draw_sum += dc
+		draw_max = maxi(draw_max, dc)
+	var proc_ms := 0.0
+	for v in proc_samples:
+		proc_ms += v
+	proc_ms /= maxf(1.0, float(proc_samples.size()))
+	var draw_avg := draw_sum / maxf(1.0, float(PERF_FRAMES))
+	var scene_nodes := 0
+	var stack: Array[Node] = [sc]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		scene_nodes += 1
+		for c in node.get_children():
+			stack.append(c)
+	var nodes := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
+	var line := "HD2DPERF map=archief_v1_gang night=1 heroes=4 hd2d=1 point_lights=%d directional=%d proc_ms=%.3f draw_avg=%.1f draw_max=%d scene_nodes=%d nodes=%d frames=%d" % [
+			pts, rig.count_enabled_directional_lights(), proc_ms, draw_avg, draw_max, scene_nodes, nodes, PERF_FRAMES]
+	print(line)
+	check("HD2D perf: meting gelogd (HD2DPERF)", true)
+	check("HD2D perf: draw_max headless < 400", draw_max < 400)
 
 
 func _await_map(path: String, spawn := "") -> Node:
