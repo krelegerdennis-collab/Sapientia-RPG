@@ -25,6 +25,12 @@ const FEET := Vector2(128, 194)
 const BODY_SCALE := 0.25
 ## Straal van de pagina's in kaartpixels (de projectiel-node staat op schaal 1).
 const PAGE_RADIUS := 36.0
+## Bestaand pose-byte in de vijand-snapshot. Alleen de co-op Page Warden zet bits;
+## andere vijanden blijven 0. Formaat (20 bytes) groeit niet.
+const POSE_HIT := 1
+const POSE_ORBIT := 2
+const POSE_FLASH := 4
+const POSE_FRAME_SHIFT := 3
 
 var body: Sprite2D
 var hit: Sprite2D
@@ -115,14 +121,20 @@ func sync(fight: PageWardenFight) -> void:
 			show_hit, show_pages, fight.tick_no, flash_on, flash_t)
 
 
-## Gast: zelfde platen, afgeleid van de snapshot-telegraaf. Geen fight, geen RNG, geen faseflits
-## (de snapshot draagt de invuln-ticks niet).
-func sync_guest(boss_phase: int, tele_phase: int, attack_id: String, orbit_tick: int) -> void:
+## Gast: platen uit de snapshot. phase = telegraaf (WINDUP/ACTIVE/RECOVERY).
+## pose = stagger-flits, kern-pagina's en faseflits. Geen fight, geen RNG.
+func sync_guest(boss_phase: int, tele_phase: int, attack_id: String, orbit_tick: int, pose: int = 0) -> void:
 	var windup := tele_phase == TelegraphState.State.WINDUP
 	var active := tele_phase == TelegraphState.State.ACTIVE
 	var recovery := tele_phase == TelegraphState.State.RECOVERY
-	var show_pages := attack_id == "page_fan" and windup
-	_paint(boss_phase, windup or active, 1 if active else 0, recovery, show_pages, orbit_tick, false, 0.0)
+	var show_hit := (recovery or (pose & POSE_HIT) != 0) and not windup and not active
+	var show_pages := (attack_id == "page_fan" and windup) or (pose & POSE_ORBIT) != 0
+	var flash_on := (pose & POSE_FLASH) != 0
+	var flash_t := 0.0
+	if flash_on:
+		var frame := (pose >> POSE_FRAME_SHIFT) & 3
+		flash_t = float(frame) / float(PageWardenBoss.SPRITE_PHASE_FLASH_FRAMES)
+	_paint(boss_phase, windup or active, 1 if active else 0, show_hit, show_pages, orbit_tick, flash_on, flash_t)
 
 
 func _paint(boss_phase: int, attacking: bool, strike_frame: int, show_hit: bool, show_pages: bool, orbit_tick: int, flash_on: bool, flash_t: float) -> void:

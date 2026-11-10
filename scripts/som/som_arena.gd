@@ -40,6 +40,7 @@ const GolemBossView := preload("res://scripts/som/golem_boss_view.gd")
 const PageWardenBoss := preload("res://scripts/som/page_warden_boss.gd")
 const PageWardenFight := preload("res://scripts/som/page_warden_fight.gd")
 const PageWardenView := preload("res://scripts/som/page_warden_view.gd")
+const BossPhaseMachine := preload("res://scripts/som/boss_phase_machine.gd")
 const ThreatTable := preload("res://scripts/som/threat_table.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
@@ -1735,8 +1736,9 @@ func _page_events(m: Node, e: Dictionary, evs: Array) -> void:
 				if room and room.has_node("Objects"):
 					SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), float(d["windup"]) / float(TICK_HZ))
 			"attack_hit":
+				# Schade op deze tick, zelfde oorsprong. De telegraaf blijft tot ACTIVE voorbij is,
+				# anders ziet de gast in de snapshot alleen IDLE.
 				_page_strike(e, str(d["id"]), float(d["power"]))
-				_page_clear_telegraph(e)
 				_monster_pose(m, e, "attack", 1, SomData.MONSTER_STRIKE_MS / 1000.0)
 			"telegraphs_cancelled", "stagger_break":
 				_page_clear_telegraph(e)
@@ -1758,15 +1760,22 @@ func _page_sync_visual(m: Node, e: Dictionary, fight: PageWardenFight) -> void:
 	var view := _ensure_page_view(m, e)
 	if view != null:
 		view.sync(fight)
-	if fight.step == PageWardenFight.Step.WINDUP and e.has("page_def") and e.has("tg"):
-		var def: Dictionary = e["page_def"]
-		(e["tg"] as TelegraphAttack).mirror_from_network(
-				def, 0, TelegraphState.State.WINDUP, int(fight.step_left),
-				e.get("page_origin", Vector2i.ZERO), e.get("page_dir", Vector2i.DOWN),
-				str(def.get("shape", "line")))
-		e["tele"] = float(fight.step_left) * TICK_DT
-	elif fight.step != PageWardenFight.Step.WINDUP and e.has("page_def"):
-		if fight.step != PageWardenFight.Step.ACTIVE:
+	if e.has("page_def") and e.has("tg"):
+		var phase := -1
+		if fight.step == PageWardenFight.Step.WINDUP:
+			phase = TelegraphState.State.WINDUP
+		elif fight.step == PageWardenFight.Step.ACTIVE:
+			phase = TelegraphState.State.ACTIVE
+		elif fight.step == PageWardenFight.Step.RECOVERY:
+			phase = TelegraphState.State.RECOVERY
+		if phase >= 0:
+			var def: Dictionary = e["page_def"]
+			(e["tg"] as TelegraphAttack).mirror_from_network(
+					def, 0, phase, int(fight.step_left),
+					e.get("page_origin", Vector2i.ZERO), e.get("page_dir", Vector2i.DOWN),
+					str(def.get("shape", "line")))
+			e["tele"] = float(fight.step_left) * TICK_DT
+		else:
 			_page_clear_telegraph(e)
 
 
@@ -1840,7 +1849,7 @@ func _ensure_page_view(m: Node, e: Dictionary) -> PageWardenView:
 
 
 ## Gast tekent de platen uit de al gemirrorde snapshot-telegraaf. Geen tick, geen threat, geen RNG.
-func _page_sync_guest_visual(e: Dictionary, orbit_tick: int) -> void:
+func _page_sync_guest_visual(e: Dictionary, orbit_tick: int, pose: int) -> void:
 	if e.get("page_warden", null) != null:
 		return
 	var view: PageWardenView = e.get("page_view", null)
@@ -1852,7 +1861,26 @@ func _page_sync_guest_visual(e: Dictionary, orbit_tick: int) -> void:
 	if tg != null and tg.is_busy():
 		tele_phase = tg.state()
 		aid = tg.attack_id()
-	view.sync_guest(_page_guest_phase(e), tele_phase, aid, orbit_tick)
+	view.sync_guest(_page_guest_phase(e), tele_phase, aid, orbit_tick, pose)
+
+
+## Zichtbare staat voor de gast, in het bestaande pose-byte. Geen extra snapshot-velden.
+func _page_wire_pose(e: Dictionary) -> int:
+	var fight: PageWardenFight = e.get("page_warden", null)
+	if fight == null:
+		return 0
+	var pose := 0
+	if fight.step == PageWardenFight.Step.STAGGER or fight.step == PageWardenFight.Step.RECOVERY:
+		pose |= PageWardenView.POSE_HIT
+	if fight.core.open:
+		pose |= PageWardenView.POSE_ORBIT
+	if fight.is_invulnerable():
+		pose |= PageWardenView.POSE_FLASH
+		var left := int(fight.pm._invuln_ticks)
+		var t := 1.0 - float(left) / float(BossPhaseMachine.INVULN_TICKS)
+		var frame := clampi(int(t * PageWardenBoss.SPRITE_PHASE_FLASH_FRAMES), 0, PageWardenBoss.SPRITE_PHASE_FLASH_FRAMES - 1)
+		pose |= frame << PageWardenView.POSE_FRAME_SHIFT
+	return pose
 
 
 ## Zelfde drempel als fase 0 van het script (hp_until 0,50). Volle HP blijft fase 1-plaat.
@@ -3154,7 +3182,7 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 			"x": int(center_of(m).x),
 			"y": int(center_of(m).y),
 			"hp": int(e.get("hp", 0)),
-			"pose": 0,
+			"pose": _page_wire_pose(e),
 			"target_slot": tslot,
 		}
 		var tg: TelegraphAttack = e.get("tg", null)
@@ -3206,7 +3234,7 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 		m.position = Vector2(cx, cy) - Vector2(0, center_of(m).y - m.position.y)
 		if not coop_sim_host and room != null:
 			TelegraphSnapshot.apply_row_to_enemy(e, row, room.room_id, room.tier())
-			_page_sync_guest_visual(e, int(snap.get("tick", 0)))
+			_page_sync_guest_visual(e, int(snap.get("tick", 0)), int(row.get("pose", 0)))
 	if not coop_sim_host:
 		combat_zones.apply_wire_rows(snap.get("zones", []))
 		combat_roots.apply_wire_rows(snap.get("roots", []), _coop_slots)

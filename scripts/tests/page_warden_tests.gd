@@ -13,6 +13,7 @@ const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
+const NetCodec := preload("res://scripts/net/net_codec.gd")
 const EnemyAttacks := preload("res://scripts/som/enemy_attacks.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
@@ -57,6 +58,7 @@ func _run() -> void:
 	_no_placeholder_generator()
 	_guest_view()
 	_events_cap()
+	_host_guest_frames()
 	PageWardenBoss.unregister()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -430,6 +432,83 @@ func _events_cap() -> void:
 	arena.free()
 
 
+## Echt host-gevecht → ingepakte snapshot → gast-view. Geen zelf verzonnen ACTIVE-rij.
+func _host_guest_frames() -> void:
+	var host := SomArena.new()
+	var guest := SomArena.new()
+	var host_room := StubRoom.new()
+	var guest_room := StubRoom.new()
+	host.room = host_room
+	guest.room = guest_room
+	host.coop_mode = true
+	host.coop_sim_host = true
+	guest.coop_mode = true
+	guest.coop_sim_host = false
+	host.seed_rng(7)
+	guest.seed_rng(7)
+	var hm := _guest_monster()
+	var gm := _guest_monster()
+	host.register(hm)
+	guest.register(gm)
+	var fight: PageWardenFight = host.enemies[hm]["page_warden"]
+	var view: PageWardenView = guest.enemies[gm]["page_view"]
+	var saw_strike := false
+	var saw_hit := false
+	var saw_orbit := false
+	var saw_stagger := false
+	var broke := false
+	for _i in 1200:
+		host._page_ai(hm, host.enemies[hm], 1.0 / 60.0)
+		var snap := NetCodec.unpack_snapshot(host.coop_encode_snapshot(host.sim_tick))
+		_feed_guest(guest, gm, snap)
+		var row: Dictionary = (snap.get("enemies", []) as Array)[0]
+		if int(row.get("phase", 0)) == TelegraphState.State.ACTIVE and int(row.get("atk_id", 0)) != 0:
+			if view.body.frame == 1 and view.body.texture == PageWardenView.TEX_ATTACK and not view.hit.visible:
+				saw_strike = true
+		if int(row.get("phase", 0)) == TelegraphState.State.RECOVERY and view.hit.visible and view.body.frame == 0:
+			saw_hit = true
+		if fight.core.open and (int(row.get("pose", 0)) & PageWardenView.POSE_ORBIT) != 0:
+			var page: Sprite2D = view._pages[0]
+			if page.visible and is_equal_approx(page.position.length(), PageWardenView.PAGE_RADIUS):
+				saw_orbit = true
+		if not broke and fight.core.open and fight.step == PageWardenFight.Step.WINDUP:
+			fight.damage(int(PageWardenBoss.STAGGER["break_damage"]))
+			host._page_events(hm, host.enemies[hm], fight.take_events())
+			var snap_s := NetCodec.unpack_snapshot(host.coop_encode_snapshot(host.sim_tick))
+			_feed_guest(guest, gm, snap_s)
+			var row_s: Dictionary = (snap_s.get("enemies", []) as Array)[0]
+			if fight.step == PageWardenFight.Step.STAGGER and view.hit.visible \
+					and int(row_s.get("phase", -1)) == TelegraphState.State.IDLE \
+					and (int(row_s.get("pose", 0)) & PageWardenView.POSE_HIT) != 0 \
+					and view.body.texture != PageWardenView.TEX_ATTACK:
+				saw_stagger = true
+			broke = true
+	check("gast ziet het slagframe uit een echte host-snapshot", saw_strike)
+	check("gast ziet TEX_HIT tijdens recovery uit een echte host-snapshot", saw_hit)
+	check("gast ziet de kern-pagina's uit een echte host-snapshot", saw_orbit)
+	check("gast ziet TEX_HIT tijdens stagger uit een echte host-snapshot", saw_stagger)
+	hm.free()
+	gm.free()
+	host_room.free()
+	guest_room.free()
+	host.free()
+	guest.free()
+
+
+func _guest_monster() -> GuestMonster:
+	var m := GuestMonster.new()
+	m.boss = true
+	m.enemy_id = "papiergeest"
+	m.floor_nr = 10
+	m.placeholder = true
+	return m
+
+
+func _feed_guest(guest: SomArena, m: Node, snap: Dictionary) -> void:
+	guest._enemy_order = [m]
+	guest.apply_coop_snapshot(snap)
+
+
 ## Genoeg velden voor page_warden_rt_applies. Geen MapMonster: die class_name botst met een preload.
 class FloorMonster:
 	extends Node
@@ -446,6 +525,7 @@ class GuestMonster:
 	var moves := true
 	var size := Vector2i.ONE
 	var sprite = null
+	var placeholder := false
 
 
 class StubRoom:
