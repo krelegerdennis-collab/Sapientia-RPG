@@ -50,7 +50,7 @@ func _run() -> void:
 	_classic_unchanged()
 	_coop_gate()
 	_snapshot_ids()
-	check("boss-sprites maten en preload", PageWardenView.textures_ok())
+	_view_art()
 	PageWardenBoss.unregister()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -286,6 +286,47 @@ func _snapshot_ids() -> void:
 	check("page_volley staat in de snapshot-lijst", TelegraphSnapshot.attack_index("page_volley") > 0)
 	var px := EnemyAttacks.attack("page_line")
 	check("page_line heeft px-vorm voor de gast", int(px.get("reach", 0)) > 0 and str(px.get("shape", "")) == "line")
+
+
+func _view_art() -> void:
+	check("boss-sprites laden met de juiste maten", PageWardenView.textures_ok())
+	var view := PageWardenView.new()
+	var fight := PageWardenFight.new(1000, 4)
+	fight.attack_id = "page_line"
+	fight.step = PageWardenFight.Step.WINDUP
+	view.sync(fight)
+	check("windup: slagframe 0, geen trefferflits", view.body.frame == 0 and not view.hit.visible)
+	check("windup: voeten op (128, 194)", view.frame_feet_local(view.body).is_equal_approx(Vector2.ZERO))
+	fight.step = PageWardenFight.Step.ACTIVE
+	view.sync(fight)
+	check("active: slagframe zichtbaar, flits uit", view.body.frame == 1 and view.body.texture == PageWardenView.TEX_ATTACK and not view.hit.visible)
+	check("active: voeten blijven op het anker", view.frame_feet_local(view.body).is_equal_approx(Vector2.ZERO))
+	fight.step = PageWardenFight.Step.RECOVERY
+	view.sync(fight)
+	check("recovery toont de trefferflits", view.hit.visible)
+	fight.step = PageWardenFight.Step.STAGGER
+	view.sync(fight)
+	check("stagger toont de trefferflits", view.hit.visible)
+	check("stagger: voeten van lijf en flits op hetzelfde anker",
+			view.frame_feet_local(view.body).is_equal_approx(Vector2.ZERO)
+			and view.frame_feet_local(view.hit).is_equal_approx(Vector2.ZERO))
+	fight.damage(500)
+	fight.step = PageWardenFight.Step.IDLE
+	view.sync(fight)
+	check("fase 2: phase2-plaat, voeten nog op het anker",
+			view.body.texture == PageWardenView.TEX_PHASE2 and view.frame_feet_local(view.body).is_equal_approx(Vector2.ZERO))
+	var page: Sprite2D = view._pages[0]
+	var world_scale := view.scale * view.projectiles.scale * page.scale
+	check("pagina is een eigen node op 16×16 (schaal 1)", page.get_parent() == view.projectiles
+			and world_scale.is_equal_approx(Vector2.ONE)
+			and page.texture.get_width() == 16 and page.texture.get_height() == 16)
+	fight.attack_id = "page_fan"
+	fight.step = PageWardenFight.Step.WINDUP
+	fight.tick_no = 0
+	view.sync(fight)
+	check("waaier toont de pagina buiten de lichaamsschaal", page.visible
+			and is_equal_approx(page.position.length(), PageWardenView.PAGE_RADIUS))
+	view.free()
 
 
 ## Genoeg velden voor page_warden_rt_applies. Geen MapMonster: die class_name botst met een preload.

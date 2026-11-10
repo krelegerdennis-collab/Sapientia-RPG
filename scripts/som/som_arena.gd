@@ -1827,8 +1827,8 @@ func _ensure_page_view(m: Node, e: Dictionary) -> PageWardenView:
 		return existing as PageWardenView
 	var view := PageWardenView.new()
 	view.name = "PageWardenView"
-	# Voeten van de 256×200-plaat (pixel ~194) op de onderkant van het blok.
-	view.position = Vector2(0, -16)
+	# Voetenanker (128, 194) ligt op de oorsprong van de view. Onderkant van het blok ≈ y=8.
+	view.position = Vector2(0, 8)
 	m.add_child(view)
 	if m.sprite:
 		m.sprite.visible = false
