@@ -112,7 +112,7 @@ schrijft `user://sim/battlesim_<policy>_s<seed>.csv`; `python3 tools/battlesim/r
 Alle suites lokaal: `for s in autotest menutest puzzletest dungeontest golemtest archieftest kerntest kernkrachttest woudtest codextest checkpointtest dungeon100gentest dungeon100schaaltest dungeon100regelstest dungeon100integratietest dungeon100blauwtest actorsfxtest; do .github/scripts/run_suite.sh $s; done`
 (samen ~12 min; CI draait ze parallel). Een eigen `XDG_DATA_HOME` per suite houdt `user://` (saves/instellingen) gescheiden.
 
-`--relaytest` (online co-op via `relay/`) start zelf `node relay/server.js` en heeft Node >= 20 nodig; hij zit nog niet in de CI-matrix, draai hem lokaal (`relay/README.md`). Relay-unittests: `cd relay && npm ci && npm test`.
+`--relaytest` (online co-op via `relay/`) start zelf `node relay/server.js` en heeft Node >= 20 nodig; CI-job `relay` in `.github/workflows/tests.yml` draait `cd relay && npm ci && npm test` en daarna deze suite (zie `relay/README.md` voor lokaal draaien).
 
 **Nieuwe suite toevoegen:** script in `scripts/tests/<naam>_tests.gd` (zelfde PASS/FAIL/RESULT-format,
 `get_tree().quit(1 if failures else 0)`), een regel in de lijst in `scripts/game_state.gd` `_ready()`,
