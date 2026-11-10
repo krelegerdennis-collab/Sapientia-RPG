@@ -51,10 +51,12 @@ func _run() -> void:
 	_classic_unchanged()
 	_coop_gate()
 	_snapshot_ids()
+	check("boss-sprites maten en preload", PageWardenView.textures_ok())
 	_view_art()
+	_tex_heights()
 	_no_placeholder_generator()
 	_guest_view()
-	_page_event_cap()
+	_events_cap()
 	PageWardenBoss.unregister()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -293,10 +295,6 @@ func _snapshot_ids() -> void:
 
 
 func _view_art() -> void:
-	check("boss-sprites laden met de juiste maten", PageWardenView.textures_ok())
-	check("HIT en PHASE2 zijn 256×200",
-			PageWardenView.TEX_HIT.get_width() == 256 and PageWardenView.TEX_HIT.get_height() == 200
-			and PageWardenView.TEX_PHASE2.get_width() == 256 and PageWardenView.TEX_PHASE2.get_height() == 200)
 	var view := PageWardenView.new()
 	var fight := PageWardenFight.new(1000, 4)
 	fight.attack_id = "page_line"
@@ -336,6 +334,12 @@ func _view_art() -> void:
 	view.free()
 
 
+func _tex_heights() -> void:
+	check("HIT en PHASE2 zijn 256×200",
+			PageWardenView.TEX_HIT.get_width() == 256 and PageWardenView.TEX_HIT.get_height() == 200
+			and PageWardenView.TEX_PHASE2.get_width() == 256 and PageWardenView.TEX_PHASE2.get_height() == 200)
+
+
 func _no_placeholder_generator() -> void:
 	check("placeholder-generator is weg", not FileAccess.file_exists("res://tools/art_page_warden_placeholders.py"))
 	var hw := FileAccess.get_file_as_string("res://tools/handwerk.txt")
@@ -358,7 +362,7 @@ func _guest_view() -> void:
 	probe.seed = 99
 	probe.randf()
 	var after_one: int = probe.state
-	var m := FloorMonster.new()
+	var m := GuestMonster.new()
 	m.boss = true
 	m.enemy_id = "papiergeest"
 	m.floor_nr = 10
@@ -398,7 +402,7 @@ func _guest_view() -> void:
 	arena.free()
 
 
-func _page_event_cap() -> void:
+func _events_cap() -> void:
 	var arena := SomArena.new()
 	var m := FloorMonster.new()
 	var e := {}
@@ -428,6 +432,13 @@ func _page_event_cap() -> void:
 
 ## Genoeg velden voor page_warden_rt_applies. Geen MapMonster: die class_name botst met een preload.
 class FloorMonster:
+	extends Node
+	var boss := false
+	var enemy_id := ""
+	var floor_nr := 0
+
+
+class GuestMonster:
 	extends Node2D
 	var boss := false
 	var enemy_id := ""
