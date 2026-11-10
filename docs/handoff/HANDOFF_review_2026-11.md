@@ -277,7 +277,7 @@ Inspanning: S < 2 uur, M = 1-2 dagen, L = week+.
 
 | Ticket | Rol | Prio | Inspanning | Status |
 |---|---|---|---|---|
-| F-1 suites in CI | Forge/Cursor | P0 | S | open |
+| F-1 suites in CI | Forge/Cursor | P0 | S | #406 |
 | F-2 relay in CI | Forge/Cursor | P0 | S | open |
 | F-3 presets + export/ | Forge | P0 | S | open |
 | F-4 docs opruimen | Cursor | P2 | S | #397 |

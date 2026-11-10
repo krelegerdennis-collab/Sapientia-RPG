@@ -82,7 +82,7 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--echotest` | `scripts/tests/echo_tests.gd` | 12 |
 | `--battlesimtest` | `scripts/tests/battlesim_tests.gd` | 57 |
 | `--berggrotdextest` | `scripts/tests/berggrot_dex_tests.gd` | 91 |
-| `--savehardeningtest` | `scripts/tests/save_hardening_tests.gd` | 127 |
+| `--savehardeningtest` | `scripts/tests/save_hardening_tests.gd` | 156 |
 | `--saverobusttest` | `scripts/tests/save_robust_tests.gd` | (zie suite) |
 | `--relaytest` | `scripts/tests/relay_tests.gd` | 89 |
 | `--testmodustest` | `scripts/tests/testmodus_tests.gd` | 9 |
@@ -90,9 +90,21 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--wm1frametest` | `scripts/tests/wm1_frametime_tests.gd` | 57 |
 | `--wm1budgettest` | `scripts/tests/wm1_budget_tests.gd` | 286 |
 | `--wm1openbugtest` | `scripts/tests/wm1_bugjacht_open_tests.gd` | 24 |
-| `--aabtest` | `scripts/tests/aab_tests.gd` | 70 |
+| `--aabtest` | `scripts/tests/aab_tests.gd` | 84 |
 | `--perfprobetest` | `scripts/tests/perf_probe_tests.gd` | 62 |
 | `--statemachinetest` | `scripts/tests/state_machine_tests.gd` | 75 |
+| `--coopguestsavetest` | `scripts/tests/coop_guest_save_tests.gd` | 18 |
+| `--combatrngtest` | `scripts/tests/combat_rng_tests.gd` | 11 |
+| `--combatsimtest` | `scripts/tests/combat_sim_tests.gd` | 17 |
+| `--demofixtest` | `scripts/tests/demofix_tests.gd` | 23 |
+| `--kasdeurtest` | `scripts/tests/kas_deur_tests.gd` | 8 |
+| `--zonetest` | `scripts/tests/zone_tests.gd` | 34 |
+| `--telegraphcooptest` | `scripts/tests/telegraph_coop_sync_tests.gd` | 12 |
+| `--uxtest` | `scripts/tests/ux_tests.gd` | 121 |
+| `--uipolishtest` | `scripts/tests/ui_polish_tests.gd` | 753 |
+| `--uxpolishtest` | `scripts/tests/ux_polish_autotest.gd` | 26 |
+| `--sessiefixtest` | `scripts/tests/sessiefix_tests.gd` | 30 |
+| `--wm1releasetest` | `scripts/tests/wm1_release_tests.gd` | 102 |
 
 Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`
 schrijft `user://sim/battlesim_<policy>_s<seed>.csv`; `python3 tools/battlesim/rapport.py [csv|map]` geeft winrate, mediaan beurten en de zwaarste groepen.
