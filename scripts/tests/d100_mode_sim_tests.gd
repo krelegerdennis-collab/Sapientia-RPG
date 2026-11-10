@@ -55,6 +55,8 @@ func _run() -> void:
 	_param_determinisme()
 	_parity_lock()
 	_baseline_428()
+	_revive_off_baseline()
+	_revive_on_rules()
 	var solo_before := _solo_sig()
 	var party_before := _party_sig()
 	var gold_before := int(GameState.gold)
@@ -388,8 +390,9 @@ func _parity_adds(rt, add_data: Dictionary) -> void:
 	var rng_b := RandomNumberGenerator.new()
 	rng_a.seed = 20261110
 	rng_b.seed = 20261110
+	var enemy_dmg := float(rt.fight_params()["enemy_dmg"])
 	for _t in 90:
-		Sim._boss_adds(left, la, 1, rng_a, SomData.ENEMY_DAMAGE_MULT)
+		Sim._boss_adds(left, la, 1, rng_a, enemy_dmg)
 		rt.parity_adds_tick(right, ra_adds, 1, rng_b)
 	check("add-spawn en add-ticks gelijk aan rt-sim", spawn_ok and _same_heroes(left, right) and _same_adds(la, ra_adds))
 
@@ -456,3 +459,106 @@ func _baseline_428() -> void:
 			level = "%.1f" % (float(fl["boss_level_sum"]) / float(entered))
 		check("baseline #428 stoel %d bereikt %d wint %d level %s" % [seats, entered, wins, level if level != "" else "—"],
 			entered == int(spec["in"]) and wins == int(spec["wins"]) and level == str(spec["level"]))
+
+
+## --revive=off is de default en geeft de #430-tabel terug.
+func _revive_off_baseline() -> void:
+	var cfg := {
+		"mode": "easy",
+		"runs": 24,
+		"floors": 10,
+		"factors": [10],
+		"seats": [1, 2, 3, 4],
+		"hypothetical": false,
+		"base_seed": 20261110,
+		"verbose": false,
+		"revive": false,
+	}
+	var result := Sim.run_cfg(cfg)
+	check("revive uit staat in het resultaat", not bool(result.get("revive", true)))
+	check("revive uit telt geen gebruik", int(result["rows"][0].get("revives", -1)) == 0 and int(result["rows"][0].get("revive_max", -1)) == 0)
+	var want := {
+		1: {"in": 0, "wins": 0, "level": ""},
+		2: {"in": 0, "wins": 0, "level": ""},
+		3: {"in": 4, "wins": 4, "level": "106.2"},
+		4: {"in": 14, "wins": 14, "level": "109.4"},
+	}
+	for row in result["rows"]:
+		var seats := int(row["seats"])
+		var fl: Dictionary = {}
+		for candidate in row["floors"]:
+			if int(candidate["boss_key"]) == PageWardenBoss.BOSS_KEY:
+				fl = candidate
+		var spec: Dictionary = want[seats]
+		var entered := int(fl["boss_entered"])
+		var wins := int(fl["boss_wins"])
+		var level := ""
+		if entered > 0:
+			level = "%.1f" % (float(fl["boss_level_sum"]) / float(entered))
+		check("revive uit #430 stoel %d bereikt %d wint %d level %s" % [seats, entered, wins, level if level != "" else "—"],
+			entered == int(spec["in"]) and wins == int(spec["wins"]) and level == str(spec["level"]) and int(row.get("revive_max", -1)) == 0)
+	var short := {
+		"mode": "easy",
+		"runs": 1,
+		"floors": 2,
+		"factors": [10],
+		"seats": [2],
+		"hypothetical": false,
+		"base_seed": 20261110,
+		"verbose": false,
+	}
+	var off: Dictionary = short.duplicate(true)
+	off["revive"] = false
+	check("ontbrekende revive-sleutel is uit", Sim.signature(Sim.run_cfg(short)) == Sim.signature(Sim.run_cfg(off)))
+
+
+## Zelfde seed twee keer, en nooit meer dan één revive per stoel in een run.
+func _revive_on_rules() -> void:
+	var cfg := {
+		"mode": "easy",
+		"runs": 1,
+		"floors": 4,
+		"factors": [10],
+		"seats": [2, 4],
+		"hypothetical": false,
+		"base_seed": 20261110,
+		"verbose": false,
+		"revive": true,
+		"enemy_dmg": 2.2,
+		"floor_heal": 0,
+	}
+	var a := Sim.run_cfg(cfg)
+	var b := Sim.run_cfg(cfg)
+	check("revive aan, twee keer, zelfde handtekening", Sim.signature(a) == Sim.signature(b) and Sim.signature(a) != "")
+	var off: Dictionary = cfg.duplicate(true)
+	off["revive"] = false
+	check("revive aan wijkt af van uit", Sim.signature(a) != Sim.signature(Sim.run_cfg(off)))
+	var under := true
+	var used := 0
+	for row in a["rows"]:
+		if int(row.get("revive_max", 99)) > 1:
+			under = false
+		used += int(row.get("revives", 0))
+	check("korte run blijft op hoogstens 1 revive per stoel", under)
+	check("korte run gebruikt minstens één revive", used > 0)
+	var stress := {
+		"mode": "easy",
+		"runs": 4,
+		"floors": 6,
+		"factors": [10],
+		"seats": [2, 4],
+		"hypothetical": false,
+		"base_seed": 20261110,
+		"verbose": false,
+		"revive": true,
+		"enemy_dmg": 2.2,
+		"floor_heal": 0,
+	}
+	var hard := Sim.run_cfg(stress)
+	var hard_max := 0
+	var hard_used := 0
+	for row in hard["rows"]:
+		hard_max = maxi(hard_max, int(row.get("revive_max", 99)))
+		hard_used += int(row.get("revives", 0))
+	check("stress: max 1 revive per stoel per run (max %d)" % hard_max, hard_max <= 1)
+	check("stress gebruikt minstens één revive", hard_used > 0)
