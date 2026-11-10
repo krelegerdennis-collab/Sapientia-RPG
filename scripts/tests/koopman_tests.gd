@@ -150,7 +150,7 @@ func _data_tests() -> void:
 	check("in-game naam Engels: 'the Merchant'", K.NAAM == "the Merchant")
 	check("token: +10% tegen dienaren, niets zonder token of in oefening",
 			is_equal_approx(K.token_factor(true, true), 1.1) and K.token_factor(false, true) == 1.0 and K.token_factor(true, false) == 1.0)
-	var tex: Texture2D = K.SPRITE
+	var tex: Texture2D = K.sprite()
 	check("koopman_veld.png laadt (48x96)", tex != null and tex.get_size() == Vector2(48, 96))
 	check("grot_kamers.png laadt (128x48)", GK.ATLAS != null and GK.ATLAS.get_size() == Vector2(128, 48))
 	# kamersoorten
@@ -240,7 +240,7 @@ func _koopman_scene() -> void:
 	if k == null:
 		return
 	var sp: Sprite2D = k.get("sprite")
-	check("sprite = koopman_veld.png, 3x4 frames van 16x24", sp.texture == K.SPRITE and sp.hframes == 3 and sp.vframes == 4)
+	check("sprite = koopman_veld.png, 3x4 frames van 16x24", sp.texture == K.sprite() and sp.hframes == 3 and sp.vframes == 4)
 	check("kraam: 4 tegels uit rij 2 van grot_kamers.png", k.get_parent().get_node("Kraam").get_child_count() == 5)
 	var lines: Array = k.praat()
 	check("eerste gesprek: bezoek 1, fase 1", GameState.koopman_bezoeken == 1 and int(k.get("last_fase")) == 1)

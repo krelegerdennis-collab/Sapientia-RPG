@@ -59,7 +59,7 @@ static func create(kraam_links: Vector2i, sleutel: String) -> Node2D:
 func _init() -> void:
 	sprite = Sprite2D.new()
 	sprite.name = "Sprite2D"
-	sprite.texture = Data.SPRITE
+	sprite.texture = Data.sprite()
 	sprite.hframes = 3
 	sprite.vframes = 4
 	sprite.offset = Vector2(0, -4)     # 16x24-frame: voeten op de tegel
