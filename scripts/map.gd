@@ -23,6 +23,7 @@ const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const BerggrotHaak := preload("res://scripts/data/berggrot_data.gd")
 const OpeningStory := preload("res://world_warper/opening/story_mode.gd")
 const FieldMenu := preload("res://scripts/ui/field_menu.gd")
+const MapLightingC := preload("res://scripts/map_lighting.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
 const AUTOSAVE_DELAY := 0.35
 
@@ -118,9 +119,21 @@ func _ready() -> void:
 	if WorldmapCutsceneScript.should_play(scene_file_path):
 		WorldmapCutsceneScript.start_on(self)
 	_spawn_garden_creatures()
+	MapLightingC.apply(self)
+	if not Settings.changed.is_connected(_on_hd2d_setting):
+		Settings.changed.connect(_on_hd2d_setting)
 	# (de autotest wordt sinds v0.10 door GameState gestart, zie game_state.gd)
 	if _pp_on:
 		PerfProbe.end(_pp_lbl)
+
+
+func _on_hd2d_setting(key: String) -> void:
+	if key != "hd2d_light":
+		return
+	if Settings.get_value("hd2d_light"):
+		MapLightingC.apply(self)
+	else:
+		MapLightingC.strip_map(self)
 
 
 ## Start de BGM van deze map. Zonder sleutel stopt een track die nog speelde

@@ -17,6 +17,7 @@ const Videos := preload("res://scripts/data/cutscene_videos.gd")
 const Molen := preload("res://scripts/village/molen.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const TcPrologueTitleCardScript := preload("res://scripts/ui/tc_prologue_title_card.gd")
+const MapLightingC := preload("res://scripts/map_lighting.gd")
 const WINDOW_TILE := Vector2i(4, 0)      # raam-tile in binnen.png
 const WALK_SPEED := 56.0
 
@@ -494,6 +495,9 @@ func tint_to(tint: String, sec: float) -> void:
 	var m := _map()
 	if m == null:
 		return
+	if MapLightingC.enabled() and GameState.story_step < MapLightingC.STORY_TINT_FREE_STEP:
+		var phase := "night" if tint in ["evening", "night"] else "day"
+		MapLightingC.set_time(phase, sec)
 	var t := _tint_node(m)
 	var col: Color = SD.TINTS.get(tint, Color(tint) if tint.begins_with("#") else Color.WHITE)
 	if sec <= 0.0:
