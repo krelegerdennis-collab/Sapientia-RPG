@@ -595,6 +595,8 @@ func _ready() -> void:
 	#   en  godot -- --golemactionsimtest  (scripts/tests/golem_actionsim_tests.gd, kleine sim als rookproef).
 	# M9a Page Warden (Action, alleen co-op): of  godot -- --pagewardentest  (scripts/tests/page_warden_tests.gd)
 	#   en  godot -- --pagewardensim [--fights=N] [--seats=1..4] [--seed=N]  (tools/battlesim/page_warden_rt_sim.gd).
+	# M9b Easy-run (voorstel, geen balans): godot -- --d100modesim --mode=easy [--factors=4,7,10,25] [--runs=N] [--seed=N]
+	#   (tools/battlesim/d100_mode_sim.gd). Suite: godot -- --d100modesimtest (determinisme, solo, geen saves).
 	# D3 arena-hook realtime Golem (PR C): of  godot -- --golemarenatest  (scripts/tests/golem_arena_tests.gd).
 	# Golem zichtbare telegraaf/aanval (Action): of  godot -- --golemzichtbaartest  (scripts/tests/golem_zichtbaar_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
@@ -750,7 +752,9 @@ func _ready() -> void:
 			["--onlinelobbytest", "res://scripts/tests/online_lobby_tests.gd", "OnlineLobbyTest", "onlinelobbytest"],
 			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
 			["--solod100guardtest", "res://scripts/tests/solo_d100_guard_tests.gd", "SoloD100GuardTest", "solod100guardtest"],
-			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"]]:
+			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"],
+			["--d100modesim", "res://tools/battlesim/d100_mode_sim.gd", "D100ModeSim", "d100modesim"],
+			["--d100modesimtest", "res://scripts/tests/d100_mode_sim_tests.gd", "D100ModeSimTest", "d100modesimtest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
