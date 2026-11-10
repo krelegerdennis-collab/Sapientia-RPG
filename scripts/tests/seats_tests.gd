@@ -19,6 +19,12 @@ const SOLO_DISCRETE := "php:42|lotte:engage:3:0|noor:engage:3:0|rng:-20033587530
 
 var failures := 0
 var passes := 0
+## Eerste reset legt de kamer vast zoals de solo-guard hem aantreft. Een tweede gevecht
+## in dezelfde arena mag die start niet meenemen (pose, tegelstap, kijkrichting, cast-anim).
+var _solo_tiles: Dictionary = {}
+var _solo_moving: Dictionary = {}
+var _solo_process: Dictionary = {}
+var _solo_facing: Dictionary = {}
 
 
 func _ready() -> void:
@@ -532,8 +538,36 @@ func _reset_solo(arena: SomArena) -> void:
 		var tg: Variant = e.get("tg", null)
 		if tg != null and tg.has_method("cancel"):
 			tg.cancel()
+		var mid := str(m.monster_id)
+		if not _solo_tiles.has(mid):
+			_solo_tiles[mid] = m.tile
+			_solo_moving[mid] = m.is_moving
+			_solo_process[mid] = m.is_processing()
+		m.tile = _solo_tiles[mid]
+		m.target_tile = m.tile
+		m.is_moving = bool(_solo_moving[mid])
+		if e.has("orig") and m.sprite != null:
+			var o: Array = e["orig"]
+			m.sprite.texture = o[0]
+			m.sprite.hframes = int(o[1])
+			m.sprite.vframes = int(o[2])
+			if o.size() > 3:
+				m.sprite.offset = o[3]
+			e.erase("orig")
+		e["pose"] = ""
+		e["pose_t"] = 0.0
+		e.erase("pose_col")
+		e.erase("pose_el")
+		m.stun_steps = 0
+		m.set_process(bool(_solo_process[mid]))
 		i += 1
+	_silence_anims(arena.player)
 	for a in arena.allies:
+		var aid := str(a.hero_id)
+		if not _solo_facing.has(aid):
+			_solo_facing[aid] = a.facing
+		a.facing = _solo_facing[aid]
+		_silence_anims(a)
 		a.position = a.formation_point()
 		a.velocity = Vector2.ZERO
 		a.charge = 1.0
@@ -551,6 +585,9 @@ func _reset_solo(arena: SomArena) -> void:
 		h["mp"] = int(h.get("max_mp", h.get("mp", 0)))
 	arena.charge = 1.0
 	arena.swing_lock = 0.0
+	arena.b_cast_cd = 0.0
+	arena.queued = {}
+	arena._queue_t = 0.0
 	arena.iframes.clear()
 	arena._pending = {"switch": false, "attack": false, "cast": false, "dodge": false, "hold": false}
 	for anim in arena._sim_anims:
@@ -560,6 +597,16 @@ func _reset_solo(arena: SomArena) -> void:
 	arena._clear_transient_combat()
 	arena.seed_rng(SEED)
 	GameState.gold = 0
+
+
+func _silence_anims(n: Node) -> void:
+	if n == null:
+		return
+	for c in n.get_children():
+		if "sim_driven" in c:
+			c.set("hit_done", true)
+			c.set("_done", true)
+			c.queue_free()
 
 
 func _fingerprint(arena: SomArena) -> String:
