@@ -88,22 +88,57 @@ static func buff_factor(spell: Dictionary, caster_id: String) -> float:
 
 
 ## Kans dat bliksem (verlamming) of ijs (bevriezing) een beurt laat overslaan (was: altijd).
-## Goedgekeurd door Dennis (20 okt 2026), na de gevechtssimulator (docs/BATTLE_BALANCE_REPORT.md).
+## Goedgekeurd door Dennis (20 okt 2026); C-2 (nov 2026): AoE lager, bazen halve kans, stun-lock dicht.
 const STUN_CHANCE := 0.30
-## true = bazen worden nooit verlamd/bevroren. Standaard false: de 30% geldt ook voor bazen.
+## AoE-spreuken (target all_enemies): lagere stun-kans tegen stun-lock (Chain Lightning e.d.).
+const STUN_CHANCE_AOE := 0.15
+## Bazen: helft van de normale kans (enkel én AoE).
+const STUN_BOSS_MULT := 0.5
+## true = bazen worden nooit verlamd/bevroren. Standaard false.
 ## (De simulator kan true proberen met --stun-boss-immune; dat verandert de standaard niet.)
 const STUN_BOSS_IMMUNE := false
 
 
+static func stun_base_chance(spell: Dictionary) -> float:
+	if str(spell.get("target", "")) == "all_enemies":
+		return STUN_CHANCE_AOE
+	return STUN_CHANCE
+
+
+## Effectieve kans voor één worp; boss_immune (simulator-flag) negeert bazen volledig.
+static func effective_stun_chance(spell: Dictionary, target_is_boss: bool, boss_immune := STUN_BOSS_IMMUNE, chance_override := -1.0) -> float:
+	if target_is_boss and boss_immune:
+		return 0.0
+	if chance_override >= 0.0:
+		return chance_override
+	var c := stun_base_chance(spell)
+	if target_is_boss:
+		c *= STUN_BOSS_MULT
+	return c
+
+
+## Verlamd of net verlamd: geen nieuwe stun (C-2 anti stun-lock).
+static func target_blocks_stun(target: Dictionary) -> bool:
+	return int(target.get("skip", 0)) > 0 or bool(target.get("stun_immune", false))
+
+
 ## Valt de verlamming/bevriezing van 'fx' (uit on_hit) echt? roll = randf() van het gevecht
 ## (0..1), zodat een geseede run (simulator, tests) altijd hetzelfde uitkomt.
-## chance < 0 = de kans uit fx (STUN_CHANCE); de simulator kan een andere kans meegeven.
-static func stun_lands(fx: Dictionary, target_is_boss: bool, roll: float, boss_immune := STUN_BOSS_IMMUNE, chance := -1.0) -> bool:
+## chance < 0 = effective_stun_chance(spell, ...); de simulator kan een andere kans meegeven.
+static func stun_lands(
+		fx: Dictionary,
+		spell: Dictionary,
+		target_is_boss: bool,
+		roll: float,
+		boss_immune := STUN_BOSS_IMMUNE,
+		chance := -1.0,
+) -> bool:
 	if int(fx.get("skip", 0)) <= 0:
 		return false
 	if target_is_boss and boss_immune:
 		return false
-	return roll < (chance if chance >= 0.0 else float(fx.get("skip_chance", STUN_CHANCE)))
+	var p := effective_stun_chance(spell, target_is_boss, boss_immune, chance)
+	return roll < p
 
 
 ## Brand, vergif, verlamming of bevriezing na een schade-treffer. {} = geen.
@@ -115,9 +150,9 @@ static func on_hit(spell: Dictionary) -> Dictionary:
 		"vuur", "natuur":
 			return {"dot_pct": 0.05, "dot_turns": 3}
 		"bliksem":
-			return {"skip": 1, "skip_reden": "verlamming", "skip_chance": STUN_CHANCE}
+			return {"skip": 1, "skip_reden": "verlamming", "skip_chance": stun_base_chance(spell)}
 		"ijs":
-			return {"skip": 1, "skip_reden": "bevriezing", "skip_chance": STUN_CHANCE}
+			return {"skip": 1, "skip_reden": "bevriezing", "skip_chance": stun_base_chance(spell)}
 		_:
 			return {}
 

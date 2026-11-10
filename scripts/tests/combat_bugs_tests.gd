@@ -63,6 +63,8 @@ func _run() -> void:
 	await _e5_tests()
 	print("=== Brand ververst in plaats van stapelen ===")
 	await _brand_tests()
+	print("=== C-2: stun-lock, AoE- en baas-kans ===")
+	await _stun_lock_tests()
 	print("COMBATBUGSTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	for i in 10:
@@ -332,4 +334,35 @@ func _brand_tests() -> void:
 	b._apply_spell_status(foe, vuur)
 	b._tick_ailments(foe)
 	check("dubbele brand doet 1x schade per tick (50)", int(foe["s"]["hp"]) == 950)
+	b.queue_free()
+
+
+# ================================================================ C-2 (stun-lock)
+func _stun_lock_tests() -> void:
+	var b := _battle({})
+	var foe: Dictionary = b.enemies[0]
+	var schok: Dictionary = GameData.SPELLS["schok"]
+	var bliksem: Dictionary = GameData.SPELLS["bliksem"]
+	check("AoE stun-kans uit STUN_CHANCE_AOE",
+			is_equal_approx(SpellRules.stun_base_chance(bliksem), SpellRules.STUN_CHANCE_AOE))
+	check("baas enkel = helft van STUN_CHANCE",
+			is_equal_approx(SpellRules.effective_stun_chance(schok, true), SpellRules.STUN_CHANCE * SpellRules.STUN_BOSS_MULT))
+	foe["skip"] = 0
+	foe.erase("stun_immune")
+	b.stun_chance = 1.0
+	b._apply_spell_status(foe, schok)
+	check("stun met kans 100%: skip + stun_immune", int(foe.get("skip", 0)) == 1 and bool(foe.get("stun_immune", false)))
+	b.stun_chance = 1.0
+	b._apply_spell_status(foe, schok)
+	check("stun-lock: tweede stun geblokkeerd (skip nog 1)", int(foe.get("skip", 0)) == 1)
+	foe["skip"] = 0
+	foe.erase("stun_immune")
+	b.stun_chance = 1.0
+	b._apply_spell_status(foe, schok)
+	check("stun gezet", int(foe.get("skip", 0)) == 1)
+	await b._execute({"type": "attack", "actor": foe, "target": b.heroes[0]})
+	check("na skip-beurt: stun_immune weg, skip 0", int(foe.get("skip", 0)) == 0 and not foe.has("stun_immune"))
+	b.stun_chance = 1.0
+	b._apply_spell_status(foe, schok)
+	check("na immuniteit: stun weer mogelijk", int(foe.get("skip", 0)) == 1)
 	b.queue_free()
