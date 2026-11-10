@@ -9,6 +9,7 @@ const Modes := preload("res://scripts/online/online_dls_modes.gd")
 const Floor := preload("res://scripts/online/online_dls_floor.gd")
 const Finger := preload("res://scripts/online/solo_d100_fingerprint.gd")
 const PageWardenBoss := preload("res://scripts/som/page_warden_boss.gd")
+const SomData := preload("res://scripts/data/som_data.gd")
 
 const SENTINEL := "M9B-SENTINEL-DO-NOT-SAVE\n"
 const SAVE_PATHS: Array[String] = [
@@ -46,6 +47,7 @@ func _run() -> void:
 	_boss_voorstel_blijft()
 	_chain()
 	_seeds()
+	_param_determinisme()
 	var solo_before := _solo_sig()
 	var party_before := _party_sig()
 	var gold_before := int(GameState.gold)
@@ -87,6 +89,48 @@ func _chain() -> void:
 	var swings := Sim.chain_swing_count(300)
 	check("keten slaat minstens 4 keer in 5 s (%d)" % swings, swings >= 4)
 	check("keten blijft onder 12 slagen in 5 s", swings < 12)
+
+
+func _param_determinisme() -> void:
+	check("spel-mult blijft 2.2", is_equal_approx(SomData.ENEMY_DAMAGE_MULT, 2.2))
+	var base := {
+		"mode": "easy",
+		"runs": 1,
+		"floors": 3,
+		"factors": [10],
+		"seats": [1],
+		"hypothetical": false,
+		"base_seed": 20261110,
+		"verbose": false,
+		"enemy_dmg": 2.2,
+		"floor_heal": 0,
+	}
+	var a := Sim.run_cfg(base)
+	var b := Sim.run_cfg(base)
+	check("zelfde dmg en herstel, zelfde handtekening", Sim.signature(a) == Sim.signature(b) and Sim.signature(a) != "")
+	var plain: Dictionary = base.duplicate(true)
+	plain.erase("enemy_dmg")
+	plain.erase("floor_heal")
+	check("default is dmg 2.2 en herstel 0", Sim.signature(Sim.run_cfg(plain)) == Sim.signature(a))
+	var low: Dictionary = base.duplicate(true)
+	low["enemy_dmg"] = 1.2
+	var healed: Dictionary = base.duplicate(true)
+	healed["floor_heal"] = 50
+	var c := Sim.run_cfg(low)
+	var d := Sim.run_cfg(healed)
+	check("easy_enemy_dmg 1.2 twee keer gelijk", Sim.signature(c) == Sim.signature(Sim.run_cfg(low)))
+	check("floor_heal 50 twee keer gelijk", Sim.signature(d) == Sim.signature(Sim.run_cfg(healed)))
+	check("lagere easy_enemy_dmg wijzigt de handtekening", Sim.signature(c) != Sim.signature(a))
+	check("floor_heal wijzigt de handtekening", Sim.signature(d) != Sim.signature(a))
+	var hero := {"hp": 10, "max_hp": 40, "mp": 4, "max_mp": 10}
+	var down := {"hp": 0, "max_hp": 40, "mp": 0, "max_mp": 10}
+	var party: Array = [hero, down]
+	Sim.floor_heal_living(party, 0)
+	check("herstel 0 laat HP staan", int(hero["hp"]) == 10 and int(down["hp"]) == 0)
+	Sim.floor_heal_living(party, 50)
+	check("herstel 50 is de helft van max, neer blijft liggen", int(hero["hp"]) == 30 and int(hero["mp"]) == 9 and int(down["hp"]) == 0)
+	Sim.floor_heal_living(party, 100)
+	check("herstel 100 vult de levende, niet de neergegane", int(hero["hp"]) == 40 and int(hero["mp"]) == 10 and int(down["hp"]) == 0 and int(down["mp"]) == 0)
 
 
 func _seeds() -> void:
