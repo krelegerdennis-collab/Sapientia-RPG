@@ -114,16 +114,17 @@ const BOOK_ID := "leeg_boek"
 ## Een spreukrol (Vuur, Bliksem of Genees) ligt soms in een gewone kist. De party gaat de grot in zonder magie.
 const SPELL_CHANCE := 0.12
 const SPELL_SCROLLS := ["spreuk_vuur", "spreuk_bliksem", "spreuk_genees"]
-## V3: extra rollen vanaf een buitniveau (vervanger Kernkracht).
-## V3-pool per buitniveau (Dennis-ladder: rollen vanaf buit-tier 2/3/4).
-const SPELL_SCROLLS_FROM_TIER := {2: ["spreuk_vuurbal", "spreuk_grote_genezing"], 3: ["spreuk_zonnevlam"], 4: ["spreuk_g4_zonneslag"]}
+## V3: extra rollen vanaf een verdieping (Dennis — floor ladder, niet buit-tier).
+## Fireball + Major Heal vanaf 20, Solar Flare 40, Sunstrike 80 (tier_for_floor ongewijzigd).
+const SPELL_SCROLLS_V3_FROM_FLOOR := {20: ["spreuk_vuurbal", "spreuk_grote_genezing"], 40: ["spreuk_zonnevlam"], 80: ["spreuk_g4_zonneslag"]}
 
 
-static func spell_scrolls_for_tier(tier: int) -> Array:
+static func spell_scrolls_for_floor(floor_nr: int) -> Array:
 	var out: Array = SPELL_SCROLLS.duplicate()
-	for t in SPELL_SCROLLS_FROM_TIER:
-		if tier >= int(t):
-			out.append_array(SPELL_SCROLLS_FROM_TIER[t])
+	var f := clamp_floor(floor_nr)
+	for threshold in SPELL_SCROLLS_V3_FROM_FLOOR:
+		if f >= int(threshold):
+			out.append_array(SPELL_SCROLLS_V3_FROM_FLOOR[threshold])
 	return out
 
 
@@ -360,7 +361,7 @@ static func chest_loot(floor_nr: int, rng, boss := false) -> Dictionary:
 		if tier >= 2 and rng.randf() < BOOK_CHANCE:
 			items.append({"item": BOOK_ID, "n": 1})
 		if rng.randf() < SPELL_CHANCE:
-			var pool := spell_scrolls_for_tier(tier)
+			var pool := spell_scrolls_for_floor(f)
 			items.append({"item": str(pool[rng.randi_range(0, pool.size() - 1)]), "n": 1})
 	return {"tier": tier, "items": items, "gold": gold, "boss": false, "kind": kind}
 

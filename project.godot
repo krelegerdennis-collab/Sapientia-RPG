@@ -8,23 +8,15 @@
 
 config_version=5
 
-[animation]
-
-compatibility/default_parent_skeleton_in_mesh_instance_3d=true
-
 [application]
 
 config/name="SAPIENTIA"
 config/description="Top-down JRPG prototype for mobile"
 config/version="0.20"
 run/main_scene="res://scenes/ui/title.tscn"
-config/features=PackedStringArray("4.3", "Mobile")
 run/max_fps=60
+config/features=PackedStringArray("4.3", "Mobile")
 config/icon="res://icon.png"
-
-[audio]
-
-general/default_playback_type.web=0
 
 [autoload]
 
@@ -103,6 +95,18 @@ debug_battle={
 
 pointing/emulate_touch_from_mouse=true
 
+[audio]
+
+; Web-standaard is Sample (1). Sample + extra bussen (Music/SFX) is stil in de
+; browser (Godot 4.7, godot#119026). 0 = Stream.
+general/default_playback_type.web=0
+
+[sapientia]
+
+; Online co-op: WebSocket-URL van de relay (relay/README.md), bv. "wss://naam.fly.dev".
+; Leeg = alleen LAN. Omgevingsvariabele SAPIENTIA_RELAY_URL wint (dev/test).
+net/relay_url=""
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
@@ -111,7 +115,3 @@ renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 2d/snap/snap_2d_transforms_to_pixel=true
 2d/snap/snap_2d_vertices_to_pixel=true
-
-[sapientia]
-
-net/relay_url=""

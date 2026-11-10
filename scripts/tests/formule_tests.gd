@@ -13,6 +13,7 @@ const PartyActions := preload("res://scripts/party_actions.gd")
 const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const DamageCalc := preload("res://scripts/battle/damage_calc.gd")
 const BATTLE_SCRIPT := "res://scripts/battle/battle.gd"
+const D100 := preload("res://scripts/data/dungeon100_scaling.gd")
 
 var failures := 0
 var passes := 0
@@ -40,6 +41,7 @@ func _run() -> void:
 	_level_up_tests()
 	print("=== Deel D: spreuken (C-12 mag/mdef/zwak-resist) ===")
 	_spell_formula_tests()
+	_v3_scroll_floor_tests()
 	print("FORMULETEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	for i in 10:
@@ -187,3 +189,12 @@ func _spell_formula_tests() -> void:
 	var b: Object = (load(BATTLE_SCRIPT) as GDScript).new()
 	check("battle.spell_base = DamageCalc", is_equal_approx(b.spell_base(caster, sp, tgt), base))
 	b.free()
+
+
+func _v3_scroll_floor_tests() -> void:
+	var p19 := D100.spell_scrolls_for_floor(19)
+	var p20 := D100.spell_scrolls_for_floor(20)
+	check("V3 floor 19: geen vuurbal in kist-pool", not p19.has("spreuk_vuurbal"))
+	check("V3 floor 20: vuurbal in kist-pool", p20.has("spreuk_vuurbal"))
+	check("V3 floor 79: geen zonneslag in kist-pool", not D100.spell_scrolls_for_floor(79).has("spreuk_g4_zonneslag"))
+	check("V3 floor 80: zonneslag in kist-pool", D100.spell_scrolls_for_floor(80).has("spreuk_g4_zonneslag"))
