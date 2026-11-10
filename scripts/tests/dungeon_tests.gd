@@ -1108,7 +1108,25 @@ func _theme_tests(hw: String) -> void:
 	check("grijze sprites bestaan, zelfde maat als het origineel (fout: %s)" % [missing], missing.is_empty())
 	check("themed(): geen thema of archief_v14 -> origineel", DR.themed("res://assets/puzzle/hendel.png", "archief_v14") == "res://assets/puzzle/hendel.png"
 			and DR.themed("res://assets/sprites/player.png", "archief_grijs") == "res://assets/sprites/player.png")
-	check("gegenereerde grijze art staat NIET in handwerk.txt", not ("archief_grijs" in hw) and not ("dungeon/grijs/" in hw))
+	var handwerk_grijs: Array = [
+		"assets/tiles/dungeon/archief_grijs_tiles.png",
+		"assets/tiles/dungeon/archief_grijs_bibliotheek.png",
+		"assets/sprites/dungeon/grijs/geheime_deur_archief.png",
+		"assets/sprites/dungeon/grijs/golemdeur.png",
+		"assets/sprites/dungeon/grijs/hendel.png",
+		"assets/sprites/dungeon/grijs/herstelsteen.png",
+		"assets/sprites/dungeon/grijs/kandelaar.png",
+		"assets/sprites/dungeon/grijs/kast_duwbaar.png",
+		"assets/sprites/dungeon/grijs/kast_vast.png",
+		"assets/sprites/dungeon/grijs/kast_zwaar.png",
+		"assets/sprites/dungeon/grijs/kist.png",
+		"assets/sprites/dungeon/grijs/leestafel.png",
+		"assets/sprites/dungeon/grijs/poort.png",
+		"assets/sprites/dungeon/grijs/schatkist.png",
+		"assets/sprites/dungeon/grijs/staande_kast.png",
+	]
+	var mist_hw := handwerk_grijs.filter(func(p): return not (p in hw))
+	check("handgepolijste grijze archief-art staat in handwerk.txt (mist: %s)" % [mist_hw], mist_hw.is_empty())
 	var ts_old: TileSet = DungeonRoom.tileset(true, "archief_v14")
 	var ts_new: TileSet = DungeonRoom.tileset(true, "archief_grijs")
 	var same := true

@@ -105,6 +105,24 @@ function createRelay(userConfig = {}) {
     room.lastActivity = Date.now();
   }
 
+  const MAX_PEER_ID = 65535;
+
+  function allocPeerId(room) {
+    while (room.freeIds.length > 0) {
+      const id = room.freeIds.pop();
+      if (!room.members.has(id)) return id;
+    }
+    if (room.nextId > MAX_PEER_ID) return null;
+    const id = room.nextId;
+    room.nextId += 1;
+    return id;
+  }
+
+  function releasePeerId(room, peerId) {
+    if (peerId === HOST_PEER_ID || peerId <= 0 || peerId > MAX_PEER_ID) return;
+    if (!room.freeIds.includes(peerId)) room.freeIds.push(peerId);
+  }
+
   function newRoom(host) {
     let code = generateCode();
     for (let i = 0; i < 20 && rooms.has(code); i++) code = generateCode();
@@ -114,6 +132,7 @@ function createRelay(userConfig = {}) {
       host,
       members: new Map([[HOST_PEER_ID, host]]),
       nextId: HOST_PEER_ID + 1,
+      freeIds: [],
       createdAt: Date.now(),
       lastActivity: Date.now(),
     };
@@ -155,7 +174,8 @@ function createRelay(userConfig = {}) {
     const room = code ? rooms.get(code) : undefined;
     if (!room) return fail(conn, 'no_room');
     if (room.members.size >= cfg.maxPlayers) return fail(conn, 'room_full');
-    const id = room.nextId++;
+    const id = allocPeerId(room);
+    if (id === null) return fail(conn, 'room_full');
     room.members.set(id, conn);
     conn.room = room;
     conn.peerId = id;
@@ -196,6 +216,9 @@ function createRelay(userConfig = {}) {
         return handleKick(conn, msg);
       case 'leave':
         return closeConn(conn, 1000, 'leave');
+      case '_test_throw':
+        if (cfg._testInjectThrow) throw new Error('_test_throw');
+        return fail(conn, 'bad_message');
       default:
         return fail(conn, 'bad_message');
     }
@@ -206,6 +229,7 @@ function createRelay(userConfig = {}) {
     if (!room) return fail(conn, 'bad_message');
     if (buf.length <= HEADER_BYTES) return noteViolation(conn);
     const target = buf.readUInt16BE(0);
+    if (conn.peerId > MAX_PEER_ID) return fail(conn, 'bad_message');
     const framed = Buffer.allocUnsafe(buf.length);
     framed.writeUInt16BE(conn.peerId, 0);
     buf.copy(framed, HEADER_BYTES, HEADER_BYTES);
@@ -255,9 +279,11 @@ function createRelay(userConfig = {}) {
       return;
     }
     if (room.members.get(conn.peerId) === conn) {
-      room.members.delete(conn.peerId);
+      const leftId = conn.peerId;
+      room.members.delete(leftId);
+      releasePeerId(room, leftId);
       touch(room);
-      sendJson(room.host, { t: 'peer_left', peer: conn.peerId });
+      sendJson(room.host, { t: 'peer_left', peer: leftId });
     }
   }
 
@@ -284,7 +310,9 @@ function createRelay(userConfig = {}) {
       byteBucket: new TokenBucket(cfg.byteRate, cfg.byteBurst),
       handshakeTimer: null,
     };
-    ws.on('error', noop);
+    ws.on('error', (err) => {
+      log('ws_error', { ip, err: err && err.message ? err.message : String(err) });
+    });
     if (closing || conns.size >= cfg.maxConnections) {
       fail(conn, 'busy');
       return;
@@ -298,11 +326,28 @@ function createRelay(userConfig = {}) {
     conn.handshakeTimer = setTimeout(() => {
       if (!conn.room) fail(conn, 'handshake_timeout');
     }, cfg.handshakeMs);
-    ws.on('message', (data, isBinary) => onMessage(conn, data, isBinary));
-    ws.on('pong', () => {
-      conn.alive = true;
+    ws.on('message', (data, isBinary) => {
+      try {
+        onMessage(conn, data, isBinary);
+      } catch (err) {
+        log('handler_error', { where: 'message', err: err.message });
+        fail(conn, 'bad_message');
+      }
     });
-    ws.on('close', () => onClose(conn));
+    ws.on('pong', () => {
+      try {
+        conn.alive = true;
+      } catch (err) {
+        log('handler_error', { where: 'pong', err: err.message });
+      }
+    });
+    ws.on('close', () => {
+      try {
+        onClose(conn);
+      } catch (err) {
+        log('handler_error', { where: 'close', err: err.message });
+      }
+    });
   });
 
   let lastPing = Date.now();
