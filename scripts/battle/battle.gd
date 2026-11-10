@@ -1662,8 +1662,10 @@ func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
 			burn["pct"] = maxf(float(burn.get("pct", 0.0)), pct)
 			burn["turns"] = maxi(int(burn.get("turns", 0)), turns)
 	# Verlamming/bevriezing: kans uit SpellRules (enkel/AoE, baas-halve kans), anti stun-lock.
-	if int(fx.get("skip", 0)) > 0 and not SpellRules.target_blocks_stun(target):
-		if SpellRules.stun_lands(fx, spell, is_boss_target(target), randf(), stun_boss_immune, stun_chance):
+	# roll altijd trekken (ook bij immune/skip) zodat de gevechts-randf()-reeks gelijk blijft.
+	if int(fx.get("skip", 0)) > 0:
+		var roll := randf()
+		if not SpellRules.target_blocks_stun(target) and SpellRules.stun_lands(fx, spell, is_boss_target(target), roll, stun_boss_immune, stun_chance):
 			target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
 			target["skip_reden"] = str(fx.get("skip_reden", "bevriezing"))
 			target["stun_immune"] = true
