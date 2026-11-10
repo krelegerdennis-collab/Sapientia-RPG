@@ -81,10 +81,11 @@ const SCRIPT := {
 	"enrage": false,
 }
 
-## Bestaande baas-art (handwerk). Niet wijzigen.
+## Definitieve art van RPG ART (handwerk). Niet wijzigen.
 const SPRITE_BODY := "res://assets/sprites/enemies/page_warden.png"
 const SPRITE_BACK := "res://assets/sprites/enemies/page_warden_rug.png"
-## Placeholders (magenta hoek + PH). Echte frames: PR "Nodig van RPG ART".
+## Definitieve art van RPG ART. De *_ph.png-namen zijn historisch (eerder placeholders);
+## de paden staan in tools/handwerk.txt en blijven zo.
 const SPRITE_ATTACK := "res://assets/sprites/bosses/page_warden_attack_ph.png"     # 512x200, 2×256x200
 const SPRITE_ATTACK_FRAMES := 2
 const SPRITE_HIT := "res://assets/sprites/bosses/page_warden_hit_ph.png"           # 256x200
