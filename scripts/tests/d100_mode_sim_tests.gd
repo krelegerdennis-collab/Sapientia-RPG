@@ -43,6 +43,7 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	_factor_stays()
 	_boss_voorstel_blijft()
+	_chain()
 	_seeds()
 	var solo_before := _solo_sig()
 	var party_before := _party_sig()
@@ -79,6 +80,12 @@ func _boss_voorstel_blijft() -> void:
 	check("SEAT_HP blijft de tabel uit #420", _close(PageWardenBoss.SEAT_HP, [0.0, 1.0, 2.6, 2.95, 3.35]))
 	check("SEAT_ATK blijft de tabel uit #420", _close(PageWardenBoss.SEAT_ATK, [0.0, 1.0, 1.42, 1.43, 1.45]))
 	check("boss_key blijft 10", PageWardenBoss.BOSS_KEY == 10)
+
+
+func _chain() -> void:
+	var swings := Sim.chain_swing_count(300)
+	check("keten slaat minstens 4 keer in 5 s (%d)" % swings, swings >= 4)
+	check("keten blijft onder 12 slagen in 5 s", swings < 12)
 
 
 func _seeds() -> void:
@@ -131,6 +138,13 @@ func _determinisme() -> void:
 			hypo_ok = false
 	check("tien vloeren per cel, inclusief boss_key 10", floors_ok)
 	check("hypo-baas één keer per cel", hypo_ok)
+	var causes_ok := true
+	for row in rows:
+		for fl in row["floors"]:
+			var summed := int(fl["cause_wipe"]) + int(fl["cause_timeout"]) + int(fl["cause_soft"]) + int(fl["cause_other"])
+			if summed != int(fl["losses"]):
+				causes_ok = false
+	check("elke verlies heeft één oorzaak", causes_ok)
 
 
 func _plant_saves() -> Dictionary:
