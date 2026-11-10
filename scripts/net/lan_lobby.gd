@@ -7,6 +7,10 @@ extends Node
 
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const RelayPeerScript := preload("res://scripts/net/relay_peer.gd")
+const Codec := preload("res://scripts/net/net_codec.gd")
+const AvatarBlob := preload("res://scripts/net/avatar_blob.gd")
+const EmoteGateScript := preload("res://scripts/net/emote_gate.gd")
+const RewardAckScript := preload("res://scripts/net/reward_ack.gd")
 
 signal assigned(slot: int, character_id: String)
 signal refused(reason: int)
@@ -17,6 +21,12 @@ signal start_game_received
 signal session_ended(reason: String)
 ## Relay-host: de relay gaf een kamercode. Alleen bij transport RELAY.
 signal room_ready(code: String)
+## Online v2: de host heeft een emote doorgelaten. Tonen is M5.
+signal emote_received(seat: int, emote_id: int)
+## Online v2: ready-vinkje van een menselijke stoel.
+signal ready_changed
+## Online v2: de host koos een simulatie. Gasten zien de keuze.
+signal sim_selected(sim_id: String, mode: String)
 
 enum Phase { IDLE, JOINING, IN, REFUSED, LOST }
 enum Transport { LAN, RELAY }
@@ -35,6 +45,14 @@ var transport: Transport = Transport.LAN
 var room_code := ""
 ## Relay: laatste reden van de relay/verbinding (RelayPeer.last_reason), "" = geen.
 var relay_reason := ""
+## 1 = LAN (fase B). 2 = online co-op. De twee praten niet door elkaar.
+var protocol_version := Protocol.VERSION
+## Online v2: gekozen simulatie (leeg tot de host kiest) en ready per stoel.
+var sim_id := ""
+var sim_mode := ""
+var _ready_by_seat: Dictionary = {}
+## Leeg = de client leest applied_grants van het M1-profiel. Vervangt die lezing.
+var is_grant_applied: Callable = Callable()
 
 var _peer: MultiplayerPeer
 var _join_timeout := Protocol.JOIN_TIMEOUT_SEC
@@ -48,6 +66,10 @@ var _remotes: Array[int] = []
 var _kick_queued: Array[int] = []
 var _drop_ids: Array[int] = []
 var _gameplay: Node = null
+var _online_profile: Dictionary = {}
+var _emote_gate: EmoteGate = null
+var _rewards: RewardAck = null
+var _inbox: RewardAck = null
 
 
 func _ready() -> void:
@@ -152,6 +174,142 @@ func join_relay(url: String, code: String, character_id: String, display_name: S
 	return OK
 
 
+## Online host (protocol v2). profile: uid, name, class, look (dict of blob).
+## LAN-host_relay blijft versie 1 en wijst nog de vaste helden toe.
+func host_relay_v2(url: String, profile: Dictionary) -> Error:
+	if phase != Phase.IDLE or _peer != null:
+		return ERR_ALREADY_IN_USE
+	var norm := Codec.normalize_profile(profile)
+	if not bool(norm.get("ok", false)):
+		return ERR_INVALID_PARAMETER
+	var peer: RelayPeer = RelayPeerScript.new()
+	var err := peer.create_host(url)
+	if err != OK:
+		_note_failure("host relay v2", err, 0)
+		return err
+	last_error = OK
+	last_error_port = 0
+	transport = Transport.RELAY
+	room_code = ""
+	relay_reason = ""
+	protocol_version = Protocol.VERSION_ONLINE
+	_online_profile = norm
+	_emote_gate = EmoteGateScript.new()
+	_rewards = RewardAckScript.new()
+	peer.room_ready.connect(_on_relay_room_ready)
+	_bind(peer)
+	is_host = true
+	phase = Phase.IN
+	_display_name = str(norm.get("name", ""))
+	_add_online_slot(Protocol.HOST_PEER_ID, Protocol.HOST_SLOT, norm, Protocol.CTRL_LOCAL)
+	local_slot = Protocol.HOST_SLOT
+	local_character = AvatarBlob.base_hero(str(norm.get("class_id", "")))
+	return OK
+
+
+## Online gast (protocol v2). Een v1-host antwoordt met REFUSE VERSION.
+func join_relay_v2(url: String, code: String, profile: Dictionary) -> Error:
+	if phase != Phase.IDLE or _peer != null:
+		return ERR_ALREADY_IN_USE
+	var norm := Codec.normalize_profile(profile)
+	if not bool(norm.get("ok", false)):
+		return ERR_INVALID_PARAMETER
+	var clean := Protocol.filter_room_code(code)
+	if not Protocol.is_room_code(clean):
+		return ERR_INVALID_PARAMETER
+	var peer: RelayPeer = RelayPeerScript.new()
+	var err := peer.create_client(url, clean)
+	if err != OK:
+		_note_failure("join relay v2", err, 0)
+		return err
+	last_error = OK
+	last_error_port = 0
+	transport = Transport.RELAY
+	room_code = clean
+	relay_reason = ""
+	protocol_version = Protocol.VERSION_ONLINE
+	_online_profile = norm
+	_bind(peer)
+	is_host = false
+	phase = Phase.JOINING
+	_want_character = ""
+	_display_name = str(norm.get("name", ""))
+	_hello_version = Protocol.VERSION_ONLINE
+	_hello_sent = false
+	_join_wait = 0.0
+	_join_timeout = Protocol.RELAY_JOIN_TIMEOUT_SEC
+	return OK
+
+
+## Eigen stoel stuurt een emote. De host keurt goed; gasten wachten op de broadcast.
+func send_emote(emote_id: int) -> void:
+	if phase != Phase.IN or protocol_version != Protocol.VERSION_ONLINE:
+		return
+	if local_slot == Protocol.NO_SLOT:
+		return
+	if is_host:
+		_accept_emote(local_slot, local_slot, emote_id)
+		return
+	var raw := Codec.encode_emote(local_slot, emote_id)
+	if raw.is_empty() or _peer == null:
+		return
+	_peer.set_target_peer(Protocol.HOST_PEER_ID)
+	_peer.put_packet(raw)
+	_peer.poll()
+
+
+## Eigen stoel zet Ready aan of uit. Alleen protocol v2.
+func set_ready(ready: bool) -> void:
+	if phase != Phase.IN or protocol_version != Protocol.VERSION_ONLINE:
+		return
+	if local_slot == Protocol.NO_SLOT:
+		return
+	if is_host:
+		_store_ready(local_slot, ready)
+		_broadcast(Protocol.Kind.READY, {"seat": local_slot, "ready": ready})
+		return
+	_store_ready(local_slot, ready)
+	var raw := Codec.encode_ready(local_slot, ready)
+	if raw.is_empty() or _peer == null:
+		return
+	_peer.set_target_peer(Protocol.HOST_PEER_ID)
+	_peer.put_packet(raw)
+	_peer.poll()
+
+
+func seat_ready(seat: int) -> bool:
+	return bool(_ready_by_seat.get(seat, false))
+
+
+## Elke menselijke stoel (niet AI) staat op Ready. Lege stoelen tellen niet mee.
+func human_seats_ready() -> bool:
+	if slots.is_empty() or protocol_version != Protocol.VERSION_ONLINE:
+		return false
+	var any := false
+	for row in slots:
+		var wire := str(row.get("wire_controller", row.get("controller", "")))
+		if wire == Protocol.CTRL_AI:
+			continue
+		any = true
+		var seat := int(row.get("seat", row.get("slot", Protocol.NO_SLOT)))
+		if not seat_ready(seat):
+			return false
+	return any
+
+
+## Host kiest de simulatie. Een gast kan dit niet. De hal laat in de proef alleen Easy toe.
+func select_sim(sim: String, mode: String) -> bool:
+	if not is_host or phase != Phase.IN or protocol_version != Protocol.VERSION_ONLINE:
+		return false
+	if Codec.encode_sim_select(sim, mode).is_empty():
+		return false
+	sim_id = sim
+	sim_mode = mode
+	_broadcast(Protocol.Kind.SIM_SELECT, {"sim": sim, "mode": mode})
+	sim_selected.emit(sim, mode)
+	return true
+
+
 func _on_relay_room_ready(code: String) -> void:
 	room_code = code
 	room_ready.emit(code)
@@ -186,6 +344,12 @@ func close() -> void:
 	transport = Transport.LAN
 	room_code = ""
 	relay_reason = ""
+	protocol_version = Protocol.VERSION
+	_online_profile = {}
+	_emote_gate = null
+	sim_id = ""
+	sim_mode = ""
+	_ready_by_seat.clear()
 	_suppress = false
 
 
@@ -259,10 +423,13 @@ func _process(delta: float) -> void:
 		_set_refused(_join_failure_reason())
 		return
 	if status == MultiplayerPeer.CONNECTION_CONNECTED and not _hello_sent:
-		_send_to(Protocol.HOST_PEER_ID, Protocol.Kind.HELLO, {
-			"character_id": _want_character,
-			"display_name": _display_name,
-		}, _hello_version)
+		if protocol_version == Protocol.VERSION_ONLINE:
+			_send_to(Protocol.HOST_PEER_ID, Protocol.Kind.HELLO, Codec.hello_body(_online_profile), Protocol.VERSION_ONLINE)
+		else:
+			_send_to(Protocol.HOST_PEER_ID, Protocol.Kind.HELLO, {
+				"character_id": _want_character,
+				"display_name": _display_name,
+			}, _hello_version)
 		_hello_sent = true
 	_join_wait += minf(delta, Protocol.JOIN_TICK_CAP_SEC)
 	if _join_wait >= _join_timeout and local_slot == Protocol.NO_SLOT and refuse_reason == Protocol.Refuse.NONE:
@@ -319,7 +486,7 @@ func _apply_drops() -> void:
 		if is_host:
 			_remotes.erase(id)
 			if _remove_peer(id):
-				_broadcast(Protocol.Kind.ROSTER, {"roster": _roster_payload()})
+				_emit_roster()
 				member_left.emit(id)
 		else:
 			_on_link_lost()
@@ -349,7 +516,7 @@ func _drain() -> void:
 			if _gameplay != null and _gameplay.has_method("ingest_packet"):
 				_gameplay.ingest_packet(from_id, raw)
 			continue
-		var msg := Protocol.decode(raw)
+		var msg := Codec.decode_v2(raw) if protocol_version == Protocol.VERSION_ONLINE else Protocol.decode(raw)
 		if is_host:
 			_on_host_packet(from_id, msg)
 		else:
@@ -363,12 +530,15 @@ func _on_host_packet(from_id: int, msg: Dictionary) -> void:
 	if not bool(msg["compatible"]):
 		_refuse(from_id, Protocol.Refuse.VERSION)
 		return
+	if protocol_version == Protocol.VERSION_ONLINE:
+		_on_host_v2(from_id, msg)
+		return
 	match int(msg["kind"]):
 		Protocol.Kind.HELLO:
 			_on_hello(from_id, msg["body"])
 		Protocol.Kind.LEAVE:
 			if _remove_peer(from_id):
-				_broadcast(Protocol.Kind.ROSTER, {"roster": _roster_payload()})
+				_emit_roster()
 				member_left.emit(from_id)
 			_queue_kick(from_id)
 
@@ -392,10 +562,328 @@ func _on_hello(from_id: int, body: Dictionary) -> void:
 	var display := Protocol.clean_name(str(body.get("display_name", "")))
 	_add_slot(from_id, slot, character, display)
 	_send_to(from_id, Protocol.Kind.WELCOME, {"slot": slot, "character_id": character})
-	_broadcast(Protocol.Kind.ROSTER, {"roster": _roster_payload()})
+	_emit_roster()
+
+
+func _on_host_v2(from_id: int, msg: Dictionary) -> void:
+	match int(msg["kind"]):
+		Protocol.Kind.HELLO:
+			_on_hello_v2(from_id, msg["body"])
+		Protocol.Kind.LEAVE:
+			if _remove_peer(from_id):
+				_emit_roster()
+				member_left.emit(from_id)
+			_queue_kick(from_id)
+		Protocol.Kind.EMOTE:
+			_on_emote_packet(from_id, msg["body"])
+		Protocol.Kind.READY:
+			_on_ready_packet(from_id, msg["body"])
+		Protocol.Kind.REWARD_ACK:
+			_on_reward_ack(from_id, msg["body"])
+
+
+func _on_hello_v2(from_id: int, body: Dictionary) -> void:
+	if from_id == Protocol.HOST_PEER_ID or _peer_slotted(from_id):
+		return
+	if slots.size() >= Protocol.MAX_PLAYERS:
+		_refuse(from_id, Protocol.Refuse.FULL)
+		return
+	var norm := Codec.read_hello_v2(body)
+	if not bool(norm.get("ok", false)):
+		_refuse(from_id, Protocol.Refuse.BAD_PACKET)
+		return
+	var uid := str(norm.get("uid", ""))
+	var used: Array[int] = []
+	for row in slots:
+		if str(row.get("uid", "")) == uid:
+			_refuse(from_id, Protocol.Refuse.BAD_PACKET)
+			return
+		used.append(int(row.get("slot", Protocol.NO_SLOT)))
+	var slot := Protocol.free_slot(used)
+	if slot == Protocol.NO_SLOT:
+		_refuse(from_id, Protocol.Refuse.FULL)
+		return
+	_add_online_slot(from_id, slot, norm, Protocol.CTRL_REMOTE)
+	_send_to(from_id, Protocol.Kind.WELCOME, {"slot": slot, "uid": uid}, Protocol.VERSION_ONLINE)
+	_emit_roster()
+	_resend_unacked(from_id, uid)
+
+
+func _on_ready_packet(from_id: int, body: Dictionary) -> void:
+	# Eigen broadcast mag niet terug de host in (anders een lus als de relay echoot).
+	if from_id == Protocol.HOST_PEER_ID:
+		return
+	var parsed := Codec.read_ready(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	var seat := _seat_of_peer(from_id)
+	if seat == Protocol.NO_SLOT or seat != int(parsed.get("seat", Protocol.NO_SLOT)):
+		return
+	var ready := bool(parsed.get("ready", false))
+	_store_ready(seat, ready)
+	_broadcast(Protocol.Kind.READY, {"seat": seat, "ready": ready})
+
+
+func _store_ready(seat: int, ready: bool) -> void:
+	_ready_by_seat[seat] = ready
+	ready_changed.emit()
+
+
+func _prune_ready() -> void:
+	var live := {}
+	for row in slots:
+		live[int(row.get("seat", row.get("slot", -1)))] = true
+	var gone: Array = []
+	for key in _ready_by_seat.keys():
+		if not live.has(int(key)):
+			gone.append(key)
+	if gone.is_empty():
+		return
+	for key in gone:
+		_ready_by_seat.erase(key)
+	ready_changed.emit()
+
+
+func _on_emote_packet(from_id: int, body: Dictionary) -> void:
+	var parsed := Codec.read_emote(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	_accept_emote(_seat_of_peer(from_id), int(parsed.get("seat", Protocol.NO_SLOT)), int(parsed.get("emote_id", -1)))
+
+
+## seat moet de stoel van de afzender zijn, id uit de tabel, en de cooldown voorbij.
+func _accept_emote(sender_seat: int, claimed_seat: int, emote_id: int) -> void:
+	if sender_seat == Protocol.NO_SLOT or sender_seat != claimed_seat:
+		return
+	if not Codec.read_emote(Codec.emote_body(claimed_seat, emote_id)).get("ok", false):
+		return
+	if _emote_gate == null or not _emote_gate.allow(sender_seat, _emote_now()):
+		return
+	_broadcast(Protocol.Kind.EMOTE, Codec.emote_body(sender_seat, emote_id))
+	emote_received.emit(sender_seat, emote_id)
+
+
+func _emote_now() -> float:
+	return float(Time.get_ticks_msec()) / 1000.0
+
+
+func _seat_of_peer(peer_id: int) -> int:
+	for row in slots:
+		if int(row.get("peer_id", 0)) == peer_id:
+			return int(row.get("slot", Protocol.NO_SLOT))
+	return Protocol.NO_SLOT
+
+
+func _uid_of_peer(peer_id: int) -> String:
+	for row in slots:
+		if int(row.get("peer_id", 0)) == peer_id:
+			return str(row.get("uid", ""))
+	return ""
+
+
+## Online v2. Bewaart de bundle tot REWARD_ACK. Leeg als dit geen v2-host is.
+func send_reward(peer_id: int, bundle: Dictionary) -> String:
+	if protocol_version != Protocol.VERSION_ONLINE or not is_host or _rewards == null:
+		return ""
+	var uid := _uid_of_peer(peer_id)
+	if uid == "":
+		return ""
+	var offered: Dictionary = _rewards.offer(uid, bundle)
+	if not bool(offered.get("ok", false)):
+		return ""
+	var body: Dictionary = offered.get("body", {})
+	_send_to(peer_id, Protocol.Kind.REWARD_BUNDLE, body, Protocol.VERSION_ONLINE)
+	return str(offered.get("grant_key", ""))
+
+
+func _resend_unacked(peer_id: int, uid: String) -> void:
+	if _rewards == null:
+		return
+	for item in _rewards.unacked(uid):
+		if item is Dictionary:
+			_send_to(peer_id, Protocol.Kind.REWARD_BUNDLE, item, Protocol.VERSION_ONLINE)
+
+
+func _on_reward_ack(from_id: int, body: Dictionary) -> void:
+	if _rewards == null:
+		return
+	var parsed := Codec.read_reward_ack(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	var uid := _uid_of_peer(from_id)
+	if uid == "":
+		return
+	_rewards.ack(uid, str(parsed.get("grant_key", "")))
+
+
+func _on_reward_bundle(body: Dictionary) -> void:
+	if phase != Phase.IN or protocol_version != Protocol.VERSION_ONLINE:
+		return
+	if _inbox == null:
+		_inbox = RewardAckScript.new()
+	if is_grant_applied.is_valid():
+		_inbox.is_grant_applied = is_grant_applied
+	var result: Dictionary = _inbox.receive(body)
+	if not bool(result.get("ok", false)):
+		return
+	_send_to(Protocol.HOST_PEER_ID, Protocol.Kind.REWARD_ACK, {
+		"grant_key": str(result.get("grant_key", "")),
+	}, Protocol.VERSION_ONLINE)
+
+
+func _on_client_v2(msg: Dictionary) -> void:
+	if not bool(msg.get("ok", false)):
+		_set_refused(Protocol.Refuse.BAD_PACKET)
+		return
+	var kind := int(msg.get("kind", 0))
+	var body: Dictionary = msg.get("body", {})
+	if not bool(msg.get("compatible", false)):
+		if kind == Protocol.Kind.REFUSE:
+			_set_refused(int(body.get("reason", Protocol.Refuse.VERSION)))
+		else:
+			_set_refused(Protocol.Refuse.VERSION)
+		return
+	match kind:
+		Protocol.Kind.REFUSE:
+			_set_refused(int(body.get("reason", Protocol.Refuse.BAD_PACKET)))
+		Protocol.Kind.WELCOME:
+			_take_welcome_v2(body)
+		Protocol.Kind.ROSTER:
+			_apply_roster_v2(body)
+		Protocol.Kind.EMOTE:
+			_emit_emote_local(body)
+		Protocol.Kind.READY:
+			_on_ready_remote(body)
+		Protocol.Kind.SIM_SELECT:
+			_on_sim_remote(body)
+		Protocol.Kind.REWARD_BUNDLE:
+			_on_reward_bundle(body)
+		Protocol.Kind.SESSION_END:
+			_on_session_end(body)
+		Protocol.Kind.START_GAME:
+			if phase == Phase.IN:
+				start_game_received.emit()
+
+
+func _take_welcome_v2(body: Dictionary) -> void:
+	var slot := int(body.get("slot", Protocol.NO_SLOT))
+	var uid := str(body.get("uid", ""))
+	if slot < 0 or slot >= Protocol.MAX_PLAYERS or uid != str(_online_profile.get("uid", "")):
+		_set_refused(Protocol.Refuse.BAD_PACKET)
+		return
+	local_slot = slot
+	local_character = AvatarBlob.base_hero(str(_online_profile.get("class_id", "")))
+	if local_character == "":
+		_set_refused(Protocol.Refuse.BAD_PACKET)
+		return
+	phase = Phase.IN
+	refuse_reason = Protocol.Refuse.NONE
+	_refresh_view_controllers()
+	assigned.emit(local_slot, local_character)
+
+
+func _apply_roster_v2(body: Dictionary) -> void:
+	var parsed := Codec.read_roster_v2(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	var next: Array[Dictionary] = []
+	for item in parsed.get("seats", []):
+		if not (item is Dictionary):
+			return
+		var seat_row: Dictionary = item
+		var seat := int(seat_row.get("seat", Protocol.NO_SLOT))
+		var class_id := str(seat_row.get("class_id", ""))
+		var wire := str(seat_row.get("controller", ""))
+		var display := str(seat_row.get("name", ""))
+		var look: PackedByteArray = seat_row.get("look", PackedByteArray())
+		next.append({
+			"peer_id": 0,
+			"slot": seat,
+			"seat": seat,
+			"character_id": AvatarBlob.base_hero(class_id),
+			"display_name": display,
+			"uid": str(seat_row.get("uid", "")),
+			"name": display,
+			"class": class_id,
+			"wire_controller": wire,
+			"controller": Codec.view_controller(wire, seat, local_slot),
+			"look": look,
+		})
+	slots = next
+	_prune_ready()
+	roster_changed.emit()
+
+
+func _refresh_view_controllers() -> void:
+	if local_slot == Protocol.NO_SLOT:
+		return
+	for row in slots:
+		var wire := str(row.get("wire_controller", ""))
+		if wire == "":
+			continue
+		row["controller"] = Codec.view_controller(wire, int(row.get("seat", Protocol.NO_SLOT)), local_slot)
+
+
+func _on_ready_remote(body: Dictionary) -> void:
+	if phase != Phase.IN:
+		return
+	var parsed := Codec.read_ready(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	_store_ready(int(parsed.get("seat", Protocol.NO_SLOT)), bool(parsed.get("ready", false)))
+
+
+func _on_sim_remote(body: Dictionary) -> void:
+	if phase != Phase.IN:
+		return
+	var parsed := Codec.read_sim_select(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	sim_id = str(parsed.get("sim", ""))
+	sim_mode = str(parsed.get("mode", ""))
+	sim_selected.emit(sim_id, sim_mode)
+
+
+func _emit_emote_local(body: Dictionary) -> void:
+	if phase != Phase.IN:
+		return
+	var parsed := Codec.read_emote(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	emote_received.emit(int(parsed.get("seat", 0)), int(parsed.get("emote_id", 0)))
+
+
+func _add_online_slot(peer_id: int, seat: int, norm: Dictionary, controller: String) -> void:
+	var class_id := str(norm.get("class_id", ""))
+	var display := str(norm.get("name", ""))
+	var look: PackedByteArray = norm.get("look", PackedByteArray())
+	slots.append({
+		"peer_id": peer_id,
+		"slot": seat,
+		"seat": seat,
+		"character_id": AvatarBlob.base_hero(class_id),
+		"display_name": display,
+		"uid": str(norm.get("uid", "")),
+		"name": display,
+		"class": class_id,
+		"controller": controller,
+		"wire_controller": controller,
+		"look": look,
+	})
+	roster_changed.emit()
+
+
+func _emit_roster() -> void:
+	if protocol_version == Protocol.VERSION_ONLINE:
+		_broadcast(Protocol.Kind.ROSTER, Codec.roster_body_from_slots(slots))
+	else:
+		_broadcast(Protocol.Kind.ROSTER, {"roster": _roster_payload()})
 
 
 func _on_client_packet(msg: Dictionary) -> void:
+	if protocol_version == Protocol.VERSION_ONLINE:
+		_on_client_v2(msg)
+		return
 	if not bool(msg["ok"]) or not bool(msg["compatible"]):
 		_set_refused(Protocol.Refuse.BAD_PACKET)
 		return
@@ -448,7 +936,9 @@ func _apply_roster(body: Dictionary) -> void:
 
 
 func _refuse(peer_id: int, reason: int) -> void:
-	_send_to(peer_id, Protocol.Kind.REFUSE, {"reason": reason})
+	# Versie-weigering gaat als v1 de deur uit, zodat een oude build de reden leest.
+	var ver := Protocol.VERSION if reason == Protocol.Refuse.VERSION else protocol_version
+	_send_to(peer_id, Protocol.Kind.REFUSE, {"reason": reason}, ver)
 	_queue_kick(peer_id)
 
 
@@ -509,6 +999,7 @@ func _remove_peer(peer_id: int) -> bool:
 		next.append(row)
 	if removed:
 		slots = next
+		_prune_ready()
 		roster_changed.emit()
 	return removed
 
@@ -541,14 +1032,14 @@ func _unicast_remotes(kind: int, body: Dictionary) -> void:
 		var peer_id := int(row["peer_id"])
 		if peer_id == Protocol.HOST_PEER_ID:
 			continue
-		_send_to(peer_id, kind, body)
+		_send_to(peer_id, kind, body, protocol_version)
 
 
 func _broadcast(kind: int, body: Dictionary) -> void:
 	if _peer == null:
 		return
 	_peer.set_target_peer(MultiplayerPeer.TARGET_PEER_BROADCAST)
-	_peer.put_packet(Protocol.encode(kind, body))
+	_peer.put_packet(Protocol.encode(kind, body, protocol_version))
 	_peer.poll()
 
 

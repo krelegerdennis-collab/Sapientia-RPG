@@ -1,0 +1,644 @@
+{
+ "doc": "Recolor-tabel paper-doll, volledige set (v2-stijl). Elke laag is getekend in een sleutel-ramp (5 tonen: rand, donker, schaduw, basis, licht). Bakken (1x per sheet per avatar): per laag sleutelkleur i -> doelramp[i], lagen in volgorde samenvoegen, daarna buitenrand-pass, schaduwlaag eronder. Wapens zijn vaste kleuren (niet herkleuren).",
+ "tone_order": [
+  "rand",
+  "donker",
+  "schaduw",
+  "basis",
+  "licht"
+ ],
+ "key_ramp_kleding_haar_hoofd_cape": [
+  "#181820",
+  "#283034",
+  "#3c4a4a",
+  "#5c6866",
+  "#868c88"
+ ],
+ "key_ramp_huid": [
+  "#4a2418",
+  "#7a3e28",
+  "#d0905e",
+  "#eab88a",
+  "#f8e0c0"
+ ],
+ "vaste_kleuren_niet_kleuren": {
+  "laarzen_riem": [
+   "#201410",
+   "#3c2418",
+   "#5e3a22",
+   "#86562e",
+   "#ae7c44"
+  ],
+  "E": "#0a0a12",
+  "W": "#fffaf0",
+  "I": "#4078c8",
+  "J": "#1c2c60",
+  "u": "#1c1a26",
+  "g": "#e0b040",
+  "y": "#f8e890",
+  "n": "#a87020",
+  "m": "#6e3e10",
+  "Z": "#0a0a12",
+  "a": "#b8b4ac",
+  "c": "#fffaf0",
+  "e": "#5c6866",
+  "p": "#3c2418",
+  "r": "#86562e",
+  "t": "#ae7c44",
+  "x": "#a87020",
+  "z": "#f8e890",
+  "D": "#6a28b0",
+  "V": "#a466f0",
+  "F": "#e8b8ff",
+  "L": "#40e0e8",
+  "M": "#c8f4ff",
+  "Y": "#2c4c98",
+  "O": "#d6ccb0",
+  "X": "#a8a294"
+ },
+ "buitenrand_na_bakken": {
+  "kleur": "#3a4058",
+  "regel": "donkere (som RGB <= 156) pixels op de buitencontour van de samengestelde figuur (zonder schaduwlaag) worden deze kleur, zoals dax_wm1"
+ },
+ "huid": {
+  "licht": [
+   "#4a2418",
+   "#7a3e28",
+   "#d0905e",
+   "#eab88a",
+   "#f8e0c0"
+  ],
+  "midden": [
+   "#4a2418",
+   "#7a3e28",
+   "#b0683e",
+   "#d0905e",
+   "#eab88a"
+  ],
+  "getint": [
+   "#201410",
+   "#4a2418",
+   "#7a3e28",
+   "#b0683e",
+   "#d0905e"
+  ],
+  "donker": [
+   "#101018",
+   "#3c2418",
+   "#4a2418",
+   "#7a3e28",
+   "#b0683e"
+  ]
+ },
+ "haar": {
+  "zwart": [
+   "#101018",
+   "#141420",
+   "#262838",
+   "#3a4058",
+   "#5a6480"
+  ],
+  "bruin": [
+   "#201410",
+   "#3c2418",
+   "#5e3a22",
+   "#86562e",
+   "#ae7c44"
+  ],
+  "blond": [
+   "#5e3a22",
+   "#a87020",
+   "#e0b040",
+   "#f8e890",
+   "#fffaf0"
+  ],
+  "rood": [
+   "#280808",
+   "#581010",
+   "#98201c",
+   "#d04020",
+   "#f07838"
+  ],
+  "zilver": [
+   "#3c4a4a",
+   "#5c6866",
+   "#868c88",
+   "#b8b4ac",
+   "#fffaf0"
+  ],
+  "blauw": [
+   "#0c1430",
+   "#1c2c60",
+   "#2c4c98",
+   "#4078c8",
+   "#a8a8e0"
+  ],
+  "paars": [
+   "#140a34",
+   "#341468",
+   "#6a28b0",
+   "#a466f0",
+   "#e8b8ff"
+  ],
+  "groen": [
+   "#101c18",
+   "#1c3424",
+   "#2e5030",
+   "#4a7038",
+   "#74963e"
+  ]
+ },
+ "kleding": {
+  "nacht": [
+   "#0a0a12",
+   "#0c1430",
+   "#1c2c60",
+   "#2c4c98",
+   "#4078c8"
+  ],
+  "rood": [
+   "#280808",
+   "#581010",
+   "#98201c",
+   "#d04020",
+   "#f07838"
+  ],
+  "mos": [
+   "#101c18",
+   "#1c3424",
+   "#2e5030",
+   "#4a7038",
+   "#74963e"
+  ],
+  "leer": [
+   "#201410",
+   "#3c2418",
+   "#5e3a22",
+   "#86562e",
+   "#ae7c44"
+  ],
+  "papier": [
+   "#423c33",
+   "#706c74",
+   "#a8a294",
+   "#d6ccb0",
+   "#fffaf0"
+  ],
+  "paars": [
+   "#140a34",
+   "#341468",
+   "#6a28b0",
+   "#a466f0",
+   "#e8b8ff"
+  ]
+ },
+ "hoofddeksel": {
+  "nacht": [
+   "#0a0a12",
+   "#0c1430",
+   "#1c2c60",
+   "#2c4c98",
+   "#4078c8"
+  ],
+  "rood": [
+   "#280808",
+   "#581010",
+   "#98201c",
+   "#d04020",
+   "#f07838"
+  ],
+  "mos": [
+   "#101c18",
+   "#1c3424",
+   "#2e5030",
+   "#4a7038",
+   "#74963e"
+  ],
+  "leer": [
+   "#201410",
+   "#3c2418",
+   "#5e3a22",
+   "#86562e",
+   "#ae7c44"
+  ]
+ },
+ "cape": "zelfde 6 ramps als kleding",
+ "opties": {
+  "lichaam": 1,
+  "huid": [
+   "licht",
+   "midden",
+   "getint",
+   "donker"
+  ],
+  "haar": [
+   "kort",
+   "lang",
+   "staart",
+   "knot",
+   "stekel",
+   "krul"
+  ],
+  "haarkleur": [
+   "zwart",
+   "bruin",
+   "blond",
+   "rood",
+   "zilver",
+   "blauw",
+   "paars",
+   "groen"
+  ],
+  "boven": [
+   "tuniek",
+   "mantel",
+   "harnas",
+   "gewaad"
+  ],
+  "onder": [
+   "broek",
+   "rok",
+   "korte_broek"
+  ],
+  "kleding_kleur": [
+   "nacht",
+   "rood",
+   "mos",
+   "leer",
+   "papier",
+   "paars"
+  ],
+  "hoofd": [
+   "kap",
+   "hoed",
+   null
+  ],
+  "hoofd_kleur": [
+   "nacht",
+   "rood",
+   "mos",
+   "leer"
+  ],
+  "cape": [
+   "cape",
+   null
+  ],
+  "cape_kleur": [
+   "nacht",
+   "rood",
+   "mos",
+   "leer",
+   "papier",
+   "paars"
+  ],
+  "wapen": {
+   "zwaard": "krijger (Warrior, base dennis/Dax)",
+   "staf": "magier (Mage, base noor/Vesper)",
+   "scepter": "priester (Priest, base lotte/Seren)",
+   "psy": "psytech (base kael)",
+   "boog": "boogschutter (Archer, base orion)"
+  }
+ },
+ "lagen": [
+  {
+   "bestand": "schaduw",
+   "laag": 1,
+   "soort": "schaduw",
+   "optie": null,
+   "ramp": null
+  },
+  {
+   "bestand": "lichaam",
+   "laag": 2,
+   "soort": "lichaam",
+   "optie": null,
+   "ramp": "huid"
+  },
+  {
+   "bestand": "onder_broek",
+   "laag": 3,
+   "soort": "onder",
+   "optie": "broek",
+   "ramp": "kleding"
+  },
+  {
+   "bestand": "onder_rok",
+   "laag": 3,
+   "soort": "onder",
+   "optie": "rok",
+   "ramp": "kleding"
+  },
+  {
+   "bestand": "onder_korte_broek",
+   "laag": 3,
+   "soort": "onder",
+   "optie": "korte_broek",
+   "ramp": "kleding"
+  },
+  {
+   "bestand": "boven_tuniek",
+   "laag": 4,
+   "soort": "boven",
+   "optie": "tuniek",
+   "ramp": "kleding"
+  },
+  {
+   "bestand": "boven_mantel",
+   "laag": 4,
+   "soort": "boven",
+   "optie": "mantel",
+   "ramp": "kleding"
+  },
+  {
+   "bestand": "boven_harnas",
+   "laag": 4,
+   "soort": "boven",
+   "optie": "harnas",
+   "ramp": "kleding"
+  },
+  {
+   "bestand": "boven_gewaad",
+   "laag": 4,
+   "soort": "boven",
+   "optie": "gewaad",
+   "ramp": "kleding"
+  },
+  {
+   "bestand": "cape",
+   "laag": 5,
+   "soort": "cape",
+   "optie": "cape",
+   "ramp": "kleding"
+  },
+  {
+   "bestand": "haar_kort_achter",
+   "laag": 6,
+   "soort": "haar_achter",
+   "optie": "kort",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_lang_achter",
+   "laag": 6,
+   "soort": "haar_achter",
+   "optie": "lang",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_staart_achter",
+   "laag": 6,
+   "soort": "haar_achter",
+   "optie": "staart",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_knot_achter",
+   "laag": 6,
+   "soort": "haar_achter",
+   "optie": "knot",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_stekel_achter",
+   "laag": 6,
+   "soort": "haar_achter",
+   "optie": "stekel",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_krul_achter",
+   "laag": 6,
+   "soort": "haar_achter",
+   "optie": "krul",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "gezicht",
+   "laag": 7,
+   "soort": "gezicht",
+   "optie": null,
+   "ramp": "huid"
+  },
+  {
+   "bestand": "haar_kort_voor",
+   "laag": 8,
+   "soort": "haar_voor",
+   "optie": "kort",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_lang_voor",
+   "laag": 8,
+   "soort": "haar_voor",
+   "optie": "lang",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_staart_voor",
+   "laag": 8,
+   "soort": "haar_voor",
+   "optie": "staart",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_knot_voor",
+   "laag": 8,
+   "soort": "haar_voor",
+   "optie": "knot",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_stekel_voor",
+   "laag": 8,
+   "soort": "haar_voor",
+   "optie": "stekel",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "haar_krul_voor",
+   "laag": 8,
+   "soort": "haar_voor",
+   "optie": "krul",
+   "ramp": "haar"
+  },
+  {
+   "bestand": "hoofd_kap",
+   "laag": 9,
+   "soort": "hoofd",
+   "optie": "kap",
+   "ramp": "hoofddeksel"
+  },
+  {
+   "bestand": "hoofd_hoed",
+   "laag": 9,
+   "soort": "hoofd",
+   "optie": "hoed",
+   "ramp": "hoofddeksel"
+  },
+  {
+   "bestand": "wapen_zwaard",
+   "laag": 10,
+   "soort": "wapen",
+   "optie": "zwaard",
+   "ramp": null
+  },
+  {
+   "bestand": "wapen_staf",
+   "laag": 10,
+   "soort": "wapen",
+   "optie": "staf",
+   "ramp": null
+  },
+  {
+   "bestand": "wapen_scepter",
+   "laag": 10,
+   "soort": "wapen",
+   "optie": "scepter",
+   "ramp": null
+  },
+  {
+   "bestand": "wapen_psy",
+   "laag": 10,
+   "soort": "wapen",
+   "optie": "psy",
+   "ramp": null
+  },
+  {
+   "bestand": "wapen_boog",
+   "laag": 10,
+   "soort": "wapen",
+   "optie": "boog",
+   "ramp": null
+  }
+ ],
+ "bak_volgorde": [
+  "schaduw (onderop, na rand-pass)",
+  "lichaam",
+  "onder_*",
+  "boven_*",
+  "cape",
+  "haar_*_achter",
+  "gezicht",
+  "haar_*_voor",
+  "hoofd_*",
+  "wapen_*"
+ ],
+ "sheets": {
+  "kaart_24x32": {
+   "cel": [
+    24,
+    32
+   ],
+   "sheet": [
+    120,
+    128
+   ],
+   "kolommen": [
+    "stand",
+    "stap1",
+    "door1 (bob -1px)",
+    "stap2",
+    "door2 (bob -1px)"
+   ],
+   "bob_px": [
+    0,
+    0,
+    -1,
+    0,
+    -1
+   ],
+   "zij_leun_frames": [
+    1,
+    3
+   ],
+   "rijen": [
+    "onder",
+    "links",
+    "rechts (gebakken spiegel van links)",
+    "boven"
+   ],
+   "lagen": 30
+  },
+  "ko_48x48": {
+   "cel": [
+    48,
+    48
+   ],
+   "frames": 1,
+   "lagen": 30,
+   "noot": "sterretjes in laag schaduw; wapen ligt op de grond"
+  },
+  "portret_32x32": {
+   "cel": [
+    32,
+    32
+   ],
+   "frames": 1,
+   "noot": "lobby-borstbeeld; geen schaduw, onderkant of wapen (die lagen ontbreken = leeg)"
+  }
+ },
+ "voorbeelden": {
+  "voorbeeld_a": {
+   "skin": "midden",
+   "hair": "kort",
+   "hair_color": "zwart",
+   "top": "harnas",
+   "top_color": "nacht",
+   "bottom": "broek",
+   "bottom_color": "leer",
+   "head": null,
+   "cape": "rood",
+   "weapon": "zwaard"
+  },
+  "voorbeeld_b": {
+   "skin": "licht",
+   "hair": "staart",
+   "hair_color": "blond",
+   "top": "gewaad",
+   "top_color": "papier",
+   "bottom": "rok",
+   "bottom_color": "nacht",
+   "head": null,
+   "cape": null,
+   "weapon": "scepter"
+  },
+  "voorbeeld_c": {
+   "skin": "getint",
+   "hair": "krul",
+   "hair_color": "zwart",
+   "top": "mantel",
+   "top_color": "paars",
+   "bottom": "korte_broek",
+   "bottom_color": "nacht",
+   "head": "hoed",
+   "head_color": "leer",
+   "cape": "nacht",
+   "weapon": "staf"
+  },
+  "voorbeeld_d": {
+   "skin": "donker",
+   "hair": "stekel",
+   "hair_color": "zilver",
+   "top": "tuniek",
+   "top_color": "mos",
+   "bottom": "broek",
+   "bottom_color": "leer",
+   "head": null,
+   "cape": "nacht",
+   "weapon": "psy"
+  },
+  "voorbeeld_e": {
+   "skin": "midden",
+   "hair": "knot",
+   "hair_color": "rood",
+   "top": "tuniek",
+   "top_color": "leer",
+   "bottom": "korte_broek",
+   "bottom_color": "mos",
+   "head": null,
+   "cape": null,
+   "weapon": "boog"
+  }
+ },
+ "combo_seed": 20261110
+}

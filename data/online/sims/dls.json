@@ -1,0 +1,19 @@
+{
+  "id": "dls",
+  "label_key": "Deep Learning Simulation",
+  "generator": "dungeon100",
+  "modes": {
+    "easy": {"floors": 10, "eff": "compressed_98", "bosses": {"10": 10}, "rest": [5]},
+    "normal": {"floors": 50, "eff": "compressed_98", "bosses": "half_keys", "rest": [10, 20, 30, 40]},
+    "hard": {"floors": 100, "eff": "identity", "bosses": "solo", "rest": "solo"}
+  },
+  "resume_at_rest": ["normal", "hard"],
+  "seed": "host_random",
+  "enemy_cap": 8,
+  "bosses": "boss_script_only",
+  "min_players": 1,
+  "max_players": 4,
+  "ai_fill": true,
+  "rewards": {"profile_exp_per_floor": 0, "unlock_table": "dls_v1"},
+  "unlock": {"needs": []}
+}

@@ -594,6 +594,10 @@ func _ready() -> void:
 	# D3 bazen fase-machine (PR A): of  godot -- --bossphasetest  (scripts/tests/boss_phase_tests.gd).
 	# D3 realtime Golem (PR B): of  godot -- --golemactiontest  (scripts/tests/golem_action_tests.gd)
 	#   en  godot -- --golemactionsimtest  (scripts/tests/golem_actionsim_tests.gd, kleine sim als rookproef).
+	# M9a Page Warden (Action, alleen co-op): of  godot -- --pagewardentest  (scripts/tests/page_warden_tests.gd)
+	#   en  godot -- --pagewardensim [--fights=N] [--seats=1..4] [--seed=N]  (tools/battlesim/page_warden_rt_sim.gd).
+	# M9b Easy-run (voorstel, geen balans): godot -- --d100modesim --mode=easy [--factors=4,7,10,25] [--runs=N] [--seed=N]
+	#   (tools/battlesim/d100_mode_sim.gd). Suite: godot -- --d100modesimtest (determinisme, solo, geen saves).
 	# D3 arena-hook realtime Golem (PR C): of  godot -- --golemarenatest  (scripts/tests/golem_arena_tests.gd).
 	# Golem zichtbare telegraaf/aanval (Action): of  godot -- --golemzichtbaartest  (scripts/tests/golem_zichtbaar_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
@@ -693,6 +697,8 @@ func _ready() -> void:
 			["--bossphasetest", "res://scripts/tests/boss_phase_tests.gd", "BossPhaseTest", "bossphasetest"],
 			["--golemactiontest", "res://scripts/tests/golem_action_tests.gd", "GolemActionTest", "golemactiontest"],
 			["--golemactionsimtest", "res://scripts/tests/golem_actionsim_tests.gd", "GolemActionsimTest", "golemactionsimtest"],
+			["--pagewardentest", "res://scripts/tests/page_warden_tests.gd", "PageWardenTest", "pagewardentest"],
+			["--pagewardensim", "res://tools/battlesim/page_warden_rt_sim.gd", "PageWardenSim", "pagewardensim"],
 			["--golemarenatest", "res://scripts/tests/golem_arena_tests.gd", "GolemArenaTest", "golemarenatest"],
 			["--golemzichtbaartest", "res://scripts/tests/golem_zichtbaar_tests.gd", "GolemZichtbaarTest", "golemzichtbaartest"],
 			["--golemstorytest", "res://scripts/tests/golem_story_tests.gd", "GolemStoryTest", "golemstorytest"],
@@ -702,6 +708,8 @@ func _ready() -> void:
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
+			["--protocolv2test", "res://scripts/tests/protocol_v2_tests.gd", "ProtocolV2Test", "protocolv2test"],
+			["--rewardacktest", "res://scripts/tests/reward_ack_tests.gd", "RewardAckTest", "rewardacktest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--formuletest", "res://scripts/tests/formule_tests.gd", "FormuleTest", "formuletest"],
 			["--battlesimenemytest", "res://scripts/tests/battlesim_enemy_tests.gd", "BattlesimEnemyTest", "battlesimenemytest"],
@@ -740,7 +748,16 @@ func _ready() -> void:
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
-			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:
+			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
+			["--onlineprofiletest", "res://scripts/tests/online_profile_tests.gd", "OnlineProfileTest", "onlineprofiletest"],
+			["--paperdolltest", "res://scripts/tests/paper_doll_tests.gd", "PaperDollTest", "paperdolltest"],
+			["--onlinelobbytest", "res://scripts/tests/online_lobby_tests.gd", "OnlineLobbyTest", "onlinelobbytest"],
+			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
+			["--solod100guardtest", "res://scripts/tests/solo_d100_guard_tests.gd", "SoloD100GuardTest", "solod100guardtest"],
+			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"],
+			["--d100modesim", "res://tools/battlesim/d100_mode_sim.gd", "D100ModeSim", "d100modesim"],
+			["--d100modesimtest", "res://scripts/tests/d100_mode_sim_tests.gd", "D100ModeSimTest", "d100modesimtest"],
+			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
