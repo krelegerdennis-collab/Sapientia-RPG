@@ -11,6 +11,7 @@ const CombatZones := preload("res://scripts/som/combat_zones.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 
 const BORDER_PX := 3
 const FILL_STEPS := 4
@@ -46,6 +47,7 @@ class RootFxOverlay extends Node2D:
 		z_index = 22
 		y_sort_enabled = false
 		name = "RootFxOverlay"
+		Hd2dUnmodulated.mark(self)
 
 	func _process(_delta: float) -> void:
 		if host != null and host.root_icon_count() > 0:
@@ -77,6 +79,7 @@ func _ready() -> void:
 	z_index = 4
 	y_sort_enabled = false
 	name = "TelegraphLayer"
+	Hd2dUnmodulated.mark(self)
 	_root_tex = SomFx.tex(str(SomData.FX_ROOT.get("sheet", "")))
 	call_deferred("_attach_root_overlay")
 

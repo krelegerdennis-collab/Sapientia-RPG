@@ -1306,3 +1306,13 @@ assets/ui/icons/items/icons16/spreuk_grote_genezing.png
 assets/ui/icons/items/icons32/spreuk_grote_genezing.png
 assets/ui/icons/items/icons16/spreuk_zonnevlam.png
 assets/ui/icons/items/icons32/spreuk_zonnevlam.png
+# 10 nov 2026: palette-fix RPG ART (art_title_palfix/out) van de vijf titelbestanden,
+#        73-kleuren masterpalet, alpha 0/255. Paden stonden al in dit bestand (v0.13):
+#        assets/ui/title_bg.png
+#        assets/ui/title_logo.png
+#        assets/ui/title_ondertitel.png
+#        assets/ui/title_logo_glitch.png
+#        assets/ui/title_kern.png
+#        Niet overschrijven met art_ui_v13/titel/titel.py of art_ondertitel_v20/make.py
+#        (die zitten buiten de repo en buiten het palet; make.py zet ook alpha 220 op de outline).
+

@@ -115,8 +115,8 @@ const BOOK_ID := "leeg_boek"
 const SPELL_CHANCE := 0.12
 const SPELL_SCROLLS := ["spreuk_vuur", "spreuk_bliksem", "spreuk_genees"]
 ## V3: extra rollen vanaf een buitniveau (vervanger Kernkracht).
-## V3-pool per buitniveau. Optie (a): één tier eerder dan de COMBAT-standaard (2/3/4 → 1/2/3).
-const SPELL_SCROLLS_FROM_TIER := {1: ["spreuk_vuurbal", "spreuk_grote_genezing"], 2: ["spreuk_zonnevlam"], 3: ["spreuk_g4_zonneslag"]}
+## V3-pool per buitniveau (Dennis-ladder: rollen vanaf buit-tier 2/3/4).
+const SPELL_SCROLLS_FROM_TIER := {2: ["spreuk_vuurbal", "spreuk_grote_genezing"], 3: ["spreuk_zonnevlam"], 4: ["spreuk_g4_zonneslag"]}
 
 
 static func spell_scrolls_for_tier(tier: int) -> Array:

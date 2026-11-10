@@ -18,6 +18,9 @@ static var _sprite_tex: Texture2D
 
 ## Veld-sprite. Geen parse-time preload: bij `--import` herlaadt Godot gewijzigde scripts (bv. damage_calc)
 ## vóórdat texture-.ctex bestaat; dan faalt preload en valt game_state om.
+static var SPRITE: Texture2D:
+	get: return sprite()
+
 static func sprite() -> Texture2D:
 	if _sprite_tex == null:
 		_sprite_tex = load(SPRITE_PATH) as Texture2D

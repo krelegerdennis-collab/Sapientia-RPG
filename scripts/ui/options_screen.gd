@@ -32,6 +32,7 @@ const ROWS := [
 	["touch_opacity", "Button Fade", "How clearly you see the joystick and A/B."],
 	["touch_size", "Button Size", "Size of the joystick and A/B on screen."],
 	["crt", "Scanlines", "Picture filter with lines, vignette, and glitches."],
+	["hd2d_light", "HD-2D Light", "Map lighting with normals and lamps. Turn off to save battery."],
 	["screen_shake", "Screen Shake", "Shake the screen when a hit lands."],
 	["autosave", "Autosave", "Save when you enter or leave a dungeon."],
 	[RESET_KEY, "Default", "Set every option back to the default (A)."],
