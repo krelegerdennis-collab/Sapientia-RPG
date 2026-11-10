@@ -484,7 +484,7 @@ func _four_player_tests() -> void:
 	for row in host.slots:
 		if int((row as Dictionary)["slot"]) == 2:
 			new_peer_id = int((row as Dictionary)["peer_id"])
-	check("rejoin: nieuw peer-id (relay hergebruikt er geen)", new_peer_id != 0 and new_peer_id != old_peer_id)
+	check("rejoin: hergebruikte peer-id (relay vrije lijst)", new_peer_id != 0 and new_peer_id == old_peer_id)
 	var g2_started := [false]
 	g2.start_game_received.connect(func() -> void: g2_started[0] = true)
 	host.host_start_game()

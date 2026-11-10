@@ -133,7 +133,7 @@ test('kamer is vol bij 4 spelers, een plek komt vrij na vertrek', async () => {
     const { guest: again, joined: j2 } = await joinRoom(url, code);
     track(again);
     assert.strictEqual(j2.t, 'joined');
-    assert.strictEqual(j2.peer, 5, 'peer-id wordt niet hergebruikt');
+    assert.strictEqual(j2.peer, 2, 'vrijgekomen peer-id wordt hergebruikt');
   });
 });
 
