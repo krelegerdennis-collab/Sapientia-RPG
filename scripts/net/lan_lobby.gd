@@ -22,6 +22,10 @@ signal session_ended(reason: String)
 signal room_ready(code: String)
 ## Online v2: de host heeft een emote doorgelaten. Tonen is M5.
 signal emote_received(seat: int, emote_id: int)
+## Online v2: ready-vinkje van een menselijke stoel.
+signal ready_changed
+## Online v2: de host koos een simulatie. Gasten zien de keuze.
+signal sim_selected(sim_id: String, mode: String)
 
 enum Phase { IDLE, JOINING, IN, REFUSED, LOST }
 enum Transport { LAN, RELAY }
@@ -42,6 +46,10 @@ var room_code := ""
 var relay_reason := ""
 ## 1 = LAN (fase B). 2 = online co-op. De twee praten niet door elkaar.
 var protocol_version := Protocol.VERSION
+## Online v2: gekozen simulatie (leeg tot de host kiest) en ready per stoel.
+var sim_id := ""
+var sim_mode := ""
+var _ready_by_seat: Dictionary = {}
 
 var _peer: MultiplayerPeer
 var _join_timeout := Protocol.JOIN_TIMEOUT_SEC
@@ -244,6 +252,58 @@ func send_emote(emote_id: int) -> void:
 	_peer.poll()
 
 
+## Eigen stoel zet Ready aan of uit. Alleen protocol v2.
+func set_ready(ready: bool) -> void:
+	if phase != Phase.IN or protocol_version != Protocol.VERSION_ONLINE:
+		return
+	if local_slot == Protocol.NO_SLOT:
+		return
+	if is_host:
+		_store_ready(local_slot, ready)
+		_broadcast(Protocol.Kind.READY, {"seat": local_slot, "ready": ready})
+		return
+	_store_ready(local_slot, ready)
+	var raw := Codec.encode_ready(local_slot, ready)
+	if raw.is_empty() or _peer == null:
+		return
+	_peer.set_target_peer(Protocol.HOST_PEER_ID)
+	_peer.put_packet(raw)
+	_peer.poll()
+
+
+func seat_ready(seat: int) -> bool:
+	return bool(_ready_by_seat.get(seat, false))
+
+
+## Elke menselijke stoel (niet AI) staat op Ready. Lege stoelen tellen niet mee.
+func human_seats_ready() -> bool:
+	if slots.is_empty() or protocol_version != Protocol.VERSION_ONLINE:
+		return false
+	var any := false
+	for row in slots:
+		var wire := str(row.get("wire_controller", row.get("controller", "")))
+		if wire == Protocol.CTRL_AI:
+			continue
+		any = true
+		var seat := int(row.get("seat", row.get("slot", Protocol.NO_SLOT)))
+		if not seat_ready(seat):
+			return false
+	return any
+
+
+## Host kiest de simulatie. Een gast kan dit niet. De hal laat in de proef alleen Easy toe.
+func select_sim(sim: String, mode: String) -> bool:
+	if not is_host or phase != Phase.IN or protocol_version != Protocol.VERSION_ONLINE:
+		return false
+	if Codec.encode_sim_select(sim, mode).is_empty():
+		return false
+	sim_id = sim
+	sim_mode = mode
+	_broadcast(Protocol.Kind.SIM_SELECT, {"sim": sim, "mode": mode})
+	sim_selected.emit(sim, mode)
+	return true
+
+
 func _on_relay_room_ready(code: String) -> void:
 	room_code = code
 	room_ready.emit(code)
@@ -281,6 +341,9 @@ func close() -> void:
 	protocol_version = Protocol.VERSION
 	_online_profile = {}
 	_emote_gate = null
+	sim_id = ""
+	sim_mode = ""
+	_ready_by_seat.clear()
 	_suppress = false
 
 
@@ -507,6 +570,8 @@ func _on_host_v2(from_id: int, msg: Dictionary) -> void:
 			_queue_kick(from_id)
 		Protocol.Kind.EMOTE:
 			_on_emote_packet(from_id, msg["body"])
+		Protocol.Kind.READY:
+			_on_ready_packet(from_id, msg["body"])
 
 
 func _on_hello_v2(from_id: int, body: Dictionary) -> void:
@@ -533,6 +598,41 @@ func _on_hello_v2(from_id: int, body: Dictionary) -> void:
 	_add_online_slot(from_id, slot, norm, Protocol.CTRL_REMOTE)
 	_send_to(from_id, Protocol.Kind.WELCOME, {"slot": slot, "uid": uid}, Protocol.VERSION_ONLINE)
 	_emit_roster()
+
+
+func _on_ready_packet(from_id: int, body: Dictionary) -> void:
+	# Eigen broadcast mag niet terug de host in (anders een lus als de relay echoot).
+	if from_id == Protocol.HOST_PEER_ID:
+		return
+	var parsed := Codec.read_ready(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	var seat := _seat_of_peer(from_id)
+	if seat == Protocol.NO_SLOT or seat != int(parsed.get("seat", Protocol.NO_SLOT)):
+		return
+	var ready := bool(parsed.get("ready", false))
+	_store_ready(seat, ready)
+	_broadcast(Protocol.Kind.READY, {"seat": seat, "ready": ready})
+
+
+func _store_ready(seat: int, ready: bool) -> void:
+	_ready_by_seat[seat] = ready
+	ready_changed.emit()
+
+
+func _prune_ready() -> void:
+	var live := {}
+	for row in slots:
+		live[int(row.get("seat", row.get("slot", -1)))] = true
+	var gone: Array = []
+	for key in _ready_by_seat.keys():
+		if not live.has(int(key)):
+			gone.append(key)
+	if gone.is_empty():
+		return
+	for key in gone:
+		_ready_by_seat.erase(key)
+	ready_changed.emit()
 
 
 func _on_emote_packet(from_id: int, body: Dictionary) -> void:
@@ -586,6 +686,10 @@ func _on_client_v2(msg: Dictionary) -> void:
 			_apply_roster_v2(body)
 		Protocol.Kind.EMOTE:
 			_emit_emote_local(body)
+		Protocol.Kind.READY:
+			_on_ready_remote(body)
+		Protocol.Kind.SIM_SELECT:
+			_on_sim_remote(body)
 		Protocol.Kind.SESSION_END:
 			_on_session_end(body)
 		Protocol.Kind.START_GAME:
@@ -638,6 +742,7 @@ func _apply_roster_v2(body: Dictionary) -> void:
 			"look": look,
 		})
 	slots = next
+	_prune_ready()
 	roster_changed.emit()
 
 
@@ -649,6 +754,26 @@ func _refresh_view_controllers() -> void:
 		if wire == "":
 			continue
 		row["controller"] = Codec.view_controller(wire, int(row.get("seat", Protocol.NO_SLOT)), local_slot)
+
+
+func _on_ready_remote(body: Dictionary) -> void:
+	if phase != Phase.IN:
+		return
+	var parsed := Codec.read_ready(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	_store_ready(int(parsed.get("seat", Protocol.NO_SLOT)), bool(parsed.get("ready", false)))
+
+
+func _on_sim_remote(body: Dictionary) -> void:
+	if phase != Phase.IN:
+		return
+	var parsed := Codec.read_sim_select(body)
+	if not bool(parsed.get("ok", false)):
+		return
+	sim_id = str(parsed.get("sim", ""))
+	sim_mode = str(parsed.get("mode", ""))
+	sim_selected.emit(sim_id, sim_mode)
 
 
 func _emit_emote_local(body: Dictionary) -> void:
@@ -806,6 +931,7 @@ func _remove_peer(peer_id: int) -> bool:
 		next.append(row)
 	if removed:
 		slots = next
+		_prune_ready()
 		roster_changed.emit()
 	return removed
 
