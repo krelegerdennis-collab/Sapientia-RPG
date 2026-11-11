@@ -1,5 +1,7 @@
 # M9b-3 — Easy met revive (voorstel)
 
+Dennis koos op 11-11-2026 revive aan, samen met schade 1.2 en herstel 50, alleen voor online co-op Easy. Zie `docs/combat/m9b_easy_gekozen.md`. De tabellen hier blijven de sim-meting.
+
 Alleen in de sim. `--revive=off` is de default en geeft de #430-baseline terug. `SomData.ENEMY_DAMAGE_MULT` blijft 2.2. `mode_exp_factor` blijft 10. Geen speldata gewijzigd.
 
 Factor 10, 24 runs, seed `20261110`, vloeren 1–10, stoelen 1–4. `--no-hypo --no-classic`. Zelfde kaarten en dezelfde `combat_seed` als `docs/combat/m9b_easy_dmg_heal.md`.

@@ -47,6 +47,8 @@ func _ready() -> void:
 	super._ready()
 	_restore_solo(snap)
 	_place_online_rest()
+	if som != null and som.has_method("apply_online_easy_entry"):
+		som.apply_online_easy_entry()
 
 
 ## Zelfde prop als solo (Dungeon100Rustpunt). interact() slaat online af zolang de run loopt.

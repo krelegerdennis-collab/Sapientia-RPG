@@ -116,6 +116,8 @@ var forced_joy := Vector2.ZERO
 var coop_ring_no_pause := false
 var coop_mode := false
 var coop_sim_host := false
+## Eén keer per arena: Easy-vloerherstel (50% en, op vloer 5, rust + apply_rest).
+var _easy_entry_done := false
 var coop_local_slot := -1
 ## Wipe alleen als elke meewerkende stoel down is. Solo blijft arena.down + _party_down.
 var coop_wiped := false
@@ -1700,7 +1702,7 @@ func _golem_strike(m: Node, e: Dictionary, attack_id: String, power: float) -> v
 	for id in party_ids():
 		if is_alive(id) and node_of(id) != null and origin.distance_to(body_of(id)) <= reach:
 			golem_strike_hit_member_count += 1
-			hit_member(id, int(e["atk"]), power)
+			hit_member(id, int(e["atk"]), power, 0, true)
 			if slam and not shook and _feel_local_hero(id) and shake != null and SomFeelData.ENABLED:
 				shake.kick("boss_slam")
 				shook = true
@@ -1816,7 +1818,7 @@ func _page_strike(e: Dictionary, attack_id: String, power: float) -> void:
 		if not shape.contains_i(TelegraphShape.to_px(body)):
 			continue
 		page_strike_hits += 1
-		hit_member(id, int(e["atk"]), power)
+		hit_member(id, int(e["atk"]), power, 0, true)
 
 
 func _page_spawn_adds(m: Node, ids: Array) -> void:
@@ -2230,14 +2232,35 @@ func hit_player(atk: int, _from := Vector2.ZERO) -> void:
 	hit_member(active_id, atk)
 
 
-func hit_member(id: String, atk: int, power: float = 1.0, root_ticks: int = 0) -> void:
+## Troep en adds in online co-op Easy: 1.2. Baasklap en elke andere kamer: enemy_damage_mult (2.2 x gebied).
+func enemy_hit_mult(boss_hit: bool = false) -> float:
+	var rid := str(room.room_id)
+	var tier := int(room.tier())
+	if _online_easy_combat() and not boss_hit:
+		return SomData.coop_enemy_damage_mult("easy", rid, tier, false)
+	return SomData.enemy_damage_mult(rid, tier)
+
+
+func _online_easy_combat() -> bool:
+	if not coop_mode or room == null or room.get("online_dls") != true:
+		return false
+	var mode := ""
+	var raw: Variant = room.get("room")
+	if raw is Dictionary:
+		mode = str((raw as Dictionary).get("online_mode", ""))
+	if mode == "" and OnlineDlsRun.active:
+		mode = OnlineDlsRun.mode
+	return mode == "easy"
+
+
+func hit_member(id: String, atk: int, power: float = 1.0, root_ticks: int = 0, boss_hit: bool = false) -> void:
 	if down or not is_alive(id):
 		return
 	if float(iframes.get(id, 0.0)) > 0.0:
 		_dodge(id)
 		return
 	var h := member(id)
-	var mult: float = SomData.enemy_damage_mult(room.room_id, room.tier()) * maxf(0.0, power)
+	var mult: float = enemy_hit_mult(boss_hit) * maxf(0.0, power)
 	var dmg := maxi(1, roundi(physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0, rng) * mult))
 	h["hp"] = maxi(0, int(h["hp"]) - dmg)
 	last_player_damage = dmg
@@ -2264,7 +2287,7 @@ func hit_member_zone_dot(id: String, atk: int, power: float) -> void:
 	if float(iframes.get(id, 0.0)) > 0.0:
 		return
 	var h := member(id)
-	var mult: float = SomData.enemy_damage_mult(room.room_id, room.tier()) * maxf(0.0, power)
+	var mult: float = enemy_hit_mult(false) * maxf(0.0, power)
 	var dmg := maxi(1, roundi(physical_damage(float(atk), float(GameState.effective_stat(h, "def")), 1.0, rng) * mult))
 	h["hp"] = maxi(0, int(h["hp"]) - dmg)
 	last_player_damage = dmg
@@ -2484,12 +2507,18 @@ func _coop_sync_down_rows() -> void:
 
 
 func _coop_park_revives(slot: int, row: Dictionary) -> void:
-	_coop_revive_keep[slot] = int(row.get("revives", 0))
+	var n := int(row.get("revives", 0))
+	_coop_revive_keep[slot] = n
+	if OnlineDlsRun.active and slot >= 0 and slot < 4:
+		OnlineDlsRun.note_revive(slot, n)
 
 
 func _coop_make_down_row(slot: int, hero_id: String, controller: String) -> Dictionary:
 	var row := CoopSeat.make(slot, hero_id, controller)
-	row["revives"] = int(_coop_revive_keep.get(slot, 0))
+	var n := int(_coop_revive_keep.get(slot, 0))
+	if OnlineDlsRun.active:
+		n = maxi(n, OnlineDlsRun.revive_of(slot))
+	row["revives"] = n
 	_coop_down[slot] = row
 	return row
 
@@ -2519,6 +2548,51 @@ func coop_bind_seat_row(ally: SomAlly) -> void:
 	row["x"] = int(ally.position.x)
 	row["y"] = int(ally.position.y)
 	ally.coop_row = row
+
+
+## Host (of de enige sim zonder sessie) past Easy-vloerherstel één keer toe.
+## Vloer 1 en andere modi doen niets. Gasten schrijven niets.
+func apply_online_easy_entry() -> bool:
+	if _easy_entry_done or GameState.party.is_empty():
+		return false
+	if not _easy_entry_authority() or not _online_easy_combat():
+		return false
+	var floor_no := _online_floor_no()
+	_coop_sync_down_rows()
+	var did := OnlineDlsFloor.apply_easy_entry("easy", floor_no, GameState.party, coop_down_rows())
+	if not did:
+		return false
+	_easy_entry_done = true
+	for row in coop_down_rows():
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var slot := int(row.get("slot", -1))
+		var hid := str(row.get("hero_id", ""))
+		if slot >= 0 and slot < Protocol.MAX_PLAYERS:
+			_coop_park_revives(slot, row)
+			_coop_show_ko(slot, hid, bool(row.get("down", false)))
+	_refresh_tracked_vitals()
+	return true
+
+
+func _easy_entry_authority() -> bool:
+	if not coop_mode or GameState.coop_is_guest():
+		return false
+	if coop_sim_host or GameState.coop_is_host():
+		return true
+	return not GameState.coop_in_session()
+
+
+func _online_floor_no() -> int:
+	if room != null and "mode_floor" in room:
+		return int(room.mode_floor)
+	if room != null:
+		var raw: Variant = room.get("room")
+		if raw is Dictionary and (raw as Dictionary).has("online_mode_floor"):
+			return int((raw as Dictionary)["online_mode_floor"])
+	if OnlineDlsRun.active:
+		return OnlineDlsRun.floor_no
+	return 1
 
 
 ## Host past het online rustpunt toe. Gasten schrijven niets; de snapshot volgt.
@@ -3159,8 +3233,10 @@ func setup_coop(session: Node, roster: Array, local_slot: int) -> void:
 		_page_adopt_bosses()
 	_ensure_coop_ring()
 	_coop_sync_down_rows()
-	if coop_sim_host:
+	# Een online klim bewaart de teller op OnlineDlsRun. begin_run hier zou hem per verdieping wissen.
+	if coop_sim_host and not OnlineDlsRun.active:
 		_coop_begin_revive_run()
+	apply_online_easy_entry()
 	if not coop_sim_host:
 		player.set_analog(func() -> Vector2: return Vector2.ZERO, SomData.MOVE_SPEED)
 
