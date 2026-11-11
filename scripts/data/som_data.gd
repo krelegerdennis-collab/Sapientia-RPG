@@ -207,6 +207,12 @@ const CHARGE_MIN_MULT := 0.1
 const CHARGE_AFTER_ANIM := true
 ## Vijandschade in realtime x deze factor (zelfde formule als turn-based; balans via --actionsim).
 const ENEMY_DAMAGE_MULT := 2.2     # v3: --actionsim iteratie 7
+## Online co-op Easy, besluit Dennis 11-11-2026 (kaart t755s4283).
+## Vervangt 2.2 alleen op troep en Page Warden-adds. De baasklap blijft ENEMY_DAMAGE_MULT.
+## Solo, Classic en offline lezen ENEMY_DAMAGE_MULT en blijven 2.2.
+const COOP_EASY_ENEMY_DAMAGE_MULT := 1.2
+## Procent van max HP en max MP erbij voor levenden, vanaf Easy-vloer 2, vóór het gevecht.
+const COOP_EASY_FLOOR_HEAL_PCT := 50
 ## Balans per gebied, ALLEEN in Action (som_arena.gd enemy_stats en --archief1balans). Classic (battle.gd) en
 ## bazen/unieke vijanden blijven ongemoeid. Zie BALANS_ARCHIEF1.md (meting met --archief1balans).
 ##   rooms      = room_id-voorvoegsels van het gebied
@@ -269,6 +275,14 @@ static func fresh_dax_atk(level: int) -> float:
 ## Schadefactor van vijandaanvallen in realtime voor deze kamer (ENEMY_DAMAGE_MULT x gebieds-/tierfactor).
 static func enemy_damage_mult(room_id: String, tier := 0) -> float:
 	return ENEMY_DAMAGE_MULT * area_rule(room_id, tier, "atk")
+
+
+## Modus-lookup. easy + geen baasklap = COOP_EASY_ENEMY_DAMAGE_MULT. Alles anders blijft 2.2 x gebied.
+static func coop_enemy_damage_mult(mode: String, room_id: String, tier: int, boss_hit: bool) -> float:
+	var base := ENEMY_DAMAGE_MULT
+	if mode == "easy" and not boss_hit:
+		base = COOP_EASY_ENEMY_DAMAGE_MULT
+	return base * area_rule(room_id, tier, "atk")
 
 
 ## Regel "atk"/"cooldown" voor deze kamer en tier: tiers[tier] > gebiedsstandaard > 1.0.
