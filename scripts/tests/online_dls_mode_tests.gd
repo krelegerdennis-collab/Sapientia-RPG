@@ -7,6 +7,12 @@ const Floor := preload("res://scripts/online/online_dls_floor.gd")
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
+const Run := preload("res://scripts/online/online_dls_run.gd")
+const Rust := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
+const Revive := preload("res://scripts/coop/coop_revive.gd")
+const Codec := preload("res://scripts/net/net_codec.gd")
+const SeatCtrl := preload("res://scripts/coop/seat_controller.gd")
+const CoopAvatar := preload("res://scripts/coop/coop_avatar.gd")
 
 const EASY := {1: 1, 2: 12, 3: 23, 4: 34, 5: 45, 6: 55, 7: 66, 8: 77, 9: 88, 10: 99}
 const CANON := [25, 50, 75, 99]
@@ -36,6 +42,7 @@ func _run() -> void:
 	_rest()
 	_exp_and_canon()
 	_heals()
+	await _online_rest_checks()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
 
@@ -166,6 +173,181 @@ func _heals() -> void:
 			int(easy["items"][0]["n"]) == 20 and int(easy["items"][1]["n"]) == 1 and int(easy["gold"]) == 10)
 	check("hard laat het aantal genees-items staan", int(hard["items"][0]["n"]) == 2)
 	check("bron-buit blijft staan", int(loot["items"][0]["n"]) == 2)
+
+
+func _online_rest_checks() -> void:
+	GameState.dungeon100_snapshot = {}
+	GameState.coop_role = ""
+	GameState.new_game("Dax")
+	GameState.join_member("kael")
+	Run.start("easy", 11)
+	Run.floor_no = 5
+	var packed := load(Run.SCENE) as PackedScene
+	var node := packed.instantiate() as OnlineDlsRoom
+	add_child(node)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	node.set_process(false)
+	if node.som != null:
+		node.som.set_process(false)
+	var rp := node.get_node_or_null("Objects/Rustpunt")
+	check("easy 5 zet een Dungeon100Rustpunt", rp is Dungeon100Rustpunt)
+	if rp == null:
+		rp = Rust.create(Vector2i(2, 2))
+		node.get_node("Objects").add_child(rp)
+		await get_tree().process_frame
+	var som: SomArena = node.som
+	som.coop_mode = true
+	som.coop_sim_host = true
+	som.coop_local_slot = 0
+	som.allies_enabled = false
+	var sc := SeatCtrl.new()
+	sc.configure("KAMER", true, 0)
+	var dmax := int(GameState.member("dennis")["max_hp"])
+	var kmax := int(GameState.member("kael")["max_hp"])
+	var kmp := int(GameState.member("kael")["max_mp"])
+	sc.assign([
+		{"slot": 0, "uid": "host", "hero_id": "dennis", "controller": "local", "hp": 5, "mp": 0, "max_hp": dmax, "max_mp": 0},
+		{"slot": 1, "uid": "guest", "hero_id": "kael", "controller": "remote", "hp": 0, "mp": 2, "max_hp": kmax, "max_mp": kmp},
+	])
+	som.seat_controller = sc
+	som._coop_slots[0] = "dennis"
+	som._coop_slots[1] = "kael"
+	GameState.member("dennis")["hp"] = 5
+	GameState.member("kael")["hp"] = 0
+	GameState.member("kael")["mp"] = 2
+	som._coop_sync_down_rows()
+	var down: Dictionary = som._coop_down[1]
+	down["down"] = true
+	down["hp"] = 0
+	down["revives"] = 1
+	down["active"] = true
+	down["participate"] = true
+	sc.set_hp_mp(0, 5, 0)
+	sc.set_hp_mp(1, 0, 2)
+	var av := CoopAvatar.new()
+	av.facing = Vector2i.DOWN
+	av.position = Vector2(48, 48)
+	node.add_child(av)
+	som._coop_avatars[1] = av
+	var hud := GameState.get_node_or_null("Dungeon100Hud")
+	if hud != null:
+		hud.set_process(false)
+	GameState.dungeon100_floor = 50
+	GameState.dungeon100_checkpoint = 30
+	GameState.dungeon100_best = 44
+	var saves := [0]
+	GameState.game_saved.connect(func(_p, _ok): saves[0] += 1)
+	var save_path := GameState.save_path
+	var save_before := FileAccess.get_modified_time(save_path) if FileAccess.file_exists(save_path) else -1
+	rp.interact(node.player)
+	await get_tree().process_frame
+	var living: Dictionary = som._coop_down[0]
+	check("online rustpunt geneest de levende stoel tot vol HP",
+			int(living.get("hp", 0)) == dmax and int(sc.hp_of(0)) == dmax and int(GameState.member("dennis")["hp"]) == dmax)
+	check("online rustpunt vult MP van een stoel die MP heeft",
+			int(GameState.member("kael")["mp"]) == kmp and int(sc.mp_of(1)) == kmp)
+	check("online rustpunt laat de down-stoel opstaan",
+			not bool(down.get("down", true)) and int(down.get("hp", 0)) == kmax and int(GameState.member("kael")["hp"]) == kmax)
+	var snap := Codec.unpack_snapshot(som.coop_encode_snapshot(4))
+	var wire_ok := true
+	var seen := 0
+	for row in snap.get("players", []):
+		var slot := int(row.get("slot", -1))
+		if slot != 0 and slot != 1:
+			continue
+		seen += 1
+		var want := dmax if slot == 0 else kmax
+		if int(row.get("hp", 0)) != want or Revive.flag_is_down(int(row.get("flags", 0))):
+			wire_ok = false
+	check("snapshot na rust: volle HP en geen down-vlag", wire_ok and seen == 2)
+	GameState.member("kael")["hp"] = 1
+	var guest := SomArena.new()
+	guest.coop_mode = true
+	guest.coop_sim_host = false
+	guest._coop_slots[1] = "kael"
+	var gbody := CoopAvatar.new()
+	gbody.facing = Vector2i.DOWN
+	gbody.position = Vector2(12, 12)
+	add_child(guest)
+	guest.add_child(gbody)
+	guest._coop_avatars[1] = gbody
+	guest.apply_coop_snapshot(snap)
+	var grew: Dictionary = guest._coop_down[1] if guest._coop_down.has(1) else {}
+	check("gast leest de snapshot: HP vol en niet down",
+			int(GameState.member("kael")["hp"]) == kmax and not bool(grew.get("down", true)))
+	check("online rustpunt laat dungeon100_checkpoint staan", GameState.dungeon100_checkpoint == 30)
+	check("online rustpunt laat dungeon100_best staan", GameState.dungeon100_best == 44)
+	var save_after := FileAccess.get_modified_time(save_path) if FileAccess.file_exists(save_path) else -1
+	check("online rustpunt stelt geen solo-savevraag en schrijft niets",
+			str(rp.last_result) == "online_rest" and not rp.last_activated and not Dialog.is_open
+			and saves[0] == 0 and save_after == save_before)
+	check("revive-teller blijft staan na een rustpunt", int(down.get("revives", -1)) == 1)
+	if hud != null:
+		hud.set_process(true)
+	await _shut_dialog()
+	node.queue_free()
+	guest.queue_free()
+	Run.stop()
+	await _solo_rest_still()
+
+
+func _solo_rest_still() -> void:
+	Run.stop()
+	GameState.coop_role = ""
+	GameState.dungeon100_snapshot = {}
+	GameState.new_game("Dax")
+	GameState.join_member("lotte")
+	GameState.dungeon100_floor = 20
+	GameState.dungeon100_checkpoint = 10
+	GameState.dungeon100_best = 10
+	GameState.party[0]["hp"] = 1
+	GameState.member("lotte")["hp"] = 3
+	GameState.member("lotte")["mp"] = 1
+	var rp: Node2D = Rust.create(Vector2i(3, 3))
+	add_child(rp)
+	await get_tree().process_frame
+	var pl := Node2D.new()
+	add_child(pl)
+	var saves := [0]
+	GameState.game_saved.connect(func(_p, _ok): saves[0] += 1)
+	rp.interact(pl)
+	var lmax := int(GameState.member("lotte")["max_hp"])
+	var lmp := int(GameState.member("lotte")["max_mp"])
+	check("solo rustpunt geneest nog en verhoogt het checkpoint",
+			not Run.active and GameState.dungeon100_checkpoint == 20 and GameState.dungeon100_best == 20
+			and int(GameState.party[0]["hp"]) == int(GameState.party[0]["max_hp"])
+			and int(GameState.member("lotte")["hp"]) == lmax and int(GameState.member("lotte")["mp"]) == lmp
+			and rp.last_activated)
+	var saw := false
+	for _i in 20:
+		if Dialog.has_choices():
+			saw = true
+			break
+		if not Dialog.is_open:
+			break
+		Dialog.advance()
+		await get_tree().process_frame
+	check("solo rustpunt vraagt nog om op te slaan", saw and Dialog.choices.size() == 2)
+	if Dialog.has_choices():
+		Dialog.choose(Dialog.choices.size() - 1)
+	await get_tree().process_frame
+	check("solo Nee slaat niet op", str(rp.last_result) == "declined" and saves[0] == 0
+			and GameState.dungeon100_checkpoint == 20)
+	await _shut_dialog()
+	rp.queue_free()
+	pl.queue_free()
+
+
+func _shut_dialog() -> void:
+	for _i in 12:
+		if not Dialog.is_open:
+			return
+		if Dialog.has_choices():
+			Dialog.choose(Dialog.choices.size() - 1)
+		else:
+			Dialog.advance()
+		await get_tree().process_frame
 
 
 func _canon_same(a: Dictionary, b: Dictionary) -> bool:
