@@ -4,10 +4,11 @@ class_name D100ModeSim
 ##
 ##   godot --path . -- --d100modesim --mode=easy [--factors=4,7,10,25] [--runs=N] [--seed=N]
 ##        [--floors=10] [--seats=1,2,3,4] [--easy_enemy_dmg=2.2] [--floor_heal=0]
-##        [--out=res://docs/combat/m9b_easy_sim.md]
+##        [--revive=off] [--out=res://docs/combat/m9b_easy_sim.md]
 ##
-## De factor, easy_enemy_dmg en floor_heal zijn alleen sim-parameters.
+## De factor, easy_enemy_dmg, floor_heal en revive zijn alleen sim-parameters.
 ## OnlineDlsModes.mode_exp_factor blijft 100/N. SomData.ENEMY_DAMAGE_MULT blijft 2.2.
+## --revive=off is de default. Die run blijft de #428/#430-baseline.
 ## Host-autoritatief: één RNG per gevecht (mix_seed), nooit globale randf()/randi().
 ## Schrijft geen user:// saves. --out weigert user://.
 ##
@@ -28,8 +29,11 @@ class_name D100ModeSim
 ##    Neergegane helden blijven liggen. 0 = basis (alleen het rustpunt).
 ##  - Rust (Easy vloer 5) heelt levenden vóór het gevecht. Geen drankjes, geen feniksveer:
 ##    die zijn in het spel een handmatige ring-actie, en de bondgenoot-AI gebruikt ze niet.
-##  - M8a (down/revive) zit niet in de code. Eén down is geen verlies; de vloer stopt
+##    CoopRevive.phoenix blijft dus uit, ook met --revive=on.
+##  - --revive=off: een held op 0 HP blijft liggen. Eén down is geen verlies; de vloer stopt
 ##    pas als iedereen op 0 ligt, de tick-cap raakt, of de vijanden dood zijn.
+##  - --revive=on gebruikt CoopRevive (scripts/coop/coop_revive.gd). Regels en aannames
+##    staan bij _make_revive_rows. De spelcode zelf krijgt geen andere balans.
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomArena := preload("res://scripts/som/som_arena.gd")
@@ -45,6 +49,8 @@ const Heavy := preload("res://scripts/data/som_heavy_data.gd")
 const Modes := preload("res://scripts/online/online_dls_modes.gd")
 const Floor := preload("res://scripts/online/online_dls_floor.gd")
 const Generator := preload("res://scripts/dungeon/dungeon100_generator.gd")
+const Revive := preload("res://scripts/coop/coop_revive.gd")
+const Seat := preload("res://scripts/coop/coop_seat.gd")
 
 const DT := 1.0 / 60.0
 const TRASH_MAX_TICKS := 120 * 60
@@ -91,6 +97,7 @@ func _run() -> void:
 	var ms := Time.get_ticks_msec() - t0
 	var md := markdown(result, cfg, classic, ms)
 	print(md)
+	print(format_revive_table(result))
 	var out := str(cfg.get("out", ""))
 	if out != "":
 		var f := FileAccess.open(out, FileAccess.WRITE)
@@ -117,6 +124,8 @@ static func _cfg_from_args() -> Dictionary:
 	var out := ""
 	var enemy_dmg := -1.0
 	var floor_heal := 0
+	var revive := false
+	var revive_set := false
 	for a in OS.get_cmdline_user_args():
 		var s := str(a)
 		if s.begins_with("--mode="):
@@ -143,6 +152,12 @@ static func _cfg_from_args() -> Dictionary:
 			enemy_dmg = float(s.trim_prefix("--easy_enemy_dmg="))
 		elif s.begins_with("--floor_heal="):
 			floor_heal = int(s.trim_prefix("--floor_heal="))
+		elif s.begins_with("--revive="):
+			var flag := s.trim_prefix("--revive=")
+			if flag != "on" and flag != "off":
+				return {"error": "--revive is on of off."}
+			revive = flag == "on"
+			revive_set = true
 	if mode != "easy":
 		return {"error": "M9b simuleert alleen --mode=easy. Normal/Hard hebben nog geen realtime baas."}
 	if out.begins_with("user://"):
@@ -171,6 +186,7 @@ static func _cfg_from_args() -> Dictionary:
 		"verbose": true,
 		"enemy_dmg": enemy_dmg if enemy_dmg > 0.0 else SomData.ENEMY_DAMAGE_MULT,
 		"floor_heal": clampi(floor_heal, 0, 100),
+		"revive": revive if revive_set else false,
 	}
 
 
@@ -208,6 +224,7 @@ static func run_cfg(cfg: Dictionary) -> Dictionary:
 	if enemy_dmg <= 0.0:
 		enemy_dmg = SomData.ENEMY_DAMAGE_MULT
 	var floor_heal := clampi(int(cfg.get("floor_heal", 0)), 0, 100)
+	var revive_on := bool(cfg.get("revive", false))
 	var maps: Array = []
 	var run_seeds: Array = []
 	var fp_parts: PackedStringArray = PackedStringArray()
@@ -228,7 +245,7 @@ static func run_cfg(cfg: Dictionary) -> Dictionary:
 		var fac := maxi(1, int(factor))
 		for seat_n in seats:
 			var t0 := Time.get_ticks_msec()
-			rows.append(_simulate_cell(maps, run_seeds, fac, int(seat_n), hypo, examples, caps, enemy_dmg, floor_heal))
+			rows.append(_simulate_cell(maps, run_seeds, fac, int(seat_n), hypo, examples, caps, enemy_dmg, floor_heal, revive_on))
 			if verbose:
 				print("SIM factor %d stoelen %d klaar (%d ms)" % [fac, int(seat_n), Time.get_ticks_msec() - t0])
 	return {
@@ -243,6 +260,7 @@ static func run_cfg(cfg: Dictionary) -> Dictionary:
 		"examples": examples,
 		"enemy_dmg": enemy_dmg,
 		"floor_heal": floor_heal,
+		"revive": revive_on,
 	}
 
 
@@ -284,7 +302,7 @@ static func _empty_floor(floor_no: int, eff: int, boss_key: int) -> Dictionary:
 	}
 
 
-static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: int, hypo: bool, examples: Array, caps: Dictionary, enemy_dmg: float, floor_heal: int) -> Dictionary:
+static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: int, hypo: bool, examples: Array, caps: Dictionary, enemy_dmg: float, floor_heal: int, revive_on: bool) -> Dictionary:
 	var ids := party_ids_for(seats)
 	var floor_rows: Array = []
 	var proto: Array = maps[0]
@@ -297,6 +315,7 @@ static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: in
 	var hypo_level_sum := 0
 	var hypo_orion_wins := 0
 	var hypo_orion_ticks := 0
+	var tally := {"sum": 0, "max": 0}
 	var boss_floor := 0
 	for fl0 in proto:
 		if int(fl0["boss_key"]) == PageWardenBoss.BOSS_KEY:
@@ -317,10 +336,11 @@ static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: in
 			for e in fl["enemies"]:
 				clear += scaled_exp(int(e["exp_base"]), factor)
 		exp_clear_sum += clear
-		_climb(built, rs, factor, seats, ids, floor_rows, examples, caps, enemy_dmg, floor_heal)
+		_climb(built, rs, factor, seats, ids, floor_rows, examples, caps, enemy_dmg, floor_heal, revive_on, tally)
 		if hypo and boss_floor > 0:
 			var party := make_party(ids, clear)
-			var bf: Dictionary = _boss_fight(party, seats, combat_seed(rs, boss_floor, seats, factor, KIND_HYPO), enemy_dmg)
+			var hypo_rows: Array = _make_revive_rows(party) if revive_on else []
+			var bf: Dictionary = _boss_fight(party, seats, combat_seed(rs, boss_floor, seats, factor, KIND_HYPO), enemy_dmg, hypo_rows)
 			hypo_n += 1
 			hypo_ticks += int(bf["ticks"])
 			hypo_level_sum += level_of(party)
@@ -328,7 +348,8 @@ static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: in
 				hypo_wins += 1
 			if seats == 4:
 				var orion := make_party(ORION_IDS, clear)
-				var bo: Dictionary = _boss_fight(orion, 4, combat_seed(rs, boss_floor, 4, factor, KIND_HYPO_ORION), enemy_dmg)
+				var orion_rows: Array = _make_revive_rows(orion) if revive_on else []
+				var bo: Dictionary = _boss_fight(orion, 4, combat_seed(rs, boss_floor, 4, factor, KIND_HYPO_ORION), enemy_dmg, orion_rows)
 				hypo_orion_ticks += int(bo["ticks"])
 				if bool(bo["win"]):
 					hypo_orion_wins += 1
@@ -344,11 +365,14 @@ static func _simulate_cell(maps: Array, run_seeds: Array, factor: int, seats: in
 		"hypo_level_sum": hypo_level_sum,
 		"hypo_orion_wins": hypo_orion_wins,
 		"hypo_orion_ticks": hypo_orion_ticks,
+		"revives": int(tally["sum"]),
+		"revive_max": int(tally["max"]),
 	}
 
 
-static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Array, floor_rows: Array, examples: Array, caps: Dictionary, enemy_dmg: float, floor_heal: int) -> void:
+static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Array, floor_rows: Array, examples: Array, caps: Dictionary, enemy_dmg: float, floor_heal: int, revive_on: bool, tally: Dictionary) -> void:
 	var party := make_party(ids, 0)
+	var rows: Array = _make_revive_rows(party) if revive_on else []
 	for i in built.size():
 		if not any_alive(party):
 			break
@@ -368,8 +392,10 @@ static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Ar
 			floor_heal_living(party, floor_heal)
 		if bool(fl["rest"]):
 			rest_heal(party)
+			if revive_on:
+				_revive_apply_rest(party, rows)
 		var meta := {"factor": factor, "seats": seats, "floor": floor_no, "seed": run_seed, "hp_in": hp_now, "hp_in_max": hp_max}
-		var trash: Dictionary = _trash_fight(party, fl["enemies"], combat_seed(run_seed, floor_no, seats, factor, KIND_TRASH), factor, enemy_dmg)
+		var trash: Dictionary = _trash_fight(party, fl["enemies"], combat_seed(run_seed, floor_no, seats, factor, KIND_TRASH), factor, enemy_dmg, rows)
 		row["ticks"] = int(row["ticks"]) + int(trash["ticks"])
 		if not bool(trash["win"]):
 			_note_loss(row, trash, examples, caps, meta)
@@ -383,7 +409,7 @@ static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Ar
 			break
 		row["boss_entered"] = int(row["boss_entered"]) + 1
 		row["boss_level_sum"] = int(row["boss_level_sum"]) + level_of(party)
-		var bf: Dictionary = _boss_fight(party, seats, combat_seed(run_seed, floor_no, seats, factor, KIND_BOSS), enemy_dmg)
+		var bf: Dictionary = _boss_fight(party, seats, combat_seed(run_seed, floor_no, seats, factor, KIND_BOSS), enemy_dmg, rows)
 		row["ticks"] = int(row["ticks"]) + int(bf["ticks"])
 		row["boss_ticks"] = int(row["boss_ticks"]) + int(bf["ticks"])
 		if bool(bf["win"]):
@@ -394,9 +420,10 @@ static func _climb(built: Array, run_seed: int, factor: int, seats: int, ids: Ar
 				row["boss_wipes"] = int(row["boss_wipes"]) + 1
 			_note_loss(row, bf, examples, caps, meta)
 			break
+	_tally_revives(rows, tally)
 
 
-static func _trash_fight(party: Array, enemies: Array, seed_val: int, factor: int, enemy_dmg: float = -1.0) -> Dictionary:
+static func _trash_fight(party: Array, enemies: Array, seed_val: int, factor: int, enemy_dmg: float = -1.0, revive_rows: Array = []) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_val
 	var heroes := _runtime(party)
@@ -425,8 +452,12 @@ static func _trash_fight(party: Array, enemies: Array, seed_val: int, factor: in
 		if active.is_empty():
 			break
 		ticks += 1
+		if not revive_rows.is_empty():
+			_revive_mark_hold(heroes, revive_rows)
 		var acted := _trash_heroes(heroes, active, rng, events, ticks)
 		var hurt := _trash_enemies(heroes, active, rng, events, ticks, enemy_dmg)
+		if not revive_rows.is_empty():
+			_revive_resolve(heroes, revive_rows)
 		if acted or hurt:
 			quiet = 0
 		else:
@@ -442,6 +473,8 @@ static func _trash_heroes(heroes: Array, active: Array, rng: RandomNumberGenerat
 	var swung := false
 	var killed := false
 	for hr in heroes:
+		if bool(hr.get("revive_hold", false)):
+			continue
 		if int(hr["h"]["hp"]) <= 0:
 			continue
 		_tick_hero_clock(hr)
@@ -539,7 +572,7 @@ static func _trash_enemies(heroes: Array, active: Array, rng: RandomNumberGenera
 				e["cd"] = SomData.ATTACK_COOLDOWN
 				var slot := int(e["target"])
 				var hr := _runtime_slot(heroes, slot)
-				if not hr.is_empty() and int(hr["h"]["hp"]) > 0 and float(hr["iframes"]) <= 0.0:
+				if not hr.is_empty() and int(hr["h"]["hp"]) > 0 and not _hit_blocked(hr):
 					var dodge := DODGE_PLAYER if int(hr["slot"]) == 0 else DODGE_ALLY
 					if rng.randf() >= dodge:
 						var dmg := roundi(SomArena.physical_damage(float(e["d"]["atk"]), float(hr["def"]), 1.0, rng) * _enemy_mult(enemy_dmg))
@@ -578,7 +611,7 @@ static func _enemy_mult(enemy_dmg: float) -> float:
 	return enemy_dmg
 
 
-static func _boss_fight(party: Array, seats: int, seed_val: int, enemy_dmg: float = -1.0) -> Dictionary:
+static func _boss_fight(party: Array, seats: int, seed_val: int, enemy_dmg: float = -1.0, revive_rows: Array = []) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_val
 	var boss: Dictionary = PageWardenBoss.stats_for_seats(seats)
@@ -597,6 +630,8 @@ static func _boss_fight(party: Array, seats: int, seed_val: int, enemy_dmg: floa
 		if _runtime_alive(heroes).is_empty():
 			break
 		ticks += 1
+		if not revive_rows.is_empty():
+			_revive_mark_hold(heroes, revive_rows)
 		var before := _pool_hp(heroes).x
 		var swings_before := _swing_total(heroes)
 		gf.tick()
@@ -616,6 +651,8 @@ static func _boss_fight(party: Array, seats: int, seed_val: int, enemy_dmg: floa
 			if not bool(hr["downed"]) and int(hr["h"]["hp"]) <= 0:
 				hr["downed"] = true
 				threat.clear_slot(int(hr["slot"]))
+		if not revive_rows.is_empty():
+			_revive_resolve(heroes, revive_rows)
 		var after := _pool_hp(heroes).x
 		var did := _swing_total(heroes) > swings_before
 		if did or after < before:
@@ -671,7 +708,7 @@ static func _boss_hit(heroes: Array, boss: Dictionary, target: int, id: String, 
 		elif slot == target:
 			victims.append(hr)
 	for hr in victims:
-		if float(hr["iframes"]) > 0.0:
+		if _hit_blocked(hr):
 			continue
 		var dodge := DODGE_PLAYER if int(hr["slot"]) == 0 else DODGE_ALLY
 		if rng.randf() < dodge:
@@ -684,6 +721,8 @@ static func _boss_hit(heroes: Array, boss: Dictionary, target: int, id: String, 
 ## De slag is de keten. Doel, klap, spreuk en adds staan hier, niet in page_warden_rt_sim.gd.
 static func _boss_heroes(gf: PageWardenFight, heroes: Array, adds: Array, boss: Dictionary, rng: RandomNumberGenerator, threat: ThreatTable) -> void:
 	for hr in heroes:
+		if bool(hr.get("revive_hold", false)):
+			continue
 		if int(hr["h"]["hp"]) <= 0:
 			continue
 		_tick_hero_clock(hr)
@@ -779,7 +818,7 @@ static func _boss_adds(heroes: Array, adds: Array, target: int, rng: RandomNumbe
 			if float(e["tele"]) <= 0.0:
 				e["cd"] = SomData.ATTACK_COOLDOWN
 				var hr := _runtime_slot(heroes, target if target >= 0 else 0)
-				if hr.is_empty() or int(hr["h"]["hp"]) <= 0 or float(hr["iframes"]) > 0.0:
+				if hr.is_empty() or int(hr["h"]["hp"]) <= 0 or _hit_blocked(hr):
 					continue
 				var dodge := DODGE_PLAYER if int(hr["slot"]) == 0 else DODGE_ALLY
 				if rng.randf() >= dodge:
@@ -792,9 +831,152 @@ static func _boss_adds(heroes: Array, adds: Array, target: int, rng: RandomNumbe
 		e["tele"] = SomData.TELEGRAPH
 
 
+static func _hit_blocked(hr: Dictionary) -> bool:
+	return float(hr.get("iframes", 0.0)) > 0.0 or int(hr.get("revive_iframes", 0)) > 0
+
+
+## Stoelrijen voor --revive=on. Leeg = uit, en dan raakt geen gevecht deze functies aan.
+## Bronnen (geen gekopieerde getallen; de klasse levert ze):
+## - max 1 per stoel per run: CoopRevive.REVIVES_PER_RUN, can_be_revived, begin_run
+##   (scripts/coop/coop_revive.gd). begin_run is de enige reset; apply_rest wist de teller niet.
+## - kanaal: channel_ticks_for. Heal (HEAL_HERO "lotte") 72 ticks, anders 120. SIM_HZ 60.
+## - HP na een kanaal: revive_hp = 30% van max_hp, minstens 1. iframes = IFRAME_TICKS (60).
+## - wie mag: mensen altijd (step start hun kanaal). AI alleen als ai_should_revive:
+##   lotte wel, andere AI alleen zonder levende Heal (AI_OTHERS_ONLY_WITHOUT_HEAL).
+## - wipe: everyone_down. step(..., already_wiped) kanaliseert niet meer. De klim stopt.
+## - bleed: BLEED_END_STAY_DOWN. Afloop laat ze liggen. Geen permadeath in de run.
+## - rust: apply_rest zet wie ligt op max HP. Levenden blijft de bestaande rest_heal.
+## Aannames, omdat de gevechtssim geen tegel en geen stick heeft:
+## - Alle stoelen staan op (0, 0). in_range is dan waar (RANGE_PX is 16). Geen looptijd.
+## - SomAlly._coop_revive_drive roept begin_channel, maar keert terug zolang
+##   seat_controller.gd bestaat. try_revive geeft false. Deze sim roept begin_channel
+##   tóch aan voor een AI die query_revive toestaat. Zonder die aanname revivet geen AI.
+## - Treffer: hit_seq omhoog bij HP-verlies, zoals action_sandbox_sim._damage_row.
+##   som_arena.gd verhoogt hit_seq nergens. Het kanaal valt terug naar 0, niet op pauze.
+## - Een AI met een geldige query slaat die tick niet (SomAlly.tick keert eerder terug).
+##   De menselijke host (stoel 0) blijft slaan terwijl zijn kanaal loopt.
+## - Feniksveer (phoenix) blijft uit. De AI gebruikt geen ring-item.
+static func _make_revive_rows(party: Array) -> Array:
+	var rows: Array = []
+	var i := 0
+	for h in party:
+		var hero: Dictionary = h
+		var ctrl := Seat.CONTROLLER_HUMAN if i == 0 else Seat.CONTROLLER_AI
+		var row := Seat.make(i, str(hero.get("id", "")), ctrl)
+		row["hp"] = int(hero["hp"])
+		row["max_hp"] = maxi(1, int(hero.get("max_hp", 1)))
+		row["x"] = 0
+		row["y"] = 0
+		row["active"] = true
+		row["participate"] = true
+		rows.append(row)
+		i += 1
+	Revive.begin_run(rows)
+	return rows
+
+
+static func _hero_by_slot(heroes: Array, slot: int) -> Dictionary:
+	for hr in heroes:
+		if int(hr["slot"]) == slot:
+			return hr
+	return {}
+
+
+static func _revive_apply_rest(party: Array, rows: Array) -> void:
+	if rows.is_empty():
+		return
+	var i := 0
+	for h in party:
+		if i >= rows.size():
+			break
+		var row: Dictionary = rows[i]
+		var hero: Dictionary = h
+		row["hp"] = int(hero["hp"])
+		row["max_hp"] = maxi(1, int(hero.get("max_hp", 1)))
+		row["x"] = 0
+		row["y"] = 0
+		i += 1
+	Revive.apply_rest(rows)
+	i = 0
+	for h2 in party:
+		if i >= rows.size():
+			break
+		var back: Dictionary = rows[i]
+		var hero2: Dictionary = h2
+		hero2["hp"] = int(back.get("hp", 0))
+		i += 1
+
+
+static func _revive_mark_hold(heroes: Array, rows: Array) -> void:
+	for hr in heroes:
+		hr["revive_hold"] = false
+	for row in rows:
+		if not Revive.is_ai_controller(row) or not Revive.row_alive(row):
+			continue
+		var q := Revive.query_revive(rows, row)
+		if not bool(q.get("ok", false)):
+			continue
+		var held := _hero_by_slot(heroes, int(row.get("slot", -1)))
+		if not held.is_empty():
+			held["revive_hold"] = true
+
+
+static func _revive_resolve(heroes: Array, rows: Array) -> void:
+	for row in rows:
+		var hr := _hero_by_slot(heroes, int(row.get("slot", -1)))
+		if hr.is_empty():
+			continue
+		var hero: Dictionary = hr["h"]
+		var hp := int(hero["hp"])
+		row["max_hp"] = maxi(1, int(hero.get("max_hp", 1)))
+		row["x"] = 0
+		row["y"] = 0
+		var seq := int(hr.get("hurt_seq", 0))
+		var seen := int(row.get("_hurt_seen", 0))
+		if seq != seen:
+			row["hit_seq"] = int(row.get("hit_seq", 0)) + maxi(1, seq - seen)
+			row["_hurt_seen"] = seq
+		row["hp"] = hp
+		if hp <= 0 and not bool(row.get("down", false)):
+			Revive.enter_down(row)
+	for row2 in rows:
+		if not Revive.is_ai_controller(row2) or not Revive.row_alive(row2):
+			continue
+		var q := Revive.query_revive(rows, row2)
+		var ok := bool(q.get("ok", false))
+		var slot := int(q.get("slot", -1))
+		if ok:
+			Revive.begin_channel(rows, row2, slot)
+	Revive.step(rows, false)
+	for row3 in rows:
+		var hr3 := _hero_by_slot(heroes, int(row3.get("slot", -1)))
+		if hr3.is_empty():
+			continue
+		var hero3: Dictionary = hr3["h"]
+		hero3["hp"] = int(row3.get("hp", 0))
+		hr3["revive_iframes"] = int(row3.get("iframes", 0))
+		if int(hero3["hp"]) > 0:
+			hr3["downed"] = false
+
+
+static func _tally_revives(rows: Array, tally: Dictionary) -> void:
+	if rows.is_empty():
+		return
+	var run_max := 0
+	var run_sum := 0
+	for row in rows:
+		var used := int(row.get("revives", 0))
+		run_sum += used
+		run_max = maxi(run_max, used)
+	tally["sum"] = int(tally.get("sum", 0)) + run_sum
+	tally["max"] = maxi(int(tally.get("max", 0)), run_max)
+
+
 static func _hurt(hr: Dictionary, dmg: int) -> void:
 	hr["h"]["hp"] = maxi(0, int(hr["h"]["hp"]) - maxi(1, dmg))
 	hr["iframes"] = float(SomData.DODGE_IFRAME_TICKS) * DT
+	# Alleen een teller. De schadeformule blijft. --revive=on leest hem om het kanaal te breken.
+	hr["hurt_seq"] = int(hr.get("hurt_seq", 0)) + 1
 
 
 static func _runtime(party: Array) -> Array:
@@ -1215,6 +1397,7 @@ static func signature(result: Dictionary) -> String:
 	parts.append("m=%s" % str(result.get("mode", "")))
 	parts.append("dmg=%d" % int(round(float(result.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT)) * 1000.0)))
 	parts.append("heal=%d" % int(result.get("floor_heal", 0)))
+	parts.append("revive=%d" % (1 if bool(result.get("revive", false)) else 0))
 	parts.append("b=%d" % int(result.get("base_seed", 0)))
 	parts.append("r=%d" % int(result.get("runs", 0)))
 	parts.append("f=%d" % int(result.get("floors", 0)))
@@ -1223,6 +1406,7 @@ static func signature(result: Dictionary) -> String:
 		parts.append("s=%d" % int(s))
 	for row in result.get("rows", []):
 		parts.append("F%d.S%d" % [int(row["factor"]), int(row["seats"])])
+		parts.append("ru=%d/%d" % [int(row.get("revives", 0)), int(row.get("revive_max", 0))])
 		parts.append("e=%d" % int(row["exp_clear_sum"]))
 		parts.append("h=%d/%d/%d/%d" % [int(row["hypo_n"]), int(row["hypo_wins"]), int(row["hypo_ticks"]), int(row["hypo_level_sum"])])
 		parts.append("o=%d/%d" % [int(row["hypo_orion_wins"]), int(row["hypo_orion_ticks"])])
@@ -1267,7 +1451,11 @@ static func markdown(result: Dictionary, cfg: Dictionary, classic: Dictionary, m
 		PageWardenBoss.ACTION_HP_MULT, PageWardenBoss.ACTION_ATK_MULT, str(PageWardenBoss.SEAT_HP), str(PageWardenBoss.SEAT_ATK)]
 	s += "- Partij: %s. Stoel 0 is de host (ontwijk %.2f), de rest is AI (ontwijk %.2f). Bij 4 stoelen zit Orion er niet bij.\n" % [party_label(PARTY_IDS), DODGE_PLAYER, DODGE_ALLY]
 	s += "- Kaart: `OnlineDlsFloor.build` (eff, cap %d, groep = één vijand). Troep max %d s, baas max %d s, golf %d.\n" % [Modes.enemy_cap(), TRASH_MAX_TICKS / 60, BOSS_MAX_TICKS / 60, WAVE]
-	s += "- Rust op Easy vloer 5 heelt levenden. Geen drankjes en geen feniksveer (handmatig in het spel, de AI gebruikt ze niet). M8a zit niet in de code: een held op 0 HP blijft liggen. Eén down is geen verlies.\n"
+	if bool(result.get("revive", false)):
+		s += "- Revive aan (`--revive=on`, alleen deze sim). Kanaal, 30% HP, één keer per stoel per run, wipe als iedereen ligt. Regels: `docs/combat/m9b_easy_revive.md`.\n"
+	else:
+		s += "- Revive uit (`--revive=off`, de default). Een held op 0 HP blijft liggen. Eén down is geen verlies. Geen drankjes en geen feniksveer.\n"
+	s += "- Rust op Easy vloer 5 heelt levenden. De feniksveer blijft een handmatige ring-actie; de AI gebruikt die niet.\n"
 	s += "- EXP per stoel, vol, meteen per vijand (`round_half_even(basis × factor)`). Keten: hit1/hit2/finisher, vervolg 6 ticks na de animatie. Klassieke DLS stript spreuken; deze sim houdt de klasse-spreuken.\n"
 	s += "- Duur is gevechtstijd (60 Hz), zonder looptijd. Tooltijd %.1f s.\n\n" % [ms / 1000.0]
 	s += "Herhalen:\n\n```\n%s\n```\n\n" % _command(cfg)
@@ -1306,9 +1494,17 @@ static func markdown(result: Dictionary, cfg: Dictionary, classic: Dictionary, m
 				_pct_plain(int(fl["hp_end_sum"]), int(fl["hp_end_max"])),
 			]
 	s += "\n## Wat de sim gelijk doet aan de online Easy-run\n\n"
-	s += "- Zonder `--floor_heal` blijven HP en MP staan tussen vloeren. Rustvloer 5 (BookPoint.restore) vult levenden bij. Wie op 0 staat, blijft liggen.\n"
+	s += "- Zonder `--floor_heal` blijven HP en MP staan tussen vloeren. Rustvloer 5 (BookPoint.restore) vult levenden bij. "
+	if bool(result.get("revive", false)):
+		s += "Met `--revive=on` zet `CoopRevive.apply_rest` wie ligt op volle HP. De teller `revives` blijft.\n"
+	else:
+		s += "Wie op 0 staat, blijft liggen.\n"
 	s += "- Eén down is geen verlies. De vloer eindigt als de vijanden dood zijn, als iedereen op 0 ligt, of op de tick-cap.\n"
-	s += "- Feniksveer en drankjes zijn een handmatige ring-actie (`PartyActions.use_item`). De bondgenoot-AI gebruikt ze niet. Deze sim ook niet. M8a ontbreekt, dus geen automatische revive.\n"
+	s += "- Feniksveer en drankjes zijn een handmatige ring-actie (`PartyActions.use_item`). De bondgenoot-AI gebruikt ze niet. Deze sim ook niet.\n"
+	if bool(result.get("revive", false)):
+		s += "- Met `--revive=on` loopt het kanaal van CoopRevive. Zonder die vlag blijft een held op 0 liggen.\n"
+	else:
+		s += "- `--revive` staat uit. Een held op 0 HP blijft liggen, ook op het rustpunt.\n"
 	s += "- EXP valt per verslagen vijand, vol, aan elke levende held, meteen (`give_exp`). Een level-up vult HP bij met de groei.\n"
 	s += "- Aanvalsketen zoals `som_ally.gd`: hit1 ×1.0, hit2 ×1.1, finisher ×1.6, vervolg %d ticks na de animatie (venster %d). " % [Chain.ALLY_FOLLOWUP_TICKS, Chain.CHAIN_WINDOW_TICKS]
 	s += "De host ketent hetzelfde. Na de finisher laadt een AI-bondgenoot een zware slag niveau %d (%d ticks, ×%.1f).\n" % [Heavy.ALLY_LEVEL, int(Heavy.LEVEL_TICKS[0]), Heavy.damage_mult(Heavy.ALLY_LEVEL)]
@@ -1421,9 +1617,10 @@ static func _command(cfg: Dictionary) -> String:
 		extra += " --no-hypo"
 	if not bool(cfg.get("classic_ref", true)):
 		extra += " --no-classic"
-	extra += " --easy_enemy_dmg=%s --floor_heal=%d" % [
+	extra += " --easy_enemy_dmg=%s --floor_heal=%d --revive=%s" % [
 		_fmt_mult(float(cfg.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT))),
 		clampi(int(cfg.get("floor_heal", 0)), 0, 100),
+		"on" if bool(cfg.get("revive", false)) else "off",
 	]
 	var out := str(cfg.get("out", ""))
 	if out != "":
@@ -1460,6 +1657,46 @@ static func _pw_summary(result: Dictionary) -> String:
 		]
 	s += "\n"
 	return s
+
+
+static func format_revive_table(result: Dictionary) -> String:
+	var runs := maxi(1, int(result.get("runs", 1)))
+	var on := bool(result.get("revive", false))
+	var s := ""
+	for row in result.get("rows", []):
+		var fl := _boss_floor(row)
+		var entered := 0
+		var wins := 0
+		var level := "—"
+		if not fl.is_empty():
+			entered = int(fl.get("boss_entered", 0))
+			wins = int(fl.get("boss_wins", 0))
+			if entered > 0:
+				level = "%.1f" % (float(fl["boss_level_sum"]) / float(entered))
+		var win_pct := 100.0 * float(wins) / float(runs)
+		s += "SIMREV dmg=%s heal=%d seats=%d revive=%s pw=%d/%d win=%.1f wins=%d level=%s revives=%d max=%d wipes=%s\n" % [
+			_fmt_mult(float(result.get("enemy_dmg", SomData.ENEMY_DAMAGE_MULT))),
+			int(result.get("floor_heal", 0)),
+			int(row["seats"]),
+			"on" if on else "off",
+			entered, runs, win_pct, wins, level,
+			int(row.get("revives", 0)),
+			int(row.get("revive_max", 0)),
+			_wipe_where(row),
+		]
+	return s
+
+
+static func _wipe_where(row: Dictionary) -> String:
+	var bits: PackedStringArray = PackedStringArray()
+	for fl in row.get("floors", []):
+		var n := int(fl.get("cause_wipe", 0))
+		if n <= 0:
+			continue
+		bits.append("%d:%d" % [int(fl["floor"]), n])
+	if bits.is_empty():
+		return "—"
+	return ",".join(bits)
 
 
 static func _furthest_wipe(row: Dictionary) -> int:
