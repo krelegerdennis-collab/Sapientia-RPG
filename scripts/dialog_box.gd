@@ -288,7 +288,7 @@ func needed_height(w: float) -> float:
 		if bool(lay["horizontal"]):
 			h = maxf(h, PAD_T + text_h + float(lay["row_h"]) + CHOICE_ROW_BOTTOM)
 		else:
-			h = maxf(h, PAD_T + lh + choices.size() * (choice_row_h() + 1.0) + 4.0)
+			h = maxf(h, PAD_T + text_h + choices.size() * (choice_row_h() + 1.0) + 4.0)
 	return ceilf(maxf(MIN_H, h))
 
 

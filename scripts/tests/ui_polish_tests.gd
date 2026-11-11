@@ -10,6 +10,7 @@ extends Node
 const Scenarios := preload("res://tools/ui_polish/ui_scenarios.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const CoopLobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
+const StoryData := preload("res://scripts/data/story_data.gd")
 
 const SUB_SCREENS: Array[String] = ["menu_items", "menu_equipment", "menu_magic", "menu_status", "menu_codex",
 		"menu_bestiary", "menu_party", "menu_quests", "menu_options", "menu_save"]
@@ -246,6 +247,26 @@ func _dialog_tests(tag: String) -> void:
 		short_ok = short_ok and r.size.y >= UiTouchC.TOUCH_MIN - 0.01 and r.size.x >= UiTouchC.TOUCH_MIN
 	check(tag + "tekstvak: Yes/No blijven rechtsonder onder elkaar, elk >= 25 hoog", short_ok)
 	check(tag + "tekstvak: Yes/No: vak binnen het veilige gebied", _within(Dialog.box_rect(), _safe()))
+	# 1 regel: text_h == lh, dus de hoogte blijft de oude formule
+	# ceil(max(MIN_H, PAD_T + lh + 2*(25+1) + 4)) = 74.
+	check(tag + "tekstvak: 1 regel met keuzes houdt de oude hoogte 74",
+			Dialog.text_label.get_line_count() == 1 and Dialog.box_rect().size.y == 74.0)
+	await sc.close_all()
+	Dialog.ask(StoryData.QUOTE_GRAAN_OUD, [StoryData.KEUZE_GRAAN_JA, StoryData.KEUZE_GRAAN_NEE])
+	await sc.pframes(8)
+	var wrapped: Array[Rect2] = Dialog.choice_rects()
+	var font_w: Font = Dialog.text_label.get_theme_font("font")
+	var fs_w: int = Dialog.text_label.get_theme_font_size("font_size")
+	var lh_w: float = font_w.get_height(fs_w)
+	var nlines: int = Dialog.text_label.get_line_count()
+	var text_h: float = float(nlines) * lh_w + float(nlines - 1) * float(Dialog.LINE_SPACING)
+	var text_bottom: float = Dialog.text_label.get_global_rect().position.y + text_h
+	var choice_top: float = wrapped[0].position.y if not wrapped.is_empty() else -1.0
+	var wide: bool = Dialog.box_rect().size.x >= 360.0
+	check(tag + "tekstvak: 2 regels + gestapelde keuzes, bovenkant keuze >= onderkant tekst (regels %d, keuze %.0f, tekst %.0f)" % [nlines, choice_top, text_bottom],
+			wrapped.size() == 2 and wrapped[1].position.y > wrapped[0].position.y
+			and (nlines == 2 if wide else nlines >= 2)
+			and choice_top >= text_bottom)
 	await sc.close_all()
 
 
