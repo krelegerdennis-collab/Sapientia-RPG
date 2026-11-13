@@ -150,6 +150,8 @@ func _start(flags_source: Node) -> void:
 		_source = null
 		return
 	_flags = _read_flags(flags_source).duplicate()
+	# CS-11 vóór de Hal-dialoog (dormant slot); daarna ECHO-regels uit het filmpje weglaten.
+	await Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ATRIUM_PENDANT, self)
 	_lines = Dreiging.lines(_flags)
 	_hanger_einde = Dreiging.einde_hanger(_flags)
 	if _lines.is_empty():
@@ -263,7 +265,6 @@ func _apply_beat(beat: int) -> void:
 		1:
 			_beat_purple()
 		2:
-			Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ATRIUM_PENDANT)
 			_beat_gloed()
 		3:
 			Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ATRIUM_THREAT)
