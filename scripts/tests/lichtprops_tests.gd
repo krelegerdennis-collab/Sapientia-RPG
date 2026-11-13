@@ -7,11 +7,12 @@ const MapLightingRig := preload("res://scripts/map_lighting_rig.gd")
 const DungeonRooms := preload("res://scripts/data/dungeon_rooms.gd")
 const COOP_HERO_LIGHTS := 4
 const HD2D_MAX_POINT := 8
-const EXCLUDE_MAPS: Array[String] = ["archief_2_v3_licht"]
+const EXCLUDE_MAPS: Array[String] = []
 const NO_GLOW_PRESET: Array[String] = ["archief_v2_trapzaal", "wereldkaart"]
 const BUSY_NIGHT_MAP := "woud_pad"
 const WOUD_PAD := "res://scenes/maps/woud_pad.tscn"
-const EXCLUDED_LICHT_SCENE := "res://scenes/maps/archief_2_v3_licht.tscn"
+const LICHT_V3_SCENE := "res://scenes/maps/archief_2_v3_licht.tscn"
+const LICHT_V3_PROP_COUNT := 7
 const PARTY_FOUR := ["noor", "lotte", "kael"]
 const BUSY_CAM := Vector2(224, 0)
 
@@ -29,7 +30,8 @@ const PROP_IDS: Array[String] = [
 const LICHTPROP_MAPS: Array[String] = [
 	"archief_v1_gang", "archief_v2_kastenzaal", "archief_v2_leeszaal", "archief_v2_trapzaal",
 	"archief_v3_gang", "archief_v4_voorhal",
-	"archief_2_v1_plaat", "archief_2_v2_gang", "archief_2_v2_lotte", "archief_2_v3_wurger",
+	"archief_2_v1_plaat", "archief_2_v2_gang", "archief_2_v2_lotte", "archief_2_v3_licht",
+	"archief_2_v3_wurger",
 	"archief_2_v4_hal", "leven_ingang", "leven_v1_plaat", "leven_v2_leeszaal", "leven_v3_combi",
 	"warper_warp_ring", "warper_hanger_nis",
 	"kamer_beeldkamer", "kamer_echo_kamer", "kamer_handelskamer", "kamer_kern",
@@ -57,7 +59,7 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	_asset_tests()
 	_preset_tests()
-	_excluded_map_tests()
+	_archief_v3_licht_tests()
 	_collision_report_tests()
 	_scene_placement_tests()
 	_busy_budget_reference_tests()
@@ -99,8 +101,8 @@ func _preset_tests() -> void:
 			check("%s %s candle=1.8" % [mid, tod], float(lights.get("candle", 0.0)) == 1.8)
 
 
-func _excluded_map_tests() -> void:
-	var path := EXCLUDED_LICHT_SCENE
+func _archief_v3_licht_tests() -> void:
+	var path := LICHT_V3_SCENE
 	var sc := load(path) as PackedScene
 	var inst := sc.instantiate()
 	var n := 0
@@ -108,7 +110,22 @@ func _excluded_map_tests() -> void:
 		if str(c.name).begins_with("Lp_"):
 			n += 1
 	inst.free()
-	check("archief_2_v3_licht: geen geplaatste props", n == 0)
+	check("archief_2_v3_licht: %d lichtprops" % LICHT_V3_PROP_COUNT, n == LICHT_V3_PROP_COUNT)
+	var busy_txt := FileAccess.get_file_as_string("res://data/hd2d/reference/render_report_lichtprops_busy.json")
+	var busy_parsed: Variant = JSON.parse_string(busy_txt)
+	if busy_parsed is Dictionary:
+		for tod in ["day", "night"]:
+			var key := "archief_2_v3_licht|%s" % tod
+			if not busy_parsed.has(key):
+				check("archief_2_v3_licht busy report %s" % key, false)
+				continue
+			var v: Dictionary = busy_parsed[key]
+			var pl := int(v.get("point_lights", 99))
+			var heroes := int(v.get("heroes", 0))
+			check("archief_2_v3_licht|%s point_lights<=%d (got %d)" % [tod, HD2D_MAX_POINT, pl],
+					pl <= HD2D_MAX_POINT and heroes == COOP_HERO_LIGHTS)
+			var scan_props := int(v.get("scan_max_props", 99))
+			check("archief_2_v3_licht|%s scan_max_props+heroes<=8" % tod, scan_props + COOP_HERO_LIGHTS <= HD2D_MAX_POINT)
 
 
 func _collision_report_tests() -> void:
@@ -190,7 +207,12 @@ func _busy_budget_reference_tests() -> void:
 	if not parsed is Dictionary:
 		return
 	for key in parsed:
-		if key.begins_with(EXCLUDE_MAPS[0]):
+		var skip_key := false
+		for ex in EXCLUDE_MAPS:
+			if key.begins_with(ex):
+				skip_key = true
+				break
+		if skip_key:
 			continue
 		if not str(key).ends_with("|night"):
 			continue

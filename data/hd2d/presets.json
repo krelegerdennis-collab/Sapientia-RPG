@@ -1084,7 +1084,8 @@
      "book": 1.0,
      "screen": 1.0,
      "hero": 1.0,
-     "eyes": 1.0
+     "eyes": 1.0,
+     "glow": 1.0
     },
     "halo": 0.8,
     "player_light": {
@@ -1176,7 +1177,8 @@
      "book": 1.0,
      "screen": 1.0,
      "hero": 1.0,
-     "eyes": 1.0
+     "eyes": 1.0,
+     "glow": 1.0
     },
     "halo": 0.8,
     "player_light": {
@@ -1273,7 +1275,8 @@
      "book": 1.0,
      "screen": 1.0,
      "hero": 1.0,
-     "eyes": 1.0
+     "eyes": 1.0,
+     "glow": 1.0
     },
     "halo": 0.8,
     "player_light": {
@@ -1365,7 +1368,8 @@
      "book": 1.0,
      "screen": 1.0,
      "hero": 1.0,
-     "eyes": 1.0
+     "eyes": 1.0,
+     "glow": 1.0
     },
     "halo": 0.8,
     "player_light": {
