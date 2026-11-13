@@ -185,7 +185,10 @@ func run(event_id: String, arg := "", origin := "") -> void:
 	if running:
 		return
 	if event_id == "noor_ontmoeting":
-		Wm1VideoSlot.before_dialogue(Wm1VideoSlot.MAPLETON_VESPER)
+		var film_host: Node = _map()
+		if film_host == null:
+			film_host = self
+		await Wm1VideoSlot.before_dialogue(Wm1VideoSlot.MAPLETON_VESPER, film_host)
 	current_origin = origin
 	running = true
 	_lock(true)

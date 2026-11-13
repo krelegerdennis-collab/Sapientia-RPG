@@ -84,6 +84,15 @@ const VIDEOS := {
 		"scene_id": "cs08",
 		"title": "The Merchant",
 	},
+	"cs09": {
+		"path": "res://assets/video/cs09_vesper_mapleton.ogv",
+		"flag": "cutscene_cs09_gezien",
+		"aspect": WIDE,
+		"max_seconds": 32.0,
+		"nearest": true,
+		"scene_id": "cs09",
+		"title": "Sparks on the Square",
+	},
 	"worldmap": {
 		"path": "res://assets/video/worldmap_intro_v2.ogv",
 		"flag": "cutscene_wereldkaart_gezien",
