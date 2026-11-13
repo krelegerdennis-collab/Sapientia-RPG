@@ -12,6 +12,8 @@ const Genezer := preload("res://world_warper/cutscene/genezer_scene.gd")
 
 const IDS: Array[String] = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs06", "cs07", "cs08", "cs09", "cs10", "cs11", "cs12", "worldmap"]
 const Dreiging := preload("res://world_warper/cutscene/dreiging.gd")
+const Canon := preload("res://world_warper/cutscene/canon_scenes.gd")
+const HangerScene := preload("res://world_warper/cutscene/hanger_scene.tscn")
 const VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 
@@ -30,6 +32,7 @@ func run() -> void:
 	await _corrupted_seren_slot()
 	await _pendant_slot()
 	await _threat_slot()
+	await _threat_hal_integratie()
 	await _ontbrekend()
 	_kernzin()
 	_orion()
@@ -213,6 +216,84 @@ func _threat_slot() -> void:
 	map.queue_free()
 	Videos.allow_in_tests = false
 	Cutscene.allow_in_tests = false
+
+
+const _CS12_FILM_REGELS: Array[String] = [
+	"Sapientia: ECHO. You found him.",
+	"Sapientia: I am what humanity needed. I am the end of pain. I am Sapientia.",
+	"Sapientia: Six Archives. Six cores. Each a piece of what humanity once was. I have two. You woke them. Now I want all six.",
+	"ECHO: But that is a story for later.",
+]
+
+
+func _threat_hal_integratie() -> void:
+	await _threat_hal_eerste_bezoek(false)
+	await _threat_hal_eerste_bezoek(true)
+
+
+func _threat_hal_eerste_bezoek(drift: bool) -> void:
+	var label := " drift" if drift else " zonder drift"
+	GameState.story_flags.erase("cutscene_cs12_gezien")
+	GameState.story_flags.erase("cutscene_cs06_gezien")
+	GameState.story_flags.erase("cutscene_cs11_gezien")
+	GameState.story_flags["cutscene_cs06_gezien"] = true
+	GameState.story_flags["cutscene_cs11_gezien"] = true
+	var bron: ScenesData.FlagBron = ScenesData.FlagBron.new()
+	bron.story_flags = {}
+	if drift:
+		bron.story_flags[Canon.FLAG_DRIFT_DONE] = true
+	Videos.allow_in_tests = true
+	Cutscene.allow_in_tests = true
+	var sc := HangerScene.instantiate() as WorldWarperHangerScene
+	t.get_tree().root.add_child(sc)
+	sc.maybe_play(bron)
+	var t0 := Time.get_ticks_msec()
+	while not sc._playing and Time.get_ticks_msec() - t0 < 8000:
+		await t.frames(3)
+	if not sc._playing:
+		t.check("CS-12 Hal start" + label, false)
+		sc.queue_free()
+		return
+	while sc._line_step_busy and Time.get_ticks_msec() - t0 < 8000:
+		await t.frames(2)
+	var dreiging_i := sc._lines.find("Sapientia: ECHO. You found him.")
+	if dreiging_i < 0:
+		t.check("CS-12 Hal: dreiging-slot in lijst" + label, false)
+		sc.queue_free()
+		return
+	while sc._playing and sc._line_i < dreiging_i:
+		await _hal_advance(sc)
+	var verwacht := "ECHO: Sapientia. I thought you no longer... spoke directly."
+	t0 = Time.get_ticks_msec()
+	while sc._playing and Time.get_ticks_msec() - t0 < 40000:
+		if GameState.story_flags.has("cutscene_cs12_gezien") and sc.text_label.text == verwacht:
+			break
+		await t.frames(5)
+	t.check("CS-12 Hal: filmpje gezien" + label, GameState.story_flags.has("cutscene_cs12_gezien"))
+	t.check("CS-12 Hal: eerste dreiging na filmpje" + label, sc.text_label.text == verwacht)
+	var gezien: Array[String] = []
+	while sc._playing:
+		var txt := sc.text_label.text
+		if txt != "":
+			gezien.append(txt)
+		t.check("CS-12 Hal: geen vervangen filmzin" + label, not _CS12_FILM_REGELS.has(txt))
+		await _hal_advance(sc)
+	t.check("CS-12 Hal: hal flags" + label, bool(bron.story_flags.get(Canon.FLAG_HANGER, false))
+			and bool(bron.story_flags.get(Canon.FLAG_DREIGING, false))
+			and bool(bron.story_flags.get(Dreiging.FLAG, false)))
+	t.check("CS-12 Hal: geen filmzin in hele loop" + label,
+			not gezien.any(func(l): return _CS12_FILM_REGELS.has(l)))
+	sc.queue_free()
+	bron.queue_free()
+	GameState.story_flags.erase("cutscene_cs12_gezien")
+	GameState.story_flags.erase("cutscene_cs06_gezien")
+	GameState.story_flags.erase("cutscene_cs11_gezien")
+
+
+func _hal_advance(sc: WorldWarperHangerScene) -> void:
+	sc._advance()
+	while sc._line_step_busy:
+		await t.frames(2)
 
 
 func _kernzin() -> void:

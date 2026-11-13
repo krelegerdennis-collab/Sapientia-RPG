@@ -43,6 +43,7 @@ var _advanced_frame := -1
 var _lines: Array[String] = []
 var _flags: Dictionary = {}
 var _hanger_einde := -1
+var _line_step_busy := false
 ## Roze silhouet van Sapientia (beat 3). Publiek voor de tests.
 var sapientia: TextureRect
 var _hologram_home := Vector2.ZERO
@@ -166,11 +167,13 @@ func _start(flags_source: Node) -> void:
 	_jitter_i = 0
 	_arm_frame = Engine.get_process_frames()
 	layer.visible = true
-	_enter(0)
+	_line_step_busy = true
+	await _enter(0)
+	_line_step_busy = false
 
 
 func _input(event: InputEvent) -> void:
-	if not _playing:
+	if not _playing or _line_step_busy:
 		return
 	if not _is_advance(event):
 		return
@@ -182,7 +185,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	_advanced_frame = Engine.get_process_frames()
-	_advance()
+	_advance.call_deferred()
 	get_viewport().set_input_as_handled()
 
 
@@ -209,7 +212,11 @@ func _advance() -> void:
 		return
 	if leaving == 2:
 		_emit_activated()
-	_enter(_line_i + 1)
+	if _line_step_busy:
+		return
+	_line_step_busy = true
+	await _enter(_line_i + 1)
+	_line_step_busy = false
 
 
 func _enter(line_index: int) -> void:
@@ -226,7 +233,31 @@ func _enter(line_index: int) -> void:
 	# CS-12: dormant slot bij beat 3 (Sapientia's dreiging), ná CS-06, vóór de dialoog.
 	if nieuwe_beat and beat == 3:
 		await Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ATRIUM_THREAT, self)
+		if GameState.story_flags.has("cutscene_cs12_gezien"):
+			_herbouw_regels_na_cs12()
 	_show_line()
+
+
+func _herbouw_regels_na_cs12() -> void:
+	var oud: Array[String] = _lines
+	var was := _line_i
+	_lines = Dreiging.lines(_flags)
+	_hanger_einde = Dreiging.einde_hanger(_flags)
+	_line_i = _map_line_index(oud, was, _lines)
+
+
+## Eerste regel in nieuw die op of na was in oud nog over is (tekst-match).
+func _map_line_index(oud: Array[String], was: int, nieuw: Array[String]) -> int:
+	if nieuw.is_empty():
+		return 0
+	if oud.is_empty():
+		return clampi(was, 0, nieuw.size() - 1)
+	was = clampi(was, 0, oud.size() - 1)
+	for j in range(was, oud.size()):
+		var ni := nieuw.find(oud[j])
+		if ni >= 0:
+			return ni
+	return clampi(was, 0, nieuw.size() - 1)
 
 
 func _sapientia_opent() -> bool:
