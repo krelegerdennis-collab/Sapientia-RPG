@@ -184,20 +184,20 @@ func _threat_slot() -> void:
 	t.check("CS-12: identity-regel weg", not hang.any(func(l): return "I am Sapientia." in l and l.begins_with("Sapientia:")))
 	t.check("CS-12: zes archieven weg", not hang.any(func(l): return "Now I want all six." in l))
 	t.check("CS-12: story for later weg", not hang.any(func(l): return l.ends_with("But that is a story for later.")))
-	var opener := -1
+	var dri_start := Dreiging.einde_hanger({}) + 1
+	t.check("CS-12: eerste dreiging-regel is ECHO's comeback", dri_start >= 0 and dri_start < hang.size()
+			and hang[dri_start] == "ECHO: Sapientia. I thought you no longer... spoke directly."
+			and Dreiging.beat_at(dri_start, {}) == 3)
+	var last_echo3 := -1
 	for j in hang.size():
-		var l := hang[j]
-		if l.begins_with("Sapientia:") or l.begins_with("ECHO:"):
-			opener = j
-			break
-	t.check("CS-12: eerste dreiging-regel is ECHO's comeback", opener >= 0
-			and hang[opener] == "ECHO: Sapientia. I thought you no longer... spoke directly."
-			and Dreiging.beat_at(opener, {}) == 3)
-	var tail := hang.size() - 1
-	while tail >= 0 and not hang[tail].begins_with("ECHO:"):
-		tail -= 1
-	t.check("CS-12: beat_at laatste ECHO vóór cue 4", tail >= 0 and Dreiging.beat_at(tail, {}) == 3
-			and (tail + 1 >= hang.size() or Dreiging.beat_at(tail + 1, {}) == 4))
+		if Dreiging.beat_at(j, {}) == 3 and hang[j].begins_with("ECHO:"):
+			last_echo3 = j
+	t.check("CS-12: laatste ECHO in beat 3", last_echo3 >= 0
+			and hang[last_echo3] == "ECHO: Sapientia, you know this can't be done. The World Warper cannot be forced—")
+	var cue4 := last_echo3 + 1
+	while cue4 < hang.size() and Dreiging.beat_at(cue4, {}) != 4:
+		cue4 += 1
+	t.check("CS-12: cue 4 begint met Vesper", cue4 < hang.size() and hang[cue4].begins_with("Vesper:"))
 	GameState.story_flags.erase("cutscene_cs12_gezien")
 	var zonder: Array[String] = Dreiging.lines({})
 	t.check("CS-12 uit: dreiging compleet", zonder.any(func(l): return l == "Sapientia: ECHO. You found him.")
