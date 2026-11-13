@@ -17,6 +17,22 @@ const CS11_ECHO_SKIP: Array[String] = [
 	"That's a long story. And there is little time.",
 ]
 
+## CS-12 (Sapientia Threat): filmpje vervangt deze regels uit canon DREIGING zodra cutscene_cs12_gezien staat.
+const CS12_DREIGING_SKIP: Array[String] = [
+	"ECHO. You found him.",
+	"I am what humanity needed. I am the end of pain. I am Sapientia.",
+	"Six Archives. Six cores. Each a piece of what humanity once was. I have two. You woke them. Now I want all six.",
+	"But that is a story for later.",
+]
+
+
+static func _regel_weglaten(text: String) -> bool:
+	if GameState.story_flags.has("cutscene_cs11_gezien") and CS11_ECHO_SKIP.has(text):
+		return true
+	if GameState.story_flags.has("cutscene_cs12_gezien") and CS12_DREIGING_SKIP.has(text):
+		return true
+	return false
+
 
 ## Speelt tot scène 3 gezien is (canon-vlag). Oude saves met alleen FLAG zien de canon alsnog.
 static func should_play(flags: Dictionary) -> bool:
@@ -29,10 +45,9 @@ static func regels(flags: Dictionary = {}) -> Array:
 
 static func lines(flags: Dictionary = {}) -> Array[String]:
 	var out: Array[String] = []
-	var film := GameState.story_flags.has("cutscene_cs11_gezien")
 	for r in regels(flags):
 		var text := str(r.get("text", ""))
-		if film and CS11_ECHO_SKIP.has(text):
+		if _regel_weglaten(text):
 			continue
 		out.append(Canon.als_tekst(r))
 	return out
@@ -44,11 +59,10 @@ static func beat_at(line_index: int, flags: Dictionary = {}) -> int:
 	var rs := regels(flags)
 	if rs.is_empty():
 		return 1
-	var film := GameState.story_flags.has("cutscene_cs11_gezien")
 	var kept: Array = []
 	for r in rs:
 		var text := str(r.get("text", ""))
-		if film and CS11_ECHO_SKIP.has(text):
+		if _regel_weglaten(text):
 			continue
 		kept.append(r)
 	if kept.is_empty():
@@ -62,10 +76,9 @@ static func einde_hanger(flags: Dictionary = {}) -> int:
 	if bool(flags.get(Canon.FLAG_HANGER, false)):
 		return -1
 	var count := 0
-	var film := GameState.story_flags.has("cutscene_cs11_gezien")
 	for r in Canon.HANGER:
 		var text := str(r.get("text", ""))
-		if film and CS11_ECHO_SKIP.has(text):
+		if _regel_weglaten(text):
 			continue
 		count += 1
 	return count - 1 if count > 0 else -1
