@@ -93,6 +93,15 @@ const VIDEOS := {
 		"scene_id": "cs09",
 		"title": "Sparks on the Square",
 	},
+	"cs10": {
+		"path": "res://assets/video/cs10_corrupted_seren.ogv",
+		"flag": "cutscene_cs10_gezien",
+		"aspect": WIDE,
+		"max_seconds": 28.0,
+		"nearest": true,
+		"scene_id": "cs10",
+		"title": "Corrupted Seren",
+	},
 	"cs11": {
 		"path": "res://assets/video/cs11_pendant.ogv",
 		"flag": "cutscene_cs11_gezien",

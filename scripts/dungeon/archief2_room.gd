@@ -143,13 +143,17 @@ func _na_kern() -> void:
 
 
 func _verhaal() -> void:
+	# CS-10 speelt via Wm1VideoSlot ARCHIEF2_CORRUPTED_SEREN vóór de dialoog. Zonder filmpje het oude pad.
 	if GameState.archief2_lotte_join:
 		GameState.archief2_lotte_join = false
 		Archief2.sluit_lotte_aan()
-		Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ARCHIEF2_CORRUPTED_SEREN)
-		await _zeg([Archief2.LOTTE_GLITCH_GEDACHTE], GameState.player_name)
-		await _zeg(Archief2.LOTTE_AANSLUIT.slice(1, -1), "Seren")
-		await _toon_seren_join()
+		await Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ARCHIEF2_CORRUPTED_SEREN, self)
+		if not GameState.story_flags.has("cutscene_cs10_gezien"):
+			await _zeg([Archief2.LOTTE_GLITCH_GEDACHTE], GameState.player_name)
+			await _zeg(Archief2.LOTTE_AANSLUIT.slice(1, -1), "Seren")
+			await _toon_seren_join()
+		else:
+			await _zeg([Archief2.LOTTE_AANSLUIT[Archief2.LOTTE_AANSLUIT.size() - 1]], "")
 	if room_id == Archief2.ENTREE and not GameState.story_flags.has("archief2_keten"):
 		await _zeg(["Another Archive. I hope we're not too late.", "What if this is where Sapientia wants us to go?"], GameState.player_name)
 		await _zeg(Archief2.KETEN, "ECHO")
