@@ -38,7 +38,7 @@ mapwissel start (UX).
 | 11 | Overgang | `scripts/transition.gd` | geen eigen toestand (tweens) | — | **gelaten**; de "bezig"-toestand is `changing_map` (#1) |
 
 Al expliciet vóór deze audit (ter referentie, niet aangeraakt): `TelegraphState.State` (`scripts/som/telegraph_state.gd`),
-`BossPhaseMachine` (`scripts/som/boss_phase_machine.gd`), `GolemFight.Step`, `LanLobby.Phase`/`Transport`,
+`BossPhaseMachine` (`scripts/som/boss_phase_machine.gd`), `GolemFight.Step`, `PageWardenFight.Step`, `LanLobby.Phase`/`Transport`,
 `RelayPeer.Role`, `CoopLobbyScreen.Screen`, `GardenCreatures.Mode`, `WarperBrain.State` (world_warper).
 
 ## §1 Veldflow — `FlowState`
@@ -81,6 +81,8 @@ Bekende losse eindjes (bewust niet veranderd): `"win"`/`"lose"` zijn **geen** ba
 
 Per tick opnieuw bepaald (geen geheugen behalve KO): `niet alive → ko`; `laag HP én vijand → flee`;
 `vijand → engage`; anders `follow`. KO is de enige toestand met in/uit-werk (grijs/plat zetten).
+Online co-op revive is geen extra toestand: een levende SomAlly blijft `follow` terwijl hij naar een
+down-stoel loopt (`CoopRevive`). De set `follow/engage/flee/ko` blijft dus gelijk.
 
 ## §4 Kern-absorptie — `kern_absorption.gd`
 

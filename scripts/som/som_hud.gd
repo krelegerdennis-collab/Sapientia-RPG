@@ -147,6 +147,11 @@ func toast(text: String) -> void:
 ## Eén vak per partylid (hud_frame.png 72x20 van RPG ART, anders getekend): naam + HP, HP-balk;
 ## de bestuurde held geel gemarkeerd + zijn wapenmeter.
 func _draw_bars() -> void:
+	if arena != null and arena.has_method("coop_hud_rows"):
+		var seat_rows: Array = arena.coop_hud_rows()
+		if not seat_rows.is_empty():
+			_draw_seat_bars(seat_rows)
+			return
 	if GameState.party.is_empty() or arena == null:
 		return
 	var f: Font = THEME.default_font if THEME.default_font else ThemeDB.fallback_font
@@ -163,7 +168,12 @@ func _draw_bars() -> void:
 			if act:
 				bars.draw_rect(Rect2(0, y, 72, 20), Color(1, 0.85, 0.3), false, 1.0)
 		var col := Color(0.6, 0.6, 0.65) if ko else (Color(1, 0.95, 0.6) if act else Color(1, 1, 1))
-		bars.draw_string(f, Vector2(4, y + 9), "%s %d/%d" % [h["name"], int(h["hp"]), int(h["max_hp"])], HORIZONTAL_ALIGNMENT_LEFT, 66, 8, col)
+		var label := str(h["name"])
+		if arena.has_method("coop_hud_name"):
+			var alt := str(arena.coop_hud_name(id))
+			if alt != "":
+				label = alt
+		bars.draw_string(f, Vector2(4, y + 9), "%s %d/%d" % [label, int(h["hp"]), int(h["max_hp"])], HORIZONTAL_ALIGNMENT_LEFT, 66, 8, col)
 		var r := float(h["hp"]) / maxf(1.0, float(h["max_hp"]))
 		bars.draw_rect(Rect2(4, y + 12, 64, 2), Color(0.2, 0.05, 0.05))
 		bars.draw_rect(Rect2(4, y + 12, 64.0 * r, 2), Color(0.3, 1, 0.4) if r > 0.25 else Color(1, 0.3, 0.3))
@@ -173,4 +183,21 @@ func _draw_bars() -> void:
 			var st := float(arena.combat_stamina.current(id)) / float(SomData.STAMINA_MAX)
 			bars.draw_rect(Rect2(4, y + 18, 64, 2), Color(0.05, 0.08, 0.15))
 			bars.draw_rect(Rect2(4, y + 18, 64.0 * st, 2), Color(0.45, 0.75, 1.0))
+		y += 21.0
+
+
+func _draw_seat_bars(rows: Array) -> void:
+	var f: Font = THEME.default_font if THEME.default_font else ThemeDB.fallback_font
+	var y := 0.0
+	for row in rows:
+		var label := str(row.get("name", ""))
+		var hp := int(row.get("hp", 0))
+		var max_hp := maxi(1, int(row.get("max_hp", 1)))
+		var ko := hp <= 0
+		bars.draw_rect(Rect2(0, y, 72, 20), Color(0, 0, 0, 0.65))
+		var col := Color(0.6, 0.6, 0.65) if ko else Color(0.75, 0.95, 0.95) if label.begins_with("AI ") else Color.WHITE
+		bars.draw_string(f, Vector2(4, y + 9), "%s %d/%d" % [label, hp, max_hp], HORIZONTAL_ALIGNMENT_LEFT, 66, 8, col)
+		var r := float(hp) / float(max_hp)
+		bars.draw_rect(Rect2(4, y + 12, 64, 2), Color(0.2, 0.05, 0.05))
+		bars.draw_rect(Rect2(4, y + 12, 64.0 * r, 2), Color(0.3, 1, 0.4) if r > 0.25 else Color(1, 0.3, 0.3))
 		y += 21.0

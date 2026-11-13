@@ -5,10 +5,13 @@ extends Node
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 const Sim := preload("res://scripts/net/action_sandbox_sim.gd")
+const Revive := preload("res://scripts/coop/coop_revive.gd")
 
 signal slot_removed(slot: int)
 signal snapshot_applied(tick: int)
 signal link_lost
+## Run voorbij: "wipe" als elke stoel tegelijk down is. Het resultaatscherm komt later.
+signal run_result(kind: String)
 
 var is_host := false
 var local_slot := Protocol.NO_SLOT
@@ -34,6 +37,10 @@ var _lock_idx := -1
 var _peer_to_slot: Dictionary = {}
 var _tick := 0
 var _skip_arena_poll := false
+var _result_sent := false
+## M6: alleen aan als de arena een stoel-controller heeft. Anders blijft drop = stoel vrij (v1).
+var seats: RefCounted = null
+var seat_takeover := false
 ## Teller voor INPUT van peers buiten de roster (anti-spoof / join-race).
 var unknown_input_peer_drops := 0
 
@@ -91,8 +98,17 @@ func attach_arena(p_arena: Node) -> void:
 		arena.coop_ring_no_pause = true
 
 
+func bind_seats(sc: RefCounted) -> void:
+	seats = sc
+	seat_takeover = sc != null
+
+
 func simulate_peer_drop(peer_id: int) -> void:
-	_on_peer_disconnected(peer_id)
+	_drop_peer(peer_id, "socket")
+
+
+func note_ping_timeout(peer_id: int) -> void:
+	_drop_peer(peer_id, "ping")
 
 
 func set_local_input(stick: Vector2, attack: bool, ring: bool, lock_tap: bool, lock_idx: int = -1) -> void:
@@ -113,9 +129,10 @@ func shutdown(keep_peer: bool = true) -> void:
 		_lobby.unbind_gameplay()
 		_lobby = null
 		lobby_feed = false
-	var mp := get_tree().get_multiplayer()
-	if mp != null and mp.multiplayer_peer == _peer:
-		mp.multiplayer_peer = null
+	if is_inside_tree():
+		var mp := get_tree().get_multiplayer()
+		if mp != null and mp.multiplayer_peer == _peer:
+			mp.multiplayer_peer = null
 	if _peer != null and own_peer and not keep_peer:
 		_peer.close()
 	_peer = null
@@ -169,6 +186,7 @@ func _host_frame(delta: float) -> void:
 			if sim.tick % (Protocol.SIM_HZ / Protocol.SNAPSHOT_HZ) == 0:
 				_broadcast_snapshot(sim.encode_snapshot())
 		_inputs.clear()
+		poll_result()
 
 
 func _guest_frame(delta: float) -> void:
@@ -178,6 +196,22 @@ func _guest_frame(delta: float) -> void:
 		_input_send_acc -= input_dt
 		_send_input_packet()
 	_apply_interpolation(delta)
+
+
+func poll_result() -> void:
+	if _result_sent:
+		return
+	var wiped := false
+	# OnlineHal heeft geen coop_wiped. Object.get geeft dan null, en bool(null)
+	# is in Godot 4.3 geen constructor. null == true blijft false.
+	if arena_drive and arena != null and arena.get("coop_wiped") == true:
+		wiped = true
+	elif sim != null and sim.get("wiped") == true:
+		wiped = true
+	if not wiped:
+		return
+	_result_sent = true
+	run_result.emit(Revive.RESULT_WIPE)
 
 
 func _collect_local_input() -> void:
@@ -301,12 +335,24 @@ func _on_peer_connected(_id: int) -> void:
 
 
 func _on_peer_disconnected(id: int) -> void:
+	# Host-wegval (wij zijn gast): sessie-einde, geen migratie.
+	_drop_peer(id, "socket")
+
+
+func _drop_peer(id: int, reason: String) -> void:
 	if not is_host:
 		link_lost.emit()
 		shutdown(true)
 		return
 	var slot := int(_peer_to_slot.get(id, Protocol.NO_SLOT))
 	if slot == Protocol.NO_SLOT:
+		return
+	if seat_takeover and _handoff_to_ai(slot, reason):
+		_peer_to_slot.erase(id)
+		if arena_drive and arena != null and arena.has_method("coop_encode_snapshot"):
+			_broadcast_snapshot(arena.coop_encode_snapshot(_tick))
+		elif not arena_drive and sim != null:
+			_broadcast_snapshot(sim.encode_snapshot())
 		return
 	if arena != null and arena.has_method("coop_deactivate_slot"):
 		arena.coop_deactivate_slot(slot)
@@ -318,3 +364,11 @@ func _on_peer_disconnected(id: int) -> void:
 		_broadcast_snapshot(arena.coop_encode_snapshot(_tick))
 	elif not arena_drive:
 		_broadcast_snapshot(sim.encode_snapshot())
+
+
+func _handoff_to_ai(slot: int, reason: String) -> bool:
+	if arena != null and arena.has_method("coop_guest_lost"):
+		return bool(arena.coop_guest_lost(slot, reason))
+	if seats != null and seats.has_method("guest_lost"):
+		return bool(seats.guest_lost(slot, reason))
+	return false

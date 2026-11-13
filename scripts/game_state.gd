@@ -581,6 +581,7 @@ func _ready() -> void:
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
+	# Down/revive/wipe in online co-op (M8a): of  godot -- --revivetest  (scripts/tests/revive_tests.gd).
 	# Seeded gevecht-RNG (zelfde seed = zelfde gevecht): of  godot -- --combatrngtest  (scripts/tests/combat_rng_tests.gd).
 	# Vaste 60 Hz-gevechtsstap (framerate-onafhankelijk): of  godot -- --combattick  (scripts/tests/combat_tick_tests.gd).
 	# Pure gevechtskern + beweging/treffers/lock op de stap: of  godot -- --combatsimtest  (scripts/tests/combat_sim_tests.gd).
@@ -593,6 +594,10 @@ func _ready() -> void:
 	# D3 bazen fase-machine (PR A): of  godot -- --bossphasetest  (scripts/tests/boss_phase_tests.gd).
 	# D3 realtime Golem (PR B): of  godot -- --golemactiontest  (scripts/tests/golem_action_tests.gd)
 	#   en  godot -- --golemactionsimtest  (scripts/tests/golem_actionsim_tests.gd, kleine sim als rookproef).
+	# M9a Page Warden (Action, alleen co-op): of  godot -- --pagewardentest  (scripts/tests/page_warden_tests.gd)
+	#   en  godot -- --pagewardensim [--fights=N] [--seats=1..4] [--seed=N]  (tools/battlesim/page_warden_rt_sim.gd).
+	# M9b Easy-run (voorstel, geen balans): godot -- --d100modesim --mode=easy [--factors=4,7,10,25] [--runs=N] [--seed=N]
+	#   (tools/battlesim/d100_mode_sim.gd). Suite: godot -- --d100modesimtest (determinisme, solo, geen saves).
 	# D3 arena-hook realtime Golem (PR C): of  godot -- --golemarenatest  (scripts/tests/golem_arena_tests.gd).
 	# Golem zichtbare telegraaf/aanval (Action): of  godot -- --golemzichtbaartest  (scripts/tests/golem_zichtbaar_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
@@ -678,6 +683,7 @@ func _ready() -> void:
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
+			["--revivetest", "res://scripts/tests/revive_tests.gd", "ReviveTest", "revivetest"],
 			["--coophosttest", "res://scripts/tests/coop_host_tests.gd", "CoopHostTest", "coophosttest"],
 			["--coopguestsavetest", "res://scripts/tests/coop_guest_save_tests.gd", "CoopGuestSaveTest", "coopguestsavetest"],
 			["--combatrngtest", "res://scripts/tests/combat_rng_tests.gd", "CombatRngTest", "combatrngtest"],
@@ -692,6 +698,8 @@ func _ready() -> void:
 			["--bossphasetest", "res://scripts/tests/boss_phase_tests.gd", "BossPhaseTest", "bossphasetest"],
 			["--golemactiontest", "res://scripts/tests/golem_action_tests.gd", "GolemActionTest", "golemactiontest"],
 			["--golemactionsimtest", "res://scripts/tests/golem_actionsim_tests.gd", "GolemActionsimTest", "golemactionsimtest"],
+			["--pagewardentest", "res://scripts/tests/page_warden_tests.gd", "PageWardenTest", "pagewardentest"],
+			["--pagewardensim", "res://tools/battlesim/page_warden_rt_sim.gd", "PageWardenSim", "pagewardensim"],
 			["--golemarenatest", "res://scripts/tests/golem_arena_tests.gd", "GolemArenaTest", "golemarenatest"],
 			["--golemzichtbaartest", "res://scripts/tests/golem_zichtbaar_tests.gd", "GolemZichtbaarTest", "golemzichtbaartest"],
 			["--golemstorytest", "res://scripts/tests/golem_story_tests.gd", "GolemStoryTest", "golemstorytest"],
@@ -702,6 +710,8 @@ func _ready() -> void:
 			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--onlinerewardtest", "res://scripts/tests/online_reward_tests.gd", "OnlineRewardTest", "onlinerewardtest"],
+			["--protocolv2test", "res://scripts/tests/protocol_v2_tests.gd", "ProtocolV2Test", "protocolv2test"],
+			["--rewardacktest", "res://scripts/tests/reward_ack_tests.gd", "RewardAckTest", "rewardacktest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
 			["--formuletest", "res://scripts/tests/formule_tests.gd", "FormuleTest", "formuletest"],
 			["--battlesimenemytest", "res://scripts/tests/battlesim_enemy_tests.gd", "BattlesimEnemyTest", "battlesimenemytest"],
@@ -740,7 +750,17 @@ func _ready() -> void:
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
-			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:
+			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
+			["--onlineprofiletest", "res://scripts/tests/online_profile_tests.gd", "OnlineProfileTest", "onlineprofiletest"],
+			["--paperdolltest", "res://scripts/tests/paper_doll_tests.gd", "PaperDollTest", "paperdolltest"],
+			["--onlinelobbytest", "res://scripts/tests/online_lobby_tests.gd", "OnlineLobbyTest", "onlinelobbytest"],
+			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
+			["--easycoopbalanstest", "res://scripts/tests/easy_coop_balance_tests.gd", "EasyCoopBalanceTest", "easycoopbalanstest"],
+			["--solod100guardtest", "res://scripts/tests/solo_d100_guard_tests.gd", "SoloD100GuardTest", "solod100guardtest"],
+			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"],
+			["--d100modesim", "res://tools/battlesim/d100_mode_sim.gd", "D100ModeSim", "d100modesim"],
+			["--d100modesimtest", "res://scripts/tests/d100_mode_sim_tests.gd", "D100ModeSimTest", "d100modesimtest"],
+			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):

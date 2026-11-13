@@ -10,6 +10,8 @@ const SomData := preload("res://scripts/data/som_data.gd")
 const SomMove := preload("res://scripts/som/som_move.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
+const CoopRevive := preload("res://scripts/coop/coop_revive.gd")
+const SeatCtrl := preload("res://scripts/coop/seat_controller.gd")
 const DIR_ROW := {Vector2i.DOWN: 0, Vector2i.LEFT: 1, Vector2i.RIGHT: 2, Vector2i.UP: 3}
 const WALK_CYCLE := [1, 0, 2, 0]  # 3-koloms; 5-koloms via MapSprite.walk_cycle(hframes)
 
@@ -32,6 +34,12 @@ var spell_cd := 1.0
 var teleports := 0
 var attacks := 0
 var _walk := 0.0
+## Zelfde record als CoopSeat, gevuld door de arena zolang deze bondgenoot meedoet in co-op.
+## M6 zet de stoel op slot 0..3; tot die tijd blijft dit leeg in de normale co-op (allies_enabled uit).
+var coop_row: Dictionary = {}
+## Co-op-stoel (alleen host). Solo/WM1 laat dit uit: tick() blijft het oude pad.
+var seat_ai := false
+var seat_slot := -1
 
 
 func setup(p_arena: Node, id: String, p_slot: int) -> void:
@@ -99,6 +107,9 @@ func in_wall() -> bool:
 
 
 func tick(delta: float) -> void:
+	# Co-op AI stuurt virtuele input (coop_virtual_input). Dit pad is solo/WM1.
+	if seat_ai:
+		return
 	if not alive():
 		if state != ST_KO:
 			var ko: Texture2D = arena.pose_tex(hero_id, "ko")
@@ -113,6 +124,8 @@ func tick(delta: float) -> void:
 	sprite.modulate = Color.WHITE
 	if in_wall():
 		_teleport()
+	if _coop_revive_drive(delta):
+		return
 	charge = minf(1.0, charge + delta / SomData.CHARGE_TIME)
 	spell_cd -= delta
 	var m: Dictionary = member()
@@ -205,6 +218,65 @@ func _think_spell() -> void:
 		if str(sp.get("type", "")) == "damage" and int(m["mp"]) >= int(sp.get("mp", 0)):
 			arena.cast_spell(str(s), hero_id, {})
 			return
+
+
+func _coop_revive_drive(delta: float) -> bool:
+	# Geen nieuwe state: kanaliseren blijft ST_FOLLOW. --statemachinetest eist die set.
+	# SeatController.try_revive is een stub (DRIVES_REVIVE uit). Deze bondgenoot
+	# blijft query_revive / begin_channel / end_channel aanroepen, ook als het bestand er is.
+	if arena == null or not ("coop_mode" in arena) or not bool(arena.coop_mode):
+		return false
+	var seat_drive := seat_ai and seat_slot >= 0
+	if not seat_drive:
+		if not ("allies_enabled" in arena) or not bool(arena.allies_enabled):
+			return false
+	if SeatCtrl.DRIVES_REVIVE:
+		return false
+	if not arena.has_method("coop_down_rows"):
+		return false
+	# Een AI-stoel hangt al aan slot 0..3. Een losse SomAlly zonder rij blijft staan:
+	# coop_down_rows() zou die rij anders zelf aanmaken en hem laten lopen.
+	if seat_drive and arena.has_method("coop_bind_seat_row"):
+		arena.coop_bind_seat_row(self)
+	if coop_row.is_empty():
+		return false
+	var rows: Array = arena.coop_down_rows()
+	var mine: Dictionary = coop_row
+	if not CoopRevive.row_alive(mine):
+		if not mine.is_empty():
+			CoopRevive.end_channel(mine)
+		return false
+	var q := CoopRevive.query_revive(rows, mine)
+	if bool(q.get("ok", false)):
+		CoopRevive.begin_channel(rows, mine, int(q.get("slot", -1)))
+		state = ST_FOLLOW
+		return true
+	var heal_alive := CoopRevive.heal_seat_alive(rows)
+	var someone_down := CoopRevive.any_down(rows)
+	if not CoopRevive.ai_should_revive(hero_id, heal_alive, someone_down):
+		CoopRevive.end_channel(mine)
+		return false
+	var tgt := CoopRevive.nearest_down_row(rows, position)
+	if tgt.is_empty():
+		CoopRevive.end_channel(mine)
+		return false
+	state = ST_FOLLOW
+	_move_to(Vector2(float(tgt.get("x", 0)), float(tgt.get("y", 0))), delta)
+	return true
+
+
+## Virtuele stick + knoppen, zelfde vorm als een speler. rng = arena.rng.
+func coop_virtual_input(senses: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
+	if not seat_ai or rng == null:
+		return {}
+	return SeatCtrl.plan_input(SeatCtrl.role_of(hero_id), senses, rng)
+
+
+## PLACEHOLDER: grijs-cyaan tint op de standaard sheet (SeatCtrl.AI_TINT).
+func apply_ai_placeholder_look() -> void:
+	seat_ai = true
+	if sprite != null:
+		sprite.modulate = SeatCtrl.AI_TINT
 
 
 func _frame() -> void:

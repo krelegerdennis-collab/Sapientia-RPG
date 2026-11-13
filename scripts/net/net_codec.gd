@@ -1,8 +1,29 @@
 class_name NetCodec
 extends RefCounted
 ## Binair inpakken voor Action-co-op (docs/fase_b/ARCHITECTUUR.md, net_protocol.gd).
+## Protocol v2 (online): JSON-kinds naast de binaire INPUT/SNAPSHOT. LAN blijft v1.
 
 const Protocol := preload("res://scripts/net/net_protocol.gd")
+const AvatarBlob := preload("res://scripts/net/avatar_blob.gd")
+const EmoteTable := preload("res://scripts/net/emote_table.gd")
+
+## Zelfde nummers als NetProtocol.Kind. Hier zodat encode/decode van v2 op één plek staat.
+const KIND_READY := 9
+const KIND_SIM_SELECT := 10
+const KIND_RUN_RESULT := 11
+const KIND_REWARD_BUNDLE := 12
+const KIND_HOST_PAUSED := 13
+const KIND_EMOTE := 14
+const KIND_VOTE := 15
+const KIND_REWARD_ACK := 16
+## 'g' + 15 hex. Past in M1 applied_grants (max 16 tekens).
+const GRANT_KEY_LEN := 16
+
+const SIM_ID := "dls"
+const MODES: Array[String] = ["easy", "normal", "hard"]
+const VOTE_CHOICE_MAX := 7
+const UNLOCK_MAX := 8
+const UNLOCK_TOKEN_MAX := 16
 const TelegraphSnapshot := preload("res://scripts/net/telegraph_snapshot.gd")
 const ZONE_WIRE_BYTES := TelegraphSnapshot.ZONE_WIRE_BYTES
 const ROOT_WIRE_BYTES := TelegraphSnapshot.ROOT_WIRE_BYTES
@@ -150,6 +171,10 @@ static func _enemy_wire_bytes(codec_version: int) -> int:
 	return Protocol.SNAPSHOT_ENEMY_BYTES_V0 if codec_version <= 0 else Protocol.SNAPSHOT_ENEMY_BYTES_V1
 
 
+## Down-staat zit in het bestaande flags-woord (11 bytes per speler, offset 9).
+## Zie NetProtocol.FLAG_DOWN / FLAG_CHANNEL / FLAG_BLEED_DONE.
+## Hoge byte = voortgang 0..100 voor de gast-boog. Geen los veld, geen RUN_RESULT:
+## dat pakket is van M3 en hoort niet in deze snapshot.
 static func _pack_player(buf: PackedByteArray, off: int, p: Dictionary) -> int:
 	buf[off] = int(p.get("slot", 0)) & 0xFF
 	_write_i16(buf, off + 1, int(p.get("x", 0)))
@@ -284,3 +309,418 @@ static func _unpack_root(raw: PackedByteArray, off: int, out: Dictionary) -> int
 	out["root_ticks"] = int(raw[off + 1])
 	out["immune_ticks"] = int(raw[off + 2])
 	return off + ROOT_WIRE_BYTES
+
+
+# --- protocol v2 (online). LAN-decode in NetProtocol blijft versie 1. -----------------
+
+static func encode_v2(kind: int, body: Dictionary) -> PackedByteArray:
+	if kind < Protocol.Kind.HELLO or kind > Protocol.Kind.REWARD_ACK:
+		return PackedByteArray()
+	var raw := Protocol.encode(kind, body, Protocol.VERSION_ONLINE)
+	if raw.is_empty() or raw.size() >= Protocol.MAX_ONLINE_PACKET_BYTES:
+		return PackedByteArray()
+	return raw
+
+
+## Zelfde vorm als NetProtocol.decode. Alleen VERSION_ONLINE is compatible.
+## Versie 1 (oude build) is leesbaar met reason VERSION, zodat de host REFUSE kan sturen.
+static func decode_v2(raw: PackedByteArray) -> Dictionary:
+	var fail := {
+		"ok": false,
+		"compatible": false,
+		"version": 0,
+		"kind": 0,
+		"body": {},
+		"reason": Protocol.Refuse.BAD_PACKET,
+	}
+	if raw.is_empty() or raw.size() >= Protocol.MAX_ONLINE_PACKET_BYTES:
+		return fail
+	var text := raw.get_string_from_utf8()
+	if not text.begins_with("{"):
+		return fail
+	var parsed: Variant = JSON.parse_string(text)
+	if not (parsed is Dictionary):
+		return fail
+	var data: Dictionary = parsed
+	if str(data.get("game", "")) != Protocol.GAME_ID:
+		return fail
+	var version := int(data.get("v", 0))
+	var kind := int(data.get("kind", 0))
+	var body_v: Variant = data.get("body", {})
+	var body: Dictionary = body_v if body_v is Dictionary else {}
+	if version != Protocol.VERSION_ONLINE:
+		return {
+			"ok": true,
+			"compatible": false,
+			"version": version,
+			"kind": kind,
+			"body": body,
+			"reason": Protocol.Refuse.VERSION,
+		}
+	if kind < Protocol.Kind.HELLO or kind > Protocol.Kind.REWARD_ACK or not (body_v is Dictionary):
+		return fail
+	return {
+		"ok": true,
+		"compatible": true,
+		"version": version,
+		"kind": kind,
+		"body": body,
+		"reason": Protocol.Refuse.NONE,
+	}
+
+
+static func look_to_wire(look: PackedByteArray) -> String:
+	return Marshalls.raw_to_base64(look)
+
+
+static func look_from_wire(text: String) -> PackedByteArray:
+	return Marshalls.base64_to_raw(text.strip_edges())
+
+
+static func clean_online_name(raw: String) -> String:
+	var out := ""
+	for i in raw.length():
+		var ch := raw.substr(i, 1)
+		if ch.unicode_at(0) < 32:
+			continue
+		out += ch
+		if out.length() >= Protocol.ONLINE_NAME_MAX:
+			break
+	return out.strip_edges()
+
+
+## Profiel of HELLO-body. look mag een dictionary, een blob of base64 zijn.
+## {ok, uid, name, class_id, look}.
+static func normalize_profile(profile: Dictionary) -> Dictionary:
+	var uid := str(profile.get("uid", "")).strip_edges().to_lower()
+	var name := clean_online_name(str(profile.get("name", "")))
+	var class_id := str(profile.get("class", ""))
+	var look := _coerce_look(profile.get("look", PackedByteArray()), class_id)
+	var decoded := AvatarBlob.decode(look)
+	if not _valid_uid(uid) or name == "" or not AvatarBlob.known_class(class_id):
+		return {"ok": false}
+	if not bool(decoded.get("ok", false)) or str(decoded.get("class_id", "")) != class_id:
+		return {"ok": false}
+	return {
+		"ok": true,
+		"uid": uid,
+		"name": name,
+		"class_id": class_id,
+		"look": look,
+	}
+
+
+static func hello_body(norm: Dictionary) -> Dictionary:
+	var look: PackedByteArray = norm.get("look", PackedByteArray())
+	return {
+		"uid": str(norm.get("uid", "")),
+		"name": str(norm.get("name", "")),
+		"class": str(norm.get("class_id", "")),
+		"look": look_to_wire(look),
+	}
+
+
+static func read_hello_v2(body: Dictionary) -> Dictionary:
+	return normalize_profile(body)
+
+
+static func roster_body_from_slots(slots: Array) -> Dictionary:
+	var roster: Array = []
+	for row in slots:
+		if not (row is Dictionary):
+			continue
+		var d: Dictionary = row
+		var look: PackedByteArray = d.get("look", PackedByteArray())
+		roster.append({
+			"seat": int(d.get("seat", d.get("slot", -1))),
+			"uid": str(d.get("uid", "")),
+			"name": str(d.get("name", "")),
+			"class": str(d.get("class", "")),
+			"controller": str(d.get("wire_controller", d.get("controller", ""))),
+			"look": look_to_wire(look),
+		})
+	return {"roster": roster}
+
+
+## {ok, seats: [{seat, uid, name, class_id, controller, look}]}.
+static func read_roster_v2(body: Dictionary) -> Dictionary:
+	var raw_v: Variant = body.get("roster", null)
+	if not (raw_v is Array):
+		return {"ok": false, "seats": []}
+	var raw: Array = raw_v
+	if raw.size() > Protocol.MAX_PLAYERS:
+		return {"ok": false, "seats": []}
+	var seats: Array = []
+	var seen_seat := {}
+	var seen_uid := {}
+	for item in raw:
+		if not (item is Dictionary):
+			return {"ok": false, "seats": []}
+		var row: Dictionary = item
+		if not _is_number(row.get("seat", null)):
+			return {"ok": false, "seats": []}
+		var seat := int(row.get("seat", -1))
+		if not _seat_ok(seat) or seen_seat.has(seat):
+			return {"ok": false, "seats": []}
+		var ctrl := str(row.get("controller", ""))
+		if ctrl != Protocol.CTRL_LOCAL and ctrl != Protocol.CTRL_REMOTE and ctrl != Protocol.CTRL_AI:
+			return {"ok": false, "seats": []}
+		var norm := normalize_profile(row)
+		if not bool(norm.get("ok", false)):
+			return {"ok": false, "seats": []}
+		var uid := str(norm.get("uid", ""))
+		if seen_uid.has(uid):
+			return {"ok": false, "seats": []}
+		seen_seat[seat] = true
+		seen_uid[uid] = true
+		seats.append({
+			"seat": seat,
+			"uid": uid,
+			"name": str(norm.get("name", "")),
+			"class_id": str(norm.get("class_id", "")),
+			"controller": ctrl,
+			"look": norm.get("look", PackedByteArray()),
+		})
+	return {"ok": true, "seats": seats}
+
+
+## Gast ziet de eigen stoel als local; ai blijft ai; de rest is remote.
+static func view_controller(wire: String, seat: int, local_seat: int) -> String:
+	if wire == Protocol.CTRL_AI:
+		return Protocol.CTRL_AI
+	if local_seat != Protocol.NO_SLOT and seat == local_seat:
+		return Protocol.CTRL_LOCAL
+	return Protocol.CTRL_REMOTE
+
+
+static func encode_ready(seat: int, ready: bool) -> PackedByteArray:
+	if not _seat_ok(seat):
+		return PackedByteArray()
+	return encode_v2(KIND_READY, {"seat": seat, "ready": ready})
+
+
+static func read_ready(body: Dictionary) -> Dictionary:
+	if not _seat_field(body) or not (body.get("ready", null) is bool):
+		return {"ok": false}
+	return {"ok": true, "seat": int(body["seat"]), "ready": bool(body["ready"])}
+
+
+static func encode_sim_select(sim: String, mode: String) -> PackedByteArray:
+	if sim != SIM_ID or not MODES.has(mode):
+		return PackedByteArray()
+	return encode_v2(KIND_SIM_SELECT, {"sim": sim, "mode": mode})
+
+
+static func read_sim_select(body: Dictionary) -> Dictionary:
+	var sim := str(body.get("sim", ""))
+	var mode := str(body.get("mode", ""))
+	if sim != SIM_ID or not MODES.has(mode):
+		return {"ok": false}
+	return {"ok": true, "sim": sim, "mode": mode}
+
+
+static func encode_run_result(floors: int, kills: int, revives: int, mode: String) -> PackedByteArray:
+	if floors < 0 or kills < 0 or revives < 0 or not MODES.has(mode):
+		return PackedByteArray()
+	return encode_v2(KIND_RUN_RESULT, {
+		"floors": floors,
+		"kills": kills,
+		"revives": revives,
+		"mode": mode,
+	})
+
+
+static func read_run_result(body: Dictionary) -> Dictionary:
+	if not MODES.has(str(body.get("mode", ""))):
+		return {"ok": false}
+	if not _nonneg(body, "floors") or not _nonneg(body, "kills") or not _nonneg(body, "revives"):
+		return {"ok": false}
+	return {
+		"ok": true,
+		"floors": int(body["floors"]),
+		"kills": int(body["kills"]),
+		"revives": int(body["revives"]),
+		"mode": str(body["mode"]),
+	}
+
+
+static func encode_reward_bundle(uid: String, session_id: int, host_tick: int, profile_exp: int, unlocks: Array, grant_key: String = "") -> PackedByteArray:
+	if not _valid_uid(uid.to_lower()) or session_id < 0 or host_tick < 0 or profile_exp < 0:
+		return PackedByteArray()
+	if unlocks.size() > UNLOCK_MAX:
+		return PackedByteArray()
+	if grant_key != "" and not valid_grant_key(grant_key):
+		return PackedByteArray()
+	var clean: Array = []
+	for item in unlocks:
+		var token := str(item)
+		if not _token(token):
+			return PackedByteArray()
+		clean.append(token)
+	var body := {
+		"uid": uid.to_lower(),
+		"session_id": session_id,
+		"host_tick": host_tick,
+		"profile_exp": profile_exp,
+		"unlocks": clean,
+	}
+	if grant_key != "":
+		body["grant_key"] = grant_key
+	return encode_v2(KIND_REWARD_BUNDLE, body)
+
+
+static func read_reward_bundle(body: Dictionary) -> Dictionary:
+	var uid := str(body.get("uid", "")).to_lower()
+	if not _valid_uid(uid):
+		return {"ok": false}
+	if not _nonneg(body, "session_id") or not _nonneg(body, "host_tick") or not _nonneg(body, "profile_exp"):
+		return {"ok": false}
+	var unlocks_v: Variant = body.get("unlocks", null)
+	if not (unlocks_v is Array):
+		return {"ok": false}
+	var unlocks: Array = unlocks_v
+	if unlocks.size() > UNLOCK_MAX:
+		return {"ok": false}
+	var clean: Array[String] = []
+	for item in unlocks:
+		if not (item is String) or not _token(str(item)):
+			return {"ok": false}
+		clean.append(str(item))
+	var grant_key := ""
+	if body.has("grant_key"):
+		grant_key = str(body.get("grant_key", ""))
+		if not valid_grant_key(grant_key):
+			return {"ok": false}
+	return {
+		"ok": true,
+		"uid": uid,
+		"session_id": int(body["session_id"]),
+		"host_tick": int(body["host_tick"]),
+		"profile_exp": int(body["profile_exp"]),
+		"unlocks": clean,
+		"grant_key": grant_key,
+	}
+
+
+static func valid_grant_key(key: String) -> bool:
+	if key.length() != GRANT_KEY_LEN or not key.begins_with("g"):
+		return false
+	for i in range(1, GRANT_KEY_LEN):
+		var c := key.unicode_at(i)
+		var hex := (c >= 48 and c <= 57) or (c >= 97 and c <= 102)
+		if not hex:
+			return false
+	return true
+
+
+static func encode_reward_ack(grant_key: String) -> PackedByteArray:
+	if not valid_grant_key(grant_key):
+		return PackedByteArray()
+	return encode_v2(KIND_REWARD_ACK, {"grant_key": grant_key})
+
+
+static func read_reward_ack(body: Dictionary) -> Dictionary:
+	var key := str(body.get("grant_key", ""))
+	if not valid_grant_key(key):
+		return {"ok": false}
+	return {"ok": true, "grant_key": key}
+
+
+static func encode_host_paused(paused: bool) -> PackedByteArray:
+	return encode_v2(KIND_HOST_PAUSED, {"paused": paused})
+
+
+static func read_host_paused(body: Dictionary) -> Dictionary:
+	if not (body.get("paused", null) is bool):
+		return {"ok": false}
+	return {"ok": true, "paused": bool(body["paused"])}
+
+
+static func emote_body(seat: int, emote_id: int) -> Dictionary:
+	return {"seat": seat, "emote_id": emote_id}
+
+
+static func encode_emote(seat: int, emote_id: int) -> PackedByteArray:
+	if not _seat_ok(seat) or not EmoteTable.valid_id(emote_id):
+		return PackedByteArray()
+	return encode_v2(KIND_EMOTE, emote_body(seat, emote_id))
+
+
+static func read_emote(body: Dictionary) -> Dictionary:
+	if not _seat_field(body) or not _is_number(body.get("emote_id", null)):
+		return {"ok": false}
+	var emote_id := int(body.get("emote_id", -1))
+	if not EmoteTable.valid_id(emote_id):
+		return {"ok": false}
+	return {"ok": true, "seat": int(body["seat"]), "emote_id": emote_id}
+
+
+static func encode_vote(seat: int, choice: int) -> PackedByteArray:
+	if not _seat_ok(seat) or choice < 0 or choice > VOTE_CHOICE_MAX:
+		return PackedByteArray()
+	return encode_v2(KIND_VOTE, {"seat": seat, "choice": choice})
+
+
+static func read_vote(body: Dictionary) -> Dictionary:
+	if not _seat_field(body) or not _is_number(body.get("choice", null)):
+		return {"ok": false}
+	var choice := int(body.get("choice", -1))
+	if choice < 0 or choice > VOTE_CHOICE_MAX:
+		return {"ok": false}
+	return {"ok": true, "seat": int(body["seat"]), "choice": choice}
+
+
+static func _coerce_look(v: Variant, class_id: String) -> PackedByteArray:
+	if v is PackedByteArray:
+		return v
+	if v is String:
+		return look_from_wire(str(v))
+	if v is Dictionary:
+		var d: Dictionary = (v as Dictionary).duplicate()
+		if str(d.get("class", "")) == "":
+			d["class"] = class_id
+		return AvatarBlob.encode(d)
+	return PackedByteArray()
+
+
+static func _valid_uid(uid: String) -> bool:
+	if uid.length() != Protocol.UID_HEX_LEN:
+		return false
+	for i in uid.length():
+		var c := uid.unicode_at(i)
+		var hex := (c >= 48 and c <= 57) or (c >= 97 and c <= 102)
+		if not hex:
+			return false
+	return true
+
+
+static func _token(text: String) -> bool:
+	if text == "" or text.length() > UNLOCK_TOKEN_MAX:
+		return false
+	for i in text.length():
+		var c := text.unicode_at(i)
+		var ok := (c >= 48 and c <= 57) or (c >= 97 and c <= 122) or c == 95
+		if not ok:
+			return false
+	return true
+
+
+static func _seat_ok(seat: int) -> bool:
+	return seat >= 0 and seat < Protocol.MAX_PLAYERS
+
+
+static func _seat_field(body: Dictionary) -> bool:
+	return _is_number(body.get("seat", null)) and _seat_ok(int(body.get("seat", -1)))
+
+
+static func _is_number(v: Variant) -> bool:
+	return v is int or v is float
+
+
+static func _nonneg(body: Dictionary, key: String) -> bool:
+	var v: Variant = body.get(key, null)
+	if not _is_number(v):
+		return false
+	var n := int(v)
+	return n >= 0 and float(v) == float(n)
+

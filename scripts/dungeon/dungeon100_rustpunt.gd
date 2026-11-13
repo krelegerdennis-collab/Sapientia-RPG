@@ -17,6 +17,7 @@ extends "res://scripts/book_point.gd"
 
 const SCENE := "res://scenes/dungeon100_rustpunt.tscn"
 const RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")
+const Run := preload("res://scripts/online/online_dls_run.gd")
 const TINT := Color(1.0, 0.86, 0.62)
 const SHEET := preload("res://assets/sprites/dungeon100_rustpunt.png")
 const FRAME_COUNT := 4
@@ -71,6 +72,10 @@ static func _frame(index: int) -> AtlasTexture:
 
 
 func interact(player: Node2D) -> void:
+	# Solo-pad hieronder blijft hetzelfde. Alleen een online run slaat af.
+	if Run.active:
+		_interact_online(player)
+		return
 	if busy or Dialog.is_open:
 		return
 	busy = true
@@ -98,3 +103,36 @@ func interact(player: Node2D) -> void:
 	else:
 		last_result = "declined"
 	busy = false
+
+
+## Online: de host geneest de stoelen en laat down-stoelen opstaan.
+## Geen dungeon100-checkpoint, geen solo-opslagvraag. De revive-teller blijft staan.
+func _interact_online(_player: Node2D) -> void:
+	if busy or Dialog.is_open:
+		return
+	busy = true
+	last_activated = false
+	var did := false
+	var seen: Array = []
+	for arena in _online_arenas():
+		if arena == null or seen.has(arena):
+			continue
+		seen.append(arena)
+		if arena.has_method("coop_apply_online_rest") and bool(arena.coop_apply_online_rest()):
+			did = true
+	last_result = "online_rest" if did else "online_skip"
+	busy = false
+
+
+func _online_arenas() -> Array:
+	var out: Array = []
+	var n: Node = get_parent()
+	while n != null:
+		if "som" in n and n.get("som") != null:
+			out.append(n.som)
+			break
+		n = n.get_parent()
+	var sess: Node = GameState._coop_session
+	if sess != null and is_instance_valid(sess) and sess.get("arena") != null:
+		out.append(sess.arena)
+	return out

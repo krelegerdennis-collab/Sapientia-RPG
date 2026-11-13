@@ -4,7 +4,10 @@ extends RefCounted
 ## Afspraak: docs/fase_b/ARCHITECTUUR.md. Vriendenmodus (pvp/) houdt 7777–7779.
 
 const GAME_ID := "sapientia-coop"
+## LAN (fase B) blijft versie 1. Online co-op spreekt VERSION_ONLINE.
+## Een pakket van de andere versie is leesbaar maar niet compatible: REFUSE VERSION.
 const VERSION := 1
+const VERSION_ONLINE := 2
 
 ## Host + 3 gasten. ENet telt alleen de gasten; de host is peer 1.
 const MAX_PLAYERS := 4
@@ -28,6 +31,17 @@ const PORT_MAX := 65535
 const NAME_MAX := 16
 const DEFAULT_GUEST_NAME := "Friend"
 const MAX_PACKET_BYTES := 1024
+## Online (§5.1 / §9). Naam max 5 tekens, uid 8 hex, look 16 bytes.
+## Relay-frame is 2048 inclusief 2 bytes kop; het spelpakket zelf blijft daaronder.
+const ONLINE_NAME_MAX := 5
+const UID_HEX_LEN := 8
+const LOOK_BYTES := 16
+const MAX_ONLINE_PACKET_BYTES := 2048
+## Host weigert een tweede emote van dezelfde stoel binnen dit venster.
+const EMOTE_COOLDOWN_SEC := 1.5
+const CTRL_LOCAL := "local"
+const CTRL_REMOTE := "remote"
+const CTRL_AI := "ai"
 
 const JOIN_TIMEOUT_SEC := 5.0
 const JOIN_TICK_CAP_SEC := 0.1
@@ -64,6 +78,16 @@ enum Kind {
 	ANNOUNCE = 6,
 	SESSION_END = 7,
 	START_GAME = 8,
+	## Online v2. LAN-decode blijft bij START_GAME; deze kinds horen bij VERSION_ONLINE.
+	READY = 9,
+	SIM_SELECT = 10,
+	RUN_RESULT = 11,
+	REWARD_BUNDLE = 12,
+	HOST_PAUSED = 13,
+	EMOTE = 14,
+	VOTE = 15,
+	## Client bevestigt een ontvangen bundle. VERSION_ONLINE blijft 2.
+	REWARD_ACK = 16,
 }
 
 ## Binaire gameplay-berichten (zelfde ENet-peer als de lobby; geen JSON).
@@ -75,10 +99,18 @@ enum BinKind {
 ## Losse poort voor headless sync-tests (geen botsing met een lopende lobby).
 const SYNC_TEST_PORT := 38424
 
-## Vlaggen per speler in snapshots (u16).
+## Vlaggen per speler in de snapshot (u16 op offset 9, geen extra byte).
+## M3 leest dit als hij RUN_RESULT / REWARD_BUNDLE in net_codec bouwt.
+## Dit bestand voegt dat pakket niet toe.
+## Lage byte: RING_OPEN=1, ATTACK=2, DOWN=4, CHANNEL=8, BLEED_DONE=16.
+## Hoge byte: kanaal-voortgang 0..100, alleen gezet op de liggende stoel.
 const FLAG_RING_OPEN := 1
 const FLAG_ATTACK := 2
 const FLAG_DOWN := 4
+## Hulp-stoel die een revive kanaliseert (M8a). Lage byte, naast DOWN.
+const FLAG_CHANNEL := 8
+## Bleed-timer is afgelopen; de stoel blijft liggen (VOORSTEL, geen permadeath).
+const FLAG_BLEED_DONE := 16
 
 enum Refuse {
 	NONE = 0,

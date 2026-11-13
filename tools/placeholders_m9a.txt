@@ -1,0 +1,5 @@
+# M9a Page Warden (Action). De boss-platen zijn definitieve art van RPG ART
+# en staan in tools/handwerk.txt. De generator is weg: die zou ze overschrijven.
+# De *_ph.png-namen zijn historisch en blijven.
+# page_warden.png, page_warden_rug.png en assets/map_monsters/page_warden.png
+# zijn hetzelfde handwerk.
