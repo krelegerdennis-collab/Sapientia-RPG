@@ -215,13 +215,17 @@ func _advance() -> void:
 func _enter(line_index: int) -> void:
 	_line_i = line_index
 	var beat := Dreiging.beat_at(_line_i, _flags)
-	if beat != _beat:
+	var nieuwe_beat := beat != _beat
+	if nieuwe_beat:
 		_beat = beat
 		_apply_beat(beat)
 	# CS-06: vlak vóór Sapientia's eerste regel in de dreiging. Poort: tests zien de zin meteen.
 	if _sapientia_opent() and Videos.will_play("cs06"):
 		var map := get_tree().current_scene if is_inside_tree() else self
 		await Videos.play_await("cs06", self, {"map": map})
+	# CS-12: dormant slot bij beat 3 (Sapientia's dreiging), ná CS-06, vóór de dialoog.
+	if nieuwe_beat and beat == 3:
+		await Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ATRIUM_THREAT, self)
 	_show_line()
 
 
@@ -267,7 +271,6 @@ func _apply_beat(beat: int) -> void:
 		2:
 			_beat_gloed()
 		3:
-			Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ATRIUM_THREAT)
 			_beat_threat()
 		4:
 			_beat_restore()

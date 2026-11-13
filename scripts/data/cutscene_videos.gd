@@ -111,6 +111,15 @@ const VIDEOS := {
 		"scene_id": "cs11",
 		"title": "The Pendant",
 	},
+	"cs12": {
+		"path": "res://assets/video/cs12_sapientia_threat.ogv",
+		"flag": "cutscene_cs12_gezien",
+		"aspect": WIDE,
+		"max_seconds": 30.0,
+		"nearest": true,
+		"scene_id": "cs12",
+		"title": "Sapientia Threat",
+	},
 	"worldmap": {
 		"path": "res://assets/video/worldmap_intro_v2.ogv",
 		"flag": "cutscene_wereldkaart_gezien",
