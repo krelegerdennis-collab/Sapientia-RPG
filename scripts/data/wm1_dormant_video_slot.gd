@@ -1,7 +1,7 @@
 class_name Wm1DormantVideoSlot
 extends RefCounted
 ## Vaste ids voor in-engine dialoog die later een filmpje kan krijgen (WM1, PR #393).
-## MAPLETON_VESPER = CS-09; overige ids zijn nog dormant.
+## MAPLETON_VESPER = CS-09 (#436); ARCHIEF2_CORRUPTED_SEREN = CS-10.
 
 const MAPLETON_VESPER := "dialogue_mapleton_vesper"
 const ARCHIEF2_CORRUPTED_SEREN := "dialogue_archief2_corrupted_seren"
@@ -24,5 +24,10 @@ static func before_dialogue(scene_id: String, host: Node = null) -> void:
 				host = Story
 			if Videos.will_play("cs09"):
 				await Videos.play_await("cs09", host, {"map": host})
+		ARCHIEF2_CORRUPTED_SEREN:
+			if host == null:
+				return
+			if Videos.will_play("cs10"):
+				await Videos.play_await("cs10", host, {"map": host})
 		_:
 			pass

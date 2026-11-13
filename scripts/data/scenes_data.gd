@@ -32,6 +32,7 @@ const SCENES := [
 	{"id": "cs07", "title": "Orion", "flag": "cutscene_cs07_gezien", "kind": "film"},
 	{"id": "cs08", "title": "The Merchant", "flag": "cutscene_cs08_gezien", "kind": "film"},
 	{"id": "cs09", "title": "Sparks on the Square", "flag": "cutscene_cs09_gezien", "kind": "film"},
+	{"id": "cs10", "title": "Corrupted Seren", "flag": "cutscene_cs10_gezien", "kind": "film"},
 ]
 
 
