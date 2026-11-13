@@ -10,7 +10,9 @@ const Kern := preload("res://scripts/kern/kern_absorption.gd")
 const Rekruut := preload("res://world_warper/services/rekruut.gd")
 const Genezer := preload("res://world_warper/cutscene/genezer_scene.gd")
 
-const IDS: Array[String] = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs06", "cs07", "cs08", "worldmap"]
+const IDS: Array[String] = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs06", "cs07", "cs08", "cs10", "worldmap"]
+const VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
+const Archief2 := preload("res://scripts/data/archief2.gd")
 
 var t: Node
 
@@ -23,6 +25,7 @@ func run() -> void:
 	_bestanden()
 	_poort()
 	await _skip_en_eenmalig()
+	await _corrupted_seren_slot()
 	await _ontbrekend()
 	_kernzin()
 	_orion()
@@ -51,8 +54,8 @@ func _bestanden() -> void:
 	t.check("CS-05 speelt genezer_warper_v3", FileAccess.file_exists("res://assets/video/genezer_warper_v3.ogv")
 			and str(Videos.spec("cs05").get("path", "")).ends_with("genezer_warper_v3.ogv"))
 	var ids: Array = ScenesData.ids()
-	t.check("scenes-lijst houdt wereldkaart + warper en voegt CS-01..08 toe (CS-05 = ww_warper)",
-			ids == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08"])
+	t.check("scenes-lijst houdt wereldkaart + warper en voegt CS-01..08 + CS-10 toe (CS-05 = ww_warper)",
+			ids == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08", "cs10"])
 	var cmds: Array = SD.EVENTS["catastrofe"][0]["do"]
 	t.check("CS-01 staat direct na de leesregel", cmds.size() >= 2 and cmds[0][0] == "say" and cmds[1][0] == "video" and cmds[1][1] == "cs01")
 
@@ -91,6 +94,23 @@ func _skip_en_eenmalig() -> void:
 			and Story.idle() and not Dialog.is_open and not GameState.scene_busy())
 	map.queue_free()
 	Videos.allow_in_tests = false
+
+
+func _corrupted_seren_slot() -> void:
+	t.check("CS-10 dormant id", VideoSlot.ARCHIEF2_CORRUPTED_SEREN == "dialogue_archief2_corrupted_seren")
+	GameState.story_flags.erase("cutscene_cs10_gezien")
+	GameState.new_game("Dax")
+	GameState.give_exp(GameState.party[0], preload("res://scripts/data/game_data.gd").exp_for_level(7))
+	var map := _dummy_map()
+	Videos.allow_in_tests = true
+	Cutscene.allow_in_tests = true
+	await VideoSlot.before_dialogue(VideoSlot.ARCHIEF2_CORRUPTED_SEREN, map)
+	t.check("CS-10 start via Archief2-slot en zet vlag", GameState.story_flags.has("cutscene_cs10_gezien"))
+	t.check("CS-10 speelt maar één keer", not Videos.will_play("cs10") and Videos.play("cs10", map) == null)
+	t.check("CS-10: Seren kan nog aansluiten na filmpje", Archief2.sluit_lotte_aan() and GameState.has_member("lotte"))
+	map.queue_free()
+	Videos.allow_in_tests = false
+	Cutscene.allow_in_tests = false
 
 
 func _ontbrekend() -> void:

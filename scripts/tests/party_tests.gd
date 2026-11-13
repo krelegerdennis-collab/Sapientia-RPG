@@ -654,7 +654,7 @@ func _scenes_tests() -> void:
 	for cf in [ScenesDataT.CANON_GENEZER_FLAG, ScenesDataT.CANON_HANGER_FLAG, ScenesDataT.CANON_DREIGING_FLAG]:
 		GameState.story_flags.erase(cf)
 	GameState.scenes_seen = []
-	check("scenes: lijst = alleen de video-cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08"]
+	check("scenes: lijst = alleen de video-cutscenes (%s)" % [ScenesDataT.ids()], ScenesDataT.ids() == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08", "cs10"]
 			and GameState.seen_scenes().is_empty())
 	GameState.mark_scene_seen("ww_warper")
 	GameState.mark_scene_seen("hanger")         # v0.24 niet meer in de lijst: telt niet
