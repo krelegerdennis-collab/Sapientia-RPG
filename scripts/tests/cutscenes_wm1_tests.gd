@@ -161,6 +161,8 @@ func _pendant_slot() -> void:
 	t.check("CS-11: filmpje vervangt Welcome-regel", not " ".join(hang).contains("Welcome to the World Warper, Dax."))
 	t.check("CS-11: pendant-key-regel weg", not hang.any(func(l): return "Only to that Pendant." in l))
 	t.check("CS-11: einde_hanger nog geldig", Dreiging.einde_hanger({}) == 12)
+	var ah_i := hang.find("ECHO: ...Ah.")
+	t.check("CS-11: beat_at ...Ah. blijft cue 2", ah_i >= 0 and Dreiging.beat_at(ah_i, {}) == 2)
 	map.queue_free()
 	Videos.allow_in_tests = false
 	Cutscene.allow_in_tests = false

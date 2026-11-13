@@ -39,12 +39,22 @@ static func lines(flags: Dictionary = {}) -> Array[String]:
 
 
 ## 1 stille hal, 2 paarse Hanger-gloed, 3 roze Sapientia-glitch, 4 herstel.
+## line_index telt gefilterde regels (zelfde filter als lines()).
 static func beat_at(line_index: int, flags: Dictionary = {}) -> int:
 	var rs := regels(flags)
 	if rs.is_empty():
 		return 1
-	var i := clampi(line_index, 0, rs.size() - 1)
-	return int(rs[i].get("cue", 1))
+	var film := GameState.story_flags.has("cutscene_cs11_gezien")
+	var kept: Array = []
+	for r in rs:
+		var text := str(r.get("text", ""))
+		if film and CS11_ECHO_SKIP.has(text):
+			continue
+		kept.append(r)
+	if kept.is_empty():
+		return 1
+	var i := clampi(line_index, 0, kept.size() - 1)
+	return int(kept[i].get("cue", 1))
 
 
 ## Laatste index van scène 2 in deze reeks (-1 als scène 2 al gezien is).
