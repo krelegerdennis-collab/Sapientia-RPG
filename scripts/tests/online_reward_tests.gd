@@ -224,8 +224,8 @@ func _reward_tests() -> void:
 	var hard := OnlineReward.make_bundle("sess", 3, "hard", {"seat_uid": seat, "floors": 100, "best_floor": 100})
 	check("voltooide Normal en Hard: eigen placeholder", normal["unlocks"] == [OnlineReward.UNLOCK_NORMAL] and hard["unlocks"] == [OnlineReward.UNLOCK_HARD])
 	check("profile_exp Normal 75 en Hard 200, allebei int", normal["profile_exp"] == 75 and hard["profile_exp"] == 200 and typeof(normal["profile_exp"]) == TYPE_INT)
-	var key := OnlineReward.grant_key("sess", 1)
-	check("grant-sleutel is g + 15 hex, stabiel, zonder plus", key.length() == 16 and key == OnlineReward.grant_key("sess", 1) and key != OnlineReward.grant_key("sess", 2) and key != OnlineReward.grant_key("andere", 1) and _id_chars(key) and not key.contains("+"))
+	var key := OnlineReward.grant_key("sess", 1, seat)
+	check("grant-sleutel is g + 15 hex, stabiel, zonder plus", key.length() == 16 and key == OnlineReward.grant_key("sess", 1, seat) and key != OnlineReward.grant_key("sess", 2, seat) and key != OnlineReward.grant_key("andere", 1, seat) and _id_chars(key) and not key.contains("+"))
 	var rich := {
 		"seat_uid": seat, "floors": 2, "best_floor": 2, "kills": 9,
 		"loot": {"gold": 500, "exp": 800, "items": [{"item": "drankje", "n": 3}]},
@@ -331,9 +331,9 @@ func _epoch_tests() -> void:
 		applied_ok = applied_ok and str(res["status"]) == OnlineReward.STATUS_APPLIED
 		cur = res["profile"]
 	var grants: Array = cur["slots"][0]["applied_grants"]
-	var first_key := OnlineReward.grant_key(session, 1)
+	var first_key := OnlineReward.grant_key(session, 1, seat)
 	check("negen bundles in één sessie toegepast", applied_ok and cur["slots"][0]["profile_exp"] == 9)
-	check("FIFO houdt 8 grants en laat de eerste vallen", grants.size() == 8 and not grants.has(first_key) and grants.has(OnlineReward.grant_key(session, 9)))
+	check("FIFO houdt 8 grants en laat de eerste vallen", grants.size() == 8 and not grants.has(first_key) and grants.has(OnlineReward.grant_key(session, 9, seat)))
 	var replay: Dictionary = live.apply_bundle(cur, first)
 	check("replay van de eerste na FIFO is duplicate", replay["status"] == OnlineReward.STATUS_DUPLICATE and replay["grant_key"] == first_key and replay["profile"]["slots"][0]["profile_exp"] == 9 and replay["profile"]["slots"][0]["applied_grants"] == grants)
 	check("profiel na FIFO slaagt voor de M1-nabootsing", _m1_json_ok(replay["profile"]))
@@ -356,14 +356,14 @@ func _epoch_tests() -> void:
 		queued.append(outgoing)
 		host_ok = host_ok and host.note_pending(outgoing)
 	var pending: Array = host.pending_for(seat)
-	var oldest := OnlineReward.grant_key("hostpending", 1)
-	var newest := OnlineReward.grant_key("hostpending", 9)
+	var oldest := OnlineReward.grant_key("hostpending", 1, seat)
+	var newest := OnlineReward.grant_key("hostpending", 9, seat)
 	var pending_keys := _pending_keys(pending)
 	check("pending komt niet boven 8", host_ok and pending.size() == 8 and pending.size() <= OnlineReward.MAX_GRANTS and not pending_keys.has(oldest) and pending_keys.has(newest))
 	var other_seat := OnlineReward.make_bundle("hostpending", 1, "easy", {"seat_uid": UIDS[1], "floors": 1, "best_floor": 1})
 	check("pending van een andere stoel telt apart", host.note_pending(other_seat) and host.pending_for(UIDS[1]).size() == 1 and host.pending_for(seat).size() == 8)
 	var ack_key := newest
-	host.ack(ack_key)
+	host.ack(seat, ack_key)
 	var after_ack := _pending_keys(host.pending_for(seat))
 	check("ACK haalt de bundle van de lijst", not after_ack.has(ack_key) and host.pending_for(seat).size() == 7)
 	var acked_bundle: Dictionary = queued[8]
@@ -384,13 +384,54 @@ func _epoch_tests() -> void:
 	var cap: Dictionary = capped.apply_bundle(full, OnlineReward.make_bundle("unlockcap", 1, "easy", {"seat_uid": seat, "floors": 10, "best_floor": 10}))
 	var cap_unlocks: Array = cap["profile"]["slots"][0]["unlocks"]
 	check("unlocks blijven op 16 zonder dubbelen", cap["status"] == OnlineReward.STATUS_APPLIED and cap_unlocks.size() == 16 and cap_unlocks == ids and cap["profile"]["slots"][0]["profile_exp"] == 10 and _m1_json_ok(cap["profile"]))
+	_per_seat_grant_tests()
+
+
+func _per_seat_grant_tests() -> void:
+	var seat_a := UIDS[0]
+	var seat_b := UIDS[1]
+	var shared_session := "same-run"
+	var shared_tick := 42
+	var bundle_a := OnlineReward.make_bundle(shared_session, shared_tick, "easy", {"seat_uid": seat_a, "floors": 1, "best_floor": 1})
+	var bundle_b := OnlineReward.make_bundle(shared_session, shared_tick, "easy", {"seat_uid": seat_b, "floors": 1, "best_floor": 1})
+	var key_a := OnlineReward.grant_key_for_bundle(bundle_a)
+	var key_b := OnlineReward.grant_key_for_bundle(bundle_b)
+	check("grant_keys van verschillende stoelen in dezelfde run verschillen", key_a != key_b and _id_chars(key_a) and _id_chars(key_b))
+	var dual_host := OnlineReward.new()
+	check("pending per stoel bij dezelfde session en tick", dual_host.note_pending(bundle_a) and dual_host.note_pending(bundle_b)
+			and dual_host.pending_for(seat_a).size() == 1 and dual_host.pending_for(seat_b).size() == 1)
+	dual_host.ack(seat_a, key_a)
+	check("ACK van stoel A laat pending van stoel B staan", dual_host.pending_for(seat_a).is_empty() and dual_host.pending_for(seat_b).size() == 1
+			and _pending_keys(dual_host.pending_for(seat_b)) == [key_b])
+	var client_a := OnlineReward.new()
+	var client_b := OnlineReward.new()
+	var prof_a := _profile(seat_a)
+	var prof_b := _profile(seat_b)
+	var apply_a: Dictionary = client_a.apply_bundle(prof_a, bundle_a)
+	var apply_b: Dictionary = client_b.apply_bundle(prof_b, bundle_b)
+	check("zelfde tick per stoel: beide applied zonder live-set-botsing", apply_a["status"] == OnlineReward.STATUS_APPLIED and apply_b["status"] == OnlineReward.STATUS_APPLIED
+			and apply_a["grant_key"] == key_a and apply_b["grant_key"] == key_b)
+	var dup_a: Dictionary = client_a.apply_bundle(apply_a["profile"], bundle_a)
+	check("duplicate-bescherming blijft per stoel", dup_a["status"] == OnlineReward.STATUS_DUPLICATE and dup_a["grant_key"] == key_a and dup_a["profile"] == apply_a["profile"])
+	var killed_b := OnlineReward.new()
+	var lost_b := bundle_b.duplicate(true)
+	var once_b: Dictionary = killed_b.apply_bundle(prof_b, lost_b)
+	var restarted_b := OnlineReward.new()
+	var resent_b: Dictionary = restarted_b.apply_bundle(prof_b, lost_b)
+	check("reconnect per stoel: resend telt 1x zonder ACK", once_b["status"] == OnlineReward.STATUS_APPLIED and resent_b["status"] == OnlineReward.STATUS_APPLIED
+			and resent_b["profile"]["slots"][0]["profile_exp"] == 1)
+	var saved_b: Dictionary = once_b["profile"]
+	var ack_lost_b := OnlineReward.new()
+	var again_b: Dictionary = ack_lost_b.apply_bundle(saved_b, lost_b)
+	check("reconnect per stoel: opgeslagen profiel + resend is duplicate", again_b["status"] == OnlineReward.STATUS_DUPLICATE and again_b["grant_key"] == key_b
+			and again_b["profile"]["slots"][0]["profile_exp"] == 1)
 
 
 func _pending_keys(pending: Array) -> Array:
 	var out: Array = []
 	for bundle in pending:
 		if bundle is Dictionary:
-			out.append(OnlineReward.grant_key(str(bundle.get("session_id", "")), int(bundle.get("host_tick", 0))))
+			out.append(OnlineReward.grant_key_for_bundle(bundle))
 	return out
 
 

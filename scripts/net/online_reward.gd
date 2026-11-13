@@ -28,7 +28,7 @@ extends RefCounted
 ## profiel, dan is de resend duplicate en 0 extra.
 ##
 ## Grant-sleutel (max 8 in het profiel, FIFO, hash heeft geen volgorde):
-##   "g" + 15 kleine hex van SHA256("session_id|host_tick") via HashingContext.
+##   "g" + 15 kleine hex van SHA256("session_id|host_tick|seat_uid") via HashingContext.
 ##   Geen Godot-hash(), geen "+". 16 tekens [a-z0-9], passend bij M1.
 ## De runtime-set vangt een replay in hetzelfde proces nadat FIFO de oudste
 ## van meer dan 8 runs uit applied_grants heeft gezet. Ze gaat niet mee naar schijf.
@@ -44,7 +44,7 @@ extends RefCounted
 ## De host houdt per stoel-uid een pending-lijst van onbevestigde bundles,
 ## hoogstens 8 (nooit meer dan M1's applied_grants). FIFO: de oudste valt weg.
 ##   host.note_pending(bundle)   # na verzenden; een al ACK'te sleutel wordt niet gezet
-##   host.ack(grant_key)         # haalt de bundle van de lijst; nooit opnieuw sturen
+##   host.ack(uid, grant_key)    # haalt de bundle van die stoel; nooit opnieuw sturen
 ##   host.pending_for(uid)       # bij rejoin opnieuw sturen
 ## Pending en de ACK-set zijn runtime van de host-instantie, niet van het profiel.
 ## Gebruik voor de host een andere instantie dan voor de client.
@@ -165,13 +165,17 @@ static func profile_exp_for(floors_cleared: int, mode: String) -> int:
 	return clampi(raw, 0, MAX_PROFILE_EXP)
 
 
-## 16 tekens [a-z0-9]: "g" + 15 hex van SHA256("session_id|host_tick").
+## 16 tekens [a-z0-9]: "g" + 15 hex van SHA256("session_id|host_tick|seat_uid").
 ## HashingContext, niet Godot hash() (dat verschilt per platform).
-static func grant_key(session_id: String, host_tick: int) -> String:
+static func grant_key(session_id: String, host_tick: int, seat_uid: String) -> String:
 	var ctx := HashingContext.new()
 	ctx.start(HashingContext.HASH_SHA256)
-	ctx.update(("%s|%d" % [session_id, host_tick]).to_utf8_buffer())
+	ctx.update(("%s|%d|%s" % [session_id, host_tick, seat_uid]).to_utf8_buffer())
 	return "g" + ctx.finish().hex_encode().substr(0, 15)
+
+
+static func grant_key_for_bundle(bundle: Dictionary) -> String:
+	return grant_key(str(bundle.get("session_id", "")), int(bundle.get("host_tick", 0)), str(bundle.get("seat_uid", "")))
 
 
 ## seats: rapporten uit OnlineLoot.reports() (of hetzelfde dict-formaat).
@@ -258,7 +262,7 @@ func apply_bundle(profile: Dictionary, bundle: Dictionary) -> Dictionary:
 	var out := profile.duplicate(true)
 	if not bundle_clean(bundle):
 		return _verdict(out, STATUS_REJECTED, "")
-	var key := grant_key(str(bundle["session_id"]), int(bundle["host_tick"]))
+	var key := grant_key_for_bundle(bundle)
 	if _live_grant_keys.has(key):
 		return _verdict(out, STATUS_DUPLICATE, key)
 	var slots_v: Variant = out.get("slots", [])
@@ -312,14 +316,14 @@ func apply_bundle(profile: Dictionary, bundle: Dictionary) -> Dictionary:
 func note_pending(bundle: Dictionary) -> bool:
 	if not bundle_clean(bundle):
 		return false
-	var key := grant_key(str(bundle["session_id"]), int(bundle["host_tick"]))
+	var key := grant_key_for_bundle(bundle)
 	if _acked.has(key):
 		return false
 	var uid := str(bundle["seat_uid"])
 	var raw: Variant = _pending.get(uid, [])
 	var list: Array = (raw as Array).duplicate(true) if raw is Array else []
 	for existing in list:
-		if existing is Dictionary and grant_key(str(existing.get("session_id", "")), int(existing.get("host_tick", 0))) == key:
+		if existing is Dictionary and grant_key_for_bundle(existing) == key:
 			return true
 	list.append(bundle.duplicate(true))
 	while list.size() > MAX_GRANTS:
@@ -328,23 +332,21 @@ func note_pending(bundle: Dictionary) -> bool:
 	return true
 
 
-## ACK binnen. De bundle gaat van de pending-lijst en wordt niet opnieuw verstuurd.
-func ack(key: String) -> void:
-	if key == "":
+## ACK binnen. De bundle gaat van de pending-lijst van deze stoel en wordt niet opnieuw verstuurd.
+func ack(uid: String, key: String) -> void:
+	if key == "" or uid == "":
 		return
 	_acked[key] = true
-	for uid in _pending.keys():
-		var raw: Variant = _pending[uid]
-		if not (raw is Array):
+	var raw: Variant = _pending.get(uid, [])
+	if not (raw is Array):
+		return
+	var kept: Array = []
+	for existing in raw:
+		if not (existing is Dictionary):
 			continue
-		var kept: Array = []
-		for existing in raw:
-			if not (existing is Dictionary):
-				continue
-			var existing_key := grant_key(str(existing.get("session_id", "")), int(existing.get("host_tick", 0)))
-			if existing_key != key:
-				kept.append(existing)
-		_pending[uid] = kept
+		if grant_key_for_bundle(existing) != key:
+			kept.append(existing)
+	_pending[uid] = kept
 
 
 ## Bundles die deze host bij een rejoin opnieuw mag sturen. Kopie; de lijst zelf blijft hier.
