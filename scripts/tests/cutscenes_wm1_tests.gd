@@ -10,7 +10,7 @@ const Kern := preload("res://scripts/kern/kern_absorption.gd")
 const Rekruut := preload("res://world_warper/services/rekruut.gd")
 const Genezer := preload("res://world_warper/cutscene/genezer_scene.gd")
 
-const IDS: Array[String] = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs06", "cs07", "cs08", "cs10", "worldmap"]
+const IDS: Array[String] = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs06", "cs07", "cs08", "cs09", "cs10", "worldmap"]
 const VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 
@@ -25,6 +25,7 @@ func run() -> void:
 	_bestanden()
 	_poort()
 	await _skip_en_eenmalig()
+	await _mapleton_slot()
 	await _corrupted_seren_slot()
 	await _ontbrekend()
 	_kernzin()
@@ -54,8 +55,8 @@ func _bestanden() -> void:
 	t.check("CS-05 speelt genezer_warper_v3", FileAccess.file_exists("res://assets/video/genezer_warper_v3.ogv")
 			and str(Videos.spec("cs05").get("path", "")).ends_with("genezer_warper_v3.ogv"))
 	var ids: Array = ScenesData.ids()
-	t.check("scenes-lijst houdt wereldkaart + warper en voegt CS-01..08 + CS-10 toe (CS-05 = ww_warper)",
-			ids == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08", "cs10"])
+	t.check("scenes-lijst houdt wereldkaart + warper en voegt CS-01..10 toe (CS-05 = ww_warper)",
+			ids == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08", "cs09", "cs10"])
 	var cmds: Array = SD.EVENTS["catastrofe"][0]["do"]
 	t.check("CS-01 staat direct na de leesregel", cmds.size() >= 2 and cmds[0][0] == "say" and cmds[1][0] == "video" and cmds[1][1] == "cs01")
 
@@ -129,6 +130,20 @@ func _ontbrekend() -> void:
 	t.check("ontbrekend bestand is meteen klaar", not is_instance_valid(c) or c.is_done())
 	t.check("ontbrekend bestand geeft input terug", not bool(speler.get("input_locked")))
 	map.queue_free()
+
+
+func _mapleton_slot() -> void:
+	t.check("CS-09 dormant id", VideoSlot.MAPLETON_VESPER == "dialogue_mapleton_vesper")
+	GameState.story_flags.erase("cutscene_cs09_gezien")
+	var map := _dummy_map()
+	Videos.allow_in_tests = true
+	Cutscene.allow_in_tests = true
+	await VideoSlot.before_dialogue(VideoSlot.MAPLETON_VESPER, map)
+	t.check("CS-09 start via Mapleton-slot en zet vlag", GameState.story_flags.has("cutscene_cs09_gezien"))
+	t.check("CS-09 speelt maar één keer", not Videos.will_play("cs09") and Videos.play("cs09", map) == null)
+	map.queue_free()
+	Videos.allow_in_tests = false
+	Cutscene.allow_in_tests = false
 
 
 func _kernzin() -> void:
