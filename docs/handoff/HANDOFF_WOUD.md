@@ -2,7 +2,7 @@
 
 ## Verloop voor de speler
 1. Na de Golem (`bewaker:archief_golemhal/golem`) gaat Esdoorn open op de wereldkaart (exit `NaarEsdoorn`, event `naar_esdoorn`).
-2. Bij binnenkomst draait één keer `noor_ontmoeting` (MAP_ENTER, flag `noor_ontmoet`). Wortels grijpen Noor (object `WortelGreep`), en Marit start de opdracht (`quest_noor`, stap `NOOR_KWIJT` = 110). Het veldmenu toont "Opdracht: Red Noor uit het Donker Woud".
+2. Bij binnenkomst draait één keer `noor_ontmoeting` (MAP_ENTER, flag `noor_ontmoet`). Vóór het event kan CS-09 één keer spelen (`assets/video/cs09_vesper_mapleton.ogv`, vlag `cutscene_cs09_gezien`, dormant slot `MAPLETON_VESPER` in `wm1_dormant_video_slot.gd`): na het filmpje volgt een verkorte in-engine staart met dezelfde progressie (`noor_ontmoet`, `quest_noor`, stap `NOOR_KWIJT` = 110, `marit_boeken`); zonder filmpje (testpoort of fallback) draait de volledige in-engine scène met Wortelgreep. Marit start de opdracht; het veldmenu toont "Opdracht: Red Noor uit het Donker Woud".
 3. Wereldkaart, exit `NaarWoud` (event `woud_ingang`; zonder `quest_noor` staat er alleen een hint). De volgorde is woud_rand → woud_pad → woud_mistpoel → woud_sporenkring (savepunt) → woud_open_plek.
 4. Op de cocon staat de Wortelkoning als bewaker (2x2 tegels). Na winst draait `noor_bevrijd` (MAP_ENTER op `woud_open_plek` met de Wortelkoning-flag en zonder `noor_gered`). Noor komt erbij via `join` (niveau Dennis-1, eiken_staf + reisgewaad), daarna flags `noor_gered` en `noor_lid` en stap `NOOR_GERED` = 120.
 

@@ -14,6 +14,17 @@ const IDS: Array[String] = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs06", "cs0
 const Dreiging := preload("res://world_warper/cutscene/dreiging.gd")
 const VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
+const GD := preload("res://scripts/data/game_data.gd")
+const WORLD := "res://scenes/maps/wereldkaart.tscn"
+
+## Alleen in de fallback-tak van noor_ontmoeting (zonder CS-09-filmpje).
+const CS09_FALLBACK_VESPER_SNIPPETS: Array[String] = [
+	"You came over the hills?",
+	"I'm Vesper. You look like you're looking for someone.",
+	"People here call me the girl with the sparks.",
+	"Pink sparks dance between her fingers",
+	"They're... they're pulling me!",
+]
 
 var t: Node
 
@@ -27,6 +38,7 @@ func run() -> void:
 	_poort()
 	await _skip_en_eenmalig()
 	await _mapleton_slot()
+	await _noor_ontmoeting_filmpad()
 	await _corrupted_seren_slot()
 	await _pendant_slot()
 	await _ontbrekend()
@@ -146,6 +158,121 @@ func _mapleton_slot() -> void:
 	map.queue_free()
 	Videos.allow_in_tests = false
 	Cutscene.allow_in_tests = false
+
+
+func _noor_ontmoeting_filmpad() -> void:
+	var saved_flags: Dictionary = GameState.story_flags.duplicate(true)
+	var saved_step: int = GameState.story_step
+	var saved_history: Array = Story.history.duplicate()
+	if Dialog.is_open:
+		Dialog.close()
+	GameState.new_game("Dax")
+	GameState.story_flags.erase("cutscene_cs09_gezien")
+	GameState.story_flags.erase("noor_ontmoet")
+	GameState.story_flags.erase("quest_noor")
+	GameState.story_flags.erase("marit_boeken")
+	GameState.story_flags[SD.GOLEM_FLAG] = true
+	Videos.allow_in_tests = true
+	Cutscene.allow_in_tests = true
+	var geladen := await _enter_map(SD.ESDOORN, "zuid_ingang")
+	t.check("CS-09 E2E: Esdoorn geladen", geladen)
+	if not geladen:
+		_restore_noor_test_state(saved_flags, saved_step, saved_history)
+		Videos.allow_in_tests = false
+		Cutscene.allow_in_tests = false
+		return
+	var t0 := Time.get_ticks_msec()
+	while not Story.running and Time.get_ticks_msec() - t0 < 8000:
+		var map_wait: Node = t.scene()
+		var vid_wait: Node = map_wait.get_node_or_null("CutsceneVideo") if map_wait != null else null
+		if vid_wait != null or Story.running:
+			break
+		await t.frames(1)
+	var story_out: Dictionary = await _advance_story_with_video(90.0)
+	var lines: Array = story_out.get("lines", [])
+	var video_gezien: bool = bool(story_out.get("video", false))
+	var v: Node = t.scene()
+	var vesper: Node = v.get_node_or_null("Objects/Vesper") if v != null else null
+	var wortel: Node = v.get_node_or_null("Objects/WortelGreep") if v != null else null
+	var tekst := " ".join(lines.map(func(l): return str(l)))
+	t.check("CS-09 E2E: filmpje speelde en zette cutscene_cs09_gezien", video_gezien and GameState.story_flags.has("cutscene_cs09_gezien"))
+	t.check("CS-09 E2E: progressie vlaggen + NOOR_KWIJT", Story.has_flag("noor_ontmoet") and Story.has_flag("quest_noor")
+			and GameState.story_step == SD.NOOR_KWIJT)
+	t.check("CS-09 E2E: marit_boeken (3 lege boeken)", Story.has_flag("marit_boeken")
+			and GameState.item_count("leeg_boek") == 3 and not GD.START_INVENTORY.has("leeg_boek"))
+	t.check("CS-09 E2E: Vesper en WortelGreep verborgen", vesper != null and not vesper.visible
+			and wortel != null and not wortel.visible)
+	t.check("CS-09 E2E: geen lange Vesper-regels uit fallback-tak", not CS09_FALLBACK_VESPER_SNIPPETS.any(func(s: String) -> bool: return s in tekst))
+	t.check("CS-09 E2E: wel Marigold-opdrachtregel", tekst.contains("save her") or tekst.contains("Save Vesper"))
+	t.check("CS-09 E2E: filmpje speelt niet opnieuw", not Videos.will_play("cs09") and Videos.play("cs09", v) == null)
+	var hist_n := Story.history.count("noor_ontmoeting")
+	await _enter_map(WORLD, "van_esdoorn")
+	await _enter_map(SD.ESDOORN, "zuid_ingang")
+	await t.get_tree().create_timer(0.8).timeout
+	t.check("CS-09 E2E: tweede binnenkomst geen herhaalde ontmoeting", Story.history.count("noor_ontmoeting") == hist_n
+			and hist_n == 1 and not Story.running)
+	_restore_noor_test_state(saved_flags, saved_step, saved_history)
+	Videos.allow_in_tests = false
+	Cutscene.allow_in_tests = false
+
+
+func _restore_noor_test_state(flags: Dictionary, step: int, history: Array) -> void:
+	GameState.story_flags = flags.duplicate(true)
+	GameState.story_step = step
+	Story.history.clear()
+	for ev in history:
+		Story.history.append(str(ev))
+
+
+func _scene_node_name(path: String) -> String:
+	var out := ""
+	for p in path.get_file().get_basename().split("_"):
+		out += p.capitalize().replace(" ", "")
+	return out
+
+
+func _enter_map(path: String, spawn: String) -> bool:
+	GameState.change_map(path, spawn)
+	var ok: bool = await t.wait_scene(_scene_node_name(path), 20.0)
+	if ok:
+		var t0 := Time.get_ticks_msec()
+		while Time.get_ticks_msec() - t0 < 3000:
+			if Transition._rect.color.a <= 0.01:
+				break
+			await t.frames(1)
+		await t.frames(2)
+	return ok
+
+
+func _advance_story_with_video(timeout: float) -> Dictionary:
+	var seen: Array = []
+	var video_gezien := false
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < timeout * 1000.0:
+		var map: Node = t.scene()
+		var vid: Node = map.get_node_or_null("CutsceneVideo") if map != null else null
+		if vid != null:
+			video_gezien = true
+			if vid.has_method("is_done") and not bool(vid.call("is_done")):
+				await t.get_tree().create_timer(0.35).timeout
+				_klik()
+				await t.frames(3)
+				continue
+		if Dialog.is_open:
+			var line := "%s: %s" % [Dialog.name_label.text, Dialog.text_label.text]
+			if seen.is_empty() or seen[seen.size() - 1] != line:
+				seen.append(line)
+			if Dialog._is_typing():
+				await t.frames(2)
+			else:
+				await t.press_interact()
+		elif not Story.running:
+			await t.frames(6)
+			if not Story.running and vid == null:
+				break
+		else:
+			await t.frames(1)
+	return {"lines": seen, "video": video_gezien}
 
 
 func _pendant_slot() -> void:
