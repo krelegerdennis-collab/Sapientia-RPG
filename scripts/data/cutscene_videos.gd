@@ -102,6 +102,15 @@ const VIDEOS := {
 		"scene_id": "cs10",
 		"title": "Corrupted Seren",
 	},
+	"cs11": {
+		"path": "res://assets/video/cs11_pendant.ogv",
+		"flag": "cutscene_cs11_gezien",
+		"aspect": WIDE,
+		"max_seconds": 27.0,
+		"nearest": true,
+		"scene_id": "cs11",
+		"title": "The Pendant",
+	},
 	"worldmap": {
 		"path": "res://assets/video/worldmap_intro_v2.ogv",
 		"flag": "cutscene_wereldkaart_gezien",

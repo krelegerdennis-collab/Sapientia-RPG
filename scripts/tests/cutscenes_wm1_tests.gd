@@ -10,7 +10,8 @@ const Kern := preload("res://scripts/kern/kern_absorption.gd")
 const Rekruut := preload("res://world_warper/services/rekruut.gd")
 const Genezer := preload("res://world_warper/cutscene/genezer_scene.gd")
 
-const IDS: Array[String] = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs06", "cs07", "cs08", "cs09", "cs10", "worldmap"]
+const IDS: Array[String] = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs06", "cs07", "cs08", "cs09", "cs10", "cs11", "worldmap"]
+const Dreiging := preload("res://world_warper/cutscene/dreiging.gd")
 const VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
 const Archief2 := preload("res://scripts/data/archief2.gd")
 
@@ -27,6 +28,7 @@ func run() -> void:
 	await _skip_en_eenmalig()
 	await _mapleton_slot()
 	await _corrupted_seren_slot()
+	await _pendant_slot()
 	await _ontbrekend()
 	_kernzin()
 	_orion()
@@ -55,8 +57,8 @@ func _bestanden() -> void:
 	t.check("CS-05 speelt genezer_warper_v3", FileAccess.file_exists("res://assets/video/genezer_warper_v3.ogv")
 			and str(Videos.spec("cs05").get("path", "")).ends_with("genezer_warper_v3.ogv"))
 	var ids: Array = ScenesData.ids()
-	t.check("scenes-lijst houdt wereldkaart + warper en voegt CS-01..10 toe (CS-05 = ww_warper)",
-			ids == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08", "cs09", "cs10"])
+	t.check("scenes-lijst houdt wereldkaart + warper en voegt CS-01..11 toe (CS-05 = ww_warper)",
+			ids == ["wereldkaart", "ww_warper", "cs01", "cs02", "cs03", "cs04", "cs06", "cs07", "cs08", "cs09", "cs10", "cs11"])
 	var cmds: Array = SD.EVENTS["catastrofe"][0]["do"]
 	t.check("CS-01 staat direct na de leesregel", cmds.size() >= 2 and cmds[0][0] == "say" and cmds[1][0] == "video" and cmds[1][1] == "cs01")
 
@@ -141,6 +143,26 @@ func _mapleton_slot() -> void:
 	await VideoSlot.before_dialogue(VideoSlot.MAPLETON_VESPER, map)
 	t.check("CS-09 start via Mapleton-slot en zet vlag", GameState.story_flags.has("cutscene_cs09_gezien"))
 	t.check("CS-09 speelt maar één keer", not Videos.will_play("cs09") and Videos.play("cs09", map) == null)
+	map.queue_free()
+	Videos.allow_in_tests = false
+	Cutscene.allow_in_tests = false
+
+
+func _pendant_slot() -> void:
+	t.check("CS-11 dormant id", VideoSlot.ATRIUM_PENDANT == "dialogue_atrium_pendant")
+	GameState.story_flags.erase("cutscene_cs11_gezien")
+	var map := _dummy_map()
+	Videos.allow_in_tests = true
+	Cutscene.allow_in_tests = true
+	await VideoSlot.before_dialogue(VideoSlot.ATRIUM_PENDANT, map)
+	t.check("CS-11 start via Atrium-slot en zet vlag", GameState.story_flags.has("cutscene_cs11_gezien"))
+	t.check("CS-11 speelt maar één keer", not Videos.will_play("cs11") and Videos.play("cs11", map) == null)
+	var hang: Array[String] = Dreiging.lines({})
+	t.check("CS-11: filmpje vervangt Welcome-regel", not " ".join(hang).contains("Welcome to the World Warper, Dax."))
+	t.check("CS-11: pendant-key-regel weg", not hang.any(func(l): return "Only to that Pendant." in l))
+	t.check("CS-11: einde_hanger nog geldig", Dreiging.einde_hanger({}) == 12)
+	var ah_i := hang.find("ECHO: ...Ah.")
+	t.check("CS-11: beat_at ...Ah. blijft cue 2", ah_i >= 0 and Dreiging.beat_at(ah_i, {}) == 2)
 	map.queue_free()
 	Videos.allow_in_tests = false
 	Cutscene.allow_in_tests = false
