@@ -48,6 +48,7 @@ Elke `FAIL` begint met een label: `[SOFTLOCK]` (wereld komt niet in rust of een 
 * `push_error`-regels zijn in Godot 4.3 niet vanuit GDScript te vangen. De statische audit spiegelt de bekende `push_error`-voorwaarden van `dungeon_room.gd`; verder blijft het logbestand de bron.
 * De Diepe Grot, PvP, co-op en WM2/WM3 zitten er niet in.
 * De puzzelkamers worden opgelost via `PuzzleLogic` (de oplossingen staan in de eigen suites); het lopen erna is echt.
+* De locked filmpjes CS-10/11/12 speelt deze suite niet (`CutsceneVideos.blocked_by_tests`). Het filmpad zit in `scripts/tests/cutscenes_wm1_tests.gd`: CS-10 *Corrupted Seren* (`cs10_corrupted_seren.ogv`, vlag `cutscene_cs10_gezien`) na `archief2_verwerk_einde` in Seren's Room, daarna alleen de slotregel van `LOTTE_AANSLUIT`; CS-11 *The Pendant* vóór de Hal-dialoog en CS-12 *Sapientia Threat* bij beat 3 (`cs11_pendant.ogv`, `cs12_sapientia_threat.ogv`). De code legt geen poort CS-10 vóór de Hal; binnen één Hal-bezoek komt CS-11 vóór CS-12.
 * Gewone map-monsters worden voor de wandeling uit de kamer gehaald (ze versperren gangen); bewakers en bazen worden echt gevochten.
 
 ## CI
