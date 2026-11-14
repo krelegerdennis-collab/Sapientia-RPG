@@ -88,6 +88,7 @@ func _exit_tree() -> void:
 	if _session != null and is_instance_valid(_session):
 		_session.shutdown(true)
 	_session = null
+	Baker.release_warm_cache()
 
 
 func _process(delta: float) -> void:

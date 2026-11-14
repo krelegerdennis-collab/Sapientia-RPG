@@ -88,6 +88,9 @@
       "options": {
         "0": {
           "walk": "res://assets/sprites/paperdoll/kaart/schaduw.png",
+          "attack": "res://assets/sprites/paperdoll/attack/schaduw.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/schaduw.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/schaduw.png",
           "ko": "res://assets/sprites/paperdoll/ko/schaduw.png"
         }
       }
@@ -103,6 +106,9 @@
       "options": {
         "0": {
           "walk": "res://assets/sprites/paperdoll/kaart/lichaam.png",
+          "attack": "res://assets/sprites/paperdoll/attack/lichaam.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/lichaam.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/lichaam.png",
           "ko": "res://assets/sprites/paperdoll/ko/lichaam.png"
         }
       }
@@ -121,14 +127,23 @@
       "options": {
         "broek": {
           "walk": "res://assets/sprites/paperdoll/kaart/onder_broek.png",
+          "attack": "res://assets/sprites/paperdoll/attack/onder_broek.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/onder_broek.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/onder_broek.png",
           "ko": "res://assets/sprites/paperdoll/ko/onder_broek.png"
         },
         "rok": {
           "walk": "res://assets/sprites/paperdoll/kaart/onder_rok.png",
+          "attack": "res://assets/sprites/paperdoll/attack/onder_rok.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/onder_rok.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/onder_rok.png",
           "ko": "res://assets/sprites/paperdoll/ko/onder_rok.png"
         },
         "korte_broek": {
           "walk": "res://assets/sprites/paperdoll/kaart/onder_korte_broek.png",
+          "attack": "res://assets/sprites/paperdoll/attack/onder_korte_broek.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/onder_korte_broek.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/onder_korte_broek.png",
           "ko": "res://assets/sprites/paperdoll/ko/onder_korte_broek.png"
         }
       }
@@ -148,18 +163,30 @@
       "options": {
         "tuniek": {
           "walk": "res://assets/sprites/paperdoll/kaart/boven_tuniek.png",
+          "attack": "res://assets/sprites/paperdoll/attack/boven_tuniek.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/boven_tuniek.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/boven_tuniek.png",
           "ko": "res://assets/sprites/paperdoll/ko/boven_tuniek.png"
         },
         "mantel": {
           "walk": "res://assets/sprites/paperdoll/kaart/boven_mantel.png",
+          "attack": "res://assets/sprites/paperdoll/attack/boven_mantel.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/boven_mantel.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/boven_mantel.png",
           "ko": "res://assets/sprites/paperdoll/ko/boven_mantel.png"
         },
         "harnas": {
           "walk": "res://assets/sprites/paperdoll/kaart/boven_harnas.png",
+          "attack": "res://assets/sprites/paperdoll/attack/boven_harnas.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/boven_harnas.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/boven_harnas.png",
           "ko": "res://assets/sprites/paperdoll/ko/boven_harnas.png"
         },
         "gewaad": {
           "walk": "res://assets/sprites/paperdoll/kaart/boven_gewaad.png",
+          "attack": "res://assets/sprites/paperdoll/attack/boven_gewaad.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/boven_gewaad.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/boven_gewaad.png",
           "ko": "res://assets/sprites/paperdoll/ko/boven_gewaad.png"
         }
       }
@@ -176,6 +203,9 @@
       "options": {
         "cape": {
           "walk": "res://assets/sprites/paperdoll/kaart/cape.png",
+          "attack": "res://assets/sprites/paperdoll/attack/cape.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/cape.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/cape.png",
           "ko": "res://assets/sprites/paperdoll/ko/cape.png"
         }
       }
@@ -197,26 +227,44 @@
       "options": {
         "kort": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_kort_achter.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_kort_achter.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_kort_achter.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_kort_achter.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_kort_achter.png"
         },
         "lang": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_lang_achter.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_lang_achter.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_lang_achter.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_lang_achter.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_lang_achter.png"
         },
         "staart": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_staart_achter.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_staart_achter.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_staart_achter.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_staart_achter.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_staart_achter.png"
         },
         "knot": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_knot_achter.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_knot_achter.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_knot_achter.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_knot_achter.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_knot_achter.png"
         },
         "stekel": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_stekel_achter.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_stekel_achter.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_stekel_achter.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_stekel_achter.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_stekel_achter.png"
         },
         "krul": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_krul_achter.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_krul_achter.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_krul_achter.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_krul_achter.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_krul_achter.png"
         }
       }
@@ -232,6 +280,9 @@
       "options": {
         "0": {
           "walk": "res://assets/sprites/paperdoll/kaart/gezicht.png",
+          "attack": "res://assets/sprites/paperdoll/attack/gezicht.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/gezicht.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/gezicht.png",
           "ko": "res://assets/sprites/paperdoll/ko/gezicht.png"
         }
       }
@@ -253,26 +304,44 @@
       "options": {
         "kort": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_kort_voor.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_kort_voor.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_kort_voor.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_kort_voor.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_kort_voor.png"
         },
         "lang": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_lang_voor.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_lang_voor.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_lang_voor.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_lang_voor.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_lang_voor.png"
         },
         "staart": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_staart_voor.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_staart_voor.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_staart_voor.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_staart_voor.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_staart_voor.png"
         },
         "knot": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_knot_voor.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_knot_voor.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_knot_voor.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_knot_voor.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_knot_voor.png"
         },
         "stekel": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_stekel_voor.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_stekel_voor.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_stekel_voor.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_stekel_voor.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_stekel_voor.png"
         },
         "krul": {
           "walk": "res://assets/sprites/paperdoll/kaart/haar_krul_voor.png",
+          "attack": "res://assets/sprites/paperdoll/attack/haar_krul_voor.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/haar_krul_voor.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/haar_krul_voor.png",
           "ko": "res://assets/sprites/paperdoll/ko/haar_krul_voor.png"
         }
       }
@@ -291,10 +360,16 @@
       "options": {
         "kap": {
           "walk": "res://assets/sprites/paperdoll/kaart/hoofd_kap.png",
+          "attack": "res://assets/sprites/paperdoll/attack/hoofd_kap.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/hoofd_kap.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/hoofd_kap.png",
           "ko": "res://assets/sprites/paperdoll/ko/hoofd_kap.png"
         },
         "hoed": {
           "walk": "res://assets/sprites/paperdoll/kaart/hoofd_hoed.png",
+          "attack": "res://assets/sprites/paperdoll/attack/hoofd_hoed.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/hoofd_hoed.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/hoofd_hoed.png",
           "ko": "res://assets/sprites/paperdoll/ko/hoofd_hoed.png"
         }
       }
@@ -314,22 +389,37 @@
       "options": {
         "zwaard": {
           "walk": "res://assets/sprites/paperdoll/kaart/wapen_zwaard.png",
+          "attack": "res://assets/sprites/paperdoll/attack/wapen_zwaard.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/wapen_zwaard.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/wapen_zwaard.png",
           "ko": "res://assets/sprites/paperdoll/ko/wapen_zwaard.png"
         },
         "staf": {
           "walk": "res://assets/sprites/paperdoll/kaart/wapen_staf.png",
+          "attack": "res://assets/sprites/paperdoll/attack/wapen_staf.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/wapen_staf.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/wapen_staf.png",
           "ko": "res://assets/sprites/paperdoll/ko/wapen_staf.png"
         },
         "scepter": {
           "walk": "res://assets/sprites/paperdoll/kaart/wapen_scepter.png",
+          "attack": "res://assets/sprites/paperdoll/attack/wapen_scepter.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/wapen_scepter.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/wapen_scepter.png",
           "ko": "res://assets/sprites/paperdoll/ko/wapen_scepter.png"
         },
         "psy": {
           "walk": "res://assets/sprites/paperdoll/kaart/wapen_psy.png",
+          "attack": "res://assets/sprites/paperdoll/attack/wapen_psy.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/wapen_psy.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/wapen_psy.png",
           "ko": "res://assets/sprites/paperdoll/ko/wapen_psy.png"
         },
         "boog": {
           "walk": "res://assets/sprites/paperdoll/kaart/wapen_boog.png",
+          "attack": "res://assets/sprites/paperdoll/attack/wapen_boog.png",
+          "hurt": "res://assets/sprites/paperdoll/hurt/wapen_boog.png",
+          "dodge": "res://assets/sprites/paperdoll/dodge/wapen_boog.png",
           "ko": "res://assets/sprites/paperdoll/ko/wapen_boog.png"
         }
       }
