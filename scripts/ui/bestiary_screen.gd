@@ -161,7 +161,7 @@ func _ready() -> void:
 		seen += 1 if known else 0
 		beaten += 1 if GameState.defeated_count(id) > 0 else 0
 		var b := UiMenu.button("%03d %s" % [int(e.get("no", 0)), str(e["name"]) if known else "???"])
-		b.custom_minimum_size = Vector2(106, 15)
+		b.custom_minimum_size = Vector2(106, UiTouchC.ROW_TOUCH)   # F6-2: tikvlak 25 (was 15)
 		b.focus_entered.connect(show_entry.bind(id))
 		b.pressed.connect(show_entry.bind(id))
 		list.add_child(b)

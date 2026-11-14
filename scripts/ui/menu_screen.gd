@@ -21,7 +21,10 @@ const LAYER := 21
 const FRAME_INSET := 6         # afstand venster - schermrand
 const PAD_X := 12              # inhoud - schermrand (links/rechts)
 const PAD_Y := 9               # inhoud - schermrand (boven/onder)
-const ROW_H := 16              # hoogte van een menuregel (ook = minimale tikhoogte)
+const ROW_H := 16              # hoogte van een compacte menuregel (vaste panelen zonder scroll)
+## F6-2: hoogte van een kiesbare lijstregel in een scrollende lijst = tikvlak (UiTouch.ROW_TOUCH, 25 = ~48 dp).
+## De knop heeft geen zichtbare achtergrond: de extra hoogte is onzichtbare padding rond de tekst.
+const LIST_ROW_H := UiTouchC.ROW_TOUCH
 const BACK_W := 56             # breedte van de 'Terug'-knop (groot genoeg voor een duim)
 const MESSAGE_TIME := 2.5      # zo lang blijft een melding staan (seconden)
 const DEFAULT_HINT := "A: choose   B: back"

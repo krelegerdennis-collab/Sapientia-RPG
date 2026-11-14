@@ -418,7 +418,7 @@ func open_list(slot: String) -> void:
 	list_ids = ids
 	for id in ids:
 		var b := UiMenu.button("%s x%d" % [Equipment.item_name(id).rpad(NAME_COLS), GameState.item_count(id)])
-		b.custom_minimum_size = Vector2(0, ROW_H)
+		b.custom_minimum_size = Vector2(0, LIST_ROW_H)
 		b.clip_text = true
 		ItemIcons.apply16(b, str(id))
 		if GameState.is_permanent_item(str(id)):

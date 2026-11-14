@@ -144,7 +144,7 @@ func _rij(q: Dictionary, flags: Dictionary, stap: int, vg: Dictionary) -> void:
 	var b := UiMenu.button(tekst)
 	b.name = "Quest_" + str(q["id"])
 	b.set_meta("quest", str(q["id"]))
-	b.custom_minimum_size = Vector2(0, TOUCH_H)
+	b.custom_minimum_size = Vector2(0, LIST_ROW_H)   # F6-2: regel = tikvlak 25 (tabs blijven TOUCH_H)
 	b.clip_text = true
 	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	lock_horizontal_focus(b)

@@ -81,7 +81,7 @@ func _fill() -> void:
 		var seen: bool = GameState.scene_seen(str(sc["id"]))
 		var b := UiMenu.button("%d. %s" % [i + 1, str(sc["title"]) if seen else ScenesData.LOCKED_TITLE])
 		b.name = "Scene_" + str(sc["id"])
-		b.custom_minimum_size = Vector2(0, ROW_H)
+		b.custom_minimum_size = Vector2(0, LIST_ROW_H)
 		b.pressed.connect(choose.bind(str(sc["id"])))
 		if not seen:
 			_grey(b)

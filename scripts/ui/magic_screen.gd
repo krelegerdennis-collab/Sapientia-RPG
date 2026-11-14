@@ -19,6 +19,7 @@ var prev_button: Button
 var next_button: Button
 var caster_label: Label
 var list: VBoxContainer
+var scroll: ScrollContainer
 var entries: Array[Button] = []
 var spell_ids: Array = []
 var name_label: Label
@@ -45,10 +46,18 @@ func _build() -> void:
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 8)
 	content.add_child(body)
+	# F6-2: regels zijn 25 hoog (tikvlak); bij veel spreuken scrolt de lijst (volgt de focus)
+	scroll = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(LIST_W, 0)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.scroll_deadzone = 6
+	scroll.follow_focus = true
+	body.add_child(scroll)
 	list = VBoxContainer.new()
 	list.custom_minimum_size = Vector2(LIST_W, 0)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override("separation", 0)
-	body.add_child(list)
+	scroll.add_child(list)
 	var detail := VBoxContainer.new()
 	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	detail.add_theme_constant_override("separation", 2)
@@ -88,7 +97,7 @@ func show_caster(i: int, keep_id := "") -> void:
 	for sid in spell_ids:
 		var sp := PartyActions.spell_data(str(sid))
 		var b := UiMenu.button("%s %2d MP" % [str(sp.get("name", sid)).rpad(NAME_COLS), int(sp.get("mp", 0))])
-		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
+		b.custom_minimum_size = Vector2(LIST_W - 4, LIST_ROW_H)
 		b.focus_entered.connect(show_spell.bind(str(sid)))
 		b.pressed.connect(choose_spell.bind(str(sid)))
 		if PartyActions.spell_block_reason(c, str(sid)) != "":
