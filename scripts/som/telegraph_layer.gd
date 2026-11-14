@@ -10,6 +10,8 @@ const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const CombatZones := preload("res://scripts/som/combat_zones.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
+const SomStaggerData := preload("res://scripts/data/som_stagger_data.gd")
+const SomFeelData := preload("res://scripts/data/som_feel_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const TelegraphFloorArt := preload("res://scripts/som/telegraph_floor_art.gd")
@@ -47,6 +49,12 @@ class RootIconEntry:
 	var pos: Vector2 = Vector2.ZERO
 
 
+class StaggerBarEntry:
+	var pos: Vector2 = Vector2.ZERO
+	var ratio: float = 0.0
+	var wankel: bool = false
+
+
 ## Root-FX boven held-sprites (y_sort op Objects); telegraaf-vormen blijven op laag z_index 4.
 class RootFxOverlay extends Node2D:
 	var host: TelegraphLayer
@@ -73,6 +81,7 @@ class RootFxOverlay extends Node2D:
 var _entries: Array[DrawEntry] = []
 var _zone_entries: Array[ZoneDrawEntry] = []
 const TELEGRAPH_ALPHA := 1.0
+var _stagger_bars: Array = []
 var _root_icons: Array = []
 var _root_anim_start_ms: Dictionary = {}
 var _root_tex: Texture2D = null
@@ -182,6 +191,40 @@ func sync_from_enemies(enemies: Dictionary, interruptible_for_attack: Callable =
 	if _entries_changed(next):
 		_entries = next
 		queue_redraw()
+
+
+## F2: goedkoop stagger-balkje boven de vijand (geen HP-UI elders in Action).
+func sync_stagger_bars(enemies: Dictionary, center_of: Callable) -> void:
+	var next: Array = []
+	for m in enemies.keys():
+		if not is_instance_valid(m):
+			continue
+		var e: Dictionary = enemies[m]
+		if e.has("golem"):
+			continue
+		var max_v := SomStaggerData.max_meter(e.get("data", {}), m)
+		var fill := float(e.get("stg", 0)) / float(maxi(1, max_v))
+		if fill <= 0.0 and int(e.get("stg_wankel", 0)) <= 0:
+			continue
+		var ent := StaggerBarEntry.new()
+		ent.pos = center_of.call(m) + Vector2(0, -18)
+		ent.ratio = clampf(fill, 0.0, 1.0)
+		ent.wankel = int(e.get("stg_wankel", 0)) > 0
+		next.append(ent)
+	if _stagger_bars_changed(next):
+		_stagger_bars = next
+		queue_redraw()
+
+
+func _stagger_bars_changed(next: Array) -> bool:
+	if next.size() != _stagger_bars.size():
+		return true
+	for i in next.size():
+		var a: StaggerBarEntry = next[i]
+		var b: StaggerBarEntry = _stagger_bars[i]
+		if a.pos != b.pos or absf(a.ratio - b.ratio) > 0.02 or a.wankel != b.wankel:
+			return true
+	return false
 
 
 ## Actieve grondzones (Combat T4b); alleen tekenen.
@@ -388,8 +431,19 @@ static func _wedge_poly(shape: TelegraphShape, scale: float) -> PackedVector2Arr
 func _draw() -> void:
 	for ent in _entries:
 		_draw_entry(ent)
+	for bar in _stagger_bars:
+		_draw_stagger_bar(bar)
 	for ze in _zone_entries:
 		_draw_zone(ze)
+
+
+func _draw_stagger_bar(bar: StaggerBarEntry) -> void:
+	var w := float(SomStaggerData.STAGGER_BAR_W)
+	var h := float(SomStaggerData.STAGGER_BAR_H)
+	var origin := bar.pos - Vector2(w * 0.5, 0.0)
+	draw_rect(Rect2(origin, Vector2(w, h)), Color(0.1, 0.1, 0.1, 0.65))
+	var fill_col := Color(SomFeelData.COL_FINISHER if bar.wankel else Color(1, 0.85, 0.35, 0.92))
+	draw_rect(Rect2(origin, Vector2(w * bar.ratio, h)), fill_col)
 
 
 func _draw_root_icon_on(canvas: CanvasItem, center: Vector2, hid: String) -> void:

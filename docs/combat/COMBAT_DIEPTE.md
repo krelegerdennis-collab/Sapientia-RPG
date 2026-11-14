@@ -67,17 +67,19 @@ Algemene regels voor alle PR's
 
 ## F2 — Stagger-meter vijanden
 
+**Status (PR `combat/f2-stagger`, basis `finish/wm1`): gebouwd** — `scripts/data/som_stagger_data.gd`, `scripts/som/som_stagger.gd`, arena-hook, co-op snapshot v2 (**21 B** vijandrecord, **1 B** stagger: 2 bits state + 6 bits meter/63), stagger-balk in `telegraph_layer.gd`, suite `--staggertest` (CI).
+
 **Doel**: ketens en zware slagen een doel geven buiten pure schade; bestaande bool "stagger" wordt een meter.
 
 **Mechaniek** (per vijand `e["stg"]` int, max **100**)
-- Vulling per treffer: hit1 **8**, hit2 **10**, finisher **22**, heavy L1 **30**, L2 **45**, perfect-counter **+20**, spreuk **5** **[NG: spreukpad niet bekeken]**.
+- Vulling per treffer: hit1 **8**, hit2 **10**, finisher **22**, heavy L1 **30**, L2 **45**, perfect-counter **+20** (constante alleen), spreuk **5** via `cast_spell` → `damage_enemy(..., KIND_SPELL)` [GEV].
 - Verval: na **60 ticks** zonder treffer −1 per 2 ticks.
 - Vol → **Wankel** **90 ticks**: telegraaf `interrupt()`, geen aanvallen, ontvangt **×1.3** schade; daarna meter 0 en **180 ticks** immuun voor vulling.
 - Bestaande gedrag blijft: volle slag/finisher onderbreekt windup (dat is "kleine stagger"); de meter is de "grote stagger".
 - Golem: niet via de meter; de kern-break (`break_damage` 45 → `stagger_ticks` 60) **is** zijn stagger. Optioneel: meter vult alleen tijdens kern-open (later, niet in deze PR).
 - Boss/unique (Inktwurm): max **160**.
 
-**Bestanden**: nieuw `scripts/data/som_stagger_data.gd`; `som_arena.gd` (`damage_enemy`, `_enemy_ai`, `_enemy_ai_telegraph`); HUD-balkje boven vijand in `scripts/som/som_hud.gd` of `som_fx.gd` **[NG welke tekent vijand-hp]**; snapshot-veld `stg` voor co-op.
+**Bestanden**: `scripts/data/som_stagger_data.gd`; `som_arena.gd`; stagger-balk in `telegraph_layer.gd` (geen vijand-HP-UI in Action [GEV]); co-op v2: één `stg`-byte per vijand (host autoritair; gasten decoderen state + fill).
 
 **Tests/metrics**: nieuw `scripts/tests/stagger_tests.gd` (vulling per staptype, verval, wankel-duur, immuniteit, determinisme); sim: wankels per kamer (doel 1-2 bij normale groep), aandeel schade in wankel (doel 20-30 %), kamertijd ≤ −10 %.
 
