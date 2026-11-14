@@ -13,6 +13,12 @@ var _pattern_i := 0
 var _acc := 0.0
 
 
+func _ready() -> void:
+	# Stil = geen _process (mobiel). test_tick() roept _process direct aan.
+	if _remaining_ticks <= 0:
+		set_process(false)
+
+
 func setup(cam: Camera2D) -> void:
 	_cam = cam
 
@@ -29,6 +35,7 @@ func kick(kind: String) -> void:
 	_remaining_ticks = _total_ticks
 	_pattern_i = 0
 	_acc = 0.0
+	set_process(true)
 
 
 func stop() -> void:
@@ -37,6 +44,7 @@ func stop() -> void:
 	_kind = ""
 	_pattern_i = 0
 	_acc = 0.0
+	set_process(false)
 	if _cam != null:
 		_cam.offset = Vector2.ZERO
 

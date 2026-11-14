@@ -9,7 +9,7 @@ Screenshake en gekleurde schadegetallen op vijanden. Geen wijziging aan hitstop,
 | finisher (eigen held) | 1 | 4 |
 | heavy L1 | 2 | 6 |
 | heavy L2 | 3 | 8 |
-| Golem hamerslag (eigen held geraakt) | 3 | 10 |
+| Golem hamerslag en grote AoE (eigen held geraakt) | 3 | 10 |
 
 Alleen de **lokale** held triggert schudden (geen shake bij AI-bondgenoten of andere spelers). Co-op gast: shake `heavy1` als eigen HP in de snapshot met ≥ 10 % daalt.
 
@@ -25,6 +25,8 @@ Patroon: vaste tabel in `SomFeelData.PATTERN` (geen `randf`). Na elke shake: `Ca
 | heavy L2 | `#FFD24A` | 1.25 |
 
 Oranje/goud: witte rij in `dmg_digits.png` + `modulate`. Party-schade (rood) en heal (groen) blijven de bestaande rijen.
+
+HD-2D zet elke frame de `modulate` van combat-nodes op de inverse kaart-tint. Finisher- en heavy-getallen bewaren hun kleur in meta `feel_rgb`; de compensatie vermenigvuldigt daarmee, zodat het getal op het scherm oranje of goud blijft. Alpha van de fade-tween blijft staan.
 
 ## Uitzetten
 

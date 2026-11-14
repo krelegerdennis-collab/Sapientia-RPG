@@ -533,14 +533,15 @@ func next_alive(from: String) -> String:
 ## SWITCH: besturing naar de volgende levende held. Speler-lichaam en bondgenoot-lichaam ruilen van held
 ## (sprite + plek); de camera glijdt mee. Geeft de nieuwe held-id ("" = niets gewisseld).
 func switch_hero(to := "") -> String:
-	if shake != null:
-		shake.stop()
 	var nxt := to if to != "" else next_alive(active_id)
 	if nxt == "" or nxt == active_id or not is_alive(nxt):
 		return ""
 	var a := ally_of(nxt)
 	if a == null:
 		return ""
+	# Alleen een echte wissel stopt de shake (een mislukte tik laat hem doorlopen).
+	if shake != null:
+		shake.stop()
 	if a.in_wall():
 		a._teleport()      # anders belandt de bestuurde held in de muur en kan hij niet meer lopen
 	combat_roots.clear_member(active_id)
@@ -1602,7 +1603,8 @@ func _golem_strike(m: Node, e: Dictionary, attack_id: String, power: float) -> v
 	var a := GolemBoss.attack(attack_id)
 	var origin: Vector2 = e.get("golem_origin", center_of(m))
 	var reach := float(_golem_strike_reach_px(m, a))
-	var slam := attack_id in GolemBoss.SLAM_ATTACKS
+	# Hamerslag én grote AoE (shockwave): alleen de lokale held, client-only.
+	var slam := attack_id in GolemBoss.SLAM_ATTACKS or bool(a.get("large_aoe", false))
 	var shook := false
 	for id in party_ids():
 		if is_alive(id) and node_of(id) != null and origin.distance_to(body_of(id)) <= reach:
