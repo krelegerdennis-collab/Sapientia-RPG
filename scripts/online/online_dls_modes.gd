@@ -4,12 +4,13 @@ extends RefCounted
 ## Solo-DLS (Classic) blijft dungeon100_scaling / dungeon100_rules. Zie ONLINE_COOP_DESIGN §7.0 en §11.
 ##
 ## PROPOSAL — RPG FORGE, geen canon. Dennis keurt de balans.
-## Startwaarde van mode_exp_factor: 100/N (Easy ×10, Normal ×2, Hard ×1).
+## Startwaarde van mode_exp_factor: Easy ×EASY_EXP_FACTOR (7), anders 100/N (Normal ×2, Hard ×1).
 ## Niet in dungeon100_scaling.gd. De battlesim mag dit later bijstellen.
 
 const SIM_PATH := "res://data/online/sims/dls.json"
 ## PROPOSAL_MODE_EXP_NUMERATOR: teller van 100/N. Geen canon-balansgetal.
 const PROPOSAL_MODE_EXP_NUMERATOR := 100
+const EASY_EXP_FACTOR := 7
 
 const Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Rules := preload("res://scripts/dungeon/dungeon100_rules.gd")
@@ -99,8 +100,10 @@ static func is_rest(mode: String, f: int) -> bool:
 	return false
 
 
-## PROPOSAL. Zie PROPOSAL_MODE_EXP_NUMERATOR. Easy 10, Normal 2, Hard 1.
+## PROPOSAL. Easy: EASY_EXP_FACTOR. Normal/Hard: PROPOSAL_MODE_EXP_NUMERATOR / floors (2 / 1).
 static func mode_exp_factor(mode: String) -> int:
+	if mode == "easy":
+		return EASY_EXP_FACTOR
 	var n := floors(mode)
 	if n <= 0:
 		return 1

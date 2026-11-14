@@ -71,7 +71,7 @@ func _run() -> void:
 	check("goud ongewijzigd", int(GameState.gold) == gold_before)
 	check("inventaris ongewijzigd", _inv_sig() == inv_before)
 	check("dungeon100_floor ongewijzigd", int(GameState.dungeon100_floor) == floor_before)
-	check("exp-factor blijft 10 na de sim", Modes.mode_exp_factor("easy") == 10)
+	check("exp-factor blijft 7 na de sim", Modes.mode_exp_factor("easy") == 7)
 	_cleanup(planted)
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -79,9 +79,9 @@ func _run() -> void:
 
 func _factor_stays() -> void:
 	var applied: Dictionary = Floor.apply_mode_exp("easy", {"exp": 37})
-	check("scaled_exp(37, 10) = apply_mode_exp easy", Sim.scaled_exp(37, 10) == int(applied["exp"]))
+	check("scaled_exp(37, 7) = apply_mode_exp easy", Sim.scaled_exp(37, 7) == int(applied["exp"]))
 	check("scaled_exp(37, 25) wijkt af van de spelwaarde", Sim.scaled_exp(37, 25) != int(applied["exp"]))
-	check("spelwaarde easy is 10", Modes.mode_exp_factor("easy") == 10)
+	check("spelwaarde easy is 7", Modes.mode_exp_factor("easy") == 7)
 	check("PROPOSAL-teller blijft 100", Modes.PROPOSAL_MODE_EXP_NUMERATOR == 100)
 	check("normal/hard-factor blijft 2/1", Modes.mode_exp_factor("normal") == 2 and Modes.mode_exp_factor("hard") == 1)
 

@@ -2,6 +2,8 @@
 
 Dennis koos op 11-11-2026 (kaart t755s4283) de online co-op Easy-balans: vijandschade ×1.2, vloerherstel 50, revive aan.
 
+Op 14-11-2026 koos Dennis voor **EXP-factor ×7** (was ×10) voor online co-op Easy (`OnlineDlsModes.EASY_EXP_FACTOR`). Normal ×2 en Hard ×1 blijven via `PROPOSAL_MODE_EXP_NUMERATOR / floors`.
+
 Alleen een online DLS-kamer met modus `easy` gebruikt dit. `SomData.ENEMY_DAMAGE_MULT` blijft 2.2. `SomData.enemy_damage_mult` blijft `ENEMY_DAMAGE_MULT` × de gebiedsregel. Solo, Classic, offline en Normal/Hard lezen die functie en krijgen geen vloerherstel.
 
 ## Schade
@@ -22,6 +24,15 @@ Eén geslaagde revive per stoel per run (`CoopRevive.REVIVES_PER_RUN`). `OnlineD
 
 Seren (`lotte`) start het kanaal meteen als iemand ligt. Andere AI alleen als er geen levende Heal-stoel is (`CoopRevive.ai_should_revive`). `SeatController.DRIVES_REVIVE` blijft uit en `try_revive` blijft `false`. `SomAlly._coop_revive_drive` blijft de CoopRevive-aanroepen doen.
 
-## Sim
+## Sim (EXP ×7, schade 1.2, herstel 50, revive)
 
-Factor 10, 24 runs, seed `20261110`, vloeren 1–10, `--no-hypo`, revive aan, schade 1.2, herstel 50. Winst alle (baas / 24): 0.0% (0), 70.8% (17), 87.5% (21), 95.8% (23) voor 1–4 stoelen. Bron: `docs/combat/m9b_easy_revive.md`. Suite: `--easycoopbalanstest`.
+Factor **7**, 24 runs, seed `20261110`, vloeren 1–10, `--no-hypo`, revive aan, schade 1.2, herstel 50. Page Warden-winst (baas / 24):
+
+| Stoelen | Winsten | % |
+|--------:|--------:|--:|
+| 1 | 0 | 0.0% |
+| 2 | 8 | 33.3% |
+| 3 | 20 | 83.3% |
+| 4 | 21 | 87.5% |
+
+Bron: `docs/combat/m9b_easy_revive.md`. Suite: `--easycoopbalanstest`.
