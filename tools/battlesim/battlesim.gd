@@ -227,11 +227,11 @@ func _d100_scenario(f: int, boss: bool) -> Dictionary:
 		spells["lotte"] = ["genees"]
 	if f >= 30:
 		spells["noor"] = ["vuur", "bliksem"]
-	# V3-rollenladder (Dennis): vuurbal+grote_genezing@20, zonnevlam@40, zonneslag@80.
+	# V3-rollenladder (Dennis): vuurbal+grote_genezing+zonnevlam@20, zonneslag@80.
 	if f >= 20:
 		spells["noor"].append("vuurbal")
 		spells["lotte"].append("grote_genezing")
-	if f >= 40:
+	if f >= 20:
 		spells["noor"].append("zonnevlam")
 	if f >= 80:
 		spells["noor"].append("zonneslag")
