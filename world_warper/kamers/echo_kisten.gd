@@ -22,6 +22,10 @@ const KLEUREN := {
 	"accessoire": Color("3ddec0"),
 }
 const LEEG := Color(0.12, 0.13, 0.18, 1)
+## F6-5: leesbare kistnamen (Dauwpixel is 1:1 op 10). Breedte volgt de tekst; de middelste naam staat
+## onder zijn kist, zodat drie namen van ~54 breed naast kisten op 32 afstand elkaar niet raken.
+const LABEL_FONT := 10
+const KIST_HOOG := 14
 const ECHO_FELLER := Color(1.55, 1.25, 1.85, 1)
 
 var _vlakken: Array[Sprite2D] = []
@@ -75,17 +79,24 @@ func _ready() -> void:
 		add_child(vlak)
 		_vlakken.append(vlak)
 		var lab := Label.new()
+		lab.name = "Naam"
 		lab.text = str(NAMEN[soort])
-		lab.position = Vector2(-16, -18)
-		lab.size = Vector2(36, 10)
 		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		lab.add_theme_font_override("font", FONT)
-		lab.add_theme_font_size_override("font_size", 6)
+		lab.add_theme_font_size_override("font_size", LABEL_FONT)
 		lab.add_theme_color_override("font_color", Color("f2e9d8"))
 		vlak.add_child(lab)
+		_plaats_label(lab, i)
 	GameState.echo_grot_voltooid = tel_resultaat(GameState.story_flags, GameState.echo_grot_voltooid)
 	ververs()
+
+
+func _plaats_label(lab: Label, i: int) -> void:
+	var maat := lab.get_minimum_size()
+	lab.size = maat
+	var y := KIST_HOOG / 2.0 + 1.0 if i % 2 == 1 else -KIST_HOOG / 2.0 - 1.0 - maat.y
+	lab.position = Vector2(-roundf(maat.x / 2.0), roundf(y))
 
 
 func ververs() -> void:
@@ -142,7 +153,7 @@ func _process(delta: float) -> void:
 
 
 func _vlak(kleur: Color) -> ImageTexture:
-	var img := Image.create(18, 14, false, Image.FORMAT_RGBA8)
+	var img := Image.create(18, KIST_HOOG, false, Image.FORMAT_RGBA8)
 	img.fill(kleur)
 	return ImageTexture.create_from_image(img)
 

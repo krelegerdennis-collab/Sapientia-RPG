@@ -15,6 +15,7 @@ signal party_changed
 
 const PartyLines := preload("res://world_warper/services/party_view_test.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 const ANCHOR_GROUP := "ww_anchor_party"
 const PANEL_SIZE := Vector2(220, 180)
@@ -89,8 +90,14 @@ func _place_at_anchor() -> void:
 	if not is_inside_tree():
 		return
 	var anchor := _first_anchor()
+	var ins := UiTouchC.insets(get_viewport())
 	if anchor == null:
+		# F6-5: het hele scherm, maar binnen het veilige gebied (notch, gebarenbalk)
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		offset_left = ins.x
+		offset_top = ins.y
+		offset_right = -ins.z
+		offset_bottom = -ins.w
 		return
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	var doel := PANEL_SIZE
@@ -103,6 +110,20 @@ func _place_at_anchor() -> void:
 	elif anchor is Node2D:
 		global_position = (anchor as Node2D).global_position
 	size = doel
+	_binnen_veilig(ins)
+
+
+## F6-5: paneel (bij een anker) helemaal binnen het veilige gebied schuiven; past het niet, dan krimpt
+## het tot het veilige gebied (nooit kleiner dan PANEL_SIZE, dat past altijd op 216 hoog min insets).
+func _binnen_veilig(ins: Vector4) -> void:
+	var vp := get_viewport_rect().size
+	var veilig := Rect2(Vector2(ins.x, ins.y), vp - Vector2(ins.x + ins.z, ins.y + ins.w))
+	var r := Rect2(global_position, size)
+	r.size = Vector2(minf(r.size.x, maxf(veilig.size.x, PANEL_SIZE.x)), minf(r.size.y, maxf(veilig.size.y, PANEL_SIZE.y)))
+	r.position.x = clampf(r.position.x, veilig.position.x, maxf(veilig.position.x, veilig.end.x - r.size.x))
+	r.position.y = clampf(r.position.y, veilig.position.y, maxf(veilig.position.y, veilig.end.y - r.size.y))
+	global_position = r.position
+	size = r.size
 
 
 func _first_anchor() -> Node:
