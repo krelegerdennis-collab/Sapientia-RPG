@@ -7,6 +7,7 @@ extends RefCounted
 ## - slash/spark/number/telegraph: FX; Gauge: wapenmeter boven de held.
 
 const SomData := preload("res://scripts/data/som_data.gd")
+const SomFeelData := preload("res://scripts/data/som_feel_data.gd")
 const THEME := preload("res://assets/theme.tres")
 const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const PLACEHOLDER_COLOR := Color("ff1ee6")
@@ -325,9 +326,11 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 		d.sheet = digits
 		d.text = text.trim_prefix("+")
 		d.row = _digit_row(color)
-		# F4 finisher/heavy: witte rij + modulate (laat rood/groen _digit_row ongemoeid).
-		if color.is_equal_approx(Color("FF8A3D")) or color.is_equal_approx(Color("FFD24A")):
+		# F4 finisher/heavy: witte rij + modulate (rood/groen _digit_row blijft). Meta zodat
+		# HD-2D-compensatie (elke frame) de kleur vermenigvuldigt i.p.v. hem te wissen.
+		if color.is_equal_approx(SomFeelData.COL_FINISHER) or color.is_equal_approx(SomFeelData.COL_HEAVY):
 			d.row = 0
+			d.set_meta(Hd2dUnmodulated.FEEL_RGB, color)
 			n = d
 			n.modulate = color
 		else:
