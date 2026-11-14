@@ -62,7 +62,12 @@ static var _fixed: Dictionary = {}
 static var _outline := Color8(58, 64, 88)
 static var _colors: Dictionary = {}
 static var _recolored: Dictionary = {}
+static var _opaque_pixels: Dictionary = {}
+static var _layer_rgba_cache: Dictionary = {}
+static var _layer_bytes_cache: Dictionary = {}
+static var _layer_size_cache: Dictionary = {}
 static var _images: Dictionary = {}
+static var _layer_mutex: Mutex = Mutex.new()
 static var _textures: Dictionary = {}
 static var _avatars: Dictionary = {}
 static var bakes: int = 0
@@ -73,6 +78,7 @@ static var last_bake_us: int = 0
 static func clear_cache() -> void:
 	_recolored.clear()
 	_images.clear()
+	# _layer_rgba_cache / _opaque_pixels blijven voor bake-prestatie
 	_textures.clear()
 	_avatars.clear()
 
@@ -197,10 +203,18 @@ static func look_key(look: Dictionary) -> String:
 
 static func image_for(look: Dictionary, sheet: String) -> Image:
 	var key := "%s#%s" % [look_key(look), sheet]
-	if _images.has(key):
-		return _images[key]
+	_layer_mutex.lock()
+	var hit: Variant = _images.get(key)
+	_layer_mutex.unlock()
+	if hit is Image:
+		return hit
 	var image := _compose(look, sheet)
-	_images[key] = image
+	_layer_mutex.lock()
+	if not _images.has(key):
+		_images[key] = image
+	else:
+		image = _images[key]
+	_layer_mutex.unlock()
 	return image
 
 
@@ -227,14 +241,25 @@ static func bake(look: Dictionary, sheet: String = "") -> Variant:
 
 
 static func _bake_avatar(look: Dictionary) -> Dictionary:
+	_ensure()
 	var key := look_key(look)
 	if _avatars.has(key):
 		cache_hits += 1
 		return _avatars[key]
 	var t0 := Time.get_ticks_usec()
 	var out := {}
+	var tasks: Array = []
 	for sid in SHEET_LIST:
-		out[sid] = _bake_sheet(look, sid, false)
+		var cap_sid := sid
+		tasks.append(WorkerThreadPool.add_task(
+			func() -> void:
+				var tex := _bake_sheet(look, cap_sid, false)
+				_layer_mutex.lock()
+				out[cap_sid] = tex
+				_layer_mutex.unlock()
+		))
+	for task_id in tasks:
+		WorkerThreadPool.wait_for_task_completion(int(task_id))
 	_avatars[key] = out
 	bakes += 1
 	last_bake_us = int(Time.get_ticks_usec() - t0)
@@ -243,15 +268,23 @@ static func _bake_avatar(look: Dictionary) -> Dictionary:
 
 static func _bake_sheet(look: Dictionary, sheet: String, count: bool) -> ImageTexture:
 	var key := "%s#%s" % [look_key(look), sheet]
-	if _textures.has(key):
+	_layer_mutex.lock()
+	var hit: Variant = _textures.get(key)
+	_layer_mutex.unlock()
+	if hit is ImageTexture:
 		if count:
 			cache_hits += 1
-		return _textures[key]
+		return hit
 	var t0 := Time.get_ticks_usec()
 	var image := image_for(look, sheet)
 	var texture := ImageTexture.create_from_image(image)
 	apply_nearest(texture)
-	_textures[key] = texture
+	_layer_mutex.lock()
+	if not _textures.has(key):
+		_textures[key] = texture
+	else:
+		texture = _textures[key]
+	_layer_mutex.unlock()
 	if count:
 		bakes += 1
 		last_bake_us = int(Time.get_ticks_usec() - t0)
@@ -271,24 +304,7 @@ static func apply_nearest(target: Object) -> void:
 static func recolor_image(src: Image, keys: PackedColorArray, ramp: PackedColorArray) -> Image:
 	if src == null:
 		return null
-	var out := Image.create(src.get_width(), src.get_height(), false, Image.FORMAT_RGBA8)
-	var map := PackedInt32Array()
-	map.resize(keys.size())
-	for i in keys.size():
-		map[i] = _pack(keys[i])
-	for y in src.get_height():
-		for x in src.get_width():
-			var c := src.get_pixel(x, y)
-			if c.a8 == 0:
-				continue
-			var packed := _pack(c)
-			var slot := map.find(packed)
-			if slot >= 0 and slot < ramp.size():
-				var dest: Color = ramp[slot]
-				out.set_pixel(x, y, Color8(dest.r8, dest.g8, dest.b8, 255))
-			else:
-				out.set_pixel(x, y, Color8(c.r8, c.g8, c.b8, 255))
-	return out
+	return _recolor_bytes(src, keys, ramp)
 
 
 static func validate() -> PackedStringArray:
@@ -326,7 +342,31 @@ static func validate() -> PackedStringArray:
 				var rel := _option_path(options[id], sheet)
 				if rel == "" or not FileAccess.file_exists(rel):
 					errors.append("mist %s/%s/%s" % [layer, str(id), sheet])
+	_warm_opaque_caches()
 	return errors
+
+
+static func _warm_opaque_caches() -> void:
+	for layer in ORDER:
+		var spec: Dictionary = _layers.get(layer, {})
+		if spec.is_empty():
+			continue
+		var options: Dictionary = spec.get("options", {})
+		var do_recolor := str(spec.get("recolor", "")) != ""
+		for id in options:
+			for sid in SHEET_LIST:
+				var rel := _option_path(options[id], sid)
+				if rel == "" or not FileAccess.file_exists(rel):
+					continue
+				var cached: Variant = _layer_rgba_cache.get(rel)
+				if not (cached is Image):
+					_layer_rgba(rel)
+					cached = _layer_rgba_cache.get(rel)
+				if not _layer_bytes_cache.has(rel) and cached is Image:
+					_layer_bytes_cache[rel] = (cached as Image).get_data()
+					_layer_size_cache[rel] = Vector2i((cached as Image).get_width(), (cached as Image).get_height())
+				if do_recolor and _layer_bytes_cache.has(rel) and not _opaque_pixels.has(rel):
+					_opaque_list_for(rel, _layer_bytes_cache[rel])
 
 
 static func _ensure() -> void:
@@ -422,15 +462,14 @@ static func _compose(look: Dictionary, sheet: String) -> Image:
 	blank.fill(Color(0, 0, 0, 0))
 	if size == Vector2i.ZERO:
 		return blank
+	var prepared := _prepare_layers_parallel(look, sheet, size)
 	var figure := blank.duplicate()
 	var shadow: Image = null
 	for layer in ORDER:
+		var painted: Variant = prepared.get(layer)
+		if not (painted is Image):
+			continue
 		var spec: Dictionary = _layers.get(layer, {})
-		if spec.is_empty():
-			continue
-		var painted := _prepare_layer(look, spec, sheet, size)
-		if painted == null:
-			continue
 		if bool(spec.get("under", false)):
 			shadow = painted
 		else:
@@ -441,6 +480,35 @@ static func _compose(look: Dictionary, sheet: String) -> Image:
 		dest.blend_rect(shadow, Rect2i(0, 0, size.x, size.y), Vector2i.ZERO)
 	dest.blend_rect(outlined, Rect2i(0, 0, size.x, size.y), Vector2i.ZERO)
 	return dest
+
+
+static func _prepare_layers_parallel(look: Dictionary, sheet: String, size: Vector2i) -> Dictionary:
+	var out := {}
+	var big := size.x * size.y >= 20000
+	if not big:
+		for layer in ORDER:
+			var spec: Dictionary = _layers.get(layer, {})
+			if spec.is_empty():
+				continue
+			out[layer] = _prepare_layer(look, spec, sheet, size)
+		return out
+	var tasks: Array = []
+	for layer in ORDER:
+		var spec: Dictionary = _layers.get(layer, {})
+		if spec.is_empty():
+			continue
+		var cap_layer := layer
+		var cap_spec := spec
+		tasks.append(WorkerThreadPool.add_task(
+			func() -> void:
+				var painted := _prepare_layer(look, cap_spec, sheet, size)
+				_layer_mutex.lock()
+				out[cap_layer] = painted
+				_layer_mutex.unlock()
+		))
+	for task_id in tasks:
+		WorkerThreadPool.wait_for_task_completion(int(task_id))
+	return out
 
 
 static func _prepare_layer(look: Dictionary, spec: Dictionary, sheet: String, size: Vector2i) -> Image:
@@ -465,12 +533,20 @@ static func _prepare_layer(look: Dictionary, spec: Dictionary, sheet: String, si
 		ramp = ramp_colors(group, index)
 		keys = key_colors(key_name if key_name != "" else "kleding")
 		cache_key = "%s@%s:%s" % [path, group, color_name]
-	if _recolored.has(cache_key):
-		return _recolored[cache_key]
+	_layer_mutex.lock()
+	var cached: Variant = _recolored.get(cache_key)
+	_layer_mutex.unlock()
+	if cached is Image:
+		return cached
 	var painted := _load_layer(path, group != "", keys, ramp)
 	if painted == null or painted.get_width() != size.x or painted.get_height() != size.y:
 		return null
-	_recolored[cache_key] = painted
+	_layer_mutex.lock()
+	if not _recolored.has(cache_key):
+		_recolored[cache_key] = painted
+	else:
+		painted = _recolored[cache_key]
+	_layer_mutex.unlock()
 	return painted
 
 
@@ -488,12 +564,39 @@ static func _load_layer(path: String, do_recolor: bool, keys: PackedColorArray, 
 		return null
 	if do_recolor and bytes.size() >= 26 and bytes[25] == 3:
 		return _load_patched(bytes, ramp)
-	var image := _load_png(path)
-	if image == null:
-		return null
 	if do_recolor:
-		return _recolor_bytes(image, keys, ramp)
+		var data := _layer_bytes(path)
+		if data.is_empty():
+			return null
+		var size_v: Variant = _layer_size_cache.get(path)
+		var size: Vector2i = size_v if size_v is Vector2i else Vector2i.ZERO
+		var touch := _opaque_list_for(path, _layer_bytes_cache.get(path, data))
+		return _recolor_data(size.x, size.y, data, touch, keys, ramp)
+	var image := _layer_rgba(path)
 	return image
+
+
+static func _layer_rgba(path: String) -> Image:
+	var cached: Variant = _layer_rgba_cache.get(path)
+	if cached is Image:
+		return (cached as Image).duplicate()
+	var image := _load_png(path)
+	if image != null:
+		_layer_rgba_cache[path] = image
+		_layer_bytes_cache[path] = image.get_data()
+		_layer_size_cache[path] = Vector2i(image.get_width(), image.get_height())
+		return image.duplicate()
+	return null
+
+
+static func _layer_bytes(path: String) -> PackedByteArray:
+	var hit: Variant = _layer_bytes_cache.get(path)
+	if hit is PackedByteArray:
+		return (hit as PackedByteArray).duplicate()
+	var image := _layer_rgba(path)
+	if image == null:
+		return PackedByteArray()
+	return image.get_data()
 
 
 ## Vervangt PLTE-index 1..5 en laat Godot decoderen. Zelfde ramp → dezelfde bytes.
@@ -672,30 +775,87 @@ static func _index_of(r: int, g: int, b: int, plte: PackedByteArray, count: int)
 	return -1
 
 
+static func _opaque_list_for(path: String, data: PackedByteArray) -> PackedInt32Array:
+	var cached: Variant = _opaque_pixels.get(path)
+	if cached is PackedInt32Array:
+		return cached
+	var pixels := int(data.size() / 4)
+	var list := PackedInt32Array()
+	for i in pixels:
+		if int(data[i * 4 + 3]) != 0:
+			list.append(i)
+	_opaque_pixels[path] = list
+	return list
+
+
+static func _recolor_bytes_sparse(path: String, src: Image, keys: PackedColorArray, ramp: PackedColorArray) -> Image:
+	var data := _layer_bytes(path)
+	if data.is_empty():
+		return null
+	var touch := _opaque_list_for(path, _layer_bytes_cache.get(path, data))
+	return _recolor_data(src.get_width(), src.get_height(), data, touch, keys, ramp)
+
+
 static func _recolor_bytes(src: Image, keys: PackedColorArray, ramp: PackedColorArray) -> Image:
 	var data := src.get_data()
-	var map := PackedInt32Array()
-	map.resize(keys.size())
-	for i in keys.size():
-		map[i] = _pack(keys[i])
-	var i := 0
+	var touch := PackedInt32Array()
 	var pixels := int(data.size() / 4)
-	while i < pixels:
-		var o := i * 4
-		if int(data[o + 3]) != 0:
-			var packed := (int(data[o]) << 16) | (int(data[o + 1]) << 8) | int(data[o + 2])
-			var slot := map.find(packed)
-			if slot >= 0 and slot < ramp.size():
-				var dest: Color = ramp[slot]
-				data[o] = dest.r8
-				data[o + 1] = dest.g8
-				data[o + 2] = dest.b8
-				data[o + 3] = 255
-			else:
-				data[o + 3] = 255
-		i += 1
-	var out := Image.create_from_data(src.get_width(), src.get_height(), false, Image.FORMAT_RGBA8, data)
-	return out
+	for i in pixels:
+		if int(data[i * 4 + 3]) != 0:
+			touch.append(i)
+	return _recolor_pixels(src, touch, keys, ramp)
+
+
+static func _recolor_pixels(src: Image, touch: PackedInt32Array, keys: PackedColorArray, ramp: PackedColorArray) -> Image:
+	return _recolor_data(src.get_width(), src.get_height(), src.get_data(), touch, keys, ramp)
+
+
+static func _recolor_data(w: int, h: int, data: PackedByteArray, touch: PackedInt32Array, keys: PackedColorArray, ramp: PackedColorArray) -> Image:
+	var key_packed := PackedInt32Array()
+	var ramp_r := PackedByteArray()
+	var ramp_g := PackedByteArray()
+	var ramp_b := PackedByteArray()
+	key_packed.resize(keys.size())
+	ramp_r.resize(keys.size())
+	ramp_g.resize(keys.size())
+	ramp_b.resize(keys.size())
+	for i in keys.size():
+		key_packed[i] = _pack(keys[i])
+		if i < ramp.size():
+			var dest: Color = ramp[i]
+			ramp_r[i] = dest.r8
+			ramp_g[i] = dest.g8
+			ramp_b[i] = dest.b8
+	var n := touch.size()
+	var t := 0
+	while t < n:
+		var o := int(touch[t]) * 4
+		var packed := (int(data[o]) << 16) | (int(data[o + 1]) << 8) | int(data[o + 2])
+		var slot := _tone_slot_packed(packed, key_packed)
+		if slot >= 0:
+			data[o] = ramp_r[slot]
+			data[o + 1] = ramp_g[slot]
+			data[o + 2] = ramp_b[slot]
+			data[o + 3] = 255
+		else:
+			data[o + 3] = 255
+		t += 1
+	return Image.create_from_data(w, h, false, Image.FORMAT_RGBA8, data)
+
+
+static func _tone_slot_packed(packed: int, keys: PackedInt32Array) -> int:
+	var n := keys.size()
+	if n >= 1 and packed == keys[0]:
+		return 0
+	if n >= 2 and packed == keys[1]:
+		return 1
+	if n >= 3 and packed == keys[2]:
+		return 2
+	if n >= 4 and packed == keys[3]:
+		return 3
+	if n >= 5 and packed == keys[4]:
+		return 4
+	return -1
 
 
 static func _outline_pass(figure: Image) -> Image:
@@ -706,18 +866,24 @@ static func _outline_pass(figure: Image) -> Image:
 	var er := _outline.r8
 	var eg := _outline.g8
 	var eb := _outline.b8
-	var i := 0
+	var touch := PackedInt32Array()
 	var pixels := w * h
-	while i < pixels:
+	for i in pixels:
+		if int(src[i * 4 + 3]) == 255:
+			touch.append(i)
+	for idx in touch:
+		var i := int(idx)
+		var x := i % w
+		var y := int(i / w)
 		var o := i * 4
-		if int(src[o + 3]) == 255 and _on_contour(src, w, h, i % w, int(i / w)):
-			var sum := int(src[o]) + int(src[o + 1]) + int(src[o + 2])
-			if sum <= OUTLINE_MAX_SUM:
-				out[o] = er
-				out[o + 1] = eg
-				out[o + 2] = eb
-				out[o + 3] = 255
-		i += 1
+		if not _on_contour(src, w, h, x, y):
+			continue
+		var sum := int(src[o]) + int(src[o + 1]) + int(src[o + 2])
+		if sum <= OUTLINE_MAX_SUM:
+			out[o] = er
+			out[o + 1] = eg
+			out[o + 2] = eb
+			out[o + 3] = 255
 	return Image.create_from_data(w, h, false, Image.FORMAT_RGBA8, out)
 
 
