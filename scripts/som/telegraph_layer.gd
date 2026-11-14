@@ -1,8 +1,8 @@
 class_name TelegraphLayer
 extends Node2D
 ## Grond-telegraaf (Combat T3): één `_draw()` voor alle actieve vormen uit de sim.
-## PLACEHOLDER-kleuren en polygonen; geen art, geen shaders. Leest alleen TelegraphAttack/TelegraphShape
-## en TelegraphState — verandert geen timings, schade of RNG.
+## WM1-vloerart via `telegraph_floor_art.gd` (docs/art/telegraph_floor_README.md); cone/ground_ring blijven placeholder.
+## Leest alleen TelegraphAttack/TelegraphShape en TelegraphState — verandert geen timings, schade of RNG.
 
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
@@ -12,6 +12,7 @@ const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
+const TelegraphFloorArt := preload("res://scripts/som/telegraph_floor_art.gd")
 
 const BORDER_PX := 3
 const FILL_STEPS := 4
@@ -31,6 +32,14 @@ class DrawEntry:
 	var shape: TelegraphShape
 	var fill_steps: int = 0
 	var style: int = Style.RED_DODGE
+	var phase: int = TelegraphState.State.IDLE
+	var ticks_left: int = 0
+	var active_ticks: int = 0
+
+
+class ZoneDrawEntry:
+	var shape: TelegraphShape
+	var age_ticks: int = 0
 
 
 class RootIconEntry:
@@ -63,6 +72,8 @@ class RootFxOverlay extends Node2D:
 
 var _entries: Array[DrawEntry] = []
 var _zone_shapes: Array[TelegraphShape] = []
+var _zone_entries: Array[ZoneDrawEntry] = []
+const TELEGRAPH_ALPHA := 1.0
 var _root_icons: Array = []
 var _root_anim_start_ms: Dictionary = {}
 var _root_tex: Texture2D = null
@@ -223,21 +234,29 @@ func _root_icons_changed(next: Array) -> bool:
 
 func sync_from_zones(zones: CombatZones) -> void:
 	var next: Array[TelegraphShape] = []
+	var next_e: Array[ZoneDrawEntry] = []
 	if zones != null:
 		for z in zones.zones_for_draw():
 			var sh := TelegraphShape.make_circle(z.get("origin", Vector2i.ZERO), int(z.get("r", 0)))
 			if sh.valid:
 				next.append(sh)
-	if _zone_shapes_changed(next):
+				var ze := ZoneDrawEntry.new()
+				ze.shape = sh
+				ze.age_ticks = int(z.get("age", 0))
+				next_e.append(ze)
+	if _zone_entries_changed(next_e):
 		_zone_shapes = next
+		_zone_entries = next_e
 		queue_redraw()
 
 
-func _zone_shapes_changed(next: Array[TelegraphShape]) -> bool:
-	if next.size() != _zone_shapes.size():
+func _zone_entries_changed(next: Array) -> bool:
+	if next.size() != _zone_entries.size():
 		return true
 	for i in next.size():
-		if next[i].origin != _zone_shapes[i].origin or next[i].reach != _zone_shapes[i].reach:
+		var a: ZoneDrawEntry = next[i]
+		var b: ZoneDrawEntry = _zone_entries[i]
+		if a.shape.origin != b.shape.origin or a.shape.reach != b.shape.reach or a.age_ticks != b.age_ticks:
 			return true
 	return false
 
@@ -270,6 +289,9 @@ static func entry_from_attack(tg: TelegraphAttack, interruptible_for_attack: Cal
 	if interruptible_for_attack.is_valid():
 		intr = bool(interruptible_for_attack.call(tg.attack_id()))
 	ent.style = Style.YELLOW_INTERRUPT if intr else Style.RED_DODGE
+	ent.phase = st
+	ent.ticks_left = tg.ticks_left_in_phase()
+	ent.active_ticks = tg.active_duration_ticks()
 	return ent
 
 
@@ -364,8 +386,8 @@ static func _wedge_poly(shape: TelegraphShape, scale: float) -> PackedVector2Arr
 func _draw() -> void:
 	for ent in _entries:
 		_draw_entry(ent)
-	for sh in _zone_shapes:
-		_draw_zone(sh)
+	for ze in _zone_entries:
+		_draw_zone(ze)
 
 
 func _draw_root_icon_on(canvas: CanvasItem, center: Vector2, hid: String) -> void:
@@ -403,22 +425,37 @@ func _draw_root_icon_fallback(center: Vector2) -> void:
 	_draw_root_icon_fallback_on(self, center)
 
 
-func _draw_zone(shape: TelegraphShape) -> void:
-	var outer := outline_polygon(shape, 1.0)
-	if outer.is_empty():
+func _draw_zone(ze: ZoneDrawEntry) -> void:
+	if ze == null or ze.shape == null or not ze.shape.valid:
 		return
-	draw_colored_polygon(outer, PLACEHOLDER_INK_FILL)
-	draw_polyline(outer, PLACEHOLDER_INK_EDGE, float(BORDER_PX), true)
+	TelegraphFloorArt.draw_ink_zone(self, ze.shape, ze.age_ticks, TELEGRAPH_ALPHA)
 
 
 func _draw_entry(ent: DrawEntry) -> void:
+	if ent.shape == null or not ent.shape.valid:
+		return
+	var yellow: bool = ent.style == Style.YELLOW_INTERRUPT
+	match ent.shape.kind:
+		TelegraphShape.Kind.CONE, TelegraphShape.Kind.GROUND_RING:
+			_draw_entry_placeholder(ent)
+		TelegraphShape.Kind.MELEE_ARC:
+			if ent.shape.angle_deg != 120:
+				_draw_entry_placeholder(ent)
+				return
+			TelegraphFloorArt.draw_entry(self, ent.shape, yellow, ent.fill_steps, ent.phase, ent.ticks_left,
+					ent.active_ticks, TELEGRAPH_ALPHA)
+		_:
+			TelegraphFloorArt.draw_entry(self, ent.shape, yellow, ent.fill_steps, ent.phase, ent.ticks_left,
+					ent.active_ticks, TELEGRAPH_ALPHA)
+
+
+func _draw_entry_placeholder(ent: DrawEntry) -> void:
 	var outer := outline_polygon(ent.shape, 1.0)
 	if outer.is_empty():
 		return
 	var edge := PLACEHOLDER_YELLOW_EDGE if ent.style == Style.YELLOW_INTERRUPT else PLACEHOLDER_RED_EDGE
 	var fill := PLACEHOLDER_YELLOW_FILL if ent.style == Style.YELLOW_INTERRUPT else PLACEHOLDER_RED_FILL
 	if ent.fill_steps > 0:
-		# PLACEHOLDER: FILL_STEPS discrete opvulstappen (buiten → binnen), cumulatief via alpha.
 		var fc := fill
 		fc.a = fill.a * float(ent.fill_steps) / float(FILL_STEPS)
 		draw_colored_polygon(outer, fc)
