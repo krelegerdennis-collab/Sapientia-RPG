@@ -116,6 +116,11 @@ func _dialog_queue() -> void:
 	await _drain_dialog()
 	await _story_style_awaits()
 	await _drain_dialog()
+	await _two_asks()
+	await _drain_dialog()
+	await _close_when_shut()
+	await _queue_cap()
+	await _drain_dialog()
 	await _frames(3)
 	check("wachtrij leeg en vak dicht na alles", Dialog.queue_empty() and not Dialog.is_open)
 
@@ -207,8 +212,90 @@ func _story_style_awaits() -> void:
 	check("story-stijl: beide awaits hervatten na hun eigen regel", done)
 
 
+## Twee asks: de tweede komt binnen terwijl de eerste nog open is.
+## Beide keren de gekozen index terug, nooit -1, en in die volgorde.
+func _two_asks() -> void:
+	var first := {"done": false, "value": -99}
+	var second := {"done": false, "value": -99}
+	_capture_ask_at(first, "First question?", ["Stay", "Follow"])
+	var opened: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.has_choices() and Dialog.text_label.text == "First question?"
+	, 2.0)
+	check("twee asks: eerste vraag open", opened)
+	if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+		Dialog.advance()
+	_capture_ask_at(second, "Second question?", ["Yes", "No"])
+	await _frames(2)
+	var stayed: bool = Dialog.is_open and Dialog.phase() == Dialog.PHASE_CHOOSING \
+			and Dialog.text_label.text == "First question?" and Dialog.choices.size() == 2 \
+			and not bool(first["done"]) and not bool(second["done"])
+	check("twee asks: tweede wacht, eerste vraag blijft", stayed)
+	Dialog.choose(0)
+	var first_done: bool = await _wacht(func() -> bool:
+		return bool(first["done"]) and int(first["value"]) == 0 \
+				and Dialog.is_open and Dialog.text_label.text == "Second question?" \
+				and Dialog.has_choices() and not bool(second["done"])
+	, 2.0)
+	check("twee asks: eerste geeft 0, daarna de tweede vraag", first_done)
+	if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+		Dialog.advance()
+	Dialog.choose(1)
+	var second_done: bool = await _wacht(func() -> bool:
+		return bool(second["done"]) and int(second["value"]) == 1 and int(second["value"]) != -1 \
+				and int(first["value"]) == 0 and Dialog.queue_empty() and not Dialog.is_open
+	, 2.0)
+	check("twee asks: tweede geeft 1, niet -1", second_done)
+
+
+## close() op een vak dat al dicht is geeft nog steeds finished, en opent niets.
+func _close_when_shut() -> void:
+	var woke := {"done": false}
+	check("dicht voor extra close", not Dialog.is_open and Dialog.queue_empty())
+	_note_finished(woke)
+	Dialog.close()
+	var ok: bool = await _wacht(func() -> bool: return bool(woke["done"]), 2.0)
+	check("close op een dicht vak geeft finished", ok)
+	await _frames(2)
+	check("close op een dicht vak laat het vak dicht", not Dialog.is_open and Dialog.queue_empty() and ok)
+
+
+## Het 33e verzoek (bovenop het open vak) wordt niet getoond.
+func _queue_cap() -> void:
+	Dialog.show_lines(["Head"])
+	for i in Dialog.QUEUE_MAX:
+		Dialog.show_lines(["Slot %d" % i])
+	Dialog.show_lines(["Overflow"])
+	var seen: Array = []
+	var guard := 0
+	while (Dialog.is_open or not Dialog.queue_empty()) and guard < Dialog.QUEUE_MAX + 4:
+		if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+			Dialog.advance()
+		if Dialog.is_open:
+			seen.append(str(Dialog.text_label.text))
+			Dialog.advance()
+		guard += 1
+	var overflow := false
+	for line in seen:
+		if str(line) == "Overflow":
+			overflow = true
+	var order_ok := seen.size() == Dialog.QUEUE_MAX + 1 and str(seen[0]) == "Head" \
+			and str(seen[seen.size() - 1]) == "Slot %d" % (Dialog.QUEUE_MAX - 1)
+	check("wachtrij-limiet: overflow niet getoond", not overflow and order_ok)
+	check("wachtrij-limiet: daarna leeg en dicht", Dialog.queue_empty() and not Dialog.is_open)
+
+
 func _capture_ask(bucket: Dictionary) -> void:
 	bucket["value"] = await Dialog.ask("Stay or follow?", ["Stay", "Follow"], "", 0)
+	bucket["done"] = true
+
+
+func _capture_ask_at(bucket: Dictionary, question: String, options: Array) -> void:
+	bucket["value"] = await Dialog.ask(question, options, "", 0)
+	bucket["done"] = true
+
+
+func _note_finished(bucket: Dictionary) -> void:
+	await Dialog.finished
 	bucket["done"] = true
 
 
@@ -241,7 +328,7 @@ func _dismiss_one() -> void:
 
 func _drain_dialog() -> void:
 	var guard := 0
-	while (Dialog.is_open or not Dialog.queue_empty()) and guard < 12:
+	while (Dialog.is_open or not Dialog.queue_empty()) and guard < 40:
 		_dismiss_one()
 		guard += 1
 		await get_tree().process_frame

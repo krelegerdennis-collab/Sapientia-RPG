@@ -37,6 +37,8 @@ const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 var is_open := false
 
 ## FIFO van show_lines/ask die binnenkwamen terwijl het vak open was.
+## Meer dan dit wordt niet bewaard: anders groeit een vastgelopen vak onbeperkt.
+const QUEUE_MAX := 32
 var _queue: Array = []
 ## Het vak dat nu op het scherm staat (leeg = geen).
 var _current: Dictionary = {}
@@ -161,8 +163,7 @@ func show_lines(lines: Array, speaker := "", source: Node = null) -> void:
 		_open_job(_make_job(lines, speaker, source, false))
 		return
 	if is_open or _resume_lock:
-		_queue.append(_make_job(lines, speaker, source, false))
-		_arm_seal()
+		_enqueue(_make_job(lines, speaker, source, false))
 		return
 	_open_job(_make_job(lines, speaker, source, false))
 
@@ -188,8 +189,9 @@ func ask(question: String, options: Array, speaker := "", default_index := 0) ->
 		var job := _make_job([question], speaker, null, true)
 		job["ask_choices"] = opts
 		job["ask_index"] = idx
-		_queue.append(job)
-		_arm_seal()
+		# Volle wachtrij: de vraag is nooit gestart, dus geen keuze-index.
+		if not _enqueue(job):
+			return -1
 		await finished
 		return choice_result
 	_asking = true
@@ -251,6 +253,15 @@ func _open_job(job: Dictionary) -> void:
 		_asking = false
 		_build_choices()
 	_arm_seal()
+
+
+func _enqueue(job: Dictionary) -> bool:
+	if _queue.size() >= QUEUE_MAX:
+		push_warning("Dialog: wachtrij vol (%d), tekst overgeslagen." % QUEUE_MAX)
+		return false
+	_queue.append(job)
+	_arm_seal()
+	return true
 
 
 func _arm_seal() -> void:
@@ -742,7 +753,8 @@ func phase() -> String:
 func close() -> void:
 	if not is_open:
 		panel.hide()
-		finished.emit()
+		# Zelfde pad als een vak dat klaar is: geen losse finished.emit().
+		_finish_job({})
 		return
 	_settle_jobs(true)
 	var job: Dictionary = _current
