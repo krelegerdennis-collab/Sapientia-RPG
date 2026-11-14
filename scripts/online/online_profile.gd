@@ -28,6 +28,17 @@ const LOOK_MAX := {
 ## Zelfde 31 tekens als relay/src/codes.js. Geen 0/O/1/I/L, dus dit is base31, geen RFC-base32.
 const CODE_ALFABET := "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
 const MAX_CODE_CHARS := 4096
+## Harde grens voor import en export, gecontroleerd vóór het (trage, O(n²)) base31-decoderen.
+## Berekening van de langst mogelijke geldige code:
+## - Grootste geldige document (compact JSON): 3 slots, naam van 5 letters, klasse "psytech",
+##   alle look-waarden op LOOK_MAX, profile_exp 999999, best_floor 100, runs 9999,
+##   16 unlocks en 8 grants van elk 16 tekens = 2165 bytes.
+## - Deflate maakt dat nooit groter dan een opgeslagen blok: 2165 + 11 = 2176 bytes.
+## - Envelop: 1 (versie) + 4 (lengte) + 2176 + 4 (crc32) = 2185 bytes.
+## - Base31: 2185 * 8 / log2(31) = 3528,6 → hoogstens 3529 tekens.
+## Gemeten (300 profielen met willekeurige id's, alles vol): langste code 1830 tekens.
+## 3600 ligt boven de harde bovengrens; een code van 4096 tekens wordt meteen geweigerd.
+const MAX_CODE_LEN := 3600
 const MAX_RAW_CHARS := 16384
 const MAX_JSON_BYTES := 3072
 const MAX_WIRE_BYTES := 8192
@@ -209,13 +220,19 @@ static func encode_profile_code(document: Dictionary, envelope_version: int = FO
 		return _fout("too_long")
 	_append_u32(wire, crc32_ieee(wire))
 	var code := encode_base31(wire)
-	if code.is_empty() or code.length() > MAX_CODE_CHARS:
+	if code.is_empty() or code.length() > MAX_CODE_LEN:
 		return _fout("too_long")
 	return _goed({"code": code})
 
 
 static func decode_profile_code(code: String) -> Dictionary:
-	var dec := decode_base31(code)
+	# Lengte eerst: een te lange code komt niet in het base31-decoderen.
+	var norm := _normaliseer_code(code)
+	if not bool(norm.get("ok", false)):
+		return norm
+	if str(norm.get("code", "")).length() > MAX_CODE_LEN:
+		return _fout("too_long")
+	var dec := decode_base31(str(norm.get("code", "")))
 	if not bool(dec.get("ok", false)):
 		return dec
 	var bytes: PackedByteArray = dec.get("bytes", PackedByteArray())
