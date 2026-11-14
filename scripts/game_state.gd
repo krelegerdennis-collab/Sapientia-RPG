@@ -728,6 +728,7 @@ func _ready() -> void:
 			["--tcptest", "res://scripts/tests/tc_p_autotest.gd", "TcPTest", "tcptest"],
 			["--studiourltest", "res://scripts/tests/studio_url_tests.gd", "StudioUrlTest", "studiourltest"],
 			["--aabtest", "res://scripts/tests/aab_tests.gd", "AabTest", "aabtest"],
+			["--launchertest", "res://scripts/tests/launcher_icon_tests.gd", "LauncherIconTest", "launchertest"],
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
 			["--wm1dekkingtest", "res://scripts/tests/wm1_dekking_tests.gd", "Wm1DekkingTest", "wm1dekkingtest"],
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],

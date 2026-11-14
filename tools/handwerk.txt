@@ -1343,3 +1343,9 @@ assets/sprites/lichtprops/archief_leeslamp_glow.png
 assets/sprites/lichtprops/archief_wandblaker_glow.png
 assets/sprites/lichtprops/kas_gloeipot_glow.png
 assets/sprites/lichtprops/bouw_stormlamp_glow.png
+# Android launcher-icoon optie C (archief-embleem, open boek + magenta S) van RPG ART
+# (art_launcher; gekozen door Dennis 14 nov 2026 08:15, via RPG FORGE)
+assets/ui/launcher/launcher_adaptive_bg_432.png
+assets/ui/launcher/launcher_adaptive_fg_432.png
+assets/ui/launcher/launcher_icon_512.png
+assets/ui/launcher/launcher_main_192.png
