@@ -53,7 +53,7 @@ func _data() -> void:
 	check("vijand-cap 8", Modes.enemy_cap() == 8 and int(sim.get("enemy_cap", 0)) == 8)
 	check("verdiepingen easy/normal/hard", Modes.floors("easy") == 10 and Modes.floors("normal") == 50 and Modes.floors("hard") == 100)
 	check("PROPOSAL-teller is 100", Modes.PROPOSAL_MODE_EXP_NUMERATOR == 100)
-	check("exp-factor 10/2/1", Modes.mode_exp_factor("easy") == 10 and Modes.mode_exp_factor("normal") == 2 and Modes.mode_exp_factor("hard") == 1)
+	check("exp-factor 7/2/1", Modes.mode_exp_factor("easy") == 7 and Modes.mode_exp_factor("normal") == 2 and Modes.mode_exp_factor("hard") == 1)
 	check("onbekende modus blijft leeg", Modes.floors("nope") == 0 and Modes.eff_floor("nope", 1) == 0 and Modes.boss_key("nope", 1) == 0 and not Modes.is_rest("nope", 1) and Modes.mode_exp_factor("nope") == 1)
 
 
@@ -162,15 +162,15 @@ func _exp_and_canon() -> void:
 	check("easy 10 is Page Warden, niet The Voice (eff 99)",
 			str(warden.get("name", "")) == "Page Warden" and int(warden["max_hp"]) == int(solo10["max_hp"])
 			and int(warden["max_hp"]) != int(voice["max_hp"])
-			and int(warden["exp"]) == GameData.round_half_even(float(solo10["exp"]) * 10.0))
+			and int(warden["exp"]) == GameData.round_half_even(float(solo10["exp"]) * 7.0))
 
 
 func _heals() -> void:
 	var loot := {"items": [{"item": "drankje", "n": 2}, {"item": "kort_zwaard", "n": 1}], "gold": 10}
 	var easy: Dictionary = Floor.scale_heal_loot("easy", loot)
 	var hard: Dictionary = Floor.scale_heal_loot("hard", loot)
-	check("genees-items × exp-factor (easy ×10), uitrusting niet",
-			int(easy["items"][0]["n"]) == 20 and int(easy["items"][1]["n"]) == 1 and int(easy["gold"]) == 10)
+	check("genees-items × exp-factor (easy ×7), uitrusting niet",
+			int(easy["items"][0]["n"]) == 14 and int(easy["items"][1]["n"]) == 1 and int(easy["gold"]) == 10)
 	check("hard laat het aantal genees-items staan", int(hard["items"][0]["n"]) == 2)
 	check("bron-buit blijft staan", int(loot["items"][0]["n"]) == 2)
 
