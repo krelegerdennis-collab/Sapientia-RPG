@@ -579,6 +579,8 @@ func _ready() -> void:
 	#   godot -- --uxtest [--shots=/pad/map]  (scripts/tests/ux_tests.gd).
 	# F6 UX-polish (desktop-insets / plaatsing ballon+schat+tip): of
 	#   godot -- --uxpolishtest [--shots=/pad/map]  (scripts/tests/ux_polish_autotest.gd).
+	# F6-6 change_map vangnet (ontbrekend pad, geen zwarte hang): of
+	#   godot -- --f6uxtest  (scripts/tests/f6_ux_tests.gd).
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
@@ -677,6 +679,7 @@ func _ready() -> void:
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
 			["--uxtest", "res://scripts/tests/ux_tests.gd", "UxTest", "uxtest"],
 			["--uxpolishtest", "res://scripts/tests/ux_polish_autotest.gd", "UxPolishTest", "uxpolishtest"],
+			["--f6uxtest", "res://scripts/tests/f6_ux_tests.gd", "F6UxTest", "f6uxtest"],
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
@@ -2672,22 +2675,54 @@ func enter_map(path: String) -> void:
 
 ## Ga naar een andere map: fade uit, wissel van scène, en zet de speler
 ## op het spawnpunt met de naam spawn_name (een node onder "Spawns").
-func change_map(path: String, spawn_name: String) -> void:
+## true = de wissel is gestart. false = niets gedaan (bezig, geblokkeerd, of het pad bestaat niet).
+## Een ontbrekend pad faalt vóór de fade, zodat het scherm niet op zwart blijft hangen.
+func change_map(path: String, spawn_name: String) -> bool:
 	if scene_busy():
-		return
+		return false
 	if ReleaseFlags.dev_scene_blocked(path):
-		return
+		return false
+	var van := current_map
+	var route := huis_route(van, path, spawn_name)
+	path = str(route[0])
+	spawn_name = str(route[1])
+	if not _map_scene_available(path):
+		_abort_missing_map(path)
+		return false
 	changing_map = true
-	warp_from_map = current_map
-	var route := huis_route(current_map, path, spawn_name)
-	path = route[0]
-	spawn_name = route[1]
-	SessieLog.warp(current_map, path, spawn_name)
+	warp_from_map = van
+	SessieLog.warp(van, path, spawn_name)
 	pending_spawn = spawn_name
 	has_return_point = false
 	entry_kind = "door"
-	_autosave_request = "map" if is_dungeon_transition(current_map, path) else ""
+	_autosave_request = "map" if is_dungeon_transition(van, path) else ""
+	# Niet awaiten: de bool moet meteen terug, vóór de fade (map.gd leest hem synchroon).
+	_fade_and_enter_map(path)
+	return true
+
+
+## Pad bestaat als geladen PackedScene of als resource op schijf.
+func _map_scene_available(path: String) -> bool:
+	if path.is_empty():
+		return false
+	if _loaded.has(path) and _loaded[path] is PackedScene:
+		return true
+	return ResourceLoader.exists(path)
+
+
+## Ontbrekend doel: geen changing_map, geen hangend zwart.
+func _abort_missing_map(path: String) -> void:
+	changing_map = false
+	push_warning("change_map: scène ontbreekt: %s" % path)
+	Transition.clear_overlay()
+
+
+## Fade en scènewissel nadat change_map de bool al heeft teruggegeven.
+func _fade_and_enter_map(path: String) -> void:
 	await Transition.fade_out()
+	if not _map_scene_available(path):
+		_abort_missing_map(path)
+		return
 	_go_to_scene(path)
 
 
