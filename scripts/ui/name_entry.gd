@@ -1,14 +1,18 @@
 extends Control
 ## v0.10 Naam kiezen: 'Hoe heet je?' met een LineEdit, voorgevuld met 'Dax',
-## max. 10 tekens, en een OK-knop. Leeg = 'Dax'.
+## max. 10 tekens, een OK-knop en een Back-knop. Leeg = 'Dax'.
 ## De eerste toets vervangt Dax (alles geselecteerd). Op de telefoon (web en Android)
-## opent een tik het schermtoetsenbord. Daarna begint het nieuwe spel in Wilgendal.
+## opent een tik het schermtoetsenbord. OK begint het nieuwe spel in Wilgendal.
+## Back, B en Android-terug gaan terug naar het titelscherm, ook als het vak focus heeft.
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 
+const ACTION_SIZE := Vector2(44, 32)
+
 var edit: LineEdit
 var ok_button: Button
+var back_button: Button
 var _done := false
 ## Zolang de speler nog niets getypt heeft, vervangt de eerste letter 'Dax'.
 var _pristine := true
@@ -52,8 +56,12 @@ func _ready() -> void:
 	edit.add_theme_color_override("selection_color", Color(UiStyleC.MAGENTA_DIM, 0.8))
 	row.add_child(edit)
 	ok_button = UiMenu.button("OK")
-	ok_button.custom_minimum_size = Vector2(44, 32)
+	ok_button.custom_minimum_size = ACTION_SIZE
 	row.add_child(ok_button)
+	back_button = UiMenu.button("Back")
+	back_button.name = "Back"
+	back_button.custom_minimum_size = ACTION_SIZE
+	row.add_child(back_button)
 	col.add_child(UiMenu.label("Tap the box and type your own name.", UiStyleC.TEXT_DIM))
 	col.add_child(UiMenu.label("max %d characters, empty = %s" % [GameState.NAME_MAX, GameState.DEFAULT_NAME], UiStyleC.TEXT_DIM))
 	edit.text_submitted.connect(func(_t): confirm())
@@ -61,6 +69,7 @@ func _ready() -> void:
 	edit.gui_input.connect(_on_edit_input)
 	edit.focus_entered.connect(_show_keyboard)
 	ok_button.pressed.connect(confirm)
+	back_button.pressed.connect(back_to_title)
 	resized.connect(_center.bind(box))
 	_center.call_deferred(box)
 	edit.grab_focus.call_deferred()
@@ -122,11 +131,24 @@ func _center(box: Control) -> void:
 
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("cancel") and not edit.has_focus():
-		set_process(false)
-		get_tree().change_scene_to_file(GameState.TITLE_SCENE)
+	# Ook terwijl het vak focus heeft: B / Android-terug = terug naar de titel.
+	if Input.is_action_just_pressed("cancel"):
+		back_to_title()
 		return
 	UiMenu.pad_nav(get_viewport())
+
+
+## Terug naar het titelscherm, zonder een spel te starten. Verbergt het schermtoetsenbord.
+func back_to_title() -> void:
+	if _done:
+		return
+	_done = true
+	_set_web_name_mode(false)
+	if edit != null and is_instance_valid(edit):
+		edit.release_focus()
+	DisplayServer.virtual_keyboard_hide()
+	set_process(false)
+	get_tree().change_scene_to_file(GameState.TITLE_SCENE)
 
 
 ## De naam zoals hij gebruikt wordt (leeg = Dax).
