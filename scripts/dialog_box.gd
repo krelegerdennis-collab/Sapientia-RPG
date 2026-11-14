@@ -6,6 +6,9 @@ extends CanvasLayer
 ## v0.10: "{naam}" in een regel wordt de naam van de speler.
 ## Vraag met keuzes:  var i: int = await Dialog.ask("Opslaan?", ["Ja", "Nee"])
 ##   omhoog/omlaag kiest, A bevestigt, B = laatste keuze (meestal "Nee"), of tik erop.
+## Wachtrij: een show_lines terwijl het vak open is (niet de interne aanroep van ask)
+## wacht tot het huidige vak klaar is. Elke aanroeper die op finished wacht, gaat
+## verder nadat ZIJN tekst getoond is — een latere tekst steelt het vak niet.
 ##
 ## v0.16 LUFIA 2-STIJL (wens Dennis, ref. Lufia 2; art van RPG ART, art_tekstvak_v15/out):
 ##   - personage praat (spreker ingevuld) -> blauwe SPRAAKBALLON (assets/ui/ballon_blauw.png) met
@@ -32,6 +35,16 @@ const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 @export var chars_per_second := 40.0
 
 var is_open := false
+
+## FIFO van show_lines/ask die binnenkwamen terwijl het vak open was.
+var _queue: Array = []
+## Het vak dat nu op het scherm staat (leeg = geen).
+var _current: Dictionary = {}
+## Tijdens finished: nieuwe show_lines in de wachtrij, niet meteen over het volgende vak.
+var _resume_lock := false
+## One-shot finished-verbindingen die bij geen enkel vak horen (al aanwezig, of te veel).
+var _ignored: Dictionary = {}
+var _seal_queued := false
 ## Fase van het tekstvak (docs/STATE_MACHINES.md §7), afgeleid; alleen lezen via phase():
 ##   CLOSED -> TYPING (letters verschijnen) -> WAITING (pijltje: A/tik) of CHOOSING (vraag) -> ...
 const PHASE_CLOSED := "closed"
@@ -140,24 +153,23 @@ func _apply_style(kind: String) -> void:
 func show_lines(lines: Array, speaker := "", source: Node = null) -> void:
 	if lines.is_empty():
 		return
-	if not _asking:
-		choices = []
-		_clear_choices()
-	var named: Array = []
-	for l in lines:
-		named.append(str(l).replace("{naam}", GameState.player_name))
-	_lines = named
-	_index = 0
-	name_label.text = speaker
-	name_tab.visible = speaker != ""
-	if name_tab.has_method("set_text"):
-		name_tab.set_text(speaker)
-	speaker_node = _find_speaker(speaker, source)
-	_apply_style("ballon" if speaker != "" else "vak")
-	_update_placement()
-	is_open = true
-	panel.show()
-	_show_current()
+	# Eerdere vakken eerst aan hun wachter koppelen, anders pakt dit verzoek
+	# een finished-verbinding die nog bij het open vak hoort.
+	_settle_jobs(true)
+	# De interne aanroep van ask() zet de vraag op het vak dat ask zelf opent.
+	if _asking:
+		_open_job(_make_job(lines, speaker, source, false))
+		return
+	if is_open or _resume_lock:
+		_queue.append(_make_job(lines, speaker, source, false))
+		_arm_seal()
+		return
+	_open_job(_make_job(lines, speaker, source, false))
+
+
+## true = er staat geen verzoek meer te wachten (het open vak telt niet mee).
+func queue_empty() -> bool:
+	return _queue.is_empty()
 
 
 var _asking := false
@@ -167,15 +179,172 @@ const BLIP_EVERY := 3
 
 ## Toon een vraag met keuzes en wacht tot er gekozen is. Geeft de index terug.
 func ask(question: String, options: Array, speaker := "", default_index := 0) -> int:
+	var opts: Array = options.duplicate()
+	var idx := clampi(default_index, 0, maxi(0, opts.size() - 1))
+	# Een vraag die binnenkomt terwijl er al tekst (of een wachtrij) is, wacht
+	# zijn beurt. Anders zou show_lines het open vak — en een lopende keuze — wissen.
+	if is_open or _resume_lock or not _queue.is_empty():
+		_settle_jobs(true)
+		var job := _make_job([question], speaker, null, true)
+		job["ask_choices"] = opts
+		job["ask_index"] = idx
+		_queue.append(job)
+		_arm_seal()
+		await finished
+		return choice_result
 	_asking = true
-	choices = options.duplicate()
-	choice_index = clampi(default_index, 0, maxi(0, options.size() - 1))
+	choices = opts
+	choice_index = idx
 	choice_result = -1
 	show_lines([question], speaker)
 	_asking = false
 	_build_choices()
 	await finished
 	return choice_result
+
+
+func _make_job(lines: Array, speaker: String, source: Node, is_ask: bool) -> Dictionary:
+	var named: Array = []
+	for l in lines:
+		named.append(str(l).replace("{naam}", GameState.player_name))
+	return {
+		"lines": named,
+		"speaker": speaker,
+		"source": source,
+		"is_ask": is_ask,
+		"ask_choices": [],
+		"ask_index": 0,
+		"sealed": false,
+		"waiter": Callable(),
+	}
+
+
+func _open_job(job: Dictionary) -> void:
+	_current = job
+	var ask_job := bool(job.get("is_ask", false))
+	if ask_job:
+		_asking = true
+		choices = job.get("ask_choices", [])
+		choice_index = int(job.get("ask_index", 0))
+		choice_result = -1
+	elif not _asking:
+		choices = []
+		_clear_choices()
+	_lines = job["lines"]
+	_index = 0
+	var speaker := str(job.get("speaker", ""))
+	name_label.text = speaker
+	name_tab.visible = speaker != ""
+	if name_tab.has_method("set_text"):
+		name_tab.set_text(speaker)
+	var src: Object = job.get("source")
+	var node: Node = null
+	if is_instance_valid(src) and src is Node:
+		node = src as Node
+	speaker_node = _find_speaker(speaker, node)
+	_apply_style("ballon" if speaker != "" else "vak")
+	_update_placement()
+	is_open = true
+	panel.show()
+	_show_current()
+	if ask_job:
+		_asking = false
+		_build_choices()
+	_arm_seal()
+
+
+func _arm_seal() -> void:
+	if _seal_queued:
+		return
+	_seal_queued = true
+	_seal_deferred.call_deferred()
+
+
+func _seal_deferred() -> void:
+	_seal_queued = false
+	# Alleen koppelen wat al op finished wacht. Een vak zonder wachter
+	# (fire-and-forget) blijft open tot de volgende show_lines of close.
+	_settle_jobs(false)
+
+
+func _cid(cb: Callable) -> int:
+	var obj: Object = cb.get_object()
+	if obj != null:
+		return obj.get_instance_id()
+	return cb.hash()
+
+
+func _unsealed_jobs() -> Array:
+	var jobs: Array = []
+	if not _current.is_empty() and not bool(_current.get("sealed", false)):
+		jobs.append(_current)
+	for job in _queue:
+		if not bool((job as Dictionary).get("sealed", false)):
+			jobs.append(job)
+	return jobs
+
+
+func _all_jobs() -> Array:
+	var jobs: Array = []
+	if not _current.is_empty():
+		jobs.append(_current)
+	for job in _queue:
+		jobs.append(job)
+	return jobs
+
+
+## Koppel nieuwe one-shot-wachtters (await finished) aan open vakken, oudste eerst.
+## seal_unclaimed: vakken waar niemand op wacht zijn fire-and-forget.
+func _settle_jobs(seal_unclaimed: bool) -> void:
+	_prune_ignored()
+	var fresh: Array = []
+	for c in finished.get_connections():
+		if (int(c.get("flags", 0)) & CONNECT_ONE_SHOT) == 0:
+			continue
+		var conn_cb: Callable = c["callable"]
+		if _ignored.has(_cid(conn_cb)):
+			continue
+		fresh.append(conn_cb)
+	var jobs: Array = _unsealed_jobs()
+	var i := 0
+	for job in jobs:
+		if i < fresh.size():
+			var cb: Callable = fresh[i]
+			if finished.is_connected(cb):
+				finished.disconnect(cb)
+			job["waiter"] = cb
+			job["sealed"] = true
+			i += 1
+		elif seal_unclaimed:
+			job["sealed"] = true
+	while i < fresh.size():
+		_ignored[_cid(fresh[i])] = true
+		i += 1
+
+
+func _prune_ignored() -> void:
+	var live: Dictionary = {}
+	for c in finished.get_connections():
+		live[_cid(c["callable"])] = true
+	for job in _all_jobs():
+		var w: Callable = job.get("waiter", Callable())
+		if w.is_valid():
+			live[_cid(w)] = true
+	var dead: Array = []
+	for k in _ignored:
+		if not live.has(k):
+			dead.append(k)
+	for k in dead:
+		_ignored.erase(k)
+
+
+## Maak alleen de wachter van dit vak wakker. Andere awaits blijven op hun eigen vak staan.
+func _finish_job(job: Dictionary) -> void:
+	var cb: Callable = job.get("waiter", Callable())
+	job["waiter"] = Callable()
+	if cb.is_valid() and not finished.is_connected(cb):
+		finished.connect(cb, CONNECT_ONE_SHOT)
+	finished.emit()
 
 
 # ---------------------------------------------------------------- spreker
@@ -571,9 +740,27 @@ func phase() -> String:
 
 
 func close() -> void:
-	is_open = false
-	panel.hide()
-	finished.emit()
+	if not is_open:
+		panel.hide()
+		finished.emit()
+		return
+	_settle_jobs(true)
+	var job: Dictionary = _current
+	_current = {}
+	# Zolang er nog tekst wacht, blijft is_open true. Story.player_free() en de
+	# timer in story.gd kijken alleen naar is_open; een gat zou een event starten.
+	var keep_open := not _queue.is_empty()
+	if not keep_open:
+		is_open = false
+		panel.hide()
+	_resume_lock = true
+	_finish_job(job)
+	_settle_jobs(false)
+	_resume_lock = false
+	if _current.is_empty() and not _queue.is_empty():
+		_open_job(_queue.pop_front())
+	elif not is_open:
+		panel.hide()
 
 
 func _show_current() -> void:
