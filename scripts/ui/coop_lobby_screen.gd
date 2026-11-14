@@ -10,6 +10,8 @@ const Protocol := preload("res://scripts/net/net_protocol.gd")
 const LobbyScript := preload("res://scripts/net/lan_lobby.gd")
 const DiscoveryScript := preload("res://scripts/net/lan_discovery.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+const SeatRoles := preload("res://scripts/coop/seat_controller.gd")
+const LobbyPortrait := preload("res://scripts/ui/lobby_portrait_slot.gd")
 
 ## Android 48dp minimum. 1 eenheid = ~1,9 dp op een telefoon in landschap (zie UiTouch), dus 25 eenheden.
 const TOUCH_TARGET_DP := 48
@@ -396,15 +398,25 @@ func _collect_buttons(node: Node, out: Array[Button]) -> void:
 
 
 func _add_roster_rows(host_view: bool) -> void:
-	var seat_names: Array[String] = ["Dax", "Seren", "Vesper", "Kael"]
 	for slot in Protocol.MAX_PLAYERS:
+		var cid := lobby.character_at(slot)
 		var who := _seat_label(slot)
 		if who == "":
 			who = "Empty"
 		var prefix := "Seat %d: " % slot
 		if host_view and slot == Protocol.HOST_SLOT:
 			prefix = "Host: "
-		_box.add_child(UiMenu.label(prefix + who, UiStyleC.TEXT_DIM if who == "Empty" else UiStyleC.TEXT, TEXT_SIZE))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		var portrait := LobbyPortrait.new()
+		portrait.name = "SeatPortrait%d" % slot
+		portrait.set_seat(cid, _seat_role(slot, cid))
+		row.add_child(portrait)
+		var label := UiMenu.label(prefix + who, UiStyleC.TEXT_DIM if who == "Empty" else UiStyleC.TEXT, TEXT_SIZE)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+		_box.add_child(row)
 
 
 func _seat_label(slot: int) -> String:
@@ -412,6 +424,15 @@ func _seat_label(slot: int) -> String:
 	if cid == "":
 		return ""
 	return _hero_name(cid)
+
+
+func _seat_role(slot: int, character_id: String) -> String:
+	var role := SeatRoles.role_of(character_id)
+	if role != "":
+		return role
+	if slot >= 0 and slot < Protocol.ROSTER.size():
+		return SeatRoles.role_of(Protocol.ROSTER[slot])
+	return ""
 
 
 func _hero_name(character_id: String) -> String:
