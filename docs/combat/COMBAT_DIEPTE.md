@@ -1,4 +1,4 @@
-> **F1 perfect dodge:** bevriest alleen de aanvallende vijand (Dennis 02-11).
+F1 perfect dodge bevriest alleen de aanvallende vijand (Dennis 02-11)
 
 # SAPIENTIA — Combat "dieper, niet groter" (Action-modus, WM1)
 
