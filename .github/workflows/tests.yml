@@ -29,15 +29,15 @@ jobs:
                 actorsfxtest, fusietest, catalogustest, updatetest, archief2test,
                 warperkamertest, hangertest, spiegeltest, berggrottest, pvptest,
                 wilgendaltest, huisdrawtest, huispixeltest, questtest, tutorialtest, battlesimtest, echotest, castjointest,
-                muziektest, sessielogtest, sessielogcoretest, locktest, swinglocktest, dodgetest, chaintest, t26sheettest, chargetest, nettest, netsynctest, coope2etest,
+                muziektest, sessielogtest, sessielogcoretest, locktest, swinglocktest, dodgetest, chaintest, t26sheettest, chargetest, staggertest, nettest, netsynctest, coope2etest,
                 openingtest, partytest, savetest, savefuzztest, saveroundtriptest, saverobusttest, musictest, grotlayouttest, held24test,
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
                 koopmantest, testmodustest, telegraphtest, roottest,
-                formuletest, battlesimenemytest, combatbugstest, perfprobetest, huiscollisiontest,
+                formuletest, battlesimenemytest, combatbugstest, gqzonnevlamscrolltest, perfprobetest, huiscollisiontest,
                 studiourltest, gategaptest, woudgrondtest, golemstorytest, statemachinetest, driftbgtest,
                 wm1bugtest, wm1openbugtest, wm1storytexttest, sessiefixtest, savehardeningtest, lifecycletest, zonetest, kasdeurtest,
                 berggrotdextest, demofixtest, combatrngtest, combatsimtest, aabtest, uxtest, uipolishtest, uxpolishtest,
-                wm1dekkingtest, wm1releasetest, wm1f3stabilitytest, wm1balanstest, playtestkittest, telegraphcooptest,
+                wm1dekkingtest, wm1releasetest, wm1f3stabilitytest, wm1balanstest, playtestkittest, launchertest, gamefeeltest, telegraphcooptest,
                 coopguestsavetest, hd2dtest, lichtpropstest]
     steps:
       - uses: actions/checkout@v4

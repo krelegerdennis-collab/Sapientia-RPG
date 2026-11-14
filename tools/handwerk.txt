@@ -1349,3 +1349,15 @@ assets/ui/launcher/launcher_adaptive_bg_432.png
 assets/ui/launcher/launcher_adaptive_fg_432.png
 assets/ui/launcher/launcher_icon_512.png
 assets/ui/launcher/launcher_main_192.png
+# WM1 vloer-telegraphs (RPG ART, spec RPG COMBAT 14-11, finish/wm1 db9d44e2): cirkel 48/96, boog 120, lijn, inktplas-zone
+# (art_telegraph/repo_drop; pixel voor pixel via src/teken.py, alleen masterpalet, alpha 0/255)
+assets/sprites/telegraph/telegraph_circle_48.png
+assets/sprites/telegraph/telegraph_circle_96.png
+assets/sprites/telegraph/telegraph_arc120_64.png
+assets/sprites/telegraph/telegraph_line_16.png
+assets/sprites/telegraph/telegraph_ink_zone_48.png
+assets/sprites/telegraph/telegraph_inkspit_22x44.png
+assets/sprites/telegraph/telegraph_arc120_diag_64.png
+assets/sprites/telegraph/telegraph_line_diag_16.png
+assets/sprites/telegraph/telegraph_line_start_16.png
+assets/sprites/telegraph/telegraph_inkspit_diag_22x44.png
