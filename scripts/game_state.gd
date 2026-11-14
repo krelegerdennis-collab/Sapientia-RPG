@@ -604,6 +604,7 @@ func _ready() -> void:
 	# F4 game feel (screenshake + schadekleuren): of  godot -- --gamefeeltest  (scripts/tests/gamefeel_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
+	# M8b buit per stoel + run-resultaat + reward-bundle (puur, geen netwerk): of  godot -- --onlinerewardtest  (scripts/tests/online_reward_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -708,6 +709,7 @@ func _ready() -> void:
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
+			["--onlinerewardtest", "res://scripts/tests/online_reward_tests.gd", "OnlineRewardTest", "onlinerewardtest"],
 			["--protocolv2test", "res://scripts/tests/protocol_v2_tests.gd", "ProtocolV2Test", "protocolv2test"],
 			["--rewardacktest", "res://scripts/tests/reward_ack_tests.gd", "RewardAckTest", "rewardacktest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
