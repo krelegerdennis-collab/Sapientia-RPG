@@ -147,7 +147,11 @@ static func unpack_snapshot(raw: PackedByteArray) -> Dictionary:
 
 
 static func _enemy_wire_bytes(codec_version: int) -> int:
-	return Protocol.SNAPSHOT_ENEMY_BYTES_V0 if codec_version <= 0 else Protocol.SNAPSHOT_ENEMY_BYTES_V1
+	if codec_version <= 0:
+		return Protocol.SNAPSHOT_ENEMY_BYTES_V0
+	if codec_version <= 1:
+		return Protocol.SNAPSHOT_ENEMY_BYTES_V1
+	return Protocol.SNAPSHOT_ENEMY_BYTES_V2
 
 
 static func _pack_player(buf: PackedByteArray, off: int, p: Dictionary) -> int:
@@ -193,7 +197,13 @@ static func _pack_enemy(buf: PackedByteArray, off: int, e: Dictionary, codec_ver
 	_write_i16(buf, off + 14, int(e.get("oy", 0)))
 	_write_i16(buf, off + 16, int(e.get("dir_x", 0)))
 	_write_i16(buf, off + 18, int(e.get("dir_y", 0)))
-	return off + Protocol.SNAPSHOT_ENEMY_BYTES_V1
+	var end_v1 := off + Protocol.SNAPSHOT_ENEMY_BYTES_V1
+	if codec_version <= 1:
+		return end_v1
+	buf[off + 20] = clampi(int(e.get("stg", 0)), 0, 255)
+	buf[off + 21] = clampi(int(e.get("stg_wankel", 0)), 0, 255)
+	buf[off + 22] = clampi(int(e.get("stg_immune", 0)), 0, 255)
+	return off + Protocol.SNAPSHOT_ENEMY_BYTES_V2
 
 
 static func _unpack_enemy(raw: PackedByteArray, off: int, out: Dictionary, codec_version: int) -> int:
@@ -219,6 +229,15 @@ static func _unpack_enemy(raw: PackedByteArray, off: int, out: Dictionary, codec
 	out["dir_y"] = _read_i16(raw, off + 18)
 	out["zones"] = []
 	end = off + Protocol.SNAPSHOT_ENEMY_BYTES_V1
+	if codec_version <= 1:
+		out["stg"] = 0
+		out["stg_wankel"] = 0
+		out["stg_immune"] = 0
+		return end
+	out["stg"] = int(raw[off + 20])
+	out["stg_wankel"] = int(raw[off + 21])
+	out["stg_immune"] = int(raw[off + 22])
+	end = off + Protocol.SNAPSHOT_ENEMY_BYTES_V2
 	return end
 
 

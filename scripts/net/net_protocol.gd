@@ -41,11 +41,12 @@ const INTERP_DELAY_MSEC := 100
 ## Plafond voor de bandbreedte-schatting: kop + 4 spelers + 8 vijanden.
 const SNAPSHOT_HEADER_BYTES := 5
 const SNAPSHOT_PLAYER_BYTES := 11
-## V0 vijandrecord (zonder telegraaf); V1 = + telegraaf-velden (Combat T5).
-const SNAPSHOT_CODEC_VERSION := 1
+## V0 vijandrecord (zonder telegraaf); V1 = + telegraaf-velden (Combat T5); V2 = + stagger (F2).
+const SNAPSHOT_CODEC_VERSION := 2
 const SNAPSHOT_ENEMY_BYTES_V0 := 9
 const SNAPSHOT_ENEMY_BYTES_V1 := 20
-const SNAPSHOT_ENEMY_BYTES := SNAPSHOT_ENEMY_BYTES_V1
+const SNAPSHOT_ENEMY_BYTES_V2 := 23
+const SNAPSHOT_ENEMY_BYTES := SNAPSHOT_ENEMY_BYTES_V2
 const SNAPSHOT_ENEMY_BUDGET := 8
 const INPUT_BYTES := 6
 ## UDP/IPv4 (28) plus een ruime ENet-kop. Schatting, geen meting.
@@ -356,7 +357,11 @@ static func parse_announce(raw: PackedByteArray) -> Dictionary:
 
 
 static func snapshot_payload_bytes(codec_version: int = SNAPSHOT_CODEC_VERSION) -> int:
-	var enemy_sz := SNAPSHOT_ENEMY_BYTES_V0 if codec_version <= 0 else SNAPSHOT_ENEMY_BYTES_V1
+	var enemy_sz := SNAPSHOT_ENEMY_BYTES_V0
+	if codec_version >= 2:
+		enemy_sz = SNAPSHOT_ENEMY_BYTES_V2
+	elif codec_version >= 1:
+		enemy_sz = SNAPSHOT_ENEMY_BYTES_V1
 	var base := SNAPSHOT_HEADER_BYTES + SNAPSHOT_PLAYER_BYTES * MAX_PLAYERS + enemy_sz * SNAPSHOT_ENEMY_BUDGET
 	if codec_version <= 0:
 		return base

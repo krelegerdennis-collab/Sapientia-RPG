@@ -57,6 +57,8 @@ const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const SomChainData := preload("res://scripts/data/som_chain_data.gd")
 const SomHeavyData := preload("res://scripts/data/som_heavy_data.gd")
 const SomFeelData := preload("res://scripts/data/som_feel_data.gd")
+const SomStaggerData := preload("res://scripts/data/som_stagger_data.gd")
+const SomStagger := preload("res://scripts/som/som_stagger.gd")
 const SomShakeScript := preload("res://scripts/som/som_shake.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
@@ -436,6 +438,8 @@ func register(m: Node) -> void:
 			"def": int(d.get("def", 0)), "exp": int(d.get("exp", 0)), "gold": int(d.get("gold", 0)),
 			"drops": d.get("drops", []), "data": d, "cd": 0.6, "tele": 0.0, "chase": rng.randf() * SomData.CHASE_INTERVAL,
 			"flash": 0.0, "target": ""}
+	if Settings.action_battles():
+		SomStagger.init_entry(entry)
 	if golem_rt:
 		# Fases, kern-venster, schadeplafond per fasedrempel en 90 ticks fasewissel: GolemFight (PR B).
 		var fseed := rng_seed if rng_seed != 0 else hash(str(room.room_id))
@@ -732,6 +736,7 @@ func sim_step() -> void:
 			_tick_ally_dodge_ai(a)
 		_tick_ally_heavy()
 	_tick_stamina_and_dodge()
+	_tick_stagger()
 	for m in enemies.keys():
 		if is_instance_valid(m):
 			_enemy_ai(m, dt)
@@ -1066,8 +1071,13 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				elif step >= 0 and SomChainData.is_finisher(step):
 					num_color = SomFeelData.COL_FINISHER
 					shake_kind = "finisher"
+			var stg_kind := SomStaggerData.KIND_NONE
+			if step >= 0:
+				stg_kind = step
+			elif heavy > 0:
+				stg_kind = SomStaggerData.KIND_HEAVY_L1 if heavy == 1 else SomStaggerData.KIND_HEAVY_L2
 			damage_enemy(m, physical_damage(atk, float(e["def"]), mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
-					num_color, num_scale)
+					num_color, num_scale, stg_kind)
 			if shake_kind != "" and _feel_local_hero(id) and shake != null:
 				shake.kick(shake_kind)
 			hits += 1
@@ -1141,7 +1151,7 @@ func _aim_caster_at(caster_id: String, m: Node) -> void:
 ## stagger = false (slag onder 100%): wel schade, maar geen afgebroken telegraaf en geen knockback.
 ## knock_tiles / hitstop: aanvalsketen (SomChainData); standaard 1 tegel en geen hitstop (zoals voorheen).
 func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles := 1, hitstop := 0,
-		num_color := Color(1, 1, 1), num_scale := 1.0) -> void:
+		num_color := Color(1, 1, 1), num_scale := 1.0, stg_kind := SomStaggerData.KIND_NONE) -> void:
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
@@ -1155,6 +1165,12 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 			last_enemy_damage = 0
 			return
 	else:
+		if Settings.action_battles():
+			var mult := SomStagger.damage_multiplier(e)
+			if mult > 1.0:
+				dmg = maxi(1, roundi(float(dmg) * mult))
+				if SomFeelData.ENABLED:
+					num_color = SomFeelData.COL_FINISHER
 		e["hp"] = int(e["hp"]) - dmg
 	e["flash"] = SomData.HIT_FLASH
 	last_enemy_damage = dmg
@@ -1164,6 +1180,12 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), num_color, 0.6, num_scale)
 	SomFx.spark(room.get_node("Objects"), center_of(m))
 	enemy_hit.emit(m, dmg)
+	if Settings.action_battles() and not golem and stg_kind != SomStaggerData.KIND_NONE:
+		if SomStagger.apply_hit(e, m, e["data"], stg_kind):
+			SomStagger.enter_wankel(e)
+			if e.has("tg"):
+				(e["tg"] as TelegraphAttack).interrupt()
+			e["tele"] = 0.0
 	if int(e["hp"]) <= 0:
 		_defeat_enemy(m)
 		return
@@ -1377,12 +1399,39 @@ func _target_for(m: Node) -> String:
 	return best
 
 
+func _tick_stagger() -> void:
+	if not Settings.action_battles():
+		return
+	if coop_mode and not coop_sim_host:
+		return
+	for m in enemies.keys():
+		if not is_instance_valid(m) or not enemies.has(m):
+			continue
+		SomStagger.tick_entry(enemies[m], enemies[m].has("golem"))
+
+
+func _enemy_wankel_hold(m: Node, e: Dictionary, delta: float) -> void:
+	if float(e["flash"]) > 0.0:
+		e["flash"] = float(e["flash"]) - delta
+	_pose_tick(m, e, delta)
+	if e.has("tg"):
+		var tg: TelegraphAttack = e["tg"]
+		if tg.is_busy():
+			tg.interrupt()
+	e["tele"] = 0.0
+	e["cd"] = maxf(float(e["cd"]), 0.2)
+	_tint(m, e)
+
+
 func _enemy_ai(m: Node, delta: float) -> void:
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
 	if int(e.get("hitstop", 0)) > 0:       # hitstop (finisher): vijand bevriest een paar ticks
 		e["hitstop"] = int(e["hitstop"]) - 1
+		return
+	if Settings.action_battles() and SomStaggerData.in_wankel(e):
+		_enemy_wankel_hold(m, e, delta)
 		return
 	if e.has("golem"):
 		_golem_ai(m, e, delta)
@@ -1627,6 +1676,9 @@ func _golem_spawn_adds(m: Node, ids: Array) -> void:
 
 ## Inktwurm / Inktspuw: TelegraphState + vaste shape (T4a). Zelfde cadans als de float-telegraaf.
 func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
+	if Settings.action_battles() and SomStaggerData.in_wankel(e):
+		_enemy_wankel_hold(m, e, delta)
+		return
 	var tg: TelegraphAttack = e["tg"]
 	if float(e["flash"]) > 0.0:
 		e["flash"] = float(e["flash"]) - delta
@@ -1706,6 +1758,7 @@ func _sync_telegraph_draw() -> void:
 	if telegraph_layer == null:
 		return
 	telegraph_layer.sync_from_enemies(enemies, Callable(self, "_telegraph_interruptible"))
+	telegraph_layer.sync_stagger_bars(enemies, Callable(self, "center_of"))
 	telegraph_layer.sync_from_zones(combat_zones)
 	telegraph_layer.sync_from_roots(combat_roots, _root_icon_positions())
 
@@ -2164,7 +2217,8 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 				last_attacker = caster_id
 				spell_effect(spell_id, feet_of_enemy(m))
 				SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
-				damage_enemy(m, maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))), Vector2i.ZERO))
+				damage_enemy(m, maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))), Vector2i.ZERO, true, 1, 0,
+						Color(1, 1, 1), 1.0, SomStaggerData.KIND_SPELL))
 		return "%s casts %s!" % [caster.get("name", ""), sp.get("name", spell_id)]
 	if kind == "heal":
 		var t := heal_target
@@ -2772,7 +2826,10 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 			"target_slot": tslot,
 		}
 		var tg: TelegraphAttack = e.get("tg", null)
-		elist.append(TelegraphSnapshot.merge_enemy_row(base, tg, tslot))
+		var row: Dictionary = TelegraphSnapshot.merge_enemy_row(base, tg, tslot)
+		for k in SomStagger.wire_fields(e).keys():
+			row[k] = SomStagger.wire_fields(e)[k]
+		elist.append(row)
 	return Codec.pack_snapshot(tick, players, elist, combat_zones.wire_rows(), combat_roots.wire_rows(_coop_slots))
 
 
@@ -2815,6 +2872,7 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 			continue
 		var e: Dictionary = enemies[m]
 		e["hp"] = int(row.get("hp", e["hp"]))
+		SomStagger.apply_wire(e, row)
 		var cx := float(row.get("x", 0))
 		var cy := float(row.get("y", 0))
 		m.position = Vector2(cx, cy) - Vector2(0, center_of(m).y - m.position.y)
