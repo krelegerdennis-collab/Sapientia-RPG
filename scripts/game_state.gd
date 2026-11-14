@@ -532,6 +532,7 @@ func _ready() -> void:
 	# Dungeon100: of  godot -- --dungeon100integratietest [--shots=/pad/map]  (scripts/tests/dungeon100_integratie_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100blauwtest [--shots=/pad/map]  (scripts/tests/dungeon100_blauw_tests.gd).
 	# Blauwe Kist-sprite: of  godot -- --blauwekisttest  (scripts/tests/blauwe_kist_tests.gd).
+	# GQ optie A Solar Flare@20: of  godot -- --gqzonnevlamscrolltest  (scripts/tests/gq_zonnevlam_scroll_tests.gd).
 	# Dungeon100 rustpunt-sheet: of  godot -- --dungeon100rustpunttest  (scripts/tests/dungeon100_rustpunt_tests.gd).
 	# Dungeon100 baas-kaartsprites: of  godot -- --dungeon100bossmaptest  (scripts/tests/dungeon100_bossmap_tests.gd).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
@@ -600,6 +601,7 @@ func _ready() -> void:
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
 	# F4 game feel (screenshake + schadekleuren): of  godot -- --gamefeeltest  (scripts/tests/gamefeel_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
+	# F2 stagger-meter (Action): of  godot -- --staggertest  (scripts/tests/stagger_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -637,6 +639,7 @@ func _ready() -> void:
 			["--dungeon100integratietest", "res://scripts/tests/dungeon100_integratie_tests.gd", "Dungeon100IntegratieTest", "dungeon100integratietest"],
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
 			["--blauwekisttest", "res://scripts/tests/blauwe_kist_tests.gd", "BlauweKistTest", "blauwekisttest"],
+			["--gqzonnevlamscrolltest", "res://scripts/tests/gq_zonnevlam_scroll_tests.gd", "GqZonnevlamScrollTest", "gqzonnevlamscrolltest"],
 			["--dungeon100rustpunttest", "res://scripts/tests/dungeon100_rustpunt_tests.gd", "Dungeon100RustpuntTest", "dungeon100rustpunttest"],
 			["--dungeon100bossmaptest", "res://scripts/tests/dungeon100_bossmap_tests.gd", "Dungeon100BossMapTest", "dungeon100bossmaptest"],
 			["--grotlayouttest", "res://scripts/tests/grot_layout_tests.gd", "GrotLayoutTest", "grotlayouttest"],
@@ -701,6 +704,7 @@ func _ready() -> void:
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
+			["--staggertest", "res://scripts/tests/stagger_tests.gd", "StaggerTest", "staggertest"],
 			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
