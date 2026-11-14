@@ -107,11 +107,13 @@ static func sheet_xform(d8: int) -> SheetXform:
 	return x
 
 
-static func build_transform(origin: Vector2, xform: SheetXform) -> Transform2D:
-	var s := Vector2(-1.0 if xform.flip_h else 1.0, -1.0 if xform.flip_v else 1.0)
-	var t := Transform2D.IDENTITY.scaled(s).rotated(xform.rot)
-	t.origin = origin
-	return t
+static func _draw_push(canvas: CanvasItem, origin: Vector2, xform: SheetXform) -> void:
+	var scale := Vector2(-1.0 if xform.flip_h else 1.0, -1.0 if xform.flip_v else 1.0)
+	canvas.draw_set_transform(origin, xform.rot, scale)
+
+
+static func _draw_pop(canvas: CanvasItem) -> void:
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 static func row_for_style(yellow_interrupt: bool) -> int:
@@ -146,10 +148,9 @@ static func draw_arc(canvas: CanvasItem, shape: TelegraphShape, row: int, col: i
 	var ch := 64.0
 	var fi: int = frame_index(row, col)
 	var src := Rect2(float(fi % COLS) * cw, float(fi / COLS) * ch, cw, ch)
-	var t := build_transform(Vector2(shape.origin), xf)
-	canvas.draw_set_transform(t)
+	_draw_push(canvas, Vector2(shape.origin), xf)
 	canvas.draw_texture_rect_region(tex, Rect2(-cw * 0.5, -ch * 0.5, cw, ch), src, Color(1, 1, 1, alpha))
-	canvas.draw_set_transform(Transform2D.IDENTITY)
+	_draw_pop(canvas)
 
 
 static func draw_inkspit(canvas: CanvasItem, shape: TelegraphShape, row: int, col: int, alpha: float) -> void:
@@ -162,13 +163,12 @@ static func draw_inkspit(canvas: CanvasItem, shape: TelegraphShape, row: int, co
 	var ch := 44.0 if tex == TEX_INKSPIT else 48.0
 	var fi: int = frame_index(row, col)
 	var src := Rect2(float(fi % COLS) * cw, float(fi / COLS) * ch, cw, ch)
-	var t := build_transform(Vector2(shape.origin), xf)
-	canvas.draw_set_transform(t)
+	_draw_push(canvas, Vector2(shape.origin), xf)
 	if tex == TEX_INKSPIT:
 		canvas.draw_texture_rect_region(tex, Rect2(0.0, -22.0, cw, ch), src, Color(1, 1, 1, alpha))
 	else:
 		canvas.draw_texture_rect_region(tex, Rect2(-16.0, -16.0, cw, ch), src, Color(1, 1, 1, alpha))
-	canvas.draw_set_transform(Transform2D.IDENTITY)
+	_draw_pop(canvas)
 
 
 static func draw_line_cardinal(canvas: CanvasItem, shape: TelegraphShape, row: int, col: int, alpha: float) -> void:
@@ -176,14 +176,13 @@ static func draw_line_cardinal(canvas: CanvasItem, shape: TelegraphShape, row: i
 		return
 	var d8: int = dir8_from_shape(shape)
 	var xf: SheetXform = sheet_xform(d8)
-	var t := build_transform(Vector2(shape.origin), xf)
+	_draw_push(canvas, Vector2(shape.origin), xf)
 	var sy: float = float(row) * 16.0
 	var frame_x: float = float(col) * 32.0
 	var reach: int = shape.reach
 	var total_tiles: int = maxi(1, int(ceil(float(reach) / float(LINE_TILE_ALONG))))
 	var mids: int = maxi(0, total_tiles - 2)
 	var pos := Vector2.ZERO
-	canvas.draw_set_transform(t)
 	var start_src := Rect2(float(col) * 16.0, sy, 16.0, 16.0)
 	canvas.draw_texture_rect_region(TEX_LINE_START, Rect2(pos.x, pos.y - 8.0, 16.0, 16.0), start_src, Color(1, 1, 1, alpha))
 	pos.x += float(LINE_TILE_ALONG)
@@ -193,7 +192,7 @@ static func draw_line_cardinal(canvas: CanvasItem, shape: TelegraphShape, row: i
 		pos.x += float(LINE_TILE_ALONG)
 	var end_src := Rect2(frame_x + 16.0, sy, 16.0, 16.0)
 	canvas.draw_texture_rect_region(TEX_LINE, Rect2(pos.x, pos.y - 8.0, 16.0, 16.0), end_src, Color(1, 1, 1, alpha))
-	canvas.draw_set_transform(Transform2D.IDENTITY)
+	_draw_pop(canvas)
 
 
 static func _diag_mid_count(reach_px: int) -> int:
@@ -205,12 +204,11 @@ static func draw_line_diag(canvas: CanvasItem, shape: TelegraphShape, row: int, 
 		return
 	var d8: int = dir8_from_shape(shape)
 	var xf: SheetXform = sheet_xform(d8)
-	var t := build_transform(Vector2(shape.origin), xf)
+	_draw_push(canvas, Vector2(shape.origin), xf)
 	var sy: float = float(row) * DIAG_CELL
 	var frame_x: float = float(col) * 72.0
 	var n_mid: int = _diag_mid_count(shape.reach)
 	var pieces: int = n_mid + 2
-	canvas.draw_set_transform(t)
 	for k in pieces:
 		var cell := Vector2(float(k) * DIAG_STEP.x - 6.0, float(k) * DIAG_STEP.y - 6.0)
 		var part_src: Rect2
@@ -221,7 +219,7 @@ static func draw_line_diag(canvas: CanvasItem, shape: TelegraphShape, row: int, 
 		else:
 			part_src = Rect2(frame_x + DIAG_CELL, sy, DIAG_CELL, DIAG_CELL)
 		canvas.draw_texture_rect_region(TEX_LINE_DIAG, Rect2(cell.x, cell.y, DIAG_CELL, DIAG_CELL), part_src, Color(1, 1, 1, alpha))
-	canvas.draw_set_transform(Transform2D.IDENTITY)
+	_draw_pop(canvas)
 
 
 static func draw_line(canvas: CanvasItem, shape: TelegraphShape, row: int, col: int, alpha: float) -> void:
