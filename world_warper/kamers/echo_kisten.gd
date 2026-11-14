@@ -22,6 +22,11 @@ const KLEUREN := {
 	"accessoire": Color("3ddec0"),
 }
 const LEEG := Color(0.12, 0.13, 0.18, 1)
+## F6-5: kistlabels op Dauwpixel 1:1 (10). Kist 18x14; label boven of (middelste) onder de kist,
+## zodat de bredere woorden ("Equipment", "Accessory") elkaar niet raken bij 32 px tussen de kisten.
+const LETTER := 10
+const KIST_HALF_H := 7.0
+const LABEL_GAP := 1.0
 const ECHO_FELLER := Color(1.55, 1.25, 1.85, 1)
 
 var _vlakken: Array[Sprite2D] = []
@@ -75,17 +80,27 @@ func _ready() -> void:
 		add_child(vlak)
 		_vlakken.append(vlak)
 		var lab := Label.new()
+		lab.name = "Label"
 		lab.text = str(NAMEN[soort])
-		lab.position = Vector2(-16, -18)
-		lab.size = Vector2(36, 10)
 		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		lab.add_theme_font_override("font", FONT)
-		lab.add_theme_font_size_override("font_size", 6)
+		lab.add_theme_font_size_override("font_size", LETTER)
 		lab.add_theme_color_override("font_color", Color("f2e9d8"))
 		vlak.add_child(lab)
+		_plaats_label(lab, i % 2 == 1)
 	GameState.echo_grot_voltooid = tel_resultaat(GameState.story_flags, GameState.echo_grot_voltooid)
 	ververs()
+
+
+## Breedte naar de tekst (geen clip), gecentreerd boven of onder de kist.
+func _plaats_label(lab: Label, onder: bool) -> void:
+	var maat := lab.get_minimum_size()
+	var tekst := FONT.get_string_size(lab.text, HORIZONTAL_ALIGNMENT_LEFT, -1, LETTER)
+	maat = Vector2(ceilf(maxf(maat.x, tekst.x)), ceilf(maxf(maat.y, tekst.y)))
+	var y := KIST_HALF_H + LABEL_GAP if onder else -KIST_HALF_H - LABEL_GAP - maat.y
+	lab.position = Vector2(-roundf(maat.x / 2.0), y)
+	lab.size = maat
 
 
 func ververs() -> void:

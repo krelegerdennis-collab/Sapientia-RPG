@@ -8,9 +8,16 @@ signal dicht
 const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 
+## Afstand van de kolom tot de rand van het veilige gebied (zelfde als vroeger op 384x216 zonder insets).
+const MARGE := Vector2(16, 8)
+## Kleinste lettergrootte: Dauwpixel is 1:1 op 10; op 8 vallen pixelkolommen weg (W leek V). F6-5.
+const LETTER := 10
+
 var _status: Label
 var _actief: VBoxContainer
 var _bank: VBoxContainer
+var _root: Control
+var _inhoud: VBoxContainer
 
 
 func _ready() -> void:
@@ -20,12 +27,12 @@ func _ready() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.gui_input.connect(_op_gui)
 	add_child(root)
+	_root = root
 	var kolom := VBoxContainer.new()
-	kolom.position = Vector2(16, 8)
-	kolom.size = Vector2(352, 200)
 	kolom.add_theme_constant_override("separation", 2)
 	root.add_child(kolom)
-	var kop := _label("Rest Room - swapping is free", 8)
+	_inhoud = kolom
+	var kop := _label("Rest Room - swapping is free", LETTER)
 	kolom.add_child(kop)
 	var rijen := HBoxContainer.new()
 	rijen.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -33,7 +40,7 @@ func _ready() -> void:
 	kolom.add_child(rijen)
 	_actief = _kolom(rijen, "Active")
 	_bank = _kolom(rijen, "Bench")
-	_status = _label("", 8)
+	_status = _label("", LETTER)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.custom_minimum_size = Vector2(0, 20)
 	kolom.add_child(_status)
@@ -45,6 +52,17 @@ func _ready() -> void:
 	terug.pressed.connect(_sluit)
 	kolom.add_child(terug)
 	_vul()
+	_plaats()
+	root.resized.connect(_plaats)
+
+
+## F6-5: kolom binnen het veilige gebied (notch, afgeronde hoeken, gebarenbalk).
+## Op 384x216 zonder insets precies de oude plek: (16, 8), 352x200.
+func _plaats() -> void:
+	var vp := _root.get_viewport_rect().size
+	var veilig := UiTouch.safe_rect(vp, _root.get_viewport())
+	_inhoud.position = veilig.position + MARGE
+	_inhoud.size = veilig.size - MARGE * 2.0
 
 
 func _kolom(ouder: Node, titel: String) -> VBoxContainer:
@@ -52,7 +70,7 @@ func _kolom(ouder: Node, titel: String) -> VBoxContainer:
 	doos.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	doos.add_theme_constant_override("separation", 2)
 	ouder.add_child(doos)
-	doos.add_child(_label(titel, 8))
+	doos.add_child(_label(titel, LETTER))
 	var lijst := VBoxContainer.new()
 	lijst.add_theme_constant_override("separation", 2)
 	doos.add_child(lijst)
@@ -82,7 +100,7 @@ func _vul() -> void:
 			_bank.add_child(_knop(str(held.get("name", "")) + " → party", _naar_groep.bind(i, pad)))
 		i += 1
 	if _bank.get_child_count() == 0:
-		_bank.add_child(_label("Nobody on the bench.", 8))
+		_bank.add_child(_label("Nobody on the bench.", LETTER))
 
 
 func _naar_bank(index: int, pad: String) -> void:

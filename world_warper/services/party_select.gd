@@ -10,6 +10,7 @@ extends Control
 ##
 ## Anker: eerste Control of Node2D in ww_anchor_party (deze node telt niet).
 ## Zonder anker vult het scherm de ouder. Past in 384x216.
+## F6-5: het paneel blijft altijd binnen het veilige gebied (UiTouch.safe_rect: notch, gebarenbalk).
 
 signal party_changed
 
@@ -40,6 +41,7 @@ func _ready() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_place_at_anchor()
 	call_deferred("_place_at_anchor")
+	get_viewport().size_changed.connect(_place_at_anchor)
 
 
 func open() -> void:
@@ -91,6 +93,7 @@ func _place_at_anchor() -> void:
 	var anchor := _first_anchor()
 	if anchor == null:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_keep_in_safe_area()
 		return
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	var doel := PANEL_SIZE
@@ -103,6 +106,21 @@ func _place_at_anchor() -> void:
 	elif anchor is Node2D:
 		global_position = (anchor as Node2D).global_position
 	size = doel
+	_keep_in_safe_area()
+
+
+## F6-5: schuif (en zo nodig verklein) het paneel tot het binnen het veilige gebied valt.
+## Zonder insets en binnen beeld verandert er niets.
+func _keep_in_safe_area() -> void:
+	var veilig := UiTouch.safe_rect(get_viewport_rect().size, get_viewport())
+	var r := get_global_rect()
+	var maat := Vector2(minf(r.size.x, veilig.size.x), minf(r.size.y, veilig.size.y))
+	var pos := Vector2(clampf(r.position.x, veilig.position.x, veilig.end.x - maat.x),
+			clampf(r.position.y, veilig.position.y, veilig.end.y - maat.y))
+	if not pos.is_equal_approx(r.position):
+		global_position = pos
+	if not maat.is_equal_approx(r.size):
+		size = maat
 
 
 func _first_anchor() -> Node:
