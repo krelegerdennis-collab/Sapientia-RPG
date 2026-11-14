@@ -41,6 +41,13 @@ func fade_in(duration := 0.3) -> void:
 	await _fade_to(Color(0, 0, 0, 0), duration)
 
 
+## Read-only voor tests: dekking van de fade (0 = beeld vrij).
+func overlay_alpha() -> float:
+	if _rect == null:
+		return 0.0
+	return _rect.color.a
+
+
 ## Start de fade en geeft het `finished`-signaal terug (geen coroutine, geen Tween).
 ## Een Signal verwijst zwak naar de tween; wacht de aanroeper op de tween zelf, dan houden
 ## coroutine en tween elkaar vast. Sluit het spel af terwijl de fade nog loopt (bv. de
