@@ -121,6 +121,16 @@ func _process(delta: float) -> void:
 		_toon_frame()
 
 
+## Read-only voor tests: de Hal-scène toont nog dialoog.
+func is_playing() -> bool:
+	return _playing
+
+
+## Read-only voor tests: een beat of filmpje blokkeert de volgende tik.
+func is_line_step_busy() -> bool:
+	return _line_step_busy
+
+
 func maybe_play(flags_source: Node = null) -> void:
 	if _playing or _finished:
 		return

@@ -29,7 +29,7 @@ const CS09_FALLBACK_VESPER_SNIPPETS: Array[String] = [
 ]
 const LOTTE_SCENE := "res://scenes/maps/archief_2_v2_lotte.tscn"
 const ScenesScreen := preload("res://scripts/ui/scenes_screen.gd")
-## In-engine Seren-regels die CS-10 vervangt (archief2_room._verhaal zonder filmpje).
+## In-engine Seren-regels die CS-10 vervangt (de kamer toont ze alleen zonder filmpje).
 const CS10_FALLBACK_SNIPPETS: Array[String] = [
 	"The glitch tears. Seren breaks it herself.",
 	"I can hear the Order of the Silent Flame again.",
@@ -42,6 +42,12 @@ const CS10_SLOTREGEL := "Seren joins. Priest, with Light and Ice, grade 1."
 var t: Node
 var _live_ids: Array[String] = []
 var _live_paden := {}
+var _hal_klaar := false
+var _wacht_doel := ""
+var _wacht_tekst := ""
+## Per Hal-stap, niet één open wacht van de hele scène.
+const HAL_STAP_SEC := 2.0
+const HAL_FILM_SEC := 3.0
 
 
 func _init(p_t: Node) -> void:
@@ -635,7 +641,9 @@ func _hal_filmpad() -> void:
 	if hs == null:
 		_einde_filmpad(saved_flags, saved_step, saved_history)
 		return
-	var stuk: Dictionary = await _hal_afspelen(70.0)
+	var stuk: Dictionary = await _hal_afspelen()
+	var hal_fout := str(stuk.get("fout", ""))
+	t.check("CS-11 E2E: elke Hal-stap binnen 3s" if hal_fout == "" else "CS-11 E2E: timeout — " + hal_fout, hal_fout == "")
 	var ids: Array = stuk.get("ids", [])
 	var paden: Dictionary = stuk.get("paden", {})
 	var regels: Array = stuk.get("lines", [])
@@ -665,7 +673,7 @@ func _hal_filmpad() -> void:
 	var opnieuw := await _herlaad_map(Canon.HAL_SCENE, Canon.HAL_SPAWN)
 	var hs2 := _hanger()
 	var stil := await _geen_filmpje(2.0)
-	t.check("CS-11 E2E: tweede Hal-bezoek geen herhaling", opnieuw and stil and hs2 != null and not hs2._playing
+	t.check("CS-11 E2E: tweede Hal-bezoek geen herhaling", opnieuw and stil and hs2 != null and not hs2.is_playing()
 			and not Dreiging.should_play(GameState.story_flags))
 	t.check("CS-12 E2E: tweede Hal-bezoek geen dreiging-filmpje", stil and GameState.story_flags.has("cutscene_cs12_gezien")
 			and not Videos.will_play("cs12"))
@@ -757,7 +765,7 @@ func _herlaad_map(path: String, spawn: String) -> bool:
 		if s != null and s.name == naam and s.is_node_ready() and s.get_instance_id() != id:
 			var f0 := Time.get_ticks_msec()
 			while Time.get_ticks_msec() - f0 < 3000:
-				if Transition._rect.color.a <= 0.01:
+				if Transition.overlay_alpha() <= 0.01:
 					break
 				await t.frames(1)
 			await t.frames(2)
@@ -766,11 +774,22 @@ func _herlaad_map(path: String, spawn: String) -> bool:
 	return false
 
 
-func _sla_filmpje_over(vid: Node) -> void:
-	await t.get_tree().create_timer(0.5).timeout
+## skip_now wacht niet op de klik-grace. false = het filmpje bleef langer dan de stap open.
+func _sla_filmpje_over(vid: Node) -> bool:
+	await t.frames(2)
 	if is_instance_valid(vid) and vid.has_method("is_done") and not bool(vid.call("is_done")) and vid.has_method("skip_now"):
 		vid.call("skip_now")
-	await t.frames(3)
+	var t0 := Time.get_ticks_msec()
+	var lim := int(HAL_STAP_SEC * 1000.0)
+	while Time.get_ticks_msec() - t0 < lim:
+		if not is_instance_valid(vid) or vid.is_queued_for_deletion():
+			return true
+		if vid.has_method("is_done") and bool(vid.call("is_done")):
+			return true
+		await t.frames(1)
+	if not is_instance_valid(vid):
+		return true
+	return vid.has_method("is_done") and bool(vid.call("is_done"))
 
 
 func _kamer_filmpje(timeout: float) -> Dictionary:
@@ -796,7 +815,7 @@ func _kamer_filmpje(timeout: float) -> Dictionary:
 			var line := "%s: %s" % [Dialog.name_label.text, Dialog.text_label.text]
 			if lines.is_empty() or lines[lines.size() - 1] != line:
 				lines.append(line)
-			if Dialog._is_typing():
+			if Dialog.phase() == Dialog.PHASE_TYPING:
 				await t.frames(2)
 			else:
 				await t.press_interact()
@@ -816,61 +835,128 @@ func _on_filmpje_node(n: Node) -> void:
 		_noteer_filmpje(_live_ids, _live_paden, n)
 
 
-func _hal_afspelen(timeout: float) -> Dictionary:
-	var ids: Array[String] = []
-	var paden := {}
-	var lines: Array[String] = []
-	_live_ids = []
-	_live_paden = {}
-	if not t.get_tree().node_added.is_connected(_on_filmpje_node):
-		t.get_tree().node_added.connect(_on_filmpje_node)
-	var t0 := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < timeout * 1000.0:
-		var hs := _hanger()
-		var host: Node = hs if hs != null else t.scene()
+func _on_hal_klaar() -> void:
+	_hal_klaar = true
+
+
+func _sync_films(ids: Array[String], paden: Dictionary) -> void:
+	var hosts: Array[Node] = []
+	var hs := _hanger()
+	if hs != null:
+		hosts.append(hs)
+	var map: Node = t.scene()
+	if map != null:
+		hosts.append(map)
+	for host in hosts:
 		for gezien in _filmpje_nodes(host):
 			_noteer_filmpje(ids, paden, gezien as Node)
-		for live_id in _live_ids:
-			if not ids.has(live_id):
-				ids.append(live_id)
-				paden[live_id] = str(_live_paden.get(live_id, ""))
-		var vid := _actief_filmpje(host)
-		if vid != null:
-			await _sla_filmpje_over(vid)
-			continue
-		if hs == null:
-			await t.frames(2)
-			continue
-		if hs._line_step_busy:
-			await t.frames(1)
-			continue
-		if hs._playing:
-			var txt := hs.text_label.text
-			if txt != "" and (lines.is_empty() or lines[lines.size() - 1] != txt):
-				lines.append(txt)
-			_klik()
-			var w0 := Time.get_ticks_msec()
-			while Time.get_ticks_msec() - w0 < 2500:
-				var nu := _hanger()
-				if nu == null:
-					break
-				if _actief_filmpje(nu) != null or nu._line_step_busy:
-					break
-				if not nu._playing or nu.text_label.text != txt:
-					break
-				await t.frames(1)
-			continue
-		if hs._finished and GameState.story_flags.has("cutscene_cs12_gezien"):
-			await t.frames(4)
-			break
-		await t.frames(2)
-	if t.get_tree().node_added.is_connected(_on_filmpje_node):
-		t.get_tree().node_added.disconnect(_on_filmpje_node)
 	for live_id in _live_ids:
 		if not ids.has(live_id):
 			ids.append(live_id)
 			paden[live_id] = str(_live_paden.get(live_id, ""))
-	return {"ids": ids, "paden": paden, "lines": lines}
+
+
+func _wacht_klaar() -> bool:
+	var hs := _hanger()
+	var host: Node = hs if hs != null else t.scene()
+	var vid := _actief_filmpje(host)
+	if vid == null and t.scene() != null:
+		vid = _actief_filmpje(t.scene())
+	match _wacht_doel:
+		"starten":
+			if _hal_klaar or hs == null:
+				return true
+			return vid != null or hs.is_playing() or hs.is_line_step_busy()
+		"bezig":
+			if _hal_klaar or hs == null or vid != null:
+				return true
+			return not hs.is_line_step_busy()
+		"regel":
+			if _hal_klaar or hs == null or not hs.is_playing() or vid != null or hs.is_line_step_busy():
+				return true
+			return hs.text_label.text != _wacht_tekst
+		_:
+			return false
+
+
+func _wacht_sec(seconden: float) -> bool:
+	var t0 := Time.get_ticks_msec()
+	var lim := int(seconden * 1000.0)
+	while Time.get_ticks_msec() - t0 < lim:
+		if _wacht_klaar():
+			return true
+		await t.frames(1)
+	return _wacht_klaar()
+
+
+## Eén tik of één filmpje per stap, elk met een eigen tijdslimiet.
+func _hal_afspelen() -> Dictionary:
+	var ids: Array[String] = []
+	var paden := {}
+	var lines: Array[String] = []
+	var fout := ""
+	var gezien_spelen := false
+	_live_ids = []
+	_live_paden = {}
+	_hal_klaar = false
+	var hs0 := _hanger()
+	if hs0 != null and not hs0.threat_finished.is_connected(_on_hal_klaar):
+		hs0.threat_finished.connect(_on_hal_klaar)
+	if not t.get_tree().node_added.is_connected(_on_filmpje_node):
+		t.get_tree().node_added.connect(_on_filmpje_node)
+	var stappen := 0
+	while fout == "" and stappen < 120:
+		stappen += 1
+		_sync_films(ids, paden)
+		var hs := _hanger()
+		if hs == null:
+			fout = "Hanger weg op stap %d" % stappen
+			break
+		var vid := _actief_filmpje(hs)
+		if vid == null:
+			vid = _actief_filmpje(t.scene())
+		if vid != null:
+			var pad := str(vid.get("video_path")).get_file()
+			if not await _sla_filmpje_over(vid):
+				fout = "filmpje niet weg binnen %.0fs (%s)" % [HAL_STAP_SEC, pad]
+			continue
+		if hs.is_playing():
+			gezien_spelen = true
+		elif _hal_klaar or gezien_spelen:
+			break
+		else:
+			_wacht_doel = "starten"
+			if not await _wacht_sec(HAL_FILM_SEC):
+				fout = "Hal-dialoog startte niet binnen %.0fs" % HAL_FILM_SEC
+			continue
+		if hs.is_line_step_busy():
+			_wacht_doel = "bezig"
+			if not await _wacht_sec(HAL_FILM_SEC):
+				fout = "beat-stap hing langer dan %.0fs" % HAL_FILM_SEC
+			continue
+		var txt := hs.text_label.text
+		if txt != "" and (lines.is_empty() or lines[lines.size() - 1] != txt):
+			lines.append(txt)
+		_wacht_tekst = txt
+		_wacht_doel = "regel"
+		_klik()
+		if await _wacht_sec(HAL_STAP_SEC):
+			continue
+		await t.frames(2)
+		var nog := _hanger()
+		if nog != null and nog.is_playing() and not nog.is_line_step_busy() and nog.text_label.text == txt:
+			_klik()
+			if await _wacht_sec(HAL_STAP_SEC):
+				continue
+		fout = "regel hing langer dan %.0fs: %s" % [HAL_STAP_SEC, txt]
+	if fout == "" and stappen >= 120 and not _hal_klaar:
+		fout = "meer dan 120 Hal-stappen"
+	if t.get_tree().node_added.is_connected(_on_filmpje_node):
+		t.get_tree().node_added.disconnect(_on_filmpje_node)
+	if hs0 != null and is_instance_valid(hs0) and hs0.threat_finished.is_connected(_on_hal_klaar):
+		hs0.threat_finished.disconnect(_on_hal_klaar)
+	_sync_films(ids, paden)
+	return {"ids": ids, "paden": paden, "lines": lines, "fout": fout}
 
 
 func _geen_filmpje(seconden: float) -> bool:
@@ -879,7 +965,7 @@ func _geen_filmpje(seconden: float) -> bool:
 		var map: Node = t.scene()
 		if _actief_filmpje(map) != null or _actief_filmpje(_hanger()) != null:
 			return false
-		if Dialog.is_open and not Dialog._is_typing():
+		if Dialog.is_open and Dialog.phase() != Dialog.PHASE_TYPING:
 			await t.press_interact()
 		else:
 			await t.frames(2)
