@@ -10,7 +10,10 @@ const TargetList := preload("res://scripts/ui/target_list.gd")
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 
-const OPTION_ROW_H := 19       # 13 regels in twee kolommen (7 + 6) passen met tabbalk en hulpregel op 216 hoog
+## F6-1: 14 regels in twee kolommen (7 + 7). Op 19,5:9 met notch (insets 4 boven, 6 onder) heeft het
+## tabblad 154 hoog: tabbalk 24 + 2 + 7 x 18 = 152, dus alles plus de hulpregel binnen het veilige gebied,
+## zonder scrollen. Met 19 was het 159 en schoof de hulpregel over de vensterrand.
+const OPTION_ROW_H := 18
 const TAB_BAR_H := 24          # zelfde tikminimum als questlog-tab (ROW_H / RIJ_H-traditie: 24 logic px)
 const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks: mobiel tikdoel (logic pixels)
 const VALUE_W := 50            # breedte van de waarde tussen '<' en '>' (twee kolommen: elke kolom is ~178 breed)
@@ -47,7 +50,7 @@ var keys: Array[String] = []
 var value_labels := {}         # sleutel -> Label
 var tab := "general"
 var tab_buttons := {}
-var general_box: HBoxContainer   # twee kolommen met regels (links 7, rechts 6)
+var general_box: HBoxContainer   # twee kolommen met regels (links 7, rechts 7)
 var _col_a: VBoxContainer
 var _col_b: VBoxContainer
 var music_root: Control
