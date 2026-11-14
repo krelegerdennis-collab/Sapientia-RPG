@@ -115,8 +115,8 @@ const BOOK_ID := "leeg_boek"
 const SPELL_CHANCE := 0.12
 const SPELL_SCROLLS := ["spreuk_vuur", "spreuk_bliksem", "spreuk_genees"]
 ## V3: extra rollen vanaf een verdieping (Dennis — floor ladder, niet buit-tier).
-## Fireball + Major Heal vanaf 20, Solar Flare 40, Sunstrike 80 (tier_for_floor ongewijzigd).
-const SPELL_SCROLLS_V3_FROM_FLOOR := {20: ["spreuk_vuurbal", "spreuk_grote_genezing"], 40: ["spreuk_zonnevlam"], 80: ["spreuk_g4_zonneslag"]}
+## Fireball + Major Heal + Solar Flare vanaf 20, Sunstrike 80 (tier_for_floor ongewijzigd).
+const SPELL_SCROLLS_V3_FROM_FLOOR := {20: ["spreuk_vuurbal", "spreuk_grote_genezing", "spreuk_zonnevlam"], 80: ["spreuk_g4_zonneslag"]}
 
 
 static func spell_scrolls_for_floor(floor_nr: int) -> Array:
