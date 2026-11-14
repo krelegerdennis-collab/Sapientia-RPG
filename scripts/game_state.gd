@@ -532,6 +532,7 @@ func _ready() -> void:
 	# Dungeon100: of  godot -- --dungeon100integratietest [--shots=/pad/map]  (scripts/tests/dungeon100_integratie_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100blauwtest [--shots=/pad/map]  (scripts/tests/dungeon100_blauw_tests.gd).
 	# Blauwe Kist-sprite: of  godot -- --blauwekisttest  (scripts/tests/blauwe_kist_tests.gd).
+	# GQ optie A Solar Flare@20: of  godot -- --gqzonnevlamscrolltest  (scripts/tests/gq_zonnevlam_scroll_tests.gd).
 	# Dungeon100 rustpunt-sheet: of  godot -- --dungeon100rustpunttest  (scripts/tests/dungeon100_rustpunt_tests.gd).
 	# Dungeon100 baas-kaartsprites: of  godot -- --dungeon100bossmaptest  (scripts/tests/dungeon100_bossmap_tests.gd).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
@@ -635,6 +636,7 @@ func _ready() -> void:
 			["--dungeon100integratietest", "res://scripts/tests/dungeon100_integratie_tests.gd", "Dungeon100IntegratieTest", "dungeon100integratietest"],
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
 			["--blauwekisttest", "res://scripts/tests/blauwe_kist_tests.gd", "BlauweKistTest", "blauwekisttest"],
+			["--gqzonnevlamscrolltest", "res://scripts/tests/gq_zonnevlam_scroll_tests.gd", "GqZonnevlamScrollTest", "gqzonnevlamscrolltest"],
 			["--dungeon100rustpunttest", "res://scripts/tests/dungeon100_rustpunt_tests.gd", "Dungeon100RustpuntTest", "dungeon100rustpunttest"],
 			["--dungeon100bossmaptest", "res://scripts/tests/dungeon100_bossmap_tests.gd", "Dungeon100BossMapTest", "dungeon100bossmaptest"],
 			["--grotlayouttest", "res://scripts/tests/grot_layout_tests.gd", "GrotLayoutTest", "grotlayouttest"],
