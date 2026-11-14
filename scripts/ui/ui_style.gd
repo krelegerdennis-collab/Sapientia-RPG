@@ -21,7 +21,7 @@ const BORDER_DIM := Color("6a5838")     # rustige rand
 const BORDER_DARK := BORDER_DIM         # (alias)
 const TEXT := Color("f2e9d8")           # crème
 const TEXT_DIM := Color("b5a78d")       # labels
-const TEXT_OFF := Color("6c6455")       # uitgeschakeld
+const TEXT_OFF := Color("857c6b")       # uitgeschakeld (F6-8: 4,59:1 op INK, WCAG AA; was 6c6455 = 3,24:1)
 const SHADOW := Color("07060a")
 
 # ---------------------------------------------------------------- accenten
