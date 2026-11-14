@@ -130,14 +130,37 @@ func _determinism_tests() -> void:
 
 
 func _codec_tests() -> void:
+	var data: Dictionary = {"unique": false}
+	var e_norm := _blank_entry()
+	e_norm["stg"] = 50
+	var wire_norm := SomStagger.encode_wire_byte(e_norm, data, null)
+	var e_wankel := _blank_entry()
+	SomStagger.enter_wankel(e_wankel)
+	var wire_wankel := SomStagger.encode_wire_byte(e_wankel, data, null)
+	check("wire: wankel state bits", (wire_wankel >> 6) == SomStagger.WIRE_STATE_WANKEL)
+	var e_imm := _blank_entry()
+	e_imm["stg_immune"] = 40
+	var wire_imm := SomStagger.encode_wire_byte(e_imm, data, null)
+	check("wire: immune state bits", (wire_imm >> 6) == SomStagger.WIRE_STATE_IMMUNE)
+	var guest := _blank_entry()
+	SomStagger.decode_wire_byte(guest, wire_norm, data, null)
+	check("wire: decode normal fill", int(guest["stg"]) >= 48 and int(guest["stg"]) <= 52)
+	guest = _blank_entry()
+	SomStagger.decode_wire_byte(guest, wire_wankel, data, null)
+	check("wire: decode wankel flag", int(guest["stg_wankel"]) == 1 and int(guest["stg_immune"]) == 0)
+	guest = _blank_entry()
+	SomStagger.decode_wire_byte(guest, wire_imm, data, null)
+	check("wire: decode immune flag", int(guest["stg_immune"]) == 1 and int(guest["stg_wankel"]) == 0)
 	var row: Dictionary = {"idx": 0, "x": 0, "y": 0, "hp": 50, "pose": 0, "target_slot": 0,
 			"atk_id": 0, "phase": 0, "t": 0, "ox": 0, "oy": 0, "dir_x": 0, "dir_y": 0,
-			"stg": 77, "stg_wankel": 12, "stg_immune": 0}
+			"stg": wire_norm}
 	var raw: PackedByteArray = Codec.pack_snapshot(9, [], [row])
 	var snap: Dictionary = Codec.unpack_snapshot(raw)
 	check("codec v2 version", int(snap.get("codec_version", -1)) == Protocol.SNAPSHOT_CODEC_VERSION)
 	var er: Dictionary = (snap.get("enemies", []) as Array)[0]
-	check("codec stg velden", int(er.get("stg", -1)) == 77 and int(er.get("stg_wankel", -1)) == 12)
+	check("codec stg wire byte", int(er.get("stg", -1)) == wire_norm)
+	check("uplink onder 16 KiB/s", Protocol.host_uplink_bytes_per_sec() < 16 * 1024)
+	check("snapshot payload budget", raw.size() <= Protocol.snapshot_payload_bytes() + 1)
 
 
 func _sim_metrics() -> void:

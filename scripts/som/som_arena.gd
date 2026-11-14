@@ -2827,8 +2827,9 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 		}
 		var tg: TelegraphAttack = e.get("tg", null)
 		var row: Dictionary = TelegraphSnapshot.merge_enemy_row(base, tg, tslot)
-		for k in SomStagger.wire_fields(e).keys():
-			row[k] = SomStagger.wire_fields(e)[k]
+		var wf := SomStagger.wire_fields(e, e.get("data", {}), m)
+		for k in wf.keys():
+			row[k] = wf[k]
 		elist.append(row)
 	return Codec.pack_snapshot(tick, players, elist, combat_zones.wire_rows(), combat_roots.wire_rows(_coop_slots))
 
@@ -2872,7 +2873,7 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 			continue
 		var e: Dictionary = enemies[m]
 		e["hp"] = int(row.get("hp", e["hp"]))
-		SomStagger.apply_wire(e, row)
+		SomStagger.apply_wire(e, row, m)
 		var cx := float(row.get("x", 0))
 		var cy := float(row.get("y", 0))
 		m.position = Vector2(cx, cy) - Vector2(0, center_of(m).y - m.position.y)

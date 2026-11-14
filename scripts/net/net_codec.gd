@@ -201,8 +201,6 @@ static func _pack_enemy(buf: PackedByteArray, off: int, e: Dictionary, codec_ver
 	if codec_version <= 1:
 		return end_v1
 	buf[off + 20] = clampi(int(e.get("stg", 0)), 0, 255)
-	buf[off + 21] = clampi(int(e.get("stg_wankel", 0)), 0, 255)
-	buf[off + 22] = clampi(int(e.get("stg_immune", 0)), 0, 255)
 	return off + Protocol.SNAPSHOT_ENEMY_BYTES_V2
 
 
@@ -231,12 +229,8 @@ static func _unpack_enemy(raw: PackedByteArray, off: int, out: Dictionary, codec
 	end = off + Protocol.SNAPSHOT_ENEMY_BYTES_V1
 	if codec_version <= 1:
 		out["stg"] = 0
-		out["stg_wankel"] = 0
-		out["stg_immune"] = 0
 		return end
 	out["stg"] = int(raw[off + 20])
-	out["stg_wankel"] = int(raw[off + 21])
-	out["stg_immune"] = int(raw[off + 22])
 	end = off + Protocol.SNAPSHOT_ENEMY_BYTES_V2
 	return end
 

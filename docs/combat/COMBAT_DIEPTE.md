@@ -67,7 +67,7 @@ Algemene regels voor alle PR's
 
 ## F2 — Stagger-meter vijanden
 
-**Status (PR `combat/f2-stagger`, basis `finish/wm1`): gebouwd** — `scripts/data/som_stagger_data.gd`, `scripts/som/som_stagger.gd`, arena-Hook + co-op snapshot v2 (`stg`/`stg_wankel`/`stg_immune`), stagger-balk in `telegraph_layer.gd`, suite `--staggertest`.
+**Status (PR `combat/f2-stagger`, basis `finish/wm1`): gebouwd** — `scripts/data/som_stagger_data.gd`, `scripts/som/som_stagger.gd`, arena-hook, co-op snapshot v2 (**21 B** vijandrecord, **1 B** stagger: 2 bits state + 6 bits meter/63), stagger-balk in `telegraph_layer.gd`, suite `--staggertest` (CI).
 
 **Doel**: ketens en zware slagen een doel geven buiten pure schade; bestaande bool "stagger" wordt een meter.
 
@@ -79,7 +79,7 @@ Algemene regels voor alle PR's
 - Golem: niet via de meter; de kern-break (`break_damage` 45 → `stagger_ticks` 60) **is** zijn stagger. Optioneel: meter vult alleen tijdens kern-open (later, niet in deze PR).
 - Boss/unique (Inktwurm): max **160**.
 
-**Bestanden**: `scripts/data/som_stagger_data.gd`; `som_arena.gd`; stagger-balk boven vijand in `telegraph_layer.gd` (geen aparte vijand-HP-UI in Action [GEV]); co-op snapshot v2-velden `stg` voor co-op.
+**Bestanden**: `scripts/data/som_stagger_data.gd`; `som_arena.gd`; stagger-balk in `telegraph_layer.gd` (geen vijand-HP-UI in Action [GEV]); co-op v2: één `stg`-byte per vijand (host autoritair; gasten decoderen state + fill).
 
 **Tests/metrics**: nieuw `scripts/tests/stagger_tests.gd` (vulling per staptype, verval, wankel-duur, immuniteit, determinisme); sim: wankels per kamer (doel 1-2 bij normale groep), aandeel schade in wankel (doel 20-30 %), kamertijd ≤ −10 %.
 
