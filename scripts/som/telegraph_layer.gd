@@ -71,7 +71,6 @@ class RootFxOverlay extends Node2D:
 
 
 var _entries: Array[DrawEntry] = []
-var _zone_shapes: Array[TelegraphShape] = []
 var _zone_entries: Array[ZoneDrawEntry] = []
 const TELEGRAPH_ALPHA := 1.0
 var _root_icons: Array = []
@@ -233,19 +232,16 @@ func _root_icons_changed(next: Array) -> bool:
 
 
 func sync_from_zones(zones: CombatZones) -> void:
-	var next: Array[TelegraphShape] = []
 	var next_e: Array[ZoneDrawEntry] = []
 	if zones != null:
 		for z in zones.zones_for_draw():
 			var sh := TelegraphShape.make_circle(z.get("origin", Vector2i.ZERO), int(z.get("r", 0)))
 			if sh.valid:
-				next.append(sh)
 				var ze := ZoneDrawEntry.new()
 				ze.shape = sh
 				ze.age_ticks = int(z.get("age", 0))
 				next_e.append(ze)
 	if _zone_entries_changed(next_e):
-		_zone_shapes = next
 		_zone_entries = next_e
 		queue_redraw()
 
@@ -267,7 +263,13 @@ func _entries_changed(next: Array[DrawEntry]) -> bool:
 	for i in next.size():
 		var a: DrawEntry = next[i]
 		var b: DrawEntry = _entries[i]
-		if a.fill_steps != b.fill_steps or a.style != b.style or a.shape != b.shape:
+		if a.style != b.style or a.shape != b.shape:
+			return true
+		if a.fill_steps != b.fill_steps:
+			return true
+		var col_a: int = TelegraphFloorArt.sheet_column(a.fill_steps, a.phase, a.ticks_left, a.active_ticks)
+		var col_b: int = TelegraphFloorArt.sheet_column(b.fill_steps, b.phase, b.ticks_left, b.active_ticks)
+		if col_a != col_b:
 			return true
 	return false
 

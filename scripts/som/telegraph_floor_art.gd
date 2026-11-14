@@ -39,6 +39,9 @@ class SheetXform:
 	var use_diag: bool = false
 
 
+static var _reusable_sheet_xform := SheetXform.new()
+
+
 static func is_inkspit_line(shape: TelegraphShape) -> bool:
 	return shape.kind == TelegraphShape.Kind.LINE and shape.reach == INKSPIW_REACH and shape.width == INKSPIW_WIDTH
 
@@ -81,7 +84,11 @@ static func dir8_from_shape(shape: TelegraphShape) -> int:
 
 
 static func sheet_xform(d8: int) -> SheetXform:
-	var x := SheetXform.new()
+	var x: SheetXform = _reusable_sheet_xform
+	x.rot = 0.0
+	x.flip_h = false
+	x.flip_v = false
+	x.use_diag = false
 	match d8:
 		Dir8.RIGHT:
 			pass
@@ -171,11 +178,16 @@ static func draw_inkspit(canvas: CanvasItem, shape: TelegraphShape, row: int, co
 	_draw_pop(canvas)
 
 
-static func draw_line_cardinal(canvas: CanvasItem, shape: TelegraphShape, row: int, col: int, alpha: float) -> void:
+static func draw_line_cardinal(
+	canvas: CanvasItem,
+	shape: TelegraphShape,
+	row: int,
+	col: int,
+	alpha: float,
+	xf: SheetXform,
+) -> void:
 	if col < 0:
 		return
-	var d8: int = dir8_from_shape(shape)
-	var xf: SheetXform = sheet_xform(d8)
 	_draw_push(canvas, Vector2(shape.origin), xf)
 	var sy: float = float(row) * 16.0
 	var frame_x: float = float(col) * 32.0
@@ -199,11 +211,16 @@ static func _diag_mid_count(reach_px: int) -> int:
 	return maxi(0, int(roundf(float(reach_px) / DIAG_ALONG)) - 2)
 
 
-static func draw_line_diag(canvas: CanvasItem, shape: TelegraphShape, row: int, col: int, alpha: float) -> void:
+static func draw_line_diag(
+	canvas: CanvasItem,
+	shape: TelegraphShape,
+	row: int,
+	col: int,
+	alpha: float,
+	xf: SheetXform,
+) -> void:
 	if col < 0:
 		return
-	var d8: int = dir8_from_shape(shape)
-	var xf: SheetXform = sheet_xform(d8)
 	_draw_push(canvas, Vector2(shape.origin), xf)
 	var sy: float = float(row) * DIAG_CELL
 	var frame_x: float = float(col) * 72.0
@@ -224,10 +241,11 @@ static func draw_line_diag(canvas: CanvasItem, shape: TelegraphShape, row: int, 
 
 static func draw_line(canvas: CanvasItem, shape: TelegraphShape, row: int, col: int, alpha: float) -> void:
 	var d8: int = dir8_from_shape(shape)
-	if sheet_xform(d8).use_diag:
-		draw_line_diag(canvas, shape, row, col, alpha)
+	var xf: SheetXform = sheet_xform(d8)
+	if xf.use_diag:
+		draw_line_diag(canvas, shape, row, col, alpha, xf)
 	else:
-		draw_line_cardinal(canvas, shape, row, col, alpha)
+		draw_line_cardinal(canvas, shape, row, col, alpha, xf)
 
 
 static func draw_ink_zone(canvas: CanvasItem, shape: TelegraphShape, age_ticks: int, alpha: float) -> void:
@@ -237,6 +255,23 @@ static func draw_ink_zone(canvas: CanvasItem, shape: TelegraphShape, age_ticks: 
 	var o := Vector2(shape.origin)
 	var dest := Rect2(o.x - cw * 0.5, o.y - cw * 0.5, cw, cw)
 	canvas.draw_texture_rect_region(TEX_INK_ZONE, dest, src, Color(1, 1, 1, alpha))
+
+
+## Windup-kolommen 0..2; ACTIVE flits-kolom 4 alleen tijdens eerste FLASH_MS, daarna 3.
+static func verify_sheet_column_transitions() -> bool:
+	var flash_ticks: int = maxi(1, TelegraphState.ms_to_ticks(FLASH_MS))
+	var active_len: int = flash_ticks + 4
+	if sheet_column(1, TelegraphState.State.WINDUP, 10, 0) != 0:
+		return false
+	if sheet_column(4, TelegraphState.State.ACTIVE, active_len, active_len) != 4:
+		return false
+	if sheet_column(4, TelegraphState.State.ACTIVE, active_len - 1, active_len) != 4:
+		return false
+	if sheet_column(4, TelegraphState.State.ACTIVE, active_len - flash_ticks, active_len) != 3:
+		return false
+	if sheet_column(4, TelegraphState.State.ACTIVE, 1, active_len) != 3:
+		return false
+	return true
 
 
 static func draw_entry(
