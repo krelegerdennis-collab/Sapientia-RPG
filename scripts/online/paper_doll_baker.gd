@@ -87,6 +87,26 @@ static func clear_cache() -> void:
 	_avatars.clear()
 
 
+## Geheugen terug na online/co-op: paint- en decode-warm caches (niet clear_cache).
+static func release_warm_cache() -> void:
+	_layer_paint_cache.clear()
+	_layer_rgba_cache.clear()
+	_layer_bytes_cache.clear()
+	_layer_size_cache.clear()
+	_opaque_pixels.clear()
+	_png_bytes_cache.clear()
+	_compose_bufs.clear()
+	clear_cache()
+
+
+static func warm_layer_paint_count() -> int:
+	return _layer_paint_cache.size()
+
+
+static func warm_bytes_path_count() -> int:
+	return _layer_bytes_cache.size()
+
+
 static func reset_stats() -> void:
 	bakes = 0
 	cache_hits = 0

@@ -41,6 +41,7 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	_sizes()
 	_legacy_hash_parity()
+	_release_warm_cache()
 	_bake_perf_budget()
 	print("PAPERDOLLACTIONS %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -72,6 +73,32 @@ func _legacy_hash_parity() -> void:
 			var fast := Baker.image_hash(Baker.image_for(look, sheet))
 			var slow := Legacy.image_hash(Legacy.image_for(look, sheet))
 			check("legacy hash %s %s" % [tag, sheet], fast == slow and fast != "")
+
+
+func _release_warm_cache() -> void:
+	Baker.validate()
+	var warm_n := Baker.warm_layer_paint_count()
+	var bytes_n := Baker.warm_bytes_path_count()
+	var mem_warm := float(Performance.get_monitor(Performance.MEMORY_STATIC)) / 1048576.0
+	check("warm cache gevuld na validate (%d paints, %d bytes)" % [warm_n, bytes_n], warm_n > 100 and bytes_n > 10)
+	Baker.release_warm_cache()
+	check("release_warm_cache leegt paint-cache", Baker.warm_layer_paint_count() == 0)
+	check("release_warm_cache leegt decode-bytes", Baker.warm_bytes_path_count() == 0)
+	var mem_released := float(Performance.get_monitor(Performance.MEMORY_STATIC)) / 1048576.0
+	var delta := mem_warm - mem_released
+	print("PAPERDOLLACTIONS warm_cache_mb warm=%.2f released=%.2f delta=%.2f (n=%d paints)" % [mem_warm, mem_released, delta, warm_n])
+	check("validate na release vult opnieuw", Baker.validate().is_empty() and Baker.warm_layer_paint_count() > 100)
+	Baker.clear_cache()
+	Legacy.clear_cache()
+	var looks: Array = [{"name": "full", "look": FULL}, {"name": "voorbeeld", "look": VOORBEELD}, {"name": "bare", "look": BARE}]
+	var sheets: PackedStringArray = PackedStringArray(["walk", "attack", "hurt", "dodge"])
+	for entry in looks:
+		var look: Dictionary = entry["look"]
+		var tag: String = str(entry["name"])
+		for sheet in sheets:
+			var fast := Baker.image_hash(Baker.image_for(look, sheet))
+			var slow := Legacy.image_hash(Legacy.image_for(look, sheet))
+			check("post-release hash %s %s" % [tag, sheet], fast == slow and fast != "")
 
 
 func _bake_perf_budget() -> void:

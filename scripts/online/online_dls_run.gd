@@ -4,6 +4,7 @@ extends RefCounted
 ## M5 (lobby) roept start() aan en laadt daarna ONLINE_SCENE. M9 opent het baas-slot.
 
 const SCENE := "res://scenes/online/online_dls_room.tscn"
+const Baker := preload("res://scripts/online/paper_doll_baker.gd")
 
 static var active := false
 static var mode := "easy"
@@ -31,6 +32,7 @@ static func stop() -> void:
 	exit_reached = false
 	returned_to_hall = false
 	clear_revives()
+	Baker.release_warm_cache()
 
 
 static func clear_revives() -> void:
