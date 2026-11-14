@@ -3,9 +3,9 @@ extends RefCounted
 ## M8b — buit per stoel voor online co-op (design-doc §7.5, COMBAT D8).
 ##
 ## Puur en in geheugen. De host rolt per stoel op een eigen RandomNumberGenerator.
-## De seed is hash(run-seed + stoel-uid), hetzelfde idee als dungeon_chest.gd
-## (hash van een tekst). Die stroom is niet arena.rng: extra kist- of drop-rolls
-## verschuiven de sim niet.
+## De seed is de eerste 8 bytes (LE) van SHA256("online-loot|run-seed|uid").
+## HashingContext, niet Godot hash() (dat verschilt per platform). Die stroom is
+## niet arena.rng: extra kist- of drop-rolls verschuiven de sim niet.
 ##
 ## Kisten gaan door Dungeon100Scaling.chest_loot. Monster-drops gebruiken de
 ## bestaande "drops"-tabel en de schaal via het "floor"-veld (battle_enemy).
@@ -35,7 +35,13 @@ var _seq: int = 0
 
 ## Deterministische seed. Zelfde run-seed + uid = zelfde stroom. Geen globale rand.
 static func seat_seed(run_seed_value: int, seat_uid: String) -> int:
-	var s := hash("online-loot|%d|%s" % [run_seed_value, seat_uid])
+	var ctx := HashingContext.new()
+	ctx.start(HashingContext.HASH_SHA256)
+	ctx.update(("online-loot|%d|%s" % [run_seed_value, seat_uid]).to_utf8_buffer())
+	var digest: PackedByteArray = ctx.finish()
+	var s: int = 0
+	for i in 8:
+		s |= int(digest[i]) << (8 * i)
 	if s == 0:
 		return 1
 	return s

@@ -332,14 +332,21 @@ func note_pending(bundle: Dictionary) -> bool:
 	return true
 
 
-## ACK binnen. De bundle gaat van de pending-lijst van deze stoel en wordt niet opnieuw verstuurd.
-func ack(uid: String, key: String) -> void:
+## ACK binnen. Alleen als key op de pending-lijst van uid staat: weg en niet opnieuw verstuurd.
+func ack(uid: String, key: String) -> bool:
 	if key == "" or uid == "":
-		return
-	_acked[key] = true
+		return false
 	var raw: Variant = _pending.get(uid, [])
 	if not (raw is Array):
-		return
+		return false
+	var found := false
+	for existing in raw:
+		if existing is Dictionary and grant_key_for_bundle(existing) == key:
+			found = true
+			break
+	if not found:
+		return false
+	_acked[key] = true
 	var kept: Array = []
 	for existing in raw:
 		if not (existing is Dictionary):
@@ -347,6 +354,7 @@ func ack(uid: String, key: String) -> void:
 		if grant_key_for_bundle(existing) != key:
 			kept.append(existing)
 	_pending[uid] = kept
+	return true
 
 
 ## Bundles die deze host bij een rejoin opnieuw mag sturen. Kopie; de lijst zelf blijft hier.

@@ -50,6 +50,7 @@ func _run() -> void:
 # ---------------------------------------------------------------- rng en rolls
 func _seed_tests() -> void:
 	var s0 := OnlineLoot.seat_seed(11, UIDS[0])
+	check("seat-seed SHA256 vastgepind (11, a1b2c3d4)", s0 == 6840732855379553888)
 	check("seat-seed stabiel voor seed+uid", s0 == OnlineLoot.seat_seed(11, UIDS[0]) and s0 != 0)
 	var seeds_differ := true
 	var seen := {}
@@ -363,9 +364,20 @@ func _epoch_tests() -> void:
 	var other_seat := OnlineReward.make_bundle("hostpending", 1, "easy", {"seat_uid": UIDS[1], "floors": 1, "best_floor": 1})
 	check("pending van een andere stoel telt apart", host.note_pending(other_seat) and host.pending_for(UIDS[1]).size() == 1 and host.pending_for(seat).size() == 8)
 	var ack_key := newest
-	host.ack(seat, ack_key)
+	check("ACK haalt de bundle van de lijst", host.ack(seat, ack_key))
 	var after_ack := _pending_keys(host.pending_for(seat))
-	check("ACK haalt de bundle van de lijst", not after_ack.has(ack_key) and host.pending_for(seat).size() == 7)
+	check("pending na geldige ACK", not after_ack.has(ack_key) and host.pending_for(seat).size() == 7)
+	var cross_host := OnlineReward.new()
+	var cross_a := OnlineReward.make_bundle("cross", 1, "easy", {"seat_uid": seat, "floors": 1, "best_floor": 1})
+	var cross_b := OnlineReward.make_bundle("cross", 1, "easy", {"seat_uid": UIDS[1], "floors": 1, "best_floor": 1})
+	var cross_key_a := OnlineReward.grant_key_for_bundle(cross_a)
+	check("cross-seat ACK is no-op", cross_host.note_pending(cross_a) and cross_host.note_pending(cross_b)
+			and not cross_host.ack(UIDS[1], cross_key_a) and cross_host.pending_for(seat).size() == 1
+			and _pending_keys(cross_host.pending_for(seat)) == [cross_key_a])
+	var unknown_host := OnlineReward.new()
+	var unknown_bundle := OnlineReward.make_bundle("unknown", 1, "easy", {"seat_uid": seat, "floors": 1, "best_floor": 1})
+	check("ACK voor onbekende sleutel is no-op", unknown_host.note_pending(unknown_bundle)
+			and not unknown_host.ack(seat, "g00000000000000") and unknown_host.pending_for(seat).size() == 1)
 	var acked_bundle: Dictionary = queued[8]
 	check("ACK'te bundle wordt niet opnieuw gezet", not host.note_pending(acked_bundle) and not _pending_keys(host.pending_for(seat)).has(ack_key))
 	var rejoin: Array = host.pending_for(seat)
@@ -400,7 +412,7 @@ func _per_seat_grant_tests() -> void:
 	var dual_host := OnlineReward.new()
 	check("pending per stoel bij dezelfde session en tick", dual_host.note_pending(bundle_a) and dual_host.note_pending(bundle_b)
 			and dual_host.pending_for(seat_a).size() == 1 and dual_host.pending_for(seat_b).size() == 1)
-	dual_host.ack(seat_a, key_a)
+	check("ACK van stoel A slaagt", dual_host.ack(seat_a, key_a))
 	check("ACK van stoel A laat pending van stoel B staan", dual_host.pending_for(seat_a).is_empty() and dual_host.pending_for(seat_b).size() == 1
 			and _pending_keys(dual_host.pending_for(seat_b)) == [key_b])
 	var client_a := OnlineReward.new()
