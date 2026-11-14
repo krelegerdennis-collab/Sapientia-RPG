@@ -1,6 +1,7 @@
 extends Node
 ## F6-6: change_map blijft niet op zwart hangen als het doelpad ontbreekt (--f6uxtest).
 ## F6-6b: een deur zet input pas vast als change_map echt start.
+## F6-7: een tweede show_lines wacht in een wachtrij en steelt een open ask niet.
 ## Start: godot --path . -- --f6uxtest
 
 const TOWN := "res://scenes/maps/wilgendal.tscn"
@@ -39,6 +40,7 @@ func _run() -> void:
 	await _missing_path()
 	await _valid_path()
 	await _exit_missing()
+	await _dialog_queue()
 	await _door_missing()
 	await _door_valid()
 	print("F6UXTEST %d PASS, %d FAIL" % [passes, failures])
@@ -110,6 +112,233 @@ func _exit_missing() -> void:
 	check("uitgang ontbrekend pad: input_locked na frames nog false",
 			is_instance_valid(player) and bool(player.get("input_locked")) == false)
 	check("uitgang ontbrekend pad: overlay alpha 0", Transition.overlay_alpha() == 0.0)
+
+
+## F6-7: wachtrij. Drie controles, plus de story-stijl (show_lines + await finished per regel).
+func _dialog_queue() -> void:
+	await _drain_dialog()
+	await _ask_then_lines()
+	await _drain_dialog()
+	await _two_lines_in_order()
+	await _drain_dialog()
+	await _story_style_awaits()
+	await _drain_dialog()
+	await _two_asks()
+	await _drain_dialog()
+	await _close_when_shut()
+	await _queue_cap()
+	await _drain_dialog()
+	await _frames(3)
+	check("wachtrij leeg en vak dicht na alles", Dialog.queue_empty() and not Dialog.is_open)
+
+
+## (1) ask met twee keuzes; show_lines tijdens het wachten laat de vraag staan.
+## Na een echte keuze is het resultaat 0 of 1, niet -1 en niet stil de standaard.
+## De tweede tekst komt daarna.
+func _ask_then_lines() -> void:
+	var bucket := {"done": false, "value": -99}
+	_capture_ask(bucket)
+	var opened: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.has_choices()
+	, 2.0)
+	check("ask: vraag staat open", opened)
+	if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+		Dialog.advance()
+	var waiting: bool = Dialog.is_open and Dialog.phase() == Dialog.PHASE_CHOOSING \
+			and Dialog.text_label.text == "Stay or follow?" and Dialog.choices.size() == 2
+	check("ask: twee keuzes, vraag blijft leesbaar", waiting)
+	Dialog.show_lines(["Other"])
+	await _frames(2)
+	var stayed: bool = Dialog.is_open and Dialog.has_choices() \
+			and Dialog.phase() == Dialog.PHASE_CHOOSING \
+			and Dialog.text_label.text == "Stay or follow?" \
+			and Dialog.choices.size() == 2 \
+			and str(Dialog.choices[0]) == "Stay" and str(Dialog.choices[1]) == "Follow" \
+			and not bool(bucket["done"])
+	check("show_lines tijdens ask: eerste vraag blijft", stayed)
+	# Standaardindex is 0; kies bewust de andere, zodat een stille default faalt.
+	Dialog.choose(1)
+	var answered: bool = await _wacht(func() -> bool: return bool(bucket["done"]), 2.0)
+	var value := int(bucket["value"])
+	check("ask-resultaat is 0 of 1, niet -1", answered and (value == 0 or value == 1) and value != -1)
+	check("ask-resultaat is de gekozen index, niet de standaard", answered and value == 1)
+	var second: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.text_label.text == "Other" and not Dialog.has_choices()
+	, 2.0)
+	check("tweede tekst komt na de keuze", second)
+	_dismiss_one()
+	var clear: bool = await _wacht(func() -> bool:
+		return Dialog.queue_empty() and not Dialog.is_open
+	, 2.0)
+	check("na ask + tweede tekst: wachtrij leeg en vak dicht", clear)
+
+
+## (2) twee show_lines achter elkaar, zonder ask: beide teksten, in volgorde.
+## Elke await finished hervat pas nadat díe tekst klaar is.
+func _two_lines_in_order() -> void:
+	var order: Array = []
+	_await_line("First", order)
+	_await_line("Second", order)
+	var first: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.text_label.text == "First" and order.is_empty()
+	, 2.0)
+	check("twee show_lines: eerst de eerste tekst", first)
+	_dismiss_one()
+	var second: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.text_label.text == "Second" \
+				and order.size() == 1 and str(order[0]) == "First"
+	, 2.0)
+	check("twee show_lines: daarna de tweede tekst", second)
+	check("wachter van de eerste tekst hervat vóór de tweede klaar is", second)
+	_dismiss_one()
+	var both: bool = await _wacht(func() -> bool:
+		return order.size() == 2 and str(order[0]) == "First" and str(order[1]) == "Second" \
+				and Dialog.queue_empty() and not Dialog.is_open
+	, 2.0)
+	check("twee show_lines: beide teksten af, in volgorde", both)
+
+
+## Zelfde patroon als story.gd say: show_lines en meteen await finished, daarna de volgende regel.
+func _story_style_awaits() -> void:
+	var log: Array = []
+	_story_chain(log)
+	var alpha: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.text_label.text == "Alpha" and log.is_empty()
+	, 2.0)
+	check("story-stijl: eerste regel open", alpha)
+	_dismiss_one()
+	var beta: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.text_label.text == "Beta" \
+				and log.size() == 1 and str(log[0]) == "a"
+	, 2.0)
+	check("story-stijl: tweede regel pas na finished van de eerste", beta)
+	_dismiss_one()
+	var done: bool = await _wacht(func() -> bool:
+		return log.size() == 2 and str(log[1]) == "b" and Dialog.queue_empty() and not Dialog.is_open
+	, 2.0)
+	check("story-stijl: beide awaits hervatten na hun eigen regel", done)
+
+
+## Twee asks: de tweede komt binnen terwijl de eerste nog open is.
+## Beide keren de gekozen index terug, nooit -1, en in die volgorde.
+func _two_asks() -> void:
+	var first := {"done": false, "value": -99}
+	var second := {"done": false, "value": -99}
+	_capture_ask_at(first, "First question?", ["Stay", "Follow"])
+	var opened: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.has_choices() and Dialog.text_label.text == "First question?"
+	, 2.0)
+	check("twee asks: eerste vraag open", opened)
+	if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+		Dialog.advance()
+	_capture_ask_at(second, "Second question?", ["Yes", "No"])
+	await _frames(2)
+	var stayed: bool = Dialog.is_open and Dialog.phase() == Dialog.PHASE_CHOOSING \
+			and Dialog.text_label.text == "First question?" and Dialog.choices.size() == 2 \
+			and not bool(first["done"]) and not bool(second["done"])
+	check("twee asks: tweede wacht, eerste vraag blijft", stayed)
+	Dialog.choose(0)
+	var first_done: bool = await _wacht(func() -> bool:
+		return bool(first["done"]) and int(first["value"]) == 0 \
+				and Dialog.is_open and Dialog.text_label.text == "Second question?" \
+				and Dialog.has_choices() and not bool(second["done"])
+	, 2.0)
+	check("twee asks: eerste geeft 0, daarna de tweede vraag", first_done)
+	if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+		Dialog.advance()
+	Dialog.choose(1)
+	var second_done: bool = await _wacht(func() -> bool:
+		return bool(second["done"]) and int(second["value"]) == 1 and int(second["value"]) != -1 \
+				and int(first["value"]) == 0 and Dialog.queue_empty() and not Dialog.is_open
+	, 2.0)
+	check("twee asks: tweede geeft 1, niet -1", second_done)
+
+
+## close() op een vak dat al dicht is geeft nog steeds finished, en opent niets.
+func _close_when_shut() -> void:
+	var woke := {"done": false}
+	check("dicht voor extra close", not Dialog.is_open and Dialog.queue_empty())
+	_note_finished(woke)
+	Dialog.close()
+	var ok: bool = await _wacht(func() -> bool: return bool(woke["done"]), 2.0)
+	check("close op een dicht vak geeft finished", ok)
+	await _frames(2)
+	check("close op een dicht vak laat het vak dicht", not Dialog.is_open and Dialog.queue_empty() and ok)
+
+
+## Het 33e verzoek (bovenop het open vak) wordt niet getoond.
+func _queue_cap() -> void:
+	Dialog.show_lines(["Head"])
+	for i in Dialog.QUEUE_MAX:
+		Dialog.show_lines(["Slot %d" % i])
+	Dialog.show_lines(["Overflow"])
+	var seen: Array = []
+	var guard := 0
+	while (Dialog.is_open or not Dialog.queue_empty()) and guard < Dialog.QUEUE_MAX + 4:
+		if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+			Dialog.advance()
+		if Dialog.is_open:
+			seen.append(str(Dialog.text_label.text))
+			Dialog.advance()
+		guard += 1
+	var overflow := false
+	for line in seen:
+		if str(line) == "Overflow":
+			overflow = true
+	var order_ok := seen.size() == Dialog.QUEUE_MAX + 1 and str(seen[0]) == "Head" \
+			and str(seen[seen.size() - 1]) == "Slot %d" % (Dialog.QUEUE_MAX - 1)
+	check("wachtrij-limiet: overflow niet getoond", not overflow and order_ok)
+	check("wachtrij-limiet: daarna leeg en dicht", Dialog.queue_empty() and not Dialog.is_open)
+
+
+func _capture_ask(bucket: Dictionary) -> void:
+	bucket["value"] = await Dialog.ask("Stay or follow?", ["Stay", "Follow"], "", 0)
+	bucket["done"] = true
+
+
+func _capture_ask_at(bucket: Dictionary, question: String, options: Array) -> void:
+	bucket["value"] = await Dialog.ask(question, options, "", 0)
+	bucket["done"] = true
+
+
+func _note_finished(bucket: Dictionary) -> void:
+	await Dialog.finished
+	bucket["done"] = true
+
+
+func _await_line(line: String, order: Array) -> void:
+	Dialog.show_lines([line])
+	await Dialog.finished
+	order.append(line)
+
+
+func _story_chain(log: Array) -> void:
+	Dialog.show_lines(["Alpha"])
+	await Dialog.finished
+	log.append("a")
+	Dialog.show_lines(["Beta"])
+	await Dialog.finished
+	log.append("b")
+
+
+func _dismiss_one() -> void:
+	if not Dialog.is_open:
+		return
+	if Dialog.phase() == Dialog.PHASE_TYPING:
+		Dialog.advance()
+	if Dialog.phase() == Dialog.PHASE_CHOOSING:
+		Dialog.choose(0)
+		return
+	if Dialog.is_open:
+		Dialog.advance()
+
+
+func _drain_dialog() -> void:
+	var guard := 0
+	while (Dialog.is_open or not Dialog.queue_empty()) and guard < 40:
+		_dismiss_one()
+		guard += 1
+		await get_tree().process_frame
 
 
 ## (4) Deur naar een ontbrekend pad: niet vast, geen scriptfout, lopen en opnieuw proberen kan.
