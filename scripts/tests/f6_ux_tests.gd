@@ -128,6 +128,10 @@ func _dialog_queue() -> void:
 	await _close_when_shut()
 	await _queue_cap()
 	await _drain_dialog()
+	await _close_with_queue()
+	await _drain_dialog()
+	await _ask_at_queue_max()
+	await _drain_dialog()
 	await _frames(3)
 	check("wachtrij leeg en vak dicht na alles", Dialog.queue_empty() and not Dialog.is_open)
 
@@ -289,6 +293,107 @@ func _queue_cap() -> void:
 			and str(seen[seen.size() - 1]) == "Slot %d" % (Dialog.QUEUE_MAX - 1)
 	check("wachtrij-limiet: overflow niet getoond", not overflow and order_ok)
 	check("wachtrij-limiet: daarna leeg en dicht", Dialog.queue_empty() and not Dialog.is_open)
+
+
+## close() terwijl er nog vakken in de rij staan: het huidige vak eindigt,
+## het volgende komt meteen, en is_open blijft true tot de rij leeg is.
+## Een ask in die rij geeft de gekozen index, niet -1.
+func _close_with_queue() -> void:
+	var order: Array = []
+	var ask_box := {"done": false, "value": -99}
+	_mark_line("CloseFirst", order, "first")
+	var opened: bool = await _wacht(func() -> bool:
+		return Dialog.is_open and Dialog.text_label.text == "CloseFirst"
+	, 2.0)
+	check("close met rij: eerste vak open", opened)
+	_capture_ask_at(ask_box, "Close question?", ["Stay", "Follow"])
+	_mark_line("CloseThird", order, "third")
+	await _frames(2)
+	var waiting: bool = Dialog.is_open and not Dialog.queue_empty() \
+			and Dialog.text_label.text == "CloseFirst" and order.is_empty() \
+			and not bool(ask_box["done"])
+	check("close met rij: vraag en volgende regel wachten nog", waiting)
+	Dialog.close()
+	var stepped: bool = await _wacht(func() -> bool:
+		return order.size() == 1 and str(order[0]) == "first" \
+				and Dialog.is_open and not Dialog.queue_empty() \
+				and Dialog.text_label.text == "Close question?" and Dialog.has_choices() \
+				and not bool(ask_box["done"])
+	, 2.0)
+	check("close met rij: eerst finished, daarna de vraag, vak blijft open", stepped)
+	if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+		Dialog.advance()
+	if Dialog.is_open and Dialog.has_choices():
+		Dialog.choose(1)
+	var chosen: bool = await _wacht(func() -> bool:
+		return bool(ask_box["done"]) and int(ask_box["value"]) == 1 \
+				and Dialog.is_open and Dialog.text_label.text == "CloseThird" \
+				and order.size() == 1
+	, 2.0)
+	check("close met rij: ask geeft 1, niet -1", chosen)
+	_dismiss_one()
+	var done: bool = await _wacht(func() -> bool:
+		return order.size() == 2 and str(order[0]) == "first" and str(order[1]) == "third" \
+				and int(ask_box["value"]) == 1 and Dialog.queue_empty() and not Dialog.is_open
+	, 2.0)
+	check("close met rij: finished in volgorde, daarna leeg", done)
+
+
+## ask() bij een volle rij: de code wijst hem af met -1 en een waarschuwing.
+## Het open vak en de rij blijven staan; niets blijft hangen.
+func _ask_at_queue_max() -> void:
+	Dialog.show_lines(["CapHead"])
+	for i in Dialog.QUEUE_MAX:
+		Dialog.show_lines(["Cap %d" % i])
+	var before := _warning_count()
+	var bucket := {"done": false, "value": -99}
+	_capture_ask_at(bucket, "Rejected question?", ["Yes", "No"])
+	await _frames(2)
+	var rejected: bool = bool(bucket["done"]) and int(bucket["value"]) == -1 \
+			and Dialog.is_open and Dialog.text_label.text == "CapHead" and not Dialog.queue_empty()
+	check("ask op volle rij: meteen -1, vak en rij blijven", rejected)
+	check("ask op volle rij: waarschuwing", _warning_count() > before)
+	var seen: Array = []
+	var guard := 0
+	while (Dialog.is_open or not Dialog.queue_empty()) and guard < Dialog.QUEUE_MAX + 4:
+		if Dialog.is_open and Dialog.phase() == Dialog.PHASE_TYPING:
+			Dialog.advance()
+		if Dialog.is_open:
+			seen.append(str(Dialog.text_label.text))
+			Dialog.advance()
+		guard += 1
+	var showed := false
+	for line in seen:
+		if str(line) == "Rejected question?":
+			showed = true
+	var order_ok := seen.size() == Dialog.QUEUE_MAX + 1 and str(seen[0]) == "CapHead" \
+			and str(seen[seen.size() - 1]) == "Cap %d" % (Dialog.QUEUE_MAX - 1)
+	check("ask op volle rij: vraag niet getoond, rest in volgorde", not showed and order_ok)
+	check("ask op volle rij: daarna leeg en dicht", Dialog.queue_empty() and not Dialog.is_open)
+
+
+func _mark_line(line: String, order: Array, tag: String) -> void:
+	Dialog.show_lines([line])
+	await Dialog.finished
+	order.append(tag)
+
+
+## Aantal keren dat de wachtrij-waarschuwing op stderr stond. Godot 4.3 heeft geen logger-API.
+func _warning_count() -> int:
+	var handle := FileAccess.open("/proc/self/fd/2", FileAccess.READ)
+	if handle == null:
+		return 0
+	var text := handle.get_as_text()
+	var needle := "Dialog: wachtrij vol (%d)" % Dialog.QUEUE_MAX
+	var n := 0
+	var from := 0
+	while true:
+		var at := text.find(needle, from)
+		if at < 0:
+			return n
+		n += 1
+		from = at + needle.length()
+	return n
 
 
 func _capture_ask(bucket: Dictionary) -> void:
