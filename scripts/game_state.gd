@@ -247,6 +247,9 @@ const AUTOSAVE_SLOT := 0
 const AUTOSAVE_REASONS := ["map", "achtergrond"]
 ## Gekozen slot voor het volgende nieuwe spel (titelscherm > New Game > slot kiezen).
 var pending_new_slot := 1
+## Aantal aanroepen van start_new_game. Niet in de save. De Android-terugtest leest dit
+## om te zien dat Back op het naamscherm geen spel start.
+var new_game_starts := 0
 ## Autosave alleen bij een overgang wereldkaart <-> kerker (niet bij elke kamer of een dorp).
 const NON_DUNGEON_MAPS := ["wilgendal", "dorp_wilgendal", "esdoorn", "wilgendal_binnen",
 		"huis_wilgendal", "esdoorn_herberg", "esdoorn_huis_noor"]
@@ -608,6 +611,7 @@ func _ready() -> void:
 	# T27 suite: of  godot -- --perfprobetest  (scripts/tests/perf_probe_tests.gd).
 	# Drift-achtergrond op een breed landschap: of  godot -- --driftbgtest  (scripts/tests/drift_bg_tests.gd).
 	# TC-P proloog-titelkaart: of  godot -- --tcptest [--shots=/pad]  (scripts/tests/tc_p_autotest.gd; geen CI-matrix).
+	# Android-terug + Back op het naamscherm (F6-3/F6-4): of  godot -- --androidbacktest  (scripts/tests/android_back_tests.gd).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
@@ -732,6 +736,7 @@ func _ready() -> void:
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
 			["--wm1dekkingtest", "res://scripts/tests/wm1_dekking_tests.gd", "Wm1DekkingTest", "wm1dekkingtest"],
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
+			["--androidbacktest", "res://scripts/tests/android_back_tests.gd", "AndroidBackTest", "androidbacktest"],
 			["--statemachinetest", "res://scripts/tests/state_machine_tests.gd", "StateMachineTest", "statemachinetest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
@@ -2612,6 +2617,7 @@ func _fill_eind_codex() -> void:
 
 ## Na de naamkeuze: nieuw spel en naar het startpunt in het dorp.
 func start_new_game(hero_name: String) -> void:
+	new_game_starts += 1
 	use_story_saves()
 	new_game(hero_name)
 	# Forge/Dennis 21 okt 2026: een NIEUW spel begint altijd in Action (Classic blijft kiesbaar in Settings).
