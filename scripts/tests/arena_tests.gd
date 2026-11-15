@@ -8,6 +8,7 @@ const ShopData := preload("res://scripts/data/arena_shop_data.gd")
 const Shop := preload("res://scripts/arena/arena_shop.gd")
 const Art := preload("res://scripts/data/arena_art.gd")
 const Entry := preload("res://scripts/arena/arena_entry.gd")
+const GateLock := preload("res://scripts/arena/arena_gate_lock.gd")
 const RunScript := preload("res://scripts/arena/arena_run.gd")
 const HudScript := preload("res://scripts/arena/arena_hud.gd")
 const ShopScreen := preload("res://scripts/arena/arena_shop_screen.gd")
@@ -127,7 +128,7 @@ func _flag_off() -> void:
 	check("vlag aan: overlay verschijnt", open_map.get_node_or_null("ArenaOverlay") != null)
 	check("vlag aan: geen magenta marker", open_map.get_node_or_null("Objects/ArenaMarker") == null)
 	var gate: MapExit = open_map.get_node("Exits/NaarArena")
-	check("vlag aan: dichte uitgang meldt dat hij dicht is", gate.target_map == "" and gate.lines.size() == 1 and gate.lines[0] == "The gate is closed.")
+	check("vlag aan: uitgang altijd naar de lobby", gate.target_map == LOBBY and gate.target_spawn == "ingang" and gate.lines.is_empty())
 	var origin := Art.WORLD_TILE
 	check("vlag aan: uitgang is 2x2 op de tegel", gate.position == Vector2(origin) * 16.0 and gate.size_tiles == Vector2i(2, 2))
 	var layer: TileMapLayer = open_map.get_node("ArenaOverlay")
@@ -136,7 +137,14 @@ func _flag_off() -> void:
 	check("vlag aan: spawntegel blijft leeg", layer.get_cell_source_id(Vector2i(30, 25)) == -1)
 	GameState.story_flags["noor_lid"] = true
 	Entry.refresh(open_map)
-	check("vlag aan: noor_lid opent de uitgang naar de lobby", gate.target_map == LOBBY and gate.target_spawn == "ingang" and gate.lines.is_empty())
+	check("vlag aan: noor_lid laat de werelduitgang open", gate.target_map == LOBBY and gate.target_spawn == "ingang" and gate.lines.is_empty())
+	var parked := MapExit.new()
+	GateLock.apply(parked, LOBBY, "ingang")
+	check("slot-helper open met noor_lid", parked.target_map == LOBBY and parked.lines.is_empty())
+	GameState.story_flags.erase("noor_lid")
+	GateLock.apply(parked, LOBBY, "ingang")
+	check("slot-helper dicht zonder noor_lid", parked.target_map == "" and parked.lines.size() == 1 and parked.lines[0] == "The gate is closed.")
+	parked.free()
 	open_map.queue_free()
 	ReleaseFlags.arena_enabled_override = -1
 	check("override terug: vlag weer uit", ReleaseFlags.arena_enabled() == false)
@@ -406,7 +414,7 @@ func _rooms() -> void:
 	check("winkelier-botsing 12x6", kshape != null and kshape.size == Vector2(12, 6))
 	var lgate := _sprite_named(lobby, "arena_gate.png")
 	var lbody := lgate.get_parent() as Node2D if lgate != null else null
-	check("lobbypoort gecentreerd op x=192", lbody != null and lbody.position.x == 192.0 and lgate.frame == 2 and lgate.hframes == 3)
+	check("lobbypoort gecentreerd op x=192", lbody != null and lbody.position.x == 192.0 and lgate.frame == 1 and lgate.hframes == 3)
 	check("lobbypoort-offset", lgate != null and lgate.centered == false and lgate.offset == Vector2(-24, -48))
 	check("lobby is 24 tegels van 16 px", lg.get_used_rect().size.x * 16 == 384)
 	var hall: Node = (load(HALL) as PackedScene).instantiate()
@@ -470,19 +478,18 @@ func _art() -> void:
 	check("wereldkaart: overlay boven Ground", ov != null and ground.get_index() < ov.get_index())
 	var exit := live.get_node_or_null("Exits/NaarArena") as MapExit
 	var origin := Art.WORLD_TILE
-	check("wereldkaart: dichte uitgang op de tegel", exit != null and exit.target_map == "" and exit.lines.size() == 1 and exit.lines[0] == "The gate is closed." and exit.position == Vector2(origin) * 16.0 and exit.size_tiles == Vector2i(2, 2))
+	check("wereldkaart: uitgang altijd naar de lobby", exit != null and exit.target_map == LOBBY and exit.target_spawn == "ingang" and exit.lines.is_empty() and exit.position == Vector2(origin) * 16.0 and exit.size_tiles == Vector2i(2, 2))
 	check("wereldkaart: open atlas op het 2x2", ov != null and ov.get_cell_atlas_coords(origin) == Vector2i(0, 0) and ov.get_cell_atlas_coords(origin + Vector2i(1, 0)) == Vector2i(1, 0) and ov.get_cell_atlas_coords(origin + Vector2i(0, 1)) == Vector2i(0, 1) and ov.get_cell_atlas_coords(origin + Vector2i(1, 1)) == Vector2i(1, 1))
 	var locked_lobby: Node = (load(LOBBY) as PackedScene).instantiate()
 	add_child(locked_lobby)
 	await get_tree().process_frame
 	var locked_gate := _sprite_named(locked_lobby, "arena_gate.png")
-	check("lobbypoort op slot zonder noor_lid", locked_gate != null and locked_gate.frame == 2)
-	check("dichte lobbypoort zegt dat hij dicht is", str(locked_lobby.call("gate_closed_text")) == "The gate is closed.")
+	check("lobbypoort nog niet op slot", locked_gate != null and locked_gate.frame == 1)
 	GameState.story_flags["noor_lid"] = true
 	Entry.refresh(live)
-	check("wereldkaart: noor_lid opent de uitgang", exit.target_map == LOBBY and exit.target_spawn == "ingang" and exit.lines.is_empty())
+	check("wereldkaart: noor_lid verandert de uitgang niet", exit.target_map == LOBBY and exit.target_spawn == "ingang" and exit.lines.is_empty())
 	locked_lobby.call("refresh_gate")
-	check("lobbypoort open na noor_lid", locked_gate != null and locked_gate.frame == 1)
+	check("lobbypoort hangt nog niet aan noor_lid", locked_gate != null and locked_gate.frame == 1)
 	locked_lobby.queue_free()
 	await get_tree().process_frame
 	live.queue_free()

@@ -86,20 +86,14 @@ func _blocked(idx: int, x: int, y: int) -> bool:
 	return idx >= 32
 
 
-const CLOSED_LINE := "The gate is closed."
-
-
-func gate_closed_text() -> String:
-	return CLOSED_LINE
-
-
 func refresh_gate() -> void:
 	var objects := get_node_or_null("Objects")
 	if objects == null:
 		return
 	var frame := 0
 	if room_kind == "lobby":
-		frame = 1 if Story.has_flag("noor_lid") else 2
+		# Slot (arena_gate_lock.gd) hangt hier nog niet. De nis blijft open.
+		frame = 1
 	else:
 		var gs := get_node_or_null("/root/GameState")
 		var arena := gs.get_node_or_null("ArenaRun") if gs != null else null
@@ -183,9 +177,6 @@ func _gate_used() -> void:
 		return
 	if room_kind != "lobby":
 		Dialog.show_lines(["The gate is shut."], "")
-		return
-	if not Story.has_flag("noor_lid"):
-		Dialog.show_lines([CLOSED_LINE], "")
 		return
 	var arena := Host.ensure()
 	if str(arena.phase) != RunScript.PHASE_LOBBY:
