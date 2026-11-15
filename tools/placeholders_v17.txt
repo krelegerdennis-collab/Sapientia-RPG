@@ -112,9 +112,6 @@ assets/sprites/binnen/keukenkast.png                   24x32   keukenkast (huis_
 assets/sprites/binnen/doorframe_32.png                 32x32   binnendeur frame (huis_wilgendal ART-interieur)   [KLAAR]
 assets/sprites/binnen/slaapkamer_kast_PLACEHOLDER.png  24x32   slaapkamerkast Dax/Opa (huis_wilgendal)   [KLAAR: wardrobe in huis_props]
 # Action Combat T6: root-icoon om de voeten — [KLAAR] fx_root.png (TelegraphLayer._draw_root_icon).
-# F1 perfect dodge (draw_arc placeholder in SomFx.perfect_ring until art lands):
-assets/sprites/fx/fx_perfect_ring.png   64x16   open ring, 4 frames of 16x16, white/cyan
-assets/sprites/fx/fx_counter_spark.png    48x16   optional counter spark, 3 frames (16x16)
 # T18 aanvalsketen (combat T15): hit2 + finisher hergebruiken <held>_attack.png met ander tempo (SomChainData.STEP_MS). TODO RPG ART.
 # WM1 T2 Donker Woud 16x16 tegels (tools/woud_tegels_placeholders.py). Magenta hoekjes, geen definitieve art.
 # Vervangen: zie docs/art/woud_tiles_16px.md en data/woud_tegels.json (alleen "file").

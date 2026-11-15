@@ -1099,6 +1099,8 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				stg_kind = SomStaggerData.KIND_HEAVY_L1 if heavy == 1 else SomStaggerData.KIND_HEAVY_L2
 			damage_enemy(m, physical_damage(atk, float(e["def"]), swing_mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
 					num_color, num_scale, stg_kind)
+			if use_counter:
+				SomFx.counter_spark(room.get_node("Objects"), center_of(m))
 			if use_counter and Settings.action_battles() and not e.has("golem"):
 				if SomStagger.apply_hit(e, m, e["data"], SomStaggerData.KIND_PERFECT_COUNTER):
 					SomStagger.enter_wankel(e)

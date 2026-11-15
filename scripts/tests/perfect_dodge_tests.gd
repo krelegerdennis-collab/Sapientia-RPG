@@ -16,6 +16,7 @@ const TelegraphAttack := preload("res://scripts/som/telegraph_attack.gd")
 const MapMonster := preload("res://scripts/dungeon/map_monster.gd")
 const MockRoom := preload("res://scripts/tests/perfect_dodge_mock_room.gd")
 const PlayerScript := preload("res://scripts/player.gd")
+const SomFx := preload("res://scripts/som/som_fx.gd")
 
 var failures := 0
 var passes := 0
@@ -37,6 +38,7 @@ func check(label: String, ok: bool) -> void:
 func _run() -> void:
 	SomPerfectDodgeData.force_active = true
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	_fx_art_tests()
 	_data_tests()
 	_window_sim_step_tests()
 	_window_coop_host_tests()
@@ -52,6 +54,21 @@ func _run() -> void:
 	SomPerfectDodgeData.force_active = null
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
+
+
+func _fx_art_tests() -> void:
+	var ring: Dictionary = SomData.FX_PERFECT_RING
+	var spark: Dictionary = SomData.FX_COUNTER_SPARK
+	var tr: Texture2D = SomFx.tex(str(ring["sheet"]))
+	var ts: Texture2D = SomFx.tex(str(spark["sheet"]))
+	check("FX_PERFECT_RING sheet laadt", tr != null)
+	check("FX_COUNTER_SPARK sheet laadt", ts != null)
+	if tr != null:
+		check("FX_PERFECT_RING size 64x16", tr.get_size() == Vector2(64, 16))
+		check("FX_PERFECT_RING 4 frames", int(ring["frames"]) == 4 and tr.get_width() / int(ring["cell"][0]) == 4)
+	if ts != null:
+		check("FX_COUNTER_SPARK size 48x16", ts.get_size() == Vector2(48, 16))
+		check("FX_COUNTER_SPARK 3 frames", int(spark["frames"]) == 3 and ts.get_width() / int(spark["cell"][0]) == 3)
 
 
 func _arena() -> SomArena:

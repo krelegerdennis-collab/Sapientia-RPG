@@ -1361,3 +1361,8 @@ assets/sprites/telegraph/telegraph_arc120_diag_64.png
 assets/sprites/telegraph/telegraph_line_diag_16.png
 assets/sprites/telegraph/telegraph_line_start_16.png
 assets/sprites/telegraph/telegraph_inkspit_diag_22x44.png
+# F1 perfect-dodge FX (RPG ART, spec RPG COMBAT SPEC_F1_perfect_dodge.md):
+# open uitdijende ring + counter-vonk, alleen masterpalet, alpha 0/255
+# (art_fx/perfect_dodge/repo_drop; pad = bestaande combat-FX in assets/sprites/som/fx/)
+assets/sprites/som/fx/fx_perfect_ring.png
+assets/sprites/som/fx/fx_counter_spark.png
