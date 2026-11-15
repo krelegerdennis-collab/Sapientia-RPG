@@ -14,6 +14,9 @@ const BARE := {
 	"skin": "licht", "hair": -1, "top": -1, "bottom": -1, "head": -1, "class": "",
 }
 
+const BAKE_MS_LIMIT_LOCAL := 50.0
+const BAKE_MS_LIMIT_CI := 100.0 # GitHub-runners zijn trager; alleen deze testgrens ruimer op CI.
+
 var failures := 0
 var passes := 0
 var shots := ""
@@ -176,7 +179,8 @@ func _bake_tests() -> void:
 	var ms := float(Time.get_ticks_usec() - t0) / 1000.0
 	print("PAPERDOLL bake_ms=%.3f" % ms)
 	var first: Dictionary = baked
-	check("bakken < 50 ms (%.2f ms)" % ms, ms < 50.0 and first.size() == 5)
+	var bake_limit := BAKE_MS_LIMIT_CI if not OS.get_environment("CI").is_empty() or not OS.get_environment("GITHUB_ACTIONS").is_empty() else BAKE_MS_LIMIT_LOCAL
+	check("bakken < %.0f ms (%.2f ms)" % [bake_limit, ms], ms < bake_limit and first.size() == 5)
 	var walk_tex: Texture2D = first["walk"]
 	var attack_tex: Texture2D = first["attack"]
 	var hurt_tex: Texture2D = first["hurt"]
