@@ -63,21 +63,20 @@ Open en locked zijn even groot: 2x2 tiles = 32x32, zoals Mapleton.
 
 **Belangrijk:** de omgeving van de tiles is transparant. De grasstiles van v14 zijn off-palette (≈51,67,43), dus ik kon geen gras inbakken. Je moet de tiles op een **overlay-TileMapLayer** boven Ground zetten, of als Sprite2D (zoals KasIngang en BerggrotIngang). Als je ze in de Ground-laag zelf zet, krijg je gaten.
 
-**Plek (BEVESTIGD door Dennis, 2026-11-15 16:06: "plek van colosseum onder willowdale, gaat pas open na vesper"):**
-- De site staat op tiles **(30,26)-(31,27)**, linksboven (30,26), dus px (480,416)-(511,447) en midden px (496,432).
-- Dat is direct onder het dorp Wilgendal/Willowdale. Dat dorp is `Exits/NaarWilgendal` in `wereldkaart.tscn`, tiles (30,23)-(31,24).
-- De spawn `van_wilgendal` (488,408) = tile (30,25) blijft vrij. Er zit dus 1 rij gras tussen dorp en Colosseum.
-- Alle 4 tiles zijn gras (v14 #0/#1, begaanbaar). Links eronder (29,27) en onder (30,28) begint het gebergte; er ligt geen bos of water op of naast de site.
-
+**Plek (BEVESTIGD door Dennis, 2026-11-15 16:06: "plek van colosseum onder willowdale, gaat pas open na vesper"; 16:20: "Doe hem nog 4 vakjes zuid"):**
+- De site staat op tiles **(30,30)-(31,31)**, linksboven (30,30), dus px (480,480)-(511,511) en midden px (496,496).
+- Dat is 4 tiles zuidelijker dan de eerste plek (30,26), onder het dorp Wilgendal/Willowdale. Dat dorp is `Exits/NaarWilgendal` in `wereldkaart.tscn`, tiles (30,23)-(31,24).
+- Ondergrond: v14 #25, #31, #29 en #27 ("zand / nu: as en grind"), niet solid, dus begaanbaar. Het is een grind-inham tussen de bergen: (25-29,30) en (25-26,31) zijn berg in het westen, (33-34,30-31) is bos in het oosten, en (30-31,32) is gras eronder. Er ligt geen water in de buurt.
+- Pad (gecontroleerd met een BFS over de Ground-laag, berg en zee solid): spawn `van_wilgendal` (30,25) → (31,25) (31,26) (31,27) (31,28) (31,29) → (30,29) → (30,30). Kolom 31 loopt langs de bergrand, want (30,28) is berg. Vanaf rij 28 is het gras er ook breder (x31-36), dus er is geen smalle doorgang.
 Overlay-tiles per toestand:
 
-| toestand | wanneer | atlas coords → tiles (30,26) (31,26) (30,27) (31,27) |
+| toestand | wanneer | atlas coords → tiles (30,30) (31,30) (30,31) (31,31) |
 |---|---|---|
 | **locked** | tot de Vesper-unlock | (2,0) (3,0) (2,1) (3,1) |
 | **open** | na de Vesper-unlock | (0,0) (1,0) (0,1) (1,1) |
 
 De unlock is bevestigd. Als vlag stel ik `noor_lid` voor: dat is dezelfde vlag die `berggrot_data.gd` gebruikt als `TUNNEL_VLAG`, en naar zijn naam staat hij voor "Vesper (noor) is party-lid". Waar hij precies gezet wordt heb ik niet nagelopen; CODE bevestigt de vlagnaam.
-Exit/trigger (CODE): een `map_exit` 2x2 op (480,416) naar `arena_lobby.tscn`, alleen actief na de unlock. Zolang hij locked is, geeft hij een melding (bijv. "De poort is gesloten.").
+Exit/trigger (CODE): een `map_exit` 2x2 op (480,480) naar `arena_lobby.tscn`, alleen actief na de unlock. Zolang hij locked is, geeft hij een melding (bijv. "De poort is gesloten.").
 De data hiervoor staat in `placements_arena.json` → `wereldkaart` en `layouts.json` → `wereldkaart`.
 `wereld_v17_iconen.png` is niet aangeraakt.
 
@@ -180,7 +179,7 @@ Scènepaden `res://scenes/maps/arena_hal.tscn` en `arena_lobby.tscn` zijn TIJDEL
 
 ## Open vragen
 1. De wereldkaart-tiles hebben een transparante omgeving (het v14-gras is off-palette). Ze moeten dus op een overlay-laag of als Sprite2D. CODE moet bevestigen welke.
-2. Plek (30,26) en de unlock (locked tot Vesper, open daarna) zijn BEVESTIGD. Alleen de vlagnaam (voorstel `noor_lid`) en de exit/melding liggen nog bij CODE.
+2. Plek (30,30) en de unlock (locked tot Vesper, open daarna) zijn BEVESTIGD. Alleen de vlagnaam (voorstel `noor_lid`) en de exit/melding liggen nog bij CODE.
 3. Het NPC-pad: de slim-lookup van KaartStijl in npc.gd verwacht een basis-sheet. Ik raad aan dat CODE direct naar `arena_koopman_wm1_slim.png` verwijst.
 4. Lichtbudget hal: 6 fakkels + 4 hero > 8, dus clustering of selectie nodig (CODE).
 5. De atlas is gegroeid van 256x96 naar 256x112 (rij 6 nieuw); bestaande indices zijn stabiel. Als de TileSet-resource al bestaat, moet CODE de atlas-grootte/rij 6 toevoegen.
