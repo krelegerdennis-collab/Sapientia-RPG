@@ -8,7 +8,8 @@ extends Node
 ##   Deel D: twee keer snel opslaan, opslaan binnen een save/autosave (re-entrant), 25 saves achter elkaar
 ##   Deel E: save van vóór het versienummer laadt en wordt gemigreerd; nieuwere versie blijft alleen-lezen
 ## Vult savetest / savefuzztest / saveroundtriptest / saverobusttest / savehardeningtest aan, vervangt ze niet.
-## Werkt alleen op user://savestress_*; echte saves worden niet aangeraakt. Zit niet in de export (scripts/tests/*).
+## Paden: user://savestress_* (expliciet in deze suite) én via game_state testmodus user://savestresstest_save_*.json /
+## savestresstest_autosave_*.json (slot 1–4). Echte spelersaves worden niet aangeraakt. Zit niet in de export (scripts/tests/*).
 
 const F := preload("res://scripts/tests/save_stress_fixtures.gd")
 const PausePart := preload("res://scripts/tests/save_stress_pause.gd")
@@ -122,6 +123,29 @@ func _sig(tile: Vector2i, facing: Vector2i, map: String) -> String:
 	return JSON.stringify(JSON.parse_string(JSON.stringify(d)), "", true)
 
 
+## Story-deel van _sig(), zonder vlaggen die laden er zelf bij mag zetten (migratie).
+func _story_for_compare(sig_json: String) -> Dictionary:
+	var d := JSON.parse_string(sig_json) as Dictionary
+	var story: Dictionary = d.get("story", {}) if d.get("story") is Dictionary else {}
+	var out := story.duplicate()
+	if out.get("flags") is Array:
+		var flags: Array = (out["flags"] as Array).duplicate()
+		for f in MIGRATIE_VLAGGEN:
+			flags.erase(f)
+		flags.sort()
+		out["flags"] = flags
+	return out
+
+
+func _sig_equal_except_migration(before: String, after: String) -> bool:
+	var verschil := _diff(before, after)
+	if verschil.is_empty():
+		return true
+	if verschil != ["story"]:
+		return false
+	return _json(_story_for_compare(before)) == _json(_story_for_compare(after))
+
+
 ## Welke bovenste sleutels verschillen tussen twee _sig()-teksten?
 func _diff(a: String, b: String) -> Array:
 	var da := JSON.parse_string(a) as Dictionary
@@ -170,6 +194,8 @@ func _run() -> void:
 	_roundtrip_tests()
 	print("=== Deel B: kapotte saves ===")
 	_corruption_tests()
+	print("=== Deel B2: slots 2–4 onafhankelijk ===")
+	_multi_slot_tests()
 	print("=== Deel D: snel / dubbel opslaan ===")
 	_double_save_tests()
 	print("=== Deel E: oudere en nieuwere save-versie ===")
@@ -232,8 +258,8 @@ func _roundtrip_tests() -> void:
 				not GameState.in_battle and not GameState.save_readonly)
 		var after := _sig(tile, facing, map)
 		var verschil := _diff(before, after)
-		check("[%s] volledige staat gelijk, op migratievlaggen na (verschil: %s)" % [naam, verschil],
-				verschil.is_empty() or verschil == ["story"])
+		check("[%s] volledige staat gelijk, op migratievlaggen in story.flags na (verschil: %s)" % [naam, verschil],
+				_sig_equal_except_migration(before, after))
 
 		# tweede round-trip: opslaan wat er geladen is moet exact hetzelfde opleveren
 		GameState.save_game(GameState.return_tile, GameState.return_facing, RT2)
@@ -300,7 +326,9 @@ func _corruption_tests() -> void:
 	# 1) kapotte hoofd-save + goede reservekopie
 	var bad_load: Array = []
 	var bad_after_save: Array = []
-	var recovered := 0
+	var bak_recovery_missers: Array = []
+	var valid_main_missers: Array = []
+	var still_valid_count := 0
 	var variants := _corrupt_variants(good_main)
 	for v in variants:
 		var vnaam := str(v["name"])
@@ -313,13 +341,16 @@ func _corruption_tests() -> void:
 		var ok := GameState.load_game(CORRUPT)
 		var good: bool
 		if main_still_valid:
-			# een bitflip in witruimte of tekst kan geldige JSON laten: dan geldt de hoofd-save (opgeschoond)
+			still_valid_count += 1
+			# Bitflip in witruimte of onschuldige tekst: JSON blijft een save — hoofd-bestand mag laden (opgeschoond).
 			good = ok and GameState.last_load_notice == "" and not GameState.party.is_empty() \
 					and GameState.gold >= 0 and GameState.gold <= GameState.MAX_GOLD
+			if not good:
+				valid_main_missers.append(vnaam)
 		else:
 			good = ok and GameState.gold == 777 and GameState.last_load_notice == GameState.NOTICE_RECOVERED
-			if good:
-				recovered += 1
+			if not good:
+				bak_recovery_missers.append(vnaam)
 		if not good:
 			bad_load.append(vnaam)
 		# daarna opslaan: nooit een kapot bestand als reservekopie, en een goede .bak blijft goed
@@ -337,12 +368,14 @@ func _corruption_tests() -> void:
 			after_ok = saved and _gold_in(CORRUPT) == 999 and bak_ok and _no_temp(CORRUPT)
 		if not after_ok:
 			bad_after_save.append(vnaam)
-	check("%d kapotte varianten: laden crasht niet en geeft de .bak of de (nog geldige) hoofd-save (%d hersteld; misser: %s)"
-			% [variants.size(), recovered, bad_load], bad_load.is_empty())
+	check("%d kapotte varianten: laden crasht niet en geeft de .bak of de (nog geldige) hoofd-save (misser: %s)"
+			% [variants.size(), bad_load], bad_load.is_empty())
+	check("%d varianten met nog geldige hoofd-JSON: party niet leeg, geen crash (misser: %s)"
+			% [still_valid_count, valid_main_missers], valid_main_missers.is_empty())
+	check("%d varianten met ongeldige hoofd-JSON: herstel via .bak, goud 777 (misser: %s)"
+			% [variants.size() - still_valid_count, bak_recovery_missers], bak_recovery_missers.is_empty())
 	check("%d kapotte varianten: opslaan daarna lukt, hoofd-save goud 999, .bak blijft de goede 777 (misser: %s)"
 			% [variants.size(), bad_after_save], bad_after_save.is_empty())
-	check("de meeste varianten testen echt het herstelpad (%d van %d)" % [recovered, variants.size()],
-			recovered >= variants.size() - 12)
 
 	# 2) kapotte hoofd-save zonder reservekopie: nette melding, staat en bestand onaangeroerd
 	var no_bak_bad: Array = []
@@ -413,6 +446,38 @@ func _corruption_tests() -> void:
 	check("hoofd-save en .bak kapot: bestanden niet stil vervangen", _bytes(CORRUPT) == "garbage".to_utf8_buffer()
 			and _bytes(CORRUPT + ".bak") == "{}".to_utf8_buffer())
 	_remove_save(CORRUPT)
+
+
+func _multi_slot_tests() -> void:
+	var gold_by_slot := {2: 202, 3: 303, 4: 404}
+	var orig_slot := GameState.active_slot
+	for s in [2, 3, 4]:
+		_remove_save(GameState.slot_path(s))
+	for s in [2, 3, 4]:
+		GameState.active_slot = s
+		GameState.sync_autosave_path()
+		_base_state(gold_by_slot[s])
+		check("slot %d: save naar %s" % [s, GameState.slot_path(s)],
+				GameState.save_game(Vector2i(s, s), Vector2i.DOWN, GameState.slot_path(s)))
+	for s in [2, 3, 4]:
+		GameState.new_game("Zed")
+		check("slot %d: laden goud %d" % [s, gold_by_slot[s]],
+				GameState.load_game(GameState.slot_path(s)) and GameState.gold == gold_by_slot[s])
+	var slot3 := GameState.slot_path(3)
+	_write(slot3, "not-json")
+	GameState.new_game("Zed")
+	check("slot 3 kapot: load_game faalt zonder andere slots te raken",
+			not GameState.load_game(slot3) and GameState.last_load_notice != "")
+	GameState.new_game("Zed")
+	check("slot 2 na corruptie slot 3: goud %d" % gold_by_slot[2],
+			GameState.load_game(GameState.slot_path(2)) and GameState.gold == gold_by_slot[2])
+	GameState.new_game("Zed")
+	check("slot 4 na corruptie slot 3: goud %d" % gold_by_slot[4],
+			GameState.load_game(GameState.slot_path(4)) and GameState.gold == gold_by_slot[4])
+	for s in [2, 3, 4]:
+		_remove_save(GameState.slot_path(s))
+	GameState.active_slot = orig_slot
+	GameState.sync_autosave_path()
 
 
 # ---------------------------------------------------------------- D: snel / dubbel opslaan
@@ -532,8 +597,12 @@ func _double_save_tests() -> void:
 
 # ---------------------------------------------------------------- E: versies
 func _version_tests() -> void:
-	check("SAVE_VERSION is %d (migratie gaat per sleutel, niet per versienummer)" % GameState.SAVE_VERSION,
-			GameState.SAVE_VERSION >= 1)
+	_remove_save(RT)
+	_base_state(11)
+	GameState.save_game(Vector2i(1, 1), Vector2i.DOWN, RT)
+	check("verse save schrijft version == SAVE_VERSION (%d)" % GameState.SAVE_VERSION,
+			int(GameState._read_save_file(RT).get("version", -1)) == GameState.SAVE_VERSION)
+	_remove_save(RT)
 	for variant in ["zonder version", "version 0"]:
 		var old := F.old_save_v0()
 		if variant == "version 0":
