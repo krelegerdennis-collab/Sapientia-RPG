@@ -2,7 +2,9 @@
 
 Status: **DECISION** op de regel zelf (Dennis: "Go alles" op de 8 game-feel-tips, 15 nov 2026, 14:03 Europe/Amsterdam). De exacte palet-slots hieronder zijn **PROPOSAL**, afgeleid uit het 73-kleuren-masterpalet en uit FX die de regel al volgen (`fx_death_glitch`, `fx_loot_pop`, Orion-finisher).
 
-Dit is de laatste van die 8 tips: één signaalkleur voor gevaar, één voor beloning. Zo leest combat op een telefoon in één oogopslag. Geen nieuwe sheets in deze levering; bestaande FX zijn alleen gecontroleerd, niet aangepast.
+Dit is de laatste van die 8 tips: één signaalkleur voor gevaar, één voor beloning. Zo leest combat op een telefoon in één oogopslag.
+
+**PR `art/kleurregel` (naar `finish/wm1`):** vier bestaande repo-sheets zijn byte-exact hergetint volgens deze spec — `fx_perfect_ring.png` (64×16), `fx_counter_spark.png` (48×16), `fx_impact_licht.png` (72×24), `fx_enemy_read.png` (48×16). De twee chain-finisher-sheets (`fx_chain_finisher_dennis.png`, `fx_chain_finisher_noor.png`) volgen in een aparte art-drop zodra **PR #475** op `finish/wm1` staat; die bestanden zitten nog niet in de repo. De audit-sectie hieronder beschrijft de oorspronkelijke stand vóór die herkleuringen; previews en fix-mocks blijven referentie.
 
 Preview: `kleurregel_preview_4x.png` (268×344 bron, nearest 4× = 1072×1376, alleen masterpalet, alpha 0/255). 16×16-crops (loot, read, dodge-ring) staan 2× nearest in hun cel, met een `2X`-label in de cel, zodat ze even zwaar lezen als de 32×32-crops.
 
@@ -96,7 +98,7 @@ Buiten deze mappen, ter info: de bestaande `fx_telegraph.png` in de repo is ook 
 
 ## Open / later
 
-De 6 sheets hierboven pas herkleuren na een kort akkoord van Dennis (of een toewijzing van Forge). Geen vorm- of timingwijziging nodig, alleen de signaalkleur. Schadegetallen in code (`COL_HEAVY` / `#FFD24A`) zijn een COMBAT-punt: Gold 4 gebruiken als ze op palet moeten.
+Vier van de zes audit-overtredingen zijn geleverd in PR `art/kleurregel` (zie intro). Nog open op art: `fx_chain_finisher_dennis.png` en `fx_chain_finisher_noor.png` — wacht op merge van **#475**. Geen vorm- of timingwijziging nodig, alleen de signaalkleur. Schadegetallen in code (`COL_HEAVY` / `#FFD24A`) zijn een COMBAT-punt: Gold 4 gebruiken als ze op palet moeten.
 
 ## Levering
 
