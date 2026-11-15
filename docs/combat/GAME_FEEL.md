@@ -6,7 +6,7 @@ Screenshake en gekleurde schadegetallen op vijanden. Geen wijziging aan hitstop,
 
 | soort | px | ticks |
 |---|---|---|
-| finisher (eigen held) | 1 | 4 |
+| finisher (eigen held) | 2 | 6 |
 | heavy L1 | 2 | 6 |
 | heavy L2 | 3 | 8 |
 | Golem hamerslag en grote AoE (eigen held geraakt) | 3 | 10 |
@@ -20,7 +20,7 @@ Patroon: vaste tabel in `SomFeelData.PATTERN` (geen `randf`). Na elke shake: `Ca
 | treffer | kleur | schaal |
 |---|---|---|
 | gewoon | wit | 1.0 |
-| finisher | `#FF8A3D` | 1.0 |
+| finisher | `#FFD24A` | 1.3 |
 | heavy L1 | `#FFD24A` | 1.0 |
 | heavy L2 | `#FFD24A` | 1.25 |
 

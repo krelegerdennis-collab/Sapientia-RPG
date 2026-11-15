@@ -604,6 +604,7 @@ func _ready() -> void:
 	# D3 arena-hook realtime Golem (PR C): of  godot -- --golemarenatest  (scripts/tests/golem_arena_tests.gd).
 	# Golem zichtbare telegraaf/aanval (Action): of  godot -- --golemzichtbaartest  (scripts/tests/golem_zichtbaar_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
+	# Epic keten-feel (strips, nagloed, WM1): of  godot -- --chainfeeltest  (scripts/tests/chain_feel_tests.gd).
 	# F4 game feel (screenshake + schadekleuren): of  godot -- --gamefeeltest  (scripts/tests/gamefeel_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# F2 stagger-meter (Action): of  godot -- --staggertest  (scripts/tests/stagger_tests.gd).
@@ -712,6 +713,7 @@ func _ready() -> void:
 			["--golemstorytest", "res://scripts/tests/golem_story_tests.gd", "GolemStoryTest", "golemstorytest"],
 			["--gamefeeltest", "res://scripts/tests/gamefeel_tests.gd", "GameFeelTest", "gamefeeltest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
+			["--chainfeeltest", "res://scripts/tests/chain_feel_tests.gd", "ChainFeelTest", "chainfeeltest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--staggertest", "res://scripts/tests/stagger_tests.gd", "StaggerTest", "staggertest"],
