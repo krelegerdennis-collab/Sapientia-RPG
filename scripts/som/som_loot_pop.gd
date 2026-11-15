@@ -9,7 +9,7 @@ const MAX_DROPS := 4
 
 
 class LootDrop extends Node2D:
-	var _tick := 0
+	var _elapsed := 0.0
 	var _index := 0
 	var _item_id := ""
 	var _pop_done := false
@@ -34,23 +34,24 @@ class LootDrop extends Node2D:
 		add_child(_icon)
 
 
-	func _process(_delta: float) -> void:
-		_tick += 1
+	func _process(delta: float) -> void:
+		_elapsed += delta
+		var tick := int(floor(_elapsed / TICK_SEC + 0.0001))
 		if _icon == null:
 			queue_free()
 			return
-		var y: float = _Self.y_at_tick(_tick)
+		var y: float = _Self.y_at_tick(tick)
 		_icon.position.y = -y
-		if _tick == 19 and not _pop_done:
+		if tick >= 19 and not _pop_done:
 			_pop_done = true
 			var pop := SomFx.oneshot(self, SomData.FX_LOOT_POP, Vector2.ZERO, "SomLootRing", Color.WHITE)
 			if pop is Sprite2D:
 				_ring = pop as Sprite2D
-		if _tick >= 64:
-			var phase := _tick - 64
+		if tick >= 64:
+			var phase := tick - 64
 			var blink_on := (phase / 2) % 2 == 0
 			modulate.a = 1.0 if blink_on else 0.0
-		if _tick >= 75:
+		if tick >= 75:
 			queue_free()
 
 

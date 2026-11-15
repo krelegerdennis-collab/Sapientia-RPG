@@ -39,7 +39,7 @@ static func begin_telegraph(arena, m: Node, parent: Node, center_fn: Callable, w
 	var bang_life := maxf(0.05, windup_sec - SomGameFeelData.ENEMY_READ_DELAY_SEC)
 	var tree: SceneTree = arena.get_tree()
 	tree.create_timer(SomGameFeelData.ENEMY_READ_DELAY_SEC).timeout.connect(func() -> void:
-		if not is_instance_valid(m) or not is_instance_valid(arena):
+		if not is_instance_valid(m) or not is_instance_valid(arena) or not arena.enemies.has(m):
 			return
 		pose_fn.call()
 		SomFx.number(parent, center_fn.call(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), bang_life)

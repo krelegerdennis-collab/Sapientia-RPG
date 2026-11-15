@@ -42,6 +42,7 @@ func _run() -> void:
 	_loot_curve_tests()
 	await _death_tests()
 	await _read_tests()
+	await _read_dead_enemy_tests()
 	await _determinism_tests()
 	_finish()
 
@@ -65,8 +66,19 @@ func _loot_curve_tests() -> void:
 	check("loot onbekend icoon null", SomLootPop._item_icon("niet_bestaand_xyz") == null)
 	var root := Node2D.new()
 	add_child(root)
-	SomLootPop.spawn_group(root, Vector2(64, 64), ["drankje", "niet_bestaand_xyz", "kruid"])
-	check("loot spawn crasht niet", true)
+	var ground := Vector2(100.0, 80.0)
+	var bad_root := Node2D.new()
+	add_child(bad_root)
+	SomLootPop.spawn_group(bad_root, Vector2.ZERO, ["niet_bestaand_xyz"])
+	check("loot onbekend icoon geen node", bad_root.get_child_count() == 0)
+	bad_root.queue_free()
+	SomLootPop.spawn_group(root, ground, ["drankje", "kruid"])
+	var n0: Node2D = root.get_node_or_null("SomLootDrop_0") as Node2D
+	var n1: Node2D = root.get_node_or_null("SomLootDrop_1") as Node2D
+	check("loot 2 drops met icoon", n0 != null and n1 != null)
+	if n0 != null and n1 != null:
+		check("loot drop0 +3px", is_equal_approx(n0.position.x - ground.x, 3.0))
+		check("loot drop1 -3px", is_equal_approx(n1.position.x - ground.x, -3.0))
 	root.queue_free()
 
 
@@ -115,24 +127,30 @@ func _death_tests() -> void:
 	check("vijand voor defeat", m != null)
 	if m == null:
 		return
+	var e: Dictionary = arena.enemies[m]
 	var gold0 := GameState.gold
-	var exp_msgs := 0
+	var gold_gain := int(e["gold"])
+	var got_capture: Array = []
+	arena.enemy_defeated.connect(func(_mon, _exp, _gld, got: Array) -> void:
+		got_capture = got
+	)
 	arena._defeat_enemy(m)
 	check("vijand direct uit enemies", not arena.enemies.has(m))
 	var glitch := arena.room.get_node("Objects").get_node_or_null("SomDeathGlitch")
 	check("glitch overlay-node", glitch != null)
 	var big: bool = m.size != Vector2i.ONE
 	check("overlay 32 vs 48", glitch != null and int((SomData.FX_DEATH_GLITCH_48 if big else SomData.FX_DEATH_GLITCH)["frames"]) > 0)
+	for _i in 5:
+		await get_tree().process_frame
+	var expected_drops := mini(got_capture.size(), SomLootPop.MAX_DROPS)
+	var drop_count := 0
+	for c in arena.room.get_node("Objects").get_children():
+		if str(c.name).begins_with("SomLootDrop"):
+			drop_count += 1
+	check("loot-drop count = got (max 4)", drop_count == expected_drops)
 	await get_tree().create_timer(0.45).timeout
 	check("defeat na fx: monster freed", not is_instance_valid(m) or m.is_queued_for_deletion())
-	check("goud na defeat", GameState.gold >= gold0)
-	var objs := arena.room.get_node("Objects")
-	var drops := 0
-	for c in objs.get_children():
-		if str(c.name).begins_with("SomLootDrop"):
-			drops += 1
-	# drops alleen als RNG drops rolde; geen crash is genoeg
-	check("loot nodes geen crash", true)
+	check("goud exact +gold", GameState.gold == gold0 + gold_gain)
 
 
 func _read_tests() -> void:
@@ -169,33 +187,99 @@ func _read_tests() -> void:
 	check("trefferfase bereikt", active_tick >= 0)
 
 
-func _fingerprint(arena: SomArena) -> String:
+func _read_dead_enemy_tests() -> void:
+	var arena := await _setup_arena(8803)
+	if arena == null:
+		check("read-dead arena", false)
+		return
+	var m: Node = null
+	for k in arena.enemies.keys():
+		m = k
+		break
+	if m == null or m.sprite == null:
+		check("read-dead vijand+sprite", false)
+		return
+	var e: Dictionary = arena.enemies[m]
+	var objs := arena.room.get_node("Objects")
+	var tex_before: Texture2D = m.sprite.texture
+	var frame_before: int = m.sprite.frame
+	SomEnemyRead.begin_telegraph(arena, m, objs, Callable(arena, "center_of"), 0.45,
+			Callable(arena, "_telegraph_charge_pose").bind(m, e, 0.5))
+	await get_tree().process_frame
+	arena._defeat_enemy(m)
+	check("read-dead: vijand weg", not arena.enemies.has(m))
+	await get_tree().create_timer(SomGameFeelData.ENEMY_READ_DELAY_SEC + 0.05).timeout
+	check("read-dead: geen '!'", objs.get_node_or_null("SomNumber") == null)
+	if is_instance_valid(m) and m.sprite != null:
+		var attack := arena._monster_sheet(m, "attack")
+		var is_charge_pose: bool = attack != null and m.sprite.texture == attack
+		if not is_charge_pose:
+			check("read-dead: geen aanval-pose op lijk", true)
+		else:
+			check("read-dead: geen aanval-pose op lijk", m.sprite.frame == frame_before and m.sprite.texture == tex_before)
+	else:
+		check("read-dead: geen aanval-pose op lijk", true)
+
+
+func _sim_snapshot(arena: SomArena) -> Dictionary:
 	var m: Node = null
 	for k in arena.enemies.keys():
 		if is_instance_valid(k):
 			m = k
 			break
 	if m == null:
-		return ""
-	return "%d:%s:%d:%d" % [int(arena.enemies[m]["hp"]), str(m.tile), arena.rng.seed, arena.last_knockback_tiles]
+		return {
+			"hp": 0,
+			"tile": "",
+			"rng_state": arena.rng.state,
+			"enemies": arena.enemies.size(),
+		}
+	return {
+		"hp": int(arena.enemies[m]["hp"]),
+		"tile": str(m.tile),
+		"rng_state": arena.rng.state,
+		"enemies": arena.enemies.size(),
+	}
+
+
+func _determinism_actions(arena: SomArena) -> bool:
+	var start_n := arena.enemies.size()
+	if start_n == 0:
+		return false
+	var m: Node = null
+	for k in arena.enemies.keys():
+		if is_instance_valid(k):
+			m = k
+			break
+	if m == null:
+		return false
+	arena._pending_chain_step = SomChainData.STEP_HIT1
+	arena.damage_enemy(m, 3, Vector2i.RIGHT, false, 0, 0)
+	for _t in 8:
+		arena.step_ticks(1)
+	if not arena.enemies.has(m):
+		return arena.enemies.size() < start_n
+	var hp_left := int(arena.enemies[m]["hp"])
+	arena.damage_enemy(m, hp_left, Vector2i.LEFT, false, 0, 0)
+	return arena.enemies.size() < start_n
 
 
 func _determinism_tests() -> void:
-	var arena := await _setup_arena(9901)
-	if arena == null:
-		check("determ arena", false)
-		return
-	var m: Node = null
-	for k in arena.enemies.keys():
-		m = k
-		break
-	if m == null:
-		check("determ vijand", false)
-		return
-	arena._pending_chain_step = SomChainData.STEP_HIT1
-	arena.damage_enemy(m, 3, Vector2i.RIGHT, false, 0, 0)
-	var fp1 := _fingerprint(arena)
-	for _t in 40:
-		arena.step_ticks(1)
-	var fp2 := _fingerprint(arena)
-	check("2 seeded runs zelfde sim-fingerprint", fp1 == fp2 and fp1 != "")
+	var snaps: Array = []
+	var kills: Array = []
+	for _run in 2:
+		var arena := await _setup_arena(9901)
+		if arena == null:
+			check("determ arena run", false)
+			return
+		kills.append(_determinism_actions(arena))
+		snaps.append(_sim_snapshot(arena))
+	check("determ vijand na acties", snaps.size() == 2 and not snaps[0].is_empty() and not snaps[1].is_empty())
+	if snaps.size() == 2 and not snaps[0].is_empty():
+		var a: Dictionary = snaps[0]
+		var b: Dictionary = snaps[1]
+		check("determ hp", a["hp"] == b["hp"])
+		check("determ tile", a["tile"] == b["tile"])
+		check("determ rng.state", a["rng_state"] == b["rng_state"])
+		check("determ enemies.size", a["enemies"] == b["enemies"])
+		check("determ kill erin", kills.size() == 2 and kills[0] and kills[1])
