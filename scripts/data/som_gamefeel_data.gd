@@ -2,6 +2,10 @@ extends RefCounted
 ## Game-feel fase 1: impact-FX, gewichtsklassen, squash/nudge-tabellen.
 ## Alleen client-weergave; geen sim-knockback of netwerk.
 
+## Fase 2: glitch-dood + loot-pop (client-only). false = oude death-sheet / fade.
+const DEATH_GLITCH_ENABLED := true
+const ENEMY_READ_DELAY_SEC := 2.0 / 60.0
+
 const GameData := preload("res://scripts/data/game_data.gd")
 const VALID_IMPACT_ELEMENTS: Array[String] = ["fysiek", "vuur", "ijs", "bliksem", "natuur", "licht"]
 

@@ -1383,3 +1383,11 @@ assets/sprites/som/fx/fx_dust_finisher.png
 assets/sprites/som/fx/fx_perfect_ring.png
 assets/sprites/som/fx/fx_counter_spark.png
 assets/sprites/som/fx/fx_impact_licht.png
+# Game-feel FX fase 2 (RPG ART, Dennis "Go alles"):
+# glitch-dood (32 + 48), loot-pop-ring, vijand-read-flits; alleen masterpalet, alpha 0/255
+# (art_gamefeel/fase2/repo_drop; pad = bestaande combat-FX in assets/sprites/som/fx/)
+# scanline-verschuiving van de vijand + opvering van de drop = code (README fase 2)
+assets/sprites/som/fx/fx_death_glitch.png
+assets/sprites/som/fx/fx_death_glitch_48.png
+assets/sprites/som/fx/fx_loot_pop.png
+assets/sprites/som/fx/fx_enemy_read.png
