@@ -185,7 +185,7 @@ func _battle_part(player: Node) -> void:
 	var count0 := GameState.autosave_count
 	GameState.start_battle(["mosslijm"], player.get_tile(), player.facing, "archief", false, 0)
 	var b: Node = null
-	for i in 900:
+	for i in 180:
 		b = _battle()
 		if b != null:
 			break
@@ -205,7 +205,7 @@ func _battle_part(player: Node) -> void:
 	var reward_gold := -1
 	var reward_exp := -1
 	var victory_checked := false
-	for guard in 3000:
+	for guard in 600:
 		if _battle() != b or not is_instance_valid(b):
 			break
 		var st := str(b.state)

@@ -52,6 +52,39 @@ func _remove_save(path: String) -> void:
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
 
 
+var _teardown_done := false
+
+
+func _all_stress_paths() -> Array[String]:
+	var out: Array[String] = [RT, RT2, CORRUPT, DUBBEL, SNEL, OUD]
+	out.append(GameState.save_path)
+	out.append(GameState.autosave_path)
+	for s in range(0, GameState.SLOT_COUNT + 1):
+		var sp := GameState.slot_path(s)
+		if sp != "":
+			out.append(sp)
+		var ap := GameState.autosave_slot_path(s)
+		if ap != "":
+			out.append(ap)
+	var legacy := GameState._legacy_shared_autosave_path()
+	if legacy != "":
+		out.append(legacy)
+	return out
+
+
+func _teardown_saves() -> void:
+	if _teardown_done:
+		return
+	_teardown_done = true
+	for p in _all_stress_paths():
+		_remove_save(p)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_teardown_saves()
+
+
 func _write(path: String, text: String) -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(text)
@@ -149,8 +182,7 @@ func _run() -> void:
 	await pause.run()
 	Settings.set_value("autosave", orig_autosave)
 	Settings.set_value("battle_style", orig_style)
-	for p in [RT, RT2, CORRUPT, DUBBEL, SNEL, OUD]:
-		_remove_save(p)
+	_teardown_saves()
 	print("SAVESTRESSTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -332,8 +364,10 @@ func _corruption_tests() -> void:
 	_remove_save(CORRUPT)
 	_write(CORRUPT, "")
 	GameState.new_game("Zed")
-	check("geen .bak, leeg bestand: read_save geeft {} en de titel-check (has_any_save) crasht niet",
-			GameState.read_save(CORRUPT).is_empty() and (GameState.has_any_save() or true))
+	check("geen .bak, leeg bestand: read_save {}, has_any_save consistent met newest_save_path (geen crash)",
+			GameState.read_save(CORRUPT).is_empty()
+			and GameState.has_any_save() == (GameState.newest_save_path() != "")
+			and GameState.newest_save_path() != CORRUPT)
 
 	# 3) goede hoofd-save + kapotte reservekopie: hoofd-save laadt, volgende save herstelt de .bak
 	_remove_save(CORRUPT)
