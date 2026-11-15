@@ -33,6 +33,8 @@ func bump(player: Node2D) -> void:
 func _enter(player: Node2D) -> void:
 	if GameState.changing_map or Dialog.is_open:
 		return
-	if "input_locked" in player:
-		player.input_locked = true
-	GameState.change_map(target_map, target_spawn)
+	# Alleen vastzetten als de wissel echt start. Een ontbrekend of ongeldig pad
+	# geeft false vóór de fade: de deur blijft dan bruikbaar (geen softlock).
+	if GameState.change_map(target_map, target_spawn):
+		if "input_locked" in player:
+			player.input_locked = true

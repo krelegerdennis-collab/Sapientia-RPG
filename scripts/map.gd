@@ -336,8 +336,8 @@ func _process(_delta: float) -> void:
 	if ReleaseFlags.dev_rooms_allowed() and InputMap.has_action("debug_puzzle") and Input.is_action_just_pressed("debug_puzzle"):
 		if not GameState.scene_busy() and not player.is_moving \
 				and not Dialog.is_open and not menu_open() and not Story.running:
-			player.input_locked = true
-			GameState.change_map(DEBUG_PUZZLE_ROOM, "ingang")
+			if GameState.change_map(DEBUG_PUZZLE_ROOM, "ingang"):
+				player.input_locked = true
 	# F2 = forceer een gevecht (alleen in debug-builds en alleen op maps met monsters).
 	if OS.is_debug_build() and encounters and Input.is_action_just_pressed("debug_battle"):
 		if not GameState.scene_busy() and not player.is_moving and not Dialog.is_open:
@@ -404,8 +404,8 @@ func _use_exit(exit: Node) -> void:
 		if EchoGrot.blokkeert_wereldkaart(scene_file_path, str(exit.target_map)):
 			Dialog.show_lines([EchoGrot.ZIN_WERELD], "")
 			return
-		player.input_locked = true
-		GameState.change_map(exit.target_map, exit.target_spawn)
+		if GameState.change_map(exit.target_map, exit.target_spawn):
+			player.input_locked = true
 	elif not exit.lines.is_empty():
 		Dialog.show_lines(exit.lines, "")
 
