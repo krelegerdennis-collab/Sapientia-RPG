@@ -40,7 +40,7 @@ func _ready() -> void:
 	# Eigen user:// (de host start ons met een eigen XDG_DATA_HOME): eigen M1-profiel, zoals op de telefoon.
 	var store := Profile.new()
 	if not store.has_slot(0):
-		store.create_slot(0, "Gast", "warrior")
+		store.create_slot(0, "Guest", "warrior")
 	_note("boot", true)
 	_begin.call_deferred()
 

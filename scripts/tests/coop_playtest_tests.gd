@@ -288,7 +288,7 @@ func _start_round(hal: OnlineHal, tag: String) -> bool:
 	var r := _run_scene()
 	check("ronde %s: zelfde seed en verdieping (gast volgt de host)" % tag, OnlineDlsRun.active and OnlineDlsRun.floor_no == 1 and int(_guest().get("run_seed", -1)) == OnlineDlsRun.run_seed)
 	await _shot("online_run_%s" % tag)
-	check("ronde %s: Terug naar lobby-knop zichtbaar" % tag, r.leave_button() != null and r.leave_button().is_visible_in_tree() and r.leave_button().text.strip_edges() == "Terug naar lobby")
+	check("ronde %s: Terug naar lobby-knop zichtbaar" % tag, r.leave_button() != null and r.leave_button().is_visible_in_tree() and r.leave_button().text.strip_edges() == "Back to lobby")
 	return true
 
 

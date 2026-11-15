@@ -24,9 +24,9 @@ const Run := preload("res://scripts/online/online_dls_run.gd")
 const RUN_SCENE := "res://scenes/online/online_run.tscn"
 ## Reden in SESSION_END als de host de kamer of de run verlaat.
 const END_HOST_LEFT := "host_left"
-const LEAVE_TEXT := "Verlaten"
-const MSG_HOST_LEFT := "De host heeft de kamer verlaten."
-const MSG_LINK_LOST := "Verbinding met de kamer verbroken."
+const LEAVE_TEXT := "Leave"
+const MSG_HOST_LEFT := "The host left the room."
+const MSG_LINK_LOST := "Connection to the room lost."
 
 const TRIAL_SIM := "dls"
 const TRIAL_MODE := "easy"

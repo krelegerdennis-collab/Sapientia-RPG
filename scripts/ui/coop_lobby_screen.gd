@@ -328,7 +328,7 @@ static func online_packet(src: Dictionary) -> Dictionary:
 	if row.is_empty():
 		var store := Profile.new()
 		if not store.has_slot(0) and not bool(store.create_slot(0, _default_online_name(), "warrior").get("ok", false)):
-			store.create_slot(0, "Held", "warrior")
+			store.create_slot(0, "Hero", "warrior")
 		if store.has_slot(0):
 			row = store.get_slot(0)
 	if row.is_empty():
@@ -355,7 +355,7 @@ static func _default_online_name() -> String:
 			out += raw.substr(i, 1)
 		if out.length() >= Profile.NAME_MAX:
 			break
-	return out if out != "" else "Held"
+	return out if out != "" else "Hero"
 
 
 func _build_host() -> void:

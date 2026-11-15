@@ -17,11 +17,11 @@ const THEME := preload("res://assets/theme.tres")
 const HALL_SCENE := "res://scenes/coop/online_hal.tscn"
 const END_HOST_LEFT := "host_left"
 const END_RUN_DONE := "run_done"
-const LEAVE_TEXT := "Terug naar lobby"
-const MSG_HOST_LEFT := "De host heeft de run gestopt."
-const MSG_LINK_LOST := "Verbinding met de host verbroken."
-const MSG_RUN_DONE := "Run voorbij. Terug in de lobby."
-const MSG_NO_LOBBY := "Geen verbinding meer met de kamer."
+const LEAVE_TEXT := "Back to lobby"
+const MSG_HOST_LEFT := "The host stopped the run."
+const MSG_LINK_LOST := "Connection to the host lost."
+const MSG_RUN_DONE := "Run finished. Back in the lobby."
+const MSG_NO_LOBBY := "No connection to the room."
 const LEAVE_W := 92.0
 const LEAVE_H := 20.0
 ## Zo lang wachten we op de SomArena van een nieuwe kamer (frames).
