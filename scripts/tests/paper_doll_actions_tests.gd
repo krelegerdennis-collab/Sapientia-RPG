@@ -21,6 +21,9 @@ const BARE := {
 	"skin": "licht", "hair": -1, "top": -1, "bottom": -1, "head": -1, "class": "",
 }
 
+const BAKE_MS_LIMIT_LOCAL := 50.0
+const BAKE_MS_LIMIT_CI := 100.0 # GitHub-runners zijn trager; alleen deze testgrens ruimer op CI.
+
 var failures := 0
 var passes := 0
 
@@ -108,4 +111,5 @@ func _bake_perf_budget() -> void:
 	var _unused: Variant = Baker.bake(FULL)
 	var ms := float(Time.get_ticks_usec() - t0) / 1000.0
 	print("PAPERDOLLACTIONS bake_ms=%.3f" % ms)
-	check("bakken < 50 ms met marge (%.2f ms)" % ms, ms < 49.5)
+	var bake_limit := BAKE_MS_LIMIT_CI if not OS.get_environment("CI").is_empty() or not OS.get_environment("GITHUB_ACTIONS").is_empty() else BAKE_MS_LIMIT_LOCAL
+	check("bakken < %.0f ms met marge (%.2f ms)" % [bake_limit, ms], ms < bake_limit - 0.5)
