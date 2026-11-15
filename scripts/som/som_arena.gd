@@ -1854,6 +1854,9 @@ func _clear_transient_combat() -> void:
 	_pd_icd.clear()
 	_pd_counter.clear()
 	_pd_flash.clear()
+	# Perfect-tellers horen bij één gevecht (klus 9).
+	perfect_count = 0
+	perfect_event_ticks.clear()
 	chain_reset("*")
 	heavy_hold.clear()
 	_ai_heavy.clear()
@@ -1921,8 +1924,10 @@ func _tint(m: Node, e: Dictionary) -> void:
 
 
 ## Vijand raakt een held. Bestuurde held = de oude naam hit_player (ook voor tests).
-func hit_player(atk: int, _from := Vector2.ZERO) -> void:
-	hit_member(active_id, atk)
+## src (optioneel): de aanvallende vijand-node; bij een perfect dodge wordt die het counter-doel.
+## Zonder src gedrag exact als voorheen.
+func hit_player(atk: int, _from := Vector2.ZERO, src: Node = null) -> void:
+	hit_member(active_id, atk, 1.0, 0, src)
 
 
 func _perfect_active() -> bool:
