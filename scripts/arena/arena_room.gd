@@ -1,6 +1,9 @@
 extends "res://scripts/map.gd"
 ## Lobby 24x14 en hal 30x20, tegels 16x16. Bestaande binnentegels tot arena_tiles.png er is.
 ## De poort zit in het midden van de noordmuur.
+## Scènes staan in scenes/arena/, niet in scenes/maps/: die map is WM1-content
+## (muziek + playtest-gebied). BGM is bestaande tracks tot er een Colosseum-track is:
+## lobby rustplek, hal gevecht_normaal.
 
 const Tiles := preload("res://assets/tiles/binnen.tres")
 const RunScript := preload("res://scripts/arena/arena_run.gd")
@@ -11,7 +14,7 @@ const Koopman := preload("res://scripts/arena/arena_koopman.gd")
 
 const FLOOR := Vector2i(0, 0)
 const WALL := Vector2i(2, 0)
-const HALL := "res://scenes/maps/arena_hall.tscn"
+const HALL := "res://scenes/arena/arena_hall.tscn"
 
 @export var room_kind := "lobby"
 

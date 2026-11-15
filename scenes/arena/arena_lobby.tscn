@@ -9,6 +9,7 @@
 script = ExtResource("1_room")
 room_kind = "lobby"
 map_name = "Colosseum"
+music_track = "rustplek"
 encounters = false
 sets_checkpoint = false
 

@@ -4,7 +4,7 @@ extends CanvasLayer
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const RunScript := preload("res://scripts/arena/arena_run.gd")
-const LOBBY := "res://scenes/maps/arena_lobby.tscn"
+const LOBBY := "res://scenes/arena/arena_lobby.tscn"
 
 var run: Node
 var box: VBoxContainer

@@ -16,8 +16,8 @@ const Equipment := preload("res://scripts/equipment.gd")
 const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
-const LOBBY := "res://scenes/maps/arena_lobby.tscn"
-const HALL := "res://scenes/maps/arena_hall.tscn"
+const LOBBY := "res://scenes/arena/arena_lobby.tscn"
+const HALL := "res://scenes/arena/arena_hall.tscn"
 
 var failures := 0
 var passes := 0

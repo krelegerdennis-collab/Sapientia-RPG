@@ -7,7 +7,7 @@ const Art := preload("res://scripts/data/arena_art.gd")
 
 const EXIT_NAME := "NaarArena"
 const MARKER_NAME := "ArenaMarker"
-const LOBBY := "res://scenes/maps/arena_lobby.tscn"
+const LOBBY := "res://scenes/arena/arena_lobby.tscn"
 ## PLACEHOLDER tegel tot Dennis de plek tussen Vesper en de grot kiest.
 const TILE := Vector2i(34, 21)
 
