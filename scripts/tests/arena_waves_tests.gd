@@ -31,6 +31,7 @@ func _run_all() -> void:
 	_interface()
 	await _stub_flow()
 	await _spawn_rules()
+	await _waves_3_5_som_tick()
 	_determinism()
 	await _wave_cleared_flow()
 	await _party_wiped_flow()
@@ -108,6 +109,40 @@ func _spawn_rules() -> void:
 					gate_ok = false
 			check("wave %d: geen gate-tegel" % n, gate_ok)
 			check("wave %d: min 3 tegels van spawn" % n, SomArenaWaves._tile_dist(t, Vector2i(14, 18)) >= 3)
+		for m in hall.monsters:
+			m.queue_free()
+		hall.monsters.clear()
+	run.queue_free()
+	hall.queue_free()
+	ReleaseFlags.arena_enabled_override = -1
+
+
+## Golven 3–5: langere tick zodat SomArena._step_toward loopt (vroeger SCRIPT ERROR zonder monster_can_enter).
+func _waves_3_5_som_tick() -> void:
+	await _await_frames(3)
+	ReleaseFlags.arena_enabled_override = 1
+	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
+	GameState.new_game("Dax")
+	var hall := _mock_hall()
+	await _await_frames(3)
+	var run := RunScript.new()
+	run.name = "SomTickRun"
+	run.run_seed = 4242
+	add_child(run)
+	var waves: SomArenaWaves = run.get_node("Waves") as SomArenaWaves
+	for n in [3, 4, 5]:
+		waves.start_wave(n)
+		await _await_frames(40)
+		check("wave %d: monster_can_enter aanwezig" % n, hall.has_method("monster_can_enter"))
+		var step_ok := true
+		for m in hall.monsters:
+			for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+				var r: String = hall.monster_can_enter(m, m.tile + d)
+				if r not in ["free", "player", "blocked", "wall"]:
+					step_ok = false
+			if hall.som != null:
+				hall.som._step_toward(m, hall.player.position + Vector2(8, 8))
+		check("wave %d: som-stappen zonder scriptfout" % n, step_ok)
 		for m in hall.monsters:
 			m.queue_free()
 		hall.monsters.clear()

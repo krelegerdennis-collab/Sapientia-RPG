@@ -26,6 +26,10 @@ var monsters: Array = []
 var som: Node = null
 var _gate: Array[Vector2i] = []
 var _solid: Dictionary = {}
+var invuln_left := 0.0
+var _blink_t := 0.0
+const INVULN := 1.5
+const BLINK := 0.1
 
 
 func _ready() -> void:
@@ -101,6 +105,61 @@ func is_wall(t: Vector2i) -> bool:
 	if t.x < 0 or t.y < 0 or t.x >= map_width() or t.y >= map_height():
 		return true
 	return bool(_solid.get(t, true))
+
+
+## Tiles van de speler (zelfde idee als DungeonRoom; SoM gebruikt meerdere voet-tegels).
+func player_tiles() -> Array[Vector2i]:
+	var out: Array[Vector2i] = [player.get_tile()]
+	if som != null:
+		for off in [Vector2(-5, 0), Vector2(5, 0), Vector2(-5, 7), Vector2(5, 7)]:
+			var t2 := Vector2i(((player.position + off) / 16.0).floor())
+			if not out.has(t2):
+				out.append(t2)
+	if player.is_moving:
+		var tp: Vector2 = player.get("_target")
+		var t := Vector2i((tp / 16.0).floor())
+		if not out.has(t):
+			out.append(t)
+	return out
+
+
+## Mag monster m naar tile 'to'? Zelfde semantiek als dungeon_room.gd; binnen loopbare hal.
+func monster_can_enter(m: Node, to: Vector2i) -> String:
+	for dx in m.size.x:
+		for dy in m.size.y:
+			var t: Vector2i = to + Vector2i(dx, dy)
+			if is_wall(t):
+				return "wall"
+			if t in _gate:
+				return "wall"
+			if t in player_tiles():
+				return "blocked" if invuln_left > 0.0 else "player"
+			for o in monsters:
+				if o != m and is_instance_valid(o) and o.covers(t):
+					return "blocked"
+	return "free"
+
+
+func monster_touch(m: Node) -> void:
+	if som != null and (not m.boss or som.enemies.has(m)):
+		return
+	if not is_instance_valid(m) or not (m in monsters):
+		return
+
+
+func start_invuln(sec := INVULN) -> void:
+	invuln_left = sec
+	_blink_t = 0.0
+
+
+func _process(delta: float) -> void:
+	super._process(delta)
+	if not is_instance_valid(player):
+		return
+	if invuln_left > 0.0:
+		invuln_left = maxf(0.0, invuln_left - delta)
+		_blink_t += delta
+		player.sprite.modulate.a = 1.0 if invuln_left <= 0.0 or int(_blink_t / BLINK) % 2 == 0 else 0.25
 
 
 func _paint() -> void:
