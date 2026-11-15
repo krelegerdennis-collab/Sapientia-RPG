@@ -12,6 +12,11 @@ const MapMonster := preload("res://scripts/dungeon/map_monster.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const ROOM := "res://scenes/maps/archief_v1_gang.tscn"
 
+
+class _SomRoomStub extends Node2D:
+	var som: SomArena
+
+
 var failures := 0
 var passes := 0
 
@@ -136,10 +141,64 @@ func _hitreact_unit_tests() -> void:
 	SomHitReact.tick(b, 0.01)
 	check("flits vijand A uit na finish", is_equal_approx(float(ma.get_shader_parameter("flash")), 0.0))
 	check("flits vijand B nog aan", float(mb.get_shader_parameter("flash")) > 0.5)
+	# Tweede treffer na >270 ms: flash opnieuw vol aan
+	var twice := _no_hurt_monster()
+	var orig := CanvasItemMaterial.new()
+	twice.sprite.material = orig
+	SomHitReact.trigger(arena, twice, {}, Vector2i.RIGHT, "middel", false, false)
+	var mt: ShaderMaterial = twice.sprite.material as ShaderMaterial
+	check("shader flits treffer 1 frame 1", mt != null and float(mt.get_shader_parameter("flash")) > 0.9)
+	for _i in 60:
+		SomHitReact.tick(twice, 0.005)
+	for _i in 20:
+		SomHitReact.tick(twice, 0.02)
+	SomHitReact.trigger(arena, twice, {}, Vector2i.RIGHT, "middel", false, false)
+	check("shader flits treffer 2 frame 1", float(mt.get_shader_parameter("flash")) > 0.9)
+	# Re-hit tijdens lopende flits: origineel material terug na finish
+	var rehit := _no_hurt_monster()
+	var keep := StandardMaterial3D.new()
+	rehit.sprite.material = keep
+	SomHitReact.trigger(arena, rehit, {}, Vector2i.RIGHT, "middel", false, false)
+	SomHitReact.tick(rehit, 0.01)
+	SomHitReact.trigger(arena, rehit, {}, Vector2i.RIGHT, "middel", false, false)
+	for _i in 70:
+		SomHitReact.tick(rehit, 0.005)
+	check("re-hit: origineel material terug", rehit.sprite.material == keep)
+	# dir ZERO: geen nudge op x; y alleen voet-pivot
+	var zd := _no_hurt_monster()
+	var off_z: Vector2 = zd.sprite.offset
+	SomHitReact.trigger(arena, zd, {}, Vector2i.ZERO, "middel", false, false)
+	SomHitReact.tick(zd, 0.04)
+	check("dir zero: offset.x ongewijzigd", is_equal_approx(zd.sprite.offset.x, off_z.x))
+	var off_y_only := (off_z.y + 8.0) / zd.sprite.scale.y - 8.0
+	check("dir zero: geen nudge op y", is_equal_approx(zd.sprite.offset.y, off_y_only))
+	# hitstop-freeze (alleen meta-timer; geen arena-diff)
+	var hs := _no_hurt_monster()
+	var room := _SomRoomStub.new()
+	var som := SomArena.new()
+	som.enemies[hs] = {"hitstop": 8, "hp": 100}
+	room.som = som
+	hs.room = room
+	add_child(room)
+	SomHitReact.trigger(arena, hs, {}, Vector2i.RIGHT, "middel", false, false)
+	check("hitstop: koppel room->som->enemy", room.som == som and som.enemies.has(hs) and hs.room == room)
+	check("hitstop: flits frame 0", SomHitReact.contact_flash_active(hs))
+	SomHitReact.tick(hs, 0.08)
+	var hs_st: Dictionary = hs.get_meta(&"som_hitreact")
+	check("hitstop: meta-timer bevriest", is_equal_approx(float(hs_st["t"]), 0.0))
+	check("hitstop: timer bevriest tijdens hitstop", SomHitReact.contact_flash_active(hs))
+	som.enemies[hs]["hitstop"] = 0
+	SomHitReact.tick(hs, 0.08)
+	check("hitstop: timer loopt na hitstop", not SomHitReact.contact_flash_active(hs))
 	m.queue_free()
 	mv.queue_free()
 	a.queue_free()
 	b.queue_free()
+	twice.queue_free()
+	rehit.queue_free()
+	zd.queue_free()
+	hs.queue_free()
+	room.queue_free()
 
 
 func _load_room() -> Node:

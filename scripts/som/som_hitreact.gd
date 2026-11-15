@@ -43,8 +43,10 @@ static func trigger(arena, m: Node, e: Dictionary, dir: Vector2i, weight: String
 	st["weight"] = weight
 	st["heavy_squash"] = weight == "zwaar" and finisher_or_heavy
 	st["sprite_off0"] = m.sprite.offset
+	var flash_mat: ShaderMaterial = st.get("flash_mat")
+	if m.sprite.material != flash_mat:
+		st["saved_mat"] = m.sprite.material
 	st["had_shader"] = false
-	st["saved_mat"] = m.sprite.material
 	if _has_hurt_sheet(m):
 		if full_hurt_pose:
 			arena._monster_pose(m, e, "hurt", 0, arena._hurt_seconds())
@@ -77,10 +79,13 @@ static func force_hurt_flash_frame(m: Node, e: Dictionary) -> bool:
 
 
 static func _hitstop_ticks(m: Node) -> int:
-	if m == null or not "room" in m or m.room == null:
+	if m == null:
 		return 0
-	var som = m.room.get("som")
-	if som == null or not som.enemies.has(m):
+	var room: Variant = m.get("room")
+	if room == null:
+		return 0
+	var som: Variant = room.get("som")
+	if som == null or not som.get("enemies").has(m):
 		return 0
 	return int(som.enemies[m].get("hitstop", 0))
 
@@ -105,13 +110,11 @@ static func tick(m: Node, delta: float) -> void:
 	m.sprite.scale = sc
 	var off0: Vector2 = st["sprite_off0"]
 	var off_y := (off0.y + FOOT_PIVOT) / sc.y - FOOT_PIVOT
-	var nudge := SomGameFeelData.nudge_px(weight, t_ms)
-	var dir := Vector2(st["dir"])
-	if dir.length_squared() < 0.01:
-		dir = Vector2.RIGHT
-	else:
-		dir = dir.normalized()
-	var nudge_v := dir * nudge
+	var nudge_v := Vector2.ZERO
+	if st["dir"] != Vector2i.ZERO:
+		var dir := Vector2(st["dir"]).normalized()
+		var nudge := SomGameFeelData.nudge_px(weight, t_ms)
+		nudge_v = dir * nudge
 	m.sprite.offset = Vector2(off0.x + nudge_v.x, off_y + nudge_v.y)
 	if not _has_hurt_sheet(m):
 		_apply_shader_flash(m, st, 1.0 if t_ms < SomData.HIT_FLASH_CONTACT * 1000.0 else 0.0)
@@ -124,8 +127,9 @@ static func _ensure_flash_mat(m: Node, st: Dictionary) -> void:
 		mat = ShaderMaterial.new()
 		mat.shader = FLASH_SHADER
 		st["flash_mat"] = mat
-		st["had_shader"] = true
+	if m.sprite.material != mat:
 		m.sprite.material = mat
+	st["had_shader"] = true
 
 
 static func _apply_shader_flash(m: Node, st: Dictionary, amount: float) -> void:
