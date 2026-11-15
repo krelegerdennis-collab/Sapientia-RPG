@@ -60,7 +60,7 @@ func _data_tests() -> void:
 	check("gewicht zwaar: baas", SomGameFeelData.weight_class_for_monster(_fake_monster("inktwurm", true), {}) == "zwaar")
 	check("element vuur-spreuk", SomGameFeelData.impact_element_for_spell("vuur") == "vuur")
 	check("heal geen element", SomGameFeelData.impact_element_for_spell("genees") == "")
-	check("heal cast geen impact-spark in arena", str(GameData.SPELLS.get("genees", {}).get("type", "")) == "heal")
+	check("heal spell heeft type heal (raakt damage_enemy niet)", str(GameData.SPELLS.get("genees", {}).get("type", "")) == "heal")
 	var sc := SomGameFeelData.squash_for("licht", 0, false)
 	check("squash licht fase0 = 1/16-stappen", is_equal_approx(sc.x, 1.125) and is_equal_approx(sc.y, 0.875))
 	var sc1 := SomGameFeelData.squash_for("licht", 1, false)
