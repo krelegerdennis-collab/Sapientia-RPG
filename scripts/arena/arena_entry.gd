@@ -1,46 +1,93 @@
 extends RefCounted
 ## Wereldkaart-ingang. Met de vlag uit keert dit meteen terug: geen node, geen art-load.
-## Plek en unlock (na Vesper) zijn nog open. Tot die keuze staat de tegel hier.
+## Plek: tegels (30,32)-(31,33), onder de as/grind-inham. Spawn van_wilgendal (30,25) blijft vrij.
+## Dicht tot noor_lid (Vesper in de groep, zelfde vlag als de bouwplaats).
 
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const Art := preload("res://scripts/data/arena_art.gd")
 
 const EXIT_NAME := "NaarArena"
-const MARKER_NAME := "ArenaMarker"
+const OVERLAY_NAME := "ArenaOverlay"
 const LOBBY := "res://scenes/arena/arena_lobby.tscn"
-## PLACEHOLDER tegel tot Dennis de plek tussen Vesper en de grot kiest.
-const TILE := Vector2i(34, 21)
+const CLOSED_LINE := "The gate is closed."
+
+const SITE := [Vector2i(30, 32), Vector2i(31, 32), Vector2i(30, 33), Vector2i(31, 33)]
+const LOCKED := [Vector2i(2, 0), Vector2i(3, 0), Vector2i(2, 1), Vector2i(3, 1)]
+const OPEN := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
+const EXIT_POS := Vector2(480, 512)
+
+static var _world_ts: TileSet
 
 
 static func consider(map: Node2D) -> void:
 	if not ReleaseFlags.arena_enabled():
 		return
+	_ensure_overlay(map)
+	_ensure_exit(map)
+	refresh(map)
+
+
+static func refresh(map: Node2D) -> void:
+	if map == null or not ReleaseFlags.arena_enabled():
+		return
+	var open := Story.has_flag("noor_lid")
+	var layer := map.get_node_or_null(OVERLAY_NAME) as TileMapLayer
+	if layer != null and layer.tile_set != null:
+		var coords := OPEN if open else LOCKED
+		for i in SITE.size():
+			layer.set_cell(SITE[i], 0, coords[i])
+	var gate := map.get_node_or_null("Exits/" + EXIT_NAME) as MapExit
+	if gate == null:
+		return
+	if open:
+		gate.target_map = LOBBY
+		gate.target_spawn = "ingang"
+		var empty: Array[String] = []
+		gate.lines = empty
+	else:
+		gate.target_map = ""
+		gate.target_spawn = ""
+		var lines: Array[String] = [CLOSED_LINE]
+		gate.lines = lines
+
+
+static func _ensure_overlay(map: Node2D) -> void:
+	if map.get_node_or_null(OVERLAY_NAME) != null:
+		return
+	var tex := Art.world_texture()
+	if tex == null:
+		return
+	var layer := TileMapLayer.new()
+	layer.name = OVERLAY_NAME
+	layer.tile_set = _tileset(tex)
+	var ground := map.get_node_or_null("Ground")
+	if ground != null:
+		ground.add_sibling(layer)
+	else:
+		map.add_child(layer)
+
+
+static func _ensure_exit(map: Node2D) -> void:
 	var exits := map.get_node_or_null("Exits")
 	if exits == null or exits.get_node_or_null(EXIT_NAME) != null:
 		return
 	var gate := MapExit.new()
 	gate.name = EXIT_NAME
-	gate.position = Vector2(TILE) * 16.0
-	gate.size_tiles = Vector2i(1, 1)
-	gate.target_map = LOBBY
-	gate.target_spawn = "ingang"
+	gate.position = EXIT_POS
+	gate.size_tiles = Vector2i(2, 2)
 	exits.add_child(gate)
-	_marker(map)
 
 
-static func _marker(map: Node2D) -> void:
-	var objects := map.get_node_or_null("Objects")
-	if objects == null or objects.get_node_or_null(MARKER_NAME) != null:
-		return
-	var spr := Sprite2D.new()
-	spr.name = MARKER_NAME
-	spr.position = Vector2(TILE) * 16.0 + Vector2(16, 16)
-	var tex := Art.world_texture()
-	if tex != null:
-		spr.texture = tex
-	else:
-		# Geen bestand: magenta vlak, 32x32, tot RPG ART wereld_v18_arena.png levert.
-		var img := Image.create(32, 32, false, Image.FORMAT_RGBA8)
-		img.fill(Color(1, 0, 1, 1))
-		spr.texture = ImageTexture.create_from_image(img)
-	objects.add_child(spr)
+static func _tileset(tex: Texture2D) -> TileSet:
+	if _world_ts != null:
+		return _world_ts
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(16, 16)
+	var src := TileSetAtlasSource.new()
+	src.texture = tex
+	src.texture_region_size = Vector2i(16, 16)
+	for c in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1)]:
+		src.create_tile(c)
+	ts.add_source(src, 0)
+	_world_ts = ts
+	return ts

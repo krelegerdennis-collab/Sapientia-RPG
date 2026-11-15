@@ -5,6 +5,7 @@ const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const RunScript := preload("res://scripts/arena/arena_run.gd")
 const LOBBY := "res://scenes/arena/arena_lobby.tscn"
+const ICON_TOKEN := preload("res://assets/ui/arena/icon_arena_token.png")
 
 var run: Node
 var box: VBoxContainer
@@ -70,12 +71,26 @@ func _show_results() -> void:
 		box.add_child(UiMenu.label("Colosseum"))
 	box.add_child(UiMenu.label("Waves cleared: %d" % int(s.get("waves", 0))))
 	box.add_child(UiMenu.label("XP each: %d" % int(s.get("xp", 0))))
-	box.add_child(UiMenu.label("Arena Tokens earned: %d" % int(s.get("tokens", 0))))
-	box.add_child(UiMenu.label("Arena Tokens: %d" % int(s.get("wallet", 0))))
+	box.add_child(_token_line("Arena Tokens earned: %d" % int(s.get("tokens", 0))))
+	box.add_child(_token_line("Arena Tokens: %d" % int(s.get("wallet", 0))))
 	var notes: Array = s.get("notes", [])
 	for line in notes:
 		box.add_child(UiMenu.label(str(line)))
 	box.add_child(_button("Back to the lobby", _on_lobby))
+
+
+func _token_line(text: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	var icon := TextureRect.new()
+	icon.texture = ICON_TOKEN
+	icon.custom_minimum_size = Vector2(16, 16)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(icon)
+	row.add_child(UiMenu.label(text))
+	return row
 
 
 func _button(text: String, cb: Callable) -> Button:

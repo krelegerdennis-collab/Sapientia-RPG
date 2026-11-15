@@ -378,6 +378,7 @@ func _build_candidates() -> void:
 				_cands.append({"pos": gp, "kind": r["kind"], "rule": r, "color": td["color"], "family": td["family"],
 						"px": int(td["px"]), "node": tl, "local": null})
 	MapLightingC.cluster_tile_lights(_cands)
+	MapLightingC.cluster_arena_torches(_cands)
 
 
 func _view_rect() -> Rect2:

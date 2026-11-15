@@ -28,7 +28,7 @@ tile_set = ExtResource("2_tiles")
 y_sort_enabled = true
 
 [node name="Player" parent="Objects" instance=ExtResource("3_player")]
-position = Vector2(232, 72)
+position = Vector2(232, 296)
 
 [node name="Spawns" type="Node2D" parent="."]
 

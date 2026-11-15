@@ -14,6 +14,8 @@ const ShopScreen := preload("res://scripts/arena/arena_shop_screen.gd")
 const GradeGear := preload("res://scripts/data/grade_gear.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 const UiTouch := preload("res://scripts/ui/ui_touch.gd")
+const Berggrot := preload("res://scripts/data/berggrot_data.gd")
+const MapLightingC := preload("res://scripts/map_lighting.gd")
 
 const WORLD := "res://scenes/maps/wereldkaart.tscn"
 const LOBBY := "res://scenes/arena/arena_lobby.tscn"
@@ -62,6 +64,7 @@ func _run_all() -> void:
 	ReleaseFlags.arena_enabled_override = -1
 	GameState.new_game("Dax")
 	await _rooms()
+	await _art()
 	ReleaseFlags.arena_enabled_override = -1
 	_drop_run()
 	print("ARENATEST %d PASS, %d FAIL" % [passes, failures])
@@ -109,6 +112,7 @@ func _flag_off() -> void:
 	Entry.consider(dummy)
 	check("vlag uit: consider voegt geen uitgang toe", dummy.get_node("Exits").get_child_count() == exits_before)
 	check("vlag uit: geen marker", dummy.get_node_or_null("Objects/ArenaMarker") == null)
+	check("vlag uit: geen overlay", dummy.get_node_or_null("ArenaOverlay") == null)
 	check("vlag uit: goud onaangeroerd", GameState.gold == gold_before)
 	check("vlag uit: tas onaangeroerd", GameState.inventory == inv_before)
 	check("vlag uit: kopen weigert", Shop.buy("potion").get("ok") == false and GameState.arena_tokens == 0)
@@ -116,12 +120,26 @@ func _flag_off() -> void:
 	dummy.queue_free()
 	# De haak zelf werkt pas als een test de override aanzet, en zet hem daarna terug.
 	ReleaseFlags.arena_enabled_override = 1
+	GameState.story_flags.erase("noor_lid")
 	var open_map := _dummy_map()
 	Entry.consider(open_map)
 	check("vlag aan: uitgang verschijnt", open_map.get_node_or_null("Exits/NaarArena") != null)
-	check("vlag aan: marker verschijnt", open_map.get_node_or_null("Objects/ArenaMarker") != null)
-	var gate: Node2D = open_map.get_node("Exits/NaarArena")
-	check("vlag aan: doel is de lobby", str(gate.get("target_map")) == LOBBY)
+	check("vlag aan: overlay verschijnt", open_map.get_node_or_null("ArenaOverlay") != null)
+	check("vlag aan: geen magenta marker", open_map.get_node_or_null("Objects/ArenaMarker") == null)
+	var gate: MapExit = open_map.get_node("Exits/NaarArena")
+	check("vlag aan: zonder noor_lid blijft de poort dicht", gate.target_map == "")
+	check("vlag aan: dichte poort zegt dat hij dicht is", gate.lines.size() == 1 and gate.lines[0] == "The gate is closed.")
+	check("vlag aan: uitgang is 2x2 op (480,512)", gate.position == Vector2(480, 512) and gate.size_tiles == Vector2i(2, 2))
+	var layer: TileMapLayer = open_map.get_node("ArenaOverlay")
+	check("vlag aan: dicht atlas (2,0)", layer.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(2, 0))
+	check("vlag aan: dicht atlas (3,1)", layer.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(3, 1))
+	check("vlag aan: spawntegel blijft leeg", layer.get_cell_source_id(Vector2i(30, 25)) == -1)
+	GameState.story_flags["noor_lid"] = true
+	Entry.refresh(open_map)
+	check("vlag aan: na noor_lid gaat de poort open", gate.target_map == LOBBY and gate.target_spawn == "ingang" and gate.lines.is_empty())
+	check("vlag aan: open atlas (0,0)", layer.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(0, 0))
+	check("vlag aan: open atlas (1,1)", layer.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(1, 1))
+	GameState.story_flags.erase("noor_lid")
 	open_map.queue_free()
 	ReleaseFlags.arena_enabled_override = -1
 	check("override terug: vlag weer uit", ReleaseFlags.arena_enabled() == false)
@@ -159,6 +177,7 @@ func _world_map_untouched() -> void:
 	check("wereldkaart: zelfde uitgangen als het bestand", live_names == cold_names)
 	check("wereldkaart: geen NaarArena", not live_names.has("NaarArena"))
 	check("wereldkaart: geen ArenaMarker", live.get_node_or_null("Objects/ArenaMarker") == null)
+	check("wereldkaart: geen ArenaOverlay", live.get_node_or_null("ArenaOverlay") == null)
 	check("wereldkaart: tokens blijven 0", GameState.arena_tokens == tokens_before)
 	check("wereldkaart: goud ongewijzigd", GameState.gold == gold_before)
 	check("wereldkaart: geen run-node", GameState.get_node_or_null("ArenaRun") == null)
@@ -375,8 +394,23 @@ func _rooms() -> void:
 	var lg: TileMapLayer = lobby.get_node("Ground")
 	check("lobby is 24x14", lg.get_used_rect().size == Vector2i(24, 14))
 	var lgates: Array = lobby.gate_tiles()
-	check("lobby-poort midden noord", lgates.size() == 2 and lgates[0] == Vector2i(11, 0) and lgates[1] == Vector2i(12, 0))
+	check("lobby-poort in de nis", lgates.size() == 2 and lgates[0] == Vector2i(11, 2) and lgates[1] == Vector2i(12, 2))
 	check("lobby heeft de winkelier", lobby.get_node_or_null("Objects/ArenaShopkeeper") != null)
+	var layouts: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://docs/arena/layouts.json"))
+	var lidx := int(layouts["lobby"][0][0])
+	check("lobby schildert layouts.json", lg.get_cell_atlas_coords(Vector2i(0, 0)) == Vector2i(lidx % 16, int(lidx / 16.0)))
+	var keeper: Node2D = lobby.get_node("Objects/ArenaShopkeeper")
+	var kspr := keeper.get_node("Sprite2D") as Sprite2D
+	var ksheet := keeper.get("sheet") as Texture2D
+	check("winkelier laadt de idle-sheet", kspr.texture != null and str(kspr.texture.resource_path).ends_with("arena_koopman_wm1_slim_idle.png"))
+	check("winkelier-sheet is het loopblad", ksheet != null and str(ksheet.resource_path).ends_with("arena_koopman_wm1_slim.png"))
+	check("winkelier staat achter de toonbank", keeper.position == Vector2(88, 90))
+	var kshape := (keeper.get_node("CollisionShape2D") as CollisionShape2D).shape as RectangleShape2D
+	check("winkelier-botsing 12x6", kshape != null and kshape.size == Vector2(12, 6))
+	var lgate := _sprite_named(lobby, "arena_gate.png")
+	var lbody := lgate.get_parent() as Node2D if lgate != null else null
+	check("lobbypoort gecentreerd op x=192", lbody != null and lbody.position.x == 192.0 and lgate.frame == 1)
+	check("lobbypoort-offset", lgate != null and lgate.centered == false and lgate.offset == Vector2(-24, -48))
 	check("lobby is 24 tegels van 16 px", lg.get_used_rect().size.x * 16 == 384)
 	var hall: Node = (load(HALL) as PackedScene).instantiate()
 	add_child(hall)
@@ -385,8 +419,16 @@ func _rooms() -> void:
 	var rect: Rect2i = hg.get_used_rect()
 	check("hal is 30x20", rect.size == Vector2i(30, 20))
 	var hgates: Array = hall.gate_tiles()
-	check("hal-poort midden noord", hgates.size() == 2 and hgates[0] == Vector2i(14, 0) and hgates[1] == Vector2i(15, 0))
+	check("hal-poort noord", hgates.size() == 2 and hgates[0] == Vector2i(14, 2) and hgates[1] == Vector2i(15, 2))
 	check("hal heeft geen winkelier", hall.get_node_or_null("Objects/ArenaShopkeeper") == null)
+	var hidx := int(layouts["hall"][0][0])
+	check("hal schildert layouts.json", hg.get_cell_atlas_coords(Vector2i(0, 0)) == Vector2i(hidx % 16, int(hidx / 16.0)))
+	var torches := _sprites_named(hall, "arena_torch.png")
+	check("hal: zes fakkels", torches.size() == 6)
+	check("fakkel: 4 frames", torches.size() == 6 and torches[0].hframes == 4 and torches[0].offset == Vector2(-8, -32))
+	var torch_frame := torches[0].frame if torches.size() > 0 else -1
+	await get_tree().create_timer(0.2).timeout
+	check("fakkel loopt", torches.size() == 6 and is_instance_valid(torches[0]) and torches[0].frame != torch_frame)
 	var map_px := Vector2i(rect.size.x * 16, rect.size.y * 16)
 	check("hal groter dan het 384x216-beeld", map_px.x > 384 and map_px.y > 216)
 	var cam: Camera2D = hall.get_node("Objects/Player/Camera2D")
@@ -397,6 +439,94 @@ func _rooms() -> void:
 	lobby.queue_free()
 	hall.queue_free()
 	await get_tree().process_frame
+
+
+func _art() -> void:
+	ReleaseFlags.arena_enabled_override = 1
+	GameState.new_game("Dax")
+	GameState.story_flags.erase("noor_lid")
+	check("noor_lid is de Vesper-vlag", Berggrot.TUNNEL_VLAG == "noor_lid")
+	var world := Art.world_texture()
+	check("wereld-atlas 64x32", world != null and world.get_width() == 64 and world.get_height() == 32)
+	var tiles := Art.tiles_texture()
+	check("arena-tegels 256x112", tiles != null and tiles.get_width() == 256 and tiles.get_height() == 112)
+	var walk := Art.npc_texture()
+	check("koopman-loopblad 72x128", walk != null and walk.get_width() == 72 and walk.get_height() == 128)
+	var idle := Art.npc_idle_texture()
+	check("koopman-idle 48x128", idle != null and idle.get_width() == 48 and idle.get_height() == 128)
+	var icon := Art.arena_icon()
+	check("icoon arena 16x16", icon != null and icon.get_width() == 16 and icon.get_height() == 16)
+	var token := Art.token_icon()
+	check("icoon token 16x16", token != null and token.get_width() == 16 and token.get_height() == 16)
+	check("fakkel-emissive", MapLightingC.hd_texture("res://assets/sprites/arena/arena_torch.png", "_e.png") != null)
+	check("fakkel-normal", MapLightingC.hd_texture("res://assets/sprites/arena/arena_torch.png", "_n.png") != null)
+	check("tegel-normal", MapLightingC.hd_texture("res://assets/tiles/arena/arena_tiles.png", "_n.png") != null)
+	var hd2d_was := bool(Settings.get_value("hd2d_light"))
+	var tod_was := GameState.time_of_day
+	var live: Node = (load(WORLD) as PackedScene).instantiate()
+	add_child(live)
+	await get_tree().process_frame
+	var spawn := live.get_node_or_null("Spawns/van_wilgendal") as Node2D
+	check("spawn van_wilgendal blijft vrij", spawn != null and spawn.position == Vector2(488, 408))
+	var ground := live.get_node("Ground") as Node
+	var ov := live.get_node_or_null("ArenaOverlay") as TileMapLayer
+	check("wereldkaart: overlay boven Ground", ov != null and ground.get_index() < ov.get_index())
+	var exit := live.get_node_or_null("Exits/NaarArena") as MapExit
+	check("wereldkaart: poort dicht zonder noor_lid", exit != null and exit.target_map == "" and exit.position == Vector2(480, 512) and exit.size_tiles == Vector2i(2, 2) and exit.lines.size() == 1 and exit.lines[0] == "The gate is closed.")
+	check("wereldkaart: dicht op (30,32)-(31,33)", ov != null and ov.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(2, 0) and ov.get_cell_atlas_coords(Vector2i(31, 32)) == Vector2i(3, 0) and ov.get_cell_atlas_coords(Vector2i(30, 33)) == Vector2i(2, 1) and ov.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(3, 1))
+	GameState.story_flags["noor_lid"] = true
+	Entry.refresh(live)
+	check("wereldkaart: open na noor_lid", exit != null and exit.target_map == LOBBY and exit.lines.is_empty())
+	check("wereldkaart: open atlas", ov != null and ov.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(0, 0) and ov.get_cell_atlas_coords(Vector2i(31, 32)) == Vector2i(1, 0) and ov.get_cell_atlas_coords(Vector2i(30, 33)) == Vector2i(0, 1) and ov.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(1, 1))
+	live.queue_free()
+	await get_tree().process_frame
+	GameState.story_flags.erase("noor_lid")
+	GameState.add_member("noor")
+	GameState.add_member("lotte")
+	GameState.add_member("kael")
+	check("hal-test: vier helden", GameState.party.size() == 4)
+	Settings.set_value("hd2d_light", true)
+	GameState.time_of_day = "night"
+	var hall: Node = (load(HALL) as PackedScene).instantiate()
+	add_child(hall)
+	await get_tree().process_frame
+	var rig := hall.get_node_or_null("MapLightingRig")
+	check("hal heeft een licht-rig", rig != null)
+	if rig != null:
+		rig.set_phase("night", 0.0)
+		var torch_lights := 0
+		var paired := 0
+		for c in rig._cands:
+			if typeof(c) != TYPE_DICTIONARY:
+				continue
+			if str((c as Dictionary).get("kind", "")) != "fire":
+				continue
+			torch_lights += 1
+			if int((c as Dictionary).get("n", 0)) == 2:
+				paired += 1
+		check("hal: zes fakkels worden drie lichten", torch_lights == 3 and paired == 3)
+		check("hal: hoogstens 8 puntlichten", rig.enabled_point_lights() <= 8)
+	hall.queue_free()
+	await get_tree().process_frame
+	Settings.set_value("hd2d_light", hd2d_was)
+	GameState.time_of_day = tod_was
+	ReleaseFlags.arena_enabled_override = -1
+
+
+func _sprites_named(root: Node, file_name: String) -> Array[Sprite2D]:
+	var out: Array[Sprite2D] = []
+	for n in root.find_children("*", "Sprite2D", true, false):
+		var s := n as Sprite2D
+		if s.texture != null and str(s.texture.resource_path).ends_with("/" + file_name):
+			out.append(s)
+	return out
+
+
+func _sprite_named(root: Node, file_name: String) -> Sprite2D:
+	var all := _sprites_named(root, file_name)
+	if all.is_empty():
+		return null
+	return all[0]
 
 
 class MemberDown:

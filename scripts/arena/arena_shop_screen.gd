@@ -8,6 +8,8 @@ const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const Shop := preload("res://scripts/arena/arena_shop.gd")
 const Data := preload("res://scripts/data/arena_shop_data.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
+const ICON_ARENA := preload("res://assets/ui/arena/icon_arena.png")
+const ICON_TOKEN := preload("res://assets/ui/arena/icon_arena_token.png")
 
 var box: VBoxContainer
 var status: Label
@@ -37,10 +39,11 @@ func _fill() -> void:
 	for c in box.get_children():
 		box.remove_child(c)
 		c.free()
-	box.add_child(UiMenu.label("Colosseum shop"))
-	status = UiMenu.label("Arena Tokens: %d" % GameState.arena_tokens)
-	status.name = "TokenLine"
-	box.add_child(status)
+	box.add_child(_icon_line(ICON_ARENA, "Colosseum shop"))
+	var token_row := _icon_line(ICON_TOKEN, "Arena Tokens: %d" % GameState.arena_tokens)
+	token_row.name = "TokenLine"
+	status = token_row.get_node("Caption") as Label
+	box.add_child(token_row)
 	if not ReleaseFlags.arena_enabled():
 		box.add_child(UiMenu.label("The Colosseum is closed."))
 		box.add_child(_button("Close", _close))
@@ -54,6 +57,22 @@ func _fill() -> void:
 		b.name = "buy_" + id
 		box.add_child(b)
 	box.add_child(_button("Close", _close))
+
+
+func _icon_line(tex: Texture2D, text: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	var icon := TextureRect.new()
+	icon.texture = tex
+	icon.custom_minimum_size = Vector2(16, 16)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(icon)
+	var caption := UiMenu.label(text)
+	caption.name = "Caption"
+	row.add_child(caption)
+	return row
 
 
 func _button(text: String, cb: Callable) -> Button:

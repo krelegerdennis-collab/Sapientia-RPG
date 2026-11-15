@@ -8,11 +8,17 @@ const StoryData := preload("res://scripts/data/story_data.gd")
 const PRESETS_PATH := "res://data/hd2d/presets.json"
 const LIGHTS_PATH := "res://data/hd2d/lights.json"
 const MAPS_INDEX_PATH := "res://data/hd2d/maps_index.json"
+## Arena-data blijft in *_arena.json. Alleen mergen zolang de vlag aan staat.
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
+const ARENA_PRESETS_PATH := "res://data/hd2d/presets_arena.json"
+const ARENA_LIGHTS_PATH := "res://data/hd2d/lights_arena.json"
+const ARENA_INDEX_PATH := "res://data/hd2d/maps_index_arena.json"
 
 ## Na deze verhaalstap stuurt proloog-StoryTint de preset niet meer (alleen time_of_day).
 const STORY_TINT_FREE_STEP := StoryData.KLAAR
 
 static var _loaded := false
+static var _arena_merged := false
 static var _maps: Dictionary = {}
 static var _lights: Dictionary = {}
 static var _index: Dictionary = {}
@@ -35,15 +41,42 @@ static func enabled() -> bool:
 
 
 static func _ensure() -> void:
-	if _loaded:
+	if not _loaded:
+		var pd: Dictionary = _read_json(PRESETS_PATH)
+		_maps = pd.get("maps", {}) as Dictionary
+		var ld: Dictionary = _read_json(LIGHTS_PATH)
+		_lights = ld.get("assets", {}) as Dictionary
+		_index = _read_json(MAPS_INDEX_PATH) as Dictionary
+		_prep_bake_tiles()
+		_loaded = true
+	_sync_arena()
+
+
+## Voegt de arena-json toe aan de runtime-cache. De bestanden zelf blijven onaangeroerd.
+## Scènepaden wijzen naar scenes/arena/ (de ART-json noemt scenes/maps/, die map is WM1).
+static func _sync_arena() -> void:
+	var on := ReleaseFlags.arena_enabled()
+	if on == _arena_merged:
 		return
-	var pd: Dictionary = _read_json(PRESETS_PATH)
-	_maps = pd.get("maps", {}) as Dictionary
-	var ld: Dictionary = _read_json(LIGHTS_PATH)
-	_lights = ld.get("assets", {}) as Dictionary
-	_index = _read_json(MAPS_INDEX_PATH) as Dictionary
-	_prep_bake_tiles()
-	_loaded = true
+	_arena_merged = on
+	if not on:
+		return
+	var lights: Dictionary = _read_json(ARENA_LIGHTS_PATH).get("assets", {}) as Dictionary
+	for k in lights:
+		_lights[str(k)] = lights[k]
+	var presets: Dictionary = _read_json(ARENA_PRESETS_PATH).get("maps", {}) as Dictionary
+	for k in presets:
+		var rec: Dictionary = (presets[k] as Dictionary).duplicate(true)
+		if str(k) == "arena_hal":
+			rec["scene"] = "res://scenes/arena/arena_hall.tscn"
+		elif str(k) == "arena_lobby":
+			rec["scene"] = "res://scenes/arena/arena_lobby.tscn"
+		_maps[str(k)] = rec
+	var index := _read_json(ARENA_INDEX_PATH)
+	for k in index:
+		if str(k).begins_with("_"):
+			continue
+		_index[str(k)] = index[k]
 
 
 static func _read_json(path: String) -> Dictionary:
@@ -89,7 +122,11 @@ static func map_id_from(map_root: Node) -> String:
 		return "dungeon100"
 	if "room_id" in map_root:
 		return str(map_root.room_id)
-	return path.get_file().get_basename()
+	var naam := path.get_file().get_basename()
+	# ART noemt de hal arena_hal; de scène heet arena_hall.
+	if naam == "arena_hall":
+		return "arena_hal"
+	return naam
 
 
 static func preset_record(map_id: String) -> Dictionary:
@@ -407,6 +444,65 @@ static func index_has_files(map_id: String) -> bool:
 	if not _maps.has(map_id):
 		return false
 	return true
+
+
+## Zes hal-fakkels zijn lokale ankers; cluster_tile_lights laat die met rust.
+## Paarsgewijs (noord, west, oost) blijven het er drie, zodat 3 + 4 heldenlichten <= 8.
+static func cluster_arena_torches(cands: Array) -> void:
+	var idx: Array[int] = []
+	for i in cands.size():
+		var c: Dictionary = cands[i]
+		var n: Object = c.get("node")
+		if not (n is Sprite2D):
+			continue
+		var spr := n as Sprite2D
+		if spr.texture == null:
+			continue
+		if str(spr.texture.resource_path).ends_with("/arena_torch.png"):
+			idx.append(i)
+	if idx.size() != 6:
+		return
+	var used := {}
+	var drop := {}
+	var merged: Array = []
+	for a in idx.size():
+		var ia: int = idx[a]
+		if used.has(ia):
+			continue
+		var best := -1
+		var best_d := 1000000.0
+		var pa: Vector2 = (cands[ia]["node"] as Node2D).position
+		for b in range(a + 1, idx.size()):
+			var ib: int = idx[b]
+			if used.has(ib):
+				continue
+			var pb: Vector2 = (cands[ib]["node"] as Node2D).position
+			var d := pa.distance_to(pb)
+			if d < best_d:
+				best_d = d
+				best = ib
+		if best < 0:
+			continue
+		used[ia] = true
+		used[best] = true
+		drop[ia] = true
+		drop[best] = true
+		var ca: Dictionary = cands[ia]
+		var cb: Dictionary = cands[best]
+		var m := ca.duplicate()
+		m["pos"] = (ca["pos"] + cb["pos"]) * 0.5
+		m["px"] = int(ca["px"]) + int(cb["px"])
+		m["n"] = 2
+		merged.append(m)
+	if merged.size() != 3:
+		return
+	var keep: Array = []
+	for i in cands.size():
+		if not drop.has(i):
+			keep.append(cands[i])
+	keep.append_array(merged)
+	cands.clear()
+	cands.append_array(keep)
 
 
 static func verify_index_sample() -> bool:

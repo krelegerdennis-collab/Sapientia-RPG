@@ -1,26 +1,51 @@
 extends RefCounted
-## Geplande art van RPG ART. Laden alleen als de vlag aan staat én het bestand er is.
-## Tot die tijd gebruikt de flow bestaande texturen of een code-marker.
+## Arena-art van RPG ART. Laden alleen als de vlag aan staat én het bestand er is,
+## zodat een dichte vlag de rest van de game geen texturen laat inladen.
 
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
+
+const WORLD := "res://assets/tiles/wereld_v18_arena.png"
+const TILES := "res://assets/tiles/arena/arena_tiles.png"
+const NPC := "res://assets/sprites/npc/arena_koopman_wm1_slim.png"
+const NPC_IDLE := "res://assets/sprites/npc/arena_koopman_wm1_slim_idle.png"
+const ICON := "res://assets/ui/arena/icon_arena.png"
+const TOKEN := "res://assets/ui/arena/icon_arena_token.png"
 
 
 static func world_texture() -> Texture2D:
 	if not ReleaseFlags.arena_enabled():
 		return null
-	return _load("res://assets/tiles/wereld_v18_arena.png")
+	return _load(WORLD)
+
+
+static func tiles_texture() -> Texture2D:
+	if not ReleaseFlags.arena_enabled():
+		return null
+	return _load(TILES)
 
 
 static func npc_texture() -> Texture2D:
 	if not ReleaseFlags.arena_enabled():
 		return null
-	return _load("res://assets/sprites/npc/arena_koopman_wm1_slim.png")
+	return _load(NPC)
+
+
+static func npc_idle_texture() -> Texture2D:
+	if not ReleaseFlags.arena_enabled():
+		return null
+	return _load(NPC_IDLE)
+
+
+static func arena_icon() -> Texture2D:
+	if not ReleaseFlags.arena_enabled():
+		return null
+	return _load(ICON)
 
 
 static func token_icon() -> Texture2D:
 	if not ReleaseFlags.arena_enabled():
 		return null
-	return _load("res://assets/ui/icons/icon_arena_token.png")
+	return _load(TOKEN)
 
 
 static func _load(path: String) -> Texture2D:
