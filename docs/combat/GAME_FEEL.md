@@ -1,6 +1,6 @@
 # F4 — Game feel (client-only)
 
-Screenshake en gekleurde schadegetallen op vijanden. Geen wijziging aan hitstop, sim of netcode.
+Screenshake en gekleurde schadegetallen op vijanden. Hitstop keten: hit2 = 2 ticks (Dennis goedgekeurd voor keten-feel); hit1 en finisher hitstop ongewijzigd t.o.v. de keten-tabel elders. Geen wijziging aan sim of netcode.
 
 ## Screenshake (`scripts/som/som_shake.gd`)
 

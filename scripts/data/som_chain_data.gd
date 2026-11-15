@@ -16,7 +16,7 @@ const STEP_STATES: Array[String] = ["hit1", "hit2", "finisher"]
 const CHAIN_WINDOW_TICKS := 20
 ## Schademultiplier per stap (bovenop de wapenmeter, SomArena.charge_mult).
 const DAMAGE_MULT: Array[float] = [1.0, 1.1, 1.6]
-## Hitstop (ticks dat de geraakte vijand bevriest). hit1/hit2 = 0 zodat de gewone slag niet verandert.
+## Hitstop (ticks dat de geraakte vijand bevriest): hit1 = 0, hit2 = 2, finisher = 6.
 const HITSTOP_TICKS: Array[int] = [0, 2, 6]
 ## Knockback in tegels (de bestaande _knockback was altijd 1 tegel).
 const KNOCKBACK_TILES: Array[int] = [1, 1, 2]

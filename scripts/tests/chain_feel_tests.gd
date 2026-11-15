@@ -36,7 +36,7 @@ func _run() -> void:
 	_shake_settings_tests()
 	_number_tests()
 	_afterimage_data_tests()
-	_classic_hash_test()
+	_settings_action_battles_classic_toggle_test()
 	await _afterimage_runtime_test()
 	await _afterimage_pool_survives_hero_free_test()
 	await _shockwave_rotation_test()
@@ -114,7 +114,7 @@ func _afterimage_data_tests() -> void:
 	check("flash 1 tick", is_equal_approx(SomChainData.FINISHER_ENEMY_FLASH_SEC, 1.0 / 60.0))
 
 
-func _classic_hash_test() -> void:
+func _settings_action_battles_classic_toggle_test() -> void:
 	var a := SomArena.new()
 	a.down = false
 	var before := str(a.get_script())
