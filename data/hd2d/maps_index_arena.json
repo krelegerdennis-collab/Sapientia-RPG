@@ -75,7 +75,7 @@
  "assets/tiles/arena/arena_tiles.png": {
   "size": [
    256,
-   112
+   144
   ],
   "profile": "ground",
   "cell": [
@@ -83,25 +83,25 @@
    16
   ],
   "hframes": 16,
-  "vframes": 7,
+  "vframes": 9,
   "repo_albedo": "assets/tiles/arena/arena_tiles.png",
   "new_art": true,
-  "albedo_sha256": "bbd045557002dee3b6e11a0ca11ab3abedeb14a3601aaad2d238055d8ce85f6f",
-  "desc": "arena interior tileset 16x7 tiles (v2: row 6 = centred gate recess + shadows)",
+  "albedo_sha256": "b060525b7c24810a1e2120caee10d8966b65f13d124dc9cd651dbae621e923ef",
+  "desc": "arena interior tileset 16x9 tiles (v2 row 6: centred gate recess; v3 rows 7-8: wear, sand variation, trophy niche, dense crowd)",
   "rooms": [],
   "found_by": [
    "arena_v1"
   ],
   "normal": true,
   "normal_file": "assets/hd2d/tiles/arena/arena_tiles_n.png",
-  "normal_sha256": "359224567703a1dc44585a6b3e95d87f65a4a6fc206d0ce7839b5abb182889b9",
+  "normal_sha256": "4b50643fe2f00b934a464fd4bd24dad42ee57bede59fea9a5b42e1c5892024b8",
   "emissive_px": 67,
   "emissive_file": "assets/hd2d/tiles/arena/arena_tiles_e.png",
-  "emissive_sha256": "c54756387464b2a05b613fd9f721be50f919153a55a9a988f1d62102522e3342"
+  "emissive_sha256": "c21304ac7e54e546d41c1decfedab15bd5ef94372ab7b7cb70b990bb65b5b1c2"
  },
  "assets/sprites/arena/arena_gate.png": {
   "size": [
-   96,
+   144,
    48
   ],
   "profile": "prop",
@@ -109,12 +109,12 @@
    48,
    48
   ],
-  "hframes": 2,
+  "hframes": 3,
   "vframes": 1,
   "repo_albedo": "assets/sprites/arena/arena_gate.png",
   "new_art": true,
-  "albedo_sha256": "355eec40258fed87bb75f9985a413d92acd401019a76488fdfd790de8b27a297",
-  "desc": "arena gate 48x48, f0 closed f1 open",
+  "albedo_sha256": "79dcfb74f119aa7a2bce3b9fc434df198c7d0dc1b82cd12e93969bcc2be5e4e1",
+  "desc": "arena gate 48x48: f0 closed, f1 open, f2 closed+chained (lobby lock until noor_lid)",
   "rooms": [
    "arena_hal",
    "arena_lobby"
@@ -124,10 +124,10 @@
   ],
   "normal": true,
   "normal_file": "assets/hd2d/sprites/arena/arena_gate_n.png",
-  "normal_sha256": "526de073513eeec700d500b6a3fe0e4bf6d6e244a832049344757027c3976b12",
-  "emissive_px": 8,
+  "normal_sha256": "93d778f8625f2547adab3798b2e23e638c07ea1e51d77959647dec8668067ca3",
+  "emissive_px": 16,
   "emissive_file": "assets/hd2d/sprites/arena/arena_gate_e.png",
-  "emissive_sha256": "48fb9dd13336cc48854dc5ed91eba94192ff6a7c0ef5abc6a474522a792c267e"
+  "emissive_sha256": "6916b511b49d76dcff6baaf9cd94fb57847b997604b083acb6d7794efaee90a7"
  },
  "assets/sprites/arena/arena_banner.png": {
   "size": [
@@ -240,6 +240,139 @@
   "normal": true,
   "normal_file": "assets/hd2d/sprites/arena/arena_weapon_rack_n.png",
   "normal_sha256": "77df6b4174af14123847ff68016b0c37c3151e94dc2360776d6b3e07cce0cc08"
+ },
+ "assets/sprites/arena/arena_bench.png": {
+  "size": [
+   32,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   16
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_bench.png",
+  "new_art": true,
+  "albedo_sha256": "272be4b1814a5ff9a8c93c8ada4077f558159309e3c6ed2d39b4dfc284d86e56",
+  "desc": "waiting bench 32x16",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_bench_n.png",
+  "normal_sha256": "c51bbc1c57d5dac84728ee2ec248825ffbdd0fc9949c71e036740d74b22451d2"
+ },
+ "assets/sprites/arena/arena_crates.png": {
+  "size": [
+   32,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_crates.png",
+  "new_art": true,
+  "albedo_sha256": "31edfa85373be7fcf75ba3f2d2a0def6149f11a79498ed1f1c82ef4f14603481",
+  "desc": "crates + barrel 32x32",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_crates_n.png",
+  "normal_sha256": "3f46148fa9c32f4a3cab58dda3bcbb7a8361f384c02987756b3979f9af751fe0"
+ },
+ "assets/sprites/arena/arena_brazier.png": {
+  "size": [
+   128,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   32
+  ],
+  "hframes": 4,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_brazier.png",
+  "new_art": true,
+  "albedo_sha256": "7d361b6c2ca2231f0b520e880e14a9c7ed577d5a84407e29cc3bf26e94a836b7",
+  "desc": "fire bowl 32x32, 4 frames @125 ms",
+  "rooms": [
+   "arena_hal"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_brazier_n.png",
+  "normal_sha256": "74e542c26840f1a533622765a13aaa8ecd40e913af9661b16fdff1f9204ff503",
+  "emissive_px": 530,
+  "emissive_file": "assets/hd2d/sprites/arena/arena_brazier_e.png",
+  "emissive_sha256": "e477e551d097de94a95a965bb82fbac506774c6fab76c152d0957cf576601b4f"
+ },
+ "assets/sprites/arena/arena_sand_ring.png": {
+  "size": [
+   64,
+   64
+  ],
+  "profile": "ground",
+  "cell": [
+   64,
+   64
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_sand_ring.png",
+  "new_art": true,
+  "albedo_sha256": "f57ee010a8bda48f726546cf8507b43da4c2bae7c9471cdc0dcaf45d4c4b2115",
+  "desc": "trodden sand ring decal 64x64 (floor)",
+  "rooms": [
+   "arena_hal"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_sand_ring_n.png",
+  "normal_sha256": "3fb06a638b30dd0d95eaf30f4cd3f306cb4465a7f48112523983b60faf0013fb"
+ },
+ "assets/sprites/arena/arena_vip_loge.png": {
+  "size": [
+   48,
+   64
+  ],
+  "profile": "prop",
+  "cell": [
+   48,
+   64
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_vip_loge.png",
+  "new_art": true,
+  "albedo_sha256": "90fc3bd11ffec41d28b44116aefbe1bac5d6895fa3eb9dca255c93575995bcda",
+  "desc": "VIP box 48x64 on the east stands",
+  "rooms": [
+   "arena_hal"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_vip_loge_n.png",
+  "normal_sha256": "7b22bb16bf85a3d2d3af0d865eb491851a3efb88207bdd480ab88725e7e28a27"
  },
  "assets/sprites/arena/arena_notice_board.png": {
   "size": [
