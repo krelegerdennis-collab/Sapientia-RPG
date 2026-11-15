@@ -248,6 +248,30 @@ static func spark(parent: Node, at: Vector2) -> void:
 	parent.add_child(a)
 
 
+static func counter_spark(parent: Node, at: Vector2) -> void:
+	var d: Dictionary = SomData.FX_COUNTER_SPARK
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		return
+	var n := int(d["frames"])
+	var ms_one := int(d["ms"])
+	var a := Anim.new()
+	a.name = "SomCounterSpark"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.z_index = 22
+	parent.add_child(a)
+
+
 ## Eenmalig effect (SomData.FX_HEAL_GLOW / FX_SPELL_IMPACT) met zijn anker op 'feet'.
 ## Zonder art: een getekende placeholder-ring in dezelfde kleur. Geeft de node terug.
 static func oneshot(parent: Node, d: Dictionary, feet: Vector2, node_name: String, color: Color) -> Node2D:
@@ -280,6 +304,38 @@ static func oneshot(parent: Node, d: Dictionary, feet: Vector2, node_name: Strin
 	a.ms = ms
 	a.position = feet
 	a.z_index = 22
+	parent.add_child(a)
+	return a
+
+
+## F1 perfect dodge: fx_perfect_ring (64x16, 4×16², 75 ms/frame) of draw_arc-terugval.
+static func perfect_ring(parent: Node, at: Vector2) -> Node2D:
+	var d: Dictionary = SomData.FX_PERFECT_RING
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		var ph := Ring.new()
+		ph.color = Color(0.85, 0.95, 1.0)
+		ph.position = at
+		ph.radius = 14.0
+		ph.z_index = 23
+		parent.add_child(ph)
+		return ph
+	var n := int(d["frames"])
+	var ms_one := int(d["ms"])
+	var a := Anim.new()
+	a.name = "SomPerfectRing"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.z_index = 23
 	parent.add_child(a)
 	return a
 
