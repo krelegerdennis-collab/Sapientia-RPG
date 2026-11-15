@@ -7,8 +7,8 @@ const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 
 ## Linksboven van het 2x2 Colosseum op de wereldkaart.
 ## Overlay-tegels en de 2x2-uitgang (px = tegel * 16) hangen alleen aan deze regel.
-## ART: (30, 30), dus px (480, 480).
-const WORLD_TILE := Vector2i(30, 30)
+## ART: (30, 32), dus px (480, 512).
+const WORLD_TILE := Vector2i(30, 32)
 
 const WORLD := "res://assets/tiles/wereld_v18_arena.png"
 const TILES := "res://assets/tiles/arena/arena_tiles.png"
