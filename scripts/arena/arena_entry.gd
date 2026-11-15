@@ -1,7 +1,7 @@
 extends RefCounted
 ## Wereldkaart-ingang. Met de vlag uit keert dit meteen terug: geen node, geen art-load.
 ## Plek: Art.WORLD_TILE, 2x2. Spawn van_wilgendal (30,25) blijft vrij.
-## De wereldkaart-uitgang is altijd open (Dennis 16:31). Het slot zit op de lobbypoort.
+## De uitgang naar de lobby werkt alleen met noor_lid. Anders: "The gate is closed."
 
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const Art := preload("res://scripts/data/arena_art.gd")
@@ -9,6 +9,7 @@ const Art := preload("res://scripts/data/arena_art.gd")
 const EXIT_NAME := "NaarArena"
 const OVERLAY_NAME := "ArenaOverlay"
 const LOBBY := "res://scenes/arena/arena_lobby.tscn"
+const CLOSED := "The gate is closed."
 const OPEN := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
 
 static var _world_ts: TileSet
@@ -33,10 +34,16 @@ static func refresh(map: Node2D) -> void:
 	var gate := map.get_node_or_null("Exits/" + EXIT_NAME) as MapExit
 	if gate == null:
 		return
-	gate.target_map = LOBBY
-	gate.target_spawn = "ingang"
-	var empty: Array[String] = []
-	gate.lines = empty
+	if Story.has_flag("noor_lid"):
+		gate.target_map = LOBBY
+		gate.target_spawn = "ingang"
+		var empty: Array[String] = []
+		gate.lines = empty
+	else:
+		gate.target_map = ""
+		gate.target_spawn = ""
+		var closed: Array[String] = [CLOSED]
+		gate.lines = closed
 
 
 static func _ensure_overlay(map: Node2D) -> void:
