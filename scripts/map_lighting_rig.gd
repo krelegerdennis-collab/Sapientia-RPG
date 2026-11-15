@@ -65,25 +65,6 @@ func _resolve_phase(phase: String) -> String:
 	return "day"
 
 
-func _story_replace_tint() -> bool:
-	if not has_node("/root/Story"):
-		return false
-	var story: Node = get_node("/root/Story")
-	if not story.has_method("tint_name"):
-		return false
-	var tn: String = story.tint_name()
-	return tn in ["day", "evening", "night"] and GameState.story_step < MapLightingC.STORY_TINT_FREE_STEP
-
-
-func _thema_mult() -> Color:
-	var mult := Color.WHITE
-	for n: CanvasModulate in _map.find_children("*", "CanvasModulate", true, false):
-		if n.name == "StoryTint" and _story_replace_tint():
-			continue
-		mult *= n.color
-	return mult
-
-
 func _apply_full() -> void:
 	_wrap_normals()
 	_setup_tint()
@@ -114,20 +95,17 @@ func _wrap_normals() -> void:
 
 
 func _setup_tint() -> void:
-	_tint_base = _thema_mult()
-	var cms: Array = _map.find_children("*", "CanvasModulate", true, false)
-	_tint_node = cms[0] as CanvasModulate if not cms.is_empty() else null
-	if _tint_node == null:
-		_tint_node = CanvasModulate.new()
-		_tint_node.name = "Hd2dTint"
-		_map.add_child(_tint_node)
-	elif _tint_node.name != "ThemaTint" and _tint_node.name != "StoryTint":
-		pass
-	_tint_node.color = MapLightingC.col(_preset["ambient"]) * _tint_base
-	if _story_replace_tint():
-		var st := _map.get_node_or_null("StoryTint") as CanvasModulate
-		if st:
-			st.color = Color.WHITE
+	# Ambient hoort op Hd2dTint; StoryTint blijft van Story. Godot vermenigvuldigt
+	# CanvasModulate: beeld = Hd2dTint × StoryTint × ThemaTint. Avond/nacht
+	# (night-ambient × storykleur) is donkerder dan dag (day-ambient × wit).
+	_tint_base = Color.WHITE
+	var bestaand := _map.get_node_or_null("Hd2dTint") as CanvasModulate
+	if bestaand == null:
+		bestaand = CanvasModulate.new()
+		bestaand.name = "Hd2dTint"
+		_map.add_child(bestaand)
+	_tint_node = bestaand
+	_tint_node.color = MapLightingC.col(_preset["ambient"])
 
 
 func _setup_sun() -> void:
