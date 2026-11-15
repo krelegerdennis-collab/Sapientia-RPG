@@ -872,7 +872,9 @@ func _town_tests() -> void:
 	var dag_tint_ok: bool = scene().get_node("StoryTint").color.is_equal_approx(Color.WHITE)
 	if Settings.hd2d_light_enabled():
 		var hd := scene().get_node_or_null("Hd2dTint") as CanvasModulate
-		dag_tint_ok = hd != null and hd.color.is_equal_approx(Color(0.8, 0.8, 0.8))
+		var dag: Dictionary = MapLighting.preset_record(MapLighting.map_id_from(scene())).get("day", {})
+		var amb: Array = dag.get("ambient", [])
+		dag_tint_ok = hd != null and amb.size() >= 3 and hd.color.is_equal_approx(MapLighting.col(amb))
 	check("na de proloog: dag-tint, Oude Man weg", dag_tint_ok
 			and not scene().get_node("Objects/OudeMan").visible)
 	await frames(30)
