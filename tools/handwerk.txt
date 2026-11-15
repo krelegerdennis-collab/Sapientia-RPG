@@ -1379,3 +1379,7 @@ assets/sprites/som/fx/fx_impact_licht.png
 assets/sprites/som/fx/fx_dust_dodge.png
 assets/sprites/som/fx/fx_dust_land.png
 assets/sprites/som/fx/fx_dust_finisher.png
+# Kleurregel her-tint (RPG ART, docs/art/SPEC_kleurregel.md); alleen masterpalet, alpha 0/255
+assets/sprites/som/fx/fx_perfect_ring.png
+assets/sprites/som/fx/fx_counter_spark.png
+assets/sprites/som/fx/fx_impact_licht.png
