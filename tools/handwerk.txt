@@ -1366,3 +1366,16 @@ assets/sprites/telegraph/telegraph_inkspit_diag_22x44.png
 # (art_fx/perfect_dodge/repo_drop; pad = bestaande combat-FX in assets/sprites/som/fx/)
 assets/sprites/som/fx/fx_perfect_ring.png
 assets/sprites/som/fx/fx_counter_spark.png
+# Game-feel FX fase 1 (RPG ART, Dennis "Go alles"):
+# impact-spark per element (fysiek/vuur/ijs/bliksem/natuur/licht) + stofwolkjes (dodge/land/finisher)
+# alleen masterpalet, alpha 0/255 (art_gamefeel/fase1/repo_drop; pad = bestaande combat-FX in assets/sprites/som/fx/)
+# hit-flash/squash = code (SPEC_hitreact.md), geen nieuwe vijand-sprites
+assets/sprites/som/fx/fx_impact_fysiek.png
+assets/sprites/som/fx/fx_impact_vuur.png
+assets/sprites/som/fx/fx_impact_ijs.png
+assets/sprites/som/fx/fx_impact_bliksem.png
+assets/sprites/som/fx/fx_impact_natuur.png
+assets/sprites/som/fx/fx_impact_licht.png
+assets/sprites/som/fx/fx_dust_dodge.png
+assets/sprites/som/fx/fx_dust_land.png
+assets/sprites/som/fx/fx_dust_finisher.png
