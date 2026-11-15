@@ -144,7 +144,6 @@ var last_enemy_damage := 0
 ## Client-only FX-keuze voor de volgende damage_enemy (geen sim-state).
 var _pending_impact_element := ""
 var _pending_chain_step := -2
-var _pending_impact_suppress := false
 var last_player_damage := 0
 var last_hit_id := ""
 var last_attacker := ""
@@ -1112,7 +1111,6 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				stg_kind = SomStaggerData.KIND_HEAVY_L1 if heavy == 1 else SomStaggerData.KIND_HEAVY_L2
 			_pending_chain_step = step
 			_pending_impact_element = ""
-			_pending_impact_suppress = false
 			damage_enemy(m, physical_damage(atk, float(e["def"]), swing_mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
 					num_color, num_scale, stg_kind)
 			if (step >= 0 and SomChainData.is_finisher(step)) or heavy >= 2:
@@ -1201,6 +1199,10 @@ func _aim_caster_at(caster_id: String, m: Node) -> void:
 ## knock_tiles / hitstop: aanvalsketen (SomChainData); standaard 1 tegel en geen hitstop (zoals voorheen).
 func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles := 1, hitstop := 0,
 		num_color := Color(1, 1, 1), num_scale := 1.0, stg_kind := SomStaggerData.KIND_NONE) -> void:
+	var chain_step := _pending_chain_step
+	var impact_el := _pending_impact_element
+	_pending_impact_element = ""
+	_pending_chain_step = -2
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
@@ -1227,20 +1229,13 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 		num_color = Color(1, 1, 1)
 		num_scale = 1.0
 	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), num_color, 0.6, num_scale)
-	var chain_step := _pending_chain_step
-	var impact_el := _pending_impact_element
-	var suppress_fx := _pending_impact_suppress
-	_pending_impact_element = ""
-	_pending_chain_step = -2
-	_pending_impact_suppress = false
-	if not suppress_fx:
-		var at := center_of(m)
-		if impact_el != "":
-			SomFx.impact_spark(room.get_node("Objects"), at, impact_el)
-		elif chain_step == SomChainData.STEP_HIT1 or chain_step == SomChainData.STEP_HIT2:
-			SomFx.spark(room.get_node("Objects"), at)
-		else:
-			SomFx.impact_spark(room.get_node("Objects"), at, "fysiek")
+	var at := center_of(m)
+	if impact_el != "":
+		SomFx.impact_spark(room.get_node("Objects"), at, impact_el)
+	elif chain_step == SomChainData.STEP_HIT1 or chain_step == SomChainData.STEP_HIT2:
+		SomFx.spark(room.get_node("Objects"), at)
+	else:
+		SomFx.impact_spark(room.get_node("Objects"), at, "fysiek")
 	enemy_hit.emit(m, dmg)
 	if Settings.action_battles() and not golem and stg_kind != SomStaggerData.KIND_NONE:
 		if SomStagger.apply_hit(e, m, e["data"], stg_kind):
@@ -1249,6 +1244,7 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 				(e["tg"] as TelegraphAttack).interrupt()
 			e["tele"] = 0.0
 	if int(e["hp"]) <= 0:
+		# Geen SomHitReact op de doodsslag (bewust); fase 2 vervangt sterfbeeld door glitch-death-sheet.
 		_defeat_enemy(m)
 		return
 	var finisher_hit := chain_step == SomChainData.STEP_FINISHER
@@ -2413,7 +2409,6 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 				SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
 				_pending_impact_element = SomGameFeelData.impact_element_for_spell(spell_id)
 				_pending_chain_step = -2
-				_pending_impact_suppress = false
 				damage_enemy(m, maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))), Vector2i.ZERO, true, 1, 0,
 						Color(1, 1, 1), 1.0, SomStaggerData.KIND_SPELL))
 		return "%s casts %s!" % [caster.get("name", ""), sp.get("name", spell_id)]

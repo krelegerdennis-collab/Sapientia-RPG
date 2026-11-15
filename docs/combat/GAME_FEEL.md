@@ -37,6 +37,7 @@ Zet in `scripts/data/som_feel_data.gd` constante `ENABLED` op `false` — dan wi
 - Element-impact `fx_impact_<element>` op schadetreffers; chain hit1/hit2 houdt `fx_hit_spark`.
 - Stof: `fx_dust_dodge` (flip_h naar links), `fx_dust_land` (dodge-einde / verticaal), `fx_dust_finisher`.
 - Hit-react: hurt kolom 0 (50 ms, `HIT_FLASH_CONTACT`); squash/nudge alleen op `sprite.offset`/`scale` (voeten-pivot).
+- **Doodsslag:** geen hit-react op de laatste treffer die HP op 0 zet; visuele sterf in fase 2 (glitch-death-sheet).
 - Gewichtsklassen in `scripts/data/som_gamefeel_data.gd` (licht/middel/zwaar per vijand-id).
 - `HIT_FLASH` (0.12 s) blijft staan; de contact-flits gebruikt `HIT_FLASH_CONTACT` (0.05 s).
 

@@ -7,6 +7,7 @@ const SomFx := preload("res://scripts/som/som_fx.gd")
 const SomGameFeelData := preload("res://scripts/data/som_gamefeel_data.gd")
 const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
 const SomArena := preload("res://scripts/som/som_arena.gd")
+const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const MapMonster := preload("res://scripts/dungeon/map_monster.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
@@ -46,6 +47,7 @@ func _run() -> void:
 	_impact_rule_tests()
 	_hitreact_unit_tests()
 	await _arena_sim_tests()
+	await _pending_fx_leak_tests()
 	await _dodge_dust_tests()
 	_finish()
 
@@ -297,7 +299,80 @@ func _arena_sim_tests() -> void:
 	for _t in 30:
 		a2.step_ticks(1)
 	var fp2 := _fingerprint(a2)
-	check("sim-fingerprint stabiel na FX-ticks", fp1 != "")
+	check("sim-fingerprint stabiel na FX-ticks", fp1 == fp2 and fp1 != "")
+
+
+func _clear_impact_fx(objects: Node) -> void:
+	for c in objects.get_children():
+		if str(c.name).begins_with("SomImpact") or c.name == "SomSpark":
+			c.queue_free()
+
+
+func _golem_invuln(f: GolemFight) -> bool:
+	var guard := 0
+	while f.hp() > 217 and guard < 100000:
+		guard += 1
+		f.tick()
+		f.take_events()
+		if f.is_invulnerable():
+			return true
+		var need := f.hp() - 217
+		var raw := maxi(1, int(ceil(float(need) / f.core.damage_mult())))
+		if f.core.open:
+			if need < 2:
+				continue
+			raw = 1
+		f.damage(raw)
+	f.damage(10)
+	f.take_events()
+	return f.is_invulnerable()
+
+
+func _pending_fx_leak_tests() -> void:
+	var arena := await _setup_arena(4243)
+	if arena == null:
+		check("pending-leak arena", false)
+		return
+	var m: Node = null
+	for k in arena.enemies.keys():
+		if is_instance_valid(k):
+			m = k
+			break
+	check("pending-leak vijand", m != null)
+	if m == null:
+		return
+	var objects := arena.room.get_node("Objects")
+	# Onbekende vijand: pending wordt opgegeten vóór return.
+	var stray := _fake_monster("stray_pending_leak")
+	arena._pending_chain_step = SomChainData.STEP_HIT1
+	arena._pending_impact_element = "vuur"
+	arena.damage_enemy(stray, 9, Vector2i.RIGHT, false, 0, 0)
+	check("onbekende vijand: pending geleegd", arena._pending_chain_step == -2 and arena._pending_impact_element == "")
+	_clear_impact_fx(objects)
+	arena.damage_enemy(m, 4, Vector2i.RIGHT, false, 0, 0)
+	check("na stray-hit: fysiek-impact (geen chain-lek)", objects.get_node_or_null("SomImpact_fysiek") != null
+			and objects.get_node_or_null("SomSpark") == null)
+	_clear_impact_fx(objects)
+	# Golem 0 schade (onkwetsbaar): zelfde pending-reset.
+	var gf := GolemFight.new(360, 7)
+	arena.enemies[m]["hp"] = 360
+	arena.enemies[m]["golem"] = gf
+	check("golem invuln voor 0-schade", _golem_invuln(gf))
+	arena.enemies[m]["hp"] = gf.hp()
+	arena._pending_chain_step = SomChainData.STEP_HIT2
+	arena._pending_impact_element = ""
+	var hp_before := gf.hp()
+	arena.damage_enemy(m, 50, Vector2i.LEFT, false, 0, 0)
+	check("golem 0-schade: pending geleegd", arena._pending_chain_step == -2)
+	check("golem 0-schade: HP ongewijzigd", gf.hp() == hp_before)
+	_clear_impact_fx(objects)
+	arena._pending_chain_step = -2
+	arena._pending_impact_element = ""
+	arena.damage_enemy(m, 6, Vector2i.RIGHT, false, 0, 0)
+	check("na golem-blok: generic fysiek-impact", objects.get_node_or_null("SomImpact_fysiek") != null
+			and objects.get_node_or_null("SomSpark") == null)
+	arena.enemies[m].erase("golem")
+	stray.queue_free()
 
 
 func _dodge_dust_tests() -> void:
