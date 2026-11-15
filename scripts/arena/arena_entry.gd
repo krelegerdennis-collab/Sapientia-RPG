@@ -1,7 +1,7 @@
 extends RefCounted
 ## Wereldkaart-ingang. Met de vlag uit keert dit meteen terug: geen node, geen art-load.
-## Plek: tegels (30,32)-(31,33), onder de as/grind-inham. Spawn van_wilgendal (30,25) blijft vrij.
-## Dicht tot noor_lid (Vesper in de groep, zelfde vlag als de bouwplaats).
+## Plek: tegels (30,32)-(31,33). Spawn van_wilgendal (30,25) blijft vrij.
+## De wereldkaart-uitgang is altijd open (Dennis 16:31). Het slot zit op de lobbypoort.
 
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const Art := preload("res://scripts/data/arena_art.gd")
@@ -9,10 +9,7 @@ const Art := preload("res://scripts/data/arena_art.gd")
 const EXIT_NAME := "NaarArena"
 const OVERLAY_NAME := "ArenaOverlay"
 const LOBBY := "res://scenes/arena/arena_lobby.tscn"
-const CLOSED_LINE := "The gate is closed."
-
 const SITE := [Vector2i(30, 32), Vector2i(31, 32), Vector2i(30, 33), Vector2i(31, 33)]
-const LOCKED := [Vector2i(2, 0), Vector2i(3, 0), Vector2i(2, 1), Vector2i(3, 1)]
 const OPEN := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
 const EXIT_POS := Vector2(480, 512)
 
@@ -30,25 +27,17 @@ static func consider(map: Node2D) -> void:
 static func refresh(map: Node2D) -> void:
 	if map == null or not ReleaseFlags.arena_enabled():
 		return
-	var open := Story.has_flag("noor_lid")
 	var layer := map.get_node_or_null(OVERLAY_NAME) as TileMapLayer
 	if layer != null and layer.tile_set != null:
-		var coords := OPEN if open else LOCKED
 		for i in SITE.size():
-			layer.set_cell(SITE[i], 0, coords[i])
+			layer.set_cell(SITE[i], 0, OPEN[i])
 	var gate := map.get_node_or_null("Exits/" + EXIT_NAME) as MapExit
 	if gate == null:
 		return
-	if open:
-		gate.target_map = LOBBY
-		gate.target_spawn = "ingang"
-		var empty: Array[String] = []
-		gate.lines = empty
-	else:
-		gate.target_map = ""
-		gate.target_spawn = ""
-		var lines: Array[String] = [CLOSED_LINE]
-		gate.lines = lines
+	gate.target_map = LOBBY
+	gate.target_spawn = "ingang"
+	var empty: Array[String] = []
+	gate.lines = empty
 
 
 static func _ensure_overlay(map: Node2D) -> void:

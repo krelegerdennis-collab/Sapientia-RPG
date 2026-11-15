@@ -12,6 +12,11 @@ const FRAME := {
 	"arena_counter": Vector2i(48, 32),
 	"arena_weapon_rack": Vector2i(32, 32),
 	"arena_notice_board": Vector2i(32, 32),
+	"arena_bench": Vector2i(32, 16),
+	"arena_crates": Vector2i(32, 32),
+	"arena_brazier": Vector2i(32, 32),
+	"arena_vip_loge": Vector2i(48, 64),
+	"arena_sand_ring": Vector2i(64, 64),
 }
 
 static var _maps: Dictionary = {}
@@ -38,6 +43,9 @@ static func place(map: Node2D, kind: String) -> void:
 			continue
 		n += 1
 		var frame_px: Vector2i = FRAME[prop]
+		if prop == "arena_sand_ring":
+			_decal(map, tex, Vector2(float(spec.get("x", 0)), float(spec.get("y", 0))), frame_px)
+			continue
 		var body := StaticBody2D.new()
 		body.name = "%s_%d" % [prop, n]
 		body.position = Vector2(float(spec.get("x", 0)), float(spec.get("y", 0)))
@@ -49,7 +57,7 @@ static func place(map: Node2D, kind: String) -> void:
 		spr.hframes = maxi(1, int(spec.get("hframes", 1)))
 		spr.frame = int(spec.get("frame", 0))
 		spr.flip_h = bool(spec.get("flip", false))
-		if prop == "arena_torch":
+		if prop == "arena_torch" or prop == "arena_brazier":
 			spr.set_script(TorchScript)
 		body.add_child(spr)
 		_feet(body, prop, int(spec.get("frame", 0)))
@@ -66,20 +74,55 @@ static func _list(key: String) -> Array:
 	return rows if rows is Array else []
 
 
+static func set_gate_frame(body: StaticBody2D, frame: int) -> void:
+	var spr := body.get_node_or_null("Sprite2D") as Sprite2D
+	if spr != null:
+		spr.hframes = 3
+		spr.frame = frame
+	var old: Array[Node] = []
+	for c in body.get_children():
+		if c is CollisionShape2D:
+			old.append(c)
+	for c in old:
+		body.remove_child(c)
+		c.free()
+	_feet(body, "arena_gate", frame)
+
+
+static func _decal(map: Node2D, tex: Texture2D, at: Vector2, frame_px: Vector2i) -> void:
+	var spr := Sprite2D.new()
+	spr.name = "ArenaSandRing"
+	spr.centered = false
+	spr.texture = tex
+	spr.offset = Vector2(-frame_px.x * 0.5, -float(frame_px.y))
+	spr.position = at
+	var ground := map.get_node_or_null("Ground")
+	if ground != null:
+		ground.add_sibling(spr)
+	else:
+		map.add_child(spr)
+
+
 static func _feet(body: StaticBody2D, prop: String, frame: int) -> void:
 	match prop:
 		"arena_gate":
 			_rect(body, Vector2(-20, -4), Vector2(8, 8))
 			_rect(body, Vector2(20, -4), Vector2(8, 8))
-			# f0 dicht: het midden (32 px) is muur. f1 laat die 32 px open.
-			if frame == 0:
-				_rect(body, Vector2(0, -4), Vector2(32, 8))
+			# f1 laat de 48px-opening vrij. f0 en f2 (hangslot) zijn dicht.
+			if frame != 1:
+				_rect(body, Vector2(0, -4), Vector2(48, 8))
 		"arena_torch":
 			_rect(body, Vector2(0, -2), Vector2(6, 4))
+		"arena_brazier":
+			_rect(body, Vector2(0, -3), Vector2(10, 6))
 		"arena_counter":
 			_rect(body, Vector2(0, -6), Vector2(44, 12))
 		"arena_weapon_rack":
 			_rect(body, Vector2(0, -3), Vector2(28, 6))
+		"arena_bench":
+			_rect(body, Vector2(0, -2.5), Vector2(28, 5))
+		"arena_crates":
+			_rect(body, Vector2(0, -7), Vector2(30, 14))
 		"arena_notice_board":
 			# Twee palen, sprite-lokaal x3 en x27, 4x4. Sprite-oorsprong ligt 16 px links van de node.
 			_rect(body, Vector2(-11, -2), Vector2(4, 4))

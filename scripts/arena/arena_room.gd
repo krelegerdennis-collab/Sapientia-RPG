@@ -73,6 +73,7 @@ func _paint() -> void:
 			ground.set_cell(cell, 0, Vector2i(idx % 16, int(idx / 16.0)))
 			_solid[cell] = _blocked(idx, x, y)
 	Props.place(self, room_kind)
+	refresh_gate()
 
 
 func _blocked(idx: int, x: int, y: int) -> bool:
@@ -83,6 +84,29 @@ func _blocked(idx: int, x: int, y: int) -> bool:
 	if room_kind == "hall" and idx >= 89 and idx <= 92:
 		return false
 	return idx >= 32
+
+
+const CLOSED_LINE := "The gate is closed."
+
+
+func gate_closed_text() -> String:
+	return CLOSED_LINE
+
+
+func refresh_gate() -> void:
+	var objects := get_node_or_null("Objects")
+	if objects == null:
+		return
+	var frame := 0
+	if room_kind == "lobby":
+		frame = 1 if Story.has_flag("noor_lid") else 2
+	else:
+		var gs := get_node_or_null("/root/GameState")
+		var arena := gs.get_node_or_null("ArenaRun") if gs != null else null
+		frame = 1 if arena != null and str(arena.phase) == RunScript.PHASE_WAVE else 0
+	for n in objects.get_children():
+		if str(n.name).begins_with("arena_gate") and n is StaticBody2D:
+			Props.set_gate_frame(n, frame)
 
 
 func _build_gate() -> void:
@@ -159,6 +183,9 @@ func _gate_used() -> void:
 		return
 	if room_kind != "lobby":
 		Dialog.show_lines(["The gate is shut."], "")
+		return
+	if not Story.has_flag("noor_lid"):
+		Dialog.show_lines([CLOSED_LINE], "")
 		return
 	var arena := Host.ensure()
 	if str(arena.phase) != RunScript.PHASE_LOBBY:

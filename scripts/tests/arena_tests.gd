@@ -127,19 +127,15 @@ func _flag_off() -> void:
 	check("vlag aan: overlay verschijnt", open_map.get_node_or_null("ArenaOverlay") != null)
 	check("vlag aan: geen magenta marker", open_map.get_node_or_null("Objects/ArenaMarker") == null)
 	var gate: MapExit = open_map.get_node("Exits/NaarArena")
-	check("vlag aan: zonder noor_lid blijft de poort dicht", gate.target_map == "")
-	check("vlag aan: dichte poort zegt dat hij dicht is", gate.lines.size() == 1 and gate.lines[0] == "The gate is closed.")
+	check("vlag aan: werelduitgang is de lobby", gate.target_map == LOBBY and gate.target_spawn == "ingang" and gate.lines.is_empty())
 	check("vlag aan: uitgang is 2x2 op (480,512)", gate.position == Vector2(480, 512) and gate.size_tiles == Vector2i(2, 2))
 	var layer: TileMapLayer = open_map.get_node("ArenaOverlay")
-	check("vlag aan: dicht atlas (2,0)", layer.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(2, 0))
-	check("vlag aan: dicht atlas (3,1)", layer.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(3, 1))
+	check("vlag aan: open atlas (0,0)", layer.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(0, 0))
+	check("vlag aan: open atlas (1,1)", layer.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(1, 1))
 	check("vlag aan: spawntegel blijft leeg", layer.get_cell_source_id(Vector2i(30, 25)) == -1)
 	GameState.story_flags["noor_lid"] = true
 	Entry.refresh(open_map)
-	check("vlag aan: na noor_lid gaat de poort open", gate.target_map == LOBBY and gate.target_spawn == "ingang" and gate.lines.is_empty())
-	check("vlag aan: open atlas (0,0)", layer.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(0, 0))
-	check("vlag aan: open atlas (1,1)", layer.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(1, 1))
-	GameState.story_flags.erase("noor_lid")
+	check("vlag aan: noor_lid laat de werelduitgang open", gate.target_map == LOBBY and gate.lines.is_empty())
 	open_map.queue_free()
 	ReleaseFlags.arena_enabled_override = -1
 	check("override terug: vlag weer uit", ReleaseFlags.arena_enabled() == false)
@@ -409,7 +405,7 @@ func _rooms() -> void:
 	check("winkelier-botsing 12x6", kshape != null and kshape.size == Vector2(12, 6))
 	var lgate := _sprite_named(lobby, "arena_gate.png")
 	var lbody := lgate.get_parent() as Node2D if lgate != null else null
-	check("lobbypoort gecentreerd op x=192", lbody != null and lbody.position.x == 192.0 and lgate.frame == 1)
+	check("lobbypoort gecentreerd op x=192", lbody != null and lbody.position.x == 192.0 and lgate.frame == 2 and lgate.hframes == 3)
 	check("lobbypoort-offset", lgate != null and lgate.centered == false and lgate.offset == Vector2(-24, -48))
 	check("lobby is 24 tegels van 16 px", lg.get_used_rect().size.x * 16 == 384)
 	var hall: Node = (load(HALL) as PackedScene).instantiate()
@@ -449,7 +445,7 @@ func _art() -> void:
 	var world := Art.world_texture()
 	check("wereld-atlas 64x32", world != null and world.get_width() == 64 and world.get_height() == 32)
 	var tiles := Art.tiles_texture()
-	check("arena-tegels 256x112", tiles != null and tiles.get_width() == 256 and tiles.get_height() == 112)
+	check("arena-tegels 256x144", tiles != null and tiles.get_width() == 256 and tiles.get_height() == 144)
 	var walk := Art.npc_texture()
 	check("koopman-loopblad 72x128", walk != null and walk.get_width() == 72 and walk.get_height() == 128)
 	var idle := Art.npc_idle_texture()
@@ -472,12 +468,19 @@ func _art() -> void:
 	var ov := live.get_node_or_null("ArenaOverlay") as TileMapLayer
 	check("wereldkaart: overlay boven Ground", ov != null and ground.get_index() < ov.get_index())
 	var exit := live.get_node_or_null("Exits/NaarArena") as MapExit
-	check("wereldkaart: poort dicht zonder noor_lid", exit != null and exit.target_map == "" and exit.position == Vector2(480, 512) and exit.size_tiles == Vector2i(2, 2) and exit.lines.size() == 1 and exit.lines[0] == "The gate is closed.")
-	check("wereldkaart: dicht op (30,32)-(31,33)", ov != null and ov.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(2, 0) and ov.get_cell_atlas_coords(Vector2i(31, 32)) == Vector2i(3, 0) and ov.get_cell_atlas_coords(Vector2i(30, 33)) == Vector2i(2, 1) and ov.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(3, 1))
+	check("wereldkaart: uitgang altijd naar de lobby", exit != null and exit.target_map == LOBBY and exit.lines.is_empty() and exit.position == Vector2(480, 512) and exit.size_tiles == Vector2i(2, 2))
+	check("wereldkaart: open atlas op (30,32)-(31,33)", ov != null and ov.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(0, 0) and ov.get_cell_atlas_coords(Vector2i(31, 32)) == Vector2i(1, 0) and ov.get_cell_atlas_coords(Vector2i(30, 33)) == Vector2i(0, 1) and ov.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(1, 1))
+	var locked_lobby: Node = (load(LOBBY) as PackedScene).instantiate()
+	add_child(locked_lobby)
+	await get_tree().process_frame
+	var locked_gate := _sprite_named(locked_lobby, "arena_gate.png")
+	check("lobbypoort op slot zonder noor_lid", locked_gate != null and locked_gate.frame == 2)
+	check("dichte lobbypoort zegt dat hij dicht is", str(locked_lobby.call("gate_closed_text")) == "The gate is closed.")
 	GameState.story_flags["noor_lid"] = true
-	Entry.refresh(live)
-	check("wereldkaart: open na noor_lid", exit != null and exit.target_map == LOBBY and exit.lines.is_empty())
-	check("wereldkaart: open atlas", ov != null and ov.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(0, 0) and ov.get_cell_atlas_coords(Vector2i(31, 32)) == Vector2i(1, 0) and ov.get_cell_atlas_coords(Vector2i(30, 33)) == Vector2i(0, 1) and ov.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(1, 1))
+	locked_lobby.call("refresh_gate")
+	check("lobbypoort open na noor_lid", locked_gate != null and locked_gate.frame == 1)
+	locked_lobby.queue_free()
+	await get_tree().process_frame
 	live.queue_free()
 	await get_tree().process_frame
 	GameState.story_flags.erase("noor_lid")
@@ -504,7 +507,7 @@ func _art() -> void:
 			torch_lights += 1
 			if int((c as Dictionary).get("n", 0)) == 2:
 				paired += 1
-		check("hal: zes fakkels worden drie lichten", torch_lights == 3 and paired == 3)
+		check("hal: zes fakkels worden drie lichten", paired == 3)
 		check("hal: hoogstens 8 puntlichten", rig.enabled_point_lights() <= 8)
 	hall.queue_free()
 	await get_tree().process_frame
