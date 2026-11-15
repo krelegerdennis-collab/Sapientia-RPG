@@ -83,6 +83,8 @@ var allies: Array = []
 ## Onkwetsbaar-tijd per held-id.
 var iframes := {}
 var down := false
+## Arena-colosseum: wel player_defeated, geen GameState.end_battle("lose"). Default uit = WM1 ongewijzigd.
+var arena_mode := false
 var hud: Node
 var ring: Node
 ## Codex vangen in Action (scripts/som/som_codex.gd)
@@ -2251,6 +2253,8 @@ func _party_down() -> void:
 	SomFx.set_ko(player, pose_tex(active_id, "ko"), true)
 	_say(SomData.TXT_FALLEN % "The party")
 	player_defeated.emit()
+	if arena_mode:
+		return
 	await get_tree().create_timer(1.2).timeout
 	GameState.in_battle = true
 	GameState.pending_boss = false

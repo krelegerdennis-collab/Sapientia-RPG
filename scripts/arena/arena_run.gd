@@ -4,7 +4,7 @@ extends Node
 ## Hele party neer: results, verdiende rewards blijven, terug naar de lobby.
 ## Geen game over.
 
-const WavesScript := preload("res://scripts/arena/arena_waves_stub.gd")
+const WavesScript := preload("res://scripts/arena/som_arena_waves.gd")
 const Rewards := preload("res://scripts/data/arena_rewards.gd")
 
 const PHASE_LOBBY := "lobby"
@@ -24,6 +24,8 @@ var wiped := false
 var last_started := 0
 var level_notes: Array[String] = []
 var waves: Node
+## Door de host gezet vóór begin(); 0 = kies bij begin().
+var run_seed := 0
 
 var _paid: Dictionary = {}
 
@@ -48,6 +50,8 @@ func begin() -> void:
 	level_notes = []
 	_paid = {}
 	wave = 0
+	if run_seed == 0:
+		run_seed = hash("arena_run|%d" % Time.get_ticks_usec())
 	_start_wave()
 
 

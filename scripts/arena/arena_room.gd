@@ -13,16 +13,23 @@ const HudScript := preload("res://scripts/arena/arena_hud.gd")
 const GateLock := preload("res://scripts/arena/arena_gate_lock.gd")
 const NpcScene := preload("res://scenes/npc.tscn")
 const Koopman := preload("res://scripts/arena/arena_koopman.gd")
+const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
+const SomArenaScript := preload("res://scripts/som/som_arena.gd")
 
 const HALL := "res://scenes/arena/arena_hall.tscn"
 
 @export var room_kind := "lobby"
 
+## MapLighting-presets: arena_hal / arena_lobby (wordt in _ready gezet).
+var room_id := ""
+var monsters: Array = []
+var som: Node = null
 var _gate: Array[Vector2i] = []
 var _solid: Dictionary = {}
 
 
 func _ready() -> void:
+	room_id = "arena_hal" if room_kind == "hall" else "arena_lobby"
 	encounters = false
 	sets_checkpoint = false
 	_paint()
@@ -31,8 +38,48 @@ func _ready() -> void:
 	_ensure_spawn()
 	if room_kind == "lobby":
 		_build_shopkeeper()
+	if room_kind == "hall":
+		_setup_arena_combat()
 	super._ready()
 	_attach_hud()
+
+
+func tier() -> int:
+	return 0
+
+
+func monsters_active() -> bool:
+	return is_node_ready() and som != null and is_instance_valid(player) \
+			and not GameState.scene_busy() and not Dialog.is_open and not menu_open() and not Story.running
+
+
+func add_monster(d: Dictionary, rng_seed: int = 0, hp_mult: float = 1.0) -> MapMonster:
+	var m: MapMonster = MapMonsterScript.new()
+	var seed := rng_seed if rng_seed != 0 else hash(room_id) + monsters.size() * 7919
+	m.setup(self, d, seed)
+	$Objects.add_child(m)
+	monsters.append(m)
+	if som != null and som.has_method("register"):
+		som.register(m)
+		if hp_mult > 1.0001 and som.enemies.has(m):
+			var e: Dictionary = som.enemies[m]
+			var mx := maxi(1, int(e.get("max_hp", 1)))
+			var scaled := maxi(1, int(ceil(float(mx) * hp_mult)))
+			e["max_hp"] = scaled
+			e["hp"] = scaled
+	return m
+
+
+func _setup_arena_combat() -> void:
+	if not ReleaseFlags.arena_enabled():
+		return
+	if som != null:
+		return
+	add_to_group("arena_hall")
+	som = SomArenaScript.new()
+	add_child(som)
+	som.setup(self)
+	som.arena_mode = true
 
 
 func map_width() -> int:
