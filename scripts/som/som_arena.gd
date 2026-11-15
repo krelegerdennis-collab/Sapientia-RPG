@@ -63,6 +63,8 @@ const SomPerfectDodgeData := preload("res://scripts/data/som_perfect_dodge_data.
 const SomShakeScript := preload("res://scripts/som/som_shake.gd")
 const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
 const SomGameFeelData := preload("res://scripts/data/som_gamefeel_data.gd")
+const SomDeathGlitch := preload("res://scripts/som/som_death_glitch.gd")
+const SomEnemyRead := preload("res://scripts/som/som_enemy_read.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const MapSprite := preload("res://scripts/map_sprite.gd")
@@ -1323,6 +1325,9 @@ func _defeat_enemy(m: Node) -> void:
 	enemy_defeated.emit(m, gained_exp, gained_gold, got)
 	m.set_process(false)
 	m.collision_layer = 0
+	if SomGameFeelData.DEATH_GLITCH_ENABLED and room != null and room.has_node("Objects"):
+		SomDeathGlitch.play(room.get_node("Objects"), self, m, e, got)
+		return
 	var dt := _monster_sheet(m, "death")
 	if dt and m.sprite:
 		# doodgaan-sheet: 4 frames x MONSTER_DEATH_MS
@@ -1358,6 +1363,10 @@ func _monster_sheet(m: Node, kind: String) -> Texture2D:
 
 ## Pose tonen voor 'sec' seconden. attack: kolom col (0 opladen, 1 uithaal, 2 terug) in de rij van de
 ## kijkrichting; hurt: kolom = richting. Het monster staat zolang stil (zijn eigen loopanimatie uit).
+func _telegraph_charge_pose(m: Node, e: Dictionary, sec: float) -> void:
+	_monster_pose(m, e, "attack", 0, sec)
+
+
 func _monster_pose(m: Node, e: Dictionary, kind: String, col: int, sec: float) -> void:
 	var t := _monster_sheet(m, kind)
 	if t == null or m.sprite == null:
@@ -1529,8 +1538,9 @@ func _enemy_ai(m: Node, delta: float) -> void:
 		e["tele"] = SomData.TELEGRAPH
 		var to := body_of(tid) - center_of(m)
 		m.facing = Vector2i(signi(roundi(to.x)), 0) if absf(to.x) >= absf(to.y) else Vector2i(0, signi(roundi(to.y)))
-		_monster_pose(m, e, "attack", 0, SomData.TELEGRAPH + 0.05)
-		SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), SomData.TELEGRAPH)
+		var objs := room.get_node("Objects")
+		SomEnemyRead.begin_telegraph(self, m, objs, Callable(self, "center_of"), SomData.TELEGRAPH,
+				Callable(self, "_telegraph_charge_pose").bind(m, e, SomData.TELEGRAPH + 0.05))
 	if dist > SomData.ENEMY_REACH - 6.0 and float(e["tele"]) <= 0.0:
 		e["chase"] = float(e["chase"]) - delta
 		if float(e["chase"]) <= 0.0 and not m.is_moving and dist < SomData.CHASE_RANGE * 16.0:
@@ -1573,9 +1583,11 @@ func _golem_events(m: Node, e: Dictionary, evs: Array) -> void:
 				if tid != "":
 					m.facing = Vector2i(signi(roundi(to.x)), 0) if absf(to.x) >= absf(to.y) else Vector2i(0, signi(roundi(to.y)))
 				_golem_start_visual_telegraph(m, e, str(d["id"]), a, origin, dir, int(d["windup"]))
-				_monster_pose(m, e, "attack", 0, float(d["windup"]) / float(TICK_HZ) + 0.05)
+				var g_wu := float(d["windup"]) / float(TICK_HZ)
 				if room and room.has_node("Objects"):
-					SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), float(d["windup"]) / float(TICK_HZ))
+					var gobjs := room.get_node("Objects")
+					SomEnemyRead.begin_telegraph(self, m, gobjs, Callable(self, "center_of"), g_wu,
+							Callable(self, "_telegraph_charge_pose").bind(m, e, g_wu + 0.05))
 			"attack_hit":
 				_golem_clear_telegraph(e)
 				_golem_temp_hit_flash(m)
@@ -1806,8 +1818,9 @@ func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
 		var dir: Vector2i = TelegraphShape.dir_from_vector(to)
 		tg.start(origin, dir, str(def.get("shape", "line")))
 		_sync_telegraph_meters(e, tg)
-		_monster_pose(m, e, "attack", 0, SomData.TELEGRAPH + 0.05)
-		SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), SomData.TELEGRAPH)
+		var tobjs := room.get_node("Objects")
+		SomEnemyRead.begin_telegraph(self, m, tobjs, Callable(self, "center_of"), SomData.TELEGRAPH,
+				Callable(self, "_telegraph_charge_pose").bind(m, e, SomData.TELEGRAPH + 0.05))
 	else:
 		_sync_telegraph_meters(e, tg)
 	if dist > SomData.ENEMY_REACH - 6.0 and float(e["tele"]) <= 0.0:
