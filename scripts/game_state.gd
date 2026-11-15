@@ -610,6 +610,7 @@ func _ready() -> void:
 	# F1 perfect dodge (Action): of  godot -- --perfectdodgetest  (scripts/tests/perfect_dodge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
+	# RC-checklist WM1 (alleen lezen, bekende OPEN-punten als OPEN-regel): of  godot -- --rcchecktest  (scripts/tests/rc_check_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	# Laadtijden WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
@@ -742,6 +743,7 @@ func _ready() -> void:
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
 			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
+			["--rcchecktest", "res://scripts/tests/rc_check_tests.gd", "RcCheckTest", "rcchecktest"],
 			["--openingtest", "res://scripts/tests/opening_tests.gd", "OpeningTest", "openingtest"],
 			["--driftbgtest", "res://scripts/tests/drift_bg_tests.gd", "DriftBgTest", "driftbgtest"],
 			["--tcptest", "res://scripts/tests/tc_p_autotest.gd", "TcPTest", "tcptest"],
