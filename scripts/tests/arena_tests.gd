@@ -414,7 +414,13 @@ func _rooms() -> void:
 	check("winkelier-botsing 12x6", kshape != null and kshape.size == Vector2(12, 6))
 	var lgate := _sprite_named(lobby, "arena_gate.png")
 	var lbody := lgate.get_parent() as Node2D if lgate != null else null
-	check("lobbypoort gecentreerd op x=192", lbody != null and lbody.position.x == 192.0 and lgate.frame == 1 and lgate.hframes == 3)
+	check("lobbypoort gecentreerd op x=192", lbody != null and lbody.position.x == 192.0 and lgate.frame == 2 and lgate.hframes == 3)
+	check("lobbypoort dicht: opening 48 px solid", lbody != null and _opening_solid(lbody))
+	var lsrc := lg.tile_set.get_source(0) as TileSetAtlasSource
+	var glitch := Vector2i(12, 8)
+	check("tegel 140/141 animeert 250 ms", lsrc != null and lsrc.get_tile_animation_frames_count(glitch) == 2 and is_equal_approx(lsrc.get_tile_animation_frame_duration(glitch, 0), 0.25) and is_equal_approx(lsrc.get_tile_animation_frame_duration(glitch, 1), 0.25))
+	check("lobby: 3 banken", _sprites_named(lobby, "arena_bench.png").size() == 3)
+	check("lobby: 2 kisten", _sprites_named(lobby, "arena_crates.png").size() == 2)
 	check("lobbypoort-offset", lgate != null and lgate.centered == false and lgate.offset == Vector2(-24, -48))
 	check("lobby is 24 tegels van 16 px", lg.get_used_rect().size.x * 16 == 384)
 	var hall: Node = (load(HALL) as PackedScene).instantiate()
@@ -432,8 +438,18 @@ func _rooms() -> void:
 	check("hal: zes fakkels", torches.size() == 6)
 	check("fakkel: 4 frames", torches.size() == 6 and torches[0].hframes == 4 and torches[0].offset == Vector2(-8, -32))
 	var torch_frame := torches[0].frame if torches.size() > 0 else -1
+	var braziers := _sprites_named(hall, "arena_brazier.png")
+	var brazier_frame := braziers[0].frame if braziers.size() > 0 else -1
 	await get_tree().create_timer(0.2).timeout
 	check("fakkel loopt", torches.size() == 6 and is_instance_valid(torches[0]) and torches[0].frame != torch_frame)
+	check("hal: 4 vuurschalen", braziers.size() == 4 and braziers[0].hframes == 4 and braziers[0].offset == Vector2(-16, -32))
+	check("vuurschaal loopt", braziers.size() == 4 and is_instance_valid(braziers[0]) and braziers[0].frame != brazier_frame)
+	var hgate := _sprite_named(hall, "arena_gate.png")
+	check("hal-poort dicht buiten een golf", hgate != null and hgate.frame == 0 and hgate.hframes == 3)
+	check("hal: vip-loge", _sprites_named(hall, "arena_vip_loge.png").size() == 1)
+	var ring := hall.get_node_or_null("ArenaSandRing") as CanvasItem
+	var hobjects := hall.get_node("Objects")
+	check("zandring tussen vloer en objecten", ring != null and hg.get_index() < ring.get_index() and ring.get_index() < hobjects.get_index())
 	var map_px := Vector2i(rect.size.x * 16, rect.size.y * 16)
 	check("hal groter dan het 384x216-beeld", map_px.x > 384 and map_px.y > 216)
 	var cam: Camera2D = hall.get_node("Objects/Player/Camera2D")
@@ -455,6 +471,13 @@ func _art() -> void:
 	check("wereld-atlas 64x32", world != null and world.get_width() == 64 and world.get_height() == 32)
 	var tiles := Art.tiles_texture()
 	check("arena-tegels 256x144", tiles != null and tiles.get_width() == 256 and tiles.get_height() == 144)
+	var gate_tex := load("res://assets/sprites/arena/arena_gate.png") as Texture2D
+	check("poort 144x48", gate_tex != null and gate_tex.get_width() == 144 and gate_tex.get_height() == 48)
+	check("bank 32x16", _tex_size("res://assets/sprites/arena/arena_bench.png") == Vector2i(32, 16))
+	check("kisten 32x32", _tex_size("res://assets/sprites/arena/arena_crates.png") == Vector2i(32, 32))
+	check("vuurschaal 128x32", _tex_size("res://assets/sprites/arena/arena_brazier.png") == Vector2i(128, 32))
+	check("vip-loge 48x64", _tex_size("res://assets/sprites/arena/arena_vip_loge.png") == Vector2i(48, 64))
+	check("zandring 64x64", _tex_size("res://assets/sprites/arena/arena_sand_ring.png") == Vector2i(64, 64))
 	var walk := Art.npc_texture()
 	check("koopman-loopblad 72x128", walk != null and walk.get_width() == 72 and walk.get_height() == 128)
 	var idle := Art.npc_idle_texture()
@@ -480,16 +503,24 @@ func _art() -> void:
 	var origin := Art.WORLD_TILE
 	check("wereldkaart: uitgang altijd naar de lobby", exit != null and exit.target_map == LOBBY and exit.target_spawn == "ingang" and exit.lines.is_empty() and exit.position == Vector2(origin) * 16.0 and exit.size_tiles == Vector2i(2, 2))
 	check("wereldkaart: open atlas op het 2x2", ov != null and ov.get_cell_atlas_coords(origin) == Vector2i(0, 0) and ov.get_cell_atlas_coords(origin + Vector2i(1, 0)) == Vector2i(1, 0) and ov.get_cell_atlas_coords(origin + Vector2i(0, 1)) == Vector2i(0, 1) and ov.get_cell_atlas_coords(origin + Vector2i(1, 1)) == Vector2i(1, 1))
+	check("wereldkaart: locked atlas 4-7 ongebruikt", ov != null and ov.get_cell_atlas_coords(origin) != Vector2i(2, 0) and ov.get_cell_atlas_coords(origin + Vector2i(1, 1)) != Vector2i(3, 1))
 	var locked_lobby: Node = (load(LOBBY) as PackedScene).instantiate()
 	add_child(locked_lobby)
 	await get_tree().process_frame
 	var locked_gate := _sprite_named(locked_lobby, "arena_gate.png")
-	check("lobbypoort nog niet op slot", locked_gate != null and locked_gate.frame == 1)
+	var lobby_exit := locked_lobby.get_node_or_null("Exits/ArenaPoort") as MapExit
+	var lobby_body := locked_gate.get_parent() as Node2D if locked_gate != null else null
+	check("lobbypoort op slot zonder noor_lid", locked_gate != null and locked_gate.frame == 2 and lobby_exit != null and lobby_exit.target_map == "" and lobby_exit.lines.size() == 1 and lobby_exit.lines[0] == "The gate is closed.")
+	check("lobbypoort: opening x168-216 solid", lobby_body != null and lobby_body.position.x == 192.0 and _opening_solid(lobby_body))
+	var map_was := GameState.current_map
+	locked_lobby.call("_gate_used")
+	check("interactie toont dat de poort dicht is", Dialog.is_open and Dialog.text_label.text == "The gate is closed." and GameState.current_map == map_was)
+	Dialog.close()
 	GameState.story_flags["noor_lid"] = true
 	Entry.refresh(live)
 	check("wereldkaart: noor_lid verandert de uitgang niet", exit.target_map == LOBBY and exit.target_spawn == "ingang" and exit.lines.is_empty())
 	locked_lobby.call("refresh_gate")
-	check("lobbypoort hangt nog niet aan noor_lid", locked_gate != null and locked_gate.frame == 1)
+	check("lobbypoort open na noor_lid", locked_gate != null and locked_gate.frame == 1 and lobby_exit.target_map == HALL and lobby_exit.target_spawn == "ingang" and lobby_exit.lines.is_empty() and not _opening_solid(lobby_body))
 	locked_lobby.queue_free()
 	await get_tree().process_frame
 	live.queue_free()
@@ -509,17 +540,36 @@ func _art() -> void:
 	if rig != null:
 		rig.set_phase("night", 0.0)
 		var torch_lights := 0
-		var paired := 0
 		for c in rig._cands:
 			if typeof(c) != TYPE_DICTIONARY:
 				continue
 			if str((c as Dictionary).get("kind", "")) != "fire":
 				continue
 			torch_lights += 1
-			if int((c as Dictionary).get("n", 0)) == 2:
-				paired += 1
-		check("hal: zes fakkels worden drie lichten", paired == 3)
+		check("hal: tien vuren worden vier lichten", torch_lights == 4)
 		check("hal: hoogstens 8 puntlichten", rig.enabled_point_lights() <= 8)
+	var lobby_lit: Node = (load(LOBBY) as PackedScene).instantiate()
+	add_child(lobby_lit)
+	await get_tree().process_frame
+	var lrig := lobby_lit.get_node_or_null("MapLightingRig")
+	check("lobby heeft een licht-rig", lrig != null)
+	if lrig != null:
+		lrig.set_phase("night", 0.0)
+		var lobby_fire := 0
+		var shaft := false
+		for c in lrig._cands:
+			if typeof(c) != TYPE_DICTIONARY:
+				continue
+			var kind := str((c as Dictionary).get("kind", ""))
+			if kind == "fire":
+				lobby_fire += 1
+			elif kind == "tile":
+				shaft = true
+		check("lobby: twee fakkels blijven los", lobby_fire == 2)
+		check("lobby: lichtschacht", shaft)
+		check("lobby: hoogstens 8 puntlichten", lrig.enabled_point_lights() <= 8)
+	lobby_lit.queue_free()
+	await get_tree().process_frame
 	hall.queue_free()
 	await get_tree().process_frame
 	Settings.set_value("hd2d_light", hd2d_was)
@@ -534,6 +584,23 @@ func _sprites_named(root: Node, file_name: String) -> Array[Sprite2D]:
 		if s.texture != null and str(s.texture.resource_path).ends_with("/" + file_name):
 			out.append(s)
 	return out
+
+
+func _tex_size(path: String) -> Vector2i:
+	var tex := load(path) as Texture2D
+	if tex == null:
+		return Vector2i.ZERO
+	return Vector2i(tex.get_width(), tex.get_height())
+
+
+func _opening_solid(body: Node2D) -> bool:
+	for c in body.get_children():
+		if not (c is CollisionShape2D):
+			continue
+		var shape := (c as CollisionShape2D).shape as RectangleShape2D
+		if shape != null and shape.size == Vector2(48, 8):
+			return true
+	return false
 
 
 func _sprite_named(root: Node, file_name: String) -> Sprite2D:

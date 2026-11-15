@@ -1,6 +1,5 @@
 extends RefCounted
-## Slot voor de noordpoort lobby → hal. Nog nergens aangehaakt: ART levert
-## die poort en de layouts later. apply() zet een MapExit dan dicht tot noor_lid.
+## Slot voor de noordpoort lobby → hal. apply() zet de uitgang dicht tot noor_lid.
 
 const FLAG := "noor_lid"
 const CLOSED_LINE := "The gate is closed."

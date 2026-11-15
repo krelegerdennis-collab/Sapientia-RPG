@@ -446,55 +446,61 @@ static func index_has_files(map_id: String) -> bool:
 	return true
 
 
-## Zes hal-fakkels zijn lokale ankers; cluster_tile_lights laat die met rust.
-## Paarsgewijs (noord, west, oost) blijven het er drie, zodat 3 + 4 heldenlichten <= 8.
+## Hal: 6 fakkels + 4 vuurschalen worden 4 vuurlichten (noord-fakkels, noord-schalen,
+## west, oost). Met 4 heldenlichten blijft het totaal op 8. De lobby (2 fakkels) blijft los.
 static func cluster_arena_torches(cands: Array) -> void:
-	var idx: Array[int] = []
+	var torches: Array[int] = []
+	var braziers: Array[int] = []
 	for i in cands.size():
 		var c: Dictionary = cands[i]
+		if str(c.get("kind", "")) != "fire":
+			continue
 		var n: Object = c.get("node")
 		if not (n is Sprite2D):
 			continue
 		var spr := n as Sprite2D
 		if spr.texture == null:
 			continue
-		if str(spr.texture.resource_path).ends_with("/arena_torch.png"):
-			idx.append(i)
-	if idx.size() != 6:
+		var path := str(spr.texture.resource_path)
+		if path.ends_with("/arena_torch.png"):
+			torches.append(i)
+		elif path.ends_with("/arena_brazier.png"):
+			braziers.append(i)
+	if torches.size() != 6 or braziers.size() != 4:
 		return
-	var used := {}
+	var groups := {"nt": [], "nb": [], "w": [], "e": []}
 	var drop := {}
+	for i in torches:
+		var p := _arena_anchor(cands[i])
+		var key := "nt" if p.y < 100.0 else ("w" if p.x < 240.0 else "e")
+		var bucket: Array = groups[key]
+		bucket.append(i)
+		groups[key] = bucket
+		drop[i] = true
+	for i in braziers:
+		var p := _arena_anchor(cands[i])
+		var key := "nb" if p.y < 150.0 else ("w" if p.x < 240.0 else "e")
+		var bucket: Array = groups[key]
+		bucket.append(i)
+		groups[key] = bucket
+		drop[i] = true
 	var merged: Array = []
-	for a in idx.size():
-		var ia: int = idx[a]
-		if used.has(ia):
-			continue
-		var best := -1
-		var best_d := 1000000.0
-		var pa: Vector2 = (cands[ia]["node"] as Node2D).position
-		for b in range(a + 1, idx.size()):
-			var ib: int = idx[b]
-			if used.has(ib):
-				continue
-			var pb: Vector2 = (cands[ib]["node"] as Node2D).position
-			var d := pa.distance_to(pb)
-			if d < best_d:
-				best_d = d
-				best = ib
-		if best < 0:
-			continue
-		used[ia] = true
-		used[best] = true
-		drop[ia] = true
-		drop[best] = true
-		var ca: Dictionary = cands[ia]
-		var cb: Dictionary = cands[best]
-		var m := ca.duplicate()
-		m["pos"] = (ca["pos"] + cb["pos"]) * 0.5
-		m["px"] = int(ca["px"]) + int(cb["px"])
-		m["n"] = 2
-		merged.append(m)
-	if merged.size() != 3:
+	for key in ["nt", "nb", "w", "e"]:
+		var ids: Array = groups[key]
+		if ids.is_empty():
+			return
+		var acc: Dictionary = (cands[int(ids[0])] as Dictionary).duplicate()
+		var pos: Vector2 = acc["pos"]
+		var px := int(acc.get("px", 1))
+		for j in range(1, ids.size()):
+			var other: Dictionary = cands[int(ids[j])]
+			pos += other["pos"]
+			px += int(other.get("px", 1))
+		acc["pos"] = pos / float(ids.size())
+		acc["px"] = px
+		acc["n"] = ids.size()
+		merged.append(acc)
+	if merged.size() != 4:
 		return
 	var keep: Array = []
 	for i in cands.size():
@@ -503,6 +509,13 @@ static func cluster_arena_torches(cands: Array) -> void:
 	keep.append_array(merged)
 	cands.clear()
 	cands.append_array(keep)
+
+
+static func _arena_anchor(c: Dictionary) -> Vector2:
+	var spr := c.get("node") as Node2D
+	if spr != null and spr.get_parent() is Node2D:
+		return (spr.get_parent() as Node2D).global_position
+	return spr.global_position if spr != null else Vector2.ZERO
 
 
 static func verify_index_sample() -> bool:

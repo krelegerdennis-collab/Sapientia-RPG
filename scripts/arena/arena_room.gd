@@ -10,6 +10,7 @@ const Props := preload("res://scripts/arena/arena_props.gd")
 const RunScript := preload("res://scripts/arena/arena_run.gd")
 const Host := preload("res://scripts/arena/arena_host.gd")
 const HudScript := preload("res://scripts/arena/arena_hud.gd")
+const GateLock := preload("res://scripts/arena/arena_gate_lock.gd")
 const NpcScene := preload("res://scenes/npc.tscn")
 const Koopman := preload("res://scripts/arena/arena_koopman.gd")
 
@@ -26,6 +27,7 @@ func _ready() -> void:
 	sets_checkpoint = false
 	_paint()
 	_build_gate()
+	_sync_lobby_lock()
 	_ensure_spawn()
 	if room_kind == "lobby":
 		_build_shopkeeper()
@@ -92,8 +94,7 @@ func refresh_gate() -> void:
 		return
 	var frame := 0
 	if room_kind == "lobby":
-		# Slot (arena_gate_lock.gd) hangt hier nog niet. De nis blijft open.
-		frame = 1
+		frame = 1 if GateLock.is_open() else 2
 	else:
 		var gs := get_node_or_null("/root/GameState")
 		var arena := gs.get_node_or_null("ArenaRun") if gs != null else null
@@ -101,6 +102,7 @@ func refresh_gate() -> void:
 	for n in objects.get_children():
 		if str(n.name).begins_with("arena_gate") and n is StaticBody2D:
 			Props.set_gate_frame(n, frame)
+	_sync_lobby_lock()
 
 
 func _build_gate() -> void:
@@ -172,11 +174,22 @@ func _use_exit(exit: Node) -> void:
 	super._use_exit(exit)
 
 
+func _sync_lobby_lock() -> void:
+	if room_kind != "lobby":
+		return
+	var gate := get_node_or_null("Exits/ArenaPoort") as MapExit
+	GateLock.apply(gate, HALL, "ingang")
+
+
 func _gate_used() -> void:
 	if not ReleaseFlags.arena_enabled():
 		return
 	if room_kind != "lobby":
 		Dialog.show_lines(["The gate is shut."], "")
+		return
+	_sync_lobby_lock()
+	if not GateLock.is_open():
+		Dialog.show_lines([GateLock.CLOSED_LINE], "")
 		return
 	var arena := Host.ensure()
 	if str(arena.phase) != RunScript.PHASE_LOBBY:
