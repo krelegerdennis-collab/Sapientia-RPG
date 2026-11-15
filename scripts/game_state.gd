@@ -584,6 +584,8 @@ func _ready() -> void:
 	#   godot -- --uxpolishtest [--shots=/pad/map]  (scripts/tests/ux_polish_autotest.gd).
 	# F6-6 change_map vangnet (ontbrekend pad, geen zwarte hang): of
 	#   godot -- --f6uxtest  (scripts/tests/f6_ux_tests.gd).
+	# F6 UX-fixes WM1 set 2 (o.a. F6-8 TEXT_OFF-contrast): of
+	#   godot -- --f6uxtest2  (scripts/tests/f6_ux2_tests.gd).
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
@@ -734,6 +736,7 @@ func _ready() -> void:
 			["--huiscollisiontest", "res://scripts/tests/huis_collision_tests.gd", "HuisCollisionTest", "huiscollisiontest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
 			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
+			["--f6uxtest2", "res://scripts/tests/f6_ux2_tests.gd", "F6Ux2Test", "f6uxtest2"],
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
 			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
