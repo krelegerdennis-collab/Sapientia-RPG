@@ -1,0 +1,320 @@
+{
+ "assets/tiles/wereld_v18_arena.png": {
+  "size": [
+   64,
+   32
+  ],
+  "profile": "ground",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "vframes": 2,
+  "repo_albedo": "assets/tiles/wereld_v18_arena.png",
+  "new_art": true,
+  "albedo_sha256": "ac4f529b49bd0c7b131677a0d212cf5e16fe8f0ff400b6614c7c46f2824a226c",
+  "desc": "worldmap Colosseum 2x2: left 32x32 open, right 32x32 locked (transparent surround)",
+  "rooms": [
+   "wereldkaart"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/tiles/wereld_v18_arena_n.png",
+  "normal_sha256": "f959c01b260a567f6369de026fe34684b99aa10806abb8a235dfc30f649960db",
+  "emissive_px": 4,
+  "emissive_file": "assets/hd2d/tiles/wereld_v18_arena_e.png",
+  "emissive_sha256": "46f84c11178cff88708f1841e170b0fc8c6dbfb6dc9aa756db6523df1500f45c"
+ },
+ "assets/ui/arena/icon_arena.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": null,
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/ui/arena/icon_arena.png",
+  "new_art": true,
+  "albedo_sha256": "9df5c7a357649885dcfb1ed0c5ce89b68edd87b242fd8d63a533295c44534073",
+  "desc": "arena icon 16x16 (menu/lobby/minimap)",
+  "rooms": [],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": false
+ },
+ "assets/ui/arena/icon_arena_token.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": null,
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/ui/arena/icon_arena_token.png",
+  "new_art": true,
+  "albedo_sha256": "163e6c6620339ec11dc6f92b98d66284ce7646981da921c0164784b42ffff209",
+  "desc": "Arena Token currency icon 16x16",
+  "rooms": [],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": false
+ },
+ "assets/tiles/arena/arena_tiles.png": {
+  "size": [
+   256,
+   112
+  ],
+  "profile": "ground",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 16,
+  "vframes": 7,
+  "repo_albedo": "assets/tiles/arena/arena_tiles.png",
+  "new_art": true,
+  "albedo_sha256": "bbd045557002dee3b6e11a0ca11ab3abedeb14a3601aaad2d238055d8ce85f6f",
+  "desc": "arena interior tileset 16x7 tiles (v2: row 6 = centred gate recess + shadows)",
+  "rooms": [],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/tiles/arena/arena_tiles_n.png",
+  "normal_sha256": "359224567703a1dc44585a6b3e95d87f65a4a6fc206d0ce7839b5abb182889b9",
+  "emissive_px": 67,
+  "emissive_file": "assets/hd2d/tiles/arena/arena_tiles_e.png",
+  "emissive_sha256": "c54756387464b2a05b613fd9f721be50f919153a55a9a988f1d62102522e3342"
+ },
+ "assets/sprites/arena/arena_gate.png": {
+  "size": [
+   96,
+   48
+  ],
+  "profile": "prop",
+  "cell": [
+   48,
+   48
+  ],
+  "hframes": 2,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_gate.png",
+  "new_art": true,
+  "albedo_sha256": "355eec40258fed87bb75f9985a413d92acd401019a76488fdfd790de8b27a297",
+  "desc": "arena gate 48x48, f0 closed f1 open",
+  "rooms": [
+   "arena_hal",
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_gate_n.png",
+  "normal_sha256": "526de073513eeec700d500b6a3fe0e4bf6d6e244a832049344757027c3976b12",
+  "emissive_px": 8,
+  "emissive_file": "assets/hd2d/sprites/arena/arena_gate_e.png",
+  "emissive_sha256": "48fb9dd13336cc48854dc5ed91eba94192ff6a7c0ef5abc6a474522a792c267e"
+ },
+ "assets/sprites/arena/arena_banner.png": {
+  "size": [
+   16,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_banner.png",
+  "new_art": true,
+  "albedo_sha256": "80f07037e6588e5084dde934762360bb7d49bf3f52297f0ac0de10984a624e79",
+  "desc": "maroon arena banner 16x32",
+  "rooms": [
+   "arena_hal",
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_banner_n.png",
+  "normal_sha256": "d5be4720c866504e7598c2c3ccfe965fe4567e6ae861073095a4f6bc02007380",
+  "emissive_px": 3,
+  "emissive_file": "assets/hd2d/sprites/arena/arena_banner_e.png",
+  "emissive_sha256": "325960e0a1c49c842eb85f7170a3e00c74d7464994366f8c00ec0123b8c8906e"
+ },
+ "assets/sprites/arena/arena_torch.png": {
+  "size": [
+   64,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 4,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_torch.png",
+  "new_art": true,
+  "albedo_sha256": "c336a2264a026ff4bad250665e43ac4ab0a21c203b2724cb6a2316e70182daae",
+  "desc": "standing iron torch 16x32, 4 frames @125 ms (8 fps, like the lichtprops)",
+  "rooms": [
+   "arena_hal",
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_torch_n.png",
+  "normal_sha256": "1a1affa871a61c0f24f23721df519c7c65fa08b44985eef6e9d446bf2cee40bf",
+  "emissive_px": 182,
+  "emissive_file": "assets/hd2d/sprites/arena/arena_torch_e.png",
+  "emissive_sha256": "f16d84f74ff0f85c6f230e52917320f8386a27904b8d6b278f663add82d8ff50"
+ },
+ "assets/sprites/arena/arena_counter.png": {
+  "size": [
+   48,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   48,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_counter.png",
+  "new_art": true,
+  "albedo_sha256": "66b4a8ba4205e90278ded3d10f27e433db6f77c5024f9c11e499056a5b8cb005",
+  "desc": "arena shop counter 48x32",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_counter_n.png",
+  "normal_sha256": "8a41f1238633bc037d1336e3c57c50b4d6cc1063c3280e49cb88662b69640ed2"
+ },
+ "assets/sprites/arena/arena_weapon_rack.png": {
+  "size": [
+   32,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_weapon_rack.png",
+  "new_art": true,
+  "albedo_sha256": "a6c747f526072e4b7bbf5e146974bf7159099aef60272e86f6c610e3621e65ee",
+  "desc": "weapon rack 32x32 (spear, gladii, axe, shield)",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_weapon_rack_n.png",
+  "normal_sha256": "77df6b4174af14123847ff68016b0c37c3151e94dc2360776d6b3e07cce0cc08"
+ },
+ "assets/sprites/arena/arena_notice_board.png": {
+  "size": [
+   32,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_notice_board.png",
+  "new_art": true,
+  "albedo_sha256": "7eed0fff355a2bc7429d73bf4536def0516f1f2938be38a43ef394fcd17dce4d",
+  "desc": "notice board 32x32 (arena ladder + notices)",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_notice_board_n.png",
+  "normal_sha256": "f74cb1ad6ba688fda1421ec3376a17a8ba89494ba036a11fc8fae508a65116b1"
+ },
+ "assets/sprites/npc/arena_koopman_wm1_slim.png": {
+  "size": [
+   72,
+   128
+  ],
+  "profile": "npc",
+  "cell": [
+   24,
+   32
+  ],
+  "hframes": 3,
+  "vframes": 4,
+  "repo_albedo": "assets/sprites/npc/arena_koopman_wm1_slim.png",
+  "new_art": true,
+  "albedo_sha256": "02849dfdb35d7227abee0a3dc2b1f948dae404848102d4f0ab774974421fe319",
+  "desc": "Arena Quartermaster 24x32, wm1_slim 3x4",
+  "rooms": [],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/npc/arena_koopman_wm1_slim_n.png",
+  "normal_sha256": "a3c46029441e613dc17a5948299aa632431b85933b68056f4c9a256fdf1ff05d"
+ },
+ "assets/sprites/npc/arena_koopman_wm1_slim_idle.png": {
+  "size": [
+   48,
+   128
+  ],
+  "profile": "npc",
+  "cell": [
+   24,
+   32
+  ],
+  "hframes": 2,
+  "vframes": 4,
+  "repo_albedo": "assets/sprites/npc/arena_koopman_wm1_slim_idle.png",
+  "new_art": true,
+  "albedo_sha256": "8ae694b9c0f725685c5c698f572bd1f57707991734e199a450e5655411abace8",
+  "desc": "Arena Quartermaster idle 2x4 @600 ms",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/npc/arena_koopman_wm1_slim_idle_n.png",
+  "normal_sha256": "2aef0bc68e69e117483efa75b862bf0339b2f9716d839bf65d3cff2ca91e0d96"
+ }
+}

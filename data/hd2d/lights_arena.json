@@ -1,0 +1,304 @@
+{
+ "_note": "Arena additions to res://data/hd2d/lights.json (same schema, merge by key). anchors offset = px from the top-left of frame 0; tile_cells = atlas coords whose tile glows. kind \"glow\" = emissive overlay + halo only, never a PointLight2D.",
+ "assets": {
+  "assets/tiles/wereld_v18_arena.png": {
+   "kind": "tile",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6389999985694885,
+    0.3440000116825104
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      0,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      15.5,
+      4.0
+     ],
+     "color": [
+      1.0,
+      0.6389999985694885,
+      0.3440000116825104
+     ],
+     "family": "warm"
+    },
+    {
+     "cell": [
+      1,
+      1
+     ],
+     "px": 2,
+     "offset": [
+      2.5,
+      4.0
+     ],
+     "color": [
+      1.0,
+      0.6389999985694885,
+      0.3440000116825104
+     ],
+     "family": "warm"
+    }
+   ],
+   "energy": 0.5,
+   "scale": 0.5,
+   "height": 18,
+   "flicker": 0.6,
+   "halo": "warm",
+   "halo_size": 24
+  },
+  "assets/tiles/arena/arena_tiles.png": {
+   "kind": "tile",
+   "family": "violet",
+   "color": [
+    0.7440000176429749,
+    0.5059999823570251,
+    1.0
+   ],
+   "cell": [
+    16,
+    16
+   ],
+   "anchors": [],
+   "tile_cells": [
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "px": 18,
+     "offset": [
+      7.6,
+      8.0
+     ],
+     "color": [
+      0.5600000023841858,
+      0.8149999976158142,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      9,
+      0
+     ],
+     "px": 17,
+     "offset": [
+      8.2,
+      9.7
+     ],
+     "color": [
+      1.0,
+      0.33500000834465027,
+      0.8220000267028809
+     ],
+     "family": "magenta"
+    },
+    {
+     "cell": [
+      12,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      14.6,
+      14.6
+     ],
+     "color": [
+      0.675000011920929,
+      0.36399999260902405,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      13,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      1.4,
+      14.6
+     ],
+     "color": [
+      0.675000011920929,
+      0.36399999260902405,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      14,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      14.6,
+      1.4
+     ],
+     "color": [
+      0.6389999985694885,
+      0.3160000145435333,
+      1.0
+     ],
+     "family": "violet"
+    },
+    {
+     "cell": [
+      15,
+      1
+     ],
+     "px": 8,
+     "offset": [
+      1.4,
+      1.4
+     ],
+     "color": [
+      0.6389999985694885,
+      0.3160000145435333,
+      1.0
+     ],
+     "family": "violet"
+    }
+   ],
+   "energy": 0.6,
+   "scale": 0.55,
+   "height": 18,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24
+  },
+  "assets/sprites/arena/arena_gate.png": {
+   "kind": "glow",
+   "family": "violet",
+   "color": [
+    0.7429999709129333,
+    0.503000020980835,
+    1.0
+   ],
+   "cell": [
+    48,
+    48
+   ],
+   "anchors": [
+    {
+     "offset": [
+      24.0,
+      5.0
+     ],
+     "px": 4,
+     "bbox": [
+      23,
+      4,
+      25,
+      6
+     ],
+     "halo_at": [
+      24.0,
+      5.0
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": "auto",
+   "halo_size": 24,
+   "glow_only": true
+  },
+  "assets/sprites/arena/arena_banner.png": {
+   "kind": "glow",
+   "family": "violet",
+   "color": [
+    0.6620000004768372,
+    0.3720000088214874,
+    1.0
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.2,
+      19.8
+     ],
+     "px": 3,
+     "bbox": [
+      7,
+      19,
+      9,
+      21
+     ],
+     "halo_at": [
+      8.2,
+      19.8
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 0.0,
+   "scale": 0.0,
+   "height": 0,
+   "flicker": 0.0,
+   "halo": null,
+   "halo_size": 0,
+   "glow_only": true
+  },
+  "assets/sprites/arena/arena_torch.png": {
+   "kind": "fire",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.6309999823570251,
+    0.36399999260902405
+   ],
+   "cell": [
+    16,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      8.4,
+      22.2
+     ],
+     "px": 45,
+     "bbox": [
+      5,
+      1,
+      12,
+      10
+     ],
+     "halo_at": [
+      8.4,
+      6.2
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.1,
+   "scale": 1.5,
+   "height": 24,
+   "flicker": 1.2,
+   "halo": "warm",
+   "halo_size": 48
+  }
+ }
+}

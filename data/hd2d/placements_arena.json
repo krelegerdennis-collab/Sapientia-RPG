@@ -1,0 +1,274 @@
+{
+ "_note": "x,y = bottom-centre (y-sort origin) in map pixels of the reference layouts (README). Sprite2D centered=false, offset=(-w/2,-h), hframes as given. Torch: 4 frames at 125 ms (8 fps). Gate: frame 0 closed / 1 open. Collision feet: see README.",
+ "maps": {
+  "arena_hal": [
+   {
+    "prop": "arena_gate",
+    "albedo": "assets/sprites/arena/arena_gate.png",
+    "x": 232,
+    "y": 48,
+    "flip": false,
+    "hframes": 2,
+    "frame": 0,
+    "note": "monster gate, centre of the north stands (tiles x13-15, y0-2); frame 0 closed, 1 open during a wave"
+   },
+   {
+    "prop": "arena_torch",
+    "albedo": "assets/sprites/arena/arena_torch.png",
+    "x": 196,
+    "y": 62,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_torch",
+    "albedo": "assets/sprites/arena/arena_torch.png",
+    "x": 268,
+    "y": 62,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_torch",
+    "albedo": "assets/sprites/arena/arena_torch.png",
+    "x": 60,
+    "y": 150,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_torch",
+    "albedo": "assets/sprites/arena/arena_torch.png",
+    "x": 60,
+    "y": 262,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_torch",
+    "albedo": "assets/sprites/arena/arena_torch.png",
+    "x": 420,
+    "y": 150,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_torch",
+    "albedo": "assets/sprites/arena/arena_torch.png",
+    "x": 420,
+    "y": 262,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_banner",
+    "albedo": "assets/sprites/arena/arena_banner.png",
+    "x": 88,
+    "y": 62,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   },
+   {
+    "prop": "arena_banner",
+    "albedo": "assets/sprites/arena/arena_banner.png",
+    "x": 152,
+    "y": 62,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   },
+   {
+    "prop": "arena_banner",
+    "albedo": "assets/sprites/arena/arena_banner.png",
+    "x": 312,
+    "y": 62,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   },
+   {
+    "prop": "arena_banner",
+    "albedo": "assets/sprites/arena/arena_banner.png",
+    "x": 376,
+    "y": 62,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   }
+  ],
+  "arena_lobby": [
+   {
+    "prop": "arena_gate",
+    "albedo": "assets/sprites/arena/arena_gate.png",
+    "x": 192,
+    "y": 48,
+    "flip": false,
+    "hframes": 2,
+    "frame": 1,
+    "note": "gate to the hall, centred on x=192 (between columns 11|12) over the centred recess tiles 96-107 on columns 10-13; frame 1 open (the lobby is only reachable after the Vesper unlock)"
+   },
+   {
+    "prop": "arena_banner",
+    "albedo": "assets/sprites/arena/arena_banner.png",
+    "x": 144,
+    "y": 46,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   },
+   {
+    "prop": "arena_banner",
+    "albedo": "assets/sprites/arena/arena_banner.png",
+    "x": 240,
+    "y": 46,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   },
+   {
+    "prop": "arena_torch",
+    "albedo": "assets/sprites/arena/arena_torch.png",
+    "x": 88,
+    "y": 60,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_torch",
+    "albedo": "assets/sprites/arena/arena_torch.png",
+    "x": 296,
+    "y": 60,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_notice_board",
+    "albedo": "assets/sprites/arena/arena_notice_board.png",
+    "x": 344,
+    "y": 62,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0,
+    "note": "against the north wall, columns 20-21"
+   },
+   {
+    "prop": "arena_weapon_rack",
+    "albedo": "assets/sprites/arena/arena_weapon_rack.png",
+    "x": 296,
+    "y": 124,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0,
+    "note": "free-standing, mirrors the counter (88,120) about x=192"
+   },
+   {
+    "prop": "arena_koopman_wm1_slim_idle",
+    "albedo": "assets/sprites/npc/arena_koopman_wm1_slim_idle.png",
+    "x": 88,
+    "y": 98,
+    "flip": false,
+    "hframes": 2,
+    "frame": 0,
+    "hframes_note": "idle sheet 2x4, row 0 (down)"
+   },
+   {
+    "prop": "arena_counter",
+    "albedo": "assets/sprites/arena/arena_counter.png",
+    "x": 88,
+    "y": 120,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0,
+    "note": "shop counter; the NPC stands behind it (y-sort: NPC y < counter y)"
+   }
+  ]
+ },
+ "wereldkaart": {
+  "site_tiles_tl": [
+   30,
+   26
+  ],
+  "site_tiles": [
+   [
+    30,
+    26
+   ],
+   [
+    31,
+    26
+   ],
+   [
+    30,
+    27
+   ],
+   [
+    31,
+    27
+   ]
+  ],
+  "site_px_tl": [
+   480,
+   416
+  ],
+  "site_px_centre": [
+   496,
+   432
+  ],
+  "besluit": "Dennis 2026-11-15 16:06: \"plek van colosseum onder willowdale, gaat pas open na vesper\" (BEVESTIGD, geen aanname meer)",
+  "ref": "Wilgendal/Willowdale-dorp = wereldkaart.tscn Exits/NaarWilgendal tiles (30,23)-(31,24), spawn van_wilgendal (488,408) = tile (30,25) blijft vrij; site = de eerste vrije 2x2 grasplek direct daaronder",
+  "atlas": "assets/tiles/wereld_v18_arena.png",
+  "locked": {
+   "atlas_coords": [
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "when": "tot de Vesper-unlock"
+  },
+  "open": {
+   "atlas_coords": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "when": "na de Vesper-unlock"
+  },
+  "unlock_flag_suggestie": "noor_lid (zelfde vlag als berggrot_data.gd TUNNEL_VLAG); CODE bevestigt",
+  "layer": "overlay TileMapLayer boven Ground (of Sprite2D); transparante omgeving, Ground-gras blijft eronder"
+ }
+}
