@@ -46,14 +46,14 @@ Ondersteuning, geen signaalkleur: White/Paper 5 `#FFFAF0` als witte flits/kern i
 
 | Moment | Rol | Voorbeeld (bestaande art) |
 |---|---|---|
-| Vijand gaat uithalen, read-flits, telegraaf "`!`" | gevaar / magenta | *moet*; `fx_death_glitch` volgt dit al, `fx_enemy_read` nog niet |
+| Vijand gaat uithalen, read-flits, telegraaf "`!`" | gevaar / magenta | *moet*; `fx_death_glitch` volgt dit al; `fx_enemy_read` **geleverd** (PR `art/kleurregel`) |
 | Glitch-dood, ECHO-storing, enemy-glitch | gevaar / magenta + ECHO-cyaan als split | `fx_death_glitch.png`, `fx_death_glitch_48.png` |
 | Loot-pop, goud-drop, beloning op de grond | beloning / goud | `fx_loot_pop.png` |
 | Ketting-finisher, heavy treffer-burst, finisher-schadegetal | beloning / goud | `fx_chain_finisher_orion.png`, goudflits op `fx_chain_shockwave.png` |
-| Perfecte dodge, counter-vonk | beloning / goud | *moet*; `fx_counter_spark` heeft al goud, `fx_perfect_ring` nog niet |
+| Perfecte dodge, counter-vonk | beloning / goud | **geleverd** (PR `art/kleurregel`): `fx_perfect_ring`, `fx_counter_spark` |
 | Crit- / finisher-schadegetal | beloning / Gold 4, niet `#FFD24A` | code-kleur, geen sheet in deze audit |
 | Gewone hit 1 / hit 2, fysieke spark | neutraal (Paper + Steen) | `fx_chain_hit1.png`, `fx_impact_fysiek.png` |
-| Element-hit (geen finisher) | elementramp, geen goud-lichaam, geen magenta | vuur / ijs / bliksem / natuur: zie fase 1. Licht: *nog niet* |
+| Element-hit (geen finisher) | elementramp, geen goud-lichaam, geen magenta | vuur / ijs / bliksem / natuur: zie fase 1. Licht: `fx_impact_licht` **geleverd** (PR `art/kleurregel`) |
 
 **Elementen, gewone hits** (FACT uit fase 1, blijft staan):
 
@@ -69,20 +69,20 @@ De kleding, het haar en het wapen van een held zijn identiteit, geen signaal. Da
 
 FX dat *feedback* is (burst, ring, vonk, read, dood, loot, schadegetal) volgt de kleurregel, ook als de held paars of goud is. Een Dax- of Vesper-finisher mag een dunne karakter-accentrand houden, maar het lichaam van de boog moet goud lezen, zoals bij Orion. Anders is "ik heb een finisher geland" niet te onderscheiden van "hier komt glitch-gevaar".
 
-## Audit (bestaande FX, niet gewijzigd)
+## Audit (historisch, vóór hertinting)
 
-Gecontroleerd: alle `repo_drop`-sheets in `art_fx/chain_epic/`, `art_fx/perfect_dodge/`, `art_gamefeel/fase1/`, `art_gamefeel/fase2/` en smear v2 in `art_gamefeel/fase3_smear/`. Scratch, previews en originelen buiten die drops zijn geen levering.
+Gecontroleerd (15 nov 2026): alle `repo_drop`-sheets in `art_fx/chain_epic/`, `art_fx/perfect_dodge/`, `art_gamefeel/fase1/`, `art_gamefeel/fase2/` en smear v2 in `art_gamefeel/fase3_smear/`. Scratch, previews en originelen buiten die drops zijn geen levering.
 
-**38 sheets gecontroleerd. 6 overtredingen. Niets aangepast.**
+**38 sheets gecontroleerd. 6 overtredingen.** Vier daarvan zijn sindsdien in de repo hergetint (PR `art/kleurregel`); twee chain-finishers volgen na **#475**.
 
-| Bestand | Wat er mis is | Wat er moet veranderen (later, niet nu) |
+| Bestand | Wat er mis was (audit) | Status |
 |---|---|---|
-| `art_gamefeel/fase2/.../fx_enemy_read.png` | Read-flits is Red/Danger 1/4/5/6, dezelfde familie als het bestaande `fx_telegraph` "`!`". De regel wil magenta. | Herkleur naar Magenta 4/5/2 + Purple 1-outline, Paper 5-kern. Vorm mag blijven. Als de "`!`" meegaat, is dat een aparte, bestaande repo-sheet (buiten deze audit). |
-| `art_fx/perfect_dodge/.../fx_perfect_ring.png` | De ring is volledig Blue 4/5/6 (ECHO-cyaan). Perfecte dodge is beloning, en cyaan alleen is glitch-taal. | Herkleur naar Gold 2/3/4/5 + Paper 5, zelfde ringvorm als nu, zelfde taal als `fx_loot_pop`. |
-| `art_fx/perfect_dodge/.../fx_counter_spark.png` | Heeft al Gold 4/5 (goed), maar ook Blue 4/5/6 in frame 1 en in de armen. | Vervang cyaan door Gold 3 / Paper 4–5. Gouden punten en witte kern mogen blijven. |
-| `art_gamefeel/fase1/.../fx_impact_licht.png` | Gewone licht-hit is 80% Gold 3/4/5. Leest als loot of finisher, niet als element. | Herkleur het lichaam naar Paper 3/4/5, hooguit Gold 5 als klein glimlicht (zoals vuur). |
-| `art_fx/chain_epic/.../fx_chain_finisher_dennis.png` | 91,5% Glitch Purple, goudflits maar 5,9%. Player-finisher leest als ECHO-gevaar. | Houd een dunne paarse kling-accent als Dax-identiteit; maak de boog Gold 3/4/5 + Paper 5, zoals Orion. |
-| `art_fx/chain_epic/.../fx_chain_finisher_noor.png` | 93,6% Glitch Purple, goudflits 5,0%. Zelfde probleem als Dax, voor Vesper. | Zelfde fix: paarse accentrand, gouden lichaam. |
+| `fx_enemy_read.png` | Read-flits Red/Danger i.p.v. magenta (telegraaf-“`!`”-familie). | **Geleverd** — Magenta 4/5/2 + Purple 1-outline, Paper 5-kern. |
+| `fx_perfect_ring.png` | Ring volledig ECHO-cyaan; perfect dodge = beloning. | **Geleverd** — Gold 2/3/4/5 + Paper 5. |
+| `fx_counter_spark.png` | Goud deels goed, maar cyaan in frame 1/armen. | **Geleverd** — cyaan → Gold 3 / Paper 4–5. |
+| `fx_impact_licht.png` | Licht-hit 80% goud; leest als loot/finisher. | **Geleverd** — lichaam Paper 3/4/5, hooguit Gold 5-glim. |
+| `fx_chain_finisher_dennis.png` | Paars lichaam; finisher leest als ECHO-gevaar. | **Open** — na merge **#475**. |
+| `fx_chain_finisher_noor.png` | Zelfde als Dax, Vesper. | **Open** — na merge **#475**. |
 
 **Geen overtreding (kort):**
 
@@ -104,7 +104,7 @@ Vier van de zes audit-overtredingen zijn geleverd in PR `art/kleurregel` (zie in
 
 - `SPEC_kleurregel.md` — deze spec.
 - `kleurregel_preview_4x.png` — swatches per rol + WEL/NIET-crops uit de bestaande FX (piekframes). 16×16-crops zijn 2× nearest in de cel (label `2X`); 24- en 32-crops blijven 1×. Daarna de hele sheet nearest 4×.
-- `kleurregel_fixes_4x.png` — vóór/na-mock van de 6 voorgestelde herkleuringen. Alleen paletwissel, dezelfde vorm. Originelen ongewijzigd.
+- `kleurregel_fixes_4x.png` — vóór/na-mock van de 6 voorgestelde herkleuringen (historisch; vier fixes zijn in de repo). Alleen paletwissel, dezelfde vorm.
 - `src/preview.py`, `src/fixes.py` — herbouw, wijzigen geen FX.
 
-Geen repo- of enginebestanden aangeraakt. `wacht/wm2/` is niet gelezen.
+Repo: vier FX-PNG's + deze spec via PR `art/kleurregel`. Previews/fix-mocks blijven buiten de repo. `wacht/wm2/` is niet gelezen.
