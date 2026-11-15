@@ -1,0 +1,145 @@
+extends Node
+## Colosseum-run: lobby -> wave 1..5 -> keuze -> results -> lobby.
+## Praat met SomArenaWaves alleen via start_wave en de drie signalen.
+## Hele party neer: results, verdiende rewards blijven, terug naar de lobby.
+## Geen game over.
+
+const WavesScript := preload("res://scripts/arena/arena_waves_stub.gd")
+const Rewards := preload("res://scripts/data/arena_rewards.gd")
+
+const PHASE_LOBBY := "lobby"
+const PHASE_WAVE := "wave"
+const PHASE_CHOICE := "choice"
+const PHASE_RESULTS := "results"
+const PHASES: Array[String] = [PHASE_LOBBY, PHASE_WAVE, PHASE_CHOICE, PHASE_RESULTS]
+
+signal phase_changed(phase: String)
+
+var phase: String = PHASE_LOBBY
+var wave := 0
+var waves_cleared := 0
+var earned_xp := 0
+var earned_tokens := 0
+var wiped := false
+var last_started := 0
+var level_notes: Array[String] = []
+var waves: Node
+
+var _paid: Dictionary = {}
+
+
+func _ready() -> void:
+	var w := WavesScript.new()
+	w.name = "Waves"
+	add_child(w)
+	waves = w
+	w.wave_started.connect(_on_wave_started)
+	w.wave_cleared.connect(_on_wave_cleared)
+	w.party_wiped.connect(_on_party_wiped)
+
+
+func begin() -> void:
+	if phase != PHASE_LOBBY:
+		return
+	earned_xp = 0
+	earned_tokens = 0
+	waves_cleared = 0
+	wiped = false
+	level_notes = []
+	_paid = {}
+	wave = 0
+	_start_wave()
+
+
+func choose_continue() -> void:
+	if phase != PHASE_CHOICE:
+		return
+	_start_wave()
+
+
+func choose_leave() -> void:
+	if phase != PHASE_CHOICE:
+		return
+	_to_results(false)
+
+
+func acknowledge() -> void:
+	if phase != PHASE_RESULTS:
+		return
+	wave = 0
+	_set_phase(PHASE_LOBBY)
+
+
+func summary() -> Dictionary:
+	return {
+		"waves": waves_cleared,
+		"xp": earned_xp,
+		"tokens": earned_tokens,
+		"wiped": wiped,
+		"wallet": GameState.arena_tokens,
+		"notes": level_notes.duplicate(),
+	}
+
+
+func _start_wave() -> void:
+	wave += 1
+	_set_phase(PHASE_WAVE)
+	if waves != null and waves.has_method("start_wave"):
+		waves.start_wave(wave)
+
+
+func _on_wave_started(n: int) -> void:
+	if phase != PHASE_WAVE or n != wave:
+		return
+	last_started = n
+
+
+func _on_wave_cleared(n: int) -> void:
+	if phase != PHASE_WAVE or n != wave:
+		return
+	_grant(n)
+	Rewards.restore_between_waves()
+	if n >= Rewards.WAVE_COUNT:
+		_to_results(false)
+		return
+	_set_phase(PHASE_CHOICE)
+
+
+func _on_party_wiped() -> void:
+	# Alleen tijdens een wave. Een los 'één speler neer' komt hier niet binnen.
+	if phase != PHASE_WAVE:
+		return
+	_to_results(true)
+
+
+func _grant(n: int) -> void:
+	if _paid.has(n):
+		return
+	_paid[n] = true
+	var row := Rewards.for_wave(n)
+	var xp := int(row.get("xp", 0))
+	var tokens := int(row.get("tokens", 0))
+	for raw in GameState.party:
+		if typeof(raw) != TYPE_DICTIONARY or xp <= 0:
+			continue
+		var hero: Dictionary = raw
+		var msgs: Array[String] = GameState.give_exp(hero, xp)
+		for m in msgs:
+			level_notes.append(m)
+	var before := GameState.arena_tokens
+	GameState.add_arena_tokens(tokens)
+	earned_tokens += GameState.arena_tokens - before
+	earned_xp += xp
+	waves_cleared = maxi(waves_cleared, n)
+
+
+func _to_results(down: bool) -> void:
+	wiped = down
+	_set_phase(PHASE_RESULTS)
+
+
+func _set_phase(next: String) -> void:
+	if phase == next:
+		return
+	phase = next
+	phase_changed.emit(phase)

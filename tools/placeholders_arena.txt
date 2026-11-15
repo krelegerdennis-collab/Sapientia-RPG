@@ -1,0 +1,8 @@
+# Colosseum (feature/arena). Nog geen bestanden: RPG ART levert ze.
+# De flow laadt ze alleen als ARENA_ENABLED aan staat én het bestand bestaat.
+# Tot die tijd: bestaande binnentegels (assets/tiles/binnen.tres), npc.png, en een magenta code-marker.
+assets/tiles/wereld_v18_arena.png                 32x32   wereldkaart-tegel Colosseum
+assets/ui/icons/icon_arena.png                    16x16   icoon Colosseum
+assets/ui/icons/icon_arena_token.png              16x16   icoon Arena Token
+assets/tiles/arena_tiles.png                      tileset 16x16   interieur lobby + hal
+assets/sprites/npc/arena_koopman_wm1_slim.png     NPC-sheet   Quartermaster, zelfde indeling als npc_wm1_slim
