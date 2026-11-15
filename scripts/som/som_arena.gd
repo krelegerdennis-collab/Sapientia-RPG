@@ -61,6 +61,8 @@ const SomStaggerData := preload("res://scripts/data/som_stagger_data.gd")
 const SomStagger := preload("res://scripts/som/som_stagger.gd")
 const SomPerfectDodgeData := preload("res://scripts/data/som_perfect_dodge_data.gd")
 const SomShakeScript := preload("res://scripts/som/som_shake.gd")
+const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
+const SomGameFeelData := preload("res://scripts/data/som_gamefeel_data.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const MapSprite := preload("res://scripts/map_sprite.gd")
@@ -139,6 +141,10 @@ var step_texs := {}
 var map_cast_texs := {}
 ## Voor de autotest: laatste schade, laatste melding, tellers.
 var last_enemy_damage := 0
+## Client-only FX-keuze voor de volgende damage_enemy (geen sim-state).
+var _pending_impact_element := ""
+var _pending_chain_step := -2
+var _pending_impact_suppress := false
 var last_player_damage := 0
 var last_hit_id := ""
 var last_attacker := ""
@@ -748,6 +754,7 @@ func sim_step() -> void:
 	_tick_stamina_and_dodge()
 	_tick_stagger()
 	_tick_perfect_dodge_pre()
+	_tick_hitreact(dt)
 	for m in enemies.keys():
 		if is_instance_valid(m):
 			_enemy_ai(m, dt)
@@ -761,6 +768,12 @@ func sim_step() -> void:
 
 ## Wereld op de vaste stap: tegelbeweging van de vijanden (MapMonster.sim_move) en de arena-animaties
 ## (SomFx.Anim.step: treffer- en vrijgaveframe). Ook voor de co-op-host (coop_host_step).
+func _tick_hitreact(dt: float) -> void:
+	for m in enemies.keys():
+		if is_instance_valid(m) and SomHitReact.active(m):
+			SomHitReact.tick(m, dt)
+
+
 func _sim_world(dt: float) -> void:
 	for m in enemies.keys():
 		if is_instance_valid(m) and m.has_method("sim_move"):
@@ -1097,8 +1110,13 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				stg_kind = step
 			elif heavy > 0:
 				stg_kind = SomStaggerData.KIND_HEAVY_L1 if heavy == 1 else SomStaggerData.KIND_HEAVY_L2
+			_pending_chain_step = step
+			_pending_impact_element = ""
+			_pending_impact_suppress = false
 			damage_enemy(m, physical_damage(atk, float(e["def"]), swing_mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
 					num_color, num_scale, stg_kind)
+			if (step >= 0 and SomChainData.is_finisher(step)) or heavy >= 2:
+				SomFx.dust_finisher(room.get_node("Objects"), feet_of_enemy(m))
 			if use_counter:
 				SomFx.counter_spark(room.get_node("Objects"), center_of(m))
 			if use_counter and Settings.action_battles() and not e.has("golem"):
@@ -1203,13 +1221,26 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 				if SomFeelData.ENABLED:
 					num_color = SomFeelData.COL_FINISHER
 		e["hp"] = int(e["hp"]) - dmg
-	e["flash"] = SomData.HIT_FLASH
+	e["flash"] = SomData.HIT_FLASH_CONTACT
 	last_enemy_damage = dmg
 	if not SomFeelData.ENABLED:
 		num_color = Color(1, 1, 1)
 		num_scale = 1.0
 	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), num_color, 0.6, num_scale)
-	SomFx.spark(room.get_node("Objects"), center_of(m))
+	var chain_step := _pending_chain_step
+	var impact_el := _pending_impact_element
+	var suppress_fx := _pending_impact_suppress
+	_pending_impact_element = ""
+	_pending_chain_step = -2
+	_pending_impact_suppress = false
+	if not suppress_fx:
+		var at := center_of(m)
+		if impact_el != "":
+			SomFx.impact_spark(room.get_node("Objects"), at, impact_el)
+		elif chain_step == SomChainData.STEP_HIT1 or chain_step == SomChainData.STEP_HIT2:
+			SomFx.spark(room.get_node("Objects"), at)
+		else:
+			SomFx.impact_spark(room.get_node("Objects"), at, "fysiek")
 	enemy_hit.emit(m, dmg)
 	if Settings.action_battles() and not golem and stg_kind != SomStaggerData.KIND_NONE:
 		if SomStagger.apply_hit(e, m, e["data"], stg_kind):
@@ -1220,6 +1251,9 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	if int(e["hp"]) <= 0:
 		_defeat_enemy(m)
 		return
+	var finisher_hit := chain_step == SomChainData.STEP_FINISHER
+	var wt := SomGameFeelData.weight_class_for_monster(m, e)
+	SomHitReact.trigger(self, m, e, dir, wt, finisher_hit, stagger and not golem)
 	last_hitstop_ticks = hitstop
 	if hitstop > 0:
 		e["hitstop"] = maxi(int(e.get("hitstop", 0)), hitstop)
@@ -1228,7 +1262,6 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	if e.has("tg"):
 		(e["tg"] as TelegraphAttack).interrupt()
 	e["tele"] = 0.0          # volle treffer = telegraaf afgebroken
-	_monster_pose(m, e, "hurt", 0, _hurt_seconds())
 	last_knockback_tiles = knock_tiles
 	_knockback(m, dir, knock_tiles)
 
@@ -1366,6 +1399,8 @@ func e_orig_offset(m: Node) -> Vector2:
 
 
 func _hurt_frame(m: Node, e: Dictionary, delta: float) -> void:
+	if SomHitReact.force_hurt_flash_frame(m, e):
+		return
 	# 2 frames: wit (70 ms), dan rode terugslag (220 ms)
 	e["pose_el"] = float(e.get("pose_el", 0.0)) + delta
 	var hms: Array = SomData.MONSTER_SHEETS["hurt"]["ms"]
@@ -1911,8 +1946,10 @@ func _tint(m: Node, e: Dictionary) -> void:
 		return
 	if bool(e.get("pd_freeze", false)) and int(e.get("hitstop", 0)) > 0:
 		m.sprite.modulate = SomPerfectDodgeData.COL_FREEZE_TINT
+	elif SomHitReact.contact_flash_active(m):
+		m.sprite.modulate = Color.WHITE
 	elif float(e["flash"]) > 0.0:
-		m.sprite.modulate = Color(3, 3, 3)       # hit flash (wit)
+		m.sprite.modulate = Color(3, 3, 3)       # hit flash (wit, alleen zonder hurt-sheet)
 	elif float(e["tele"]) > 0.0:
 		var on := fmod(float(e["tele"]), 0.16) < 0.08
 		m.sprite.modulate = Color(1.8, 0.5, 0.5) if on else Color.WHITE     # telegraaf: rood knipperen
@@ -2136,6 +2173,7 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 	if id == active_id and room != null and room.has_method("start_invuln"):
 		room.start_invuln(float(SomData.DODGE_IFRAME_TICKS) * TICK_DT)
 	_dodge(id)
+	_spawn_dodge_dust(id)
 	return true
 
 
@@ -2146,6 +2184,19 @@ func _room_is_wall(t: Vector2i) -> bool:
 
 
 ## Dodge-stap: zelfde logische tegel-clamp als player._process_analog (SomSlide + move_and_collide).
+func _spawn_dodge_dust(id: String) -> void:
+	if room == null:
+		return
+	var n := node_of(id)
+	if n == null:
+		return
+	var d: Vector2 = _dodge_dir.get(id, Vector2.RIGHT)
+	var flip_h := d.x < -0.01
+	SomFx.dust_dodge(room.get_node("Objects"), n.position, flip_h)
+	if absf(d.x) < 0.35:
+		SomFx.dust_land(room.get_node("Objects"), n.position)
+
+
 func _apply_dodge_motion(n: Node2D, motion: Vector2) -> void:
 	if motion == Vector2.ZERO:
 		return
@@ -2185,6 +2236,8 @@ func _tick_stamina_and_dodge() -> void:
 		left -= 1
 		if left <= 0:
 			_dodge_roll_ticks.erase(id)
+			if n != null and room != null:
+				SomFx.dust_land(room.get_node("Objects"), n.position)
 		else:
 			_dodge_roll_ticks[id] = left
 
@@ -2358,6 +2411,9 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 				last_attacker = caster_id
 				spell_effect(spell_id, feet_of_enemy(m))
 				SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
+				_pending_impact_element = SomGameFeelData.impact_element_for_spell(spell_id)
+				_pending_chain_step = -2
+				_pending_impact_suppress = false
 				damage_enemy(m, maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))), Vector2i.ZERO, true, 1, 0,
 						Color(1, 1, 1), 1.0, SomStaggerData.KIND_SPELL))
 		return "%s casts %s!" % [caster.get("name", ""), sp.get("name", spell_id)]

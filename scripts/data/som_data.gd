@@ -347,6 +347,13 @@ const ATTACK_COOLDOWN := 1.2     # v3: --actionsim iteratie 7 (was 1.6)
 ## Afstand (px, middelpunten) waarop een vijand kan aanvallen/raken.
 const ENEMY_REACH := 22.0
 const HIT_FLASH := 0.12
+## Fase-1 contact-flits (50 ms); HIT_FLASH blijft voor backwards-compat in tests/docs.
+const HIT_FLASH_CONTACT := 0.05
+const FX_IMPACT_DIR := "res://assets/sprites/som/fx/fx_impact_%s.png"
+const FX_IMPACT := {"cell": [24, 24], "frames": 3, "ms": 50, "anchor": [12, 12]}
+const FX_DUST_DODGE := {"sheet": "res://assets/sprites/som/fx/fx_dust_dodge.png", "cell": [16, 16], "frames": 4, "ms": 60, "anchor": [8, 16]}
+const FX_DUST_LAND := {"sheet": "res://assets/sprites/som/fx/fx_dust_land.png", "cell": [24, 12], "frames": 4, "ms": 60, "anchor": [12, 12]}
+const FX_DUST_FINISHER := {"sheet": "res://assets/sprites/som/fx/fx_dust_finisher.png", "cell": [32, 16], "frames": 5, "ms": 70, "anchor": [16, 16]}
 
 ## --- Skill-ring: technieken per held-id (vragen een volle wapenmeter). radius > 0 = rondom.
 const SKILLS := {
