@@ -753,6 +753,7 @@ func _ready() -> void:
 			["--paperdolltest", "res://scripts/tests/paper_doll_tests.gd", "PaperDollTest", "paperdolltest"],
 			["--paperdollactionstest", "res://scripts/tests/paper_doll_actions_tests.gd", "PaperDollActionsTest", "paperdollactionstest"],
 			["--lobbyportraitslottest", "res://scripts/tests/lobby_portrait_slot_tests.gd", "LobbyPortraitSlotTest", "lobbyportraitslottest"],
+			["--portraitbakertest", "res://scripts/tests/portrait_baker_tests.gd", "PortraitBakerTest", "portraitbakertest"],
 			["--onlinelobbytest", "res://scripts/tests/online_lobby_tests.gd", "OnlineLobbyTest", "onlinelobbytest"],
 			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
 			["--easycoopbalanstest", "res://scripts/tests/easy_coop_balance_tests.gd", "EasyCoopBalanceTest", "easycoopbalanstest"],

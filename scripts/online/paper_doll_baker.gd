@@ -97,6 +97,7 @@ static func release_warm_cache() -> void:
 	_png_bytes_cache.clear()
 	_compose_bufs.clear()
 	clear_cache()
+	PortraitBaker.release_cache()
 
 
 static func warm_layer_paint_count() -> int:
@@ -254,6 +255,63 @@ static func image_hash(image: Image) -> String:
 static func palette_count() -> int:
 	_ensure()
 	return _colors.size()
+
+
+## Voor de portretbakker: gekozen optie-id van een laag ("" = laag leeg).
+static func layer_option(look: Dictionary, layer: String) -> String:
+	_ensure()
+	var spec: Dictionary = _layers.get(layer, {})
+	if spec.is_empty():
+		return ""
+	return _resolve_id(look, spec)
+
+
+## Bestand van de gekozen optie in een sheet (bv. "walk"), of "".
+static func layer_source(look: Dictionary, layer: String, sheet: String) -> String:
+	var id := layer_option(look, layer)
+	if id == "":
+		return ""
+	var spec: Dictionary = _layers.get(layer, {})
+	var options: Dictionary = spec.get("options", {})
+	if not options.has(id):
+		return ""
+	return _option_path(options[id], sheet)
+
+
+## Recolor-groep van een laag ("" = vaste kleuren).
+static func layer_group(layer: String) -> String:
+	_ensure()
+	var spec: Dictionary = _layers.get(layer, {})
+	return str(spec.get("recolor", ""))
+
+
+## Kleurnaam die de look voor deze laag kiest (zelfde regels als het bakken).
+static func layer_color(look: Dictionary, layer: String) -> String:
+	_ensure()
+	var spec: Dictionary = _layers.get(layer, {})
+	var group := str(spec.get("recolor", ""))
+	if group == "":
+		return ""
+	return _color_name(look, str(spec.get("color_key", "")), group)
+
+
+## Herkleurt RGBA-bytes met de 5-tonen-tabel van groep+kleur. Leeg bij onbekende kleur.
+static func recolor_layer_bytes(data: PackedByteArray, group: String, color_name: String) -> PackedByteArray:
+	_ensure()
+	var table := _recolor_table(group, color_name)
+	if table.is_empty():
+		return PackedByteArray()
+	var touch := PackedInt32Array()
+	for i in int(data.size() / 4):
+		if int(data[i * 4 + 3]) != 0:
+			touch.append(i)
+	return _recolor_bytes_with_table(data, touch, table)
+
+
+## Buitenrand-pass (#3a4058) op een samengestelde figuur, zoals na het bakken van een sheet.
+static func outline_bytes(data: PackedByteArray, w: int, h: int) -> PackedByteArray:
+	_ensure()
+	return _outline_bytes(data, w, h)
 
 
 ## Lege sheet bakt alle vijf sheets en geeft één texture per sheet terug.
