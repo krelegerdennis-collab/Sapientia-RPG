@@ -21,7 +21,8 @@ const BORDER_DIM := Color("6a5838")     # rustige rand
 const BORDER_DARK := BORDER_DIM         # (alias)
 const TEXT := Color("f2e9d8")           # crème
 const TEXT_DIM := Color("b5a78d")       # labels
-const TEXT_OFF := Color("857c6b")       # uitgeschakeld (F6-8: 4,59:1 op INK, WCAG AA; was 6c6455 = 3,24:1)
+const TEXT_OFF := Color("8e8677")       # uitgeschakeld (F6-8: WCAG AA op INK + knopvlak; was 6c6455 = 3,24:1)
+const ACCENT_GREY := Color("988f80")    # menu: grijs item met focus (F6-8: helderder dan TEXT_OFF, zelfde WCAG)
 const SHADOW := Color("07060a")
 
 # ---------------------------------------------------------------- accenten

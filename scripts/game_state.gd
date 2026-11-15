@@ -584,6 +584,8 @@ func _ready() -> void:
 	#   godot -- --uxpolishtest [--shots=/pad/map]  (scripts/tests/ux_polish_autotest.gd).
 	# F6-6 change_map vangnet (ontbrekend pad, geen zwarte hang): of
 	#   godot -- --f6uxtest  (scripts/tests/f6_ux_tests.gd).
+	# F6 UX-fixes WM1 set 2 (o.a. F6-8 TEXT_OFF-contrast): of
+	#   godot -- --f6uxtest2  (scripts/tests/f6_ux2_tests.gd).
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
