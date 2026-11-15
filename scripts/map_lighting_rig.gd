@@ -414,10 +414,20 @@ func _connect_camera() -> void:
 
 
 func _process(_delta: float) -> void:
-	for s in _emissive_sync:
+	# _emissive_sync bewaart de bron-sprite (meerdere frames). Die kan vrijkomen terwijl
+	# de rig op de kaart blijft: een verslagen map-monster, een weggehaald object.
+	# De referentie is dan geen null maar een freed instance; get_node_or_null daarop
+	# is een SCRIPT ERROR. Alleen sprites die nog bestaan horen in de sync-lijst.
+	var sync_i := 0
+	while sync_i < _emissive_sync.size():
+		var s: Sprite2D = _emissive_sync[sync_i]
+		if not is_instance_valid(s):
+			_emissive_sync.remove_at(sync_i)
+			continue
 		var o := s.get_node_or_null("_hd2d_em") as Sprite2D
 		if o:
 			o.frame = s.frame
+		sync_i += 1
 	var cam := _active_camera()
 	if cam == null:
 		return
