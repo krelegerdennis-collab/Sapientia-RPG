@@ -270,8 +270,14 @@ func _counter_tests() -> void:
 	a.hit_member("dennis", 8, 1.0, 0, m)
 	check("counter: venster open", int(a._pd_counter.get("dennis", 0)) == SomPerfectDodgeData.COUNTER_WINDOW_TICKS)
 	var atk := float(GameState.effective_stat(GameState.member("dennis"), "atk"))
+	var ctr_rng := a.rng.state
 	var dmg_base := a.physical_damage(atk, 2.0, 1.0, a.rng)
+	a.rng.state = ctr_rng
 	var dmg_counter := a.physical_damage(atk, 2.0, SomPerfectDodgeData.COUNTER_DAMAGE_MULT, a.rng)
+	a.rng.state = ctr_rng
+	var ctr_spread := a.rng.randf_range(0.85, 1.15)
+	var lin := (atk - 2.0 / 2.0) * 1.0
+	var expect_counter := maxi(1, roundi(lin * SomPerfectDodgeData.COUNTER_DAMAGE_MULT * ctr_spread))
 	var hp0 := int(a.enemies[m]["hp"])
 	a._pd_counter["dennis"] = 8
 	a.damage_enemy(m, dmg_counter, Vector2i.RIGHT, false, 0, 0,
@@ -280,7 +286,7 @@ func _counter_tests() -> void:
 	a.enemies[m]["hp"] = hp0
 	a.damage_enemy(m, dmg_base, Vector2i.RIGHT, false, 0, 0, Color.WHITE, 1.0, SomStaggerData.KIND_NONE)
 	var hp2 := int(a.enemies[m]["hp"])
-	check("counter: x1.5 schade", (hp0 - hp1) >= maxi(1, roundi(float(dmg_base) * SomPerfectDodgeData.COUNTER_DAMAGE_MULT * 0.85)))
+	check("counter: x1.5 schade", dmg_counter == expect_counter and dmg_base == maxi(1, roundi(lin * ctr_spread)))
 	check("counter: meer dan gewone slag", (hp0 - hp1) > (hp0 - hp2))
 	a._pd_counter["dennis"] = 12
 	for _i in 12:

@@ -203,7 +203,7 @@ gekozen; het balansrapport is van vóór #408/#414/#446/#450) en F6.14/F6.17 (to
 
 ## Suite `--rcchecktest`
 
-`scripts/tests/rc_check_tests.gd`, geregistreerd in `scripts/game_state.gd`. Nog **niet** in `tests.yml`: dat doet Forge na akkoord van Dennis.
+`scripts/tests/rc_check_tests.gd`, geregistreerd in `scripts/game_state.gd`. Draait in CI sinds #481 (akkoord Dennis): matrix in `.github/workflows/tests.yml`.
 
 Wat de suite controleert (alleen lezen):
 - Versie: versiebron == `project.godot` == elke Android-preset (`version/name`, `version/code`).
@@ -218,7 +218,7 @@ Wat de suite controleert (alleen lezen):
 
 **Bekende OPEN-punten** komen als `OPEN  [id] ...` in de uitvoer. Die tellen niet als `FAIL`, zodat de suite groen kan blijven
 terwijl de bevinding zichtbaar is. Gaat zo'n punt dicht, dan wordt het een `PASS` met de melding dat dit rapport bijgewerkt moet
-worden. Nu verwacht: [F8.2], [F8.4], [F8.8], [F6.23], [F6.23b], [F6.24] en [F2.5].
+worden. Nu verwacht: [F8.4], [F6.23], [F6.23b], [F6.24] en [F2.5].
 
 Waarom deze keuze: een rode suite in CI zou elke PR blokkeren voor punten die alleen Forge of Dennis kan oplossen
 (versie, presets, audio). Een stille suite zou de bevinding verbergen. Met `OPEN` blijft het zichtbaar in de log en in dit rapport,
