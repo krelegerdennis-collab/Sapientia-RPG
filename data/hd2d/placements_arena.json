@@ -8,7 +8,7 @@
     "x": 232,
     "y": 48,
     "flip": false,
-    "hframes": 2,
+    "hframes": 3,
     "frame": 0,
     "note": "monster gate, centre of the north stands (tiles x13-15, y0-2); frame 0 closed, 1 open during a wave"
    },
@@ -101,6 +101,63 @@
     "flip": false,
     "hframes": 1,
     "frame": 0
+   },
+   {
+    "prop": "arena_brazier",
+    "albedo": "assets/sprites/arena/arena_brazier.png",
+    "x": 120,
+    "y": 76,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0,
+    "note": "fire bowl, field edge"
+   },
+   {
+    "prop": "arena_brazier",
+    "albedo": "assets/sprites/arena/arena_brazier.png",
+    "x": 360,
+    "y": 76,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_brazier",
+    "albedo": "assets/sprites/arena/arena_brazier.png",
+    "x": 104,
+    "y": 268,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_brazier",
+    "albedo": "assets/sprites/arena/arena_brazier.png",
+    "x": 376,
+    "y": 268,
+    "flip": false,
+    "hframes": 4,
+    "frame": 0
+   },
+   {
+    "prop": "arena_vip_loge",
+    "albedo": "assets/sprites/arena/arena_vip_loge.png",
+    "x": 456,
+    "y": 192,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0,
+    "note": "VIP box on the east stands, tiles x27-29 y8-11 (48x64), y-sort with the stands"
+   },
+   {
+    "prop": "arena_sand_ring",
+    "albedo": "assets/sprites/arena/arena_sand_ring.png",
+    "x": 240,
+    "y": 192,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0,
+    "note": "floor decal centred on the emblem (240,160); draw above the floor tiles, below all y-sorted sprites"
    }
   ],
   "arena_lobby": [
@@ -110,9 +167,9 @@
     "x": 192,
     "y": 48,
     "flip": false,
-    "hframes": 2,
-    "frame": 1,
-    "note": "gate to the hall, centred on x=192 (between columns 11|12) over the centred recess tiles 96-107 on columns 10-13; frame 1 open (the lobby is only reachable after the Vesper unlock)"
+    "hframes": 3,
+    "frame": 2,
+    "note": "gate lobby->hall, centred on x=192 (columns 11|12) over recess tiles 96-107 (x10-13). LOCK: frame 2 (chained) while flag noor_lid is NOT set, interact -> \"The gate is closed.\"; frame 1 (open, passable) once noor_lid is set"
    },
    {
     "prop": "arena_banner",
@@ -189,6 +246,52 @@
     "hframes": 1,
     "frame": 0,
     "note": "shop counter; the NPC stands behind it (y-sort: NPC y < counter y)"
+   },
+   {
+    "prop": "arena_bench",
+    "albedo": "assets/sprites/arena/arena_bench.png",
+    "x": 64,
+    "y": 186,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0,
+    "note": "waiting area"
+   },
+   {
+    "prop": "arena_bench",
+    "albedo": "assets/sprites/arena/arena_bench.png",
+    "x": 112,
+    "y": 186,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   },
+   {
+    "prop": "arena_bench",
+    "albedo": "assets/sprites/arena/arena_bench.png",
+    "x": 296,
+    "y": 186,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   },
+   {
+    "prop": "arena_crates",
+    "albedo": "assets/sprites/arena/arena_crates.png",
+    "x": 36,
+    "y": 206,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
+   },
+   {
+    "prop": "arena_crates",
+    "albedo": "assets/sprites/arena/arena_crates.png",
+    "x": 348,
+    "y": 206,
+    "flip": false,
+    "hframes": 1,
+    "frame": 0
    }
   ]
  },
@@ -235,27 +338,6 @@
   "ref": "Wilgendal/Willowdale-dorp = wereldkaart.tscn Exits/NaarWilgendal tiles (30,23)-(31,24), spawn van_wilgendal (488,408) = tile (30,25) blijft vrij; site = (30,32)-(31,33): 6 tiles zuidelijker dan de eerste plek (30,26), direct onder de as/grind-inham; ondergrond v14 #0 (gras, begaanbaar)",
   "pad": "begaanbaar pad vanaf spawn (30,25): (31,25) (31,26) (31,27) (31,28) (31,29) (30,29) (30,30) (30,31) -> (30,32); kolom 31 langs de bergrand ((30,28) is berg), dan door de as/grind-inham",
   "atlas": "assets/tiles/wereld_v18_arena.png",
-  "locked": {
-   "atlas_coords": [
-    [
-     2,
-     0
-    ],
-    [
-     3,
-     0
-    ],
-    [
-     2,
-     1
-    ],
-    [
-     3,
-     1
-    ]
-   ],
-   "when": "tot de Vesper-unlock"
-  },
   "open": {
    "atlas_coords": [
     [
@@ -275,9 +357,62 @@
      1
     ]
    ],
-   "when": "na de Vesper-unlock"
+   "when": "altijd (sinds Dennis 16:31: lobby bereikbaar voor Vesper)"
   },
-  "unlock_flag_suggestie": "noor_lid (zelfde vlag als berggrot_data.gd TUNNEL_VLAG); CODE bevestigt",
+  "locked": {
+   "atlas_coords": [
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     0
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "when": "ONGEBRUIKT voor toegang; optioneel puur visueel"
+  },
+  "exit": "altijd actief -> arena_lobby.tscn; het slot zit nu op de lobbypoort naar de hal (vlag noor_lid), zie toegang",
   "layer": "overlay TileMapLayer boven Ground (of Sprite2D); transparante omgeving, Ground (gras) blijft eronder"
+ },
+ "lights_extra": {
+  "arena_lobby": [
+   {
+    "kind": "shaft",
+    "x": 192,
+    "y": 150,
+    "radius": 72,
+    "height": 96,
+    "color": [
+     1.0,
+     0.93,
+     0.8
+    ],
+    "energy": 0.6,
+    "note": "ceiling light shaft onto the centre of the runner (soft round PointLight2D, no flicker; motes optional)"
+   }
+  ]
+ },
+ "toegang": {
+  "besluit": "Dennis 2026-11-15 16:31: \"maak de coloseum zo dat je de lobby inkan voordat je vesper hebt maar nog niet verder naar binnen kan\"",
+  "worldmap_exit": "altijd open: map_exit 2x2 op (480,512) -> arena_lobby.tscn, geen vlag",
+  "lobby_gate": {
+   "flag": "noor_lid",
+   "closed_frame": 2,
+   "open_frame": 1,
+   "message_closed": "The gate is closed.",
+   "closed": "solid (collision over the 48px opening) + interact shows the message",
+   "open": "gate exit -> arena_hal.tscn (spawn south passage), frame 1"
+  },
+  "hall_gate": "monster gate in the hall: frame 0 closed, frame 1 open during a wave (no flag)",
+  "worldmap_locked_variant": "tiles 4-7 of wereld_v18_arena.png are now UNUSED for access; optional visual only (e.g. before the Colosseum is discovered)"
  }
 }

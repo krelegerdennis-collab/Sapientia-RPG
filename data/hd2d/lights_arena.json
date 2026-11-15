@@ -299,6 +299,45 @@
    "flicker": 1.2,
    "halo": "warm",
    "halo_size": 48
+  },
+  "assets/sprites/arena/arena_brazier.png": {
+   "kind": "fire",
+   "family": "warm",
+   "color": [
+    1.0,
+    0.628000020980835,
+    0.36399999260902405
+   ],
+   "cell": [
+    32,
+    32
+   ],
+   "anchors": [
+    {
+     "offset": [
+      16.3,
+      20.4
+     ],
+     "px": 133,
+     "bbox": [
+      6,
+      2,
+      26,
+      15
+     ],
+     "halo_at": [
+      16.3,
+      10.4
+     ]
+    }
+   ],
+   "tile_cells": [],
+   "energy": 1.3,
+   "scale": 1.8,
+   "height": 20,
+   "flicker": 1.0,
+   "halo": "warm",
+   "halo_size": 56
   }
  }
 }
