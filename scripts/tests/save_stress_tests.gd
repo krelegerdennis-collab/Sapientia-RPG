@@ -516,7 +516,7 @@ func _version_tests() -> void:
 				and str(GameState.party[0]["name"]) == "Dax" and GameState.player_name == "Dax")
 		check("oude save (%s): goud 250, tas (3 drankjes, 1 toverwater) als gehele getallen" % variant,
 				GameState.gold == 250 and GameState.item_count("drankje") == 3 and GameState.item_count("toverwater") == 1
-				and typeof(GameState.inventory["drankje"]) == TYPE_INT)
+				and typeof(GameState.inventory.get("drankje")) == TYPE_INT)
 		check("oude save (%s): verhaalstap TAKEN, vlag water_klaar, positie (5,6) omlaag" % variant,
 				GameState.story_step == StoryData.TAKEN and GameState.story_flags.has("water_klaar")
 				and GameState.return_tile == Vector2i(5, 6) and GameState.return_facing == Vector2i(0, 1))
