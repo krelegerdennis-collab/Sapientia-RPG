@@ -607,6 +607,7 @@ func _ready() -> void:
 	# F4 game feel (screenshake + schadekleuren): of  godot -- --gamefeeltest  (scripts/tests/gamefeel_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# F2 stagger-meter (Action): of  godot -- --staggertest  (scripts/tests/stagger_tests.gd).
+	# F1 perfect dodge (Action): of  godot -- --perfectdodgetest  (scripts/tests/perfect_dodge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
@@ -714,6 +715,7 @@ func _ready() -> void:
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--staggertest", "res://scripts/tests/stagger_tests.gd", "StaggerTest", "staggertest"],
+			["--perfectdodgetest", "res://scripts/tests/perfect_dodge_tests.gd", "PerfectDodgeTest", "perfectdodgetest"],
 			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],

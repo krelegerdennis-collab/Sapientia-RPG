@@ -284,6 +284,17 @@ static func oneshot(parent: Node, d: Dictionary, feet: Vector2, node_name: Strin
 	return a
 
 
+## F1 perfect dodge: draw_arc-ring (geen art).
+static func perfect_ring(parent: Node, at: Vector2) -> Node2D:
+	var ph := Ring.new()
+	ph.color = Color(0.85, 0.95, 1.0)
+	ph.position = at
+	ph.radius = 14.0
+	ph.z_index = 23
+	parent.add_child(ph)
+	return ph
+
+
 ## Placeholder voor ontbrekende effect-art: uitdijende ring, 0,3 s.
 class Ring extends Node2D:
 	var color := Color.WHITE
