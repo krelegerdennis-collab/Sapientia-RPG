@@ -10,6 +10,8 @@ oudere versieparagrafen stonden vroeger in `README.md` (nu alleen nog technische
 
 ## [Unreleased]
 
+## [0.21] (RC) - 2026-11-15
+
 Alles op `main` na tag `v0.20`.
 
 ### Toegevoegd
@@ -30,6 +32,8 @@ Alles op `main` na tag `v0.20`.
 - Release-docs: `LAUNCH_PLAN.md`, `FINISH_LOG.md` (scorekaart), `STORE_LISTING.md`; `tools/sfx/` (SFX-generatie via ComfyUI + Stable Audio Open).
 
 ### Gewijzigd
+- Interne RC (besluit Dennis, 15 nov): versie 0.21 / versionCode 23; netwerkrechten (`internet`, `access_network_state`,
+  `access_wifi_state`, `change_wifi_multicast_state`) uit in alle Android-presets, omdat online dicht is (H11). Solo speelt zonder netwerk.
 - Toestandsmachines expliciet gemaakt zonder de buitenkant te veranderen (`docs/STATE_MACHINES.md`): veldflow via
   `FlowState` (`GameState.flow_state()/scene_busy()/field_free()` + signaal `flow_changed`) in plaats van ~20 herhaalde
   guards; benoemde constanten + sets voor `battle.state`, `som_ally.state`, `kern_absorption.phase` en de `mode` van
@@ -52,7 +56,7 @@ Alles op `main` na tag `v0.20`.
 
 ### Bekend (WM1-release)
 - PvP en co-op zijn verborgen zonder relay-URL (content-lock H11); hubkamers Training Hall tot en met The Core zitten achter de Diepe Grot-levels (H3).
-- Geluidseffecten zijn nog synthetische placeholders (`tools/placeholders_algemene_sfx.txt`); vervanging loopt via `tools/sfx/`.
+- Geluidseffecten zijn nog synthetische placeholders (`tools/placeholders_algemene_sfx.txt`); vervanging loopt via `tools/sfx/`. Voor de interne RC bewust geaccepteerd (besluit Dennis, 15 nov).
 - Een deel van de art in Archief 2 en de World Warper is placeholder (`docs/PLAN.md`).
 
 ## [0.20] - 2026-10-13
