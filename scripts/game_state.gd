@@ -616,6 +616,8 @@ func _ready() -> void:
 	# Drift-achtergrond op een breed landschap: of  godot -- --driftbgtest  (scripts/tests/drift_bg_tests.gd).
 	# TC-P proloog-titelkaart: of  godot -- --tcptest [--shots=/pad]  (scripts/tests/tc_p_autotest.gd; geen CI-matrix).
 	# Android-terug + Back op het naamscherm (F6-3/F6-4): of  godot -- --androidbacktest  (scripts/tests/android_back_tests.gd).
+	# Opslag/hervat-stress WM1 (round-trip, kapotte saves, pauze in menu/dialoog/gevecht, dubbel opslaan, oude versie):
+	#   godot -- --savestresstest  (scripts/tests/save_stress_tests.gd).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
@@ -668,6 +670,7 @@ func _ready() -> void:
 			["--savefuzztest", "res://scripts/tests/save_fuzz_tests.gd", "SaveFuzzTest", "savefuzztest"],
 			["--saverobusttest", "res://scripts/tests/save_robust_tests.gd", "SaveRobustTest", "saverobusttest"],
 			["--saveroundtriptest", "res://scripts/tests/save_roundtrip_tests.gd", "SaveRoundtripTest", "saveroundtriptest"],
+			["--savestresstest", "res://scripts/tests/save_stress_tests.gd", "SaveStressTest", "savestresstest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],

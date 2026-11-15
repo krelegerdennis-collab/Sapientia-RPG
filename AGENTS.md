@@ -83,6 +83,7 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--battlesimtest` | `scripts/tests/battlesim_tests.gd` | 57 |
 | `--berggrotdextest` | `scripts/tests/berggrot_dex_tests.gd` | 91 |
 | `--savehardeningtest` | `scripts/tests/save_hardening_tests.gd` | 156 |
+| `--savestresstest` | `scripts/tests/save_stress_tests.gd` | 135 |
 | `--saverobusttest` | `scripts/tests/save_robust_tests.gd` | (zie suite) |
 | `--relaytest` | `scripts/tests/relay_tests.gd` | 89 |
 | `--testmodustest` | `scripts/tests/testmodus_tests.gd` | 9 |
