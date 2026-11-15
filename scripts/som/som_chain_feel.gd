@@ -41,18 +41,34 @@ static func attach(hero: Node2D, anim: SomFx.Anim, hero_id: String) -> Node:
 	return ctrl
 
 
+static func _new_pool_sprite(index: int) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.name = "SomAfterimage%d" % index
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	s.centered = true
+	s.visible = false
+	return s
+
+
+static func _sanitize_pool(hero_id: String) -> void:
+	if not _pools.has(hero_id):
+		return
+	var arr: Array = _pools[hero_id]
+	for i in arr.size():
+		if not is_instance_valid(arr[i]):
+			arr[i] = _new_pool_sprite(i)
+
+
 static func _borrow(hero_id: String) -> Array[Sprite2D]:
 	if not _pools.has(hero_id):
 		var arr: Array[Sprite2D] = []
-		for _i in 3:
-			var s := Sprite2D.new()
-			s.name = "SomAfterimage%d" % _i
-			s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-			s.centered = true
-			s.visible = false
-			arr.append(s)
+		for i in 3:
+			arr.append(_new_pool_sprite(i))
 		_pools[hero_id] = arr
+	_sanitize_pool(hero_id)
 	for s in _pools[hero_id]:
+		if not is_instance_valid(s):
+			continue
 		var p: Node = s.get_parent()
 		if p != null and is_instance_valid(p) and p.name == "SomChainAfterimage":
 			return []
@@ -61,14 +77,24 @@ static func _borrow(hero_id: String) -> Array[Sprite2D]:
 
 static func _alloc_ephemeral() -> Array[Sprite2D]:
 	var arr: Array[Sprite2D] = []
-	for _i in 3:
+	for i in 3:
 		var s := Sprite2D.new()
-		s.name = "SomAfterimageTmp%d" % _i
+		s.name = "SomAfterimageTmp%d" % i
 		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		s.centered = true
 		s.visible = false
 		arr.append(s)
 	return arr
+
+
+static func _detach_for_pool(sprites: Array[Sprite2D]) -> void:
+	for s in sprites:
+		if not is_instance_valid(s):
+			continue
+		var p: Node = s.get_parent()
+		if p != null and is_instance_valid(p):
+			p.remove_child(s)
+		s.visible = false
 
 
 func step(delta: float) -> void:
@@ -82,12 +108,27 @@ func step(delta: float) -> void:
 			_done()
 
 
+func _exit_tree() -> void:
+	if _ephemeral:
+		for s in _sprites:
+			if is_instance_valid(s):
+				if s.get_parent() == self:
+					remove_child(s)
+				s.queue_free()
+		_sprites.clear()
+		return
+	_detach_for_pool(_sprites)
+	_sprites.clear()
+
+
 func _sync_sprites() -> void:
 	var tint: Color = SomChainData.AFTERIMAGE_TINT.get(_hero_id, Color(1, 1, 1, 0.5))
 	for i in _sprites.size():
 		var lag := i + 1
 		var idx := maxi(0, _anim.index - lag)
 		var spr := _sprites[i]
+		if not is_instance_valid(spr):
+			continue
 		spr.texture = _anim.texture
 		spr.hframes = _anim.hframes
 		spr.vframes = _anim.vframes
@@ -104,12 +145,15 @@ func _sync_sprites() -> void:
 
 
 func _done() -> void:
-	for s in _sprites:
-		if is_instance_valid(s):
-			s.visible = false
-			if s.get_parent() == self:
-				remove_child(s)
-		if _ephemeral and is_instance_valid(s):
-			s.queue_free()
+	if _ephemeral:
+		for s in _sprites:
+			if is_instance_valid(s):
+				s.visible = false
+				if s.get_parent() == self:
+					remove_child(s)
+				s.queue_free()
+	else:
+		_detach_for_pool(_sprites)
 	_sprites.clear()
-	queue_free()
+	if is_inside_tree():
+		queue_free()

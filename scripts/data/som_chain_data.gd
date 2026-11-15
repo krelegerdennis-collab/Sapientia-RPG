@@ -56,11 +56,11 @@ const FINISHER_FX_SHEETS := {
 	"orion": "res://assets/sprites/som/fx/fx_chain_finisher_orion.png",
 }
 const AFTERIMAGE_TINT := {
-	"dennis": Color(164, 102, 240),
-	"lotte": Color(200, 244, 255),
-	"noor": Color(232, 184, 255),
-	"kael": Color(64, 224, 232),
-	"orion": Color(248, 232, 144),
+	"dennis": Color8(164, 102, 240),
+	"lotte": Color8(200, 244, 255),
+	"noor": Color8(232, 184, 255),
+	"kael": Color8(64, 224, 232),
+	"orion": Color8(248, 232, 144),
 }
 const AFTERIMAGE_OFFSETS: Array[float] = [4.0, 8.0, 12.0]
 const AFTERIMAGE_ALPHAS: Array[float] = [0.55, 0.35, 0.18]

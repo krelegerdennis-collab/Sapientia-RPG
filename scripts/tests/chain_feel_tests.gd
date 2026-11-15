@@ -38,6 +38,7 @@ func _run() -> void:
 	_afterimage_data_tests()
 	_classic_hash_test()
 	await _afterimage_runtime_test()
+	await _afterimage_pool_survives_hero_free_test()
 	await _shockwave_rotation_test()
 	_uplink_test()
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
@@ -107,6 +108,9 @@ func _afterimage_data_tests() -> void:
 	check("nagloed 3 offsets", SomChainData.AFTERIMAGE_OFFSETS.size() == 3)
 	check("nagloed alphas", SomChainData.AFTERIMAGE_ALPHAS.size() == 3 and absf(SomChainData.AFTERIMAGE_ALPHAS[0] - 0.55) < 0.001
 			and absf(SomChainData.AFTERIMAGE_ALPHAS[1] - 0.35) < 0.001 and absf(SomChainData.AFTERIMAGE_ALPHAS[2] - 0.18) < 0.001)
+	for id in HEROES:
+		var c: Color = SomChainData.AFTERIMAGE_TINT[id]
+		check("%s tint componenten 0..1" % id, c.r >= 0.0 and c.r <= 1.0 and c.g >= 0.0 and c.g <= 1.0 and c.b >= 0.0 and c.b <= 1.0)
 	check("flash 1 tick", is_equal_approx(SomChainData.FINISHER_ENEMY_FLASH_SEC, 1.0 / 60.0))
 
 
@@ -154,6 +158,35 @@ func _afterimage_runtime_test() -> void:
 	await get_tree().process_frame
 	check("nagloed opgeruimd", not is_instance_valid(ctrl) or ctrl.get_child_count() == 0)
 	hero.queue_free()
+
+
+func _afterimage_pool_survives_hero_free_test() -> void:
+	var hero := _hero_node("dennis")
+	var tex := SomFx.tex(SomData.ATTACK_ANIMS["dennis"]["sheet"])
+	var anim := SomFx.attack_anim(hero, tex, SomData.ATTACK_ANIMS["dennis"])
+	anim.sim_driven = true
+	var ctrl: Node = SomChainFeelScript.attach(hero, anim, "dennis")
+	for _t in 3:
+		anim.step(CombatSim.TICK_DT)
+		if ctrl.has_method("step"):
+			ctrl.step(CombatSim.TICK_DT)
+	hero.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var hero2 := _hero_node("dennis")
+	var anim2 := SomFx.attack_anim(hero2, tex, SomData.ATTACK_ANIMS["dennis"])
+	anim2.sim_driven = true
+	var ctrl2: Node = SomChainFeelScript.attach(hero2, anim2, "dennis")
+	check("pool: tweede finisher start", ctrl2 != null)
+	check("pool: 3 sprites na held-free", ctrl2.get_child_count() == 3)
+	var valid := 0
+	for c in ctrl2.get_children():
+		if c is Sprite2D and is_instance_valid(c):
+			valid += 1
+	check("pool: 3 geldige Sprite2D", valid == 3)
+	anim2.finish_now()
+	hero2.queue_free()
+	await get_tree().process_frame
 
 
 func _shockwave_rotation_test() -> void:
