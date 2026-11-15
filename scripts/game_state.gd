@@ -757,6 +757,7 @@ func _ready() -> void:
 			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
 			["--easycoopbalanstest", "res://scripts/tests/easy_coop_balance_tests.gd", "EasyCoopBalanceTest", "easycoopbalanstest"],
 			["--solod100guardtest", "res://scripts/tests/solo_d100_guard_tests.gd", "SoloD100GuardTest", "solod100guardtest"],
+			["--cosmeticstest", "res://scripts/tests/cosmetics_tests.gd", "CosmeticsTest", "cosmeticstest"],
 			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"],
 			["--d100modesim", "res://tools/battlesim/d100_mode_sim.gd", "D100ModeSim", "d100modesim"],
 			["--d100modesimtest", "res://scripts/tests/d100_mode_sim_tests.gd", "D100ModeSimTest", "d100modesimtest"],

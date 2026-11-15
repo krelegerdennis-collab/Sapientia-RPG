@@ -59,6 +59,8 @@ func _ready() -> void:
 	resized.connect(_apply_safe_area)
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 4)
+	_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_panel.add_child(_box)
 	lobby = LobbyScript.new()
 	lobby.name = "CoopLobby"
@@ -277,14 +279,13 @@ func _build_host() -> void:
 			_box.add_child(UiMenu.label("Friends tap Join online and enter this code.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	else:
 		_box.add_child(UiMenu.label("Waiting for friends on Wi-Fi...", UiStyleC.TEXT_DIM, TEXT_SIZE))
-	_add_roster_rows(true)
+	_box.add_child(_roster_scroll(true))
 	var start := _touch_button("Start Action sandbox")
 	start.disabled = not lobby.is_host or (online and lobby.room_code == "")
 	start.pressed.connect(_on_host_start)
-	_box.add_child(start)
 	var cancel := _touch_button("Cancel")
 	cancel.pressed.connect(_show_menu)
-	_box.add_child(cancel)
+	_box.add_child(_action_row([start, cancel]))
 
 
 func _build_join() -> void:
@@ -397,7 +398,32 @@ func _collect_buttons(node: Node, out: Array[Button]) -> void:
 		_collect_buttons(child, out)
 
 
-func _add_roster_rows(host_view: bool) -> void:
+func _roster_scroll(host_view: bool) -> ScrollContainer:
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	var roster := VBoxContainer.new()
+	roster.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	roster.add_theme_constant_override("separation", 2)
+	_add_roster_rows(host_view, roster)
+	scroll.add_child(roster)
+	return scroll
+
+
+func _action_row(buttons: Array) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for btn in buttons:
+		if btn is Button:
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(btn)
+	return row
+
+
+func _add_roster_rows(host_view: bool, parent: VBoxContainer = null) -> void:
+	var box := parent if parent != null else _box
 	for slot in Protocol.MAX_PLAYERS:
 		var cid := lobby.character_at(slot)
 		var who := _seat_label(slot)
@@ -416,7 +442,7 @@ func _add_roster_rows(host_view: bool) -> void:
 		var label := UiMenu.label(prefix + who, UiStyleC.TEXT_DIM if who == "Empty" else UiStyleC.TEXT, TEXT_SIZE)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(label)
-		_box.add_child(row)
+		box.add_child(row)
 
 
 func _seat_label(slot: int) -> String:
@@ -499,7 +525,7 @@ func _on_roster_changed() -> void:
 func _rebuild_join_guest() -> void:
 	_clear_box()
 	_box.add_child(UiMenu.label("Joined %s" % _hero_name(lobby.local_character), UiStyleC.HILITE, TITLE_SIZE))
-	_add_roster_rows(false)
+	_box.add_child(_roster_scroll(false))
 	_box.add_child(UiMenu.label("Waiting for the host to start...", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	var leave := _touch_button("Leave")
 	leave.pressed.connect(_show_menu)
