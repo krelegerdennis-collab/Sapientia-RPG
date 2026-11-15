@@ -51,6 +51,7 @@ func _run() -> void:
 	_determinism_tests()
 	_disabled_byte_tests()
 	_ally_rate_tests()
+	_followup_src_and_clear_tests()
 	SomPerfectDodgeData.force_active = null
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FAIL", passes, failures])
 	get_tree().quit(1 if failures else 0)
@@ -413,3 +414,37 @@ func _ally_rate_tests() -> void:
 	var rate := 0.0 if tries == 0 else float(perfects) / float(tries) * 100.0
 	check("ally-model: perfect-rate 10-30%% (%.1f%%, n=%d)" % [rate, tries], rate >= 10.0 and rate <= 30.0)
 	a.free(); m.free()
+
+
+## Follow-ups: src door hit_player, en tellers leeg na gevecht.
+func _followup_src_and_clear_tests() -> void:
+	var a := _arena()
+	var m1 := _mock_enemy(a)
+	var m2 := _mock_enemy(a)
+	_start_dodge(a)
+	_age_dodge(a, "dennis", 2)
+	a.hit_player(8, Vector2.ZERO, m1)
+	check("hit_player src: perfect", a.perfect_count == 1)
+	check("hit_player src: juiste vijand", int(a.enemies[m1].get("hitstop", 0)) == SomPerfectDodgeData.HITSTOP_TICKS and bool(a.enemies[m1].get("pd_freeze", false)))
+	check("hit_player src: andere vijand niet", int(a.enemies[m2].get("hitstop", 0)) == 0 and not bool(a.enemies[m2].get("pd_freeze", false)))
+	a._pd_icd.erase("dennis")
+	a.perfect_count = 0
+	a.last_perfect_hitstop = -1
+	a.enemies[m1]["hitstop"] = 0
+	a.enemies[m1]["pd_freeze"] = false
+	_start_dodge(a)
+	_age_dodge(a, "dennis", 2)
+	a.hit_player(8, Vector2.ZERO, null)
+	check("hit_player null src: geen crash", true)
+	check("hit_player null src: perfect zonder vijand-freeze", a.perfect_count == 1 and int(a.enemies[m1].get("hitstop", 0)) == 0 and int(a.enemies[m2].get("hitstop", 0)) == 0 and a.last_perfect_hitstop == -1)
+	a._pd_icd.erase("dennis")
+	_start_dodge(a)
+	_age_dodge(a, "dennis", 2)
+	a.hit_player(8)
+	check("hit_player zonder src-argument: geen crash", a.perfect_count == 2)
+	a.perfect_count = 3
+	a.perfect_event_ticks = [4, 9, 12]
+	a._clear_transient_combat()
+	check("clear: perfect_count 0", a.perfect_count == 0)
+	check("clear: perfect_event_ticks leeg", a.perfect_event_ticks.is_empty())
+	a.free(); m1.free(); m2.free()
