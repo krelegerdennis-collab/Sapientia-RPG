@@ -128,10 +128,11 @@ func _flag_off() -> void:
 	check("vlag aan: geen magenta marker", open_map.get_node_or_null("Objects/ArenaMarker") == null)
 	var gate: MapExit = open_map.get_node("Exits/NaarArena")
 	check("vlag aan: werelduitgang is de lobby", gate.target_map == LOBBY and gate.target_spawn == "ingang" and gate.lines.is_empty())
-	check("vlag aan: uitgang is 2x2 op (480,512)", gate.position == Vector2(480, 512) and gate.size_tiles == Vector2i(2, 2))
+	var origin := Art.WORLD_TILE
+	check("vlag aan: uitgang is 2x2 op de tegel", gate.position == Vector2(origin) * 16.0 and gate.size_tiles == Vector2i(2, 2))
 	var layer: TileMapLayer = open_map.get_node("ArenaOverlay")
-	check("vlag aan: open atlas (0,0)", layer.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(0, 0))
-	check("vlag aan: open atlas (1,1)", layer.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(1, 1))
+	check("vlag aan: open atlas (0,0)", layer.get_cell_atlas_coords(origin) == Vector2i(0, 0))
+	check("vlag aan: open atlas (1,1)", layer.get_cell_atlas_coords(origin + Vector2i(1, 1)) == Vector2i(1, 1))
 	check("vlag aan: spawntegel blijft leeg", layer.get_cell_source_id(Vector2i(30, 25)) == -1)
 	GameState.story_flags["noor_lid"] = true
 	Entry.refresh(open_map)
@@ -468,8 +469,9 @@ func _art() -> void:
 	var ov := live.get_node_or_null("ArenaOverlay") as TileMapLayer
 	check("wereldkaart: overlay boven Ground", ov != null and ground.get_index() < ov.get_index())
 	var exit := live.get_node_or_null("Exits/NaarArena") as MapExit
-	check("wereldkaart: uitgang altijd naar de lobby", exit != null and exit.target_map == LOBBY and exit.lines.is_empty() and exit.position == Vector2(480, 512) and exit.size_tiles == Vector2i(2, 2))
-	check("wereldkaart: open atlas op (30,32)-(31,33)", ov != null and ov.get_cell_atlas_coords(Vector2i(30, 32)) == Vector2i(0, 0) and ov.get_cell_atlas_coords(Vector2i(31, 32)) == Vector2i(1, 0) and ov.get_cell_atlas_coords(Vector2i(30, 33)) == Vector2i(0, 1) and ov.get_cell_atlas_coords(Vector2i(31, 33)) == Vector2i(1, 1))
+	var origin := Art.WORLD_TILE
+	check("wereldkaart: uitgang altijd naar de lobby", exit != null and exit.target_map == LOBBY and exit.lines.is_empty() and exit.position == Vector2(origin) * 16.0 and exit.size_tiles == Vector2i(2, 2))
+	check("wereldkaart: open atlas op het 2x2", ov != null and ov.get_cell_atlas_coords(origin) == Vector2i(0, 0) and ov.get_cell_atlas_coords(origin + Vector2i(1, 0)) == Vector2i(1, 0) and ov.get_cell_atlas_coords(origin + Vector2i(0, 1)) == Vector2i(0, 1) and ov.get_cell_atlas_coords(origin + Vector2i(1, 1)) == Vector2i(1, 1))
 	var locked_lobby: Node = (load(LOBBY) as PackedScene).instantiate()
 	add_child(locked_lobby)
 	await get_tree().process_frame

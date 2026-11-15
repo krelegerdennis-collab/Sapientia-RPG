@@ -1,8 +1,14 @@
 extends RefCounted
+class_name ArenaArt
 ## Arena-art van RPG ART. Laden alleen als de vlag aan staat én het bestand er is,
 ## zodat een dichte vlag de rest van de game geen texturen laat inladen.
 
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
+
+## Linksboven van het 2x2 Colosseum op de wereldkaart.
+## Overlay-tegels en de 2x2-uitgang (px = tegel * 16) hangen alleen aan deze regel.
+## ART 16:23: (30, 32), zes tegels onder de eerste plek (30, 26).
+const WORLD_TILE := Vector2i(30, 32)
 
 const WORLD := "res://assets/tiles/wereld_v18_arena.png"
 const TILES := "res://assets/tiles/arena/arena_tiles.png"
