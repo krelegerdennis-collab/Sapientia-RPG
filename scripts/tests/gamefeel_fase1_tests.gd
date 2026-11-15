@@ -39,6 +39,7 @@ func _run() -> void:
 	_data_tests()
 	_fx_spawn_tests()
 	_impact_rule_tests()
+	_hitreact_unit_tests()
 	await _arena_sim_tests()
 	await _dodge_dust_tests()
 	_finish()
@@ -55,6 +56,9 @@ func _data_tests() -> void:
 	check("heal cast geen impact-spark in arena", str(GameData.SPELLS.get("genees", {}).get("type", "")) == "heal")
 	var sc := SomGameFeelData.squash_for("licht", 0, false)
 	check("squash licht fase0 = 1/16-stappen", is_equal_approx(sc.x, 1.125) and is_equal_approx(sc.y, 0.875))
+	var sc1 := SomGameFeelData.squash_for("licht", 1, false)
+	check("squash licht fase1 ±1px", is_equal_approx(sc1.x, 1.0625) and is_equal_approx(sc1.y, 0.9375))
+	check("zwaar zonder finisher: squash 1", SomGameFeelData.squash_for("zwaar", 0, false) == Vector2.ONE)
 	check("uplink host 15960 B/s", Protocol.host_uplink_bytes_per_sec() == 15960)
 
 
@@ -86,6 +90,56 @@ func _fx_spawn_tests() -> void:
 func _impact_rule_tests() -> void:
 	check("fysiek pad bestaat", ResourceLoader.exists(SomData.FX_IMPACT_DIR % "fysiek"))
 	check("vuur pad bestaat", ResourceLoader.exists(SomData.FX_IMPACT_DIR % "vuur"))
+
+
+func _no_hurt_monster() -> MapMonster:
+	var m := MapMonster.new()
+	m.enemy_id = "geen_hurt_test"
+	m.placeholder = true
+	m.size = Vector2i.ONE
+	m.sprite = Sprite2D.new()
+	m.sprite.offset = Vector2(1.0, 2.0)
+	m.add_child(m.sprite)
+	return m
+
+
+func _foot_y(spr: Sprite2D) -> float:
+	return (spr.offset.y + 8.0) * spr.scale.y
+
+
+func _hitreact_unit_tests() -> void:
+	var arena := SomArena.new()
+	var m := _no_hurt_monster()
+	var foot_ref := _foot_y(m.sprite)
+	SomHitReact.trigger(arena, m, {}, Vector2i.RIGHT, "middel", false, false)
+	var foot_ok := true
+	for _i in 6:
+		SomHitReact.tick(m, 0.02)
+		if not is_equal_approx(_foot_y(m.sprite), foot_ref):
+			foot_ok = false
+			break
+	check("voet-y gelijk tijdens squash", foot_ok)
+	var mv := _no_hurt_monster()
+	var ox0 := mv.sprite.offset.x
+	SomHitReact.trigger(arena, mv, {}, Vector2i.UP, "middel", false, false)
+	SomHitReact.tick(mv, 0.06)
+	check("verticale treffer: offset.x ongewijzigd", is_equal_approx(mv.sprite.offset.x, ox0))
+	var a := _no_hurt_monster()
+	var b := _no_hurt_monster()
+	SomHitReact.trigger(arena, a, {}, Vector2i.RIGHT, "zwaar", true, false)
+	SomHitReact.trigger(arena, b, {}, Vector2i.RIGHT, "zwaar", true, false)
+	var ma: ShaderMaterial = a.sprite.material as ShaderMaterial
+	var mb: ShaderMaterial = b.sprite.material as ShaderMaterial
+	check("flash-shader per vijand", ma != null and mb != null and ma != mb)
+	for _i in 80:
+		SomHitReact.tick(a, 0.005)
+	SomHitReact.tick(b, 0.01)
+	check("flits vijand A uit na finish", is_equal_approx(float(ma.get_shader_parameter("flash")), 0.0))
+	check("flits vijand B nog aan", float(mb.get_shader_parameter("flash")) > 0.5)
+	m.queue_free()
+	mv.queue_free()
+	a.queue_free()
+	b.queue_free()
 
 
 func _load_room() -> Node:

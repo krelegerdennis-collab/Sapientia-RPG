@@ -1,11 +1,10 @@
 extends RefCounted
-## Game-feel fase 1: impact-FX, gewichtsklassen (TIJDELIJK), squash/nudge-tabellen.
+## Game-feel fase 1: impact-FX, gewichtsklassen, squash/nudge-tabellen.
 ## Alleen client-weergave; geen sim-knockback of netwerk.
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const VALID_IMPACT_ELEMENTS: Array[String] = ["fysiek", "vuur", "ijs", "bliksem", "natuur", "licht"]
 
-## TIJDELIJKE AANNAME (Dennis beslist nog): geen officiële gewichtsklasse in content-data.
 const WEIGHT_LIGHT: Array[String] = ["moskonijn", "glitchmot", "papiergeest"]
 const WEIGHT_MEDIUM: Array[String] = ["mosslijm", "inktwurm"]
 
@@ -35,23 +34,31 @@ static func weight_class_for_monster(m: Node, e: Dictionary) -> String:
 
 ## Squash (sx, sy) per fase; alleen veelvouden van 1/16.
 static func squash_for(weight: String, phase: int, finisher_only_heavy: bool) -> Vector2:
-	if weight == "zwaar" and finisher_only_heavy:
+	if weight == "zwaar":
+		if not finisher_only_heavy:
+			return Vector2.ONE
 		if phase == 0:
 			return Vector2(1.0625, 0.9375)
 		return Vector2.ONE
 	match weight:
 		"licht":
 			match phase:
-				0, 1:
+				0:
 					return Vector2(1.125, 0.875)
+				1:
+					return Vector2(1.0625, 0.9375)
 				2:
 					return Vector2(0.9375, 1.0625)
+				_:
+					return Vector2.ONE
 		_:
 			match phase:
 				0, 1:
 					return Vector2(1.0625, 0.9375)
 				2:
 					return Vector2(0.9375, 1.0625)
+				_:
+					return Vector2.ONE
 	return Vector2.ONE
 
 

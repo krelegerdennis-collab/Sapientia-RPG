@@ -7,9 +7,7 @@ const SomGameFeelData := preload("res://scripts/data/som_gamefeel_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const META_KEY := &"som_hitreact"
 const FLASH_SHADER := preload("res://assets/shaders/som_hit_flash.gdshader")
-const CELL_H := 16.0
-
-static var _shader_cache: ShaderMaterial
+const FOOT_PIVOT := 8.0
 
 
 static func _state(m: Node) -> Dictionary:
@@ -22,6 +20,7 @@ static func _state(m: Node) -> Dictionary:
 			"sprite_off0": Vector2.ZERO,
 			"had_shader": false,
 			"saved_mat": null,
+			"flash_mat": null,
 		})
 	return m.get_meta(META_KEY)
 
@@ -52,6 +51,7 @@ static func trigger(arena, m: Node, e: Dictionary, dir: Vector2i, weight: String
 		else:
 			arena._monster_pose(m, e, "hurt", 0, SomData.HIT_FLASH_CONTACT)
 	else:
+		_ensure_flash_mat(m, st)
 		_apply_shader_flash(m, st, 1.0)
 	m.set_meta(META_KEY, st)
 
@@ -70,11 +70,19 @@ static func force_hurt_flash_frame(m: Node, e: Dictionary) -> bool:
 		return false
 	if m.sprite == null:
 		return false
-	var hms: Array = SomData.MONSTER_SHEETS["hurt"]["ms"]
 	var row := mini(SomFx.dir_index(m.facing), m.sprite.vframes - 1)
 	m.sprite.frame = row * m.sprite.hframes + 0
 	e["pose_el"] = 0.0
 	return true
+
+
+static func _hitstop_ticks(m: Node) -> int:
+	if m == null or not "room" in m or m.room == null:
+		return 0
+	var som = m.room.get("som")
+	if som == null or not som.enemies.has(m):
+		return 0
+	return int(som.enemies[m].get("hitstop", 0))
 
 
 static func tick(m: Node, delta: float) -> void:
@@ -84,8 +92,9 @@ static func tick(m: Node, delta: float) -> void:
 	var t_ms := float(st["t"])
 	if t_ms < 0.0:
 		return
-	t_ms += delta * 1000.0
-	st["t"] = t_ms
+	if _hitstop_ticks(m) <= 0:
+		t_ms += delta * 1000.0
+		st["t"] = t_ms
 	if t_ms > 270.0:
 		_finish(m, st)
 		m.set_meta(META_KEY, st)
@@ -94,30 +103,35 @@ static func tick(m: Node, delta: float) -> void:
 	var phase := SomGameFeelData.squash_phase(t_ms)
 	var sc := SomGameFeelData.squash_for(weight, phase, bool(st["heavy_squash"]))
 	m.sprite.scale = sc
-	var foot_y := _foot_offset_y(sc.y)
-	var nudge := SomGameFeelData.nudge_px(weight, t_ms)
-	var dx := float(st["dir"].x)
-	if dx == 0.0:
-		dx = float(st["dir"].y)
 	var off0: Vector2 = st["sprite_off0"]
-	m.sprite.offset = off0 + Vector2(dx * nudge, foot_y)
+	var off_y := (off0.y + FOOT_PIVOT) / sc.y - FOOT_PIVOT
+	var nudge := SomGameFeelData.nudge_px(weight, t_ms)
+	var dir := Vector2(st["dir"])
+	if dir.length_squared() < 0.01:
+		dir = Vector2.RIGHT
+	else:
+		dir = dir.normalized()
+	var nudge_v := dir * nudge
+	m.sprite.offset = Vector2(off0.x + nudge_v.x, off_y + nudge_v.y)
 	if not _has_hurt_sheet(m):
 		_apply_shader_flash(m, st, 1.0 if t_ms < SomData.HIT_FLASH_CONTACT * 1000.0 else 0.0)
 	m.set_meta(META_KEY, st)
 
 
-static func _foot_offset_y(scale_y: float) -> float:
-	return -CELL_H * 0.5 * (1.0 - scale_y)
+static func _ensure_flash_mat(m: Node, st: Dictionary) -> void:
+	var mat: ShaderMaterial = st.get("flash_mat")
+	if mat == null:
+		mat = ShaderMaterial.new()
+		mat.shader = FLASH_SHADER
+		st["flash_mat"] = mat
+		st["had_shader"] = true
+		m.sprite.material = mat
 
 
 static func _apply_shader_flash(m: Node, st: Dictionary, amount: float) -> void:
-	if _shader_cache == null:
-		_shader_cache = ShaderMaterial.new()
-		_shader_cache.shader = FLASH_SHADER
-	if st.get("had_shader", false) == false and amount > 0.0:
-		st["had_shader"] = true
-		m.sprite.material = _shader_cache
-	_shader_cache.set_shader_parameter("flash", amount)
+	_ensure_flash_mat(m, st)
+	var mat: ShaderMaterial = st["flash_mat"]
+	mat.set_shader_parameter("flash", amount)
 
 
 static func _finish(m: Node, st: Dictionary) -> void:
@@ -125,7 +139,8 @@ static func _finish(m: Node, st: Dictionary) -> void:
 	m.sprite.scale = Vector2.ONE
 	m.sprite.offset = st["sprite_off0"]
 	if bool(st.get("had_shader", false)):
+		var mat: ShaderMaterial = st.get("flash_mat")
+		if mat != null:
+			mat.set_shader_parameter("flash", 0.0)
 		m.sprite.material = st.get("saved_mat")
 		st["had_shader"] = false
-	if _shader_cache != null:
-		_shader_cache.set_shader_parameter("flash", 0.0)
