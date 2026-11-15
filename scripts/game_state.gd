@@ -713,6 +713,7 @@ func _ready() -> void:
 			["--golemstorytest", "res://scripts/tests/golem_story_tests.gd", "GolemStoryTest", "golemstorytest"],
 			["--gamefeeltest", "res://scripts/tests/gamefeel_tests.gd", "GameFeelTest", "gamefeeltest"],
 			["--gamefeelfase1test", "res://scripts/tests/gamefeel_fase1_tests.gd", "GameFeelFase1Test", "gamefeelfase1test"],
+			["--gamefeelfase2test", "res://scripts/tests/gamefeel_fase2_tests.gd", "GameFeelFase2Test", "gamefeelfase2test"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
