@@ -195,37 +195,45 @@
  "wereldkaart": {
   "site_tiles_tl": [
    30,
-   30
+   32
   ],
   "site_tiles": [
    [
     30,
-    30
+    32
    ],
    [
     31,
-    30
+    32
    ],
    [
     30,
-    31
+    33
    ],
    [
     31,
-    31
+    33
    ]
   ],
   "site_px_tl": [
    480,
-   480
+   512
+  ],
+  "site_px_br": [
+   511,
+   543
   ],
   "site_px_centre": [
    496,
-   496
+   528
   ],
-  "besluit": "Dennis 2026-11-15 16:06: \"plek van colosseum onder willowdale, gaat pas open na vesper\"; 16:20: \"Doe hem nog 4 vakjes zuid\" (BEVESTIGD)",
-  "ref": "Wilgendal/Willowdale-dorp = wereldkaart.tscn Exits/NaarWilgendal tiles (30,23)-(31,24), spawn van_wilgendal (488,408) = tile (30,25) blijft vrij; site = 4 tiles zuidelijker dan de eerste plek (30,26), in de as/grind-inham tussen de bergen; ondergrond v14 #25/#31/#29/#27 (as en grind, begaanbaar)",
-  "pad": "begaanbaar pad vanaf spawn (30,25): (31,25) (31,26) (31,27) (31,28) (31,29) (30,29) -> (30,30); kolom 31 loopt langs de bergrand ((30,28) is berg)",
+  "exit_px": [
+   480,
+   512
+  ],
+  "besluit": "Dennis 2026-11-15 16:06: \"plek van colosseum onder willowdale, gaat pas open na vesper\"; 16:20: \"Doe hem nog 4 vakjes zuid\"; 16:23: \"Doe maar nog 2 vakjes naar zuid\" (BEVESTIGD)",
+  "ref": "Wilgendal/Willowdale-dorp = wereldkaart.tscn Exits/NaarWilgendal tiles (30,23)-(31,24), spawn van_wilgendal (488,408) = tile (30,25) blijft vrij; site = (30,32)-(31,33): 6 tiles zuidelijker dan de eerste plek (30,26), direct onder de as/grind-inham; ondergrond v14 #0 (gras, begaanbaar)",
+  "pad": "begaanbaar pad vanaf spawn (30,25): (31,25) (31,26) (31,27) (31,28) (31,29) (30,29) (30,30) (30,31) -> (30,32); kolom 31 langs de bergrand ((30,28) is berg), dan door de as/grind-inham",
   "atlas": "assets/tiles/wereld_v18_arena.png",
   "locked": {
    "atlas_coords": [
@@ -270,6 +278,6 @@
    "when": "na de Vesper-unlock"
   },
   "unlock_flag_suggestie": "noor_lid (zelfde vlag als berggrot_data.gd TUNNEL_VLAG); CODE bevestigt",
-  "layer": "overlay TileMapLayer boven Ground (of Sprite2D); transparante omgeving, Ground (as/grind) blijft eronder"
+  "layer": "overlay TileMapLayer boven Ground (of Sprite2D); transparante omgeving, Ground (gras) blijft eronder"
  }
 }
