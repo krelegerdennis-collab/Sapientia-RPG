@@ -166,7 +166,7 @@ func _coop_purge_guest_save_files() -> void:
 
 
 func _on_coop_link_lost() -> void:
-	if not coop_in_session():
+	if not coop_in_session() or _coop_scene_handles_end():
 		return
 	var msg := "Connection lost."
 	coop_end_session("")
@@ -179,8 +179,17 @@ func coop_session_end_message(reason: String) -> String:
 	return str(Protocol.SESSION_END_TEXT.get(reason, Protocol.SESSION_END_TEXT["ended"]))
 
 
+## Online hal en online run sturen zelf terug naar de lobby (met melding), niet naar de titel.
+func _coop_scene_handles_end() -> bool:
+	var tree := get_tree()
+	var scene := tree.current_scene if tree != null else null
+	return scene != null and scene.has_method("handles_coop_end") and bool(scene.handles_coop_end())
+
+
 func _on_coop_session_ended(reason: String) -> void:
 	if coop_role == "" and reason == "":
+		return
+	if _coop_scene_handles_end():
 		return
 	var tree := get_tree()
 	var scene := tree.current_scene if tree != null else null
@@ -762,7 +771,9 @@ func _ready() -> void:
 			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"],
 			["--d100modesim", "res://tools/battlesim/d100_mode_sim.gd", "D100ModeSim", "d100modesim"],
 			["--d100modesimtest", "res://scripts/tests/d100_mode_sim_tests.gd", "D100ModeSimTest", "d100modesimtest"],
-			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"]]:
+			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"],
+			["--coopplaytesttest", "res://scripts/tests/coop_playtest_tests.gd", "CoopPlaytestTest", "coopplaytesttest"],
+			["--coopplaytestgast", "res://scripts/tests/coop_playtest_guest.gd", "CoopPlaytestGast", "coopplaytestgast"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):

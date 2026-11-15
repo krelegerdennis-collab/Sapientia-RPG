@@ -50,6 +50,8 @@ var protocol_version := Protocol.VERSION
 ## Online v2: gekozen simulatie (leeg tot de host kiest) en ready per stoel.
 var sim_id := ""
 var sim_mode := ""
+## Online v2: body van het laatste START_GAME (seed, mode, floor). Leeg bij LAN.
+var start_body: Dictionary = {}
 var _ready_by_seat: Dictionary = {}
 ## Leeg = de client leest applied_grants van het M1-profiel. Vervangt die lezing.
 var is_grant_applied: Callable = Callable()
@@ -349,6 +351,7 @@ func close() -> void:
 	_emote_gate = null
 	sim_id = ""
 	sim_mode = ""
+	start_body = {}
 	_ready_by_seat.clear()
 	_suppress = false
 
@@ -371,11 +374,19 @@ func unbind_gameplay() -> void:
 	_gameplay = null
 
 
-## Host: iedereen mag de Action-sandbox laden.
-func host_start_game() -> void:
+## Host: iedereen mag de Action-sandbox laden. Online (v2) draagt body seed/mode/floor van de run.
+func host_start_game(body: Dictionary = {}) -> void:
 	if not is_host or _peer == null:
 		return
-	_unicast_remotes(Protocol.Kind.START_GAME, {})
+	start_body = body.duplicate()
+	_unicast_remotes(Protocol.Kind.START_GAME, body)
+
+
+## Gast: netjes vertrekken (LEAVE naar de host) en de verbinding sluiten.
+func leave_session() -> void:
+	if _peer != null and not is_host and phase == Phase.IN:
+		_send_to(Protocol.HOST_PEER_ID, Protocol.Kind.LEAVE, {}, protocol_version)
+	close()
 
 
 ## Host: sessie beëindigen (bv. app op pauze). Gasten krijgen session_ended.
@@ -762,6 +773,7 @@ func _on_client_v2(msg: Dictionary) -> void:
 			_on_session_end(body)
 		Protocol.Kind.START_GAME:
 			if phase == Phase.IN:
+				start_body = body.duplicate()
 				start_game_received.emit()
 
 

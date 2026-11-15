@@ -20,6 +20,13 @@ const LobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const THEME := preload("res://assets/theme.tres")
+const Run := preload("res://scripts/online/online_dls_run.gd")
+const RUN_SCENE := "res://scenes/online/online_run.tscn"
+## Reden in SESSION_END als de host de kamer of de run verlaat.
+const END_HOST_LEFT := "host_left"
+const LEAVE_TEXT := "Verlaten"
+const MSG_HOST_LEFT := "De host heeft de kamer verlaten."
+const MSG_LINK_LOST := "Verbinding met de kamer verbroken."
 
 const TRIAL_SIM := "dls"
 const TRIAL_MODE := "easy"
@@ -56,6 +63,7 @@ var _code_label: Label
 var _mode_label: Label
 var _ready_btn: Button
 var _start_btn: Button
+var _leave_btn: Button
 var _mode_btns: Dictionary = {}
 var _bodies: Dictionary = {}
 var _walk_rect := Rect2(16, 16, 352, 184)
@@ -198,13 +206,39 @@ func start_enabled() -> bool:
 	return lobby != null and lobby.is_host and lobby.human_seats_ready() and not started
 
 
+## Host: Start. Stuurt seed/mode/floor naar de gasten en laadt de online run (alleen als
+## deze hal de hoofdscène is; een ingebedde hal, bv. in een test, blijft staan).
 func press_start() -> bool:
 	if not start_enabled():
 		return false
-	lobby.host_start_game()
+	if lobby.sim_mode == "":
+		lobby.select_sim(TRIAL_SIM, TRIAL_MODE)
+	var body := {
+		"seed": randi() & 0x7FFFFFFF,
+		"mode": lobby.sim_mode if lobby.sim_mode != "" else TRIAL_MODE,
+		"floor": 1,
+	}
+	lobby.host_start_game(body)
 	started = true
 	_refresh_hud()
+	_launch_run(body)
 	return true
+
+
+## De hal is de online lobby: GameState laat sessie-einde en verbindingsverlies aan ons.
+func handles_coop_end() -> bool:
+	return true
+
+
+## Kamer verlaten (host of gast): verbinding netjes dicht, terug naar Host/Join.
+func leave() -> void:
+	var lob := active_lobby()
+	if lob != null:
+		if lob.is_host and lob.phase == LanLobby.Phase.IN:
+			lob.broadcast_session_end(END_HOST_LEFT)
+		elif not lob.is_host:
+			lob.leave_session()
+	_reset_to_menu("")
 
 
 ## Alleen ids 0..3 (help, hier heen, goed gedaan, bedankt). Geen tekstvak.
@@ -282,6 +316,10 @@ func attach(p_lobby: LanLobby) -> void:
 		lobby.emote_received.connect(_on_emote)
 	if not lobby.start_game_received.is_connected(_on_start_game):
 		lobby.start_game_received.connect(_on_start_game)
+	if not lobby.session_ended.is_connected(_on_session_ended):
+		lobby.session_ended.connect(_on_session_ended)
+	if not lobby.link_lost.is_connected(_on_link_lost):
+		lobby.link_lost.connect(_on_link_lost)
 	refresh_actors()
 	_start_sync()
 	_refresh_hud()
@@ -299,6 +337,9 @@ func coop_poll_local_input() -> Dictionary:
 	var stick := _stick
 	if stick.length_squared() < 0.0001 and _touch != null:
 		stick = _touch.joy_raw
+	if stick.length_squared() < 0.0001:
+		# Laptop/toetsenbord (de host op de laptop had geen joystick).
+		stick = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if stick.length() < 0.2:
 		stick = Vector2.ZERO
 	else:
@@ -388,6 +429,7 @@ func _open_code_screen() -> void:
 	screen.hall_profile = _profile_packet()
 	layer.add_child(screen)
 	_code = screen
+	screen.apply_hall_entry()
 	if not screen.lobby.room_ready.is_connected(_on_room_ready):
 		screen.lobby.room_ready.connect(_on_room_ready)
 	if not screen.lobby.assigned.is_connected(_on_assigned):
@@ -419,33 +461,7 @@ func _maybe_enter() -> void:
 
 
 func _profile_packet() -> Dictionary:
-	var src := profile
-	if src.is_empty():
-		var store := Profile.new()
-		if store.has_slot(0):
-			src = store.get_slot(0)
-	if src.is_empty():
-		return {}
-	var class_id := str(src.get("class", ""))
-	var look_v: Variant = src.get("look", {})
-	if look_v is PackedByteArray:
-		return {
-			"uid": str(src.get("uid", "")),
-			"name": str(src.get("name", "")),
-			"class": class_id,
-			"look": look_v,
-		}
-	var look := {}
-	if look_v is Dictionary:
-		look = (look_v as Dictionary).duplicate()
-	if class_id != "":
-		look["class"] = class_id
-	return {
-		"uid": str(src.get("uid", "")),
-		"name": str(src.get("name", "")),
-		"class": class_id,
-		"look": look,
-	}
+	return LobbyScreen.online_packet(profile)
 
 
 func _start_sync() -> void:
@@ -492,6 +508,72 @@ func _on_emote(seat: int, emote_id: int) -> void:
 
 func _on_start_game() -> void:
 	started = true
+	_refresh_hud()
+	if lobby != null:
+		_launch_run(lobby.start_body)
+
+
+## Naar de online run (scenes/online/online_run.tscn). De lobby gaat mee via GameState.
+func _launch_run(body: Dictionary) -> void:
+	if lobby == null or not is_inside_tree() or get_tree().current_scene != self:
+		return
+	var mode := str(body.get("mode", TRIAL_MODE))
+	if OnlineDlsModes.floors(mode) <= 0 or LOCKED_MODES.has(mode):
+		mode = TRIAL_MODE
+	var seed := int(body.get("seed", 0))
+	if _session != null and is_instance_valid(_session):
+		_session.shutdown(true)
+	_session = null
+	if _code != null:
+		_code.hand_off_net()
+	GameState.coop_register_lobby(lobby, null)
+	GameState.coop_role = "host" if lobby.is_host else "guest"
+	Run.start(mode, seed)
+	Run.floor_no = clampi(int(body.get("floor", 1)), 1, Run.floors_total())
+	get_tree().change_scene_to_file(RUN_SCENE)
+
+
+func _on_session_ended(reason: String) -> void:
+	var msg := MSG_HOST_LEFT if reason == END_HOST_LEFT else GameState.coop_session_end_message(reason)
+	_reset_to_menu(msg)
+
+
+func _on_link_lost() -> void:
+	_reset_to_menu(MSG_LINK_LOST)
+
+
+func _detach() -> void:
+	if lobby == null:
+		return
+	var pairs := [
+		[lobby.roster_changed, _on_roster], [lobby.ready_changed, _on_ready],
+		[lobby.sim_selected, _on_sim], [lobby.emote_received, _on_emote],
+		[lobby.start_game_received, _on_start_game], [lobby.session_ended, _on_session_ended],
+		[lobby.link_lost, _on_link_lost],
+	]
+	for pair in pairs:
+		var sig: Signal = pair[0]
+		var fn: Callable = pair[1]
+		if sig.is_connected(fn):
+			sig.disconnect(fn)
+
+
+## Terug naar Host/Join in deze hal: sessie weg, poppetjes weg, code-scherm weer open.
+func _reset_to_menu(message: String) -> void:
+	if _session != null and is_instance_valid(_session):
+		_session.shutdown(true)
+	_session = null
+	_detach()
+	lobby = null
+	_entered = false
+	started = false
+	close_picker()
+	_spawn_all([])
+	_balloon_left.clear()
+	if _hud != null:
+		_hud.visible = false
+	if _code != null:
+		_code.unfold_for_hall(message)
 	_refresh_hud()
 
 
@@ -704,6 +786,8 @@ func _build_hud() -> void:
 	_row.offset_top = 2.0
 	_row.offset_right = -2.0
 	_row.offset_bottom = 22.0
+	# Meer knoppen dan 220 breed (Verlaten erbij): groei naar links, niet uit beeld.
+	_row.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_row)
 	for i in Icons.EMOTE_COUNT:
@@ -723,6 +807,9 @@ func _build_hud() -> void:
 	_start_btn = _text_button("Start", "StartButton")
 	_start_btn.pressed.connect(press_start)
 	_row.add_child(_start_btn)
+	_leave_btn = _text_button(LEAVE_TEXT, "LeaveButton")
+	_leave_btn.pressed.connect(leave)
+	_row.add_child(_leave_btn)
 	_picker = HBoxContainer.new()
 	_picker.name = "SimPicker"
 	_picker.visible = false
