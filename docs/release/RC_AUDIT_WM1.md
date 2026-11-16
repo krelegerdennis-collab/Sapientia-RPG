@@ -85,7 +85,7 @@ gekozen; het balansrapport is van vóór #408/#414/#446/#450) en F6.14/F6.17 (to
 | F3.6 | Archief 2 zonder Vesper (H17) | NIET TE CHECKEN | Handmatig. Deels: `kasdeurtest`, `archieftest`. | | | |
 | F3.7 | Golem Hall-varianten | NIET TE CHECKEN | Handmatig. Deels: `codextest`, `wm1playthroughtest`. | | | |
 | F3.8 | Zingend Graan | NIET TE CHECKEN | Handmatig. Deels: `woudtest`, `uxtest`, #363. | | | |
-| F3.9 | Game over bij elke baas | OPEN | `checkpointtest` dekt Golem (deel D) en Root King (deel E). Strangler en Mender hebben geen test. | Nieuwe suite voor respawn bij Strangler en Mender (geen bestaande test aanpassen). Tot dan in de playtest meenemen. | M | nee (nieuwe suite; CI-regel later via Forge) |
+| F3.9 | Game over bij elke baas | KLAAR | `checkpointtest` deelt D/E (Golem, Root King); `--bossrespawntest` dekt respawn bij The Strangler en The Mender (Archief 2). | CI-regel voor `bossrespawntest` later via Forge. | M | nee (nieuwe suite; CI-regel later via Forge) |
 | F3.10 | Save/load, autosave, oude saves | KLAAR | `savetest`, `savefuzztest`, `saveroundtriptest`, `saverobusttest`, `savehardeningtest`, `savestresstest` (#469), autosave per slot #391, versie-guard #392; allemaal in CI. | | | |
 | F3.11 | Hub-checks | NIET TE CHECKEN | Handmatig. Deels: `warperkamertest`, `echotest`, `wm1releasetest`. | | | |
 | F3.12 | Diepe Grot | KLAAR | `dungeon100gentest`/`schaaltest`/`regelstest`/`integratietest`/`blauwtest`/`rustpunttest`, `koopmantest`; allemaal in CI. | | | |
