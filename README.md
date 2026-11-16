@@ -5,6 +5,7 @@
 dit bestand en de overige docs zijn Nederlands.
 
 - Agent-regels en testsuites: [`AGENTS.md`](AGENTS.md) en [`docs/WORKFLOW.md`](docs/WORKFLOW.md).
+- **Huidige versie: 0.21 (code 23).** De enige bron is [`tools/release/version.json`](tools/release/version.json); `tools/release/bump_version --check` controleert dat `project.godot` en de presets gelijk zijn.
 - **Versiegeschiedenis en release-notities** staan in [`CHANGELOG.md`](CHANGELOG.md) (niet meer hieronder).
 - Overdrachten van RPG CODE / RPG ART (patches, screenshots, besluiten): [`docs/handoff/`](docs/handoff/).
 
@@ -423,7 +424,7 @@ vensters op 384x216.
 
 **Klaar in dit project (v0.10):** `export_presets.cfg` bevat een preset **"Android"** en een preset
 **"Android arm64"** (alleen arm64-v8a, kleiner; export naar `../rpg_prototype_arm64.apk`):
-- pakket `com.dennis.rpgprototype`, app-naam *SAPIENTIA* (tot v0.12: *RPG Prototype*), versie 0.13 (code 15)
+- pakket `com.dennis.rpgprototype`, app-naam *SAPIENTIA* (tot v0.12: *RPG Prototype*), versie en code uit `tools/release/version.json` (nu 0.21, code 23)
 - arm64-v8a + armeabi-v7a, liggend (`window/handheld/orientation` = sensor landscape), immersive
 - officiële sjabloon-APK (geen Gradle): min SDK 21, target SDK 34. Een eigen min SDK (bv. 24) kan
   alleen met *Gradle Build*

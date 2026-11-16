@@ -178,8 +178,8 @@ gekozen; het balansrapport is van vóór #408/#414/#446/#450) en F6.14/F6.17 (to
 |---|---|---|---|---|---|---|
 | F8.1 | Versie kiezen en overal gelijk | KLAAR | Besluit Dennis 15 nov: 0.21 / 23. Gezet met `bump_version set 0.21 --code 23` in versiebron, `project.godot:15` en alle 3 Android-presets; `bump_version --check` OK; `rcchecktest` [F8.1/F8.2] PASS; titelscherm leest `config/version` (`autotest`: label v0.21). Job 11, `release/wm1-rc-prep`. | Dennis kiest, Forge draait `bump_version minor`. | S | ja (versie) |
 | F8.2 | `version/code` hoger dan de vorige build | KLAAR | `rcchecktest` [F8.2]: code 23 > 22 (v0.20), PASS. | Komt mee met F8.1. | S | nee (Forge) |
-| F8.3 | Changelog | OPEN | Kop `## [0.21] (RC) - 2026-11-15` staat erin (Job 11), met regels over versie, netwerkrechten en geaccepteerde placeholder-SFX. De rest is nog niet bijgewerkt: `CHANGELOG.md` bestaat (#365) maar is sinds #397 (9 nov) niet bijgewerkt. Ontbreekt o.a.: HD-2D, CS-09 tot CS-12, F1/F2/F4, launcher-icoon. "Bekend (WM1-release)" zegt dat H3-kamers "achter de Diepe Grot-levels" zitten, maar `hub_cut` houdt ze dicht (`release_flags.gd:4`). Ook de regel over placeholder-art in Archief 2/World Warper is verouderd (`placeholders_v17.txt`: VERVANGEN v0.21). | Forge werkt Unreleased + Bekend bij, met de known issues uit deze audit. | M | nee (Forge) |
-| F8.4 | README en BUILDS kloppen | OPEN | `rcchecktest` [F8.4]: README noemt 0.21 nergens, wel "versie 0.13 (code 15)" (`README.md:426`). | Forge werkt beide bij. | S | nee (Forge) |
+| F8.3 | Changelog | KLAAR | Klus 12: `CHANGELOG.md` `## [0.21] (RC) - 2026-11-15` dekt nu `finish/wm1` sinds `v0.20` t/m #491 (Toegevoegd / Gewijzigd / Opgelost), o.a. HD-2D, CS-09 t/m CS-12, F2/F4, game-feel, launcher-icoon. Kopje "Bekend" bijgewerkt: `online_cut` + netwerkrechten uit, `hub_cut` (H3/H2), perfect dodge uit (`som_perfect_dodge_data.gd` `ENABLED = false`), placeholder-SFX, Action-HUD/F2.5. `[Unreleased]` leeg; `bump_version --check` OK. | | | |
+| F8.4 | README en BUILDS kloppen | KLAAR | Klus 12: `README.md:8` noemt "Huidige versie: 0.21 (code 23)" met `tools/release/version.json` als enige bron; de Android-sectie (`README.md:427`) verwijst naar die bron in plaats van "versie 0.13 (code 15)". Historische (v0.xx)-notities blijven. `rcchecktest` [F8.4] wordt daarmee PASS. | | | |
 | F8.5 | CI groen op de RC-commit | OPEN | Zie top 5 #4. | | S | ja (bij workflow-optie) |
 | F8.6 | Release-APK met secrets | OPEN | Zie top 5 #3. Of de secrets bestaan, kan deze sessie niet zien (Actions-API afgeschermd). | | S | nee |
 | F8.7 | `apksigner` / `aapt` | NIET TE CHECKEN | Er is nog geen release-APK. | | | |
@@ -218,7 +218,7 @@ Wat de suite controleert (alleen lezen):
 
 **Bekende OPEN-punten** komen als `OPEN  [id] ...` in de uitvoer. Die tellen niet als `FAIL`, zodat de suite groen kan blijven
 terwijl de bevinding zichtbaar is. Gaat zo'n punt dicht, dan wordt het een `PASS` met de melding dat dit rapport bijgewerkt moet
-worden. Nu verwacht: [F8.4], [F6.23], [F6.23b], [F6.24] en [F2.5].
+worden. Nu verwacht: [F6.23], [F6.23b], [F6.24] en [F2.5] ([F8.4] is dicht sinds Klus 12).
 
 Waarom deze keuze: een rode suite in CI zou elke PR blokkeren voor punten die alleen Forge of Dennis kan oplossen
 (versie, presets, audio). Een stille suite zou de bevinding verbergen. Met `OPEN` blijft het zichtbaar in de log en in dit rapport,
