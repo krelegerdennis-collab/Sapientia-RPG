@@ -42,5 +42,5 @@ static func begin_telegraph(arena, m: Node, parent: Node, center_fn: Callable, w
 		if not is_instance_valid(m) or not is_instance_valid(arena) or not arena.enemies.has(m):
 			return
 		pose_fn.call()
-		SomFx.number(parent, center_fn.call(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), bang_life)
+		SomFx.number(parent, center_fn.call(m) + Vector2(0, -14), "!", SomGameFeelData.TELEGRAPH_BANG_COLOR, bang_life)
 	, CONNECT_ONE_SHOT)
