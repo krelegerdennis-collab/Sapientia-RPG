@@ -6,8 +6,10 @@ const Protocol := preload("res://scripts/net/net_protocol.gd")
 const CoopLobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
 const Lobby := preload("res://scripts/net/lan_lobby.gd")
 const Discovery := preload("res://scripts/net/lan_discovery.gd")
+const Flags := preload("res://scripts/data/release_flags.gd")
 
 ## Zonder deze vier permissies kan een release-APK geen socket openen (ENet: ERR_CANT_CREATE).
+## WM1-RC (besluit Dennis 15 nov 2026): zolang online dicht is (ReleaseFlags.online_cut, H11) staan ze UIT.
 const NET_PERMISSIONS: Array[String] = [
 	"permissions/internet",
 	"permissions/access_network_state",
@@ -57,9 +59,10 @@ func _preset_tests() -> void:
 			continue
 		android += 1
 		var opt := name + ".options"
+		var verwacht := not Flags.online_cut
 		for perm in NET_PERMISSIONS:
-			check("%s (%s): %s = true" % [name, str(cfg.get_value(name, "name", "")), perm],
-					bool(cfg.get_value(opt, perm, false)))
+			check("%s (%s): %s = %s (online_cut %s)" % [name, str(cfg.get_value(name, "name", "")), perm, verwacht, Flags.online_cut],
+					bool(cfg.get_value(opt, perm, false)) == verwacht)
 		check("%s: signing-velden leeg (niet aangeraakt)" % name,
 				str(cfg.get_value(opt, "keystore/release", "")) == ""
 				and str(cfg.get_value(opt, "keystore/release_password", "")) == "")

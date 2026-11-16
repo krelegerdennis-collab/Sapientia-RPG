@@ -119,6 +119,9 @@ func _ready() -> void:
 	if WorldmapCutsceneScript.should_play(scene_file_path):
 		WorldmapCutsceneScript.start_on(self)
 	_spawn_garden_creatures()
+	# Colosseum: met ARENA_ENABLED uit doet consider() niets (geen node, geen save).
+	if scene_file_path.ends_with("/wereldkaart.tscn"):
+		preload("res://scripts/arena/arena_entry.gd").consider(self)
 	MapLightingC.apply(self)
 	if not Settings.changed.is_connected(_on_hd2d_setting):
 		Settings.changed.connect(_on_hd2d_setting)
