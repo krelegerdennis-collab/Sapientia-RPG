@@ -1,0 +1,453 @@
+{
+ "assets/tiles/wereld_v18_arena.png": {
+  "size": [
+   64,
+   32
+  ],
+  "profile": "ground",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 4,
+  "vframes": 2,
+  "repo_albedo": "assets/tiles/wereld_v18_arena.png",
+  "new_art": true,
+  "albedo_sha256": "ac4f529b49bd0c7b131677a0d212cf5e16fe8f0ff400b6614c7c46f2824a226c",
+  "desc": "worldmap Colosseum 2x2: left 32x32 open, right 32x32 locked (transparent surround)",
+  "rooms": [
+   "wereldkaart"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/tiles/wereld_v18_arena_n.png",
+  "normal_sha256": "f959c01b260a567f6369de026fe34684b99aa10806abb8a235dfc30f649960db",
+  "emissive_px": 4,
+  "emissive_file": "assets/hd2d/tiles/wereld_v18_arena_e.png",
+  "emissive_sha256": "46f84c11178cff88708f1841e170b0fc8c6dbfb6dc9aa756db6523df1500f45c"
+ },
+ "assets/ui/arena/icon_arena.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": null,
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/ui/arena/icon_arena.png",
+  "new_art": true,
+  "albedo_sha256": "9df5c7a357649885dcfb1ed0c5ce89b68edd87b242fd8d63a533295c44534073",
+  "desc": "arena icon 16x16 (menu/lobby/minimap)",
+  "rooms": [],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": false
+ },
+ "assets/ui/arena/icon_arena_token.png": {
+  "size": [
+   16,
+   16
+  ],
+  "profile": null,
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/ui/arena/icon_arena_token.png",
+  "new_art": true,
+  "albedo_sha256": "163e6c6620339ec11dc6f92b98d66284ce7646981da921c0164784b42ffff209",
+  "desc": "Arena Token currency icon 16x16",
+  "rooms": [],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": false
+ },
+ "assets/tiles/arena/arena_tiles.png": {
+  "size": [
+   256,
+   144
+  ],
+  "profile": "ground",
+  "cell": [
+   16,
+   16
+  ],
+  "hframes": 16,
+  "vframes": 9,
+  "repo_albedo": "assets/tiles/arena/arena_tiles.png",
+  "new_art": true,
+  "albedo_sha256": "b060525b7c24810a1e2120caee10d8966b65f13d124dc9cd651dbae621e923ef",
+  "desc": "arena interior tileset 16x9 tiles (v2 row 6: centred gate recess; v3 rows 7-8: wear, sand variation, trophy niche, dense crowd)",
+  "rooms": [],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/tiles/arena/arena_tiles_n.png",
+  "normal_sha256": "4b50643fe2f00b934a464fd4bd24dad42ee57bede59fea9a5b42e1c5892024b8",
+  "emissive_px": 67,
+  "emissive_file": "assets/hd2d/tiles/arena/arena_tiles_e.png",
+  "emissive_sha256": "c21304ac7e54e546d41c1decfedab15bd5ef94372ab7b7cb70b990bb65b5b1c2"
+ },
+ "assets/sprites/arena/arena_gate.png": {
+  "size": [
+   144,
+   48
+  ],
+  "profile": "prop",
+  "cell": [
+   48,
+   48
+  ],
+  "hframes": 3,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_gate.png",
+  "new_art": true,
+  "albedo_sha256": "79dcfb74f119aa7a2bce3b9fc434df198c7d0dc1b82cd12e93969bcc2be5e4e1",
+  "desc": "arena gate 48x48: f0 closed, f1 open, f2 closed+chained (lobby lock until noor_lid)",
+  "rooms": [
+   "arena_hal",
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_gate_n.png",
+  "normal_sha256": "93d778f8625f2547adab3798b2e23e638c07ea1e51d77959647dec8668067ca3",
+  "emissive_px": 16,
+  "emissive_file": "assets/hd2d/sprites/arena/arena_gate_e.png",
+  "emissive_sha256": "6916b511b49d76dcff6baaf9cd94fb57847b997604b083acb6d7794efaee90a7"
+ },
+ "assets/sprites/arena/arena_banner.png": {
+  "size": [
+   16,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_banner.png",
+  "new_art": true,
+  "albedo_sha256": "80f07037e6588e5084dde934762360bb7d49bf3f52297f0ac0de10984a624e79",
+  "desc": "maroon arena banner 16x32",
+  "rooms": [
+   "arena_hal",
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_banner_n.png",
+  "normal_sha256": "d5be4720c866504e7598c2c3ccfe965fe4567e6ae861073095a4f6bc02007380",
+  "emissive_px": 3,
+  "emissive_file": "assets/hd2d/sprites/arena/arena_banner_e.png",
+  "emissive_sha256": "325960e0a1c49c842eb85f7170a3e00c74d7464994366f8c00ec0123b8c8906e"
+ },
+ "assets/sprites/arena/arena_torch.png": {
+  "size": [
+   64,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   16,
+   32
+  ],
+  "hframes": 4,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_torch.png",
+  "new_art": true,
+  "albedo_sha256": "c336a2264a026ff4bad250665e43ac4ab0a21c203b2724cb6a2316e70182daae",
+  "desc": "standing iron torch 16x32, 4 frames @125 ms (8 fps, like the lichtprops)",
+  "rooms": [
+   "arena_hal",
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_torch_n.png",
+  "normal_sha256": "1a1affa871a61c0f24f23721df519c7c65fa08b44985eef6e9d446bf2cee40bf",
+  "emissive_px": 182,
+  "emissive_file": "assets/hd2d/sprites/arena/arena_torch_e.png",
+  "emissive_sha256": "f16d84f74ff0f85c6f230e52917320f8386a27904b8d6b278f663add82d8ff50"
+ },
+ "assets/sprites/arena/arena_counter.png": {
+  "size": [
+   48,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   48,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_counter.png",
+  "new_art": true,
+  "albedo_sha256": "66b4a8ba4205e90278ded3d10f27e433db6f77c5024f9c11e499056a5b8cb005",
+  "desc": "arena shop counter 48x32",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_counter_n.png",
+  "normal_sha256": "8a41f1238633bc037d1336e3c57c50b4d6cc1063c3280e49cb88662b69640ed2"
+ },
+ "assets/sprites/arena/arena_weapon_rack.png": {
+  "size": [
+   32,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_weapon_rack.png",
+  "new_art": true,
+  "albedo_sha256": "a6c747f526072e4b7bbf5e146974bf7159099aef60272e86f6c610e3621e65ee",
+  "desc": "weapon rack 32x32 (spear, gladii, axe, shield)",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_weapon_rack_n.png",
+  "normal_sha256": "77df6b4174af14123847ff68016b0c37c3151e94dc2360776d6b3e07cce0cc08"
+ },
+ "assets/sprites/arena/arena_bench.png": {
+  "size": [
+   32,
+   16
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   16
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_bench.png",
+  "new_art": true,
+  "albedo_sha256": "272be4b1814a5ff9a8c93c8ada4077f558159309e3c6ed2d39b4dfc284d86e56",
+  "desc": "waiting bench 32x16",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_bench_n.png",
+  "normal_sha256": "c51bbc1c57d5dac84728ee2ec248825ffbdd0fc9949c71e036740d74b22451d2"
+ },
+ "assets/sprites/arena/arena_crates.png": {
+  "size": [
+   32,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_crates.png",
+  "new_art": true,
+  "albedo_sha256": "31edfa85373be7fcf75ba3f2d2a0def6149f11a79498ed1f1c82ef4f14603481",
+  "desc": "crates + barrel 32x32",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_crates_n.png",
+  "normal_sha256": "3f46148fa9c32f4a3cab58dda3bcbb7a8361f384c02987756b3979f9af751fe0"
+ },
+ "assets/sprites/arena/arena_brazier.png": {
+  "size": [
+   128,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   32
+  ],
+  "hframes": 4,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_brazier.png",
+  "new_art": true,
+  "albedo_sha256": "7d361b6c2ca2231f0b520e880e14a9c7ed577d5a84407e29cc3bf26e94a836b7",
+  "desc": "fire bowl 32x32, 4 frames @125 ms",
+  "rooms": [
+   "arena_hal"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_brazier_n.png",
+  "normal_sha256": "74e542c26840f1a533622765a13aaa8ecd40e913af9661b16fdff1f9204ff503",
+  "emissive_px": 530,
+  "emissive_file": "assets/hd2d/sprites/arena/arena_brazier_e.png",
+  "emissive_sha256": "e477e551d097de94a95a965bb82fbac506774c6fab76c152d0957cf576601b4f"
+ },
+ "assets/sprites/arena/arena_sand_ring.png": {
+  "size": [
+   64,
+   64
+  ],
+  "profile": "ground",
+  "cell": [
+   64,
+   64
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_sand_ring.png",
+  "new_art": true,
+  "albedo_sha256": "f57ee010a8bda48f726546cf8507b43da4c2bae7c9471cdc0dcaf45d4c4b2115",
+  "desc": "trodden sand ring decal 64x64 (floor)",
+  "rooms": [
+   "arena_hal"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_sand_ring_n.png",
+  "normal_sha256": "3fb06a638b30dd0d95eaf30f4cd3f306cb4465a7f48112523983b60faf0013fb"
+ },
+ "assets/sprites/arena/arena_vip_loge.png": {
+  "size": [
+   48,
+   64
+  ],
+  "profile": "prop",
+  "cell": [
+   48,
+   64
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_vip_loge.png",
+  "new_art": true,
+  "albedo_sha256": "90fc3bd11ffec41d28b44116aefbe1bac5d6895fa3eb9dca255c93575995bcda",
+  "desc": "VIP box 48x64 on the east stands",
+  "rooms": [
+   "arena_hal"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_vip_loge_n.png",
+  "normal_sha256": "7b22bb16bf85a3d2d3af0d865eb491851a3efb88207bdd480ab88725e7e28a27"
+ },
+ "assets/sprites/arena/arena_notice_board.png": {
+  "size": [
+   32,
+   32
+  ],
+  "profile": "prop",
+  "cell": [
+   32,
+   32
+  ],
+  "hframes": 1,
+  "vframes": 1,
+  "repo_albedo": "assets/sprites/arena/arena_notice_board.png",
+  "new_art": true,
+  "albedo_sha256": "7eed0fff355a2bc7429d73bf4536def0516f1f2938be38a43ef394fcd17dce4d",
+  "desc": "notice board 32x32 (arena ladder + notices)",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/arena/arena_notice_board_n.png",
+  "normal_sha256": "f74cb1ad6ba688fda1421ec3376a17a8ba89494ba036a11fc8fae508a65116b1"
+ },
+ "assets/sprites/npc/arena_koopman_wm1_slim.png": {
+  "size": [
+   72,
+   128
+  ],
+  "profile": "npc",
+  "cell": [
+   24,
+   32
+  ],
+  "hframes": 3,
+  "vframes": 4,
+  "repo_albedo": "assets/sprites/npc/arena_koopman_wm1_slim.png",
+  "new_art": true,
+  "albedo_sha256": "02849dfdb35d7227abee0a3dc2b1f948dae404848102d4f0ab774974421fe319",
+  "desc": "Arena Quartermaster 24x32, wm1_slim 3x4",
+  "rooms": [],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/npc/arena_koopman_wm1_slim_n.png",
+  "normal_sha256": "a3c46029441e613dc17a5948299aa632431b85933b68056f4c9a256fdf1ff05d"
+ },
+ "assets/sprites/npc/arena_koopman_wm1_slim_idle.png": {
+  "size": [
+   48,
+   128
+  ],
+  "profile": "npc",
+  "cell": [
+   24,
+   32
+  ],
+  "hframes": 2,
+  "vframes": 4,
+  "repo_albedo": "assets/sprites/npc/arena_koopman_wm1_slim_idle.png",
+  "new_art": true,
+  "albedo_sha256": "8ae694b9c0f725685c5c698f572bd1f57707991734e199a450e5655411abace8",
+  "desc": "Arena Quartermaster idle 2x4 @600 ms",
+  "rooms": [
+   "arena_lobby"
+  ],
+  "found_by": [
+   "arena_v1"
+  ],
+  "normal": true,
+  "normal_file": "assets/hd2d/sprites/npc/arena_koopman_wm1_slim_idle_n.png",
+  "normal_sha256": "2aef0bc68e69e117483efa75b862bf0339b2f9716d839bf65d3cff2ca91e0d96"
+ }
+}

@@ -59,7 +59,12 @@ const SomHeavyData := preload("res://scripts/data/som_heavy_data.gd")
 const SomFeelData := preload("res://scripts/data/som_feel_data.gd")
 const SomStaggerData := preload("res://scripts/data/som_stagger_data.gd")
 const SomStagger := preload("res://scripts/som/som_stagger.gd")
+const SomPerfectDodgeData := preload("res://scripts/data/som_perfect_dodge_data.gd")
 const SomShakeScript := preload("res://scripts/som/som_shake.gd")
+const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
+const SomGameFeelData := preload("res://scripts/data/som_gamefeel_data.gd")
+const SomDeathGlitch := preload("res://scripts/som/som_death_glitch.gd")
+const SomEnemyRead := preload("res://scripts/som/som_enemy_read.gd")
 const TelegraphShape := preload("res://scripts/som/telegraph_shape.gd")
 const TelegraphLayer := preload("res://scripts/som/telegraph_layer.gd")
 const MapSprite := preload("res://scripts/map_sprite.gd")
@@ -82,6 +87,8 @@ var allies: Array = []
 ## Onkwetsbaar-tijd per held-id.
 var iframes := {}
 var down := false
+## Arena-colosseum: wel player_defeated, geen GameState.end_battle("lose"). Default uit = WM1 ongewijzigd.
+var arena_mode := false
 var hud: Node
 var ring: Node
 ## Codex vangen in Action (scripts/som/som_codex.gd)
@@ -98,6 +105,15 @@ var combat_stamina := CombatStamina.new()
 var _dodge_roll_ticks: Dictionary = {}
 var _dodge_cd_ticks: Dictionary = {}
 var _dodge_dir: Dictionary = {}
+## F1 perfect dodge: leeftijd roll (ticks), ICD, counter-venster, held-flits (ticks).
+var _pd_age: Dictionary = {}
+var _pd_icd: Dictionary = {}
+var _pd_counter: Dictionary = {}
+var _pd_flash: Dictionary = {}
+## Tests: perfect-events en tellers.
+var perfect_event_ticks: Array = []
+var perfect_count := 0
+var last_perfect_hitstop := -1
 ## Tests: geforceerde aanval-id voor de volgende telegraaf-windup ("" = RNG).
 var forced_enemy_attack := ""
 ## Keuze uit het ringmenu die na het sluiten "landt": {"kind": "item"/"spell", "id", "caster"}.
@@ -129,6 +145,9 @@ var step_texs := {}
 var map_cast_texs := {}
 ## Voor de autotest: laatste schade, laatste melding, tellers.
 var last_enemy_damage := 0
+## Client-only FX-keuze voor de volgende damage_enemy (geen sim-state).
+var _pending_impact_element := ""
+var _pending_chain_step := -2
 var last_player_damage := 0
 var last_hit_id := ""
 var last_attacker := ""
@@ -737,6 +756,8 @@ func sim_step() -> void:
 		_tick_ally_heavy()
 	_tick_stamina_and_dodge()
 	_tick_stagger()
+	_tick_perfect_dodge_pre()
+	_tick_hitreact(dt)
 	for m in enemies.keys():
 		if is_instance_valid(m):
 			_enemy_ai(m, dt)
@@ -745,10 +766,17 @@ func sim_step() -> void:
 	_tick_zones()
 	_tick_roots()
 	_sim_world(dt)
+	_tick_perfect_flash_vis()
 
 
 ## Wereld op de vaste stap: tegelbeweging van de vijanden (MapMonster.sim_move) en de arena-animaties
 ## (SomFx.Anim.step: treffer- en vrijgaveframe). Ook voor de co-op-host (coop_host_step).
+func _tick_hitreact(dt: float) -> void:
+	for m in enemies.keys():
+		if is_instance_valid(m) and SomHitReact.active(m):
+			SomHitReact.tick(m, dt)
+
+
 func _sim_world(dt: float) -> void:
 	for m in enemies.keys():
 		if is_instance_valid(m) and m.has_method("sim_move"):
@@ -1043,13 +1071,17 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 	SomFx.slash(room.get_node("Objects"), point, f)
 	var hits := 0
 	var atk := float(GameState.effective_stat(member(id), "atk"))
+	var use_counter := _pd_counter_active(id)
+	var swing_mult := mult
+	if use_counter:
+		swing_mult *= SomPerfectDodgeData.COUNTER_DAMAGE_MULT
 	for m in enemies.keys():
 		if not is_instance_valid(m):
 			continue
 		if center_of(m).distance_to(point) <= SomData.attack_reach(id) + 8.0 * maxf(m.size.x, m.size.y):
 			var e: Dictionary = enemies[m]
 			last_attacker = id
-			var stagger := mult >= 1.0
+			var stagger := swing_mult >= 1.0
 			var tiles := 1
 			var stop := 0
 			if step >= 0:
@@ -1060,11 +1092,16 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				stagger = stagger or SomHeavyData.ALWAYS_STAGGERS
 				tiles = SomHeavyData.knockback_tiles(heavy)
 				stop = SomHeavyData.hitstop_ticks(heavy)
+			if use_counter:
+				stagger = true
 			var num_color := SomFeelData.COL_NORMAL
 			var num_scale := 1.0
 			var shake_kind := ""
 			if SomFeelData.ENABLED:
-				if heavy > 0:
+				if use_counter:
+					num_color = SomFeelData.COL_HEAVY
+					num_scale = SomPerfectDodgeData.COUNTER_NUM_SCALE
+				elif heavy > 0:
 					num_color = SomFeelData.COL_HEAVY
 					num_scale = SomFeelData.SCALE_HEAVY2 if heavy >= 2 else 1.0
 					shake_kind = "heavy2" if heavy >= 2 else "heavy1"
@@ -1076,11 +1113,25 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				stg_kind = step
 			elif heavy > 0:
 				stg_kind = SomStaggerData.KIND_HEAVY_L1 if heavy == 1 else SomStaggerData.KIND_HEAVY_L2
-			damage_enemy(m, physical_damage(atk, float(e["def"]), mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
+			_pending_chain_step = step
+			_pending_impact_element = ""
+			damage_enemy(m, physical_damage(atk, float(e["def"]), swing_mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
 					num_color, num_scale, stg_kind)
+			if (step >= 0 and SomChainData.is_finisher(step)) or heavy >= 2:
+				SomFx.dust_finisher(room.get_node("Objects"), feet_of_enemy(m))
+			if use_counter:
+				SomFx.counter_spark(room.get_node("Objects"), center_of(m))
+			if use_counter and Settings.action_battles() and not e.has("golem"):
+				if SomStagger.apply_hit(e, m, e["data"], SomStaggerData.KIND_PERFECT_COUNTER):
+					SomStagger.enter_wankel(e)
+					if e.has("tg"):
+						(e["tg"] as TelegraphAttack).interrupt()
+					e["tele"] = 0.0
 			if shake_kind != "" and _feel_local_hero(id) and shake != null:
 				shake.kick(shake_kind)
 			hits += 1
+	if use_counter and hits > 0:
+		_pd_counter.erase(id)
 	swing_landed.emit(id, hits)
 	SessieLog.actie_slag(id, hits)
 	return hits
@@ -1152,6 +1203,10 @@ func _aim_caster_at(caster_id: String, m: Node) -> void:
 ## knock_tiles / hitstop: aanvalsketen (SomChainData); standaard 1 tegel en geen hitstop (zoals voorheen).
 func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles := 1, hitstop := 0,
 		num_color := Color(1, 1, 1), num_scale := 1.0, stg_kind := SomStaggerData.KIND_NONE) -> void:
+	var chain_step := _pending_chain_step
+	var impact_el := _pending_impact_element
+	_pending_impact_element = ""
+	_pending_chain_step = -2
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
@@ -1172,13 +1227,19 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 				if SomFeelData.ENABLED:
 					num_color = SomFeelData.COL_FINISHER
 		e["hp"] = int(e["hp"]) - dmg
-	e["flash"] = SomData.HIT_FLASH
+	e["flash"] = SomData.HIT_FLASH_CONTACT
 	last_enemy_damage = dmg
 	if not SomFeelData.ENABLED:
 		num_color = Color(1, 1, 1)
 		num_scale = 1.0
 	SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -10), str(dmg), num_color, 0.6, num_scale)
-	SomFx.spark(room.get_node("Objects"), center_of(m))
+	var at := center_of(m)
+	if impact_el != "":
+		SomFx.impact_spark(room.get_node("Objects"), at, impact_el)
+	elif chain_step == SomChainData.STEP_HIT1 or chain_step == SomChainData.STEP_HIT2:
+		SomFx.spark(room.get_node("Objects"), at)
+	else:
+		SomFx.impact_spark(room.get_node("Objects"), at, "fysiek")
 	enemy_hit.emit(m, dmg)
 	if Settings.action_battles() and not golem and stg_kind != SomStaggerData.KIND_NONE:
 		if SomStagger.apply_hit(e, m, e["data"], stg_kind):
@@ -1187,8 +1248,12 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 				(e["tg"] as TelegraphAttack).interrupt()
 			e["tele"] = 0.0
 	if int(e["hp"]) <= 0:
+		# Geen SomHitReact op de doodsslag (bewust); fase 2 vervangt sterfbeeld door glitch-death-sheet.
 		_defeat_enemy(m)
 		return
+	var finisher_hit := chain_step == SomChainData.STEP_FINISHER
+	var wt := SomGameFeelData.weight_class_for_monster(m, e)
+	SomHitReact.trigger(self, m, e, dir, wt, finisher_hit, stagger and not golem)
 	last_hitstop_ticks = hitstop
 	if hitstop > 0:
 		e["hitstop"] = maxi(int(e.get("hitstop", 0)), hitstop)
@@ -1197,7 +1262,6 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 	if e.has("tg"):
 		(e["tg"] as TelegraphAttack).interrupt()
 	e["tele"] = 0.0          # volle treffer = telegraaf afgebroken
-	_monster_pose(m, e, "hurt", 0, _hurt_seconds())
 	last_knockback_tiles = knock_tiles
 	_knockback(m, dir, knock_tiles)
 
@@ -1263,6 +1327,9 @@ func _defeat_enemy(m: Node) -> void:
 	enemy_defeated.emit(m, gained_exp, gained_gold, got)
 	m.set_process(false)
 	m.collision_layer = 0
+	if SomGameFeelData.DEATH_GLITCH_ENABLED and room != null and room.has_node("Objects"):
+		SomDeathGlitch.play(room.get_node("Objects"), self, m, e, got)
+		return
 	var dt := _monster_sheet(m, "death")
 	if dt and m.sprite:
 		# doodgaan-sheet: 4 frames x MONSTER_DEATH_MS
@@ -1298,6 +1365,10 @@ func _monster_sheet(m: Node, kind: String) -> Texture2D:
 
 ## Pose tonen voor 'sec' seconden. attack: kolom col (0 opladen, 1 uithaal, 2 terug) in de rij van de
 ## kijkrichting; hurt: kolom = richting. Het monster staat zolang stil (zijn eigen loopanimatie uit).
+func _telegraph_charge_pose(m: Node, e: Dictionary, sec: float) -> void:
+	_monster_pose(m, e, "attack", 0, sec)
+
+
 func _monster_pose(m: Node, e: Dictionary, kind: String, col: int, sec: float) -> void:
 	var t := _monster_sheet(m, kind)
 	if t == null or m.sprite == null:
@@ -1335,6 +1406,8 @@ func e_orig_offset(m: Node) -> Vector2:
 
 
 func _hurt_frame(m: Node, e: Dictionary, delta: float) -> void:
+	if SomHitReact.force_hurt_flash_frame(m, e):
+		return
 	# 2 frames: wit (70 ms), dan rode terugslag (220 ms)
 	e["pose_el"] = float(e.get("pose_el", 0.0)) + delta
 	var hms: Array = SomData.MONSTER_SHEETS["hurt"]["ms"]
@@ -1429,6 +1502,8 @@ func _enemy_ai(m: Node, delta: float) -> void:
 	var e: Dictionary = enemies[m]
 	if int(e.get("hitstop", 0)) > 0:       # hitstop (finisher): vijand bevriest een paar ticks
 		e["hitstop"] = int(e["hitstop"]) - 1
+		if int(e["hitstop"]) <= 0:
+			e["pd_freeze"] = false
 		return
 	if Settings.action_battles() and SomStaggerData.in_wankel(e):
 		_enemy_wankel_hold(m, e, delta)
@@ -1458,15 +1533,16 @@ func _enemy_ai(m: Node, delta: float) -> void:
 			e["cd"] = SomData.attack_cooldown(room.room_id, room.tier())
 			_monster_pose(m, e, "attack", 1, SomData.MONSTER_STRIKE_MS / 1000.0)
 			if dist <= SomData.ENEMY_REACH + 8.0 * (maxf(m.size.x, m.size.y) - 1.0):
-				hit_member(tid, int(e["atk"]))
+				hit_member(tid, int(e["atk"]), 1.0, 0, m)
 	elif float(e["cd"]) > 0.0:
 		e["cd"] = float(e["cd"]) - delta
 	elif dist <= SomData.ENEMY_REACH:
 		e["tele"] = SomData.TELEGRAPH
 		var to := body_of(tid) - center_of(m)
 		m.facing = Vector2i(signi(roundi(to.x)), 0) if absf(to.x) >= absf(to.y) else Vector2i(0, signi(roundi(to.y)))
-		_monster_pose(m, e, "attack", 0, SomData.TELEGRAPH + 0.05)
-		SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), SomData.TELEGRAPH)
+		var objs := room.get_node("Objects")
+		SomEnemyRead.begin_telegraph(self, m, objs, Callable(self, "center_of"), SomData.TELEGRAPH,
+				Callable(self, "_telegraph_charge_pose").bind(m, e, SomData.TELEGRAPH + 0.05))
 	if dist > SomData.ENEMY_REACH - 6.0 and float(e["tele"]) <= 0.0:
 		e["chase"] = float(e["chase"]) - delta
 		if float(e["chase"]) <= 0.0 and not m.is_moving and dist < SomData.CHASE_RANGE * 16.0:
@@ -1509,9 +1585,11 @@ func _golem_events(m: Node, e: Dictionary, evs: Array) -> void:
 				if tid != "":
 					m.facing = Vector2i(signi(roundi(to.x)), 0) if absf(to.x) >= absf(to.y) else Vector2i(0, signi(roundi(to.y)))
 				_golem_start_visual_telegraph(m, e, str(d["id"]), a, origin, dir, int(d["windup"]))
-				_monster_pose(m, e, "attack", 0, float(d["windup"]) / float(TICK_HZ) + 0.05)
+				var g_wu := float(d["windup"]) / float(TICK_HZ)
 				if room and room.has_node("Objects"):
-					SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), float(d["windup"]) / float(TICK_HZ))
+					var gobjs := room.get_node("Objects")
+					SomEnemyRead.begin_telegraph(self, m, gobjs, Callable(self, "center_of"), g_wu,
+							Callable(self, "_telegraph_charge_pose").bind(m, e, g_wu + 0.05))
 			"attack_hit":
 				_golem_clear_telegraph(e)
 				_golem_temp_hit_flash(m)
@@ -1658,7 +1736,7 @@ func _golem_strike(m: Node, e: Dictionary, attack_id: String, power: float) -> v
 	for id in party_ids():
 		if is_alive(id) and node_of(id) != null and origin.distance_to(body_of(id)) <= reach:
 			golem_strike_hit_member_count += 1
-			hit_member(id, int(e["atk"]), power)
+			hit_member(id, int(e["atk"]), power, 0, m)
 			if slam and not shook and _feel_local_hero(id) and shake != null and SomFeelData.ENABLED:
 				shake.kick("boss_slam")
 				shook = true
@@ -1716,7 +1794,7 @@ func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
 				var hit_pt := TelegraphShape.to_px(body_of(tid))
 				if tg.hits_point_i(hit_pt):
 					var root_ticks := int(def.get("root_ticks", CombatRoots.MAX_ROOT_TICKS)) if bool(def.get("applies_root", false)) else 0
-					hit_member(tid, int(e["atk"]), power, root_ticks)
+					hit_member(tid, int(e["atk"]), power, root_ticks, m)
 				if bool(def.get("spawns_zone", false)) and _zones_authority():
 					combat_zones.try_spawn(
 							_enemy_index(m),
@@ -1742,8 +1820,9 @@ func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
 		var dir: Vector2i = TelegraphShape.dir_from_vector(to)
 		tg.start(origin, dir, str(def.get("shape", "line")))
 		_sync_telegraph_meters(e, tg)
-		_monster_pose(m, e, "attack", 0, SomData.TELEGRAPH + 0.05)
-		SomFx.number(room.get_node("Objects"), center_of(m) + Vector2(0, -14), "!", Color(1, 0.3, 0.3), SomData.TELEGRAPH)
+		var tobjs := room.get_node("Objects")
+		SomEnemyRead.begin_telegraph(self, m, tobjs, Callable(self, "center_of"), SomData.TELEGRAPH,
+				Callable(self, "_telegraph_charge_pose").bind(m, e, SomData.TELEGRAPH + 0.05))
 	else:
 		_sync_telegraph_meters(e, tg)
 	if dist > SomData.ENEMY_REACH - 6.0 and float(e["tele"]) <= 0.0:
@@ -1817,6 +1896,12 @@ func _clear_transient_combat() -> void:
 	_dodge_roll_ticks.clear()
 	_dodge_cd_ticks.clear()
 	_dodge_dir.clear()
+	_pd_age.clear()
+	_pd_icd.clear()
+	_pd_counter.clear()
+	_pd_flash.clear()
+	perfect_count = 0
+	perfect_event_ticks.clear()
 	chain_reset("*")
 	heavy_hold.clear()
 	_ai_heavy.clear()
@@ -1872,8 +1957,12 @@ func _step_toward(m: Node, to: Vector2) -> void:
 func _tint(m: Node, e: Dictionary) -> void:
 	if m.sprite == null or m.is_stunned():
 		return
-	if float(e["flash"]) > 0.0:
-		m.sprite.modulate = Color(3, 3, 3)       # hit flash (wit)
+	if bool(e.get("pd_freeze", false)) and int(e.get("hitstop", 0)) > 0:
+		m.sprite.modulate = SomPerfectDodgeData.COL_FREEZE_TINT
+	elif SomHitReact.contact_flash_active(m):
+		m.sprite.modulate = Color.WHITE
+	elif float(e["flash"]) > 0.0:
+		m.sprite.modulate = Color(3, 3, 3)       # hit flash (wit, alleen zonder hurt-sheet)
 	elif float(e["tele"]) > 0.0:
 		var on := fmod(float(e["tele"]), 0.16) < 0.08
 		m.sprite.modulate = Color(1.8, 0.5, 0.5) if on else Color.WHITE     # telegraaf: rood knipperen
@@ -1881,15 +1970,116 @@ func _tint(m: Node, e: Dictionary) -> void:
 		m.sprite.modulate = Color.WHITE
 
 
-## Vijand raakt een held. Bestuurde held = de oude naam hit_player (ook voor tests).
-func hit_player(atk: int, _from := Vector2.ZERO) -> void:
-	hit_member(active_id, atk)
+## Vijand raakt de bestuurde held. src is de aanvallende vijand-node (null = onbekend,
+## zelfde pad als voorheen: geen freeze-doel). Oude naam hit_player blijft voor tests.
+func hit_player(atk: int, _from := Vector2.ZERO, src: Node = null) -> void:
+	hit_member(active_id, atk, 1.0, 0, src)
 
 
-func hit_member(id: String, atk: int, power: float = 1.0, root_ticks: int = 0) -> void:
+func _perfect_active() -> bool:
+	return SomPerfectDodgeData.is_active() and Settings.action_battles()
+
+
+func _pd_counter_active(id: String) -> bool:
+	return _perfect_active() and int(_pd_counter.get(id, 0)) > 0
+
+
+func _perfect_window(id: String) -> int:
+	return SomPerfectDodgeData.window_for_hero(self, id)
+
+
+func _tick_perfect_dodge_pre() -> void:
+	if not _perfect_active():
+		return
+	for id in _pd_age.keys():
+		if int(_dodge_roll_ticks.get(id, 0)) > 0:
+			_pd_age[id] = int(_pd_age.get(id, 0)) + 1
+		else:
+			_pd_age.erase(id)
+	var icd_rm: Array = []
+	for id in _pd_icd.keys():
+		var v := int(_pd_icd[id]) - 1
+		if v <= 0:
+			icd_rm.append(id)
+		else:
+			_pd_icd[id] = v
+	for id in icd_rm:
+		_pd_icd.erase(id)
+	var ctr_rm: Array = []
+	for id in _pd_counter.keys():
+		var c := int(_pd_counter[id]) - 1
+		if c <= 0:
+			ctr_rm.append(id)
+		else:
+			_pd_counter[id] = c
+	for id in ctr_rm:
+		_pd_counter.erase(id)
+	var flash_rm: Array = []
+	for id in _pd_flash.keys():
+		var f := int(_pd_flash[id]) - 1
+		if f <= 0:
+			flash_rm.append(id)
+		else:
+			_pd_flash[id] = f
+	for id in flash_rm:
+		_pd_flash.erase(id)
+
+
+func _tick_perfect_flash_vis() -> void:
+	if not _perfect_active() or room == null:
+		return
+	for id in party_ids():
+		var n := node_of(id)
+		if n == null or not n.has_method("get") or n.get("sprite") == null:
+			continue
+		var spr: CanvasItem = n.sprite
+		if int(_pd_flash.get(id, 0)) > 0:
+			spr.modulate = Color(3, 3, 3)
+		elif float(iframes.get(id, 0.0)) <= 0.0 and spr.modulate == Color(3, 3, 3):
+			spr.modulate = Color.WHITE
+
+
+func _is_perfect_dodge(id: String) -> bool:
+	if not _perfect_active():
+		return false
+	if int(_dodge_roll_ticks.get(id, 0)) <= 0:
+		return false
+	if int(_pd_icd.get(id, 0)) > 0:
+		return false
+	var age := int(_pd_age.get(id, 0))
+	return age > 0 and age <= _perfect_window(id)
+
+
+func _apply_perfect_dodge(id: String, src: Node) -> void:
+	perfect_count += 1
+	perfect_event_ticks.append(clock.tick)
+	_pd_icd[id] = SomPerfectDodgeData.ICD_TICKS
+	_pd_counter[id] = SomPerfectDodgeData.COUNTER_WINDOW_TICKS
+	combat_stamina.set_current(id, mini(SomData.STAMINA_MAX, combat_stamina.current(id) + SomPerfectDodgeData.STAMINA_REFUND))
+	if src != null and enemies.has(src):
+		var e: Dictionary = enemies[src]
+		var stop := SomPerfectDodgeData.HITSTOP_TICKS
+		if e.has("golem"):
+			stop = SomPerfectDodgeData.GOLEM_HITSTOP_TICKS
+		if stop > 0:
+			e["hitstop"] = maxi(int(e.get("hitstop", 0)), stop)
+			e["pd_freeze"] = true
+			last_perfect_hitstop = int(e["hitstop"])
+		else:
+			last_perfect_hitstop = 0
+	_pd_flash[id] = SomPerfectDodgeData.FLASH_TICKS
+	if _feel_local_hero(id) and shake != null and SomFeelData.ENABLED:
+		shake.kick("perfect")
+	if room != null and room.has_node("Objects"):
+		SomFx.perfect_ring(room.get_node("Objects"), body_of(id) + Vector2(0, -12))
+
+
+func hit_member(id: String, atk: int, power: float = 1.0, root_ticks: int = 0, src: Node = null) -> void:
 	if down or not is_alive(id):
 		return
 	if float(iframes.get(id, 0.0)) > 0.0:
+		if _is_perfect_dodge(id):
+			_apply_perfect_dodge(id, src)
 		_dodge(id)
 		return
 	var h := member(id)
@@ -1983,6 +2173,8 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 		d = Vector2.DOWN
 	_dodge_dir[id] = d
 	_dodge_roll_ticks[id] = SomData.DODGE_DURATION_TICKS
+	if _perfect_active():
+		_pd_age[id] = 0
 	_dodge_cd_ticks[id] = SomData.DODGE_COOLDOWN_TICKS
 	chain_reset(id)            # dodge annuleert de aanvalsketen van deze actor
 	if id == active_id:
@@ -1995,6 +2187,7 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 	if id == active_id and room != null and room.has_method("start_invuln"):
 		room.start_invuln(float(SomData.DODGE_IFRAME_TICKS) * TICK_DT)
 	_dodge(id)
+	_spawn_dodge_dust(id)
 	return true
 
 
@@ -2005,6 +2198,19 @@ func _room_is_wall(t: Vector2i) -> bool:
 
 
 ## Dodge-stap: zelfde logische tegel-clamp als player._process_analog (SomSlide + move_and_collide).
+func _spawn_dodge_dust(id: String) -> void:
+	if room == null:
+		return
+	var n := node_of(id)
+	if n == null:
+		return
+	var d: Vector2 = _dodge_dir.get(id, Vector2.RIGHT)
+	var flip_h := d.x < -0.01
+	SomFx.dust_dodge(room.get_node("Objects"), n.position, flip_h)
+	if absf(d.x) < 0.35:
+		SomFx.dust_land(room.get_node("Objects"), n.position)
+
+
 func _apply_dodge_motion(n: Node2D, motion: Vector2) -> void:
 	if motion == Vector2.ZERO:
 		return
@@ -2044,6 +2250,8 @@ func _tick_stamina_and_dodge() -> void:
 		left -= 1
 		if left <= 0:
 			_dodge_roll_ticks.erase(id)
+			if n != null and room != null:
+				SomFx.dust_land(room.get_node("Objects"), n.position)
 		else:
 			_dodge_roll_ticks[id] = left
 
@@ -2110,6 +2318,8 @@ func _party_down() -> void:
 	SomFx.set_ko(player, pose_tex(active_id, "ko"), true)
 	_say(SomData.TXT_FALLEN % "The party")
 	player_defeated.emit()
+	if arena_mode:
+		return
 	await get_tree().create_timer(1.2).timeout
 	GameState.in_battle = true
 	GameState.pending_boss = false
@@ -2217,6 +2427,8 @@ func cast_spell(spell_id: String, caster_id: String, heal_target: Dictionary, en
 				last_attacker = caster_id
 				spell_effect(spell_id, feet_of_enemy(m))
 				SomFx.oneshot(room.get_node("Objects"), SomData.FX_SPELL_IMPACT, feet_of_enemy(m), "SomSpellImpact", Color(1, 0.6, 0.2))
+				_pending_impact_element = SomGameFeelData.impact_element_for_spell(spell_id)
+				_pending_chain_step = -2
 				damage_enemy(m, maxi(1, roundi(amt * rng.randf_range(0.9, 1.1))), Vector2i.ZERO, true, 1, 0,
 						Color(1, 1, 1), 1.0, SomStaggerData.KIND_SPELL))
 		return "%s casts %s!" % [caster.get("name", ""), sp.get("name", spell_id)]
@@ -2724,6 +2936,7 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 	for sl in _coop_swing_lock.keys():
 		_coop_swing_lock[sl] = maxf(0.0, float(_coop_swing_lock[sl]) - dt)
 	_tick_chain()
+	_tick_perfect_dodge_pre()
 	for m in enemies.keys():
 		if is_instance_valid(m):
 			_enemy_ai(m, dt)
@@ -2733,6 +2946,7 @@ func coop_host_step(inputs: Array, dt: float) -> void:
 	_tick_roots()
 	_tick_stamina_and_dodge()
 	_sim_world(dt)
+	_tick_perfect_flash_vis()
 	_rebuild_enemy_order()
 
 
@@ -2796,6 +3010,9 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 			continue
 		var hid := str(_coop_slots[slot])
 		var h := member(hid)
+		var flags := Protocol.FLAG_RING_OPEN if ring.is_open and int(slot) == coop_local_slot else 0
+		if int(_pd_counter.get(hid, 0)) > 0:
+			flags |= Protocol.FLAG_PERFECT
 		players.append({
 			"slot": int(slot),
 			"x": int(body.position.x),
@@ -2804,7 +3021,7 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 			"frame": 0,
 			"hp": int(h.get("hp", 0)),
 			"mp": combat_stamina.wire_stamina(hid),
-			"flags": Protocol.FLAG_RING_OPEN if ring.is_open and int(slot) == coop_local_slot else 0,
+			"flags": flags,
 		})
 	var elist: Array = []
 	_rebuild_enemy_order()
@@ -2817,12 +3034,15 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 		var tslot := _slot_for_hero(tid)
 		if tslot == Protocol.NO_SLOT:
 			tslot = Protocol.HOST_SLOT
+		var pose := 0
+		if bool(e.get("pd_freeze", false)) and int(e.get("hitstop", 0)) > 0:
+			pose |= SomPerfectDodgeData.POSE_FREEZE_BIT
 		var base := {
 			"idx": i,
 			"x": int(center_of(m).x),
 			"y": int(center_of(m).y),
 			"hp": int(e.get("hp", 0)),
-			"pose": 0,
+			"pose": pose,
 			"target_slot": tslot,
 		}
 		var tg: TelegraphAttack = e.get("tg", null)
@@ -2873,7 +3093,10 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 			continue
 		var e: Dictionary = enemies[m]
 		e["hp"] = int(row.get("hp", e["hp"]))
+		var pose_i := int(row.get("pose", 0))
+		e["pd_freeze"] = (pose_i & SomPerfectDodgeData.POSE_FREEZE_BIT) != 0
 		SomStagger.apply_wire(e, row, m)
+		_tint(m, e)
 		var cx := float(row.get("x", 0))
 		var cy := float(row.get("y", 0))
 		m.position = Vector2(cx, cy) - Vector2(0, center_of(m).y - m.position.y)

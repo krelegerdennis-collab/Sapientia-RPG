@@ -80,6 +80,8 @@ const SYNC_TEST_PORT := 38424
 const FLAG_RING_OPEN := 1
 const FLAG_ATTACK := 2
 const FLAG_DOWN := 4
+## F1: counter-venster open (30 ticks) voor snapshot-flits/HUD op gast.
+const FLAG_PERFECT := 8
 
 enum Refuse {
 	NONE = 0,

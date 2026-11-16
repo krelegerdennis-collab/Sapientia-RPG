@@ -6,6 +6,7 @@ extends CanvasLayer
 ##   await Transition.flash(Color.WHITE, 0.6)   (v0.11: verblindende flits die wegebt)
 
 var _rect: ColorRect
+var _fade_tween: Tween
 
 
 func _ready() -> void:
@@ -48,15 +49,24 @@ func overlay_alpha() -> float:
 	return _rect.color.a
 
 
+## Meteen doorzichtig. Stopt een lopende fade zodat een mislukte mapwissel niet op zwart blijft hangen.
+func clear_overlay() -> void:
+	if _fade_tween != null and is_instance_valid(_fade_tween):
+		_fade_tween.kill()
+		_fade_tween = null
+	if _rect != null:
+		_rect.color = Color(0, 0, 0, 0)
+
+
 ## Start de fade en geeft het `finished`-signaal terug (geen coroutine, geen Tween).
 ## Een Signal verwijst zwak naar de tween; wacht de aanroeper op de tween zelf, dan houden
 ## coroutine en tween elkaar vast. Sluit het spel af terwijl de fade nog loopt (bv. de
 ## fade_in van het titelscherm in een snelle testsuite), dan gaf dat
 ## "ObjectDB instances leaked at exit".
 func _fade_to(target: Color, duration: float) -> Signal:
-	var tween := create_tween()
-	tween.tween_property(_rect, "color", target, duration)
-	return tween.finished
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(_rect, "color", target, duration)
+	return _fade_tween.finished
 
 
 func flash(color: Color, duration := 0.6) -> void:
