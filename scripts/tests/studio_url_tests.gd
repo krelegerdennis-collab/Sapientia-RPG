@@ -1,5 +1,5 @@
 extends Node
-## WM1 studio-URL op het titelscherm (--studiourltest). Niet in tests.yml / CI.
+## WM1 studio-URL op het titelscherm (--studiourltest). In de CI-matrix.
 ## Start: godot --path . -- --studiourltest [--shots=/pad/map]
 
 const Wm1Config := preload("res://scripts/data/wm1_config.gd")
