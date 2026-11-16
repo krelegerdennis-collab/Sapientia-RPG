@@ -31,6 +31,9 @@ var _built := false
 var _empty: Label
 var _scroll: ScrollContainer
 var _rows: VBoxContainer
+var _layout_hooks := false
+var _lay_vp := Vector2.ZERO
+var _lay_ins := Vector4(-1, -1, -1, -1)
 
 
 func _ready() -> void:
@@ -39,8 +42,41 @@ func _ready() -> void:
 	if not _open:
 		visible = false
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_koppel_layout_hooks()
 	_place_at_anchor()
 	call_deferred("_place_at_anchor")
+
+
+func _enter_tree() -> void:
+	_koppel_layout_hooks()
+
+
+func _exit_tree() -> void:
+	_ontkoppel_layout_hooks()
+
+
+func _koppel_layout_hooks() -> void:
+	if _layout_hooks or not is_inside_tree():
+		return
+	var vp := get_viewport()
+	var root := get_tree().root
+	if vp != null and not vp.size_changed.is_connected(_place_at_anchor):
+		vp.size_changed.connect(_place_at_anchor)
+	if root != null and not root.resized.is_connected(_place_at_anchor):
+		root.resized.connect(_place_at_anchor)
+	_layout_hooks = true
+
+
+func _ontkoppel_layout_hooks() -> void:
+	if not _layout_hooks:
+		return
+	var vp := get_viewport()
+	var root := get_tree().root if is_inside_tree() else null
+	if vp != null and vp.size_changed.is_connected(_place_at_anchor):
+		vp.size_changed.disconnect(_place_at_anchor)
+	if root != null and root.resized.is_connected(_place_at_anchor):
+		root.resized.disconnect(_place_at_anchor)
+	_layout_hooks = false
 
 
 func open() -> void:
@@ -48,6 +84,7 @@ func open() -> void:
 	_ensure_ui()
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_lay_ins = Vector4(-1, -1, -1, -1)
 	_place_at_anchor()
 	refresh()
 
@@ -56,6 +93,19 @@ func close() -> void:
 	_open = false
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lay_ins = Vector4(-1, -1, -1, -1)
+
+
+func _process(_delta: float) -> void:
+	if not _open or not visible or not is_inside_tree():
+		return
+	var vp := get_viewport_rect().size
+	var ins := UiTouchC.insets(get_viewport())
+	if vp == _lay_vp and ins == _lay_ins:
+		return
+	_lay_vp = vp
+	_lay_ins = ins
+	_place_at_anchor()
 
 
 func is_open() -> bool:
@@ -93,6 +143,7 @@ func _place_at_anchor() -> void:
 	var ins := UiTouchC.insets(get_viewport())
 	if anchor == null:
 		# F6-5: het hele scherm, maar binnen het veilige gebied (notch, gebarenbalk)
+		custom_minimum_size = PANEL_SIZE
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		offset_left = ins.x
 		offset_top = ins.y
@@ -113,13 +164,14 @@ func _place_at_anchor() -> void:
 	_binnen_veilig(ins)
 
 
-## F6-5: paneel (bij een anker) helemaal binnen het veilige gebied schuiven; past het niet, dan krimpt
-## het tot het veilige gebied (nooit kleiner dan PANEL_SIZE, dat past altijd op 216 hoog min insets).
+## F6-5: paneel (bij een anker) helemaal binnen het veilige gebied schuiven; past het niet, krimpt
+## het (ook onder PANEL_SIZE) tot het volledig in de safe rect past.
 func _binnen_veilig(ins: Vector4) -> void:
 	var vp := get_viewport_rect().size
 	var veilig := Rect2(Vector2(ins.x, ins.y), vp - Vector2(ins.x + ins.z, ins.y + ins.w))
 	var r := Rect2(global_position, size)
-	r.size = Vector2(minf(r.size.x, maxf(veilig.size.x, PANEL_SIZE.x)), minf(r.size.y, maxf(veilig.size.y, PANEL_SIZE.y)))
+	r.size = Vector2(minf(r.size.x, veilig.size.x), minf(r.size.y, veilig.size.y))
+	custom_minimum_size = Vector2(minf(PANEL_SIZE.x, veilig.size.x), minf(PANEL_SIZE.y, veilig.size.y))
 	r.position.x = clampf(r.position.x, veilig.position.x, maxf(veilig.position.x, veilig.end.x - r.size.x))
 	r.position.y = clampf(r.position.y, veilig.position.y, maxf(veilig.position.y, veilig.end.y - r.size.y))
 	global_position = r.position

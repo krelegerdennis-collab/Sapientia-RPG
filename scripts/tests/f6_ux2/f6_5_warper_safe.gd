@@ -6,10 +6,13 @@ extends RefCounted
 
 const PartyWisselS := preload("res://world_warper/kamers/party_wissel.gd")
 const PartySelectScene := preload("res://world_warper/services/party_select.tscn")
+const PartySelectGd := preload("res://world_warper/services/party_select.gd")
 const EchoKistenS := preload("res://world_warper/kamers/echo_kisten.gd")
+const Scenarios := preload("res://tools/ui_polish/ui_scenarios.gd")
 const FONT_MIN := 10
 ## [profiel, insets (links, boven, rechts, onder)]
 const CASES := [["16x9", Vector4(30, 0, 30, 0)], ["19_5x9", Vector4(30, 0, 30, 0)], ["19_5x9_notch", Vector4(22, 4, 10, 6)]]
+const ECHO_PROFILES := [["16x9", Vector4(30, 0, 30, 0)], ["19_5x9_notch", Vector4(22, 4, 10, 6)]]
 
 
 func needs_game() -> bool:
@@ -58,6 +61,44 @@ func _check_screen(t: Node, tag: String, top: Node, skip: Array) -> void:
 			not txt.is_empty() and small.is_empty())
 
 
+## Insets zodat de safe rect op het 16x9-basisprofiel smaller is dan PartySelect PANEL_SIZE.
+static func _insets_kleiner_dan_panel() -> Vector4:
+	var basis: Vector2i = Scenarios.PROFILES["16x9"]
+	var p: Vector2 = PartySelectGd.PANEL_SIZE
+	var mx := (float(basis.x) - p.x) * 0.5 + 2.0
+	var my := (float(basis.y) - p.y) * 0.5 + 2.0
+	return Vector4(mx, my, mx, my)
+
+
+func _check_echo_kisten(t: Node, tag: String) -> void:
+	var host := Node2D.new()
+	t.get_tree().root.add_child(host)
+	var kisten: Node2D = EchoKistenS.new()
+	kisten.name = "Kisten"
+	host.add_child(kisten)
+	await t.pframes(3)
+	var labels: Array = []
+	for vlak in kisten.get_children():
+		var lab := (vlak as Node).get_node_or_null("Naam") as Label
+		if lab != null:
+			labels.append(lab)
+	t.check("%s ECHO-kisten: drie namen (%d)" % [tag, labels.size()], labels.size() == 3)
+	for lab in labels:
+		var l := lab as Label
+		var fs := l.get_theme_font_size("font_size")
+		var w := l.get_minimum_size().x
+		t.check("%s ECHO-kist '%s': font %d >= %d, tekst %.0f <= breedte %.0f, niet afgekapt" % [tag, l.text, fs, FONT_MIN, w, l.size.x],
+				fs >= FONT_MIN and w <= l.size.x + 0.5 and not l.clip_text and l.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING)
+	var overlap := 0
+	for i in labels.size():
+		for j in range(i + 1, labels.size()):
+			if (labels[i] as Label).get_global_rect().intersects((labels[j] as Label).get_global_rect()):
+				overlap += 1
+	t.check("%s ECHO-kisten: namen overlappen elkaar niet (%d)" % [tag, overlap], overlap == 0)
+	host.queue_free()
+	await t.pframes(2)
+
+
 func run(t: Node) -> void:
 	# iemand op de bank, zodat beide kolommen van de Rustkamer knoppen hebben
 	if GameState.party.size() >= 3 and GameState.party_bench.is_empty():
@@ -104,6 +145,63 @@ func run(t: Node) -> void:
 		layer.queue_free()
 		await t.pframes(2)
 	UiTouch.insets_override = null
+	# --- ECHO-kisten onder inset-profielen 16x9 en 19_5x9_notch (extra)
+	for ep in ECHO_PROFILES:
+		await t.sc.set_profile(ep[0])
+		UiTouch.insets_override = ep[1]
+		await t.pframes(2)
+		await _check_echo_kisten(t, "F6-5 [%s insets %s]" % [ep[0], ep[1]])
+	UiTouch.insets_override = null
+	# --- Party-select: geankerd terwijl safe rect kleiner is dan PANEL_SIZE (16x9)
+	await t.sc.set_profile("16x9")
+	UiTouch.insets_override = _insets_kleiner_dan_panel()
+	await t.pframes(2)
+	var layer_klein := CanvasLayer.new()
+	layer_klein.layer = 40
+	t.get_tree().root.add_child(layer_klein)
+	var anker_klein := Control.new()
+	anker_klein.size = PartySelectGd.PANEL_SIZE
+	anker_klein.add_to_group("ww_anchor_party")
+	layer_klein.add_child(anker_klein)
+	anker_klein.global_position = t.safe().position
+	var ps_klein: Control = PartySelectScene.instantiate()
+	layer_klein.add_child(ps_klein)
+	await t.pframes(2)
+	ps_klein.open()
+	await t.pframes(4)
+	_check_screen(t, "F6-5 [16x9 klein veilig vlak] Party select (anker)", ps_klein, [])
+	t.check("F6-5 [16x9 klein veilig vlak] Party select: paneel <= safe %s" % t.safe(),
+			ps_klein.get_global_rect().size.x <= t.safe().size.x + 0.5
+			and ps_klein.get_global_rect().size.y <= t.safe().size.y + 0.5)
+	ps_klein.close()
+	layer_klein.queue_free()
+	UiTouch.insets_override = null
+	await t.pframes(2)
+	# --- Party-select: herpositioneer na viewport-resize (insets wisselen)
+	await t.sc.set_profile("16x9")
+	UiTouch.insets_override = Vector4(30, 0, 30, 0)
+	await t.pframes(2)
+	var layer_rs := CanvasLayer.new()
+	layer_rs.layer = 40
+	t.get_tree().root.add_child(layer_rs)
+	var anker_rs := Control.new()
+	anker_rs.size = Vector2(20, 20)
+	anker_rs.add_to_group("ww_anchor_party")
+	layer_rs.add_child(anker_rs)
+	anker_rs.global_position = Vector2.ZERO
+	var ps_rs: Control = PartySelectScene.instantiate()
+	layer_rs.add_child(ps_rs)
+	await t.pframes(2)
+	ps_rs.open()
+	await t.pframes(4)
+	await t.sc.set_profile("19_5x9_notch")
+	UiTouch.insets_override = Vector4(22, 4, 10, 6)
+	await t.pframes(4)
+	_check_screen(t, "F6-5 [resize 16x9 -> 19_5x9_notch] Party select (anker)", ps_rs, [])
+	ps_rs.close()
+	layer_rs.queue_free()
+	UiTouch.insets_override = null
+	await t.pframes(2)
 	# --- ECHO-kisten: namen leesbaar
 	var host := Node2D.new()
 	t.get_tree().root.add_child(host)
