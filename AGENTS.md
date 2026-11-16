@@ -83,6 +83,7 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--battlesimtest` | `scripts/tests/battlesim_tests.gd` | 57 |
 | `--berggrotdextest` | `scripts/tests/berggrot_dex_tests.gd` | 91 |
 | `--savehardeningtest` | `scripts/tests/save_hardening_tests.gd` | 156 |
+| `--savestresstest` | `scripts/tests/save_stress_tests.gd` | 135 |
 | `--saverobusttest` | `scripts/tests/save_robust_tests.gd` | (zie suite) |
 | `--relaytest` | `scripts/tests/relay_tests.gd` | 89 |
 | `--testmodustest` | `scripts/tests/testmodus_tests.gd` | 9 |
@@ -105,6 +106,7 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--uxpolishtest` | `scripts/tests/ux_polish_autotest.gd` | 26 |
 | `--sessiefixtest` | `scripts/tests/sessiefix_tests.gd` | 30 |
 | `--wm1releasetest` | `scripts/tests/wm1_release_tests.gd` | 102 |
+| `--rcchecktest` | `scripts/tests/rc_check_tests.gd` | 97 |
 
 Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`
 schrijft `user://sim/battlesim_<policy>_s<seed>.csv`; `python3 tools/battlesim/rapport.py [csv|map]` geeft winrate, mediaan beurten en de zwaarste groepen.

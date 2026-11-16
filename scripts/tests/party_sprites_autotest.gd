@@ -326,15 +326,18 @@ func _leider_checks() -> void:
 		for naam in HELDEN:
 			_zet_leider(naam)
 			var tex: Texture2D = p.sprite.texture if p else null
-			if tex == null or tex.resource_path != KAART + HELDEN[naam][1] or p.sprite.offset != Vector2(0, -8):
-				fout += "%s -> %s; " % [naam, tex.resource_path.get_file() if tex else "geen speler"]
+			var blad: Texture2D = MapLighting.base_texture(tex)
+			var blad_pad: String = blad.resource_path if blad != null else ""
+			if tex == null or blad_pad != KAART + HELDEN[naam][1] or p.sprite.offset != Vector2(0, -8):
+				fout += "%s -> %s; " % [naam, blad_pad.get_file() if tex else "geen speler"]
 		t.check("party-sprites: %s: Dax/Seren/Vesper als leider tonen hun 24x32-sheet (%s)" % [pad.get_file(), fout if fout != "" else "ok"],
 				p != null and fout == "")
 	_zet_leider("Dax")
 	var wk := await _laad(MAPS + "wereldkaart.tscn")
 	var wp := _speler(wk)
+	var wk_blad: Texture2D = MapLighting.base_texture(wp.sprite.texture) if wp != null else null
 	t.check("party-sprites: wereldkaart houdt de oude 16x24 player.png (offset -4)",
-			wp != null and wp.sprite.texture.resource_path == OUD and wp.sprite.offset == Vector2(0, -4)
+			wp != null and wk_blad != null and wk_blad.resource_path == OUD and wp.sprite.offset == Vector2(0, -4)
 			and not KaartStijl.held_nieuw_op(MAPS + "wereldkaart.tscn"))
 
 
@@ -352,9 +355,11 @@ func _deur_sweep() -> void:
 		if p == null:
 			continue
 		n_maps += 1
-		if KaartStijl.held_nieuw_op(MAPS + f) and not (p.sprite.texture.resource_path == KAART + "dax_wm1.png"
+		var deur_blad: Texture2D = MapLighting.base_texture(p.sprite.texture)
+		var deur_pad: String = deur_blad.resource_path if deur_blad != null else ""
+		if KaartStijl.held_nieuw_op(MAPS + f) and not (deur_pad == KAART + "dax_wm1.png"
 				and p.sprite.get_rect().end.y == TEGEL / 2.0):
-			fout += "%s: sheet %s; " % [f, p.sprite.texture.resource_path.get_file()]
+			fout += "%s: sheet %s; " % [f, deur_pad.get_file()]
 		_poorten_open(s, p)
 		for d in _doorgangen(s):
 			n_door += 1
@@ -399,7 +404,8 @@ func _wandel(pad: String, naam: String, doel: String, shot: String) -> void:
 	p.place_at(start[0], start[1])
 	# fade-in van de vorige wissel laten aflopen (anders is de screenshot donker)
 	await t.get_tree().create_timer(0.8).timeout
-	var sheet_ok: bool = p.sprite.texture.resource_path == KAART + HELDEN[naam][1]
+	var voor_blad: Texture2D = MapLighting.base_texture(p.sprite.texture)
+	var sheet_ok: bool = voor_blad != null and voor_blad.resource_path == KAART + HELDEN[naam][1]
 	var deur_naam := str(gekozen["node"].name)
 	await _shot(shot)
 	var actie: String = RICHTING[start[1]]
@@ -415,8 +421,9 @@ func _wandel(pad: String, naam: String, doel: String, shot: String) -> void:
 	if aankomst != null:
 		await t.get_tree().create_timer(0.8).timeout
 		await _shot(shot + "_aankomst")
+	var na_blad: Texture2D = MapLighting.base_texture(ap.sprite.texture) if ap != null else null
 	var aan_ok: bool = ap != null and (not KaartStijl.held_nieuw_op(doelpad)
-			or ap.sprite.texture.resource_path == KAART + HELDEN[naam][1])
+			or (na_blad != null and na_blad.resource_path == KAART + HELDEN[naam][1]))
 	t.check("party-sprites: %s met %s (%s): door %s %s van %s naar %s, sheet klopt voor en na" % [pad.get_file(), naam,
 			HELDEN[naam][1], gekozen["soort"], deur_naam, start[0], doelpad.get_file()],
 			sheet_ok and aankomst != null and aan_ok)

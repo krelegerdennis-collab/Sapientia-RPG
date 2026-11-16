@@ -248,6 +248,80 @@ static func spark(parent: Node, at: Vector2) -> void:
 	parent.add_child(a)
 
 
+## Fase-1 element-impact (3×24×24, 50 ms); positie vast op 'at', niet gekoppeld aan knockback.
+static func impact_spark(parent: Node, at: Vector2, element: String) -> void:
+	var key := element if element != "" else "fysiek"
+	var path := SomData.FX_IMPACT_DIR % key
+	var t := tex(path)
+	if t == null:
+		spark(parent, at)
+		return
+	var spec: Dictionary = SomData.FX_IMPACT
+	var n := int(spec["frames"])
+	var ms_one := int(spec["ms"])
+	var cell: Array = spec["cell"]
+	var anc: Array = spec["anchor"]
+	var a := Anim.new()
+	a.name = "SomImpact_%s" % key
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	a.centered = false
+	a.offset = Vector2(-float(anc[0]), -float(anc[1]))
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.z_index = 22
+	parent.add_child(a)
+
+
+static func dust_dodge(parent: Node, feet: Vector2, flip_h: bool) -> void:
+	var d: Dictionary = SomData.FX_DUST_DODGE
+	var node := oneshot(parent, d, feet, "SomDustDodge", Color.WHITE)
+	if node is Sprite2D and flip_h:
+		(node as Sprite2D).flip_h = true
+	node.z_index = 5
+
+
+static func dust_land(parent: Node, feet: Vector2) -> void:
+	var node := oneshot(parent, SomData.FX_DUST_LAND, feet, "SomDustLand", Color.WHITE)
+	node.z_index = 5
+
+
+static func dust_finisher(parent: Node, feet: Vector2) -> void:
+	var node := oneshot(parent, SomData.FX_DUST_FINISHER, feet, "SomDustFinisher", Color.WHITE)
+	node.z_index = 5
+
+
+static func counter_spark(parent: Node, at: Vector2) -> void:
+	var d: Dictionary = SomData.FX_COUNTER_SPARK
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		return
+	var n := int(d["frames"])
+	var ms_one := int(d["ms"])
+	var a := Anim.new()
+	a.name = "SomCounterSpark"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.z_index = 22
+	parent.add_child(a)
+
+
 ## Eenmalig effect (SomData.FX_HEAL_GLOW / FX_SPELL_IMPACT) met zijn anker op 'feet'.
 ## Zonder art: een getekende placeholder-ring in dezelfde kleur. Geeft de node terug.
 static func oneshot(parent: Node, d: Dictionary, feet: Vector2, node_name: String, color: Color) -> Node2D:
@@ -280,6 +354,38 @@ static func oneshot(parent: Node, d: Dictionary, feet: Vector2, node_name: Strin
 	a.ms = ms
 	a.position = feet
 	a.z_index = 22
+	parent.add_child(a)
+	return a
+
+
+## F1 perfect dodge: fx_perfect_ring (64x16, 4×16², 75 ms/frame) of draw_arc-terugval.
+static func perfect_ring(parent: Node, at: Vector2) -> Node2D:
+	var d: Dictionary = SomData.FX_PERFECT_RING
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		var ph := Ring.new()
+		ph.color = Color(0.85, 0.95, 1.0)
+		ph.position = at
+		ph.radius = 14.0
+		ph.z_index = 23
+		parent.add_child(ph)
+		return ph
+	var n := int(d["frames"])
+	var ms_one := int(d["ms"])
+	var a := Anim.new()
+	a.name = "SomPerfectRing"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.z_index = 23
 	parent.add_child(a)
 	return a
 
