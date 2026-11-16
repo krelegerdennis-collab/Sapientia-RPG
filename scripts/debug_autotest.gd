@@ -2430,7 +2430,6 @@ func _prologue_tests() -> void:
 	check("verhaal hersteld: stap TAKEN, kist, emmer, mantel aan, plek (8,4)",
 			GameState.story_step == SD.TAKEN and Story.has_flag("kist_open") and Story.wears(ARMOR)
 			and GameState.item_count("emmer_water") == 1 and tile() == Vector2i(8, 4))
-	await _story_drain(false, "", "", 120.0)
 	check("na laden geen wakker-cutscene", not Story.running and not Dialog.is_open)
 	await walk("move_left", 3)
 	await walk("move_down", 14)
