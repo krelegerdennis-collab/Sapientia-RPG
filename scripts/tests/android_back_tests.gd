@@ -1,7 +1,7 @@
 extends Node
 ## F6-3 + F6-4: Android-systeemterug en de Back-knop op het naamscherm.
 ## Start: godot --path . -- --androidbacktest [--shots=/pad]
-## Niet in de CI-matrix. Bestaande suites worden niet aangepast.
+## In de CI-matrix. Bestaande suites worden niet aangepast.
 ##
 ## Systeemterug = NOTIFICATION_WM_GO_BACK_REQUEST op de boom, daarna het
 ## Window-signaal go_back_requested (zo doet de engine het). Dat mag niet stoppen.
