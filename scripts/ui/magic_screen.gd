@@ -87,7 +87,7 @@ func show_caster(i: int, keep_id := "") -> void:
 	spell_ids = c.get("spells", []).duplicate()
 	for sid in spell_ids:
 		var sp := PartyActions.spell_data(str(sid))
-		var b := UiMenu.button("%s %2d MP" % [str(sp.get("name", sid)).rpad(NAME_COLS), int(sp.get("mp", 0))])
+		var b := touch_row(UiMenu.button("%s %2d MP" % [str(sp.get("name", sid)).rpad(NAME_COLS), int(sp.get("mp", 0))]))
 		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
 		b.focus_entered.connect(show_spell.bind(str(sid)))
 		b.pressed.connect(choose_spell.bind(str(sid)))

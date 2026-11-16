@@ -11,6 +11,8 @@ extends RefCounted
 const TOUCH_MIN := 25.0
 ## Hoogte van een lijstregel in schermen met weinig, grote keuzes (winkel, Codex, tekstvak-keuzes).
 const ROW_TOUCH := 25.0
+## Maximale beweging (eenheden) voor een tik op de extra lijstrand (touch_row_zones.gd); groter = scroll.
+const TAP_SLOP := 6.0
 ## Maximale inset per kant (eenheden): een rare waarde van het platform mag het scherm niet opeten.
 const INSET_MAX := 48.0
 
