@@ -49,7 +49,7 @@ func _wave_seed(n: int) -> int:
 func _spawn_when_ready(n: int) -> void:
 	if not is_inside_tree() or active_wave != n:
 		return
-	for _i in 120:
+	for _i in WavesData.HALL_FIND_MAX_FRAMES:
 		if not is_inside_tree():
 			return
 		if active_wave != n:
@@ -61,6 +61,13 @@ func _spawn_when_ready(n: int) -> void:
 			_spawn_wave(room, n)
 			return
 		await get_tree().process_frame
+	if not is_inside_tree() or active_wave != n:
+		return
+	push_warning(
+		"SomArenaWaves: hal niet gevonden na %d frames; wave %d wordt overgeslagen (wave_cleared)."
+		% [WavesData.HALL_FIND_MAX_FRAMES, n]
+	)
+	_emit_wave_cleared(n)
 
 
 func _find_hall() -> Node:
@@ -118,7 +125,7 @@ func _spawn_wave(room: Node, n: int) -> void:
 			"tile": [tile.x, tile.y],
 			"moves": false,
 		}
-		var m: Node = _add_monster(room, d, _wave_seed(n) + i * 7919, hp_mult)
+		var m: Node = _add_monster(room, d, _wave_seed(n) + i * WavesData.MONSTER_RNG_STRIDE, hp_mult)
 		if m != null:
 			_spawned.append(m)
 			_alive += 1
@@ -151,9 +158,7 @@ static func _apply_hp_mult(som: Node, m: Node, hp_mult: float) -> void:
 
 
 func _pick_tiles(room: Node, count: int, rng: RandomNumberGenerator) -> Array[Vector2i]:
-	var spawn := Vector2i(14, 18)
-	if room.has_method("_ensure_spawn"):
-		pass
+	var spawn := _spawn_tile(room)
 	var gates: Array = []
 	if room.has_method("gate_tiles"):
 		gates = room.gate_tiles()
@@ -174,7 +179,7 @@ func _pick_tiles(room: Node, count: int, rng: RandomNumberGenerator) -> Array[Ve
 				continue
 			if room.is_wall(t):
 				continue
-			if _tile_dist(t, spawn) < 3:
+			if _tile_dist(t, spawn) < WavesData.MIN_TILE_DIST_FROM_SPAWN:
 				continue
 			opts.append(t)
 	_seeded_shuffle(opts, rng)
@@ -184,6 +189,18 @@ func _pick_tiles(room: Node, count: int, rng: RandomNumberGenerator) -> Array[Ve
 	while out.size() < count and not opts.is_empty():
 		out.append(opts[rng.randi_range(0, opts.size() - 1)])
 	return out
+
+
+static func _spawn_tile(room: Node) -> Vector2i:
+	if room.has_method("_ensure_spawn"):
+		room._ensure_spawn()
+	var spawns: Node = room.get_node_or_null("Spawns")
+	if spawns != null:
+		var ingang: Node2D = spawns.get_node_or_null("ingang") as Node2D
+		if ingang != null:
+			var p := ingang.position
+			return Vector2i(int((p.x - 8.0) / 16.0), int((p.y - 8.0) / 16.0))
+	return WavesData.HALL_SPAWN_FALLBACK
 
 
 static func _tile_dist(a: Vector2i, b: Vector2i) -> int:

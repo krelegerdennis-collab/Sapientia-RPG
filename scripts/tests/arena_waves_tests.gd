@@ -1,5 +1,5 @@
 extends Node
-## SomArenaWaves (--arenawavestest). Geen CI-matrix.
+## SomArenaWaves (--arenawavestest). Suite in .github/workflows/tests.yml (CI, akkoord Dennis).
 
 const WavesScript := preload("res://scripts/arena/som_arena_waves.gd")
 const WavesData := preload("res://scripts/data/arena_waves_data.gd")
@@ -32,7 +32,8 @@ func _run_all() -> void:
 	await _stub_flow()
 	await _spawn_rules()
 	await _waves_3_5_som_tick()
-	_determinism()
+	await _determinism()
+	await _spawn_timeout_no_hall()
 	await _wave_cleared_flow()
 	await _party_wiped_flow()
 	await _arena_mode_guard()
@@ -76,6 +77,10 @@ func _mock_hall() -> Node:
 	return hall
 
 
+func _hall_spawn_tile(hall: Node) -> Vector2i:
+	return SomArenaWaves._spawn_tile(hall)
+
+
 func _await_frames(n: int) -> void:
 	for _i in n:
 		await get_tree().process_frame
@@ -88,6 +93,7 @@ func _spawn_rules() -> void:
 	GameState.new_game("Dax")
 	var hall := _mock_hall()
 	await _await_frames(3)
+	var spawn_tile := _hall_spawn_tile(hall)
 	var run := RunScript.new()
 	run.name = "SpawnRun"
 	run.run_seed = 9001
@@ -108,7 +114,10 @@ func _spawn_rules() -> void:
 				if t == gt:
 					gate_ok = false
 			check("wave %d: geen gate-tegel" % n, gate_ok)
-			check("wave %d: min 3 tegels van spawn" % n, SomArenaWaves._tile_dist(t, Vector2i(14, 18)) >= 3)
+			check(
+				"wave %d: min %d tegels van spawn" % [n, WavesData.MIN_TILE_DIST_FROM_SPAWN],
+				SomArenaWaves._tile_dist(t, spawn_tile) >= WavesData.MIN_TILE_DIST_FROM_SPAWN
+			)
 		for m in hall.monsters:
 			m.queue_free()
 		hall.monsters.clear()
@@ -152,39 +161,45 @@ func _waves_3_5_som_tick() -> void:
 
 
 func _determinism() -> void:
-	var plans_a := _plan_wave(111, 2)
-	var plans_b := _plan_wave(111, 2)
-	var plans_c := _plan_wave(222, 2)
-	check("zelfde seed:zelfde spawn", plans_a == plans_b)
-	check("andere seed:anders", plans_a != plans_c)
+	var hall := _mock_hall()
+	await _await_frames(3)
+	var snap_a := await _wave_spawn_snapshot(hall, 111, 2)
+	var snap_b := await _wave_spawn_snapshot(hall, 111, 2)
+	var snap_c := await _wave_spawn_snapshot(hall, 222, 2)
+	hall.queue_free()
+	check("zelfde seed:zelfde spawn", snap_a == snap_b)
+	check("andere seed:anders", snap_a != snap_c)
 
 
-func _plan_wave(run_seed: int, wave: int) -> Array:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = hash("arena_wave|%d|%d" % [run_seed, wave])
-	var pool := WavesData.pool_for_wave(wave)
-	var count := WavesData.enemy_count(wave)
-	var w := 30
-	var h := 20
-	var spawn := Vector2i(14, 18)
-	var gates := [Vector2i(14, 2), Vector2i(15, 2)]
-	var gate_set := {gates[0]: true, gates[1]: true}
-	var opts: Array[Vector2i] = []
-	for y in h:
-		for x in w:
-			var t := Vector2i(x, y)
-			if gate_set.has(t):
-				continue
-			if SomArenaWaves._tile_dist(t, spawn) < 3:
-				continue
-			opts.append(t)
-	SomArenaWaves._seeded_shuffle(opts, rng)
-	var out: Array = []
-	for i in count:
-		var enemy_id := pool[rng.randi_range(0, pool.size() - 1)]
-		var tile: Vector2i = opts[i] if i < opts.size() else opts[0]
-		out.append({"enemy": enemy_id, "tile": tile})
-	return out
+func _wave_spawn_snapshot(hall: Node, run_seed: int, wave_n: int) -> Array:
+	for m in hall.monsters:
+		if is_instance_valid(m):
+			m.queue_free()
+	hall.monsters.clear()
+	var run := RunScript.new()
+	run.run_seed = run_seed
+	add_child(run)
+	var waves: SomArenaWaves = run.get_node("Waves") as SomArenaWaves
+	waves._spawn_wave(hall, wave_n)
+	var snap: Array = []
+	for m in hall.monsters:
+		snap.append({"enemy": m.enemy_id, "tile": m.tile})
+	run.queue_free()
+	await _await_frames(1)
+	return snap
+
+
+func _spawn_timeout_no_hall() -> void:
+	var run := RunScript.new()
+	run.run_seed = 5050
+	add_child(run)
+	var waves: SomArenaWaves = run.get_node("Waves") as SomArenaWaves
+	var cleared: Array[int] = []
+	waves.wave_cleared.connect(func(n: int) -> void: cleared.append(n))
+	waves.start_wave(2)
+	await _await_frames(WavesData.HALL_FIND_MAX_FRAMES + 8)
+	check("timeout zonder hal: wave_cleared precies 1x", cleared.size() == 1 and cleared[0] == 2)
+	run.queue_free()
 
 
 func _wave_cleared_flow() -> void:

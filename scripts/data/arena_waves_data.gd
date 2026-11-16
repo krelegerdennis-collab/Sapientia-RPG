@@ -22,6 +22,15 @@ const HP_MULT := {
 	5: 1.5,
 }
 
+## Hal-ingang (zuid), zelfde tegel als arena_room._ensure_spawn voor room_kind hall.
+const HALL_SPAWN_FALLBACK := Vector2i(14, 18)
+## Minimale Chebyshev-afstand spawnpunt → vijand-tegel.
+const MIN_TILE_DIST_FROM_SPAWN := 3
+## Max frames wachten op arena_hall voordat de golf wordt overgeslagen (geen soft lock).
+const HALL_FIND_MAX_FRAMES := 120
+## RNG-stap per monster binnen één golf (zelfde patroon als arena_room.add_monster).
+const MONSTER_RNG_STRIDE := 7919
+
 ## Alleen gewone WM1-mapmonsters (geen bazen/golems).
 const WM1_ENEMY_IDS: Array[String] = [
 	"mosslijm",
