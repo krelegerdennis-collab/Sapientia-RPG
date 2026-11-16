@@ -13,6 +13,7 @@ const SHAKE: Dictionary = {
 	"heavy1": Vector2i(2, 6),
 	"heavy2": Vector2i(3, 8),
 	"boss_slam": Vector2i(3, 10),
+	"perfect": Vector2i(1, 4),
 }
 
 const PATTERN: Array[Vector2i] = [

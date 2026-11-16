@@ -9,6 +9,7 @@ extends Node
 const MIN_TARGET_SDK := 36
 const AAB_PRESET := "Android AAB"
 const SOURCE := "res://tools/release/version.json"
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const SECRET_CANARIES := ["CANARY_storepw_9f3a", "CANARY_alias_1c7e", "CANARY_keypw_77b2"]
 
 var failures := 0
@@ -123,7 +124,10 @@ func _preset_tests() -> void:
 			and not bool(cfg.get_value(o, "architectures/x86", true))
 			and not bool(cfg.get_value(o, "architectures/x86_64", true)))
 	check("AAB: package/signed = true (sleutel via omgeving)", bool(cfg.get_value(o, "package/signed", false)))
-	check("AAB: INTERNET-permissie (co-op/relay)", bool(cfg.get_value(o, "permissions/internet", false)))
+	# WM1-RC (besluit Dennis 15 nov 2026): INTERNET volgt H11; online dicht (online_cut) = permissie uit.
+	var net_verwacht := not ReleaseFlags.online_cut
+	check("AAB: INTERNET-permissie = %s (online_cut %s)" % [net_verwacht, ReleaseFlags.online_cut],
+			bool(cfg.get_value(o, "permissions/internet", false)) == net_verwacht)
 	check("AAB: tests/docs/tools niet in de export",
 			str(cfg.get_value(aab, "exclude_filter", "")).contains("scripts/tests/*")
 			and str(cfg.get_value(aab, "exclude_filter", "")).contains("tools/*"))
