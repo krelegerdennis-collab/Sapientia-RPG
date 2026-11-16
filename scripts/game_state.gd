@@ -568,8 +568,8 @@ func _ready() -> void:
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
 	# WM1 frametime-log + budget: of  godot -- --wm1frametest / --wm1budgettest  (scripts/tests/wm1_frametime_tests.gd, wm1_budget_tests.gd).
 	# F-5 nulmeting per kamer, geïsoleerd (geen CI, faalt niet op budget): of  godot -- --wm1roombaselinetest  (scripts/tests/wm1_room_baseline_tests.gd).
-	# WM1 F3 stabiliteit (lokaal, geen CI): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
-	# Colosseum-flow (lokaal, geen CI-matrix): godot -- --arenatest  (scripts/tests/arena_tests.gd).
+	# WM1 F3 stabiliteit (in CI-matrix): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
+	# Colosseum-flow (in CI-matrix): godot -- --arenatest  (scripts/tests/arena_tests.gd).
 	# Wachtershuis classic-muur (geen TileSet-polygonen): godot -- --huiscollisiontest  (scripts/tests/huis_collision_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# SoM slag vs lock: of  godot -- --swinglocktest  (scripts/tests/swing_lock_tests.gd).
