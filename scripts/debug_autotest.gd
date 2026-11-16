@@ -1630,7 +1630,8 @@ func _title_v13_checks(t: Node) -> void:
 			and absf(st.get_center().y - t.size.y / 2.0) <= 1.0)
 	check("menu rechtsonder (x 240..372, y ~150..200): %s" % cr,
 			absf(cr.position.x - 240.0) <= 1.0 and absf(cr.end.x - 372.0) <= 1.0 and cr.end.y <= 201.0 and cr.position.y >= 148.0)
-	check("versielabel v0.20 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.20"
+	var versie := "v" + str(ProjectSettings.get_setting("application/config/version", ""))
+	check("versielabel %s rechtsonder (%s)" % [versie, t.version_label.text], versie != "v" and t.version_label.text == versie
 			and t.version_label.get_global_rect().end.x <= t.size.x and t.version_label.get_global_rect().end.y <= t.size.y)
 	if has_main:
 		return
