@@ -627,6 +627,7 @@ func _ready() -> void:
 	# Android-terug + Back op het naamscherm (F6-3/F6-4): of  godot -- --androidbacktest  (scripts/tests/android_back_tests.gd).
 	# Opslag/hervat-stress WM1 (round-trip, kapotte saves, pauze in menu/dialoog/gevecht, dubbel opslaan, oude versie):
 	#   godot -- --savestresstest  (scripts/tests/save_stress_tests.gd).
+	# book_point await-guards (object weg tijdens interact): of  godot -- --bookpointawaittest  (scripts/tests/book_point_await_tests.gd).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
@@ -648,6 +649,7 @@ func _ready() -> void:
 			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
 			["--fusietest", "res://scripts/tests/fusie_tests.gd", "FusieTest", "fusietest"],
 			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"],
+			["--bookpointawaittest", "res://scripts/tests/book_point_await_tests.gd", "BookPointAwaitTest", "bookpointawaittest"],
 			["--bossrespawntest", "res://scripts/tests/boss_respawn_tests.gd", "BossRespawnTest", "bossrespawntest"],
 			["--dungeon100gentest", "res://scripts/tests/dungeon100_generator_tests.gd", "Dungeon100GenTest", "dungeon100gentest"],
 			["--dungeon100schaaltest", "res://scripts/tests/dungeon100_schaal_tests.gd", "Dungeon100SchaalTest", "dungeon100schaaltest"],
