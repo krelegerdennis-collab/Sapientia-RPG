@@ -22,6 +22,13 @@ const VERSION_SRC := "res://tools/release/version.json"
 const PRESETS := "res://export_presets.cfg"
 ## Laatst uitgebrachte build: tag v0.20 = version/code 22. De RC moet hoger zijn (checklist F8.2).
 const LAATSTE_CODE := 22
+## Besluit Dennis 15 nov 2026 (Job 11): RC-versie en netwerkrechten (F8.1, F8.2, F8.8).
+const RC_VERSIE := "0.21"
+const RC_CODE := 23
+## Deze Android-rechten moeten in elke Android-preset UIT staan zolang online dicht is (H11).
+const RC_NET_RECHTEN: Array[String] = ["permissions/internet", "permissions/access_network_state",
+		"permissions/access_wifi_state", "permissions/change_wifi_multicast_state",
+		"permissions/change_wifi_state", "permissions/change_network_state"]
 ## Moet in de exclude_filter van elke preset staan (checklist F3.15).
 const EXCLUDE_EIS: Array[String] = ["tools/*", "docs/*", "scripts/tests/*", "scripts/debug_autotest.gd",
 		"scripts/debug_menutest.gd", "wacht/*", "export/*", "pvp/tests/*", "world_warper/tests/*"]
@@ -83,6 +90,7 @@ func _run() -> void:
 	_test_dispatch()
 	_enabled_vlaggen()
 	_bekende_open_punten(presets, android)
+	_rc_besluit(presets, android)
 	print("RCCHECKTEST %d PASS, %d FAIL, %d OPEN" % [passes, failures, opens])
 	print("RESULT %s (%d goed, %d fouten, %d bekende OPEN-punten)" % ["OK" if failures == 0 else "FOUT", passes, failures, opens])
 	await get_tree().process_frame
@@ -305,3 +313,71 @@ func _open_regels(pad: String, zonder_status: bool) -> int:
 			continue
 		n += 1
 	return n
+
+
+# ---------------------------------------------------------------- RC-besluit Dennis 15 nov (Job 11: F8.1/F8.2/F8.8)
+## Afwijkingen van de RC-versie (0.21 / 23) in versiebron, project.godot en elke Android-preset. Leeg = goed.
+static func rc_versie_fouten(src: Variant, project_versie: String, cfg: ConfigFile, android: Array[String]) -> Array[String]:
+	var fout: Array[String] = []
+	if not (src is Dictionary):
+		fout.append("versiebron geen object")
+	else:
+		if str(src.get("version_name", "")) != RC_VERSIE:
+			fout.append("versiebron name %s" % src.get("version_name", ""))
+		if int(src.get("version_code", -1)) != RC_CODE:
+			fout.append("versiebron code %s" % src.get("version_code", ""))
+	if project_versie != RC_VERSIE:
+		fout.append("project.godot %s" % project_versie)
+	if android.is_empty():
+		fout.append("geen Android-preset")
+	for s in android:
+		var o := s + ".options"
+		if str(cfg.get_value(o, "version/name", "")) != RC_VERSIE:
+			fout.append("%s name %s" % [s, cfg.get_value(o, "version/name", "")])
+		if int(cfg.get_value(o, "version/code", -1)) != RC_CODE:
+			fout.append("%s code %s" % [s, cfg.get_value(o, "version/code", "")])
+	return fout
+
+
+## Netwerkrechten die nog AAN staan in een Android-preset ("preset.N:recht"). Leeg = goed.
+static func rc_netwerk_aan(cfg: ConfigFile, android: Array[String]) -> Array[String]:
+	var aan: Array[String] = []
+	for s in android:
+		for k in RC_NET_RECHTEN:
+			if bool(cfg.get_value(s + ".options", k, false)):
+				aan.append("%s:%s" % [s, k.get_slice("/", 1)])
+	return aan
+
+
+func _rc_besluit(cfg: ConfigFile, android: Array[String]) -> void:
+	var src: Variant = JSON.parse_string(FileAccess.get_file_as_string(VERSION_SRC))
+	var pv := str(ProjectSettings.get_setting("application/config/version", ""))
+	var vf := rc_versie_fouten(src, pv, cfg, android)
+	check("[F8.1/F8.2] RC-versie %s / code %d overal (afwijkend: %s)" % [RC_VERSIE, RC_CODE, vf], vf.is_empty())
+	check("[F8.2] RC-code %d hoger dan laatste build %d" % [RC_CODE, LAATSTE_CODE], RC_CODE > LAATSTE_CODE)
+	var na := rc_netwerk_aan(cfg, android)
+	check("[F8.8] netwerkrechten uit in alle Android-presets (nog aan: %s)" % [na], na.is_empty())
+	# Solo zonder netwerk: PvP/Co-op-knoppen verborgen in een release (online_cut, geen relay-URL).
+	check("[F8.8] online dicht: online_cut aan", Flags.online_cut)
+	check("[F8.8] online dicht: PvP/Co-op-knoppen verborgen", not Flags.online_buttons_visible())
+	# Zelftest van de regels: een preset met de oude stand moet FAIL opleveren.
+	var nep := ConfigFile.new()
+	nep.set_value("preset.0", "platform", "Android")
+	nep.set_value("preset.0.options", "version/name", "0.20")
+	nep.set_value("preset.0.options", "version/code", 22)
+	nep.set_value("preset.0.options", "permissions/internet", true)
+	nep.set_value("preset.0.options", "permissions/change_wifi_multicast_state", true)
+	var nep_android: Array[String] = ["preset.0"]
+	var oud := rc_versie_fouten({"version_name": "0.20", "version_code": 22}, "0.20", nep, nep_android)
+	check("zelftest: versie 0.20/22 wordt afgekeurd (%d afwijkingen)" % oud.size(), oud.size() == 5)
+	check("zelftest: alleen code fout (0.21/22) wordt afgekeurd",
+			rc_versie_fouten({"version_name": "0.21", "version_code": 22}, "0.21", ConfigFile.new(), [] as Array[String]).size() == 2)
+	check("zelftest: netwerkrecht aan wordt afgekeurd (%s)" % [rc_netwerk_aan(nep, nep_android)],
+			rc_netwerk_aan(nep, nep_android).size() == 2)
+	nep.set_value("preset.0.options", "version/name", RC_VERSIE)
+	nep.set_value("preset.0.options", "version/code", RC_CODE)
+	nep.set_value("preset.0.options", "permissions/internet", false)
+	nep.set_value("preset.0.options", "permissions/change_wifi_multicast_state", false)
+	check("zelftest: 0.21/23 zonder netwerk wordt goedgekeurd",
+			rc_versie_fouten({"version_name": RC_VERSIE, "version_code": RC_CODE}, RC_VERSIE, nep, nep_android).is_empty()
+			and rc_netwerk_aan(nep, nep_android).is_empty())
