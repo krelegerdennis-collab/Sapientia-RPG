@@ -1,7 +1,7 @@
 extends Node
 ## ALLEEN VOOR TESTEN - Glitch Queen optie A: Solar Flare-scroll in V3-kistpool vanaf verdieping 20.
 ## Start:  godot --path . -- --gqzonnevlamscrolltest
-## Niet in de CI-matrix (tests.yml onaangeroerd). Zie --blauwekisttest / PR #435-patroon.
+## In de CI-matrix. Zie --blauwekisttest / PR #435-patroon.
 
 const D100 := preload("res://scripts/data/dungeon100_scaling.gd")
 

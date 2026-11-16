@@ -113,7 +113,7 @@ func _build() -> void:
 	state_label.custom_minimum_size = Vector2(100, 0)
 	detail.add_child(state_label)
 	# v0.19 fusie: knop vóór 'Terug' (tikken; met de joystick: rechts)
-	fuse_button = UiMenu.button("Fusion")
+	fuse_button = touch_row(UiMenu.button("Fusion"))
 	fuse_button.custom_minimum_size = Vector2(FUSE_W, ROW_H)
 	fuse_button.focus_mode = Control.FOCUS_NONE
 	fuse_button.pressed.connect(start_fusion)
