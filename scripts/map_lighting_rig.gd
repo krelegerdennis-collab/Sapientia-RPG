@@ -356,6 +356,31 @@ func _build_candidates() -> void:
 				_cands.append({"pos": gp, "kind": r["kind"], "rule": r, "color": td["color"], "family": td["family"],
 						"px": int(td["px"]), "node": tl, "local": null})
 	MapLightingC.cluster_tile_lights(_cands)
+	MapLightingC.cluster_arena_torches(_cands)
+	_lobby_shaft()
+
+
+func _lobby_shaft() -> void:
+	# Zachte lichtschacht, data-only in placements_arena.json. Geen flikker.
+	if _map_id != "arena_lobby" or not (_map is Node2D):
+		return
+	var rule := {
+		"energy": 0.46,
+		"scale": 1.125,
+		"height": 96.0,
+		"family": "warm",
+		"flicker": 0.0,
+	}
+	_cands.append({
+		"pos": (_map as Node2D).to_global(Vector2(192, 150)),
+		"kind": "tile",
+		"rule": rule,
+		"color": [1.0, 0.93, 0.8],
+		"family": "warm",
+		"px": 1,
+		"node": null,
+		"local": null,
+	})
 
 
 func _view_rect() -> Rect2:

@@ -1366,6 +1366,25 @@ assets/sprites/telegraph/telegraph_inkspit_diag_22x44.png
 # (art_fx/perfect_dodge/repo_drop; pad = bestaande combat-FX in assets/sprites/som/fx/)
 assets/sprites/som/fx/fx_perfect_ring.png
 assets/sprites/som/fx/fx_counter_spark.png
+# 2026-11-15: Colosseum/arena set van RPG ART (hand-gepixeld, generators in art_arena/src)
+assets/tiles/wereld_v18_arena.png
+assets/ui/arena/icon_arena.png
+assets/ui/arena/icon_arena_token.png
+assets/tiles/arena/arena_tiles.png
+assets/sprites/arena/arena_gate.png
+assets/sprites/arena/arena_banner.png
+assets/sprites/arena/arena_torch.png
+assets/sprites/arena/arena_counter.png
+assets/sprites/npc/arena_koopman_wm1_slim.png
+assets/sprites/npc/arena_koopman_wm1_slim_idle.png
+assets/sprites/arena/arena_weapon_rack.png
+assets/sprites/arena/arena_notice_board.png
+assets/sprites/arena/arena_bench.png
+assets/sprites/arena/arena_crates.png
+assets/sprites/arena/arena_brazier.png
+assets/sprites/arena/arena_vip_loge.png
+assets/sprites/arena/arena_sand_ring.png
+# handronde 3 (16:42): arena_vip_loge.png, arena_tiles.png (tegels 118/119 trofeeennis), arena_bench.png opnieuw met de hand; formaten ongewijzigd
 # Game-feel FX fase 1 (RPG ART, Dennis "Go alles"):
 # impact-spark per element (fysiek/vuur/ijs/bliksem/natuur/licht) + stofwolkjes (dodge/land/finisher)
 # alleen masterpalet, alpha 0/255 (art_gamefeel/fase1/repo_drop; pad = bestaande combat-FX in assets/sprites/som/fx/)
