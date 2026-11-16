@@ -574,6 +574,7 @@ func _ready() -> void:
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# SoM slag vs lock: of  godot -- --swinglocktest  (scripts/tests/swing_lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
+	# F6.15 RUN-knop in kerker, Rest Room en Koopman (lokaal, geen CI-matrix): of  godot -- --runknoptest  (scripts/tests/run_knop_kamers_tests.gd).
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
 	# ECHO questlog (smoke): of  godot -- --echotest [--shots=/pad/map]  (scripts/tests/echo_tests.gd).
@@ -629,6 +630,7 @@ func _ready() -> void:
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
 			["--hudtest", "res://scripts/tests/hud_tests.gd", "HudTest", "hudtest"],
+			["--runknoptest", "res://scripts/tests/run_knop_kamers_tests.gd", "RunKnopTest", "runknoptest"],
 			["--inventorytest", "res://scripts/tests/inventory_tests.gd", "InventoryTest", "inventorytest"],
 			["--locktest", "res://scripts/tests/lock_tests.gd", "LockTest", "locktest"],
 			["--swinglocktest", "res://scripts/tests/swing_lock_tests.gd", "SwingLockTest", "swinglocktest"],
