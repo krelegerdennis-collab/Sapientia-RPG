@@ -400,6 +400,8 @@ var bezochte_kaarten: Array[String] = []
 var echo_grot_voltooid := 0
 var inventory := {}            # item-id -> aantal
 var gold := 0
+## Colosseum-munt. Oude saves zonder sleutel laden als 0. Alleen verdiend als de arena aan staat.
+var arena_tokens := 0
 ## SoM-proef (scripts/data/som_data.gd): realtime gevecht in de SoM-kamers. Alleen aan via de knop
 ## "SoM" op het titelscherm; niet in de save, uit bij elk nieuw/geladen spel.
 var som_mode := false
@@ -567,6 +569,7 @@ func _ready() -> void:
 	# WM1 frametime-log + budget: of  godot -- --wm1frametest / --wm1budgettest  (scripts/tests/wm1_frametime_tests.gd, wm1_budget_tests.gd).
 	# F-5 nulmeting per kamer, geïsoleerd (geen CI, faalt niet op budget): of  godot -- --wm1roombaselinetest  (scripts/tests/wm1_room_baseline_tests.gd).
 	# WM1 F3 stabiliteit (lokaal, geen CI): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
+	# Colosseum-flow (lokaal, geen CI-matrix): godot -- --arenatest  (scripts/tests/arena_tests.gd).
 	# Wachtershuis classic-muur (geen TileSet-polygonen): godot -- --huiscollisiontest  (scripts/tests/huis_collision_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# SoM slag vs lock: of  godot -- --swinglocktest  (scripts/tests/swing_lock_tests.gd).
@@ -611,6 +614,7 @@ func _ready() -> void:
 	# F1 perfect dodge (Action): of  godot -- --perfectdodgetest  (scripts/tests/perfect_dodge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
+	# RC-checklist WM1 (alleen lezen, bekende OPEN-punten als OPEN-regel): of  godot -- --rcchecktest  (scripts/tests/rc_check_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	# Laadtijden WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
@@ -712,6 +716,9 @@ func _ready() -> void:
 			["--golemzichtbaartest", "res://scripts/tests/golem_zichtbaar_tests.gd", "GolemZichtbaarTest", "golemzichtbaartest"],
 			["--golemstorytest", "res://scripts/tests/golem_story_tests.gd", "GolemStoryTest", "golemstorytest"],
 			["--gamefeeltest", "res://scripts/tests/gamefeel_tests.gd", "GameFeelTest", "gamefeeltest"],
+			["--gamefeelfase1test", "res://scripts/tests/gamefeel_fase1_tests.gd", "GameFeelFase1Test", "gamefeelfase1test"],
+			["--gamefeelfase2test", "res://scripts/tests/gamefeel_fase2_tests.gd", "GameFeelFase2Test", "gamefeelfase2test"],
+			["--magentabangtest", "res://scripts/tests/magenta_bang_tests.gd", "MagentaBangTest", "magentabangtest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--chainfeeltest", "res://scripts/tests/chain_feel_tests.gd", "ChainFeelTest", "chainfeeltest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
@@ -744,6 +751,7 @@ func _ready() -> void:
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
 			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
+			["--rcchecktest", "res://scripts/tests/rc_check_tests.gd", "RcCheckTest", "rcchecktest"],
 			["--openingtest", "res://scripts/tests/opening_tests.gd", "OpeningTest", "openingtest"],
 			["--driftbgtest", "res://scripts/tests/drift_bg_tests.gd", "DriftBgTest", "driftbgtest"],
 			["--tcptest", "res://scripts/tests/tc_p_autotest.gd", "TcPTest", "tcptest"],
@@ -761,7 +769,9 @@ func _ready() -> void:
 			["--archief1balans", "res://tools/battlesim/archief1_balans.gd", "Archief1Balans", "archief1balans"],
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
-			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"]]:
+			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
+			["--arenatest", "res://scripts/tests/arena_tests.gd", "ArenaTest", "arenatest"],
+			["--arenawavestest", "res://scripts/tests/arena_waves_tests.gd", "ArenaWavesTest", "arenawavestest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
@@ -1063,6 +1073,8 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	map_monster_battle = {}
 	defeated_map_monsters = {}
 	gold = GameData.START_GOLD
+	arena_tokens = 0
+	_drop_arena_run()
 	steps_until_encounter_possible = GameData.SAFE_STEPS
 	bestiary.clear()
 	puzzle_latched.clear()
@@ -2045,6 +2057,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"huis_herkomst": huis_herkomst,
 		"inventory": inventory.duplicate(true),
 		"gold": gold,
+		"arena_tokens": arena_tokens,
 		"play_time": play_time(),
 		"bestiary": bestiary.duplicate(true),
 		"puzzle_latched": puzzle_latched.duplicate(true),
@@ -2184,6 +2197,7 @@ func apply_state(d: Dictionary) -> bool:
 	# of nieuwere saves) laten het spel nooit vastlopen.
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
+	_drop_arena_run()
 	var oude_namen := not d.has(NAMES_KEY)
 	player_name = clean_name(str(d.get("player_name", DEFAULT_NAME)))
 	if oude_namen:
@@ -2207,6 +2221,8 @@ func apply_state(d: Dictionary) -> bool:
 		if Equipment.is_equipment(str(id)):
 			inventory[id] = int(inventory.get(id, 0)) + 1
 	gold = _gold_from(d.get("gold", 0))
+	# Ontbrekende sleutel (oude save) of een kapot type -> 0, net als goud.
+	arena_tokens = mini(_arena_token_cap(), _gold_from(d.get("arena_tokens", 0)))
 	bestiary = {}
 	var best = d.get("bestiary", {})
 	if best is Dictionary:
@@ -3442,6 +3458,38 @@ func spend_gold(n: int) -> bool:
 		return false
 	gold -= n
 	return true
+
+
+func _arena_token_cap() -> int:
+	return int(preload("res://scripts/data/arena_rewards.gd").token_cap())
+
+
+func add_arena_tokens(n: int) -> void:
+	if n <= 0:
+		return
+	if not ReleaseFlags.arena_enabled():
+		if OS.is_debug_build():
+			push_warning("add_arena_tokens genegeerd: arena uitgeschakeld")
+		return
+	arena_tokens = mini(_arena_token_cap(), arena_tokens + n)
+
+
+func spend_arena_tokens(n: int) -> bool:
+	if n <= 0:
+		return true
+	if arena_tokens < n:
+		return false
+	arena_tokens -= n
+	return true
+
+
+## Run-node hangt alleen aan GameState zolang iemand de arena echt in gaat. Uit = er is geen node.
+func _drop_arena_run() -> void:
+	var n := get_node_or_null("ArenaRun")
+	if n == null:
+		return
+	remove_child(n)
+	n.free()
 
 
 ## Leg loot-items in de tas (clamps). Geeft het goud uit de loot-dict (nog niet opgeteld).

@@ -1,0 +1,9 @@
+# Colosseum-art is geleverd door RPG ART (v2/v3, 2026-11-15). Geen open placeholders.
+# Niet zelf tekenen. Bron: docs/arena/ART_README.md.
+assets/tiles/arena/arena_tiles.png            256x144   16x9, indices 0-111 stabiel, 112-143 nieuw, 140/141 animatie 250 ms   [KLAAR: RPG ART]
+assets/sprites/arena/arena_gate.png           144x48    3 frames 48x48: dicht, open, dicht+ketting   [KLAAR: RPG ART]
+assets/sprites/arena/arena_bench.png          32x16     bank   [KLAAR: RPG ART]
+assets/sprites/arena/arena_crates.png         32x32     kisten   [KLAAR: RPG ART]
+assets/sprites/arena/arena_brazier.png        128x32    vuurschaal, 4 frames 125 ms   [KLAAR: RPG ART]
+assets/sprites/arena/arena_vip_loge.png       48x64     VIP-loge   [KLAAR: RPG ART]
+assets/sprites/arena/arena_sand_ring.png      64x64     zandring-decal   [KLAAR: RPG ART]
