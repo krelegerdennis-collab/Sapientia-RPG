@@ -33,7 +33,7 @@ func _build() -> void:
 	bar.add_theme_constant_override("separation", 4)
 	content.add_child(bar)
 	for t in TABS:
-		var b := UiMenu.button(_tab_naam(t))
+		var b := touch_row(UiMenu.button(_tab_naam(t)))
 		b.name = "Tab_" + t
 		b.custom_minimum_size = Vector2(TAB_W, TOUCH_H)
 		b.focus_mode = Control.FOCUS_NONE
@@ -141,7 +141,7 @@ func _fill() -> void:
 
 func _rij(q: Dictionary, flags: Dictionary, stap: int, vg: Dictionary) -> void:
 	var tekst := QD.regel(q, flags, stap, vg)
-	var b := UiMenu.button(tekst)
+	var b := touch_row(UiMenu.button(tekst))
 	b.name = "Quest_" + str(q["id"])
 	b.set_meta("quest", str(q["id"]))
 	b.custom_minimum_size = Vector2(0, TOUCH_H)

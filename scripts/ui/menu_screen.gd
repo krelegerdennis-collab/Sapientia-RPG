@@ -16,6 +16,7 @@ const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const PartyCard := preload("res://scripts/ui/party_card.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+const TouchRowS := preload("res://scripts/ui/touch_row.gd")
 
 const LAYER := 21
 const FRAME_INSET := 6         # afstand venster - schermrand
@@ -185,8 +186,17 @@ static func lock_horizontal_focus(c: Control) -> void:
 
 
 ## Kleine knop ('<', '>') die je alleen aantikt; de joystick doet hetzelfde met links/rechts.
+## F6-2: lijstregel met een onzichtbaar tikvlak van minstens TOUCH_MIN (scripts/ui/touch_row.gd).
+## De zichtbare hoogte blijft wat het scherm zet (ROW_H). Geeft dezelfde knop terug.
+static func touch_row(b: Button) -> Button:
+	if b.get_script() == null:
+		b.set_script(TouchRowS)
+	return b
+
+
 static func arrow_button(text: String) -> Button:
 	var b := Button.new()
+	b.set_script(TouchRowS)   # F6-2: onzichtbaar tikvlak >= TOUCH_MIN
 	b.text = text
 	b.focus_mode = Control.FOCUS_NONE
 	b.custom_minimum_size = Vector2(ROW_H + 4, ROW_H)

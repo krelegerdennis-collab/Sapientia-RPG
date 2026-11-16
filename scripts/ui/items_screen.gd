@@ -98,7 +98,7 @@ func rebuild(keep_id := "") -> void:
 		ib = ib if ib >= 0 else order.size()
 		return ia < ib if ia != ib else str(a) < str(b))
 	for id in ids:
-		var b := UiMenu.button(entry_label(id))
+		var b := touch_row(UiMenu.button(entry_label(id)))
 		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
 		ItemIcons.apply16(b, str(id))
 		b.focus_entered.connect(show_item.bind(id))
