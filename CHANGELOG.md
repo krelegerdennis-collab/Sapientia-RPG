@@ -12,11 +12,11 @@ oudere versieparagrafen stonden vroeger in `README.md` (nu alleen nog technische
 
 ## [0.21] (RC) - 2026-11-15
 
-Alles op `main` na tag `v0.20`.
+Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 
 ### Toegevoegd
 - Online co-op via een Node-relay (`relay/`, kamers met 6-tekencode, max. 4 spelers) onder dezelfde lobby/sync als LAN; `--relaytest`.
-- Fase B: LAN co-op lobby, host-autoritaire Action-sync in de sandbox, co-op host op Android (INTERNET-permissies in de presets).
+- Fase B: LAN co-op lobby, host-autoritaire Action-sync in de sandbox, co-op host op Android (voor de RC weer dicht, zie Bekend).
 - Action-modus: doel-lock met tikken, auto-lock, Codex vangen in Action, gekozen leider blijft over warps/opslaan/laden, Action als standaard voor een nieuw spel.
 - Action-HUD overal (joystick + knoppenrij, geen D-pad), RUN/MENU-knoppen in dezelfde stijl.
 - Rekruten Kael en Orion in de World Warper-hal, met eigen gevechtssprites, ontwijk-poses en actor-sfx.
@@ -30,6 +30,17 @@ Alles op `main` na tag `v0.20`.
 - Realtime Golem-baas in Action (fases, kernvenster, telegraph) met story-events na de arenawinst; opening Drift + story-Hal met ECHO.
 - Tekst en lore (`finish/wm1`, 5 nov): unieke beschrijvingen voor alle Diepe Grot-uitrusting, bestiarium-tekst voor alle twaalf grotbazen, 20 lege-kamer-briefjes, ECHO-hubregels in zijn eigen stem, namen en tweede zinnen voor de Wilgendal-winkeliers en -dorpelingen, Koopman-variatie per bezoek.
 - Release-docs: `LAUNCH_PLAN.md`, `FINISH_LOG.md` (scorekaart), `STORE_LISTING.md`; `tools/sfx/` (SFX-generatie via ComfyUI + Stable Audio Open).
+- WM1-filmpjes CS-01 t/m CS-12 met Scenes-menu, goedgekeurde storytext en proloog-titelkaart (#383, #393, #394, #436, #439-#441).
+- HD-2D-mapverlichting voor WM1 (`MapLighting`) met lichtprops in Archief 2 (#413, #415, #437).
+- Action: stagger-meter voor vijanden (F2, #450) en vloer-telegraphs (#453).
+- Action game-feel: screenshake, gekleurde schadegetallen, impact, stof, hit-react, glitch-dood, loot-pop en enemy-read (#404, #444, #477, #482).
+- Autosave per slot (`autosave_N.json`, met migratie) (#391).
+- Uitleg over opslaan voor de speler: save-boek en grijze Save-knop (#388).
+- Wachtrij voor `Dialog.show_lines` (#457); Android-terugknop en Back op het naamscherm (#451).
+- Android launcher-icoon (archief-embleem) (#443).
+- Masterpalet (`docs/art/masterpalet.gpl`) met `palet_check` en CI-waarschuwing (#366).
+- Centrale inventaris- en goud-API (#399).
+- Nieuwe suites o.a. `--rcchecktest` (#481), `--savestresstest` (#469), `--f6uxtest2` (#463) en de game-feel-suites (#449, #480, #488).
 
 ### Gewijzigd
 - Interne RC (besluit Dennis, 15 nov): versie 0.21 / versionCode 23; netwerkrechten (`internet`, `access_network_state`,
@@ -44,7 +55,14 @@ Alles op `main` na tag `v0.20`.
 - Art-batches 1 en 3 en nieuw titelscherm naar het masterpalet (RPG ART).
 - Power scaling v2 (data-only monster/baas-stats; Wortelkoning ~82% winst) en Action-balans Archief 1.
 - Framerate begrensd op 60 fps; opties met 24px tikhoogte en layouttests op drie viewports.
-- CI-matrix van 79 naar 102 suites (alle geregistreerde suites behalve perf/benchmark, relay en de lange playthrough).
+- CI-matrix naar 121 suites plus een aparte relay-job (alle geregistreerde suites behalve perf/benchmark en de lange playthrough) (#406, #409).
+- Art naar het masterpalet en eigen sprites voor rustpunt, Blauwe Kist en uitgang-warper (RPG ART; #369-#372, #375, #378, #379, #381, #403, #411, #412).
+- Telegraph-kleur van rood naar magenta (kleurregel) (#485, #490).
+- Gevechtsbalans: stun-lock dicht (C-2, #408), MAG/MDEF met zwakte/resistentie en scroll-ladder in de Diepe Grot (C-12, #414), Solar Flare-scroll vanaf vloer 20 (#446).
+- Hoofdmenu: Beta Test, End State en SoM achter een testvlag (#398).
+- Export-presets gelijkgetrokken; `export/web` niet meer in git (#390).
+- Grijze UI-tekst haalt 4,5:1 contrast (#463).
+- Battle Style-uitleg en tutorial: Golem is realtime in Action (#367).
 
 ### Opgelost
 - Saves zijn atomair en herstelbaar; verplichte pauze-save hersteld; suspend-save alleen op mobiel.
@@ -53,11 +71,19 @@ Alles op `main` na tag `v0.20`.
 - KO door gif of brand wordt gemeld als gewone KO (bericht, geluid, wegfade).
 - Zingend Meel van de molen is per bezoek en niet meer per save: laden geeft geen tweede meel.
 - Respawn-tekst definitief ("The Current pulls you back...").
+- Saves: versie-guard, `scene_busy`-guard en geneste typechecks bij laden (#392, #395); Molen-meel alleen via `story_flags` (#387).
+- `change_map` heeft een vangnet bij een ontbrekend pad; een deur zet input pas vast als de wissel slaagt (#452, #459).
+- Tekstvak te laag bij gestapelde keuzes (#434); Classic-baasnaam afgekapt op 16:9 (#410).
+- Golem-aanvallen zichtbaar in Action (#374); Drift-achtergrond vult een breed scherm (#373).
+- Relay: peer-id-overflow en gast-input gebonden aan de afzender (#405, #407).
+- Localisatie-guard: PvP-modi in het Engels (#386).
 
-### Bekend (WM1-release)
-- PvP en co-op zijn verborgen zonder relay-URL (content-lock H11); hubkamers Training Hall tot en met The Core zitten achter de Diepe Grot-levels (H3).
+### Bekend
+- Online staat dicht: PvP en co-op (LAN en relay) zijn verborgen via `online_cut` (H11), en de Android-presets vragen geen netwerkrechten.
+- Hubkamers Training Hall, Workshop, Exchange en The Core en de hub-nissen blijven dicht via `hub_cut` (H3/H2).
+- Perfect dodge (F1) zit in de code maar staat uit (`SomPerfectDodgeData.ENABLED = false`) tot de balanspas (#472, #486).
 - Geluidseffecten zijn nog synthetische placeholders (`tools/placeholders_algemene_sfx.txt`); vervanging loopt via `tools/sfx/`. Voor de interne RC bewust geaccepteerd (besluit Dennis, 15 nov).
-- Een deel van de art in Archief 2 en de World Warper is placeholder (`docs/PLAN.md`).
+- Het Action-HUD wordt in code getekend en is nog niet beoordeeld; `tools/placeholders_v17.txt` heeft nog open regels (RC-audit F2.5).
 
 ## [0.20] - 2026-10-13
 
