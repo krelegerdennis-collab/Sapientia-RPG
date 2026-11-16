@@ -1,7 +1,7 @@
 extends Node
 ## Android launcher-icoon C (--launchertest): export_presets launcher_icons + bestandsgrootte.
 ## Start: godot --path . -- --launchertest
-## Zit niet in de export (scripts/tests/*). Niet in de CI-matrix tot Dennis toevoegt.
+## Zit niet in de export (scripts/tests/*). In de CI-matrix.
 
 const EXPECTED_MAIN := "res://assets/ui/launcher/launcher_main_192.png"
 const EXPECTED_FG := "res://assets/ui/launcher/launcher_adaptive_fg_432.png"

@@ -425,7 +425,10 @@ func release_all() -> void:
 
 func _notification(what: int) -> void:
 	# App naar de achtergrond of venster kwijt: laat alle knoppen los.
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+	# Klus 13: ook bij PAUSED (scherm uit/split-screen kan PAUSED sturen zonder FOCUS_OUT naar deze laag);
+	# anders blijft een vinger op de joystick na hervatten 'ingedrukt' en loopt de held door.
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT \
+			or what == NOTIFICATION_APPLICATION_PAUSED:
 		release_all()
 	# Sessielog 21 okt 2026 (vast in de Golemhal): deze laag verdwijnt met de oude kaart (warp) terwijl
 	# een vinger nog op de D-pad ligt. Input.action_press is globaal en niemand liet move_* dan nog los:

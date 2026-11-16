@@ -7,6 +7,8 @@ extends RefCounted
 ## Schermen: Items, Equipment, Magic, Party, Quest Log, Bestiary, Scenes (+ Music), Codex (Fusion-knop).
 
 const GameDataS := preload("res://scripts/data/game_data.gd")
+const MenuScreenS := preload("res://scripts/ui/menu_screen.gd")
+const UiMenuS := preload("res://scripts/ui/ui_menu.gd")
 const SCREENS: Array[String] = ["menu_items", "menu_equipment", "menu_magic", "menu_party", "menu_quests",
 		"menu_bestiary", "menu_codex", "scenes", "scenes_music"]
 
@@ -60,6 +62,29 @@ static func owners(buttons: Array, gp: Vector2) -> Array:
 	return out
 
 
+## Punt in de extra tikrand (binnen touch_rect, buiten zichtbare regel) met één eigenaar.
+static func _padding_point(btns: Array) -> Array:
+	if btns.is_empty():
+		return []
+	for pick in btns:
+		if not pick.has_method("owns"):
+			continue
+		var g := (pick as Control).get_global_rect()
+		var r := touch_rect(pick)
+		if r.size.y <= g.size.y + 0.5:
+			continue
+		var probes: Array[Vector2] = [
+				Vector2(g.get_center().x, g.position.y - 2.0),
+				Vector2(g.get_center().x, g.end.y + 2.0),
+				Vector2(r.get_center().x, r.position.y + 1.0),
+				Vector2(r.get_center().x, r.end.y - 1.0),
+		]
+		for gp in probes:
+			if r.has_point(gp) and not g.has_point(gp) and pick.owns(gp):
+				return [pick, gp]
+	return []
+
+
 ## Eerste (knop, punt) met een punt in het tikvlak maar buiten de zichtbare knop, dat alleen die knop heeft.
 static func _probe(btns: Array) -> Array:
 	for b in btns:
@@ -90,6 +115,119 @@ static func _click(t: Node, gp: Vector2) -> void:
 		t.get_viewport().push_input(e, true)
 
 
+static func _win_pos(t: Node, gp: Vector2) -> Vector2:
+	return t.get_tree().root.get_final_transform() * gp
+
+
+static func _drag_vertical(t: Node, gp: Vector2, dy: float) -> void:
+	var mb := InputEventMouseButton.new()
+	mb.button_index = MOUSE_BUTTON_LEFT
+	mb.pressed = true
+	mb.position = _win_pos(t, gp)
+	mb.global_position = gp
+	Input.parse_input_event(mb)
+	await t.pframes(2)
+	var steps := 5
+	for i in range(1, steps + 1):
+		var y := gp.y + dy * float(i) / float(steps)
+		var mot := InputEventMouseMotion.new()
+		mot.position = _win_pos(t, Vector2(gp.x, y))
+		mot.global_position = Vector2(gp.x, y)
+		mot.button_mask = MOUSE_BUTTON_MASK_LEFT
+		Input.parse_input_event(mot)
+		await t.pframes(1)
+	mb = InputEventMouseButton.new()
+	mb.button_index = MOUSE_BUTTON_LEFT
+	mb.pressed = false
+	mb.position = _win_pos(t, Vector2(gp.x, gp.y + dy))
+	mb.global_position = Vector2(gp.x, gp.y + dy)
+	Input.parse_input_event(mb)
+
+
+static func _touch_tap(t: Node, zones: Control, gp: Vector2) -> void:
+	var local := zones.get_global_transform().affine_inverse() * gp
+	var st := InputEventScreenTouch.new()
+	st.index = 0
+	st.device = 0
+	st.pressed = true
+	st.position = local
+	zones._gui_input(st)
+	await t.pframes(2)
+	var rel := InputEventScreenTouch.new()
+	rel.index = 0
+	rel.device = 0
+	rel.pressed = false
+	rel.position = local
+	zones._gui_input(rel)
+
+
+## Tik/sleep in de extra tikrand (padding): pressed alleen bij tik, scroll bij sleep; touch zonder dubbele pressed.
+func _padding_gesture_tests(t: Node) -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 120
+	t.get_tree().root.add_child(layer)
+	var panel := Control.new()
+	panel.position = Vector2.ZERO
+	panel.size = t.get_viewport().get_visible_rect().size
+	panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	layer.add_child(panel)
+	panel.theme = load(UiMenuS.THEME_PATH)
+	var scroll := ScrollContainer.new()
+	scroll.name = "HarnessScroll"
+	scroll.clip_contents = true
+	scroll.position = Vector2(40, 40)
+	scroll.custom_minimum_size = Vector2(120, 48)
+	scroll.scroll_deadzone = 6
+	panel.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 8)
+	scroll.add_child(list)
+	var btns: Array = []
+	for i in 6:
+		var b := MenuScreenS.touch_row(UiMenuS.button("R%d" % i))
+		b.custom_minimum_size = Vector2(96, 16)
+		b.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
+		list.add_child(b)
+		btns.append(b)
+	await t.pframes(4)
+	scroll.scroll_vertical = 20
+	await t.pframes(2)
+	var probe := _padding_point(btns)
+	t.check("F6-2 padding: proefpunt in tikrand", not probe.is_empty())
+	if probe.is_empty():
+		layer.queue_free()
+		return
+	var target: Button = probe[0]
+	var gp: Vector2 = probe[1]
+	var presses := [0]
+	var cb := func() -> void:
+		presses[0] += 1
+	target.pressed.connect(cb)
+	_click(t, gp)
+	await t.pframes(3)
+	t.check("F6-2 padding-tik: pressed bij loslaten in tikrand", presses[0] == 1)
+	target.pressed.disconnect(cb)
+	presses[0] = 0
+	target.pressed.connect(cb)
+	var zones: Control = panel.get_node_or_null("TouchRowZones") as Control
+	t.check("F6-2 touch: zones-laag aanwezig", zones != null)
+	if zones != null:
+		await _touch_tap(t, zones, gp)
+		await t.pframes(3)
+		t.check("F6-2 touch-tikrand: precies één pressed (was %d)" % presses[0], presses[0] == 1)
+	target.pressed.disconnect(cb)
+	presses[0] = 0
+	target.pressed.connect(cb)
+	var y0 := scroll.scroll_vertical
+	await _drag_vertical(t, gp, 24.0)
+	await t.pframes(4)
+	t.check("F6-2 padding-sleep: geen pressed", presses[0] == 0)
+	t.check("F6-2 padding-sleep: lijst scrollt", scroll.scroll_vertical != y0)
+	if is_instance_valid(target):
+		target.pressed.disconnect(cb)
+	layer.queue_free()
+
+
 func _open(t: Node, name: String) -> Node:
 	if name.begins_with("scenes"):
 		var fm: Node = await t.sc.open_field_menu()
@@ -115,6 +253,7 @@ func run(t: Node) -> void:
 		n += 1
 		if n >= 14:
 			break
+	await _padding_gesture_tests(t)
 	for p in ["16x9", "19_5x9_notch"]:
 		await t.sc.set_profile(p)
 		for name in SCREENS:
