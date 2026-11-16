@@ -16,6 +16,8 @@ var _spawned: Array = []
 var _alive: int = 0
 var _cleared_for: int = 0
 var _wiped_for: int = 0
+## Golf die zonder gevecht is afgerond (hal-timeout of 0 spawns): geen beloning (review #487, punt C).
+var _skipped_for: int = 0
 var _som_hooked := false
 
 
@@ -23,6 +25,7 @@ func start_wave(n: int) -> void:
 	active_wave = n
 	_cleared_for = 0
 	_wiped_for = 0
+	_skipped_for = 0
 	_teardown_wave()
 	wave_started.emit(n)
 	if not _spawn_authority():
@@ -59,14 +62,24 @@ func _spawn_when_ready(n: int) -> void:
 			_room = room
 			_bind_som(room)
 			_spawn_wave(room, n)
+			if _alive <= 0:
+				# Review #487 punt B: niets gespawnd -> golf meteen afronden, anders hangt de run in PHASE_WAVE.
+				_skip_wave(n, "0 monsters gespawnd (geen geldige tegel of lege lijst)")
 			return
 		await get_tree().process_frame
 	if not is_inside_tree() or active_wave != n:
 		return
-	push_warning(
-		"SomArenaWaves: hal niet gevonden na %d frames; wave %d wordt overgeslagen (wave_cleared)."
-		% [WavesData.HALL_FIND_MAX_FRAMES, n]
-	)
+	_skip_wave(n, "hal niet gevonden na %d frames" % WavesData.HALL_FIND_MAX_FRAMES)
+
+
+## True als golf n zonder gevecht is afgerond; arena_run geeft dan geen beloning.
+func wave_was_skipped(n: int) -> bool:
+	return n > 0 and _skipped_for == n
+
+
+func _skip_wave(n: int, reason: String) -> void:
+	push_warning("SomArenaWaves: %s; wave %d wordt overgeslagen (wave_cleared, geen beloning)." % [reason, n])
+	_skipped_for = n
 	_emit_wave_cleared(n)
 
 
@@ -115,6 +128,9 @@ func _spawn_wave(room: Node, n: int) -> void:
 	var hp_mult := WavesData.hp_multiplier(n)
 	_spawned.clear()
 	_alive = 0
+	# Geen tegel of lege pool: niets spawnen (tiles[0] zou anders buiten bereik vallen).
+	if tiles.is_empty() or pool.is_empty():
+		return
 	for i in count:
 		var enemy_id := pool[rng.randi_range(0, pool.size() - 1)]
 		var tile: Vector2i = tiles[i] if i < tiles.size() else tiles[0]
