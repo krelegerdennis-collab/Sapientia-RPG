@@ -46,6 +46,7 @@ func _run_all() -> void:
 	GameState.new_game("Dax")
 	_flag_off()
 	await _world_map_untouched()
+	ReleaseFlags.arena_enabled_override = 1
 	GameState.new_game("Dax")
 	_full_path()
 	GameState.new_game("Dax")
@@ -58,8 +59,10 @@ func _run_all() -> void:
 	_no_double_rewards()
 	GameState.new_game("Dax")
 	_save_roundtrip()
+	ReleaseFlags.arena_enabled_override = -1
 	GameState.new_game("Dax")
 	_shop()
+	ReleaseFlags.arena_enabled_override = 1
 	GameState.new_game("Dax")
 	_touch_choice()
 	ReleaseFlags.arena_enabled_override = -1
@@ -98,6 +101,9 @@ func _flag_off() -> void:
 	check("vlag uit: geen wereldtegel geladen", Art.world_texture() == null)
 	check("vlag uit: geen npc-sheet geladen", Art.npc_texture() == null)
 	check("vlag uit: tokens beginnen op 0", GameState.arena_tokens == 0)
+	var tok_off := GameState.arena_tokens
+	GameState.add_arena_tokens(40)
+	check("vlag uit: add_arena_tokens doet niets", GameState.arena_tokens == tok_off)
 	check("vlag uit: geen ArenaRun op GameState", GameState.get_node_or_null("ArenaRun") == null)
 	var proj := FileAccess.get_file_as_string("res://project.godot")
 	var auto := ""
@@ -121,6 +127,9 @@ func _flag_off() -> void:
 	dummy.queue_free()
 	# De haak zelf werkt pas als een test de override aanzet, en zet hem daarna terug.
 	ReleaseFlags.arena_enabled_override = 1
+	var tok_on := GameState.arena_tokens
+	GameState.add_arena_tokens(7)
+	check("vlag aan: add_arena_tokens telt op", GameState.arena_tokens == tok_on + 7)
 	GameState.story_flags.erase("noor_lid")
 	var open_map := _dummy_map()
 	Entry.consider(open_map)

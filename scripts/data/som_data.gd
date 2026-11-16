@@ -162,6 +162,10 @@ const FX_ROOT := {"sheet": "res://assets/sprites/som/fx/fx_root.png", "cell": [1
 const FX_SPELL_IMPACT := {"sheet": "res://assets/sprites/som/fx/fx_spell_impact.png", "cell": [24, 24], "frames": 4, "ms": 70, "anchor": [12, 24]}
 const FX_PERFECT_RING := {"sheet": "res://assets/sprites/som/fx/fx_perfect_ring.png", "cell": [16, 16], "frames": 4, "ms": 75, "anchor": [8, 8]}
 const FX_COUNTER_SPARK := {"sheet": "res://assets/sprites/som/fx/fx_counter_spark.png", "cell": [16, 16], "frames": 3, "ms": 50, "anchor": [8, 8]}
+const FX_DEATH_GLITCH := {"sheet": "res://assets/sprites/som/fx/fx_death_glitch.png", "cell": [32, 32], "frames": 7, "ms": 60, "anchor": [16, 16]}
+const FX_DEATH_GLITCH_48 := {"sheet": "res://assets/sprites/som/fx/fx_death_glitch_48.png", "cell": [48, 48], "frames": 6, "ms": 60, "anchor": [24, 24]}
+const FX_LOOT_POP := {"sheet": "res://assets/sprites/som/fx/fx_loot_pop.png", "cell": [16, 16], "frames": 4, "ms": 67, "anchor": [8, 12]}
+const FX_ENEMY_READ := {"sheet": "res://assets/sprites/som/fx/fx_enemy_read.png", "cell": [16, 16], "frames": 3, "ms": 40, "anchor": [8, 8]}
 const FX_TELEGRAPH := "res://assets/sprites/som/fx/fx_telegraph.png"  # 8x8
 const UI_DIGITS := "res://assets/sprites/som/ui/dmg_digits.png"       # 50x21: rijen wit, rood, groen; cijfers 5x7
 const UI_GAUGE_BAR := "res://assets/sprites/som/ui/gauge_bar.png"     # 18x4
@@ -347,6 +351,13 @@ const ATTACK_COOLDOWN := 1.2     # v3: --actionsim iteratie 7 (was 1.6)
 ## Afstand (px, middelpunten) waarop een vijand kan aanvallen/raken.
 const ENEMY_REACH := 22.0
 const HIT_FLASH := 0.12
+## Fase-1 contact-flits (50 ms); HIT_FLASH blijft voor backwards-compat in tests/docs.
+const HIT_FLASH_CONTACT := 0.05
+const FX_IMPACT_DIR := "res://assets/sprites/som/fx/fx_impact_%s.png"
+const FX_IMPACT := {"cell": [24, 24], "frames": 3, "ms": 50, "anchor": [12, 12]}
+const FX_DUST_DODGE := {"sheet": "res://assets/sprites/som/fx/fx_dust_dodge.png", "cell": [16, 16], "frames": 4, "ms": 60, "anchor": [8, 16]}
+const FX_DUST_LAND := {"sheet": "res://assets/sprites/som/fx/fx_dust_land.png", "cell": [24, 12], "frames": 4, "ms": 60, "anchor": [12, 12]}
+const FX_DUST_FINISHER := {"sheet": "res://assets/sprites/som/fx/fx_dust_finisher.png", "cell": [32, 16], "frames": 5, "ms": 70, "anchor": [16, 16]}
 
 ## --- Skill-ring: technieken per held-id (vragen een volle wapenmeter). radius > 0 = rondom.
 const SKILLS := {
