@@ -1,5 +1,5 @@
 extends Node
-## Colosseum-flow (--arenatest). Geen CI-matrix.
+## Colosseum-flow (--arenatest). In CI-matrix.
 ## Start: godot --path . -- --arenatest
 
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")

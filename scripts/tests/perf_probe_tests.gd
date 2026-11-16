@@ -1,7 +1,7 @@
 extends Node
 ## T27: PerfProbe (--perfprobetest). Uit = geen data; aan = labels + geldige dump-JSON.
 ## Start: godot --path . -- --perfprobetest
-## Zit niet in de export (scripts/tests/*). Niet in de CI-matrix (taak: workflows niet wijzigen).
+## Zit niet in de export (scripts/tests/*). In de CI-matrix.
 
 const Probe := preload("res://scripts/perf/perf_probe.gd")
 

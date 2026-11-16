@@ -1,7 +1,7 @@
 extends Node
 ## Classic-muur in het Wachtershuis (--huiscollisiontest): is_wall + player._can_move.
 ## Start: godot --path . -- --huiscollisiontest
-## Niet via debug_autotest.gd. CI-matrix: voorstel aan Dennis (niet in tests.yml).
+## Niet via debug_autotest.gd. In de CI-matrix.
 
 const SD := preload("res://scripts/data/story_data.gd")
 const Build := preload("res://scripts/data/huis_interieur_build.gd")
