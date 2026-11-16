@@ -5,6 +5,8 @@ extends RefCounted
 ## Fase 2: glitch-dood + loot-pop (client-only). false = oude death-sheet / fade.
 const DEATH_GLITCH_ENABLED := true
 const ENEMY_READ_DELAY_SEC := 2.0 / 60.0
+## Kleurregel: telegraaf-"!" = magenta (gevaar).
+const TELEGRAPH_BANG_COLOR := Color("#E040C0")
 
 const GameData := preload("res://scripts/data/game_data.gd")
 const VALID_IMPACT_ELEMENTS: Array[String] = ["fysiek", "vuur", "ijs", "bliksem", "natuur", "licht"]
