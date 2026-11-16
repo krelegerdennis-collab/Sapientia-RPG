@@ -3465,6 +3465,10 @@ func _arena_token_cap() -> int:
 func add_arena_tokens(n: int) -> void:
 	if n <= 0:
 		return
+	if not ReleaseFlags.arena_enabled():
+		if OS.is_debug_build():
+			push_warning("add_arena_tokens genegeerd: arena uitgeschakeld")
+		return
 	arena_tokens = mini(_arena_token_cap(), arena_tokens + n)
 
 
