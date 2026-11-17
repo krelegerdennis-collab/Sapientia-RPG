@@ -9,6 +9,7 @@ Gebruik (vanuit de repo-root):
     python3 tools/art_audit/palet_check.py
     python3 tools/art_audit/palet_check.py --assets assets/sprites/som --top 50
     python3 tools/art_audit/palet_check.py --palet docs/art/masterpalet.gpl --streng
+    python3 tools/art_audit/palet_check.py --negeer '**/*_n.png' --negeer 'tmp/**'
 """
 from __future__ import annotations
 
@@ -23,11 +24,13 @@ import meet  # noqa: E402
 STANDAARD_PALET: Path = meet.REPO_ROOT / "docs" / "art" / "masterpalet.gpl"
 
 
-def check(assets: Path, palet: set[meet.RGB]) -> list[tuple[str, int, int]]:
+def check(assets: Path, palet: set[meet.RGB], negeer: list[str] | None = None) -> list[tuple[str, int, int]]:
     """Geeft (pad, buiten_palet, unieke_kleuren) per PNG, slechtste eerst."""
     rijen: list[tuple[str, int, int]] = []
     basis = assets.parent
-    for png in meet.zoek_pngs(assets):
+    # Zonder --negeer is `pngs` dezelfde lijst als zoek_pngs (geen standaard-uitsluiting).
+    pngs, _genegeerd = meet.zonder_negeer(assets, negeer or [])
+    for png in pngs:
         try:
             m = meet.meet_png(png, palet)
         except Exception as fout:  # kapotte PNG: melden, doorgaan
@@ -44,16 +47,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--assets", type=Path, default=meet.REPO_ROOT / "assets", help="map om te scannen")
     parser.add_argument("--top", type=int, default=20, help="hoeveel afwijkers tonen (0 = alle)")
     parser.add_argument("--streng", action="store_true", help="exit 1 als er afwijkers zijn")
+    parser.add_argument("--negeer", action="append", default=None, metavar="GLOB",
+                        help="glob op het repo-relatieve pad; sla treffers over (herhaalbaar)")
     args = parser.parse_args(argv)
 
     if not args.assets.is_dir():
         parser.error(f"map bestaat niet: {args.assets}")
     palet = meet.lees_palet(args.palet)
-    rijen = check(args.assets.resolve(), palet)
+    assets = args.assets.resolve()
+    globs: list[str] = args.negeer or []
+    rijen = check(assets, palet, globs)
     fout = [r for r in rijen if r[1] > 0]
 
     print(f"Paletcheck: {len(palet)} paletkleuren, {len(rijen)} PNG's, "
           f"{len(rijen) - len(fout)} schoon, {len(fout)} met kleuren buiten het palet")
+    if args.negeer:
+        print(f"{meet.zonder_negeer(assets, globs)[1]} genegeerd")
     toon = fout if args.top == 0 else fout[:args.top]
     for pad, buiten, uniek in toon:
         print(f"  {buiten:5d} buiten / {uniek:5d} uniek  {pad}")
