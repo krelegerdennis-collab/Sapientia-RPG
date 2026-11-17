@@ -16,6 +16,10 @@ var slot_buttons: Array[Button] = []
 var venster: PanelContainer
 var dim: ColorRect
 var _placing := false
+## Laatste viewport, insets en oudergrootte waarvoor het venster is gezet (party_select).
+var _lay_vp := Vector2(-1, -1)
+var _lay_ins := Vector4(-1, -1, -1, -1)
+var _lay_psz := Vector2(-1, -1)
 ## "load" (standaard) of "new"
 ## Waarvoor staat de lijst open (docs/STATE_MACHINES.md §5): LOAD (Continue, standaard) | NEW (New Game).
 ## title_screen.gd zet hem vóór het vullen.
@@ -94,7 +98,25 @@ func _ready() -> void:
 	_place.call_deferred()
 
 
-## Het venster staat in het midden. Ankers op een nog lege ouder landen anders links boven het beeld.
+## Insets kunnen wisselen zonder dat de viewport van maat verandert (notch-test).
+func _process(_delta: float) -> void:
+	if not is_inside_tree():
+		return
+	var vp := get_viewport_rect().size
+	var ins := UiTouch.insets(get_viewport())
+	var parent := get_parent() as Control
+	var psz := parent.size if parent != null else vp
+	if vp == _lay_vp and ins == _lay_ins and psz == _lay_psz:
+		return
+	_lay_vp = vp
+	_lay_ins = ins
+	_lay_psz = psz
+	_place()
+
+
+## Het venster staat in het midden van UiTouch.safe_rect (notch, gebarenbalk).
+## Bij insets 0 blijft dat dezelfde pixel als het midden van de ouder.
+## Ankers op een nog lege ouder landen anders links boven het beeld.
 func _place() -> void:
 	if _placing:
 		return
@@ -113,7 +135,18 @@ func _place() -> void:
 		_placing = false
 		return
 	venster.reset_size()
-	venster.position = ((psz - venster.size) / 2.0).floor()
+	var ins := UiTouch.insets(get_viewport())
+	if ins == Vector4.ZERO:
+		venster.position = ((psz - venster.size) / 2.0).floor()
+	else:
+		# Zelfde klem als party_select._binnen_veilig: helemaal in het veilige gebied,
+		# en als het past het midden daarvan (niet het midden van de volle viewport).
+		var vp := get_viewport_rect().size
+		var safe := UiTouch.safe_rect(vp, get_viewport())
+		var pos := (safe.position + (safe.size - venster.size) / 2.0).floor()
+		pos.x = clampf(pos.x, safe.position.x, maxf(safe.position.x, safe.end.x - venster.size.x))
+		pos.y = clampf(pos.y, safe.position.y, maxf(safe.position.y, safe.end.y - venster.size.y))
+		venster.global_position = pos
 	_placing = false
 
 
