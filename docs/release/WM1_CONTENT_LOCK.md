@@ -1,6 +1,6 @@
 # WM1 Content Lock (release-roadmap, fase 1: feature freeze en content lock)
 
-Basis: `main` op `61986e9` (merge van PR #208), 24 okt 2026. Alleen documentatie: geen code, geen scènes, geen data,
+Basis: `f76aa715` (wm1-freeze). Oorspronkelijk opgesteld op `61986e9` (merge van PR #208), 24 okt 2026. Alleen documentatie: geen code, geen scènes, geen data,
 geen tests, geen workflows aangepast.
 
 **Status: voorstel tot akkoord.** De lock is bindend vanaf de merge van deze PR (Dennis en RPG Forge reviewen en
@@ -14,7 +14,7 @@ Dit document hoort bij `docs/release/WM1_RELEASE_CHECKLIST.md` (de acht fases; d
   gelezen en niet aangeraakt. `wacht/.gdignore` bestaat, dus Godot importeert en exporteert die map niet.
 - Elke regel in sectie 2 is een belofte: dit **levert** de WM1-release, niet meer en niet minder. Wat hier niet staat
   en niet bestaat, komt er niet bij (sectie 4).
-- Elke inventarisregel noemt het bestand dat de waarheid bevat. De inventaris is gelezen uit `main` en waar mogelijk
+- Elke inventarisregel noemt het bestand dat de waarheid bevat. De inventaris is gelezen uit `f76aa715` (wm1-freeze) en waar mogelijk
   met een headless Godot-script uit de echte data gehaald (`GameData.ENEMIES`, `DungeonRooms`, `PuzzleRooms`,
   `BerggrotData`, `Archief2Rooms`, `WoudRooms`, `QuestData`). Als code en dit document verschillen, wint de code en
   moet dit document in een "lock-wijziging" worden gecorrigeerd (sectie 5).
@@ -41,7 +41,7 @@ Gemeten op `f76aa715` (wm1-freeze). Een afwijking na de freeze zonder lock-wijzi
 | Codex-soorten / Codex-vaardigheden | 21 / 32 | `scripts/data/codex_data.gd` |
 | Kernfragmenten / kerngevechtsvaardigheden / wereldvaardigheden | 2 / 1 / 2 | `scripts/data/kern_data.gd` |
 | Opdrachten (6 hoofd, 1 zij) / acts in de questlog | 7 / 6 (act 3-6 "later") | `data/quests.json` |
-| Story-events | 62 | `scripts/data/story_data.gd` (`EVENTS`) |
+| Story-events | 62 = 53 string-keys + 9 expressie-keys | `scripts/data/story_data.gd` (`EVENTS`) |
 | BGM-tracks in het manifest / met bestand | 24 / 13 | `assets/audio/audio_manifest.json`, `assets/audio/bgm/` |
 | SFX in het manifest / ontbrekende bestanden | 99 / 0 (allemaal placeholders) | `assets/audio/audio_manifest.json` |
 | `TODO(design)` en `TODO(verhaal)` in WM1-code (zonder tests) | 51 | `git grep -n -E 'TODO\((design\|verhaal)' -- scripts world_warper pvp` (zonder `scripts/tests/`) |
@@ -468,6 +468,7 @@ toevoegt dat hier niet staat en dit document niet aanpast, wordt geweigerd.
   `data/quests.json`, `scenes/maps/`). Elke toename zonder lock-wijziging is een afwijzing.
 - `git diff --stat` toont nieuwe `.tscn`, `.ogg`, `.wav`, `.png` of `.ogv`? Alleen toegestaan als vervanging (4.2).
 - Nieuwe `TODO(design)` of `TODO(verhaal)` in een PR? Niet toegestaan; los het op of laat het weg.
+- TODO-telling (zonder tests): `git grep -n -E 'TODO\((design|verhaal)' f76aa715 -- scripts world_warper pvp` = 56, minus 5 in `scripts/tests/` = 51.
 - Zit er `.uid`, `.apk`, `.aab`, `.keystore`, `.jks` of `.env` in de diff? Afwijzen (`.gitignore` blokkeert ze al).
 
 ## 5. Bijhouden
