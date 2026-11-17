@@ -3,6 +3,8 @@ extends Node
 ## Praat met SomArenaWaves alleen via start_wave en de drie signalen.
 ## Hele party neer: results, verdiende rewards blijven, terug naar de lobby.
 ## Geen game over.
+## Co-op (LAN of online): de runfase wordt niet gesynct, dus de arena start dan niet
+## (review #487, punt D). Echte co-op-arena-sync is een latere klus.
 
 const WavesScript := preload("res://scripts/arena/som_arena_waves.gd")
 const Rewards := preload("res://scripts/data/arena_rewards.gd")
@@ -12,6 +14,8 @@ const PHASE_WAVE := "wave"
 const PHASE_CHOICE := "choice"
 const PHASE_RESULTS := "results"
 const PHASES: Array[String] = [PHASE_LOBBY, PHASE_WAVE, PHASE_CHOICE, PHASE_RESULTS]
+## Speler-tekst als de poort dicht blijft tijdens co-op.
+const COOP_CLOSED_LINE := "The arena is closed during co-op."
 
 signal phase_changed(phase: String)
 
@@ -40,8 +44,16 @@ func _ready() -> void:
 	w.party_wiped.connect(_on_party_wiped)
 
 
+## True zolang er een co-op-sessie loopt (host of gast, LAN of online).
+static func coop_blocked() -> bool:
+	return GameState.coop_in_session()
+
+
 func begin() -> void:
 	if phase != PHASE_LOBBY:
+		return
+	if coop_blocked():
+		push_warning("ArenaRun: begin() geweigerd tijdens co-op (geen arena-sync).")
 		return
 	earned_xp = 0
 	earned_tokens = 0
@@ -101,8 +113,11 @@ func _on_wave_started(n: int) -> void:
 func _on_wave_cleared(n: int) -> void:
 	if phase != PHASE_WAVE or n != wave:
 		return
-	_grant(n)
-	Rewards.restore_between_waves()
+	# Review #487 punt C: overgeslagen golf (timeout / 0 spawns) = niets verslagen = geen beloning.
+	var skipped: bool = waves != null and waves.has_method("wave_was_skipped") and waves.wave_was_skipped(n)
+	if not skipped:
+		_grant(n)
+		Rewards.restore_between_waves()
 	if n >= Rewards.WAVE_COUNT:
 		_to_results(false)
 		return

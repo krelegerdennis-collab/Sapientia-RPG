@@ -24,7 +24,7 @@ func setup(cam: Camera2D) -> void:
 
 
 func kick(kind: String) -> void:
-	if not SomFeelData.ENABLED or _cam == null or kind == "":
+	if not SomFeelData.ENABLED or _cam == null or kind == "" or not Settings.shake_enabled():
 		return
 	var incoming := SomFeelData.shake_strength(kind)
 	if _remaining_ticks > 0 and SomFeelData.shake_strength(_kind) >= incoming:

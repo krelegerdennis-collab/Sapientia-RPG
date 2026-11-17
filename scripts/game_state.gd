@@ -571,6 +571,7 @@ func _ready() -> void:
 	# F-5 nulmeting per kamer, geïsoleerd (geen CI, faalt niet op budget): of  godot -- --wm1roombaselinetest  (scripts/tests/wm1_room_baseline_tests.gd).
 	# WM1 F3 stabiliteit (in CI-matrix): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
 	# Colosseum-flow (in CI-matrix): godot -- --arenatest  (scripts/tests/arena_tests.gd).
+	# Arena-golven vervolg review #487 (lokaal; CI-regel later via Forge): godot -- --arenawavesfollowuptest  (scripts/tests/arena_waves_followup_tests.gd).
 	# Wachtershuis classic-muur (geen TileSet-polygonen): godot -- --huiscollisiontest  (scripts/tests/huis_collision_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# SoM slag vs lock: of  godot -- --swinglocktest  (scripts/tests/swing_lock_tests.gd).
@@ -609,6 +610,7 @@ func _ready() -> void:
 	# D3 arena-hook realtime Golem (PR C): of  godot -- --golemarenatest  (scripts/tests/golem_arena_tests.gd).
 	# Golem zichtbare telegraaf/aanval (Action): of  godot -- --golemzichtbaartest  (scripts/tests/golem_zichtbaar_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
+	# Epic keten-feel (strips, nagloed, WM1): of  godot -- --chainfeeltest  (scripts/tests/chain_feel_tests.gd).
 	# F4 game feel (screenshake + schadekleuren): of  godot -- --gamefeeltest  (scripts/tests/gamefeel_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# F2 stagger-meter (Action): of  godot -- --staggertest  (scripts/tests/stagger_tests.gd).
@@ -616,6 +618,7 @@ func _ready() -> void:
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# RC-checklist WM1 (alleen lezen, bekende OPEN-punten als OPEN-regel): of  godot -- --rcchecktest  (scripts/tests/rc_check_tests.gd).
+	# Klus 13 WM1 QA-ronde (warps, opslaan/laden, duplicatie, pauze): of  godot -- --wm1qasweeptest  (scripts/tests/wm1_qa_sweep_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	# Laadtijden WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
@@ -627,6 +630,7 @@ func _ready() -> void:
 	# Android-terug + Back op het naamscherm (F6-3/F6-4): of  godot -- --androidbacktest  (scripts/tests/android_back_tests.gd).
 	# Opslag/hervat-stress WM1 (round-trip, kapotte saves, pauze in menu/dialoog/gevecht, dubbel opslaan, oude versie):
 	#   godot -- --savestresstest  (scripts/tests/save_stress_tests.gd).
+	# book_point await-guards (object weg tijdens interact): of  godot -- --bookpointawaittest  (scripts/tests/book_point_await_tests.gd).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
@@ -649,6 +653,7 @@ func _ready() -> void:
 			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
 			["--fusietest", "res://scripts/tests/fusie_tests.gd", "FusieTest", "fusietest"],
 			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"],
+			["--bookpointawaittest", "res://scripts/tests/book_point_await_tests.gd", "BookPointAwaitTest", "bookpointawaittest"],
 			["--bossrespawntest", "res://scripts/tests/boss_respawn_tests.gd", "BossRespawnTest", "bossrespawntest"],
 			["--dungeon100gentest", "res://scripts/tests/dungeon100_generator_tests.gd", "Dungeon100GenTest", "dungeon100gentest"],
 			["--dungeon100schaaltest", "res://scripts/tests/dungeon100_schaal_tests.gd", "Dungeon100SchaalTest", "dungeon100schaaltest"],
@@ -723,6 +728,7 @@ func _ready() -> void:
 			["--gamefeelfase2test", "res://scripts/tests/gamefeel_fase2_tests.gd", "GameFeelFase2Test", "gamefeelfase2test"],
 			["--magentabangtest", "res://scripts/tests/magenta_bang_tests.gd", "MagentaBangTest", "magentabangtest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
+			["--chainfeeltest", "res://scripts/tests/chain_feel_tests.gd", "ChainFeelTest", "chainfeeltest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--staggertest", "res://scripts/tests/stagger_tests.gd", "StaggerTest", "staggertest"],
@@ -754,6 +760,7 @@ func _ready() -> void:
 			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
 			["--rcchecktest", "res://scripts/tests/rc_check_tests.gd", "RcCheckTest", "rcchecktest"],
+			["--wm1qasweeptest", "res://scripts/tests/wm1_qa_sweep_tests.gd", "Wm1QaSweepTest", "wm1qasweeptest"],
 			["--openingtest", "res://scripts/tests/opening_tests.gd", "OpeningTest", "openingtest"],
 			["--driftbgtest", "res://scripts/tests/drift_bg_tests.gd", "DriftBgTest", "driftbgtest"],
 			["--tcptest", "res://scripts/tests/tc_p_autotest.gd", "TcPTest", "tcptest"],
@@ -773,7 +780,8 @@ func _ready() -> void:
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
 			["--arenatest", "res://scripts/tests/arena_tests.gd", "ArenaTest", "arenatest"],
-			["--arenawavestest", "res://scripts/tests/arena_waves_tests.gd", "ArenaWavesTest", "arenawavestest"]]:
+			["--arenawavestest", "res://scripts/tests/arena_waves_tests.gd", "ArenaWavesTest", "arenawavestest"],
+			["--arenawavesfollowuptest", "res://scripts/tests/arena_waves_followup_tests.gd", "ArenaWavesFollowupTest", "arenawavesfollowuptest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
@@ -2071,6 +2079,8 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
 		"pending_unique_event": Story.pending_unique_event if has_node("/root/Story") else "",
+		# Klus 13: absorptie-moment dat nog moet spelen (pauze-save vlak na een baas); anders na laden kwijt
+		"pending_kern_absorb": pending_kern_absorb,
 		"scenes_seen": seen_scenes(),
 		"heard_music": heard_music.duplicate(),
 		"quests": _quests_save(),
@@ -2221,7 +2231,8 @@ func apply_state(d: Dictionary) -> bool:
 	for id in stray_equipment:
 		# alleen echte uitrusting terug in de tas; een onbekend id uit een kapotte save valt weg
 		if Equipment.is_equipment(str(id)):
-			inventory[id] = int(inventory.get(id, 0)) + 1
+			# Klus 13: ook hier de stapel begrenzen (anders > MAX_ITEM_STACK na laden)
+			inventory[id] = mini(MAX_ITEM_STACK, int(inventory.get(id, 0)) + 1)
 	gold = _gold_from(d.get("gold", 0))
 	# Ontbrekende sleutel (oude save) of een kapot type -> 0, net als goud.
 	arena_tokens = mini(_arena_token_cap(), _gold_from(d.get("arena_tokens", 0)))
@@ -2281,6 +2292,10 @@ func apply_state(d: Dictionary) -> bool:
 			if KernData.KERNFRAGMENTEN.has(str(k)):
 				var e: Dictionary = kn[k] if kn[k] is Dictionary else {}
 				kernfragmenten[str(k)] = e.duplicate(true)
+	# Klus 13: alleen een kern die je echt hebt; oude saves zonder sleutel = geen moment.
+	var pk = d.get("pending_kern_absorb", "")
+	if pk is String and kernfragmenten.has(pk):
+		pending_kern_absorb = pk
 	# Codex: oude saves zonder "codex" = lege Codex; kapotte pagina's vallen weg.
 	codex_load_data(d.get("codex", {}))
 	dungeon100_load(d.get("dungeon100", {}))
