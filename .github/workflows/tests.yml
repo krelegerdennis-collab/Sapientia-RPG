@@ -22,10 +22,11 @@ jobs:
       fail-fast: false
       matrix:
         suite: [autotest, menutest, hudtest, runknoptest, inventorytest, puzzletest, dungeontest, golemtest,
-                bossphasetest, golemactiontest, golemactionsimtest, golemarenatest, golemzichtbaartest,
+                bossphasetest, bossnametest, golemactiontest, golemactionsimtest, golemarenatest, golemzichtbaartest,
                 archieftest, kerntest, kernkrachttest, woudtest, woud16test, codextest,
                 checkpointtest, dungeon100gentest, dungeon100schaaltest,
-                dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest, dungeon100rustpunttest,
+                dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
+                blauwekisttest, dungeon100bossmaptest, dungeon100rustpunttest,
                 actorsfxtest, fusietest, catalogustest, updatetest, archief2test,
                 warperkamertest, hangertest, spiegeltest, berggrottest, pvptest,
                 wilgendaltest, huisdrawtest, huispixeltest, questtest, tutorialtest, battlesimtest, echotest, castjointest,
