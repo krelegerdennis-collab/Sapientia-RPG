@@ -14,8 +14,10 @@ extends Control
 ## Menu (Doorgaan/Nieuw spel + save-info) rechtsonder, x 240..372, onderkant y 200.
 ## Betatest en Eindstaat staan links onder: aparte voortgang, niet in dit kaartje.
 ## v0.13 (afgemaakt): alle titel-art staat in een vaste 'stage' van 384x216. Die stage staat
-## gecentreerd in het veilige gebied (UiTouch.safe_rect) en wordt daarbinnen geklemd, pixel-precies
-## (Nearest). Zonder insets is dat het midden van het scherm. Op bredere/hogere schermen (telefoons
+## gecentreerd in het veilige gebied (UiTouch.safe_rect), pixel-precies (Nearest). Past de stage
+## op een as niet in die rect, dan blijft het midden geklemd op het kijkvenster
+## ([0, venster - stage]), zodat de stage niet uit beeld schuift. Zonder insets is dat het
+## midden van het scherm. Op bredere/hogere schermen (telefoons
 ## zijn vaak breder dan 16:9) vult een donkere, vergrote kopie van de achtergrond de randen; zo blijven
 ## logo, ondertitel en de kern van de Golem precies op hun plek in de achtergrond. Het menu blijft
 ## rechtsonder in de stage; het versielabel blijft rechtsonder in het venster.
@@ -322,9 +324,10 @@ func _build_legacy_title(bg: TextureRect) -> void:
 	glitch.set_background(bg)
 
 
-## Stage (384x216) gecentreerd in UiTouch.safe_rect en daarbinnen geklemd.
-## Insets 0: dezelfde plek als centreren in het volle venster. Het menu blijft rechtsonder
-## IN de stage: x CARD_LEFT..CARD_RIGHT, onderkant op CARD_BOTTOM (nooit over de held of de Golem).
+## Stage (384x216) gecentreerd in UiTouch.safe_rect. Past hij op een as niet, dan klem op
+## het kijkvenster (nooit voorbij 0 of venster-stage). Insets 0: dezelfde plek als centreren
+## in het volle venster. Het menu blijft rechtsonder IN de stage: x CARD_LEFT..CARD_RIGHT,
+## onderkant op CARD_BOTTOM (nooit over de held of de Golem).
 func _place_card() -> void:
 	stage.position = _stage_in_safe()
 	card.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 0)
@@ -390,17 +393,24 @@ func _volg_veilig() -> void:
 	_place_card()
 
 
-## Midden van de safe rect. Past de stage niet, dan tegen de rand van die rect (zelfde klem als party_select).
-## Insets 0 houdt de oude formule, pixel voor pixel.
+## Midden van de safe rect. Past de stage op een as niet in die rect, dan dat midden klemmen
+## op [0, venster - stage]: de stage blijft in het kijkvenster (16:9 met gelijke zij-insets
+## blijft op x 0). Insets 0 houdt de oude formule, pixel voor pixel.
 func _stage_in_safe() -> Vector2:
 	var vp := size
 	var safe := UiTouchC.safe_rect(vp, get_viewport())
 	if safe.position == Vector2.ZERO and safe.size == vp:
 		return ((vp - STAGE_SIZE) / 2.0).floor()
 	var pos := (safe.position + (safe.size - STAGE_SIZE) / 2.0).floor()
-	pos.x = clampf(pos.x, safe.position.x, maxf(safe.position.x, safe.end.x - STAGE_SIZE.x))
-	pos.y = clampf(pos.y, safe.position.y, maxf(safe.position.y, safe.end.y - STAGE_SIZE.y))
+	pos.x = _klem_as(pos.x, safe.position.x, safe.size.x, vp.x, STAGE_SIZE.x)
+	pos.y = _klem_as(pos.y, safe.position.y, safe.size.y, vp.y, STAGE_SIZE.y)
 	return pos
+
+
+func _klem_as(midden: float, safe_pos: float, safe_size: float, venster: float, stage: float) -> float:
+	if safe_size >= stage:
+		return clampf(midden, safe_pos, maxf(safe_pos, safe_pos + safe_size - stage))
+	return clampf(midden, 0.0, maxf(0.0, venster - stage))
 
 
 func _place_text_title() -> void:
