@@ -2,13 +2,16 @@ class_name WorldWarperWarpView
 extends Control
 ## Twee stappen: eerst een wereld, daarna een bestemming.
 ## Zonder anker in de groep ww_anchor_warp vult de view de ouder
-## (CanvasLayer in een test). Geen shader, geen eigen art.
+## (CanvasLayer in een test), binnen UiTouch.safe_rect. De inhoudsmarge
+## blijft 6 px. Insets 0 geeft hetzelfde volle vlak als voorheen.
+## Geen shader, geen eigen art.
 
 signal warp_requested(wm_id: String, place_id: String)
 signal warp_closed
 
 const Destinations := preload("res://world_warper/warp/destinations.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 const ANCHOR_GROUP := "ww_anchor_warp"
 const VIEW_SIZE := Vector2(384, 216)
@@ -44,6 +47,9 @@ var _wm_id := ""
 var _place_id := ""
 var _opened := false
 var _built := false
+var _layout_hooks := false
+var _lay_vp := Vector2.ZERO
+var _lay_ins := Vector4(-1, -1, -1, -1)
 
 var _title: Label
 var _rows: VBoxContainer
@@ -55,8 +61,36 @@ func _ready() -> void:
 	_ensure_ui()
 	if not _opened:
 		visible = false
+		set_process(false)
+	_koppel_layout_hooks()
 	_place_at_anchor()
 	call_deferred("_place_at_anchor")
+
+
+func _enter_tree() -> void:
+	_koppel_layout_hooks()
+
+
+func _exit_tree() -> void:
+	_ontkoppel_layout_hooks()
+
+
+func _koppel_layout_hooks() -> void:
+	if _layout_hooks or not is_inside_tree():
+		return
+	var vp := get_viewport()
+	if vp != null and not vp.size_changed.is_connected(_place_at_anchor):
+		vp.size_changed.connect(_place_at_anchor)
+	_layout_hooks = true
+
+
+func _ontkoppel_layout_hooks() -> void:
+	if not _layout_hooks:
+		return
+	var vp := get_viewport()
+	if vp != null and vp.size_changed.is_connected(_place_at_anchor):
+		vp.size_changed.disconnect(_place_at_anchor)
+	_layout_hooks = false
 
 
 func open() -> void:
@@ -66,6 +100,9 @@ func open() -> void:
 	_wm_id = ""
 	_place_id = ""
 	visible = true
+	set_process(true)
+	_lay_vp = Vector2.ZERO
+	_lay_ins = Vector4(-1, -1, -1, -1)
 	_place_at_anchor()
 	_show_step()
 
@@ -73,19 +110,32 @@ func open() -> void:
 func close() -> void:
 	_opened = false
 	visible = false
+	set_process(false)
+	_lay_vp = Vector2.ZERO
+	_lay_ins = Vector4(-1, -1, -1, -1)
 	warp_closed.emit()
+
+
+## Insets kunnen wisselen zonder dat de viewportgrootte verandert (insets_override).
+func _process(_delta: float) -> void:
+	if not _opened or not visible or not is_inside_tree():
+		return
+	var vp := get_viewport_rect().size
+	var ins := UiTouchC.insets(get_viewport())
+	if vp == _lay_vp and ins == _lay_ins:
+		return
+	_lay_vp = vp
+	_lay_ins = ins
+	_place_at_anchor()
 
 
 func _place_at_anchor() -> void:
 	if not is_inside_tree():
 		return
-	var nodes := get_tree().get_nodes_in_group(ANCHOR_GROUP)
-	if nodes.is_empty():
-		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		return
-	var anchor: Node = nodes[0]
-	if anchor == self or not (anchor is Control or anchor is Node2D):
-		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var ins := UiTouchC.insets(get_viewport())
+	var anchor := _eerste_anker()
+	if anchor == null:
+		_zet_vol_vlak(ins)
 		return
 	# Eerste node in de groep. Een Control-anker deelt het UI-vlak.
 	# TODO(design): een Node2D-anker staat in wereldpixels; dat valt alleen
@@ -98,6 +148,56 @@ func _place_at_anchor() -> void:
 	else:
 		global_position = (anchor as Node2D).global_position
 		size = VIEW_SIZE
+	# Insets 0: de ankerplaats blijft pixel-gelijk. Anders schuift het paneel
+	# de veilige zone in, zodat knoppen niet onder de rand vallen.
+	if ins != Vector4.ZERO:
+		_binnen_veilig(ins)
+
+
+func _eerste_anker() -> Node:
+	if not is_inside_tree():
+		return null
+	var nodes := get_tree().get_nodes_in_group(ANCHOR_GROUP)
+	if nodes.is_empty():
+		return null
+	var anchor: Node = nodes[0]
+	if anchor == self or not (anchor is Control or anchor is Node2D):
+		return null
+	return anchor
+
+
+## Geen anker: het hele ouder-vlak, maar binnen het veilige gebied.
+## Insets 0 zet alleen PRESET_FULL_RECT, gelijk aan de oude layout.
+func _zet_vol_vlak(ins: Vector4) -> void:
+	if ins == Vector4.ZERO:
+		if custom_minimum_size != VIEW_SIZE:
+			custom_minimum_size = VIEW_SIZE
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		return
+	var veilig := UiTouchC.safe_rect(get_viewport_rect().size, get_viewport())
+	custom_minimum_size = Vector2(
+			minf(VIEW_SIZE.x, maxf(veilig.size.x, 1.0)),
+			minf(VIEW_SIZE.y, maxf(veilig.size.y, 1.0)))
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	offset_left = ins.x
+	offset_top = ins.y
+	offset_right = -ins.z
+	offset_bottom = -ins.w
+
+
+## Paneel (bij een anker) helemaal binnen het veilige gebied schuiven. Past het niet,
+## dan krimpt het tot het in de safe rect past.
+func _binnen_veilig(_ins: Vector4) -> void:
+	var veilig := UiTouchC.safe_rect(get_viewport_rect().size, get_viewport())
+	var r := Rect2(global_position, size)
+	r.size = Vector2(minf(r.size.x, maxf(veilig.size.x, 1.0)), minf(r.size.y, maxf(veilig.size.y, 1.0)))
+	custom_minimum_size = Vector2(
+			minf(VIEW_SIZE.x, maxf(veilig.size.x, 1.0)),
+			minf(VIEW_SIZE.y, maxf(veilig.size.y, 1.0)))
+	r.position.x = clampf(r.position.x, veilig.position.x, maxf(veilig.position.x, veilig.end.x - r.size.x))
+	r.position.y = clampf(r.position.y, veilig.position.y, maxf(veilig.position.y, veilig.end.y - r.size.y))
+	global_position = r.position
+	size = r.size
 
 
 func _ensure_ui() -> void:
@@ -129,6 +229,7 @@ func _ensure_ui() -> void:
 	add_child(achtergrond)
 
 	var marge := MarginContainer.new()
+	marge.name = "Marge"
 	marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	marge.add_theme_constant_override("margin_left", 6)
 	marge.add_theme_constant_override("margin_top", 6)
