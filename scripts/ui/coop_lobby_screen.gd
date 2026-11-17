@@ -12,6 +12,8 @@ const DiscoveryScript := preload("res://scripts/net/lan_discovery.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const SeatRoles := preload("res://scripts/coop/seat_controller.gd")
 const LobbyPortrait := preload("res://scripts/ui/lobby_portrait_slot.gd")
+const Profile := preload("res://scripts/online/online_profile.gd")
+const ONLINE_HALL_SCENE := "res://scenes/coop/online_hal.tscn"
 
 ## Android 48dp minimum. 1 eenheid = ~1,9 dp op een telefoon in landschap (zie UiTouch), dus 25 eenheden.
 const TOUCH_TARGET_DP := 48
@@ -28,6 +30,13 @@ enum Screen { MENU, HOST, JOIN, JOIN_CODE, MESSAGE }
 var hall_mode := false
 var hall_profile: Dictionary = {}
 var folded := false
+## Lobby en discovery zijn doorgegeven aan GameState (spel gestart): _exit_tree sluit ze dan niet.
+var handed_off := false
+## Titel > Co-op > Host/Join online opent de online hal (protocol v2) met dit scherm al open.
+## "host" of "join"; de hal leest en wist het in apply_hall_entry().
+static var hall_entry := ""
+## Melding voor de volgende hal (bv. na het verlaten van een online run). Leeg = gewoon menu.
+static var hall_message := ""
 
 var lobby: LanLobby
 var discovery: LanDiscovery
@@ -59,6 +68,8 @@ func _ready() -> void:
 	resized.connect(_apply_safe_area)
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 4)
+	_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_panel.add_child(_box)
 	lobby = LobbyScript.new()
 	lobby.name = "CoopLobby"
@@ -76,6 +87,10 @@ func _ready() -> void:
 	discovery.host_found.connect(_on_host_found)
 	GameState.coop_register_lobby(lobby, discovery)
 	_show_menu()
+	if hall_mode and hall_message != "":
+		var msg := hall_message
+		hall_message = ""
+		_show_message(msg)
 
 
 ## Paneel binnen het veilige gebied (notch, gebarenbalk).
@@ -99,6 +114,36 @@ func fold_for_hall() -> void:
 	visible = false
 
 
+## Hal: weer tonen (na verlaten van de kamer), terug naar het menu.
+func unfold_for_hall(message: String = "") -> void:
+	folded = false
+	visible = true
+	_show_menu()
+	if message != "":
+		_show_message(message)
+
+
+## Hal: de keuze van het titelscherm (Host online / Join online) meteen uitvoeren.
+func apply_hall_entry() -> void:
+	var entry := hall_entry
+	hall_entry = ""
+	if not hall_mode or Protocol.relay_url() == "":
+		return
+	if entry == "host":
+		_show_host_online()
+	elif entry == "join":
+		_show_join_code()
+
+
+## Online hal start de run: alleen de lobby naar GameState (de LAN-discovery is daar niet in gebruik).
+func hand_off_net() -> void:
+	discovery.stop()
+	if lobby.get_parent() != GameState:
+		lobby.reparent(GameState)
+	GameState.coop_register_lobby(lobby, null)
+	handed_off = true
+
+
 func cancel() -> void:
 	if folded:
 		return
@@ -120,6 +165,9 @@ func cancel() -> void:
 
 
 func _exit_tree() -> void:
+	# Na hand-off draait het spel op deze lobby verder; niet sluiten en GameState niet wissen.
+	if handed_off:
+		return
 	GameState.coop_clear_lobby_refs()
 	_teardown_net()
 
@@ -252,15 +300,66 @@ func _build_menu() -> void:
 	_box.add_child(join)
 	if online:
 		var host_online := _touch_button("Host online")
-		host_online.pressed.connect(func() -> void: _show_host_online())
+		host_online.pressed.connect(func() -> void: _on_online_pressed("host"))
 		_box.add_child(host_online)
 		var join_online := _touch_button("Join online")
-		join_online.pressed.connect(func() -> void: _show_join_code())
+		join_online.pressed.connect(func() -> void: _on_online_pressed("join"))
 		_box.add_child(join_online)
 	_box.add_child(UiMenu.label("Friend mode (PvP) is separate.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	var back := _touch_button("Back")
 	back.pressed.connect(_on_back)
 	_box.add_child(back)
+
+
+## Online gaat altijd via de online hal (protocol v2), zodat titel-join en hal-host dezelfde versie spreken.
+## Alleen een ingebed scherm (geen hoofdscène, bv. een test) blijft hier.
+func _on_online_pressed(entry: String) -> void:
+	if not hall_mode and get_tree() != null and get_tree().current_scene == self:
+		_teardown_net()
+		hall_entry = entry
+		get_tree().change_scene_to_file(ONLINE_HALL_SCENE)
+		return
+	if entry == "host":
+		_show_host_online()
+	else:
+		_show_join_code()
+
+
+## M1-profiel voor de online hal (uid, name, class, look). Geen profiel: maak slot 0 aan,
+## zodat een verse installatie (APK met het titelscherm) toch online kan.
+static func online_packet(src: Dictionary) -> Dictionary:
+	var row := src
+	if row.is_empty():
+		var store := Profile.new()
+		if not store.has_slot(0) and not bool(store.create_slot(0, _default_online_name(), "warrior").get("ok", false)):
+			store.create_slot(0, "Hero", "warrior")
+		if store.has_slot(0):
+			row = store.get_slot(0)
+	if row.is_empty():
+		return {}
+	var class_id := str(row.get("class", ""))
+	var look_v: Variant = row.get("look", {})
+	if look_v is PackedByteArray:
+		return {"uid": str(row.get("uid", "")), "name": str(row.get("name", "")), "class": class_id, "look": look_v}
+	var look := {}
+	if look_v is Dictionary:
+		look = (look_v as Dictionary).duplicate()
+	if class_id != "":
+		look["class"] = class_id
+	return {"uid": str(row.get("uid", "")), "name": str(row.get("name", "")), "class": class_id, "look": look}
+
+
+static func _default_online_name() -> String:
+	var raw := str(GameState.player_name).strip_edges()
+	var out := ""
+	for i in raw.length():
+		var c := raw.unicode_at(i)
+		# Zelfde regel als OnlineProfile: alleen A-Z/a-z, max NAME_MAX.
+		if (c >= 65 and c <= 90) or (c >= 97 and c <= 122):
+			out += raw.substr(i, 1)
+		if out.length() >= Profile.NAME_MAX:
+			break
+	return out if out != "" else "Hero"
 
 
 func _build_host() -> void:
@@ -277,14 +376,13 @@ func _build_host() -> void:
 			_box.add_child(UiMenu.label("Friends tap Join online and enter this code.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	else:
 		_box.add_child(UiMenu.label("Waiting for friends on Wi-Fi...", UiStyleC.TEXT_DIM, TEXT_SIZE))
-	_add_roster_rows(true)
+	_box.add_child(_roster_scroll(true))
 	var start := _touch_button("Start Action sandbox")
 	start.disabled = not lobby.is_host or (online and lobby.room_code == "")
 	start.pressed.connect(_on_host_start)
-	_box.add_child(start)
 	var cancel := _touch_button("Cancel")
 	cancel.pressed.connect(_show_menu)
-	_box.add_child(cancel)
+	_box.add_child(_action_row([start, cancel]))
 
 
 func _build_join() -> void:
@@ -353,6 +451,10 @@ func _submit_code() -> void:
 		return
 	var code := Protocol.filter_room_code(_code_edit.text)
 	if Protocol.is_room_code(code):
+		# Toetsenbord van de telefoon dicht, anders ligt het over de joystick in de hal.
+		_code_edit.release_focus()
+		if DisplayServer.has_feature(DisplayServer.FEATURE_VIRTUAL_KEYBOARD):
+			DisplayServer.virtual_keyboard_hide()
 		_join_online(code)
 
 
@@ -361,6 +463,12 @@ func _build_message() -> void:
 	msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	msg.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_box.add_child(msg)
+	if hall_mode:
+		# In de online hal: terug naar Host/Join (vanuit het menu kan je nog naar de titel).
+		var back := _touch_button("Back")
+		back.pressed.connect(_show_menu)
+		_box.add_child(back)
+		return
 	var ok := _touch_button("Back to title")
 	ok.pressed.connect(_leave_to_title)
 	_box.add_child(ok)
@@ -397,7 +505,32 @@ func _collect_buttons(node: Node, out: Array[Button]) -> void:
 		_collect_buttons(child, out)
 
 
-func _add_roster_rows(host_view: bool) -> void:
+func _roster_scroll(host_view: bool) -> ScrollContainer:
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	var roster := VBoxContainer.new()
+	roster.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	roster.add_theme_constant_override("separation", 2)
+	_add_roster_rows(host_view, roster)
+	scroll.add_child(roster)
+	return scroll
+
+
+func _action_row(buttons: Array) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for btn in buttons:
+		if btn is Button:
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(btn)
+	return row
+
+
+func _add_roster_rows(host_view: bool, parent: VBoxContainer = null) -> void:
+	var box := parent if parent != null else _box
 	for slot in Protocol.MAX_PLAYERS:
 		var cid := lobby.character_at(slot)
 		var who := _seat_label(slot)
@@ -417,7 +550,7 @@ func _add_roster_rows(host_view: bool) -> void:
 		var label := UiMenu.label(prefix + who, UiStyleC.TEXT_DIM if who == "Empty" else UiStyleC.TEXT, TEXT_SIZE)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(label)
-		_box.add_child(row)
+		box.add_child(row)
 
 
 func _seat_label(slot: int) -> String:
@@ -516,7 +649,7 @@ func _on_roster_changed() -> void:
 func _rebuild_join_guest() -> void:
 	_clear_box()
 	_box.add_child(UiMenu.label("Joined %s" % _hero_name(lobby.local_character), UiStyleC.HILITE, TITLE_SIZE))
-	_add_roster_rows(false)
+	_box.add_child(_roster_scroll(false))
 	_box.add_child(UiMenu.label("Waiting for the host to start...", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	var leave := _touch_button("Leave")
 	leave.pressed.connect(_show_menu)
@@ -570,6 +703,7 @@ func _persist_net_nodes() -> void:
 	if discovery.get_parent() != GameState:
 		discovery.reparent(GameState)
 	GameState.coop_register_lobby(lobby, discovery)
+	handed_off = true
 
 
 func _end_host_session(reason: String) -> void:
