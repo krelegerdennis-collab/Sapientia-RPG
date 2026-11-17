@@ -680,6 +680,7 @@ func _ready() -> void:
 			["--berggrotdextest", "res://scripts/tests/berggrot_dex_tests.gd", "BerggrotDexTest", "berggrotdextest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
+			["--wmdeathtest", "res://scripts/tests/wmdeath_tests.gd", "WmDeathTest", "wmdeathtest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
@@ -2980,6 +2981,9 @@ func respawn_at_checkpoint(boss := false) -> String:
 	var keep_seen: Array = StoryData.UNIQUE_SEEN_FLAGS.values().filter(func(f): return story_flags.has(str(f)))
 	if story_flags.has(StoryData.TUTORIAL_CODEX_FLAG):
 		keep_seen.append(StoryData.TUTORIAL_CODEX_FLAG)
+	# Wereldkaart-filmpje: het checkpoint wordt gezet vóór het filmpje zijn vlag zet; niet terugrollen
+	if story_flags.has(WorldmapCutscene.FLAG):
+		keep_seen.append(WorldmapCutscene.FLAG)
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
 	koopman_load(keep_koopman)
