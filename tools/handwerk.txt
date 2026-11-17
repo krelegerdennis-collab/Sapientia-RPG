@@ -1513,3 +1513,19 @@ assets/ui/portrait_wachter.png
 assets/ui/window.png
 assets/ui/window_glass.png
 assets/ui/window_hd.png
+# F2.2 paletfix 10_assets_sprites (RPG ART, besluit Dennis 17-11): alleen masterpalet, alpha 0/255; groups/10_assets_sprites/repo_drop
+assets/sprites/som/monsters/glitchmot_attack.png
+assets/sprites/som/monsters/glitchmot_death.png
+assets/sprites/som/monsters/glitchmot_hurt.png
+assets/sprites/som/monsters/inktwurm_attack.png
+assets/sprites/som/monsters/inktwurm_death.png
+assets/sprites/som/monsters/inktwurm_hurt.png
+assets/sprites/som/monsters/moskonijn_attack.png
+assets/sprites/som/monsters/moskonijn_death.png
+assets/sprites/som/monsters/moskonijn_hurt.png
+assets/sprites/som/monsters/mosslijm_attack.png
+assets/sprites/som/monsters/mosslijm_death.png
+assets/sprites/som/monsters/mosslijm_hurt.png
+assets/sprites/som/monsters/papiergeest_attack.png
+assets/sprites/som/monsters/papiergeest_death.png
+assets/sprites/som/monsters/papiergeest_hurt.png
