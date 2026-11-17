@@ -3,10 +3,9 @@
 Meting van RC_AUDIT-punten **F5.2, F5.4, F5.5 en F5.6** op de huidige `finish/wm1`. Dit rapport **meet en stelt voor**;
 er is geen enkel balans- of spelgetal veranderd. Besluiten per afwijking: Dennis (F5.3, tabel in paragraaf 6).
 
-- **Commit:** `9a87280c25bdcc707cb84bb21e2b6dd158176c8b` (`finish/wm1`, F6.15 #498). Daarin zitten C-2 stun-lock #408,
-  C-12 MAG/MDEF #414, GQ-balans #446, F2 stagger #450 en perfect dodge #472 (standaard uit).
-  De PR staat op `47e3daf9` (nieuwste `finish/wm1`). Het verschil met `9a87280` is alleen docs en `tools/art_audit` (#503, #505), dus
-  geen invloed op de getallen.
+- **Meetcommit:** `9a87280c25bdcc707cb84bb21e2b6dd158176c8b` (`finish/wm1` op het moment van de meting, F6.15 #498). Daarin zitten C-2 stun-lock #408,
+  C-12 MAG/MDEF #414, GQ-balans #446, F2 stagger #450 en perfect dodge #472 (standaard uit). De cijfers in dit rapport zijn op die commit
+  vastgelegd; latere alleen-docs merges op `finish/wm1` (o.a. #503, #505, #507) wijzigen de gameplay niet.
 - **Engine:** Godot 4.3-stable (official, `77dcf97d8`), headless op xvfb (`--rendering-driver opengl3`), 2 kernen.
 - **Seed:** overal `20261020`. Zelfde seed + zelfde code = dezelfde getallen (zie F5.2: de battlesim komt byte voor byte overeen
   met het rapport in de repo).
