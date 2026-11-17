@@ -2192,7 +2192,7 @@ func _named(line: String) -> String:
 
 ## v0.13: nieuwe dorpssprites van RPG ART (art_tiles_v14: dennis_dorp.png -> player.png,
 ## wachter_dorp.png -> wachter.png). Herkend aan het aantal niet-doorzichtige pixels.
-const DORP_SPRITES := {"res://assets/sprites/player.png": 3016, "res://assets/sprites/wachter.png": 3220}
+const DORP_SPRITES := {"res://assets/sprites/player.png": 2950, "res://assets/sprites/wachter.png": 3184}
 
 
 func _opaque_pixels(path: String) -> int:
