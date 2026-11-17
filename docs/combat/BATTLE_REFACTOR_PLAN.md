@@ -1,10 +1,10 @@
 # Plan: refactor-blok battle.gd (fase 1, vanaf ma 24-11-2026)
 
-Auteur: RPG COMBAT · stand: finish/wm1 @ `39204468` (16-11-2026) · alleen een plan, geen code.
+Auteur: RPG COMBAT · stand: finish/wm1 @ `39204468` (16-11-2026), bijgewerkt op `9a87280` (17-11-2026) · alleen een plan, geen code.
 
-Labels: **FEIT** = nagekeken in de repo op `39204468`. **VOORSTEL** = mijn plan, FORGE beslist.
+Labels: **FEIT** = nagekeken in de repo op `39204468` en opnieuw op `9a87280` (zie §1a). **VOORSTEL** = mijn plan, FORGE beslist.
 
-## 0. Opdracht en spelregels (FEIT, plan.md 14-11 09:32)
+## 0. Opdracht en spelregels (FEIT, bron: gedeelde planning `/workspace/sapientia-plan/plan.md` op de box, refactorblok; staat niet in de repo)
 
 Dennis (14-11): *"Ja, start 24-11 met battle.gd en daarna game_state.gd en som_arena.gd zodra coop/easy en finish/wm1 gelijk zijn"*.
 
@@ -52,7 +52,7 @@ Gedeelde staat: `heroes`, `enemies` en `tutorial` lezen bijna alle groepen. `sta
 ### Wie gebruikt battle.gd van buiten (FEIT)
 
 - **Sim:** `tools/battlesim/sim_battle.gd` doet `extends "res://scripts/battle/battle.gd"` en **overschrijft** `_enter_detail_mode`, `_exit_tree`, `_start_battle_music`, `_wait`, `show_message`, `say`, `_hero_wind_up`, `_enemy_lunge`, `_kern_fireball`, `_popup_number`, `_shake`, `_blink`, `_show_hit_frame`, `_process`, `_layout`, `_victory`, `_defeat`, `_run` en `_choose_commands`. `wm1_sim_battle.gd` overschrijft daarbovenop `_hit` en `_victory` (met `super`). Gebruikt door battlesim.gd, battlesim_runs.gd, wm1_balans.gd, combat_bugs_tests en battlesim_tests.
-- **Script direct:** `game_state.gd:868` (MAIN_THREAD_SCRIPTS), ux_tests, formule_tests (`GDScript.new()` **zonder `_ready`**), archief2_tests (`BattleC.art_fit`, `BOSS_MAX_ART_*`, `MAX_ENEMY_ART_H`), state_machine_tests (`BattleScript.new()`, STATES, `_set_state`) en perf_probe_tests.
+- **Script direct:** `game_state.gd:879` (MAIN_THREAD_SCRIPTS; was r.868 op `39204468`), ux_tests, formule_tests (`GDScript.new()` **zonder `_ready`**), archief2_tests (`BattleC.art_fit`, `BOSS_MAX_ART_*`, `MAX_ENEMY_ART_H`), state_machine_tests (`BattleScript.new()`, STATES, `_set_state`) en perf_probe_tests.
 - **battle.tscn instantiëren:** game_state (`BATTLE_SCENE`), debug_autotest, som_autotest, perf_wm1, wm1_baseline_benchmark, dungeon_tests, battlesim*, combat_bugs_tests, codex-, dungeon100_*-, rekruut-, save_hardening-, save_stress- en ux_polish-tests.
 - **Methoden die van buiten bij naam worden aangeroepen** (aantal treffers): `say` 20, `_apply_spell_status` 16, `spell_base` 13, `_physical_damage` 11, `_execute` 11, `physical_base` 9, `_available_items` 7, `art_fit` 6, `_run` 5, `_hero_wind_up` 5, `_alive` 5, `grant_fixed_boss_drops`/`_wait`/`_hit`/`_dungeon100_boss_loot`/`_damage`/`battle_music_for` 4, `_tick_ailments`/`_revive`/`_refresh_party`/`_apply_buffs` 3, en 1-2 keer: `tip_origin`, `show_message`, `in_battle`, `codex_command_shown`, `_set_state`, `_report_kos`, `_list_row_h`, `_hero_rest`, `_buff_mult`, `victory_text`, `stage_x`, `kern_damage/base`, `has_usable_magic`, `enemy_region`, `enemy_feet`, `choosing`, `_valid_target/_ally`, `_token_mult`, `_spell_amount`, `_skill_effect`, `_show_tip`, `_safe`, `_make_combatant`, `_layout`, `_heal`, `_guard_up`, `_defense_of`, `_blink`.
 
@@ -75,6 +75,17 @@ Deze tests lezen de **tekst** van `battle.gd`. Code die verhuist kan ze breken, 
 ### Sim-baseline (FEIT, lokaal gedraaid 16-11 20:11, Europe/Amsterdam)
 
 `xvfb-run -a godot --rendering-driver opengl3 --path . -- --battlesim --seed=20261020 --fights=100 --out=/tmp/r.md --json=/tmp/r.json` op `39204468`: 57 gebieden, `RESULT OK`, 0 SCRIPT ERROR. JSON-sha256 = `d61b2d1128e55f2ef363862b691d351bdf2716afa943af1e95b99c107aeee1f2`. Twee runs gaven dezelfde hash. Het .md-rapport verschilt alleen in de regel "Runtime". **Altijd `--out` meegeven**, anders overschrijft de sim `docs/BATTLE_BALANCE_REPORT.md`.
+
+## 1a. Stand na #450, #472 en #501 (FEIT, nagekeken 17-11 op `9a87280`)
+
+- **battle.gd is niet veranderd** sinds `39204468`: nog steeds 2531 regels, laatste wijziging `4e96b78` (#410). Alle analyse in §1 blijft geldig.
+- **#450** (stagger-meter, `f19ff387`) en **#472** (perfect dodge, `8d614deb`) zaten al in `39204468`. Ze raken Action-bestanden (`scripts/som/*`, `scripts/net/*`, eigen data en tests) plus `game_state.gd` en `tests.yml` voor de testkoppeling, maar niets in `scripts/battle/`.
+- **#501** (finishers Dax en Vesper, `9dc0976a`) kwam erna, maar wijzigt alleen twee PNG's in `assets/sprites/som/fx/`. Geen invloed op battle.gd.
+- Andere wijzigingen sinds `39204468` (14 commits) in `scripts/data/` (`som_chain_data`, `som_feel_data`, `shop_data`) en `game_state.gd` worden niet door `scripts/battle/` gebruikt.
+- **Tekstankers** staan er nog allemaal in battle.gd: `battle_label`, `s25_check`, `_pp_on = PerfProbe.enabled`, `UiSfx.TARGET`, `_set_state(`, `art_fit`, `BOSS_MAX_ART_*`.
+- **Sim-baseline** opnieuw gedraaid op `9a87280` (seed 20261020, 100 gevechten, twee keer): `RESULT OK`, JSON-sha256 **ongewijzigd** `d61b2d1128e55f2ef363862b691d351bdf2716afa943af1e95b99c107aeee1f2`.
+- **Regelnummers in game_state.gd zijn verschoven** (dispatcher nu vanaf r.636, MAIN_THREAD_SCRIPTS r.879). Stap 0 kijkt ze op 24-11 opnieuw na.
+- **Werkafspraak (review #495):** elke stap begint met een verse branch vanaf de actuele finish/wm1-head. Vóór stap 0 draait de sim-baseline nog één keer op die head; wijkt de hash af, dan eerst uitzoeken waarom en de golden-waarden pas daarna vastzetten.
 
 ## 2. Doelopbouw (VOORSTEL)
 
@@ -134,7 +145,7 @@ Elke PR: pure move/extract, 1 helper per PR, branch vanaf finish/wm1, geen rebas
 
 ### Stap 0 in detail (VOORSTEL)
 
-Nieuw bestand `scripts/tests/battle_refactor_tests.gd`, gebaseerd op `sim_battle.gd`, zodat wachten en animaties wegvallen. Het draait op `39204468` en zet de uitkomsten als **vaste golden-waarden** in de test:
+Nieuw bestand `scripts/tests/battle_refactor_tests.gd`, gebaseerd op `sim_battle.gd`, zodat wachten en animaties wegvallen. Het draait op de finish/wm1-head waarop stap 0 start en zet de uitkomsten als **vaste golden-waarden** in de test:
 1. **Schade- en formuletabel:** `seed(1234)`, daarna 50x `_physical_damage`, `_spell_amount` en `kern_damage` op vaste vechters. Hash van de reeks.
 2. **Gevecht-golden:** 30 geseede gevechten (WM1, Archief 2, Golem, D100 blauw/baas). Per gevecht een hash van winst/rondes/HP per held/items/MP/EXP/goud/buit en van de **berichtlog** (`say`/`show_message` in volgorde).
 3. **RNG-vingerafdruk:** na elk gevecht `randi()` = vaste waarde. Dat vangt elke verschoven randf-aanroep.
@@ -142,7 +153,7 @@ Nieuw bestand `scripts/tests/battle_refactor_tests.gd`, gebaseerd op `sim_battle
 5. **Broncontrole:** de ankers uit de tabel "Broncontroles" staan nog in battle.gd.
 6. **Layout-golden:** posities bij 384x216, 480x216 en 512x216 voor 1 t/m 5 vijanden en een baas.
 
-Koppelen: 1 regel in de dispatcher van `scripts/game_state.gd` (r.629 e.v.) voor `--battlerefactortest`. **Let op:** dat is een kleine toevoeging in game_state.gd (fase 2-bestand). De CI-regel `battlerefactortest` in tests.yml **wacht op een ja van Dennis**. Tot die tijd draaien FORGE/COMBAT de test lokaal en zetten ze de uitvoer in de PR.
+Koppelen: 1 regel in de dispatcher van `scripts/game_state.gd` (de lijst `for t in [["--autotest", ...` vanaf r.636 op `9a87280`; regelnummer op de dag zelf opnieuw nakijken) voor `--battlerefactortest`. **Let op:** dat is een kleine toevoeging in game_state.gd (fase 2-bestand). De CI-regel `battlerefactortest` in tests.yml **wacht op een ja van Dennis**. Tot die tijd draaien FORGE/COMBAT de test lokaal en zetten ze de uitvoer in de PR.
 
 ## 4. Gaten en risico's
 
