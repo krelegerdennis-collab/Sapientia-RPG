@@ -11,7 +11,8 @@ Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 - Bronnen: code en data in de repo, GitHub REST (labels, tags, issues, PR's, check-runs), `tools/art_audit/palet_check.py` (alleen lezen).
 - Automatische controles staan in de nieuwe suite `--rcchecktest` (`scripts/tests/rc_check_tests.gd`). Bekende OPEN-punten
   geven daar een regel `OPEN  [id] ...` en maken de suite niet rood (zie onderaan).
-- Statussen: **KLAAR** (bewijs in code, suite of PR), **OPEN** (er mist iets), **NIET TE CHECKEN** (handmatig, op toestel of proces).
+- Statussen: **KLAAR** (bewijs in code, suite of PR), **KLAAR (meting)** en **KLAAR (tussenmeting)** (tel mee als KLAAR in de voortgangstabellen),
+  **OPEN** (er mist iets), **NIET TE CHECKEN** (handmatig, op toestel of proces).
 - Grootte: S (uren), M (een dag), L (meerdere dagen of afhankelijk van een ander). "Ja Dennis" = vraagt een besluit over balans,
   nieuwe mechanic, bestaande test, workflow of publicatie (of een ander besluit dat alleen Dennis neemt; dat staat erbij).
 
@@ -24,7 +25,7 @@ Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 | NIET TE CHECKEN | 29 |
 | **Totaal** | **93** |
 
-Voortgang per fase (telling van de detailrijen hieronder, 17 nov middag):
+Voortgang per fase (telling van de detailrijen hieronder, 17 nov middag; **KLAAR (meting)** en **KLAAR (tussenmeting)** tellen als KLAAR):
 
 | Fase | KLAAR | OPEN | NIET TE CHECKEN | Gate |
 |---|---:|---:|---:|---|
@@ -48,7 +49,7 @@ KLAAR (F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)). F1.4 en F8.3 terug naar OPEN (ni
 | 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Verse debug-APK van de huidige `finish/wm1` (F7.1), één ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
 | 2 | F1.7 Freeze / scope | Geen freeze-commit (tag niet nagekeken: GitHub onbereikbaar deze sessie; in de repo verwijst niets naar een `wm1-freeze`). Ook na 15 nov kwamen er features bij: #475 keten-feel, #477 en #482 game-feel fase 1 en 2, #478 en #494 arena (achter `ARENA_ENABLED = false`). De RC van 20 nov is over 3 dagen. | Dennis kiest nu de freeze-commit (bijv. de head ná deze PR), Forge tagt die. Daarna tot de RC alleen `wm1-bugfix`/`wm1-polish`. | S | ja (scope, freeze-commit) |
 | 3 | F8.6 Release-APK | `build-apk` heeft nog nooit met `build_type: release` gedraaid (laatste run op deze branch: debug, `5cb270c`, 5 nov). Of de signing-secrets er staan, kan deze sessie niet zien. Een ondertekende APK is de kern van de RC. | Forge doet nu een droge release-run op de huidige head. Dan blijkt meteen of de secrets kloppen, ruim voor 20 nov. | S | nee (bestaande workflow, interne build, niet publiceren) |
-| 4 | F8.5 CI op de RC-commit | `tests.yml` draait nog steeds alleen op `pull_request` en `push` naar `main` (gecontroleerd op `9a87280`). De squash-commits op `finish/wm1` krijgen zelf geen run (op 15 nov: `0fb6334` 0 check-runs). De matrix telt nu 131 suites. | Optie a: de RC-commit testen via een draft-PR (niet mergen). Optie b: `workflow_dispatch` aan `tests.yml` toevoegen. | S | ja (b is een workflow-wijziging) |
+| 4 | F8.5 CI op de RC-commit | `tests.yml` draait nog steeds alleen op `pull_request` en `push` naar `main` (gecontroleerd op `9a87280`). De squash-commits op `finish/wm1` krijgen zelf geen run (op 15 nov: `0fb6334` 0 check-runs). De matrix telt nu 134 suites (zie F1.4). | Optie a: de RC-commit testen via een draft-PR (niet mergen). Optie b: `workflow_dispatch` aan `tests.yml` toevoegen. | S | ja (b is een workflow-wijziging) |
 | 5 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt`. LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). | Voor de interne RC: Dennis accepteert de placeholders bewust (komt in known issues). Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
 
 Net buiten de top 5 vallen: F4.2 (geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`), F5.1 en F5.3 (doelvensters en
@@ -97,7 +98,7 @@ F8.3 (CHANGELOG mist de merges na #493) en F6.24 (drie World Warper-cues geven e
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
 | F3.1 | Verse import zonder fouten | NIET TE CHECKEN | Er is geen Godot in deze sessie. CI importeert bij elke run, maar faalt niet op import-warnings. | Dennis draait lokaal `--import` en leest de uitvoer. | | |
-| F3.2 | Alle suites groen op de freeze-commit | KLAAR | Er is nog geen freeze-commit (F8.5 blijft OPEN). Op 15 nov: PR-head #476 `bb1622e` 122/122 groen, branch-commit `0fb6334` 0 check-runs. `wm1qasweeptest` (#492) zit sinds #500 in CI. `--wm1playthroughtest` (golden path, bewust niet in CI): na verse `--import` op `9a87280c` gaf RPG CODE 17-11 **591 PASS / 0 FAIL / exit 0**. Eerdere 51 FAIL kwamen door ontbrekende class-cache (`MapLightingRig` parse-fout zonder `--import`). | Na de freeze: CI op die commit (F8.5). | S | nee |
+| F3.2 | Alle suites groen op de freeze-commit | KLAAR (tussenmeting) | Tussenmeting op `9a87280c` (nog geen freeze-commit; F1.7/F8.5 OPEN). Op 15 nov: PR-head #476 `bb1622e` 122/122 groen, branch-commit `0fb6334` 0 check-runs. `wm1qasweeptest` (#492) zit sinds #500 in CI. `--wm1playthroughtest` (golden path, bewust niet in CI): na verse `--import` op `9a87280c` gaf RPG CODE 17-11 **591 PASS / 0 FAIL / exit 0**. Eerdere 51 FAIL kwamen door ontbrekende class-cache (`MapLightingRig` parse-fout zonder `--import`). Op de freeze-commit moeten CI (F8.5) en `wm1playthroughtest` opnieuw groen zijn. | Na `wm1-freeze`: CI op die commit (F8.5) en golden path opnieuw draaien. | S | nee |
 | F3.3 | Geen `SCRIPT ERROR` | KLAAR | `.github/scripts/run_suite.sh:25,30-33` faalt erop; #476 groen. | | | |
 | F3.4 | Golden path route A en B | NIET TE CHECKEN | Handmatig. Deels gedekt door `wm1playthroughtest` (kas en berggrot, niet in CI). | | | |
 | F3.5 | Terugweg Archief 2 (H14) | NIET TE CHECKEN | Handmatig. `archief2test` raakt `leven_v1_plaat`. | | | |
