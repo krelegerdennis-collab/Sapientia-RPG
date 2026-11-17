@@ -7,15 +7,21 @@ extends Control
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 const ACTION_SIZE := Vector2(44, 32)
+## Bovenin, zodat het schermtoetsenbord (onderste helft) niets bedekt.
+const TOP_Y := 22.0
 
 var edit: LineEdit
 var ok_button: Button
 var back_button: Button
+var _box: Control
 var _done := false
 ## Zolang de speler nog niets getypt heeft, vervangt de eerste letter 'Dax'.
 var _pristine := true
+var _lay_vp := Vector2(-1, -1)
+var _lay_ins := Vector4(-1, -1, -1, -1)
 
 
 func _ready() -> void:
@@ -27,7 +33,8 @@ func _ready() -> void:
 	add_child(bg)
 	# bovenin, zodat het schermtoetsenbord (onderste helft) niets bedekt
 	var box := UiMenu.panel(UiStyleC.MAGENTA_DIM)
-	box.position = Vector2(0, 22)
+	_box = box
+	box.position = Vector2(0, TOP_Y + UiTouchC.insets(get_viewport()).y)
 	add_child(box)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
@@ -70,8 +77,8 @@ func _ready() -> void:
 	edit.focus_entered.connect(_show_keyboard)
 	ok_button.pressed.connect(confirm)
 	back_button.pressed.connect(back_to_title)
-	resized.connect(_center.bind(box))
-	_center.call_deferred(box)
+	resized.connect(_place)
+	_place.call_deferred()
 	edit.grab_focus.call_deferred()
 	_select_default.call_deferred()
 	_set_web_name_mode(true)
@@ -125,9 +132,33 @@ func _set_web_name_mode(on: bool) -> void:
 	JavaScriptBridge.eval("window.sapientiaWantName=%s;window.sapientiaNameText='%s';" % ["true" if on else "false", text], true)
 
 
-func _center(box: Control) -> void:
-	box.reset_size()
-	box.position.x = roundf((size.x - box.size.x) / 2.0)
+## y = 22 + inset boven. x blijft het midden, en schuift alleen zo ver als nodig om in de
+## safe rect te blijven. Bij insets 0 is dat dezelfde pixel als het oude midden op y = 22.
+func _place() -> void:
+	if _box == null or not is_inside_tree():
+		return
+	var vp := size
+	if vp.x < 1.0 or vp.y < 1.0:
+		return
+	_box.reset_size()
+	var ins := UiTouchC.insets(get_viewport())
+	var x := roundf((vp.x - _box.size.x) / 2.0)
+	var safe := UiTouchC.safe_rect(vp, get_viewport())
+	var max_x := maxf(safe.position.x, safe.end.x - _box.size.x)
+	x = clampf(x, safe.position.x, max_x)
+	_box.position = Vector2(x, TOP_Y + ins.y)
+	_lay_vp = vp
+	_lay_ins = ins
+
+
+func _volg_veilig_gebied() -> void:
+	if _box == null or not is_inside_tree():
+		return
+	var vp := size
+	var ins := UiTouchC.insets(get_viewport())
+	if vp == _lay_vp and ins == _lay_ins:
+		return
+	_place()
 
 
 func _process(_delta: float) -> void:
@@ -136,6 +167,8 @@ func _process(_delta: float) -> void:
 		back_to_title()
 		return
 	UiMenu.pad_nav(get_viewport())
+	# insets_override en een notch veranderen de safe rect zonder dat het scherm resizet
+	_volg_veilig_gebied()
 
 
 ## Terug naar het titelscherm, zonder een spel te starten. Verbergt het schermtoetsenbord.
