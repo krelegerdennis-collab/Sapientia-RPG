@@ -2670,7 +2670,10 @@ func _fill_eind_codex() -> void:
 
 
 ## Na de naamkeuze: nieuw spel en naar het startpunt in het dorp.
-func start_new_game(hero_name: String) -> void:
+## skip_opening (standaard false): alleen de drift overslaan. new_game wist de vlaggen,
+## dus warper_drift_done (opening/flow.gd FLAG_DRIFT_DONE) moet daarna gezet worden,
+## vóór should_play. De rest van dit pad blijft hetzelfde, ook de map naar het startpunt.
+func start_new_game(hero_name: String, skip_opening: bool = false) -> void:
 	new_game_starts += 1
 	use_story_saves()
 	new_game(hero_name)
@@ -2678,6 +2681,8 @@ func start_new_game(hero_name: String) -> void:
 	# Geladen saves houden hun eigen keuze (load_game; zonder sleutel = Classic).
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	changing_map = false
+	if skip_opening:
+		_mark_opening_drift_done()
 	if bool(_call_opening_flow("should_play", story_flags)):
 		_call_opening_flow("start")
 	else:
@@ -2685,6 +2690,15 @@ func start_new_game(hero_name: String) -> void:
 	# v0.11: niet meteen automatisch opslaan bij een nieuw spel (anders is de autosave van
 	# het vorige spel direct weg); dat gebeurt pas bij de eerste echte mapwissel.
 	_autosave_request = ""
+
+
+## Screenshots (--uishots) slaan de drift over. Zelfde vlag als flow.gd FLAG_DRIFT_DONE.
+func _mark_opening_drift_done() -> void:
+	var flag := "warper_drift_done"
+	var flow := _opening_flow_script()
+	if flow != null:
+		flag = str(flow.get_script_constant_map().get("FLAG_DRIFT_DONE", flag))
+	story_flags[flag] = true
 
 
 ## Terug naar het titelscherm (bv. vanuit het veldmenu, en in de autotest).

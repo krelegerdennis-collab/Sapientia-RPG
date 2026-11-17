@@ -73,71 +73,6 @@ func wait_scene(scene_name: String, timeout := 20.0) -> bool:
 	return false
 
 
-## Vlag van world_warper/opening/flow.gd (FLAG_DRIFT_DONE). Lazy: geen preload, dezelfde
-## reden als GameState (flow → drift → font breekt een import-keten als het te vroeg parst).
-var _drift_flag := ""
-
-
-func _drift_flag_name() -> String:
-	if _drift_flag != "":
-		return _drift_flag
-	_drift_flag = "warper_drift_done"
-	var flow: Script = load("res://world_warper/opening/flow.gd") as Script
-	if flow != null:
-		_drift_flag = str(flow.get_script_constant_map().get("FLAG_DRIFT_DONE", _drift_flag))
-	return _drift_flag
-
-
-## new_game() wist story_flags. start_new_game() (game_state.gd) roept daarna
-## WorldWarperOpeningFlow.should_play aan. --uishots eindigt niet op "test", dus
-## flow.gd:_mag_in_tests() laat de drift toe bij een lege user://. De CanvasLayer
-## (drift.gd, laag 125, tekst "For now, you only drift.") blijft tot MAX_SECONDS
-## over élk scherm; warper_drift_done wordt pas gezet als de hele opening klaar is
-## (flow.gd, na Hal + echo). De tool loopt de profielen in dict-volgorde, dus de
-## eerste profielen schieten de intro en een later profiel (op een trage machine
-## de notch) niet meer. Daarom niet start_new_game(), maar dezelfde opzet met de
-## vlag meteen ná new_game().
-func _begin_without_drift(hero_name: String) -> void:
-	GameState.new_game_starts += 1
-	GameState.use_story_saves()
-	GameState.new_game(hero_name)
-	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
-	GameState.changing_map = false
-	GameState._autosave_request = ""
-	_mark_drift_seen()
-	_free_opening_nodes()
-
-
-func _mark_drift_seen() -> void:
-	GameState.story_flags[_drift_flag_name()] = true
-
-
-func _is_opening_runner(n: Node) -> bool:
-	if n == null or not is_instance_valid(n):
-		return false
-	var scr := n.get_script() as Script
-	if scr == null:
-		return false
-	return scr.resource_path.ends_with("world_warper/opening/flow.gd") and n.has_method("_wacht_hal")
-
-
-## Drift-laag en de opening-runner weg, vóór die alsnog naar de Hal wisselt.
-func _free_opening_nodes() -> void:
-	var root := get_tree().root
-	var doomed: Array[Node] = []
-	for child in root.get_children():
-		if _is_opening_runner(child):
-			doomed.append(child)
-	var drift := root.find_child("OpeningDrift", true, false)
-	if drift != null and is_instance_valid(drift):
-		var host := drift.get_parent()
-		if host == null or not doomed.has(host):
-			doomed.append(drift)
-	for n in doomed:
-		if is_instance_valid(n):
-			n.free()
-
-
 func _on_town() -> bool:
 	var s := scene()
 	return s != null and s.name == "Wilgendal" and s.is_node_ready()
@@ -156,7 +91,6 @@ func _ensure_town() -> bool:
 		return true
 	if GameState.in_battle:
 		return false
-	_free_opening_nodes()
 	GameState.changing_map = false
 	if not GameState.change_map(WORLD_TOWN, "start"):
 		await pframes(2)
@@ -189,15 +123,15 @@ func viewport_size() -> Vector2:
 func start_game() -> bool:
 	# scanlines uit: tekst en randen zijn zo goed te beoordelen (en de PNG's blijven klein)
 	Settings.set_value("crt", false)
-	_begin_without_drift("Kees")
+	# skip_opening: --uishots eindigt niet op "test", dus start_new_game zou anders
+	# de drift starten (game_state.gd). De vlag wordt daar gezet, ná new_game.
+	GameState.start_new_game("Kees", true)
 	var sd: Script = load("res://scripts/data/story_data.gd")
 	GameState.set("story_step", int(sd.get_script_constant_map().get("KLAAR", 0)))
-	_mark_drift_seen()
 	await seconds(0.4)
 	while GameState.changing_map:
 		await get_tree().process_frame
 	await seconds(0.4)
-	_free_opening_nodes()
 	GameState.change_map(WORLD_TOWN, "start")
 	var ok := await wait_scene("Wilgendal")
 	await seconds(0.6)
@@ -252,9 +186,6 @@ func close_field_menu() -> void:
 
 ## Opent het scenario; geeft false als het niet kon.
 func open(name: String) -> bool:
-	# Vangnet: staat de drift er toch, haal hem weg vóór het scherm én vóór de PNG.
-	_mark_drift_seen()
-	_free_opening_nodes()
 	if not await _ensure_town():
 		return false
 	match name:
@@ -420,8 +351,6 @@ func shot_if(file_name: String) -> void:
 func shot(file_name: String) -> String:
 	if shots_dir == "":
 		return ""
-	_mark_drift_seen()
-	_free_opening_nodes()
 	await pframes(3)
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
