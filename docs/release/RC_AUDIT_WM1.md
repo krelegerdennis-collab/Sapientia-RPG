@@ -20,8 +20,8 @@ Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 44 |
-| OPEN | 20 |
+| KLAAR | 46 |
+| OPEN | 18 |
 | NIET TE CHECKEN | 29 |
 | **Totaal** | **93** |
 
@@ -29,17 +29,17 @@ Voortgang per fase (telling van de detailrijen hieronder, 17 nov middag; **KLAAR
 
 | Fase | KLAAR | OPEN | NIET TE CHECKEN | Gate |
 |---|---:|---:|---:|---|
-| 1 Freeze | 4 | 3 | 0 | OPEN |
+| 1 Freeze | 5 | 2 | 0 | OPEN |
 | 2 Art op palet | 3 | 3 | 2 | OPEN |
 | 3 Stabiliteit | 9 | 0 | 8 | OPEN |
 | 4 S25-performance | 2 | 1 | 4 | OPEN |
 | 5 Balans | 5 | 2 | 1 | OPEN |
 | 6 UX-polish | 15 | 5 | 4 | OPEN |
 | 7 Playtest en fixronde | 0 | 3 | 5 | OPEN |
-| 8 Release candidate | 6 | 3 | 5 | OPEN |
-| **Totaal** | **44** | **20** | **29** | |
+| 8 Release candidate | 7 | 2 | 5 | OPEN |
+| **Totaal** | **46** | **18** | **29** | |
 
-Sinds de eerste audit (15 nov): F1.4, F1.7, F2.5, F3.2, F3.9, F5.2, F5.4, F5.5, F5.6, F6.14, F6.15, F6.17, F8.1, F8.2, F8.3, F8.4 en F8.8 naar
+Sinds de eerste audit (15 nov): F1.4, F1.5, F1.7, F2.5, F3.2, F3.9, F5.2, F5.4, F5.5, F5.6, F6.14, F6.15, F6.17, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
 KLAAR (F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
 
 ### Top 5 OPEN op risico (voor de interne RC van 20 nov)
@@ -47,12 +47,12 @@ KLAAR (F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
 | # | Punt | Waarom risico | Voorstel | Grootte | Ja Dennis |
 |---:|---|---|---|---|---|
 | 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Verse debug-APK van de huidige `finish/wm1` (F7.1), één ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
-| 2 | F1.7 Freeze / scope | KLAAR: tag `wm1-freeze` op `finish/wm1` commit `f76aa7150f23385d47c630e54179e26ac1ba2cb8` (`f76aa715`), akkoord Dennis 17-11-2026 15:25 (kaart t890s5659). | | S | ja (scope, freeze-commit) |
+| 2 | F1.6 Lock-cijfers | Hergeteld op `f76aa715`: vijf tabellen wijken af (kaartscènes 48 vs 50, `ITEMS` 50 vs 53, Codex 18/29 vs 21/32, story-`EVENTS` 58 vs 53, TODO zonder tests 56 vs 49). | Correctie via aparte PR `docs/wm1-lock-hertelling`. | S | nee |
 | 3 | F8.6 Release-APK | `build-apk` heeft nog nooit met `build_type: release` gedraaid (laatste run op deze branch: debug, `5cb270c`, 5 nov). Of de signing-secrets er staan, kan deze sessie niet zien. Een ondertekende APK is de kern van de RC. | Forge doet nu een droge release-run op de huidige head. Dan blijkt meteen of de secrets kloppen, ruim voor 20 nov. | S | nee (bestaande workflow, interne build, niet publiceren) |
-| 4 | F8.5 CI op de RC-commit | `tests.yml` draait nog steeds alleen op `pull_request` en `push` naar `main` (gecontroleerd op `9a87280`). De squash-commits op `finish/wm1` krijgen zelf geen run (op 15 nov: `0fb6334` 0 check-runs). De matrix telt nu 135 suites (zie F1.4). | Optie a: de RC-commit testen via een draft-PR (niet mergen). Optie b: `workflow_dispatch` aan `tests.yml` toevoegen. | S | ja (b is een workflow-wijziging) |
+| 4 | F4.2 S25-meting | Geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`. | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
 | 5 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt` (F6.23b). LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
 
-Net buiten de top 5 vallen: F4.2 (geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`), F5.1 en F5.3 (doelvensters en
+Net buiten de top 5 vallen: F5.1 en F5.3 (doelvensters en
 besluit per afwijking: beide OPEN, wachten op Dennis; cijfers staan in `docs/release/WM1_BALANCE_REPORT_RC.md`, afwijkingentabel §7) en
 F6.24 (drie World Warper-cues geven een `push_error`).
 
@@ -74,7 +74,7 @@ F6.24 (drie World Warper-cues geven een `push_error`).
 | F1.2 | BESLIS-punten H3/H11/H13 | KLAAR | `release_flags.gd:13-24`; suite `wm1releasetest` | | | |
 | F1.3 | Labels `wm1-*` | OPEN | Labels (REST): `wm1-bugfix` en `wm1-lock` bestaan. `wm1-polish`, `wm1-cut` en `wm1-vervanging` ontbreken. | Forge maakt de drie labels aan. | S | nee (Forge) |
 | F1.4 | CI-matrix gelijk met `game_state.gd` | KLAAR | #361, #380, #400, #406, #449, #480, #488, #500; #507 (merge `060140df`) zette `blauwekisttest`, `bossnametest` en `dungeon100bossmaptest` in de matrix (Dennis akkoord 17-11 12:06). #514 zette `--combattick` in de matrix; de suite draait in CI sinds `f01ba40a`. Matrix nu 135 suites (`.github/workflows/tests.yml:24-42`), `relaytest` als eigen job. Buiten de matrix blijven perf/sim/benchmark en `wm1playthroughtest` (bewust, checklist). | | S | ja (workflow) |
-| F1.5 | Baseline PASS-aantallen | OPEN | Geen freeze-commit, geen baseline. De tabel in `AGENTS.md` is van v0.18. | Na de freeze de CI-samenvatting (`GITHUB_STEP_SUMMARY`) in de checklist of in een issue zetten. | S | nee |
+| F1.5 | Baseline PASS-aantallen | KLAAR | Baseline: 138 checks groen op `f76aa715` (draft-PR #515, `rc/wm1-freeze-ci`, gesloten zonder merge). `--combattick` draait in CI sinds #514. De tabel in `AGENTS.md` is van v0.18. | | S | nee |
 | F1.6 | Lock-cijfers hertellen | OPEN | Hergeteld op `f76aa715` (`git show`, top-level keys). Gelijk: `ENEMIES` 26, berggrot-`MONSTERS` 3, `BOSSES` 12 (10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 99), helden 5 (Dax, Vesper, Seren, Kael Voss, Orion), sleutelvoorwerpen 4, `EQUIPMENT` 85, blauwe-kist 36, `SPELLS` 81 (21/20/20/20), kern 2/1/2, opdrachten 7 (6 hoofd, 1 zij) / acts 6 (act 3-6 "later"), BGM 24/13, SFX 99/0. Afwijking: kaartscènes doc 48 (46 speelroute, 2 dev) vs 50 (48 speelroute, 2 dev; extra `leven_v2_leeszaal.tscn`, `woud_beek.tscn`); `ITEMS` doc 50 vs 53 (`spreuk_grote_genezing`, `spreuk_vuurbal`, `spreuk_zonnevlam`); Codex doc 18/29 vs 21/32 (`adermot`, `druipslak`, `steenluis` / `aderspark`, `koude_druppel`, `steenbeet`); story-`EVENTS` doc 58 vs 53; `TODO(design\|verhaal)` zonder tests doc 56 vs 49. | Correctie via aparte wm1-lock-PR. | S | nee |
 | F1.7 | Tag `wm1-freeze` | KLAAR | Tag `wm1-freeze` op `finish/wm1` commit `f76aa7150f23385d47c630e54179e26ac1ba2cb8` (`f76aa715`), akkoord Dennis 17-11-2026 15:25 (kaart t890s5659). | | S | ja (scope) |
 
@@ -136,7 +136,7 @@ F6.24 (drie World Warper-cues geven een `push_error`).
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
 | F5.1 | Doelvensters kiezen | OPEN | Niets genoteerd in de checklist. | Dennis neemt het voorstel over of past het aan. | S | ja (balans) |
-| F5.2 | Volledig rapport op de freeze-commit | KLAAR (meting) | Gemeten op `9a87280` (klus 17): `docs/release/WM1_BALANCE_REPORT_RC.md` §3. `--battlesim --seed=20261020 --fights=2000` is gelijk aan `BATTLE_BALANCE_REPORT.md` (alle 59 rijen); `--wm1balans` per gebied en per baas naast `fb17c40`/#208. Afwijking: Wortelkoning 28% (oorzaak #394, gebisect); besluit via F5.3 / `WM1_BALANCE_REPORT_RC.md` §7. | `--battlesim --seed=20261020 --fights=2000` draaien na de freeze. | M | nee (meten) |
+| F5.2 | Volledig rapport op de freeze-commit | KLAAR (meting) | Op `f76aa715` draaide RPG COMBAT `--battlesim --seed=20261020 --fights=2000`. Alle rijen gelijk aan `docs/release/WM1_BALANCE_REPORT_RC.md` §3.1; het rapport is byte-gelijk aan `docs/BATTLE_BALANCE_REPORT.md` op de looptijd in de kop na. Bestanden `/workspace/combat/f52/sim_f76aa71.txt` en `.json` (box van het team, niet in de repo). Wortelkoning 28% staat zo in §3.1 en wacht op F5.3 / §7. | | M | nee (meten) |
 | F5.3 | Besluit per afwijking | OPEN | Hangt aan F5.2. | Afwijkingentabel aan Dennis voorleggen. | M | ja (balans) |
 | F5.4 | Levelcurve | KLAAR (meting) | `docs/release/WM1_BALANCE_REPORT_RC.md` §4: per level gevechten en minuten (aanname 5 s/ronde); Golem bereikt op Lv 7 (ontwerp 8), eind Lv 15; 67 verplichte gevechten. Kanttekening: afwijking Golem Lv 7 i.p.v. 8, eind Lv 15 i.p.v. 16 (A14) wacht op besluit Dennis via F5.3 / `WM1_BALANCE_REPORT_RC.md` §7. | Diepe Grot-run-tijden via de sim. | M | ja (bij afstellen) |
 | F5.5 | Economie | KLAAR (meting) | `docs/release/WM1_BALANCE_REPORT_RC.md` §5: goud per gebied tegenover `shop_data.gd`; alleen monstergoud, kisten geven items. Pakket overal betaalbaar behalve de eerste 70 g (startgoud 0). | CSV-modus tegen `shop_data.gd`. | M | ja (bij afstellen) |
@@ -200,7 +200,7 @@ F6.24 (drie World Warper-cues geven een `push_error`).
 | F8.2 | `version/code` hoger dan de vorige build | KLAAR | `rcchecktest` [F8.2]: code 23 > 22 (v0.20), PASS. | Komt mee met F8.1. | S | nee (Forge) |
 | F8.3 | Changelog | KLAAR | `[0.21]` in `CHANGELOG.md` dekt de merges op `finish/wm1` na #493 t/m #514 (één regel per PR). `[Unreleased]` is leeg. | | S | nee |
 | F8.4 | README en BUILDS kloppen | KLAAR | Klus 12: `README.md:8` noemt "Huidige versie: 0.21 (code 23)" met `tools/release/version.json` als enige bron; de Android-sectie (`README.md:427`) verwijst naar die bron in plaats van "versie 0.13 (code 15)". Historische (v0.xx)-notities blijven. `rcchecktest` [F8.4] wordt daarmee PASS. | | | |
-| F8.5 | CI groen op de RC-commit | OPEN | Zie top 5 #4. | | S | ja (bij workflow-optie) |
+| F8.5 | CI groen op de RC-commit | KLAAR | Optie a: draft-PR #515 (`rc/wm1-freeze-ci`, gesloten zonder merge) draaide de volledige CI-matrix op `wm1-freeze` `f76aa715`: 138/138 checks groen. | | S | nee |
 | F8.6 | Release-APK met secrets | OPEN | Zie top 5 #3. Of de secrets bestaan, kan deze sessie niet zien (Actions-API afgeschermd). | | S | nee |
 | F8.7 | `apksigner` / `aapt` | NIET TE CHECKEN | Er is nog geen release-APK. | | | |
 | F8.8 | Rechten passen bij H11 | KLAAR | Besluit Dennis 15 nov: uit. `internet`, `access_network_state`, `access_wifi_state` en `change_wifi_multicast_state` staan op `false` in alle Android-presets (`export_presets.cfg:60-63,131-134,244-247`). `rcchecktest` [F8.8] PASS: geen netwerkrecht aan, `online_cut` aan, PvP/Co-op-knop verborgen (`title_screen.gd:384-390`). Solo raakt geen netwerkcode: `scripts/net/` en `pvp/` worden alleen geopend via die twee knoppen (`title_screen.gd:560-567`). `coophosttest` en `aabtest` volgen nu `online_cut`. | Besluit: online blijft dicht voor de RC, dus de rechten uit. Forge past de presets aan. | S | ja (H11) |
