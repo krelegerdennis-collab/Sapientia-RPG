@@ -13,6 +13,7 @@ const Floor := preload("res://scripts/online/online_dls_floor.gd")
 const HAL_SCENE := "res://scenes/coop/online_hal.tscn"
 const RELAY_DIR := "res://relay"
 const STEP := 10.0
+const SNAP_STEP := 20.0
 
 var failures := 0
 var passes := 0
@@ -256,14 +257,23 @@ func _host_room(hal: OnlineHal) -> String:
 
 func _hal_input(hal: OnlineHal) -> void:
 	var gx := hal.body_at(1).position.x
-	_cmd("stick_right")
-	var guest_moves := await wait_until(func() -> bool: return hal.body_at(1) != null and hal.body_at(1).position.x > gx + 8.0, STEP)
-	_cmd("stick_stop")
+	var guest_hal_x := _guest_float("hal_x", hal.body_at(1).position.x if hal.body_at(1) != null else 0.0)
+	await _cmd_ack("stick_right")
+	var guest_moves := await wait_until(func() -> bool:
+		var body := hal.body_at(1)
+		if body == null:
+			return false
+		var host_sees := body.position.x > gx + 8.0
+		var guest_x := _guest_float("hal_x", guest_hal_x)
+		return host_sees and absf(guest_x - guest_hal_x) > 6.0
+	, SNAP_STEP)
+	await _cmd_ack("stick_stop")
 	check("hal: invoer van de gast beweegt zijn poppetje bij de host", guest_moves)
 	var hx := hal.local_body().position.x
-	Input.action_press("move_left")
-	var keys := await wait_until(func() -> bool: return hal.local_body().position.x < hx - 6.0, STEP)
-	Input.action_release("move_left")
+	# Headless heeft geen betrouwbare toetsenbord-focus; de hal gebruikt dezelfde stick-vector als het toetsenbord.
+	hal.set_stick(Vector2.LEFT)
+	var keys := await wait_until(func() -> bool: return hal.local_body() != null and hal.local_body().position.x < hx - 6.0, SNAP_STEP)
+	hal.set_stick(Vector2.ZERO)
 	check("hal: host (laptop) loopt met het toetsenbord", keys)
 
 
@@ -303,16 +313,26 @@ func _run_input(tag: String) -> void:
 	if body == null:
 		return
 	var start := body.position
-	_cmd("stick_right")
-	var moved := await wait_until(func() -> bool: return body.position.distance_to(start) > 6.0, STEP)
-	_cmd("stick_stop")
+	await _cmd_ack("stick_right")
+	var moved := await wait_until(func() -> bool: return body.position.distance_to(start) > 6.0, SNAP_STEP)
+	await _cmd_ack("stick_stop")
 	check("ronde %s: invoer van de gast beweegt zijn held in het spel (bij de host)" % tag, moved)
 	var host_body: Node2D = som._coop_body(0)
 	var hs := host_body.position if host_body != null else Vector2.ZERO
-	var gx := float(_guest().get("run_host_x", -1.0))
+	var gx_snapshot := _guest_float("run_host_x")
 	run.set_stick(Vector2.LEFT)
-	var host_moved := await wait_until(func() -> bool: return host_body != null and host_body.position.distance_to(hs) > 6.0, STEP)
-	var guest_sees := await wait_until(func() -> bool: return absf(float(_guest().get("run_host_x", -1.0)) - gx) > 4.0, STEP)
+	var host_moved := await wait_until(func() -> bool: return host_body != null and host_body.position.distance_to(hs) > 6.0, SNAP_STEP)
+	# Wacht tot de gast de hostpositie uit snapshots toont (niet alleen lokale host-sim).
+	var guest_sees := false
+	if host_moved:
+		guest_sees = await wait_until(func() -> bool:
+			var seen := _guest_float("run_host_x")
+			if seen < 0.0:
+				return false
+			if gx_snapshot < 0.0:
+				return absf(seen - hs.x) > 4.0
+			return absf(seen - gx_snapshot) > 4.0
+		, SNAP_STEP)
 	run.set_stick(Vector2.ZERO)
 	check("ronde %s: host loopt in het spel" % tag, host_moved)
 	check("ronde %s: gast ziet de host bewegen (snapshots)" % tag, guest_sees)
@@ -377,12 +397,26 @@ func _guest() -> Dictionary:
 	return _last_guest
 
 
+func _guest_float(key: String, fallback: float = -1.0) -> float:
+	var g := _guest()
+	return float(g.get(key, fallback)) if g.has(key) else fallback
+
+
+func _await_guest_cmd(cmd: String, seconds: float = STEP) -> bool:
+	return await wait_until(func() -> bool: return str(_guest().get("last_cmd", "")) == cmd, seconds)
+
+
 func _cmd(c: String) -> void:
 	_cmds.append(c)
 	var f := FileAccess.open(_cmd_path, FileAccess.WRITE)
 	if f != null:
 		f.store_string("\n".join(_cmds) + "\n")
 		f.close()
+
+
+func _cmd_ack(c: String) -> void:
+	_cmd(c)
+	await _await_guest_cmd(c)
 
 
 func _stop_guest() -> void:

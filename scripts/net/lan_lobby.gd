@@ -11,6 +11,8 @@ const Codec := preload("res://scripts/net/net_codec.gd")
 const AvatarBlob := preload("res://scripts/net/avatar_blob.gd")
 const EmoteGateScript := preload("res://scripts/net/emote_gate.gd")
 const RewardAckScript := preload("res://scripts/net/reward_ack.gd")
+const OnlineRewardScript := preload("res://scripts/net/online_reward.gd")
+const OnlineProfileScript := preload("res://scripts/online/online_profile.gd")
 
 signal assigned(slot: int, character_id: String)
 signal refused(reason: int)
@@ -27,6 +29,9 @@ signal emote_received(seat: int, emote_id: int)
 signal ready_changed
 ## Online v2: de host koos een simulatie. Gasten zien de keuze.
 signal sim_selected(sim_id: String, mode: String)
+## Online v2 (gast): uitkomst van een ontvangen REWARD_BUNDLE.
+## status: applied, duplicate, rejected of save_failed. Alleen applied/duplicate krijgen een ACK.
+signal reward_handled(status: String, grant_key: String)
 
 enum Phase { IDLE, JOINING, IN, REFUSED, LOST }
 enum Transport { LAN, RELAY }
@@ -53,8 +58,9 @@ var sim_mode := ""
 ## Online v2: body van het laatste START_GAME (seed, mode, floor). Leeg bij LAN.
 var start_body: Dictionary = {}
 var _ready_by_seat: Dictionary = {}
-## Leeg = de client leest applied_grants van het M1-profiel. Vervangt die lezing.
-var is_grant_applied: Callable = Callable()
+## Gast: het online profiel waarop de buit landt. null = bij elke bundle vers
+## van schijf laden (user://online_profile.json). Tests zetten hier een eigen instantie.
+var profile_store: OnlineProfile = null
 
 var _peer: MultiplayerPeer
 var _join_timeout := Protocol.JOIN_TIMEOUT_SEC
@@ -71,7 +77,7 @@ var _gameplay: Node = null
 var _online_profile: Dictionary = {}
 var _emote_gate: EmoteGate = null
 var _rewards: RewardAck = null
-var _inbox: RewardAck = null
+var _loot_inbox: OnlineReward = null
 
 
 func _ready() -> void:
@@ -727,19 +733,76 @@ func _on_reward_ack(from_id: int, body: Dictionary) -> void:
 	_rewards.ack(uid, str(parsed.get("grant_key", "")))
 
 
+## Gast: eigen bundle op het eigen profiel zetten, opslaan, en pas daarna ACK.
+## Volgorde (OnlineReward-haak): apply_bundle -> set_progress (schrijft) -> REWARD_ACK.
+## duplicate: niets schrijven, wel ACK. rejected of opslaan mislukt: geen ACK,
+## de host houdt de bundle pending en stuurt hem bij een rejoin opnieuw.
 func _on_reward_bundle(body: Dictionary) -> void:
 	if phase != Phase.IN or protocol_version != Protocol.VERSION_ONLINE:
 		return
-	if _inbox == null:
-		_inbox = RewardAckScript.new()
-	if is_grant_applied.is_valid():
-		_inbox.is_grant_applied = is_grant_applied
-	var result: Dictionary = _inbox.receive(body)
-	if not bool(result.get("ok", false)):
+	var parsed := Codec.read_reward_bundle(body)
+	var wire_key := str(parsed.get("grant_key", ""))
+	if not bool(parsed.get("ok", false)) or not Codec.valid_grant_key(wire_key):
+		reward_handled.emit(OnlineRewardScript.STATUS_REJECTED, "")
 		return
+	var own_uid := str(_online_profile.get("uid", "")).to_lower()
+	var uid := str(parsed.get("uid", ""))
+	# Alleen de eigen stoel. Het profielbestand kan ook andere lokale slots hebben.
+	if own_uid == "" or uid != own_uid:
+		reward_handled.emit(OnlineRewardScript.STATUS_REJECTED, wire_key)
+		return
+	var store := profile_store
+	if store == null:
+		store = OnlineProfileScript.new()
+		store.load_profile()
+	var index := _profile_index(store, uid)
+	if index < 0:
+		reward_handled.emit(OnlineRewardScript.STATUS_REJECTED, wire_key)
+		return
+	if _loot_inbox == null:
+		_loot_inbox = OnlineRewardScript.new()
+	# best_floor gaat (nog) niet over de lijn: 0 laat het opgeslagen record staan.
+	var bundle := {
+		"session_id": str(int(parsed.get("session_id", 0))),
+		"host_tick": int(parsed.get("host_tick", 0)),
+		"seat_uid": uid,
+		"profile_exp": int(parsed.get("profile_exp", 0)),
+		"best_floor": 0,
+		"unlocks": (parsed.get("unlocks", []) as Array).duplicate(),
+	}
+	var next: Dictionary = _loot_inbox.apply_bundle(store.document(), bundle)
+	var status := str(next.get("status", OnlineRewardScript.STATUS_REJECTED))
+	if status == OnlineRewardScript.STATUS_REJECTED:
+		reward_handled.emit(status, wire_key)
+		return
+	if status == OnlineRewardScript.STATUS_APPLIED:
+		var slots_v: Variant = (next.get("profile", {}) as Dictionary).get("slots", [])
+		var slot: Dictionary = (slots_v as Array)[index] if slots_v is Array else {}
+		var seen: Dictionary = slot.get("stats_seen", {}) if slot.get("stats_seen", {}) is Dictionary else {}
+		var saved := store.set_progress(
+			index,
+			int(slot.get("profile_exp", 0)),
+			int(seen.get("best_floor", 0)),
+			int(seen.get("runs", 0)),
+			slot.get("unlocks", []),
+			slot.get("applied_grants", []),
+		)
+		if not bool(saved.get("ok", false)):
+			# Niet op schijf: runtime-set weggooien, anders telt een resend als duplicate.
+			_loot_inbox = null
+			reward_handled.emit("save_failed", wire_key)
+			return
 	_send_to(Protocol.HOST_PEER_ID, Protocol.Kind.REWARD_ACK, {
-		"grant_key": str(result.get("grant_key", "")),
+		"grant_key": wire_key,
 	}, Protocol.VERSION_ONLINE)
+	reward_handled.emit(status, wire_key)
+
+
+static func _profile_index(store: OnlineProfile, uid: String) -> int:
+	for i in OnlineProfileScript.SLOT_COUNT:
+		if store.has_slot(i) and str(store.get_slot(i).get("uid", "")).to_lower() == uid:
+			return i
+	return -1
 
 
 func _on_client_v2(msg: Dictionary) -> void:

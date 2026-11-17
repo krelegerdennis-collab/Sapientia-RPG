@@ -614,6 +614,7 @@ func _ready() -> void:
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# M8b buit per stoel + run-resultaat + reward-bundle (puur, geen netwerk): of  godot -- --onlinerewardtest  (scripts/tests/online_reward_tests.gd).
+	# Buit per stoel via de echte lobby (relay v2, 2 gasten, ACK pas na opslaan): of  godot -- --liveseatloottest  (scripts/tests/live_seat_loot_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -773,7 +774,8 @@ func _ready() -> void:
 			["--d100modesimtest", "res://scripts/tests/d100_mode_sim_tests.gd", "D100ModeSimTest", "d100modesimtest"],
 			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"],
 			["--coopplaytesttest", "res://scripts/tests/coop_playtest_tests.gd", "CoopPlaytestTest", "coopplaytesttest"],
-			["--coopplaytestgast", "res://scripts/tests/coop_playtest_guest.gd", "CoopPlaytestGast", "coopplaytestgast"]]:
+			["--coopplaytestgast", "res://scripts/tests/coop_playtest_guest.gd", "CoopPlaytestGast", "coopplaytestgast"],
+			["--liveseatloottest", "res://scripts/tests/live_seat_loot_tests.gd", "LiveSeatLootTest", "liveseatloottest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
