@@ -13,11 +13,12 @@ extends Control
 ## Ontbreekt een bestand, dan valt alleen dat stuk terug (tekst / bibliotheek / code-glitch).
 ## Menu (Doorgaan/Nieuw spel + save-info) rechtsonder, x 240..372, onderkant y 200.
 ## Betatest en Eindstaat staan links onder: aparte voortgang, niet in dit kaartje.
-## v0.13 (afgemaakt): alle titel-art staat in een vaste 'stage' van 384x216 die in het midden
-## van het scherm staat (pixel-precies, Nearest). Op bredere/hogere schermen (telefoons zijn vaak
-## breder dan 16:9) vult een donkere, vergrote kopie van de achtergrond de randen; zo blijven
-## logo, ondertitel en de kern van de Golem precies op hun plek in de achtergrond. Het menu en
-## het versielabel staan ook in de stage / rechtsonder.
+## v0.13 (afgemaakt): alle titel-art staat in een vaste 'stage' van 384x216. Die stage staat
+## gecentreerd in het veilige gebied (UiTouch.safe_rect) en wordt daarbinnen geklemd, pixel-precies
+## (Nearest). Zonder insets is dat het midden van het scherm. Op bredere/hogere schermen (telefoons
+## zijn vaak breder dan 16:9) vult een donkere, vergrote kopie van de achtergrond de randen; zo blijven
+## logo, ondertitel en de kern van de Golem precies op hun plek in de achtergrond. Het menu blijft
+## rechtsonder in de stage; het versielabel blijft rechtsonder in het venster.
 ## Het 'Doorgaan'-kaartje (naam, speeltijd, auto) staat in een paletvenster (UiStyle).
 ## Doorgaan is grijs (uitgeschakeld) als er nog geen save is (user://save_1.json).
 ## v0.11: Doorgaan kijkt naar de NIEUWSTE van handmatige save en autosave
@@ -31,6 +32,7 @@ const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const TitleGlitch := preload("res://scripts/ui/title_glitch.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const Wm1Config := preload("res://scripts/data/wm1_config.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const BACKDROP := "res://assets/battle/bibliotheek.png"
 const TITLE_MAIN := "res://assets/ui/title_main.png"   # hoofdpagina 384x216 (titel zit in de plaat)
 const TITLE_BG := "res://assets/ui/title_bg.png"
@@ -73,7 +75,10 @@ var kern: TextureRect           # kloppende kern van de Golem (title_kern.png)
 var kern_frames: Array[Texture2D] = []
 var kern_frame := 0
 var _kern_t := 0.0
-## v0.13: vaste 384x216-laag met alle titel-art (midden in beeld); backfill = randen.
+## Laatst geplaatste venstergrootte en insets, zodat een notch zonder resize de stage mee schuift.
+var _lay_vp := Vector2(-1, -1)
+var _lay_ins := Vector4(-1, -1, -1, -1)
+## v0.13: vaste 384x216-laag met alle titel-art (in het veilige gebied); backfill = randen.
 var stage: Control
 var backfill: TextureRect
 var version_label: Label
@@ -317,10 +322,11 @@ func _build_legacy_title(bg: TextureRect) -> void:
 	glitch.set_background(bg)
 
 
-## Stage (384x216) in het midden; menu rechtsonder IN de stage: x CARD_LEFT..CARD_RIGHT,
-## onderkant op CARD_BOTTOM (zo valt het nooit over de held of de Golem in de achtergrond).
+## Stage (384x216) gecentreerd in UiTouch.safe_rect en daarbinnen geklemd.
+## Insets 0: dezelfde plek als centreren in het volle venster. Het menu blijft rechtsonder
+## IN de stage: x CARD_LEFT..CARD_RIGHT, onderkant op CARD_BOTTOM (nooit over de held of de Golem).
 func _place_card() -> void:
-	stage.position = ((size - STAGE_SIZE) / 2.0).floor()
+	stage.position = _stage_in_safe()
 	card.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 0)
 	card.reset_size()
 	card.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - card.size.y)).round()
@@ -371,6 +377,30 @@ func _place_card() -> void:
 	studio_label.position = (Vector2(
 			version_label.position.x - FOOTER_LABEL_GAP - studio_label.size.x,
 			version_label.position.y)).round()
+
+
+## Insets of venstergrootte gewijzigd: stage opnieuw in het veilige gebied zetten.
+func _volg_veilig() -> void:
+	var vp := size
+	var ins := UiTouchC.insets(get_viewport())
+	if vp == _lay_vp and ins == _lay_ins:
+		return
+	_lay_vp = vp
+	_lay_ins = ins
+	_place_card()
+
+
+## Midden van de safe rect. Past de stage niet, dan tegen de rand van die rect (zelfde klem als party_select).
+## Insets 0 houdt de oude formule, pixel voor pixel.
+func _stage_in_safe() -> Vector2:
+	var vp := size
+	var safe := UiTouchC.safe_rect(vp, get_viewport())
+	if safe.position == Vector2.ZERO and safe.size == vp:
+		return ((vp - STAGE_SIZE) / 2.0).floor()
+	var pos := (safe.position + (safe.size - STAGE_SIZE) / 2.0).floor()
+	pos.x = clampf(pos.x, safe.position.x, maxf(safe.position.x, safe.end.x - STAGE_SIZE.x))
+	pos.y = clampf(pos.y, safe.position.y, maxf(safe.position.y, safe.end.y - STAGE_SIZE.y))
+	return pos
 
 
 func _place_text_title() -> void:
@@ -476,6 +506,7 @@ func _toon_beta_info() -> void:
 
 func _process(delta: float) -> void:
 	UiMenu.pad_nav(get_viewport())
+	_volg_veilig()
 	if kern and kern_frames.size() > 1:
 		_kern_t += delta
 		if _kern_t >= 1.0 / KERN_FPS:
