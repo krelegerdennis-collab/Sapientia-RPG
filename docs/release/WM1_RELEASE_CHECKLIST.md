@@ -249,7 +249,7 @@ Engelse tekst (AGENTS.md regel 3)
 Touch
 - [ ] Alle knoppen en tikdoelen minstens 48 dp op de S25 (`scripts/touch_controls.gd`, `scenes/ui/touch_controls.tscn`);
   reken viewport-pixels om op het echte toestel.
-- [ ] RUN-knop in elke kamer-soort behalve gevecht (kerker, dorp, Rest Room, Koopman): geen suite dekt dit (backlog A11).
+- [x] RUN-knop in elke kamer-soort behalve gevecht (kerker, dorp, Rest Room, Koopman): dorp via `hudtest` deel D; kerker, Rest Room en Koopman via `--runknoptest` (CI-matrix).
 - [ ] Joystick en D-pad in Action-gevecht, ringmenu, Codex-knop.
 - [ ] Veilige zone (camera-uitsparing, rand): niets belangrijks onder de rand.
 - [ ] Meerdere vingers tegelijk, schermrotatie, app naar de achtergrond en terug (autosave bij focusverlies staat in

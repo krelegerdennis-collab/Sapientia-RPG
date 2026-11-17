@@ -15,12 +15,12 @@ Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 28 |
-| OPEN | 36 |
+| KLAAR | 29 |
+| OPEN | 35 |
 | NIET TE CHECKEN | 29 |
 | **Totaal** | **93** |
 
-Per fase (K / O / N): F1 3/4/0 · F2 2/4/2 · F3 7/2/8 · F4 2/1/4 · F5 1/6/1 · F6 12/8/4 · F7 0/3/5 · F8 1/8/5.
+Per fase (K / O / N): F1 3/4/0 · F2 2/4/2 · F3 7/2/8 · F4 2/1/4 · F5 1/6/1 · F6 13/7/4 · F7 0/3/5 · F8 1/8/5.
 
 ### Top 5 OPEN op risico (voor de interne RC van 20 nov)
 
@@ -144,7 +144,7 @@ gekozen; het balansrapport is van vóór #408/#414/#446/#450) en F6.14/F6.17 (to
 | F6.12 | Afkapping in ballonnen en menu's | NIET TE CHECKEN | Handmatig. Deels: `uipolishtest` (753), #434. | | | |
 | F6.13 | Tekst van Dennis (H8, ECHO) | OPEN | `WM1_PLAYTEST.md:200`: de ECHO-zinnen zijn nog door de agent geschreven. In `story_data.gd` staan 5 `TODO(verhaal)`-notities (ingekorte tekst, regels 8-291). | Dennis keurt de tekst goed of levert eigen tekst. | M | ja (tekst) |
 | F6.14 | Tikdoelen ≥ 48 dp | OPEN | #466 (F6-2: tikvlak ≥ `TOUCH_MIN`) staat open. Meten op het toestel is nog niet gedaan. | #466 reviewen en mergen, daarna op de S25 nameten. | S | nee (Forge review) |
-| F6.15 | RUN-knop in elke kamersoort | OPEN | `hudtest` deel D dekt veld, dorp, hub-hal en wereldkaart. Kerker, Rest Room en Koopman niet (backlog A11). | Nieuwe kleine suite voor die drie kamersoorten (hudtest niet aanpassen). | S | nee |
+| F6.15 | RUN-knop in elke kamersoort | KLAAR | `--runknoptest` (CI-matrix): kerker (`archief_ingang`), Rest Room en Koopman. `hudtest` deel D dekt veld, dorp, hub-hal en wereldkaart. De knop is aanwezig; geen codefix nodig. | | | |
 | F6.16 | Joystick, ringmenu, Codex-knop | KLAAR | `hudtest` deel D/G (geen D-pad, zo bedoeld). | | | |
 | F6.17 | Veilige zone | OPEN | #465 (World Warper/Rustkamer) en #467 (Settings) staan open. Al gemerged: #463. | Reviewen en mergen, daarna op toestel met notch kijken. | S | nee (Forge review) |
 | F6.18 | Multitouch, rotatie, achtergrond, vergrendelen | NIET TE CHECKEN | Toestel. Deels: `lifecycletest`, `savestresstest` deel C. | | | |
