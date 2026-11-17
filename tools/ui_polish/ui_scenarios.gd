@@ -73,6 +73,32 @@ func wait_scene(scene_name: String, timeout := 20.0) -> bool:
 	return false
 
 
+func _on_town() -> bool:
+	var s := scene()
+	return s != null and s.name == "Wilgendal" and s.is_node_ready()
+
+
+## De opening kan de kaart onder een scenario vandaan halen. Zonder Wilgendal is
+## FieldMenu null en crasht open_bestiary() (race, ui_scenarios open()).
+func _ensure_town() -> bool:
+	if _on_town():
+		return true
+	var t := 0.0
+	while not _on_town() and GameState.changing_map and t < 4.0:
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	if _on_town():
+		return true
+	if GameState.in_battle:
+		return false
+	GameState.changing_map = false
+	if not GameState.change_map(WORLD_TOWN, "start"):
+		await pframes(2)
+		GameState.changing_map = false
+		GameState.change_map(WORLD_TOWN, "start")
+	return await wait_scene("Wilgendal", 8.0)
+
+
 ## Zet de viewport op een profiel. KEEP + vaste basisgrootte geeft exact wat 'expand' op die verhouding toont,
 ## los van de (xvfb-)vensteromvang.
 func set_profile(name: String) -> void:
@@ -97,7 +123,9 @@ func viewport_size() -> Vector2:
 func start_game() -> bool:
 	# scanlines uit: tekst en randen zijn zo goed te beoordelen (en de PNG's blijven klein)
 	Settings.set_value("crt", false)
-	GameState.start_new_game("Kees")
+	# skip_opening: --uishots eindigt niet op "test", dus start_new_game zou anders
+	# de drift starten (game_state.gd). De vlag wordt daar gezet, ná new_game.
+	GameState.start_new_game("Kees", true)
 	var sd: Script = load("res://scripts/data/story_data.gd")
 	GameState.set("story_step", int(sd.get_script_constant_map().get("KLAAR", 0)))
 	await seconds(0.4)
@@ -126,10 +154,27 @@ func field_menu() -> Node:
 
 
 func open_field_menu() -> Node:
-	if field_menu() == null:
+	if not await _ensure_town():
+		return null
+	# Een tik tijdens lopen, een fade of een net gewiste kaart opent niets.
+	# Opnieuw proberen; nooit een methode op null aanroepen.
+	for _i in 8:
+		if field_menu() != null:
+			return field_menu()
 		await tap("menu")
 		await pframes(3)
 	return field_menu()
+
+
+func _call_menu(method: String, arg: Variant = null) -> bool:
+	var menu := await open_field_menu()
+	if menu == null or not menu.has_method(method):
+		return false
+	if arg == null:
+		menu.call(method)
+	else:
+		menu.call(method, arg)
+	return true
 
 
 func close_field_menu() -> void:
@@ -141,6 +186,8 @@ func close_field_menu() -> void:
 
 ## Opent het scenario; geeft false als het niet kon.
 func open(name: String) -> bool:
+	if not await _ensure_town():
+		return false
 	match name:
 		"hud":
 			await pframes(2)
@@ -153,27 +200,38 @@ func open(name: String) -> bool:
 			Dialog.ask("Do you want to rest at the inn for the night?", ["Yes, please", "No, thanks", "Tell me more"], "Aunt Mien")
 			await pframes(8)
 		"menu_main":
-			await open_field_menu()
+			if await open_field_menu() == null:
+				return false
 		"menu_items":
-			(await open_field_menu()).choose("items")
+			if not await _call_menu("choose", "items"):
+				return false
 		"menu_equipment":
-			(await open_field_menu()).open_equipment(0)
+			if not await _call_menu("open_equipment", 0):
+				return false
 		"menu_magic":
-			(await open_field_menu()).choose("magic")
+			if not await _call_menu("choose", "magic"):
+				return false
 		"menu_status":
-			(await open_field_menu()).open_status(0)
+			if not await _call_menu("open_status", 0):
+				return false
 		"menu_codex":
-			(await open_field_menu()).open_codex()
+			if not await _call_menu("open_codex"):
+				return false
 		"menu_bestiary":
-			(await open_field_menu()).open_bestiary()
+			if not await _call_menu("open_bestiary"):
+				return false
 		"menu_party":
-			(await open_field_menu()).open_party()
+			if not await _call_menu("open_party"):
+				return false
 		"menu_quests":
-			(await open_field_menu()).open_quests()
+			if not await _call_menu("open_quests"):
+				return false
 		"menu_options":
-			(await open_field_menu()).choose("options")
+			if not await _call_menu("choose", "options"):
+				return false
 		"menu_save":
-			(await open_field_menu()).open_save()
+			if not await _call_menu("open_save"):
+				return false
 		"shop_buy", "shop_sell":
 			var shop := ShopScreen.new()
 			shop.name = "ShopScreen"
