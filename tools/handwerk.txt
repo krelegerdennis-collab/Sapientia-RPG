@@ -1539,3 +1539,18 @@ assets/sprites/paperdoll/dodge/wapen_psy.png
 assets/sprites/paperdoll/dodge/wapen_scepter.png
 assets/sprites/paperdoll/dodge/wapen_staf.png
 assets/sprites/paperdoll/dodge/wapen_zwaard.png
+# online co-op: lobby-portretten 5 helden (32x32) + rol-lijsten achter/voor (36x36) van RPG ART
+# (art_coop/lobby; goedgekeurd door Dennis 14 nov 2026 21:13, "Ja mag meteen")
+assets/ui/lobby/portret_dennis.png
+assets/ui/lobby/portret_lotte.png
+assets/ui/lobby/portret_noor.png
+assets/ui/lobby/portret_kael.png
+assets/ui/lobby/portret_orion.png
+assets/ui/lobby/lijst_tank_achter.png
+assets/ui/lobby/lijst_tank_voor.png
+assets/ui/lobby/lijst_heal_achter.png
+assets/ui/lobby/lijst_heal_voor.png
+assets/ui/lobby/lijst_control_achter.png
+assets/ui/lobby/lijst_control_voor.png
+assets/ui/lobby/lijst_dps_achter.png
+assets/ui/lobby/lijst_dps_voor.png

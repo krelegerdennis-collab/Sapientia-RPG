@@ -166,7 +166,7 @@ func _coop_purge_guest_save_files() -> void:
 
 
 func _on_coop_link_lost() -> void:
-	if not coop_in_session():
+	if not coop_in_session() or _coop_scene_handles_end():
 		return
 	var msg := "Connection lost."
 	coop_end_session("")
@@ -179,8 +179,17 @@ func coop_session_end_message(reason: String) -> String:
 	return str(Protocol.SESSION_END_TEXT.get(reason, Protocol.SESSION_END_TEXT["ended"]))
 
 
+## Online hal en online run sturen zelf terug naar de lobby (met melding), niet naar de titel.
+func _coop_scene_handles_end() -> bool:
+	var tree := get_tree()
+	var scene := tree.current_scene if tree != null else null
+	return scene != null and scene.has_method("handles_coop_end") and bool(scene.handles_coop_end())
+
+
 func _on_coop_session_ended(reason: String) -> void:
 	if coop_role == "" and reason == "":
+		return
+	if _coop_scene_handles_end():
 		return
 	var tree := get_tree()
 	var scene := tree.current_scene if tree != null else null
@@ -604,6 +613,8 @@ func _ready() -> void:
 	# F4 game feel (screenshake + schadekleuren): of  godot -- --gamefeeltest  (scripts/tests/gamefeel_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
+	# M8b buit per stoel + run-resultaat + reward-bundle (puur, geen netwerk): of  godot -- --onlinerewardtest  (scripts/tests/online_reward_tests.gd).
+	# Buit per stoel via de echte lobby (relay v2, 2 gasten, ACK pas na opslaan): of  godot -- --liveseatloottest  (scripts/tests/live_seat_loot_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
@@ -708,6 +719,7 @@ func _ready() -> void:
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
+			["--onlinerewardtest", "res://scripts/tests/online_reward_tests.gd", "OnlineRewardTest", "onlinerewardtest"],
 			["--protocolv2test", "res://scripts/tests/protocol_v2_tests.gd", "ProtocolV2Test", "protocolv2test"],
 			["--rewardacktest", "res://scripts/tests/reward_ack_tests.gd", "RewardAckTest", "rewardacktest"],
 			["--battlesimtest", "res://scripts/tests/battlesim_tests.gd", "BattlesimTest", "battlesimtest"],
@@ -753,14 +765,19 @@ func _ready() -> void:
 			["--profilecodefuzztest", "res://scripts/tests/profile_code_fuzz_tests.gd", "ProfileCodeFuzzTest", "profilecodefuzztest"],
 			["--paperdolltest", "res://scripts/tests/paper_doll_tests.gd", "PaperDollTest", "paperdolltest"],
 			["--paperdollactionstest", "res://scripts/tests/paper_doll_actions_tests.gd", "PaperDollActionsTest", "paperdollactionstest"],
+			["--lobbyportraitslottest", "res://scripts/tests/lobby_portrait_slot_tests.gd", "LobbyPortraitSlotTest", "lobbyportraitslottest"],
 			["--onlinelobbytest", "res://scripts/tests/online_lobby_tests.gd", "OnlineLobbyTest", "onlinelobbytest"],
 			["--onlinedlsmodetest", "res://scripts/tests/online_dls_mode_tests.gd", "OnlineDlsModeTest", "onlinedlsmodetest"],
 			["--easycoopbalanstest", "res://scripts/tests/easy_coop_balance_tests.gd", "EasyCoopBalanceTest", "easycoopbalanstest"],
 			["--solod100guardtest", "res://scripts/tests/solo_d100_guard_tests.gd", "SoloD100GuardTest", "solod100guardtest"],
+			["--cosmeticstest", "res://scripts/tests/cosmetics_tests.gd", "CosmeticsTest", "cosmeticstest"],
 			["--coopdlstest", "res://scripts/tests/coop_dls_tests.gd", "CoopDlsTest", "coopdlstest"],
 			["--d100modesim", "res://tools/battlesim/d100_mode_sim.gd", "D100ModeSim", "d100modesim"],
 			["--d100modesimtest", "res://scripts/tests/d100_mode_sim_tests.gd", "D100ModeSimTest", "d100modesimtest"],
-			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"]]:
+			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"],
+			["--coopplaytesttest", "res://scripts/tests/coop_playtest_tests.gd", "CoopPlaytestTest", "coopplaytesttest"],
+			["--coopplaytestgast", "res://scripts/tests/coop_playtest_guest.gd", "CoopPlaytestGast", "coopplaytestgast"],
+			["--liveseatloottest", "res://scripts/tests/live_seat_loot_tests.gd", "LiveSeatLootTest", "liveseatloottest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
