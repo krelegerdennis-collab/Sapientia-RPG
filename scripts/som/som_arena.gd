@@ -749,6 +749,10 @@ func sim_step() -> void:
 		attack()
 		if Settings.action_battles() and is_alive(active_id):
 			heavy_hold[active_id] = 0          # indrukken start de vasthoud-teller
+	if _ai_heavy.has(active_id):
+		# held werd bestuurd terwijl zijn bondgenoot-AI een zware slag oplaadde (wissel/active_id gezet):
+		# die AI-lading hoort bij het bondgenoot-lichaam, niet loslaten als slag van de speler.
+		heavy_cancel(active_id)
 	heavy_tick(active_id, bool(_pending.get("hold", false)), player, 1.0)
 	if _pending["cast"]:
 		_pending["cast"] = false
