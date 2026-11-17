@@ -150,4 +150,9 @@ func _spawn_worm() -> void:
 	}, 1907)
 	room.get_node("Objects").add_child(m)
 	room.monsters.append(m)
+	# Action: de arena registreert alleen de monsters die er bij setup() al waren. Gaat de kast open
+	# terwijl je in de kamer bent, dan hier aanmelden (anders: CODEX "No enemy in range.", geen gevecht).
+	var som: Node = room.get("som")
+	if som != null and is_instance_valid(som):
+		som.register(m)
 	_worm = m
