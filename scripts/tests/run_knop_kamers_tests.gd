@@ -5,7 +5,7 @@ extends Node
 ## van de drie ontbrekende soorten en toetst de RUN-knop hetzelfde: aanwezig, zichtbaar,
 ## binnen het veilige gebied, en tikbaar (tikvlak >= UiTouch.TOUCH_MIN, zoals touch_controls
 ## de tik op RUN beoordeelt: hit_rect(run_rect(), 2)).
-## Lokaal; niet in de CI-matrix (tests.yml onaangeroerd). Zit niet in de export (scripts/tests/*).
+## In de CI-matrix (tests.yml). Zit niet in de export (scripts/tests/*).
 
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const GK := preload("res://scripts/data/grot_kamers.gd")
