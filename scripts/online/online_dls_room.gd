@@ -66,6 +66,12 @@ func _place_online_rest() -> void:
 
 func _use_exit(exit: Node) -> void:
 	var spawn := str(exit.target_spawn)
+	# Online run (scenes/online/online_run.tscn): alleen de host wisselt van verdieping, voor iedereen.
+	var run_scene := get_parent()
+	if run_scene != null and run_scene.has_method("room_exit"):
+		if not GameState.coop_is_guest():
+			run_scene.room_exit(spawn, str(exit.target_map))
+		return
 	if spawn == "uitgang":
 		Run.exit_reached = true
 		return
