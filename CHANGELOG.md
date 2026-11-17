@@ -88,6 +88,8 @@ Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 - Paletaudit F2.2, run 2 (alleen meting) (#512).
 - Droge Android-releasebuild gedocumenteerd (F8.6) (#513).
 - `--combattick` in de CI-suite-matrix (F1.4) (#514).
+- RC-audit freeze (F1.7, F1.4, F3.2, F6.23) en changelog 0.21 (F8.3) (#516).
+- Lock-cijfers herteld op `f76aa715` (F1.6) (#517).
 
 ### Opgelost
 - Saves zijn atomair en herstelbaar; verplichte pauze-save hersteld; suspend-save alleen op mobiel.
@@ -110,7 +112,7 @@ Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 - Hubkamers Training Hall, Workshop, Exchange en The Core en de hub-nissen blijven dicht via `hub_cut` (H3/H2).
 - Perfect dodge (F1) zit in de code maar staat uit (`SomPerfectDodgeData.ENABLED = false`) tot de balanspas (#472, #486).
 - Geluidseffecten zijn nog synthetische placeholders (`tools/placeholders_algemene_sfx.txt`); vervanging loopt via `tools/sfx/`. Voor de interne RC bewust geaccepteerd (besluit Dennis, 15 nov).
-- Het Action-HUD wordt in code getekend en is nog niet beoordeeld; `tools/placeholders_v17.txt` heeft nog open regels (RC-audit F2.5).
+- Het Action-HUD wordt in code getekend en is nog niet beoordeeld (kanttekening bij F2.5, geen open placeholder-regel). `tools/placeholders_v17.txt` is opgeschoond (#506, merge `70f6743c`): 0 open regels.
 
 ## [0.20] - 2026-10-13
 
