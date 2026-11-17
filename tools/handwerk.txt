@@ -1366,6 +1366,19 @@ assets/sprites/telegraph/telegraph_inkspit_diag_22x44.png
 # (art_fx/perfect_dodge/repo_drop; pad = bestaande combat-FX in assets/sprites/som/fx/)
 assets/sprites/som/fx/fx_perfect_ring.png
 assets/sprites/som/fx/fx_counter_spark.png
+# Epic 3-hit chain FX (RPG ART, Dennis goedgekeurd):
+# per-stap slash + per-held finisher-boog + gedeelde grond-schokgolf
+# alleen masterpalet, alpha 0/255 (art_fx/chain_epic/repo_drop;
+# pad = bestaande combat-FX in assets/sprites/som/fx/)
+# geen afterimage-sheets: code tint de held-sprite (recept in README)
+assets/sprites/som/fx/fx_chain_hit1.png
+assets/sprites/som/fx/fx_chain_hit2.png
+assets/sprites/som/fx/fx_chain_finisher_dennis.png
+assets/sprites/som/fx/fx_chain_finisher_lotte.png
+assets/sprites/som/fx/fx_chain_finisher_noor.png
+assets/sprites/som/fx/fx_chain_finisher_kael.png
+assets/sprites/som/fx/fx_chain_finisher_orion.png
+assets/sprites/som/fx/fx_chain_shockwave.png
 # 2026-11-15: Colosseum/arena set van RPG ART (hand-gepixeld, generators in art_arena/src)
 assets/tiles/wereld_v18_arena.png
 assets/ui/arena/icon_arena.png

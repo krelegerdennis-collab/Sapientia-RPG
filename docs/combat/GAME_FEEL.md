@@ -1,12 +1,12 @@
 # F4 — Game feel (client-only)
 
-Screenshake en gekleurde schadegetallen op vijanden. Geen wijziging aan hitstop, sim of netcode.
+Screenshake en gekleurde schadegetallen op vijanden. Hitstop keten: hit2 = 2 ticks (Dennis goedgekeurd voor keten-feel); hit1 en finisher hitstop ongewijzigd t.o.v. de keten-tabel elders. Wel sim-hitstop hit2 (0→2 ticks, `HITSTOP_TICKS [0, 2, 6]`, Dennis goedgekeurd 15-11) en finisher-shake; geen netcode-wijziging.
 
 ## Screenshake (`scripts/som/som_shake.gd`)
 
 | soort | px | ticks |
 |---|---|---|
-| finisher (eigen held) | 1 | 4 |
+| finisher (eigen held) | 2 | 6 |
 | heavy L1 | 2 | 6 |
 | heavy L2 | 3 | 8 |
 | Golem hamerslag en grote AoE (eigen held geraakt) | 3 | 10 |
@@ -20,7 +20,7 @@ Patroon: vaste tabel in `SomFeelData.PATTERN` (geen `randf`). Na elke shake: `Ca
 | treffer | kleur | schaal |
 |---|---|---|
 | gewoon | wit | 1.0 |
-| finisher | `#FF8A3D` | 1.0 |
+| finisher | `#FFD24A` | 1.3 |
 | heavy L1 | `#FFD24A` | 1.0 |
 | heavy L2 | `#FFD24A` | 1.25 |
 

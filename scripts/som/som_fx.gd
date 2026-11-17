@@ -8,6 +8,7 @@ extends RefCounted
 
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomFeelData := preload("res://scripts/data/som_feel_data.gd")
+const SomChainData := preload("res://scripts/data/som_chain_data.gd")
 const THEME := preload("res://assets/theme.tres")
 const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const PLACEHOLDER_COLOR := Color("ff1ee6")
@@ -207,6 +208,66 @@ static func set_ko(p: Node2D, t: Texture2D, on: bool) -> void:
 		k.free()
 	if body and t:
 		body.visible = not on
+
+
+## Keten-stap slash: eigen strip of terugval naar fx_slash (onbekende held / ontbrekende art).
+static func chain_hit(parent: Node, at: Vector2, dir: Vector2, step: int, hero_id: String) -> Node2D:
+	var d: Dictionary = SomChainData.fx_def_for_step(step, hero_id)
+	if d.is_empty():
+		return slash(parent, at, dir)
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		return slash(parent, at, dir)
+	var n := int(d["frames"])
+	var ms_raw: Variant = d.get("ms", 50)
+	var ms: Array = ms_raw if ms_raw is Array else []
+	if ms.is_empty():
+		for _i in n:
+			ms.append(int(ms_raw))
+	var a := Anim.new()
+	a.name = "SomChainSlash"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	a.centered = true
+	var seq: Array = []
+	for i in n:
+		seq.append(i)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.rotation = dir.angle()
+	a.z_index = 20
+	parent.add_child(a)
+	return a
+
+
+## Grond-schokgolf op de finisher (geen rotatie).
+static func chain_shockwave(parent: Node, feet: Vector2) -> Node2D:
+	var d: Dictionary = SomChainData.FX_SHOCKWAVE
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		return null
+	var n := int(d["frames"])
+	var ms_one := int(d["ms"])
+	var a := Anim.new()
+	a.name = "SomChainShockwave"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	a.centered = true
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = feet
+	a.rotation = 0.0
+	a.z_index = 19
+	parent.add_child(a)
+	return a
 
 
 static func slash(parent: Node, at: Vector2, dir: Vector2) -> Node2D:
@@ -434,7 +495,8 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 		d.row = _digit_row(color)
 		# F4 finisher/heavy: witte rij + modulate (rood/groen _digit_row blijft). Meta zodat
 		# HD-2D-compensatie (elke frame) de kleur vermenigvuldigt i.p.v. hem te wissen.
-		if color.is_equal_approx(SomFeelData.COL_FINISHER) or color.is_equal_approx(SomFeelData.COL_HEAVY):
+		if color.is_equal_approx(SomFeelData.COL_FINISHER) or color.is_equal_approx(SomFeelData.COL_HEAVY) \
+				or color.is_equal_approx(SomFeelData.COL_FINISHER_NUMBER):
 			d.row = 0
 			d.set_meta(Hd2dUnmodulated.FEEL_RGB, color)
 			n = d

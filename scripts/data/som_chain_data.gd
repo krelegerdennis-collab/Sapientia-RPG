@@ -16,8 +16,8 @@ const STEP_STATES: Array[String] = ["hit1", "hit2", "finisher"]
 const CHAIN_WINDOW_TICKS := 20
 ## Schademultiplier per stap (bovenop de wapenmeter, SomArena.charge_mult).
 const DAMAGE_MULT: Array[float] = [1.0, 1.1, 1.6]
-## Hitstop (ticks dat de geraakte vijand bevriest). hit1/hit2 = 0 zodat de gewone slag niet verandert.
-const HITSTOP_TICKS: Array[int] = [0, 0, 6]
+## Hitstop (ticks dat de geraakte vijand bevriest): hit1 = 0, hit2 = 2, finisher = 6.
+const HITSTOP_TICKS: Array[int] = [0, 2, 6]
 ## Knockback in tegels (de bestaande _knockback was altijd 1 tegel).
 const KNOCKBACK_TILES: Array[int] = [1, 1, 2]
 ## De finisher staggert altijd (telegraaf breken + knockback), ook met een niet-volle meter:
@@ -42,6 +42,30 @@ const STEP_SHEETS := {
 	"kael": {"hit2": "res://assets/sprites/som/combat/kael_attack2.png", "finisher": "res://assets/sprites/som/combat/kael_finisher.png"},
 	"orion": {"hit2": "res://assets/sprites/som/combat/orion_attack2.png", "finisher": "res://assets/sprites/som/combat/orion_finisher.png"},
 }
+## Epic keten-FX (RPG ART): horizontale strips, anker midden, geen lus; zie docs/combat/chain_feel.md.
+const FX_HIT1 := {"sheet": "res://assets/sprites/som/fx/fx_chain_hit1.png", "cell": [32, 32], "frames": 3, "ms": 50}
+const FX_HIT2 := {"sheet": "res://assets/sprites/som/fx/fx_chain_hit2.png", "cell": [32, 32], "frames": 3, "ms": 50}
+const FX_SHOCKWAVE := {"sheet": "res://assets/sprites/som/fx/fx_chain_shockwave.png", "cell": [48, 48], "frames": 4, "ms": 55,
+	"anchor": [24, 24]}
+const FINISHER_FX_MS: Array[int] = [50, 50, 60, 50, 50]
+const FINISHER_FX_SHEETS := {
+	"dennis": "res://assets/sprites/som/fx/fx_chain_finisher_dennis.png",
+	"lotte": "res://assets/sprites/som/fx/fx_chain_finisher_lotte.png",
+	"noor": "res://assets/sprites/som/fx/fx_chain_finisher_noor.png",
+	"kael": "res://assets/sprites/som/fx/fx_chain_finisher_kael.png",
+	"orion": "res://assets/sprites/som/fx/fx_chain_finisher_orion.png",
+}
+const AFTERIMAGE_TINT := {
+	"dennis": Color8(164, 102, 240),
+	"lotte": Color8(200, 244, 255),
+	"noor": Color8(232, 184, 255),
+	"kael": Color8(64, 224, 232),
+	"orion": Color8(248, 232, 144),
+}
+const AFTERIMAGE_OFFSETS: Array[float] = [4.0, 8.0, 12.0]
+const AFTERIMAGE_ALPHAS: Array[float] = [0.55, 0.35, 0.18]
+const FINISHER_ENEMY_FLASH_SEC := 1.0 / 60.0
+
 const STEP_MS := {
 	"hit1": [],   # leeg = SomData.ATTACK_ANIMS[id]["ms"] (bestaande slag)
 	"hit2": [80, 120, 40, 90, 70, 120],      # eigen sheet: STEP_SHEETS
@@ -97,6 +121,28 @@ static func anim_def(base: Dictionary, step: int, id := "") -> Dictionary:
 		d["sheet"] = own
 	d["placeholder"] = step != STEP_HIT1 and own == ""
 	return d
+
+
+static func fx_def_for_step(step: int, hero_id: String) -> Dictionary:
+	match clamp_step(step):
+		STEP_HIT1:
+			return FX_HIT1.duplicate()
+		STEP_HIT2:
+			return FX_HIT2.duplicate()
+		STEP_FINISHER:
+			var sheet := finisher_fx_sheet(hero_id)
+			if sheet == "":
+				return {}
+			return {"sheet": sheet, "cell": [32, 32], "frames": 5, "ms": FINISHER_FX_MS.duplicate()}
+		_:
+			return {}
+
+
+static func finisher_fx_sheet(hero_id: String) -> String:
+	var path := str(FINISHER_FX_SHEETS.get(hero_id, ""))
+	if path == "" or not ResourceLoader.exists(path):
+		return ""
+	return path
 
 
 static func anim_ticks(def: Dictionary, tick_dt: float) -> int:
