@@ -40,7 +40,7 @@ jobs:
                 wm1dekkingtest, wm1releasetest, wm1f3stabilitytest, wm1balanstest, playtestkittest, telegraphcooptest,
                 coopguestsavetest, hd2dtest, lichtpropstest,
                 onlineprofiletest, protocolv2test, paperdolltest, paperdollactionstest, onlinedlsmodetest, coopdlstest, cosmeticstest, solod100guardtest,
-                seatstest, revivetest, pagewardentest, rewardacktest, onlinerewardtest, onlinelobbytest, liveseatloottest, d100modesimtest, easycoopbalanstest]
+                seatstest, revivetest, pagewardentest, rewardacktest, onlinerewardtest, coopplaytesttest, onlinelobbytest, liveseatloottest, d100modesimtest, easycoopbalanstest]
     steps:
       - uses: actions/checkout@v4
 

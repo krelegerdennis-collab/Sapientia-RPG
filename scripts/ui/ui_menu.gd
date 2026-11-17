@@ -61,7 +61,8 @@ static func button(text: String) -> Button:
 	b.focus_exited.connect(func(): _mark(b, false))
 	# muis bewogen boven de knop = focus (niet bij alleen 'verschijnen onder de cursor')
 	b.gui_input.connect(func(e):
-		if e is InputEventMouseMotion and e.relative.length() > 0.0 and not b.disabled and not b.has_focus():
+		if e is InputEventMouseMotion and e.relative.length() > 0.0 and not b.disabled and not b.has_focus() \
+				and b.focus_mode != Control.FOCUS_NONE:
 			b.grab_focus())
 	b.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	return b
