@@ -42,6 +42,9 @@ func _ready() -> void:
 	if not _open:
 		visible = false
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_process(false)
+	else:
+		set_process(true)
 	_koppel_layout_hooks()
 	_place_at_anchor()
 	call_deferred("_place_at_anchor")
@@ -59,11 +62,8 @@ func _koppel_layout_hooks() -> void:
 	if _layout_hooks or not is_inside_tree():
 		return
 	var vp := get_viewport()
-	var root := get_tree().root
 	if vp != null and not vp.size_changed.is_connected(_place_at_anchor):
 		vp.size_changed.connect(_place_at_anchor)
-	if root != null and not root.resized.is_connected(_place_at_anchor):
-		root.resized.connect(_place_at_anchor)
 	_layout_hooks = true
 
 
@@ -71,11 +71,8 @@ func _ontkoppel_layout_hooks() -> void:
 	if not _layout_hooks:
 		return
 	var vp := get_viewport()
-	var root := get_tree().root if is_inside_tree() else null
 	if vp != null and vp.size_changed.is_connected(_place_at_anchor):
 		vp.size_changed.disconnect(_place_at_anchor)
-	if root != null and root.resized.is_connected(_place_at_anchor):
-		root.resized.disconnect(_place_at_anchor)
 	_layout_hooks = false
 
 
@@ -84,6 +81,7 @@ func open() -> void:
 	_ensure_ui()
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	set_process(true)
 	_lay_ins = Vector4(-1, -1, -1, -1)
 	_place_at_anchor()
 	refresh()
@@ -93,6 +91,7 @@ func close() -> void:
 	_open = false
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_process(false)
 	_lay_ins = Vector4(-1, -1, -1, -1)
 
 
