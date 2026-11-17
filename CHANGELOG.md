@@ -41,6 +41,15 @@ Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 - Masterpalet (`docs/art/masterpalet.gpl`) met `palet_check` en CI-waarschuwing (#366).
 - Centrale inventaris- en goud-API (#399).
 - Nieuwe suites o.a. `--rcchecktest` (#481), `--savestresstest` (#469), `--f6uxtest2` (#463) en de game-feel-suites (#449, #480, #488).
+- Keten-feel: 3-hit chain (#475).
+- Arena-flow, achter `ARENA_ENABLED = false` (#478).
+- WM1 QA-ronde op de RC en suite `--wm1qasweeptest` (#492).
+- Arena-golven: vervolgpunten review #487 (A-D) (#494).
+- Plan voor het refactor-blok van `battle.gd` (fase 1, vanaf 24-11) (#495).
+- Game over en respawn bij Strangler en Mender, suite `--bossrespawntest` (#497).
+- RUN-knop in kerker, Rest Room en Koopman, suite `--runknoptest` (#498).
+- `--negeer <glob>` in `palet_check.py` en `meet.py` (#505).
+- Balansmeting WM1 voor de interne RC (F5.2, F5.4, F5.5, F5.6) (#508).
 
 ### Gewijzigd
 - Interne RC (besluit Dennis, 15 nov): versie 0.21 / versionCode 23; netwerkrechten (`internet`, `access_network_state`,
@@ -63,6 +72,22 @@ Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 - Export-presets gelijkgetrokken; `export/web` niet meer in git (#390).
 - Grijze UI-tekst haalt 4,5:1 contrast (#463).
 - Battle Style-uitleg en tutorial: Golem is realtime in Action (#367).
+- World Warper Rustkamer en Party-select binnen de safe area, letters >= 10, ECHO-kistnamen leesbaar (#465).
+- Lijstregels in menu's krijgen een onzichtbaar tikvlak >= `TOUCH_MIN` (#466).
+- Settings General past binnen venster en safe area (16:9, 19,5:9, notch) (#467).
+- Perfect dodge (F1): bron via `hit_player`, tellers reset per gevecht (#479).
+- Verouderde geen-CI-matrix-comments bij de arena weg (#496).
+- Vier bestaande suites in `tests.yml` (bossrespawn, book_point, qa-sweep, arena-followup) (#500).
+- Dax- en Vesper-finishers in de kleurregel (#501).
+- `BATTLE_REFACTOR_PLAN` bijgewerkt na #450, #472 en #501 (#503).
+- RC-audit bijgewerkt (klus 18) en kleine doc-nits (#504).
+- `placeholders_v17.txt` opgeschoond (F2.5) (#506).
+- `blauwekisttest`, `bossnametest` en `dungeon100bossmaptest` in de CI-matrix (F1.4) (#507).
+- RC-audit klus 19 (17 nov middag, #506–#508) (#509).
+- EOF-newline in twee book_point-tests (#511).
+- Paletaudit F2.2, run 2 (alleen meting) (#512).
+- Droge Android-releasebuild gedocumenteerd (F8.6) (#513).
+- `--combattick` in de CI-suite-matrix (F1.4) (#514).
 
 ### Opgelost
 - Saves zijn atomair en herstelbaar; verplichte pauze-save hersteld; suspend-save alleen op mobiel.
@@ -77,6 +102,8 @@ Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 - Golem-aanvallen zichtbaar in Action (#374); Drift-achtergrond vult een breed scherm (#373).
 - Relay: peer-id-overflow en gast-input gebonden aan de afzender (#405, #407).
 - Localisatie-guard: PvP-modi in het Engels (#386).
+- `book_point` stopt na await als het object weg is (#499).
+- `--combattick` groen op 30 fps (meter-framecorrectie); enemy-read zonder lambda-capture-errors (#510).
 
 ### Bekend
 - Online staat dicht: PvP en co-op (LAN en relay) zijn verborgen via `online_cut` (H11), en de Android-presets vragen geen netwerkrechten.
