@@ -345,11 +345,11 @@ de release-commit, Dennis geeft go.
 
 | Fase | Status | Datum | Akkoord |
 |---:|---|---|---|
-| 1 Freeze | in uitvoering: cuts H3/H11/H13 doorgevoerd (CHANGELOG, 24 okt); tag `wm1-freeze` en baseline nog open. Volgorde en scope: `docs/release/LAUNCH_PLAN.md` (5 nov) | 2026-11-05 | Dennis: go op LAUNCH_PLAN |
-| 2 Art op palet | open | | |
-| 3 Stabiliteit | open | | |
-| 4 S25-performance | open | | |
-| 5 Balans | open | | |
-| 6 UX-polish | open | | |
-| 7 Playtest en fixronde | open | | |
-| 8 Release candidate | open | | |
+| 1 Freeze | in uitvoering: cuts H3/H11/H13 doorgevoerd (CHANGELOG, 24 okt); tag `wm1-freeze` en baseline nog open (RC-audit 17 nov: 2 klaar, 5 open). Volgorde en scope: `docs/release/LAUNCH_PLAN.md` (5 nov) | 2026-11-05 | Dennis: go op LAUNCH_PLAN |
+| 2 Art op palet | open (RC-audit 17 nov: 2 klaar, 4 open, 2 handmatig) | 2026-11-17 | |
+| 3 Stabiliteit | in uitvoering (RC-audit 17 nov: 8 klaar, 1 open, 8 handmatig) | 2026-11-17 | |
+| 4 S25-performance | open (RC-audit 17 nov: 2 klaar, 1 open, 4 op toestel) | 2026-11-17 | |
+| 5 Balans | open (RC-audit 17 nov: 1 klaar, 6 open, 1 proces) | 2026-11-17 | |
+| 6 UX-polish | in uitvoering (RC-audit 17 nov: 15 klaar, 5 open, 4 handmatig) | 2026-11-17 | |
+| 7 Playtest en fixronde | open (RC-audit 17 nov: 0 klaar, 3 open, 5 proces) | 2026-11-17 | |
+| 8 Release candidate | in uitvoering (RC-audit 17 nov: 5 klaar, 4 open, 5 toestel/na RC) | 2026-11-17 | |
