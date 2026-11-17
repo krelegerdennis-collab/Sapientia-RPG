@@ -38,9 +38,17 @@ static func begin_telegraph(arena, m: Node, parent: Node, center_fn: Callable, w
 	spawn_read(parent, center_fn.call(m) + read_anchor(m))
 	var bang_life := maxf(0.05, windup_sec - SomGameFeelData.ENEMY_READ_DELAY_SEC)
 	var tree: SceneTree = arena.get_tree()
+	# Zwakke verwijzingen: de timer kan afgaan nadat kamer/arena/vijand al weg zijn (kamerwissel). Een lambda
+	# die de nodes zelf vasthoudt, geeft dan "Lambda capture ... was freed"; een WeakRef geeft gewoon null.
+	var wm: WeakRef = weakref(m)
+	var wa: WeakRef = weakref(arena)
+	var wp: WeakRef = weakref(parent)
 	tree.create_timer(SomGameFeelData.ENEMY_READ_DELAY_SEC).timeout.connect(func() -> void:
-		if not is_instance_valid(m) or not is_instance_valid(arena) or not arena.enemies.has(m):
+		var mm: Node = wm.get_ref()
+		var aa = wa.get_ref()
+		var pp: Node = wp.get_ref()
+		if mm == null or aa == null or pp == null or not aa.enemies.has(mm):
 			return
 		pose_fn.call()
-		SomFx.number(parent, center_fn.call(m) + Vector2(0, -14), "!", SomGameFeelData.TELEGRAPH_BANG_COLOR, bang_life)
+		SomFx.number(pp, center_fn.call(mm) + Vector2(0, -14), "!", SomGameFeelData.TELEGRAPH_BANG_COLOR, bang_life)
 	, CONNECT_ONE_SHOT)
