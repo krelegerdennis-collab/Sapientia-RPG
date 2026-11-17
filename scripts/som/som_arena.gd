@@ -61,6 +61,7 @@ const SomStaggerData := preload("res://scripts/data/som_stagger_data.gd")
 const SomStagger := preload("res://scripts/som/som_stagger.gd")
 const SomPerfectDodgeData := preload("res://scripts/data/som_perfect_dodge_data.gd")
 const SomShakeScript := preload("res://scripts/som/som_shake.gd")
+const SomChainFeelScript := preload("res://scripts/som/som_chain_feel.gd")
 const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
 const SomGameFeelData := preload("res://scripts/data/som_gamefeel_data.gd")
 const SomDeathGlitch := preload("res://scripts/som/som_death_glitch.gd")
@@ -1052,6 +1053,9 @@ func _swing(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 			anim.set_meta("chain_state", SomHeavyData.state_for(heavy))
 		elif step >= 0:
 			anim.set_meta("chain_state", SomChainData.state_for(step))
+			if Settings.action_battles() and SomChainData.is_finisher(step):
+				var ghost: Node = SomChainFeelScript.attach(n, anim, id)
+				_drive(ghost)
 		# bondgenoot: de slag gaat de kant op waar hij begon (zijn AI kan tijdens de animatie al draaien)
 		var face0: Vector2i = n.facing
 		anim.hit.connect(func() -> void:
@@ -1068,8 +1072,13 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 		return 0
 	var f := Vector2(_swing_facing(id, n))
 	var point: Vector2 = n.position + Vector2(0, SomData.BODY_Y) + f * SomData.attack_offset(id)
-	SomFx.slash(room.get_node("Objects"), point, f)
+	var fx_parent: Node = room.get_node("Objects")
+	if step >= 0 and Settings.action_battles():
+		SomFx.chain_hit(fx_parent, point, f, step, id)
+	else:
+		SomFx.slash(fx_parent, point, f)
 	var hits := 0
+	var shock_feet: Vector2 = Vector2.ZERO
 	var atk := float(GameState.effective_stat(member(id), "atk"))
 	var use_counter := _pd_counter_active(id)
 	var swing_mult := mult
@@ -1106,7 +1115,8 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 					num_scale = SomFeelData.SCALE_HEAVY2 if heavy >= 2 else 1.0
 					shake_kind = "heavy2" if heavy >= 2 else "heavy1"
 				elif step >= 0 and SomChainData.is_finisher(step):
-					num_color = SomFeelData.COL_FINISHER
+					num_color = SomFeelData.COL_FINISHER_NUMBER
+					num_scale = SomFeelData.SCALE_FINISHER_NUMBER
 					shake_kind = "finisher"
 			var stg_kind := SomStaggerData.KIND_NONE
 			if step >= 0:
@@ -1115,8 +1125,11 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				stg_kind = SomStaggerData.KIND_HEAVY_L1 if heavy == 1 else SomStaggerData.KIND_HEAVY_L2
 			_pending_chain_step = step
 			_pending_impact_element = ""
+			var is_fin := step >= 0 and SomChainData.is_finisher(step) and Settings.action_battles()
+			if is_fin:
+				shock_feet = m.position + Vector2(0, SomData.BODY_Y)
 			damage_enemy(m, physical_damage(atk, float(e["def"]), swing_mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
-					num_color, num_scale, stg_kind)
+					num_color, num_scale, stg_kind, is_fin)
 			if (step >= 0 and SomChainData.is_finisher(step)) or heavy >= 2:
 				SomFx.dust_finisher(room.get_node("Objects"), feet_of_enemy(m))
 			if use_counter:
@@ -1130,6 +1143,8 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 			if shake_kind != "" and _feel_local_hero(id) and shake != null:
 				shake.kick(shake_kind)
 			hits += 1
+	if shock_feet != Vector2.ZERO and hits > 0:
+		SomFx.chain_shockwave(fx_parent, shock_feet)
 	if use_counter and hits > 0:
 		_pd_counter.erase(id)
 	swing_landed.emit(id, hits)
@@ -1202,7 +1217,7 @@ func _aim_caster_at(caster_id: String, m: Node) -> void:
 ## stagger = false (slag onder 100%): wel schade, maar geen afgebroken telegraaf en geen knockback.
 ## knock_tiles / hitstop: aanvalsketen (SomChainData); standaard 1 tegel en geen hitstop (zoals voorheen).
 func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles := 1, hitstop := 0,
-		num_color := Color(1, 1, 1), num_scale := 1.0, stg_kind := SomStaggerData.KIND_NONE) -> void:
+		num_color := Color(1, 1, 1), num_scale := 1.0, stg_kind := SomStaggerData.KIND_NONE, finisher_flash := false) -> void:
 	var chain_step := _pending_chain_step
 	var impact_el := _pending_impact_element
 	_pending_impact_element = ""
@@ -1227,7 +1242,7 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 				if SomFeelData.ENABLED:
 					num_color = SomFeelData.COL_FINISHER
 		e["hp"] = int(e["hp"]) - dmg
-	e["flash"] = SomData.HIT_FLASH_CONTACT
+	e["flash"] = SomChainData.FINISHER_ENEMY_FLASH_SEC if finisher_flash else SomData.HIT_FLASH_CONTACT
 	last_enemy_damage = dmg
 	if not SomFeelData.ENABLED:
 		num_color = Color(1, 1, 1)

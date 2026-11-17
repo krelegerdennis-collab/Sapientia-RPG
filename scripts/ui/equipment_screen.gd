@@ -188,7 +188,7 @@ func _build_right(body: HBoxContainer) -> void:
 	slot_panel.add_child(col)
 	var list: Array = []
 	for s in Equipment.slots():
-		var b := UiMenu.button("")
+		var b := touch_row(UiMenu.button(""))
 		b.custom_minimum_size = Vector2(0, ROW_H)
 		b.clip_text = true
 		b.pressed.connect(choose_slot.bind(str(s)))
@@ -213,7 +213,7 @@ func _build_right(body: HBoxContainer) -> void:
 	var order: Array = []
 	for i in COMMANDS.size():
 		var id := str(COMMANDS[i][0])
-		var b := UiMenu.button(str(COMMANDS[i][1]))
+		var b := touch_row(UiMenu.button(str(COMMANDS[i][1])))
 		b.custom_minimum_size = Vector2(CMD_W, ROW_H)
 		b.pressed.connect(do_command.bind(id))
 		lock_horizontal_focus(b)
@@ -417,7 +417,7 @@ func open_list(slot: String) -> void:
 	list_buttons.clear()
 	list_ids = ids
 	for id in ids:
-		var b := UiMenu.button("%s x%d" % [Equipment.item_name(id).rpad(NAME_COLS), GameState.item_count(id)])
+		var b := touch_row(UiMenu.button("%s x%d" % [Equipment.item_name(id).rpad(NAME_COLS), GameState.item_count(id)]))
 		b.custom_minimum_size = Vector2(0, ROW_H)
 		b.clip_text = true
 		ItemIcons.apply16(b, str(id))

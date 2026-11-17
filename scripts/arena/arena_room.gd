@@ -15,6 +15,8 @@ const NpcScene := preload("res://scenes/npc.tscn")
 const Koopman := preload("res://scripts/arena/arena_koopman.gd")
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
 const SomArenaScript := preload("res://scripts/som/som_arena.gd")
+## Bron van MONSTER_RNG_STRIDE (RNG-stap per monster), gedeeld met SomArenaWaves.
+const WavesData := preload("res://scripts/data/arena_waves_data.gd")
 
 const HALL := "res://scenes/arena/arena_hall.tscn"
 
@@ -59,7 +61,7 @@ func monsters_active() -> bool:
 
 func add_monster(d: Dictionary, rng_seed: int = 0, hp_mult: float = 1.0) -> MapMonster:
 	var m: MapMonster = MapMonsterScript.new()
-	var seed := rng_seed if rng_seed != 0 else hash(room_id) + monsters.size() * 7919
+	var seed := rng_seed if rng_seed != 0 else hash(room_id) + monsters.size() * WavesData.MONSTER_RNG_STRIDE
 	m.setup(self, d, seed)
 	$Objects.add_child(m)
 	monsters.append(m)
@@ -296,6 +298,10 @@ func _gate_used() -> void:
 	_sync_lobby_lock()
 	if not GateLock.is_open():
 		Dialog.show_lines([GateLock.CLOSED_LINE], "")
+		return
+	# Review #487 punt D: geen arena-sync in co-op, dus de poort blijft dicht.
+	if RunScript.coop_blocked():
+		Dialog.show_lines([RunScript.COOP_CLOSED_LINE], "")
 		return
 	var arena := Host.ensure()
 	if str(arena.phase) != RunScript.PHASE_LOBBY:

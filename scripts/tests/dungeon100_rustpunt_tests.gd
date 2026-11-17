@@ -3,7 +3,7 @@ extends Node
 ## Start:  godot --path . -- --dungeon100rustpunttest [--shots=/pad/map]
 ##   De sheet laadt als 64x16, de zichtbare animatie heeft 4 frames (Nearest, lus 6-8 fps)
 ##   en het boek is niet meer getint. De verborgen grot-kampvuur-node (`vuur`) is weg.
-## Niet in de CI-matrix (tests.yml blijft onaangeroerd). Zit niet in de export (scripts/tests/*).
+## In de CI-matrix. Zit niet in de export (scripts/tests/*).
 
 const Rust := preload("res://scripts/dungeon/dungeon100_rustpunt.gd")
 
