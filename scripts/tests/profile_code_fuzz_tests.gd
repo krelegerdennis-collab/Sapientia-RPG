@@ -71,6 +71,7 @@ func _run() -> void:
 	_ruis_fuzz()
 	_roundtrip_fuzz()
 	_snelheid_tests()
+	_maxlengte_tests()
 	_eind_tests()
 	print("PROFILECODEFUZZTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -436,6 +437,74 @@ func _snelheid_tests() -> void:
 	var wit := _probeer(" ".repeat(Profiel.MAX_RAW_CHARS - 1) + "3", "corrupt")
 	check("%d tekens wit plus één cijfer netjes geweigerd" % Profiel.MAX_RAW_CHARS, wit == "")
 	print("INFO  import van %d tekens wit: %d ms" % [Profiel.MAX_RAW_CHARS, Time.get_ticks_msec() - t1])
+
+
+## MAX_CODE_LEN: te lang wordt meteen geweigerd, de langst mogelijke geldige code komt erdoor.
+func _maxlengte_tests() -> void:
+	var lang := ""
+	for _i in 4096:
+		lang += Profiel.CODE_ALFABET[_rng.randi_range(0, 30)]
+	var t0 := Time.get_ticks_usec()
+	var snel: Dictionary = _p.import_code(lang)
+	var us := Time.get_ticks_usec() - t0
+	print("INFO  weigering van 4096 tekens: %d us" % us)
+	check("4096 tekens geweigerd als too_long", snel.get("ok") == false and snel.get("reason") == "too_long" and str(snel.get("message", "")) == str(Profiel.MELDING["too_long"]))
+	check("4096 tekens geweigerd binnen 50 ms (%d us)" % us, us < 50000)
+	_verwacht("4096 tekens: profiel blijft heel", lang, "too_long")
+	_verwacht("MAX_CODE_LEN + 1 tekens", "3".repeat(Profiel.MAX_CODE_LEN + 1), "too_long")
+	_verwacht("MAX_CODE_LEN + 1 tekens met spaties ertussen", _rommel_opmaak("3".repeat(Profiel.MAX_CODE_LEN + 1)), "too_long")
+	var grens := _probeer("3".repeat(Profiel.MAX_CODE_LEN), "*")
+	check("precies MAX_CODE_LEN tekens gaat door de lengtecheck%s" % ("" if grens == "" else " (%s)" % grens), grens == "" and _geweigerd[-1] != "too_long")
+	# Langst mogelijke geldige code: alles vol, slecht comprimeerbare id's; neem de langste van 40.
+	var langste_doc: Dictionary = {}
+	var langste := ""
+	for _r in 40:
+		var doc := _vol_document()
+		var c := str(Profiel.encode_profile_code(doc).get("code", ""))
+		if c.length() > langste.length():
+			langste = c
+			langste_doc = doc
+	var json_len := JSON.stringify(langste_doc).to_utf8_buffer().size()
+	var ruis := _rng_bytes(json_len)
+	var grens_tekens := ceili((9 + ruis.compress(FileAccess.COMPRESSION_DEFLATE).size()) * 8.0 / (log(31.0) / log(2.0)))
+	print("INFO  langste geldige code %d tekens (JSON %d bytes, bovengrens %d, MAX_CODE_LEN %d)" % [langste.length(), json_len, grens_tekens, Profiel.MAX_CODE_LEN])
+	check("langste geldige code is gemaakt", langste != "")
+	check("bovengrens (ongecomprimeerbaar) %d past onder MAX_CODE_LEN" % grens_tekens, grens_tekens <= Profiel.MAX_CODE_LEN)
+	_verwacht("langst mogelijke geldige code (%d tekens)" % langste.length(), langste, "OK")
+	var r := _probeer(langste, "OK")
+	check("langste code: import → export gelijk", r == "" and _p.document() == langste_doc and str(_p.export_code().get("code", "")) == langste)
+	_herstel()
+
+
+## Grootste geldige document: 3 slots, 5 letters, langste klasse, alles op max, lijsten vol met 16 tekens.
+func _vol_document() -> Dictionary:
+	var tekens := "abcdefghijklmnopqrstuvwxyz0123456789_"
+	var slots: Array = []
+	for i in Profiel.SLOT_COUNT:
+		var look := {}
+		for k in Profiel.LOOK_KEYS:
+			look[k] = int(Profiel.LOOK_MAX[k])
+		var lijsten: Array = []
+		for n in [Profiel.MAX_UNLOCKS, Profiel.MAX_GRANTS]:
+			var ids: Array = []
+			while ids.size() < n:
+				var id := ""
+				for _j in Profiel.MAX_UNLOCK_LEN:
+					id += tekens[_rng.randi_range(0, tekens.length() - 1)]
+				if not (id in ids):
+					ids.append(id)
+			lijsten.append(ids)
+		slots.append({
+			"uid": "%08x" % (0x10000000 + i * 0x01111111 + _rng.randi_range(0, 0xFFFFF)),
+			"name": ["Abcde", "Fghij", "Klmno"][i],
+			"class": ["psytech", "warrior", "psytech"][i],
+			"look": look,
+			"profile_exp": Profiel.MAX_PROFILE_EXP,
+			"unlocks": lijsten[0],
+			"stats_seen": {"best_floor": Profiel.MAX_BEST_FLOOR, "runs": Profiel.MAX_RUNS},
+			"applied_grants": lijsten[1],
+		})
+	return {"version": 1, "slots": slots}
 
 
 func _eind_tests() -> void:
