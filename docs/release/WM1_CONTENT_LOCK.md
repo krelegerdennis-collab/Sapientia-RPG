@@ -459,7 +459,7 @@ mag alleen bij een bugfix of een gat in de CI en mag geen bestaande suite wijzig
 ### 4.4 Uitzonderingen en lock-wijziging
 
 Een uitzondering op de lock is alleen geldig als Dennis dat schriftelijk zegt in de PR of het issue. Zo'n PR
-past ook dit document aan (sectie 2 en de lock-cijfers), zodat de inventaris klopt met `main`. Een PR die iets
+past ook dit document aan (sectie 2 en de lock-cijfers), zodat de inventaris klopt met de freeze-basis `f76aa715` (wm1-freeze). Een PR die iets
 toevoegt dat hier niet staat en dit document niet aanpast, wordt geweigerd.
 
 ### 4.5 Hoe een reviewer de lock controleert
