@@ -32,7 +32,7 @@ jobs:
                 wilgendaltest, huisdrawtest, huispixeltest, questtest, tutorialtest, battlesimtest, echotest, castjointest,
                 muziektest, sessielogtest, sessielogcoretest, locktest, swinglocktest, dodgetest, chaintest, chainfeeltest, t26sheettest, chargetest, staggertest, perfectdodgetest, pdfollowuptest, nettest, netsynctest, coope2etest, bossrespawntest, bookpointawaittest, wm1qasweeptest, arenawavesfollowuptest,
                 openingtest, partytest, savetest, savefuzztest, savestresstest, saveroundtriptest, saverobusttest, musictest, grotlayouttest, held24test,
-                rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
+                rekruuttest, balansarchief1test, somroomstest, cutscenetest, wmdeathtest, coophosttest,
                 koopmantest, testmodustest, telegraphtest, roottest,
                 formuletest, battlesimenemytest, combatbugstest, gqzonnevlamscrolltest, perfprobetest, huiscollisiontest,
                 studiourltest, gategaptest, woudgrondtest, golemstorytest, statemachinetest, driftbgtest,
