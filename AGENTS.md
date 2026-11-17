@@ -52,7 +52,8 @@ GODOT=$GODOT .github/scripts/run_suite.sh codextest
 XDG_DATA_HOME=/tmp/xdg_codex xvfb-run -a $GODOT --rendering-driver opengl3 --path . -- --codextest --shots=/tmp/shots
 ```
 
-Suites (v0.18, aantallen PASS ter referentie):
+Suites (aantallen PASS ter referentie uit v0.18; `–` = nog geen referentie, de baseline volgt na de freeze, zie RC-audit F1.5).
+De tabel volgt de matrix in `.github/workflows/tests.yml`; `--relaytest` draait daar als eigen job.
 
 | suite | script | PASS |
 |---|---|---|
@@ -70,7 +71,6 @@ Suites (v0.18, aantallen PASS ter referentie):
 | `--checkpointtest` | `scripts/tests/checkpoint_tests.gd` | 65 |
 | `--dungeon100gentest` | `scripts/tests/dungeon100_generator_tests.gd` | 58 |
 
-Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`tools/battlesim/`) schrijft `docs/BATTLE_BALANCE_REPORT.md`; een kleine vaste-seed steekproef zit in `--autotest`.
 | `--dungeon100schaaltest` | `scripts/tests/dungeon100_schaal_tests.gd` | 78 |
 | `--dungeon100regelstest` | `scripts/tests/dungeon100_tests.gd` | 72 |
 | `--dungeon100integratietest` | `scripts/tests/dungeon100_integratie_tests.gd` | 41 |
@@ -107,6 +107,93 @@ Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`to
 | `--sessiefixtest` | `scripts/tests/sessiefix_tests.gd` | 30 |
 | `--wm1releasetest` | `scripts/tests/wm1_release_tests.gd` | 102 |
 | `--rcchecktest` | `scripts/tests/rc_check_tests.gd` | 97 |
+| `--androidbacktest` | `scripts/tests/android_back_tests.gd` | – |
+| `--archief2test` | `scripts/tests/archief2_tests.gd` | – |
+| `--arenatest` | `scripts/tests/arena_tests.gd` | – |
+| `--arenawavesfollowuptest` | `scripts/tests/arena_waves_followup_tests.gd` | – |
+| `--arenawavestest` | `scripts/tests/arena_waves_tests.gd` | – |
+| `--balansarchief1test` | `scripts/tests/balans_archief1_tests.gd` | – |
+| `--battlesimenemytest` | `scripts/tests/battlesim_enemy_tests.gd` | – |
+| `--berggrottest` | `scripts/tests/berggrot_tests.gd` | – |
+| `--bookpointawaittest` | `scripts/tests/book_point_await_tests.gd` | – |
+| `--bossphasetest` | `scripts/tests/boss_phase_tests.gd` | – |
+| `--bossrespawntest` | `scripts/tests/boss_respawn_tests.gd` | – |
+| `--castjointest` | `scripts/tests/cast_join_tests.gd` | – |
+| `--catalogustest` | `scripts/tests/catalogus_tests.gd` | – |
+| `--chainfeeltest` | `scripts/tests/chain_feel_tests.gd` | – |
+| `--chaintest` | `scripts/tests/chain_tests.gd` | – |
+| `--chargetest` | `scripts/tests/charge_tests.gd` | – |
+| `--combatbugstest` | `scripts/tests/combat_bugs_tests.gd` | – |
+| `--coope2etest` | `scripts/tests/coop_e2e_tests.gd` | – |
+| `--coophosttest` | `scripts/tests/coop_host_tests.gd` | – |
+| `--cutscenetest` | `scripts/tests/worldmap_cutscene_tests.gd` | – |
+| `--dodgetest` | `scripts/tests/dodge_tests.gd` | – |
+| `--driftbgtest` | `scripts/tests/drift_bg_tests.gd` | – |
+| `--dungeon100rustpunttest` | `scripts/tests/dungeon100_rustpunt_tests.gd` | – |
+| `--f6uxtest` | `scripts/tests/f6_ux_tests.gd` | – |
+| `--f6uxtest2` | `scripts/tests/f6_ux2_tests.gd` | – |
+| `--formuletest` | `scripts/tests/formule_tests.gd` | – |
+| `--fusietest` | `scripts/tests/fusie_tests.gd` | – |
+| `--gamefeelfase1test` | `scripts/tests/gamefeel_fase1_tests.gd` | – |
+| `--gamefeelfase2test` | `scripts/tests/gamefeel_fase2_tests.gd` | – |
+| `--gamefeeltest` | `scripts/tests/gamefeel_tests.gd` | – |
+| `--gategaptest` | `scripts/tests/gate_gap_tests.gd` | – |
+| `--golemactionsimtest` | `scripts/tests/golem_actionsim_tests.gd` | – |
+| `--golemactiontest` | `scripts/tests/golem_action_tests.gd` | – |
+| `--golemarenatest` | `scripts/tests/golem_arena_tests.gd` | – |
+| `--golemstorytest` | `scripts/tests/golem_story_tests.gd` | – |
+| `--golemzichtbaartest` | `scripts/tests/golem_zichtbaar_tests.gd` | – |
+| `--gqzonnevlamscrolltest` | `scripts/tests/gq_zonnevlam_scroll_tests.gd` | – |
+| `--grotlayouttest` | `scripts/tests/grot_layout_tests.gd` | – |
+| `--hangertest` | `scripts/tests/hanger_tests.gd` | – |
+| `--hd2dtest` | `scripts/tests/hd2d_tests.gd` | – |
+| `--held24test` | `scripts/tests/held24_tests.gd` | – |
+| `--hudtest` | `scripts/tests/hud_tests.gd` | – |
+| `--huiscollisiontest` | `scripts/tests/huis_collision_tests.gd` | – |
+| `--huisdrawtest` | `scripts/tests/huis_draw_calls_tests.gd` | – |
+| `--huispixeltest` | `scripts/tests/huis_pixel_tests.gd` | – |
+| `--inventorytest` | `scripts/tests/inventory_tests.gd` | – |
+| `--launchertest` | `scripts/tests/launcher_icon_tests.gd` | – |
+| `--lichtpropstest` | `scripts/tests/lichtprops_tests.gd` | – |
+| `--lifecycletest` | `scripts/tests/lifecycle_tests.gd` | – |
+| `--locktest` | `scripts/tests/lock_tests.gd` | – |
+| `--magentabangtest` | `scripts/tests/magenta_bang_tests.gd` | – |
+| `--musictest` | `scripts/tests/music_tests.gd` | – |
+| `--muziektest` | `scripts/tests/muziek_tests.gd` | – |
+| `--netsynctest` | `scripts/tests/net_sync_tests.gd` | – |
+| `--nettest` | `scripts/tests/net_tests.gd` | – |
+| `--openingtest` | `scripts/tests/opening_tests.gd` | – |
+| `--partytest` | `scripts/tests/party_tests.gd` | – |
+| `--pdfollowuptest` | `scripts/tests/pd_followup_tests.gd` | – |
+| `--perfectdodgetest` | `scripts/tests/perfect_dodge_tests.gd` | – |
+| `--playtestkittest` | `scripts/tests/playtest_kit_tests.gd` | – |
+| `--pvptest` | `pvp/tests/pvp_tests.gd` | – |
+| `--rekruuttest` | `scripts/tests/rekruut_tests.gd` | – |
+| `--roottest` | `scripts/tests/root_tests.gd` | – |
+| `--runknoptest` | `scripts/tests/run_knop_kamers_tests.gd` | – |
+| `--savefuzztest` | `scripts/tests/save_fuzz_tests.gd` | – |
+| `--saveroundtriptest` | `scripts/tests/save_roundtrip_tests.gd` | – |
+| `--savetest` | `scripts/tests/save_tests.gd` | – |
+| `--sessielogcoretest` | `scripts/tests/sessielog_core_tests.gd` | – |
+| `--sessielogtest` | `scripts/tests/sessielog_tests.gd` | – |
+| `--somroomstest` | `scripts/tests/som_rooms_tests.gd` | – |
+| `--spiegeltest` | `scripts/tests/spiegel_tests.gd` | – |
+| `--staggertest` | `scripts/tests/stagger_tests.gd` | – |
+| `--studiourltest` | `scripts/tests/studio_url_tests.gd` | – |
+| `--swinglocktest` | `scripts/tests/swing_lock_tests.gd` | – |
+| `--t26sheettest` | `scripts/tests/t26_sheet_tests.gd` | – |
+| `--telegraphtest` | `scripts/tests/telegraph_tests.gd` | – |
+| `--updatetest` | `scripts/tests/todo_update_tests.gd` | – |
+| `--warperkamertest` | `scripts/tests/warper_kamer_tests.gd` | – |
+| `--wilgendaltest` | `scripts/tests/wilgendal_tests.gd` | – |
+| `--wm1balanstest` | `scripts/tests/wm1_balans_tests.gd` | – |
+| `--wm1dekkingtest` | `scripts/tests/wm1_dekking_tests.gd` | – |
+| `--wm1f3stabilitytest` | `scripts/tests/wm1_f3_stability_tests.gd` | – |
+| `--wm1qasweeptest` | `scripts/tests/wm1_qa_sweep_tests.gd` | – |
+| `--wm1storytexttest` | `scripts/tests/wm1_storytext_tests.gd` | – |
+| `--woudgrondtest` | `scripts/tests/woud_grond_tests.gd` | – |
+
+Balans (geen test): `-- --battlesim [--seed=N] [--fights=N] [--only=id,id]` (`tools/battlesim/`) schrijft `docs/BATTLE_BALANCE_REPORT.md`; een kleine vaste-seed steekproef zit in `--autotest`.
 
 Balans per run (CSV, geen test): `-- --battlesim --party=dennis:5,noor:5 --enemy=all|enc<N>|<groep-id>|a+b --runs=N --seed=S --policy=simpel`
 schrijft `user://sim/battlesim_<policy>_s<seed>.csv`; `python3 tools/battlesim/rapport.py [csv|map]` geeft winrate, mediaan beurten en de zwaarste groepen.
