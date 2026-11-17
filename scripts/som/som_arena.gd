@@ -646,6 +646,12 @@ var _tick_acc: float:
 var _sim_anims: Array = []
 ## Input van dit frame, verbruikt door de eerstvolgende stap (zelfde volgorde als voorheen).
 var _pending := {"switch": false, "attack": false, "cast": false, "dodge": false}
+## Framerate-eerlijkheid van de meter: input wordt per frame gelezen, dus bij een frame van n stappen kan
+## een volle meter tot n-1 stappen onopgemerkt blijven (30 fps: 1 stap per slag, en dat telt op).
+## _full_ticks = stappen dat de meter al vol is; _input_frame_ticks = stappen van het frame waarin de input
+## gelezen werd (vorige advance()). Bij 60 fps (of step_ticks/co-op) is dat 1, dus geen correctie.
+var _full_ticks := 0
+var _input_frame_ticks := 1
 
 
 func _process(delta: float) -> void:
@@ -688,6 +694,8 @@ func advance(delta: float) -> int:
 	var n := clock.frames_to_ticks(delta)
 	for i in n:
 		sim_step()
+	if n > 0:
+		_input_frame_ticks = n
 	return n
 
 
@@ -724,6 +732,7 @@ func sim_step() -> void:
 		target_lock.tick(dt)
 	swing_lock = maxf(0.0, swing_lock - dt)
 	charge = CombatSim.charge_after(charge, swing_lock, SomData.CHARGE_AFTER_ANIM, SomData.CHARGE_TIME, dt)
+	_full_ticks = _full_ticks + 1 if charge >= 1.0 else 0
 	CombatSim.tick_down(iframes, dt)
 	_tick_chain()
 	if _pending["switch"]:
@@ -740,6 +749,10 @@ func sim_step() -> void:
 		attack()
 		if Settings.action_battles() and is_alive(active_id):
 			heavy_hold[active_id] = 0          # indrukken start de vasthoud-teller
+	if _ai_heavy.has(active_id):
+		# held werd bestuurd terwijl zijn bondgenoot-AI een zware slag oplaadde (wissel/active_id gezet):
+		# die AI-lading hoort bij het bondgenoot-lichaam, niet loslaten als slag van de speler.
+		heavy_cancel(active_id)
 	heavy_tick(active_id, bool(_pending.get("hold", false)), player, 1.0)
 	if _pending["cast"]:
 		_pending["cast"] = false
@@ -802,8 +815,9 @@ func _drive(anim: Node) -> Node:
 	return anim
 
 
-## Tests/sim: n stappen zonder frametijd.
+## Tests/sim: n stappen zonder frametijd (input per stap: geen framecorrectie).
 func step_ticks(n: int) -> void:
+	_input_frame_ticks = 1
 	for i in n:
 		sim_step()
 
@@ -859,9 +873,18 @@ func attack() -> int:
 	if step >= 0:
 		mult *= SomChainData.damage_mult(step)
 	_full_swing = charge >= 1.0
-	charge = 0.0
+	charge = _frame_lag_charge()
 	swing_lock = _anim_seconds_def(active_id, _attack_def(active_id, step))
 	return _swing(active_id, player, mult, step)
+
+
+## Startwaarde van de meter na een slag: de stappen die de volle meter in het vorige (lange) frame al
+## onopgemerkt vol stond, tellen mee (max. n-1). Zo loopt 30 fps niet elke slag een stap achter op 60 fps.
+## 60 fps / step_ticks: altijd 0.0 (gelijk aan vroeger). _full_ticks telt de huidige stap mee, dus -2.
+func _frame_lag_charge() -> float:
+	var lag := clampi(_full_ticks - 2, 0, _input_frame_ticks - 1)
+	_full_ticks = 0
+	return float(lag) * TICK_DT / SomData.CHARGE_TIME
 
 
 ## Slag van elke actor via de keten (bondgenoot-AI, co-op-peer). base_mult = meter/vaste multiplier.
