@@ -79,7 +79,7 @@ Deze tests lezen de **tekst** van `battle.gd`. Code die verhuist kan ze breken, 
 ## 1a. Stand na #450, #472 en #501 (FEIT, nagekeken 17-11 op `9a87280`)
 
 - **battle.gd is niet veranderd** sinds `39204468`: nog steeds 2531 regels, laatste wijziging `4e96b78` (#410). Alle analyse in §1 blijft geldig.
-- **#450** (stagger-meter, `f19ff387`) en **#472** (perfect dodge, `8d614deb`) zaten al in `39204468`. Ze raken alleen Action-bestanden (`scripts/som/*`, `scripts/net/*`, eigen data en tests) en niet `scripts/battle/`.
+- **#450** (stagger-meter, `f19ff387`) en **#472** (perfect dodge, `8d614deb`) zaten al in `39204468`. Ze raken Action-bestanden (`scripts/som/*`, `scripts/net/*`, eigen data en tests) plus `game_state.gd` en `tests.yml` voor de testkoppeling, maar niets in `scripts/battle/`.
 - **#501** (finishers Dax en Vesper, `9dc0976a`) kwam erna, maar wijzigt alleen twee PNG's in `assets/sprites/som/fx/`. Geen invloed op battle.gd.
 - Andere wijzigingen sinds `39204468` (14 commits) in `scripts/data/` (`som_chain_data`, `som_feel_data`, `shop_data`) en `game_state.gd` worden niet door `scripts/battle/` gebruikt.
 - **Tekstankers** staan er nog allemaal in battle.gd: `battle_label`, `s25_check`, `_pp_on = PerfProbe.enabled`, `UiSfx.TARGET`, `_set_state(`, `art_fit`, `BOSS_MAX_ART_*`.
