@@ -47,4 +47,4 @@ Trigger op treffer (zelfde moment als `SomFx.slash`). Zie README in de RPG ART-d
 
 ## Tests
 
-`godot -- --chainfeeltest` (nog niet in CI-matrix; Dennis voegt `chainfeeltest` toe aan `tests.yml`).
+`godot -- --chainfeeltest` — suite `chainfeeltest` staat in de CI-matrix (`.github/workflows/tests.yml`).

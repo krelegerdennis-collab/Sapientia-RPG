@@ -3,6 +3,7 @@ extends Node
 
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const SomChainData := preload("res://scripts/data/som_chain_data.gd")
+const _SelfScript := preload("res://scripts/som/som_chain_feel.gd")
 
 var sim_driven := true
 var _anim: SomFx.Anim
@@ -17,7 +18,7 @@ static var _pools: Dictionary = {}
 
 
 static func attach(hero: Node2D, anim: SomFx.Anim, hero_id: String) -> Node:
-	var ctrl: Node = load("res://scripts/som/som_chain_feel.gd").new()
+	var ctrl: Node = _SelfScript.new()
 	ctrl.name = "SomChainAfterimage"
 	ctrl._anim = anim
 	ctrl._hero_id = hero_id
