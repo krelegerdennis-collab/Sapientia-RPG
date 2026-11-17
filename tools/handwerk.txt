@@ -1529,3 +1529,5 @@ assets/sprites/som/monsters/mosslijm_hurt.png
 assets/sprites/som/monsters/papiergeest_attack.png
 assets/sprites/som/monsters/papiergeest_death.png
 assets/sprites/som/monsters/papiergeest_hurt.png
+# F2.2 paletfix 06_assets_hd2d (RPG ART, besluit Dennis 17-11): alleen masterpalet, alpha 0/255; groups/06_assets_hd2d/repo_drop
+assets/hd2d/fx_data/light_soft_128.png
