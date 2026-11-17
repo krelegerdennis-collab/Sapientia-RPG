@@ -22,10 +22,11 @@ jobs:
       fail-fast: false
       matrix:
         suite: [autotest, menutest, hudtest, runknoptest, inventorytest, puzzletest, dungeontest, golemtest,
-                bossphasetest, golemactiontest, golemactionsimtest, golemarenatest, golemzichtbaartest,
+                bossphasetest, bossnametest, golemactiontest, golemactionsimtest, golemarenatest, golemzichtbaartest,
                 archieftest, kerntest, kernkrachttest, woudtest, woud16test, codextest,
                 checkpointtest, dungeon100gentest, dungeon100schaaltest,
-                dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest, dungeon100rustpunttest,
+                dungeon100regelstest, dungeon100integratietest, dungeon100blauwtest,
+                blauwekisttest, dungeon100bossmaptest, dungeon100rustpunttest,
                 actorsfxtest, fusietest, catalogustest, updatetest, archief2test,
                 warperkamertest, hangertest, spiegeltest, berggrottest, pvptest,
                 wilgendaltest, huisdrawtest, huispixeltest, questtest, tutorialtest, battlesimtest, echotest, castjointest,
@@ -33,7 +34,7 @@ jobs:
                 openingtest, partytest, savetest, savefuzztest, savestresstest, saveroundtriptest, saverobusttest, musictest, grotlayouttest, held24test,
                 rekruuttest, balansarchief1test, somroomstest, cutscenetest, coophosttest,
                 koopmantest, testmodustest, telegraphtest, roottest,
-                formuletest, battlesimenemytest, combatbugstest, gqzonnevlamscrolltest, perfprobetest, huiscollisiontest,
+                formuletest, battlesimenemytest, combatbugstest, combattick, gqzonnevlamscrolltest, perfprobetest, huiscollisiontest,
                 studiourltest, gategaptest, woudgrondtest, golemstorytest, statemachinetest, driftbgtest,
                 wm1bugtest, wm1openbugtest, wm1storytexttest, sessiefixtest, savehardeningtest, lifecycletest, zonetest, kasdeurtest,
                 berggrotdextest, demofixtest, combatrngtest, combatsimtest, aabtest, uxtest, uipolishtest, uxpolishtest, f6uxtest, f6uxtest2,
