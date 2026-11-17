@@ -1,6 +1,7 @@
 class_name LobbyPortraitSlot
 extends Control
 ## 36x36 co-op lobby seat: rol-lijst + 32x32 heldenportret (RPG ART).
+## Met set_look() het gebakken portret van de eigen look (PortraitBaker); bij een fout het vaste portret.
 
 const SLOT_SIZE := 36
 const PORTRAIT_POS := Vector2(2, 2)
@@ -33,6 +34,9 @@ var _portrait: TextureRect
 var _voor: TextureRect
 var _hero_id := ""
 var _role := ""
+## Look van de speler in deze stoel (dict of AvatarBlob). null = vast heldenportret.
+var _look: Variant = null
+var _source := ""
 
 
 func _ready() -> void:
@@ -71,6 +75,18 @@ func set_seat(hero_id: String, role: String) -> void:
 		_apply()
 
 
+## Eigen look tonen in plaats van het vaste portret. Lukt bakken niet: vast portret.
+func set_look(look: Variant) -> void:
+	_look = look
+	if is_node_ready():
+		_apply()
+
+
+## "baked", "hero" of "" (geen portret).
+func portrait_source() -> String:
+	return _source
+
+
 func portrait_texture() -> Texture2D:
 	return _portrait.texture if _portrait != null else null
 
@@ -93,5 +109,11 @@ func _apply() -> void:
 	var face: Texture2D = null
 	if _hero_id != "" and _PORTRAITS.has(_hero_id):
 		face = _PORTRAITS[_hero_id] as Texture2D
+	_source = "hero" if face != null else ""
+	if _look != null and _hero_id != "":
+		var baked := PortraitBaker.bake(_look)
+		if baked != null:
+			face = baked
+			_source = "baked"
 	_portrait.texture = face
 	_portrait.visible = face != null

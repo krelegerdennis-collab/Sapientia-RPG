@@ -545,6 +545,7 @@ func _add_roster_rows(host_view: bool, parent: VBoxContainer = null) -> void:
 		var portrait := LobbyPortrait.new()
 		portrait.name = "SeatPortrait%d" % slot
 		portrait.set_seat(cid, _seat_role(slot, cid))
+		portrait.set_look(_seat_look(slot))
 		row.add_child(portrait)
 		var label := UiMenu.label(prefix + who, UiStyleC.TEXT_DIM if who == "Empty" else UiStyleC.TEXT, TEXT_SIZE)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -557,6 +558,22 @@ func _seat_label(slot: int) -> String:
 	if cid == "":
 		return ""
 	return _hero_name(cid)
+
+
+## Look voor het portret: uit de seat-data (protocol v2), voor de eigen stoel anders uit
+## het hal-profiel. null = geen look, dan blijft het vaste heldenportret staan.
+func _seat_look(slot: int) -> Variant:
+	if lobby.character_at(slot) == "":
+		return null
+	for row in lobby.slots:
+		if int(row.get("slot", Protocol.NO_SLOT)) != slot:
+			continue
+		var look: Variant = row.get("look", null)
+		if look is PackedByteArray and not (look as PackedByteArray).is_empty():
+			return look
+	if slot == lobby.local_slot and hall_profile.has("look"):
+		return hall_profile["look"]
+	return null
 
 
 func _seat_role(slot: int, character_id: String) -> String:
