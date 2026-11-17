@@ -1502,3 +1502,5 @@ assets/placeholder/woud/water_oever_z.png
 assets/placeholder/woud/water_oever_zo.png
 assets/placeholder/woud/water_oever_zw.png
 assets/placeholder/woud/wegwijzer.png
+# F2.2 paletfix 09_assets_puzzle (RPG ART, besluit Dennis 17-11): alleen masterpalet, alpha 0/255; groups/09_assets_puzzle/repo_drop
+assets/puzzle/los_boek.png
