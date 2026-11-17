@@ -30,21 +30,23 @@ Gemeten op `61986e9`. Een afwijking na de freeze zonder lock-wijziging is een re
 
 | Tabel | Aantal | Bron |
 |---|---:|---|
-| Kaartscènes in `scenes/maps/` | 48 (46 in de speelroute, 2 dev-only: H1) | `scenes/maps/*.tscn` |
+| Kaartscènes in `scenes/maps/` | 50 (48 in de speelroute, 2 dev-only: H1) | `scenes/maps/*.tscn` |
 | Vijanden in `GameData.ENEMIES` | 26 | `scripts/data/game_data.gd` |
 | Berggrot-monsters (apart van ENEMIES) | 3 | `scripts/data/berggrot_data.gd` (`MONSTERS`) |
 | Diepe Grot-bazen (verdiepingen) | 12 (10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 99) | `scripts/data/dungeon100_scaling.gd` (`BOSSES`) |
 | Helden | 5 (Dax, Vesper, Seren, Kael Voss, Orion) | `GameData.HEROES` |
-| Items (`ITEMS`) / sleutelvoorwerpen / uitrusting | 50 / 4 / 85 | `game_data.gd` |
+| Items (`ITEMS`) / sleutelvoorwerpen / uitrusting | 53 / 4 / 85 | `game_data.gd` |
 | Blauwe-kist-uitrusting (Diepe Grot) | 36 | `scripts/data/grade_gear.gd` |
 | Spreuken | 81 (21 / 20 / 20 / 20 per grade 1-4) | `scripts/data/spells.gd` |
-| Codex-soorten / Codex-vaardigheden | 18 / 29 | `scripts/data/codex_data.gd` |
+| Codex-soorten / Codex-vaardigheden | 21 / 32 | `scripts/data/codex_data.gd` |
 | Kernfragmenten / kerngevechtsvaardigheden / wereldvaardigheden | 2 / 1 / 2 | `scripts/data/kern_data.gd` |
 | Opdrachten (6 hoofd, 1 zij) / acts in de questlog | 7 / 6 (act 3-6 "later") | `data/quests.json` |
-| Story-events | 58 | `scripts/data/story_data.gd` (`EVENTS`) |
+| Story-events | 62 | `scripts/data/story_data.gd` (`EVENTS`) |
 | BGM-tracks in het manifest / met bestand | 24 / 13 | `assets/audio/audio_manifest.json`, `assets/audio/bgm/` |
 | SFX in het manifest / ontbrekende bestanden | 99 / 0 (allemaal placeholders) | `assets/audio/audio_manifest.json` |
-| `TODO(design)` en `TODO(verhaal)` in WM1-code (zonder tests) | 56 | `rg "TODO\((design\|verhaal)" scripts world_warper pvp` |
+| `TODO(design)` en `TODO(verhaal)` in WM1-code (zonder tests) | 49 | `rg "TODO\((design\|verhaal)" scripts world_warper pvp` |
+
+Hergeteld op `f76aa715` (wm1-freeze), 17-11-2026 (F1.6).
 
 ## 1. Wat WM1 is
 
@@ -318,7 +320,7 @@ Alle items staan in `scripts/data/game_data.gd` (`ITEMS`, `KEY_ITEMS`, `EQUIPMEN
 - **Kern en wereldvaardigheden:** Golem Core `golemkern` geeft Core Power `kernslag` (gevecht) en `zware_blokken` en
   `kernvuur` (veld); Living Core `levenskern` geeft alleen zijn zin (`scripts/data/kern_data.gd`,
   `scripts/kern/`).
-- **Codex:** 18 vangbare soorten, 29 bondgenootvaardigheden, fusie (`scripts/data/codex_data.gd`,
+- **Codex:** 21 vangbare soorten, 32 bondgenootvaardigheden, fusie (`scripts/data/codex_data.gd`,
   `scripts/battle/codex_battle.gd`, `scripts/battle/codex_ally.gd`). Max. 12 pagina's, 1 Codex-monster mee in het gevecht.
 - **Vijandvaardigheden:** `bind`, `poison`, `charge`, `drain`, `pull` (Archief 2) en per vijand een eigen skill-tabel
   (`GameData.ENEMIES`).
