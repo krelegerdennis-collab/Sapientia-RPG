@@ -26,7 +26,7 @@ Dit document hoort bij `docs/release/WM1_RELEASE_CHECKLIST.md` (de acht fases; d
 
 ### Lock-cijfers (om drift te zien)
 
-Gemeten op `61986e9`. Een afwijking na de freeze zonder lock-wijziging is een regel-overtreding.
+Gemeten op `f76aa715` (wm1-freeze). Een afwijking na de freeze zonder lock-wijziging is een regel-overtreding.
 
 | Tabel | Aantal | Bron |
 |---|---:|---|
@@ -44,7 +44,7 @@ Gemeten op `61986e9`. Een afwijking na de freeze zonder lock-wijziging is een re
 | Story-events | 62 | `scripts/data/story_data.gd` (`EVENTS`) |
 | BGM-tracks in het manifest / met bestand | 24 / 13 | `assets/audio/audio_manifest.json`, `assets/audio/bgm/` |
 | SFX in het manifest / ontbrekende bestanden | 99 / 0 (allemaal placeholders) | `assets/audio/audio_manifest.json` |
-| `TODO(design)` en `TODO(verhaal)` in WM1-code (zonder tests) | 49 | `rg "TODO\((design\|verhaal)" scripts world_warper pvp` |
+| `TODO(design)` en `TODO(verhaal)` in WM1-code (zonder tests) | 51 | `git grep -n -E 'TODO\((design\|verhaal)' -- scripts world_warper pvp` (zonder `scripts/tests/`) |
 
 Hergeteld op `f76aa715` (wm1-freeze), 17-11-2026 (F1.6).
 
