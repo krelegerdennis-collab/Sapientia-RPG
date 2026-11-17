@@ -231,6 +231,12 @@ func _finish() -> void:
 	if _player != null and is_instance_valid(_player) and "input_locked" in _player:
 		if Story.idle() and not Dialog.is_open and not GameState.scene_busy():
 			_player.input_locked = false
+		elif Dialog.is_open and Story.idle():
+			# tekstvak (bv. respawn-bericht) nog open: ontgrendel zodra het dicht is
+			var p := _player
+			Dialog.finished.connect(func():
+				if is_instance_valid(p) and Story.idle() and not GameState.scene_busy():
+					p.input_locked = false, CONNECT_ONE_SHOT)
 	if _map != null and is_instance_valid(_map) and _map.has_method("_play_map_music"):
 		_map._play_map_music()
 	_sharp_off()
