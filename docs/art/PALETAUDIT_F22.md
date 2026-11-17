@@ -1,12 +1,12 @@
 # Paletaudit F2.2 — meting met `--negeer '**/*_n.png'`
 
-**Status:** rapport van een read-only meting. Geen art gewijzigd, geen commit, geen PR.
+**Status:** rapport van een read-only meting. Geen art gewijzigd; RPG FORGE zette dit rapport via een docs-PR in de repo.
 **Bron:** `origin/finish/wm1` @ `cd491d3a7bd8a5531852ba1165f0b70f8d70fd64` (17 nov 2026, 13:19 Europe/Amsterdam).
 **Tools:** `palet_check.py` en `meet.py` van deze head, inclusief `--negeer` uit PR #505 (gemerged als `47e3daf9661af05aee732843d183ea1c7e903c6a`, 17 nov 2026, 11:55 Europe/Amsterdam). Geen losse #505-branch gebruikt.
 **Palet:** `docs/art/masterpalet.gpl` — 73 kleuren.
 **Export:** git archive van alleen `art/`, `world_warper/art/`, `assets/`, `docs/art/` en `tools/art_audit/`. `wacht/wm2/` is niet uitgepakt en niet gelezen.
 **Meting:** 17 nov 2026, 15:05 Europe/Amsterdam.
-**Voorgesteld pad in de repo:** `docs/art/PALETAUDIT_F22.md` (dit bestand staat nu alleen in `/workspace/art_f22/run2/`; de repo is niet aangepast).
+**Pad in de repo:** `docs/art/PALETAUDIT_F22.md` (bron: HANDOFF van RPG ART, `/workspace/art_f22/run2/`).
 
 Afwijkingen niet aangepast; wacht op besluit Dennis.
 
@@ -547,7 +547,7 @@ Volledige lijst paletfouten in `assets/` (reden per bestand):
 ## Wat er níet is gedaan
 
 - Geen art gewijzigd.
-- Geen repo-bestand aangepast, geen commit, geen push, geen PR.
+- Tijdens de meting geen repo-bestand aangepast; alleen dit rapport is daarna als docs-PR toegevoegd.
 - `wacht/wm2/` niet gelezen.
 
 Ruwe logs en CSV’s: `/workspace/art_f22/run2/logs/` en `/workspace/art_f22/run2/out/` (inclusief `afwijkingen_alle.csv`, 643 rijen). Telefoon-samenvatting: `/workspace/art_f22/run2/f22_run2_samenvatting.png`.
