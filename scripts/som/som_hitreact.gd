@@ -114,7 +114,8 @@ static func tick(m: Node, delta: float) -> void:
 	if st["dir"] != Vector2i.ZERO:
 		var dir := Vector2(st["dir"]).normalized()
 		var nudge := SomGameFeelData.nudge_px(weight, t_ms)
-		nudge_v = dir * nudge
+		# Hele pixels (pixel-perfect), ook diagonaal: geen sub-pixel jitter.
+		nudge_v = (dir * nudge).round()
 	m.sprite.offset = Vector2(off0.x + nudge_v.x, off_y + nudge_v.y)
 	if not _has_hurt_sheet(m):
 		_apply_shader_flash(m, st, 1.0 if t_ms < SomData.HIT_FLASH_CONTACT * 1000.0 else 0.0)
