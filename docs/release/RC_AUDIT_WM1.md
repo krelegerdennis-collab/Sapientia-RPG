@@ -4,13 +4,15 @@ Doel: vaststellen wat er vóór de interne RC (F8, uiterlijk 20 nov 2026, **niet
 Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 
 - Basis: `finish/wm1` op `0fb6334` (#476, 15 nov 2026). Checklist: `docs/release/WM1_RELEASE_CHECKLIST.md` (93 punten).
-- **Bijgewerkt (klus 18, 17 nov 2026):** elke regel opnieuw nagelopen op `finish/wm1` `9a87280` (#498). Daartussen gemerged:
-  #465-#467, #475, #477-#486, #488-#501. GitHub (labels, tags, issues, check-runs, Actions) was in deze sessie niet bereikbaar;
-  regels die daarop leunen blijven zoals ze waren en staan waar nodig als ONVERIFIED.
+- **Bijgewerkt (klus 19, 17 nov 2026, middag):** nagelopen op `finish/wm1` `d8a38e41` (#508). Sinds klus 18 gemerged: #502-#508
+  (o.a. #506 placeholders Wilgendal, #507 drie suites in CI, #508 balansmeting `WM1_BALANCE_REPORT_RC.md`). Eerder nog #465-#501.
+  GitHub (labels, tags, issues, check-runs, Actions) was in sessie klus 18 niet bereikbaar; regels die daarop leunen staan waar nodig
+  als ONVERIFIED.
 - Bronnen: code en data in de repo, GitHub REST (labels, tags, issues, PR's, check-runs), `tools/art_audit/palet_check.py` (alleen lezen).
 - Automatische controles staan in de nieuwe suite `--rcchecktest` (`scripts/tests/rc_check_tests.gd`). Bekende OPEN-punten
   geven daar een regel `OPEN  [id] ...` en maken de suite niet rood (zie onderaan).
-- Statussen: **KLAAR** (bewijs in code, suite of PR), **OPEN** (er mist iets), **NIET TE CHECKEN** (handmatig, op toestel of proces).
+- Statussen: **KLAAR** (bewijs in code, suite of PR), **KLAAR (meting)** en **KLAAR (tussenmeting)** (tel mee als KLAAR in de voortgangstabellen),
+  **OPEN** (er mist iets), **NIET TE CHECKEN** (handmatig, op toestel of proces).
 - Grootte: S (uren), M (een dag), L (meerdere dagen of afhankelijk van een ander). "Ja Dennis" = vraagt een besluit over balans,
   nieuwe mechanic, bestaande test, workflow of publicatie (of een ander besluit dat alleen Dennis neemt; dat staat erbij).
 
@@ -18,27 +20,27 @@ Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 35 |
-| OPEN | 29 |
+| KLAAR | 41 |
+| OPEN | 23 |
 | NIET TE CHECKEN | 29 |
 | **Totaal** | **93** |
 
-Voortgang per fase (telling van de detailrijen hieronder, 17 nov):
+Voortgang per fase (telling van de detailrijen hieronder, 17 nov middag; **KLAAR (meting)** en **KLAAR (tussenmeting)** tellen als KLAAR):
 
 | Fase | KLAAR | OPEN | NIET TE CHECKEN | Gate |
 |---|---:|---:|---:|---|
 | 1 Freeze | 2 | 5 | 0 | OPEN |
-| 2 Art op palet | 2 | 4 | 2 | OPEN |
-| 3 Stabiliteit | 8 | 1 | 8 | OPEN |
+| 2 Art op palet | 3 | 3 | 2 | OPEN |
+| 3 Stabiliteit | 9 | 0 | 8 | OPEN |
 | 4 S25-performance | 2 | 1 | 4 | OPEN |
-| 5 Balans | 1 | 6 | 1 | OPEN |
+| 5 Balans | 5 | 2 | 1 | OPEN |
 | 6 UX-polish | 15 | 5 | 4 | OPEN |
 | 7 Playtest en fixronde | 0 | 3 | 5 | OPEN |
 | 8 Release candidate | 5 | 4 | 5 | OPEN |
-| **Totaal** | **35** | **29** | **29** | |
+| **Totaal** | **41** | **23** | **29** | |
 
-Sinds de eerste audit (15 nov): F3.9, F6.14, F6.15, F6.17, F8.1, F8.2, F8.4 en F8.8 naar KLAAR. F1.4 en F8.3 terug naar OPEN
-(nieuwe bevinding, zie de rij).
+Sinds de eerste audit (15 nov): F2.5, F3.2, F3.9, F5.2, F5.4, F5.5, F5.6, F6.14, F6.15, F6.17, F8.1, F8.2, F8.4 en F8.8 naar
+KLAAR (F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)). F1.4 en F8.3 terug naar OPEN (nieuwe bevinding, zie de rij).
 
 ### Top 5 OPEN op risico (voor de interne RC van 20 nov)
 
@@ -47,12 +49,12 @@ Sinds de eerste audit (15 nov): F3.9, F6.14, F6.15, F6.17, F8.1, F8.2, F8.4 en F
 | 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Verse debug-APK van de huidige `finish/wm1` (F7.1), één ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
 | 2 | F1.7 Freeze / scope | Geen freeze-commit (tag niet nagekeken: GitHub onbereikbaar deze sessie; in de repo verwijst niets naar een `wm1-freeze`). Ook na 15 nov kwamen er features bij: #475 keten-feel, #477 en #482 game-feel fase 1 en 2, #478 en #494 arena (achter `ARENA_ENABLED = false`). De RC van 20 nov is over 3 dagen. | Dennis kiest nu de freeze-commit (bijv. de head ná deze PR), Forge tagt die. Daarna tot de RC alleen `wm1-bugfix`/`wm1-polish`. | S | ja (scope, freeze-commit) |
 | 3 | F8.6 Release-APK | `build-apk` heeft nog nooit met `build_type: release` gedraaid (laatste run op deze branch: debug, `5cb270c`, 5 nov). Of de signing-secrets er staan, kan deze sessie niet zien. Een ondertekende APK is de kern van de RC. | Forge doet nu een droge release-run op de huidige head. Dan blijkt meteen of de secrets kloppen, ruim voor 20 nov. | S | nee (bestaande workflow, interne build, niet publiceren) |
-| 4 | F8.5 CI op de RC-commit | `tests.yml` draait nog steeds alleen op `pull_request` en `push` naar `main` (gecontroleerd op `9a87280`). De squash-commits op `finish/wm1` krijgen zelf geen run (op 15 nov: `0fb6334` 0 check-runs). De matrix telt nu 131 suites. | Optie a: de RC-commit testen via een draft-PR (niet mergen). Optie b: `workflow_dispatch` aan `tests.yml` toevoegen. | S | ja (b is een workflow-wijziging) |
+| 4 | F8.5 CI op de RC-commit | `tests.yml` draait nog steeds alleen op `pull_request` en `push` naar `main` (gecontroleerd op `9a87280`). De squash-commits op `finish/wm1` krijgen zelf geen run (op 15 nov: `0fb6334` 0 check-runs). De matrix telt nu 134 suites (zie F1.4). | Optie a: de RC-commit testen via een draft-PR (niet mergen). Optie b: `workflow_dispatch` aan `tests.yml` toevoegen. | S | ja (b is een workflow-wijziging) |
 | 5 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt`. LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). | Voor de interne RC: Dennis accepteert de placeholders bewust (komt in known issues). Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
 
-Net buiten de top 5 vallen: F4.2 (geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`), F5.1/F5.2 (geen doelvensters
-gekozen; de balansrapporten zijn van vóór #408/#414/#446/#450/#475/#477/#482), F8.3 (CHANGELOG mist de merges na #493)
-en F6.24 (drie World Warper-cues geven een `push_error`).
+Net buiten de top 5 vallen: F4.2 (geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`), F5.1 en F5.3 (doelvensters en
+besluit per afwijking: beide OPEN, wachten op Dennis; cijfers staan in `docs/release/WM1_BALANCE_REPORT_RC.md`, afwijkingentabel §7),
+F8.3 (CHANGELOG mist de merges na #493) en F6.24 (drie World Warper-cues geven een `push_error`).
 
 ### Verouderde tekst in de checklist (FACT, niet gerepareerd)
 
@@ -71,7 +73,7 @@ en F6.24 (drie World Warper-cues geven een `push_error`).
 | F1.1 | Lock reviewen en mergen | KLAAR | `docs/release/WM1_CONTENT_LOCK.md` staat op de branch; cuts doorgevoerd (CHANGELOG 24 okt; `scripts/data/release_flags.gd`). Het vakje zelf is niet afgevinkt. | | | |
 | F1.2 | BESLIS-punten H3/H11/H13 | KLAAR | `release_flags.gd:13-24`; suite `wm1releasetest` | | | |
 | F1.3 | Labels `wm1-*` | OPEN | Labels (REST): `wm1-bugfix` en `wm1-lock` bestaan. `wm1-polish`, `wm1-cut` en `wm1-vervanging` ontbreken. | Forge maakt de drie labels aan. | S | nee (Forge) |
-| F1.4 | CI-matrix gelijk met `game_state.gd` | OPEN | #361, #380, #400, #406, #449, #480, #488, #500; matrix nu 131 suites (`.github/workflows/tests.yml:24-41`), `relaytest` als eigen job. Nageteld 17 nov: behalve perf/sim/benchmark en `wm1playthroughtest` staan ook `blauwekisttest`, `bossnametest`, `dungeon100bossmaptest` en `combattick` niet in de matrix en worden ze door geen andere suite aangeroepen. De checklist noemt alleen perf/benchmark, `relaytest` en `wm1playthroughtest` als bewuste uitzondering. | Forge kijkt of die vier bewust buiten staan; zo niet, in de matrix (één regel in `tests.yml`). | S | ja (workflow) |
+| F1.4 | CI-matrix gelijk met `game_state.gd` | OPEN | #361, #380, #400, #406, #449, #480, #488, #500; #507 (merge `060140df`) zette `blauwekisttest`, `bossnametest` en `dungeon100bossmaptest` in de matrix (Dennis akkoord 17-11 12:06). Matrix nu 134 suites (`.github/workflows/tests.yml:24-42`), `relaytest` als eigen job. Buiten de matrix blijven perf/sim/benchmark en `wm1playthroughtest` (bewust, checklist). `combattick` is ook goedgekeurd maar staat er nog niet in: faalt lokaal op `30 fps: tijdverschil per treffer <= 3 stappen` (13/1); eerst codefix in de SoM-arena-tijdstap, test niet aanpassen. | `combattick` in de matrix zodra de suite groen is. | S | ja (workflow) |
 | F1.5 | Baseline PASS-aantallen | OPEN | Geen freeze-commit, geen baseline. De tabel in `AGENTS.md` is van v0.18. | Na de freeze de CI-samenvatting (`GITHUB_STEP_SUMMARY`) in de checklist of in een issue zetten. | S | nee |
 | F1.6 | Lock-cijfers hertellen | OPEN | Hangt aan de freeze-commit. | Hertellen na de tag; zo nodig een `wm1-lock`-PR. | S | nee |
 | F1.7 | Tag `wm1-freeze` | OPEN | Tags op 15 nov: `v0.17`-`v0.20`, `debug-*`, `coop-*`; geen `wm1-freeze` (17 nov niet opnieuw nagekeken, GitHub onbereikbaar). Features na 5 nov: zie top 5 #2. | Dennis kiest de commit, Forge tagt. Daarna alleen bugfix/polish. | S | ja (scope) |
@@ -84,7 +86,7 @@ en F6.24 (drie World Warper-cues geven een `push_error`).
 | F2.2 | Alle PNG's meten | OPEN | `palet_check.py` (15 nov, alleen lezen): 1893 PNG's, waarvan 1113 schoon en 780 buiten het palet. Van die 780 zijn er 442 HD-2D-normal maps (`*_n.png`) en 339 overige (o.a. `ui/icons` 118, `placeholder/woud` 80, `sprites/buiten` 19, `sprites/archief2` 19). `meet.py` (CSV) is niet gedraaid op `art/` en `world_warper/art/`. | `meet.py` draaien op de drie mappen. Normal maps uitsluiten of als uitzondering laten tekenen. | M | ja (uitzonderingslijst) |
 | F2.3 | CSV filteren op WM1 | OPEN | Hangt aan F2.2. | Filteren op de lock-inventaris. | M | nee |
 | F2.4 | RPG ART levert batches | OPEN | Al geleverd: #369-#372, #379, #381, #403, #411, #412. De rest hangt aan F2.3. | ART per batch, met akkoord van Dennis. | L | ja (art-akkoord) |
-| F2.5 | Placeholders in de route (H10) | OPEN | Rustpunt #375, Blauwe Kist #378 en uitgang-warper #381 zijn klaar. Het Action-HUD (slagboog, meters, ringmenu) wordt in code getekend en is niet beoordeeld. `tools/placeholders_v17.txt` heeft 12 regels zonder KLAAR/VERVANGEN: de dubbele Wilgendal-regels 79-90 (nageteld 17 nov met dezelfde regel als `rcchecktest` [F2.5]; het bestand is niet veranderd sinds 15 nov). | Dennis bekijkt het Action-HUD op het toestel en kiest "laten staan" of "ART". Forge/ART ruimt de lijst op. | S | ja (bewust laten staan) |
+| F2.5 | Placeholders in de route (H10) | KLAAR | Rustpunt #375, Blauwe Kist #378 en uitgang-warper #381 zijn klaar. #506 (merge `70f6743c`) haalde 12 dubbele Wilgendal-regels uit `tools/placeholders_v17.txt`; 0 open regels (`rcchecktest` [F2.5] PASS). Het Action-HUD (slagboog, meters, ringmenu) wordt in code getekend en is niet beoordeeld — bewuste kanttekening, geen open placeholder-regel. | | S | ja (bewust laten staan) |
 | F2.6 | Ontbrekende art melden in PR | NIET TE CHECKEN | Procesregel. | | | |
 | F2.7 | Suites na elke batch | KLAAR | CI draait alle suites op elke PR. Laatste art-PR's waren groen (bijv. #476: 122/122). | | | |
 | F2.8 | Screenshots voor/na | NIET TE CHECKEN | Handmatig. | | | |
@@ -96,7 +98,7 @@ en F6.24 (drie World Warper-cues geven een `push_error`).
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
 | F3.1 | Verse import zonder fouten | NIET TE CHECKEN | Er is geen Godot in deze sessie. CI importeert bij elke run, maar faalt niet op import-warnings. | Dennis draait lokaal `--import` en leest de uitvoer. | | |
-| F3.2 | Alle suites groen op de freeze-commit | OPEN | Er is geen freeze-commit. Op 15 nov: PR-head #476 `bb1622e` 122/122 groen, branch-commit `0fb6334` 0 check-runs (zie F8.5). CI-stand van de huidige head `9a87280` ONVERIFIED (GitHub onbereikbaar). `wm1qasweeptest` (#492) zit sinds #500 in CI; `wm1playthroughtest` (golden path) bewust niet (laatste lokale run: 591 PASS, `QA_SWEEP_WM1.md`). | Na de freeze: CI op die commit (F8.5) en `wm1playthroughtest` één keer lokaal. | S | nee |
+| F3.2 | Alle suites groen op de freeze-commit | KLAAR (tussenmeting) | Tussenmeting op `9a87280c` (nog geen freeze-commit; F1.7/F8.5 OPEN). Op 15 nov: PR-head #476 `bb1622e` 122/122 groen, branch-commit `0fb6334` 0 check-runs. `wm1qasweeptest` (#492) zit sinds #500 in CI. `--wm1playthroughtest` (golden path, bewust niet in CI): na verse `--import` op `9a87280c` gaf RPG CODE 17-11 **591 PASS / 0 FAIL / exit 0**. Eerdere 51 FAIL kwamen door ontbrekende class-cache (`MapLightingRig` parse-fout zonder `--import`). Op de freeze-commit moeten CI (F8.5) en `wm1playthroughtest` opnieuw groen zijn. | Na `wm1-freeze`: CI op die commit (F8.5) en golden path opnieuw draaien. | S | nee |
 | F3.3 | Geen `SCRIPT ERROR` | KLAAR | `.github/scripts/run_suite.sh:25,30-33` faalt erop; #476 groen. | | | |
 | F3.4 | Golden path route A en B | NIET TE CHECKEN | Handmatig. Deels gedekt door `wm1playthroughtest` (kas en berggrot, niet in CI). | | | |
 | F3.5 | Terugweg Archief 2 (H14) | NIET TE CHECKEN | Handmatig. `archief2test` raakt `leven_v1_plaat`. | | | |
@@ -236,8 +238,8 @@ Wat de suite controleert (alleen lezen):
 
 **Bekende OPEN-punten** komen als `OPEN  [id] ...` in de uitvoer. Die tellen niet als `FAIL`, zodat de suite groen kan blijven
 terwijl de bevinding zichtbaar is. Gaat zo'n punt dicht, dan wordt het een `PASS` met de melding dat dit rapport bijgewerkt moet
-worden. Nu verwacht: [F6.23], [F6.23b], [F6.24] en [F2.5]. Dicht (PASS): [F8.2] en [F8.8] sinds Job 11 (#484), [F8.4] sinds Klus 12 (#493).
-Statisch nageteld op 17 nov met de logica van de suite: geen van de vier is dicht (162 + 120 sfx-regels, 3 cues, 12 artregels).
+worden. Nu verwacht: [F6.23], [F6.23b], [F6.24]. Dicht (PASS): [F2.5] sinds #506, [F8.2] en [F8.8] sinds Job 11 (#484), [F8.4] sinds Klus 12 (#493).
+Statisch nageteld op 17 nov middag: sfx en WW-cues nog open (162 + 120 sfx-regels, 3 cues); placeholders-route is dicht.
 
 Waarom deze keuze: een rode suite in CI zou elke PR blokkeren voor punten die alleen Forge of Dennis kan oplossen
 (versie, presets, audio). Een stille suite zou de bevinding verbergen. Met `OPEN` blijft het zichtbaar in de log en in dit rapport,
