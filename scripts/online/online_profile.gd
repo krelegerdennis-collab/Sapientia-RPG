@@ -471,13 +471,16 @@ func _backup_ruw(ruw: PackedByteArray) -> String:
 	return ""
 
 
-## Geldige UTF-8, inclusief ASCII. Ongeldige reeksen gaan niet door de JSON-parser.
+## Geldige UTF-8, inclusief ASCII (RFC 3629: geen overlong, surrogaat of > U+10FFFF).
+## Ongeldige reeksen en NUL-bytes gaan niet door de JSON-parser.
 static func _utf8_ok(ruw: PackedByteArray) -> bool:
 	var i := 0
 	while i < ruw.size():
 		var c := int(ruw[i]) & 0xFF
 		var nodig := 1
-		if c <= 0x7F:
+		if c == 0x00:
+			return false
+		elif c <= 0x7F:
 			nodig = 1
 		elif c >= 0xC2 and c <= 0xDF:
 			nodig = 2
@@ -489,6 +492,13 @@ static func _utf8_ok(ruw: PackedByteArray) -> bool:
 			return false
 		if i + nodig > ruw.size():
 			return false
+		# Tweede byte begrenzen: geen overlong (E0/F0), geen surrogaat (ED), niet boven U+10FFFF (F4).
+		if nodig > 1:
+			var tweede := int(ruw[i + 1]) & 0xFF
+			if (c == 0xE0 and tweede < 0xA0) or (c == 0xED and tweede > 0x9F):
+				return false
+			if (c == 0xF0 and tweede < 0x90) or (c == 0xF4 and tweede > 0x8F):
+				return false
 		for j in range(1, nodig):
 			var volg := int(ruw[i + j]) & 0xFF
 			if volg < 0x80 or volg > 0xBF:
@@ -552,13 +562,16 @@ static func _slot_uit_json(raw: Variant) -> Dictionary:
 			return {}
 	if d.size() != toegestaan.size():
 		return {}
-	var uid := str(d.get("uid", ""))
+	# Alleen echte strings: str() maakte van uid 12345678 (getal) of naam true (bool) een geldige waarde.
+	if not (d.get("uid") is String) or not (d.get("name") is String) or not (d.get("class") is String):
+		return {}
+	var uid: String = d.get("uid")
 	if not _uid_ok(uid):
 		return {}
-	var naam := str(d.get("name", ""))
+	var naam: String = d.get("name")
 	if not _naam_ok(naam):
 		return {}
-	var klasse := str(d.get("class", ""))
+	var klasse: String = d.get("class")
 	if not CLASS_INFO.has(klasse):
 		return {}
 	if not (d.get("look") is Dictionary) or not _look_ok(d.get("look")):

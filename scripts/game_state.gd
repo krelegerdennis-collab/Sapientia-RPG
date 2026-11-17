@@ -762,6 +762,7 @@ func _ready() -> void:
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
 			["--onlineprofiletest", "res://scripts/tests/online_profile_tests.gd", "OnlineProfileTest", "onlineprofiletest"],
+			["--profilecodefuzztest", "res://scripts/tests/profile_code_fuzz_tests.gd", "ProfileCodeFuzzTest", "profilecodefuzztest"],
 			["--paperdolltest", "res://scripts/tests/paper_doll_tests.gd", "PaperDollTest", "paperdolltest"],
 			["--paperdollactionstest", "res://scripts/tests/paper_doll_actions_tests.gd", "PaperDollActionsTest", "paperdollactionstest"],
 			["--lobbyportraitslottest", "res://scripts/tests/lobby_portrait_slot_tests.gd", "LobbyPortraitSlotTest", "lobbyportraitslottest"],

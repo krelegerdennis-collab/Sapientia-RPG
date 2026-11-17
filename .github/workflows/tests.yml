@@ -39,7 +39,7 @@ jobs:
                 berggrotdextest, demofixtest, combatrngtest, combatsimtest, aabtest, uxtest, uipolishtest, uxpolishtest,
                 wm1dekkingtest, wm1releasetest, wm1f3stabilitytest, wm1balanstest, playtestkittest, telegraphcooptest,
                 coopguestsavetest, hd2dtest, lichtpropstest,
-                onlineprofiletest, protocolv2test, paperdolltest, paperdollactionstest, onlinedlsmodetest, coopdlstest, cosmeticstest, solod100guardtest,
+                onlineprofiletest, profilecodefuzztest, protocolv2test, paperdolltest, paperdollactionstest, onlinedlsmodetest, coopdlstest, cosmeticstest, solod100guardtest,
                 seatstest, revivetest, pagewardentest, rewardacktest, onlinerewardtest, coopplaytesttest, onlinelobbytest, liveseatloottest, lobbyportraitslottest, d100modesimtest, easycoopbalanstest]
     steps:
       - uses: actions/checkout@v4
