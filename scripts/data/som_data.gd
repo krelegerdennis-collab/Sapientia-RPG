@@ -7,6 +7,7 @@
 extends RefCounted
 
 const BossCore := preload("res://scripts/battle/boss_core.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 
 ## Hoofdschakelaar. false = de proef bestaat niet (geen realtime, knop op het titelscherm doet niets).
 const ENABLED := true
@@ -385,9 +386,33 @@ static func boss_party_scale(party_count: int) -> float:
 	return 1.0
 
 
-## Baas-stats voor Action (D3): BossCore.apply_boss, geen ACTION_BOSS_MULT.
+## F5.3 A4 (akkoord Dennis 18-11-2026): alleen in Action een eigen baas-ATK, Classic blijft gelijk.
+## Golem (kennis_beest) Classic ATK 23 -> Action ATK 27: --actionsim --boss-rt Lv 7 98,5% -> 72% winst
+## (doel 60-80%, seed 20261020, zie docs/combat/f53_golem_action_atk.md). Sleutel = vijand-key in GameData.ENEMIES.
+const ACTION_BOSS_ATK := {"kennis_beest": 27}
+
+
+## Vijand-key uit ACTION_BOSS_ATK waar data bij hoort, of "".
+## Expliciet: data moet een "boss"-blok hebben (ruwe vijand-data, vóór apply_boss) en hetzelfde
+## bestiarium-nummer "no" als GameData.ENEMIES[key] ("no" is per vijand uniek). Zonder "boss" of
+## zonder "no" -> "" (geen Action-ATK, gewoon apply_boss).
+static func _boss_id_of(data: Dictionary) -> String:
+	if not data.has("boss") or not data.has("no"):
+		return ""
+	var no := int(data["no"])
+	for key in ACTION_BOSS_ATK:
+		var e: Dictionary = GameData.ENEMIES.get(key, {})
+		if e.has("boss") and e.has("no") and int(e["no"]) == no:
+			return str(key)
+	return ""
+
+
+## Baas-stats voor Action (D3): BossCore.apply_boss, geen ACTION_BOSS_MULT; plus ACTION_BOSS_ATK (F5.3).
 static func action_boss_stats(data: Dictionary, party_count: int = 1) -> Dictionary:
 	var out := BossCore.apply_boss(data)
+	var bid := _boss_id_of(data)
+	if bid != "":
+		out["atk"] = int(ACTION_BOSS_ATK[bid])
 	var scale := boss_party_scale(party_count)
 	if is_equal_approx(scale, 1.0):
 		return out
