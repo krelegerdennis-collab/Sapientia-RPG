@@ -359,8 +359,9 @@ func _finish_job(job: Dictionary) -> void:
 
 
 # ---------------------------------------------------------------- spreker
-## v0.16 Wie praat er? 1) de meegegeven node, 2) de speler (zijn eigen naam), 3) een object
-## op de map met npc_name == spreker (zichtbaar). Anders null (dan geen staartje).
+## v0.16 Wie praat er? 1) de meegegeven node, 2) een object op de map met npc_name == spreker
+## (zichtbaar), 3) de speler (zijn eigen naam). Anders null (dan geen staartje).
+## NPC vóór speler: anders wijst de ballon naar de speler als zijn naam gelijk is aan een NPC.
 func _find_speaker(speaker: String, source: Node) -> Node2D:
 	if speaker == "" or not is_inside_tree() or GameState.in_battle:
 		return null
@@ -369,15 +370,14 @@ func _find_speaker(speaker: String, source: Node) -> Node2D:
 	var scene := get_tree().current_scene
 	if scene == null:
 		return null
+	var objects := scene.get_node_or_null("Objects")
+	if objects != null:
+		for n in objects.get_children():
+			if n is Node2D and n.visible and "npc_name" in n and str(n.get("npc_name")) == speaker:
+				return n
 	var p = scene.get("player") if "player" in scene else null
 	if p is Node2D and is_instance_valid(p) and speaker == GameState.player_name:
 		return p
-	var objects := scene.get_node_or_null("Objects")
-	if objects == null:
-		return null
-	for n in objects.get_children():
-		if n is Node2D and n.visible and "npc_name" in n and str(n.get("npc_name")) == speaker:
-			return n
 	return null
 
 
