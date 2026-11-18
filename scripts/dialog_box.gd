@@ -93,7 +93,7 @@ const PAD_B := 4.0
 const LINE_SPACING := 4
 ## Keuzes: tikmaat (25 hoog, ~48 dp). Korte keuzes (Yes/No, Next/Skip) staan rechtsonder onder elkaar, zoals altijd.
 ## Langere keuzes (tot 3) staan op een rij onderin het vak, zodat het vak laag blijft en de speler niet bedekt;
-## bij 4+ keuzes staan ze onder elkaar met 20 hoog.
+## bij 4+ keuzes staan ze onder elkaar met 25 hoog, of 20 als het vak anders niet past (choice_row_h).
 const CHOICE_ROW_TOUCH := 25.0
 const CHOICE_ROW_MANY := 20.0
 const CHOICE_MIN_W := 60.0
@@ -452,6 +452,19 @@ func _low_candidate(cname: String, x0: float, x1: float, ctrl: Dictionary, vs: V
 
 ## Hoogte van het vak voor alle regels (en de keuzes) bij deze breedte; minstens MIN_H.
 func needed_height(w: float) -> float:
+	var text_h := _text_height(w)
+	var h := PAD_T + text_h + PAD_B + 2.0
+	if not choices.is_empty():
+		var lay := choice_layout(w)
+		if bool(lay["horizontal"]):
+			h = maxf(h, PAD_T + text_h + float(lay["row_h"]) + CHOICE_ROW_BOTTOM)
+		else:
+			h = maxf(h, _stacked_height(text_h, float(lay["row_h"])))
+	return ceilf(maxf(MIN_H, h))
+
+
+## Hoogte van de tekstregels (zonder marges) bij vakbreedte w.
+func _text_height(w: float) -> float:
 	var font: Font = text_label.get_theme_font("font")
 	var fs: int = text_label.get_theme_font_size("font_size")
 	var lh := font.get_height(fs)
@@ -461,15 +474,12 @@ func needed_height(w: float) -> float:
 		var sz := font.get_multiline_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, tw, fs, -1,
 				TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE)
 		lines = maxi(lines, maxi(1, roundi(sz.y / lh)))
-	var text_h := lines * lh + (lines - 1) * LINE_SPACING
-	var h := PAD_T + text_h + PAD_B + 2.0
-	if not choices.is_empty():
-		var lay := choice_layout(w)
-		if bool(lay["horizontal"]):
-			h = maxf(h, PAD_T + text_h + float(lay["row_h"]) + CHOICE_ROW_BOTTOM)
-		else:
-			h = maxf(h, PAD_T + text_h + choices.size() * (choice_row_h() + 1.0) + 4.0)
-	return ceilf(maxf(MIN_H, h))
+	return lines * lh + (lines - 1) * LINE_SPACING
+
+
+## Hoogte van een vak met keuzes onder elkaar (regels van row_h + 1 tussenruimte).
+func _stacked_height(text_h: float, row_h: float) -> float:
+	return PAD_T + text_h + choices.size() * (row_h + 1.0) + 4.0
 
 
 ## Zet het vak op een plek (+ staartje en naamtabje).
@@ -591,16 +601,26 @@ func _focus_rects() -> Array[Rect2]:
 	return out
 
 
-## Hoogte van een keuzeregel (tikvlak).
-func choice_row_h() -> float:
-	return CHOICE_ROW_TOUCH if choices.size() <= 3 else CHOICE_ROW_MANY
+## Hoogte van een keuzeregel (tikvlak) bij vakbreedte w (< 0 = volle breedte).
+## F6-T10: ook bij 4+ keuzes 25 (~48 dp), zolang het vak dan nog tussen TOP_Y en BOTTOM_MARGIN in het
+## veilige gebied past; anders (lange namenlijst) terug naar CHOICE_ROW_MANY (20), zoals voorheen.
+func choice_row_h(w := -1.0) -> float:
+	if choices.size() <= 3:
+		return CHOICE_ROW_TOUCH
+	var vs := get_viewport().get_visible_rect().size
+	var ins := UiTouchC.insets(get_viewport())
+	if w < 0.0:
+		w = vs.x - 2.0 * SIDE - ins.x - ins.z
+	var room := vs.y - ins.y - ins.w - TOP_Y - BOTTOM_MARGIN
+	var h := ceilf(maxf(MIN_H, _stacked_height(_text_height(w), CHOICE_ROW_TOUCH)))
+	return CHOICE_ROW_TOUCH if h <= room else CHOICE_ROW_MANY
 
 
 ## Indeling van de keuzes in een vak van breedte w: {"horizontal", "widths", "row_h"}.
 ## Korte keuzes en 4+ keuzes staan onder elkaar. Tot 3 langere keuzes staan op een rij (breedte naar tekst; past dat
 ## niet dan krimpen ze en lopen ze over twee regels). Zo blijft het vak laag en de keuzes >= 25 hoog (CHOICE_ROW_TOUCH).
 func choice_layout(w: float) -> Dictionary:
-	var stacked := {"horizontal": false, "widths": [], "row_h": choice_row_h()}
+	var stacked := {"horizontal": false, "widths": [], "row_h": choice_row_h(w)}
 	var n := choices.size()
 	if n == 0 or n > 3:
 		return stacked
