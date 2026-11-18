@@ -64,6 +64,8 @@ var choice_index := 0
 var choice_result := -1
 var _choice_box: BoxContainer
 var _choice_labels: Array[Label] = []
+## Breedte van de laatste choice_layout()-aanroep (needed_height roept die vóór choice_row_h aan).
+var _choice_layout_w := -1.0
 ## Plek van het tekstvak: true = onderin (standaard, v0.16), false = bovenin.
 var at_bottom := true
 ## v0.16 Welke plek is gekozen: "onder" (volle breedte boven de knoppen), "onder_smal" (rechts
@@ -593,13 +595,17 @@ func _focus_rects() -> Array[Rect2]:
 
 ## Hoogte van een keuzeregel (tikvlak).
 func choice_row_h() -> float:
-	return CHOICE_ROW_TOUCH if choices.size() <= 3 else CHOICE_ROW_MANY
+	if choices.size() <= 3:
+		return CHOICE_ROW_TOUCH
+	var w := _choice_layout_w if _choice_layout_w > 0.0 else _choice_default_width()
+	return _stacked_row_h(w)
 
 
 ## Indeling van de keuzes in een vak van breedte w: {"horizontal", "widths", "row_h"}.
 ## Korte keuzes en 4+ keuzes staan onder elkaar. Tot 3 langere keuzes staan op een rij (breedte naar tekst; past dat
 ## niet dan krimpen ze en lopen ze over twee regels). Zo blijft het vak laag en de keuzes >= 25 hoog (CHOICE_ROW_TOUCH).
 func choice_layout(w: float) -> Dictionary:
+	_choice_layout_w = w
 	var stacked := {"horizontal": false, "widths": [], "row_h": choice_row_h()}
 	var n := choices.size()
 	if n == 0 or n > 3:
@@ -634,6 +640,89 @@ func choice_layout(w: float) -> Dictionary:
 	if total > avail + 0.5 or lines > 2:
 		return stacked
 	return {"horizontal": true, "widths": widths, "row_h": maxf(CHOICE_ROW_TOUCH, float(lines) * lh + 4.0)}
+
+
+func _choice_default_width() -> float:
+	if not is_inside_tree():
+		return 368.0
+	var vs := get_viewport().get_visible_rect().size
+	var ins := UiTouchC.insets(get_viewport())
+	return vs.x - 2.0 * SIDE - ins.x - ins.z
+
+
+func _dialog_text_h(w: float) -> float:
+	var font: Font = text_label.get_theme_font("font")
+	var fs: int = text_label.get_theme_font_size("font_size")
+	var lh := font.get_height(fs)
+	var tw := maxf(w - PAD_L - PAD_R, 16.0)
+	var lines := 1
+	for l in _lines:
+		var sz := font.get_multiline_string_size(str(l), HORIZONTAL_ALIGNMENT_LEFT, tw, fs, -1,
+				TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE)
+		lines = maxi(lines, maxi(1, roundi(sz.y / lh)))
+	return float(lines * lh + (lines - 1) * LINE_SPACING)
+
+
+func _height_with_stacked_row(w: float, row_h: float) -> float:
+	var text_h := _dialog_text_h(w)
+	var h := PAD_T + text_h + PAD_B + 2.0
+	if choices.size() > 3:
+		h = maxf(h, PAD_T + text_h + choices.size() * (row_h + 1.0) + 4.0)
+	return ceilf(maxf(MIN_H, h))
+
+
+func _box_parts_in_safe(box: Rect2, safe: Rect2) -> bool:
+	for r in _rects_for(box):
+		if r.position.x < safe.position.x - 0.5 or r.position.y < safe.position.y - 0.5:
+			return false
+		if r.end.x > safe.end.x + 0.5 or r.end.y > safe.end.y + 0.5:
+			return false
+	return true
+
+
+func _stacked_row_h(w: float) -> float:
+	if _stacked_placement_fits(w, CHOICE_ROW_TOUCH):
+		return CHOICE_ROW_TOUCH
+	return CHOICE_ROW_MANY
+
+
+func _stacked_placement_fits(w: float, row_h: float) -> bool:
+	if not is_inside_tree():
+		return false
+	var safe := UiTouchC.safe_rect(get_viewport().get_visible_rect().size, get_viewport())
+	var vs := get_viewport().get_visible_rect().size
+	var ins := UiTouchC.insets(get_viewport())
+	var x1 := vs.x - SIDE - ins.z
+	var min_y := MIN_TOP + ins.y
+	var ctrl := _touch_rects()
+	var bottom := vs.y - BOTTOM_MARGIN - ins.w
+	for k in ctrl:
+		var r: Rect2 = ctrl[k]
+		if r.position.x < x1 and r.end.x > SIDE + ins.x:
+			bottom = minf(bottom, r.position.y - 2.0)
+	var x0 := SIDE + ins.x
+	var w_full := x1 - x0
+	var h_full := _height_with_stacked_row(w_full, row_h)
+	var rect_under := Rect2(x0, roundf(bottom - h_full), w_full, h_full)
+	if rect_under.position.y >= min_y and _box_parts_in_safe(rect_under, safe):
+		return true
+	if ctrl.has("dpad"):
+		var dx: float = (ctrl["dpad"] as Rect2).end.x + 4.0
+		if x1 - dx >= 200.0:
+			var w_narrow := x1 - dx
+			var h_narrow := _height_with_stacked_row(w_narrow, row_h)
+			var bottom_n := bottom
+			for k in ctrl:
+				var r: Rect2 = ctrl[k]
+				if r.position.x < x1 and r.end.x > dx:
+					bottom_n = minf(bottom_n, r.position.y - 2.0)
+			var rect_narrow := Rect2(dx, roundf(bottom_n - h_narrow), w_narrow, h_narrow)
+			if rect_narrow.position.y >= min_y and _box_parts_in_safe(rect_narrow, safe):
+				return true
+	var rect_top := Rect2(x0, TOP_Y + ins.y, w_full, h_full)
+	if _box_parts_in_safe(rect_top, safe):
+		return true
+	return false
 
 
 ## Passen de keuzes (max. 3) naast elkaar in een vak van breedte w?
