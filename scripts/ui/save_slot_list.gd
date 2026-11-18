@@ -16,6 +16,8 @@ var slot_buttons: Array[Button] = []
 var venster: PanelContainer
 var dim: ColorRect
 var _placing := false
+## Zelfde rust-frame als menu_screen: geen cancel in het openingsframe.
+var _quiet_frame := -1
 ## Laatste viewport, insets en oudergrootte waarvoor het venster is gezet (party_select).
 var _lay_vp := Vector2(-1, -1)
 var _lay_ins := Vector4(-1, -1, -1, -1)
@@ -31,6 +33,7 @@ var autosave_button: Button = null
 
 
 func _ready() -> void:
+	_quiet_frame = Engine.get_process_frames()
 	name = "SaveSlotList"
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -106,12 +109,21 @@ func _process(_delta: float) -> void:
 	var ins := UiTouch.insets(get_viewport())
 	var parent := get_parent() as Control
 	var psz := parent.size if parent != null else vp
-	if vp == _lay_vp and ins == _lay_ins and psz == _lay_psz:
+	if vp != _lay_vp or ins != _lay_ins or psz != _lay_psz:
+		_lay_vp = vp
+		_lay_ins = ins
+		_lay_psz = psz
+		_place()
+	if Engine.get_process_frames() <= _quiet_frame:
 		return
-	_lay_vp = vp
-	_lay_ins = ins
-	_lay_psz = psz
-	_place()
+	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
+		cancelled.emit()
+		# Loslaten in hetzelfde beeld: anders ziet een ouder/sibling die later in _process
+		# draait (bv. veldmenu als Load net dichtgaat) dezelfde synthetische terugdruk nog.
+		if InputMap.has_action("cancel") and Input.is_action_pressed("cancel"):
+			Input.action_release("cancel")
+		if InputMap.has_action("menu") and Input.is_action_pressed("menu"):
+			Input.action_release("menu")
 
 
 ## Het venster staat in het midden van UiTouch.safe_rect (notch, gebarenbalk).
@@ -172,8 +184,3 @@ static func summary(d: Dictionary) -> String:
 	var t: Variant = d.get("play_time", 0.0)
 	return "%s %s" % [who, UiMenu.format_time(float(t) if (t is int or t is float) else 0.0)]
 
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("cancel") or event.is_action_pressed("menu"):
-		cancelled.emit()
-		get_viewport().set_input_as_handled()
