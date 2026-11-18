@@ -346,7 +346,7 @@ const ENEMIES := {
 		"no": 30, "mp": 12, "weak": [], "resist": [],
 		"drops": [],
 		"boss": {
-			"max_hp": 270, "atk": 32, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
+			"max_hp": 405, "atk": 36, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
 			"exp": 20, "gold": 0,
 			"skills": [{"name": "Silence", "chance": 0.25, "power": 1.2}],
 			"tint": [0.72, 0.40, 1.15],
