@@ -15,7 +15,7 @@ Een gedeelde ATK 24 bracht Classic Lv 7 naar 59%, daarom alleen Action.
 
 ## Wijziging
 - `SomData.ACTION_BOSS_ATK = {"kennis_beest": 27}`; `SomData.action_boss_stats` zet die ATK na `BossCore.apply_boss`.
-  De baas wordt herkend aan zijn `"boss"`-blok (gelijk aan dat in `GameData.ENEMIES`), dus alleen ruwe vijand-data.
+  De baas wordt expliciet herkend: ruwe data met een `"boss"`-blok én hetzelfde bestiarium-nummer `"no"` als `GameData.ENEMIES["kennis_beest"]`. Zonder `"boss"` of `"no"`: gewoon `apply_boss`.
 - Classic (`battle.gd`, `BossCore.apply_boss`) en `game_data.gd` zijn ongewijzigd. Andere bazen ook.
 - Tests: `golem_action_tests.gd` (Action ATK 27 + Classic nog 23), `boss_phase_tests.gd` (Golem-ATK = `ACTION_BOSS_ATK`, Wortelkoning = `apply_boss`).
 

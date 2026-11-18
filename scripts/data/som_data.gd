@@ -388,19 +388,22 @@ static func boss_party_scale(party_count: int) -> float:
 
 ## F5.3 A4 (akkoord Dennis 18-11-2026): alleen in Action een eigen baas-ATK, Classic blijft gelijk.
 ## Golem (kennis_beest) Classic ATK 23 -> Action ATK 27: --actionsim --boss-rt Lv 7 98,5% -> 72% winst
-## (doel 60-80%, seed 20261020, zie docs/combat/f53_golem_action_atk.md). Sleutel = vijand-id; de baas
-## wordt herkend aan zijn "boss"-blok in GameData.ENEMIES (alleen ruwe data met "boss", vóór apply_boss).
+## (doel 60-80%, seed 20261020, zie docs/combat/f53_golem_action_atk.md). Sleutel = vijand-key in GameData.ENEMIES.
 const ACTION_BOSS_ATK := {"kennis_beest": 27}
 
 
-## Vijand-id waarvan het "boss"-blok gelijk is aan dat van data, of "" (geen baas-blok / onbekend).
+## Vijand-key uit ACTION_BOSS_ATK waar data bij hoort, of "".
+## Expliciet: data moet een "boss"-blok hebben (ruwe vijand-data, vóór apply_boss) en hetzelfde
+## bestiarium-nummer "no" als GameData.ENEMIES[key] ("no" is per vijand uniek). Zonder "boss" of
+## zonder "no" -> "" (geen Action-ATK, gewoon apply_boss).
 static func _boss_id_of(data: Dictionary) -> String:
-	if not data.has("boss"):
+	if not data.has("boss") or not data.has("no"):
 		return ""
-	for id in ACTION_BOSS_ATK:
-		var e: Dictionary = GameData.ENEMIES.get(id, {})
-		if e.has("boss") and e["boss"] == data["boss"]:
-			return id
+	var no := int(data["no"])
+	for key in ACTION_BOSS_ATK:
+		var e: Dictionary = GameData.ENEMIES.get(key, {})
+		if e.has("boss") and e.has("no") and int(e["no"]) == no:
+			return str(key)
 	return ""
 
 
