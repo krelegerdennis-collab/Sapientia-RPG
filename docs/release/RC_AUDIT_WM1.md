@@ -3,7 +3,8 @@
 Doel: vaststellen wat er vóór de interne RC (F8, uiterlijk 20 nov 2026, **niet publiceren**) nog moet gebeuren.
 Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 
-- Basis: `finish/wm1` op `f76aa715` (tag `wm1-freeze`, 17-11-2026). Checklist: `docs/release/WM1_RELEASE_CHECKLIST.md` (93 punten).
+- Basis: `finish/wm1` op `f76aa715` (tag `wm1-freeze`, 17-11-2026). Huidige freeze is `wm1-freeze2` (zie Freeze 2).
+  Checklist: `docs/release/WM1_RELEASE_CHECKLIST.md` (93 punten).
   Historisch: de eerste audit (klus 10) stond op `0fb6334` (#476, 15 nov 2026). Klus 19 (17 nov 2026, middag) liep na op `d8a38e41` (#508); sinds klus 18 toen gemerged: #502-#508
   (o.a. #506 placeholders Wilgendal, #507 drie suites in CI, #508 balansmeting `WM1_BALANCE_REPORT_RC.md`). Eerder nog #465-#501.
 - **Bijgewerkt (freeze-ronde, 17-11-2026):** lock-cijfers herteld op `f76aa715` in #517 (merge `e7f33011`). F1.6 is daarmee KLAAR.
@@ -16,6 +17,21 @@ Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
   **OPEN** (er mist iets), **NIET TE CHECKEN** (handmatig, op toestel of proces).
 - Grootte: S (uren), M (een dag), L (meerdere dagen of afhankelijk van een ander). "Ja Dennis" = vraagt een besluit over balans,
   nieuwe mechanic, bestaande test, workflow of publicatie (of een ander besluit dat alleen Dennis neemt; dat staat erbij).
+
+## Freeze 2
+
+Huidige freeze voor de interne RC. Tag `wm1-freeze` (commit `f76aa715`) blijft zoals hij is.
+
+- Tag `wm1-freeze2` (annotated tag-object `fa723ca4`) op commit `961101acb98de40daea50077c495f79082ca8a09`.
+  Tag-object volledig `fa723ca4d173763b14851264a1c82d0c822fc992`, tagger RPG Forge, 18-11-2026. Niet publiceren.
+- Inhoud: F2.2-paletfix af. #538 (`12_assets_ui`), #540 (`10_assets_sprites`, inclusief dambord-voetschaduw;
+  `DORP_SPRITES` 2950/3184, akkoord Dennis 17-11 20:18 via RPG Forge), #541 (`06_assets_hd2d`, `light_soft_128` Bayer 8x8).
+  F6 safe-area: #533, #534, #535, #536 en #537. #539 dicht de `step_dir`-testrace (F3.2).
+- F3.2 op `961101ac`: 591 PASS / 0 FAIL, twee keer serieel gedraaid. Rapporten blijven op de build-box:
+  `F3_2_playthrough_961101a_run1.txt` en `run2.txt`. Niet in de repo.
+- Debug-APK v0.21, versionCode 23, gebouwd door RPG Forge. Niet gepubliceerd.
+- Nog open: installeren op de Samsung S25, en Dennis' HD-2D-oogcheck. F6.23 placeholder-SFX blijft een bekend open punt
+  (geen blocker).
 
 ## Samenvatting
 
@@ -78,7 +94,7 @@ F6.24 (drie World Warper-cues geven een `push_error`).
 | F1.4 | CI-matrix gelijk met `game_state.gd` | KLAAR | #361, #380, #400, #406, #449, #480, #488, #500; #507 (merge `060140df`) zette `blauwekisttest`, `bossnametest` en `dungeon100bossmaptest` in de matrix (Dennis akkoord 17-11 12:06). #514 zette `--combattick` in de matrix; de suite draait in CI sinds `f01ba40a`. Matrix nu 135 suites (`.github/workflows/tests.yml:24-42`), `relaytest` als eigen job. Buiten de matrix blijven perf/sim/benchmark en `wm1playthroughtest` (bewust, checklist). | | S | ja (workflow) |
 | F1.5 | Baseline PASS-aantallen | KLAAR | Baseline: 138 checks groen op `f76aa715` (draft-PR #515, `rc/wm1-freeze-ci`, gesloten zonder merge). `--combattick` draait in CI sinds #514. De tabel in `AGENTS.md` is van v0.18. | | S | nee |
 | F1.6 | Lock-cijfers hertellen | KLAAR | #517 (merge `e7f33011`, https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/517) hertelde alle lock-cijfers op `f76aa715` (tag `wm1-freeze`) en schreef ze in `docs/release/WM1_CONTENT_LOCK.md`. Story-`EVENTS` is 62 (= 53 string-keys + 9 expressie-keys); de eerdere driftlijst noemde ten onrechte 58 vs 53. Overige rijen na die hertelling: kaartscènes 50 (48 speelroute, 2 dev; extra `leven_v2_leeszaal.tscn`, `woud_beek.tscn`), `ITEMS` 53 (`spreuk_grote_genezing`, `spreuk_vuurbal`, `spreuk_zonnevlam`), Codex 21/32 (`adermot`, `druipslak`, `steenluis` / `aderspark`, `koude_druppel`, `steenbeet`), `TODO(design\|verhaal)` zonder tests 51 (56 − 5 in `scripts/tests/`). Gelijk: `ENEMIES` 26, berggrot-`MONSTERS` 3, `BOSSES` 12 (10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 99), helden 5 (Dax, Vesper, Seren, Kael Voss, Orion), sleutelvoorwerpen 4, `EQUIPMENT` 85, blauwe-kist 36, `SPELLS` 81 (21/20/20/20), kern 2/1/2, opdrachten 7 (6 hoofd, 1 zij) / acts 6 (act 3-6 "later"), BGM 24/13, SFX 99/0. | | S | nee |
-| F1.7 | Tag `wm1-freeze` | KLAAR | Tag `wm1-freeze` op `finish/wm1` commit `f76aa7150f23385d47c630e54179e26ac1ba2cb8` (`f76aa715`), akkoord Dennis 17-11-2026 15:25 (kaart t890s5659). | | S | ja (scope) |
+| F1.7 | Tag `wm1-freeze` | KLAAR | Tag `wm1-freeze` op `finish/wm1` commit `f76aa7150f23385d47c630e54179e26ac1ba2cb8` (`f76aa715`), akkoord Dennis 17-11-2026 15:25 (kaart t890s5659). Huidige freeze is `wm1-freeze2` (zie Freeze 2); deze tag blijft staan. | | S | ja (scope) |
 
 ## Fase 2: Art op palet
 

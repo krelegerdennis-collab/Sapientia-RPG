@@ -90,6 +90,26 @@ Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 - `--combattick` in de CI-suite-matrix (F1.4) (#514).
 - RC-audit freeze (F1.7, F1.4, F3.2, F6.23) en changelog 0.21 (F8.3) (#516).
 - Lock-cijfers herteld op `f76aa715` (F1.6) (#517).
+- RC-audit: F1.6 KLAAR (EVENTS 62) na hertelling #517 (#519).
+- `wmdeathtest` in de CI-matrix (`tests.yml`, akkoord Dennis) (#521).
+- Paletfix F2.2 `01_art` (#523).
+- Paletfix F2.2 `02_world_warper_art` (#524).
+- Paletfix F2.2 `03_assets_bg` (#525).
+- Paletfix F2.2 `04_assets_characters` (#526).
+- Paletfix F2.2 `05_assets_fx` (#527).
+- Paletfix F2.2 `08_assets_placeholder` (#528).
+- Paletfix F2.2 `11_assets_tiles` (#529).
+- Paletfix F2.2 `07_assets_map_monsters` (sporekop v2) (#530).
+- Paletfix F2.2 `09_assets_puzzle` (#531).
+- Hit-react-nudge op hele pixels, ook diagonaal (alleen weergave) (#532).
+- Naamscherm binnen de veilige zone (#533).
+- Diepe Grot-pil volgt het veilige gebied (#534).
+- Slotlijst gecentreerd in de veilige zone (#535).
+- Warp-view binnen de veilige zone (#536).
+- Titelscherm-stage in het veilige gebied (#537).
+- Paletfix F2.2 `12_assets_ui` (#538).
+- Paletfix F2.2 `10_assets_sprites` (#540).
+- Paletfix F2.2 `06_assets_hd2d` (`light_soft_128`, Bayer 8x8) (#541).
 
 ### Opgelost
 - Saves zijn atomair en herstelbaar; verplichte pauze-save hersteld; suspend-save alleen op mobiel.
@@ -106,6 +126,10 @@ Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 - Localisatie-guard: PvP-modi in het Engels (#386).
 - `book_point` stopt na await als het object weg is (#499).
 - `--combattick` groen op 30 fps (meter-framecorrectie); enemy-read zonder lambda-capture-errors (#510).
+- Inktwurm uit de geheime kast is vangbaar in de Action-arena ("No enemy in range") (#518).
+- Softlock na game over op de wereldkaart (#520).
+- `--uishots` slaat de intro-cutscene over (#522).
+- `step_dir` wacht op process-frames in plaats van physics-frames (race bij `time_scale` 4, F3.2) (#539).
 
 ### Bekend
 - Online staat dicht: PvP en co-op (LAN en relay) zijn verborgen via `online_cut` (H11), en de Android-presets vragen geen netwerkrechten.
