@@ -109,6 +109,8 @@ Algemene regels voor alle PR's
 - Vesper "backstab": vijanden hebben `m.facing` (gebruikt in `_knockback`/`place_at`) **[NG of facing van vijanden betrouwbaar wordt bijgewerkt]**. Vesper is Mage — vaker spreuk dan melee; effect evt. ook op spreuk **[NG]**.
 - Kael aggro lock in co-op: `_target_for` geeft nu altijd slot 0 terug (`som_arena.gd:1312-1316`) → lock moet vóór die tak gecontroleerd worden.
 - Orion slow kan via bestaande zone-slow (`zone_slow_mult` 0,6) hergebruikt worden **[NG of monster-slow los van zones bestaat]**.
+- **Orion**: `after_melee_hit` slaat Golem-vijanden volledig over (geen `sig_slow`, geen windup-verlenging).
+- **Kael**: aggro lock per finisher-treffer op die vijand in `_land` (bij multi-hit: elke geraakte vijand); ICD **240 ticks op Kael** voorkomt een tweede lock binnen de cooldown.
 
 **Bestanden**: nieuw `scripts/data/som_signature_data.gd`; `som_arena.gd` (`_land`, `damage_enemy`, `_target_for`, `_knockback`); heal via bestaand heal-pad **[NG: functienaam]**.
 

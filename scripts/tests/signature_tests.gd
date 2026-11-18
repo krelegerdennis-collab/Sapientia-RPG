@@ -18,6 +18,9 @@ const SomAllyScript := preload("res://scripts/som/som_ally.gd")
 const CombatStamina := preload("res://scripts/som/combat_stamina.gd")
 const CombatRoots := preload("res://scripts/som/combat_roots.gd")
 
+const VESPER_RNG_SEED := 4242
+const VESPER_AT := Vector2(128, 120)
+
 var failures := 0
 var passes := 0
 
@@ -47,6 +50,7 @@ func _run() -> void:
 	_kael_coop_target_tests()
 	_orion_integration_tests()
 	_orion_chase_slow_tests()
+	_orion_enemy_ai_chase_hook_tests()
 	_ally_ai_kael_test()
 	_disabled_tests()
 	SomSignatureData.force_active = null
@@ -173,9 +177,9 @@ func _seren_integration_tests() -> void:
 
 
 func _noor_swing_dmg(a: SomArena, backstab: bool) -> int:
-	a.rng.seed = 4242
+	a.rng.seed = VESPER_RNG_SEED
 	# Backstab in sim: aanvalrichting · vijand-facing > 0,5 (zelfde kant als kijkrichting).
-	var m := _enemy(a, Vector2i.RIGHT if backstab else Vector2i.LEFT, Vector2(128, 120))
+	var m := _enemy(a, Vector2i.RIGHT if backstab else Vector2i.LEFT, VESPER_AT)
 	a.active_id = "noor"
 	a.player.facing = Vector2i.RIGHT
 	var hp0 := int(a.enemies[m]["hp"])
@@ -185,12 +189,14 @@ func _noor_swing_dmg(a: SomArena, backstab: bool) -> int:
 
 
 func _vesper_integration_tests() -> void:
-	var a := _arena()
-	var front := _noor_swing_dmg(a, false)
-	a.sig_backstab_hits = 0
-	var back := _noor_swing_dmg(a, true)
-	check("vesper swing backstab meer schade", back > front and back >= roundi(float(front) * SomSignatureData.CRIT_MULT * 0.85))
-	check("vesper swing telt backstab", a.sig_backstab_hits == 1)
+	var front := _noor_swing_dmg(_arena(), false)
+	var back := _noor_swing_dmg(_arena(), true)
+	check("vesper front raakt", front > 0)
+	check("vesper back == roundi(front*1.5)", back == roundi(float(front) * SomSignatureData.CRIT_MULT))
+	var a_cnt := _arena()
+	a_cnt.sig_backstab_hits = 0
+	_noor_swing_dmg(a_cnt, true)
+	check("vesper swing telt backstab", a_cnt.sig_backstab_hits == 1)
 
 
 func _kael_integration_tests() -> void:
@@ -202,7 +208,19 @@ func _kael_integration_tests() -> void:
 	check("kael target lock", SomSignature.aggro_target(a, m) == "kael")
 	SomSignature.after_melee_hit(a, "kael", m, a.enemies[m], SomChainData.STEP_FINISHER, 0)
 	check("kael ICD: geen tweede lock", int(a.enemies[m]["sig_aggro"]["until"]) == until)
-	while a.sim_tick < until:
+	for i in 12:
+		SomSignature.tick(a)
+		a.clock.tick += 1
+	SomSignature.after_melee_hit(a, "kael", m, a.enemies[m], SomChainData.STEP_FINISHER, 0)
+	check("kael ICD: lock-eindtijd stabiel", int(a.enemies[m]["sig_aggro"]["until"]) == until)
+	for i in SomSignatureData.KAEL_ICD_TICKS + 4:
+		SomSignature.tick(a)
+	check("kael ICD verloopt", SomSignature.icd_ready(a._sig_icd, "kael"))
+	a.clock.tick += 1
+	SomSignature.after_melee_hit(a, "kael", m, a.enemies[m], SomChainData.STEP_FINISHER, 0)
+	var until2 := int(a.enemies[m]["sig_aggro"]["until"])
+	check("kael ICD: nieuwe lock na cooldown", until2 > until and until2 > a.sim_tick)
+	while a.sim_tick < until2:
 		a.clock.tick += 1
 	check("kael lock verloopt", SomSignature.aggro_target(a, m) == "")
 
@@ -255,6 +273,24 @@ func _orion_chase_slow_tests() -> void:
 	check("orion chase normaal na tick", is_equal_approx(SomSignature.chase_interval(base, a.enemies[m]), base))
 
 
+func _orion_enemy_ai_chase_hook_tests() -> void:
+	var a := _arena()
+	var m := _enemy(a, Vector2i.LEFT, Vector2(200, 120))
+	var e: Dictionary = a.enemies[m]
+	e["sig_slow"] = 90
+	e["chase"] = 0.001
+	e["tele"] = 0.0
+	e["cd"] = 0.0
+	e["target"] = "dennis"
+	var expect_slow := SomSignature.chase_interval(SomData.CHASE_INTERVAL, e)
+	a._enemy_ai(m, 0.02)
+	check("_enemy_ai chase langzamer met sig_slow", is_equal_approx(float(e["chase"]), expect_slow))
+	e["sig_slow"] = 0
+	e["chase"] = 0.001
+	a._enemy_ai(m, 0.02)
+	check("_enemy_ai chase normaal zonder sig_slow", is_equal_approx(float(e["chase"]), SomData.CHASE_INTERVAL))
+
+
 func _ally_ai_kael_test() -> void:
 	var a := _arena()
 	var m := _enemy(a, Vector2i.LEFT, Vector2(130, 120))
@@ -279,9 +315,22 @@ func _disabled_tests() -> void:
 	a.chains["dennis"] = {"next": SomChainData.STEP_FINISHER, "window": 0, "state": "finisher", "last": 2}
 	a.chain_swing("dennis", a.player, 1.0)
 	check("uit dennis: basis knockback finisher", a.last_knockback_tiles == SomChainData.knockback_tiles(SomChainData.STEP_FINISHER))
+	var a_stg := _arena()
+	var m_stg := _enemy(a_stg, Vector2i.LEFT, Vector2(128, 120))
+	a_stg.active_id = "dennis"
+	a_stg.chains["dennis"] = {"next": SomChainData.STEP_FINISHER, "window": 0, "state": "finisher", "last": 2}
+	a_stg.chain_swing("dennis", a_stg.player, 1.0)
+	check("uit dennis: stagger zonder x1.25", int(a_stg.enemies[m_stg]["stg"]) == SomStaggerData.FILL_FINISHER)
+	a.active_id = "lotte"
+	a.player.position = Vector2(100, 120)
+	for h in GameState.party:
+		if str(h.get("id", "")) == "dennis":
+			h["hp"] = maxi(1, int(h["max_hp"]) / 4)
+	var heal_before := a.sig_heal_total
+	SomSignature.try_seren_heal(a, "lotte", SomChainData.STEP_FINISHER, 1)
+	check("uit lotte: geen heal bij gewonde in range", a.sig_heal_total == heal_before and a.last_sig_heal == 0
+			and int(a._sig_icd.get("lotte", 0)) == 0)
 	var m2 := _enemy(a, Vector2i.LEFT, Vector2(128, 104))
-	SomSignature.after_melee_hit(a, "lotte", m2, a.enemies[m2], SomChainData.STEP_FINISHER, 0)
-	check("uit lotte: geen heal-tick", a.sig_heal_total == 0)
 	var dmg_back_off := _noor_swing_dmg(_arena(), true)
 	var dmg_front_off := _noor_swing_dmg(_arena(), false)
 	var a_last := _arena()
