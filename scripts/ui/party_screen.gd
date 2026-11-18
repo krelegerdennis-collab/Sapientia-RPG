@@ -24,11 +24,59 @@ var reserve_monster_knoppen: Array[Button] = []
 var gekozen := -1
 ## Laatste uitkomst (voor de partytest)
 var laatste_tekst := ""
+var _hint_band: Control
+
+
+## Onderste hintregel: wrap binnen de inhoudsbreedte (lange F6.3-tekst).
+func _layout_party_hint() -> void:
+	if hint == null or not is_instance_valid(root) or not root.is_inside_tree():
+		return
+	var vp := root.get_viewport().get_visible_rect().size
+	var safe := UiTouchC.safe_rect(vp, root.get_viewport())
+	var inhoud_b := maxf(8.0, safe.size.x - (PAD_X * 2.0))
+	if _outer.size.x > 1.0:
+		inhoud_b = minf(inhoud_b, _outer.size.x)
+	var font := hint.get_theme_font("font")
+	var fs := hint.get_theme_font_size("font_size")
+	var regels := _hint_regels(HINT, inhoud_b, fs, font)
+	var rij_h := float(fs + 3)
+	var hoog := maxf(float(ROW_H), rij_h * float(regels.size()))
+	_hint_band.custom_minimum_size = Vector2(inhoud_b, hoog)
+	_hint_band.size = Vector2(inhoud_b, hoog)
+
+
+static func _hint_regels(tekst: String, breedte: float, fs: int, font: Font) -> PackedStringArray:
+	var words := tekst.split(" ")
+	var regels: PackedStringArray = []
+	var cur := ""
+	for w in words:
+		var probe := (cur + " " + w).strip_edges()
+		if font.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > breedte and cur != "":
+			regels.append(cur)
+			cur = w
+		else:
+			cur = probe
+	if cur != "":
+		regels.append(cur)
+	return regels
 
 
 func _build() -> void:
 	header.text = "Party  (in battle: %d heroes + %d monster)" % [PartyLimiet.MAX_HELDEN, PartyLimiet.MAX_MONSTERS]
 	set_hint(HINT)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.clip_text = false
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint_band = Control.new()
+	_hint_band.name = "HintBand"
+	_hint_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_outer.remove_child(hint)
+	_hint_band.add_child(hint)
+	hint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_outer.add_child(_hint_band)
+	if not root.resized.is_connected(_layout_party_hint):
+		root.resized.connect(_layout_party_hint)
+	_layout_party_hint.call_deferred()
 	PartyLimiet.normaliseer()
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL

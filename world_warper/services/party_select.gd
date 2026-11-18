@@ -21,6 +21,7 @@ const ANCHOR_GROUP := "ww_anchor_party"
 const PANEL_SIZE := Vector2(220, 180)
 const RIJ_HOOG := 40
 const LEEG := "Nobody in the party."
+const UITLEG := "This is your current party. To change who fights, go to the Rest Room, or open MENU, then Party."
 
 const COLOR_PANEL := Color("3d2158")
 const COLOR_BUTTON := Color("5c3484")
@@ -36,6 +37,8 @@ var _rows: VBoxContainer
 var _layout_hooks := false
 var _lay_vp := Vector2.ZERO
 var _lay_ins := Vector4(-1, -1, -1, -1)
+var _uitleg: Label
+var _uitleg_band: Control
 
 
 func _ready() -> void:
@@ -159,12 +162,15 @@ func _place_at_anchor() -> void:
 	var ins := UiTouchC.insets(get_viewport())
 	if anchor == null:
 		# F6-5: het hele scherm, maar binnen het veilige gebied (notch, gebarenbalk)
-		custom_minimum_size = PANEL_SIZE
+		var vp := get_viewport_rect().size
+		var veilig := Rect2(Vector2(ins.x, ins.y), vp - Vector2(ins.x + ins.z, ins.y + ins.w))
+		custom_minimum_size = Vector2(minf(PANEL_SIZE.x, veilig.size.x), minf(PANEL_SIZE.y, veilig.size.y))
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		offset_left = ins.x
 		offset_top = ins.y
 		offset_right = -ins.z
 		offset_bottom = -ins.w
+		_layout_uitleg()
 		return
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	var doel := PANEL_SIZE
@@ -192,6 +198,31 @@ func _binnen_veilig(ins: Vector4) -> void:
 	r.position.y = clampf(r.position.y, veilig.position.y, maxf(veilig.position.y, veilig.end.y - r.size.y))
 	global_position = r.position
 	size = r.size
+	_layout_uitleg()
+
+
+static func _uitleg_hoog(tekst: String, breedte: float, fs: int) -> float:
+	var words := tekst.split(" ")
+	var cur := ""
+	var lines := 1
+	for w in words:
+		var probe := (cur + " " + w).strip_edges()
+		if FONT.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > breedte and cur != "":
+			lines += 1
+			cur = w
+		else:
+			cur = probe
+	return maxf(float(fs), float(lines) * float(fs + 3))
+
+
+func _layout_uitleg() -> void:
+	if _uitleg == null or _uitleg_band == null or not _built:
+		return
+	var fs := theme.default_font_size if theme != null else 10
+	var breedte := maxf(8.0, size.x - 12.0)
+	var hoog := _uitleg_hoog(UITLEG, breedte, fs)
+	_uitleg_band.custom_minimum_size = Vector2(breedte, hoog)
+	_uitleg_band.size = Vector2(breedte, hoog)
 
 
 func _first_anchor() -> Node:
@@ -241,6 +272,20 @@ func _ensure_ui() -> void:
 	var kolom := VBoxContainer.new()
 	kolom.add_theme_constant_override("separation", 4)
 	marge.add_child(kolom)
+
+	_uitleg_band = Control.new()
+	_uitleg_band.name = "UitlegBand"
+	_uitleg_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	kolom.add_child(_uitleg_band)
+	_uitleg = Label.new()
+	_uitleg.name = "Uitleg"
+	_uitleg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_uitleg.text = UITLEG
+	_uitleg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_uitleg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_uitleg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_uitleg.add_theme_color_override("font_color", UiStyle.TEXT)
+	_uitleg_band.add_child(_uitleg)
 
 	var titel := Label.new()
 	titel.name = "Titel"

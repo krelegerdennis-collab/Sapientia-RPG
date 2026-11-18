@@ -201,6 +201,10 @@ const SAVE_UITLEG_LINE := "Glowing books save and heal. There is no saving from 
 const RUN_UITLEG_FLAG := "run_uitleg_gezien"
 const RUN_UITLEG_LINE := "Tap RUN at the top right to move faster. Tap it again to walk. It stays on until you turn it off."
 
+## F6.3: eenmalige uitleg de eerste keer dat de Warp-view opent (World Warper).
+const WARP_UITLEG_FLAG := "warp_uitleg_gezien"
+const WARP_UITLEG_LINE := "Pick a world, then a place you have visited, then Travel. Locked places stay closed until you reach them on foot."
+
 ## Vang-tutorial (Codex), direct na de Inktwurm-tutorial. Speelt eenmalig zodra de speler in de Golemhal
 ## vrij is (FREE_EVENTS), ook als de eerste tutorial overgeslagen is. Max. 2 korte regels per pagina.
 const TUTORIAL_CODEX := "tutorial_codex_vangen"

@@ -18,9 +18,6 @@ static func op_stap(speler: Node) -> void:
 		return
 	if not _mag(speler):
 		return
-	var tree := speler.get_tree()
-	if tree == null:
-		return
 	GameState.story_flags[SD.RUN_UITLEG_FLAG] = true
 	Dialog.show_lines([SD.RUN_UITLEG_LINE])
 
