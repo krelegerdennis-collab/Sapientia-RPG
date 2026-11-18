@@ -24,6 +24,7 @@ const BerggrotHaak := preload("res://scripts/data/berggrot_data.gd")
 const OpeningStory := preload("res://world_warper/opening/story_mode.gd")
 const FieldMenu := preload("res://scripts/ui/field_menu.gd")
 const MapLightingC := preload("res://scripts/map_lighting.gd")
+const RunUitleg := preload("res://scripts/run_uitleg.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
 const AUTOSAVE_DELAY := 0.35
 
@@ -370,6 +371,8 @@ func _on_player_stepped(tile: Vector2i) -> void:
 	# 2) Random encounter (alleen als deze map monsters heeft)
 	if encounters and GameState.on_player_step(terrain_at(tile)):
 		start_battle(GameState.pick_encounter_group(terrain_at(tile)))
+		return
+	RunUitleg.op_stap(player)
 
 
 ## Grotmond in de bergwand: de bergtegel blijft blokkeren, maar wie er van onderaf

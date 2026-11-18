@@ -12,7 +12,7 @@ extends "res://scripts/ui/menu_screen.gd"
 const PartyLimiet := preload("res://scripts/party_limiet.gd")
 const HeroStatusBox := preload("res://scripts/battle/hero_status_box.gd")
 const COL_W := 172
-const HINT := "A: pick, then pick who swaps in   B: back"
+const HINT := "Tap someone in Active, then someone in Reserve to swap. Back to close."
 
 var actief_lijst: VBoxContainer
 var reserve_lijst: VBoxContainer

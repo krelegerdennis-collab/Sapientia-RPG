@@ -197,6 +197,10 @@ const UNIQUE_SEEN_FLAGS := {"inktwurm": TUTORIAL_INKTWURM_FLAG}
 const SAVE_UITLEG_FLAG := "save_uitleg_gezien"
 const SAVE_UITLEG_LINE := "Glowing books save and heal. There is no saving from the menu."
 
+## F6.3: eenmalige uitleg bij de eerste vrije stap op het veld (RUN-knop).
+const RUN_UITLEG_FLAG := "run_uitleg_gezien"
+const RUN_UITLEG_LINE := "Tap RUN at the top right to move faster. Tap it again to walk. It stays on until you turn it off."
+
 ## Vang-tutorial (Codex), direct na de Inktwurm-tutorial. Speelt eenmalig zodra de speler in de Golemhal
 ## vrij is (FREE_EVENTS), ook als de eerste tutorial overgeslagen is. Max. 2 korte regels per pagina.
 const TUTORIAL_CODEX := "tutorial_codex_vangen"
