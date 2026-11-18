@@ -46,6 +46,8 @@ var _step := STEP_WORLDS
 var _wm_id := ""
 var _place_id := ""
 var _opened := false
+## Geen cancel in het openingsframe (zelfde A-tik mag niet meteen terug).
+var _quiet_frame := -1
 var _built := false
 var _layout_hooks := false
 var _lay_vp := Vector2.ZERO
@@ -101,6 +103,7 @@ func _ontkoppel_layout_hooks() -> void:
 
 func open() -> void:
 	_opened = true
+	_quiet_frame = Engine.get_process_frames()
 	_ensure_ui()
 	_step = STEP_WORLDS
 	_wm_id = ""
@@ -125,6 +128,11 @@ func close() -> void:
 ## Insets kunnen wisselen zonder dat de viewportgrootte verandert (insets_override).
 func _process(_delta: float) -> void:
 	if not _opened or not visible or not is_inside_tree():
+		return
+	if Engine.get_process_frames() <= _quiet_frame:
+		return
+	if Input.is_action_just_pressed("cancel"):
+		_on_back()
 		return
 	var vp := get_viewport_rect().size
 	var ins := UiTouchC.insets(get_viewport())
