@@ -736,6 +736,7 @@ func _ready() -> void:
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--staggertest", "res://scripts/tests/stagger_tests.gd", "StaggerTest", "staggertest"],
 			["--perfectdodgetest", "res://scripts/tests/perfect_dodge_tests.gd", "PerfectDodgeTest", "perfectdodgetest"],
+			["--signaturetest", "res://scripts/tests/signature_tests.gd", "SignatureTest", "signaturetest"],
 			["--pdfollowuptest", "res://scripts/tests/pd_followup_tests.gd", "PdFollowupTest", "pdfollowuptest"],
 			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],

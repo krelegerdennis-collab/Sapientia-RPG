@@ -60,6 +60,8 @@ const SomFeelData := preload("res://scripts/data/som_feel_data.gd")
 const SomStaggerData := preload("res://scripts/data/som_stagger_data.gd")
 const SomStagger := preload("res://scripts/som/som_stagger.gd")
 const SomPerfectDodgeData := preload("res://scripts/data/som_perfect_dodge_data.gd")
+const SomSignatureData := preload("res://scripts/data/som_signature_data.gd")
+const SomSignature := preload("res://scripts/som/som_signature.gd")
 const SomShakeScript := preload("res://scripts/som/som_shake.gd")
 const SomChainFeelScript := preload("res://scripts/som/som_chain_feel.gd")
 const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
@@ -111,6 +113,12 @@ var _pd_age: Dictionary = {}
 var _pd_icd: Dictionary = {}
 var _pd_counter: Dictionary = {}
 var _pd_flash: Dictionary = {}
+## F3 signatures: ICD per held-id (ticks); vijand aggro/slow in enemies[m].
+var _sig_icd: Dictionary = {}
+## Tests: laatste signature-heal en teller.
+var last_sig_heal := 0
+var sig_heal_total := 0
+var sig_backstab_hits := 0
 ## Tests: perfect-events en tellers.
 var perfect_event_ticks: Array = []
 var perfect_count := 0
@@ -149,6 +157,7 @@ var last_enemy_damage := 0
 ## Client-only FX-keuze voor de volgende damage_enemy (geen sim-state).
 var _pending_impact_element := ""
 var _pending_chain_step := -2
+var _pending_heavy_level := 0
 var last_player_damage := 0
 var last_hit_id := ""
 var last_attacker := ""
@@ -770,6 +779,7 @@ func sim_step() -> void:
 		_tick_ally_heavy()
 	_tick_stamina_and_dodge()
 	_tick_stagger()
+	_tick_signatures()
 	_tick_perfect_dodge_pre()
 	_tick_hitreact(dt)
 	for m in enemies.keys():
@@ -1124,6 +1134,10 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				stagger = stagger or SomHeavyData.ALWAYS_STAGGERS
 				tiles = SomHeavyData.knockback_tiles(heavy)
 				stop = SomHeavyData.hitstop_ticks(heavy)
+			if SomSignatureData.is_active() and id == "dennis":
+				var dk := SomSignature.dax_knockback_tiles(step, heavy)
+				if dk > 0:
+					tiles = dk
 			if use_counter:
 				stagger = true
 			var num_color := SomFeelData.COL_NORMAL
@@ -1147,12 +1161,22 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 			elif heavy > 0:
 				stg_kind = SomStaggerData.KIND_HEAVY_L1 if heavy == 1 else SomStaggerData.KIND_HEAVY_L2
 			_pending_chain_step = step
+			_pending_heavy_level = heavy
 			_pending_impact_element = ""
 			var is_fin := step >= 0 and SomChainData.is_finisher(step) and Settings.action_battles()
 			if is_fin:
 				shock_feet = m.position + Vector2(0, SomData.BODY_Y)
-			damage_enemy(m, physical_damage(atk, float(e["def"]), swing_mult, rng), Vector2i(roundi(f.x), roundi(f.y)), stagger, tiles, stop,
-					num_color, num_scale, stg_kind, is_fin)
+			var strike_dir := Vector2i(roundi(f.x), roundi(f.y))
+			var raw := physical_damage(atk, float(e["def"]), swing_mult, rng)
+			if SomSignatureData.is_active() and id == "noor" and SomSignature.backstab_hit(m.facing, strike_dir):
+				raw = maxi(1, roundi(float(raw) * SomSignatureData.CRIT_MULT))
+				sig_backstab_hits += 1
+				if SomFeelData.ENABLED:
+					num_color = SomFeelData.COL_FINISHER_NUMBER
+					num_scale = SomFeelData.SCALE_FINISHER_NUMBER
+			damage_enemy(m, raw, strike_dir, stagger, tiles, stop, num_color, num_scale, stg_kind, is_fin)
+			if SomSignatureData.is_active():
+				_sig_after_melee_hit(id, m, e, step, heavy)
 			if (step >= 0 and SomChainData.is_finisher(step)) or heavy >= 2:
 				SomFx.dust_finisher(room.get_node("Objects"), feet_of_enemy(m))
 			if use_counter:
@@ -1170,6 +1194,8 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 		SomFx.chain_shockwave(fx_parent, shock_feet)
 	if use_counter and hits > 0:
 		_pd_counter.erase(id)
+	if SomSignatureData.is_active() and id == "lotte" and step >= 0 and SomChainData.is_finisher(step) and hits > 0:
+		_sig_seren_heal(id)
 	swing_landed.emit(id, hits)
 	SessieLog.actie_slag(id, hits)
 	return hits
@@ -1242,9 +1268,11 @@ func _aim_caster_at(caster_id: String, m: Node) -> void:
 func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles := 1, hitstop := 0,
 		num_color := Color(1, 1, 1), num_scale := 1.0, stg_kind := SomStaggerData.KIND_NONE, finisher_flash := false) -> void:
 	var chain_step := _pending_chain_step
+	var heavy_lv := _pending_heavy_level
 	var impact_el := _pending_impact_element
 	_pending_impact_element = ""
 	_pending_chain_step = -2
+	_pending_heavy_level = 0
 	if not enemies.has(m):
 		return
 	var e: Dictionary = enemies[m]
@@ -1280,7 +1308,10 @@ func damage_enemy(m: Node, dmg: int, dir: Vector2i, stagger := true, knock_tiles
 		SomFx.impact_spark(room.get_node("Objects"), at, "fysiek")
 	enemy_hit.emit(m, dmg)
 	if Settings.action_battles() and not golem and stg_kind != SomStaggerData.KIND_NONE:
-		if SomStagger.apply_hit(e, m, e["data"], stg_kind):
+		var sg_mult := 1.0
+		if SomSignatureData.is_active() and last_attacker == "dennis":
+			sg_mult = SomSignature.dax_stagger_fill_mult(chain_step, heavy_lv)
+		if SomStagger.apply_hit(e, m, e["data"], stg_kind, sg_mult):
 			SomStagger.enter_wankel(e)
 			if e.has("tg"):
 				(e["tg"] as TelegraphAttack).interrupt()
@@ -1493,6 +1524,13 @@ func _slot_for_hero(hero_id: String) -> int:
 
 
 func _target_for(m: Node) -> String:
+	if enemies.has(m) and SomSignatureData.is_active():
+		var ae: Dictionary = enemies[m]
+		var ag: Dictionary = ae.get("sig_aggro", {})
+		if int(ag.get("until", 0)) > sim_tick:
+			var hid := str(ag.get("hero", ""))
+			if hid != "" and is_alive(hid):
+				return hid
 	if coop_mode:
 		var hid: String = str(_coop_slots.get(0, "dennis"))
 		if is_alive(hid):
@@ -1519,6 +1557,76 @@ func _tick_stagger() -> void:
 		if not is_instance_valid(m) or not enemies.has(m):
 			continue
 		SomStagger.tick_entry(enemies[m], enemies[m].has("golem"))
+
+
+func _tick_signatures() -> void:
+	if not SomSignatureData.is_active():
+		return
+	if coop_mode and not coop_sim_host:
+		return
+	for hid in _sig_icd.keys():
+		var left := int(_sig_icd[hid])
+		if left > 0:
+			_sig_icd[hid] = left - 1
+	for m in enemies.keys():
+		if not is_instance_valid(m) or not enemies.has(m):
+			continue
+		var e: Dictionary = enemies[m]
+		var slow := int(e.get("sig_slow", 0))
+		if slow > 0:
+			e["sig_slow"] = slow - 1
+
+
+func _sig_after_melee_hit(attacker_id: String, m: Node, e: Dictionary, step: int, heavy: int) -> void:
+	if not SomSignatureData.is_active():
+		return
+	var fin := step >= 0 and SomChainData.is_finisher(step)
+	var heavy_hit := heavy > 0
+	if attacker_id == "kael" and fin and SomSignature.icd_ready(_sig_icd, "kael"):
+		e["sig_aggro"] = {"hero": "kael", "until": sim_tick + SomSignatureData.KAEL_LOCK_TICKS}
+		_sig_icd["kael"] = SomSignatureData.KAEL_ICD_TICKS
+	if attacker_id == "orion" and (fin or heavy_hit) and not e.has("golem"):
+		e["sig_slow"] = SomSignatureData.ORION_SLOW_TICKS
+		if e.has("tg"):
+			var tg: TelegraphAttack = e["tg"]
+			if tg.in_windup():
+				tg.extend_windup(SomSignatureData.ORION_WINDUP_EXTRA_TICKS)
+				_sync_telegraph_meters(e, tg)
+
+
+func _sig_seren_heal(caster_id: String) -> void:
+	if not SomSignatureData.is_active():
+		return
+	if caster_id != "lotte" or not SomSignature.icd_ready(_sig_icd, "lotte"):
+		return
+	var from: Vector2 = body_of(caster_id)
+	var tgt := _sig_lowest_ally_within(from, SomSignatureData.SEREN_HEAL_RADIUS_PX)
+	if tgt.is_empty():
+		return
+	var amt := maxi(1, roundi(float(tgt["max_hp"]) * SomSignatureData.SEREN_HEAL_PCT))
+	var got := PartyActions.restore(tgt, amt, 0)
+	last_sig_heal = int(got.x)
+	sig_heal_total += int(got.x)
+	_sig_icd["lotte"] = SomSignatureData.SEREN_ICD_TICKS
+	if room != null and room.has_node("Objects"):
+		SomFx.number(room.get_node("Objects"), body_of(str(tgt["id"])) + Vector2(0, -22), "+%d" % got.x, Color(0.4, 1, 0.5))
+	heal_glow(str(tgt.get("id", "")))
+
+
+func _sig_lowest_ally_within(from: Vector2, radius: float) -> Dictionary:
+	var best := {}
+	var best_r := 2.0
+	for hid in party_ids():
+		if not is_alive(hid):
+			continue
+		if body_of(hid).distance_to(from) > radius:
+			continue
+		var h: Dictionary = member(hid)
+		var r := float(h["hp"]) / maxf(1.0, float(h["max_hp"]))
+		if r < best_r:
+			best_r = r
+			best = h
+	return best
 
 
 func _enemy_wankel_hold(m: Node, e: Dictionary, delta: float) -> void:
@@ -1584,7 +1692,10 @@ func _enemy_ai(m: Node, delta: float) -> void:
 	if dist > SomData.ENEMY_REACH - 6.0 and float(e["tele"]) <= 0.0:
 		e["chase"] = float(e["chase"]) - delta
 		if float(e["chase"]) <= 0.0 and not m.is_moving and dist < SomData.CHASE_RANGE * 16.0:
-			e["chase"] = SomData.CHASE_INTERVAL
+			var chase_iv := SomData.CHASE_INTERVAL
+			if SomSignatureData.is_active() and int(e.get("sig_slow", 0)) > 0:
+				chase_iv /= SomSignatureData.ORION_SLOW_MULT
+			e["chase"] = chase_iv
 			_step_toward(m, body_of(tid))
 	_tint(m, e)
 
@@ -1866,7 +1977,10 @@ func _enemy_ai_telegraph(m: Node, e: Dictionary, delta: float) -> void:
 	if dist > SomData.ENEMY_REACH - 6.0 and float(e["tele"]) <= 0.0:
 		e["chase"] = float(e["chase"]) - delta
 		if float(e["chase"]) <= 0.0 and not m.is_moving and dist < SomData.CHASE_RANGE * 16.0:
-			e["chase"] = SomData.CHASE_INTERVAL
+			var chase_iv2 := SomData.CHASE_INTERVAL
+			if SomSignatureData.is_active() and int(e.get("sig_slow", 0)) > 0:
+				chase_iv2 /= SomSignatureData.ORION_SLOW_MULT
+			e["chase"] = chase_iv2
 			_step_toward(m, body_of(tid))
 	_tint(m, e)
 
@@ -1938,6 +2052,10 @@ func _clear_transient_combat() -> void:
 	_pd_icd.clear()
 	_pd_counter.clear()
 	_pd_flash.clear()
+	_sig_icd.clear()
+	last_sig_heal = 0
+	sig_heal_total = 0
+	sig_backstab_hits = 0
 	perfect_count = 0
 	perfect_event_ticks.clear()
 	chain_reset("*")

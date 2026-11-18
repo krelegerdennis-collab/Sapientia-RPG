@@ -89,6 +89,13 @@ Algemene regels voor alle PR's
 
 ## F3 — Signature-eigenschap per held (keten/charge)
 
+**Status (PR4, branch `combat/f3-signatures`)**: geïmplementeerd achter `SomSignatureData.ENABLED` (default **aan** op die branch; tests: `force_active`). Data: `scripts/data/som_signature_data.gd`; hooks: `som_arena.gd` (`_land`, `damage_enemy`, `_target_for`, `_enemy_ai` chase-interval). Tests: `--signaturetest`.
+
+**NG keuzes (gecontroleerd in code)**:
+- **Vijand-facing**: bijgewerkt in `_enemy_ai` / telegraaf-start (richting naar doelheld) → backstab via `SomSignature.backstab_hit(m.facing, strike_dir)`; alleen **melee** (geen spreuk-backstab).
+- **Monster-slow**: eigen `enemies[m].sig_slow` (ticks) + langere `CHASE_INTERVAL` (÷ 0,6), **niet** `combat_zones.slow_mult`.
+- **Heal-pad**: `PartyActions.restore` + `SomFx.number` groen `Color(0.4, 1, 0.5)` + `heal_glow` (zelfde als `cast_spell` heal).
+
 **Doel**: elke held voelt anders binnen hetzelfde 3-slag/charge-schema. Geen duo/team-combo's. AI gebruikt identieke regels (triggert dus ook voor bondgenoten).
 
 | Held (id) | Trigger | Effect (voorstel) |
