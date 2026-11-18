@@ -35,7 +35,7 @@ func _ready() -> void:
 	bars = Control.new()
 	bars.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.position = BARS_POS
-	bars.size = Vector2(80, 64)
+	bars.size = Vector2(80, 84)   # 4 helden (PartyLimiet.MAX_HELDEN) x 21 - 1 = 83
 	bars.draw.connect(_draw_bars)
 	root.add_child(bars)
 	ring_button = UiMenu.button(SomData.TXT_RING)

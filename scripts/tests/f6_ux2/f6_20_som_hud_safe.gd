@@ -6,6 +6,8 @@ extends RefCounted
 
 const SomHudS := preload("res://scripts/som/som_hud.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+const TouchControlsS := preload("res://scripts/touch_controls.gd")
+const SomDataS := preload("res://scripts/data/som_data.gd")
 ## Partyvak (hud_frame 72x20), 21 per held (som_hud._draw_bars).
 const FRAME := Vector2(72, 20)
 const ROW := 21.0
@@ -52,12 +54,23 @@ static func _old(hud: Node, vx: float) -> Dictionary:
 			"ring": ring, "codex": codex, "swap": swap}
 
 
-func _make(t: Node) -> Array:
+func _make(t: Node, with_touch := false) -> Array:
 	var arena := FakeArena.new()
 	arena.name = "FakeSomArena"
 	if not GameState.party.is_empty():
 		arena.active_id = str(GameState.party[0].get("id", ""))
 	t.get_tree().root.add_child(arena)
+	if with_touch:
+		# echte touch_controls (zoals TouchControls/Control in een kamer): de knoppenrij via som_row_slot()
+		var layer := CanvasLayer.new()
+		layer.name = "TouchControls"
+		arena.add_child(layer)
+		var tc: Control = TouchControlsS.new()
+		tc.name = "Control"
+		layer.add_child(tc)
+		await t.pframes(1)
+		tc.refit()
+		arena.touch = tc
 	var hud: CanvasLayer = SomHudS.new()
 	hud.arena = arena
 	arena.add_child(hud)
@@ -109,4 +122,49 @@ func run(t: Node) -> void:
 		await t.shot("f6_20_som_hud_%s" % cs[0])
 		made[0].queue_free()
 		await t.pframes(2)
+	await _touch_path(t)
 	UiTouchC.insets_override = null
+
+
+## Touch aan: de rij [Swap][Codex][Ring] komt uit touch_controls.som_row_slot() (naast MENU, met safe_inset).
+## Insets 0: op de oude plek (MENU-rect zonder inset). Notch/zijkanten: binnen UiTouch.safe_rect.
+func _touch_path(t: Node) -> void:
+	var was: bool = TouchControlsS.touch_mode
+	TouchControlsS.touch_mode = true
+	for cs in [["16x9", null], ["16x9", Vector4.ZERO], ["19_5x9", Vector4.ZERO], ["16x9", NOTCH],
+			["19_5x9_notch", NOTCH], ["19_5x9", Vector4(30, 0, 30, 0)]]:
+		await t.sc.set_profile(cs[0])
+		UiTouchC.insets_override = cs[1]
+		var made: Array = await _make(t, true)
+		var arena: Node = made[0]
+		var hud: Node = made[1]
+		var tc: Control = arena.touch
+		await t.pframes(2)
+		var tag := "F6-T14 touch [%s insets %s]" % [cs[0], cs[1]]
+		var buttons: Array = [hud.ring_button, hud.codex_button, hud.switch_button]   # slot 0, 1, 2
+		var zero: bool = cs[1] == null or cs[1] == Vector4.ZERO
+		if zero:
+			# oude plek: MENU = (breedte - rand - 38, rand - 2, 38, 14), rij links ervan (TOP_BUTTON_GAP + breedte per slot)
+			var bs: Vector2 = SomDataS.TOP_BUTTON_SIZE
+			var m := Rect2(tc.size.x - tc.edge_margin - 38.0, tc.edge_margin - 2.0, 38.0, 14.0)
+			var same := true
+			var got: Array = []
+			for i in buttons.size():
+				var want := tc.position + Vector2(m.position.x - (SomDataS.TOP_BUTTON_GAP + bs.x) * float(i + 1), m.get_center().y - bs.y / 2.0)
+				var b: Control = buttons[i]
+				got.append(b.position)
+				same = same and b.position == want and b.size == bs
+			t.check("%s: knoppenrij via som_row_slot op de oude plek %s" % [tag, got], same)
+		else:
+			var safe: Rect2 = t.safe()
+			for b in buttons:
+				var r: Rect2 = (b as Control).get_global_rect()
+				t.check("%s: knop %s %s binnen safe %s" % [tag, (b as Control).name, r, safe], t.within(r, safe))
+		var ok_slot := true
+		for i in buttons.size():
+			ok_slot = ok_slot and (buttons[i] as Control).position == tc.position + tc.som_row_slot(i).position
+		t.check("%s: knoppen volgen som_row_slot(0..2)" % tag, ok_slot)
+		await t.shot("f6_20_som_hud_touch_%s" % cs[0])
+		arena.queue_free()
+		await t.pframes(2)
+	TouchControlsS.touch_mode = was
