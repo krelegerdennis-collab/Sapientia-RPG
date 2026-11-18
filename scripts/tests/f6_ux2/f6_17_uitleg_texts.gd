@@ -243,7 +243,8 @@ func _keeper_flow(t: Node) -> void:
 	var npc: Node = NpcScene.instantiate()
 	npc.event = "shop"
 	npc.event_arg = "wilgendal_wapen"
-	npc.lines = []
+	var geen_regels: Array[String] = []
+	npc.lines = geen_regels
 	t.get_tree().root.add_child(npc)
 	var dummy := Node2D.new()
 	t.get_tree().root.add_child(dummy)
