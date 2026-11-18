@@ -106,6 +106,10 @@ func _process(_delta: float) -> void:
 		return
 	if Input.is_action_just_pressed("cancel"):
 		close()
+		if Input.is_action_pressed("cancel"):
+			Input.action_release("cancel")
+		if InputMap.has_action("menu") and Input.is_action_pressed("menu"):
+			Input.action_release("menu")
 		return
 	var vp := get_viewport_rect().size
 	var ins := UiTouchC.insets(get_viewport())
@@ -199,14 +203,6 @@ func _first_anchor() -> Node:
 		if node is Control or node is Node2D:
 			return node
 	return null
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not _open or not visible:
-		return
-	if event.is_action_pressed("cancel"):
-		close()
-		get_viewport().set_input_as_handled()
 
 
 func _ensure_ui() -> void:
