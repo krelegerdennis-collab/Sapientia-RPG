@@ -614,15 +614,15 @@ func _battle_tests(map: Node) -> void:
 	for i in 5:
 		var hr: Rect2 = cross.hit_rect(i)
 		ok_hit = ok_hit and UiTouch.big_enough(hr)
-		ok_art = ok_art and (cross.buttons[i] as Control).size == Vector2(24, 24)
+		ok_art = ok_art and (cross.buttons[i] as Control).size == Vector2(26, 26)
 	check("gevecht: elk kruisknopje heeft een tikvlak >= 25x25", ok_hit)
-	check("gevecht: het plaatje (art van RPG ART) blijft 24x24, afstand 25", ok_art
-			and cross.button_rect(1).get_center().is_equal_approx(cross.button_rect(0).get_center() + Vector2(0, -25)))
+	check("gevecht: het plaatje (art van RPG ART) is 26x26, afstand 27 (F6-T16)", ok_art
+			and cross.button_rect(1).get_center().is_equal_approx(cross.button_rect(0).get_center() + Vector2(0, -27)))
 	var edge_ok := true
 	for i in 5:
 		var btn: Control = cross.buttons[i]
-		edge_ok = edge_ok and btn._has_point(Vector2(-0.9, 12.0)) and btn._has_point(Vector2(24.9, 12.0)) \
-				and not btn._has_point(Vector2(-1.5, 12.0)) and not btn._has_point(Vector2(26.0, 12.0))
+		edge_ok = edge_ok and btn._has_point(Vector2(-0.9, 13.0)) and btn._has_point(Vector2(26.9, 13.0)) \
+				and not btn._has_point(Vector2(-1.5, 13.0)) and not btn._has_point(Vector2(28.0, 13.0))
 	check("gevecht: tikvlak is 1 eenheid ruimer dan het plaatje (CrossButton)", edge_ok)
 	check("gevecht: kruis blijft binnen beeld", vp_rect().encloses(cross.cross_rect()))
 	await shot("ux_battle")

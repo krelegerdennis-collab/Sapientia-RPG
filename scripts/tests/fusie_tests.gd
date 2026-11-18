@@ -993,10 +993,10 @@ func _codex_button_tests() -> void:
 	bt.enemies[1]["s"]["hp"] = maxi(1, roundi(bt.enemies[1]["s"]["max_hp"] * 0.8))
 	bt._refresh_party()
 	var h := hero_c(bt)
-	check("Codex-knop zichtbaar (pagina's + boeken), 24x24 (>= 16)", bt.cross.is_shown(CODEX) and bt.cross.buttons[CODEX].visible
-			and bt.cross.buttons[CODEX].size == Vector2(24, 24))
+	check("Codex-knop zichtbaar (pagina's + boeken), 26x26 (>= 16)", bt.cross.is_shown(CODEX) and bt.cross.buttons[CODEX].visible
+			and bt.cross.buttons[CODEX].size == Vector2(26, 26))
 	check("Codex-knop rechtsonder in het kruis, binnen 384x216", bt.cross.button_rect(CODEX).get_center().is_equal_approx(
-			bt.cross.button_rect(0).get_center() + Vector2(25, 25)) and in_screen(bt, bt.cross.buttons[CODEX]))
+			bt.cross.button_rect(0).get_center() + Vector2(27, 27)) and in_screen(bt, bt.cross.buttons[CODEX]))
 	var overlap := false
 	for i in 5:
 		overlap = overlap or bt.cross.button_rect(i).intersects(bt.cross.button_rect(CODEX))
