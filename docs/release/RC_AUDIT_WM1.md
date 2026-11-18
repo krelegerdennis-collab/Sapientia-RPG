@@ -49,8 +49,8 @@ Huidige freeze voor de interne RC. Freeze 2 en tag `wm1-freeze` blijven staan.
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 50 |
-| OPEN | 15 |
+| KLAAR | 51 |
+| OPEN | 14 |
 | NIET TE CHECKEN | 28 |
 | **Totaal** | **93** |
 
@@ -63,12 +63,12 @@ Voortgang per fase (telling van de detailrijen hieronder, freeze 3 op `fcb3f21e`
 | 3 Stabiliteit | 9 | 0 | 8 | OPEN |
 | 4 S25-performance | 2 | 1 | 4 | OPEN |
 | 5 Balans | 6 | 1 | 1 | OPEN |
-| 6 UX-polish | 16 | 5 | 3 | OPEN |
+| 6 UX-polish | 17 | 4 | 3 | OPEN |
 | 7 Playtest en fixronde | 0 | 3 | 5 | OPEN |
 | 8 Release candidate | 7 | 2 | 5 | OPEN |
-| **Totaal** | **50** | **15** | **28** | |
+| **Totaal** | **51** | **14** | **28** | |
 
-Sinds de eerste audit (15 nov): F1.4, F1.5, F1.6, F1.7, F2.2, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.5, F6.14, F6.15, F6.17, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
+Sinds de eerste audit (15 nov): F1.4, F1.5, F1.6, F1.7, F2.2, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.14, F6.15, F6.17, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
 KLAAR (F2.2/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
 
 ### OPEN op risico (voor de interne RC van 20 nov)
@@ -183,7 +183,7 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 |---|---|---|---|---|---|---|
 | F6.1 | Uitrusting-tutorial (mantel) | NIET TE CHECKEN | Handmatig. Deels: `uxtest`. | | | |
 | F6.2 | Inktwurm- en vang-tutorial | KLAAR | `tutorialtest` in CI; tekstfix #367. | | | |
-| F6.3 | Uitleg RUN/partywissel/winkels/Warp | OPEN | Alleen opslaan is uitgelegd (#388). Over de rest is geen besluit genoteerd. | Dennis beslist per onderwerp of de bestaande tekst volstaat (geen nieuwe tutorial, lock §4). | S | ja (tekst/scope) |
+| F6.3 | Uitleg RUN/partywissel/winkels/Warp | KLAAR | #551 (merge `c1ded179`, https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/551): de 9 door Dennis goedgekeurde teksten staan exact in de code (RUN-uitleg eenmalig, partywissel, winkels, Warp-uitleg eenmalig). De RUN- en Warp-uitlegvlag wordt pas gezet na lezen of sluiten. Opslaan was al uitgelegd (#388). `f6uxtest2` (`f6_ux2/f6_17_uitleg_texts.gd`) in CI. | | S | |
 | F6.4 | Titelknoppen volgens H11 | KLAAR | `wm1releasetest` (titel); #398 (testknoppen achter vlag); `rcchecktest`. | | | |
 | F6.5 | Veldmenu met één duim, Android-terug | KLAAR | F6-T01 #546 (merge `0132a8be`, Android-back sluit save-slotlijst), F6-T02 #547 (merge `2258429d`, hub Warp/Party boven joystick), F6-T03 #548 (merge `6f1ec479`, hub Android-terug); F6-T04+T05 #545 (checklist-feiten). `f6uxtest2` (`f6_10_back_slotlist.gd`, `f6_11_hub_touch.gd`, `f6_12_hub_back.gd`) in CI; eerder `menutest`, `androidbacktest` (#451), rij-tikvlakken #466. Nameten op de S25 gaat mee in de playtest (F7.2). | | | |
 | F6.6 | Melding "warp hub cannot be reached yet" | KLAAR | `scripts/ui/field_menu.gd`; `menutest`. | | | |
