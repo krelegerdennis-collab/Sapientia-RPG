@@ -7,6 +7,11 @@ const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const THEME := preload("res://assets/theme.tres")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+## Linksboven van de partyvakken en de toast zonder notch (F6-T14: daar komt UiTouch.insets bij).
+const BARS_POS := Vector2(4, 4)
+const TOAST_POS := Vector2(80, 24)
+const TOAST_H := 30.0
 
 var arena: Node
 var root: Control
@@ -29,7 +34,7 @@ func _ready() -> void:
 	add_child(root)
 	bars = Control.new()
 	bars.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bars.position = Vector2(4, 4)
+	bars.position = BARS_POS
 	bars.size = Vector2(80, 64)
 	bars.draw.connect(_draw_bars)
 	root.add_child(bars)
@@ -106,6 +111,9 @@ static func skin_button(b: Button, key: String) -> bool:
 
 func _place() -> void:
 	var vs := root.get_viewport_rect().size
+	# F6-T14: notch/punch-hole (zoals dungeon100_hud.gd). Insets 0 = de oude plekken, pixelgelijk.
+	var ins := UiTouchC.insets(get_viewport())
+	bars.position = BARS_POS + Vector2(ins.x, ins.y)
 	var tc: Control = arena.touch if arena != null else null
 	if tc and tc.has_method("som_row_slot"):
 		# één rij rechtsboven naast MENU: [RUN][Swap][Codex][Ring][MENU] (RUN zet touch_controls zelf neer)
@@ -120,13 +128,14 @@ func _place() -> void:
 		switch_button.size = sr.size
 	else:
 		ring_button.reset_size()
-		ring_button.position = Vector2(vs.x - 4.0 - 38.0 - 4.0 - ring_button.size.x, 2.0)
+		ring_button.position = Vector2(vs.x - ins.z - 4.0 - 38.0 - 4.0 - ring_button.size.x, 2.0 + ins.y)
 		codex_button.reset_size()
-		codex_button.position = Vector2(ring_button.position.x - 4.0 - codex_button.size.x, 2.0)
+		codex_button.position = Vector2(ring_button.position.x - 4.0 - codex_button.size.x, 2.0 + ins.y)
 		switch_button.reset_size()
-		switch_button.position = Vector2(codex_button.position.x - 4.0 - switch_button.size.x, 2.0)
-	toast_label.position = Vector2(80, 24)
-	toast_label.size = Vector2(vs.x - 160, 30)
+		switch_button.position = Vector2(codex_button.position.x - 4.0 - switch_button.size.x, 2.0 + ins.y)
+	# toast: zelfde marge links en rechts (80) binnen het veilige gebied, dus nog gecentreerd in safe
+	toast_label.position = TOAST_POS + Vector2(ins.x, ins.y)
+	toast_label.size = Vector2(vs.x - 2.0 * TOAST_POS.x - ins.x - ins.z, TOAST_H)
 
 
 func _process(delta: float) -> void:
