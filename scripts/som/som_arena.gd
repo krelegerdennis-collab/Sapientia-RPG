@@ -1168,10 +1168,12 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 				shock_feet = m.position + Vector2(0, SomData.BODY_Y)
 			var strike_dir := Vector2i(roundi(f.x), roundi(f.y))
 			var raw := physical_damage(atk, float(e["def"]), swing_mult, rng)
-			var adj: Dictionary = SomSignature.adjust_melee_damage(self, id, m, raw, strike_dir, num_color, num_scale)
-			raw = int(adj["dmg"])
-			num_color = adj["color"]
-			num_scale = float(adj["scale"])
+			if SomSignatureData.is_active() and id == "noor":
+				var adj: Dictionary = SomSignature.adjust_melee_damage(self, m, raw, strike_dir)
+				if not adj.is_empty():
+					raw = int(adj["dmg"])
+					num_color = adj["color"]
+					num_scale = float(adj["scale"])
 			damage_enemy(m, raw, strike_dir, stagger, tiles, stop, num_color, num_scale, stg_kind, is_fin)
 			SomSignature.after_melee_hit(self, id, m, e, step, heavy)
 			if (step >= 0 and SomChainData.is_finisher(step)) or heavy >= 2:

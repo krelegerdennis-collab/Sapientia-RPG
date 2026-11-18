@@ -79,16 +79,12 @@ static func on_telegraph_started(e: Dictionary) -> void:
 	e["sig_orion_windup_done"] = false
 
 
-## Schade + kleur voor Vesper backstab; telt sig_backstab_hits op arena.
-static func adjust_melee_damage(arena, attacker_id: String, m: Node, raw: int, strike_dir: Vector2i,
-		num_color: Color, num_scale: float) -> Dictionary:
-	var out := {"dmg": raw, "color": num_color, "scale": num_scale}
-	if not SomSignatureData.is_active() or attacker_id != "noor":
-		return out
+## Vesper backstab via _land: lege dict = geen wijziging (geen alloc op de meeste hits).
+static func adjust_melee_damage(arena, m: Node, raw: int, strike_dir: Vector2i) -> Dictionary:
 	if not backstab_hit(m.facing, strike_dir):
-		return out
-	out["dmg"] = maxi(1, roundi(float(raw) * SomSignatureData.CRIT_MULT))
+		return {}
 	arena.sig_backstab_hits += 1
+	var out := {"dmg": maxi(1, roundi(float(raw) * SomSignatureData.CRIT_MULT))}
 	if SomFeelData.ENABLED:
 		out["color"] = SomFeelData.COL_FINISHER_NUMBER
 		out["scale"] = SomFeelData.SCALE_FINISHER_NUMBER
@@ -127,6 +123,8 @@ static func try_seren_heal(arena, caster_id: String, step: int, hits: int) -> vo
 		return
 	var amt := maxi(1, roundi(float(tgt["max_hp"]) * SomSignatureData.SEREN_HEAL_PCT))
 	var got := PartyActions.restore(tgt, amt, 0)
+	if int(got.x) <= 0:
+		return
 	arena.last_sig_heal = int(got.x)
 	arena.sig_heal_total += int(got.x)
 	arena._sig_icd["lotte"] = SomSignatureData.SEREN_ICD_TICKS

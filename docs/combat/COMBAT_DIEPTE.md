@@ -89,7 +89,7 @@ Algemene regels voor alle PR's
 
 ## F3 — Signature-eigenschap per held (keten/charge)
 
-**Status (PR4, branch `combat/f3-signatures`)**: geïmplementeerd achter `SomSignatureData.ENABLED` (default **aan** op die branch; tests: `force_active`). Data: `scripts/data/som_signature_data.gd`; hooks: `som_arena.gd` (`_land`, `damage_enemy`, `_target_for`, `_enemy_ai` chase-interval). Tests: `--signaturetest`.
+**Status (PR4, branch `combat/f3-signatures`)**: geïmplementeerd achter `SomSignatureData.ENABLED` (default **aan**; tests: `force_active`). Logica in `scripts/som/som_signature.gd`; dunne hooks in `som_arena.gd`. Vesper-crit alleen in `_land` als actief + `noor` (geen dict-alloc op overige hits). Seren-ICD pas na heal > 0. Orion-windup +6 max 1× per telegraaf (`sig_orion_windup_done`). Tests: `--signaturetest` (echte `chain_swing`/`heavy_tick`, co-op aggro vóór slot 0).
 
 **NG keuzes (gecontroleerd in code)**:
 - **Vijand-facing**: bijgewerkt in `_enemy_ai` / telegraaf-start (richting naar doelheld) → backstab via `SomSignature.backstab_hit(m.facing, strike_dir)`; alleen **melee** (geen spreuk-backstab).
