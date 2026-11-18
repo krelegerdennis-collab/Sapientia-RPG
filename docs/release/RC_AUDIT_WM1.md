@@ -3,7 +3,7 @@
 Doel: vaststellen wat er vóór de interne RC (F8, uiterlijk 20 nov 2026, **niet publiceren**) nog moet gebeuren.
 Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 
-- Basis: `finish/wm1` op `f76aa715` (tag `wm1-freeze`, 17-11-2026). Huidige freeze is `wm1-freeze2` (zie Freeze 2).
+- Basis: `finish/wm1` op `f76aa715` (tag `wm1-freeze`, 17-11-2026). Huidige freeze is `wm1-freeze3` (zie Freeze 3).
   Checklist: `docs/release/WM1_RELEASE_CHECKLIST.md` (93 punten).
   Historisch: de eerste audit (klus 10) stond op `0fb6334` (#476, 15 nov 2026). Klus 19 (17 nov 2026, middag) liep na op `d8a38e41` (#508); sinds klus 18 toen gemerged: #502-#508
   (o.a. #506 placeholders Wilgendal, #507 drie suites in CI, #508 balansmeting `WM1_BALANCE_REPORT_RC.md`). Eerder nog #465-#501.
@@ -20,7 +20,7 @@ Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 
 ## Freeze 2
 
-Huidige freeze voor de interne RC. Tag `wm1-freeze` (commit `f76aa715`) blijft zoals hij is.
+Tag `wm1-freeze` (commit `f76aa715`) blijft zoals hij is.
 
 - Tag `wm1-freeze2` (annotated tag-object `fa723ca4`) op commit `961101acb98de40daea50077c495f79082ca8a09`.
   Tag-object volledig `fa723ca4d173763b14851264a1c82d0c822fc992`, tagger RPG Forge, 18-11-2026. Niet publiceren.
@@ -29,20 +29,32 @@ Huidige freeze voor de interne RC. Tag `wm1-freeze` (commit `f76aa715`) blijft z
   F6 safe-area: #533, #534, #535, #536 en #537. #539 dicht de `step_dir`-testrace (F3.2).
 - F3.2 op `961101ac`: 591 PASS / 0 FAIL, twee keer serieel gedraaid. Rapporten blijven op de build-box:
   `F3_2_playthrough_961101a_run1.txt` en `run2.txt`. Niet in de repo.
-- Debug-APK v0.21, versionCode 23, gebouwd door RPG Forge. Niet gepubliceerd.
-- Nog open: installeren op de Samsung S25, en Dennis' HD-2D-oogcheck. F6.23 placeholder-SFX blijft een bekend open punt
+- Debug-APK v0.21, versionCode 23, alleen **arm64-v8a**, gebouwd door RPG Forge. Niet gepubliceerd.
+
+## Freeze 3
+
+Huidige freeze voor de interne RC. Freeze 2 en tag `wm1-freeze` blijven staan.
+
+- Tag `wm1-freeze3` (annotated tag-object `a072e034`) op commit `fcb3f21e80e3346a468a521781085e6167ad5b69`
+  (`fcb3f21e`, head van `finish/wm1`), tagger RPG Forge, 18-11-2026. Niet publiceren.
+- Inhoud na freeze 2: F5.3 combat #544 (merge `63012138`, Golem Action-ATK 27) en #549 (merge `fcb3f21e`, Seren 405/36).
+  F6-T01 t/m F6-T03: #546 (merge `0132a8be`), #547 (merge `2258429d`), #548 (merge `6f1ec479`); F6-T04+T05: #545 (merge `325a0105`).
+- F3.2 op `fcb3f21e`: `RESULT OK (591 goed, 0 fouten)`, twee keer serieel gedraaid. Rapporten op de build-box:
+  `/workspace/f3/F3_2_playthrough_fcb3f21_run1.txt` en `F3_2_playthrough_fcb3f21_run2.txt`. Niet in de repo.
+- Debug-APK `sapientia-wm1-freeze3-fcb3f21-debug.apk`, v0.21, versionCode 23, **arm64-v8a en armeabi-v7a**, gebouwd door RPG Forge. Niet gepubliceerd (APK niet in de repo).
+- Nog open: installeren op de Samsung S25 (F7.1), Dennis' HD-2D-oogcheck. F6.23 placeholder-SFX blijft een bekend open punt
   (geen blocker).
 
 ## Samenvatting
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 48 |
-| OPEN | 16 |
-| NIET TE CHECKEN | 29 |
+| KLAAR | 50 |
+| OPEN | 15 |
+| NIET TE CHECKEN | 28 |
 | **Totaal** | **93** |
 
-Voortgang per fase (telling van de detailrijen hieronder, freeze-ronde 17-11-2026; **KLAAR (meting)** en **KLAAR (tussenmeting)** tellen als KLAAR):
+Voortgang per fase (telling van de detailrijen hieronder, freeze 3 op `fcb3f21e`; **KLAAR (meting)** en **KLAAR (tussenmeting)** tellen als KLAAR):
 
 | Fase | KLAAR | OPEN | NIET TE CHECKEN | Gate |
 |---|---:|---:|---:|---|
@@ -50,13 +62,13 @@ Voortgang per fase (telling van de detailrijen hieronder, freeze-ronde 17-11-202
 | 2 Art op palet | 4 | 2 | 2 | OPEN |
 | 3 Stabiliteit | 9 | 0 | 8 | OPEN |
 | 4 S25-performance | 2 | 1 | 4 | OPEN |
-| 5 Balans | 5 | 2 | 1 | OPEN |
-| 6 UX-polish | 15 | 5 | 4 | OPEN |
+| 5 Balans | 6 | 1 | 1 | OPEN |
+| 6 UX-polish | 16 | 5 | 3 | OPEN |
 | 7 Playtest en fixronde | 0 | 3 | 5 | OPEN |
 | 8 Release candidate | 7 | 2 | 5 | OPEN |
-| **Totaal** | **48** | **16** | **29** | |
+| **Totaal** | **50** | **15** | **28** | |
 
-Sinds de eerste audit (15 nov): F1.4, F1.5, F1.6, F1.7, F2.2, F2.5, F3.2, F3.9, F5.2, F5.4, F5.5, F5.6, F6.14, F6.15, F6.17, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
+Sinds de eerste audit (15 nov): F1.4, F1.5, F1.6, F1.7, F2.2, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.5, F6.14, F6.15, F6.17, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
 KLAAR (F2.2/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
 
 ### OPEN op risico (voor de interne RC van 20 nov)
@@ -65,14 +77,13 @@ F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt to
 
 | # | Punt | Waarom risico | Voorstel | Grootte | Ja Dennis |
 |---:|---|---|---|---|---|
-| 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Debug-APK v0.21, versionCode 23, commit `961101ac` (tag `wm1-freeze2`, F7.1). Installatie op de S25 door Dennis blijft open. Eén ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
+| 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Debug-APK v0.21, versionCode 23, commit `fcb3f21e` (tag `wm1-freeze3`, `sapientia-wm1-freeze3-fcb3f21-debug.apk`, arm64-v8a + armeabi-v7a, F7.1). Installatie op de S25 door Dennis blijft open. Eén ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
 | 2 | F8.6 Release-APK | `build-apk` heeft nog nooit met `build_type: release` gedraaid (laatste run op deze branch: debug, `5cb270c`, 5 nov). Of de signing-secrets er staan, kan deze sessie niet zien. Een ondertekende APK is de kern van de RC. | Forge doet nu een droge release-run op de huidige head. Dan blijkt meteen of de secrets kloppen, ruim voor 20 nov. | S | nee (bestaande workflow, interne build, niet publiceren) |
 | 3 | F4.2 S25-meting | Geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`. | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
 | 4 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt` (F6.23b). LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
 
-Daarnaast open: F5.1 en F5.3 (doelvensters en
-besluit per afwijking: beide OPEN, wachten op Dennis; cijfers staan in `docs/release/WM1_BALANCE_REPORT_RC.md`, afwijkingentabel §7) en
-F6.24 (World Warper-cues: in spel stil via `ambience.gd`, manifest-/RC-besluit nog open).
+Daarnaast open: F5.1 (doelvensters; cijfers staan in `docs/release/WM1_BALANCE_REPORT_RC.md` §3) en
+F6.24 (World Warper-cues: in spel stil via `ambience.gd`, manifest-/RC-besluit nog open; optie b wacht op Dennis).
 
 ### Verouderde tekst in de checklist
 
@@ -96,7 +107,7 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 | F1.4 | CI-matrix gelijk met `game_state.gd` | KLAAR | #361, #380, #400, #406, #449, #480, #488, #500; #507 (merge `060140df`) zette `blauwekisttest`, `bossnametest` en `dungeon100bossmaptest` in de matrix (Dennis akkoord 17-11 12:06). #514 zette `--combattick` in de matrix; de suite draait in CI sinds `f01ba40a`. Matrix nu 135 suites (`.github/workflows/tests.yml:24-42`), `relaytest` als eigen job. Buiten de matrix blijven perf/sim/benchmark en `wm1playthroughtest` (bewust, checklist). | | S | ja (workflow) |
 | F1.5 | Baseline PASS-aantallen | KLAAR | Baseline: 140 checks groen op freeze 2 (incl. #521 `wmdeathtest`; PR #542, 140/140). Eerder 138/138 op `f76aa715` (draft-PR #515, `rc/wm1-freeze-ci`, gesloten zonder merge). `--combattick` draait in CI sinds #514. De tabel in `AGENTS.md` is van v0.18. | | S | nee |
 | F1.6 | Lock-cijfers hertellen | KLAAR | #517 (merge `e7f33011`, https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/517) hertelde alle lock-cijfers op `f76aa715` (tag `wm1-freeze`) en schreef ze in `docs/release/WM1_CONTENT_LOCK.md`. Story-`EVENTS` is 62 (= 53 string-keys + 9 expressie-keys); de eerdere driftlijst noemde ten onrechte 58 vs 53. Overige rijen na die hertelling: kaartscènes 50 (48 speelroute, 2 dev; extra `leven_v2_leeszaal.tscn`, `woud_beek.tscn`), `ITEMS` 53 (`spreuk_grote_genezing`, `spreuk_vuurbal`, `spreuk_zonnevlam`), Codex 21/32 (`adermot`, `druipslak`, `steenluis` / `aderspark`, `koude_druppel`, `steenbeet`), `TODO(design\|verhaal)` zonder tests 51 (56 − 5 in `scripts/tests/`). Gelijk: `ENEMIES` 26, berggrot-`MONSTERS` 3, `BOSSES` 12 (10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 99), helden 5 (Dax, Vesper, Seren, Kael Voss, Orion), sleutelvoorwerpen 4, `EQUIPMENT` 85, blauwe-kist 36, `SPELLS` 81 (21/20/20/20), kern 2/1/2, opdrachten 7 (6 hoofd, 1 zij) / acts 6 (act 3-6 "later"), BGM 24/13, SFX 99/0. | | S | nee |
-| F1.7 | Tag `wm1-freeze` | KLAAR | Tag `wm1-freeze` op `finish/wm1` commit `f76aa7150f23385d47c630e54179e26ac1ba2cb8` (`f76aa715`), akkoord Dennis 17-11-2026 15:25 (kaart t890s5659). Huidige freeze is `wm1-freeze2` (zie Freeze 2); deze tag blijft staan. | | S | ja (scope) |
+| F1.7 | Tag `wm1-freeze` | KLAAR | Tag `wm1-freeze` op `finish/wm1` commit `f76aa7150f23385d47c630e54179e26ac1ba2cb8` (`f76aa715`), akkoord Dennis 17-11-2026 15:25 (kaart t890s5659); tag `wm1-freeze2` op `961101ac`; huidige freeze is `wm1-freeze3` (tag-object `a072e034`) op `fcb3f21e` (zie Freeze 3). Debug-APK freeze 3: beide ABI's (arm64-v8a en armeabi-v7a). Tags blijven staan. | | S | ja (scope) |
 
 ## Fase 2: Art op palet
 
@@ -118,7 +129,7 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
 | F3.1 | Verse import zonder fouten | NIET TE CHECKEN | Er is geen Godot in deze sessie. CI importeert bij elke run, maar faalt niet op import-warnings. | Dennis draait lokaal `--import` en leest de uitvoer. | | |
-| F3.2 | Alle suites groen op de freeze-commit | KLAAR | Op freeze-commit `f76aa715` (tag `wm1-freeze`): `--wm1playthroughtest` na een verse `--import` **591 PASS / 0 FAIL / 0 SCRIPT ERRORs**. Rapport `/workspace/f3/F3_2_playthrough_f76aa71.txt` (box van het team, niet in de repo). Freeze 2 op `961101ac`: 591 PASS / 0 FAIL, twee keer serieel (`F3_2_playthrough_961101a_run1.txt` en `run2.txt`, build-box, niet in de repo). | | S | nee |
+| F3.2 | Alle suites groen op de freeze-commit | KLAAR | Op freeze-commit `f76aa715` (tag `wm1-freeze`): `--wm1playthroughtest` na een verse `--import` **591 PASS / 0 FAIL / 0 SCRIPT ERRORs**. Rapport `/workspace/f3/F3_2_playthrough_f76aa71.txt` (box van het team, niet in de repo). Freeze 2 op `961101ac`: 591 PASS / 0 FAIL, twee keer serieel (`F3_2_playthrough_961101a_run1.txt` en `run2.txt`, build-box, niet in de repo). Freeze 3 op `fcb3f21e`: **591 PASS / 0 FAIL**, twee keer serieel (`RESULT OK (591 goed, 0 fouten)` in `/workspace/f3/F3_2_playthrough_fcb3f21_run1.txt` en `run2.txt`, build-box, niet in de repo). | | S | nee |
 | F3.3 | Geen `SCRIPT ERROR` | KLAAR | `.github/scripts/run_suite.sh:25,30-33` faalt erop; #476 groen. | | | |
 | F3.4 | Golden path route A en B | NIET TE CHECKEN | Handmatig. Deels gedekt door `wm1playthroughtest` (kas en berggrot, niet in CI). | | | |
 | F3.5 | Terugweg Archief 2 (H14) | NIET TE CHECKEN | Handmatig. `archief2test` raakt `leven_v1_plaat`. | | | |
@@ -157,10 +168,10 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 |---|---|---|---|---|---|---|
 | F5.1 | Doelvensters kiezen | OPEN | Niets genoteerd in de checklist. | Dennis neemt het voorstel over of past het aan. | S | ja (balans) |
 | F5.2 | Volledig rapport op de freeze-commit | KLAAR (meting) | Op `f76aa715` draaide RPG COMBAT `--battlesim --seed=20261020 --fights=2000`. Alle rijen gelijk aan `docs/release/WM1_BALANCE_REPORT_RC.md` §3.1; het rapport is byte-gelijk aan `docs/BATTLE_BALANCE_REPORT.md` op de looptijd in de kop na. Bestanden `/workspace/combat/f52/sim_f76aa71.txt` en `.json` (box van het team, niet in de repo). Wortelkoning 28% staat zo in §3.1 en wacht op F5.3 / §7. | | M | nee (meten) |
-| F5.3 | Besluit per afwijking | OPEN | Hangt aan F5.2. | Afwijkingentabel aan Dennis voorleggen. | M | ja (balans) |
-| F5.4 | Levelcurve | KLAAR (meting) | `docs/release/WM1_BALANCE_REPORT_RC.md` §4: per level gevechten en minuten (aanname 5 s/ronde); Golem bereikt op Lv 7 (ontwerp 8), eind Lv 15; 67 verplichte gevechten. Kanttekening: afwijking Golem Lv 7 i.p.v. 8, eind Lv 15 i.p.v. 16 (A14) wacht op besluit Dennis via F5.3 / `WM1_BALANCE_REPORT_RC.md` §7. | Diepe Grot-run-tijden via de sim. | M | ja (bij afstellen) |
+| F5.3 | Besluit per afwijking | KLAAR | Dennis 18-11-2026, `docs/combat/f53_beslissingen.md` (#549). **A1** nee: Wortelkoning baas-ATK blijft **38** (`ENEMIES.wortelkoning.boss`, power scaling v2 #208). **A4** ja: Golem Action-ATK 27, Classic ongewijzigd (#544, merge `63012138`). **A8** ja: Seren (`lotte_glitch.boss`) HP 405 / ATK 36 (#549, merge `fcb3f21e`). **A2, A9, A10:** nee (geen wijziging). **A3, A5, A6, A7, A11, A12, A13, A14:** bewust zo gelaten (zoals voorgesteld in `WM1_BALANCE_REPORT_RC.md` §7). | | M | ja (balans) |
+| F5.4 | Levelcurve | KLAAR (meting) | `docs/release/WM1_BALANCE_REPORT_RC.md` §4: per level gevechten en minuten (aanname 5 s/ronde); Golem bereikt op Lv 7 (ontwerp 8), eind Lv 15; 67 verplichte gevechten. A14 bewust: in-game levels zijn het doel (geen data-wijziging). | Diepe Grot-run-tijden via de sim. | M | ja (bij afstellen) |
 | F5.5 | Economie | KLAAR (meting) | `docs/release/WM1_BALANCE_REPORT_RC.md` §5: goud per gebied tegenover `shop_data.gd`; alleen monstergoud, kisten geven items. Pakket overal betaalbaar behalve de eerste 70 g (startgoud 0). | CSV-modus tegen `shop_data.gd`. | M | ja (bij afstellen) |
-| F5.6 | Classic tegenover Action | KLAAR (meting) | `docs/release/WM1_BALANCE_REPORT_RC.md` §6: `--actionsim` opnieuw (perfect dodge uit): 13,9% HP per kamer (was 11,1%); Classic op dezelfde kamers ≤ 1,7% per gevecht (`tools/battlesim/rc_classic_som.gd`); realtime Golem Lv 7 98,5% (was 65,5%). Stagger (#450) zit niet in de sim. Kanttekening: RT-Golem 98,5% buiten doel 60–80% (A4) wacht op besluit Dennis via F5.3 / `WM1_BALANCE_REPORT_RC.md` §7. | `--actionsim` opnieuw draaien. | M | ja (bij afstellen) |
+| F5.6 | Classic tegenover Action | KLAAR (meting) | `docs/release/WM1_BALANCE_REPORT_RC.md` §6: `--actionsim` opnieuw (perfect dodge uit): 13,9% HP per kamer (was 11,1%); Classic op dezelfde kamers ≤ 1,7% per gevecht (`tools/battlesim/rc_classic_som.gd`); realtime Golem Lv 7 was 98,5% vóór F5.3 A4 (#544: Action-ATK 27 → ~72% winst, doel 60–80%). Stagger (#450) zit niet in de sim. | `--actionsim` opnieuw draaien. | M | ja (bij afstellen) |
 | F5.7 | Zelfde seed opnieuw als bewijs | NIET TE CHECKEN | Procesregel. | | | |
 | F5.8 | Balans-suites groen | KLAAR | `battlesimtest`, `balansarchief1test`, `wm1balanstest`, `dungeon100schaaltest`, `autotest`, `woudtest`, `archief2test` in CI; #476 groen. | | | |
 
@@ -174,7 +185,7 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 | F6.2 | Inktwurm- en vang-tutorial | KLAAR | `tutorialtest` in CI; tekstfix #367. | | | |
 | F6.3 | Uitleg RUN/partywissel/winkels/Warp | OPEN | Alleen opslaan is uitgelegd (#388). Over de rest is geen besluit genoteerd. | Dennis beslist per onderwerp of de bestaande tekst volstaat (geen nieuwe tutorial, lock §4). | S | ja (tekst/scope) |
 | F6.4 | Titelknoppen volgens H11 | KLAAR | `wm1releasetest` (titel); #398 (testknoppen achter vlag); `rcchecktest`. | | | |
-| F6.5 | Veldmenu met één duim, Android-terug | NIET TE CHECKEN | Eén duim: toestel. Wel gedekt: `menutest`, `androidbacktest` (#451), rij-tikvlakken #466. | | | |
+| F6.5 | Veldmenu met één duim, Android-terug | KLAAR | F6-T01 #546 (merge `0132a8be`, Android-back sluit save-slotlijst), F6-T02 #547 (merge `2258429d`, hub Warp/Party boven joystick), F6-T03 #548 (merge `6f1ec479`, hub Android-terug); F6-T04+T05 #545 (checklist-feiten). `f6uxtest2` (`f6_10_back_slotlist.gd`, `f6_11_hub_touch.gd`, `f6_12_hub_back.gd`) in CI; eerder `menutest`, `androidbacktest` (#451), rij-tikvlakken #466. Nameten op de S25 gaat mee in de playtest (F7.2). | | | |
 | F6.6 | Melding "warp hub cannot be reached yet" | KLAAR | `scripts/ui/field_menu.gd`; `menutest`. | | | |
 | F6.7 | Bevestiging bij opslaan/laden | KLAAR | #388 (uitleg + grijze Save-knop), #391 (autosave per slot). De beleving zelf hoort in de playtest. | | | |
 | F6.8 | Quest Log | KLAAR | `questtest`; titel zijopdracht Engels (H7). | | | |
@@ -201,7 +212,7 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
-| F7.1 | Playtest-APK | OPEN | Debug-APK v0.21, versionCode 23, commit `961101ac` (tag `wm1-freeze2`), gebouwd door RPG Forge. Niet gepubliceerd (Freeze 2). | Installatie op de Samsung S25 door Dennis. | S | nee |
+| F7.1 | Playtest-APK | OPEN | Debug-APK v0.21, versionCode 23, commit `fcb3f21e` (tag `wm1-freeze3`, bestand `sapientia-wm1-freeze3-fcb3f21-debug.apk`, arm64-v8a en armeabi-v7a), gebouwd door RPG Forge. Niet gepubliceerd (Freeze 3). | Installatie op de Samsung S25 door Dennis. | S | nee |
 | F7.2 | Dennis speelt de golden path | OPEN | Kolom "Dennis" in de scorekaart (`FINISH_LOG.md`) is leeg. Zie OPEN-lijst #1. | Eén ronde volgens `WM1_PLAYTEST.md`. | L | ja |
 | F7.3 | Bugs als issue | NIET TE CHECKEN | Procesregel. Nu 0 open issues met label `bug`. | | | |
 | F7.4 | Ernst P0-P3 | NIET TE CHECKEN | Definitie, procesregel. | | | |
@@ -218,7 +229,7 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 |---|---|---|---|---|---|---|
 | F8.1 | Versie kiezen en overal gelijk | KLAAR | Besluit Dennis 15 nov: 0.21 / 23. Gezet met `bump_version set 0.21 --code 23` in versiebron, `project.godot:15` en alle 3 Android-presets; `bump_version --check` OK; `rcchecktest` [F8.1/F8.2] PASS; titelscherm leest `config/version` (`autotest`: label v0.21). Job 11, `release/wm1-rc-prep`. | Dennis kiest, Forge draait `bump_version minor`. | S | ja (versie) |
 | F8.2 | `version/code` hoger dan de vorige build | KLAAR | `rcchecktest` [F8.2]: code 23 > 22 (v0.20), PASS. | Komt mee met F8.1. | S | nee (Forge) |
-| F8.3 | Changelog | KLAAR | `[0.21]` in `CHANGELOG.md` dekt de merges op `finish/wm1` na #493 t/m #541 (één regel per PR, inclusief #516 t/m #541). `[Unreleased]` is leeg. | | S | nee |
+| F8.3 | Changelog | KLAAR | `[0.21]` in `CHANGELOG.md` dekt de merges op `finish/wm1` na #493 t/m #549 (één regel per PR, inclusief #516 t/m #549). `[Unreleased]` is leeg. | | S | nee |
 | F8.4 | README en BUILDS kloppen | KLAAR | Klus 12: `README.md:8` noemt "Huidige versie: 0.21 (code 23)" met `tools/release/version.json` als enige bron; de Android-sectie (`README.md:427`) verwijst naar die bron in plaats van "versie 0.13 (code 15)". Historische (v0.xx)-notities blijven. `rcchecktest` [F8.4] wordt daarmee PASS. | | | |
 | F8.5 | CI groen op de RC-commit | KLAAR | Optie a: draft-PR #515 (`rc/wm1-freeze-ci`, gesloten zonder merge) draaide de volledige CI-matrix op `wm1-freeze` `f76aa715`: 138/138 checks groen. Freeze 2: 140 checks (incl. #521 `wmdeathtest`); PR #542 140/140 groen. | | S | nee |
 | F8.6 | Release-APK met secrets | OPEN | Zie OPEN-lijst #2. Of de secrets bestaan, kan deze sessie niet zien (Actions-API afgeschermd). | | S | nee |

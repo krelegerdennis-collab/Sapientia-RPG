@@ -110,6 +110,13 @@ Alles op `finish/wm1` na tag `v0.20` (release-branch voor WM1).
 - Paletfix F2.2 `12_assets_ui` (#538).
 - Paletfix F2.2 `10_assets_sprites` (#540).
 - Paletfix F2.2 `06_assets_hd2d` (`light_soft_128`, Bayer 8x8) (#541).
+- RC-audit freeze2 nits F2.3/F2.4, gate fase 2, F7.1 (#543).
+- F6-T04/T05: RC-audit en checklist-feiten WM1 (#545).
+- F6-T01: Android-back sluit save-slotlijst (#546).
+- F6-T02: hub Warp/Party tikken niet meer door joystick gestolen (#547).
+- F6-T03: Hub-schermen reageren op Android-terug (#548).
+- combat(F5.3 A4): Golem eigen Action-ATK 27, Classic ongewijzigd (#544).
+- combat(F5.3 A8): Seren-baas HP 405 / ATK 36 (#549).
 
 ### Opgelost
 - Saves zijn atomair en herstelbaar; verplichte pauze-save hersteld; suspend-save alleen op mobiel.
