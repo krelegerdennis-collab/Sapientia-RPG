@@ -1231,15 +1231,15 @@ func _cross_nav_tests(b: Node) -> void:
 	var art := true
 	for i in 5:
 		art = art and b.cross.has_art(i)
-	check("kruis: 5 knoppen met de art van RPG ART (knop_*.png, 24x24)", art
-			and b.cross.buttons.all(func(k): return k.size == Vector2(24, 24)))
+	check("kruis: 5 knoppen met de art van RPG ART (knop_*.png, 26x26)", art
+			and b.cross.buttons.all(func(k): return k.size == Vector2(26, 26)))
 	check("kruis begint op Aanval (midden, frame 'gekozen')", b.cross.selected == 0 and cross_frame(b, 0) == 1
 			and cross_frame(b, 3) == 0)
 	var centre: Vector2 = b.cross.button_rect(0).get_center()
-	var shape: bool = b.cross.button_rect(1).get_center().is_equal_approx(centre + Vector2(0, -25)) \
-			and b.cross.button_rect(2).get_center().is_equal_approx(centre + Vector2(-25, 0)) \
-			and b.cross.button_rect(3).get_center().is_equal_approx(centre + Vector2(25, 0)) \
-			and b.cross.button_rect(4).get_center().is_equal_approx(centre + Vector2(0, 25))
+	var shape: bool = b.cross.button_rect(1).get_center().is_equal_approx(centre + Vector2(0, -27)) \
+			and b.cross.button_rect(2).get_center().is_equal_approx(centre + Vector2(-27, 0)) \
+			and b.cross.button_rect(3).get_center().is_equal_approx(centre + Vector2(27, 0)) \
+			and b.cross.button_rect(4).get_center().is_equal_approx(centre + Vector2(0, 27))
 	check("kruisvorm: Magie boven, Item links, Verdedig rechts, Vluchten onder", shape)
 	var path := []
 	for step in ["move_up", "move_down", "move_left", "move_right", "move_right", "move_down", "move_up"]:
