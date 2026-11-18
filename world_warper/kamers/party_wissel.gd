@@ -18,9 +18,13 @@ var _actief: VBoxContainer
 var _bank: VBoxContainer
 var _root: Control
 var _kolom_doos: VBoxContainer
+## Geen cancel/menu in het openingsframe.
+var _quiet_frame := -1
 
 
 func _ready() -> void:
+	_quiet_frame = Engine.get_process_frames()
+	set_process(true)
 	layer = 22
 	PartyBench.normaliseer()
 	var root := Control.new()
@@ -148,6 +152,15 @@ func _leeg(doos: Node) -> void:
 
 func _op_gui(event: InputEvent) -> void:
 	if event.is_action_pressed("cancel") or event.is_action_pressed("menu"):
+		_sluit()
+
+
+func _process(_delta: float) -> void:
+	if not is_inside_tree():
+		return
+	if Engine.get_process_frames() <= _quiet_frame:
+		return
+	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
 		_sluit()
 
 

@@ -27,6 +27,8 @@ const COLOR_BUTTON := Color("5c3484")
 const COLOR_BORDER := Color("8d6bb0")
 
 var _open := false
+## Geen cancel in het openingsframe (zelfde A-tik mag niet meteen terug).
+var _quiet_frame := -1
 var _built := false
 var _empty: Label
 var _scroll: ScrollContainer
@@ -78,6 +80,7 @@ func _ontkoppel_layout_hooks() -> void:
 
 func open() -> void:
 	_open = true
+	_quiet_frame = Engine.get_process_frames()
 	_ensure_ui()
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -97,6 +100,11 @@ func close() -> void:
 
 func _process(_delta: float) -> void:
 	if not _open or not visible or not is_inside_tree():
+		return
+	if Engine.get_process_frames() <= _quiet_frame:
+		return
+	if Input.is_action_just_pressed("cancel"):
+		close()
 		return
 	var vp := get_viewport_rect().size
 	var ins := UiTouchC.insets(get_viewport())
