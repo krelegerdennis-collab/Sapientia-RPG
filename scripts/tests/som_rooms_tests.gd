@@ -305,8 +305,12 @@ func _bazen() -> void:
 			var ca: Array = stats.get(Settings.BATTLE_STYLE_ACTION, [])
 			var cc: Array = stats.get(Settings.BATTLE_STYLE_CLASSIC, [])
 			if is_golem_rt:
-				check("baas %s (%s): Action realtime, geen turn-based via aanraken; stats = Classic (HP/ATK/DEF %s = %s)" % [bd.get("enemy", ""), rid, ca, cc],
-						bool(geopend.get(Settings.BATTLE_STYLE_ACTION, false)) and not ca.is_empty() and ca == cc)
+				# F5.3 A4: alleen de ATK verschilt in Action (SomData.ACTION_BOSS_ATK); HP en DEF = Classic.
+				var want := cc.duplicate()
+				if want.size() >= 2:
+					want[1] = int(SomData.ACTION_BOSS_ATK.get(str(bd.get("enemy", "")), want[1]))
+				check("baas %s (%s): Action realtime, geen turn-based via aanraken; stats = Classic behalve ACTION_BOSS_ATK (HP/ATK/DEF %s = %s)" % [bd.get("enemy", ""), rid, ca, want],
+						bool(geopend.get(Settings.BATTLE_STYLE_ACTION, false)) and not ca.is_empty() and ca == want)
 			else:
 				check("baas %s (%s): opent het TURN-BASED gevecht in Action, stats = Classic (HP/ATK/DEF %s = %s, geen Action-vermenigvuldiger)" % [bd.get("enemy", ""), rid, ca, cc],
 						bool(geopend.get(Settings.BATTLE_STYLE_ACTION, false)) and not ca.is_empty() and ca == cc)

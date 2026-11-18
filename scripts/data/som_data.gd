@@ -7,6 +7,7 @@
 extends RefCounted
 
 const BossCore := preload("res://scripts/battle/boss_core.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 
 ## Hoofdschakelaar. false = de proef bestaat niet (geen realtime, knop op het titelscherm doet niets).
 const ENABLED := true
@@ -385,9 +386,30 @@ static func boss_party_scale(party_count: int) -> float:
 	return 1.0
 
 
-## Baas-stats voor Action (D3): BossCore.apply_boss, geen ACTION_BOSS_MULT.
+## F5.3 A4 (akkoord Dennis 18-11-2026): alleen in Action een eigen baas-ATK, Classic blijft gelijk.
+## Golem (kennis_beest) Classic ATK 23 -> Action ATK 27: --actionsim --boss-rt Lv 7 98,5% -> 72% winst
+## (doel 60-80%, seed 20261020, zie docs/combat/f53_golem_action_atk.md). Sleutel = vijand-id; de baas
+## wordt herkend aan zijn "boss"-blok in GameData.ENEMIES (alleen ruwe data met "boss", vóór apply_boss).
+const ACTION_BOSS_ATK := {"kennis_beest": 27}
+
+
+## Vijand-id waarvan het "boss"-blok gelijk is aan dat van data, of "" (geen baas-blok / onbekend).
+static func _boss_id_of(data: Dictionary) -> String:
+	if not data.has("boss"):
+		return ""
+	for id in ACTION_BOSS_ATK:
+		var e: Dictionary = GameData.ENEMIES.get(id, {})
+		if e.has("boss") and e["boss"] == data["boss"]:
+			return id
+	return ""
+
+
+## Baas-stats voor Action (D3): BossCore.apply_boss, geen ACTION_BOSS_MULT; plus ACTION_BOSS_ATK (F5.3).
 static func action_boss_stats(data: Dictionary, party_count: int = 1) -> Dictionary:
 	var out := BossCore.apply_boss(data)
+	var bid := _boss_id_of(data)
+	if bid != "":
+		out["atk"] = int(ACTION_BOSS_ATK[bid])
 	var scale := boss_party_scale(party_count)
 	if is_equal_approx(scale, 1.0):
 		return out
