@@ -1531,3 +1531,15 @@ assets/sprites/som/monsters/papiergeest_death.png
 assets/sprites/som/monsters/papiergeest_hurt.png
 # F2.2 paletfix 06_assets_hd2d (RPG ART, besluit Dennis 17-11): alleen masterpalet, alpha 0/255; groups/06_assets_hd2d/repo_drop
 assets/hd2d/fx_data/light_soft_128.png
+# F6-T16 UI-art (RPG ART, akkoord Dennis 18-11)
+assets/ui/hud_menu.png
+assets/ui/hud_menu_ingedrukt.png
+assets/ui/hud_run.png
+assets/ui/hud_run_ingedrukt.png
+assets/ui/hud_run_aan.png
+assets/ui/hud_run_aan_ingedrukt.png
+assets/ui/hud_core.png
+assets/ui/hud_core_ingedrukt.png
+assets/ui/knop_codex.png
+assets/ui/title_knopkader.png
+assets/ui/title_knopkader_gekozen.png

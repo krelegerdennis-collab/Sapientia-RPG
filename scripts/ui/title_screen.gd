@@ -90,6 +90,11 @@ const FOOTER_MARGIN := Vector2(4, 1)
 const FOOTER_LABEL_GAP := 4
 ## Tikdoel van elke knop op het titelscherm: UiTouch.TOUCH_MIN (25 = ~48dp). Twee rijen vullen het kaartje (y 148..201).
 const TOUCH_H := 25.0
+## F6-T16 knopkader van RPG ART (118x25, 9-slice met 6 px aan elke kant; tekst blijft uit de code).
+## 'gekozen' = de knop met focus. Ontbreekt het plaatje, dan blijft de knop zoals hij was (alleen tekst).
+const KNOPKADER := "res://assets/ui/title_knopkader.png"
+const KNOPKADER_GEKOZEN := "res://assets/ui/title_knopkader_gekozen.png"
+const KNOPKADER_MARGIN := 6.0
 const INFO_H := 10.0
 
 
@@ -241,6 +246,9 @@ func _ready() -> void:
 	load_button.focus_neighbor_left = continue_button.get_path()
 	load_button.focus_neighbor_right = load_button.get_path()
 
+	for b in title_buttons():
+		_apply_knopkader(b)
+
 	apply_online_visibility()
 	apply_test_menu_visibility()
 	studio_label = UiMenu.label(Wm1Config.STUDIO_URL, UiStyleC.TEXT_OFF, 10)
@@ -257,6 +265,48 @@ func _ready() -> void:
 	# Eigen track. Op web start play() pas na de eerste tik (AudioManager).
 	AudioManager.play_music("main_menu", 0.6)
 	Transition.fade_in()
+
+
+## Alle knoppen van het titelscherm (ook de verborgen test-/online-knoppen).
+func title_buttons() -> Array[Button]:
+	return [continue_button, load_button, new_button, coop_button, pvp_button, som_button, beta_button, eind_button]
+
+
+## F6-T16: 9-slice-kader (patch 6 px). De content-marges blijven 0 (zoals de lege stijl van het thema),
+## zodat de maat en de plek van elke knop en de tekst gelijk blijven. focus = het 'gekozen' kader
+## (Godot tekent focus over normal/hover/pressed heen).
+static func knopkader_style(path: String) -> StyleBoxTexture:
+	if not ResourceLoader.exists(path):
+		return null
+	var tex: Texture2D = load(path)
+	if tex == null:
+		return null
+	var sb := StyleBoxTexture.new()
+	sb.texture = tex
+	sb.texture_margin_left = KNOPKADER_MARGIN
+	sb.texture_margin_top = KNOPKADER_MARGIN
+	sb.texture_margin_right = KNOPKADER_MARGIN
+	sb.texture_margin_bottom = KNOPKADER_MARGIN
+	sb.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_STRETCH
+	sb.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_STRETCH
+	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		sb.set_content_margin(side, 0.0)
+	return sb
+
+
+func _apply_knopkader(b: Button) -> void:
+	var kader := knopkader_style(KNOPKADER)
+	if kader == null:
+		return
+	var gekozen := knopkader_style(KNOPKADER_GEKOZEN)
+	b.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	for st in ["normal", "hover", "pressed", "hover_pressed"]:
+		b.add_theme_stylebox_override(st, kader)
+	var uit := kader.duplicate() as StyleBoxTexture
+	uit.modulate_color = Color(1, 1, 1, 0.55)
+	b.add_theme_stylebox_override("disabled", uit)
+	if gekozen != null:
+		b.add_theme_stylebox_override("focus", gekozen)
 
 
 ## Kaartje zonder verticale binnenmarge: de knoppen van 48dp vullen het.

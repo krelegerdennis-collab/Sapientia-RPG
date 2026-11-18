@@ -14,9 +14,10 @@ extends Control
 ## Besturing: D-pad/pijltjes kiezen een arm (vanaf een arm terug naar het midden met de
 ## tegenovergestelde richting), A = kiezen, B = terug. Tikken: 1e tik kiest een knop, tik op de gekozen knop bevestigt.
 ## Uitgeschakelde commando's zijn grijs (frame 2); A of tikken doet dan niets.
-## Art (RPG ART): assets/ui/knop_<id>.png = strook 72x24, 3 frames van 24x24:
-## 0 = normaal, 1 = gekozen, 2 = uit. Ontbreekt een plaatje, dan tekent de code een
-## eenvoudige reserve-knop (zie _draw_placeholder). Spec: art_specs_v13/BATTLE_UI_SPEC.md.
+## Art (RPG ART, F6-T16): assets/ui/knop_<id>.png = strook 78x26, 3 frames van 26x26 (ook knop_codex.png):
+## 0 = normaal, 1 = gekozen, 2 = uit. Het plaatje vult het hele tikvlak (26x26, ~48dp).
+## Ontbreekt een plaatje, dan tekent de code een eenvoudige reserve-knop (zie _draw_placeholder).
+## Spec: art_specs_v13/BATTLE_UI_SPEC.md, /workspace/art_f6/t16/LEESMIJ.md.
 ## Boven het kruis staat een klein naamlabel ('Kees: Aanval'): vervangt de oude strook
 ## 'Wat doet Kees?'.
 
@@ -31,9 +32,10 @@ const NAMES := ["Attack", "Magic", "Item", "Defend", "Flee", "Codex"]
 const CODEX := 5
 ## Plek van elke knop in het kruis (in knoppen; midden = 0,0)
 const CELLS := [Vector2i(0, 0), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
-const BUTTON := 24.0
+const BUTTON := 26.0               # F6-T16: frame 26x26 (was 24x24)
 const GAP := 1.0
 const ART_DIR := "res://assets/ui/"
+const FRAMES := 3                  # normaal, gekozen, uit
 
 var active := false
 var selected := 0
@@ -82,18 +84,19 @@ func _ready() -> void:
 	_refresh()
 
 
-## 3 frames van 24x24 uit een strook van 72x24 (leeg als het plaatje er niet is).
+## 3 frames van BUTTON x BUTTON (26x26) uit een strook van 78x26 (leeg als het plaatje er niet is of
+## te klein is, bv. nog een oude strook van 72x24: dan de reserve-knop i.p.v. een afgesneden frame).
 static func _load_frames(path: String) -> Array:
 	if not ResourceLoader.exists(path):
 		return []
 	var tex: Texture2D = load(path)
-	if tex == null or tex.get_width() < 72:
+	if tex == null or tex.get_width() < BUTTON * FRAMES or tex.get_height() < BUTTON:
 		return []
 	var out := []
-	for f in 3:
+	for f in FRAMES:
 		var at := AtlasTexture.new()
 		at.atlas = tex
-		at.region = Rect2(f * 24, 0, 24, 24)
+		at.region = Rect2(f * BUTTON, 0, BUTTON, BUTTON)
 		out.append(at)
 	return out
 
@@ -304,8 +307,11 @@ func _draw_placeholder(b: Control, i: int) -> void:
 	var r := Rect2(Vector2.ZERO, b.size)
 	b.draw_rect(r, Color(UiStyleC.INK, 0.9))
 	b.draw_rect(r.grow(-0.5), UiStyleC.HILITE if sel else UiStyleC.BORDER_DIM, false, 1.0)
+	# de reserve-tekening is op 24x24 gemaakt: gecentreerd in de knop van BUTTON x BUTTON
+	var o := Vector2.ONE * floorf((BUTTON - 24.0) / 2.0)
 	if i == CODEX:
-		# v0.19 reserve-icoon (tot ART knop_codex.png levert): open boekje met paarse rug
+		# v0.19 reserve-icoon (alleen als knop_codex.png ontbreekt): open boekje met paarse rug
+		b.draw_set_transform(o)
 		var col: Color = UiStyleC.TEXT if on else UiStyleC.TEXT_OFF
 		var glow: Color = Color(0.72, 0.45, 1.0) if on else UiStyleC.TEXT_OFF
 		b.draw_rect(Rect2(5, 7, 6, 10), Color(col, 0.9))
@@ -315,8 +321,9 @@ func _draw_placeholder(b: Control, i: int) -> void:
 		b.draw_rect(Rect2(14, 9, 4, 1), Color(UiStyleC.INK, 0.8))
 		b.draw_rect(Rect2(6, 12, 4, 1), Color(UiStyleC.INK, 0.8))
 		b.draw_rect(Rect2(14, 12, 4, 1), Color(UiStyleC.INK, 0.8))
+		b.draw_set_transform(Vector2.ZERO)
 		return
 	var font := b.get_theme_default_font()
 	if font:
-		b.draw_string(font, Vector2(8, 16), NAMES[i].left(1), HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
+		b.draw_string(font, Vector2(8, 16) + o, NAMES[i].left(1), HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
 				UiStyleC.TEXT if on else UiStyleC.TEXT_OFF)

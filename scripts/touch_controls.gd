@@ -14,6 +14,26 @@ const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const SomDataC := preload("res://scripts/data/som_data.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
+## F6-T16 HUD-art (RPG ART): MENU 38x25, RUN en CORE 46x25, met ingedrukt-varianten; RUN heeft een
+## apart plaatje met het lampje aan. Het plaatje staat gecentreerd op menu_rect()/run_rect()/kern_rect()
+## (die rechthoeken en de tikvlakken blijven gelijk; het plaatje vult het tikvlak in de hoogte).
+## Ontbreekt een plaatje (null), dan tekent de code de oude knop (rechthoek + tekst).
+const HUD_MENU := preload("res://assets/ui/hud_menu.png")
+const HUD_MENU_PRESSED := preload("res://assets/ui/hud_menu_ingedrukt.png")
+const HUD_RUN := preload("res://assets/ui/hud_run.png")
+const HUD_RUN_PRESSED := preload("res://assets/ui/hud_run_ingedrukt.png")
+const HUD_RUN_ON := preload("res://assets/ui/hud_run_aan.png")
+const HUD_RUN_ON_PRESSED := preload("res://assets/ui/hud_run_aan_ingedrukt.png")
+const HUD_CORE := preload("res://assets/ui/hud_core.png")
+const HUD_CORE_PRESSED := preload("res://assets/ui/hud_core_ingedrukt.png")
+## sleutel -> [normaal, ingedrukt]; "run_on" = lampje aan. Een null-waarde = reserve-tekening (ook voor tests).
+var hud_art := {
+	"menu": [HUD_MENU, HUD_MENU_PRESSED],
+	"run": [HUD_RUN, HUD_RUN_PRESSED],
+	"run_on": [HUD_RUN_ON, HUD_RUN_ON_PRESSED],
+	"core": [HUD_CORE, HUD_CORE_PRESSED],
+}
+
 @export var dpad_radius := 30.0
 @export var button_radius := 15.0
 @export var edge_margin := 8.0
@@ -86,6 +106,7 @@ var _press_count := {}    # actie -> aantal vingers dat hem indrukt
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST   # pixel-art (HUD-knoppen, joystick) scherp
 	resized.connect(queue_redraw)
 	get_viewport().size_changed.connect(refit)
 	_base_dpad_radius = dpad_radius
@@ -111,6 +132,8 @@ func apply_settings() -> void:
 func _on_setting_changed(key: String) -> void:
 	if key in ["touch_size", "touch_opacity"]:
 		apply_settings()
+	elif key == "run":
+		queue_redraw()   # F6-T16: lampje op de RUN-art volgt de stand
 
 
 ## Vul het scherm. Als de CanvasLayer geschaald is (in gevechten 2x, voor het
@@ -508,6 +531,8 @@ func _draw_rest(line: float) -> void:
 		_draw_run_button(line)
 	if show_menu:
 		var mr := menu_rect()
+		if _draw_hud_art(mr, "menu", _press_count.has("menu")):
+			return
 		var st := top_style(_press_count.has("menu"))
 		draw_rect(mr, st["fill"])
 		draw_rect(mr, st["border"], false, line)
@@ -516,6 +541,31 @@ func _draw_rest(line: float) -> void:
 		var tp := Vector2(mr.get_center().x - ts.x / 2.0, mr.position.y + 11.0).round()
 		draw_string(font, tp + Vector2(1, 1), "MENU", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyleC.SHADOW)
 		draw_string(font, tp, "MENU", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, st["text"])
+
+
+## F6-T16: welk HUD-plaatje hoort nu bij deze knop (null = reserve-tekening)?
+## key: "menu", "run" (kiest zelf lampje aan/uit via run_on()) of "core".
+func hud_texture(key: String, pressed: bool) -> Texture2D:
+	if key == "run" and run_on():
+		key = "run_on"
+	var pair: Array = hud_art.get(key, [])
+	if pair.size() < 2:
+		return null
+	return pair[1] if pressed else pair[0]
+
+
+## Waar het plaatje komt: zijn eigen maat, gecentreerd op de knoprechthoek, op hele eenheden.
+static func hud_art_rect(r: Rect2, tex_size: Vector2) -> Rect2:
+	return Rect2((r.get_center() - tex_size / 2.0).round(), tex_size)
+
+
+## Tekent de HUD-art voor deze knop; false = geen plaatje (de aanroeper tekent de reserve-knop).
+func _draw_hud_art(r: Rect2, key: String, pressed: bool) -> bool:
+	var tex := hud_texture(key, pressed)
+	if tex == null:
+		return false
+	draw_texture_rect(tex, hud_art_rect(r, tex.get_size()), false)
+	return true
 
 
 func _fine() -> bool:
@@ -549,6 +599,8 @@ var _kern_icon: Texture2D
 func _draw_kern_button(line: float) -> void:
 	var kr := kern_rect()
 	var pressed := _press_count.has("kern")
+	if _draw_hud_art(kr, "core", pressed):
+		return
 	draw_rect(kr.grow(line), Color(KERN_NEON.r, KERN_NEON.g, KERN_NEON.b, 0.16 if not pressed else 0.4))   # gloed
 	draw_rect(kr, Color(0.1, 0.07, 0.14, 0.85) if not pressed else Color(0.28, 0.18, 0.38, 0.95))
 	draw_rect(kr, KERN_NEON if not pressed else Color.WHITE, false, line)
@@ -580,6 +632,8 @@ const RUN_NEON := Color(0.35, 1.0, 0.55)
 
 func _draw_run_button(line: float) -> void:
 	var rr := run_rect()
+	if _draw_hud_art(rr, "run", _press_count.has("run")):
+		return
 	var on := run_on()
 	var st := top_style(_press_count.has("run"))
 	draw_rect(rr, st["fill"])
