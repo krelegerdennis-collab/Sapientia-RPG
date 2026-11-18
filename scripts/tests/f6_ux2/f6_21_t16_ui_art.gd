@@ -6,6 +6,7 @@ extends RefCounted
 const CrossScript := preload("res://scripts/battle/command_cross.gd")
 const TouchScript := preload("res://scripts/touch_controls.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const KADER := "res://assets/ui/title_knopkader.png"
 const KADER_GEKOZEN := "res://assets/ui/title_knopkader_gekozen.png"
 
@@ -57,9 +58,77 @@ func _title_tests(t: Node) -> void:
 	var fs := nb.get_theme_stylebox("focus") as StyleBoxTexture
 	t.check("T16 titel: New Game met focus toont het gekozen-kader", nb.has_focus() and fs != null
 			and fs.texture.resource_path == KADER_GEKOZEN)
-	t.check("T16 titel: content-marges 0 (maat en tekstplek van de knoppen ongewijzigd)",
-			is_zero_approx(fs.get_content_margin(SIDE_LEFT)) and is_zero_approx(fs.get_content_margin(SIDE_TOP)))
+	t.check("T16 titel: tekstmarge 4 links/rechts, 0 boven/onder (hoogte blijft 25)",
+			is_equal_approx(fs.get_content_margin(SIDE_LEFT), 4.0) and is_equal_approx(fs.get_content_margin(SIDE_RIGHT), 4.0)
+			and is_zero_approx(fs.get_content_margin(SIDE_TOP)) and is_zero_approx(fs.get_content_margin(SIDE_BOTTOM)))
 	await t.shot("f6_t16_title")
+	# tekst past in het kader: standaard, en met alle 8 knoppen zichtbaar (online + testmenu), ook met notch
+	var oud_online: bool = ReleaseFlags.online_cut
+	var oud_test: int = ReleaseFlags.test_menu_override
+	for alles in [false, true]:
+		ReleaseFlags.online_cut = not alles if alles else oud_online
+		ReleaseFlags.test_menu_override = 1 if alles else oud_test
+		titel.apply_online_visibility()
+		titel.apply_test_menu_visibility()
+		for cs in [["16x9", Vector4.ZERO], ["19_5x9_notch", Vector4(22, 4, 10, 6)]]:
+			await t.sc.set_profile(cs[0])
+			UiTouch.insets_override = cs[1]
+			await t.pframes(6)
+			titel._place_card()
+			await t.pframes(2)
+			_check_title_fit(t, titel, "T16 titel [%s, %s]" % ["alle knoppen" if alles else "standaard", cs[0]])
+			if alles and cs[0] == "16x9":
+				await t.shot("f6_t16_title_alle_knoppen")
+		UiTouch.insets_override = null
+	ReleaseFlags.online_cut = oud_online
+	ReleaseFlags.test_menu_override = oud_test
+	titel.apply_online_visibility()
+	titel.apply_test_menu_visibility()
+	await t.sc.set_profile("16x9")
+	await t.pframes(6)
+	titel._place_card()
+	titel.refresh()
+	await t.pframes(4)
+	await t.shot("f6_t16_title_v2")
+
+
+## Elke zichtbare titelknop: '> label' en '  label' (breedte font + 2x tekstmarge) passen in het kader,
+## de knop ligt in beeld en in het veilige gebied, geen twee knoppen overlappen, en Continue en
+## New Game beginnen hun tekst op dezelfde x (nette kolom).
+func _check_title_fit(t: Node, titel: Node, tag: String) -> void:
+	var vis: Array[Button] = []
+	for b: Button in titel.title_buttons():
+		if b.is_visible_in_tree():
+			vis.append(b)
+	var bad := []
+	var beeld := Rect2(Vector2.ZERO, t.get_viewport().get_visible_rect().size)
+	var veilig: Rect2 = t.safe()
+	for b in vis:
+		var st := b.get_theme_stylebox("normal")
+		var font := b.get_theme_font("font")
+		var fsz := b.get_theme_font_size("font_size")
+		var label := str(b.get_meta("label", ""))
+		var w := 0.0
+		for pre in ["> ", "  "]:
+			w = maxf(w, font.get_string_size(pre + label, HORIZONTAL_ALIGNMENT_LEFT, -1, fsz).x)
+		var need := w + st.get_content_margin(SIDE_LEFT) + st.get_content_margin(SIDE_RIGHT)
+		var r := b.get_global_rect()
+		if need > r.size.x + 0.01 or font.get_height(fsz) > r.size.y:
+			bad.append("%s: tekst %.0f+marges > %.0f" % [b.name, w, r.size.x])
+		if not t.within(r, beeld) or not t.within(r, veilig):
+			bad.append("%s buiten beeld/veilig %s" % [b.name, r])
+	for i in vis.size():
+		for j in range(i + 1, vis.size()):
+			if vis[i].get_global_rect().intersects(vis[j].get_global_rect()):
+				bad.append("%s overlapt %s" % [vis[i].name, vis[j].name])
+	t.check("%s: elke tekst past in zijn kader, in beeld/veilig, geen overlap (%d knoppen) %s" % [tag, vis.size(), bad],
+			bad.is_empty() and vis.size() >= 3)
+	var c: Rect2 = titel.continue_button.get_global_rect()
+	var l: Rect2 = titel.load_button.get_global_rect()
+	var n: Rect2 = titel.new_button.get_global_rect()
+	t.check("%s: Continue %s + Load %s vullen samen de rij van New Game %s (zelfde linker- en rechterrand)" % [tag, c.size, l.size, n.size],
+			is_equal_approx(c.position.x, n.position.x) and is_equal_approx(l.end.x, n.end.x)
+			and is_equal_approx(c.position.y, l.position.y) and c.end.x < l.position.x)
 
 
 func _cross_and_hud_tests(t: Node) -> void:

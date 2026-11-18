@@ -95,6 +95,10 @@ const TOUCH_H := 25.0
 const KNOPKADER := "res://assets/ui/title_knopkader.png"
 const KNOPKADER_GEKOZEN := "res://assets/ui/title_knopkader_gekozen.png"
 const KNOPKADER_MARGIN := 6.0
+## Tekst binnen het kader: 4 px links/rechts (de gouden rand is 2 px; zo blijft er 2 px lucht). Boven/onder 0,
+## de knoppen blijven TOUCH_H hoog. Door deze marge is de minimale breedte van Continue 68 (tekst 60) en
+## krijgt Load in dezelfde rij de rest (48); de tekst staat in elke knop op dezelfde 4 px van de linkerrand.
+const KNOPKADER_TEXT_PAD := 4.0
 const INFO_H := 10.0
 
 
@@ -272,9 +276,8 @@ func title_buttons() -> Array[Button]:
 	return [continue_button, load_button, new_button, coop_button, pvp_button, som_button, beta_button, eind_button]
 
 
-## F6-T16: 9-slice-kader (patch 6 px). De content-marges blijven 0 (zoals de lege stijl van het thema),
-## zodat de maat en de plek van elke knop en de tekst gelijk blijven. focus = het 'gekozen' kader
-## (Godot tekent focus over normal/hover/pressed heen).
+## F6-T16: 9-slice-kader (patch 6 px). Content-marge links/rechts KNOPKADER_TEXT_PAD, boven/onder 0
+## (hoogte blijft TOUCH_H). focus = het 'gekozen' kader (Godot tekent focus over normal/hover/pressed heen).
 static func knopkader_style(path: String) -> StyleBoxTexture:
 	if not ResourceLoader.exists(path):
 		return null
@@ -289,8 +292,10 @@ static func knopkader_style(path: String) -> StyleBoxTexture:
 	sb.texture_margin_bottom = KNOPKADER_MARGIN
 	sb.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_STRETCH
 	sb.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_STRETCH
-	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
-		sb.set_content_margin(side, 0.0)
+	sb.set_content_margin(SIDE_LEFT, KNOPKADER_TEXT_PAD)
+	sb.set_content_margin(SIDE_RIGHT, KNOPKADER_TEXT_PAD)
+	sb.set_content_margin(SIDE_TOP, 0.0)
+	sb.set_content_margin(SIDE_BOTTOM, 0.0)
 	return sb
 
 
