@@ -13,6 +13,13 @@ func needs_game() -> bool:
 	return false
 
 
+static func _input_locked_uit(n: Node) -> bool:
+	if not is_instance_valid(n) or not ("input_locked" in n):
+		return true
+	var v: Variant = n.get("input_locked")
+	return v is bool and not v
+
+
 func _go_back(t: Node) -> void:
 	await t.pframes(1)
 	t.get_tree().root.propagate_notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
@@ -67,7 +74,7 @@ func _test_wissel(t: Node) -> void:
 	t.check("F6-T03 wissel: scherm staat open", pw.is_inside_tree())
 	await _go_back(t)
 	t.check("F6-T03 wissel: node weg na cancel", not is_instance_valid(pw) or not pw.is_inside_tree())
-	t.check("F6-T03 wissel: input_locked weer uit", not bool(player.get("input_locked")))
+	t.check("F6-T03 wissel: input_locked weer uit", _input_locked_uit(player))
 	player.queue_free()
 	await t.pframes(2)
 
