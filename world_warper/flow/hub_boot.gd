@@ -254,7 +254,7 @@ class Interactievlak extends Area2D:
 		collision_mask = 1
 		var vorm := CollisionShape2D.new()
 		var rect := RectangleShape2D.new()
-		rect.size = Vector2(14, 14)
+		rect.size = Vector2(26, 26)
 		vorm.shape = rect
 		add_child(vorm)
 		# Art van RPG ART (16x16, kleuraccent per Archief): vlak_warp / vlak_gezelschap.
