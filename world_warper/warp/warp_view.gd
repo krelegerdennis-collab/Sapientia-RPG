@@ -121,6 +121,7 @@ func open() -> void:
 
 
 func close() -> void:
+	_markeer_uitleg_gelezen()
 	_opened = false
 	visible = false
 	set_process(false)
@@ -255,9 +256,13 @@ func _zet_uitleg_eerste_keer() -> void:
 		return
 	var tonen := not GameState.story_flags.has(SD.WARP_UITLEG_FLAG)
 	_uitleg_band.visible = tonen
-	if tonen:
-		GameState.story_flags[SD.WARP_UITLEG_FLAG] = true
 	_layout_uitleg()
+
+
+## Vlag pas zetten als de uitleg getoond is en het scherm sluit of de reis start.
+func _markeer_uitleg_gelezen() -> void:
+	if _uitleg_band != null and _uitleg_band.visible:
+		GameState.story_flags[SD.WARP_UITLEG_FLAG] = true
 
 
 func _ensure_ui() -> void:
@@ -540,6 +545,7 @@ func _on_travel() -> void:
 	var path := str(gekozen.get("path", ""))
 	var spawn := str(gekozen.get("spawn", ""))
 	GameState.change_map(path, spawn)
+	_markeer_uitleg_gelezen()
 	warp_requested.emit(_wm_id, _place_id)
 
 

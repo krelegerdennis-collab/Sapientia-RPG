@@ -294,6 +294,7 @@ func _check_warp_uitleg(t: Node, tag: String) -> void:
 		var br := band.get_global_rect()
 		var rr := rijen.get_global_rect()
 		t.check("%s: Warp-lijst onder uitleg" % tag, br.end.y <= rr.position.y + 0.5)
+	t.check("%s: Warp-vlag nog niet gezet tijdens lezen" % tag, not GameState.story_flags.has(SD.WARP_UITLEG_FLAG))
 	wv.close()
 	wv.open()
 	await t.pframes(6)
@@ -340,7 +341,7 @@ func _run_line_once(t: Node) -> void:
 			break
 		await t.pframes(2)
 	t.check("F6.3: RUN-uitleg na eerste vrije stap", zag and str(Dialog._lines[0]) == SD.RUN_UITLEG_LINE)
-	t.check("F6.3: vlag gezet", GameState.story_flags.has(SD.RUN_UITLEG_FLAG))
+	t.check("F6.3: RUN-vlag nog niet gezet tijdens lezen", not GameState.story_flags.has(SD.RUN_UITLEG_FLAG))
 	while Dialog.is_open:
 		if Dialog.has_choices():
 			Dialog.choose(0)
@@ -349,6 +350,7 @@ func _run_line_once(t: Node) -> void:
 		await t.pframes(2)
 	await t.pframes(2)
 	var vlag := GameState.story_flags.has(SD.RUN_UITLEG_FLAG)
+	t.check("F6.3: RUN-vlag gezet na sluiten", vlag)
 	m.call("_on_player_stepped", tile)
 	await t.pframes(4)
 	t.check("F6.3: tweede stap geen RUN-uitleg", vlag and not Dialog.is_open)

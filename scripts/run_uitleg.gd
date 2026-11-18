@@ -18,8 +18,10 @@ static func op_stap(speler: Node) -> void:
 		return
 	if not _mag(speler):
 		return
-	GameState.story_flags[SD.RUN_UITLEG_FLAG] = true
 	Dialog.show_lines([SD.RUN_UITLEG_LINE])
+	# Vlag pas zetten als de speler de regel echt gelezen en gesloten heeft.
+	await Dialog.finished
+	GameState.story_flags[SD.RUN_UITLEG_FLAG] = true
 
 
 static func _mag(speler: Node) -> bool:

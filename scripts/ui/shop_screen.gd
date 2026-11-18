@@ -203,7 +203,6 @@ func _show_held(spell_id: String) -> void:
 	set_hint(SPELL_LEARN)
 	_layout_shop_hint()
 	_clear()
-	content.add_child(UiMenu.label(SPELL_LEARN, MenuColors.TEXT))
 	var any := false
 	for h in GameState.party:
 		if int(h.get("hp", 1)) <= 0:
