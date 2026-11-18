@@ -17,6 +17,7 @@ const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const PartyCard := preload("res://scripts/ui/party_card.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const TouchRowS := preload("res://scripts/ui/touch_row.gd")
+const TouchHints := preload("res://scripts/ui/touch_hints.gd")
 
 const LAYER := 21
 const FRAME_INSET := 6         # afstand venster - schermrand
@@ -80,7 +81,7 @@ func _ready() -> void:
 	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", 2)
 	outer.add_child(content)
-	hint = UiMenu.label(hint_text, MenuColors.TEXT_DIM)
+	hint = UiMenu.label(TouchHints.display(hint_text), MenuColors.TEXT_DIM)
 	hint.clip_text = true
 	outer.add_child(hint)
 	back_zone = Control.new()
@@ -151,14 +152,14 @@ func show_message(text: String, color := MenuColors.INFO) -> void:
 func clear_message() -> void:
 	_message_left = 0.0
 	if hint:
-		hint.text = hint_text
+		hint.text = TouchHints.display(hint_text)
 		hint.add_theme_color_override("font_color", MenuColors.TEXT_DIM)
 
 
 func set_hint(text: String) -> void:
 	hint_text = text
 	if _message_left <= 0.0 and hint:
-		hint.text = text
+		hint.text = TouchHints.display(text)
 
 
 ## Laatste melding (of de hint) - handig voor de autotest.
@@ -255,7 +256,7 @@ func _process(delta: float) -> void:
 	if _message_left > 0.0:
 		_message_left -= delta
 		if _message_left <= 0.0:
-			hint.text = hint_text
+			hint.text = TouchHints.display(hint_text)
 			hint.add_theme_color_override("font_color", MenuColors.TEXT_DIM)
 	if Engine.get_process_frames() <= _quiet_frame:
 		return
