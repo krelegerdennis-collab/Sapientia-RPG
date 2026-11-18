@@ -65,7 +65,7 @@ F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt to
 
 | # | Punt | Waarom risico | Voorstel | Grootte | Ja Dennis |
 |---:|---|---|---|---|---|
-| 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Verse debug-APK van de huidige `finish/wm1` (F7.1), één ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
+| 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Debug-APK v0.21, versionCode 23, commit `961101ac` (tag `wm1-freeze2`, F7.1). Installatie op de S25 door Dennis blijft open. Eén ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
 | 2 | F8.6 Release-APK | `build-apk` heeft nog nooit met `build_type: release` gedraaid (laatste run op deze branch: debug, `5cb270c`, 5 nov). Of de signing-secrets er staan, kan deze sessie niet zien. Een ondertekende APK is de kern van de RC. | Forge doet nu een droge release-run op de huidige head. Dan blijkt meteen of de secrets kloppen, ruim voor 20 nov. | S | nee (bestaande workflow, interne build, niet publiceren) |
 | 3 | F4.2 S25-meting | Geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`. | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
 | 4 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt` (F6.23b). LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
@@ -102,14 +102,14 @@ F6.24 (drie World Warper-cues geven een `push_error`).
 |---|---|---|---|---|---|---|
 | F2.1 | Masterpalet vastgelegd | KLAAR | `docs/art/masterpalet.gpl`; #366; CI-job `palet-check` | | | |
 | F2.2 | Alle PNG's meten | KLAAR (meting) | Batches geleverd: #538 (`12_assets_ui`), #540 (`10_assets_sprites`), #541 (`06_assets_hd2d`). `palet_check.py --streng` op deze boom (gelijk aan `finish/wm1` `961101ac`): `assets/ui` 364/364 schoon, `assets/sprites` 595/595, `assets/hd2d` 219/219 met `--negeer '**/*_n.png'` (453 genegeerd). Dennis' HD-2D-oogcheck blijft open. | | M | ja (oogcheck) |
-| F2.3 | CSV filteren op WM1 | OPEN | Hangt aan F2.2. | Filteren op de lock-inventaris. | M | nee |
-| F2.4 | RPG ART levert batches | OPEN | Al geleverd: #369-#372, #379, #381, #403, #411, #412. De rest hangt aan F2.3. | ART per batch, met akkoord van Dennis. | L | ja (art-akkoord) |
+| F2.3 | CSV filteren op WM1 | OPEN | F2.2 is KLAAR (meting): `palet_check.py --streng` op `assets/ui` 364/364, `assets/sprites` 595/595, `assets/hd2d` 219/219 met `--negeer '**/*_n.png'` (453 genegeerd). De CSV-filter op de lock-inventaris staat niet in dit rapport. Dennis' HD-2D-oogcheck blijft open. | Filteren op de lock-inventaris (kaarten, NPC's, vijanden, items, cutscenes, UI, hub; WM2/WM3 valt af). | M | nee |
+| F2.4 | RPG ART levert batches | OPEN | Geleverd: #369-#372, #379, #381, #403, #411, #412, en freeze2 #538 (`12_assets_ui`), #540 (`10_assets_sprites`, akkoord Dennis 17-11 20:18), #541 (`06_assets_hd2d`). Verder akkoord per batch staat niet in dit rapport. Dennis' HD-2D-oogcheck blijft open. | ART per batch, met akkoord van Dennis. | L | ja (art-akkoord) |
 | F2.5 | Placeholders in de route (H10) | KLAAR | Rustpunt #375, Blauwe Kist #378 en uitgang-warper #381 zijn klaar. #506 (merge `70f6743c`) haalde 12 dubbele Wilgendal-regels uit `tools/placeholders_v17.txt`; 0 open regels (`rcchecktest` [F2.5] PASS). Het Action-HUD (slagboog, meters, ringmenu) wordt in code getekend en is niet beoordeeld — bewuste kanttekening, geen open placeholder-regel. | | S | ja (bewust laten staan) |
 | F2.6 | Ontbrekende art melden in PR | NIET TE CHECKEN | Procesregel. | | | |
 | F2.7 | Suites na elke batch | KLAAR | CI draait alle suites op elke PR. Laatste art-PR's waren groen (bijv. #476: 122/122). | | | |
 | F2.8 | Screenshots voor/na | NIET TE CHECKEN | Handmatig. | | | |
 
-**Gate fase 2:** OPEN (`buiten_palet` niet 0 en geen getekende uitzonderingslijst).
+**Gate fase 2:** OPEN (F2.2-meting schoon: `palet_check.py --streng` `assets/ui` 364/364, `assets/sprites` 595/595, `assets/hd2d` 219/219, 453 `*_n.png` genegeerd; Dennis' HD-2D-oogcheck blijft open).
 
 ## Fase 3: Stabiliteit
 
@@ -199,7 +199,7 @@ F6.24 (drie World Warper-cues geven een `push_error`).
 
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
-| F7.1 | Playtest-APK | OPEN | Laatste bekende `build-apk` op `finish/wm1`: `5cb270c` (debug, 5 nov; 17 nov niet opnieuw nagekeken). Daarna 105 commits op de branch (`git log 5cb270c..9a87280`). | Forge bouwt een debug-APK van de huidige head (bestaande workflow). | S | nee |
+| F7.1 | Playtest-APK | OPEN | Debug-APK v0.21, versionCode 23, commit `961101ac` (tag `wm1-freeze2`), gebouwd door RPG Forge. Niet gepubliceerd (Freeze 2). | Installatie op de Samsung S25 door Dennis. | S | nee |
 | F7.2 | Dennis speelt de golden path | OPEN | Kolom "Dennis" in de scorekaart (`FINISH_LOG.md`) is leeg. Zie OPEN-lijst #1. | Eén ronde volgens `WM1_PLAYTEST.md`. | L | ja |
 | F7.3 | Bugs als issue | NIET TE CHECKEN | Procesregel. Nu 0 open issues met label `bug`. | | | |
 | F7.4 | Ernst P0-P3 | NIET TE CHECKEN | Definitie, procesregel. | | | |
