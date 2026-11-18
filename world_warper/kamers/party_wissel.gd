@@ -12,12 +12,14 @@ const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 const MARGE := Vector2(16, 8)
 ## F6-5: kleinste lettergrootte; Dauwpixel laat op 8 pixelkolommen weg.
 const FONT_MIN := 10
+const UITLEG := "Tap a name to move them between Active and Bench. Dax stays in the party."
 
 var _status: Label
 var _actief: VBoxContainer
 var _bank: VBoxContainer
 var _root: Control
 var _kolom_doos: VBoxContainer
+var _uitleg_box: Control
 ## Geen cancel/menu in het openingsframe.
 var _quiet_frame := -1
 
@@ -41,6 +43,8 @@ func _ready() -> void:
 	root.resized.connect(_pas_veilig_toe)
 	var kop := _label("Rest Room - swapping is free", FONT_MIN)
 	kolom.add_child(kop)
+	_uitleg_box = Control.new()
+	kolom.add_child(_uitleg_box)
 	var rijen := HBoxContainer.new()
 	rijen.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	rijen.add_theme_constant_override("separation", 8)
@@ -70,6 +74,53 @@ func _pas_veilig_toe() -> void:
 	_kolom_doos.offset_top = MARGE.y + ins.y
 	_kolom_doos.offset_right = -(MARGE.x + ins.z)
 	_kolom_doos.offset_bottom = -(MARGE.y + ins.w)
+	call_deferred("_layout_uitleg")
+
+
+static func _uitleg_regels(kol_b: float) -> PackedStringArray:
+	var fs := FONT_MIN
+	var words := UITLEG.split(" ")
+	var regels: PackedStringArray = []
+	var cur := ""
+	for w in words:
+		var probe := (cur + " " + w).strip_edges()
+		if FONT.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > kol_b and cur != "":
+			regels.append(cur)
+			cur = w
+		else:
+			cur = probe
+	if cur != "":
+		regels.append(cur)
+	return regels
+
+
+func _layout_uitleg() -> void:
+	if _uitleg_box == null or _kolom_doos == null:
+		return
+	var vp := _root.get_viewport().get_visible_rect().size if _root.is_inside_tree() else Vector2.ZERO
+	if vp.x < 8.0:
+		call_deferred("_layout_uitleg")
+		return
+	var safe := UiTouch.safe_rect(vp, _root.get_viewport())
+	var kol_b := maxf(8.0, safe.size.x - (MARGE.x * 2.0))
+	for ch in _uitleg_box.get_children():
+		_uitleg_box.remove_child(ch)
+		ch.queue_free()
+	var fs := FONT_MIN
+	var regels := _uitleg_regels(kol_b)
+	var y := 0.0
+	var rij_h := float(fs + 3)
+	for regel in regels:
+		var lab := _label(regel, fs)
+		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lab.clip_text = true
+		lab.position = Vector2(0, y)
+		lab.custom_minimum_size = Vector2(kol_b, rij_h)
+		lab.size = Vector2(kol_b, rij_h)
+		_uitleg_box.add_child(lab)
+		y += rij_h
+	_uitleg_box.custom_minimum_size = Vector2(kol_b, y)
+	_uitleg_box.size = Vector2(kol_b, y)
 
 
 func _kolom(ouder: Node, titel: String) -> VBoxContainer:

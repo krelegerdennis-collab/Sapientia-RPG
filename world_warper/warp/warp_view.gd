@@ -10,6 +10,7 @@ signal warp_requested(wm_id: String, place_id: String)
 signal warp_closed
 
 const Destinations := preload("res://world_warper/warp/destinations.gd")
+const SD := preload("res://scripts/data/story_data.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
@@ -54,6 +55,8 @@ var _lay_vp := Vector2.ZERO
 var _lay_ins := Vector4(-1, -1, -1, -1)
 
 var _title: Label
+var _uitleg_band: Control
+var _uitleg: Label
 var _rows: VBoxContainer
 var _back: Button
 var _travel: Button
@@ -113,10 +116,12 @@ func open() -> void:
 	_lay_vp = Vector2.ZERO
 	_lay_ins = Vector4(-1, -1, -1, -1)
 	_place_at_anchor()
+	_zet_uitleg_eerste_keer()
 	_show_step()
 
 
 func close() -> void:
+	_markeer_uitleg_gelezen()
 	_opened = false
 	visible = false
 	set_process(false)
@@ -187,6 +192,7 @@ func _zet_vol_vlak(ins: Vector4) -> void:
 		if custom_minimum_size != VIEW_SIZE:
 			custom_minimum_size = VIEW_SIZE
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_layout_uitleg()
 		return
 	var veilig := UiTouchC.safe_rect(get_viewport_rect().size, get_viewport())
 	custom_minimum_size = Vector2(
@@ -197,6 +203,7 @@ func _zet_vol_vlak(ins: Vector4) -> void:
 	offset_top = ins.y
 	offset_right = -ins.z
 	offset_bottom = -ins.w
+	_layout_uitleg()
 
 
 ## Paneel (bij een anker) helemaal binnen het veilige gebied schuiven. Past het niet,
@@ -212,6 +219,50 @@ func _binnen_veilig(_ins: Vector4) -> void:
 	r.position.y = clampf(r.position.y, veilig.position.y, maxf(veilig.position.y, veilig.end.y - r.size.y))
 	global_position = r.position
 	size = r.size
+	_layout_uitleg()
+
+
+static func _uitleg_hoog(tekst: String, breedte: float, fs: int) -> float:
+	var words := tekst.split(" ")
+	var cur := ""
+	var lines := 1
+	for w in words:
+		var probe := (cur + " " + w).strip_edges()
+		if FONT.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > breedte and cur != "":
+			lines += 1
+			cur = w
+		else:
+			cur = probe
+	return maxf(float(fs), float(lines) * float(fs + 3))
+
+
+func _layout_uitleg() -> void:
+	if _uitleg == null or _uitleg_band == null or not _built:
+		return
+	if not _uitleg_band.visible:
+		_uitleg_band.custom_minimum_size = Vector2.ZERO
+		return
+	var fs := theme.default_font_size if theme != null else 10
+	var veilig := UiTouchC.safe_rect(get_viewport_rect().size, get_viewport())
+	var breedte := maxf(8.0, minf(size.x - 12.0, veilig.size.x))
+	var hoog := _uitleg_hoog(SD.WARP_UITLEG_LINE, breedte, fs)
+	hoog = minf(hoog, maxf(28.0, size.y - RIJ_HOOG * 5.0))
+	_uitleg_band.custom_minimum_size = Vector2(breedte, hoog)
+	_uitleg_band.size = Vector2(breedte, hoog)
+
+
+func _zet_uitleg_eerste_keer() -> void:
+	if _uitleg_band == null:
+		return
+	var tonen := not GameState.story_flags.has(SD.WARP_UITLEG_FLAG)
+	_uitleg_band.visible = tonen
+	_layout_uitleg()
+
+
+## Vlag pas zetten als de uitleg getoond is en het scherm sluit of de reis start.
+func _markeer_uitleg_gelezen() -> void:
+	if _uitleg_band != null and _uitleg_band.visible:
+		GameState.story_flags[SD.WARP_UITLEG_FLAG] = true
 
 
 func _ensure_ui() -> void:
@@ -254,6 +305,21 @@ func _ensure_ui() -> void:
 	var kolom := VBoxContainer.new()
 	kolom.add_theme_constant_override("separation", 4)
 	marge.add_child(kolom)
+
+	_uitleg_band = Control.new()
+	_uitleg_band.name = "UitlegBand"
+	_uitleg_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_uitleg_band.visible = false
+	kolom.add_child(_uitleg_band)
+	_uitleg = Label.new()
+	_uitleg.name = "Uitleg"
+	_uitleg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_uitleg.text = SD.WARP_UITLEG_LINE
+	_uitleg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_uitleg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_uitleg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_uitleg.add_theme_color_override("font_color", UiStyle.TEXT_DIM)
+	_uitleg_band.add_child(_uitleg)
 
 	_title = Label.new()
 	_title.name = "Titel"
@@ -479,6 +545,7 @@ func _on_travel() -> void:
 	var path := str(gekozen.get("path", ""))
 	var spawn := str(gekozen.get("spawn", ""))
 	GameState.change_map(path, spawn)
+	_markeer_uitleg_gelezen()
 	warp_requested.emit(_wm_id, _place_id)
 
 

@@ -14,7 +14,7 @@ var last_text := ""
 
 func _build() -> void:
 	header.text = "The Merchant  %dg" % GameState.gold
-	set_hint("A: choose   B: back")
+	_init_hint_band()
 	_wrap_scroll()
 	_show_koop()
 
