@@ -11,17 +11,30 @@ static func _suite_draait() -> bool:
 	return false
 
 
+## True zolang de uitleg open staat: map.gd roept op_stap per stap aan zonder await,
+## dus een tweede stap mag de regel niet nog eens tonen.
+static var _bezig := false
+
+
+static func is_bezig() -> bool:
+	return _bezig
+
+
 static func op_stap(speler: Node) -> void:
+	if _bezig:
+		return
 	if _suite_draait():
 		return
 	if GameState.story_flags.has(SD.RUN_UITLEG_FLAG):
 		return
 	if not _mag(speler):
 		return
+	_bezig = true
 	Dialog.show_lines([SD.RUN_UITLEG_LINE])
 	# Vlag pas zetten als de speler de regel echt gelezen en gesloten heeft.
 	await Dialog.finished
 	GameState.story_flags[SD.RUN_UITLEG_FLAG] = true
+	_bezig = false
 
 
 static func _mag(speler: Node) -> bool:
