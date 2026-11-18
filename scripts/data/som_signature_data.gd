@@ -31,25 +31,11 @@ const ORION_SLOW_MULT := 0.6
 const ORION_SLOW_TICKS := 90
 const ORION_WINDUP_EXTRA_TICKS := 6
 
-## Partij-ids per rij (zelfde als game_data-helden).
+## Partij-ids (game_data-helden).
 const HERO_IDS: Array[String] = ["dennis", "lotte", "noor", "kael", "orion"]
-
-const ROWS := {
-	"dennis": {"trait": "dax", "knock_fin": DAX_KNOCK_FIN, "knock_h1": DAX_KNOCK_HEAVY1, "knock_h2": DAX_KNOCK_HEAVY2,
-			"stagger_mult": DAX_STAGGER_MULT},
-	"lotte": {"trait": "seren", "heal_pct": SEREN_HEAL_PCT, "heal_radius": SEREN_HEAL_RADIUS_PX, "icd": SEREN_ICD_TICKS},
-	"noor": {"trait": "vesper", "backstab_dot": BACKSTAB_DOT, "crit_mult": CRIT_MULT},
-	"kael": {"trait": "kael", "lock_ticks": KAEL_LOCK_TICKS, "icd": KAEL_ICD_TICKS},
-	"orion": {"trait": "orion", "slow_mult": ORION_SLOW_MULT, "slow_ticks": ORION_SLOW_TICKS,
-			"windup_extra": ORION_WINDUP_EXTRA_TICKS},
-}
 
 
 static func is_active() -> bool:
 	if force_active != null:
 		return bool(force_active)
 	return ENABLED and Settings.action_battles()
-
-
-static func row(hero_id: String) -> Dictionary:
-	return ROWS.get(hero_id, {})
