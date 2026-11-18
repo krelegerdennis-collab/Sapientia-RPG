@@ -51,7 +51,8 @@ func run(t: Node) -> void:
 		return
 	await _go_back(t)
 	t.check("F6-T01 titel>Load: lijst weg na terug", titel.get_node_or_null("SaveSlotList") == null)
-	t.check("F6-T01 titel>Load: blijft op titel", t.sc.scene() == titel and titel.name == "Title")
+	t.check("F6-T01 titel>Load: titel blijft staan, geen extra reactie", t.sc.scene() == titel and titel.name == "Title"
+			and titel.is_inside_tree() and titel.visible)
 	t.check("F6-T01 titel>Load: start_new_game niet aangeroepen", GameState.new_game_starts == starts_load)
 
 	var starts_new := GameState.new_game_starts
@@ -85,6 +86,18 @@ func run(t: Node) -> void:
 	var ls: Node = m.sub
 	t.check("F6-T01 veld>Load: laadscherm met lijst", saved and ls != null and ls.name == "Load" and ls.list != null)
 	if ls == null or ls.list == null:
+		return
+	await _go_back(t)
+	var fm: Node = t.sc.field_menu()
+	t.check("F6-T01 veld>Load: één terug sluit alleen lijst, veldmenu blijft", m.sub == null and fm != null
+			and fm == m and is_instance_valid(m) and t.sc.scene() != null and t.sc.scene().name == "Wilgendal")
+	if m.sub != null:
+		return
+	m.open_load()
+	await t.pframes(6)
+	ls = m.sub
+	if ls == null or ls.list == null:
+		t.check("F6-T01 veld>Load: lijst opnieuw open voor prompt", false)
 		return
 	ls.list.slot_buttons[0].pressed.emit()
 	await t.pframes(6)

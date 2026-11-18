@@ -118,6 +118,12 @@ func _process(_delta: float) -> void:
 		return
 	if Input.is_action_just_pressed("cancel") or Input.is_action_just_pressed("menu"):
 		cancelled.emit()
+		# Loslaten in hetzelfde beeld: anders ziet een ouder/sibling die later in _process
+		# draait (bv. veldmenu als Load net dichtgaat) dezelfde synthetische terugdruk nog.
+		if InputMap.has_action("cancel") and Input.is_action_pressed("cancel"):
+			Input.action_release("cancel")
+		if InputMap.has_action("menu") and Input.is_action_pressed("menu"):
+			Input.action_release("menu")
 
 
 ## Het venster staat in het midden van UiTouch.safe_rect (notch, gebarenbalk).
