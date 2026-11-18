@@ -39,6 +39,7 @@ var _lay_ins := Vector4(-1, -1, -1, -1)
 
 
 func _ready() -> void:
+	add_to_group("touch_priority")
 	_ensure_ui()
 	refresh()
 	if not _open:
@@ -117,6 +118,10 @@ func _process(_delta: float) -> void:
 
 func is_open() -> bool:
 	return _open and visible
+
+
+func claims_touch(viewport_pos: Vector2) -> bool:
+	return is_open() and get_global_rect().has_point(viewport_pos)
 
 
 func refresh() -> void:

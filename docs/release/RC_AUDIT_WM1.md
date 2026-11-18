@@ -72,15 +72,17 @@ F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt to
 
 Daarnaast open: F5.1 en F5.3 (doelvensters en
 besluit per afwijking: beide OPEN, wachten op Dennis; cijfers staan in `docs/release/WM1_BALANCE_REPORT_RC.md`, afwijkingentabel §7) en
-F6.24 (drie World Warper-cues geven een `push_error`).
+F6.24 (World Warper-cues: in spel stil via `ambience.gd`, manifest-/RC-besluit nog open).
 
-### Verouderde tekst in de checklist (FACT, niet gerepareerd)
+### Verouderde tekst in de checklist
 
-- F8.1 noemt preset `version/name="0.19"`. Nu staat alles op 0.21 / code 23 (`tools/release/version.json`, `project.godot:15`, `export_presets.cfg:34-35,105-106,218-219`).
-- F4.3/F4.5 noemen 9 video's (30,46 MB). Het zijn er nu 13: 40.054.438 bytes in `assets/video/*.ogv`.
-- F5.6 noemt `SomData.ACTION_BOSS_MULT`. Die is verwijderd (`scripts/data/som_data.gd:6`).
-- F6.16 noemt de D-pad. Die is bewust weg (CHANGELOG Unreleased: "joystick + knoppenrij, geen D-pad").
-- Voortgangstabel onderaan de checklist: bijgewerkt in klus 18 (status per fase met de telling uit dit rapport; akkoordkolom leeg gelaten).
+De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en zijn in PR **docs/f6-t04-t05** (F6-T05) gecorrigeerd:
+
+- F8.1: preset en `project.godot` noemden 0.19/0.20; repo staat nu op 0.21 / code 23 (`tools/release/version.json`, `project.godot:15`, `export_presets.cfg:34-35,105-106,218-219`).
+- F4.3/F4.5: 9 video's (30,46 MB) → 13 bestanden, 40.054.438 bytes in `assets/video/*.ogv`.
+- F5.6: `SomData.ACTION_BOSS_MULT` verwijderd; Action-bazen via `BossCore.apply_boss` (`scripts/data/som_data.gd:6`).
+- F6.16: D-pad bewust weg (joystick + knoppenrij).
+- Voortgangstabel onderaan de checklist: bijgewerkt in klus 18 (status per fase met de telling uit dit rapport; akkoordkolom leeg gelaten); ongewijzigd in die PR.
 
 ---
 
@@ -191,7 +193,7 @@ F6.24 (drie World Warper-cues geven een `push_error`).
 | F6.21 | Ontbrekende BGM stil (H9) | KLAAR | 11 tracks zonder bestand. Geen ervan wordt in WM1-code aangeroepen (`FINISH_LOG.md` R2; grep 15 nov). Het manifest is niet gesnoeid (LAUNCH_PLAN stap 4), maar dat is niet nodig. | | | |
 | F6.22 | Volume, mute, stoppen bij focusverlies | KLAAR | `muziektest`/`musictest` (schuiven, mute); `lifecycletest` deel B (geluid bij pauze). | | | |
 | F6.23 | Placeholder-SFX | OPEN | `rcchecktest` [F6.23] en [F6.23b]: 162 + 120 placeholderregels; `gen_sfx.py` nog nooit gedraaid. Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Zie OPEN-lijst #4. | L / S | ja (audio) |
-| F6.24 | World Warper-cues zonder fout | OPEN | `ww_hum`, `ww_warp` en `ww_sapientia_glitch` staan niet in de `sfx` van het manifest (`ww_ambient` staat wel onder `bgm`, nageteld 17 nov). Gevolg: geen crash, wel één `push_error` per cue (`audio_manager.gd:252`, via `world_warper/flow/hub_boot.gd:51-142`). `rcchecktest` [F6.24]. | Optie a: de 3 cues zonder bestand in het manifest zetten (ontbrekend bestand = stil, zonder error). Optie b: bewust accepteren. | S | ja (audio, lock H9) |
+| F6.24 | World Warper-cues zonder fout | OPEN | `ww_hum`, `ww_warp` en `ww_sapientia_glitch` staan niet in de `sfx` van het manifest (`ww_ambient` onder `bgm`, nageteld 17 nov). Enige speelpad: `world_warper/audio/ambience.gd:49-57` (`_play_sfx`): bij ontbrekende cue controleert `has_sfx` en keert stil terug (sinds `828e1497`); geen `push_error` in de hub. Rechtstreekse `AudioManager.play_sfx` zou bij onbekende naam `audio_manager.gd:252` (`_report` → `push_error`) aanroepen; geen andere `play_sfx`-aanroep met deze drie namen. `rcchecktest` [F6.24] OPEN: meldingstekst nog «push_error per cue», verouderd t.o.v. `ambience.gd`; bestaande test niet gewijzigd. | Optie a: cues **met** platte `.wav` in het manifest (lege/ontbrekende placeholders falen in CI-job `algemene-sfx`: `tools/check_algemene_sfx.py` ontbrekend bestand `:95-96`, stil `rms<0.02` `:129-130`, geen `.import` `:139-141`). Optie b: bewust stil accepteren voor RC — besluit naar Dennis via RPG Forge; hier niet als besloten markeren. | S | ja (audio, lock H9) |
 
 **Gate fase 6:** OPEN.
 

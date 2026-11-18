@@ -60,6 +60,7 @@ var _travel: Button
 
 
 func _ready() -> void:
+	add_to_group("touch_priority")
 	_ensure_ui()
 	if not _opened:
 		visible = false
@@ -67,6 +68,11 @@ func _ready() -> void:
 	_koppel_layout_hooks()
 	_place_at_anchor()
 	call_deferred("_place_at_anchor")
+
+
+## Hub: joystick-zone overlapte rijknoppen; claim ScreenTouch zodat TouchControls niet beweegt.
+func claims_touch(viewport_pos: Vector2) -> bool:
+	return _opened and visible and get_global_rect().has_point(viewport_pos)
 
 
 func _enter_tree() -> void:
