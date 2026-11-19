@@ -49,8 +49,8 @@ Huidige freeze voor de interne RC. Freeze 2 en tag `wm1-freeze` blijven staan.
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 51 |
-| OPEN | 14 |
+| KLAAR | 52 |
+| OPEN | 13 |
 | NIET TE CHECKEN | 28 |
 | **Totaal** | **93** |
 
@@ -63,12 +63,12 @@ Voortgang per fase (telling van de detailrijen hieronder, freeze 3 op `fcb3f21e`
 | 3 Stabiliteit | 9 | 0 | 8 | OPEN |
 | 4 S25-performance | 2 | 1 | 4 | OPEN |
 | 5 Balans | 6 | 1 | 1 | OPEN |
-| 6 UX-polish | 17 | 4 | 3 | OPEN |
+| 6 UX-polish | 18 | 3 | 3 | OPEN |
 | 7 Playtest en fixronde | 0 | 3 | 5 | OPEN |
 | 8 Release candidate | 7 | 2 | 5 | OPEN |
-| **Totaal** | **51** | **14** | **28** | |
+| **Totaal** | **52** | **13** | **28** | |
 
-Sinds de eerste audit (15 nov): F1.4, F1.5, F1.6, F1.7, F2.2, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.14, F6.15, F6.17, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
+Sinds de eerste audit (15 nov): F1.4, F1.5, F1.6, F1.7, F2.2, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.14, F6.15, F6.17, F6.24, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
 KLAAR (F2.2/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
 
 ### OPEN op risico (voor de interne RC van 20 nov)
@@ -82,8 +82,8 @@ F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt to
 | 3 | F4.2 S25-meting | Geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`. | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
 | 4 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt` (F6.23b). LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
 
-Daarnaast open: F5.1 (doelvensters; cijfers staan in `docs/release/WM1_BALANCE_REPORT_RC.md` §3) en
-F6.24 (World Warper-cues: in spel stil via `ambience.gd`, manifest-/RC-besluit nog open; optie b wacht op Dennis).
+Daarnaast open: F5.1 (doelvensters; cijfers staan in `docs/release/WM1_BALANCE_REPORT_RC.md` §3).
+F6.24 is KLAAR via #554 (merge `83000372`) en staat niet meer in deze lijst.
 
 ### Verouderde tekst in de checklist
 
@@ -204,7 +204,7 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 | F6.21 | Ontbrekende BGM stil (H9) | KLAAR | 11 tracks zonder bestand. Geen ervan wordt in WM1-code aangeroepen (`FINISH_LOG.md` R2; grep 15 nov). Het manifest is niet gesnoeid (LAUNCH_PLAN stap 4), maar dat is niet nodig. | | | |
 | F6.22 | Volume, mute, stoppen bij focusverlies | KLAAR | `muziektest`/`musictest` (schuiven, mute); `lifecycletest` deel B (geluid bij pauze). | | | |
 | F6.23 | Placeholder-SFX | OPEN | `rcchecktest` [F6.23] en [F6.23b]: 162 + 120 placeholderregels; `gen_sfx.py` nog nooit gedraaid. Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Zie OPEN-lijst #4. | L / S | ja (audio) |
-| F6.24 | World Warper-cues zonder fout | OPEN | `ww_hum`, `ww_warp` en `ww_sapientia_glitch` staan niet in de `sfx` van het manifest (`ww_ambient` onder `bgm`, nageteld 17 nov). Enige speelpad: `world_warper/audio/ambience.gd:49-57` (`_play_sfx`): bij ontbrekende cue controleert `has_sfx` en keert stil terug (sinds `828e1497`); geen `push_error` in de hub. Rechtstreekse `AudioManager.play_sfx` zou bij onbekende naam `audio_manager.gd:252` (`_report` → `push_error`) aanroepen; geen andere `play_sfx`-aanroep met deze drie namen. `rcchecktest` [F6.24] OPEN: meldingstekst nog «push_error per cue», verouderd t.o.v. `ambience.gd`; bestaande test niet gewijzigd. | Optie a: cues **met** platte `.wav` in het manifest (lege/ontbrekende placeholders falen in CI-job `algemene-sfx`: `tools/check_algemene_sfx.py` ontbrekend bestand `:95-96`, stil `rms<0.02` `:129-130`, geen `.import` `:139-141`). Optie b: bewust stil accepteren voor RC — besluit naar Dennis via RPG Forge; hier niet als besloten markeren. | S | ja (audio, lock H9) |
+| F6.24 | World Warper-cues zonder fout | KLAAR | #554 (merge `83000372`, https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/554): `ww_hum`, `ww_warp` en `ww_sapientia_glitch` staan in de `sfx` van `assets/audio/audio_manifest.json`, elk met één bestand `sfx_<id>_01.wav`. Gekozen seeds (Dennis, Stable Audio Open 1.0, `assets/audio/sfx/HERKOMST.md`): hum s1002, warp s1002, glitch s1000. `ww_ambient` stond al onder `bgm`. `ambience.gd` speelt via AudioManager; ontbrekende cues blijven stil via `has_sfx` (geen `push_error` in de hub). `rcchecktest` [F6.24] is daarmee PASS (cues staan in het manifest). | | S | |
 
 **Gate fase 6:** OPEN.
 
@@ -269,8 +269,8 @@ Wat de suite controleert (alleen lezen):
 
 **Bekende OPEN-punten** komen als `OPEN  [id] ...` in de uitvoer. Die tellen niet als `FAIL`, zodat de suite groen kan blijven
 terwijl de bevinding zichtbaar is. Gaat zo'n punt dicht, dan wordt het een `PASS` met de melding dat dit rapport bijgewerkt moet
-worden. Nu verwacht: [F6.23], [F6.23b], [F6.24]. [F6.23] en [F6.23b] blijven een bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). Dicht (PASS): [F2.5] sinds #506, [F8.2] en [F8.8] sinds Job 11 (#484), [F8.4] sinds Klus 12 (#493).
-Statisch nageteld op 17 nov middag: sfx en WW-cues nog open (162 + 120 sfx-regels, 3 cues); placeholders-route is dicht.
+worden. Nu verwacht: [F6.23], [F6.23b]. [F6.23] en [F6.23b] blijven een bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). Dicht (PASS): [F2.5] sinds #506, [F8.2] en [F8.8] sinds Job 11 (#484), [F8.4] sinds Klus 12 (#493), [F6.24] sinds #554 (merge `83000372`).
+Statisch nageteld op 17 nov middag: sfx nog open (162 + 120 sfx-regels); placeholders-route is dicht. WW-cues staan sindsdien in het manifest (#554).
 
 Waarom deze keuze: een rode suite in CI zou elke PR blokkeren voor punten die alleen Forge of Dennis kan oplossen
 (versie, presets, audio). Een stille suite zou de bevinding verbergen. Met `OPEN` blijft het zichtbaar in de log en in dit rapport,

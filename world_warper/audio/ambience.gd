@@ -2,9 +2,11 @@ class_name WorldWarperAmbience
 extends RefCounted
 ## Aanroepen voor de ambience van de World Warper.
 ##
-## Geen audiobestanden en geen manifest-wijziging: ontbrekende cues blijven stil.
-## AudioManager.play_music / play_sfx geven dan false terug en crashen niet.
-## Deze klasse instantieert geen andere systemen.
+## SFX `ww_hum`, `ww_warp` en `ww_sapientia_glitch` staan in `assets/audio/audio_manifest.json`.
+## Hub-muziek gebruikt `ww_ambient` (eveneens in het manifest, onder `bgm`).
+## Ontbrekende cues blijven stil: `_play_sfx` keert terug als `has_sfx` false is,
+## zodat AudioManager geen `push_error` geeft. `play_music` / `play_sfx` crashen niet.
+## Deze klasse instantieert geen andere systemen en heeft geen procedurele fallback.
 ##
 ## TODO(design): muzikale richting is een lage tech-hum, paars/sci-fi.
 
