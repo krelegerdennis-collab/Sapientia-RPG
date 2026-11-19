@@ -127,43 +127,38 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 |---|---|---|---|---|---|---|
 | F2.1 | Masterpalet vastgelegd | KLAAR | `docs/art/masterpalet.gpl`; #366; CI-job `palet-check` | | | |
 | F2.2 | Alle PNG's meten | KLAAR (meting) | Batches geleverd: #538 (`12_assets_ui`), #540 (`10_assets_sprites`), #541 (`06_assets_hd2d`). `palet_check.py --streng` op deze boom (gelijk aan `finish/wm1` `961101ac`): `assets/ui` 364/364 schoon, `assets/sprites` 595/595, `assets/hd2d` 219/219 met `--negeer '**/*_n.png'` (453 genegeerd). Dennis' HD-2D-oogcheck blijft open. | | M | ja (oogcheck) |
-| F2.3 | CSV filteren op WM1 | KLAAR (meting) | Gemeten op `439ff805` (tag `wm1-freeze5`) met `tools/art_audit/meet.py` en `docs/art/masterpalet.gpl` (alleen lezen) op `assets/`, `art/` en `world_warper/art/`: 2053 PNG's, 0 leesfouten. Werk-CSV niet in de repo. Criterium: WM2/WM3-context als het pad onder `wacht/` staat of een padsegment/bestandsstem de token `wm2` of `wm3` heeft (`(?:^|[/._-])wm[23](?:[/._-]|$)`). `wacht/` is niet gescand (inhoud niet geopend); `git ls-files` noemt 2 PNG's onder `wacht/wm2/`. In de scan 8 treffers, alle in `world_warper/art/` (knop/icoon locked-wereld); 2045 rijen blijven over. Die 8 zijn in WM1 zichtbaar als Locked-teasers (lock H15); als je ze tot "wat WM1 laat zien" rekent, blijft de set 2053. `buiten_palet` is 0 voor alle niet-`*_n.png` in beide sets (457 buiten-palet zijn allemaal `*_n.png`: 453 in `assets/hd2d`, 4 in `assets/placeholder`). Per map: zie de meting onder de tabel. F2.2-tellingen kloppen (`assets/ui` 364, `assets/sprites` 595, `assets/hd2d` 219 + 453 `*_n.png`). | | M | nee |
+| F2.3 | CSV filteren op WM1 | KLAAR (meting) | Op `439ff805` (tag `wm1-freeze5`): `python3 tools/art_audit/palet_check.py --streng --negeer '**/*_n.png'` met de standaardpaden van het script (default `--assets assets/`, palet `docs/art/masterpalet.gpl`). Uitkomst: 73 paletkleuren, 1491 PNG's gecontroleerd, 1491 schoon, **0 buiten het palet**, 461 `*_n.png` overgeslagen, exit 0 (zelfde cijfers als Forge op deze commit). `light_soft_128` (`assets/hd2d/fx_data/light_soft_128.png`) zit in die standaardscan en is schoon (5 unieke kleuren, `buiten_palet` 0); de dithering blijft staan op Dennis' besluit, paletvast sinds #541 (Bayer 8x8). Van de 2053 PNG's in `assets/`+`art/`+`world_warper/art/` vallen er 101 buiten het standaardpad: `art/` 12 en `world_warper/art/` 89. Die zijn apart gecontroleerd met hetzelfde commando plus `--assets art` (12/12 schoon, exit 0) en `--assets world_warper/art` (89/89 schoon, exit 0). Alle gemeten mappen zijn schoon; F2.3 is daarmee KLAAR voor alles in die set. `wacht/` niet gescand. Details en aanvullende meet.py-cijfers: zie de meting onder de tabel. | | M | nee |
 | F2.4 | RPG ART levert batches | OPEN | Geleverd: #369-#372, #379, #381, #403, #411, #412, en freeze2 #538 (`12_assets_ui`), #540 (`10_assets_sprites`, akkoord Dennis 17-11 20:18), #541 (`06_assets_hd2d`). Verder akkoord per batch staat niet in dit rapport. Dennis' HD-2D-oogcheck blijft open. | ART per batch, met akkoord van Dennis. | L | ja (art-akkoord) |
 | F2.5 | Placeholders in de route (H10) | KLAAR | Rustpunt #375, Blauwe Kist #378 en uitgang-warper #381 zijn klaar. #506 (merge `70f6743c`) haalde 12 dubbele Wilgendal-regels uit `tools/placeholders_v17.txt`; 0 open regels (`rcchecktest` [F2.5] PASS). Het Action-HUD (slagboog, meters, ringmenu) wordt in code getekend en is niet beoordeeld — bewuste kanttekening, geen open placeholder-regel. | | S | ja (bewust laten staan) |
 | F2.6 | Ontbrekende art melden in PR | NIET TE CHECKEN | Procesregel. | | | |
 | F2.7 | Suites na elke batch | KLAAR | CI draait alle suites op elke PR. Laatste art-PR's waren groen (bijv. #476: 122/122). | | | |
 | F2.8 | Screenshots voor/na | NIET TE CHECKEN | Handmatig. | | | |
 
-**Gate fase 2:** OPEN (F2.3-filter staat in dit rapport; `buiten_palet` is 0 voor de WM1-set zonder `*_n.png`. F2.2-meting schoon: `palet_check.py --streng` `assets/ui` 364/364, `assets/sprites` 595/595, `assets/hd2d` 219/219, 453 `*_n.png` genegeerd; Dennis' HD-2D-oogcheck en F2.4 blijven open).
+**Gate fase 2:** OPEN (`palet_check.py --streng --negeer '**/*_n.png'` op `439ff805`: `assets/` 1491/1491 schoon, `art/` 12/12, `world_warper/art/` 89/89, 0 buiten het palet. Dennis' HD-2D-oogcheck en F2.4 blijven open).
 
 ### F2.3-meting (freeze 5, `439ff805`)
 
-Scan: `assets/` (1952), `art/` (12), `world_warper/art/` (89) = 2053 PNG's. `wacht/` niet gescand. Filter zoals in F2.3: 8 WM2/WM3-rijen eruit, 2045 over (plus 2 geparkeerde PNG-namen onder `wacht/wm2/`, niet geopend).
+**palet_check (leidend).** Commando, op een checkout waarvan alleen dit rapport verschilt van `439ff805`:
 
-Overgebleven WM1-set per map (aantal, waarvan `*_n.png`, waarvan `buiten_palet` > 0 zonder `*_n.png`):
+`python3 tools/art_audit/palet_check.py --streng --negeer '**/*_n.png'`
 
-| Map | PNG's | `*_n.png` | buiten palet (geen `_n`) |
-|---|---:|---:|---:|
-| `art/battle_bg` | 3 | 0 | 0 |
-| `art/cutscene` | 1 | 0 | 0 |
-| `art/enemies` | 4 | 0 | 0 |
-| `art/map_creatures` | 4 | 0 | 0 |
-| `assets/battle` | 13 | 0 | 0 |
-| `assets/bg` | 2 | 0 | 0 |
-| `assets/characters` | 2 | 0 | 0 |
-| `assets/fx` | 5 | 0 | 0 |
-| `assets/hd2d` | 672 | 453 | 0 |
-| `assets/map_monsters` | 42 | 0 | 0 |
-| `assets/placeholder` | 84 | 4 | 0 |
-| `assets/puzzle` | 13 | 0 | 0 |
-| `assets/sprites` | 595 | 0 | 0 |
-| `assets/tiles` | 146 | 4 | 0 |
-| `assets/tilesets` | 14 | 0 | 0 |
-| `assets/ui` | 364 | 0 | 0 |
-| `world_warper/art` | 81 | 0 | 0 |
-| **Totaal WM1 (streng filter)** | **2045** | **461** | **0** |
+Het script kijkt standaard naar `assets/` (default `--assets`, palet `docs/art/masterpalet.gpl`). Uitkomst: 73 paletkleuren, 1491 PNG's gecontroleerd, 1491 schoon, **0 buiten het palet**, 461 `*_n.png` overgeslagen, exit 0. Zelfde cijfers als Forge op deze commit. `wacht/` is niet gescand (inhoud niet geopend).
 
-De 8 gedropte scan-rijen (`world_warper/art/knop_wm2.png`, `knop_wm2_ingedrukt.png`, `knop_wm3.png`, `knop_wm3_ingedrukt.png`, `warp_icoon_wm2.png`, `warp_icoon_wm2_dicht.png`, `warp_icoon_wm3.png`, `warp_icoon_wm3_dicht.png`) hebben ook `buiten_palet` 0.
+`light_soft_128` valt in die standaardscan (`assets/hd2d/fx_data/light_soft_128.png`) en is schoon (5 unieke kleuren, `buiten_palet` 0). Run 2 van ART (op `cd491d3a`) vond nog 420 afwijkers, waaronder dit bestand; die paletafwijking is weg sinds de F2.2-batches (#538, #540, #541, `light_soft_128` Bayer 8x8). De dithering zelf blijft staan op Dennis' besluit.
+
+Van de 2053 PNG's in `assets/` (1952) + `art/` (12) + `world_warper/art/` (89) vallen er **101 niet in het standaardpad** `assets/`:
+
+| Map buiten `assets/` | PNG's | `*_n.png` | palet_check (zelfde vlaggen) |
+|---|---:|---:|---|
+| `art/` (`battle_bg` 3, `cutscene` 1, `enemies` 4, `map_creatures` 4) | 12 | 0 | `--assets art`: 12/12 schoon, 0 genegeerd, exit 0 |
+| `world_warper/art/` | 89 | 0 | `--assets world_warper/art`: 89/89 schoon, 0 genegeerd, exit 0 |
+| **Totaal buiten het standaardpad** | **101** | **0** | **101/101 schoon** |
+
+Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele set.
+
+**Waarom een eerdere meet.py-run ook 0 gaf.** `palet_check.py` roept `meet.meet_png` aan en gebruikt hetzelfde masterpalet; het criterium is identiek (`buiten_palet` = unieke zichtbare RGB-kleuren die niet in het palet zitten). Het verschil zat in de paden: palet_check scant standaard alleen `assets/` (1952 PNG's, minus 461 `*_n.png` → 1491), terwijl meet.py ook `art/` en `world_warper/art/` meenam (samen 2053). Op niet-`*_n.png` gaven beide 0 buiten het palet. De 457 "buiten palet" in die meet.py-run waren allemaal de `*_n.png` die palet_check met `--negeer` overslaat (453 in `assets/hd2d`, 4 in `assets/placeholder`; 4 `*_n.png` in `assets/tiles` hebben `buiten_palet` 0).
+
+**Aanvullend: WM2/WM3-filter (zelfde palet, niet leidend voor de paletstatus).** Criterium: WM2/WM3-context als het pad onder `wacht/` staat of een padsegment/bestandsstem de token `wm2` of `wm3` heeft (`(?:^|[/._-])wm[23](?:[/._-]|$)`). In de 2053-scan 8 treffers, alle in `world_warper/art/` (knop/icoon locked-wereld); 2045 rijen blijven over. Die 8 zijn in WM1 zichtbaar als Locked-teasers (lock H15) en zaten in de palet_check van `world_warper/art/` (89/89 schoon). `git ls-files` noemt daarnaast 2 PNG's onder `wacht/wm2/` (niet geopend, niet in de scan).
 
 ## Fase 3: Stabiliteit
 
