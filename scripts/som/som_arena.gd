@@ -1335,6 +1335,7 @@ func _defeat_enemy(m: Node) -> void:
 	elif e.has("tg"):
 		(e["tg"] as TelegraphAttack).cancel()
 	enemies.erase(m)
+	SomEnemyRead.cancel_bang(m)
 	if enemies.is_empty():
 		_clear_transient_combat()
 	if target_lock:

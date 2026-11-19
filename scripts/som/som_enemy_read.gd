@@ -5,6 +5,8 @@ const SomData := preload("res://scripts/data/som_data.gd")
 const SomGameFeelData := preload("res://scripts/data/som_gamefeel_data.gd")
 const SomFx := preload("res://scripts/som/som_fx.gd")
 
+const BANG_META := &"som_read_bang"
+
 
 static func read_anchor(m: Node) -> Vector2:
 	var f: Vector2i = m.facing
@@ -50,5 +52,21 @@ static func begin_telegraph(arena, m: Node, parent: Node, center_fn: Callable, w
 		if mm == null or aa == null or pp == null or not aa.enemies.has(mm):
 			return
 		pose_fn.call()
-		SomFx.number(pp, center_fn.call(mm) + Vector2(0, -14), "!", SomGameFeelData.TELEGRAPH_BANG_COLOR, bang_life)
+		var bang: Node = SomFx.number(pp, center_fn.call(mm) + Vector2(0, -14), "!", SomGameFeelData.TELEGRAPH_BANG_COLOR, bang_life)
+		mm.set_meta(BANG_META, weakref(bang))
 	, CONNECT_ONE_SHOT)
+
+
+## Vijand verslagen terwijl de '!' nog zweeft: weghalen, anders blijft hij boven het lijk hangen. Bij een lange
+## frame (>= 2 ticks, trage laptop) gaat de 2-ticks-timer nog in dezelfde frame af, vóór de defeat.
+static func cancel_bang(m: Node) -> void:
+	if m == null or not m.has_meta(BANG_META):
+		return
+	var wr: WeakRef = m.get_meta(BANG_META)
+	m.remove_meta(BANG_META)
+	var bang: Node = wr.get_ref() if wr != null else null
+	if bang != null and is_instance_valid(bang):
+		var pp := bang.get_parent()
+		if pp != null:
+			pp.remove_child(bang)
+		bang.queue_free()
