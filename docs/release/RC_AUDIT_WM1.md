@@ -3,14 +3,14 @@
 Doel: vaststellen wat er vóór de interne RC (F8, uiterlijk 20 nov 2026, **niet publiceren**) nog moet gebeuren.
 Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 
-- Basis: `finish/wm1` op `f76aa715` (tag `wm1-freeze`, 17-11-2026). Huidige freeze is `wm1-freeze3` (zie Freeze 3).
+- Basis: `finish/wm1` op `f76aa715` (tag `wm1-freeze`, 17-11-2026). Huidige freeze is `wm1-freeze5` (zie Freeze 5).
   Checklist: `docs/release/WM1_RELEASE_CHECKLIST.md` (93 punten).
   Historisch: de eerste audit (klus 10) stond op `0fb6334` (#476, 15 nov 2026). Klus 19 (17 nov 2026, middag) liep na op `d8a38e41` (#508); sinds klus 18 toen gemerged: #502-#508
   (o.a. #506 placeholders Wilgendal, #507 drie suites in CI, #508 balansmeting `WM1_BALANCE_REPORT_RC.md`). Eerder nog #465-#501.
 - **Bijgewerkt (freeze-ronde, 17-11-2026):** lock-cijfers herteld op `f76aa715` in #517 (merge `e7f33011`). F1.6 is daarmee KLAAR.
   GitHub (labels, tags, issues, check-runs, Actions) was in sessie klus 18 niet bereikbaar; regels die daarop leunen staan waar nodig
   als ONVERIFIED.
-- Bronnen: code en data in de repo, GitHub REST (labels, tags, issues, PR's, check-runs), `tools/art_audit/palet_check.py` (alleen lezen).
+- Bronnen: code en data in de repo, GitHub REST (labels, tags, issues, PR's, check-runs), `tools/art_audit/palet_check.py` en `tools/art_audit/meet.py` (alleen lezen).
 - Automatische controles staan in de nieuwe suite `--rcchecktest` (`scripts/tests/rc_check_tests.gd`). Bekende OPEN-punten
   geven daar een regel `OPEN  [id] ...` en maken de suite niet rood (zie onderaan).
 - Statussen: **KLAAR** (bewijs in code, suite of PR), **KLAAR (meting)** en **KLAAR (tussenmeting)** (tel mee als KLAAR in de voortgangstabellen),
@@ -33,7 +33,7 @@ Tag `wm1-freeze` (commit `f76aa715`) blijft zoals hij is.
 
 ## Freeze 3
 
-Huidige freeze voor de interne RC. Freeze 2 en tag `wm1-freeze` blijven staan.
+Snapshot van 18-11-2026. Freeze 2 en tag `wm1-freeze` blijven staan.
 
 - Tag `wm1-freeze3` (annotated tag-object `a072e034`) op commit `fcb3f21e80e3346a468a521781085e6167ad5b69`
   (`fcb3f21e`, head van `finish/wm1`), tagger RPG Forge, 18-11-2026. Niet publiceren.
@@ -42,6 +42,18 @@ Huidige freeze voor de interne RC. Freeze 2 en tag `wm1-freeze` blijven staan.
 - F3.2 op `fcb3f21e`: `RESULT OK (591 goed, 0 fouten)`, twee keer serieel gedraaid. Rapporten op de build-box:
   `/workspace/f3/F3_2_playthrough_fcb3f21_run1.txt` en `F3_2_playthrough_fcb3f21_run2.txt`. Niet in de repo.
 - Debug-APK `sapientia-wm1-freeze3-fcb3f21-debug.apk`, v0.21, versionCode 23, **arm64-v8a en armeabi-v7a**, gebouwd door RPG Forge. Niet gepubliceerd (APK niet in de repo).
+- Toen nog open: installeren op de Samsung S25 (F7.1), Dennis' HD-2D-oogcheck. F6.23 placeholder-SFX blijft een bekend open punt
+  (geen blocker).
+
+## Freeze 5
+
+Huidige freeze voor de interne RC. Eerdere tags (`wm1-freeze` t/m `wm1-freeze4`) blijven staan.
+
+- Tag `wm1-freeze5` (annotated tag-object `6611e218`) op commit `439ff805c071972548f30cb8bab17d6ac9b9648a`
+  (`439ff805`, head van `finish/wm1`), tagger Dennis Kreleger, 19-11-2026 02:01 (Europe/Amsterdam). Niet publiceren.
+- Inhoud na freeze 3: F6.3 uitlegteksten #551 (merge `c1ded179`); BATTLE_BALANCE_REPORT #552 (merge `a0783abb`, tevens tag `wm1-freeze4` op 18-11-2026 19:01, tagger RPG FORGE); RC-audit F6.3 #553 (merge `4e26c7e3`); F6.24 WW-sfx #554 (merge `83000372`) en RC-audit docs #555 (merge `439ff805`).
+- F3.2 op `439ff805`: 591 PASS / 0 FAIL, twee keer serieel gedraaid (Forge, bij de freeze). Rapporten blijven op de build-box. Niet in de repo.
+- Debug-APK `sapientia-wm1-freeze5-439ff80-debug.apk`, v0.21, versionCode 23, **arm64-v8a en armeabi-v7a**, gebouwd door RPG Forge. Niet gepubliceerd (APK niet in de repo).
 - Nog open: installeren op de Samsung S25 (F7.1), Dennis' HD-2D-oogcheck. F6.23 placeholder-SFX blijft een bekend open punt
   (geen blocker).
 
@@ -49,27 +61,27 @@ Huidige freeze voor de interne RC. Freeze 2 en tag `wm1-freeze` blijven staan.
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 52 |
-| OPEN | 13 |
+| KLAAR | 54 |
+| OPEN | 11 |
 | NIET TE CHECKEN | 28 |
 | **Totaal** | **93** |
 
-Voortgang per fase (telling van de detailrijen hieronder, freeze 3 op `fcb3f21e`; **KLAAR (meting)** en **KLAAR (tussenmeting)** tellen als KLAAR):
+Voortgang per fase (telling van de detailrijen hieronder, freeze 5 op `439ff805`; **KLAAR (meting)** en **KLAAR (tussenmeting)** tellen als KLAAR):
 
 | Fase | KLAAR | OPEN | NIET TE CHECKEN | Gate |
 |---|---:|---:|---:|---|
-| 1 Freeze | 6 | 1 | 0 | OPEN |
-| 2 Art op palet | 4 | 2 | 2 | OPEN |
+| 1 Freeze | 7 | 0 | 0 | KLAAR |
+| 2 Art op palet | 5 | 1 | 2 | OPEN |
 | 3 Stabiliteit | 9 | 0 | 8 | OPEN |
 | 4 S25-performance | 2 | 1 | 4 | OPEN |
 | 5 Balans | 6 | 1 | 1 | OPEN |
 | 6 UX-polish | 18 | 3 | 3 | OPEN |
 | 7 Playtest en fixronde | 0 | 3 | 5 | OPEN |
 | 8 Release candidate | 7 | 2 | 5 | OPEN |
-| **Totaal** | **52** | **13** | **28** | |
+| **Totaal** | **54** | **11** | **28** | |
 
-Sinds de eerste audit (15 nov): F1.4, F1.5, F1.6, F1.7, F2.2, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.14, F6.15, F6.17, F6.24, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
-KLAAR (F2.2/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
+Sinds de eerste audit (15 nov): F1.3, F1.4, F1.5, F1.6, F1.7, F2.2, F2.3, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.14, F6.15, F6.17, F6.24, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
+KLAAR (F2.2/F2.3/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
 
 ### OPEN op risico (voor de interne RC van 20 nov)
 
@@ -77,7 +89,7 @@ F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt to
 
 | # | Punt | Waarom risico | Voorstel | Grootte | Ja Dennis |
 |---:|---|---|---|---|---|
-| 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Debug-APK v0.21, versionCode 23, commit `fcb3f21e` (tag `wm1-freeze3`, `sapientia-wm1-freeze3-fcb3f21-debug.apk`, arm64-v8a + armeabi-v7a, F7.1). Installatie op de S25 door Dennis blijft open. Eén ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
+| 1 | F7.2 Dennis' playtest | Scorekaart in `FINISH_LOG.md` heeft geen cijfers van Dennis; geen playtest-issues. Of er P0/P1 zijn, weet niemand. Gate fase 7 staat dus open. | Debug-APK v0.21, versionCode 23, commit `439ff805` (tag `wm1-freeze5`, `sapientia-wm1-freeze5-439ff80-debug.apk`, arm64-v8a + armeabi-v7a, F7.1). Installatie op de S25 door Dennis blijft open. Eén ronde volgens `WM1_PLAYTEST.md`, bugs als issue met label `bug`. | L | ja (alleen Dennis kan spelen) |
 | 2 | F8.6 Release-APK | `build-apk` heeft nog nooit met `build_type: release` gedraaid (laatste run op deze branch: debug, `5cb270c`, 5 nov). Of de signing-secrets er staan, kan deze sessie niet zien. Een ondertekende APK is de kern van de RC. | Forge doet nu een droge release-run op de huidige head. Dan blijkt meteen of de secrets kloppen, ruim voor 20 nov. | S | nee (bestaande workflow, interne build, niet publiceren) |
 | 3 | F4.2 S25-meting | Geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`. | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
 | 4 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt` (F6.23b). LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
@@ -103,11 +115,11 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 |---|---|---|---|---|---|---|
 | F1.1 | Lock reviewen en mergen | KLAAR | `docs/release/WM1_CONTENT_LOCK.md` staat op de branch; cuts doorgevoerd (CHANGELOG 24 okt; `scripts/data/release_flags.gd`). Het vakje zelf is niet afgevinkt. | | | |
 | F1.2 | BESLIS-punten H3/H11/H13 | KLAAR | `release_flags.gd:13-24`; suite `wm1releasetest` | | | |
-| F1.3 | Labels `wm1-*` | OPEN | Labels (REST): `wm1-bugfix` en `wm1-lock` bestaan. `wm1-polish`, `wm1-cut` en `wm1-vervanging` ontbreken. | Forge maakt de drie labels aan. | S | nee (Forge) |
+| F1.3 | Labels `wm1-*` | KLAAR | Labels (REST, `gh label list -R krelegerdennis-collab/Sapientia-RPG`, 19-11-2026, Europe/Amsterdam): `wm1-bugfix`, `wm1-lock`, `wm1-polish` ("Kleine UX/polish-fix voor WM1 (geen nieuwe feature)"), `wm1-cut` ("Uit WM1 geschrapt of geparkeerd tot na de RC") en `wm1-vervanging` ("Placeholder of asset die vervangen moet worden voor WM1") bestaan. | | S | nee |
 | F1.4 | CI-matrix gelijk met `game_state.gd` | KLAAR | #361, #380, #400, #406, #449, #480, #488, #500; #507 (merge `060140df`) zette `blauwekisttest`, `bossnametest` en `dungeon100bossmaptest` in de matrix (Dennis akkoord 17-11 12:06). #514 zette `--combattick` in de matrix; de suite draait in CI sinds `f01ba40a`. Matrix nu 135 suites (`.github/workflows/tests.yml:24-42`), `relaytest` als eigen job. Buiten de matrix blijven perf/sim/benchmark en `wm1playthroughtest` (bewust, checklist). | | S | ja (workflow) |
 | F1.5 | Baseline PASS-aantallen | KLAAR | Baseline: 140 checks groen op freeze 2 (incl. #521 `wmdeathtest`; PR #542, 140/140). Eerder 138/138 op `f76aa715` (draft-PR #515, `rc/wm1-freeze-ci`, gesloten zonder merge). `--combattick` draait in CI sinds #514. De tabel in `AGENTS.md` is van v0.18. | | S | nee |
 | F1.6 | Lock-cijfers hertellen | KLAAR | #517 (merge `e7f33011`, https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/517) hertelde alle lock-cijfers op `f76aa715` (tag `wm1-freeze`) en schreef ze in `docs/release/WM1_CONTENT_LOCK.md`. Story-`EVENTS` is 62 (= 53 string-keys + 9 expressie-keys); de eerdere driftlijst noemde ten onrechte 58 vs 53. Overige rijen na die hertelling: kaartscènes 50 (48 speelroute, 2 dev; extra `leven_v2_leeszaal.tscn`, `woud_beek.tscn`), `ITEMS` 53 (`spreuk_grote_genezing`, `spreuk_vuurbal`, `spreuk_zonnevlam`), Codex 21/32 (`adermot`, `druipslak`, `steenluis` / `aderspark`, `koude_druppel`, `steenbeet`), `TODO(design\|verhaal)` zonder tests 51 (56 − 5 in `scripts/tests/`). Gelijk: `ENEMIES` 26, berggrot-`MONSTERS` 3, `BOSSES` 12 (10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 99), helden 5 (Dax, Vesper, Seren, Kael Voss, Orion), sleutelvoorwerpen 4, `EQUIPMENT` 85, blauwe-kist 36, `SPELLS` 81 (21/20/20/20), kern 2/1/2, opdrachten 7 (6 hoofd, 1 zij) / acts 6 (act 3-6 "later"), BGM 24/13, SFX 99/0. | | S | nee |
-| F1.7 | Tag `wm1-freeze` | KLAAR | Tag `wm1-freeze` op `finish/wm1` commit `f76aa7150f23385d47c630e54179e26ac1ba2cb8` (`f76aa715`), akkoord Dennis 17-11-2026 15:25 (kaart t890s5659); tag `wm1-freeze2` op `961101ac`; huidige freeze is `wm1-freeze3` (tag-object `a072e034`) op `fcb3f21e` (zie Freeze 3). Debug-APK freeze 3: beide ABI's (arm64-v8a en armeabi-v7a). Tags blijven staan. | | S | ja (scope) |
+| F1.7 | Tag `wm1-freeze` | KLAAR | Tag `wm1-freeze` op `finish/wm1` commit `f76aa7150f23385d47c630e54179e26ac1ba2cb8` (`f76aa715`), akkoord Dennis 17-11-2026 15:25 (kaart t890s5659); tag `wm1-freeze2` op `961101ac`; huidige freeze is `wm1-freeze5` (tag-object `6611e218`) op `439ff805` (zie Freeze 5). Tags `wm1-freeze` t/m `wm1-freeze5` blijven staan. Debug-APK freeze 5: beide ABI's (arm64-v8a en armeabi-v7a). | | S | ja (scope) |
 
 ## Fase 2: Art op palet
 
@@ -115,21 +127,45 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 |---|---|---|---|---|---|---|
 | F2.1 | Masterpalet vastgelegd | KLAAR | `docs/art/masterpalet.gpl`; #366; CI-job `palet-check` | | | |
 | F2.2 | Alle PNG's meten | KLAAR (meting) | Batches geleverd: #538 (`12_assets_ui`), #540 (`10_assets_sprites`), #541 (`06_assets_hd2d`). `palet_check.py --streng` op deze boom (gelijk aan `finish/wm1` `961101ac`): `assets/ui` 364/364 schoon, `assets/sprites` 595/595, `assets/hd2d` 219/219 met `--negeer '**/*_n.png'` (453 genegeerd). Dennis' HD-2D-oogcheck blijft open. | | M | ja (oogcheck) |
-| F2.3 | CSV filteren op WM1 | OPEN | F2.2 is KLAAR (meting): `palet_check.py --streng` op `assets/ui` 364/364, `assets/sprites` 595/595, `assets/hd2d` 219/219 met `--negeer '**/*_n.png'` (453 genegeerd). De CSV-filter op de lock-inventaris staat niet in dit rapport. Dennis' HD-2D-oogcheck blijft open. | Filteren op de lock-inventaris (kaarten, NPC's, vijanden, items, cutscenes, UI, hub; WM2/WM3 valt af). | M | nee |
+| F2.3 | CSV filteren op WM1 | KLAAR (meting) | Op `439ff805` (tag `wm1-freeze5`): `python3 tools/art_audit/palet_check.py --streng --negeer '**/*_n.png'` met de standaardpaden van het script (default `--assets assets/`, palet `docs/art/masterpalet.gpl`). Uitkomst: 73 paletkleuren, 1491 PNG's gecontroleerd, 1491 schoon, **0 buiten het palet**, 461 `*_n.png` overgeslagen, exit 0 (zelfde cijfers als Forge op deze commit). `light_soft_128` (`assets/hd2d/fx_data/light_soft_128.png`) zit in die standaardscan en is schoon (5 unieke kleuren, `buiten_palet` 0); de dithering blijft staan op Dennis' besluit, paletvast sinds #541 (Bayer 8x8). Van de 2053 PNG's in `assets/`+`art/`+`world_warper/art/` vallen er 101 buiten het standaardpad: `art/` 12 en `world_warper/art/` 89. Die zijn apart gecontroleerd met hetzelfde commando plus `--assets art` (12/12 schoon, exit 0) en `--assets world_warper/art` (89/89 schoon, exit 0). Alle gemeten mappen zijn schoon; F2.3 is daarmee KLAAR voor alles in die set. `wacht/` niet gescand. Details en aanvullende meet.py-cijfers: zie de meting onder de tabel. | | M | nee |
 | F2.4 | RPG ART levert batches | OPEN | Geleverd: #369-#372, #379, #381, #403, #411, #412, en freeze2 #538 (`12_assets_ui`), #540 (`10_assets_sprites`, akkoord Dennis 17-11 20:18), #541 (`06_assets_hd2d`). Verder akkoord per batch staat niet in dit rapport. Dennis' HD-2D-oogcheck blijft open. | ART per batch, met akkoord van Dennis. | L | ja (art-akkoord) |
 | F2.5 | Placeholders in de route (H10) | KLAAR | Rustpunt #375, Blauwe Kist #378 en uitgang-warper #381 zijn klaar. #506 (merge `70f6743c`) haalde 12 dubbele Wilgendal-regels uit `tools/placeholders_v17.txt`; 0 open regels (`rcchecktest` [F2.5] PASS). Het Action-HUD (slagboog, meters, ringmenu) wordt in code getekend en is niet beoordeeld — bewuste kanttekening, geen open placeholder-regel. | | S | ja (bewust laten staan) |
 | F2.6 | Ontbrekende art melden in PR | NIET TE CHECKEN | Procesregel. | | | |
 | F2.7 | Suites na elke batch | KLAAR | CI draait alle suites op elke PR. Laatste art-PR's waren groen (bijv. #476: 122/122). | | | |
 | F2.8 | Screenshots voor/na | NIET TE CHECKEN | Handmatig. | | | |
 
-**Gate fase 2:** OPEN (F2.2-meting schoon: `palet_check.py --streng` `assets/ui` 364/364, `assets/sprites` 595/595, `assets/hd2d` 219/219, 453 `*_n.png` genegeerd; Dennis' HD-2D-oogcheck blijft open).
+**Gate fase 2:** OPEN (`palet_check.py --streng --negeer '**/*_n.png'` op `439ff805`: `assets/` 1491/1491 schoon, `art/` 12/12, `world_warper/art/` 89/89, 0 buiten het palet. Dennis' HD-2D-oogcheck en F2.4 blijven open).
+
+### F2.3-meting (freeze 5, `439ff805`)
+
+**palet_check (leidend).** Commando, op een checkout waarvan alleen dit rapport verschilt van `439ff805`:
+
+`python3 tools/art_audit/palet_check.py --streng --negeer '**/*_n.png'`
+
+Het script kijkt standaard naar `assets/` (default `--assets`, palet `docs/art/masterpalet.gpl`). Uitkomst: 73 paletkleuren, 1491 PNG's gecontroleerd, 1491 schoon, **0 buiten het palet**, 461 `*_n.png` overgeslagen, exit 0. Zelfde cijfers als Forge op deze commit. `wacht/` is niet gescand (inhoud niet geopend).
+
+`light_soft_128` valt in die standaardscan (`assets/hd2d/fx_data/light_soft_128.png`) en is schoon (5 unieke kleuren, `buiten_palet` 0). Run 2 van ART (op `cd491d3a`) vond nog 420 afwijkers, waaronder dit bestand; die paletafwijking is weg sinds de F2.2-batches (#538, #540, #541, `light_soft_128` Bayer 8x8). De dithering zelf blijft staan op Dennis' besluit.
+
+Van de 2053 PNG's in `assets/` (1952) + `art/` (12) + `world_warper/art/` (89) vallen er **101 niet in het standaardpad** `assets/`:
+
+| Map buiten `assets/` | PNG's | `*_n.png` | palet_check (zelfde vlaggen) |
+|---|---:|---:|---|
+| `art/` (`battle_bg` 3, `cutscene` 1, `enemies` 4, `map_creatures` 4) | 12 | 0 | `--assets art`: 12/12 schoon, 0 genegeerd, exit 0 |
+| `world_warper/art/` | 89 | 0 | `--assets world_warper/art`: 89/89 schoon, 0 genegeerd, exit 0 |
+| **Totaal buiten het standaardpad** | **101** | **0** | **101/101 schoon** |
+
+Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele set.
+
+**Waarom een eerdere meet.py-run ook 0 gaf.** `palet_check.py` roept `meet.meet_png` aan en gebruikt hetzelfde masterpalet; het criterium is identiek (`buiten_palet` = unieke zichtbare RGB-kleuren die niet in het palet zitten). Het verschil zat in de paden: palet_check scant standaard alleen `assets/` (1952 PNG's, minus 461 `*_n.png` → 1491), terwijl meet.py ook `art/` en `world_warper/art/` meenam (samen 2053). Op niet-`*_n.png` gaven beide 0 buiten het palet. De 457 "buiten palet" in die meet.py-run waren allemaal de `*_n.png` die palet_check met `--negeer` overslaat (453 in `assets/hd2d`, 4 in `assets/placeholder`; 4 `*_n.png` in `assets/tiles` hebben `buiten_palet` 0).
+
+**Aanvullend: WM2/WM3-filter (zelfde palet, niet leidend voor de paletstatus).** Criterium: WM2/WM3-context als het pad onder `wacht/` staat of een padsegment/bestandsstem de token `wm2` of `wm3` heeft (`(?:^|[/._-])wm[23](?:[/._-]|$)`). In de 2053-scan 8 treffers, alle in `world_warper/art/` (knop/icoon locked-wereld); 2045 rijen blijven over. Die 8 zijn in WM1 zichtbaar als Locked-teasers (lock H15) en zaten in de palet_check van `world_warper/art/` (89/89 schoon). `git ls-files` noemt daarnaast 2 PNG's onder `wacht/wm2/` (niet geopend, niet in de scan).
 
 ## Fase 3: Stabiliteit
 
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
 | F3.1 | Verse import zonder fouten | NIET TE CHECKEN | Er is geen Godot in deze sessie. CI importeert bij elke run, maar faalt niet op import-warnings. | Dennis draait lokaal `--import` en leest de uitvoer. | | |
-| F3.2 | Alle suites groen op de freeze-commit | KLAAR | Op freeze-commit `f76aa715` (tag `wm1-freeze`): `--wm1playthroughtest` na een verse `--import` **591 PASS / 0 FAIL / 0 SCRIPT ERRORs**. Rapport `/workspace/f3/F3_2_playthrough_f76aa71.txt` (box van het team, niet in de repo). Freeze 2 op `961101ac`: 591 PASS / 0 FAIL, twee keer serieel (`F3_2_playthrough_961101a_run1.txt` en `run2.txt`, build-box, niet in de repo). Freeze 3 op `fcb3f21e`: **591 PASS / 0 FAIL**, twee keer serieel (`RESULT OK (591 goed, 0 fouten)` in `/workspace/f3/F3_2_playthrough_fcb3f21_run1.txt` en `run2.txt`, build-box, niet in de repo). | | S | nee |
+| F3.2 | Alle suites groen op de freeze-commit | KLAAR | Op freeze-commit `f76aa715` (tag `wm1-freeze`): `--wm1playthroughtest` na een verse `--import` **591 PASS / 0 FAIL / 0 SCRIPT ERRORs**. Rapport `/workspace/f3/F3_2_playthrough_f76aa71.txt` (box van het team, niet in de repo). Freeze 2 op `961101ac`: 591 PASS / 0 FAIL, twee keer serieel (`F3_2_playthrough_961101a_run1.txt` en `run2.txt`, build-box, niet in de repo). Freeze 3 op `fcb3f21e`: **591 PASS / 0 FAIL**, twee keer serieel (`RESULT OK (591 goed, 0 fouten)` in `/workspace/f3/F3_2_playthrough_fcb3f21_run1.txt` en `run2.txt`, build-box, niet in de repo). Freeze 5 op `439ff805`: **591 PASS / 0 FAIL**, twee keer serieel (Forge, bij de freeze; rapporten op de build-box, niet in de repo). | | S | nee |
 | F3.3 | Geen `SCRIPT ERROR` | KLAAR | `.github/scripts/run_suite.sh:25,30-33` faalt erop; #476 groen. | | | |
 | F3.4 | Golden path route A en B | NIET TE CHECKEN | Handmatig. Deels gedekt door `wm1playthroughtest` (kas en berggrot, niet in CI). | | | |
 | F3.5 | Terugweg Archief 2 (H14) | NIET TE CHECKEN | Handmatig. `archief2test` raakt `leven_v1_plaat`. | | | |
@@ -212,7 +248,7 @@ De onderstaande feitfouten stonden in `docs/release/WM1_RELEASE_CHECKLIST.md` en
 
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
-| F7.1 | Playtest-APK | OPEN | Debug-APK v0.21, versionCode 23, commit `fcb3f21e` (tag `wm1-freeze3`, bestand `sapientia-wm1-freeze3-fcb3f21-debug.apk`, arm64-v8a en armeabi-v7a), gebouwd door RPG Forge. Niet gepubliceerd (Freeze 3). | Installatie op de Samsung S25 door Dennis. | S | nee |
+| F7.1 | Playtest-APK | OPEN | Debug-APK v0.21, versionCode 23, commit `439ff805` (tag `wm1-freeze5`, bestand `sapientia-wm1-freeze5-439ff80-debug.apk`, arm64-v8a en armeabi-v7a), gebouwd door RPG Forge. F3.2 op die commit twee keer 591/0. Niet gepubliceerd (Freeze 5). | Installatie op de Samsung S25 door Dennis. | S | nee |
 | F7.2 | Dennis speelt de golden path | OPEN | Kolom "Dennis" in de scorekaart (`FINISH_LOG.md`) is leeg. Zie OPEN-lijst #1. | Eén ronde volgens `WM1_PLAYTEST.md`. | L | ja |
 | F7.3 | Bugs als issue | NIET TE CHECKEN | Procesregel. Nu 0 open issues met label `bug`. | | | |
 | F7.4 | Ernst P0-P3 | NIET TE CHECKEN | Definitie, procesregel. | | | |
