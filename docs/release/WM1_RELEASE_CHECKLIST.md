@@ -306,9 +306,10 @@ Audio
 Versie en changelog (RPG Forge)
 - [ ] Versienummer kiezen en overal gelijk zetten. Op `finish/wm1` staan `config/version="0.21"` in `project.godot`,
   `tools/release/version.json` en alle drie Android-presets in `export_presets.cfg` op `version/name="0.21"` en
-  `version/code=23`. `README.md` kan nog oudere labels noemen. Alleen RPG Forge past dit aan; agents niet.
+  `version/code=23`. `README.md:8` noemt ook 0.21 (code 23), met `tools/release/version.json` als enige bron
+  (F8.4 KLAAR in `RC_AUDIT_WM1.md`). Alleen RPG Forge past dit aan; agents niet.
 - [ ] `version/code` hoger dan de laatst geïnstalleerde APK, zodat updaten over een bestaande installatie werkt.
-- [ ] Changelog schrijven: er is nog geen `CHANGELOG.md`. Inhoud: wat WM1 bevat (lock sectie 2), known issues (de
+- [ ] Changelog bijhouden in `CHANGELOG.md` (kopje `[0.21]`; F8.3 KLAAR in `RC_AUDIT_WM1.md`). Inhoud: wat WM1 bevat (lock sectie 2), known issues (de
   open P2/P3-bugs en de SHIP-punten met lacune uit lock sectie 3), PvP en Co-op als experimenteel of verborgen
   (H11), bekende placeholders (H10, H9).
 - [ ] `README.md` en `docs/BUILDS.md` kloppen met de RC (alleen RPG Forge).
