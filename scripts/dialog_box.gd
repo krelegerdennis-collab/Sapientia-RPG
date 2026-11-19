@@ -128,8 +128,8 @@ func _ready() -> void:
 	if name_tab.has_method("set_color"):
 		name_tab.set_color(UiStyleC.BOX_NAME)
 	text_label.add_theme_color_override("font_color", UiStyleC.BOX_TEXT)
-	text_label.add_theme_color_override("font_shadow_color", UiStyleC.BOX_SHADOW)
 	text_label.add_theme_constant_override("line_spacing", LINE_SPACING)
+	_make_shadow_label()
 	var sheet: Texture2D = load(UiStyleC.TAIL_TEXTURE)
 	for i in 2:
 		var at := AtlasTexture.new()
@@ -786,7 +786,51 @@ func _is_typing() -> bool:
 	return text_label.visible_characters != -1
 
 
+## Perf (post-RC): de Label-schaduw (shadow_outline_size 1) wisselt per letter tussen de outline- en de
+## vul-textuur van het font, en kost zo ~2 draw calls per letter (~90 per tekstvak op GL Compatibility).
+## Een losse schaduw-Label achter de tekst (outline = schaduw, zelfde verschuiving) tekent per stap in één batch.
+var _shadow_label: Label
+
+
+func _make_shadow_label() -> void:
+	var sh := text_label.duplicate(0) as Label
+	sh.name = "TextShadow"
+	var off := Vector2(text_label.get_theme_constant("shadow_offset_x"), text_label.get_theme_constant("shadow_offset_y"))
+	var so := text_label.get_theme_constant("shadow_outline_size")
+	sh.add_theme_color_override("font_color", UiStyleC.BOX_SHADOW)
+	sh.add_theme_color_override("font_outline_color", UiStyleC.BOX_SHADOW)
+	sh.add_theme_constant_override("outline_size", so)
+	sh.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0))
+	sh.offset_left += off.x
+	sh.offset_right += off.x
+	sh.offset_top += off.y
+	sh.offset_bottom += off.y
+	text_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0))
+	text_label.add_sibling(sh)
+	text_label.get_parent().move_child(sh, text_label.get_index())
+	_shadow_label = sh
+
+
+func _sync_shadow() -> void:
+	var sh := _shadow_label
+	if sh == null:
+		return
+	if sh.text != text_label.text:
+		sh.text = text_label.text
+	sh.visible_characters = text_label.visible_characters
+	sh.visible = text_label.visible
+	var want := text_label.position + Vector2(text_label.get_theme_constant("shadow_offset_x"), text_label.get_theme_constant("shadow_offset_y"))
+	if sh.position != want or sh.size != text_label.size:
+		sh.position = want
+		sh.size = text_label.size
+
+
 func _process(delta: float) -> void:
+	_process_dialog(delta)
+	_sync_shadow()
+
+
+func _process_dialog(delta: float) -> void:
 	if not is_open:
 		return
 	if _is_typing():

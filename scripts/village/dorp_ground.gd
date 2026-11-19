@@ -3,6 +3,7 @@ extends TileMapLayer
 ## tileset van het gebied (assets/tilesets/som/wilgendal/terrain.tres), blob47-autotiling voor pad en
 ## beek, een overlay-laag voor de brug en kegelbomen (RPG ART) op de rand.
 ## Tekens en kolommen: scripts/data/wilgendal_dorp.gd.
+const TileRenderSplit := preload("res://scripts/perf/tile_render_split.gd")
 
 const Data := preload("res://scripts/data/wilgendal_dorp.gd")
 const SOM_BOOM := "res://assets/sprites/som/wilgendal/kegelboom.png"
@@ -350,6 +351,8 @@ func _v8() -> void:
 				v8.set_cell(Vector2i(x, y), 1, Vector2i(atlas_van[k], 0))
 			elif b >= 0:
 				v8.set_cell(Vector2i(x, y), b, Vector2i(atlas_van[k] % kol, atlas_van[k] / kol))
+	# perf: 3 bronnen (v8, licht gras, v8-licht) door elkaar -> per bron een beeldlaag (~110 -> ~15 draw calls)
+	TileRenderSplit.split(v8)
 
 
 ## Zelfde als de buurcontrole in pad_zoom() (3x3 rond de cel, alleen binnen de kaart), met het raster.
