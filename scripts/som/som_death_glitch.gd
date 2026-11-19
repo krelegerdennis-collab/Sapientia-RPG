@@ -95,6 +95,8 @@ static func play(parent: Node, arena, m: Node, e: Dictionary, got: Array) -> voi
 		if is_instance_valid(m):
 			m.queue_free()
 		return
+	# post-RC sfx. CO-OP: alleen de HOST hoort dit (_defeat_enemy draait niet op de gast).
+	# Netcode-follow-up: gast-sfx.
 	WorldSfx.play(WorldSfx.ENEMY_DEATH_MECH if e.has("golem") else WorldSfx.ENEMY_DEATH)
 	var big: bool = m.size != Vector2i.ONE
 	var spec: Dictionary = SomData.FX_DEATH_GLITCH_48 if big else SomData.FX_DEATH_GLITCH

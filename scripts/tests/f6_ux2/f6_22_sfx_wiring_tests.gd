@@ -8,6 +8,9 @@ const DoorS := preload("res://scripts/door.gd")
 const DungeonChestS := preload("res://scripts/dungeon/dungeon_chest.gd")
 const HekPoortS := preload("res://scripts/village/hek_poort.gd")
 const QuestData := preload("res://scripts/data/quest_data.gd")
+const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
+## Doel (Forge/COMBAT): enemy_hurt hoogstens ~1 per 4 ticks (~66 ms bij 60 fps), globaal.
+const HURT_MAX_RATE_MS := 66
 
 
 func needs_game() -> bool:
@@ -143,3 +146,71 @@ func run(t: Node) -> void:
 	t.check("sfx-wiring: quest_sync(false) (laden) -> stil", _since(n0).is_empty())
 	if not saved_stand.is_empty():
 		GameState._quest_klank_stand = saved_stand
+
+	# 9. enemy_hurt-burst: 4 helden x 4 vijanden = 16 SomHitReact.trigger per beeld (zelfde + volgende beelden).
+	#    Echt afgespeeld = AudioManager zette een nieuwe tijd in _sfx_last_played_ms (de min_interval_ms-poort).
+	await _hurt_burst(t)
+
+
+## Nep-monster met wat SomHitReact.trigger leest (placeholder -> shader-flits, geen arena nodig).
+static func _fake_monster(parent: Node) -> Node2D:
+	var scr := GDScript.new()
+	scr.source_code = "extends Node2D\nvar sprite: Sprite2D\nvar placeholder := true\nvar size := Vector2i.ONE\nvar enemy_id := \"sfx_test\"\n"
+	scr.reload()
+	var m: Node2D = Node2D.new()
+	m.set_script(scr)
+	var spr := Sprite2D.new()
+	m.add_child(spr)
+	m.set("sprite", spr)
+	parent.add_child(m)
+	return m
+
+
+func _hurt_burst(t: Node) -> void:
+	var interval := int(AudioManager._sfx.get(WorldSfx.ENEMY_HURT, {}).get("min_interval_ms", 0))
+	t.check("sfx-wiring: enemy_hurt min_interval_ms %d >= %d (max ~1 per 4 ticks)" % [interval, HURT_MAX_RATE_MS],
+			interval >= HURT_MAX_RATE_MS)
+	var monsters: Array[Node2D] = []
+	for i in 4:
+		monsters.append(_fake_monster(t))
+	AudioManager._sfx_last_played_ms.erase(WorldSfx.ENEMY_HURT)
+	var plays := 0
+	var requests := 0
+	var last := -1
+	# a) één beeld: 4 helden raken 4 vijanden tegelijk
+	for hero in 4:
+		for m in monsters:
+			SomHitReact.trigger(null, m, {}, Vector2i.RIGHT, "middel", false, false)
+			requests += 1
+			var ts := int(AudioManager._sfx_last_played_ms.get(WorldSfx.ENEMY_HURT, -1))
+			if ts != last:
+				plays += 1
+				last = ts
+	print("INFO  enemy_hurt burst 1 beeld: %d treffers -> %d keer gespeeld" % [requests, plays])
+	t.check("sfx-wiring: 16 treffers in één beeld -> precies 1 enemy_hurt (%d)" % plays, plays == 1)
+	# b) 60 opeenvolgende beelden met elk 16 treffers
+	plays = 0
+	requests = 0
+	AudioManager._sfx_last_played_ms.erase(WorldSfx.ENEMY_HURT)
+	last = -1
+	var t0 := Time.get_ticks_msec()
+	var frames := 60
+	for f in frames:
+		for hero in 4:
+			for m in monsters:
+				SomHitReact.trigger(null, m, {}, Vector2i.LEFT, "middel", false, false)
+				requests += 1
+				var ts := int(AudioManager._sfx_last_played_ms.get(WorldSfx.ENEMY_HURT, -1))
+				if ts != last:
+					plays += 1
+					last = ts
+		await t.get_tree().process_frame
+	var elapsed := maxi(1, Time.get_ticks_msec() - t0)
+	var cap_manifest := elapsed / maxi(1, interval) + 1
+	var cap_goal := elapsed / HURT_MAX_RATE_MS + 1
+	print("INFO  enemy_hurt burst %d beelden: %d treffers in %d ms -> %d keer gespeeld (grens manifest %d, doel %d)"
+			% [frames, requests, elapsed, plays, cap_manifest, cap_goal])
+	t.check("sfx-wiring: burst %d treffers / %d ms -> %d gespeeld <= %d (1 per %d ms)" % [requests, elapsed, plays, cap_goal, HURT_MAX_RATE_MS],
+			plays >= 1 and plays <= cap_goal and plays <= cap_manifest)
+	for m in monsters:
+		m.queue_free()

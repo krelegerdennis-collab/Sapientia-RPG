@@ -38,7 +38,11 @@ static func contact_flash_active(m: Node) -> bool:
 static func trigger(arena, m: Node, e: Dictionary, dir: Vector2i, weight: String, finisher_or_heavy: bool, full_hurt_pose: bool) -> void:
 	if m == null or m.sprite == null:
 		return
-	WorldSfx.play(WorldSfx.ENEMY_HURT)   # post-RC: niet-dodelijke treffer (de doodsslag: SomDeathGlitch)
+	# post-RC sfx: niet-dodelijke treffer (de doodsslag: SomDeathGlitch). Begrensd door het manifest:
+	# enemy_hurt min_interval_ms 80 (AudioManager.play_sfx, globaal per sleutel) = max 1 per ~5 ticks.
+	# CO-OP: alleen de HOST hoort dit (damage_enemy draait niet op de gast; die zet hp uit de
+	# snapshot in SomArena.apply_coop_snapshot). Netcode-follow-up: gast-sfx.
+	WorldSfx.play(WorldSfx.ENEMY_HURT)
 	var st := _state(m)
 	st["t"] = 0.0
 	st["dir"] = dir
