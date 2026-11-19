@@ -321,7 +321,10 @@ Build en handtekening (RPG Forge)
 - [ ] Controle op de APK: `apksigner verify --print-certs sapientia.apk` (ondertekend met de release-sleutel, niet
   debug), `aapt dump badging sapientia.apk` (package `com.dennis.rpgprototype`, versieNaam en versieCode kloppen,
   arm64-v8a aanwezig), bestandsgrootte genoteerd.
-- [ ] Rechten in de APK kloppen met de keuze bij H11 (`internet`, wifi-state, multicast staan nu aan in de preset).
+- [ ] Rechten in de APK kloppen met de keuze bij H11: online blijft dicht, dus geen netwerkrechten. `internet`,
+  `access_network_state`, `access_wifi_state` en `change_wifi_multicast_state` staan op `false` in alle drie
+  Android-presets (`export_presets.cfg:60-63,131-134,244-247`; besluit Dennis 15 nov, F8.8 in `RC_AUDIT_WM1.md`).
+  Controle: `aapt dump permissions` op de APK toont geen `uses-permission` (zoals in `F8_6_DRY_BUILD.md`).
 - [ ] Installatietest op de S25: schone installatie en update over de vorige build met een bestaande save (saves blijven).
 - [ ] Rookroute op de RC-APK: nieuw spel, proloog, wereldkaart, Willowdale-winkel, Archief 1 tot de Golem, opslaan,
   afsluiten, Continue. Daarna een korte hub-check met een testsave of vroege cheatloze doorloop.

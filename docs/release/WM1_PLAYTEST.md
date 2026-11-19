@@ -228,7 +228,7 @@ Uit `docs/BACKLOG_WM1.md`, `docs/qa/SAVE_HARDENING.md` en de handoffs:
 
 - Balans is te makkelijk in WM1 en de Diepe Grot (wereldkaart-gevechten bijna altijd winst). Meld wel als het te *moeilijk* of een baas oneerlijk is.
 - Veel kaarten (Archief 1, berggrot, puzzelkamers) zijn nog niet 1,4x geschaald; dat is een bekend punt.
-- Veel BGM- en alle SFX-bestanden zijn placeholder of ontbreken; World Warper-geluiden zijn grotendeels stil.
+- Veel BGM- en SFX-bestanden zijn placeholder of ontbreken (F6.23). World Warper heeft sinds #554 drie cues (`ww_hum`, `ww_warp`, `ww_sapientia_glitch`); verder zijn de WW-geluiden grotendeels stil.
 - Een deel van de NPC-teksten in Esdoorn en ECHO's zinnen is voorlopig (`TODO_STORY`).
 - De Root King heeft geen kernmechaniek; stun-betekenis op de wereldkaart is nog niet besloten.
 - Puzzelstand midden in een puzzel zit niet in de save.
