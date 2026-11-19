@@ -61,8 +61,8 @@ Huidige freeze voor de interne RC. Eerdere tags (`wm1-freeze` t/m `wm1-freeze4`)
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 54 |
-| OPEN | 11 |
+| KLAAR | 56 |
+| OPEN | 9 |
 | NIET TE CHECKEN | 28 |
 | **Totaal** | **93** |
 
@@ -75,12 +75,12 @@ Voortgang per fase (telling van de detailrijen hieronder, freeze 5 op `439ff805`
 | 3 Stabiliteit | 9 | 0 | 8 | OPEN |
 | 4 S25-performance | 2 | 1 | 4 | OPEN |
 | 5 Balans | 6 | 1 | 1 | OPEN |
-| 6 UX-polish | 18 | 3 | 3 | OPEN |
+| 6 UX-polish | 20 | 1 | 3 | OPEN |
 | 7 Playtest en fixronde | 0 | 3 | 5 | OPEN |
 | 8 Release candidate | 7 | 2 | 5 | OPEN |
-| **Totaal** | **54** | **11** | **28** | |
+| **Totaal** | **56** | **9** | **28** | |
 
-Sinds de eerste audit (15 nov): F1.3, F1.4, F1.5, F1.6, F1.7, F2.2, F2.3, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.14, F6.15, F6.17, F6.24, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
+Sinds de eerste audit (15 nov): F1.3, F1.4, F1.5, F1.6, F1.7, F2.2, F2.3, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.11, F6.13, F6.14, F6.15, F6.17, F6.24, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
 KLAAR (F2.2/F2.3/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
 
 ### OPEN op risico (voor de interne RC van 20 nov)
@@ -227,9 +227,9 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 | F6.8 | Quest Log | KLAAR | `questtest`; titel zijopdracht Engels (H7). | | | |
 | F6.9 | Punten uit H7 | KLAAR | Geen van de H7-strings komt nog voor in `scripts/`, `world_warper/` of `pvp/` (grep 15 nov). | | | |
 | F6.10 | Volledige sweep op Nederlandse tekst | KLAAR | `rg`-sweep: 79 treffers buiten tests. Allemaal intern (validatiemeldingen, nodenamen, redencodes zoals `"niet nu"` in `kern_kracht_veld.gd:84`). Verder #386 (localisatie-guard) en `[TEKST]`-checks in `wm1playthroughtest`. | | | |
-| F6.11 | Namenlijst | OPEN | `namen_engels.md` staat nergens in de repo (`docs/BACKLOG_WM1.md:82`, A5). | Dennis levert de lijst of verklaart CANON voldoende. | S | ja (tekst) |
+| F6.11 | Namenlijst | KLAAR | Dennis 18-11-2026 14:09 (F6.11/T08, via RPG Forge): "Ja, de namenlijst in CANON volstaat". `docs/lore/CANON.md` is sindsdien ongewijzigd (laatste commit `39ec3bb7`, 9-11-2026, #397; `git log` na 18-11 14:09 is leeg). `namen_engels.md` staat nog steeds nergens in de repo; dat is geen open punt meer, omdat CANON volstaat. | | S | ja (tekst) |
 | F6.12 | Afkapping in ballonnen en menu's | NIET TE CHECKEN | Handmatig. Deels: `uipolishtest` (753), #434. | | | |
-| F6.13 | Tekst van Dennis (H8, ECHO) | OPEN | `WM1_PLAYTEST.md:200`: de ECHO-zinnen zijn nog door de agent geschreven. In `story_data.gd` staan 5 `TODO(verhaal)`-notities (ingekorte tekst, regels 8-291). | Dennis keurt de tekst goed of levert eigen tekst. | M | ja (tekst) |
+| F6.13 | Tekst van Dennis (H8, ECHO) | KLAAR | Dennis 18-11-2026 14:42 (F6.13/T09, via RPG Forge): "Ja, de ECHO-zinnen en 4 stukken mogen zo mee in de RC". De eerdere bevinding (`WM1_PLAYTEST.md:200`: ECHO-zinnen door de agent geschreven; 5 `TODO(verhaal)` in `story_data.gd`, regels 8-291) blijft als achtergrond staan, maar is door dit akkoord geen open punt meer voor de RC. | | M | ja (tekst) |
 | F6.14 | Tikdoelen ≥ 48 dp | KLAAR | #466 gemerged: lijstregels in alle menu's krijgen een tikvlak ≥ `UiTouch.TOUCH_MIN` (`scripts/ui/touch_row.gd`, `touch_row_zones.gd`). `TOUCH_MIN` = 25 eenheden ≈ 47,7 dp op 412 dp (`uxtest` controleert ≥ 47,5); `f6uxtest2` (`f6_ux2/f6_2_row_touch.gd`) in CI. Nameten op de S25 gaat mee in de playtest (F7.2). | | | |
 | F6.15 | RUN-knop in elke kamersoort | KLAAR | `--runknoptest` (CI-matrix): kerker (`archief_ingang`), Rest Room en Koopman. `hudtest` deel D dekt veld, dorp, hub-hal en wereldkaart. De knop is aanwezig; geen codefix nodig. | | | |
 | F6.16 | Joystick, ringmenu, Codex-knop | KLAAR | `hudtest` deel D/G (geen D-pad, zo bedoeld). | | | |
@@ -242,7 +242,7 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 | F6.23 | Placeholder-SFX | OPEN | `rcchecktest` [F6.23] en [F6.23b]: 162 + 120 placeholderregels; `gen_sfx.py` nog nooit gedraaid. Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Zie OPEN-lijst #4. | L / S | ja (audio) |
 | F6.24 | World Warper-cues zonder fout | KLAAR | #554 (merge `83000372`, https://github.com/krelegerdennis-collab/Sapientia-RPG/pull/554): `ww_hum`, `ww_warp` en `ww_sapientia_glitch` staan in de `sfx` van `assets/audio/audio_manifest.json`, elk met één bestand `sfx_<id>_01.wav`. Gekozen seeds (Dennis, Stable Audio Open 1.0, `assets/audio/sfx/HERKOMST.md`): hum s1002, warp s1002, glitch s1000. `ww_ambient` stond al onder `bgm`. `ambience.gd` speelt via AudioManager; ontbrekende cues blijven stil via `has_sfx` (geen `push_error` in de hub). `rcchecktest` [F6.24] is daarmee PASS (cues staan in het manifest). | | S | |
 
-**Gate fase 6:** OPEN.
+**Gate fase 6:** OPEN (F6.23 placeholder-SFX blijft open; geen RC-blocker).
 
 ## Fase 7: Playtest en fixronde
 
