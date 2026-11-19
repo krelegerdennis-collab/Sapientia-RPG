@@ -753,7 +753,12 @@ func _place_cross(w: float, h: float) -> void:
 ## v0.15 Linkerrand van de statusvakken zodat het kruis (CROSS_EDGE + kruis + CROSS_HERO_GAP)
 ## links naast de art van de eerste held past. Schuift de vakken alleen naar rechts zolang ze
 ## minstens MIN_BOX_W breed blijven; anders blijft alles staan (het kruis gaat dan boven de helden).
+## F6-T16: het kruis is 80 px breed (3x 26 + 2x 1). Met 4 helden op 384x216 past het nooit naast de
+## art (vakken zouden < MIN_BOX_W worden), en boven de helden is te weinig hoogte (naam-tabje +
+## 80 px). Dan schuiven de vakken nog wel zo ver dat het kruis naast het TIK-VAK van held 0 past
+## (anders steelt het kruis tikken van die held), met vakken van minstens MIN_BOX_W_TAP.
 const MIN_BOX_W := 56.0
+const MIN_BOX_W_TAP := 52.0     # 9-slice-kaart met alleen balken + ingekorte naam: nog leesbaar
 
 func _box_left_for_cross(left: float, right: float, count: int) -> float:
 	if hero_nodes.is_empty() or not hero_nodes[0].has_method("art_rect"):
@@ -761,18 +766,27 @@ func _box_left_for_cross(left: float, right: float, count: int) -> float:
 	var span: float = CommandCrossScript.BUTTON * 3.0 + CommandCrossScript.GAP * 2.0
 	var art_off: float = -hero_nodes[0].art_rect(Vector2.ZERO).position.x     # art links van de voeten
 	var tap_off: float = hero_nodes[0].FEET.x
-	var need := CROSS_EDGE + span + CROSS_HERO_GAP + maxf(art_off, tap_off)  # midden van held 0
+	var base := CROSS_EDGE + span + CROSS_HERO_GAP      # + afstand voeten -> linkerkant = midden van held 0
+	var l := _box_left_for(left, right, count, base + maxf(art_off, tap_off), MIN_BOX_W)
+	if l < 0.0:
+		l = _box_left_for(left, right, count, base + tap_off, MIN_BOX_W_TAP)
+	return left if l < 0.0 else l
+
+
+## Kleinste linkerrand (vanaf left) waarbij het midden van vak 0 op x >= need komt en de vakken
+## minstens min_w breed blijven; -1 als dat niet kan.
+func _box_left_for(left: float, right: float, count: int, need: float, min_w: float) -> float:
 	var l := left
 	while l < right:
 		var bw := minf(floorf((right - l - BOX_GAP * (count - 1)) / count), 88.0)
-		if bw < MIN_BOX_W:
-			return left
+		if bw < min_w:
+			return -1.0
 		var total := bw * count + BOX_GAP * (count - 1)
 		var x0 := roundf(l + (right - l - total) / 2.0)
 		if x0 + roundf(bw / 2.0) >= need:
 			return l
 		l += 1.0
-	return left
+	return -1.0
 
 
 ## v0.15 Gebied voor de vijandenrij: [links, rechts] (rechts van het kruis).
