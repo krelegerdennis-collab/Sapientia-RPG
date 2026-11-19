@@ -775,6 +775,7 @@ func _ready() -> void:
 			["--wm1dekkingtest", "res://scripts/tests/wm1_dekking_tests.gd", "Wm1DekkingTest", "wm1dekkingtest"],
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
 			["--androidbacktest", "res://scripts/tests/android_back_tests.gd", "AndroidBackTest", "androidbacktest"],
+			["--nameentrysafetest", "res://scripts/tests/name_entry_safe_tests.gd", "NameEntrySafeTest", "nameentrysafetest"],
 			["--statemachinetest", "res://scripts/tests/state_machine_tests.gd", "StateMachineTest", "statemachinetest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
@@ -805,7 +806,11 @@ func _ready() -> void:
 		if FileAccess.file_exists(autosave_path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(autosave_path))
 		_finish_preload()   # tests: achtergrond-laden eerst afmaken (geen race/deadlock met load() in de suite)
-		var tester: Node = load(t[1]).new()
+		var scr: Script = load(t[1])
+		# Losse --script-suite (extends SceneTree, bv. name_entry_safe_tests.gd): draai de binnenklasse Runner.
+		if scr.get_instance_base_type() == &"SceneTree" and scr.get_script_constant_map().has("Runner"):
+			scr = scr.get_script_constant_map()["Runner"]
+		var tester: Node = scr.new()
 		tester.name = t[2]
 		get_tree().root.add_child.call_deferred(tester)
 		break
