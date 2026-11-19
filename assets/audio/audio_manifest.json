@@ -1276,6 +1276,36 @@
 			"volume_db": -8,
 			"pitch_variatie": 0.02,
 			"min_interval_ms": 0
+		},
+		"ww_hum": {
+			"bestanden": [
+				"sfx_ww_hum_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "World Warper: zachte, warme machinale brom met een lichte boventoon.",
+			"volume_db": -8,
+			"pitch_variatie": 0.02,
+			"min_interval_ms": 300
+		},
+		"ww_warp": {
+			"bestanden": [
+				"sfx_ww_warp_01.wav"
+			],
+			"categorie": "wereld",
+			"beschrijving": "World Warper: oplopende fantasy-teleport-whoosh met een glinster.",
+			"volume_db": -6,
+			"pitch_variatie": 0.0,
+			"min_interval_ms": 400
+		},
+		"ww_sapientia_glitch": {
+			"bestanden": [
+				"sfx_ww_sapientia_glitch_01.wav"
+			],
+			"categorie": "sapientia",
+			"beschrijving": "Korte digitale glitch, bitcrush-stotter, licht onheilspellend.",
+			"volume_db": -6,
+			"pitch_variatie": 0.03,
+			"min_interval_ms": 200
 		}
 	}
 }
