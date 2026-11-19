@@ -5,6 +5,7 @@ extends RefCounted
 
 const MAX_ROOT_TICKS := 60
 const IMMUNITY_TICKS := 90
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 
 var _rooted: Dictionary = {}
 var _immune: Dictionary = {}
@@ -53,6 +54,8 @@ func try_apply_root(id: String, ticks: int = MAX_ROOT_TICKS) -> bool:
 	if cur >= want:
 		return cur > 0
 	_rooted[id] = maxi(cur, want)
+	if cur <= 0:
+		WorldSfx.play(WorldSfx.STATUS_STUN)   # post-RC: nieuwe wortelgreep (geen verlenging)
 	return true
 
 

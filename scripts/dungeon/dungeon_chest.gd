@@ -16,6 +16,7 @@ const DungeonRoomsTheme := preload("res://scripts/data/dungeon_rooms.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const Dungeon100Scaling := preload("res://scripts/data/dungeon100_scaling.gd")
 const Blue := preload("res://scripts/data/dungeon100_blue.gd")
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 const EMPTY_LINES := ["The chest is empty."]
 const MIMIC_LINES := ["{naam} lifts the lid...", "The chest bites back! It's a Mimic!"]
 ## Het Gesimuleerde Archief: een Mimic-kist is wakker geworden (de kamer start het gevecht).
@@ -139,6 +140,7 @@ func open_chest() -> void:
 func _give_loot(intro: Array) -> void:
 	# eerst de vlag, dan het voorwerp: nooit dubbel
 	GameState.story_flags[flag_of(chest_id)] = true
+	WorldSfx.play(WorldSfx.CHEST_OPEN)
 	if not loot.is_empty():
 		var gold := GameState.grant_loot_items(loot)
 		GameState.add_gold(gold)
