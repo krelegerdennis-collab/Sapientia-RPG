@@ -1,8 +1,8 @@
 # World Warper — audio-placeholders
 
-Er is nog geen audio. Deze map bevat geen geluidsbestanden (geen `.ogg`, `.wav` of andere clips). Ontbrekende cues blijven stil.
+KLAAR (#554, merge `83000372`): de SFX `ww_hum`, `ww_warp` en `ww_sapientia_glitch` staan in `assets/audio/audio_manifest.json` met elk één `.wav` onder `assets/audio/sfx/`. Gekozen seeds (Dennis, Stable Audio Open 1.0, zie `assets/audio/sfx/HERKOMST.md`): hum s1002, warp s1002, glitch s1000.
 
-RPG ART / audio levert later de bestanden. De cues horen dan in het audiomanifest; tot die tijd wijzigt deze taak dat manifest niet.
+Deze map bevat zelf geen geluidsbestanden. Hub-muziek `ww_ambient` stond al onder `bgm` (hergebruik Diepe Grot). Ontbrekende cues blijven stil via `ambience.gd`.
 
 | Cue | Soort | Aanroep |
 |---|---|---|
