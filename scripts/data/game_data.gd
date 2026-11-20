@@ -1110,7 +1110,8 @@ const ARCHIEF_EXP_SCHAAL := 0.50
 ##   Tier 7 = Berggrot (berggrot_data.gd; was tier 0).
 ##   EXP/goud per tier blijven gelijk aan de oude tier (5 = oud 2, 6 = oud 3, 7 = basis).
 ##   Seren (lotte_glitch baas-blok): HP x3, ATK x2,3. Wortelkoning baas-blok: ATK 34 -> 38 (~80-90% winst in de battlesim; in #126 was het 68%).
-##   Canon-bazen (Golem 360/27/15, Wurger, Genezer, Diepe Grot 25/50/75/99) NIET gewijzigd.
+##   Canon-bazen: Golem 360/27/15, Genezer en Diepe Grot 25/50/75 ongewijzigd.
+##   F5 (Dennis 20-11): Wurger 700/42 -> 2450/80, The Voice (Diepe Grot 99) 2250/135 -> 15750/250.
 const TIERS := {
 	1: {"hp": 1.0, "atk": 8, "def": 1, "exp": 2.0, "gold": 1.0},
 	2: {"hp": 1.5, "atk": 4, "def": 3, "exp": 2.5, "gold": 1.5},
