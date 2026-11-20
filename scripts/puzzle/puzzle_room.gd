@@ -28,6 +28,7 @@ const SecretDoor := preload("res://scripts/puzzle/secret_door.gd")
 const BookSwitch := preload("res://scripts/puzzle/book_switch.gd")
 const TreasureChest := preload("res://scripts/puzzle/treasure_chest.gd")
 const GrowPlate := preload("res://scripts/puzzle/grow_plate.gd")
+const CollisionMerge := preload("res://scripts/perf/collision_merge.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
 ## Standaardteksten (Nederlands); per object te vervangen in de data.
@@ -315,6 +316,8 @@ func _build_dungeon_ground() -> void:
 	var body := StaticBody2D.new()
 	body.name = "Muren"
 	add_child(body)
+	# Perf (post-RC): de muur-tegels als samengevoegde rechthoeken (zelfde tegels, minder nodes)
+	var muur: Array = []
 	for y in logic.size.y:
 		for x in logic.size.x:
 			var t := Vector2i(x, y)
@@ -327,12 +330,8 @@ func _build_dungeon_ground() -> void:
 					near_open = true
 			if not near_open:
 				continue
-			var cs := CollisionShape2D.new()
-			var rect := RectangleShape2D.new()
-			rect.size = Vector2(16, 16)
-			cs.shape = rect
-			cs.position = Vector2(t) * 16 + Vector2(8, 8)
-			body.add_child(cs)
+			muur.append(t)
+	CollisionMerge.add_shapes(body, muur)
 	for t in logic.statics:
 		var k := Sprite2D.new()
 		k.name = "VasteKast_%d_%d" % [t.x, t.y]

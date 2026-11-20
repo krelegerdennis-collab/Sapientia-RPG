@@ -16,6 +16,12 @@ const CASES := [
 	["dorp_wilgendal", "day"], ["dorp_wilgendal", "night"],
 	["huis_wilgendal", "day"], ["huis_wilgendal", "night"],
 	["leven_ingang", "day"],
+	# puzzelkamers (botsing 'Muren' samengevoegd): beeld moet gelijk blijven
+	["archief_puzzel", "day"], ["berggrot_geheim", "day"], ["berggrot_grendel", "day"],
+	["leven_v1_plaat", "day"], ["leven_v2_leeszaal", "day"], ["leven_v3_combi", "day"],
+	# dorp: speler (en camera) bij de bosrand en de beek, zodat bomen en beekrand in beeld zijn
+	["dorp_wilgendal", "day", Vector2i(4, 4)], ["dorp_wilgendal", "day", Vector2i(85, 51)],
+	["dorp_wilgendal", "night", Vector2i(4, 24)], ["dorp_wilgendal", "day", Vector2i(60, 24)],
 ]
 
 var sampler := Wm1FrametimeScript.new()
@@ -47,7 +53,9 @@ func _run() -> void:
 	for r in Wm1FrametimeScript.rooms():
 		rooms[r["id"]] = r
 	for c in CASES:
+		var spot: Vector2i = c[2] if c.size() > 2 else Vector2i(-1, -1)
 		var key := "%s:%s" % [c[0], c[1]]
+		var naam := str(c[0]) if spot.x < 0 else "%s_at%d_%d" % [c[0], spot.x, spot.y]
 		if not only.is_empty() and not (key in only):
 			continue
 		get_tree().paused = false
@@ -61,6 +69,12 @@ func _run() -> void:
 			print("CAPFIXED %s LOADFAIL" % key)
 			continue
 		var cs := get_tree().current_scene
+		if spot.x >= 0:
+			var pl := cs.get_node_or_null("Objects/Player") as Node2D
+			if pl:
+				pl.position = Vector2(spot) * 16.0 + Vector2(8, 8)
+			for cam in cs.find_children("*", "Camera2D", true, false):
+				(cam as Camera2D).reset_smoothing()
 		await _frames(30)
 		var rig := cs.get_node_or_null("MapLightingRig")
 		var phase := str(rig.get("_phase")) if rig else "-"
@@ -86,7 +100,7 @@ func _run() -> void:
 		await _frames(5)
 		await RenderingServer.frame_post_draw
 		var img := get_viewport().get_texture().get_image()
-		var f := "%s/%s__%s__%s.png" % [out, c[0], c[1], tag]
+		var f := "%s/%s__%s__%s.png" % [out, naam, c[1], tag]
 		img.save_png(f)
 		var dc := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 		var split_n := cs.find_children("*_R*", "TileMapLayer", true, false).size()
