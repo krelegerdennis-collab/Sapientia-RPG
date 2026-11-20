@@ -13,8 +13,11 @@ Er is **niets gerepareerd**: alleen gelezen, geteld en gemeten.
 - Bronnen: code en data in de repo, GitHub REST (labels, tags, issues, PR's, check-runs), `tools/art_audit/palet_check.py` en `tools/art_audit/meet.py` (alleen lezen).
 - Automatische controles staan in de nieuwe suite `--rcchecktest` (`scripts/tests/rc_check_tests.gd`). Bekende OPEN-punten
   geven daar een regel `OPEN  [id] ...` en maken de suite niet rood (zie onderaan).
-- Statussen: **KLAAR** (bewijs in code, suite of PR), **KLAAR (meting)** en **KLAAR (tussenmeting)** (tel mee als KLAAR in de voortgangstabellen),
+- Statussen: **KLAAR** (bewijs in code, suite of PR), **KLAAR (meting)**, **KLAAR (tussenmeting)**, **KLAAR (besloten)** (besluit van Dennis, met tijd en bron) en
+  **VERVALLEN voor RC1** (punt geldt niet voor RC1 door een besluit van Dennis) (tellen mee als KLAAR in de voortgangstabellen),
   **OPEN** (er mist iets), **NIET TE CHECKEN** (handmatig, op toestel of proces).
+- Gate-status **KLAAR op N open punt(en) na**: de gate is gehaald op de genoemde open punten na. Dit is alleen een gate-status; de rijtellingen in de
+  voortgangstabellen veranderen er niet door (de rijen zelf houden hun eigen status).
 - Grootte: S (uren), M (een dag), L (meerdere dagen of afhankelijk van een ander). "Ja Dennis" = vraagt een besluit over balans,
   nieuwe mechanic, bestaande test, workflow of publicatie (of een ander besluit dat alleen Dennis neemt; dat staat erbij).
 
@@ -61,31 +64,33 @@ Huidige freeze voor de interne RC. Eerdere tags (`wm1-freeze` t/m `wm1-freeze4`)
 
 | Status | Aantal |
 |---|---:|
-| KLAAR | 56 |
-| OPEN | 9 |
+| KLAAR | 60 |
+| OPEN | 5 |
 | NIET TE CHECKEN | 28 |
 | **Totaal** | **93** |
 
-Voortgang per fase (telling van de detailrijen hieronder, freeze 5 op `439ff805`; **KLAAR (meting)** en **KLAAR (tussenmeting)** tellen als KLAAR):
+Voortgang per fase (telling van de detailrijen hieronder, freeze 5 op `439ff805`, bijgewerkt met de besluiten van Dennis van 19-11; **KLAAR (meting)**, **KLAAR (tussenmeting)**, **KLAAR (besloten)** en **VERVALLEN voor RC1** tellen als KLAAR):
 
 | Fase | KLAAR | OPEN | NIET TE CHECKEN | Gate |
 |---|---:|---:|---:|---|
 | 1 Freeze | 7 | 0 | 0 | KLAAR |
 | 2 Art op palet | 5 | 1 | 2 | OPEN |
 | 3 Stabiliteit | 9 | 0 | 8 | OPEN |
-| 4 S25-performance | 2 | 1 | 4 | OPEN |
-| 5 Balans | 6 | 1 | 1 | OPEN |
+| 4 S25-performance | 3 | 0 | 4 | KLAAR (interne RC) |
+| 5 Balans | 7 | 0 | 1 | KLAAR (besloten) |
 | 6 UX-polish | 20 | 1 | 3 | OPEN |
-| 7 Playtest en fixronde | 0 | 3 | 5 | OPEN |
+| 7 Playtest en fixronde | 2 | 1 | 5 | OPEN |
 | 8 Release candidate | 7 | 2 | 5 | OPEN |
-| **Totaal** | **56** | **9** | **28** | |
+| **Totaal** | **60** | **5** | **28** | |
 
 Sinds de eerste audit (15 nov): F1.3, F1.4, F1.5, F1.6, F1.7, F2.2, F2.3, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.11, F6.13, F6.14, F6.15, F6.17, F6.24, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
-KLAAR (F2.2/F2.3/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)).
+KLAAR (F2.2/F2.3/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)). Op 19-11 (besluiten Dennis): F4.2, F5.1 en F7.2 naar KLAAR (besloten), F7.8 VERVALLEN voor RC1. Op 20-11: gate fase 5 KLAAR (besloten) na #562, #563 en #565 (Action kastenzaal opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE)) (geen rij-wijziging).
 
 ### OPEN op risico (voor de interne RC van 20 nov)
 
 F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt toegevoegd.
+**19-11:** #1 (F7.2) en #3 (F4.2) zijn besloten door Dennis (zie de detailrijen); de regels blijven hieronder staan als geschiedenis. Nog open op risico: #2 (F8.6) en #4 (F6.23, geen RC-blocker).
+**20-11:** gate fase 5 KLAAR (besloten), na #562, #563 en #565 (Action kastenzaal opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE)). Zie fase 5. De lijst blijft verder ongewijzigd.
 
 | # | Punt | Waarom risico | Voorstel | Grootte | Ja Dennis |
 |---:|---|---|---|---|---|
@@ -94,7 +99,7 @@ F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt to
 | 3 | F4.2 S25-meting | Geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`. | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
 | 4 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt` (F6.23b). LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
 
-Daarnaast open: F5.1 (doelvensters; cijfers staan in `docs/release/WM1_BALANCE_REPORT_RC.md` §3).
+F5.1 (doelvensters) is op 19-11 besloten door Dennis (KLAAR (besloten), zie fase 5). Op 20-11 is de gate van fase 5 KLAAR (besloten): #562, #563 en #565 gemerged (Action kastenzaal opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE)), Genezer blijft voor RC1, Wurger en The Voice canon.
 F6.24 is KLAAR via #554 (merge `83000372`) en staat niet meer in deze lijst.
 
 ### Verouderde tekst in de checklist
@@ -165,7 +170,7 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
 | F3.1 | Verse import zonder fouten | NIET TE CHECKEN | Er is geen Godot in deze sessie. CI importeert bij elke run, maar faalt niet op import-warnings. | Dennis draait lokaal `--import` en leest de uitvoer. | | |
-| F3.2 | Alle suites groen op de freeze-commit | KLAAR | Op freeze-commit `f76aa715` (tag `wm1-freeze`): `--wm1playthroughtest` na een verse `--import` **591 PASS / 0 FAIL / 0 SCRIPT ERRORs**. Rapport `/workspace/f3/F3_2_playthrough_f76aa71.txt` (box van het team, niet in de repo). Freeze 2 op `961101ac`: 591 PASS / 0 FAIL, twee keer serieel (`F3_2_playthrough_961101a_run1.txt` en `run2.txt`, build-box, niet in de repo). Freeze 3 op `fcb3f21e`: **591 PASS / 0 FAIL**, twee keer serieel (`RESULT OK (591 goed, 0 fouten)` in `/workspace/f3/F3_2_playthrough_fcb3f21_run1.txt` en `run2.txt`, build-box, niet in de repo). Freeze 5 op `439ff805`: **591 PASS / 0 FAIL**, twee keer serieel (Forge, bij de freeze; rapporten op de build-box, niet in de repo). | | S | nee |
+| F3.2 | Alle suites groen op de freeze-commit | KLAAR | Op freeze-commit `f76aa715` (tag `wm1-freeze`): `--wm1playthroughtest` na een verse `--import` **591 PASS / 0 FAIL / 0 SCRIPT ERRORs**. Rapport `/workspace/f3/F3_2_playthrough_f76aa71.txt` (box van het team, niet in de repo). Freeze 2 op `961101ac`: 591 PASS / 0 FAIL, twee keer serieel (`F3_2_playthrough_961101a_run1.txt` en `run2.txt`, build-box, niet in de repo). Freeze 3 op `fcb3f21e`: **591 PASS / 0 FAIL**, twee keer serieel (`RESULT OK (591 goed, 0 fouten)` in `/workspace/f3/F3_2_playthrough_fcb3f21_run1.txt` en `run2.txt`, build-box, niet in de repo). Freeze 5 op `439ff805`: **591 PASS / 0 FAIL**, twee keer serieel (Forge, bij de freeze; rapporten op de build-box, niet in de repo). RC1-kandidaat `a23cd27a` (na #558 en #559): **591 PASS / 0 FAIL**, twee keer serieel op 19-11 (`F3_2_playthrough_a23cd27_run1.txt` en `run2.txt`, build-box, niet in de repo). | | S | nee |
 | F3.3 | Geen `SCRIPT ERROR` | KLAAR | `.github/scripts/run_suite.sh:25,30-33` faalt erop; #476 groen. | | | |
 | F3.4 | Golden path route A en B | NIET TE CHECKEN | Handmatig. Deels gedekt door `wm1playthroughtest` (kas en berggrot, niet in CI). | | | |
 | F3.5 | Terugweg Archief 2 (H14) | NIET TE CHECKEN | Handmatig. `archief2test` raakt `leven_v1_plaat`. | | | |
@@ -189,20 +194,20 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
 | F4.1 | Release- en debug-APK op toestel | NIET TE CHECKEN | Toestel. | | | |
-| F4.2 | Meting per scène (fps, 1%-low, RAM) | OPEN | Er is geen S25-meting. `docs/perf_wm1.md:137` is gemeten op xvfb/llvmpipe. `wm1budgettest` geeft vermoedelijk dubbele instantiatie (OVERDRACHT §4.4, ONVERIFIED). | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
+| F4.2 | Meting per scène (fps, 1%-low, RAM) | KLAAR (besloten) | Dennis, 19-11-2026 18:36: "Ik accepteer fase 4 zonder S25-meting voor de interne RC" (bron: antwoord van Dennis aan RPG FORGE (DM), 19-11, zoals vastgelegd door RPG FORGE). Geaccepteerd zonder meting, **alleen voor de interne RC**. Achtergrond: er is geen S25-meting. `docs/perf_wm1.md:137` is gemeten op xvfb/llvmpipe. `wm1budgettest` geeft vermoedelijk dubbele instantiatie (OVERDRACHT §4.4, ONVERIFIED). | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
 | F4.3 | Meetscènes | NIET TE CHECKEN | Toestel. Lijst verouderd: 13 video's, geen 9. | | | |
 | F4.4 | 30 minuten spelen | NIET TE CHECKEN | Toestel. | | | |
 | F4.5 | Opstarttijd, laadtijd, APK-grootte | NIET TE CHECKEN | Toestel. Assets nu ±84 MB (audio 36,5 MB, video 40,1 MB). | | | |
 | F4.6 | Netwerk-idle bij Co-op/PvP | KLAAR | Niet van toepassing: online dicht (`online_cut`, H11; LAUNCH_PLAN B4). | | | |
 | F4.7 | Regressie na fix | KLAAR | CI op elke PR. | | | |
 
-**Gate fase 4:** OPEN (geen meetrapport en geen getekende acceptatie).
+**Gate fase 4:** KLAAR voor de interne RC (acceptatie Dennis 19-11 18:36, F4.2; geen meetrapport). Voor een publieke release blijft een S25-meting nodig.
 
 ## Fase 5: Balans
 
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
-| F5.1 | Doelvensters kiezen | OPEN | Niets genoteerd in de checklist. | Dennis neemt het voorstel over of past het aan. | S | ja (balans) |
+| F5.1 | Doelvensters kiezen | KLAAR (besloten) | Dennis, 19-11-2026 18:36: "Ja, F5.1-doelwaarden zoals voorgesteld" (bron: antwoord van Dennis aan RPG FORGE (DM), 19-11, zoals vastgelegd door RPG FORGE). Doelvensters: normale gevechten 10-25% HP-verlies, bazen 60-85% winst, Diepe Grot 60-80% winst rond verdieping 80-99 (voorstel `WM1_RELEASE_CHECKLIST.md:198-199`). | Dennis neemt het voorstel over of past het aan. | S | ja (balans) |
 | F5.2 | Volledig rapport op de freeze-commit | KLAAR (meting) | Op `f76aa715` draaide RPG COMBAT `--battlesim --seed=20261020 --fights=2000`. Alle rijen gelijk aan `docs/release/WM1_BALANCE_REPORT_RC.md` §3.1; het rapport is byte-gelijk aan `docs/BATTLE_BALANCE_REPORT.md` op de looptijd in de kop na. Bestanden `/workspace/combat/f52/sim_f76aa71.txt` en `.json` (box van het team, niet in de repo). Wortelkoning 28% staat zo in §3.1 en wacht op F5.3 / §7. | | M | nee (meten) |
 | F5.3 | Besluit per afwijking | KLAAR | Dennis 18-11-2026, `docs/combat/f53_beslissingen.md` (#549). **A1** nee: Wortelkoning baas-ATK blijft **38** (`ENEMIES.wortelkoning.boss`, power scaling v2 #208). **A4** ja: Golem Action-ATK 27, Classic ongewijzigd (#544, merge `63012138`). **A8** ja: Seren (`lotte_glitch.boss`) HP 405 / ATK 36 (#549, merge `fcb3f21e`). **A2, A9, A10:** nee (geen wijziging). **A3, A5, A6, A7, A11, A12, A13, A14:** bewust zo gelaten (zoals voorgesteld in `WM1_BALANCE_REPORT_RC.md` §7). | | M | ja (balans) |
 | F5.4 | Levelcurve | KLAAR (meting) | `docs/release/WM1_BALANCE_REPORT_RC.md` §4: per level gevechten en minuten (aanname 5 s/ronde); Golem bereikt op Lv 7 (ontwerp 8), eind Lv 15; 67 verplichte gevechten. A14 bewust: in-game levels zijn het doel (geen data-wijziging). | Diepe Grot-run-tijden via de sim. | M | ja (bij afstellen) |
@@ -211,7 +216,22 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 | F5.7 | Zelfde seed opnieuw als bewijs | NIET TE CHECKEN | Procesregel. | | | |
 | F5.8 | Balans-suites groen | KLAAR | `battlesimtest`, `balansarchief1test`, `wm1balanstest`, `dungeon100schaaltest`, `autotest`, `woudtest`, `archief2test` in CI; #476 groen. | | | |
 
-**Gate fase 5:** OPEN.
+**Gate fase 5:** KLAAR (besloten) (20-11-2026). Geen open punt meer: Action kastenzaal opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE) (zie Bekende uitzonderingen, 1).
+
+- Vensters (F5.1, Dennis): normale gevechten 10-25% HP-verlies; bazen 60-85% winst; Diepe Grot 60-80% winst op verdieping 80-99, inclusief de gewone vloeren 85 en 95.
+- Gemerged: #562 (merge `45fb4fd6`, F5 rebalance WM1 + Diepe Grot-bazen + canon Wurger/The Voice + Action tier-2 ATK) en #563 (merge `43d446c9`, Diepe Grot gewone vloeren 81-89/91-98 via `FLOOR_MULT`). Heads `3f0cdb29` en `1518f016`: elk 141/141 checks groen.
+- Meting (letterlijk uit `/workspace/f5/sim_after/SUMMARY.md` §6-7, box van het team, niet in de repo; `--seed=20261020`):
+  - §6 Action/SoM (commit D `11a7c81b`, tier 2 houdt ATK +9 in Action; Classic blijft +4): leeszaal **11,9%** (binnen), trapzaal **13,6%** (binnen), kastenzaal 5,3% (zoals base, al buiten; daarna opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE)), gemiddeld iteratie 7 (SomData) **13,9%** (binnen); `balansarchief1` Dax solo tier 2 winst **75%** (doel 70-85%, groen). Classic `--wm1balans` 300/600/100 byte-gelijk aan vóór D.
+  - §7 Diepe Grot, 3000 gevechten (winst / HP-verlies): baas 80 Great Book Golem **73,10% / 57,4%**; gewoon 85 **73,47% / 48,0%** (was 99,9% / 11,1%); baas 90 Root Emperor **74,40% / 55,4%**; gewoon 95 **65,83% / 54,0%** (was 99,9% / 12,0%); baas 99 The Voice **79,47% / 49,6%**; eindbaas 100 Knowledge Beast **75,80% / 51,5%**. Bandranden: 81 **69,20% / 49,9%**, 89 **68,00% / 52,3%**, 91 **71,70% / 46,5%**, 98 **65,63% / 53,1%**. Alle binnen 60-80%.
+- Besluiten:
+  - Genezer blijft zoals hij is voor RC1 (Dennis, 20-11-2026 13:15; bron: besluit van Dennis, zoals doorgegeven door RPG FORGE).
+  - Wurger 2450/80 en The Voice 15750/250 zijn canon (Dennis, 20-11-2026 12:12; bron: besluit van Dennis, zoals doorgegeven door RPG FORGE).
+
+Bekende uitzonderingen (getallen uit `/workspace/f5/sim_after/SUMMARY.md`):
+
+1. **Action kastenzaal: opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE).** Vóór #565 5,3% HP-verlies, onder het venster van 10-25% (§6: na D 5,3%, "zoals base, al buiten"; §2: base 5,3%); dat was al zo vóór F5. Dennis wilde de kastenzaal ook binnen 10-25% (20-11-2026 16:52; bron: besluit van Dennis, zoals doorgegeven door RPG FORGE); RPG COMBAT deed dat in #565 (Classic ongewijzigd).
+2. **Genezer: 100% winst** (§3: oud, zonder C en met C allemaal 100%), buiten 60-85%. Blijft zo voor RC1 (Dennis, 20-11-2026 13:15; bron: besluit van Dennis, zoals doorgegeven door RPG FORGE).
+3. **Diepe Grot buiten de scope verdieping 80-99:** bazen 30/40/60/70 op **91 / 94,5 / 93 / 91% winst** (§4, ongewijzigd door #562), en de gewone vloeren 35/45/65 (pool `woud`, 26-80) met **3,4 / 4,1 / 6,3% HP-verlies** (§4, na #562; was 3,6 / 4,6 / 7,3%). Voor die vloeren staat in §4 geen winstpercentage. #563 raakt alleen de strook 81-89/91-98 en verandert deze waarden niet.
 
 ## Fase 6: UX-polish
 
@@ -248,16 +268,16 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 
 | # | Punt | Status | Bewijs | Bij OPEN: wat mist → voorstel | Grootte | Ja Dennis |
 |---|---|---|---|---|---|---|
-| F7.1 | Playtest-APK | OPEN | Debug-APK v0.21, versionCode 23, commit `439ff805` (tag `wm1-freeze5`, bestand `sapientia-wm1-freeze5-439ff80-debug.apk`, arm64-v8a en armeabi-v7a), gebouwd door RPG Forge. F3.2 op die commit twee keer 591/0. Niet gepubliceerd (Freeze 5). | Installatie op de Samsung S25 door Dennis. | S | nee |
-| F7.2 | Dennis speelt de golden path | OPEN | Kolom "Dennis" in de scorekaart (`FINISH_LOG.md`) is leeg. Zie OPEN-lijst #1. | Eén ronde volgens `WM1_PLAYTEST.md`. | L | ja |
+| F7.1 | Playtest-APK | OPEN | Debug-APK v0.21, versionCode 23, commit `439ff805` (tag `wm1-freeze5`, bestand `sapientia-wm1-freeze5-439ff80-debug.apk`, arm64-v8a en armeabi-v7a), gebouwd door RPG Forge. F3.2 op die commit twee keer 591/0. Niet gepubliceerd (Freeze 5). RC1-kandidaat: debug-APK van `a23cd27a` (`sapientia-wm1-rc1cand-a23cd27-debug.apk`, v0.21/23, debug-signed), gebouwd door RPG Forge op 19-11; nog niet getagd of gepubliceerd. | Installatie op de Samsung S25 door Dennis. | S | nee |
+| F7.2 | Dennis speelt de golden path | KLAAR (besloten) | Dennis, 19-11-2026 18:36 (F7.2/D3): "Nee, RC1 mag zonder mijn playtest" (bron: antwoord van Dennis aan RPG FORGE (DM), 19-11, zoals vastgelegd door RPG FORGE). RC1 gaat zonder playtest van Dennis; de kolom "Dennis" in `FINISH_LOG.md` blijft leeg. | Eén ronde volgens `WM1_PLAYTEST.md`. | L | ja |
 | F7.3 | Bugs als issue | NIET TE CHECKEN | Procesregel. Nu 0 open issues met label `bug`. | | | |
 | F7.4 | Ernst P0-P3 | NIET TE CHECKEN | Definitie, procesregel. | | | |
 | F7.5 | Triage | NIET TE CHECKEN | Proces; er is nog niets te triëren. | | | |
 | F7.6 | Fixronde per branch | NIET TE CHECKEN | Proces; label `wm1-bugfix` bestaat. | | | |
 | F7.7 | Suites na fix-batch | NIET TE CHECKEN | Proces (CI op PR). | | | |
-| F7.8 | Tweede playtest | OPEN | Hangt aan F7.2. | Plannen na de fixronde, uiterlijk 19 nov voor de RC van 20 nov. | M | ja |
+| F7.8 | Tweede playtest | VERVALLEN voor RC1 | Hangt aan F7.2; door het besluit van Dennis van 19-11 18:36 (F7.2) is er voor RC1 geen eerste playtest, dus ook geen tweede. | Plannen na de fixronde, uiterlijk 19 nov voor de RC van 20 nov. | M | ja |
 
-**Gate fase 7:** OPEN.
+**Gate fase 7:** OPEN (F7.1: installatie op de S25 door Dennis). F7.2 en F7.8 zijn voor RC1 besloten/vervallen (19-11).
 
 ## Fase 8: Release candidate
 
@@ -267,8 +287,8 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 | F8.2 | `version/code` hoger dan de vorige build | KLAAR | `rcchecktest` [F8.2]: code 23 > 22 (v0.20), PASS. | Komt mee met F8.1. | S | nee (Forge) |
 | F8.3 | Changelog | KLAAR | `[0.21]` in `CHANGELOG.md` dekt de merges op `finish/wm1` na #493 t/m #549 (één regel per PR, inclusief #516 t/m #549). `[Unreleased]` is leeg. | | S | nee |
 | F8.4 | README en BUILDS kloppen | KLAAR | Klus 12: `README.md:8` noemt "Huidige versie: 0.21 (code 23)" met `tools/release/version.json` als enige bron; de Android-sectie (`README.md:427`) verwijst naar die bron in plaats van "versie 0.13 (code 15)". Historische (v0.xx)-notities blijven. `rcchecktest` [F8.4] wordt daarmee PASS. | | | |
-| F8.5 | CI groen op de RC-commit | KLAAR | Optie a: draft-PR #515 (`rc/wm1-freeze-ci`, gesloten zonder merge) draaide de volledige CI-matrix op `wm1-freeze` `f76aa715`: 138/138 checks groen. Freeze 2: 140 checks (incl. #521 `wmdeathtest`); PR #542 140/140 groen. | | S | nee |
-| F8.6 | Release-APK met secrets | OPEN | Zie OPEN-lijst #2. Of de secrets bestaan, kan deze sessie niet zien (Actions-API afgeschermd). | | S | nee |
+| F8.5 | CI groen op de RC-commit | KLAAR | Optie a: draft-PR #515 (`rc/wm1-freeze-ci`, gesloten zonder merge) draaide de volledige CI-matrix op `wm1-freeze` `f76aa715`: 138/138 checks groen. Freeze 2: 140 checks (incl. #521 `wmdeathtest`); PR #542 140/140 groen. RC1-kandidaat: merge-commits op `finish/wm1` krijgen geen eigen CI-run; deze docs-PR draait de volledige matrix (141 checks) op `a23cd27a` plus alleen deze docs-wijziging. | | S | nee |
+| F8.6 | Release-APK met secrets | OPEN | Zie OPEN-lijst #2. Of de secrets bestaan, kan deze sessie niet zien (Actions-API afgeschermd). Dennis, 19-11-2026 18:37: kiest een release-sleutel die hij zelf maakt en zelf als secrets zet (bron: antwoord van Dennis aan RPG FORGE (DM), 19-11, zoals vastgelegd door RPG FORGE). Dat is nog niet gebeurd; daarom blijft F8.6 OPEN. | | S | nee |
 | F8.7 | `apksigner` / `aapt` | NIET TE CHECKEN | Er is nog geen release-APK. | | | |
 | F8.8 | Rechten passen bij H11 | KLAAR | Besluit Dennis 15 nov: uit. `internet`, `access_network_state`, `access_wifi_state` en `change_wifi_multicast_state` staan op `false` in alle Android-presets (`export_presets.cfg:60-63,131-134,244-247`). `rcchecktest` [F8.8] PASS: geen netwerkrecht aan, `online_cut` aan, PvP/Co-op-knop verborgen (`title_screen.gd:384-390`). Solo raakt geen netwerkcode: `scripts/net/` en `pvp/` worden alleen geopend via die twee knoppen (`title_screen.gd:560-567`). `coophosttest` en `aabtest` volgen nu `online_cut`. | Besluit: online blijft dicht voor de RC, dus de rechten uit. Forge past de presets aan. | S | ja (H11) |
 | F8.9 | Installatietest S25 | NIET TE CHECKEN | Toestel. | | | |

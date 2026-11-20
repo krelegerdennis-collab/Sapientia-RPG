@@ -199,7 +199,7 @@ func _enemy_list() -> Array:
 			var d: Dictionary = (GameData.ENEMIES.get(str(mm["enemy"]), {}) as Dictionary).duplicate(true)
 			if d.is_empty(): continue
 			if tier > 0 and not bool(d.get("unique", false)):
-				d = GameData.apply_archief_tier(d, tier)
+				d = GameData.apply_archief_tier(d, tier, true, rid)
 			d = SomData.apply_action_area(d, rid, tier)
 			var key := "%s@t%d" % [mm["enemy"], tier]
 			if seen.has(key): continue

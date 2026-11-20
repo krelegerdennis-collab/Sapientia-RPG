@@ -68,8 +68,18 @@ const CANON_BOSS := {
 	25: {"max_hp": 750, "atk": 45, "def": 30, "weak": ["licht"]},
 	50: {"max_hp": 1250, "atk": 75, "def": 50, "weak": ["bliksem"]},
 	75: {"max_hp": 1750, "atk": 105, "def": 70, "weak": ["natuur"]},
-	99: {"max_hp": 2250, "atk": 135, "def": 90, "weak": ["ijs"]},
+	99: {"max_hp": 15750, "atk": 250, "def": 90, "weak": ["ijs"]},
 }
+## F5.1 (Dennis 19-11): bazen vloer 80/90 lagen op 92% winst; extra factor alleen voor die twee vloeren (doel 60-80%).
+const BOSS_FLOOR_MULT := {80: {"max_hp": 1.5, "atk": 1.2}, 90: {"max_hp": 1.5, "atk": 1.2}}
+## F5 (Dennis 20-11 16:14): het Diepe Grot-venster 60-80% winst geldt ook voor gewone gevechten
+## op vloer 85 en 95, niet alleen de bazen 80/90/99. Zelfde soort overlay als BOSS_FLOOR_MULT,
+## toegepast in battle_enemy() voor gewone gevechten (niet in de ruwe curve, niet in boss_stats:
+## bazen 80/90/99 en de eindbaas 100 blijven zoals in #562).
+## Strook 81-89 en 91-98 (tussen die bazen), zodat 85/95 geen één-vloer-piek worden.
+## GEMETEN seed 20261020, 3000 gevechten, aankomst-level: 85 73,5%/48% verlies, 95 65,8%/54% verlies.
+const FLOOR_MULT := {"max_hp": 3.0, "atk": 1.7}
+const FLOOR_MULT_BANDS := [[81, 89], [91, 98]]
 ## Extra skill van de eindbaas (bovenop de skills van zijn vijand-sprite).
 const FINAL_SKILL := {"name": "Last Judgment", "chance": 0.15, "power": 2.0}
 ## Skill voor een baas als zijn vijand er geen heeft.
@@ -246,6 +256,9 @@ static func boss_stats(base: Dictionary, floor_nr: int) -> Dictionary:
 		if final:
 			v *= float(FINAL_MULT.get(k, 1.0))
 		out[k] = GameData.round_half_even(v)
+	if BOSS_FLOOR_MULT.has(f):
+		for k in BOSS_FLOOR_MULT[f]:
+			out[k] = GameData.round_half_even(float(out[k]) * float(BOSS_FLOOR_MULT[f][k]))
 	out["max_hp"] = maxi(1, int(out["max_hp"]))
 	var info := boss_for_floor(f)
 	if not info.is_empty():
@@ -278,12 +291,33 @@ static func boss_stats(base: Dictionary, floor_nr: int) -> Dictionary:
 	return out
 
 
+## Of deze gewone verdieping de F5-vloer-overlay krijgt (niet voor bazen).
+static func _in_floor_mult_band(floor_nr: int) -> bool:
+	var f := clamp_floor(floor_nr)
+	for b in FLOOR_MULT_BANDS:
+		if f >= int(b[0]) and f <= int(b[1]):
+			return true
+	return false
+
+
+## Overlay bovenop monster_stats, alleen voor gewone gevechten in FLOOR_MULT_BANDS.
+static func apply_floor_mult(data: Dictionary, floor_nr: int) -> Dictionary:
+	if not _in_floor_mult_band(floor_nr):
+		return data
+	var out := data
+	for k in FLOOR_MULT:
+		if out.has(k):
+			out[k] = GameData.round_half_even(float(out[k]) * float(FLOOR_MULT[k]))
+	out["max_hp"] = maxi(1, int(out["max_hp"]))
+	return out
+
+
 ## Wat battle.gd per vijand aanroept: de data voor dit gevecht. floor_nr <= 0 = ongewijzigd.
 ## 'boss' = baasgevecht (GameState.pending_boss).
 static func battle_enemy(data: Dictionary, floor_nr: int, boss: bool) -> Dictionary:
 	if floor_nr <= 0:
 		return data
-	return boss_stats(data, floor_nr) if boss else monster_stats(data, floor_nr)
+	return boss_stats(data, floor_nr) if boss else apply_floor_mult(monster_stats(data, floor_nr), floor_nr)
 
 
 # ---------------------------------------------------------------- buit
