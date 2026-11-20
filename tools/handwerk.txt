@@ -1860,3 +1860,16 @@ assets/ui/icons/items/icons32/sword_obsidian.png
 assets/ui/icons/items/icons32/sword_rapier.png
 assets/ui/icons/items/icons32/sword_ruby.png
 assets/ui/icons/items/icons32/sword_sapphire.png
+# post-rc item-icons (RPG ART, besluit Dennis 20-11 20:53): zes beenstukken / greaves 16px+32px, handgetekend per maat, masterpalet 73, alpha 0/255.
+assets/ui/icons/items/icons16/bg_g1_benen.png
+assets/ui/icons/items/icons16/bg_g2_benen.png
+assets/ui/icons/items/icons16/bg_g3_benen.png
+assets/ui/icons/items/icons16/bg_g4_natuur_benen.png
+assets/ui/icons/items/icons16/bg_g4_plated_benen.png
+assets/ui/icons/items/icons16/bg_g4_robes_benen.png
+assets/ui/icons/items/icons32/bg_g1_benen.png
+assets/ui/icons/items/icons32/bg_g2_benen.png
+assets/ui/icons/items/icons32/bg_g3_benen.png
+assets/ui/icons/items/icons32/bg_g4_natuur_benen.png
+assets/ui/icons/items/icons32/bg_g4_plated_benen.png
+assets/ui/icons/items/icons32/bg_g4_robes_benen.png
