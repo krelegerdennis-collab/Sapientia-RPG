@@ -8,7 +8,6 @@ const UiTouch := preload("res://scripts/ui/ui_touch.gd")
 const Shop := preload("res://scripts/arena/arena_shop.gd")
 const Data := preload("res://scripts/data/arena_shop_data.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
-const ItemIcons := preload("res://scripts/data/item_icons.gd")
 const ICON_ARENA := preload("res://assets/ui/arena/icon_arena.png")
 const ICON_TOKEN := preload("res://assets/ui/arena/icon_arena_token.png")
 
@@ -56,8 +55,6 @@ func _fill() -> void:
 		var label := "%s  %d" % [Data.display_name(item_id), price]
 		var b := _button(label, _buy.bind(id))
 		b.name = "buy_" + id
-		# Post-RC: zelfde 16px-item-icoon als de gewone winkel (item_icon_overrides.gd)
-		ItemIcons.apply16(b, item_id)
 		box.add_child(b)
 	box.add_child(_button("Close", _close))
 
