@@ -77,20 +77,20 @@ Voortgang per fase (telling van de detailrijen hieronder, freeze 5 op `439ff805`
 | 2 Art op palet | 5 | 1 | 2 | OPEN |
 | 3 Stabiliteit | 9 | 0 | 8 | OPEN |
 | 4 S25-performance | 3 | 0 | 4 | KLAAR (interne RC) |
-| 5 Balans | 7 | 0 | 1 | KLAAR op 1 open punt na |
+| 5 Balans | 7 | 0 | 1 | KLAAR (besloten) |
 | 6 UX-polish | 20 | 1 | 3 | OPEN |
 | 7 Playtest en fixronde | 2 | 1 | 5 | OPEN |
 | 8 Release candidate | 7 | 2 | 5 | OPEN |
 | **Totaal** | **60** | **5** | **28** | |
 
 Sinds de eerste audit (15 nov): F1.3, F1.4, F1.5, F1.6, F1.7, F2.2, F2.3, F2.5, F3.2, F3.9, F5.2, F5.3, F5.4, F5.5, F5.6, F6.3, F6.5, F6.11, F6.13, F6.14, F6.15, F6.17, F6.24, F8.1, F8.2, F8.3, F8.4, F8.5 en F8.8 naar
-KLAAR (F2.2/F2.3/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)). Op 19-11 (besluiten Dennis): F4.2, F5.1 en F7.2 naar KLAAR (besloten), F7.8 VERVALLEN voor RC1. Op 20-11: gate fase 5 KLAAR op 1 open punt na (Action kastenzaal 5,3%: wordt aangepast (Dennis 16:52), PR volgt) na #562 en #563 (geen rij-wijziging).
+KLAAR (F2.2/F2.3/F5.2/F5.4/F5.5/F5.6 als KLAAR (meting)). Op 19-11 (besluiten Dennis): F4.2, F5.1 en F7.2 naar KLAAR (besloten), F7.8 VERVALLEN voor RC1. Op 20-11: gate fase 5 KLAAR (besloten) na #562, #563 en #565 (Action kastenzaal opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE)) (geen rij-wijziging).
 
 ### OPEN op risico (voor de interne RC van 20 nov)
 
 F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt toegevoegd.
 **19-11:** #1 (F7.2) en #3 (F4.2) zijn besloten door Dennis (zie de detailrijen); de regels blijven hieronder staan als geschiedenis. Nog open op risico: #2 (F8.6) en #4 (F6.23, geen RC-blocker).
-**20-11:** gate fase 5 KLAAR op 1 open punt na (Action kastenzaal 5,3%: wordt aangepast (Dennis 16:52), PR volgt), na #562 en #563. Zie fase 5. De lijst blijft verder ongewijzigd.
+**20-11:** gate fase 5 KLAAR (besloten), na #562, #563 en #565 (Action kastenzaal opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE)). Zie fase 5. De lijst blijft verder ongewijzigd.
 
 | # | Punt | Waarom risico | Voorstel | Grootte | Ja Dennis |
 |---:|---|---|---|---|---|
@@ -99,7 +99,7 @@ F1.6 is KLAAR via #517 en staat niet meer in deze lijst. Geen vervangend punt to
 | 3 | F4.2 S25-meting | Geen S25-meting, alleen xvfb/llvmpipe in `docs/perf_wm1.md`. | Dennis meet met `adb dumpsys gfxinfo` op een debug-APK, of accepteert fase 4 bewust voor de interne RC. | M | ja (acceptatie) |
 | 4 | F6.23 Placeholder-SFX | 162 regels in `tools/placeholders_algemene_sfx.txt` en 120 in `tools/placeholders_sfx.txt` (F6.23b). LAUNCH_PLAN B2 noemt dit een blocker. `gen_sfx.py` heeft nog nooit gedraaid (OVERDRACHT §4.3). Bekend open punt, geen RC-blocker (akkoord Dennis 17-11-2026 15:29 (kaart t890s5665)). | Vervangen blijft nodig voor de publieke release. | L (vervangen) / S (accepteren) | ja (audio-keuze) |
 
-F5.1 (doelvensters) is op 19-11 besloten door Dennis (KLAAR (besloten), zie fase 5). Op 20-11 is de gate van fase 5 KLAAR op 1 open punt na (Action kastenzaal: wordt aangepast (Dennis 16:52), PR volgt): #562 en #563 gemerged, Genezer blijft voor RC1, Wurger en The Voice canon.
+F5.1 (doelvensters) is op 19-11 besloten door Dennis (KLAAR (besloten), zie fase 5). Op 20-11 is de gate van fase 5 KLAAR (besloten): #562, #563 en #565 gemerged (Action kastenzaal opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE)), Genezer blijft voor RC1, Wurger en The Voice canon.
 F6.24 is KLAAR via #554 (merge `83000372`) en staat niet meer in deze lijst.
 
 ### Verouderde tekst in de checklist
@@ -216,12 +216,12 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 | F5.7 | Zelfde seed opnieuw als bewijs | NIET TE CHECKEN | Procesregel. | | | |
 | F5.8 | Balans-suites groen | KLAAR | `battlesimtest`, `balansarchief1test`, `wm1balanstest`, `dungeon100schaaltest`, `autotest`, `woudtest`, `archief2test` in CI; #476 groen. | | | |
 
-**Gate fase 5:** KLAAR op 1 open punt na (20-11-2026). Open punt: Action kastenzaal (zie Bekende uitzonderingen, 1).
+**Gate fase 5:** KLAAR (besloten) (20-11-2026). Geen open punt meer: Action kastenzaal opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE) (zie Bekende uitzonderingen, 1).
 
 - Vensters (F5.1, Dennis): normale gevechten 10-25% HP-verlies; bazen 60-85% winst; Diepe Grot 60-80% winst op verdieping 80-99, inclusief de gewone vloeren 85 en 95.
 - Gemerged: #562 (merge `45fb4fd6`, F5 rebalance WM1 + Diepe Grot-bazen + canon Wurger/The Voice + Action tier-2 ATK) en #563 (merge `43d446c9`, Diepe Grot gewone vloeren 81-89/91-98 via `FLOOR_MULT`). Heads `3f0cdb29` en `1518f016`: elk 141/141 checks groen.
 - Meting (letterlijk uit `/workspace/f5/sim_after/SUMMARY.md` §6-7, box van het team, niet in de repo; `--seed=20261020`):
-  - §6 Action/SoM (commit D `11a7c81b`, tier 2 houdt ATK +9 in Action; Classic blijft +4): leeszaal **11,9%** (binnen), trapzaal **13,6%** (binnen), kastenzaal 5,3% (zoals base, al buiten), gemiddeld iteratie 7 (SomData) **13,9%** (binnen); `balansarchief1` Dax solo tier 2 winst **75%** (doel 70-85%, groen). Classic `--wm1balans` 300/600/100 byte-gelijk aan vóór D.
+  - §6 Action/SoM (commit D `11a7c81b`, tier 2 houdt ATK +9 in Action; Classic blijft +4): leeszaal **11,9%** (binnen), trapzaal **13,6%** (binnen), kastenzaal 5,3% (zoals base, al buiten; daarna opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE)), gemiddeld iteratie 7 (SomData) **13,9%** (binnen); `balansarchief1` Dax solo tier 2 winst **75%** (doel 70-85%, groen). Classic `--wm1balans` 300/600/100 byte-gelijk aan vóór D.
   - §7 Diepe Grot, 3000 gevechten (winst / HP-verlies): baas 80 Great Book Golem **73,10% / 57,4%**; gewoon 85 **73,47% / 48,0%** (was 99,9% / 11,1%); baas 90 Root Emperor **74,40% / 55,4%**; gewoon 95 **65,83% / 54,0%** (was 99,9% / 12,0%); baas 99 The Voice **79,47% / 49,6%**; eindbaas 100 Knowledge Beast **75,80% / 51,5%**. Bandranden: 81 **69,20% / 49,9%**, 89 **68,00% / 52,3%**, 91 **71,70% / 46,5%**, 98 **65,63% / 53,1%**. Alle binnen 60-80%.
 - Besluiten:
   - Genezer blijft zoals hij is voor RC1 (Dennis, 20-11-2026 13:15; bron: besluit van Dennis, zoals doorgegeven door RPG FORGE).
@@ -229,7 +229,7 @@ Alle drie de mappen zijn gecontroleerd en schoon. F2.3 is KLAAR voor die hele se
 
 Bekende uitzonderingen (getallen uit `/workspace/f5/sim_after/SUMMARY.md`):
 
-1. **Action kastenzaal: 5,3% HP-verlies**, onder het venster van 10-25% (§6: na D 5,3%, "zoals base, al buiten"; §2: base 5,3%). Dit was al zo vóór F5. **wordt aangepast (Dennis 16:52), PR volgt**: volgens Dennis (20-11-2026 16:52; bron: besluit van Dennis, zoals doorgegeven door RPG FORGE) moet ook de kastenzaal binnen 10-25% komen; RPG COMBAT opent daarvoor een PR. Dit is het ene open punt van de gate.
+1. **Action kastenzaal: opgelost in #565 (e60f6934), ~13,1% (zoals doorgegeven door RPG FORGE).** Vóór #565 5,3% HP-verlies, onder het venster van 10-25% (§6: na D 5,3%, "zoals base, al buiten"; §2: base 5,3%); dat was al zo vóór F5. Dennis wilde de kastenzaal ook binnen 10-25% (20-11-2026 16:52; bron: besluit van Dennis, zoals doorgegeven door RPG FORGE); RPG COMBAT deed dat in #565 (Classic ongewijzigd).
 2. **Genezer: 100% winst** (§3: oud, zonder C en met C allemaal 100%), buiten 60-85%. Blijft zo voor RC1 (Dennis, 20-11-2026 13:15; bron: besluit van Dennis, zoals doorgegeven door RPG FORGE).
 3. **Diepe Grot buiten de scope verdieping 80-99:** bazen 30/40/60/70 op **91 / 94,5 / 93 / 91% winst** (§4, ongewijzigd door #562), en de gewone vloeren 35/45/65 (pool `woud`, 26-80) met **3,4 / 4,1 / 6,3% HP-verlies** (§4, na #562; was 3,6 / 4,6 / 7,3%). Voor die vloeren staat in §4 geen winstpercentage. #563 raakt alleen de strook 81-89/91-98 en verandert deze waarden niet.
 
