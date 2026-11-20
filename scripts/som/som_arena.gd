@@ -411,7 +411,7 @@ func enemy_stats(m: Node) -> Dictionary:
 	var t: int = room.tier()
 	if t > 0 and not bool(d.get("unique", false)) and d.has("max_hp"):
 		var in_archief: bool = DungeonRooms.ROOMS.has(room.room_id)
-		d = GameData.apply_archief_tier(d, t, true) if in_archief else GameData.apply_tier(d, t)
+		d = GameData.apply_archief_tier(d, t, true, str(room.room_id)) if in_archief else GameData.apply_tier(d, t)
 	if m.boss and BossScript.has_script(id):
 		var n: int = GameState.party.size() if GameState.party.size() > 0 else 1
 		return SomData.action_boss_stats(d, n)

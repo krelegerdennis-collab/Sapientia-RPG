@@ -171,7 +171,7 @@ func setup() -> void:
 			if d.is_empty():
 				continue
 			if tier > 0 and not bool(d.get("unique", false)):
-				d = GameData.apply_archief_tier(d, tier, true)
+				d = GameData.apply_archief_tier(d, tier, true, rid)
 			d["id"] = str(m["enemy"])
 			list.append(d)
 		rooms.append({"id": rid, "tier": tier, "enemies": list})
