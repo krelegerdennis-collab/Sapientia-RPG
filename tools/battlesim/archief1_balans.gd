@@ -77,7 +77,7 @@ static func kamers(met_gebied: bool) -> Array:
 			if d.is_empty() or d.get("unique", false):
 				continue
 			if tier > 0:
-				d = GameData.apply_archief_tier(d, tier, true)
+				d = GameData.apply_archief_tier(d, tier, true, str(rid))
 			if met_gebied:
 				d = SomData.apply_action_area(d, str(rid), tier)
 			d["id"] = str(m["enemy"])
