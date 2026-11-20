@@ -356,13 +356,13 @@ const ENEMIES := {
 	},
 	"wurger": {
 		"name": "The Strangler", "sprite": "res://assets/sprites/archief2/wurger.png",
-		"max_hp": 700, "atk": 42, "def": 28, "agi": 5, "mag": 0, "mdef": 4,
+		"max_hp": 2450, "atk": 80, "def": 28, "agi": 5, "mag": 0, "mdef": 4,
 		"exp": 48, "gold": 20, "y_offset": 0,
 		"skills": [],
 		"no": 31, "mp": 0, "weak": ["ijs", "fysiek"], "resist": [],
 		"drops": [],
 		"boss": {
-			"max_hp": 700, "atk": 42, "def": 28, "agi": 5, "mag": 0, "mdef": 4, "mp": 0,
+			"max_hp": 2450, "atk": 80, "def": 28, "agi": 5, "mag": 0, "mdef": 4, "mp": 0,
 			"exp": 48, "gold": 20,
 			"skills": [],
 			"weak": ["ijs", "fysiek"],

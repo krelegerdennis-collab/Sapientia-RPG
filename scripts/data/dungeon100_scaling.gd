@@ -68,7 +68,7 @@ const CANON_BOSS := {
 	25: {"max_hp": 750, "atk": 45, "def": 30, "weak": ["licht"]},
 	50: {"max_hp": 1250, "atk": 75, "def": 50, "weak": ["bliksem"]},
 	75: {"max_hp": 1750, "atk": 105, "def": 70, "weak": ["natuur"]},
-	99: {"max_hp": 2250, "atk": 135, "def": 90, "weak": ["ijs"]},
+	99: {"max_hp": 15750, "atk": 250, "def": 90, "weak": ["ijs"]},
 }
 ## F5.1 (Dennis 19-11): bazen vloer 80/90 lagen op 92% winst; extra factor alleen voor die twee vloeren (doel 60-80%).
 const BOSS_FLOOR_MULT := {80: {"max_hp": 1.5, "atk": 1.2}, 90: {"max_hp": 1.5, "atk": 1.2}}

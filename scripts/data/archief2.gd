@@ -24,8 +24,8 @@ const LEECH_MIN := 0.08
 const LEECH_MAX := 0.12
 ## Canon: HP = level × 50, ATK = level × 3, DEF = level × 2.
 ## De Wurger is level 14, De Genezer level 18.
-const WURGER_HP := 700
-const WURGER_ATK := 42
+const WURGER_HP := 2450
+const WURGER_ATK := 80
 const WURGER_DEF := 28
 const GENEZER_HP := 900
 const GENEZER_ATK := 54
