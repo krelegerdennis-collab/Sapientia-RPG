@@ -175,7 +175,7 @@ func _boss_tests() -> void:
 	check("elke curve-baas is sterker dan elk gewoon monster op dezelfde verdieping (HP/ATK/DEF/EXP/goud)", bossier)
 	check("curve-bazen worden sterker per baasverdieping (10 -> 90)", rising)
 	var canon_ok := true
-	var want := {25: [750, 45, 30, "licht"], 50: [1250, 75, 50, "bliksem"], 75: [1750, 105, 70, "natuur"], 99: [2250, 135, 90, "ijs"]}
+	var want := {25: [750, 45, 30, "licht"], 50: [1250, 75, 50, "bliksem"], 75: [1750, 105, 70, "natuur"], 99: [15750, 250, 90, "ijs"]}
 	for f in want:
 		var bs2 := S.boss_stats(GD.ENEMIES[S.boss_for_floor(f)["enemy"]], f)
 		var row: Array = want[f]
@@ -209,8 +209,10 @@ func _boss_tests() -> void:
 	check("alle 12 bazen van de Deep Learning Simulation hebben eigen art 256x200 + rug", b12_ok)
 	var b100 := S.boss_stats(GD.ENEMIES["kennis_beest"], 100)
 	var b90 := S.boss_stats(GD.ENEMIES["kennis_beest"], 90)
+	# F5: vloer 99 is canon The Voice (15750/250), niet meer de curve (b100 HP 12753 > 15750*1,25 faalde).
+	# Vergelijk met vloer 98: zelfde formule, geen canon, geen eindbaas-bonus.
 	check("eindbaas (100) sterker dan een baas met dezelfde formule zonder eindbaas-bonus",
-			int(b100["max_hp"]) > int(S.boss_stats(GD.ENEMIES["kennis_beest"], 99)["max_hp"]) * 1.25 and int(b100["atk"]) > int(b90["atk"]))
+			int(b100["max_hp"]) > int(S.boss_stats(GD.ENEMIES["kennis_beest"], 98)["max_hp"]) * 1.25 and int(b100["atk"]) > int(b90["atk"]))
 	check("verdieping 100 heeft geen baasnaam; de formule houdt de vijandnaam, geen roze kern",
 			b100["name"] == "The Knowledge Beast" and not b100.has("core") and not b100.has("boss")
 			and int(b100["boss_floor"]) == 100)
