@@ -3,6 +3,8 @@ extends RefCounted
 ## Diepe Grot; arena_shop_data.gd: arena-winkel). MAPPING.csv (RPG ART) blijft onaangeraakt; ItemIcons leest
 ## deze tabel na de csv. Waarde = bestandsnaam zonder .png in icons16/ en icons32/ (beide maten bestaan).
 ## Een id die al in MAPPING.csv staat wint altijd (de override vult alleen gaten).
+## Idee (Forge: nog niet, buiten spec): ook de Colosseum-winkel (scripts/arena/arena_shop_screen.gd)
+## kan deze iconen tonen met ItemIcons.apply16(b, item_id) op de koopknoppen.
 
 const ICONS := {
 	# nieuwe pack-iconen (post-rc/item-icons, RPG ART)
@@ -40,9 +42,12 @@ const ICONS := {
 	"bg_g4_plated_harnas": "schrootplaat",
 	"bg_g4_robes_harnas": "hartmantel",
 	"bg_g4_natuur_harnas": "werkmantel",
+	# beenstukken: eigen iconen (post-rc/item-icons ba2ae22e, RPG ART), bestandsnaam = id
+	"bg_g1_benen": "bg_g1_benen",
+	"bg_g2_benen": "bg_g2_benen",
+	"bg_g3_benen": "bg_g3_benen",
+	"bg_g4_plated_benen": "bg_g4_plated_benen",
+	"bg_g4_robes_benen": "bg_g4_robes_benen",
+	"bg_g4_natuur_benen": "bg_g4_natuur_benen",
 }
 
-## Bewust zonder eigen icoon: houden het categorie-icoon (vraag aan Dennis via Forge).
-const CATEGORY_ONLY: Array[String] = [
-	"bg_g1_benen", "bg_g2_benen", "bg_g3_benen", "bg_g4_plated_benen", "bg_g4_robes_benen", "bg_g4_natuur_benen",
-]
