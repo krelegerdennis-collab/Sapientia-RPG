@@ -72,6 +72,8 @@ var mist_layer: TileMapLayer
 ## SoM-proef (scripts/som/som_arena.gd): realtime gevecht in deze kamer, of null (turn-based zoals altijd).
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomArenaScript := preload("res://scripts/som/som_arena.gd")
+## Post-RC sfx: luistert naar de SomArena-signalen (zwaard, spreuk, raak, KO, level-up).
+const SomSfx := preload("res://scripts/audio/som_sfx.gd")
 var som: Node = null
 
 
@@ -114,6 +116,7 @@ func _setup_som() -> void:
 	som = SomArenaScript.new()
 	add_child(som)
 	som.setup(self)
+	SomSfx.attach(som)
 
 
 ## Modus-direct: Battle Style (Classic/Action) in de Opties geldt meteen in deze kamer, niet pas na een
