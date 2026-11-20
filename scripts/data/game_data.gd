@@ -1146,11 +1146,20 @@ static func apply_tier(data: Dictionary, tier: int) -> Dictionary:
 	return d
 
 
+## F5 (Dennis 20-11): Classic tier 2 ging naar ATK +4 (F5.1-venster). Action/SoM (realtime, eigen schaal in
+## SomData.ACTION_AREAS) houdt de oude tier-2-ATK +9, anders zakken de Action-kamers onder hun doelen.
+## Alleen gebruikt als apply_archief_tier(..., action = true) (som_arena en de Action-sims); Classic niet.
+const ARCHIEF_ACTION_TIER_ATK := {2: 9}
+
+
 ## Zelfde tier-tabel, daarna omlaag naar doel-level 7. Tier 0 blijft ongewijzigd.
-static func apply_archief_tier(data: Dictionary, tier: int) -> Dictionary:
+## action = true: Action/SoM-pad, met ARCHIEF_ACTION_TIER_ATK in plaats van TIERS[tier]["atk"].
+static func apply_archief_tier(data: Dictionary, tier: int, action := false) -> Dictionary:
 	var d := apply_tier(data, tier)
 	if not TIERS.has(tier):
 		return d
+	if action and ARCHIEF_ACTION_TIER_ATK.has(tier):
+		d["atk"] = int(d["atk"]) - int(TIERS[tier]["atk"]) + int(ARCHIEF_ACTION_TIER_ATK[tier])
 	d["max_hp"] = maxi(1, round_half_even(float(d["max_hp"]) * ARCHIEF_STAT_SCHAAL))
 	d["atk"] = maxi(1, round_half_even(float(d["atk"]) * ARCHIEF_STAT_SCHAAL))
 	d["def"] = maxi(0, round_half_even(float(d["def"]) * ARCHIEF_STAT_SCHAAL))
