@@ -1151,11 +1151,16 @@ static func apply_tier(data: Dictionary, tier: int) -> Dictionary:
 ## SomData.ACTION_AREAS) houdt de oude tier-2-ATK +9, anders zakken de Action-kamers onder hun doelen.
 ## Alleen gebruikt als apply_archief_tier(..., action = true) (som_arena en de Action-sims); Classic niet.
 const ARCHIEF_ACTION_TIER_ATK := {2: 9}
+## F5 (Dennis 20-11): Action-kastenzaal zat onder het 10-25%-venster; leeszaal/trapzaal al erbinnen.
+## Alleen deze kamer, alleen Action. Classic en de gedeelde tier-2-ATK blijven ongemoeid.
+## Sleutels optioneel: "max_hp" / "atk" (factor na de schaal). Alleen ATK bleek Dax-solo tier-2 onder 70% te duwen.
+const ARCHIEF_ACTION_ROOM := {"archief_v2_kastenzaal": {"max_hp": 1.7}}
 
 
 ## Zelfde tier-tabel, daarna omlaag naar doel-level 7. Tier 0 blijft ongewijzigd.
 ## action = true: Action/SoM-pad, met ARCHIEF_ACTION_TIER_ATK in plaats van TIERS[tier]["atk"].
-static func apply_archief_tier(data: Dictionary, tier: int, action := false) -> Dictionary:
+## room_id: optioneel, alleen Action; past ARCHIEF_ACTION_ROOM toe (na de schaal).
+static func apply_archief_tier(data: Dictionary, tier: int, action := false, room_id := "") -> Dictionary:
 	var d := apply_tier(data, tier)
 	if not TIERS.has(tier):
 		return d
@@ -1168,6 +1173,12 @@ static func apply_archief_tier(data: Dictionary, tier: int, action := false) -> 
 		d["mag"] = maxi(0, round_half_even(float(d["mag"]) * ARCHIEF_STAT_SCHAAL))
 	if d.has("mdef"):
 		d["mdef"] = maxi(0, round_half_even(float(d["mdef"]) * ARCHIEF_STAT_SCHAAL))
+	if action and room_id != "" and ARCHIEF_ACTION_ROOM.has(room_id):
+		var ov: Dictionary = ARCHIEF_ACTION_ROOM[room_id]
+		if ov.has("max_hp"):
+			d["max_hp"] = maxi(1, round_half_even(float(d["max_hp"]) * float(ov["max_hp"])))
+		if ov.has("atk"):
+			d["atk"] = maxi(1, round_half_even(float(d["atk"]) * float(ov["atk"])))
 	d["exp"] = maxi(1, round_half_even(float(d.get("exp", 0)) * ARCHIEF_EXP_SCHAAL))
 	d["gold"] = maxi(0, round_half_even(float(d.get("gold", 0)) * ARCHIEF_STAT_SCHAAL))
 	d["archief_doel"] = EERSTE_ARCHIEF_DOEL
