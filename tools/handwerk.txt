@@ -1873,3 +1873,4 @@ assets/ui/icons/items/icons32/bg_g3_benen.png
 assets/ui/icons/items/icons32/bg_g4_natuur_benen.png
 assets/ui/icons/items/icons32/bg_g4_plated_benen.png
 assets/ui/icons/items/icons32/bg_g4_robes_benen.png
+# post-rc item-icons (RPG ART, silhouet-redo 20-11): dezelfde 12 greaves 16/32, 3/4 kniekop+scheen+enkelwacht, masterpalet 73, alpha 0/255.
