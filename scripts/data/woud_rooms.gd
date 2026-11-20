@@ -30,7 +30,7 @@ const WOUD_LEGEND := {"P": 85, "j": 86, "J": 103, "D": 107, "C": 102, "i": 111, 
 const ROOMS := {
 	# 1 WOUDRAND (28x17, v1.4x; was 20x12): ingang vanaf de wereldkaart
 	"woud_rand": {
-		"name": "Dark Wood - Wood's Edge", "floor": 1, "tier": 3, "theme": THEME, "legend": WOUD_LEGEND,
+		"name": "Dark Wood - Wood's Edge", "floor": 1, "tier": 4, "theme": THEME, "legend": WOUD_LEGEND,
 		"layout": [
 			"a--------------------------b",
 			"<LFFFMFFFFFFFFAFFFFGFFFFFFR>",
