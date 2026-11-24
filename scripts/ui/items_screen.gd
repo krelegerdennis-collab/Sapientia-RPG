@@ -11,8 +11,9 @@ const GameData := preload("res://scripts/data/game_data.gd")
 const Dungeon100Reward := preload("res://scripts/data/dungeon100_reward.gd")
 const ItemIcons := preload("res://scripts/data/item_icons.gd")
 
-const LIST_W := 132            # breedte van de itemlijst
-const NAME_COLS := PartyActions.LIST_NAME_COLS   # tekens voor de naam, daarna 'x3'
+const LIST_W := 132            # breedte van de itemlijst (minimum)
+const LIST_W_MAX := 176        # post-RC: lijst groeit tot hier mee met de langste naam (detail houdt >= 176 op 384 breed)
+const NAME_COLS := PartyActions.LIST_NAME_COLS   # tekens voor de naam, daarna 'x3' (minimum)
 const HINT_LIST := "A: use   B: back"
 const HINT_TARGET := "On whom?   A: use   B: other choice"
 const PERMANENT_NOTE := "Blue databank: this stays."
@@ -29,6 +30,7 @@ var targets: TargetList
 var empty_label: Label
 var selected_id := ""
 var targeting := false
+var name_cols := NAME_COLS     # post-RC: naamkolom = langste naam in de lijst (minstens NAME_COLS)
 
 
 func _build() -> void:
@@ -97,6 +99,11 @@ func rebuild(keep_id := "") -> void:
 		ia = ia if ia >= 0 else order.size()
 		ib = ib if ib >= 0 else order.size()
 		return ia < ib if ia != ib else str(a) < str(b))
+	# post-RC: volle namen (geen harde knip na 13 tekens); 'x3' blijft in één kolom
+	name_cols = NAME_COLS
+	for id in ids:
+		name_cols = maxi(name_cols, list_name(str(id)).length())
+	var need := 0.0
 	for id in ids:
 		var b := touch_row(UiMenu.button(entry_label(id)))
 		b.custom_minimum_size = Vector2(LIST_W - 4, ROW_H)
@@ -109,6 +116,11 @@ func rebuild(keep_id := "") -> void:
 			tint_permanent(b)
 		list.add_child(b)
 		entries.append(b)
+		# breedte met volle tekst meten, daarna knippen met '…' (alleen als het echt niet past)
+		need = maxf(need, b.get_combined_minimum_size().x)
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_fit_list_width(need)
 	TargetList.link_ring(entries)
 	empty_label.visible = entries.is_empty()
 	if entries.is_empty():
@@ -124,9 +136,31 @@ func rebuild(keep_id := "") -> void:
 	show_item(ids[i])
 
 
+## Naam in de lijst: met 'short' (game_data.gd) de korte naam als de volle te lang is, anders de volle naam.
+func list_name(id: String) -> String:
+	if PartyActions.item_data(id).has("short"):
+		return PartyActions.item_list_name(id, NAME_COLS)
+	return PartyActions.item_name(id)
+
+
 func entry_label(id: String) -> String:
-	var n := PartyActions.item_list_name(id, NAME_COLS)
-	return "%s x%d" % [n.rpad(NAME_COLS), GameState.item_count(id)]
+	return "%s x%d" % [list_name(id).rpad(name_cols), GameState.item_count(id)]
+
+
+## Lijst zo breed als de langste regel (+ schuifbalk), tussen LIST_W en LIST_W_MAX.
+func _fit_list_width(need: float) -> void:
+	if need <= LIST_W - 4:
+		# past al: precies de oude maat (LIST_W, knoppen LIST_W - 4)
+		scroll.custom_minimum_size.x = LIST_W
+		for b in entries:
+			b.custom_minimum_size.x = LIST_W - 4
+		return
+	var bar := scroll.get_v_scroll_bar()
+	var bar_w := bar.get_combined_minimum_size().x if bar != null else 0.0
+	var w := clampf(ceilf(need + bar_w + 4.0), LIST_W, LIST_W_MAX)
+	scroll.custom_minimum_size.x = w
+	for b in entries:
+		b.custom_minimum_size.x = w - 4.0 - bar_w
 
 
 func entry_text(i: int) -> String:

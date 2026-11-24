@@ -15,6 +15,8 @@ const NpcScene := preload("res://scenes/npc.tscn")
 const Koopman := preload("res://scripts/arena/arena_koopman.gd")
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
 const SomArenaScript := preload("res://scripts/som/som_arena.gd")
+## Post-RC sfx: luistert naar de SomArena-signalen (zwaard, spreuk, raak, KO).
+const SomSfx := preload("res://scripts/audio/som_sfx.gd")
 ## Bron van MONSTER_RNG_STRIDE (RNG-stap per monster), gedeeld met SomArenaWaves.
 const WavesData := preload("res://scripts/data/arena_waves_data.gd")
 
@@ -86,6 +88,7 @@ func _setup_arena_combat() -> void:
 	add_child(som)
 	som.setup(self)
 	som.arena_mode = true
+	SomSfx.attach(som)
 
 
 func map_width() -> int:

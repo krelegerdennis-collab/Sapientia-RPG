@@ -27,6 +27,7 @@ const ResetStone := preload("res://scripts/puzzle/reset_stone.gd")
 const SecretDoor := preload("res://scripts/puzzle/secret_door.gd")
 const BookSwitch := preload("res://scripts/puzzle/book_switch.gd")
 const TreasureChest := preload("res://scripts/puzzle/treasure_chest.gd")
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 const GrowPlate := preload("res://scripts/puzzle/grow_plate.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
 const BerggrotData := preload("res://scripts/data/berggrot_data.gd")
@@ -92,6 +93,9 @@ var hidden_cover: Node2D
 
 
 func _ready() -> void:
+	# Post-RC: het geluidshaakje speelt nu de manifest-sfx (WorldSfx.PUZZLE; "duw"/"herstel" nog stil).
+	if not puzzle_sound.is_connected(Callable(WorldSfx, "puzzle")):
+		puzzle_sound.connect(Callable(WorldSfx, "puzzle"))
 	_build()
 	# Direct gestart (geen spawn/terugkeerpunt): toch bij de ingang beginnen.
 	var returning: bool = GameState.has_return_point and GameState.return_map == scene_file_path

@@ -82,7 +82,8 @@ func run(t: Node) -> void:
 			_since(n0).count(SomSfx.DODGE) >= 1)
 	n0 = _mark()
 	a._swing("dennis", a.player, 1.0, -1, 0)
-	t.check("som-arena-sfx: _swing speelt sword_swing %s" % [_since(n0)], _since(n0).has(SomSfx.SWORD_SWING))
+	t.check("som-arena-sfx: _swing (mis) speelt één sword_swing %s" % [_since(n0)],
+			_since(n0).count(SomSfx.SWORD_SWING) == 1 and not _since(n0).has(SomSfx.SWORD_HIT))
 	if not GameState.has_member("lotte"):
 		GameState.add_member("lotte")
 	for m in GameState.party:
@@ -91,7 +92,8 @@ func run(t: Node) -> void:
 	a.combat_stamina.init_member("lotte")
 	n0 = _mark()
 	a._member_ko("lotte")
-	t.check("som-arena-sfx: KO speelt player_death %s" % [_since(n0)], _since(n0).has(SomSfx.PLAYER_DEATH))
+	t.check("som-arena-sfx: KO speelt één player_death (geen dubbel pad) %s" % [_since(n0)],
+			_since(n0).count(SomSfx.PLAYER_DEATH) == 1)
 	a.queue_free()
 	await t.pframes(1)
 
@@ -166,4 +168,7 @@ func _arena() -> Node:
 	p.position = Vector2(96, 120)
 	a.player = p
 	a.add_child(p)
+	# Zwaard/KO/spreuk/geraakt/level-up klinken via de signaal-luisteraar (#575), net als in de game
+	# (dungeon_room.gd/arena_room.gd); dodge en perfect dodge speelt som_arena.gd zelf.
+	SomSfx.attach(a)
 	return a

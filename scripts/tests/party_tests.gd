@@ -833,7 +833,7 @@ func _namen_migratie_tests() -> void:
 	var ok := GameState.apply_state(oud)
 	check("namen-migratie: oude save laadt", ok)
 	check("namen-migratie: speler heet Dax", GameState.player_name == "Dax")
-	check("namen-migratie: party heet Dax/Vesper/Seren (%s)" % namen(GameState.party),
+	check("namen-migratie: party heet Dax/Vesper/Seren (%s)" % [namen(GameState.party)],
 		GameState.party.size() == 3 and GameState.party[0]["name"] == "Dax"
 		and GameState.party[1]["name"] == "Vesper" and GameState.party[2]["name"] == "Seren"
 		and GameState.party[1]["id"] == "noor" and GameState.party[2]["id"] == "lotte")

@@ -6,6 +6,7 @@ extends RefCounted
 const GameData := preload("res://scripts/data/game_data.gd")
 const Equipment := preload("res://scripts/equipment.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")
+const Overrides := preload("res://scripts/data/item_icon_overrides.gd")
 
 const ROOT := "res://assets/ui/icons/items/"
 const MAP_PATH := ROOT + "MAPPING.csv"
@@ -52,6 +53,13 @@ static func _ensure() -> void:
 			continue
 		_file16[id] = ROOT + String(cols[1]).strip_edges()
 		_file32[id] = ROOT + String(cols[2]).strip_edges()
+	# Post-RC: uitrusting buiten GameData (grade_gear, arena) uit item_icon_overrides.gd; csv wint.
+	for oid in Overrides.ICONS:
+		var key := str(oid)
+		if _file16.has(key):
+			continue
+		_file16[key] = ROOT + "icons16/%s.png" % str(Overrides.ICONS[oid])
+		_file32[key] = ROOT + "icons32/%s.png" % str(Overrides.ICONS[oid])
 
 
 ## Alle item_ids uit de catalogus (ITEMS, KEY_ITEMS, EQUIPMENT, kernfragmenten).

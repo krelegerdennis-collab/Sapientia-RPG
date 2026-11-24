@@ -136,56 +136,105 @@ func _na_kern() -> void:
 	# Canon-scène 1 (CANON.md punt 17): de World Warper verschijnt, daarna warp naar de Hal.
 	if CanonGenezer.speel(self):
 		return
-	await _zeg(Archief2.NA_GENEZER, "")
+	# Vlag vóór de await: als de kamer tijdens de dialoog verdwijnt, geen progressieblokkade.
 	GameState.story_flags["archief2_naar_warper"] = true
-	var NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
-	NaGenezer.probeer()
+	_StoryJob.new().na_genezer(self)
 
 
 func _verhaal() -> void:
-	# CS-10 speelt via Wm1VideoSlot ARCHIEF2_CORRUPTED_SEREN vóór de dialoog. Zonder filmpje het oude pad.
-	if GameState.archief2_lotte_join:
-		GameState.archief2_lotte_join = false
-		Archief2.sluit_lotte_aan()
-		await Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ARCHIEF2_CORRUPTED_SEREN, self)
-		if not GameState.story_flags.has("cutscene_cs10_gezien"):
-			await _zeg([Archief2.LOTTE_GLITCH_GEDACHTE], GameState.player_name)
-			await _zeg(Archief2.LOTTE_AANSLUIT.slice(1, -1), "Seren")
-			await _toon_seren_join()
-		else:
-			await _zeg([Archief2.LOTTE_AANSLUIT[Archief2.LOTTE_AANSLUIT.size() - 1]], "")
-	if room_id == Archief2.ENTREE and not GameState.story_flags.has("archief2_keten"):
-		await _zeg(["Another Archive. I hope we're not too late.", "What if this is where Sapientia wants us to go?"], GameState.player_name)
-		await _zeg(Archief2.KETEN, "ECHO")
-		GameState.story_flags["archief2_keten"] = true
-	# Save-veilig: kern al binnen maar scène 1 nooit afgemaakt (afgesloten tijdens de scène).
-	if room_id == "archief_2_v4_genezer" and GameState.kernfragmenten.has(Archief2.KERN_ID) \
-			and str(GameState.pending_kern_absorb) == "" and not GameState.world_warper_is_unlocked():
-		if CanonGenezer.speel(self):
-			return
-	if room_id == Archief2.WARPER and not GameState.story_flags.has("archief2_echo"):
-		await _zeg(Archief2.ECHO_REGELS, "")
-		GameState.story_flags["archief2_echo"] = true
+	# Awaits staan op een RefCounted-job, niet op deze kamer: als de kamer mid-dialoog
+	# verdwijnt, geen "Resumed function _zeg() after await, but class instance is gone".
+	_StoryJob.new().verhaal(self)
 
 
 func _toon_seren_join() -> void:
-	await _zeg(["I'm Seren."], "Seren")
-	await _zeg(["Dax. This is Vesper."], GameState.player_name)
-	await _zeg(["What brought you here?"], "Seren")
-	await _zeg(["I'm looking for two mages. I've found one."], GameState.player_name)
-	await _zeg(["I'm a healer. Let me come with you."], "Seren")
-	await _zeg(["All right. We go together."], GameState.player_name)
-	await _zeg([Archief2.LOTTE_AANSLUIT[Archief2.LOTTE_AANSLUIT.size() - 1]], "")
+	_StoryJob.new().toon_seren_join(self)
 
 
 func _zeg(lines: Array, speaker: String) -> void:
-	if is_instance_valid(player):
-		player.input_locked = true
-	await get_tree().create_timer(0.35).timeout
-	Dialog.show_lines(lines, speaker)
-	await Dialog.finished
-	if is_instance_valid(player) and not GameState.scene_busy():
-		player.input_locked = false
+	# Awaits op de job, niet op de kamer (zie _StoryJob).
+	_StoryJob.new().zeg(self, lines, speaker)
+
+
+## Draait de dialoog-awaits buiten de kamer-instance. RefCounted blijft in leven
+## zolang de coroutine loopt, ook als de kamer tussentijds wordt vrijgegeven.
+class _StoryJob extends RefCounted:
+	const CanonGenezer := preload("res://world_warper/cutscene/genezer_scene.gd")
+	const Archief2 := preload("res://scripts/data/archief2.gd")
+	const Wm1VideoSlot := preload("res://scripts/data/wm1_dormant_video_slot.gd")
+	const NaGenezer := preload("res://world_warper/flow/na_genezer.gd")
+	static var _alive: Array = []
+
+	func _kamer_ok(room: Variant) -> bool:
+		return is_instance_valid(room) and room is Node and (room as Node).is_inside_tree()
+
+	func verhaal(room: Variant) -> void:
+		_alive.append(self)
+		# CS-10 speelt via Wm1VideoSlot ARCHIEF2_CORRUPTED_SEREN vóór de dialoog. Zonder filmpje het oude pad.
+		if GameState.archief2_lotte_join:
+			GameState.archief2_lotte_join = false
+			Archief2.sluit_lotte_aan()
+			await Wm1VideoSlot.before_dialogue(Wm1VideoSlot.ARCHIEF2_CORRUPTED_SEREN, room if _kamer_ok(room) else null)
+			if not GameState.story_flags.has("cutscene_cs10_gezien"):
+				await zeg(room, [Archief2.LOTTE_GLITCH_GEDACHTE], GameState.player_name)
+				await zeg(room, Archief2.LOTTE_AANSLUIT.slice(1, -1), "Seren")
+				await toon_seren_join(room)
+			else:
+				await zeg(room, [Archief2.LOTTE_AANSLUIT[Archief2.LOTTE_AANSLUIT.size() - 1]], "")
+		if _kamer_ok(room) and room.room_id == Archief2.ENTREE and not GameState.story_flags.has("archief2_keten"):
+			GameState.story_flags["archief2_keten"] = true
+			await zeg(room, ["Another Archive. I hope we're not too late.", "What if this is where Sapientia wants us to go?"], GameState.player_name)
+			await zeg(room, Archief2.KETEN, "ECHO")
+		# Save-veilig: kern al binnen maar scène 1 nooit afgemaakt (afgesloten tijdens de scène).
+		if _kamer_ok(room) and room.room_id == "archief_2_v4_genezer" and GameState.kernfragmenten.has(Archief2.KERN_ID) \
+				and str(GameState.pending_kern_absorb) == "" and not GameState.world_warper_is_unlocked():
+			if CanonGenezer.speel(room):
+				_alive.erase(self)
+				return
+		if _kamer_ok(room) and room.room_id == Archief2.WARPER and not GameState.story_flags.has("archief2_echo"):
+			GameState.story_flags["archief2_echo"] = true
+			await zeg(room, Archief2.ECHO_REGELS, "")
+		_alive.erase(self)
+
+	func na_genezer(room: Variant) -> void:
+		_alive.append(self)
+		await zeg(room, Archief2.NA_GENEZER, "")
+		NaGenezer.probeer()
+		_alive.erase(self)
+
+	func toon_seren_join(room: Variant) -> void:
+		await zeg(room, ["I'm Seren."], "Seren")
+		await zeg(room, ["Dax. This is Vesper."], GameState.player_name)
+		await zeg(room, ["What brought you here?"], "Seren")
+		await zeg(room, ["I'm looking for two mages. I've found one."], GameState.player_name)
+		await zeg(room, ["I'm a healer. Let me come with you."], "Seren")
+		await zeg(room, ["All right. We go together."], GameState.player_name)
+		await zeg(room, [Archief2.LOTTE_AANSLUIT[Archief2.LOTTE_AANSLUIT.size() - 1]], "")
+
+	func zeg(room: Variant, lines: Array, speaker: String) -> void:
+		if not _kamer_ok(room):
+			return
+		var node: Node = room
+		var player: Node = node.player if "player" in node else null
+		if is_instance_valid(player):
+			player.input_locked = true
+		var tree: SceneTree = node.get_tree()
+		if tree == null:
+			tree = Engine.get_main_loop() as SceneTree
+		if tree == null:
+			return
+		await tree.create_timer(0.35).timeout
+		if not _kamer_ok(room):
+			return
+		node = room
+		Dialog.show_lines(lines, speaker)
+		await Dialog.finished
+		if not _kamer_ok(room):
+			return
+		node = room
+		player = node.player if "player" in node else null
+		if is_instance_valid(player) and not GameState.scene_busy():
+			player.input_locked = false
 
 
 func _headless_suite() -> bool:

@@ -86,6 +86,7 @@ var _press_count := {}    # actie -> aantal vingers dat hem indrukt
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_to_group("touch_safe_inset")
 	resized.connect(queue_redraw)
 	get_viewport().size_changed.connect(refit)
 	_base_dpad_radius = dpad_radius

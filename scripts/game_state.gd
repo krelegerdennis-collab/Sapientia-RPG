@@ -388,6 +388,7 @@ const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 ## Story.event_finished (quest_event).
 var quest_progress := {}
 const QuestData := preload("res://scripts/data/quest_data.gd")
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 ## v0.11: opties voor het volgende gevecht als het een oefengevecht is ({} = gewoon)
 var pending_tutorial := {}
 
@@ -413,6 +414,8 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 
 ## Huidige map (pad naar de .tscn) en het spawnpunt voor de volgende map.
 var current_map := ""
+## Post-RC sfx: laatst gehoorde opdrachtenstand (zie _quest_klank).
+var _quest_klank_stand := {}
 var pending_spawn := ""
 ## Laatste warp-bron (pad naar .tscn), gezet in change_map vóór de scènewissel.
 var warp_from_map := ""
@@ -821,10 +824,7 @@ func _ready() -> void:
 	# Berggrot, zonder wereldkaart. Zelfde haakje als de mond op de kaart.
 	if BerggrotData.DEBUG_ARG in args and not ("--berggrottest" in args):
 		call_deferred("_start_berggrot")
-	_story_save_path = save_path
-	_story_autosave_path = autosave_path
-	_migrate_legacy_autosave()
-	sync_autosave_path()
+	_bind_story_save_paths()
 
 
 ## Testmodus (alleen bij een --...test-suite; O-4, flaky berggrottest onder load):
@@ -1223,11 +1223,46 @@ func _koppel_quests() -> void:
 ## Story heeft een event afgerond: stappen met dat event worden klaar (en alles wat de vlaggen nu zeggen).
 func quest_event(event_id: String) -> void:
 	QuestData.on_event(quest_progress, event_id, story_flags, story_step)
+	_quest_klank()
 
 
 ## Legt vast wat volgens de vlaggen/verhaalstap klaar is (bv. een baas uit een gevecht).
-func quest_sync() -> void:
+## klank = false (laden): geen quest-geluid, alleen de stand onthouden.
+func quest_sync(klank := true) -> void:
 	QuestData.sync(quest_progress, story_flags, story_step)
+	if klank:
+		_quest_klank()
+	else:
+		_quest_klank_stand = _quest_stand()
+
+
+## Post-RC sfx: per opdracht 0 = niet gestart, 1 = gestart, 2 = klaar.
+func _quest_stand() -> Dictionary:
+	var uit := {}
+	for q in QuestData.quests():
+		var klaar := QuestData.quest_klaar(q, story_flags, story_step, quest_progress)
+		uit[str(q["id"])] = 2 if klaar else (1 if QuestData.quest_gestart(q, story_flags, story_step, quest_progress) else 0)
+	return uit
+
+
+## Een opdracht ging naar klaar -> quest_complete; anders een nieuwe gestart -> quest_accept.
+## De eerste keer (lege stand) alleen onthouden.
+func _quest_klank() -> void:
+	var nu := _quest_stand()
+	if not _quest_klank_stand.is_empty():
+		var klaar := false
+		var gestart := false
+		for qid in nu:
+			var oud := int(_quest_klank_stand.get(qid, 0))
+			if int(nu[qid]) == 2 and oud < 2:
+				klaar = true
+			elif int(nu[qid]) >= 1 and oud == 0:
+				gestart = true
+		if klaar:
+			WorldSfx.play(WorldSfx.QUEST_COMPLETE)
+		elif gestart:
+			WorldSfx.play(WorldSfx.QUEST_ACCEPT)
+	_quest_klank_stand = nu
 
 
 func hoor_muziek(manifest_id: String) -> void:
@@ -1425,7 +1460,12 @@ func has_save() -> bool:
 
 ## v0.11: is er een automatische save?
 func has_autosave() -> bool:
-	return _save_file_exists(autosave_path)
+	if _save_file_exists(autosave_path):
+		return true
+	for p in _legacy_double_suffix_autosave_paths(active_slot):
+		if _save_file_exists(p):
+			return true
+	return false
 
 
 ## v0.11: handmatige save óf autosave aanwezig (titelscherm: 'Doorgaan' aan).
@@ -1445,11 +1485,37 @@ func slot_path(slot: int) -> String:
 	return save_path.trim_suffix("save_1.json") + "save_%d.json" % slot
 
 
+## Basis van de story-autosave: altijd .../autosave.json, nooit .../autosave_N.json.
+## C-11 schrijft per slot autosave_N.json vanaf deze basis. Na 7aa5d373 zette _ready
+## _story_autosave_path op het al gesuffixte autosave_path (ná new_game), waardoor
+## autosave_slot_path nog eens _N plakte (autosave_1_1.json).
+func _autosave_base_path(path := "") -> String:
+	var base := path
+	if base == "":
+		base = _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var name := base.get_file()
+	var dir := base.trim_suffix(name)
+	if not name.ends_with(".json"):
+		return base
+	var stem := name.trim_suffix(".json")
+	while true:
+		var us := stem.rfind("_")
+		if us < 0:
+			break
+		var head := stem.substr(0, us)
+		var suffix := stem.substr(us + 1)
+		if suffix.is_valid_int() and head.ends_with("autosave"):
+			stem = head
+			continue
+		break
+	return dir + stem + ".json"
+
+
 ## Pad van de autosave die bij handmatig slot hoort (C-11: niet meer één gedeeld bestand).
 func autosave_slot_path(slot: int) -> String:
 	if slot < 1 or slot > SLOT_COUNT:
 		return ""
-	var base := _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var base := _autosave_base_path()
 	if base.ends_with("autosave.json"):
 		return base.trim_suffix("autosave.json") + "autosave_%d.json" % slot
 	if base.ends_with(".json"):
@@ -1459,10 +1525,35 @@ func autosave_slot_path(slot: int) -> String:
 
 ## Oud gedeeld autosave-bestand (vóór C-11); gebruikt voor migratie.
 func _legacy_shared_autosave_path() -> String:
-	var base := _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var base := _autosave_base_path()
 	if base.ends_with("autosave.json"):
 		return base
 	return AUTOSAVE_PATH
+
+
+## Paden die de dubbele-suffix-bug (autosave_K_N.json) voor dit slot kon schrijven.
+func _legacy_double_suffix_autosave_paths(slot: int) -> Array[String]:
+	var out: Array[String] = []
+	var target := autosave_slot_path(slot)
+	var base := _autosave_base_path()
+	if slot < 1 or slot > SLOT_COUNT or not base.ends_with("autosave.json"):
+		return out
+	var prefix := base.trim_suffix("autosave.json")
+	for k in range(1, SLOT_COUNT + 1):
+		var p := prefix + "autosave_%d_%d.json" % [k, slot]
+		if p != "" and p != target:
+			out.append(p)
+	return out
+
+
+## Zet de story-basispaden (zonder slot-suffix) en migreert oude autosave-bestanden.
+func _bind_story_save_paths() -> void:
+	_story_save_path = save_path
+	var raw := _story_autosave_path if _story_autosave_path != "" else (autosave_path if autosave_path != "" else AUTOSAVE_PATH)
+	_story_autosave_path = _autosave_base_path(raw)
+	_migrate_legacy_autosave()
+	_migrate_double_suffix_autosaves()
+	sync_autosave_path()
 
 
 ## Zet autosave_path op het bestand van active_slot (alleen story-modus).
@@ -1489,6 +1580,9 @@ func is_autosave_path(path: String) -> bool:
 	for i in range(1, SLOT_COUNT + 1):
 		if path == autosave_slot_path(i):
 			return true
+		for p in _legacy_double_suffix_autosave_paths(i):
+			if path == p:
+				return true
 	return false
 
 
@@ -1509,6 +1603,23 @@ func _migrate_legacy_autosave() -> void:
 		return
 	if not _move_save_files(legacy, target):
 		push_warning("Autosave-migratie mislukt: %s -> %s" % [legacy, target])
+
+
+## Verplaats autosave_K_N.json (bug na C-11) naar autosave_N.json, eenmalig en veilig.
+## Bestaat de juiste file al: niet overschrijven (ook niet als die ouder is — geen data verliezen).
+## Lezen/Doorgaan kiest dan de nieuwste van de twee (zie _slot_autosave_record).
+func _migrate_double_suffix_autosaves() -> void:
+	for slot in range(1, SLOT_COUNT + 1):
+		var target := autosave_slot_path(slot)
+		if target == "":
+			continue
+		for legacy in _legacy_double_suffix_autosave_paths(slot):
+			if not FileAccess.file_exists(legacy):
+				continue
+			if _save_file_exists(target):
+				continue
+			if not _move_save_files(legacy, target):
+				push_warning("Autosave-migratie (dubbele suffix) mislukt: %s -> %s" % [legacy, target])
 
 
 func _move_save_files(from: String, to: String) -> bool:
@@ -1565,7 +1676,22 @@ func _manual_slot_record(slot: int) -> Dictionary:
 
 
 func _slot_autosave_record(slot: int) -> Dictionary:
-	var path := autosave_slot_path(slot)
+	var best := _autosave_record_at(autosave_slot_path(slot), slot)
+	for legacy in _legacy_double_suffix_autosave_paths(slot):
+		var rec := _autosave_record_at(legacy, slot)
+		if rec.is_empty():
+			continue
+		if best.is_empty() or (bool(best.get("corrupt", false)) and not bool(rec.get("corrupt", false))):
+			best = rec
+			continue
+		if bool(rec.get("corrupt", false)) and not bool(best.get("corrupt", false)):
+			continue
+		if float(rec["stamp"]) > float(best["stamp"]):
+			best = rec
+	return best
+
+
+func _autosave_record_at(path: String, slot: int) -> Dictionary:
 	if path == "" or not _save_file_exists(path):
 		return {}
 	var src := _read_save_source(path)
@@ -2283,7 +2409,7 @@ func apply_state(d: Dictionary) -> bool:
 	_hoor_huidige_muziek()
 	# v0.25 Quest Log; oude saves zonder "quests" -> afgeleid van de vlaggen en de verhaalstap
 	quest_progress = QuestData.van_save(d.get("quests", {}))
-	quest_sync()
+	quest_sync(false)
 	pending_tutorial = {}
 	if has_node("/root/Story"):
 		var story: Node = get_node("/root/Story")
