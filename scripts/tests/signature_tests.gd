@@ -105,6 +105,7 @@ func _enemy(a: SomArena, facing := Vector2i.LEFT, at := Vector2(160, 120)) -> Ma
 		"hitstop": 0, "target": "dennis", "data": {"max_hp": 200, "def": 2, "unique": false}, "stg": 0,
 		"stg_idle": 0, "stg_wankel": 0, "stg_immune": 0}
 	a.enemies[m] = e
+	m.room = a.room
 	return m
 
 
@@ -295,10 +296,12 @@ func _orion_enemy_ai_chase_hook_tests() -> void:
 	e["cd"] = 0.0
 	e["target"] = "dennis"
 	var expect_slow := SomSignature.chase_interval(SomData.CHASE_INTERVAL, e)
+	m.is_moving = false
 	a._enemy_ai(m, 0.02)
 	check("_enemy_ai chase langzamer met sig_slow", is_equal_approx(float(e["chase"]), expect_slow))
 	e["sig_slow"] = 0
 	e["chase"] = 0.001
+	m.is_moving = false
 	a._enemy_ai(m, 0.02)
 	check("_enemy_ai chase normaal zonder sig_slow", is_equal_approx(float(e["chase"]), SomData.CHASE_INTERVAL))
 
@@ -317,10 +320,12 @@ func _orion_enemy_ai_telegraph_chase_hook_tests() -> void:
 	e["cd"] = 0.0
 	e["target"] = "dennis"
 	var expect_slow := SomSignature.chase_interval(SomData.CHASE_INTERVAL, e)
+	m.is_moving = false
 	a._enemy_ai_telegraph(m, e, 0.02)
 	check("_enemy_ai_telegraph chase langzamer met sig_slow", is_equal_approx(float(e["chase"]), expect_slow))
 	e["sig_slow"] = 0
 	e["chase"] = 0.001
+	m.is_moving = false
 	a._enemy_ai_telegraph(m, e, 0.02)
 	check("_enemy_ai_telegraph chase normaal zonder sig_slow", is_equal_approx(float(e["chase"]), SomData.CHASE_INTERVAL))
 
