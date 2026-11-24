@@ -129,7 +129,7 @@ func run(t: Node) -> void:
 
 func _hurt_dummy() -> Node2D:
 	var gs := GDScript.new()
-	gs.source_code = "extends Node2D\nvar sprite: Sprite2D\n"
+	gs.source_code = "extends Node2D\nvar sprite: Sprite2D\nvar placeholder := true\nvar size := Vector2i.ONE\nvar enemy_id := \"\"\n"
 	gs.reload()
 	var n: Node2D = gs.new()
 	var s := Sprite2D.new()
@@ -140,6 +140,7 @@ func _hurt_dummy() -> Node2D:
 
 func _arena() -> Node:
 	var a: Node = SomArenaScript.new()
+	a.process_mode = Node.PROCESS_MODE_DISABLED
 	a.down = false
 	a.combat_stamina = CombatStamina.new()
 	a.combat_roots = CombatRoots.new()
@@ -150,7 +151,10 @@ func _arena() -> Node:
 		a.combat_stamina.init_member(hid)
 	for m in GameState.party:
 		m["hp"] = maxi(1, int(m.get("max_hp", 1)))
-	var r := MockRoom.new()
+	var rm := GDScript.new()
+	rm.source_code = "extends \"res://scripts/tests/perfect_dodge_mock_room.gd\"\nfunc monsters_active() -> bool:\n\treturn false\n"
+	rm.reload()
+	var r: Node = rm.new()
 	var objs := Node2D.new()
 	objs.name = "Objects"
 	r.add_child(objs)
