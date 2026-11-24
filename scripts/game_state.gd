@@ -821,10 +821,7 @@ func _ready() -> void:
 	# Berggrot, zonder wereldkaart. Zelfde haakje als de mond op de kaart.
 	if BerggrotData.DEBUG_ARG in args and not ("--berggrottest" in args):
 		call_deferred("_start_berggrot")
-	_story_save_path = save_path
-	_story_autosave_path = autosave_path
-	_migrate_legacy_autosave()
-	sync_autosave_path()
+	_bind_story_save_paths()
 
 
 ## Testmodus (alleen bij een --...test-suite; O-4, flaky berggrottest onder load):
@@ -1425,7 +1422,12 @@ func has_save() -> bool:
 
 ## v0.11: is er een automatische save?
 func has_autosave() -> bool:
-	return _save_file_exists(autosave_path)
+	if _save_file_exists(autosave_path):
+		return true
+	for p in _legacy_double_suffix_autosave_paths(active_slot):
+		if _save_file_exists(p):
+			return true
+	return false
 
 
 ## v0.11: handmatige save óf autosave aanwezig (titelscherm: 'Doorgaan' aan).
@@ -1445,11 +1447,37 @@ func slot_path(slot: int) -> String:
 	return save_path.trim_suffix("save_1.json") + "save_%d.json" % slot
 
 
+## Basis van de story-autosave: altijd .../autosave.json, nooit .../autosave_N.json.
+## C-11 schrijft per slot autosave_N.json vanaf deze basis. Na 7aa5d373 zette _ready
+## _story_autosave_path op het al gesuffixte autosave_path (ná new_game), waardoor
+## autosave_slot_path nog eens _N plakte (autosave_1_1.json).
+func _autosave_base_path(path := "") -> String:
+	var base := path
+	if base == "":
+		base = _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var name := base.get_file()
+	var dir := base.trim_suffix(name)
+	if not name.ends_with(".json"):
+		return base
+	var stem := name.trim_suffix(".json")
+	while true:
+		var us := stem.rfind("_")
+		if us < 0:
+			break
+		var head := stem.substr(0, us)
+		var suffix := stem.substr(us + 1)
+		if suffix.is_valid_int() and head.ends_with("autosave"):
+			stem = head
+			continue
+		break
+	return dir + stem + ".json"
+
+
 ## Pad van de autosave die bij handmatig slot hoort (C-11: niet meer één gedeeld bestand).
 func autosave_slot_path(slot: int) -> String:
 	if slot < 1 or slot > SLOT_COUNT:
 		return ""
-	var base := _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var base := _autosave_base_path()
 	if base.ends_with("autosave.json"):
 		return base.trim_suffix("autosave.json") + "autosave_%d.json" % slot
 	if base.ends_with(".json"):
@@ -1459,10 +1487,35 @@ func autosave_slot_path(slot: int) -> String:
 
 ## Oud gedeeld autosave-bestand (vóór C-11); gebruikt voor migratie.
 func _legacy_shared_autosave_path() -> String:
-	var base := _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var base := _autosave_base_path()
 	if base.ends_with("autosave.json"):
 		return base
 	return AUTOSAVE_PATH
+
+
+## Paden die de dubbele-suffix-bug (autosave_K_N.json) voor dit slot kon schrijven.
+func _legacy_double_suffix_autosave_paths(slot: int) -> Array[String]:
+	var out: Array[String] = []
+	var target := autosave_slot_path(slot)
+	var base := _autosave_base_path()
+	if slot < 1 or slot > SLOT_COUNT or not base.ends_with("autosave.json"):
+		return out
+	var prefix := base.trim_suffix("autosave.json")
+	for k in range(1, SLOT_COUNT + 1):
+		var p := prefix + "autosave_%d_%d.json" % [k, slot]
+		if p != "" and p != target:
+			out.append(p)
+	return out
+
+
+## Zet de story-basispaden (zonder slot-suffix) en migreert oude autosave-bestanden.
+func _bind_story_save_paths() -> void:
+	_story_save_path = save_path
+	var raw := _story_autosave_path if _story_autosave_path != "" else (autosave_path if autosave_path != "" else AUTOSAVE_PATH)
+	_story_autosave_path = _autosave_base_path(raw)
+	_migrate_legacy_autosave()
+	_migrate_double_suffix_autosaves()
+	sync_autosave_path()
 
 
 ## Zet autosave_path op het bestand van active_slot (alleen story-modus).
@@ -1489,6 +1542,9 @@ func is_autosave_path(path: String) -> bool:
 	for i in range(1, SLOT_COUNT + 1):
 		if path == autosave_slot_path(i):
 			return true
+		for p in _legacy_double_suffix_autosave_paths(i):
+			if path == p:
+				return true
 	return false
 
 
@@ -1509,6 +1565,23 @@ func _migrate_legacy_autosave() -> void:
 		return
 	if not _move_save_files(legacy, target):
 		push_warning("Autosave-migratie mislukt: %s -> %s" % [legacy, target])
+
+
+## Verplaats autosave_K_N.json (bug na C-11) naar autosave_N.json, eenmalig en veilig.
+## Bestaat de juiste file al: niet overschrijven (ook niet als die ouder is — geen data verliezen).
+## Lezen/Doorgaan kiest dan de nieuwste van de twee (zie _slot_autosave_record).
+func _migrate_double_suffix_autosaves() -> void:
+	for slot in range(1, SLOT_COUNT + 1):
+		var target := autosave_slot_path(slot)
+		if target == "":
+			continue
+		for legacy in _legacy_double_suffix_autosave_paths(slot):
+			if not FileAccess.file_exists(legacy):
+				continue
+			if _save_file_exists(target):
+				continue
+			if not _move_save_files(legacy, target):
+				push_warning("Autosave-migratie (dubbele suffix) mislukt: %s -> %s" % [legacy, target])
 
 
 func _move_save_files(from: String, to: String) -> bool:
@@ -1565,7 +1638,22 @@ func _manual_slot_record(slot: int) -> Dictionary:
 
 
 func _slot_autosave_record(slot: int) -> Dictionary:
-	var path := autosave_slot_path(slot)
+	var best := _autosave_record_at(autosave_slot_path(slot), slot)
+	for legacy in _legacy_double_suffix_autosave_paths(slot):
+		var rec := _autosave_record_at(legacy, slot)
+		if rec.is_empty():
+			continue
+		if best.is_empty() or (bool(best.get("corrupt", false)) and not bool(rec.get("corrupt", false))):
+			best = rec
+			continue
+		if bool(rec.get("corrupt", false)) and not bool(best.get("corrupt", false)):
+			continue
+		if float(rec["stamp"]) > float(best["stamp"]):
+			best = rec
+	return best
+
+
+func _autosave_record_at(path: String, slot: int) -> Dictionary:
 	if path == "" or not _save_file_exists(path):
 		return {}
 	var src := _read_save_source(path)
