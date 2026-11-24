@@ -89,6 +89,13 @@ Algemene regels voor alle PR's
 
 ## F3 — Signature-eigenschap per held (keten/charge)
 
+**Status (PR4, branch `combat/f3-signatures`)**: geïmplementeerd achter `SomSignatureData.ENABLED` (default **aan**; tests: `force_active`). Logica in `scripts/som/som_signature.gd`; dunne hooks in `som_arena.gd`. Vesper-crit alleen in `_land` als actief + `noor` (geen dict-alloc op overige hits). Seren-ICD pas na heal > 0. Orion-windup +6 max 1× per telegraaf (`sig_orion_windup_done`). Tests: `--signaturetest` (echte `chain_swing`/`heavy_tick`, co-op aggro vóór slot 0).
+
+**NG keuzes (gecontroleerd in code)**:
+- **Vijand-facing**: bijgewerkt in `_enemy_ai` / telegraaf-start (richting naar doelheld) → backstab via `SomSignature.backstab_hit(m.facing, strike_dir)`; alleen **melee** (geen spreuk-backstab).
+- **Monster-slow**: eigen `enemies[m].sig_slow` (ticks) + langere `CHASE_INTERVAL` (÷ 0,6), **niet** `combat_zones.slow_mult`.
+- **Heal-pad**: `PartyActions.restore` + `SomFx.number` groen `Color(0.4, 1, 0.5)` + `heal_glow` (zelfde als `cast_spell` heal).
+
 **Doel**: elke held voelt anders binnen hetzelfde 3-slag/charge-schema. Geen duo/team-combo's. AI gebruikt identieke regels (triggert dus ook voor bondgenoten).
 
 | Held (id) | Trigger | Effect (voorstel) |
@@ -102,6 +109,8 @@ Algemene regels voor alle PR's
 - Vesper "backstab": vijanden hebben `m.facing` (gebruikt in `_knockback`/`place_at`) **[NG of facing van vijanden betrouwbaar wordt bijgewerkt]**. Vesper is Mage — vaker spreuk dan melee; effect evt. ook op spreuk **[NG]**.
 - Kael aggro lock in co-op: `_target_for` geeft nu altijd slot 0 terug (`som_arena.gd:1312-1316`) → lock moet vóór die tak gecontroleerd worden.
 - Orion slow kan via bestaande zone-slow (`zone_slow_mult` 0,6) hergebruikt worden **[NG of monster-slow los van zones bestaat]**.
+- **Orion**: `after_melee_hit` slaat Golem-vijanden volledig over (geen `sig_slow`, geen windup-verlenging).
+- **Kael**: finisher lock alleen op de eerste geraakte vijand in die slag; ICD **240 ticks** op Kael.
 
 **Bestanden**: nieuw `scripts/data/som_signature_data.gd`; `som_arena.gd` (`_land`, `damage_enemy`, `_target_for`, `_knockback`); heal via bestaand heal-pad **[NG: functienaam]**.
 

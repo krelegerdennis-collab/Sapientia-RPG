@@ -17,7 +17,7 @@ static func init_entry(e: Dictionary) -> void:
 	e["stg_immune"] = 0
 
 
-static func apply_hit(e: Dictionary, m: Node, data: Dictionary, kind: int) -> bool:
+static func apply_hit(e: Dictionary, m: Node, data: Dictionary, kind: int, fill_mult: float = 1.0) -> bool:
 	## Geeft true als vijand net wankel is ingegaan (telegraaf onderbreken).
 	if e.get("golem", null) != null:
 		return false
@@ -25,7 +25,7 @@ static func apply_hit(e: Dictionary, m: Node, data: Dictionary, kind: int) -> bo
 		return false
 	if SomStaggerData.in_wankel(e) or SomStaggerData.immune(e):
 		return false
-	var add := SomStaggerData.fill_for_kind(kind)
+	var add := roundi(float(SomStaggerData.fill_for_kind(kind)) * maxf(0.0, fill_mult))
 	if add <= 0:
 		return false
 	e["stg_idle"] = 0
