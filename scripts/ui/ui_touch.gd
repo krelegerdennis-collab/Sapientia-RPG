@@ -17,7 +17,16 @@ const TAP_SLOP := 6.0
 const INSET_MAX := 48.0
 
 ## Test/screenshot-override: Vector4(links, boven, rechts, onder) in eenheden. null = platform.
-static var insets_override: Variant = null
+## Bij wijziging roept de setter meteen refit() aan op de groep touch_safe_inset (geen per-frame-kosten).
+static var insets_override: Variant = null:
+	set(v):
+		if insets_override == v:
+			return
+		insets_override = v
+		var tree := Engine.get_main_loop() as SceneTree
+		if tree != null:
+			tree.call_group("touch_safe_inset", "refit")
+
 ## Test-hook: nep-DisplayServer-insets (Windows-taakbalk). insets() gebruikt dit alleen op mobiel;
 ## op desktop/headless blijft het resultaat nul, ook als dit gezet is.
 static var test_display_insets: Variant = null
