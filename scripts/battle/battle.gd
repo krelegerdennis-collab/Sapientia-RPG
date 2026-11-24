@@ -119,6 +119,7 @@ const DamageCalc := preload("res://scripts/battle/damage_calc.gd")   # schadefor
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
 const BattleLayoutScript := preload("res://scripts/battle/battle_layout.gd")
+const BattleCommandsScript := preload("res://scripts/battle/battle_commands.gd")
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
 const CORE_HIT_COLOR := Color("ff8ad8")
 const ARMOR_HIT_COLOR := Color("b5a78d")
@@ -283,6 +284,13 @@ func _ready() -> void:
 ## Demo-fix 3: zichtbare HP-balk voor de baas (eerste vijand met een kern / in een baasgevecht).
 var boss_bar: Control = null
 var _layout_h: RefCounted
+var _cmds_h: RefCounted
+
+
+func _cmds():
+	if _cmds_h == null:
+		_cmds_h = BattleCommandsScript.new(self)
+	return _cmds_h
 
 
 # ================================================================ scherm/layout (battle_layout.gd)
@@ -560,257 +568,72 @@ func _run() -> void:
 		_reserved.clear()
 
 
-# ================================================================ commando's kiezen
+# ================================================================ commando's kiezen (battle_commands.gd)
 func _choose_commands() -> Array:
 	var actions: Array = []
 	actions.resize(heroes.size())
 	_reserved.clear()
-	var i := _next_alive_hero(-1)
+	var cmds: RefCounted = _cmds()
+	var i: int = cmds.next_alive_hero(-1)
 	while i < heroes.size():
-		_set_active_hero(i)
-		var act = await _choose_for_hero(heroes[i], _prev_alive_hero(i) != -1)
+		cmds.set_active_hero(i)
+		var act = await cmds.choose_for_hero(heroes[i], cmds.prev_alive_hero(i) != -1)
 		if act == null:
-			var prev := _prev_alive_hero(i)
+			var prev: int = cmds.prev_alive_hero(i)
 			if prev != -1:
-				_unreserve(actions[prev])
+				cmds.unreserve(actions[prev])
 				actions[prev] = null
 				i = prev
 			continue
 		if act["type"] == "flee":
 			for a in actions:
-				_unreserve(a)
-			_set_active_hero(-1)
+				cmds.unreserve(a)
+			cmds.set_active_hero(-1)
 			return [act]
 		actions[i] = act
-		i = _next_alive_hero(i)
-	_set_active_hero(-1)
+		i = cmds.next_alive_hero(i)
+	cmds.set_active_hero(-1)
 	return actions.filter(func(a): return a != null)
 
 
-## De held die kiest stapt naar voren, de rest staat op zijn plek.
 func _set_active_hero(i: int) -> void:
-	current_hero = i
-	if i >= 0:
-		_place_menu(i, true)
-	for j in hero_nodes.size():
-		var node: Control = hero_nodes[j]
-		var forward := j == i
-		if node.stepped_forward != forward or (forward and node.pose != "klaar"):
-			node.step(forward)
-	_refresh_party()
+	_cmds().set_active_hero(i)
 
 
 func _choose_for_hero(hero: Dictionary, can_go_back: bool):
-	var last := 0          # na 'terug' uit een submenu/doelkeuze staat het kruis weer daar
-	while true:
-		_set_state(ST_COMMAND)
-		show_message("What will %s do?" % hero["name"])
-		_show_tip(hero)
-		var allowed := [
-			true,
-			not hero["s"]["spells"].is_empty() or not _kern_skills(hero).is_empty(),   # v0.15: + kern
-			not _available_items().is_empty(),
-			true,
-			tutorial.is_empty() and can_flee,   # oefengevecht / baas (v0.15): niet vluchten
-			_items_left(CodexDataScript.BOOK_ITEM) > 0 or codex.can_swap(),   # v0.19 Codex
-		]
-		cross.open(hero["name"], allowed, last, can_go_back, [] if codex_command_shown() else [COMMANDS.size() - 1])
-		var cmd: int = await cross.finished
-		if cmd == 1 and not has_usable_magic(hero) and _kern_skills(hero).is_empty():
-			# Demo-fix 1: spreuken maar geen MP / niets te kiezen — geen submenu (soft-lock voorkomen).
-			# Met kernvaardigheden altijd _choose_spell: laad-regels staan uitgegrijsd (kerntest).
-			show_notice("No spells yet")
-			last = 0
-			continue
-		cross.deactivate()
-		last = maxi(cmd, 0)
-		match cmd:
-			-1:
-				return null
-			0:
-				var t = await _select_enemy()
-				if t != null:
-					return {"type": "attack", "actor": hero, "target": t}
-			1:
-				var s = await _choose_spell(hero)
-				if s != null:
-					return s
-			2:
-				var it = await _choose_item(hero)
-				if it != null:
-					return it
-			3:
-				return {"type": "defend", "actor": hero}
-			4:
-				return {"type": "flee", "actor": hero}
-			5:
-				var c = await _choose_codex(hero)
-				if c != null:
-					return c
-	return null
+	return await _cmds().choose_for_hero(hero, can_go_back)
 
 
-## Demo-fix 1: heeft de held een spreuk met genoeg MP of een geladen kernvaardigheid?
 func has_usable_magic(hero: Dictionary) -> bool:
-	for id in hero["s"]["spells"]:
-		if int(hero["s"]["mp"]) >= int(GameData.SPELLS[id]["mp"]):
-			return true
-	for id in _kern_skills(hero):
-		if kern_ready(hero, id):
-			return true
-	return false
+	return _cmds().has_usable_magic(hero)
 
 
-## Bericht dat ook tijdens het kiezen in de strook verschijnt (show_message verbergt die dan).
 func show_notice(text: String) -> void:
-	show_message(text)
-	message_label.text = text
-	message_label.modulate = Color.WHITE
-	caption.visible = true
-	_fit_caption()
+	_cmds().show_notice(text)
 
 
-## v0.19: staat de Codex-knop in het kruis? Niet in het oefengevecht, en niet zolang er nog
-## niets te doen is (0 pagina's en 0 Lege Boeken).
 func codex_command_shown() -> bool:
-	if not tutorial.is_empty() or GameState.practice_battle:
-		return false
-	return not GameState.codex_pages.is_empty() or GameState.item_count(CodexDataScript.BOOK_ITEM) > 0
+	return _cmds().codex_command_shown()
 
 
-## v0.19 Codex-submenu: 0 = Vangen, 1 = Wissel bondgenoot. Uitgeschakeld = grijs met de reden.
 func _choose_codex(hero: Dictionary):
-	var book: String = CodexDataScript.BOOK_ITEM
-	var last := 0
-	while true:
-		_set_state(ST_COMMAND)
-		var books := _items_left(book)
-		var vangen := "Capture  Book x%d" % books if books > 0 else "Capture: no Blank Book"
-		var wissel := "Swap ally"
-		if not codex.can_swap():
-			wissel = "Swap: Codex empty" if GameState.codex_pages.is_empty() else "Swap: all down"
-			if not codex.wissel_in_gevecht and not GameState.codex_pages.is_empty():
-				wissel = "Swap: outside battle"   # v0.22 partylimiet: wisselen via het menu
-		show_message("Codex: capture or swap?")
-		menu.open("Codex", [{"text": vangen, "enabled": books > 0},
-				{"text": wissel, "enabled": codex.can_swap()}], last, true, _list_row_h(2))
-		var k: int = await menu.finished
-		menu.close()
-		if k == -1:
-			return null
-		last = k
-		if k == 0:
-			var bk := "1 book" if books == 1 else "%d books" % books
-			var t = await _select_enemy(func(c): return "%s %s (%s)" % [c["name"], codex.capture_hint(c), bk], "Capture: ")
-			if t != null:
-				_reserved[book] = _reserved.get(book, 0) + 1
-				return {"type": "item", "actor": hero, "item": book, "target": t}   # zelfde weg als Item
-		else:
-			var sw = await _choose_swap(hero)
-			if sw != null:
-				return sw
-	return null
+	return await _cmds().choose_codex(hero)
 
 
-## v0.19 Wissel-lijst: niet-KO pagina's ('Lv' + naam) en onderaan 'Geen'. De bondgenoot die nu
-## meevecht staat erin maar is grijs ('nu'); 'Geen' is grijs als er geen bondgenoot is.
 func _choose_swap(hero: Dictionary):
-	var cur := codex.current_ally_uid()
-	var pages: Array = codex.swap_choices()
-	var entries := []
-	var start := 0
-	for i in pages.size():
-		var p: Dictionary = pages[i]
-		var here := str(p["uid"]) == cur
-		entries.append({"text": "%s Lv%d%s" % [p["name"], int(p["level"]), " now" if here else ""], "enabled": not here})
-	entries.append({"text": "None", "enabled": cur != ""})
-	show_message("Who fights alongside you?")
-	menu.open("Swap", entries, start, true, _list_row_h(mini(entries.size(), CODEX_ROWS_MAX)), CODEX_ROWS_MAX)
-	var k: int = await menu.finished
-	menu.close()
-	if k == -1:
-		return null
-	var uid := "" if k >= pages.size() else str(pages[k]["uid"])
-	return {"type": "codex_swap", "actor": hero, "page": uid}
+	return await _cmds().choose_swap(hero)
 
 
 func _choose_spell(hero: Dictionary):
-	while true:
-		_set_state(ST_COMMAND)
-		var ids: Array = hero["s"]["spells"]
-		var entries := []
-		for id in ids:
-			var sp: Dictionary = GameData.SPELLS[id]
-			entries.append({"text": "%-7s %dMP" % [sp["name"], sp["mp"]], "enabled": hero["s"]["mp"] >= sp["mp"]})
-		# v0.15: kernvaardigheden onder de spreuken (geen MP, wel opladen)
-		var kern := _kern_skills(hero)
-		for id in kern:
-			entries.append({"text": kern_entry_text(hero, id), "enabled": kern_ready(hero, id)})
-		show_message("Which spell?" if kern.is_empty() else ("Which skill?" if ids.is_empty() else "Which spell or skill?"))
-		menu.open("Magic" if kern.is_empty() else ("Core" if ids.is_empty() else "Magic/Core"), entries,
-				0, true, _list_row_h(mini(entries.size(), LIST_ROWS_MAX)), LIST_ROWS_MAX)
-		var k: int = await menu.finished
-		menu.close()        # v0.13: lijstje weg, dan is het doel goed te zien
-		if k == -1:
-			return null
-		if k >= ids.size():
-			var kid: String = kern[k - ids.size()]
-			if not kern_ready(hero, kid):
-				continue
-			var kt = await _select_enemy()
-			if kt != null:
-				return {"type": "kern_skill", "actor": hero, "skill": kid, "target": kt}
-			continue
-		var spell: Dictionary = GameData.SPELLS[ids[k]]
-		var t = null
-		match spell["target"]:
-			"enemy":
-				t = await _select_enemy()
-			"ally":
-				t = await _select_ally()
-			"ko":
-				t = await _select_ko()
-			"all_enemies", "all_allies":
-				return {"type": "spell", "actor": hero, "spell": ids[k], "target": null}
-		if t != null:
-			return {"type": "spell", "actor": hero, "spell": ids[k], "target": t}
-	return null
+	return await _cmds().choose_spell(hero)
 
 
 func _choose_item(hero: Dictionary):
-	while true:
-		_set_state(ST_COMMAND)
-		var ids := _available_items()
-		if ids.is_empty():
-			return null
-		var entries := []
-		for id in ids:
-			entries.append({"text": "%s x%d" % [GameData.ITEMS[id].get("short", GameData.ITEMS[id]["name"]), _items_left(id)], "enabled": true})
-		show_message("Which item?")
-		menu.open("Item", entries, 0, true, _list_row_h(mini(entries.size(), LIST_ROWS_MAX)), LIST_ROWS_MAX)
-		var k: int = await menu.finished
-		menu.close()
-		if k == -1:
-			return null
-		var t = null
-		if str(GameData.ITEMS[ids[k]].get("target", "ally")) == "enemy":
-			t = await _select_enemy()      # Codex: Leeg Boek op een vijand
-		elif float(GameData.ITEMS[ids[k]].get("revive", 0.0)) > 0.0:
-			t = await _select_ko()         # Feniksveer: een KO-held aanwijzen (H3)
-		else:
-			t = await _select_ally()
-		if t != null:
-			_reserved[ids[k]] = _reserved.get(ids[k], 0) + 1
-			return {"type": "item", "actor": hero, "item": ids[k], "target": t}
-	return null
+	return await _cmds().choose_item(hero)
 
 
 func _available_items() -> Array:
-	var ids := []
-	for id in GameData.ITEMS:
-		if _items_left(id) > 0 and battle_usable(GameData.ITEMS[id]):
-			ids.append(id)
-	return ids
+	return _cmds().available_items()
 
 
 ## Heeft dit item een effect in het gevecht? (genezen, revive, tegengif, vangen, spreuk leren)
@@ -831,63 +654,34 @@ static func heal_would_help(t: Dictionary, it: Dictionary) -> bool:
 
 
 func _items_left(id: String) -> int:
-	return GameState.item_count(id) - int(_reserved.get(id, 0))
+	return _cmds().items_left(id)
 
 
 func _unreserve(action) -> void:
-	if action != null and action["type"] == "item":
-		_reserved[action["item"]] = maxi(0, _reserved.get(action["item"], 0) - 1)
+	_cmds().unreserve(action)
 
 
 func _next_alive_hero(from: int) -> int:
-	for j in range(from + 1, heroes.size()):
-		if heroes[j]["s"]["hp"] > 0 and not heroes[j].get("ally", false):
-			return j
-	return heroes.size()
+	return _cmds().next_alive_hero(from)
 
 
 func _prev_alive_hero(from: int) -> int:
-	for j in range(from - 1, -1, -1):
-		if heroes[j]["s"]["hp"] > 0 and not heroes[j].get("ally", false):
-			return j
-	return -1
+	return _cmds().prev_alive_hero(from)
 
 
-# ================================================================ doel kiezen
-## Doel kiezen: de namen staan in het menu (op dezelfde plek als het commandomenu) en een
-## pijltje wijst het doel aan. Kiezen met omhoog/omlaag/links/rechts + A, op een naam tikken
-## of op de vijand zelf tikken. B = terug.
-## v0.19: label (optioneel) = tekst bij het pijltje (bv. 'Mosslijm 35%' bij Vangen); prefix komt
-## ervoor in de berichtstrook.
 func _select_enemy(label := Callable(), prefix := ""):
-	_set_state(ST_TARGET_ENEMY)
-	var living := _alive(enemies)
-	# v9.1: vijanden staan bovenin; het pijltje blijft onder de bericht-strook (dan wijst het
-	# iets in het plaatje, op het hoofd)
-	var above := func(c): return Vector2(c["node"].position.x + roundf(c["node"].size.x / 2.0), maxf(c["node"].position.y + float(c.get("top", 0)) - 2.0, CURSOR_MIN_Y))
-	return await _pick_target(living, "Target", above, false, label, prefix)
+	return await _cmds().select_enemy(label, prefix)
 
 
 func _select_ally():
-	_set_state(ST_TARGET_ALLY)
-	var living := _alive(heroes)
-	var result = await _pick_target(living, "On whom?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
-	if result != null:
-		last_ally_target_row = result["row"]
-	return result
+	return await _cmds().select_ally()
 
 
 func _select_ko():
-	var dead: Array = []
-	for h in heroes:
-		if int(h["s"]["hp"]) <= 0:
-			dead.append(h)
-	if dead.is_empty():
-		show_message("Nobody is knocked out.")
-		await _wait(MESSAGE_TIME)
-		return null
-	_set_state(ST_TARGET_ALLY)
-	return await _pick_target(dead, "Who?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
+	return await _cmds().select_ko()
+
+
+# ================================================================ doel kiezen (_pick_target blijft hier: ux_tests / UiSfx.TARGET)
 
 
 ## v0.13: geen namenlijst meer. Een pijltje (richtpijl.png) wijst het doel aan, met de naam
