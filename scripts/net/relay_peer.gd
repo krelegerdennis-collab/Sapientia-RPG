@@ -15,6 +15,12 @@ const HOST_ID := 1
 const TARGET_ALL := 0
 ## Koude start van een gratis host (Render slaapt na 15 min) kan ~1 min duren; de lobby wacht zo lang.
 const CONNECT_TIMEOUT_SEC := 60.0
+## Handshake-deadline zolang de socket nog niet OPEN is.
+## Godot 4.3 meldt een geweigerde TCP-connect niet: WebSocketPeer blijft CONNECTING tot de
+## engine-timeout (connect_timeout_seconds, 30 s). Daardoor hangt Windows/mobiel ~30 s.
+## 4 s blijft onder relay_tests.gd STEP (5.0 s), zodat _unreachable_tests groen blijft, en
+## laat ruimte voor een trage mobiele wss-handshake (DNS + TLS). Na OPEN geldt CONNECT_TIMEOUT_SEC.
+const CONNECT_DEADLINE_SEC := 4.0
 
 enum Role { NONE, HOST, GUEST }
 
@@ -46,6 +52,9 @@ var _hello_sent := false
 var _opened := false
 var _wait := 0.0
 var _last_poll_msec := 0
+## Alleen voor tests: doe alsof de handshake in CONNECTING blijft, zodat de connect-deadline
+## deterministisch te meten is (zonder te leunen op OS-TCP-gedrag bij een dode poort).
+var debug_stuck_connecting := false
 
 
 func create_host(url: String) -> Error:
@@ -108,13 +117,19 @@ func _poll() -> void:
 	_ws.poll()
 	if _ended:
 		return
-	match _ws.get_ready_state():
+	var state := _ws.get_ready_state()
+	if debug_stuck_connecting and not _opened:
+		state = WebSocketPeer.STATE_CONNECTING
+	match state:
 		WebSocketPeer.STATE_CONNECTING:
 			_wait += dt
-			if _wait >= CONNECT_TIMEOUT_SEC:
-				_fail("timeout")
+			if _wait >= CONNECT_DEADLINE_SEC:
+				_fail("unreachable")
 		WebSocketPeer.STATE_OPEN:
-			_opened = true
+			if not _opened:
+				_opened = true
+				# Handshake klaar; de 60 s-budget is voor het room-hello (koude Render-start), niet voor TCP.
+				_wait = 0.0
 			if not _hello_sent:
 				_send_hello()
 			_read_frames()
