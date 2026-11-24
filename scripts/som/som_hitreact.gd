@@ -35,6 +35,11 @@ static func contact_flash_active(m: Node) -> bool:
 	return float(st["t"]) >= 0.0 and float(st["t"]) < SomData.HIT_FLASH_CONTACT * 1000.0
 
 
+## Klap is dodelijk als de vijand-dict een hp heeft en die op of onder 0 staat (damage_enemy trekt hp eerst af).
+static func hurt_is_lethal(e: Dictionary) -> bool:
+	return e.has("hp") and int(e["hp"]) <= 0
+
+
 static func trigger(arena, m: Node, e: Dictionary, dir: Vector2i, weight: String, finisher_or_heavy: bool, full_hurt_pose: bool) -> void:
 	if m == null or m.sprite == null:
 		return
@@ -42,7 +47,9 @@ static func trigger(arena, m: Node, e: Dictionary, dir: Vector2i, weight: String
 	# enemy_hurt min_interval_ms 80 (AudioManager.play_sfx, globaal per sleutel) = max 1 per ~5 ticks.
 	# CO-OP: alleen de HOST hoort dit (damage_enemy draait niet op de gast; die zet hp uit de
 	# snapshot in SomArena.apply_coop_snapshot). Netcode-follow-up: gast-sfx.
-	WorldSfx.play(WorldSfx.ENEMY_HURT)
+	# Dodelijke klap (hp <= 0): geen enemy_hurt, het death-pad (SomDeathGlitch) speelt enemy_death.
+	if not hurt_is_lethal(e):
+		WorldSfx.play(WorldSfx.ENEMY_HURT)
 	var st := _state(m)
 	st["t"] = 0.0
 	st["dir"] = dir

@@ -8,6 +8,7 @@ const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 const SomSfx := preload("res://scripts/audio/som_sfx.gd")
 const SomArenaScript := preload("res://scripts/som/som_arena.gd")
 const Spells := preload("res://scripts/data/spells.gd")
+const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
 const SIGNALS := ["swing_landed", "spell_released", "player_hit", "member_down", "enemy_defeated"]
 
 
@@ -117,4 +118,26 @@ func run(t: Node) -> void:
 				not _since(n0).has(WorldSfx.LEVEL_UP))
 		hero["level"] = lvl0
 	a.queue_free()
+
+	# 6. dodelijke klap: geen enemy_hurt (het death-pad speelt enemy_death), gewone klap wel
+	var hr_arena: Node = SomArenaScript.new()
+	var mm := MapMonster.new()
+	mm.enemy_id = "geen_hurt_test"
+	mm.placeholder = true
+	mm.size = Vector2i.ONE
+	mm.sprite = Sprite2D.new()
+	mm.add_child(mm.sprite)
+	t.check("som-sfx: hp 0 = dodelijk, hp 5 = niet, geen hp = niet",
+			SomHitReact.hurt_is_lethal({"hp": 0}) and not SomHitReact.hurt_is_lethal({"hp": 5})
+			and not SomHitReact.hurt_is_lethal({}))
+	n0 = _mark()
+	SomHitReact.trigger(hr_arena, mm, {"hp": 0}, Vector2i.RIGHT, "middel", false, false)
+	t.check("som-sfx: dodelijke klap = geen enemy_hurt %s" % [_since(n0)],
+			not _since(n0).has(WorldSfx.ENEMY_HURT))
+	n0 = _mark()
+	SomHitReact.trigger(hr_arena, mm, {"hp": 5}, Vector2i.RIGHT, "middel", false, false)
+	t.check("som-sfx: niet-dodelijke klap = enemy_hurt %s" % [_since(n0)],
+			_since(n0).has(WorldSfx.ENEMY_HURT))
+	mm.free()
+	hr_arena.free()
 	await t.pframes(1)
