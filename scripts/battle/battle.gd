@@ -111,7 +111,6 @@ const CommandCrossScript := preload("res://scripts/battle/command_cross.gd")
 const CodexDataScript := preload("res://scripts/data/codex_data.gd")   # v0.19 Codex-knop
 ## v0.14 (RPG CODE) roze kern van de Golem-baas: regels + beeld (zie boss_core.gd)
 const BossCore := preload("res://scripts/battle/boss_core.gd")
-const BossHpBarScript := preload("res://scripts/battle/boss_hp_bar.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")   # v0.15 kernvaardigheden
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const Archief2Vijanden := preload("res://scripts/data/archief2_vijanden.gd")
@@ -119,6 +118,7 @@ const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const DamageCalc := preload("res://scripts/battle/damage_calc.gd")   # schadeformules (static)
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
+const BattleLayoutScript := preload("res://scripts/battle/battle_layout.gd")
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
 const CORE_HIT_COLOR := Color("ff8ad8")
 const ARMOR_HIT_COLOR := Color("b5a78d")
@@ -209,6 +209,7 @@ var _pp_lbl := ""
 
 
 func _ready() -> void:
+	_layout_h = BattleLayoutScript.new(self)
 	# T27: s25_check RISK — gevecht-enter (battle_gras/woud/archief/baas_golem/kas)
 	_pp_on = PerfProbe.enabled
 	if _pp_on:
@@ -281,122 +282,49 @@ func _ready() -> void:
 
 ## Demo-fix 3: zichtbare HP-balk voor de baas (eerste vijand met een kern / in een baasgevecht).
 var boss_bar: Control = null
+var _layout_h: RefCounted
 
 
+# ================================================================ scherm/layout (battle_layout.gd)
 func _make_boss_bar() -> void:
-	if not GameState.pending_boss or enemies.is_empty():
-		return
-	var t: Dictionary = enemies[0]
-	for e in enemies:
-		if e.has("core"):
-			t = e
-			break
-	boss_bar = BossHpBarScript.new()
-	boss_bar.name = "BossHpBar"
-	add_child(boss_bar)
-	move_child(boss_bar, $TouchControls.get_index())
-	boss_bar.setup(t)
+	_layout_h.make_boss_bar()
 
 
 func _place_boss_bar(w: float) -> void:
-	if boss_bar:
-		var max_w := w - 8.0 - 6.0 - _safe().z
-		if boss_bar.has_method("relayout"):
-			boss_bar.relayout(max_w)
-		boss_bar.position = Vector2(roundf(w - boss_bar.size.x - 6.0 - _safe().z), 18.0 + _safe().y)
+	_layout_h.place_boss_bar(w)
 
 
-# ================================================================ fijn raster (768x432)
-## Het venster rendert tijdens het gevecht 2x zo veel pixels (content_scale_size),
-## en deze scène + de touch-knoppen worden 2x geschaald. Alles in deze scène
-## rekent dus gewoon verder in 384x216. Bij het verlaten zetten we het terug,
-## zodat de overworld er precies hetzelfde uitziet als altijd.
+## Het venster rendert tijdens het gevecht 2x zo veel pixels; zie battle_layout.enter_detail_mode().
 func _enter_detail_mode() -> void:
-	var win := get_window()
-	_previous_scale_size = win.content_scale_size
-	if _previous_scale_size == Vector2i.ZERO:
-		_previous_scale_size = Vector2i(384, 216)
-	win.content_scale_size = _previous_scale_size * DETAIL
-	set_anchors_preset(Control.PRESET_TOP_LEFT)
-	scale = Vector2(DETAIL, DETAIL)
-	$TouchControls.scale = Vector2(DETAIL, DETAIL)
-	_fit_to_screen()
-	get_viewport().size_changed.connect(_fit_to_screen)
+	_layout_h.enter_detail_mode()
 
 
-## Vensters met dunne, scherpe randen op het 2x-raster (zie hd_ui.gd). We passen een
-## KOPIE van het thema aan, zodat de vensters in de overworld niet veranderen.
 func _apply_hd_ui() -> void:
-	if theme:
-		var t: Theme = theme.duplicate()
-		for type_name in ["Panel", "PanelContainer"]:
-			if t.has_stylebox("panel", type_name):
-				t.set_stylebox("panel", type_name,
-						HdUi.hd_style(t.get_stylebox("panel", type_name), "res://assets/ui/window_hd.png"))
-		theme = t
-	# v0.13: palet (scripts/ui/ui_style.gd) voor strook en overwinningsvenster
-	# v0.16: buit/beloning na het gevecht in het blauwe Lufia 2-vak (zelfde als de tekstvakken)
-	victory_panel.add_theme_stylebox_override("panel", UiStyle.blue_box("vak", Vector4(9, 7, 9, 6)))
-	victory_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	victory_label.add_theme_color_override("font_color", UiStyle.BOX_TEXT)
-	victory_label.add_theme_color_override("font_shadow_color", UiStyle.BOX_SHADOW)
-	caption.add_theme_stylebox_override("panel", UiStyle.panel("soft"))
+	_layout_h.apply_hd_ui()
 
 
-## v0.13: commando-kruis + doelnaam-label maken.
 func _make_cross() -> void:
-	cross = CommandCrossScript.new()
-	cross.name = "CommandCross"
-	add_child(cross)
-	move_child(cross, $TouchControls.get_index())     # onder de touch-knoppen
-	cross.denied.connect(func(i: int): if i == 1: show_notice("No spells yet"))
-	target_name = PanelContainer.new()
-	target_name.name = "TargetName"
-	target_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	target_name.add_theme_stylebox_override("panel", UiStyle.panel("tab", UiStyle.TEAL_DIM))
-	target_name_label = Label.new()
-	target_name_label.add_theme_color_override("font_color", UiStyle.TEXT)
-	target_name.add_child(target_name_label)
-	add_child(target_name)
-	move_child(target_name, $TouchControls.get_index())
-	target_name.hide()
+	_layout_h.make_cross()
 
 
-## Regelhoogte voor een lijstje van n regels: zo hoog als de tikmaat (25), maar niet hoger dan er past boven
-## de helden (het lijstje staat rechtsboven en bedekt de helden liever niet), nooit onder LIST_ROW_MIN.
 func _list_row_h(n: int) -> int:
-	if _hero_top_y <= 0.0 or n <= 0:
-		return LIST_ROW_H
-	var free := _hero_top_y - (SUBMENU_TOP + _safe().y) - LIST_CHROME
-	return clampi(int(floorf(free / float(n))), LIST_ROW_MIN, LIST_ROW_H)
+	return _layout_h.list_row_h(n)
 
 
-## Veilig gebied (notch) in de eenheden van dit scherm; de touch-laag rekent het uit.
 func _safe() -> Vector4:
-	if touch != null and "safe_inset" in touch:
-		return touch.safe_inset
-	return Vector4.ZERO
+	return _layout_h.safe()
 
 
 func _fit_to_screen() -> void:
-	if not is_inside_tree():
-		return
-	position = Vector2.ZERO
-	size = get_viewport_rect().size / DETAIL
-	if touch and touch.has_method("refit"):
-		touch.refit()
+	_layout_h.fit_to_screen()
 
 
 func _exit_tree() -> void:
 	if _battle_music_pushed:
 		_battle_music_pushed = false
 		AudioManager.pop_music(0.35)
-	if get_viewport().size_changed.is_connected(_fit_to_screen):
-		get_viewport().size_changed.disconnect(_fit_to_screen)
-	if touch and get_viewport().size_changed.is_connected(touch.refit):
-		get_viewport().size_changed.disconnect(touch.refit)
-	if _previous_scale_size != Vector2i.ZERO:
-		get_window().content_scale_size = _previous_scale_size
+	if _layout_h:
+		_layout_h.leave_detail_mode()
 
 
 ## Alleen de baas van Archief 2 (De Genezer) heeft een eigen track; de rest blijft zoals het was.
@@ -510,347 +438,56 @@ func _spawn_enemies(ids: Array) -> void:
 		enemies.append(c)
 
 
-static var _top_cache := {}
-
-
-## v0.13: optionele idle-animatie van een vijand (game_data.gd: "idle" = strook met
-## "idle_frames" frames, elk frame even groot als "sprite"; "idle_time" = sec per frame).
-## Zonder "idle" blijft het plaatje stil (zoals altijd).
-## Optioneel ook "hit" = plaatje (zelfde grootte/ankerpunt) dat even getoond wordt bij schade.
 func _add_enemy_idle(node: TextureButton, data: Dictionary) -> void:
-	node.set_meta("still", node.texture_normal)
-	var hit_path := str(data.get("hit", ""))
-	if hit_path != "" and ResourceLoader.exists(hit_path):
-		node.set_meta("hit_tex", GameState.get_resource(hit_path))
-	_add_enemy_under(node, data)
-	var path := str(data.get("idle", ""))
-	if path == "" or not ResourceLoader.exists(path):
-		return
-	var strip: Texture2D = GameState.get_resource(path)
-	var n := maxi(1, int(data.get("idle_frames", 2)))
-	var fw := strip.get_width() / n
-	var frames: Array[Texture2D] = []
-	for i in n:
-		var at := AtlasTexture.new()
-		at.atlas = strip
-		at.region = Rect2(i * fw, 0, fw, strip.get_height())
-		frames.append(at)
-	node.texture_normal = frames[0]
-	node.set_meta("idle_frames", frames)
-	var timer := Timer.new()
-	timer.name = "Idle"
-	timer.wait_time = float(data.get("idle_time", 0.5))
-	timer.autostart = true
-	var k := [0]
-	timer.timeout.connect(func():
-		k[0] = (k[0] + 1) % frames.size()
-		if not node.has_meta("hit_until"):
-			node.texture_normal = frames[k[0]])
-	node.add_child(timer)
+	_layout_h.add_enemy_idle(node, data)
 
 
-const HIT_SHOW := 0.3
-
-## v0.13: optionele aparte laag ONDER/achter de vijand (bv. de runecirkel van de Golem):
-## game_data.gd "under" = strook met "under_frames" frames, "under_pos" = [x, y] linksboven in
-## de pixels van het vijand-plaatje (mag eronder uitsteken), "under_time" = sec per frame.
 func _add_enemy_under(node: TextureButton, data: Dictionary) -> void:
-	var path := str(data.get("under", ""))
-	if path == "" or not ResourceLoader.exists(path):
-		return
-	var strip: Texture2D = GameState.get_resource(path)
-	var n := maxi(1, int(data.get("under_frames", 1)))
-	var fw := strip.get_width() / n
-	var frames: Array[Texture2D] = []
-	for i in n:
-		var at := AtlasTexture.new()
-		at.atlas = strip
-		at.region = Rect2(i * fw, 0, fw, strip.get_height())
-		frames.append(at)
-	var still: Texture2D = node.texture_normal
-	var k := node.size.x / float(still.get_width())    # zelfde schaal als het vijand-plaatje
-	var up: Array = data.get("under_pos", [0, 0])
-	var under := TextureRect.new()
-	under.name = "Under"
-	under.texture = frames[0]
-	under.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	under.stretch_mode = TextureRect.STRETCH_SCALE
-	under.position = Vector2(float(up[0]), float(up[1])) * k
-	under.size = Vector2(fw, strip.get_height()) * k
-	under.show_behind_parent = true
-	under.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	under.set_meta("frames", frames)
-	node.add_child(under)
-	if n > 1:
-		var timer := Timer.new()
-		timer.name = "UnderTimer"
-		timer.wait_time = float(data.get("under_time", 0.8))
-		timer.autostart = true
-		var j := [0]
-		timer.timeout.connect(func():
-			j[0] = (j[0] + 1) % frames.size()
-			under.texture = frames[j[0]])
-		node.add_child(timer)
+	_layout_h.add_enemy_under(node, data)
 
-## v0.13: raak-plaatje even tonen (alleen als de vijand er een heeft), daarna terug naar
-## het idle-frame / het stille plaatje.
+
 func _show_hit_frame(node: Control) -> void:
-	if not (node is TextureButton) or not node.has_meta("hit_tex"):
-		return
-	var b := node as TextureButton
-	var token := Time.get_ticks_usec()
-	b.set_meta("hit_until", token)
-	b.texture_normal = b.get_meta("hit_tex")
-	await get_tree().create_timer(HIT_SHOW).timeout
-	if not is_instance_valid(b) or b.get_meta("hit_until", 0) != token:
-		return
-	b.remove_meta("hit_until")
-	var idle_t: Timer = b.get_node_or_null("Idle")
-	if b.has_meta("idle_frames") and idle_t:
-		b.texture_normal = b.get_meta("idle_frames")[0]
-	else:
-		b.texture_normal = b.get_meta("still")
+	await _layout_h.show_hit_frame(node)
 
 
-## Eerste niet-doorzichtige rij van een plaatje (gecachet).
 static func sprite_top(path: String, tex: Texture2D) -> float:
-	if not _top_cache.has(path):
-		var img := tex.get_image()
-		_top_cache[path] = float(img.get_used_rect().position.y) if img and not img.is_empty() else 0.0
-	return _top_cache[path]
+	return BattleLayoutScript.sprite_top(path, tex)
 
 
-## Alles op zijn plek zetten (ook opnieuw als het scherm van grootte verandert).
 func _layout() -> void:
-	var w := size.x if size.x > 0 else 384.0
-	var h := size.y if size.y > 0 else 216.0
-	var dx := roundf((w - 384.0) / 2.0)
-	# Knoppen: statusvakken tussen de joystick en de B-knop, menu links van de A-knop.
-	var left := 78.0
-	var right := 300.0
-	var menu_right := w - 49.0
-	if touch and touch.has_method("dpad_center"):
-		left = touch.dpad_center().x + touch.joy_radius() * 1.2 + 4.0
-		right = touch.b_center().x - touch.button_radius * 1.25 - 4.0
-		menu_right = floorf(touch.a_center().x - touch.button_radius * 1.25 - 1.0)
-	# v0.13: lijstje (spreuken/items) rechtsboven; het kruis rechtsonder boven A/B
-	menu.right_edge = w - CROSS_MARGIN - _safe().z
-	menu.top_edge = SUBMENU_TOP + _safe().y
-	menu.bottom_edge = -1.0
-	_menu_left = left
-	_menu_right = right
-	_fit_caption()
-	_place_boss_bar(w)
-	# Statusvakken: onderaan. v0.22 (Dennis): het Codex-monster heeft GEEN vak in de rij meer;
-	# zijn vak is een klein 'zijspeler'-label (icoon + naam, geen balken) boven de B-knop en de
-	# sprite staat daar vlak boven. De lijst status_boxes blijft gelijk aan heroes (indexen).
-	var row_boxes: Array = status_boxes.filter(func(bx): return not bool(bx.get("monster")))
-	var count := row_boxes.size()
-	if count > 0:
-		# v0.15: links ruimte maken voor het commando-kruis naast de eerste held (als het past)
-		var box_left := _box_left_for_cross(left, right, count)
-		var bw := floorf((right - box_left - BOX_GAP * (count - 1)) / count)
-		bw = minf(bw, 88.0)
-		var total := bw * count + BOX_GAP * (count - 1)
-		var x0 := roundf(box_left + (right - box_left - total) / 2.0)
-		for i in count:
-			var box: Control = row_boxes[i]
-			box.position = Vector2(x0 + i * (bw + BOX_GAP), h - StatusBoxScript.HEIGHT - 3)
-			box.size = Vector2(bw, StatusBoxScript.HEIGHT)
-			box.queue_redraw()
-	var b_mid := Vector2(w - 54.0, h - 34.0)
-	var b_r := 15.0
-	if touch and touch.has_method("b_center"):
-		b_mid = touch.b_center()
-		b_r = touch.button_radius * 1.25
-	for bx in status_boxes:
-		if bool(bx.get("monster")):
-			var sz: Vector2 = StatusBoxScript.SIDE_SIZE
-			var px := clampf(roundf(b_mid.x - sz.x / 2.0), 2.0, w - sz.x - 2.0)
-			bx.position = Vector2(px, roundf(b_mid.y - b_r - SIDE_GAP - sz.y))
-			bx.size = sz
-			bx.queue_redraw()
-	# Helden: midden boven hun eigen statusvak (reserve: de oude vaste plekken); het monster
-	# boven zijn zijspeler-label
-	for i in hero_nodes.size():
-		var slot: Vector2
-		if i < status_boxes.size():
-			var box: Control = status_boxes[i]
-			var gap := 0.0 if bool(box.get("monster")) else HERO_BOX_GAP
-			slot = Vector2(roundf(box.position.x + box.size.x / 2.0), box.position.y - gap)
-		elif i < HERO_SLOTS.size():
-			slot = HERO_SLOTS[i] + Vector2(dx, 0)
-		else:
-			slot = HERO_SLOTS[HERO_SLOTS.size() - 1] + Vector2(dx + 26 * (i - HERO_SLOTS.size() + 1), 0)
-		hero_nodes[i].set_home(slot)
-	_sort_by_feet(party_layer)
-	# v0.15: het kruis links naast de helden (hangt af van waar de helden staan)
-	_place_cross(w, h)
-	_layout_enemies(w, dx)
-	_place_menu(maxi(_menu_hero, 0), false)
+	_layout_h.layout()
 
 
-## v0.15 Commando-kruis LINKS naast de party (zie CROSS_HERO_GAP). Horizontaal: rechterkant net
-## links van de meest linkse held (zichtbare art en tik-vak, ook als hij een stap naar voren zet).
-## Verticaal: midden op de hoogte van de helden, maar boven de statusvakken en - als het kruis
-## boven de D-pad uitkomt - boven de D-pad. Past het niet naast de helden (heel smal scherm), dan
-## links tegen de rand en boven de helden.
 func _place_cross(w: float, h: float) -> void:
-	if cross == null:
-		return
-	var span: float = CommandCrossScript.BUTTON * 3.0 + CommandCrossScript.GAP * 2.0
-	var half := span / 2.0
-	# heldenblok: linkerkant, boven- en onderkant (tik-vak + art, thuis en een stap naar voren)
-	var hero_l := w
-	var hero_top := h
-	var hero_bottom := 0.0
-	_hero_top_y = 0.0
-	for node in hero_nodes:
-		var rects: Array = [Rect2(node.home - node.FEET, node.SIZE),
-				Rect2(node.home + node.STEP - node.FEET, node.SIZE)]
-		if node.has_method("art_rect"):
-			rects.append(node.art_rect(node.home))
-		for r in rects:
-			hero_l = minf(hero_l, r.position.x)
-			hero_top = minf(hero_top, r.position.y)
-			hero_bottom = maxf(hero_bottom, r.end.y)
-	if hero_nodes.is_empty():
-		hero_l = w * 0.45
-		hero_top = h * 0.45
-		hero_bottom = h - StatusBoxScript.HEIGHT - 6.0
-	else:
-		_hero_top_y = hero_top
-	var right := floorf(hero_l - CROSS_HERO_GAP)
-	var x0 := maxf(CROSS_EDGE + _safe().x, right - span)
-	var beside := x0 + span <= right + 0.5
-	var r_x := Rect2(x0, 0, span, h)
-	# onderkant: niet over een statusvak of (als het kruis erboven komt) de D-pad
-	var bottom_limit := h - CROSS_EDGE
-	for box in status_boxes:
-		var br := Rect2(box.position, box.size)
-		if br.position.x < r_x.end.x and br.end.x > r_x.position.x:
-			bottom_limit = minf(bottom_limit, br.position.y - 2.0)
-	if touch and touch.has_method("dpad_center"):
-		var dc: Vector2 = touch.dpad_center()
-		var dr: float = touch.joy_radius() * 1.2
-		if x0 < dc.x + dr:
-			bottom_limit = minf(bottom_limit, dc.y - dr - 2.0)
-	var cy: float
-	if beside:
-		# midden op de heldenrij (iets hoger dan het midden: dichter bij hun bovenlijf)
-		cy = (hero_top + hero_bottom) / 2.0 - 4.0
-	else:
-		# geen plek naast de helden: boven ze
-		cy = hero_top - 2.0 - half
-	cy = minf(cy, bottom_limit - half)
-	cy = maxf(cy, CAPTION_TOP + 1.0 + CROSS_TAB_ROOM + half)
-	cross.place(Vector2(roundf(x0 + half), floorf(cy)))
-	# vijanden rechts van het kruis (en zijn naam-tabje) houden
-	var cr: Rect2 = cross.cross_rect()
-	_enemy_left_reserve = cr.end.x + 3.0 if cr.position.y - CROSS_TAB_ROOM < ENEMY_FEET_Y + 6.0 else 0.0
+	_layout_h.place_cross(w, h)
 
-
-## v0.15 Linkerrand van de statusvakken zodat het kruis (CROSS_EDGE + kruis + CROSS_HERO_GAP)
-## links naast de art van de eerste held past. Schuift de vakken alleen naar rechts zolang ze
-## minstens MIN_BOX_W breed blijven; anders blijft alles staan (het kruis gaat dan boven de helden).
-const MIN_BOX_W := 56.0
 
 func _box_left_for_cross(left: float, right: float, count: int) -> float:
-	if hero_nodes.is_empty() or not hero_nodes[0].has_method("art_rect"):
-		return left
-	var span: float = CommandCrossScript.BUTTON * 3.0 + CommandCrossScript.GAP * 2.0
-	var art_off: float = -hero_nodes[0].art_rect(Vector2.ZERO).position.x     # art links van de voeten
-	var tap_off: float = hero_nodes[0].FEET.x
-	var need := CROSS_EDGE + span + CROSS_HERO_GAP + maxf(art_off, tap_off)  # midden van held 0
-	var l := left
-	while l < right:
-		var bw := minf(floorf((right - l - BOX_GAP * (count - 1)) / count), 88.0)
-		if bw < MIN_BOX_W:
-			return left
-		var total := bw * count + BOX_GAP * (count - 1)
-		var x0 := roundf(l + (right - l - total) / 2.0)
-		if x0 + roundf(bw / 2.0) >= need:
-			return l
-		l += 1.0
-	return left
+	return _layout_h.box_left_for_cross(left, right, count)
 
 
-## v0.15 Gebied voor de vijandenrij: [links, rechts] (rechts van het kruis).
 func enemy_region(w: float) -> Array:
-	return [maxf(ENEMY_LEFT, _enemy_left_reserve), w - ENEMY_LEFT]
+	return _layout_h.enemy_region(w)
 
 
-## Commandomenu boven het statusvak van held i (linkerkanten gelijk, geklemd tussen
-## D-pad en A/B). animate = kort opzij schuiven naar de volgende held.
-## v0.13: het lijstje staat vast rechtsboven (niet meer over de held heen).
 func _place_menu(i: int, _animate: bool) -> void:
-	_menu_hero = i
-	menu.bottom_edge = -1.0
-	menu.place()
+	_layout_h.place_menu(i, _animate)
 
 
-## Vijanden naast elkaar van ENEMY_LEFT tot de rechterrand (de baas is breed, de rest
-## klein). Past het niet, dan schuiven ze iets over elkaar.
 func _layout_enemies(w: float, dx: float) -> void:
-	var n := enemies.size()
-	if n == 0:
-		return
-	# v0.15: gecentreerd over de hele breedte; alleen als de rij over het kruis (links) zou vallen
-	# schuift hij naar rechts (enemy_region) en zo nodig iets in elkaar.
-	var reg := enemy_region(w)
-	var region_l: float = reg[0]
-	var region_r: float = reg[1]
-	var gap := 4.0
-	var total := 0.0
-	for e in enemies:
-		total += e["node"].size.x
-	total += gap * (n - 1)
-	var avail := region_r - region_l
-	var x := maxf(region_l, ENEMY_LEFT + maxf(0.0, (region_r - ENEMY_LEFT - total) / 2.0))
-	if total > avail and n > 1:
-		gap -= (total - avail) / (n - 1)
-		x = region_l
-	elif total < avail:
-		# v0.10: heeft de achtergrond een vaste plek (bv. de magenta cirkel van de baas),
-		# dan staat de rij daar horizontaal boven (game_data.gd BACKDROP_STAGE)
-		var sx := stage_x(w, size.y if size.y > 0 else 216.0)
-		if not is_nan(sx):
-			var cap := maxf(region_l + total, region_r - STAGE_RIGHT_RESERVE)
-			x = clampf(roundf(sx - total / 2.0), region_l, cap - total)
-	for i in n:
-		var node: Control = enemies[i]["node"]
-		var feet := Vector2(x + node.size.x / 2.0, ENEMY_FEET_Y + (2.0 if i % 2 == 1 else 0.0))
-		feet.y += float(enemies[i]["s"].get("y_offset", 0))
-		# hoog plaatje: zo ver omlaag als nodig (max. ENEMY_FEET_Y_MAX) zodat de bovenkant in beeld blijft
-		feet.y = maxf(feet.y, minf(enemy_feet(node).y, ENEMY_FEET_Y_MAX))
-		node.position = (feet - enemy_feet(node)).round()
-		x += node.size.x + gap
-	_sort_by_feet(enemy_layer)
+	_layout_h.layout_enemies(w, dx)
 
 
-## x op het scherm van het 'podium' in de achtergrond (NAN als die er niet is).
-## De achtergrond vult het scherm (keep aspect covered), dus: schaal + centreren.
 func stage_x(w: float, h: float) -> float:
-	var stage = GameData.BACKDROP_STAGE.get(GameState.pending_backdrop_id)
-	var tex: Texture2D = $Backdrop.texture
-	if stage == null or tex == null:
-		return NAN
-	var ts := tex.get_size()
-	var sc := maxf(w / ts.x, h / ts.y)
-	return (w - ts.x * sc) / 2.0 + float(stage.x) * sc
+	return _layout_h.stage_x(w, h)
 
 
-## Voeten binnen een vijand-plaatje: midden onderaan (de grondschaduw).
 func enemy_feet(node: Control) -> Vector2:
-	return Vector2(roundf(node.size.x / 2.0), node.size.y - 3.0 * ENEMY_DEPTH_SCALE)
+	return _layout_h.enemy_feet(node)
 
 
-## Wie lager op het scherm staat, wordt later (= ervoor) getekend.
 func _sort_by_feet(layer: Control) -> void:
-	var kids := layer.get_children()
-	kids.sort_custom(func(a, b): return a.position.y + a.size.y < b.position.y + b.size.y)
-	for k in kids.size():
-		layer.move_child(kids[k], k)
+	_layout_h.sort_by_feet(layer)
 
 
 # ================================================================ hoofdlus
@@ -2520,12 +2157,4 @@ func _kern_tick(c: Dictionary) -> void:
 ## v0.21: verkleinfactor (<= 1) zodat een plaatje binnen de maximummaat valt.
 ## Baas ("is_boss"): BOSS_MAX_ART_W x BOSS_MAX_ART_H; anders alleen de hoogte MAX_ENEMY_ART_H.
 static func art_fit(size: Vector2, is_boss: bool) -> float:
-	var f := 1.0
-	if is_boss:
-		if size.y > BOSS_MAX_ART_H:
-			f = minf(f, float(BOSS_MAX_ART_H) / size.y)
-		if size.x > BOSS_MAX_ART_W:
-			f = minf(f, float(BOSS_MAX_ART_W) / size.x)
-	elif size.y > MAX_ENEMY_ART_H:
-		f = float(MAX_ENEMY_ART_H) / size.y
-	return f
+	return BattleLayoutScript.art_fit(size, is_boss, MAX_ENEMY_ART_H, BOSS_MAX_ART_W, BOSS_MAX_ART_H)
