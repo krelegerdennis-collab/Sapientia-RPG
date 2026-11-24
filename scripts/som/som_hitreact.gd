@@ -8,6 +8,7 @@ const SomFx := preload("res://scripts/som/som_fx.gd")
 const META_KEY := &"som_hitreact"
 const FLASH_SHADER := preload("res://assets/shaders/som_hit_flash.gdshader")
 const FOOT_PIVOT := 8.0
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 
 
 static func _state(m: Node) -> Dictionary:
@@ -37,6 +38,9 @@ static func contact_flash_active(m: Node) -> bool:
 static func trigger(arena, m: Node, e: Dictionary, dir: Vector2i, weight: String, finisher_or_heavy: bool, full_hurt_pose: bool) -> void:
 	if m == null or m.sprite == null:
 		return
+	# post-RC sfx: niet-dodelijke treffer, één keer per hit (niet per frame).
+	# Extra begrenzing: manifest enemy_hurt min_interval_ms 80.
+	WorldSfx.play(WorldSfx.ENEMY_HURT)
 	var st := _state(m)
 	st["t"] = 0.0
 	st["dir"] = dir

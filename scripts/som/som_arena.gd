@@ -65,6 +65,7 @@ const SomSignature := preload("res://scripts/som/som_signature.gd")
 const SomShakeScript := preload("res://scripts/som/som_shake.gd")
 const SomChainFeelScript := preload("res://scripts/som/som_chain_feel.gd")
 const SomHitReact := preload("res://scripts/som/som_hitreact.gd")
+const SomSfx := preload("res://scripts/audio/som_sfx.gd")
 const SomGameFeelData := preload("res://scripts/data/som_gamefeel_data.gd")
 const SomDeathGlitch := preload("res://scripts/som/som_death_glitch.gd")
 const SomEnemyRead := preload("res://scripts/som/som_enemy_read.gd")
@@ -1078,6 +1079,7 @@ func anim_seconds(id: String) -> float:
 ## Slag van een held-node (speler of bondgenoot) in zijn kijkrichting. Met een aanvalssheet valt de treffer
 ## pas op het hit-frame (SomFx.Anim 'hit'); dan geeft dit -1 terug en volgt swing_landed. Zonder art: meteen.
 func _swing(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
+	SomSfx.play_sword_swing()
 	if attack_texs.has(id):
 		# zware slag: placeholder = de finisher-placeholder (TODO RPG ART: <held>_heavy.png)
 		var def := _attack_def(id, SomChainData.STEP_FINISHER if heavy > 0 else step)
@@ -1194,6 +1196,8 @@ func _land(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
 	if use_counter and hits > 0:
 		_pd_counter.erase(id)
 	SomSignature.try_seren_heal(self, id, step, hits)
+	if hits > 0:
+		SomSfx.play_sword_hit()
 	swing_landed.emit(id, hits)
 	SessieLog.actie_slag(id, hits)
 	return hits
@@ -1374,9 +1378,12 @@ func _defeat_enemy(m: Node) -> void:
 	var gained_gold := int(e["gold"])
 	GameState.add_gold(gained_gold)
 	var lines: Array[String] = [SomData.TXT_EXP % [gained_exp, gained_gold]]
+	var leveled := false
 	for h in GameState.alive_heroes():
 		var msgs := GameState.give_exp(h, gained_exp)
 		lines.append_array(msgs)
+		if not msgs.is_empty():
+			leveled = true
 	var got: Array = []
 	for d in e["drops"]:
 		if typeof(d) == TYPE_DICTIONARY and GameData.ITEMS.has(str(d.get("item", ""))) and rng.randf() < float(d.get("chance", 0.0)):
@@ -1392,6 +1399,8 @@ func _defeat_enemy(m: Node) -> void:
 	if e.has("golem") and _story_authority():
 		# realtime Golem verslagen: dezelfde verhaal-beat als de turn-based winst (eenmalig, host)
 		golem_story_fired = GolemStoryWin.apply(str(room.room_id), str(m.monster_id), str(m.enemy_id), room)
+	if leveled and not arena_mode:
+		SomSfx.play_level_up()
 	enemy_defeated.emit(m, gained_exp, gained_gold, got)
 	m.set_process(false)
 	m.collision_layer = 0
@@ -2131,6 +2140,7 @@ func _is_perfect_dodge(id: String) -> bool:
 
 
 func _apply_perfect_dodge(id: String, src: Node) -> void:
+	SomSfx.play_perfect_dodge()
 	perfect_count += 1
 	perfect_event_ticks.append(clock.tick)
 	_pd_icd[id] = SomPerfectDodgeData.ICD_TICKS
@@ -2176,6 +2186,8 @@ func hit_member(id: String, atk: int, power: float = 1.0, root_ticks: int = 0, s
 		SomFx.hurt_pose(node_of(id), hurt, SomData.HURT_TIME)
 	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(1, 0.4, 0.4))
 	player_hit.emit(dmg)
+	if dmg > 0:
+		SomSfx.play_player_hurt()
 	SessieLog.actie_treffer(id, dmg, int(h["hp"]))
 	if root_ticks > 0 and _roots_authority():
 		combat_roots.try_apply_root(id, root_ticks)
@@ -2197,6 +2209,8 @@ func hit_member_zone_dot(id: String, atk: int, power: float) -> void:
 	last_hit_id = id
 	SomFx.number(room.get_node("Objects"), body_of(id) + Vector2(0, -22), str(dmg), Color(0.55, 0.45, 0.95))
 	player_hit.emit(dmg)
+	if dmg > 0:
+		SomSfx.play_player_hurt()
 	if int(h["hp"]) <= 0:
 		_member_ko(id)
 
@@ -2268,6 +2282,7 @@ func try_active_dodge(id: String, dir: Vector2) -> bool:
 		room.start_invuln(float(SomData.DODGE_IFRAME_TICKS) * TICK_DT)
 	_dodge(id)
 	_spawn_dodge_dust(id)
+	SomSfx.play_dodge()
 	return true
 
 
@@ -2383,6 +2398,7 @@ func _member_ko(id: String) -> void:
 	combat_stamina.clear_member(id)
 	_say(SomData.TXT_KO % str(member(id).get("name", id)))
 	member_down.emit(id)
+	SomSfx.play_player_death()
 	if GameState.alive_heroes().is_empty():
 		_party_down()
 		return
@@ -2559,6 +2575,7 @@ func _cast_then(caster_id: String, spell_id: String, apply: Callable) -> void:
 	var n := node_of(caster_id)
 	var done := func() -> void:
 		apply.call()
+		SomSfx.play_spell(spell_id)
 		spell_released.emit(spell_id, caster_id)
 	var circle := SomFx.tex(str(SomData.CAST_CIRCLE.get(caster_id, "")))
 	match cast_kind(caster_id):
