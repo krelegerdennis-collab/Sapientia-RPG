@@ -8,6 +8,7 @@ const SomLootPop := preload("res://scripts/som/som_loot_pop.gd")
 const SCAN_F1: Array[int] = [0, 1, 0, -1, 2, 0, -1, 1]
 const SCAN_F2: Array[int] = [-2, 1, 3, -1, -3, 2, 0, -2]
 const FRAME_MS := 60
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 
 
 class GlitchFx extends Node2D:
@@ -94,6 +95,9 @@ static func play(parent: Node, arena, m: Node, e: Dictionary, got: Array) -> voi
 		if is_instance_valid(m):
 			m.queue_free()
 		return
+	# post-RC sfx. CO-OP: alleen de HOST hoort dit (_defeat_enemy draait niet op de gast).
+	# Netcode-follow-up: gast-sfx.
+	WorldSfx.play(WorldSfx.ENEMY_DEATH_MECH if e.has("golem") else WorldSfx.ENEMY_DEATH)
 	var big: bool = m.size != Vector2i.ONE
 	var spec: Dictionary = SomData.FX_DEATH_GLITCH_48 if big else SomData.FX_DEATH_GLITCH
 	arena._restore_monster(m, e)

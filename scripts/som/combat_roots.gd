@@ -5,6 +5,7 @@ extends RefCounted
 
 const MAX_ROOT_TICKS := 60
 const IMMUNITY_TICKS := 90
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 
 var _rooted: Dictionary = {}
 var _immune: Dictionary = {}
@@ -53,6 +54,10 @@ func try_apply_root(id: String, ticks: int = MAX_ROOT_TICKS) -> bool:
 	if cur >= want:
 		return cur > 0
 	_rooted[id] = maxi(cur, want)
+	# post-RC sfx: nieuwe wortelgreep (geen verlenging). CO-OP: alleen de HOST hoort dit; de gast
+	# krijgt roots via apply_wire_rows (snapshot), dat speelt niets. Netcode-follow-up: gast-sfx.
+	if cur <= 0:
+		WorldSfx.play(WorldSfx.STATUS_STUN)
 	return true
 
 

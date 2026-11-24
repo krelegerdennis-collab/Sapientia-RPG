@@ -15,6 +15,7 @@ const DIRS := [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 const SPRITE_DIR := "res://assets/map_monsters/"
 ## Loopsnelheid in pixels per seconde (de speler loopt 64).
 const WALK_SPEED := 40.0
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 ## Pauze tussen twee stappen (seconden, willekeurig ertussen).
 const PAUSE := Vector2(0.35, 1.3)
 ## Stap-animatie (frames per seconde) voor rondlopende monsters.
@@ -285,6 +286,8 @@ func is_stunned() -> bool:
 func stun(n: int) -> void:
 	if boss or disguised:
 		return
+	if stun_steps <= 0 and n > 0:
+		WorldSfx.play(WorldSfx.STATUS_STUN)
 	stun_steps = maxi(stun_steps, n)
 	if _stun_fx == null:
 		_stun_fx = Node2D.new()

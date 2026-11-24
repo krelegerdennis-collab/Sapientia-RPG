@@ -8,6 +8,7 @@ extends Node
 
 const WavesScript := preload("res://scripts/arena/som_arena_waves.gd")
 const Rewards := preload("res://scripts/data/arena_rewards.gd")
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 
 const PHASE_LOBBY := "lobby"
 const PHASE_WAVE := "wave"
@@ -145,6 +146,8 @@ func _grant(n: int) -> void:
 		var msgs: Array[String] = GameState.give_exp(hero, xp)
 		for m in msgs:
 			level_notes.append(m)
+		if not msgs.is_empty():
+			WorldSfx.play(WorldSfx.LEVEL_UP)
 	var before := GameState.arena_tokens
 	GameState.add_arena_tokens(tokens)
 	earned_tokens += GameState.arena_tokens - before

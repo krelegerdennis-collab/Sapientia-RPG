@@ -388,6 +388,7 @@ const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 ## Story.event_finished (quest_event).
 var quest_progress := {}
 const QuestData := preload("res://scripts/data/quest_data.gd")
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 ## v0.11: opties voor het volgende gevecht als het een oefengevecht is ({} = gewoon)
 var pending_tutorial := {}
 
@@ -413,6 +414,8 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 
 ## Huidige map (pad naar de .tscn) en het spawnpunt voor de volgende map.
 var current_map := ""
+## Post-RC sfx: laatst gehoorde opdrachtenstand (zie _quest_klank).
+var _quest_klank_stand := {}
 var pending_spawn := ""
 ## Laatste warp-bron (pad naar .tscn), gezet in change_map vóór de scènewissel.
 var warp_from_map := ""
@@ -1220,11 +1223,46 @@ func _koppel_quests() -> void:
 ## Story heeft een event afgerond: stappen met dat event worden klaar (en alles wat de vlaggen nu zeggen).
 func quest_event(event_id: String) -> void:
 	QuestData.on_event(quest_progress, event_id, story_flags, story_step)
+	_quest_klank()
 
 
 ## Legt vast wat volgens de vlaggen/verhaalstap klaar is (bv. een baas uit een gevecht).
-func quest_sync() -> void:
+## klank = false (laden): geen quest-geluid, alleen de stand onthouden.
+func quest_sync(klank := true) -> void:
 	QuestData.sync(quest_progress, story_flags, story_step)
+	if klank:
+		_quest_klank()
+	else:
+		_quest_klank_stand = _quest_stand()
+
+
+## Post-RC sfx: per opdracht 0 = niet gestart, 1 = gestart, 2 = klaar.
+func _quest_stand() -> Dictionary:
+	var uit := {}
+	for q in QuestData.quests():
+		var klaar := QuestData.quest_klaar(q, story_flags, story_step, quest_progress)
+		uit[str(q["id"])] = 2 if klaar else (1 if QuestData.quest_gestart(q, story_flags, story_step, quest_progress) else 0)
+	return uit
+
+
+## Een opdracht ging naar klaar -> quest_complete; anders een nieuwe gestart -> quest_accept.
+## De eerste keer (lege stand) alleen onthouden.
+func _quest_klank() -> void:
+	var nu := _quest_stand()
+	if not _quest_klank_stand.is_empty():
+		var klaar := false
+		var gestart := false
+		for qid in nu:
+			var oud := int(_quest_klank_stand.get(qid, 0))
+			if int(nu[qid]) == 2 and oud < 2:
+				klaar = true
+			elif int(nu[qid]) >= 1 and oud == 0:
+				gestart = true
+		if klaar:
+			WorldSfx.play(WorldSfx.QUEST_COMPLETE)
+		elif gestart:
+			WorldSfx.play(WorldSfx.QUEST_ACCEPT)
+	_quest_klank_stand = nu
 
 
 func hoor_muziek(manifest_id: String) -> void:
@@ -2371,7 +2409,7 @@ func apply_state(d: Dictionary) -> bool:
 	_hoor_huidige_muziek()
 	# v0.25 Quest Log; oude saves zonder "quests" -> afgeleid van de vlaggen en de verhaalstap
 	quest_progress = QuestData.van_save(d.get("quests", {}))
-	quest_sync()
+	quest_sync(false)
 	pending_tutorial = {}
 	if has_node("/root/Story"):
 		var story: Node = get_node("/root/Story")
