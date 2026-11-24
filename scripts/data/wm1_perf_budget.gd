@@ -4,8 +4,8 @@ extends RefCounted
 ## opengl3, viewport 384×216, warmup 30 + 180 meetframes (scripts/perf/wm1_frametime.gd).
 ## Drempels = gemeten waarde + marge (proc_ms +35% +1,5 ms; draw +3; scene_nodes +8; nodes +120).
 ## Opnieuw gemeten 5 nov 2026 op finish/wm1 (7fce674) met --wm1frametest; Archief 2 en bibliotheek tekenen meer sinds
-## walk5/1.4x-kas. Let op: --wm1budgettest zelf meet dorp_wilgendal, huis_wilgendal en woud_beek 2-4x hoger dan
-## --wm1frametest (scene_nodes 1679 i.p.v. 838): ONVERIFIED of dat volgorde-lek in de suite is of echt; zie FINISH_LOG R5.
+## walk5/1.4x-kas. --wm1budgettest en --wm1frametest tellen hetzelfde (Wm1Frametime.count_nodes
+## op current_scene na 30 warmup-frames). huis_wilgendal/woud_beek hoger door props en TileRenderSplit, geen lek (zie lekrapport).
 ## Zie docs/perf_wm1.md. Opnieuw genereren: run_suite.sh wm1frametest | python3 tools/perf/wm1_budget_from_log.py
 
 const WARMUP_FRAMES := 30
