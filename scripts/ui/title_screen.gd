@@ -35,6 +35,12 @@ const TitleGlitch := preload("res://scripts/ui/title_glitch.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const Wm1Config := preload("res://scripts/data/wm1_config.gd")
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+const OnlineProfile := preload("res://scripts/online/online_profile.gd")
+const MpCharacterSlots := preload("res://scripts/ui/mp_character_slots.gd")
+const MpCharacterCreate := preload("res://scripts/ui/mp_character_create.gd")
+const CoopLobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
+const OnlineHalScript := preload("res://scripts/coop/online_hal.gd")
+const ONLINE_HALL_SCENE := "res://scenes/coop/online_hal.tscn"
 const BACKDROP := "res://assets/battle/bibliotheek.png"
 const TITLE_MAIN := "res://assets/ui/title_main.png"   # hoofdpagina 384x216 (titel zit in de plaat)
 const TITLE_BG := "res://assets/ui/title_bg.png"
@@ -85,6 +91,10 @@ var stage: Control
 var backfill: TextureRect
 var version_label: Label
 var studio_label: Label
+var mp_slots: MpCharacterSlots = null
+var _mp_profile: OnlineProfile
+var _mp_create: MpCharacterCreate = null
+var _mp_delete_prompt: SavePrompt = null
 const STAGE_SIZE := Vector2(384, 216)
 const FOOTER_MARGIN := Vector2(4, 1)
 const FOOTER_LABEL_GAP := 4
@@ -243,6 +253,7 @@ func _ready() -> void:
 
 	apply_online_visibility()
 	apply_test_menu_visibility()
+	apply_coop_only_menu()
 	studio_label = UiMenu.label(Wm1Config.STUDIO_URL, UiStyleC.TEXT_OFF, 10)
 	studio_label.name = "StudioUrl"
 	studio_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -330,6 +341,20 @@ func _build_legacy_title(bg: TextureRect) -> void:
 ## onderkant op CARD_BOTTOM (nooit over de held of de Golem).
 func _place_card() -> void:
 	stage.position = _stage_in_safe()
+	if ReleaseFlags.coop_only_mode() and mp_slots != null:
+		mp_slots.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 0)
+		mp_slots.reset_size()
+		mp_slots.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - mp_slots.size.y)).round()
+		if version_label == null or studio_label == null:
+			return
+		version_label.reset_size()
+		studio_label.reset_size()
+		var footer_right := (size - FOOTER_MARGIN).round()
+		version_label.position = (footer_right - version_label.size).round()
+		studio_label.position = (Vector2(
+				version_label.position.x - FOOTER_LABEL_GAP - studio_label.size.x,
+				version_label.position.y)).round()
+		return
 	card.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 0)
 	card.reset_size()
 	card.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - card.size.y)).round()
@@ -422,7 +447,52 @@ func _place_text_title() -> void:
 
 ## WM1 (H11): PvP en Co-op blijven verborgen tot er een relay-URL is (ReleaseFlags.online_cut).
 ## De knoppen blijven bestaan (positie, tests); ze zijn alleen onzichtbaar en niet focusbaar.
+## Co-op-only export: geen verhaal/PvP, alleen co-op naar de online hal.
+func _ensure_mp_slots() -> void:
+	if mp_slots != null:
+		return
+	_mp_profile = OnlineProfile.new()
+	_mp_profile.load_profile()
+	mp_slots = MpCharacterSlots.new()
+	mp_slots.name = "MpSlots"
+	mp_slots.visible = false
+	mp_slots.bind_store(_mp_profile)
+	mp_slots.play_slot.connect(_on_mp_play)
+	mp_slots.create_slot.connect(_on_mp_create)
+	mp_slots.delete_slot.connect(_on_mp_delete)
+	add_child(mp_slots)
+
+
+func apply_coop_only_menu() -> void:
+	if not ReleaseFlags.coop_only_mode():
+		return
+	_ensure_mp_slots()
+	card.visible = false
+	save_info.visible = false
+	save_info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for b in [continue_button, load_button, new_button, pvp_button, som_button, beta_button, eind_button]:
+		_zet_testknop(b, false)
+	beta_card.visible = false
+	beta_info.visible = false
+	beta_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	coop_button.visible = false
+	coop_button.disabled = true
+	coop_button.focus_mode = Control.FOCUS_NONE
+	coop_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mp_slots.visible = true
+	mp_slots.refresh()
+	_wire_title_focus()
+	if is_node_ready():
+		_place_card()
+		mp_slots.focus_first_playable()
+
+
 func apply_online_visibility() -> void:
+	if ReleaseFlags.coop_only_mode():
+		apply_coop_only_menu()
+		return
+	if mp_slots != null:
+		mp_slots.visible = false
 	var zichtbaar := ReleaseFlags.online_buttons_visible()
 	for b in [pvp_button, coop_button]:
 		b.visible = zichtbaar
@@ -458,6 +528,8 @@ func _zet_testknop(b: Button, aan: bool) -> void:
 
 ## Focus wijst nooit naar een verborgen knop. Met de testvlag aan blijft de oude keten.
 func _wire_title_focus() -> void:
+	if ReleaseFlags.coop_only_mode():
+		return
 	var online := ReleaseFlags.online_buttons_visible()
 	var test_aan := ReleaseFlags.test_menu_buttons_visible()
 	if online:
@@ -483,6 +555,9 @@ func _wire_title_focus() -> void:
 
 ## Doorgaan aan/uit naar gelang er een save is.
 func refresh() -> void:
+	if ReleaseFlags.coop_only_mode():
+		apply_coop_only_menu()
+		return
 	# één keer de nieuwste save zoeken (voorheen: twee keer alle slots lezen)
 	var rec := GameState.newest_slot_record()
 	var has := not rec.is_empty()
@@ -606,6 +681,55 @@ func _on_pvp() -> void:
 func _on_coop() -> void:
 	set_process(false)
 	get_tree().change_scene_to_file("res://scenes/ui/coop_lobby.tscn")
+
+
+func _on_mp_play(index: int) -> void:
+	if _mp_profile == null:
+		return
+	var row := _mp_profile.get_slot(index)
+	if row.is_empty():
+		return
+	OnlineHalScript.entry_profile = CoopLobbyScreen.online_packet(row)
+	OnlineHalScript.entry_slot_index = index
+	set_process(false)
+	get_tree().change_scene_to_file(ONLINE_HALL_SCENE)
+
+
+func _on_mp_create(index: int) -> void:
+	if _mp_profile == null:
+		return
+	if _mp_create != null or _mp_delete_prompt != null:
+		return
+	if _mp_profile.has_slot(index):
+		return
+	_mp_create = MpCharacterCreate.new()
+	_mp_create.setup(_mp_profile, index)
+	_mp_create.finished.connect(func(_ok: bool) -> void:
+		_mp_create = null
+		mp_slots.refresh()
+		if _mp_profile.has_slot(index):
+			_on_mp_play(index))
+	_mp_create.cancelled.connect(func() -> void: _mp_create = null)
+	add_child(_mp_create)
+
+
+func _on_mp_delete(index: int) -> void:
+	if _mp_profile == null:
+		return
+	if _mp_delete_prompt != null or not _mp_profile.has_slot(index):
+		return
+	var row := _mp_profile.get_slot(index)
+	_mp_delete_prompt = SavePrompt.new()
+	_mp_delete_prompt.question = "Delete this character?"
+	_mp_delete_prompt.detail = "%s (%s)" % [str(row.get("name", "")), OnlineProfile.role_for(str(row.get("class", "")))]
+	_mp_delete_prompt.default_no = true
+	_mp_delete_prompt.answered.connect(func(yes: bool) -> void:
+		_mp_delete_prompt = null
+		if yes:
+			_mp_profile.clear_slot(index)
+			mp_slots.refresh()
+			mp_slots.focus_first_playable())
+	add_child(_mp_delete_prompt)
 
 
 ## SoM-proef: nieuw los spel (eigen save-pad), standaard-party, meteen de proefkerker in.
