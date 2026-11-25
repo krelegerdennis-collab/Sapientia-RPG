@@ -442,8 +442,8 @@ func _baseline_428() -> void:
 	var want := {
 		1: {"in": 0, "wins": 0, "level": ""},
 		2: {"in": 0, "wins": 0, "level": ""},
-		3: {"in": 4, "wins": 4, "level": "106.2"},
-		4: {"in": 14, "wins": 14, "level": "109.4"},
+		3: {"in": 7, "wins": 7, "level": "106.3"},
+		4: {"in": 16, "wins": 14, "level": "109.6"},
 	}
 	for row in result["rows"]:
 		var seats := int(row["seats"])
@@ -480,8 +480,8 @@ func _revive_off_baseline() -> void:
 	var want := {
 		1: {"in": 0, "wins": 0, "level": ""},
 		2: {"in": 0, "wins": 0, "level": ""},
-		3: {"in": 4, "wins": 4, "level": "106.2"},
-		4: {"in": 14, "wins": 14, "level": "109.4"},
+		3: {"in": 7, "wins": 7, "level": "106.3"},
+		4: {"in": 16, "wins": 14, "level": "109.6"},
 	}
 	for row in result["rows"]:
 		var seats := int(row["seats"])

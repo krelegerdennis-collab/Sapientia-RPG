@@ -4,6 +4,7 @@ extends Area2D
 ## De Area zelf blokkeert niemand en blijft ook open bereikbaar (om weer te sluiten).
 
 const Data := preload("res://scripts/data/wilgendal_dorp.gd")
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 
 var tegel := Vector2i.ZERO
 var grond: Node
@@ -22,7 +23,9 @@ func is_open() -> bool:
 
 
 func interact(_player: Node2D) -> void:
-	zet(not is_open())
+	var open := not is_open()
+	zet(open)
+	WorldSfx.play(WorldSfx.DOOR_OPEN if open else WorldSfx.DOOR_CLOSE)
 
 
 func zet(open: bool) -> void:

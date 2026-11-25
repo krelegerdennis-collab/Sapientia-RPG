@@ -10,6 +10,8 @@ extends StaticBody2D
 ## v0.11: verhaal-event (story_data.gd) dat eerst mag reageren (bv. "op slot").
 @export var event := ""
 
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
+
 
 func interact(player: Node2D) -> void:
 	if event != "" and Story.trigger(event, self):
@@ -17,6 +19,7 @@ func interact(player: Node2D) -> void:
 	if target_map != "":
 		_enter(player)
 	else:
+		WorldSfx.play(WorldSfx.DOOR_LOCKED)
 		Dialog.show_lines(lines, "")
 
 
@@ -27,12 +30,16 @@ func bump(player: Node2D) -> void:
 	if target_map != "":
 		_enter(player)
 	elif not Dialog.is_open:
+		WorldSfx.play(WorldSfx.DOOR_LOCKED)
 		Dialog.show_lines(lines, "")
 
 
 func _enter(player: Node2D) -> void:
 	if GameState.changing_map or Dialog.is_open:
 		return
-	if "input_locked" in player:
-		player.input_locked = true
-	GameState.change_map(target_map, target_spawn)
+	# Alleen vastzetten als de wissel echt start. Een ontbrekend of ongeldig pad
+	# geeft false vóór de fade: de deur blijft dan bruikbaar (geen softlock).
+	if GameState.change_map(target_map, target_spawn):
+		WorldSfx.play(WorldSfx.DOOR_OPEN)
+		if "input_locked" in player:
+			player.input_locked = true

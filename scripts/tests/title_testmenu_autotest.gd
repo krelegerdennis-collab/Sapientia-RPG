@@ -94,9 +94,14 @@ func _check_zichtbaar(titel: Node, kaart: Rect2) -> void:
 			and titel.beta_card.get_global_rect().end.x <= kaart.position.x + 0.5
 			and pvp.custom_minimum_size.x < titel.card.size.x - 1.0)
 	_kaart_blijft(titel, kaart)
-	t.check("testmenu aan: focusketen naar SoM en Beta Test",
-			titel.new_button.focus_neighbor_top == som.get_path()
-			and titel.new_button.focus_neighbor_left == beta.get_path())
+	if ReleaseFlags.online_buttons_visible():
+		t.check("testmenu aan: focusketen via PvP (co-op release, online open)",
+				titel.new_button.focus_neighbor_top == titel.pvp_button.get_path()
+				and titel.new_button.focus_neighbor_left == beta.get_path())
+	else:
+		t.check("testmenu aan: focusketen naar SoM en Beta Test",
+				titel.new_button.focus_neighbor_top == som.get_path()
+				and titel.new_button.focus_neighbor_left == beta.get_path())
 
 
 func _kaart_blijft(titel: Node, kaart: Rect2) -> void:

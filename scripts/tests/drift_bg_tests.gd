@@ -2,7 +2,7 @@ extends Node
 ## Drift-achtergrond op een breed landschap (2400×1080, stretch expand).
 ## De achtergrond moet het viewport dekken; tekst en schip blijven in het midden.
 ## Start: godot --path . -- --driftbgtest [--shots=/pad/map]
-## Niet in tests.yml / CI (bewust los van de matrix).
+## In de CI-matrix.
 
 const Drift := preload("res://world_warper/opening/drift.gd")
 const Art := preload("res://world_warper/opening/art.gd")

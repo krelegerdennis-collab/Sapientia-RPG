@@ -1,17 +1,27 @@
 extends Control
 ## v0.10 Naam kiezen: 'Hoe heet je?' met een LineEdit, voorgevuld met 'Dax',
-## max. 10 tekens, en een OK-knop. Leeg = 'Dax'.
+## max. 10 tekens, een OK-knop en een Back-knop. Leeg = 'Dax'.
 ## De eerste toets vervangt Dax (alles geselecteerd). Op de telefoon (web en Android)
-## opent een tik het schermtoetsenbord. Daarna begint het nieuwe spel in Wilgendal.
+## opent een tik het schermtoetsenbord. OK begint het nieuwe spel in Wilgendal.
+## Back, B en Android-terug gaan terug naar het titelscherm, ook als het vak focus heeft.
 
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+
+const ACTION_SIZE := Vector2(44, 32)
+## Bovenin, zodat het schermtoetsenbord (onderste helft) niets bedekt.
+const TOP_Y := 22.0
 
 var edit: LineEdit
 var ok_button: Button
+var back_button: Button
+var _box: Control
 var _done := false
 ## Zolang de speler nog niets getypt heeft, vervangt de eerste letter 'Dax'.
 var _pristine := true
+var _lay_vp := Vector2(-1, -1)
+var _lay_ins := Vector4(-1, -1, -1, -1)
 
 
 func _ready() -> void:
@@ -23,7 +33,8 @@ func _ready() -> void:
 	add_child(bg)
 	# bovenin, zodat het schermtoetsenbord (onderste helft) niets bedekt
 	var box := UiMenu.panel(UiStyleC.MAGENTA_DIM)
-	box.position = Vector2(0, 22)
+	_box = box
+	box.position = Vector2(0, TOP_Y + UiTouchC.insets(get_viewport()).y)
 	add_child(box)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
@@ -52,8 +63,12 @@ func _ready() -> void:
 	edit.add_theme_color_override("selection_color", Color(UiStyleC.MAGENTA_DIM, 0.8))
 	row.add_child(edit)
 	ok_button = UiMenu.button("OK")
-	ok_button.custom_minimum_size = Vector2(44, 32)
+	ok_button.custom_minimum_size = ACTION_SIZE
 	row.add_child(ok_button)
+	back_button = UiMenu.button("Back")
+	back_button.name = "Back"
+	back_button.custom_minimum_size = ACTION_SIZE
+	row.add_child(back_button)
 	col.add_child(UiMenu.label("Tap the box and type your own name.", UiStyleC.TEXT_DIM))
 	col.add_child(UiMenu.label("max %d characters, empty = %s" % [GameState.NAME_MAX, GameState.DEFAULT_NAME], UiStyleC.TEXT_DIM))
 	edit.text_submitted.connect(func(_t): confirm())
@@ -61,8 +76,9 @@ func _ready() -> void:
 	edit.gui_input.connect(_on_edit_input)
 	edit.focus_entered.connect(_show_keyboard)
 	ok_button.pressed.connect(confirm)
-	resized.connect(_center.bind(box))
-	_center.call_deferred(box)
+	back_button.pressed.connect(back_to_title)
+	resized.connect(_place)
+	_place.call_deferred()
 	edit.grab_focus.call_deferred()
 	_select_default.call_deferred()
 	_set_web_name_mode(true)
@@ -116,17 +132,56 @@ func _set_web_name_mode(on: bool) -> void:
 	JavaScriptBridge.eval("window.sapientiaWantName=%s;window.sapientiaNameText='%s';" % ["true" if on else "false", text], true)
 
 
-func _center(box: Control) -> void:
-	box.reset_size()
-	box.position.x = roundf((size.x - box.size.x) / 2.0)
+## y = 22 + inset boven. x blijft het midden, en schuift alleen zo ver als nodig om in de
+## safe rect te blijven. Bij insets 0 is dat dezelfde pixel als het oude midden op y = 22.
+func _place() -> void:
+	if _box == null or not is_inside_tree():
+		return
+	var vp := size
+	if vp.x < 1.0 or vp.y < 1.0:
+		return
+	_box.reset_size()
+	var ins := UiTouchC.insets(get_viewport())
+	var x := roundf((vp.x - _box.size.x) / 2.0)
+	var safe := UiTouchC.safe_rect(vp, get_viewport())
+	var max_x := maxf(safe.position.x, safe.end.x - _box.size.x)
+	x = clampf(x, safe.position.x, max_x)
+	_box.position = Vector2(x, TOP_Y + ins.y)
+	_lay_vp = vp
+	_lay_ins = ins
+
+
+func _volg_veilig_gebied() -> void:
+	if _box == null or not is_inside_tree():
+		return
+	var vp := size
+	var ins := UiTouchC.insets(get_viewport())
+	if vp == _lay_vp and ins == _lay_ins:
+		return
+	_place()
 
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("cancel") and not edit.has_focus():
-		set_process(false)
-		get_tree().change_scene_to_file(GameState.TITLE_SCENE)
+	# Ook terwijl het vak focus heeft: B / Android-terug = terug naar de titel.
+	if Input.is_action_just_pressed("cancel"):
+		back_to_title()
 		return
 	UiMenu.pad_nav(get_viewport())
+	# insets_override en een notch veranderen de safe rect zonder dat het scherm resizet
+	_volg_veilig_gebied()
+
+
+## Terug naar het titelscherm, zonder een spel te starten. Verbergt het schermtoetsenbord.
+func back_to_title() -> void:
+	if _done:
+		return
+	_done = true
+	_set_web_name_mode(false)
+	if edit != null and is_instance_valid(edit):
+		edit.release_focus()
+	DisplayServer.virtual_keyboard_hide()
+	set_process(false)
+	get_tree().change_scene_to_file(GameState.TITLE_SCENE)
 
 
 ## De naam zoals hij gebruikt wordt (leeg = Dax).

@@ -8,6 +8,7 @@ const NPC := preload("res://scenes/npc.tscn")
 const DEUR := preload("res://scenes/door.tscn")
 const Lus := preload("res://scripts/village/plein_lus.gd")
 const Poort := preload("res://scripts/village/hek_poort.gd")
+const CollisionMerge := preload("res://scripts/perf/collision_merge.gd")
 
 ## v0.21: bord een tegel onder de gevel (zie bord.position).
 const BORD_OMLAAG := 16.0
@@ -60,12 +61,18 @@ func _beek_en_brug(kaart: Node) -> void:
 	# Kind van Ground: de kaart zelf is nog bezig met _ready (add_child daar faalt),
 	# en als kind tekent de laag boven de grondtegels maar onder Objects.
 	kaart.get_node("Ground").add_child(laag)
+	# Perf (post-RC): beekrand-botsing samengevoegd in één body (was één body per tegel); zelfde tegels.
+	var beek_tegels: Array = []
+	for x in Data.W:
+		var t := Vector2i(x, Data.BEEK_RIJ)
+		if Data.beek(t):
+			beek_tegels.append(t)
+	var rand := StaticBody2D.new()
+	rand.name = "BeekRand"
+	CollisionMerge.add_shapes(rand, beek_tegels)
 	if Data.som():
 		# SoM: beek en brug zijn tegels (dorp_ground.gd); alleen de botsing blijft hier.
-		for x in Data.W:
-			var t := Vector2i(x, Data.BEEK_RIJ)
-			if Data.beek(t):
-				_blok(laag, "BeekRand_%d" % x, Rect2i(t, Vector2i.ONE))
+		laag.add_child(rand)
 		return
 	var tex: Texture2D = load(Data.PROPS_MAP + "beek_h.png")
 	for x in Data.W:
@@ -78,8 +85,7 @@ func _beek_en_brug(kaart: Node) -> void:
 		spr.position = Vector2(t) * 16.0
 		laag.add_child(spr)
 		_beek.append(spr)
-		if Data.beek(t):
-			_blok(laag, "BeekRand_%d" % x, Rect2i(t, Vector2i.ONE))
+	laag.add_child(rand)
 	var brug := Sprite2D.new()
 	brug.name = "Brug"
 	brug.texture = load(Data.PROPS_MAP + "brug_v.png")
@@ -451,13 +457,8 @@ func _plein10(kaart: Node, objects: Node) -> void:
 		for x in Data.W:
 			if Data.GROND[y][x] == "W":
 				tegels.append(Vector2i(x, y))
-	var vorm := RectangleShape2D.new()      # alle vaste tegels delen dezelfde 16x16-botsvorm
-	vorm.size = Vector2(16, 16)
-	for t in tegels:
-		var bots := CollisionShape2D.new()
-		bots.shape = vorm
-		bots.position = Vector2(t) * 16.0 + Vector2(8, 8)
-		vast.add_child(bots)
+	# Perf (post-RC): aangrenzende vaste tegels als rechthoeken (zelfde tegels, minder nodes)
+	CollisionMerge.add_shapes(vast, tegels)
 	# decor: y-sort op de voet
 	var decor := Node2D.new()
 	decor.name = "Decor10"

@@ -5,6 +5,7 @@ const BossScript := preload("res://scripts/som/boss_script.gd")
 const GolemBoss := preload("res://scripts/som/golem_boss.gd")
 const GolemFight := preload("res://scripts/som/golem_fight.gd")
 const BossCoreRt := preload("res://scripts/som/boss_core_rt.gd")
+const BossCore := preload("res://scripts/battle/boss_core.gd")
 const GolemBossView := preload("res://scripts/som/golem_boss_view.gd")
 const EnemyAttacks := preload("res://scripts/som/enemy_attacks.gd")
 const TelegraphState := preload("res://scripts/som/telegraph_state.gd")
@@ -47,8 +48,11 @@ func _run() -> void:
 
 func _stats_tests() -> void:
 	var d := SomData.action_boss_stats(GameData.ENEMIES["kennis_beest"].duplicate(true), 1)
-	check("Golem stats ongewijzigd: HP 520 ATK 23 DEF 15 (%d/%d/%d)" % [d["max_hp"], d["atk"], d["def"]],
-		int(d["max_hp"]) == 520 and int(d["atk"]) == 23 and int(d["def"]) == 15)
+	check("Golem Action-stats: HP 520 ATK 27 (F5.3 A4) DEF 15 (%d/%d/%d)" % [d["max_hp"], d["atk"], d["def"]],
+		int(d["max_hp"]) == 520 and int(d["atk"]) == 27 and int(d["def"]) == 15)
+	var c := BossCore.apply_boss(GameData.ENEMIES["kennis_beest"].duplicate(true))
+	check("Golem Classic-stats ongewijzigd: HP 520 ATK 23 DEF 15 (%d/%d/%d)" % [c["max_hp"], c["atk"], c["def"]],
+		int(c["max_hp"]) == 520 and int(c["atk"]) == 23 and int(c["def"]) == 15)
 	var d4 := SomData.action_boss_stats(GameData.ENEMIES["kennis_beest"].duplicate(true), 4)
 	check("boss_party_scale: 4 spelers ook 520 HP (geen schaal in v1)", int(d4["max_hp"]) == 520)
 

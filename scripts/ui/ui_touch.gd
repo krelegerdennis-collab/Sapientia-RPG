@@ -11,11 +11,22 @@ extends RefCounted
 const TOUCH_MIN := 25.0
 ## Hoogte van een lijstregel in schermen met weinig, grote keuzes (winkel, Codex, tekstvak-keuzes).
 const ROW_TOUCH := 25.0
+## Maximale beweging (eenheden) voor een tik op de extra lijstrand (touch_row_zones.gd); groter = scroll.
+const TAP_SLOP := 6.0
 ## Maximale inset per kant (eenheden): een rare waarde van het platform mag het scherm niet opeten.
 const INSET_MAX := 48.0
 
 ## Test/screenshot-override: Vector4(links, boven, rechts, onder) in eenheden. null = platform.
-static var insets_override: Variant = null
+## Bij wijziging roept de setter meteen refit() aan op de groep touch_safe_inset (geen per-frame-kosten).
+static var insets_override: Variant = null:
+	set(v):
+		if insets_override == v:
+			return
+		insets_override = v
+		var tree := Engine.get_main_loop() as SceneTree
+		if tree != null:
+			tree.call_group("touch_safe_inset", "refit")
+
 ## Test-hook: nep-DisplayServer-insets (Windows-taakbalk). insets() gebruikt dit alleen op mobiel;
 ## op desktop/headless blijft het resultaat nul, ook als dit gezet is.
 static var test_display_insets: Variant = null

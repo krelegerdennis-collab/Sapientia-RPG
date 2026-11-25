@@ -42,6 +42,8 @@ var busy := false
 var last_result := ""
 ## Uitleg na 'Nee': even uitstellen zodat tests direct na de keuze nog geen tweede dialoog zien.
 var _uitleg_timer: SceneTreeTimer = null
+## true zolang dit boekpunt zelf Dialog heeft geopend (interact, slotkeuze of save-uitleg).
+var _flow_active := false
 
 
 func _ready() -> void:
@@ -63,6 +65,22 @@ func _ready() -> void:
 	add_child(aura)
 	move_child(aura, 0)
 	_update_aura()
+
+
+func _exit_tree() -> void:
+	_cleanup_flow()
+	_cancel_uitleg_timer()
+
+
+
+
+## Sluit alleen dialoog/flow die door dit boekpunt zijn gestart (niet Story-events elders).
+func _cleanup_flow() -> void:
+	_cancel_uitleg_timer()
+	if _flow_active and Dialog.is_open:
+		Dialog.close()
+	_flow_active = false
+	busy = false
 
 
 ## Zachte ronde gloed (wit-getint midden -> doorzichtig), één keer per kleur gemaakt en gedeeld.
@@ -128,18 +146,25 @@ func interact(player: Node2D) -> void:
 	if busy or Dialog.is_open:
 		return
 	busy = true
+	_flow_active = true
 	restore()
 	last_result = "restored"
 	var line: String = info.get("line", "")
 	if line != "":
 		Dialog.show_lines([line])
 		await Dialog.finished
+		if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+			return
 	if info.get("save", false):
 		var slot := GameState.active_slot
 		var q := "%s (Slot %d)" % [info.get("question", "Save progress?"), slot]
 		var choice: int = await Dialog.ask(q, ["Yes", "No", "Other slot"])
+		if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+			return
 		if choice == 2:
 			slot = await ask_slot()
+			if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+				return
 			choice = 0 if slot > 0 else 1
 		if choice == 0:
 			GameState.active_slot = slot
@@ -154,11 +179,20 @@ func interact(player: Node2D) -> void:
 			last_result = "declined"
 	_maybe_save_uitleg()
 	busy = false
+	if not _save_uitleg_nog_komt():
+		_flow_active = false
+
+
+func _save_uitleg_nog_komt() -> bool:
+	if not info.get("save", false) or GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
+		return false
+	return last_result == "declined" or last_result == "saved" or last_result == "failed"
 
 
 func _cancel_uitleg_timer() -> void:
 	if _uitleg_timer != null:
-		_uitleg_timer.timeout.disconnect(_deferred_save_uitleg)
+		if _uitleg_timer.timeout.is_connected(_deferred_save_uitleg):
+			_uitleg_timer.timeout.disconnect(_deferred_save_uitleg)
 		_uitleg_timer = null
 
 
@@ -168,6 +202,7 @@ func _maybe_save_uitleg() -> void:
 		return
 	if last_result == "declined":
 		_cancel_uitleg_timer()
+		_flow_active = true
 		_uitleg_timer = get_tree().create_timer(0.4, true, false, true)
 		_uitleg_timer.timeout.connect(_deferred_save_uitleg, CONNECT_ONE_SHOT)
 	elif (last_result == "saved" or last_result == "failed") and not GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
@@ -176,26 +211,40 @@ func _maybe_save_uitleg() -> void:
 
 
 func _show_save_uitleg_after_saved_line() -> void:
+	_flow_active = true
 	for _i in 120:
+		if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+			return
 		if not Dialog.is_open and not busy:
 			await _show_save_uitleg()
 			return
 		await get_tree().process_frame
+		if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+			return
 
 
 func _deferred_save_uitleg() -> void:
 	_uitleg_timer = null
+	if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+		return
 	if busy or Dialog.is_open or GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
 		return
 	await _show_save_uitleg()
 
 
 func _show_save_uitleg() -> void:
-	if GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
+	if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
 		return
+	if GameState.story_flags.has(StoryData.SAVE_UITLEG_FLAG):
+		_flow_active = false
+		return
+	_flow_active = true
 	GameState.story_flags[StoryData.SAVE_UITLEG_FLAG] = true
 	Dialog.show_lines([StoryData.SAVE_UITLEG_LINE])
 	await Dialog.finished
+	if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+		return
+	_flow_active = false
 
 
 ## Kies een van de vier slots (het actieve staat eerst geselecteerd). 0 = terug/nee.
@@ -208,11 +257,15 @@ func ask_slot() -> int:
 		opts.append("%sSlot %d: %s" % [mark, i, "empty" if rec.is_empty() else SaveSlotListC.summary(rec.get("data", {}))])
 	opts.append("Back")
 	var pick: int = await Dialog.ask("Save to which slot?", opts, "", GameState.active_slot - 1)
+	if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+		return 0
 	if pick < 0 or pick >= GameState.SLOT_COUNT:
 		return 0
 	var slot := pick + 1
 	if slot != GameState.active_slot and not GameState.slot_record(slot).is_empty():
 		var ok: int = await Dialog.ask("Overwrite slot %d?" % slot, ["No", "Yes"])
+		if not is_instance_valid(self) or not is_inside_tree() or is_queued_for_deletion():
+			return 0
 		if ok != 1:
 			return 0
 	return slot

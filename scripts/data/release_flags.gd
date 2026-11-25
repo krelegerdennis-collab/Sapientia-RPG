@@ -22,7 +22,8 @@ const RELAY_SETTING := "sapientia/net/relay_url"
 const RELAY_ENV := "SAPIENTIA_RELAY_URL"
 
 static var hub_cut := true
-static var online_cut := true
+## Co-op-release op coop/easy: online open (WM1 solo-RC op finish/wm1 blijft online_cut true).
+static var online_cut := false
 ## Testhaak: -1 = echt (OS.is_debug_build()), 0 = doen alsof release, 1 = doen alsof debug.
 static var debug_build_override := -1
 ## Testhaak: null = niets, anders vervangt dit de relay-URL uit de instellingen.
@@ -90,3 +91,16 @@ static func test_menu_from(override: int, in_test: bool, args: PackedStringArray
 	if in_test:
 		return true
 	return args.has("--testmenu") and debug
+
+
+## Colosseum op WM1. Uit = geen wereldkaart-ingang en geen arena-gedrag.
+## Live voor WM1 (akkoord Dennis 25-11). Override is alleen een testhaak
+## (-1 = de const, 0 = uit, 1 = aan), zelfde patroon als test_menu_override.
+const ARENA_ENABLED := true
+static var arena_enabled_override := -1
+
+
+static func arena_enabled() -> bool:
+	if arena_enabled_override >= 0:
+		return arena_enabled_override == 1
+	return ARENA_ENABLED

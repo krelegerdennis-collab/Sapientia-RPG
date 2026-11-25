@@ -65,25 +65,6 @@ func _resolve_phase(phase: String) -> String:
 	return "day"
 
 
-func _story_replace_tint() -> bool:
-	if not has_node("/root/Story"):
-		return false
-	var story: Node = get_node("/root/Story")
-	if not story.has_method("tint_name"):
-		return false
-	var tn: String = story.tint_name()
-	return tn in ["day", "evening", "night"] and GameState.story_step < MapLightingC.STORY_TINT_FREE_STEP
-
-
-func _thema_mult() -> Color:
-	var mult := Color.WHITE
-	for n: CanvasModulate in _map.find_children("*", "CanvasModulate", true, false):
-		if n.name == "StoryTint" and _story_replace_tint():
-			continue
-		mult *= n.color
-	return mult
-
-
 func _apply_full() -> void:
 	_wrap_normals()
 	_setup_tint()
@@ -114,20 +95,17 @@ func _wrap_normals() -> void:
 
 
 func _setup_tint() -> void:
-	_tint_base = _thema_mult()
-	var cms: Array = _map.find_children("*", "CanvasModulate", true, false)
-	_tint_node = cms[0] as CanvasModulate if not cms.is_empty() else null
-	if _tint_node == null:
-		_tint_node = CanvasModulate.new()
-		_tint_node.name = "Hd2dTint"
-		_map.add_child(_tint_node)
-	elif _tint_node.name != "ThemaTint" and _tint_node.name != "StoryTint":
-		pass
-	_tint_node.color = MapLightingC.col(_preset["ambient"]) * _tint_base
-	if _story_replace_tint():
-		var st := _map.get_node_or_null("StoryTint") as CanvasModulate
-		if st:
-			st.color = Color.WHITE
+	# Ambient hoort op Hd2dTint; StoryTint blijft van Story. Godot vermenigvuldigt
+	# CanvasModulate: beeld = Hd2dTint × StoryTint × ThemaTint. Avond/nacht
+	# (night-ambient × storykleur) is donkerder dan dag (day-ambient × wit).
+	_tint_base = Color.WHITE
+	var bestaand := _map.get_node_or_null("Hd2dTint") as CanvasModulate
+	if bestaand == null:
+		bestaand = CanvasModulate.new()
+		bestaand.name = "Hd2dTint"
+		_map.add_child(bestaand)
+	_tint_node = bestaand
+	_tint_node.color = MapLightingC.col(_preset["ambient"])
 
 
 func _setup_sun() -> void:
@@ -274,8 +252,8 @@ func _tile_emissive_layers() -> void:
 	var kw := float(em.get("window_tile", 0.0))
 	for n in _map.find_children("*", "TileMapLayer", true, false):
 		var tl := n as TileMapLayer
-		if tl.name.ends_with("_Hd2dEmissive"):
-			continue
+		if tl.name.ends_with("_Hd2dEmissive") or tl.has_meta(&"render_split"):
+			continue   # render_split: onzichtbare datalaag; de beeldlagen krijgen hun eigen emissive
 		_tile_emissive_one(tl, k, kw)
 
 
@@ -378,6 +356,31 @@ func _build_candidates() -> void:
 				_cands.append({"pos": gp, "kind": r["kind"], "rule": r, "color": td["color"], "family": td["family"],
 						"px": int(td["px"]), "node": tl, "local": null})
 	MapLightingC.cluster_tile_lights(_cands)
+	MapLightingC.cluster_arena_torches(_cands)
+	_lobby_shaft()
+
+
+func _lobby_shaft() -> void:
+	# Zachte lichtschacht, data-only in placements_arena.json. Geen flikker.
+	if _map_id != "arena_lobby" or not (_map is Node2D):
+		return
+	var rule := {
+		"energy": 0.46,
+		"scale": 1.125,
+		"height": 96.0,
+		"family": "warm",
+		"flicker": 0.0,
+	}
+	_cands.append({
+		"pos": (_map as Node2D).to_global(Vector2(192, 150)),
+		"kind": "tile",
+		"rule": rule,
+		"color": [1.0, 0.93, 0.8],
+		"family": "warm",
+		"px": 1,
+		"node": null,
+		"local": null,
+	})
 
 
 func _view_rect() -> Rect2:
@@ -414,10 +417,20 @@ func _connect_camera() -> void:
 
 
 func _process(_delta: float) -> void:
-	for s in _emissive_sync:
+	# _emissive_sync bewaart de bron-sprite (meerdere frames). Die kan vrijkomen terwijl
+	# de rig op de kaart blijft: een verslagen map-monster, een weggehaald object.
+	# De referentie is dan geen null maar een freed instance; get_node_or_null daarop
+	# is een SCRIPT ERROR. Alleen sprites die nog bestaan horen in de sync-lijst.
+	var sync_i := 0
+	while sync_i < _emissive_sync.size():
+		var s: Sprite2D = _emissive_sync[sync_i]
+		if not is_instance_valid(s):
+			_emissive_sync.remove_at(sync_i)
+			continue
 		var o := s.get_node_or_null("_hd2d_em") as Sprite2D
 		if o:
 			o.frame = s.frame
+		sync_i += 1
 	var cam := _active_camera()
 	if cam == null:
 		return

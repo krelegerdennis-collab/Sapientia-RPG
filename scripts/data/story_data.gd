@@ -197,6 +197,14 @@ const UNIQUE_SEEN_FLAGS := {"inktwurm": TUTORIAL_INKTWURM_FLAG}
 const SAVE_UITLEG_FLAG := "save_uitleg_gezien"
 const SAVE_UITLEG_LINE := "Glowing books save and heal. There is no saving from the menu."
 
+## F6.3: eenmalige uitleg bij de eerste vrije stap op het veld (RUN-knop).
+const RUN_UITLEG_FLAG := "run_uitleg_gezien"
+const RUN_UITLEG_LINE := "Tap RUN at the top right to move faster. Tap it again to walk. It stays on until you turn it off."
+
+## F6.3: eenmalige uitleg de eerste keer dat de Warp-view opent (World Warper).
+const WARP_UITLEG_FLAG := "warp_uitleg_gezien"
+const WARP_UITLEG_LINE := "Pick a world, then a place you have visited, then Travel. Locked places stay closed until you reach them on foot."
+
 ## Vang-tutorial (Codex), direct na de Inktwurm-tutorial. Speelt eenmalig zodra de speler in de Golemhal
 ## vrij is (FREE_EVENTS), ook als de eerste tutorial overgeslagen is. Max. 2 korte regels per pagina.
 const TUTORIAL_CODEX := "tutorial_codex_vangen"
@@ -555,43 +563,62 @@ const EVENTS := {
 		["flag", "mender_hal_moment"],
 	]}],
 
+	# CS-09 speelt via Wm1VideoSlot MAPLETON_VESPER vóór dit event. Vervangt de ontmoeting zodra het filmpje
+	# start. Zonder filmpje (testpoort of bestand weg) blijft het oude pad (zoals CS-01 / CS-03).
 	"noor_ontmoeting": [{"do": [
-		["place", "player", [24, 30], "up"],   # 1.4x-kaart (48x34): zuidpad, Vesper op (24,19)
-		["wait", 0.3],
-		["walk", "player", "up", 8],
-		["walk", "Vesper", "down", 1],
-		["say", "Vesper", ["You came over the hills? I didn't think anyone lived out there."]],
-		["walk", "player", "up", 1],
-		["say", "{naam}", ["I'm {naam}. I live by the Archives."]],
-		["say", "Vesper", ["I'm Vesper. You look like you're looking for someone."]],
-		["say", "{naam}", ["Two mages. That's all I have to go on."]],
-		["say", "Vesper", ["People here call me the girl with the sparks."]],
-		["say", "{naam}", ["Sparks?"]],
-		["say", "Vesper", ["Watch."]],
-		["flash", "#ff3ad0", 0.25],
-		["say", "{naam}", ["Pink sparks dance between her fingers... and hitch, like a picture that sticks."]],
-		["say", "Vesper", ["They've done that lately. And at night the woods whisper my name."]],
-		["shake", 1.2, 2.5],
-		["glitch", 0.4],
-		["say", "{naam}", ["The ground splits open! Black roots full of flickering pink marks shoot up."]],
-		["show", "WortelGreep"],
-		["hide", "Vesper"],
-		["say", "Vesper", ["They're... they're pulling me! {naam}!"]],
-		["glitch", 0.5],
-		["flash", "#ff3ad0", 0.5],
-		["hide", "WortelGreep"],
-		["shake", 0.8, 1.5],
-		["say", "{naam}", ["When the light pulls away, Vesper is gone.", "A trail of torn earth runs west... toward the Dark Wood."]],
-		["walk", "Marit", "down", 3],
-		["walk", "Marit", "left", 2],
-		["face", "Marit", "left"],
-		["face", "player", "right"],
-		["say", "Marigold", ["Vesper! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
-		["flag", "noor_ontmoet"],
-		["flag", "quest_noor"],
-		["step", NOOR_KWIJT],
-		["say", "", ["New quest: Save Vesper from the Dark Wood"]],
-		["run", "marit_boeken"],
+		["if", {"not_flags": ["cutscene_cs09_gezien"]}, [
+			["place", "player", [24, 30], "up"],   # 1.4x-kaart (48x34): zuidpad, Vesper op (24,19)
+			["wait", 0.3],
+			["walk", "player", "up", 8],
+			["walk", "Vesper", "down", 1],
+			["say", "Vesper", ["You came over the hills? I didn't think anyone lived out there."]],
+			["walk", "player", "up", 1],
+			["say", "{naam}", ["I'm {naam}. I live by the Archives."]],
+			["say", "Vesper", ["I'm Vesper. You look like you're looking for someone."]],
+			["say", "{naam}", ["Two mages. That's all I have to go on."]],
+			["say", "Vesper", ["People here call me the girl with the sparks."]],
+			["say", "{naam}", ["Sparks?"]],
+			["say", "Vesper", ["Watch."]],
+			["flash", "#ff3ad0", 0.25],
+			["say", "{naam}", ["Pink sparks dance between her fingers... and hitch, like a picture that sticks."]],
+			["say", "Vesper", ["They've done that lately. And at night the woods whisper my name."]],
+			["shake", 1.2, 2.5],
+			["glitch", 0.4],
+			["say", "{naam}", ["The ground splits open! Black roots full of flickering pink marks shoot up."]],
+			["show", "WortelGreep"],
+			["hide", "Vesper"],
+			["say", "Vesper", ["They're... they're pulling me! {naam}!"]],
+			["glitch", 0.5],
+			["flash", "#ff3ad0", 0.5],
+			["hide", "WortelGreep"],
+			["shake", 0.8, 1.5],
+			["say", "{naam}", ["When the light pulls away, Vesper is gone.", "A trail of torn earth runs west... toward the Dark Wood."]],
+			["walk", "Marit", "down", 3],
+			["walk", "Marit", "left", 2],
+			["face", "Marit", "left"],
+			["face", "player", "right"],
+			["say", "Marigold", ["Vesper! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
+			["flag", "noor_ontmoet"],
+			["flag", "quest_noor"],
+			["step", NOOR_KWIJT],
+			["say", "", ["New quest: Save Vesper from the Dark Wood"]],
+			["run", "marit_boeken"],
+		]],
+		["if", {"flags": ["cutscene_cs09_gezien"]}, [
+			["place", "player", [24, 21], "right"],
+			["hide", "Vesper"],
+			["hide", "WortelGreep"],
+			["walk", "Marit", "down", 3],
+			["walk", "Marit", "left", 2],
+			["face", "Marit", "left"],
+			["face", "player", "right"],
+			["say", "Marigold", ["Vesper! No... the Dark Wood took her!", "You there, you have a sword. Please, save her!", "The wood lies west of the village."]],
+			["flag", "noor_ontmoet"],
+			["flag", "quest_noor"],
+			["step", NOOR_KWIJT],
+			["say", "", ["New quest: Save Vesper from the Dark Wood"]],
+			["run", "marit_boeken"],
+		]],
 	]}],
 	# v0.17 Codex: Marit geeft 3 Lege Boeken (eenmalig; ook via een gesprek met haar als de ontmoeting
 	# al eerder gezien is, bv. een oude save). Geen winkel nog; 2 extra in kisten van het Donker Woud.

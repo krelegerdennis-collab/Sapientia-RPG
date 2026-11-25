@@ -1,0 +1,9 @@
+{
+  "_doc": "WW-geluiden (World Warper, F6.24). Sleutel = sfx-id uit audio_manifest.json. prompt = Engels voor Stable Audio Open; seconds = lengte om te genereren; max_s = lengte na trimmen (tools/check_algemene_sfx.py eist <= 0.60 s). Per geluid 3 kandidaten (andere seeds); Dennis kiest er een, die wordt _01.",
+  "_style": "16-bit era JRPG sound effect, biomechanical magic machine, clean, dry, no music, short reverb only",
+  "_negative": "music, melody, song, speech, voice, long reverb tail, crowd, noise floor, harsh distortion, low quality",
+
+  "ww_hum":              {"prompt": "soft warm mechanical hum of an ancient magic machine, gentle low drone with a light shimmering overtone", "seconds": 1.5, "max_s": 0.6},
+  "ww_warp":             {"prompt": "rising fantasy teleport whoosh with a bright magical sparkle at the end", "seconds": 1.5, "max_s": 0.6},
+  "ww_sapientia_glitch": {"prompt": "short digital glitch, bitcrushed stutter, slightly ominous computer malfunction", "seconds": 1.0, "max_s": 0.5}
+}

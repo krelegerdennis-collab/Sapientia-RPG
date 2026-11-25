@@ -537,8 +537,9 @@ func step_dir(d: Vector2i) -> bool:
 	var action: String = DIRS[d]
 	Input.action_press(action)
 	var waited := 0
-	while is_instance_valid(p) and not p.is_moving and waited < 8:
-		await get_tree().physics_frame
+	# De speler loopt in _process; bij time_scale 4 gaan 8 physics-frames soms voorbij in één beeld.
+	while is_instance_valid(p) and not p.is_moving and p.get_tile() == from and waited < 30:
+		await get_tree().process_frame
 		waited += 1
 	Input.action_release(action)
 	while is_instance_valid(p) and p.is_moving:

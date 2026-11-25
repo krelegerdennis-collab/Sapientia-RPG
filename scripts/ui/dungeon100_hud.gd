@@ -5,19 +5,25 @@ extends CanvasLayer
 ## blijft staan als de scène wisselt (verdieping naar verdieping, gevecht en terug).
 ##
 ## STIJL: hetzelfde pilletje als de MENU-knop van de touch-besturing (scripts/touch_controls.gd,
-## rechtsboven, x 8 van de rand, y 6, 14 hoog), met het palet 'Inkt & Perkament' uit ui_style.gd:
-## inkt-paneel, perkament-gouden rand, crème tekst, het getal in warm goud. Op een rustverdieping
-## (10, 20, ...) is de rand goud en staat er een klein cyaan 'rust'-puntje: daar is een rustpunt.
+## rechtsboven, 14 hoog), met het palet 'Inkt & Perkament' uit ui_style.gd: inkt-paneel,
+## perkament-gouden rand, crème tekst, het getal in warm goud. De basisplek is x 8, y 6 binnen
+## het veilige gebied. UiTouch.insets (notch links, gebarenbalk boven) komt daar bovenop, net als
+## safe_inset op de MENU-knop. Insets 0 = exact die vaste plek (pixel-identiek).
+## Op een rustverdieping (10, 20, ...) is de rand goud en staat er een klein cyaan 'rust'-puntje:
+## daar is een rustpunt.
 ## LAGEN: 4 = onder het tekstvak (5), de touch-knoppen (10) en het veldmenu (20); alleen een
 ## tekstvak bovenin kan eroverheen vallen. De HUD vangt geen tikken (mouse_filter = IGNORE).
-## Kost niets per frame: alleen een vergelijking van twee getallen; tekenen alleen bij verandering.
+## Deze laag is niet geschaald, dus de insets staan al in dezelfde eenheden als POS.
+## Kost niets per frame: alleen een vergelijking van verdieping, gevecht en insets; tekenen alleen
+## bij verandering.
 
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const RulesC := preload("res://scripts/dungeon/dungeon100_rules.gd")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 const LAYER := 4
 const FONT_SIZE := 10
-## Positie en hoogte (zelfde rand/hoogte als de MENU-knop, maar links).
+## Marge binnen het veilige gebied (zelfde rand/hoogte als de MENU-knop, maar links).
 const POS := Vector2(8, 6)
 const HEIGHT := 14.0
 const PAD_X := 5.0
@@ -27,6 +33,7 @@ var view: Control
 var shown_floor := 0
 var _last_floor := -1
 var _last_battle := false
+var _last_insets := Vector4.ZERO
 
 
 func _init() -> void:
@@ -50,8 +57,13 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	var f: int = GameState.dungeon100_floor
 	var b: bool = GameState.in_battle
+	var ins := _safe_insets()
 	if f != _last_floor or b != _last_battle:
 		refresh()
+	elif ins != _last_insets:
+		_last_insets = ins
+		if view:
+			view.queue_redraw()
 
 
 ## Zichtbaarheid en tekening bijwerken; houdt ook de hoogst bereikte verdieping bij.
@@ -59,6 +71,7 @@ func refresh() -> void:
 	var f: int = GameState.dungeon100_floor
 	_last_floor = f
 	_last_battle = GameState.in_battle
+	_last_insets = _safe_insets()
 	GameState.dungeon100_best = RulesC.best_after(GameState.dungeon100_best, f)
 	shown_floor = clampi(f, 0, RulesC.FLOORS)
 	visible = RulesC.shows_hud(f) and not _last_battle
@@ -66,13 +79,21 @@ func refresh() -> void:
 		view.queue_redraw()
 
 
+## Notch / gebarenbalk in viewport-eenheden. Override (tests) telt ook buiten de boom.
+func _safe_insets() -> Vector4:
+	var vp: Viewport = get_viewport() if is_inside_tree() else null
+	return UiTouchC.insets(vp)
+
+
 ## Het pilletje (voor de tests en voor wie de plek wil weten).
+## POS plus het veilige gebied links/boven. Insets 0 = POS, dezelfde rechthoek als voorheen.
 func pill_rect() -> Rect2:
 	var font := view.get_theme_default_font()
 	var w := font.get_string_size(RulesC.hud_text(shown_floor), HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE).x
 	if RulesC.is_rest_floor(shown_floor):
 		w += 9.0
-	return Rect2(POS, Vector2(ceilf(w + PAD_X * 2.0), HEIGHT))
+	var ins := _safe_insets()
+	return Rect2(POS + Vector2(ins.x, ins.y), Vector2(ceilf(w + PAD_X * 2.0), HEIGHT))
 
 
 ## Tekenen op 'view' (via het draw-signaal: een CanvasLayer kan zelf niet tekenen).

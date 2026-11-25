@@ -241,7 +241,7 @@ func _golem_unchanged() -> void:
 	GolemBoss.ensure_registered()
 	check("kennis_beest blijft registreerbaar", BossScript.has_script("kennis_beest"))
 	var d := SomData.action_boss_stats(GameData.ENEMIES["kennis_beest"].duplicate(true), 4)
-	check("Golem-stats 520/23/15 ook bij 4 spelers", int(d["max_hp"]) == 520 and int(d["atk"]) == 23 and int(d["def"]) == 15)
+	check("Golem-stats 520/27/15 ook bij 4 spelers", int(d["max_hp"]) == 520 and int(d["atk"]) == 27 and int(d["def"]) == 15)
 	var ga := _golem_digest(5)
 	var gb := _golem_digest(5)
 	check("Golem zelfde seed = zelfde verloop", ga == gb and ga != "")
@@ -266,7 +266,7 @@ func _classic_unchanged() -> void:
 	check("twee aanroepen gelijk", int(a["max_hp"]) == int(b["max_hp"]) and int(a["atk"]) == int(b["atk"]) and int(a["def"]) == int(b["def"]))
 	print("classic sleutel 10 HP %d ATK %d DEF %d" % [int(a["max_hp"]), int(a["atk"]), int(a["def"])])
 	var voice := Scaling.boss_stats((GameData.ENEMIES["papiergeest"] as Dictionary).duplicate(true), 99)
-	check("The Voice sleutel 99 blijft HP 2250", str(voice["name"]) == "The Voice" and int(voice["max_hp"]) == 2250)
+	check("The Voice sleutel 99 blijft HP 15750", str(voice["name"]) == "The Voice" and int(voice["max_hp"]) == 15750)
 
 
 func _coop_gate() -> void:

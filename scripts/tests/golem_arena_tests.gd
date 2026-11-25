@@ -105,7 +105,7 @@ func _hook_on() -> void:
 	if f == null:
 		return
 	var e: Dictionary = a.enemies[m]
-	check("aan: stats ongewijzigd (HP 520, ATK 23)", f.max_hp() == 520 and int(e["hp"]) == 520 and int(e["atk"]) == 23)
+	check("aan: Action-stats (HP 520, ATK 27, F5.3 A4)", f.max_hp() == 520 and int(e["hp"]) == 520 and int(e["atk"]) == 27)
 	check("aan: start fase 0, niet onkwetsbaar", f.phase_index() == 0 and not f.is_invulnerable())
 
 	# aanraken = geen turn-based gevecht meer

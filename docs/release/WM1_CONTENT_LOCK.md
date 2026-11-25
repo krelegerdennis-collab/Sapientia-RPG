@@ -1,6 +1,6 @@
 # WM1 Content Lock (release-roadmap, fase 1: feature freeze en content lock)
 
-Basis: `main` op `61986e9` (merge van PR #208), 24 okt 2026. Alleen documentatie: geen code, geen scènes, geen data,
+Basis: `f76aa715` (wm1-freeze). Oorspronkelijk opgesteld op `61986e9` (merge van PR #208), 24 okt 2026. Alleen documentatie: geen code, geen scènes, geen data,
 geen tests, geen workflows aangepast.
 
 **Status: voorstel tot akkoord.** De lock is bindend vanaf de merge van deze PR (Dennis en RPG Forge reviewen en
@@ -14,7 +14,7 @@ Dit document hoort bij `docs/release/WM1_RELEASE_CHECKLIST.md` (de acht fases; d
   gelezen en niet aangeraakt. `wacht/.gdignore` bestaat, dus Godot importeert en exporteert die map niet.
 - Elke regel in sectie 2 is een belofte: dit **levert** de WM1-release, niet meer en niet minder. Wat hier niet staat
   en niet bestaat, komt er niet bij (sectie 4).
-- Elke inventarisregel noemt het bestand dat de waarheid bevat. De inventaris is gelezen uit `main` en waar mogelijk
+- Elke inventarisregel noemt het bestand dat de waarheid bevat. De inventaris is gelezen uit `f76aa715` (wm1-freeze) en waar mogelijk
   met een headless Godot-script uit de echte data gehaald (`GameData.ENEMIES`, `DungeonRooms`, `PuzzleRooms`,
   `BerggrotData`, `Archief2Rooms`, `WoudRooms`, `QuestData`). Als code en dit document verschillen, wint de code en
   moet dit document in een "lock-wijziging" worden gecorrigeerd (sectie 5).
@@ -26,25 +26,27 @@ Dit document hoort bij `docs/release/WM1_RELEASE_CHECKLIST.md` (de acht fases; d
 
 ### Lock-cijfers (om drift te zien)
 
-Gemeten op `61986e9`. Een afwijking na de freeze zonder lock-wijziging is een regel-overtreding.
+Gemeten op `f76aa715` (wm1-freeze). Een afwijking na de freeze zonder lock-wijziging is een regel-overtreding.
 
 | Tabel | Aantal | Bron |
 |---|---:|---|
-| Kaartscènes in `scenes/maps/` | 48 (46 in de speelroute, 2 dev-only: H1) | `scenes/maps/*.tscn` |
+| Kaartscènes in `scenes/maps/` | 50 (48 in de speelroute, 2 dev-only: H1) | `scenes/maps/*.tscn` |
 | Vijanden in `GameData.ENEMIES` | 26 | `scripts/data/game_data.gd` |
 | Berggrot-monsters (apart van ENEMIES) | 3 | `scripts/data/berggrot_data.gd` (`MONSTERS`) |
 | Diepe Grot-bazen (verdiepingen) | 12 (10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 99) | `scripts/data/dungeon100_scaling.gd` (`BOSSES`) |
 | Helden | 5 (Dax, Vesper, Seren, Kael Voss, Orion) | `GameData.HEROES` |
-| Items (`ITEMS`) / sleutelvoorwerpen / uitrusting | 50 / 4 / 85 | `game_data.gd` |
+| Items (`ITEMS`) / sleutelvoorwerpen / uitrusting | 53 / 4 / 85 | `game_data.gd` |
 | Blauwe-kist-uitrusting (Diepe Grot) | 36 | `scripts/data/grade_gear.gd` |
 | Spreuken | 81 (21 / 20 / 20 / 20 per grade 1-4) | `scripts/data/spells.gd` |
-| Codex-soorten / Codex-vaardigheden | 18 / 29 | `scripts/data/codex_data.gd` |
+| Codex-soorten / Codex-vaardigheden | 21 / 32 | `scripts/data/codex_data.gd` |
 | Kernfragmenten / kerngevechtsvaardigheden / wereldvaardigheden | 2 / 1 / 2 | `scripts/data/kern_data.gd` |
 | Opdrachten (6 hoofd, 1 zij) / acts in de questlog | 7 / 6 (act 3-6 "later") | `data/quests.json` |
-| Story-events | 58 | `scripts/data/story_data.gd` (`EVENTS`) |
+| Story-events | 62 = 53 string-keys + 9 expressie-keys | `scripts/data/story_data.gd` (`EVENTS`) |
 | BGM-tracks in het manifest / met bestand | 24 / 13 | `assets/audio/audio_manifest.json`, `assets/audio/bgm/` |
 | SFX in het manifest / ontbrekende bestanden | 99 / 0 (allemaal placeholders) | `assets/audio/audio_manifest.json` |
-| `TODO(design)` en `TODO(verhaal)` in WM1-code (zonder tests) | 56 | `rg "TODO\((design\|verhaal)" scripts world_warper pvp` |
+| `TODO(design)` en `TODO(verhaal)` in WM1-code (zonder tests) | 51 | `git grep -n -E 'TODO\((design\|verhaal)' f76aa715 -- scripts world_warper pvp` (zonder `scripts/tests/`): 56 − 5 = 51 |
+
+Hergeteld op `f76aa715` (wm1-freeze), 17-11-2026 (F1.6).
 
 ## 1. Wat WM1 is
 
@@ -318,7 +320,7 @@ Alle items staan in `scripts/data/game_data.gd` (`ITEMS`, `KEY_ITEMS`, `EQUIPMEN
 - **Kern en wereldvaardigheden:** Golem Core `golemkern` geeft Core Power `kernslag` (gevecht) en `zware_blokken` en
   `kernvuur` (veld); Living Core `levenskern` geeft alleen zijn zin (`scripts/data/kern_data.gd`,
   `scripts/kern/`).
-- **Codex:** 18 vangbare soorten, 29 bondgenootvaardigheden, fusie (`scripts/data/codex_data.gd`,
+- **Codex:** 21 vangbare soorten, 32 bondgenootvaardigheden, fusie (`scripts/data/codex_data.gd`,
   `scripts/battle/codex_battle.gd`, `scripts/battle/codex_ally.gd`). Max. 12 pagina's, 1 Codex-monster mee in het gevecht.
 - **Vijandvaardigheden:** `bind`, `poison`, `charge`, `drain`, `pull` (Archief 2) en per vijand een eigen skill-tabel
   (`GameData.ENEMIES`).
@@ -457,7 +459,7 @@ mag alleen bij een bugfix of een gat in de CI en mag geen bestaande suite wijzig
 ### 4.4 Uitzonderingen en lock-wijziging
 
 Een uitzondering op de lock is alleen geldig als Dennis dat schriftelijk zegt in de PR of het issue. Zo'n PR
-past ook dit document aan (sectie 2 en de lock-cijfers), zodat de inventaris klopt met `main`. Een PR die iets
+past ook dit document aan (sectie 2 en de lock-cijfers), zodat de inventaris klopt met de freeze-basis `f76aa715` (wm1-freeze). Een PR die iets
 toevoegt dat hier niet staat en dit document niet aanpast, wordt geweigerd.
 
 ### 4.5 Hoe een reviewer de lock controleert
@@ -466,6 +468,7 @@ toevoegt dat hier niet staat en dit document niet aanpast, wordt geweigerd.
   `data/quests.json`, `scenes/maps/`). Elke toename zonder lock-wijziging is een afwijzing.
 - `git diff --stat` toont nieuwe `.tscn`, `.ogg`, `.wav`, `.png` of `.ogv`? Alleen toegestaan als vervanging (4.2).
 - Nieuwe `TODO(design)` of `TODO(verhaal)` in een PR? Niet toegestaan; los het op of laat het weg.
+- TODO-telling (zonder tests): `git grep -n -E 'TODO\((design|verhaal)' f76aa715 -- scripts world_warper pvp` = 56, minus 5 in `scripts/tests/` = 51.
 - Zit er `.uid`, `.apk`, `.aab`, `.keystore`, `.jks` of `.env` in de diff? Afwijzen (`.gitignore` blokkeert ze al).
 
 ## 5. Bijhouden

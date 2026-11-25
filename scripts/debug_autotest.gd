@@ -869,7 +869,13 @@ func _town_tests() -> void:
 	check("speler start voor het huis op (24,10): %s" % start, start == Vector2i(24, 10))
 	check("kijkt omlaag bij de start", player().facing == Vector2i.DOWN)
 	_dorpsprite_checks()
-	check("na de proloog: dag-tint, Oude Man weg", scene().get_node("StoryTint").color.is_equal_approx(Color.WHITE)
+	var dag_tint_ok: bool = scene().get_node("StoryTint").color.is_equal_approx(Color.WHITE)
+	if Settings.hd2d_light_enabled():
+		var hd := scene().get_node_or_null("Hd2dTint") as CanvasModulate
+		var dag: Dictionary = MapLighting.preset_record(MapLighting.map_id_from(scene())).get("day", {})
+		var amb: Array = dag.get("ambient", [])
+		dag_tint_ok = hd != null and amb.size() >= 3 and hd.color.is_equal_approx(MapLighting.col(amb))
+	check("na de proloog: dag-tint, Oude Man weg", dag_tint_ok
 			and not scene().get_node("Objects/OudeMan").visible)
 	await frames(30)
 	await overworld_shot("_town")
@@ -1624,7 +1630,8 @@ func _title_v13_checks(t: Node) -> void:
 			and absf(st.get_center().y - t.size.y / 2.0) <= 1.0)
 	check("menu rechtsonder (x 240..372, y ~150..200): %s" % cr,
 			absf(cr.position.x - 240.0) <= 1.0 and absf(cr.end.x - 372.0) <= 1.0 and cr.end.y <= 201.0 and cr.position.y >= 148.0)
-	check("versielabel v0.20 rechtsonder (%s)" % t.version_label.text, t.version_label.text == "v0.20"
+	var versie := "v" + str(ProjectSettings.get_setting("application/config/version", ""))
+	check("versielabel %s rechtsonder (%s)" % [versie, t.version_label.text], versie != "v" and t.version_label.text == versie
 			and t.version_label.get_global_rect().end.x <= t.size.x and t.version_label.get_global_rect().end.y <= t.size.y)
 	if has_main:
 		return
@@ -2185,7 +2192,7 @@ func _named(line: String) -> String:
 
 ## v0.13: nieuwe dorpssprites van RPG ART (art_tiles_v14: dennis_dorp.png -> player.png,
 ## wachter_dorp.png -> wachter.png). Herkend aan het aantal niet-doorzichtige pixels.
-const DORP_SPRITES := {"res://assets/sprites/player.png": 3016, "res://assets/sprites/wachter.png": 3220}
+const DORP_SPRITES := {"res://assets/sprites/player.png": 2950, "res://assets/sprites/wachter.png": 3184}
 
 
 func _opaque_pixels(path: String) -> int:
@@ -2204,9 +2211,10 @@ func _opaque_pixels(path: String) -> int:
 
 func _dorpsprite_checks() -> void:
 	var tex: Texture2D = player().sprite.texture
+	var basis: Texture2D = MapLighting.base_texture(tex)
 	# Held 24x32 (21 okt 2026): buiten wereldkaart/bouwplaats de WM1-sheet van de leider (Dax 120x128 = 5x4 van 24x32 walk v2)
-	check("speler-sprite = dax_wm1.png 120x128, 5x4 frames van 24x32, voeten op +8 (%s)" % tex.resource_path,
-			tex.resource_path.ends_with("som/kaart/dax_wm1.png") and tex.get_size() == Vector2(120, 128)
+	check("speler-sprite = dax_wm1.png 120x128, 5x4 frames van 24x32, voeten op +8 (%s)" % (basis.resource_path if basis else ""),
+			basis != null and basis.resource_path.ends_with("som/kaart/dax_wm1.png") and tex.get_size() == Vector2(120, 128)
 			and player().sprite.hframes == 5 and player().sprite.vframes == 4 and player().sprite.offset == Vector2(0, -8))
 	for path in DORP_SPRITES:
 		var n := _opaque_pixels(path)
@@ -2218,7 +2226,8 @@ func _dorpsprite_checks() -> void:
 
 
 func _wachter_ok(npc: Node) -> bool:
-	return npc != null and npc.sprite.texture != null and npc.sprite.texture.resource_path.ends_with("som/wilgendal/npcs/oude_man_wm1_slim.png") \
+	var basis: Texture2D = MapLighting.base_texture(npc.sprite.texture) if npc != null else null
+	return npc != null and basis != null and basis.resource_path.ends_with("som/wilgendal/npcs/oude_man_wm1_slim.png") \
 			and npc.sprite.hframes == 3 and npc.sprite.vframes == 4 and npc.sprite.texture.get_size() == Vector2(72, 128) \
 			and npc.sprite.offset == Vector2(0, -8)
 
@@ -2542,7 +2551,7 @@ func _prologue_tests() -> void:
 	await frames(10)
 	check("buiten is het nacht, Oude Man weg, ingang open en gloeit",
 			scene().get_node("StoryTint").color.is_equal_approx(SD.TINTS["night"]) and not _obj("OudeMan").visible
-			and _obj("Archief").looping and _obj("Archief").sprite.texture.resource_path.replace("_v8.png", ".png").ends_with("archief_ingang_open_flikker.png")
+			and _obj("Archief").looping and MapLighting.base_texture(_obj("Archief").sprite.texture).resource_path.replace("_v8.png", ".png").ends_with("archief_ingang_open_flikker.png")
 			and _obj("Archief").glow.visible)
 	await walk("move_down", 2)
 	await walk("move_right", 11)
@@ -2699,10 +2708,10 @@ func _book_tests() -> void:
 	if red == null or green == null:
 		return
 	check("rood boek: type hp, eigen art (4 frames), rode aura (additief)", red.type == "hp" and red.sprite.hframes == 4
-			and red.sprite.texture.resource_path.ends_with("hp_book.png") and red.aura_color.is_equal_approx(Color("ff3f4f"))
+			and MapLighting.base_texture(red.sprite.texture).resource_path.ends_with("hp_book.png") and red.aura_color.is_equal_approx(Color("ff3f4f"))
 			and red.aura.material.blend_mode == CanvasItemMaterial.BLEND_MODE_ADD and red.aura.texture.get_width() == 88)
 	check("groen boek: type mp, eigen art (4 frames), groene aura (additief)", green.type == "mp" and green.sprite.hframes == 4
-			and green.sprite.texture.resource_path.ends_with("mp_book.png") and green.aura_color.is_equal_approx(Color("3fff7a"))
+			and MapLighting.base_texture(green.sprite.texture).resource_path.ends_with("mp_book.png") and green.aura_color.is_equal_approx(Color("3fff7a"))
 			and green.aura.material.blend_mode == CanvasItemMaterial.BLEND_MODE_ADD)
 	var a_lo := 9.0
 	var a_hi := -9.0

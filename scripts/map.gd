@@ -24,6 +24,7 @@ const BerggrotHaak := preload("res://scripts/data/berggrot_data.gd")
 const OpeningStory := preload("res://world_warper/opening/story_mode.gd")
 const FieldMenu := preload("res://scripts/ui/field_menu.gd")
 const MapLightingC := preload("res://scripts/map_lighting.gd")
+const RunUitleg := preload("res://scripts/run_uitleg.gd")
 ## v0.11 Automatisch opslaan na binnenkomst: net na de fade-in (Transition, 0,3 sec).
 const AUTOSAVE_DELAY := 0.35
 
@@ -119,6 +120,9 @@ func _ready() -> void:
 	if WorldmapCutsceneScript.should_play(scene_file_path):
 		WorldmapCutsceneScript.start_on(self)
 	_spawn_garden_creatures()
+	# Colosseum: met ARENA_ENABLED uit doet consider() niets (geen node, geen save).
+	if scene_file_path.ends_with("/wereldkaart.tscn"):
+		preload("res://scripts/arena/arena_entry.gd").consider(self)
 	MapLightingC.apply(self)
 	if not Settings.changed.is_connected(_on_hd2d_setting):
 		Settings.changed.connect(_on_hd2d_setting)
@@ -336,8 +340,8 @@ func _process(_delta: float) -> void:
 	if ReleaseFlags.dev_rooms_allowed() and InputMap.has_action("debug_puzzle") and Input.is_action_just_pressed("debug_puzzle"):
 		if not GameState.scene_busy() and not player.is_moving \
 				and not Dialog.is_open and not menu_open() and not Story.running:
-			player.input_locked = true
-			GameState.change_map(DEBUG_PUZZLE_ROOM, "ingang")
+			if GameState.change_map(DEBUG_PUZZLE_ROOM, "ingang"):
+				player.input_locked = true
 	# F2 = forceer een gevecht (alleen in debug-builds en alleen op maps met monsters).
 	if OS.is_debug_build() and encounters and Input.is_action_just_pressed("debug_battle"):
 		if not GameState.scene_busy() and not player.is_moving and not Dialog.is_open:
@@ -367,6 +371,8 @@ func _on_player_stepped(tile: Vector2i) -> void:
 	# 2) Random encounter (alleen als deze map monsters heeft)
 	if encounters and GameState.on_player_step(terrain_at(tile)):
 		start_battle(GameState.pick_encounter_group(terrain_at(tile)))
+		return
+	RunUitleg.op_stap(player)
 
 
 ## Grotmond in de bergwand: de bergtegel blijft blokkeren, maar wie er van onderaf
@@ -404,8 +410,8 @@ func _use_exit(exit: Node) -> void:
 		if EchoGrot.blokkeert_wereldkaart(scene_file_path, str(exit.target_map)):
 			Dialog.show_lines([EchoGrot.ZIN_WERELD], "")
 			return
-		player.input_locked = true
-		GameState.change_map(exit.target_map, exit.target_spawn)
+		if GameState.change_map(exit.target_map, exit.target_spawn):
+			player.input_locked = true
 	elif not exit.lines.is_empty():
 		Dialog.show_lines(exit.lines, "")
 

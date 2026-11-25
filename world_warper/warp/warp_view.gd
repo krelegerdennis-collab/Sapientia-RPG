@@ -2,13 +2,17 @@ class_name WorldWarperWarpView
 extends Control
 ## Twee stappen: eerst een wereld, daarna een bestemming.
 ## Zonder anker in de groep ww_anchor_warp vult de view de ouder
-## (CanvasLayer in een test). Geen shader, geen eigen art.
+## (CanvasLayer in een test), binnen UiTouch.safe_rect. De inhoudsmarge
+## blijft 6 px. Insets 0 geeft hetzelfde volle vlak als voorheen.
+## Geen shader, geen eigen art.
 
 signal warp_requested(wm_id: String, place_id: String)
 signal warp_closed
 
 const Destinations := preload("res://world_warper/warp/destinations.gd")
+const SD := preload("res://scripts/data/story_data.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 const ANCHOR_GROUP := "ww_anchor_warp"
 const VIEW_SIZE := Vector2(384, 216)
@@ -43,49 +47,114 @@ var _step := STEP_WORLDS
 var _wm_id := ""
 var _place_id := ""
 var _opened := false
+## Geen cancel in het openingsframe (zelfde A-tik mag niet meteen terug).
+var _quiet_frame := -1
 var _built := false
+var _layout_hooks := false
+var _lay_vp := Vector2.ZERO
+var _lay_ins := Vector4(-1, -1, -1, -1)
 
 var _title: Label
+var _uitleg_band: Control
+var _uitleg: Label
 var _rows: VBoxContainer
 var _back: Button
 var _travel: Button
 
 
 func _ready() -> void:
+	add_to_group("touch_priority")
 	_ensure_ui()
 	if not _opened:
 		visible = false
+		set_process(false)
+	_koppel_layout_hooks()
 	_place_at_anchor()
 	call_deferred("_place_at_anchor")
 
 
+## Hub: joystick-zone overlapte rijknoppen; claim ScreenTouch zodat TouchControls niet beweegt.
+func claims_touch(viewport_pos: Vector2) -> bool:
+	return _opened and visible and get_global_rect().has_point(viewport_pos)
+
+
+func _enter_tree() -> void:
+	_koppel_layout_hooks()
+
+
+func _exit_tree() -> void:
+	_ontkoppel_layout_hooks()
+
+
+func _koppel_layout_hooks() -> void:
+	if _layout_hooks or not is_inside_tree():
+		return
+	var vp := get_viewport()
+	if vp != null and not vp.size_changed.is_connected(_place_at_anchor):
+		vp.size_changed.connect(_place_at_anchor)
+	_layout_hooks = true
+
+
+func _ontkoppel_layout_hooks() -> void:
+	if not _layout_hooks:
+		return
+	var vp := get_viewport()
+	if vp != null and vp.size_changed.is_connected(_place_at_anchor):
+		vp.size_changed.disconnect(_place_at_anchor)
+	_layout_hooks = false
+
+
 func open() -> void:
 	_opened = true
+	_quiet_frame = Engine.get_process_frames()
 	_ensure_ui()
 	_step = STEP_WORLDS
 	_wm_id = ""
 	_place_id = ""
 	visible = true
+	set_process(true)
+	_lay_vp = Vector2.ZERO
+	_lay_ins = Vector4(-1, -1, -1, -1)
 	_place_at_anchor()
+	_zet_uitleg_eerste_keer()
 	_show_step()
 
 
 func close() -> void:
+	_markeer_uitleg_gelezen()
 	_opened = false
 	visible = false
+	set_process(false)
+	_lay_vp = Vector2.ZERO
+	_lay_ins = Vector4(-1, -1, -1, -1)
 	warp_closed.emit()
+
+
+## Insets kunnen wisselen zonder dat de viewportgrootte verandert (insets_override).
+func _process(_delta: float) -> void:
+	if not _opened or not visible or not is_inside_tree():
+		return
+	if Engine.get_process_frames() <= _quiet_frame:
+		return
+	if Input.is_action_just_pressed("cancel"):
+		_on_back()
+		return
+	var vp := get_viewport_rect().size
+	var ins := UiTouchC.insets(get_viewport())
+	if vp == _lay_vp and ins == _lay_ins:
+		return
+	_lay_vp = vp
+	_lay_ins = ins
+	_place_at_anchor()
 
 
 func _place_at_anchor() -> void:
 	if not is_inside_tree():
 		return
-	var nodes := get_tree().get_nodes_in_group(ANCHOR_GROUP)
-	if nodes.is_empty():
-		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		return
-	var anchor: Node = nodes[0]
-	if anchor == self or not (anchor is Control or anchor is Node2D):
-		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var ins := UiTouchC.insets(get_viewport())
+	var anchor := _eerste_anker()
+	if anchor == null:
+		_zet_vol_vlak(ins)
 		return
 	# Eerste node in de groep. Een Control-anker deelt het UI-vlak.
 	# TODO(design): een Node2D-anker staat in wereldpixels; dat valt alleen
@@ -98,6 +167,102 @@ func _place_at_anchor() -> void:
 	else:
 		global_position = (anchor as Node2D).global_position
 		size = VIEW_SIZE
+	# Insets 0: de ankerplaats blijft pixel-gelijk. Anders schuift het paneel
+	# de veilige zone in, zodat knoppen niet onder de rand vallen.
+	if ins != Vector4.ZERO:
+		_binnen_veilig(ins)
+
+
+func _eerste_anker() -> Node:
+	if not is_inside_tree():
+		return null
+	var nodes := get_tree().get_nodes_in_group(ANCHOR_GROUP)
+	if nodes.is_empty():
+		return null
+	var anchor: Node = nodes[0]
+	if anchor == self or not (anchor is Control or anchor is Node2D):
+		return null
+	return anchor
+
+
+## Geen anker: het hele ouder-vlak, maar binnen het veilige gebied.
+## Insets 0 zet alleen PRESET_FULL_RECT, gelijk aan de oude layout.
+func _zet_vol_vlak(ins: Vector4) -> void:
+	if ins == Vector4.ZERO:
+		if custom_minimum_size != VIEW_SIZE:
+			custom_minimum_size = VIEW_SIZE
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_layout_uitleg()
+		return
+	var veilig := UiTouchC.safe_rect(get_viewport_rect().size, get_viewport())
+	custom_minimum_size = Vector2(
+			minf(VIEW_SIZE.x, maxf(veilig.size.x, 1.0)),
+			minf(VIEW_SIZE.y, maxf(veilig.size.y, 1.0)))
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	offset_left = ins.x
+	offset_top = ins.y
+	offset_right = -ins.z
+	offset_bottom = -ins.w
+	_layout_uitleg()
+
+
+## Paneel (bij een anker) helemaal binnen het veilige gebied schuiven. Past het niet,
+## dan krimpt het tot het in de safe rect past.
+func _binnen_veilig(_ins: Vector4) -> void:
+	var veilig := UiTouchC.safe_rect(get_viewport_rect().size, get_viewport())
+	var r := Rect2(global_position, size)
+	r.size = Vector2(minf(r.size.x, maxf(veilig.size.x, 1.0)), minf(r.size.y, maxf(veilig.size.y, 1.0)))
+	custom_minimum_size = Vector2(
+			minf(VIEW_SIZE.x, maxf(veilig.size.x, 1.0)),
+			minf(VIEW_SIZE.y, maxf(veilig.size.y, 1.0)))
+	r.position.x = clampf(r.position.x, veilig.position.x, maxf(veilig.position.x, veilig.end.x - r.size.x))
+	r.position.y = clampf(r.position.y, veilig.position.y, maxf(veilig.position.y, veilig.end.y - r.size.y))
+	global_position = r.position
+	size = r.size
+	_layout_uitleg()
+
+
+static func _uitleg_hoog(tekst: String, breedte: float, fs: int) -> float:
+	var words := tekst.split(" ")
+	var cur := ""
+	var lines := 1
+	for w in words:
+		var probe := (cur + " " + w).strip_edges()
+		if FONT.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > breedte and cur != "":
+			lines += 1
+			cur = w
+		else:
+			cur = probe
+	return maxf(float(fs), float(lines) * float(fs + 3))
+
+
+func _layout_uitleg() -> void:
+	if _uitleg == null or _uitleg_band == null or not _built:
+		return
+	if not _uitleg_band.visible:
+		_uitleg_band.custom_minimum_size = Vector2.ZERO
+		return
+	var fs := theme.default_font_size if theme != null else 10
+	var veilig := UiTouchC.safe_rect(get_viewport_rect().size, get_viewport())
+	var breedte := maxf(8.0, minf(size.x - 12.0, veilig.size.x))
+	var hoog := _uitleg_hoog(SD.WARP_UITLEG_LINE, breedte, fs)
+	hoog = minf(hoog, maxf(28.0, size.y - RIJ_HOOG * 5.0))
+	_uitleg_band.custom_minimum_size = Vector2(breedte, hoog)
+	_uitleg_band.size = Vector2(breedte, hoog)
+
+
+func _zet_uitleg_eerste_keer() -> void:
+	if _uitleg_band == null:
+		return
+	var tonen := not GameState.story_flags.has(SD.WARP_UITLEG_FLAG)
+	_uitleg_band.visible = tonen
+	_layout_uitleg()
+
+
+## Vlag pas zetten als de uitleg getoond is en het scherm sluit of de reis start.
+func _markeer_uitleg_gelezen() -> void:
+	if _uitleg_band != null and _uitleg_band.visible:
+		GameState.story_flags[SD.WARP_UITLEG_FLAG] = true
 
 
 func _ensure_ui() -> void:
@@ -129,6 +294,7 @@ func _ensure_ui() -> void:
 	add_child(achtergrond)
 
 	var marge := MarginContainer.new()
+	marge.name = "Marge"
 	marge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	marge.add_theme_constant_override("margin_left", 6)
 	marge.add_theme_constant_override("margin_top", 6)
@@ -139,6 +305,21 @@ func _ensure_ui() -> void:
 	var kolom := VBoxContainer.new()
 	kolom.add_theme_constant_override("separation", 4)
 	marge.add_child(kolom)
+
+	_uitleg_band = Control.new()
+	_uitleg_band.name = "UitlegBand"
+	_uitleg_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_uitleg_band.visible = false
+	kolom.add_child(_uitleg_band)
+	_uitleg = Label.new()
+	_uitleg.name = "Uitleg"
+	_uitleg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_uitleg.text = SD.WARP_UITLEG_LINE
+	_uitleg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_uitleg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_uitleg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_uitleg.add_theme_color_override("font_color", UiStyle.TEXT_DIM)
+	_uitleg_band.add_child(_uitleg)
 
 	_title = Label.new()
 	_title.name = "Titel"
@@ -364,6 +545,7 @@ func _on_travel() -> void:
 	var path := str(gekozen.get("path", ""))
 	var spawn := str(gekozen.get("spawn", ""))
 	GameState.change_map(path, spawn)
+	_markeer_uitleg_gelezen()
 	warp_requested.emit(_wm_id, _place_id)
 
 

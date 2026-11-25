@@ -5,6 +5,7 @@ extends "res://scripts/map.gd"
 const Beek := preload("res://scripts/data/woud_beek.gd")
 const BORD := preload("res://scenes/sign.tscn")
 const OVERLAY_Z := 10
+const TileRenderSplit := preload("res://scripts/perf/tile_render_split.gd")
 
 
 func _ready() -> void:
@@ -32,6 +33,9 @@ func _bouw() -> void:
 		_zet(grond, t, str(lagen["grond"][t]))
 	for t in lagen["overlay"]:
 		_zet(over, t, str(lagen["overlay"][t]))
+	# perf: één textuur per tegel (99 bronnen) -> per bron een beeldlaag, ~335 -> ~100 draw calls
+	TileRenderSplit.split(grond)
+	TileRenderSplit.split(over)
 	for naam in Beek.SPAWNS:
 		var v: Array = Beek.SPAWNS[naam]
 		var sp := MapSpawn.new()

@@ -45,6 +45,7 @@ var _quiet_frame := -1
 
 
 const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
+const MenuScreenS := preload("res://scripts/ui/menu_screen.gd")   # F6-2: touch_row()
 const BACK_W := 56
 
 
@@ -160,7 +161,7 @@ func _ready() -> void:
 		var known := GameState.is_seen(id)
 		seen += 1 if known else 0
 		beaten += 1 if GameState.defeated_count(id) > 0 else 0
-		var b := UiMenu.button("%03d %s" % [int(e.get("no", 0)), str(e["name"]) if known else "???"])
+		var b := MenuScreenS.touch_row(UiMenu.button("%03d %s" % [int(e.get("no", 0)), str(e["name"]) if known else "???"]))
 		b.custom_minimum_size = Vector2(106, 15)
 		b.focus_entered.connect(show_entry.bind(id))
 		b.pressed.connect(show_entry.bind(id))
