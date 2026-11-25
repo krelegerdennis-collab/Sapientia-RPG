@@ -9,6 +9,7 @@ signal delete_slot(index: int)
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const UiStyleC := preload("res://scripts/ui/ui_style.gd")
 const Profile := preload("res://scripts/online/online_profile.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 
 const TOUCH_H := 25.0
 const ROW_GAP := 1.0
@@ -24,7 +25,7 @@ func _init() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", ROW_GAP)
 	add_child(col)
-	col.add_child(UiMenu.label("Multiplayer", UiStyleC.HILITE))
+	col.add_child(UiMenu.label(ReleaseFlags.COOP_ONLY_PLAYER_LABEL, UiStyleC.HILITE))
 	_rows = VBoxContainer.new()
 	_rows.add_theme_constant_override("separation", ROW_GAP)
 	col.add_child(_rows)
@@ -68,16 +69,42 @@ func refresh() -> void:
 			del.visible = false
 			del.disabled = true
 			del.focus_mode = Control.FOCUS_NONE
+	wire_focus_neighbors()
+
+
+## Slot/Del-knoppen in een ring (boven/onder wikkelen) voor pad-navigatie.
+func wire_focus_neighbors() -> void:
+	var chain: Array[Button] = []
+	for i in Profile.SLOT_COUNT:
+		chain.append(_slot_buttons[i])
+		var del := _delete_buttons[i]
+		if del.visible and not del.disabled:
+			del.focus_mode = Control.FOCUS_ALL
+			chain.append(del)
+		else:
+			del.focus_mode = Control.FOCUS_NONE
+	if chain.is_empty():
+		return
+	for j in chain.size():
+		var b: Button = chain[j]
+		var prev: Button = chain[(j - 1 + chain.size()) % chain.size()]
+		var next: Button = chain[(j + 1) % chain.size()]
+		b.focus_neighbor_top = prev.get_path()
+		b.focus_neighbor_bottom = next.get_path()
+	for i in Profile.SLOT_COUNT:
+		var main := _slot_buttons[i]
+		var del := _delete_buttons[i]
+		if del.visible and not del.disabled:
+			main.focus_neighbor_right = del.get_path()
+			del.focus_neighbor_left = main.get_path()
+			del.focus_neighbor_right = del.get_path()
+		else:
+			main.focus_neighbor_right = main.get_path()
 
 
 func focus_first_playable() -> void:
-	for i in _slot_buttons.size():
-		if _store != null and _store.has_slot(i):
-			_slot_buttons[i].grab_focus()
-			return
-	for b in _slot_buttons:
-		b.grab_focus()
-		return
+	if not _slot_buttons.is_empty():
+		_slot_buttons[0].grab_focus()
 
 
 func _on_main_pressed(index: int) -> void:

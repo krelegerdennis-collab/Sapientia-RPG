@@ -727,5 +727,7 @@ func _leave_to_title() -> void:
 	GameState.coop_end_session()
 	_teardown_net()
 	leave_requested.emit()
+	if not is_inside_tree():
+		return
 	if ReleaseFlags.coop_only_mode() or get_parent() == get_tree().root:
 		get_tree().change_scene_to_file(GameState.TITLE_SCENE)

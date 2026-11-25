@@ -91,7 +91,7 @@ var stage: Control
 var backfill: TextureRect
 var version_label: Label
 var studio_label: Label
-var mp_slots: MpCharacterSlots
+var mp_slots: MpCharacterSlots = null
 var _mp_profile: OnlineProfile
 var _mp_create: MpCharacterCreate = null
 var _mp_delete_prompt: SavePrompt = null
@@ -251,17 +251,6 @@ func _ready() -> void:
 	load_button.focus_neighbor_left = continue_button.get_path()
 	load_button.focus_neighbor_right = load_button.get_path()
 
-	_mp_profile = OnlineProfile.new()
-	_mp_profile.load_profile()
-	mp_slots = MpCharacterSlots.new()
-	mp_slots.name = "MpSlots"
-	mp_slots.visible = false
-	mp_slots.bind_store(_mp_profile)
-	mp_slots.play_slot.connect(_on_mp_play)
-	mp_slots.create_slot.connect(_on_mp_create)
-	mp_slots.delete_slot.connect(_on_mp_delete)
-	add_child(mp_slots)
-
 	apply_online_visibility()
 	apply_test_menu_visibility()
 	apply_coop_only_menu()
@@ -352,7 +341,7 @@ func _build_legacy_title(bg: TextureRect) -> void:
 ## onderkant op CARD_BOTTOM (nooit over de held of de Golem).
 func _place_card() -> void:
 	stage.position = _stage_in_safe()
-	if ReleaseFlags.coop_only_mode():
+	if ReleaseFlags.coop_only_mode() and mp_slots != null:
 		mp_slots.custom_minimum_size = Vector2(CARD_RIGHT - CARD_LEFT, 0)
 		mp_slots.reset_size()
 		mp_slots.position = (stage.position + Vector2(CARD_LEFT, CARD_BOTTOM - mp_slots.size.y)).round()
@@ -459,9 +448,25 @@ func _place_text_title() -> void:
 ## WM1 (H11): PvP en Co-op blijven verborgen tot er een relay-URL is (ReleaseFlags.online_cut).
 ## De knoppen blijven bestaan (positie, tests); ze zijn alleen onzichtbaar en niet focusbaar.
 ## Co-op-only export: geen verhaal/PvP, alleen co-op naar de online hal.
+func _ensure_mp_slots() -> void:
+	if mp_slots != null:
+		return
+	_mp_profile = OnlineProfile.new()
+	_mp_profile.load_profile()
+	mp_slots = MpCharacterSlots.new()
+	mp_slots.name = "MpSlots"
+	mp_slots.visible = false
+	mp_slots.bind_store(_mp_profile)
+	mp_slots.play_slot.connect(_on_mp_play)
+	mp_slots.create_slot.connect(_on_mp_create)
+	mp_slots.delete_slot.connect(_on_mp_delete)
+	add_child(mp_slots)
+
+
 func apply_coop_only_menu() -> void:
 	if not ReleaseFlags.coop_only_mode():
 		return
+	_ensure_mp_slots()
 	card.visible = false
 	save_info.visible = false
 	save_info.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -679,6 +684,8 @@ func _on_coop() -> void:
 
 
 func _on_mp_play(index: int) -> void:
+	if _mp_profile == null:
+		return
 	var row := _mp_profile.get_slot(index)
 	if row.is_empty():
 		return
@@ -689,6 +696,8 @@ func _on_mp_play(index: int) -> void:
 
 
 func _on_mp_create(index: int) -> void:
+	if _mp_profile == null:
+		return
 	if _mp_create != null or _mp_delete_prompt != null:
 		return
 	if _mp_profile.has_slot(index):
@@ -705,6 +714,8 @@ func _on_mp_create(index: int) -> void:
 
 
 func _on_mp_delete(index: int) -> void:
+	if _mp_profile == null:
+		return
 	if _mp_delete_prompt != null or not _mp_profile.has_slot(index):
 		return
 	var row := _mp_profile.get_slot(index)

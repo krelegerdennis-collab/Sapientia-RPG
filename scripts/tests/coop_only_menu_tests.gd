@@ -6,6 +6,10 @@ const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const Profile := preload("res://scripts/online/online_profile.gd")
 const CoopLobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
 const OnlineHalScript := preload("res://scripts/coop/online_hal.gd")
+const MpCharacterCreate := preload("res://scripts/ui/mp_character_create.gd")
+const SavePrompt := preload("res://scripts/ui/save_prompt.gd")
+const Protocol := preload("res://scripts/net/net_protocol.gd")
+const LanLobby := preload("res://scripts/net/lan_lobby.gd")
 const ONLINE_HALL := "res://scenes/coop/online_hal.tscn"
 const STORY_SAVE := "user://save_1.json"
 
@@ -28,7 +32,7 @@ func check(label: String, ok: bool) -> void:
 
 func _titel() -> Node:
 	var nu := get_tree().current_scene
-	return nu if nu != null and nu.get("mp_slots") != null else null
+	return nu if nu != null and nu.has_method("apply_coop_only_menu") else null
 
 
 func _story_hidden(t: Node) -> bool:
@@ -93,6 +97,145 @@ func _profile_slot_tests() -> void:
 	check("selectie naar lobby-pakket", packet.get("name", "") == "Aaa" and packet.get("class", "") == "warrior")
 
 
+func _empty_name_create_test() -> void:
+	_wipe_profile()
+	var profiel: OnlineProfile = Profile.new()
+	profiel.load_profile()
+	var ui: MpCharacterCreate = MpCharacterCreate.new()
+	ui.setup(profiel, 0)
+	add_child(ui)
+	await get_tree().process_frame
+	ui._edit.text = "   "
+	ui._on_create()
+	await get_tree().process_frame
+	check("lege naam: geen slot geschreven", not profiel.has_slot(0))
+	check("lege naam: foutmelding", ui._error.text != "")
+	ui.queue_free()
+
+
+func _delete_confirm_test(t: Node) -> void:
+	_wipe_profile()
+	var profiel: OnlineProfile = Profile.new()
+	profiel.load_profile()
+	check("delete-test: slot aanmaken", bool(profiel.create_slot(0, "Zed", "warrior").get("ok", false)))
+	t._mp_profile.load_profile()
+	t.mp_slots.refresh()
+	t._on_mp_delete(0)
+	await get_tree().process_frame
+	var prompt: SavePrompt = t._mp_delete_prompt
+	check("delete: confirm dialoog", prompt != null)
+	check("delete: default No", prompt.default_no)
+	prompt.answer(false)
+	await get_tree().process_frame
+	check("delete: No behoudt slot", t._mp_profile.has_slot(0))
+	t._on_mp_delete(0)
+	await get_tree().process_frame
+	prompt = t._mp_delete_prompt
+	check("delete: tweede confirm", prompt != null)
+	prompt.answer(true)
+	await get_tree().process_frame
+	t.mp_slots.refresh()
+	check("delete: Yes wist slot", not t._mp_profile.has_slot(0))
+	check("delete: laatste poppetje weg, geen crash", not t._mp_profile.has_slot(0) and not t._mp_profile.has_slot(1))
+	check("delete: slot leeg in UI", t.mp_slots._slot_buttons[0].text == "New character")
+
+
+func _focus_neighbor_test(t: Node) -> void:
+	t.mp_slots.refresh()
+	var first: Button = t.mp_slots._slot_buttons[0]
+	check("focus: start op eerste slot", get_viewport().gui_get_focus_owner() == first)
+	var top_path: NodePath = first.focus_neighbor_top
+	check("focus: bovenbuur bestaat", top_path != NodePath())
+	var bottom_path: NodePath = first.focus_neighbor_bottom
+	check("focus: onderbuur bestaat", bottom_path != NodePath())
+	check("focus: Del rechts van slot 0", first.focus_neighbor_right == t.mp_slots._delete_buttons[0].get_path())
+
+
+func _wait_hal() -> OnlineHal:
+	get_tree().change_scene_to_file(ONLINE_HALL)
+	for _i in 240:
+		var sc := get_tree().current_scene
+		if sc != null and String(sc.scene_file_path) == ONLINE_HALL:
+			return sc as OnlineHal
+		await get_tree().process_frame
+	return null
+
+
+func _relay_unreachable_test(t: Node) -> void:
+	if t == null:
+		check("relay-test: titel", false)
+		return
+	_wipe_profile()
+	var profiel: OnlineProfile = Profile.new()
+	profiel.load_profile()
+	check("relay-test: profiel", bool(profiel.create_slot(0, "Rex", "mage").get("ok", false)))
+	ProjectSettings.set_setting(Protocol.RELAY_URL_SETTING, "wss://127.0.0.1:9")
+	var row: Dictionary = profiel.get_slot(0)
+	OnlineHalScript.entry_profile = CoopLobbyScreen.online_packet(row)
+	var hal := await _wait_hal()
+	check("relay-test: hal geladen", hal != null)
+	if hal == null:
+		return
+	for _i in 60:
+		if hal._code != null:
+			break
+		await get_tree().process_frame
+	var code: CoopLobbyScreen = hal._code
+	check("relay-test: code-scherm", code != null)
+	code._show_host_online()
+	var bruikbaar := false
+	for _i in 90:
+		if code._screen == CoopLobbyScreen.Screen.MESSAGE \
+				or code.lobby.phase == LanLobby.Phase.IDLE \
+				or code.all_touch_buttons().size() > 0:
+			bruikbaar = true
+			break
+		await get_tree().process_frame
+	check("relay-test: geen crash (hal leeft)", is_instance_valid(hal) and hal.is_inside_tree())
+	check("relay-test: host-poging geen softlock", bruikbaar)
+	if code.is_inside_tree() and code._screen == CoopLobbyScreen.Screen.MESSAGE:
+		for b in code.all_touch_buttons():
+			if b.text == "Back":
+				b.pressed.emit()
+				break
+		await get_tree().process_frame
+	GameState.go_to_title(true)
+	for _i in 120:
+		if _titel() != null:
+			break
+		await get_tree().process_frame
+	var terug: Node = _titel()
+	check("relay-test: terug naar titel UI", terug != null and ReleaseFlags.coop_only_mode())
+	ProjectSettings.set_setting(Protocol.RELAY_URL_SETTING, "")
+	t = terug
+
+
+func _hall_back_to_title_test() -> void:
+	_wipe_profile()
+	var profiel: OnlineProfile = Profile.new()
+	profiel.load_profile()
+	check("back-test: profiel", bool(profiel.create_slot(0, "Bee", "priest").get("ok", false)))
+	ReleaseFlags.coop_only_override = 1
+	OnlineHalScript.entry_profile = CoopLobbyScreen.online_packet(profiel.get_slot(0))
+	var hal := await _wait_hal()
+	check("back-test: hal", hal != null)
+	if hal == null:
+		return
+	for _i in 60:
+		if hal._code != null:
+			break
+		await get_tree().process_frame
+	if hal._code != null and is_instance_valid(hal._code) and hal._code.is_inside_tree():
+		hal._code.cancel()
+	else:
+		GameState.go_to_title(true)
+	for _i in 120:
+		if _titel() != null:
+			break
+		await get_tree().process_frame
+	check("hall Back: coop-only titel", _titel() != null)
+
+
 func _run() -> void:
 	await _suite()
 
@@ -111,6 +254,7 @@ func _suite() -> void:
 			f.close()
 		story_bytes = FileAccess.get_file_as_bytes(STORY_SAVE)
 	_export_preset_tests()
+	await _empty_name_create_test()
 	_profile_slot_tests()
 	check("multiplayer data: OnlineProfile pad", Profile.PATH == "user://online_profile.json")
 	check("standaard: geen co-op-only zonder feature", not ReleaseFlags.coop_only_mode())
@@ -124,32 +268,24 @@ func _suite() -> void:
 	t.apply_test_menu_visibility()
 	t.refresh()
 	await get_tree().process_frame
-	check("zonder co-op-only: mp_slots verborgen", not t.mp_slots.visible)
+	check("zonder co-op-only: geen mp_slots", t.mp_slots == null)
 	check("zonder co-op-only: verhaalmenu zichtbaar", t.card.visible and t.new_button.visible)
 	ReleaseFlags.coop_only_override = 1
 	t.apply_coop_only_menu()
 	t.refresh()
 	await get_tree().process_frame
 	check("co-op-only: verhaalmenu verborgen", _story_hidden(t))
-	check("co-op-only: mp_slots zichtbaar", t.mp_slots.visible)
+	check("co-op-only: mp_slots zichtbaar", t.mp_slots != null and t.mp_slots.visible)
 	check("co-op-only: versielabel blijft", t.version_label.visible and t.version_label.text.begins_with("v"))
 	t._mp_profile.load_profile()
 	t.mp_slots.refresh()
 	check("co-op-only: titel toont slot 0", t._mp_profile.has_slot(0))
-	var focus_owner := get_viewport().gui_get_focus_owner()
-	check("co-op-only: focus op een slot-knop", focus_owner is Button)
+	_focus_neighbor_test(t)
 	var row0: Dictionary = t._mp_profile.get_slot(0)
 	check("co-op-only: selectie-pakket voor lobby", CoopLobbyScreen.online_packet(row0).get("name", "") == "Aaa")
 	OnlineHalScript.entry_profile = CoopLobbyScreen.online_packet(row0)
 	OnlineHalScript.entry_slot_index = 0
-	get_tree().change_scene_to_file(ONLINE_HALL)
-	var hal: OnlineHal = null
-	for _i in 240:
-		var sc := get_tree().current_scene
-		if sc != null and String(sc.scene_file_path) == ONLINE_HALL:
-			hal = sc as OnlineHal
-			break
-		await get_tree().process_frame
+	var hal: OnlineHal = await _wait_hal()
 	check("co-op-only: online hal geladen", hal != null)
 	check("co-op-only: profiel op hal", hal != null and not hal.profile.is_empty())
 	check("co-op-only: hal profielnaam uit slot 0", hal != null and str(hal.profile.get("name", "")) == "Aaa")
@@ -164,6 +300,14 @@ func _suite() -> void:
 			break
 	check("co-op-only: lobbytitel Multiplayer", lobby_title == ReleaseFlags.COOP_ONLY_PLAYER_LABEL)
 	lobby.queue_free()
+	GameState.go_to_title(true)
+	t = await _wait_titel()
+	ReleaseFlags.coop_only_override = 1
+	if t != null:
+		t.apply_coop_only_menu()
+	await _delete_confirm_test(t)
+	await _relay_unreachable_test(t)
+	await _hall_back_to_title_test()
 	ReleaseFlags.coop_only_override = 0
 	check("normale build: lobbytitel nog Co-op", ReleaseFlags.coop_lobby_menu_title(true) == "Co-op (LAN / Online)")
 	check("verhaal-save onaangetast", FileAccess.get_file_as_bytes(STORY_SAVE) == story_bytes)
@@ -174,6 +318,7 @@ func _suite() -> void:
 
 func _release(oude_override: int, had_story: bool, story_bytes: PackedByteArray) -> void:
 	ReleaseFlags.coop_only_override = oude_override
+	ProjectSettings.set_setting(Protocol.RELAY_URL_SETTING, "")
 	_wipe_profile()
 	if had_story:
 		var f := FileAccess.open(STORY_SAVE, FileAccess.WRITE)
