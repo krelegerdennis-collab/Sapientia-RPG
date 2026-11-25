@@ -1,7 +1,8 @@
 extends RefCounted
-## Leest docs/arena/layouts.json (hall 30x20, lobby 24x14). Het bestand zelf blijft van RPG ART.
+## Leest data/arena/layouts.json (hall 30x20, lobby 24x14). Kopie van docs/arena/layouts.json
+## (ART-bron); niet onder docs/* zodat web/APK-export de tegels meeneemt (exclude_filter docs/*).
 
-const PATH := "res://docs/arena/layouts.json"
+const PATH := "res://data/arena/layouts.json"
 
 static var _data: Dictionary = {}
 
