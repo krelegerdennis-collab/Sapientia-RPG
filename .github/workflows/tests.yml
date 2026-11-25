@@ -39,7 +39,7 @@ jobs:
                 wm1bugtest, wm1openbugtest, wm1storytexttest, sessiefixtest, savehardeningtest, lifecycletest, zonetest, kasdeurtest,
                 berggrotdextest, demofixtest, combatrngtest, combatsimtest, combattick, aabtest, uxtest, uipolishtest, uxpolishtest, f6uxtest, f6uxtest2,
                 wm1dekkingtest, wm1releasetest, rcchecktest, wm1f3stabilitytest, wm1balanstest, playtestkittest, launchertest, gamefeeltest, gamefeelfase1test, gamefeelfase2test, magentabangtest, telegraphcooptest,
-                coopguestsavetest, hd2dtest, lichtpropstest, androidbacktest, nameentrysafetest, arenatest, arenawavestest]
+                coopguestsavetest, hd2dtest, lichtpropstest, androidbacktest, nameentrysafetest, arenatest, arenalobbytest, arenawavestest]
     steps:
       - uses: actions/checkout@v4
 
