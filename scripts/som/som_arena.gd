@@ -2488,11 +2488,12 @@ func _hit_src_node(src) -> Node:
 
 
 func _hit_src_boss(src) -> bool:
+	# Geen bool(Variant): Godot 4.3 kent geen bool-constructor (CI golemarena*).
 	if src is bool:
-		return bool(src)
+		return src
 	if src is Node and enemies.has(src):
 		var e: Dictionary = enemies[src]
-		if bool(e.get("golem", false)):
+		if e.get("golem", false):
 			return true
 		if e.get("page_warden", null) != null:
 			return true
