@@ -332,7 +332,7 @@ func _rebind_active_wave(arena: Node) -> void:
 	if str(arena.phase) != RunScript.PHASE_WAVE or arena.waves == null:
 		return
 	var w: Node = arena.waves
-	if w._som == som and is_instance_valid(w._som):
+	if w.has_method("rebind_som") and w.rebind_som(self):
 		return
 	w.start_wave(int(arena.wave))
 
