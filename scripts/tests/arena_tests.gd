@@ -59,7 +59,7 @@ func _run_all() -> void:
 	_no_double_rewards()
 	GameState.new_game("Dax")
 	_save_roundtrip()
-	ReleaseFlags.arena_enabled_override = -1
+	ReleaseFlags.arena_enabled_override = 0
 	GameState.new_game("Dax")
 	_shop()
 	ReleaseFlags.arena_enabled_override = 1
@@ -96,8 +96,9 @@ func _waves(run: Node) -> Node:
 
 
 func _flag_off() -> void:
-	check("ARENA_ENABLED is false", ReleaseFlags.ARENA_ENABLED == false)
-	check("arena_enabled() volgt de const", ReleaseFlags.arena_enabled() == false)
+	check("ARENA_ENABLED is true", ReleaseFlags.ARENA_ENABLED == true)
+	check("arena_enabled() volgt de const", ReleaseFlags.arena_enabled() == true)
+	ReleaseFlags.arena_enabled_override = 0
 	check("vlag uit: geen wereldtegel geladen", Art.world_texture() == null)
 	check("vlag uit: geen npc-sheet geladen", Art.npc_texture() == null)
 	check("vlag uit: tokens beginnen op 0", GameState.arena_tokens == 0)
@@ -156,7 +157,7 @@ func _flag_off() -> void:
 	parked.free()
 	open_map.queue_free()
 	ReleaseFlags.arena_enabled_override = -1
-	check("override terug: vlag weer uit", ReleaseFlags.arena_enabled() == false)
+	check("override terug: vlag volgt de const", ReleaseFlags.arena_enabled() == true)
 
 
 func _dummy_map() -> Node2D:
@@ -173,7 +174,7 @@ func _dummy_map() -> Node2D:
 
 
 func _world_map_untouched() -> void:
-	ReleaseFlags.arena_enabled_override = -1
+	ReleaseFlags.arena_enabled_override = 0
 	var packed := load(WORLD) as PackedScene
 	var cold: Node = packed.instantiate()
 	var cold_names: Array[String] = []
@@ -277,9 +278,16 @@ func _single_down() -> void:
 	check("één speler neer: signaal komt aan, run blijft", bool(heard["on"]) and run.phase == RunScript.PHASE_WAVE and run.wave == 1)
 	check("neer blijft 0 voor de clear", int(noor["hp"]) == 0)
 	var half := int(dax["hp"])
+	var dax_sim: Dictionary = dax.duplicate(true)
+	var xp_w1 := int(Rewards.for_wave(1).get("xp", 0))
+	if int(dax_sim.get("hp", 0)) > 0 and xp_w1 > 0:
+		GameState.give_exp(dax_sim, xp_w1)
+	var mx_exp := int(dax_sim["max_hp"])
+	var hp_exp := int(dax_sim["hp"])
+	var gain_exp := int(float(mx_exp) * float(Rewards.hp_percent()) / 100.0)
+	var hp_expected := mini(mx_exp, hp_exp + gain_exp)
 	waves.wave_cleared.emit(1)
-	var gain := int(float(mx) * float(Rewards.hp_percent()) / 100.0)
-	check("tussen waves: procent HP, niet boven max", int(dax["hp"]) == mini(mx, half + gain))
+	check("tussen waves: procent HP, niet boven max", int(dax["hp"]) == hp_expected)
 	check("één speler neer blijft neer", int(noor["hp"]) == 0)
 	check("na clear: keuze, geen results", run.phase == RunScript.PHASE_CHOICE)
 
@@ -353,7 +361,7 @@ func _shop() -> void:
 	var gear_buy: Dictionary = Shop.buy("blade")
 	check("gear gekocht", gear_buy.get("ok") == true and GameState.item_count("arena_blade") == 1)
 	check("gear telt als uitrusting zolang de vlag aan staat", Equipment.is_equipment("arena_blade"))
-	check("gear-atk is de placeholder", int(Equipment.item("arena_blade").get("atk", 0)) == ShopData.BLADE_ATK)
+	check("gear-atk volgt shop-data", int(Equipment.item("arena_blade").get("atk", 0)) == ShopData.BLADE_ATK)
 	var screen := ShopScreen.new()
 	screen.name = "TestShop"
 	add_child(screen)
@@ -367,8 +375,8 @@ func _shop() -> void:
 		btn.pressed.emit()
 	check("tik op de knop koopt", GameState.arena_tokens == 0 and GameState.item_count("drankje") == count_now + 1)
 	screen.queue_free()
-	ReleaseFlags.arena_enabled_override = -1
-	check("vlag weer uit: gear telt niet meer mee", not Equipment.is_equipment("arena_blade"))
+	ReleaseFlags.arena_enabled_override = 0
+	check("vlag uit: gear telt niet meer mee", not Equipment.is_equipment("arena_blade"))
 
 
 func _touch_choice() -> void:
@@ -401,7 +409,7 @@ func _touch_choice() -> void:
 
 
 func _rooms() -> void:
-	ReleaseFlags.arena_enabled_override = -1
+	ReleaseFlags.arena_enabled_override = 0
 	var lobby: Node = (load(LOBBY) as PackedScene).instantiate()
 	add_child(lobby)
 	await get_tree().process_frame

@@ -41,7 +41,7 @@ func _run_all() -> void:
 	await _punt_c_echte_golf_wel_beloning()
 	await _punt_d_coop_guard()
 	ReleaseFlags.arena_enabled_override = -1
-	check("ARENA_ENABLED blijft false", ReleaseFlags.ARENA_ENABLED == false)
+	check("ARENA_ENABLED blijft true", ReleaseFlags.ARENA_ENABLED == true)
 	print("ARENAWAVESFOLLOWUPTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
 	await get_tree().process_frame
