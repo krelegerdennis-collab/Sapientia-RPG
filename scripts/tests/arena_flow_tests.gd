@@ -44,7 +44,7 @@ func _run_all() -> void:
 	await _wave_banner(hall)
 	await _wipe_full_revive(hall)
 	await _second_run_clears()
-	await _results_button_on_screen(get_tree().current_scene)
+	await _results_button_on_screen(get_tree().current_scene as Node)
 	await _load_hall_redirects_lobby()
 	await _lobby_exit_to_world()
 	print("ARENAFLOWTEST %d PASS, %d FAIL" % [passes, failures])
