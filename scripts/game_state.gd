@@ -757,6 +757,7 @@ func _ready() -> void:
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
 			["--chainfeeltest", "res://scripts/tests/chain_feel_tests.gd", "ChainFeelTest", "chainfeeltest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
+			["--heroattackanimtest", "res://scripts/tests/hero_attack_anim_tests.gd", "HeroAttackAnimTest", "heroattackanimtest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
 			["--staggertest", "res://scripts/tests/stagger_tests.gd", "StaggerTest", "staggertest"],
 			["--perfectdodgetest", "res://scripts/tests/perfect_dodge_tests.gd", "PerfectDodgeTest", "perfectdodgetest"],
