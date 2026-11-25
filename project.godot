@@ -107,7 +107,7 @@ general/default_playback_type.web=0
 
 ; Online co-op: WebSocket-URL van de relay (relay/README.md), bv. "wss://naam.fly.dev".
 ; Leeg = alleen LAN. Omgevingsvariabele SAPIENTIA_RELAY_URL wint (dev/test).
-net/relay_url=""
+net/relay_url="wss://sapientia-coop-relay.fly.dev"
 
 [rendering]
 
