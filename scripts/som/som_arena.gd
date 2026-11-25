@@ -3773,7 +3773,15 @@ func _pull_seat_vitals(slot: int) -> void:
 	var h := member(hid)
 	if h.is_empty():
 		return
-	seat_controller.set_hp_mp(slot, int(h.get("hp", seat_controller.hp_of(slot))), int(h.get("mp", seat_controller.mp_of(slot))))
+	var max_hp := maxi(1, int(h.get("max_hp", seat_controller.max_hp_of(slot))))
+	var max_mp := int(h.get("max_mp", seat_controller.mp_of(slot)))
+	seat_controller.sync_vitals(
+		slot,
+		int(h.get("hp", seat_controller.hp_of(slot))),
+		int(h.get("mp", seat_controller.mp_of(slot))),
+		max_hp,
+		max_mp,
+	)
 
 
 ## member() is de bron. Snapshot en AI lezen daarna dezelfde stoelkopie.
@@ -4428,12 +4436,16 @@ func coop_encode_snapshot(tick: int) -> PackedByteArray:
 		var hid := str(_coop_slots[slot])
 		var h := member(hid)
 		var flags := 0
-		if _coop_down.has(int(slot)):
+		var slot_down := _coop_down.has(int(slot))
+		if slot_down:
 			flags = int((_coop_down[int(slot)] as Dictionary).get("flags", 0))
 		elif ring.is_open and int(slot) == coop_local_slot:
 			flags = Protocol.FLAG_RING_OPEN
 		if int(_pd_counter.get(hid, 0)) > 0:
 			flags |= Protocol.FLAG_PERFECT
+		if not slot_down:
+			var wire_max := mini(maxi(1, int(h.get("max_hp", 1))), 255)
+			flags = (flags & 0xFF) | (wire_max << 8)
 		var hp := int(h.get("hp", 0))
 		if seat_controller != null and seat_controller.tracks(int(slot)):
 			hp = seat_controller.hp_of(int(slot))
@@ -4499,15 +4511,25 @@ func apply_coop_snapshot(snap: Dictionary) -> void:
 		if not hid.is_empty():
 			var h := member(hid)
 			if not h.is_empty():
+				var flags_i := int(row.get("flags", 0))
 				var old_hp := int(h.get("hp", 0))
 				var max_hp := int(h.get("max_hp", old_hp))
+				if not CoopRevive.flag_is_down(flags_i):
+					var wire_max := (flags_i >> 8) & 0xFF
+					if wire_max > 0:
+						max_hp = wire_max
+						h["max_hp"] = max_hp
 				var new_hp := int(row.get("hp", old_hp))
 				if slot == coop_local_slot and shake != null and SomFeelData.ENABLED:
 					var thresh := maxi(1, int(ceil(float(max_hp) * 0.1)))
 					if old_hp - new_hp >= thresh:
 						shake.kick("heavy1")
 				h["hp"] = new_hp
-				combat_stamina.set_current(hid, int(row.get("mp", combat_stamina.current(hid))))
+				var wire_mp := int(row.get("mp", combat_stamina.current(hid)))
+				combat_stamina.set_current(hid, wire_mp)
+				if seat_controller != null and seat_controller.tracks(slot):
+					var max_mp := int(h.get("max_mp", 0))
+					seat_controller.sync_vitals(slot, new_hp, wire_mp, max_hp, max_mp)
 			if not coop_sim_host:
 				_coop_apply_guest_down(slot, hid, body, int(row.get("flags", 0)))
 	if not coop_sim_host:
