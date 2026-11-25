@@ -5,6 +5,8 @@ extends RefCounted
 const WAVE_COUNT := 5
 
 const HP_PERCENT := 30
+## Fractie van max_hp na wipe-terugkeer (1.0 = vol HP). Design Dennis 25-11.
+const ARENA_WIPE_REVIVE_HP_PCT := 1.0
 const TOKEN_CAP := 150
 const WAVES := {
 	1: {"xp": 15, "tokens": 5},
@@ -26,6 +28,19 @@ static func hp_percent() -> int:
 static func for_wave(n: int) -> Dictionary:
 	var row = WAVES.get(n, {})
 	return (row as Dictionary).duplicate(true) if row is Dictionary else {}
+
+
+## Na wipe + 'Back to the lobby': iedereen op 0 weer op (geen dode party op de kaart).
+static func revive_after_wipe() -> void:
+	var pct: float = ARENA_WIPE_REVIVE_HP_PCT
+	for raw in GameState.party:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var hero: Dictionary = raw
+		if int(hero.get("hp", 0)) > 0:
+			continue
+		var mx := maxi(1, int(hero.get("max_hp", 1)))
+		hero["hp"] = maxi(1, int(ceil(float(mx) * pct)))
 
 
 ## Tussen waves: een deel van de max-HP terug, alleen wie nog staat.

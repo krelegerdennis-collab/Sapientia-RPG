@@ -18,7 +18,7 @@ var _cleared_for: int = 0
 var _wiped_for: int = 0
 ## Golf die zonder gevecht is afgerond (hal-timeout of 0 spawns): geen beloning (review #487, punt C).
 var _skipped_for: int = 0
-var _som_hooked := false
+var _som: Node = null
 
 
 func start_wave(n: int) -> void:
@@ -107,16 +107,19 @@ func _is_hall(node: Node) -> bool:
 
 
 func _bind_som(room: Node) -> void:
-	if _som_hooked:
-		return
 	var som: Node = room.get("som") if "som" in room else null
-	if som == null:
+	if som == null or som == _som:
 		return
+	if is_instance_valid(_som):
+		if _som.enemy_defeated.is_connected(_on_enemy_defeated):
+			_som.enemy_defeated.disconnect(_on_enemy_defeated)
+		if _som.player_defeated.is_connected(_on_player_defeated):
+			_som.player_defeated.disconnect(_on_player_defeated)
 	if not som.enemy_defeated.is_connected(_on_enemy_defeated):
 		som.enemy_defeated.connect(_on_enemy_defeated)
 	if not som.player_defeated.is_connected(_on_player_defeated):
 		som.player_defeated.connect(_on_player_defeated)
-	_som_hooked = true
+	_som = som
 
 
 func _spawn_wave(room: Node, n: int) -> void:

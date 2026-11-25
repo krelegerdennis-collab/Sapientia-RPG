@@ -7,6 +7,18 @@ const COLS := 16
 const ROWS := 9
 ## Tegel 140 (atlas 12,8) animeert met de buurkolom 141. 250 ms.
 const GLITCH := Vector2i(12, 8)
+## v3-vloerdecor (docs/arena/ART_README): kerb/schaduw/sleet/zand/littekens — loopbaar, geen muur.
+const WALKABLE_FLOOR_DECO: Dictionary = {
+	108: true, 109: true, 110: true, 111: true,
+	112: true, 113: true, 114: true, 115: true, 116: true, 117: true,
+	120: true, 121: true, 122: true, 123: true,
+	124: true, 125: true, 126: true, 127: true,
+}
+
+
+static func is_walkable_floor_deco(idx: int) -> bool:
+	return bool(WALKABLE_FLOOR_DECO.get(idx, false))
+
 
 static var _ts: TileSet
 

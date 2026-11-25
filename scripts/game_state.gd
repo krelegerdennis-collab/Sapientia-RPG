@@ -791,7 +791,8 @@ func _ready() -> void:
 			["--arenatest", "res://scripts/tests/arena_tests.gd", "ArenaTest", "arenatest"],
 			["--arenawavestest", "res://scripts/tests/arena_waves_tests.gd", "ArenaWavesTest", "arenawavestest"],
 			["--arenawavesfollowuptest", "res://scripts/tests/arena_waves_followup_tests.gd", "ArenaWavesFollowupTest", "arenawavesfollowuptest"],
-			["--arenalobbytest", "res://scripts/tests/arena_lobby_tests.gd", "ArenaLobbyTest", "arenalobbytest"]]:
+			["--arenalobbytest", "res://scripts/tests/arena_lobby_tests.gd", "ArenaLobbyTest", "arenalobbytest"],
+			["--arenaflowtest", "res://scripts/tests/arena_flow_tests.gd", "ArenaFlowTest", "arenaflowtest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
