@@ -1,0 +1,451 @@
+{
+  "archief2": {
+    "platen": {}
+  },
+  "arena_tokens": 0.0,
+  "autosave": true,
+  "battle_style": 0.0,
+  "bestiary": {
+    "mosslijm": {
+      "defeated": 1.0,
+      "seen": true
+    }
+  },
+  "bezocht": [],
+  "checkpoint": {
+    "facing": [
+      0.0,
+      -1.0
+    ],
+    "map": "res://scenes/maps/wilgendal.tscn",
+    "state": {
+      "archief2": {
+        "platen": {}
+      },
+      "arena_tokens": 0.0,
+      "battle_style": 0.0,
+      "bestiary": {
+        "mosslijm": {
+          "defeated": 1.0,
+          "seen": true
+        }
+      },
+      "bezocht": [],
+      "codex": {
+        "active": "codex_0001",
+        "next": 2.0,
+        "pages": [
+          {
+            "agi": 7.0,
+            "atk": 18.0,
+            "caught": {},
+            "def": 6.0,
+            "element": "natuur",
+            "exp": 240.0,
+            "fusion": {
+              "generation": 0.0,
+              "parents": []
+            },
+            "fusion_tags": [
+              "mos",
+              "slijm"
+            ],
+            "hp": 33.0,
+            "level": 5.0,
+            "max_hp": 33.0,
+            "max_mp": 0.0,
+            "mp": 0.0,
+            "name": "Moss Slime",
+            "skills": [
+              "slijmklodder",
+              "mosheling"
+            ],
+            "species": "mosslijm",
+            "type": "slijm",
+            "uid": "codex_0001"
+          }
+        ]
+      },
+      "dungeon100": {
+        "best": 3.0,
+        "checkpoint": 0.0,
+        "delivered": {},
+        "floor": 2.0,
+        "permanent": {},
+        "seed": 0.0,
+        "snapshot": {},
+        "warpers": []
+      },
+      "echo_grot_voltooid": 0.0,
+      "facing": [
+        0.0,
+        -1.0
+      ],
+      "gold": 1234.0,
+      "heard_music": [],
+      "huis_herkomst": "",
+      "inktwurm_codex_sync": true,
+      "inventory": {
+        "drankje": 5.0,
+        "toverwater": 1.0
+      },
+      "kernen": {},
+      "koopman": {
+        "bezoeken": 0.0,
+        "gekocht": [],
+        "laatste": "",
+        "token": false
+      },
+      "leader": "dennis",
+      "map": "res://scenes/maps/wilgendal.tscn",
+      "names_v23": true,
+      "party": [
+        {
+          "agi": 12.0,
+          "atk": 26.0,
+          "base": {
+            "agi": 12.0,
+            "atk": 23.0,
+            "def": 14.0,
+            "mag": 2.0,
+            "mdef": 7.0
+          },
+          "def": 14.0,
+          "equip": {
+            "accessoire": "",
+            "benen": "",
+            "harnas": "",
+            "helm": "",
+            "laarzen": "",
+            "schild": "",
+            "wapen": "kort_zwaard"
+          },
+          "exp": 180.0,
+          "hp": 69.0,
+          "id": "dennis",
+          "level": 4.0,
+          "mag": 2.0,
+          "max_hp": 69.0,
+          "max_mp": 0.0,
+          "mdef": 7.0,
+          "mp": 0.0,
+          "name": "Dennis",
+          "pool_hp": 69.0,
+          "pool_mp": 0.0,
+          "spells": [],
+          "weapon": "kort_zwaard"
+        },
+        {
+          "agi": 18.0,
+          "atk": 31.0,
+          "base": {
+            "agi": 18.0,
+            "atk": 31.0,
+            "def": 17.0,
+            "mag": 29.0,
+            "mdef": 31.0
+          },
+          "def": 17.0,
+          "equip": {
+            "accessoire": "",
+            "benen": "",
+            "harnas": "",
+            "helm": "",
+            "laarzen": "",
+            "schild": "",
+            "wapen": ""
+          },
+          "exp": 1815.0,
+          "hp": 98.0,
+          "id": "lotte",
+          "level": 12.0,
+          "mag": 29.0,
+          "max_hp": 98.0,
+          "max_mp": 47.0,
+          "mdef": 31.0,
+          "mp": 47.0,
+          "name": "Seren",
+          "pool_hp": 98.0,
+          "pool_mp": 47.0,
+          "spells": [
+            "genees"
+          ],
+          "weapon": ""
+        },
+        {
+          "agi": 25.0,
+          "atk": 14.0,
+          "base": {
+            "agi": 25.0,
+            "atk": 14.0,
+            "def": 12.0,
+            "mag": 24.0,
+            "mdef": 22.0
+          },
+          "def": 12.0,
+          "equip": {
+            "accessoire": "",
+            "benen": "",
+            "harnas": "",
+            "helm": "",
+            "laarzen": "",
+            "schild": "",
+            "wapen": ""
+          },
+          "exp": 735.0,
+          "hp": 63.0,
+          "id": "noor",
+          "level": 8.0,
+          "mag": 24.0,
+          "max_hp": 63.0,
+          "max_mp": 46.0,
+          "mdef": 22.0,
+          "mp": 46.0,
+          "name": "Vesper",
+          "pool_hp": 63.0,
+          "pool_mp": 46.0,
+          "spells": [
+            "vuur",
+            "bliksem"
+          ],
+          "weapon": ""
+        }
+      ],
+      "party_bank": [],
+      "pending_kern_absorb": "",
+      "pending_unique_event": "",
+      "play_time": 42.5,
+      "player_name": "Dennis",
+      "puzzle_latched": {},
+      "quests": {},
+      "scenes_seen": [],
+      "story": {
+        "flags": [
+          "golem_verslagen",
+          "gesproken_gerrit",
+          "warper_drift_done"
+        ],
+        "step": 6.0
+      },
+      "tile": [
+        11.0,
+        14.0
+      ],
+      "time_of_day": "day",
+      "uniek": {},
+      "version": 1.0
+    },
+    "tile": [
+      11.0,
+      14.0
+    ]
+  },
+  "codex": {
+    "active": "codex_0001",
+    "next": 2.0,
+    "pages": [
+      {
+        "agi": 7.0,
+        "atk": 18.0,
+        "caught": {},
+        "def": 6.0,
+        "element": "natuur",
+        "exp": 240.0,
+        "fusion": {
+          "generation": 0.0,
+          "parents": []
+        },
+        "fusion_tags": [
+          "mos",
+          "slijm"
+        ],
+        "hp": 33.0,
+        "level": 5.0,
+        "max_hp": 33.0,
+        "max_mp": 0.0,
+        "mp": 0.0,
+        "name": "Moss Slime",
+        "skills": [
+          "slijmklodder",
+          "mosheling"
+        ],
+        "species": "mosslijm",
+        "type": "slijm",
+        "uid": "codex_0001"
+      }
+    ]
+  },
+  "dungeon100": {
+    "best": 3.0,
+    "checkpoint": 0.0,
+    "delivered": {},
+    "floor": 2.0,
+    "permanent": {},
+    "seed": 0.0,
+    "snapshot": {},
+    "warpers": []
+  },
+  "echo_grot_voltooid": 0.0,
+  "facing": [
+    0.0,
+    -1.0
+  ],
+  "game_version": "0.21",
+  "gold": 1234.0,
+  "heard_music": [],
+  "home_slot": 1.0,
+  "huis_herkomst": "",
+  "inktwurm_codex_sync": true,
+  "inventory": {
+    "drankje": 5.0,
+    "toverwater": 1.0
+  },
+  "kernen": {},
+  "koopman": {
+    "bezoeken": 0.0,
+    "gekocht": [],
+    "laatste": "",
+    "token": false
+  },
+  "leader": "dennis",
+  "map": "res://scenes/maps/wilgendal.tscn",
+  "names_v23": true,
+  "party": [
+    {
+      "agi": 12.0,
+      "atk": 26.0,
+      "base": {
+        "agi": 12.0,
+        "atk": 23.0,
+        "def": 14.0,
+        "mag": 2.0,
+        "mdef": 7.0
+      },
+      "def": 14.0,
+      "equip": {
+        "accessoire": "",
+        "benen": "",
+        "harnas": "",
+        "helm": "",
+        "laarzen": "",
+        "schild": "",
+        "wapen": "kort_zwaard"
+      },
+      "exp": 180.0,
+      "hp": 69.0,
+      "id": "dennis",
+      "level": 4.0,
+      "mag": 2.0,
+      "max_hp": 69.0,
+      "max_mp": 0.0,
+      "mdef": 7.0,
+      "mp": 0.0,
+      "name": "Dennis",
+      "pool_hp": 69.0,
+      "pool_mp": 0.0,
+      "spells": [],
+      "weapon": "kort_zwaard"
+    },
+    {
+      "agi": 18.0,
+      "atk": 31.0,
+      "base": {
+        "agi": 18.0,
+        "atk": 31.0,
+        "def": 17.0,
+        "mag": 29.0,
+        "mdef": 31.0
+      },
+      "def": 17.0,
+      "equip": {
+        "accessoire": "",
+        "benen": "",
+        "harnas": "",
+        "helm": "",
+        "laarzen": "",
+        "schild": "",
+        "wapen": ""
+      },
+      "exp": 1815.0,
+      "hp": 98.0,
+      "id": "lotte",
+      "level": 12.0,
+      "mag": 29.0,
+      "max_hp": 98.0,
+      "max_mp": 47.0,
+      "mdef": 31.0,
+      "mp": 47.0,
+      "name": "Seren",
+      "pool_hp": 98.0,
+      "pool_mp": 47.0,
+      "spells": [
+        "genees"
+      ],
+      "weapon": ""
+    },
+    {
+      "agi": 25.0,
+      "atk": 14.0,
+      "base": {
+        "agi": 25.0,
+        "atk": 14.0,
+        "def": 12.0,
+        "mag": 24.0,
+        "mdef": 22.0
+      },
+      "def": 12.0,
+      "equip": {
+        "accessoire": "",
+        "benen": "",
+        "harnas": "",
+        "helm": "",
+        "laarzen": "",
+        "schild": "",
+        "wapen": ""
+      },
+      "exp": 735.0,
+      "hp": 63.0,
+      "id": "noor",
+      "level": 8.0,
+      "mag": 24.0,
+      "max_hp": 63.0,
+      "max_mp": 46.0,
+      "mdef": 22.0,
+      "mp": 46.0,
+      "name": "Vesper",
+      "pool_hp": 63.0,
+      "pool_mp": 46.0,
+      "spells": [
+        "vuur",
+        "bliksem"
+      ],
+      "weapon": ""
+    }
+  ],
+  "party_bank": [],
+  "pending_kern_absorb": "",
+  "pending_unique_event": "",
+  "play_time": 42.5,
+  "player_name": "Dennis",
+  "puzzle_latched": {},
+  "quests": {},
+  "saved_at": "2026-01-15T12:00:00",
+  "saved_unix": 1736935200,
+  "scenes_seen": [],
+  "slot": 0.0,
+  "story": {
+    "flags": [
+      "golem_verslagen",
+      "gesproken_gerrit",
+      "warper_drift_done"
+    ],
+    "step": 6.0
+  },
+  "tile": [
+    11.0,
+    14.0
+  ],
+  "time_of_day": "day",
+  "uniek": {},
+  "version": 1.0
+}
