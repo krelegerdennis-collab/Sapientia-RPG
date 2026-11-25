@@ -475,8 +475,8 @@ func _winkel_data() -> void:
 	var vk: Array = W.voorraad(SEED, 2, [], 55).filter(func(x): return x["soort"] == "uitrusting")
 	var kr := W.koop(SEED, 2, [], str(vk[0]["id"]), 55)
 	check("geschaald stuk kopen werkt", kr["ok"] and int(GameState.inventory.get(str(vk[0]["id"]), 0)) >= 1)
-	check("inkoop: consumable 50% (Elixir %d)" % W.inkoop_prijs("elixer"), W.inkoop_prijs("elixer") == 150)
-	check("inkoop: uitrusting 40% (Short Sword %d)" % W.inkoop_prijs("kort_zwaard"), W.inkoop_prijs("kort_zwaard") == 48)
+	check("inkoop: consumable 50%% (Elixir %d)" % W.inkoop_prijs("elixer"), W.inkoop_prijs("elixer") == 150)
+	check("inkoop: uitrusting 40%% (Short Sword %d)" % W.inkoop_prijs("kort_zwaard"), W.inkoop_prijs("kort_zwaard") == 48)
 	var g4id: String = g4[0]["id"]
 	check("inkoop: Grade 4 60%", W.inkoop_prijs(g4id) == int(W.basis_prijs(g4id) * 0.6))
 	check("sleutel-items koopt hij niet", W.inkoop_prijs("hanger") == 0)

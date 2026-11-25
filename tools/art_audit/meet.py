@@ -7,6 +7,7 @@ Gebruik (vanuit de repo-root):
     python3 tools/art_audit/meet.py
     python3 tools/art_audit/meet.py --palet pad/naar/master.gpl
     python3 tools/art_audit/meet.py --palet master.png --assets assets --uit art_meting.csv
+    python3 tools/art_audit/meet.py --negeer '**/*_n.png' --negeer 'tmp/**'
 
 Kolommen:
     pad                  pad t.o.v. de map waarin gescand wordt (assets/...)
@@ -27,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import fnmatch
 import sys
 from pathlib import Path
 
@@ -113,9 +115,65 @@ def zoek_pngs(map_: Path) -> list[Path]:
     return sorted(p for p in map_.rglob("*") if p.is_file() and p.suffix.lower() == ".png")
 
 
-def meet_map(assets: Path, uit: Path, palet: set[RGB] | None) -> int:
+def glob_match(rel: str, patroon: str) -> bool:
+    """Of het volledige posix-pad de glob dekt. `**` is nul of meer mappen."""
+    pat = [deel for deel in patroon.replace("\\", "/").split("/") if deel]
+    if not pat:
+        return False
+    return _segmenten(rel.split("/") if rel else [], pat)
+
+
+def _segmenten(delen: list[str], pat: list[str]) -> bool:
+    # `**` als heel segment; pathlib 3.12 laat `**` niet over mappen heen lopen.
+    i = j = 0
+    ster_i = ster_j = -1
+    while i < len(delen):
+        if j < len(pat) and pat[j] == "**":
+            ster_i, ster_j = i, j
+            j += 1
+        elif j < len(pat) and fnmatch.fnmatchcase(delen[i], pat[j]):
+            i += 1
+            j += 1
+        elif ster_j >= 0:
+            ster_i += 1
+            i, j = ster_i, ster_j + 1
+        else:
+            return False
+    while j < len(pat) and pat[j] == "**":
+        j += 1
+    return j == len(pat)
+
+
+def is_genegeerd(pad: Path, globs: list[str]) -> bool:
+    """True als het repo-relatieve pad bij een --negeer-glob hoort. Lege lijst: nooit."""
+    if not globs:
+        return False
+    opgelost = pad.resolve()
+    try:
+        rel = opgelost.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        rel = opgelost.as_posix()
+    return any(glob_match(rel, patroon) for patroon in globs)
+
+
+def zonder_negeer(map_: Path, globs: list[str]) -> tuple[list[Path], int]:
+    """PNG's die overblijven, plus hoeveel --negeer eruit haalde. Geen standaardlijst."""
+    pngs = zoek_pngs(map_)
+    if not globs:
+        return pngs, 0
+    houden: list[Path] = []
+    genegeerd = 0
+    for png in pngs:
+        if is_genegeerd(png, globs):
+            genegeerd += 1
+        else:
+            houden.append(png)
+    return houden, genegeerd
+
+
+def meet_map(assets: Path, uit: Path, palet: set[RGB] | None, negeer: list[str] | None = None) -> int:
     """Meet alle PNG's onder `assets` en schrijf de CSV naar `uit`. Geeft het aantal rijen terug."""
-    pngs = zoek_pngs(assets)
+    pngs, _genegeerd = zonder_negeer(assets, negeer or [])
     basis = assets.parent
     with uit.open("w", newline="", encoding="utf-8") as f:
         schrijver = csv.DictWriter(f, fieldnames=KOLOMMEN)
@@ -137,14 +195,20 @@ def main(argv: list[str] | None = None) -> int:
                         help="map om te scannen (standaard: <repo>/assets)")
     parser.add_argument("--uit", type=Path, default=Path("art_meting.csv"),
                         help="uitvoer-CSV (standaard: ./art_meting.csv)")
+    parser.add_argument("--negeer", action="append", default=None, metavar="GLOB",
+                        help="glob op het repo-relatieve pad; sla treffers over (herhaalbaar)")
     args = parser.parse_args(argv)
 
     if not args.assets.is_dir():
         parser.error(f"map bestaat niet: {args.assets}")
     palet = lees_palet(args.palet) if args.palet else None
 
-    aantal = meet_map(args.assets.resolve(), args.uit, palet)
+    assets = args.assets.resolve()
+    globs: list[str] = args.negeer or []
+    aantal = meet_map(assets, args.uit, palet, globs)
     print(f"{aantal} PNG's gemeten -> {args.uit}")
+    if args.negeer:
+        print(f"{zonder_negeer(assets, globs)[1]} genegeerd")
     return 0
 
 

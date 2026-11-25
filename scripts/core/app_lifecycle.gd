@@ -13,8 +13,11 @@ extends Node
 ##    verversingssnelheid). Op een telefoon geprint (adb logcat -s godot) en in de SessieLog gezet.
 ##  - NIETS opslaan. De pauze-save blijft in GameState (commit 0e9178b: reden "achtergrond", alle
 ##    blokkades blijven gelden). Een autosave bij suspend komt niet terug (besluit Dennis).
+##  - Android-systeemterug (NOTIFICATION_WM_GO_BACK_REQUEST) wordt één 'cancel'-tik, hetzelfde
+##    als B/Back. Het spel sluit daar niet vanzelf op af (quit_on_go_back uit).
 ##
 ## Testen: godot -- --lifecycletest (scripts/tests/lifecycle_tests.gd).
+##          godot -- --androidbacktest (scripts/tests/android_back_tests.gd).
 
 signal backgrounded
 signal foregrounded
@@ -47,10 +50,16 @@ var _paused_players: Array[WeakRef] = []
 var _menus: Dictionary = {}
 var _script_cache: Dictionary = {}
 var _last_info_key := ""
+## Systeemterug: tik in het volgende _process (deze autoload loopt vóór de schermen),
+## loslaten het beeld daarna. Zo ziet is_action_just_pressed('cancel') precies één beeld.
+var _pending_cancel := false
+var _release_cancel := false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Android: systeemterug mag de app niet sluiten. De melding hieronder wordt 'cancel'.
+	get_tree().set_quit_on_go_back(false)
 	low_processor_enabled = bool(ProjectSettings.get_setting(SETTING_LOW_PROCESSOR, true)) \
 			and OS.get_cmdline_user_args().is_empty()
 	get_tree().node_added.connect(_on_node_added)
@@ -85,6 +94,29 @@ func _notification(what: int) -> void:
 				_enter_background("focus")
 		NOTIFICATION_APPLICATION_FOCUS_IN:
 			_leave_background("focus")
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			_pending_cancel = true
+
+
+func _process(_delta: float) -> void:
+	if _pending_cancel:
+		_pending_cancel = false
+		_release_cancel = _press_cancel()
+		return
+	if _release_cancel:
+		_release_cancel = false
+		if InputMap.has_action("cancel"):
+			Input.action_release("cancel")
+
+
+## Eén cancel-tik. False als de actie niet bestaat (dan ook niet loslaten).
+func _press_cancel() -> bool:
+	if not InputMap.has_action("cancel"):
+		return false
+	if Input.is_action_pressed("cancel"):
+		Input.action_release("cancel")
+	Input.action_press("cancel")
+	return true
 
 
 # ---------------------------------------------------------------------------

@@ -111,7 +111,6 @@ const CommandCrossScript := preload("res://scripts/battle/command_cross.gd")
 const CodexDataScript := preload("res://scripts/data/codex_data.gd")   # v0.19 Codex-knop
 ## v0.14 (RPG CODE) roze kern van de Golem-baas: regels + beeld (zie boss_core.gd)
 const BossCore := preload("res://scripts/battle/boss_core.gd")
-const BossHpBarScript := preload("res://scripts/battle/boss_hp_bar.gd")
 const KernData := preload("res://scripts/data/kern_data.gd")   # v0.15 kernvaardigheden
 const Archief2 := preload("res://scripts/data/archief2.gd")
 const Archief2Vijanden := preload("res://scripts/data/archief2_vijanden.gd")
@@ -119,6 +118,13 @@ const SpellRules := preload("res://scripts/data/spell_rules.gd")
 const DamageCalc := preload("res://scripts/battle/damage_calc.gd")   # schadeformules (static)
 const BossCoreView := preload("res://scripts/battle/boss_core_view.gd")
 const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: vangen + bondgenoot
+const BattleLayoutScript := preload("res://scripts/battle/battle_layout.gd")
+const BattleCommandsScript := preload("res://scripts/battle/battle_commands.gd")
+const BattleRulesScript := preload("res://scripts/battle/battle_rules.gd")
+const BattleTipsScript := preload("res://scripts/battle/battle_tips.gd")
+const BattleKernScript := preload("res://scripts/battle/battle_kern.gd")
+const BattleStatusScript := preload("res://scripts/battle/battle_status.gd")
+const BattleBossScript := preload("res://scripts/battle/battle_boss.gd")
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
 const CORE_HIT_COLOR := Color("ff8ad8")
 const ARMOR_HIT_COLOR := Color("b5a78d")
@@ -209,6 +215,7 @@ var _pp_lbl := ""
 
 
 func _ready() -> void:
+	_layout_h = BattleLayoutScript.new(self)
 	# T27: s25_check RISK — gevecht-enter (battle_gras/woud/archief/baas_golem/kas)
 	_pp_on = PerfProbe.enabled
 	if _pp_on:
@@ -281,129 +288,89 @@ func _ready() -> void:
 
 ## Demo-fix 3: zichtbare HP-balk voor de baas (eerste vijand met een kern / in een baasgevecht).
 var boss_bar: Control = null
+var _layout_h: RefCounted
+var _cmds_h: RefCounted
+var _tips_h: RefCounted
+var _kern_h: RefCounted
+var _status_h: RefCounted
+var _boss_h: RefCounted
 
 
+func _boss():
+	if _boss_h == null:
+		_boss_h = BattleBossScript.new(self)
+	return _boss_h
+
+
+func _kern():
+	if _kern_h == null:
+		_kern_h = BattleKernScript.new(self)
+	return _kern_h
+
+
+func _status():
+	if _status_h == null:
+		_status_h = BattleStatusScript.new(self)
+	return _status_h
+
+
+func _tips():
+	if _tips_h == null:
+		_tips_h = BattleTipsScript.new(self)
+	return _tips_h
+
+
+func _cmds():
+	if _cmds_h == null:
+		_cmds_h = BattleCommandsScript.new(self)
+	return _cmds_h
+
+
+# ================================================================ scherm/layout (battle_layout.gd)
 func _make_boss_bar() -> void:
-	if not GameState.pending_boss or enemies.is_empty():
-		return
-	var t: Dictionary = enemies[0]
-	for e in enemies:
-		if e.has("core"):
-			t = e
-			break
-	boss_bar = BossHpBarScript.new()
-	boss_bar.name = "BossHpBar"
-	add_child(boss_bar)
-	move_child(boss_bar, $TouchControls.get_index())
-	boss_bar.setup(t)
+	_layout_h.make_boss_bar()
 
 
 func _place_boss_bar(w: float) -> void:
-	if boss_bar:
-		var max_w := w - 8.0 - 6.0 - _safe().z
-		if boss_bar.has_method("relayout"):
-			boss_bar.relayout(max_w)
-		boss_bar.position = Vector2(roundf(w - boss_bar.size.x - 6.0 - _safe().z), 18.0 + _safe().y)
+	_layout_h.place_boss_bar(w)
 
 
-# ================================================================ fijn raster (768x432)
-## Het venster rendert tijdens het gevecht 2x zo veel pixels (content_scale_size),
-## en deze scène + de touch-knoppen worden 2x geschaald. Alles in deze scène
-## rekent dus gewoon verder in 384x216. Bij het verlaten zetten we het terug,
-## zodat de overworld er precies hetzelfde uitziet als altijd.
+## Het venster rendert tijdens het gevecht 2x zo veel pixels; zie battle_layout.enter_detail_mode().
 func _enter_detail_mode() -> void:
-	var win := get_window()
-	_previous_scale_size = win.content_scale_size
-	if _previous_scale_size == Vector2i.ZERO:
-		_previous_scale_size = Vector2i(384, 216)
-	win.content_scale_size = _previous_scale_size * DETAIL
-	set_anchors_preset(Control.PRESET_TOP_LEFT)
-	scale = Vector2(DETAIL, DETAIL)
-	$TouchControls.scale = Vector2(DETAIL, DETAIL)
-	_fit_to_screen()
-	get_viewport().size_changed.connect(_fit_to_screen)
+	_layout_h.enter_detail_mode()
 
 
-## Vensters met dunne, scherpe randen op het 2x-raster (zie hd_ui.gd). We passen een
-## KOPIE van het thema aan, zodat de vensters in de overworld niet veranderen.
 func _apply_hd_ui() -> void:
-	if theme:
-		var t: Theme = theme.duplicate()
-		for type_name in ["Panel", "PanelContainer"]:
-			if t.has_stylebox("panel", type_name):
-				t.set_stylebox("panel", type_name,
-						HdUi.hd_style(t.get_stylebox("panel", type_name), "res://assets/ui/window_hd.png"))
-		theme = t
-	# v0.13: palet (scripts/ui/ui_style.gd) voor strook en overwinningsvenster
-	# v0.16: buit/beloning na het gevecht in het blauwe Lufia 2-vak (zelfde als de tekstvakken)
-	victory_panel.add_theme_stylebox_override("panel", UiStyle.blue_box("vak", Vector4(9, 7, 9, 6)))
-	victory_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	victory_label.add_theme_color_override("font_color", UiStyle.BOX_TEXT)
-	victory_label.add_theme_color_override("font_shadow_color", UiStyle.BOX_SHADOW)
-	caption.add_theme_stylebox_override("panel", UiStyle.panel("soft"))
+	_layout_h.apply_hd_ui()
 
 
-## v0.13: commando-kruis + doelnaam-label maken.
 func _make_cross() -> void:
-	cross = CommandCrossScript.new()
-	cross.name = "CommandCross"
-	add_child(cross)
-	move_child(cross, $TouchControls.get_index())     # onder de touch-knoppen
-	cross.denied.connect(func(i: int): if i == 1: show_notice("No spells yet"))
-	target_name = PanelContainer.new()
-	target_name.name = "TargetName"
-	target_name.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	target_name.add_theme_stylebox_override("panel", UiStyle.panel("tab", UiStyle.TEAL_DIM))
-	target_name_label = Label.new()
-	target_name_label.add_theme_color_override("font_color", UiStyle.TEXT)
-	target_name.add_child(target_name_label)
-	add_child(target_name)
-	move_child(target_name, $TouchControls.get_index())
-	target_name.hide()
+	_layout_h.make_cross()
 
 
-## Regelhoogte voor een lijstje van n regels: zo hoog als de tikmaat (25), maar niet hoger dan er past boven
-## de helden (het lijstje staat rechtsboven en bedekt de helden liever niet), nooit onder LIST_ROW_MIN.
 func _list_row_h(n: int) -> int:
-	if _hero_top_y <= 0.0 or n <= 0:
-		return LIST_ROW_H
-	var free := _hero_top_y - (SUBMENU_TOP + _safe().y) - LIST_CHROME
-	return clampi(int(floorf(free / float(n))), LIST_ROW_MIN, LIST_ROW_H)
+	return _layout_h.list_row_h(n)
 
 
-## Veilig gebied (notch) in de eenheden van dit scherm; de touch-laag rekent het uit.
 func _safe() -> Vector4:
-	if touch != null and "safe_inset" in touch:
-		return touch.safe_inset
-	return Vector4.ZERO
+	return _layout_h.safe()
 
 
 func _fit_to_screen() -> void:
-	if not is_inside_tree():
-		return
-	position = Vector2.ZERO
-	size = get_viewport_rect().size / DETAIL
-	if touch and touch.has_method("refit"):
-		touch.refit()
+	_layout_h.fit_to_screen()
 
 
 func _exit_tree() -> void:
 	if _battle_music_pushed:
 		_battle_music_pushed = false
 		AudioManager.pop_music(0.35)
-	if get_viewport().size_changed.is_connected(_fit_to_screen):
-		get_viewport().size_changed.disconnect(_fit_to_screen)
-	if touch and get_viewport().size_changed.is_connected(touch.refit):
-		get_viewport().size_changed.disconnect(touch.refit)
-	if _previous_scale_size != Vector2i.ZERO:
-		get_window().content_scale_size = _previous_scale_size
+	if _layout_h:
+		_layout_h.leave_detail_mode()
 
 
 ## Alleen de baas van Archief 2 (De Genezer) heeft een eigen track; de rest blijft zoals het was.
 static func battle_music_for(enemies: Array, boss: bool) -> String:
-	if boss and "genezer" in enemies:
-		return "baas_archief2"
-	return "gevecht_miniboss" if boss else "gevecht_normaal"
+	return BattleRulesScript.battle_music_for(enemies, boss)
 
 
 func _start_battle_music() -> void:
@@ -510,347 +477,56 @@ func _spawn_enemies(ids: Array) -> void:
 		enemies.append(c)
 
 
-static var _top_cache := {}
-
-
-## v0.13: optionele idle-animatie van een vijand (game_data.gd: "idle" = strook met
-## "idle_frames" frames, elk frame even groot als "sprite"; "idle_time" = sec per frame).
-## Zonder "idle" blijft het plaatje stil (zoals altijd).
-## Optioneel ook "hit" = plaatje (zelfde grootte/ankerpunt) dat even getoond wordt bij schade.
 func _add_enemy_idle(node: TextureButton, data: Dictionary) -> void:
-	node.set_meta("still", node.texture_normal)
-	var hit_path := str(data.get("hit", ""))
-	if hit_path != "" and ResourceLoader.exists(hit_path):
-		node.set_meta("hit_tex", GameState.get_resource(hit_path))
-	_add_enemy_under(node, data)
-	var path := str(data.get("idle", ""))
-	if path == "" or not ResourceLoader.exists(path):
-		return
-	var strip: Texture2D = GameState.get_resource(path)
-	var n := maxi(1, int(data.get("idle_frames", 2)))
-	var fw := strip.get_width() / n
-	var frames: Array[Texture2D] = []
-	for i in n:
-		var at := AtlasTexture.new()
-		at.atlas = strip
-		at.region = Rect2(i * fw, 0, fw, strip.get_height())
-		frames.append(at)
-	node.texture_normal = frames[0]
-	node.set_meta("idle_frames", frames)
-	var timer := Timer.new()
-	timer.name = "Idle"
-	timer.wait_time = float(data.get("idle_time", 0.5))
-	timer.autostart = true
-	var k := [0]
-	timer.timeout.connect(func():
-		k[0] = (k[0] + 1) % frames.size()
-		if not node.has_meta("hit_until"):
-			node.texture_normal = frames[k[0]])
-	node.add_child(timer)
+	_layout_h.add_enemy_idle(node, data)
 
 
-const HIT_SHOW := 0.3
-
-## v0.13: optionele aparte laag ONDER/achter de vijand (bv. de runecirkel van de Golem):
-## game_data.gd "under" = strook met "under_frames" frames, "under_pos" = [x, y] linksboven in
-## de pixels van het vijand-plaatje (mag eronder uitsteken), "under_time" = sec per frame.
 func _add_enemy_under(node: TextureButton, data: Dictionary) -> void:
-	var path := str(data.get("under", ""))
-	if path == "" or not ResourceLoader.exists(path):
-		return
-	var strip: Texture2D = GameState.get_resource(path)
-	var n := maxi(1, int(data.get("under_frames", 1)))
-	var fw := strip.get_width() / n
-	var frames: Array[Texture2D] = []
-	for i in n:
-		var at := AtlasTexture.new()
-		at.atlas = strip
-		at.region = Rect2(i * fw, 0, fw, strip.get_height())
-		frames.append(at)
-	var still: Texture2D = node.texture_normal
-	var k := node.size.x / float(still.get_width())    # zelfde schaal als het vijand-plaatje
-	var up: Array = data.get("under_pos", [0, 0])
-	var under := TextureRect.new()
-	under.name = "Under"
-	under.texture = frames[0]
-	under.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	under.stretch_mode = TextureRect.STRETCH_SCALE
-	under.position = Vector2(float(up[0]), float(up[1])) * k
-	under.size = Vector2(fw, strip.get_height()) * k
-	under.show_behind_parent = true
-	under.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	under.set_meta("frames", frames)
-	node.add_child(under)
-	if n > 1:
-		var timer := Timer.new()
-		timer.name = "UnderTimer"
-		timer.wait_time = float(data.get("under_time", 0.8))
-		timer.autostart = true
-		var j := [0]
-		timer.timeout.connect(func():
-			j[0] = (j[0] + 1) % frames.size()
-			under.texture = frames[j[0]])
-		node.add_child(timer)
+	_layout_h.add_enemy_under(node, data)
 
-## v0.13: raak-plaatje even tonen (alleen als de vijand er een heeft), daarna terug naar
-## het idle-frame / het stille plaatje.
+
 func _show_hit_frame(node: Control) -> void:
-	if not (node is TextureButton) or not node.has_meta("hit_tex"):
-		return
-	var b := node as TextureButton
-	var token := Time.get_ticks_usec()
-	b.set_meta("hit_until", token)
-	b.texture_normal = b.get_meta("hit_tex")
-	await get_tree().create_timer(HIT_SHOW).timeout
-	if not is_instance_valid(b) or b.get_meta("hit_until", 0) != token:
-		return
-	b.remove_meta("hit_until")
-	var idle_t: Timer = b.get_node_or_null("Idle")
-	if b.has_meta("idle_frames") and idle_t:
-		b.texture_normal = b.get_meta("idle_frames")[0]
-	else:
-		b.texture_normal = b.get_meta("still")
+	await _layout_h.show_hit_frame(node)
 
 
-## Eerste niet-doorzichtige rij van een plaatje (gecachet).
 static func sprite_top(path: String, tex: Texture2D) -> float:
-	if not _top_cache.has(path):
-		var img := tex.get_image()
-		_top_cache[path] = float(img.get_used_rect().position.y) if img and not img.is_empty() else 0.0
-	return _top_cache[path]
+	return BattleLayoutScript.sprite_top(path, tex)
 
 
-## Alles op zijn plek zetten (ook opnieuw als het scherm van grootte verandert).
 func _layout() -> void:
-	var w := size.x if size.x > 0 else 384.0
-	var h := size.y if size.y > 0 else 216.0
-	var dx := roundf((w - 384.0) / 2.0)
-	# Knoppen: statusvakken tussen de joystick en de B-knop, menu links van de A-knop.
-	var left := 78.0
-	var right := 300.0
-	var menu_right := w - 49.0
-	if touch and touch.has_method("dpad_center"):
-		left = touch.dpad_center().x + touch.joy_radius() * 1.2 + 4.0
-		right = touch.b_center().x - touch.button_radius * 1.25 - 4.0
-		menu_right = floorf(touch.a_center().x - touch.button_radius * 1.25 - 1.0)
-	# v0.13: lijstje (spreuken/items) rechtsboven; het kruis rechtsonder boven A/B
-	menu.right_edge = w - CROSS_MARGIN - _safe().z
-	menu.top_edge = SUBMENU_TOP + _safe().y
-	menu.bottom_edge = -1.0
-	_menu_left = left
-	_menu_right = right
-	_fit_caption()
-	_place_boss_bar(w)
-	# Statusvakken: onderaan. v0.22 (Dennis): het Codex-monster heeft GEEN vak in de rij meer;
-	# zijn vak is een klein 'zijspeler'-label (icoon + naam, geen balken) boven de B-knop en de
-	# sprite staat daar vlak boven. De lijst status_boxes blijft gelijk aan heroes (indexen).
-	var row_boxes: Array = status_boxes.filter(func(bx): return not bool(bx.get("monster")))
-	var count := row_boxes.size()
-	if count > 0:
-		# v0.15: links ruimte maken voor het commando-kruis naast de eerste held (als het past)
-		var box_left := _box_left_for_cross(left, right, count)
-		var bw := floorf((right - box_left - BOX_GAP * (count - 1)) / count)
-		bw = minf(bw, 88.0)
-		var total := bw * count + BOX_GAP * (count - 1)
-		var x0 := roundf(box_left + (right - box_left - total) / 2.0)
-		for i in count:
-			var box: Control = row_boxes[i]
-			box.position = Vector2(x0 + i * (bw + BOX_GAP), h - StatusBoxScript.HEIGHT - 3)
-			box.size = Vector2(bw, StatusBoxScript.HEIGHT)
-			box.queue_redraw()
-	var b_mid := Vector2(w - 54.0, h - 34.0)
-	var b_r := 15.0
-	if touch and touch.has_method("b_center"):
-		b_mid = touch.b_center()
-		b_r = touch.button_radius * 1.25
-	for bx in status_boxes:
-		if bool(bx.get("monster")):
-			var sz: Vector2 = StatusBoxScript.SIDE_SIZE
-			var px := clampf(roundf(b_mid.x - sz.x / 2.0), 2.0, w - sz.x - 2.0)
-			bx.position = Vector2(px, roundf(b_mid.y - b_r - SIDE_GAP - sz.y))
-			bx.size = sz
-			bx.queue_redraw()
-	# Helden: midden boven hun eigen statusvak (reserve: de oude vaste plekken); het monster
-	# boven zijn zijspeler-label
-	for i in hero_nodes.size():
-		var slot: Vector2
-		if i < status_boxes.size():
-			var box: Control = status_boxes[i]
-			var gap := 0.0 if bool(box.get("monster")) else HERO_BOX_GAP
-			slot = Vector2(roundf(box.position.x + box.size.x / 2.0), box.position.y - gap)
-		elif i < HERO_SLOTS.size():
-			slot = HERO_SLOTS[i] + Vector2(dx, 0)
-		else:
-			slot = HERO_SLOTS[HERO_SLOTS.size() - 1] + Vector2(dx + 26 * (i - HERO_SLOTS.size() + 1), 0)
-		hero_nodes[i].set_home(slot)
-	_sort_by_feet(party_layer)
-	# v0.15: het kruis links naast de helden (hangt af van waar de helden staan)
-	_place_cross(w, h)
-	_layout_enemies(w, dx)
-	_place_menu(maxi(_menu_hero, 0), false)
+	_layout_h.layout()
 
 
-## v0.15 Commando-kruis LINKS naast de party (zie CROSS_HERO_GAP). Horizontaal: rechterkant net
-## links van de meest linkse held (zichtbare art en tik-vak, ook als hij een stap naar voren zet).
-## Verticaal: midden op de hoogte van de helden, maar boven de statusvakken en - als het kruis
-## boven de D-pad uitkomt - boven de D-pad. Past het niet naast de helden (heel smal scherm), dan
-## links tegen de rand en boven de helden.
 func _place_cross(w: float, h: float) -> void:
-	if cross == null:
-		return
-	var span: float = CommandCrossScript.BUTTON * 3.0 + CommandCrossScript.GAP * 2.0
-	var half := span / 2.0
-	# heldenblok: linkerkant, boven- en onderkant (tik-vak + art, thuis en een stap naar voren)
-	var hero_l := w
-	var hero_top := h
-	var hero_bottom := 0.0
-	_hero_top_y = 0.0
-	for node in hero_nodes:
-		var rects: Array = [Rect2(node.home - node.FEET, node.SIZE),
-				Rect2(node.home + node.STEP - node.FEET, node.SIZE)]
-		if node.has_method("art_rect"):
-			rects.append(node.art_rect(node.home))
-		for r in rects:
-			hero_l = minf(hero_l, r.position.x)
-			hero_top = minf(hero_top, r.position.y)
-			hero_bottom = maxf(hero_bottom, r.end.y)
-	if hero_nodes.is_empty():
-		hero_l = w * 0.45
-		hero_top = h * 0.45
-		hero_bottom = h - StatusBoxScript.HEIGHT - 6.0
-	else:
-		_hero_top_y = hero_top
-	var right := floorf(hero_l - CROSS_HERO_GAP)
-	var x0 := maxf(CROSS_EDGE + _safe().x, right - span)
-	var beside := x0 + span <= right + 0.5
-	var r_x := Rect2(x0, 0, span, h)
-	# onderkant: niet over een statusvak of (als het kruis erboven komt) de D-pad
-	var bottom_limit := h - CROSS_EDGE
-	for box in status_boxes:
-		var br := Rect2(box.position, box.size)
-		if br.position.x < r_x.end.x and br.end.x > r_x.position.x:
-			bottom_limit = minf(bottom_limit, br.position.y - 2.0)
-	if touch and touch.has_method("dpad_center"):
-		var dc: Vector2 = touch.dpad_center()
-		var dr: float = touch.joy_radius() * 1.2
-		if x0 < dc.x + dr:
-			bottom_limit = minf(bottom_limit, dc.y - dr - 2.0)
-	var cy: float
-	if beside:
-		# midden op de heldenrij (iets hoger dan het midden: dichter bij hun bovenlijf)
-		cy = (hero_top + hero_bottom) / 2.0 - 4.0
-	else:
-		# geen plek naast de helden: boven ze
-		cy = hero_top - 2.0 - half
-	cy = minf(cy, bottom_limit - half)
-	cy = maxf(cy, CAPTION_TOP + 1.0 + CROSS_TAB_ROOM + half)
-	cross.place(Vector2(roundf(x0 + half), floorf(cy)))
-	# vijanden rechts van het kruis (en zijn naam-tabje) houden
-	var cr: Rect2 = cross.cross_rect()
-	_enemy_left_reserve = cr.end.x + 3.0 if cr.position.y - CROSS_TAB_ROOM < ENEMY_FEET_Y + 6.0 else 0.0
+	_layout_h.place_cross(w, h)
 
-
-## v0.15 Linkerrand van de statusvakken zodat het kruis (CROSS_EDGE + kruis + CROSS_HERO_GAP)
-## links naast de art van de eerste held past. Schuift de vakken alleen naar rechts zolang ze
-## minstens MIN_BOX_W breed blijven; anders blijft alles staan (het kruis gaat dan boven de helden).
-const MIN_BOX_W := 56.0
 
 func _box_left_for_cross(left: float, right: float, count: int) -> float:
-	if hero_nodes.is_empty() or not hero_nodes[0].has_method("art_rect"):
-		return left
-	var span: float = CommandCrossScript.BUTTON * 3.0 + CommandCrossScript.GAP * 2.0
-	var art_off: float = -hero_nodes[0].art_rect(Vector2.ZERO).position.x     # art links van de voeten
-	var tap_off: float = hero_nodes[0].FEET.x
-	var need := CROSS_EDGE + span + CROSS_HERO_GAP + maxf(art_off, tap_off)  # midden van held 0
-	var l := left
-	while l < right:
-		var bw := minf(floorf((right - l - BOX_GAP * (count - 1)) / count), 88.0)
-		if bw < MIN_BOX_W:
-			return left
-		var total := bw * count + BOX_GAP * (count - 1)
-		var x0 := roundf(l + (right - l - total) / 2.0)
-		if x0 + roundf(bw / 2.0) >= need:
-			return l
-		l += 1.0
-	return left
+	return _layout_h.box_left_for_cross(left, right, count)
 
 
-## v0.15 Gebied voor de vijandenrij: [links, rechts] (rechts van het kruis).
 func enemy_region(w: float) -> Array:
-	return [maxf(ENEMY_LEFT, _enemy_left_reserve), w - ENEMY_LEFT]
+	return _layout_h.enemy_region(w)
 
 
-## Commandomenu boven het statusvak van held i (linkerkanten gelijk, geklemd tussen
-## D-pad en A/B). animate = kort opzij schuiven naar de volgende held.
-## v0.13: het lijstje staat vast rechtsboven (niet meer over de held heen).
 func _place_menu(i: int, _animate: bool) -> void:
-	_menu_hero = i
-	menu.bottom_edge = -1.0
-	menu.place()
+	_layout_h.place_menu(i, _animate)
 
 
-## Vijanden naast elkaar van ENEMY_LEFT tot de rechterrand (de baas is breed, de rest
-## klein). Past het niet, dan schuiven ze iets over elkaar.
 func _layout_enemies(w: float, dx: float) -> void:
-	var n := enemies.size()
-	if n == 0:
-		return
-	# v0.15: gecentreerd over de hele breedte; alleen als de rij over het kruis (links) zou vallen
-	# schuift hij naar rechts (enemy_region) en zo nodig iets in elkaar.
-	var reg := enemy_region(w)
-	var region_l: float = reg[0]
-	var region_r: float = reg[1]
-	var gap := 4.0
-	var total := 0.0
-	for e in enemies:
-		total += e["node"].size.x
-	total += gap * (n - 1)
-	var avail := region_r - region_l
-	var x := maxf(region_l, ENEMY_LEFT + maxf(0.0, (region_r - ENEMY_LEFT - total) / 2.0))
-	if total > avail and n > 1:
-		gap -= (total - avail) / (n - 1)
-		x = region_l
-	elif total < avail:
-		# v0.10: heeft de achtergrond een vaste plek (bv. de magenta cirkel van de baas),
-		# dan staat de rij daar horizontaal boven (game_data.gd BACKDROP_STAGE)
-		var sx := stage_x(w, size.y if size.y > 0 else 216.0)
-		if not is_nan(sx):
-			var cap := maxf(region_l + total, region_r - STAGE_RIGHT_RESERVE)
-			x = clampf(roundf(sx - total / 2.0), region_l, cap - total)
-	for i in n:
-		var node: Control = enemies[i]["node"]
-		var feet := Vector2(x + node.size.x / 2.0, ENEMY_FEET_Y + (2.0 if i % 2 == 1 else 0.0))
-		feet.y += float(enemies[i]["s"].get("y_offset", 0))
-		# hoog plaatje: zo ver omlaag als nodig (max. ENEMY_FEET_Y_MAX) zodat de bovenkant in beeld blijft
-		feet.y = maxf(feet.y, minf(enemy_feet(node).y, ENEMY_FEET_Y_MAX))
-		node.position = (feet - enemy_feet(node)).round()
-		x += node.size.x + gap
-	_sort_by_feet(enemy_layer)
+	_layout_h.layout_enemies(w, dx)
 
 
-## x op het scherm van het 'podium' in de achtergrond (NAN als die er niet is).
-## De achtergrond vult het scherm (keep aspect covered), dus: schaal + centreren.
 func stage_x(w: float, h: float) -> float:
-	var stage = GameData.BACKDROP_STAGE.get(GameState.pending_backdrop_id)
-	var tex: Texture2D = $Backdrop.texture
-	if stage == null or tex == null:
-		return NAN
-	var ts := tex.get_size()
-	var sc := maxf(w / ts.x, h / ts.y)
-	return (w - ts.x * sc) / 2.0 + float(stage.x) * sc
+	return _layout_h.stage_x(w, h)
 
 
-## Voeten binnen een vijand-plaatje: midden onderaan (de grondschaduw).
 func enemy_feet(node: Control) -> Vector2:
-	return Vector2(roundf(node.size.x / 2.0), node.size.y - 3.0 * ENEMY_DEPTH_SCALE)
+	return _layout_h.enemy_feet(node)
 
 
-## Wie lager op het scherm staat, wordt later (= ervoor) getekend.
 func _sort_by_feet(layer: Control) -> void:
-	var kids := layer.get_children()
-	kids.sort_custom(func(a, b): return a.position.y + a.size.y < b.position.y + b.size.y)
-	for k in kids.size():
-		layer.move_child(kids[k], k)
+	_layout_h.sort_by_feet(layer)
 
 
 # ================================================================ hoofdlus
@@ -923,334 +599,114 @@ func _run() -> void:
 		_reserved.clear()
 
 
-# ================================================================ commando's kiezen
+# ================================================================ commando's kiezen (battle_commands.gd)
 func _choose_commands() -> Array:
 	var actions: Array = []
 	actions.resize(heroes.size())
 	_reserved.clear()
-	var i := _next_alive_hero(-1)
+	var cmds: RefCounted = _cmds()
+	var i: int = cmds.next_alive_hero(-1)
 	while i < heroes.size():
-		_set_active_hero(i)
-		var act = await _choose_for_hero(heroes[i], _prev_alive_hero(i) != -1)
+		cmds.set_active_hero(i)
+		var act = await cmds.choose_for_hero(heroes[i], cmds.prev_alive_hero(i) != -1)
 		if act == null:
-			var prev := _prev_alive_hero(i)
+			var prev: int = cmds.prev_alive_hero(i)
 			if prev != -1:
-				_unreserve(actions[prev])
+				cmds.unreserve(actions[prev])
 				actions[prev] = null
 				i = prev
 			continue
 		if act["type"] == "flee":
 			for a in actions:
-				_unreserve(a)
-			_set_active_hero(-1)
+				cmds.unreserve(a)
+			cmds.set_active_hero(-1)
 			return [act]
 		actions[i] = act
-		i = _next_alive_hero(i)
-	_set_active_hero(-1)
+		i = cmds.next_alive_hero(i)
+	cmds.set_active_hero(-1)
 	return actions.filter(func(a): return a != null)
 
 
-## De held die kiest stapt naar voren, de rest staat op zijn plek.
 func _set_active_hero(i: int) -> void:
-	current_hero = i
-	if i >= 0:
-		_place_menu(i, true)
-	for j in hero_nodes.size():
-		var node: Control = hero_nodes[j]
-		var forward := j == i
-		if node.stepped_forward != forward or (forward and node.pose != "klaar"):
-			node.step(forward)
-	_refresh_party()
+	_cmds().set_active_hero(i)
 
 
 func _choose_for_hero(hero: Dictionary, can_go_back: bool):
-	var last := 0          # na 'terug' uit een submenu/doelkeuze staat het kruis weer daar
-	while true:
-		_set_state(ST_COMMAND)
-		show_message("What will %s do?" % hero["name"])
-		_show_tip(hero)
-		var allowed := [
-			true,
-			not hero["s"]["spells"].is_empty() or not _kern_skills(hero).is_empty(),   # v0.15: + kern
-			not _available_items().is_empty(),
-			true,
-			tutorial.is_empty() and can_flee,   # oefengevecht / baas (v0.15): niet vluchten
-			_items_left(CodexDataScript.BOOK_ITEM) > 0 or codex.can_swap(),   # v0.19 Codex
-		]
-		cross.open(hero["name"], allowed, last, can_go_back, [] if codex_command_shown() else [COMMANDS.size() - 1])
-		var cmd: int = await cross.finished
-		if cmd == 1 and not has_usable_magic(hero) and _kern_skills(hero).is_empty():
-			# Demo-fix 1: spreuken maar geen MP / niets te kiezen — geen submenu (soft-lock voorkomen).
-			# Met kernvaardigheden altijd _choose_spell: laad-regels staan uitgegrijsd (kerntest).
-			show_notice("No spells yet")
-			last = 0
-			continue
-		cross.deactivate()
-		last = maxi(cmd, 0)
-		match cmd:
-			-1:
-				return null
-			0:
-				var t = await _select_enemy()
-				if t != null:
-					return {"type": "attack", "actor": hero, "target": t}
-			1:
-				var s = await _choose_spell(hero)
-				if s != null:
-					return s
-			2:
-				var it = await _choose_item(hero)
-				if it != null:
-					return it
-			3:
-				return {"type": "defend", "actor": hero}
-			4:
-				return {"type": "flee", "actor": hero}
-			5:
-				var c = await _choose_codex(hero)
-				if c != null:
-					return c
-	return null
+	return await _cmds().choose_for_hero(hero, can_go_back)
 
 
-## Demo-fix 1: heeft de held een spreuk met genoeg MP of een geladen kernvaardigheid?
 func has_usable_magic(hero: Dictionary) -> bool:
-	for id in hero["s"]["spells"]:
-		if int(hero["s"]["mp"]) >= int(GameData.SPELLS[id]["mp"]):
-			return true
-	for id in _kern_skills(hero):
-		if kern_ready(hero, id):
-			return true
-	return false
+	return _cmds().has_usable_magic(hero)
 
 
-## Bericht dat ook tijdens het kiezen in de strook verschijnt (show_message verbergt die dan).
 func show_notice(text: String) -> void:
-	show_message(text)
-	message_label.text = text
-	message_label.modulate = Color.WHITE
-	caption.visible = true
-	_fit_caption()
+	_cmds().show_notice(text)
 
 
-## v0.19: staat de Codex-knop in het kruis? Niet in het oefengevecht, en niet zolang er nog
-## niets te doen is (0 pagina's en 0 Lege Boeken).
 func codex_command_shown() -> bool:
-	if not tutorial.is_empty() or GameState.practice_battle:
-		return false
-	return not GameState.codex_pages.is_empty() or GameState.item_count(CodexDataScript.BOOK_ITEM) > 0
+	return _cmds().codex_command_shown()
 
 
-## v0.19 Codex-submenu: 0 = Vangen, 1 = Wissel bondgenoot. Uitgeschakeld = grijs met de reden.
 func _choose_codex(hero: Dictionary):
-	var book: String = CodexDataScript.BOOK_ITEM
-	var last := 0
-	while true:
-		_set_state(ST_COMMAND)
-		var books := _items_left(book)
-		var vangen := "Capture  Book x%d" % books if books > 0 else "Capture: no Blank Book"
-		var wissel := "Swap ally"
-		if not codex.can_swap():
-			wissel = "Swap: Codex empty" if GameState.codex_pages.is_empty() else "Swap: all down"
-			if not codex.wissel_in_gevecht and not GameState.codex_pages.is_empty():
-				wissel = "Swap: outside battle"   # v0.22 partylimiet: wisselen via het menu
-		show_message("Codex: capture or swap?")
-		menu.open("Codex", [{"text": vangen, "enabled": books > 0},
-				{"text": wissel, "enabled": codex.can_swap()}], last, true, _list_row_h(2))
-		var k: int = await menu.finished
-		menu.close()
-		if k == -1:
-			return null
-		last = k
-		if k == 0:
-			var bk := "1 book" if books == 1 else "%d books" % books
-			var t = await _select_enemy(func(c): return "%s %s (%s)" % [c["name"], codex.capture_hint(c), bk], "Capture: ")
-			if t != null:
-				_reserved[book] = _reserved.get(book, 0) + 1
-				return {"type": "item", "actor": hero, "item": book, "target": t}   # zelfde weg als Item
-		else:
-			var sw = await _choose_swap(hero)
-			if sw != null:
-				return sw
-	return null
+	return await _cmds().choose_codex(hero)
 
 
-## v0.19 Wissel-lijst: niet-KO pagina's ('Lv' + naam) en onderaan 'Geen'. De bondgenoot die nu
-## meevecht staat erin maar is grijs ('nu'); 'Geen' is grijs als er geen bondgenoot is.
 func _choose_swap(hero: Dictionary):
-	var cur := codex.current_ally_uid()
-	var pages: Array = codex.swap_choices()
-	var entries := []
-	var start := 0
-	for i in pages.size():
-		var p: Dictionary = pages[i]
-		var here := str(p["uid"]) == cur
-		entries.append({"text": "%s Lv%d%s" % [p["name"], int(p["level"]), " now" if here else ""], "enabled": not here})
-	entries.append({"text": "None", "enabled": cur != ""})
-	show_message("Who fights alongside you?")
-	menu.open("Swap", entries, start, true, _list_row_h(mini(entries.size(), CODEX_ROWS_MAX)), CODEX_ROWS_MAX)
-	var k: int = await menu.finished
-	menu.close()
-	if k == -1:
-		return null
-	var uid := "" if k >= pages.size() else str(pages[k]["uid"])
-	return {"type": "codex_swap", "actor": hero, "page": uid}
+	return await _cmds().choose_swap(hero)
 
 
 func _choose_spell(hero: Dictionary):
-	while true:
-		_set_state(ST_COMMAND)
-		var ids: Array = hero["s"]["spells"]
-		var entries := []
-		for id in ids:
-			var sp: Dictionary = GameData.SPELLS[id]
-			entries.append({"text": "%-7s %dMP" % [sp["name"], sp["mp"]], "enabled": hero["s"]["mp"] >= sp["mp"]})
-		# v0.15: kernvaardigheden onder de spreuken (geen MP, wel opladen)
-		var kern := _kern_skills(hero)
-		for id in kern:
-			entries.append({"text": kern_entry_text(hero, id), "enabled": kern_ready(hero, id)})
-		show_message("Which spell?" if kern.is_empty() else ("Which skill?" if ids.is_empty() else "Which spell or skill?"))
-		menu.open("Magic" if kern.is_empty() else ("Core" if ids.is_empty() else "Magic/Core"), entries,
-				0, true, _list_row_h(mini(entries.size(), LIST_ROWS_MAX)), LIST_ROWS_MAX)
-		var k: int = await menu.finished
-		menu.close()        # v0.13: lijstje weg, dan is het doel goed te zien
-		if k == -1:
-			return null
-		if k >= ids.size():
-			var kid: String = kern[k - ids.size()]
-			if not kern_ready(hero, kid):
-				continue
-			var kt = await _select_enemy()
-			if kt != null:
-				return {"type": "kern_skill", "actor": hero, "skill": kid, "target": kt}
-			continue
-		var spell: Dictionary = GameData.SPELLS[ids[k]]
-		var t = null
-		match spell["target"]:
-			"enemy":
-				t = await _select_enemy()
-			"ally":
-				t = await _select_ally()
-			"ko":
-				t = await _select_ko()
-			"all_enemies", "all_allies":
-				return {"type": "spell", "actor": hero, "spell": ids[k], "target": null}
-		if t != null:
-			return {"type": "spell", "actor": hero, "spell": ids[k], "target": t}
-	return null
+	return await _cmds().choose_spell(hero)
 
 
 func _choose_item(hero: Dictionary):
-	while true:
-		_set_state(ST_COMMAND)
-		var ids := _available_items()
-		if ids.is_empty():
-			return null
-		var entries := []
-		for id in ids:
-			entries.append({"text": "%s x%d" % [GameData.ITEMS[id].get("short", GameData.ITEMS[id]["name"]), _items_left(id)], "enabled": true})
-		show_message("Which item?")
-		menu.open("Item", entries, 0, true, _list_row_h(mini(entries.size(), LIST_ROWS_MAX)), LIST_ROWS_MAX)
-		var k: int = await menu.finished
-		menu.close()
-		if k == -1:
-			return null
-		var t = null
-		if str(GameData.ITEMS[ids[k]].get("target", "ally")) == "enemy":
-			t = await _select_enemy()      # Codex: Leeg Boek op een vijand
-		elif float(GameData.ITEMS[ids[k]].get("revive", 0.0)) > 0.0:
-			t = await _select_ko()         # Feniksveer: een KO-held aanwijzen (H3)
-		else:
-			t = await _select_ally()
-		if t != null:
-			_reserved[ids[k]] = _reserved.get(ids[k], 0) + 1
-			return {"type": "item", "actor": hero, "item": ids[k], "target": t}
-	return null
+	return await _cmds().choose_item(hero)
 
 
 func _available_items() -> Array:
-	var ids := []
-	for id in GameData.ITEMS:
-		if _items_left(id) > 0 and battle_usable(GameData.ITEMS[id]):
-			ids.append(id)
-	return ids
+	return _cmds().available_items()
 
 
 ## Heeft dit item een effect in het gevecht? (genezen, revive, tegengif, vangen, spreuk leren)
 ## Lore-voorwerpen (Faded Note), sleutels en veld-items (Stun Bomb, Warp) dus niet (#1/#12).
 static func battle_usable(it: Dictionary) -> bool:
-	return int(it.get("heal_hp", 0)) > 0 or int(it.get("heal_mp", 0)) > 0 \
-			or float(it.get("revive", 0.0)) > 0.0 or bool(it.get("cure", false)) \
-			or bool(it.get("capture", false)) or str(it.get("teach", "")) != ""
+	return BattleRulesScript.battle_usable(it)
 
 
 ## Zou een genees-item (heal_hp/heal_mp) dit doel helpen? Zelfde regel als het veld (#2).
 static func heal_would_help(t: Dictionary, it: Dictionary) -> bool:
-	if t.is_empty():
-		return false
-	var s: Dictionary = t["s"]
-	return (int(it.get("heal_hp", 0)) > 0 and int(s["hp"]) < int(s["max_hp"])) \
-			or (int(it.get("heal_mp", 0)) > 0 and int(s["mp"]) < int(s["max_mp"]))
+	return BattleRulesScript.heal_would_help(t, it)
 
 
 func _items_left(id: String) -> int:
-	return GameState.item_count(id) - int(_reserved.get(id, 0))
+	return _cmds().items_left(id)
 
 
 func _unreserve(action) -> void:
-	if action != null and action["type"] == "item":
-		_reserved[action["item"]] = maxi(0, _reserved.get(action["item"], 0) - 1)
+	_cmds().unreserve(action)
 
 
 func _next_alive_hero(from: int) -> int:
-	for j in range(from + 1, heroes.size()):
-		if heroes[j]["s"]["hp"] > 0 and not heroes[j].get("ally", false):
-			return j
-	return heroes.size()
+	return _cmds().next_alive_hero(from)
 
 
 func _prev_alive_hero(from: int) -> int:
-	for j in range(from - 1, -1, -1):
-		if heroes[j]["s"]["hp"] > 0 and not heroes[j].get("ally", false):
-			return j
-	return -1
+	return _cmds().prev_alive_hero(from)
 
 
-# ================================================================ doel kiezen
-## Doel kiezen: de namen staan in het menu (op dezelfde plek als het commandomenu) en een
-## pijltje wijst het doel aan. Kiezen met omhoog/omlaag/links/rechts + A, op een naam tikken
-## of op de vijand zelf tikken. B = terug.
-## v0.19: label (optioneel) = tekst bij het pijltje (bv. 'Mosslijm 35%' bij Vangen); prefix komt
-## ervoor in de berichtstrook.
 func _select_enemy(label := Callable(), prefix := ""):
-	_set_state(ST_TARGET_ENEMY)
-	var living := _alive(enemies)
-	# v9.1: vijanden staan bovenin; het pijltje blijft onder de bericht-strook (dan wijst het
-	# iets in het plaatje, op het hoofd)
-	var above := func(c): return Vector2(c["node"].position.x + roundf(c["node"].size.x / 2.0), maxf(c["node"].position.y + float(c.get("top", 0)) - 2.0, CURSOR_MIN_Y))
-	return await _pick_target(living, "Target", above, false, label, prefix)
+	return await _cmds().select_enemy(label, prefix)
 
 
 func _select_ally():
-	_set_state(ST_TARGET_ALLY)
-	var living := _alive(heroes)
-	var result = await _pick_target(living, "On whom?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
-	if result != null:
-		last_ally_target_row = result["row"]
-	return result
+	return await _cmds().select_ally()
 
 
 func _select_ko():
-	var dead: Array = []
-	for h in heroes:
-		if int(h["s"]["hp"]) <= 0:
-			dead.append(h)
-	if dead.is_empty():
-		show_message("Nobody is knocked out.")
-		await _wait(MESSAGE_TIME)
-		return null
-	_set_state(ST_TARGET_ALLY)
-	return await _pick_target(dead, "Who?", func(c): return c["node"].head_position() + Vector2(0, -2), true)
+	return await _cmds().select_ko()
+
+
+# ================================================================ doel kiezen (_pick_target blijft hier: ux_tests / UiSfx.TARGET)
 
 
 ## v0.13: geen namenlijst meer. Een pijltje (richtpijl.png) wijst het doel aan, met de naam
@@ -1617,107 +1073,24 @@ func _token_mult(c: Dictionary) -> float:
 
 
 func _apply_buffs(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
-	var rows: Array = spell.get("buffs", [])
-	if rows.is_empty() and str(spell.get("buff_stat", "")) != "":
-		var key := "buff_" + str(spell.get("buff_stat", "def"))
-		ally[key] = int(ally.get(key, 0)) + int(spell.get("buff_n", 1))
-	if not ally.has("buffs"):
-		ally["buffs"] = []
-	var mult := SpellRules.buff_factor(spell, str(caster["s"].get("id", "")))
-	for row in rows:
-		if typeof(row) != TYPE_DICTIONARY:
-			continue
-		Archief2Vijanden.refresh_row(ally["buffs"], {
-			"stat": str(row.get("stat", "def")),
-			"pct": float(row.get("pct", 0.0)) * mult,
-			"turns": int(row.get("turns", 3)),
-		}, "stat")
-	show_message("%s is strengthened." % ally["name"])
+	_status().apply_buffs(ally, spell, caster)
 
 
 func _add_hot(ally: Dictionary, spell: Dictionary, caster: Dictionary) -> void:
-	if not ally.has("hots"):
-		ally["hots"] = []
-	var turns := int(spell.get("hot_turns", 3))
-	(ally["hots"] as Array).append({"amount": _spell_amount(caster, spell, {}), "turns": turns})
-	show_message("%s recovers slowly." % ally["name"])
+	_status().add_hot(ally, spell, caster)
 
 
 func _apply_spell_status(target: Dictionary, spell: Dictionary) -> void:
-	if int(target["s"]["hp"]) <= 0:
-		return
-	var fx := SpellRules.on_hit(spell)
-	if float(fx.get("dot_pct", 0.0)) > 0.0:
-		if not target.has("dots"):
-			target["dots"] = []
-		var pct := float(fx["dot_pct"])
-		var turns := int(fx.get("dot_turns", 3))
-		# Brand (de niet-gif DoT) stapelt niet: een nieuwe brand ververst de bestaande entry
-		# (duur en pct naar de hoogste waarde), zodat er per doel maar een brand loopt.
-		var burn: Dictionary = {}
-		for d in target["dots"]:
-			if typeof(d) == TYPE_DICTIONARY and not bool(d.get("gif", false)):
-				burn = d
-				break
-		if burn.is_empty():
-			(target["dots"] as Array).append({"pct": pct, "turns": turns})
-		else:
-			burn["pct"] = maxf(float(burn.get("pct", 0.0)), pct)
-			burn["turns"] = maxi(int(burn.get("turns", 0)), turns)
-	# Verlamming/bevriezing: kans uit SpellRules (enkel/AoE, baas-halve kans), anti stun-lock.
-	# roll altijd trekken (ook bij immune/skip) zodat de gevechts-randf()-reeks gelijk blijft.
-	if int(fx.get("skip", 0)) > 0:
-		var roll := randf()
-		if not SpellRules.target_blocks_stun(target) and SpellRules.stun_lands(fx, spell, is_boss_target(target), roll, stun_boss_immune, stun_chance):
-			target["skip"] = maxi(int(target.get("skip", 0)), int(fx["skip"]))
-			target["skip_reden"] = str(fx.get("skip_reden", "bevriezing"))
-			target["stun_immune"] = true
+	_status().apply_spell_status(target, spell)
 
 
 ## Telt als baas voor verlamming/bevriezing: een vijand in een baasgevecht of met "is_boss".
 func is_boss_target(t: Dictionary) -> bool:
-	if bool(t.get("is_hero", false)):
-		return false
-	return GameState.pending_boss or bool(t["s"].get("is_boss", false))
+	return BattleRulesScript.is_boss_target(t)
 
 
 func _tick_ailments(c: Dictionary) -> void:
-	var dots: Array = c.get("dots", [])
-	var left_dots: Array = []
-	if int(c["s"]["hp"]) > 0:
-		for d in dots:
-			if typeof(d) != TYPE_DICTIONARY:
-				continue
-			var pct := float(d.get("pct", 0.0))
-			var dmg := maxi(1, roundi(float(c["s"]["max_hp"]) * pct))
-			c["s"]["hp"] = maxi(0, int(c["s"]["hp"]) - dmg)
-			d["turns"] = int(d.get("turns", 1)) - 1
-			if int(d["turns"]) > 0 and int(c["s"]["hp"]) > 0:
-				left_dots.append(d)
-	c["dots"] = left_dots
-	var hots: Array = c.get("hots", [])
-	var left_hots: Array = []
-	for h in hots:
-		if typeof(h) != TYPE_DICTIONARY:
-			continue
-		if int(c["s"]["hp"]) > 0:
-			var room := int(c["s"]["max_hp"]) - int(c["s"]["hp"])
-			c["s"]["hp"] += mini(int(h.get("amount", 0)), maxi(0, room))
-		h["turns"] = int(h.get("turns", 1)) - 1
-		if int(h["turns"]) > 0:
-			left_hots.append(h)
-	c["hots"] = left_hots
-	var buffs: Array = c.get("buffs", [])
-	var left_buffs: Array = []
-	for b in buffs:
-		if typeof(b) != TYPE_DICTIONARY:
-			continue
-		b["turns"] = int(b.get("turns", 1)) - 1
-		if int(b["turns"]) > 0:
-			left_buffs.append(b)
-	c["buffs"] = left_buffs
-	if int(c["s"]["hp"]) <= 0 and bool(c.get("is_hero", false)) and c.get("node") != null:
-		c["node"].set_ko(true)
+	_status().tick_ailments(c)
 
 
 func _revive(t, amount: int) -> void:
@@ -1756,23 +1129,12 @@ func _revive_combatant(c: Dictionary, hp: int) -> void:
 ## #3/#4/#17: wie opstaat begint schoon. Binden/bevriezing (skip), gif/brand, HoT en buffs van
 ## voor de KO vervallen, ongeacht in welke ronde de revive valt.
 static func clear_ko_status(c: Dictionary) -> void:
-	c["skip"] = 0
-	c.erase("skip_reden")
-	c.erase("stun_immune")
-	c["dots"] = []
-	c["hots"] = []
-	c["buffs"] = []
-	c["defending"] = false
+	BattleRulesScript.clear_ko_status(c)
 
 
 ## Tegengif: valt er iets te genezen (gif-DoT of gebonden door een Rankje)?
 func _has_curable(t: Dictionary) -> bool:
-	if t.is_empty():
-		return false
-	for d in t.get("dots", []):
-		if bool(d.get("gif", false)):
-			return true
-	return str(t.get("skip_reden", "")) == Archief2Vijanden.SKIP_REDEN_BIND and int(t.get("skip", 0)) > 0
+	return BattleRulesScript.has_curable(t)
 
 
 ## v0.19: doet deze combatant nog mee? (een weggewisselde bondgenoot niet meer)
@@ -1890,77 +1252,29 @@ func _try_flee() -> bool:
 	return false
 
 
+func _avg_agi(list: Array) -> float:
+	return BattleRulesScript.avg_agi(_alive(list))
+
+
+# ================================================================ v0.14 roze kern / Archief 2 (battle_boss.gd)
 ## De Genezer: eerste klap is scripted (ongeveer 30%). true = het gevecht is daar gestopt.
 func _archief2_opening() -> bool:
-	for e in enemies:
-		if not bool(e["s"].get("archief2_open", false)):
-			continue
-		var pool: Array = []
-		for c in heroes:
-			if not bool(c.get("ally", false)) and int(c["s"]["hp"]) > 0:
-				pool.append(c)
-		if pool.is_empty():
-			return false
-		var t: Dictionary = pool[0]
-		var dmg := Archief2.openingslag(int(t["s"]["max_hp"]))
-		var zin := str(e["s"].get("archief2_zin", Archief2.KERN_ZIN))
-		await say(zin)
-		if str(e["s"].get("id", "")) == "genezer" and GameState.has_member("lotte"):
-			await say("Seren: You call that healing?")
-		await _damage(t, dmg)
-		GameState.archief2_last_open = {"schade": dmg, "max": int(t["s"]["max_hp"]), "id": str(t["s"].get("id", ""))}
-		if codex.party_down():
-			await _defeat()
-			return true
-	return false
+	return await _boss().archief2_opening()
 
 
 ## Daarna 8-12% van het doel, en hij herstelt hetzelfde aantal.
 func _archief2_leech(actor: Dictionary) -> void:
-	var pool: Array = []
-	for c in _alive(heroes):
-		if not bool(c.get("ally", false)):
-			pool.append(c)
-	if pool.is_empty():
-		pool = _alive(heroes)
-	if pool.is_empty():
-		return
-	var t: Dictionary = pool[0]
-	var n := Archief2.leech_hoeveelheid(randf(), int(t["s"]["max_hp"]))
-	show_message("%s corrects %s." % [actor["name"], t["name"]])
-	await _damage(t, n)
-	var voor := int(actor["s"]["hp"])
-	actor["s"]["hp"] = mini(int(actor["s"]["max_hp"]), voor + n)
-	GameState.archief2_last_leech = {"schade": n, "heal": n, "bij": int(actor["s"]["hp"]) - voor}
-	show_message("%s recovers %d." % [actor["name"], n])
-	await _wait(MESSAGE_TIME)
+	await _boss().archief2_leech(actor)
 
 
-func _avg_agi(list: Array) -> float:
-	var living := _alive(list)
-	if living.is_empty():
-		return 0.0
-	var total := 0.0
-	for c in living:
-		total += float(c["s"]["agi"])
-	return total / living.size()
-
-
-# ================================================================ v0.14 roze kern (Golem-baas)
 ## Vijanden met een kern (alleen de Golem in een baasgevecht).
 func core_enemies() -> Array:
-	return enemies.filter(func(e): return e.has("core"))
+	return _boss().core_enemies()
 
 
 ## Tekst voor de roze strook tijdens het kiezen ("" = geen kern open).
 func _core_banner() -> String:
-	for e in core_enemies():
-		if e["s"]["hp"] > 0 and e["core"].open:
-			return BossCore.MSG_WINDOW
-	for e in enemies:   # v0.15: schild omhoog (Mech. Wachter)
-		if e["s"]["hp"] > 0 and int(e.get("guard", 0)) > 0:
-			return GUARD_BANNER % e["name"]
-	return ""
+	return _boss().core_banner()
 
 
 # ================================================================ v0.15 schild omhoog
@@ -1973,67 +1287,37 @@ const GUARD_TINT := Color(0.7, 0.88, 1.3)
 
 
 func _guard_up(actor: Dictionary, skill: Dictionary) -> void:
-	ActorSfx.play(actor, "vaardigheid")
-	actor["guard"] = 2
-	actor["guard_mult"] = float(skill.get("def_mult", 2.0))
-	if actor["node"]:
-		actor["node"].modulate = GUARD_TINT
-	show_message(GUARD_TEXT % actor["name"])
-	await _wait(MESSAGE_TIME)
+	await _boss().guard_up(actor, skill)
 
 
 func _guard_tick(c: Dictionary) -> void:
-	if int(c.get("guard", 0)) <= 0:
-		return
-	c["guard"] = int(c["guard"]) - 1
-	if c["guard"] == 0 and c["node"] and c["s"]["hp"] > 0:
-		c["node"].modulate = Color.WHITE
+	_boss().guard_tick(c)
 
 
 ## DEF van een doelwit, met schild omhoog (x guard_mult).
 func _defense_of(t: Dictionary) -> float:
-	return DamageCalc.defense_of(t)
+	return _boss().defense_of(t)
 
 
 ## Eén keer aan het begin: uitleg in één regel.
 func _core_hint() -> void:
-	if not core_enemies().is_empty():
-		await say(BossCore.MSG_HINT)
+	await _boss().core_hint()
 
 
 ## Begin van een ronde: gaat de kern open, dan het bericht 'De kern gloeit roze!'.
 func _core_round_start() -> void:
-	for e in core_enemies():
-		if e["s"]["hp"] > 0 and e["core"].start_round(round_no):
-			_flash_enemy(e)
-			await say(BossCore.MSG_OPEN % e["name"])
+	await _boss().core_round_start()
 
 
 ## Actie van de Golem aan het eind van de oplaad-ronde: wankelen of Hamerslag.
 func _core_resolve(a: Dictionary) -> void:
-	var actor: Dictionary = a["actor"]
-	var core = actor["core"]
-	if core.resolve() == "break":
-		show_message(BossCore.MSG_BREAK % actor["name"])
-		_shake(actor["node"], 4.0)
-		await _wait(MESSAGE_TIME * 1.5)
-	else:
-		var t = _valid_target(a["target"], true)
-		if t == null:
-			return
-		show_message(BossCore.MSG_SLAM % [actor["name"], core.slam_name])
-		ActorSfx.play(actor, "vaardigheid")
-		await _enemy_lunge(actor, t)
-		await _damage(t, _physical_damage(actor, t, core.slam_power))
-	if _alive(heroes).size() > 0:
-		show_message(BossCore.MSG_CLOSE)
-		await _wait(MESSAGE_TIME)
+	await _boss().core_resolve(a)
 
 
 ## Korte roze flits op de vijand (kern gaat open).
 func _flash_enemy(e: Dictionary) -> void:
 	var node: CanvasItem = e["node"]
-	var tw := create_tween()
+	var tw: Tween = create_tween()
 	tw.tween_property(node, "modulate", Color(1.6, 0.8, 1.5), 0.12)
 	tw.tween_property(node, "modulate", Color.WHITE, 0.25)
 
@@ -2139,21 +1423,10 @@ func _dungeon100_boss_loot() -> String:
 
 ## Tekst van de eerste overwinningspagina (ook gebruikt door de autotest).
 func victory_text(exp_total: int, gold_total: int, loot_lines: Array = []) -> String:
-	var lines: Array[String] = ["Gained %d EXP." % exp_total, "Gained %d GOLD." % gold_total]
-	for line in loot_lines:
-		lines.append(str(line))
-	lines.append("")
 	# Kolommen over de hele vensterbreedte (zoals Lufia 2): naam links,
 	# 'VOLG. LEVEL' in het midden, getal rechts uitgelijnd. Letters zijn 6 px breed.
 	var width := victory_panel.size.x if victory_panel.size.x > 0 else size.x - 20.0
-	var cols := maxi(30, int((width - 28.0) / 6.0) - 1)
-	var col_label := int(cols * 0.36)
-	for h in heroes:
-		var s: Dictionary = h["s"]
-		var need: int = maxi(0, GameData.exp_for_level(int(s["level"]) + 1) - int(s["exp"]))
-		var left := str(s["name"]).rpad(col_label - 1) + " NEXT LEVEL"
-		lines.append(left + " " + str(need).lpad(cols - left.length() - 1))
-	return "\n".join(lines)
+	return BattleRulesScript.victory_text(exp_total, gold_total, loot_lines, heroes, width)
 
 
 func _victory_page(text: String) -> void:
@@ -2351,70 +1624,30 @@ func _alive(list: Array) -> Array:
 	return list.filter(func(c): return c["s"]["hp"] > 0)
 
 
-# ================================================================ v0.11 oefengevecht
-## Tip-venster links (boven de D-pad): eerst "Aanval", daarna "Item".
+# ================================================================ v0.11 oefengevecht (battle_tips.gd)
 func _make_tip() -> void:
-	tip_panel = Panel.new()
-	tip_panel.name = "TipPanel"
-	# v0.16: tutorialtekst in hetzelfde blauwe vak als de verteller (Lufia 2-stijl)
-	tip_panel.add_theme_stylebox_override("panel", UiStyle.blue_box("vak", Vector4.ZERO))
-	tip_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(tip_panel)
-	tip_label = Label.new()
-	tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	tip_label.add_theme_color_override("font_color", UiStyle.BOX_TEXT)
-	tip_label.add_theme_color_override("font_shadow_color", UiStyle.BOX_SHADOW)
-	tip_panel.add_child(tip_label)
-	tip_panel.hide()
+	_tips().make_tip()
 
 
 func tip_text(hero: Dictionary) -> String:
-	var hurt := int(hero["s"]["hp"]) < int(hero["s"]["max_hp"])
-	if round_no <= 1 or not hurt or _available_items().is_empty():
-		tips_shown["aanval"] = true
-		return "TIP: Attack, then the Moss Slime."
-	tips_shown["item"] = true
-	return "TIP: hurt? Item > Herb gives HP back."
+	return _tips().tip_text(hero)
 
 
 func _show_tip(hero: Dictionary) -> void:
-	if tip_panel == null:
-		return
-	tip_label.text = tip_text(hero)
-	var w := 132.0
-	tip_label.position = Vector2(7, 5)
-	tip_label.custom_minimum_size = Vector2(w - 14, 0)
-	tip_label.size = Vector2(w - 14, 0)
-	# Hoogte uit het lettertype zelf (een Label met autowrap meldt bij breedte 0 per letter een regel).
-	var font := tip_label.get_theme_font("font")
-	var fs := tip_label.get_theme_font_size("font_size")
-	var th := font.get_multiline_string_size(tip_label.text, HORIZONTAL_ALIGNMENT_LEFT, w - 14, fs,
-			-1, TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND).y
-	tip_label.size = Vector2(w - 14, th)
-	var h := ceilf(th) + 10.0
-	tip_panel.size = Vector2(w, h)
-	tip_panel.position = tip_origin()   # linksboven, onder de strook; notch schuift mee
-	tip_panel.show()
+	_tips().show_tip(hero)
 
 
-## Plek van het tip-venster in gevechtseenheden (384x216). Desktop: (6, 22).
-## Op mobiel telt de veilige zone (notch); het gevecht is 2x geschaald, insets staan in viewport-px.
 func tip_origin() -> Vector2:
-	var ins := UiTouchC.insets(get_viewport())
-	var s := maxf(get_global_transform().get_scale().x, 0.001)
-	return Vector2(6.0 + ins.x / s, 22.0 + ins.y / s)
+	return _tips().tip_origin()
 
 
 func _hide_tip() -> void:
-	if tip_panel:
-		tip_panel.hide()
+	_tips().hide_tip()
 
 
-# ================================================================ v0.15 kernvaardigheden
+# ================================================================ v0.15 kernvaardigheden (battle_kern.gd)
 ## Uit kernfragmenten (scripts/data/kern_data.gd, KERN_SKILLS). Geen MP: na gebruik laadt de
 ## vaardigheid "cooldown" rondes op (in c["kern_cd"][id]; telt af aan het eind van elke ronde).
-const KERN_TINT := Color(1.45, 0.85, 1.9)       # v0.16: paarse flits (Kernkracht)
 ## v0.16 KERNKRACHT: paarse vuurbal uit de hand (scripts/kern/kern_vuurbal.gd) i.p.v. een zwaardslag.
 const KernVuurbal := preload("res://scripts/kern/kern_vuurbal.gd")
 const KERN_FX_SCALE := 2.0            # bal 16x16 -> 32 eenheden (gevechtsbeeld is groter dan het veld)
@@ -2426,29 +1659,24 @@ const KERN_ARC := Vector2(16, 52)     # min/max boog-hoogte in eenheden
 ## laatste vuurbal / inslag (voor de tests en screenshots)
 var last_kern_fireball: Node2D
 var last_kern_impact: Node2D
-const KERN_HIT_TEXT := "%s: %s!"
 
 
 func _kern_skills(hero: Dictionary) -> Array:
-	if not hero.get("is_hero", false):
-		return []
-	return GameState.kern_skills_of(str(hero["s"].get("id", "")))
+	return _kern().kern_skills(hero)
 
 
 ## Rondes tot de vaardigheid weer klaar is (0 = klaar).
 func kern_charge(hero: Dictionary, id: String) -> int:
-	return int(hero.get("kern_cd", {}).get(id, 0))
+	return _kern().kern_charge(hero, id)
 
 
 func kern_ready(hero: Dictionary, id: String) -> bool:
-	return kern_charge(hero, id) <= 0
+	return _kern().kern_ready(hero, id)
 
 
 ## Regel in het menu: "Kernkracht KERN" (klaar) of "Kernkracht (2)" (nog 2 rondes opladen).
 func kern_entry_text(hero: Dictionary, id: String) -> String:
-	var n := str(KernData.KERN_SKILLS[id]["name"])
-	var cd := kern_charge(hero, id)
-	return ("%-10s CORE" % n) if cd <= 0 else ("%-10s (%d)" % [n, cd])
+	return _kern().kern_entry_text(hero, id)
 
 
 ## Schade van een fysieke kernvaardigheid: ATK x atk_mult - DEF x def_factor, +/- 15%,
@@ -2462,33 +1690,11 @@ func kern_base(attacker: Dictionary, target: Dictionary, skill: Dictionary) -> f
 
 
 func _kern_strike(a: Dictionary) -> void:
-	var actor: Dictionary = a["actor"]
-	var id: String = a["skill"]
-	var skill: Dictionary = KernData.KERN_SKILLS.get(id, {})
-	if skill.is_empty() or not kern_ready(actor, id):
-		return
-	var t = _valid_target(a["target"], false)
-	if t == null:
-		return
-	if not actor.has("kern_cd"):
-		actor["kern_cd"] = {}
-	actor["kern_cd"][id] = int(skill.get("cooldown", 3))
-	show_message(KERN_HIT_TEXT % [actor["name"], skill["name"]])
-	ActorSfx.play(actor, "vaardigheid")
-	if actor["node"]:
-		var tw := create_tween()
-		tw.tween_property(actor["node"], "modulate", KERN_TINT, 0.15)
-		tw.tween_property(actor["node"], "modulate", Color.WHITE, 0.35)
-	if str(skill.get("fx", "")) == "vuurbal":
-		await _kern_fireball(actor, t)     # v0.16: hand vooruit, vuurbal, inslag
-	else:
-		await _hero_wind_up(actor, true)
-	if t["node"]:
-		var tw2 := create_tween()
-		tw2.tween_property(t["node"], "modulate", KERN_TINT, 0.08)
-		tw2.tween_property(t["node"], "modulate", GUARD_TINT if int(t.get("guard", 0)) > 0 else Color.WHITE, 0.3)
-	await _damage(t, kern_damage(actor, t, skill))
-	_hero_rest(actor)
+	await _kern().kern_strike(a)
+
+
+func _kern_tick(c: Dictionary) -> void:
+	_kern().kern_tick(c)
 
 
 ## v0.16 Kernkracht: held stapt naar voren en steekt de hand uit (spreuk-pose, geen zwaardzwaai),
@@ -2510,22 +1716,7 @@ func _kern_fireball(actor: Dictionary, t: Dictionary) -> void:
 	last_kern_impact = KernVuurbal.impact(effects, to, KERN_FX_SCALE)
 
 
-func _kern_tick(c: Dictionary) -> void:
-	if not c.has("kern_cd"):
-		return
-	for id in c["kern_cd"]:
-		c["kern_cd"][id] = maxi(0, int(c["kern_cd"][id]) - 1)
-
-
 ## v0.21: verkleinfactor (<= 1) zodat een plaatje binnen de maximummaat valt.
 ## Baas ("is_boss"): BOSS_MAX_ART_W x BOSS_MAX_ART_H; anders alleen de hoogte MAX_ENEMY_ART_H.
 static func art_fit(size: Vector2, is_boss: bool) -> float:
-	var f := 1.0
-	if is_boss:
-		if size.y > BOSS_MAX_ART_H:
-			f = minf(f, float(BOSS_MAX_ART_H) / size.y)
-		if size.x > BOSS_MAX_ART_W:
-			f = minf(f, float(BOSS_MAX_ART_W) / size.x)
-	elif size.y > MAX_ENEMY_ART_H:
-		f = float(MAX_ENEMY_ART_H) / size.y
-	return f
+	return BattleLayoutScript.art_fit(size, is_boss, MAX_ENEMY_ART_H, BOSS_MAX_ART_W, BOSS_MAX_ART_H)

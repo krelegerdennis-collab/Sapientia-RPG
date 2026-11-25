@@ -256,6 +256,9 @@ const AUTOSAVE_SLOT := 0
 const AUTOSAVE_REASONS := ["map", "achtergrond"]
 ## Gekozen slot voor het volgende nieuwe spel (titelscherm > New Game > slot kiezen).
 var pending_new_slot := 1
+## Aantal aanroepen van start_new_game. Niet in de save. De Android-terugtest leest dit
+## om te zien dat Back op het naamscherm geen spel start.
+var new_game_starts := 0
 ## Autosave alleen bij een overgang wereldkaart <-> kerker (niet bij elke kamer of een dorp).
 const NON_DUNGEON_MAPS := ["wilgendal", "dorp_wilgendal", "esdoorn", "wilgendal_binnen",
 		"huis_wilgendal", "esdoorn_herberg", "esdoorn_huis_noor"]
@@ -394,6 +397,7 @@ const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 ## Story.event_finished (quest_event).
 var quest_progress := {}
 const QuestData := preload("res://scripts/data/quest_data.gd")
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 ## v0.11: opties voor het volgende gevecht als het een oefengevecht is ({} = gewoon)
 var pending_tutorial := {}
 
@@ -406,6 +410,8 @@ var bezochte_kaarten: Array[String] = []
 var echo_grot_voltooid := 0
 var inventory := {}            # item-id -> aantal
 var gold := 0
+## Colosseum-munt. Oude saves zonder sleutel laden als 0. Alleen verdiend als de arena aan staat.
+var arena_tokens := 0
 ## SoM-proef (scripts/data/som_data.gd): realtime gevecht in de SoM-kamers. Alleen aan via de knop
 ## "SoM" op het titelscherm; niet in de save, uit bij elk nieuw/geladen spel.
 var som_mode := false
@@ -417,6 +423,8 @@ var steps_until_encounter_possible: int = GameData.SAFE_STEPS
 
 ## Huidige map (pad naar de .tscn) en het spawnpunt voor de volgende map.
 var current_map := ""
+## Post-RC sfx: laatst gehoorde opdrachtenstand (zie _quest_klank).
+var _quest_klank_stand := {}
 var pending_spawn := ""
 ## Laatste warp-bron (pad naar .tscn), gezet in change_map vóór de scènewissel.
 var warp_from_map := ""
@@ -541,11 +549,13 @@ func _ready() -> void:
 	# Dungeon100: of  godot -- --dungeon100integratietest [--shots=/pad/map]  (scripts/tests/dungeon100_integratie_tests.gd).
 	# Dungeon100: of  godot -- --dungeon100blauwtest [--shots=/pad/map]  (scripts/tests/dungeon100_blauw_tests.gd).
 	# Blauwe Kist-sprite: of  godot -- --blauwekisttest  (scripts/tests/blauwe_kist_tests.gd).
+	# GQ optie A Solar Flare@20: of  godot -- --gqzonnevlamscrolltest  (scripts/tests/gq_zonnevlam_scroll_tests.gd).
 	# Dungeon100 rustpunt-sheet: of  godot -- --dungeon100rustpunttest  (scripts/tests/dungeon100_rustpunt_tests.gd).
 	# Dungeon100 baas-kaartsprites: of  godot -- --dungeon100bossmaptest  (scripts/tests/dungeon100_bossmap_tests.gd).
 	# Codex: of  godot -- --codextest [--shots=/pad/map]  (scripts/tests/codex_tests.gd).
 	# v0.19: of  godot -- --fusietest [--shots=/pad/map]  (scripts/tests/fusie_tests.gd, glitch-fusie + Inktwurm).
 	# v0.19: of  godot -- --checkpointtest [--shots=/pad/map] [--v19=/workspace]  (kamer-checkpoint / respawn).
+	# RC F3.9: of  godot -- --bossrespawntest  (Strangler + Mender game over / respawn, scripts/tests/boss_respawn_tests.gd).
 	# Sfx per held/monster: of  godot -- --actorsfxtest  (scripts/tests/actor_sfx_tests.gd).
 	# Catalogus t/m Act 6: of  godot -- --catalogustest  (scripts/tests/catalogus_tests.gd).
 	# Updates 1-4: of  godot -- --updatetest  (scripts/tests/todo_update_tests.gd).
@@ -571,11 +581,14 @@ func _ready() -> void:
 	# Profiel WM1 (laadtijd, frametijd, draw calls, nodes, textuurgeheugen): of  godot -- --perftest  (scripts/tests/perf_wm1.gd).
 	# WM1 frametime-log + budget: of  godot -- --wm1frametest / --wm1budgettest  (scripts/tests/wm1_frametime_tests.gd, wm1_budget_tests.gd).
 	# F-5 nulmeting per kamer, geïsoleerd (geen CI, faalt niet op budget): of  godot -- --wm1roombaselinetest  (scripts/tests/wm1_room_baseline_tests.gd).
-	# WM1 F3 stabiliteit (lokaal, geen CI): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
+	# WM1 F3 stabiliteit (in CI-matrix): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
+	# Colosseum-flow (in CI-matrix): godot -- --arenatest  (scripts/tests/arena_tests.gd).
+	# Arena-golven vervolg review #487 (lokaal; CI-regel later via Forge): godot -- --arenawavesfollowuptest  (scripts/tests/arena_waves_followup_tests.gd).
 	# Wachtershuis classic-muur (geen TileSet-polygonen): godot -- --huiscollisiontest  (scripts/tests/huis_collision_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
 	# SoM slag vs lock: of  godot -- --swinglocktest  (scripts/tests/swing_lock_tests.gd).
 	# Action-HUD overal (joystick + rij, geen D-pad): of  godot -- --hudtest [--shots=/pad/map]
+	# F6.15 RUN-knop in kerker, Rest Room en Koopman (in CI-matrix): of  godot -- --runknoptest  (scripts/tests/run_knop_kamers_tests.gd).
 	# Wilgendal-panden: of  godot -- --wilgendaltest  (scripts/tests/wilgendal_tests.gd).
 	# Quest Log + ECHO per act: of  godot -- --questtest [--shots=/pad/map]  (scripts/tests/quest_tests.gd).
 	# ECHO questlog (smoke): of  godot -- --echotest [--shots=/pad/map]  (scripts/tests/echo_tests.gd).
@@ -587,6 +600,10 @@ func _ready() -> void:
 	#   godot -- --uxtest [--shots=/pad/map]  (scripts/tests/ux_tests.gd).
 	# F6 UX-polish (desktop-insets / plaatsing ballon+schat+tip): of
 	#   godot -- --uxpolishtest [--shots=/pad/map]  (scripts/tests/ux_polish_autotest.gd).
+	# F6-6 change_map vangnet (ontbrekend pad, geen zwarte hang): of
+	#   godot -- --f6uxtest  (scripts/tests/f6_ux_tests.gd).
+	# F6 UX-fixes WM1 set 2 (o.a. F6-8 TEXT_OFF-contrast): of
+	#   godot -- --f6uxtest2  (scripts/tests/f6_ux2_tests.gd).
 	# Fase B-lobby (geen gameplay): of  godot -- --nettest  (scripts/tests/net_tests.gd).
 	# Action-co-op sync: of  godot -- --netsynctest  (scripts/tests/net_sync_tests.gd).
 	# Co-op integratie (lobby+sandbox): of  godot -- --coope2etest  (scripts/tests/coop_e2e_tests.gd).
@@ -610,12 +627,18 @@ func _ready() -> void:
 	# D3 arena-hook realtime Golem (PR C): of  godot -- --golemarenatest  (scripts/tests/golem_arena_tests.gd).
 	# Golem zichtbare telegraaf/aanval (Action): of  godot -- --golemzichtbaartest  (scripts/tests/golem_zichtbaar_tests.gd).
 	# 3-slag aanvalsketen (Combat T15): of  godot -- --chaintest  (scripts/tests/chain_tests.gd).
+	# Epic keten-feel (strips, nagloed, WM1): of  godot -- --chainfeeltest  (scripts/tests/chain_feel_tests.gd).
 	# F4 game feel (screenshake + schadekleuren): of  godot -- --gamefeeltest  (scripts/tests/gamefeel_tests.gd).
 	# Opgeladen zware slag (Action): of  godot -- --chargetest  (scripts/tests/charge_tests.gd).
+	# F2 stagger-meter (Action): of  godot -- --staggertest  (scripts/tests/stagger_tests.gd).
+	# F1 perfect dodge (Action): of  godot -- --perfectdodgetest  (scripts/tests/perfect_dodge_tests.gd).
+	# F1 perfect dodge vervolg (klus 9): of  godot -- --pdfollowuptest  (scripts/tests/pd_followup_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# M8b buit per stoel + run-resultaat + reward-bundle (puur, geen netwerk): of  godot -- --onlinerewardtest  (scripts/tests/online_reward_tests.gd).
 	# Buit per stoel via de echte lobby (relay v2, 2 gasten, ACK pas na opslaan): of  godot -- --liveseatloottest  (scripts/tests/live_seat_loot_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
+	# RC-checklist WM1 (alleen lezen, bekende OPEN-punten als OPEN-regel): of  godot -- --rcchecktest  (scripts/tests/rc_check_tests.gd).
+	# Klus 13 WM1 QA-ronde (warps, opslaan/laden, duplicatie, pauze): of  godot -- --wm1qasweeptest  (scripts/tests/wm1_qa_sweep_tests.gd).
 	# Debug-ingang zonder wereldkaart: godot -- --berggrot  (roept BerggrotData.start() aan)
 	# Geen van de testers zit in de export, dus in de APK onbereikbaar.
 	# Laadtijden WM1 (voorladen, save laden, dorp-grond): of  godot -- --perfwm1test  (scripts/tests/perf_wm1_tests.gd).
@@ -624,10 +647,15 @@ func _ready() -> void:
 	# T27 suite: of  godot -- --perfprobetest  (scripts/tests/perf_probe_tests.gd).
 	# Drift-achtergrond op een breed landschap: of  godot -- --driftbgtest  (scripts/tests/drift_bg_tests.gd).
 	# TC-P proloog-titelkaart: of  godot -- --tcptest [--shots=/pad]  (scripts/tests/tc_p_autotest.gd; geen CI-matrix).
+	# Android-terug + Back op het naamscherm (F6-3/F6-4): of  godot -- --androidbacktest  (scripts/tests/android_back_tests.gd).
+	# Opslag/hervat-stress WM1 (round-trip, kapotte saves, pauze in menu/dialoog/gevecht, dubbel opslaan, oude versie):
+	#   godot -- --savestresstest  (scripts/tests/save_stress_tests.gd).
+	# book_point await-guards (object weg tijdens interact): of  godot -- --bookpointawaittest  (scripts/tests/book_point_await_tests.gd).
 	var args := OS.get_cmdline_user_args()
 	for t in [["--autotest", "res://scripts/debug_autotest.gd", "AutoTest", "autotest"],
 			["--menutest", "res://scripts/debug_menutest.gd", "MenuTest", "autotest"],
 			["--hudtest", "res://scripts/tests/hud_tests.gd", "HudTest", "hudtest"],
+			["--runknoptest", "res://scripts/tests/run_knop_kamers_tests.gd", "RunKnopTest", "runknoptest"],
 			["--inventorytest", "res://scripts/tests/inventory_tests.gd", "InventoryTest", "inventorytest"],
 			["--locktest", "res://scripts/tests/lock_tests.gd", "LockTest", "locktest"],
 			["--swinglocktest", "res://scripts/tests/swing_lock_tests.gd", "SwingLockTest", "swinglocktest"],
@@ -639,18 +667,22 @@ func _ready() -> void:
 			["--archieftest", "res://scripts/tests/archief_tests.gd", "GeheimTest", "archieftest"],
 			["--kerntest", "res://scripts/tests/kern_tests.gd", "KernTest", "kerntest"],
 			["--kernkrachttest", "res://scripts/tests/kernkracht_tests.gd", "KernkrachtTest", "kernkrachttest"],
+			["--kastvangentest", "res://scripts/tests/kast_vangen_tests.gd", "KastVangenTest", "kastvangentest"],
 			["--woudtest", "res://scripts/tests/woud_tests.gd", "WoudTest", "woudtest"],
 			["--woud16test", "res://scripts/tests/woud16_tests.gd", "Woud16Test", "woud16test"],
 			["--woudgrondtest", "res://scripts/tests/woud_grond_tests.gd", "WoudGrondTest", "woudgrondtest"],
 			["--codextest", "res://scripts/tests/codex_tests.gd", "CodexTest", "codextest"],
 			["--fusietest", "res://scripts/tests/fusie_tests.gd", "FusieTest", "fusietest"],
 			["--checkpointtest", "res://scripts/tests/checkpoint_tests.gd", "CheckpointTest", "checkpointtest"],
+			["--bookpointawaittest", "res://scripts/tests/book_point_await_tests.gd", "BookPointAwaitTest", "bookpointawaittest"],
+			["--bossrespawntest", "res://scripts/tests/boss_respawn_tests.gd", "BossRespawnTest", "bossrespawntest"],
 			["--dungeon100gentest", "res://scripts/tests/dungeon100_generator_tests.gd", "Dungeon100GenTest", "dungeon100gentest"],
 			["--dungeon100schaaltest", "res://scripts/tests/dungeon100_schaal_tests.gd", "Dungeon100SchaalTest", "dungeon100schaaltest"],
 			["--dungeon100regelstest", "res://scripts/tests/dungeon100_tests.gd", "Dungeon100RegelsTest", "dungeon100regelstest"],
 			["--dungeon100integratietest", "res://scripts/tests/dungeon100_integratie_tests.gd", "Dungeon100IntegratieTest", "dungeon100integratietest"],
 			["--dungeon100blauwtest", "res://scripts/tests/dungeon100_blauw_tests.gd", "Dungeon100BlauwTest", "dungeon100blauwtest"],
 			["--blauwekisttest", "res://scripts/tests/blauwe_kist_tests.gd", "BlauweKistTest", "blauwekisttest"],
+			["--gqzonnevlamscrolltest", "res://scripts/tests/gq_zonnevlam_scroll_tests.gd", "GqZonnevlamScrollTest", "gqzonnevlamscrolltest"],
 			["--dungeon100rustpunttest", "res://scripts/tests/dungeon100_rustpunt_tests.gd", "Dungeon100RustpuntTest", "dungeon100rustpunttest"],
 			["--dungeon100bossmaptest", "res://scripts/tests/dungeon100_bossmap_tests.gd", "Dungeon100BossMapTest", "dungeon100bossmaptest"],
 			["--grotlayouttest", "res://scripts/tests/grot_layout_tests.gd", "GrotLayoutTest", "grotlayouttest"],
@@ -668,6 +700,7 @@ func _ready() -> void:
 			["--berggrotdextest", "res://scripts/tests/berggrot_dex_tests.gd", "BerggrotDexTest", "berggrotdextest"],
 			["--wilgendaltest", "res://scripts/tests/wilgendal_tests.gd", "WilgendalTest", "wilgendaltest"],
 			["--cutscenetest", "res://scripts/tests/worldmap_cutscene_tests.gd", "CutsceneTest", "cutscenetest"],
+			["--wmdeathtest", "res://scripts/tests/wmdeath_tests.gd", "WmDeathTest", "wmdeathtest"],
 			["--pvptest", "res://pvp/tests/pvp_tests.gd", "PvpTest", "pvptest"],
 			["--partytest", "res://scripts/tests/party_tests.gd", "PartyTest", "partytest"],
 			["--savetest", "res://scripts/tests/save_tests.gd", "SaveTest", "savetest"],
@@ -675,6 +708,7 @@ func _ready() -> void:
 			["--savefuzztest", "res://scripts/tests/save_fuzz_tests.gd", "SaveFuzzTest", "savefuzztest"],
 			["--saverobusttest", "res://scripts/tests/save_robust_tests.gd", "SaveRobustTest", "saverobusttest"],
 			["--saveroundtriptest", "res://scripts/tests/save_roundtrip_tests.gd", "SaveRoundtripTest", "saveroundtriptest"],
+			["--savestresstest", "res://scripts/tests/save_stress_tests.gd", "SaveStressTest", "savestresstest"],
 			["--sessielogtest", "res://scripts/tests/sessielog_tests.gd", "SessielogTest", "sessielogtest"],
 			["--sessielogcoretest", "res://scripts/tests/sessielog_core_tests.gd", "SessielogCoreTest", "sessielogcoretest"],
 			["--somroomstest", "res://scripts/tests/som_rooms_tests.gd", "SomRoomsTest", "somroomstest"],
@@ -690,6 +724,7 @@ func _ready() -> void:
 			["--tutorialtest", "res://scripts/tests/tutorial_tests.gd", "TutorialTest", "tutorialtest"],
 			["--uxtest", "res://scripts/tests/ux_tests.gd", "UxTest", "uxtest"],
 			["--uxpolishtest", "res://scripts/tests/ux_polish_autotest.gd", "UxPolishTest", "uxpolishtest"],
+			["--f6uxtest", "res://scripts/tests/f6_ux_tests.gd", "F6UxTest", "f6uxtest"],
 			["--nettest", "res://scripts/tests/net_tests.gd", "NetTest", "nettest"],
 			["--netsynctest", "res://scripts/tests/net_sync_tests.gd", "NetSyncTest", "netsynctest"],
 			["--coope2etest", "res://scripts/tests/coop_e2e_tests.gd", "CoopE2eTest", "coope2etest"],
@@ -714,9 +749,16 @@ func _ready() -> void:
 			["--golemzichtbaartest", "res://scripts/tests/golem_zichtbaar_tests.gd", "GolemZichtbaarTest", "golemzichtbaartest"],
 			["--golemstorytest", "res://scripts/tests/golem_story_tests.gd", "GolemStoryTest", "golemstorytest"],
 			["--gamefeeltest", "res://scripts/tests/gamefeel_tests.gd", "GameFeelTest", "gamefeeltest"],
+			["--gamefeelfase1test", "res://scripts/tests/gamefeel_fase1_tests.gd", "GameFeelFase1Test", "gamefeelfase1test"],
+			["--gamefeelfase2test", "res://scripts/tests/gamefeel_fase2_tests.gd", "GameFeelFase2Test", "gamefeelfase2test"],
+			["--magentabangtest", "res://scripts/tests/magenta_bang_tests.gd", "MagentaBangTest", "magentabangtest"],
 			["--chaintest", "res://scripts/tests/chain_tests.gd", "ChainTest", "chaintest"],
+			["--chainfeeltest", "res://scripts/tests/chain_feel_tests.gd", "ChainFeelTest", "chainfeeltest"],
 			["--t26sheettest", "res://scripts/tests/t26_sheet_tests.gd", "T26SheetTest", "t26sheettest"],
 			["--chargetest", "res://scripts/tests/charge_tests.gd", "ChargeTest", "chargetest"],
+			["--staggertest", "res://scripts/tests/stagger_tests.gd", "StaggerTest", "staggertest"],
+			["--perfectdodgetest", "res://scripts/tests/perfect_dodge_tests.gd", "PerfectDodgeTest", "perfectdodgetest"],
+			["--pdfollowuptest", "res://scripts/tests/pd_followup_tests.gd", "PdFollowupTest", "pdfollowuptest"],
 			["--gategaptest", "res://scripts/tests/gate_gap_tests.gd", "GateGapTest", "gategaptest"],
 			["--relaytest", "res://scripts/tests/relay_tests.gd", "RelayTest", "relaytest"],
 			["--onlinerewardtest", "res://scripts/tests/online_reward_tests.gd", "OnlineRewardTest", "onlinerewardtest"],
@@ -742,17 +784,23 @@ func _ready() -> void:
 			["--huiscollisiontest", "res://scripts/tests/huis_collision_tests.gd", "HuisCollisionTest", "huiscollisiontest"],
 			["--uipolishtest", "res://scripts/tests/ui_polish_tests.gd", "UiPolishTest", "uipolishtest"],
 			["--uishots", "res://tools/ui_polish/ui_shots.gd", "UiShots", "uishots"],
+			["--f6uxtest2", "res://scripts/tests/f6_ux2_tests.gd", "F6Ux2Test", "f6uxtest2"],
 			["--wm1bugtest", "res://scripts/tests/wm1_bugjacht_tests.gd", "Wm1BugTest", "wm1bugtest"],
 			["--wm1openbugtest", "res://scripts/tests/wm1_bugjacht_open_tests.gd", "Wm1OpenBugTest", "wm1openbugtest"],
 			["--wm1releasetest", "res://scripts/tests/wm1_release_tests.gd", "Wm1ReleaseTest", "wm1releasetest"],
+			["--rcchecktest", "res://scripts/tests/rc_check_tests.gd", "RcCheckTest", "rcchecktest"],
+			["--wm1qasweeptest", "res://scripts/tests/wm1_qa_sweep_tests.gd", "Wm1QaSweepTest", "wm1qasweeptest"],
 			["--openingtest", "res://scripts/tests/opening_tests.gd", "OpeningTest", "openingtest"],
 			["--driftbgtest", "res://scripts/tests/drift_bg_tests.gd", "DriftBgTest", "driftbgtest"],
 			["--tcptest", "res://scripts/tests/tc_p_autotest.gd", "TcPTest", "tcptest"],
 			["--studiourltest", "res://scripts/tests/studio_url_tests.gd", "StudioUrlTest", "studiourltest"],
 			["--aabtest", "res://scripts/tests/aab_tests.gd", "AabTest", "aabtest"],
+			["--launchertest", "res://scripts/tests/launcher_icon_tests.gd", "LauncherIconTest", "launchertest"],
 			["--playtestkittest", "res://scripts/tests/playtest_kit_tests.gd", "PlaytestKitTest", "playtestkittest"],
 			["--wm1dekkingtest", "res://scripts/tests/wm1_dekking_tests.gd", "Wm1DekkingTest", "wm1dekkingtest"],
 			["--lifecycletest", "res://scripts/tests/lifecycle_tests.gd", "LifecycleTest", "lifecycletest"],
+			["--androidbacktest", "res://scripts/tests/android_back_tests.gd", "AndroidBackTest", "androidbacktest"],
+			["--nameentrysafetest", "res://scripts/tests/name_entry_safe_tests.gd", "NameEntrySafeTest", "nameentrysafetest"],
 			["--statemachinetest", "res://scripts/tests/state_machine_tests.gd", "StateMachineTest", "statemachinetest"],
 			["--battlesim", "res://tools/battlesim/battlesim.gd", "BattleSim", "battlesim"],
 			["--actionsim", "res://tools/battlesim/action_sim.gd", "ActionSim", "actionsim"],
@@ -761,6 +809,9 @@ func _ready() -> void:
 			["--perfwm1test", "res://scripts/tests/perf_wm1_tests.gd", "PerfWm1Test", "perfwm1test"],
 			["--perfprobetest", "res://scripts/tests/perf_probe_tests.gd", "PerfProbeTest", "perfprobetest"],
 			["--wm1balans", "res://tools/battlesim/wm1_balans.gd", "Wm1Balans", "wm1balans"],
+			["--arenatest", "res://scripts/tests/arena_tests.gd", "ArenaTest", "arenatest"],
+			["--arenawavestest", "res://scripts/tests/arena_waves_tests.gd", "ArenaWavesTest", "arenawavestest"],
+			["--arenawavesfollowuptest", "res://scripts/tests/arena_waves_followup_tests.gd", "ArenaWavesFollowupTest", "arenawavesfollowuptest"],
 			["--onlineprofiletest", "res://scripts/tests/online_profile_tests.gd", "OnlineProfileTest", "onlineprofiletest"],
 			["--profilecodefuzztest", "res://scripts/tests/profile_code_fuzz_tests.gd", "ProfileCodeFuzzTest", "profilecodefuzztest"],
 			["--paperdolltest", "res://scripts/tests/paper_doll_tests.gd", "PaperDollTest", "paperdolltest"],
@@ -798,7 +849,11 @@ func _ready() -> void:
 		if FileAccess.file_exists(autosave_path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(autosave_path))
 		_finish_preload()   # tests: achtergrond-laden eerst afmaken (geen race/deadlock met load() in de suite)
-		var tester: Node = load(t[1]).new()
+		var scr: Script = load(t[1])
+		# Losse --script-suite (extends SceneTree, bv. name_entry_safe_tests.gd): draai de binnenklasse Runner.
+		if scr.get_instance_base_type() == &"SceneTree" and scr.get_script_constant_map().has("Runner"):
+			scr = scr.get_script_constant_map()["Runner"]
+		var tester: Node = scr.new()
 		tester.name = t[2]
 		get_tree().root.add_child.call_deferred(tester)
 		break
@@ -809,10 +864,7 @@ func _ready() -> void:
 	# Berggrot, zonder wereldkaart. Zelfde haakje als de mond op de kaart.
 	if BerggrotData.DEBUG_ARG in args and not ("--berggrottest" in args):
 		call_deferred("_start_berggrot")
-	_story_save_path = save_path
-	_story_autosave_path = autosave_path
-	_migrate_legacy_autosave()
-	sync_autosave_path()
+	_bind_story_save_paths()
 
 
 ## Testmodus (alleen bij een --...test-suite; O-4, flaky berggrottest onder load):
@@ -1080,6 +1132,8 @@ func new_game(hero_name := DEFAULT_NAME) -> void:
 	map_monster_battle = {}
 	defeated_map_monsters = {}
 	gold = GameData.START_GOLD
+	arena_tokens = 0
+	_drop_arena_run()
 	steps_until_encounter_possible = GameData.SAFE_STEPS
 	bestiary.clear()
 	puzzle_latched.clear()
@@ -1209,11 +1263,46 @@ func _koppel_quests() -> void:
 ## Story heeft een event afgerond: stappen met dat event worden klaar (en alles wat de vlaggen nu zeggen).
 func quest_event(event_id: String) -> void:
 	QuestData.on_event(quest_progress, event_id, story_flags, story_step)
+	_quest_klank()
 
 
 ## Legt vast wat volgens de vlaggen/verhaalstap klaar is (bv. een baas uit een gevecht).
-func quest_sync() -> void:
+## klank = false (laden): geen quest-geluid, alleen de stand onthouden.
+func quest_sync(klank := true) -> void:
 	QuestData.sync(quest_progress, story_flags, story_step)
+	if klank:
+		_quest_klank()
+	else:
+		_quest_klank_stand = _quest_stand()
+
+
+## Post-RC sfx: per opdracht 0 = niet gestart, 1 = gestart, 2 = klaar.
+func _quest_stand() -> Dictionary:
+	var uit := {}
+	for q in QuestData.quests():
+		var klaar := QuestData.quest_klaar(q, story_flags, story_step, quest_progress)
+		uit[str(q["id"])] = 2 if klaar else (1 if QuestData.quest_gestart(q, story_flags, story_step, quest_progress) else 0)
+	return uit
+
+
+## Een opdracht ging naar klaar -> quest_complete; anders een nieuwe gestart -> quest_accept.
+## De eerste keer (lege stand) alleen onthouden.
+func _quest_klank() -> void:
+	var nu := _quest_stand()
+	if not _quest_klank_stand.is_empty():
+		var klaar := false
+		var gestart := false
+		for qid in nu:
+			var oud := int(_quest_klank_stand.get(qid, 0))
+			if int(nu[qid]) == 2 and oud < 2:
+				klaar = true
+			elif int(nu[qid]) >= 1 and oud == 0:
+				gestart = true
+		if klaar:
+			WorldSfx.play(WorldSfx.QUEST_COMPLETE)
+		elif gestart:
+			WorldSfx.play(WorldSfx.QUEST_ACCEPT)
+	_quest_klank_stand = nu
 
 
 func hoor_muziek(manifest_id: String) -> void:
@@ -1411,7 +1500,12 @@ func has_save() -> bool:
 
 ## v0.11: is er een automatische save?
 func has_autosave() -> bool:
-	return _save_file_exists(autosave_path)
+	if _save_file_exists(autosave_path):
+		return true
+	for p in _legacy_double_suffix_autosave_paths(active_slot):
+		if _save_file_exists(p):
+			return true
+	return false
 
 
 ## v0.11: handmatige save óf autosave aanwezig (titelscherm: 'Doorgaan' aan).
@@ -1431,11 +1525,37 @@ func slot_path(slot: int) -> String:
 	return save_path.trim_suffix("save_1.json") + "save_%d.json" % slot
 
 
+## Basis van de story-autosave: altijd .../autosave.json, nooit .../autosave_N.json.
+## C-11 schrijft per slot autosave_N.json vanaf deze basis. Na 7aa5d373 zette _ready
+## _story_autosave_path op het al gesuffixte autosave_path (ná new_game), waardoor
+## autosave_slot_path nog eens _N plakte (autosave_1_1.json).
+func _autosave_base_path(path := "") -> String:
+	var base := path
+	if base == "":
+		base = _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var name := base.get_file()
+	var dir := base.trim_suffix(name)
+	if not name.ends_with(".json"):
+		return base
+	var stem := name.trim_suffix(".json")
+	while true:
+		var us := stem.rfind("_")
+		if us < 0:
+			break
+		var head := stem.substr(0, us)
+		var suffix := stem.substr(us + 1)
+		if suffix.is_valid_int() and head.ends_with("autosave"):
+			stem = head
+			continue
+		break
+	return dir + stem + ".json"
+
+
 ## Pad van de autosave die bij handmatig slot hoort (C-11: niet meer één gedeeld bestand).
 func autosave_slot_path(slot: int) -> String:
 	if slot < 1 or slot > SLOT_COUNT:
 		return ""
-	var base := _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var base := _autosave_base_path()
 	if base.ends_with("autosave.json"):
 		return base.trim_suffix("autosave.json") + "autosave_%d.json" % slot
 	if base.ends_with(".json"):
@@ -1445,10 +1565,35 @@ func autosave_slot_path(slot: int) -> String:
 
 ## Oud gedeeld autosave-bestand (vóór C-11); gebruikt voor migratie.
 func _legacy_shared_autosave_path() -> String:
-	var base := _story_autosave_path if _story_autosave_path != "" else AUTOSAVE_PATH
+	var base := _autosave_base_path()
 	if base.ends_with("autosave.json"):
 		return base
 	return AUTOSAVE_PATH
+
+
+## Paden die de dubbele-suffix-bug (autosave_K_N.json) voor dit slot kon schrijven.
+func _legacy_double_suffix_autosave_paths(slot: int) -> Array[String]:
+	var out: Array[String] = []
+	var target := autosave_slot_path(slot)
+	var base := _autosave_base_path()
+	if slot < 1 or slot > SLOT_COUNT or not base.ends_with("autosave.json"):
+		return out
+	var prefix := base.trim_suffix("autosave.json")
+	for k in range(1, SLOT_COUNT + 1):
+		var p := prefix + "autosave_%d_%d.json" % [k, slot]
+		if p != "" and p != target:
+			out.append(p)
+	return out
+
+
+## Zet de story-basispaden (zonder slot-suffix) en migreert oude autosave-bestanden.
+func _bind_story_save_paths() -> void:
+	_story_save_path = save_path
+	var raw := _story_autosave_path if _story_autosave_path != "" else (autosave_path if autosave_path != "" else AUTOSAVE_PATH)
+	_story_autosave_path = _autosave_base_path(raw)
+	_migrate_legacy_autosave()
+	_migrate_double_suffix_autosaves()
+	sync_autosave_path()
 
 
 ## Zet autosave_path op het bestand van active_slot (alleen story-modus).
@@ -1475,6 +1620,9 @@ func is_autosave_path(path: String) -> bool:
 	for i in range(1, SLOT_COUNT + 1):
 		if path == autosave_slot_path(i):
 			return true
+		for p in _legacy_double_suffix_autosave_paths(i):
+			if path == p:
+				return true
 	return false
 
 
@@ -1495,6 +1643,23 @@ func _migrate_legacy_autosave() -> void:
 		return
 	if not _move_save_files(legacy, target):
 		push_warning("Autosave-migratie mislukt: %s -> %s" % [legacy, target])
+
+
+## Verplaats autosave_K_N.json (bug na C-11) naar autosave_N.json, eenmalig en veilig.
+## Bestaat de juiste file al: niet overschrijven (ook niet als die ouder is — geen data verliezen).
+## Lezen/Doorgaan kiest dan de nieuwste van de twee (zie _slot_autosave_record).
+func _migrate_double_suffix_autosaves() -> void:
+	for slot in range(1, SLOT_COUNT + 1):
+		var target := autosave_slot_path(slot)
+		if target == "":
+			continue
+		for legacy in _legacy_double_suffix_autosave_paths(slot):
+			if not FileAccess.file_exists(legacy):
+				continue
+			if _save_file_exists(target):
+				continue
+			if not _move_save_files(legacy, target):
+				push_warning("Autosave-migratie (dubbele suffix) mislukt: %s -> %s" % [legacy, target])
 
 
 func _move_save_files(from: String, to: String) -> bool:
@@ -1551,7 +1716,22 @@ func _manual_slot_record(slot: int) -> Dictionary:
 
 
 func _slot_autosave_record(slot: int) -> Dictionary:
-	var path := autosave_slot_path(slot)
+	var best := _autosave_record_at(autosave_slot_path(slot), slot)
+	for legacy in _legacy_double_suffix_autosave_paths(slot):
+		var rec := _autosave_record_at(legacy, slot)
+		if rec.is_empty():
+			continue
+		if best.is_empty() or (bool(best.get("corrupt", false)) and not bool(rec.get("corrupt", false))):
+			best = rec
+			continue
+		if bool(rec.get("corrupt", false)) and not bool(best.get("corrupt", false)):
+			continue
+		if float(rec["stamp"]) > float(best["stamp"]):
+			best = rec
+	return best
+
+
+func _autosave_record_at(path: String, slot: int) -> Dictionary:
 	if path == "" or not _save_file_exists(path):
 		return {}
 	var src := _read_save_source(path)
@@ -2062,6 +2242,7 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 		"huis_herkomst": huis_herkomst,
 		"inventory": inventory.duplicate(true),
 		"gold": gold,
+		"arena_tokens": arena_tokens,
 		"play_time": play_time(),
 		"bestiary": bestiary.duplicate(true),
 		"puzzle_latched": puzzle_latched.duplicate(true),
@@ -2073,6 +2254,8 @@ func state_data(tile: Vector2i, facing: Vector2i, map := "") -> Dictionary:
 				"warpers": dungeon100_warpers}),
 		"story": {"step": story_step, "flags": story_flags.keys()},
 		"pending_unique_event": Story.pending_unique_event if has_node("/root/Story") else "",
+		# Klus 13: absorptie-moment dat nog moet spelen (pauze-save vlak na een baas); anders na laden kwijt
+		"pending_kern_absorb": pending_kern_absorb,
 		"scenes_seen": seen_scenes(),
 		"heard_music": heard_music.duplicate(),
 		"quests": _quests_save(),
@@ -2201,6 +2384,7 @@ func apply_state(d: Dictionary) -> bool:
 	# of nieuwere saves) laten het spel nooit vastlopen.
 	if d.is_empty() or not d.has("map") or not (d.get("party") is Array):
 		return false
+	_drop_arena_run()
 	var oude_namen := not d.has(NAMES_KEY)
 	player_name = clean_name(str(d.get("player_name", DEFAULT_NAME)))
 	if oude_namen:
@@ -2222,8 +2406,11 @@ func apply_state(d: Dictionary) -> bool:
 	for id in stray_equipment:
 		# alleen echte uitrusting terug in de tas; een onbekend id uit een kapotte save valt weg
 		if Equipment.is_equipment(str(id)):
-			inventory[id] = int(inventory.get(id, 0)) + 1
+			# Klus 13: ook hier de stapel begrenzen (anders > MAX_ITEM_STACK na laden)
+			inventory[id] = mini(MAX_ITEM_STACK, int(inventory.get(id, 0)) + 1)
 	gold = _gold_from(d.get("gold", 0))
+	# Ontbrekende sleutel (oude save) of een kapot type -> 0, net als goud.
+	arena_tokens = mini(_arena_token_cap(), _gold_from(d.get("arena_tokens", 0)))
 	bestiary = {}
 	var best = d.get("bestiary", {})
 	if best is Dictionary:
@@ -2262,7 +2449,7 @@ func apply_state(d: Dictionary) -> bool:
 	_hoor_huidige_muziek()
 	# v0.25 Quest Log; oude saves zonder "quests" -> afgeleid van de vlaggen en de verhaalstap
 	quest_progress = QuestData.van_save(d.get("quests", {}))
-	quest_sync()
+	quest_sync(false)
 	pending_tutorial = {}
 	if has_node("/root/Story"):
 		var story: Node = get_node("/root/Story")
@@ -2280,6 +2467,10 @@ func apply_state(d: Dictionary) -> bool:
 			if KernData.KERNFRAGMENTEN.has(str(k)):
 				var e: Dictionary = kn[k] if kn[k] is Dictionary else {}
 				kernfragmenten[str(k)] = e.duplicate(true)
+	# Klus 13: alleen een kern die je echt hebt; oude saves zonder sleutel = geen moment.
+	var pk = d.get("pending_kern_absorb", "")
+	if pk is String and kernfragmenten.has(pk):
+		pending_kern_absorb = pk
 	# Codex: oude saves zonder "codex" = lege Codex; kapotte pagina's vallen weg.
 	codex_load_data(d.get("codex", {}))
 	dungeon100_load(d.get("dungeon100", {}))
@@ -2650,13 +2841,19 @@ func _fill_eind_codex() -> void:
 
 
 ## Na de naamkeuze: nieuw spel en naar het startpunt in het dorp.
-func start_new_game(hero_name: String) -> void:
+## skip_opening (standaard false): alleen de drift overslaan. new_game wist de vlaggen,
+## dus warper_drift_done (opening/flow.gd FLAG_DRIFT_DONE) moet daarna gezet worden,
+## vóór should_play. De rest van dit pad blijft hetzelfde, ook de map naar het startpunt.
+func start_new_game(hero_name: String, skip_opening: bool = false) -> void:
+	new_game_starts += 1
 	use_story_saves()
 	new_game(hero_name)
 	# Forge/Dennis 21 okt 2026: een NIEUW spel begint altijd in Action (Classic blijft kiesbaar in Settings).
 	# Geladen saves houden hun eigen keuze (load_game; zonder sleutel = Classic).
 	Settings.set_value("battle_style", Settings.BATTLE_STYLE_ACTION)
 	changing_map = false
+	if skip_opening:
+		_mark_opening_drift_done()
 	if bool(_call_opening_flow("should_play", story_flags)):
 		_call_opening_flow("start")
 	else:
@@ -2664,6 +2861,15 @@ func start_new_game(hero_name: String) -> void:
 	# v0.11: niet meteen automatisch opslaan bij een nieuw spel (anders is de autosave van
 	# het vorige spel direct weg); dat gebeurt pas bij de eerste echte mapwissel.
 	_autosave_request = ""
+
+
+## Screenshots (--uishots) slaan de drift over. Zelfde vlag als flow.gd FLAG_DRIFT_DONE.
+func _mark_opening_drift_done() -> void:
+	var flag := "warper_drift_done"
+	var flow := _opening_flow_script()
+	if flow != null:
+		flag = str(flow.get_script_constant_map().get("FLAG_DRIFT_DONE", flag))
+	story_flags[flag] = true
 
 
 ## Terug naar het titelscherm (bv. vanuit het veldmenu, en in de autotest).
@@ -2707,22 +2913,54 @@ func enter_map(path: String) -> void:
 
 ## Ga naar een andere map: fade uit, wissel van scène, en zet de speler
 ## op het spawnpunt met de naam spawn_name (een node onder "Spawns").
-func change_map(path: String, spawn_name: String) -> void:
+## true = de wissel is gestart. false = niets gedaan (bezig, geblokkeerd, of het pad bestaat niet).
+## Een ontbrekend pad faalt vóór de fade, zodat het scherm niet op zwart blijft hangen.
+func change_map(path: String, spawn_name: String) -> bool:
 	if scene_busy():
-		return
+		return false
 	if ReleaseFlags.dev_scene_blocked(path):
-		return
+		return false
+	var van := current_map
+	var route := huis_route(van, path, spawn_name)
+	path = str(route[0])
+	spawn_name = str(route[1])
+	if not _map_scene_available(path):
+		_abort_missing_map(path)
+		return false
 	changing_map = true
-	warp_from_map = current_map
-	var route := huis_route(current_map, path, spawn_name)
-	path = route[0]
-	spawn_name = route[1]
-	SessieLog.warp(current_map, path, spawn_name)
+	warp_from_map = van
+	SessieLog.warp(van, path, spawn_name)
 	pending_spawn = spawn_name
 	has_return_point = false
 	entry_kind = "door"
-	_autosave_request = "map" if is_dungeon_transition(current_map, path) else ""
+	_autosave_request = "map" if is_dungeon_transition(van, path) else ""
+	# Niet awaiten: de bool moet meteen terug, vóór de fade (map.gd leest hem synchroon).
+	_fade_and_enter_map(path)
+	return true
+
+
+## Pad bestaat als geladen PackedScene of als resource op schijf.
+func _map_scene_available(path: String) -> bool:
+	if path.is_empty():
+		return false
+	if _loaded.has(path) and _loaded[path] is PackedScene:
+		return true
+	return ResourceLoader.exists(path)
+
+
+## Ontbrekend doel: geen changing_map, geen hangend zwart.
+func _abort_missing_map(path: String) -> void:
+	changing_map = false
+	push_warning("change_map: scène ontbreekt: %s" % path)
+	Transition.clear_overlay()
+
+
+## Fade en scènewissel nadat change_map de bool al heeft teruggegeven.
+func _fade_and_enter_map(path: String) -> void:
 	await Transition.fade_out()
+	if not _map_scene_available(path):
+		_abort_missing_map(path)
+		return
 	_go_to_scene(path)
 
 
@@ -2929,6 +3167,9 @@ func respawn_at_checkpoint(boss := false) -> String:
 	var keep_seen: Array = StoryData.UNIQUE_SEEN_FLAGS.values().filter(func(f): return story_flags.has(str(f)))
 	if story_flags.has(StoryData.TUTORIAL_CODEX_FLAG):
 		keep_seen.append(StoryData.TUTORIAL_CODEX_FLAG)
+	# Wereldkaart-filmpje: het checkpoint wordt gezet vóór het filmpje zijn vlag zet; niet terugrollen
+	if story_flags.has(WorldmapCutscene.FLAG):
+		keep_seen.append(WorldmapCutscene.FLAG)
 	var cp := checkpoint.duplicate(true)
 	apply_state(cp["state"])
 	koopman_load(keep_koopman)
@@ -3426,6 +3667,38 @@ func spend_gold(n: int) -> bool:
 		return false
 	gold -= n
 	return true
+
+
+func _arena_token_cap() -> int:
+	return int(preload("res://scripts/data/arena_rewards.gd").token_cap())
+
+
+func add_arena_tokens(n: int) -> void:
+	if n <= 0:
+		return
+	if not ReleaseFlags.arena_enabled():
+		if OS.is_debug_build():
+			push_warning("add_arena_tokens genegeerd: arena uitgeschakeld")
+		return
+	arena_tokens = mini(_arena_token_cap(), arena_tokens + n)
+
+
+func spend_arena_tokens(n: int) -> bool:
+	if n <= 0:
+		return true
+	if arena_tokens < n:
+		return false
+	arena_tokens -= n
+	return true
+
+
+## Run-node hangt alleen aan GameState zolang iemand de arena echt in gaat. Uit = er is geen node.
+func _drop_arena_run() -> void:
+	var n := get_node_or_null("ArenaRun")
+	if n == null:
+		return
+	remove_child(n)
+	n.free()
 
 
 ## Leg loot-items in de tas (clamps). Geeft het goud uit de loot-dict (nog niet opgeteld).

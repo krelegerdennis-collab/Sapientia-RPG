@@ -233,7 +233,7 @@ const ENEMIES := {
 	"wortelkruiper": {
 		"name": "Root Crawler", "sprite": "res://assets/sprites/enemies/wortelkruiper.png",
 		"sprite_back": "res://assets/sprites/enemies/wortelkruiper_rug.png",
-		"max_hp": 34, "atk": 22, "def": 10, "agi": 7, "mag": 0, "mdef": 6,
+		"max_hp": 28, "atk": 15, "def": 10, "agi": 7, "mag": 0, "mdef": 6,
 		"exp": 16, "gold": 10, "y_offset": 0,
 		"skills": [{"name": "Root Grip", "chance": 0.2, "power": 1.3}],
 		"no": 7, "mp": 0, "weak": ["vuur"], "resist": [],
@@ -244,7 +244,7 @@ const ENEMIES := {
 	"mistuil": {
 		"name": "Mist Owl", "sprite": "res://assets/sprites/enemies/mistuil.png",
 		"sprite_back": "res://assets/sprites/enemies/mistuil_rug.png",
-		"max_hp": 26, "atk": 20, "def": 6, "agi": 16, "mag": 8, "mdef": 10,
+		"max_hp": 22, "atk": 14, "def": 6, "agi": 16, "mag": 8, "mdef": 10,
 		"exp": 15, "gold": 9, "y_offset": 0,
 		"skills": [{"name": "Mist Cry", "chance": 0.2, "power": 1.25}],
 		"no": 8, "mp": 4, "weak": ["vuur"], "resist": [],
@@ -255,7 +255,7 @@ const ENEMIES := {
 	"sporenzwam": {
 		"name": "Spore Cap", "sprite": "res://assets/sprites/enemies/sporenzwam.png",
 		"sprite_back": "res://assets/sprites/enemies/sporenzwam_rug.png",
-		"max_hp": 40, "atk": 18, "def": 12, "agi": 4, "mag": 6, "mdef": 8,
+		"max_hp": 32, "atk": 12, "def": 12, "agi": 4, "mag": 6, "mdef": 8,
 		"exp": 18, "gold": 12, "y_offset": 0,
 		"skills": [{"name": "Spore Cloud", "chance": 0.25, "power": 1.4}],
 		"no": 9, "mp": 0, "weak": ["vuur"], "resist": [],
@@ -346,7 +346,7 @@ const ENEMIES := {
 		"no": 30, "mp": 12, "weak": [], "resist": [],
 		"drops": [],
 		"boss": {
-			"max_hp": 270, "atk": 32, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
+			"max_hp": 405, "atk": 36, "def": 5, "agi": 8, "mag": 8, "mdef": 6, "mp": 12,
 			"exp": 20, "gold": 0,
 			"skills": [{"name": "Silence", "chance": 0.25, "power": 1.2}],
 			"tint": [0.72, 0.40, 1.15],
@@ -356,13 +356,13 @@ const ENEMIES := {
 	},
 	"wurger": {
 		"name": "The Strangler", "sprite": "res://assets/sprites/archief2/wurger.png",
-		"max_hp": 700, "atk": 42, "def": 28, "agi": 5, "mag": 0, "mdef": 4,
+		"max_hp": 2450, "atk": 80, "def": 28, "agi": 5, "mag": 0, "mdef": 4,
 		"exp": 48, "gold": 20, "y_offset": 0,
 		"skills": [],
 		"no": 31, "mp": 0, "weak": ["ijs", "fysiek"], "resist": [],
 		"drops": [],
 		"boss": {
-			"max_hp": 700, "atk": 42, "def": 28, "agi": 5, "mag": 0, "mdef": 4, "mp": 0,
+			"max_hp": 2450, "atk": 80, "def": 28, "agi": 5, "mag": 0, "mdef": 4, "mp": 0,
 			"exp": 48, "gold": 20,
 			"skills": [],
 			"weak": ["ijs", "fysiek"],
@@ -1110,15 +1110,16 @@ const ARCHIEF_EXP_SCHAAL := 0.50
 ##   Tier 7 = Berggrot (berggrot_data.gd; was tier 0).
 ##   EXP/goud per tier blijven gelijk aan de oude tier (5 = oud 2, 6 = oud 3, 7 = basis).
 ##   Seren (lotte_glitch baas-blok): HP x3, ATK x2,3. Wortelkoning baas-blok: ATK 34 -> 38 (~80-90% winst in de battlesim; in #126 was het 68%).
-##   Canon-bazen (Golem 360/27/15, Wurger, Genezer, Diepe Grot 25/50/75/99) NIET gewijzigd.
+##   Canon-bazen: Golem 360/27/15, Genezer en Diepe Grot 25/50/75 ongewijzigd.
+##   F5 (Dennis 20-11): Wurger 700/42 -> 2450/80, The Voice (Diepe Grot 99) 2250/135 -> 15750/250.
 const TIERS := {
 	1: {"hp": 1.0, "atk": 8, "def": 1, "exp": 2.0, "gold": 1.0},
-	2: {"hp": 1.5, "atk": 9, "def": 3, "exp": 2.5, "gold": 1.5},
+	2: {"hp": 1.5, "atk": 4, "def": 3, "exp": 2.5, "gold": 1.5},
 	3: {"hp": 1.9, "atk": 9, "def": 5, "exp": 3.0, "gold": 2.0},
 	4: {"hp": 2.3, "atk": 10, "def": 7, "exp": 3.0, "gold": 2.5},
-	5: {"hp": 5.0, "atk": 46, "def": 4, "exp": 2.5, "gold": 1.5},
-	6: {"hp": 6.5, "atk": 66, "def": 6, "exp": 3.0, "gold": 2.0},
-	7: {"hp": 3.5, "atk": 28, "def": 0, "exp": 1.0, "gold": 1.0},
+	5: {"hp": 8.0, "atk": 54, "def": 4, "exp": 2.5, "gold": 1.5},
+	6: {"hp": 12.0, "atk": 80, "def": 6, "exp": 3.0, "gold": 2.0},
+	7: {"hp": 4.5, "atk": 42, "def": 0, "exp": 1.0, "gold": 1.0},
 }
 
 
@@ -1146,11 +1147,25 @@ static func apply_tier(data: Dictionary, tier: int) -> Dictionary:
 	return d
 
 
+## F5 (Dennis 20-11): Classic tier 2 ging naar ATK +4 (F5.1-venster). Action/SoM (realtime, eigen schaal in
+## SomData.ACTION_AREAS) houdt de oude tier-2-ATK +9, anders zakken de Action-kamers onder hun doelen.
+## Alleen gebruikt als apply_archief_tier(..., action = true) (som_arena en de Action-sims); Classic niet.
+const ARCHIEF_ACTION_TIER_ATK := {2: 9}
+## F5 (Dennis 20-11): Action-kastenzaal zat onder het 10-25%-venster; leeszaal/trapzaal al erbinnen.
+## Alleen deze kamer, alleen Action. Classic en de gedeelde tier-2-ATK blijven ongemoeid.
+## Sleutels optioneel: "max_hp" / "atk" (factor na de schaal). Alleen ATK bleek Dax-solo tier-2 onder 70% te duwen.
+const ARCHIEF_ACTION_ROOM := {"archief_v2_kastenzaal": {"max_hp": 1.7}}
+
+
 ## Zelfde tier-tabel, daarna omlaag naar doel-level 7. Tier 0 blijft ongewijzigd.
-static func apply_archief_tier(data: Dictionary, tier: int) -> Dictionary:
+## action = true: Action/SoM-pad, met ARCHIEF_ACTION_TIER_ATK in plaats van TIERS[tier]["atk"].
+## room_id: optioneel, alleen Action; past ARCHIEF_ACTION_ROOM toe (na de schaal).
+static func apply_archief_tier(data: Dictionary, tier: int, action := false, room_id := "") -> Dictionary:
 	var d := apply_tier(data, tier)
 	if not TIERS.has(tier):
 		return d
+	if action and ARCHIEF_ACTION_TIER_ATK.has(tier):
+		d["atk"] = int(d["atk"]) - int(TIERS[tier]["atk"]) + int(ARCHIEF_ACTION_TIER_ATK[tier])
 	d["max_hp"] = maxi(1, round_half_even(float(d["max_hp"]) * ARCHIEF_STAT_SCHAAL))
 	d["atk"] = maxi(1, round_half_even(float(d["atk"]) * ARCHIEF_STAT_SCHAAL))
 	d["def"] = maxi(0, round_half_even(float(d["def"]) * ARCHIEF_STAT_SCHAAL))
@@ -1158,6 +1173,12 @@ static func apply_archief_tier(data: Dictionary, tier: int) -> Dictionary:
 		d["mag"] = maxi(0, round_half_even(float(d["mag"]) * ARCHIEF_STAT_SCHAAL))
 	if d.has("mdef"):
 		d["mdef"] = maxi(0, round_half_even(float(d["mdef"]) * ARCHIEF_STAT_SCHAAL))
+	if action and room_id != "" and ARCHIEF_ACTION_ROOM.has(room_id):
+		var ov: Dictionary = ARCHIEF_ACTION_ROOM[room_id]
+		if ov.has("max_hp"):
+			d["max_hp"] = maxi(1, round_half_even(float(d["max_hp"]) * float(ov["max_hp"])))
+		if ov.has("atk"):
+			d["atk"] = maxi(1, round_half_even(float(d["atk"]) * float(ov["atk"])))
 	d["exp"] = maxi(1, round_half_even(float(d.get("exp", 0)) * ARCHIEF_EXP_SCHAAL))
 	d["gold"] = maxi(0, round_half_even(float(d.get("gold", 0)) * ARCHIEF_STAT_SCHAAL))
 	d["archief_doel"] = EERSTE_ARCHIEF_DOEL
@@ -1295,9 +1316,9 @@ const ENCOUNTER_GROUPS := [
 	{"enemies": ["papiergeest"], "weight": 3},
 	{"enemies": ["papiergeest", "papiergeest"], "weight": 3},
 	{"enemies": ["glitchmot", "papiergeest"], "weight": 3},
-	{"enemies": ["glitchmot", "glitchmot", "glitchmot"], "weight": 1},
-	{"enemies": ["kennis_beest"], "weight": 1},
-	{"enemies": ["kennis_beest", "papiergeest"], "weight": 1},
+	{"enemies": ["glitchmot", "papiergeest"], "weight": 1},
+	{"enemies": ["kennis_beest"], "weight": 2},
+	{"enemies": ["kennis_beest", "papiergeest"], "weight": 0},
 	# v0.13: De Vergeten Archieven. Daar zijn GEEN random encounters (zichtbare map-monsters,
 	# scripts/data/dungeon_rooms.gd); deze groep is er voor als een kamer toch een groep
 	# per terrein wil (en voor F2 in debug). Op de wereldkaart komt hij nooit voor.

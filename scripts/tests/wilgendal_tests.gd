@@ -419,6 +419,13 @@ func _panden() -> void:
 			check("vitrine %s" % id, kamer.get_node_or_null("Objects/Vitrine") != null)
 			bank.interact(kamer.get_node("Objects/Player"))
 			await get_tree().process_frame
+			# F6.3: winkelier zegt eerst zijn begroeting; wacht tot die klaar is.
+			var stappen := 0
+			while Dialog.is_open and stappen < 60:
+				Dialog.advance()
+				await get_tree().process_frame
+				stappen += 1
+			await get_tree().process_frame
 			var scherm := kamer.get_node_or_null("ShopScreen")
 			check("winkel open %s" % id, scherm != null and scherm.shop_id == str(rij["shop_id"])
 					and scherm.header.text == Shop.shop_name(str(rij["shop_id"])))

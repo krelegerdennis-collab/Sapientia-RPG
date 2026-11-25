@@ -134,7 +134,7 @@ zuidpad kolom 24-25); de uitgang blijft 3 breed. Padranden (dorp.png 10+masker) 
 - Spawn/uitgang zuid (16,21)/(15,23)→(24,30)/(23,33); put (16,12)→(24,16).
 - NPC's: Marit (19,14)→(27,18), Bram (6,12)→(11,16), Jens (24,18)→(36,24), Tobias (26,14)→(38,18),
   Vesper (16,15)→(24,19), wortelgreep 1 onder Vesper (24,20); bord (5,11)→(10,15).
-- Cutscene `noor_ontmoeting`: speler start (24,30) en loopt 8 omhoog (was 3); Marit-stappen ongewijzigd.
+- Cutscene `noor_ontmoeting`: speler start (24,30) en loopt 8 omhoog (was 3) in de fallback-tak; met CS-09 (`cs09_vesper_mapleton.ogv`, `cutscene_cs09_gezien`) plaatsing (24,21) en verkorte tail. Marit-stappen ongewijzigd.
 - v8-grond: `tools/som/esdoorn_v8_grond.py` → `assets/tilesets/som/esdoorn/grond_v8.*` (567 unieke tegels,
   atlas 1024x144), getoond door `scripts/village/v8_grond.gd` (laag GrondV8) op gras/pad/plein; bomen,
   vijver, hek, heg, tonnen en bloembakken blijven de oude dorp.png-tegels. Interieurs niet geschaald.

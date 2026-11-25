@@ -5,6 +5,9 @@ extends RefCounted
 const GROUP := "hd2d_unmodulated"
 ## Alleen deze bit krijgt kaartlicht; combat/HUD gebruikt 0.
 const WORLD_LIGHT_MASK := 1
+## F4: finisher/heavy-getallen zetten deze meta (Color). Compensatie vermenigvuldigt ermee
+## i.p.v. de kleur elke frame te wissen; alpha blijft (fade-tween).
+const FEEL_RGB := &"feel_rgb"
 
 
 static func mark(node: Node) -> void:
@@ -40,19 +43,29 @@ static func apply_compensation(tint: Color) -> void:
 	var st := _tree()
 	if st == null:
 		return
-	var comp := inverse_modulate(tint)
-	for n in st.get_nodes_in_group(GROUP):
-		if n is CanvasItem and is_instance_valid(n):
-			(n as CanvasItem).modulate = comp
+	_paint_group(inverse_modulate(tint))
 
 
 static func reset_compensation() -> void:
 	var st := _tree()
 	if st == null:
 		return
+	_paint_group(Color.WHITE)
+
+
+static func _paint_group(rgb: Color) -> void:
+	var st := _tree()
+	if st == null:
+		return
 	for n in st.get_nodes_in_group(GROUP):
 		if n is CanvasItem and is_instance_valid(n):
-			(n as CanvasItem).modulate = Color.WHITE
+			var ci := n as CanvasItem
+			if ci.has_meta(FEEL_RGB):
+				var base: Color = ci.get_meta(FEEL_RGB)
+				var a := ci.modulate.a
+				ci.modulate = Color(rgb.r * base.r, rgb.g * base.g, rgb.b * base.b, a)
+			else:
+				ci.modulate = rgb
 
 
 static func canvas_tint_on_map(map: Node) -> Color:

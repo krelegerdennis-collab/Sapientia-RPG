@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/tmp/lichtprops_v2")
-EXCLUDE_MAPS = {"archief_2_v3_licht"}
+EXCLUDE_MAPS: set[str] = set()
 
 
 def merge_json() -> None:

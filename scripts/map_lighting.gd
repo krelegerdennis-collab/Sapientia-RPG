@@ -8,11 +8,17 @@ const StoryData := preload("res://scripts/data/story_data.gd")
 const PRESETS_PATH := "res://data/hd2d/presets.json"
 const LIGHTS_PATH := "res://data/hd2d/lights.json"
 const MAPS_INDEX_PATH := "res://data/hd2d/maps_index.json"
+## Arena-data blijft in *_arena.json. Alleen mergen zolang de vlag aan staat.
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
+const ARENA_PRESETS_PATH := "res://data/hd2d/presets_arena.json"
+const ARENA_LIGHTS_PATH := "res://data/hd2d/lights_arena.json"
+const ARENA_INDEX_PATH := "res://data/hd2d/maps_index_arena.json"
 
 ## Na deze verhaalstap stuurt proloog-StoryTint de preset niet meer (alleen time_of_day).
 const STORY_TINT_FREE_STEP := StoryData.KLAAR
 
 static var _loaded := false
+static var _arena_merged := false
 static var _maps: Dictionary = {}
 static var _lights: Dictionary = {}
 static var _index: Dictionary = {}
@@ -35,15 +41,42 @@ static func enabled() -> bool:
 
 
 static func _ensure() -> void:
-	if _loaded:
+	if not _loaded:
+		var pd: Dictionary = _read_json(PRESETS_PATH)
+		_maps = pd.get("maps", {}) as Dictionary
+		var ld: Dictionary = _read_json(LIGHTS_PATH)
+		_lights = ld.get("assets", {}) as Dictionary
+		_index = _read_json(MAPS_INDEX_PATH) as Dictionary
+		_prep_bake_tiles()
+		_loaded = true
+	_sync_arena()
+
+
+## Voegt de arena-json toe aan de runtime-cache. De bestanden zelf blijven onaangeroerd.
+## Scènepaden wijzen naar scenes/arena/ (de ART-json noemt scenes/maps/, die map is WM1).
+static func _sync_arena() -> void:
+	var on := ReleaseFlags.arena_enabled()
+	if on == _arena_merged:
 		return
-	var pd: Dictionary = _read_json(PRESETS_PATH)
-	_maps = pd.get("maps", {}) as Dictionary
-	var ld: Dictionary = _read_json(LIGHTS_PATH)
-	_lights = ld.get("assets", {}) as Dictionary
-	_index = _read_json(MAPS_INDEX_PATH) as Dictionary
-	_prep_bake_tiles()
-	_loaded = true
+	_arena_merged = on
+	if not on:
+		return
+	var lights: Dictionary = _read_json(ARENA_LIGHTS_PATH).get("assets", {}) as Dictionary
+	for k in lights:
+		_lights[str(k)] = lights[k]
+	var presets: Dictionary = _read_json(ARENA_PRESETS_PATH).get("maps", {}) as Dictionary
+	for k in presets:
+		var rec: Dictionary = (presets[k] as Dictionary).duplicate(true)
+		if str(k) == "arena_hal":
+			rec["scene"] = "res://scenes/arena/arena_hall.tscn"
+		elif str(k) == "arena_lobby":
+			rec["scene"] = "res://scenes/arena/arena_lobby.tscn"
+		_maps[str(k)] = rec
+	var index := _read_json(ARENA_INDEX_PATH)
+	for k in index:
+		if str(k).begins_with("_"):
+			continue
+		_index[str(k)] = index[k]
 
 
 static func _read_json(path: String) -> Dictionary:
@@ -89,7 +122,11 @@ static func map_id_from(map_root: Node) -> String:
 		return "dungeon100"
 	if "room_id" in map_root:
 		return str(map_root.room_id)
-	return path.get_file().get_basename()
+	var naam := path.get_file().get_basename()
+	# ART noemt de hal arena_hal; de scène heet arena_hall.
+	if naam == "arena_hall":
+		return "arena_hal"
+	return naam
 
 
 static func preset_record(map_id: String) -> Dictionary:
@@ -407,6 +444,78 @@ static func index_has_files(map_id: String) -> bool:
 	if not _maps.has(map_id):
 		return false
 	return true
+
+
+## Hal: 6 fakkels + 4 vuurschalen worden 4 vuurlichten (noord-fakkels, noord-schalen,
+## west, oost). Met 4 heldenlichten blijft het totaal op 8. De lobby (2 fakkels) blijft los.
+static func cluster_arena_torches(cands: Array) -> void:
+	var torches: Array[int] = []
+	var braziers: Array[int] = []
+	for i in cands.size():
+		var c: Dictionary = cands[i]
+		if str(c.get("kind", "")) != "fire":
+			continue
+		var n: Object = c.get("node")
+		if not (n is Sprite2D):
+			continue
+		var spr := n as Sprite2D
+		if spr.texture == null:
+			continue
+		var path := str(spr.texture.resource_path)
+		if path.ends_with("/arena_torch.png"):
+			torches.append(i)
+		elif path.ends_with("/arena_brazier.png"):
+			braziers.append(i)
+	if torches.size() != 6 or braziers.size() != 4:
+		return
+	var groups := {"nt": [], "nb": [], "w": [], "e": []}
+	var drop := {}
+	for i in torches:
+		var p := _arena_anchor(cands[i])
+		var key := "nt" if p.y < 100.0 else ("w" if p.x < 240.0 else "e")
+		var bucket: Array = groups[key]
+		bucket.append(i)
+		groups[key] = bucket
+		drop[i] = true
+	for i in braziers:
+		var p := _arena_anchor(cands[i])
+		var key := "nb" if p.y < 150.0 else ("w" if p.x < 240.0 else "e")
+		var bucket: Array = groups[key]
+		bucket.append(i)
+		groups[key] = bucket
+		drop[i] = true
+	var merged: Array = []
+	for key in ["nt", "nb", "w", "e"]:
+		var ids: Array = groups[key]
+		if ids.is_empty():
+			return
+		var acc: Dictionary = (cands[int(ids[0])] as Dictionary).duplicate()
+		var pos: Vector2 = acc["pos"]
+		var px := int(acc.get("px", 1))
+		for j in range(1, ids.size()):
+			var other: Dictionary = cands[int(ids[j])]
+			pos += other["pos"]
+			px += int(other.get("px", 1))
+		acc["pos"] = pos / float(ids.size())
+		acc["px"] = px
+		acc["n"] = ids.size()
+		merged.append(acc)
+	if merged.size() != 4:
+		return
+	var keep: Array = []
+	for i in cands.size():
+		if not drop.has(i):
+			keep.append(cands[i])
+	keep.append_array(merged)
+	cands.clear()
+	cands.append_array(keep)
+
+
+static func _arena_anchor(c: Dictionary) -> Vector2:
+	var spr := c.get("node") as Node2D
+	if spr != null and spr.get_parent() is Node2D:
+		return (spr.get_parent() as Node2D).global_position
+	return spr.global_position if spr != null else Vector2.ZERO
 
 
 static func verify_index_sample() -> bool:

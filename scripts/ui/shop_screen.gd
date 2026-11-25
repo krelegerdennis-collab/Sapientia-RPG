@@ -6,8 +6,13 @@ const ShopData := preload("res://scripts/data/shop_data.gd")
 const ItemIcons := preload("res://scripts/data/item_icons.gd")
 const PartyActions := preload("res://scripts/party_actions.gd")
 const GameData := preload("res://scripts/data/game_data.gd")
+const PartyScreenS := preload("res://scripts/ui/party_screen.gd")
+
+const HINT := "Tap an item to buy it. Tap Sell to sell what you carry. Back to leave."
+const SPELL_LEARN := "Tap who should learn this spell."
 
 var shop_id := ""
+var _hint_band: Control
 ## Tabblad van de winkel (docs/STATE_MACHINES.md §5): KOOP | VERKOOP | HELD (uitrusting per held).
 const MODE_KOOP := "koop"
 const MODE_VERKOOP := "verkoop"
@@ -21,11 +26,47 @@ var detail_name: Label
 var detail_desc: Label
 
 
+func _init_hint_band() -> void:
+	set_hint(HINT)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.clip_text = false
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if _hint_band == null:
+		_hint_band = Control.new()
+		_hint_band.name = "HintBand"
+		_hint_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_outer.remove_child(hint)
+		_hint_band.add_child(hint)
+		hint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_outer.add_child(_hint_band)
+		if not root.resized.is_connected(_layout_shop_hint):
+			root.resized.connect(_layout_shop_hint)
+	_layout_shop_hint.call_deferred()
+
+
 func _build() -> void:
 	header.text = ShopData.shop_name(shop_id)
-	set_hint("A: choose   B: back")
+	_init_hint_band()
 	_wrap_scroll()
 	_show_koop()
+
+
+func _layout_shop_hint() -> void:
+	if hint == null or _hint_band == null or not is_instance_valid(root) or not root.is_inside_tree():
+		return
+	var vp := root.get_viewport().get_visible_rect().size
+	var safe := UiTouchC.safe_rect(vp, root.get_viewport())
+	var inhoud_b := maxf(8.0, safe.size.x - (PAD_X * 2.0))
+	if _outer.size.x > 1.0:
+		inhoud_b = minf(inhoud_b, _outer.size.x)
+	inhoud_b = minf(inhoud_b, safe.size.x)
+	var font := hint.get_theme_font("font")
+	var fs := hint.get_theme_font_size("font_size")
+	var regels := PartyScreenS._hint_regels(str(hint_text), inhoud_b, fs, font)
+	var rij_h := float(fs + 3)
+	var hoog := maxf(float(ROW_H), rij_h * float(regels.size()))
+	_hint_band.custom_minimum_size = Vector2(inhoud_b, hoog)
+	_hint_band.size = Vector2(inhoud_b, hoog)
 
 
 ## Winkelregel op tikmaat (25 eenheden = ~48 dp). De lijst scrolt met de vinger of de joystick.
@@ -119,6 +160,8 @@ func _detail_desc(id: String) -> String:
 func _show_koop() -> void:
 	mode = MODE_KOOP
 	_pending_spell = ""
+	set_hint(HINT)
+	_layout_shop_hint()
 	_clear()
 	var switch := _row("Sell")
 	switch.pressed.connect(_show_verkoop)
@@ -157,8 +200,9 @@ func _show_verkoop() -> void:
 func _show_held(spell_id: String) -> void:
 	mode = MODE_HELD
 	_pending_spell = spell_id
+	set_hint(SPELL_LEARN)
+	_layout_shop_hint()
 	_clear()
-	content.add_child(UiMenu.label("Who learns this?", MenuColors.TEXT))
 	var any := false
 	for h in GameState.party:
 		if int(h.get("hp", 1)) <= 0:

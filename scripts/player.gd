@@ -14,6 +14,7 @@ signal bumped(tile: Vector2i)
 const TILE_SIZE := 16
 const SomMove := preload("res://scripts/som/som_move.gd")
 const SomSlide := preload("res://scripts/som/som_slide.gd")
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 
 ## TODO.md "run feature" (CANON): RUN aan = 2 tegels per zet, sprite 2x zo snel. Toggle via de
 ## RUN-knop (touch, boven CORE) of toets R (actie "run"); de stand staat in Settings ("run").
@@ -61,6 +62,11 @@ var hold_until_release := false
 ## Sessielog-review 21 okt 2026: na binnenkomen via een uitgang met de richting nog ingedrukt: niet lopen
 ## tot alle richtingen zijn losgelaten (geen warp-pingpong tussen twee kaarten).
 var spawn_hold := false
+## Post-RC voetstappen: afgelegde pixels sinds de vorige stap (afstand, niet per beeld) en de
+## positie/tijd van het vorige beeld en de vorige stap.
+var _fs_acc := 0.0
+var _fs_last_pos := Vector2.INF
+var _fs_last_ms := -100000
 
 ## Bewegingstoestand (docs/STATE_MACHINES.md §6), afgeleid van de vlaggen hierboven; alleen lezen.
 ## Prioriteit: SCRIPTED > LOCKED > ANALOG > STEPPING > IDLE. Voor debug, sessielog en tests; de
@@ -142,6 +148,7 @@ func current_speed() -> float:
 ## 60x per seconde). Op telefoons met 90/120 Hz-schermen (Samsung) liep de speler en de
 ## camera anders schokkerig: soms 1, soms 2 beelden per physics-stap.
 func _process(delta: float) -> void:
+	_footstep_tick()
 	if _scripted:
 		return   # cutscene laat de speler lopen (script_walk)
 	# --- Praten / tekstvak doorklikken ---
@@ -269,6 +276,30 @@ func _process_analog(delta: float) -> void:
 			_bump_tile = get_tile() + facing
 			_try_bump()
 	_update_sprite()
+
+
+## Post-RC voetstap: telt de afgelegde afstand (grid, analoog én cutscene-lopen); elke
+## WorldSfx.FOOTSTEP_PX een stap, nooit vaker dan FOOTSTEP_MIN_MS. Ondergrond per kaart.
+## Een sprong (teleport/kaartwissel) of stilstand zet de teller terug.
+func _footstep_tick() -> void:
+	var pos := position
+	var moved := 0.0 if _fs_last_pos == Vector2.INF else pos.distance_to(_fs_last_pos)
+	_fs_last_pos = pos
+	if moved <= 0.001 or moved > WorldSfx.FOOTSTEP_JUMP_PX:
+		if moved > WorldSfx.FOOTSTEP_JUMP_PX or not (is_moving or _scripted):
+			_fs_acc = 0.0
+		return
+	if GameState.changing_map or GameState.in_battle or not is_visible_in_tree():
+		return
+	_fs_acc += moved
+	if _fs_acc < WorldSfx.FOOTSTEP_PX:
+		return
+	_fs_acc = fmod(_fs_acc, WorldSfx.FOOTSTEP_PX)
+	var now := Time.get_ticks_msec()
+	if now - _fs_last_ms < WorldSfx.FOOTSTEP_MIN_MS:
+		return
+	_fs_last_ms = now
+	WorldSfx.play(WorldSfx.surface_for(GameState.current_map))
 
 
 ## Kamer-`is_wall` (data), niet de TileSet-physics. Geen node-cache: bij een

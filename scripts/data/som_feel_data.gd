@@ -9,10 +9,11 @@ const TICK_DT := 1.0 / 60.0
 
 ## px, ticks per shake-soort.
 const SHAKE: Dictionary = {
-	"finisher": Vector2i(1, 4),
+	"finisher": Vector2i(2, 6),
 	"heavy1": Vector2i(2, 6),
 	"heavy2": Vector2i(3, 8),
 	"boss_slam": Vector2i(3, 10),
+	"perfect": Vector2i(1, 4),
 }
 
 const PATTERN: Array[Vector2i] = [
@@ -26,6 +27,9 @@ const PATTERN: Array[Vector2i] = [
 
 const COL_NORMAL := Color(1, 1, 1)
 const COL_FINISHER := Color("FF8A3D")
+## Alleen het finisher-schadegetal (keten stap 3); stagger/wankel blijft COL_FINISHER.
+const COL_FINISHER_NUMBER := Color("FFD24A")
+const SCALE_FINISHER_NUMBER := 1.3
 const COL_HEAVY := Color("FFD24A")
 const SCALE_HEAVY2 := 1.25
 

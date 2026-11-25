@@ -9,6 +9,30 @@ const Canon := preload("res://world_warper/cutscene/canon_scenes.gd")
 ## Oude vlag blijft voor oude saves en tests; zet de Hal-scène na afloop ook.
 const FLAG := "world_warper_intro_seen"
 
+## CS-11 (The Pendant): filmpje vervangt deze ECHO-regels uit canon HANGER zodra cutscene_cs11_gezien staat.
+const CS11_ECHO_SKIP: Array[String] = [
+	"Welcome to the World Warper, Dax. And company. I am ECHO.",
+	"There it is. The Pendant. I had hoped I would never see it again.",
+	"The key. This building only answers to it. Only to that Pendant. No one else can switch the World Warper on.",
+	"That's a long story. And there is little time.",
+]
+
+## CS-12 (Sapientia Threat): filmpje vervangt deze regels uit canon DREIGING zodra cutscene_cs12_gezien staat.
+const CS12_DREIGING_SKIP: Array[String] = [
+	"ECHO. You found him.",
+	"I am what humanity needed. I am the end of pain. I am Sapientia.",
+	"Six Archives. Six cores. Each a piece of what humanity once was. I have two. You woke them. Now I want all six.",
+	"But that is a story for later.",
+]
+
+
+static func _regel_weglaten(text: String) -> bool:
+	if GameState.story_flags.has("cutscene_cs11_gezien") and CS11_ECHO_SKIP.has(text):
+		return true
+	if GameState.story_flags.has("cutscene_cs12_gezien") and CS12_DREIGING_SKIP.has(text):
+		return true
+	return false
+
 
 ## Speelt tot scène 3 gezien is (canon-vlag). Oude saves met alleen FLAG zien de canon alsnog.
 static func should_play(flags: Dictionary) -> bool:
@@ -22,21 +46,39 @@ static func regels(flags: Dictionary = {}) -> Array:
 static func lines(flags: Dictionary = {}) -> Array[String]:
 	var out: Array[String] = []
 	for r in regels(flags):
+		var text := str(r.get("text", ""))
+		if _regel_weglaten(text):
+			continue
 		out.append(Canon.als_tekst(r))
 	return out
 
 
 ## 1 stille hal, 2 paarse Hanger-gloed, 3 roze Sapientia-glitch, 4 herstel.
+## line_index telt gefilterde regels (zelfde filter als lines()).
 static func beat_at(line_index: int, flags: Dictionary = {}) -> int:
 	var rs := regels(flags)
 	if rs.is_empty():
 		return 1
-	var i := clampi(line_index, 0, rs.size() - 1)
-	return int(rs[i].get("cue", 1))
+	var kept: Array = []
+	for r in rs:
+		var text := str(r.get("text", ""))
+		if _regel_weglaten(text):
+			continue
+		kept.append(r)
+	if kept.is_empty():
+		return 1
+	var i := clampi(line_index, 0, kept.size() - 1)
+	return int(kept[i].get("cue", 1))
 
 
 ## Laatste index van scène 2 in deze reeks (-1 als scène 2 al gezien is).
 static func einde_hanger(flags: Dictionary = {}) -> int:
 	if bool(flags.get(Canon.FLAG_HANGER, false)):
 		return -1
-	return Canon.HANGER.size() - 1
+	var count := 0
+	for r in Canon.HANGER:
+		var text := str(r.get("text", ""))
+		if _regel_weglaten(text):
+			continue
+		count += 1
+	return count - 1 if count > 0 else -1

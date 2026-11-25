@@ -15,38 +15,81 @@ signal party_changed
 
 const PartyLines := preload("res://world_warper/services/party_view_test.gd")
 const FONT := preload("res://assets/fonts/Dauwpixel-Regular.ttf")
+const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 
 const ANCHOR_GROUP := "ww_anchor_party"
 const PANEL_SIZE := Vector2(220, 180)
 const RIJ_HOOG := 40
 const LEEG := "Nobody in the party."
+const UITLEG := "This is your current party. To change who fights, go to the Rest Room, or open MENU, then Party."
 
 const COLOR_PANEL := Color("3d2158")
 const COLOR_BUTTON := Color("5c3484")
 const COLOR_BORDER := Color("8d6bb0")
 
 var _open := false
+## Geen cancel in het openingsframe (zelfde A-tik mag niet meteen terug).
+var _quiet_frame := -1
 var _built := false
 var _empty: Label
 var _scroll: ScrollContainer
 var _rows: VBoxContainer
+var _layout_hooks := false
+var _lay_vp := Vector2.ZERO
+var _lay_ins := Vector4(-1, -1, -1, -1)
+var _uitleg: Label
+var _uitleg_band: Control
 
 
 func _ready() -> void:
+	add_to_group("touch_priority")
 	_ensure_ui()
 	refresh()
 	if not _open:
 		visible = false
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_process(false)
+	else:
+		set_process(true)
+	_koppel_layout_hooks()
 	_place_at_anchor()
 	call_deferred("_place_at_anchor")
 
 
+func _enter_tree() -> void:
+	_koppel_layout_hooks()
+
+
+func _exit_tree() -> void:
+	_ontkoppel_layout_hooks()
+
+
+func _koppel_layout_hooks() -> void:
+	if _layout_hooks or not is_inside_tree():
+		return
+	var vp := get_viewport()
+	if vp != null and not vp.size_changed.is_connected(_place_at_anchor):
+		vp.size_changed.connect(_place_at_anchor)
+	_layout_hooks = true
+
+
+func _ontkoppel_layout_hooks() -> void:
+	if not _layout_hooks:
+		return
+	var vp := get_viewport()
+	if vp != null and vp.size_changed.is_connected(_place_at_anchor):
+		vp.size_changed.disconnect(_place_at_anchor)
+	_layout_hooks = false
+
+
 func open() -> void:
 	_open = true
+	_quiet_frame = Engine.get_process_frames()
 	_ensure_ui()
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	set_process(true)
+	_lay_ins = Vector4(-1, -1, -1, -1)
 	_place_at_anchor()
 	refresh()
 
@@ -55,10 +98,37 @@ func close() -> void:
 	_open = false
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_process(false)
+	_lay_ins = Vector4(-1, -1, -1, -1)
+
+
+func _process(_delta: float) -> void:
+	if not _open or not visible or not is_inside_tree():
+		return
+	if Engine.get_process_frames() <= _quiet_frame:
+		return
+	if Input.is_action_just_pressed("cancel"):
+		close()
+		if Input.is_action_pressed("cancel"):
+			Input.action_release("cancel")
+		if InputMap.has_action("menu") and Input.is_action_pressed("menu"):
+			Input.action_release("menu")
+		return
+	var vp := get_viewport_rect().size
+	var ins := UiTouchC.insets(get_viewport())
+	if vp == _lay_vp and ins == _lay_ins:
+		return
+	_lay_vp = vp
+	_lay_ins = ins
+	_place_at_anchor()
 
 
 func is_open() -> bool:
 	return _open and visible
+
+
+func claims_touch(viewport_pos: Vector2) -> bool:
+	return is_open() and get_global_rect().has_point(viewport_pos)
 
 
 func refresh() -> void:
@@ -89,8 +159,18 @@ func _place_at_anchor() -> void:
 	if not is_inside_tree():
 		return
 	var anchor := _first_anchor()
+	var ins := UiTouchC.insets(get_viewport())
 	if anchor == null:
+		# F6-5: het hele scherm, maar binnen het veilige gebied (notch, gebarenbalk)
+		var vp := get_viewport_rect().size
+		var veilig := Rect2(Vector2(ins.x, ins.y), vp - Vector2(ins.x + ins.z, ins.y + ins.w))
+		custom_minimum_size = Vector2(minf(PANEL_SIZE.x, veilig.size.x), minf(PANEL_SIZE.y, veilig.size.y))
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		offset_left = ins.x
+		offset_top = ins.y
+		offset_right = -ins.z
+		offset_bottom = -ins.w
+		_layout_uitleg()
 		return
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	var doel := PANEL_SIZE
@@ -103,6 +183,46 @@ func _place_at_anchor() -> void:
 	elif anchor is Node2D:
 		global_position = (anchor as Node2D).global_position
 	size = doel
+	_binnen_veilig(ins)
+
+
+## F6-5: paneel (bij een anker) helemaal binnen het veilige gebied schuiven; past het niet, krimpt
+## het (ook onder PANEL_SIZE) tot het volledig in de safe rect past.
+func _binnen_veilig(ins: Vector4) -> void:
+	var vp := get_viewport_rect().size
+	var veilig := Rect2(Vector2(ins.x, ins.y), vp - Vector2(ins.x + ins.z, ins.y + ins.w))
+	var r := Rect2(global_position, size)
+	r.size = Vector2(minf(r.size.x, veilig.size.x), minf(r.size.y, veilig.size.y))
+	custom_minimum_size = Vector2(minf(PANEL_SIZE.x, veilig.size.x), minf(PANEL_SIZE.y, veilig.size.y))
+	r.position.x = clampf(r.position.x, veilig.position.x, maxf(veilig.position.x, veilig.end.x - r.size.x))
+	r.position.y = clampf(r.position.y, veilig.position.y, maxf(veilig.position.y, veilig.end.y - r.size.y))
+	global_position = r.position
+	size = r.size
+	_layout_uitleg()
+
+
+static func _uitleg_hoog(tekst: String, breedte: float, fs: int) -> float:
+	var words := tekst.split(" ")
+	var cur := ""
+	var lines := 1
+	for w in words:
+		var probe := (cur + " " + w).strip_edges()
+		if FONT.get_string_size(probe, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > breedte and cur != "":
+			lines += 1
+			cur = w
+		else:
+			cur = probe
+	return maxf(float(fs), float(lines) * float(fs + 3))
+
+
+func _layout_uitleg() -> void:
+	if _uitleg == null or _uitleg_band == null or not _built:
+		return
+	var fs := theme.default_font_size if theme != null else 10
+	var breedte := maxf(8.0, size.x - 12.0)
+	var hoog := _uitleg_hoog(UITLEG, breedte, fs)
+	_uitleg_band.custom_minimum_size = Vector2(breedte, hoog)
+	_uitleg_band.size = Vector2(breedte, hoog)
 
 
 func _first_anchor() -> Node:
@@ -114,14 +234,6 @@ func _first_anchor() -> Node:
 		if node is Control or node is Node2D:
 			return node
 	return null
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not _open or not visible:
-		return
-	if event.is_action_pressed("cancel"):
-		close()
-		get_viewport().set_input_as_handled()
 
 
 func _ensure_ui() -> void:
@@ -160,6 +272,20 @@ func _ensure_ui() -> void:
 	var kolom := VBoxContainer.new()
 	kolom.add_theme_constant_override("separation", 4)
 	marge.add_child(kolom)
+
+	_uitleg_band = Control.new()
+	_uitleg_band.name = "UitlegBand"
+	_uitleg_band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	kolom.add_child(_uitleg_band)
+	_uitleg = Label.new()
+	_uitleg.name = "Uitleg"
+	_uitleg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_uitleg.text = UITLEG
+	_uitleg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_uitleg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_uitleg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_uitleg.add_theme_color_override("font_color", UiStyle.TEXT)
+	_uitleg_band.add_child(_uitleg)
 
 	var titel := Label.new()
 	titel.name = "Titel"

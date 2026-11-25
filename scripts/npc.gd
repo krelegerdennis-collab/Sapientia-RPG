@@ -52,11 +52,30 @@ func interact(player: Node2D) -> void:
 		facing = -player.facing
 		_update_sprite()
 	if event == "shop" and event_arg != "":
-		_open_shop(player)
+		if lines.is_empty():
+			_open_shop(player)
+		else:
+			await _shop_na_dialog(player)
 		return
 	if event != "" and Story.trigger(event, self, event_arg):
 		return
 	Dialog.show_lines(lines, npc_name, self)
+
+
+func _shop_na_dialog(player: Node2D) -> void:
+	if get_tree().current_scene.get_node_or_null("ShopScreen") != null:
+		return
+	Dialog.show_lines(lines, npc_name, self)
+	await Dialog.finished
+	if not is_instance_valid(player) or get_tree().current_scene.get_node_or_null("ShopScreen") != null:
+		return
+	for act in ["interact", "cancel", "menu"]:
+		if Input.is_action_pressed(act):
+			Input.action_release(act)
+	_open_shop(player)
+	var shop := get_tree().current_scene.get_node_or_null("ShopScreen")
+	if shop != null and shop.has_method("quiet"):
+		shop.quiet()
 
 
 func _open_shop(player: Node2D) -> void:
@@ -72,6 +91,7 @@ func _open_shop(player: Node2D) -> void:
 			player.input_locked = false
 	)
 	get_tree().current_scene.add_child(shop)
+	shop.quiet()
 
 
 func story_refresh() -> void:

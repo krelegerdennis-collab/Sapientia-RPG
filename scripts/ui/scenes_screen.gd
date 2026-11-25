@@ -43,7 +43,7 @@ func _build() -> void:
 	bar.add_theme_constant_override("separation", 4)
 	content.add_child(bar)
 	for t in TABS:
-		var tb := UiMenu.button(TAB_NAMES[t])
+		var tb := touch_row(UiMenu.button(TAB_NAMES[t]))
 		tb.name = "Tab_" + t
 		tb.custom_minimum_size = Vector2(64, PLAY_ROW_H)
 		tb.focus_mode = Control.FOCUS_NONE
@@ -79,7 +79,7 @@ func _fill() -> void:
 	for i in ScenesData.SCENES.size():
 		var sc: Dictionary = ScenesData.SCENES[i]
 		var seen: bool = GameState.scene_seen(str(sc["id"]))
-		var b := UiMenu.button("%d. %s" % [i + 1, str(sc["title"]) if seen else ScenesData.LOCKED_TITLE])
+		var b := touch_row(UiMenu.button("%d. %s" % [i + 1, str(sc["title"]) if seen else ScenesData.LOCKED_TITLE]))
 		b.name = "Scene_" + str(sc["id"])
 		b.custom_minimum_size = Vector2(0, ROW_H)
 		b.pressed.connect(choose.bind(str(sc["id"])))
@@ -266,7 +266,7 @@ func _fill_music() -> void:
 		var tr: Dictionary = MusicTracks.TRACKS[i]
 		var tid := str(tr["id"])
 		var heard: bool = GameState.heard_music.has(tid)
-		var b := UiMenu.button(_music_label(i, tr, heard))
+		var b := touch_row(UiMenu.button(_music_label(i, tr, heard)))
 		b.name = "Track_" + tid
 		b.custom_minimum_size = Vector2(0, PLAY_ROW_H)
 		b.pressed.connect(choose_track.bind(tid))

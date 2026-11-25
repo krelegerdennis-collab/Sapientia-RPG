@@ -140,6 +140,15 @@ func mirror(phase: int, ticks_left: int) -> void:
 	_ticks_left = maxi(0, ticks_left)
 
 
+## F3 Orion: verleng lopende windup (geen andere fasen).
+func extend_windup(extra_ticks: int) -> bool:
+	if extra_ticks <= 0 or _state != State.WINDUP:
+		return false
+	_ticks_left += extra_ticks
+	_windup_ticks += extra_ticks
+	return true
+
+
 func _revalidate() -> void:
 	_invalid_reason = ""
 	for label in ["windup", "active", "recovery", "cooldown"]:

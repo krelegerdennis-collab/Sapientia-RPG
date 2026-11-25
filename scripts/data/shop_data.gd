@@ -163,6 +163,9 @@ static func buy_item(shop_id: String, id: String) -> Dictionary:
 	if row.is_empty() or str(row.get("kind", "")) != "item":
 		return {"ok": false, "text": "That isn't sold here."}
 	var price := int(row["price"])
+	# Klus 13: volle stapel = niet kopen (add_item begrenst, dan was het goud weg zonder item)
+	if GameState.item_count(id) >= GameState.MAX_ITEM_STACK:
+		return {"ok": false, "text": "You can't carry any more."}
 	if GameState.gold < price:
 		return {"ok": false, "text": "Not enough gold."}
 	if not GameState.spend_gold(price):

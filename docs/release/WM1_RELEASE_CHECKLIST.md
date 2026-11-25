@@ -141,11 +141,11 @@ Meetopstelling (RPG Forge of Dennis, op het echte toestel; geen emulator)
   `adb shell dumpsys meminfo com.dennis.rpgprototype`, `adb logcat -s godot`.
 - [ ] Meetscènes: wereldkaart, Willowdale (90x56 tegels met molen, beek en veel props), Mapleton, elk Donker Woud-type
   (mist en overlay), Archief 1 (glitch-effect), berggrot, Archief 2, hub-hal, Diepe Grot (rustverdieping en een
-  drukke verdieping), Classic- en Action-gevecht, de cutscene-video's (`assets/video/*.ogv`, 9 bestanden, 30.462.852 bytes = 30,46 MB / 29,05 MiB), menu's en
+  drukke verdieping), Classic- en Action-gevecht, de cutscene-video's (`assets/video/*.ogv`, 13 bestanden, 40.054.438 bytes ≈ 40,05 MB), menu's en
   Scenes & Music.
 - [ ] 30 minuten achter elkaar spelen: temperatuur, throttling, batterijverbruik per uur.
 - [ ] Opstarttijd (koude start tot titelscherm), laadtijd bij Continue, en grootte van de APK (assets 85 MB, waarvan
-  audio 48 MB en video 30,46 MB: de 9 `.ogv` in `assets/video/`, 30.462.852 bytes).
+  audio 48 MB en video ≈ 40,05 MB: de 13 `.ogv` in `assets/video/`, 40.054.438 bytes).
 - [ ] Bij Co-op of PvP als die meeleveren (lock H11): idle-verbruik van netwerk en discovery.
 
 Voorgestelde doelen (Dennis en RPG Forge bevestigen)
@@ -205,7 +205,7 @@ Taken
   Lv 26, 32 en 37 (lock H3) via Diepe Grot-run-tijden.
 - [ ] Controleer de economie met de CSV-modus: goud uit gevechten tegen prijzen in `scripts/data/shop_data.gd`
   (Willowdale), kist-buit en Diepe Grot-buit (`dungeon100_reward.gd`).
-- [ ] Controleer Classic tegenover Action (zelfde doelen; Action-bazen via `SomData.ACTION_BOSS_MULT`).
+- [ ] Controleer Classic tegenover Action (zelfde doelen; Action-bazen via `BossCore.apply_boss` / `som_data.gd` `action_boss_stats`).
 - [ ] Na elke wijziging dezelfde seed opnieuw draaien en het rapport als bewijs in de PR zetten
   (zelfde seed en code geven dezelfde cijfers).
 - [ ] Suites: `battlesimtest`, `balansarchief1test`, `dungeon100schaaltest`, `autotest`, `woudtest`, `archief2test`.
@@ -249,8 +249,8 @@ Engelse tekst (AGENTS.md regel 3)
 Touch
 - [ ] Alle knoppen en tikdoelen minstens 48 dp op de S25 (`scripts/touch_controls.gd`, `scenes/ui/touch_controls.tscn`);
   reken viewport-pixels om op het echte toestel.
-- [ ] RUN-knop in elke kamer-soort behalve gevecht (kerker, dorp, Rest Room, Koopman): geen suite dekt dit (backlog A11).
-- [ ] Joystick en D-pad in Action-gevecht, ringmenu, Codex-knop.
+- [x] RUN-knop in elke kamer-soort behalve gevecht (kerker, dorp, Rest Room, Koopman): dorp via `hudtest` deel D; kerker, Rest Room en Koopman via `--runknoptest` (CI-matrix).
+- [ ] Joystick in Action-gevecht, ringmenu, Codex-knop (geen D-pad; bewust verwijderd).
 - [ ] Veilige zone (camera-uitsparing, rand): niets belangrijks onder de rand.
 - [ ] Meerdere vingers tegelijk, schermrotatie, app naar de achtergrond en terug (autosave bij focusverlies staat in
   `scripts/game_state.gd`), schermvergrendeling tijdens een cutscene of video.
@@ -304,9 +304,9 @@ Audio
 **Doel:** één ondertekende APK die Dennis kan installeren en die bij een groene CI hoort.
 
 Versie en changelog (RPG Forge)
-- [ ] Versienummer kiezen en overal gelijk zetten. Nu staat `config/version="0.20"` in `project.godot`, terwijl de
-  preset Android in `export_presets.cfg` `version/name="0.19"` en `version/code=22` heeft en `README.md` nog eerdere
-  versielabels noemt. Alleen RPG Forge past dit aan; agents niet.
+- [ ] Versienummer kiezen en overal gelijk zetten. Op `finish/wm1` staan `config/version="0.21"` in `project.godot`,
+  `tools/release/version.json` en alle drie Android-presets in `export_presets.cfg` op `version/name="0.21"` en
+  `version/code=23`. `README.md` kan nog oudere labels noemen. Alleen RPG Forge past dit aan; agents niet.
 - [ ] `version/code` hoger dan de laatst geïnstalleerde APK, zodat updaten over een bestaande installatie werkt.
 - [ ] Changelog schrijven: er is nog geen `CHANGELOG.md`. Inhoud: wat WM1 bevat (lock sectie 2), known issues (de
   open P2/P3-bugs en de SHIP-punten met lacune uit lock sectie 3), PvP en Co-op als experimenteel of verborgen
@@ -345,11 +345,11 @@ de release-commit, Dennis geeft go.
 
 | Fase | Status | Datum | Akkoord |
 |---:|---|---|---|
-| 1 Freeze | in uitvoering: cuts H3/H11/H13 doorgevoerd (CHANGELOG, 24 okt); tag `wm1-freeze` en baseline nog open. Volgorde en scope: `docs/release/LAUNCH_PLAN.md` (5 nov) | 2026-11-05 | Dennis: go op LAUNCH_PLAN |
-| 2 Art op palet | open | | |
-| 3 Stabiliteit | open | | |
-| 4 S25-performance | open | | |
-| 5 Balans | open | | |
-| 6 UX-polish | open | | |
-| 7 Playtest en fixronde | open | | |
-| 8 Release candidate | open | | |
+| 1 Freeze | in uitvoering: cuts H3/H11/H13 doorgevoerd (CHANGELOG, 24 okt); tag `wm1-freeze` en baseline nog open (RC-audit 17 nov: 2 klaar, 5 open). Volgorde en scope: `docs/release/LAUNCH_PLAN.md` (5 nov) | 2026-11-05 | Dennis: go op LAUNCH_PLAN |
+| 2 Art op palet | open (RC-audit 17 nov: 2 klaar, 4 open, 2 handmatig) | 2026-11-17 | |
+| 3 Stabiliteit | in uitvoering (RC-audit 17 nov: 8 klaar, 1 open, 8 handmatig) | 2026-11-17 | |
+| 4 S25-performance | open (RC-audit 17 nov: 2 klaar, 1 open, 4 op toestel) | 2026-11-17 | |
+| 5 Balans | open (RC-audit 17 nov: 1 klaar, 6 open, 1 proces) | 2026-11-17 | |
+| 6 UX-polish | in uitvoering (RC-audit 17 nov: 15 klaar, 5 open, 4 handmatig) | 2026-11-17 | |
+| 7 Playtest en fixronde | open (RC-audit 17 nov: 0 klaar, 3 open, 5 proces) | 2026-11-17 | |
+| 8 Release candidate | in uitvoering (RC-audit 17 nov: 5 klaar, 4 open, 5 toestel/na RC) | 2026-11-17 | |

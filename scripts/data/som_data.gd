@@ -7,6 +7,7 @@
 extends RefCounted
 
 const BossCore := preload("res://scripts/battle/boss_core.gd")
+const GameData := preload("res://scripts/data/game_data.gd")
 
 ## Hoofdschakelaar. false = de proef bestaat niet (geen realtime, knop op het titelscherm doet niets).
 const ENABLED := true
@@ -160,6 +161,12 @@ const FX_SPARK := "res://assets/sprites/som/fx/fx_hit_spark.png"      # 64x16, 4
 const FX_HEAL_GLOW := {"sheet": "res://assets/sprites/som/fx/fx_heal_glow.png", "cell": [16, 16], "frames": 4, "ms": 100, "anchor": [8, 16]}
 const FX_ROOT := {"sheet": "res://assets/sprites/som/fx/fx_root.png", "cell": [16, 16], "frames": 4, "ms": 100, "anchor": [8, 16]}
 const FX_SPELL_IMPACT := {"sheet": "res://assets/sprites/som/fx/fx_spell_impact.png", "cell": [24, 24], "frames": 4, "ms": 70, "anchor": [12, 24]}
+const FX_PERFECT_RING := {"sheet": "res://assets/sprites/som/fx/fx_perfect_ring.png", "cell": [16, 16], "frames": 4, "ms": 75, "anchor": [8, 8]}
+const FX_COUNTER_SPARK := {"sheet": "res://assets/sprites/som/fx/fx_counter_spark.png", "cell": [16, 16], "frames": 3, "ms": 50, "anchor": [8, 8]}
+const FX_DEATH_GLITCH := {"sheet": "res://assets/sprites/som/fx/fx_death_glitch.png", "cell": [32, 32], "frames": 7, "ms": 60, "anchor": [16, 16]}
+const FX_DEATH_GLITCH_48 := {"sheet": "res://assets/sprites/som/fx/fx_death_glitch_48.png", "cell": [48, 48], "frames": 6, "ms": 60, "anchor": [24, 24]}
+const FX_LOOT_POP := {"sheet": "res://assets/sprites/som/fx/fx_loot_pop.png", "cell": [16, 16], "frames": 4, "ms": 67, "anchor": [8, 12]}
+const FX_ENEMY_READ := {"sheet": "res://assets/sprites/som/fx/fx_enemy_read.png", "cell": [16, 16], "frames": 3, "ms": 40, "anchor": [8, 8]}
 const FX_TELEGRAPH := "res://assets/sprites/som/fx/fx_telegraph.png"  # 8x8
 const UI_DIGITS := "res://assets/sprites/som/ui/dmg_digits.png"       # 50x21: rijen wit, rood, groen; cijfers 5x7
 const UI_GAUGE_BAR := "res://assets/sprites/som/ui/gauge_bar.png"     # 18x4
@@ -359,6 +366,13 @@ const ATTACK_COOLDOWN := 1.2     # v3: --actionsim iteratie 7 (was 1.6)
 ## Afstand (px, middelpunten) waarop een vijand kan aanvallen/raken.
 const ENEMY_REACH := 22.0
 const HIT_FLASH := 0.12
+## Fase-1 contact-flits (50 ms); HIT_FLASH blijft voor backwards-compat in tests/docs.
+const HIT_FLASH_CONTACT := 0.05
+const FX_IMPACT_DIR := "res://assets/sprites/som/fx/fx_impact_%s.png"
+const FX_IMPACT := {"cell": [24, 24], "frames": 3, "ms": 50, "anchor": [12, 12]}
+const FX_DUST_DODGE := {"sheet": "res://assets/sprites/som/fx/fx_dust_dodge.png", "cell": [16, 16], "frames": 4, "ms": 60, "anchor": [8, 16]}
+const FX_DUST_LAND := {"sheet": "res://assets/sprites/som/fx/fx_dust_land.png", "cell": [24, 12], "frames": 4, "ms": 60, "anchor": [12, 12]}
+const FX_DUST_FINISHER := {"sheet": "res://assets/sprites/som/fx/fx_dust_finisher.png", "cell": [32, 16], "frames": 5, "ms": 70, "anchor": [16, 16]}
 
 ## --- Skill-ring: technieken per held-id (vragen een volle wapenmeter). radius > 0 = rondom.
 const SKILLS := {
@@ -386,9 +400,33 @@ static func boss_party_scale(party_count: int) -> float:
 	return 1.0
 
 
-## Baas-stats voor Action (D3): BossCore.apply_boss, geen ACTION_BOSS_MULT.
+## F5.3 A4 (akkoord Dennis 18-11-2026): alleen in Action een eigen baas-ATK, Classic blijft gelijk.
+## Golem (kennis_beest) Classic ATK 23 -> Action ATK 27: --actionsim --boss-rt Lv 7 98,5% -> 72% winst
+## (doel 60-80%, seed 20261020, zie docs/combat/f53_golem_action_atk.md). Sleutel = vijand-key in GameData.ENEMIES.
+const ACTION_BOSS_ATK := {"kennis_beest": 27}
+
+
+## Vijand-key uit ACTION_BOSS_ATK waar data bij hoort, of "".
+## Expliciet: data moet een "boss"-blok hebben (ruwe vijand-data, vóór apply_boss) en hetzelfde
+## bestiarium-nummer "no" als GameData.ENEMIES[key] ("no" is per vijand uniek). Zonder "boss" of
+## zonder "no" -> "" (geen Action-ATK, gewoon apply_boss).
+static func _boss_id_of(data: Dictionary) -> String:
+	if not data.has("boss") or not data.has("no"):
+		return ""
+	var no := int(data["no"])
+	for key in ACTION_BOSS_ATK:
+		var e: Dictionary = GameData.ENEMIES.get(key, {})
+		if e.has("boss") and e.has("no") and int(e["no"]) == no:
+			return str(key)
+	return ""
+
+
+## Baas-stats voor Action (D3): BossCore.apply_boss, geen ACTION_BOSS_MULT; plus ACTION_BOSS_ATK (F5.3).
 static func action_boss_stats(data: Dictionary, party_count: int = 1) -> Dictionary:
 	var out := BossCore.apply_boss(data)
+	var bid := _boss_id_of(data)
+	if bid != "":
+		out["atk"] = int(ACTION_BOSS_ATK[bid])
 	var scale := boss_party_scale(party_count)
 	if is_equal_approx(scale, 1.0):
 		return out

@@ -126,7 +126,13 @@ func _action_boss_stats_tests() -> void:
 	var base := GameData.ENEMIES["kennis_beest"].duplicate(true)
 	var applied := SomData.action_boss_stats(base, 2)
 	var expected := BossCore.apply_boss(base)
-	check("action_boss_stats = apply_boss (scale 1.0)", applied["max_hp"] == expected["max_hp"] and applied["atk"] == expected["atk"])
+	check("action_boss_stats = apply_boss (scale 1.0), Golem-ATK = ACTION_BOSS_ATK (F5.3 A4)",
+		applied["max_hp"] == expected["max_hp"] and int(applied["atk"]) == int(SomData.ACTION_BOSS_ATK["kennis_beest"]))
+	var koning := GameData.ENEMIES["wortelkoning"].duplicate(true)
+	var k_applied := SomData.action_boss_stats(koning, 2)
+	var k_expected := BossCore.apply_boss(koning)
+	check("action_boss_stats = apply_boss voor bazen zonder ACTION_BOSS_ATK (Wortelkoning)",
+		k_applied["max_hp"] == k_expected["max_hp"] and k_applied["atk"] == k_expected["atk"])
 	check("boss_party_scale(4) = 1.0", is_equal_approx(SomData.boss_party_scale(4), 1.0))
 
 

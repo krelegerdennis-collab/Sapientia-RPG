@@ -6,6 +6,7 @@ extends StaticBody2D
 ## de geheime deur een placeholder is. Vervangen: zie docs/HANDOFF_ARCHIEF1.md.
 
 const PLACEHOLDER := true
+const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 const TEX := "res://assets/sprites/dungeon/schatkist.png"
 
 var room: Node
@@ -38,4 +39,5 @@ func setup(p_room: Node, id: String, t: Vector2i, d: Dictionary) -> void:
 
 func interact(_by: Node) -> void:
 	if not Dialog.is_open:
+		WorldSfx.play(WorldSfx.CHEST_LOCKED)
 		Dialog.show_lines(["The chest is stuck fast. (later)"])

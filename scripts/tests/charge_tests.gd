@@ -8,6 +8,7 @@ const SomArena := preload("res://scripts/som/som_arena.gd")
 const SomData := preload("res://scripts/data/som_data.gd")
 const SomChainData := preload("res://scripts/data/som_chain_data.gd")
 const SomHeavyData := preload("res://scripts/data/som_heavy_data.gd")
+const SomSignatureData := preload("res://scripts/data/som_signature_data.gd")
 const Codec := preload("res://scripts/net/net_codec.gd")
 const ROOM := "res://scenes/maps/archief_v1_gang.tscn"
 const HEROES: Array[String] = ["dennis", "lotte"]
@@ -190,7 +191,8 @@ func _hero_tests(id: String) -> void:
 	var stop := int(arena.enemies[m].get("hitstop", 0))
 	check("%s: zware slag meer schade dan tap (%d > %d)" % [id, heavy_dmg, tap_dmg], heavy_dmg > tap_dmg)
 	check("%s: hitstop niveau 2 (> finisher)" % id, arena.last_hitstop_ticks == SomHeavyData.hitstop_ticks(2) and stop > SomChainData.hitstop_ticks(2))
-	check("%s: knockback niveau 2 (> finisher)" % id, arena.last_knockback_tiles == SomHeavyData.knockback_tiles(2))
+	var expect_knock2 := SomSignatureData.DAX_KNOCK_HEAVY2 if id == "dennis" else SomHeavyData.knockback_tiles(2)
+	check("%s: knockback niveau 2 (%d tegels)" % [id, expect_knock2], arena.last_knockback_tiles == expect_knock2)
 	for _t in 30:
 		if not m.is_moving:
 			break

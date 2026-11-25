@@ -57,6 +57,10 @@ func windup_duration_ticks() -> int:
 	return _state.windup_duration_ticks
 
 
+func active_duration_ticks() -> int:
+	return _state.active_duration_ticks
+
+
 ## Origin en richting vastgezet bij start (WINDUP); shape gebouwd met from_data.
 func start(origin: Vector2i, direction: Vector2i, shape_id: String) -> bool:
 	if not _state.start():
@@ -103,6 +107,10 @@ func cancel() -> bool:
 
 func interrupt() -> bool:
 	return _state.interrupt()
+
+
+func extend_windup(extra_ticks: int) -> bool:
+	return _state.extend_windup(extra_ticks)
 
 
 ## Gast-only: telegraaf uit snapshot (geen gameplay, alleen tekenen).

@@ -10,10 +10,14 @@ const TargetList := preload("res://scripts/ui/target_list.gd")
 const MusicTracks := preload("res://scripts/data/music_tracks.gd")
 const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 
-const OPTION_ROW_H := 19       # 13 regels in twee kolommen (7 + 6) passen met tabbalk en hulpregel op 216 hoog
+const OPTION_ROW_H := 19       # zichtbare regelhoogte; tikvlak >= UiTouch.TOUCH_MIN via touch_row (F6-2)
+## F6-1: 14 regels (7 + 7) + tabbalk + hulpregel passen niet altijd (19,5:9 met notch): de kolommen staan
+## in een ScrollContainer die met de focus meescrollt, zodat de hulpregel altijd in het venster blijft.
 const TAB_BAR_H := 24          # zelfde tikminimum als questlog-tab (ROW_H / RIJ_H-traditie: 24 logic px)
 const TOUCH_MIN_H := 48        # Music-tab schuiven/tracks: mobiel tikdoel (logic pixels)
-const VALUE_W := 50            # breedte van de waarde tussen '<' en '>' (twee kolommen: elke kolom is ~178 breed)
+const VALUE_W := 46            # breedte van de waarde tussen '<' en '>' (F6-1: was 50; "Classic"/"Instant" = 42)
+const ARROW_W := 16            # F6-1: zichtbare breedte van '<' '>' (tikvlak blijft >= TOUCH_MIN via touch_row)
+## F6-1 rekensom 16:9 (360 breed): kolom = naam 84 + 2 + 16 + 2 + waarde 46..60 ("Debug only") + 2 + 16 <= 176.
 const RESET_KEY := "_reset"
 const EXPORT_KEY := "_export"      # playtest: logboek aanbieden (SessieLog)
 const TABS := ["general", "music"]
@@ -47,7 +51,8 @@ var keys: Array[String] = []
 var value_labels := {}         # sleutel -> Label
 var tab := "general"
 var tab_buttons := {}
-var general_box: HBoxContainer   # twee kolommen met regels (links 7, rechts 6)
+var general_box: HBoxContainer   # twee kolommen met regels (links 7, rechts 7)
+var general_scroll: ScrollContainer   # F6-1: om general_box heen (scrollt als het niet past)
 var _col_a: VBoxContainer
 var _col_b: VBoxContainer
 var music_root: Control
@@ -78,10 +83,18 @@ func _build() -> void:
 		tb.pressed.connect(kies_tab.bind(t))
 		bar.add_child(tb)
 		tab_buttons[t] = tb
+	general_scroll = ScrollContainer.new()
+	general_scroll.name = "GeneralScroll"
+	general_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	general_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	general_scroll.follow_focus = true
+	general_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER   # geen balk: die kost breedte (16:9)
+	outer.add_child(general_scroll)
 	general_box = HBoxContainer.new()
+	general_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	general_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	general_box.add_theme_constant_override("separation", 8)
-	outer.add_child(general_box)
+	general_scroll.add_child(general_box)
 	_col_a = VBoxContainer.new()
 	_col_b = VBoxContainer.new()
 	for col in [_col_a, _col_b]:
@@ -98,7 +111,7 @@ func _build() -> void:
 	outer.add_child(music_root)
 	_build_general_rows()
 	_refresh_tabs()
-	general_box.visible = true
+	general_scroll.visible = true
 	rows[0].grab_focus()
 
 
@@ -111,7 +124,7 @@ func _build_general_rows() -> void:
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 2)
 		(_col_a if n < split else _col_b).add_child(line)
-		var b := UiMenu.button(str(r[1]))
+		var b := touch_row(UiMenu.button(str(r[1])))
 		b.custom_minimum_size = Vector2(0, OPTION_ROW_H)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.set_meta("key", key)
@@ -123,7 +136,7 @@ func _build_general_rows() -> void:
 		if key == RESET_KEY or key == EXPORT_KEY:
 			continue
 		var minus := arrow_button("<")
-		minus.custom_minimum_size.y = OPTION_ROW_H
+		minus.custom_minimum_size = Vector2(ARROW_W, OPTION_ROW_H)
 		minus.pressed.connect(change.bind(key, -1))
 		line.add_child(minus)
 		var v := UiMenu.label("", MenuColors.TEXT)
@@ -133,7 +146,7 @@ func _build_general_rows() -> void:
 		line.add_child(v)
 		value_labels[key] = v
 		var plus := arrow_button(">")
-		plus.custom_minimum_size.y = OPTION_ROW_H
+		plus.custom_minimum_size = Vector2(ARROW_W, OPTION_ROW_H)
 		plus.pressed.connect(change.bind(key, 1))
 		line.add_child(plus)
 	TargetList.link_ring(rows)
@@ -298,7 +311,7 @@ func kies_tab(t: String) -> void:
 		stop_preview()
 	tab = t
 	quiet()
-	general_box.visible = tab == "general"
+	general_scroll.visible = tab == "general"
 	music_root.visible = tab == "music"
 	_refresh_tabs()
 	if tab == "music":

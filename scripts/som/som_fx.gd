@@ -7,6 +7,8 @@ extends RefCounted
 ## - slash/spark/number/telegraph: FX; Gauge: wapenmeter boven de held.
 
 const SomData := preload("res://scripts/data/som_data.gd")
+const SomFeelData := preload("res://scripts/data/som_feel_data.gd")
+const SomChainData := preload("res://scripts/data/som_chain_data.gd")
 const THEME := preload("res://assets/theme.tres")
 const Hd2dUnmodulated := preload("res://scripts/hd2d_unmodulated.gd")
 const PLACEHOLDER_COLOR := Color("ff1ee6")
@@ -208,6 +210,66 @@ static func set_ko(p: Node2D, t: Texture2D, on: bool) -> void:
 		body.visible = not on
 
 
+## Keten-stap slash: eigen strip of terugval naar fx_slash (onbekende held / ontbrekende art).
+static func chain_hit(parent: Node, at: Vector2, dir: Vector2, step: int, hero_id: String) -> Node2D:
+	var d: Dictionary = SomChainData.fx_def_for_step(step, hero_id)
+	if d.is_empty():
+		return slash(parent, at, dir)
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		return slash(parent, at, dir)
+	var n := int(d["frames"])
+	var ms_raw: Variant = d.get("ms", 50)
+	var ms: Array = ms_raw if ms_raw is Array else []
+	if ms.is_empty():
+		for _i in n:
+			ms.append(int(ms_raw))
+	var a := Anim.new()
+	a.name = "SomChainSlash"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	a.centered = true
+	var seq: Array = []
+	for i in n:
+		seq.append(i)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.rotation = dir.angle()
+	a.z_index = 20
+	parent.add_child(a)
+	return a
+
+
+## Grond-schokgolf op de finisher (geen rotatie).
+static func chain_shockwave(parent: Node, feet: Vector2) -> Node2D:
+	var d: Dictionary = SomChainData.FX_SHOCKWAVE
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		return null
+	var n := int(d["frames"])
+	var ms_one := int(d["ms"])
+	var a := Anim.new()
+	a.name = "SomChainShockwave"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	a.centered = true
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = feet
+	a.rotation = 0.0
+	a.z_index = 19
+	parent.add_child(a)
+	return a
+
+
 static func slash(parent: Node, at: Vector2, dir: Vector2) -> Node2D:
 	var t := tex(SomData.FX_SLASH)
 	if t:
@@ -247,6 +309,80 @@ static func spark(parent: Node, at: Vector2) -> void:
 	parent.add_child(a)
 
 
+## Fase-1 element-impact (3×24×24, 50 ms); positie vast op 'at', niet gekoppeld aan knockback.
+static func impact_spark(parent: Node, at: Vector2, element: String) -> void:
+	var key := element if element != "" else "fysiek"
+	var path := SomData.FX_IMPACT_DIR % key
+	var t := tex(path)
+	if t == null:
+		spark(parent, at)
+		return
+	var spec: Dictionary = SomData.FX_IMPACT
+	var n := int(spec["frames"])
+	var ms_one := int(spec["ms"])
+	var cell: Array = spec["cell"]
+	var anc: Array = spec["anchor"]
+	var a := Anim.new()
+	a.name = "SomImpact_%s" % key
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	a.centered = false
+	a.offset = Vector2(-float(anc[0]), -float(anc[1]))
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.z_index = 22
+	parent.add_child(a)
+
+
+static func dust_dodge(parent: Node, feet: Vector2, flip_h: bool) -> void:
+	var d: Dictionary = SomData.FX_DUST_DODGE
+	var node := oneshot(parent, d, feet, "SomDustDodge", Color.WHITE)
+	if node is Sprite2D and flip_h:
+		(node as Sprite2D).flip_h = true
+	node.z_index = 5
+
+
+static func dust_land(parent: Node, feet: Vector2) -> void:
+	var node := oneshot(parent, SomData.FX_DUST_LAND, feet, "SomDustLand", Color.WHITE)
+	node.z_index = 5
+
+
+static func dust_finisher(parent: Node, feet: Vector2) -> void:
+	var node := oneshot(parent, SomData.FX_DUST_FINISHER, feet, "SomDustFinisher", Color.WHITE)
+	node.z_index = 5
+
+
+static func counter_spark(parent: Node, at: Vector2) -> void:
+	var d: Dictionary = SomData.FX_COUNTER_SPARK
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		return
+	var n := int(d["frames"])
+	var ms_one := int(d["ms"])
+	var a := Anim.new()
+	a.name = "SomCounterSpark"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.z_index = 22
+	parent.add_child(a)
+
+
 ## Eenmalig effect (SomData.FX_HEAL_GLOW / FX_SPELL_IMPACT) met zijn anker op 'feet'.
 ## Zonder art: een getekende placeholder-ring in dezelfde kleur. Geeft de node terug.
 static func oneshot(parent: Node, d: Dictionary, feet: Vector2, node_name: String, color: Color) -> Node2D:
@@ -279,6 +415,38 @@ static func oneshot(parent: Node, d: Dictionary, feet: Vector2, node_name: Strin
 	a.ms = ms
 	a.position = feet
 	a.z_index = 22
+	parent.add_child(a)
+	return a
+
+
+## F1 perfect dodge: fx_perfect_ring (64x16, 4×16², 75 ms/frame) of draw_arc-terugval.
+static func perfect_ring(parent: Node, at: Vector2) -> Node2D:
+	var d: Dictionary = SomData.FX_PERFECT_RING
+	var t := tex(str(d["sheet"]))
+	if t == null:
+		var ph := Ring.new()
+		ph.color = Color(0.85, 0.95, 1.0)
+		ph.position = at
+		ph.radius = 14.0
+		ph.z_index = 23
+		parent.add_child(ph)
+		return ph
+	var n := int(d["frames"])
+	var ms_one := int(d["ms"])
+	var a := Anim.new()
+	a.name = "SomPerfectRing"
+	a.texture = t
+	a.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	a.hframes = n
+	var seq: Array = []
+	var ms: Array = []
+	for i in n:
+		seq.append(i)
+		ms.append(ms_one)
+	a.seq = seq
+	a.ms = ms
+	a.position = at
+	a.z_index = 23
 	parent.add_child(a)
 	return a
 
@@ -325,9 +493,12 @@ static func number(parent: Node, at: Vector2, text: String, color: Color, life :
 		d.sheet = digits
 		d.text = text.trim_prefix("+")
 		d.row = _digit_row(color)
-		# F4 finisher/heavy: witte rij + modulate (laat rood/groen _digit_row ongemoeid).
-		if color.is_equal_approx(Color("FF8A3D")) or color.is_equal_approx(Color("FFD24A")):
+		# F4 finisher/heavy: witte rij + modulate (rood/groen _digit_row blijft). Meta zodat
+		# HD-2D-compensatie (elke frame) de kleur vermenigvuldigt i.p.v. hem te wissen.
+		if color.is_equal_approx(SomFeelData.COL_FINISHER) or color.is_equal_approx(SomFeelData.COL_HEAVY) \
+				or color.is_equal_approx(SomFeelData.COL_FINISHER_NUMBER):
 			d.row = 0
+			d.set_meta(Hd2dUnmodulated.FEEL_RGB, color)
 			n = d
 			n.modulate = color
 		else:

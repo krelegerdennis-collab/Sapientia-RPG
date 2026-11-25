@@ -55,11 +55,12 @@ const INTERP_DELAY_MSEC := 100
 ## Plafond voor de bandbreedte-schatting: kop + 4 spelers + 8 vijanden.
 const SNAPSHOT_HEADER_BYTES := 5
 const SNAPSHOT_PLAYER_BYTES := 11
-## V0 vijandrecord (zonder telegraaf); V1 = + telegraaf-velden (Combat T5).
-const SNAPSHOT_CODEC_VERSION := 1
+## V0 vijandrecord (zonder telegraaf); V1 = + telegraaf-velden (Combat T5); V2 = + stagger (F2).
+const SNAPSHOT_CODEC_VERSION := 2
 const SNAPSHOT_ENEMY_BYTES_V0 := 9
 const SNAPSHOT_ENEMY_BYTES_V1 := 20
-const SNAPSHOT_ENEMY_BYTES := SNAPSHOT_ENEMY_BYTES_V1
+const SNAPSHOT_ENEMY_BYTES_V2 := 21
+const SNAPSHOT_ENEMY_BYTES := SNAPSHOT_ENEMY_BYTES_V2
 const SNAPSHOT_ENEMY_BUDGET := 8
 const INPUT_BYTES := 6
 ## UDP/IPv4 (28) plus een ruime ENet-kop. Schatting, geen meting.
@@ -102,7 +103,8 @@ const SYNC_TEST_PORT := 38424
 ## Vlaggen per speler in de snapshot (u16 op offset 9, geen extra byte).
 ## M3 leest dit als hij RUN_RESULT / REWARD_BUNDLE in net_codec bouwt.
 ## Dit bestand voegt dat pakket niet toe.
-## Lage byte: RING_OPEN=1, ATTACK=2, DOWN=4, CHANNEL=8, BLEED_DONE=16.
+## Lage byte: RING_OPEN=1, ATTACK=2, DOWN=4, CHANNEL|PERFECT=8, BLEED_DONE=16.
+## Bit 8: revive-kanaal (hulpstoel) en perfect-counter overlappen niet in gameplay; zelfde wire-bit.
 ## Hoge byte: kanaal-voortgang 0..100, alleen gezet op de liggende stoel.
 const FLAG_RING_OPEN := 1
 const FLAG_ATTACK := 2
@@ -111,6 +113,8 @@ const FLAG_DOWN := 4
 const FLAG_CHANNEL := 8
 ## Bleed-timer is afgelopen; de stoel blijft liggen (VOORSTEL, geen permadeath).
 const FLAG_BLEED_DONE := 16
+## F1: counter-venster open (30 ticks) voor snapshot-flits/HUD op gast.
+const FLAG_PERFECT := 8
 
 enum Refuse {
 	NONE = 0,
@@ -388,7 +392,11 @@ static func parse_announce(raw: PackedByteArray) -> Dictionary:
 
 
 static func snapshot_payload_bytes(codec_version: int = SNAPSHOT_CODEC_VERSION) -> int:
-	var enemy_sz := SNAPSHOT_ENEMY_BYTES_V0 if codec_version <= 0 else SNAPSHOT_ENEMY_BYTES_V1
+	var enemy_sz := SNAPSHOT_ENEMY_BYTES_V0
+	if codec_version >= 2:
+		enemy_sz = SNAPSHOT_ENEMY_BYTES_V2
+	elif codec_version >= 1:
+		enemy_sz = SNAPSHOT_ENEMY_BYTES_V1
 	var base := SNAPSHOT_HEADER_BYTES + SNAPSHOT_PLAYER_BYTES * MAX_PLAYERS + enemy_sz * SNAPSHOT_ENEMY_BUDGET
 	if codec_version <= 0:
 		return base

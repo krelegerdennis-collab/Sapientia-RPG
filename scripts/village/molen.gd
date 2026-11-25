@@ -13,7 +13,8 @@ const REGEL_ZANG := "The mill turns again."
 const REGEL_GEZANG := "Soft singing."
 const SFX_ZANG := "molen_zang"
 const VRAAG := "What would you like?"
-const KEUZES := ["Save", "Switch party", "Done"]
+const KEUZES := ["Save", "Change leader", "Done"]
+const REGEL_PARTY_MENU := "To change who fights with you, open MENU, then Party."
 const VRAAG_SAVE := "Save your progress?"
 const REGEL_OPGESLAGEN := "Saved."
 const REGEL_MISLUKT := "Save failed."
@@ -99,6 +100,8 @@ static func _wissel() -> void:
 	if i < 0 or not GameState.move_member_to_front(i):
 		return
 	Dialog.show_lines(["%s leads the way." % namen[i]])
+	await Dialog.finished
+	Dialog.show_lines([REGEL_PARTY_MENU])
 	await Dialog.finished
 
 
