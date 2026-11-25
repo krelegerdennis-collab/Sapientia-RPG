@@ -37,8 +37,13 @@ func _run_all() -> void:
 
 
 func _export_path() -> void:
+	const DOCS_LAYOUTS := "res://docs/arena/layouts.json"
 	check("layouts.json onder data/ (niet docs/)", Layout.PATH.begins_with("res://data/"))
 	check("layouts.json bestaat", FileAccess.file_exists(Layout.PATH))
+	check("docs-layouts bestaat (dev/CI)", FileAccess.file_exists(DOCS_LAYOUTS))
+	var data_parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(Layout.PATH))
+	var docs_parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(DOCS_LAYOUTS))
+	check("data en docs layouts.json identiek", data_parsed is Dictionary and docs_parsed is Dictionary and (data_parsed as Dictionary).hash() == (docs_parsed as Dictionary).hash())
 	var grid: Array = Layout.grid("lobby")
 	check("lobby-grid 24x14", grid.size() == 14 and grid[0].size() == 24)
 	var hall: Array = Layout.grid("hall")
