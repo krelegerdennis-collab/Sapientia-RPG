@@ -216,7 +216,7 @@ static func net_error_text(what: String, err: int, port: int, transport: String 
 static func relay_url() -> String:
 	var url := OS.get_environment(RELAY_URL_ENV).strip_edges()
 	if url == "":
-		url = str(ProjectSettings.get_setting(RELAY_URL_SETTING, "")).strip_edges()
+		url = str(ProjectSettings.get_setting_with_override(RELAY_URL_SETTING)).strip_edges()
 	return url if is_valid_relay_url(url) else ""
 
 
