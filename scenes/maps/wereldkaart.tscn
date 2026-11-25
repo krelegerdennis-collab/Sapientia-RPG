@@ -71,6 +71,11 @@ position = Vector2(488, 408)
 script = ExtResource("4_de1fy")
 facing = Vector2i(0, 1)
 
+[node name="van_arena" type="Marker2D" parent="Spawns"]
+position = Vector2(488, 504)
+script = ExtResource("4_de1fy")
+facing = Vector2i(0, -1)
+
 [node name="van_esdoorn" type="Marker2D" parent="Spawns"]
 position = Vector2(760, 424)
 script = ExtResource("4_de1fy")

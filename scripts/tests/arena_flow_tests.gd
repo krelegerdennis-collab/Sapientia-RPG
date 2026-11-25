@@ -178,10 +178,11 @@ func _lobby_exit_to_world() -> void:
 	lobby.call("_on_player_stepped", Vector2i(11, 13))
 	await _wait_path(WORLD, 12.0)
 	var world: Node = get_tree().current_scene
+	var world_player: Node = world.get_node("Objects/Player")
 	check("lobby exit: wereldkaart", world.scene_file_path == WORLD)
 	check("lobby exit: spawn van_arena", world.get_node_or_null("Spawns/" + Entry.RETURN_SPAWN) != null)
-	check("lobby exit: tile", player.get_tile() == Entry.RETURN_TILE)
-	check("lobby exit: facing weg", player.facing == Entry.RETURN_FACING)
+	check("lobby exit: tile", world_player.get_tile() == Entry.RETURN_TILE)
+	check("lobby exit: facing weg", world_player.facing == Entry.RETURN_FACING)
 
 
 func _load_hall_redirects_lobby() -> void:
@@ -189,7 +190,10 @@ func _load_hall_redirects_lobby() -> void:
 	var player: Node = hall.get_node("Objects/Player")
 	var path := "user://arenaflowtest_hall_save.json"
 	check("save in hal", GameState.save_game(player.get_tile(), player.facing, path))
-	GameState.load_game(path)
+	var raw: String = FileAccess.get_file_as_string(path)
+	var data: Variant = JSON.parse_string(raw)
+	var rec: Dictionary = {"path": path, "data": data, "slot": 1}
+	check("continue uit hall-save", rec["data"] is Dictionary and await GameState._continue_record(rec))
 	await _wait_path(LOBBY, 12.0)
 	check("load hall-save landt in lobby", get_tree().current_scene.scene_file_path == LOBBY)
 
