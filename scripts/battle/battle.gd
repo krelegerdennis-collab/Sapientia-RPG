@@ -121,6 +121,7 @@ const CodexBattle := preload("res://scripts/battle/codex_battle.gd")   # Codex: 
 const BattleLayoutScript := preload("res://scripts/battle/battle_layout.gd")
 const BattleCommandsScript := preload("res://scripts/battle/battle_commands.gd")
 const BattleRulesScript := preload("res://scripts/battle/battle_rules.gd")
+const BattleTipsScript := preload("res://scripts/battle/battle_tips.gd")
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
 const CORE_HIT_COLOR := Color("ff8ad8")
 const ARMOR_HIT_COLOR := Color("b5a78d")
@@ -286,6 +287,13 @@ func _ready() -> void:
 var boss_bar: Control = null
 var _layout_h: RefCounted
 var _cmds_h: RefCounted
+var _tips_h: RefCounted
+
+
+func _tips():
+	if _tips_h == null:
+		_tips_h = BattleTipsScript.new(self)
+	return _tips_h
 
 
 func _cmds():
@@ -1745,64 +1753,25 @@ func _alive(list: Array) -> Array:
 	return list.filter(func(c): return c["s"]["hp"] > 0)
 
 
-# ================================================================ v0.11 oefengevecht
-## Tip-venster links (boven de D-pad): eerst "Aanval", daarna "Item".
+# ================================================================ v0.11 oefengevecht (battle_tips.gd)
 func _make_tip() -> void:
-	tip_panel = Panel.new()
-	tip_panel.name = "TipPanel"
-	# v0.16: tutorialtekst in hetzelfde blauwe vak als de verteller (Lufia 2-stijl)
-	tip_panel.add_theme_stylebox_override("panel", UiStyle.blue_box("vak", Vector4.ZERO))
-	tip_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(tip_panel)
-	tip_label = Label.new()
-	tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	tip_label.add_theme_color_override("font_color", UiStyle.BOX_TEXT)
-	tip_label.add_theme_color_override("font_shadow_color", UiStyle.BOX_SHADOW)
-	tip_panel.add_child(tip_label)
-	tip_panel.hide()
+	_tips().make_tip()
 
 
 func tip_text(hero: Dictionary) -> String:
-	var hurt := int(hero["s"]["hp"]) < int(hero["s"]["max_hp"])
-	if round_no <= 1 or not hurt or _available_items().is_empty():
-		tips_shown["aanval"] = true
-		return "TIP: Attack, then the Moss Slime."
-	tips_shown["item"] = true
-	return "TIP: hurt? Item > Herb gives HP back."
+	return _tips().tip_text(hero)
 
 
 func _show_tip(hero: Dictionary) -> void:
-	if tip_panel == null:
-		return
-	tip_label.text = tip_text(hero)
-	var w := 132.0
-	tip_label.position = Vector2(7, 5)
-	tip_label.custom_minimum_size = Vector2(w - 14, 0)
-	tip_label.size = Vector2(w - 14, 0)
-	# Hoogte uit het lettertype zelf (een Label met autowrap meldt bij breedte 0 per letter een regel).
-	var font := tip_label.get_theme_font("font")
-	var fs := tip_label.get_theme_font_size("font_size")
-	var th := font.get_multiline_string_size(tip_label.text, HORIZONTAL_ALIGNMENT_LEFT, w - 14, fs,
-			-1, TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND).y
-	tip_label.size = Vector2(w - 14, th)
-	var h := ceilf(th) + 10.0
-	tip_panel.size = Vector2(w, h)
-	tip_panel.position = tip_origin()   # linksboven, onder de strook; notch schuift mee
-	tip_panel.show()
+	_tips().show_tip(hero)
 
 
-## Plek van het tip-venster in gevechtseenheden (384x216). Desktop: (6, 22).
-## Op mobiel telt de veilige zone (notch); het gevecht is 2x geschaald, insets staan in viewport-px.
 func tip_origin() -> Vector2:
-	var ins := UiTouchC.insets(get_viewport())
-	var s := maxf(get_global_transform().get_scale().x, 0.001)
-	return Vector2(6.0 + ins.x / s, 22.0 + ins.y / s)
+	return _tips().tip_origin()
 
 
 func _hide_tip() -> void:
-	if tip_panel:
-		tip_panel.hide()
+	_tips().hide_tip()
 
 
 # ================================================================ v0.15 kernvaardigheden
