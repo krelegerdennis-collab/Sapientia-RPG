@@ -47,6 +47,7 @@ func _ready() -> void:
 	_build_gate()
 	if room_kind == "lobby":
 		_build_lobby_world_exit()
+	_drop_stale_run()
 	_sync_lobby_lock()
 	_ensure_spawn()
 	if room_kind == "lobby":
@@ -310,8 +311,30 @@ func _redirect_stale_hall() -> void:
 		return
 	var arena: Node = gs.get_node_or_null("ArenaRun")
 	if arena != null and str(arena.phase) != RunScript.PHASE_LOBBY:
+		_rebind_active_wave(arena)
 		return
 	GameState.change_map(LOBBY, "ingang")
+
+
+## Lobby geladen terwijl de run nog in wave/choice/results staat: de hal is weg, dus de run ook.
+func _drop_stale_run() -> void:
+	if room_kind != "lobby":
+		return
+	var gs := get_node_or_null("/root/GameState")
+	var arena: Node = gs.get_node_or_null("ArenaRun") if gs != null else null
+	if arena != null and arena.has_method("abandon") and str(arena.phase) != RunScript.PHASE_LOBBY:
+		push_warning("ArenaRoom: run in fase '%s' zonder hal; terug naar lobby." % str(arena.phase))
+		arena.abandon()
+
+
+## Hal opnieuw geladen midden in een wave (niet via de poort): golf opnieuw starten op deze som.
+func _rebind_active_wave(arena: Node) -> void:
+	if str(arena.phase) != RunScript.PHASE_WAVE or arena.waves == null:
+		return
+	var w: Node = arena.waves
+	if w.has_method("rebind_som") and w.rebind_som(self):
+		return
+	w.start_wave(int(arena.wave))
 
 
 func _attach_hud() -> void:

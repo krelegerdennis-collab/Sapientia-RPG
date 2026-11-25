@@ -106,20 +106,36 @@ func _is_hall(node: Node) -> bool:
 	return node.has_node("Objects")
 
 
-func _bind_som(room: Node) -> void:
-	var som: Node = room.get("som") if "som" in room else null
-	if som == null or som == _som:
-		return
+func _unbind_som() -> void:
 	if is_instance_valid(_som):
 		if _som.enemy_defeated.is_connected(_on_enemy_defeated):
 			_som.enemy_defeated.disconnect(_on_enemy_defeated)
 		if _som.player_defeated.is_connected(_on_player_defeated):
 			_som.player_defeated.disconnect(_on_player_defeated)
+
+
+func _bind_som(room: Node) -> void:
+	var som: Node = room.get("som") if "som" in room else null
+	if som == null or som == _som:
+		return
+	_unbind_som()
 	if not som.enemy_defeated.is_connected(_on_enemy_defeated):
 		som.enemy_defeated.connect(_on_enemy_defeated)
 	if not som.player_defeated.is_connected(_on_player_defeated):
 		som.player_defeated.connect(_on_player_defeated)
 	_som = som
+
+
+## Koppel de golven aan de som van deze hal. True als er geen herstart nodig is.
+func rebind_som(room: Node) -> bool:
+	var som: Node = room.get("som") if "som" in room else null
+	if som == null:
+		return false
+	if som == _som and is_instance_valid(_som):
+		return true
+	_room = room
+	_bind_som(room)
+	return false
 
 
 func _spawn_wave(room: Node, n: int) -> void:
@@ -259,6 +275,17 @@ func _on_player_defeated() -> void:
 		return
 	_wiped_for = active_wave
 	party_wiped.emit()
+
+
+func abort() -> void:
+	active_wave = 0
+	_cleared_for = 0
+	_wiped_for = 0
+	_skipped_for = 0
+	_teardown_wave()
+	_unbind_som()
+	_room = null
+	_som = null
 
 
 func _teardown_wave() -> void:

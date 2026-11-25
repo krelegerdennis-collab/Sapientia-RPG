@@ -574,6 +574,7 @@ func _ready() -> void:
 	# F-5 nulmeting per kamer, geïsoleerd (geen CI, faalt niet op budget): of  godot -- --wm1roombaselinetest  (scripts/tests/wm1_room_baseline_tests.gd).
 	# WM1 F3 stabiliteit (in CI-matrix): godot -- --wm1f3stabilitytest  (scripts/tests/wm1_f3_stability_tests.gd).
 	# Colosseum-flow (in CI-matrix): godot -- --arenatest  (scripts/tests/arena_tests.gd).
+	# Colosseum abandon mid-wave (lokaal): godot -- --arenaabandontest  (scripts/tests/arena_abandon_tests.gd).
 	# Colosseum lobby export + wereldkaart-ingang: godot -- --arenalobbytest  (scripts/tests/arena_lobby_tests.gd).
 	# Arena-golven vervolg review #487 (lokaal; CI-regel later via Forge): godot -- --arenawavesfollowuptest  (scripts/tests/arena_waves_followup_tests.gd).
 	# Wachtershuis classic-muur (geen TileSet-polygonen): godot -- --huiscollisiontest  (scripts/tests/huis_collision_tests.gd).
@@ -792,7 +793,8 @@ func _ready() -> void:
 			["--arenawavestest", "res://scripts/tests/arena_waves_tests.gd", "ArenaWavesTest", "arenawavestest"],
 			["--arenawavesfollowuptest", "res://scripts/tests/arena_waves_followup_tests.gd", "ArenaWavesFollowupTest", "arenawavesfollowuptest"],
 			["--arenalobbytest", "res://scripts/tests/arena_lobby_tests.gd", "ArenaLobbyTest", "arenalobbytest"],
-			["--arenaflowtest", "res://scripts/tests/arena_flow_tests.gd", "ArenaFlowTest", "arenaflowtest"]]:
+			["--arenaflowtest", "res://scripts/tests/arena_flow_tests.gd", "ArenaFlowTest", "arenaflowtest"],
+			["--arenaabandontest", "res://scripts/tests/arena_abandon_tests.gd", "ArenaAbandonTest", "arenaabandontest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
