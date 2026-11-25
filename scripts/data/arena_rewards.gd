@@ -1,21 +1,17 @@
 extends RefCounted
-## Beloning per wave van het Colosseum. Data, geen gevechtslogica.
-## Wave 5 schaalt per run in SomArenaData (RPG COMBAT), niet hier.
-## Het token-plafond stopt eindeloos grinden tot Dennis het getal vastzet.
+## Beloning per wave van het Colosseum. Data, geen gevechtslogica (akkoord Dennis 25-11).
+## Geen kill-XP/goud in de hal: alleen deze milestone-regels + tokens.
 
 const WAVE_COUNT := 5
 
-# PLACEHOLDER (Dennis approves balance)
-const HP_PERCENT := 25
-# PLACEHOLDER (Dennis approves balance)
-const TOKEN_CAP := 200
-# PLACEHOLDER (Dennis approves balance)
+const HP_PERCENT := 30
+const TOKEN_CAP := 150
 const WAVES := {
-	1: {"xp": 8, "tokens": 4},
-	2: {"xp": 12, "tokens": 6},
-	3: {"xp": 16, "tokens": 8},
-	4: {"xp": 20, "tokens": 10},
-	5: {"xp": 28, "tokens": 14},
+	1: {"xp": 15, "tokens": 5},
+	2: {"xp": 18, "tokens": 6},
+	3: {"xp": 22, "tokens": 8},
+	4: {"xp": 28, "tokens": 10},
+	5: {"xp": 35, "tokens": 12},
 }
 
 

@@ -9,6 +9,7 @@ const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const Protocol := preload("res://scripts/net/net_protocol.gd")
 const HALL := "res://scenes/arena/arena_hall.tscn"
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
+const MockRoom := preload("res://scripts/tests/perfect_dodge_mock_room.gd")
 
 var failures := 0
 var passes := 0
@@ -37,6 +38,7 @@ func _run_all() -> void:
 	await _wave_cleared_flow()
 	await _party_wiped_flow()
 	await _arena_mode_guard()
+	_arena_kill_loot_off()
 	_flag_off()
 	print("ARENAWAVESTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -190,6 +192,10 @@ func _wave_spawn_snapshot(hall: Node, run_seed: int, wave_n: int) -> Array:
 
 
 func _spawn_timeout_no_hall() -> void:
+	for node in get_tree().get_nodes_in_group("arena_hall"):
+		if is_instance_valid(node):
+			node.queue_free()
+	await _await_frames(15)
 	var run := RunScript.new()
 	run.run_seed = 5050
 	add_child(run)
@@ -283,9 +289,41 @@ func _arena_mode_guard() -> void:
 	ReleaseFlags.arena_enabled_override = -1
 
 
+func _arena_kill_loot_off() -> void:
+	GameState.new_game("Dax")
+	var gold0 := GameState.gold
+	var exp0 := int(GameState.party[0]["exp"])
+	var inv0 := GameState.item_count("drankje")
+	var som: SomArena = SomArena.new()
+	som.arena_mode = true
+	var room := MockRoom.new()
+	room.room_id = "arena_kill_loot_test"
+	room.monsters = []
+	som.room = room
+	add_child(som)
+	var m: MapMonster = MapMonsterScript.new()
+	m.enemy_id = "mosslijm"
+	m.monster_id = "9001"
+	som.enemies[m] = {
+		"hp": 0,
+		"max_hp": 13,
+		"exp": 40,
+		"gold": 77,
+		"drops": [{"item": "drankje", "chance": 1.0}],
+		"data": {},
+	}
+	som._defeat_enemy(m)
+	check("arena_mode: geen kill-goud", GameState.gold == gold0)
+	check("arena_mode: geen kill-xp", int(GameState.party[0]["exp"]) == exp0)
+	check("arena_mode: geen kill-drops", GameState.item_count("drankje") == inv0)
+	som.queue_free()
+	m.queue_free()
+	room.queue_free()
+
+
 func _flag_off() -> void:
 	ReleaseFlags.arena_enabled_override = -1
-	check("ARENA_ENABLED false", ReleaseFlags.ARENA_ENABLED == false)
+	check("ARENA_ENABLED true", ReleaseFlags.ARENA_ENABLED == true)
 	check("uplink 15960", Protocol.host_uplink_bytes_per_sec() == 15960)
 	var run := RunScript.new()
 	add_child(run)

@@ -1463,25 +1463,29 @@ func _defeat_enemy(m: Node) -> void:
 	if target_lock:
 		target_lock.on_target_gone(m)
 	GameState.mark_defeated(m.enemy_id)
-	var gained_exp := int(e["exp"])
-	var gained_gold := int(e["gold"])
-	GameState.add_gold(gained_gold)
-	var lines: Array[String] = [SomData.TXT_EXP % [gained_exp, gained_gold]]
-	for h in GameState.alive_heroes():
-		var msgs := GameState.give_exp(h, gained_exp)
-		lines.append_array(msgs)
+	var gained_exp := 0
+	var gained_gold := 0
 	var got: Array = []
-	for d in e["drops"]:
-		if typeof(d) == TYPE_DICTIONARY and GameData.ITEMS.has(str(d.get("item", ""))) and rng.randf() < float(d.get("chance", 0.0)):
-			var id := str(d["item"])
-			GameState.add_item(id, 1)
-			got.append(id)
-			lines.append(SomData.TXT_GOT % PartyActions.item_name(id))
+	if not arena_mode:
+		gained_exp = int(e["exp"])
+		gained_gold = int(e["gold"])
+		GameState.add_gold(gained_gold)
+		var lines: Array[String] = [SomData.TXT_EXP % [gained_exp, gained_gold]]
+		for h in GameState.alive_heroes():
+			var msgs := GameState.give_exp(h, gained_exp)
+			lines.append_array(msgs)
+		for d in e["drops"]:
+			if typeof(d) == TYPE_DICTIONARY and GameData.ITEMS.has(str(d.get("item", ""))) and rng.randf() < float(d.get("chance", 0.0)):
+				var id := str(d["item"])
+				GameState.add_item(id, 1)
+				got.append(id)
+				lines.append(SomData.TXT_GOT % PartyActions.item_name(id))
+		if not lines.is_empty():
+			_say("\n".join(lines))
 	if not GameState.defeated_map_monsters.has(room.room_id):
 		GameState.defeated_map_monsters[room.room_id] = {}
 	GameState.defeated_map_monsters[room.room_id][m.monster_id] = true
 	room.monsters.erase(m)
-	_say("\n".join(lines))
 	if e.has("golem") and _story_authority():
 		# realtime Golem verslagen: dezelfde verhaal-beat als de turn-based winst (eenmalig, host)
 		golem_story_fired = GolemStoryWin.apply(str(room.room_id), str(m.monster_id), str(m.enemy_id), room)
