@@ -188,7 +188,10 @@ func _project() -> void:
 # ---------------------------------------------------------------- releasevlaggen (F3.14, H1/H2/H3/H11)
 func _releasevlaggen() -> void:
 	check("hub_cut staat aan (H2/H3)", Flags.hub_cut)
-	check("online_cut staat aan (H11)", Flags.online_cut)
+	if Flags.online_cut:
+		check("online_cut staat aan (H11)", true)
+	else:
+		check("co-op release: online_cut uit", not Flags.online_cut)
 	check("geen debug_build_override", Flags.debug_build_override == -1)
 	check("geen relay_url_override", Flags.relay_url_override == null)
 	check("geen test_menu_override", Flags.test_menu_override == -1)
@@ -357,11 +360,26 @@ func _rc_besluit(cfg: ConfigFile, android: Array[String]) -> void:
 	var vf := rc_versie_fouten(src, pv, cfg, android)
 	check("[F8.1/F8.2] RC-versie %s / code %d overal (afwijkend: %s)" % [RC_VERSIE, RC_CODE, vf], vf.is_empty())
 	check("[F8.2] RC-code %d hoger dan laatste build %d" % [RC_CODE, LAATSTE_CODE], RC_CODE > LAATSTE_CODE)
-	var na := rc_netwerk_aan(cfg, android)
-	check("[F8.8] netwerkrechten uit in alle Android-presets (nog aan: %s)" % [na], na.is_empty())
-	# Solo zonder netwerk: PvP/Co-op-knoppen verborgen in een release (online_cut, geen relay-URL).
-	check("[F8.8] online dicht: online_cut aan", Flags.online_cut)
-	check("[F8.8] online dicht: PvP/Co-op-knoppen verborgen", not Flags.online_buttons_visible())
+	if Flags.online_cut:
+		var na := rc_netwerk_aan(cfg, android)
+		check("[F8.8] netwerkrechten uit in alle Android-presets (nog aan: %s)" % [na], na.is_empty())
+		# Solo zonder netwerk: PvP/Co-op-knoppen verborgen in een release (online_cut, geen relay-URL).
+		check("[F8.8] online dicht: online_cut aan", true)
+		check("[F8.8] online dicht: PvP/Co-op-knoppen verborgen", not Flags.online_buttons_visible())
+	else:
+		# Zelfde vier als coophosttest (coop/easy-presets; geen change_wifi/state op LAN/relay).
+		var verplicht: Array[String] = [
+			"permissions/internet", "permissions/access_network_state",
+			"permissions/access_wifi_state", "permissions/change_wifi_multicast_state",
+		]
+		var uit: Array[String] = []
+		for s in android:
+			for k in verplicht:
+				if not bool(cfg.get_value(s + ".options", k, false)):
+					uit.append("%s:%s" % [s, k.get_slice("/", 1)])
+		check("[F8.8] co-op release: kern-netwerkrechten aan (nog uit: %s)" % [uit], uit.is_empty())
+		check("[F8.8] co-op release: online_cut uit", not Flags.online_cut)
+		check("[F8.8] co-op release: online-knoppen zichtbaar", Flags.online_buttons_visible())
 	# Zelftest van de regels: een preset met de oude stand moet FAIL opleveren.
 	var nep := ConfigFile.new()
 	nep.set_value("preset.0", "platform", "Android")

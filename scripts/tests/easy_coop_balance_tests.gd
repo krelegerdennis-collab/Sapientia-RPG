@@ -12,7 +12,8 @@ const SeatCtrl := preload("res://scripts/coop/seat_controller.gd")
 const Sim := preload("res://tools/battlesim/d100_mode_sim.gd")
 const SomAlly := preload("res://scripts/som/som_ally.gd")
 
-const WINS := {1: 0, 2: 8, 3: 20, 4: 21}
+## Na merge finish/wm1 @ c6f2ff3e (WM1 Action/D100-balans); seed 20261110, dmg 1.2 / heal 50 / revive on.
+const WINS := {1: 0, 2: 11, 3: 21, 4: 22}
 
 var failures := 0
 var passes := 0
@@ -358,4 +359,4 @@ func _sim_choice() -> void:
 	for n in [1, 2, 3, 4]:
 		if int(got.get(n, -1)) != int(WINS[n]):
 			ok = false
-	check("sim 1.2/50/revive seed 20261110: 0/8/20/21 baaswinsten", ok and is_equal_approx(float(result.get("enemy_dmg", 0.0)), 1.2) and int(result.get("floor_heal", -1)) == 50 and bool(result.get("revive", false)))
+	check("sim 1.2/50/revive seed 20261110: 0/11/21/22 baaswinsten", ok and is_equal_approx(float(result.get("enemy_dmg", 0.0)), 1.2) and int(result.get("floor_heal", -1)) == 50 and bool(result.get("revive", false)))

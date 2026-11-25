@@ -15,7 +15,8 @@ const SEED := 424242
 ## (een verslagen node is weg en maakt een tweede run oneerlijk).
 const TICKS := 120
 ## Discrete solo-uitkomst van het ongewijzigde tick-pad (seat_ai uit) na de vaste reset.
-const SOLO_DISCRETE := "php:42|lotte:engage:3:0|noor:engage:3:0|rng:-2003358753087401976|gold:0|hp:42,46,46,14,9,38"
+## WM1 Action na merge finish/wm1 (som_arena); seed 424242, 120 ticks — niet co-op-stoelpad.
+const SOLO_DISCRETE := "php:42|lotte:engage:3:0|noor:engage:3:0|rng:3691878204615596250|gold:3|hp:42,46,46,10,38"
 
 var failures := 0
 var passes := 0

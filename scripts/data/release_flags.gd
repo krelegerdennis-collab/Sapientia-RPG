@@ -22,7 +22,8 @@ const RELAY_SETTING := "sapientia/net/relay_url"
 const RELAY_ENV := "SAPIENTIA_RELAY_URL"
 
 static var hub_cut := true
-static var online_cut := true
+## Co-op-release op coop/easy: online open (WM1 solo-RC op finish/wm1 blijft online_cut true).
+static var online_cut := false
 ## Testhaak: -1 = echt (OS.is_debug_build()), 0 = doen alsof release, 1 = doen alsof debug.
 static var debug_build_override := -1
 ## Testhaak: null = niets, anders vervangt dit de relay-URL uit de instellingen.
