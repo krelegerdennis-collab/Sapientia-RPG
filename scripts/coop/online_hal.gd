@@ -17,6 +17,7 @@ const Icons := preload("res://scripts/coop/online_icon_paths.gd")
 const AiSeats := preload("res://scripts/coop/online_ai_seats.gd")
 const SeatController := preload("res://scripts/coop/seat_controller.gd")
 const LobbyScreen := preload("res://scripts/ui/coop_lobby_screen.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const UiMenu := preload("res://scripts/ui/ui_menu.gd")
 const MenuColors := preload("res://scripts/ui/menu_colors.gd")
 const THEME := preload("res://assets/theme.tres")
@@ -25,6 +26,9 @@ const RUN_SCENE := "res://scenes/online/online_run.tscn"
 ## Reden in SESSION_END als de host de kamer of de run verlaat.
 const END_HOST_LEFT := "host_left"
 const LEAVE_TEXT := "Leave"
+## Co-op-only titel: gekozen online-profielslot vóór scene_load.
+static var entry_profile: Dictionary = {}
+static var entry_slot_index := -1
 const MSG_HOST_LEFT := "The host left the room."
 const MSG_LINK_LOST := "Connection to the room lost."
 
@@ -76,6 +80,9 @@ var _balloon_left: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if not entry_profile.is_empty():
+		profile = entry_profile.duplicate()
+		entry_profile = {}
 	add_to_group("touch_priority")
 	_ground = get_node_or_null("Ground") as TileMapLayer
 	_camera = get_node_or_null("Camera2D") as Camera2D
@@ -429,6 +436,8 @@ func _open_code_screen() -> void:
 	screen.hall_profile = _profile_packet()
 	layer.add_child(screen)
 	_code = screen
+	if ReleaseFlags.coop_only_mode() and not screen.leave_requested.is_connected(_exit_to_title):
+		screen.leave_requested.connect(_exit_to_title)
 	screen.apply_hall_entry()
 	if not screen.lobby.room_ready.is_connected(_on_room_ready):
 		screen.lobby.room_ready.connect(_on_room_ready)
@@ -556,6 +565,11 @@ func _detach() -> void:
 		var fn: Callable = pair[1]
 		if sig.is_connected(fn):
 			sig.disconnect(fn)
+
+
+func _exit_to_title() -> void:
+	if is_inside_tree():
+		get_tree().change_scene_to_file(GameState.TITLE_SCENE)
 
 
 ## Terug naar Host/Join in deze hal: sessie weg, poppetjes weg, code-scherm weer open.

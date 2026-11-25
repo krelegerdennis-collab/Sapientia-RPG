@@ -28,6 +28,8 @@ static var online_cut := false
 static var debug_build_override := -1
 ## Testhaak: null = niets, anders vervangt dit de relay-URL uit de instellingen.
 static var relay_url_override: Variant = null
+## Testhaak voor co-op-only titelmenu (-1 = OS.has_feature("coop_only"), 0/1 = forceer).
+static var coop_only_override := -1
 
 
 static func is_debug_build() -> bool:
@@ -72,6 +74,22 @@ static func online_buttons_visible() -> bool:
 	if not online_cut:
 		return true
 	return relay_url() != ""
+
+
+## Web-export 'Web Co-op': titel toont alleen multiplayer (feature tag coop_only).
+## Poppetjes: bestaand OnlineProfile (user://online_profile.json), 3 slots, los van verhaal-saves.
+const COOP_ONLY_PLAYER_LABEL := "Multiplayer"
+static func coop_only_mode() -> bool:
+	if coop_only_override >= 0:
+		return coop_only_override == 1
+	return OS.has_feature("coop_only")
+
+
+## Speler-tekst op titel/lobby: in co-op-only altijd 'Multiplayer', anders ongewijzigd.
+static func coop_lobby_menu_title(online: bool) -> String:
+	if coop_only_mode():
+		return COOP_ONLY_PLAYER_LABEL
+	return "Co-op (LAN / Online)" if online else "Co-op (LAN)"
 
 
 ## Testhaak voor Beta Test, End State en SoM op het titelscherm.

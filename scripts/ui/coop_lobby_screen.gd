@@ -13,6 +13,7 @@ const UiTouchC := preload("res://scripts/ui/ui_touch.gd")
 const SeatRoles := preload("res://scripts/coop/seat_controller.gd")
 const LobbyPortrait := preload("res://scripts/ui/lobby_portrait_slot.gd")
 const Profile := preload("res://scripts/online/online_profile.gd")
+const ReleaseFlags := preload("res://scripts/data/release_flags.gd")
 const ONLINE_HALL_SCENE := "res://scenes/coop/online_hal.tscn"
 
 ## Android 48dp minimum. 1 eenheid = ~1,9 dp op een telefoon in landschap (zie UiTouch), dus 25 eenheden.
@@ -290,7 +291,7 @@ func _rebuild() -> void:
 
 func _build_menu() -> void:
 	var online := Protocol.relay_url() != ""
-	_box.add_child(UiMenu.label("Co-op (LAN / Online)" if online else "Co-op (LAN)", UiStyleC.HILITE, TITLE_SIZE))
+	_box.add_child(UiMenu.label(ReleaseFlags.coop_lobby_menu_title(online), UiStyleC.HILITE, TITLE_SIZE))
 	_box.add_child(UiMenu.label("Action sandbox, up to 4 players.", UiStyleC.TEXT_DIM, TEXT_SIZE))
 	var host := _touch_button("Host")
 	host.pressed.connect(func() -> void: _show_host())
@@ -726,5 +727,5 @@ func _leave_to_title() -> void:
 	GameState.coop_end_session()
 	_teardown_net()
 	leave_requested.emit()
-	if get_parent() == get_tree().root:
+	if ReleaseFlags.coop_only_mode() or get_parent() == get_tree().root:
 		get_tree().change_scene_to_file(GameState.TITLE_SCENE)
