@@ -250,13 +250,9 @@ func setup(p_room: Node) -> void:
 	player = room.player
 	name = "SomArena"
 	_ensure_actions()
-	# Geheugen: alleen de sheets van de party (en de reserve) vooraf; andere helden (bv. een co-op-peer) via sheet_for().
+	# Geheugen: alleen de sheets van de party (en de reserve) vooraf; andere helden (bv. een co-op-peer) via _ensure_attack_sheets().
 	for id in _held_ids_nodig():
-		_laad_sheet(id)
-		var sheet := str(SomData.ATTACK_ANIMS.get(id, {}).get("sheet", ""))
-		if sheet != "" and ResourceLoader.exists(sheet):
-			attack_texs[id] = load(sheet)
-		_laad_step_sheets(id)
+		_ensure_attack_sheets(id)
 		_laad_held_cast(id)
 	# leider-behoud: de held die je met SWAP koos (GameState.leader_id), terugval Dax bij KO / niet in de party
 	active_id = GameState.active_leader()
@@ -1047,6 +1043,18 @@ func _laad_step_sheets(id: String) -> void:
 			step_texs[id][SomChainData.state_for(step)] = load(path)
 
 
+## Aanvalsheets (hit1 + hit2/finisher) voor held 'id'; setup(), co-op-roster en lazy _swing.
+func _ensure_attack_sheets(id: String) -> void:
+	if id == "" or not SomData.ATTACK_ANIMS.has(id):
+		return
+	if not attack_texs.has(id):
+		_laad_sheet(id)
+		var sheet := str(SomData.ATTACK_ANIMS.get(id, {}).get("sheet", ""))
+		if sheet != "" and ResourceLoader.exists(sheet):
+			attack_texs[id] = load(sheet)
+	_laad_step_sheets(id)
+
+
 ## Textuur voor de slag van held 'id' met animatie-definitie 'def' (eigen stap-sheet of <held>_attack.png).
 func attack_tex_for(id: String, def: Dictionary) -> Texture2D:
 	var st := str(def.get("chain_state", ""))
@@ -1079,6 +1087,8 @@ func anim_seconds(id: String) -> float:
 ## Slag van een held-node (speler of bondgenoot) in zijn kijkrichting. Met een aanvalssheet valt de treffer
 ## pas op het hit-frame (SomFx.Anim 'hit'); dan geeft dit -1 terug en volgt swing_landed. Zonder art: meteen.
 func _swing(id: String, n: Node2D, mult: float, step := -1, heavy := 0) -> int:
+	if not attack_texs.has(id):
+		_ensure_attack_sheets(id)
 	if attack_texs.has(id):
 		# zware slag: placeholder = de finisher-placeholder (TODO RPG ART: <held>_heavy.png)
 		var def := _attack_def(id, SomChainData.STEP_FINISHER if heavy > 0 else step)
@@ -2750,6 +2760,7 @@ func coop_sync_roster(roster: Array) -> void:
 		if slot == Protocol.NO_SLOT or cid == "":
 			continue
 		seated[slot] = cid
+		_ensure_attack_sheets(cid)
 	for slot in _coop_avatars.keys():
 		if not seated.has(int(slot)):
 			coop_deactivate_slot(int(slot))
