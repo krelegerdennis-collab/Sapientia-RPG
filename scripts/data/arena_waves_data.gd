@@ -1,25 +1,23 @@
 extends RefCounted
 class_name ArenaWavesData
-## PLACEHOLDER: balans door Dennis. Alleen aantallen, HP-schaal en vijandpools voor de arena-hal.
+## Aantallen, HP-schaal en vijandpools voor de arena-hal (balans akkoord Dennis 25-11).
 
 const GameData := preload("res://scripts/data/game_data.gd")
 
-# PLACEHOLDER: balans door Dennis — vijanden per golf
 const WAVE_COUNT := {
 	1: 3,
 	2: 4,
-	3: 5,
-	4: 6,
-	5: 7,
+	3: 4,
+	4: 5,
+	5: 6,
 }
 
-# PLACEHOLDER: balans door Dennis — HP-vermenigvuldiger t.o.v. game_data-basis
 const HP_MULT := {
-	1: 1.0,
-	2: 1.1,
-	3: 1.2,
-	4: 1.35,
-	5: 1.5,
+	1: 0.98,
+	2: 1.08,
+	3: 1.18,
+	4: 1.32,
+	5: 1.45,
 }
 
 ## Hal-ingang (zuid), zelfde tegel als arena_room._ensure_spawn voor room_kind hall.
@@ -43,13 +41,12 @@ const WM1_ENEMY_IDS: Array[String] = [
 	"sporenzwam",
 ]
 
-# PLACEHOLDER: balans door Dennis — per golf 3–5 ids uit de WM1-set
 const WAVE_POOLS := {
 	1: ["mosslijm", "moskonijn", "papiergeest"],
 	2: ["moskonijn", "papiergeest", "glitchmot"],
 	3: ["papiergeest", "glitchmot", "mech_wachter", "wortelkruiper"],
 	4: ["glitchmot", "mech_wachter", "wortelkruiper", "mistuil"],
-	5: ["mech_wachter", "wortelkruiper", "mistuil", "sporenzwam", "mosslijm"],
+	5: ["mech_wachter", "wortelkruiper", "mistuil", "sporenzwam"],
 }
 
 

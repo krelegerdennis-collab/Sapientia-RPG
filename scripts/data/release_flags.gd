@@ -93,9 +93,9 @@ static func test_menu_from(override: int, in_test: bool, args: PackedStringArray
 
 
 ## Colosseum op WM1. Uit = geen wereldkaart-ingang en geen arena-gedrag.
-## De const blijft false tot Dennis hem aanzet. De override is alleen een testhaak
+## Live voor WM1 (akkoord Dennis 25-11). Override is alleen een testhaak
 ## (-1 = de const, 0 = uit, 1 = aan), zelfde patroon als test_menu_override.
-const ARENA_ENABLED := false
+const ARENA_ENABLED := true
 static var arena_enabled_override := -1
 
 

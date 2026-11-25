@@ -1,5 +1,5 @@
 extends RefCounted
-## Colosseum-winkel. Prijzen en stats zijn placeholders.
+## Colosseum-winkel (akkoord Dennis 25-11).
 ## Niet sterker dan de grot-loot grade 1 (GradeGear):
 ## bg_g1_zwaard atk 6, bg_g1_staf mag 6, bg_g1_helm def 3,
 ## bg_g1_harnas def 4, bg_g1_laarzen agi 1.
@@ -7,19 +7,12 @@ extends RefCounted
 
 const GameData := preload("res://scripts/data/game_data.gd")
 
-# PLACEHOLDER (Dennis approves balance)
-const POTION_PRICE := 8
-# PLACEHOLDER (Dennis approves balance)
-const BLADE_PRICE := 30
-# PLACEHOLDER (Dennis approves balance)
-const BLADE_ATK := 4
-# PLACEHOLDER (Dennis approves balance)
-const CAP_PRICE := 20
-# PLACEHOLDER (Dennis approves balance)
+const POTION_PRICE := 6
+const BLADE_PRICE := 28
+const BLADE_ATK := 5
+const CAP_PRICE := 18
 const CAP_DEF := 2
-# PLACEHOLDER (Dennis approves balance)
-const MAIL_PRICE := 24
-# PLACEHOLDER (Dennis approves balance)
+const MAIL_PRICE := 22
 const MAIL_DEF := 3
 
 const GEAR := {
