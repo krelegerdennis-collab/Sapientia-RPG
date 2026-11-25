@@ -143,8 +143,6 @@ func _grant(n: int) -> void:
 		if typeof(raw) != TYPE_DICTIONARY or xp <= 0:
 			continue
 		var hero: Dictionary = raw
-		if int(hero.get("hp", 0)) <= 0:
-			continue
 		var msgs: Array[String] = GameState.give_exp(hero, xp)
 		for m in msgs:
 			level_notes.append(m)

@@ -278,6 +278,7 @@ func _single_down() -> void:
 	check("één speler neer: signaal komt aan, run blijft", bool(heard["on"]) and run.phase == RunScript.PHASE_WAVE and run.wave == 1)
 	check("neer blijft 0 voor de clear", int(noor["hp"]) == 0)
 	var half := int(dax["hp"])
+	var noor_exp_before := int(noor["exp"])
 	var dax_sim: Dictionary = dax.duplicate(true)
 	var xp_w1 := int(Rewards.for_wave(1).get("xp", 0))
 	if int(dax_sim.get("hp", 0)) > 0 and xp_w1 > 0:
@@ -288,7 +289,10 @@ func _single_down() -> void:
 	var hp_expected := mini(mx_exp, hp_exp + gain_exp)
 	waves.wave_cleared.emit(1)
 	check("tussen waves: procent HP, niet boven max", int(dax["hp"]) == hp_expected)
-	check("één speler neer blijft neer", int(noor["hp"]) == 0)
+	check(
+		"milestone-xp op KO-held (restore raakt 0 HP niet aan)",
+		int(noor["exp"]) == noor_exp_before + xp_w1
+	)
 	check("na clear: keuze, geen results", run.phase == RunScript.PHASE_CHOICE)
 
 
