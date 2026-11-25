@@ -122,6 +122,7 @@ const BattleLayoutScript := preload("res://scripts/battle/battle_layout.gd")
 const BattleCommandsScript := preload("res://scripts/battle/battle_commands.gd")
 const BattleRulesScript := preload("res://scripts/battle/battle_rules.gd")
 const BattleTipsScript := preload("res://scripts/battle/battle_tips.gd")
+const BattleKernScript := preload("res://scripts/battle/battle_kern.gd")
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
 const CORE_HIT_COLOR := Color("ff8ad8")
 const ARMOR_HIT_COLOR := Color("b5a78d")
@@ -288,6 +289,13 @@ var boss_bar: Control = null
 var _layout_h: RefCounted
 var _cmds_h: RefCounted
 var _tips_h: RefCounted
+var _kern_h: RefCounted
+
+
+func _kern():
+	if _kern_h == null:
+		_kern_h = BattleKernScript.new(self)
+	return _kern_h
 
 
 func _tips():
@@ -1774,10 +1782,9 @@ func _hide_tip() -> void:
 	_tips().hide_tip()
 
 
-# ================================================================ v0.15 kernvaardigheden
+# ================================================================ v0.15 kernvaardigheden (battle_kern.gd)
 ## Uit kernfragmenten (scripts/data/kern_data.gd, KERN_SKILLS). Geen MP: na gebruik laadt de
 ## vaardigheid "cooldown" rondes op (in c["kern_cd"][id]; telt af aan het eind van elke ronde).
-const KERN_TINT := Color(1.45, 0.85, 1.9)       # v0.16: paarse flits (Kernkracht)
 ## v0.16 KERNKRACHT: paarse vuurbal uit de hand (scripts/kern/kern_vuurbal.gd) i.p.v. een zwaardslag.
 const KernVuurbal := preload("res://scripts/kern/kern_vuurbal.gd")
 const KERN_FX_SCALE := 2.0            # bal 16x16 -> 32 eenheden (gevechtsbeeld is groter dan het veld)
@@ -1789,29 +1796,24 @@ const KERN_ARC := Vector2(16, 52)     # min/max boog-hoogte in eenheden
 ## laatste vuurbal / inslag (voor de tests en screenshots)
 var last_kern_fireball: Node2D
 var last_kern_impact: Node2D
-const KERN_HIT_TEXT := "%s: %s!"
 
 
 func _kern_skills(hero: Dictionary) -> Array:
-	if not hero.get("is_hero", false):
-		return []
-	return GameState.kern_skills_of(str(hero["s"].get("id", "")))
+	return _kern().kern_skills(hero)
 
 
 ## Rondes tot de vaardigheid weer klaar is (0 = klaar).
 func kern_charge(hero: Dictionary, id: String) -> int:
-	return int(hero.get("kern_cd", {}).get(id, 0))
+	return _kern().kern_charge(hero, id)
 
 
 func kern_ready(hero: Dictionary, id: String) -> bool:
-	return kern_charge(hero, id) <= 0
+	return _kern().kern_ready(hero, id)
 
 
 ## Regel in het menu: "Kernkracht KERN" (klaar) of "Kernkracht (2)" (nog 2 rondes opladen).
 func kern_entry_text(hero: Dictionary, id: String) -> String:
-	var n := str(KernData.KERN_SKILLS[id]["name"])
-	var cd := kern_charge(hero, id)
-	return ("%-10s CORE" % n) if cd <= 0 else ("%-10s (%d)" % [n, cd])
+	return _kern().kern_entry_text(hero, id)
 
 
 ## Schade van een fysieke kernvaardigheid: ATK x atk_mult - DEF x def_factor, +/- 15%,
@@ -1825,33 +1827,11 @@ func kern_base(attacker: Dictionary, target: Dictionary, skill: Dictionary) -> f
 
 
 func _kern_strike(a: Dictionary) -> void:
-	var actor: Dictionary = a["actor"]
-	var id: String = a["skill"]
-	var skill: Dictionary = KernData.KERN_SKILLS.get(id, {})
-	if skill.is_empty() or not kern_ready(actor, id):
-		return
-	var t = _valid_target(a["target"], false)
-	if t == null:
-		return
-	if not actor.has("kern_cd"):
-		actor["kern_cd"] = {}
-	actor["kern_cd"][id] = int(skill.get("cooldown", 3))
-	show_message(KERN_HIT_TEXT % [actor["name"], skill["name"]])
-	ActorSfx.play(actor, "vaardigheid")
-	if actor["node"]:
-		var tw := create_tween()
-		tw.tween_property(actor["node"], "modulate", KERN_TINT, 0.15)
-		tw.tween_property(actor["node"], "modulate", Color.WHITE, 0.35)
-	if str(skill.get("fx", "")) == "vuurbal":
-		await _kern_fireball(actor, t)     # v0.16: hand vooruit, vuurbal, inslag
-	else:
-		await _hero_wind_up(actor, true)
-	if t["node"]:
-		var tw2 := create_tween()
-		tw2.tween_property(t["node"], "modulate", KERN_TINT, 0.08)
-		tw2.tween_property(t["node"], "modulate", GUARD_TINT if int(t.get("guard", 0)) > 0 else Color.WHITE, 0.3)
-	await _damage(t, kern_damage(actor, t, skill))
-	_hero_rest(actor)
+	await _kern().kern_strike(a)
+
+
+func _kern_tick(c: Dictionary) -> void:
+	_kern().kern_tick(c)
 
 
 ## v0.16 Kernkracht: held stapt naar voren en steekt de hand uit (spreuk-pose, geen zwaardzwaai),
@@ -1871,13 +1851,6 @@ func _kern_fireball(actor: Dictionary, t: Dictionary) -> void:
 	await vb.fly(from, to, KERN_FIREBALL_SPEED, arc)
 	vb.queue_free()
 	last_kern_impact = KernVuurbal.impact(effects, to, KERN_FX_SCALE)
-
-
-func _kern_tick(c: Dictionary) -> void:
-	if not c.has("kern_cd"):
-		return
-	for id in c["kern_cd"]:
-		c["kern_cd"][id] = maxi(0, int(c["kern_cd"][id]) - 1)
 
 
 ## v0.21: verkleinfactor (<= 1) zodat een plaatje binnen de maximummaat valt.
