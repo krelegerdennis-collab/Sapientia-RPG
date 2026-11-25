@@ -10,6 +10,11 @@ const Art := preload("res://scripts/data/arena_art.gd")
 const EXIT_NAME := "NaarArena"
 const OVERLAY_NAME := "ArenaOverlay"
 const LOBBY := "res://scenes/arena/arena_lobby.tscn"
+const WORLD_MAP := "res://scenes/maps/wereldkaart.tscn"
+## Terug uit de lobby: net boven het 2x2 Colosseum op de wereldkaart, kijkend weg van de ingang.
+const RETURN_SPAWN := "van_arena"
+const RETURN_TILE := Vector2i(30, 31)
+const RETURN_FACING := Vector2i.UP
 const OPEN := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
 
 static var _world_ts: TileSet
@@ -20,6 +25,7 @@ static func consider(map: Node2D) -> void:
 		return
 	_ensure_overlay(map)
 	_ensure_exit(map)
+	_ensure_return_spawn(map)
 	refresh(map)
 
 
@@ -54,6 +60,17 @@ static func _ensure_overlay(map: Node2D) -> void:
 		ground.add_sibling(layer)
 	else:
 		map.add_child(layer)
+
+
+static func _ensure_return_spawn(map: Node2D) -> void:
+	var spawns := map.get_node_or_null("Spawns")
+	if spawns == null or spawns.get_node_or_null(RETURN_SPAWN) != null:
+		return
+	var s := MapSpawn.new()
+	s.name = RETURN_SPAWN
+	s.position = Vector2(RETURN_TILE) * 16.0 + Vector2(8, 8)
+	s.facing = RETURN_FACING
+	spawns.add_child(s)
 
 
 static func _ensure_exit(map: Node2D) -> void:

@@ -83,6 +83,8 @@ func choose_leave() -> void:
 func acknowledge() -> void:
 	if phase != PHASE_RESULTS:
 		return
+	if wiped:
+		Rewards.revive_after_wipe()
 	wave = 0
 	_set_phase(PHASE_LOBBY)
 

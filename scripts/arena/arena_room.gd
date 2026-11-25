@@ -13,6 +13,9 @@ const HudScript := preload("res://scripts/arena/arena_hud.gd")
 const GateLock := preload("res://scripts/arena/arena_gate_lock.gd")
 const NpcScene := preload("res://scenes/npc.tscn")
 const Koopman := preload("res://scripts/arena/arena_koopman.gd")
+const ShopTalk := preload("res://scripts/arena/arena_shop_talk.gd")
+const Entry := preload("res://scripts/arena/arena_entry.gd")
+const LOBBY := "res://scenes/arena/arena_lobby.tscn"
 const MapMonsterScript := preload("res://scripts/dungeon/map_monster.gd")
 const SomArenaScript := preload("res://scripts/som/som_arena.gd")
 ## Post-RC sfx: luistert naar de SomArena-signalen (zwaard, spreuk, raak, KO).
@@ -42,12 +45,15 @@ func _ready() -> void:
 	sets_checkpoint = false
 	_paint()
 	_build_gate()
+	if room_kind == "lobby":
+		_build_lobby_world_exit()
 	_sync_lobby_lock()
 	_ensure_spawn()
 	if room_kind == "lobby":
 		_build_shopkeeper()
 	if room_kind == "hall":
 		_setup_arena_combat()
+		call_deferred("_redirect_stale_hall")
 	super._ready()
 	_attach_hud()
 
@@ -196,6 +202,8 @@ func _blocked(idx: int, x: int, y: int) -> bool:
 	# Zuidelijke doorgang van de hal (indices 89-92).
 	if room_kind == "hall" and idx >= 89 and idx <= 92:
 		return false
+	if Tiles.is_walkable_floor_deco(idx):
+		return false
 	return idx >= 32
 
 
@@ -231,6 +239,22 @@ func _build_gate() -> void:
 	exits.add_child(gate)
 
 
+## Zuidelijke doorgang (tegels 13, rij 10–13): terug naar wereldkaart bij het Colosseum.
+func _build_lobby_world_exit() -> void:
+	var exits := get_node("Exits")
+	var old := exits.get_node_or_null("NaarWereld")
+	if old != null:
+		exits.remove_child(old)
+		old.free()
+	var out := MapExit.new()
+	out.name = "NaarWereld"
+	out.position = Vector2(10, 13) * 16.0
+	out.size_tiles = Vector2i(4, 1)
+	out.target_map = Entry.WORLD_MAP
+	out.target_spawn = Entry.RETURN_SPAWN
+	exits.add_child(out)
+
+
 func _ensure_spawn() -> void:
 	var spawns := get_node("Spawns")
 	var s := spawns.get_node_or_null("ingang")
@@ -261,6 +285,33 @@ func _build_shopkeeper() -> void:
 	# Voeten op (88, 98): de 24x32-sheet zet de voeten 8 px onder de node.
 	npc.position = Vector2(88, 90)
 	objects.add_child(npc)
+	_add_shop_talk(npc)
+
+
+func _add_shop_talk(npc: Node2D) -> void:
+	var zone := Area2D.new()
+	zone.name = "ShopTalk"
+	zone.set_script(ShopTalk)
+	var col := CollisionShape2D.new()
+	var shape := RectangleShape2D.new()
+	shape.size = Vector2(48, 44)
+	col.shape = shape
+	col.position = Vector2(0, 12)
+	zone.add_child(col)
+	npc.add_child(zone)
+
+
+## Hall na laden zonder actieve run (bv. save in hal): terug naar lobby i.p.v. dode hal.
+func _redirect_stale_hall() -> void:
+	if room_kind != "hall" or not is_inside_tree():
+		return
+	var gs := get_node_or_null("/root/GameState")
+	if gs == null:
+		return
+	var arena: Node = gs.get_node_or_null("ArenaRun")
+	if arena != null and str(arena.phase) != RunScript.PHASE_LOBBY:
+		return
+	GameState.change_map(LOBBY, "ingang")
 
 
 func _attach_hud() -> void:
