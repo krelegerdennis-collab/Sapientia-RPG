@@ -124,6 +124,7 @@ const BattleRulesScript := preload("res://scripts/battle/battle_rules.gd")
 const BattleTipsScript := preload("res://scripts/battle/battle_tips.gd")
 const BattleKernScript := preload("res://scripts/battle/battle_kern.gd")
 const BattleStatusScript := preload("res://scripts/battle/battle_status.gd")
+const BattleBossScript := preload("res://scripts/battle/battle_boss.gd")
 ## schadegetal op de open kern (roze) en op het pantser (grijs)
 const CORE_HIT_COLOR := Color("ff8ad8")
 const ARMOR_HIT_COLOR := Color("b5a78d")
@@ -292,6 +293,13 @@ var _cmds_h: RefCounted
 var _tips_h: RefCounted
 var _kern_h: RefCounted
 var _status_h: RefCounted
+var _boss_h: RefCounted
+
+
+func _boss():
+	if _boss_h == null:
+		_boss_h = BattleBossScript.new(self)
+	return _boss_h
 
 
 func _kern():
@@ -1244,71 +1252,29 @@ func _try_flee() -> bool:
 	return false
 
 
-## De Genezer: eerste klap is scripted (ongeveer 30%). true = het gevecht is daar gestopt.
-func _archief2_opening() -> bool:
-	for e in enemies:
-		if not bool(e["s"].get("archief2_open", false)):
-			continue
-		var pool: Array = []
-		for c in heroes:
-			if not bool(c.get("ally", false)) and int(c["s"]["hp"]) > 0:
-				pool.append(c)
-		if pool.is_empty():
-			return false
-		var t: Dictionary = pool[0]
-		var dmg := Archief2.openingslag(int(t["s"]["max_hp"]))
-		var zin := str(e["s"].get("archief2_zin", Archief2.KERN_ZIN))
-		await say(zin)
-		if str(e["s"].get("id", "")) == "genezer" and GameState.has_member("lotte"):
-			await say("Seren: You call that healing?")
-		await _damage(t, dmg)
-		GameState.archief2_last_open = {"schade": dmg, "max": int(t["s"]["max_hp"]), "id": str(t["s"].get("id", ""))}
-		if codex.party_down():
-			await _defeat()
-			return true
-	return false
-
-
-## Daarna 8-12% van het doel, en hij herstelt hetzelfde aantal.
-func _archief2_leech(actor: Dictionary) -> void:
-	var pool: Array = []
-	for c in _alive(heroes):
-		if not bool(c.get("ally", false)):
-			pool.append(c)
-	if pool.is_empty():
-		pool = _alive(heroes)
-	if pool.is_empty():
-		return
-	var t: Dictionary = pool[0]
-	var n := Archief2.leech_hoeveelheid(randf(), int(t["s"]["max_hp"]))
-	show_message("%s corrects %s." % [actor["name"], t["name"]])
-	await _damage(t, n)
-	var voor := int(actor["s"]["hp"])
-	actor["s"]["hp"] = mini(int(actor["s"]["max_hp"]), voor + n)
-	GameState.archief2_last_leech = {"schade": n, "heal": n, "bij": int(actor["s"]["hp"]) - voor}
-	show_message("%s recovers %d." % [actor["name"], n])
-	await _wait(MESSAGE_TIME)
-
-
 func _avg_agi(list: Array) -> float:
 	return BattleRulesScript.avg_agi(_alive(list))
 
 
-# ================================================================ v0.14 roze kern (Golem-baas)
+# ================================================================ v0.14 roze kern / Archief 2 (battle_boss.gd)
+## De Genezer: eerste klap is scripted (ongeveer 30%). true = het gevecht is daar gestopt.
+func _archief2_opening() -> bool:
+	return await _boss().archief2_opening()
+
+
+## Daarna 8-12% van het doel, en hij herstelt hetzelfde aantal.
+func _archief2_leech(actor: Dictionary) -> void:
+	await _boss().archief2_leech(actor)
+
+
 ## Vijanden met een kern (alleen de Golem in een baasgevecht).
 func core_enemies() -> Array:
-	return enemies.filter(func(e): return e.has("core"))
+	return _boss().core_enemies()
 
 
 ## Tekst voor de roze strook tijdens het kiezen ("" = geen kern open).
 func _core_banner() -> String:
-	for e in core_enemies():
-		if e["s"]["hp"] > 0 and e["core"].open:
-			return BossCore.MSG_WINDOW
-	for e in enemies:   # v0.15: schild omhoog (Mech. Wachter)
-		if e["s"]["hp"] > 0 and int(e.get("guard", 0)) > 0:
-			return GUARD_BANNER % e["name"]
-	return ""
+	return _boss().core_banner()
 
 
 # ================================================================ v0.15 schild omhoog
@@ -1321,67 +1287,37 @@ const GUARD_TINT := Color(0.7, 0.88, 1.3)
 
 
 func _guard_up(actor: Dictionary, skill: Dictionary) -> void:
-	ActorSfx.play(actor, "vaardigheid")
-	actor["guard"] = 2
-	actor["guard_mult"] = float(skill.get("def_mult", 2.0))
-	if actor["node"]:
-		actor["node"].modulate = GUARD_TINT
-	show_message(GUARD_TEXT % actor["name"])
-	await _wait(MESSAGE_TIME)
+	await _boss().guard_up(actor, skill)
 
 
 func _guard_tick(c: Dictionary) -> void:
-	if int(c.get("guard", 0)) <= 0:
-		return
-	c["guard"] = int(c["guard"]) - 1
-	if c["guard"] == 0 and c["node"] and c["s"]["hp"] > 0:
-		c["node"].modulate = Color.WHITE
+	_boss().guard_tick(c)
 
 
 ## DEF van een doelwit, met schild omhoog (x guard_mult).
 func _defense_of(t: Dictionary) -> float:
-	return DamageCalc.defense_of(t)
+	return _boss().defense_of(t)
 
 
 ## Eén keer aan het begin: uitleg in één regel.
 func _core_hint() -> void:
-	if not core_enemies().is_empty():
-		await say(BossCore.MSG_HINT)
+	await _boss().core_hint()
 
 
 ## Begin van een ronde: gaat de kern open, dan het bericht 'De kern gloeit roze!'.
 func _core_round_start() -> void:
-	for e in core_enemies():
-		if e["s"]["hp"] > 0 and e["core"].start_round(round_no):
-			_flash_enemy(e)
-			await say(BossCore.MSG_OPEN % e["name"])
+	await _boss().core_round_start()
 
 
 ## Actie van de Golem aan het eind van de oplaad-ronde: wankelen of Hamerslag.
 func _core_resolve(a: Dictionary) -> void:
-	var actor: Dictionary = a["actor"]
-	var core = actor["core"]
-	if core.resolve() == "break":
-		show_message(BossCore.MSG_BREAK % actor["name"])
-		_shake(actor["node"], 4.0)
-		await _wait(MESSAGE_TIME * 1.5)
-	else:
-		var t = _valid_target(a["target"], true)
-		if t == null:
-			return
-		show_message(BossCore.MSG_SLAM % [actor["name"], core.slam_name])
-		ActorSfx.play(actor, "vaardigheid")
-		await _enemy_lunge(actor, t)
-		await _damage(t, _physical_damage(actor, t, core.slam_power))
-	if _alive(heroes).size() > 0:
-		show_message(BossCore.MSG_CLOSE)
-		await _wait(MESSAGE_TIME)
+	await _boss().core_resolve(a)
 
 
 ## Korte roze flits op de vijand (kern gaat open).
 func _flash_enemy(e: Dictionary) -> void:
 	var node: CanvasItem = e["node"]
-	var tw := create_tween()
+	var tw: Tween = create_tween()
 	tw.tween_property(node, "modulate", Color(1.6, 0.8, 1.5), 0.12)
 	tw.tween_property(node, "modulate", Color.WHITE, 0.25)
 
