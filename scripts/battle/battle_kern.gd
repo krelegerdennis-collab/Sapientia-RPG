@@ -8,10 +8,10 @@ const ActorSfx := preload("res://scripts/data/actor_sfx.gd")
 const KERN_TINT := Color(1.45, 0.85, 1.9)       # v0.16: paarse flits (Kernkracht)
 const KERN_HIT_TEXT := "%s: %s!"
 
-var battle  # scripts/battle/battle.gd root (geen class_name)
+var battle: Control
 
 
-func _init(b) -> void:
+func _init(b: Control) -> void:
 	battle = b
 
 
@@ -62,7 +62,7 @@ func kern_strike(a: Dictionary) -> void:
 	battle.show_message(KERN_HIT_TEXT % [actor["name"], skill["name"]])
 	ActorSfx.play(actor, "vaardigheid")
 	if actor["node"]:
-		var tw := battle.create_tween()
+		var tw: Tween = battle.create_tween()
 		tw.tween_property(actor["node"], "modulate", KERN_TINT, 0.15)
 		tw.tween_property(actor["node"], "modulate", Color.WHITE, 0.35)
 	if str(skill.get("fx", "")) == "vuurbal":
@@ -70,7 +70,7 @@ func kern_strike(a: Dictionary) -> void:
 	else:
 		await battle._hero_wind_up(actor, true)
 	if t["node"]:
-		var tw2 := battle.create_tween()
+		var tw2: Tween = battle.create_tween()
 		tw2.tween_property(t["node"], "modulate", KERN_TINT, 0.08)
 		tw2.tween_property(t["node"], "modulate", battle.GUARD_TINT if int(t.get("guard", 0)) > 0 else Color.WHITE, 0.3)
 	await battle._damage(t, kern_damage(actor, t, skill))
