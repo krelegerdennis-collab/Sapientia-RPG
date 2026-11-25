@@ -42,6 +42,7 @@ const ENABLED_TOEGESTAAN := {
 	"scripts/data/som_data.gd:ENABLED": "Action-modus (SoM), shipt in WM1 (CHANGELOG Unreleased)",
 	"scripts/data/som_feel_data.gd:ENABLED": "F4 game feel (#404, #444)",
 	"scripts/data/som_gamefeel_data.gd:DEATH_GLITCH_ENABLED": "Game-feel fase 2 glitch-dood (#482), gaat mee in WM1 (akkoord Dennis 15-11)",
+	"scripts/data/som_signature_data.gd:ENABLED": "F3 heldtechnieken (#578), gaan mee in WM1 (akkoord Dennis 25-11)",
 }
 const SCAN_MAPPEN: Array[String] = ["scripts", "world_warper", "pvp"]
 

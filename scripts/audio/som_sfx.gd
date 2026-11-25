@@ -4,10 +4,15 @@ extends Node
 ## wijziging in som_arena.gd of battle.gd. Speelt via WorldSfx -> UiSfx.play -> AudioManager.play_sfx
 ## (manifest: volume, pitch, varianten en min_interval_ms). Aangemaakt door dungeon_room.gd en
 ## arena_room.gd direct na SomArena.setup(). Co-op: signalen vuren op de host (zie sfx_plan.md).
+## F3 (COMBAT): som_arena.gd speelt zelf ALLEEN wat geen signaal heeft: dodge en perfect dodge
+## (play_dodge/play_perfect_dodge). Zwaard, spreuk, geraakt, KO en level-up lopen uitsluitend via
+## de signalen hieronder: één afspeelpad per gebeurtenis, geen dubbel geluid.
+## perfect_dodge heeft geen eigen manifest-sleutel: zelfde "dodge". sword_hit_armor niet gekoppeld.
 
 const WorldSfx := preload("res://scripts/audio/world_sfx.gd")
 const Spells := preload("res://scripts/data/spells.gd")
 
+const DODGE := "dodge"
 const SWORD_SWING := "sword_swing"
 const SWORD_HIT := "sword_hit_flesh"
 const PLAYER_HURT := "player_hurt"
@@ -24,8 +29,8 @@ const SPELL_BY_ELEMENT := {
 }
 const SPELL_BY_TYPE := {"heal": HEAL, "hot": HEAL, "revive": HEAL, "buff": BUFF}
 
-const ALL := [SWORD_SWING, SWORD_HIT, PLAYER_HURT, PLAYER_DEATH, HEAL, BUFF,
-		"spell_fire", "spell_ice", "spell_lightning", "spell_arcane_beam"]
+const ALL := [DODGE, SWORD_SWING, SWORD_HIT, PLAYER_HURT, PLAYER_DEATH, HEAL, BUFF,
+		"spell_fire", "spell_ice", "spell_lightning", "spell_arcane_beam", WorldSfx.LEVEL_UP]
 
 var arena: Node = null
 ## level per held-id bij het begin / na het laatste verslagen monster (level-up = verschil).
@@ -108,3 +113,42 @@ func _party_levels() -> Dictionary:
 	for h in GameState.party:
 		out[str(h.get("id", h.get("name", "")))] = int(h.get("level", 1))
 	return out
+
+
+## --- Statische helpers (F3). In de game roept som_arena.gd alleen play_dodge/play_perfect_dodge aan;
+## de rest is voor tests en losse aanroepers en staat NIET in som_arena.gd (de luisteraar dekt die al).
+static func play(key: String) -> bool:
+	return WorldSfx.play(key)
+
+
+static func play_dodge() -> bool:
+	return play(DODGE)
+
+
+## Geen eigen perfect_dodge-sleutel in het manifest; zelfde geluid als dodge.
+static func play_perfect_dodge() -> bool:
+	return play(DODGE)
+
+
+static func play_sword_swing() -> bool:
+	return play(SWORD_SWING)
+
+
+static func play_sword_hit() -> bool:
+	return play(SWORD_HIT)
+
+
+static func play_spell(spell_id: String) -> bool:
+	return play(spell_key(spell_id))
+
+
+static func play_player_hurt() -> bool:
+	return play(PLAYER_HURT)
+
+
+static func play_player_death() -> bool:
+	return play(PLAYER_DEATH)
+
+
+static func play_level_up() -> bool:
+	return play(WorldSfx.LEVEL_UP)

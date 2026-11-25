@@ -109,6 +109,10 @@ func interrupt() -> bool:
 	return _state.interrupt()
 
 
+func extend_windup(extra_ticks: int) -> bool:
+	return _state.extend_windup(extra_ticks)
+
+
 ## Gast-only: telegraaf uit snapshot (geen gameplay, alleen tekenen).
 func mirror_idle() -> void:
 	_state.mirror(TelegraphState.State.IDLE, 0)
