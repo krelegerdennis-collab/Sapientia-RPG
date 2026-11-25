@@ -261,6 +261,16 @@ func _on_player_defeated() -> void:
 	party_wiped.emit()
 
 
+func abort() -> void:
+	active_wave = 0
+	_cleared_for = 0
+	_wiped_for = 0
+	_skipped_for = 0
+	_teardown_wave()
+	_room = null
+	_som = null
+
+
 func _teardown_wave() -> void:
 	for m in _spawned:
 		if is_instance_valid(m):

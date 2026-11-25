@@ -89,6 +89,19 @@ func acknowledge() -> void:
 	_set_phase(PHASE_LOBBY)
 
 
+## Run zonder hal (hal verlaten zonder load, bv. Warp midden in een wave): terug naar LOBBY,
+## anders weigert begin() en blijft de poort stil dicht. Verdiende rewards blijven.
+func abandon() -> void:
+	if phase == PHASE_LOBBY:
+		return
+	if phase == PHASE_RESULTS and wiped:
+		Rewards.revive_after_wipe()
+	if waves != null and waves.has_method("abort"):
+		waves.abort()
+	wave = 0
+	_set_phase(PHASE_LOBBY)
+
+
 func summary() -> Dictionary:
 	return {
 		"waves": waves_cleared,
