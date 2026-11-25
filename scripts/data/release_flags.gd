@@ -61,7 +61,7 @@ static func relay_url() -> String:
 		return str(relay_url_override).strip_edges()
 	var url := ""
 	if ProjectSettings.has_setting(RELAY_SETTING):
-		url = str(ProjectSettings.get_setting(RELAY_SETTING, "")).strip_edges()
+		url = str(ProjectSettings.get_setting_with_override(RELAY_SETTING)).strip_edges()
 	if url == "":
 		url = OS.get_environment(RELAY_ENV).strip_edges()
 	return url
