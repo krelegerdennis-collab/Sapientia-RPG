@@ -828,6 +828,7 @@ func _ready() -> void:
 			["--d100modesimtest", "res://scripts/tests/d100_mode_sim_tests.gd", "D100ModeSimTest", "d100modesimtest"],
 			["--seatstest", "res://scripts/tests/seats_tests.gd", "SeatsTest", "seatstest"],
 			["--coopplaytesttest", "res://scripts/tests/coop_playtest_tests.gd", "CoopPlaytestTest", "coopplaytesttest"],
+			["--coopguesthudsynctest", "res://scripts/tests/coop_guest_hud_sync_tests.gd", "CoopGuestHudSyncTest", "coopguesthudsynctest"],
 			["--coopplaytestgast", "res://scripts/tests/coop_playtest_guest.gd", "CoopPlaytestGast", "coopplaytestgast"],
 			["--liveseatloottest", "res://scripts/tests/live_seat_loot_tests.gd", "LiveSeatLootTest", "liveseatloottest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):

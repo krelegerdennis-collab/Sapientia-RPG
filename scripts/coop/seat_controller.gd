@@ -329,6 +329,19 @@ func set_hp_mp(slot: int, hp: int, mp: int) -> void:
 	seats[slot]["mp"] = mp
 
 
+## HP/MP en max-vitals vanuit de arena-member (host-pull of gast-snapshot).
+func sync_vitals(slot: int, hp: int, mp: int, max_hp: int = -1, max_mp: int = -1) -> void:
+	if not tracks(slot):
+		return
+	var seat: Dictionary = seats[slot]
+	seat["hp"] = hp
+	seat["mp"] = mp
+	if max_hp >= 1:
+		seat["max_hp"] = max_hp
+	if max_mp >= 0:
+		seat["max_mp"] = max_mp
+
+
 func remember_pos(slot: int, pos: Vector2) -> void:
 	if not tracks(slot):
 		return
