@@ -576,6 +576,7 @@ func _ready() -> void:
 	# Colosseum-flow (in CI-matrix): godot -- --arenatest  (scripts/tests/arena_tests.gd).
 	# Colosseum abandon mid-wave (lokaal): godot -- --arenaabandontest  (scripts/tests/arena_abandon_tests.gd).
 	# Colosseum lobby export + wereldkaart-ingang: godot -- --arenalobbytest  (scripts/tests/arena_lobby_tests.gd).
+	# WM1 WarpView Colosseum (runner only): godot -- --warpcolosseumtest  (scripts/tests/warp_colosseum_tests.gd).
 	# Arena-golven vervolg review #487 (lokaal; CI-regel later via Forge): godot -- --arenawavesfollowuptest  (scripts/tests/arena_waves_followup_tests.gd).
 	# Wachtershuis classic-muur (geen TileSet-polygonen): godot -- --huiscollisiontest  (scripts/tests/huis_collision_tests.gd).
 	# Action doel-lock: of  godot -- --locktest [--shots=/pad/map]  (scripts/tests/lock_tests.gd).
@@ -794,7 +795,8 @@ func _ready() -> void:
 			["--arenawavesfollowuptest", "res://scripts/tests/arena_waves_followup_tests.gd", "ArenaWavesFollowupTest", "arenawavesfollowuptest"],
 			["--arenalobbytest", "res://scripts/tests/arena_lobby_tests.gd", "ArenaLobbyTest", "arenalobbytest"],
 			["--arenaflowtest", "res://scripts/tests/arena_flow_tests.gd", "ArenaFlowTest", "arenaflowtest"],
-			["--arenaabandontest", "res://scripts/tests/arena_abandon_tests.gd", "ArenaAbandonTest", "arenaabandontest"]]:
+			["--arenaabandontest", "res://scripts/tests/arena_abandon_tests.gd", "ArenaAbandonTest", "arenaabandontest"],
+			["--warpcolosseumtest", "res://scripts/tests/warp_colosseum_tests.gd", "WarpColosseumTest", "warpcolosseumtest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):

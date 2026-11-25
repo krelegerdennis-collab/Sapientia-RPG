@@ -17,6 +17,10 @@ const WM3 := "WM3"
 ## mag niet gewijzigd worden. van_dorp is de bestaande betastart-spawn
 ## (Marker2D onder Spawns in wereldkaart.tscn).
 const WORLD_MAP_SPAWN := "van_dorp"
+const COLOSSEUM_SPAWN := "van_arena"
+
+## Colosseum-lobby op WM1; warp terug naar de wereldkaart bij de arena-ingang.
+const ARENA_LOBBY_PATH := "res://scenes/arena/arena_lobby.tscn"
 
 ## Dorp Wilgendal. wilgendal.tscn is het Wachtershuis, geen tweede dorp.
 const WILGENDAL_PATH := "res://scenes/maps/dorp_wilgendal.tscn"
@@ -28,6 +32,7 @@ const ESDOORN_SPAWN := "zuid_ingang"
 const PLACE_WERELDKAART := "wereldkaart"
 const PLACE_WILGENDAL := "wilgendal"
 const PLACE_ESDOORN := "esdoorn"
+const PLACE_COLOSSEUM := "colosseum"
 
 
 ## WM1, WM2 en WM3. WM2 en WM3 hebben nog geen eilandscènes.
@@ -63,6 +68,13 @@ static func places(wm_id: String) -> Array[Dictionary]:
 		"path": ESDOORN_PATH,
 		"spawn": ESDOORN_SPAWN,
 	})
+	if _arena_lobby_bezocht(huidige_bezocht()):
+		out.append({
+			"id": PLACE_COLOSSEUM,
+			"label": "Colosseum",
+			"path": GameState.WORLD_MAP,
+			"spawn": COLOSSEUM_SPAWN,
+		})
 	return out
 
 
@@ -104,6 +116,13 @@ static func huidige_bezocht() -> Array:
 	if raw is Array:
 		return raw
 	return []
+
+
+static func _arena_lobby_bezocht(bezocht: Array) -> bool:
+	for pad in bezocht:
+		if str(pad) == ARENA_LOBBY_PATH:
+			return true
+	return false
 
 
 ## Lege dictionary als de wereld dicht is, het dorp nog niet bezocht is,
