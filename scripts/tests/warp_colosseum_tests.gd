@@ -27,6 +27,7 @@ func check(label: String, ok: bool) -> void:
 
 func _run_all() -> void:
 	_zuivere_bestemmingen()
+	_save_roundtrip()
 	await _warp_landing()
 	print("WARPCOLOSSEUMTEST %d PASS, %d FAIL" % [passes, failures])
 	print("RESULT %s (%d goed, %d fouten)" % ["OK" if failures == 0 else "FOUT", passes, failures])
@@ -108,6 +109,22 @@ func _zuivere_bestemmingen() -> void:
 			and str(actueel.get("spawn", "")) == str(verwacht.get("spawn", "")),
 		)
 	GameState.bezochte_kaarten = oud
+
+
+func _save_roundtrip() -> void:
+	GameState.new_game("Dax")
+	GameState.bezochte_kaarten = [WORLD, LOBBY]
+	var snap := GameState.state_data(Vector2i(1, 1), Vector2i.DOWN, WORLD)
+	GameState.bezochte_kaarten = []
+	check("roundtrip: serialize niet leeg", snap.has("bezocht") and (snap["bezocht"] as Array).has(LOBBY))
+	var ok := GameState.apply_state(snap)
+	check("roundtrip: apply_state", ok)
+	check("roundtrip: lobby in bezochte_kaarten", GameState.bezochte_kaarten.has(LOBBY))
+	var na_laden: Array[Dictionary] = Destinations.places(Destinations.WM1)
+	check(
+		"roundtrip: Colosseum in WM1 places",
+		not _plaats_voor_id(na_laden, Destinations.PLACE_COLOSSEUM).is_empty(),
+	)
 
 
 func _warp_landing() -> void:
