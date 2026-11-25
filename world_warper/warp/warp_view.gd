@@ -57,6 +57,7 @@ var _lay_ins := Vector4(-1, -1, -1, -1)
 var _title: Label
 var _uitleg_band: Control
 var _uitleg: Label
+var _rows_scroll: ScrollContainer
 var _rows: VBoxContainer
 var _back: Button
 var _travel: Button
@@ -327,11 +328,19 @@ func _ensure_ui() -> void:
 	_title.add_theme_color_override("font_color", UiStyle.TEXT)
 	kolom.add_child(_title)
 
+	_rows_scroll = ScrollContainer.new()
+	_rows_scroll.name = "RijenScroll"
+	_rows_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_rows_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_rows_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_rows_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	kolom.add_child(_rows_scroll)
+
 	_rows = VBoxContainer.new()
 	_rows.name = "Rijen"
-	_rows.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_rows.add_theme_constant_override("separation", 4)
-	kolom.add_child(_rows)
+	_rows_scroll.add_child(_rows)
 
 	var balk := HBoxContainer.new()
 	balk.add_theme_constant_override("separation", 8)

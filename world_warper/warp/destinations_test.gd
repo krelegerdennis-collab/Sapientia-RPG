@@ -5,8 +5,9 @@ extends RefCounted
 const Destinations := preload("res://world_warper/warp/destinations.gd")
 
 ## Spawns die in de scènes onder Spawns staan. Geen verzonnen dorp.
+## Wereldkaart heeft twee warp-spawns: dorp-start en Colosseum-ingang.
 const ECHTE_SPAWN := {
-	"res://scenes/maps/wereldkaart.tscn": "van_dorp",
+	"res://scenes/maps/wereldkaart.tscn": ["van_dorp", "van_arena"],
 	"res://scenes/maps/dorp_wilgendal.tscn": "zuid_ingang",
 	"res://scenes/maps/esdoorn.tscn": "zuid_ingang",
 }
@@ -37,10 +38,26 @@ static func wm2_dicht() -> PackedStringArray:
 
 static func wm1_echte_bestemming() -> PackedStringArray:
 	var fouten := PackedStringArray()
+	var oud: Array[String] = []
+	for pad in Destinations.huidige_bezocht():
+		oud.append(str(pad))
+	GameState.bezochte_kaarten = [GameState.WORLD_MAP]
+	fouten.append_array(_wm1_echte_plaatsen(false))
+	GameState.bezochte_kaarten = [GameState.WORLD_MAP, Destinations.ARENA_LOBBY_PATH]
+	fouten.append_array(_wm1_echte_plaatsen(true))
+	GameState.bezochte_kaarten = oud
+	return fouten
+
+
+static func _wm1_echte_plaatsen(met_colosseum: bool) -> PackedStringArray:
+	var fouten := PackedStringArray()
 	var plaatsen: Array[Dictionary] = Destinations.places(Destinations.WM1)
+	var verwacht := 4 if met_colosseum else 3
 	if plaatsen.is_empty():
 		fouten.append("WM1 heeft geen bestemming")
 		return fouten
+	if plaatsen.size() != verwacht:
+		fouten.append("WM1 hoort %d bestemmingen te hebben (nu %d)" % [verwacht, plaatsen.size()])
 	var echt := 0
 	for place in plaatsen:
 		var path := str(place.get("path", ""))
@@ -51,18 +68,34 @@ static func wm1_echte_bestemming() -> PackedStringArray:
 		if path.ends_with("/wilgendal.tscn"):
 			fouten.append("wilgendal.tscn is het Wachtershuis, niet Willowdale")
 			continue
-		if str(ECHTE_SPAWN.get(path, "")) != spawn:
+		if not _spawn_geldig(path, spawn):
 			fouten.append("geen echte scène: %s / %s" % [path, spawn])
 			continue
 		echt += 1
-	if echt < 1:
-		fouten.append("WM1 heeft geen echte bestemming")
+	if echt != verwacht:
+		fouten.append("WM1 heeft %d/%d echte bestemmingen" % [echt, verwacht])
 	fouten.append_array(_eis_plaats(plaatsen, Destinations.PLACE_WERELDKAART, GameState.WORLD_MAP, "van_dorp"))
 	fouten.append_array(_eis_plaats(plaatsen, Destinations.PLACE_WILGENDAL, "res://scenes/maps/dorp_wilgendal.tscn", "zuid_ingang"))
 	fouten.append_array(_eis_plaats(plaatsen, Destinations.PLACE_ESDOORN, "res://scenes/maps/esdoorn.tscn", "zuid_ingang"))
+	if met_colosseum:
+		fouten.append_array(_eis_plaats(plaatsen, Destinations.PLACE_COLOSSEUM, GameState.WORLD_MAP, Destinations.COLOSSEUM_SPAWN))
+	else:
+		for place in plaatsen:
+			if str(place.get("id", "")) == Destinations.PLACE_COLOSSEUM:
+				fouten.append("Colosseum hoort zonder lobby-bezoek niet in de lijst")
+				break
 	if GameState.WORLD_MAP != "res://scenes/maps/wereldkaart.tscn":
 		fouten.append("GameState.WORLD_MAP wijkt af van wereldkaart.tscn")
 	return fouten
+
+
+static func _spawn_geldig(path: String, spawn: String) -> bool:
+	var raw: Variant = ECHTE_SPAWN.get(path)
+	if raw is String:
+		return str(raw) == spawn
+	if raw is Array:
+		return (raw as Array).has(spawn)
+	return false
 
 
 static func bezoek_filter() -> PackedStringArray:
