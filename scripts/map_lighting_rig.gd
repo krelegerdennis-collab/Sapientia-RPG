@@ -252,8 +252,8 @@ func _tile_emissive_layers() -> void:
 	var kw := float(em.get("window_tile", 0.0))
 	for n in _map.find_children("*", "TileMapLayer", true, false):
 		var tl := n as TileMapLayer
-		if tl.name.ends_with("_Hd2dEmissive"):
-			continue
+		if tl.name.ends_with("_Hd2dEmissive") or tl.has_meta(&"render_split"):
+			continue   # render_split: onzichtbare datalaag; de beeldlagen krijgen hun eigen emissive
 		_tile_emissive_one(tl, k, kw)
 
 

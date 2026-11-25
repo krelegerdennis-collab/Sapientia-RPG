@@ -3,6 +3,8 @@ extends TileMapLayer
 ## tileset van het gebied (assets/tilesets/som/wilgendal/terrain.tres), blob47-autotiling voor pad en
 ## beek, een overlay-laag voor de brug en kegelbomen (RPG ART) op de rand.
 ## Tekens en kolommen: scripts/data/wilgendal_dorp.gd.
+const TileRenderSplit := preload("res://scripts/perf/tile_render_split.gd")
+const CollisionMerge := preload("res://scripts/perf/collision_merge.gd")
 
 const Data := preload("res://scripts/data/wilgendal_dorp.gd")
 const SOM_BOOM := "res://assets/sprites/som/wilgendal/kegelboom.png"
@@ -183,31 +185,32 @@ func _som() -> void:
 func _bomen(ouder: Node2D) -> void:
 	var groot: Texture2D = load(SOM_BOOM)
 	var klein: Texture2D = load(SOM_BOOM_KLEIN)
-	# één gedeelde botsvorm voor alle bomen (was: een nieuwe RectangleShape2D per boom)
-	var vorm := RectangleShape2D.new()
-	vorm.size = Vector2(16, 16)
+	# Perf (post-RC): per boom alleen nog één Sprite2D (was StaticBody2D + CollisionShape2D + Sprite2D).
+	# De sprite staat op het oude body-punt (= y-sort-sleutel) met de oude sprite-positie als offset:
+	# zelfde pixels, zelfde volgorde. De botsing (16x16 per 'T'-tegel) zit samengevoegd in één body.
+	var tegels: Array = []
 	for y in Data.H:
 		for x in Data.W:
 			var t := Vector2i(x, y)
 			if teken(t) != "T":
 				continue
-			var body := StaticBody2D.new()
-			body.name = "Boom_%d_%d" % [x, y]
-			body.position = Vector2(t) * 16.0 + Vector2(8, 8)
-			var bots := CollisionShape2D.new()
-			bots.shape = vorm
-			body.add_child(bots)
+			tegels.append(t)
 			var rand := x == 0 or y == 0 or x == Data.W - 1 or y == Data.H - 1
 			var spr := Sprite2D.new()
+			spr.name = "Boom_%d_%d" % [x, y]
 			spr.texture = groot if rand else klein
 			spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			spr.centered = false
-			spr.position = Vector2(-16, 8 - spr.texture.get_height())
+			spr.position = Vector2(t) * 16.0 + Vector2(8, 8)
+			spr.offset = Vector2(-16, 8 - spr.texture.get_height())
 			# om en om iets verschoven zodat de rand een bos lijkt, geen hek
 			if rand and (x + y) % 2 == 1:
-				spr.position += Vector2(0, -6)
-			body.add_child(spr)
-			ouder.add_child(body)
+				spr.offset += Vector2(0, -6)
+			ouder.add_child(spr)
+	var body := StaticBody2D.new()
+	body.name = "BomenBotsing"
+	ouder.add_child(body)
+	CollisionMerge.add_shapes(body, tegels)
 
 
 ## Poort open/dicht: wisselt de tegel (en dus de botsing).
@@ -350,6 +353,8 @@ func _v8() -> void:
 				v8.set_cell(Vector2i(x, y), 1, Vector2i(atlas_van[k], 0))
 			elif b >= 0:
 				v8.set_cell(Vector2i(x, y), b, Vector2i(atlas_van[k] % kol, atlas_van[k] / kol))
+	# perf: 3 bronnen (v8, licht gras, v8-licht) door elkaar -> per bron een beeldlaag (~110 -> ~15 draw calls)
+	TileRenderSplit.split(v8)
 
 
 ## Zelfde als de buurcontrole in pad_zoom() (3x3 rond de cel, alleen binnen de kaart), met het raster.
