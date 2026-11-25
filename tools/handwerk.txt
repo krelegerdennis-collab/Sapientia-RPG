@@ -2090,3 +2090,7 @@ assets/ui/icons/items/icons32/bg_g4_plated_benen.png
 assets/ui/icons/items/icons32/bg_g4_robes_benen.png
 # post-rc item-icons (RPG ART, silhouet-redo 20-11): dezelfde 12 greaves 16/32, 3/4 kniekop+scheen+enkelwacht, masterpalet 73, alpha 0/255.
 # post-rc item-icons (RPG ART, concept-redo 20-11): dezelfde 12 benen 16/32, nu paar beenstukken van voren (riem, kruis-gap, kniekoppen, geen voeten), masterpalet 73, alpha 0/255.
+# Orion archer attack chain v2 (RPG ART, art_v2, 25-11): orion_attack / orion_attack2 / orion_finisher 288x192, 6x4 van 48x48, rijen down/left/right/up, frame 6 = walk-idle. 1-op-1 vervanging van de bestaande sheets. fx_arrow* niet meegenomen.
+assets/sprites/som/combat/orion_attack.png
+assets/sprites/som/combat/orion_attack2.png
+assets/sprites/som/combat/orion_finisher.png
