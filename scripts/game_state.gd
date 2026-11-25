@@ -636,6 +636,7 @@ func _ready() -> void:
 	# F1 perfect dodge vervolg (klus 9): of  godot -- --pdfollowuptest  (scripts/tests/pd_followup_tests.gd).
 	# Online co-op via de relay (start de Node-relay lokaal, 4 spelers): of  godot -- --relaytest  (scripts/tests/relay_tests.gd).
 	# M8b buit per stoel + run-resultaat + reward-bundle (puur, geen netwerk): of  godot -- --onlinerewardtest  (scripts/tests/online_reward_tests.gd).
+	# MP-split fase 0 solo-baseline (golden save-bytes + state-hash, runner-only): of  godot -- --mpsolobaselinetest  (scripts/tests/mp_solo_baseline_tests.gd).
 	# Buit per stoel via de echte lobby (relay v2, 2 gasten, ACK pas na opslaan): of  godot -- --liveseatloottest  (scripts/tests/live_seat_loot_tests.gd).
 	# Play Store-release (versiebron, AAB-preset, bump_version, build-script): of  godot -- --aabtest  (scripts/tests/aab_tests.gd).
 	# RC-checklist WM1 (alleen lezen, bekende OPEN-punten als OPEN-regel): of  godot -- --rcchecktest  (scripts/tests/rc_check_tests.gd).
@@ -832,7 +833,8 @@ func _ready() -> void:
 			["--coopplaytesttest", "res://scripts/tests/coop_playtest_tests.gd", "CoopPlaytestTest", "coopplaytesttest"],
 			["--coopguesthudsynctest", "res://scripts/tests/coop_guest_hud_sync_tests.gd", "CoopGuestHudSyncTest", "coopguesthudsynctest"],
 			["--coopplaytestgast", "res://scripts/tests/coop_playtest_guest.gd", "CoopPlaytestGast", "coopplaytestgast"],
-			["--liveseatloottest", "res://scripts/tests/live_seat_loot_tests.gd", "LiveSeatLootTest", "liveseatloottest"]]:
+			["--liveseatloottest", "res://scripts/tests/live_seat_loot_tests.gd", "LiveSeatLootTest", "liveseatloottest"],
+			["--mpsolobaselinetest", "res://scripts/tests/mp_solo_baseline_tests.gd", "MpSoloBaselineTest", "mpsolobaselinetest"]]:
 		if not (t[0] in args) or not ResourceLoader.exists(t[1]):
 			continue
 		if str(t[3]).ends_with("test"):
